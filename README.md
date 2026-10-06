@@ -147,7 +147,7 @@ the original ELF won't apply to the rebuilt one.
 - **Status:** `ninja` rebuilds a byte-identical code image of SLUS_217.99 (100% asm). The ELF still has
   its symbol table (18k symbols) and `.mdebug` debug info; the game is C++ built with EE-GCC 2.9x
   (`gcc2_compiled.` markers, GCC 2 name mangling). Decompiled: `System/PlaySpeedCtrl` (code and data),
-  `System/Graphic/ColorFader` (code; its `.rodata` still from asm, see the open question below).
+  `System/Graphic/ColorFader` (code and data).
   Code and data are split into the original objects (game code under `System/`, `Game/`, `Form/`,
   Sony SDK / newlib / libgcc under `lib/`): 665 `.text`, 232 `.data`, 373 `.rodata` and 105 `.bss`
   units. Objects without debug info are `lib/nodebug/<first symbol>` (their data boundaries are
@@ -174,7 +174,13 @@ the original ELF won't apply to the rebuilt one.
   Ps2EeAs would add its erratum padding a second time. (Without Ps2EeAs, it targets modern gas instead.)
   Ps2EeAs crashes under wibo instead of printing an error, so a crash in the `cc` step means an
   assembler error; `ee_asm_compat`'s output is in `build/.../<file>.o.s`.
-- **Open question:** string literals of header inline functions (assert/allocation messages such as
-  `"c:/KHCOM/MainApp/System/Graphic/Gprim.h(613)"`) land in every including object's `.rodata`, even
-  unused. The original emitted them at a later point than our compiler does (e.g. after
-  `ColorFader`'s vtable), so for now such files keep their `.rodata` from the assembly.
+- **`.rodata` layout of an object:** first the string literals of the inline functions of every included
+  header, in include order and whether used or not (assert/allocation messages such as
+  `"c:/KHCOM/MainApp/System/Graphic/Gprim.h(613)"`, `"m_V"`); then the constants of the file's own
+  functions; vtables last. Nothing references the unused header strings, so `split_objects.py` assigns
+  unreferenced data before a file's first referenced item to that file (they used to land with the
+  previous file). To match a file's `.rodata`, its headers must reproduce those strings, `__LINE__`
+  included.
+- objdiff can report less than 100% for data that matches: the target objects contain splat's
+  `.word func_0` relocations for zero words (e.g. empty vtable slots) and the padding before the next
+  object, the compiled ones don't. The full build's checksum is what counts.

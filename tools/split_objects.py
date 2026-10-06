@@ -10,7 +10,10 @@ expand.s).
 .data / .rodata / .bss: objects keep their link order in every section. Each
 object's data starts at the lowest of its own symbols (statics and globals from
 .mdebug) and the anonymous labels (string literals, jump tables, float
-constants) that only its code references. Uninitialized globals the linker put
+constants) that only its code references. In .rodata it starts even earlier:
+gcc writes the string literals of included headers' inline functions first,
+used or not, so unreferenced data before an object's first known item is its
+own. Uninitialized globals the linker put
 after all objects (COMMON) form one final .bss unit. .sndata, .sdata and .sbss
 (all small COMMON) stay single files.
 
@@ -207,7 +210,19 @@ def code_refs(order, asm_dir: Path) -> dict[int, set[int]]:
     return refs
 
 
-def split_data(section, lo, hi, order, files, owner, refs, elf_named) -> tuple[list[tuple[int, str]], dict]:
+def item_end(addr: int, sizes: dict[int, int], read) -> int:
+    """End of the data item at addr: the symbol's size, or a NUL-terminated string's length, else one word."""
+    if sizes.get(addr):
+        return addr + sizes[addr]
+    data = read(addr, 0x400)
+    end = data.find(b"\0")
+    if end > 0 and all(0x20 <= c < 0x7F or c in (9, 10, 13) for c in data[:end]):
+        return addr + end + 1
+    return addr + 4
+
+
+def split_data(section, lo, hi, order, files, owner, refs, elf_named, sizes=None, read=None
+               ) -> tuple[list[tuple[int, str]], dict]:
     """Returns ([(start, name)], stats)."""
     sc = DATA_SECTIONS[section]
     own: dict[int, set[int]] = {}
@@ -243,6 +258,22 @@ def split_data(section, lo, hi, order, files, owner, refs, elf_named) -> tuple[l
             stats["starts moved by refs"] += 1
         cuts.append((min(addrs), o.name, max(addrs)))
         running = max(addrs)
+
+    # gcc writes the string literals of a header's inline functions when it reads the class definition, i.e. at
+    # the start of the including file's .rodata, used or not (assert/allocation messages like "Gprim.h(613)").
+    # Unreferenced data between one object's last known item and the next object's first one is therefore the
+    # next object's leading data.
+    if section == ".rodata" and read is not None:
+        named = sorted(a for a, _ in elf_named if lo <= a < hi and a not in claimed)
+        for k in range(1, len(cuts)):
+            end = item_end(cuts[k - 1][2], sizes or {}, read)
+            # Named data nobody claims belongs to an object without debug info (handled below): stop there.
+            end = max([end] + [item_end(a, sizes or {}, read) for a in named if end <= a < cuts[k][0]])
+            data = read(end, max(0, cuts[k][0] - end))
+            first = next((i for i, b in enumerate(data) if b), None)
+            if first is not None and end + first < cuts[k][0]:
+                cuts[k] = ((end + first) & ~3, cuts[k][1], cuts[k][2])
+                stats["leading data moved to the next object"] += 1
 
     # Named symbols nobody claims come from objects without debug info: give them a unit of their own when they
     # come after everything known about the object in front of them.
@@ -364,10 +395,13 @@ def main() -> None:
         owner = owner_map(files, order)
         # configure.py's all-asm tree (objdiff's targets) still has complete .s files for decompiled units.
         refs = code_refs(order, ROOT / opts["build_path"] / "expected" / "asm")
+        image = (ROOT / opts["target_path"]).read_bytes()
+        read = lambda vram, size: image[rom(vram):rom(vram) + size]
+        sizes = {s["st_value"]: s["st_size"] for s in elf_syms if s["st_size"]}
         for section in DATA_SECTIONS:
             lo, hi = ranges[section]
             common = common_start(files, owner, lo, hi) if section == ".bss" else hi
-            cuts, stats = split_data(section, lo, common, order, files, owner, refs, elf_named)
+            cuts, stats = split_data(section, lo, common, order, files, owner, refs, elf_named, sizes, read)
             if common < hi:
                 cuts.append((common, "common"))
                 stats["units"] += 1
