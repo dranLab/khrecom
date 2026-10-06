@@ -88,4 +88,9 @@ typedef struct _pppPObject { /* 0xa0 */
     char val[0];
 } pppPObject;
 
+// PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppDrawMatrix
+extern pppPObject *ppvPObj;
+extern sceVu0FMATRIX ppvSWMatrix;
+void sceVu0MulMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1, sceVu0FMATRIX m2);
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
