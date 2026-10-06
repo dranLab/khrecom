@@ -93,4 +93,59 @@ extern pppPObject *ppvPObj;
 extern sceVu0FMATRIX ppvSWMatrix;
 void sceVu0MulMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1, sceVu0FMATRIX m2);
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMngFlag */
+
+typedef struct { /* 0x4 */
+    word time;
+} pppCDT;
+
+typedef struct _pppMngSt { /* 0xd0 */
+    union {
+        sceVu0FMATRIX parMat;
+        struct {
+            sceVu0FVECTOR parRot[3];
+            sceVu0FVECTOR parLoc;
+        } s;
+    } u;
+    sceVu0FVECTOR parScl;
+    sceVu0FVECTOR parCol;
+    sceVu0FVECTOR parChrScl;
+    word startFrame;
+    word totalFrame;
+    word time;
+    word otime;
+    word skip_frame;
+    word progn;
+    word pdtn;
+    word newtime;
+    pppPData *m_pdata;
+    pppPObject *m_pobj;
+    pppProg **m_prog;
+    pppPData **m_lppdt;
+    pppPDataVal *m_pdtval;
+    u_char partLoopf;
+    u_char partLoopEndf;
+    u_short usef;
+    char *pchDpd;
+    struct _pppPEtcData *pEtc;
+    u_char bViewClip;
+    u_char bTexVramBlock;
+    u_char bClutVramBlock;
+    u_char bDpdId;
+    float fFrameTimeAccum;
+    short shTexpStart;
+    short shClutpStart;
+    float fWaitCt;
+    u_char bDrawPriority;
+    u_char bFlagStop;
+    u_char bBoolFollowCam;
+    u_char bBoolNoViewClip;
+    u_char bBoolSlow;
+    u_char bEnd;
+    u_char Pad[2];
+} pppMngSt;
+
+extern pppMngSt *ppvMng;
+/* end PARTIAL pppRyjMngFlag */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
