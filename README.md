@@ -121,9 +121,19 @@ the original ELF won't apply to the rebuilt one.
    - [0x00C260, cpp, System/PlaySpeedCtrl]
    - [0x2920FC, .data, System/PlaySpeedCtrl]
    ```
-   `tools/split_objects.py` keeps these changes when it is re-run.
+   `tools/split_objects.py` keeps these changes when it is re-run. A file's data can stay `data`/`rodata`/
+   `bss` (from the original assembly) while its code is already `cpp`: the compiled object then only
+   contributes its code (see `object_fixups` in `configure.py`).
 2. Write `src/<path>.cpp` and `.h`, starting from `ref/<VERSION>/src/<path>.cpp` (names, signatures,
    class layouts). Functions not done yet can stay as `INCLUDE_ASM` (see `include/include_asm.h`).
+   Things to know about how the original was built:
+   - Inline functions defined in a class are emitted (weak) at the end of the file that defines the
+     class's first non-inline virtual function; a class whose virtuals are all inline or pure gets
+     no vtable of its own. Weak functions at the end of an object are such inlines.
+   - Headers are included as `"System/..."` (paths relative to `src/`): `__FILE__` then reads
+     `src/System/...`, which the build turns into the original `c:/KHCOM/MainApp/System/...`.
+   - `python3 tools/compare_compilers.py SLUS_XXX.XX src/<path>.cpp` compiles a file with every installed
+     compiler and compares each function with the original.
 3. Re-run `configure.py`, then compare with objdiff and iterate:
    ```sh
    tools/objdiff.sh diff -u System/PlaySpeedCtrl     # interactive, rebuilds when you save
@@ -136,7 +146,8 @@ the original ELF won't apply to the rebuilt one.
 
 - **Status:** `ninja` rebuilds a byte-identical code image of SLUS_217.99 (100% asm). The ELF still has
   its symbol table (18k symbols) and `.mdebug` debug info; the game is C++ built with EE-GCC 2.9x
-  (`gcc2_compiled.` markers, GCC 2 name mangling). First decompiled file: `System/PlaySpeedCtrl`.
+  (`gcc2_compiled.` markers, GCC 2 name mangling). Decompiled: `System/PlaySpeedCtrl` (code and data),
+  `System/Graphic/ColorFader` (code; its `.rodata` still from asm, see the open question below).
   Code and data are split into the original objects (game code under `System/`, `Game/`, `Form/`,
   Sony SDK / newlib / libgcc under `lib/`): 665 `.text`, 232 `.data`, 373 `.rodata` and 105 `.bss`
   units. Objects without debug info are `lib/nodebug/<first symbol>` (their data boundaries are
@@ -144,14 +155,26 @@ the original ELF won't apply to the rebuilt one.
   `.sbss` are single files.
 - `mips-linux-gnu-as` aligns every section to 16 bytes, the original toolchain didn't, and Sony's
   linker script starts each section at `ALIGN(128)`. `configure.py` resets each object's sections to
-  the alignment its original address implies (see `alignment_flags`).
+  the alignment its original address implies (see `object_fixups`).
 
-- **Compiler:** SN Systems ProDG EE-GCC 2.95.x (`ee-gcc2.95.3-136`, a Windows executable run under
-  [wibo](https://github.com/decompals/wibo)) with `-O2 -G0 -fno-exceptions`. Sony's ee-gcc 2.96 schedules
-  differently. The anonymous namespace names in the ELF (`...cppM1aaaa`, from a `c:\` path) have the
-  low-entropy suffix only the Windows builds produce, and the libraries contain SN Systems code.
-  2.95.3-114 and 2.95.2-273a match the first file as well; harder functions will tell them apart.
-  Only `build.cpp` was built with exception tables (`_GLOBAL_$F$...` at the start of `.data`).
-- `tools/ee_asm_compat.py` turns `cvt.w.s` (rejected by binutils for the r5900) into a `.word`, and gives
-  anonymous namespaces their original names (`_GLOBAL_$N$c__KHCOM_...cppM1aaaa`), so objects carry
-  the original symbol names and builds are reproducible.
+- **Toolchain:** SN Systems ProDG, all Windows executables run under [wibo](https://github.com/decompals/wibo):
+  compiler `ee-gcc2.95.3-136` with `-O2 -G0 -fno-exceptions -fno-rtti -g`, assembler **Ps2EeAs** (from the
+  same package). Only this combination matches every function of `ColorFader`; 2.95.3-114, 2.95.2-273a
+  (each with its own Ps2EeAs), the Linux 2.9 builds and Sony's 2.96 don't.
+  - Ps2EeAs inserts the EE's hazard nops and pads divisions and short loops (hardware errata). Its
+    divisions rule fires near labels, and `-g`'s line-number labels decide where: without `-g` the
+    padding differs. `-g` changes no instruction otherwise.
+  - The anonymous namespace names in the ELF (`...cppM1aaaa`, from a `c:\` path) have the low-entropy
+    suffix only the Windows compilers produce; only `build.cpp` has exception tables; vtables have no
+    RTTI slot.
+- `tools/ee_asm_compat.py` sits between compiler and assembler: it gives anonymous namespaces their
+  original names (`_GLOBAL_$N$c__KHCOM_...cppM1aaaa`) and source paths in strings their original
+  `c:/KHCOM/MainApp/` prefix. Ps2EeAs can't read splat's macros, so `INCLUDE_ASM` files are inlined with
+  the macros expanded and every instruction that needs no relocation written as a `.word`: otherwise
+  Ps2EeAs would add its erratum padding a second time. (Without Ps2EeAs, it targets modern gas instead.)
+  Ps2EeAs crashes under wibo instead of printing an error, so a crash in the `cc` step means an
+  assembler error; `ee_asm_compat`'s output is in `build/.../<file>.o.s`.
+- **Open question:** string literals of header inline functions (assert/allocation messages such as
+  `"c:/KHCOM/MainApp/System/Graphic/Gprim.h(613)"`) land in every including object's `.rodata`, even
+  unused. The original emitted them at a later point than our compiler does (e.g. after
+  `ColorFader`'s vtable), so for now such files keep their `.rodata` from the assembly.

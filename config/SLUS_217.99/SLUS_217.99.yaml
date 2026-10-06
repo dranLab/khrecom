@@ -20,6 +20,8 @@ options:
   ld_wildcard_sections: True
   ld_bss_contains_common: True
   ld_align_section_vram_end: False
+  # Data stays in its own (asm or compiled) unit instead of moving into INCLUDE_ASM functions.
+  migrate_rodata_to_functions: False
 
   create_asm_dependencies: True
 
@@ -102,7 +104,7 @@ segments:
       - [0x01D4D8, asm, System/Graphic/Anim] # c:/KHCOM/MainApp/System/Graphic/Anim.cpp
       - [0x020650, asm, System/Graphic/Billboard] # c:/KHCOM/MainApp/System/Graphic/Billboard.cpp
       - [0x020BF0, asm, System/Graphic/Camera] # c:/KHCOM/MainApp/System/Graphic/Camera.cpp
-      - [0x0217B0, asm, System/Graphic/ColorFader] # c:/KHCOM/MainApp/System/Graphic/ColorFader.cpp
+      - [0x0217B0, cpp, System/Graphic/ColorFader] # c:/KHCOM/MainApp/System/Graphic/ColorFader.cpp
       - [0x021B68, asm, System/Graphic/DeFocus] # c:/KHCOM/MainApp/System/Graphic/DeFocus.cpp
       - [0x023D88, asm, System/Graphic/DispList] # c:/KHCOM/MainApp/System/Graphic/DispList.cpp
       - [0x025A58, asm, System/Graphic/FrecFont] # c:/KHCOM/MainApp/System/Graphic/FrecFont.cpp

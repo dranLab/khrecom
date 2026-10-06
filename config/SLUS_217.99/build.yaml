@@ -1,4 +1,5 @@
 # Read by configure.py.
 elf: iso/SLUS_217.99            # original ELF (not committed)
 compiler: ee-gcc2.95.3-136   # SN Systems ProDG build (Windows, runs under wibo)
-cflags: -O2 -G0 -fno-exceptions   # only build.cpp has exception frame info
+cflags: -O2 -G0 -fno-exceptions -fno-rtti -g   # -g: its line labels steer Ps2EeAs's erratum nops; only build.cpp has exception tables
+source_root: c:/KHCOM/MainApp/   # original path prefix of __FILE__ (src/ in this repo)

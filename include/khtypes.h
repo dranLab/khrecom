@@ -45,4 +45,11 @@ typedef u_int u_int32;
 typedef u_long u_int64;
 typedef u_long128 u_int128;
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
 #endif /* KHTYPES_H */

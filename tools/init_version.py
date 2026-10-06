@@ -52,7 +52,9 @@ def rewrite(yaml: str, version: str, name: str) -> str:
         (r"^  # undefined_funcs_auto_path: .*$", f"  undefined_funcs_auto_path: {cfg}/undefined_funcs_auto.txt"),
         (r"^  # undefined_syms_auto_path: .*$", f"  undefined_syms_auto_path: {cfg}/undefined_syms_auto.txt"),
         # Padding after the last loaded section would grow the image; configure.py handles section alignment.
-        (r"^  ld_bss_contains_common: True$", "  ld_bss_contains_common: True\n  ld_align_section_vram_end: False"),
+        # Data stays in its own (asm or compiled) unit instead of moving into INCLUDE_ASM functions.
+        (r"^  ld_bss_contains_common: True$",
+         "  ld_bss_contains_common: True\n  ld_align_section_vram_end: False\n  migrate_rodata_to_functions: False"),
     ]
     for pattern, replacement in replacements:
         yaml, count = re.subn(pattern, replacement, yaml, count=1, flags=re.MULTILINE)

@@ -56,19 +56,41 @@ SECTION_ALIGN_CAP = {".text": 8}
 DEFAULT_ALIGN_CAP = 128
 
 
-def alignment_flags(entries: list) -> str:
-    # splat links every object under every section ("auto_link_sections"), interleaved with the real data. Sections
-    # an object has no subsegment for are empty (asm), or must be (C/C++: its data needs .data/.rodata/.bss
-    # subsegments to be placed), but their default alignment of 16 would still move things.
-    aligns = {section: 1 for section in set(TYPE_SECTION.values())}
+def object_fixups(entries: list, compiled: bool) -> str:
+    """objcopy flags for one object (see the comment above TYPE_SECTION for the alignments).
+
+    splat links every object under every section ("auto_link_sections"), interleaved with the real data. In
+    assembled objects the sections without a subsegment are empty, but their default alignment of 16 would still
+    move things, so it is set to 1. Compiled objects only contribute the sections they have a subsegment for
+    (`cpp` for code, `.data`/`.rodata`/`.bss` for data): the others are removed, so a file's code can come from
+    C++ while its data still comes from the original assembly. Their .mdebug (from -g) goes too: ld crashes on it.
+    """
+    owned = {}
     for entry in entries:
         section = TYPE_SECTION.get(entry.segment.type.lstrip("."))
         start = entry.segment.vram_start
         # Skip the auto-linked entries, e.g. a code object listed under .data.
         if section is None or section != entry.section_order_type or not start:
             continue
-        aligns[section] = min(SECTION_ALIGN_CAP.get(section, DEFAULT_ALIGN_CAP), start & -start)
-    return " ".join(f"--set-section-alignment {s}={a}" for s, a in sorted(aligns.items()))
+        owned[section] = min(SECTION_ALIGN_CAP.get(section, DEFAULT_ALIGN_CAP), start & -start)
+    flags = [f"--set-section-alignment {s}={a}" for s, a in sorted(owned.items())]
+    for section in sorted(set(TYPE_SECTION.values()) - set(owned)):
+        flags += [f"-R {section} -R .rel{section}"] if compiled else [f"--set-section-alignment {section}=1"]
+    if compiled:
+        flags.append("-R .mdebug")
+    return " ".join(flags)
+
+
+def compiler_commands(compiler: str) -> tuple[str, str | None]:
+    """(compiler command, original assembler command or None) for a package in tools/compilers/."""
+    cc_dir = ROOT / "tools" / "compilers" / compiler
+    rel = cc_dir.relative_to(ROOT).as_posix()
+    if not (cc_dir / "bin" / "ee-gcc.exe").exists():
+        return f"{rel}/bin/ee-gcc -B {rel}/bin/ee-", None
+    snas = next((p for p in cc_dir.glob("lib/gcc-lib/ee/*/*") if p.name.lower() == "ps2eeas.exe" and not p.is_symlink()),
+                None)
+    wibo = "tools/wibo/wibo"
+    return f"{wibo} {rel}/bin/ee-gcc.exe", f"{wibo} {snas.relative_to(ROOT).as_posix()}" if snas else None
 
 
 def expected_config(splat_yaml: Path, opts: dict) -> tuple[Path, Path]:
@@ -163,21 +185,25 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         # See alignment_flags().
         set_align = f"{CROSS}objcopy $align_flags $out"
         n.rule("as", f"{CROSS}as $asflags -o $out $in && {set_align}", description="AS $in")
-        # Compile to assembly with the original compiler, then assemble with modern binutils so
-        # INCLUDE_ASM'd splat output assembles exactly like the plain .s files. tools/ee_asm_compat.py
-        # rewrites the few EE instructions modern binutils won't accept.
-        # Windows-only compilers (SN Systems' ee-gcc 2.95.x) run under wibo.
-        if (ROOT / cc_dir / "bin" / "ee-gcc.exe").exists():
-            cc = "tools/wibo/wibo $cc_dir/bin/ee-gcc.exe"
-        else:
-            cc = "$cc_dir/bin/ee-gcc -B $cc_dir/bin/ee-"
+        # Compile to assembly with the original compiler, post-process it with tools/ee_asm_compat.py and
+        # assemble it with the original assembler when the package has one (SN Systems' Ps2EeAs: it inserts
+        # the EE's hazard and erratum nops, guided by -g's line labels), otherwise with modern binutils.
+        # Windows-only tools (SN Systems' ee-gcc 2.95.x) run under wibo.
+        cc, snas = compiler_commands(build_cfg["compiler"])
         symbols = f"{cfg_dir}/elf_symbol_addrs.txt"
         compat_args = f" --source $in --symbols {symbols}" if (ROOT / symbols).exists() else ""
+        if build_cfg.get("source_root"):
+            compat_args += f" --source-root {build_cfg['source_root']}"
+        if snas:
+            assemble = f"{snas} --stdout -G{gp_match.group(1) if gp_match else 0} -o $out $out.s"
+            compat_args += " --assembler snas"
+        else:
+            assemble = f"{CROSS}as $cc_asflags -o $out $out.s"
         n.rule(
             "cc",
             f"{cc} -S $cflags -I include -I src -o $out.gcc.s $in"
             f" && {sys.executable} tools/ee_asm_compat.py $out.gcc.s $out.s{compat_args}"
-            f" && {CROSS}as $cc_asflags -o $out $out.s && {set_align}",
+            f" && {assemble} && {set_align}",
             description="CC $in",
         )
         n.rule("bin", f"{CROSS}ld -EL -r -b binary -o $out $in", description="BIN $in")
@@ -207,7 +233,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         for obj, entries in by_object.items():
             src = entries[0].src_paths[0].as_posix()
             suffix = entries[0].src_paths[0].suffix
-            align = {"align_flags": alignment_flags(entries)}
+            align = {"align_flags": object_fixups(entries, compiled=suffix in (".c", ".cpp", ".cc"))}
             if suffix in (".c", ".cpp", ".cc"):  # ee-gcc picks cc1 / cc1plus from the extension
                 n.build(obj, "cc", src, variables=align)
                 compiled[entries[0].segment.name] = (obj, src)
