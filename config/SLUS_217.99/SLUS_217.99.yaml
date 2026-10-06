@@ -1,0 +1,79 @@
+name: Kingdom Hearts Re:Chain of Memories (SLUS_217.99)
+sha1: 382358e1972ef643158632c13032a7d9203a066a
+options:
+  basename: SLUS_217.99
+  target_path: iso/SLUS_217.99.rom
+  elf_path: build/SLUS_217.99/SLUS_217.99.elf
+  base_path: ../..
+  platform: ps2
+  compiler: EEGCC
+
+  gp_value: 0x00507670
+  ld_gp_expression: cod_SDATA_START + 0x7FF0
+
+  asm_path: asm/SLUS_217.99
+  src_path: src
+  build_path: build/SLUS_217.99
+
+  ld_script_path: build/SLUS_217.99/SLUS_217.99.ld
+  ld_dependencies: True
+  ld_wildcard_sections: True
+  ld_bss_contains_common: True
+  ld_align_section_vram_end: False
+
+  create_asm_dependencies: True
+
+  find_file_boundaries: False
+
+  o_as_suffix: True
+
+  symbol_addrs_path:
+    - config/SLUS_217.99/symbol_addrs.txt
+  reloc_addrs_path:
+    - config/SLUS_217.99/reloc_addrs.txt
+
+  undefined_funcs_auto_path: config/SLUS_217.99/undefined_funcs_auto.txt
+  undefined_syms_auto_path: config/SLUS_217.99/undefined_syms_auto.txt
+
+  extensions_path: tools/splat_ext
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  named_regs_for_c_funcs: False
+
+  section_order:
+    - .text
+    - .data
+    # - .sndata
+    - .rodata
+    - .sdata
+    - .sbss
+    - .bss
+
+  auto_link_sections:
+    - .data
+    # - .sndata
+    - .rodata
+    - .sdata
+    - .sbss
+    - .bss
+
+segments:
+  - name: cod
+    type: code
+    start: 0x000000
+    vram: 0x00100000
+    bss_size: 0x1A17D0
+    subalign: null
+    subsegments:
+      - [0x000000, asm, cod/000000] # .text
+      - [0x292080, data, cod/292080] # .data
+      - [0x2C2B00, data, cod/2C2B00] # .sndata
+      - [0x35AB00, rodata, cod/35AB00] # .rodata
+      - [0x3FF680, sdata, cod/3FF680] # .sdata
+      - { type: sbss, vram: 0x004FF700, name: cod/004FF700 } # .sbss
+      - { type: bss, vram: 0x004FF800, name: cod/004FF800 } # .bss
+  - [0x3FF698]

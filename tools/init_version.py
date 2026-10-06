@@ -49,6 +49,8 @@ def rewrite(yaml: str, version: str, name: str) -> str:
         (r"^    - reloc_addrs\.txt$", f"    - {cfg}/reloc_addrs.txt"),
         (r"^  # undefined_funcs_auto_path: .*$", f"  undefined_funcs_auto_path: {cfg}/undefined_funcs_auto.txt"),
         (r"^  # undefined_syms_auto_path: .*$", f"  undefined_syms_auto_path: {cfg}/undefined_syms_auto.txt"),
+        # Padding after the last loaded section would grow the image; configure.py handles section alignment.
+        (r"^  ld_bss_contains_common: True$", "  ld_bss_contains_common: True\n  ld_align_section_vram_end: False"),
     ]
     for pattern, replacement in replacements:
         yaml, count = re.subn(pattern, replacement, yaml, count=1, flags=re.MULTILINE)

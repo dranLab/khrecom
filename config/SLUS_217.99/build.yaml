@@ -1,0 +1,4 @@
+# Read by configure.py.
+elf: iso/SLUS_217.99            # original ELF (not committed)
+compiler: ee-gcc2.96   # folder under tools/compilers/ (splat guessed EEGCC)
+cflags: -O2 -G0

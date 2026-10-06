@@ -32,8 +32,10 @@ build/        (ignored) build output
 
 ## Setup
 
-Everything runs inside Linux. On Windows use WSL (Ubuntu); the repo can stay on `C:` (`/mnt/c/git/khrecom`),
-but builds are much faster if you clone it into the WSL filesystem (`~/khrecom`).
+Everything runs inside Linux. On Windows use WSL (Ubuntu) and **clone the repo into the WSL filesystem**
+(e.g. `~/khrecom`). On a Windows drive (`/mnt/c/...`) the 32-bit PS2 compilers fail with
+`installation problem, cannot exec 'cc1plus'` (they can't `stat()` files with 64-bit inode numbers),
+and everything else is much slower. Splitting and the asm-only build do work from `/mnt/c`.
 
 ```sh
 bash tools/setup_wsl.sh            # apt packages (mips binutils, ninja, i386 libc) + .venv
@@ -77,6 +79,12 @@ source .venv/bin/activate
    or a [decomp.me](https://decomp.me) scratch), rebuild, and repeat until `ninja` says OK.
 
 ## Notes
+
+- **Status:** `ninja` rebuilds a byte-identical code image of SLUS_217.99 (100% asm). The ELF still has
+  its symbol table (18k symbols) and `.mdebug` debug info; the game is C++ built with EE-GCC 2.9x
+  (`gcc2_compiled.` markers, GCC 2 name mangling), most likely ee-gcc 2.96 from SDK 3.1.0.
+- Sony's linker script starts each section at `ALIGN(128)`; `configure.py` reproduces that for
+  `.sbss`/`.bss` by adding a `.balign` to the first asm file of each (splat can't express it).
 
 - `-G`/gp settings, `-mabi` and the exact compiler build matter for matching. If code compiled from C
   differs only in instruction scheduling, try assembling with the compiler's own `ee-as`.

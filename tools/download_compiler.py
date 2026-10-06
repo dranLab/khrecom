@@ -66,6 +66,11 @@ def main() -> None:
         tar.extractall(dest, **extract_kwargs)
     archive.unlink()
     print(f"installed to {dest}")
+    if str(dest).startswith("/mnt/"):
+        print(
+            "warning: the compilers are 32-bit binaries and can't find their own cc1/cc1plus on a Windows drive\n"
+            "         (64-bit inode numbers -> EOVERFLOW). Clone the repo into the WSL filesystem (e.g. ~/khrecom)."
+        )
 
 
 if __name__ == "__main__":

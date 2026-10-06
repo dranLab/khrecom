@@ -45,6 +45,30 @@ def ensure_target(target: Path, elf: Path) -> None:
     subprocess.run([f"{CROSS}objcopy", "-O", "binary", "--gap-fill=0x00", str(elf), str(target)], check=True)
 
 
+# Sony's linker script (app.cmd) starts every section at ALIGN(128). splat can only align section *ends*,
+# which is fine for loaded sections (the padding lives in the split files) but not for NOLOAD ones, so the
+# first input of each NOLOAD section gets the alignment itself.
+NOLOAD_SECTION_ALIGN = {".sbss": 128, ".bss": 128}
+ALIGN_MARKER = "# section start alignment, added by configure.py"
+
+
+def align_noload_sections() -> None:
+    for section, align in NOLOAD_SECTION_ALIGN.items():
+        header = f'.section {section}, "wa"\n'
+        # splat lists every object under every section, so look for the first file that really has it.
+        for entry in split.linker_writer.entries:
+            if entry.section_order_type != section or not entry.src_paths or entry.src_paths[0].suffix != ".s":
+                continue
+            asm = ROOT / entry.src_paths[0]
+            text = asm.read_text(encoding="utf-8")
+            if header not in text:
+                continue
+            if ALIGN_MARKER not in text:
+                text = text.replace(header, f"{header}.balign {align} {ALIGN_MARKER}\n", 1)
+                asm.write_text(text, encoding="utf-8", newline="\n")
+            break
+
+
 def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg: dict) -> None:
     cfg_dir = f"config/{version}"
     build_dir = opts["build_path"]
@@ -153,7 +177,9 @@ def main() -> None:
             shutil.rmtree(ROOT / path, ignore_errors=True)
 
     ensure_target(ROOT / opts["target_path"], ROOT / build_cfg["elf"])
-    split.main([splat_yaml], modes=["all"], verbose=False)
+    # No cache: a cached run writes incomplete undefined_*_auto.txt files and the link fails.
+    split.main([splat_yaml], modes=["all"], verbose=False, use_cache=False)
+    align_noload_sections()
     write_ninja(version, splat_yaml, opts, splat_cfg["sha1"], build_cfg)
     print(f"\nwrote build.ninja for {version} - run `ninja`")
 
