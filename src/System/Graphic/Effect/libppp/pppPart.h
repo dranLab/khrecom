@@ -162,4 +162,10 @@ extern sceVu0FMATRIX ppvScreenMatrix;
 void sceVu0CopyMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1);
 /* end PARTIAL pppKeDMat */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeDMatPht */
+extern sceVu0FVECTOR ppvParScl;
+void sceVu0ScaleVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, float t);
+void sceVu0ApplyMatrix(sceVu0FVECTOR v0, sceVu0FMATRIX m0, sceVu0FVECTOR v1);
+/* end PARTIAL pppKeDMatPht */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
