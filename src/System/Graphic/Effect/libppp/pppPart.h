@@ -189,4 +189,9 @@ extern sceVu0FVECTOR *ppvReferencePosList;
 extern int ppvReferencePosNum;
 /* end PARTIAL pppRyjMegaBirthUserCtrl */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthUserCtrl2 */
+extern sceVu0FMATRIX *ppvReferenceMatrixList;
+extern int ppvReferenceMatrixNum;
+/* end PARTIAL pppRyjMegaBirthUserCtrl2 */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
