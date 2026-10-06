@@ -199,4 +199,14 @@ typedef void (*PPPUSRFUNC)();
 extern PPPUSRFUNC *ppvHookFuncTbl;
 /* end PARTIAL pppDrawHook */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeParMatR */
+typedef struct { /* 0x8 */
+    word pdtn;
+    word valoff;
+} pppParamPObj;
+
+void sceVu0Normalize(sceVu0FVECTOR v0, sceVu0FVECTOR v1);
+void sceVu0CopyVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1);
+/* end PARTIAL pppKeParMatR */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
