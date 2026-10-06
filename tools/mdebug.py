@@ -1,7 +1,8 @@
 """Minimal reader for the ECOFF symbolic debug info (.mdebug) in PS2 ELFs.
 
 Only what the project's tools need: the file descriptors (one per compilation
-unit, in link order) with their source name, procedures and local symbols.
+unit, in link order) with their source name, procedures, local symbols and
+the external (global) symbols they define.
 Layouts follow binutils' include/coff/sym.h (32-bit, little-endian).
 """
 
@@ -20,6 +21,7 @@ HDRR_FIELDS = (
 FDR = struct.Struct("<Iiiiiiiiiihhiiiiiii")  # file descriptor, 0x48 bytes
 PDR = struct.Struct("<Iiiiiiiiihhiii")  # procedure descriptor, 0x34 bytes
 SYMR = struct.Struct("<iII")           # local symbol, 0x0C bytes
+EXTR = struct.Struct("<Hh")             # external symbol: flags, ifd; followed by a SYMR (0x10 bytes total)
 MAGIC = 0x7009
 
 # SYMR.st (symbol type) / SYMR.sc (storage class) values used here
@@ -43,6 +45,7 @@ class SourceFile:
     adr: int
     procs: list[int] = field(default_factory=list)  # procedure addresses
     symbols: list[Symbol] = field(default_factory=list)
+    externals: list[Symbol] = field(default_factory=list)  # global symbols defined in this file
 
 
 def _cstr(data: bytes, offset: int) -> str:
@@ -77,4 +80,13 @@ def read_mdebug(elf_path: Path) -> list[SourceFile]:
             iss, value, bits = SYMR.unpack_from(data, cb_sym_offset + s * SYMR.size)
             sf.symbols.append(Symbol(_cstr(data, strings + iss), value, bits & 0x3F, (bits >> 6) & 0x1F, bits >> 12))
         files.append(sf)
+
+    ext_strings = hdr["cbSsExtOffset"]
+    for e in range(hdr["iextMax"]):
+        offset = hdr["cbExtOffset"] + e * (EXTR.size + SYMR.size)
+        _flags, ifd = EXTR.unpack_from(data, offset)
+        iss, value, bits = SYMR.unpack_from(data, offset + EXTR.size)
+        if 0 <= ifd < len(files):
+            files[ifd].externals.append(
+                Symbol(_cstr(data, ext_strings + iss), value, bits & 0x3F, (bits >> 6) & 0x1F, bits >> 12))
     return files

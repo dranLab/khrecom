@@ -62,10 +62,12 @@ source .venv/bin/activate
    ```sh
    python3 tools/import_symbols.py SLUS_XXX.XX
    ```
-   and if it has `.mdebug` debug info, split `.text` into the original source files:
+   and if it has `.mdebug` debug info, split it into the original object files. The data split uses
+   the code's references, so it needs the split `.text` assembly first:
    ```sh
-   python3 tools/split_text.py SLUS_XXX.XX --dry-run   # check the report first
-   python3 tools/split_text.py SLUS_XXX.XX
+   python3 tools/split_objects.py SLUS_XXX.XX --text-only && python3 configure.py
+   python3 tools/split_objects.py SLUS_XXX.XX --dry-run   # check the report first
+   python3 tools/split_objects.py SLUS_XXX.XX
    ```
 5. **Get the compiler**
    ```sh
@@ -84,6 +86,8 @@ source .venv/bin/activate
 
 1. Move the file's subsegment in the yaml from `asm` to `cpp`, e.g. `- [0x1234, cpp, main/foo]`, and re-run `configure.py`.
    splat writes `src/main/foo.cpp` with an `INCLUDE_ASM(...)` line for each function.
+   Once the file's data comes from C++ too, change its data subsegments from `data`/`rodata`/`bss` to
+   `.data`/`.rodata`/`.bss` (leading dot) so they are taken from the compiled object.
 2. Replace one `INCLUDE_ASM` with C (start from [m2c](https://github.com/matt-kempster/m2c)
    or a [decomp.me](https://decomp.me) scratch), rebuild, and repeat until `ninja` says OK.
 
@@ -92,12 +96,14 @@ source .venv/bin/activate
 - **Status:** `ninja` rebuilds a byte-identical code image of SLUS_217.99 (100% asm). The ELF still has
   its symbol table (18k symbols) and `.mdebug` debug info; the game is C++ built with EE-GCC 2.9x
   (`gcc2_compiled.` markers, GCC 2 name mangling), most likely ee-gcc 2.96 from SDK 3.1.0.
-  `.text` is split into the 665 original objects (game code under `System/`, `Game/`, `Form/`,
-  Sony SDK / newlib / libgcc under `lib/`); `.data`, `.rodata` and `.bss` are not split yet.
-- `mips-linux-gnu-as` aligns `.text` to 16 bytes, the original toolchain didn't; `configure.py` resets
-  each object's `.text` alignment to what its original address implies (8, or 4 for `lib/at3core`).
-- Sony's linker script starts each section at `ALIGN(128)`; `configure.py` reproduces that for
-  `.sbss`/`.bss` by adding a `.balign` to the first asm file of each (splat can't express it).
+  Code and data are split into the original objects (game code under `System/`, `Game/`, `Form/`,
+  Sony SDK / newlib / libgcc under `lib/`): 665 `.text`, 232 `.data`, 373 `.rodata` and 105 `.bss`
+  units. Objects without debug info are `lib/nodebug/<first symbol>` (their data boundaries are
+  approximate), uninitialized globals the linker placed last are `common`; `.sndata`, `.sdata` and
+  `.sbss` are single files.
+- `mips-linux-gnu-as` aligns every section to 16 bytes, the original toolchain didn't, and Sony's
+  linker script starts each section at `ALIGN(128)`. `configure.py` resets each object's sections to
+  the alignment its original address implies (see `alignment_flags`).
 
 - `-G`/gp settings, `-mabi` and the exact compiler build matter for matching. If code compiled from C
   differs only in instruction scheduling, try assembling with the compiler's own `ee-as`.

@@ -45,28 +45,30 @@ def ensure_target(target: Path, elf: Path) -> None:
     subprocess.run([f"{CROSS}objcopy", "-O", "binary", "--gap-fill=0x00", str(elf), str(target)], check=True)
 
 
-# Sony's linker script (app.cmd) starts every section at ALIGN(128). splat can only align section *ends*,
-# which is fine for loaded sections (the padding lives in the split files) but not for NOLOAD ones, so the
-# first input of each NOLOAD section gets the alignment itself.
-NOLOAD_SECTION_ALIGN = {".sbss": 128, ".bss": 128}
-ALIGN_MARKER = "# section start alignment, added by configure.py"
+# mips-linux-gnu-as aligns every section to 16; the original (ee-elf) toolchain only used what the contents asked
+# for, and Sony's linker script starts each output section at ALIGN(128). Each object's sections get the alignment
+# their original start address implies, capped at gcc's 8 for code and at 128 for data. Any value between the
+# original alignment and that address's alignment places the object correctly, now and once neighbours become C.
+TYPE_SECTION = {"asm": ".text", "hasm": ".text", "c": ".text", "cpp": ".text", "data": ".data", "rodata": ".rodata",
+                "sdata": ".sdata", "bss": ".bss", "sbss": ".sbss"}
+SECTION_ALIGN_CAP = {".text": 8}
+DEFAULT_ALIGN_CAP = 128
 
 
-def align_noload_sections() -> None:
-    for section, align in NOLOAD_SECTION_ALIGN.items():
-        header = f'.section {section}, "wa"\n'
-        # splat lists every object under every section, so look for the first file that really has it.
-        for entry in split.linker_writer.entries:
-            if entry.section_order_type != section or not entry.src_paths or entry.src_paths[0].suffix != ".s":
-                continue
-            asm = ROOT / entry.src_paths[0]
-            text = asm.read_text(encoding="utf-8")
-            if header not in text:
-                continue
-            if ALIGN_MARKER not in text:
-                text = text.replace(header, f"{header}.balign {align} {ALIGN_MARKER}\n", 1)
-                asm.write_text(text, encoding="utf-8", newline="\n")
-            break
+def alignment_flags(entries: list, from_asm: bool) -> str:
+    aligns = {}
+    if from_asm:
+        # splat links every object under every section ("auto_link_sections"), interleaved with the real data.
+        # For splat's asm the other sections are empty, but their default alignment of 16 would still move things.
+        aligns = {section: 1 for section in set(TYPE_SECTION.values())}
+    for entry in entries:
+        section = TYPE_SECTION.get(entry.segment.type.lstrip("."))
+        start = entry.segment.vram_start
+        # Skip the auto-linked entries, e.g. a code object listed under .data.
+        if section is None or section != entry.section_order_type or not start:
+            continue
+        aligns[section] = min(SECTION_ALIGN_CAP.get(section, DEFAULT_ALIGN_CAP), start & -start)
+    return " ".join(f"--set-section-alignment {s}={a}" for s, a in sorted(aligns.items()))
 
 
 def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg: dict) -> None:
@@ -94,10 +96,8 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         n.variable("cc_dir", cc_dir)
         n.newline()
 
-        # mips-linux-gnu-as aligns .text to 16; the original (ee-elf) toolchain only used what the code asked for.
-        # Every object gets the alignment its original start address implies (capped at gcc's 8).
-        n.variable("text_align", 8)
-        set_align = f"{CROSS}objcopy --set-section-alignment .text=$text_align $out"
+        # See alignment_flags().
+        set_align = f"{CROSS}objcopy $align_flags $out"
         n.rule("as", f"{CROSS}as $asflags -o $out $in && {set_align}", description="AS $in")
         # Compile to assembly with the original compiler, then assemble with modern binutils so
         # INCLUDE_ASM'd splat output assembles exactly like the plain .s files.
@@ -123,17 +123,17 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         )
         n.newline()
 
-        objects: list[str] = []
+        # splat emits one linker entry per section of the same file; group them per object.
+        by_object: dict[str, list] = {}
         for entry in split.linker_writer.entries:
-            if entry.object_path is None or not entry.src_paths:
-                continue
-            obj = entry.object_path.as_posix()
-            if obj in objects:  # splat emits one linker entry per section of the same file
-                continue
-            src = entry.src_paths[0].as_posix()
-            suffix = entry.src_paths[0].suffix
-            start = entry.segment.vram_start or 0
-            align = {"text_align": min(8, start & -start) if start else 8}
+            if entry.object_path is not None and entry.src_paths:
+                by_object.setdefault(entry.object_path.as_posix(), []).append(entry)
+
+        objects = list(by_object)
+        for obj, entries in by_object.items():
+            src = entries[0].src_paths[0].as_posix()
+            suffix = entries[0].src_paths[0].suffix
+            align = {"align_flags": alignment_flags(entries, from_asm=suffix == ".s")}
             if suffix in (".c", ".cpp", ".cc"):  # ee-gcc picks cc1 / cc1plus from the extension
                 n.build(obj, "cc", src, variables=align)
             elif suffix == ".s":
@@ -142,7 +142,6 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
                 n.build(obj, "bin", src)
             else:
                 sys.exit(f"error: don't know how to build {src}")
-            objects.append(obj)
         n.newline()
 
         n.build(
@@ -185,7 +184,6 @@ def main() -> None:
     ensure_target(ROOT / opts["target_path"], ROOT / build_cfg["elf"])
     # No cache: a cached run writes incomplete undefined_*_auto.txt files and the link fails.
     split.main([splat_yaml], modes=["all"], verbose=False, use_cache=False)
-    align_noload_sections()
     write_ninja(version, splat_yaml, opts, splat_cfg["sha1"], build_cfg)
     print(f"\nwrote build.ninja for {version} - run `ninja`")
 
