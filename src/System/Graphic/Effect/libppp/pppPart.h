@@ -7,7 +7,9 @@
 /* Core particle (ppp) types shared by the libppp units (C). */
 
 typedef int word;
-typedef float sceVu0FVECTOR[4];
+/* PARTIAL: aligned(16) added for keProg/pppKeLnsLpSft (as in the SDK's libvu0.h): makes pppMngSt
+   8-aligned so gcc merges "ppvMng->bFlagStop == 0 && ppvMng->bBoolSlow == 0" into one ld + mask */
+typedef float sceVu0FVECTOR[4] __attribute__((aligned(16)));
 typedef float sceVu0FMATRIX[4][4];
 
 typedef struct {
