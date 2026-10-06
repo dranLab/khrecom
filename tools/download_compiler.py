@@ -18,6 +18,9 @@ from pathlib import Path
 RELEASE_API = "https://api.github.com/repos/decompme/compilers/releases/tags/compilers"
 ROOT = Path(__file__).resolve().parent.parent
 COMPILERS_DIR = ROOT / "tools" / "compilers"
+# Windows-only compilers (e.g. SN Systems' ee-gcc 2.95.x) run under wibo, a minimal Win32 loader.
+WIBO_URL = "https://github.com/decompals/wibo/releases/download/1.2.0/wibo-x86_64"
+WIBO = ROOT / "tools" / "wibo" / "wibo"
 SUFFIXES = (".tar.xz", ".tar.gz")
 
 
@@ -33,6 +36,15 @@ def ps2_packages() -> dict[str, str]:
             if name.endswith(suffix):
                 packages[name[: -len(suffix)]] = asset["browser_download_url"]
     return packages
+
+
+def ensure_wibo() -> None:
+    if WIBO.exists():
+        return
+    WIBO.parent.mkdir(parents=True, exist_ok=True)
+    print(f"downloading {WIBO_URL}")
+    urllib.request.urlretrieve(WIBO_URL, WIBO)
+    WIBO.chmod(0o755)
 
 
 def main() -> None:
@@ -51,6 +63,8 @@ def main() -> None:
     dest = COMPILERS_DIR / args.name
     if dest.exists():
         print(f"{dest} already exists")
+        if list(dest.glob("bin/*.exe")):
+            ensure_wibo()
         return
 
     url = packages[args.name]
@@ -66,6 +80,8 @@ def main() -> None:
         tar.extractall(dest, **extract_kwargs)
     archive.unlink()
     print(f"installed to {dest}")
+    if list(dest.glob("bin/*.exe")):
+        ensure_wibo()
     if str(dest).startswith("/mnt/"):
         print(
             "warning: the compilers are 32-bit binaries and can't find their own cc1/cc1plus on a Windows drive\n"

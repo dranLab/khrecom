@@ -10,6 +10,7 @@ asm/
 assets/
 build/
 build.ninja
+objdiff.json
 .ninja_*
 *.ld
 !config/**/*.ld
@@ -20,7 +21,9 @@ config/**/*_auto.txt
 
 # --- Downloaded toolchains ---
 tools/compilers/
+tools/wibo/
 tools/ccc/
+tools/objdiff/
 
 # --- Reference tree from tools/gen_reference.py (contains game data) ---
 ref/

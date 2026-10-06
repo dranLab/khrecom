@@ -81,7 +81,7 @@ segments:
       - [0x005A18, asm, System/Fsm] # c:/KHCOM/MainApp/System/Fsm.cpp
       - [0x005F78, asm, System/MainApp] # c:/KHCOM/MainApp/System/MainApp.cpp
       - [0x008BE0, asm, System/Math3D] # c:/KHCOM/MainApp/System/Math3D.cpp
-      - [0x00C260, asm, System/PlaySpeedCtrl] # c:/KHCOM/MainApp/System/PlaySpeedCtrl.cpp
+      - [0x00C260, cpp, System/PlaySpeedCtrl] # c:/KHCOM/MainApp/System/PlaySpeedCtrl.cpp
       - [0x00C300, asm, System/Rnd] # c:/KHCOM/MainApp/System/Rnd.cpp
       - [0x00CAE0, asm, System/Thread] # c:/KHCOM/MainApp/System/Thread.cpp
       - [0x00CB28, asm, System/Tsin] # c:/KHCOM/MainApp/System/Tsin.cpp
@@ -742,7 +742,7 @@ segments:
       - [0x2920A0, data, System/Coord]
       - [0x2920B0, data, System/CoordMan]
       - [0x2920C0, data, System/MainApp]
-      - [0x2920FC, data, System/PlaySpeedCtrl]
+      - [0x2920FC, .data, System/PlaySpeedCtrl]
       - [0x292108, data, System/Rnd]
       - [0x292118, data, System/Wnd]
       - [0x292150, data, System/FileIO]

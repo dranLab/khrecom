@@ -1,4 +1,4 @@
 # Read by configure.py.
 elf: iso/SLUS_217.99            # original ELF (not committed)
-compiler: ee-gcc2.96   # folder under tools/compilers/ (splat guessed EEGCC)
-cflags: -O2 -G0
+compiler: ee-gcc2.95.3-136   # SN Systems ProDG build (Windows, runs under wibo)
+cflags: -O2 -G0 -fno-exceptions   # only build.cpp has exception frame info

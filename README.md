@@ -17,7 +17,8 @@ config/<VERSION>/       one folder per game version (e.g. SLUS_XXX.XX)
   linker_script_extra.ld
   build.yaml            compiler + flags for this version
 include/                headers (common.h; splat also generates include_asm.h, macro.inc)
-src/                    decompiled C++ code (the game is C++, built with EE-GCC 2.9x)
+include/khtypes.h       the game's basic types (INT, BOOL, FLOAT, TIMEQ, ...)
+src/                    decompiled C++ code, laid out like the original (src/System/PlaySpeedCtrl.cpp + .h)
 tools/
   setup_wsl.sh          one-time install of the toolchain (Ubuntu/WSL)
   extract_iso.py        pulls the boot ELF out of a disc image
@@ -27,6 +28,8 @@ tools/
   split_objects.py      splits code and data into the original objects (uses mdebug.py)
   gen_reference.py      C++ reference tree from the debug info (ccc's stdump/uncc)
   build_iso.py          copy of the disc image with the built ELF, for boot tests (`ninja iso`)
+  objdiff.sh            runs objdiff-cli (downloaded on first use) with the generated objdiff.json
+  ee_asm_compat.py      fixes up the compiler's assembly for modern binutils (used by the build)
   download_compiler.py  fetches a PS2 compiler from decomp.me's archive
   splat_ext/            custom splat segment types (later)
 iso/          (ignored) your disc image + extracted ELF
@@ -110,20 +113,30 @@ offset), and its loadable image is compared with the original's. Boot the result
 hardware. PCSX2 identifies games by serial *and* ELF CRC: settings and patches keyed by the CRC of
 the original ELF won't apply to the rebuilt one.
 
-## Decompiling a function
+## Decompiling a file
 
-1. Move the file's subsegment in the yaml from `asm` to `cpp`, e.g. `- [0x1234, cpp, main/foo]`, and re-run `configure.py`.
-   splat writes `src/main/foo.cpp` with an `INCLUDE_ASM(...)` line for each function.
-   Once the file's data comes from C++ too, change its data subsegments from `data`/`rodata`/`bss` to
-   `.data`/`.rodata`/`.bss` (leading dot) so they are taken from the compiled object.
-2. Replace one `INCLUDE_ASM` with C (start from [m2c](https://github.com/matt-kempster/m2c)
-   or a [decomp.me](https://decomp.me) scratch), rebuild, and repeat until `ninja` says OK.
+1. In the yaml, change the file's code subsegment from `asm` to `cpp` and its data subsegments from
+   `data`/`rodata`/`bss` to `.data`/`.rodata`/`.bss` (leading dot: taken from the compiled object), e.g.
+   ```
+   - [0x00C260, cpp, System/PlaySpeedCtrl]
+   - [0x2920FC, .data, System/PlaySpeedCtrl]
+   ```
+   `tools/split_objects.py` keeps these changes when it is re-run.
+2. Write `src/<path>.cpp` and `.h`, starting from `ref/<VERSION>/src/<path>.cpp` (names, signatures,
+   class layouts). Functions not done yet can stay as `INCLUDE_ASM` (see `include/include_asm.h`).
+3. Re-run `configure.py`, then compare with objdiff and iterate:
+   ```sh
+   tools/objdiff.sh diff -u System/PlaySpeedCtrl     # interactive, rebuilds when you save
+   ninja                                            # the whole image must still match
+   ```
+   objdiff compares against `build/<VERSION>/expected/units/<path>.o`, assembled from the original for
+   every unit (`ninja expected`). Each unit also has decomp.me scratch settings in `objdiff.json`.
 
 ## Notes
 
 - **Status:** `ninja` rebuilds a byte-identical code image of SLUS_217.99 (100% asm). The ELF still has
   its symbol table (18k symbols) and `.mdebug` debug info; the game is C++ built with EE-GCC 2.9x
-  (`gcc2_compiled.` markers, GCC 2 name mangling), most likely ee-gcc 2.96 from SDK 3.1.0.
+  (`gcc2_compiled.` markers, GCC 2 name mangling). First decompiled file: `System/PlaySpeedCtrl`.
   Code and data are split into the original objects (game code under `System/`, `Game/`, `Form/`,
   Sony SDK / newlib / libgcc under `lib/`): 665 `.text`, 232 `.data`, 373 `.rodata` and 105 `.bss`
   units. Objects without debug info are `lib/nodebug/<first symbol>` (their data boundaries are
@@ -133,7 +146,12 @@ the original ELF won't apply to the rebuilt one.
   linker script starts each section at `ALIGN(128)`. `configure.py` resets each object's sections to
   the alignment its original address implies (see `alignment_flags`).
 
-- `-G`/gp settings, `-mabi` and the exact compiler build matter for matching. If code compiled from C
-  differs only in instruction scheduling, try assembling with the compiler's own `ee-as`.
-- Metrowerks (`mwcps2-*`) compilers are Windows executables and would need
-  [wibo](https://github.com/decompals/wibo) or Wine; `configure.py` currently only wires up EE-GCC.
+- **Compiler:** SN Systems ProDG EE-GCC 2.95.x (`ee-gcc2.95.3-136`, a Windows executable run under
+  [wibo](https://github.com/decompals/wibo)) with `-O2 -G0 -fno-exceptions`. Sony's ee-gcc 2.96 schedules
+  differently. The anonymous namespace names in the ELF (`...cppM1aaaa`, from a `c:\` path) have the
+  low-entropy suffix only the Windows builds produce, and the libraries contain SN Systems code.
+  2.95.3-114 and 2.95.2-273a match the first file as well; harder functions will tell them apart.
+  Only `build.cpp` was built with exception tables (`_GLOBAL_$F$...` at the start of `.data`).
+- `tools/ee_asm_compat.py` turns `cvt.w.s` (rejected by binutils for the r5900) into a `.word`, and gives
+  anonymous namespaces their original names (`_GLOBAL_$N$c__KHCOM_...cppM1aaaa`), so objects carry
+  the original symbol names and builds are reproducible.

@@ -8,6 +8,7 @@ Run inside WSL/Linux from the repo root:
 """
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -55,12 +56,11 @@ SECTION_ALIGN_CAP = {".text": 8}
 DEFAULT_ALIGN_CAP = 128
 
 
-def alignment_flags(entries: list, from_asm: bool) -> str:
-    aligns = {}
-    if from_asm:
-        # splat links every object under every section ("auto_link_sections"), interleaved with the real data.
-        # For splat's asm the other sections are empty, but their default alignment of 16 would still move things.
-        aligns = {section: 1 for section in set(TYPE_SECTION.values())}
+def alignment_flags(entries: list) -> str:
+    # splat links every object under every section ("auto_link_sections"), interleaved with the real data. Sections
+    # an object has no subsegment for are empty (asm), or must be (C/C++: its data needs .data/.rodata/.bss
+    # subsegments to be placed), but their default alignment of 16 would still move things.
+    aligns = {section: 1 for section in set(TYPE_SECTION.values())}
     for entry in entries:
         section = TYPE_SECTION.get(entry.segment.type.lstrip("."))
         start = entry.segment.vram_start
@@ -71,7 +71,71 @@ def alignment_flags(entries: list, from_asm: bool) -> str:
     return " ".join(f"--set-section-alignment {s}={a}" for s, a in sorted(aligns.items()))
 
 
-def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg: dict) -> None:
+def expected_config(splat_yaml: Path, opts: dict) -> tuple[Path, Path]:
+    """A copy of the splat config with every file as assembly, writing to build/<VERSION>/expected/.
+
+    Its objects are objdiff's targets: they always come from the original ELF, also for files that are
+    already decompiled (splat no longer writes their complete .s in the normal tree). Returns (yaml, asm dir).
+    """
+    exp = f"{opts['build_path']}/expected"
+    text = splat_yaml.read_text(encoding="utf-8")
+    text = re.sub(r", (c|cpp), ", ", asm, ", text)
+    text = re.sub(r", \.(data|rodata|bss|sdata|sbss), ", r", \1, ", text)
+    text = re.sub(r"type: \.(bss|sbss)\b", r"type: \1", text)
+    for option, value in {
+        "base_path": "../../..",  # the copy lives one level deeper than config/<VERSION>/
+        "asm_path": f"{exp}/asm",
+        "build_path": f"{exp}/obj",
+        "elf_path": f"{exp}/expected.elf",
+        "ld_script_path": f"{exp}/expected.ld",
+        "undefined_funcs_auto_path": f"{exp}/undefined_funcs_auto.txt",
+        "undefined_syms_auto_path": f"{exp}/undefined_syms_auto.txt",
+    }.items():
+        text, count = re.subn(rf"^  {option}: .*$", f"  {option}: {value}", text, count=1, flags=re.MULTILINE)
+        if count != 1:
+            sys.exit(f"error: option {option} not found in {splat_yaml}")
+    text = text.replace("options:\n", "options:\n  generate_asm_macros_files: False\n", 1)
+    path = ROOT / exp / "expected.yaml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8", newline="\n")
+    return path, ROOT / exp / "asm"
+
+
+def expected_units(asm_dir: Path) -> dict[str, list[str]]:
+    """Unit name -> its .s files (code, data, rodata, bss) in the expected tree."""
+    units: dict[str, list[str]] = {}
+    for path in sorted(asm_dir.rglob("*.s")):
+        rel = path.relative_to(asm_dir).as_posix()
+        name = re.sub(r"\.(data|rodata|bss|sdata|sbss)\.s$", "", rel[len("data/"):]) if rel.startswith("data/") \
+            else rel[:-len(".s")]
+        units.setdefault(name, []).append(path.relative_to(ROOT).as_posix())
+    return units
+
+
+def write_objdiff(opts: dict, build_cfg: dict, units: dict[str, list[str]], compiled: dict[str, tuple[str, str]]):
+    """objdiff.json: one unit per object; compiled = unit name -> (object, source) of the decompiled ones."""
+    exp = f"{opts['build_path']}/expected/units"
+    config = {
+        "$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
+        "min_version": "2.0.0",
+        "custom_make": "ninja",
+        "build_target": True,
+        "build_base": True,
+        "watch_patterns": ["*.c", "*.cpp", "*.h", "*.hpp", "*.inc", "*.s"],
+        "units": [],
+    }
+    for name in sorted(units):
+        unit = {"name": name, "target_path": f"{exp}/{name}.o"}
+        if name in compiled:
+            unit["base_path"], source = compiled[name]
+            unit["metadata"] = {"source_path": source}
+        unit["scratch"] = {"platform": "ps2", "compiler": build_cfg["compiler"], "c_flags": build_cfg["cflags"]}
+        config["units"].append(unit)
+    (ROOT / "objdiff.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8", newline="\n")
+
+
+def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg: dict,
+                units: dict[str, list[str]]) -> dict[str, str]:
     cfg_dir = f"config/{version}"
     build_dir = opts["build_path"]
     elf_out = opts["elf_path"]
@@ -100,10 +164,19 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         set_align = f"{CROSS}objcopy $align_flags $out"
         n.rule("as", f"{CROSS}as $asflags -o $out $in && {set_align}", description="AS $in")
         # Compile to assembly with the original compiler, then assemble with modern binutils so
-        # INCLUDE_ASM'd splat output assembles exactly like the plain .s files.
+        # INCLUDE_ASM'd splat output assembles exactly like the plain .s files. tools/ee_asm_compat.py
+        # rewrites the few EE instructions modern binutils won't accept.
+        # Windows-only compilers (SN Systems' ee-gcc 2.95.x) run under wibo.
+        if (ROOT / cc_dir / "bin" / "ee-gcc.exe").exists():
+            cc = "tools/wibo/wibo $cc_dir/bin/ee-gcc.exe"
+        else:
+            cc = "$cc_dir/bin/ee-gcc -B $cc_dir/bin/ee-"
+        symbols = f"{cfg_dir}/elf_symbol_addrs.txt"
+        compat_args = f" --source $in --symbols {symbols}" if (ROOT / symbols).exists() else ""
         n.rule(
             "cc",
-            f"$cc_dir/bin/ee-gcc -S -B $cc_dir/bin/ee- $cflags -I include -I src -o $out.s $in"
+            f"{cc} -S $cflags -I include -I src -o $out.gcc.s $in"
+            f" && {sys.executable} tools/ee_asm_compat.py $out.gcc.s $out.s{compat_args}"
             f" && {CROSS}as $cc_asflags -o $out $out.s && {set_align}",
             description="CC $in",
         )
@@ -130,12 +203,14 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
                 by_object.setdefault(entry.object_path.as_posix(), []).append(entry)
 
         objects = list(by_object)
+        compiled: dict[str, tuple[str, str]] = {}
         for obj, entries in by_object.items():
             src = entries[0].src_paths[0].as_posix()
             suffix = entries[0].src_paths[0].suffix
-            align = {"align_flags": alignment_flags(entries, from_asm=suffix == ".s")}
+            align = {"align_flags": alignment_flags(entries)}
             if suffix in (".c", ".cpp", ".cc"):  # ee-gcc picks cc1 / cc1plus from the extension
                 n.build(obj, "cc", src, variables=align)
+                compiled[entries[0].segment.name] = (obj, src)
             elif suffix == ".s":
                 n.build(obj, "as", src, variables=align)
             elif suffix == ".bin":
@@ -160,11 +235,29 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         n.build("iso", "phony", f"{build_dir}/{version}.iso")
         n.newline()
 
+        # objdiff targets (see expected_config()): every unit's code and data assembled from the original, merged
+        # into one object like a compiled source file. Built on demand by objdiff or with `ninja expected`.
+        n.rule("as_expected", f"{CROSS}as $asflags -o $out $in", description="AS $in")
+        n.rule("merge", f"{CROSS}ld -EL -r -o $out $in", description="MERGE $out")
+        exp = f"{build_dir}/expected"
+        unit_objects = []
+        for name, sources in units.items():
+            parts = []
+            for src in sources:
+                part = f"{exp}/obj/{Path(src).relative_to(f'{exp}/asm').with_suffix('.o').as_posix()}"
+                n.build(part, "as_expected", src)
+                parts.append(part)
+            unit_objects.append(f"{exp}/units/{name}.o")
+            n.build(unit_objects[-1], "merge", parts)
+        n.build("expected", "phony", unit_objects)
+        n.newline()
+
         n.build(
             "build.ninja", "configure",
             implicit=["configure.py", splat_yaml.relative_to(ROOT).as_posix(), f"{cfg_dir}/build.yaml",
                       *(p.relative_to(ROOT).as_posix() for p in (ROOT / cfg_dir).glob("*_addrs.txt"))],
         )
+    return compiled
 
 
 def main() -> None:
@@ -186,10 +279,23 @@ def main() -> None:
             shutil.rmtree(ROOT / path, ignore_errors=True)
 
     ensure_target(ROOT / opts["target_path"], ROOT / build_cfg["elf"])
-    # No cache: a cached run writes incomplete undefined_*_auto.txt files and the link fails.
-    split.main([splat_yaml], modes=["all"], verbose=False, use_cache=False)
-    write_ninja(version, splat_yaml, opts, splat_cfg["sha1"], build_cfg)
-    print(f"\nwrote build.ninja for {version} - run `ninja`")
+
+    # The all-asm split for objdiff's targets runs in parallel with the real one.
+    exp_yaml, exp_asm = expected_config(splat_yaml, opts)
+    shutil.rmtree(exp_asm, ignore_errors=True)
+    exp_log = exp_yaml.with_suffix(".log")
+    with exp_log.open("w") as log:
+        exp_split = subprocess.Popen([sys.executable, "-m", "splat", "split", str(exp_yaml)], stdout=log, stderr=log)
+        # No cache: a cached run writes incomplete undefined_*_auto.txt files and the link fails.
+        split.main([splat_yaml], modes=["all"], verbose=False, use_cache=False)
+        if exp_split.wait() != 0:
+            sys.exit(f"error: the expected split failed, see {exp_log.relative_to(ROOT)}")
+
+    units = expected_units(exp_asm)
+    compiled = write_ninja(version, splat_yaml, opts, splat_cfg["sha1"], build_cfg, units)
+    write_objdiff(opts, build_cfg, units, compiled)
+    print(f"\nwrote build.ninja and objdiff.json ({len(units)} units, {len(compiled)} from source) for {version}"
+          " - run `ninja`")
 
 
 if __name__ == "__main__":
