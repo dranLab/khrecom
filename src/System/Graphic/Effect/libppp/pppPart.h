@@ -194,4 +194,9 @@ extern sceVu0FMATRIX *ppvReferenceMatrixList;
 extern int ppvReferenceMatrixNum;
 /* end PARTIAL pppRyjMegaBirthUserCtrl2 */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppDrawHook */
+typedef void (*PPPUSRFUNC)();
+extern PPPUSRFUNC *ppvHookFuncTbl;
+/* end PARTIAL pppDrawHook */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
