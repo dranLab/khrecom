@@ -17,7 +17,7 @@ config/<VERSION>/       one folder per game version (e.g. SLUS_XXX.XX)
   linker_script_extra.ld
   build.yaml            compiler + flags for this version
 include/                headers (common.h; splat also generates include_asm.h, macro.inc)
-src/                    decompiled C code
+src/                    decompiled C++ code (the game is C++, built with EE-GCC 2.9x)
 tools/
   setup_wsl.sh          one-time install of the toolchain (Ubuntu/WSL)
   extract_iso.py        pulls the boot ELF out of a disc image
@@ -71,8 +71,8 @@ source .venv/bin/activate
 
 ## Decompiling a function
 
-1. Move the file's subsegment in the yaml from `asm` to `c`, e.g. `- [0x1234, c, main/foo]`, and re-run `configure.py`.
-   splat writes `src/main/foo.c` with an `INCLUDE_ASM(...)` line for each function.
+1. Move the file's subsegment in the yaml from `asm` to `cpp`, e.g. `- [0x1234, cpp, main/foo]`, and re-run `configure.py`.
+   splat writes `src/main/foo.cpp` with an `INCLUDE_ASM(...)` line for each function.
 2. Replace one `INCLUDE_ASM` with C (start from [m2c](https://github.com/matt-kempster/m2c)
    or a [decomp.me](https://decomp.me) scratch), rebuild, and repeat until `ninja` says OK.
 

@@ -104,7 +104,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
                 continue
             src = entry.src_paths[0].as_posix()
             suffix = entry.src_paths[0].suffix
-            if suffix == ".c":
+            if suffix in (".c", ".cpp", ".cc"):  # ee-gcc picks cc1 / cc1plus from the extension
                 n.build(obj, "cc", src)
             elif suffix == ".s":
                 n.build(obj, "as", src)
