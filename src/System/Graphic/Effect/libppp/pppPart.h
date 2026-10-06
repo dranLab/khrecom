@@ -148,4 +148,12 @@ typedef struct _pppMngSt { /* 0xd0 */
 extern pppMngSt *ppvMng;
 /* end PARTIAL pppRyjMngFlag */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeDrct */
+typedef struct { /* 0xc */
+    float x;
+    float y;
+    float z;
+} pppFVECTOR;
+/* end PARTIAL pppKeDrct */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
