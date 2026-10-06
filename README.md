@@ -26,6 +26,7 @@ tools/
   import_symbols.py     ELF symbol table -> config/<VERSION>/elf_symbol_addrs.txt
   split_objects.py      splits code and data into the original objects (uses mdebug.py)
   gen_reference.py      C++ reference tree from the debug info (ccc's stdump/uncc)
+  build_iso.py          copy of the disc image with the built ELF, for boot tests (`ninja iso`)
   download_compiler.py  fetches a PS2 compiler from decomp.me's archive
   splat_ext/            custom splat segment types (later)
 iso/          (ignored) your disc image + extracted ELF
@@ -95,6 +96,19 @@ source .venv/bin/activate
    It is a reference for writing the real code in `include/` and `src/`, not compilable as is.
    With Ghidra, export its decompilation using `tools/ccc/*/CCCDecompileAllFunctions.java` and pass
    the result with `--functions FUNCTIONS.txt` to get function bodies as well.
+
+## Boot testing
+
+```sh
+ninja iso        # -> build/SLUS_XXX.XX/SLUS_XXX.XX.iso (the first run copies the 4+ GB image)
+```
+
+`tools/build_iso.py` writes the built ELF into the original ELF's sectors of a copy of the disc
+image and updates its size in the ISO9660 and UDF directories; every other file keeps its sector.
+The boot copy of the ELF gets `PhysAddr = VirtAddr` (splat's linker script sets it to the ROM
+offset), and its loadable image is compared with the original's. Boot the result in PCSX2 or on
+hardware. PCSX2 identifies games by serial *and* ELF CRC: settings and patches keyed by the CRC of
+the original ELF won't apply to the rebuilt one.
 
 ## Decompiling a function
 

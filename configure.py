@@ -154,6 +154,10 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         n.build(f"{build_dir}/{Path(rom_out).name}.ok", "sha1", rom_out, variables={"sha1": sha1})
         n.build("check", "phony", f"{build_dir}/{Path(rom_out).name}.ok")
         n.default("check")
+        # Not built by default: copies the 4+ GB disc image on first use.
+        n.rule("iso", f"{sys.executable} tools/build_iso.py {version}", description="ISO $out")
+        n.build(f"{build_dir}/{version}.iso", "iso", elf_out, implicit=["tools/build_iso.py"])
+        n.build("iso", "phony", f"{build_dir}/{version}.iso")
         n.newline()
 
         n.build(
