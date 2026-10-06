@@ -20,6 +20,10 @@ config/**/*_auto.txt
 
 # --- Downloaded toolchains ---
 tools/compilers/
+tools/ccc/
+
+# --- Reference tree from tools/gen_reference.py (contains game data) ---
+ref/
 
 # --- Python ---
 .venv/
