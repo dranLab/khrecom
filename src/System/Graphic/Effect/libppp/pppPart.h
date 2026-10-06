@@ -175,6 +175,7 @@ extern sceVu0FVECTOR ppvParScl;
 void sceVu0ScaleVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, float t);
 void sceVu0ApplyMatrix(sceVu0FVECTOR v0, sceVu0FMATRIX m0, sceVu0FVECTOR v1);
 void sceVu0UnitMatrix(sceVu0FMATRIX m);
+extern sceVu0FMATRIX *ppvlpCMatrix;
 /* end PARTIAL pppKeDMatPht */
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthUserCtrl */

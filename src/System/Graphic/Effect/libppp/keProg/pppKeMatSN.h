@@ -18,7 +18,6 @@ typedef struct { /* 0x90 */
     pppIVECTOR PreRot;
 } VKeMatSN;
 
-extern sceVu0FMATRIX *ppvlpCMatrix;
 extern sceVu0FVECTOR KeVec0001;
 
 void pppKeMatSN(pppPObject *pobj, PKeMatSN *dat, pppCtrlTable *ctbl);
