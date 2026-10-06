@@ -45,6 +45,15 @@ typedef u_int u_int32;
 typedef u_long u_int64;
 typedef u_long128 u_int128;
 
+/* C++ can't convert ((void*)0) to other pointer types; __null is what g++'s <stddef.h> uses. */
+#ifndef NULL
+#ifdef __cplusplus
+#define NULL __null
+#else
+#define NULL ((void*)0)
+#endif
+#endif
+
 #ifndef TRUE
 #define TRUE 1
 #endif

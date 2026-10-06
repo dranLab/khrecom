@@ -18,7 +18,7 @@ extern MAPUNITTABLE g_DoorWorld12[12];
 extern MAPUNITTABLE g_DoorWorld13[12];
 
 MAPUNITTABLE* mapUnitTable_G[1] = {
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_0[10] = {
@@ -31,7 +31,7 @@ MAPUNITTABLE* mapUnitTable_0[10] = {
     &g_DoorWorld0[6],
     &g_DoorWorld0[7],
     &g_DoorWorld0[8],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_1[13] = {
@@ -47,7 +47,7 @@ MAPUNITTABLE* mapUnitTable_1[13] = {
     &g_DoorWorld1[9],
     &g_DoorWorld1[10],
     &g_DoorWorld1[11],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_2[13] = {
@@ -63,7 +63,7 @@ MAPUNITTABLE* mapUnitTable_2[13] = {
     &g_DoorWorld2[9],
     &g_DoorWorld2[10],
     &g_DoorWorld2[11],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_3[13] = {
@@ -79,7 +79,7 @@ MAPUNITTABLE* mapUnitTable_3[13] = {
     &g_DoorWorld3[9],
     &g_DoorWorld3[10],
     &g_DoorWorld3[11],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_4[13] = {
@@ -95,7 +95,7 @@ MAPUNITTABLE* mapUnitTable_4[13] = {
     &g_DoorWorld4[9],
     &g_DoorWorld4[10],
     &g_DoorWorld4[11],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_5[13] = {
@@ -111,7 +111,7 @@ MAPUNITTABLE* mapUnitTable_5[13] = {
     &g_DoorWorld5[9],
     &g_DoorWorld5[10],
     &g_DoorWorld5[11],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_6[13] = {
@@ -127,7 +127,7 @@ MAPUNITTABLE* mapUnitTable_6[13] = {
     &g_DoorWorld6[9],
     &g_DoorWorld6[10],
     &g_DoorWorld6[11],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_7[13] = {
@@ -143,7 +143,7 @@ MAPUNITTABLE* mapUnitTable_7[13] = {
     &g_DoorWorld7[9],
     &g_DoorWorld7[10],
     &g_DoorWorld7[11],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_8[13] = {
@@ -159,7 +159,7 @@ MAPUNITTABLE* mapUnitTable_8[13] = {
     &g_DoorWorld8[9],
     &g_DoorWorld8[10],
     &g_DoorWorld8[11],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_9[13] = {
@@ -175,7 +175,7 @@ MAPUNITTABLE* mapUnitTable_9[13] = {
     &g_DoorWorld9[9],
     &g_DoorWorld9[10],
     &g_DoorWorld9[11],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_10[18] = {
@@ -191,12 +191,12 @@ MAPUNITTABLE* mapUnitTable_10[18] = {
     &g_DoorWorld10[9],
     &g_DoorWorld10[10],
     &g_DoorWorld10[11],
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_11[13] = {
@@ -212,7 +212,7 @@ MAPUNITTABLE* mapUnitTable_11[13] = {
     &g_DoorWorld11[9],
     &g_DoorWorld11[10],
     &g_DoorWorld11[11],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_12[13] = {
@@ -228,7 +228,7 @@ MAPUNITTABLE* mapUnitTable_12[13] = {
     &g_DoorWorld12[9],
     &g_DoorWorld12[10],
     &g_DoorWorld12[11],
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTable_13[13] = {
@@ -244,7 +244,7 @@ MAPUNITTABLE* mapUnitTable_13[13] = {
     &g_DoorWorld13[9],
     &g_DoorWorld13[10],
     &g_DoorWorld13[11],
-    0,
+    NULL,
 };
 
 static MAPUNITTABLE** _pMapUnitTableTbl[16] = {
@@ -263,21 +263,21 @@ static MAPUNITTABLE** _pMapUnitTableTbl[16] = {
     mapUnitTable_11,
     mapUnitTable_12,
     mapUnitTable_13,
-    0,
+    NULL,
 };
 
 MAPUNITTABLE* mapUnitTableSearch(const ZONEPARTS* parts) {
     MAPUNITTABLE** ppTbl;
     MAPUNITTABLE* pItem;
 
-    for (INT i = 0; (ppTbl = _pMapUnitTableTbl[i]) != 0; i++) {
-        for (INT j = 0; (pItem = ppTbl[j]) != 0; j++) {
+    for (INT i = 0; (ppTbl = _pMapUnitTableTbl[i]) != NULL; i++) {
+        for (INT j = 0; (pItem = ppTbl[j]) != NULL; j++) {
             if (pItem->id.ui != 0 && parts->effectId == pItem->id.ui) {
                 return pItem;
             }
         }
     }
-    return 0;
+    return NULL;
 }
 
 // SOURCE DATA: .data
