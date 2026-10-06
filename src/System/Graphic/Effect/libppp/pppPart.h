@@ -156,4 +156,10 @@ typedef struct { /* 0xc */
 } pppFVECTOR;
 /* end PARTIAL pppKeDrct */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeDMat */
+extern sceVu0FMATRIX ppvWorldMatrix;
+extern sceVu0FMATRIX ppvScreenMatrix;
+void sceVu0CopyMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1);
+/* end PARTIAL pppKeDMat */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
