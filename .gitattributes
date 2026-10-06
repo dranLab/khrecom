@@ -1,0 +1,4 @@
+# The build runs inside Linux (WSL), so keep LF line endings everywhere.
+* text=auto eol=lf
+*.bin binary
+*.png binary
