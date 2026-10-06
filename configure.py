@@ -93,6 +93,53 @@ def compiler_commands(compiler: str) -> tuple[str, str | None]:
     return f"{wibo} {rel}/bin/ee-gcc.exe", f"{wibo} {snas.relative_to(ROOT).as_posix()}" if snas else None
 
 
+SOURCE_DATA = re.compile(r"^\s*//\s*SOURCE DATA:\s*(.*?)\s*$", re.MULTILINE)
+DATA_TYPES = {".data": "data", ".rodata": "rodata", ".bss": "bss", ".sdata": "sdata", ".sbss": "sbss"}
+
+
+def source_config(splat_yaml: Path, opts: dict) -> tuple[Path, dict[str, list[str]]]:
+    """The splat config with every file that has a source in src/ switched to C/C++.
+
+    config/<VERSION>/<VERSION>.yaml stays as tools/split_objects.py writes it (all asm), so parallel branches never
+    edit it. A file's code comes from src/<unit>.cpp (or .c) as soon as that file exists; its data sections come
+    from the compiled object only when the source lists them in a comment, e.g. as its last line
+        // SOURCE DATA: .data .rodata
+    (until then they stay assembly, e.g. while INCLUDE_ASM'd functions still reference them). At the end of the
+    file it shifts no line numbers, which matter wherever __LINE__ ends up in assert or allocation messages.
+    Returns (the generated yaml, unit -> data sections from source).
+    """
+    text = splat_yaml.read_text(encoding="utf-8")
+    sources: dict[str, list[str]] = {}
+    for path in sorted((ROOT / "src").rglob("*")):
+        if path.suffix not in (".c", ".cpp"):
+            continue
+        unit = path.relative_to(ROOT / "src").with_suffix("").as_posix()
+        kind = path.suffix.lstrip(".")
+        name = re.escape(unit)
+        text, count = re.subn(rf"^(      - \[0x[0-9A-F]+, )(?:asm|c|cpp)(, {name}\])", rf"\g<1>{kind}\2", text,
+                              flags=re.MULTILINE)
+        if count != 1:
+            sys.exit(f"error: {path.relative_to(ROOT)}: no code subsegment named {unit} in {splat_yaml.name}")
+        marker = SOURCE_DATA.search(path.read_text(encoding="latin-1"))
+        sections = marker.group(1).split() if marker else []
+        for section in sections:
+            if section not in DATA_TYPES:
+                sys.exit(f"error: {path.relative_to(ROOT)}: unknown section {section!r} in SOURCE DATA")
+            t = DATA_TYPES[section]
+            text, n1 = re.subn(rf"^(      - \[0x[0-9A-F]+, )\.?{t}(, {name}\])", rf"\g<1>.{t}\2", text,
+                               flags=re.MULTILINE)
+            text, n2 = re.subn(rf"^(      - \{{ type: )\.?{t}(, vram: 0x[0-9A-F]+, name: {name} \}})", rf"\g<1>.{t}\2",
+                               text, flags=re.MULTILINE)
+            if n1 + n2 != 1:
+                sys.exit(f"error: {path.relative_to(ROOT)}: SOURCE DATA lists {section}, but {unit} has no such data")
+        sources[unit] = sections
+    # build/<VERSION>/ is as deep as config/<VERSION>/, so base_path stays the same.
+    out = ROOT / opts["build_path"] / splat_yaml.name
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(text, encoding="utf-8", newline="\n")
+    return out, sources
+
+
 def expected_config(splat_yaml: Path, opts: dict) -> tuple[Path, Path]:
     """A copy of the splat config with every file as assembly, writing to build/<VERSION>/expected/.
 
@@ -281,7 +328,10 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         n.build(
             "build.ninja", "configure",
             implicit=["configure.py", splat_yaml.relative_to(ROOT).as_posix(), f"{cfg_dir}/build.yaml",
-                      *(p.relative_to(ROOT).as_posix() for p in (ROOT / cfg_dir).glob("*_addrs.txt"))],
+                      *(p.relative_to(ROOT).as_posix() for p in (ROOT / cfg_dir).glob("*_addrs.txt")),
+                      # new sources switch files to C/C++ (see source_config); a directory changes when one is added
+                      *(p.relative_to(ROOT).as_posix() for p in [ROOT / "src", *(ROOT / "src").rglob("*")]
+                        if p.is_dir())],
         )
     return compiled
 
@@ -305,6 +355,7 @@ def main() -> None:
             shutil.rmtree(ROOT / path, ignore_errors=True)
 
     ensure_target(ROOT / opts["target_path"], ROOT / build_cfg["elf"])
+    build_yaml, sources = source_config(splat_yaml, opts)
 
     # The all-asm split for objdiff's targets runs in parallel with the real one.
     exp_yaml, exp_asm = expected_config(splat_yaml, opts)
@@ -313,15 +364,16 @@ def main() -> None:
     with exp_log.open("w") as log:
         exp_split = subprocess.Popen([sys.executable, "-m", "splat", "split", str(exp_yaml)], stdout=log, stderr=log)
         # No cache: a cached run writes incomplete undefined_*_auto.txt files and the link fails.
-        split.main([splat_yaml], modes=["all"], verbose=False, use_cache=False)
+        split.main([build_yaml], modes=["all"], verbose=False, use_cache=False)
         if exp_split.wait() != 0:
             sys.exit(f"error: the expected split failed, see {exp_log.relative_to(ROOT)}")
 
     units = expected_units(exp_asm)
     compiled = write_ninja(version, splat_yaml, opts, splat_cfg["sha1"], build_cfg, units)
     write_objdiff(opts, build_cfg, units, compiled)
-    print(f"\nwrote build.ninja and objdiff.json ({len(units)} units, {len(compiled)} from source) for {version}"
-          " - run `ninja`")
+    with_data = sum(1 for sections in sources.values() if sections)
+    print(f"\nwrote build.ninja and objdiff.json ({len(units)} units, {len(compiled)} from source, "
+          f"{with_data} with data from source) for {version} - run `ninja`")
 
 
 if __name__ == "__main__":

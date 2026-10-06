@@ -10,6 +10,8 @@ asm/
 assets/
 build/
 build.ninja
+build.configure.log
+build.ninja.log
 objdiff.json
 .ninja_*
 *.ld
@@ -18,18 +20,19 @@ include/include_asm.h
 include/macro.inc
 include/labels.inc
 config/**/*_auto.txt
+*.asmproc.d
 
 # --- Downloaded toolchains ---
-tools/compilers/
-tools/wibo/
-tools/ccc/
-tools/objdiff/
+/tools/compilers
+/tools/wibo
+/tools/ccc
+/tools/objdiff
 
 # --- Reference tree from tools/gen_reference.py (contains game data) ---
-ref/
+/ref
 
 # --- Python ---
-.venv/
+/.venv
 __pycache__/
 *.pyc
 .splache
@@ -39,3 +42,6 @@ __pycache__/
 .idea/
 .DS_Store
 Thumbs.db
+
+# --- Worktrees of Claude Code sub-agents ---
+.claude/worktrees/

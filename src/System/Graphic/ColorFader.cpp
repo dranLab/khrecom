@@ -62,3 +62,5 @@ BOOL CColorFader::reqWhiteFade(USHORT nTime, FLOAT fStart, FLOAT fEnd) {
     setWhite(fStart);
     return reqTargetAlpha(fEnd, nTime);
 }
+
+// SOURCE DATA: .rodata

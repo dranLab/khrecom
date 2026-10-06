@@ -30,6 +30,11 @@ tools/
   build_iso.py          copy of the disc image with the built ELF, for boot tests (`ninja iso`)
   objdiff.sh            runs objdiff-cli (downloaded on first use) with the generated objdiff.json
   ee_asm_compat.py      fixes up the compiler's assembly for modern binutils (used by the build)
+  check.sh              the gate: configure + full build/checksum + overview (before every commit/merge)
+  funcdiff.py           non-interactive per-function comparison with the original
+  compare_compilers.py  one source file against every installed compiler
+  candidates.py         files not decompiled yet, for handing out work
+  setup_worktree.sh     prepares a git worktree (links game files and tools, configures)
   download_compiler.py  fetches a PS2 compiler from decomp.me's archive
   splat_ext/            custom splat segment types (later)
 iso/          (ignored) your disc image + extracted ELF
@@ -115,17 +120,17 @@ the original ELF won't apply to the rebuilt one.
 
 ## Decompiling a file
 
-1. In the yaml, change the file's code subsegment from `asm` to `cpp` and its data subsegments from
-   `data`/`rodata`/`bss` to `.data`/`.rodata`/`.bss` (leading dot: taken from the compiled object), e.g.
+1. Create `src/<path>.cpp` (or `.c`, see the source path in the yaml comment): its existence switches the
+   file's code to the compiled object; `configure.py` writes the effective config to `build/<VERSION>/`, and
+   `config/<VERSION>/<VERSION>.yaml` is never edited by hand. The file's data comes from the compiled object
+   once the source lists the sections in a comment, best as its last line (no line numbers shift):
+   ```cpp
+   // SOURCE DATA: .data .rodata
    ```
-   - [0x00C260, cpp, System/PlaySpeedCtrl]
-   - [0x2920FC, .data, System/PlaySpeedCtrl]
-   ```
-   `tools/split_objects.py` keeps these changes when it is re-run. A file's data can stay `data`/`rodata`/
-   `bss` (from the original assembly) while its code is already `cpp`: the compiled object then only
-   contributes its code (see `object_fixups` in `configure.py`).
+   Until then the data stays the original assembly (see `object_fixups` and `source_config` in `configure.py`).
 2. Write `src/<path>.cpp` and `.h`, starting from `ref/<VERSION>/src/<path>.cpp` (names, signatures,
-   class layouts). Functions not done yet can stay as `INCLUDE_ASM` (see `include/include_asm.h`).
+   class layouts). Functions not done yet stay as
+   `INCLUDE_ASM("asm/<VERSION>/nonmatchings/<path>", <name>);`, in the original order.
    Things to know about how the original was built:
    - Inline functions defined in a class are emitted (weak) at the end of the file that defines the
      class's first non-inline virtual function; a class whose virtuals are all inline or pure gets
@@ -141,6 +146,32 @@ the original ELF won't apply to the rebuilt one.
    ```
    objdiff compares against `build/<VERSION>/expected/units/<path>.o`, assembled from the original for
    every unit (`ninja expected`). Each unit also has decomp.me scratch settings in `objdiff.json`.
+   `python3 tools/funcdiff.py <path> [<function>]` is the non-interactive version (used by agents).
+4. `tools/check.sh` before committing: configure, full build with checksum, and an overview of the files
+   compiled from source (`INCLUDE_ASM`'d functions are counted separately).
+
+## Parallel decompilation with Claude Code
+
+One Claude Code session coordinates; sub-agents decompile one file each in their own git worktree.
+
+- `CLAUDE.md`: project knowledge every session and sub-agent loads (toolchain, conventions, pitfalls).
+- `.claude/agents/decomp-worker.md`: the worker's procedure - prepare the worktree, write the source,
+  match it with `funcdiff.py`, pass `tools/check.sh`, commit on `decomp/<file>`, report.
+- `.claude/commands/decomp-batch.md`: `/decomp-batch [n] [hints]` for the coordinator - pick files with
+  `tools/candidates.py`, start `n` workers with worktree isolation, merge their branches one by one
+  (`--no-commit`, `tools/check.sh`, then commit or abort), clean up worktrees.
+- `.claude/settings.json`: permissions for the build/test commands, so workers don't stall on prompts.
+- `tools/setup_worktree.sh` links `iso/`, the compilers, wibo, ccc, objdiff, `ref/` and `.venv` from the main
+  checkout into a worktree and configures it; `tools/candidates.py` lists open files (size, functions,
+  header strings in `.rodata` - files sharing headers shouldn't run in parallel).
+
+Run the coordinator inside WSL, in the main checkout, on `main`:
+```sh
+cd ~/khrecom && claude
+> /decomp-batch 3
+```
+Workers edit files, so start it with `--permission-mode acceptEdits` (or approve edits as they come).
+Each worker runs `configure.py` and full builds (~200 MB disk per worktree, CPU while building).
 
 ## Notes
 

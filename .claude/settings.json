@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ninja)",
+      "Bash(ninja:*)",
+      "Bash(.venv/bin/python configure.py)",
+      "Bash(.venv/bin/python configure.py:*)",
+      "Bash(.venv/bin/python tools/funcdiff.py:*)",
+      "Bash(.venv/bin/python tools/compare_compilers.py:*)",
+      "Bash(.venv/bin/python tools/candidates.py:*)",
+      "Bash(tools/check.sh)",
+      "Bash(tools/setup_worktree.sh)",
+      "Bash(tools/setup_worktree.sh:*)",
+      "Bash(tools/objdiff.sh:*)",
+      "Bash(mips-linux-gnu-objdump:*)",
+      "Bash(mips-linux-gnu-readelf:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git switch -c:*)",
+      "Bash(git branch --list:*)",
+      "Bash(git worktree list:*)",
+      "Bash(git rev-parse:*)"
+    ]
+  }
+}

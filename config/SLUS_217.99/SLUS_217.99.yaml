@@ -83,7 +83,7 @@ segments:
       - [0x005A18, asm, System/Fsm] # c:/KHCOM/MainApp/System/Fsm.cpp
       - [0x005F78, asm, System/MainApp] # c:/KHCOM/MainApp/System/MainApp.cpp
       - [0x008BE0, asm, System/Math3D] # c:/KHCOM/MainApp/System/Math3D.cpp
-      - [0x00C260, cpp, System/PlaySpeedCtrl] # c:/KHCOM/MainApp/System/PlaySpeedCtrl.cpp
+      - [0x00C260, asm, System/PlaySpeedCtrl] # c:/KHCOM/MainApp/System/PlaySpeedCtrl.cpp
       - [0x00C300, asm, System/Rnd] # c:/KHCOM/MainApp/System/Rnd.cpp
       - [0x00CAE0, asm, System/Thread] # c:/KHCOM/MainApp/System/Thread.cpp
       - [0x00CB28, asm, System/Tsin] # c:/KHCOM/MainApp/System/Tsin.cpp
@@ -104,7 +104,7 @@ segments:
       - [0x01D4D8, asm, System/Graphic/Anim] # c:/KHCOM/MainApp/System/Graphic/Anim.cpp
       - [0x020650, asm, System/Graphic/Billboard] # c:/KHCOM/MainApp/System/Graphic/Billboard.cpp
       - [0x020BF0, asm, System/Graphic/Camera] # c:/KHCOM/MainApp/System/Graphic/Camera.cpp
-      - [0x0217B0, cpp, System/Graphic/ColorFader] # c:/KHCOM/MainApp/System/Graphic/ColorFader.cpp
+      - [0x0217B0, asm, System/Graphic/ColorFader] # c:/KHCOM/MainApp/System/Graphic/ColorFader.cpp
       - [0x021B68, asm, System/Graphic/DeFocus] # c:/KHCOM/MainApp/System/Graphic/DeFocus.cpp
       - [0x023D88, asm, System/Graphic/DispList] # c:/KHCOM/MainApp/System/Graphic/DispList.cpp
       - [0x025A58, asm, System/Graphic/FrecFont] # c:/KHCOM/MainApp/System/Graphic/FrecFont.cpp
@@ -744,7 +744,7 @@ segments:
       - [0x2920A0, data, System/Coord]
       - [0x2920B0, data, System/CoordMan]
       - [0x2920C0, data, System/MainApp]
-      - [0x2920FC, .data, System/PlaySpeedCtrl]
+      - [0x2920FC, data, System/PlaySpeedCtrl]
       - [0x292108, data, System/Rnd]
       - [0x292118, data, System/Wnd]
       - [0x292150, data, System/FileIO]
@@ -998,7 +998,7 @@ segments:
       - [0x35F040, rodata, System/Graphic/Anim]
       - [0x35F420, rodata, System/Graphic/Billboard]
       - [0x35F4A0, rodata, System/Graphic/Camera]
-      - [0x35F560, .rodata, System/Graphic/ColorFader]
+      - [0x35F560, rodata, System/Graphic/ColorFader]
       - [0x35F5B0, rodata, System/Graphic/DeFocus]
       - [0x35F780, rodata, System/Graphic/DispList]
       - [0x35FD10, rodata, System/Graphic/FrecFont]

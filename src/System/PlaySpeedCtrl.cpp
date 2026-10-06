@@ -28,3 +28,5 @@ void CPlaySpeedCtrl::setDebugPlaySpeed(FLOAT fInSpeed) {
 TIMEQ CPlaySpeedCtrl::getSysProgressTime(TIMEQ nInTQ) {
     return nInTQ * s_fDebugPlaySpeed;
 }
+
+// SOURCE DATA: .data
