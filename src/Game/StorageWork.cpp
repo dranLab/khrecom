@@ -1,6 +1,6 @@
-#include "Game/StorageWork.h"
+#include <string.h>
 
-extern "C" void* memset(void*, int, unsigned int);
+#include "Game/StorageWork.h"
 
 void STORAGE::MCWork::initialize() {
     memset(this, 0, sizeof(*this));
