@@ -3,14 +3,11 @@
 
 #include "System/Graphic/Effect/libppp/pppPart.h"
 #include "System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixXYZ.h"
+#include "System/Graphic/Effect/libppp/eiProg/pppAngle.h"
 
 typedef struct { /* 0x4 */
     pppCDT cdt;
 } PKeMatSN;
-
-typedef struct { /* 0xc */
-    pppIVECTOR ang;
-} VAngle;
 
 typedef struct { /* 0x90 */
     sceVu0FMATRIX mat;

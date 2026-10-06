@@ -101,7 +101,9 @@ typedef struct { /* 0x4 */
 
 typedef struct _pppMngSt { /* 0xd0 */
     union {
-        sceVu0FMATRIX parMat;
+        /* PARTIAL: aligned added for System/Graphic/Effect/libppp/eiProg/pppAngle
+           (sceVu0FMATRIX is 16-aligned in the SDK; lets gcc merge byte tests into one ld) */
+        sceVu0FMATRIX parMat __attribute__((aligned(16)));
         struct {
             sceVu0FVECTOR parRot[3];
             sceVu0FVECTOR parLoc;
@@ -214,5 +216,9 @@ void sceVu0CopyVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1);
 extern sceVu0FMATRIX ppvCameraMatrix;
 extern sceVu0FMATRIX ppvParMatrix;
 /* end PARTIAL pppRyjDrawMatrixWorld */
+
+/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppAngle */
+extern BOOL ppvUserStopPartF;
+/* end PARTIAL pppAngle */
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
