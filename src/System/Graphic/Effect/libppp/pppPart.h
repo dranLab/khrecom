@@ -177,4 +177,16 @@ void sceVu0ApplyMatrix(sceVu0FVECTOR v0, sceVu0FMATRIX m0, sceVu0FVECTOR v1);
 void sceVu0UnitMatrix(sceVu0FMATRIX m);
 /* end PARTIAL pppKeDMatPht */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthUserCtrl */
+typedef struct { /* 0x4 */
+    u_char r;
+    u_char g;
+    u_char b;
+    u_char a;
+} pppCVECTOR;
+
+extern sceVu0FVECTOR *ppvReferencePosList;
+extern int ppvReferencePosNum;
+/* end PARTIAL pppRyjMegaBirthUserCtrl */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
