@@ -162,4 +162,12 @@ extern sceVu0FMATRIX ppvScreenMatrix;
 void sceVu0CopyMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1);
 /* end PARTIAL pppKeDMat */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixXYZ */
+typedef struct { /* 0xc */
+    word x;
+    word y;
+    word z;
+} pppIVECTOR;
+/* end PARTIAL pppGetRotMatrixXYZ */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
