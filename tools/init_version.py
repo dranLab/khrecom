@@ -26,6 +26,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from elftools.elf.elffile import ELFFile
+
 ROOT = Path(__file__).resolve().parent.parent
 
 DEFAULT_COMPILERS = {
@@ -59,6 +61,20 @@ def rewrite(yaml: str, version: str, name: str) -> str:
     return yaml
 
 
+def fix_bss_size(yaml: str, elf: Path) -> str:
+    """splat assumes .bss directly follows the loaded data, but Sony's linker script aligns .sbss/.bss to
+    128 bytes, so the generated bss_size falls short of the real end of .bss. Recompute it from the ELF."""
+    sizes = re.findall(r"^    bss_size: 0x([0-9A-F]+)$", yaml, re.MULTILINE)
+    if len(sizes) != 1:
+        print("warning: more than one segment, check each bss_size by hand")
+        return yaml
+    with elf.open("rb") as f:
+        sections = [s for s in ELFFile(f).iter_sections() if s["sh_flags"] & 2]  # SHF_ALLOC
+        load_end = max(s["sh_addr"] + s["sh_size"] for s in sections if s["sh_type"] != "SHT_NOBITS")
+        bss_end = max(s["sh_addr"] + s["sh_size"] for s in sections if s["sh_type"] == "SHT_NOBITS")
+    return yaml.replace(f"    bss_size: 0x{sizes[0]}\n", f"    bss_size: 0x{bss_end - load_end:X}\n", 1)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("elf", type=Path, help="the game's boot ELF, e.g. iso/SLUS_217.99")
@@ -81,7 +97,7 @@ def main() -> None:
         compiler = re.search(r"^  compiler: (\w+)$", yaml, re.MULTILINE).group(1)
 
         cfg_dir.mkdir(parents=True, exist_ok=True)
-        (cfg_dir / f"{version}.yaml").write_text(rewrite(yaml, version, name), encoding="utf-8", newline="\n")
+        (cfg_dir / f"{version}.yaml").write_text(fix_bss_size(rewrite(yaml, version, name), elf), encoding="utf-8", newline="\n")
         for extra in ("symbol_addrs.txt", "linker_script_extra.ld"):
             shutil.copy(tmp_dir / extra, cfg_dir / extra)
         (ROOT / "iso").mkdir(exist_ok=True)

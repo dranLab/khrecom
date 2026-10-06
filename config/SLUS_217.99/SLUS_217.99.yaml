@@ -28,6 +28,7 @@ options:
   o_as_suffix: True
 
   symbol_addrs_path:
+    - config/SLUS_217.99/elf_symbol_addrs.txt
     - config/SLUS_217.99/symbol_addrs.txt
   reloc_addrs_path:
     - config/SLUS_217.99/reloc_addrs.txt
@@ -66,7 +67,7 @@ segments:
     type: code
     start: 0x000000
     vram: 0x00100000
-    bss_size: 0x1A17D0
+    bss_size: 0x1A1860
     subalign: null
     subsegments:
       - [0x000000, asm, cod/000000] # .text

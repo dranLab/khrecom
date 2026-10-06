@@ -58,6 +58,10 @@ source .venv/bin/activate
    python3 tools/init_version.py iso/SLUS_XXX.XX
    ```
    Then review `config/SLUS_XXX.XX/build.yaml` and pick the compiler matching what `elf_info.py` found.
+   If the ELF still has its symbol table, import it (writes `elf_symbol_addrs.txt`):
+   ```sh
+   python3 tools/import_symbols.py SLUS_XXX.XX
+   ```
 5. **Get the compiler**
    ```sh
    python3 tools/download_compiler.py --list
