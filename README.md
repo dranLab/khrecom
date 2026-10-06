@@ -62,6 +62,11 @@ source .venv/bin/activate
    ```sh
    python3 tools/import_symbols.py SLUS_XXX.XX
    ```
+   and if it has `.mdebug` debug info, split `.text` into the original source files:
+   ```sh
+   python3 tools/split_text.py SLUS_XXX.XX --dry-run   # check the report first
+   python3 tools/split_text.py SLUS_XXX.XX
+   ```
 5. **Get the compiler**
    ```sh
    python3 tools/download_compiler.py --list
@@ -87,6 +92,10 @@ source .venv/bin/activate
 - **Status:** `ninja` rebuilds a byte-identical code image of SLUS_217.99 (100% asm). The ELF still has
   its symbol table (18k symbols) and `.mdebug` debug info; the game is C++ built with EE-GCC 2.9x
   (`gcc2_compiled.` markers, GCC 2 name mangling), most likely ee-gcc 2.96 from SDK 3.1.0.
+  `.text` is split into the 665 original objects (game code under `System/`, `Game/`, `Form/`,
+  Sony SDK / newlib / libgcc under `lib/`); `.data`, `.rodata` and `.bss` are not split yet.
+- `mips-linux-gnu-as` aligns `.text` to 16 bytes, the original toolchain didn't; `configure.py` resets
+  each object's `.text` alignment to what its original address implies (8, or 4 for `lib/at3core`).
 - Sony's linker script starts each section at `ALIGN(128)`; `configure.py` reproduces that for
   `.sbss`/`.bss` by adding a `.balign` to the first asm file of each (splat can't express it).
 

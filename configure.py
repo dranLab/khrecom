@@ -94,13 +94,17 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         n.variable("cc_dir", cc_dir)
         n.newline()
 
-        n.rule("as", f"{CROSS}as $asflags -o $out $in", description="AS $in")
+        # mips-linux-gnu-as aligns .text to 16; the original (ee-elf) toolchain only used what the code asked for.
+        # Every object gets the alignment its original start address implies (capped at gcc's 8).
+        n.variable("text_align", 8)
+        set_align = f"{CROSS}objcopy --set-section-alignment .text=$text_align $out"
+        n.rule("as", f"{CROSS}as $asflags -o $out $in && {set_align}", description="AS $in")
         # Compile to assembly with the original compiler, then assemble with modern binutils so
         # INCLUDE_ASM'd splat output assembles exactly like the plain .s files.
         n.rule(
             "cc",
             f"$cc_dir/bin/ee-gcc -S -B $cc_dir/bin/ee- $cflags -I include -I src -o $out.s $in"
-            f" && {CROSS}as $cc_asflags -o $out $out.s",
+            f" && {CROSS}as $cc_asflags -o $out $out.s && {set_align}",
             description="CC $in",
         )
         n.rule("bin", f"{CROSS}ld -EL -r -b binary -o $out $in", description="BIN $in")
@@ -128,10 +132,12 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
                 continue
             src = entry.src_paths[0].as_posix()
             suffix = entry.src_paths[0].suffix
+            start = entry.segment.vram_start or 0
+            align = {"text_align": min(8, start & -start) if start else 8}
             if suffix in (".c", ".cpp", ".cc"):  # ee-gcc picks cc1 / cc1plus from the extension
-                n.build(obj, "cc", src)
+                n.build(obj, "cc", src, variables=align)
             elif suffix == ".s":
-                n.build(obj, "as", src)
+                n.build(obj, "as", src, variables=align)
             elif suffix == ".bin":
                 n.build(obj, "bin", src)
             else:
