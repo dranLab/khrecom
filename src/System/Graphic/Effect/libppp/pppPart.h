@@ -210,4 +210,9 @@ void sceVu0Normalize(sceVu0FVECTOR v0, sceVu0FVECTOR v1);
 void sceVu0CopyVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1);
 /* end PARTIAL pppKeParMatR */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjDrawMatrixWorld */
+extern sceVu0FMATRIX ppvCameraMatrix;
+extern sceVu0FMATRIX ppvParMatrix;
+/* end PARTIAL pppRyjDrawMatrixWorld */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
