@@ -333,4 +333,10 @@ extern sceVu0FMATRIX ppvColorMatrix;
 extern long128 ppvVNWork[2048];
 /* end PARTIAL pppDrawMdl */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjDrawMatrixWorldWood */
+extern sceVu0FMATRIX ppvWorldMatrixWood;
+extern sceVu0FMATRIX ppvSWMatrixWood;
+void sceVu0OuterProduct(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2);
+/* end PARTIAL pppRyjDrawMatrixWorldWood */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
