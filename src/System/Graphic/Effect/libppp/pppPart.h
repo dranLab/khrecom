@@ -231,4 +231,13 @@ extern BOOL ppvUserStopPartF;
                          : : "r"(v), "r"(s) : "memory")
 /* end PARTIAL pppMatrixXYZ */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppColMove */
+typedef struct { /* 0x8 */
+    short r;
+    short g;
+    short b;
+    short a;
+} pppHCVECTOR;
+/* end PARTIAL pppColMove */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
