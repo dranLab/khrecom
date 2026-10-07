@@ -81,7 +81,14 @@ public:
     inline CModel* getModel();
     inline CModel* getModel(INT inIndex);
     // Entity.cpp also emits this out of line (setEntityFlag__7CEntityUiUi): or inSet, then clear inMask.
-    void setEntityFlag(UINT inSet, UINT inMask) { m_uiEntityFlag = (m_uiEntityFlag | inSet) & ~inMask; }
+    // PARTIAL: changed for Game/Gimmick/GimmickSavePoint - the store goes through a reference (not a struct
+    // member access), so the scheduler does not move a following global load above it.
+    void setEntityFlag(UINT inSet, UINT inMask) { UINT& f = m_uiEntityFlag; f = (f | inSet) & ~inMask; }
+    // PARTIAL: added for Game/Gimmick/GimmickSavePoint
+    const FVECTOR& getPos() const;
+    FLOAT calcDistanceXZ(const CEntity* inEntity) const;
+    HANDLE setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale);
+    BOOL isRideOnPlayer();
 };
 
 #endif /* GAME_ENTITY_H */
