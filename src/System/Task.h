@@ -10,6 +10,20 @@ class CTask;
 template <class T> class ISLCManagerT;
 template <class T> class SLContainerT;
 
+// PARTIAL: added for Game/Bullet/BulletManager
+template <class T>
+class SLContainerT {
+private:
+    HANDLE _hID;
+    T* _pValue;
+    SLContainerT<T>* _pNextContainer;
+    int _nGeneral;
+public:
+    HANDLE getHandle() { return _hID; }
+    T* getValue() { return _pValue; }
+    SLContainerT<T>* getNext() { return _pNextContainer; }
+};
+
 template <class T>
 class CSLCListT {
 private:
@@ -19,6 +33,7 @@ private:
     int m_nListSize;
 public:
     virtual ~CSLCListT();
+    SLContainerT<T>* getHead() { return m_pHeadContainer; } // PARTIAL: added for Game/Bullet/BulletManager
 };
 
 typedef CSLCListT<CTask> CTaskSLCList;
@@ -55,7 +70,7 @@ public:
     virtual void disp();
     virtual void after();
     virtual void onOut();
-    virtual INT getTypeID();
+    virtual INT getTypeID() const;
 
     HANDLE getHandle() { return m_hThis; }
     BOOL isOut() { return m_nInfo & 0x8000; }
@@ -65,6 +80,10 @@ public:
             onOut();
         }
     }
+
+protected: // PARTIAL: added for Game/Bullet/BulletManager
+    BOOL declareSysTask(UINT nID);
+    CTaskSLCList& getChildren() { return m_listChildren; }
 };
 
 #endif /* SYSTEM_TASK_H */
