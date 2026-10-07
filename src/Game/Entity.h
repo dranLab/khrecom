@@ -8,6 +8,7 @@
 
 struct FVECTOR;
 class CState;
+class CMovement; // PARTIAL: added for Game/Gimmick/GimmickBreakable
 
 enum eObjType {
     eObjType_dummy = 0 /* values not needed yet */
@@ -29,7 +30,10 @@ public:
 
 class CEntity : public CTask, public CFSM {
 protected:
-    UBYTE _m_0x70[0x70] __attribute__((aligned(16))); /* 0x070 m_vStartPos .. 0x0d0 m_vRootMoveScale */
+    // PARTIAL: m_pMove split out for Game/Gimmick/GimmickBreakable
+    UBYTE _m_0x70[0x30] __attribute__((aligned(16))); /* 0x070 m_vStartPos .. 0x09c m_nTexAnmNum */
+    CMovement* m_pMove;  /* 0x0a0 */
+    UBYTE _m_0xa4[0x3c]; /* 0x0a4 m_pBodyColl .. 0x0d0 m_vRootMoveScale */
 private:
     eObjType m_EntityType; /* 0x0e0 */
     UINT m_uiEntityFlag;   /* 0x0e4 */
@@ -55,6 +59,12 @@ public:
     virtual void updateAfter();
     virtual void updatePositionAfter();
     virtual void lastUpdate();
+
+    // PARTIAL: added for Game/Gimmick/GimmickBreakable
+    void bodyCollOnBody(INT inKind);
+    void bodyCollOffBody(INT inKind);
+    void rideModelEnableAllCollision(BOOL inEnable);
+    void rideModelChangeListR2();
 
     void setEntityType(eObjType inType) { m_EntityType = inType; }
     eObjType getEntityType() { return m_EntityType; }
