@@ -4,6 +4,11 @@
 
 #include "khtypes.h"
 
+#ifndef __cplusplus
+/* PARTIAL: added for System/Graphic/Effect/libppp/draw/md (C units only see TRACE) */
+void TRACE(char* fmt, ...);
+#else
+
 extern "C" void TRACE(char* fmt, ...);
 
 // PARTIAL: added for System/Movie/MovieFiles
@@ -49,5 +54,7 @@ enum TtyColor {
 };
 
 extern "C" void TRACE_COL(TtyColor nCol, char* fmt, ...);
+
+#endif /* __cplusplus */
 
 #endif /* SYSTEM_DEBUG_H */

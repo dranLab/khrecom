@@ -313,6 +313,8 @@ typedef struct { /* 0x1c */
 
 extern pppEnvSt *ppvEnv;
 extern u_long128 *ppvCurPrimp;
+extern int ppvCurPrimpLen; /* PARTIAL: added for System/Graphic/Effect/libppp/draw/md */
+extern int ppvPrimpLen;    /* PARTIAL: added for System/Graphic/Effect/libppp/draw/md */
 
 /* libgraph (GIF tags and GS registers as plain 64-bit words) */
 typedef struct { /* 0x60 */

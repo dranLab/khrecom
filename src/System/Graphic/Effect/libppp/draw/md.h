@@ -59,10 +59,18 @@ typedef struct { /* 0x60 */
     float ffar;
     float fnear;
     float flimit;
-} OMD_IN;
+} OMD_IN __attribute__((aligned(16)));
 
-extern int ot_omd_size[0];
+extern int ot_omd_size[];
 
 void *op1_md_draw(OMD_H *mdh, OMD_IN *mdi, int nPacketSize);
+
+/* PARTIAL: added for System/Graphic/Effect/libppp/draw/md (draw/md0*.h) */
+void *op_md_ot8(OMD_H *mdh, OMD_IN *mdi);
+void *op_md_ot8_fog(OMD_H *mdh, OMD_IN *mdi);
+void *op_md_one8(OMD_H *mdh, OMD_IN *mdi);
+void *op_md_one8_fog(OMD_H *mdh, OMD_IN *mdi);
+void *op_md_draw_path3(OMD_H *mdh, OMD_IN *mdi);
+void *op_md_draw_path3_fog(OMD_H *mdh, OMD_IN *mdi);
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_DRAW_MD_H */
