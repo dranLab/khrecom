@@ -9,6 +9,7 @@
 struct FVECTOR;
 class CState;
 class CMovement; // PARTIAL: added for Game/Gimmick/GimmickBreakable
+class CModel;    // PARTIAL: added for Game/Gimmick/GimmickPlantChild
 
 enum eObjType {
     eObjType_dummy = 0 /* values not needed yet */
@@ -31,7 +32,12 @@ public:
 class CEntity : public CTask, public CFSM {
 protected:
     // PARTIAL: m_pMove split out for Game/Gimmick/GimmickBreakable
-    UBYTE _m_0x70[0x30] __attribute__((aligned(16))); /* 0x070 m_vStartPos .. 0x09c m_nTexAnmNum */
+    // PARTIAL: m_pModels, m_iModelCount split out for Game/Gimmick/GimmickPlantChild
+    UBYTE _m_0x70[0x10] __attribute__((aligned(16))); /* 0x070 m_vStartPos */
+    CModel* m_pModels;            /* 0x080 */
+    FVECTOR* m_pvModelColor;      /* 0x084 */
+    INT m_iModelCount;            /* 0x088 */
+    UBYTE _m_0x8c[0x14];          /* 0x08c m_pNLight .. 0x09c m_nTexAnmNum */
     CMovement* m_pMove;  /* 0x0a0 */
     UBYTE _m_0xa4[0x3c]; /* 0x0a4 m_pBodyColl .. 0x0d0 m_vRootMoveScale */
 private:
@@ -69,7 +75,13 @@ public:
     void setEntityType(eObjType inType) { m_EntityType = inType; }
     eObjType getEntityType() { return m_EntityType; }
     UINT getFlag() { return m_uiEntityFlag; }
+    // PARTIAL: added for Game/Gimmick/GimmickPlantChild (getModel needs CModel's definition: System/Graphic/Model.h)
+    INT getModelCount() { return m_iModelCount; }
+    inline CModel* getModel(INT inIndex);
     void setEntityFlag(UINT inFlag, BOOL inOn) { UINT b = inOn ? inFlag : 0; m_uiEntityFlag |= b; }
+    // PARTIAL: added for Game/Gimmick/GimmickPlantChild. Placeholder: the original's only flag setter is
+    // setEntityFlag(UINT inSet, UINT inMask) (Entity.cpp in ref), whose body is not known yet.
+    void clearEntityFlag(UINT inFlag) { m_uiEntityFlag &= ~inFlag; }
 };
 
 #endif /* GAME_ENTITY_H */
