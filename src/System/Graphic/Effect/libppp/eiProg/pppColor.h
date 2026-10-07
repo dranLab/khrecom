@@ -1,4 +1,3 @@
-// PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppColMove
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_EIPROG_PPPCOLOR_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_EIPROG_PPPCOLOR_H
 
@@ -13,5 +12,8 @@ typedef struct { /* 0xc */
     pppHCVECTOR col;
     pppCVECTOR release_col;
 } VColor;
+
+void pppColor(pppPObject *pobj, PColor *p, pppCtrlTable *ctbl);
+void pppColorCon(pppPObject *pobj, pppCtrlTable *ctbl);
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_EIPROG_PPPCOLOR_H */
