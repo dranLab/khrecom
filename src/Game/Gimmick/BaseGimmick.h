@@ -21,12 +21,19 @@ public:
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
     virtual BOOL initalize(INT inGroupID, INT inRsrcID, UINT iFlag);
     INT getUniqueID() { return m_iUniqueID; }
+    // PARTIAL: added for Game/Gimmick/GimmickBreakable
+    void setGimmickFlag(UINT inFlag, BOOL inOn) {
+        if (inOn) m_uiGimmickFlag |= inFlag;
+        else m_uiGimmickFlag &= ~inFlag;
+    }
     virtual void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
 
 protected:
     virtual void updateBefore();
     virtual void updateAfter();
     virtual void lastUpdate();
+    void changeGimmickState(INT inState); // PARTIAL: added for Game/Gimmick/GimmickBreakable
+    INT createPrize(INT inType, INT inParam); // PARTIAL: added for Game/Gimmick/GimmickBreakable
     INT saveStat(INT in_Stat);
     virtual void beginStateMain();
     virtual void stateMain();
