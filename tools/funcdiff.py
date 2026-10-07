@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Compare a file compiled from source with the original, function by function (non-interactive objdiff).
 
-Builds the unit's object and its target first. Address fields filled in at link time are ignored.
+Builds the unit's object and its target first. Address fields filled in at link time are ignored, but where
+both sides name the symbol they refer to (a called function, a global), it must be the same.
 
 Usage:
     python3 tools/funcdiff.py System/Spad                      # status of every function
@@ -63,8 +64,9 @@ def main() -> None:
     t, b = functions(ROOT / target), functions(ROOT / base)
     if not args.function:
         for name in t:
-            state = "missing" if name not in b else "MATCH" if b[name] == t[name] else "differs"
-            print(f"{state:8} {name} ({len(t[name].data)} bytes)")
+            diff = t[name].difference(b[name]) if name in b else None
+            state = "missing" if name not in b else "MATCH" if diff is None else "differs"
+            print(f"{state:8} {name} ({len(t[name].data)} bytes)" + (f": {diff}" if diff else ""))
         extra = [n for n in b if n not in t]
         if extra:
             print("only in ours (not in the original):", ", ".join(extra))

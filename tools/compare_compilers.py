@@ -11,6 +11,7 @@ Usage:
 """
 
 import argparse
+import re
 import subprocess
 import sys
 import tempfile
@@ -28,22 +29,36 @@ from configure import compiler_commands  # noqa: E402  (the build's exact comman
 RELOC_MASKS = {4: 0x03FFFFFF, 5: 0xFFFF, 6: 0xFFFF, 10: 0xFFFF}
 
 
-class Function:
-    """A function's bytes plus the fields that are only filled in at link time."""
+# Relocation targets that name the same thing differently in the original and in a compiled object: section
+# symbols (a compiled file's own data: .rodata+offset) and splat's labels for unnamed data and code.
+LOCAL_STATIC = re.compile(r"\.\d+$")
+ANONYMOUS = re.compile(r"^(\.|D_[0-9A-F]{8}$|jtbl_|L[0-9A-F]{8}$|\$L|func_[0-9A-F]{8}$)")
 
-    def __init__(self, data: bytes, masks: dict[int, int]):
-        self.data, self.masks = data, masks
+
+class Function:
+    """A function's bytes plus the fields that are only filled in at link time, and what they refer to."""
+
+    def __init__(self, data: bytes, masks: dict[int, int], targets: dict[int, str | None] | None = None):
+        self.data, self.masks, self.targets = data, masks, targets or {}
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Function) or len(self.data) != len(other.data):
-            return False
+        return isinstance(other, Function) and self.difference(other) is None
+
+    def difference(self, other: "Function") -> str | None:
+        """None if equal; else what differs first. Masked fields must refer to the same symbol where both sides
+        name one (e.g. a call to com_free, not __builtin_delete), since the linker fills them differently."""
+        if len(self.data) != len(other.data):
+            return f"size {len(self.data):#x} vs {len(other.data):#x}"
         masks = {**self.masks, **other.masks}
         for i in range(0, len(self.data), 4):
             a = int.from_bytes(self.data[i:i + 4], "little")
             b = int.from_bytes(other.data[i:i + 4], "little")
             if (a ^ b) & ~masks.get(i, 0) & 0xFFFFFFFF:
-                return False
-        return True
+                return f"instruction at +{i:#x}"
+            x, y = self.targets.get(i), other.targets.get(i)
+            if x and y and x != y:
+                return f"+{i:#x} refers to {x} vs {y}"
+        return None
 
 
 def functions(obj: Path) -> dict[str, Function]:
@@ -53,16 +68,24 @@ def functions(obj: Path) -> dict[str, Function]:
         text_index = next(i for i, s in enumerate(elf.iter_sections()) if s.name == ".text")
         text = elf.get_section(text_index).data()
         masks: dict[int, int] = {}
+        targets: dict[int, str | None] = {}  # offset -> referenced symbol name (None: anonymous)
         for section in elf.iter_sections():
             if isinstance(section, RelocationSection) and section["sh_info"] == text_index:
+                symtab = elf.get_section(section["sh_link"])
                 for reloc in section.iter_relocations():
                     masks[reloc["r_offset"]] = RELOC_MASKS.get(reloc["r_info_type"], 0xFFFFFFFF)
+                    sym = symtab.get_symbol(reloc["r_info_sym"])
+                    named = sym["st_info"]["type"] != "STT_SECTION" and not ANONYMOUS.match(sym.name)
+                    # Function-local statics are named name.<n> after a gcc-internal counter: compare the name only.
+                    targets[reloc["r_offset"]] = LOCAL_STATIC.sub("", sym.name) if named else None
         out = {}
         for sym in elf.get_section_by_name(".symtab").iter_symbols():
             if sym["st_info"]["type"] == "STT_FUNC" and sym["st_shndx"] == text_index:
                 start, size = sym["st_value"], sym["st_size"]
+                inside = lambda o: start <= o < start + size  # noqa: E731
                 out[sym.name] = Function(text[start:start + size],
-                                         {o - start: m for o, m in masks.items() if start <= o < start + size})
+                                         {o - start: m for o, m in masks.items() if inside(o)},
+                                         {o - start: n for o, n in targets.items() if inside(o)})
         return out
 
 
