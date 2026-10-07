@@ -7,6 +7,7 @@
 /* Core particle (ppp) types shared by the libppp units (C). */
 
 typedef int word;
+typedef unsigned int u_word; /* PARTIAL: added for System/Graphic/Effect/libppp/pppAlloc */
 /* 16-aligned as in the SDK's libvu0.h. This makes pppMngSt 8-aligned, so gcc merges byte tests like
    "ppvMng->bFlagStop == 0 && ppvMng->bBoolSlow == 0" into one ld + mask, as the original does. */
 typedef float sceVu0FVECTOR[4] __attribute__((aligned(16)));
@@ -277,6 +278,17 @@ extern long128 ppvDbgTemp[1];
 extern sceVu0FVECTOR ppvParAng;
 void sceVu0InversMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1);
 /* end PARTIAL pppRyjMatrixWorldXYZ */
+
+/* PARTIAL: added for System/Graphic/Effect/libppp/pppAlloc */
+typedef struct _pppEMCB { /* 0x10 */
+    struct _pppEMCB *next;
+    struct _pppEMCB *before;
+    int owner;
+    int wdummy;
+} pppEMCB;
+
+extern void (*ppvErrorFunc)();
+/* end PARTIAL pppAlloc */
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeMdlTfd */
 typedef struct { /* 0x10 */

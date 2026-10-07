@@ -4,6 +4,9 @@
 
 #include "khtypes.h"
 
-extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
+#ifdef __cplusplus
+extern "C"
+#endif
+void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
 #endif /* SYSTEM_MAINAPP_H */
