@@ -8,6 +8,7 @@
 class CTaskMan {
 public:
     static CTask* getSysTask(UINT nID);
+    static CTask* getTask(HANDLE hTask); // PARTIAL: added for Form/Menu/MoogleShop
 };
 
 #endif /* SYSTEM_TASKMAN_H */

@@ -7,4 +7,9 @@
 
 extern "C" void* com_malloc_d(size_t bytes, char* msg, unsigned int ra);
 
+// PARTIAL: added for Form/Menu/MoogleShop
+extern "C" void com_free(void* mem);
+
+inline void operator delete(void* mem) { com_free(mem); }
+
 #endif /* SYSTEM_HEAPMAN_H */

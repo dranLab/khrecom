@@ -19,15 +19,21 @@ struct _EventDoorInfo { // 0x4
 };
 
 struct MCWork { // 0x2ad4
+    // PARTIAL: added for Form/Menu/MoogleShop
+    struct _RoomInfo { // 0xb8
+        /* 0x00 */ UINT __opaque[0xb4 / 4]; // _nArea .. _mapEnemyInfo
+        /* 0xb4 */ UINT _moogleShopFlag;
+    };
+
     /* 0x0000 */ BYTE _nFloorIdx;
     /* 0x0001 */ BYTE _nRoomID;
     /* 0x0002 */ BYTE _nDoorID;
     /* 0x0003 */ BYTE _nNextRCNormaNum;
     /* 0x0004 */ BYTE _nPrevRoomID;
     /* 0x0005 */ unsigned char __nFiller[3];
-    /* 0x0008 */ UINT _roomInfo[32][0xb8 / 4];     // _RoomInfo
-    /* 0x1708 */ UINT _roomInfoStartEnt[0xb8 / 4]; // _RoomInfo
-    /* 0x17c0 */ UINT _roomInfoGoalEnt[0xb8 / 4];  // _RoomInfo
+    /* 0x0008 */ _RoomInfo _roomInfo[32];
+    /* 0x1708 */ _RoomInfo _roomInfoStartEnt;
+    /* 0x17c0 */ _RoomInfo _roomInfoGoalEnt;
     /* 0x1878 */ SHORT _nArea;
     /* 0x187a */ SHORT _nScene;
     /* 0x187c */ SHORT _nPrevArea;
