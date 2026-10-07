@@ -40,9 +40,13 @@ typedef CSLCListT<CTask> CTaskSLCList;
 
 /* Placeholder for the original header's inline function that reports a full task container pool: its
  * message ("タスク用コンテナが MAX に到達しました\n", Shift-JIS) heads .rodata of every includer. */
+/* PARTIAL: added for Game/Gimmick/GimmickHitMore - not every includer has the string (the Gimmick units
+ * don't): define TASK_H_NO_SLC_OVERFLOW_MSG before including to leave it out. */
+#ifndef TASK_H_NO_SLC_OVERFLOW_MSG
 inline void _taskSLCOverflow() {
     TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
 }
+#endif
 
 class CTask {
 private:
@@ -72,6 +76,7 @@ public:
     virtual void onOut();
     virtual INT getTypeID() const;
 
+    CTask* getSysTask(UINT nID); // PARTIAL: added for Game/Gimmick/GimmickHitMore
     HANDLE getHandle() { return m_hThis; }
     BOOL isOut() { return m_nInfo & 0x8000; }
     void out() {

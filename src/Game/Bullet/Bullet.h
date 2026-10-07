@@ -3,6 +3,7 @@
 #define GAME_BULLET_BULLET_H
 
 #include "khtypes.h"
+#include "System/Graphic/Gprim.h" // PARTIAL: moved here from Game/Entity.h for Game/Gimmick/GimmickHitMore
 #include "Game/Entity.h"
 
 struct BULLET_PARAM {
