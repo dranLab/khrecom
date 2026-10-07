@@ -77,6 +77,7 @@ public:
     UINT getFlag() { return m_uiEntityFlag; }
     // PARTIAL: added for Game/Gimmick/GimmickPlantChild (getModel needs CModel's definition: System/Graphic/Model.h)
     INT getModelCount() { return m_iModelCount; }
+    inline CModel* getModel();
     inline CModel* getModel(INT inIndex);
     void setEntityFlag(UINT inFlag, BOOL inOn) { UINT b = inOn ? inFlag : 0; m_uiEntityFlag |= b; }
     // PARTIAL: added for Game/Gimmick/GimmickPlantChild. Placeholder: the original's only flag setter is

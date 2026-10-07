@@ -19,7 +19,6 @@ inline void _emptyStringPlaceholder() {
 #include "Game/Movement.h"
 #include "Game/Gimmick/GimmickManager.h"
 #include "Game/LockOnManager.h"
-#include "include_asm.h"
 
 CGimmickPlantChild::CGimmickPlantChild(CTask* inParent) : CBaseGimmick(inParent) {
     m_Step = 0;
@@ -42,12 +41,6 @@ void CGimmickPlantChild::AfterInit() {}
 
 void CGimmickPlantChild::beginStateMain() {}
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickPlantChild", stateMain__18CGimmickPlantChild);
-
-/* Differs only in the loop: the original computes the first m_pModels[i] address with a mult each iteration
- * (its i * 288 giv is not reduced, 288 kept in s5) and strength-reduces only the second one; ours shares one
- * reduced giv for both (CSE merges them). Constants (0.020000001f in getFrameRateF, 0.005) and the switch match. */
-#if 0
 void CGimmickPlantChild::stateMain() {
     FLOAT al;
     INT i;
@@ -57,7 +50,7 @@ void CGimmickPlantChild::stateMain() {
         break;
     case 1:
         for (i = 0; i < getModelCount(); i++) {
-            al = getModel(i)->getAlphaScale() - getFrameRateF() * 0.005;
+            al = getModel()[i].getAlphaScale() - getFrameRateF() * 0.005;
             if (al <= 0.0f) {
                 al = 0.0f;
                 m_Step = 2;
@@ -70,7 +63,6 @@ void CGimmickPlantChild::stateMain() {
         break;
     }
 }
-#endif
 
 void CGimmickPlantChild::endStateMain() {}
 

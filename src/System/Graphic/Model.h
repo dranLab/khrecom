@@ -20,6 +20,7 @@ public:
 };
 
 #ifdef GAME_ENTITY_H
+inline CModel* CEntity::getModel() { return m_pModels; }
 inline CModel* CEntity::getModel(INT inIndex) { return &m_pModels[inIndex]; }
 #endif
 
