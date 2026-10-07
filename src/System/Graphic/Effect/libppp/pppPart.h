@@ -246,4 +246,28 @@ typedef struct { /* 0x8 */
 extern int ppvEmptyLoop;
 /* end PARTIAL pppMoveLoop */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppRandFloat */
+extern long128 ppvDbgTemp[1];
+
+/* r = random float in [0, 1) from the VU0 random unit (R register): xor R with -1, five rounds of
+   vrxor/vrnext, then add -1.0 (vrnext yields [1, 2)). r must be a float lvalue. */
+#define PPP_RAND_F(r)                                    \
+    __asm__ __volatile__("addi $8, $0, -1\n"             \
+                         "\tqmtc2.ni $8, $vf2\n"         \
+                         "\tvrxor $R, $vf2x\n"           \
+                         "\tvrnext.x $vf1, $R\n"         \
+                         "\tvrxor $R, $vf2x\n"           \
+                         "\tvrnext.x $vf1, $R\n"         \
+                         "\tvrxor $R, $vf2x\n"           \
+                         "\tvrnext.x $vf1, $R\n"         \
+                         "\tvrxor $R, $vf2x\n"           \
+                         "\tvrnext.x $vf1, $R\n"         \
+                         "\tvrxor $R, $vf2x\n"           \
+                         "\tvrnext.x $vf1, $R\n"         \
+                         "\tvitof0.x $vf2, $vf2\n"       \
+                         "\tvadd.x $vf1, $vf1, $vf2\n"   \
+                         "\tqmfc2.ni %0, $vf1"           \
+                         : "=r"(r) : : "$8")
+/* end PARTIAL pppRandFloat */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
