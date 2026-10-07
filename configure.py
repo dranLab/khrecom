@@ -246,12 +246,17 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
             compat_args += " --assembler snas"
         else:
             assemble = f"{CROSS}as $cc_asflags -o $out $out.s"
+        # The preprocessor writes the included headers to $out.d (gcc 2.95 has no -MT: its target is the bare
+        # object name, so it is replaced by $out), which ninja reads to rebuild the object when a header changes.
         n.rule(
             "cc",
-            f"{cc} -S $cflags -I include -I src -o $out.gcc.s $in"
+            f"{cc} -S $cflags -I include -I src -Wp,-MD,$out.d -o $out.gcc.s $in"
+            f" && sed -i '1s|^[^:]*:|$out:|' $out.d"
             f" && {sys.executable} tools/ee_asm_compat.py $out.gcc.s $out.s{compat_args}"
             f" && {assemble} && {set_align}",
             description="CC $in",
+            depfile="$out.d",
+            deps="gcc",
         )
         n.rule("bin", f"{CROSS}ld -EL -r -b binary -o $out $in", description="BIN $in")
         n.rule(
@@ -282,7 +287,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
             suffix = entries[0].src_paths[0].suffix
             align = {"align_flags": object_fixups(entries, compiled=suffix in (".c", ".cpp", ".cc"))}
             if suffix in (".c", ".cpp", ".cc"):  # ee-gcc picks cc1 / cc1plus from the extension
-                n.build(obj, "cc", src, variables=align)
+                n.build(obj, "cc", src, variables=align, implicit=["tools/ee_asm_compat.py"])
                 compiled[entries[0].segment.name] = (obj, src)
             elif suffix == ".s":
                 n.build(obj, "as", src, variables=align)
