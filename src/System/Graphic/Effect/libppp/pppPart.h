@@ -277,4 +277,53 @@ extern sceVu0FVECTOR ppvParAng;
 void sceVu0InversMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1);
 /* end PARTIAL pppRyjMatrixWorldXYZ */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeMdlTfd */
+typedef struct { /* 0x10 */
+    struct _pppEMCB *last_free_heap;
+    struct _pppEMCB *effect_heap_top;
+    struct _pppEMCB *effect_heap_bottom;
+    int allocSize;
+} pppMemMng;
+
+typedef struct { /* 0x24 */
+    word nvert;
+    word nnorm;
+    word npoly;
+    word tex0l;
+    word tex0h;
+    pppSVECTOR *vert;
+    pppSVECTOR *norm;
+    struct _OMD_H *omd;
+    word nPacketSize;
+} pppModelSt;
+
+typedef struct { /* 0x1c */
+    pppMemMng heapMng;
+    pppModelSt *lpModel;
+    struct _pppShapeSt *lpShape;
+    struct _pppVsfSt *lpVsf;
+} pppEnvSt;
+
+extern pppEnvSt *ppvEnv;
+extern u_long128 *ppvCurPrimp;
+
+/* libgraph (GIF tags and GS registers as plain 64-bit words) */
+typedef struct { /* 0x60 */
+    u_long giftag0[2];
+    u_long bitbltbuf;
+    u_long bitbltbufaddr;
+    u_long trxpos;
+    u_long trxposaddr;
+    u_long trxreg;
+    u_long trxregaddr;
+    u_long trxdir;
+    u_long trxdiraddr;
+    u_long giftag1[2];
+} sceGsLoadImage;
+
+int sceGsSetDefLoadImage(sceGsLoadImage *lp, short dbp, short dbw, short dpsm, short x, short y, short w,
+                         short h);
+void op_ot_add_before(u_long128 *packet, int qsize, int otz, int pri);
+/* end PARTIAL pppKeMdlTfd */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
