@@ -384,6 +384,8 @@ typedef struct tagOANM_HEADER { /* 0x18 */
     u_short size;
     OANM_SEQ seq[1];
 } OANM_HEADER;
+
+void debugDpdCheckShapeData(int nShapeNum); /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppDrawShapeX (partMng.h) */
 /* end PARTIAL pppDrawShape */
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
