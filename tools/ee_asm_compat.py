@@ -13,6 +13,9 @@ Always:
 - cvt.w.s: the EE only truncates, so binutils rejects the instruction for r5900. Emit its encoding.
 
 --assembler snas (SN Systems' Ps2EeAs, the original assembler):
+- Short loops in compiled code: our Ps2EeAs pads them (EE erratum) to 6 instructions label..branch, the
+  one that built the game to 5. fix_short_loops inserts the original padding and hides the branch from
+  Ps2EeAs (see there).
 - INCLUDE_ASM'd splat assembly is inlined, because Ps2EeAs can't read splat's macro file: its macros
   (glabel, endlabel, dlabel, ...) are expanded into plain directives.
 - In that inlined code, instructions are emitted as .word with their original encoding (from
@@ -49,6 +52,75 @@ def fix_cvt_w_s(line: str) -> str:
         word = 0x46000024 | (fs << 11) | (fd << 6)  # COP1, fmt=S, funct=CVT.W
         return f"{m.group(1)}.word 0x{word:08X} # cvt.w.s $f{fd},$f{fs}"
     return line
+
+
+LABEL = re.compile(r"^(\$L\d+):\s*$")
+INSN = re.compile(r"^\t([a-z][\w.]*)\b(.*)$")  # an instruction line of gcc's output (not a directive)
+SET_REORDER = re.compile(r"^\t\.set\t(no)?reorder\s*$")
+BRANCH = re.compile(r"^\t(b|beqz?l?|bnez?l?|blezl?|bgtzl?|bltzl?|bgezl?|bc1[tf]l?)\t(?:(.*),)?(\$L\d+)\s*$")
+REGS = {"zero": 0, "at": 1, "gp": 28, "sp": 29, "fp": 30, "ra": 31}
+BRANCH_OPCODES = {  # mnemonic: (opcode, fixed rt or None, number of register operands)
+    "beq": (4, None, 2), "bne": (5, None, 2), "beql": (20, None, 2), "bnel": (21, None, 2),
+    "beqz": (4, 0, 1), "bnez": (5, 0, 1), "beqzl": (20, 0, 1), "bnezl": (21, 0, 1),
+    "blez": (6, 0, 1), "bgtz": (7, 0, 1), "blezl": (22, 0, 1), "bgtzl": (23, 0, 1),
+    "bltz": (1, 0, 1), "bgez": (1, 1, 1), "bltzl": (1, 2, 1), "bgezl": (1, 3, 1),
+}
+COP1_BRANCHES = {"bc1f": 0x45000000, "bc1t": 0x45010000, "bc1fl": 0x45020000, "bc1tl": 0x45030000}
+SHORT_LOOP = 5  # the original pads label..branch to 5 instructions
+
+
+def reg(name: str) -> int:
+    name = name.strip().lstrip("$")
+    return int(name) if name.isdigit() else REGS[name]
+
+
+def branch_word(mnemonic: str, operands: str | None) -> int:
+    """Encoding of a branch without its offset (the low 16 bits)."""
+    if mnemonic in COP1_BRANCHES:
+        return COP1_BRANCHES[mnemonic]
+    if mnemonic == "b":
+        return 4 << 26  # beq $0,$0
+    opcode, rt, nregs = BRANCH_OPCODES[mnemonic]
+    regs = [reg(r) for r in (operands or "").split(",")]
+    if len(regs) != nregs:
+        raise ValueError(f"unexpected operands for {mnemonic}: {operands}")
+    return (opcode << 26) | (regs[0] << 21) | ((regs[1] if nregs == 2 else rt) << 16)
+
+
+def fix_short_loops(lines: list[str]) -> list[str]:
+    """Pad short loops the way the original assembler did.
+
+    The EE needs short loops padded with nops (an erratum). The Ps2EeAs we have pads the label..branch
+    span to 6 instructions; the one that built the game padded it to 5 (all 1867 short loops of the game's
+    own code agree). For each backward branch that closes a short loop, insert the original padding before
+    the branch (counted by the assembler, so macro instructions are sized correctly) and emit the branch as
+    a .word whose offset the assembler computes from labels, so Ps2EeAs doesn't recognize the loop and adds
+    no padding of its own. A branch in reorder code (gcc left its delay slot to the assembler) gets the
+    delay slot nop the assembler would have added."""
+    out: list[str] = []
+    labels: dict[str, int] = {}  # label -> index in out
+    noreorder = False
+    n = 0
+    for i, line in enumerate(lines):
+        if m := SET_REORDER.match(line):
+            noreorder = m.group(1) == "no"
+        elif line.startswith("\t.ent\t"):
+            labels.clear()
+        elif m := LABEL.match(line):
+            labels[m.group(1)] = len(out)
+        elif (m := BRANCH.match(line)) and m.group(3) in labels:
+            body = [l for l in out[labels[m.group(3)] + 1:] if INSN.match(l)]
+            if len(body) + 1 <= SHORT_LOOP + 1:  # macros only make loops longer
+                label, pad, at = m.group(3), f"$LSLp{n}", f"$LSLb{n}"
+                count = f"{SHORT_LOOP} - (({pad} - {label}) >> 2) - 1"
+                word = f"\t.word 0x{branch_word(m.group(1), m.group(2)):08X} | ((({label} - {at} - 4) >> 2) & 0xFFFF)"
+                out += ([] if noreorder else ["\t.set\tnoreorder"]) + [
+                    f"{pad}:", f"\t.if {count} > 0", f"\t.rept {count}", "\tnop", "\t.endr", "\t.endif",
+                    f"{at}:", f"{word} # {line.strip()}"] + ([] if noreorder else ["\tnop", "\t.set\treorder"])
+                n += 1
+                continue
+        out.append(line)
+    return out
 
 
 def original_namespace(source: str, symbols_path: str) -> str | None:
@@ -123,7 +195,10 @@ def main() -> None:
             text = ANON_NAMESPACE.sub(lambda _: f"_{len(name)}{name}", text)
 
     lines = []
-    for line in text.splitlines():
+    source_lines = text.splitlines()
+    if args.assembler == "snas":
+        source_lines = fix_short_loops(source_lines)  # compiled code only: INCLUDE_ASM'd code is inlined below
+    for line in source_lines:
         if args.assembler == "gas":
             lines.append(fix_cvt_w_s(line))
         elif m := INCLUDE.match(line):
