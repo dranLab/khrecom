@@ -11,6 +11,7 @@ public:
     static SHORT getCurrentFloorNumber();
     static INT getCurrentRoomID();
     static RoomInfo* getRoomInfo(INT nRoomID);
+    static INT getRoomIndex(INT nRoomID); // PARTIAL: added for Form/Menu/MoogleShop
 };
 
 #endif /* GAME_SCENEINFO_H */
