@@ -4,7 +4,7 @@
 
 #include "khtypes.h"
 #include "System/Task.h"
-#include "System/Graphic/Gprim.h"
+// PARTIAL: Gprim.h include moved to Game/Bullet/Bullet.h for Game/Gimmick/GimmickHitMore (its strings are not in every includer)
 
 struct FVECTOR;
 class CState;
@@ -46,7 +46,7 @@ public:
     virtual void disp();
     virtual void onMsg(INT inMsg, void* inExtraInfo);
     virtual void getLockOnPos(FVECTOR& outPos);
-    virtual void getHeadPos(FVECTOR& outPos);
+    virtual void getHeadPos(FVECTOR& outPos) const; // PARTIAL: const added for Game/Gimmick/GimmickHitMore
     virtual void getUseCardPos(FVECTOR& outPos);
     virtual void getCameraTargetPos(FVECTOR& outPos);
     virtual void endStateProc();
