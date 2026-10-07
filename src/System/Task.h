@@ -78,6 +78,8 @@ public:
 
     CTask* getSysTask(UINT nID); // PARTIAL: added for Game/Gimmick/GimmickHitMore
     HANDLE getHandle() { return m_hThis; }
+    TIMEQ getFrameRate() { return m_nTimeLag; }                   // PARTIAL: added for Game/Gimmick/GimmickPlantChild
+    FLOAT getFrameRateF() { return (FLOAT)getFrameRate() * 0.020000001f; } // PARTIAL: added for Game/Gimmick/GimmickPlantChild
     BOOL isOut() { return m_nInfo & 0x8000; }
     void out() {
         if (!isOut()) {

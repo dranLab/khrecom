@@ -1,0 +1,82 @@
+#define TASK_H_NO_SLC_OVERFLOW_MSG
+#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#include "Game/Gimmick/GimmickPlantChild.h"
+#include "Game/BodyCollision.h"
+#include "System/Graphic/Effect/effect.h"
+#include "System/Graphic/Gprim.h"
+#include "System/Graphic/2d/2DMan.h"
+#include "Game/CardBattle.h"
+#include "System/Graphic/Str.h"
+#include "Game/Collision/CollUtil.h"
+
+/* Placeholder: an empty string follows CollUtil.h's strings in .rodata (as in GimmickBreakable); which
+ * header it comes from is not known. */
+inline void _emptyStringPlaceholder() {
+    TRACE("");
+}
+
+#include "System/Graphic/Model.h"
+#include "Game/Movement.h"
+#include "Game/Gimmick/GimmickManager.h"
+#include "Game/LockOnManager.h"
+#include "include_asm.h"
+
+CGimmickPlantChild::CGimmickPlantChild(CTask* inParent) : CBaseGimmick(inParent) {
+    m_Step = 0;
+}
+
+CGimmickPlantChild::~CGimmickPlantChild() {}
+
+BOOL CGimmickPlantChild::initalize(INT inGroupID, INT inRsrcID) {
+    if (!CBaseGimmick::initalize(inGroupID, inRsrcID)) return FALSE;
+    m_pMove->enableGravity(FALSE);
+    m_pMove->setFlag(1, TRUE);
+    m_pMove->setCollisionFlag(0xF, FALSE);
+    m_pMove->setFlag(8, TRUE);
+    getSysTask(32);
+    LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
+    return TRUE;
+}
+
+void CGimmickPlantChild::AfterInit() {}
+
+void CGimmickPlantChild::beginStateMain() {}
+
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickPlantChild", stateMain__18CGimmickPlantChild);
+
+/* Differs only in the loop: the original computes the first m_pModels[i] address with a mult each iteration
+ * (its i * 288 giv is not reduced, 288 kept in s5) and strength-reduces only the second one; ours shares one
+ * reduced giv for both (CSE merges them). Constants (0.020000001f in getFrameRateF, 0.005) and the switch match. */
+#if 0
+void CGimmickPlantChild::stateMain() {
+    FLOAT al;
+    INT i;
+
+    switch (m_Step) {
+    case 0:
+        break;
+    case 1:
+        for (i = 0; i < getModelCount(); i++) {
+            al = getModel(i)->getAlphaScale() - getFrameRateF() * 0.005;
+            if (al <= 0.0f) {
+                al = 0.0f;
+                m_Step = 2;
+            }
+            getModel(i)->setAlphaScale(al);
+        }
+        break;
+    case 2:
+        out();
+        break;
+    }
+}
+#endif
+
+void CGimmickPlantChild::endStateMain() {}
+
+void CGimmickPlantChild::killPlant() {
+    m_Step = 1;
+    changeMotion(2, 0, FALSE, 0, 0, 0);
+    clearEntityFlag(0x10000);
+}
+// SOURCE DATA: .rodata
