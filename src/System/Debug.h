@@ -26,4 +26,28 @@ enum USER {
 
 extern "C" void TRACE_USER(USER uid, char* fmt);
 
+// PARTIAL: added for System/Graphic/2d/2DBase
+enum TtyColor {
+    _TTY_NORMAL = 0,
+    _TTY_BLACK = 30,
+    _TTY_RED = 31,
+    _TTY_GREEN = 32,
+    _TTY_YELLOW = 33,
+    _TTY_BLUE = 34,
+    _TTY_PURPLE = 35,
+    _TTY_CYAN = 36,
+    _TTY_WHITE = 37,
+    _TTY_REV = 7,
+    _TTY_REV_BLACK = 40,
+    _TTY_REV_RED = 41,
+    _TTY_REV_GREEN = 42,
+    _TTY_REV_YELLOW = 43,
+    _TTY_REV_BLUE = 44,
+    _TTY_REV_PURPLE = 45,
+    _TTY_REV_CYAN = 46,
+    _TTY_REV_WHITE = 47
+};
+
+extern "C" void TRACE_COL(TtyColor nCol, char* fmt, ...);
+
 #endif /* SYSTEM_DEBUG_H */
