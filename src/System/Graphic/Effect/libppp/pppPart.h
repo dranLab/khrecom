@@ -345,6 +345,17 @@ typedef struct { /* 0x60 */
 int sceGsSetDefLoadImage(sceGsLoadImage *lp, short dbp, short dbw, short dpsm, short x, short y, short w,
                          short h);
 void op_ot_add_before(u_long128 *packet, int qsize, int otz, int pri);
+void op_ot_add(u_long128 *packet, int qsize, int otz, int pri); /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeShpDtt */
+
+/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeShpDtt (partMng.h) */
+extern int ppvDispWidth;
+extern int ppvDispHeight;
+extern int ppvDrawWidth;
+extern int ppvDrawHeight;
+extern int ppvDrawFrameBase;
+extern int ppvDispFrameBase;
+extern u_long ppvGsScissor;
+/* end PARTIAL pppKeShpDtt */
 /* end PARTIAL pppKeMdlTfd */
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppDrawMdl */
