@@ -1,13 +1,5 @@
 #include "pppMatrixXYZ.h"
 
-/* v.xyz *= s (VU0 macro mode) */
-#define SCALE_VECTOR_XYZ(v, s)                  \
-    __asm__ __volatile__("qmtc2.ni %1, $vf9\n"  \
-                         "\tlqc2 $vf10, 0(%0)\n" \
-                         "\tvmulx.xyz $vf10, $vf10, $vf9x\n" \
-                         "\tsqc2 $vf10, 0(%0)"   \
-                         : : "r"(v), "r"(s) : "memory")
-
 void pppMatrixXYZ(pppPObject *pobj, PMatrixXYZ *p, pppCtrlTable *ctbl) {
     VPoint *vp;
     VAngle *va;

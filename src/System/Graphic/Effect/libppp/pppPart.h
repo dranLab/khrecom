@@ -221,4 +221,14 @@ extern sceVu0FMATRIX ppvParMatrix;
 extern BOOL ppvUserStopPartF;
 /* end PARTIAL pppAngle */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppMatrixXYZ */
+/* v.xyz *= s (VU0 macro mode) */
+#define SCALE_VECTOR_XYZ(v, s)                  \
+    __asm__ __volatile__("qmtc2.ni %1, $vf9\n"  \
+                         "\tlqc2 $vf10, 0(%0)\n" \
+                         "\tvmulx.xyz $vf10, $vf10, $vf9x\n" \
+                         "\tsqc2 $vf10, 0(%0)"   \
+                         : : "r"(v), "r"(s) : "memory")
+/* end PARTIAL pppMatrixXYZ */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
