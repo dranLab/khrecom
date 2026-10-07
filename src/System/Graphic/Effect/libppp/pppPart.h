@@ -326,4 +326,10 @@ int sceGsSetDefLoadImage(sceGsLoadImage *lp, short dbp, short dbw, short dpsm, s
 void op_ot_add_before(u_long128 *packet, int qsize, int otz, int pri);
 /* end PARTIAL pppKeMdlTfd */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppDrawMdl */
+extern sceVu0FMATRIX ppvLightMatrix;
+extern sceVu0FMATRIX ppvColorMatrix;
+extern long128 ppvVNWork[2048];
+/* end PARTIAL pppDrawMdl */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
