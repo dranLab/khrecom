@@ -174,6 +174,7 @@ typedef struct { /* 0xc */
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeDMatPht */
 extern sceVu0FVECTOR ppvParScl;
+extern sceVu0FVECTOR ppvParLoc;
 void sceVu0ScaleVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, float t);
 void sceVu0ApplyMatrix(sceVu0FVECTOR v0, sceVu0FMATRIX m0, sceVu0FVECTOR v1);
 void sceVu0UnitMatrix(sceVu0FMATRIX m);
