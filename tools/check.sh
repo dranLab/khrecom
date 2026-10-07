@@ -6,11 +6,25 @@
 #   4. whether this branch contains the current main, and uncommitted changes
 # Exit code 0 only if 1 and 2 pass.
 #
-#   tools/check.sh
+# The overview of all files is written to build/check.overview.txt. The terminal shows the files that are not
+# complete (INCLUDE_ASM or not matching) and those changed on this branch or uncommitted, plus the totals;
+# --full prints every file. This only changes what is printed, never the checks or the exit code.
+#
+#   tools/check.sh [--full]
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 PY=.venv/bin/python
 status=0
+full=0
+for arg in "$@"; do
+    case "$arg" in
+        --full) full=1 ;;
+        *) echo "usage: tools/check.sh [--full]" >&2; exit 2 ;;
+    esac
+done
+# Source files changed on this branch (since it left main) or not committed yet.
+base=$(git merge-base main HEAD 2>/dev/null || git rev-parse HEAD)
+changed=$( { git diff --name-only "$base"; git ls-files --others --exclude-standard; } | sort -u | tr '\n' ' ')
 
 echo "== configure"
 if ! $PY configure.py > build.configure.log 2>&1; then
@@ -30,9 +44,11 @@ fi
 
 echo "== files from source (objdiff)"
 if ninja expected > /dev/null 2>&1 && tools/objdiff.sh report generate -o build/report.json > /dev/null 2>&1; then
-    $PY - <<'PY'
-import json, re
+    CHECK_FULL=$full CHECK_CHANGED="$changed" $PY - <<'PY'
+import json, os, re
 from pathlib import Path
+full, changed = os.environ["CHECK_FULL"] == "1", set(os.environ["CHECK_CHANGED"].split())
+lines, shown, complete = [], [], 0
 units = {u["name"]: u["metadata"]["source_path"] for u in json.load(open("objdiff.json"))["units"] if "base_path" in u}
 total = decompiled = 0
 for u in sorted(json.load(open("build/report.json"))["units"], key=lambda u: u["name"]):
@@ -46,10 +62,21 @@ for u in sorted(json.load(open("build/report.json"))["units"], key=lambda u: u["
     done = [f for f in fns if f.get("fuzzy_match_percent", 0) >= 100 and f["name"] not in asm]
     open_fns = [f["name"] for f in fns if f.get("fuzzy_match_percent", 0) < 100]
     total += len(fns); decompiled += len(done)
-    print(f"  {u['name']}: {len(done)}/{len(fns)} functions decompiled and matching"
-          + (f", {len(asm)} still INCLUDE_ASM" if asm else "")
-          + (f", NOT matching: {', '.join(open_fns)}" if open_fns else ""))
-print(f"  total: {decompiled} functions decompiled in {len(units)} files")
+    line = (f"  {u['name']}: {len(done)}/{len(fns)} functions decompiled and matching"
+            + (f", {len(asm)} still INCLUDE_ASM" if asm else "")
+            + (f", NOT matching: {', '.join(open_fns)}" if open_fns else ""))
+    lines.append(line)
+    is_complete = len(done) == len(fns)
+    complete += is_complete
+    if full or not is_complete or units[u["name"]] in changed:
+        shown.append(line)
+summary = f"  total: {decompiled} functions decompiled in {len(units)} files"
+Path("build/check.overview.txt").write_text("\n".join(lines + [summary]) + "\n")
+if shown:
+    print("\n".join(shown))
+if len(shown) < len(lines):
+    print(f"  ({len(lines) - len(shown)} more files, all complete, not listed; every file: build/check.overview.txt)")
+print(f"{summary}; {complete} files complete, {len(units) - complete} not")
 PY
 else
     echo "  (objdiff report failed)"

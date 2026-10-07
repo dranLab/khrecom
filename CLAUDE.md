@@ -7,6 +7,7 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
 ## Build and verify
 
 - `tools/check.sh` - the gate: configure + full build + checksum + overview. Must exit 0 before any commit/merge.
+  Lists only files not complete or changed on the branch (all: `--full` or `build/check.overview.txt`).
 - `.venv/bin/python configure.py` - re-split (splat) and write `build.ninja`/`objdiff.json` (~30 s). `check.sh` runs it.
 - `ninja` - build; fails unless the rebuilt image matches the original (SHA-1).
 - `.venv/bin/python tools/funcdiff.py <unit> [<function>]` - status per function, or original | ours side by side
