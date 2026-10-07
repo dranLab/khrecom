@@ -7,8 +7,10 @@
 /* Core particle (ppp) types shared by the libppp units (C). */
 
 typedef int word;
-typedef float sceVu0FVECTOR[4];
-typedef float sceVu0FMATRIX[4][4];
+/* 16-aligned as in the SDK's libvu0.h. This makes pppMngSt 8-aligned, so gcc merges byte tests like
+   "ppvMng->bFlagStop == 0 && ppvMng->bBoolSlow == 0" into one ld + mask, as the original does. */
+typedef float sceVu0FVECTOR[4] __attribute__((aligned(16)));
+typedef float sceVu0FMATRIX[4][4] __attribute__((aligned(16)));
 
 typedef struct {
     short x;
@@ -101,9 +103,7 @@ typedef struct { /* 0x4 */
 
 typedef struct _pppMngSt { /* 0xd0 */
     union {
-        /* PARTIAL: aligned added for System/Graphic/Effect/libppp/eiProg/pppAngle
-           (sceVu0FMATRIX is 16-aligned in the SDK; lets gcc merge byte tests into one ld) */
-        sceVu0FMATRIX parMat __attribute__((aligned(16)));
+        sceVu0FMATRIX parMat;
         struct {
             sceVu0FVECTOR parRot[3];
             sceVu0FVECTOR parLoc;
