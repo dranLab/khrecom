@@ -6,7 +6,8 @@ both sides name the symbol they refer to (a called function, a global), it must 
 
 Usage:
     python3 tools/funcdiff.py System/Spad                      # status of every function
-    python3 tools/funcdiff.py System/Spad init__5CSpad         # original | ours, side by side
+    python3 tools/funcdiff.py System/Spad init__5CSpad         # original | ours: the differences, with context
+    python3 tools/funcdiff.py System/Spad init__5CSpad --full  # original | ours: every line
 """
 
 import argparse
@@ -40,8 +41,14 @@ def disassemble(obj: Path, name: str, size: int) -> list[str]:
                 break
             count += is_insn
             line = re.sub(r"^\s+[0-9a-f]+:\t", "", line)               # drop addresses
+            line = re.sub(r"^\s+[0-9a-f]+: (R_)", r"   \1", line)       # and relocations' (they follow their insn)
             line = re.sub(r"\b[0-9a-f]+ <([^>+]*)(\+0x[0-9a-f]+)?>", r"<\1\2>", line)  # branch targets
+            line = line.replace(f"<{name}+", "<+")                     # branches within the function
             lines.append(line.replace("\t", " ").rstrip())
+    # An unlinked jal shows a meaningless target (offset 0 in its section); the relocation below names the real one.
+    for i in range(len(lines) - 1):
+        if lines[i + 1].lstrip().startswith("R_MIPS_26"):
+            lines[i] = re.sub(r"^(jal) <[^>]*>$", r"\1", lines[i])
     return lines
 
 
@@ -50,6 +57,9 @@ def main() -> None:
     parser.add_argument("unit", help="e.g. System/Spad")
     parser.add_argument("function", nargs="?", help="mangled name; omit for an overview")
     parser.add_argument("--version", help="folder name under config/ (default: the only one)")
+    parser.add_argument("--full", action="store_true", help="side by side: print every line, not just the differences")
+    parser.add_argument("-C", "--context", type=int, default=3, metavar="N",
+                        help="side by side: matching lines shown around each difference (default 3)")
     args = parser.parse_args()
 
     versions = sorted(p.name for p in (ROOT / "config").iterdir() if (p / f"{p.name}.yaml").exists())
@@ -74,15 +84,46 @@ def main() -> None:
 
     if args.function not in t:
         sys.exit(f"{args.function} not in the original {args.unit}")
-    left = disassemble(ROOT / target, args.function, len(t[args.function].data))
-    right = disassemble(ROOT / base, args.function, len(b[args.function].data)) if args.function in b else []
-    width = max(len(line) for line in left) + 2
-    for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(a=left, b=right, autojunk=False).get_opcodes():
+    name = args.function
+    diff = t[name].difference(b[name]) if name in b else "missing in ours"
+    left = disassemble(ROOT / target, name, len(t[name].data))
+    right = disassemble(ROOT / base, name, len(b[name].data)) if name in b else []
+    # Lines are aligned on a key without branch-target offsets, so code shifted by an earlier difference still
+    # lines up. Such lines are marked "~" (they differ only in an offset); "|" marks a real difference.
+    # Display only: MATCH / differs above comes from comparing the bytes.
+    def key(line: str) -> str:
+        return re.sub(r"<\+0x[0-9a-f]+>", "<+?>", line)
+    rows = []  # (mark, original, ours)
+    keys_l, keys_r = [key(line) for line in left], [key(line) for line in right]
+    for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(a=keys_l, b=keys_r, autojunk=False).get_opcodes():
         for k in range(max(i2 - i1, j2 - j1)):
             a = left[i1 + k] if i1 + k < i2 else ""
             c = right[j1 + k] if j1 + k < j2 else ""
-            mark = " " if tag == "equal" else "|"
-            print(f"{a:<{width}}{mark} {c}")
+            rows.append(("|" if tag != "equal" else "~" if a != c else " ", a, c))
+    real = sum(m == "|" for m, _, _ in rows)
+    offsets = sum(m == "~" for m, _, _ in rows)
+    print(f"{'MATCH' if diff is None else 'differs'} {name}: original {len(t[name].data)} bytes, "
+          f"ours {len(b[name].data) if name in b else 0} bytes" + (f"; {diff}" if diff else ""))
+    if diff is None and not args.full:
+        return
+    print(f"{real} of {len(rows)} lines differ (|), {offsets} only in a branch offset (~); original | ours")
+    # Show rows within --context of a real difference; elide the rest (nothing with --full).
+    keep = [args.full or any(rows[j][0] == "|" for j in range(max(0, i - args.context), min(len(rows), i + args.context + 1)))
+            for i in range(len(rows))]
+    width = max(len(line) for line in left) + 2
+    skipped = []
+    def flush() -> None:
+        if skipped:
+            n = sum(m == "~" for m in skipped)
+            print(f"   ... {len(skipped)} lines" + (f" ({n} differ only in a branch offset)" if n else " equal") + " ...")
+            skipped.clear()
+    for (mark, a, c), shown in zip(rows, keep):
+        if not shown:
+            skipped.append(mark)
+            continue
+        flush()
+        print(f"{a:<{width}}{mark} {c}")
+    flush()
 
 
 if __name__ == "__main__":

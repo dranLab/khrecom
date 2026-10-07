@@ -25,7 +25,8 @@ worktree; other workers are doing other units at the same time.
    after everything else. Keep them as `INCLUDE_ASM` at the end of the `.cpp` until their definitions (in the
    class, in the header) reproduce them there.
 4. **Match.** After each change: `ninja build/SLUS_217.99/src/<unit>.o` and `.venv/bin/python tools/funcdiff.py <unit>`
-   (overview) / `.venv/bin/python tools/funcdiff.py <unit> <function>` (side by side). Reorder statements, change types,
+   (overview) / `.venv/bin/python tools/funcdiff.py <unit> <function>` (side by side, differences only: `|` differs,
+   `~` only a branch offset; `--full` shows every line). Reorder statements, change types,
    temporaries, signedness, inline helpers until the function shows MATCH. Keep line numbers where `__LINE__`
    matters. If a function does not match after a serious effort, keep it as `INCLUDE_ASM` and put your best
    attempt below it in `#if 0 ... #endif` with a one-line note on what differs.
