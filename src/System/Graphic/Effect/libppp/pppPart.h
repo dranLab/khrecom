@@ -240,4 +240,8 @@ typedef struct { /* 0x8 */
 } pppHCVECTOR;
 /* end PARTIAL pppColMove */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppMoveLoop */
+extern int ppvEmptyLoop;
+/* end PARTIAL pppMoveLoop */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
