@@ -69,6 +69,6 @@ void CGimmickPlantChild::endStateMain() {}
 void CGimmickPlantChild::killPlant() {
     m_Step = 1;
     changeMotion(2, 0, FALSE, 0, 0, 0);
-    clearEntityFlag(0x10000);
+    setEntityFlag(0, 0x10000);
 }
 // SOURCE DATA: .rodata

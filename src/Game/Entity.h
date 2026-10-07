@@ -75,14 +75,13 @@ public:
     void setEntityType(eObjType inType) { m_EntityType = inType; }
     eObjType getEntityType() { return m_EntityType; }
     UINT getFlag() { return m_uiEntityFlag; }
+    UINT isHeartless() const { return m_uiEntityFlag & 0x20000; } // PARTIAL: added for Game/Bullet/CreateBullet
     // PARTIAL: added for Game/Gimmick/GimmickPlantChild (getModel needs CModel's definition: System/Graphic/Model.h)
     INT getModelCount() { return m_iModelCount; }
     inline CModel* getModel();
     inline CModel* getModel(INT inIndex);
-    void setEntityFlag(UINT inFlag, BOOL inOn) { UINT b = inOn ? inFlag : 0; m_uiEntityFlag |= b; }
-    // PARTIAL: added for Game/Gimmick/GimmickPlantChild. Placeholder: the original's only flag setter is
-    // setEntityFlag(UINT inSet, UINT inMask) (Entity.cpp in ref), whose body is not known yet.
-    void clearEntityFlag(UINT inFlag) { m_uiEntityFlag &= ~inFlag; }
+    // Entity.cpp also emits this out of line (setEntityFlag__7CEntityUiUi): or inSet, then clear inMask.
+    void setEntityFlag(UINT inSet, UINT inMask) { m_uiEntityFlag = (m_uiEntityFlag | inSet) & ~inMask; }
 };
 
 #endif /* GAME_ENTITY_H */

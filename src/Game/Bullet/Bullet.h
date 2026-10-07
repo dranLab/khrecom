@@ -32,7 +32,7 @@ public:
     void setOwner(CEntity* inOwner) {
         m_hOwner = inOwner->getHandle();
         setEntityType(inOwner->getEntityType());
-        setEntityFlag(0x20000, inOwner->getFlag() & 0x20000);
+        setEntityFlag(inOwner->isHeartless() ? 0x20000 : 0, 0);
     }
 };
 

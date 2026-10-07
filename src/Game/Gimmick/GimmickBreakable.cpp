@@ -67,7 +67,7 @@ void CGimmickBreakable::beginStateHitAttack() {
     rideModelEnableAllCollision(FALSE);
     changeMotion(2, 0, FALSE, -1, 0, 0);
     m_Stat = 1;
-    setEntityFlag(1, TRUE);
+    setEntityFlag(1, 0);
     changeGimmickState(0);
 }
 
