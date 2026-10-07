@@ -14,6 +14,7 @@ import re
 import shutil
 import subprocess
 import sys
+from collections import Counter
 from pathlib import Path
 
 import ninja_syntax
@@ -170,6 +171,29 @@ def expected_config(splat_yaml: Path, opts: dict) -> tuple[Path, Path]:
     return path, ROOT / exp / "asm"
 
 
+def deduplicated_names(symbols: Path) -> dict[str, str]:
+    """name_<ADDR> -> name for the names the symbol file de-duplicated (see tools/import_symbols.py)."""
+    names = {}
+    if symbols.exists():
+        for line in symbols.read_text(encoding="utf-8").splitlines():
+            m = re.match(r"^(\S+)_([0-9A-F]{8}) = 0x([0-9A-F]{8});", line)
+            if m and m.group(2) == m.group(3):
+                names[f"{m.group(1)}_{m.group(2)}"] = m.group(1)
+    return names
+
+
+def expected_renames(sources: list[str], dedup: dict[str, str]) -> str:
+    """objcopy options giving a unit's de-duplicated names their original name back (when that stays unique)."""
+    found = set()
+    for src in sources:
+        found |= {w for w in re.findall(r"[\w$.]+_[0-9A-F]{8}\b", (ROOT / src).read_text(encoding="utf-8"))
+                  if w in dedup}
+    bases = Counter(dedup[w] for w in found)
+    # $ in names ("_11BattleEnemy$BadStatusEffectName") is a ninja variable: escape it.
+    return " ".join(ninja_syntax.escape(f"--redefine-sym '{w}={dedup[w]}'")
+                    for w in sorted(found) if bases[dedup[w]] == 1)
+
+
 def expected_units(asm_dir: Path) -> dict[str, list[str]]:
     """Unit name -> its .s files (code, data, rodata, bss) in the expected tree."""
     units: dict[str, list[str]] = {}
@@ -316,8 +340,12 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         # objdiff targets (see expected_config()): every unit's code and data assembled from the original, merged
         # into one object like a compiled source file. Built on demand by objdiff or with `ninja expected`.
         n.rule("as_expected", f"{CROSS}as $asflags -o $out $in", description="AS $in")
-        n.rule("merge", f"{CROSS}ld -EL -r -o $out $in", description="MERGE $out")
+        # Names that occur more than once in the game (file-local statics like randf) carry an _<ADDR> suffix in
+        # the symbol file; in the merged objects they get their original name back, as in compiled objects, so
+        # objdiff pairs them.
         exp = f"{build_dir}/expected"
+        dedup = deduplicated_names(ROOT / cfg_dir / "elf_symbol_addrs.txt")
+        n.rule("merge", f"{CROSS}ld -EL -r -o $out $in && {CROSS}objcopy $renames $out", description="MERGE $out")
         unit_objects = []
         for name, sources in units.items():
             parts = []
@@ -326,7 +354,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
                 n.build(part, "as_expected", src)
                 parts.append(part)
             unit_objects.append(f"{exp}/units/{name}.o")
-            n.build(unit_objects[-1], "merge", parts)
+            n.build(unit_objects[-1], "merge", parts, variables={"renames": expected_renames(sources, dedup)})
         n.build("expected", "phony", unit_objects)
         n.newline()
 
