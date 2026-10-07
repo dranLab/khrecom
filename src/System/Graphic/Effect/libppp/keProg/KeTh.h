@@ -68,9 +68,40 @@ typedef struct _KeThCp { /* 0x10 */
     char _P0[11];
 } KeThCp;
 
+typedef struct _KetThBp_Pr { /* 0x50 */
+    u_char ColCe[4];
+    u_char ColLt[4];
+    float _P1;
+    float Wid;
+    signed char AddColCe[4];
+    signed char AddColLt[4];
+    float _P2;
+    float AddWid;
+    float Spd1st;
+    float Wild;
+    float Curv;
+    float Corner;
+    float CePstg;
+    float StepSpd;
+    float MvWidSz;
+    float MvWidMv;
+    u_char LowMax;
+    u_char Pstg;
+    u_char MaxStep;
+    char _P0[13];
+} KetThBp_Pr;
+
 typedef struct { /* 0x90 */
     KeThCp Cp;
-    u_char _rest[0x80]; /* KetThBp_Pr Pr, Res, Tp, MaxLen, Spd, colors */
+    KetThBp_Pr Pr;
+    struct _KeThResHd *Res;
+    struct _KeThTP *Tp;
+    float MaxLen;
+    float Spd;
+    pppHCVECTOR ColCe;
+    pppHCVECTOR ColEg;
+    pppHCVECTOR AddColCe;
+    pppHCVECTOR AddColEg;
 } VKeTh;
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_KETH_H */
