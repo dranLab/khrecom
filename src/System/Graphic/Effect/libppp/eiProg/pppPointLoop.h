@@ -1,4 +1,3 @@
-// PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppMatrixLoop
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_EIPROG_PPPPOINTLOOP_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_EIPROG_PPPPOINTLOOP_H
 
@@ -13,5 +12,9 @@ typedef struct { /* 0x10 */
     pppFVECTOR m_pos;
     void *m_pp;
 } VPointLoop;
+
+void pppPointLoopCon(pppPObject *pobj, pppCtrlTable *ctbl);
+void pppPointLoopCon2(pppPObject *pobj, pppCtrlTable *ctbl);
+void pppPointLoop(pppPObject *pobj, PPointLoop *p, pppCtrlTable *ctbl);
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_EIPROG_PPPPOINTLOOP_H */
