@@ -3,12 +3,6 @@
 
 #include "System/Graphic/Effect/libppp/pppPart.h"
 
-typedef struct _pppVsfSt { /* 0x8 */
-    short modelno;
-    short indexn;
-    u_short *index;
-} pppVsfSt;
-
 typedef void (*KetBornRnd_Born)(pppPObject *pObj, void *pDat, pppSVECTOR *pVert);
 
 int KeVu0RndI(void);

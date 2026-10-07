@@ -298,6 +298,12 @@ typedef struct { /* 0x24 */
     word nPacketSize;
 } pppModelSt;
 
+typedef struct _pppVsfSt { /* 0x8 */
+    short modelno;
+    short indexn;
+    u_short *index;
+} pppVsfSt;
+
 typedef struct { /* 0x1c */
     pppMemMng heapMng;
     pppModelSt *lpModel;

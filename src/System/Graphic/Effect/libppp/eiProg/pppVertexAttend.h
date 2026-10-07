@@ -4,13 +4,6 @@
 #include "System/Graphic/Effect/libppp/pppPart.h"
 #include "System/Graphic/Effect/libppp/eiProg/pppPoint.h"
 
-/* also in keProg/KeBornRnd.h */
-typedef struct _pppVsfSt { /* 0x8 */
-    short modelno;
-    short indexn;
-    u_short *index;
-} pppVsfSt;
-
 typedef struct { /* 0x10 */
     pppCDT cdt;
     pppParamPObj mat;
