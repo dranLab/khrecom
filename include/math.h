@@ -9,6 +9,7 @@ extern "C" {
 #endif
 
 double atan(double x);
+float fmodf(float x, float y);
 
 #ifdef __cplusplus
 }
