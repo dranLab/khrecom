@@ -271,4 +271,9 @@ extern long128 ppvDbgTemp[1];
                          : "=r"(r) : : "$8")
 /* end PARTIAL pppRandFloat */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMatrixWorldXYZ */
+extern sceVu0FVECTOR ppvParAng;
+void sceVu0InversMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1);
+/* end PARTIAL pppRyjMatrixWorldXYZ */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */

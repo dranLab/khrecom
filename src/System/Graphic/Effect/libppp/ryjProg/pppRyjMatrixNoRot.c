@@ -1,7 +1,5 @@
 #include "pppRyjMatrixNoRot.h"
 
-void sceVu0InversMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1);
-
 #define SCALE_VECTOR_XYZ_TO(d, v, s)            \
     __asm__ __volatile__("qmtc2.ni %2, $vf9\n"  \
                          "\tlqc2 $vf10, 0(%1)\n" \
