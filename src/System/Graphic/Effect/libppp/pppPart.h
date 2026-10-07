@@ -244,6 +244,7 @@ typedef struct { /* 0x8 */
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppMoveLoop */
 extern int ppvEmptyLoop;
+extern int ppvMonochrome;
 /* end PARTIAL pppMoveLoop */
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppRandFloat */
