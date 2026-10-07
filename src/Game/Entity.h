@@ -38,7 +38,7 @@ private:
 public:
     CEntity(CTask* inParent);
     virtual ~CEntity();
-    virtual INT getTypeID();
+    virtual INT getTypeID() const;
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
     virtual BOOL initalize(INT inGroupID, INT inRsrcID, UINT iFlag);
     virtual void AfterInit();

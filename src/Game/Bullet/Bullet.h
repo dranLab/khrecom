@@ -21,9 +21,12 @@ private:
 public:
     CBullet(CTask* inParent);
     virtual ~CBullet();
-    virtual INT getTypeID();
+    virtual INT getTypeID() const;
     virtual BOOL setup(const BULLET_PARAM& inParam);
     virtual void disp();
+
+    HANDLE getOwner() const { return m_hOwner; } // PARTIAL: added for Game/Bullet/BulletManager
+    void kill();                                 // PARTIAL: added for Game/Bullet/BulletManager
 
     void setOwner(CEntity* inOwner) {
         m_hOwner = inOwner->getHandle();
