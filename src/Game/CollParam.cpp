@@ -2,16 +2,7 @@
 #include "System/MainApp.h"
 #include "System/Debug.h"
 #include <string.h>
-#include "include_asm.h"
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CollParam", getAtkKind__C14ATK_COLL_PARAM);
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CollParam", addrMapping__17COLL_PARAM_HEADER);
-
-// Both functions below MATCH (funcdiff), and with "// SOURCE DATA: .rodata" the unit's .rodata is
-// complete - but the yaml cuts this unit's .rodata at 0x37CB14 (the start of EffectMotion), in the
-// middle of the TRACE string (0x37CB10..0x37CB4F). With the boundary at 0x37CB50 they can be enabled.
-#if 0
 #line 15
 ATK_KIND ATK_COLL_PARAM::getAtkKind() const {
     static const ATK_KIND g_AtkKind[21] = {
@@ -77,4 +68,4 @@ BOOL COLL_PARAM_HEADER::addrMapping() {
     pOtherParam = (OTHER_PARAM*)((INT)this + (INT)pOtherParam);
     return 1;
 }
-#endif
+// SOURCE DATA: .rodata

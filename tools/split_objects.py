@@ -12,8 +12,9 @@ object's data starts at the lowest of its own symbols (statics and globals from
 .mdebug) and the anonymous labels (string literals, jump tables, float
 constants) that only its code references. In .rodata it starts even earlier:
 gcc writes the string literals of included headers' inline functions first,
-used or not, so unreferenced data before an object's first known item is its
-own. Uninitialized globals the linker put
+used or not, so unreferenced strings (ASCII or Shift-JIS) before an object's
+first known item are its own; other unreferenced data there (e.g. the vtable of a
+template class) is the previous object's. Uninitialized globals the linker put
 after all objects (COMMON) form one final .bss unit. .sndata, .sdata and .sbss
 (all small COMMON) stay single files.
 
@@ -216,9 +217,28 @@ def item_end(addr: int, sizes: dict[int, int], read) -> int:
         return addr + sizes[addr]
     data = read(addr, 0x400)
     end = data.find(b"\0")
-    if end > 0 and all(0x20 <= c < 0x7F or c in (9, 10, 13) for c in data[:end]):
+    if end > 0 and is_text(data[:end]):
         return addr + end + 1
     return addr + 4
+
+
+def starts_text(addr: int, limit: int, read) -> bool:
+    """Whether a NUL-terminated text string starts at addr and ends before limit."""
+    data = read(addr, max(0, limit - addr))
+    end = data.find(b"\0")
+    return end > 0 and is_text(data[:end])
+
+
+def is_text(data: bytes) -> bool:
+    """Printable text, ASCII or Shift-JIS (the game's messages, e.g. TRACE output, are in Japanese). Shift-JIS
+    text must be at least 4 bytes: shorter runs are as likely binary data (e.g. 9C 75 in a float constant)."""
+    if all(0x20 <= c < 0x7F or c in (9, 10, 13) for c in data):
+        return True
+    try:
+        text = data.decode("cp932")
+    except UnicodeDecodeError:
+        return False
+    return len(data) >= 4 and all(c.isprintable() or c in "\t\n\r" for c in text)
 
 
 def split_data(section, lo, hi, order, files, owner, refs, elf_named, sizes=None, read=None
@@ -269,10 +289,11 @@ def split_data(section, lo, hi, order, files, owner, refs, elf_named, sizes=None
             end = item_end(cuts[k - 1][2], sizes or {}, read)
             # Named data nobody claims belongs to an object without debug info (handled below): stop there.
             end = max([end] + [item_end(a, sizes or {}, read) for a in named if end <= a < cuts[k][0]])
-            data = read(end, max(0, cuts[k][0] - end))
-            first = next((i for i, b in enumerate(data) if b), None)
-            if first is not None and end + first < cuts[k][0]:
-                cuts[k] = ((end + first) & ~3, cuts[k][1], cuts[k][2])
+            # The leading data are string literals; anything else before the first one (e.g. the vtable of a
+            # template class, which has no symbol) is the previous object's trailing data.
+            first = next((p for p in range((end + 3) & ~3, cuts[k][0], 4) if starts_text(p, cuts[k][0], read)), None)
+            if first is not None:
+                cuts[k] = (first, cuts[k][1], cuts[k][2])
                 stats["leading data moved to the next object"] += 1
 
     # Named symbols nobody claims come from objects without debug info: give them a unit of their own when they
