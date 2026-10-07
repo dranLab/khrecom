@@ -333,4 +333,31 @@ extern sceVu0FMATRIX ppvColorMatrix;
 extern long128 ppvVNWork[2048];
 /* end PARTIAL pppDrawMdl */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppDrawShape */
+typedef struct _pppShapeSt { /* 0x8 */
+    long *shape;
+    word nPacketSize;
+} pppShapeSt;
+
+typedef struct tagOANM_SEQ { /* 0x8 */
+    short sha;
+    short wait;
+    char flag;
+    char res[3];
+} OANM_SEQ;
+
+typedef struct tagOANM_HEADER { /* 0x18 */
+    char id;
+    char ver;
+    short flag;
+    short shc;
+    short seqc;
+    short x;
+    short y;
+    short res;
+    u_short size;
+    OANM_SEQ seq[1];
+} OANM_HEADER;
+/* end PARTIAL pppDrawShape */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
