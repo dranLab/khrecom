@@ -347,6 +347,15 @@ int sceGsSetDefLoadImage(sceGsLoadImage *lp, short dbp, short dbw, short dpsm, s
 void op_ot_add_before(u_long128 *packet, int qsize, int otz, int pri);
 void op_ot_add(u_long128 *packet, int qsize, int otz, int pri); /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeShpDtt */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeTkFade */
+void *op_spr_alloc(word mem);
+void op_spr_free(word mem);
+int sceGsExecLoadImage(sceGsLoadImage *lp, u_long128 *srcaddr);
+int FlushCache(int operation);
+void sceVu0DivVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, float q);
+void sceVu0AddVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2);
+/* end PARTIAL pppKeTkFade */
+
 /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeShpDtt (partMng.h) */
 extern int ppvDispWidth;
 extern int ppvDispHeight;
