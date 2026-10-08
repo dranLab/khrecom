@@ -1,4 +1,3 @@
-// PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeMdlTfd
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_KEMDL_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_KEMDL_H
 
