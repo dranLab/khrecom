@@ -2,7 +2,6 @@
 #include "pppColor.h"
 #include "System/Graphic/Effect/libppp/draw/md.h"
 #include <math.h>
-#include "include_asm.h"
 
 static void pppDrawMdlLoopInit(PDrawMdlLoop *p, VDrawMdlLoop *pv) {
     pv->m_tu = p->m_tu;
@@ -54,12 +53,6 @@ void pppDrawMdlLoopCalc(pppPObject *pobj, PDrawMdlLoop *p, pppCtrlTable *ctbl) {
     pv->m_tv = fmodf(pv->m_tv, 32768.0f);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppDrawMdlLoop", pppDrawMdlLoopDraw);
-
-/* Logic matches; the tail after the scissor block differs in register allocation (the original keeps
- * %hi(ppvPObj) in a2 across both branches) and store scheduling. Tried scissor-block orders, color and
- * uv statement orders. */
-#if 0
 void pppDrawMdlLoopDraw(pppPObject *pobj, PDrawMdlLoop *p, pppCtrlTable *ctbl) {
     VDrawMdlLoop *pv;
     VColor *pcol;
@@ -116,17 +109,16 @@ void pppDrawMdlLoopDraw(pppPObject *pobj, PDrawMdlLoop *p, pppCtrlTable *ctbl) {
     mdi.pri = 0;
     *(int *)&mdi.toff = 0;
     *(int *)&mdi.ar = 0;
-    mdi.lcmat = &ppvColorMatrix;
     mdi.pmat = &ppvPObj->dmat;
+    mdi.pzmat = 0;
+    mdi.lcmat = &ppvColorMatrix;
     mdi.lvmat = &ppvLightMatrix;
     mdi.lwmat = &ppvPObj->cmat;
     mdi.packet = ppvCurPrimp;
-    mdi.pzmat = 0;
     mdi.va = ppvPObj->lpvert;
-    *(int *)&mdi.ot = 0;
     mdi.na = ppvPObj->lpnorm;
+    *(int *)&mdi.ot = 0;
     mdi.invisible = 0;
     mdi.ztest_off = 0;
     ppvCurPrimp = op1_md_draw(omd, &mdi, ppvEnv->lpModel[p->m_model].nPacketSize);
 }
-#endif
