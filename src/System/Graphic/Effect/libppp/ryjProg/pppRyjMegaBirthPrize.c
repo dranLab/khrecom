@@ -20,9 +20,10 @@ typedef struct _PRIZE_SHAPE { /* 0xc */
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthPrize", pppRyjDrawMegaBirthPrize);
 
-/* Logic matches; differs in the matrix loop's pointer registers (original: s1 = matrix, s0 = shape list),
- * the asm operand registers and the scheduling at the loop end. The original reloads ah->seqc after the
- * random asm (emulated here with an empty asm with a memory clobber). */
+/* All but the block before the asm matches: there the original keeps the pos loads after the scale store
+ * and puts 255.0f in f0 / Scale in f1. The empty asm with a memory clobber stands in for the original
+ * reload of ah->seqc after the random asm, the volatile store for the original keeping flag = 10 before
+ * the ppvUserStopPartF load. */
 #if 0
 void pppRyjDrawMegaBirthPrize(pppPObject *pobj, PRyjMegaBirthPrize *param, pppCtrlTable *ctbl) {
     PRIZE_SHAPE *prize_shape_list;
@@ -60,10 +61,12 @@ void pppRyjDrawMegaBirthPrize(pppPObject *pobj, PRyjMegaBirthPrize *param, pppCt
     }
     shi0->addz = shi1->addz = 0.0f;
     for (i = 0; i < 10; i++) {
+        PRIZE_SHAPE *ps = &prize_shape_list[i];
+
         sceVu0UnitMatrix(prize_type_mat_list[i]);
-        sceVu0ScaleVector(prize_type_mat_list[i][0], prize_type_mat_list[i][0], prize_shape_list[i].fScale * ppvParScl[0]);
-        sceVu0ScaleVector(prize_type_mat_list[i][1], prize_type_mat_list[i][1], prize_shape_list[i].fScale * ppvParScl[1]);
-        sceVu0ScaleVector(prize_type_mat_list[i][2], prize_type_mat_list[i][2], prize_shape_list[i].fScale * ppvParScl[2]);
+        sceVu0ScaleVector(prize_type_mat_list[i][0], prize_type_mat_list[i][0], ps->fScale * ppvParScl[0]);
+        sceVu0ScaleVector(prize_type_mat_list[i][1], prize_type_mat_list[i][1], ps->fScale * ppvParScl[1]);
+        sceVu0ScaleVector(prize_type_mat_list[i][2], prize_type_mat_list[i][2], ps->fScale * ppvParScl[2]);
     }
     for (i = 0; i < ppvReferencePosNum; i++) {
         prize_data = &((PRIZE_DATA *)ppvReferencePosList)[i];
@@ -101,8 +104,8 @@ void pppRyjDrawMegaBirthPrize(pppPObject *pobj, PRyjMegaBirthPrize *param, pppCt
         scale = prize_data->Scale / 255.0f;
         seq = &ah->seq[prize_data->SeqCt];
         sh = (OSHAPE_VU1 *)((char *)ah + seq->sha);
-        pos[0] = prize_data->X;
         pos[1] = prize_data->Y;
+        pos[0] = prize_data->X;
         pos[2] = prize_data->Z;
         pos[3] = 1.0f;
         __asm__ __volatile__(
@@ -110,15 +113,15 @@ void pppRyjDrawMegaBirthPrize(pppPObject *pobj, PRyjMegaBirthPrize *param, pppCt
             "lqc2 $vf2, 0x10(%0)\n"
             "lqc2 $vf3, 0x20(%0)\n"
             "lqc2 $vf4, 0x30(%0)\n"
-            "lqc2 $vf5, 0x0(%1)\n"
-            "lqc2 $vf6, 0x10(%1)\n"
-            "lqc2 $vf7, 0x20(%1)\n"
-            "lqc2 $vf8, 0x30(%1)\n"
-            "lqc2 $vf9, 0x0(%2)\n"
-            "lqc2 $vf10, 0x10(%2)\n"
-            "lqc2 $vf11, 0x20(%2)\n"
-            "lqc2 $vf12, 0x30(%2)\n"
-            "lqc2 $vf13, 0x0(%3)\n"
+            "lqc2 $vf5, 0x0(%2)\n"
+            "lqc2 $vf6, 0x10(%2)\n"
+            "lqc2 $vf7, 0x20(%2)\n"
+            "lqc2 $vf8, 0x30(%2)\n"
+            "lqc2 $vf9, 0x0(%3)\n"
+            "lqc2 $vf10, 0x10(%3)\n"
+            "lqc2 $vf11, 0x20(%3)\n"
+            "lqc2 $vf12, 0x30(%3)\n"
+            "lqc2 $vf13, 0x0(%1)\n"
             "lw $8, 0x0(%4)\n"
             "qmtc2.ni $8, $vf14\n"
             "vmulax.xyzw $ACC, $vf5, $vf13x\n"
@@ -149,15 +152,14 @@ void pppRyjDrawMegaBirthPrize(pppPObject *pobj, PRyjMegaBirthPrize *param, pppCt
             "sqc2 $vf3, 0x20(%5)\n"
             "sqc2 $vf4, 0x30(%5)"
             :
-            : "r"(prize_type_mat), "r"(ppvCameraMatrix), "r"(ppvScreenMatrix), "r"(pos), "r"(&scale),
-              "r"(ppvPObj->dmat)
+            : "r"(prize_type_mat), "r"(pos), "r"(ppvCameraMatrix), "r"(ppvScreenMatrix), "r"(&scale), "r"(ppvPObj->dmat)
             : "$8");
         ((u_long128 *)shi0->mat)[0] = ((u_long128 *)ppvPObj->dmat)[0];
         ((u_long128 *)shi0->mat)[1] = ((u_long128 *)ppvPObj->dmat)[1];
         ((u_long128 *)shi0->mat)[2] = ((u_long128 *)ppvPObj->dmat)[2];
         ((u_long128 *)shi0->mat)[3] = ((u_long128 *)ppvPObj->dmat)[3];
         pppVu1ShapeDraw(sh, shi0);
-        shi0->flag = 10;
+        *(volatile int *)&shi0->flag = 10;
         if (ppvUserStopPartF) {
             continue;
         }
@@ -176,7 +178,6 @@ void pppRyjDrawMegaBirthPrize(pppPObject *pobj, PRyjMegaBirthPrize *param, pppCt
     pppWaitVif1();
     op_ztest_init();
 }
-
 #endif
 
 void pppRyjMegaBirthPrizeCon(pppPObject *pobj, pppCtrlTable *ctbl) {
