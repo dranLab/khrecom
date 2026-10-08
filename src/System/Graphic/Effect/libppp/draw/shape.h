@@ -33,4 +33,30 @@ typedef struct { /* 0x30 */
 
 void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize);
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthPrize */
+typedef struct { /* 0x70 */
+    word flag;
+    word dummy0;
+    float addz;
+    float dummy1;
+    word r;
+    word g;
+    word b;
+    word a;
+    word tex0_l;
+    word tex0_h;
+    word shape_flag;
+    word counter;
+    sceVu0FMATRIX mat;
+} OSHAPE_IN_VU1;
+
+void pppStartVu1ShapeProg(int fog);
+void pppVu1ShapeDraw(OSHAPE_VU1 *sh, OSHAPE_IN_VU1 *vu1shi);
+void *pppGetVu1DrawSpad0(void);
+void *pppGetVu1DrawSpad1(void);
+void *pppGetVu1DrawSpad(void);
+void op_ztest_init(void);
+void pppWaitVif1(void);
+/* end PARTIAL pppRyjMegaBirthPrize */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_DRAW_SHAPE_H */
