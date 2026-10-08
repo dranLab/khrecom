@@ -1,7 +1,6 @@
 #include "KeMdl.h"
 #include "Ke.h"
 #include "System/Graphic/Effect/libppp/draw/md.h"
-#include "include_asm.h"
 
 void KeMdl_MkTkClut(u_int colBs, u_int colSs, float lv, u_int *pCltBuf) {
     sceVu0FVECTOR fv0;
@@ -59,11 +58,9 @@ void KeMdl_MkTkClut(u_int colBs, u_int colSs, float lv, u_int *pCltBuf) {
     op_spr_free(0x20);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/keProg/KeMdl", KeMdl_Draw);
 
 /* Logic matches; the original threads the flg & 2 path (mdi.flag = 4, then 4 | 8 folded to 0xC) and keeps
  * omd in s1 / pCol in s2. Tried else/ternary/negated forms of the flag selection. */
-#if 0
 void KeMdl_Draw(int mdlIdx, u_short *pCol, int cOfs, int u, int v, u_char flg, sceVu0FMATRIX *zMat) {
     sceVu0FMATRIX lvwMat;
     pppModelSt *pMdl;
@@ -78,11 +75,16 @@ void KeMdl_Draw(int mdlIdx, u_short *pCol, int cOfs, int u, int v, u_char flg, s
     mdi.flag = 0;
     if (flg & 2) {
         mdi.flag = 4;
-    } else if (flg & 1) {
-        mdi.flag = 0x80;
-    }
-    if (!(omd->flag & 1)) {
-        mdi.flag |= 8;
+        if (!(omd->flag & 1)) {
+            mdi.flag |= 8;
+        }
+    } else {
+        if (flg & 1) {
+            mdi.flag = 0x80;
+        }
+        if (!(omd->flag & 1)) {
+            mdi.flag |= 8;
+        }
     }
     if (!(omd->flag & 2)) {
         mdi.flag |= 0x10;
@@ -103,8 +105,10 @@ void KeMdl_Draw(int mdlIdx, u_short *pCol, int cOfs, int u, int v, u_char flg, s
     } else {
         mdi.pzmat = 0;
     }
-    *(int *)&mdi.ar = 0;
     *(u_short *)&mdi.alpha = *(u_short *)&omd->alpha;
+    *(int *)&mdi.ar = 0;
+    mdi.va = ppvPObj->lpvert;
+    mdi.na = ppvPObj->lpnorm;
     mdi.tmp_a = (char *)ppvVNWork;
     mdi.coff = cOfs;
     mdi.u = u << 16;
@@ -118,11 +122,8 @@ void KeMdl_Draw(int mdlIdx, u_short *pCol, int cOfs, int u, int v, u_char flg, s
     mdi.lvmat = &ppvLightMatrix;
     mdi.lwmat = &ppvPObj->cmat;
     mdi.packet = ppvCurPrimp;
-    mdi.va = ppvPObj->lpvert;
-    mdi.na = ppvPObj->lpnorm;
     mdi.toff = 0;
     *(int *)&mdi.ot = 0;
     mdi.pri = 0;
     ppvCurPrimp = op1_md_draw(omd, &mdi, pMdl->nPacketSize);
 }
-#endif
