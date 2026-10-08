@@ -1,6 +1,5 @@
 #include "Ke.h"
 #include <math.h>
-#include "include_asm.h"
 
 int KeRnd_Value = 0;
 
@@ -64,21 +63,25 @@ int KeVu0RndI() {
     return f * 32768.0f;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/keProg/Ke", KeVu0ItrsBallLine);
 
 /* The tail (-b and a + a computed before the d < 0 test) matches; the dot products differ in load order
  * and register allocation. Tried all orders of the a/b/c statements. */
-#if 0
 int KeVu0ItrsBallLine(KeaVu0ItrsBallLine *_a) {
     float a;
     float b;
     float c;
     float d;
 
-    a = _a->LineDist[0] * _a->LineDist[0] + _a->LineDist[1] * _a->LineDist[1] + _a->LineDist[2] * _a->LineDist[2];
-    c = _a->LinePos[0] * _a->LinePos[0] + _a->LinePos[1] * _a->LinePos[1] + _a->LinePos[2] * _a->LinePos[2] -
-        _a->BallR * _a->BallR;
-    b = _a->LineDist[0] * _a->LinePos[0] + _a->LineDist[1] * _a->LinePos[1] + _a->LineDist[2] * _a->LinePos[2];
+    a = _a->LineDist[0] * _a->LineDist[0];
+    a += _a->LineDist[1] * _a->LineDist[1];
+    a += _a->LineDist[2] * _a->LineDist[2];
+    b = _a->LineDist[0] * _a->LinePos[0];
+    b += _a->LineDist[1] * _a->LinePos[1];
+    b += _a->LineDist[2] * _a->LinePos[2];
+    c = _a->LinePos[0] * _a->LinePos[0];
+    c += _a->LinePos[1] * _a->LinePos[1];
+    c += _a->LinePos[2] * _a->LinePos[2];
+    c -= _a->BallR * _a->BallR;
     b = b + b;
     d = b * b - 4.0f * a * c;
     c = -b;
@@ -89,7 +92,6 @@ int KeVu0ItrsBallLine(KeaVu0ItrsBallLine *_a) {
     _a->T = (c - KeVu0Sqrt(d)) / b;
     return 1;
 }
-#endif
 
 float KeVu0LowClamp(float s, float low) {
     sceVu0FVECTOR v;
