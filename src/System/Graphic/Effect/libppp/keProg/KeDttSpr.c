@@ -1,6 +1,5 @@
 #include "KeDttSpr.h"
 #include "System/Graphic/Effect/libppp/draw/draw_w.h"
-#include "include_asm.h"
 
 void KeDttSpr_MkGifPk_Pre(KeaDttSpr_MkGifPk *a) {
     struct {
@@ -89,17 +88,15 @@ void KeDttSpr_MkGifPk_Pre(KeaDttSpr_MkGifPk *a) {
     op_spr_free(sizeof(*w));
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/keProg/KeDttSpr", KeDttSpr_MkGifPk);
 
 /* All but the tail matches: the original puts the 0x80 constant in a0, computes the new Pk into v0 and
  * stores Pk before Z. Tried return/branch shapes, store orders, register variables and clobber sets. */
-#if 0
 int KeDttSpr_MkGifPk(KeaDttSpr_MkGifPk *a) {
     sceVu0FVECTOR zz;
     register KeaDttSpr_MkGifPk *ra asm("$6") = a;
     u_long *p = ra->Pk;
     register int i asm("$5");
-    int z;
+    register int k asm("$4");
 
     __asm__ __volatile__(
         "lqc2 $vf8, 0x0(%2)\n"
@@ -234,12 +231,10 @@ int KeDttSpr_MkGifPk(KeaDttSpr_MkGifPk *a) {
         : "=r"(i), "=m"(zz), "+r"(ra)
         : "r"(p)
         : "$2", "$3", "$4", "memory");
-    z = ((int *)zz)[2];
-    if (i != 0x80) {
+    if (i != (k = 0x80)) {
+        ra->Z = ((int *)zz)[2];
         ra->Pk = p + 0x4C;
-        ra->Z = z;
         return 1;
     }
     return 0;
 }
-#endif
