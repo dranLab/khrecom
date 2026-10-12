@@ -8,6 +8,23 @@
 
 struct ZONEPARTS;
 
+// PARTIAL: added for Game/Gimmick/GimmickGuillotine
+struct GimParam {
+    SHORT GimID;      /* 0x0 */
+    BYTE AtkPow;      /* 0x2 */
+    BYTE AtkAttr;     /* 0x3 */
+    CHAR Hp;          /* 0x4 */
+    BYTE LunchType;   /* 0x5 */
+    BYTE B_Prob;      /* 0x6 */
+    BYTE G_Index;     /* 0x7 */
+    BYTE R_Index;     /* 0x8 */
+    BYTE G_Prob;      /* 0x9 */
+    BYTE R_Prob;      /* 0xa */
+    BYTE C_Prob;      /* 0xb */
+    BYTE Riku_GIndex; /* 0xc */
+    BYTE Riku_GProb;  /* 0xd */
+};
+
 class CBaseGimmick : public CEntity {
 private:
     UINT m_uiGimmickFlag;       /* 0x1d0 */
@@ -39,6 +56,7 @@ protected:
     void changeGimmickState(INT inState); // PARTIAL: added for Game/Gimmick/GimmickBreakable
     INT createPrize(INT inType, INT inParam); // PARTIAL: added for Game/Gimmick/GimmickBreakable
     INT saveStat(INT in_Stat);
+    GimParam* getGimParam(); // PARTIAL: added for Game/Gimmick/GimmickGuillotine
     virtual void beginStateMain();
     virtual void stateMain();
     virtual void endStateMain();

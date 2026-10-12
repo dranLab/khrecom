@@ -13,6 +13,7 @@ class CAttackMotion; // PARTIAL: added for Game/Gimmick/GimmickToldPipe
 class CModel;    // PARTIAL: added for Game/Gimmick/GimmickPlantChild
 union FMATRIX;   // PARTIAL: added for Game/Gimmick/GimmickWindowLid
 class CAnim;     // PARTIAL: added for Game/Gimmick/GimmickLotusLeaf
+class CBodyCollision; // PARTIAL: added for Game/Gimmick/GimmickGuillotine
 
 enum eObjType {
     eObjType_dummy = 0 /* values not needed yet */
@@ -46,7 +47,7 @@ protected:
     UBYTE _m_0x98[0x8];           /* 0x098 m_pTexAnm, m_nTexAnmNum */
     CMovement* m_pMove;  /* 0x0a0 */
     // PARTIAL: m_pAttack, m_iID split out for Game/Gimmick/GimmickToldPipe
-    UBYTE _m_0xa4[0x4];  /* 0x0a4 m_pBodyColl */
+    CBodyCollision* m_pBodyColl; /* 0x0a4 */ // PARTIAL: split out for Game/Gimmick/GimmickGuillotine
     CAttackMotion* m_pAttack; /* 0x0a8 */
     UBYTE _m_0xac[0x10]; /* 0x0ac m_pEffect .. 0x0b8 m_pSEEx */
     INT m_iID;           /* 0x0bc */
@@ -83,6 +84,7 @@ public:
     // PARTIAL: added for Game/Gimmick/GimmickBreakable
     void bodyCollOnBody(INT inKind);
     void bodyCollOffBody(INT inKind);
+    void bodyCollOn(INT inKind); // PARTIAL: added for Game/Gimmick/GimmickGuillotine
     void rideModelEnableAllCollision(BOOL inEnable);
     void rideModelChangeListR2();
 
