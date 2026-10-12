@@ -50,7 +50,10 @@ protected:
 private:
     eObjType m_EntityType; /* 0x0e0 */
     UINT m_uiEntityFlag;   /* 0x0e4 */
-    UBYTE _m_0xe8[0xe8];   /* 0x0e8 m_uiDispOffFlag .. 0x1c4 m_pDamageString */
+    // PARTIAL: m_tqTimer split out for Game/Player/FriendJack
+    UBYTE _m_0xe8[0x8];    /* 0x0e8 m_uiDispOffFlag, m_uiCheckEyeOffFlag */
+    TIMEQ m_tqTimer;       /* 0x0f0 */
+    UBYTE _m_0xf4[0xdc];   /* 0x0f4 m_iFlashingCounter .. 0x1c4 m_pDamageString */
 
 public:
     CEntity(CTask* inParent);
@@ -102,6 +105,9 @@ public:
     BOOL isMotionEnd() const;
     BOOL isHangOnPlayer();
     void rideModelEnableChipCollision(INT inIdx, BOOL inSw);
+    // PARTIAL: added for Game/Player/FriendJack
+    void setTimer(TIMEQ inTq) { m_tqTimer = inTq; }
+    TIMEQ getTimer() { return m_tqTimer; }
     void rideModelSetChipLocalMatrix(INT inIndex, const FMATRIX* in_pMatrix);
 };
 

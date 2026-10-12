@@ -81,6 +81,7 @@ protected:
     void homingPlayerTargetY(HANDLE inTarget, FLOAT inRate);
     INT getPower(INT inSkillID, INT inKind);
     void getWeaponTopPos(FVECTOR& inPos);
+    void setMagic(INT inID); // added for Game/Player/FriendJack
     void changeCamera(HANDLE inTarget, INT inMode, INT inReset);
 public:
     void setExit(INT inFlag);
