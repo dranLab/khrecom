@@ -12,4 +12,18 @@ inline void _cardBattleCheckUser(void* inUser) {
     if (!inUser) AssertApp(__FILE__, __LINE__, "inUser", 0);
 }
 
+// PARTIAL: added for Game/Player/FriendAladdin
+struct BC_PARAM {
+    unsigned short POWER[4];
+    BYTE BREAK;
+    BYTE RESPONSE;
+    BYTE COST;
+    BYTE ATTR;
+    LPCSTR EFF_NAME;
+};
+
+namespace CardBattle {
+extern BC_PARAM* g_pBattleCardList;
+}
+
 #endif /* GAME_CARDBATTLE_H */
