@@ -10,6 +10,7 @@ struct FVECTOR;
 class CState;
 class CMovement; // PARTIAL: added for Game/Gimmick/GimmickBreakable
 class CModel;    // PARTIAL: added for Game/Gimmick/GimmickPlantChild
+union FMATRIX;   // PARTIAL: added for Game/Gimmick/GimmickWindowLid
 
 enum eObjType {
     eObjType_dummy = 0 /* values not needed yet */
@@ -89,6 +90,12 @@ public:
     FLOAT calcDistanceXZ(const CEntity* inEntity) const;
     HANDLE setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale);
     BOOL isRideOnPlayer();
+    // PARTIAL: added for Game/Gimmick/GimmickWindowLid
+    INT getBoneIndex(const CHAR* inBoneName, INT inModelIndex) const;
+    BOOL isMotionEnd() const;
+    BOOL isHangOnPlayer();
+    void rideModelEnableChipCollision(INT inIdx, BOOL inSw);
+    void rideModelSetChipLocalMatrix(INT inIndex, const FMATRIX* in_pMatrix);
 };
 
 #endif /* GAME_ENTITY_H */
