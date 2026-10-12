@@ -13,4 +13,15 @@ inline void _animCheckFlagIdx(UINT idx) {
     if (!(2 > idx)) AssertApp(__FILE__, __LINE__, "2 > idx", 0);
 }
 
+// PARTIAL: added for Game/Gimmick/GimmickLotusLeaf
+typedef ULONG ANIMID;
+class CAnim {
+private:
+    UBYTE _m_0x00[0x14]; /* 0x000 m_pCrds .. 0x010 m_pMotData */
+    ANIMID m_noId;       /* 0x014 */
+public:
+    ULONG getFlag(UINT idx) const;
+    ANIMID getAnimID() { return m_noId; }
+};
+
 #endif /* SYSTEM_GRAPHIC_ANIM_H */
