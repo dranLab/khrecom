@@ -137,10 +137,6 @@ static void callConProg(pppPObject *pobj) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/pppPart", pppCreatePObject);
-
-/* Matches, but its string literals need the unit's .rodata from source, which waits for the .rodata split fix (the pppfunctbl strings at the start of this unit's range belong to pppfunctbl). */
-#if 0
 pppPObject *pppCreatePObject(pppMngSt *mng, pppPDataVal *pdv0) {
     pppPData *pdt;
     pppPObject *apobj;
@@ -192,7 +188,6 @@ end:
     callConProg(apobj);
     return apobj;
 }
-#endif
 
 void pppDeletePObject(pppPObject *pobj) {
     pppPDataVal *pdv;
@@ -296,10 +291,6 @@ void pppSetMatrix(pppMngSt *mng) {
 }
 #endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/pppPart", pppStartPart);
-
-/* Matches, but its string literals need the unit's .rodata from source, which waits for the .rodata split fix (the pppfunctbl strings at the start of this unit's range belong to pppfunctbl). */
-#if 0
 BOOL pppStartPart(pppMngSt *mng, long *lpdt, BOOL callInitFuncf) {
     char *pdt0;
     u_char pdtno;
@@ -366,7 +357,6 @@ BOOL pppStartPart(pppMngSt *mng, long *lpdt, BOOL callInitFuncf) {
     mng->fFrameTimeAccum = 0;
     return TRUE;
 }
-#endif
 
 void pppInitPdt(long *lpdt, pppProg *progtbl) {
     char *pdt0;
@@ -701,10 +691,6 @@ static void pppEmptyRunPobject(pppMngSt *mng, pppPObject *pobj) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/pppPart", apeaPObject);
-
-/* Matches, but its string literals need the unit's .rodata from source, which waits for the .rodata split fix (the pppfunctbl strings at the start of this unit's range belong to pppfunctbl). */
-#if 0
 static BOOL apeaPObject(pppMngSt *mng) {
     int pdtct;
     pppPDataVal *pdv;
@@ -722,12 +708,7 @@ static BOOL apeaPObject(pppMngSt *mng) {
     }
     return TRUE;
 }
-#endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/pppPart", pppRunPartExec);
-
-/* Matches, but its string literals need the unit's .rodata from source, which waits for the .rodata split fix (the pppfunctbl strings at the start of this unit's range belong to pppfunctbl). */
-#if 0
 BOOL pppRunPartExec(pppMngSt *mng) {
 #line 1033
     if (!(mng != NULL)) AssertApp(__FILE__, __LINE__, "mng != ((void *)0)", 0);
@@ -736,12 +717,7 @@ BOOL pppRunPartExec(pppMngSt *mng) {
     pppRunPartCalc(mng);
     return TRUE;
 }
-#endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/pppPart", pppRunPart);
-
-/* Matches, but its string literals need the unit's .rodata from source, which waits for the .rodata split fix (the pppfunctbl strings at the start of this unit's range belong to pppfunctbl). */
-#if 0
 BOOL pppRunPart(pppMngSt *mng, BOOL drawf) {
 #line 1053
     if (!(mng != NULL)) AssertApp(__FILE__, __LINE__, "mng != ((void *)0)", 0);
@@ -749,12 +725,7 @@ BOOL pppRunPart(pppMngSt *mng, BOOL drawf) {
     callEndProg(mng);
     return pppRunPartImpotent(mng);
 }
-#endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/pppPart", pppRunPartImpotent);
-
-/* Matches, but its string literals need the unit's .rodata from source, which waits for the .rodata split fix (the pppfunctbl strings at the start of this unit's range belong to pppfunctbl). */
-#if 0
 BOOL pppRunPartImpotent(pppMngSt *mng) {
 #line 1067
     if (!(mng != NULL)) AssertApp(__FILE__, __LINE__, "mng != ((void *)0)", 0);
@@ -776,5 +747,4 @@ BOOL pppRunPartImpotent(pppMngSt *mng) {
     }
     return mng->bEnd;
 }
-#endif
-// SOURCE DATA: .data .bss
+// SOURCE DATA: .data .rodata .bss
