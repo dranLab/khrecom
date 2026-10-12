@@ -4,7 +4,7 @@
 
 #include "khtypes.h"
 
-struct FVECTOR;
+union FVECTOR;
 
 namespace D2 {
 

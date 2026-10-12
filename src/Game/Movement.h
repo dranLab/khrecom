@@ -4,7 +4,7 @@
 
 #include "khtypes.h"
 
-struct FVECTOR; // PARTIAL: added for Game/Debug/KisEnemy
+union FVECTOR; // PARTIAL: added for Game/Debug/KisEnemy
 
 class CMovement {
 private:

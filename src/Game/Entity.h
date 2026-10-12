@@ -6,7 +6,7 @@
 #include "System/Task.h"
 // PARTIAL: Gprim.h include moved to Game/Bullet/Bullet.h for Game/Gimmick/GimmickHitMore (its strings are not in every includer)
 
-struct FVECTOR;
+union FVECTOR;
 class CState;
 class CMovement; // PARTIAL: added for Game/Gimmick/GimmickBreakable
 class CModel;    // PARTIAL: added for Game/Gimmick/GimmickPlantChild

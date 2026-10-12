@@ -4,27 +4,8 @@
 
 #include "khtypes.h"
 #include "System/Task.h"
+#include "System/Vector.h"
 
-// PARTIAL: added for Game/Atel/AtelCamera (belongs in the math header)
-typedef float _FVECTOR[4];
-union FVECTOR {
-    _FVECTOR v;
-    struct {
-        FLOAT x;
-        FLOAT y;
-        FLOAT z;
-        FLOAT w;
-    };
-    u_long128 _q;
-};
-
-// PARTIAL: added for Game/Atel/AtelCamera (belongs in the math header)
-typedef float _FMATRIX[4][4];
-union FMATRIX {
-    _FMATRIX m;
-    FVECTOR v[4];
-    void setTrans(const FVECTOR& vecIn) { v[3] = vecIn; }
-};
 
 // PARTIAL: added for Game/Atel/AtelCamera
 class CCoord {

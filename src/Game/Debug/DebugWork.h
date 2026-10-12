@@ -5,23 +5,7 @@
 
 class CNakCamera;
 
-/* FVECTOR (0x10, 16-byte aligned union) belongs to the math headers; only its layout is
- * needed here. Its inline members are left out. */
-#ifndef FVECTOR_DEFINED
-#define FVECTOR_DEFINED
-union FVECTOR {
-    float v[4];
-    struct {
-        FLOAT x;
-        FLOAT y;
-        FLOAT z;
-        FLOAT w;
-    };
-    u_long128 _q;
-    unsigned long _ul[2];
-    unsigned int _ui[4];
-};
-#endif
+#include "System/Vector.h"
 
 struct DEBUG_WORK_SYS {
     SBYTE m_iDispCounter;

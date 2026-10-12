@@ -22,14 +22,7 @@ inline void _taskSLCOverflowPlaceholder() {
     TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
 }
 
-/* FVECTOR is a union in the math headers; Game/Entity.h declares it as a struct, so only its layout
- * is given here (the mangled names are the same). */
-struct FVECTOR {
-    FLOAT x;
-    FLOAT y;
-    FLOAT z;
-    FLOAT w;
-} __attribute__((aligned(16)));
+#include "System/Vector.h"
 
 #include "Game/Movement.h"
 #include "Game/LockOnManager.h"

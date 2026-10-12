@@ -16,14 +16,7 @@ inline void _emptyStringPlaceholder1() {
     TRACE("");
 }
 
-/* FVECTOR is a union in the math headers; Game/Entity.h declares it as a struct, so only its layout
- * is given here (the mangled names are the same). */
-struct FVECTOR {
-    FLOAT x;
-    FLOAT y;
-    FLOAT z;
-    FLOAT w;
-} __attribute__((aligned(16)));
+#include "System/Vector.h"
 
 #include "Game/Atel/AtelTutorial.h"
 #include "Game/Player/Player.h"
