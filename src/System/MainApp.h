@@ -9,4 +9,15 @@ extern "C"
 #endif
 void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
+#ifdef __cplusplus
+// PARTIAL: added for System/Movie/Movie
+class CMainApp {
+public:
+    static void setFpsFull();
+    static void setFpsHalf();
+    static BOOL isFpsHalf();
+    static BOOL isPAL();
+};
+#endif
+
 #endif /* SYSTEM_MAINAPP_H */
