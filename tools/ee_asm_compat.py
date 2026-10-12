@@ -5,7 +5,9 @@ Always:
 - Anonymous namespaces: gcc names them after the source path plus six random characters
   (_58_GLOBAL_$N$c__KHCOM_MainApp_System_PlaySpeedCtrl.cppM1aaaa). With --symbols, the name is
   replaced by the original one for this source file, so objects get the original symbol names
-  (objdiff can pair them) and builds are reproducible.
+  (objdiff can pair them) and builds are reproducible. Likewise the global constructor/destructor that
+  runs a file's static initializers (_GLOBAL_$I$c__KHCOM_MainApp_main.cpp00aaaa, _GLOBAL_$D$...), which
+  the original __CTOR_LIST__/__DTOR_LIST__ reference by name.
 - Source paths in string literals (__FILE__ in assert/allocation messages): with --source-root, the
   "src/" prefix becomes the original one (e.g. "c:/KHCOM/MainApp/").
 
@@ -34,6 +36,7 @@ from pathlib import Path, PurePosixPath
 
 CVT_W_S = re.compile(r"^(\s*)cvt\.w\.s\s+\$f(\d+)\s*,\s*\$f(\d+)\s*$")
 ANON_NAMESPACE = re.compile(r"_\d+(_GLOBAL_\$N\$[\w.]*?\.(?:cpp|cc|c)[A-Za-z0-9]{6})(?=\$|\W|$)")
+GLOBAL_CDTOR = re.compile(r"_GLOBAL_\$([ID])\$[\w.]*?\.(?:cpp|cc|c)[A-Za-z0-9]{6}(?=\$|\W|$)")
 INCLUDE = re.compile(r'^\s*\.include\s+"([^"]+)"\s*$')
 MACRO = re.compile(r'^\s*(glabel|alabel|ehlabel|jlabel|dlabel|endlabel|enddlabel|nonmatching)\s+"?([^",\s]+)"?\s*(?:,\s*(\S+))?\s*$')
 SPLAT_INSN = re.compile(r"^\s*/\* [0-9A-F]+ [0-9A-F]+ ([0-9A-F]{8}) \*/\s+(\S+)")
@@ -123,12 +126,15 @@ def fix_short_loops(lines: list[str]) -> list[str]:
     return out
 
 
-def original_namespace(source: str, symbols_path: str) -> str | None:
-    """The mangled anonymous namespace name the original object used for this source file."""
+def original_global(kind: str, source: str, symbols_path: str) -> str | None:
+    """The name of gcc's per-file global _GLOBAL_$<kind>$ (N: anonymous namespace, I/D: global
+    constructor/destructor) in the original object of this source file."""
     rel = PurePosixPath(source)
     rel = rel.relative_to("src") if rel.parts[0] == "src" else rel
     stem = re.escape("_" + "_".join(rel.parts))
-    pattern = re.compile(rf"_GLOBAL_\$N\$[\w.]*{stem}[A-Za-z0-9]{{6}}(?=\$)")
+    # A namespace name is followed by its member's name ($...), a constructor's name ends there.
+    end = r"(?=\$)" if kind == "N" else r"(?![\w.$])"
+    pattern = re.compile(rf"_GLOBAL_\${kind}\$[\w.]*{stem}[A-Za-z0-9]{{6}}{end}")
     with open(symbols_path, encoding="utf-8") as f:
         for line in f:
             if m := pattern.search(line):
@@ -190,9 +196,12 @@ def main() -> None:
     if args.source_root:
         text = re.sub(r'^(\s*\.ascii\s+")src/', lambda m: m.group(1) + args.source_root, text, flags=re.MULTILINE)
     if args.source and args.symbols and "_GLOBAL_$N$" in text:
-        name = original_namespace(args.source, args.symbols)
+        name = original_global("N", args.source, args.symbols)
         if name:
             text = ANON_NAMESPACE.sub(lambda _: f"_{len(name)}{name}", text)
+    if args.source and args.symbols and ("_GLOBAL_$I$" in text or "_GLOBAL_$D$" in text):
+        names = {kind: original_global(kind, args.source, args.symbols) for kind in "ID"}
+        text = GLOBAL_CDTOR.sub(lambda m: names[m.group(1)] or m.group(0), text)
 
     lines = []
     source_lines = text.splitlines()
