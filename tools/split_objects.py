@@ -10,7 +10,7 @@ expand.s).
 .data / .rodata / .bss: objects keep their link order in every section. Each
 object's data starts at the lowest of its own symbols (statics and globals from
 .mdebug) and the anonymous labels (string literals, jump tables, float
-constants) that only its code references. In .rodata it starts even earlier:
+constants) that only its code (or its .data pointers) references. In .rodata it starts even earlier:
 gcc writes the string literals of included headers' inline functions first,
 used or not, so unreferenced strings (ASCII or Shift-JIS) before an object's
 first known item are its own; other unreferenced data there (e.g. the vtable of a
@@ -54,6 +54,7 @@ SINGLE_LINES = {  # the subsegment splat's create_config wrote for each section
     ".bss": r"      - \{ type: bss, vram: 0x[0-9A-F]+, name: [^}]+\} # \.bss\n",
 }
 REF = re.compile(r"%(?:hi|lo|gp_rel)\(([A-Za-z_][\w.$]*)")
+DATA_REF = re.compile(r"\.word ([A-Za-z_][\w.$]*)")  # pointers in an object's .data (e.g. a table of names)
 ANON = re.compile(r"^[A-Za-z]+_([0-9A-F]{8})$")  # spimdisasm's D_xxxxxxxx, jtbl_xxxxxxxx, ...
 
 
@@ -198,16 +199,20 @@ def owner_map(files, order) -> dict[int, int]:
 
 
 def code_refs(order, asm_dir: Path) -> dict[int, set[int]]:
-    """link position -> addresses of anonymous labels referenced by that object's code."""
+    """link position -> addresses of anonymous labels referenced by that object's code or .data pointers."""
+    anon = lambda names: {int(m.group(1), 16) for name in names if (m := ANON.match(name))}
     refs = {}
     for i, o in enumerate(order):
-        if o.text is None:
-            continue
-        path = asm_dir / f"{o.name}.s"
-        if not path.exists():
-            sys.exit(f"error: {path} missing - run configure.py after the .text split first (see --help)")
-        refs[i] = {int(m.group(1), 16) for name in REF.findall(path.read_text(encoding="utf-8"))
-                   if (m := ANON.match(name))}
+        # Pointers in .data count too: an object without code (a table of names) owns the strings it points to.
+        data = asm_dir / "data" / f"{o.name}.data.s"
+        mine = anon(DATA_REF.findall(data.read_text(encoding="utf-8"))) if data.exists() else set()
+        if o.text is not None:
+            path = asm_dir / f"{o.name}.s"
+            if not path.exists():
+                sys.exit(f"error: {path} missing - run configure.py after the .text split first (see --help)")
+            mine |= anon(REF.findall(path.read_text(encoding="utf-8")))
+        if mine or o.text is not None:
+            refs[i] = mine
     return refs
 
 
