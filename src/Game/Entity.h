@@ -12,6 +12,7 @@ class CMovement; // PARTIAL: added for Game/Gimmick/GimmickBreakable
 class CAttackMotion; // PARTIAL: added for Game/Gimmick/GimmickToldPipe
 class CModel;    // PARTIAL: added for Game/Gimmick/GimmickPlantChild
 union FMATRIX;   // PARTIAL: added for Game/Gimmick/GimmickWindowLid
+class CAnim;     // PARTIAL: added for Game/Gimmick/GimmickLotusLeaf
 
 enum eObjType {
     eObjType_dummy = 0 /* values not needed yet */
@@ -39,7 +40,10 @@ protected:
     CModel* m_pModels;            /* 0x080 */
     FVECTOR* m_pvModelColor;      /* 0x084 */
     INT m_iModelCount;            /* 0x088 */
-    UBYTE _m_0x8c[0x14];          /* 0x08c m_pNLight .. 0x09c m_nTexAnmNum */
+    // PARTIAL: m_pAnim split out for Game/Gimmick/GimmickLotusLeaf
+    UBYTE _m_0x8c[0x8];           /* 0x08c m_pNLight, m_pGLight */
+    CAnim* m_pAnim;               /* 0x094 */
+    UBYTE _m_0x98[0x8];           /* 0x098 m_pTexAnm, m_nTexAnmNum */
     CMovement* m_pMove;  /* 0x0a0 */
     // PARTIAL: m_pAttack, m_iID split out for Game/Gimmick/GimmickToldPipe
     UBYTE _m_0xa4[0x4];  /* 0x0a4 m_pBodyColl */
