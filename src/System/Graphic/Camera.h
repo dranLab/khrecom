@@ -11,6 +11,9 @@
 class CCoord {
 public:
     FMATRIX m_Local;
+    UBYTE _pad40[0x50];  // PARTIAL: added for Game/Gimmick/GimmickBell (0x40..0x8f not needed yet)
+    FMATRIX m_World;     /* 0x90 */
+    FMATRIX& getWorldMatrix() { return m_World; } // PARTIAL: added for Game/Gimmick/GimmickBell
 };
 
 class CCamera : public CTaskSecondary {
