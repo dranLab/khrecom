@@ -18,6 +18,13 @@ union FVECTOR {
     u_long128 _q;
     unsigned long _ul[2];
     unsigned int _ui[4];
+    // PARTIAL: added for Game/Player/FriendAladdin
+    void set(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW = 1.0f) {
+        x = inX;
+        y = inY;
+        z = inZ;
+        w = inW;
+    }
 };
 
 typedef float _FMATRIX[4][4];

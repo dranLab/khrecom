@@ -1,0 +1,92 @@
+// PARTIAL: added for Game/Player/FriendAladdin
+#ifndef GAME_PLAYER_FRIEND_H
+#define GAME_PLAYER_FRIEND_H
+
+#include "khtypes.h"
+#include "System/Graphic/Anim.h"
+#include "System/Vector.h"
+#include "Game/Entity.h"
+#include "System/PadHandler.h"
+
+class CPlayer;
+struct PATK_DATA;
+
+namespace Friend {
+
+class CFriend : public CEntity, public CPadHandler {
+protected:
+    UINT m_uiCharaID;           /* 0x1e0 */
+    UINT m_uiRCID;              /* 0x1e4 */
+    USHORT m_uiAnimID;          /* 0x1e8 */
+    USHORT m_uiStartAnimID;     /* 0x1ea */
+    USHORT m_uiGroundAnimID;    /* 0x1ec */
+    USHORT m_uiSkillID;         /* 0x1ee */
+    USHORT m_uiLevel;           /* 0x1f0 */
+    USHORT m_uiKind;            /* 0x1f2 */
+    FLOAT m_fScale;             /* 0x1f4 */
+    CPlayer* m_pPlayer;         /* 0x1f8 */
+    FLOAT m_fDir;               /* 0x1fc */
+    FLOAT m_fMoveSpdXZ;         /* 0x200 */
+    FLOAT m_fCamHeight;         /* 0x204 */
+    PATK_DATA* m_pAtkData;      /* 0x208 */
+    INT m_iAttackNo;            /* 0x20c */
+    UINT m_uiAttackID;          /* 0x210 */
+    INT m_iAttackPower;         /* 0x214 */
+    INT m_AtkAttr;              /* 0x218 ATK_ATTR */
+    TIMEQ m_tqTrgFrame;         /* 0x21c */
+    HANDLE m_hTarget;           /* 0x220 */
+    HANDLE m_hLockon;           /* 0x224 */
+    FVECTOR m_vAtkOffset;       /* 0x230 */
+    INT m_iAtkBone;             /* 0x240 */
+    FVECTOR m_vAimPos;          /* 0x250 */
+    FLOAT m_fRotDir;            /* 0x260 */
+    FLOAT m_fDist;              /* 0x264 */
+    TIMEQ m_tqSubTimer;         /* 0x268 */
+    UINT m_uiCollAttackID;      /* 0x26c */
+    FLOAT m_fBodyRviseCoefficient; /* 0x270 */
+    INT m_iSubState;            /* 0x274 */
+    UINT m_uiFlag;              /* 0x278 */
+public:
+    UBYTE m_State[6][0x20];     /* 0x27c CStateTemplate<Friend::CFriend>[6] */
+    INT m_iState;               /* 0x33c */
+
+public:
+    CFriend(CTask* inParent, INT inID, INT inEx);
+    virtual ~CFriend();
+    void changeState(INT inState);
+    void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo, INT inActNo);
+protected:
+    virtual void getCameraTargetPos(FVECTOR& outPos);
+    virtual void updateBefore();
+    virtual void updateAfter();
+    virtual void lastUpdate();
+    virtual void beginStateAppear();
+    virtual void stateAppear();
+    virtual void endStateAppear();
+    virtual void beginStateMain();
+    virtual void stateMain();
+    virtual void endStateMain();
+    virtual void beginStateAction1();
+    virtual void stateAction1();
+    virtual void endStateAction1();
+    virtual void beginStateAction2();
+    virtual void stateAction2();
+    virtual void endStateAction2();
+    virtual void beginStateAction3();
+    virtual void stateAction3();
+    virtual void endStateAction3();
+    virtual void beginStateExit();
+    virtual void stateExit();
+    virtual void endStateExit();
+    void homingPlayerTargetY(HANDLE inTarget, FLOAT inRate);
+    INT getPower(INT inSkillID, INT inKind);
+    void getWeaponTopPos(FVECTOR& inPos);
+    void changeCamera(HANDLE inTarget, INT inMode, INT inReset);
+public:
+    void setExit(INT inFlag);
+    virtual INT setSkill(INT inID);
+};
+
+} // namespace Friend
+
+#endif /* GAME_PLAYER_FRIEND_H */

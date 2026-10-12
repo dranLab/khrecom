@@ -6,6 +6,7 @@
 
 namespace RND {
 int genrand_int31();
+float genrand_real1(); // PARTIAL: added for Game/Player/FriendAladdin
 }
 
 #endif /* SYSTEM_RND_H */
