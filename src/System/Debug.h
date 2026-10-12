@@ -26,10 +26,57 @@ enum USER {
     MNAKASHI = 10,
     USR_PLAN = 11,
     YYOSHIMO = 12,
-    YASUE = 13
+    YASUE = 13,
+    KMIYAZAK = 14,
+    KYOSHIOK = 15,
+    DKAWABE = 16,
+    FAYUMI = 17,
+    TANADA = 18,
+    MMATSUUR = 19,
+    USR_GRA = 20,
+    TFUJIMOT = 21,
+    YAMASEI = 22,
+    THAMA = 23,
+    SOTANI = 24,
+    KKONDO = 25,
+    VMARK = 26,
+    KIWASAKI = 27,
+    TYAMAZAK = 28,
+    ONISHI = 29,
+    TSUGINO = 30,
+    GKOBAYAS = 31,
+    TTAKAKO = 32,
+    HSUGIYAM = 33,
+    SHINODA = 34,
+    HATAKERU = 35,
+    HAMADAK = 36,
+    MIKI = 37,
+    KO_INOUE = 38,
+    ADACHIJ = 39,
+    AIWATA = 40,
+    MAKI = 41,
+    YSHUHEI = 42,
+    SHINICHI = 43,
+    NSAKI = 44,
+    UCHIMURA = 45,
+    IMAKI = 46,
+    FMIYUKI = 47,
+    DCHIBA = 48,
+    MWAKIMUR = 49,
+    ITAI = 50,
+    THONDA = 51,
+    _GRA_RESERVE1 = 52,
+    _GRA_RESERVE0 = 53,
+    USR_SOUND = 54,
+    _SOUND_RESERVE1 = 55,
+    _SOUND_RESERVE0 = 56,
+    USR_OTHER = 57,
+    _OTHER_RESERVE1 = 58,
+    _OTHER_RESERVE0 = 59,
+    USR_TERMINATOR = 60
 };
 
-extern "C" void TRACE_USER(USER uid, char* fmt);
+extern "C" void TRACE_USER(USER uid, char* fmt, ...);
 
 // PARTIAL: added for System/Graphic/2d/2DBase
 enum TtyColor {
@@ -54,6 +101,20 @@ enum TtyColor {
 };
 
 extern "C" void TRACE_COL(TtyColor nCol, char* fmt, ...);
+
+// PARTIAL: added for System/Debug
+extern "C" void TRACE_USER_COL(USER uid, TtyColor nCol, char* fmt, ...);
+extern "C" int dbgCheckUser(USER uid);
+INT dbgButtonTrg(USER uid, UINT button, INT padId);
+INT dbgButtonDown(USER uid, UINT button, INT padId);
+INT dbgButtonRTrg(USER uid, UINT button, INT padId);
+INT dbgButtonRpt(USER uid, UINT button, INT padId);
+INT dbgAnalogRX(USER uid, INT padId);
+INT dbgAnalogRY(USER uid, INT padId);
+INT dbgAnalogLX(USER uid, INT padId);
+INT dbgAnalogLY(USER uid, INT padId);
+
+extern char _szTraceBuf[1536];
 
 #endif /* __cplusplus */
 

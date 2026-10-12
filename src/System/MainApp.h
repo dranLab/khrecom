@@ -9,6 +9,13 @@ extern "C"
 #endif
 void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
+// PARTIAL: added for System/Debug
+extern int g_bTraceOnScreen;
+#ifdef __cplusplus
+extern "C"
+#endif
+void addTraceString(CHAR* pszSrc);
+
 #ifdef __cplusplus
 // PARTIAL: added for System/Movie/Movie
 class CMainApp {
