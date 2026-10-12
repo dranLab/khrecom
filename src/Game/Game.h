@@ -9,6 +9,7 @@ class CGame : public CTask {
 public:
     CGame();
     static BOOL reqSave();
+    static BOOL isSoraGame(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
 };
 
 #endif /* GAME_GAME_H */

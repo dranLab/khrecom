@@ -9,6 +9,7 @@ struct RoomInfo;
 class CSceneInfo {
 public:
     static SHORT getCurrentFloorNumber();
+    static BOOL hasReqChangeScene(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
     static INT getCurrentRoomID();
     static RoomInfo* getRoomInfo(INT nRoomID);
     static INT getRoomIndex(INT nRoomID); // PARTIAL: added for Form/Menu/MoogleShop
