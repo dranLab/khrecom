@@ -18,7 +18,9 @@ class CPlayer : public CEntity {
 private:
     UBYTE _m_0x1d0[0x130];       /* 0x1d0 .. 0x2fc */
     PlayerState m_PlayerState;   /* 0x300 */
-    UBYTE _m_0x304[0x1c];        /* 0x304 .. 0x31c */
+    UBYTE _m_0x304[0x10];        /* 0x304 .. 0x310 */
+    UINT m_uiConditionFlag;      /* 0x314 */ // PARTIAL: split out for Game/Gimmick/GimmickWindowLid
+    UBYTE _m_0x318[0x8];         /* 0x318 .. 0x31c */
     INT m_iHP;                   /* 0x320 */
     INT m_iMaxHP;                /* 0x324 */
     UBYTE _m_0x328[0x3f4];       /* 0x328 .. 0x718 */
@@ -33,6 +35,8 @@ public:
     void addHP(INT inHP, INT inFlag, INT inEffect);
     void cancelLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
+    // PARTIAL: added for Game/Gimmick/GimmickWindowLid
+    void setConditionFlag(UINT inSet, UINT inMask) { m_uiConditionFlag = (m_uiConditionFlag | inSet) & ~inMask; }
     HANDLE getLockonHandle() {
         HANDLE handle = m_hLockon;
         if (handle == 0 || handle == -1) handle = m_hTarget;
