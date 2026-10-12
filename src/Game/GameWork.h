@@ -12,6 +12,7 @@ private:
 public:
     static STORAGE::MCWork& progMCW() { return *m_pMCWork; }
     static void setFlag(UINT inKind, UINT inFlag, BOOL inOn); // PARTIAL: added for Game/Gimmick/GimmickSavePoint
+    static INT getInt(UINT inKind, UINT inIndex); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
 };
 
 #endif /* GAME_GAMEWORK_H */
