@@ -6,6 +6,7 @@
 #include "System/Debug.h"
 
 class CCoords;
+class CCoord; // PARTIAL: added for Game/Atel/AtelCamera
 class CTask;
 template <class T> class ISLCManagerT;
 template <class T> class SLContainerT;
@@ -87,10 +88,32 @@ public:
             onOut();
         }
     }
+    CCoord& Crd(UINT nIndex); // PARTIAL: added for Game/Atel/AtelCamera
+    // PARTIAL: added for Game/Atel/AtelCamera
+    void ignorePause(BOOL bFlag) {
+        if (bFlag) {
+            m_nInfo |= 0x80;
+        } else {
+            m_nInfo &= ~0x80;
+        }
+    }
+    void ignorePlaySpeed(BOOL bFlag) {
+        if (bFlag) {
+            m_nInfo |= 0x100;
+        } else {
+            m_nInfo &= ~0x100;
+        }
+    }
 
 protected: // PARTIAL: added for Game/Bullet/BulletManager
     BOOL declareSysTask(UINT nID);
     CTaskSLCList& getChildren() { return m_listChildren; }
+};
+
+// PARTIAL: added for Game/Atel/AtelCamera
+class CTaskSecondary : public CTask {
+public:
+    CTaskSecondary(CTask* pParent, INT nProcPrio);
 };
 
 #endif /* SYSTEM_TASK_H */
