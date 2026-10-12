@@ -4,6 +4,8 @@
 
 #include "khtypes.h"
 
+struct FVECTOR; // PARTIAL: added for Game/Debug/KisEnemy
+
 class CMovement {
 private:
     UBYTE _m_0x00[0x108] __attribute__((aligned(16))); /* 0x000 m_vOldPos .. 0x104 m_WallCollInfoO */
@@ -24,6 +26,10 @@ public:
         else m_uiCollisionFlag &= ~inFlag;
     }
     void enableGravity(BOOL inOn);
+    // PARTIAL: added for Game/Debug/KisEnemy (m_vPos 0x20, m_vRot 0x40, m_vVel 0x70)
+    FVECTOR& getPos() { return *(FVECTOR*)&_m_0x00[0x20]; }
+    FVECTOR& getRot() { return *(FVECTOR*)&_m_0x00[0x40]; }
+    FVECTOR& getVel() { return *(FVECTOR*)&_m_0x00[0x70]; }
 };
 
 #endif /* GAME_MOVEMENT_H */
