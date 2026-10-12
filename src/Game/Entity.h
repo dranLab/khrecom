@@ -9,6 +9,7 @@
 union FVECTOR;
 class CState;
 class CMovement; // PARTIAL: added for Game/Gimmick/GimmickBreakable
+class CAttackMotion; // PARTIAL: added for Game/Gimmick/GimmickToldPipe
 class CModel;    // PARTIAL: added for Game/Gimmick/GimmickPlantChild
 union FMATRIX;   // PARTIAL: added for Game/Gimmick/GimmickWindowLid
 
@@ -40,7 +41,12 @@ protected:
     INT m_iModelCount;            /* 0x088 */
     UBYTE _m_0x8c[0x14];          /* 0x08c m_pNLight .. 0x09c m_nTexAnmNum */
     CMovement* m_pMove;  /* 0x0a0 */
-    UBYTE _m_0xa4[0x3c]; /* 0x0a4 m_pBodyColl .. 0x0d0 m_vRootMoveScale */
+    // PARTIAL: m_pAttack, m_iID split out for Game/Gimmick/GimmickToldPipe
+    UBYTE _m_0xa4[0x4];  /* 0x0a4 m_pBodyColl */
+    CAttackMotion* m_pAttack; /* 0x0a8 */
+    UBYTE _m_0xac[0x10]; /* 0x0ac m_pEffect .. 0x0b8 m_pSEEx */
+    INT m_iID;           /* 0x0bc */
+    UBYTE _m_0xc0[0x20]; /* 0x0c0 m_vTargetPos .. 0x0d0 m_vRootMoveScale */
 private:
     eObjType m_EntityType; /* 0x0e0 */
     UINT m_uiEntityFlag;   /* 0x0e4 */
@@ -78,6 +84,7 @@ public:
     UINT getFlag() { return m_uiEntityFlag; }
     UINT isHeartless() const { return m_uiEntityFlag & 0x20000; } // PARTIAL: added for Game/Bullet/CreateBullet
     // PARTIAL: added for Game/Gimmick/GimmickPlantChild (getModel needs CModel's definition: System/Graphic/Model.h)
+    INT getID() { return m_iID; } // PARTIAL: added for Game/Gimmick/GimmickToldPipe
     INT getModelCount() { return m_iModelCount; }
     inline CModel* getModel();
     inline CModel* getModel(INT inIndex);

@@ -8,6 +8,7 @@
 class CGimmickManager : public CTask {
 public:
     CGimmickManager(CTask* inParent);
+    CTaskSLCList& getChildren() { return CTask::getChildren(); } // PARTIAL: added for Game/Gimmick/GimmickToldPipe
     INT getStorageGimmickState(INT inUniqueID);
     BOOL setStorageGimmickState(INT inUniqueID, BYTE inState);
 };
