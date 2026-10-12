@@ -9,11 +9,14 @@ struct ZONEPARTS;
 union MAPUNITID {
     UINT ui;
     char c[4];
+    /* PARTIAL: added for Game/Gimmick/SampleGimmick - the {"xxxx", NewClass<T>, kind} table initializers
+     * construct the id in place (memset of the table, then the id word loaded from the string literal) */
+    MAPUNITID(const char* inID) { ui = *(UINT*)inID; }
 };
 
 struct MAPUNITTABLE {
     MAPUNITID id;
-    CTask* (*maptable)(CTask*, ZONEPARTS&);
+    CTask* (*maptable)(CTask*, const ZONEPARTS&); // const: NewClass<T>(CTask*, const ZONEPARTS&) (Game/Gimmick/SampleGimmick)
     INT kind;
 };
 
