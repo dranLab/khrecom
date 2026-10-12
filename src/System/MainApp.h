@@ -13,6 +13,9 @@ void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 // PARTIAL: added for System/Movie/Movie
 class CMainApp {
 public:
+    static void initialize(int mode); // PARTIAL: added for main
+    static INT run();
+    static void finalize();
     static void setFpsFull();
     static void setFpsHalf();
     static BOOL isFpsHalf();

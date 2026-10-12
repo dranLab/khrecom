@@ -1,5 +1,6 @@
 #include "khtypes.h"
 #include "System/Debug.h"
+#include "System/MainApp.h"
 
 extern char _end[];
 
@@ -11,13 +12,6 @@ static INT _HEAP_SIZE = 0x2000000 - 0x40000 - _HEAP_START;
 class CHeapMan {
 public:
     static void createHeap(void* base, unsigned int size);
-};
-
-class CMainApp {
-public:
-    static void initialize(int mode);
-    static INT run();
-    static void finalize();
 };
 
 int main(int argc, char** argv) {
