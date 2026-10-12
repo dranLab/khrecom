@@ -440,4 +440,55 @@ typedef struct tagOANM_HEADER { /* 0x18 */
 void debugDpdCheckShapeData(int nShapeNum); /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppDrawShapeX (partMng.h) */
 /* end PARTIAL pppDrawShape */
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/pppPart */
+typedef int sceVu0IVECTOR[4] __attribute__((aligned(16)));
+
+typedef struct _pppPEtcData { /* 0x110 */
+    float afBbox[32];
+    sceVu0FVECTOR vecOffset;
+    sceVu0IVECTOR ivecAngle;
+    sceVu0FVECTOR vecScale;
+    u_char abUseTexture[16];
+    u_char abUseShape[16];
+    u_char abUseRsd[16];
+    u_char abUseVsf[16];
+    int nWorkMemSize;
+    int nPacketMemSize;
+    u_char bViewClipStop;
+    u_char bChrScale;
+    u_char bBindPosOnly;
+    u_char bNonAmbient;
+    u_short ushSeNo;
+    u_short ushSeVolAdd;
+    float fSeWait;
+    int nBoneNo;
+    float fWait;
+    int nRes[1];
+} pppPEtcData;
+
+typedef void (*PPPCALC)();
+typedef void (*PPPDELT)();
+typedef void (*PPPDRAW)();
+typedef void (*PPPINI)();
+typedef void (*PPPSTA)();
+typedef void (*PPPEND)();
+typedef void (*PPPCON)();
+typedef void (*PPPCON2)();
+typedef void (*PPPDES)();
+
+extern sceVu0FVECTOR ppvEye;
+extern BOOL ppvSysStopPartF;
+float sceVu0InnerProduct(sceVu0FVECTOR v0, sceVu0FVECTOR v1);
+BOOL pppStartPart(pppMngSt *mng, long *lpdt, BOOL callInitFuncf);
+void pppInitPdt(long *lpdt, pppProg *progtbl);
+void pppMovePdt(long *lpdt, int offset);
+void pppDeletePObject(pppPObject *pobj);
+void pppAllFreePObject(pppMngSt *mng);
+void pppNormalize(float *v0, float *v1);
+void pppSetMatrix(pppMngSt *mng);
+BOOL pppRunPartExec(pppMngSt *mng);
+BOOL pppRunPart(pppMngSt *mng, BOOL drawf);
+BOOL pppRunPartImpotent(pppMngSt *mng);
+/* end PARTIAL pppPart */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */
