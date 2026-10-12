@@ -6,6 +6,8 @@
 #include "System/Graphic/Anim.h"
 #include "Game/Entity.h"
 
+struct ZONEPARTS;
+
 class CBaseGimmick : public CEntity {
 private:
     UINT m_uiGimmickFlag;       /* 0x1d0 */
@@ -16,10 +18,12 @@ private:
 
 public:
     CBaseGimmick(CTask* inParent);
+    CBaseGimmick(CTask* inParent, const ZONEPARTS& inParts); // PARTIAL: added for Game/Gimmick/SampleGimmick
     virtual ~CBaseGimmick();
     virtual INT getTypeID() const;
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
     virtual BOOL initalize(INT inGroupID, INT inRsrcID, UINT iFlag);
+    INT getParam() { return m_iParam; } // PARTIAL: added for Game/Gimmick/SampleGimmick
     INT getUniqueID() { return m_iUniqueID; }
     // PARTIAL: added for Game/Gimmick/GimmickBreakable
     void setGimmickFlag(UINT inFlag, BOOL inOn) {
