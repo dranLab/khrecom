@@ -5,6 +5,10 @@
 #include "khtypes.h"
 #include "Game/Entity.h"
 
+namespace PlayerCamera {
+class CPlayerCamera; // PARTIAL: added for Game/Player/FriendJack
+}
+
 enum PlayerState {
     INIT = 0,
     START_WAIT = 1,
@@ -16,7 +20,10 @@ enum PlayerState {
 
 class CPlayer : public CEntity {
 private:
-    UBYTE _m_0x1d0[0x130];       /* 0x1d0 .. 0x2fc */
+    // PARTIAL: m_pCam split out for Game/Player/FriendJack
+    UBYTE _m_0x1d0[0x114];       /* 0x1d0 .. 0x2e0 */
+    PlayerCamera::CPlayerCamera* m_pCam; /* 0x2e4 */
+    UBYTE _m_0x2e8[0x18];        /* 0x2e8 .. 0x2fc */
     PlayerState m_PlayerState;   /* 0x300 */
     UBYTE _m_0x304[0x10];        /* 0x304 .. 0x310 */
     UINT m_uiConditionFlag;      /* 0x314 */ // PARTIAL: split out for Game/Gimmick/GimmickWindowLid
@@ -29,6 +36,7 @@ private:
 
 public:
     CPlayer(CTask* inParent);
+    PlayerCamera::CPlayerCamera* getPlayerCamera() { return m_pCam; } // PARTIAL: added for Game/Player/FriendJack
     INT getPlayerState() { return m_PlayerState; }
     INT getHP() { return m_iHP; }
     INT getMaxHP() { return m_iMaxHP; }
