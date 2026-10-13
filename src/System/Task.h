@@ -88,6 +88,7 @@ public:
             onOut();
         }
     }
+    void setPriority(INT pri) { m_nProcPrio = pri; } // PARTIAL: added for System/Graphic/TexCtrl
     CCoord& Crd(UINT nIndex); // PARTIAL: added for Game/Atel/AtelCamera
     // PARTIAL: added for Game/Atel/AtelCamera
     void ignorePause(BOOL bFlag) {
