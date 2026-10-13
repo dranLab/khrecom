@@ -53,7 +53,9 @@ A *unit* is one original object file, named after its source path, e.g. `System/
   the build gives them the original names. `name.123` symbols are function-local statics.
 - **Weak functions at the end of an object are inline functions** defined in a class body (or `inline` in a
   header), emitted in the file that defines the class's first non-inline, non-pure virtual function. A class
-  whose virtuals are all inline or pure has no vtable of its own. Global functions are the `.cpp`'s own.
+  whose virtuals are all inline or pure has no vtable of its own. gcc still emits a weak vtable for it in every
+  object that constructs it; the original linker kept one copy, so the build drops copies outside the object's
+  data from source (`tools/ee_asm_compat.py`): declare such classes normally. Global functions are the `.cpp`'s own.
 - `.rodata` of an object: first the string literals of all inline functions of every included header (in include
   order, used or not - assert/allocation messages like `"...Gprim.h(613)"`), then the constants of the file's
   functions, vtables last. To match it, headers must reproduce those strings, including `__LINE__`.

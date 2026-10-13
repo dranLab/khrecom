@@ -1,1 +1,5 @@
 // Visit https://github.com/ethteck/splat/wiki/Adding-Symbols for documentation about this file
+
+// Weak copies of inline functions whose names the original linker dropped (it kept one global symbol per name):
+// <name>_<ADDR>, like the de-duplicated names in elf_symbol_addrs.txt.
+_$_10CCollision_0022BFD0 = 0x0022BFD0; // type:func size:0x30

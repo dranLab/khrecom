@@ -1,11 +1,8 @@
 #include "Game/Collision/CollUtilA.h"
 #include "System/HeapMan.h"
 
-// CCollision has an inline virtual destructor (vtable _vt$10CCollision, the weak destructor copy at the end of
-// this object). The original linker kept only the first copy of the weak vtable (Game/SEMotion's .rodata), and
-// this object has no .rodata of its own, but gcc emits the vtable here and the build strips non-source .rodata.
-// So the vtable pointer and the destructor are spelled out by hand: same code, no vtable emitted.
-extern char _vt_CCollision[] asm("_vt$10CCollision");
+// CCollision has an inline virtual destructor: its weak copy ends this object. Its weak vtable _vt$10CCollision
+// is not part of this object (the original linker kept Game/SEMotion's copy); the build drops ours.
 
 enum COLL_TYPE {
     COLL_TYPE_NONE = 0,
@@ -41,19 +38,16 @@ public:
     /* 0x64 */ FLOAT m_shiftY;
     /* 0x68 */ COLL_INFO_UNION m_outInfo;
     /* 0x6c */ COLL_INFO_UNION m_outInfoO;
-    /* 0x70 */ void* m_pVtbl;
 
     CCollision() {
         m_Kind = COLL_KIND_PLAYER;
         m_outInfoO.info = 0;
-        m_pVtbl = _vt_CCollision;
         m_outInfo.info = 0;
         m_shiftY = 0.0f;
         m_Radius = 0.0f;
         m_fgStatus = 0;
     }
     CCollision(const CCollision& c) {
-        m_pVtbl = _vt_CCollision;
         m_inWS = c.m_inWS;
         m_inWE = c.m_inWE;
         m_outWE = c.m_outWE;
@@ -68,7 +62,7 @@ public:
         m_outInfo = c.m_outInfo;
         m_outInfoO = c.m_outInfoO;
     }
-    ~CCollision() { m_pVtbl = _vt_CCollision; }
+    virtual ~CCollision() {}
 };
 
 // PARTIAL: from System/Coord.h
@@ -229,11 +223,3 @@ INT CCollUtil::_checkWaterSurface(FVECTOR& inPos) {
     return 0;
 }
 
-// The weak out-of-line copy of CCollision::~CCollision() (_$_10CCollision; the linker dropped this copy's
-// symbol, hence the address name)
-extern "C" void func_0022BFD0(CCollision* coll, int inChrg) {
-    coll->m_pVtbl = _vt_CCollision;
-    if (inChrg & 1) {
-        operator delete(coll);
-    }
-}

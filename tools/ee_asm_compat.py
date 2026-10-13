@@ -10,6 +10,8 @@ Always:
   the original __CTOR_LIST__/__DTOR_LIST__ reference by name.
 - Source paths in string literals (__FILE__ in assert/allocation messages): with --source-root, the
   "src/" prefix becomes the original one (e.g. "c:/KHCOM/MainApp/").
+- Weak data (vtables of classes whose virtual functions are all inline): with --symbols and --own-data, a copy the
+  original object doesn't contain is dropped (see drop_foreign_weak_data).
 
 --assembler gas (mips-linux-gnu-as):
 - cvt.w.s: the EE only truncates, so binutils rejects the instruction for r5900. Emit its encoding.
@@ -28,6 +30,7 @@ Always:
 
 Usage (from configure.py's cc rule):
     ee_asm_compat.py IN.s OUT.s [--assembler gas|snas] [--source src/X.cpp --symbols elf_symbol_addrs.txt]
+                   [--own-data 0xSTART-0xEND,...]
 """
 
 import argparse
@@ -126,6 +129,70 @@ def fix_short_loops(lines: list[str]) -> list[str]:
     return out
 
 
+WEAK = re.compile(r"^\t\.weak\t(\S+)\s*$")
+DATA_SECTION = re.compile(r"^\t\.(?:rdata|data|sdata|bss|sbss)\s*$|^\t\.section\s+\.(?:rodata|data|sdata|bss|sbss)\b")
+OTHER_SECTION = re.compile(r"^\t\.(?:text|section)\b")
+DATA_DIRECTIVE = re.compile(r"^\t\.(?:byte|half|word|dword|float|double|space|ascii|asciz)\b")
+
+
+def symbol_addresses(symbols_path: str, names: set[str]) -> dict[str, int]:
+    addrs = {}
+    with open(symbols_path, encoding="utf-8") as f:
+        for line in f:
+            if (m := re.match(r"^(\S+) = 0x([0-9A-Fa-f]+);", line)) and m.group(1) in names:
+                addrs[m.group(1)] = int(m.group(2), 16)
+    return addrs
+
+
+def drop_foreign_weak_data(lines: list[str], symbols_path: str, own_data: str) -> list[str]:
+    """Remove weak data definitions the original object doesn't contain.
+
+    gcc emits the vtable of a class whose virtual functions are all inline (and other weak data) into every object
+    that needs it. The original linker kept one copy, at the address the symbol file gives; in every other object
+    it is extra data, and in a section that doesn't come from the source (removed by objcopy) a missing symbol. So a
+    weak object whose original address lies outside this object's data from source (own_data: "0xSTART-0xEND,...",
+    or "none") loses its definition and the references resolve to the original copy."""
+    own = [tuple(int(x, 16) for x in r.split("-")) for r in own_data.split(",") if r != "none"]
+    weak = {m.group(1) for line in lines if (m := WEAK.match(line))}
+    if not weak:
+        return lines
+    addrs = symbol_addresses(symbols_path, weak)
+    foreign = {name for name, addr in addrs.items() if not any(lo <= addr < hi for lo, hi in own)}
+    in_data, data_labels = False, set()
+    for line in lines:
+        if DATA_SECTION.match(line):
+            in_data = True
+        elif OTHER_SECTION.match(line):
+            in_data = False
+        elif in_data and line.endswith(":") and line[:-1] in foreign:
+            data_labels.add(line[:-1])
+    if not data_labels:
+        return lines
+    out: list[str] = []
+    dropping = False
+    for line in lines:
+        if dropping:
+            if DATA_DIRECTIVE.match(line):
+                continue
+            dropping = False
+        if (m := WEAK.match(line)) and m.group(1) in data_labels:
+            continue
+        if (m := re.match(r"^\t\.(?:type|size)\t\s*([^,\s]+),", line)) and m.group(1) in data_labels:
+            if line.startswith("\t.type"):  # the object's alignment comes just before it
+                for i in range(len(out) - 1, -1, -1):
+                    if out[i].startswith("\t.align"):
+                        del out[i]
+                        break
+                    if not out[i].lstrip().startswith(".stabs"):
+                        break
+            continue
+        if line.endswith(":") and line[:-1] in data_labels:
+            dropping = True
+            continue
+        out.append(line)
+    return out
+
+
 def original_global(kind: str, source: str, symbols_path: str) -> str | None:
     """The name of gcc's per-file global _GLOBAL_$<kind>$ (N: anonymous namespace, I/D: global
     constructor/destructor) in the original object of this source file."""
@@ -189,6 +256,7 @@ def main() -> None:
     parser.add_argument("--source", help="the compiled source file (for the anonymous namespace name)")
     parser.add_argument("--symbols", help="symbol file with the original names")
     parser.add_argument("--source-root", help='original path prefix for "src/" in string literals')
+    parser.add_argument("--own-data", help='address ranges of the data from source ("0xSTART-0xEND,..." or "none")')
     args = parser.parse_args()
 
     with open(args.input, encoding="latin-1") as f:
@@ -205,6 +273,8 @@ def main() -> None:
 
     lines = []
     source_lines = text.splitlines()
+    if args.symbols and args.own_data:
+        source_lines = drop_foreign_weak_data(source_lines, args.symbols, args.own_data)
     if args.assembler == "snas":
         source_lines = fix_short_loops(source_lines)  # compiled code only: INCLUDE_ASM'd code is inlined below
     for line in source_lines:

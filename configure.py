@@ -82,6 +82,20 @@ def object_fixups(entries: list, compiled: bool) -> str:
     return " ".join(flags)
 
 
+def own_data_ranges(entries: list) -> str:
+    """ee_asm_compat.py's --own-data argument for a compiled object: the address ranges of the data sections that
+    come from its source. Weak data (vtables of classes whose virtual functions are all inline) that lies outside
+    them is dropped: the original linker kept one copy of it, in some other object."""
+    ranges = []
+    for entry in entries:
+        section = TYPE_SECTION.get(entry.segment.type.lstrip("."))
+        start, end = entry.segment.vram_start, entry.segment.vram_end
+        if section in (None, ".text") or section != entry.section_order_type or not start or end is None:
+            continue
+        ranges.append(f"0x{start:X}-0x{end:X}")
+    return ",".join(ranges) or "none"
+
+
 def compiler_commands(compiler: str) -> tuple[str, str | None]:
     """(compiler command, original assembler command or None) for a package in tools/compilers/."""
     cc_dir = ROOT / "tools" / "compilers" / compiler
@@ -262,7 +276,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         # Windows-only tools (SN Systems' ee-gcc 2.95.x) run under wibo.
         cc, snas = compiler_commands(build_cfg["compiler"])
         symbols = f"{cfg_dir}/elf_symbol_addrs.txt"
-        compat_args = f" --source $in --symbols {symbols}" if (ROOT / symbols).exists() else ""
+        compat_args = f" --source $in --symbols {symbols} --own-data $own_data" if (ROOT / symbols).exists() else ""
         if build_cfg.get("source_root"):
             compat_args += f" --source-root {build_cfg['source_root']}"
         if snas:
@@ -311,7 +325,8 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
             suffix = entries[0].src_paths[0].suffix
             align = {"align_flags": object_fixups(entries, compiled=suffix in (".c", ".cpp", ".cc"))}
             if suffix in (".c", ".cpp", ".cc"):  # ee-gcc picks cc1 / cc1plus from the extension
-                n.build(obj, "cc", src, variables=align, implicit=["tools/ee_asm_compat.py"])
+                n.build(obj, "cc", src, variables={**align, "own_data": own_data_ranges(entries)},
+                        implicit=["tools/ee_asm_compat.py"])
                 compiled[entries[0].segment.name] = (obj, src)
             elif suffix == ".s":
                 n.build(obj, "as", src, variables=align)
@@ -344,7 +359,9 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         # the symbol file; in the merged objects they get their original name back, as in compiled objects, so
         # objdiff pairs them.
         exp = f"{build_dir}/expected"
-        dedup = deduplicated_names(ROOT / cfg_dir / "elf_symbol_addrs.txt")
+        # symbol_addrs.txt (by hand) names e.g. weak copies whose names the original linker dropped the same way.
+        dedup = {**deduplicated_names(ROOT / cfg_dir / "elf_symbol_addrs.txt"),
+                 **deduplicated_names(ROOT / cfg_dir / "symbol_addrs.txt")}
         n.rule("merge", f"{CROSS}ld -EL -r -o $out $in && {CROSS}objcopy $renames $out", description="MERGE $out")
         unit_objects = []
         for name, sources in units.items():
