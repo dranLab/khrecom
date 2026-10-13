@@ -12,7 +12,12 @@ class CModel {
 private:
     UBYTE _m_0x00[0x2c]; /* 0x000 CDrawable .. m_ColorScale.z */
     FLOAT m_fAlphaScale; /* 0x02c m_ColorScale.w */
-    UBYTE _m_0x30[0xf0]; /* 0x030 m_nFlag .. 0x120 */
+public:
+    // PARTIAL: m_nFlag split out (public) for Game/Gimmick/GimmickDominoPillar, which sets bit 0x100
+    // directly (an inline CModel setter adds an addiu per model and does not match)
+    SHORT m_nFlag;       /* 0x030 */
+private:
+    UBYTE _m_0x32[0xee]; /* 0x032 m_nPacketSize .. 0x120 */
 
 public:
     FLOAT getAlphaScale() { return m_fAlphaScale; }
