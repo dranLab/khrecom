@@ -4,7 +4,10 @@
 
 #include "khtypes.h"
 
-struct RoomInfo;
+// PARTIAL: getCardID added for Game/Enemy/MapEnemyShadow
+struct RoomInfo {
+    BYTE getCardID() const;
+};
 
 class CSceneInfo {
 public:

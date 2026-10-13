@@ -3,8 +3,9 @@
 #define GAME_MOVEMENT_H
 
 #include "khtypes.h"
+#include "System/Vector.h" // PARTIAL: added for Game/Enemy/MapEnemyShadow (setScale)
 
-union FVECTOR; // PARTIAL: added for Game/Debug/KisEnemy
+class CEntity; // PARTIAL: added for Game/Enemy/MapEnemyShadow
 
 class CMovement {
 private:
@@ -30,6 +31,11 @@ public:
     FVECTOR& getPos() { return *(FVECTOR*)&_m_0x00[0x20]; }
     FVECTOR& getRot() { return *(FVECTOR*)&_m_0x00[0x40]; }
     FVECTOR& getVel() { return *(FVECTOR*)&_m_0x00[0x70]; }
+    // PARTIAL: added for Game/Enemy/MapEnemyShadow (m_vScale 0x60)
+    void setScale(const FVECTOR& inScale) { *(FVECTOR*)&_m_0x00[0x60] = inScale; }
+    void homingY(const CEntity* inTarget, FLOAT inRate);
+    void homingMoveXZ(const FVECTOR& inTarget, FLOAT inRate, FLOAT inSpeed);
+    void homingMoveXZ(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed);
 };
 
 #endif /* GAME_MOVEMENT_H */
