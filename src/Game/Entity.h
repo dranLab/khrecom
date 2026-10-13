@@ -112,6 +112,7 @@ public:
     void setPos(const FVECTOR& inPos); // PARTIAL: added for Game/Gimmick/GimmickHitFlying
     FLOAT calcDistanceXZ(const CEntity* inEntity) const;
     FLOAT calcDistance(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickDeceive
+    FLOAT calcDirection(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickFallTomb
     HANDLE setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale);
     BOOL isRideOnPlayer();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid

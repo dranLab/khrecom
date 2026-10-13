@@ -8,6 +8,7 @@
 
 class CEntity;
 union FVECTOR;
+struct GimParam; // PARTIAL: added for Game/Gimmick/GimmickFallTomb
 
 class CGimmickManager : public CTask {
 public:
@@ -16,6 +17,7 @@ public:
     INT getStorageGimmickState(INT inUniqueID);
     BOOL setStorageGimmickState(INT inUniqueID, BYTE inState);
     INT DecidePrize(INT inGimID, const FVECTOR* inPos, const FVECTOR* inRot, INT inParam); // PARTIAL: added for Game/Gimmick/GimmickHitReturn
+    GimParam* getGimParam(INT inGimID); // PARTIAL: added for Game/Gimmick/GimmickFallTomb
     CEntity* getDoor(DOOR_ID inID, FVECTOR* outPos, FVECTOR* outRot); // PARTIAL: added for Game/Gimmick/GimmickPlantParent
 };
 
