@@ -49,12 +49,20 @@ public:
     virtual C2DSeqObj* addSeqShift(LPCTSTR pSedName, UINT idxSeq, FLOAT fShiftX, FLOAT fShiftY);
     virtual C2DSeqObj* addFntShift(LPCTSTR pSqdName, C2DFnt* p2DFnt, UINT nLayer, FLOAT fShiftX, FLOAT fShiftY);
     virtual C2DSeqObj* addFntShift(LPCTSTR pSqdName, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
+    /* PARTIAL: added for Form/Menu/MonstroGauge - [14]..[19]; signatures from the symbols */
+    virtual C2DSeqObj* replaceSeqShift(UINT nIdx, LPCTSTR pSedName, UINT idxSeq, UINT nLayer, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* replaceSeqShift(UINT nIdx, LPCTSTR pSedName, UINT idxSeq, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* replaceFntShift(UINT nIdx, LPCTSTR pSqdName, UINT nLayer, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* replaceFntShift(UINT nIdx, LPCTSTR pSqdName, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* shiftSeqPos(UINT nIdx, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* setFntPos(UINT nIdx, FLOAT fX, FLOAT fY);
     void setLocalPos(FVECTOR& vPos);
     void setPos(FVECTOR& vPos);                               /* PARTIAL: added for Form/Menu/GameOver */
     BOOL isEnd(UINT nIdx);                                    /* PARTIAL: added for Form/Menu/GameOver */
     void setLayer(INT nLayer) { m_nLayer = nLayer; }          /* PARTIAL: added for Form/Menu/GameOver */
     void enableDisp(INT nIdx, BOOL bEnable);                  /* PARTIAL: added for Form/SystemMessage */
     void changeLayer(INT nLayer);                             /* PARTIAL: added for Form/SystemMessage */
+    void changeTime(UINT nIdx, UINT qTime);                  /* PARTIAL: added for Form/Menu/MonstroGauge */
     void enableColorCtrl(BOOL bEnable) { m_seqControl.fgColor = bEnable; } /* PARTIAL: added for Form/SystemMessage */
 };
 
