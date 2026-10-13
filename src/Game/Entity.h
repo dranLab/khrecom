@@ -134,6 +134,7 @@ public:
     void setRot(const FVECTOR& inRot);
     void setScale(const FVECTOR& inScale);
     const FVECTOR& getRot();
+    const FVECTOR& getRot() const; // PARTIAL: added for Game/Gimmick/GimmickPlantParent
     const FVECTOR& getScale() const;
     void updateCoord();
     void coordFix();
