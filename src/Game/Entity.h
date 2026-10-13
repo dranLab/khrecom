@@ -108,6 +108,7 @@ public:
     void setCheckEyeOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiCheckEyeOffFlag; f = (f | inSet) & ~inMask; }
     // PARTIAL: added for Game/Gimmick/GimmickSavePoint
     const FVECTOR& getPos() const;
+    void setPos(const FVECTOR& inPos); // PARTIAL: added for Game/Gimmick/GimmickHitFlying
     FLOAT calcDistanceXZ(const CEntity* inEntity) const;
     HANDLE setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale);
     BOOL isRideOnPlayer();
