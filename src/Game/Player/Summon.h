@@ -81,6 +81,9 @@ protected:
     virtual void stateExit();
     virtual void endStateExit();
     void homingPlayerTargetY(HANDLE inTarget, FLOAT inRate);
+    void homingPlayerTargetXZ(HANDLE inTarget, FLOAT inRate); // PARTIAL: added for Game/Player/SummonSinba
+    void turnPlayerTargetY(HANDLE inTarget, FLOAT inRate);    // PARTIAL: added for Game/Player/SummonSinba
+    void changeCamera(HANDLE inTarget, INT inMode, INT inReset); // PARTIAL: added for Game/Player/SummonSinba
     INT getPower(INT inSkillID, INT inKind);
 public:
     void setExit(INT inFlag);

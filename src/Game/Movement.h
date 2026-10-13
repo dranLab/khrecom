@@ -6,6 +6,7 @@
 #include "System/Vector.h" // PARTIAL: added for Game/Enemy/MapEnemyShadow (setScale)
 
 class CEntity; // PARTIAL: added for Game/Enemy/MapEnemyShadow
+class CCollMap; // PARTIAL: added for Game/Player/SummonSinba
 
 class CMovement {
 private:
@@ -13,7 +14,9 @@ private:
     UINT m_uiFlag;              /* 0x108 */
     UINT m_uiOldCollisionFlag;  /* 0x10c */
     UINT m_uiCollisionFlag;     /* 0x110 */
-    UBYTE _m_0x114[0x4c];       /* 0x114 m_fMass .. 0x150 m_vLastHitPos */
+    UBYTE _m_0x114[0x30];       /* 0x114 m_fMass .. 0x140 m_pOwner */
+    CCollMap* m_pMapCollision;  /* 0x144 */ // PARTIAL: added for Game/Player/SummonSinba
+    UBYTE _m_0x148[0x18];       /* 0x148 .. 0x150 m_vLastHitPos */
 
 public:
     virtual ~CMovement();       /* 0x160 */
@@ -38,6 +41,7 @@ public:
     void homingMoveXZ(const FVECTOR& inTarget, FLOAT inRate, FLOAT inSpeed);
     void homingMoveXZ(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed);
     void calcVelocityXZ(FLOAT inSpeed); // PARTIAL: added for Game/Player/SummonDumbo
+    CCollMap* getMapCollision() { return m_pMapCollision; } // PARTIAL: added for Game/Player/SummonSinba
 };
 
 // PARTIAL: added for Game/Player/SummonDumbo
