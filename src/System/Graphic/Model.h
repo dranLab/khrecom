@@ -17,6 +17,7 @@ private:
 public:
     FLOAT getAlphaScale() { return m_fAlphaScale; }
     void setAlphaScale(FLOAT inScale);
+    void changeTexture(const CHAR* inSrc, const CHAR* inDst); // PARTIAL: added for Game/Enemy/MapEnemyShadow
 };
 
 #ifdef GAME_ENTITY_H

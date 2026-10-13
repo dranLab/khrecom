@@ -8,6 +8,7 @@
 namespace Math3D {
 FLOAT LimitPI(FLOAT inRad);
 void LimitPIVector(FVECTOR& pai);
+void VectorLerp(FVECTOR& outResult, const FVECTOR& inP1, const FVECTOR& inP2, FLOAT inT); // PARTIAL: added for Game/Enemy/MapEnemyShadow
 }
 
 #endif /* SYSTEM_MATH3D_H */

@@ -121,6 +121,12 @@ public:
     TIMEQ getTimer() { return m_tqTimer; }
     void rideModelSetChipLocalMatrix(INT inIndex, const FMATRIX* in_pMatrix);
     void rideModelSetAttachMatrix(const FMATRIX* inpMat); // PARTIAL: added for Game/Gimmick/GimmickRideOn
+    // PARTIAL: added for Game/Enemy/MapEnemyShadow
+    FLOAT calcDistanceSq(const CEntity* inEntity) const;
+    TIMEQ getMotionTotalTime() const;
+    BOOL arriveTarget(const FVECTOR& inTarget, FLOAT inRange);
+    void clearSpeed();
+    void warp(const FVECTOR& inPos);
 };
 
 #endif /* GAME_ENTITY_H */
