@@ -11,9 +11,16 @@
 class CCoord {
 public:
     FMATRIX m_Local;
-    UBYTE _pad40[0x50];  // PARTIAL: added for Game/Gimmick/GimmickBell (0x40..0x8f not needed yet)
+    // PARTIAL: 0x40..0x8f split for Game/Gimmick/GimmickFountain
+    TIMEQ m_FixTimestamp;   /* 0x40 */
+    INT m_Flag;             /* 0x44 */
+    TIMEQ m_WorldTimestamp; /* 0x48 */
+    CCoord* m_pParent;      /* 0x4c */
+    UBYTE _pad50[0x40];     /* 0x50 m_Rot */
     FMATRIX m_World;     /* 0x90 */
     FMATRIX& getWorldMatrix() { return m_World; } // PARTIAL: added for Game/Gimmick/GimmickBell
+    FMATRIX& getLocalMatrix() { return m_Local; } // PARTIAL: added for Game/Gimmick/GimmickFountain
+    CCoord* getParent() { return m_pParent; }     // PARTIAL: added for Game/Gimmick/GimmickFountain
 };
 
 class CCamera : public CTaskSecondary {
