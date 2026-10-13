@@ -15,12 +15,13 @@ struct PCAM_DATA {
     FVECTOR vAim;
 };
 
+namespace PlayerCamera {
+
+// PARTIAL: moved into namespace PlayerCamera for Game/Player/SummonMushu (mangled Q212PlayerCamera10BCAM_PARAM)
 struct BCAM_PARAM {
     PCAM_DATA Normal;
     PCAM_DATA Lockon;
 };
-
-namespace PlayerCamera {
 
 class CPlayerCamera {
 private:
@@ -34,8 +35,13 @@ public:
     }
     void changeNowPlayer(HANDLE inPlayer, HANDLE inTarget);
     void changeCamMode(INT inMode, INT inReset);
+    // PARTIAL: added for Game/Player/SummonMushu
+    static void setBattleCamData(HANDLE inHandle, const BCAM_PARAM* inParam);
+    static void getBattleCamData(BCAM_PARAM& outParam);
 };
 
 } // namespace PlayerCamera
+
+using PlayerCamera::BCAM_PARAM;
 
 #endif /* GAME_PLAYER_PLAYERCAMERA_H */

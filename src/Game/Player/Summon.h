@@ -85,6 +85,10 @@ protected:
     void turnPlayerTargetY(HANDLE inTarget, FLOAT inRate);    // PARTIAL: added for Game/Player/SummonSinba
     void changeCamera(HANDLE inTarget, INT inMode, INT inReset); // PARTIAL: added for Game/Player/SummonSinba
     INT getPower(INT inSkillID, INT inKind);
+    // PARTIAL: added for Game/Player/SummonMushu
+    void getWeaponTopPos(FVECTOR& inPos);
+    void setLockon(HANDLE inHandle);
+    void setPushon(INT inFlag);
 public:
     void setExit(INT inFlag);
     virtual INT setSkill(INT inID);

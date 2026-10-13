@@ -5,12 +5,62 @@
 #include "khtypes.h"
 #include "System/Graphic/Gprim.h" // PARTIAL: moved here from Game/Entity.h for Game/Gimmick/GimmickHitMore
 #include "Game/Entity.h"
+#include "System/Vector.h" // PARTIAL: added for Game/Player/SummonMushu (BULLET_PARAM)
+
+// PARTIAL: completed for Game/Player/SummonMushu
+struct BULLET_EFFECT_INFO {
+    CHAR* pEffectName;
+    INT iNo;
+    INT iFile;
+    INT iID;
+};
+
+struct BULLET_EFFECT_SHADOW_INFO {
+    CHAR* pEffectName;
+    INT iNo;
+};
 
 struct BULLET_PARAM {
-    INT iBulletID;
-    INT iGroupID;
-    INT iMemberID;
-    /* ... (rest not needed yet) */
+    INT iBulletID;          /* 0x00 */
+    INT iGroupID;           /* 0x04 */
+    INT iMemberID;          /* 0x08 */
+    INT CollKind;           /* 0x0c COLL_KIND */
+    FVECTOR vPos;           /* 0x10 */
+    FVECTOR vRot;           /* 0x20 */
+    FLOAT fSpeed;           /* 0x30 */
+    FLOAT fMaxDist;         /* 0x34 */
+    TIMEQ tqExplodeTime;    /* 0x38 */
+    TIMEQ tqHomingTime;     /* 0x3c */
+    TIMEQ tqHomingTime2;    /* 0x40 */
+    HANDLE hHomingTarget;   /* 0x44 */
+    FLOAT fHomingRadius;    /* 0x48 */
+    FLOAT fHomingRate;      /* 0x4c */
+    FVECTOR vHomingPos;     /* 0x50 */
+    ULONGLONG uiFlag;       /* 0x60 */
+    INT AtkKind;            /* 0x68 ATK_KIND */
+    INT AtkAttr;            /* 0x6c ATK_ATTR */
+    INT iAttackPoint;       /* 0x70 */
+    UINT uiAttackID;        /* 0x74 */
+    FLOAT fCollRadius;      /* 0x78 */
+    FLOAT fShiftY;          /* 0x7c */
+    INT CollType;           /* 0x80 COLL_TYPE */
+    FLOAT fChangeRadius;    /* 0x84 */
+    FLOAT fCollOffsetY;     /* 0x88 */
+    TIMEQ tqCollAtkTime;    /* 0x8c */
+    FLOAT fScale;           /* 0x90 */
+    TIMEQ tqFadeTime;       /* 0x94 */
+    HANDLE hBoundTarget;    /* 0x98 */
+    INT iBoundCount;        /* 0x9c */
+    FLOAT fEffectBulletSkipFrame; /* 0xa0 */
+    BULLET_EFFECT_INFO* pEffectTbl;        /* 0xa4 */
+    FVECTOR* pOffsetTbl;                   /* 0xa8 */
+    FVECTOR* pRotTbl;                      /* 0xac */
+    INT iExtraEffectNum;                   /* 0xb0 */
+    BULLET_EFFECT_INFO* pExtraEffectTbl;   /* 0xb4 */
+    BULLET_EFFECT_INFO* pExplodeEffectTbl; /* 0xb8 */
+    BULLET_EFFECT_SHADOW_INFO* pShadow;    /* 0xbc */
+
+    void init(INT inBulletID, INT inGroupID);
 };
 
 class CBullet : public CEntity {

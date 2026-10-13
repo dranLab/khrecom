@@ -116,6 +116,7 @@ public:
     FLOAT calcDistanceXZ(const CEntity* inEntity) const;
     FLOAT calcDistance(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickDeceive
     FLOAT calcDirection(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickFallTomb
+    void calcDirection(FVECTOR& outRot, const FVECTOR& inPos) const; // PARTIAL: added for Game/Player/SummonMushu
     HANDLE setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale);
     BOOL isRideOnPlayer();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
