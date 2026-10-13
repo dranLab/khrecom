@@ -3,12 +3,13 @@
 #define SYSTEM_GRAPHIC_2D_2DSEQCTRL_H
 
 #include "khtypes.h"
-
-union FVECTOR;
+#include "System/Vector.h"
 
 /* PARTIAL: added for Form/SystemMessage */
 struct SeqControl {
-    u_long128 _m_0x000[0x120 / 16]; /* 0x000 matrix ... vCol */
+    u_long128 _m_0x000[0xe0 / 16];  /* 0x000 matrix ... controlColor */
+    FVECTOR vPos;                   /* 0x0e0 PARTIAL: added for Form/Menu/MenuParts */
+    u_long128 _m_0x0f0[3];          /* 0x0f0 vRot, vScl, vCol */
     SeqControl* pParentSeqControl;  /* 0x120 */
     CHAR fgColor;                   /* 0x124 */
     CHAR fgBilinear;                /* 0x125 */
@@ -22,7 +23,7 @@ class C2DSeqObj;
 class C2DFnt;
 
 class C2DSeqCtrl {
-protected:
+public: /* PARTIAL: public as in the debug info - Form/Menu/MenuParts reads m_seqControl.vPos */
     SeqControl m_seqControl;  /* 0x000 */
 private:
     CHAR m_bitEnable;      /* 0x130 */
@@ -63,6 +64,9 @@ public:
     void enableDisp(INT nIdx, BOOL bEnable);                  /* PARTIAL: added for Form/SystemMessage */
     void changeLayer(INT nLayer);                             /* PARTIAL: added for Form/SystemMessage */
     void changeTime(UINT nIdx, UINT qTime);                  /* PARTIAL: added for Form/Menu/MonstroGauge */
+    void enableDisp(BOOL bEnable);                            /* PARTIAL: added for Form/Menu/MenuParts */
+    void setScl(FVECTOR& vScl);                               /* PARTIAL: added for Form/Menu/MenuParts */
+    void setParent(C2DSeqCtrl* pParent);                      /* PARTIAL: added for Form/Menu/MenuParts */
     void enableColorCtrl(BOOL bEnable) { m_seqControl.fgColor = bEnable; } /* PARTIAL: added for Form/SystemMessage */
 };
 
