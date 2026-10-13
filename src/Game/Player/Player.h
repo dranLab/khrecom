@@ -66,7 +66,8 @@ private:
     PlayerState m_PlayerState;   /* 0x300 */
     UBYTE _m_0x304[0x10];        /* 0x304 .. 0x310 */
     UINT m_uiConditionFlag;      /* 0x314 */ // PARTIAL: split out for Game/Gimmick/GimmickWindowLid
-    UBYTE _m_0x318[0x8];         /* 0x318 .. 0x31c */
+    UINT m_uiTrgFlag;            /* 0x318 */ // PARTIAL: split out for Game/Player/SummonMushu
+    UINT m_uiBattleFlag;         /* 0x31c */
     INT m_iHP;                   /* 0x320 */
     INT m_iMaxHP;                /* 0x324 */
     // PARTIAL: m_uiAttackID split out for Game/Player/FriendKing
@@ -92,6 +93,7 @@ public:
     INT isConditionFlag(UINT inFlag) { return m_uiConditionFlag & inFlag; }
     UINT getAttackID() { return m_uiAttackID; }
     void setCure(INT inID, INT inPow);
+    INT isBattleFlag(UINT inFlag) { return m_uiBattleFlag & inFlag; } // PARTIAL: added for Game/Player/SummonMushu
     HANDLE getLockonHandle() {
         HANDLE handle = m_hLockon;
         if (handle == 0 || handle == -1) handle = m_hTarget;
