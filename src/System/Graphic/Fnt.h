@@ -35,6 +35,13 @@ public:
            INT nInZ);
     CFntM2();
     virtual ~CFntM2();
+    /* PARTIAL: added for Form/Menu/MenuParts */
+    void allocText(const CHAR* pText);
+    LPCSTR getText() { return m_pText; }
+    void setSpace(SHORT x, SHORT y) {
+        m_Space.x = x;
+        m_Space.y = y;
+    }
     virtual INT getSize(G_XY& outSize, G_XY* pLineSize, INT* pNumCharcter) const;
     virtual UINT getPacketSize() const;
 private:
