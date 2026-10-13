@@ -60,7 +60,10 @@ private:
     UINT m_uiDispOffFlag;     /* 0x0e8 */
     UINT m_uiCheckEyeOffFlag; /* 0x0ec */
     TIMEQ m_tqTimer;       /* 0x0f0 */
-    UBYTE _m_0xf4[0xdc];   /* 0x0f4 m_iFlashingCounter .. 0x1c4 m_pDamageString */
+    // PARTIAL: m_iFlashingCounter/m_fNearTranslucence split out for Game/Gimmick/GimmickDominoPillar
+    INT m_iFlashingCounter;    /* 0x0f4 */
+    FLOAT m_fNearTranslucence; /* 0x0f8 */
+    UBYTE _m_0xfc[0xd4];   /* 0x0fc m_fSpeed .. 0x1c4 m_pDamageString */
 
 public:
     CEntity(CTask* inParent);
@@ -147,6 +150,9 @@ public:
     void userBodyCollOff(INT inIndex);
     void userBodyCollOffBody(INT inIndex);
     HANDLE setAppearEffect();
+    // PARTIAL: added for Game/Gimmick/GimmickDominoPillar
+    void setNearTranslucence(FLOAT inTrans) { m_fNearTranslucence = inTrans; }
+    FLOAT getNearTranslucence() const { return m_fNearTranslucence; }
 };
 
 #endif /* GAME_ENTITY_H */
