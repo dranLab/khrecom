@@ -10,6 +10,9 @@ public:
     CGame();
     static BOOL reqSave();
     static BOOL isSoraGame(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
+    static void enablePause(BOOL bEnable); // PARTIAL: added for Form/Menu/GameOver
+    static BOOL reqContinue_GameOver();    // PARTIAL: added for Form/Menu/GameOver
+    static BOOL reqExit_GameOver();        // PARTIAL: added for Form/Menu/GameOver
 };
 
 #endif /* GAME_GAME_H */

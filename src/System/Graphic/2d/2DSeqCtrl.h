@@ -50,6 +50,9 @@ public:
     virtual C2DSeqObj* addFntShift(LPCTSTR pSqdName, C2DFnt* p2DFnt, UINT nLayer, FLOAT fShiftX, FLOAT fShiftY);
     virtual C2DSeqObj* addFntShift(LPCTSTR pSqdName, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
     void setLocalPos(FVECTOR& vPos);
+    void setPos(FVECTOR& vPos);                               /* PARTIAL: added for Form/Menu/GameOver */
+    BOOL isEnd(UINT nIdx);                                    /* PARTIAL: added for Form/Menu/GameOver */
+    void setLayer(INT nLayer) { m_nLayer = nLayer; }          /* PARTIAL: added for Form/Menu/GameOver */
     void enableDisp(INT nIdx, BOOL bEnable);                  /* PARTIAL: added for Form/SystemMessage */
     void changeLayer(INT nLayer);                             /* PARTIAL: added for Form/SystemMessage */
     void enableColorCtrl(BOOL bEnable) { m_seqControl.fgColor = bEnable; } /* PARTIAL: added for Form/SystemMessage */
