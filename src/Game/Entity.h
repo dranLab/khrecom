@@ -158,6 +158,9 @@ public:
     UINT isTargetMoveXZ() const { return m_uiEntityFlag & 0x40; }
     BOOL startTargetMoveXZ(const FVECTOR& inPos, FLOAT inSpeed, FLOAT inAccel, FLOAT inRange);
     void endTargetMoveXZ();
+    // PARTIAL: added for Game/Player/FriendPan
+    FLOAT calcDirection(const FVECTOR& inPos) const;
+    void setAnimSpeed(FLOAT inSpeed);
 };
 
 #endif /* GAME_ENTITY_H */

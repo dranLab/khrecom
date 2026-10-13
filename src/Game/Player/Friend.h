@@ -84,6 +84,8 @@ protected:
     void setMagic(INT inID); // added for Game/Player/FriendJack
     void changeCamera(HANDLE inTarget, INT inMode, INT inReset);
     void calcCirclePos(FVECTOR& outPos, FLOAT inDist, FLOAT inRot); // PARTIAL: added for Game/Player/FriendPluto
+    void setLockon(HANDLE inHandle); // PARTIAL: added for Game/Player/FriendPan
+    void setPushon(INT inFlag);      // PARTIAL: added for Game/Player/FriendPan
 public:
     void setExit(INT inFlag);
     virtual INT setSkill(INT inID);

@@ -41,6 +41,9 @@ public:
     void homingMoveXZ(const FVECTOR& inTarget, FLOAT inRate, FLOAT inSpeed);
     void homingMoveXZ(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed);
     void calcVelocityXZ(FLOAT inSpeed); // PARTIAL: added for Game/Player/SummonDumbo
+    // PARTIAL: added for Game/Player/FriendPan
+    void homing(const CEntity* inTarget, FLOAT inRate);
+    void calcVelocity(FLOAT inSpeed);
     CCollMap* getMapCollision() { return m_pMapCollision; } // PARTIAL: added for Game/Player/SummonSinba
 };
 
