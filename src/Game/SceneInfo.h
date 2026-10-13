@@ -44,6 +44,7 @@ public:
     static SHORT getCurrentSceneNum(); // PARTIAL: added for Game/Gimmick/GimmickRideOn
     static void clear(); // PARTIAL: added for System/RootTask
     static void dispose();
+    static BOOL reqEnterBattle(SHORT inID); // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy
 };
 
 #endif /* GAME_SCENEINFO_H */
