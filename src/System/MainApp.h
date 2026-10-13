@@ -27,6 +27,9 @@ public:
     static void setFpsHalf();
     static BOOL isFpsHalf();
     static BOOL isPAL();
+    static void enableSoftReset(BOOL bEnable); // PARTIAL: added for System/RootTask
+    static BOOL isSkipLogo();
+    static void enableWarningPause(BOOL bEnable);
 };
 #endif
 
