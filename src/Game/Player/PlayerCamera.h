@@ -3,6 +3,22 @@
 #define GAME_PLAYER_PLAYERCAMERA_H
 
 #include "khtypes.h"
+#include "System/Vector.h" // PARTIAL: added for Game/Player/FriendKing
+
+// PARTIAL: added for Game/Player/FriendKing
+struct PCAM_DATA {
+    FLOAT fViewAngle;
+    FLOAT fSize;
+    FLOAT fAdjust;
+    FLOAT fDistance;
+    FVECTOR vEye;
+    FVECTOR vAim;
+};
+
+struct BCAM_PARAM {
+    PCAM_DATA Normal;
+    PCAM_DATA Lockon;
+};
 
 namespace PlayerCamera {
 

@@ -44,6 +44,12 @@ class CCardBattle {
 public:
     static void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inUpKind);
 };
+
+// PARTIAL: added for Game/Player/FriendKing
+class CCardRevolver {
+public:
+    void setAction(INT inAction, INT inParam);
+};
 }
 
 #endif /* GAME_CARDBATTLE_H */
