@@ -4,6 +4,8 @@
 
 #include "khtypes.h"
 #include "System/MainApp.h"
+#include "Game/CollParam.h"     // PARTIAL: added for Game/Player/SummonDumbo (ATK_KIND)
+#include "Game/AttackMotion.h" // PARTIAL: added for Game/Player/SummonDumbo (ATK_ATTR)
 
 /* Placeholder for the original header's inline function asserting inUser: its strings
  * ("Game/CardBattle.h", "inUser") are in .rodata of every includer. The line number is not known. */
@@ -22,8 +24,26 @@ struct BC_PARAM {
     LPCSTR EFF_NAME;
 };
 
+// PARTIAL: added for Game/Player/SummonDumbo
+struct SS_PARAM {
+    unsigned short POWER[4];
+    BYTE DUMMY;
+    BYTE CATEGORY;
+    BYTE ATTR;
+    BYTE UP_TYPE0 : 4;
+    BYTE UP_TYPE1 : 4;
+    LPCSTR NAME;
+};
+
 namespace CardBattle {
 extern BC_PARAM* g_pBattleCardList;
+extern SS_PARAM* g_pStockSkillList; // PARTIAL: added for Game/Player/SummonDumbo
+
+// PARTIAL: added for Game/Player/SummonDumbo
+class CCardBattle {
+public:
+    static void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inUpKind);
+};
 }
 
 #endif /* GAME_CARDBATTLE_H */
