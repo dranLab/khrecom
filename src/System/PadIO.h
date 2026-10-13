@@ -16,6 +16,7 @@ public:
     static INT getAnalogRY(UINT nPad = 0);
     static INT getAnalogLX(UINT nPad = 0);
     static INT getAnalogLY(UINT nPad = 0);
+    static BOOL isConnected(UINT nPad); // PARTIAL: added for System/RootTask
 };
 
 #endif // SYSTEM_PADIO_H
