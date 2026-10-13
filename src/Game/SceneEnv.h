@@ -26,9 +26,11 @@ enum eObjBit {
     OBJ_BIT_CAMERA = 32768,
     OBJ_BIT_2D = 65536,
     OBJ_BIT_ENCOUNT = 1073741824,
-    OBJ_BIT_STILL_SCR = -2147483647 - 1,
+    /* PARTIAL: Form/Menu/Pause - the enum is 8 bytes (0x80000000 and -1 together need a 64-bit type):
+       0x80000000 and 0xFFFEFFFF are positive (the debug info prints them truncated to 32 bits) */
+    OBJ_BIT_STILL_SCR = 0x80000000L,
     OBJ_BIT_DOOR = 1920,
-    OBJ_BIT_ALL = -65537,
+    OBJ_BIT_ALL = 0xFFFEFFFFL,
     OBJ_BIT_TRUE_ALL = -1
 };
 } // namespace ObjType
@@ -36,6 +38,7 @@ enum eObjBit {
 class CSceneEnv {
 public:
     static void setStop(ObjType::eObjBit inBit);
+    static ObjType::eObjBit getStopAndRequestTypeBit(); // PARTIAL: added for Form/Menu/Pause
 };
 
 #endif /* GAME_SCENEENV_H */

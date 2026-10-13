@@ -17,6 +17,8 @@ public:
     static INT getAnalogLX(UINT nPad = 0);
     static INT getAnalogLY(UINT nPad = 0);
     static BOOL isConnected(UINT nPad); // PARTIAL: added for System/RootTask
+    static void suspendVibration(); // PARTIAL: added for Form/Menu/Pause
+    static void resumeVibration();  // PARTIAL: added for Form/Menu/Pause
 };
 
 #endif // SYSTEM_PADIO_H
