@@ -13,6 +13,7 @@ public:
     static INT getCurrentRoomID();
     static RoomInfo* getRoomInfo(INT nRoomID);
     static INT getRoomIndex(INT nRoomID); // PARTIAL: added for Form/Menu/MoogleShop
+    static SHORT getCurrentSceneNum(); // PARTIAL: added for Game/Gimmick/GimmickRideOn
 };
 
 #endif /* GAME_SCENEINFO_H */
