@@ -90,6 +90,7 @@ public:
     void bodyCollOff(INT inKind); // PARTIAL: added for Game/Gimmick/GimmickStatue
     void rideModelEnableAllCollision(BOOL inEnable);
     void rideModelChangeListR2();
+    void rideModelChangeListRC(); // PARTIAL: added for Game/Gimmick/GimmickRideDest
 
     void setEntityType(eObjType inType) { m_EntityType = inType; }
     eObjType getEntityType() { return m_EntityType; }
