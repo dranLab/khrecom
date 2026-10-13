@@ -38,6 +38,24 @@ struct G_RGBA {
         UINT c;
         unsigned char v[4];
     };
+    // PARTIAL: added for Game/NowLoading (the original has constructors; a union member here can't)
+    void set(UBYTE _r, UBYTE _g, UBYTE _b, UBYTE _a) {
+        r = _r;
+        g = _g;
+        b = _b;
+        a = _a;
+    }
+};
+
+// PARTIAL: added for Game/NowLoading
+struct G_UV {
+    USHORT u;
+    USHORT v;
+
+    void set(USHORT _u, USHORT _v) {
+        u = _u;
+        v = _v;
+    }
 };
 
 union G_LAYER {
@@ -77,6 +95,15 @@ protected:
     UINT m_nTestFlag;
     G_LAYER m_LayerInfo;
 public:
+    // PARTIAL: added for Game/NowLoading
+    CDrawable() {}
+    void setTestFlag(UINT nFlag) { m_nTestFlag = nFlag; }
+    void setLayer(USHORT nID, USHORT nDepth) {
+        m_LayerInfo._nID = nID;
+        m_LayerInfo._nDepth = nDepth;
+    }
+    void setLayerFG(USHORT nDepth) { setLayer(3, nDepth); }
+    void setSemiTrans(ALPHA nInAlpha) { m_nAlphaMode = nInAlpha; }
     virtual void disp();
     virtual UINT getPacketSize() const;
 private:
@@ -86,7 +113,23 @@ private:
 class CGPrim : public CDrawable {
 protected:
     UINT m_nAttribute;
+    // PARTIAL: added for Game/NowLoading
+    void initAttribute(UINT nABE, UINT nIIP, UINT nBackClip) {
+        m_nAttribute = nABE | (nIIP << 1) | (nBackClip << 2);
+    }
 public:
+    CGPrim() {
+        initAttribute(0, 1, 0);
+        setTestFlag(0x5000D);
+        m_iFlag = 0;
+        m_nZ = 0;
+        m_nAlphaMode = 0;
+        setLayer(0, 0);
+    }
+    void setSemiTrans(ALPHA nInAlpha) {
+        CDrawable::setSemiTrans(nInAlpha);
+        m_nAttribute |= 1;
+    }
     virtual ~CGPrim();
     virtual void disp();
     virtual FIX4 calcZ();
@@ -96,6 +139,8 @@ class CGTexPrim : public CGPrim {
 protected:
     struct TexInfo* m_pTexInfo;
 public:
+    CGTexPrim() { m_pTexInfo = 0; } // PARTIAL: added for Game/NowLoading
+    void setTPage(struct TexInfo* pInInfo) { m_pTexInfo = pInInfo; }
     virtual ~CGTexPrim();
     virtual UINT getPacketSize() const;
 };
@@ -142,6 +187,35 @@ public:
         if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
     }
     void remove();
+};
+
+// PARTIAL: added for Game/NowLoading
+class CSprt : public CGTexPrim {
+public:
+    G_XYZ m_P0;
+    G_XYZ m_P1;
+    G_RGBA m_C0;
+    G_UV m_T0;
+    G_UV m_T1;
+
+    CSprt() { m_C0.set(0x80, 0x80, 0x80, 0x80); }
+    virtual ~CSprt();
+    void setXY(FIX4 x, FIX4 y) {
+        m_P0.x = x;
+        m_P0.y = y;
+    }
+    void setUVWH(USHORT u, USHORT v, USHORT w, USHORT h) {
+        FIX4 _x = w << 4;
+        FIX4 _y = h << 4;
+        m_P1.x = m_P0.x + _x;
+        m_P1.y = m_P0.y + _y;
+        m_T0.set(u, v);
+        m_T1.set(u + w, v + h);
+    }
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
 };
 
 #endif /* SYSTEM_GRAPHIC_GPRIM_H */
