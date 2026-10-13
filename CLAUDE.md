@@ -72,4 +72,7 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 - objdiff's data percentages can be below 100% for matching data (`func_0` relocations on zero words, padding
   before the next object). The checksum in `tools/check.sh` is what counts.
 - WSL wipes `/tmp` when idle: keep scratch files in `build/`.
+- VU0 inline asm: splat's `.s` (rabbitizer) and objdump print `vadda`/`vmsuba` with the two source operands
+  swapped (`fs` and `ft` reversed, unlike every other VU0 instruction). Ps2EeAs follows Sony's syntax, `fs` first, so swap
+  them back when writing the source: the disassembly's `vadda.xyz $ACC, $vf0, $vf2` is `vadda.xyz $ACC, $vf2, $vf0`.
 - Don't run `tools/split_objects.py` or change `configure.py`/`tools/` in a decompilation task.
