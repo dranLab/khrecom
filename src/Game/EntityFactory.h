@@ -27,6 +27,7 @@ public:
     CEntity* createBullet(const BULLET_PARAM& inParam, CTask* inParent);
     static CEntityFactory* getInstance();                                // PARTIAL: added for Game/Player/FriendAladdin
     CEntity* createPrize(const PRIZE_PARAM& inParam, CTask* inParent); // PARTIAL: added for Game/Player/FriendAladdin
+    CEntity* createEntity(INT inKind, INT inID, CTask* inParent, void* inExtraInfo); // PARTIAL: added for Game/Gimmick/GimmickDeceive
 };
 
 #endif /* GAME_ENTITYFACTORY_H */
