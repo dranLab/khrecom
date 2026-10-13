@@ -56,7 +56,9 @@ private:
     eObjType m_EntityType; /* 0x0e0 */
     UINT m_uiEntityFlag;   /* 0x0e4 */
     // PARTIAL: m_tqTimer split out for Game/Player/FriendJack
-    UBYTE _m_0xe8[0x8];    /* 0x0e8 m_uiDispOffFlag, m_uiCheckEyeOffFlag */
+    // PARTIAL: m_uiDispOffFlag/m_uiCheckEyeOffFlag split out for Game/Gimmick/GimmickStatue
+    UINT m_uiDispOffFlag;     /* 0x0e8 */
+    UINT m_uiCheckEyeOffFlag; /* 0x0ec */
     TIMEQ m_tqTimer;       /* 0x0f0 */
     UBYTE _m_0xf4[0xdc];   /* 0x0f4 m_iFlashingCounter .. 0x1c4 m_pDamageString */
 
@@ -85,6 +87,7 @@ public:
     void bodyCollOnBody(INT inKind);
     void bodyCollOffBody(INT inKind);
     void bodyCollOn(INT inKind); // PARTIAL: added for Game/Gimmick/GimmickGuillotine
+    void bodyCollOff(INT inKind); // PARTIAL: added for Game/Gimmick/GimmickStatue
     void rideModelEnableAllCollision(BOOL inEnable);
     void rideModelChangeListR2();
 
@@ -101,6 +104,8 @@ public:
     // PARTIAL: changed for Game/Gimmick/GimmickSavePoint - the store goes through a reference (not a struct
     // member access), so the scheduler does not move a following global load above it.
     void setEntityFlag(UINT inSet, UINT inMask) { UINT& f = m_uiEntityFlag; f = (f | inSet) & ~inMask; }
+    // PARTIAL: added for Game/Gimmick/GimmickStatue (also out of line: setCheckEyeOffFlag__7CEntityUiUi)
+    void setCheckEyeOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiCheckEyeOffFlag; f = (f | inSet) & ~inMask; }
     // PARTIAL: added for Game/Gimmick/GimmickSavePoint
     const FVECTOR& getPos() const;
     FLOAT calcDistanceXZ(const CEntity* inEntity) const;
