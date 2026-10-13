@@ -127,6 +127,14 @@ public:
     BOOL arriveTarget(const FVECTOR& inTarget, FLOAT inRange);
     void clearSpeed();
     void warp(const FVECTOR& inPos);
+    // PARTIAL: added for Game/Player/SummonDumbo
+    void setPos(const FVECTOR& inPos);
+    void setRot(const FVECTOR& inRot);
+    void setScale(const FVECTOR& inScale);
+    const FVECTOR& getRot();
+    const FVECTOR& getScale() const;
+    void updateCoord();
+    void coordFix();
 };
 
 #endif /* GAME_ENTITY_H */

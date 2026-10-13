@@ -36,6 +36,12 @@ public:
     void homingY(const CEntity* inTarget, FLOAT inRate);
     void homingMoveXZ(const FVECTOR& inTarget, FLOAT inRate, FLOAT inSpeed);
     void homingMoveXZ(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed);
+    void calcVelocityXZ(FLOAT inSpeed); // PARTIAL: added for Game/Player/SummonDumbo
 };
+
+// PARTIAL: added for Game/Player/SummonDumbo
+namespace Movement {
+FLOAT Approach(FLOAT inA0, FLOAT inA1, FLOAT inRate, FLOAT inFrameRate);
+}
 
 #endif /* GAME_MOVEMENT_H */
