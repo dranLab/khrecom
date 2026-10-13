@@ -19,9 +19,15 @@ class CAnim {
 private:
     UBYTE _m_0x00[0x14]; /* 0x000 m_pCrds .. 0x010 m_pMotData */
     ANIMID m_noId;       /* 0x014 */
+    // PARTIAL: m_Flags added for Game/Gimmick/GimmickDeceiveEnemy
+    UBYTE _m_0x18[0x14]; /* 0x018 m_Tq .. 0x028 m_Speed */
+    USHORT m_Flags[2];   /* 0x02c */
 public:
     ULONG getFlag(UINT idx) const;
     ANIMID getAnimID() { return m_noId; }
+    // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy (name guessed: tests m_Flags[1] bit 1 inline)
+    BOOL isMotionLooped() { return m_Flags[1] & 2; }
+    void change(ANIMID inId, TIMEQ inTq, BOOL inLoop); // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy
 };
 
 #endif /* SYSTEM_GRAPHIC_ANIM_H */
