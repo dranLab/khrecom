@@ -15,6 +15,20 @@
 
 typedef USHORT ALPHA;
 
+// PARTIAL: added for Game/AtWater
+union QWdata {
+    u_long ul64[2];
+    u_long128 ul128;
+    u_int ui32[4];
+    u_long u64[2];
+    u_long128 u128;
+    u_int u32[4];
+    u_short u16[8];
+    long s64[2];
+    int s32[4];
+    short s16[8];
+};
+
 struct G_XY {
     FIX4 x;
     FIX4 y;
@@ -130,7 +144,7 @@ public:
         CDrawable::setSemiTrans(nInAlpha);
         m_nAttribute |= 1;
     }
-    virtual ~CGPrim();
+    virtual ~CGPrim() {} // PARTIAL: inline (Game/AtWater: no out-of-line _$_6CGPrim exists)
     virtual void disp();
     virtual FIX4 calcZ();
 };
