@@ -15,6 +15,7 @@ public:
     CTaskSLCList& getChildren() { return CTask::getChildren(); } // PARTIAL: added for Game/Gimmick/GimmickToldPipe
     INT getStorageGimmickState(INT inUniqueID);
     BOOL setStorageGimmickState(INT inUniqueID, BYTE inState);
+    INT DecidePrize(INT inGimID, const FVECTOR* inPos, const FVECTOR* inRot, INT inParam); // PARTIAL: added for Game/Gimmick/GimmickHitReturn
     CEntity* getDoor(DOOR_ID inID, FVECTOR* outPos, FVECTOR* outRot); // PARTIAL: added for Game/Gimmick/GimmickPlantParent
 };
 
