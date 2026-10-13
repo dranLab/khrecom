@@ -9,13 +9,45 @@ namespace PlayerCamera {
 class CPlayerCamera; // PARTIAL: added for Game/Player/FriendJack
 }
 
-enum PlayerState {
+enum PlayerState { // complete (from types.h)
     INIT = 0,
     START_WAIT = 1,
     STAND = 2,
     WALK = 3,
-    RUN = 4
-    /* ... */
+    RUN = 4,
+    WALL = 5,
+    AVOID = 6,
+    JUMP = 7,
+    GLIDE = 8,
+    HANG = 9,
+    ATTACK_FLD = 10,
+    ATTACK = 11,
+    DAMAGE = 12,
+    FLICKS = 13,
+    ITEM = 14,
+    HIDE = 15,
+    LADDER = 16,
+    TREASUREBOX = 17,
+    CHARGE = 18,
+    MAGIC = 19,
+    ROOMCREATION = 20,
+    WORLDSELECT = 21,
+    SKILL = 22,
+    ESCAPE = 23,
+    BADCONDITION = 24,
+    GIMMICKCARD = 25,
+    FRIEND = 26,
+    SUMMON = 27,
+    END_BTL = 28,
+    DEAD = 29,
+    CARRY = 30,
+    TALK = 31,
+    TRANSFORM = 32,
+    JUMP_2ND = 33,
+    DUEL = 34,
+    FOOTING = 35,
+    PRONOUNCE = 36,
+    DBGWAIT = 37
 };
 
 class CPlayer : public CEntity {

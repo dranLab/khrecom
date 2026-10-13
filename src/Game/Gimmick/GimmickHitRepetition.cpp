@@ -80,7 +80,7 @@ void CGimmickHitRepetition::stateMain() {
         m_pAttack->updateAttackID();
     }
     if ((m_ID == 0x136 || m_ID == 0x38A) && isRideOnPlayer()) {
-        if (m_RepeatFlag && g_pPlayer->getPlayerState() != 9) putPrize();
+        if (m_RepeatFlag && g_pPlayer->getPlayerState() != HANG) putPrize();
     }
 }
 
