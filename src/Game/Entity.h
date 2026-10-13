@@ -154,6 +154,10 @@ public:
     // PARTIAL: added for Game/Gimmick/GimmickDominoPillar
     void setNearTranslucence(FLOAT inTrans) { m_fNearTranslucence = inTrans; }
     FLOAT getNearTranslucence() const { return m_fNearTranslucence; }
+    // PARTIAL: added for Game/Player/FriendPluto
+    UINT isTargetMoveXZ() const { return m_uiEntityFlag & 0x40; }
+    BOOL startTargetMoveXZ(const FVECTOR& inPos, FLOAT inSpeed, FLOAT inAccel, FLOAT inRange);
+    void endTargetMoveXZ();
 };
 
 #endif /* GAME_ENTITY_H */

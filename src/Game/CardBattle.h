@@ -7,6 +7,8 @@
 #include "Game/CollParam.h"     // PARTIAL: added for Game/Player/SummonDumbo (ATK_KIND)
 #include "Game/AttackMotion.h" // PARTIAL: added for Game/Player/SummonDumbo (ATK_ATTR)
 
+union FVECTOR; // PARTIAL: added for Game/Player/FriendPluto
+
 /* Placeholder for the original header's inline function asserting inUser: its strings
  * ("Game/CardBattle.h", "inUser") are in .rodata of every includer. The line number is not known. */
 #line 1 "Game/CardBattle.h"
@@ -49,6 +51,10 @@ public:
 class CCardRevolver {
 public:
     void setAction(INT inAction, INT inParam);
+    // PARTIAL: added for Game/Player/FriendPluto
+    INT getHave(INT inKind, INT inA, INT inB, INT inC, INT inD);
+    INT calcPlutoMark();
+    void dropPlutoMarkCard(const FVECTOR* inPos);
 };
 }
 
