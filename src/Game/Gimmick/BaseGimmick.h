@@ -41,6 +41,7 @@ public:
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
     virtual BOOL initalize(INT inGroupID, INT inRsrcID, UINT iFlag);
     INT getParam() { return m_iParam; } // PARTIAL: added for Game/Gimmick/SampleGimmick
+    UINT getGimmickFlag() { return m_uiGimmickFlag; } // PARTIAL: added for Game/Gimmick/GimmickHitRepetition
     INT getUniqueID() { return m_iUniqueID; }
     // PARTIAL: added for Game/Gimmick/GimmickBreakable
     void setGimmickFlag(UINT inFlag, BOOL inOn) {

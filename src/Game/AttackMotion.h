@@ -19,6 +19,7 @@ class CAttackMotion {
 public:
     void setCollKind(INT inKind);
     void setAttackParam(INT inAttack, ATK_ATTR inAttr); // PARTIAL: added for Game/Gimmick/GimmickGuillotine
+    void updateAttackID(); // PARTIAL: added for Game/Gimmick/GimmickHitRepetition
 };
 
 #endif /* GAME_ATTACKMOTION_H */
