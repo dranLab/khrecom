@@ -138,6 +138,14 @@ public:
     const FVECTOR& getScale() const;
     void updateCoord();
     void coordFix();
+    // PARTIAL: added for Game/Player/FriendKing (also out of line: setDispOffFlag__7CEntityUiUi)
+    void setDispOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiDispOffFlag; f = (f | inSet) & ~inMask; }
+    TIMEQ getMotionCurrentTime() const;
+    void userBodyCollOn(INT inIndex);
+    void userBodyCollOnBody(INT inIndex);
+    void userBodyCollOff(INT inIndex);
+    void userBodyCollOffBody(INT inIndex);
+    HANDLE setAppearEffect();
 };
 
 #endif /* GAME_ENTITY_H */
