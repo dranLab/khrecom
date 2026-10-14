@@ -63,6 +63,27 @@ struct BULLET_PARAM {
     void init(INT inBulletID, INT inGroupID);
 };
 
+// PARTIAL: added for Game/Player/SummonGenie
+enum COLL_KIND {
+    COLL_KIND_SHOT = -2147483647 - 1,
+    COLL_KIND_PLAYER = 0,
+    COLL_KIND_ENEMY = 2,
+    COLL_KIND_OBJECT = 4,
+    COLL_KIND_ITEM = 6,
+    COLL_KIND_PSHOT = -2147483647 - 1,
+    COLL_KIND_ESHOT = -2147483646,
+    COLL_KIND_OSHOT = -2147483644,
+    COLL_KIND_SHADOW = -2147483640,
+    COLL_KIND_FOOT = 10,
+    COLL_KIND_CAMERA = -2147483636,
+    COLL_KIND_CAMERAT = -2147483634,
+    COLL_KIND_BODY = 0,
+    COLL_KIND_ATTACK = 1,
+    COLL_KIND_NONE = -1,
+    COLL_KIND_CK_PE = 14,
+    COLL_KIND_CK_BA = 1
+};
+
 class CBullet : public CEntity {
 private:
     ULONGLONG m_uiFlag;      /* 0x1d0 */
@@ -78,6 +99,7 @@ public:
 
     HANDLE getOwner() const { return m_hOwner; } // PARTIAL: added for Game/Bullet/BulletManager
     void kill();                                 // PARTIAL: added for Game/Bullet/BulletManager
+    void setBodyRadius(FLOAT inRadius, FLOAT inShiftY, INT inSliding, COLL_KIND inKind); // PARTIAL: added for Game/Player/SummonGenie
 
     void setOwner(CEntity* inOwner) {
         m_hOwner = inOwner->getHandle();
