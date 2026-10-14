@@ -22,6 +22,8 @@ public:
     void checkBack();
     void setParent(D2::C2DSeqCtrl* pParent);
     void enableDisp(BOOL bEnable);
+    void changeLayer(INT nLayer); /* PARTIAL: added for Form/Menu/Roulette */
+    void replace(CARD card);      /* PARTIAL: added for Form/Menu/Roulette */
 };
 
 #endif /* SYSTEM_GRAPHIC_2D_2DCARD_H */

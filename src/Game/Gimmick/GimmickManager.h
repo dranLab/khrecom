@@ -23,6 +23,7 @@ public:
     GimParam* getGimParam(INT inGimID); // PARTIAL: added for Game/Gimmick/GimmickFallTomb
     // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
     DropPrize DecideTreasurePrize();
+    DropPrize DecideMapCardPrize(INT inParam); // PARTIAL: added for Form/Menu/Roulette
     void GimDebugTrace(const DropPrize* inPrize);
     void changeTreasureBoxLock(BOOL inLock);
     CEntity* getDoor(DOOR_ID inID, FVECTOR* outPos, FVECTOR* outRot); // PARTIAL: added for Game/Gimmick/GimmickPlantParent

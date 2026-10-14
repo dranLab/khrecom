@@ -9,7 +9,8 @@
 struct SeqControl {
     u_long128 _m_0x000[0xe0 / 16];  /* 0x000 matrix ... controlColor */
     FVECTOR vPos;                   /* 0x0e0 PARTIAL: added for Form/Menu/MenuParts */
-    u_long128 _m_0x0f0[3];          /* 0x0f0 vRot, vScl, vCol */
+    u_long128 _m_0x0f0[2];          /* 0x0f0 vRot, vScl */
+    FVECTOR vCol;                   /* 0x110 PARTIAL: added for Form/Menu/Roulette */
     SeqControl* pParentSeqControl;  /* 0x120 */
     CHAR fgColor;                   /* 0x124 */
     CHAR fgBilinear;                /* 0x125 */
