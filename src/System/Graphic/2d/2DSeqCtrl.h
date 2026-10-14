@@ -40,7 +40,7 @@ public:
     virtual C2DSeqObj* addSeq(LPCTSTR pSedName, UINT idxSeq, UINT nLayer);
     virtual C2DSeqObj* addSeq(LPCTSTR pSedName, UINT idxSeq);
     /* PARTIAL: added for Form/SystemMessage - the overloads with a layer are guesses */
-    virtual C2DSeqObj* addFnt(LPCTSTR pSqdName, C2DFnt* p2DFnt, UINT nLayer);
+    virtual C2DSeqObj* addFnt(LPCTSTR pSqdName, UINT nLayer, C2DFnt* p2DFnt); /* PARTIAL: order from the symbol, for Game/Player/NaviMap */
     virtual C2DSeqObj* addFnt(LPCTSTR pSqdName, C2DFnt* p2DFnt);
     virtual C2DSeqObj* replaceSeq(UINT nIdx, LPCTSTR pSedName, UINT idxSeq, UINT nLayer);
     virtual C2DSeqObj* replaceSeq(UINT nIdx, LPCTSTR pSedName, UINT idxSeq);
@@ -57,6 +57,7 @@ public:
     virtual C2DSeqObj* replaceFntShift(UINT nIdx, LPCTSTR pSqdName, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
     virtual C2DSeqObj* shiftSeqPos(UINT nIdx, FLOAT fShiftX, FLOAT fShiftY);
     virtual C2DSeqObj* setFntPos(UINT nIdx, FLOAT fX, FLOAT fY);
+    void destroy();                                           /* PARTIAL: added for Game/Player/NaviMap */
     void setLocalPos(FVECTOR& vPos);
     void setPos(FVECTOR& vPos);                               /* PARTIAL: added for Form/Menu/GameOver */
     BOOL isEnd(UINT nIdx);                                    /* PARTIAL: added for Form/Menu/GameOver */
