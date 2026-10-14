@@ -5,6 +5,7 @@
 #include "khtypes.h"
 
 union FVECTOR; // PARTIAL: added for Game/Player/FriendBeast
+class CEntity; // PARTIAL: added for Game/Gimmick/BaseGimmick
 
 // PARTIAL: added for Game/Gimmick/GimmickGuillotine
 enum ATK_ATTR {
@@ -17,7 +18,18 @@ enum ATK_ATTR {
     ATK_ATTR_MAX = 6
 };
 
-class CAttackMotion {
+// PARTIAL: added for Game/Gimmick/BaseGimmick (virtual set/update)
+class CAttachMotion {
+protected:
+    CEntity* m_pOwner; /* 0x0 */
+public:
+    virtual ~CAttachMotion();
+    virtual BOOL set(INT inIndex);
+    virtual void stop();
+    virtual void update();
+};
+
+class CAttackMotion : public CAttachMotion { // PARTIAL: base CAttachMotion added for Game/Gimmick/BaseGimmick
 public:
     void setCollKind(INT inKind);
     void setAttackParam(INT inAttack, ATK_ATTR inAttr); // PARTIAL: added for Game/Gimmick/GimmickGuillotine
