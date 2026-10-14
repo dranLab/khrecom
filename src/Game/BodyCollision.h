@@ -6,6 +6,8 @@
 #include "System/MainApp.h"
 #include "Game/CollParam.h"
 
+union FVECTOR; // PARTIAL: added for Game/Gimmick/BaseGimmick
+
 // PARTIAL: added for Game/Gimmick/GimmickGuillotine (layouts partial)
 class CCollBody {
 private:
@@ -13,13 +15,20 @@ private:
     ATK_KIND m_DamageKind; /* 0x070 */
 public:
     ATK_KIND getDamageKind() { return m_DamageKind; }
+    HANDLE setHitEffect(); // PARTIAL: added for Game/Gimmick/BaseGimmick
 };
 
 class CBodyCollision {
 private:
-    UBYTE _m_0x00[0x30]; /* 0x00 m_uiFlag .. m_iHitIndex */
+    UINT m_uiFlag;       /* 0x00 */ // PARTIAL: split out for Game/Gimmick/BaseGimmick
+    UBYTE _m_0x04[0x2c]; /* 0x04 m_uiSysBodyFlag .. m_iHitIndex */
     CCollBody* m_pHit;   /* 0x30 */
 public:
+    // PARTIAL: added for Game/Gimmick/BaseGimmick
+    INT isHit() { return m_uiFlag & 4; }
+    void update();
+    void detect();
+    BOOL collideBody(FVECTOR* outPos, FVECTOR* outNormal, FVECTOR* outDetectPos);
     CCollBody* getHitCollBody() { return m_pHit; }
 };
 

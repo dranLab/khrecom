@@ -60,6 +60,7 @@ public:
     static _MapEnemyRoomInfo* getCurrentRoomMapEnemyInfo(); // PARTIAL: added for Game/Enemy/MapEnemyManager
     static INT getRoomIndex(INT nRoomID); // PARTIAL: added for Form/Menu/MoogleShop
     static SHORT getCurrentSceneNum(); // PARTIAL: added for Game/Gimmick/GimmickRideOn
+    static INT getCurrentWorldID(BOOL bChkEntrance = FALSE); // PARTIAL: added for Game/Gimmick/BaseGimmick (returns WORLD_ID)
     static void clear(); // PARTIAL: added for System/RootTask
     static void dispose();
     static BOOL reqEnterBattle(SHORT inID); // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy

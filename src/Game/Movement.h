@@ -19,6 +19,7 @@ private:
     UBYTE _m_0x148[0x18];       /* 0x148 .. 0x150 m_vLastHitPos */
 
 public:
+    CMovement(CEntity* inOwner); // PARTIAL: added for Game/Gimmick/BaseGimmick
     virtual ~CMovement();       /* 0x160 */
 
     void setFlag(UINT inFlag, BOOL inOn) {

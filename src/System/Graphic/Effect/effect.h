@@ -24,6 +24,7 @@ public:
     u_int m_iFlag;       /* 0x30 */
     UBYTE _m_0x34[0x4c]; /* 0x34 m_pData .. */
     void loopEnd();
+    void kill(); // PARTIAL: added for Game/Gimmick/BaseGimmick
     // PARTIAL: added for Game/Gimmick/GimmickTutorial
     void setScale(FLOAT fScale) {
         m_vScale.x = m_vScale.y = m_vScale.z = fScale;

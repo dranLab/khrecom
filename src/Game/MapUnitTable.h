@@ -12,6 +12,7 @@ union MAPUNITID {
     /* PARTIAL: added for Game/Gimmick/SampleGimmick - the {"xxxx", NewClass<T>, kind} table initializers
      * construct the id in place (memset of the table, then the id word loaded from the string literal) */
     MAPUNITID(const char* inID) { ui = *(UINT*)inID; }
+    MAPUNITID() {} // PARTIAL: added for Game/Gimmick/BaseGimmick
 };
 
 struct MAPUNITTABLE {

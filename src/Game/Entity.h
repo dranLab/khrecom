@@ -4,6 +4,7 @@
 
 #include "khtypes.h"
 #include "System/Task.h"
+#include "System/Graphic/Effect/EffectMan.h" // PARTIAL: added for Game/Gimmick/BaseGimmick (ObjType::eObjType)
 // PARTIAL: Gprim.h include moved to Game/Bullet/Bullet.h for Game/Gimmick/GimmickHitMore (its strings are not in every includer)
 
 union FVECTOR;
@@ -67,6 +68,7 @@ private:
 
 public:
     CEntity(CTask* inParent);
+    CEntity(CTask* inParent, ObjType::eObjType inType); // PARTIAL: added for Game/Gimmick/BaseGimmick
     virtual ~CEntity();
     virtual INT getTypeID() const;
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
@@ -113,6 +115,7 @@ public:
     // PARTIAL: added for Game/Gimmick/GimmickSavePoint
     const FVECTOR& getPos() const;
     void setPos(const FVECTOR& inPos); // PARTIAL: added for Game/Gimmick/GimmickHitFlying
+    void setOldPos(const FVECTOR& inPos); // PARTIAL: added for Game/Gimmick/BaseGimmick
     FLOAT calcDistanceXZ(const CEntity* inEntity) const;
     FLOAT calcDistance(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickDeceive
     FLOAT calcDirection(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickFallTomb
