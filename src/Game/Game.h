@@ -8,6 +8,8 @@
 class CGame : public CTask {
 public:
     CGame();
+    CGame(CTask* pParent);              // PARTIAL: added for System/MainTaskFactory
+    CGame(CTask* pParent, INT nMode);   // PARTIAL: added for System/MainTaskFactory
     static BOOL reqSave();
     static BOOL isSoraGame(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
     static void enablePause(BOOL bEnable); // PARTIAL: added for Form/Menu/GameOver

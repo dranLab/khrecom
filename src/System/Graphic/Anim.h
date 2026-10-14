@@ -8,7 +8,12 @@
 /* Placeholder for the original header's inline function asserting an index into CAnim's two flag words
  * (probably CAnim::getFlag): its strings ("System/Graphic/Anim.h", "2 > idx") head .rodata of every
  * includer. The line number is not known (it is not part of the data). */
-#line 1 "System/Graphic/Anim.h"
+/* PARTIAL: added for System/MainTaskFactory - __FILE__ of this header differs per includer ("System/Graphic/anim.h"
+ * in System/MainTaskFactory): define ANIM_H_PATH before including it to pick another one. */
+#ifndef ANIM_H_PATH
+#define ANIM_H_PATH "System/Graphic/Anim.h"
+#endif
+#line 1 ANIM_H_PATH
 inline void _animCheckFlagIdx(UINT idx) {
     if (!(2 > idx)) AssertApp(__FILE__, __LINE__, "2 > idx", 0);
 }
