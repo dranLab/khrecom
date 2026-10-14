@@ -12,4 +12,10 @@ inline void _modelDataCheckTexInfo(void* _pTexInfo) {
     if (!_pTexInfo) AssertApp(__FILE__, __LINE__, "_pTexInfo", 0);
 }
 
+// PARTIAL: added for Game/ModelObj
+struct MODELDATA {
+    BOOL enablePointLight() const;
+    BOOL enableLight() const;
+};
+
 #endif /* SYSTEM_GRAPHIC_MODELDATA_H */

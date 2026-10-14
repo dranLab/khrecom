@@ -13,6 +13,7 @@
 class CTask;
 class CCoord;
 class CTexAnm;
+class CLightUnit; // PARTIAL: added for Game/ModelObj
 struct MODELDATA;
 
 // PARTIAL: CModel derives from CDrawable (System/Graphic/Gprim.h, which every includer includes first) and
@@ -26,7 +27,9 @@ public:
     // directly (an inline CModel setter adds an addiu per model and does not match)
     SHORT m_nFlag;       /* 0x030 */
 private:
-    UBYTE _m_0x32[0x26]; /* 0x032 m_nPacketSize .. 0x058 */
+    UBYTE _m_0x32[0xa];  /* 0x032 m_nPacketSize .. 0x03c */
+    CLightUnit* m_pLightUnit; /* 0x03c PARTIAL: split out for Game/ModelObj */
+    UBYTE _m_0x40[0x18]; /* 0x040 .. 0x058 */
     const MODELDATA* m_pData; /* 0x058 */
     UBYTE _m_0x5c[0x98]; /* 0x05c m_Mode .. 0x0f4 */
     FMATRIX* m_pWSMat;   /* 0x0f4 */
@@ -51,6 +54,9 @@ public:
     virtual BOOL dispCheck();
     virtual void changeLayerExt(INT a, INT b);        // PARTIAL: parameters guessed, for Form/Menu/MenuModel
     FLOAT getAlphaScale() { return m_fAlphaScale; }
+    // PARTIAL: added for Game/ModelObj (m_ColorScale is the FVECTOR at 0x020)
+    FVECTOR& getColorScale() { return *(FVECTOR*)&_m_0x18[8]; }
+    void setLightUnit(CLightUnit* p) { m_pLightUnit = p; } // PARTIAL: added for Game/ModelObj
     void setAlphaScale(FLOAT inScale);
     void changeTexture(const CHAR* inSrc, const CHAR* inDst); // PARTIAL: added for Game/Enemy/MapEnemyShadow
 };
