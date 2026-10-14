@@ -4,6 +4,8 @@
 
 #include "khtypes.h"
 
+union FVECTOR; // PARTIAL: added for Game/Player/FriendBeast
+
 // PARTIAL: added for Game/Gimmick/GimmickGuillotine
 enum ATK_ATTR {
     ATK_ATTR_PHYSICAL = 0,
@@ -21,6 +23,7 @@ public:
     void setAttackParam(INT inAttack, ATK_ATTR inAttr); // PARTIAL: added for Game/Gimmick/GimmickGuillotine
     void updateAttackID(); // PARTIAL: added for Game/Gimmick/GimmickHitRepetition
     BOOL test(); // PARTIAL: added for Game/Gimmick/GimmickHitFlying
+    void setEnemyPos(const FVECTOR& inPos); // PARTIAL: added for Game/Player/FriendBeast
 };
 
 #endif /* GAME_ATTACKMOTION_H */

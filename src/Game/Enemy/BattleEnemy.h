@@ -27,7 +27,9 @@ inline void _battleEnemyCheckIndex(INT inIndex, INT inState) {
 
 class CBattleEnemy : public CEntity {
 private:
-    UBYTE _m_0x1d0[0x44];  /* 0x1d0 m_vHitBackVel .. 0x210 m_iSysStep */
+    UBYTE _m_0x1d0[0x30]; /* 0x1d0 m_vHitBackVel .. 0x1f0 m_vBackupVel */
+    ULONGLONG m_ullBtlEnemyFlag; /* 0x200 */ // PARTIAL: split out for Game/Player/FriendBeast
+    UBYTE _m_0x208[0xc];   /* 0x208 m_ullBackupFlag, 0x210 m_iSysStep */
     INT m_iHp;             /* 0x214 */
     UBYTE _m_0x218[0x618]; /* 0x218 m_iAttackState .. 0x450 m_EnemyState[31] */
 
@@ -42,6 +44,8 @@ public:
     virtual void onMsg(INT inMsg, void* inExtraInfo);
     virtual void onOut();
     void setHp(INT inHp) { m_iHp = inHp; }
+    // PARTIAL: added for Game/Player/FriendBeast (original names of the flag tests unknown)
+    ULONGLONG isBtlEnemyFlag(ULONGLONG inFlag) const { return m_ullBtlEnemyFlag & inFlag; }
     virtual void getUseCardPos(FVECTOR& outPos);
     virtual void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     virtual BOOL startCardBattle();
