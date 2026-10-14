@@ -7,19 +7,49 @@
 #include "System/HeapMan.h"
 #include "System/Debug.h"
 #include "System/Graphic/modeldata.h"
+#include "System/Vector.h"
+#include "System/Graphic/Gprim.h"
 
-class CModel {
+class CTask;
+class CCoord;
+class CTexAnm;
+struct MODELDATA;
+
+// PARTIAL: CModel derives from CDrawable (System/Graphic/Gprim.h, which every includer includes first) and
+// its virtual functions added for Form/Menu/MenuModel
+class CModel : public CDrawable {
 private:
-    UBYTE _m_0x00[0x2c]; /* 0x000 CDrawable .. m_ColorScale.z */
+    UBYTE _m_0x18[0x14]; /* 0x018 .. m_ColorScale.z */
     FLOAT m_fAlphaScale; /* 0x02c m_ColorScale.w */
 public:
     // PARTIAL: m_nFlag split out (public) for Game/Gimmick/GimmickDominoPillar, which sets bit 0x100
     // directly (an inline CModel setter adds an addiu per model and does not match)
     SHORT m_nFlag;       /* 0x030 */
 private:
-    UBYTE _m_0x32[0xee]; /* 0x032 m_nPacketSize .. 0x120 */
+    UBYTE _m_0x32[0x26]; /* 0x032 m_nPacketSize .. 0x058 */
+    const MODELDATA* m_pData; /* 0x058 */
+    UBYTE _m_0x5c[0x98]; /* 0x05c m_Mode .. 0x0f4 */
+    FMATRIX* m_pWSMat;   /* 0x0f4 */
+    UBYTE _m_0xf8[0x28]; /* 0x0f8 m_pShadowMapModel .. 0x120 */
 
 public:
+    CModel(const MODELDATA* pData = NULL); // PARTIAL: added for Form/Menu/MenuModel
+    virtual ~CModel();                     // PARTIAL: added for Form/Menu/MenuModel
+    INT link(CTask* p);                    // PARTIAL: added for Form/Menu/MenuModel
+    // PARTIAL: added for Form/Menu/MenuModel
+    INT link(CTask* p, const MODELDATA* d) {
+        m_pData = d;
+        return link(p);
+    }
+    CCoord& getCrd(INT nIndex);                       // PARTIAL: added for Form/Menu/MenuModel
+    INT getBoneIndex(const CHAR* pName) const;        // PARTIAL: added for Form/Menu/MenuModel
+    void linkTexAnm(CTexAnm* pTexAnm, INT nTexAnm);   // PARTIAL: added for Form/Menu/MenuModel
+    void setColorScale(const FVECTOR& vColor);        // PARTIAL: added for Form/Menu/MenuModel
+    void setWorldScreenMatrix(FMATRIX* pWSMat) { m_pWSMat = pWSMat; } // PARTIAL: added for Form/Menu/MenuModel
+    virtual void dispImpl();                          // PARTIAL: added for Form/Menu/MenuModel
+    virtual void dispUpdate();
+    virtual BOOL dispCheck();
+    virtual void changeLayerExt(INT a, INT b);        // PARTIAL: parameters guessed, for Form/Menu/MenuModel
     FLOAT getAlphaScale() { return m_fAlphaScale; }
     void setAlphaScale(FLOAT inScale);
     void changeTexture(const CHAR* inSrc, const CHAR* inDst); // PARTIAL: added for Game/Enemy/MapEnemyShadow

@@ -15,6 +15,7 @@ inline void _animCheckFlagIdx(UINT idx) {
 
 // PARTIAL: added for Game/Gimmick/GimmickLotusLeaf
 typedef ULONG ANIMID;
+class CTask;
 class CAnim {
 private:
     UBYTE _m_0x00[0x14]; /* 0x000 m_pCrds .. 0x010 m_pMotData */
@@ -22,9 +23,22 @@ private:
     // PARTIAL: m_Flags added for Game/Gimmick/GimmickDeceiveEnemy
     // PARTIAL: m_Tq split out for Game/Gimmick/GimmickOnceReaction
     TIMEQ m_Tq;          /* 0x018 */
-    UBYTE _m_0x1c[0x10]; /* 0x01c .. 0x028 m_Speed */
+    UBYTE _m_0x1c[0xc];  /* 0x01c .. 0x028 */
+    FLOAT m_Speed;       /* 0x028 PARTIAL: split out for Form/Menu/MenuModel */
     USHORT m_Flags[2];   /* 0x02c */
+    UBYTE _m_0x30[0xd8] __attribute__((aligned(16))); /* 0x030 .. 0x108 PARTIAL: added for Form/Menu/MenuModel (sizeof 0x110) */
 public:
+    /* 0x108 vtable */
+    // PARTIAL: added for Form/Menu/MenuModel
+    CAnim();
+    virtual ~CAnim();
+    void link(CTask* pTask, INT n);
+    void init(UINT nId, INT n);
+    void play(TIMEQ tq, INT n);
+    void changeEx(INT nRsrcID, ANIMID inId, TIMEQ inTq, BOOL inLoop);
+    void setSpeed(FLOAT s) { m_Speed = s; }
+    BOOL isMotionEnd() { return m_Flags[0] & 3; }
+
     ULONG getFlag(UINT idx) const;
     ANIMID getAnimID() { return m_noId; }
     TIMEQ getCurrentTqCrd() { return m_Tq; } // PARTIAL: added for Game/Gimmick/GimmickOnceReaction
