@@ -8,6 +8,9 @@ Always:
   (objdiff can pair them) and builds are reproducible. Likewise the global constructor/destructor that
   runs a file's static initializers (_GLOBAL_$I$c__KHCOM_MainApp_main.cpp00aaaa, _GLOBAL_$D$...), which
   the original __CTOR_LIST__/__DTOR_LIST__ reference by name.
+- Function-local statics: gcc numbers them in compilation order (env.63), the original had other numbers
+  (env.193). With --symbols and --unit-data they get the original names, and lose their definition when their data
+  doesn't come from the source (see rename_local_statics).
 - Source paths in string literals (__FILE__ in assert/allocation messages): with --source-root, the
   "src/" prefix becomes the original one (e.g. "c:/KHCOM/MainApp/").
 - Weak data (vtables of classes whose virtual functions are all inline): with --symbols and --own-data, a copy the
@@ -30,7 +33,7 @@ Always:
 
 Usage (from configure.py's cc rule):
     ee_asm_compat.py IN.s OUT.s [--assembler gas|snas] [--source src/X.cpp --symbols elf_symbol_addrs.txt]
-                   [--own-data 0xSTART-0xEND,...]
+                   [--own-data 0xSTART-0xEND,...] [--unit-data 0xSTART-0xEND,...]
 """
 
 import argparse
@@ -38,7 +41,9 @@ import re
 from pathlib import Path, PurePosixPath
 
 CVT_W_S = re.compile(r"^(\s*)cvt\.w\.s\s+\$f(\d+)\s*,\s*\$f(\d+)\s*$")
-ANON_NAMESPACE = re.compile(r"_\d+(_GLOBAL_\$N\$[\w.]*?\.(?:cpp|cc|c)[A-Za-z0-9]{6})(?=\$|\W|$)")
+# The namespace's length prefix follows "_" in a member's name (_58_GLOBAL_$N$...), "Q<n>" inside a mangled type
+# (_release__FPPQ239_GLOBAL_$N$...11_MallocUnit) or the type code before it (P39_GLOBAL_$N$...).
+ANON_NAMESPACE = re.compile(r"(?:(?<=Q\d)|(?<![\dQ]))\d+(_GLOBAL_\$N\$[\w.]*?\.(?:cpp|cc|c)[A-Za-z0-9]{6})(?=\$|\d|\W|$)")
 GLOBAL_CDTOR = re.compile(r"_GLOBAL_\$([ID])\$[\w.]*?\.(?:cpp|cc|c)[A-Za-z0-9]{6}(?=\$|\W|$)")
 INCLUDE = re.compile(r'^\s*\.include\s+"([^"]+)"\s*$')
 MACRO = re.compile(r'^\s*(glabel|alabel|ehlabel|jlabel|dlabel|endlabel|enddlabel|nonmatching)\s+"?([^",\s]+)"?\s*(?:,\s*(\S+))?\s*$')
@@ -132,6 +137,9 @@ def fix_short_loops(lines: list[str]) -> list[str]:
 WEAK = re.compile(r"^\t\.weak\t(\S+)\s*$")
 DATA_SECTION = re.compile(r"^\t\.(?:rdata|data|sdata|bss|sbss)\s*$|^\t\.section\s+\.(?:rodata|data|sdata|bss|sbss)\b")
 OTHER_SECTION = re.compile(r"^\t\.(?:text|section)\b")
+LOCAL_STATIC_LABEL = re.compile(r"^([A-Za-z_]\w*)\.(\d+):$")
+LOCAL_STATIC_SYMBOL = re.compile(r"^(([A-Za-z_]\w*)\.(\d+)(_([0-9A-F]{8}))?) = 0x([0-9A-Fa-f]+);")
+STABS_SYMBOL = re.compile(r"^\s*\.stabs\s.*,([^,\s]+)\s*$")
 DATA_DIRECTIVE = re.compile(r"^\t\.(?:byte|half|word|dword|float|double|space|ascii|asciz)\b")
 
 
@@ -156,7 +164,7 @@ def drop_foreign_weak_data(lines: list[str], symbols_path: str, own_data: str) -
     Some original objects hold an unnamed copy of such data too (the linker kept another copy's name). A copy named
     <name>_<ADDR> in symbol_addrs.txt (next to the symbol file), with ADDR in this object's data from source, is
     kept."""
-    own = [tuple(int(x, 16) for x in r.split("-")) for r in own_data.split(",") if r != "none"]
+    own = parse_ranges(own_data)
     weak = {m.group(1) for line in lines if (m := WEAK.match(line))}
     if not weak:
         return lines
@@ -177,6 +185,12 @@ def drop_foreign_weak_data(lines: list[str], symbols_path: str, own_data: str) -
             in_data = False
         elif in_data and line.endswith(":") and line[:-1] in foreign:
             data_labels.add(line[:-1])
+    return drop_data_definitions(lines, data_labels)
+
+
+def drop_data_definitions(lines: list[str], data_labels: set[str]) -> list[str]:
+    """Remove the definitions (label, .weak/.type/.size, alignment, data directives, .stabs) of these data labels: the
+    references then resolve to the original copy."""
     if not data_labels:
         return lines
     out: list[str] = []
@@ -188,6 +202,8 @@ def drop_foreign_weak_data(lines: list[str], symbols_path: str, own_data: str) -
             dropping = False
         if (m := WEAK.match(line)) and m.group(1) in data_labels:
             continue
+        if (m := STABS_SYMBOL.match(line)) and m.group(1) in data_labels:
+            continue  # debug info for a static: Ps2EeAs crashes on it once the symbol is undefined
         if (m := re.match(r"^\t\.(?:type|size)\t\s*([^,\s]+),", line)) and m.group(1) in data_labels:
             if line.startswith("\t.type"):  # the object's alignment comes just before it
                 for i in range(len(out) - 1, -1, -1):
@@ -204,14 +220,58 @@ def drop_foreign_weak_data(lines: list[str], symbols_path: str, own_data: str) -
     return out
 
 
+def parse_ranges(ranges: str | None) -> list[tuple[int, int]]:
+    return [tuple(int(x, 16) for x in r.split("-")) for r in (ranges or "none").split(",") if r != "none"]
+
+
+def rename_local_statics(lines: list[str], symbols_path: str, unit_data: str, own_data: str) -> list[str]:
+    """Give function-local statics (gcc: <name>.<n>, numbered in compilation order) their original names.
+
+    The original object's statics of the same name are the symbols <name>.<m> (or splat's <name>.<m>_<ADDR>) whose
+    address lies in this unit's data (unit_data: all its data sections, from source or not); in number order they
+    pair with ours. A static whose data doesn't come from the source (own_data) loses its definition, as gcc's copy
+    would land in a section objcopy removes: the references resolve to the original data's label."""
+    ours: dict[str, list[int]] = {}
+    for line in lines:
+        if m := LOCAL_STATIC_LABEL.match(line):
+            ours.setdefault(m.group(1), []).append(int(m.group(2)))
+    unit = parse_ranges(unit_data)
+    if not ours or not unit:
+        return lines
+    candidates: dict[str, list[tuple[int, str, int]]] = {}
+    with open(symbols_path, encoding="utf-8") as f:
+        for line in f:
+            if (m := LOCAL_STATIC_SYMBOL.match(line)) and m.group(2) in ours:
+                addr = int(m.group(6), 16)
+                if any(lo <= addr < hi for lo, hi in unit):
+                    candidates.setdefault(m.group(2), []).append((int(m.group(3)), m.group(1), addr))
+    own = parse_ranges(own_data)
+    renames: dict[str, str] = {}
+    foreign: set[str] = set()
+    for base, numbers in ours.items():
+        originals = sorted(candidates.get(base, []))
+        if len(originals) != len(numbers):
+            continue  # can't pair them: leave gcc's names
+        for n, (_, name, addr) in zip(sorted(numbers), originals):
+            renames[f"{base}.{n}"] = name
+            if not any(lo <= addr < hi for lo, hi in own):
+                foreign.add(name)
+    if not renames:
+        return lines
+    token = re.compile(r"(?<![\w.$])(" + "|".join(re.escape(k) for k in renames) + r")(?![\w.])")
+    lines = [token.sub(lambda m: renames[m.group(1)], line) for line in lines]
+    return drop_data_definitions(lines, foreign)
+
+
 def original_global(kind: str, source: str, symbols_path: str) -> str | None:
     """The name of gcc's per-file global _GLOBAL_$<kind>$ (N: anonymous namespace, I/D: global
     constructor/destructor) in the original object of this source file."""
     rel = PurePosixPath(source)
     rel = rel.relative_to("src") if rel.parts[0] == "src" else rel
     stem = re.escape("_" + "_".join(rel.parts))
-    # A namespace name is followed by its member's name ($...), a constructor's name ends there.
-    end = r"(?=\$)" if kind == "N" else r"(?![\w.$])"
+    # A namespace name is followed by its member's name ($...) or, inside a mangled type, by the length of the
+    # nested name (...11_MallocUnit); a constructor's name ends there.
+    end = r"(?=\$|\d)" if kind == "N" else r"(?![\w.$])"
     pattern = re.compile(rf"_GLOBAL_\${kind}\$[\w.]*{stem}[A-Za-z0-9]{{6}}{end}")
     with open(symbols_path, encoding="utf-8") as f:
         for line in f:
@@ -268,6 +328,7 @@ def main() -> None:
     parser.add_argument("--source", help="the compiled source file (for the anonymous namespace name)")
     parser.add_argument("--symbols", help="symbol file with the original names")
     parser.add_argument("--source-root", help='original path prefix for "src/" in string literals')
+    parser.add_argument("--unit-data", help='address ranges of all the unit\'s data, from source or not (as --own-data)')
     parser.add_argument("--own-data", help='address ranges of the data from source ("0xSTART-0xEND,..." or "none")')
     args = parser.parse_args()
 
@@ -278,7 +339,7 @@ def main() -> None:
     if args.source and args.symbols and "_GLOBAL_$N$" in text:
         name = original_global("N", args.source, args.symbols)
         if name:
-            text = ANON_NAMESPACE.sub(lambda _: f"_{len(name)}{name}", text)
+            text = ANON_NAMESPACE.sub(lambda _: f"{len(name)}{name}", text)
     if args.source and args.symbols and ("_GLOBAL_$I$" in text or "_GLOBAL_$D$" in text):
         names = {kind: original_global(kind, args.source, args.symbols) for kind in "ID"}
         text = GLOBAL_CDTOR.sub(lambda m: names[m.group(1)] or m.group(0), text)
@@ -287,6 +348,8 @@ def main() -> None:
     source_lines = text.splitlines()
     if args.symbols and args.own_data:
         source_lines = drop_foreign_weak_data(source_lines, args.symbols, args.own_data)
+    if args.symbols and args.unit_data:
+        source_lines = rename_local_statics(source_lines, args.symbols, args.unit_data, args.own_data)
     if args.assembler == "snas":
         source_lines = fix_short_loops(source_lines)  # compiled code only: INCLUDE_ASM'd code is inlined below
     for line in source_lines:

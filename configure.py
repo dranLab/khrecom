@@ -96,6 +96,19 @@ def own_data_ranges(entries: list) -> str:
     return ",".join(ranges) or "none"
 
 
+def unit_data_ranges(entries: list) -> dict[str, str]:
+    """Per unit (segment name): the address ranges of all its data sections, from source or still assembly, for
+    ee_asm_compat.py's --unit-data (which original function-local statics are this unit's)."""
+    ranges: dict[str, list[str]] = {}
+    for entry in entries:
+        section = TYPE_SECTION.get(entry.segment.type.lstrip("."))
+        start, end = entry.segment.vram_start, entry.segment.vram_end
+        if section in (None, ".text") or not start or end is None:
+            continue
+        ranges.setdefault(entry.segment.name, []).append(f"0x{start:X}-0x{end:X}")
+    return {name: ",".join(r) for name, r in ranges.items()}
+
+
 def compiler_commands(compiler: str) -> tuple[str, str | None]:
     """(compiler command, original assembler command or None) for a package in tools/compilers/."""
     cc_dir = ROOT / "tools" / "compilers" / compiler
@@ -276,7 +289,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         # Windows-only tools (SN Systems' ee-gcc 2.95.x) run under wibo.
         cc, snas = compiler_commands(build_cfg["compiler"])
         symbols = f"{cfg_dir}/elf_symbol_addrs.txt"
-        compat_args = f" --source $in --symbols {symbols} --own-data $own_data" if (ROOT / symbols).exists() else ""
+        compat_args = f" --source $in --symbols {symbols} --own-data $own_data --unit-data $unit_data" if (ROOT / symbols).exists() else ""
         if build_cfg.get("source_root"):
             compat_args += f" --source-root {build_cfg['source_root']}"
         if snas:
@@ -318,6 +331,7 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
             if entry.object_path is not None and entry.src_paths:
                 by_object.setdefault(entry.object_path.as_posix(), []).append(entry)
 
+        unit_data = unit_data_ranges(split.linker_writer.entries)
         objects = list(by_object)
         compiled: dict[str, tuple[str, str]] = {}
         for obj, entries in by_object.items():
@@ -325,7 +339,8 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
             suffix = entries[0].src_paths[0].suffix
             align = {"align_flags": object_fixups(entries, compiled=suffix in (".c", ".cpp", ".cc"))}
             if suffix in (".c", ".cpp", ".cc"):  # ee-gcc picks cc1 / cc1plus from the extension
-                n.build(obj, "cc", src, variables={**align, "own_data": own_data_ranges(entries)},
+                n.build(obj, "cc", src, variables={**align, "own_data": own_data_ranges(entries),
+                                                 "unit_data": unit_data.get(entries[0].segment.name, "none")},
                         implicit=["tools/ee_asm_compat.py"])
                 compiled[entries[0].segment.name] = (obj, src)
             elif suffix == ".s":
