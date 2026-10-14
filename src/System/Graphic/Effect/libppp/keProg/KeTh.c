@@ -9,6 +9,16 @@ int sceGsSyncPath(int mode, u_short timeout);
 void sceVu0FTOI0Vector(sceVu0IVECTOR v0, sceVu0FVECTOR v1);
 void sceVu0ClampVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, float min, float max);
 void sceVu0SubVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2);
+void sceVu0InterVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2, float t);
+void sceVu0RotMatrixX(sceVu0FMATRIX m0, sceVu0FMATRIX m1, float rx);
+void sceVu0RotMatrixY(sceVu0FMATRIX m0, sceVu0FMATRIX m1, float ry);
+void sceVu0RotMatrixZ(sceVu0FMATRIX m0, sceVu0FMATRIX m1, float rz);
+
+static void (*ERotMatrix[3])(sceVu0FMATRIX m0, sceVu0FMATRIX m1, float r) = {
+    sceVu0RotMatrixX,
+    sceVu0RotMatrixY,
+    sceVu0RotMatrixZ,
+};
 
 void KeThRP_Quit(KeThRP *_p, int flg) {
     KeThBP *pBP;
@@ -19,6 +29,7 @@ void KeThRP_Quit(KeThRP *_p, int flg) {
         pBP->Flg |= flg;
     }
 }
+
 #define KE_RP_NEXT() (vi._02_Rp = (KeThRP *)((char *)vi._02_Rp + vi._06_RpSz))
 int KeThBP_MkGifPk(KeaThBp_MkGifPk *_a) {
     struct {
@@ -406,7 +417,317 @@ lst:
     last();
     return 1;
 }
+
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/keProg/KeTh", KeThBP_Update);
+#if 0
+/* Best attempt: same code apart from register allocation (the original has flg in s7, pTp in fp and &vf._06
+   in s6; this gets fp/s6/s7) and the order of a few spill slots (preStep - rootStep, &vf._07, &vf._08,
+   flg & 0x120, &pRP->InVec), which shifts scheduling around them. */
+void KeThBP_Update(KeaThBp_Update *_w) {
+    struct {
+        sceVu0FMATRIX _01_04_Mat;
+        sceVu0FVECTOR _05;
+        sceVu0FVECTOR _06;
+        sceVu0FVECTOR _07;
+        sceVu0FVECTOR _08;
+        float _09x_Spd1st;
+        float _09y_Dist;
+        float _09z_Pow;
+        float _09w_Corner;
+        float _10x_ValidR;
+        float _10y_HitR;
+        float _10z_TPow;
+        float _10w_Type;
+        sceVu0FVECTOR _11;
+        sceVu0FVECTOR _12;
+        sceVu0FVECTOR _31;
+    } vf;
+    KeThBP *_p;
+    int flg;
+    KeThBP *pBp;
+    KeThRP *rpTbl;
+    KeThRP *pRP;
+    KeThRP *pPreRP;
+    KeThRP *pRpW;
+    KeThTP *pTp;
+    float step;
+    int rootStep;
+    int preStep;
+    int nNewStep;
+    int nRootStep;
+    int i;
+    int j;
+    int r;
+    int a;
+    int rn;
+    u_int lwPstg;
+    int lwf;
+    int cmdSpdFix;
+    float f;
+
+    _p = _w->This;
+    flg = _p->Flg;
+    if (flg & KeThBP_SttHit) {
+        flg |= KeThBP_SttHitted;
+        flg &= ~KeThBP_SttHit;
+    }
+    if (flg & KeThBP_FlgParentDel) {
+        if (!(flg & KeThBP_FlgRootStep)) {
+            flg |= KeThBP_FlgReqDel;
+            _p->Flg = flg;
+            return;
+        }
+        flg &= ~KeThBP_FlgParentDel;
+        flg |= KeThBP_FlgNoParent;
+    }
+    rpTbl = _p->RpTbl;
+    step = _p->Step;
+    lwf = 0;
+    preStep = step;
+    lwPstg = _w->Pr->Pstg;
+    rootStep = _p->RootStep;
+    rn = _p->RPNum;
+    if (lwPstg != 0xFF) {
+        lwf = _p->LowNum < _w->Pr->LowMax;
+    }
+    cmdSpdFix = _p->Flg & KeThBP_SttSpdFix;
+    i = (int)(step + _w->Pr->StepSpd) - preStep;
+    nRootStep = i;
+    if (!(flg & KeThBP_FlgStepStop)) {
+        step += _w->Pr->StepSpd;
+        if (!(flg & KeThBP_FlgStepLimit) && (int)step >= _w->Pr->MaxStep) {
+            if (flg & KeThBP_SttNonStop) {
+                flg |= KeThBP_FlgRootStep;
+            }
+            if (!(flg & KeThBP_FlgRootStep)) {
+                nRootStep = (int)step - _w->Pr->MaxStep;
+                step = _w->Pr->MaxStep;
+                i -= nRootStep;
+            } else {
+                flg |= KeThBP_FlgStepLimit;
+                nRootStep = (int)step - _w->Pr->MaxStep;
+                flg &= ~KeThBP_SttCpSync;
+            }
+        }
+        nNewStep = i;
+    } else {
+        nNewStep = 0;
+    }
+    r = flg & KeThBP_FlgRootStep;
+    if (!r) {
+        nRootStep = 0;
+        if (flg & KeThBP_FlgNoParent) {
+            pTp = _w->TP;
+            _p->TpAdr = pTp;
+        } else {
+            pTp = _p->TpAdr;
+        }
+    } else {
+        pTp = _p->TpAdr;
+        rootStep += nRootStep;
+        if (pTp == NULL || rootStep >= preStep) {
+            _p->Flg |= KeThBP_FlgReqDel;
+            return;
+        }
+    }
+    j = _p->RootIdx;
+    pRP = &rpTbl[j];
+    for (i = nRootStep; i > 0; i--) {
+        KeThRP_Quit(pRP, r);
+        j++;
+        pRP++;
+        if (j == rn) {
+            j = 0;
+            pRP = rpTbl;
+        }
+    }
+    _p->RootIdx = j;
+    i = 0;
+    a = preStep - rootStep + nNewStep;
+    _p->OrgStep += nRootStep;
+    vf._09x_Spd1st = _w->Pr->Spd1st;
+    vf._09w_Corner = _w->Pr->Corner;
+    vf._10x_ValidR = pTp->ValidR;
+    vf._10y_HitR = pTp->HitR;
+    vf._10z_TPow = pTp->Pow;
+    vf._10w_Type = pTp->RPos[3];
+    sceVu0CopyVector(vf._08, pTp->RPos);
+    KeVu0CopyVecXYZ(vf._06, pRP->InVec);
+    vf._06[3] = 0.0f;
+    sceVu0CopyVector(vf._07, pRP->RPos);
+    if ((flg & (KeThBP_FlgRootStep | KeThBP_FlgNoParent)) == KeThBP_FlgNoParent) {
+        sceVu0SubVector(vf._05, vf._08, vf._07);
+        vf._09y_Dist = KeVu0VecLen(vf._05);
+        vf._09z_Pow = vf._09w_Corner;
+        if (vf._09y_Dist < vf._10x_ValidR) {
+            vf._09z_Pow = vf._09w_Corner + (vf._10z_TPow - vf._10z_TPow * (vf._09y_Dist - vf._10y_HitR) / (vf._10x_ValidR - vf._10y_HitR));
+        }
+        sceVu0Normalize(vf._05, vf._05);
+        sceVu0InterVector(vf._06, vf._05, vf._06, vf._09z_Pow);
+        if (cmdSpdFix) {
+            sceVu0Normalize(vf._06, vf._06);
+        }
+        r = KeVu0RndI();
+        ERotMatrix[r % 3](vf._01_04_Mat, _w->UnitMat, _w->Pr->Curv * (float)(r % 1001 - 500) / 500.0f);
+        sceVu0ApplyMatrix(vf._06, vf._01_04_Mat, vf._06);
+        sceVu0InterVector(vf._06, vf._06, pRP->InVec, _w->Pr->Wild);
+        if (cmdSpdFix) {
+            sceVu0Normalize(vf._06, vf._06);
+        }
+    }
+    while (1) {
+        sceVu0SubVector(vf._05, vf._08, vf._07);
+        vf._09y_Dist = KeVu0VecLen(vf._05);
+        if ((vf._10w_Type != 0.0f && pTp->HitR < vf._09y_Dist) || (vf._10w_Type == 0.0f && vf._09y_Dist < pTp->HitR)) {
+            pTp = pTp->Nxt;
+            if (pTp == NULL) {
+                step = rootStep + i;
+                _p->LastIdx = j;
+                flg |= KeThBP_SttHit;
+                for (i++; i <= preStep - rootStep; i++) {
+                    j++;
+                    pRP++;
+                    if (j == rn) {
+                        j = 0;
+                        pRP = rpTbl;
+                    }
+                    KeThRP_Quit(pRP, flg & KeThBP_FlgRootStep);
+                }
+                if (flg & KeThBP_SttNonStop) {
+                    flg |= KeThBP_FlgRootStep;
+                }
+                goto end;
+            }
+            sceVu0CopyVector(vf._08, pTp->RPos);
+            if (i == 0) {
+                _p->TpAdr = pTp;
+            }
+            vf._10x_ValidR = pTp->ValidR;
+            vf._10y_HitR = pTp->HitR;
+            vf._10z_TPow = pTp->Pow;
+            vf._10w_Type = pTp->RPos[3];
+        }
+        i++;
+        if (i > a) {
+            _p->LastIdx = j;
+            goto end;
+        }
+        pPreRP = pRP;
+        if (++j == rn) {
+            j = 0;
+            pRP = rpTbl;
+        } else {
+            pRP++;
+        }
+        sceVu0CopyVector(vf._12, vf._07);
+        KeVu0CopyVecXYZ(vf._11, vf._06);
+        sceVu0ScaleVector(vf._31, vf._06, vf._09x_Spd1st);
+        sceVu0AddVector(vf._07, vf._07, vf._31);
+        KeVu0CopyVecXYZ(pRP->RPos, vf._07);
+        vf._09z_Pow = vf._09w_Corner;
+        if (vf._09y_Dist < vf._10x_ValidR) {
+            vf._09z_Pow = vf._09w_Corner + (vf._10z_TPow - vf._10z_TPow * (vf._09y_Dist - vf._10y_HitR) / (vf._10x_ValidR - vf._10y_HitR));
+        }
+        sceVu0Normalize(vf._05, vf._05);
+        sceVu0InterVector(vf._06, vf._05, vf._06, vf._09z_Pow);
+        if (cmdSpdFix) {
+            sceVu0Normalize(vf._06, vf._06);
+        }
+        r = KeVu0RndI();
+        ERotMatrix[r % 3](vf._01_04_Mat, _w->UnitMat, _w->Pr->Curv * (float)(r % 1001 - 500) / 500.0f);
+        sceVu0ApplyMatrix(vf._06, vf._01_04_Mat, vf._06);
+        if (i <= preStep - rootStep) {
+            sceVu0InterVector(vf._06, vf._06, pRP->InVec, _w->Pr->Wild);
+            if (cmdSpdFix) {
+                sceVu0Normalize(vf._06, vf._06);
+            }
+            f = ((float)r * (1.0f / 2147483648.0f) * 2.0f + -1.0f) * _w->Pr->MvWidMv + pPreRP->Scl;
+            if (1.0f < f) {
+                f = 1.0f;
+            } else if (f < 0.0f) {
+                f = 0.0f;
+            }
+            pRP->Scl += (f - pRP->Scl) * _w->Pr->Wild;
+            for (pBp = (KeThBP *)pRP->GrpList.FirstItem; pBp != NULL; pBp = (KeThBP *)pBp->GrpTag.NextItem) {
+                pRpW = &pBp->RpTbl[pBp->RootIdx];
+                KeVu0CopyVecXYZ(pRpW->RPos, vf._12);
+                KeVu0CopyVecXYZ(pRpW->InVec, vf._11);
+                pRpW->Scl = pRP->Scl;
+                pBp->TpAdr = pTp;
+            }
+        } else {
+            pRP->GrpList.FirstItem = NULL;
+            pRP->RPos[3] = 1.0f;
+            f = ((float)r * (1.0f / 2147483648.0f) * 2.0f + -1.0f) * _w->Pr->MvWidMv + pPreRP->Scl;
+            if (1.0f < f) {
+                f = 1.0f;
+            } else if (f < 0.0f) {
+                f = 0.0f;
+            }
+            pRP->Scl = f;
+            if (lwf && !(r & lwPstg)) {
+                KeThBP *pBP;
+
+                pBP = KeThResHd_BPAlloc(_w->PkHd);
+                if (pBP != NULL) {
+                    KeWrkThBP_Init wrk;
+
+                    _p->LowNum++;
+                    wrk.This = pBP;
+                    wrk.RPNum = _w->PkHd->RPNum;
+                    KeThBP_Init(&wrk);
+                    pBP->TpAdr = pTp;
+                    pBP->Flg |= _p->Flg & (KeThBP_SttSpdFix | KeThBP_SttRvrs);
+                    pBP->LowNum = _p->LowNum;
+                    pBP->OrgStep = _p->OrgStep + preStep + i - (preStep - rootStep);
+                    KeVu0CopyVecXYZ(pBP->RpTbl[0].RPos, vf._12);
+                    KeVu0CopyVecXYZ(pBP->RpTbl[0].InVec, vf._11);
+                    pBP->RpTbl[0].Scl = pPreRP->Scl;
+                    if (_p->UdtTag.NextItem != NULL) {
+                        ((KeThBP *)_p->UdtTag.NextItem)->UdtTag.PrevTag = &pBP->UdtTag;
+                    }
+                    pBP->UdtTag.NextItem = _p->UdtTag.NextItem;
+                    pBP->UdtTag.PrevTag = &_p->UdtTag;
+                    _p->UdtTag.NextItem = pBP;
+                    {
+                        KeListTag *it = &pBP->GrpTag;
+
+                        if (pRP->GrpList.FirstItem != NULL) {
+                            ((KeThBP *)pRP->GrpList.FirstItem)->GrpTag.PrevTag = it;
+                        }
+                        it->NextItem = pRP->GrpList.FirstItem;
+                        it->PrevTag = (KeListTag *)&pRP->GrpList;
+                        pRP->GrpList.FirstItem = pBP;
+                    }
+                } else {
+                    lwf = 0;
+                }
+                if (_p->LowNum >= _w->Pr->LowMax) {
+                    lwf = 0;
+                }
+            }
+        }
+        KeVu0CopyVecXYZ(pRP->InVec, vf._06);
+    }
+end:
+    i = _p->RootIdx;
+    j = _p->LastIdx;
+    if (i < j) {
+        _p->FromZero = 0;
+        _p->FromRoot = j - i + 1;
+    } else if (j < i) {
+        _p->FromZero = j + 1;
+        _p->FromRoot = _p->RPNum - i;
+    } else {
+        _p->FromRoot = 0;
+        _p->FromZero = 0;
+    }
+    _p->Flg = flg;
+    _p->Step = step;
+    _p->RootStep = rootStep;
+}
+#endif
+
 void KeThBP_Init(KeWrkThBP_Init *_w) {
     KeThBP *_p = _w->This;
     KeData16 *pV;
@@ -437,6 +758,7 @@ void KeThBP_Init(KeWrkThBP_Init *_w) {
     pV->u4[2] = 0x14000000;
     pV->u4[3] = 0x11000000;
 }
+
 void KeThBP_Quit(KeThBP *_p) {
     KeThRP *pRp;
     int i;
@@ -458,6 +780,7 @@ void KeThBP_Quit(KeThBP *_p) {
         _p->GrpTag.PrevTag->NextItem = _p->GrpTag.NextItem;
     }
 }
+
 KeThBP *KeThResHd_BPAlloc(KeThResHd *_t) {
     KeThBP *pBP = (KeThBP *)_t->FreeAlow.FirstItem;
 
@@ -467,6 +790,7 @@ KeThBP *KeThResHd_BPAlloc(KeThResHd *_t) {
     _t->FreeAlow.FirstItem = pBP->UdtTag.NextItem;
     return pBP;
 }
+
 void KeThResHd_Init(KeThResHd *_t, u_char bpNum, u_char rpNum) {
     KeThBP *pBP;
     KeThBP *pPreBP;
@@ -486,6 +810,7 @@ void KeThResHd_Init(KeThResHd *_t, u_char bpNum, u_char rpNum) {
     }
     pBP->UdtTag.NextItem = NULL;
 }
+
 void KeThCp_Reset(KeThCp *_t, KeThResHd *res) {
     KeThBP *bp;
     KeThBP *bpw;
@@ -500,6 +825,7 @@ void KeThCp_Reset(KeThCp *_t, KeThResHd *res) {
     }
     _t->UdtList.FirstItem = NULL;
 }
+
 void KeThCp_AddBp(KeThCp *_t, KeThResHd *pResHd, sceVu0FVECTOR *pRPos, sceVu0FVECTOR *pVec) {
     KeThBP *pBp;
     KeWrkThBP_Init aBp;
@@ -536,6 +862,7 @@ void KeThCp_AddBp(KeThCp *_t, KeThResHd *pResHd, sceVu0FVECTOR *pRPos, sceVu0FVE
         _t->UdtList.FirstItem = pBp;
     }
 }
+
 void KeThCp_Update(KeaThCp_Update *_a) {
     KeaThBp_Update wrk;
     KeThBP *pBP;
@@ -579,6 +906,7 @@ void KeThCp_Update(KeaThCp_Update *_a) {
         }
     }
 }
+
 void KeThCp_Draw(KeThCp *_t, sceVu0FMATRIX *pMat, float *scl, KetThBp_Pr *pPr, u_long128 **pPkBuf, u_long Alpha, u_long Test) {
     sceDmaChan *dcGif;
     KeaThBp_MkGifPk aMk;
@@ -608,7 +936,10 @@ void KeThCp_Draw(KeThCp *_t, sceVu0FMATRIX *pMat, float *scl, KetThBp_Pr *pPr, u
         }
     }
 }
+
 void KeThCp_Init(KeThCp *_t) {
     _t->UdtList.FirstItem = NULL;
     _t->Stt = 0;
 }
+
+// SOURCE DATA: .data
