@@ -19,6 +19,7 @@ public:
     BYTE* allocBuf_A128(INT nSize);
     BYTE* allocBuf_A256(INT nSize);
     void releaseBuf(INT n);
+    void copyTo(CBuf& dst); // PARTIAL: added for System/VramMan
     BYTE* getBufPtr() { return m_pBuf; }
     const BYTE* getBufPtr() const { return m_pBuf; }
     INT getBufSize() const { return m_nBufSize; }
