@@ -161,6 +161,9 @@ public:
     // PARTIAL: added for Game/Player/FriendPan
     FLOAT calcDirection(const FVECTOR& inPos) const;
     void setAnimSpeed(FLOAT inSpeed);
+    // PARTIAL: added for Game/Player/FriendAriel
+    const FVECTOR& getVel() const;
+    void setVel(const FVECTOR& inVel);
 };
 
 #endif /* GAME_ENTITY_H */
