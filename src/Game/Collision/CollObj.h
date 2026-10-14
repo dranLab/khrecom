@@ -33,12 +33,26 @@ public:
     FVECTOR m_outDetect; /* 0x40 */
     // PARTIAL: m_Type, m_fgStatus, m_Radius split out for Game/Player/PlayerWeapon
     INT m_Type;          /* 0x50 COLL_TYPE */
-    UBYTE _m_0x54[0x8];  /* 0x54 m_Kind, m_outStatus */
+    // PARTIAL: m_Kind .. m_outInfoO split out for Game/Gimmick/GimmickSearchLaser
+    INT m_Kind;          /* 0x54 COLL_KIND */
+    INT m_outStatus;     /* 0x58 */
     INT m_fgStatus;      /* 0x5c */
     FLOAT m_Radius;      /* 0x60 */
-    UBYTE _m_0x64[0xc];  /* 0x64 m_shiftY .. 0x6c m_outInfoO */
+    FLOAT m_shiftY;      /* 0x64 */
+    INT m_outInfo;       /* 0x68 COLL_INFO_UNION */
+    INT m_outInfoO;      /* 0x6c COLL_INFO_UNION */
 
-    virtual ~CCollision(); /* 0x70 */
+    // PARTIAL: inline constructor and destructor (weak in the original) added for Game/Gimmick/GimmickSearchLaser
+    // (as in Game/Collision/CollUtilF.cpp)
+    CCollision() {
+        m_fgStatus = 0;
+        m_Kind = 0;
+        m_outInfoO = 0;
+        m_outInfo = 0;
+        m_shiftY = 0.0f;
+        m_Radius = 0.0f;
+    }
+    virtual ~CCollision() {} /* 0x70 */
     void setStartPos(const FVECTOR& inPos) { m_inWS = inPos; }
     void setEndPos(const FVECTOR& inPos) { m_inWE = inPos; }
 };
