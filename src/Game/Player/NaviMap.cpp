@@ -22,12 +22,6 @@
 #include "System/HeapMan.h"
 #include "include_asm.h"
 
-/* The data from source (.data/.rodata, last line of the file) needs config/SLUS_217.99/symbol_addrs.txt entries for
- * this object's unnamed copies of CLightUnit's inline functions and vtable (see the end of the file). Until they are
- * there, the data comes from the original assembly, and the functions with string literals (_initialize,
- * initRoomName) stay assembly too. With the entries: set NAVIMAP_SOURCE_DATA to 1 and add
- * "// SOURCE DATA: .data .rodata" as the last line. */
-#define NAVIMAP_SOURCE_DATA 0
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
@@ -349,7 +343,6 @@ static inline FLOAT _roundRot(FLOAT fInRot) {
 
 namespace Gauge {
 
-#if NAVIMAP_SOURCE_DATA
 BOOL CNaviMap::m_bBattleEnd = 0;
 
 static LPCSTR szNaviMap2DFile[31] = {
@@ -364,7 +357,6 @@ UINT g_uiFlag_WorldStart[27] = {
     0x100,   0x200,   0x400,   0x800,    0x1000,   0x10000,   0x20000,   0x40000,   0x80000,
     0x100000, 0x200000, 0x400000, 0x800000, 0x1000000, 0x2000000, 0x4000000, 0x8000000, 0x10000000,
 };
-#endif
 
 CNaviMap::CNaviMap(CTask* pParent) : CTask(pParent, 0x4000) {
     _initialize();
@@ -396,7 +388,6 @@ CNaviMap::~CNaviMap() {
     m_bBattleEnd = FALSE;
 }
 
-#if NAVIMAP_SOURCE_DATA
 void CNaviMap::_initialize() {
     m_uiState = 2;
     m_pModels = NULL;
@@ -496,22 +487,15 @@ void CNaviMap::_initialize() {
     }
 }
 
-#else
-}  // namespace Gauge
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/NaviMap", _initialize__Q25Gauge8CNaviMap);
-namespace Gauge {
-#endif
 
 }  // namespace Gauge
 
-#if NAVIMAP_SOURCE_DATA
 /* main's jump tables (the function is still assembly). */
 asm(".rdata\n.align 4\njtbl_00497810:\n"
     ".word .L0025EB64\n.word .L0025EA5C\n.word .L0025EB0C\n.word .L0025EB64\n.word .L0025EB64\n.word .L0025EB64\n"
     ".align 4\njtbl_00497830:\n"
     ".word .L0025ECE4\n.word .L0025EB8C\n.word .L0025EC10\n.word .L0025ECA4\n.word .L0025ECE4\n.word .L0025ECE4\n"
     ".text");
-#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/NaviMap", main__Q25Gauge8CNaviMap);
 
 namespace Gauge {
@@ -754,7 +738,6 @@ void CNaviMap::calcDispFlag() {
     }
 }
 
-#if NAVIMAP_SOURCE_DATA
 void CNaviMap::initRoomName(const CHAR* inFile, UINT inIdxSeq) {
     if (!m_pRoomName) {
         return;
@@ -804,32 +787,7 @@ void CNaviMap::initRoomName(const CHAR* inFile, UINT inIdxSeq) {
     }
 }
 
-#else
-}  // namespace Gauge
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/NaviMap", initRoomName__Q25Gauge8CNaviMapPCcUi);
-namespace Gauge {
-#endif
 
 }  // namespace Gauge
 
-#if !NAVIMAP_SOURCE_DATA
-/* CLightUnit's inline functions (System/Graphic/LightUnit.h), emitted from source once _initialize (which
- * constructs a CLightUnit) is. */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/NaviMap", func_0025F5A0);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/NaviMap", func_0025F5D0);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/NaviMap", func_0025F5F0);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/NaviMap", func_0025F630);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/NaviMap", func_0025F638);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/NaviMap", func_0025F670);
-#endif
-
-/* config/SLUS_217.99/symbol_addrs.txt entries needed for the data from source:
-// Game/Player/NaviMap: CLightUnit's inline functions and an unnamed copy of its vtable
-_$_10CLightUnit_0025F5A0 = 0x0025F5A0; // type:func size:0x30
-setAnchor__10CLightUnitPC6CCoordRC9MODELDATAi_0025F5D0 = 0x0025F5D0; // type:func size:0x1C
-reCalc__10CLightUnit_0025F5F0 = 0x0025F5F0; // type:func size:0x3C
-getPointLightData__C10CLightUnit_0025F630 = 0x0025F630; // type:func size:0x8
-_calc__10CLightUnit_0025F638 = 0x0025F638; // type:func size:0x34
-calc__10CLightUnit_0025F670 = 0x0025F670; // type:func size:0x18
-_vt$10CLightUnit_004978B8 = 0x004978B8; // size:0x38
-*/
+// SOURCE DATA: .data .rodata

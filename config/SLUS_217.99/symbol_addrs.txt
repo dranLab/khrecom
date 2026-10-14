@@ -32,3 +32,12 @@ _vt$t7CVector1Z6G_LINE_0048BD40 = 0x0048BD40; // size:0x18
 // System/Movie/AudioDec: CBuf's inline destructor and an unnamed copy of its vtable
 _$_4CBuf_001B5960 = 0x001B5960; // type:func size:0x54
 _vt$4CBuf_0046C4B0 = 0x0046C4B0; // size:0x18
+
+// Game/Player/NaviMap: CLightUnit's inline functions and an unnamed copy of its vtable
+_$_10CLightUnit_0025F5A0 = 0x0025F5A0; // type:func size:0x30
+setAnchor__10CLightUnitPC6CCoordRC9MODELDATAi_0025F5D0 = 0x0025F5D0; // type:func size:0x1C
+reCalc__10CLightUnit_0025F5F0 = 0x0025F5F0; // type:func size:0x3C
+getPointLightData__C10CLightUnit_0025F630 = 0x0025F630; // type:func size:0x8
+_calc__10CLightUnit_0025F638 = 0x0025F638; // type:func size:0x34
+calc__10CLightUnit_0025F670 = 0x0025F670; // type:func size:0x18
+_vt$10CLightUnit_004978B8 = 0x004978B8; // size:0x38
