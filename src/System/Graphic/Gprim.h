@@ -64,6 +64,16 @@ struct G_XYZ {
     FIX4 x;
     FIX4 y;
     FIX4 z;
+    // PARTIAL: added for System/DebugProcInfo
+    void set(FIX4 _x, FIX4 _y, FIX4 _z) {
+        x = _x;
+        y = _y;
+        z = _z;
+    }
+    void set(FIX4 _x, FIX4 _y) {
+        x = _x;
+        y = _y;
+    }
 };
 
 struct G_RGBA {
@@ -231,6 +241,21 @@ public:
         if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
     }
     void remove();
+};
+
+// PARTIAL: added for System/DebugProcInfo
+class CTile : public CGPrim {
+public:
+    G_XYZ m_P0;
+    G_XYZ m_P1;
+    G_RGBA m_C0;
+
+    CTile() {}
+    virtual ~CTile() {}
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
 };
 
 // PARTIAL: added for Game/NowLoading
