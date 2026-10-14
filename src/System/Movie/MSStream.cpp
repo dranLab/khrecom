@@ -48,19 +48,11 @@ public:
 static CMSStream* s_pMSS = NULL;
 static INT s_nMssThreadStat = 0;
 
-/* s_mssThreadStack is defined in assembly: other (still assembly) data holds words that splat took for pointers
- * into it, so its labels D_00677562 and D_00678358 must exist. */
 extern "C" unsigned char s_mssThreadStack[4096];
 asm(".section .bss\n"
     "\t.align 3\n"
     "s_mssThreadStack:\n"
-    "\t.space 0x122\n"
-    "\t.globl D_00677562\n"
-    "D_00677562:\n"
-    "\t.space 0xDF6\n"
-    "\t.globl D_00678358\n"
-    "D_00678358:\n"
-    "\t.space 0xE8\n"
+    "\t.space 0x1000\n"
     "\t.text");
 static INT s_nMssThreadID;
 static volatile SHORT s_nMssPtr;

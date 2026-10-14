@@ -27,14 +27,6 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/Movement.h"
 #include "System/TaskMan.h"
 
-/* Other (still assembly) data holds string bytes that splat took for pointers into this object's .rodata, so
- * its labels D_00495350 and D_00495564 must exist. Ps2EeAs can't define a symbol relative to another (.set
- * crashes it), so they are absolute: the addresses of .rodata+0x50 and .rodata+0x264 in the original. */
-asm(".globl D_00495350\n"
-    "D_00495350 = 0x00495350\n"
-    "\t.globl D_00495564\n"
-    "D_00495564 = 0x00495564");
-
 namespace Friend {
 
 unsigned char g_BeastAttackID[4] = { 91, 113, 114, 0 };

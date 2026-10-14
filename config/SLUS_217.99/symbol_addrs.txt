@@ -3,3 +3,10 @@
 // Weak copies of inline functions whose names the original linker dropped (it kept one global symbol per name):
 // <name>_<ADDR>, like the de-duplicated names in elf_symbol_addrs.txt.
 _$_10CCollision_0022BFD0 = 0x0022BFD0; // type:func size:0x30
+
+// Addresses that still-assembly data holds as plain words (string bytes), not pointers: without this splat makes
+// them references to labels inside objects whose data now comes from source.
+D_00495350 = 0x00495350; // can_be_referenced:False
+D_00495564 = 0x00495564; // can_be_referenced:False
+D_00677562 = 0x00677562; // can_be_referenced:False
+D_00678358 = 0x00678358; // can_be_referenced:False
