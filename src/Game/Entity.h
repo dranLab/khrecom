@@ -164,6 +164,9 @@ public:
     // PARTIAL: added for Game/Player/FriendAriel
     const FVECTOR& getVel() const;
     void setVel(const FVECTOR& inVel);
+    // PARTIAL: added for Game/Gimmick/GimmickThunderTrap
+    HANDLE attachEffect(const CHAR* inName, UINT inNo, const CCoord* inParent, const FVECTOR* inPos,
+                        const FVECTOR* inRot, FLOAT inWait);
 };
 
 #endif /* GAME_ENTITY_H */
