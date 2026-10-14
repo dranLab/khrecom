@@ -10,6 +10,17 @@ class CCoord; // PARTIAL: added for Game/Atel/AtelCamera
 class CTask;
 template <class T> class ISLCManagerT;
 template <class T> class SLContainerT;
+template <class T> class CSLCListT; // PARTIAL: added for System/CoordMan
+
+// PARTIAL: added for System/CoordMan
+template <class T>
+class ISLCManagerT {
+public:
+    virtual ~ISLCManagerT() {}
+    virtual SLContainerT<T>* createContainer() = 0;
+    virtual void releaseContainer(SLContainerT<T>& inContainer) = 0;
+    virtual SLContainerT<T>* getContainer(HANDLE hID) = 0;
+};
 
 // PARTIAL: added for Game/Bullet/BulletManager
 template <class T>
@@ -19,6 +30,7 @@ private:
     T* _pValue;
     SLContainerT<T>* _pNextContainer;
     int _nGeneral;
+    friend class CSLCListT<T>; // PARTIAL: added for System/CoordMan
 public:
     HANDLE getHandle() { return _hID; }
     T* getValue() { return _pValue; }
@@ -33,8 +45,73 @@ private:
     SLContainerT<T>* m_pTailContainer;
     int m_nListSize;
 public:
-    virtual ~CSLCListT();
+    virtual ~CSLCListT() { removeAll(); } // PARTIAL: body added for System/CoordMan
     SLContainerT<T>* getHead() { return m_pHeadContainer; } // PARTIAL: added for Game/Bullet/BulletManager
+    // PARTIAL: added for System/CoordMan
+    CSLCListT(ISLCManagerT<T>& inSLCManager) : m_SLCManager(inSLCManager) { resetParam(); }
+    SLContainerT<T>* pushBack(T& inEntry) {
+        SLContainerT<T>* pContainer = createContainer(inEntry);
+        if (!pContainer) {
+            return NULL;
+        }
+        if (m_pTailContainer) {
+            m_pTailContainer->_pNextContainer = pContainer;
+        }
+        m_pTailContainer = pContainer;
+        if (!m_pHeadContainer) {
+            m_pHeadContainer = pContainer;
+        }
+        m_nListSize++;
+        return pContainer;
+    }
+    BOOL remove(HANDLE hContainer) {
+        SLContainerT<T>* pPrevContainer = NULL;
+        SLContainerT<T>* pContainer = m_pHeadContainer;
+        while (pContainer) {
+            SLContainerT<T>* pNextContainer = pContainer->getNext();
+            if (hContainer == pContainer->getHandle()) {
+                if (pPrevContainer) {
+                    pPrevContainer->_pNextContainer = pNextContainer;
+                } else {
+                    m_pHeadContainer = pNextContainer;
+                }
+                if (pContainer == m_pTailContainer) {
+                    m_pTailContainer = pPrevContainer;
+                }
+                releaseContainer(*pContainer);
+                m_nListSize--;
+                return TRUE;
+            }
+            pPrevContainer = pContainer;
+            pContainer = pNextContainer;
+        }
+        return FALSE;
+    }
+    void removeAll() {
+        SLContainerT<T>* pContainer = m_pHeadContainer;
+        while (pContainer) {
+            SLContainerT<T>* p = pContainer;
+            pContainer = pContainer->getNext();
+            releaseContainer(*p);
+        }
+        resetParam();
+    }
+
+protected:
+    SLContainerT<T>* createContainer(T& inEntry) {
+        SLContainerT<T>* pContainer = m_SLCManager.createContainer();
+        if (pContainer) {
+            pContainer->_pValue = &inEntry;
+            pContainer->_pNextContainer = NULL;
+        }
+        return pContainer;
+    }
+    void releaseContainer(SLContainerT<T>& inContainer) { m_SLCManager.releaseContainer(inContainer); }
+    void resetParam() {
+        m_pHeadContainer = NULL;
+        m_pTailContainer = NULL;
+        m_nListSize = 0;
+    }
 };
 
 typedef CSLCListT<CTask> CTaskSLCList;
