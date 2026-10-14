@@ -91,6 +91,10 @@ protected:
     void setPushon(INT inFlag);
     void resetLockon(); // PARTIAL: added for Game/Player/SummonGenie
     void killChild(FLOAT inFadeTime); // PARTIAL: added for Game/Player/SummonTink
+    // PARTIAL: added for Game/Player/SummonCloud
+    INT entryChainTrg(INT inNum);
+    INT checkChainTrg();
+    INT isSucceedChain();
 public:
     void setExit(INT inFlag);
     virtual INT setSkill(INT inID);

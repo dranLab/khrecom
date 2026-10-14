@@ -197,6 +197,11 @@ public:
                          const CCoord* inParent3, const FVECTOR* inPos1, const FVECTOR* inPos2, const FVECTOR* inPos3,
                          FLOAT inWait);
     BOOL isMotionLoop() const;
+    // PARTIAL: added for Game/Player/SummonCloud
+    void setModelAlphaScale(FLOAT inAlpha, INT inModel);
+    UINT isPermissionLockOn() const { return m_uiEntityFlag & 0x10000; }
+    FLOAT calcDistanceXZSq(const FVECTOR& inPos) const;
+    FLOAT calcDistanceXZSq(const CEntity* inEntity) const;
     void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel) {
         setEntityFlag(0x40000000, 0);
         m_fStartAlpha = inStart;

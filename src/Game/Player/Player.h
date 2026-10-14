@@ -82,7 +82,9 @@ private:
     // PARTIAL: m_vCenterPos, m_vAppearPos, m_vJumpStartPos, m_hMark, m_vMarkPos split out for Game/Player/PlayerWeapon
     UBYTE _m_0x328[0x78];        /* 0x328 .. 0x390 m_vWeaponTopPos */
     FVECTOR m_vCenterPos;        /* 0x3a0 */
-    UBYTE _m_0x3b0[0x40];        /* 0x3b0 m_vStartPos .. 0x3e0 m_vOldSafeField */
+    UBYTE _m_0x3b0[0x14];        /* 0x3b0 m_vStartPos, 0x3c0 m_fStartDir */
+    FLOAT m_fDir;                /* 0x3c4 */ // PARTIAL: split out for Game/Player/SummonCloud
+    UBYTE _m_0x3c8[0x28];        /* 0x3c8 m_fScale .. 0x3e0 m_vOldSafeField */
     FVECTOR m_vAppearPos;        /* 0x3f0 */
     UBYTE _m_0x400[0xc0];        /* 0x400 .. 0x4b0 */
     FVECTOR m_vJumpStartPos;     /* 0x4c0 */
@@ -120,6 +122,9 @@ public:
     // PARTIAL: added for Game/Player/FriendDonald
     PlayerWeapon::CPlayerWeapon* getWeapon() { return m_pWeapon; }
     void getWeaponTopPos(FVECTOR& outPos);
+    // PARTIAL: added for Game/Player/SummonCloud
+    void setDir(FLOAT inDir) { m_fDir = inDir; }
+    void calcAppearPos(FLOAT inX, FLOAT inZ, FVECTOR* inTarget);
     HANDLE isNowMark() { return m_hMark; } // PARTIAL: added for Game/Player/FriendGoofy (original name/type unknown)
     // PARTIAL: added for Game/Gimmick/GimmickJumpStand
     INT getJumpState() const;
