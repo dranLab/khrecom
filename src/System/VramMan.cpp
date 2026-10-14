@@ -132,17 +132,13 @@ volatile INT s_nTexTransStatus;
 
 }
 
-/* gcc mangles _MallocUnit (anonymous namespace) as Q2<len>_GLOBAL_$N$<path><random>11_MallocUnit; the build only
- * renames the namespace where its length follows an underscore, so these names are given explicitly. */
-#define VRAMMAN_NS "Q252_GLOBAL_$N$c__KHCOM_MainApp_System_VramMan.cpp2gbaaa11_MallocUnit"
-static void _release(_MallocUnit** ppInPtr) __asm__("_release__FPP" VRAMMAN_NS);
-static void _release(_MallocUnit** ppInPtr, UINT nPos) __asm__("_release__FPP" VRAMMAN_NS "Ui");
-static _MallocUnit* _createUnit(UINT nStartPos, UINT nSize, _MallocUnit* pPrev, _MallocUnit* pNext)
-    __asm__("_createUnit__FUiUiP" VRAMMAN_NS "T2");
-static INT _allocSub(_MallocUnit*& pAddr, UINT nStartPos, UINT nEndPos, UINT nSize, const CHAR* pszType)
-    __asm__("_allocSub__FRP" VRAMMAN_NS "UiUiUiPCc");
-static void _compact(_MallocUnit** ppUnit) __asm__("_compact__FPP" VRAMMAN_NS);
-static void _dbgReportAllocatedUnit(const _MallocUnit* pUnit) __asm__("_dbgReportAllocatedUnit__FPC" VRAMMAN_NS);
+static void _release(_MallocUnit** ppInPtr);
+static void _release(_MallocUnit** ppInPtr, UINT nPos);
+static _MallocUnit* _createUnit(UINT nStartPos, UINT nSize, _MallocUnit* pPrev, _MallocUnit* pNext);
+static INT _allocSub(_MallocUnit*& pAddr, UINT nStartPos, UINT nEndPos, UINT nSize, const CHAR* pszType);
+static void _compact(_MallocUnit** ppUnit);
+static void _dbgReportAllocatedUnit(const _MallocUnit* pUnit);
+#line 146
 
 INT VRAM::_FRAME_SIZE;
 INT VRAM::_FRAME_AREA_END;
