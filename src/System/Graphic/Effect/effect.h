@@ -14,6 +14,8 @@ inline void _effectCheckValid(BOOL inValid) {
     if (!inValid) AssertApp(__FILE__, __LINE__, "isValid()", 0);
 }
 
+class CEntity; // PARTIAL: added for Game/Player/SummonGenie
+
 /* PARTIAL: added for Game/Player/SummonTink */
 class CEffect {
     FVECTOR m_vScale;    /* 0x00 */ // PARTIAL: split out for Game/Gimmick/GimmickTutorial
@@ -26,6 +28,16 @@ public:
     void setScale(FLOAT fScale) {
         m_vScale.x = m_vScale.y = m_vScale.z = fScale;
     }
+    // PARTIAL: added for Game/Player/SummonGenie
+    FVECTOR& scale() { return m_vScale; }
+    void setAttachNoRot(BOOL bVal) {
+        if (bVal) {
+            m_iFlag |= 4;
+        } else {
+            m_iFlag &= ~4;
+        }
+    }
+    void setZSortEntity(CEntity* pEnt, INT nEntZOfs, BOOL bAlpha);
 };
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_EFFECT_H */

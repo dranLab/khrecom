@@ -89,6 +89,7 @@ protected:
     void getWeaponTopPos(FVECTOR& inPos);
     void setLockon(HANDLE inHandle);
     void setPushon(INT inFlag);
+    void resetLockon(); // PARTIAL: added for Game/Player/SummonGenie
     void killChild(FLOAT inFadeTime); // PARTIAL: added for Game/Player/SummonTink
 public:
     void setExit(INT inFlag);
