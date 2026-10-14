@@ -5,6 +5,7 @@
 #include "khtypes.h"
 
 union FMATRIX;
+class CEffect; // PARTIAL: added for Game/Player/SummonTink
 
 namespace ObjType {
 enum eObjType {
@@ -35,6 +36,7 @@ enum eObjType {
 class CEffectMan {
 public:
     static HANDLE setEffect(const CHAR* inName, UINT inFlag, ObjType::eObjType inType, const FMATRIX* inMat, FLOAT inScale);
+    static CEffect* getEffect(HANDLE inHandle); // PARTIAL: added for Game/Player/SummonTink
 };
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_EFFECTMAN_H */
