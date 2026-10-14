@@ -15,6 +15,7 @@ public:
     static INT getInt(UINT inKind, UINT inIndex); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
     static void setInt(UINT inKind, UINT inIndex, INT inValue); // PARTIAL: added for Form/Menu/GameOver
     static BOOL getFlag(UINT inKind, UINT inFlag); // PARTIAL: added for Form/Menu/Menu
+    static BYTE getByte(UINT inKind, UINT inIndex); // PARTIAL: added for Game/Player/PlayerControl
 };
 
 #endif /* GAME_GAMEWORK_H */
