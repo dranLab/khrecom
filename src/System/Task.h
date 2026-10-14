@@ -90,6 +90,9 @@ public:
     }
     void setPriority(INT pri) { m_nProcPrio = pri; } // PARTIAL: added for System/Graphic/TexCtrl
     CCoord& Crd(UINT nIndex); // PARTIAL: added for Game/Atel/AtelCamera
+    void addCoord(UINT nNum);                               // PARTIAL: added for Game/ModelObj
+    INT getCoordNum() const;                                // PARTIAL: added for Game/ModelObj
+    BOOL isClippedLastTime() { return m_cLastClip < 0; }    // PARTIAL: added for Game/ModelObj
     // PARTIAL: added for Game/Atel/AtelCamera
     void ignorePause(BOOL bFlag) {
         if (bFlag) {

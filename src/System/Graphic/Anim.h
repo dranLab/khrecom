@@ -16,6 +16,8 @@ inline void _animCheckFlagIdx(UINT idx) {
 // PARTIAL: added for Game/Gimmick/GimmickLotusLeaf
 typedef ULONG ANIMID;
 class CTask;
+class CRsrcANN;  // PARTIAL: added for Game/ModelObj
+struct MODELDATA; // PARTIAL: added for Game/ModelObj
 class CAnim {
 private:
     UBYTE _m_0x00[0x14]; /* 0x000 m_pCrds .. 0x010 m_pMotData */
@@ -33,6 +35,9 @@ public:
     CAnim();
     virtual ~CAnim();
     void link(CTask* pTask, INT n);
+    void link(CTask* pTask, const CRsrcANN* pANN, MODELDATA* pData); // PARTIAL: added for Game/ModelObj
+    // PARTIAL: added for Game/ModelObj (name guessed: clears a bit of m_Flags[1] inline)
+    void clearFlag1(USHORT nBit) { m_Flags[1] &= ~nBit; }
     void init(UINT nId, INT n);
     void play(TIMEQ tq, INT n);
     void changeEx(INT nRsrcID, ANIMID inId, TIMEQ inTq, BOOL inLoop);
