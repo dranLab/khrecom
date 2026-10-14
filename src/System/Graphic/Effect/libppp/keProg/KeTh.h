@@ -4,6 +4,60 @@
 
 #include "System/Graphic/Effect/libppp/pppPart.h"
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/KeTh */
+typedef struct { /* 0x10 */
+    u_long NLOOP : 15;
+    u_long EOP : 1;
+    u_long pad16 : 16;
+    u_long id : 14;
+    u_long PRE : 1;
+    u_long PRIM : 11;
+    u_long FLG : 2;
+    u_long NREG : 4;
+    u_long REGS0 : 4;
+    u_long REGS1 : 4;
+    u_long REGS2 : 4;
+    u_long REGS3 : 4;
+    u_long REGS4 : 4;
+    u_long REGS5 : 4;
+    u_long REGS6 : 4;
+    u_long REGS7 : 4;
+    u_long REGS8 : 4;
+    u_long REGS9 : 4;
+    u_long REGS10 : 4;
+    u_long REGS11 : 4;
+    u_long REGS12 : 4;
+    u_long REGS13 : 4;
+    u_long REGS14 : 4;
+    u_long REGS15 : 4;
+} sceGifTag;
+
+typedef struct _sceDmaTag { /* 0x10 */
+    u_short qwc;
+    u_char mark;
+    u_char id;
+    struct _sceDmaTag *next;
+    u_int p[2];
+} sceDmaTag;
+
+typedef union { /* 0x10 */
+    sceDmaTag dt;
+    sceGifTag gt;
+    sceVu0FVECTOR fv;
+    sceVu0IVECTOR iv;
+    signed char s1[16];
+    short s2[8];
+    int s4[4];
+    long s8[2];
+    long128 s16;
+    u_char u1[16];
+    u_short u2[8];
+    u_int u4[4];
+    u_long u8[2];
+    u_long128 u16;
+    float f4[4];
+} KeData16;
+
 typedef struct _KeListTag { /* 0x8 */
     void *NextItem;
     struct _KeListTag *PrevTag;
@@ -56,7 +110,7 @@ typedef struct _KeThBP { /* 0x70 */
     u_short RootStep;
     u_char LowNum;
     char _P0[1];
-    u_long128 Send; /* KeData16 */
+    KeData16 Send;
     float OrgStep;
     u_short RootIdx;
     u_char LastIdx;
@@ -142,6 +196,39 @@ typedef struct _KeaThCp_Update { /* 0x18 */
     sceVu0FVECTOR *RPos;
     sceVu0FVECTOR *Vec;
 } KeaThCp_Update;
+
+/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/KeTh */
+typedef struct _KeaThBp_MkGifPk { /* 0x28 */
+    sceVu0FMATRIX *Mat;
+    KeThBP *This;
+    u_long128 *GifPkBuf;
+    struct _KetThBp_Pr *Pr;
+    float *Scl;
+    sceGifTag *LTag;
+    u_long Alpha;
+    u_long Test;
+} KeaThBp_MkGifPk;
+
+typedef struct _KeaThBp_Update { /* 0x50 */
+    sceVu0FMATRIX UnitMat;
+    struct _KeThBP *This;
+    struct _KeThTP *TP;
+    struct _KeThResHd *PkHd;
+    struct _KetThBp_Pr *Pr;
+} KeaThBp_Update;
+
+typedef struct _KeWrkThBP_Init { /* 0x8 */
+    struct _KeThBP *This;
+    u_char RPNum;
+} KeWrkThBP_Init;
+
+void KeThRP_Quit(KeThRP *_p, int flg);
+int KeThBP_MkGifPk(KeaThBp_MkGifPk *_a);
+void KeThBP_Update(KeaThBp_Update *_w);
+void KeThBP_Init(KeWrkThBP_Init *_w);
+void KeThBP_Quit(KeThBP *_p);
+KeThBP *KeThResHd_BPAlloc(KeThResHd *_t);
+void KeThCp_Reset(KeThCp *_t, KeThResHd *res);
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeTh */
 void KeThResHd_Init(KeThResHd *_t, u_char bpNum, u_char rpNum);
