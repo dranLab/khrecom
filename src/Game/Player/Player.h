@@ -73,14 +73,28 @@ private:
     INT m_iHP;                   /* 0x320 */
     INT m_iMaxHP;                /* 0x324 */
     // PARTIAL: m_uiAttackID split out for Game/Player/FriendKing
-    UBYTE _m_0x328[0x1f0];       /* 0x328 .. 0x514 */
+    // PARTIAL: m_vCenterPos, m_vAppearPos, m_vJumpStartPos, m_hMark, m_vMarkPos split out for Game/Player/PlayerWeapon
+    UBYTE _m_0x328[0x78];        /* 0x328 .. 0x390 m_vWeaponTopPos */
+    FVECTOR m_vCenterPos;        /* 0x3a0 */
+    UBYTE _m_0x3b0[0x40];        /* 0x3b0 m_vStartPos .. 0x3e0 m_vOldSafeField */
+    FVECTOR m_vAppearPos;        /* 0x3f0 */
+    UBYTE _m_0x400[0xc0];        /* 0x400 .. 0x4b0 */
+    FVECTOR m_vJumpStartPos;     /* 0x4c0 */
+    UBYTE _m_0x4d0[0x48];        /* 0x4d0 .. 0x514 */
     UINT m_uiAttackID;           /* 0x518 */
     UBYTE _m_0x51c[0x200];       /* 0x51c .. 0x718 */
     HANDLE m_hTarget;            /* 0x71c */
     HANDLE m_hLockon;            /* 0x720 */
+    HANDLE m_hMark;              /* 0x724 */
+    FVECTOR m_vMarkPos;          /* 0x730 */
 
 public:
     CPlayer(CTask* inParent);
+    // PARTIAL: added for Game/Player/PlayerWeapon
+    FVECTOR& getCenterPos() { return m_vCenterPos; }
+    FVECTOR& getAppearPos() { return m_vAppearPos; }
+    FVECTOR& getJumpStartPos() { return m_vJumpStartPos; }
+    FVECTOR& getMarkPos() { return m_vMarkPos; }
     PlayerCamera::CPlayerCamera* getPlayerCamera() { return m_pCam; } // PARTIAL: added for Game/Player/FriendJack
     INT getPlayerState() { return m_PlayerState; }
     INT getHP() { return m_iHP; }

@@ -64,6 +64,7 @@ public:
     static void clear(); // PARTIAL: added for System/RootTask
     static void dispose();
     static BOOL reqEnterBattle(SHORT inID); // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy
+    static BOOL isFieldScene(); // PARTIAL: added for Game/Player/PlayerWeapon
 };
 
 #endif /* GAME_SCENEINFO_H */

@@ -15,6 +15,7 @@ class CModel;    // PARTIAL: added for Game/Gimmick/GimmickPlantChild
 union FMATRIX;   // PARTIAL: added for Game/Gimmick/GimmickWindowLid
 class CAnim;     // PARTIAL: added for Game/Gimmick/GimmickLotusLeaf
 class CBodyCollision; // PARTIAL: added for Game/Gimmick/GimmickGuillotine
+class CEffectMotion;  // PARTIAL: added for Game/Player/PlayerWeapon
 
 enum eObjType {
     eObjType_dummy = 0 /* values not needed yet */
@@ -50,7 +51,9 @@ protected:
     // PARTIAL: m_pAttack, m_iID split out for Game/Gimmick/GimmickToldPipe
     CBodyCollision* m_pBodyColl; /* 0x0a4 */ // PARTIAL: split out for Game/Gimmick/GimmickGuillotine
     CAttackMotion* m_pAttack; /* 0x0a8 */
-    UBYTE _m_0xac[0x10]; /* 0x0ac m_pEffect .. 0x0b8 m_pSEEx */
+    // PARTIAL: m_pEffect split out for Game/Player/PlayerWeapon
+    CEffectMotion* m_pEffect; /* 0x0ac */
+    UBYTE _m_0xb0[0xc];  /* 0x0b0 m_pEffectEx .. 0x0b8 m_pSEEx */
     INT m_iID;           /* 0x0bc */
     UBYTE _m_0xc0[0x20]; /* 0x0c0 m_vTargetPos .. 0x0d0 m_vRootMoveScale */
 private:
@@ -64,7 +67,15 @@ private:
     // PARTIAL: m_iFlashingCounter/m_fNearTranslucence split out for Game/Gimmick/GimmickDominoPillar
     INT m_iFlashingCounter;    /* 0x0f4 */
     FLOAT m_fNearTranslucence; /* 0x0f8 */
-    UBYTE _m_0xfc[0xd4];   /* 0x0fc m_fSpeed .. 0x1c4 m_pDamageString */
+    // PARTIAL: fade members split out for Game/Player/PlayerWeapon
+    UBYTE _m_0xfc[0x10];   /* 0x0fc m_fSpeed .. 0x108 m_fArriveRadius */
+    FLOAT m_fStartAlpha;   /* 0x10c */
+    FLOAT m_fEndAlpha;     /* 0x110 */
+    FLOAT m_fFadeAlpha;    /* 0x114 */
+    TIMEQ m_tqFadeTimer;   /* 0x118 */
+    TIMEQ m_tqFadeTime;    /* 0x11c */
+    INT m_iFadeModel;      /* 0x120 */
+    UBYTE _m_0x124[0xac];  /* 0x124 m_pCollParam .. 0x1c4 m_pDamageString */
 
 public:
     CEntity(CTask* inParent);
@@ -176,6 +187,16 @@ public:
     // PARTIAL: added for Game/Player/SummonBambi
     BOOL isGround() const;
     FLOAT calcDistance(const FVECTOR& inPos) const;
+    // PARTIAL: added for Game/Player/PlayerWeapon (weak in the original)
+    UINT isDispOFF() const { return m_uiEntityFlag & 1; }
+    void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel) {
+        setEntityFlag(0x40000000, 0);
+        m_fStartAlpha = inStart;
+        m_fEndAlpha = inEnd;
+        m_tqFadeTimer = inTime;
+        m_tqFadeTime = inTime;
+        m_iFadeModel = inModel;
+    }
 };
 
 #endif /* GAME_ENTITY_H */
