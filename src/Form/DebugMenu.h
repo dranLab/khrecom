@@ -5,6 +5,8 @@
 #include "khtypes.h"
 #include "System/Debug.h"
 
+class CTask; // PARTIAL: added for System/MainTaskFactory
+
 // PARTIAL: added for System/RootTask
 struct DebugParam {
     INT _nUserIndex;
@@ -31,11 +33,24 @@ struct DebugParam {
 
 class CDebugMenu {
 public:
+    CDebugMenu(CTask* pParent); // PARTIAL: added for System/MainTaskFactory
     static USER getDebugUser();
     static DebugParam& getDebugParam(); // PARTIAL: added for System/RootTask
     static void initParam(INT nUser);
     static BOOL startLoadFromMemoca();
     static BOOL isCompleteLoadFromMemoca();
+};
+
+// PARTIAL: added for System/MainTaskFactory (CTask-derived; base omitted so the header need not include Task.h)
+class CColorCheck {
+public:
+    CColorCheck(CTask* pParent);
+};
+
+// PARTIAL: added for System/MainTaskFactory (CTask-derived; base omitted so the header need not include Task.h)
+class CScreenCheck {
+public:
+    CScreenCheck(CTask* pParent);
 };
 
 #endif // FORM_DEBUGMENU_H
