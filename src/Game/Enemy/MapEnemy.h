@@ -3,8 +3,12 @@
 #define GAME_ENEMY_MAPENEMY_H
 
 #include "khtypes.h"
+/* PARTIAL: added for Game/Enemy/MapEnemyManager - its .rodata has no BodyCollision.h/Anim.h strings: define
+ * MAPENEMY_H_NO_COLL_ANIM before including to leave these two out. */
+#ifndef MAPENEMY_H_NO_COLL_ANIM
 #include "Game/BodyCollision.h"
 #include "System/Graphic/Anim.h"
+#endif
 #include "Game/Entity.h"
 #include "System/Vector.h"
 
@@ -22,7 +26,9 @@ protected:
     INT m_iAppearType;           /* 0x1f4 */
 private:
     UINT m_uiFlag;               /* 0x1f8 */
-    UBYTE _m_0x1fc[0x144];       /* 0x1fc m_iSysStep .. m_MapEnemyState[9] */
+    INT m_iSysStep;              /* 0x1fc */ // PARTIAL: m_iSysStep, m_iUniqueID split out for Game/Enemy/MapEnemyManager
+    INT m_iUniqueID;             /* 0x200 */
+    UBYTE _m_0x204[0x13c];       /* 0x204 m_iMapEnemyParam .. m_MapEnemyState[9] */
 
 public:
     CMapEnemy(CTask* inParent, CState* inState = __null);
@@ -34,6 +40,8 @@ public:
         if (inOn) m_uiFlag |= inFlag;
         else m_uiFlag &= ~inFlag;
     }
+    void setUniqueID(INT inID) { m_iUniqueID = inID; } // PARTIAL: added for Game/Enemy/MapEnemyManager
+    UINT isAppear() const { return m_uiFlag & 1; }      // PARTIAL: added for Game/Enemy/MapEnemyManager
     static FLOAT getAppearDistance();
     static FLOAT getDisappearDistance();
 
