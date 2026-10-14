@@ -25,26 +25,49 @@ from compare_compilers import functions  # noqa: E402
 
 
 def disassemble(obj: Path, name: str, size: int) -> list[str]:
-    """The function's instructions (and their relocations), without the padding after it."""
+    """The function's instructions (and their relocations), without the padding after it.
+
+    Labels inside the function (the original's jump-table targets, `.L...`) are skipped, and branches within the
+    function are shown as offsets from its start (`<+0x40>`), whether they go to a label (the original: an
+    R_MIPS_PC16 relocation) or are resolved already (ours)."""
     out = subprocess.run(["mips-linux-gnu-objdump", "-dr", "-z", "--no-show-raw-insn", str(obj)],
                          capture_output=True, text=True, check=True).stdout
+    labels = {m.group(2): int(m.group(1), 16)
+              for m in re.finditer(r"^([0-9a-f]+) <([^>]+)>:$", out, re.M)}
+    start = labels.get(name)
+    end = None if start is None else start + size
+    def local(addr: int) -> str:
+        return f"<+0x{addr - start:x}>" if addr != start else "<+0x0>"
     lines, inside, count = [], False, 0
     for line in out.splitlines():
         if line.endswith(f"<{name}>:"):
             inside = True
             continue
-        if inside and (not line.strip() or re.match(r"^[0-9a-f]+ <", line)):
-            break
-        if inside:
-            is_insn = re.match(r"^\s+[0-9a-f]+:\t", line) is not None
-            if is_insn and count == size // 4:
+        if not inside:
+            continue
+        label = re.match(r"^([0-9a-f]+) <[^>]+>:$", line)
+        if not line.strip() or label:
+            if count == size // 4 or (label and int(label.group(1), 16) >= end):
                 break
-            count += is_insn
-            line = re.sub(r"^\s+[0-9a-f]+:\t", "", line)               # drop addresses
-            line = re.sub(r"^\s+[0-9a-f]+: (R_)", r"   \1", line)       # and relocations' (they follow their insn)
-            line = re.sub(r"\b[0-9a-f]+ <([^>+]*)(\+0x[0-9a-f]+)?>", r"<\1\2>", line)  # branch targets
-            line = line.replace(f"<{name}+", "<+")                     # branches within the function
-            lines.append(line.replace("\t", " ").rstrip())
+            continue                                                  # a label within the function
+        is_insn = re.match(r"^\s+[0-9a-f]+:\t", line) is not None
+        if is_insn and count == size // 4:
+            break
+        count += is_insn
+        reloc = re.match(r"^\s+[0-9a-f]+: (R_MIPS_PC16)\s+(\S+?)(\+0x[0-9a-f]+|-0x[0-9a-f]+)?$", line)
+        if reloc and reloc.group(2) in labels and lines:
+            # a branch to a label: the instruction shows no real target; put the label's offset there
+            target = labels[reloc.group(2)]
+            if start <= target < end:
+                lines[-1] = re.sub(r"<[^>]*>$", local(target), lines[-1])
+                continue
+        line = re.sub(r"^\s+[0-9a-f]+:\t", "", line)               # drop addresses
+        line = re.sub(r"^\s+[0-9a-f]+: (R_)", r"   \1", line)       # and relocations' (they follow their insn)
+        def target(m: re.Match) -> str:
+            addr = int(m.group(1), 16)
+            return local(addr) if start is not None and start <= addr < end else f"<{m.group(2)}{m.group(3) or ''}>"
+        line = re.sub(r"\b([0-9a-f]+) <([^>+]*)(\+0x[0-9a-f]+)?>", target, line)  # branch targets
+        lines.append(line.replace("\t", " ").rstrip())
     # An unlinked jal shows a meaningless target (offset 0 in its section); the relocation below names the real one.
     for i in range(len(lines) - 1):
         if lines[i + 1].lstrip().startswith("R_MIPS_26"):
@@ -88,13 +111,25 @@ def main() -> None:
     diff = t[name].difference(b[name]) if name in b else "missing in ours"
     left = disassemble(ROOT / target, name, len(t[name].data))
     right = disassemble(ROOT / base, name, len(b[name].data)) if name in b else []
-    # Lines are aligned on a key without branch-target offsets, so code shifted by an earlier difference still
-    # lines up. Such lines are marked "~" (they differ only in an offset); "|" marks a real difference.
+    # Lines are aligned on a key without branch-target offsets and anonymous data addresses (the original's
+    # jtbl_/D_ labels vs. our section + offset), so code shifted by an earlier difference still lines up. Such
+    # lines are marked "~" (they differ only in an offset or address); "|" marks a real difference.
     # Display only: MATCH / differs above comes from comparing the bytes.
     def key(line: str) -> str:
-        return re.sub(r"<\+0x[0-9a-f]+>", "<+?>", line)
+        line = re.sub(r"<\+0x[0-9a-f]+>", "<+?>", line)
+        # data the original refers to by a label of its own (jtbl_..., D_...) and ours by section + offset
+        line = re.sub(r"(R_MIPS_(?:HI16|LO16|32|GPREL16))\s+(?:\.(?:ro|s)?data|\.s?bss|jtbl_\w+|D_[0-9A-F]+|\.L\w+)"
+                      r"([+-]0x[0-9a-f]+)?$", r"\1 <data>", line)
+        line = re.sub(r"(R_MIPS_\w+\s+[\w$]+)\.\d+\b", r"\1.N", line)  # function-local statics: name.<number>
+        return line
+    def keys(lines: list[str]) -> list[str]:
+        k = [key(line) for line in lines]
+        for i in range(len(k) - 1):  # the address part an anonymous data relocation fills in (%lo(...) offset)
+            if k[i + 1].endswith(" <data>"):
+                k[i] = re.sub(r"(,|^\S+ )-?(?:0x)?[0-9a-f]+(\(\w+\))?$", r"\1?\2", k[i])
+        return k
     rows = []  # (mark, original, ours)
-    keys_l, keys_r = [key(line) for line in left], [key(line) for line in right]
+    keys_l, keys_r = keys(left), keys(right)
     for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(a=keys_l, b=keys_r, autojunk=False).get_opcodes():
         for k in range(max(i2 - i1, j2 - j1)):
             a = left[i1 + k] if i1 + k < i2 else ""
@@ -106,7 +141,7 @@ def main() -> None:
           f"ours {len(b[name].data) if name in b else 0} bytes" + (f"; {diff}" if diff else ""))
     if diff is None and not args.full:
         return
-    print(f"{real} of {len(rows)} lines differ (|), {offsets} only in a branch offset (~); original | ours")
+    print(f"{real} of {len(rows)} lines differ (|), {offsets} only in an offset or address (~); original | ours")
     # Show rows within --context of a real difference; elide the rest (nothing with --full).
     keep = [args.full or any(rows[j][0] == "|" for j in range(max(0, i - args.context), min(len(rows), i + args.context + 1)))
             for i in range(len(rows))]
@@ -115,7 +150,7 @@ def main() -> None:
     def flush() -> None:
         if skipped:
             n = sum(m == "~" for m in skipped)
-            print(f"   ... {len(skipped)} lines" + (f" ({n} differ only in a branch offset)" if n else " equal") + " ...")
+            print(f"   ... {len(skipped)} lines" + (f" ({n} differ only in an offset or address)" if n else " equal") + " ...")
             skipped.clear()
     for (mark, a, c), shown in zip(rows, keep):
         if not shown:
