@@ -211,11 +211,12 @@ def original_global(kind: str, source: str, symbols_path: str) -> str | None:
 
 def expand_macro(kind: str, name: str, arg: str | None) -> list[str]:
     """Plain directives for one of splat's macros. No .size: Ps2EeAs crashes on it inside .ent/.end
-    and derives function sizes from .ent/.end itself."""
+    and derives function sizes from .ent/.end itself. No .aent for alabel either (splat's func_ labels at
+    jump targets inside a function): Ps2EeAs crashes on it too."""
     visible = arg != "local"
-    if kind in ("glabel", "alabel"):
-        return ([f"\t.globl {name}"] if visible else []) + [f"{name}:", f"\t.{'ent' if kind == 'glabel' else 'aent'} {name}"]
-    if kind in ("ehlabel", "jlabel", "dlabel"):
+    if kind == "glabel":
+        return ([f"\t.globl {name}"] if visible else []) + [f"{name}:", f"\t.ent {name}"]
+    if kind in ("alabel", "ehlabel", "jlabel", "dlabel"):
         return ([f"\t.globl {name}"] if visible else []) + [f"{name}:"]
     if kind == "endlabel":
         return [f"\t.end {name}"]
