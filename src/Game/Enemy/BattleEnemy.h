@@ -18,7 +18,10 @@ static CHAR* RecoverEffectName = "cure01";
 
 /* Placeholder for the original header's inline functions checking indices: their strings are in .rodata
  * of every includer, in this order. Line numbers are not known. */
-#line 1 "Game/Enemy/BattleEnemy.h"
+#ifndef BATTLEENEMY_H_PATH // PARTIAL: path override added for Game/Gimmick/CreateGimmick ("../Enemy/BattleEnemy.h")
+#define BATTLEENEMY_H_PATH "Game/Enemy/BattleEnemy.h"
+#endif
+#line 1 BATTLEENEMY_H_PATH
 inline void _battleEnemyCheckIndex(INT inIndex, INT inState) {
     if (!(0 <= inIndex && inIndex < 6)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < ATK_ATTR_MAX", 0);
     if (!(0 <= inIndex && inIndex < 2)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < 2", 0);
