@@ -173,6 +173,7 @@ public:
     CCoord& Crd(UINT nIndex); // PARTIAL: added for Game/Atel/AtelCamera
     const FMATRIX& getWorld(UINT nIndex) const; // PARTIAL: added for System/Graphic/PathCamera
     void addCoord(UINT nNum);                               // PARTIAL: added for Game/ModelObj
+    void addCoord(UINT nNum, CCoord* pParent);              // PARTIAL: added for Game/Player/PlayerWeapon
     INT getCoordNum() const;                                // PARTIAL: added for Game/ModelObj
     BOOL isClippedLastTime() { return m_cLastClip < 0; }    // PARTIAL: added for Game/ModelObj
     // PARTIAL: added for Game/Atel/AtelCamera
