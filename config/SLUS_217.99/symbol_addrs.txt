@@ -20,3 +20,7 @@ _calc__10CLightUnit_00208A50 = 0x00208A50; // type:func size:0x34
 calc__10CLightUnit_00208AA0 = 0x00208AA0; // type:func size:0x18
 // and an unnamed copy of its vtable (tools/ee_asm_compat.py keeps our compiled copy for it)
 _vt$10CLightUnit_00482228 = 0x00482228; // size:0x38
+
+// Game/Gimmick/BaseGimmick: CState's inline destructor and an unnamed copy of its vtable
+_$_6CState_002D6ED8 = 0x002D6ED8; // type:func size:0x30
+_vt$6CState_004C97B8 = 0x004C97B8; // size:0x30

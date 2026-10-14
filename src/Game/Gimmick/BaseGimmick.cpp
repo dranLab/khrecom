@@ -1,12 +1,3 @@
-/* BASEGIMMICK_SOURCE_RODATA 1 compiles every function and needs "// SOURCE DATA: .rodata" as the last line, plus
- * the unnamed copy of CState's vtable at the end of this object's .rodata named in
- * config/SLUS_217.99/symbol_addrs.txt ("_vt$6CState_004C97B8 = 0x004C97B8; // size:0x30"), so that
- * tools/ee_asm_compat.py keeps our compiled copy. With that, all 37 functions and the .rodata match (verified).
- * Without it (0), the functions that use .rodata (strings, jump table, member pointer constants) and the ones
- * that make the compiler emit the vtables and inline functions (the destructor is the key function) stay
- * INCLUDE_ASM. */
-#define BASEGIMMICK_SOURCE_RODATA 0
-
 #define GAME_GIMMICK_BASEGIMMICK_CPP
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Task.h"
@@ -44,7 +35,6 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/Collision/CollObj.h"
 #include "Game/Gimmick/GimmickManager.h"
 #include "Game/SceneInfo.h"
-#include "include_asm.h"
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
@@ -52,17 +42,12 @@ inline void* operator new(size_t size, char* msg) throw() {
     return com_malloc_d(size, msg, RET_ADDR());
 }
 
-#if BASEGIMMICK_SOURCE_RODATA
 CBaseGimmick::CBaseGimmick(CTask* inParent)
     : CEntity(inParent, ObjType::OBJ_TYPE_GIMMICK), m_uiGimmickFlag(0), m_iUniqueID(0), m_hEffectHandle(0) {
     initFSM_();
     setEntityFlag(0, 0x1000);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", __12CBaseGimmickP5CTask);
-#endif
 
-#if BASEGIMMICK_SOURCE_RODATA
 CBaseGimmick::CBaseGimmick(CTask* inParent, const ZONEPARTS& inParts)
     : CEntity(inParent, ObjType::OBJ_TYPE_ENEMY), m_uiGimmickFlag(0), m_iUniqueID(0), m_hEffectHandle(0) {
     INT id = effectIDtoI(inParts.effectId);
@@ -86,18 +71,11 @@ CBaseGimmick::CBaseGimmick(CTask* inParent, const ZONEPARTS& inParts)
         initFSM_();
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", __12CBaseGimmickP5CTaskRC9ZONEPARTS);
-#endif
 
-#if BASEGIMMICK_SOURCE_RODATA
 CBaseGimmick::~CBaseGimmick() {
     CEffect* effect = CEffectMan::getEffect(m_hEffectHandle);
     if (effect) effect->kill();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", _$_12CBaseGimmick);
-#endif
 
 INT CBaseGimmick::getTypeID() const {
     return 0x1005;
@@ -166,16 +144,12 @@ void CBaseGimmick::lastUpdate() {
     if (m_pAttack && !(getGimmickFlag() & 0x10)) m_pAttack->update();
 }
 
-#if BASEGIMMICK_SOURCE_RODATA
 static inline void _setNewState(CState*& p, CState& NewState) { p = &NewState; }
 #line 328
 void CBaseGimmick::changeGimmickState(INT inState) {
     if (!(0 <= inState && inState < GM_STATE_MAX)) AssertApp(__FILE__, __LINE__, "0 <= inState && inState < GM_STATE_MAX", 0);
     _setNewState(m_pNewState, m_GimmickState[inState]);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", changeGimmickState__12CBaseGimmicki);
-#endif
 
 void CBaseGimmick::makeCoord(const ZONEPARTS& inParts) {
     FVECTOR& rot = (FVECTOR&)getRot();
@@ -191,18 +165,13 @@ void CBaseGimmick::makeCoord(const ZONEPARTS& inParts) {
     coordFix();
 }
 
-#if BASEGIMMICK_SOURCE_RODATA
 void CBaseGimmick::initFSM_() {
     m_GimmickState[GM_STATE_MAIN].set(this, &CBaseGimmick::beginStateMain, &CBaseGimmick::stateMain,
                                       &CBaseGimmick::endStateMain);
     m_GimmickState[GM_STATE_HIT_ATTACK].set(this, &CBaseGimmick::beginStateHitAttack, &CBaseGimmick::stateHitAttack,
                                             &CBaseGimmick::endStateHitAttack);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", initFSM___12CBaseGimmick);
-#endif
 
-#if BASEGIMMICK_SOURCE_RODATA
 #line 375
 BOOL CBaseGimmick::hitTest_() {
     if (!m_pBodyColl) return FALSE;
@@ -232,9 +201,6 @@ BOOL CBaseGimmick::hitTest_() {
     changeGimmickState(GM_STATE_HIT_ATTACK);
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", hitTest___12CBaseGimmick);
-#endif
 
 BOOL CBaseGimmick::initGimmickParam(INT inGroupID, INT inRsrcID) {
     return TRUE;
@@ -244,7 +210,6 @@ GimParam* CBaseGimmick::getGimParam() {
     return ((CGimmickManager*)getSysTask(17))->getGimParam(m_iID);
 }
 
-#if BASEGIMMICK_SOURCE_RODATA
 INT CBaseGimmick::createPrize(INT in_Flag, INT in_NotDropCardFlag) {
     CGimmickManager* pCGimMan = (CGimmickManager*)getSysTask(17);
     INT ret;
@@ -261,9 +226,6 @@ INT CBaseGimmick::createPrize(INT in_Flag, INT in_NotDropCardFlag) {
     }
     return ret;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", createPrize__12CBaseGimmickii);
-#endif
 
 INT CBaseGimmick::saveStat(INT in_Stat) {
     INT ret = 0;
@@ -274,23 +236,4 @@ INT CBaseGimmick::saveStat(INT in_Stat) {
     return ret;
 }
 
-#if !BASEGIMMICK_SOURCE_RODATA
-/* Weak (inline) functions: from the headers once the destructor (the key function) is compiled here. */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", _$_t14CStateTemplate1Z12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", setGimmickFlag__12CBaseGimmickUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", setParam__12CBaseGimmicki);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", setUniqueID__12CBaseGimmicki);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", getGimmickFlag__C12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", getParam__C12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", getUniqueID__C12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", beginStateMain__12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", stateMain__12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", endStateMain__12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", beginStateHitAttack__12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", stateHitAttack__12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", endStateHitAttack__12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", executeBeginState__t14CStateTemplate1Z12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", executeState__t14CStateTemplate1Z12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", executeEndState__t14CStateTemplate1Z12CBaseGimmick);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/BaseGimmick", func_002D6ED8);
-#endif
+// SOURCE DATA: .rodata
