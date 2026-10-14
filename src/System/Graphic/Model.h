@@ -69,7 +69,11 @@ inline CModel* CEntity::getModel(INT inIndex) { return &m_pModels[inIndex]; }
 /* Placeholders for the original header's inline functions: their strings ("System/Graphic/Model.h",
  * "m_pData != __null", "System/Graphic/Model.h(569)", "0", and CMCShader's "create CMCShader\n" /
  * "delete CMCShader\n") are in .rodata of every includer, in this order. Only line 569 is known. */
-#line 1 "System/Graphic/Model.h"
+/* PARTIAL: MODEL_H_PATH added for System/VramMan, whose original includes it as "System/Graphic/model.h" */
+#ifndef MODEL_H_PATH
+#define MODEL_H_PATH "System/Graphic/Model.h"
+#endif
+#line 1 MODEL_H_PATH
 inline void _modelCheckData(void* inData) {
     if (!(inData != __null)) AssertApp(__FILE__, __LINE__, "m_pData != __null", 0);
 }

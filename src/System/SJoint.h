@@ -42,6 +42,16 @@ public:
             m_nListSize++;
         }
     }
+    // PARTIAL: added for System/VramMan
+    void popFront() {
+        if (m_pHead != NULL) {
+            T* pNext = m_pHead->getNext();
+            m_pHead->setNext(NULL);
+            m_pHead = pNext;
+            if (m_pHead == NULL) m_pTail = NULL;
+            m_nListSize--;
+        }
+    }
     BOOL remove(T& inEntry) {
         T* pPrevEntry = NULL;
         T* pEntry = m_pHead;
