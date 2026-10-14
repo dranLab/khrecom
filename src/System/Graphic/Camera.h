@@ -49,6 +49,7 @@ public:
     FMATRIX& getLocalMatrix() { return m_Local; } // PARTIAL: added for Game/Gimmick/GimmickFountain
     CCoord* getParent() { return m_pParent; }     // PARTIAL: added for Game/Gimmick/GimmickFountain
     void recalcLocalMatrix(); // PARTIAL: added for System/Graphic/Camera
+    void recalcWorldMatrix(); // PARTIAL: added for Form/Menu/WorldSelect
 };
 
 class CCamera : public CTaskSecondary {

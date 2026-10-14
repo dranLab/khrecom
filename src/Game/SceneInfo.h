@@ -4,6 +4,25 @@
 
 #include "khtypes.h"
 
+// PARTIAL: added for Form/Menu/WorldSelect
+enum WORLD_ID {
+    WORLD_ID_COMMON = 0,
+    WORLD_ID_TRAVERSE = 1,
+    WORLD_ID_AGRABAH = 2,
+    WORLD_ID_OLYMPOS = 3,
+    WORLD_ID_WONDERLAND = 4,
+    WORLD_ID_MONSTRO = 5,
+    WORLD_ID_HALLOWEEN = 6,
+    WORLD_ID_ATLANTICA = 7,
+    WORLD_ID_NEVERLAND = 8,
+    WORLD_ID_HOLLOWBASTION = 9,
+    WORLD_ID_100ACRE = 10,
+    WORLD_ID_TWILIGHTTOWN = 11,
+    WORLD_ID_DISTINYISLAND = 12,
+    WORLD_ID_CASTLE = 13,
+    _WORLD_ID_MAX = 14
+};
+
 // PARTIAL: added for Game/Gimmick/GimmickPlantParent
 enum DOOR_ID {
     DOOR_ID_RU = 0,
@@ -89,6 +108,10 @@ public:
     static BOOL reqEnterBattle(SHORT inID); // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy
     static BOOL isFieldScene(); // PARTIAL: added for Game/Player/PlayerWeapon
     static DoorInfo* getDoorInfo(DOOR_ID inDoorID, INT inRoomID); // PARTIAL: added for Game/Player/NaviMap
+    // PARTIAL: added for Form/Menu/WorldSelect
+    static USHORT getCurrentFloorIndex();
+    static WORLD_ID getWorldID(USHORT nFloorIndex);
+    static BOOL reqEnterWorld(WORLD_ID nWorldID);
 };
 
 #endif /* GAME_SCENEINFO_H */

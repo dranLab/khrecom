@@ -127,6 +127,7 @@ public:
     static void notifyGetPrize(INT inKind, INT inNumber, INT inState); // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
     // PARTIAL: added for Game/Player/FriendBeast (also out of line: setPlayerFlag__7CPlayerUiUi)
     void setPlayerFlag(UINT inSet, UINT inMask) { UINT& f = m_uiPlayerFlag; f = (f | inSet) & ~inMask; }
+    void setTrgFlag(UINT inSet, UINT inMask) { UINT& f = m_uiTrgFlag; f = (f | inSet) & ~inMask; } // PARTIAL: added for Form/Menu/WorldSelect
     // PARTIAL: added for Game/Player/FriendBeast (CPlayer's virtuals up to vtable[36])
     virtual void beginStateField();
     virtual void stateField();

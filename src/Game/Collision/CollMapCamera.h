@@ -16,6 +16,9 @@ public:
     virtual INT collideMap();
     INT collideMapTrueCamera(INT fgContinue);
     BOOL checkBGforCamera(FVECTOR& vPos, FVECTOR& vAim, FVECTOR& vOutPos, BOOL fgTransparency);
+    // PARTIAL: added for Form/Menu/WorldSelect
+    static BOOL m_fgForceStop;
+    static void clearList();
 };
 
 #endif /* GAME_COLLISION_COLLMAPCAMERA_H */

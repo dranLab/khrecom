@@ -37,10 +37,11 @@ public:
         return *m_pInstance;
     }
     // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
+    /* PARTIAL: reference added for Form/Menu/WorldSelect (the load of m_pInstance stays after stores) */
 #line 57 "Game/Atel/ChatMan.h"
-    static CChatMan& instance() {
-        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
-        return *m_pInstance;
+    static CChatMan& instance() { CChatMan*& instance = m_pInstance;
+        if (!(instance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        return *instance;
     }
     virtual INT reqCommand(INT nCmd, void* pParam, INT nID);
 };
