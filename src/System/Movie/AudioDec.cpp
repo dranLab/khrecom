@@ -115,12 +115,14 @@ private:
     void getIopEmptyArea(INT& pd0, INT& d0, INT& pd1, INT& d1, INT nPos);
 };
 
-// Original: static CAudioDecImpl* s_pAudioDec = NULL; (in .data, which still comes from the original assembly)
-extern CAudioDecImpl* s_pAudioDec;
+static CAudioDecImpl* s_pAudioDec = NULL;
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Movie/AudioDec", __13CAudioDecImpl);
+// The constructor's allocation messages (.rodata's first strings), for its INCLUDE_ASM; remove with it.
+asm(".section .rodata\n.align 3\n.globl D_0046C330\nD_0046C330:\n.asciz \"c:/KHCOM/MainApp/System/Movie/AudioDec.cpp(165)\"\n"
+    ".align 3\n.globl D_0046C360\nD_0046C360:\n.asciz \"c:/KHCOM/MainApp/System/Movie/AudioDec.cpp(166)\"\n.previous");
 // Not matching: the delay slot of hncAt3dec_Init gets the p_at3decwork store instead of at3decparam's
-// (and v0/v1 swap in the next lines); also needs the data from source (string literals).
+// (and v0/v1 swap in the next lines).
 #if 0
 CAudioDecImpl::CAudioDecImpl()
     : m_nState(0), m_nHeaderCount(0), m_nPcmPut(0), m_nPcmCount(0), m_nPcmTotalBytes(0), m_nAt3Put(0),
@@ -220,10 +222,6 @@ void CAudioDecImpl::endPutAt3(INT nSize) {
     m_nAt3TotalBytes += nSize;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Movie/AudioDec", decodeAt3__13CAudioDecImpli);
-// Compiles to the original code, but its string literals need the unit's data from source, which needs
-// symbol_addrs.txt entries for the unnamed copies of CBuf's vtable and destructor (see the end of the file).
-#if 0
 void CAudioDecImpl::decodeAt3(BOOL bAll) {
     BYTE* pd0;
     BYTE* pd1;
@@ -249,7 +247,6 @@ void CAudioDecImpl::decodeAt3(BOOL bAll) {
         }
     }
 }
-#endif
 
 BOOL CAudioDecImpl::isPreset() const {
     return m_nTotalBytesSent >= m_nIopBufSize;
@@ -329,10 +326,6 @@ void CAudioDecImpl::reset() {
     m_nAt3TotalBytes = 0;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Movie/AudioDec", pause__13CAudioDecImpl);
-// Compiles to the original code, but its string literals need the unit's data from source, which needs
-// symbol_addrs.txt entries for the unnamed copies of CBuf's vtable and destructor (see the end of the file).
-#if 0
 void CAudioDecImpl::pause() {
     if ((UINT)m_nState < 2 || m_nState == 3) {
         return;
@@ -344,7 +337,6 @@ void CAudioDecImpl::pause() {
     TRACE_USER(TGOTO, "*** Movie-Audio IOP pause-pos : %X ***\n", m_nIopPausePos);
     TsSdMpegTransVoice(m_nIopZeroAddr, 0x4000, m_nIopZeroSize);
 }
-#endif
 
 void CAudioDecImpl::resume() {
     TsSdMpegSetVolume(0x7FFF);
@@ -368,17 +360,12 @@ void CAudioDecImpl::getIopEmptyArea(INT& pd0, INT& d0, INT& pd1, INT& d1, INT nP
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Movie/AudioDec", create__9CAudioDec);
-// Compiles to the original code, but its string literals need the unit's data from source, which needs
-// symbol_addrs.txt entries for the unnamed copies of CBuf's vtable and destructor (see the end of the file).
-#if 0
 void CAudioDec::create() {
     s_pAudioDec = new (com_malloc_d(sizeof(CAudioDecImpl), __FILE__ "(631)", RET_ADDR())) CAudioDecImpl;
     if (!s_pAudioDec) {
         AssertApp(__FILE__, 632, "s_pAudioDec", 0);
     }
 }
-#endif
 
 void CAudioDec::dispose() {
     if (s_pAudioDec) {
@@ -415,17 +402,12 @@ BOOL CAudioDec::isPause() {
     return FALSE;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Movie/AudioDec", start__9CAudioDec);
-// Compiles to the original code, but its string literals need the unit's data from source, which needs
-// symbol_addrs.txt entries for the unnamed copies of CBuf's vtable and destructor (see the end of the file).
-#if 0
 void CAudioDec::start() {
     if (s_pAudioDec) {
         s_pAudioDec->resume();
         TRACE_USER(TGOTO, "*** Movie-Audio Start !! ***\n");
     }
 }
-#endif
 
 INT CAudioDec::sendToIOP() {
     if (s_pAudioDec) {
@@ -434,10 +416,6 @@ INT CAudioDec::sendToIOP() {
     return 0;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Movie/AudioDec", reset__9CAudioDec);
-// Compiles to the original code, but its string literals need the unit's data from source, which needs
-// symbol_addrs.txt entries for the unnamed copies of CBuf's vtable and destructor (see the end of the file).
-#if 0
 void CAudioDec::reset() {
     if (s_pAudioDec) {
         s_pAudioDec->reset();
@@ -445,7 +423,6 @@ void CAudioDec::reset() {
         s_pAudioDec = new (com_malloc_d(sizeof(CAudioDecImpl), __FILE__ "(701)", RET_ADDR())) CAudioDecImpl;
     }
 }
-#endif
 
 void CAudioDec::pause() {
     if (s_pAudioDec) {
@@ -525,9 +502,4 @@ static int _copy2area(BYTE* pd0, INT nD0, BYTE* pd1, INT nD1, const BYTE* pSrc, 
     return nSize;
 }
 
-// CBuf's inline destructor (func_001B5960 in the original) is emitted here as a weak copy, and the original
-// .rodata ends with an unnamed copy of CBuf's vtable (0x0046C4B0). To compile the data from source
-// (s_pAudioDec back to `static ... = NULL`, the #if 0 functions enabled, `// SOURCE DATA: .data .rodata`),
-// config/SLUS_217.99/symbol_addrs.txt needs:
-//   _$_4CBuf_001B5960 = 0x001B5960; // type:func size:0x54
-//   _vt$4CBuf_0046C4B0 = 0x0046C4B0; // size:0x18
+// SOURCE DATA: .data .rodata

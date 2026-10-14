@@ -28,3 +28,7 @@ _vt$6CState_004C97B8 = 0x004C97B8; // size:0x30
 // Game/Atel/EventTrap: CVector<G_LINE>'s inline destructor and an unnamed copy of its vtable
 _$_t7CVector1Z6G_LINE_00240FA0 = 0x00240FA0; // type:func size:0x8C
 _vt$t7CVector1Z6G_LINE_0048BD40 = 0x0048BD40; // size:0x18
+
+// System/Movie/AudioDec: CBuf's inline destructor and an unnamed copy of its vtable
+_$_4CBuf_001B5960 = 0x001B5960; // type:func size:0x54
+_vt$4CBuf_0046C4B0 = 0x0046C4B0; // size:0x18
