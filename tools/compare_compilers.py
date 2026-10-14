@@ -75,7 +75,9 @@ def functions(obj: Path) -> dict[str, Function]:
                 for reloc in section.iter_relocations():
                     masks[reloc["r_offset"]] = RELOC_MASKS.get(reloc["r_info_type"], 0xFFFFFFFF)
                     sym = symtab.get_symbol(reloc["r_info_sym"])
-                    named = sym["st_info"]["type"] != "STT_SECTION" and not ANONYMOUS.match(sym.name)
+                    # _gp: the original names that address after whatever symbol lies there.
+                    named = (sym["st_info"]["type"] != "STT_SECTION" and not ANONYMOUS.match(sym.name)
+                             and sym.name != "_gp")
                     # Function-local statics are named name.<n> after a gcc-internal counter: compare the name only.
                     targets[reloc["r_offset"]] = LOCAL_STATIC.sub("", sym.name) if named else None
         out = {}
