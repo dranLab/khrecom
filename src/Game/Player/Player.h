@@ -13,6 +13,10 @@ namespace PlayerCamera {
 class CPlayerCamera; // PARTIAL: added for Game/Player/FriendJack
 }
 
+namespace PlayerWeapon {
+class CPlayerWeapon; // PARTIAL: added for Game/Player/FriendDonald
+}
+
 enum PlayerState { // complete (from types.h)
     INIT = 0,
     START_WAIT = 1,
@@ -57,7 +61,9 @@ enum PlayerState { // complete (from types.h)
 class CPlayer : public CEntity {
 private:
     // PARTIAL: m_pCam split out for Game/Player/FriendJack
-    UBYTE _m_0x1d0[0x114];       /* 0x1d0 .. 0x2e0 */
+    // PARTIAL: m_pWeapon split out for Game/Player/FriendDonald
+    UBYTE _m_0x1d0[0x110];       /* 0x1d0 .. 0x2dc */
+    PlayerWeapon::CPlayerWeapon* m_pWeapon; /* 0x2e0 */
     PlayerCamera::CPlayerCamera* m_pCam; /* 0x2e4 */
     // PARTIAL: m_pRevolver split out for Game/Player/FriendKing
     UBYTE _m_0x2e8[0x8];         /* 0x2e8 m_pGauge, m_pCB */
@@ -111,6 +117,9 @@ public:
     UINT getAttackID() { return m_uiAttackID; }
     void setCure(INT inID, INT inPow);
     INT isBattleFlag(UINT inFlag) { return m_uiBattleFlag & inFlag; } // PARTIAL: added for Game/Player/SummonMushu
+    // PARTIAL: added for Game/Player/FriendDonald
+    PlayerWeapon::CPlayerWeapon* getWeapon() { return m_pWeapon; }
+    void getWeaponTopPos(FVECTOR& outPos);
     HANDLE isNowMark() { return m_hMark; } // PARTIAL: added for Game/Player/FriendGoofy (original name/type unknown)
     // PARTIAL: added for Game/Gimmick/GimmickJumpStand
     INT getJumpState() const;

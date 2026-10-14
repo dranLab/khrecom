@@ -32,6 +32,8 @@ public:
     }
     // PARTIAL: added for Game/Player/SummonGenie
     FVECTOR& scale() { return m_vScale; }
+    // PARTIAL: added for Game/Player/FriendDonald
+    void setScale(FLOAT _x, FLOAT _y, FLOAT _z) { m_vScale.set(_x, _y, _z); }
     void setAttachNoRot(BOOL bVal) {
         if (bVal) {
             m_iFlag |= 4;
