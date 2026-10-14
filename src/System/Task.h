@@ -82,6 +82,9 @@ public:
     TIMEQ getFrameRate() { return m_nTimeLag; }                   // PARTIAL: added for Game/Gimmick/GimmickPlantChild
     FLOAT getFrameRateF() { return (FLOAT)getFrameRate() * 0.020000001f; } // PARTIAL: added for Game/Gimmick/GimmickPlantChild
     BOOL isOut() { return m_nInfo & 0x8000; }
+    CTask* getParent() { return m_pParent; }           // PARTIAL: added for System/Component
+    BOOL isInactive() { return m_nInfo & 0x8008; }     // PARTIAL: added for System/Component
+    BOOL isInvisible() { return m_nInfo & 0x8010; }    // PARTIAL: added for System/Component
     void out() {
         if (!isOut()) {
             m_nInfo |= 0x8000;
