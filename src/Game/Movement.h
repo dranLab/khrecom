@@ -38,6 +38,7 @@ public:
     // PARTIAL: added for Game/Enemy/MapEnemyShadow (m_vScale 0x60)
     void setScale(const FVECTOR& inScale) { *(FVECTOR*)&_m_0x00[0x60] = inScale; }
     void homingY(const CEntity* inTarget, FLOAT inRate);
+    void homingY(const FVECTOR& inTarget, FLOAT inRate); // PARTIAL: added for Game/Player/FriendAriel
     void homingMoveXZ(const FVECTOR& inTarget, FLOAT inRate, FLOAT inSpeed);
     void homingMoveXZ(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed);
     void calcVelocityXZ(FLOAT inSpeed); // PARTIAL: added for Game/Player/SummonDumbo

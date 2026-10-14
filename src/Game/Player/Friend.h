@@ -86,6 +86,10 @@ protected:
     void calcCirclePos(FVECTOR& outPos, FLOAT inDist, FLOAT inRot); // PARTIAL: added for Game/Player/FriendPluto
     void setLockon(HANDLE inHandle); // PARTIAL: added for Game/Player/FriendPan
     void setPushon(INT inFlag);      // PARTIAL: added for Game/Player/FriendPan
+    // PARTIAL: added for Game/Player/FriendAriel
+    INT entryChainTrg(INT inNum);
+    INT checkChainTrg();
+    INT isSucceedChain();
 public:
     void setExit(INT inFlag);
     virtual INT setSkill(INT inID);

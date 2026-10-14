@@ -25,6 +25,11 @@ union FVECTOR {
         z = inZ;
         w = inW;
     }
+    // PARTIAL: added for Game/Player/FriendAriel
+    void init() {
+        _q = 0;
+        w = 1.0f;
+    }
 };
 
 typedef float _FMATRIX[4][4];
