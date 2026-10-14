@@ -9,18 +9,7 @@
 #include "System/Buf.h"
 #include "System/SJoint.h"
 
-/* The unnamed copies of CBuf's inline destructor and vtable in this object need entries in
- * config/SLUS_217.99/symbol_addrs.txt before .rodata can come from source. Until then the data stays from the
- * original assembly and the string literals are referenced through its labels (VSTR). */
-#ifndef VRAMMAN_SOURCE_DATA
-#define VRAMMAN_SOURCE_DATA 0
-#endif
-#if VRAMMAN_SOURCE_DATA
-#define VSTR(label, str) str
-#else
-#define VSTR(label, str) label
-extern "C" char D_0045ED50[], D_0045ED78[], D_0045EDA8[], D_0045EDD0[], D_0045EDD8[], D_0045EE18[], D_0045EE20[], D_0045EE28[], D_0045EE30[], D_0045EE60[], D_0045EE78[], D_0045EE80[], D_0045EED0[], D_0045EF10[], D_0045EF28[], D_0045EF40[], D_0045EF58[], D_0045EF70[], D_0045EF88[], D_0045EFA0[];
-#endif
+#line 24
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
@@ -98,7 +87,7 @@ private:
 public:
     CVtransReq(const TexInfo& inTexInfo, CBuf& inSrc) : m_bTrans(FALSE) {
         m_TexInfo = inTexInfo;
-        m_pSrcData = new (com_malloc_d(sizeof(CBuf), VSTR(D_0045ED50, __FILE__ "(43)"), RET_ADDR())) CBuf;
+        m_pSrcData = new (com_malloc_d(sizeof(CBuf), __FILE__ "(43)", RET_ADDR())) CBuf;
         if (m_pSrcData) inSrc.copyTo(*m_pSrcData);
     }
     virtual ~CVtransReq() {
@@ -379,8 +368,8 @@ void CVramMan::releaseClut(UINT nPos, INT nType) {
 #line 359
 static _MallocUnit* _createUnit(UINT nStartPos, UINT nSize, _MallocUnit* pPrev, _MallocUnit* pNext) {
     _MallocUnit* pUnit;
-    pUnit = (_MallocUnit*)com_malloc_d(sizeof(_MallocUnit), VSTR(D_0045ED78, __FILE__ "(361)"), RET_ADDR());
-    if (!pUnit) AssertApp(VSTR(D_0045EDA8, __FILE__), __LINE__, VSTR(D_0045EDD0, "pUnit"), 0);
+    pUnit = (_MallocUnit*)com_malloc_d(sizeof(_MallocUnit), __FILE__ "(361)", RET_ADDR());
+    if (!pUnit) AssertApp(__FILE__, __LINE__, "pUnit", 0);
     pUnit->_nStartPos = nStartPos;
     pUnit->_nEndPos = nStartPos + nSize;
     pUnit->_nSize = nSize;
@@ -414,7 +403,7 @@ static INT _allocSub(_MallocUnit*& pAddr, UINT nStartPos, UINT nEndPos, UINT nSi
     }
     SignalSema(s_nAllocSema);
     if (nPos < 0) {
-        TRACE(VSTR(D_0045EDD8, "\x81\x49\x81\x49\x81\x49\x81\x49 %s \x97\xcc\x88\xe6\x8a\x6d\x95\xdb(size = 0x%x) \x82\xc9\x8e\xb8\x94\x73\x82\xb5\x82\xdc\x82\xb5\x82\xbd\x81\x42\x81\x49\x81\x49\x81\x49\x81\x49\n"),
+        TRACE("\x81\x49\x81\x49\x81\x49\x81\x49 %s \x97\xcc\x88\xe6\x8a\x6d\x95\xdb(size = 0x%x) \x82\xc9\x8e\xb8\x94\x73\x82\xb5\x82\xdc\x82\xb5\x82\xbd\x81\x42\x81\x49\x81\x49\x81\x49\x81\x49\n",
               pszType, nSize);
     }
     return nPos;
@@ -444,8 +433,8 @@ static INT _allocTex(UINT nSize, INT nType) {
         break;
     }
 #line 466
-    if (!ppAddr) AssertApp(VSTR(D_0045EDA8, __FILE__), __LINE__, VSTR(D_0045EE18, "ppAddr"), 0);
-    return _allocSub(*ppAddr, nStartPos, nEndPos, nSize, VSTR(D_0045EE20, "TEX"));
+    if (!ppAddr) AssertApp(__FILE__, __LINE__, "ppAddr", 0);
+    return _allocSub(*ppAddr, nStartPos, nEndPos, nSize, "TEX");
 }
 
 #line 485
@@ -471,8 +460,8 @@ static INT _allocClut(UINT nSize, INT nType) {
         break;
     }
 #line 503
-    if (!ppAddr) AssertApp(VSTR(D_0045EDA8, __FILE__), __LINE__, VSTR(D_0045EE18, "ppAddr"), 0);
-    return _allocSub(*ppAddr, nStartPos, nEndPos, nSize, VSTR(D_0045EE28, "CLUT"));
+    if (!ppAddr) AssertApp(__FILE__, __LINE__, "ppAddr", 0);
+    return _allocSub(*ppAddr, nStartPos, nEndPos, nSize, "CLUT");
 }
 
 static void _compact(_MallocUnit** ppUnit) {
@@ -589,7 +578,7 @@ BOOL CVramMan::reqTransTex(const TexInfo& texInfo, CBuf& data) {
         (texInfo._TexInfo._pImage != NULL || texInfo._ClutInfo._pImage != NULL)) {
         WaitSema(s_nTransSema);
 #line 701
-        CVtransReq* pReq = new (com_malloc_d(sizeof(CVtransReq), VSTR(D_0045EE30, __FILE__ "(701)"), RET_ADDR())) CVtransReq(texInfo, data);
+        CVtransReq* pReq = new (com_malloc_d(sizeof(CVtransReq), __FILE__ "(701)", RET_ADDR())) CVtransReq(texInfo, data);
         if (pReq) {
             s_TransQueue.pushBack(*pReq);
             bResult = TRUE;
@@ -605,31 +594,31 @@ INT CVramMan::getHeapSize() {
 
 static void _dbgReportAllocatedUnit(const _MallocUnit* pUnit) {
     if (!pUnit) {
-        TRACE(VSTR(D_0045EE60, ":  ** NO DATA **\n"));
+        TRACE(":  ** NO DATA **\n");
         return;
     }
-    TRACE(VSTR(D_0045EE78, "\n"));
+    TRACE("\n");
     for (; pUnit; pUnit = pUnit->_pNext) {
-        TRACE(VSTR(D_0045EE80, "    UNIT[%07X] -> START:[%04X] END:[%04X] SIZE:[%04X] PREV:[%07X] NEXT:[%07X]\n"), pUnit,
+        TRACE("    UNIT[%07X] -> START:[%04X] END:[%04X] SIZE:[%04X] PREV:[%07X] NEXT:[%07X]\n", pUnit,
               pUnit->_nStartPos, pUnit->_nEndPos, pUnit->_nSize, pUnit->_pPrev, pUnit->_pNext);
     }
 }
 
 void CVramMan::dbgReportAllocatedUnit() {
-    TRACE(VSTR(D_0045EED0, "------------------- occupied-vram report ------------------\n"));
-    TRACE(VSTR(D_0045EF10, "< _pPreFixedTexPtr >  "));
+    TRACE("------------------- occupied-vram report ------------------\n");
+    TRACE("< _pPreFixedTexPtr >  ");
     _dbgReportAllocatedUnit(s_pPreFixedTexPtr);
-    TRACE(VSTR(D_0045EF28, "< _pFixedTexPtr >     "));
+    TRACE("< _pFixedTexPtr >     ");
     _dbgReportAllocatedUnit(s_pFixedTexPtr);
-    TRACE(VSTR(D_0045EF40, "< _pFontTexPtr >      "));
+    TRACE("< _pFontTexPtr >      ");
     _dbgReportAllocatedUnit(s_pFontTexPtr);
-    TRACE(VSTR(D_0045EF58, "< _pPreFixedClutPtr > "));
+    TRACE("< _pPreFixedClutPtr > ");
     _dbgReportAllocatedUnit(s_pPreFixedClutPtr);
-    TRACE(VSTR(D_0045EF70, "< _pFixedClutPtr >    "));
+    TRACE("< _pFixedClutPtr >    ");
     _dbgReportAllocatedUnit(s_pFixedClutPtr);
-    TRACE(VSTR(D_0045EF88, "< _pFontClutPtr >     "));
+    TRACE("< _pFontClutPtr >     ");
     _dbgReportAllocatedUnit(s_pFontClutPtr);
-    TRACE(VSTR(D_0045EFA0, "----------------- occupied-vram report end -----------------\n"));
+    TRACE("----------------- occupied-vram report end -----------------\n");
 }
 
 void CVramMan::mapping(BOOL bNTSC) {
@@ -685,4 +674,4 @@ void CVramMan::mapping(BOOL bNTSC) {
     _CLUT_FIX_END = 0x4000;
     _CLUT_FIX_SIZE = _CLUT_AREA_END - _CLUT_FIX_START;
 }
-// SOURCE DATA: .bss
+// SOURCE DATA: .rodata .bss
