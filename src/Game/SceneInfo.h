@@ -53,6 +53,7 @@ struct _MapEnemyRoomInfo {
 class CSceneInfo {
 public:
     static SHORT getCurrentFloorNumber();
+    static SHORT getCurrentAreaNum(); // PARTIAL: added for System/DebugProcInfo
     static BOOL hasReqChangeScene(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
     static INT getCurrentRoomID();
     static RoomInfo* getRoomInfo(INT nRoomID);

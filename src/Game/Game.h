@@ -16,6 +16,7 @@ public:
     static BOOL reqContinue_GameOver();    // PARTIAL: added for Form/Menu/GameOver
     static BOOL reqExit_GameOver();        // PARTIAL: added for Form/Menu/GameOver
     static BOOL isSuspended();             // PARTIAL: added for Game/SceneEnv
+    static INT getMapID();                 // PARTIAL: added for System/DebugProcInfo
 };
 
 #endif /* GAME_GAME_H */

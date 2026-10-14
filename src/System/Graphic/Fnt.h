@@ -37,6 +37,7 @@ public:
     virtual ~CFntM2();
     /* PARTIAL: added for Form/Menu/MenuParts */
     void allocText(const CHAR* pText);
+    void setText(const CHAR* lpszInStr); /* PARTIAL: added for System/DebugProcInfo */
     LPCSTR getText() { return m_pText; }
     void setSpace(SHORT x, SHORT y) {
         m_Space.x = x;

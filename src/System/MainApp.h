@@ -30,6 +30,13 @@ public:
     static void enableSoftReset(BOOL bEnable); // PARTIAL: added for System/RootTask
     static BOOL isSkipLogo();
     static void enableWarningPause(BOOL bEnable);
+    // PARTIAL: added for System/DebugProcInfo
+    static TIMEQ getMainCount();
+    static INT getObjCount();
+    static INT getProcCount();
+    static INT getDrawCount();
+    static INT getDraw2Count();
+    static INT getProcCountMax();
 };
 #endif
 
