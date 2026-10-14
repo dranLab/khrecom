@@ -50,6 +50,9 @@ public:
     void calcVelocity(FLOAT inSpeed, const FVECTOR& inDir);
     FLOAT calcOrbitSpeedFromDistance(FLOAT inTheta, FLOAT inDist);
     CCollMap* getMapCollision() { return m_pMapCollision; } // PARTIAL: added for Game/Player/SummonSinba
+    // PARTIAL: added for Game/Gimmick/GimmickSearchLaser
+    void setRadius(FLOAT inRadius);
+    void land(FLOAT inDownLength, FLOAT inUpLength, BOOL inFirstHit);
 };
 
 // PARTIAL: added for Game/Player/SummonDumbo
