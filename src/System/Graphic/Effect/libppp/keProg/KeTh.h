@@ -13,6 +13,14 @@ typedef struct _KeListHold { /* 0x4 */
     void *FirstItem;
 } KeListHold;
 
+typedef struct _KeThTP { /* 0x20 */
+    sceVu0FVECTOR RPos;
+    float ValidR;
+    float Pow;
+    float HitR;
+    struct _KeThTP *Nxt;
+} KeThTP;
+
 typedef struct _KeThRP { /* 0x30 */
     sceVu0FVECTOR RPos;
     float _P1[2];
@@ -60,6 +68,28 @@ typedef struct _KeThBP { /* 0x70 */
     KeThRP RpTbl[1];
 } KeThBP;
 
+typedef struct _KeAlowHold { /* 0x4 */
+    void *FirstItem;
+} KeAlowHold;
+
+typedef struct _KeThResHd { /* 0x80 */
+    u_char BPNum;
+    u_char RPNum;
+    u_short Sz;
+    KeAlowHold FreeAlow;
+    char _Pad0[8];
+    KeThBP BP[1];
+} KeThResHd;
+
+enum {
+    KeThCp_SttClr_ = 0,
+    KeThCp_FlgRootStep = 2,
+    KeThCp_SttNonStop = 4,
+    KeThCp_SttSpdFix = 8,
+    KeThCp_SttCpSync = 16,
+    KeThCp_SttRvrs = 32
+};
+
 typedef u_char KeThCp_Stt;
 
 typedef struct _KeThCp { /* 0x10 */
@@ -103,5 +133,21 @@ typedef struct { /* 0x90 */
     pppHCVECTOR AddColCe;
     pppHCVECTOR AddColEg;
 } VKeTh;
+
+typedef struct _KeaThCp_Update { /* 0x18 */
+    KeThCp *This;
+    KeThTP *TP;
+    KetThBp_Pr *Pr;
+    KeThResHd *Res;
+    sceVu0FVECTOR *RPos;
+    sceVu0FVECTOR *Vec;
+} KeaThCp_Update;
+
+/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeTh */
+void KeThResHd_Init(KeThResHd *_t, u_char bpNum, u_char rpNum);
+void KeThCp_AddBp(KeThCp *_t, KeThResHd *pResHd, sceVu0FVECTOR *pRPos, sceVu0FVECTOR *pVec);
+void KeThCp_Update(KeaThCp_Update *_a);
+void KeThCp_Draw(KeThCp *_t, sceVu0FMATRIX *pMat, float *scl, KetThBp_Pr *pPr, u_long128 **pPkBuf, u_long Alpha, u_long Test);
+void KeThCp_Init(KeThCp *_t);
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_KETH_H */
