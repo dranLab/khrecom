@@ -1,4 +1,3 @@
-// PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMegaPlaceLamp
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_RYJPROG_PPPRYJMEGAPLACE_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_RYJPROG_PPPRYJMEGAPLACE_H
 
@@ -79,5 +78,9 @@ typedef struct { /* 0x48 */
 int entry_megaplace_shape(void *pvMegaPlace, PRyjMegaPlaceShape *pMegaPlaceShape);
 int entry_megaplace_model(void *pvMegaPlace, PRyjMegaPlaceModel *pMegaPlaceModel);
 int entry_megaplace_lamp(void *pvMegaPlace, PRyjMegaPlaceLamp *pMegaPlaceLamp);
+void pppRyjMegaPlace(pppPObject *pPobj, PRyjMegaPlace *pParam, pppCtrlTable *pCtbl);
+void pppRyjDrawMegaPlace(pppPObject *pPobj, PRyjMegaPlace *pParam, pppCtrlTable *pCtbl);
+void pppRyjMegaPlaceCon(pppPObject *pPobj, pppCtrlTable *pCtbl);
+void pppRyjMegaPlaceDes(pppPObject *pPobj, pppCtrlTable *pCtbl);
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_RYJPROG_PPPRYJMEGAPLACE_H */
