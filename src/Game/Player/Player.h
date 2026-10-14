@@ -94,6 +94,9 @@ public:
     UINT getAttackID() { return m_uiAttackID; }
     void setCure(INT inID, INT inPow);
     INT isBattleFlag(UINT inFlag) { return m_uiBattleFlag & inFlag; } // PARTIAL: added for Game/Player/SummonMushu
+    // PARTIAL: added for Game/Gimmick/GimmickJumpStand
+    INT getJumpState() const;
+    static void notifyGimmickJump(HANDLE inHandle, INT inPower);
     HANDLE getLockonHandle() {
         HANDLE handle = m_hLockon;
         if (handle == 0 || handle == -1) handle = m_hTarget;
