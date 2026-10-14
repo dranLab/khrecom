@@ -191,13 +191,16 @@ public:
 
 protected: // PARTIAL: added for Game/Bullet/BulletManager
     BOOL declareSysTask(UINT nID);
+    void adjustSelfCoord(); // PARTIAL: added for System/Graphic/Camera
+    friend class CTaskSecondary; // PARTIAL: added for System/Graphic/Camera (m_nInfo)
     CTaskSLCList& getChildren() { return m_listChildren; }
 };
 
 // PARTIAL: added for Game/Atel/AtelCamera
 class CTaskSecondary : public CTask {
 public:
-    CTaskSecondary(CTask* pParent, INT nProcPrio);
+    // PARTIAL: inline body added for System/Graphic/Camera
+    CTaskSecondary(CTask* pParent, INT nProcPrio = 0x4000) : CTask(pParent, nProcPrio) { m_nInfo |= 2; }
 };
 
 #endif /* SYSTEM_TASK_H */
