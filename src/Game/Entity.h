@@ -190,6 +190,13 @@ public:
     FLOAT calcDistance(const FVECTOR& inPos) const;
     // PARTIAL: added for Game/Player/PlayerWeapon (weak in the original)
     UINT isDispOFF() const { return m_uiEntityFlag & 1; }
+    // PARTIAL: added for Game/EffectMotion
+    CAnim* getAnim() { return m_pAnim; }
+    HANDLE setEffect(const CHAR* inName, UINT inFlag, const FMATRIX* inMat, FLOAT inScale);
+    HANDLE attachEffect3(const CHAR* inName, UINT inNo, const CCoord* inParent1, const CCoord* inParent2,
+                         const CCoord* inParent3, const FVECTOR* inPos1, const FVECTOR* inPos2, const FVECTOR* inPos3,
+                         FLOAT inWait);
+    BOOL isMotionLoop() const;
     void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel) {
         setEntityFlag(0x40000000, 0);
         m_fStartAlpha = inStart;
