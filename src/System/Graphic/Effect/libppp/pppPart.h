@@ -383,7 +383,7 @@ typedef struct {
 void *op_spr_alloc(word mem);
 void op_spr_free(word mem);
 int sceGsExecLoadImage(sceGsLoadImage *lp, u_long128 *srcaddr);
-int FlushCache(int operation);
+void FlushCache(int operation);
 void sceVu0DivVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, float q);
 void sceVu0AddVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2);
 /* end PARTIAL pppKeTkFade */
