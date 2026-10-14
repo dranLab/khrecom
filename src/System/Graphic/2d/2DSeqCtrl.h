@@ -68,6 +68,10 @@ public:
     void enableDisp(BOOL bEnable);                            /* PARTIAL: added for Form/Menu/MenuParts */
     void setScl(FVECTOR& vScl);                               /* PARTIAL: added for Form/Menu/MenuParts */
     void setParent(C2DSeqCtrl* pParent);                      /* PARTIAL: added for Form/Menu/MenuParts */
+    void destroy(UINT nIdx);                                  /* PARTIAL: added for Form/Menu/WorldSelect */
+    void setScl(FLOAT fScl);                                  /* PARTIAL: added for Form/Menu/WorldSelect */
+    void setRot(FVECTOR& vRot);                               /* PARTIAL: added for Form/Menu/WorldSelect */
+    UINT getNumSeq() { return m_nSeq; }                       /* PARTIAL: added for Form/Menu/WorldSelect */
     void enableColorCtrl(BOOL bEnable) { m_seqControl.fgColor = bEnable; } /* PARTIAL: added for Form/SystemMessage */
 };
 

@@ -7,6 +7,7 @@
 union FMATRIX;
 union FVECTOR; // PARTIAL: added for Game/Gimmick/GimmickTutorial
 class CEffect; // PARTIAL: added for Game/Player/SummonTink
+class CCoord;  // PARTIAL: added for Form/Menu/WorldSelect
 
 namespace ObjType {
 enum eObjType {
@@ -41,6 +42,10 @@ public:
     static HANDLE setEffect(const CHAR* inName, UINT inFlag, ObjType::eObjType inType, const FVECTOR* inPos,
                             const FVECTOR* inRot, FLOAT inScale);
     static CEffect* getEffect(HANDLE inHandle); // PARTIAL: added for Game/Player/SummonTink
+    // PARTIAL: added for Form/Menu/WorldSelect
+    static HANDLE attachEffect(const CHAR* inName, UINT inNo, ObjType::eObjType inType, const CCoord* inParent,
+                               const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inWait);
+    static void killEffect(HANDLE inHandle, FLOAT inTime);
 };
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_EFFECTMAN_H */
