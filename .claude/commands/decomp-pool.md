@@ -17,7 +17,14 @@ replacement right away, so the pool stays at the requested size (default 3).
 
 ## 2. Picking a unit
 
-Each time a slot is free:
+Each time a slot is free, first the **usage gate**: `python3 .claude/usage_gate.py --running <workers still
+running> --per-worker <estimate>` (needs the status line `~/.claude/statusline.py`, which saves the plan's usage to
+`~/.claude/usage-latest.json`). On `WAIT`, start nothing: tell the user in one line and leave the slot empty (see
+section 5). The estimate is the 5-hour-window % one worker uses: start with 8; append
+`<time> <5h %> <running> <event>` to `build/usage.log` at every start and finish, and once a few workers have
+finished, use the observed average.
+
+Then:
 - `.venv/bin/python tools/candidates.py SLUS_217.99 --no-headers --limit 60` (drop `--no-headers` if the user
   asks for harder files). Skip units that already have a branch (`git branch --list 'decomp/*'`) or are
   assigned to a running worker.
@@ -55,6 +62,9 @@ Only one merge at a time: if several workers finish together, merge them one aft
 
 - When running under `/loop`, re-arm the fallback wakeup (1200-1800 s) after each event; the workers'
   notifications are the real wake signal. On a fallback wakeup with all workers still running, do nothing else.
+- While the usage gate says `WAIT`: don't refill. With workers still running, their notifications wake you as
+  usual. With none left, schedule the wakeup for shortly after the 5-hour window resets (the gate prints the reset
+  time; wakeups are capped at 3600 s, so chain them), then re-check the gate and refill.
 - Stop refilling when the user asks, when no suitable candidate is left, or when two merges in a row fail
   `tools/check.sh` (something systemic, needs the user). Let running workers finish and merge them, then end
   the loop and summarize all units of the run.
