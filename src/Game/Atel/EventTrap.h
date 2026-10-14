@@ -53,13 +53,7 @@ public:
     }
     BOOL isActive() { return m_nFlag & 1; }
     USHORT getType() { return m_nType; }
-    /* dispShape() is emitted after the vtables, and this asm puts the bytes there: the original object holds an
-     * unnamed copy of CVector<G_LINE>'s (weak) vtable after its own, which tools/ee_asm_compat.py drops from the
-     * compiled output because the linker kept the named copy elsewhere. Remove once symbol_addrs.txt names the
-     * copy (_vt$t7CVector1Z6G_LINE_0048BD40), so that the tool keeps our compiled one. */
-    virtual void dispShape() {
-        __asm__(".rdata\n\t.align 3\n\t.word 0, 0, 0, _$_t7CVector1Z6G_LINE, 0, 0\n\t.text");
-    }
+    virtual void dispShape() {}
 
 protected:
     virtual void onSetActive(BOOL b) {}
