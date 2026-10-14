@@ -19,4 +19,14 @@ inline void* _collUtilCreate() {
     return p;
 }
 
+/* PARTIAL: added for Game/Atel/EventTrap - the singleton accessor (line 194), for includers that have the class
+ * (Game/Collision/CollUtilA.h, included before this header). */
+#ifdef GAME_COLLISION_COLLUTILA_H
+#line 193
+inline CCollUtil* CCollUtil::getInstance() {
+    if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+    return m_pInstance;
+}
+#endif
+
 #endif /* GAME_COLLISION_COLLUTIL_H */

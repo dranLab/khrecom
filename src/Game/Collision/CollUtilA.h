@@ -76,6 +76,9 @@ public:
     INT _detectActorTrapXZ(const ETMoveData& moveData, const EventTrapData& trapData);
     INT detect2DLineLine(const FVECTOR& vP0, const FVECTOR& vP1);
     INT detect2DLinePoint(const FVECTOR& vP0, const FVECTOR& vP1, const FVECTOR& vPC);
+    // PARTIAL: added for Game/Atel/EventTrap (defined inline in CollUtil.h)
+    static CCollUtil* m_pInstance;
+    static CCollUtil* getInstance();
 
     /* 0x000 */ char _pad000[0x30];
     /* 0x030 */ FVECTOR m_vCkS;

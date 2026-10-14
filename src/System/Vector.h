@@ -32,6 +32,19 @@ union FVECTOR {
     }
 };
 
+// PARTIAL: added for Game/Atel/EventTrap
+typedef int _IVECTOR[4];
+union IVECTOR {
+    _IVECTOR v;
+    struct {
+        INT x;
+        INT y;
+        INT z;
+        INT w;
+    };
+    u_long128 _q;
+};
+
 typedef float _FMATRIX[4][4];
 union FMATRIX {
     _FMATRIX m;
@@ -58,15 +71,22 @@ private:
 
 public:
     CVector() : m_pObj(NULL), m_iMax(0), m_iIdx(0), m_iStatus(0) {}
-    virtual ~CVector() { __cleanmem(); }
-    BOOL push_back(const T& x) {
+    virtual ~CVector() { clear(); }
+    // PARTIAL: push_back/clear as in Game/Atel/EventTrap
+    void push_back(const T& x) {
         if (m_iIdx >= m_iMax) {
-            if (__alloc(__getSize(m_iMax)) == NULL) {
-                return 0;
-            }
+            __alloc(__getSize(m_iMax));
         }
-        m_pObj[m_iIdx++] = x;
-        return 1;
+        if (m_iIdx < m_iMax) {
+            m_pObj[m_iIdx] = x;
+            m_iIdx++;
+        }
+    }
+    void clear() {
+        for (INT i = 0; i < m_iIdx; i++) {
+            m_pObj[i].~T();
+        }
+        __cleanmem();
     }
     INT size() const { return m_iIdx; }
     T& operator[](INT i) {
@@ -77,7 +97,9 @@ public:
 private:
     void __cleanmem() {
         if (m_pObj != NULL) {
-            com_free(m_pObj);
+            /* PARTIAL: delete, not com_free (Game/Atel/EventTrap): same code, but the larger RTL makes a synthesized
+             * destructor containing it too big to inline, which changes where gcc emits it */
+            delete m_pObj;
         }
         m_pObj = NULL;
     }
