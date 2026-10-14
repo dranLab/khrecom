@@ -9,11 +9,14 @@ CLAUDE.md explains the project, the tools and how the original was built - follo
 ## Steps
 
 1. **Study the unit.**
-   - Original: `build/SLUS_217.99/expected/asm/<unit>.s` and `.../expected/asm/data/<unit>.*.s`.
-   - Reference: `ref/SLUS_217.99/src/<unit>.cpp` / `.h`; types in `ref/SLUS_217.99/types.h`.
+   - Original: `.venv/bin/python tools/asm.py <unit>` lists the functions in original order with their size and
+     binding (`weak` = inline, belongs in a header) and the data files. `tools/asm.py <unit> <function>...` prints
+     functions' assembly, `--data [rodata ...]` the data - a third of the raw `.s` size, floats decoded. Use it
+     instead of cat/sed/grep on `expected/asm`. Read a function's assembly when you start on it, not all up front.
+   - Reference: `ref/SLUS_217.99/src/<unit>.cpp` / `.h`; types in `ref/SLUS_217.99/types.h` (big: `grep -n -A<n>`
+     the types you need, never the whole file).
    - Language: the source path in the comment of the unit's line in `config/SLUS_217.99/SLUS_217.99.yaml`
      (`.cpp` or `.c`).
-   - Which functions are weak (inline, belong in a header) vs global: `mips-linux-gnu-readelf -sW iso/SLUS_217.99`.
    - Existing headers in `src/` and `include/` that you can include.
 2. **Write** `src/<unit>.cpp` (or `.c`) and, for the unit's own classes, `src/<unit>.h`. Start with every function
    as `INCLUDE_ASM` (see CLAUDE.md) **in the original order** (`glabel`s in the original `.s`), run
@@ -32,6 +35,21 @@ CLAUDE.md explains the project, the tools and how the original was built - follo
 5. **Gate.** `tools/check.sh` must exit 0 (the full image matches). Never commit if it fails.
 6. **Commit** on the branch: only your unit's files (`git add src/<unit>.* <other files you created>`), message
    `Decompile <unit>: <n>/<m> functions` plus a short body. Do not push, merge, rebase or switch branches.
+
+## Context economy
+
+Everything a command prints stays in your context and is re-read on every later turn: a 20 KB dump at turn 10 of a
+100-turn run costs 20 KB x 90. Keep output small and never print the same thing twice.
+
+- Print only what you need: one function's assembly, one type, a line range. Bound anything that could be long
+  (`| head -40`, `grep -n`), and don't re-print a file you have already seen unchanged.
+- Your own source: after writing it, don't cat it again - `grep -n` / `sed -n 'a,bp'` the part you change. Change
+  it with Edit (short old/new strings), not by rewriting the whole file or with scripts that echo it.
+- `funcdiff.py <unit> <function>` already shows only the differences; use `--full` only for a short function.
+- Variant searches: write the script once to a file in `build/`, rerun it with arguments, and make it print one
+  line per variant (name and score), not diffs.
+- Long tool output (`configure.py`, `ninja`, `tools/check.sh`): `> build/<name>.log 2>&1; echo $?; tail -5`;
+  read more of the log only when it failed.
 
 ## Rules
 

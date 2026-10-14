@@ -12,6 +12,8 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
 - `ninja` - build; fails unless the rebuilt image matches the original (SHA-1).
 - `.venv/bin/python tools/funcdiff.py <unit> [<function>]` - status per function, or original | ours side by side
   (only the differences with 3 lines of context; `-C N` for more, `--full` for every line).
+- `.venv/bin/python tools/asm.py <unit> [<function>...]` - the original's functions (size, weak/global) or their
+  assembly, compact (a third of the raw `.s`); `--data` for the unit's data.
 - `.venv/bin/python tools/compare_compilers.py SLUS_217.99 src/<unit>.cpp` - per function, with every installed compiler.
 - `.venv/bin/python tools/candidates.py SLUS_217.99` - files not decompiled yet (size, functions, header strings).
 - `tools/setup_worktree.sh` - prepare a fresh git worktree (links game files and tools, runs configure).

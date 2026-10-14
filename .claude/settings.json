@@ -7,6 +7,7 @@
       "Bash(.venv/bin/python configure.py:*)",
       "Bash(.venv/bin/python tools/funcdiff.py:*)",
       "Bash(.venv/bin/python tools/compare_compilers.py:*)",
+      "Bash(.venv/bin/python tools/asm.py:*)",
       "Bash(.venv/bin/python tools/candidates.py:*)",
       "Bash(tools/check.sh)",
       "Bash(tools/setup_worktree.sh)",
