@@ -18,19 +18,12 @@ enum ATK_ATTR {
     ATK_ATTR_MAX = 6
 };
 
-// PARTIAL: added for Game/Gimmick/BaseGimmick (virtual set/update)
-class CAttachMotion {
-protected:
-    CEntity* m_pOwner; /* 0x0 */
-public:
-    virtual ~CAttachMotion();
-    virtual BOOL set(INT inIndex);
-    virtual void stop();
-    virtual void update();
-};
+// PARTIAL: CAttachMotion moved to Game/AttachMotion.h for Game/EffectMotion
+#include "Game/AttachMotion.h"
 
 class CAttackMotion : public CAttachMotion { // PARTIAL: base CAttachMotion added for Game/Gimmick/BaseGimmick
 public:
+    CAttackMotion(CEntity* inOwner); // PARTIAL: added for Game/EffectMotion (CAttachMotion has no default constructor)
     void setCollKind(INT inKind);
     void setAttackParam(INT inAttack, ATK_ATTR inAttr); // PARTIAL: added for Game/Gimmick/GimmickGuillotine
     void updateAttackID(); // PARTIAL: added for Game/Gimmick/GimmickHitRepetition

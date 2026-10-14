@@ -50,6 +50,7 @@ public:
     BOOL isMotionEnd() { return m_Flags[0] & 3; }
 
     ULONG getFlag(UINT idx) const;
+    BOOL isLoop(INT n); // PARTIAL: added for Game/EffectMotion
     ANIMID getAnimID() { return m_noId; }
     TIMEQ getCurrentTqCrd() { return m_Tq; } // PARTIAL: added for Game/Gimmick/GimmickOnceReaction
     // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy (name guessed: tests m_Flags[1] bit 1 inline)
