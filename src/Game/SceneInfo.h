@@ -34,12 +34,29 @@ struct RoomInfo {
     BYTE getCardID() const;
 };
 
+// PARTIAL: added for Game/Enemy/MapEnemyManager
+struct _MapEnemyInfo {
+    BYTE _byID;
+    BYTE _byDead;
+};
+
+struct _MapEnemyRoomInfo {
+    _MapEnemyInfo _MapEnemies[32];
+    SHORT _sEncountUniqueID;
+    SHORT _sEncountEnemyID;
+    BYTE _byFormationNo1;
+    BYTE _byFormationNo2;
+    BYTE _byHitPlayerAttack;
+    BYTE _byAppearType;
+};
+
 class CSceneInfo {
 public:
     static SHORT getCurrentFloorNumber();
     static BOOL hasReqChangeScene(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
     static INT getCurrentRoomID();
     static RoomInfo* getRoomInfo(INT nRoomID);
+    static _MapEnemyRoomInfo* getCurrentRoomMapEnemyInfo(); // PARTIAL: added for Game/Enemy/MapEnemyManager
     static INT getRoomIndex(INT nRoomID); // PARTIAL: added for Form/Menu/MoogleShop
     static SHORT getCurrentSceneNum(); // PARTIAL: added for Game/Gimmick/GimmickRideOn
     static void clear(); // PARTIAL: added for System/RootTask
