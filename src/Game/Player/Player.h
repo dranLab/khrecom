@@ -64,7 +64,9 @@ private:
     CardBattle::CCardRevolver* m_pRevolver; /* 0x2f0 */
     UBYTE _m_0x2f4[0xc];         /* 0x2f4 .. 0x2fc */
     PlayerState m_PlayerState;   /* 0x300 */
-    UBYTE _m_0x304[0x10];        /* 0x304 .. 0x310 */
+    UBYTE _m_0x304[0x8];         /* 0x304 m_tqStateTimer, m_iSubState */
+    UINT m_uiPlayerFlag;         /* 0x30c */ // PARTIAL: split out for Game/Player/FriendBeast
+    UBYTE _m_0x310[0x4];         /* 0x310 m_uiActionFlag */
     UINT m_uiConditionFlag;      /* 0x314 */ // PARTIAL: split out for Game/Gimmick/GimmickWindowLid
     UINT m_uiTrgFlag;            /* 0x318 */ // PARTIAL: split out for Game/Player/SummonMushu
     UINT m_uiBattleFlag;         /* 0x31c */
@@ -97,6 +99,26 @@ public:
     // PARTIAL: added for Game/Gimmick/GimmickJumpStand
     INT getJumpState() const;
     static void notifyGimmickJump(HANDLE inHandle, INT inPower);
+    // PARTIAL: added for Game/Player/FriendBeast (also out of line: setPlayerFlag__7CPlayerUiUi)
+    void setPlayerFlag(UINT inSet, UINT inMask) { UINT& f = m_uiPlayerFlag; f = (f | inSet) & ~inMask; }
+    // PARTIAL: added for Game/Player/FriendBeast (CPlayer's virtuals up to vtable[36])
+    virtual void beginStateField();
+    virtual void stateField();
+    virtual void endStateField();
+    virtual void beginStateBattle();
+    virtual void stateBattle();
+    virtual void endStateBattle();
+    virtual void beginStateWait();
+    virtual void stateWait();
+    virtual void endStateWait();
+    virtual void beginStateHide();
+    virtual void stateHide();
+    virtual void endStateHide();
+    virtual void onWeapon(INT inEffect);
+    virtual void offWeapon();
+    virtual void setStateSE(INT inState, INT inKind);
+    virtual INT getStateSESeq(INT inState);
+    virtual void setAttack_inFriend(INT inID, INT inStock, HANDLE inTarget);
     HANDLE getLockonHandle() {
         HANDLE handle = m_hLockon;
         if (handle == 0 || handle == -1) handle = m_hTarget;
