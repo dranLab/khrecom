@@ -106,7 +106,11 @@ public:
     FVECTOR& getGazePosition() { return m_GazePos; }
     FMATRIX& getLocalMatrix() { return Crd(0).getLocalMatrix(); }
     void setRate(FLOAT rate) { m_fRate = rate; }
-    BOOL isCamEnd() { return m_next == -1; }
+    // PARTIAL: written as an if for Game/Gimmick/GimmickTreasureBox (the result is a constant 1 on the true path)
+    BOOL isCamEnd() {
+        if (m_next == -1) return TRUE;
+        return FALSE;
+    }
     void setRoll(FLOAT roll) { m_Roll = roll; }
     void setOffsetX(FLOAT fInX);
     void setOffsetY(FLOAT fInY);

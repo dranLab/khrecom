@@ -5,19 +5,26 @@
 #include "khtypes.h"
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
+#include "System/Task.h" // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
 
 /* Includers define the placement operator new before including this header. */
 
 namespace ATEL {
 
-/* Only the singleton creation is real (its strings and line numbers are in .rodata of every includer);
- * the layout is a placeholder of the original size (0x50). */
-class CChatMan {
+// PARTIAL: added for Game/Gimmick/GimmickTreasureBox
+class ICommandAccepter {
+public:
+    virtual INT reqCommand(INT nCmd, void* pParam, INT nID) = 0;
+};
+
+/* Only the singleton creation is real (its strings and line numbers are in .rodata of every includer).
+ * PARTIAL: bases CTask, ICommandAccepter (0x40) added for Game/Gimmick/GimmickTreasureBox (sizeof 0x50). */
+class CChatMan : public CTask, public ICommandAccepter {
 private:
-    char _pad[0x50];
     static CChatMan* m_pInstance;
 
     CChatMan();
+    virtual ~CChatMan();
     void setup();
 
 public:
@@ -29,6 +36,13 @@ public:
         m_pInstance->setup();
         return *m_pInstance;
     }
+    // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
+#line 57 "Game/Atel/ChatMan.h"
+    static CChatMan& instance() {
+        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        return *m_pInstance;
+    }
+    virtual INT reqCommand(INT nCmd, void* pParam, INT nID);
 };
 
 } // namespace ATEL
