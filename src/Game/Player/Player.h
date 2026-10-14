@@ -114,6 +114,7 @@ public:
     // PARTIAL: added for Game/Gimmick/GimmickJumpStand
     INT getJumpState() const;
     static void notifyGimmickJump(HANDLE inHandle, INT inPower);
+    static void notifyGetPrize(INT inKind, INT inNumber, INT inState); // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
     // PARTIAL: added for Game/Player/FriendBeast (also out of line: setPlayerFlag__7CPlayerUiUi)
     void setPlayerFlag(UINT inSet, UINT inMask) { UINT& f = m_uiPlayerFlag; f = (f | inSet) & ~inMask; }
     // PARTIAL: added for Game/Player/FriendBeast (CPlayer's virtuals up to vtable[36])
