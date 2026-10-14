@@ -7,6 +7,7 @@
 
 class CCoords;
 class CCoord; // PARTIAL: added for Game/Atel/AtelCamera
+union FMATRIX; // PARTIAL: added for System/Graphic/PathCamera
 class CTask;
 template <class T> class ISLCManagerT;
 template <class T> class SLContainerT;
@@ -170,6 +171,7 @@ public:
     }
     void setPriority(INT pri) { m_nProcPrio = pri; } // PARTIAL: added for System/Graphic/TexCtrl
     CCoord& Crd(UINT nIndex); // PARTIAL: added for Game/Atel/AtelCamera
+    const FMATRIX& getWorld(UINT nIndex) const; // PARTIAL: added for System/Graphic/PathCamera
     void addCoord(UINT nNum);                               // PARTIAL: added for Game/ModelObj
     INT getCoordNum() const;                                // PARTIAL: added for Game/ModelObj
     BOOL isClippedLastTime() { return m_cLastClip < 0; }    // PARTIAL: added for Game/ModelObj
