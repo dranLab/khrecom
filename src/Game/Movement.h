@@ -45,6 +45,9 @@ public:
     // PARTIAL: added for Game/Player/FriendPan
     void homing(const CEntity* inTarget, FLOAT inRate);
     void calcVelocity(FLOAT inSpeed);
+    // PARTIAL: added for Game/Player/SummonBambi
+    void calcVelocity(FLOAT inSpeed, const FVECTOR& inDir);
+    FLOAT calcOrbitSpeedFromDistance(FLOAT inTheta, FLOAT inDist);
     CCollMap* getMapCollision() { return m_pMapCollision; } // PARTIAL: added for Game/Player/SummonSinba
 };
 

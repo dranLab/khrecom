@@ -170,6 +170,9 @@ public:
     // PARTIAL: added for Game/Player/SummonTink
     FLOAT calcDistanceXZ(const FVECTOR& inPos) const;
     static FLOAT rndArea(FLOAT inMin, FLOAT inMax);
+    // PARTIAL: added for Game/Player/SummonBambi
+    BOOL isGround() const;
+    FLOAT calcDistance(const FVECTOR& inPos) const;
 };
 
 #endif /* GAME_ENTITY_H */
