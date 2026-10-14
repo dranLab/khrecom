@@ -12,11 +12,20 @@ class CCoord {
 public:
     FMATRIX m_Local;
     // PARTIAL: 0x40..0x8f split for Game/Gimmick/GimmickFountain
-    TIMEQ m_FixTimestamp;   /* 0x40 */
-    INT m_Flag;             /* 0x44 */
-    TIMEQ m_WorldTimestamp; /* 0x48 */
-    CCoord* m_pParent;      /* 0x4c */
-    UBYTE _pad50[0x40];     /* 0x50 m_Rot */
+    union {
+        struct {
+            TIMEQ m_FixTimestamp;   /* 0x40 */
+            INT m_Flag;             /* 0x44 */
+            TIMEQ m_WorldTimestamp; /* 0x48 */
+            CCoord* m_pParent;      /* 0x4c */
+        };
+        u_long128 _q40; // PARTIAL: added for Game/Atel/EventTrap (the constructor clears 0x40..0x4f at once)
+    };
+    UBYTE _pad50[0x30];     /* 0x50 m_Rot */
+    FLOAT m_fScaleX;        /* 0x80 */
+    FLOAT m_fScaleY;        /* 0x84 */
+    FLOAT m_fScaleZ;        /* 0x88 */
+    INT m_hHandle;          /* 0x8c */
     FMATRIX m_World;     /* 0x90 */
     // PARTIAL: added for System/Graphic/Camera
     void setLocal(const FMATRIX& matIn) {
@@ -27,6 +36,15 @@ public:
     }
     void setParent(CCoord* pParent) { m_pParent = pParent; } // PARTIAL: added for System/Graphic/Camera
     void touch(); // PARTIAL: added for System/Graphic/Camera (defined below CCamera)
+    // PARTIAL: added for Game/Atel/EventTrap
+    CCoord() {
+        _q40 = 0;
+        m_fScaleX = 1.0f;
+        m_fScaleY = 1.0f;
+        m_fScaleZ = 1.0f;
+        m_hHandle = 0;
+    }
+    void fix(INT n = 0);
     FMATRIX& getWorldMatrix() { return m_World; } // PARTIAL: added for Game/Gimmick/GimmickBell
     FMATRIX& getLocalMatrix() { return m_Local; } // PARTIAL: added for Game/Gimmick/GimmickFountain
     CCoord* getParent() { return m_pParent; }     // PARTIAL: added for Game/Gimmick/GimmickFountain

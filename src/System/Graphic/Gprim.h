@@ -5,6 +5,7 @@
 #include "khtypes.h"
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
+#include "System/Vector.h" // PARTIAL: added for Game/Atel/EventTrap
 
 /* __FILE__ of this header in the original differs per includer ("System/Graphic/Gprim.h" in most, also
  * "c:/KHCOM/MainApp/System/Graphic/Gprim.h" and "System/../System/Graphic/Gprim.h"): define
@@ -13,7 +14,32 @@
 #define GPRIM_H_PATH "System/Graphic/Gprim.h"
 #endif
 
-typedef USHORT ALPHA;
+/* PARTIAL: ALPHA as a union with constructors and operator=, added for Game/Atel/EventTrap: passed by value it
+ * keeps the value in a register in CGPrim's constructor (array of C3DPolyG4), and the user-defined operator= keeps
+ * the CGPrim vtable store in C3DLines' constructor. */
+enum _ALPHA {
+    ALPHA_OFF = 0,
+    ALPHA_BLEND = 1,
+    ALPHA_PLUS = 2,
+    ALPHA_MINUS = 3,
+    ALPHA_MUL = 4,
+};
+
+union ALPHA {
+    USHORT _value;
+    struct {
+        BYTE alphaMode;
+        BYTE alphaValue;
+    };
+    ALPHA() {}
+    ALPHA(_ALPHA nMode) { _value = nMode; }
+    ALPHA(INT nMode) { _value = nMode; }
+    operator INT() const { return _value; }
+    ALPHA& operator=(const ALPHA& a) {
+        _value = a._value;
+        return *this;
+    }
+};
 
 // PARTIAL: added for Game/AtWater
 union QWdata {
@@ -133,16 +159,20 @@ protected:
     }
 public:
     CGPrim() {
-        initAttribute(0, 1, 0);
-        setTestFlag(0x5000D);
         m_iFlag = 0;
         m_nZ = 0;
-        m_nAlphaMode = 0;
+        initAttribute(0, 1, 0);
+        CDrawable::setSemiTrans(ALPHA_OFF);
+        setTestFlag(0x5000D);
         setLayer(0, 0);
     }
     void setSemiTrans(ALPHA nInAlpha) {
         CDrawable::setSemiTrans(nInAlpha);
-        m_nAttribute |= 1;
+        if (nInAlpha) {
+            m_nAttribute |= 1;
+        } else {
+            m_nAttribute &= ~1;
+        }
     }
     virtual ~CGPrim() {} // PARTIAL: inline (Game/AtWater: no out-of-line _$_6CGPrim exists)
     virtual void disp();
@@ -226,6 +256,54 @@ public:
         m_T0.set(u, v);
         m_T1.set(u + w, v + h);
     }
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+// PARTIAL: added for Game/Atel/EventTrap
+class CCoord;
+
+struct G_LINE {
+    FVECTOR P0;
+    FVECTOR P1;
+    G_RGBA C0;
+    G_RGBA C1;
+    IVECTOR p0;
+    IVECTOR p1;
+};
+
+typedef CVector<G_LINE> G_LINE_VECTOR;
+
+class C3DLines : public CGPrim {
+public:
+    CCoord* m_pCrd;
+    G_LINE_VECTOR m_vLINE;
+
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DPolyG4 : public CGPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+    IVECTOR p2;
+    IVECTOR p3;
+public:
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    FVECTOR m_P2;
+    FVECTOR m_P3;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    G_RGBA m_C2;
+    G_RGBA m_C3;
+    CCoord* m_pCrd;
+
     virtual UINT getPacketSize() const;
 private:
     virtual FIX4 calcZ();
