@@ -5,6 +5,7 @@
 #include "khtypes.h"
 
 union FMATRIX;
+union FVECTOR; // PARTIAL: added for Game/Gimmick/GimmickTutorial
 class CEffect; // PARTIAL: added for Game/Player/SummonTink
 
 namespace ObjType {
@@ -36,6 +37,9 @@ enum eObjType {
 class CEffectMan {
 public:
     static HANDLE setEffect(const CHAR* inName, UINT inFlag, ObjType::eObjType inType, const FMATRIX* inMat, FLOAT inScale);
+    // PARTIAL: added for Game/Gimmick/GimmickTutorial
+    static HANDLE setEffect(const CHAR* inName, UINT inFlag, ObjType::eObjType inType, const FVECTOR* inPos,
+                            const FVECTOR* inRot, FLOAT inScale);
     static CEffect* getEffect(HANDLE inHandle); // PARTIAL: added for Game/Player/SummonTink
 };
 
