@@ -151,13 +151,24 @@ def drop_foreign_weak_data(lines: list[str], symbols_path: str, own_data: str) -
     that needs it. The original linker kept one copy, at the address the symbol file gives; in every other object
     it is extra data, and in a section that doesn't come from the source (removed by objcopy) a missing symbol. So a
     weak object whose original address lies outside this object's data from source (own_data: "0xSTART-0xEND,...",
-    or "none") loses its definition and the references resolve to the original copy."""
+    or "none") loses its definition and the references resolve to the original copy.
+
+    Some original objects hold an unnamed copy of such data too (the linker kept another copy's name). A copy named
+    <name>_<ADDR> in symbol_addrs.txt (next to the symbol file), with ADDR in this object's data from source, is
+    kept."""
     own = [tuple(int(x, 16) for x in r.split("-")) for r in own_data.split(",") if r != "none"]
     weak = {m.group(1) for line in lines if (m := WEAK.match(line))}
     if not weak:
         return lines
+    def inside(addr: int) -> bool:
+        return any(lo <= addr < hi for lo, hi in own)
     addrs = symbol_addresses(symbols_path, weak)
-    foreign = {name for name, addr in addrs.items() if not any(lo <= addr < hi for lo, hi in own)}
+    foreign = {name for name, addr in addrs.items() if not inside(addr)}
+    manual = Path(symbols_path).with_name("symbol_addrs.txt")
+    if foreign and manual.exists():
+        copies = re.compile(r"^(\S+)_([0-9A-F]{8}) = 0x\2;", re.M)
+        foreign -= {m.group(1) for m in copies.finditer(manual.read_text(encoding="utf-8"))
+                    if m.group(1) in foreign and inside(int(m.group(2), 16))}
     in_data, data_labels = False, set()
     for line in lines:
         if DATA_SECTION.match(line):

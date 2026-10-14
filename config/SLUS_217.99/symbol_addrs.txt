@@ -18,3 +18,5 @@ reCalc__10CLightUnit_00208A08 = 0x00208A08; // type:func size:0x3C
 getPointLightData__C10CLightUnit_00208A48 = 0x00208A48; // type:func size:0x8
 _calc__10CLightUnit_00208A50 = 0x00208A50; // type:func size:0x34
 calc__10CLightUnit_00208AA0 = 0x00208AA0; // type:func size:0x18
+// and an unnamed copy of its vtable (tools/ee_asm_compat.py keeps our compiled copy for it)
+_vt$10CLightUnit_00482228 = 0x00482228; // size:0x38
