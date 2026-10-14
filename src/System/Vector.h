@@ -30,6 +30,8 @@ union FVECTOR {
         _q = 0;
         w = 1.0f;
     }
+    // PARTIAL: added for System/Graphic/Camera
+    BOOL operator!=(const FVECTOR& inV) const { return _ul[0] != inV._ul[0] || _ul[1] != inV._ul[1]; }
 };
 
 typedef float _FMATRIX[4][4];
@@ -37,6 +39,8 @@ union FMATRIX {
     _FMATRIX m;
     FVECTOR v[4];
     void setTrans(const FVECTOR& vecIn) { v[3] = vecIn; }
+    // PARTIAL: added for System/Graphic/Camera
+    BOOL operator!=(const FMATRIX& inM) const { return v[0] != inM.v[0] || v[1] != inM.v[1] || v[2] != inM.v[2] || v[3] != inM.v[3]; }
 };
 
 // PARTIAL: added for System/MainTaskFactory. Only __alloc/__getSize are known (out-of-class template members,
