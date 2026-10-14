@@ -10,3 +10,11 @@ D_00495350 = 0x00495350; // can_be_referenced:False
 D_00495564 = 0x00495564; // can_be_referenced:False
 D_00677562 = 0x00677562; // can_be_referenced:False
 D_00678358 = 0x00678358; // can_be_referenced:False
+
+// CLightUnit's inline functions, also emitted in Game/ModelObj (the named copies are LightUnit.o's):
+_$_10CLightUnit_002089B8 = 0x002089B8; // type:func size:0x30
+setAnchor__10CLightUnitPC6CCoordRC9MODELDATAi_002089E8 = 0x002089E8; // type:func size:0x1C
+reCalc__10CLightUnit_00208A08 = 0x00208A08; // type:func size:0x3C
+getPointLightData__C10CLightUnit_00208A48 = 0x00208A48; // type:func size:0x8
+_calc__10CLightUnit_00208A50 = 0x00208A50; // type:func size:0x34
+calc__10CLightUnit_00208AA0 = 0x00208AA0; // type:func size:0x18
