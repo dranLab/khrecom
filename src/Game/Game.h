@@ -13,6 +13,7 @@ public:
     static void enablePause(BOOL bEnable); // PARTIAL: added for Form/Menu/GameOver
     static BOOL reqContinue_GameOver();    // PARTIAL: added for Form/Menu/GameOver
     static BOOL reqExit_GameOver();        // PARTIAL: added for Form/Menu/GameOver
+    static BOOL isSuspended();             // PARTIAL: added for Game/SceneEnv
 };
 
 #endif /* GAME_GAME_H */
