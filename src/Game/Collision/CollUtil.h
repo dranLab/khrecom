@@ -22,10 +22,13 @@ inline void* _collUtilCreate() {
 /* PARTIAL: added for Game/Atel/EventTrap - the singleton accessor (line 194), for includers that have the class
  * (Game/Collision/CollUtilA.h, included before this header). */
 #ifdef GAME_COLLISION_COLLUTILA_H
-#line 193
+/* The load of m_pInstance is not a "fixed scalar" to gcc's alias analysis (it stays ordered after stores through
+ * pointers, Game/Gimmick/GimmickSearchLaser's CGimmickSearchLaserCircle::stateMain): a reference to it does that. */
+#line 192
 inline CCollUtil* CCollUtil::getInstance() {
-    if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
-    return m_pInstance;
+    CCollUtil*& instance = m_pInstance;
+    if (!instance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+    return instance;
 }
 #endif
 

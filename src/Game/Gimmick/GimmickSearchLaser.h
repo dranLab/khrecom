@@ -47,7 +47,7 @@ public:
     /* Inline in the original (its weak copy follows killLaser). Defined out of class for now, so that the
      * still-assembly copies of CSphereCollision's inline functions can follow it; CGimmickSearchLaser::AfterInit
      * writes the member itself (as the inlined call did). */
-    void setPearentPos(const FVECTOR& in_pos);
+    void setPearentPos(const FVECTOR& in_pos) { m_ParentPos = in_pos; }
     friend class CGimmickSearchLaser;
     BOOL followPlayer();
     BOOL setMoveTargetPos();

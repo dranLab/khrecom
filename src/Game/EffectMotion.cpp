@@ -7,7 +7,7 @@
  *     _vt$13CAttachMotion_0047CDF8 = 0x0047CDF8; // size:0x30
  * With them, set this to 1 and end the file with "// SOURCE DATA: .rodata" (all three functions below match then). Until
  * then the data comes from the original assembly, so the functions with string literals stay INCLUDE_ASM. */
-#define EFFECTMOTION_SOURCE_RODATA 0
+#define EFFECTMOTION_SOURCE_RODATA 1
 #include "System/HeapMan.h"
 #include "System/Graphic/Effect/effect.h"
 #include "System/Graphic/Gprim.h"
@@ -248,7 +248,11 @@ HANDLE CEffectMotionCtrl::fadeoutEffect_(FLOAT inTime) {
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/EffectMotion", updateAttachEffect___17CEffectMotionCtrli);
 /* Close: only case 2's "m_iStep = 0" tails differ - gcc cross-jumps them all into the second body's copy, the
- * original keeps the one in the effect == NULL branch (the other bodies jump there). */
+ * original keeps the one in the effect == NULL branch (the other bodies jump there). jump2's cross-jumping
+ * (find_cross_jump) merges a "sw $0; j" tail that follows a label after one matching insn, and the copy processed
+ * first (earlier in the function) is the one deleted; with the three tails jumping to the same label the last copy
+ * can't survive, and making the first two bodies identical merges them entirely. Explicit "return TRUE"s in the
+ * bodies and both nestings of the effect == NULL branch were tried. */
 #if 0
 BOOL CEffectMotionCtrl::updateAttachEffect_(TIMEQ inCurrentTime) {
     CEffect* effect;
@@ -721,3 +725,4 @@ void CEffectMotion::releaseObserveEffect_() {
     }
 }
 
+// SOURCE DATA: .rodata

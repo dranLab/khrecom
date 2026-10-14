@@ -8,11 +8,7 @@
 #include "Game/CardBattle.h"
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtilA.h"
-/* Game/Collision/CollUtil.h's strings, labelled for the still-assembly stateMain (CSphereCollision::collideMap's
- * singleton assert). With stateMain compiled: #include "Game/Collision/CollUtil.h" instead. */
-asm(".section .rodata\n.align 3\n.globl D_004D4A28\nD_004D4A28:\n.asciz \"Game/Collision/CollUtil.h\"\n"
-    ".align 3\n.asciz \"Game/Collision/CollUtil.h(185)\"\n"
-    ".align 3\n.globl D_004D4A68\nD_004D4A68:\n.asciz \"m_pInstance\"\n.previous");
+#include "Game/Collision/CollUtil.h"
 
 /* Placeholders: three empty strings and the task container overflow message (see System/Task.h) follow
  * CollUtil.h's strings in .rodata (as in GimmickPlantParent); which headers they come from is not known. */
@@ -219,29 +215,6 @@ void CGimmickSearchLaserCircle::AfterInit() {
 
 void CGimmickSearchLaserCircle::beginStateMain() {}
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickSearchLaser", stateMain__25CGimmickSearchLaserCircle);
-/* Its .rodata: the effect name, the jump table, and the unnamed copies of CSphereCollision's and CCollision's
- * vtables (constructed in this function; the named copies are other objects'). */
-asm(".section .rodata\n.align 4\n.globl D_004D4AF0\nD_004D4AF0:\n.asciz \"rec_ca_common.dpx\"\n"
-    ".align 4\n.globl jtbl_004D4B10\njtbl_004D4B10:\n"
-    ".word .L002ED470\n"
-    ".word .L002ECF7C\n"
-    ".word .L002ED134\n"
-    ".word .L002ED194\n"
-    ".word .L002ED22C\n"
-    ".word .L002ED1EC\n"
-    ".word .L002ED2EC\n"
-    ".word .L002ED34C\n"
-    ".word .L002ED3F0\n"
-    ".word .L002ED430\n"
-    ".align 3\n.word 0, 0, 0, _$_16CSphereCollision, 0, collideMap__16CSphereCollision, 0, 0\n"
-    ".word 0, 0, 0, _$_10CCollision, 0, 0\n"
-    ".previous");
-/* Not matching (only scheduling in case 1): the original loads CCollUtil::m_pInstance after the two lq of
- * setStartPos/setEndPos and stores m_inWS first (m_inWE in the delay slot); ours loads m_pInstance first and
- * stores m_inWE first. Everything else matches. With it compiled, the CSphereCollision/CCollision inline
- * functions are emitted from source (checked: they match func_002EDC48..func_002EDCA8). */
-#if 0
 void CGimmickSearchLaserCircle::stateMain() {
     CEffect* efx;
     GimParam* param;
@@ -346,8 +319,6 @@ void CGimmickSearchLaserCircle::stateMain() {
         break;
     }
 }
-
-#endif
 
 void CGimmickSearchLaserCircle::endStateMain() {}
 
@@ -471,17 +442,5 @@ BOOL CGimmickSearchLaserCircle::moveTargetPos() {
 void CGimmickSearchLaserCircle::killLaser() {
     m_KillFlag = 1;
 }
-
-/* Weak in the original (inline in the class; see the header). */
-void CGimmickSearchLaserCircle::setPearentPos(const FVECTOR& in_pos) {
-    m_ParentPos = in_pos;
-}
-
-/* Weak copies of CCollision's and CSphereCollision's destructors and CSphereCollision::collideMap: they come
- * from source once stateMain matches (it constructs the CSphereCollision); then setPearentPos can be defined in
- * the class again, CollUtil.h included instead of its strings and stateMain's .rodata asm dropped. */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickSearchLaser", func_002EDC48);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickSearchLaser", func_002EDC78);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickSearchLaser", func_002EDCA8);
 
 // SOURCE DATA: .rodata

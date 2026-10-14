@@ -45,3 +45,15 @@ _vt$10CLightUnit_004978B8 = 0x004978B8; // size:0x38
 // System/VramMan: CBuf's inline destructor and an unnamed copy of its vtable
 _$_4CBuf_0011D368 = 0x0011D368; // type:func size:0x54
 _vt$4CBuf_0045EFF8 = 0x0045EFF8; // size:0x18
+
+// Game/EffectMotion: CAttachMotion's inline destructor and an unnamed copy of its vtable
+_$_13CAttachMotion_001EDB28 = 0x001EDB28; // type:func size:0x30
+_vt$13CAttachMotion_0047CDF8 = 0x0047CDF8; // size:0x30
+
+// Game/Gimmick/GimmickSearchLaser: CCollision's and CSphereCollision's inline destructors, CSphereCollision::collideMap
+// and unnamed copies of their vtables
+_$_10CCollision_002EDC48 = 0x002EDC48; // type:func size:0x30
+_$_16CSphereCollision_002EDC78 = 0x002EDC78; // type:func size:0x30
+collideMap__16CSphereCollision_002EDCA8 = 0x002EDCA8; // type:func size:0x5C
+_vt$16CSphereCollision_004D4B38 = 0x004D4B38; // size:0x20
+_vt$10CCollision_004D4B58 = 0x004D4B58; // size:0x18
