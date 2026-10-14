@@ -111,6 +111,7 @@ public:
     UINT getAttackID() { return m_uiAttackID; }
     void setCure(INT inID, INT inPow);
     INT isBattleFlag(UINT inFlag) { return m_uiBattleFlag & inFlag; } // PARTIAL: added for Game/Player/SummonMushu
+    HANDLE isNowMark() { return m_hMark; } // PARTIAL: added for Game/Player/FriendGoofy (original name/type unknown)
     // PARTIAL: added for Game/Gimmick/GimmickJumpStand
     INT getJumpState() const;
     static void notifyGimmickJump(HANDLE inHandle, INT inPower);

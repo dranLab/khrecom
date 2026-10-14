@@ -178,6 +178,7 @@ public:
     // PARTIAL: added for Game/Player/FriendAriel
     const FVECTOR& getVel() const;
     void setVel(const FVECTOR& inVel);
+    const FVECTOR& getOldPos() const; // PARTIAL: added for Game/Player/FriendGoofy
     // PARTIAL: added for Game/Gimmick/GimmickThunderTrap
     HANDLE attachEffect(const CHAR* inName, UINT inNo, const CCoord* inParent, const FVECTOR* inPos,
                         const FVECTOR* inRot, FLOAT inWait);
