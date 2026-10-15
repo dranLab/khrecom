@@ -267,19 +267,9 @@ private:
 HANDLE CDecknameEdit::m_hHandle = 0;
 INT CDecknameEdit::m_nDeckNo = 0;
 
-/* STOPGAP: this object's unnamed copy of CState's vtable (0x4E6AB0, after CDnEditBase's). gcc emits it, but
- * tools/ee_asm_compat.py drops it unless config/SLUS_217.99/symbol_addrs.txt names it
- * ("_vt$6CState_004E6AB0 = 0x004E6AB0; // size:0x30"). Until then its bytes (the linked addresses of _$_6CState
- * and __pure_virtual) lead the string literal of the first table entry, which gcc outputs at that place. Once the
- * line is in symbol_addrs.txt, define CSTATE_VTBL_COPY as "" and CSTATE_VTBL_COPY_SIZE as 0 (or drop both). */
-#define CSTATE_VTBL_COPY \
-    "\000\000\000\000\000\000\000\000\000\000\000\000\110\137\020\000\000\000\000\000\310\315\065\000" \
-    "\000\000\000\000\310\315\065\000\000\000\000\000\310\315\065\000\000\000\000\000\000\000\000\000"
-#define CSTATE_VTBL_COPY_SIZE 48
-
 namespace DECKNAME_EDIT {
 static const DN_EDIT_CHAR_DATA _stDnEditCharData[105] = {
-    { { (CHAR*)(CSTATE_VTBL_COPY "A" + CSTATE_VTBL_COPY_SIZE) }, 7 }, { { "B" }, 8 }, { { "C" }, 9 }, { { "D" }, 10 }, { { "E" }, 11 },
+    { { "A" }, 7 }, { { "B" }, 8 }, { { "C" }, 9 }, { { "D" }, 10 }, { { "E" }, 11 },
     { { "a" }, 12 }, { { "b" }, 13 }, { { "c" }, 14 }, { { "d" }, 15 }, { { "e" }, 16 },
     { { "0" }, 17 }, { { "1" }, 18 }, { { "2" }, 19 }, { { "3" }, 20 }, { { "4" }, 21 },
     { { "F" }, 23 }, { { "G" }, 24 }, { { "H" }, 25 }, { { "I" }, 26 }, { { "J" }, 27 },

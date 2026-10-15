@@ -129,3 +129,6 @@ _vt$t7CVector1Z6G_LINE_004D9D58 = 0x004D9D58; // size:0x18
 // odd addresses in System/Sound/driver/sddrv_ee's .bss, which then couldn't come from source.
 D_00647261 = 0x00647261; // can_be_referenced:False
 D_0064726F = 0x0064726F; // can_be_referenced:False
+
+// Form/Menu/DecknameEdit: an unnamed copy of CState's vtable
+_vt$6CState_004E6AB0 = 0x004E6AB0; // size:0x30
