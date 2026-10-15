@@ -1,10 +1,3 @@
-/* .rodata ends with unnamed copies of CFnt's, CVector<G_STRIP>'s and CVector<G_LINE>'s vtables. gcc's copies are only
- * kept with these lines in config/SLUS_217.99/symbol_addrs.txt:
- *     _vt$4CFnt_004D9CF8 = 0x004D9CF8; // size:0x48
- *     _vt$t7CVector1Z7G_STRIP_004D9D40 = 0x004D9D40; // size:0x18
- *     _vt$t7CVector1Z6G_LINE_004D9D58 = 0x004D9D58; // size:0x18
- * With them, set this to 1 (drops the asm stopgap at the end of the file). */
-#define DEBUGWINDOW_NAMED_VTABLE_COPIES 0
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Str.h"
@@ -1387,15 +1380,4 @@ void CDebugWindow::enableTopDebugWindow(BOOL bFlg) {
     }
 }
 
-#if !DEBUGWINDOW_NAMED_VTABLE_COPIES
-/* Stopgap: the original's unnamed copies of CFnt's, CVector<G_STRIP>'s and CVector<G_LINE>'s vtables end .rodata.
- * Their entries point to the linker's first (global) definitions. */
-asm(".section .rodata.vtcopies\n"
-    "\t.align 3\n"
-    "\t.word 0, 0, 0, disp__6CGPrim, 0, getPacketSize__C8CStrPrim, 0, makePkt__8CStrPrim, 0, _$_4CFnt\n"
-    "\t.word 0, calcZ__6CFntM2, 0, getSize__C8CStrPrimR4G_XYP4G_XYPi, 0, drawFont__6CFntM2i, 0, 0\n"
-    "\t.word 0, 0, 0, _$_t7CVector1Z7G_STRIP, 0, 0\n"
-    "\t.word 0, 0, 0, _$_t7CVector1Z6G_LINE, 0, 0\n"
-    "\t.text\n");
-#endif
 // SOURCE DATA: .data .rodata

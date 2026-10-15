@@ -111,3 +111,16 @@ _vt$t8CSJointT1Z12RcfSceneInfo_004D9870 = 0x004D9870; // size:0x18
 // Game/Bullet/Bullet: unnamed copies of CVector<G_LINE>'s and CState's vtables
 _vt$t7CVector1Z6G_LINE_004D87B0 = 0x004D87B0; // size:0x18
 _vt$6CState_004D87C8 = 0x004D87C8; // size:0x30
+
+// Form/DebugWindow: inline/template functions and unnamed copies of their vtables
+__getSize__t7CVector1Z6G_LINEi_00301998 = 0x00301998; // type:func size:0x18
+__alloc__t7CVector1Z6G_LINEi_003019B0 = 0x003019B0; // type:func size:0xE0
+__getSize__t7CVector1Z7G_STRIPi_00301A90 = 0x00301A90; // type:func size:0x18
+__alloc__t7CVector1Z7G_STRIPi_00301AA8 = 0x00301AA8; // type:func size:0xCC
+_$_t7CVector1Z7G_STRIP_00301B78 = 0x00301B78; // type:func size:0x8C
+_$_4CFnt_00301C08 = 0x00301C08; // type:func size:0x28
+setStyle__4CFntUi_00301C30 = 0x00301C30; // type:func size:0xC
+_$_t7CVector1Z6G_LINE_00301D68 = 0x00301D68; // type:func size:0x8C
+_vt$4CFnt_004D9CF8 = 0x004D9CF8; // size:0x48
+_vt$t7CVector1Z7G_STRIP_004D9D40 = 0x004D9D40; // size:0x18
+_vt$t7CVector1Z6G_LINE_004D9D58 = 0x004D9D58; // size:0x18
