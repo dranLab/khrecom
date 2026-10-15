@@ -1,17 +1,3 @@
-/* SUMMON_RODATA 1: everything from source, including .data/.rodata - matches, but needs two lines in
- * config/SLUS_217.99/symbol_addrs.txt naming this object's unnamed copies of CState's inline destructor and
- * vtable (without the vtable line, tools/ee_asm_compat.py drops our copy of the vtable and .rodata comes out
- * 0x30 bytes short):
- *     _$_6CState_002A6238 = 0x002A6238; // type:func size:0x30
- *     _vt$6CState_004AA4D0 = 0x004AA4D0; // size:0x30
- * and "// SOURCE DATA: .data .rodata" as the file's last line.
- * SUMMON_RODATA 0: the data comes from the original assembly, so the functions that use .rodata (strings,
- * jump tables), the constructor/destructor (vtables) and everything gcc emits after the last function (inline and
- * template functions) stay INCLUDE_ASM. */
-#ifndef SUMMON_RODATA
-#define SUMMON_RODATA 0
-#endif
-
 #define GAME_PLAYER_SUMMON_CPP
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Task.h"
@@ -65,7 +51,6 @@ static inline void _setFlag(UINT& ioFlag, UINT inSet, UINT inMask) {
 }
 #define SET_FLAG(inSet, inMask) _setFlag(m_uiFlag, inSet, inMask)
 
-#if SUMMON_RODATA
 void (CSummon::*CSummon::m_pBeginStateTbl[STATE_MAX])() = {
     &CSummon::beginStateAppear_,  &CSummon::beginStateMain_,    &CSummon::beginStateAction1_,
     &CSummon::beginStateAction2_, &CSummon::beginStateAction3_, &CSummon::beginStateExit_,
@@ -78,9 +63,7 @@ void (CSummon::*CSummon::m_pEndStateTbl[STATE_MAX])() = {
     &CSummon::endStateAppear_,  &CSummon::endStateMain_,    &CSummon::endStateAction1_,
     &CSummon::endStateAction2_, &CSummon::endStateAction3_, &CSummon::endStateExit_,
 };
-#endif
 
-#if SUMMON_RODATA
 CSummon::CSummon(CTask* inParent, INT inID)
     : CEntity(inParent, ObjType::OBJ_TYPE_PLAYER), m_uiCharaID(inID), m_uiAnimID(0), m_pPlayer(NULL), m_uiFlag(0) {
     initalize();
@@ -98,22 +81,13 @@ void CSummon::initFSM_() {
     }
     m_iState = -1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", __Q26Summon7CSummonP5CTaski);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", _$_Q26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", initFSM___Q26Summon7CSummon);
-#endif
 
-#if SUMMON_RODATA
 static inline void _setNewState(CState*& p, CState& NewState) { p = &NewState; }
 #line 126
 void CSummon::changeState(INT inState) {
     if (!(0 <= inState && inState < STATE_MAX)) AssertApp(__FILE__, __LINE__, "0 <= inState && inState < STATE_MAX", 0);
     _setNewState(m_pNewState, m_State[inState]);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", changeState__Q26Summon7CSummoni);
-#endif
 
 void CSummon::changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo,
                            INT inActNo) {
@@ -255,7 +229,6 @@ void CSummon::stateMain() {}
 
 void CSummon::endStateMain() {}
 
-#if SUMMON_RODATA
 void CSummon::beginStateExit() {
     m_iState = STATE_EXIT;
     m_tqTrgFrame = 0;
@@ -292,9 +265,6 @@ void CSummon::beginStateExit() {
     m_pMove->enableGravity(FALSE);
     clearSpeed();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", beginStateExit__Q26Summon7CSummon);
-#endif
 
 void CSummon::stateExit() {
     if (m_iSubState > 0) {
@@ -361,7 +331,6 @@ static inline INT _getUpKind(INT inType0, INT inType1) {
     return kind;
 }
 
-#if SUMMON_RODATA
 INT CSummon::getPower(INT inSkillID, INT inKind) {
     INT result = 0;
     BC_PARAM* pBCP = NULL;
@@ -400,9 +369,6 @@ INT CSummon::getPower(INT inSkillID, INT inKind) {
     }
     return result;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", getPower__Q26Summon7CSummonii);
-#endif
 
 static inline CEntity* _getEntity(HANDLE inHandle) {
     if (inHandle > 0) return (CEntity*)CTaskMan::getTask(inHandle);
@@ -631,23 +597,4 @@ void CSummon::getCameraTargetPos(FVECTOR& outPos) {
 }
 
 } // namespace Summon
-
-#if !SUMMON_RODATA
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", _$_t14CStateTemplate1ZQ26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", getCurrentState__Q26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", beginStateAction1__Q26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", stateAction1__Q26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", endStateAction1__Q26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", beginStateAction2__Q26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", stateAction2__Q26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", endStateAction2__Q26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", beginStateAction3__Q26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", stateAction3__Q26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", endStateAction3__Q26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", getRCID__CQ26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", setBodyRviseCoefficient__Q26Summon7CSummonf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", executeBeginState__t14CStateTemplate1ZQ26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", executeState__t14CStateTemplate1ZQ26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", executeEndState__t14CStateTemplate1ZQ26Summon7CSummon);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Summon", func_002A6238);
-#endif
+// SOURCE DATA: .data .rodata
