@@ -52,6 +52,8 @@ public:
 
     static INT searchCard(USHORT inID, SHORT inNumber);
     static INT searchCardKind(USHORT inID, SHORT inNumber);
+    static BOOL isHaveMapCard(INT inNumber); // PARTIAL: added for Game/Gimmick/GimmickManager
+    static CARD correctCardRank(CARD inCard); // PARTIAL: added for Game/Gimmick/GimmickManager
     static BOOL canPremium(USHORT inKind); // PARTIAL: added for Form/Menu/Roulette
     static INT makePremiereDeck(USHORT inDeck, SHORT inIdx); // PARTIAL: added for Form/Menu/Roulette
     static BOOL addCard(USHORT inID, SHORT inNumber);        // PARTIAL: added for Form/Menu/Roulette

@@ -30,6 +30,7 @@ public:
     CEntity* createPrize(const PRIZE_PARAM& inParam, CTask* inParent); // PARTIAL: added for Game/Player/FriendAladdin
     CEntity* createMapEnemy(const OBJ_INFO& inInfo, CTask* inParent, void* inExtraInfo); // PARTIAL: added for Game/Enemy/MapEnemyManager
     CEntity* createEntity(INT inKind, INT inID, CTask* inParent, void* inExtraInfo); // PARTIAL: added for Game/Gimmick/GimmickDeceive
+    CEntity* createEntity(const OBJ_INFO& inInfo, CTask* inParent, void* inExtraInfo); // PARTIAL: added for Game/Gimmick/GimmickManager
     CEntity* createGimmick(INT inRsrcID, CTask* inParent, void* inExtraInfo); // PARTIAL: added for Game/Gimmick/CreateGimmick
 };
 
