@@ -12,6 +12,7 @@ private:
     INT m_iRsecID;     /* 0x58 */
     INT m_fTimer;      /* 0x5c */
     static BOOL m_bEnd;
+    friend class CLevelUp; /* PARTIAL: added for Form/Menu/LevelUp (reads m_bEnd: isEnd() is inline in the original) */
 
 public:
     CTechHelp(CTask* p, USHORT nTeckKind);
