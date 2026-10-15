@@ -1,4 +1,4 @@
-// PARTIAL: added for Form/DebugWindow
+// PARTIAL: added for Form/DebugWindow; CBlurPrim, m_BlurPrim, getBlur added for Form/DebugWindowTBL
 #ifndef SYSTEM_GRAPHIC_DEFOCUS_H
 #define SYSTEM_GRAPHIC_DEFOCUS_H
 
@@ -24,9 +24,30 @@ public:
     void setManual() { m_iStatus |= 0x10000; }
 };
 
+class CBlurPrim : public CGPrim {
+public:
+    INT m_iDebugID;
+
+private:
+    INT m_iKind;
+    INT m_iRate;
+    FLOAT m_fLen;
+    UINT m_iColor;
+    UINT m_iAlpha;
+    INT m_nCalcZOfs;
+
+public:
+    INT getKind() { return m_iKind; }
+    INT getRate() { return m_iRate; }
+    FLOAT getDistance() { return m_fLen; }
+    UINT getColor() { return m_iColor; }
+    UINT getAlphaModeINT() { return m_iAlpha; }
+};
+
 class CDeFocus : public CTask {
 public:
     CDeFocusPrim m_DeFocusPrim;
+    CBlurPrim m_BlurPrim[2];
     static CDeFocus* m_pInstance;
 
     CDeFocus();
@@ -35,6 +56,12 @@ public:
             return NULL;
         }
         return &m_pInstance->m_DeFocusPrim;
+    }
+    static CBlurPrim* getBlur(INT i) {
+        if (!m_pInstance || i >= 2) {
+            return NULL;
+        }
+        return &m_pInstance->m_BlurPrim[i];
     }
     static void setAutomatic() {
         CDeFocusPrim* p = getDeFocus();

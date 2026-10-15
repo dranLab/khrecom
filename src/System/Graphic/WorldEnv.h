@@ -21,6 +21,12 @@ public:
     // PARTIAL: added for Form/DebugWindow
     static CCamera* getActiveCamera();
     static CCamera* getOldCamera();
+    // PARTIAL: added for Form/DebugWindowTBL
+    static void setFogParam(FLOAT fNear, FLOAT fFar, FLOAT fMax, FLOAT fMin);
+    static FLOAT getFogNear();
+    static FLOAT getFogFar();
+    static union IVECTOR& getFogColor();
+    static FLOAT getDefScreenZ();
 };
 
 #endif /* SYSTEM_GRAPHIC_WORLDENV_H */
