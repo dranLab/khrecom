@@ -5,8 +5,11 @@
 # Run it from inside the worktree, e.g. one a sub-agent got from Claude Code:
 #   tools/setup_worktree.sh               # link + configure (~30 s)
 #   tools/setup_worktree.sh --no-configure
+# Its output is short (configure's log goes to build.configure.log): don't redirect it into build/, which a fresh
+# worktree doesn't have yet (the shell fails to open the file before the script runs).
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
+mkdir -p build
 
 here=$(pwd -P)
 main=$(git worktree list --porcelain | awk '/^worktree / {print $2; exit}')
