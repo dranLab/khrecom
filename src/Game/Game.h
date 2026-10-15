@@ -18,6 +18,8 @@ public:
     static BOOL reqExit_GameOver();        // PARTIAL: added for Form/Menu/GameOver
     static BOOL isSuspended();             // PARTIAL: added for Game/SceneEnv
     static INT getMapID();                 // PARTIAL: added for System/DebugProcInfo
+    static void dbgStartFromBattle(BOOL bBattle); // PARTIAL: added for Form/DebugMenu
+    static void startFromLoadGame();              // PARTIAL: added for Form/DebugMenu
 };
 
 #endif /* GAME_GAME_H */

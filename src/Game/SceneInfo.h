@@ -75,9 +75,66 @@ struct DoorInfo { // 0x18
     BOOL isWorldEntrance() const { return _type == DOOR_TYPE_WORLD_ENTRANCE; } // PARTIAL: added for Game/Player/NaviMap
 };
 
+// PARTIAL: added for Form/DebugMenu
+namespace FLOOR {
+enum ROOM_TYPE {
+    ROOM_TYPE_CARD = 0,
+    ROOM_TYPE_START = 1,
+    ROOM_TYPE_EVENT1 = 2,
+    ROOM_TYPE_EVENT2 = 3,
+    ROOM_TYPE_EVENT3 = 4,
+    ROOM_TYPE_GOAL = 5,
+    ROOM_TYPE_EXTRA = 6,
+    ROOM_TYPE_LAST = 7,
+    ROOM_TYPE_FIX = 8
+};
+
+struct DoorSrcInfo { // 0x4
+    SHORT _nDstRoom;
+    BYTE _nDoorType;
+    BYTE _nChkEventRoom;
+};
+
+struct RoomSrcInfo { // 0x1c
+    SHORT _nID;
+    SHORT _nRoomType;
+    SHORT _nFixScene;
+    SHORT _dummy;
+    SHORT _nPosX;
+    SHORT _nPosY;
+    DoorSrcInfo _doors[4];
+
+    BOOL isFixSceneRoom() const {
+        return (_nRoomType == ROOM_TYPE_FIX || _nRoomType == ROOM_TYPE_EXTRA || _nRoomType == ROOM_TYPE_LAST) &&
+               _nFixScene > 0;
+    }
+};
+
+struct FloorLayout { // 0x2c
+    SHORT _nID;
+    SHORT _nRoomCount;
+    SHORT _nFloorWidth;
+    SHORT _nFloorDepth;
+    SHORT _nSceneStartEnt;
+    SHORT _nSceneGoalEnt;
+    SHORT __nDummy00;
+    SHORT __nDummy01;
+    RoomSrcInfo _rooms[1];
+};
+} // namespace FLOOR
+
+// PARTIAL: added for Form/DebugMenu
+struct WorldSelTable { // 0x8
+    UINT _nCount;
+    WORLD_ID* _pTbl;
+};
+
 // PARTIAL: getCardID added for Game/Enemy/MapEnemyShadow
 struct RoomInfo {
     DoorInfo _doors[4]; /* 0x00 */ // PARTIAL: added for Game/Gimmick/GimmickPlantParent
+    FLOOR::RoomSrcInfo* _pSrcInfo; /* 0x60 */ // PARTIAL: added for Form/DebugMenu
+    void* _pStorageInfo;           /* 0x64 */
+    void* _pStorageInfo2;          /* 0x68 */
     BYTE getCardID() const;
     BYTE getRoomNameCardID() const; // PARTIAL: added for Game/Player/NaviMap
     SHORT getSceneNum() const;      // PARTIAL: added for Form/Menu/SaveLoadUtil
@@ -131,6 +188,26 @@ public:
     // PARTIAL: added for Form/Menu/WorldWarp
     static SHORT getFloorNumber(USHORT nFloorIndex, BOOL bSora);
     static void reqChangeFloor(SHORT nFloor, BOOL bFlag);
+    // PARTIAL: added for Form/DebugMenu
+    static void doneChangeScene();
+    static FLOOR::FloorLayout* getFloorDataSrc(USHORT nFloorIndex, BOOL bSora);
+    static SHORT getEventRoomSceneNum(WORLD_ID w, const FLOOR::RoomSrcInfo& info, BOOL bSora);
+    static INT getFloorDataCount(BOOL bSora);
+    static WorldSelTable* getSelectableWorldTable(INT nFloorIndex, BOOL bSora);
+    static SHORT getNextSceneNum();
+    static SHORT getNextAreaNum();
+    static void setNextAreaScene(SHORT nArea, SHORT nField, SHORT nScene);
+    static void update();
+    static void initNewGame(BOOL bSora);
+    static void setEventDoorUnavailable(INT nFloorIndex, INT nRoomID);
+    static void setupCompleteFloorWorld(WORLD_ID w);
+    static DOOR_ID setTmpCurrentRoomID(SHORT nRoomID);
+    static void openGoalDoor();
+    static RoomInfo* getEventRoomInfo(UINT nIndex);
+    static void reqChangeGoalRoom();
+    static void reqChangeRoom(INT nRoomID, DOOR_ID nDoorID, SHORT nScene);
+    static void ignoreFloorInfo();
+    static void reqChangeScene(SHORT nArea, SHORT nScene, SHORT nEntrance, INT nMode, INT nAtel);
 };
 
 #endif /* GAME_SCENEINFO_H */

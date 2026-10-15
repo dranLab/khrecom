@@ -264,6 +264,26 @@ private:
     virtual void makePkt();
 };
 
+// PARTIAL: added for Form/DebugMenu
+class CPolyG4 : public CGPrim {
+public:
+    G_XYZ m_P0;
+    G_XYZ m_P1;
+    G_XYZ m_P2;
+    G_XYZ m_P3;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    G_RGBA m_C2;
+    G_RGBA m_C3;
+
+    CPolyG4() {}
+    virtual ~CPolyG4() {}
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
 // PARTIAL: added for Game/NowLoading
 class CSprt : public CGTexPrim {
 public:

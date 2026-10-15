@@ -16,6 +16,7 @@ public:
     static BOOL isReadyMike();
     static const union FVECTOR& getMikePos();
     static void readyMike(INT nMode, INT nParam);
+    static void setFogColor(INT r, INT g, INT b); // PARTIAL: added for Form/DebugMenu
 };
 
 #endif /* SYSTEM_GRAPHIC_WORLDENV_H */
