@@ -15,7 +15,11 @@ private:
     UINT m_uiOldCollisionFlag;  /* 0x10c */
     UINT m_uiCollisionFlag;     /* 0x110 */
     FLOAT m_fMass;              /* 0x114 */ // PARTIAL: split out for Game/Player/SummonCloud
-    UBYTE _m_0x118[0x2c];       /* 0x118 m_fGravity .. 0x140 m_pOwner */
+    // PARTIAL: m_fGravity .. m_fWallRadius split out for Game/Gimmick/GimmickCarry
+    FLOAT m_fGravity;           /* 0x118 */
+    FLOAT m_fFootRadius;        /* 0x11c */
+    FLOAT m_fWallRadius;        /* 0x120 */
+    UBYTE _m_0x124[0x20];       /* 0x124 m_bExceptNowRide .. 0x140 m_pOwner */
     CCollMap* m_pMapCollision;  /* 0x144 */ // PARTIAL: added for Game/Player/SummonSinba
     UBYTE _m_0x148[0x18];       /* 0x148 .. 0x150 m_vLastHitPos */
 
@@ -55,6 +59,12 @@ public:
     void setRadius(FLOAT inRadius);
     void land(FLOAT inDownLength, FLOAT inUpLength, BOOL inFirstHit);
     void setMass(FLOAT inMass) { m_fMass = inMass; } // PARTIAL: added for Game/Player/SummonCloud
+    // PARTIAL: added for Game/Gimmick/GimmickCarry
+    void setFootRadius(FLOAT inRadius) {
+        m_fFootRadius = inRadius;
+        setRadius(inRadius);
+    }
+    void setWallRadius(FLOAT inRadius) { m_fWallRadius = inRadius; }
 };
 
 // PARTIAL: added for Game/Player/SummonDumbo

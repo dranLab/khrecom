@@ -199,6 +199,9 @@ public:
     BOOL isMotionLoop() const;
     // PARTIAL: added for Game/Player/SummonCloud
     void setModelAlphaScale(FLOAT inAlpha, INT inModel);
+    // PARTIAL: added for Game/Gimmick/GimmickCarry
+    void changeMotionEx(INT inRsrcID, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
+    void enableFade2Path(BOOL inSw, INT inIndex);
     UINT isPermissionLockOn() const { return m_uiEntityFlag & 0x10000; }
     FLOAT calcDistanceXZSq(const FVECTOR& inPos) const;
     FLOAT calcDistanceXZSq(const CEntity* inEntity) const;

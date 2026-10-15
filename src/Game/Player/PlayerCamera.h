@@ -27,7 +27,10 @@ class CPlayerCamera {
 private:
     UBYTE _m_0x000[0x110]; /* 0x000 .. 0x10c m_iModeFieldFar */ // PARTIAL: added for Game/Player/SummonDumbo
     UINT m_uiFlag;         /* 0x110 */
+    UBYTE _m_0x114[0x1bc]; /* 0x114 .. 0x2c0 m_vAim */ // PARTIAL: added for Game/Gimmick/GimmickCarry
+    FVECTOR m_vEye;        /* 0x2d0 */
 public:
+    FVECTOR getNowCamEye() { return m_vEye; } // PARTIAL: added for Game/Gimmick/GimmickCarry
     // PARTIAL: added for Game/Player/SummonDumbo
     void setFlag(UINT inFlag, BOOL inOn) {
         if (inOn) m_uiFlag |= inFlag;

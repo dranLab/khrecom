@@ -1,4 +1,3 @@
-// PARTIAL: added for Game/Gimmick/GimmickTutorial
 #ifndef GAME_GIMMICK_GIMMICKCARRY_H
 #define GAME_GIMMICK_GIMMICKCARRY_H
 
@@ -21,6 +20,14 @@ protected:
 
 public:
     CGimmickCarry(CTask* inParent);
+
+private:
+    void CarryliftStart();
+    void CarryWalkStart();
+    void CarryStandStart();
+    void CarryThrowStart();
+
+public:
     virtual ~CGimmickCarry();
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
     virtual INT getTypeID() const;
@@ -28,7 +35,14 @@ public:
     virtual void beginStateMain();
     virtual void stateMain();
     virtual void endStateMain();
+    BOOL moveThrow();
     virtual BOOL checkCarryPermission();
+    void lift();
+    void CarryWalk();
+    void CarryStand();
+    void CarryThrow();
+    void ThrowGimmick(const FVECTOR& in_TargetPos);
+    void CancelCarry();
     virtual void lastUpdate();
     void setFlagSetInfo(INT in_flag);
 };

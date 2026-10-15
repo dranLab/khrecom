@@ -12,7 +12,18 @@ struct DropPrize; // PARTIAL: added for Game/Gimmick/GimmickTutorial
 struct GimParam; // PARTIAL: added for Game/Gimmick/GimmickFallTomb
 
 class CGimmickManager : public CTask {
+private:
+    // PARTIAL: added for Game/Gimmick/GimmickCarry
+    UBYTE _m_0x40[0xc8];   /* 0x040 m_iStep .. 0x0e8 m_MapCardProb */
+    FLOAT m_ThrowDirPow;   /* 0x108 */
+    FLOAT m_ThrowMaxAngle; /* 0x10c */
+    FLOAT m_ThrowMinAngle; /* 0x110 */
+
 public:
+    // PARTIAL: added for Game/Gimmick/GimmickCarry
+    FLOAT getThrowDirPow() { return m_ThrowDirPow; }
+    FLOAT getThrowMaxAngle() { return m_ThrowMaxAngle; }
+    FLOAT getThrowMinAngle() { return m_ThrowMinAngle; }
     CGimmickManager(CTask* inParent);
     CTaskSLCList& getChildren() { return CTask::getChildren(); } // PARTIAL: added for Game/Gimmick/GimmickToldPipe
     INT getStorageGimmickState(INT inUniqueID);
