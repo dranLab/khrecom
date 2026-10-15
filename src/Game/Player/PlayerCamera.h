@@ -25,7 +25,10 @@ struct BCAM_PARAM {
 
 class CPlayerCamera {
 private:
-    UBYTE _m_0x000[0x110]; /* 0x000 .. 0x10c m_iModeFieldFar */ // PARTIAL: added for Game/Player/SummonDumbo
+    static CPlayerCamera* m_pInstance; // PARTIAL: added for Game/Player/PlayerManager
+    UBYTE _m_0x000[0x100]; /* 0x000 .. 0x0fc m_pData */ // PARTIAL: added for Game/Player/SummonDumbo
+    INT m_iMode;           /* 0x100 */ // PARTIAL: split out for Game/Player/PlayerManager
+    UBYTE _m_0x104[0xc];   /* 0x104 m_iPreMode .. 0x10c m_iModeFieldFar */
     UINT m_uiFlag;         /* 0x110 */
     UBYTE _m_0x114[0x1bc]; /* 0x114 .. 0x2c0 m_vAim */ // PARTIAL: added for Game/Gimmick/GimmickCarry
     FVECTOR m_vEye;        /* 0x2d0 */
@@ -41,7 +44,12 @@ public:
     // PARTIAL: added for Game/Player/SummonMushu
     static void setBattleCamData(HANDLE inHandle, const BCAM_PARAM* inParam);
     static void getBattleCamData(BCAM_PARAM& outParam);
+    static INT getNowCamMode() { return m_pInstance ? m_pInstance->m_iMode : 0; } // PARTIAL: added for Game/Player/PlayerManager
 };
+
+// PARTIAL: added for Game/Player/PlayerManager
+extern char* szTestCamMode[6];
+extern PCAM_DATA* pTestCamData[6];
 
 } // namespace PlayerCamera
 

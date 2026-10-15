@@ -105,6 +105,8 @@ private:
 
 public:
     CPlayer(CTask* inParent);
+    CPlayer(CTask* inParent, UINT inID, INT inEx); // PARTIAL: added for Game/Player/PlayerManager
+    void notifyDead(INT inFlag);                   // PARTIAL: added for Game/Player/PlayerManager
     // PARTIAL: added for Game/Player/PlayerWeapon
     FVECTOR& getCenterPos() { return m_vCenterPos; }
     FVECTOR& getAppearPos() { return m_vAppearPos; }
@@ -170,5 +172,37 @@ public:
 };
 
 extern CPlayer* g_pPlayer;
+
+// PARTIAL: added for Game/Player/PlayerManager
+struct PL_PARAM {
+    UINT USE_MAP_ACTION;
+    UINT USE_BTL_ACTION;
+    FLOAT BODY_COLL_RADIUS;
+    FLOAT BODY_COLL_HEIGHT;
+    FLOAT MAX_WALK_SPEED;
+    FLOAT MAX_RUN_SPEED;
+    FLOAT CARRY_MOVE_SPEED;
+    FLOAT JUMP_POWER;
+    FLOAT HIJUMP_POWER;
+    TIMEQ JUMP_TQ_START;
+    TIMEQ AVOID_TQ_MUTEKI;
+    TIMEQ AVOID_TQ_CANCEL;
+};
+
+namespace PL {
+extern FLOAT g_fWeight;
+extern FLOAT g_fJumpStopRate;
+extern FLOAT g_fGlideWeight;
+extern FLOAT g_fGlideSpeedLow;
+extern FLOAT g_fGlideSpeedHigh;
+extern FLOAT g_fGlideTurnRate;
+extern PL_PARAM g_Param;
+} // namespace PL
+
+extern char* szPlayerState[38];
+extern char* szAttackData[188];
+extern char* szPlayerSkill[110];
+extern char* szPlayerCard[67];
+extern char* szAtkAnimID[71];
 
 #endif /* GAME_PLAYER_PLAYER_H */

@@ -20,6 +20,12 @@ public:
     static INT getMapID();                 // PARTIAL: added for System/DebugProcInfo
     static void dbgStartFromBattle(BOOL bBattle); // PARTIAL: added for Form/DebugMenu
     static void startFromLoadGame();              // PARTIAL: added for Form/DebugMenu
+    // PARTIAL: added for Game/Player/PlayerManager
+    static void reqWhiteFadeOut(USHORT inTime);
+    static void reqWhiteFadeIn(USHORT inTime);
+    static BOOL isFadeDone();
+    static void recoverBGM(INT inFlag);
+    static void reqGameOver(INT inFlag);
 };
 
 #endif /* GAME_GAME_H */
