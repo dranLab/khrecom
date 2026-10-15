@@ -275,7 +275,7 @@ static inline void RotTransPersST(float *stv, float *v, float *st_sub, float *st
     stv[3] = 1.0f;
 }
 
-__asm__("init_spline_001822A8:"); static void init_spline(sceVu0FVECTOR *x, int n, sceVu0FVECTOR *data) {
+static void init_spline(sceVu0FVECTOR *x, int n, sceVu0FVECTOR *data) {
     sceVu0FVECTOR *d;
     static sceVu0FVECTOR c = { 4.0f, -1.0f, 0.0f, 0.0f };
 
@@ -391,7 +391,7 @@ __asm__("init_spline_001822A8:"); static void init_spline(sceVu0FVECTOR *x, int 
         : "$8", "$9", "$10", "$11", "$12", "$13", "$14", "$15", "$16", "$17", "$18", "$19", "memory");
 }
 
-__asm__("spline_00182468:"); static void spline(float *out, sceVu0FVECTOR *x, float t, sceVu0FVECTOR *data) {
+static void spline(float *out, sceVu0FVECTOR *x, float t, sceVu0FVECTOR *data) {
     int i;
     float d;
     static sceVu0FVECTOR c = { 3.0f, 2.0f, 0.0f, 0.0f };
@@ -480,7 +480,7 @@ static void get_pos_2D(PEiDrawShipoly *param, VEiDrawShipoly *val, float *va) {
     }
 }
 
-__asm__("get_st_001828C8:"); static void get_st(PEiDrawShipoly *param, float *s_min, float *s_max, float *t_min, float *t_max) {
+static void get_st(PEiDrawShipoly *param, float *s_min, float *s_max, float *t_min, float *t_max) {
     float smin;
     float smax;
     float tmin;
