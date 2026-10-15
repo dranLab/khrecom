@@ -39,6 +39,7 @@ protected:
 
 public:
     C2DSeqCtrl();
+    C2DSeqCtrl(INT inSw); /* PARTIAL: added for Form/Menu/DecknameEdit */
     virtual ~C2DSeqCtrl();
     virtual C2DSeqObj* addSeq(LPCTSTR pSedName, UINT idxSeq, UINT nLayer);
     virtual C2DSeqObj* addSeq(LPCTSTR pSedName, UINT idxSeq);
