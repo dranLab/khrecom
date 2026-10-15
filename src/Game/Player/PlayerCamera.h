@@ -41,6 +41,10 @@ public:
     }
     void changeNowPlayer(HANDLE inPlayer, HANDLE inTarget);
     void changeCamMode(INT inMode, INT inReset);
+    void enableRikuShiftY(); // PARTIAL: added for Game/Player/PlayerRiku
+    // PARTIAL: added for Game/Player/PlayerRiku (through a reference: the original reloads m_pInstance after stores)
+    static CPlayerCamera*& getInstanceRef() { return m_pInstance; }
+    INT getCamMode() const { return m_iMode; }
     // PARTIAL: added for Game/Player/SummonMushu
     static void setBattleCamData(HANDLE inHandle, const BCAM_PARAM* inParam);
     static void getBattleCamData(BCAM_PARAM& outParam);
