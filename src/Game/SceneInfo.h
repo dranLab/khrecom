@@ -66,6 +66,12 @@ struct DoorInfo { // 0x18
     UBYTE _m_0x0c[0xc];        /* 0x0c _nDstRoom .. _pNormaSrcInfo */
     DOOR_STAT getDoorState() const;
     BOOL isSpecialDoor() const; // PARTIAL: added for Game/Player/NaviMap
+    // PARTIAL: added for Game/Gimmick/GimmickDoor
+    BOOL isEventDoor() const {
+        BOOL ret = FALSE;
+        if (_type < DOOR_TYPE_OPEN_AFTER_EVENT) ret = _type > DOOR_TYPE_NORMAL;
+        return ret;
+    }
     BOOL isWorldEntrance() const { return _type == DOOR_TYPE_WORLD_ENTRANCE; } // PARTIAL: added for Game/Player/NaviMap
 };
 
@@ -111,6 +117,7 @@ public:
     static BOOL reqEnterBattle(SHORT inID); // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy
     static BOOL isFieldScene(); // PARTIAL: added for Game/Player/PlayerWeapon
     static DoorInfo* getDoorInfo(DOOR_ID inDoorID, INT inRoomID); // PARTIAL: added for Game/Player/NaviMap
+    static BOOL reqEnterDoor(DOOR_ID inDoorID); // PARTIAL: added for Game/Gimmick/GimmickDoor
     // PARTIAL: added for Form/Menu/WorldSelect
     static USHORT getCurrentFloorIndex();
     static WORLD_ID getWorldID(USHORT nFloorIndex);
