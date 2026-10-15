@@ -17,6 +17,8 @@ namespace Quaternion {
 void QuaternionNormalize(FVECTOR& outQ, const FVECTOR& inQ);
 void QuaternionRotationAxis(FVECTOR& outQuat, const FVECTOR& inAxis, FLOAT inRad);
 void QuaternionToMatrix(FMATRIX& outMatrix, const FVECTOR& inQuat);
+void MakeQuaternion(FVECTOR& outQuat, FLOAT inX, FLOAT inY, FLOAT inZ); // PARTIAL: added for System/Graphic/MotData
+void QuaternionSlerp(FVECTOR& outQuat, const FVECTOR& inQ1, const FVECTOR& inQ2, FLOAT inT); // PARTIAL: added for System/Graphic/MotData
 }
 
 #endif /* SYSTEM_MATH3D_H */
