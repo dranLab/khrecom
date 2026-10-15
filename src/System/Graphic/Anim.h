@@ -30,7 +30,8 @@ private:
     // PARTIAL: m_Flags added for Game/Gimmick/GimmickDeceiveEnemy
     // PARTIAL: m_Tq split out for Game/Gimmick/GimmickOnceReaction
     TIMEQ m_Tq;          /* 0x018 */
-    UBYTE _m_0x1c[0xc];  /* 0x01c .. 0x028 */
+    UBYTE _m_0x1c[0x8];  /* 0x01c .. 0x024 */
+    TIMEQ m_nMaxTq;      /* 0x024 */ // PARTIAL: split out for Game/Gimmick/GimmickCarry
     FLOAT m_Speed;       /* 0x028 PARTIAL: split out for Form/Menu/MenuModel */
     USHORT m_Flags[2];   /* 0x02c */
     UBYTE _m_0x30[0xd8] __attribute__((aligned(16))); /* 0x030 .. 0x108 PARTIAL: added for Form/Menu/MenuModel (sizeof 0x110) */
@@ -53,6 +54,7 @@ public:
     BOOL isLoop(INT n); // PARTIAL: added for Game/EffectMotion
     ANIMID getAnimID() { return m_noId; }
     TIMEQ getCurrentTqCrd() { return m_Tq; } // PARTIAL: added for Game/Gimmick/GimmickOnceReaction
+    TIMEQ getTotalTqCrd() { return m_nMaxTq; } // PARTIAL: added for Game/Gimmick/GimmickCarry
     // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy (name guessed: tests m_Flags[1] bit 1 inline)
     BOOL isMotionLooped() { return m_Flags[1] & 2; }
     void change(ANIMID inId, TIMEQ inTq, BOOL inLoop); // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy
