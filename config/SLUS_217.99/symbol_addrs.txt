@@ -10,6 +10,21 @@ D_00495350 = 0x00495350; // can_be_referenced:False
 D_00495564 = 0x00495564; // can_be_referenced:False
 D_00677562 = 0x00677562; // can_be_referenced:False
 D_00678358 = 0x00678358; // can_be_referenced:False
+D_00641016 = 0x00641016; // can_be_referenced:False
+D_00641821 = 0x00641821; // can_be_referenced:False
+D_00642520 = 0x00642520; // can_be_referenced:False
+D_0064253A = 0x0064253A; // can_be_referenced:False
+D_00642546 = 0x00642546; // can_be_referenced:False
+D_00642565 = 0x00642565; // can_be_referenced:False
+D_00643031 = 0x00643031; // can_be_referenced:False
+D_00643225 = 0x00643225; // can_be_referenced:False
+D_00643230 = 0x00643230; // can_be_referenced:False
+D_00643320 = 0x00643320; // can_be_referenced:False
+D_00643325 = 0x00643325; // can_be_referenced:False
+D_00643330 = 0x00643330; // can_be_referenced:False
+D_00643425 = 0x00643425; // can_be_referenced:False
+D_00643520 = 0x00643520; // can_be_referenced:False
+D_00643525 = 0x00643525; // can_be_referenced:False
 
 // CLightUnit's inline functions, also emitted in Game/ModelObj (the named copies are LightUnit.o's):
 _$_10CLightUnit_002089B8 = 0x002089B8; // type:func size:0x30

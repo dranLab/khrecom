@@ -33,21 +33,8 @@ extern float pppVU1FogParameter[];
 extern sceDmaTag pppVu1ShapeGifPacket;
 extern sceDmaTag pppVu1FogShapeGifPacket;
 
-/* 1: .bss from source. Other objects' still-assembly data holds addresses inside these arrays as plain words, so
-   this needs D_00641016 ... D_00643525 (the labels splat makes inside this .bss) marked can_be_referenced:False in
-   config/SLUS_217.99/symbol_addrs.txt, plus "// SOURCE DATA: .bss" as the last line. 0: the arrays stay in the
-   original assembly data and are referenced through its labels. */
-#define SHAPE_BSS_FROM_SOURCE 0
-
-#if SHAPE_BSS_FROM_SOURCE
 static long128 s_InitVu1ShapePacket[558];
 static long128 s_InitVu1FogShapePacket[558];
-#else
-extern long128 D_00640A90[558];
-extern long128 D_00642D70[558];
-#define s_InitVu1ShapePacket D_00640A90
-#define s_InitVu1FogShapePacket D_00642D70
-#endif
 
 static char *makeVu1ShapeNoRotPacket(char *base, int vuid, int fog) {
     int i;
@@ -1839,3 +1826,4 @@ void *pppGetVu1DrawSpad(void) {
     ppvVu1SprDbId ^= 1;
     return ppvVu1SprDbId ? (void *)0x70002D00 : (void *)0x70001A00;
 }
+// SOURCE DATA: .bss
