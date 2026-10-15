@@ -71,7 +71,9 @@ public:
     virtual void on() { m_Enable = 1; }
     virtual INT detectEtc();
     virtual void setKind(INT inKind);
-    virtual void init();
+    // PARTIAL: parameters added for Game/Player/PlayerManager (original: COLL_KIND, COLL_TYPE, int, int; COLL_KIND is
+    // in Game/Bullet/Bullet.h)
+    virtual void init(INT inKind, COLL_TYPE inType, INT inParam0, INT inParam1);
 
     void setStartPos(const FVECTOR& inPos) {
         if (m_pCollision) m_pCollision->setStartPos(inPos);

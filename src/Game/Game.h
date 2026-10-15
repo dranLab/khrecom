@@ -18,6 +18,12 @@ public:
     static BOOL reqExit_GameOver();        // PARTIAL: added for Form/Menu/GameOver
     static BOOL isSuspended();             // PARTIAL: added for Game/SceneEnv
     static INT getMapID();                 // PARTIAL: added for System/DebugProcInfo
+    // PARTIAL: added for Game/Player/PlayerManager
+    static void reqWhiteFadeOut(USHORT inTime);
+    static void reqWhiteFadeIn(USHORT inTime);
+    static BOOL isFadeDone();
+    static void recoverBGM(INT inFlag);
+    static void reqGameOver(INT inFlag);
 };
 
 #endif /* GAME_GAME_H */

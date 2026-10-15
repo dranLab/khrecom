@@ -51,11 +51,16 @@ struct SS_PARAM {
 namespace CardBattle {
 extern BC_PARAM* g_pBattleCardList;
 extern SS_PARAM* g_pStockSkillList; // PARTIAL: added for Game/Player/SummonDumbo
+extern unsigned char g_DropFriendCardList[32][8]; // PARTIAL: added for Game/Player/PlayerManager
+// PARTIAL: added for Game/Player/PlayerManager (Game/CardRevolver.h in the original)
+extern char* g_szDbgDeckName[10];
+extern char* g_szEnemyCardEffName[60];
 
 // PARTIAL: added for Game/Player/SummonDumbo
 class CCardBattle {
 public:
     static void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inUpKind);
+    static CCardBattle* getInstance(); // PARTIAL: added for Game/Player/PlayerManager
 };
 
 // PARTIAL: added for Game/Player/FriendKing

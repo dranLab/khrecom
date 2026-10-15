@@ -11,7 +11,7 @@ private:
 
 public:
     virtual ~CCollMap();
-    virtual void init();
+    virtual void init(INT inKind, COLL_TYPE inType, INT inParam0, INT inParam1); // PARTIAL: see CCollObj::init
     virtual INT collideMap();
     INT collideRide(INT inFlag);
 };

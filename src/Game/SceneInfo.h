@@ -73,6 +73,7 @@ struct DoorInfo { // 0x18
         return ret;
     }
     BOOL isWorldEntrance() const { return _type == DOOR_TYPE_WORLD_ENTRANCE; } // PARTIAL: added for Game/Player/NaviMap
+    BOOL isWorldExit() const { return _shape == 5; } // PARTIAL: added for Game/Player/PlayerManager
 };
 
 // PARTIAL: getCardID added for Game/Enemy/MapEnemyShadow
@@ -112,6 +113,11 @@ public:
     static _MapEnemyRoomInfo* getCurrentRoomMapEnemyInfo(); // PARTIAL: added for Game/Enemy/MapEnemyManager
     static INT getRoomIndex(INT nRoomID); // PARTIAL: added for Form/Menu/MoogleShop
     static SHORT getCurrentSceneNum(); // PARTIAL: added for Game/Gimmick/GimmickRideOn
+    // PARTIAL: added for Game/Player/PlayerManager
+    static SHORT getNextBattleSceneNum();
+    static BOOL isBattleScene();
+    static BOOL isMinigameScene();
+    static DOOR_ID getEnteredDoorID();
     static INT getCurrentWorldID(BOOL bChkEntrance = FALSE); // PARTIAL: added for Game/Gimmick/BaseGimmick (returns WORLD_ID)
     static void clear(); // PARTIAL: added for System/RootTask
     static void dispose();
