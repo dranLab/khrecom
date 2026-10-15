@@ -132,6 +132,7 @@ public:
     void setPos(const FVECTOR& inPos); // PARTIAL: added for Game/Gimmick/GimmickHitFlying
     void setOldPos(const FVECTOR& inPos); // PARTIAL: added for Game/Gimmick/BaseGimmick
     FLOAT calcDistanceXZ(const CEntity* inEntity) const;
+    FLOAT calcDistanceXZ(const CEntity& inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickDoor
     FLOAT calcDistance(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickDeceive
     FLOAT calcDirection(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickFallTomb
     void calcDirection(FVECTOR& outRot, const FVECTOR& inPos) const; // PARTIAL: added for Game/Player/SummonMushu
