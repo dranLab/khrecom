@@ -72,9 +72,11 @@ public:
         m_pInstance = NULL;
     }
     static CCtdMan& instance() {
+        /* read through a reference (Form/Menu/LevelUp): keeps the load of m_pInstance after preceding member stores */
+        CCtdMan*& pInstance = m_pInstance;
 #line 50
-        if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
-        return *m_pInstance;
+        if (!pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+        return *pInstance;
     }
     void initializeData(void* pDtHead);
     void disposeData(void* pDtHead);
