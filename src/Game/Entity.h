@@ -16,6 +16,7 @@ union FMATRIX;   // PARTIAL: added for Game/Gimmick/GimmickWindowLid
 class CAnim;     // PARTIAL: added for Game/Gimmick/GimmickLotusLeaf
 class CBodyCollision; // PARTIAL: added for Game/Gimmick/GimmickGuillotine
 class CEffectMotion;  // PARTIAL: added for Game/Player/PlayerWeapon
+class CAttachMotion; // PARTIAL: added for Game/Player/Summon
 
 enum eObjType {
     eObjType_dummy = 0 /* values not needed yet */
@@ -53,7 +54,10 @@ protected:
     CAttackMotion* m_pAttack; /* 0x0a8 */
     // PARTIAL: m_pEffect split out for Game/Player/PlayerWeapon
     CEffectMotion* m_pEffect; /* 0x0ac */
-    UBYTE _m_0xb0[0xc];  /* 0x0b0 m_pEffectEx .. 0x0b8 m_pSEEx */
+    // PARTIAL: m_pSE split out for Game/Player/Summon
+    UBYTE _m_0xb0[0x4];  /* 0x0b0 m_pEffectEx */
+    CAttachMotion* m_pSE; /* 0x0b4 CSEMotion* */
+    UBYTE _m_0xb8[0x4];  /* 0x0b8 m_pSEEx */
     INT m_iID;           /* 0x0bc */
     UBYTE _m_0xc0[0x20]; /* 0x0c0 m_vTargetPos .. 0x0d0 m_vRootMoveScale */
 private:
@@ -199,6 +203,7 @@ public:
     BOOL isMotionLoop() const;
     // PARTIAL: added for Game/Player/SummonCloud
     void setModelAlphaScale(FLOAT inAlpha, INT inModel);
+    void killLoopEffect(INT inNo); // PARTIAL: added for Game/Player/Summon
     // PARTIAL: added for Game/Gimmick/GimmickCarry
     void changeMotionEx(INT inRsrcID, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     void enableFade2Path(BOOL inSw, INT inIndex);

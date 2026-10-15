@@ -1,4 +1,3 @@
-// PARTIAL: added for Game/Player/SummonDumbo
 #ifndef GAME_PLAYER_SUMMON_H
 #define GAME_PLAYER_SUMMON_H
 
@@ -9,6 +8,7 @@
 #include "System/PadHandler.h"
 #include "Game/CollParam.h"
 #include "Game/AttackMotion.h"
+#include "System/Fsm.h"
 
 class CPlayer;
 struct PATK_DATA;
@@ -16,6 +16,17 @@ struct PATK_DATA;
 namespace Summon {
 
 class CSummon : public CEntity, public CPadHandler {
+public:
+    enum {
+        STATE_APPEAR = 0,
+        STATE_MAIN = 1,
+        STATE_ACTION1 = 2,
+        STATE_ACTION2 = 3,
+        STATE_ACTION3 = 4,
+        STATE_EXIT = 5,
+        STATE_MAX = 6
+    };
+
 protected:
     UINT m_uiCharaID;           /* 0x1e0 */
     UINT m_uiRCID;              /* 0x1e4 */
@@ -49,16 +60,21 @@ protected:
     INT m_iSubState;            /* 0x270 */
     UINT m_uiFlag;              /* 0x274 */
 public:
-    UBYTE m_State[6][0x20];     /* 0x278 CStateTemplate<Summon::CSummon>[6] */
+    CStateTemplate<CSummon> m_State[STATE_MAX]; /* 0x278 */
     INT m_iState;               /* 0x338 */
+private:
+    static void (CSummon::*m_pBeginStateTbl[STATE_MAX])();
+    static void (CSummon::*m_pStateTbl[STATE_MAX])();
+    static void (CSummon::*m_pEndStateTbl[STATE_MAX])();
 
 public:
     CSummon(CTask* inParent, INT inID);
     virtual ~CSummon();
+    BOOL initalize();
     void changeState(INT inState);
+    INT getCurrentState() { return m_iState; }
     void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo, INT inActNo);
 protected:
-    virtual void getCameraTargetPos(FVECTOR& outPos);
     virtual void updateBefore();
     virtual void updateAfter();
     virtual void lastUpdate();
@@ -68,36 +84,60 @@ protected:
     virtual void beginStateMain();
     virtual void stateMain();
     virtual void endStateMain();
-    virtual void beginStateAction1();
-    virtual void stateAction1();
-    virtual void endStateAction1();
-    virtual void beginStateAction2();
-    virtual void stateAction2();
-    virtual void endStateAction2();
-    virtual void beginStateAction3();
-    virtual void stateAction3();
-    virtual void endStateAction3();
+    virtual void beginStateAction1() {}
+    virtual void stateAction1() {}
+    virtual void endStateAction1() {}
+    virtual void beginStateAction2() {}
+    virtual void stateAction2() {}
+    virtual void endStateAction2() {}
+    virtual void beginStateAction3() {}
+    virtual void stateAction3() {}
+    virtual void endStateAction3() {}
     virtual void beginStateExit();
     virtual void stateExit();
     virtual void endStateExit();
+    virtual void getCameraTargetPos(FVECTOR& outPos);
     void homingPlayerTargetY(HANDLE inTarget, FLOAT inRate);
-    void homingPlayerTargetXZ(HANDLE inTarget, FLOAT inRate); // PARTIAL: added for Game/Player/SummonSinba
-    void turnPlayerTargetY(HANDLE inTarget, FLOAT inRate);    // PARTIAL: added for Game/Player/SummonSinba
-    void changeCamera(HANDLE inTarget, INT inMode, INT inReset); // PARTIAL: added for Game/Player/SummonSinba
+    void homingPlayerTargetXZ(HANDLE inTarget, FLOAT inRate);
+    void turnPlayerTargetY(HANDLE inTarget, FLOAT inRate);
     INT getPower(INT inSkillID, INT inKind);
-    // PARTIAL: added for Game/Player/SummonMushu
     void getWeaponTopPos(FVECTOR& inPos);
+    void changeCamera(HANDLE inTarget, INT inMode, INT inReset);
+    void changeCameraSummon(HANDLE sumTarget, INT inMode, INT inReset);
     void setLockon(HANDLE inHandle);
     void setPushon(INT inFlag);
-    void resetLockon(); // PARTIAL: added for Game/Player/SummonGenie
-    void killChild(FLOAT inFadeTime); // PARTIAL: added for Game/Player/SummonTink
-    // PARTIAL: added for Game/Player/SummonCloud
-    INT entryChainTrg(INT inNum);
+    INT entryChainTrg(INT inMode);
     INT checkChainTrg();
     INT isSucceedChain();
+    void resetLockon();
+    void killChild(FLOAT inFadeTime);
+private:
+    void beginStateAppear_();
+    void stateAppear_();
+    void endStateAppear_();
+    void beginStateMain_();
+    void stateMain_();
+    void endStateMain_();
+    void beginStateAction1_();
+    void stateAction1_();
+    void endStateAction1_();
+    void beginStateAction2_();
+    void stateAction2_();
+    void endStateAction2_();
+    void beginStateAction3_();
+    void stateAction3_();
+    void endStateAction3_();
+    void beginStateExit_();
+    void stateExit_();
+    void endStateExit_();
+    void initFSM_();
 public:
+    UINT getRCID() const { return m_uiRCID; }
+    void setAppear();
     void setExit(INT inFlag);
     virtual INT setSkill(INT inID);
+    CEntity* getTarget();
+    void setBodyRviseCoefficient(FLOAT inValue) { m_fBodyRviseCoefficient = inValue; }
 };
 
 } // namespace Summon

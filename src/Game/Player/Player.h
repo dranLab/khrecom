@@ -13,6 +13,10 @@ namespace PlayerCamera {
 class CPlayerCamera; // PARTIAL: added for Game/Player/FriendJack
 }
 
+namespace Gauge {
+class CLockonMarker; // PARTIAL: added for Game/Player/Summon
+}
+
 namespace PlayerWeapon {
 class CPlayerWeapon; // PARTIAL: added for Game/Player/FriendDonald
 }
@@ -68,7 +72,8 @@ private:
     // PARTIAL: m_pRevolver split out for Game/Player/FriendKing
     UBYTE _m_0x2e8[0x8];         /* 0x2e8 m_pGauge, m_pCB */
     CardBattle::CCardRevolver* m_pRevolver; /* 0x2f0 */
-    UBYTE _m_0x2f4[0xc];         /* 0x2f4 .. 0x2fc */
+    Gauge::CLockonMarker* m_pMarker; /* 0x2f4 */ // PARTIAL: split out for Game/Player/Summon
+    UBYTE _m_0x2f8[0x8];         /* 0x2f8 .. 0x2fc */
     PlayerState m_PlayerState;   /* 0x300 */
     UBYTE _m_0x304[0x8];         /* 0x304 m_tqStateTimer, m_iSubState */
     UINT m_uiPlayerFlag;         /* 0x30c */ // PARTIAL: split out for Game/Player/FriendBeast
@@ -124,6 +129,9 @@ public:
     void getWeaponTopPos(FVECTOR& outPos);
     // PARTIAL: added for Game/Player/SummonCloud
     void setDir(FLOAT inDir) { m_fDir = inDir; }
+    // PARTIAL: added for Game/Player/Summon
+    FLOAT getDir() { return m_fDir; }
+    Gauge::CLockonMarker* getMarker() { return m_pMarker; }
     void calcAppearPos(FLOAT inX, FLOAT inZ, FVECTOR* inTarget);
     HANDLE isNowMark() { return m_hMark; } // PARTIAL: added for Game/Player/FriendGoofy (original name/type unknown)
     // PARTIAL: added for Game/Gimmick/GimmickJumpStand
