@@ -62,4 +62,27 @@ public:
     }
 };
 
+/* PARTIAL: added for Game/MinigameManager. CFSM is still declared (opaquely) in Game/Entity.h too: this one is
+ * skipped when Entity.h came first, and Entity.h must not be included after it. */
+#ifndef GAME_ENTITY_H
+class CFSM {
+protected:
+    CState* m_pCurrentState;
+    CState* m_pNewState;
+    CStateTemplate<CFSM> m_StateInitial;
+
+public:
+    CFSM();
+    virtual ~CFSM() {}
+    virtual void update();
+    BOOL isState(CState& inState) { return m_pCurrentState == &inState; }
+    BOOL isNewState(CState& inState) { return m_pNewState == &inState; }
+    void gotoState(CState& inState) { m_pNewState = &inState; }
+    virtual void beginStateInitial() {}
+    virtual void stateInitial() {}
+    virtual void endStateInitial() {}
+    virtual void endStateProc() {}
+};
+#endif
+
 #endif /* SYSTEM_FSM_H */
