@@ -119,8 +119,8 @@ static CAudioDecImpl* s_pAudioDec = NULL;
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Movie/AudioDec", __13CAudioDecImpl);
 // The constructor's allocation messages (.rodata's first strings), for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n.align 3\n.globl D_0046C330\nD_0046C330:\n.asciz \"c:/KHCOM/MainApp/System/Movie/AudioDec.cpp(165)\"\n"
-    ".align 3\n.globl D_0046C360\nD_0046C360:\n.asciz \"c:/KHCOM/MainApp/System/Movie/AudioDec.cpp(166)\"\n.previous");
+asm(".section .rodata\n.align 3\n.asciz \"c:/KHCOM/MainApp/System/Movie/AudioDec.cpp(165)\"\n"
+    ".align 3\n.asciz \"c:/KHCOM/MainApp/System/Movie/AudioDec.cpp(166)\"\n.previous");
 // Not matching: the delay slot of hncAt3dec_Init gets the p_at3decwork store instead of at3decparam's
 // (and v0/v1 swap in the next lines).
 #if 0

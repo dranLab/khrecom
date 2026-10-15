@@ -60,8 +60,8 @@ sceVu0FVECTOR *ppvReferencePosList;
 int ppvReferencePosNum;
 sceVu0FMATRIX *ppvReferenceMatrixList;
 int ppvReferenceMatrixNum;
-/* named after its original label: pppInitPartRender (assembly) refers to it */
-static pppEnvSt g_Env asm("D_00636B18");
+
+static pppEnvSt g_Env;
 CURRENT_EFFDATA g_CurrentEffData;
 static _GsLoadImage s_GsLoadImageTex;
 static _GsLoadImage s_GsLoadImageClt;
@@ -71,10 +71,10 @@ static const u_long alDmaPkt[8] = {
     0x70000002, 0, 0x1000000000008001, 0xE, 0, 0x3F, 0, 0,
 };
 
-/* __FILE__ with its original label: vramcache is still assembly and refers to it (gcc would emit its own copy) */
-asm(".section .rodata\n.align 3\n.globl D_00468200\nD_00468200:\n"
-    ".asciz \"c:/KHCOM/MainApp/System/Graphic/Effect/libppp/partMng.c\"\n.previous");
-extern char D_00468200[];
+
+
+
+
 
 void pppSetPrimPacket(void *pvPrimPacketArea, int nLen) {
     ppvPrimp = pvPrimPacketArea;
@@ -106,7 +106,7 @@ static void initGraphicSystem() {
 void pppFreeParticle(void *mng) {
     pppMngSt *pMng = mng;
 #line 467
-    if (!(pMng != ((void *)0))) AssertApp(D_00468200, __LINE__, "pMng != ((void *)0)", 0);
+    if (!(pMng != ((void *)0))) AssertApp(__FILE__, __LINE__, "pMng != ((void *)0)", 0);
     pppAllFreePObject(pMng);
 }
 
@@ -127,7 +127,7 @@ void pppLoopEnd(void *mng) {
 }
 #define TBP0_OF(l) ((u_short)(l) & 0x3FFF)
 #define CBP_OF(h) (((h) >> 5) & 0x3FFF)
-#define ASSERTS(e, s) if (!(e)) AssertApp(D_00468200, __LINE__, s, 0)
+#define ASSERTS(e, s) if (!(e)) AssertApp(__FILE__, __LINE__, s, 0)
 
 static void setOmdTex0(OMD_H *omd, DPD_MODEL_HEADER *pMh, short shTexpStart, short shClutpStart) {
     OMD_PRIM_H *mph;
@@ -1190,16 +1190,16 @@ static void vramcachemng_clear(VRAMCACHE_MNG *pVcacheMng) {
         vramcache_clear(&pVcacheMng->aVramCacheClut[i]);
     }
 }
-/* vramcache's string literals, for its INCLUDE_ASM; remove with it. */
+/* vramcache's string literals, for its INCLUDE_ASM (the linker provides their labels); remove with it. */
 asm(".section .rodata\n"
-    ".align 3\n.globl D_00468950\nD_00468950:\n.asciz \"nBlockMax <= BLOCK_MAX\"\n"
-    ".align 3\n.globl D_00468968\nD_00468968:\n.asciz \"((void *)0) != pchDpd\"\n"
-    ".align 3\n.globl D_00468980\nD_00468980:\n.asciz \"0 <= nParId && nParId < 64\"\n"
-    ".align 3\n.globl D_004689A0\nD_004689A0:\n.asciz \"(pVcache->chBlockStart+j) < BLOCK_MAX\"\n"
-    ".align 3\n.globl D_004689C8\nD_004689C8:\n.asciz \"0 <= nStartBlock\"\n"
-    ".align 3\n.globl D_004689E0\nD_004689E0:\n.asciz \"Not find VRAMCACHE!\"\n"
-    ".align 3\n.globl D_004689F8\nD_004689F8:\n.asciz \"!(\\\"Not find VRAMCACHE!\\\")\"\n"
-    ".align 3\n.globl D_00468A18\nD_00468A18:\n.asciz \"0\"\n.previous");
+    ".align 3\n.asciz \"nBlockMax <= BLOCK_MAX\"\n"
+    ".align 3\n.asciz \"((void *)0) != pchDpd\"\n"
+    ".align 3\n.asciz \"0 <= nParId && nParId < 64\"\n"
+    ".align 3\n.asciz \"(pVcache->chBlockStart+j) < BLOCK_MAX\"\n"
+    ".align 3\n.asciz \"0 <= nStartBlock\"\n"
+    ".align 3\n.asciz \"Not find VRAMCACHE!\"\n"
+    ".align 3\n.asciz \"!(\\\"Not find VRAMCACHE!\\\")\"\n"
+    ".align 3\n.asciz \"0\"\n.previous");
 int vramcache(VRAMCACHE *paVcache, int nBlockMax, pppMngSt *pMng, u_char bUseBlockNum);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/partMng", vramcache);
 

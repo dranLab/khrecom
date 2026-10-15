@@ -3,14 +3,14 @@
 #include "System/Debug.h"
 #include "include_asm.h"
 
-/* pppFree is still assembly; the strings it shares with pppAlloc (the file name, "mng") are defined here with their
- * original labels and pppAlloc's assert uses them too, since gcc would emit its own copies (the unit's .rodata comes
- * from source). Its own message follows pppAlloc's. Once pppFree matches: __FILE__, __LINE__, the literals. */
-asm(".section .rodata\n.align 3\n.globl D_00468B00\nD_00468B00:\n"
-    ".asciz \"c:/KHCOM/MainApp/System/Graphic/Effect/libppp/pppAlloc.c\"\n"
-    ".align 3\n.globl D_00468B40\nD_00468B40:\n.asciz \"mng\"\n.previous");
-extern char D_00468B00[];
-extern char D_00468B40[];
+
+
+
+
+
+
+
+
 
 void pppDumpHeap(pppMemMng *mng) {}
 
@@ -38,7 +38,7 @@ void *pppAlloc(pppMemMng *mng, u_word size) {
     pppEMCB *mcb;
     pppEMCB *newMcb;
 
-    if (mng == NULL) AssertApp(D_00468B00, 89, D_00468B40, 0);
+    if (mng == NULL) AssertApp(__FILE__, 89, "mng", 0);
 
     size = ((size + 15) & ~15) + sizeof(pppEMCB);
     if (mng->last_free_heap == NULL) {
@@ -95,7 +95,8 @@ search:
     }
 }
 
-asm(".section .rodata\n.align 3\n.globl D_00468BA0\nD_00468BA0:\n"
+/* pppFree's message, for its INCLUDE_ASM (the linker provides the label); remove with it. */
+asm(".section .rodata\n.align 3\n"
     ".asciz \"!!!!!!!!!!!!!!!!!!!!!!!!! Effect pppFree NULL! !!!!!!!!!!!!!!!!!!!!!!!\\n\"\n.previous");
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/pppAlloc", pppFree);
