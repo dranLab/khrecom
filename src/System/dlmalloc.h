@@ -1,4 +1,3 @@
-// PARTIAL: added for System/HeapMan
 #ifndef SYSTEM_DLMALLOC_H
 #define SYSTEM_DLMALLOC_H
 
@@ -11,12 +10,20 @@ typedef void* mspace;
 extern "C" {
 #endif
 
+mspace create_mspace(size_t capacity, int locked);
 mspace create_mspace_with_base(void* base, size_t capacity, int locked);
+size_t destroy_mspace(mspace msp);
 void* mspace_malloc(mspace msp, size_t bytes);
 void mspace_free(mspace msp, void* mem);
 void* mspace_calloc(mspace msp, size_t n_elements, size_t elem_size);
 void* mspace_realloc(mspace msp, void* oldmem, size_t bytes);
 void* mspace_memalign(mspace msp, size_t alignment, size_t bytes);
+void** mspace_independent_calloc(mspace msp, size_t n_elements, size_t elem_size, void** chunks);
+void** mspace_independent_comalloc(mspace msp, size_t n_elements, size_t* sizes, void** chunks);
+int mspace_trim(mspace msp, size_t pad);
+void mspace_malloc_stats(mspace msp);
+size_t mspace_footprint(mspace msp);
+int mspace_mallopt(int param_number, int value);
 void* mspace_malloc_d(mspace msp, size_t bytes, char* msg, unsigned int ra);
 void* mspace_realloc_d(mspace msp, void* mem, size_t newsize, char* msg, unsigned int ra);
 void* mspace_calloc_d(mspace msp, size_t n_elements, size_t elem_size, char* msg, unsigned int ra);
