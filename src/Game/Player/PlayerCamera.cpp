@@ -40,6 +40,7 @@ inline void _taskSLCOverflowMsg() {
 #include "Game/GameWork.h"
 #include "Game/SceneInfo.h"
 #include "Game/SceneEnv.h"
+#include "Game/Movement.h"
 #include "Game/Debug/DebugWork.h"
 #include "System/TaskMan.h"
 #include "System/HeapMan.h"
@@ -69,10 +70,6 @@ extern "C" float sinf(float x);
 extern "C" float cosf(float x);
 
 inline void* operator new(size_t, void* p) throw() { return p; }
-/* Through a reference: gcc then can't tell the access from the local stores (keeps the original's order). */
-template <class T> static inline T& _ref(T& v) {
-    return v;
-}
 
 static inline UINT RET_ADDR() {
     UINT nRA;
@@ -692,7 +689,58 @@ void CPlayerCamera::recalcNearMove() {
     calcMapHit(m_vEye, m_vAim, m_pData->fSize, 0.0f);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", calcMapHit2__Q212PlayerCamera13CPlayerCameraR7FVECTORRC7FVECTORff);
+INT CPlayerCamera::calcMapHit2(FVECTOR& outPos, const FVECTOR& inStart, FLOAT inSize, FLOAT inDist) {
+    INT result = 0;
+    FVECTOR spos = inStart;
+    FVECTOR* dpos;
+    FVECTOR vec;
+    FVECTOR nvec;
+    m_collMap.setStartPos(spos);
+    m_collMap.setEndPos(outPos);
+    m_collMap.setType(COLL_TYPE_POINT);
+    if (m_collMap.collideMap()) {
+        dpos = m_collMap.getDetectPos();
+        if (dpos) outPos = *dpos;
+    }
+    SubVectorXYZ(vec, outPos, spos);
+    Normalize(nvec, vec);
+    ScaleVectorXYZ(vec, nvec, inSize * 1.5f);
+    SubVectorXYZ(spos, outPos, vec);
+    m_collMap.setType(COLL_TYPE_SPHERE);
+    m_collMap.setRadius(inSize);
+    m_collMap.setShiftY(0.0f);
+    m_collMap.setStartPos(spos);
+    m_collMap.setEndPos(outPos);
+    if (m_collMap.collideMap()) {
+        dpos = m_collMap.getDetectPos();
+        if (!dpos) return 0;
+        outPos = *dpos;
+        m_collMap.setEndPos(outPos);
+        result = 1;
+        if (inDist > 0.0f) {
+            SubVectorXYZ(vec, m_vAim, outPos);
+            vec.w = 1.0f;
+            if (InnerProduct(vec, vec) < inDist * inDist) {
+                m_tqNear = 1500;
+                m_uiFlag |= 0x80;
+            }
+        }
+    }
+    spos.x = outPos.x;
+    spos.y = outPos.y;
+    spos.z = outPos.z;
+    spos.y = (nvec.y < 0.0f) ? spos.y + m_pData->fSize : spos.y - m_pData->fSize;
+    m_collMap.setStartPos(spos);
+    m_collMap.setEndPos(outPos);
+    if (m_collMap.collideMap()) {
+        FVECTOR* dpos2 = m_collMap.getDetectPos();
+        if (!dpos2) return 0;
+        outPos = *dpos2;
+        m_collMap.setEndPos(outPos);
+        result = 1;
+    }
+    return result;
+}
 
 void CPlayerCamera::collideMapTrueCamera(const FVECTOR& inEye, const FVECTOR& inAim) {
     if (isFlag(0x20)) return;
@@ -705,10 +753,396 @@ void CPlayerCamera::collideMapTrueCamera(const FVECTOR& inEye, const FVECTOR& in
 }
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", procFieldNormal__Q212PlayerCamera13CPlayerCamera);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", procFieldParallel__Q212PlayerCamera13CPlayerCamera);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", changeModeBattle__Q212PlayerCamera13CPlayerCamerai);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", procBattleNormal__Q212PlayerCamera13CPlayerCamera);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", procBattleLockon__Q212PlayerCamera13CPlayerCamera);
+#if 0
+/* Only the first block's scheduling differs: the original zeroes ofs (por $v0/sq) after the copy of eye, ours
+ * between eye's load and store (por $v1), so the zero gets another register (as in getPlayerCameraDir). */
+#line 1106
+void CPlayerCamera::procFieldNormal() {
+    FVECTOR pos = getNowPlayerPos();
+    FVECTOR aim = m_pData->vAim;
+    aim.y += m_fRikuShiftY;
+    FVECTOR eye = m_pData->vEye;
+    eye.y += m_fRikuShiftY;
+    FLOAT base = 0.7853982f;
+    BOOL bTouch = FALSE;
+
+#line 1116
+    FVECTOR ofs;
+    ofs._q = 0;
+    ofs.w = 1.0f;
+    FVECTOR rot;
+    calcDirection(rot, ofs, eye);
+
+#line 1122
+    AddVectorXYZ(m_vFinalAim, pos, aim);
+    adjustCamera(m_vAim, m_vFinalAim, m_pData->fAdjust);
+
+#line 1128
+    if (!isFlag(1)) {
+        FLOAT x = CPadHandler::getAnalogRX() * (1.0f / 4096.0f) * m_fReverseX;
+        FLOAT y = -(CPadHandler::getAnalogRY() * (1.0f / 4096.0f)) * m_fReverseY;
+        if (_fabsf(x) > 0.25f) {
+            x *= getFrameRateF() * 4.0f;
+            m_vDir.y = _limitPI(m_vDir.y + x * 3.1415927f / 180.0f);
+#line 1138
+            x = _fabsf(m_vDir.y);
+            if (x > base) m_vDir.y = (m_vDir.y < 0.0f) ? -base : base;
+            bTouch = TRUE;
+        }
+#line 1142
+        if (_fabsf(y) > 0.25f) {
+            y *= getFrameRateF() * 2.0f;
+            m_vDir.x = _limitPI(m_vDir.x + y * 3.1415927f / 180.0f);
+#line 1147
+            if (m_vDir.x < rot.x - base) {
+                m_vDir.x = rot.x - base;
+            } else if (m_vDir.x > rot.x * 0.5f) {
+                m_vDir.x = rot.x * 0.5f;
+            }
+            bTouch = TRUE;
+        }
+    }
+#line 1155
+    if (!bTouch) {
+        m_vDir.y = Movement::Homing(m_vDir.y, m_vFinalDir.y, 0.1f, getFrameRateF());
+        m_vDir.x = Movement::Homing(m_vDir.x, 0.0f, 0.1f, getFrameRateF());
+    }
+
+#line 1163
+    FMATRIX mat;
+    _unitMatrix(mat);
+    _rotMatrixX(mat, m_vDir.x);
+    _rotMatrixY(mat, m_vDir.y + rot.y);
+    eye.x = 0.0f;
+    eye.z *= 1.41421f;
+    ApplyMatrixXYZ(eye, mat, eye);
+    AddVectorXYZ(m_vFinalEye, pos, eye);
+
+#line 1175
+    adjustCamera(m_vEye, m_vFinalEye, m_pData->fAdjust);
+    if (calcMapHit(m_vEye, m_vPreEye, m_pData->fSize, 0.0f)) {
+        calcDirection(rot, m_vAim, m_vEye);
+        if (_fabsf(rot.y - base) > base) {
+            setFrameEffect(1, 1000);
+            initCamera(m_iMode, 0, NULL);
+        } else {
+            SubVectorXYZ(ofs, m_vAim, m_vEye);
+            FLOAT ret = _sqrtf(InnerProduct(ofs, ofs));
+            if (ret < m_pData->fDistance) {
+                setFrameEffect(1, 1000);
+                initCamera(m_iMode, 0, NULL);
+            }
+        }
+    }
+}
+#endif
+#line 1204
+void CPlayerCamera::procFieldParallel() {
+    FVECTOR pos = getNowPlayerPos();
+    FVECTOR aim = m_pData->vAim;
+    aim.y += m_fRikuShiftY;
+    FVECTOR eye = m_pData->vEye;
+    eye.y += m_fRikuShiftY;
+    BOOL bTurn = FALSE;
+
+    pos.w = 1.0f;
+    aim.w = 1.0f;
+    eye.w = 1.0f;
+
+#line 1217
+    AddVectorXYZ(m_vFinalAim, pos, aim);
+    adjustCamera(m_vAim, m_vFinalAim, m_pData->fAdjust);
+
+#line 1222
+    AddVectorXYZ(m_vFinalEye, pos, eye);
+    FVECTOR aim2;
+    FVECTOR eye2;
+
+#line 1230
+    FLOAT r = 2.0f / eye.x;
+    ScaleVectorXYZ(aim2, eye, r);
+    AddVectorXYZ(aim2, pos, aim2);
+    eye2 = m_vFinalEye;
+    aim2.w = 1.0f;
+    eye2.w = 1.0f;
+    calcMapHit(eye2, aim2, m_pData->fSize, 0.0f);
+
+#line 1240
+    m_vOffset.init();
+    if (!isFlag(1)) {
+        FLOAT x = CPadHandler::getAnalogRX() * (1.0f / 4096.0f) * m_fReverseX;
+        FLOAT y = CPadHandler::getAnalogRY() * (1.0f / 4096.0f) * m_fReverseY;
+
+        if (_fabsf(x) > 0.25f) {
+            bTurn = TRUE;
+            m_vOffset.x = x * m_pData->fDistance;
+            m_vOffset.z = -m_vOffset.x;
+        }
+        if (_fabsf(y) > 0.25f) {
+            bTurn = TRUE;
+            m_vOffset.y = -y * m_pData->fDistance;
+        }
+    }
+    if (bTurn) {
+        FVECTOR start;
+        FVECTOR end;
+        FVECTOR ofs;
+        SubVectorXYZ(start, eye2, m_vOffset);
+        AddVectorXYZ(end, eye2, m_vOffset);
+        calcMapHit(end, start, m_pData->fSize, 0.0f);
+        SubVectorXYZ(ofs, eye2, end);
+        if (_fabsf(ofs.x) > m_pData->fDistance || _fabsf(ofs.z) > m_pData->fDistance) {
+            end.x = eye2.x;
+            end.z = eye2.z;
+        }
+        if (_fabsf(ofs.y) > m_pData->fDistance) end.y = eye2.y;
+        m_vFinalEye = end;
+    } else {
+        m_vFinalEye = eye2;
+    }
+    adjustCamera(m_vEye, m_vFinalEye, m_pData->fAdjust);
+    SubVectorXYZ(m_vAim, m_vEye, m_vLocal);
+}
+#line 1299
+void CPlayerCamera::changeModeBattle(INT inMode) {
+    m_iMode = inMode;
+    m_pData = g_pCamData[inMode];
+    if (!(m_pData)) AssertApp(__FILE__, __LINE__, "m_pData", 0);
+
+    setGakaku(m_pData->fViewAngle);
+    m_vOffset.init();
+    m_fRikuShiftY = (DebugWork::g_dw.player.iCamRikuShiftY && CGame::isRikuGame()) ? 0.4f : 0.0f;
+    FVECTOR eye = m_pData->vEye;
+    eye.y += m_fRikuShiftY;
+    FVECTOR aim = m_pData->vAim;
+    aim.y += m_fRikuShiftY;
+    SubVectorXYZ(m_vLocal, eye, aim);
+    m_fDist = _sqrtf(InnerProduct(m_vLocal, m_vLocal));
+    m_collMap.setRadius(m_pData->fSize);
+    m_collMap.setShiftY(0.0f);
+}
+#line 1325
+void CPlayerCamera::procBattleNormal() {
+    FVECTOR pos = getNowPlayerPos();
+    FVECTOR aim = m_pData->vAim;
+    aim.y += m_fRikuShiftY;
+    FVECTOR eye = m_pData->vEye;
+    eye.y += m_fRikuShiftY;
+    BOOL bTouch;
+    FMATRIX mat;
+
+#line 1337
+    FLOAT r = _limitPI(getNowPlayerDir() - 3.1415927f);
+    _unitMatrix(mat);
+    _rotMatrixY(mat, r);
+    ApplyMatrixXYZ(m_vFinalAim, mat, aim);
+    AddVectorXYZ(m_vFinalAim, pos, m_vFinalAim);
+
+#line 1347
+    adjustCamera(m_vAim, m_vFinalAim, m_pData->fAdjust);
+
+#line 1351
+    calcDirection(m_vFinalDir, m_vFinalAim, m_vEye);
+    bTouch = isFlag(0x400) ? TRUE : FALSE;
+    if (isFlag(0x80)) {
+        m_tqNear -= getFrameRate();
+        if (m_tqNear > 0) {
+            bTouch = TRUE;
+        } else {
+            setFlag(0, 0x80);
+        }
+    }
+
+#line 1361
+    if (!isFlag(1)) {
+        FLOAT x = CPadHandler::getAnalogRX() * (1.0f / 4096.0f) * m_fReverseX;
+        FLOAT y = -(CPadHandler::getAnalogRY() * (1.0f / 4096.0f)) * m_fReverseY;
+        if (_fabsf(x) > 0.25f) {
+            x *= getFrameRateF() * 3.0f;
+            m_vDir.y = _limitPI(m_vDir.y + x * 3.1415927f / 180.0f);
+            bTouch = TRUE;
+        }
+#line 1376
+        if (isFlag(0x80A)) {
+            FLOAT d = _limitPI(m_vDir.y - r);
+            if (isFlag(2)) {
+                m_fYLimitHi = 1.0471976f;
+            } else if (isFlag(8)) {
+                m_fYLimitHi = 1.5707964f;
+            } else if (isFlag(0x800)) {
+                m_fYLimitHi = 0.5235988f;
+            }
+            if (d < -m_fYLimitHi) {
+                bTouch = TRUE;
+                m_vDir.y = _limitPI(r - m_fYLimitHi);
+            } else if (d > m_fYLimitHi) {
+                bTouch = TRUE;
+                m_vDir.y = _limitPI(r + m_fYLimitHi);
+            }
+#line 1416
+            switch (m_pPlayer->getPlayerState()) {
+            case 9:
+                setFlag(0, 0x1808);
+                break;
+            case 16:
+                setFlag(0, 0x1802);
+                break;
+            default:
+                setFlag(0, 0x180A);
+                m_fYLimitHi = 3.1415927f;
+                break;
+            }
+        }
+#line 1441
+        if (_fabsf(y) > 0.25f) {
+            y *= getFrameRateF() * 1.5f;
+            m_vDir.x = _limitPI(m_vDir.x + y * 3.1415927f / 180.0f);
+            if (m_vDir.x < m_fXLimitHi) {
+                m_vDir.x = m_fXLimitHi;
+            } else if (m_vDir.x > m_fXLimitLow) {
+                m_vDir.x = m_fXLimitLow;
+            }
+            bTouch = TRUE;
+        }
+    }
+#line 1452
+    if (!bTouch) {
+        m_vDir.y = Movement::Homing(m_vDir.y, m_vFinalDir.y, 0.1f, getFrameRateF());
+        if (!m_pPlayer->isNowIdleAnim()) {
+            m_vDir.x = Movement::Homing(m_vDir.x, 0.0f, 0.02f, getFrameRateF());
+        }
+    }
+#line 1465
+    _unitMatrix(mat);
+    _rotMatrixX(mat, m_vDir.x);
+    _rotMatrixY(mat, m_vDir.y);
+    ApplyMatrixXYZ(m_vFinalEye, mat, m_vLocal);
+    AddVectorXYZ(m_vFinalEye, m_vFinalAim, m_vFinalEye);
+    if (isFlag(0x1000)) {
+        if (g_pPlayer) {
+            m_vFinalEye = g_pPlayer->getStartPos();
+            m_vFinalEye.y += 3.0f;
+            m_vEye = m_vFinalEye;
+        }
+    } else {
+        adjustCamera(m_vEye, m_vFinalEye, m_pData->fAdjust);
+    }
+#line 1479
+    if (!bTouch) {
+        if (_fabsf(m_vEye.x - m_vFinalEye.x) < 0.003f) m_vEye.x = m_vFinalEye.x;
+        if (_fabsf(m_vEye.y - m_vFinalEye.y) < 0.003f) m_vEye.y = m_vFinalEye.y;
+    }
+#line 1489
+    setFlag(0, 0x400);
+    calcMapHit(m_vEye, m_vAim, m_pData->fSize, m_pData->fDistance);
+    recalcNearMove();
+}
+#line 1504
+void CPlayerCamera::procBattleLockon() {
+    FVECTOR pos = getNowPlayerPos();
+
+    FVECTOR loc = getNowTargetPos();
+    FVECTOR aim = m_pData->vAim;
+    aim.y += m_fRikuShiftY;
+    FVECTOR eye = m_pData->vEye;
+    eye.y += m_fRikuShiftY;
+
+    FMATRIX mat;
+    BOOL bTouch = FALSE;
+
+#line 1518
+    AddVectorXYZ(m_vFinalAim, loc, pos);
+    ScaleVectorXYZ(m_vFinalAim, m_vFinalAim, 0.5f);
+    AddVectorXYZ(m_vFinalAim, m_vFinalAim, aim);
+    adjustCamera(m_vAim, m_vFinalAim, m_pData->fAdjust);
+
+#line 1527
+    FVECTOR ofs;
+    SubVectorXYZ(ofs, m_vFinalAim, pos);
+    FLOAT ret = _sqrtf(InnerProduct(ofs, ofs));
+    ofs.set(0.0f, eye.y, eye.z + ret);
+    m_fDist = ret;
+
+    calcDirection(m_vFinalDir, m_vFinalAim, m_vEye);
+
+#line 1539
+    FVECTOR dir;
+    calcDirection(dir, aim, eye);
+    _unitMatrix(mat);
+    _rotMatrixY(mat, m_vDir.y);
+    ApplyMatrixXYZ(eye, mat, eye);
+    AddVectorXYZ(eye, pos, eye);
+    FVECTOR rot;
+    calcDirection(rot, m_vAim, eye);
+    SubVectorXYZ(rot, rot, dir);
+    m_vFinalDir.x = -rot.x;
+
+#line 1557
+    if (!isFlag(1) && !m_pPlayer->isTrgFlag(0x800)) {
+        FLOAT x = CPadHandler::getAnalogRX() * (1.0f / 4096.0f) * m_fReverseX;
+        FLOAT y = -(CPadHandler::getAnalogRY() * (1.0f / 4096.0f)) * m_fReverseY;
+        if (_fabsf(x) > 0.25f) {
+            x *= getFrameRateF() * 3.0f;
+            m_vDir.y = _limitPI(m_vDir.y + x * 3.1415927f / 180.0f);
+            bTouch = TRUE;
+        }
+#line 1568
+        if (_fabsf(y) > 0.25f) {
+            y *= getFrameRateF() * 1.5f;
+            m_vDir.x = _limitPI(m_vDir.x + y * 3.1415927f / 180.0f);
+            if (m_vDir.x < m_fXLimitHi) {
+                m_vDir.x = m_fXLimitHi;
+            } else if (m_vDir.x > m_fXLimitLow) {
+                m_vDir.x = m_fXLimitLow;
+            }
+            bTouch = TRUE;
+        }
+    }
+#line 1579
+    if (m_fDist * 2.0f >= m_pData->fDistance) {
+        m_vFinalDir.set(-rot.x, rot.y, 0.0f);
+        bTouch = FALSE;
+    }
+#line 1587
+    if (!bTouch) {
+        m_vDir.y = Movement::Homing(m_vDir.y, m_vFinalDir.y, 0.1f, getFrameRateF());
+        if (!m_pPlayer->isNowIdleAnim()) {
+            m_vDir.x = Movement::Homing(m_vDir.x, m_vFinalDir.x, 0.05f, getFrameRateF());
+        }
+    }
+#line 1600
+    _unitMatrix(mat);
+    _rotMatrixX(mat, m_vDir.x);
+    _rotMatrixY(mat, m_vDir.y);
+    ApplyMatrixXYZ(m_vFinalEye, mat, ofs);
+    AddVectorXYZ(m_vFinalEye, m_vFinalAim, m_vFinalEye);
+    adjustCamera(m_vEye, m_vFinalEye, m_pData->fAdjust);
+    if (!bTouch) {
+        if (_fabsf(m_vEye.x - m_vFinalEye.x) < 0.003f) m_vEye.x = m_vFinalEye.x;
+        if (_fabsf(m_vEye.y - m_vFinalEye.y) < 0.003f) m_vEye.y = m_vFinalEye.y;
+    }
+#line 1614
+    setFlag(0, 0x400);
+    _unitMatrix(mat);
+    _rotMatrixY(mat, m_vDir.y);
+    ApplyMatrixXYZ(aim, mat, aim);
+    AddVectorXYZ(aim, pos, aim);
+#line 1628
+    if (aim.y < pos.y) {
+        eye.x = aim.x;
+        eye.y = pos.y + m_pData->fSize;
+        eye.z = aim.z;
+        calcMapHit(aim, eye, m_pData->fSize, 0.0f);
+        if (m_vEye.y < pos.y) {
+            eye.x = m_vEye.x;
+            eye.y = pos.y + m_pData->fSize;
+            eye.z = m_vEye.z;
+            calcMapHit(m_vEye, eye, m_pData->fSize, 0.0f);
+        }
+    }
+#line 1647
+    calcMapHit2(m_vEye, aim, m_pData->fSize, 0.0f);
+}
 
 void CPlayerCamera::setFrameEffect(INT inMode, TIMEQ inTime) {
     m_tqEffect = inTime;

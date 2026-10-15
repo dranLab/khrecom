@@ -344,6 +344,7 @@ public:
     // PARTIAL: added for Game/Player/PlayerCamera
     HANDLE isNowLockon() { return m_hLockon; }
     FVECTOR& getLockonPos() { return m_vLockonPos; }
+    FVECTOR& getStartPos() { return m_vStartPos; }
     BOOL isNowIdleAnim();
     // PARTIAL: added for Game/Gimmick/GimmickJumpStand
     INT getJumpState() const;
