@@ -48,12 +48,15 @@ union IVECTOR {
 };
 
 typedef float _FMATRIX[4][4];
+typedef float (*_FMATRIX_ROWP)[4];
 union FMATRIX {
     _FMATRIX m;
     FVECTOR v[4];
     void setTrans(const FVECTOR& vecIn) { v[3] = vecIn; }
     // PARTIAL: added for System/Graphic/Camera
     BOOL operator!=(const FMATRIX& inM) const { return v[0] != inM.v[0] || v[1] != inM.v[1] || v[2] != inM.v[2] || v[3] != inM.v[3]; }
+    // PARTIAL: added for Game/Bullet/Bullet (sceVu0 functions take sceVu0FMATRIX)
+    operator _FMATRIX_ROWP() { return m; }
 };
 
 // PARTIAL: added for System/MainTaskFactory. Only __alloc/__getSize are known (out-of-class template members,

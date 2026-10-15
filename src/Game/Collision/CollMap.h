@@ -11,7 +11,7 @@ private:
 
 public:
     virtual ~CCollMap();
-    virtual void init();
+    virtual void init(COLL_KIND inKind, COLL_TYPE inType, INT inFlag, INT inHandle); // PARTIAL: signature completed for Game/Bullet/Bullet
     virtual INT collideMap();
     INT collideRide(INT inFlag);
 };
