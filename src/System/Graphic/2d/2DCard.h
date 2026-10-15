@@ -5,6 +5,7 @@
 #include "khtypes.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "Game/CardKind.h"
+#include "Game/SceneInfo.h" /* PARTIAL: RCNORMA::NormaSrc, for Form/Menu/RoomCreation */
 
 class C2DCard : public D2::C2DSeqCtrl {
 public:
@@ -24,6 +25,8 @@ public:
     void enableDisp(BOOL bEnable);
     void changeLayer(INT nLayer); /* PARTIAL: added for Form/Menu/Roulette */
     void replace(CARD card);      /* PARTIAL: added for Form/Menu/Roulette */
+    void createNorma(RCNORMA::NormaSrc src, INT n);  /* PARTIAL: added for Form/Menu/RoomCreation */
+    void replaceNorma(RCNORMA::NormaSrc src, INT n); /* PARTIAL: added for Form/Menu/RoomCreation */
 };
 
 #endif /* SYSTEM_GRAPHIC_2D_2DCARD_H */

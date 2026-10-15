@@ -59,6 +59,44 @@ enum DOOR_TYPE {
     _DOOR_TYPE_DEBUG = 13
 };
 
+// PARTIAL: added for Form/Menu/RoomCreation
+enum RCNORMA_OP {
+    RCNORMA_OP_NONE = 0,
+    RCNORMA_OP_EQ_LESS = 1,
+    RCNORMA_OP_EQ_GREATER = 2,
+    RCNORMA_OP_EQUAL = 3,
+    RCNORMA_OP_TOTAL = 4
+};
+
+// PARTIAL: added for Form/Menu/RoomCreation
+enum RCNORMA_COLOR {
+    RCNORMA_COLOR_NONE = 0,
+    RCNORMA_COLOR_RED = 1,
+    RCNORMA_COLOR_GREEN = 2,
+    RCNORMA_COLOR_BLUE = 3
+};
+
+// PARTIAL: added for Form/Menu/RoomCreation
+namespace RCNORMA {
+struct NormaSrc { // 0x8
+    SHORT _nNumber;  /* 0x0 */
+    SHORT _nOp;      /* 0x2 */
+    SHORT _nColor;   /* 0x4 */
+    SHORT __nDummy;  /* 0x6 */
+};
+}
+
+// PARTIAL: added for Form/Menu/RoomCreation
+enum DOOR_RC_RESULT {
+    DOOR_RC_RESULT_INVALID = -1,
+    DOOR_RC_RESULT_NOP = 0,
+    DOOR_RC_RESULT_USED = 1,
+    DOOR_RC_RESULT_CLEAR_ONE = 2,
+    DOOR_RC_RESULT_CLEAR_ALL = 3
+};
+
+struct CARD;
+
 struct DoorInfo { // 0x18
     DOOR_ID _id;               /* 0x00 */
     INT _shape;                /* 0x04 */ // PARTIAL: _shape/_type split out for Game/Player/NaviMap
@@ -66,6 +104,15 @@ struct DoorInfo { // 0x18
     UBYTE _m_0x0c[0xc];        /* 0x0c _nDstRoom .. _pNormaSrcInfo */
     DOOR_STAT getDoorState() const;
     BOOL isSpecialDoor() const; // PARTIAL: added for Game/Player/NaviMap
+    // PARTIAL: added for Form/Menu/RoomCreation
+    RCNORMA_COLOR getNormaColor(USHORT idx) const;
+    USHORT getNormaNumber(USHORT idx) const;
+    RCNORMA_OP getNormaOperation(USHORT idx) const;
+    void resetNorma();
+    INT getNormaKeyCardID() const;
+    USHORT getNormaCount() const;
+    USHORT getNextNormaIndex() const;
+    DOOR_RC_RESULT useNormaCard(const CARD& card);
     // PARTIAL: added for Game/Gimmick/GimmickDoor
     BOOL isEventDoor() const {
         BOOL ret = FALSE;
@@ -182,6 +229,7 @@ public:
     static BOOL isFieldScene(); // PARTIAL: added for Game/Player/PlayerWeapon
     static DoorInfo* getDoorInfo(DOOR_ID inDoorID, INT inRoomID); // PARTIAL: added for Game/Player/NaviMap
     static BOOL reqEnterDoor(DOOR_ID inDoorID); // PARTIAL: added for Game/Gimmick/GimmickDoor
+    static void makeRoom(DoorInfo& door, INT n); // PARTIAL: added for Form/Menu/RoomCreation
     // PARTIAL: added for Form/Menu/WorldSelect
     static USHORT getCurrentFloorIndex();
     static WORLD_ID getWorldID(USHORT nFloorIndex);
