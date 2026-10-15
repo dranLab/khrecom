@@ -76,6 +76,8 @@ public:
     void setRot(FVECTOR& vRot);                               /* PARTIAL: added for Form/Menu/WorldSelect */
     UINT getNumSeq() { return m_nSeq; }                       /* PARTIAL: added for Form/Menu/WorldSelect */
     void changeTexture(UINT nIdx, INT inSprIdx, CHAR* pTexName, G_UV* pStart, G_UV* pEnd); /* PARTIAL: added for Form/Menu/WorldWarp */
+    void setCol(FVECTOR& vCol);                               /* PARTIAL: added for Form/Menu/RoomCreation */
+    void enableDispEach(BOOL bEnable);                        /* PARTIAL: added for Form/Menu/RoomCreation */
     void enableColorCtrl(BOOL bEnable) { m_seqControl.fgColor = bEnable; } /* PARTIAL: added for Form/SystemMessage */
 };
 
