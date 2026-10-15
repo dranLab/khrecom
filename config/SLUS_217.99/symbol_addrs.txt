@@ -124,3 +124,8 @@ _$_t7CVector1Z6G_LINE_00301D68 = 0x00301D68; // type:func size:0x8C
 _vt$4CFnt_004D9CF8 = 0x004D9CF8; // size:0x48
 _vt$t7CVector1Z7G_STRIP_004D9D40 = 0x004D9D40; // size:0x18
 _vt$t7CVector1Z6G_LINE_004D9D58 = 0x004D9D58; // size:0x18
+
+// Not symbols: splat read the text words "ard\0" (0x003CA370) and "ord\0" in cod/2C2B00.data as pointers to these
+// odd addresses in System/Sound/driver/sddrv_ee's .bss, which then couldn't come from source.
+D_00647261 = 0x00647261; // can_be_referenced:False
+D_0064726F = 0x0064726F; // can_be_referenced:False
