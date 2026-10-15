@@ -80,6 +80,7 @@ struct RoomInfo {
     DoorInfo _doors[4]; /* 0x00 */ // PARTIAL: added for Game/Gimmick/GimmickPlantParent
     BYTE getCardID() const;
     BYTE getRoomNameCardID() const; // PARTIAL: added for Game/Player/NaviMap
+    SHORT getSceneNum() const;      // PARTIAL: added for Form/Menu/SaveLoadUtil
 };
 
 // PARTIAL: added for Game/Enemy/MapEnemyManager
@@ -122,6 +123,11 @@ public:
     static USHORT getCurrentFloorIndex();
     static WORLD_ID getWorldID(USHORT nFloorIndex);
     static BOOL reqEnterWorld(WORLD_ID nWorldID);
+    // PARTIAL: added for Form/Menu/SaveLoadUtil
+    static USHORT getFloorIndex(SHORT nFloor, BOOL bSora);
+    static void initFloor(INT nFloorIndex, WORLD_ID nWorldID);
+    static INT getCurrentAreaScene();
+    static void backupEventDoorState();
 };
 
 #endif /* GAME_SCENEINFO_H */

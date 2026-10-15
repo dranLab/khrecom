@@ -45,6 +45,9 @@ public:
     // PARTIAL: added for System/Movie/MSVideo
     static INT getFrameCount();
     static BOOL isWarningPauseNow();
+    // PARTIAL: added for Form/Menu/SaveLoadUtil
+    static UINT getPlayTime();
+    static void resetPlayTime(UINT nTime);
 };
 #endif
 
