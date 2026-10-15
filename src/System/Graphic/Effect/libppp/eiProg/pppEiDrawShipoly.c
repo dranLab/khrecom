@@ -274,7 +274,7 @@ static inline void RotTransPersST(float *stv, float *v, float *st_sub, float *st
     stv[2] = 1.0f;
     stv[3] = 1.0f;
 }
-
+static void init_spline(sceVu0FVECTOR *x, int n, sceVu0FVECTOR *data) __asm__("init_spline_001822A8"); static void spline(float *out, sceVu0FVECTOR *x, float t, sceVu0FVECTOR *data) __asm__("spline_00182468"); static void get_st(PEiDrawShipoly *param, float *s_min, float *s_max, float *t_min, float *t_max) __asm__("get_st_001828C8");
 static void init_spline(sceVu0FVECTOR *x, int n, sceVu0FVECTOR *data) {
     sceVu0FVECTOR *d;
     static sceVu0FVECTOR c = { 4.0f, -1.0f, 0.0f, 0.0f };
