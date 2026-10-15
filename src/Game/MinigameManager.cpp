@@ -1,17 +1,3 @@
-/* MINIGAMEMANAGER_RODATA 1: everything from source, including .data/.rodata/.bss - matches, but needs two
- * lines in config/SLUS_217.99/symbol_addrs.txt naming this object's unnamed copies of CState's inline destructor
- * and vtable (without the vtable line, tools/ee_asm_compat.py drops our copy of the vtable and .rodata comes out
- * 0x30 bytes short):
- *     _$_6CState_00207CD8 = 0x00207CD8; // type:func size:0x30
- *     _vt$6CState_00481E78 = 0x00481E78; // size:0x30
- * and "// SOURCE DATA: .data .rodata .bss" as the file's last line.
- * MINIGAMEMANAGER_RODATA 0: the data comes from the original assembly, so the functions that use .rodata
- * (strings, member function pointer constants, jump tables) and everything gcc emits after the last function
- * (inline/template functions, static initialization) stay INCLUDE_ASM. */
-#ifndef MINIGAMEMANAGER_RODATA
-#define MINIGAMEMANAGER_RODATA 0
-#endif
-
 #include "include_asm.h"
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Task.h"
@@ -53,7 +39,6 @@ void LIMIT_RANGE(T& a, T min, T max) {
     }
 }
 
-#if MINIGAMEMANAGER_RODATA
 namespace Mini100AcreWildDive {
 static INT MOT_SORA_IDLE = 0;
 static INT MOT_SORA_RIGHT = 1;
@@ -89,7 +74,6 @@ static const FVECTOR s_vStartPos = {{0.f, 150.f, 1.f, 1.f}};
 static const FVECTOR s_vEndPos = {{0.f, 141.25f, 0.f, 1.f}};
 static FLOAT s_fFogEndDisY = s_vStartPos.y - s_vEndPos.y;
 } // namespace Mini100AcreWildDive
-#endif
 
 #line 1 "../Dlls/Minigame100Acre/Mini100AcreWildDive.h"
 inline void _wdPlaceholder(INT state) {
@@ -111,9 +95,7 @@ inline void _tjPlaceholder(INT state, FLOAT& f) {
     if (!((0 <= state) && (state < 1))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < TJ_MAIN_STATE_MAX)", 0);
     if (!((0 <= state) && (state < 2))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < TJ_PLAYER_STATE_MAX)", 0);
     if (!((0 <= state) && (state < 3))) AssertApp(__FILE__, __LINE__, "(0 <= state) && (state < TJ_TIGGER_STATE_MAX)", 0);
-#if MINIGAMEMANAGER_RODATA
     LIMIT_RANGE<float>(f, 0.f, 1.f);
-#endif
 }
 
 #line 40 "src/Game/MinigameManager.cpp"
@@ -164,12 +146,9 @@ CPlayer* createPlayer(UINT nKind, CTask* pParent, INT nParam);
 inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-#if MINIGAMEMANAGER_RODATA
 CMiniGameBase* CMinigameManager::m_pGame = NULL;
 HANDLE CMinigameManager::m_hHelp = 0;
-#endif
 
-#if MINIGAMEMANAGER_RODATA
 CMinigameManager::CMinigameManager(CTask* inpParent) : CTask(inpParent, 0x4000) {
     m_nStep = 0;
     m_nNextScene = 0;
@@ -188,11 +167,7 @@ CMinigameManager::CMinigameManager(CTask* inpParent) : CTask(inpParent, 0x4000) 
     initialize();
     changeState(STATE_MAIN);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", __16CMinigameManagerP5CTask);
-#endif
 
-#if MINIGAMEMANAGER_RODATA
 CMinigameManager::~CMinigameManager() {
     m_pGame = NULL;
     m_hHelp = 0;
@@ -201,19 +176,12 @@ CMinigameManager::~CMinigameManager() {
     _enablePause(0, TRUE);
     TRACE("---- CMinigameManager dtor.\n");
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", _$_16CMinigameManager);
-#endif
 
-#if MINIGAMEMANAGER_RODATA
 void CMinigameManager::changeState(INT inState) {
 #line 111
     if (!(inState >= 0 && inState < STATE_MAX)) AssertApp(__FILE__, __LINE__, "inState >= 0 && inState < STATE_MAX", 0);
     gotoState(m_State[inState]);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", changeState__16CMinigameManageri);
-#endif
 
 BOOL CMinigameManager::isMainState() {
     return isState(m_State[STATE_MAIN]);
@@ -223,7 +191,6 @@ void CMinigameManager::main() {
     update();
 }
 
-#if MINIGAMEMANAGER_RODATA
 void CMinigameManager::initialize() {
 #line 133
     if (!(__null == m_pGame)) AssertApp(__FILE__, __LINE__, "__null == m_pGame", 0);
@@ -273,9 +240,6 @@ void CMinigameManager::initialize() {
         m_nClearNextScene = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", initialize__16CMinigameManager);
-#endif
 
 void CMinigameManager::beginStateMain() {
 }
@@ -312,7 +276,6 @@ void CMinigameManager::beginStateEndMenu() {
     CSound::fadeoutAllSE(0x2D, TRUE);
 }
 
-#if MINIGAMEMANAGER_RODATA
 void CMinigameManager::stateEndMenu() {
     switch (m_nStep) {
     case 0:
@@ -346,14 +309,10 @@ void CMinigameManager::stateEndMenu() {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", stateEndMenu__16CMinigameManager);
-#endif
 
 void CMinigameManager::endStateEndMenu() {
 }
 
-#if MINIGAMEMANAGER_RODATA
 INT CMinigameManager::getMinigameType() {
     INT nRet = -1;
     switch (CGameWork::getByte(1, 0x142)) {
@@ -405,11 +364,7 @@ INT CMinigameManager::getMinigameType() {
     }
     return nRet;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", getMinigameType__16CMinigameManager);
-#endif
 
-#if MINIGAMEMANAGER_RODATA
 UINT CMinigameManager::sendEvent(UINT nEvent, void* pParam) {
     switch (nEvent) {
     case 1:
@@ -431,9 +386,6 @@ UINT CMinigameManager::sendEvent(UINT nEvent, void* pParam) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", sendEvent__16CMinigameManagerUiPv);
-#endif
 
 CMinigameManager* CMinigameManager::getManager() {
     return (CMinigameManager*)CTaskMan::getSysTask(0x21);
@@ -521,7 +473,6 @@ void CMinigameManager::enablePauseIdx(INT nIdx, BOOL inSw) {
     if (pGM && m_pGame) pGM->_enablePause(nIdx, inSw);
 }
 
-#if MINIGAMEMANAGER_RODATA
 void CMinigameManager::_enablePause(INT nIdx, BOOL inSw) {
 #line 543
     if (!(nIdx >= 0 && nIdx < PD_FLAG_IDX_MAX)) AssertApp(__FILE__, __LINE__, "nIdx >= 0 && nIdx < PD_FLAG_IDX_MAX", 0);
@@ -532,20 +483,13 @@ void CMinigameManager::_enablePause(INT nIdx, BOOL inSw) {
     }
     CGameWork::setFlag(1, 6, m_uiPauseDisableFlag);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", _enablePause__16CMinigameManagerii);
-#endif
 
 CMiniGameBase::CMiniGameBase(CTask* p) : CTask(p, 0x4000) {
 }
 
-#if MINIGAMEMANAGER_RODATA
 CMiniGameBase::~CMiniGameBase() {
     enablePause(TRUE);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", _$_13CMiniGameBase);
-#endif
 
 void CMiniGameBase::main() {
     update();
@@ -580,19 +524,4 @@ void killMGSkill() {
 }
 } // namespace MG_SKILL
 
-#if !MINIGAMEMANAGER_RODATA
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", LIMIT_RANGE__H1Zf_RX01X01X01_v);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", __static_initialization_and_destruction_0_00207C00);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", func_00207CD8);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", _$_t14CStateTemplate1Z16CMinigameManager);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", getGame__16CMinigameManager);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", enablePause__16CMinigameManageri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", reqFinish__13CMiniGameBases);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", isAlreadyClear__13CMiniGameBase);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", getClearNextSceneNo__13CMiniGameBase);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", enablePause__13CMiniGameBasei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", executeBeginState__t14CStateTemplate1Z16CMinigameManager);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", executeState__t14CStateTemplate1Z16CMinigameManager);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", executeEndState__t14CStateTemplate1Z16CMinigameManager);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MinigameManager", _GLOBAL_$I$c__KHCOM_MainApp_Game_MinigameManager.cppd5aaaa);
-#endif
+// SOURCE DATA: .data .rodata .bss
