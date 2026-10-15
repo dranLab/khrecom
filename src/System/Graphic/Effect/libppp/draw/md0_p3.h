@@ -1,0 +1,8 @@
+#ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_DRAW_MD0_P3_H
+#define SYSTEM_GRAPHIC_EFFECT_LIBPPP_DRAW_MD0_P3_H
+
+#include "md.h"
+
+void *op_md_draw_path3(OMD_H *mdh, OMD_IN *mdi);
+
+#endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_DRAW_MD0_P3_H */
