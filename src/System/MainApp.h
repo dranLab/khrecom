@@ -42,6 +42,9 @@ public:
     static TIMEQ getDispFrameRate();
     static void incObjCount();
     static void decObjCount();
+    // PARTIAL: added for System/Movie/MSVideo
+    static INT getFrameCount();
+    static BOOL isWarningPauseNow();
 };
 #endif
 
