@@ -47,6 +47,7 @@ inline void _emptyStringPlaceholder() {
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char _end[];
 
+/* The heap bounds a common header defines in every includer (dynamically initialized, first in .bss). */
 namespace EERAM {
 static INT _HEAP_START = (((INT)_end - 1) / 64 + 1) * 64;
 static INT _HEAP_SIZE = 0x2000000 - 0x40000 - _HEAP_START;
@@ -61,6 +62,7 @@ static inline void _unitVectorVu0(FVECTOR& v) {
     asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
 }
 
+/* Other units' classes, as far as this file uses them (their headers don't exist yet). */
 class CShadowModelMan {
 public:
     static FLOAT m_fCDensity;
@@ -155,10 +157,6 @@ public:
     CAtel();
     CVSM* getVSM() { return m_pVSM; }
 };
-
-namespace PL {
-extern FLOAT g_fWeight;
-}
 
 /* Game/CardKind's card table: a static in the original's header, emitted (with its strings) at the end of
  * .rodata. */
@@ -460,17 +458,14 @@ static void _makeInputName() {
 void _makeDispName();
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", _makeDispName__3DWTv);
 #if 0
-/* loop shape: the original keeps i+j unreduced and peels the copy loop's first iteration */
+/* differs in the copy loop: the original keeps i + j unreduced (addu/slti each pass) and lays the loop out with the first pass peeled */
 static void _makeDispName() {
     INT i;
     INT j;
     CHAR* pC = DebugWork::g_dw.nakamich.szNameBuf;
     for (i = 0; i < 8 && pC[i] == '*'; i++) {
     }
-    for (j = 0; i + j < 8; j++) {
-        if (pC[i + j] == '*') {
-            break;
-        }
+    for (j = 0; (i + j < 8) && (pC[i + j] != '*'); ++j) {
         pC[j] = pC[i + j];
     }
     pC[j] = 0;
@@ -571,10 +566,11 @@ static BOOL _fadeoutSE(CDebugWindow* pObj, INT inY, INT inParam) {
     return TRUE;
 }
 
+
 BOOL debugWinSeTestLineCall(CDebugWindow* pObj, INT iLineY, INT inParam);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", debugWinSeTestLineCall__3DWTP12CDebugWindowii);
 #if 0
-/* playSE's arguments are loaded in a different order (a2 before the delay slot) */
+/* differs only in the delay slot of the playSE call: the original loads iSE_Id last (li a2,64 first) */
 static BOOL debugWinSeTestLineCall(CDebugWindow* pObj, INT iLineY, INT inParam) {
     if (inParam & 0x20) {
         _stopSE();
@@ -732,18 +728,12 @@ static void __initDebugWorkShadow(INT i) {
     DebugWork::g_dw.shadow.b = DebugWork::g_dw.shadow.p;
 }
 
-void __setDebugWorkShadow(INT i);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", __setDebugWorkShadow__3DWTi);
-#if 0
-/* f0/f1 register swap of the two densities */
 static void __setDebugWorkShadow(INT i) {
     DEBUG_SHADOW_TEST1* p = i == 0 ? &DebugWork::g_dw.shadow.b : &DebugWork::g_dw.shadow.p;
-    FLOAT fDensity = p->fDensityColor;
-    CShadowModelMan::m_fCDensity = fDensity;
-    fDensity = p->fDensityAlpha;
-    CShadowModelMan::m_fADensity = fDensity;
+    FLOAT* pf = &p->fDensityColor;
+    CShadowModelMan::m_fCDensity = pf[0];
+    CShadowModelMan::m_fADensity = pf[1];
 }
-#endif
 
 static BOOL debugWinDebugWorkShadowLineAddSubCall(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x80) {
@@ -2594,7 +2584,6 @@ static DEBUG_WINDOW_TBL debugWinThrowTest = {"ATEL\x81@CONFIG", -176, -(SCREEN_H
 
 } // namespace DWTGimThrow
 
-#include "System/RsrcData.h"
 #include "Game/Debug/DWTBGM.h"
 
 namespace DWTFog {
@@ -2869,6 +2858,7 @@ static char* s_MenuRikuCardStringTbl[20] = {"\x83Z\x83" "C\x82\xb6\x82\xe1\x82\x
 
 static char* s_MenuAdd[2] = {"", "\x82\xc2\x82\xa2\x82\xa9\x82\xb5\x82\xdc\x82\xb5\x82\xbd\x81I"};
 
+
 static BOOL debugWCCardFull(CDebugWindow* pObj, INT inY, INT inParam) {
     short int idTbl[8][2] = {{1, 25}, {26, 42}, {42, 49}, {68, 127}, {257, 281}, {282, 298}, {161, 186}, {186, 190}};
     INT i;
@@ -2917,7 +2907,7 @@ static BOOL debugWCCardAll(CDebugWindow* pObj, INT inY, INT inParam) {
 BOOL debugWCMPFull(CDebugWindow* pObj, INT inY, INT inParam);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", debugWCMPFull__3DWTP12CDebugWindowii);
 #if 0
-/* lui of CPlayerManager::m_pInstance in v0 instead of v1 */
+/* differs only in a register: the original loads %hi(CPlayerManager::m_pInstance) into v1, ours into v0 */
 static BOOL debugWCMPFull(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x20) {
         CStatus::setMP(99999);

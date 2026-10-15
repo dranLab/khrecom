@@ -3,6 +3,8 @@
 #ifndef GAME_DEBUG_DWTBGM_H
 #define GAME_DEBUG_DWTBGM_H
 
+#include "System/RsrcData.h"
+
 static DEBUG_WINDOW_LINE s_debugWinBGM_nothing_lines[4] = {
     {"\xf9S--------------------------", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
     {" \xf9TBGM \x82\xcd\x93o\x98^\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb9\x82\xf1", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
