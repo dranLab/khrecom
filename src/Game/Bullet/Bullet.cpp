@@ -1,4 +1,10 @@
 #define GAME_BULLET_BULLET_CPP
+/* .rodata ends with unnamed copies of CVector<G_LINE>'s and CState's vtables. gcc's copies are only kept with these
+ * lines in config/SLUS_217.99/symbol_addrs.txt:
+ *     _vt$t7CVector1Z6G_LINE_004D87B0 = 0x004D87B0; // size:0x18
+ *     _vt$6CState_004D87C8 = 0x004D87C8; // size:0x30
+ * With them, set this to 1 (drops the asm stopgap at the end of the file). */
+#define BULLET_NAMED_VTABLE_COPIES 0
 #include "System/Task.h"
 #include "Game/Collision/CollUtil.h"
 
@@ -8,6 +14,8 @@ inline void _emptyStringPlaceholder() {
     TRACE("");
 }
 
+#include "Game/Entity.h"
+#include "System/Fsm.h" // before Gprim.h: CState's vtable copy follows CVector<G_LINE>'s in .rodata
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "Game/Bullet/Bullet.h"
 #include "System/Graphic/Effect/effect.h"
@@ -31,7 +39,7 @@ extern "C" {
 float sinf(float x);
 float cosf(float x);
 float atan2f(float y, float x);
-void sceVu0InversMatrix(float m0[4][4], float m1[4][4]);
+void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 void sceVu0RotMatrixX(FMATRIX& m0, const FMATRIX& m1, float rx);
 void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, float ry);
 void sceVu0RotMatrixZ(FMATRIX& m0, const FMATRIX& m1, float rz);
@@ -151,10 +159,6 @@ CBullet::~CBullet() {
 
 INT CBullet::getTypeID() const { return 0x1007; }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Bullet/Bullet", setup__7CBulletRC12BULLET_PARAM);
-/* Best attempt: all matches except the address of the local matrix m, which the original recomputes (addiu sp,160)
- * for both sceVu0InversMatrix and ApplyMatrix33, while gcc here keeps it in a callee-saved register. */
-#if 0
 #line 148
 BOOL CBullet::setup(const BULLET_PARAM& inParam) {
     FVECTOR pos;
@@ -308,12 +312,9 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
             INT segNum = 11;
             deltaRingAngle = 0.62831855f;
             ofs.set(0.0f, inParam.fShiftY, 0.0f);
-            {
-                FMATRIX* pm = &m;
-                sceVu0InversMatrix(*pm, Crd(0).getWorldMatrix());
-                asm volatile("" : "=r"(pm));
-            }
-            ApplyMatrix33(ofs, m, ofs);
+            FMATRIX& w = Crd(0).getWorldMatrix();
+            _inverse(m, w);
+            _apply33(ofs, m, ofs);
             line.C1.col = line.C0.col = 0xFF00FF00;
             for (ring = 0; ring < 5; ring++) {
                 FLOAT r0 = sinf(ring * deltaRingAngle);
@@ -342,7 +343,6 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
     }
     return TRUE;
 }
-#endif
 
 void CBullet::setBodyRadius(FLOAT inRadius, FLOAT inShiftY, INT inSliding, COLL_KIND inKind) {
     m_pMove->setRadius(inRadius);
@@ -1171,4 +1171,14 @@ BOOL CHomingBullet::bound_() {
     m_uiFlag ^= 0x400000;
     return FALSE;
 }
+
+#if !BULLET_NAMED_VTABLE_COPIES
+/* Stopgap: the original's unnamed copies of CVector<G_LINE>'s and CState's vtables end .rodata. Their entries point
+ * to the linker's first (global) definitions. */
+asm(".section .rodata.vtcopies\n"
+    "\t.align 3\n"
+    "\t.word 0, 0, 0, _$_t7CVector1Z6G_LINE, 0, 0\n"
+    "\t.word 0, 0, 0, _$_6CState, 0, __pure_virtual, 0, __pure_virtual, 0, __pure_virtual, 0, 0\n"
+    "\t.text\n");
+#endif
 // SOURCE DATA: .rodata
