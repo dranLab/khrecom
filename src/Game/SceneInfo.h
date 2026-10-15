@@ -186,6 +186,18 @@ struct RoomInfo {
     BYTE getCardID() const;
     BYTE getRoomNameCardID() const; // PARTIAL: added for Game/Player/NaviMap
     SHORT getSceneNum() const;      // PARTIAL: added for Form/Menu/SaveLoadUtil
+    BYTE getCardNumber() const;     // PARTIAL: added for Game/Gimmick/GimmickManager
+};
+
+// PARTIAL: added for Game/Gimmick/GimmickManager
+struct _GimmickInfo {
+    BYTE _nStat;
+    BYTE _nID;
+};
+
+struct _GimmickRoomInfo {
+    _GimmickInfo _gimmicks[48];
+    SHORT _cardCount;
 };
 
 // PARTIAL: added for Game/Enemy/MapEnemyManager
@@ -214,6 +226,7 @@ public:
     static BOOL hasReqChangeScene(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
     static INT getCurrentRoomID();
     static RoomInfo* getRoomInfo(INT nRoomID);
+    static _GimmickRoomInfo* getCurrentRoomGimmickInfo(); // PARTIAL: added for Game/Gimmick/GimmickManager
     static _MapEnemyRoomInfo* getCurrentRoomMapEnemyInfo(); // PARTIAL: added for Game/Enemy/MapEnemyManager
     static INT getRoomIndex(INT nRoomID); // PARTIAL: added for Form/Menu/MoogleShop
     static SHORT getCurrentSceneNum(); // PARTIAL: added for Game/Gimmick/GimmickRideOn

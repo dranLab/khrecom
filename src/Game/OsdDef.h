@@ -56,6 +56,7 @@ struct OBJ_FORMATION {
 
     OBJ_GROUP* getObjGroup(INT inCategory, INT inGroupNo);
     OBJ_GROUP* getEnemyGroup(INT inGroupNo) { return getObjGroup(OSD_CATEGORY_ENEMY, inGroupNo); }
+    OBJ_GROUP* getGimmickGroup(INT inGroupNo) { return getObjGroup(OSD_CATEGORY_GIMMICK, inGroupNo); } // PARTIAL: added for Game/Gimmick/GimmickManager
     void addrMapping(void* inBase) {
         for (UINT i = 0; i < OSD_CATEGORY_MAX; i++) {
             for (UINT j = 0; j < 16; j++) {

@@ -155,6 +155,7 @@ public:
     void rideModelSetAttachMatrix(const FMATRIX* inpMat); // PARTIAL: added for Game/Gimmick/GimmickRideOn
     // PARTIAL: added for Game/Enemy/MapEnemyShadow
     FLOAT calcDistanceSq(const CEntity* inEntity) const;
+    FLOAT calcDistanceSq(const CEntity& inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickManager
     TIMEQ getMotionTotalTime() const;
     BOOL arriveTarget(const FVECTOR& inTarget, FLOAT inRange);
     void clearSpeed();
@@ -237,5 +238,15 @@ public:
         m_iFadeModel = inModel;
     }
 };
+
+/* PARTIAL: added for Game/Gimmick/GimmickManager: the original header's random helpers (names unknown; lines
+ * from the debug info, their line notes decide the assembler's padding before a following division). */
+#include "System/Rnd.h"
+#line 574
+inline INT getRand() {
+    return RND::genrand_int31();
+}
+#line 581
+inline FLOAT getRandF() { return RND::genrand_real1(); }
 
 #endif /* GAME_ENTITY_H */
