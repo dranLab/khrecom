@@ -15,12 +15,16 @@ inline void _effectCheckValid(BOOL inValid) {
 }
 
 class CEntity; // PARTIAL: added for Game/Player/SummonGenie
+class CCoords; // PARTIAL: added for Game/Bullet/Bullet
 
 /* PARTIAL: added for Game/Player/SummonTink */
 class CEffect {
     FVECTOR m_vScale;    /* 0x00 */ // PARTIAL: split out for Game/Gimmick/GimmickTutorial
     FVECTOR m_vColor;    /* 0x10 */ // PARTIAL: split out for Game/EffectMotion
-    UBYTE _m_0x20[0x10]; /* 0x20 m_hHandle .. 0x2c m_eType */
+    // PARTIAL: split out for Game/Bullet/Bullet
+    HANDLE m_hHandle;    /* 0x20 */
+    CCoords* m_pCrds;    /* 0x24 */
+    UBYTE _m_0x28[0x8];  /* 0x28 m_pVecLst, m_eType */
 public:
     u_int m_iFlag;       /* 0x30 */
     UBYTE _m_0x34[0x4c]; /* 0x34 m_pData .. */
@@ -60,6 +64,7 @@ public:
     }
     void setLightCalc(BOOL bVal);
     void setSkipFrame(FLOAT fFrame);
+    CCoords* getCoords() { return m_pCrds; } // PARTIAL: added for Game/Bullet/Bullet
     void fadeout(FLOAT fTime);
     void setViewclip(BOOL bVal);
     BOOL isLoop();

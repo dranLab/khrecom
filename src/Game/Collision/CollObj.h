@@ -24,6 +24,27 @@ enum COLL_TYPE {
     COLL_TYPE_MODELW = 13
 };
 
+// PARTIAL: added for Game/Player/SummonGenie (moved here from Game/Bullet/Bullet.h for Game/Bullet/Bullet)
+enum COLL_KIND {
+    COLL_KIND_SHOT = -2147483647 - 1,
+    COLL_KIND_PLAYER = 0,
+    COLL_KIND_ENEMY = 2,
+    COLL_KIND_OBJECT = 4,
+    COLL_KIND_ITEM = 6,
+    COLL_KIND_PSHOT = -2147483647 - 1,
+    COLL_KIND_ESHOT = -2147483646,
+    COLL_KIND_OSHOT = -2147483644,
+    COLL_KIND_SHADOW = -2147483640,
+    COLL_KIND_FOOT = 10,
+    COLL_KIND_CAMERA = -2147483636,
+    COLL_KIND_CAMERAT = -2147483634,
+    COLL_KIND_BODY = 0,
+    COLL_KIND_ATTACK = 1,
+    COLL_KIND_NONE = -1,
+    COLL_KIND_CK_PE = 14,
+    COLL_KIND_CK_BA = 1
+};
+
 class CCollision {
 public:
     FVECTOR m_inWS;      /* 0x00 */
@@ -71,13 +92,20 @@ public:
     virtual void on() { m_Enable = 1; }
     virtual INT detectEtc();
     virtual void setKind(INT inKind);
-    virtual void init();
+    // PARTIAL: signature completed for Game/Bullet/Bullet (CCollAttack overrides it)
+    virtual void init(COLL_KIND inKind, COLL_TYPE inType, INT inFlag, INT inHandle);
 
     void setStartPos(const FVECTOR& inPos) {
         if (m_pCollision) m_pCollision->setStartPos(inPos);
     }
     void setEndPos(const FVECTOR& inPos) {
         if (m_pCollision) m_pCollision->setEndPos(inPos);
+    }
+    // PARTIAL: added for Game/Bullet/Bullet
+    INT isEnable() { return m_Enable; }
+    FVECTOR* getOutPos() {
+        if (m_pCollision) return &m_pCollision->m_outWE;
+        return 0;
     }
     FVECTOR* getDetectPos() {
         if (m_pCollision) return &m_pCollision->m_outDetect;

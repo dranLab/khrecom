@@ -4,6 +4,7 @@
 
 #include "khtypes.h"
 #include "System/Vector.h" // PARTIAL: added for Game/Enemy/MapEnemyShadow (setScale)
+#include "Game/Collision/CollObj.h" // PARTIAL: added for Game/Bullet/Bullet (COLL_KIND)
 
 class CEntity; // PARTIAL: added for Game/Enemy/MapEnemyShadow
 class CCollMap; // PARTIAL: added for Game/Player/SummonSinba
@@ -66,6 +67,15 @@ public:
     }
     void setWallRadius(FLOAT inRadius) { m_fWallRadius = inRadius; }
     void turnToTargetY(const FVECTOR& inTarget, FLOAT inRate); // PARTIAL: added for Game/Player/Summon
+    // PARTIAL: added for Game/Bullet/Bullet (m_vDetectNormal 0xa0)
+    void turnToTarget(const FVECTOR& inTarget, FLOAT inRate);
+    void homingMove(const FVECTOR& inTarget, FLOAT inRate, FLOAT inSpeed);
+    void setShiftY(FLOAT inShiftY);
+    FLOAT getRadius() const;
+    FLOAT getSpeed() const;
+    void enableSliding(INT inFlag);
+    void setCollKind(COLL_KIND inKind);
+    FVECTOR& getDetectNormal() { return *(FVECTOR*)&_m_0x00[0xa0]; }
 };
 
 // PARTIAL: added for Game/Player/SummonDumbo
