@@ -1,10 +1,4 @@
 #define GAME_BULLET_BULLET_CPP
-/* .rodata ends with unnamed copies of CVector<G_LINE>'s and CState's vtables. gcc's copies are only kept with these
- * lines in config/SLUS_217.99/symbol_addrs.txt:
- *     _vt$t7CVector1Z6G_LINE_004D87B0 = 0x004D87B0; // size:0x18
- *     _vt$6CState_004D87C8 = 0x004D87C8; // size:0x30
- * With them, set this to 1 (drops the asm stopgap at the end of the file). */
-#define BULLET_NAMED_VTABLE_COPIES 0
 #include "System/Task.h"
 #include "Game/Collision/CollUtil.h"
 
@@ -1172,13 +1166,4 @@ BOOL CHomingBullet::bound_() {
     return FALSE;
 }
 
-#if !BULLET_NAMED_VTABLE_COPIES
-/* Stopgap: the original's unnamed copies of CVector<G_LINE>'s and CState's vtables end .rodata. Their entries point
- * to the linker's first (global) definitions. */
-asm(".section .rodata.vtcopies\n"
-    "\t.align 3\n"
-    "\t.word 0, 0, 0, _$_t7CVector1Z6G_LINE, 0, 0\n"
-    "\t.word 0, 0, 0, _$_6CState, 0, __pure_virtual, 0, __pure_virtual, 0, __pure_virtual, 0, 0\n"
-    "\t.text\n");
-#endif
 // SOURCE DATA: .rodata

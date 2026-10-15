@@ -107,3 +107,7 @@ _vt$t12CSJointListT1Z12RcfSceneInfo_004D9490 = 0x004D9490; // size:0x18
 _vt$12RcfSceneInfo_004D94A8 = 0x004D94A8; // size:0x18
 _vt$4CFnt_004D94C0 = 0x004D94C0; // size:0x48
 _vt$t8CSJointT1Z12RcfSceneInfo_004D9870 = 0x004D9870; // size:0x18
+
+// Game/Bullet/Bullet: unnamed copies of CVector<G_LINE>'s and CState's vtables
+_vt$t7CVector1Z6G_LINE_004D87B0 = 0x004D87B0; // size:0x18
+_vt$6CState_004D87C8 = 0x004D87C8; // size:0x30
