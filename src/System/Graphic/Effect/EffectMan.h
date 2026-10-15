@@ -79,6 +79,7 @@ public:
                                const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inWait);
     static void killEffect(HANDLE inHandle, FLOAT inTime);
     static void killAll(ObjType::eObjBit inBit, FLOAT inTime); // PARTIAL: added for Game/Player/Summon
+    static void killAll(const CHAR* inName, FLOAT inTime); // PARTIAL: added for Game/Player/PlayerManager
 };
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_EFFECTMAN_H */

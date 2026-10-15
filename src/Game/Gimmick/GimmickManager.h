@@ -39,6 +39,7 @@ public:
     void changeTreasureBoxLock(BOOL inLock);
     CEntity* getDoor(DOOR_ID inID, FVECTOR* outPos, FVECTOR* outRot); // PARTIAL: added for Game/Gimmick/GimmickPlantParent
     BOOL getSavePointPos(FVECTOR& outPos); // PARTIAL: added for Form/Menu/SaveLoadUtil
+    void deleteAllGimmicks(); // PARTIAL: added for Game/Player/PlayerManager
 };
 
 #endif /* GAME_GIMMICK_GIMMICKMANAGER_H */
