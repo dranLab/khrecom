@@ -85,7 +85,9 @@ private:
     INT m_iMaxHP;                /* 0x324 */
     // PARTIAL: m_uiAttackID split out for Game/Player/FriendKing
     // PARTIAL: m_vCenterPos, m_vAppearPos, m_vJumpStartPos, m_hMark, m_vMarkPos split out for Game/Player/PlayerWeapon
-    UBYTE _m_0x328[0x78];        /* 0x328 .. 0x390 m_vWeaponTopPos */
+    UBYTE _m_0x328[0x24];        /* 0x328 m_iCP .. 0x348 m_uiStep */
+    INT m_iCount;                /* 0x34c */ // PARTIAL: split out for Game/Player/Friend
+    UBYTE _m_0x350[0x50];        /* 0x350 .. 0x390 m_vWeaponTopPos */
     FVECTOR m_vCenterPos;        /* 0x3a0 */
     UBYTE _m_0x3b0[0x14];        /* 0x3b0 m_vStartPos, 0x3c0 m_fStartDir */
     FLOAT m_fDir;                /* 0x3c4 */ // PARTIAL: split out for Game/Player/SummonCloud
@@ -123,6 +125,7 @@ public:
     INT isConditionFlag(UINT inFlag) { return m_uiConditionFlag & inFlag; }
     UINT getAttackID() { return m_uiAttackID; }
     void setCure(INT inID, INT inPow);
+    INT getCount() { return m_iCount; } // PARTIAL: added for Game/Player/Friend
     INT isBattleFlag(UINT inFlag) { return m_uiBattleFlag & inFlag; } // PARTIAL: added for Game/Player/SummonMushu
     // PARTIAL: added for Game/Player/FriendDonald
     PlayerWeapon::CPlayerWeapon* getWeapon() { return m_pWeapon; }

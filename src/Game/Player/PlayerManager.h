@@ -21,6 +21,7 @@ INT getWorldRotY(FLOAT& outRotY, const FMATRIX& inMat);
 // PARTIAL: added for Game/Player/PlayerWeapon
 extern UINT g_uiPlayerRcid[7];
 extern UINT g_uiSummonRcid[8]; // PARTIAL: added for Game/Player/Summon
+extern UINT g_uiFriendRcid[14]; // PARTIAL: added for Game/Player/Friend
 
 class CPlayerManager : public CTask {
 private:
@@ -29,6 +30,8 @@ private:
     CPlayer* m_pPlayer;         /* 0x044 */ // PARTIAL: split out for Game/Player/Summon
     UBYTE _m_0x48[0x4];         /* 0x048 m_pPlayerEx */
     Friend::CFriend* m_pFriend; /* 0x04c */
+    UBYTE _m_0x50[0x8];         /* 0x050 m_pFriendEx, m_pSummon */ // PARTIAL: added for Game/Player/Friend
+    UINT m_uiFlag;              /* 0x058 */
 
 public:
     CPlayerManager();
@@ -38,6 +41,9 @@ public:
     // PARTIAL: added for Game/Player/Summon
     CPlayer* getPlayer() const { return m_pPlayer; }
     void notifySummon(Summon::CSummon* inSummon, INT inFlag);
+    // PARTIAL: added for Game/Player/Friend
+    void notifyFriend(Friend::CFriend* inFriend, INT inFlag, INT inEx);
+    UINT getFlag() const { return m_uiFlag; }
 };
 }
 

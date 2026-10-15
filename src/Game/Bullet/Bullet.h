@@ -100,6 +100,7 @@ public:
     HANDLE getOwner() const { return m_hOwner; } // PARTIAL: added for Game/Bullet/BulletManager
     void kill();                                 // PARTIAL: added for Game/Bullet/BulletManager
     UINT getAttackID() const;                    // PARTIAL: added for Game/Player/FriendDonald
+    void setAttackID(UINT inID);                 // PARTIAL: added for Game/Player/Friend
     void setBodyRadius(FLOAT inRadius, FLOAT inShiftY, INT inSliding, COLL_KIND inKind); // PARTIAL: added for Game/Player/SummonGenie
 
     void setOwner(CEntity* inOwner) {
