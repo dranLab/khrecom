@@ -25,6 +25,9 @@ union FVECTOR {
         z = inZ;
         w = inW;
     }
+    // PARTIAL: added for Form/Menu/Camp
+    void setAll(FLOAT f) { x = y = z = w = f; }
+    void setAllXYZ(FLOAT f) { x = y = z = f; }
     // PARTIAL: added for Game/Player/FriendAriel
     void init() {
         _q = 0;

@@ -59,6 +59,15 @@ public:
     static BOOL addCard(USHORT inID, SHORT inNumber);        // PARTIAL: added for Form/Menu/Roulette
     static BOOL deleteCard(USHORT inID, SHORT inNumber);     // PARTIAL: added for Form/Menu/RoomCreation
     static void setDeckName(INT inDeck, const CHAR* inpName); // PARTIAL: added for Form/Menu/DecknameEdit
+    static INT removeDeck(USHORT inDeck, SHORT inIdx);       // PARTIAL: added for Form/Menu/Camp
+    static BOOL getAttribute(CARD inCard, const CHAR** ppAttack, const CHAR** ppAttribute, const CHAR** ppSpeed, const CHAR** ppHelp); // PARTIAL: added for Form/Menu/Camp
+    static INT getCP(CARD inCard);                           // PARTIAL: added for Form/Menu/Camp
+    static INT searchDeck(CARD inCard, USHORT inDeck, SHORT inStart); // PARTIAL: added for Form/Menu/Camp
+    static INT getShortCut(USHORT inDeck);                   // PARTIAL: added for Form/Menu/Camp
+    static void clearShortCut(USHORT inDeck);                // PARTIAL: added for Form/Menu/Camp
+    static void setShortCut(USHORT inDeck, USHORT inIdx);    // PARTIAL: added for Form/Menu/Camp
+    static void clearDeck(USHORT inDeck);                    // PARTIAL: added for Form/Menu/Camp
+    static void packDeck(USHORT inDeck);                     // PARTIAL: added for Form/Menu/Camp
     static CARD_INFO* m_pCardInfo;         // PARTIAL: added for Form/Menu/Roulette (private in the original)
 #ifdef GAME_SCENEINFO_H
     static void initCard(USHORT nDeck, WORLD_ID nWorld, SHORT nFloor); // PARTIAL: added for Form/DebugMenu

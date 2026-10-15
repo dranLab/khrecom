@@ -50,6 +50,7 @@ public:
     static INT getEXP() { return _info()->EXP; }
     static INT getLV() { return _info()->LV; }
     static void setLV(INT n) { _info()->LV = n; }
+    static INT getMP() { return _info()->MP; } // PARTIAL: added for Form/Menu/Camp
     static INT getLvExp(UINT nLv);
     static BOOL isLevelUp();
 #ifdef GAME_SCENEINFO_H
