@@ -24,7 +24,9 @@
       "Bash(git switch -c:*)",
       "Bash(git branch --list:*)",
       "Bash(git worktree list:*)",
-      "Bash(git rev-parse:*)"
+      "Bash(git rev-parse:*)",
+      "Edit(config/SLUS_217.99/symbol_addrs.txt)",
+      "Bash(git checkout -- config/SLUS_217.99/symbol_addrs.txt:*)"
     ]
   }
 }

@@ -53,6 +53,15 @@ Its report and completion notification wake you. In the main checkout:
    `worktree-agent-*` branch. If not: `git merge --abort`, keep the branch for review and tell the user.
 3. Handle small follow-ups the worker reported (shared headers, `include/khtypes.h`) if cheap; each such change
    passes `tools/check.sh` and gets its own commit. Changes to `configure.py` or `tools/` need the user's OK.
+   - **`config/SLUS_217.99/symbol_addrs.txt` follow-ups are pre-approved by the user** (no need to ask): when a
+     worker reports that its unit only matches with its data from source once an unnamed weak copy is named
+     (e.g. `_$_6CState_<addr>` / `_vt$6CState_<addr>`), add those lines as a commented block for the unit, switch
+     the unit to its full-source variant (the worker's macro to 1, the `#if` branches resolved, the
+     `// SOURCE DATA:` line added), `touch` the source, and run the full `tools/check.sh`. It rebuilds and
+     checksums the whole image, so it also proves no already matched unit changed. Commit only if it exits 0
+     and `tools/funcdiff.py <unit>` shows every function MATCH. If another unit breaks, fix that unit the same
+     way (name its copy, keep its source matching) until the gate passes again, or revert the follow-up
+     (`git checkout -- config/SLUS_217.99/symbol_addrs.txt src/<unit>.*`) and report it.
 4. Refill the slot (sections 2 and 3) right away, then report the merge in a few lines: merged or not,
    functions matched/total, data from source or not, open issues.
 
