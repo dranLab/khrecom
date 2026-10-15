@@ -1,4 +1,3 @@
-// PARTIAL: added for Game/Player/FriendAladdin
 #ifndef GAME_PLAYER_FRIEND_H
 #define GAME_PLAYER_FRIEND_H
 
@@ -7,13 +6,31 @@
 #include "System/Vector.h"
 #include "Game/Entity.h"
 #include "System/PadHandler.h"
+#include "System/Fsm.h"
 
 class CPlayer;
 struct PATK_DATA;
 
 namespace Friend {
 
+/* Flag updates fold ~inMask at the RTL level (li -0x4001, not lui/ori 0xffffbfff): an inline function. */
+static inline void _setFlag(UINT& ioFlag, UINT inSet, UINT inMask) {
+    UINT flag = ioFlag;
+    ioFlag = (flag | inSet) & ~inMask;
+}
+
 class CFriend : public CEntity, public CPadHandler {
+public:
+    enum {
+        STATE_APPEAR = 0,
+        STATE_MAIN = 1,
+        STATE_ACTION1 = 2,
+        STATE_ACTION2 = 3,
+        STATE_ACTION3 = 4,
+        STATE_EXIT = 5,
+        STATE_MAX = 6
+    };
+
 protected:
     UINT m_uiCharaID;           /* 0x1e0 */
     UINT m_uiRCID;              /* 0x1e4 */
@@ -47,16 +64,21 @@ protected:
     INT m_iSubState;            /* 0x274 */
     UINT m_uiFlag;              /* 0x278 */
 public:
-    UBYTE m_State[6][0x20];     /* 0x27c CStateTemplate<Friend::CFriend>[6] */
+    CStateTemplate<CFriend> m_State[STATE_MAX]; /* 0x27c */
     INT m_iState;               /* 0x33c */
+private:
+    static void (CFriend::*m_pBeginStateTbl[STATE_MAX])();
+    static void (CFriend::*m_pStateTbl[STATE_MAX])();
+    static void (CFriend::*m_pEndStateTbl[STATE_MAX])();
 
 public:
     CFriend(CTask* inParent, INT inID, INT inEx);
     virtual ~CFriend();
+    BOOL initalize();
     void changeState(INT inState);
+    INT getCurrentState() { return m_iState; }
     void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo, INT inActNo);
 protected:
-    virtual void getCameraTargetPos(FVECTOR& outPos);
     virtual void updateBefore();
     virtual void updateAfter();
     virtual void lastUpdate();
@@ -66,33 +88,62 @@ protected:
     virtual void beginStateMain();
     virtual void stateMain();
     virtual void endStateMain();
-    virtual void beginStateAction1();
-    virtual void stateAction1();
-    virtual void endStateAction1();
-    virtual void beginStateAction2();
-    virtual void stateAction2();
-    virtual void endStateAction2();
-    virtual void beginStateAction3();
-    virtual void stateAction3();
-    virtual void endStateAction3();
+    virtual void beginStateAction1() {}
+    virtual void stateAction1() {}
+    virtual void endStateAction1() {}
+    virtual void beginStateAction2() {}
+    virtual void stateAction2() {}
+    virtual void endStateAction2() {}
+    virtual void beginStateAction3() {}
+    virtual void stateAction3() {}
+    virtual void endStateAction3() {}
     virtual void beginStateExit();
     virtual void stateExit();
     virtual void endStateExit();
+    virtual void getCameraTargetPos(FVECTOR& outPos);
     void homingPlayerTargetY(HANDLE inTarget, FLOAT inRate);
+    void setMagic(INT inID);
     INT getPower(INT inSkillID, INT inKind);
     void getWeaponTopPos(FVECTOR& inPos);
-    void setMagic(INT inID); // added for Game/Player/FriendJack
+    void calcCirclePos(FVECTOR& outPos, FLOAT inRadius, FLOAT inDir);
     void changeCamera(HANDLE inTarget, INT inMode, INT inReset);
-    void calcCirclePos(FVECTOR& outPos, FLOAT inDist, FLOAT inRot); // PARTIAL: added for Game/Player/FriendPluto
-    void setLockon(HANDLE inHandle); // PARTIAL: added for Game/Player/FriendPan
-    void setPushon(INT inFlag);      // PARTIAL: added for Game/Player/FriendPan
-    // PARTIAL: added for Game/Player/FriendAriel
-    INT entryChainTrg(INT inNum);
+    void setLockon(HANDLE inHandle);
+    void setPushon(INT inFlag);
+    INT entryChainTrg(INT inMode);
     INT checkChainTrg();
     INT isSucceedChain();
+    void resetLockon();
+    void killChild(FLOAT inFadeTime);
+private:
+    void beginStateAppear_();
+    void stateAppear_();
+    void endStateAppear_();
+    void beginStateMain_();
+    void stateMain_();
+    void endStateMain_();
+    void beginStateAction1_();
+    void stateAction1_();
+    void endStateAction1_();
+    void beginStateAction2_();
+    void stateAction2_();
+    void endStateAction2_();
+    void beginStateAction3_();
+    void stateAction3_();
+    void endStateAction3_();
+    void beginStateExit_();
+    void stateExit_();
+    void endStateExit_();
+    void initFSM_();
 public:
+    UINT getRCID() const { return m_uiRCID; }
+    void setAppear();
     void setExit(INT inFlag);
     virtual INT setSkill(INT inID);
+    CEntity* getTarget();
+    INT isCombo() { return m_uiFlag & 0x1000; }
+    void setSuccess() { _setFlag(m_uiFlag, 0x4000, 0x8000); }
+    void setFailed() { _setFlag(m_uiFlag, 0x8000, 0x4000); }
+    void setBodyRviseCoefficient(FLOAT inValue) { m_fBodyRviseCoefficient = inValue; }
 };
 
 } // namespace Friend

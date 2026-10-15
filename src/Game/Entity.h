@@ -170,6 +170,7 @@ public:
     void userBodyCollOff(INT inIndex);
     void userBodyCollOffBody(INT inIndex);
     HANDLE setAppearEffect();
+    HANDLE setDisappearEffect(); // PARTIAL: added for Game/Player/Friend
     // PARTIAL: added for Game/Gimmick/GimmickDominoPillar
     void setNearTranslucence(FLOAT inTrans) { m_fNearTranslucence = inTrans; }
     FLOAT getNearTranslucence() const { return m_fNearTranslucence; }
