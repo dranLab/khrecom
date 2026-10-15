@@ -38,6 +38,10 @@ if ninja > build.ninja.log 2>&1; then
     echo "OK: the rebuilt image matches the original"
 else
     grep -E "^FAILED|: [Ee]rror|[Ee]rror:|did NOT match" build.ninja.log | head -20
+    if grep -q "did NOT match" build.ninja.log; then
+        echo "-- where the image differs (tools/imagediff.py):"
+        $PY tools/imagediff.py -n 5
+    fi
     echo "FAIL: see build.ninja.log"
     status=1
 fi
