@@ -25,6 +25,9 @@ class CAttackMotion : public CAttachMotion { // PARTIAL: base CAttachMotion adde
 public:
     CAttackMotion(CEntity* inOwner); // PARTIAL: added for Game/EffectMotion (CAttachMotion has no default constructor)
     void setCollKind(INT inKind);
+    // PARTIAL: added for Game/Player/Summon
+    virtual BOOL set(INT inIndex);
+    BOOL set(INT inIndex, INT inActNo);
     void setAttackParam(INT inAttack, ATK_ATTR inAttr); // PARTIAL: added for Game/Gimmick/GimmickGuillotine
     void updateAttackID(); // PARTIAL: added for Game/Gimmick/GimmickHitRepetition
     BOOL test(); // PARTIAL: added for Game/Gimmick/GimmickHitFlying

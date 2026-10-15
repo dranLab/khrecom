@@ -65,11 +65,13 @@ public:
         setRadius(inRadius);
     }
     void setWallRadius(FLOAT inRadius) { m_fWallRadius = inRadius; }
+    void turnToTargetY(const FVECTOR& inTarget, FLOAT inRate); // PARTIAL: added for Game/Player/Summon
 };
 
 // PARTIAL: added for Game/Player/SummonDumbo
 namespace Movement {
 FLOAT Approach(FLOAT inA0, FLOAT inA1, FLOAT inRate, FLOAT inFrameRate);
+FLOAT Homing(FLOAT inA0, FLOAT inA1, FLOAT inRate, FLOAT inFrameRate); // PARTIAL: added for Game/Player/Summon (parameter names guessed)
 }
 
 #endif /* GAME_MOVEMENT_H */
