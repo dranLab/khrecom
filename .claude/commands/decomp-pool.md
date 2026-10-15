@@ -19,7 +19,9 @@ replacement right away, so the pool stays at the requested size (default 3).
 
 Each time a slot is free, first the **usage gate**: `python3 .claude/usage_gate.py --running <workers still
 running> --per-worker <estimate>` (needs the status line `~/.claude/statusline.py`, which saves the plan's usage to
-`~/.claude/usage-latest.json`). On `WAIT`, start nothing: tell the user in one line and leave the slot empty (see
+`~/.claude/usage-latest.json`; it only refreshes when the UI redraws, so while the session idles the gate estimates
+from the last reading plus the workers started since, per the `start` lines in `build/usage.log`: always log them as
+`<HH:MM> <5h %> <running> start <unit>`). On `WAIT`, start nothing: tell the user in one line and leave the slot empty (see
 section 5). The estimate is the 5-hour-window % one worker uses: start with 8; append
 `<time> <5h %> <running> <event>` to `build/usage.log` at every start and finish, and once a few workers have
 finished, use the observed average.
