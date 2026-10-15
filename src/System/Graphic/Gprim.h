@@ -95,6 +95,12 @@ struct G_RGBA {
         b = _b;
         a = _a;
     }
+    // PARTIAL: added for System/Movie/MSVideo
+    void set(UBYTE _r, UBYTE _g, UBYTE _b) {
+        r = _r;
+        g = _g;
+        b = _b;
+    }
 };
 
 // PARTIAL: added for Game/NowLoading
