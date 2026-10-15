@@ -852,9 +852,9 @@ INT CRoulette::menuMain() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Roulette", setCardInfo__9CRoulettei);
 // setCardInfo's string literals and static tables (the end of .rodata / .data), for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n.align 3\n.globl D_004F1950\nD_004F1950:\n.asciz \"%02d\"\n"
-    ".align 3\n.globl D_004F1958\nD_004F1958:\n.asciz \"c:/KHCOM/MainApp/Form/Menu/Roulette.cpp(693)\"\n"
-    ".align 3\n.globl D_004F1988\nD_004F1988:\n.asciz \"c:/KHCOM/MainApp/Form/Menu/Roulette.cpp(722)\"\n"
+asm(".section .rodata\n.align 3\n.asciz \"%02d\"\n"
+    ".align 3\n.asciz \"c:/KHCOM/MainApp/Form/Menu/Roulette.cpp(693)\"\n"
+    ".align 3\n.asciz \"c:/KHCOM/MainApp/Form/Menu/Roulette.cpp(722)\"\n"
     ".section .data\n.align 1\nmapKindTbl.4603:\n.short 161, 172, 172, 179, 179, 185\n"
     ".align 3\nnumSeqTbl.4604:\n.short 50, 50, 50, 50, 51, 48, 48, 48, 48, 49, 46, 46, 46, 46, 47\n.previous");
 
