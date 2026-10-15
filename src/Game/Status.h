@@ -52,6 +52,9 @@ public:
     static void setLV(INT n) { _info()->LV = n; }
     static INT getLvExp(UINT nLv);
     static BOOL isLevelUp();
+#ifdef GAME_SCENEINFO_H
+    static void initStatus(USHORT nDeck, WORLD_ID nWorld, SHORT nFloor); // PARTIAL: added for Form/DebugMenu
+#endif
 };
 
 #endif /* GAME_STATUS_H */
