@@ -1102,13 +1102,4 @@ void CMemocaDataEntries::useOneSavableUnit(UINT nIndex) {
     }
 }
 
-
-/* STOPGAP: the original object holds an unnamed copy of CBuf's vtable (0x4F6020) after its own; gcc emits it here
- * as weak data, but tools/ee_asm_compat.py drops it unless config/SLUS_217.99/symbol_addrs.txt names the copy
- * (_vt$4CBuf_004F6020). Until then its bytes are spelled out here, in a section of their own that the linker places
- * after .rodata (gcc emits vtables last); delete this once the entry exists. */
-extern char _CBuf_dtor[] asm("_$_4CBuf");
-extern void* const _SaveLoadUtil_vtcopies[8];
-void* const _SaveLoadUtil_vtcopies[8] __attribute__((section(".rodata.vtcopy"))) = {0, 0, 0, _CBuf_dtor, 0, 0, 0, 0};
-
 // SOURCE DATA: .data .rodata .bss
