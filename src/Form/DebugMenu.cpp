@@ -221,70 +221,13 @@ namespace {
 USER s_DebugUser = USR_SYSTEM;
 }
 
-static CHAR* s_pszWorldNameTbl[14] = {
-    "",
-    "\x83g\x83\x89\x83\x94\x83@\x81[\x83X\x83^\x83" "E\x83\x93",
-    "\x83" "A\x83O\x83\x89\x83o\x81[",
-    "\x83I\x83\x8a\x83\x93\x83|\x83X\x83R\x83\x8d\x83V\x83" "A\x83\x80",
-    "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h",
-    "\x83\x82\x83\x93\x83X\x83g\x83\x8d",
-    "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93",
-    "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J",
-    "\x83l\x83o\x81[\x83\x89\x83\x93\x83h",
-    "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93",
-    "100\x83G\x81[\x83J\x81[\x82\xcc\x83\x82\x83\x8a",
-    "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g\x83^\x83" "E\x83\x93",
-    "\x83" "f\x83X\x83" "e\x83" "B\x83j\x81[\x83" "A\x83" "C\x83\x89\x83\x93\x83h",
-    "\x83{\x83" "E\x83L\x83\x83\x83N\x82\xcc\x83V\x83\x8d",
-};
-
-static CHAR* s_pszWorldPrefixTbl[14] = {
-    "", "tr", "ag", "ol", "wo", "mo", "ha", "at", "ne", "ho", "po", "tw", "de", "ca",
-};
-
-static CHAR* s_pszSelectMode[3] = {
-    "\x83V\x81[\x83\x93" "de\x83Z\x83\x8c\x83N\x83g",
-    "\x83}\x83" "b\x83vde\x83Z\x83\x8c\x83N\x83g",
-    "\x83\x8b\x81[\x83\x80" "de\x83Z\x83\x8c\x83N\x83g",
-};
-
-static CHAR* s_pszAppTable[22] = {
-    "GAME  - Sora -",
-    "GAME  - Riku -",
-    "\x83L\x83V\x83\x8f\x83_ \x83" "e\x83X\x83g",
-    "\x83L\x83N\x83` \x83" "e\x83X\x83g",
-    "\x83S\x83g\x83" "E \x83" "e\x83X\x83g",
-    "\x83R\x83" "E \x83" "e\x83X\x83g",
-    "\x83i\x83J\x83~\x83` \x83" "e\x83X\x83g",
-    "\x83}\x83" "c\x83I\x83J \x83" "e\x83X\x83g",
-    "\x83J\x83^\x83I\x83J \x83" "e\x83X\x83g",
-    "\x83J\x83n\x83\x89 \x83" "e\x83X\x83g",
-    "\x83i\x83J\x83V\x83} \x83" "e\x83X\x83g",
-    "SCREEN CHECK",
-    "COLOR CHECK",
-    "\x83}\x83" "b\x83v\x83r\x83\x85\x81[\x83" "A\x81[",
-    "\x83\x82\x83" "f\x83\x8b\x83r\x83\x85\x81[\x83" "A\x81[",
-    "EFFECT VIEWER",
-    "\x83R\x83\x8a\x83W\x83\x87\x83\x93\x83G\x83" "f\x83" "B\x83^",
-    "\x83n\x83" "C\x83`\x83G\x83" "f\x83" "B\x83^",
-    "2D VIEWER",
-    "ATTACH EDITOR",
-    "FONT VIEWER",
-    "MOVIE VIEWER",
-};
-
-static CHAR* s_pszLocale[7] = {
-    "JP\x83j\x83z\x83\x93",
-    "US\x83" "A\x83\x81\x83\x8a\x83J",
-    "UK\x83" "C\x83M\x83\x8a\x83X",
-    "FR\x83t\x83\x89\x83\x93\x83X",
-    "SP\x83X\x83y\x83" "C\x83\x93",
-    "GE\x83h\x83" "C\x83" "c",
-    "IT\x83" "C\x83^\x83\x8a\x83" "A",
-};
-
-static CHAR* s_pszThisMenu[2] = {"KEEP", "RELOAD"};
-static CHAR* s_pszLoadMark[2] = {"ON", "OFF"};
+static CHAR* s_pszWorldNameTbl[];
+static CHAR* s_pszWorldPrefixTbl[];
+static CHAR* s_pszSelectMode[];
+static CHAR* s_pszAppTable[];
+static CHAR* s_pszLocale[];
+static CHAR* s_pszThisMenu[];
+static CHAR* s_pszLoadMark[];
 
 static CHAR* s_pszMenuItem[3][10] = {
     {s_pszUser, s_pszApp, s_pszMode, s_pszFloor, s_pszWorld, s_pszScene, s_pszTitle, s_pszAtel, s_pszMenu, s_pszLMark},
@@ -398,14 +341,10 @@ void CDebugMenu::disp() {
     m_pL->disp();
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugMenu", initParam__10CDebugMenui);
-#if 0
 // store 0x38 (_nRoomIndex) is scheduled early instead of into the jr delay slot
 void CDebugMenu::initParam(INT nLocale) {
     DebugParam& p = s_Param;
     p._nUserIndex = 0;
-    p._nLocale = nLocale;
-    p._nSceneIndexInRoom = 0;
     p._nAppIndex = 0;
     p._nSelectIndex = 0;
     p._nAreaIndex = 0;
@@ -416,6 +355,7 @@ void CDebugMenu::initParam(INT nLocale) {
     p._nMapToAreaIndex = 0;
     p._nFloorIndex = 0;
     p._nAtelNo = 0;
+    p._nLocale = nLocale;
     p._nThisMenu = 0;
     p._nLoadingMark = 0;
     p._iDispCounter = 0;
@@ -423,8 +363,8 @@ void CDebugMenu::initParam(INT nLocale) {
     p._iDagameNumber = 0;
     p._iEffect = 0;
     p._nRoomIndex = 0;
+    p._nSceneIndexInRoom = 0;
 }
-#endif
 
 BOOL CDebugMenu::startLoadFromMemoca() {
     return CMemoca::reqLoad(s_Param);
@@ -776,9 +716,6 @@ template <class T> static inline T* _sjNext(T* p) {
     return p ? p->getNext() : NULL;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugMenu", _getAreaSceneIndex__C15CDebugMenuLocalPCt12CSJointListT1Z12RcfSceneInfo);
-#if 0
-// loop: next pointer computed straight into __pn instead of a temp copied in the delay slot
 INT CDebugMenuLocal::_getAreaSceneIndex(const RcfSceneInfoList* pList) const {
     if (!pList) {
         return CRcf::getSceneInfoIndex(s_Param._nArea, s_Param._nScene);
@@ -786,8 +723,8 @@ INT CDebugMenuLocal::_getAreaSceneIndex(const RcfSceneInfoList* pList) const {
     INT i = 0;
     RcfSceneInfo* p;
     RcfSceneInfo* __pn;
-    for (p = ((RcfSceneInfoList*)pList)->getHead(), __pn = p ? p->getNext() : NULL; p;
-         p = __pn, __pn = p ? p->getNext() : NULL) {
+    for (p = ((RcfSceneInfoList*)pList)->getHead(), __pn = p ? p->getNext() : NULL; p != NULL;
+         __pn = ((p = __pn) != NULL ? p->getNext() : NULL)) {
         if (p->_nGroup == s_Param._nArea && p->_nMember == s_Param._nScene) {
             return i;
         }
@@ -795,7 +732,6 @@ INT CDebugMenuLocal::_getAreaSceneIndex(const RcfSceneInfoList* pList) const {
     }
     return -1;
 }
-#endif
 
 INT CDebugMenuLocal::_getMapIndex(INT& nOutMapToAreaIdx) const {
     SHORT nIdx = CRcf::getMapInfoIndex(s_Param._nGroup, s_Param._nMember);
@@ -1385,7 +1321,7 @@ void CDebugMenuLocal::_updateAreaName() {
         if (s_Param._nSelectIndex == 2) {
             nArea = _getWorldNumOnFloor();
         }
-        strcat(s_szArea, " ");
+        strcat(s_szArea, "  ");
         strcat(s_szArea, s_pszWorldNameTbl[nArea]);
     }
     if (pszFloor) {
@@ -1541,7 +1477,8 @@ void CDebugMenuLocal::_launchApp(INT nSelApp) {
         CSceneInfo::initFloor(s_Param._nFloorIndex, startWorld);
         CSceneInfo::setupCompleteFloorWorld(w);
         RoomInfo* p = bStart ? NULL : CSceneInfo::getRoomInfo(nRoomID);
-        ASSERT_LINE(1848, _getFloorDataSrc(TRUE));
+        FloorLayout* pSrc = _getFloorDataSrc(TRUE);
+        ASSERT_LINE(1848, pSrc);
         if (p && p->_pSrcInfo) {
             INT id = -1;
             switch (p->_pSrcInfo->_nRoomType) {
@@ -1962,5 +1899,70 @@ static BOOL _menuUpDown_LoadMark() {
     }
     return FALSE;
 }
+
+static CHAR* s_pszWorldNameTbl[14] = {
+    "",
+    "\x83g\x83\x89\x83\x94\x83@\x81[\x83X\x83^\x83" "E\x83\x93",
+    "\x83" "A\x83O\x83\x89\x83o\x81[",
+    "\x83I\x83\x8a\x83\x93\x83|\x83X\x83R\x83\x8d\x83V\x83" "A\x83\x80",
+    "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h",
+    "\x83\x82\x83\x93\x83X\x83g\x83\x8d",
+    "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93",
+    "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J",
+    "\x83l\x83o\x81[\x83\x89\x83\x93\x83h",
+    "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93",
+    "100\x83G\x81[\x83J\x81[\x82\xcc\x83\x82\x83\x8a",
+    "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g\x83^\x83" "E\x83\x93",
+    "\x83" "f\x83X\x83" "e\x83" "B\x83j\x81[\x83" "A\x83" "C\x83\x89\x83\x93\x83h",
+    "\x83{\x83" "E\x83L\x83\x83\x83N\x82\xcc\x83V\x83\x8d",
+};
+
+static CHAR* s_pszWorldPrefixTbl[14] = {
+    "", "tr", "ag", "ol", "wo", "mo", "ha", "at", "ne", "ho", "po", "tw", "de", "ca",
+};
+
+static CHAR* s_pszSelectMode[3] = {
+    "\x83V\x81[\x83\x93" "de\x83Z\x83\x8c\x83N\x83g",
+    "\x83}\x83" "b\x83vde\x83Z\x83\x8c\x83N\x83g",
+    "\x83\x8b\x81[\x83\x80" "de\x83Z\x83\x8c\x83N\x83g",
+};
+
+static CHAR* s_pszAppTable[22] = {
+    "GAME  - Sora -",
+    "GAME  - Riku -",
+    "\x83L\x83V\x83\x8f\x83_ \x83" "e\x83X\x83g",
+    "\x83L\x83N\x83` \x83" "e\x83X\x83g",
+    "\x83S\x83g\x83" "E \x83" "e\x83X\x83g",
+    "\x83R\x83" "E \x83" "e\x83X\x83g",
+    "\x83i\x83J\x83~\x83` \x83" "e\x83X\x83g",
+    "\x83}\x83" "c\x83I\x83J \x83" "e\x83X\x83g",
+    "\x83J\x83^\x83I\x83J \x83" "e\x83X\x83g",
+    "\x83J\x83n\x83\x89 \x83" "e\x83X\x83g",
+    "\x83i\x83J\x83V\x83} \x83" "e\x83X\x83g",
+    "SCREEN CHECK",
+    "COLOR CHECK",
+    "\x83}\x83" "b\x83v\x83r\x83\x85\x81[\x83" "A\x81[",
+    "\x83\x82\x83" "f\x83\x8b\x83r\x83\x85\x81[\x83" "A\x81[",
+    "EFFECT VIEWER",
+    "\x83R\x83\x8a\x83W\x83\x87\x83\x93\x83G\x83" "f\x83" "B\x83^",
+    "\x83n\x83" "C\x83`\x83G\x83" "f\x83" "B\x83^",
+    "2D VIEWER",
+    "ATTACH EDITOR",
+    "FONT VIEWER",
+    "MOVIE VIEWER",
+};
+
+static CHAR* s_pszLocale[7] = {
+    "JP\x83j\x83z\x83\x93",
+    "US\x83" "A\x83\x81\x83\x8a\x83J",
+    "UK\x83" "C\x83M\x83\x8a\x83X",
+    "FR\x83t\x83\x89\x83\x93\x83X",
+    "SP\x83X\x83y\x83" "C\x83\x93",
+    "GE\x83h\x83" "C\x83" "c",
+    "IT\x83" "C\x83^\x83\x8a\x83" "A",
+};
+
+static CHAR* s_pszThisMenu[2] = {"KEEP", "RELOAD"};
+static CHAR* s_pszLoadMark[2] = {"ON", "OFF"};
 
 // SOURCE DATA: .data .rodata .bss
