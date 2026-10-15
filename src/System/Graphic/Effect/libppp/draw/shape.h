@@ -1,10 +1,41 @@
-// PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppDrawShape
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_DRAW_SHAPE_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_DRAW_SHAPE_H
 
 #include "System/Graphic/Effect/libppp/pppPart.h"
 
-typedef struct tagOSHAPE_VU1 OSHAPE_VU1;
+typedef struct tagOSPRITE_VU1 { /* 0x10 */
+    short x0;
+    short y0;
+    short x3;
+    short y3;
+    short s;
+    short t;
+    short w;
+    short h;
+} OSPRITE_VU1;
+
+typedef struct tagOSPRITE_VU1A { /* 0x8 */
+    u_char r;
+    u_char g;
+    u_char b;
+    u_char a;
+    u_char alpha;
+    u_char alphafix;
+    u_char alphacode;
+    u_char pal;
+} OSPRITE_VU1A;
+
+typedef struct tagOSHAPE_VU1 { /* 0x30 */
+    short flag;
+    short counter;
+    word spvu1a;
+    u_char timposx;
+    char res[7];
+    word tex0_l;
+    word tex0_h;
+    word res2[2];
+    OSPRITE_VU1 spvu1[1];
+} OSHAPE_VU1;
 
 typedef struct { /* 0x30 */
     u_short id;
@@ -50,6 +81,7 @@ typedef struct { /* 0x70 */
     sceVu0FMATRIX mat;
 } OSHAPE_IN_VU1;
 
+void pppInitVu1ShapeProg(void);
 void pppStartVu1ShapeProg(int fog);
 void pppVu1ShapeDraw(OSHAPE_VU1 *sh, OSHAPE_IN_VU1 *vu1shi);
 void *pppGetVu1DrawSpad0(void);
