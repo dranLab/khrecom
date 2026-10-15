@@ -31,4 +31,19 @@ typedef struct { /* 0x90 */
 extern OS_GS2_REGISTER os_gs2_register;
 extern sceDmaChan *oa_dmagif;
 
+/* PARTIAL: added for System/Graphic/Effect/libppp/partMng */
+typedef struct { /* 0x20 */
+    u_word poly4_c;
+    u_word poly3_c;
+    u_word shape_c;
+    u_word shaper_c;
+    u_word poly4d_c;
+    u_word poly3d_c;
+    u_word shaped_c;
+    u_word shaperd_c;
+} OS_DEBUG_DRAW;
+
+extern OS_DEBUG_DRAW os_debug_draw;
+/* end PARTIAL partMng */
+
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_DRAW_DRAW_W_H */
