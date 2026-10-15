@@ -1,15 +1,4 @@
 #define GAME_PLAYER_PLAYERCAMERA_CPP
-/* .rodata ends with unnamed copies of CVector<G_LINE>'s and CState's vtables, then the debug window titles (strings of
- * the static initialization). gcc's vtable copies are only kept with these lines in config/SLUS_217.99/symbol_addrs.txt:
- *     __getSize__t7CVector1Z6G_LINEi_0027B5C8 = 0x0027B5C8; // type:func size:0x18
- *     __alloc__t7CVector1Z6G_LINEi_0027B5E0 = 0x0027B5E0; // type:func size:0xE0
- *     _$_6CState_0027BD10 = 0x0027BD10; // type:func size:0x30
- *     _$_t7CVector1Z6G_LINE_0027BE28 = 0x0027BE28; // type:func size:0x8C
- *     _vt$t7CVector1Z6G_LINE_004A1628 = 0x004A1628; // size:0x18
- *     _vt$6CState_004A1640 = 0x004A1640; // size:0x30
- * With them, set this to 1 (drops the asm stopgap at the end of the file, which emits the vtable copies and the titles
- * after them). */
-#define PLAYERCAMERA_NAMED_VTABLE_COPIES 0
 #define TASK_H_NO_SLC_OVERFLOW_MSG
 #include "System/Fsm.h" /* the full CFSM (before Game/Entity.h) */
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
@@ -45,11 +34,6 @@ inline void _taskSLCOverflowMsg() {
 #include "System/TaskMan.h"
 #include "System/HeapMan.h"
 #include "Form/DebugWindow.h"
-#if !PLAYERCAMERA_NAMED_VTABLE_COPIES
-extern "C" char _dwtPlayerCamTitle0[], _dwtPlayerCamTitle1[], _dwtPlayerCamTitle2[], _dwtPlayerCamTitle3[],
-    _dwtPlayerCamTitle4[], _dwtPlayerCamTitle5[], _dwtPlayerCamTitle6[], _dwtPlayerCamTitle7[], _dwtPlayerCamTitle8[];
-#define DWTPLAYER_TITLE(i, s) _dwtPlayerCamTitle##i
-#endif
 #include "Game/Player/DWTPlayer.h"
 #include "include_asm.h"
 
@@ -1280,40 +1264,4 @@ void CPlayerCamera::enableRikuShiftY() {
 
 } // namespace PlayerCamera
 
-#if !PLAYERCAMERA_NAMED_VTABLE_COPIES
-/* Stopgap: the original's unnamed copies of CVector<G_LINE>'s and CState's vtables (their entries point to the linker's
- * first definitions), then the debug window titles. */
-asm(".section .rodata.vtcopies\n"
-    "\t.align 3\n"
-    "\t.word 0, 0, 0, _$_t7CVector1Z6G_LINE, 0, 0\n"
-    "\t.word 0, 0, 0, _$_6CState, 0, __pure_virtual, 0, __pure_virtual, 0, __pure_virtual, 0, 0\n"
-    "_dwtPlayerCamTitle0:\n"
-    "\t.byte 0x83, 0x76, 0x83, 0x8C, 0x83, 0x43, 0x83, 0x84, 0x81, 0x5B, 0x83, 0x4A, 0x83, 0x81, 0x83, 0x89, 0\n"
-    "\t.align 3\n"
-    "_dwtPlayerCamTitle1:\n"
-    "\t.byte 0x8D, 0x55, 0x8C, 0x82, 0x83, 0x66, 0x81, 0x5B, 0x83, 0x5E, 0\n"
-    "\t.align 3\n"
-    "_dwtPlayerCamTitle2:\n"
-    "\t.byte 0x83, 0x57, 0x83, 0x83, 0x83, 0x93, 0x83, 0x76, 0x8A, 0xD6, 0x98, 0x41, 0\n"
-    "\t.align 3\n"
-    "_dwtPlayerCamTitle3:\n"
-    "\t.byte 0x88, 0xEA, 0x8E, 0x9E, 0x93, 0x49, 0x82, 0xC8, 0x90, 0x94, 0x92, 0x6C, 0x90, 0xDD, 0x92, 0xE8, 0\n"
-    "\t.align 3\n"
-    "_dwtPlayerCamTitle4:\n"
-    "\t.byte 0x83, 0x4A, 0x81, 0x5B, 0x83, 0x68, 0x83, 0x6F, 0x83, 0x67, 0x83, 0x8B, 0x8A, 0xD6, 0x98, 0x41, 0\n"
-    "\t.align 3\n"
-    "_dwtPlayerCamTitle5:\n"
-    "\t.byte 0x83, 0x76, 0x83, 0x8C, 0x83, 0x43, 0x83, 0x84, 0x81, 0x5B, 0x44, 0x45, 0x42, 0x55, 0x47, 0\n"
-    "\t.align 3\n"
-    "_dwtPlayerCamTitle6:\n"
-    "\t.byte 0x83, 0x76, 0x83, 0x8C, 0x83, 0x43, 0x83, 0x84, 0x81, 0x5B, 0x8F, 0xEE, 0x95, 0xF1, 0\n"
-    "\t.align 3\n"
-    "_dwtPlayerCamTitle7:\n"
-    "\t.byte 0x83, 0x76, 0x83, 0x8C, 0x83, 0x43, 0x83, 0x84, 0x81, 0x5B, 0x83, 0x4A, 0x83, 0x81, 0x83, 0x89, 0x8F, 0xEE, 0x95, 0xF1, 0\n"
-    "\t.align 3\n"
-    "_dwtPlayerCamTitle8:\n"
-    "\t.byte 0x50, 0x4C, 0x4D, 0x3A, 0x3A, 0x52, 0x42, 0x5F, 0x44, 0x41, 0x54, 0x41, 0x8F, 0xEE, 0x95, 0xF1, 0\n"
-    "\t.align 3\n"
-    "\t.text\n");
-#endif
 // SOURCE DATA: .data .rodata .bss

@@ -132,3 +132,11 @@ D_0064726F = 0x0064726F; // can_be_referenced:False
 
 // Form/Menu/DecknameEdit: an unnamed copy of CState's vtable
 _vt$6CState_004E6AB0 = 0x004E6AB0; // size:0x30
+
+// Game/Player/PlayerCamera: CVector<G_LINE>'s and CState's inline/template functions and unnamed copies of their vtables
+__getSize__t7CVector1Z6G_LINEi_0027B5C8 = 0x0027B5C8; // type:func size:0x18
+__alloc__t7CVector1Z6G_LINEi_0027B5E0 = 0x0027B5E0; // type:func size:0xE0
+_$_6CState_0027BD10 = 0x0027BD10; // type:func size:0x30
+_$_t7CVector1Z6G_LINE_0027BE28 = 0x0027BE28; // type:func size:0x8C
+_vt$t7CVector1Z6G_LINE_004A1628 = 0x004A1628; // size:0x18
+_vt$6CState_004A1640 = 0x004A1640; // size:0x30
