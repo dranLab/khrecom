@@ -38,6 +38,10 @@ if ninja > build.ninja.log 2>&1; then
     echo "OK: the rebuilt image matches the original"
 else
     grep -E "^FAILED|: [Ee]rror|[Ee]rror:|did NOT match" build.ninja.log | head -20
+    if grep -q "did NOT match" build.ninja.log; then
+        echo "-- where the image differs (tools/imagediff.py):"
+        $PY tools/imagediff.py -n 5
+    fi
     echo "FAIL: see build.ninja.log"
     status=1
 fi
@@ -45,11 +49,26 @@ fi
 echo "== files from source (objdiff)"
 if ninja expected > /dev/null 2>&1 && tools/objdiff.sh report generate -o build/report.json > /dev/null 2>&1; then
     CHECK_FULL=$full CHECK_CHANGED="$changed" $PY - <<'PY'
-import json, os, re
+import json, os, re, sys
 from pathlib import Path
+sys.path.insert(0, "tools")
+from compare_compilers import functions, pair_unnamed
 full, changed = os.environ["CHECK_FULL"] == "1", set(os.environ["CHECK_CHANGED"].split())
 lines, shown, complete = [], [], 0
-units = {u["name"]: u["metadata"]["source_path"] for u in json.load(open("objdiff.json"))["units"] if "base_path" in u}
+config = [u for u in json.load(open("objdiff.json"))["units"] if "base_path" in u]
+units = {u["name"]: u["metadata"]["source_path"] for u in config}
+objects = {u["name"]: (u["target_path"], u["base_path"]) for u in config}
+
+def objdiff_only(unit, names):
+    """The names objdiff counts as not matching that are byte-identical by funcdiff's comparison: unnamed copies of
+    inline functions (func_<ADDR>, compiled under their real names) and relocations against splat's symbols for
+    constants (D_FFFF), which compiled code doesn't have."""
+    try:
+        t, b = (functions(Path(p)) for p in objects[unit])
+    except (OSError, KeyError, StopIteration):
+        return set()
+    pairs = pair_unnamed(t, b)
+    return {n for n in names if n in t and pairs.get(n, n) in b and t[n].difference(b[pairs.get(n, n)]) is None}
 total = decompiled = 0
 for u in sorted(json.load(open("build/report.json"))["units"], key=lambda u: u["name"]):
     if u["name"] not in units:
@@ -59,8 +78,11 @@ for u in sorted(json.load(open("build/report.json"))["units"], key=lambda u: u["
     source = re.sub(r"#if 0.*?#endif", "", Path(units[u["name"]]).read_text(encoding="latin-1"), flags=re.S)
     asm = set(re.findall(r"INCLUDE_ASM\([^,]+,\s*([^)\s]+)\s*\)", source))
     fns = u.get("functions", [])
-    done = [f for f in fns if f.get("fuzzy_match_percent", 0) >= 100 and f["name"] not in asm]
     open_fns = [f["name"] for f in fns if f.get("fuzzy_match_percent", 0) < 100]
+    if open_fns:
+        same = objdiff_only(u["name"], open_fns)
+        open_fns = [n for n in open_fns if n not in same]
+    done = [f for f in fns if f["name"] not in open_fns and f["name"] not in asm]
     total += len(fns); decompiled += len(done)
     line = (f"  {u['name']}: {len(done)}/{len(fns)} functions decompiled and matching"
             + (f", {len(asm)} still INCLUDE_ASM" if asm else "")

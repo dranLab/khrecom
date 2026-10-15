@@ -10,7 +10,8 @@ worktree; other workers are doing other units at the same time.
 
 ## Steps
 
-1. **Set up.** `tools/setup_worktree.sh` (links the game files and tools, runs configure; ~30 s). Then create
+1. **Set up.** `tools/setup_worktree.sh` (links the game files and tools, runs configure; ~30 s; don't redirect its output into
+   `build/`, which doesn't exist yet in a fresh worktree). Then create
    your branch: `git switch -c decomp/<unit with "/" replaced by "-">` (e.g. `decomp/System-Spad`).
 2. **Study the unit.**
    - Original: `.venv/bin/python tools/asm.py <unit>` lists the functions in original order with their size and

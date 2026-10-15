@@ -22,7 +22,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
-from compare_compilers import ANONYMOUS, LOCAL_STATIC, functions  # noqa: E402
+from compare_compilers import ANONYMOUS, functions, pair_unnamed, target_name  # noqa: E402
 
 
 def disassemble(obj: Path, name: str, size: int) -> list[str]:
@@ -96,14 +96,17 @@ def main() -> None:
         sys.exit(result.stdout[-3000:] + result.stderr[-1000:])
 
     t, b = functions(ROOT / target), functions(ROOT / base)
+    pairs = pair_unnamed(t, b)  # the original's unnamed copies of inline functions -> ours
     if not args.function:
         for name in t:
             if not t[name].data and name not in b:
                 continue  # a 0-byte label (splat's func_ at a jump target inside a function), not a function
-            diff = t[name].difference(b[name]) if name in b else None
-            state = "missing" if name not in b else "MATCH" if diff is None else "differs"
-            print(f"{state:8} {name} ({len(t[name].data)} bytes)" + (f": {diff}" if diff else ""))
-        extra = [n for n in b if n not in t]
+            ours = pairs.get(name, name)
+            diff = t[name].difference(b[ours]) if ours in b else None
+            state = "missing" if ours not in b else "MATCH" if diff is None else "differs"
+            print(f"{state:8} {name} ({len(t[name].data)} bytes)" + (f" = ours {ours}" if ours != name else "")
+                  + (f": {diff}" if diff else ""))
+        extra = [n for n in b if n not in t and n not in pairs.values()]
         if extra:
             print("only in ours (not in the original):", ", ".join(extra))
         return
@@ -111,9 +114,10 @@ def main() -> None:
     if args.function not in t:
         sys.exit(f"{args.function} not in the original {args.unit}")
     name = args.function
-    diff = t[name].difference(b[name]) if name in b else "missing in ours"
+    ours = pairs.get(name, name)
+    diff = t[name].difference(b[ours]) if ours in b else "missing in ours"
     left = disassemble(ROOT / target, name, len(t[name].data))
-    right = disassemble(ROOT / base, name, len(b[name].data)) if name in b else []
+    right = disassemble(ROOT / base, ours, len(b[ours].data)) if ours in b else []
     # Lines are aligned on a key without branch-target offsets and data addresses (see key()), so code shifted by
     # an earlier difference still lines up. Such lines are marked "~" (they differ only in an offset or address);
     # "|" marks a real difference.
@@ -134,7 +138,7 @@ def main() -> None:
         """For lines with equal keys: do they name different (non-anonymous) data?"""
         x, y = data_reloc.match(a), data_reloc.match(c)
         names = [m.group(2) for m in (x, y) if m and not ANONYMOUS.match(m.group(2)) and m.group(2) != "_gp"]
-        return len(names) == 2 and LOCAL_STATIC.sub("", names[0]) != LOCAL_STATIC.sub("", names[1])
+        return len(names) == 2 and target_name(names[0]) != target_name(names[1])
 
     def keys(lines: list[str]) -> list[str]:
         k = [key(line) for line in lines]
@@ -163,7 +167,7 @@ def main() -> None:
         if any((mask(p) != mask(q)) if (r or t) else p != q for (p, r), (q, t) in zip(x, y)):
             return False  # the immediate only counts as an address where a side relocates the instruction
         def named(lines: list[str]) -> list[str]:  # the symbols the block's relocations name (calls too)
-            return [LOCAL_STATIC.sub("", m.group(2)) for line in lines if (m := any_reloc.match(line))
+            return [target_name(m.group(2)) for line in lines if (m := any_reloc.match(line))
                     and not ANONYMOUS.match(m.group(2)) and m.group(2) != "_gp"]
         return not (named(a) and named(c) and named(a) != named(c))
     for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(a=keys_l, b=keys_r, autojunk=False).get_opcodes():
@@ -176,7 +180,8 @@ def main() -> None:
     real = sum(m == "|" for m, _, _ in rows)
     offsets = sum(m == "~" for m, _, _ in rows)
     print(f"{'MATCH' if diff is None else 'differs'} {name}: original {len(t[name].data)} bytes, "
-          f"ours {len(b[name].data) if name in b else 0} bytes" + (f"; {diff}" if diff else ""))
+          f"ours {len(b[ours].data) if ours in b else 0} bytes" + (f" ({ours})" if ours != name else "")
+          + (f"; {diff}" if diff else ""))
     if diff is None and not args.full:
         return
     print(f"{real} of {len(rows)} lines differ (|), {offsets} only in an offset or address (~); original | ours")

@@ -32,6 +32,9 @@ RELOC_MASKS = {4: 0x03FFFFFF, 5: 0xFFFF, 6: 0xFFFF, 10: 0xFFFF}
 # Relocation targets that name the same thing differently in the original and in a compiled object: section
 # symbols (a compiled file's own data: .rodata+offset) and splat's labels for unnamed data and code.
 LOCAL_STATIC = re.compile(r"\.\d+$")
+# splat's/the symbol file's suffix for a name that occurs more than once in the game (cardDataTbl_004F0B48)
+ADDRESS_SUFFIX = re.compile(r"_[0-9A-F]{8}$")
+UNNAMED_FUNCTION = re.compile(r"^func_[0-9A-F]{8}$")
 ANONYMOUS = re.compile(r"^(\.|D_[0-9A-F]{8}$|jtbl_|L[0-9A-F]{8}$|\$L|func_[0-9A-F]{8}$)")
 
 
@@ -61,6 +64,26 @@ class Function:
         return None
 
 
+def target_name(name: str) -> str:
+    """A referenced symbol's name without a local static's .<n> or a de-duplicated name's _<ADDR>."""
+    return LOCAL_STATIC.sub("", ADDRESS_SUFFIX.sub("", name))
+
+
+def pair_unnamed(original: dict[str, Function], ours: dict[str, Function]) -> dict[str, str]:
+    """Original func_<ADDR> -> our function with the same bytes. The original object's unnamed copies of inline
+    functions (the linker kept another copy's name) are compiled under their real names, which only our object has;
+    each pairs with the first equal one of those, in order."""
+    unpaired = [n for n in ours if n not in original]
+    pairs = {}
+    for name, fn in original.items():
+        if UNNAMED_FUNCTION.match(name) and name not in ours and fn.data:
+            match = next((n for n in unpaired if fn.difference(ours[n]) is None), None)
+            if match:
+                pairs[name] = match
+                unpaired.remove(match)
+    return pairs
+
+
 def functions(obj: Path) -> dict[str, Function]:
     """Function name -> its .text bytes and relocated fields."""
     with obj.open("rb") as f:
@@ -78,8 +101,9 @@ def functions(obj: Path) -> dict[str, Function]:
                     # _gp: the original names that address after whatever symbol lies there.
                     named = (sym["st_info"]["type"] != "STT_SECTION" and not ANONYMOUS.match(sym.name)
                              and sym.name != "_gp")
-                    # Function-local statics are named name.<n> after a gcc-internal counter: compare the name only.
-                    targets[reloc["r_offset"]] = LOCAL_STATIC.sub("", sym.name) if named else None
+                    # Function-local statics are named name.<n> after a gcc-internal counter, and names the game
+                    # has more than once carry an _<ADDR> suffix in the original: compare the name only.
+                    targets[reloc["r_offset"]] = target_name(sym.name) if named else None
         out = {}
         for sym in elf.get_section_by_name(".symtab").iter_symbols():
             if sym["st_info"]["type"] == "STT_FUNC" and sym["st_shndx"] == text_index:
