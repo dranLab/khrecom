@@ -76,7 +76,7 @@ public:
     BOOL isTrgBattleChange();
     BOOL isTrgWarpStartPos();
     BOOL isDownDebugMode();
-    void enableControl();
+    void enableControl() { UINT& f = m_uiPadFlag; f |= 1; } // PARTIAL: inline body added for Game/Player/PlayerRiku
     BOOL isControl();
     BOOL isTrgAnyPad();
 };

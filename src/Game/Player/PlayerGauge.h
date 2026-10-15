@@ -37,10 +37,19 @@ public:
     void onPush(INT inKind);
     void offPush();
     void holdTarget(INT inFlag);
+    void cancelLockon(INT& ioHandle, INT inFlag); // PARTIAL: added for Game/Player/PlayerRiku
+    void chkLockon(INT& ioHandle);                // PARTIAL: added for Game/Player/PlayerRiku
+    void setFlag(BOOL inFlag) { m_bFlag = inFlag; } // PARTIAL: added for Game/Player/PlayerRiku (original name unknown)
     void changeMode() {
         m_iMode = 1;
         m_bTrg = TRUE;
         m_hLockon = 0;
+    }
+    // PARTIAL: added for Game/Player/PlayerRiku (original name unknown; stores in this order)
+    void setMode(INT inMode) {
+        m_iMode = inMode;
+        m_hLockon = 0;
+        m_bTrg = TRUE;
     }
     void changeMode(INT inMode) {
         m_bTrg = TRUE;
