@@ -361,4 +361,53 @@ private:
     virtual void makePkt();
 };
 
+// PARTIAL: added for Form/DebugWindow
+struct G_ST {
+    FLOAT s;
+    FLOAT t;
+};
+
+struct G_STRIP {
+    FVECTOR P;
+    G_ST S;
+    G_RGBA C;
+    USHORT Term;
+    USHORT Bone;
+};
+
+typedef CVector<G_STRIP> G_STRIP_VECTOR;
+
+class CCoords;
+
+class C3DStripBase : public CGPrim {
+public:
+    G_STRIP_VECTOR m_vVERT;
+    FLOAT m_fGeta;
+protected:
+    FLOAT m_fGetaZ;
+    CCoord* m_pCrd;
+    CCoords* m_pObj;
+    INT m_nType;
+
+public:
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+    virtual QWdata* makePktSub();
+};
+
+class C3DLineStrip : public C3DStripBase {
+public:
+    C3DLineStrip() {
+        m_nType = 2;
+        m_pCrd = NULL;
+        m_pObj = NULL;
+        m_fGeta = 0.0f;
+    }
+    void setCoord(CCoord* pCrd) { m_pCrd = pCrd; }
+private:
+    virtual QWdata* makePktSub();
+};
+
 #endif /* SYSTEM_GRAPHIC_GPRIM_H */

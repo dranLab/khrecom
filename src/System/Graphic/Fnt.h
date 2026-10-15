@@ -38,6 +38,9 @@ public:
     /* PARTIAL: added for Form/Menu/MenuParts */
     void allocText(const CHAR* pText);
     void setText(const CHAR* lpszInStr); /* PARTIAL: added for System/DebugProcInfo */
+    /* PARTIAL: added for Form/DebugWindow */
+    void setBrightness(UBYTE r, UBYTE g, UBYTE b, UBYTE a) { m_brightness.set(r, g, b, a); }
+    void setSize(INT nSize) { m_Size = nSize << 4; }
     LPCSTR getText() { return m_pText; }
     void setSpace(SHORT x, SHORT y) {
         m_Space.x = x;

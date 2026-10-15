@@ -100,6 +100,14 @@ public:
         if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);
         return m_pObj[i];
     }
+    /* PARTIAL: added for Form/DebugWindow (names unknown; the original line of back()'s assert is 162) */
+    T* getBuffer() { return m_pObj; }
+    T& back() {
+#line 162
+        if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);
+#line 233
+        return *(m_pObj + m_iIdx - 1);
+    }
 
 private:
     void __cleanmem() {
