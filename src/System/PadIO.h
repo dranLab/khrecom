@@ -1,4 +1,3 @@
-// PARTIAL: added for System/PadHandler
 #ifndef SYSTEM_PADIO_H
 #define SYSTEM_PADIO_H
 
@@ -6,6 +5,9 @@
 
 class CPadIO {
 public:
+    static void initialize();
+    static void finalize();
+    static void mainProc(TIMEQ nTickCount, TIMEQ nRate);
     static INT isButtonDown(UINT nBtn, UINT nPad = 0);
     static INT isButtonTrg(UINT nBtn, UINT nPad = 0);
     static INT isButtonRTrg(UINT nBtn, UINT nPad = 0);
@@ -16,12 +18,20 @@ public:
     static INT getAnalogRY(UINT nPad = 0);
     static INT getAnalogLX(UINT nPad = 0);
     static INT getAnalogLY(UINT nPad = 0);
-    static BOOL isConnected(UINT nPad); // PARTIAL: added for System/RootTask
-    static void suspendVibration(); // PARTIAL: added for Form/Menu/Pause
-    static void resumeVibration();  // PARTIAL: added for Form/Menu/Pause
-    static BYTE getVibMotorL(UINT nPad); // PARTIAL: added for System/DebugProcInfo
-    static BYTE getVibMotorS(UINT nPad); // PARTIAL: added for System/DebugProcInfo
-    static BOOL isStandby(UINT nPad);    // PARTIAL: added for System/DebugProcInfo
+    static BYTE getVibMotorL(UINT nPad = 0);
+    static BYTE getVibMotorS(UINT nPad = 0);
+    static INT startVibration(INT motorL, INT motorS, TIMEQ tq, UINT nPad = 0);
+    static void stopVibration(INT handle, UINT nPad = 0);
+    static void resetVibration();
+    static void enableVibration(BOOL f, UINT nPad = 0);
+    static void suspendVibration();
+    static void resumeVibration();
+    static BOOL isVibrationSuspended();
+    static BOOL isConnected(UINT nPad = 0);
+    static BOOL isStandby(UINT nPad = 0);
+    static BOOL isRobotEnable(UINT nPad = 0);
+    static void setRobotEnableFlag(BOOL bEnableFlag, UINT nPad = 0);
+    static void setRobotPadRate(INT nRobotPad, INT nTrgRate, INT nPressRate, UINT nPad = 0);
 };
 
 #endif // SYSTEM_PADIO_H
