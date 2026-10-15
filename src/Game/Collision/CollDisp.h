@@ -19,4 +19,10 @@ inline void* _collDispCreate() {
     return p;
 }
 
+// PARTIAL: added for Game/Bullet/Bullet
+class CCollDisp {
+public:
+    static BOOL m_fgDisp;
+};
+
 #endif /* GAME_COLLISION_COLLDISP_H */

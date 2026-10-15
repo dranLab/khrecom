@@ -37,7 +37,7 @@ public:
     }
     virtual ~CCollAttack();
     virtual INT collideAttack();
-    void init(COLL_KIND inKind, COLL_TYPE inType, INT inHandle, INT inFlag);
+    virtual void init(COLL_KIND inKind, COLL_TYPE inType, INT inHandle, INT inFlag); // PARTIAL: virtual for Game/Bullet/Bullet
     void setBasePos(FVECTOR& inPos);
     FVECTOR* getBasePos();
     void updateAttackID();
@@ -48,6 +48,10 @@ public:
         m_Critical = inCritical;
     }
     INT getAttack() { return m_Attack; }
+    // PARTIAL: added for Game/Bullet/Bullet
+    void setAttackKind(INT attackKind) { m_AttackKind = attackKind; }
+    void setAttackAttr(INT attackAttr) { m_AttackAttr = attackAttr; }
+    void setEnemyHandle(HANDLE inHandle) { m_hEnemyTask = inHandle; }
     void setBackAttack(INT inBackAttack) { m_BackAttack = inBackAttack; }
     INT getAttackKind() { return m_AttackKind; }
     INT getAttackAttr() const { return m_AttackAttr; }

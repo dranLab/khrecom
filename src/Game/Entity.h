@@ -4,6 +4,7 @@
 
 #include "khtypes.h"
 #include "System/Task.h"
+#include "System/Vector.h" // PARTIAL: added for Game/Bullet/Bullet (setStartPos)
 #include "System/Graphic/Effect/EffectMan.h" // PARTIAL: added for Game/Gimmick/BaseGimmick (ObjType::eObjType)
 // PARTIAL: Gprim.h include moved to Game/Bullet/Bullet.h for Game/Gimmick/GimmickHitMore (its strings are not in every includer)
 
@@ -72,7 +73,11 @@ private:
     INT m_iFlashingCounter;    /* 0x0f4 */
     FLOAT m_fNearTranslucence; /* 0x0f8 */
     // PARTIAL: fade members split out for Game/Player/PlayerWeapon
-    UBYTE _m_0xfc[0x10];   /* 0x0fc m_fSpeed .. 0x108 m_fArriveRadius */
+    // PARTIAL: split out for Game/Bullet/Bullet
+    FLOAT m_fSpeed;        /* 0x0fc */
+    FLOAT m_fRate;         /* 0x100 */
+    HANDLE m_hTarget;      /* 0x104 */
+    FLOAT m_fArriveRadius; /* 0x108 */
     FLOAT m_fStartAlpha;   /* 0x10c */
     FLOAT m_fEndAlpha;     /* 0x110 */
     FLOAT m_fFadeAlpha;    /* 0x114 */
@@ -212,6 +217,17 @@ public:
     UINT isPermissionLockOn() const { return m_uiEntityFlag & 0x10000; }
     FLOAT calcDistanceXZSq(const FVECTOR& inPos) const;
     FLOAT calcDistanceXZSq(const CEntity* inEntity) const;
+    // PARTIAL: added for Game/Bullet/Bullet
+    const FVECTOR& getStartPos() const { return *(const FVECTOR*)_m_0x70; }
+    void setStartPos(const FVECTOR& inPos) { *(FVECTOR*)_m_0x70 = inPos; }
+    void setRate(FLOAT inRate) { m_fRate = inRate; }
+    FLOAT getRate() const { return m_fRate; }
+    FLOAT getFadeAlpha() const { return m_fFadeAlpha; }
+    UINT isFade() const { return m_uiEntityFlag & 0x40000000; }
+    FLOAT calcDistanceSq(const FVECTOR& inPos) const;
+    HANDLE playSEPanAndVol(INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
+    void setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
+    void fadeoutSE(HANDLE inHandle, INT inFile, INT inID, INT inTime, INT inFlag);
     void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel) {
         setEntityFlag(0x40000000, 0);
         m_fStartAlpha = inStart;
