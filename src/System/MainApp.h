@@ -48,6 +48,9 @@ public:
     // PARTIAL: added for Form/Menu/SaveLoadUtil
     static UINT getPlayTime();
     static void resetPlayTime(UINT nTime);
+    // PARTIAL: added for Form/DebugMenu
+    static void startCountPlayTime();
+    static void enableDbgUsrPause(BOOL bEnable, BOOL bFlag);
 };
 #endif
 

@@ -95,3 +95,15 @@ _vt$10CCollision_004CBD20 = 0x004CBD20; // size:0x18
 // Form/Menu/SaveLoadUtil: CBuf's inline destructor and an unnamed copy of its vtable
 _$_4CBuf_003559B8 = 0x003559B8; // type:func size:0x54
 _vt$4CBuf_004F6020 = 0x004F6020; // size:0x18
+
+// Form/DebugMenu: inline destructors and unnamed copies of their vtables
+_$_4CFnt_002FCA00 = 0x002FCA00; // type:func size:0x28
+_$_12RcfSceneInfo_002FCA28 = 0x002FCA28; // type:func size:0x30
+_$_4CBuf_002FCA58 = 0x002FCA58; // type:func size:0x54
+_$_t12CSJointListT1Z12RcfSceneInfo_002FCAB0 = 0x002FCAB0; // type:func size:0x30
+_$_t8CSJointT1Z12RcfSceneInfo_002FCAE0 = 0x002FCAE0; // type:func size:0x30
+_vt$4CBuf_004D9478 = 0x004D9478; // size:0x18
+_vt$t12CSJointListT1Z12RcfSceneInfo_004D9490 = 0x004D9490; // size:0x18
+_vt$12RcfSceneInfo_004D94A8 = 0x004D94A8; // size:0x18
+_vt$4CFnt_004D94C0 = 0x004D94C0; // size:0x48
+_vt$t8CSJointT1Z12RcfSceneInfo_004D9870 = 0x004D9870; // size:0x18

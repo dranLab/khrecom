@@ -56,6 +56,9 @@ public:
     static INT makePremiereDeck(USHORT inDeck, SHORT inIdx); // PARTIAL: added for Form/Menu/Roulette
     static BOOL addCard(USHORT inID, SHORT inNumber);        // PARTIAL: added for Form/Menu/Roulette
     static CARD_INFO* m_pCardInfo;         // PARTIAL: added for Form/Menu/Roulette (private in the original)
+#ifdef GAME_SCENEINFO_H
+    static void initCard(USHORT nDeck, WORLD_ID nWorld, SHORT nFloor); // PARTIAL: added for Form/DebugMenu
+#endif
 };
 
 #endif /* GAME_CARD_H */

@@ -5,6 +5,7 @@
 #include "khtypes.h"
 
 class CBuf;
+struct DebugParam; // PARTIAL: added for Form/DebugMenu
 
 typedef struct {
     unsigned char Resv2;
@@ -53,6 +54,11 @@ public:
     static INT idleCheckCard(INT nPort);
     static CHAR* getSysFileNameCOM();
     static CHAR* getGameDataFileName();
+    // PARTIAL: added for Form/DebugMenu
+    static BOOL reqLoad(DebugParam& param);
+    static BOOL reqSave(const DebugParam& param);
+    static BOOL reqSaveSysTest(BOOL bSora, BOOL bRiku, BOOL bFlag);
+    static BOOL reqLoadSysTest(CBuf& buf);
 };
 
 #endif /* SYSTEM_MEMOCA_H */
