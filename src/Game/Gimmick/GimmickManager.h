@@ -24,6 +24,10 @@ public:
     FLOAT getThrowDirPow() { return m_ThrowDirPow; }
     FLOAT getThrowMaxAngle() { return m_ThrowMaxAngle; }
     FLOAT getThrowMinAngle() { return m_ThrowMinAngle; }
+    // PARTIAL: added for Form/DebugWindowTBL
+    void setThrowDirPow(FLOAT in_dirpow) { m_ThrowDirPow = in_dirpow; }
+    void setThrowMaxAngle(FLOAT in_max) { m_ThrowMaxAngle = in_max; }
+    void setThrowMinAngle(FLOAT in_min) { m_ThrowMinAngle = in_min; }
     CGimmickManager(CTask* inParent);
     CTaskSLCList& getChildren() { return CTask::getChildren(); } // PARTIAL: added for Game/Gimmick/GimmickToldPipe
     INT getStorageGimmickState(INT inUniqueID);

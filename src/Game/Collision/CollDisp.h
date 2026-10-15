@@ -23,6 +23,11 @@ inline void* _collDispCreate() {
 class CCollDisp {
 public:
     static BOOL m_fgDisp;
+    // PARTIAL: added for Form/DebugWindowTBL
+    static UINT m_fgMapZoneDisp;
+    static SHORT m_bMapZoneColR;
+    static SHORT m_bMapZoneColG;
+    static SHORT m_bMapZoneColB;
 };
 
 #endif /* GAME_COLLISION_COLLDISP_H */
