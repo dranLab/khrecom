@@ -128,6 +128,9 @@ public:
     static void initFloor(INT nFloorIndex, WORLD_ID nWorldID);
     static INT getCurrentAreaScene();
     static void backupEventDoorState();
+    // PARTIAL: added for Form/Menu/WorldWarp
+    static SHORT getFloorNumber(USHORT nFloorIndex, BOOL bSora);
+    static void reqChangeFloor(SHORT nFloor, BOOL bFlag);
 };
 
 #endif /* GAME_SCENEINFO_H */
