@@ -38,6 +38,7 @@ public:
     void GimDebugTrace(const DropPrize* inPrize);
     void changeTreasureBoxLock(BOOL inLock);
     CEntity* getDoor(DOOR_ID inID, FVECTOR* outPos, FVECTOR* outRot); // PARTIAL: added for Game/Gimmick/GimmickPlantParent
+    BOOL getSavePointPos(FVECTOR& outPos); // PARTIAL: added for Form/Menu/SaveLoadUtil
 };
 
 #endif /* GAME_GIMMICK_GIMMICKMANAGER_H */
