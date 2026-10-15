@@ -37,6 +37,11 @@ public:
     static INT getDrawCount();
     static INT getDraw2Count();
     static INT getProcCountMax();
+    // PARTIAL: added for System/Task
+    static TIMEQ getTickCount();
+    static TIMEQ getDispFrameRate();
+    static void incObjCount();
+    static void decObjCount();
 };
 #endif
 
