@@ -18,6 +18,8 @@ struct SeqControl {
     CHAR fg3D;                      /* 0x127 */
 };
 
+struct G_UV; /* PARTIAL: added for Form/Menu/WorldWarp */
+
 namespace D2 {
 
 class C2DSeqObj;
@@ -73,6 +75,7 @@ public:
     void setScl(FLOAT fScl);                                  /* PARTIAL: added for Form/Menu/WorldSelect */
     void setRot(FVECTOR& vRot);                               /* PARTIAL: added for Form/Menu/WorldSelect */
     UINT getNumSeq() { return m_nSeq; }                       /* PARTIAL: added for Form/Menu/WorldSelect */
+    void changeTexture(UINT nIdx, INT inSprIdx, CHAR* pTexName, G_UV* pStart, G_UV* pEnd); /* PARTIAL: added for Form/Menu/WorldWarp */
     void enableColorCtrl(BOOL bEnable) { m_seqControl.fgColor = bEnable; } /* PARTIAL: added for Form/SystemMessage */
 };
 
