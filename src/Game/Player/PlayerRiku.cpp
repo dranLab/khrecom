@@ -55,11 +55,11 @@ extern FLOAT g_fGravity;
 extern TIMEQ g_CardBreakTime[];
 
 static LPCSTR g_szDpxTransform = "transform";
-/* named as splat names them: the INCLUDE_ASM'd functions refer to them so */
-static LPCSTR g_szDpxFriend asm("_2PL$g_szDpxFriend_003A814C") = "friend";
+
+static LPCSTR g_szDpxFriend = "friend";
 static LPCSTR g_szDpxDuel = "duel";
 static LPCSTR g_szDpxSEAppear = "souleater";
-static LPCSTR g_szDpxImpals asm("_2PL$g_szDpxImpals_003A8158") = "impals";
+static LPCSTR g_szDpxImpals = "impals";
 
 PL_PARAM g_RikuParam = {
     0x21279, 0x2000259, 0.3f, 1.2f, 1.3f, 6.5f, 1.8f, 34.1f, 38.0f, 200, 2200, 2200,
