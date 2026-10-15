@@ -159,12 +159,12 @@ public:
     HANDLE getHandle() { return m_hThis; }
     TIMEQ getFrameRate() { return m_nTimeLag; }                   // PARTIAL: added for Game/Gimmick/GimmickPlantChild
     FLOAT getFrameRateF() { return (FLOAT)getFrameRate() * 0.020000001f; } // PARTIAL: added for Game/Gimmick/GimmickPlantChild
-    BOOL isOut() { return m_nInfo & 0x8000; }
+    BOOL isOut() { return (m_nInfo & 0x8000) != 0; } // PARTIAL: "!= 0" for Game/MinigameManager (lhu/srl)
     CTask* getParent() { return m_pParent; }           // PARTIAL: added for System/Component
     BOOL isInactive() { return m_nInfo & 0x8008; }     // PARTIAL: added for System/Component
     BOOL isInvisible() { return m_nInfo & 0x8010; }    // PARTIAL: added for System/Component
     void out() {
-        if (!isOut()) {
+        if (!(m_nInfo & 0x8000)) { // not isOut(): that one compiles to lhu/srl
             m_nInfo |= 0x8000;
             onOut();
         }
@@ -182,6 +182,14 @@ public:
             m_nInfo |= 0x80;
         } else {
             m_nInfo &= ~0x80;
+        }
+    }
+    // PARTIAL: added for Game/MinigameManager
+    void setActive(BOOL bFlag) {
+        if (bFlag) {
+            m_nInfo &= ~0x28;
+        } else {
+            m_nInfo |= 0x28;
         }
     }
     void ignorePlaySpeed(BOOL bFlag) {

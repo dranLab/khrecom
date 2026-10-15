@@ -96,6 +96,9 @@ class CSceneInfo {
 public:
     static SHORT getCurrentFloorNumber();
     static SHORT getCurrentAreaNum(); // PARTIAL: added for System/DebugProcInfo
+    static SHORT getCurrentBattleSceneNum(); // PARTIAL: added for Game/MinigameManager
+    static void reqExitMinigame(SHORT inNextScene); // PARTIAL: added for Game/MinigameManager
+    static void reqRetryMinigame(); // PARTIAL: added for Game/MinigameManager
     static BOOL hasReqChangeScene(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
     static INT getCurrentRoomID();
     static RoomInfo* getRoomInfo(INT nRoomID);

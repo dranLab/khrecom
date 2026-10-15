@@ -26,6 +26,7 @@ private:
 
 public:
     CPlayerManager();
+    CPlayerManager(CTask* pParent); // PARTIAL: added for Game/MinigameManager
     static CPlayerManager* getPLM() { return m_pInstance; }
     Friend::CFriend* getFriend() const { return m_pFriend; }
 };
