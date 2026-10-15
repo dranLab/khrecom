@@ -55,6 +55,7 @@ public:
     static BOOL canPremium(USHORT inKind); // PARTIAL: added for Form/Menu/Roulette
     static INT makePremiereDeck(USHORT inDeck, SHORT inIdx); // PARTIAL: added for Form/Menu/Roulette
     static BOOL addCard(USHORT inID, SHORT inNumber);        // PARTIAL: added for Form/Menu/Roulette
+    static BOOL deleteCard(USHORT inID, SHORT inNumber);     // PARTIAL: added for Form/Menu/RoomCreation
     static CARD_INFO* m_pCardInfo;         // PARTIAL: added for Form/Menu/Roulette (private in the original)
 };
 
