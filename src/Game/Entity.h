@@ -23,6 +23,8 @@ enum eObjType {
     eObjType_dummy = 0 /* values not needed yet */
 };
 
+// PARTIAL: skipped for Game/Player/PlayerCamera when System/Fsm.h (the full CFSM) came first
+#ifndef SYSTEM_FSM_H
 class CFSM {
 protected:
     CState* m_pCurrentState;
@@ -36,6 +38,7 @@ public:
     virtual void endStateInitial();
     virtual void endStateProc();
 };
+#endif
 
 class CEntity : public CTask, public CFSM {
 protected:

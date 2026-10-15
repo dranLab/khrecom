@@ -15,6 +15,11 @@
 
 extern INT SCREEN_HEIGHT;
 
+/* PARTIAL: added for Game/Player/PlayerCamera (its stopgap emits the titles itself, see there) */
+#ifndef DWTPLAYER_TITLE
+#define DWTPLAYER_TITLE(i, s) s
+#endif
+
 namespace DWTPlayer {
 
 static BOOL DebugPlayerCamera(CDebugWindow* pObj, INT inY, INT inParam) {
@@ -142,7 +147,7 @@ static DEBUG_WINDOW_LINE debugPlayerCameraLine[14] = {
     {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
 };
 
-static DEBUG_WINDOW_TBL debugPlayerCamera = {"\x83v\x83\x8c\x83" "C\x83\x84\x81[\x83J\x83\x81\x83\x89", 0x66, (SCREEN_HEIGHT >> 1) - 0xEE, 10, 13, 14, 0, 0, debugPlayerCameraLine, NULL, NULL};
+static DEBUG_WINDOW_TBL debugPlayerCamera = {DWTPLAYER_TITLE(0, "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x83J\x83\x81\x83\x89"), 0x66, (SCREEN_HEIGHT >> 1) - 0xEE, 10, 13, 14, 0, 0, debugPlayerCameraLine, NULL, NULL};
 
 static DEBUG_WINDOW_LINE debugPlayerAttackLine[25] = {
     {"ID %s", &DebugWork::g_dw.player.iAttackID, 2, {0}, 0, 0.0f, 187.0f, 1.0f, szAttackData, 0, DebugPlayerAttack, NULL},
@@ -172,7 +177,7 @@ static DEBUG_WINDOW_LINE debugPlayerAttackLine[25] = {
     {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
 };
 
-static DEBUG_WINDOW_TBL debugPlayerAttack = {"\x8dU\x8c\x82\x83" "f\x81[\x83^", 0x57, (SCREEN_HEIGHT >> 1) - 0x16C, 12, 24, 13, 0, 0, debugPlayerAttackLine, NULL, NULL};
+static DEBUG_WINDOW_TBL debugPlayerAttack = {DWTPLAYER_TITLE(1, "\x8dU\x8c\x82\x83" "f\x81[\x83^"), 0x57, (SCREEN_HEIGHT >> 1) - 0x16C, 12, 24, 13, 0, 0, debugPlayerAttackLine, NULL, NULL};
 
 static DEBUG_WINDOW_LINE debugPlayerJumpLine[14] = {
     {"\x8f" "d\x97\xcd\x8cW\x90\x94       \x81@%2.2f", &PL::g_fWeight, 4, {0}, 1, 0.0f, 10.0f, 0.01f, NULL, 0, NULL, NULL},
@@ -191,7 +196,7 @@ static DEBUG_WINDOW_LINE debugPlayerJumpLine[14] = {
     {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
 };
 
-static DEBUG_WINDOW_TBL debugPlayerJump = {"\x83W\x83\x83\x83\x93\x83v\x8a\xd6\x98" "A", -0xD0, -(SCREEN_HEIGHT >> 1) + 0x30, 12, 13, 12, 0, 0, debugPlayerJumpLine, NULL, NULL};
+static DEBUG_WINDOW_TBL debugPlayerJump = {DWTPLAYER_TITLE(2, "\x83W\x83\x83\x83\x93\x83v\x8a\xd6\x98" "A"), -0xD0, -(SCREEN_HEIGHT >> 1) + 0x30, 12, 13, 12, 0, 0, debugPlayerJumpLine, NULL, NULL};
 
 static DEBUG_WINDOW_LINE debugPlayerTempLine[6] = {
     {"\x90\x94\x92l   %4d", &DebugWork::g_dw.player.iTemp, 1, {0}, 0, -1.0f, 100.0f, 1.0f, NULL, 0, NULL, NULL},
@@ -202,7 +207,7 @@ static DEBUG_WINDOW_LINE debugPlayerTempLine[6] = {
     {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
 };
 
-static DEBUG_WINDOW_TBL debugPlayerTemp = {"\x88\xea\x8e\x9e\x93I\x82\xc8\x90\x94\x92l\x90\xdd\x92\xe8", -0xD0, -(SCREEN_HEIGHT >> 1) + 0x30, 8, 5, 12, 0, 0, debugPlayerTempLine, NULL, NULL};
+static DEBUG_WINDOW_TBL debugPlayerTemp = {DWTPLAYER_TITLE(3, "\x88\xea\x8e\x9e\x93I\x82\xc8\x90\x94\x92l\x90\xdd\x92\xe8"), -0xD0, -(SCREEN_HEIGHT >> 1) + 0x30, 8, 5, 12, 0, 0, debugPlayerTempLine, NULL, NULL};
 
 static DEBUG_WINDOW_LINE debugPlayerCardBattleLine[12] = {
     {"\x83" "f\x83" "b\x83L\x83V\x83\x88\x83" "E     %s", &DebugWork::g_dw.player.iUseDbgDeck, 1, {0}, 0, 0.0f, 9.0f, 1.0f, CardBattle::g_szDbgDeckName, 0, NULL, NULL},
@@ -219,7 +224,7 @@ static DEBUG_WINDOW_LINE debugPlayerCardBattleLine[12] = {
     {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
 };
 
-static DEBUG_WINDOW_TBL debugPlayerCardBattle = {"\x83J\x81[\x83h\x83o\x83g\x83\x8b\x8a\xd6\x98" "A", -0xD0, -(SCREEN_HEIGHT >> 1) + 0x30, 18, 11, 12, 0, 0, debugPlayerCardBattleLine, NULL, NULL};
+static DEBUG_WINDOW_TBL debugPlayerCardBattle = {DWTPLAYER_TITLE(4, "\x83J\x81[\x83h\x83o\x83g\x83\x8b\x8a\xd6\x98" "A"), -0xD0, -(SCREEN_HEIGHT >> 1) + 0x30, 18, 11, 12, 0, 0, debugPlayerCardBattleLine, NULL, NULL};
 
 static DEBUG_WINDOW_LINE debugWinPlayerLine[20] = {
     {"\x83v\x83\x8c\x83" "C\x83\x84INFO     %s", &DebugWork::g_dw.player.iPlayerInfo, 1, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0, NULL, NULL},
@@ -244,7 +249,7 @@ static DEBUG_WINDOW_LINE debugWinPlayerLine[20] = {
     {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
 };
 
-static DEBUG_WINDOW_TBL debugWinPlayer = {"\x83v\x83\x8c\x83" "C\x83\x84\x81[DEBUG", -0xE0, -(SCREEN_HEIGHT >> 1) + 0x20, 12, 19, 12, 0, 0, debugWinPlayerLine, NULL, NULL};
+static DEBUG_WINDOW_TBL debugWinPlayer = {DWTPLAYER_TITLE(5, "\x83v\x83\x8c\x83" "C\x83\x84\x81[DEBUG"), -0xE0, -(SCREEN_HEIGHT >> 1) + 0x20, 12, 19, 12, 0, 0, debugWinPlayerLine, NULL, NULL};
 
 static DEBUG_WINDOW_LINE debugPlayerInfoLine[13] = {
     {"PosX:   % 9.4f", &DebugWork::g_dw.player.vPos.x, 4, {0}, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
@@ -262,7 +267,7 @@ static DEBUG_WINDOW_LINE debugPlayerInfoLine[13] = {
     {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
 };
 
-static DEBUG_WINDOW_TBL debugPlayerInfo = {"\x83v\x83\x8c\x83" "C\x83\x84\x81[\x8f\xee\x95\xf1", -0xF8, -(SCREEN_HEIGHT >> 1) + 0x60, 9, 12, 12, 0, 6, debugPlayerInfoLine, NULL, NULL};
+static DEBUG_WINDOW_TBL debugPlayerInfo = {DWTPLAYER_TITLE(6, "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x8f\xee\x95\xf1"), -0xF8, -(SCREEN_HEIGHT >> 1) + 0x60, 9, 12, 12, 0, 6, debugPlayerInfoLine, NULL, NULL};
 
 static DEBUG_WINDOW_LINE debugPlayerCameraInfoLine[6] = {
     {"%s", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, &DebugWork::g_dw.player.m_szCamera[0], 0, NULL, NULL},
@@ -273,7 +278,7 @@ static DEBUG_WINDOW_LINE debugPlayerCameraInfoLine[6] = {
     {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
 };
 
-static DEBUG_WINDOW_TBL debugPlayerCameraInfo = {"\x83v\x83\x8c\x83" "C\x83\x84\x81[\x83J\x83\x81\x83\x89\x8f\xee\x95\xf1", 0x2E, -(SCREEN_HEIGHT >> 1) + 0x3C, 20, 5, 10, 0, 6, debugPlayerCameraInfoLine, NULL, NULL};
+static DEBUG_WINDOW_TBL debugPlayerCameraInfo = {DWTPLAYER_TITLE(7, "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x83J\x83\x81\x83\x89\x8f\xee\x95\xf1"), 0x2E, -(SCREEN_HEIGHT >> 1) + 0x3C, 20, 5, 10, 0, 6, debugPlayerCameraInfoLine, NULL, NULL};
 
 static DEBUG_WINDOW_LINE debugPlayerBlockInfoLine[18] = {
     {"%s", &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, &DebugWork::g_dw.player.m_szBlock[0], 0, NULL, NULL},
@@ -296,7 +301,7 @@ static DEBUG_WINDOW_LINE debugPlayerBlockInfoLine[18] = {
     {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
 };
 
-static DEBUG_WINDOW_TBL debugPlayerBlockInfo = {"PLM::RB_DATA\x8f\xee\x95\xf1", -0x8, -(SCREEN_HEIGHT >> 1) + 0x3C, 21, 17, 12, 0, 6, debugPlayerBlockInfoLine, NULL, NULL};
+static DEBUG_WINDOW_TBL debugPlayerBlockInfo = {DWTPLAYER_TITLE(8, "PLM::RB_DATA\x8f\xee\x95\xf1"), -0x8, -(SCREEN_HEIGHT >> 1) + 0x3C, 21, 17, 12, 0, 6, debugPlayerBlockInfoLine, NULL, NULL};
 
 } // namespace DWTPlayer
 

@@ -341,6 +341,11 @@ public:
     Gauge::CLockonMarker* getMarker() { return m_pMarker; }
     void calcAppearPos(FLOAT inX, FLOAT inZ, FVECTOR* inTarget);
     HANDLE isNowMark() { return m_hMark; } // PARTIAL: added for Game/Player/FriendGoofy (original name/type unknown)
+    // PARTIAL: added for Game/Player/PlayerCamera
+    HANDLE isNowLockon() { return m_hLockon; }
+    FVECTOR& getLockonPos() { return m_vLockonPos; }
+    FVECTOR& getStartPos() { return m_vStartPos; }
+    BOOL isNowIdleAnim();
     // PARTIAL: added for Game/Gimmick/GimmickJumpStand
     INT getJumpState() const;
     static void notifyGimmickJump(HANDLE inHandle, INT inPower);

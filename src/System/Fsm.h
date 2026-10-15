@@ -63,7 +63,7 @@ public:
 };
 
 /* PARTIAL: added for Game/MinigameManager. CFSM is still declared (opaquely) in Game/Entity.h too: this one is
- * skipped when Entity.h came first, and Entity.h must not be included after it. */
+ * skipped when Entity.h came first; Entity.h skips its own when this one came first (PARTIAL: Game/Player/PlayerCamera). */
 #ifndef GAME_ENTITY_H
 class CFSM {
 protected:
