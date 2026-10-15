@@ -56,6 +56,7 @@ public:
     static INT makePremiereDeck(USHORT inDeck, SHORT inIdx); // PARTIAL: added for Form/Menu/Roulette
     static BOOL addCard(USHORT inID, SHORT inNumber);        // PARTIAL: added for Form/Menu/Roulette
     static BOOL deleteCard(USHORT inID, SHORT inNumber);     // PARTIAL: added for Form/Menu/RoomCreation
+    static void setDeckName(INT inDeck, const CHAR* inpName); // PARTIAL: added for Form/Menu/DecknameEdit
     static CARD_INFO* m_pCardInfo;         // PARTIAL: added for Form/Menu/Roulette (private in the original)
 #ifdef GAME_SCENEINFO_H
     static void initCard(USHORT nDeck, WORLD_ID nWorld, SHORT nFloor); // PARTIAL: added for Form/DebugMenu
