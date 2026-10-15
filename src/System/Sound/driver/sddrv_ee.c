@@ -868,10 +868,10 @@ int TsSdSePlayCheck(int num) {
 
 /* TsSdSepPlayDBG's string literals, for its INCLUDE_ASM; remove with it. */
 asm(".section .rodata\n"
-    ".align 3\n.globl D_0046ABD0\nD_0046ABD0:\n.asciz \"EE:  TsSdSepPlayDBG: ERROR! NO WD!!! wave%04d.wd\\n\"\n"
-    ".align 3\n.globl D_0046AC08\nD_0046AC08:\n.asciz \"EE:  TsSdSepPlayDBG: @@@@@@@@@@ SEP PLAY OVER!!! @@@@@@@@@@ sep_num=%d\\n\"\n"
-    ".align 3\n.globl D_0046AC50\nD_0046AC50:\n.asciz \"EE:  TsSdSepPlayDBG: se_data_ee_id[%d]=%d\\n\"\n"
-    ".align 3\n.globl D_0046AC80\nD_0046AC80:\n.asciz \"EE: nowait_func_buff OVER!!: TsSdSepPlayDBG\\n\"\n"
+    ".align 3\n.asciz \"EE:  TsSdSepPlayDBG: ERROR! NO WD!!! wave%04d.wd\\n\"\n"
+    ".align 3\n.asciz \"EE:  TsSdSepPlayDBG: @@@@@@@@@@ SEP PLAY OVER!!! @@@@@@@@@@ sep_num=%d\\n\"\n"
+    ".align 3\n.asciz \"EE:  TsSdSepPlayDBG: se_data_ee_id[%d]=%d\\n\"\n"
+    ".align 3\n.asciz \"EE: nowait_func_buff OVER!!: TsSdSepPlayDBG\\n\"\n"
     ".previous");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Sound/driver/sddrv_ee", TsSdSepPlayDBG);
 
@@ -1636,15 +1636,15 @@ int ConvLittleEndian(int a) {
 
 /* TsSdVsbPlay's string literals, for its INCLUDE_ASM; remove with it. */
 asm(".section .rodata\n"
-    ".align 3\n.globl D_0046B5B8\nD_0046B5B8:\n.asciz \"EE:  TsSdStrPlayVSB: ERROR!!!!!!!!!!!!!!!!!!!! MAX OVER max=%d, num=%d\\n\"\n"
-    ".align 3\n.globl D_0046B600\nD_0046B600:\n.asciz \"EE:  TsSdStrPlayVSB: ERROR!!!!!!!!!!!!!!!!!!!! No Entry num=%d\\n\"\n"
-    ".align 3\n.globl D_0046B640\nD_0046B640:\n.asciz \"EE:  TsSdStrPlayVSB: vsb_id=%d, num=%d, vol=%d, pan=%d, pos=0x%08x, size=0x%08x\\n\"\n"
-    ".align 3\n.globl D_0046B698\nD_0046B698:\n.asciz \"EE:  TsSdStrPlayVSB: volm=%d, rev=%d, rate=%d, size=0x%08x\\n\"\n"
-    ".align 3\n.globl D_0046B6D8\nD_0046B6D8:\n.asciz \"footer   addr=0x%08x\\n\"\n"
-    ".align 3\n.globl D_0046B6F0\nD_0046B6F0:\n.asciz \"%02x \"\n"
-    ".align 3\n.globl D_0046B6F8\nD_0046B6F8:\n.asciz \"\\n\"\n"
-    ".align 3\n.globl D_0046B700\nD_0046B700:\n.asciz \"end_flag addr=0x%08x\\n\"\n"
-    ".align 3\n.globl D_0046B718\nD_0046B718:\n.asciz \"header   addr=0x%08x\\n\"\n"
+    ".align 3\n.asciz \"EE:  TsSdStrPlayVSB: ERROR!!!!!!!!!!!!!!!!!!!! MAX OVER max=%d, num=%d\\n\"\n"
+    ".align 3\n.asciz \"EE:  TsSdStrPlayVSB: ERROR!!!!!!!!!!!!!!!!!!!! No Entry num=%d\\n\"\n"
+    ".align 3\n.asciz \"EE:  TsSdStrPlayVSB: vsb_id=%d, num=%d, vol=%d, pan=%d, pos=0x%08x, size=0x%08x\\n\"\n"
+    ".align 3\n.asciz \"EE:  TsSdStrPlayVSB: volm=%d, rev=%d, rate=%d, size=0x%08x\\n\"\n"
+    ".align 3\n.asciz \"footer   addr=0x%08x\\n\"\n"
+    ".align 3\n.asciz \"%02x \"\n"
+    ".align 3\n.asciz \"\\n\"\n"
+    ".align 3\n.asciz \"end_flag addr=0x%08x\\n\"\n"
+    ".align 3\n.asciz \"header   addr=0x%08x\\n\"\n"
     ".previous");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Sound/driver/sddrv_ee", TsSdVsbPlay);
 
