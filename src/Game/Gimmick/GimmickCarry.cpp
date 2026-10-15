@@ -601,15 +601,4 @@ void CGimmickCarry::setFlagSetInfo(INT in_flag) {
     m_FlagSetInfo = in_flag;
 }
 
-/* STOPGAP: the original object holds unnamed copies of CPointCollision's and CCollision's vtables (0x4CBD00,
- * 0x4CBD20) before its own; gcc emits them here as weak data, but tools/ee_asm_compat.py drops them unless
- * config/SLUS_217.99/symbol_addrs.txt names the copies (_vt$15CPointCollision_004CBD00,
- * _vt$10CCollision_004CBD20). Until then their bytes are spelled out here; delete this once the entries exist. */
-extern char _CPointCollision_dtor[] asm("_$_15CPointCollision");
-extern char _CPointCollision_collideMap[] asm("collideMap__15CPointCollision");
-extern char _CCollision_dtor[] asm("_$_10CCollision");
-extern void* const _GimmickCarry_vtcopies[14] = {
-    0, 0, 0, _CPointCollision_dtor, 0, _CPointCollision_collideMap, 0, 0,
-    0, 0, 0, _CCollision_dtor, 0, 0,
-};
 // SOURCE DATA: .rodata

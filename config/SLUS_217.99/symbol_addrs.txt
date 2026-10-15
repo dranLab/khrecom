@@ -57,3 +57,10 @@ _$_16CSphereCollision_002EDC78 = 0x002EDC78; // type:func size:0x30
 collideMap__16CSphereCollision_002EDCA8 = 0x002EDCA8; // type:func size:0x5C
 _vt$16CSphereCollision_004D4B38 = 0x004D4B38; // size:0x20
 _vt$10CCollision_004D4B58 = 0x004D4B58; // size:0x18
+// Game/Gimmick/GimmickCarry: CCollision's and CPointCollision's inline destructors, CPointCollision::collideMap
+// and unnamed copies of their vtables
+_$_10CCollision_002DB888 = 0x002DB888; // type:func size:0x30
+_$_15CPointCollision_002DB8B8 = 0x002DB8B8; // type:func size:0x30
+collideMap__15CPointCollision_002DB8E8 = 0x002DB8E8; // type:func size:0x5C
+_vt$15CPointCollision_004CBD00 = 0x004CBD00; // size:0x20
+_vt$10CCollision_004CBD20 = 0x004CBD20; // size:0x18
