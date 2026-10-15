@@ -32,8 +32,13 @@ Then:
   assigned to a running worker.
 - Small ones first, from a different class/directory than the running workers, and never a unit whose
   `.rodata` lists the same header as a running worker's unit. Follow the user's hints.
-- If an old worktree holds uncommitted work for a unit (an interrupted worker), give that unit's new worker the
-  path to those files as its starting point; remove the old worktree only after the unit is merged.
+- Interrupted workers (e.g. a pause for the usage limit) leave a `decomp/<slug>` branch with WIP commits, or a
+  worktree with uncommitted work. Resume those units first:
+  1. Uncommitted work: commit it in the old worktree as `WIP <unit> (interrupted)` (only `src/`).
+  2. The old branch stays checked out in its worktree, so the new worker can't switch to it: tell it to create
+     `decomp/<slug>-r` from main, `git merge decomp/<slug>`, run funcdiff first and continue; give the WIP status.
+  3. After merging `-r`, remove both worktrees and delete `decomp/<slug>`, `decomp/<slug>-r` and both
+     `worktree-agent-*` branches.
 - Tell the user which unit you start, in one line.
 
 ## 3. Starting a worker
