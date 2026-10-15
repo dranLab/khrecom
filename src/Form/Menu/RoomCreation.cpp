@@ -8,10 +8,11 @@
 #include "Game/Collision/CollUtil.h"
 
 /* Placeholder: an empty string follows CollUtil.h's strings in .rodata (as in WorldSelect); which header it comes
- * from is not known. */
-inline void _emptyStringPlaceholder() {
-    TRACE("");
-}
+ * from is not known (it was `inline void _emptyStringPlaceholder() { TRACE(""); }`). STOPGAP while menuMain is
+ * INCLUDE_ASM: the string under its original label, which menuMain's asm refers to; the file's "" literals use it
+ * through rcEmpty. */
+asm(".section .rodata\n.align 3\n.globl D_004EF690\nD_004EF690:\n.asciz \"\"\n.previous");
+extern char rcEmpty[] __asm__("D_004EF690");
 
 #include "Game/Card.h"
 inline void* operator new(size_t, void* p) throw() { return p; }
@@ -41,35 +42,11 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
 
-/* WIP: every function is still the original assembly. The C below (#if 0) matches 17/19 functions on its own;
- * main and menuMain are close but not matching yet (menuMain: RCNORMA::NormaSrc by-value argument is built from
- * halfword loads in the original, ours uses ld; register allocation in case 0/2). The C needs .data/.rodata from
- * source (statics are TEMP externs to the original labels). */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", __13CRoomCreationP5CTaski);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", _$_13CRoomCreation);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", dispose__13CRoomCreation);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", removeRsrc__13CRoomCreation);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", main__13CRoomCreation);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", menuMain__13CRoomCreation);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", initInfoNum__13CRoomCreationR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", selectDispInfoNum__13CRoomCreation);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", initCard__13CRoomCreation);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", initCardCheck__13CRoomCreationi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", selectDispCard__13CRoomCreation);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", initNumHolder__13CRoomCreationR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", selectDispNumHolder__13CRoomCreation);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", searchNumExist__13CRoomCreationii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", moveCursor__13CRoomCreation);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", changeCursor__13CRoomCreationii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", disp__13CRoomCreation);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", getRoomInfo__13CRoomCreationUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", getNormaInfo__13CRoomCreation);
 
-#if 0
 /* Game/CardKind's card table: a static in the original's header, emitted (with its strings) at the end of
  * .rodata. */
-static const CARD_DATA cardDataTbl[224] = {
-    { { 0x00 }, 0, 0, 0, "" }, // 0
+static const CARD_DATA cardDataTbl[224] __asm__("cardDataTbl_004F0B48") = {
+    { { 0x00 }, 0, 0, 0, rcEmpty }, // 0
     { { 0x11 }, 2, 0, 3, "Kingdom Key" }, // 1
     { { 0x11 }, 2, 1, 3, "Three Wishes" }, // 2
     { { 0x11 }, 2, 2, 3, "Crabclaw" }, // 3
@@ -288,11 +265,11 @@ static const CARD_DATA cardDataTbl[224] = {
     { { 0x0c }, 0, 0, 0, "Unknown Room" }, // 216
     { { 0x0c }, 0, 0, 0, "Conqueror's Respite" }, // 217
     { { 0x0c }, 0, 0, 0, "Room of Rewards" }, // 218
-    { { 0x0c }, 0, 0, 0, "" }, // 219
-    { { 0x0c }, 0, 0, 0, "" }, // 220
-    { { 0x00 }, 0, 0, 0, "" }, // 221
-    { { 0x00 }, 0, 0, 0, "" }, // 222
-    { { 0x00 }, 0, 0, 0, "" }, // 223
+    { { 0x0c }, 0, 0, 0, rcEmpty }, // 219
+    { { 0x0c }, 0, 0, 0, rcEmpty }, // 220
+    { { 0x00 }, 0, 0, 0, rcEmpty }, // 221
+    { { 0x00 }, 0, 0, 0, rcEmpty }, // 222
+    { { 0x00 }, 0, 0, 0, rcEmpty }, // 223
 };
 
 
@@ -373,11 +350,9 @@ public:
     }
 };
 
-#if 0 /* .data not from source yet */
 INT CRoomCreation::m_iWorldRsrc = 0;
 INT CRoomCreation::m_iPlayerRsrc = 0;
 INT CRoomCreation::m_iEffectRsrc = 0;
-#endif
 
 CRoomCreation::CRoomCreation(CTask* p, HANDLE hDoor) : CMenu(p, 1) {
 
@@ -429,7 +404,7 @@ CRoomCreation::CRoomCreation(CTask* p, HANDLE hDoor) : CMenu(p, 1) {
     m_pRoomInfo = CSceneInfo::getRoomInfo(-1);
     m_pDoorInfo = &m_pRoomInfo->_doors[m_pGimmickDoor->getDoorID()];
     m_doorStat = m_pDoorInfo->getDoorState();
-    int iDoorType[4] = { 7, 8, 9, 10 };
+    int iDoorType[4] = { 0x80, 0x100, 0x200, 0x400 };
     m_iObjType = iDoorType[m_pDoorInfo->_id] ^ 0x3FF8;
     CSceneEnv::setStop((ObjType::eObjBit)(m_iObjType | 4));
     CGameWork::setByte(1, 0x140, 2);
@@ -534,6 +509,10 @@ static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 /* g_pPlayer read through a reference: its load stays after the preceding member stores. */
 #define ASSERT_REF(e) if (!_ref(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+/* STOPGAP while menuMain is INCLUDE_ASM: its asm refers to main's __FILE__ string by the original label. */
+extern const char rcFile[] __asm__("D_004EF8A0");
+#define ASSERT_F(f, e) if (!(e)) AssertApp((char*)(f), __LINE__, #e, 0)
+#define ASSERT_REF_F(f, e) if (!_ref(e)) AssertApp((char*)(f), __LINE__, #e, 0)
 
 template <class T> static inline T& _ref(T& v) { return v; }
 
@@ -555,17 +534,10 @@ void CRoomCreation::main() {
     CCoord camCrd;
     CCoord* pCoord;
     G_RGBA rgba;
-#if 0 /* TEMP: .data not from source yet */
     static LPCTSTR pSeqName2 = "world_title:00";
     static char* pEffName[2] = { "rec_mon_he", "rec_mon_spot" };
     static char* pCameraName[4] = { "tobira01", "tobira03", "tobira02", "tobira04" };
     static char* pBoneName[2] = { "WeaponR", "wep0" };
-#else
-    extern LPCTSTR pSeqName2 __asm__("pSeqName2.4923");
-    extern char* pEffName[2] __asm__("pEffName.4924");
-    extern char* pCameraName[4] __asm__("pCameraName.4925");
-    extern char* pBoneName[2] __asm__("pBoneName.4926");
-#endif
     int iDoorType2[4] = { 7, 8, 9, 10 };
     short iEffctRsrc[14] = { 0x1779, 0x1779, 0x1783, 0x178D, 0x1797, 0x17A1, 0x17AB,
                              0x17B5, 0x17BF, 0x17C9, 0x17D3, 0x17DD, 0x17E7, 0x17F1 };
@@ -709,8 +681,9 @@ void CRoomCreation::main() {
         }
         C2DMan::destroy(m_hLay);
         m_hLay = 0;
+        {static const char sFile[] __asm__("D_004EF8A0") __attribute__((aligned(8))) = __FILE__;
 #line 405
-        ASSERT_REF(g_pPlayer);
+        ASSERT_REF_F(sFile, g_pPlayer);}
         if (m_nStep == 6) {
             g_pPlayer->setTrgFlag(0x10000, 0);
             m_nStep = 9;
@@ -730,14 +703,18 @@ void CRoomCreation::main() {
         m_pPathCamera->init(m_pDoorInfo->_id >= 2 ? pCameraName[0] : pCameraName[1], TRUE, FALSE, 0x80);
         m_pPathCamera->run();
 #line 430
-        ASSERT(g_pPlayer);
-        CPlayer*& rPlayer = g_pPlayer;
-        pCoord = &g_pPlayer->Crd(rPlayer->getBoneIndex(CGame::isSoraGame() ? pBoneName[0] : pBoneName[1], 0));
+        ASSERT_F(rcFile, g_pPlayer);
+        INT iBone = g_pPlayer->getBoneIndex(CGame::isSoraGame() ? pBoneName[0] : pBoneName[1], 0);
+        pCoord = &g_pPlayer->Crd(iBone);
 #line 433
         m_pAttachCard = NEW(433, CAttachCard)(g_pPlayer);
         if (CGame::isSoraGame()) {
             vColor.set(0.1f, -0.08f, 0.12f, 1.0f);
-            vColor2.set(2.1816616f, 1.3089969f, 0.34906584f, 1.0f);
+            FVECTOR* pColor2 = &vColor2;
+            vColor2.x = 2.1816616f;
+            vColor2.y = 1.3089969f;
+            vColor2.z = 0.34906584f;
+            pColor2->w = 1.0f;
         } else {
             vColor.init();
             vColor2._q = 0;
@@ -810,7 +787,7 @@ void CRoomCreation::main() {
         if (CSceneEnv::isColorEnd(0)) {
             CEffectMan::killEffect(m_hSpotEffect, 0.0f);
 #line 528
-            ASSERT(g_pPlayer);
+            ASSERT_F(rcFile, g_pPlayer);
             g_pPlayer->setTrgFlag(0x8000, 0);
             CGameWork::setInt(1, 0xE2, 0);
             CSceneEnv::setStop((ObjType::eObjBit)0);
@@ -829,6 +806,113 @@ void CRoomCreation::main() {
         break;
     }
 }
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/RoomCreation", menuMain__13CRoomCreation);
+// menuMain's string literals, jump table and statics, for its INCLUDE_ASM; remove with it.
+asm(".section .rodata\n"
+    ".align 3\n"
+    ".align 3\n"
+    ".globl D_004EF998\n"
+    "D_004EF998:\n"
+    ".word 0x02030506\n"
+    ".word 0x00000004\n"
+    ".align 3\n"
+    ".globl D_004EF9A0\n"
+    "D_004EF9A0:\n"
+    ".word 0x685447F9\n"
+    ".word 0x61632065\n"
+    ".word 0x20736472\n"
+    ".word 0x20756F79\n"
+    ".word 0x20656573\n"
+    ".word 0x6C616873\n"
+    ".word 0x6562206C\n"
+    ".word 0x65687420\n"
+    ".word 0x79656B20\n"
+    ".word 0xF4815C81\n"
+    ".word 0\n"
+    ".word 0\n"
+    ".align 3\n"
+    ".globl D_004EF9D0\n"
+    "D_004EF9D0:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(602)\"\n"
+    ".align 3\n"
+    ".globl D_004EFA08\n"
+    "D_004EFA08:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(618)\"\n"
+    ".align 3\n"
+    ".globl D_004EFA40\n"
+    "D_004EFA40:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(623)\"\n"
+    ".align 3\n"
+    ".globl D_004EFA78\n"
+    "D_004EFA78:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(647)\"\n"
+    ".align 3\n"
+    ".globl D_004EFAB0\n"
+    "D_004EFAB0:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(657)\"\n"
+    ".align 3\n"
+    ".globl D_004EFAE8\n"
+    "D_004EFAE8:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(667)\"\n"
+    ".align 3\n"
+    ".globl D_004EFB20\n"
+    "D_004EFB20:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(676)\"\n"
+    ".align 3\n"
+    ".globl D_004EFB58\n"
+    "D_004EFB58:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(682)\"\n"
+    ".align 3\n"
+    ".globl D_004EFB90\n"
+    "D_004EFB90:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(691)\"\n"
+    ".align 3\n"
+    ".globl D_004EFBC8\n"
+    "D_004EFBC8:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(696)\"\n"
+    ".align 3\n"
+    ".globl D_004EFC00\n"
+    "D_004EFC00:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(707)\"\n"
+    ".align 3\n"
+    ".globl D_004EFC38\n"
+    "D_004EFC38:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(712)\"\n"
+    ".align 3\n"
+    ".globl D_004EFC70\n"
+    "D_004EFC70:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(736)\"\n"
+    ".align 3\n"
+    ".globl D_004EFCA8\n"
+    "D_004EFCA8:\n"
+    ".asciz \"c:/KHCOM/MainApp/Form/Menu/RoomCreation.cpp(746)\"\n"
+    ".align 3\n"
+    ".globl D_004EFCE0\n"
+    "D_004EFCE0:\n"
+    ".asciz \"fgExist > 0\"\n"
+    ".align 3\n"
+    ".globl jtbl_004EFCF0\n"
+    "jtbl_004EFCF0:\n"
+    ".word .L00341DB0\n"
+    ".word .L00342790\n"
+    ".word .L00342864\n"
+    ".word .L00343100\n"
+    ".word .L00343188\n"
+    ".word .L00343190\n"
+    ".word .L0034394C\n"
+    ".word .L00343958\n"
+    ".section .data\n"
+    ".align 2\n"
+    "scrollBarSeqTbl.4930:\n"
+    ".short 105, 102, 108\n"
+    ".align 2\n"
+    "pKeyStr.4931:\n"
+    ".word D_004EF9A0\n"
+    ".previous\n");
+
+/* menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads
+ * in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). */
+#if 0
 INT CRoomCreation::menuMain() {
     CARD card;
     FVECTOR vec;
@@ -842,13 +926,8 @@ INT CRoomCreation::menuMain() {
     INT nNorma;
     FLOAT fWidth;
     unsigned char categorySeqTbl[5] = { 6, 5, 3, 2, 4 };
-#if 0 /* TEMP: .data not from source yet */
     static USHORT scrollBarSeqTbl[3] = { 105, 102, 108 };
     static LPCTSTR pKeyStr = "\xf9" "GThe cards you see shall be the key\x81\x5c\x81\xf4";
-#else
-    extern USHORT scrollBarSeqTbl[3] __asm__("scrollBarSeqTbl.4930");
-    extern LPCTSTR pKeyStr __asm__("pKeyStr.4931");
-#endif
     RCNORMA::NormaSrc normaSrc;
 
     switch (m_nMenuStep) {
@@ -1358,6 +1437,8 @@ INT CRoomCreation::menuMain() {
     moveCursor();
     return 0;
 }
+#endif
+#line 1206
 void CRoomCreation::initInfoNum(FVECTOR& vec) {
     FVECTOR vec2;
     for (INT i = 0; i < 10; i++) {
@@ -1374,7 +1455,7 @@ void CRoomCreation::selectDispInfoNum() {
     INT idx;
     INT nExist = 0;
     char buf[16];
-    extern LPCTSTR pStr __asm__("pStr.4938"); /* TEMP */
+    static LPCTSTR pStr = "\x81\x7e\xf9" "D%d";
     if (m_nCardSelectMax) {
         card = m_pCardWinCard[m_nCardSelect]->m_card;
         for (idx = 0; idx < m_nCardKindMax; idx++) {
@@ -1475,7 +1556,7 @@ void CRoomCreation::initNumHolder(FVECTOR& vec) {
     char chrBuf[16];
     FVECTOR vec2;
     G_RGBA rgba;
-    extern LPCTSTR pStr __asm__("pStr.4951"); /* TEMP */
+    static LPCTSTR pStr = "\x81\x7e\xf9" "D%d";
     rgba.col = 0x80006060;
     vec2.init();
     for (INT i = 0; i < 10; i++) {
@@ -1490,7 +1571,7 @@ void CRoomCreation::initNumHolder(FVECTOR& vec) {
         pCtrl->addSeqShift("room01:00", i * 2 + 0x3C, 10.0f, 24.0f);
         pCtrl->enableDisp(FALSE);
         sprintf(chrBuf, pStr, i);
-        m_pCardNumFnt[i] = NEW(1474, C2DFnt)(0, 0, &rgba, 15, "", 0x40);
+        m_pCardNumFnt[i] = NEW(1474, C2DFnt)(0, 0, &rgba, 15, rcEmpty, 0x40);
         m_pCardNumFnt[i]->allocText(chrBuf);
         pCtrl->addFntShift("room01:00", m_pCardNumFnt[i], 34.0f, 40.0f);
     }
@@ -1587,7 +1668,6 @@ void CRoomCreation::moveCursor() {
     }
 }
 void CRoomCreation::changeCursor(INT nSel, INT nIdx) {
-#if 0 /* TEMP: .data not from source yet */
     static float cursorPosTbl0[12] = {
         150.0f, 291.0f, 210.0f, 291.0f, 270.0f, 291.0f, 330.0f, 291.0f, 390.0f, 291.0f, 450.0f, 291.0f,
     };
@@ -1596,11 +1676,6 @@ void CRoomCreation::changeCursor(INT nSel, INT nIdx) {
         161.0f, 329.0f, 235.0f, 329.0f, 309.0f, 329.0f, 383.0f, 329.0f, 457.0f, 329.0f,
     };
     static LPCTSTR pCardSeqName = "card:00";
-#else
-    extern float cursorPosTbl0[12] __asm__("cursorPosTbl0.4964");
-    extern float cursorPosTbl1[20] __asm__("cursorPosTbl1.4965");
-    extern LPCTSTR pCardSeqName __asm__("pCardSeqName.4966");
-#endif
     FLOAT* fPos;
     if (!m_pCursorCtrl) {
         m_pCursorCtrl = NEW(1662, C2DSeqCtrl);
@@ -1666,12 +1741,12 @@ void CRoomCreation::changeCursor(INT nSel, INT nIdx) {
             m_pCursorCtrl->enableDisp(1, FALSE);
             m_pCursorCtrl->enableDisp(2, FALSE);
             m_pCursorCtrl->enableDisp(3, FALSE);
-            m_pRoomNameFnt->setText("");
+            m_pRoomNameFnt->setText(rcEmpty);
             selectDispInfoNum();
             if (m_pCardSample) {
                 m_pCardSample->enableDisp(FALSE);
             }
-            m_pExplainFnt[0]->setText("");
+            m_pExplainFnt[0]->setText(rcEmpty);
             m_pCardWinInfo->enableDisp(1, FALSE);
             m_pCardWinInfo->enableDisp(2, FALSE);
             if (nIdx < 0) return;
@@ -1711,7 +1786,6 @@ RCRoomInfo* CRoomCreation::getRoomInfo(USHORT kind) {
     return &roomCreationeRoomInfo[kind - 0xA1];
 }
 LPCTSTR CRoomCreation::getNormaInfo() {
-#if 0 /* TEMP: .data not from source yet */
     static char* wordEtc[8] = {
         "\xf9" "YCriteria:\xf9" "A\xf9" "D %s",
         "\xf9" "YCriteria:\xf9" "A\xf9" "D ",
@@ -1725,10 +1799,6 @@ LPCTSTR CRoomCreation::getNormaInfo() {
     static char* wordColor[8] = {
         "A c", "A red c", "A green c", "A blue c", "C", "Red c", "Green c", "Blue c",
     };
-#else
-    extern char* wordEtc[8] __asm__("wordEtc.4977");
-    extern char* wordColor[8] __asm__("wordColor.4978");
-#endif
     char buf[0x60];
     CARD card;
     RCNORMA::NormaSrc normaSrc;
@@ -1756,4 +1826,4 @@ LPCTSTR CRoomCreation::getNormaInfo() {
     }
     return m_normaInfoBuf;
 }
-#endif
+// SOURCE DATA: .data .rodata
