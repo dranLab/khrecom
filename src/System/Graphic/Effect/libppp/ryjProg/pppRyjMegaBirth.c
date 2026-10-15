@@ -3,7 +3,7 @@
 #include "System/Graphic/Effect/libppp/draw/shape.h"
 #include "System/Graphic/Effect/libppp/eiProg/pppColor.h"
 #include "System/Graphic/Effect/libppp/draw/sin_t.h"
-#include "include_asm.h"
+
 
 void *lmemset(void *dis, word code, int ln);
 void sceVu0ScaleVectorXYZ(sceVu0FVECTOR v0, sceVu0FVECTOR v1, float s);
@@ -659,14 +659,14 @@ static void init_matrix(pppPObject *pobj, pwst *pw, PRyjMegaBirth *pParam, VRyjM
     }
 }
 
-static void qsort_particle(int *idx_list, float *z_list, int first, int last);
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirth", qsort_particle);
 
-/* Matches except for the hazard nops between c.lt.s and bc1t/bc1f in the two inner loops: tools/ee_asm_compat.py
-   (fix_short_loops) emits those short-loop branches as .word, so Ps2EeAs no longer inserts the nop gcc leaves
-   to it ("#nop"), which also shifts the .p2align of the second loop. */
-#if 0
+
+
+
+
+
+
 static void qsort_particle(int *idx_list, float *z_list, int first, int last) {
     int i;
     int j;
@@ -703,7 +703,7 @@ static void qsort_particle(int *idx_list, float *z_list, int first, int last) {
         qsort_particle(idx_list, z_list, j + 1, last);
     }
 }
-#endif
+
 
 /* not in the debug info: as an inline function, the address operand lives long enough for the loop optimizer
    to hoist pw->wloc out of the draw loop, as in the original */

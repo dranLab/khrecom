@@ -210,10 +210,6 @@ CHAR* CJiminyMemoFlag::getCollecterRankName(INT inMode, FLOAT inPercentage) {
     }
     INT rank;
     for (rank = 0; rank < rankNum; rank++) {
-        /* Not an instruction (a symbol assignment, no code): tools/ee_asm_compat.py counts it as one, so it doesn't
-         * take this loop for a short one and leaves it to Ps2EeAs, which then inserts the c.lt.s/bc1fl hazard nop the
-         * original has (the tool's .word branch would drop it). */
-        __asm__ volatile("jm_hazard = 0");
         if (inPercentage < pRankTbl[rank]) break;
     }
     UINT ctdID = ctNo + rank;

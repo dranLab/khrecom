@@ -121,11 +121,16 @@ def fix_short_loops(lines: list[str]) -> list[str]:
             labels[m.group(1)] = len(out)
         elif (m := BRANCH.match(line)) and m.group(3) in labels:
             body = [l for l in out[labels[m.group(3)] + 1:] if INSN.match(l)]
-            if len(body) + 1 <= SHORT_LOOP + 1:  # macros only make loops longer
+            # gcc leaves the nop between an FP compare and its bc1t/bc1f to the assembler ("#nop"), even when it
+            # puts the branch in a noreorder block; it is part of the loop, and the .word branch would hide the
+            # hazard from Ps2EeAs, so it is counted and emitted here
+            hazard = (m.group(1).startswith("bc1") and bool(body)
+                      and INSN.match(body[-1]).group(1).startswith("c."))
+            if len(body) + hazard + 1 <= SHORT_LOOP + 1:  # macros only make loops longer
                 label, pad, at = m.group(3), f"$LSLp{n}", f"$LSLb{n}"
                 count = f"{SHORT_LOOP} - (({pad} - {label}) >> 2) - 1"
                 word = f"\t.word 0x{branch_word(m.group(1), m.group(2)):08X} | ((({label} - {at} - 4) >> 2) & 0xFFFF)"
-                out += ([] if noreorder else ["\t.set\tnoreorder"]) + [
+                out += ([] if noreorder else ["\t.set\tnoreorder"]) + (["\tnop"] if hazard else []) + [
                     f"{pad}:", f"\t.if {count} > 0", f"\t.rept {count}", "\tnop", "\t.endr", "\t.endif",
                     f"{at}:", f"{word} # {line.strip()}"] + ([] if noreorder else ["\tnop", "\t.set\treorder"])
                 n += 1
