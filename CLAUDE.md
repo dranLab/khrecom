@@ -12,6 +12,8 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
 - `ninja` - build; fails unless the rebuilt image matches the original (SHA-1).
 - `.venv/bin/python tools/funcdiff.py <unit> [<function>]` - status per function, or original | ours side by side
   (only the differences with 3 lines of context; `-C N` for more, `--full` for every line).
+- `.venv/bin/python tools/imagediff.py` - where the rebuilt image differs from the original (object, section,
+  symbol); `check.sh` runs it when the checksum fails. funcdiff ignores data: wrong data from source shows here.
 - `.venv/bin/python tools/asm.py <unit> [<function>...]` - the original's functions (size, weak/global) or their
   assembly, compact (a third of the raw `.s`); `--data` for the unit's data.
 - `.venv/bin/python tools/compare_compilers.py SLUS_217.99 src/<unit>.cpp` - per function, with every installed compiler.
@@ -69,6 +71,11 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 
 ## Pitfalls
 
+- INCLUDE_ASM'd code references splat's names (`D_004EF8A0`, `get_st_001828C8`, `jtbl_...`); `configure.py` PROVIDEs
+  every such address-named label at its original address (`build/<VERSION>/original_labels.ld`), so compiled code
+  needs no asm labels or asm names for them (Ps2EeAs crashes on aliases anyway).
+- Don't compare data bytes against `build/<VERSION>/expected/obj/data/*.o`: where splat read string bytes as
+  symbol + addend, the object holds only the addend. Compare the original image (`imagediff.py`) instead.
 - A crash (signal 11) in the `cc` step is Ps2EeAs hitting an assembler error (it can't print it under wibo).
   Look at `build/SLUS_217.99/src/<unit>.o.s` (what it assembled) and `.o.gcc.s` (raw compiler output).
 - objdiff's data percentages can be below 100% for matching data (`func_0` relocations on zero words, padding
