@@ -274,8 +274,8 @@ static inline void RotTransPersST(float *stv, float *v, float *st_sub, float *st
     stv[2] = 1.0f;
     stv[3] = 1.0f;
 }
-static void init_spline(sceVu0FVECTOR *x, int n, sceVu0FVECTOR *data) __asm__("init_spline_001822A8"); static void spline(float *out, sceVu0FVECTOR *x, float t, sceVu0FVECTOR *data) __asm__("spline_00182468"); static void get_st(PEiDrawShipoly *param, float *s_min, float *s_max, float *t_min, float *t_max) __asm__("get_st_001828C8");
-static void init_spline(sceVu0FVECTOR *x, int n, sceVu0FVECTOR *data) {
+
+__asm__("init_spline_001822A8:"); static void init_spline(sceVu0FVECTOR *x, int n, sceVu0FVECTOR *data) {
     sceVu0FVECTOR *d;
     static sceVu0FVECTOR c = { 4.0f, -1.0f, 0.0f, 0.0f };
 
@@ -391,7 +391,7 @@ static void init_spline(sceVu0FVECTOR *x, int n, sceVu0FVECTOR *data) {
         : "$8", "$9", "$10", "$11", "$12", "$13", "$14", "$15", "$16", "$17", "$18", "$19", "memory");
 }
 
-static void spline(float *out, sceVu0FVECTOR *x, float t, sceVu0FVECTOR *data) {
+__asm__("spline_00182468:"); static void spline(float *out, sceVu0FVECTOR *x, float t, sceVu0FVECTOR *data) {
     int i;
     float d;
     static sceVu0FVECTOR c = { 3.0f, 2.0f, 0.0f, 0.0f };
@@ -480,7 +480,7 @@ static void get_pos_2D(PEiDrawShipoly *param, VEiDrawShipoly *val, float *va) {
     }
 }
 
-static void get_st(PEiDrawShipoly *param, float *s_min, float *s_max, float *t_min, float *t_max) {
+__asm__("get_st_001828C8:"); static void get_st(PEiDrawShipoly *param, float *s_min, float *s_max, float *t_min, float *t_max) {
     float smin;
     float smax;
     float tmin;
@@ -1127,7 +1127,7 @@ void drawDistShipoly(PEiDrawShipoly *p, VEiDrawShipoly *val, VColor *col, sceVu0
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", pppEiDrawDrawShipoly);
 #if 0
-/* register allocation of loop temporaries differs (a0/a1/a2, thin loop) */
+/* 44 lines differ: Type!=0 copy loop hoists li -1 before lui 0x7000 (original after; spl is not an original local), Type 1 loop swaps a0/a1 (centv giv vs &dv) */
 void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable *ctbl) {
     VEiDrawShipoly *val;
     VScale *scl;
@@ -1203,14 +1203,14 @@ void pppEiDrawDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable 
     } else if (val->GetPosCt >= 3) {
         sceVu0FVECTOR *spl;
 
-        for (k = 0, spl = (sceVu0FVECTOR *)0x70000000; k < val->GetPosCt; k++) {
+        for (k = 0; k < val->GetPosCt; k++) {
+            spl = &((sceVu0FVECTOR *)0x70000000)[k];
             n = frame_ct - k;
             if (n < 0) {
                 n += smp_num;
             }
             CopyVector(*spl, smp[n]);
             (*spl)[3] = 1.0f;
-            spl++;
         }
         init_spline((sceVu0FVECTOR *)0x70000000, val->GetPosCt, (sceVu0FVECTOR *)0x70000800);
         for (k = 0; k < poly_num + 1; k++) {
@@ -1543,14 +1543,9 @@ void pppEiDrawShipoly(pppPObject *pobj, PEiDrawShipoly *param, pppCtrlTable *ctb
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly", pppEiDrawShipolyCon);
-#if 0
-/* store scheduling differs: the original loads ppvMng after all the stores, ours hoists it */
 void pppEiDrawShipolyCon(pppPObject *pobj, pppCtrlTable *ctbl) {
     VEiDrawShipoly *val = (VEiDrawShipoly *)&pobj->val[ctbl->useVal[DRAWSHIPOLY_THIS]];
 
-    val->TexScrollS = val->Gravity = val->GravityV = val->GravityA = val->Dist = val->DistV = val->DistA =
-        val->CentrifugalForce = val->CentrifugalForceV = val->CentrifugalForceA = val->TexScrollT = 0.0f;
     *(u_long128 *)val->Wind = 0;
     val->StartParam = 0;
     *(u_long128 *)val->WindV = 0;
@@ -1563,9 +1558,11 @@ void pppEiDrawShipolyCon(pppPObject *pobj, pppCtrlTable *ctbl) {
     val->Smp = 0;
     *(u_long128 *)val->GPointA = 0;
     val->GetPosCt = 0;
-    ppvMng->bBoolNoViewClip = 1;
+    val->TexScrollT = val->TexScrollS = val->Gravity = val->GravityV = val->GravityA = val->Dist = val->DistV = val->DistA =
+        val->CentrifugalForce = val->CentrifugalForceV = val->CentrifugalForceA = 0.0f;
+    /* volatile read: keeps the ppvMng load after the stores as in the original */
+    (*(pppMngSt * volatile *)&ppvMng)->bBoolNoViewClip = 1;
 }
-#endif
 
 void pppEiDrawShipolyCon2(pppPObject *pobj, pppCtrlTable *ctbl) {
     VEiDrawShipoly *val = (VEiDrawShipoly *)&pobj->val[ctbl->useVal[DRAWSHIPOLY_THIS]];
@@ -1597,3 +1594,4 @@ void pppEiDrawShipolyDes(pppPObject *pobj, pppCtrlTable *ctbl) {
         val->Smp = 0;
     }
 }
+/* __asm__("<name>_<ADDR>:") before the statics: splat's unique names, called by the INCLUDE_ASM functions */
