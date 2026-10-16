@@ -16,7 +16,10 @@ private:
     UBYTE _m_0x10[0x60];   /* 0x010 m_hTask, m_vEnemyPos .. m_vHitEffectRot */
     ATK_KIND m_DamageKind; /* 0x070 */
     INT m_DamageAttr;      /* 0x074 ATK_ATTR */ // PARTIAL: added for Game/Enemy/EnemyWhitemushroom
+    UBYTE _m_0x78[0x88];   /* 0x078 .. */
+    FLOAT m_fBadStatusParam; /* 0x100 */ // PARTIAL: added for Game/Enemy/EnemyCreapplant (name unknown)
 public:
+    FLOAT getBadStatusParam() { return m_fBadStatusParam; } // PARTIAL: added for Game/Enemy/EnemyCreapplant (name unknown)
     ATK_KIND getDamageKind() { return m_DamageKind; }
     INT getDamageAttr() { return m_DamageAttr; } // PARTIAL: added for Game/Enemy/EnemyWhitemushroom (name unknown)
     /* CCollObj::getDetectPos (m_pCollision->m_vDetectPos at 0x40) */

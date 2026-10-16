@@ -93,6 +93,9 @@ public:
     // PARTIAL: added for Game/Enemy/EnemyWhitemushroom
     void changeBattleEnemyState(INT inState);
     void makePrize(const FVECTOR* inPos);
+    // PARTIAL: added for Game/Enemy/EnemyCreapplant
+    void setBadStatusEffect(INT inKind, FLOAT inParam);
+    void killBadStatusEffect();
     BOOL canCardBattle();
     HANDLE recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent);
     virtual void getUseCardPos(FVECTOR& outPos);
