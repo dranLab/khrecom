@@ -73,7 +73,7 @@ public:
         setRadius(inRadius);
     }
     void setWallRadius(FLOAT inRadius) { m_fWallRadius = inRadius; }
-    void turnToTargetY(const FVECTOR& inTarget, FLOAT inRate); // PARTIAL: added for Game/Player/Summon
+    BOOL turnToTargetY(const FVECTOR& inTarget, FLOAT inRate); // PARTIAL: added for Game/Player/Summon
     void turnToTargetY(const CEntity* inTarget, FLOAT inRate); // PARTIAL: added for Game/Enemy/EnemyWightnight
     // PARTIAL: added for Game/Bullet/Bullet (m_vDetectNormal 0xa0)
     void turnToTarget(const FVECTOR& inTarget, FLOAT inRate);

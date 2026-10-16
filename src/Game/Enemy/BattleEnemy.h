@@ -64,6 +64,8 @@ public:
     BOOL isActiveTarget() const { return !isBtlEnemyFlag(0x80000) && !isBtlEnemyFlag(0x100000); }
     // PARTIAL: added for Game/Enemy/EnemyDarkball (original name unknown)
     void setBtlEnemyFlag(ULONGLONG inFlag) { m_ullBtlEnemyFlag |= inFlag; }
+    void clearBtlEnemyFlag(ULONGLONG inFlag) { m_ullBtlEnemyFlag &= ~inFlag; } // PARTIAL: added for Game/Enemy/EnemyTornadostep
+    void getPlayerPosition(FVECTOR& outPos);
     FLOAT getExtraParam(const CHAR* inParamName);
     void endCardBattle(CState* inState, TIMEQ inNextAttackWait);
     BOOL turnToPlayer(FLOAT inLimit);
