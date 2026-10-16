@@ -10,22 +10,23 @@ namespace D2 { struct SeqControl; } // PARTIAL: in D2 as in the original
 namespace D2 {
 
 class C2DO {
-private:
+public: // PARTIAL: inline (weak in the original) and public as in the debug info, for System/Graphic/2d/2DLayObj
     HANDLE m_hBaseHandle; /* 0x0 */
     HANDLE m_hHandle;     /* 0x4 */
     /* vtable 0x8 */
 
-public:
-    C2DO();
-    virtual ~C2DO();
-    virtual void _main();
-    virtual void _disp();
-    virtual void changeTimeExt(INT qTime);
-    virtual void changeTexture(INT nIdx, CHAR* pName, G_UV* pUV);
-    virtual void changeTexture(INT nIdx, INT nIdx2, CHAR* pName, G_UV* pUV);
-    virtual void restart(INT nFlag);
-    virtual void changeLayer(INT nLayer);
-    virtual void enableDisp(INT bEnable);
+    C2DO() : m_hBaseHandle(0), m_hHandle(0) {}
+    virtual ~C2DO() {}
+    HANDLE getBaseHandle() { return m_hBaseHandle; }
+    HANDLE _getHandle() { return m_hHandle; }
+    virtual void _main() {}
+    virtual void _disp() {}
+    virtual void changeTimeExt(INT qTime) {}
+    virtual void changeTexture(INT nIdx, CHAR* pName, G_UV* pStart, G_UV* pEnd) {}
+    virtual void changeTexture(INT nIdx, INT nIdx2, CHAR* pName, G_UV* pStart, G_UV* pEnd) {}
+    virtual void restart(INT nFlag) {}
+    virtual void changeLayer(INT nLayer) {}
+    virtual void enableDisp(INT bEnable) {}
 };
 
 class C2DSeqObj : public C2DO {
@@ -47,6 +48,8 @@ private:
 public:
     C2DSeqObj();
     virtual ~C2DSeqObj();
+    TIMEQ getTime() { return m_qTime; } // PARTIAL: added for System/Graphic/2d/2DLayObj
+    BOOL isEnd() { return m_bEnd; }
 };
 
 }  // namespace D2
