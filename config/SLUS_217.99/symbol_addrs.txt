@@ -52,6 +52,10 @@ _vt$6CState_004AA4D0 = 0x004AA4D0; // size:0x30
 _$_6CState_002568A8 = 0x002568A8; // type:func size:0x30
 _vt$6CState_00494A68 = 0x00494A68; // size:0x30
 
+// Game/GameSub: CState's inline destructor and an unnamed copy of its vtable
+_$_6CState_001FA798 = 0x001FA798; // type:func size:0x30
+_vt$6CState_0047EDB0 = 0x0047EDB0; // size:0x30
+
 // Game/Atel/EventTrap: CVector<G_LINE>'s inline destructor and an unnamed copy of its vtable
 _$_t7CVector1Z6G_LINE_00240FA0 = 0x00240FA0; // type:func size:0x8C
 _vt$t7CVector1Z6G_LINE_0048BD40 = 0x0048BD40; // size:0x18
