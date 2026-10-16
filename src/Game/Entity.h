@@ -165,6 +165,9 @@ public:
     // PARTIAL: added for Game/Enemy/EnemyDarkball
     void changeMotionFileName(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     FMATRIX* getBoneMatrix(const CHAR* inBoneName) const; // PARTIAL: added for Game/Enemy/EnemyFatbandit
+    // PARTIAL: added for Game/Enemy/MapEnemyGround
+    INT getMotionCurrentID(); /* inline in the original; defined where CAnim is complete (Game/Enemy/MapEnemyGround.cpp) */
+    void endTargetChase();
     void warp(const FVECTOR& inPos);
     // PARTIAL: added for Game/Player/SummonDumbo
     void setRot(const FVECTOR& inRot);

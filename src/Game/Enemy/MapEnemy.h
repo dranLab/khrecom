@@ -54,6 +54,7 @@ protected:
     BOOL canAppear() const;
     BOOL canPlayerChase(FLOAT inRange, INT inArg);
     void getRandomTargetPos(FVECTOR& outPos, FLOAT inRange, INT inArg);
+    INT getRunMotion() const; // PARTIAL: added for Game/Enemy/MapEnemyGround
     virtual void beginStateAppear();
     virtual void stateAppear();
     virtual void endStateAppear();

@@ -51,6 +51,7 @@ public:
     void homingY(const FVECTOR& inTarget, FLOAT inRate); // PARTIAL: added for Game/Player/FriendAriel
     void homingMoveXZ(const FVECTOR& inTarget, FLOAT inRate, FLOAT inSpeed);
     void homingMoveXZ(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed);
+    void chase(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed); // PARTIAL: added for Game/Enemy/MapEnemyGround
     void calcVelocityXZ(FLOAT inSpeed); // PARTIAL: added for Game/Player/SummonDumbo
     // PARTIAL: added for Game/Player/FriendPan
     void homing(const CEntity* inTarget, FLOAT inRate);
