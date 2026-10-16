@@ -28,9 +28,10 @@ public:
     C2DBase();
     virtual ~C2DBase();
     static void initialize();
-    virtual BOOL init() = 0;
-    virtual HANDLE create() = 0;
-    virtual void destroy() = 0;
+    // PARTIAL: parameters added for System/Graphic/2d/2DLay
+    virtual BOOL init(void* pData, const CHAR* pBaseName) = 0;
+    virtual HANDLE create(UINT inNo) = 0;
+    virtual void destroy(HANDLE handle) = 0;
     virtual INT getIdMax() = 0;
     virtual INT getUnitIdMax() { return 0; }
     virtual INT getSeqIdMax(UINT inUnitNo) { return 0; }
