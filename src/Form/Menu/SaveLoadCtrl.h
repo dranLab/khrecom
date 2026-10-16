@@ -15,6 +15,13 @@
 #define SAVELOADCTRL_H_PATH "Form/Menu/SaveLoadCtrl.h"
 #endif
 
+namespace D2 {
+class C2DMan { /* PARTIAL: added for Form/Menu/BtlReportCtrl */
+public:
+    static void destroy(HANDLE h);
+};
+}
+
 class C2DSeqAgent : public CTask {
 public:
     enum STATE {
@@ -45,7 +52,15 @@ private:
 
 public:
     C2DSeqAgent(CTask* pParent);
-    virtual ~C2DSeqAgent();
+    /* PARTIAL: inline destructor and the virtuals below added for Form/Menu/BtlReportCtrl */
+    virtual ~C2DSeqAgent() {
+        if (m_hSeqSingle) D2::C2DMan::destroy(m_hSeqSingle);
+    }
+    virtual void dispose();
+    virtual void main();
+    virtual void procLoop() {}
+    virtual void onOutSeq() {}
+    void setupSeq(D2::C2DSeqCtrl& seqCtrl, const CHAR* pszSqd, SHORT nUnit, SHORT nLayer); /* PARTIAL: added for Form/Menu/BtlReportCtrl */
     void setupSeq(D2::C2DSeqCtrl& seqCtrl, const CHAR* pszSqd, SHORT nLayer);
     void setupState(SHORT nIn, SHORT nLoop, SHORT nOut, void (*pcbEndIN)(C2DSeqAgent&),
                     void (*pcbEndOUT)(C2DSeqAgent&));
