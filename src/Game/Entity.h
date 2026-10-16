@@ -171,6 +171,10 @@ public:
     const FVECTOR& getScale() const;
     void updateCoord();
     void coordFix();
+    // PARTIAL: added for Game/Player/PlayerDRiku
+    BOOL createLegIK(FLOAT inP0, FLOAT inP1);
+    void setFootEffectIK(const CHAR* inName, INT inFlag);
+    void setGroundIK(INT inFlag);
     // PARTIAL: added for Game/Player/FriendKing (also out of line: setDispOffFlag__7CEntityUiUi)
     void setDispOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiDispOffFlag; f = (f | inSet) & ~inMask; }
     TIMEQ getMotionCurrentTime() const;
@@ -227,6 +231,7 @@ public:
     void setRate(FLOAT inRate) { m_fRate = inRate; }
     FLOAT getRate() const { return m_fRate; }
     FLOAT getFadeAlpha() const { return m_fFadeAlpha; }
+    FLOAT getEndAlpha() const { return m_fEndAlpha; } // PARTIAL: added for Game/Player/PlayerDRiku (original name unknown)
     UINT isFade() const { return m_uiEntityFlag & 0x40000000; }
     FLOAT calcDistanceSq(const FVECTOR& inPos) const;
     HANDLE playSEPanAndVol(INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);

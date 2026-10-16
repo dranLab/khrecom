@@ -84,6 +84,9 @@ class CCardRevolver {
 public:
     // PARTIAL: added for Game/Player/PlayerRiku
     void changeDarkMode(HANDLE inHandle, INT inFlag);
+    // PARTIAL: added for Game/Player/PlayerDRiku
+    void changeMode(INT inMode, INT inFlag);
+    INT chargeReloadCard(INT inFlag);
     INT setPlayerDuelPlayStock();
     INT setPlayerDuelCard(INT inNo);
     void setAction(INT inAction, INT inParam);

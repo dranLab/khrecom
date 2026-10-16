@@ -456,6 +456,16 @@ public:
     INT chkChargeMove(INT inFlag);
     void setPushon(INT inFlag);
     void setCastEffect(const CHAR* inName, INT inNo, CCoord* inCoord, FVECTOR* inPos);
+    // PARTIAL: added for Game/Player/PlayerDRiku
+    static INT importStatus();
+    void setDefAttr(FLOAT* inAttr);
+    void makeAnimIndex(INT inID);
+    void initStartPos();
+    void makeWeapon();
+    void makeCockpit();
+    void makeRevolver();
+    void setAnimSpeed(FLOAT inSpeed);
+    INT chkTrgAction(INT inFlag, UINT inMask);
     HANDLE getLockonHandle() {
         HANDLE handle = m_hLockon;
         if (handle == 0 || handle == -1) handle = m_hTarget;
