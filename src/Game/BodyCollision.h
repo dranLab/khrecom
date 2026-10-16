@@ -11,19 +11,28 @@ union FVECTOR; // PARTIAL: added for Game/Gimmick/BaseGimmick
 // PARTIAL: added for Game/Gimmick/GimmickGuillotine (layouts partial)
 class CCollBody {
 private:
-    UBYTE _m_0x00[0x70]; /* 0x000 CCollObj, m_vEnemyPos .. m_vHitEffectRot */
+    UBYTE _m_0x00[0x0c];   /* 0x000 CCollObj: CSJointT, m_Enable */
+    UBYTE* m_pCollision;   /* 0x00c CCollision* */ // PARTIAL: split out for Game/Enemy/EnemyWhitemushroom
+    UBYTE _m_0x10[0x60];   /* 0x010 m_hTask, m_vEnemyPos .. m_vHitEffectRot */
     ATK_KIND m_DamageKind; /* 0x070 */
+    INT m_DamageAttr;      /* 0x074 ATK_ATTR */ // PARTIAL: added for Game/Enemy/EnemyWhitemushroom
 public:
     ATK_KIND getDamageKind() { return m_DamageKind; }
+    INT getDamageAttr() { return m_DamageAttr; } // PARTIAL: added for Game/Enemy/EnemyWhitemushroom (name unknown)
+    /* CCollObj::getDetectPos (m_pCollision->m_vDetectPos at 0x40) */
+    FVECTOR* getDetectPos() { return m_pCollision ? (FVECTOR*)(m_pCollision + 0x40) : NULL; }
     HANDLE setHitEffect(); // PARTIAL: added for Game/Gimmick/BaseGimmick
 };
 
 class CBodyCollision {
 private:
     UINT m_uiFlag;       /* 0x00 */ // PARTIAL: split out for Game/Gimmick/BaseGimmick
-    UBYTE _m_0x04[0x2c]; /* 0x04 m_uiSysBodyFlag .. m_iHitIndex */
+    UBYTE _m_0x04[0x1c]; /* 0x04 m_uiSysBodyFlag .. */
+    INT m_iDamage;       /* 0x20 */ // PARTIAL: split out for Game/Enemy/EnemyWhitemushroom (name unknown)
+    UBYTE _m_0x24[0xc];  /* 0x24 .. m_iHitIndex */
     CCollBody* m_pHit;   /* 0x30 */
 public:
+    INT getDamage() { return m_iDamage; } // PARTIAL: added for Game/Enemy/EnemyWhitemushroom (name unknown)
     // PARTIAL: added for Game/Gimmick/BaseGimmick
     INT isHit() { return m_uiFlag & 4; }
     void update();
