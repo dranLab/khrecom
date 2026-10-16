@@ -126,6 +126,11 @@ public:
         if (m_pCollision) return &m_pCollision->m_outNormal;
         return 0;
     }
+    // PARTIAL: added for Game/Enemy/EnemyBandit (original name unknown)
+    INT getOutStatus() {
+        if (m_pCollision) return m_pCollision->m_outStatus;
+        return 0;
+    }
     FLOAT getRadius() {
         if (m_pCollision) return m_pCollision->m_Radius;
         return 0.0f;
