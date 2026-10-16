@@ -8,6 +8,8 @@
 #include "Game/CollParam.h"     // PARTIAL: added for Game/Enemy/EnemyBluerhapsody (ATK_KIND)
 #include "Game/AttackMotion.h" // PARTIAL: added for Game/Enemy/EnemyBluerhapsody (ATK_ATTR)
 
+struct ENEMY_PARAM; // PARTIAL: added for Game/Enemy/EnemyAirpirate
+
 enum CARD_KIND {
     CARD_KIND_None = 0 /* values not needed yet */
 };
@@ -83,6 +85,10 @@ public:
     INT selectDamageMotion_();
     INT getParam() { return *(INT*)&_m_0x218[0x1c]; } /* m_iParam 0x234 */
     INT getHpMax() const;
+    // PARTIAL: added for Game/Enemy/EnemyAirpirate
+    ENEMY_PARAM* getEnemyParam() { return *(ENEMY_PARAM**)&_m_0x284[0x1c]; } /* m_pEnemyParam 0x2a0 */
+    INT getAttackRate() const;
+    BOOL canCardBattle();
     HANDLE recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent);
     virtual void getUseCardPos(FVECTOR& outPos);
     virtual void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
@@ -210,6 +216,14 @@ protected:
     virtual void notifyHP();
     virtual void commonBeginAttack();
     virtual void commonEndAttack();
+
+public:
+    // PARTIAL: added for Game/Enemy/EnemyAirpirate (last in the class: it sets the original line number)
+#line 673 BATTLEENEMY_H_PATH
+    void setAttackState(INT inState) {
+        if (!(2 <= inState && inState < 10)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);
+        *(INT*)&_m_0x218[0] = inState; /* m_iAttackState 0x218 */
+    }
 };
 
 #endif /* GAME_ENEMY_BATTLEENEMY_H */

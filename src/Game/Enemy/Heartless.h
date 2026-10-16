@@ -33,6 +33,7 @@ public:
 protected:
     virtual void aiCardBattle();
     virtual INT getDuelAttackState();
+    BOOL canAttack(INT inIndex); // PARTIAL: added for Game/Enemy/EnemyAirpirate
     void commonMoveInit(const CHAR* inIdling, const CHAR* inWalk, FLOAT inRand); // PARTIAL: added for Game/Enemy/EnemyLargebody
     void commonMove();
     void commonMoveEnd();
