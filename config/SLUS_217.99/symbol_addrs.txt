@@ -10,6 +10,7 @@ D_00495350 = 0x00495350; // can_be_referenced:False
 D_00495564 = 0x00495564; // can_be_referenced:False
 D_00677562 = 0x00677562; // can_be_referenced:False
 D_00678358 = 0x00678358; // can_be_referenced:False
+D_00465A41 = 0x00465A41; // can_be_referenced:False
 D_00641016 = 0x00641016; // can_be_referenced:False
 D_00641821 = 0x00641821; // can_be_referenced:False
 D_00642520 = 0x00642520; // can_be_referenced:False
