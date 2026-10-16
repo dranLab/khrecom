@@ -55,6 +55,7 @@ public:
     // PARTIAL: added for Game/Player/FriendPan
     void homing(const CEntity* inTarget, FLOAT inRate);
     void calcVelocity(FLOAT inSpeed);
+    void calcOrbitVelocityFromDistance(FLOAT inTheta, FLOAT inDist); // PARTIAL: added for Game/Enemy/EnemyPirate
     // PARTIAL: added for Game/Player/SummonBambi
     void calcVelocity(FLOAT inSpeed, const FVECTOR& inDir);
     FLOAT calcOrbitSpeedFromDistance(FLOAT inTheta, FLOAT inDist);
