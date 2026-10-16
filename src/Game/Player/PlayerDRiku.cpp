@@ -368,52 +368,210 @@ void CPlayerDRiku::startDMode(CPlayerRiku* inRiku) {
     m_pRiku = inRiku;
     setPlayerFlag(0x40000, 0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", initTransform__Q22PL12CPlayerDRikui);
-// initTransform__Q22PL12CPlayerDRikui: its .rodata, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    "D_004A1BF8:\n"
-    ".asciz \"CPlayerDRiku:: initTransform(%d)\\n\"\n"
-    ".align 2\n"
-    ".asciz \"\"\n"
-    ".align 2\n"
-    ".section .text");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", exeTransform__Q22PL12CPlayerDRiku);
-// exeTransform__Q22PL12CPlayerDRiku: its .rodata, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    "D_004A1C20:\n"
-    ".word 0x616C5043\n"
-    ".word 0x44726579\n"
-    ".word 0x756B6952\n"
-    ".word 0x78653A3A\n"
-    ".word 0x61725465\n"
-    ".word 0x6F66736E\n"
-    ".word 0x52206D72\n"
-    ".word 0x52555445\n"
-    ".word 0xA681204E\n"
-    ".word 0x6C657544\n"
-    ".word 0x2E2E2E20\n"
-    ".word 0x6E614320\n"
-    ".word 0x216C6563\n"
-    ".word 0x0000000A\n"
-    ".section .text");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", transferControl__Q22PL12CPlayerDRiku);
-// transferControl__Q22PL12CPlayerDRiku: its .rodata, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    "D_004A1C58:\n"
-    ".asciz \"CPlayerDRiku::transferControl (Riku->DRiku) uiBattleFlag = %x,\\n\"\n"
-    ".align 2\n"
-    ".align 3\n"
-    "D_004A1C98:\n"
-    ".asciz \"CPlayerDRiku::transferControl uiBattleFlag [CARD_DUEL] clear !!\\n\"\n"
-    ".align 2\n"
-    ".asciz \"\"\n"
-    ".align 2\n"
-    ".section .text");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", exeAvoid__Q22PL12CPlayerDRiku);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", exeSpeedStep__Q22PL12CPlayerDRiku);
+void CPlayerDRiku::initTransform(INT inFlag) {
+    if (m_bIsDead) return;
+    TRACE("CPlayerDRiku:: initTransform(%d)\n", inFlag);
+    setPlayerState(TRANSFORM);
+    clearSpeed();
+    offAttack();
+    setBattleFlag(0, 8);
+    setPlayerFlag(0, 0x40000);
+    setConditionFlag(0x200000, 0x2000000);
+    _ref(m_tqCardBreakTime) = g_CardBreakTime[7];
+    m_fJumpGravity = g_fGravity;
+    _ref(m_fMoveSpdXZ) = 0.0f;
+    _ref(m_fWalkSpeed) = 0.0f;
+    m_JumpState = 3;
+    setMDFooting(0);
+    fadeEffAttack(0);
+    if (m_uiTrgFlag & 0x100000) {
+        setConditionFlag(0x2000000, 0);
+    }
+    setTrgFlag(0, 0x100000);
+    if (!inFlag) {
+        m_iSubState = 4;
+        return;
+    }
+    m_iSubState = 1;
+    FVECTOR pos = m_pRiku->getPos();
+    warp(pos);
+    setRot(m_pRiku->getRot());
+    updateCoord();
+    coordFix();
+    pos.y += 0.5f;
+    setOldPos(pos);
+    setEntityFlag(0, 1);
+    onWeapon(0);
+    setAnimForce(0x37, -1, 0, 0, 0, 0);
+    transferControl();
+    m_pCam->changeNowPlayer(m_pRiku->getHandle(), getHandle());
+    m_pCam->changeCamMode(4, 0);
+    m_pRevolver->changeMode(0, 1);
+    m_pRevolver->chargeReloadCard(1);
+    setTimer(400);
+    setupFade(0.0f, 1.0f, 100, -1);
+    m_fScale = 1.0f;
+    FVECTOR vScale = getScale();
+    vScale.x = m_fScale;
+    vScale.y = m_fScale;
+    vScale.z = m_fScale;
+    setScale(vScale);
+    setPlayerFlag(0, 0x1000);
+}
+void CPlayerDRiku::exeTransform() {
+    setPlayerFlag(0x400000, 0);
+    setBattleFlag(0, 8);
+    switch (m_iSubState) {
+    case 1:
+        if (getTimer() > 0) {
+            m_pRevolver->chargeReloadCard(2);
+        }
+        if (!isMotionEnd()) break;
+        setAnim(0x2a, -1, 0);
+        changeState(1);
+        setPlayerFlag(0, 1);
+        m_pCam->changeNowPlayer(0, 0);
+        m_pCam->changeCamMode(3, 0);
+        enableControl();
+        m_pMarker->setFlag(TRUE);
+        m_pCB->setFlag(0, 0xc0000000);
+        break;
+    case 4:
+        if (m_pCB) {
+            TRACE("CPlayerDRiku::exeTransform RETURN \x81\xa6" "Duel ... Cancel!\n");
+            m_pCB->setDuelEntry(-1);
+        }
+        m_pRiku->endDMode(this);
+        m_iSubState = 5;
+        setPlayerFlag(0x1001, 0);
+        ((_CollBodyView*)m_collBody)->offBody();
+        offWeapon();
+        m_pMarker->setFlag(FALSE);
+        m_pCB->destroyPlayCard(1, 0);
+        setBattleFlag(0, 0x10200000);
+        if (isBattleFlag(2)) {
+            setBattleFlag(0, 2);
+            m_tqEscape = 0;
+            if (m_pEscape) m_pEscape->destroy();
+            setBGFade(1.0f, 0.0f, 0);
+        }
+        setConditionFlag(0, 0x2000000);
+        changeState(2);
+        return;
+    case 5:
+        if (((CPlayer*)m_pRiku)->isConditionFlag(0x400000)) {
+            m_pCam = NULL;
+            m_pGauge = NULL;
+            m_pMarker = NULL;
+            m_pEscape = NULL;
+            m_pCB = NULL;
+            setPrizeHealing(0);
+            setupFade(1.0f, 0.0f, 1500, -1);
+            setAnimSpeed(getEndAlpha());
+            setBattleFlag(0, 0x443f90);
+            setTrgFlag(0, 0x80bff);
+            setBattleFlag(0, 0x80000);
+            setBattleFlag(0, 0x10200000);
+            setBattleFlag(0, 0x4060);
+            setBattleFlag(0, 0x130000);
+            setConditionFlag(0, 0x881803f);
+            if (m_tqConfuse > 0) {
+                m_tqConfuse = 0;
+                setConfuse(0, 0);
+            }
+        }
+        if (m_fScale > 0.0f) {
+            m_fScale += getFrameRateF() * 0.02f;
+            if (m_fScale <= 0.0f) m_fScale = 0.0f;
+            FVECTOR vScale = getScale();
+            vScale.x = m_fScale;
+            vScale.y = m_fScale;
+            vScale.z = m_fScale;
+            setScale(vScale);
+        }
+        if (!isFade() && !m_pCB) {
+            m_iSubState = 0;
+            setEntityFlag(1, 0);
+            setAnimForce(0x2a, 0, 0, 0, 0, 0);
+        }
+        break;
+    }
+}
+void CPlayerDRiku::transferControl() {
+    _ref(g_pPlayer) = this;
+    _ref(m_pInstance) = this;
+    m_iMaxHP = m_pRiku->m_iMaxHP;
+    m_iHP = m_pRiku->m_iHP;
+    m_iAP = m_pRiku->m_iAP;
+    m_iEXP = m_pRiku->m_iEXP;
+    m_iLV = m_pRiku->m_iLV;
+    m_iMP = m_pRiku->m_iMP;
+    m_iMaxDP = m_pRiku->m_iMaxDP;
+    m_iDP = m_iMaxDP;
+    m_vStartPos = m_pRiku->m_vStartPos;
+    setConditionFlag(0x400000, 0);
+    UINT flag = m_pRiku->m_uiBattleFlag;
+    TRACE("CPlayerDRiku::transferControl (Riku->DRiku) uiBattleFlag = %x,\n", flag);
+    setBattleFlag(flag, 0);
+    if (isBattleFlag(0x8000)) {
+        TRACE("CPlayerDRiku::transferControl uiBattleFlag [CARD_DUEL] clear !!\n");
+    }
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x443f90);
+    setBattleFlag(0, 0x80000);
+    setBattleFlag(0, 0x10200000);
+    setBattleFlag(0, 0x4060);
+    setBattleFlag(0, 0x130000);
+    setBattleFlag(0, 0x8000);
+    m_bIsDead = m_pRiku->m_bIsDead;
+    m_pCam = m_pRiku->m_pCam;
+    m_pGauge = m_pRiku->m_pGauge;
+    m_pMarker = m_pRiku->m_pMarker;
+    m_pEscape = m_pRiku->m_pEscape;
+    m_pGauge->setDMode(1, m_iDP, m_iMaxDP);
+    m_pCB = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+    m_pCB->transferPlayerEnchant(m_pRiku);
+    m_pCB->setFlag(0, 0x400000);
+    m_pRevolver = m_pRiku->m_pRevolver;
+    m_pRevolver->changeDarkMode(getHandle(), 1);
+    setConditionFlag(0, 0x881803f);
+    if (m_pRiku->m_tqConfuse > 0) {
+        setConfuse(1, m_pRiku->m_tqConfuse);
+    }
+    PLM::addIntBR(0x41);
+}
+
+void CPlayerDRiku::exeAvoid() {
+    exeSpeedStep();
+}
+
+void CPlayerDRiku::exeSpeedStep() {
+    setBattleFlag(0, 8);
+    FVECTOR vel = m_pMove->getVel();
+    if (isAir()) {
+        vel.y = m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        m_pMove->getVel() = vel;
+    } else {
+        if (m_fJumpSpdY < 0.0f) m_fJumpSpdY = 0.0f;
+        vel.y = m_fJumpSpdY;
+        m_pMove->getVel() = vel;
+    }
+    if (getMotionCurrentTime() >= m_pParam->AVOID_TQ_MUTEKI) {
+        setPlayerFlag(0, 1);
+    }
+    if (getMotionCurrentTime() >= m_pParam->AVOID_TQ_CANCEL) {
+        if (isActionFlag(0x2000000) && isTrgFlag(0x10)) {
+            chkChargeMove(0);
+        }
+        if (chkTrgAction(0, 0)) {
+            m_pMarker->holdTarget(0);
+            return;
+        }
+    }
+    if (isMotionEnd()) {
+        initIdle(-1, 1);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", setAttack__Q22PL12CPlayerDRiku);
 // setAttack__Q22PL12CPlayerDRiku: its .rodata, for its INCLUDE_ASM; remove with it.
 asm(".section .rodata\n"

@@ -464,6 +464,8 @@ public:
     void makeWeapon();
     void makeCockpit();
     void makeRevolver();
+    void setAnimSpeed(FLOAT inSpeed);
+    INT chkTrgAction(INT inFlag, UINT inMask);
     HANDLE getLockonHandle() {
         HANDLE handle = m_hLockon;
         if (handle == 0 || handle == -1) handle = m_hTarget;

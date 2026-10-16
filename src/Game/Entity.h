@@ -231,6 +231,7 @@ public:
     void setRate(FLOAT inRate) { m_fRate = inRate; }
     FLOAT getRate() const { return m_fRate; }
     FLOAT getFadeAlpha() const { return m_fFadeAlpha; }
+    FLOAT getEndAlpha() const { return m_fEndAlpha; } // PARTIAL: added for Game/Player/PlayerDRiku (original name unknown)
     UINT isFade() const { return m_uiEntityFlag & 0x40000000; }
     FLOAT calcDistanceSq(const FVECTOR& inPos) const;
     HANDLE playSEPanAndVol(INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
