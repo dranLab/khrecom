@@ -7,7 +7,10 @@
 
 /* Placeholder for the original header's inline function asserting _pTexInfo: its strings
  * ("System/Graphic/modeldata.h", "_pTexInfo") are in .rodata of every includer. The line number is not known. */
-#line 1 "System/Graphic/modeldata.h"
+#ifndef MODELDATA_H_PATH // PARTIAL: path override added for System/Graphic/MapUnit
+#define MODELDATA_H_PATH "System/Graphic/modeldata.h"
+#endif
+#line 1 MODELDATA_H_PATH
 inline void _modelDataCheckTexInfo(void* _pTexInfo) {
     if (!_pTexInfo) AssertApp(__FILE__, __LINE__, "_pTexInfo", 0);
 }
