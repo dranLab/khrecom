@@ -9,7 +9,11 @@
 /* Placeholders for CCollUtil's inline singleton constructor/creation: their strings
  * ("Game/Collision/CollUtil.h", "__null == m_pInstance", "Game/Collision/CollUtil.h(185)", "m_pInstance")
  * are in .rodata of every includer. Only line 185 is known (it is part of the allocation message). */
-#line 1 "Game/Collision/CollUtil.h"
+/* PARTIAL: path override added for Game/Collision/CollMapCamera ("c:/KHCOM/MainApp/...") */
+#ifndef COLLUTIL_H_PATH
+#define COLLUTIL_H_PATH "Game/Collision/CollUtil.h"
+#endif
+#line 1 COLLUTIL_H_PATH
 inline void _collUtilCheckInstance(void* inInstance) {
     if (!(__null == inInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
 }
@@ -29,6 +33,13 @@ inline CCollUtil* CCollUtil::getInstance() {
     CCollUtil*& instance = m_pInstance;
     if (!instance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
     return instance;
+}
+// PARTIAL: added for Game/Collision/CollMapCamera (original lines unknown)
+inline INT CCollUtil::detectMCD(CCollision& collision) {
+    return getInstance()->_detectMCD(collision);
+}
+inline INT CCollUtil::detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork) {
+    return getInstance()->_detectOCD(collision, pMCDInfo, pOCDWork, 1);
 }
 #endif
 

@@ -90,8 +90,8 @@ public:
     // PARTIAL: inline bodies added for Game/Player/PlayerWeapon (weak in the original)
     virtual void off() { m_Enable = 0; }
     virtual void on() { m_Enable = 1; }
-    virtual INT detectEtc();
-    virtual void setKind(INT inKind);
+    virtual INT detectEtc(CCollision& collision); // PARTIAL: parameter added for Game/Collision/CollMapCamera
+    virtual void setKind(COLL_KIND inKind); // PARTIAL: parameter type fixed for Game/Collision/CollMapCamera
     // PARTIAL: signature completed for Game/Bullet/Bullet (CCollAttack overrides it)
     virtual void init(COLL_KIND inKind, COLL_TYPE inType, INT inFlag, INT inHandle);
 
@@ -138,6 +138,17 @@ public:
     void enableSliding(INT inFlag) {
         if (m_pCollision) m_pCollision->m_fgStatus = (m_pCollision->m_fgStatus & ~1) | (inFlag != 0);
     }
+    // PARTIAL: added for Game/Collision/CollMapCamera
+    INT getType() {
+        if (m_pCollision) return m_pCollision->m_Type;
+        return 0;
+    }
+    static class CCollisionList* m_pCollListR;
+    static class CCollisionList* m_pCollListR2;
+    static class CCollisionList* m_pCollListRC;
 };
+
+// PARTIAL: added for Game/Collision/CollMapCamera
+class CCollisionList : public CSJointListT<CCollObj> {};
 
 #endif /* GAME_COLLISION_COLLOBJ_H */

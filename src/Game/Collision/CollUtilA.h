@@ -79,6 +79,10 @@ public:
     // PARTIAL: added for Game/Atel/EventTrap (defined inline in CollUtil.h)
     static CCollUtil* m_pInstance;
     static CCollUtil* getInstance();
+    // PARTIAL: added for Game/Collision/CollMapCamera (defined inline in CollUtil.h)
+    INT _detectOCD(CCollision& collision, struct MCD_INFO* pMCDInfo, struct OCD_WORK* pOCDWork, INT inFlag);
+    static INT detectMCD(CCollision& collision);
+    static INT detectOCD(CCollision& collision, struct MCD_INFO* pMCDInfo, struct OCD_WORK* pOCDWork);
 
     /* 0x000 */ char _pad000[0x30];
     /* 0x030 */ FVECTOR m_vCkS;
@@ -100,7 +104,10 @@ public:
     /* 0x170 */ FLOAT m_RadiusHosei;
     /* 0x174 */ FLOAT m_RadiusPlus;
     /* 0x178 */ INT m_DetectStatus;
-    /* 0x17c */ char _pad17c[0xb0];
+    /* 0x17c */ char _pad17c[0x24];
+    /* 0x1a0 */ FMATRIX* m_pSemiTransMat[32]; // PARTIAL: split out for Game/Collision/CollMapCamera
+    /* 0x220 */ INT m_SemiTransMatIdx;
+    /* 0x224 */ char _pad224[0x8];
     /* 0x22c */ FMATRIX* m_pDetectMatP;
     /* 0x230 */ FMATRIX* m_pDetectMatA;
     /* 0x234 */ MC_CHIP* m_pDetectChipA;
