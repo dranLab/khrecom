@@ -19,7 +19,10 @@ struct ENEMY_PARAM {
     UBYTE _m_0x00[0x4c]; /* 0x00 szCode .. 0x48 pCards */
     INT iActCount;       /* 0x4c */
     ENEMY_ACT* pActs;    /* 0x50 */
-    UBYTE _m_0x54[0x5c]; /* 0x54 iEnemyCard .. 0xa8 pad */
+    UBYTE _m_0x54[0x4c]; /* 0x54 iEnemyCard .. 0x98 iAttackRate */
+    INT iAppearMotionIndex;    /* 0xa0 */ // PARTIAL: added for Game/Enemy/MapEnemyMushroom
+    INT iDisappearMotionIndex; /* 0xa4 */
+    INT pad[2];                /* 0xa8 */
 };
 
 /* Placeholders for the original header's inline functions: their strings ("@ENP", the parameter file's

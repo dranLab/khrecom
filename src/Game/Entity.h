@@ -161,6 +161,7 @@ public:
     FLOAT calcDistanceSq(const CEntity& inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickManager
     TIMEQ getMotionTotalTime() const;
     BOOL arriveTarget(const FVECTOR& inTarget, FLOAT inRange);
+    BOOL arriveTargetXZ(const FVECTOR& inTarget, FLOAT inRange); // PARTIAL: added for Game/Enemy/MapEnemyMushroom
     void clearSpeed();
     // PARTIAL: added for Game/Enemy/EnemyDarkball
     void changeMotionFileName(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);

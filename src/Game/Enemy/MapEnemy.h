@@ -53,6 +53,7 @@ protected:
     void changeMapEnemyState(INT inState);
     BOOL checkGround();
     BOOL canAppear() const;
+    void getWarpPos(FVECTOR& outPos); // PARTIAL: added for Game/Enemy/MapEnemyMushroom
     BOOL canPlayerChase(FLOAT inRange, INT inArg);
     void getRandomTargetPos(FVECTOR& outPos, FLOAT inRange, INT inArg);
     INT getRunMotion() const; // PARTIAL: added for Game/Enemy/MapEnemyGround
