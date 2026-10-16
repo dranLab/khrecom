@@ -44,7 +44,10 @@ public:
     /* Placeholder for the original singleton creation (CCard::initialize): its strings ("Game/Card.h",
      * "__null == m_pInstance", "Game/Card.h(66)") are in .rodata of every includer. Only line 66 is
      * known (it is part of the allocation message). */
-#line 60 "Game/Card.h"
+#ifndef CARD_H_PATH // PARTIAL: path override added for Game/Status ("c:/KHCOM/MainApp/...")
+#define CARD_H_PATH "Game/Card.h"
+#endif
+#line 60 CARD_H_PATH
     static void _initializeCheck() {
         if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
         com_malloc_d(4, __FILE__ "(66)", (UINT)-1);

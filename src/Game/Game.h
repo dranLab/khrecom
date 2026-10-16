@@ -12,6 +12,7 @@ public:
     CGame(CTask* pParent, INT nMode);   // PARTIAL: added for System/MainTaskFactory
     static BOOL reqSave();
     static BOOL isSoraGame(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
+    static INT getDbgGameMode(); // PARTIAL: added for Game/Status
     static BOOL isRikuGame(); // PARTIAL: added for Game/Player/NaviMap
     static void setupConfig(); // PARTIAL: added for Form/Menu/Camp
     static void enablePause(BOOL bEnable); // PARTIAL: added for Form/Menu/GameOver
