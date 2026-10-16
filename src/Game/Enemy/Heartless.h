@@ -29,6 +29,7 @@ public:
     virtual BOOL initalize(INT inGroupID, INT inRsrcID, UINT iFlag);
     virtual BOOL initalize(INT inGroupID, INT inRsrcID) { return initalize(inGroupID, inRsrcID, 0); }
     virtual BOOL startCardBattle();
+    void setHeartlessFlag(UINT inSet, UINT inMask) { m_uiHeartlessFlag = (m_uiHeartlessFlag | inSet) & ~inMask; } // PARTIAL: added for Game/Enemy/EnemyBluerhapsody
 protected:
     virtual void aiCardBattle();
     virtual INT getDuelAttackState();
