@@ -38,6 +38,13 @@ inline CCollUtil* CCollUtil::getInstance() {
 inline INT CCollUtil::detectMCD(CCollision& collision) {
     return getInstance()->_detectMCD(collision);
 }
+// PARTIAL: added for Game/Collision/CollBody (original lines unknown)
+inline INT CCollUtil::detectColumnColumnEz(CColumnCollision& coll0, CColumnCollision& coll1) {
+    return getInstance()->_detectColumnColumnEz(coll0, coll1);
+}
+inline INT CCollUtil::detectColumnColumn(CColumnCollision& coll0, CColumnCollision& coll1) {
+    return getInstance()->_detectColumnColumn(coll0, coll1);
+}
 inline INT CCollUtil::detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork) {
     return getInstance()->_detectOCD(collision, pMCDInfo, pOCDWork, 1);
 }
