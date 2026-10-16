@@ -30,6 +30,8 @@ public:
     void detect();
     BOOL collideBody(FVECTOR* outPos, FVECTOR* outNormal, FVECTOR* outDetectPos);
     CCollBody* getHitCollBody() { return m_pHit; }
+    void setMuteki(INT inIndex);       // PARTIAL: added for Game/Enemy/EnemyBlackfungus
+    void setMutekiDir(FLOAT inDir);
 };
 
 /* Placeholder for the original header's inline function checking a collision kind: its strings
