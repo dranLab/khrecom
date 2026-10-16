@@ -39,6 +39,7 @@ public:
     CModel(const MODELDATA* pData = NULL); // PARTIAL: added for Form/Menu/MenuModel
     virtual ~CModel();                     // PARTIAL: added for Form/Menu/MenuModel
     INT link(CTask* p);                    // PARTIAL: added for Form/Menu/MenuModel
+    void disp(); // PARTIAL: added for System/Graphic/MapUnit
     // PARTIAL: added for Form/Menu/MenuModel
     INT link(CTask* p, const MODELDATA* d) {
         m_pData = d;

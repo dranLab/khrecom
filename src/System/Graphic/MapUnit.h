@@ -12,7 +12,10 @@ struct ZONEPARTS;
 inline void* operator new(size_t, void* p) { return p; }
 
 /* Creates a map unit object of class T (the function pointer in MAPUNITTABLE). */
-#line 75 "System/Graphic/MapUnit.h"
+#ifndef MAPUNIT_H_PATH // PARTIAL: path override added for System/Graphic/MapUnit
+#define MAPUNIT_H_PATH "System/Graphic/MapUnit.h"
+#endif
+#line 75 MAPUNIT_H_PATH
 template <class T> CTask* NewClass(CTask* map, const ZONEPARTS& parts) {
     CTask* p;
     char* msg = __FILE__ "(80)";
