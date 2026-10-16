@@ -5,6 +5,8 @@
 #include "khtypes.h"
 #include "System/MainApp.h"
 #include "Game/Entity.h"
+#include "Game/CollParam.h"     // PARTIAL: added for Game/Enemy/EnemyBluerhapsody (ATK_KIND)
+#include "Game/AttackMotion.h" // PARTIAL: added for Game/Enemy/EnemyBluerhapsody (ATK_ATTR)
 
 enum CARD_KIND {
     CARD_KIND_None = 0 /* values not needed yet */
@@ -63,6 +65,9 @@ public:
     // PARTIAL: added for Game/Enemy/EnemySearchghost
     BOOL turnToPlayerY(FLOAT inLimit);
     void playerHomingY(FLOAT inRate); // PARTIAL: added for Game/Enemy/EnemySeaneon
+    // PARTIAL: added for Game/Enemy/EnemyBluerhapsody
+    FLOAT getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpFlag, ATK_KIND* outAtkKind, INT inFinish);
+    ATK_ATTR getAttackAttr(INT inIndex) const;
     INT getHpMax() const;
     HANDLE recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent);
     virtual void getUseCardPos(FVECTOR& outPos);
