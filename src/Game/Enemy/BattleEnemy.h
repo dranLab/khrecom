@@ -36,7 +36,10 @@ private:
     ULONGLONG m_ullBtlEnemyFlag; /* 0x200 */ // PARTIAL: split out for Game/Player/FriendBeast
     UBYTE _m_0x208[0xc];   /* 0x208 m_ullBackupFlag, 0x210 m_iSysStep */
     INT m_iHp;             /* 0x214 */
-    UBYTE _m_0x218[0x68];  /* 0x218 m_iAttackState .. 0x27c m_fDamage */
+    UBYTE _m_0x218[0x20];  /* 0x218 m_iAttackState .. 0x234 m_iParam */
+    INT m_iFallMotionIndex; /* 0x238 */ // PARTIAL: split out for Game/Enemy/EnemyPirate
+    INT m_iLandMotionIndex; /* 0x23c */
+    UBYTE _m_0x240[0x40];  /* 0x240 .. 0x27c m_fDamage */
 protected: // PARTIAL: split out for Game/Enemy/EnemyLargebody
     FLOAT m_fBodyRviseCoefficient; /* 0x280 */
 private:
@@ -53,6 +56,8 @@ public:
     virtual void onMsg(INT inMsg, void* inExtraInfo);
     virtual void onOut();
     void setHp(INT inHp) { m_iHp = inHp; }
+    void setFallMotionIndex(INT inIndex) { m_iFallMotionIndex = inIndex; } // PARTIAL: added for Game/Enemy/EnemyPirate
+    void setLandMotionIndex(INT inIndex) { m_iLandMotionIndex = inIndex; }
     // PARTIAL: added for Game/Player/FriendBeast (original names of the flag tests unknown)
     ULONGLONG isBtlEnemyFlag(ULONGLONG inFlag) const { return m_ullBtlEnemyFlag & inFlag; }
     // PARTIAL: added for Game/Player/PlayerRiku (original name unknown)
