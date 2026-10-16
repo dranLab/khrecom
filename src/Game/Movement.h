@@ -45,6 +45,7 @@ public:
     // PARTIAL: added for Game/Enemy/EnemyBluerhapsody
     void setVel(const FVECTOR& inVel) { getVel() = inVel; }
     UINT isGround() { return m_uiCollisionFlag & 5; }
+    UINT isWall() { return m_uiCollisionFlag & 0xa; } // PARTIAL: added for Game/Enemy/EnemyYellowopera
     // PARTIAL: added for Game/Enemy/MapEnemyShadow (m_vScale 0x60)
     void setScale(const FVECTOR& inScale) { *(FVECTOR*)&_m_0x00[0x60] = inScale; }
     void homingY(const CEntity* inTarget, FLOAT inRate);
