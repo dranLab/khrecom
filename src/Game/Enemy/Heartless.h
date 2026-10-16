@@ -32,6 +32,9 @@ public:
 protected:
     virtual void aiCardBattle();
     virtual INT getDuelAttackState();
+    void commonMoveInit(const CHAR* inIdling, const CHAR* inWalk, FLOAT inRand); // PARTIAL: added for Game/Enemy/EnemyLargebody
+    void commonMove();
+    void commonMoveEnd();
     void commonFlyInit(const CHAR* inIdling, const CHAR* inWalk, FLOAT inRandMin, FLOAT inRandMax);
     void commonFly();
     void commonFlyEnd();

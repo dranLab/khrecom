@@ -34,7 +34,11 @@ private:
     ULONGLONG m_ullBtlEnemyFlag; /* 0x200 */ // PARTIAL: split out for Game/Player/FriendBeast
     UBYTE _m_0x208[0xc];   /* 0x208 m_ullBackupFlag, 0x210 m_iSysStep */
     INT m_iHp;             /* 0x214 */
-    UBYTE _m_0x218[0x618]; /* 0x218 m_iAttackState .. 0x450 m_EnemyState[31] */
+    UBYTE _m_0x218[0x68];  /* 0x218 m_iAttackState .. 0x27c m_fDamage */
+protected: // PARTIAL: split out for Game/Enemy/EnemyLargebody
+    FLOAT m_fBodyRviseCoefficient; /* 0x280 */
+private:
+    UBYTE _m_0x284[0x5ac]; /* 0x284 m_iExp .. 0x450 m_EnemyState[31] */
 
 public:
     CBattleEnemy(CTask* inParent, CState* inDefaultState, CState* inMainState);

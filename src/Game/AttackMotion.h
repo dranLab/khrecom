@@ -32,6 +32,7 @@ public:
     void updateAttackID(); // PARTIAL: added for Game/Gimmick/GimmickHitRepetition
     BOOL test(); // PARTIAL: added for Game/Gimmick/GimmickHitFlying
     void setEnemyPos(const FVECTOR& inPos); // PARTIAL: added for Game/Player/FriendBeast
+    void setRadius(FLOAT inRadius); // PARTIAL: added for Game/Enemy/EnemyLargebody
 };
 
 #endif /* GAME_ATTACKMOTION_H */
