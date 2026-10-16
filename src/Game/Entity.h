@@ -171,6 +171,10 @@ public:
     const FVECTOR& getScale() const;
     void updateCoord();
     void coordFix();
+    // PARTIAL: added for Game/Player/PlayerDRiku
+    BOOL createLegIK(FLOAT inP0, FLOAT inP1);
+    void setFootEffectIK(const CHAR* inName, INT inFlag);
+    void setGroundIK(INT inFlag);
     // PARTIAL: added for Game/Player/FriendKing (also out of line: setDispOffFlag__7CEntityUiUi)
     void setDispOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiDispOffFlag; f = (f | inSet) & ~inMask; }
     TIMEQ getMotionCurrentTime() const;
