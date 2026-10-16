@@ -13,6 +13,7 @@ class CState;
 class CMovement; // PARTIAL: added for Game/Gimmick/GimmickBreakable
 class CAttackMotion; // PARTIAL: added for Game/Gimmick/GimmickToldPipe
 class CModel;    // PARTIAL: added for Game/Gimmick/GimmickPlantChild
+class CLightUnit;        // PARTIAL: added for Game/AttachCard
 union FMATRIX;   // PARTIAL: added for Game/Gimmick/GimmickWindowLid
 class CAnim;     // PARTIAL: added for Game/Gimmick/GimmickLotusLeaf
 class CBodyCollision; // PARTIAL: added for Game/Gimmick/GimmickGuillotine
@@ -49,7 +50,9 @@ protected:
     FVECTOR* m_pvModelColor;      /* 0x084 */
     INT m_iModelCount;            /* 0x088 */
     // PARTIAL: m_pAnim split out for Game/Gimmick/GimmickLotusLeaf
-    UBYTE _m_0x8c[0x8];           /* 0x08c m_pNLight, m_pGLight */
+    // PARTIAL: m_pNLight, m_pGLight split out for Game/AttachCard
+    CLightUnit* m_pNLight;        /* 0x08c */
+    CLightUnit* m_pGLight;        /* 0x090 */
     CAnim* m_pAnim;               /* 0x094 */
     UBYTE _m_0x98[0x8];           /* 0x098 m_pTexAnm, m_nTexAnmNum */
     CMovement* m_pMove;  /* 0x0a0 */

@@ -7,6 +7,8 @@
 #include "System/HeapMan.h"
 #include "System/Debug.h"
 #include "Game/CardKind.h" // PARTIAL: added for Form/Menu/Roulette
+struct TexInfo;  // PARTIAL: added for Game/AttachCard
+union FVECTOR;   // PARTIAL: added for Game/AttachCard
 
 /* PARTIAL: added for Form/Menu/Roulette */
 struct CARD_INFO {
@@ -54,6 +56,7 @@ public:
     }
 
     static INT searchCard(USHORT inID, SHORT inNumber);
+    static TexInfo* getCardTexInfo(CARD inCard, CHAR* pTexName, FVECTOR& outST); // PARTIAL: added for Game/AttachCard
     static INT searchCardKind(USHORT inID, SHORT inNumber);
     static BOOL isHaveMapCard(INT inNumber); // PARTIAL: added for Game/Gimmick/GimmickManager
     static CARD correctCardRank(CARD inCard); // PARTIAL: added for Game/Gimmick/GimmickManager
