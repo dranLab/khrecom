@@ -6,16 +6,12 @@
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
 #include "System/Task.h" // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
+#include "Game/Atel/CommandAccepter.h"
 
 /* Includers define the placement operator new before including this header. */
 
 namespace ATEL {
 
-// PARTIAL: added for Game/Gimmick/GimmickTreasureBox
-class ICommandAccepter {
-public:
-    virtual INT reqCommand(INT nCmd, void* pParam, INT nID) = 0;
-};
 
 /* Only the singleton creation is real (its strings and line numbers are in .rodata of every includer).
  * PARTIAL: bases CTask, ICommandAccepter (0x40) added for Game/Gimmick/GimmickTreasureBox (sizeof 0x50). */
