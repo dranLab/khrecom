@@ -58,6 +58,7 @@ public:
     BOOL turnToPlayer(FLOAT inLimit);
     // PARTIAL: added for Game/Enemy/EnemySearchghost
     BOOL turnToPlayerY(FLOAT inLimit);
+    void playerHomingY(FLOAT inRate); // PARTIAL: added for Game/Enemy/EnemySeaneon
     INT getHpMax() const;
     HANDLE recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent);
     virtual void getUseCardPos(FVECTOR& outPos);
