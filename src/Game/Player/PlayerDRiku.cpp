@@ -120,6 +120,22 @@ extern BCAM_PARAM g_HolyBurstCamParam;
 }
 
 void ScaleVectorXYZ(FVECTOR& outV, const FVECTOR& inV, FLOAT inScale);
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
+
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
 
 class CGameWork {
 public:
@@ -774,10 +790,79 @@ asm(".section .rodata\n"
     ".align 2\n"
     ".section .text");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", setMagic__Q22PL12CPlayerDRikuiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", searchWarpPos__Q22PL12CPlayerDRikuf);
-// searchWarpPos__Q22PL12CPlayerDRikuf: its .data, for its INCLUDE_ASM; remove with it.
-asm(".section .data\n.align 4\ng_vDir.4590:\n"
-    ".word 0, 0, 0xC1700000, 0x3F800000, 0, 0, 0x41700000, 0x3F800000\n.previous");
+void CPlayerDRiku::searchWarpPos(FLOAT inDir) {
+    static FVECTOR g_vDir[2] = {
+        { { 0.0f, 0.0f, -15.0f, 1.0f } },
+        { { 0.0f, 0.0f, 15.0f, 1.0f } },
+    };
+    FVECTOR pos0;
+    FVECTOR pos;
+    FVECTOR vel;
+    FLOAT shiftY;
+    FVECTOR pos1;
+    FMATRIX m;
+    FVECTOR dir;
+    CEntity* pTarget = m_hMark > 0 ? (CEntity*)CTaskMan::getTask(m_hMark) : NULL;
+    if (pTarget) {
+        pTarget->getLockOnPos(pos);
+        vel = pTarget->getVel();
+        pos0 = *(FVECTOR*)((UBYTE*)&pTarget->Crd(0) + 0xc0); /* CCoord::m_World.v[3] */
+        shiftY = pos.y - pos0.y;
+        if (shiftY > 0.5f) shiftY = 0.5f;
+    } else {
+        pos = m_vCenterPos;
+        vel.init();
+        shiftY = pos.y - getPos().y;
+    }
+    pos0.x = 0.0f;
+    pos0.y = pos.y - shiftY;
+    pos0.z = 0.0f;
+    pos0.w = 1.0f;
+    ScaleVectorXYZ(vel, vel, 10.0f);
+    vel.y = 0.0f;
+    AddVectorXYZ(pos1, pos, vel);
+    m_pCollMap->setType((COLL_TYPE)2);
+    m_pCollMap->enableSliding(0);
+    m_pCollMap->setRadius(0.4f);
+    m_pCollMap->setStartPos(pos0);
+    m_pCollMap->setEndPos(pos1);
+    INT ret;
+    if (m_pPLM->isHookBattle()) {
+        ret = m_pCollMap->collideRide(0);
+    } else {
+        ret = m_pCollMap->collideMap();
+    }
+    if (ret) pos1 = *m_pCollMap->getDetectPos();
+    pos = pos1;
+    pos.y -= shiftY;
+    if (pos.y < 0.1f) pos.y = 0.1f;
+    m_vEnemyPos = pos;
+    _unitMatrixVu0(m);
+    sceVu0RotMatrixY(m, m, inDir);
+    for (INT i = 0; i < 2; i++) {
+        ApplyMatrix33(dir, m, g_vDir[i]);
+        AddVectorXYZ(dir, pos, dir);
+        m_pCollMap->setStartPos(pos);
+        m_pCollMap->setEndPos(dir);
+        if (m_pPLM->isHookBattle()) {
+            if (m_pCollMap->collideRide(0)) {
+                m_vWarpPos[i] = *m_pCollMap->getDetectPos();
+                m_vWarpNormal[i] = *m_pCollMap->getDetectNormal();
+            }
+        } else if (m_pCollMap->collideMap()) {
+            m_vWarpPos[i] = *m_pCollMap->getDetectPos();
+            m_vWarpNormal[i] = *m_pCollMap->getDetectNormal();
+        } else {
+            m_vWarpPos[i] = dir;
+            dir.set(0.0f, 0.0f, -1.0f, 1.0f);
+            ApplyMatrix33(dir, m, dir);
+            m_vWarpNormal[i] = dir;
+        }
+        m_vWarpPos[i].w = 1.0f;
+        m_vWarpNormal[i].w = 1.0f;
+    }
+    m_pCollMap->enableSliding(1);
+}
 void CPlayerDRiku::initFriend(INT inNo) {
     if (m_pCB->getEnchantKind() == 0x1b) {
         addHP(m_iMaxHP / 4, 6000, 1);
