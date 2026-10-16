@@ -78,6 +78,7 @@ public:
     // PARTIAL: added for Game/Bullet/Bullet (m_vDetectNormal 0xa0)
     void turnToTarget(const FVECTOR& inTarget, FLOAT inRate);
     void homingMove(const FVECTOR& inTarget, FLOAT inRate, FLOAT inSpeed);
+    void homingMove(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed); // PARTIAL: added for Game/Enemy/MapEnemyAir
     void setShiftY(FLOAT inShiftY);
     FLOAT getRadius() const;
     FLOAT getSpeed() const;
