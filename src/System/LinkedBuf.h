@@ -31,9 +31,31 @@ public:
     }
 };
 
+typedef CSJointListT<CLinkedPtr> CPtrList;
+
+class CLinkedBuf : public CSJointT<CLinkedBuf> { // PARTIAL: added for System/LinkedBuf
+private:
+    void* m_pBuf; /* 0x8 */
+
+public:
+    CLinkedBuf(size_t nInSize);
+    virtual ~CLinkedBuf();
+    void* allocate(size_t nInSize);
+    void* allocAligned(size_t nInAlign, size_t nInSize);
+    void release();
+    void* getBuf() { return m_pBuf; }
+    BOOL isEmpty() const { return m_pBuf == NULL; }
+};
+
 class CDelayedFree {
 public:
+    static void initFreeList(); // PARTIAL: added for System/LinkedBuf
+    static void disposeFreeList();
     static void addFreePtr(CLinkedPtr& inPtr);
+    static void lockFreeList();
+    static void unlockFreeList();
+    static BOOL isFreeListEmpty();
+    static void flipFreeList(INT nID);
     static void addFreeMallocPtr(void* pInPtr); /* name unknown (inline) */
 };
 
