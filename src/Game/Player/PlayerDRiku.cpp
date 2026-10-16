@@ -44,6 +44,7 @@ inline void _taskSLCOverflowMsg() {
 
 namespace PL {
 extern UINT g_uiStartCondition;
+extern FVECTOR g_vBGFadeColor[7];
 extern FLOAT g_fDefAttr[];
 extern FLOAT g_fGravity;
 extern TIMEQ g_CardBreakTime[];
@@ -588,48 +589,134 @@ asm(".section .rodata\n"
     ".section .text");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", initJump2nd__Q22PL12CPlayerDRiku);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", exeJump2nd__Q22PL12CPlayerDRiku);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", startStockSkillAction__Q22PL12CPlayerDRiku);
-// startStockSkillAction__Q22PL12CPlayerDRiku: its .rodata, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    "jtbl_004A1D00:\n"
-    ".word .L0027EF24\n"
-    ".word .L0027EF24\n"
-    ".word .L0027EF24\n"
-    ".word .L0027EF24\n"
-    ".word .L0027EF2C\n"
-    ".word .L0027EF64\n"
-    ".word .L0027EF24\n"
-    ".word .L0027EF3C\n"
-    ".word .L0027EF3C\n"
-    ".word .L0027EF3C\n"
-    ".word .L0027EF3C\n"
-    ".word .L0027EF3C\n"
-    ".word .L0027EF3C\n"
-    ".word 0\n"
-    ".word 0\n"
-    ".word 0\n"
-    ".section .text");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", initStockSkill__Q22PL12CPlayerDRikui);
-// initStockSkill__Q22PL12CPlayerDRikui: its .rodata, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    "jtbl_004A1D40:\n"
-    ".word .L0027F078\n"
-    ".word .L0027F08C\n"
-    ".word .L0027F0A0\n"
-    ".word .L0027F0C4\n"
-    ".word .L0027F0C4\n"
-    ".word .L0027F1C8\n"
-    ".word .L0027F0E8\n"
-    ".word .L0027F1C8\n"
-    ".word .L0027F1C8\n"
-    ".word .L0027F1C8\n"
-    ".word .L0027F128\n"
-    ".word .L0027F150\n"
-    ".word .L0027F178\n"
-    ".word 0\n"
-    ".section .text");
+INT CPlayerDRiku::startStockSkillAction() {
+    INT id;
+    switch (m_iStockSkill) {
+    case 0x5f:
+    case 0x60:
+    case 0x61:
+    case 0x62:
+    case 0x65:
+        id = m_iStockSkill;
+        goto add;
+    case 0x63:
+        id = m_iStockSkill;
+        id--;
+    add:
+        PLM::addStockBR(id);
+    case 0x66:
+    case 0x67:
+    case 0x68:
+    case 0x69:
+    case 0x6a:
+    case 0x6b:
+        initStockSkill(0);
+        m_iStepStockSkill = 10;
+        return 1;
+    }
+    return 0;
+}
+void CPlayerDRiku::initStockSkill(INT inNo) {
+    INT type;
+    setPlayerState(SKILL);
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x80000);
+    setPlayerFlag(0, 0x20000);
+    m_iAttackNo = inNo;
+    if (!inNo) m_uiPreAttackKind = 0;
+    type = 0;
+    m_bIsAttackHit = FALSE;
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    m_bIsCanCombo = FALSE;
+    m_bDmgMuteki = FALSE;
+    m_tqCardBreakTime = g_CardBreakTime[7];
+    m_nAttackCount = 0;
+    clearSpeed();
+    m_JumpState = 3;
+    _ref(m_szEffectName) = NULL;
+    _ref(m_uiAttackKind) = 8;
+    m_fMoveSpdXZ = 0.0f;
+    m_fWalkSpeed = 0.0f;
+    m_iAerialAnimShift = 0;
+    m_fJumpGravity = g_fGravity;
+    setPlayerFlag(0, 0x2800000);
+    procTargetMark();
+    switch (m_iStockSkill) {
+    case 0x5f:
+        m_uiAttackID = 0xa6;
+        m_pPLM->setReqLoad(0x5f, 0);
+        type = 1;
+        break;
+    case 0x60:
+        m_uiAttackID = 0xa8;
+        m_pPLM->setReqLoad(0x60, 0);
+        type = 1;
+        break;
+    case 0x61:
+        m_uiAttackID = 0xa9;
+        m_pPLM->setReqLoad(0x61, 0);
+        type = 1;
+        break;
+    case 0x62:
+    case 0x63:
+        m_uiAttackID = m_iStockSkill + 0x12;
+        m_pPLM->setReqLoad(0x62, 0);
+        break;
+    case 0x65:
+        m_fWallRadius = 1.0f;
+        m_uiAttackID = 0x77;
+        m_pPLM->setReqLoad(0x62, 0);
+        type = 1;
+        m_pPLM->setReqLoad(0x65, 0);
+        break;
+    case 0x69:
+        m_uiAttackID = 0xb5;
+        m_pPLM->setReqLoad(0x69, 0);
+        type = 1;
+        m_pPLM->setReqLoad(0x93, 0);
+        setBattleFlag(0x100000, 0);
+        break;
+    case 0x6a:
+        m_uiAttackID = 0xb7;
+        m_pPLM->setReqLoad(0x6a, 0);
+        type = 1;
+        m_pPLM->setReqLoad(0x94, 0);
+        m_pPLM->setReqLoad(0x92, 0);
+        setBattleFlag(0x100000, 0);
+        break;
+    case 0x6b:
+        m_uiAttackID = 0xb9;
+        m_pPLM->setReqLoad(0x6b, 0);
+        type = 1;
+        m_pPLM->setReqLoad(0x95, 0);
+        m_pPLM->setReqLoad(0x92, 0);
+        setBattleFlag(0x100000, 0);
+        break;
+    default:
+        m_iSubState = 3;
+        m_pAtkData = &g_AttackDataList[0];
+        m_uiAttackID = 0;
+        m_uiAttackKind = 0;
+        return;
+    }
+    m_pAtkData = &g_AttackDataList[m_uiAttackID];
+    if (type == 1) {
+        m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+    } else {
+        m_iAttackPower = 0;
+    }
+    _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
+    _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
+    UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
+                      CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE1);
+    calcEnchant_AttackPoint(m_iAttackPower, m_AtkKind, m_AtkAttr, up);
+    m_fDistXZ = m_fDistY = 0.0f;
+    m_iSubState = 1;
+    m_uiPreAttackKind = m_uiAttackKind;
+    setTrgFlag(0, 0x40000);
+    m_hMagicCore = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", exeStockSkill__Q22PL12CPlayerDRiku);
 // exeStockSkill__Q22PL12CPlayerDRiku: its .rodata, for its INCLUDE_ASM; remove with it.
 asm(".section .rodata\n"
@@ -643,8 +730,109 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", searchWarpPo
 // searchWarpPos__Q22PL12CPlayerDRikuf: its .data, for its INCLUDE_ASM; remove with it.
 asm(".section .data\n.align 4\ng_vDir.4590:\n"
     ".word 0, 0, 0xC1700000, 0x3F800000, 0, 0, 0x41700000, 0x3F800000\n.previous");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", initFriend__Q22PL12CPlayerDRikui);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", exeFriend__Q22PL12CPlayerDRiku);
+void CPlayerDRiku::initFriend(INT inNo) {
+    if (m_pCB->getEnchantKind() == 0x1b) {
+        addHP(m_iMaxHP / 4, 6000, 1);
+    }
+    setPlayerState(FRIEND);
+    m_iSubState = 1;
+    clearSpeed();
+    offAttack();
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x400);
+    setBattleFlag(0, 0x80000);
+    setTrgFlag(0, 0x80);
+    setPlayerFlag(0, 0x20000);
+    setPlayerFlag(0, 0x2800000);
+    _ref(m_iAttackNo) = inNo;
+    _ref(m_uiPreAttackKind) = 0;
+    _ref(m_uiAttackKind) = 0;
+    _ref(m_bIsAttackHit) = FALSE;
+    _ref(m_bNextTrg) = FALSE;
+    _ref(m_iNextAttack) = 0;
+    _ref(m_bDmgMuteki) = FALSE;
+    _ref(m_bIsCanCombo) = FALSE;
+    _ref(m_fJumpGravity) = g_fGravity;
+    _ref(m_JumpState) = 3;
+    _ref(m_fMoveSpdXZ) = 0.0f;
+    m_tqCardBreakTime = g_CardBreakTime[CardBattle::g_pBattleCardList[m_uiCardID].BREAK];
+    m_fWalkSpeed = 0.0f;
+    m_szEffectName = NULL;
+    if (m_uiCardID != 0x38) {
+        m_iSubState = 3;
+        m_pAtkData = &g_AttackDataList[0];
+        m_uiAttackID = 0;
+        m_uiAttackKind = 0;
+    } else {
+        m_uiAttackID = 0x5c;
+        m_pPLM->setReqLoad(0x62, 0);
+        m_pAtkData = &g_AttackDataList[m_uiAttackID];
+        m_uiPreAttackKind = m_uiAttackKind;
+        m_fDistXZ = m_fDistY = 0.0f;
+    }
+}
+
+void CPlayerDRiku::exeFriend() {
+    TIMEQ frame = getMotionCurrentTime() / 50;
+    setBattleFlag(0, 8);
+    procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
+    switch (m_iSubState) {
+    case 1:
+        if (isAir()) {
+            setAnim(6, 800, 0);
+            break;
+        }
+        setBGFade(g_vBGFadeColor[0], 20.0f, 0);
+        setAnimForce(0x2e, -1, 1, 0, getStateSESeq(6), 0);
+        setCastEffect(g_szDpxFriend, 0, &Crd(0), NULL);
+        calcAppearPosFS_toAttackID();
+        m_hOldLockon = m_hLockon;
+        m_iOldCamMode = _getNowCamMode();
+        if ((m_pAtkData->FLAG & 0x20) && m_pPLM->isCompleteLoadCard(m_uiCardID) != 1) {
+            setObjStop(1);
+            m_pCam->changeCamMode(5, 0);
+        }
+        m_iSubState = 4;
+        break;
+    case 4:
+        if (m_pPLM->isCompleteLoadCard(m_uiCardID) != 1) break;
+        if (!m_pPLM->isFriendReady()) {
+            m_pPLM->createFriend(m_pPLM->getFriendID_toCard(m_uiCardID), NULL);
+            break;
+        }
+        if (!isMotionLoop()) break;
+        setObjStop(0);
+        m_pCam->changeCamMode(-1, 0);
+        calcAppearPosFS_toAttackID();
+        m_pPLM->getFriend()->setAppear();
+        fadeEffect(m_hEffCast, 1);
+        setEffect(g_szDpxFriend, 3, &getPos(), NULL, 0.0f);
+        m_iSubState = m_uiAttackID * 5;
+        setAnimForce(0x2a, -1, 0, 0, 0, 0);
+        setPlayerFlag(0x100000, 0);
+        m_tqStateTimer = 0;
+        m_pMarker->holdTarget(8);
+        procTargetMark();
+        break;
+    case 0x1cc:
+        if (!m_pPLM->isFriendReady()) {
+            m_iSubState = 3;
+            break;
+        }
+        if (!m_bIsCanCombo) {
+            m_bIsCanCombo = m_pPLM->getFriend()->setSkill(m_uiAttackID);
+        }
+        exeStandUp_inFriend();
+        break;
+    case 3:
+        if (isBattleFlag(0x1000) && exeUseStock(1)) {
+            if (isPlayerFlag(0x80000000)) setBGFade(1.0f, 20.0f, 0);
+            break;
+        }
+        procSkillEnd(-1);
+        break;
+    }
+}
 
 } // namespace PL
 // SOURCE DATA: .data .rodata
