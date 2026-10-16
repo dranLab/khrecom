@@ -162,6 +162,8 @@ public:
     TIMEQ getMotionTotalTime() const;
     BOOL arriveTarget(const FVECTOR& inTarget, FLOAT inRange);
     void clearSpeed();
+    // PARTIAL: added for Game/Enemy/EnemyDarkball
+    void changeMotionFileName(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     void warp(const FVECTOR& inPos);
     // PARTIAL: added for Game/Player/SummonDumbo
     void setRot(const FVECTOR& inRot);

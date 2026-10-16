@@ -51,6 +51,11 @@ public:
     ULONGLONG isBtlEnemyFlag(ULONGLONG inFlag) const { return m_ullBtlEnemyFlag & inFlag; }
     // PARTIAL: added for Game/Player/PlayerRiku (original name unknown)
     BOOL isActiveTarget() const { return !isBtlEnemyFlag(0x80000) && !isBtlEnemyFlag(0x100000); }
+    // PARTIAL: added for Game/Enemy/EnemyDarkball (original name unknown)
+    void setBtlEnemyFlag(ULONGLONG inFlag) { m_ullBtlEnemyFlag |= inFlag; }
+    FLOAT getExtraParam(const CHAR* inParamName);
+    void endCardBattle(CState* inState, TIMEQ inNextAttackWait);
+    BOOL turnToPlayer(FLOAT inLimit);
     virtual void getUseCardPos(FVECTOR& outPos);
     virtual void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     virtual BOOL startCardBattle();
