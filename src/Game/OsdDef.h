@@ -78,7 +78,10 @@ struct OBJ_FORMATION {
     }
 };
 
-#line 126 "Game/OsdDef.h"
+#ifndef OSDDEF_H_PATH // PARTIAL: path override added for Game/EntityFactory ("c:/KHCOM/MainApp/Game/OsdDef.h")
+#define OSDDEF_H_PATH "Game/OsdDef.h"
+#endif
+#line 126 OSDDEF_H_PATH
 inline OBJ_GROUP* OBJ_FORMATION::getObjGroup(INT inCategory, INT inGroupNo) {
     if (!(0 <= inCategory && inCategory < OSD_CATEGORY_MAX)) {
         AssertApp(__FILE__, __LINE__, "0 <= inCategory && inCategory < OSD_CATEGORY_MAX", 0);
