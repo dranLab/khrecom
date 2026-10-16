@@ -140,3 +140,11 @@ _$_6CState_0027BD10 = 0x0027BD10; // type:func size:0x30
 _$_t7CVector1Z6G_LINE_0027BE28 = 0x0027BE28; // type:func size:0x8C
 _vt$t7CVector1Z6G_LINE_004A1628 = 0x004A1628; // size:0x18
 _vt$6CState_004A1640 = 0x004A1640; // size:0x30
+
+// System/Buf: CLinkedPtr's inline destructor and setPtr, CSJointT<CLinkedPtr>'s destructor and unnamed copies of
+// their vtables
+_$_10CLinkedPtr_00117968 = 0x00117968; // type:func size:0x30
+setPtr__10CLinkedPtrPv_00117998 = 0x00117998; // type:func size:0x8
+_$_t8CSJointT1Z10CLinkedPtr_00117A08 = 0x00117A08; // type:func size:0x30
+_vt$10CLinkedPtr_0045E278 = 0x0045E278; // size:0x18
+_vt$t8CSJointT1Z10CLinkedPtr_0045E290 = 0x0045E290; // size:0x18
