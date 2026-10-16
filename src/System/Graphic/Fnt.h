@@ -41,6 +41,9 @@ public:
     /* PARTIAL: added for Form/DebugWindow */
     void setBrightness(UBYTE r, UBYTE g, UBYTE b, UBYTE a) { m_brightness.set(r, g, b, a); }
     void setSize(INT nSize) { m_Size = nSize << 4; }
+    // PARTIAL: added for System/Graphic/2d/2DFntObj (signatures guessed)
+    void setPositionF(FLOAT fX, FLOAT fY, INT nZ) { m_P0.set((FIX4)(fX * 16.0f), (FIX4)(fY * 16.0f), nZ); }
+    void setBrightness(const G_RGBA& rgba) { m_brightness = rgba; }
     LPCSTR getText() { return m_pText; }
     void setSpace(SHORT x, SHORT y) {
         m_Space.x = x;

@@ -5,7 +5,7 @@
 #include "khtypes.h"
 
 struct G_UV;
-struct SeqControl;
+namespace D2 { struct SeqControl; } // PARTIAL: in D2 as in the original
 
 namespace D2 {
 
