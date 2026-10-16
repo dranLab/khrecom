@@ -82,7 +82,9 @@ public:
     void enableDispEach(BOOL bEnable);                        /* PARTIAL: added for Form/Menu/RoomCreation */
     void enableColorCtrl(BOOL bEnable) { m_seqControl.fgColor = bEnable; } /* PARTIAL: added for Form/SystemMessage */
     void restart(UINT nIdx, FLOAT fTime);                     /* PARTIAL: added for Form/Menu/Camp */
-    UINT getSeqMax() { return m_nSeq; }                       /* PARTIAL: added for Form/Menu/Camp (name unknown) */
+    UINT getSeqMax() { return m_nSeq; }
+    void changeTime(UINT qTime);                              /* PARTIAL: added for System/Graphic/2d/2DCard */
+    int* getSeqHandles() { return m_hSeqHandle; }             /* PARTIAL: added for System/Graphic/2d/2DCard (name unknown) */                       /* PARTIAL: added for Form/Menu/Camp (name unknown) */
 };
 
 }  // namespace D2

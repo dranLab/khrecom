@@ -72,6 +72,10 @@ public:
     HANDLE createFnt(HANDLE hBaseHandle, C2DFnt* p2DFnt);
     C2DObjList* getList() { return (C2DObjList*)m_p2DObjList; }
     BOOL isEnable() { return m_bEnable; }
+    // PARTIAL: added for System/Graphic/2d/2DCard
+    void shiftBase(FLOAT fX, FLOAT fY);
+    void setParentFlag(CHAR fg) { m_fgParent = fg; }
+    void setMainSkip(CHAR fg) { m_fgMainSkip = fg; }
     TIMEQ getTimeMax() { return m_qTimeMax; }
     TIMEQ getTime() { return m_qTime; } // PARTIAL: added for System/Graphic/2d/2DLayObj
     BOOL isEnd() { return m_bEnd; }
