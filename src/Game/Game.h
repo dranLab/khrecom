@@ -13,6 +13,7 @@ public:
     static BOOL reqSave();
     static BOOL isSoraGame(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
     static BOOL isRikuGame(); // PARTIAL: added for Game/Player/NaviMap
+    static void setupConfig(); // PARTIAL: added for Form/Menu/Camp
     static void enablePause(BOOL bEnable); // PARTIAL: added for Form/Menu/GameOver
     static BOOL reqContinue_GameOver();    // PARTIAL: added for Form/Menu/GameOver
     static BOOL reqExit_GameOver();        // PARTIAL: added for Form/Menu/GameOver

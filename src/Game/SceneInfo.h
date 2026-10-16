@@ -101,7 +101,9 @@ struct DoorInfo { // 0x18
     DOOR_ID _id;               /* 0x00 */
     INT _shape;                /* 0x04 */ // PARTIAL: _shape/_type split out for Game/Player/NaviMap
     DOOR_TYPE _type;           /* 0x08 */
-    UBYTE _m_0x0c[0xc];        /* 0x0c _nDstRoom .. _pNormaSrcInfo */
+    INT _nDstRoom;             /* 0x0c PARTIAL: named for Form/Menu/Camp */
+    void* _pStorageInfo;       /* 0x10 */
+    void* _pNormaSrcInfo;      /* 0x14 */
     DOOR_STAT getDoorState() const;
     BOOL isSpecialDoor() const; // PARTIAL: added for Game/Player/NaviMap
     // PARTIAL: added for Form/Menu/RoomCreation
@@ -187,6 +189,7 @@ struct RoomInfo {
     BYTE getRoomNameCardID() const; // PARTIAL: added for Game/Player/NaviMap
     SHORT getSceneNum() const;      // PARTIAL: added for Form/Menu/SaveLoadUtil
     BYTE getCardNumber() const;     // PARTIAL: added for Game/Gimmick/GimmickManager
+    BOOL hasEntered() const;        // PARTIAL: added for Form/Menu/Camp
 };
 
 // PARTIAL: added for Game/Gimmick/GimmickManager
@@ -258,6 +261,7 @@ public:
     // PARTIAL: added for Form/DebugMenu
     static void doneChangeScene();
     static FLOOR::FloorLayout* getFloorDataSrc(USHORT nFloorIndex, BOOL bSora);
+    static FLOOR::FloorLayout* getCurrentFloorDataSrc(); // PARTIAL: added for Form/Menu/Camp
     static SHORT getEventRoomSceneNum(WORLD_ID w, const FLOOR::RoomSrcInfo& info, BOOL bSora);
     static INT getFloorDataCount(BOOL bSora);
     static WorldSelTable* getSelectableWorldTable(INT nFloorIndex, BOOL bSora);

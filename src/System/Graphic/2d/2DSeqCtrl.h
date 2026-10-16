@@ -41,24 +41,24 @@ public:
     C2DSeqCtrl();
     C2DSeqCtrl(INT inSw); /* PARTIAL: added for Form/Menu/DecknameEdit */
     virtual ~C2DSeqCtrl();
-    virtual C2DSeqObj* addSeq(LPCTSTR pSedName, UINT idxSeq, UINT nLayer);
-    virtual C2DSeqObj* addSeq(LPCTSTR pSedName, UINT idxSeq);
+    virtual C2DSeqObj* addSeq(const CHAR* pSedName, UINT idxSeq, UINT nLayer);
+    virtual C2DSeqObj* addSeq(const CHAR* pSedName, UINT idxSeq);
     /* PARTIAL: added for Form/SystemMessage - the overloads with a layer are guesses */
-    virtual C2DSeqObj* addFnt(LPCTSTR pSqdName, UINT nLayer, C2DFnt* p2DFnt); /* PARTIAL: order from the symbol, for Game/Player/NaviMap */
-    virtual C2DSeqObj* addFnt(LPCTSTR pSqdName, C2DFnt* p2DFnt);
-    virtual C2DSeqObj* replaceSeq(UINT nIdx, LPCTSTR pSedName, UINT idxSeq, UINT nLayer);
-    virtual C2DSeqObj* replaceSeq(UINT nIdx, LPCTSTR pSedName, UINT idxSeq);
-    virtual C2DSeqObj* replaceFnt(UINT nIdx, LPCTSTR pSedName, C2DFnt* p2DFnt, UINT nLayer);
-    virtual C2DSeqObj* replaceFnt(UINT nIdx, LPCTSTR pSedName, C2DFnt* p2DFnt);
-    virtual C2DSeqObj* addSeqShift(LPCTSTR pSedName, UINT idxSeq, UINT nLayer, FLOAT fShiftX, FLOAT fShiftY);
-    virtual C2DSeqObj* addSeqShift(LPCTSTR pSedName, UINT idxSeq, FLOAT fShiftX, FLOAT fShiftY);
-    virtual C2DSeqObj* addFntShift(LPCTSTR pSqdName, C2DFnt* p2DFnt, UINT nLayer, FLOAT fShiftX, FLOAT fShiftY);
-    virtual C2DSeqObj* addFntShift(LPCTSTR pSqdName, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* addFnt(const CHAR* pSqdName, UINT nLayer, C2DFnt* p2DFnt); /* PARTIAL: order from the symbol, for Game/Player/NaviMap */
+    virtual C2DSeqObj* addFnt(const CHAR* pSqdName, C2DFnt* p2DFnt);
+    virtual C2DSeqObj* replaceSeq(UINT nIdx, const CHAR* pSedName, UINT idxSeq, UINT nLayer);
+    virtual C2DSeqObj* replaceSeq(UINT nIdx, const CHAR* pSedName, UINT idxSeq);
+    virtual C2DSeqObj* replaceFnt(UINT nIdx, const CHAR* pSedName, UINT nLayer, C2DFnt* p2DFnt); /* PARTIAL: const and order from the symbols, for Form/Menu/Camp */
+    virtual C2DSeqObj* replaceFnt(UINT nIdx, const CHAR* pSedName, C2DFnt* p2DFnt);
+    virtual C2DSeqObj* addSeqShift(const CHAR* pSedName, UINT idxSeq, UINT nLayer, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* addSeqShift(const CHAR* pSedName, UINT idxSeq, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* addFntShift(const CHAR* pSqdName, UINT nLayer, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* addFntShift(const CHAR* pSqdName, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
     /* PARTIAL: added for Form/Menu/MonstroGauge - [14]..[19]; signatures from the symbols */
-    virtual C2DSeqObj* replaceSeqShift(UINT nIdx, LPCTSTR pSedName, UINT idxSeq, UINT nLayer, FLOAT fShiftX, FLOAT fShiftY);
-    virtual C2DSeqObj* replaceSeqShift(UINT nIdx, LPCTSTR pSedName, UINT idxSeq, FLOAT fShiftX, FLOAT fShiftY);
-    virtual C2DSeqObj* replaceFntShift(UINT nIdx, LPCTSTR pSqdName, UINT nLayer, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
-    virtual C2DSeqObj* replaceFntShift(UINT nIdx, LPCTSTR pSqdName, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* replaceSeqShift(UINT nIdx, const CHAR* pSedName, UINT idxSeq, UINT nLayer, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* replaceSeqShift(UINT nIdx, const CHAR* pSedName, UINT idxSeq, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* replaceFntShift(UINT nIdx, const CHAR* pSqdName, UINT nLayer, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
+    virtual C2DSeqObj* replaceFntShift(UINT nIdx, const CHAR* pSqdName, C2DFnt* p2DFnt, FLOAT fShiftX, FLOAT fShiftY);
     virtual C2DSeqObj* shiftSeqPos(UINT nIdx, FLOAT fShiftX, FLOAT fShiftY);
     virtual C2DSeqObj* setFntPos(UINT nIdx, FLOAT fX, FLOAT fY);
     void destroy();                                           /* PARTIAL: added for Game/Player/NaviMap */
@@ -80,6 +80,8 @@ public:
     void setCol(FVECTOR& vCol);                               /* PARTIAL: added for Form/Menu/RoomCreation */
     void enableDispEach(BOOL bEnable);                        /* PARTIAL: added for Form/Menu/RoomCreation */
     void enableColorCtrl(BOOL bEnable) { m_seqControl.fgColor = bEnable; } /* PARTIAL: added for Form/SystemMessage */
+    void restart(UINT nIdx, FLOAT fTime);                     /* PARTIAL: added for Form/Menu/Camp */
+    UINT getSeqMax() { return m_nSeq; }                       /* PARTIAL: added for Form/Menu/Camp (name unknown) */
 };
 
 }  // namespace D2
