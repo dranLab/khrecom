@@ -18,8 +18,15 @@ void addTraceString(CHAR* pszSrc);
 
 #ifdef __cplusplus
 // PARTIAL: added for System/Movie/Movie
+// PARTIAL: added for Form/Menu/TitleReportDllStarter
+enum SOFTRESET_MODE {
+    SOFTRESET_NORMAL = 0,
+    SOFTRESET_SKIP_LOGO = 1
+};
+
 class CMainApp {
 public:
+    static void reqSoftReset(SOFTRESET_MODE mode); // PARTIAL: added for Form/Menu/TitleReportDllStarter
     static void initialize(int mode); // PARTIAL: added for main
     static INT run();
     static void finalize();

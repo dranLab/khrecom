@@ -180,3 +180,7 @@ _$_t8CSJointT1Z10CLinkedPtr_001CBDA0 = 0x001CBDA0; // type:func size:0x30
 _vt$10CLinkedPtr_00471688 = 0x00471688; // size:0x18
 _vt$10CLightUnit_004716A0 = 0x004716A0; // size:0x38
 _vt$t8CSJointT1Z10CLinkedPtr_004729E0 = 0x004729E0; // size:0x18
+
+// Form/Menu/TitleReportDllStarter: CState's inline destructor and an unnamed copy of its vtable
+_$_6CState_00356618 = 0x00356618; // type:func size:0x30
+_vt$6CState_004F66D8 = 0x004F66D8; // size:0x30
