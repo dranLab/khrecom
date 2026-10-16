@@ -9,7 +9,10 @@
 /* Placeholder for CStatus's inline singleton creation: its strings ("Game/Status.h",
  * "__null == m_pInstance", "Game/Status.h(38)") are in .rodata of every includer.
  * Only line 38 is known (it is part of the allocation message). */
-#line 1 "Game/Status.h"
+#ifndef STATUS_H_PATH // PARTIAL: path override added for Game/Status ("c:/KHCOM/MainApp/...")
+#define STATUS_H_PATH "Game/Status.h"
+#endif
+#line 1 STATUS_H_PATH
 inline void* _statusCreate(void* inInstance) {
     if (!(__null == inInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
     return com_malloc_d(4, __FILE__ "(38)", (UINT)-1);
@@ -35,6 +38,9 @@ private:
     static STATUS_INFO* m_pStatusInfo;
     /* read through a reference: the original reloads m_pStatusInfo after every store into it */
     static STATUS_INFO*& _info() { return m_pStatusInfo; }
+    CStatus(); // PARTIAL: added for Game/Status
+    ~CStatus();
+    static void setStatus(unsigned char (*pInitCardTbl)[2]);
 
 public:
     static INT getHP() { return _info()->HP; }
@@ -53,7 +59,8 @@ public:
     static INT getMP() { return _info()->MP; } // PARTIAL: added for Form/Menu/Camp
     static INT getLvExp(UINT nLv);
     static void setEXP(INT inEXP) { _info()->EXP = inEXP; } // PARTIAL: added for Form/DebugWindowTBL
-    static void setMP(INT nMP);                              // PARTIAL: added for Form/DebugWindowTBL
+    static BOOL setMP(INT inMP);                             // PARTIAL: added for Form/DebugWindowTBL
+    static BOOL addMP(INT inMP);
     static BOOL isLevelUp();
 #ifdef GAME_SCENEINFO_H
     static void initStatus(USHORT nDeck, WORLD_ID nWorld, SHORT nFloor); // PARTIAL: added for Form/DebugMenu
