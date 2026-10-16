@@ -164,6 +164,7 @@ public:
     void clearSpeed();
     // PARTIAL: added for Game/Enemy/EnemyDarkball
     void changeMotionFileName(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
+    FMATRIX* getBoneMatrix(const CHAR* inBoneName) const; // PARTIAL: added for Game/Enemy/EnemyFatbandit
     void warp(const FVECTOR& inPos);
     // PARTIAL: added for Game/Player/SummonDumbo
     void setRot(const FVECTOR& inRot);
