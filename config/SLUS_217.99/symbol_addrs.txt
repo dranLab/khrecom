@@ -56,6 +56,12 @@ _vt$6CState_00494A68 = 0x00494A68; // size:0x30
 _$_6CState_001FA798 = 0x001FA798; // type:func size:0x30
 _vt$6CState_0047EDB0 = 0x0047EDB0; // size:0x30
 
+// System/Graphic/ScreenMask: unnamed copies of IColorFader's inline virtuals
+reqBlackIn__11IColorFaderUsf_00145248 = 0x00145248; // type:func size:0x34
+reqBlackOut__11IColorFaderUsf_00145280 = 0x00145280; // type:func size:0x30
+reqWhiteIn__11IColorFaderUsf_001452B0 = 0x001452B0; // type:func size:0x30
+reqWhiteOut__11IColorFaderUsf_001452E0 = 0x001452E0; // type:func size:0x34
+
 // Game/Atel/EventTrap: CVector<G_LINE>'s inline destructor and an unnamed copy of its vtable
 _$_t7CVector1Z6G_LINE_00240FA0 = 0x00240FA0; // type:func size:0x8C
 _vt$t7CVector1Z6G_LINE_0048BD40 = 0x0048BD40; // size:0x18

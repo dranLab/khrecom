@@ -33,6 +33,7 @@ private:
     USHORT m_nFlag;
 
 public:
+    CAlphaChanger() { m_nFlag = 0; } // PARTIAL: added for System/Graphic/ScreenMask
     void setAlpha(FLOAT fAlpha) {
         if (fAlpha < 0.f) {
             fAlpha = 0.f;
