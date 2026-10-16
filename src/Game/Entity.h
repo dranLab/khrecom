@@ -178,6 +178,10 @@ public:
     const FVECTOR& getRot() const; // PARTIAL: added for Game/Gimmick/GimmickPlantParent
     const FVECTOR& getScale() const;
     void updateCoord();
+    // PARTIAL: added for Game/EntityFactory
+    void positionFix(const FVECTOR& inPos, FLOAT inDir);
+    void positionFix(const FVECTOR& inPos, const FVECTOR& inRot);
+    void land(FLOAT inDownLength, FLOAT inUpLength, BOOL inFirstHit);
     void coordFix();
     // PARTIAL: added for Game/Player/PlayerDRiku
     BOOL createLegIK(FLOAT inP0, FLOAT inP1);
