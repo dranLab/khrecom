@@ -56,6 +56,10 @@ public:
     FLOAT getExtraParam(const CHAR* inParamName);
     void endCardBattle(CState* inState, TIMEQ inNextAttackWait);
     BOOL turnToPlayer(FLOAT inLimit);
+    // PARTIAL: added for Game/Enemy/EnemySearchghost
+    BOOL turnToPlayerY(FLOAT inLimit);
+    INT getHpMax() const;
+    HANDLE recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent);
     virtual void getUseCardPos(FVECTOR& outPos);
     virtual void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     virtual BOOL startCardBattle();
