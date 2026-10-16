@@ -74,6 +74,12 @@ public:
     FLOAT getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpFlag, ATK_KIND* outAtkKind, INT inFinish);
     ATK_ATTR getAttackAttr(INT inIndex) const;
     HANDLE getPlayerHandle(); // PARTIAL: added for Game/Enemy/EnemyFatbandit
+    // PARTIAL: added for Game/Enemy/EnemyHeartsoldier
+    void changeDefaultState();
+    void playSmallDamageSE();
+    void playBigDamageSE();
+    INT selectDamageMotion_();
+    INT getParam() { return *(INT*)&_m_0x218[0x1c]; } /* m_iParam 0x234 */
     INT getHpMax() const;
     HANDLE recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent);
     virtual void getUseCardPos(FVECTOR& outPos);

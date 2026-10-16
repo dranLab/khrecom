@@ -168,6 +168,7 @@ public:
     // PARTIAL: added for Game/Enemy/MapEnemyGround
     INT getMotionCurrentID(); /* inline in the original; defined where CAnim is complete (Game/Enemy/MapEnemyGround.cpp) */
     void endTargetChase();
+    INT setTexAnmSeq(INT nAnmNo, INT nSeqNo); // PARTIAL: added for Game/Enemy/EnemyHeartsoldier
     void warp(const FVECTOR& inPos);
     // PARTIAL: added for Game/Player/SummonDumbo
     void setRot(const FVECTOR& inRot);
