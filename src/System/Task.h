@@ -336,6 +336,7 @@ protected:
     CTaskSLCList& getChildren() { return m_listChildren; }
     const CTaskSLCList& getChildren() const { return m_listChildren; }
     friend class CTaskSecondary; // PARTIAL: added for System/Graphic/Camera (m_nInfo)
+    friend class CFadeIOMask;    // PARTIAL: added for System/Graphic/ScreenMask (m_nInfo)
 
 private:
     void invokeMain(TaskMainParam& param);

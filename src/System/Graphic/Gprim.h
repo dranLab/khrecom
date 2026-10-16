@@ -35,6 +35,8 @@ union ALPHA {
     ALPHA(_ALPHA nMode) { _value = nMode; }
     ALPHA(INT nMode) { _value = nMode; }
     operator INT() const { return _value; }
+    // PARTIAL: added for System/Graphic/ScreenMask (the result is materialized: xori + bnez)
+    BOOL operator==(_ALPHA nMode) const { return _value == nMode; }
     ALPHA& operator=(const ALPHA& a) {
         _value = a._value;
         return *this;
