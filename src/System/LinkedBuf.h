@@ -59,11 +59,42 @@ public:
     static void addFreeMallocPtr(void* pInPtr); /* name unknown (inline) */
 };
 
+/* PARTIAL: path override added for Game/AttachCard ("System/LinkedBuf.h") */
+#ifdef LINKEDBUF_H_PATH
+#line 1 LINKEDBUF_H_PATH
+#endif
 #line 130
 inline void CDelayedFree::addFreeMallocPtr(void* pInPtr) {
     CMallocPtr* pPtr = new (com_malloc_d(sizeof(CMallocPtr), __FILE__ "(131)", ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }))) CMallocPtr(pInPtr);
     if (!pPtr) AssertApp(__FILE__, __LINE__, "pPtr", 0);
     addFreePtr(*pPtr);
+}
+
+// PARTIAL: added for Game/AttachCard
+template <class T>
+class CNewPtrT : public CLinkedPtr {
+private:
+    BOOL m_bArray; /* 0xc */
+
+public:
+    CNewPtrT(T* pInBuf, BOOL bInArray) : CLinkedPtr(pInBuf) { m_bArray = bInArray; }
+    virtual ~CNewPtrT() {
+        if (m_pPtr) {
+            if (m_bArray) delete[] (T*)m_pPtr;
+            else delete (T*)m_pPtr;
+        }
+    }
+};
+
+#line 140
+template <class T>
+void DelayedDelete(T* pInBuf, BOOL bInArray) {
+    if (pInBuf) {
+        CNewPtrT<T>* pPtr = new (com_malloc_d(sizeof(CNewPtrT<T>), __FILE__ "(141)", ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }))) CNewPtrT<T>(pInBuf, bInArray);
+#line 142
+        if (!pPtr) AssertApp(__FILE__, __LINE__, "pPtr", 0);
+        CDelayedFree::addFreePtr(*pPtr);
+    }
 }
 
 #endif /* SYSTEM_LINKEDBUF_H */

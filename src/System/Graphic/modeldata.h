@@ -39,6 +39,11 @@ struct MODELDATA {
 
     BOOL enablePointLight() const;
     BOOL enableLight() const;
+    // PARTIAL: added for Game/AttachCard
+    static BOOL isNormal(UINT mode);
+    static BOOL isColorI(UINT mode);
+    static BOOL isColorF(UINT mode);
+    static BOOL isTexture(UINT mode);
 };
 
 #endif /* SYSTEM_GRAPHIC_MODELDATA_H */

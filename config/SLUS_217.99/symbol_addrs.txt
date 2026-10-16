@@ -143,6 +143,9 @@ _vt$t7CVector1Z6G_LINE_004D9D58 = 0x004D9D58; // size:0x18
 // odd addresses in System/Sound/driver/sddrv_ee's .bss, which then couldn't come from source.
 D_00647261 = 0x00647261; // can_be_referenced:False
 D_0064726F = 0x0064726F; // can_be_referenced:False
+// Not a symbol: a GS packet word in lib/nodebug/__CTOR_LIST__'s data that splat read as a pointer into
+// Game/AttachCard's .rodata (its card name table), which then couldn't come from source.
+D_0047212C = 0x0047212C; // can_be_referenced:False
 
 // Form/Menu/DecknameEdit: an unnamed copy of CState's vtable
 _vt$6CState_004E6AB0 = 0x004E6AB0; // size:0x30
@@ -162,3 +165,18 @@ setPtr__10CLinkedPtrPv_00117998 = 0x00117998; // type:func size:0x8
 _$_t8CSJointT1Z10CLinkedPtr_00117A08 = 0x00117A08; // type:func size:0x30
 _vt$10CLinkedPtr_0045E278 = 0x0045E278; // size:0x18
 _vt$t8CSJointT1Z10CLinkedPtr_0045E290 = 0x0045E290; // size:0x18
+
+// Game/AttachCard: CLightUnit's, CLinkedPtr's and CSJointT<CLinkedPtr>'s inline functions and unnamed copies of
+// the CLinkedPtr, CLightUnit and CSJointT<CLinkedPtr> vtables
+_$_10CLightUnit_001CBB80 = 0x001CBB80; // type:func size:0x30
+setAnchor__10CLightUnitPC6CCoordRC9MODELDATAi_001CBBB0 = 0x001CBBB0; // type:func size:0x1C
+reCalc__10CLightUnit_001CBBD0 = 0x001CBBD0; // type:func size:0x3C
+getPointLightData__C10CLightUnit_001CBC10 = 0x001CBC10; // type:func size:0x8
+_calc__10CLightUnit_001CBC18 = 0x001CBC18; // type:func size:0x34
+_$_10CLinkedPtr_001CBC50 = 0x001CBC50; // type:func size:0x30
+setPtr__10CLinkedPtrPv_001CBC80 = 0x001CBC80; // type:func size:0x8
+calc__10CLightUnit_001CBD88 = 0x001CBD88; // type:func size:0x18
+_$_t8CSJointT1Z10CLinkedPtr_001CBDA0 = 0x001CBDA0; // type:func size:0x30
+_vt$10CLinkedPtr_00471688 = 0x00471688; // size:0x18
+_vt$10CLightUnit_004716A0 = 0x004716A0; // size:0x38
+_vt$t8CSJointT1Z10CLinkedPtr_004729E0 = 0x004729E0; // size:0x18
