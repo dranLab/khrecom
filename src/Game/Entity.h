@@ -138,6 +138,7 @@ public:
     // PARTIAL: added for Game/Gimmick/GimmickSavePoint
     const FVECTOR& getPos() const;
     void setPos(const FVECTOR& inPos); // PARTIAL: added for Game/Gimmick/GimmickHitFlying
+    INT getMotionIndex(const CHAR* inName) const; // PARTIAL: added for Game/Enemy/EnemyWyvern
     void setOldPos(const FVECTOR& inPos); // PARTIAL: added for Game/Gimmick/BaseGimmick
     FLOAT calcDistanceXZ(const CEntity* inEntity) const;
     FLOAT calcDistanceXZ(const CEntity& inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickDoor
