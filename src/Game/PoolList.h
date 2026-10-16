@@ -1,0 +1,96 @@
+// PARTIAL: added for Game/MessageManager (line numbers are the original ones where they are known)
+#ifndef GAME_POOLLIST_H
+#define GAME_POOLLIST_H
+
+#include "khtypes.h"
+#include "System/MainApp.h"
+#include "System/HeapMan.h"
+
+#define POOLLIST_RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
+/* Fixed-size pool of list entries T (with pPrev/pNext links), kept in a doubly linked list between two sentinels. */
+template <class T>
+class CPoolList {
+protected:
+    INT m_iSize;          /* 0x00 */
+    T* m_pListTbl;        /* 0x04 */
+    T** m_ppListPtrTbl;   /* 0x08 */
+    T m_Top;              /* 0x0c */
+    T m_Tail;
+    INT m_iReadPtr;
+    INT m_iWritePtr;
+    INT m_iNowCount;
+
+public:
+    CPoolList(INT inSize) {
+        m_iSize = 0;
+        m_pListTbl = NULL;
+        m_ppListPtrTbl = NULL;
+        m_iNowCount = 0;
+        m_iWritePtr = 0;
+        m_iReadPtr = 0;
+        init(inSize);
+    }
+    virtual ~CPoolList() { release(); }
+    T* getList() {
+        T* p = NULL;
+        T* q;
+        if (m_iNowCount < m_iSize && (q = m_ppListPtrTbl[m_iReadPtr]) != NULL) {
+            m_ppListPtrTbl[m_iReadPtr] = NULL;
+            if (++m_iReadPtr >= m_iSize) m_iReadPtr = 0;
+            m_iNowCount++;
+            m_Tail.pPrev->pNext = q;
+            q->pPrev = m_Tail.pPrev;
+            q->pNext = &m_Tail;
+            m_Tail.pPrev = q;
+            p = q;
+        }
+        return p;
+    }
+
+protected:
+#line 59 "src/Game/PoolList.h"
+    void init(INT inSize) {
+        INT i;
+        m_iSize = inSize;
+        m_pListTbl = (T*)com_malloc_d(inSize * sizeof(T), __FILE__ "(62)", POOLLIST_RET_ADDR());
+        m_ppListPtrTbl = (T**)com_malloc_d(inSize * sizeof(T*), __FILE__ "(63)", POOLLIST_RET_ADDR());
+        if (!m_pListTbl) AssertApp(__FILE__, __LINE__, "m_pListTbl", 0);
+        if (!m_ppListPtrTbl) AssertApp(__FILE__, __LINE__, "m_ppListPtrTbl", 0);
+        for (i = 0; i < inSize; i++) {
+            m_ppListPtrTbl[i] = &m_pListTbl[i];
+        }
+        erase();
+    }
+    void release() {
+        if (m_pListTbl) com_free(m_pListTbl);
+        m_pListTbl = NULL;
+        if (m_ppListPtrTbl) com_free(m_ppListPtrTbl);
+        m_ppListPtrTbl = NULL;
+        m_iNowCount = 0;
+        m_iWritePtr = 0;
+        m_iReadPtr = 0;
+        m_iSize = 0;
+    }
+    void erase() {
+        m_Top.pNext = &m_Tail;
+        m_Tail.pPrev = &m_Top;
+        m_iNowCount = 0;
+        m_iWritePtr = 0;
+        m_iReadPtr = 0;
+        m_Top.pPrev = NULL;
+        m_Tail.pNext = NULL;
+    }
+#line 88
+    void releaseList(T* inList) {
+        inList->pPrev->pNext = inList->pNext;
+        inList->pNext->pPrev = inList->pPrev;
+#line 93
+        if (!(m_ppListPtrTbl[m_iWritePtr] == __null)) AssertApp(__FILE__, __LINE__, "m_ppListPtrTbl[m_iWritePtr] == __null", 0);
+        m_ppListPtrTbl[m_iWritePtr] = inList;
+        if (++m_iWritePtr >= m_iSize) m_iWritePtr = 0;
+        m_iNowCount--;
+    }
+};
+
+#endif /* GAME_POOLLIST_H */
