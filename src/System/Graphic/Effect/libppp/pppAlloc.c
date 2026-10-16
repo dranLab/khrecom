@@ -1,7 +1,6 @@
 #include "pppAlloc.h"
 #include "System/MainApp.h"
 #include "System/Debug.h"
-#include "include_asm.h"
 
 
 
@@ -95,23 +94,16 @@ search:
     }
 }
 
-/* pppFree's message, for its INCLUDE_ASM (the linker provides the label); remove with it. */
-asm(".section .rodata\n.align 3\n"
-    ".asciz \"!!!!!!!!!!!!!!!!!!!!!!!!! Effect pppFree NULL! !!!!!!!!!!!!!!!!!!!!!!!\\n\"\n.previous");
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/pppAlloc", pppFree);
-
-/* Same instructions as the original except that two temporaries (mcb->before and next) get swapped
- * registers (v1/a1); about 70 equivalent spellings of the merge blocks were tried (an explicit "before" variable
- * at function or block scope, "next" as the temporary, nested ifs, ptr-based accesses, register asm variables). */
-#if 0
+/* The original's debug info lists only mcb and next in registers; `before` is a plain local whose every use CSE
+ * replaces by the temporary of the `mcb->before != NULL` test (its dead copy is deleted, so it never gets a register and
+ * is omitted from the debug info). Reading mcb->before again after the `before->next` store would reload it. */
+#line 175
 void pppFree(pppMemMng *mng, void *ptr) {
     pppEMCB *mcb;
     pppEMCB *next;
-
+    pppEMCB *before;
 #line 179
     if (mng == NULL) AssertApp(__FILE__, __LINE__, "mng", 0);
-
     if (ptr == NULL) {
         TRACE("!!!!!!!!!!!!!!!!!!!!!!!!! Effect pppFree NULL! !!!!!!!!!!!!!!!!!!!!!!!\n");
         return;
@@ -120,18 +112,24 @@ void pppFree(pppMemMng *mng, void *ptr) {
     mcb = (pppEMCB *)ptr - 1;
     mcb->owner = 0;
     mng->last_free_heap = mcb;
+
     mng->allocSize -= (u_char *)mcb->next - (u_char *)mcb;
 
-    if (mcb->before != NULL && mcb->before->owner == 0) {
-        mcb = mcb->before;
-        mcb->next = ((pppEMCB *)ptr - 1)->next;
-        ((pppEMCB *)ptr - 1)->next->before = mcb;
+    if (mcb->before != NULL) {
+        before = mcb->before;
+        if (before->owner == 0) {
+            before->next = mcb->next;
+            next = mcb->next;
+            next->before = before;
+            mcb = before;
+        }
     }
+
     next = mcb->next;
     if (next->owner == 0) {
         mcb->next = next->next;
-        next->next->before = mcb;
+        next = next->next;
+        next->before = mcb;
     }
 }
-#endif
 // SOURCE DATA: .rodata
