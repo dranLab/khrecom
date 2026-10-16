@@ -76,7 +76,7 @@ void C2DFntObj::move() {
             MulVector(vCol, vCol, *(FVECTOR*)&m_pSeqControl->_m_0x000[0xd0 / 16]);
         }
         _clampVector(vCol, vCol, 0.0f, 256.0f);
-        m_p2DFnt->setPositionF(mat.m[3][0], mat.m[3][1], 0xFFFF280);
+        m_p2DFnt->setPositionF(mat.m[3][0] * 16.0f, mat.m[3][1] * 16.0f);
         FTOI0Vector(iVec, vCol);
         rgba.set(iVec.x, iVec.y, iVec.z, iVec.w);
         m_p2DFnt->setBrightness(rgba);
