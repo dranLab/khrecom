@@ -5,7 +5,25 @@
 #include "khtypes.h"
 
 struct G_UV;
+struct TexInfo;
 namespace D2 { struct SeqControl; } // PARTIAL: in D2 as in the original
+namespace D2 { // PARTIAL: added for System/Graphic/2d/2DSeq
+class C2DFnt;
+class C2DObj;
+struct SEQ_SEQUENCE;
+struct SEQ_ANIMATION;
+struct SPR_GROUP;
+struct SPR_PARTS;
+struct SPR_SPRITE;
+struct LAY_SCREEN;
+class C2DObjList { // CSJointListT<C2DObj>
+public:
+    C2DObj* m_pHead;
+    C2DObj* m_pTail;
+    INT m_nListSize;
+    C2DObj* getHead() { return m_pHead; }
+};
+}
 
 namespace D2 {
 
@@ -47,7 +65,14 @@ private:
 
 public:
     C2DSeqObj();
+    C2DSeqObj(SeqControl* pSeqControl); // PARTIAL: added for System/Graphic/2d/2DSeq
     virtual ~C2DSeqObj();
+    HANDLE create(HANDLE hBaseHandle, const TexInfo* pTexInfo, SEQ_SEQUENCE* pSeqSequence, SEQ_ANIMATION* pSeqAnimation,
+                  SPR_GROUP* pSprGroup, SPR_PARTS* pSprParts, SPR_SPRITE* pSprSprite, LAY_SCREEN* pLayScreen);
+    HANDLE createFnt(HANDLE hBaseHandle, C2DFnt* p2DFnt);
+    C2DObjList* getList() { return (C2DObjList*)m_p2DObjList; }
+    BOOL isEnable() { return m_bEnable; }
+    TIMEQ getTimeMax() { return m_qTimeMax; }
     TIMEQ getTime() { return m_qTime; } // PARTIAL: added for System/Graphic/2d/2DLayObj
     BOOL isEnd() { return m_bEnd; }
 };
