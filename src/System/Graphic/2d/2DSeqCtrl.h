@@ -5,7 +5,12 @@
 #include "khtypes.h"
 #include "System/Vector.h"
 
-/* PARTIAL: added for Form/SystemMessage */
+
+struct G_UV; /* PARTIAL: added for Form/Menu/WorldWarp */
+
+namespace D2 {
+
+/* PARTIAL: added for Form/SystemMessage; in D2 (as in the original) for System/Graphic/2d/2DFntObj */
 struct SeqControl {
     u_long128 _m_0x000[0xe0 / 16];  /* 0x000 matrix ... controlColor */
     FVECTOR vPos;                   /* 0x0e0 PARTIAL: added for Form/Menu/MenuParts */
@@ -17,10 +22,6 @@ struct SeqControl {
     CHAR fgFntScale;                /* 0x126 */
     CHAR fg3D;                      /* 0x127 */
 };
-
-struct G_UV; /* PARTIAL: added for Form/Menu/WorldWarp */
-
-namespace D2 {
 
 class C2DSeqObj;
 class C2DFnt;

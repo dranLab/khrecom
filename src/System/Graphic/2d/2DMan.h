@@ -11,7 +11,11 @@
  * ("System/Graphic/2D/2DMan.h", "__null == m_pInstance", "System/Graphic/2D/2DMan.h(49)") and the 2D
  * container pool overflow message ("2D用コンテナが MAX に到達しました\n", Shift-JIS), in this order in
  * .rodata of every includer. Only line 49 is known (it is part of the allocation message). */
-#line 1 "System/Graphic/2D/2DMan.h"
+/* PARTIAL: path override added for System/Graphic/2d/2DFntObj ("c:/KHCOM/MainApp/System/Graphic/2d/2DMan.h") */
+#ifndef D2MAN_H_PATH
+#define D2MAN_H_PATH "System/Graphic/2D/2DMan.h"
+#endif
+#line 1 D2MAN_H_PATH
 inline void _2dManCheckInstance(void* inInstance) {
     if (!(__null == inInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
 }
