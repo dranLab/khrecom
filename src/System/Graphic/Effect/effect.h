@@ -9,7 +9,10 @@
 /* Placeholder for the original header's inline function asserting isValid(): its strings
  * ("System/Graphic/Effect/effect.h", "isValid()") are in .rodata of every includer. The line number is not
  * known (it is not part of the data). */
-#line 1 "System/Graphic/Effect/effect.h"
+#ifndef EFFECT_H_PATH // PARTIAL: path override added for Game/Enemy/EnemyBarrelspider ("System/Graphic/Effect/Effect.h")
+#define EFFECT_H_PATH "System/Graphic/Effect/effect.h"
+#endif
+#line 1 EFFECT_H_PATH
 inline void _effectCheckValid(BOOL inValid) {
     if (!inValid) AssertApp(__FILE__, __LINE__, "isValid()", 0);
 }
@@ -29,6 +32,7 @@ public:
     u_int m_iFlag;       /* 0x30 */
     UBYTE _m_0x34[0x4c]; /* 0x34 m_pData .. */
     void loopEnd();
+    INT getTotalFrame(); // PARTIAL: added for Game/Enemy/EnemyBarrelspider
     void kill(); // PARTIAL: added for Game/Gimmick/BaseGimmick
     // PARTIAL: added for Game/Gimmick/GimmickTutorial
     void setScale(FLOAT fScale) {

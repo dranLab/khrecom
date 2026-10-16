@@ -89,6 +89,7 @@ public:
     // PARTIAL: added for Game/Enemy/EnemyAirpirate
     ENEMY_PARAM* getEnemyParam() { return *(ENEMY_PARAM**)&_m_0x284[0x1c]; } /* m_pEnemyParam 0x2a0 */
     INT getAttackRate() const;
+    void destroyCard(); // PARTIAL: added for Game/Enemy/EnemyBarrelspider
     BOOL canCardBattle();
     HANDLE recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent);
     virtual void getUseCardPos(FVECTOR& outPos);
