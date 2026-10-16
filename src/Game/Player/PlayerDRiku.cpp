@@ -588,6 +588,54 @@ asm(".section .rodata\n"
     ".word 0\n"
     ".section .text");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", initJump2nd__Q22PL12CPlayerDRiku);
+
+/* Best attempt: with a target, the m_vMarkPos/m_hMark copies get swapped registers and rot.y is stored before m_fDir/m_fJumpDir instead of in the branch delay slot (11 lines differ). */
+#if 0
+void CPlayerDRiku::initJump2nd() {
+    if (isBattleFlag(0x200000)) return;
+    setPlayerState(JUMP_2ND);
+    setBattleFlag(0, 8);
+    setPlayerFlag(0x80000, 0);
+    setAnimForce(0x1b, -1, 0, 1, 0, 0);
+    setPlayerFlag(0x2800000, 0);
+    m_JumpState = 2;
+    setPlayerFlag(0x100000, 0);
+    _ref(m_fJumpPow) = m_pParam->JUMP_POWER;
+    m_fMoveSpdXZ = m_fJumpSpdXZ;
+    m_uiAttackID = 0xa5;
+    m_pAtkData = &g_AttackDataList[0xa5];
+    m_fJumpGravity = g_fGravity * 0.16f;
+    m_pMarker->holdTarget(8);
+    CEntity* pTarget = m_hTarget > 0 ? (CEntity*)CTaskMan::getTask(m_hTarget) : NULL;
+    FVECTOR rot = getRot();
+    if (pTarget) {
+        m_fDir = pTarget->getRot().y;
+        pTarget->getLockOnPos(m_vMarkPos);
+        calcAppearPos(-2.0f, 0.5f, &m_vMarkPos);
+        m_vMarkPos = m_vAppearPos;
+        m_hMark = m_hTarget;
+        m_fDir = calcDirection(m_vMarkPos);
+        m_fJumpDir = m_fDir;
+        rot.y = m_fDir;
+    } else {
+        calcAppearPos(2.0f, 0.5f, &m_vCenterPos);
+        m_hMark = 0;
+        m_vMarkPos = m_vAppearPos;
+        m_fJumpDir = rot.y;
+        FLOAT r = rot.y + 3.1415927f;
+        FLOAT d;
+        if (r < -3.1415927f) d = r + 6.2831855f;
+        else {
+            d = r;
+            if (d > 3.1415927f) d -= 6.2831855f;
+        }
+        m_fDir = d;
+    }
+    setRot(rot);
+    m_fDistXZ = m_fDistY = 0.0f;
+    m_fJumpSpdY = g_fAntiGravity * m_fJumpPow;
+}
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", exeJump2nd__Q22PL12CPlayerDRiku);
 INT CPlayerDRiku::startStockSkillAction() {
     INT id;
