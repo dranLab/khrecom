@@ -33,6 +33,7 @@ public:
     UBYTE _m_0x34[0x4c]; /* 0x34 m_pData .. */
     void loopEnd();
     INT getTotalFrame(); // PARTIAL: added for Game/Enemy/EnemyBarrelspider
+    FLOAT getNowFrame(); // PARTIAL: added for Game/Enemy/EnemyCreapplant
     void kill(); // PARTIAL: added for Game/Gimmick/BaseGimmick
     // PARTIAL: added for Game/Gimmick/GimmickTutorial
     void setScale(FLOAT fScale) {
