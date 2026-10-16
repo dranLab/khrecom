@@ -57,6 +57,7 @@ public:
     void homing(const CEntity* inTarget, FLOAT inRate);
     void calcVelocity(FLOAT inSpeed);
     void calcOrbitVelocityFromDistance(FLOAT inTheta, FLOAT inDist); // PARTIAL: added for Game/Enemy/EnemyPirate
+    void calcOrbitVelocityFromSpeedY(FLOAT inSpeedY, FLOAT inDist); // PARTIAL: added for Game/Enemy/EnemyWightnight
     // PARTIAL: added for Game/Player/SummonBambi
     void calcVelocity(FLOAT inSpeed, const FVECTOR& inDir);
     FLOAT calcOrbitSpeedFromDistance(FLOAT inTheta, FLOAT inDist);
@@ -72,6 +73,7 @@ public:
     }
     void setWallRadius(FLOAT inRadius) { m_fWallRadius = inRadius; }
     void turnToTargetY(const FVECTOR& inTarget, FLOAT inRate); // PARTIAL: added for Game/Player/Summon
+    void turnToTargetY(const CEntity* inTarget, FLOAT inRate); // PARTIAL: added for Game/Enemy/EnemyWightnight
     // PARTIAL: added for Game/Bullet/Bullet (m_vDetectNormal 0xa0)
     void turnToTarget(const FVECTOR& inTarget, FLOAT inRate);
     void homingMove(const FVECTOR& inTarget, FLOAT inRate, FLOAT inSpeed);
