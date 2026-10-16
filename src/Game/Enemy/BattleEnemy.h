@@ -58,6 +58,7 @@ public:
     virtual void onMsg(INT inMsg, void* inExtraInfo);
     virtual void onOut();
     void setHp(INT inHp) { m_iHp = inHp; }
+    INT getHp() const { return m_iHp; } // PARTIAL: added for Game/Enemy/EnemyGreenrequiem
     void setFallMotionIndex(INT inIndex) { m_iFallMotionIndex = inIndex; } // PARTIAL: added for Game/Enemy/EnemyPirate
     void setLandMotionIndex(INT inIndex) { m_iLandMotionIndex = inIndex; }
     // PARTIAL: added for Game/Player/FriendBeast (original names of the flag tests unknown)
