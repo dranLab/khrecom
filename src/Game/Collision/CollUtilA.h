@@ -82,6 +82,11 @@ public:
     // PARTIAL: added for Game/Collision/CollMapCamera (defined inline in CollUtil.h)
     INT _detectOCD(CCollision& collision, struct MCD_INFO* pMCDInfo, struct OCD_WORK* pOCDWork, INT inFlag);
     static INT detectMCD(CCollision& collision);
+    // PARTIAL: added for Game/Collision/CollBody
+    INT _detectColumnColumnEz(class CColumnCollision& coll0, class CColumnCollision& coll1);
+    INT _detectColumnColumn(class CColumnCollision& coll0, class CColumnCollision& coll1);
+    static INT detectColumnColumnEz(class CColumnCollision& coll0, class CColumnCollision& coll1);
+    static INT detectColumnColumn(class CColumnCollision& coll0, class CColumnCollision& coll1);
     static INT detectOCD(CCollision& collision, struct MCD_INFO* pMCDInfo, struct OCD_WORK* pOCDWork);
 
     /* 0x000 */ char _pad000[0x30];

@@ -70,8 +70,7 @@ public:
         m_Kind = 0;
         m_outInfoO = 0;
         m_outInfo = 0;
-        m_shiftY = 0.0f;
-        m_Radius = 0.0f;
+        m_Radius = m_shiftY = 0.0f;
     }
     virtual ~CCollision() {} /* 0x70 */
     void setStartPos(const FVECTOR& inPos) { m_inWS = inPos; }
@@ -146,9 +145,21 @@ public:
     static class CCollisionList* m_pCollListR;
     static class CCollisionList* m_pCollListR2;
     static class CCollisionList* m_pCollListRC;
+    // PARTIAL: added for Game/Collision/CollBody
+    static class CCollisionList* m_pCollListE;
+    static class CCollisionList* m_pCollListP;
+    static class CCollisionList* m_pCollListI;
+    INT getKind() {
+        if (m_pCollision) return m_pCollision->m_Kind;
+        return -1;
+    }
+    HANDLE getTaskHandle() { return m_hTask; }
 };
 
 // PARTIAL: added for Game/Collision/CollMapCamera
 class CCollisionList : public CSJointListT<CCollObj> {};
+
+// PARTIAL: added for Game/Collision/CollBody
+class CColumnCollision : public CCollision {};
 
 #endif /* GAME_COLLISION_COLLOBJ_H */
