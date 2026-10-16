@@ -68,6 +68,7 @@ public:
     // PARTIAL: added for Game/Enemy/EnemyBluerhapsody
     FLOAT getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpFlag, ATK_KIND* outAtkKind, INT inFinish);
     ATK_ATTR getAttackAttr(INT inIndex) const;
+    HANDLE getPlayerHandle(); // PARTIAL: added for Game/Enemy/EnemyFatbandit
     INT getHpMax() const;
     HANDLE recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent);
     virtual void getUseCardPos(FVECTOR& outPos);
