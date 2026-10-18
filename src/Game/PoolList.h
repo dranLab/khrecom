@@ -33,18 +33,16 @@ public:
     }
     virtual ~CPoolList() { release(); }
     T* getList() {
-        T* p = NULL;
-        T* q;
-        if (m_iNowCount < m_iSize && (q = m_ppListPtrTbl[m_iReadPtr]) != NULL) {
-            m_ppListPtrTbl[m_iReadPtr] = NULL;
-            if (++m_iReadPtr >= m_iSize) m_iReadPtr = 0;
-            m_iNowCount++;
-            m_Tail.pPrev->pNext = q;
-            q->pPrev = m_Tail.pPrev;
-            q->pNext = &m_Tail;
-            m_Tail.pPrev = q;
-            p = q;
-        }
+        if (m_iNowCount >= m_iSize) return NULL;
+        T* p = m_ppListPtrTbl[m_iReadPtr];
+        if (p == NULL) return NULL;
+        m_ppListPtrTbl[m_iReadPtr] = NULL;
+        if (++m_iReadPtr >= m_iSize) m_iReadPtr = 0;
+        m_iNowCount++;
+        m_Tail.pPrev->pNext = p;
+        p->pPrev = m_Tail.pPrev;
+        p->pNext = &m_Tail;
+        m_Tail.pPrev = p;
         return p;
     }
 
