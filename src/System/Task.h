@@ -37,6 +37,7 @@ public:
     T* getValue() { return _pValue; }
     SLContainerT<T>* getNext() { return _pNextContainer; }
     void setValue(T* pValue) { _pValue = pValue; } // PARTIAL: added for System/Task
+    void setGeneral(int nGeneral) { _nGeneral = nGeneral; } // PARTIAL: added for System/Graphic/2d/2DSpr (name unknown)
 };
 
 template <class T>
@@ -49,6 +50,7 @@ private:
 public:
     virtual ~CSLCListT() { removeAll(); } // PARTIAL: body added for System/CoordMan
     SLContainerT<T>* getHead() { return m_pHeadContainer; } // PARTIAL: added for Game/Bullet/BulletManager
+    int getSize() { return m_nListSize; } // PARTIAL: added for System/Graphic/2d/2DSpr
     // PARTIAL: added for System/CoordMan
     CSLCListT(ISLCManagerT<T>& inSLCManager) : m_SLCManager(inSLCManager) { resetParam(); }
     SLContainerT<T>* pushBack(T& inEntry) {
@@ -111,6 +113,35 @@ public:
             }
             pContainer = pNextContainer;
         }
+    }
+    // PARTIAL: added for System/Graphic/2d/2DSpr
+    SLContainerT<T>* replace(HANDLE hContainer, T& inEntry) {
+        SLContainerT<T>* pPrevContainer = NULL;
+        SLContainerT<T>* pContainer = m_pHeadContainer;
+        while (pContainer) {
+            SLContainerT<T>* pNextContainer = pContainer->getNext();
+            if (hContainer == pContainer->getHandle()) {
+                BOOL bTail = (pContainer == m_pTailContainer);
+                releaseContainer(*pContainer);
+                SLContainerT<T>* pNewContainer = createContainer(inEntry);
+                if (!pNewContainer) {
+                    return NULL;
+                }
+                if (pPrevContainer) {
+                    pPrevContainer->_pNextContainer = pNewContainer;
+                } else {
+                    m_pHeadContainer = pNewContainer;
+                }
+                if (bTail) {
+                    m_pTailContainer = pNewContainer;
+                }
+                pNewContainer->_pNextContainer = pNextContainer;
+                return pNewContainer;
+            }
+            pPrevContainer = pContainer;
+            pContainer = pNextContainer;
+        }
+        return NULL;
     }
     void removeAll() {
         SLContainerT<T>* pContainer = m_pHeadContainer;
