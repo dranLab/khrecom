@@ -140,6 +140,12 @@ _vt$4CFnt_004D9CF8 = 0x004D9CF8; // size:0x48
 _vt$t7CVector1Z7G_STRIP_004D9D40 = 0x004D9D40; // size:0x18
 _vt$t7CVector1Z6G_LINE_004D9D58 = 0x004D9D58; // size:0x18
 
+// System/Graphic/PathDataCamera: unnamed copies of CVector<G_STRIP>'s destructor and vtable and ICamera's inlines
+_$_t7CVector1Z7G_STRIP_00144AC8 = 0x00144AC8; // type:func size:0x8C
+setPos__7ICameraRC7FVECTOR_00144B58 = 0x00144B58; // type:func size:0x8
+lookAt__7ICameraRC7FVECTORPC7FVECTOR_00144B60 = 0x00144B60; // type:func size:0x8
+_vt$t7CVector1Z7G_STRIP_00462930 = 0x00462930; // size:0x18
+
 // Not symbols: splat read the text words "ard\0" (0x003CA370) and "ord\0" in cod/2C2B00.data as pointers to these
 // odd addresses in System/Sound/driver/sddrv_ee's .bss, which then couldn't come from source.
 D_00647261 = 0x00647261; // can_be_referenced:False

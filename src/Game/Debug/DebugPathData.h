@@ -13,6 +13,9 @@ private:
     static CDebugPathData* m_pInstance;
 
 public:
+    static UINT m_iCtrlFlg; // PARTIAL: added for System/Graphic/PathDataCamera
+
+public:
     CDebugPathData(CTask* p, BOOL bEnd);
     static BOOL create(CTask* p, BOOL bEnd);
     static BOOL isDebugPathData() { return m_pInstance != NULL; }

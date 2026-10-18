@@ -402,10 +402,10 @@ private:
 class C3DLineStrip : public C3DStripBase {
 public:
     C3DLineStrip() {
-        m_nType = 2;
         m_pCrd = NULL;
         m_pObj = NULL;
         m_fGeta = 0.0f;
+        m_nType = 2;
     }
     void setCoord(CCoord* pCrd) { m_pCrd = pCrd; }
 private:
