@@ -239,8 +239,8 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
         return FALSE;
     }
     m_pAttack->init((COLL_KIND)inParam.CollKind, (COLL_TYPE)inParam.CollType, getHandle(), 0);
-    m_pAttack->setAttackKind(inParam.AtkKind);
-    m_pAttack->setAttackAttr(inParam.AtkAttr);
+    m_pAttack->setAttackKind((ATK_KIND)inParam.AtkKind);
+    m_pAttack->setAttackAttr((ATK_ATTR)inParam.AtkAttr);
     m_pAttack->setAttack(inParam.iAttackPoint, 0);
     m_pAttack->setRadius(inParam.fCollRadius);
     m_pAttack->setShiftY(inParam.fShiftY);

@@ -70,6 +70,16 @@ public:
         }
         return FALSE;
     }
+    // PARTIAL: added for Game/Collision/CollAttack
+    BOOL hasMember(T& inEntry) {
+        T* pEntry = m_pHead;
+        while (pEntry != NULL) {
+            T* pNextEntry = pEntry->getNext();
+            if (&inEntry == pEntry) return TRUE;
+            pEntry = pNextEntry;
+        }
+        return FALSE;
+    }
     void resetParam() {
         m_pHead = NULL;
         m_pTail = NULL;

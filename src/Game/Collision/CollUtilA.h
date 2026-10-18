@@ -88,6 +88,21 @@ public:
     static INT detectColumnColumnEz(class CColumnCollision& coll0, class CColumnCollision& coll1);
     static INT detectColumnColumn(class CColumnCollision& coll0, class CColumnCollision& coll1);
     static INT detectOCD(CCollision& collision, struct MCD_INFO* pMCDInfo, struct OCD_WORK* pOCDWork);
+    // PARTIAL: added for Game/Collision/CollAttack
+    INT _detectSpherePoint(class CSphereCollision& coll0, class CPointCollision& coll1);
+    INT _detectSphereSphere(class CSphereCollision& coll0, class CSphereCollision& coll1);
+    INT _detectSpherePoly3(class CSphereCollision& coll0, class CPoly3Collision& coll1);
+    INT _detectSphereCircle(class CSphereCollision& coll0, class CCircleCollision& coll1);
+    INT _detectColumnPoint(class CColumnCollision& coll0, class CPointCollision& coll1);
+    INT _detectColumnSphere(class CColumnCollision& coll0, class CSphereCollision& coll1, INT inFlag);
+    INT _detectColumnPoly3(class CColumnCollision& coll0, class CPoly3Collision& coll1);
+    static INT detectSpherePoint(class CSphereCollision& coll0, class CPointCollision& coll1);
+    static INT detectSphereSphere(class CSphereCollision& coll0, class CSphereCollision& coll1);
+    static INT detectSpherePoly3(class CSphereCollision& coll0, class CPoly3Collision& coll1);
+    static INT detectSphereCircle(class CSphereCollision& coll0, class CCircleCollision& coll1);
+    static INT detectColumnPoint(class CColumnCollision& coll0, class CPointCollision& coll1);
+    static INT detectColumnSphere(class CColumnCollision& coll0, class CSphereCollision& coll1, INT inFlag);
+    static INT detectColumnPoly3(class CColumnCollision& coll0, class CPoly3Collision& coll1);
 
     /* 0x000 */ char _pad000[0x30];
     /* 0x030 */ FVECTOR m_vCkS;

@@ -5,6 +5,7 @@
 #include "System/Vector.h"
 #include "Game/Entity.h"
 #include "Game/Collision/CollAttack.h"
+#include "Game/Bullet/Bullet.h" // BULLET_EFFECT_INFO
 
 class CPlayer;
 class CCollMap;
