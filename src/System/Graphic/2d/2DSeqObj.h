@@ -37,6 +37,7 @@ public: // PARTIAL: inline (weak in the original) and public as in the debug inf
     virtual ~C2DO() {}
     HANDLE getBaseHandle() { return m_hBaseHandle; }
     HANDLE _getHandle() { return m_hHandle; }
+    void _setHandle(HANDLE h) { m_hHandle = h; } // PARTIAL: added for System/Graphic/2d/2DSpr
     virtual void _main() {}
     virtual void _disp() {}
     virtual void changeTimeExt(INT qTime) {}
@@ -69,6 +70,7 @@ public:
     virtual ~C2DSeqObj();
     HANDLE create(HANDLE hBaseHandle, const TexInfo* pTexInfo, SEQ_SEQUENCE* pSeqSequence, SEQ_ANIMATION* pSeqAnimation,
                   SPR_GROUP* pSprGroup, SPR_PARTS* pSprParts, SPR_SPRITE* pSprSprite, LAY_SCREEN* pLayScreen);
+    HANDLE create(HANDLE hBaseHandle, UINT nMax, const TexInfo* pTexInfo, SPR_GROUP* pSprGroup, SPR_PARTS* pSprParts); // PARTIAL: added for System/Graphic/2d/2DSpr (parameter names unknown)
     HANDLE createFnt(HANDLE hBaseHandle, C2DFnt* p2DFnt);
     C2DObjList* getList() { return (C2DObjList*)m_p2DObjList; }
     BOOL isEnable() { return m_bEnable; }

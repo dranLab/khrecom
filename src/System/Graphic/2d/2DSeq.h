@@ -53,7 +53,7 @@ public:
     HANDLE replaceFnt(HANDLE hCurrent, C2DFnt* p2DFnt, SeqControl* pSeqControl);
     virtual HANDLE createSpr(UINT inUnitNo, UINT inNo);
     virtual INT getIdMax() { return m_nSequenceMax; }
-    virtual INT getSprIdMax(UINT inUnitNo) { return m_nSpriteMax; }
+    virtual INT getSprIdMax(UINT inUnitNo) { return C2DSpr::getIdMax(); }
     virtual TIMEQ getTime(HANDLE handle);
     virtual TIMEQ getTimeMax(HANDLE handle);
     virtual BOOL isEnd(HANDLE handle);
