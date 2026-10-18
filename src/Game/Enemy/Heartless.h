@@ -34,6 +34,7 @@ protected:
     virtual void aiCardBattle();
     virtual INT getDuelAttackState();
     BOOL canAttack(INT inIndex); // PARTIAL: added for Game/Enemy/EnemyAirpirate
+    static void randAimPos(FVECTOR& outPos, FLOAT inRange); // PARTIAL: added for Game/Enemy/EnemyNeoshadow
     void commonMoveInit(const CHAR* inIdling, const CHAR* inWalk, FLOAT inRand); // PARTIAL: added for Game/Enemy/EnemyLargebody
     void commonMove();
     void commonMoveEnd();
