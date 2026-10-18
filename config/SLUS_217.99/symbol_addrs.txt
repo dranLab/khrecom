@@ -189,3 +189,7 @@ _vt$6CState_004F66D8 = 0x004F66D8; // size:0x30
 // Game/Collision/CollBody: CCollision's inline destructor and an unnamed copy of its vtable
 _$_10CCollision_00222C90 = 0x00222C90; // type:func size:0x30
 _vt$10CCollision_004882D0 = 0x004882D0; // size:0x18
+
+// Game/Enemy/MonstroEventBattle: OBJ_FORMATION's and OSD_HEADER's inline functions (copies of Game/Enemy/MapEnemyManager's)
+getObjGroup__13OBJ_FORMATIONii_002D5520 = 0x002D5520; // type:func size:0x80
+clear__10OSD_HEADER_002D55A0 = 0x002D55A0; // type:func size:0xC0
