@@ -42,6 +42,7 @@ public:
         m_pManager = NULL;
         inUse = -1;
     }
+    ~CEffectLight() { close(); } // PARTIAL: added for System/Graphic/WorldEnv
     void close();
     BOOL isClosed() { return inUse < 0; }
     INT getID() { return inUse; }
@@ -66,6 +67,16 @@ public:
     CEffectLight* getBlankLight();
     CEffectLight* seekNextActiveLight();
     void reset();
+    // PARTIAL: added for System/Graphic/WorldEnv
+    CEffectLight* getLight(UINT nIndex) {
+        if (nIndex < 32) return &m_LightTbl[nIndex];
+        return NULL;
+    }
+    void initSeekActiveLight() {
+        m_nLightSeeker = 1;
+        m_nLightIndex = 0;
+        m_nLightSeekMask = -1;
+    }
 
 protected:
     void closeLight(UINT n) {

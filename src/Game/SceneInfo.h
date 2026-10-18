@@ -222,6 +222,8 @@ struct _MapEnemyRoomInfo {
 class CSceneInfo {
 public:
     static SHORT getCurrentFloorNumber();
+    static BYTE getSeRangeRatio(); // PARTIAL: added for System/Graphic/WorldEnv
+    static BYTE getReverbVal();
     static SHORT getCurrentAreaNum(); // PARTIAL: added for System/DebugProcInfo
     static SHORT getCurrentBattleSceneNum(); // PARTIAL: added for Game/MinigameManager
     static void reqExitMinigame(SHORT inNextScene); // PARTIAL: added for Game/MinigameManager

@@ -23,6 +23,7 @@ private:
     FVECTOR m_vFrustum[6];
 
 public:
+    CFrustum() { m_bInit = FALSE; } // PARTIAL: added for System/Graphic/WorldEnv
     void initialize(FLOAT inE, FLOAT inA, FLOAT inN, FLOAT inF, BOOL inInit);
     BOOL isInit() { return m_bInit; }
     BOOL sphereVisible(const FVECTOR& inCenter, FLOAT inRadius);

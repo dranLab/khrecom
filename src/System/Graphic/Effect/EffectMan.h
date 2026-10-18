@@ -69,6 +69,8 @@ enum eObjBit {
 
 class CEffectMan {
 public:
+    static void setFogRange(FLOAT fNear, FLOAT fFar);            // PARTIAL: added for System/Graphic/WorldEnv
+    static void setFogClamp(unsigned char nMin, unsigned char nMax);
     static HANDLE setEffect(const CHAR* inName, UINT inFlag, ObjType::eObjType inType, const FMATRIX* inMat, FLOAT inScale);
     // PARTIAL: added for Game/Gimmick/GimmickTutorial
     static HANDLE setEffect(const CHAR* inName, UINT inFlag, ObjType::eObjType inType, const FVECTOR* inPos,
