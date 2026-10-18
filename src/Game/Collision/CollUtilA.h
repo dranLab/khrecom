@@ -88,6 +88,9 @@ public:
     static INT detectColumnColumnEz(class CColumnCollision& coll0, class CColumnCollision& coll1);
     static INT detectColumnColumn(class CColumnCollision& coll0, class CColumnCollision& coll1);
     static INT detectOCD(CCollision& collision, struct MCD_INFO* pMCDInfo, struct OCD_WORK* pOCDWork);
+    // PARTIAL: added for Game/Collision/CollMap
+    static INT detectOCD(CCollision& collision, struct MCD_INFO* pMCDInfo, struct OCD_WORK* pOCDWork, INT fgLocal);
+    static INT checkWaterSurface(FVECTOR& inPos);
     // PARTIAL: added for Game/Collision/Ride
     void _initializeData(void* pData, struct MCD_INFO* pMCDInfo);
     static void initializeData(void* pData, struct MCD_INFO* pMCDInfo);

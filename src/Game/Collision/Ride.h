@@ -103,6 +103,15 @@ public:
     CRider(HANDLE hTask, FLOAT shiftY, FLOAT radius, COLL_KIND kind, BOOL fgHang);
     HANDLE getHandle() { return m_hTask; }
     BOOL isHang() { return m_fgHang; }
+    // PARTIAL: added for Game/Collision/CollMap (original names unknown)
+    void setPosition(FVECTOR& Rotate, FVECTOR& Position) {
+        m_Rotate = Rotate;
+        m_Position = Position;
+    }
+    void getPosition(FVECTOR& Rotate, FVECTOR& Position) {
+        Rotate = m_Rotate;
+        Position = m_Position;
+    }
 };
 
 class CRiderList : public CSJointListT<CRider> {
