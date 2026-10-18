@@ -61,6 +61,8 @@ union FMATRIX {
     FVECTOR& getTrans() { return v[3]; } // PARTIAL: added for Game/Collision/CollMapCamera
     // PARTIAL: added for System/Graphic/Camera
     BOOL operator!=(const FMATRIX& inM) const { return v[0] != inM.v[0] || v[1] != inM.v[1] || v[2] != inM.v[2] || v[3] != inM.v[3]; }
+    // PARTIAL: added for Game/Collision/Ride
+    BOOL operator==(const FMATRIX& inM) const { return v[0] == inM.v[0] && v[1] == inM.v[1] && v[2] == inM.v[2] && v[3] == inM.v[3]; }
     // PARTIAL: added for Game/Bullet/Bullet (sceVu0 functions take sceVu0FMATRIX)
     operator _FMATRIX_ROWP() { return m; }
 };
