@@ -41,6 +41,8 @@ public:
         else m_uiFlag &= ~inFlag;
     }
     void setUniqueID(INT inID) { m_iUniqueID = inID; } // PARTIAL: added for Game/Enemy/MapEnemyManager
+    void setParam(INT inParam) { *(INT*)&_m_0x204[0] = inParam; } /* m_iMapEnemyParam 0x204 */ // PARTIAL: added for Game/Enemy/CreateEnemy
+    void updateBodyColl(); // PARTIAL: added for Game/Enemy/CreateEnemy
     UINT isAppear() const { return m_uiFlag & 1; }      // PARTIAL: added for Game/Enemy/MapEnemyManager
     UINT isMapEnemyFlag(UINT inFlag) const { return m_uiFlag & inFlag; } // PARTIAL: added for Game/Enemy/MapEnemyAir (name unknown)
     static FLOAT getAppearDistance();
