@@ -85,6 +85,7 @@ public:
     void playBigDamageSE();
     INT selectDamageMotion_();
     INT getParam() { return *(INT*)&_m_0x218[0x1c]; } /* m_iParam 0x234 */
+    void setParam(INT inParam) { *(INT*)&_m_0x218[0x1c] = inParam; } // PARTIAL: added for Game/Enemy/CreateEnemy
     INT getHpMax() const;
     // PARTIAL: added for Game/Enemy/EnemyAirpirate
     ENEMY_PARAM* getEnemyParam() { return *(ENEMY_PARAM**)&_m_0x284[0x1c]; } /* m_pEnemyParam 0x2a0 */
