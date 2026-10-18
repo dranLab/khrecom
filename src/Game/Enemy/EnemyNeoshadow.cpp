@@ -259,7 +259,7 @@ void CEnemyNeoshadow::stateAttack2() {
         CCollMap* coll = m_pMove->getMapCollision();
 #line 369
         ASSERT(coll);
-        coll->setStartPos(getPos());
+        coll->setStartPos((FVECTOR&)getPos());
         coll->setEndPos(target);
         if (coll->collideMap()) pos = *coll->getOutPos();
         else pos = target;

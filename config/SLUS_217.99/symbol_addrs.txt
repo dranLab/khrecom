@@ -158,6 +158,17 @@ changeLayer__Q22D24C2DOi_00160DF0 = 0x00160DF0; // type:func size:0x8
 enableDisp__Q22D24C2DOi_00160DF8 = 0x00160DF8; // type:func size:0x8
 _vt$Q22D24C2DO_00466E10 = 0x00466E10; // size:0x58
 
+// Game/Collision/CollObj: CPointCollision's, CSphereCollision's and CCollision's inline functions and unnamed
+// copies of their vtables
+_$_15CPointCollision_00227D40 = 0x00227D40; // type:func size:0x30
+collideMap__15CPointCollision_00227D70 = 0x00227D70; // type:func size:0x5C
+_$_16CSphereCollision_00227DD0 = 0x00227DD0; // type:func size:0x30
+collideMap__16CSphereCollision_00227E00 = 0x00227E00; // type:func size:0x5C
+_$_10CCollision_002282E8 = 0x002282E8; // type:func size:0x30
+_vt$16CSphereCollision_00489040 = 0x00489040; // size:0x20
+_vt$15CPointCollision_00489060 = 0x00489060; // size:0x20
+_vt$10CCollision_00489098 = 0x00489098; // size:0x18
+
 // Not symbols: splat read the text words "ard\0" (0x003CA370) and "ord\0" in cod/2C2B00.data as pointers to these
 // odd addresses in System/Sound/driver/sddrv_ee's .bss, which then couldn't come from source.
 D_00647261 = 0x00647261; // can_be_referenced:False
