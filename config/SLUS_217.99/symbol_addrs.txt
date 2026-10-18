@@ -146,6 +146,18 @@ setPos__7ICameraRC7FVECTOR_00144B58 = 0x00144B58; // type:func size:0x8
 lookAt__7ICameraRC7FVECTORPC7FVECTOR_00144B60 = 0x00144B60; // type:func size:0x8
 _vt$t7CVector1Z7G_STRIP_00462930 = 0x00462930; // size:0x18
 
+// System/Graphic/2d/2DSeqObj: unnamed copies of C2DO's inline functions and vtable
+_$_Q22D24C2DO_00160D90 = 0x00160D90; // type:func size:0x30
+_main__Q22D24C2DO_00160DC0 = 0x00160DC0; // type:func size:0x8
+_disp__Q22D24C2DO_00160DC8 = 0x00160DC8; // type:func size:0x8
+changeTimeExt__Q22D24C2DOi_00160DD0 = 0x00160DD0; // type:func size:0x8
+changeTexture__Q22D24C2DOiPcP4G_UVT3_00160DD8 = 0x00160DD8; // type:func size:0x8
+changeTexture__Q22D24C2DOiiPcP4G_UVT4_00160DE0 = 0x00160DE0; // type:func size:0x8
+restart__Q22D24C2DOi_00160DE8 = 0x00160DE8; // type:func size:0x8
+changeLayer__Q22D24C2DOi_00160DF0 = 0x00160DF0; // type:func size:0x8
+enableDisp__Q22D24C2DOi_00160DF8 = 0x00160DF8; // type:func size:0x8
+_vt$Q22D24C2DO_00466E10 = 0x00466E10; // size:0x58
+
 // Not symbols: splat read the text words "ard\0" (0x003CA370) and "ord\0" in cod/2C2B00.data as pointers to these
 // odd addresses in System/Sound/driver/sddrv_ee's .bss, which then couldn't come from source.
 D_00647261 = 0x00647261; // can_be_referenced:False

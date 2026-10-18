@@ -1,8 +1,9 @@
-// PARTIAL: added for Form/Menu/MonstroGauge
 #ifndef SYSTEM_GRAPHIC_2D_2DSEQOBJ_H
 #define SYSTEM_GRAPHIC_2D_2DSEQOBJ_H
 
 #include "khtypes.h"
+#include "System/SJoint.h"
+#include "System/Graphic/2d/2DObj.h"
 
 struct G_UV;
 struct TexInfo;
@@ -16,12 +17,42 @@ struct SPR_GROUP;
 struct SPR_PARTS;
 struct SPR_SPRITE;
 struct LAY_SCREEN;
-class C2DObjList { // CSJointListT<C2DObj>
+class C2DSprObj;
+
+struct SPR_PARTS { // PARTIAL: added for System/Graphic/2d/2DSeqObj
+    UINT palette;
+    UINT u0;
+    UINT v0;
+    UINT u1;
+    UINT v1;
+    FLOAT s_scroll;
+    FLOAT t_scroll;
+    BYTE r0, g0, b0, a0;
+    BYTE r1, g1, b1, a1;
+    BYTE r2, g2, b2, a2;
+    BYTE r3, g3, b3, a3;
+};
+
+struct SEQ_ANIMATION { // PARTIAL: added for System/Graphic/2d/2DSeqObj (members after sprite_id as padding)
+    UINT status;
+    INT sprite_id;
+    UBYTE _m_0x08[0x88];
+};
+}
+
+class CScissoring;
+class C2DCard;
+
+namespace D2 {
+class C2DObjList : public CSJointListT<C2DObj> {
 public:
-    C2DObj* m_pHead;
-    C2DObj* m_pTail;
-    INT m_nListSize;
-    C2DObj* getHead() { return m_pHead; }
+    ~C2DObjList() {
+        for (C2DObj *pEntry = getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry;
+             pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL) {
+            delete pEntry;
+        }
+        resetParam();
+    }
 };
 }
 
@@ -49,38 +80,55 @@ public: // PARTIAL: inline (weak in the original) and public as in the debug inf
 };
 
 class C2DSeqObj : public C2DO {
+    friend class ::C2DCard; // PARTIAL: System/Graphic/2d/2DCard sets m_fgMainSkip
 private:
-    void* m_pScissoringEnd;     /* 0x0c */
-    void* m_p2DObjList;         /* 0x10 */
-    SeqControl* m_pSeqControl;  /* 0x14 */
-    TIMEQ m_qTime;              /* 0x18 */
-    TIMEQ m_qTimeMax;           /* 0x1c */
-    TIMEQ m_qTimeExt;           /* 0x20 */
-    INT m_nLoop;                /* 0x24 */
-    INT m_nLoopFrame;           /* 0x28 */
-    CHAR m_bSeq;                /* 0x2c */
-    CHAR m_bEnable;             /* 0x2d */
-    CHAR m_bEnd;                /* 0x2e */
-    CHAR m_fgParent;            /* 0x2f */
-    CHAR m_fgMainSkip;          /* 0x30 */
+    static UINT m_uiID;
+    CScissoring* m_pScissoringEnd;  /* 0x0c */
+    C2DObjList* m_p2DObjList;       /* 0x10 */
+    SeqControl* m_pSeqControl;      /* 0x14 */
+    TIMEQ m_qTime;                  /* 0x18 */
+    TIMEQ m_qTimeMax;               /* 0x1c */
+    TIMEQ m_qTimeExt;               /* 0x20 */
+    INT m_nLoop;                    /* 0x24 */
+    INT m_nLoopFrame;               /* 0x28 */
+    CHAR m_bSeq;                    /* 0x2c */
+    CHAR m_bEnable;                 /* 0x2d */
+    CHAR m_bEnd;                    /* 0x2e */
+    CHAR m_fgParent;                /* 0x2f */
+    CHAR m_fgMainSkip;              /* 0x30 */
 
 public:
     C2DSeqObj();
-    C2DSeqObj(SeqControl* pSeqControl); // PARTIAL: added for System/Graphic/2d/2DSeq
+    C2DSeqObj(SeqControl* pSeqControl);
     virtual ~C2DSeqObj();
-    HANDLE create(HANDLE hBaseHandle, const TexInfo* pTexInfo, SEQ_SEQUENCE* pSeqSequence, SEQ_ANIMATION* pSeqAnimation,
-                  SPR_GROUP* pSprGroup, SPR_PARTS* pSprParts, SPR_SPRITE* pSprSprite, LAY_SCREEN* pLayScreen);
-    HANDLE create(HANDLE hBaseHandle, UINT nMax, const TexInfo* pTexInfo, SPR_GROUP* pSprGroup, SPR_PARTS* pSprParts); // PARTIAL: added for System/Graphic/2d/2DSpr (parameter names unknown)
-    HANDLE createFnt(HANDLE hBaseHandle, C2DFnt* p2DFnt);
-    C2DObjList* getList() { return (C2DObjList*)m_p2DObjList; }
-    BOOL isEnable() { return m_bEnable; }
-    // PARTIAL: added for System/Graphic/2d/2DCard
-    void shiftBase(FLOAT fX, FLOAT fY);
-    void setParentFlag(CHAR fg) { m_fgParent = fg; }
-    void setMainSkip(CHAR fg) { m_fgMainSkip = fg; }
+    virtual void _main();
+    virtual void _disp();
+    HANDLE create(HANDLE handle, UINT nSpr, const TexInfo* pTexInfo, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprParts);
+    HANDLE create(HANDLE handle, const TexInfo* pTexInfo, SEQ_SEQUENCE* pSeqSequence, SEQ_ANIMATION* pSeqAnimation,
+                  SPR_GROUP* pSprGroupe, SPR_PARTS* pSprParts, SPR_SPRITE* pSprSprite, LAY_SCREEN* pLayScreen);
+    HANDLE createFnt(HANDLE handle, C2DFnt* p2DFnt);
+    TIMEQ getTime() { return m_qTime; }
     TIMEQ getTimeMax() { return m_qTimeMax; }
-    TIMEQ getTime() { return m_qTime; } // PARTIAL: added for System/Graphic/2d/2DLayObj
+    virtual void changeTexture(INT inSprIdx, CHAR* pTexName, G_UV* pStart, G_UV* pEnd);
+    virtual void changeTexture(INT inSeqIdx, INT inSprIdx, CHAR* pTexName, G_UV* pStart, G_UV* pEnd);
+    virtual void enableDisp(BOOL bEnable) { m_bEnable = bEnable; }
+    BOOL isDisp() { return m_bEnable; }
+    virtual void changeTimeExt(TIMEQ qTimeExt);
+    virtual void changeLayer(INT nLayer);
     BOOL isEnd() { return m_bEnd; }
+    virtual void restart(TIMEQ qStart);
+    void shiftBase(FLOAT fX, FLOAT fY);
+    void shiftColor(FLOAT fR, FLOAT fG, FLOAT fB, FLOAT fA);
+    void setParent() { m_fgParent = 0; }
+    void setFukidasiSize(FLOAT fSizeX, FLOAT fSizeY);
+    INT getLoopTimes() { return m_nLoop; }
+    void setLoopTimes(INT nLoopTimes) { m_nLoop = nLoopTimes; }
+    C2DObjList* get2DObjList() { return m_p2DObjList; }
+
+private:
+    void initialize();
+    C2DSprObj* createSub(UINT nSpr, const TexInfo* pTexInfo, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprParts);
+    void restart();
 };
 
 }  // namespace D2

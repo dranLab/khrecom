@@ -413,7 +413,7 @@ void C2DCard::createBack() {
         if (h) {
             C2DSeqObj* pObj = C2DMan::getSeqObj(h);
             if (pObj) {
-                pObj->setParentFlag(0);
+                pObj->setParent();
                 if (m_nLayer >= 0) pObj->changeLayer(m_nLayer);
                 m_hSeqHandleBack = h;
             }
@@ -451,7 +451,7 @@ void C2DCard::checkBack() {
         C2DSeqObj* pObj = C2DMan::getSeqObj(*pHandle);
         if (!pObj) return;
         pObj->_main();
-        pObj->setMainSkip(1);
+        pObj->m_fgMainSkip = 1;
     }
     FMATRIX* pMat = m_seqControl.pParentSeqControl ? (FMATRIX*)((CHAR*)m_seqControl.pParentSeqControl + 0x80)
                                                    : (FMATRIX*)&m_seqControl;

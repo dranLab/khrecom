@@ -11,7 +11,10 @@ struct G_UV;
 
 namespace D2 {
 
+class C2DSeqObj;
+
 class C2DObj : public CSJointT<C2DObj> {
+    friend class C2DSeqObj; // PARTIAL: added for System/Graphic/2d/2DSeqObj (calls changeTexture/changeLayer)
 protected:
     SeqControl* m_pSeqControl; /* 0x8 */
     CHAR m_fgDisp;             /* 0xc */

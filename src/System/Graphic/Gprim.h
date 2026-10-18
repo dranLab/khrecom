@@ -363,6 +363,18 @@ private:
     virtual void makePkt();
 };
 
+// PARTIAL: added for System/Graphic/2d/2DSeqObj
+class CScissoring : public CGPrim {
+private:
+    G_XY m_P0;
+    G_XY m_P1;
+
+public:
+    CScissoring() {}
+    virtual ~CScissoring();
+    void setDefault();
+};
+
 // PARTIAL: added for Form/DebugWindow
 struct G_ST {
     FLOAT s;
