@@ -193,7 +193,7 @@ HANDLE C2DSeq::replaceSeq(HANDLE hCurrent, UINT inNo, SeqControl* pSeqControl) {
             }
             handle = 0;
         } else {
-            p2DSeqObj->enableDisp(pCurrent->isEnable());
+            p2DSeqObj->enableDisp(pCurrent->isDisp());
         }
         if (pCurrent) delete pCurrent;
     }
@@ -223,9 +223,9 @@ HANDLE C2DSeq::replaceFnt(HANDLE hCurrent, C2DFnt* p2DFnt, SeqControl* pSeqContr
             }
             handle = 0;
         } else {
-            p2DSeqObj->enableDisp(pCurrent->isEnable());
-            C2DFntObj* pCurrentFnt = (C2DFntObj*)pCurrent->getList()->getHead();
-            C2DFntObj* pFnt = (C2DFntObj*)p2DSeqObj->getList()->getHead();
+            p2DSeqObj->enableDisp(pCurrent->isDisp());
+            C2DFntObj* pCurrentFnt = (C2DFntObj*)pCurrent->get2DObjList()->getHead();
+            C2DFntObj* pFnt = (C2DFntObj*)p2DSeqObj->get2DObjList()->getHead();
             pCurrentFnt->clear2DFnt();
             pFnt->setPos(pCurrentFnt->getPos());
             pFnt->setCol(pCurrentFnt->getCol());
