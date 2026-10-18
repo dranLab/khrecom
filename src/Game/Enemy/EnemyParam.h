@@ -19,7 +19,9 @@ struct ENEMY_PARAM {
     UBYTE _m_0x00[0x4c]; /* 0x00 szCode .. 0x48 pCards */
     INT iActCount;       /* 0x4c */
     ENEMY_ACT* pActs;    /* 0x50 */
-    UBYTE _m_0x54[0x4c]; /* 0x54 iEnemyCard .. 0x98 iAttackRate */
+    UBYTE _m_0x54[0x30]; /* 0x54 iEnemyCard .. */
+    int iFaintMotionIndex[3]; /* 0x84 */ // PARTIAL: added for Game/Enemy/EnemyNeoshadow
+    UBYTE _m_0x90[0x10]; /* 0x90 iExtraParamCount .. 0x98 iAttackRate */
     INT iAppearMotionIndex;    /* 0xa0 */ // PARTIAL: added for Game/Enemy/MapEnemyMushroom
     INT iDisappearMotionIndex; /* 0xa4 */
     INT pad[2];                /* 0xa8 */
