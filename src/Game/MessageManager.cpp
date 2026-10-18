@@ -1,4 +1,3 @@
-#include "include_asm.h"
 #include "System/Graphic/modeldata.h"
 #include "System/Task.h"
 #include "Game/MessageManager.h"
@@ -49,12 +48,6 @@ void CMessageManager::main() {
     }
 }
 
-/* sendMessage: with the getList() in Game/PoolList.h the source below differs only in the branch layout of
- * getList's empty-slot test (the original branches likely to the body and jumps to the end). */
-}  // namespace Message
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/MessageManager", sendMessage__Q27Message15CMessageManageriiiiPv);
-namespace Message {
-#if 0
 BOOL CMessageManager::sendMessage(TIMEQ inDelay, HANDLE inSender, HANDLE inReceiver, INT inMsg, void* inExtraInfo) {
     MSG_LIST* p = getList();
     if (p == NULL) return FALSE;
@@ -66,7 +59,6 @@ BOOL CMessageManager::sendMessage(TIMEQ inDelay, HANDLE inSender, HANDLE inRecei
     p->tqCurrent = 0;
     return TRUE;
 }
-#endif
 
 }  // namespace Message
 
