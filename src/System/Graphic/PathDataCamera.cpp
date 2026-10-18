@@ -1,0 +1,222 @@
+#define TASK_H_NO_SLC_OVERFLOW_MSG
+#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
+#include "System/Graphic/Gprim.h"
+#include "System/Graphic/PathDataCamera.h"
+
+/* Placeholder: System/Task.h's container overflow message comes after PathDataCamera.h's strings. */
+inline void _pathDataCameraSLCOverflow() {
+    TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
+}
+
+#include "System/Graphic/Str.h"
+#include "Game/Debug/DebugPathData.h"
+#include "System/Graphic/PathData.h"
+#include "System/Graphic/HermitePath.h"
+#include "System/TaskMan.h"
+
+inline void* operator new(size_t, void* p) throw() { return p; }
+
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
+
+static inline void _initVf0(FVECTOR& v) {
+    asm volatile("sqc2 $vf0, 0x0(%0)\n" : : "r"(&v));
+}
+
+#line 30
+CPathDataCamera::CPathDataCamera(CTask* p, const CHAR* pszInName, INT iKind, const CTask* pTarget, INT iNum,
+                                 const CTask* pParent) : CTask(p, 0x4000) {
+    m_pPathData = new (com_malloc_d(sizeof(CPathData), __FILE__ "(32)", RET_ADDR())) CPathData(pszInName);
+    if (!m_pPathData) AssertApp(__FILE__, __LINE__, "m_pPathData", 0);
+    m_iStatus = 1;
+    _init(iKind, (CTask*)pTarget, iNum, (CTask*)pParent);
+}
+
+#line 41
+CPathDataCamera::CPathDataCamera(CTask* p, const PATH_DATA* pPathData, INT iKind, const CTask* pTarget, INT iNum,
+                                 const CTask* pParent) : CTask(p, 0x4000) {
+    m_pPathData = new (com_malloc_d(sizeof(CPathData), __FILE__ "(43)", RET_ADDR())) CPathData(pPathData);
+    if (!m_pPathData) AssertApp(__FILE__, __LINE__, "m_pPathData", 0);
+    m_iStatus = 1;
+    _init(iKind, (CTask*)pTarget, iNum, (CTask*)pParent);
+}
+
+CPathDataCamera::CPathDataCamera(CTask* p, const CPathData* pCPathData, INT iKind, const CTask* pTarget, INT iNum,
+                                 const CTask* pParent) : CTask(p, 0x4000) {
+    m_pPathData = (CPathData*)pCPathData;
+    m_iStatus = 0;
+    _init(iKind, (CTask*)pTarget, iNum, (CTask*)pParent);
+}
+
+CPathDataCamera::~CPathDataCamera() {
+    TRACE("CPathDataCamera::Deathtruct -> This:%08x\n", this);
+    if (m_pHPC) m_pHPC->out();
+    if (m_iStatus & 1) {
+        if (m_pPathData) delete m_pPathData;
+        m_pPathData = NULL;
+    }
+    if (m_pHPM) delete m_pHPM;
+    m_pHPM = NULL;
+    if (m_DDPathCamArrow) delete m_DDPathCamArrow;
+    m_DDPathCamArrow = NULL;
+}
+
+#line 85
+void CPathDataCamera::_init(INT iKind, CTask* pTarget, INT iNum, CTask* pParent) {
+    TRACE("CPathDataCamera::Construct -> This:%08x Kind:%d Target:%08x Num:%d\n", this, iKind, pTarget, iNum);
+    CTask* pObj = CTaskMan::getSysTask(1);
+    if (!pObj) pObj = this;
+    setPriority(0x8000);
+    m_pTarget = pTarget;
+    m_iKind = iKind;
+    m_hHPC = 0;
+    m_pHPC = NULL;
+    m_pHPM = NULL;
+    m_iNum = iNum;
+    m_iCNum = iNum;
+    CTask::ignorePlaySpeed(TRUE);
+    m_DDPathCamArrow = NULL;
+    switch (iKind) {
+    case 2:
+#line 109
+        m_pHPC = new (com_malloc_d(sizeof(CHermitePathCamera), __FILE__ "(109)", RET_ADDR())) CHermitePathCamera(pObj, m_pPathData->getPathVectorData(m_iNum), m_pTarget, NULL, 1, pParent);
+        if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);
+        break;
+    case 1:
+#line 115
+        m_pHPC = new (com_malloc_d(sizeof(CHermitePathCamera), __FILE__ "(115)", RET_ADDR())) CHermitePathCamera(pObj, m_pPathData->getPathVectorData(m_iNum), m_pTarget, NULL, 0, pParent);
+        if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);
+        break;
+    case 0:
+    case 3:
+    case 4: {
+        INT iIdx = -1;
+        INT iType;
+        for (; m_iNum < m_pPathData->getPathNum(); m_iNum++) {
+            iIdx = m_pPathData->getLinkChild(m_iNum, -1);
+            if (iIdx >= 0) break;
+        }
+        if (iIdx < 0) {
+#line 135
+            if (!(!("Child(Camera)Path Nothing!"))) AssertApp(__FILE__, __LINE__, "! (\"Child(Camera)Path Nothing!\")", 0);
+        }
+        m_iCNum = iIdx;
+        m_pTarget = this;
+        addCoord(1);
+        _unitMatrixVu0(Crd(0).m_Local);
+        if (pParent && pParent->getCoordNum() > 0) Crd(0).setParent(&pParent->Crd(0));
+        if (m_pPathData->getPathVectorNum(m_iNum) >= 2) {
+#line 149
+            m_pHPM = new (com_malloc_d(sizeof(CHermitePath), __FILE__ "(149)", RET_ADDR())) CHermitePath;
+            if (!m_pHPM) AssertApp(__FILE__, __LINE__, "m_pHPM", 0);
+            m_pHPM->makePathFromPathVector(m_pPathData->getPathVectorData(m_iNum));
+            iType = 1;
+            if (m_iKind) iType = (m_iKind == 4) ? 2 : 0;
+            update(0.0f, FALSE);
+        } else {
+            FVECTOR vPos = m_pPathData->getPathPosition(m_iNum, 0);
+            vPos.w = 1.0f;
+            iType = 0;
+            Crd(0).m_Local.setTrans(vPos);
+            m_iKind = 1;
+        }
+        Crd(0).touch();
+        Crd(0).fix(0);
+#line 192
+        m_pHPC = new (com_malloc_d(sizeof(CHermitePathCamera), __FILE__ "(192)", RET_ADDR())) CHermitePathCamera(pObj, m_pPathData->getPathVectorData(iIdx), m_pTarget, m_pHPM, iType, pParent);
+        if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);
+        break;
+    }
+    default:
+#line 198
+        if (!(!("Kind Unknown!"))) AssertApp(__FILE__, __LINE__, "! (\"Kind Unknown!\")", 0);
+        break;
+    }
+    if (m_pHPC) m_hHPC = m_pHPC->getHandle();
+}
+
+void CPathDataCamera::main() {
+    if (!(m_iStatus & 2)) update(getFrameRateF(), TRUE);
+}
+
+void CPathDataCamera::update(FLOAT fr, BOOL bUpdate) {
+    FVECTOR vPos;
+    switch (m_iKind) {
+    case 3:
+    case 4:
+        if (bUpdate) {
+            PATH_PARAM sParam;
+            CPathVector* p = m_pPathData->getPathVectorData(m_iNum);
+            p->getPathParam(sParam);
+            if (sParam.iFlags & 0x4000000) {
+                INT iBlock0 = m_pHPM->getNowBlock();
+                INT iBlock1 = iBlock0 + 1;
+                FLOAT fVSpeed0 = p->getPathSpeed(iBlock0);
+                FLOAT fVSpeed1 = p->getPathSpeed(iBlock1);
+                FLOAT fSpeed = (fVSpeed1 - fVSpeed0) * m_pHPM->getHermiteCoefficient(iBlock0, m_pHPM->getProgress()) + fVSpeed0;
+                m_pHPM->setSpeed(fSpeed * 0.0046296297f);
+            }
+            m_pHPM->update(fr);
+        }
+    case 0:
+        if (m_DDPathCamArrow) {
+            FVECTOR vRot;
+            _initVf0(vRot);
+            m_pHPM->getNowRot(vRot, 1.0f);
+            vRot.z = m_pHPM->getNowRoll();
+            vRot.w = 5.0f;
+            m_DDPathCamArrow->setCoord(NULL, &vRot);
+        }
+        if (m_iKind == 0 && bUpdate) {
+            PATH_PARAM sParam;
+            m_pPathData->getPathParam(m_iCNum, sParam);
+            if (!(sParam.iFlags & 0x20000000)) break;
+        }
+        m_pHPM->getNowPos(vPos);
+        Crd(0).m_Local.setTrans(vPos);
+        Crd(0).touch();
+        break;
+    case 1:
+    case 2:
+        break;
+    }
+}
+
+void CPathDataCamera::disp() {
+    if (CDebugPathData::isDebugPathData() && (CDebugPathData::m_iCtrlFlg & 2)) {
+        if (m_pHPM && m_pHPM->getPathVector()) m_pHPM->getPathVector()->dispDebugLine(0);
+        if (m_DDPathCamArrow) m_DDPathCamArrow->disp();
+    }
+}
+
+BOOL CPathDataCamera::isEnd() {
+    return m_pHPC->isEnd();
+}
+
+#line 309
+void CPathDataCamera::entryDebugArrow() {
+    if (!m_DDPathCamArrow && getCoordNum() > 0) {
+        FVECTOR vRot;
+#line 314
+        m_DDPathCamArrow = new (com_malloc_d(sizeof(CDbgArrow), __FILE__ "(314)", RET_ADDR())) CDbgArrow;
+        if (!m_DDPathCamArrow) AssertApp(__FILE__, __LINE__, "m_DDPathCamArrow", 0);
+        m_DDPathCamArrow->getCoord().setParent(&Crd(0));
+        _initVf0(vRot);
+        vRot.w = 5.0f;
+        m_DDPathCamArrow->setCoord(NULL, &vRot);
+    }
+}
+
+// SOURCE DATA: .rodata
