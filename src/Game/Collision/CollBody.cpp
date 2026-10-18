@@ -86,7 +86,7 @@ INT CCollBody::collideBody(INT iTargetType) {
         if (!pCollList[i]) continue;
         SJ_FOREACH(CCollObj, pEntry, *pCollList[i]) {
             if (!((CCollBody*)pEntry)->isEnableBody()) continue;
-            if (pEntry->getTaskHandle() == getTaskHandle()) continue;
+            if (pEntry->getHandle() == getHandle()) continue;
             SubVector(vTmp, *(FVECTOR*)pColl, *(FVECTOR*)((CCollBody*)pEntry)->m_pCollision);
             if (InnerProduct(vTmp, vTmp) > 100.0f) continue;
             CColumnCollision* pTarget = (CColumnCollision*)((CCollBody*)pEntry)->m_pCollision;

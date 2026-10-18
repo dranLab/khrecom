@@ -89,7 +89,7 @@ INT CCollAttack::attackSub(CCollisionList* pList) {
     INT ret1 = 0;
     SJ_FOREACH(CCollObj, pEntry, *pList) {
         if (!pEntry->isEnable()) continue;
-        if (pEntry->getTaskHandle() == getTaskHandle()) continue;
+        if (pEntry->getHandle() == getHandle()) continue;
         if ((pEntry->getKind() & 0xE) == COLL_KIND_ITEM) continue;
         CCollision* pTarget = ((CCollAttack*)pEntry)->m_pCollision;
         INT type = pEntry->getType();
@@ -150,8 +150,8 @@ INT CCollAttack::attackSub(CCollisionList* pList) {
 BOOL CCollAttack::collideAttackFunc(CCollBody* pEntry) {
     FVECTOR dir;
     FVECTOR rot;
-    pEntry->setEnemyHandle(getTaskHandle());
-    setEnemyHandle(pEntry->getTaskHandle());
+    pEntry->setEnemyHandle(getHandle());
+    setEnemyHandle(pEntry->getHandle());
     if (pEntry->checkAttackID(m_uiAttackID)) return FALSE;
     if (chkMutekiSuccess(pEntry)) {
         pEntry->setMutekiTrg(0x20);
@@ -217,7 +217,7 @@ BOOL CCollAttack::chkGuardSuccess(CCollBody* pBody) {
     if (!pBody->isGuard()) return FALSE;
     if (!(pBody->getGuardAttrFlag() & (1 << m_AttackAttr))) return FALSE;
     FVECTOR vEnemy = m_vEnemyPos;
-    CEntity* pObj = (CEntity*)CTaskMan::getTask(pBody->getTaskHandle());
+    CEntity* pObj = (CEntity*)CTaskMan::getTask(pBody->getHandle());
     if (!pObj->getCoords() || pObj->Crd(0).getParent()) return FALSE;
     FVECTOR vPos = pObj->Crd(0).getWorldMatrix().v[3];
     FVECTOR vDir;
@@ -232,7 +232,7 @@ BOOL CCollAttack::chkMutekiSuccess(CCollBody* pBody) {
     if (!pBody->isMuteki()) return FALSE;
     if (!(pBody->getMutekiAttrFlag() & (1 << m_AttackAttr))) return FALSE;
     FVECTOR vEnemy = m_vEnemyPos;
-    CEntity* pObj = (CEntity*)CTaskMan::getTask(pBody->getTaskHandle());
+    CEntity* pObj = (CEntity*)CTaskMan::getTask(pBody->getHandle());
     if (!pObj->getCoords() || pObj->Crd(0).getParent()) return FALSE;
     FVECTOR vPos = pObj->Crd(0).getWorldMatrix().v[3];
     FVECTOR vDir;
@@ -246,7 +246,7 @@ BOOL CCollAttack::chkMutekiSuccess(CCollBody* pBody) {
 INT CCollAttack::chkBackAttack(CCollBody* pBody) {
     if (!m_BackAttack) return 0;
     FVECTOR vEnemy = m_vEnemyPos;
-    CEntity* pObj = (CEntity*)CTaskMan::getTask(pBody->getTaskHandle());
+    CEntity* pObj = (CEntity*)CTaskMan::getTask(pBody->getHandle());
     if (!pObj->getCoords()) return 0;
     if (pObj->Crd(0).getParent()) return 0;
     FVECTOR vPos = pObj->Crd(0).getWorldMatrix().v[3];

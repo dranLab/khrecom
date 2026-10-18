@@ -77,90 +77,164 @@ public:
     void setEndPos(const FVECTOR& inPos) { m_inWE = inPos; }
 };
 
+/* PARTIAL: the other collision classes, for Game/Collision/CollObj (some includers have local copies) */
+#ifdef COLLOBJ_H_COLLISION_CLASSES
+class CPointCollision : public CCollision {
+public:
+    CPointCollision() { m_Type = COLL_TYPE_POINT; }
+    virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
+};
+
+class CSphereCollision : public CCollision {
+public:
+    CSphereCollision() {
+        m_Type = COLL_TYPE_SPHERE;
+        m_Radius = m_shiftY = 0.5f;
+    }
+    virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
+};
+
+class CPoly3Collision : public CCollision {
+public:
+    FVECTOR m_BasePos;
+    CPoly3Collision() { m_Type = COLL_TYPE_POLY3; }
+};
+
+#endif
+
+// PARTIAL: added for Game/Collision/CollBody
+class CColumnCollision : public CCollision {
+public:
+    CColumnCollision() { // PARTIAL: added for Game/Collision/CollObj
+        m_Type = COLL_TYPE_COLUMN;
+        m_Radius = 0.5f;
+    }
+};
+
+#ifdef COLLOBJ_H_COLLISION_CLASSES
+class CCircleCollision : public CCollision {
+public:
+    CCircleCollision() {
+        m_Type = COLL_TYPE_CIRCLE;
+        m_Radius = 0.5f;
+    }
+};
+
+class CModelCollision : public CCollision {
+public:
+    CModelCollision() { m_Type = COLL_TYPE_MODEL; }
+};
+
+class CEtcCollision : public CCollision {
+public:
+    CEtcCollision() { m_Type = COLL_TYPE_ETC; }
+};
+
+class CInfinityCollision : public CCollision {
+public:
+    CInfinityCollision() { m_Type = COLL_TYPE_INFINITY; }
+};
+#endif
+
+/* All inline members are emitted (weak) in Game/Collision/CollObj.cpp, in declaration order: keep the order. */
 class CCollObj : public CSJointT<CCollObj> {
+public:
+    static class CCollisionList* m_pCollListP;
+    static class CCollisionList* m_pCollListE;
+    static class CCollisionList* m_pCollListI;
+    static class CCollisionList* m_pCollListR;
+    static class CCollisionList* m_pCollListR2;
+    static class CCollisionList* m_pCollListRC;
+    static class CCollisionList* m_pCollListA;
 protected:
     INT m_Enable;              /* 0x08 */
     CCollision* m_pCollision;  /* 0x0c */
     HANDLE m_hTask;            /* 0x10 */
 
 public:
-    CCollObj(); // PARTIAL: added for Game/Player/PlayerWeapon
+    CCollObj();
     virtual ~CCollObj();
-    // PARTIAL: inline bodies added for Game/Player/PlayerWeapon (weak in the original)
+    static void collisionInit();
+    static void collisionDelete();
     virtual void off() { m_Enable = 0; }
     virtual void on() { m_Enable = 1; }
-    virtual INT detectEtc(CCollision& collision); // PARTIAL: parameter added for Game/Collision/CollMapCamera
-    virtual void setKind(COLL_KIND inKind); // PARTIAL: parameter type fixed for Game/Collision/CollMapCamera
-    // PARTIAL: signature completed for Game/Bullet/Bullet (CCollAttack overrides it)
-    virtual void init(COLL_KIND inKind, COLL_TYPE inType, INT inFlag, INT inHandle);
-
-    void setStartPos(const FVECTOR& inPos) {
+    virtual INT detectEtc(CCollision& collision) { return 0; }
+    INT isEnable() { return m_Enable; }
+    void setStartPos(FVECTOR& inPos) {
         if (m_pCollision) m_pCollision->setStartPos(inPos);
     }
-    void setEndPos(const FVECTOR& inPos) {
+    void setEndPos(FVECTOR& inPos) {
         if (m_pCollision) m_pCollision->setEndPos(inPos);
     }
-    // PARTIAL: added for Game/Bullet/Bullet
-    INT isEnable() { return m_Enable; }
-    FVECTOR* getOutPos() {
-        if (m_pCollision) return &m_pCollision->m_outWE;
-        return 0;
+    void setBottomPos(FVECTOR& inPos) {
+        if (m_pCollision) m_pCollision->setStartPos(inPos);
     }
-    FVECTOR* getDetectPos() {
-        if (m_pCollision) return &m_pCollision->m_outDetect;
-        return 0;
+    void setTopPos(FVECTOR& inPos) {
+        if (m_pCollision) m_pCollision->setEndPos(inPos);
     }
-    // PARTIAL: added for Game/Player/PlayerWeapon
     void setRadius(FLOAT inRadius);
-    void setShiftY(FLOAT inShiftY);
     void setType(COLL_TYPE inType) {
         if (m_pCollision) m_pCollision->m_Type = inType;
     }
+    virtual void setKind(COLL_KIND inKind) {
+        if (m_pCollision) m_pCollision->m_Kind = inKind;
+    }
+    FVECTOR* getOutPos() { return m_pCollision ? &m_pCollision->m_outWE : 0; }
+    FVECTOR* getDitectPos() { return m_pCollision ? &m_pCollision->m_outDetect : 0; }
+    FVECTOR* getDetectPos() { return m_pCollision ? &m_pCollision->m_outDetect : 0; }
     FVECTOR* getStartPos() { return (FVECTOR*)m_pCollision; }
-    FVECTOR* getEndPos() {
-        if (m_pCollision) return &m_pCollision->m_inWE;
+    FVECTOR* getEndPos() { return m_pCollision ? &m_pCollision->m_inWE : 0; }
+    FVECTOR* getDetectNormal() { return m_pCollision ? &m_pCollision->m_outNormal : 0; }
+    INT getType() { return m_pCollision ? m_pCollision->m_Type : 0; }
+    INT getKind() { return m_pCollision ? m_pCollision->m_Kind : -1; }
+    HANDLE getHandle() { return m_hTask; }
+    void setHandle(HANDLE hTask) { m_hTask = hTask; }
+    CCollision* getCollision() { return m_pCollision; }
+    void setShiftY(FLOAT inShiftY);
+    FLOAT getShiftY() { return m_pCollision ? m_pCollision->m_shiftY : 0.0f; }
+    FLOAT getRadius() { return m_pCollision ? m_pCollision->m_Radius : 0.0f; }
+    INT getDetectInfo() {
+        if (m_pCollision) return m_pCollision->m_outInfo;
         return 0;
     }
-    FVECTOR* getDetectNormal() {
-        if (m_pCollision) return &m_pCollision->m_outNormal;
+    INT getDetectInfoO() {
+        if (m_pCollision) return m_pCollision->m_outInfoO;
         return 0;
     }
-    // PARTIAL: added for Game/Enemy/EnemyBandit (original name unknown)
-    INT getOutStatus() {
-        if (m_pCollision) return m_pCollision->m_outStatus;
-        return 0;
-    }
-    FLOAT getRadius() {
-        if (m_pCollision) return m_pCollision->m_Radius;
-        return 0.0f;
-    }
+    INT getOutStatus() { return m_pCollision ? m_pCollision->m_outStatus : 0; }
     void enableSliding(INT inFlag) {
         if (m_pCollision) m_pCollision->m_fgStatus = (m_pCollision->m_fgStatus & ~1) | (inFlag != 0);
     }
-    // PARTIAL: added for Game/Collision/CollMapCamera
-    INT getType() {
-        if (m_pCollision) return m_pCollision->m_Type;
-        return 0;
+    static class CCollisionList* getCollisionList(INT iType) {
+        switch (iType) {
+        case 0:
+            return m_pCollListP;
+        case 1:
+            return m_pCollListE;
+        case 2:
+            return m_pCollListI;
+        }
+        return NULL;
     }
-    static class CCollisionList* m_pCollListR;
-    static class CCollisionList* m_pCollListR2;
-    static class CCollisionList* m_pCollListRC;
-    // PARTIAL: added for Game/Collision/CollBody
-    static class CCollisionList* m_pCollListE;
-    static class CCollisionList* m_pCollListP;
-    static class CCollisionList* m_pCollListI;
-    static class CCollisionList* m_pCollListA; // PARTIAL: added for Game/Collision/CollAttack
-    INT getKind() {
-        if (m_pCollision) return m_pCollision->m_Kind;
-        return -1;
-    }
-    HANDLE getTaskHandle() { return m_hTask; }
+private:
+    void link(HANDLE hTask);
+    void unlink();
+protected:
+    virtual void init(COLL_KIND collKind, COLL_TYPE collType, HANDLE hTask, INT fgStatus);
 };
 
 // PARTIAL: added for Game/Collision/CollMapCamera
-class CCollisionList : public CSJointListT<CCollObj> {};
+class CCollisionList : public CSJointListT<CCollObj> {
+public:
+    ~CCollisionList() {
+        for (CCollObj *pEntry = getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry;
+             pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL) {
+            delete pEntry;
+        }
+        resetParam();
+    }
+};
 
-// PARTIAL: added for Game/Collision/CollBody
-class CColumnCollision : public CCollision {};
+
 
 #endif /* GAME_COLLISION_COLLOBJ_H */

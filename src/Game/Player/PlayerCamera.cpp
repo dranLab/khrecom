@@ -634,8 +634,8 @@ void CPlayerCamera::adjustCamera(FVECTOR& outPos, const FVECTOR& inFinal, FLOAT 
 
 INT CPlayerCamera::calcMapHit(FVECTOR& outPos, const FVECTOR& inStart, FLOAT inSize, FLOAT inDist) {
     INT result = 0;
-    m_collMap.setStartPos(inStart);
-    m_collMap.setEndPos(outPos);
+    m_collMap.setStartPos((FVECTOR&)inStart);
+    m_collMap.setEndPos((FVECTOR&)outPos);
     m_collMap.setType(COLL_TYPE_SPHERE);
     m_collMap.setRadius(inSize);
     m_collMap.setShiftY(0.0f);
@@ -643,7 +643,7 @@ INT CPlayerCamera::calcMapHit(FVECTOR& outPos, const FVECTOR& inStart, FLOAT inS
         FVECTOR* pOut = m_collMap.getDetectPos();
         if (!pOut) return 0;
         outPos = *pOut;
-        m_collMap.setEndPos(outPos);
+        m_collMap.setEndPos((FVECTOR&)outPos);
         m_uiFlag |= 0x400;
         result = 1;
         if (inDist > 0.0f) {
@@ -679,8 +679,8 @@ INT CPlayerCamera::calcMapHit2(FVECTOR& outPos, const FVECTOR& inStart, FLOAT in
     FVECTOR* dpos;
     FVECTOR vec;
     FVECTOR nvec;
-    m_collMap.setStartPos(spos);
-    m_collMap.setEndPos(outPos);
+    m_collMap.setStartPos((FVECTOR&)spos);
+    m_collMap.setEndPos((FVECTOR&)outPos);
     m_collMap.setType(COLL_TYPE_POINT);
     if (m_collMap.collideMap()) {
         dpos = m_collMap.getDetectPos();
@@ -693,13 +693,13 @@ INT CPlayerCamera::calcMapHit2(FVECTOR& outPos, const FVECTOR& inStart, FLOAT in
     m_collMap.setType(COLL_TYPE_SPHERE);
     m_collMap.setRadius(inSize);
     m_collMap.setShiftY(0.0f);
-    m_collMap.setStartPos(spos);
-    m_collMap.setEndPos(outPos);
+    m_collMap.setStartPos((FVECTOR&)spos);
+    m_collMap.setEndPos((FVECTOR&)outPos);
     if (m_collMap.collideMap()) {
         dpos = m_collMap.getDetectPos();
         if (!dpos) return 0;
         outPos = *dpos;
-        m_collMap.setEndPos(outPos);
+        m_collMap.setEndPos((FVECTOR&)outPos);
         result = 1;
         if (inDist > 0.0f) {
             SubVectorXYZ(vec, m_vAim, outPos);
@@ -714,13 +714,13 @@ INT CPlayerCamera::calcMapHit2(FVECTOR& outPos, const FVECTOR& inStart, FLOAT in
     spos.y = outPos.y;
     spos.z = outPos.z;
     spos.y = (nvec.y < 0.0f) ? spos.y + m_pData->fSize : spos.y - m_pData->fSize;
-    m_collMap.setStartPos(spos);
-    m_collMap.setEndPos(outPos);
+    m_collMap.setStartPos((FVECTOR&)spos);
+    m_collMap.setEndPos((FVECTOR&)outPos);
     if (m_collMap.collideMap()) {
         FVECTOR* dpos2 = m_collMap.getDetectPos();
         if (!dpos2) return 0;
         outPos = *dpos2;
-        m_collMap.setEndPos(outPos);
+        m_collMap.setEndPos((FVECTOR&)outPos);
         result = 1;
     }
     return result;
@@ -729,8 +729,8 @@ INT CPlayerCamera::calcMapHit2(FVECTOR& outPos, const FVECTOR& inStart, FLOAT in
 void CPlayerCamera::collideMapTrueCamera(const FVECTOR& inEye, const FVECTOR& inAim) {
     if (isFlag(0x20)) return;
     m_collMap.setType(COLL_TYPE_SPHERE);
-    m_collMap.setStartPos(inAim);
-    m_collMap.setEndPos(inEye);
+    m_collMap.setStartPos((FVECTOR&)inAim);
+    m_collMap.setEndPos((FVECTOR&)inEye);
     m_collMap.setRadius(m_pData->fSize * 0.1f);
     m_collMap.setShiftY(0.0f);
     m_collMap.collideMapTrueCamera(0);
