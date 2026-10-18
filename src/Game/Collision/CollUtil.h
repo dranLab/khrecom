@@ -48,6 +48,28 @@ inline INT CCollUtil::detectColumnColumn(CColumnCollision& coll0, CColumnCollisi
 inline INT CCollUtil::detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork) {
     return getInstance()->_detectOCD(collision, pMCDInfo, pOCDWork, 1);
 }
+// PARTIAL: added for Game/Collision/CollAttack (original lines unknown)
+inline INT CCollUtil::detectSpherePoint(CSphereCollision& coll0, CPointCollision& coll1) {
+    return getInstance()->_detectSpherePoint(coll0, coll1);
+}
+inline INT CCollUtil::detectSphereSphere(CSphereCollision& coll0, CSphereCollision& coll1) {
+    return getInstance()->_detectSphereSphere(coll0, coll1);
+}
+inline INT CCollUtil::detectSpherePoly3(CSphereCollision& coll0, CPoly3Collision& coll1) {
+    return getInstance()->_detectSpherePoly3(coll0, coll1);
+}
+inline INT CCollUtil::detectSphereCircle(CSphereCollision& coll0, CCircleCollision& coll1) {
+    return getInstance()->_detectSphereCircle(coll0, coll1);
+}
+inline INT CCollUtil::detectColumnPoint(CColumnCollision& coll0, CPointCollision& coll1) {
+    return getInstance()->_detectColumnPoint(coll0, coll1);
+}
+inline INT CCollUtil::detectColumnSphere(CColumnCollision& coll0, CSphereCollision& coll1, INT inFlag) {
+    return getInstance()->_detectColumnSphere(coll0, coll1, inFlag);
+}
+inline INT CCollUtil::detectColumnPoly3(CColumnCollision& coll0, CPoly3Collision& coll1) {
+    return getInstance()->_detectColumnPoly3(coll0, coll1);
+}
 #endif
 
 #endif /* GAME_COLLISION_COLLUTIL_H */

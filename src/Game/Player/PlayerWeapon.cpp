@@ -292,7 +292,10 @@ void CPlayerWeapon::onAttack(INT inID, INT inAP, INT inKind, INT inAttr) {
     pos = m_pPlayer->getCenterPos();
     m_collAttack.setEnemyPos(pos);
     pos = Crd(0).getWorldMatrix().v[3];
-    m_collAttack.setAttackParam(inAP, inKind, inAttr);
+    m_collAttack.setAttack(inAP, 0);
+    m_collAttack.setAttackKind((ATK_KIND)inKind);
+    m_collAttack.setAttackAttr((ATK_ATTR)inAttr);
+    m_collAttack.setBackAttack(0);
     m_collAttack.setRadius(0.5f);
     m_collAttack.setShiftY(0.0f);
     m_collAttack.setStartPos(pos);

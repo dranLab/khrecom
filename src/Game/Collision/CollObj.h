@@ -149,6 +149,7 @@ public:
     static class CCollisionList* m_pCollListE;
     static class CCollisionList* m_pCollListP;
     static class CCollisionList* m_pCollListI;
+    static class CCollisionList* m_pCollListA; // PARTIAL: added for Game/Collision/CollAttack
     INT getKind() {
         if (m_pCollision) return m_pCollision->m_Kind;
         return -1;
