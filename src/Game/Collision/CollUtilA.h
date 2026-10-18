@@ -88,6 +88,10 @@ public:
     static INT detectColumnColumnEz(class CColumnCollision& coll0, class CColumnCollision& coll1);
     static INT detectColumnColumn(class CColumnCollision& coll0, class CColumnCollision& coll1);
     static INT detectOCD(CCollision& collision, struct MCD_INFO* pMCDInfo, struct OCD_WORK* pOCDWork);
+    // PARTIAL: added for Game/Collision/Ride
+    void _initializeData(void* pData, struct MCD_INFO* pMCDInfo);
+    static void initializeData(void* pData, struct MCD_INFO* pMCDInfo);
+    INT _detectBBoxPointEZ(struct COLL_CUBE& cube, CCollision& collision);
     // PARTIAL: added for Game/Collision/CollAttack
     INT _detectSpherePoint(class CSphereCollision& coll0, class CPointCollision& coll1);
     INT _detectSphereSphere(class CSphereCollision& coll0, class CSphereCollision& coll1);

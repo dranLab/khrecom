@@ -48,6 +48,10 @@ inline INT CCollUtil::detectColumnColumn(CColumnCollision& coll0, CColumnCollisi
 inline INT CCollUtil::detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork) {
     return getInstance()->_detectOCD(collision, pMCDInfo, pOCDWork, 1);
 }
+// PARTIAL: added for Game/Collision/Ride (original line unknown)
+inline void CCollUtil::initializeData(void* pData, MCD_INFO* pMCDInfo) {
+    getInstance()->_initializeData(pData, pMCDInfo);
+}
 // PARTIAL: added for Game/Collision/CollAttack (original lines unknown)
 inline INT CCollUtil::detectSpherePoint(CSphereCollision& coll0, CPointCollision& coll1) {
     return getInstance()->_detectSpherePoint(coll0, coll1);
