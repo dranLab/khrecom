@@ -205,6 +205,12 @@ void sceVif1PkAddGsPackedN(pacVif1Packet* pPacket, u_long128* pData, u_int count
 void sceVif1PkAddGsAD(pacVif1Packet* pPacket, u_int addr, u_long data);
 void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv); /* static in the original (still INCLUDE_ASM) */
 
+static inline u_long _upper(u_long128 q) {
+    u_long r;
+    __asm__ volatile("pcpyud %0, %1, $0" : "=r"(r) : "r"(q));
+    return r;
+}
+
 static inline u_long128 _pack(u_long lo, u_long hi) {
     u_long128 r;
     __asm__ volatile("pcpyld %0, %2, %1" : "=r"(r) : "r"(lo), "r"(hi));
@@ -423,30 +429,93 @@ void sceVif1PkReset(pacVif1Packet* pPacket) {
     pPacket->pCurrent = (u_int*)pPacket->pBase;
 }
 u_int sceVif1PkSize(pacVif1Packet* pPacket) { return ((u_int)pPacket->pCurrent - (u_int)pPacket->pBase) >> 4; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkTerminate__FP13pacVif1Packet);
+u_long128* sceVif1PkTerminate(pacVif1Packet* pPacket) {
+    u_int* pc = pPacket->pCurrent;
+    while ((u_int)pc & 0xc) *pc++ = 0;
+    if (pPacket->pDmaTag) {
+        *(u_long*)pPacket->pDmaTag = pPacket->lDmaTag.ul64[0] + (u_int)((u_long128*)pc - pPacket->pDmaTag - 1);
+    }
+    pPacket->pCurrent = pc;
+    pPacket->pDmaTag = NULL;
+    return (u_long128*)pc;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkRefe__FP13pacVif1PacketPUxUiUiUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkCnt__FP13pacVif1PacketUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkNext__FP13pacVif1PacketPUxUi);
+void sceVif1PkCnt(pacVif1Packet* pPacket, u_int flag) {
+    pPacket->pDmaTag = sceVif1PkTerminate(pPacket);
+    pPacket->lDmaTag.ul64[0] = (u_int)(flag | 0x10000000);
+    pPacket->pCurrent += 2;
+    pPacket->pVifCode = NULL;
+}
+void sceVif1PkNext(pacVif1Packet* pPacket, u_long128* pNext, u_int flag) {
+    pPacket->pDmaTag = sceVif1PkTerminate(pPacket);
+    pPacket->lDmaTag.ul64[0] = (u_int)(flag | 0x20000000) | ((u_long)((u_int)pNext & 0x8fffffff) << 32);
+    pPacket->pCurrent += 2;
+    pPacket->pVifCode = NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkRef__FP13pacVif1PacketPUxUiUiUiUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkRefs__FP13pacVif1PacketPUxUiUiUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkCall__FP13pacVif1PacketPUxUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkRet__FP13pacVif1PacketUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkEnd__FP13pacVif1PacketUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkOpenUpkCode__FP13pacVif1PacketUsUiUiUi);
+void sceVif1PkCall(pacVif1Packet* pPacket, u_long128* pCall, u_int flag) {
+    pPacket->pDmaTag = sceVif1PkTerminate(pPacket);
+    pPacket->lDmaTag.ul64[0] = (u_int)(flag | 0x50000000) | ((u_long)((u_int)pCall & 0x8fffffff) << 32);
+    pPacket->pCurrent += 2;
+    pPacket->pVifCode = NULL;
+}
+void sceVif1PkRet(pacVif1Packet* pPacket, u_int flag) {
+    pPacket->pDmaTag = sceVif1PkTerminate(pPacket);
+    pPacket->lDmaTag.ul64[0] = (u_int)(flag | 0x60000000);
+    pPacket->pCurrent += 2;
+    pPacket->pVifCode = NULL;
+}
+void sceVif1PkEnd(pacVif1Packet* pPacket, u_int flag) {
+    pPacket->pDmaTag = sceVif1PkTerminate(pPacket);
+    pPacket->lDmaTag.ul64[0] = (u_int)(flag | 0x70000000);
+    pPacket->pCurrent += 2;
+    pPacket->pVifCode = NULL;
+}
+void sceVif1PkOpenUpkCode(pacVif1Packet* pPacket, u_short vuaddr, u_int upkcmd, u_int cl, u_int wl) {
+    u_int* pc = pPacket->pCurrent;
+    while (((u_int)pc & 0xc) != 8) *pc++ = 0;
+    cl |= wl << 8;
+    pc[0] = cl | 0x01000000;
+    pPacket->numlen = cl;
+    pPacket->pVifCode = pc + 1;
+    pPacket->iVifCode = (upkcmd << 24) | vuaddr;
+    pPacket->pCurrent = pc + 2;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkCloseUpkCode__FP13pacVif1Packet);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkOpenUpkCodeV4_32__FP13pacVif1PacketUsUiUi);
+void sceVif1PkOpenUpkCodeV4_32(pacVif1Packet* pPacket, u_short vuaddr, u_int cl, u_int wl) {
+    u_int* pc = pPacket->pCurrent;
+    while (((u_int)pc & 0xc) != 8) *pc++ = 0;
+    cl |= wl << 8;
+    pc[0] = cl | 0x01000000;
+    pPacket->pVifCode = pc + 1;
+    pPacket->iVifCode = vuaddr | 0x6c000000;
+    pPacket->pCurrent = pc + 2;
+}
 void sceVif1PkCloseUpkCodeV4_32(pacVif1Packet* pPacket) {
     u_int* pEnd = pPacket->pCurrent - 1;
     *pPacket->pVifCode = pPacket->iVifCode + (((u_int)(pEnd - pPacket->pVifCode) >> 2) << 16);
     pPacket->pVifCode = NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkOpenDirectCode__FP13pacVif1Packeti);
+void sceVif1PkOpenDirectCode(pacVif1Packet* pPacket, int stall) {
+    u_int* pc = pPacket->pCurrent;
+    while (((u_int)pc & 0xc) != 0xc) *pc++ = 0;
+    pPacket->iVifCode = stall ? 0xd0000000 : 0x50000000;
+    pPacket->pVifCode = pc;
+    pPacket->pCurrent = pc + 1;
+}
 void sceVif1PkCloseDirectCode(pacVif1Packet* pPacket) {
     u_int* pEnd = pPacket->pCurrent - 1;
     *pPacket->pVifCode = pPacket->iVifCode + ((u_int)(pEnd - pPacket->pVifCode) >> 2);
     pPacket->pVifCode = NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkOpenDirectHLCode__FP13pacVif1Packeti);
+void sceVif1PkOpenDirectHLCode(pacVif1Packet* pPacket, int stall) {
+    u_int* pc = pPacket->pCurrent;
+    while (((u_int)pc & 0xc) != 0xc) *pc++ = 0;
+    pPacket->iVifCode = stall ? 0xd1000000 : 0x51000000;
+    pPacket->pVifCode = pc;
+    pPacket->pCurrent = pc + 1;
+}
 void sceVif1PkCloseDirectHLCode(pacVif1Packet* pPacket) {
     u_int* pEnd = pPacket->pCurrent - 1;
     *pPacket->pVifCode = pPacket->iVifCode + ((u_int)(pEnd - pPacket->pVifCode) >> 2);
@@ -463,8 +532,27 @@ u_int* sceVif1PkReserve(pacVif1Packet* pPacket, u_int count) {
     pPacket->pCurrent = p + count;
     return p;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkAlign__FP13pacVif1PacketUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkAddCode__FP13pacVif1PacketUi);
+void sceVif1PkAlign(pacVif1Packet* pPacket, u_int bit, u_int pos) {
+    u_int mask = (u_int)0xffffffff >> (32 - ((bit + 2) & 0x1f));
+    u_int* pc = pPacket->pCurrent;
+    u_int* p = (u_int*)(((u_int)pc & ~mask) + pos * 4);
+    if (p < pc) p = (u_int*)((u_int)p + (mask + 1));
+    while (pPacket->pCurrent < p) *pPacket->pCurrent++ = 0;
+}
+void sceVif1PkAddCode(pacVif1Packet* pPacket, u_int code) {
+    u_int* pc = pPacket->pCurrent;
+    if (((code >> 24) & 0x7f) == 0x13) {
+        *pc++ = 0x11000000;
+        while (((u_int)pc & 0xc) != 0xc) *pc++ = 0;
+        pc[0] = 0x50000001;
+        *(u_long*)(pc + 1) = 0x8000;
+        pc[5] = code;
+        pc += 6;
+    } else {
+        *pc++ = code;
+    }
+    pPacket->pCurrent = pc;
+}
 void sceVif1PkAddData(pacVif1Packet* pPacket, u_int data) {
     u_int* p = (u_int*)pPacket->pCurrent;
     *p = data;
@@ -492,9 +580,41 @@ void sceVif1PkAddUpkData64(pacVif1Packet* pPacket, u_long data) {
     p += 2;
     pPacket->pCurrent = p;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkAddUpkData64N__FP13pacVif1PacketPUlUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkAddUpkData128__FP13pacVif1PacketUx);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkAddUpkData128N__FP13pacVif1PacketPUxUi);
+void sceVif1PkAddUpkData64N(pacVif1Packet* pPacket, u_long* pData, u_int count) {
+    u_int* p = pPacket->pCurrent;
+    while (count--) {
+        u_long d = *pData++;
+        p[0] = d;
+        p[1] = d >> 32;
+        p += 2;
+    }
+    pPacket->pCurrent = p;
+}
+void sceVif1PkAddUpkData128(pacVif1Packet* pPacket, u_long128 data) {
+    u_int* p = pPacket->pCurrent;
+    u_long lo = (u_long)data;
+    u_long hi = _upper(data);
+    p[0] = lo;
+    p[1] = lo >> 32;
+    p[2] = hi;
+    p[3] = hi >> 32;
+    p += 4;
+    pPacket->pCurrent = p;
+}
+void sceVif1PkAddUpkData128N(pacVif1Packet* pPacket, u_long128* pData, u_int count) {
+    u_int* p = pPacket->pCurrent;
+    while (count--) {
+        u_long128 d = *pData++;
+        u_long lo = (u_long)d;
+        u_long hi = _upper(d);
+        p[0] = lo;
+        p[1] = lo >> 32;
+        p[2] = hi;
+        p[3] = hi >> 32;
+        p += 4;
+    }
+    pPacket->pCurrent = p;
+}
 void sceVif1PkAddDirectData(pacVif1Packet* pPacket, u_long128 data) {
     u_long128* p = (u_long128*)pPacket->pCurrent;
     *p = data;
