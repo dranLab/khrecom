@@ -259,6 +259,7 @@ public:
     static void clear(); // PARTIAL: added for System/RootTask
     static void dispose();
     static BOOL reqEnterBattle(SHORT inID); // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy
+    static BOOL reqEnterBattle(); // PARTIAL: added for Game/Enemy/MapEnemy
     static BOOL isFieldScene(); // PARTIAL: added for Game/Player/PlayerWeapon
     static DoorInfo* getDoorInfo(DOOR_ID inDoorID, INT inRoomID); // PARTIAL: added for Game/Player/NaviMap
     static BOOL reqEnterDoor(DOOR_ID inDoorID); // PARTIAL: added for Game/Gimmick/GimmickDoor

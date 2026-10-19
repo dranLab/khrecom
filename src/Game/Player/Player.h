@@ -130,6 +130,7 @@ using PL::DBGWAIT;
 // PARTIAL: full member layout (and the CPlayerPad base) added for Game/Player/PlayerRiku
 class CPlayer : public CEntity, public CPlayerPad {
 public: // PARTIAL: members public for Game/Player/PlayerRiku
+    void cmdState_setEncountWait(); // PARTIAL: added for Game/Enemy/MapEnemy
     UBYTE _m_0x21c[0x80];        /* 0x21c CStateTemplate<CPlayer> m_State[4] */
 public:
     INT m_iState;                /* 0x29c */

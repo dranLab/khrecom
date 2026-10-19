@@ -32,6 +32,8 @@ protected:
     CState* m_pNewState;
     UBYTE m_StateInitial[0x20]; /* CStateTemplate<CFSM> */
 public:
+    // PARTIAL: added for Game/Enemy/MapEnemy (as in System/Fsm.h)
+    BOOL isState(CState& inState) { return m_pCurrentState == &inState; }
     // PARTIAL: added for Game/Prize (as in System/Fsm.h)
     BOOL gotoState(CState& inState) {
         m_pNewState = &inState;
@@ -50,6 +52,7 @@ class CEntity : public CTask, public CFSM {
     friend class CSEMotionCtrl; // PARTIAL: added for Game/SEMotion
     friend class CSEMotion;
     friend class CMovement; // PARTIAL: added for Game/Movement
+    friend class CMapEnemy; // PARTIAL: added for Game/Enemy/MapEnemy (sets m_EntityType)
 protected:
     // PARTIAL: m_pMove split out for Game/Gimmick/GimmickBreakable
     // PARTIAL: m_pModels, m_iModelCount split out for Game/Gimmick/GimmickPlantChild
@@ -136,8 +139,12 @@ public:
     UINT getFlag() { return m_uiEntityFlag; }
     UINT isHeartless() const { return m_uiEntityFlag & 0x20000; } // PARTIAL: added for Game/Bullet/CreateBullet
     // PARTIAL: added for Game/Gimmick/GimmickPlantChild (getModel needs CModel's definition: System/Graphic/Model.h)
-    INT getID() { return m_iID; } // PARTIAL: added for Game/Gimmick/GimmickToldPipe
+    INT getID() const { return m_iID; } // PARTIAL: added for Game/Gimmick/GimmickToldPipe
     INT isFirstStandsGroundIK(); // PARTIAL: added for Game/Movement
+    void updateBadStatusEffect(HANDLE inHandle); // PARTIAL: added for Game/Enemy/MapEnemy
+    BOOL testFront(const FVECTOR& inPos) const; // PARTIAL: added for Game/Enemy/MapEnemy
+    BOOL entityVisibleAxisY(const CEntity* inEntity, FLOAT inAngle); // PARTIAL: added for Game/Enemy/MapEnemy
+    HANDLE setBadStatusEffect(const CHAR* inName, INT inKind, FLOAT inScale); // PARTIAL: added for Game/Enemy/MapEnemy (parameter names guessed)
     INT getModelCount() { return m_iModelCount; }
     inline CModel* getModel();
     inline CModel* getModel(INT inIndex);
@@ -191,7 +198,7 @@ public:
     // PARTIAL: added for Game/Player/SummonDumbo
     void setRot(const FVECTOR& inRot);
     void setScale(const FVECTOR& inScale);
-    const FVECTOR& getRot();
+    FVECTOR& getRot();
     const FVECTOR& getRot() const; // PARTIAL: added for Game/Gimmick/GimmickPlantParent
     const FVECTOR& getScale() const;
     void updateCoord();
