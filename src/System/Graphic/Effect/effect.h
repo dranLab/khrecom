@@ -1,80 +1,213 @@
-// PARTIAL: added for Game/Gimmick/GimmickBreakable
 #ifndef SYSTEM_GRAPHIC_EFFECT_EFFECT_H
 #define SYSTEM_GRAPHIC_EFFECT_EFFECT_H
 
 #include "khtypes.h"
 #include "System/MainApp.h"
 #include "System/Vector.h" // PARTIAL: added for Game/Gimmick/GimmickTutorial
+#include "System/Graphic/Effect/ObjType.h"
 
-/* Placeholder for the original header's inline function asserting isValid(): its strings
- * ("System/Graphic/Effect/effect.h", "isValid()") are in .rodata of every includer. The line number is not
- * known (it is not part of the data). */
 #ifndef EFFECT_H_PATH // PARTIAL: path override added for Game/Enemy/EnemyBarrelspider ("System/Graphic/Effect/Effect.h")
 #define EFFECT_H_PATH "System/Graphic/Effect/effect.h"
 #endif
+
+#ifdef EFFECT_CPP
+/* Placeholder: effect.cpp includes effect_inl.h (whose asserts own these strings) after other headers, but the
+ * strings come first in its .rodata. */
 #line 1 EFFECT_H_PATH
 inline void _effectCheckValid(BOOL inValid) {
     if (!inValid) AssertApp(__FILE__, __LINE__, "isValid()", 0);
 }
+#endif
 
 class CEntity; // PARTIAL: added for Game/Player/SummonGenie
 class CCoords; // PARTIAL: added for Game/Bullet/Bullet
+class CCoord;
+class CLightUnit;
+struct G_RGBA;
+typedef INT FIX4;
 
-/* PARTIAL: added for Game/Player/SummonTink */
-class CEffect {
-    FVECTOR m_vScale;    /* 0x00 */ // PARTIAL: split out for Game/Gimmick/GimmickTutorial
-    FVECTOR m_vColor;    /* 0x10 */ // PARTIAL: split out for Game/EffectMotion
-    // PARTIAL: split out for Game/Bullet/Bullet
-    HANDLE m_hHandle;    /* 0x20 */
-    CCoords* m_pCrds;    /* 0x24 */
-    UBYTE _m_0x28[0x8];  /* 0x28 m_pVecLst, m_eType */
+struct EFFECT_DATA_DPD {
+private:
+    u_long128* Data;
+
 public:
-    u_int m_iFlag;       /* 0x30 */
-    UBYTE _m_0x34[0x4c]; /* 0x34 m_pData .. */
-    void loopEnd();
-    INT getTotalFrame(); // PARTIAL: added for Game/Enemy/EnemyBarrelspider
-    FLOAT getNowFrame(); // PARTIAL: added for Game/Enemy/EnemyCreapplant
-    void kill(); // PARTIAL: added for Game/Gimmick/BaseGimmick
-    // PARTIAL: added for Game/Gimmick/GimmickTutorial
-    void setScale(FLOAT fScale) {
-        m_vScale.x = m_vScale.y = m_vScale.z = fScale;
-    }
-    // PARTIAL: added for Game/Player/SummonGenie
-    FVECTOR& scale() { return m_vScale; }
+    void set(u_long128* data);
+    static void Setup(u_long128* data);
+    static void Shift(u_long128* to, u_long128* from);
+};
+
+struct EFFECT_DATA {
+private:
+    u_long128* Data;
+
+public:
+    void set(u_long128* data);
+    BOOL no_search(u_int effect_no, u_long128*& dpd, u_int& dpd_id) const;
+    int idx_to_no(int idx) const;
+    int get_num() const;
+    static void Setup(u_long128* data, BOOL bDownVer);
+    static void Shift(u_long128* to, u_long128* from);
+};
+
+struct EFFECT_SE_DATA {
+    USHORT nENo;
+    USHORT nFile;
+    USHORT nNo;
+    UBYTE nFadeTime;
+    unsigned char nPad8[1];
+};
+
+struct EFFECT_SE_HEAD {
+    INT nId;
+    int nPad32[2];
+    USHORT nVer;
+    USHORT nNum;
+};
+
+struct EFFECT_SE {
+    EFFECT_SE_HEAD sHead;
+    EFFECT_SE_DATA sData[1];
+
+    void check() const;
+    const EFFECT_SE_DATA* getData(INT nNo) const;
+    INT getSeId(INT nNo) const;
+    INT getSeFade(INT nNo) const;
+    INT getNum() const;
+    INT getVer() const;
+    INT getDataSize() const;
+};
+
+/* Every inline member is emitted (weak) in effect.cpp, in declaration order: keep the order. */
+/* The inline members are defined in effect_inl.h, in the order effect.cpp emits them (weak). */
+class CEffect {
+    FVECTOR m_vScale;       /* 0x00 */
+    FVECTOR m_vColor;       /* 0x10 */
+    HANDLE m_hHandle;       /* 0x20 */
+    CCoords* m_pCrds;       /* 0x24 */
+    FVECTOR* m_pVecLst;     /* 0x28 */
+    ObjType::eObjType m_eType; /* 0x2c */
+public:
+    u_int m_iFlag;          /* 0x30 */
+private:
+    void* m_pData;          /* 0x34 */
+    void* m_pPartMng;       /* 0x38 */
+    float m_fFade;          /* 0x3c */
+    float m_fFadeAdd;       /* 0x40 */
+    HANDLE m_hSe;           /* 0x44 */
+    INT m_nSeID;            /* 0x48 */
+    UBYTE m_nSeFade;        /* 0x4c */
+    UBYTE m_nMCode;         /* 0x4d */
+    USHORT m_nEffNo;        /* 0x4e */
+    CLightUnit* m_pNLight;  /* 0x50 */
+    SHORT m_nZOffset;       /* 0x54 */
+    SHORT m_nEntZOfs;       /* 0x56 */
+    HANDLE m_hEnt;          /* 0x58 */
+    char m_pEffName[20];    /* 0x5c */
+    union {                 /* 0x70 */
+        struct {
+            FVECTOR* List;
+            int Num;
+        } ReferencePos;
+        struct {
+            FMATRIX* List;
+            int Num;
+        } ReferenceMatrix;
+    };
+
+public:
+    CEffect();
+    virtual ~CEffect();
+
+private:
+    void _dispose();
+    inline HANDLE _getHandle() const;
+    inline void _setHandle(HANDLE h);
+    void _playSE(const EFFECT_SE* pSeData, UINT nNo);
+    void _updateSE();
+    void _fadeoutSE(FLOAT fFrame);
+    void _setSpecialData();
+    BOOL _fade(FLOAT fFR);
+    BOOL _viewclip(const FMATRIX& mLC, BOOL frustumClip);
+    int _setData(const EFFECT_DATA& effect_data, u_int no);
+    FVECTOR& _pos();
+    FVECTOR& _scale();
+    FMATRIX& _matrix();
+    FVECTOR& _color();
+    INT _strcmpName(const char* pszEffName);
+    void _setName(const char* pszEffName);
+    BOOL _checkData();
+    BOOL start(const EFFECT_DATA& Data, UINT nNo, ObjType::eObjType eType, INT nCrdNum, FLOAT fWait);
+    inline void setType(ObjType::eObjType eType);
+    inline ObjType::eObjType getType();
+
+public:
+    inline CCoord& Crd(INT nNum);
+    inline CCoord& Crd(INT nNum) const;
+    inline INT getCoordNum() const;
+#ifndef EFFECT_CPP
+    CCoords* getCoords() { return m_pCrds; } // PARTIAL: added for Game/Bullet/Bullet
     // PARTIAL: added for Game/Player/FriendDonald
     void setScale(FLOAT _x, FLOAT _y, FLOAT _z) { m_vScale.set(_x, _y, _z); }
-    void setAttachNoRot(BOOL bVal) {
-        if (bVal) {
-            m_iFlag |= 4;
-        } else {
-            m_iFlag &= ~4;
-        }
-    }
-    void setZSortEntity(CEntity* pEnt, INT nEntZOfs, BOOL bAlpha);
-    // PARTIAL: added for Game/EffectMotion
-    FVECTOR& color() { return m_vColor; }
-    void setAttachReverseTrs(BOOL bVal) {
-        if (bVal) {
-            m_iFlag |= 8;
-        } else {
-            m_iFlag &= ~8;
-        }
-    }
-    void setAttachNoScale(BOOL bVal) {
-        if (bVal) {
-            m_iFlag |= 0x80;
-        } else {
-            m_iFlag &= ~0x80;
-        }
-    }
-    void setLightCalc(BOOL bVal);
-    void setSkipFrame(FLOAT fFrame);
-    CCoords* getCoords() { return m_pCrds; } // PARTIAL: added for Game/Bullet/Bullet
-    void fadeout(FLOAT fTime);
-    void setViewclip(BOOL bVal);
-    BOOL isLoop();
-    BOOL isEndFrame(); // PARTIAL: added for Game/GameSubBattle
+#endif
     void detachCoord();
+    inline FVECTOR& scale();
+    inline void setScale(const FVECTOR& vScale);
+    inline void setScale(FLOAT fScale);
+    inline FVECTOR& color();
+    void setIColor(const G_RGBA& color);
+    inline void setAttachNoRot(BOOL bVal);
+    inline BOOL isAttachNoRot() const;
+    inline void setAttachReverseTrs(BOOL bVal);
+    inline BOOL isAttachReverseTrs() const;
+    inline void setAttachNoScale(BOOL bVal);
+    inline BOOL isAttachNoScale() const;
+    void setLightCalc(BOOL bVal);
+    BOOL isLightCalc() const;
+    BOOL calcLight(FVECTOR& outColor, const FVECTOR& inColor);
+    void setSkipFrame(FLOAT fFrame);
+    INT getTotalFrame();
+    FLOAT getNowFrame();
+    BOOL isEndFrame();
+    void kill();
+    void fadeout(FLOAT fFrame);
+    void loopEnd();
+    void setDrawFirst(u_int priority);
+    void setDrawLast(u_int priority);
+    inline void setZOffset(FIX4 nZOffset);
+    inline FIX4 getZOffset();
+    void setZSortEntity(CEntity* pEnt, FIX4 nEntZOfs, BOOL bAlpha);
+    CEntity* getZSortEntity();
+    inline FIX4 getZSortEntityOffset();
+    inline BOOL isEntityAlpha();
+    void setStop(BOOL b);
+    void flipStop();
+    inline BOOL isStop();
+    void setDrawing(BOOL b);
+    inline BOOL isDrawing();
+    void setViewclip(BOOL b);
+    BOOL isLoop();
+    inline BOOL isActive();
+
+private:
+    inline BOOL isAlive();
+    BOOL isWaiting();
+    BOOL isDelete();
+    BOOL isSuicide();
+    BOOL isValid();
+    inline void setAttachFlag(BOOL bVal);
+    inline BOOL isAttachFlag() const;
+    void setReferenceCoordPos(INT nNum);
+
+public:
+    void setReferencePos(FVECTOR* list, int num);
+
+private:
+    void setReferenceMatrix(FMATRIX* list, int num);
+    char* print_prof();
 };
+
+#ifndef EFFECT_CPP
+#include "System/Graphic/Effect/effect_inl.h"
+#endif
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_EFFECT_H */

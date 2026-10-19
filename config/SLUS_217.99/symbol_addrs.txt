@@ -253,3 +253,12 @@ _vt$6CState_0047FF60 = 0x0047FF60; // size:0x30
 // Game/GameSubBattle: CState's inline destructor and an unnamed copy of its vtable
 _$_6CState_001FCBC8 = 0x001FCBC8; // type:func size:0x30
 _vt$6CState_0047F748 = 0x0047F748; // size:0x30
+
+// System/Graphic/Effect/effect: CLightUnit's inline functions and an unnamed copy of its vtable
+_$_10CLightUnit_00165FA8 = 0x00165FA8; // type:func size:0x30
+setAnchor__10CLightUnitPC6CCoordRC9MODELDATAi_00165FD8 = 0x00165FD8; // type:func size:0x1C
+reCalc__10CLightUnit_00165FF8 = 0x00165FF8; // type:func size:0x3C
+getPointLightData__C10CLightUnit_00166038 = 0x00166038; // type:func size:0x8
+_calc__10CLightUnit_00166040 = 0x00166040; // type:func size:0x34
+calc__10CLightUnit_00166078 = 0x00166078; // type:func size:0x18
+_vt$10CLightUnit_004677C0 = 0x004677C0; // size:0x38

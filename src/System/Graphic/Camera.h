@@ -52,6 +52,7 @@ public:
     }
     void fix(INT n = 0);
     FMATRIX& getWorldMatrix() { return m_World; } // PARTIAL: added for Game/Gimmick/GimmickBell
+    FVECTOR getWorldPos() { return m_World.v[3]; } // PARTIAL: added for System/Graphic/Effect/effect (original name unknown)
     FMATRIX& getLocalMatrix() { return m_Local; } // PARTIAL: added for Game/Gimmick/GimmickFountain
     CCoord* getParent() { return m_pParent; }     // PARTIAL: added for Game/Gimmick/GimmickFountain
     void recalcLocalMatrix(); // PARTIAL: added for System/Graphic/Camera

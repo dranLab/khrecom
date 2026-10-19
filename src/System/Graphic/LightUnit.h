@@ -124,6 +124,9 @@ public:
     void setAmbient(const FVECTOR& in_color);
     void setLight(INT idx, FVECTOR in_light, FVECTOR in_color);
     virtual POINTLIGHTPACKED* getPointLightData() const { return NULL; }
+    // PARTIAL: added for System/Graphic/Effect/effect (original names unknown)
+    const FVECTOR& getAmbient() const { return m_Ambient; }
+    const FMATRIX& getColor() const { return m_Color; }
     void betaShade(FVECTOR& out, const FVECTOR& in);
 
 protected:
