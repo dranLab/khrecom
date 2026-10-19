@@ -20,12 +20,12 @@ inline void _gameTaskSLCOverflow() {
 inline void* operator new(size_t, void* p) throw() { return p; }
 #endif
 #include "Form/Menu/TitleReportDllStarter.h"
+#include "Game/SceneInfo.h"
 #include "Game/Card.h"
 #include "Game/Status.h"
 #include "System/Fsm.h"
 #include "Game/Atel/Atel.h"
 #include "Game/GameSub.h"
-#include "Game/SceneInfo.h"
 #include "Game/NowLoading.h"
 #include "System/MainApp.h"
 #include "System/Sound/SoundMan.h"
@@ -34,6 +34,10 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "System/Graphic/ScreenMask.h"
 #include "System/PadHandler.h"
 #include "System/DebugProcInfo.h"
+#include "System/TaskMan.h"
+#include "Game/GameWork.h"
+#include "Game/StorageWork.h"
+#include "System/PadIO.h"
 #include "include_asm.h"
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
@@ -72,7 +76,7 @@ public:
     virtual ~CGameMain();
     virtual void main();
     virtual void disp();
-    BOOL reqPlayMovie(CHAR* pszMovieFile, BOOL bSkipEnable);
+    BOOL reqPlayMovie(const CHAR* pszMovieFile, BOOL bSkipEnable);
     BOOL reqSave();
     BOOL reqGameOver(BOOL bHeartless);
     BOOL reqContinue_GameOver();
@@ -357,46 +361,185 @@ void CGame::main() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", isSoraGame__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", isRikuGame__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqPlayMovie__5CGamePCci);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqSave__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqGameOver__5CGamei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqContinue_GameOver__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqExit_GameOver__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqCompleteGame__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", getMapID__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", enablePause__5CGamei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", hasPauseRequest__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", checkPause__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", suspendGameTask__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", resumeGameTask__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", isSuspended__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", playConstEnvSE__5CGameiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", stopConstEnvSE__5CGamei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", recoverBGM__5CGamei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", isFadeMaskAvailable__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setFadeMaskProcPrio__5CGameQ25CGame15_FADE_PROC_PRIO);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", getFadeMaskProcPrio__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqBlackFadeIn__5CGameUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqBlackFadeOut__5CGameUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqWhiteFadeIn__5CGameUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqWhiteFadeOut__5CGameUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setBlack__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setWhite__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", dispOffFadeMask__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", isFadeMaskActive__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", isFadeDone__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setBlackBeforeEncount__5CGamei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", isBlackBeforeEncount__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupConfig__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", startFromNewGame__5CGame);
-__asm__(".rdata\n.align 3\n.word 0x5B815183\n.word 0x4A8A8083\n.word 0xC9826E8E\n.word 0x7394B88E\n.word 0xDC82B582\n.word 0xBD82B582\n.word 0x414D4281\n.word 0x542D4E49\n.word 0x204B5341\n.word 0xD890F082\n.word 0xD691E882\n.word 0xE782A682\n.word 0xDC82EA82\n.word 0xF182B982\n.word 0x0000000A\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", startFromLoadGame__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", startTheaterMode__5CGameP5CTaskiss);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x32287070\n.word 0x29313639\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", isExitTheaterMode__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", getDbgGameMode__5CGame);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", dbgStartFromBattle__5CGamei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", isDbgStartFromBattle__5CGame);
+BOOL CGame::isSoraGame() { return CGameWork::getByte(0, 0x60) == 0; }
+BOOL CGame::isRikuGame() { return CGameWork::getByte(0, 0x60) != 0; }
+BOOL CGame::reqPlayMovie(const CHAR* pszName, INT nMode) {
+    if (s_pMain) return s_pMain->reqPlayMovie(pszName, nMode);
+    return FALSE;
+}
+BOOL CGame::reqSave() {
+    if (s_pMain) return s_pMain->reqSave();
+    return FALSE;
+}
+BOOL CGame::reqGameOver(BOOL bHeartless) {
+    if (s_pMain) return s_pMain->reqGameOver(bHeartless);
+    return FALSE;
+}
+BOOL CGame::reqContinue_GameOver() {
+    if (s_pMain) return s_pMain->reqContinue_GameOver();
+    return FALSE;
+}
+BOOL CGame::reqExit_GameOver() {
+    if (s_pMain) return s_pMain->reqExit_GameOver();
+    return FALSE;
+}
+BOOL CGame::reqCompleteGame() {
+    if (s_pMain) return s_pMain->reqCompleteGame();
+    return FALSE;
+}
+INT CGame::getMapID() {
+    if (s_pMain) return s_pMain->getMapID();
+    return 0;
+}
+void CGame::enablePause(BOOL bEnable) {
+    if (s_pMain) s_pMain->enablePause(bEnable);
+}
+BOOL CGame::hasPauseRequest() { return FALSE; }
+void CGame::checkPause() {
+    if (!s_pMain) return;
+    if (s_pMain->isInactive()) return;
+    if (s_pMain->checkExitPause()) return;
+    if (CSceneInfo::hasAnyRequest()) return;
+    if (CGameWork::getFlag(1, 0x33) && CGameWork::getFlag(1, 0x34)) return;
+    if (!s_pMain->isPauseEnable()) return;
+    switch (s_pMain->getState()) {
+    case 5:
+        s_pMain->checkStartFieldMenu();
+        break;
+    case 9:
+        s_pMain->checkStartBattleMenu();
+        break;
+    }
+}
+void CGame::suspendGameTask() {
+    CTask* p = CTaskMan::getSysTask(0xf);
+    if (p) p->setActive(FALSE);
+    p = CTaskMan::getSysTask(1);
+    if (p) p->setActive(FALSE);
+}
+void CGame::resumeGameTask() {
+    CTask* p = CTaskMan::getSysTask(0xf);
+    if (p) p->setActive(TRUE);
+    p = CTaskMan::getSysTask(1);
+    if (p) p->setActive(TRUE);
+}
+BOOL CGame::isSuspended() {
+    if (!s_pMain) return FALSE;
+    return CTaskMan::getSysTask(1)->isInactive();
+}
+void CGame::playConstEnvSE(INT nSeq, INT nVol, BOOL bForce) {
+    if (CSceneInfo::isMinigameScene() && !bForce) return;
+    CSound::playConstEnvSE(nSeq, nVol, 30);
+}
+void CGame::stopConstEnvSE(INT nTime) { CSound::stopConstEnvSE(nTime < 0 ? 30 : nTime); }
+void CGame::recoverBGM(INT nFlag) { CSound::setBGMVolume(0, 0x7f, 30); }
+BOOL CGame::isFadeMaskAvailable() {
+    if (!s_nFadeProcPrio) {
+        if (!s_pMain) return TRUE;
+        if (s_pMain->isAtelFadeActive()) return FALSE;
+    }
+    return TRUE;
+}
+void CGame::setFadeMaskProcPrio(_FADE_PROC_PRIO ePrio) { s_nFadeProcPrio = ePrio; }
+CGame::_FADE_PROC_PRIO CGame::getFadeMaskProcPrio() { return s_nFadeProcPrio; }
+void CGame::reqBlackFadeIn(USHORT nTime) {
+    if (!isFadeMaskAvailable()) return;
+    FLOAT fAlpha = isFadeMaskActive() ? s_pFadeMask->getAlpha() : 0.0f;
+    s_pFadeMask->reqBlackIn(nTime, fAlpha);
+}
+void CGame::reqBlackFadeOut(USHORT nTime) {
+    if (!isFadeMaskAvailable()) return;
+    FLOAT fAlpha = isFadeMaskActive() ? s_pFadeMask->getAlpha() : 1.0f;
+    s_pFadeMask->reqBlackOut(nTime, fAlpha);
+}
+void CGame::reqWhiteFadeIn(USHORT nTime) {
+    if (!isFadeMaskAvailable()) return;
+    FLOAT fAlpha = isFadeMaskActive() ? s_pFadeMask->getAlpha() : 1.0f;
+    s_pFadeMask->reqWhiteIn(nTime, fAlpha);
+}
+void CGame::reqWhiteFadeOut(USHORT nTime) {
+    if (!isFadeMaskAvailable()) return;
+    FLOAT fAlpha = isFadeMaskActive() ? s_pFadeMask->getAlpha() : 0.0f;
+    s_pFadeMask->reqWhiteOut(nTime, fAlpha);
+}
+void CGame::setBlack() {
+    if (isFadeMaskAvailable()) s_pFadeMask->setBlack(0.0f);
+}
+void CGame::setWhite() {
+    if (isFadeMaskAvailable()) s_pFadeMask->setWhite(1.0f);
+}
+void CGame::dispOffFadeMask() { s_pFadeMask->off(); }
+BOOL CGame::isFadeMaskActive() { return !s_pFadeMask->isInactive() && s_pFadeMask->isVisible(); }
+BOOL CGame::isFadeDone() {
+    BOOL bRes = FALSE;
+    if (!isFadeMaskActive() || s_pFadeMask->isFadeDone()) bRes = TRUE;
+    return bRes;
+}
+void CGame::setBlackBeforeEncount(BOOL bFlag) {
+    if (s_pMain) s_pMain->setBlackBeforeEncount(bFlag);
+}
+BOOL CGame::isBlackBeforeEncount() {
+    if (s_pMain) return s_pMain->isBlackBeforeEncount();
+    return TRUE;
+}
+void CGame::setupConfig() {
+    INT nMode;
+    switch (CGameWork::getByte(0, 0x62)) {
+    case 1:
+        nMode = 2;
+        break;
+    case 2:
+        nMode = 1;
+        break;
+    default:
+        nMode = 0;
+        break;
+    }
+    CSound::setPlayMode(nMode);
+    CPadIO::enableVibration(CGameWork::getByte(0, 0x63) == 0, 0);
+}
+void CGame::startFromNewGame() {
+    if (!CTaskMan::reqChangeMainTask(2, (MAINTASK_CALLMODE)1)) {
+        TRACE("\x83Q\x81[\x83\x80\x8aJ\x8en\x82\xc9\x8e\xb8\x94s\x82\xb5\x82\xdc\x82\xb5\x82\xbd\x81" "BMAIN-TASK \x82\xf0\x90\xd8\x82\xe8\x91\xd6\x82\xa6\x82\xe7\x82\xea\x82\xdc\x82\xb9\x82\xf1\n");
+        return;
+    }
+    setupConfig();
+    USHORT nDeck = 1;
+    if (!isSoraGame()) nDeck = 2;
+    CCard::initCard(nDeck, (WORLD_ID)0, 0);
+    CStatus::initStatus(nDeck, (WORLD_ID)0, 0);
+    CSceneInfo::reqChangeRoom(0, (DOOR_ID)2, -1);
+    CSceneInfo::update();
+    CMainApp::enableDbgUsrPause(TRUE, FALSE);
+}
+void CGame::startFromLoadGame() {
+    if (!CTaskMan::reqChangeMainTask(2, (MAINTASK_CALLMODE)1)) {
+        TRACE("\x83Q\x81[\x83\x80\x8aJ\x8en\x82\xc9\x8e\xb8\x94s\x82\xb5\x82\xdc\x82\xb5\x82\xbd\x81" "BMAIN-TASK \x82\xf0\x90\xd8\x82\xe8\x91\xd6\x82\xa6\x82\xe7\x82\xea\x82\xdc\x82\xb9\x82\xf1\n");
+        return;
+    }
+    CMainApp::setFpsFull();
+    setupConfig();
+    CSceneInfo::initFloor();
+    CSceneInfo::reqChangeRoom(CGameWork::progMCW()._nRoomID, (DOOR_ID)CGameWork::progMCW()._nDoorID, -1);
+    CSceneInfo::update();
+    CMainApp::enableDbgUsrPause(TRUE, FALSE);
+}
+void CGame::startTheaterMode(CTask* pParent, BOOL bSora, SHORT nArea, SHORT nScene) {
+    CPadIO::enableVibration(FALSE, 0);
+    CSceneInfo::clear();
+    CSceneInfo::initNewGame(bSora);
+    CSceneInfo::ignoreFloorInfo();
+    CSceneInfo::reqChangeScene(nArea, nScene, -1, 1, 1);
+    CSceneInfo::update();
+#line 2961
+    GAME_NEW(2961, CGame)(pParent);
+}
+BOOL CGame::isExitTheaterMode() {
+    BOOL bRes = (s_pMain == NULL);
+    if (bRes && CMainApp::isFpsHalf()) CMainApp::setFpsFull();
+    return bRes;
+}
+INT CGame::getDbgGameMode() { return s_nDbgGameMode; }
+void CGame::dbgStartFromBattle(BOOL bBattle) { s_bDbgStartFromBattle = bBattle; }
+BOOL CGame::isDbgStartFromBattle() { return s_bDbgStartFromBattle; }
 // SOURCE DATA: .data .rodata

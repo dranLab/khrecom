@@ -30,8 +30,14 @@ public:
     static void reqWhiteFadeIn(USHORT inTime);
     static BOOL isFadeDone();
     static void recoverBGM(INT inFlag);
-    static void reqGameOver(INT inFlag);
+    static BOOL reqGameOver(BOOL bHeartless);
     static void suspendGameTask(); // PARTIAL: added for System/TaskMan
+    static void resumeGameTask();
+    static BOOL reqCompleteGame();
+    static BOOL hasPauseRequest();
+    static void playConstEnvSE(INT nSeq, INT nVol, BOOL bForce);
+    static void stopConstEnvSE(INT nTime);
+    static BOOL isFadeMaskAvailable();
     static void checkPause();
     // PARTIAL: added for Game/GameSubField
     enum _FADE_PROC_PRIO { FADE_PROC_PRIO_0 = 0, FADE_PROC_PRIO_1 = 1 };
@@ -45,7 +51,11 @@ public:
     // PARTIAL: added for Game/GameSubBattle
     static void setWhite();
     static void dispOffFadeMask();
-    static INT getFadeMaskProcPrio(); // PARTIAL: added for Game/Atel/Atel
+    static _FADE_PROC_PRIO getFadeMaskProcPrio(); // PARTIAL: added for Game/Atel/Atel
+    static void startFromNewGame();
+    static void startTheaterMode(CTask* pParent, BOOL bSora, SHORT nArea, SHORT nScene);
+    static BOOL isExitTheaterMode();
+    static BOOL isFadeMaskActive();
     static void setBlackBeforeEncount(BOOL bFlag);
 };
 

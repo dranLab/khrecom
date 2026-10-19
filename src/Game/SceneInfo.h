@@ -272,6 +272,7 @@ public:
     // PARTIAL: added for Form/Menu/SaveLoadUtil
     static USHORT getFloorIndex(SHORT nFloor, BOOL bSora);
     static void initFloor(INT nFloorIndex, WORLD_ID nWorldID);
+    static void initFloor(); // PARTIAL: added for Game/Game
     static INT getCurrentAreaScene();
     static void backupEventDoorState();
     // PARTIAL: added for Form/Menu/WorldWarp
