@@ -871,8 +871,109 @@ void CGameMain::prePlayMovie() {
     CMovie::setupScript(m_szMovieFileName);
     m_nStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", playMovie__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x5B818083\n.word 0x5B817283\n.word 0x4983CC82\n.word 0x76835B81\n.word 0xC9829383\n.word 0x7394B88E\n.word 0xDC82B582\n.word 0xBD82B582\n.word 0x58834281\n.word 0x62834C83\n.word 0xB5827683\n.word 0xB782DC82\n.word 0x000A4281\n.word 0x00000000\n.word 0x6D614743\n.word 0x69614D65\n.word 0x203A206E\n.word 0x69766F4D\n.word 0x3E2D2065\n.word 0x726F4E20\n.word 0x0A6C616D\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001F8580\n.word 0x001F85E0\n.word 0x001F8638\n.word 0x001F865C\n.word 0x001F8694\n.word 0x001F8700\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F8720\n.word 0x001F8734\n.word 0x001F875C\n.word 0x001F8768\n.word 0x001F87E4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F888C\n.word 0x00000000\n.text\n");
+void CGameMain::playMovie() {
+    switch (m_nStep) {
+    case 0:
+        if (!CGame::isFadeDone()) return;
+        if (!CMovie::isCompleteSetupScript()) return;
+        m_ivFogColorBackup = CWorldEnv::getFogColor();
+        CWorldEnv::setFogColor(0, 0, 0);
+        suspendTaskInGame(7);
+        CSound::stopBGM(0);
+        m_nStep++;
+        break;
+    case 1:
+        if (CMovie::open(m_szMovieFileName)) {
+            BOOL bSkip = m_nGameProcFlag & 0x20000;
+            UINT nFlags = bSkip != FALSE;
+            CMovie::play(CGameWork::getFlag(1, 0x36) ? nFlags | 6 : nFlags);
+            m_nStep++;
+        } else {
+            TRACE("\x83\x80\x81[\x83r\x81[\x82\xcc\x83I\x81[\x83v\x83\x93\x82\xc9\x8e\xb8\x94s\x82\xb5\x82\xdc\x82\xb5\x82\xbd\x81" "B\x83X\x83L\x83" "b\x83v\x82\xb5\x82\xdc\x82\xb7\x81" "B\n");
+            m_nStep = 10;
+        }
+        break;
+    case 2:
+        m_nGameProcFlag &= ~0x200000;
+        m_nStep++;
+        break;
+    case 3:
+        if (m_nGameProcFlag & 0x1000000) {
+            CAtel::reqWhiteFadeIn(20);
+        } else {
+            CGame::dispOffFadeMask();
+        }
+        m_nStep++;
+        break;
+    case 4: {
+        INT nStatus = CMovie::getStatus();
+        if (nStatus != 7 && nStatus != 9) return;
+        if (CGameWork::getFlag(1, 0x36)) {
+            if (nStatus == 7) {
+                CGame::reqWhiteFadeOut(20);
+            } else {
+                CGame::setWhite();
+            }
+        } else {
+            CGame::setBlack();
+        }
+        m_nStep++;
+        break;
+    }
+    case 5:
+        if (!CGame::isFadeDone()) return;
+        CMovie::close();
+        m_nStep = 10;
+        break;
+    case 10:
+        CMovie::disposeScriptRsrc();
+        m_nStep++;
+        break;
+    case 11:
+        CWorldEnv::setFogColor(m_ivFogColorBackup.x, m_ivFogColorBackup.y, m_ivFogColorBackup.z);
+        resumeTaskInGame(3);
+        m_nStep++;
+        break;
+    case 12:
+        m_nStep++;
+        break;
+    case 13:
+        if (!CSceneInfo::isEventScene()) {
+            if (m_nGameProcFlag & 0x80000) {
+                CGame::setBlack();
+                m_nTimer = 20;
+                m_nStep = 20;
+                return;
+            }
+            if (CGameWork::getFlag(1, 0x36)) {
+                CGame::reqWhiteFadeIn(20);
+            } else {
+                CGame::reqBlackFadeIn(20);
+            }
+            CSound::fadeAllSE(20, 0x7f);
+        }
+        m_nStep++;
+        break;
+    case 14: {
+        if (CSceneInfo::isEventScene() && !CGame::isFadeDone()) return;
+        INT nState = 5;
+        if (m_nGameProcFlag & 0x40000) {
+            nState = 9;
+        } else if (m_nGameProcFlag & 0x80000) {
+            nState = 4;
+        }
+        changeState(nState);
+        m_nGameProcFlag &= ~0x13f0000;
+        if (!CSceneInfo::isEventScene()) CGameWork::setInt(1, 0xe2, m_nCockpitDispBackup);
+        TRACE_USER(TGOTO, "CGameMain : Movie -> Normal\n");
+        break;
+    }
+    case 20:
+        if (--m_nTimer > 0) return;
+        m_nStep = 14;
+        break;
+    }
+}
 BOOL CGameMain::reqSave() {
     if (!isPauseEnable()) return FALSE;
     m_nGameProcFlag |= 0x1000;
