@@ -248,7 +248,33 @@ void CBattleCard::setDuelStock(UINT inPri) {
         m_pRevolver->setPlayerDuelStock(this, m_iStock);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setPlayDuelStock__Q210CardBattle11CBattleCardi);
+void CBattleCard::setPlayDuelStock(INT inCount) {
+    CB_LAYOUT* pLayout;
+    m_uiMode = 1;
+    m_iStockCount = inCount;
+    pLayout = &g_LayoutData[36 + m_iStock];
+    m_StartPos.set(pLayout->x, pLayout->y);
+    m_fStartScale = pLayout->scale * 0.01f;
+    switch (inCount) {
+    case 0: pLayout = &g_LayoutData[1]; break;
+    case 3: pLayout = &g_LayoutData[43 + m_iStock]; break;
+    case 5: pLayout = &g_LayoutData[46 + m_iStock]; break;
+    case 7: pLayout = &g_LayoutData[51 + m_iStock]; break;
+    }
+    m_EndPos.set(pLayout->x, pLayout->y);
+    m_fEndScale = pLayout->scale * 0.01f;
+    m_tqTimer = 400;
+    m_Pos = m_StartPos;
+    m_vRot.w = m_fStartScale;
+    m_iLayer = pLayout->layer;
+    m_pCard->changeLayer(m_iLayer);
+    m_uiFlag = (INT)(m_uiFlag | 0x40) & ~0x2;
+    if (m_uiFlag & 0x10) {
+        m_uiFlag = (INT)m_uiFlag & ~0x10;
+        m_pCard->enableColorCtrl(FALSE);
+    }
+    m_uiFlag &= ~0x200000;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateDuel__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateDuel__Q210CardBattle11CBattleCard);
 void CBattleCard::setSnatch(HANDLE inHandle) {
@@ -297,7 +323,28 @@ void CBattleCard::setPlayPronounce() {
     }
     m_uiFlag |= 0x20020;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStatePronounce__Q210CardBattle11CBattleCard);
+void CBattleCard::preStatePronounce() {
+    CB_LAYOUT* pLayout;
+    m_iState = 6;
+    m_uiFlag |= 0x1;
+    pLayout = &g_LayoutData[16];
+    m_StartPos.set(pLayout->x, pLayout->y);
+    m_fStartScale = pLayout->scale * 0.01f;
+    pLayout = &g_LayoutData[59 + m_iStock];
+    m_EndPos.set(pLayout->x, pLayout->y);
+    m_fEndScale = pLayout->scale * 0.01f;
+    m_tqTimer = 400;
+    m_Pos = m_StartPos;
+    m_vRot.w = m_fStartScale;
+    m_iLayer = pLayout->layer;
+    m_pCard->changeLayer(m_iLayer);
+    if (m_iStock > 0) m_vRot.y = 3.1415927f;
+    m_uiFlag |= 0x2008;
+    if (m_uiFlag & 0x10) {
+        m_uiFlag = (INT)m_uiFlag & ~0x10;
+        m_pCard->enableColorCtrl(FALSE);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", statePronounce__Q210CardBattle11CBattleCard);
 void CBattleCard::setDiscard(INT inFlag) {
     m_uiMode = 20;
