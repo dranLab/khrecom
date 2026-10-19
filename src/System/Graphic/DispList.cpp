@@ -40,7 +40,12 @@ public:
 /* PARTIAL: only what this file needs (System/Graphic/SemiModel.h, FadeModel.h, ShadowModel.h) */
 class CSemiModel : public CDrawable {
 protected:
-    CModel* m_pModel; /* 0x18 */
+    CModel* m_pModel;     /* 0x18 */
+    void* m_pSemiZ;       /* 0x1c CSemiZModel* */
+    FIX4 m_nOldZ;         /* 0x20 */
+    USHORT m_nPacketSize; /* 0x24 */
+    BYTE m_SemiDraw;      /* 0x26 */
+    BYTE __pad;           /* 0x27 */
 public:
     CModel* getModel() { return m_pModel; }
 };
