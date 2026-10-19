@@ -15,8 +15,17 @@ struct ENEMY_ACT {
     FLOAT fDistance;  /* 0x1c */
 };
 
+// PARTIAL: added for Game/Enemy/Heartless
+struct ENEMY_CARD {
+    INT iCardKind;      /* 0x00 */
+    BYTE bNumber[10];   /* 0x04 */
+    BYTE pad[2];
+};
+
 struct ENEMY_PARAM {
-    UBYTE _m_0x00[0x4c]; /* 0x00 szCode .. 0x48 pCards */
+    UBYTE _m_0x00[0x44]; /* 0x00 szCode .. */
+    INT iCardCount;      /* 0x44 */ // PARTIAL: added for Game/Enemy/Heartless
+    struct ENEMY_CARD* pCards; /* 0x48 */
     INT iActCount;       /* 0x4c */
     ENEMY_ACT* pActs;    /* 0x50 */
     UBYTE _m_0x54[0x30]; /* 0x54 iEnemyCard .. */

@@ -37,6 +37,9 @@ public:
         else m_uiCollisionFlag &= ~inFlag;
     }
     void enableGravity(BOOL inOn);
+    // PARTIAL: added for Game/Enemy/Heartless
+    FVECTOR& getVelocity() { return *(FVECTOR*)&_m_0x00[0x70]; }
+    void evade(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed);
     UINT getCollisionFlag() { return m_uiCollisionFlag; } // PARTIAL: added for Game/Gimmick/GimmickHitFlying
     // PARTIAL: added for Game/Debug/KisEnemy (m_vPos 0x20, m_vRot 0x40, m_vVel 0x70)
     FVECTOR& getPos() { return *(FVECTOR*)&_m_0x00[0x20]; }
