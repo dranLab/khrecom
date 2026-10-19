@@ -309,3 +309,13 @@ _vt$10CLinkedPtr_00482F88 = 0x00482F88; // size:0x18
 _vt$10CLightUnit_00482FA0 = 0x00482FA0; // size:0x38
 _vt$t8CSJointT1Z10CLinkedPtr_00484420 = 0x00484420; // size:0x18
 _vt$6CState_00484438 = 0x00484438; // size:0x30
+
+// Game/Enemy/MapEnemy: CCollision's and CPointCollision's inline destructors, CPointCollision::collideMap, CState's
+// inline destructor and unnamed copies of the collision vtables
+_$_10CCollision_002D1DB0 = 0x002D1DB0; // type:func size:0x30
+_$_15CPointCollision_002D1DE0 = 0x002D1DE0; // type:func size:0x30
+collideMap__15CPointCollision_002D1E10 = 0x002D1E10; // type:func size:0x5C
+_$_6CState_002D20B0 = 0x002D20B0; // type:func size:0x30
+_vt$15CPointCollision_004C5FD0 = 0x004C5FD0; // size:0x20
+_vt$10CCollision_004C5FF0 = 0x004C5FF0; // size:0x18
+_vt$6CState_004C6338 = 0x004C6338; // size:0x30

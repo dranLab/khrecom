@@ -4,6 +4,7 @@
 
 #include "khtypes.h"
 #include "System/MainApp.h"
+#include <string.h>
 
 // PARTIAL: added for Game/Enemy/EnemyAirpirate (layouts from types.h, only the fields used so far)
 struct ENEMY_ACT {
@@ -22,6 +23,12 @@ struct ENEMY_CARD {
     BYTE pad[2];
 };
 
+// PARTIAL: added for Game/Enemy/MapEnemy
+struct EXTRA_ENEMY_PARAM {
+    char szName[12]; /* 0x0 */
+    FLOAT fValue;    /* 0xc */
+};
+
 struct ENEMY_PARAM {
     UBYTE _m_0x00[0x44]; /* 0x00 szCode .. */
     INT iCardCount;      /* 0x44 */ // PARTIAL: added for Game/Enemy/Heartless
@@ -31,11 +38,21 @@ struct ENEMY_PARAM {
     UBYTE _m_0x54[0x8];  /* 0x54 iEnemyCard, byEnemyCards */
     int iDamageMotionIndex[10]; /* 0x5c */ // PARTIAL: added for Game/SEMotion
     int iFaintMotionIndex[3]; /* 0x84 */ // PARTIAL: added for Game/Enemy/EnemyNeoshadow
-    UBYTE _m_0x90[0x10]; /* 0x90 iExtraParamCount .. 0x98 iAttackRate */
+    // PARTIAL: iExtraParamCount, pExtraParam split out for Game/Enemy/MapEnemy
+    INT iExtraParamCount;            /* 0x90 */
+    struct EXTRA_ENEMY_PARAM* pExtraParam; /* 0x94 */
+    int iAttackRate[2];              /* 0x98 */
     INT iAppearMotionIndex;    /* 0xa0 */ // PARTIAL: added for Game/Enemy/MapEnemyMushroom
     INT iDisappearMotionIndex; /* 0xa4 */
     INT pad[2];                /* 0xa8 */
 
+    // PARTIAL: added for Game/Enemy/MapEnemy
+    FLOAT getExtraParam(char* inName) {
+        for (INT i = 0; i < iExtraParamCount; i++) {
+            if (!strcmp(pExtraParam[i].szName, inName)) return pExtraParam[i].fValue;
+        }
+        return 0.0f;
+    }
     // PARTIAL: added for Game/SEMotion
     BOOL isDamageMotion(INT inIndex) const {
         for (INT i = 0; i < 10; i++) {
