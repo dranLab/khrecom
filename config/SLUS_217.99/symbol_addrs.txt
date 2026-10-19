@@ -341,3 +341,5 @@ _vt$17CRsrcGroupTagList_0046F730 = 0x0046F730; // size:0x18
 _vt$t12CSJointListT1Z13CRsrcGroupTag_0046F748 = 0x0046F748; // size:0x18
 _vt$4CBuf_0046F760 = 0x0046F760; // size:0x18
 _vt$t8CSJointT1Z10CLinkedPtr_0046F7A8 = 0x0046F7A8; // size:0x18
+_$_4CBuf_001C16A8 = 0x001C16A8; // type:func size:0x54
+_vt$4CBuf_0046EB68 = 0x0046EB68; // size:0x18
