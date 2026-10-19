@@ -27,6 +27,13 @@ public:
 };
 class CCMCSemiModelList : public CSJointListT<CMCSemiModel> {};
 
+class CMapModel : public CModel {
+    INT m_nGridID; /* 0x120 */
+    INT _pad[3];   /* PARTIAL: the original CModel is 16-byte aligned (size 0x130) */
+};
+
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+
 class CSky : public CTask {
 public:
     FVECTOR m_vColor; /* 0x40 */
@@ -133,8 +140,74 @@ void CMap::setColorScale(FVECTOR& inColorScale) {
 void CMap::setSkyColorScale(FVECTOR& inColorScale) {
     if (m_pSky) m_pSky->setColorScale(inColorScale);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", getBBoxMax__4CMapR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", getBBoxMin__4CMapR7FVECTOR);
+void CMap::getBBoxMax(FVECTOR& outMax) {
+    INT n = m_nModelMax;
+    if (n <= 0) {
+        outMax.z = outMax.y = outMax.x = 100000.0f;
+        return;
+    }
+    outMax.z = outMax.y = outMax.x = -100000.0f;
+    for (INT i = 0; i < n; i++) {
+        CMapModel& model = m_pModelTbl[i];
+        if (!model.getModelData()) continue;
+        BBOX* pBBox = model.getModelData()->m_pBBox;
+        FVECTOR v0;
+        FVECTOR v1;
+        v0.set(pBBox->x[0], pBBox->y[0], pBBox->z[0]);
+        v1.set(pBBox->x[1], pBBox->y[1], pBBox->z[1]);
+        ApplyMatrix(v0, model.getCrd(0).m_World, v0);
+        ApplyMatrix(v1, model.getCrd(0).m_World, v1);
+        if (v0.x > outMax.x) {
+            outMax.x = v0.x;
+        } else if (v1.x > outMax.x) {
+            outMax.x = v1.x;
+        }
+        if (v0.y > outMax.y) {
+            outMax.y = v0.y;
+        } else if (v1.y > outMax.y) {
+            outMax.y = v1.y;
+        }
+        if (v0.z > outMax.z) {
+            outMax.z = v0.z;
+        } else if (v1.z > outMax.z) {
+            outMax.z = v1.z;
+        }
+    }
+}
+void CMap::getBBoxMin(FVECTOR& outMin) {
+    INT n = m_nModelMax;
+    if (n <= 0) {
+        outMin.z = outMin.y = outMin.x = -100000.0f;
+        return;
+    }
+    outMin.z = outMin.y = outMin.x = 100000.0f;
+    for (INT i = 0; i < n; i++) {
+        CMapModel& model = m_pModelTbl[i];
+        if (!model.getModelData()) continue;
+        BBOX* pBBox = model.getModelData()->m_pBBox;
+        FVECTOR v0;
+        FVECTOR v1;
+        v0.set(pBBox->x[0], pBBox->y[0], pBBox->z[0]);
+        v1.set(pBBox->x[1], pBBox->y[1], pBBox->z[1]);
+        ApplyMatrix(v0, model.getCrd(0).m_World, v0);
+        ApplyMatrix(v1, model.getCrd(0).m_World, v1);
+        if (v0.x < outMin.x) {
+            outMin.x = v0.x;
+        } else if (v1.x < outMin.x) {
+            outMin.x = v1.x;
+        }
+        if (v0.y < outMin.y) {
+            outMin.y = v0.y;
+        } else if (v1.y < outMin.y) {
+            outMin.y = v1.y;
+        }
+        if (v0.z < outMin.z) {
+            outMin.z = v0.z;
+        } else if (v1.z < outMin.z) {
+            outMin.z = v1.z;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", createMapEffect___4CMapRC9ZONEPARTS);
 void CMap::createEnvSE(const ZONEPARTS& inParts) {
     MAPUNITID unitId;

@@ -56,6 +56,7 @@ public:
         return link(p);
     }
     CCoord& getCrd(INT nIndex);                       // PARTIAL: added for Form/Menu/MenuModel
+    MODELDATA* getModelData() { return (MODELDATA*)m_pData; } // PARTIAL: added for Game/Map
     CCoords* getCoords() { return m_pCrds; }          // PARTIAL: added for System/Graphic/DispList
     void getWorldBBox(FVECTOR& vMax, FVECTOR& vMin);  // PARTIAL: added for System/Graphic/DispList
     u_long128* getMicroProg();                        // PARTIAL: added for System/Graphic/DispList
