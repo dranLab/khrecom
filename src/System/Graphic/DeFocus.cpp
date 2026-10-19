@@ -48,12 +48,58 @@ void CDeFocus::disp() {
     }
     m_ZFill.CGPrim::disp();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", BlurSet__8CDeFocusiffi);
+void CDeFocus::BlurSet(INT iKind, FLOAT fRate, FLOAT fTime, INT iNum) {
+    if (!m_pInstance || iNum >= 2) return;
+    CBlurPrim& BlurPrim = m_pInstance->m_BlurPrim[iNum];
+    BLUR_PARAM& p = m_pInstance->m_sBlurParam[iNum];
+    if (fTime < 1.0f) fTime = 1.0f;
+    p.m_fBlurTotalTime = fTime;
+    p.m_fBlurNowTime = 0.0f;
+    if (iKind == 0) {
+        p.m_fBlurOldRate = 0.0f;
+        p.m_fBlurAimRate = 0.0f;
+    } else {
+        p.m_fBlurOldRate = p.m_fBlurAimRate;
+        p.m_fBlurAimRate = fRate;
+    }
+    BlurPrim.setKind(iKind);
+    BlurPrim.setRate(p.m_fBlurOldRate);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", _BlurUpdate__8CDeFocusf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", BlurDistanceSet__8CDeFocusfi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", BlurColorSet__8CDeFocusiiiiUli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", BlurSetEvent__8CDeFocusi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", BlurReturnEvent__8CDeFocus);
+void CDeFocus::BlurDistanceSet(FLOAT fDistance, INT iNum) {
+    if (!m_pInstance || iNum >= 2) return;
+    m_pInstance->m_BlurPrim[iNum].setDistance(fDistance);
+}
+void CDeFocus::BlurColorSet(INT iR, INT iG, INT iB, INT iA, ULONGLONG lAlpha, INT iNum) {
+    if (!m_pInstance || iNum >= 2) return;
+    CBlurPrim& BlurPrim = m_pInstance->m_BlurPrim[iNum];
+    BlurPrim.setColor(iR, iG, iB, iA);
+    BlurPrim.setAlphaMode(lAlpha);
+}
+void CDeFocus::BlurSetEvent(INT iNum) {
+    switch (iNum) {
+    case 0:
+        BlurSet(2, 2.0f, 0.0f, 1);
+        BlurColorSet(0x80, 0x80, 0x80, 6, 0x44, 1);
+        break;
+    case 1:
+        BlurSet(5, 2.0f, 0.0f, 1);
+        BlurColorSet(0xc0, 0xc0, 0xc0, 8, 0x44, 1);
+        break;
+    case 2:
+        BlurSet(1, 2.0f, 0.0f, 1);
+        BlurColorSet(0x80, 0x80, 0x80, 10, 0x44, 1);
+        break;
+    default:
+        BlurSet(1, 3.0f, 0.0f, 1);
+        BlurColorSet(0x80, 0x80, 0x80, 0x10, 0x48, 1);
+        break;
+    }
+}
+void CDeFocus::BlurReturnEvent() {
+    BlurSet(0, 0.0f, 0.0f, 1);
+    BlurColorSet(0x80, 0x80, 0x80, 0x40, 0x44, 1);
+}
 CDeFocusPrim::CDeFocusPrim() {
     setLayer(6, 0);
     m_fNear = 3.0f;
