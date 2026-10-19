@@ -21,11 +21,17 @@ public:
         };
         u_long128 _q40; // PARTIAL: added for Game/Atel/EventTrap (the constructor clears 0x40..0x4f at once)
     };
-    UBYTE _pad50[0x30];     /* 0x50 m_Rot */
-    FLOAT m_fScaleX;        /* 0x80 */
-    FLOAT m_fScaleY;        /* 0x84 */
-    FLOAT m_fScaleZ;        /* 0x88 */
-    INT m_hHandle;          /* 0x8c */
+    // PARTIAL: m_Rot added for System/Graphic/TriangleIK
+    union {
+        FMATRIX m_Rot;              /* 0x50 */
+        struct {
+            UBYTE _pad50[0x30];
+            FLOAT m_fScaleX;        /* 0x80 */
+            FLOAT m_fScaleY;        /* 0x84 */
+            FLOAT m_fScaleZ;        /* 0x88 */
+            INT m_hHandle;          /* 0x8c */
+        };
+    };
     FMATRIX m_World;     /* 0x90 */
     // PARTIAL: added for System/Graphic/Camera
     void setLocal(const FMATRIX& matIn) {
@@ -49,6 +55,12 @@ public:
     FMATRIX& getLocalMatrix() { return m_Local; } // PARTIAL: added for Game/Gimmick/GimmickFountain
     CCoord* getParent() { return m_pParent; }     // PARTIAL: added for Game/Gimmick/GimmickFountain
     void recalcLocalMatrix(); // PARTIAL: added for System/Graphic/Camera
+    // PARTIAL: added for System/Graphic/TriangleIK
+    void getScale(FVECTOR& outScale) {
+        outScale.x = m_fScaleX;
+        outScale.y = m_fScaleY;
+        outScale.z = m_fScaleZ;
+    }
     void recalcWorldMatrix(); // PARTIAL: added for Form/Menu/WorldSelect
 };
 
