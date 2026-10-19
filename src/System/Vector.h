@@ -75,7 +75,11 @@ extern "C" void com_free(void* mem);
 extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
 /* __FILE__ as in the original (the header is found through "-I src" here). Line numbers are not known. */
-#line 200 "System/Vector.h"
+/* PARTIAL: path override added for System/TaskMan ("c:/KHCOM/MainApp/System/Vector.h") */
+#ifndef VECTOR_H_PATH
+#define VECTOR_H_PATH "System/Vector.h"
+#endif
+#line 200 VECTOR_H_PATH
 template <class T>
 class CVector {
 private:
@@ -86,22 +90,28 @@ private:
 
 public:
     CVector() : m_pObj(NULL), m_iMax(0), m_iIdx(0), m_iStatus(0) {}
-    virtual ~CVector() { clear(); }
-    // PARTIAL: push_back/clear as in Game/Atel/EventTrap
-    void push_back(const T& x) {
+    virtual ~CVector() { __cleanup(); }
+    // PARTIAL: reserve added for System/TaskMan
+    void reserve(INT iNum) {
+        if (m_iMax < iNum) {
+            __alloc(iNum);
+        }
+    }
+    // PARTIAL: push_back/clear as in Game/Atel/EventTrap (BOOL result and clear's __init for System/TaskMan)
+    BOOL push_back(const T& x) {
         if (m_iIdx >= m_iMax) {
             __alloc(__getSize(m_iMax));
         }
         if (m_iIdx < m_iMax) {
             m_pObj[m_iIdx] = x;
             m_iIdx++;
+            return TRUE;
         }
+        return FALSE;
     }
     void clear() {
-        for (INT i = 0; i < m_iIdx; i++) {
-            m_pObj[i].~T();
-        }
-        __cleanmem();
+        __cleanup();
+        __init();
     }
     INT size() const { return m_iIdx; }
     T& operator[](INT i) {
@@ -117,7 +127,31 @@ public:
         return *(m_pObj + m_iIdx - 1);
     }
 
+    /* PARTIAL: added for System/TaskMan (lines of the asserts from the original) */
+#line 150
+    T* begin() {
+        if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);
+        return m_pObj;
+    }
+#line 161
+    T* end() {
+        if (!(!((m_pObj == __null)))) AssertApp(__FILE__, __LINE__, "!((m_pObj==__null))", 0);
+        return m_pObj + m_iIdx;
+    }
+
 private:
+    void __init() {
+        m_pObj = NULL;
+        m_iMax = 0;
+        m_iIdx = 0;
+        m_iStatus = 0;
+    }
+    void __cleanup() {
+        for (INT i = 0; i < m_iIdx; i++) {
+            m_pObj[i].~T();
+        }
+        __cleanmem();
+    }
     void __cleanmem() {
         if (m_pObj != NULL) {
             /* PARTIAL: delete, not com_free (Game/Atel/EventTrap): same code, but the larger RTL makes a synthesized

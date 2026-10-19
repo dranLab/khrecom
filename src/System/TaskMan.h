@@ -14,6 +14,7 @@ enum MAINTASK_CALLMODE {
 
 // PARTIAL: added for System/Task
 template <class T> class CVector;
+extern INT VSYNC_TIMEQ;
 struct TaskMainParam {
     CVector<int>& _SecondaryArray;
     TIMEQ _nSysTickCount;
@@ -22,18 +23,53 @@ struct TaskMainParam {
     INT _nRnd;
     INT _nProcLevel;
     INT _nFlag;
+
+    // PARTIAL: added for System/TaskMan
+    TaskMainParam(CVector<int>& array, TIMEQ nSysTQ, TIMEQ nSysLag, TIMEQ nLag, INT nRnd, INT nFlag)
+        : _SecondaryArray(array), _nSysTickCount(nSysTQ), _nSysLag(nSysLag), _nLag(nLag), _nRnd(nRnd), _nProcLevel(4),
+          _nFlag(nFlag) {
+        if (nLag <= VSYNC_TIMEQ) {
+            _nProcLevel = 1;
+        } else if (nLag <= VSYNC_TIMEQ * 2) {
+            _nProcLevel = 2;
+        } else if (nLag <= VSYNC_TIMEQ * 4) {
+            _nProcLevel = 3;
+        }
+    }
 };
+
+class CTaskSLCManager;
 
 class CTaskMan {
 public:
+    static void initialize();
+    static void finalize();
     // PARTIAL: added for System/Task
     static ISLCManagerT<CTask>& getSLCManager();
+    static void update(TIMEQ nTQ, TIMEQ nDispTQ, BOOL bPause);
+    static void postprocess();
     static BOOL registerSysTask(UINT nID, CTask& inTask);
     static BOOL unregisterSysTask(CTask& inTask);
     static void removeMainTask(CTask& inTask);
     static BOOL reqChangeMainTask(INT nID, MAINTASK_CALLMODE nMode); // PARTIAL: added for System/RootTask
     static CTask* getSysTask(UINT nID);
     static CTask* getTask(HANDLE hTask); // PARTIAL: added for Form/Menu/MoogleShop
+    static CTask* getRootTask();
+    static void enableRnd_TaskProc(BOOL bFlag);
+    static BOOL reqSuspendGameTask();
+    static BOOL setupDbgPlaySpeed();
+    static void setDbgSteppingMode(BOOL bMode);
+    static void resetDbgPlaySpeed();
+    static void debugDumpContainer(UINT nStartIndex, UINT nEndIndex);
+
+private:
+    static void _invokePrimary(TaskMainParam& param);
+    static void _invokePrimary_Main(TaskMainParam& param, CTask& task);
+    static void _clearTimeLagTo(CTask& task);
+    static void _invokeSecondary(TaskMainParam& param);
+    static void _invokeDisp();
+    static void _launchCurrentMainTask(BOOL bHideMode);
+    static void _updateMainTask();
 };
 
 #endif /* SYSTEM_TASKMAN_H */

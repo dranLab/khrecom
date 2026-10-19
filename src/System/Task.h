@@ -177,7 +177,25 @@ typedef CSLCListT<CTask> CTaskSLCList;
  * message ("タスク用コンテナが MAX に到達しました\n", Shift-JIS) heads .rodata of every includer. */
 /* PARTIAL: added for Game/Gimmick/GimmickHitMore - not every includer has the string (the Gimmick units
  * don't): define TASK_H_NO_SLC_OVERFLOW_MSG before including to leave it out. */
-#ifndef TASK_H_NO_SLC_OVERFLOW_MSG
+#if defined(SYSTEM_TASKMAN_CPP)
+/* PARTIAL: added for System/TaskMan - the class the placeholder below stands for (its createContainer's message);
+ * defined here, before CTask, as in the original (its vtable comes before CSLCListT<CTask>'s in .rodata) */
+#include "System/FifoFpl.h"
+class CTaskSLCManager : public ISLCManagerT<CTask>, private CFifoFpl {
+public:
+    CTaskSLCManager() { CFifoFpl::initialize(sizeof(SLContainerT<CTask>), 0x1000, NULL); }
+    virtual SLContainerT<CTask>* createContainer() {
+        SLContainerT<CTask>* pContainer = (SLContainerT<CTask>*)allocBlock();
+        if (!pContainer) {
+            TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
+        }
+        return pContainer;
+    }
+    virtual void releaseContainer(SLContainerT<CTask>& inContainer) { releaseBlock(&inContainer); }
+    virtual SLContainerT<CTask>* getContainer(HANDLE hID) { return (SLContainerT<CTask>*)getValidActiveBlock(hID); }
+    void debugDump(UINT nStartIndex, UINT nEndIndex) { CFifoFpl::debugDump(nStartIndex, nEndIndex); }
+};
+#elif !defined(TASK_H_NO_SLC_OVERFLOW_MSG)
 inline void _taskSLCOverflow() {
     TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
 }
@@ -369,6 +387,7 @@ protected:
     const CTaskSLCList& getChildren() const { return m_listChildren; }
     friend class CTaskSecondary; // PARTIAL: added for System/Graphic/Camera (m_nInfo)
     friend class CFadeIOMask;    // PARTIAL: added for System/Graphic/ScreenMask (m_nInfo)
+    friend class CTaskMan;       // PARTIAL: added for System/TaskMan
 
 private:
     void invokeMain(TaskMainParam& param);
