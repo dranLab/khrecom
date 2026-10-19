@@ -14,6 +14,32 @@
 
 using namespace ATEL;
 
+namespace ATEL {
+/* PARTIAL: only the actor table (CVSM is not decompiled yet) */
+struct Actor { // 0x1dc
+    INT _nID;            /* 0x000 */
+    INT _nRsrcID;        /* 0x004 */
+    INT _GroupID;        /* 0x008 */
+    INT _nMembarID;      /* 0x00c */
+    CAvatar* _pAvatar;   /* 0x010 */
+    UBYTE _m_0x14[0x1c8];
+};
+class CVSM {
+    UBYTE _m_0x00[0x70];
+public:
+    Actor m_ActorTbl[64]; /* 0x70 */
+};
+struct AvatarSetLook { // 0x30
+    FVECTOR LookMin;   /* 0x00 */
+    FVECTOR LookMax;   /* 0x10 */
+    FLOAT Rate;        /* 0x20 */
+    FLOAT OffsetY;     /* 0x24 */
+    INT TargetID;      /* 0x28 */
+    char* BoneName;    /* 0x2c */
+};
+}
+static inline const FVECTOR& _crdWorldPos(const CCoord& crd) { return *(const FVECTOR*)((const BYTE*)&crd + 0xc0); }
+
 extern "C" float atan2f(float, float);
 class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs the full RsrcData.h classes */
 public:
@@ -32,6 +58,8 @@ extern "C" char D_0048AEB0[];
 extern "C" char D_0048AED8[];
 extern "C" char D_0048AF08[];
 extern "C" char D_0048AB98[];
+extern "C" char D_0048B030[];
+extern "C" char D_0048B060[];
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(size_t, void* p) throw() { return p; }
 
@@ -291,10 +319,33 @@ INT CAvatar::onAvatarStart(INT nCmd, void* pParam, INT nID) {
     changeAvatarMainState(0);
     return -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onAvatarAttach__Q24ATEL7CAvatariPvi);
+INT CAvatar::onAvatarAttach(INT nCmd, void* pParam, INT nID) {
+    CAvatar* pTarget = getAtel().getVSM()->m_ActorTbl[nID]._pAvatar;
+    CCoord& crd = Crd(0);
+    *(CCoord**)((BYTE*)&crd + 0x4c) = &pTarget->Crd(pTarget->getBoneIndex((const CHAR*)pParam, 0));
+    return -1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onAvatarAttachEffect__Q24ATEL7CAvatariPvi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onAvatarSetLookPosition__Q24ATEL7CAvatariPvi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onAvatarSetLookUpdatePosition__Q24ATEL7CAvatariPvi);
+INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
+    AvatarSetLook* p = (AvatarSetLook*)pParam;
+    FVECTOR v = _crdWorldPos(getAtel().getVSM()->m_ActorTbl[p->TargetID]._pAvatar->Crd(0));
+    if (!m_pLookStruct) m_pLookStruct = (AvatarLookStruct*)com_malloc_d(sizeof(AvatarLookStruct), D_0048B030, RET_ADDR());
+    m_pLookStruct->_nTargetID = p->TargetID;
+    m_pLookStruct->_fOffsetY = p->OffsetY;
+    v.y += p->OffsetY;
+    m_pAnim->setLookPosition(v, p->LookMax, p->LookMin, getBoneIndex(p->BoneName, 0), p->Rate, 0);
+    return -1;
+}
+INT CAvatar::onAvatarSetLookUpdatePosition(INT nCmd, void* pParam, INT nID) {
+    AvatarSetLook* p = (AvatarSetLook*)pParam;
+    FVECTOR v = _crdWorldPos(getAtel().getVSM()->m_ActorTbl[p->TargetID]._pAvatar->Crd(0));
+    if (!m_pLookStruct) m_pLookStruct = (AvatarLookStruct*)com_malloc_d(sizeof(AvatarLookStruct), D_0048B060, RET_ADDR());
+    m_pLookStruct->_nTargetID = p->TargetID;
+    m_pLookStruct->_fOffsetY = p->OffsetY;
+    v.y += p->OffsetY;
+    m_pAnim->updateLookPosition(v, p->Rate, 0);
+    return -1;
+}
 INT CAvatar::onAvatarSetLookAngle(INT nCmd, void* pParam, INT nID) {
     BYTE* p = (BYTE*)pParam;
     m_pAnim->setLookPosition(*(FVECTOR*)(p + 0x20), *(FVECTOR*)(p + 0x10), *(FVECTOR*)p, getBoneIndex(*(const CHAR**)(p + 0x34), 0), *(FLOAT*)(p + 0x30), 1);
