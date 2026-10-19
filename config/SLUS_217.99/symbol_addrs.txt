@@ -274,3 +274,9 @@ _$_15CPointCollision_002CE020 = 0x002CE020; // type:func size:0x30
 collideMap__15CPointCollision_002CE050 = 0x002CE050; // type:func size:0x5C
 _vt$15CPointCollision_004C3D68 = 0x004C3D68; // size:0x20
 _vt$10CCollision_004C3D88 = 0x004C3D88; // size:0x18
+// Game/Collision/CollUtil: unnamed copies of CCollision's and CSphereCollision's inline functions and vtables
+_$_10CCollision_0022B310 = 0x0022B310; // type:func size:0x30
+collideMap__16CSphereCollision_0022B340 = 0x0022B340; // type:func size:0x5C
+_$_16CSphereCollision_0022B3A0 = 0x0022B3A0; // type:func size:0x30
+_vt$16CSphereCollision_004893A0 = 0x004893A0; // size:0x20
+_vt$10CCollision_004893C0 = 0x004893C0; // size:0x18
