@@ -319,3 +319,11 @@ _$_6CState_002D20B0 = 0x002D20B0; // type:func size:0x30
 _vt$15CPointCollision_004C5FD0 = 0x004C5FD0; // size:0x20
 _vt$10CCollision_004C5FF0 = 0x004C5FF0; // size:0x18
 _vt$6CState_004C6338 = 0x004C6338; // size:0x30
+
+// System/Wnd: CComponent's inline members (System/Component.h) and an unnamed copy of its vtable
+_$_10CComponent_00111128 = 0x00111128; // type:func size:0x30
+setPosition__10CComponentRCt7CPointT1Zi_00111158 = 0x00111158; // type:func size:0x14
+setSize__10CComponentRCt6CSizeT1Zi_00111170 = 0x00111170; // type:func size:0x18
+getPosition__C10CComponent_00111188 = 0x00111188; // type:func size:0x8
+getSize__C10CComponent_00111190 = 0x00111190; // type:func size:0x8
+_vt$10CComponent_0045D610 = 0x0045D610; // size:0x30
