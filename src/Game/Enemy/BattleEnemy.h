@@ -89,6 +89,12 @@ public:
     void makeExpPrize();              // PARTIAL: added for Game/Enemy/BossDeadDemo
     static void setBossKilledFlag();
     void setParam(INT inParam) { *(INT*)&_m_0x218[0x1c] = inParam; } // PARTIAL: added for Game/Enemy/CreateEnemy
+    // PARTIAL: added for Game/Enemy/BattleEnemyManager
+    UINT getBattleEnemyFlag() const { return m_ullBtlEnemyFlag; }
+    void setGroupNo(INT inNo) { *(INT*)&_m_0x218[4] = inNo; } /* m_iGroupNo 0x21c */
+    INT getGroupNo() const { return *(const INT*)&_m_0x218[4]; }
+    HANDLE getNearestChild(FLOAT& outDist, CEntity& inEntity);
+    ULONGLONG isPermissionCardBattle() const { return m_ullBtlEnemyFlag & 0x200; }
     INT getHpMax() const;
     // PARTIAL: added for Game/Enemy/EnemyAirpirate
     ENEMY_PARAM* getEnemyParam() { return *(ENEMY_PARAM**)&_m_0x284[0x1c]; } /* m_pEnemyParam 0x2a0 */

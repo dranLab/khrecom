@@ -52,6 +52,9 @@ public:
     virtual ~CSLCListT() { removeAll(); } // PARTIAL: body added for System/CoordMan
     SLContainerT<T>* getHead() { return m_pHeadContainer; } // PARTIAL: added for Game/Bullet/BulletManager
     int getSize() { return m_nListSize; } // PARTIAL: added for System/Graphic/2d/2DSpr
+    // PARTIAL: added for Game/Enemy/BattleEnemyManager
+    SLContainerT<T>* getHead() const { return m_pHeadContainer; }
+    int getSize() const { return m_nListSize; }
     // PARTIAL: added for System/CoordMan
     CSLCListT(ISLCManagerT<T>& inSLCManager) : m_SLCManager(inSLCManager) { resetParam(); }
     SLContainerT<T>* pushBack(T& inEntry) {
