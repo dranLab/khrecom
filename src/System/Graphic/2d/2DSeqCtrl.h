@@ -8,8 +8,6 @@
 
 struct G_UV; /* PARTIAL: added for Form/Menu/WorldWarp */
 
-namespace CardBattle { class CBattleCard; } // PARTIAL: friend below (Game/BattleCard)
-
 namespace D2 {
 
 struct SeqControl {
@@ -45,7 +43,6 @@ protected:
     CHAR m_nSeq;              /* 0x155 */
     CHAR m_nLayer;            /* 0x156 */
     CHAR m_bEnable;           /* 0x157 */
-    friend class CardBattle::CBattleCard; // PARTIAL: Game/BattleCard sets m_nLayer
 
 public:
     C2DSeqCtrl();

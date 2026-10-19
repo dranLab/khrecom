@@ -1,5 +1,6 @@
 #include "khtypes.h"
 #include "Game/BattleCard.h"
+#include "Game/GameWork.h"
 #include "include_asm.h"
 
 using namespace CardBattle;
@@ -28,11 +29,55 @@ void CardBattle::initLayoutData() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", __Q210CardBattle11CBattleCardP5CTaskiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", _$_Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", _initialize__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", changeData__Q210CardBattle11CBattleCardR4CARD);
+void CBattleCard::_initialize() {
+    m_iState = 8;
+    changeState(0);
+    m_uiMode = 0;
+    m_Pos.set(0, SCREEN_HEIGHT + 96);
+    m_vRot.set(0.0f, 0.0f, 0.0f, 1.0f);
+    m_iLayer = 3;
+    m_fBright = 1.0f;
+    m_pCard->setLayer(3);
+    m_pCard->create(m_cardData);
+    FVECTOR pos = {{m_Pos.x, m_Pos.y, 0.0f, 1.0f}};
+    m_pCard->setPos(pos);
+    m_uiFlag = (INT)m_uiFlag & ~0x80;
+    m_pCard->enableDisp(FALSE);
+}
+void CBattleCard::changeData(CARD& inData) {
+    if (m_pCard) {
+        m_cardData = inData;
+        m_pCard->destroy();
+        if (!m_cardData.m_nKind) {
+            m_uiFlag = (INT)m_uiFlag & ~0x80;
+        } else {
+            m_pCard->create(m_cardData);
+            FVECTOR pos = {{m_Pos.x, m_Pos.y, 0.0f, 1.0f}};
+            m_pCard->setPos(pos);
+            m_uiFlag = (INT)m_uiFlag & ~0x20;
+            setRoomEffect(NULL);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", main__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", dispCard__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", testDisp__Q210CardBattle11CBattleCard);
+void CBattleCard::testDisp() {
+    if (m_pCard) {
+        if (CGameWork::getInt(1, 0xe2)) {
+            m_uiFlag = (INT)m_uiFlag & ~0x80;
+            if (m_cardData.m_nKind) m_pCard->enableDisp(FALSE);
+        } else {
+            m_uiFlag |= 0x2008;
+            if (m_uiFlag & 0x1) {
+                m_uiFlag |= 0x80;
+                if (m_cardData.m_nKind) m_pCard->enableDisp(TRUE);
+            } else {
+                m_uiFlag = (INT)m_uiFlag & ~0x80;
+                if (m_cardData.m_nKind) m_pCard->enableDisp(FALSE);
+            }
+        }
+    }
+}
 void CBattleCard::changeState(INT inState) {
     if (!(inState >= 0 && inState < 7)) AssertApp(D_00473530, 492, D_00473558, 0);
     gotoState(m_State[inState]);
