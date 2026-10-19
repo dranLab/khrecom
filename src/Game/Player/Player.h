@@ -27,6 +27,7 @@ class CPlayerWeapon; // PARTIAL: added for Game/Player/FriendDonald
 #include "Game/AttackMotion.h"
 namespace PLM {
 class CPlayerManager;
+struct CARD; // PARTIAL: added for Game/Prize
 }
 namespace Gauge {
 class CPlayerGauge;
@@ -350,6 +351,10 @@ public:
     INT getJumpState() const;
     static void notifyGimmickJump(HANDLE inHandle, INT inPower);
     static void notifyGetPrize(INT inKind, INT inNumber, INT inState);
+    // PARTIAL: added for Game/Prize (getter names unknown)
+    void notifyReturnCard(const CARD* inCard);
+    FLOAT getPrizeDraw() const { return m_fPrizeDraw; }
+    FLOAT getCardDraw() const { return m_fCardDraw; }
     static BOOL notifyBossDead(INT inStep);   // PARTIAL: added for Game/Enemy/BossDeadDemo
     static HANDLE getLevelUpEffect(); // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
     // PARTIAL: added for Game/Player/FriendBeast (also out of line: setPlayerFlag__7CPlayerUiUi)

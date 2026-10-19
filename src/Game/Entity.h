@@ -32,6 +32,11 @@ protected:
     CState* m_pNewState;
     UBYTE m_StateInitial[0x20]; /* CStateTemplate<CFSM> */
 public:
+    // PARTIAL: added for Game/Prize (as in System/Fsm.h)
+    BOOL gotoState(CState& inState) {
+        m_pNewState = &inState;
+        return TRUE;
+    }
     virtual ~CFSM();
     virtual void update();
     virtual void beginStateInitial();
@@ -255,6 +260,7 @@ public:
     FLOAT getFadeAlpha() const { return m_fFadeAlpha; }
     FLOAT getEndAlpha() const { return m_fEndAlpha; } // PARTIAL: added for Game/Player/PlayerDRiku (original name unknown)
     UINT isFade() const { return m_uiEntityFlag & 0x40000000; }
+    INT getFlashingCounter() const { return m_iFlashingCounter; } // PARTIAL: added for Game/Prize (name unknown)
     FLOAT calcDistanceSq(const FVECTOR& inPos) const;
     HANDLE playSEPanAndVol(INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
     void setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
