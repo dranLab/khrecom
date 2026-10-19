@@ -243,3 +243,7 @@ _$_4CBuf_001BDCB0 = 0x001BDCB0; // type:func size:0x54
 _vt$4CBuf_0046DA28 = 0x0046DA28; // size:0x18
 _$_6CState_003580A0 = 0x003580A0; // type:func size:0x30
 _vt$6CState_004F6C08 = 0x004F6C08; // size:0x30
+// Game/Collision/CollUtilO: CCollision's and CSphereCollision's inline destructors and CSphereCollision::collideMap
+_$_10CCollision_0022DF10 = 0x0022DF10; // type:func size:0x30
+_$_16CSphereCollision_0022DF40 = 0x0022DF40; // type:func size:0x30
+collideMap__16CSphereCollision_0022DF70 = 0x0022DF70; // type:func size:0x5C
