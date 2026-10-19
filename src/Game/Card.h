@@ -38,9 +38,11 @@ struct CARD_INFO {
 
 class CCard {
 private:
+    friend struct MainAppSingletons; // PARTIAL: System/MainApp creates and deletes the instance
     static CCard* m_pInstance;
 
     CCard();
+    ~CCard(); // PARTIAL: added for System/MainApp
 
 public:
     /* Placeholder for the original singleton creation (CCard::initialize): its strings ("Game/Card.h",

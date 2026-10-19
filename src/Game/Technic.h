@@ -17,6 +17,7 @@ struct TECHNIC_INFO {
 #line 20 TECHNIC_H_PATH
 class CTechnic {
 private:
+    friend struct MainAppSingletons; // PARTIAL: System/MainApp creates and deletes the instance
     static CTechnic* m_pInstance;
     static TECHNIC_INFO* m_pTechnicInfo;
 

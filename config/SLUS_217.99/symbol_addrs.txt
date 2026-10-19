@@ -262,3 +262,8 @@ getPointLightData__C10CLightUnit_00166038 = 0x00166038; // type:func size:0x8
 _calc__10CLightUnit_00166040 = 0x00166040; // type:func size:0x34
 calc__10CLightUnit_00166078 = 0x00166078; // type:func size:0x18
 _vt$10CLightUnit_004677C0 = 0x004677C0; // size:0x38
+
+// System/MainApp: unnamed copies of CFnt's inline functions and vtable
+_$_4CFnt_00108B88 = 0x00108B88; // type:func size:0x28
+setStyle__4CFntUi_00108BB0 = 0x00108BB0; // type:func size:0xC
+_vt$4CFnt_0045C0F0 = 0x0045C0F0; // size:0x48
