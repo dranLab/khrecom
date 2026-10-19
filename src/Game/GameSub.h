@@ -7,6 +7,7 @@
 class CAtel;
 
 class CGameSub : public CFSM {
+    friend class CGameMain; // PARTIAL: added for Game/Game
 private:
     CStateTemplate<CGameSub>* m_pStateTbl; /* 0x2c */
     INT m_nNewStateID;                     /* 0x30 */

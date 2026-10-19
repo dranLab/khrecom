@@ -300,6 +300,8 @@ public:
     static SHORT getPrevSceneNum();
     static UINT getCurrentSceneCacheID();
     static BOOL hasAnyRequest(); // PARTIAL: added for Game/Game
+    static INT getNextFloorIndex(); // PARTIAL: added for Game/Game
+    static BOOL reqChangeBackupRoom(); // PARTIAL: added for Game/Game
     static INT getNextRoomID();
     static BOOL isLastFloorScene();
     static SHORT getNextAreaNum();
