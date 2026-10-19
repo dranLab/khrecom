@@ -22,6 +22,7 @@ private:
 public:
     void setAutomatic() { m_iStatus &= ~0x10000; }
     void setManual() { m_iStatus |= 0x10000; }
+    void setShadow() { m_iStatus |= 2; } // PARTIAL: added for Game/GameSubField (name unknown)
 };
 
 class CBlurPrim : public CGPrim {
@@ -51,6 +52,12 @@ public:
     static CDeFocus* m_pInstance;
 
     CDeFocus();
+    static void create(CTask* pParent); // PARTIAL: added for Game/GameSubField
+    static void setShadow() {           // PARTIAL: added for Game/GameSubField (name unknown)
+        if (m_pInstance) {
+            m_pInstance->m_DeFocusPrim.setShadow();
+        }
+    }
     static CDeFocusPrim* getDeFocus() {
         if (!m_pInstance) {
             return NULL;

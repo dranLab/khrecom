@@ -18,8 +18,8 @@ private:
 public:
     CGameSub(CStateTemplate<CGameSub>* pStateTbl);
     virtual ~CGameSub();
-    virtual INT getGameSubState() = 0;
-    virtual BOOL reqChangeGameSubState() = 0;
+    virtual INT getGameSubState() const = 0;
+    virtual BOOL reqChangeGameSubState(INT nState) = 0;
     virtual void terminate() {}
     virtual void endStateProc();
     INT getMapID() const { return m_nMapID; }

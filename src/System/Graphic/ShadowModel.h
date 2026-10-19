@@ -32,6 +32,10 @@ private:
     static FVECTOR m_vCamPos;
 
 public:
+    // PARTIAL: added for Game/GameSubField
+    static void setAutomatic() { m_iStatus &= ~4; }
+    static void setUpPer(FLOAT f) { m_fUpPer = f; }
+    static void setDownLen(FLOAT f) { m_fDownLen = f; }
     static void initialize();
     static void finalize();
     static void updateMatrix();

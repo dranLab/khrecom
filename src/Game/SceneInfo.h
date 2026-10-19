@@ -190,6 +190,7 @@ struct RoomInfo {
     SHORT getSceneNum() const;      // PARTIAL: added for Form/Menu/SaveLoadUtil
     BYTE getCardNumber() const;     // PARTIAL: added for Game/Gimmick/GimmickManager
     BOOL hasEntered() const;        // PARTIAL: added for Form/Menu/Camp
+    BOOL isFirstTimeAfterRC() const; // PARTIAL: added for Game/GameSubField
 };
 
 // PARTIAL: added for Game/Gimmick/GimmickManager
@@ -268,6 +269,15 @@ public:
     static INT getFloorDataCount(BOOL bSora);
     static WorldSelTable* getSelectableWorldTable(INT nFloorIndex, BOOL bSora);
     static SHORT getNextSceneNum();
+    // PARTIAL: added for Game/GameSubField
+    static void removeCurrentFieldSceneRsrc();
+    static BOOL isEventScene();
+    static INT checkMapRsrcCache(INT nMapID, INT nMode);
+    static void updateMapRsrcCache(INT nMapID, INT nMode);
+    static SHORT getPrevSceneNum();
+    static UINT getCurrentSceneCacheID();
+    static INT getNextRoomID();
+    static BOOL isLastFloorScene();
     static SHORT getNextAreaNum();
     static void setNextAreaScene(SHORT nArea, SHORT nField, SHORT nScene);
     static void update();

@@ -68,8 +68,11 @@ private:
     UBYTE _pad[0x15E8];
     LIGHTDATA m_Light;    /* 0x15e8 */
     LIGHTDATA m_MapLight; /* 0x1608 */
+    UBYTE _pad1628[0x58]; /* 0x1628 .. (size 0x1680) */ // PARTIAL: added for Game/GameSubField
 
 public:
+    CMap(class CTask* pParent, UINT nMapID); // PARTIAL: added for Game/GameSubField
+    void init(INT nMode0, INT nMode1);
     LIGHTDATA* getLightData() { return &m_Light; }
     LIGHTDATA* getMapLightData() { return &m_MapLight; }
 };

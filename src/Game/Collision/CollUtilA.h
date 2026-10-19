@@ -112,6 +112,7 @@ public:
     static INT detectColumnPoly3(class CColumnCollision& coll0, class CPoly3Collision& coll1);
     // PARTIAL: added for Game/Collision/CollUtilO
     INT distanceLineO(FVECTOR* pP0, FVECTOR* pP1, INT fg);
+    void dispose(); // PARTIAL: added for Game/GameSubField
     INT distanceSphereO(FVECTOR* pP0);
     INT _detectColumnColumnR(class CColumnCollision& coll0, class CColumnCollision& coll1);
 
