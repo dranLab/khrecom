@@ -10,6 +10,9 @@
 #include "System/Graphic/HermitePath.h"
 #include "System/Graphic/PathData.h"
 #include "System/Debug.h"
+#include "System/Math3D.h"
+#include "System/Graphic/Gprim.h"
+#include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
 
 using namespace ATEL;
@@ -42,6 +45,21 @@ struct AvatarMotionParamEx2 { // 0x14
     FLOAT _fPlaySpeed;  /* 0x0c */
     UINT _nHokanFrame;  /* 0x10 */
 };
+struct AvatarMotionParamEfx { // 0x1c
+    UINT _nRsrcID;      /* 0x00 */
+    UINT _nMotionID;    /* 0x04 */
+    FLOAT _fPlaySpeed;  /* 0x08 */
+    UINT _StartFrame;   /* 0x0c */
+    UINT _nHokanFrame;  /* 0x10 */
+    UINT _nEfxNo;       /* 0x14 */
+    UINT _nFlag;        /* 0x18 */
+};
+struct AvatarEffectAttach { // 0x10
+    char* EffectName;  /* 0x0 */
+    INT EfxNo;         /* 0x4 */
+    char* BoneName;    /* 0x8 */
+    INT Type;          /* 0xc */
+};
 struct AvatarSetLook { // 0x30
     FVECTOR LookMin;   /* 0x00 */
     FVECTOR LookMax;   /* 0x10 */
@@ -54,6 +72,12 @@ struct AvatarSetLook { // 0x30
 static inline const FVECTOR& _crdWorldPos(const CCoord& crd) { return *(const FVECTOR*)((const BYTE*)&crd + 0xc0); }
 
 extern "C" float atan2f(float, float);
+void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+extern "C" char D_0048B000[]; /* "LIP_TALK" */
+extern "C" char D_0048B010[];
 class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs the full RsrcData.h classes */
 public:
     static BYTE* getRsrcPTD(const CHAR* pszName);
@@ -277,8 +301,25 @@ void CAvatar::setRotAhead() {
     FVECTOR& vVel = m_pMove->getVel();
     getRot().y = atan2f(vVel.x, vVel.z);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isArrivingTarget__Q24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isArrivingTargetFuture__Q24ATEL7CAvatar);
+BOOL CAvatar::isArrivingTarget() {
+    CMovement* pMove = m_pMove;
+    FLOAT fPrev = pMove->getVel().x * pMove->getVel().x + pMove->getVel().y * pMove->getVel().y + pMove->getVel().z * pMove->getVel().z;
+    FVECTOR v;
+    SubVector(v, getAvatarTargetPos(), getPos());
+    FLOAT fNext = pMove->getVel().x * v.x + pMove->getVel().y * v.y + pMove->getVel().z * v.z;
+    return fNext * fPrev < 0.0f;
+}
+BOOL CAvatar::isArrivingTargetFuture() {
+    FVECTOR vel = m_pMove->getVel();
+    ScaleVector(vel, vel, getFrameRate() * 0.020000001f * 2.0f);
+    FVECTOR vpos = getPos();
+    AddVector(vpos, vpos, vel);
+    FLOAT fPrev = vel.x * vel.x + vel.y * vel.y + vel.z * vel.z;
+    FVECTOR v;
+    SubVector(v, getAvatarTargetPos(), vpos);
+    FLOAT fNext = vel.x * v.x + vel.y * v.y + vel.z * v.z;
+    return fNext * fPrev < 0.0f;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", MoveAvatarMain__Q24ATEL7CAvatar);
 BOOL CAvatar::updateAvatarPosOnPath(TIMEQ nTime) {
     BOOL bRet = TRUE;
@@ -460,7 +501,21 @@ INT CAvatar::onEnableNotSemiModel(INT nCmd, void* pParam, INT nID) {
     enableNotSemiModel(*(INT*)pParam, nID);
     return -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarDirY2Target__Q24ATEL7CAvatarPC7FVECTORPC7FMATRIX);
+FLOAT CAvatar::getAvatarDirY2Target(const FVECTOR* pvTarget, const FMATRIX* pMatRide) {
+    FVECTOR v;
+    FVECTOR vTarget;
+    getNowPosition(v);
+    if (pMatRide && pMatRide == getAvatarRideMatrix()) {
+        if (!pvTarget) {
+            ApplyMatrix(vTarget, *pMatRide, getAvatarTargetPosLocal());
+            pvTarget = &vTarget;
+        }
+    } else if (!pvTarget) {
+        pvTarget = &getAvatarTargetPos();
+    }
+    SubVector(v, *pvTarget, v);
+    return atan2f(v.x, v.z);
+}
 FVECTOR* CAvatar::getPathStartPos(const CHAR* pszName) const {
     FVECTOR* pPos = NULL;
     BYTE* pPTD = CRsrcDB::getRsrcPTD(pszName);
@@ -471,7 +526,14 @@ FVECTOR* CAvatar::getPathStartPos(const CHAR* pszName) const {
     }
     return pPos;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", disp__Q24ATEL7CAvatar);
+void CAvatar::disp() {
+    CEntity::disp();
+    if (DebugWork::g_dw.event.iAtelCoord) {
+        ((CGPrim*)lineX)->CGPrim::disp();
+        ((CGPrim*)lineY)->CGPrim::disp();
+        ((CGPrim*)lineZ)->CGPrim::disp();
+    }
+}
 AvatarMoveStruct::~AvatarMoveStruct() {
     delete _pPathData;
     delete _pHermiteHelper;
