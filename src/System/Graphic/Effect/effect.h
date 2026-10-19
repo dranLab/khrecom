@@ -73,6 +73,7 @@ public:
     void fadeout(FLOAT fTime);
     void setViewclip(BOOL bVal);
     BOOL isLoop();
+    BOOL isEndFrame(); // PARTIAL: added for Game/GameSubBattle
     void detachCoord();
 };
 
