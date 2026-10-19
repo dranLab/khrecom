@@ -25,6 +25,8 @@ public:
     static void setSendCtrl(INT nMode); // PARTIAL: added for System/Graphic/ShadowModel
     static void resetWorldScreenMatrix();
     static void resetMicroProgram();
+    static void disp0_SetMicroCode(u_long128* pMProg); // PARTIAL: added for System/Graphic/Effect/EffectMan
+    FIX4 getOldSemiZ(); // PARTIAL: added for System/Graphic/Effect/EffectMan
 private:
     UBYTE _m_0x18[0x14]; /* 0x018 .. m_ColorScale.z */
     FLOAT m_fAlphaScale; /* 0x02c m_ColorScale.w */

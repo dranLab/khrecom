@@ -43,21 +43,91 @@ enum eObjBit {
 };
 } // namespace ObjType
 
+class CTask;
+class CCamera;
+struct EFFECT_DATA;
+struct EFFECT_SE;
+struct EFFMAN_ZSORT_BUF;
+
 class CEffectMan {
 public:
-    static void setFogRange(FLOAT fNear, FLOAT fFar);            // PARTIAL: added for System/Graphic/WorldEnv
-    static void setFogClamp(unsigned char nMin, unsigned char nMax);
-    static HANDLE setEffect(const CHAR* inName, UINT inFlag, ObjType::eObjType inType, const FMATRIX* inMat, FLOAT inScale);
-    // PARTIAL: added for Game/Gimmick/GimmickTutorial
+    // PARTIAL: complete for System/Graphic/Effect/EffectMan
+    static void _effInitialize(int work_memory_size, int packet_memory_size);
+    static void _effFinalize();
+    static HANDLE _setEffect(const EFFECT_DATA& effect_data, UINT no, ObjType::eObjType eType, INT nNum, const CCoord* pParent,
+                             const FMATRIX* pMat, const FVECTOR* pvPos, const FVECTOR* pvRot, FLOAT fWait, const EFFECT_SE* pSeData);
+    static void _setCoord(CEffect* pEff, INT nCNum, const CCoord* pParent, const FMATRIX* pMat, const FVECTOR* pvPos,
+                          const FVECTOR* pvRot);
     static HANDLE setEffect(const CHAR* inName, UINT inFlag, ObjType::eObjType inType, const FVECTOR* inPos,
                             const FVECTOR* inRot, FLOAT inScale);
-    static CEffect* getEffect(HANDLE inHandle); // PARTIAL: added for Game/Player/SummonTink
-    // PARTIAL: added for Form/Menu/WorldSelect
+    static HANDLE setEffect(const EFFECT_DATA& data, UINT nNo, ObjType::eObjType eType, const FVECTOR* pvPos,
+                            const FVECTOR* pvRot, FLOAT fWait, const EFFECT_SE* pSeData);
+    static HANDLE setEffect(const CHAR* inName, UINT inFlag, ObjType::eObjType inType, const FMATRIX* inMat, FLOAT inScale);
+    static HANDLE setEffect(const EFFECT_DATA& data, UINT nNo, ObjType::eObjType eType, const FMATRIX* pMat, FLOAT fWait,
+                            const EFFECT_SE* pSeData);
     static HANDLE attachEffect(const CHAR* inName, UINT inNo, ObjType::eObjType inType, const CCoord* inParent,
                                const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inWait);
-    static void killEffect(HANDLE inHandle, FLOAT inTime);
+    static HANDLE attachEffect(const EFFECT_DATA& data, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
+                               const FVECTOR* pvPos, const FVECTOR* pvRot, FLOAT fWait, const EFFECT_SE* pSeData);
+    static HANDLE attachEffect(const CHAR* inName, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
+                               const FMATRIX* pMat, FLOAT fWait);
+    static HANDLE attachEffect(const EFFECT_DATA& data, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
+                               const FMATRIX* pMat, FLOAT fWait, const EFFECT_SE* pSeData);
+    static HANDLE attachEffect2(const CHAR* inName, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
+                                const CCoord* pParent1, const FVECTOR* pvPos, const FVECTOR* pvPos1, FLOAT fWait);
+    static HANDLE attachEffect2(const EFFECT_DATA& data, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
+                                const CCoord* pParent1, const FVECTOR* pvPos, const FVECTOR* pvPos1, FLOAT fWait,
+                                const EFFECT_SE* pSeData);
+    static HANDLE attachEffect2(const CHAR* inName, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
+                                const CCoord* pParent1, const FMATRIX* pMat, const FMATRIX* pMat1, FLOAT fWait);
+    static HANDLE attachEffect2(const EFFECT_DATA& data, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
+                                const CCoord* pParent1, const FMATRIX* pMat, const FMATRIX* pMat1, FLOAT fWait,
+                                const EFFECT_SE* pSeData);
+    static HANDLE attachEffect3(const CHAR* inName, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
+                                const CCoord* pParent1, const CCoord* pParent2, const FVECTOR* pvPos,
+                                const FVECTOR* pvPos1, const FVECTOR* pvPos2, FLOAT fWait);
+    static HANDLE attachEffect3(const EFFECT_DATA& data, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
+                                const CCoord* pParent1, const CCoord* pParent2, const FVECTOR* pvPos,
+                                const FVECTOR* pvPos1, const FVECTOR* pvPos2, FLOAT fWait, const EFFECT_SE* pSeData);
+    static HANDLE attachEffect3(const CHAR* inName, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
+                                const CCoord* pParent1, const CCoord* pParent2, const FMATRIX* pMat,
+                                const FMATRIX* pMat1, const FMATRIX* pMat2, FLOAT fWait);
+    static HANDLE attachEffect3(const EFFECT_DATA& data, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
+                                const CCoord* pParent1, const CCoord* pParent2, const FMATRIX* pMat,
+                                const FMATRIX* pMat1, const FMATRIX* pMat2, FLOAT fWait, const EFFECT_SE* pSeData);
     static void killAll(ObjType::eObjBit inBit, FLOAT inTime); // PARTIAL: added for Game/Player/Summon
     static void killAll(const CHAR* inName, FLOAT inTime); // PARTIAL: added for Game/Player/PlayerManager
+    static INT getEffectNameNum(const CHAR* pszName);
+    static INT getEffectNameHandles(HANDLE* pOutHandle, const CHAR* pszName, INT nSize);
+    static void setFogRange(FLOAT fNear, FLOAT fFar);            // PARTIAL: added for System/Graphic/WorldEnv
+    static void setFogClamp(unsigned char nMin, unsigned char nMax);
+    static void setFogColor(unsigned char r, unsigned char g, unsigned char b);
+    static INT _sortEffect(EFFMAN_ZSORT_BUF* elist, const FMATRIX& mWS, INT nEffNum, INT nSemiNum);
+    static BOOL _updateCoord(CEffect* effect);
+    static void _updateColor(CEffect* effect);
+    static void _calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS, CCamera* pCam, BOOL frustumClip);
+    static FLOAT getFrameRate();
+    static void play(FLOAT fFrameRate);
+    static void update();
+    static void _sendModel(void* pDmaChanVif1, EFFMAN_ZSORT_BUF* pEffList, INT nIdx, BOOL bReInit);
+    static INT setup();
+    static void draw();
+    static void destroyer();
+    static void initialize(CTask* p);
+    static void finalize();
+    static HANDLE add(CEffect& eff);
+    static BOOL del(CEffect& eff);
+    static BOOL del(HANDLE hEffect);
+    static INT getNum();
+    static CEffect* getEffect(HANDLE inHandle); // PARTIAL: added for Game/Player/SummonTink
+    static void killEffect(HANDLE inHandle, FLOAT inTime);
+    static void loopEndEffect(HANDLE hEffect);
+    static CEffect& getExceptEffect();
+    static void setWorldViewScreenMatrix(const FMATRIX* pMWV, const FMATRIX* pMVS, CCamera* pCam);
+    static void setLastDraw(BOOL bLast);
+    static BOOL isLastDraw();
+    static void dispDebugBBOXLine(BOOL bDisp);
+    static void _setDebugBBOXLine(const FVECTOR* pV);
 };
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_EFFECTMAN_H */
