@@ -123,6 +123,12 @@ struct DoorInfo { // 0x18
     }
     BOOL isWorldEntrance() const { return _type == DOOR_TYPE_WORLD_ENTRANCE; } // PARTIAL: added for Game/Player/NaviMap
     BOOL isWorldExit() const { return _shape == 5; } // PARTIAL: added for Game/Player/PlayerManager
+    // PARTIAL: added for Game/SceneInfo
+    BOOL setDoorState(DOOR_STAT nStat);
+    BOOL isNormaCardUsed() const;
+    void setFirstUsedCardInfo(BYTE nCardID, BYTE nCardNum);
+    BYTE getFirstUsedCardIDForNorma() const;
+    BYTE getFirstUsedCardNumForNorma() const;
 };
 
 // PARTIAL: added for Form/DebugMenu
@@ -191,6 +197,11 @@ struct RoomInfo {
     BYTE getCardNumber() const;     // PARTIAL: added for Game/Gimmick/GimmickManager
     BOOL hasEntered() const;        // PARTIAL: added for Form/Menu/Camp
     BOOL isFirstTimeAfterRC() const; // PARTIAL: added for Game/GameSubField
+    // PARTIAL: added for Game/SceneInfo
+    void setScene(SHORT nArea, SHORT nScene);
+    void setScene(SHORT nScene);
+    void resetScene();
+    void setCardInfo(BYTE nCardID, BYTE nCardNumber);
 };
 
 // PARTIAL: added for Game/Gimmick/GimmickManager
@@ -327,6 +338,19 @@ public:
     static void reqChangeRoom(INT nRoomID, DOOR_ID nDoorID, SHORT nScene);
     static void ignoreFloorInfo();
     static void reqChangeScene(SHORT nArea, SHORT nScene, SHORT nEntrance, INT nMode, INT nAtel);
+    // PARTIAL: added for Game/SceneInfo
+    static struct EventRoomData* getEventRoomData(BOOL bSora);
+    static void setNextBattleScene(SHORT nScene);
+    static void reqChangeEventRoom(UINT nIndex, DOOR_ID nDoorID, SHORT nScene);
+    static void cancelBattleRequest();
+    static BOOL reqEnterMinigame();
+    static BOOL reqEnterMinigame(SHORT inID);
+    static SHORT getPrevAreaNum();
+    static INT getPrevAreaScene();
+    static INT getNextAreaScene();
+    static INT getNextAtelSrcID();
+    static DOOR_ID getNextDoorID();
+    static BYTE getCardIDFromSceneNum(SHORT nScene);
 };
 
 #endif /* GAME_SCENEINFO_H */
