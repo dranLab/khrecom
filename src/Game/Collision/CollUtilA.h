@@ -110,6 +110,10 @@ public:
     static INT detectColumnPoint(class CColumnCollision& coll0, class CPointCollision& coll1);
     static INT detectColumnSphere(class CColumnCollision& coll0, class CSphereCollision& coll1, INT inFlag);
     static INT detectColumnPoly3(class CColumnCollision& coll0, class CPoly3Collision& coll1);
+    // PARTIAL: added for Game/Collision/CollUtilO
+    INT distanceLineO(FVECTOR* pP0, FVECTOR* pP1, INT fg);
+    INT distanceSphereO(FVECTOR* pP0);
+    INT _detectColumnColumnR(class CColumnCollision& coll0, class CColumnCollision& coll1);
 
     /* 0x000 */ char _pad000[0x30];
     /* 0x030 */ FVECTOR m_vCkS;
@@ -118,7 +122,13 @@ public:
     /* 0x048 */ INT m_SphereDetectFg;
     /* 0x04c */ INT m_fgCamera;
     /* 0x050 */ FVECTOR m_vCkE;
-    /* 0x060 */ char _pad060[0x70];
+    /* 0x060 */ FVECTOR m_vCkS0;
+    /* 0x070 */ FVECTOR m_vCkE0;
+    /* 0x080 */ FVECTOR m_vCkS00;
+    /* 0x090 */ FVECTOR m_vCk0;
+    /* 0x0a0 */ FVECTOR m_vCk1;
+    /* 0x0b0 */ FVECTOR m_vCk2;
+    /* 0x0c0 */ FVECTOR m_vCkVec;
     /* 0x0d0 */ FVECTOR m_vNormal;
     /* 0x0e0 */ FVECTOR m_vNormal2;
     /* 0x0f0 */ FVECTOR m_vNormalP;
@@ -126,12 +136,27 @@ public:
     /* 0x110 */ FVECTOR m_vDetect;
     /* 0x120 */ FVECTOR m_vDetect2;
     /* 0x130 */ FVECTOR m_vDetectP;
-    /* 0x140 */ char _pad140[0x2c];
+    /* 0x140 */ FVECTOR m_vChipSearchPos;
+    /* 0x150 */ FLOAT m_CkVecl;
+    /* 0x154 */ FLOAT m_CkVecl2;
+    /* 0x158 */ INT m_fgSliding;
+    /* 0x15c */ INT m_iKind;
+    /* 0x160 */ FLOAT m_RadiusL;
+    /* 0x164 */ FLOAT m_Radius0;
+    /* 0x168 */ FLOAT m_Radius1;
     /* 0x16c */ FLOAT m_Radius2;
     /* 0x170 */ FLOAT m_RadiusHosei;
     /* 0x174 */ FLOAT m_RadiusPlus;
     /* 0x178 */ INT m_DetectStatus;
-    /* 0x17c */ char _pad17c[0x24];
+    /* 0x17c */ FLOAT m_ShiftY;
+    /* 0x180 */ INT m_iChipSearchIndex;
+    /* 0x184 */ UINT* m_pChipStatus;
+    /* 0x188 */ struct PRIM_INFO* m_pPrimInfo;
+    /* 0x18c */ INT m_PrimInfoIdx;
+    /* 0x190 */ struct PRIM_INFO2* m_pPrimInfo2;
+    /* 0x194 */ INT m_PrimInfoIdx2;
+    /* 0x198 */ INT m_PrimInfoMax;
+    /* 0x19c */ struct PRIM_INFO* m_pPrimInfoCurrent;
     /* 0x1a0 */ FMATRIX* m_pSemiTransMat[32]; // PARTIAL: split out for Game/Collision/CollMapCamera
     /* 0x220 */ INT m_SemiTransMatIdx;
     /* 0x224 */ char _pad224[0x8];
