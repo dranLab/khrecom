@@ -305,14 +305,72 @@ BOOL CGameMain::checkExitPause() {
     }
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqLoadConstFloorRsrc__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x8D837483\n.word 0xED8F4183\n.word 0x8A839392\n.word 0x5B815C83\n.word 0xCC825883\n.word 0xE892778E\n.word 0xCD94AA82\n.word 0x4F8ACD88\n.word 0xB782C582\n.word 0x000A4281\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x616F4C20\n.word 0x6F432064\n.word 0x2D74736E\n.word 0x6F6F6C46\n.word 0x73522D72\n.word 0x2D206372\n.word 0x3A202D2D\n.word 0x6F6C4620\n.word 0x3D20726F\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", removeConstFloorRsrc__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x6D655220\n.word 0x2065766F\n.word 0x736E6F43\n.word 0x6C462D74\n.word 0x2D726F6F\n.word 0x63727352\n.word 0x2D2D2D20\n.word 0x46203A20\n.word 0x726F6F6C\n.word 0x25203D20\n.word 0x00000A64\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqLoadConstWolrdRsrc__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x5B818F83\n.word 0x68838B83\n.word 0x9392ED8F\n.word 0x5C838A83\n.word 0x58835B81\n.word 0x778ECC82\n.word 0xAA82E892\n.word 0xCD88CD94\n.word 0xC8824F8A\n.word 0xC582CC82\n.word 0x4C835883\n.word 0x76836283\n.word 0xDC82B582\n.word 0x4281B782\n.word 0x0000000A\n.word 0x00000000\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x616F4C20\n.word 0x6F432064\n.word 0x2D74736E\n.word 0x6C726F57\n.word 0x73522D64\n.word 0x2D206372\n.word 0x3A202D2D\n.word 0x726F5720\n.word 0x3D20646C\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", removeConstWorldRsrc__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x6D655220\n.word 0x2065766F\n.word 0x736E6F43\n.word 0x6F572D74\n.word 0x2D646C72\n.word 0x63727352\n.word 0x2D2D2D20\n.word 0x57203A20\n.word 0x646C726F\n.word 0x25203D20\n.word 0x00000A64\n.word 0x00000000\n.text\n");
+static inline INT _getConstFloorRsrcID(UINT nIndex) {
+    if (nIndex >= 16) {
+        TRACE_COL(_TTY_RED, "\x83t\x83\x8d\x83" "A\x8f\xed\x92\x93\x83\x8a\x83\\\x81[\x83X\x82\xcc\x8ew\x92\xe8\x82\xaa\x94\xcd\x88\xcd\x8aO\x82\xc5\x82\xb7\x81" "B\n");
+        return -1;
+    }
+    INT nID = nIndex + 300;
+    if (!CGame::isSoraGame()) nID = nIndex + 1300;
+    return nID;
+}
+
+void CGameMain::reqLoadConstFloorRsrc() {
+    INT nIndex = CSceneInfo::getCurrentFloorIndex();
+    if (nIndex != m_nConstFloorRsrcLoaded) {
+        INT nID = _getConstFloorRsrcID(nIndex);
+        if (nID >= 0) {
+            if (m_nConstFloorRsrcLoaded >= 0) removeConstFloorRsrc();
+            CRcf::reqLoadRCF(0xe, nID, 0x100, NULL, 0);
+            m_nConstFloorRsrcLoaded = nIndex;
+            TRACE_COL(_TTY_RED, "[CGameMain]: --- Load Const-Floor-Rsrc --- : Floor = %d\n",
+                      CSceneInfo::getFloorNumber(nIndex, CGame::isSoraGame()));
+        }
+    }
+}
+void CGameMain::removeConstFloorRsrc() {
+    if (m_nConstFloorRsrcLoaded >= 0) {
+        INT nID = _getConstFloorRsrcID(m_nConstFloorRsrcLoaded);
+        if (nID >= 0) {
+            CRsrcDB::removeGroup(0xe, nID);
+            TRACE_COL(_TTY_RED, "[CGameMain]: --- Remove Const-Floor-Rsrc --- : Floor = %d\n",
+                      CSceneInfo::getFloorNumber(m_nConstFloorRsrcLoaded, CGame::isSoraGame()));
+            m_nConstFloorRsrcLoaded = -1;
+        }
+    }
+}
+static inline INT _getConstWorldRsrcID(UINT nWorld) {
+    if (nWorld >= 14) {
+        if (nWorld == 23 || nWorld == 24) return -1;
+        nWorld = 1;
+    }
+    return CSceneInfo::getConstWorldRsrcID(nWorld, CGame::isSoraGame());
+}
+
+void CGameMain::reqLoadConstWolrdRsrc() {
+    INT nWorld = CSceneInfo::getCurrentWorldID(TRUE);
+    if (nWorld != m_nConstWorldRsrcLoaded) {
+        if (m_nConstWorldRsrcLoaded >= 0) removeConstWorldRsrc();
+        INT nID = _getConstWorldRsrcID(nWorld);
+        if (nID < 0) {
+            TRACE_COL(_TTY_RED, "\x83\x8f\x81[\x83\x8b\x83h\x8f\xed\x92\x93\x83\x8a\x83\\\x81[\x83X\x82\xcc\x8ew\x92\xe8\x82\xaa\x94\xcd\x88\xcd\x8aO\x82\xc8\x82\xcc\x82\xc5\x83X\x83L\x83" "b\x83v\x82\xb5\x82\xdc\x82\xb7\x81" "B\n");
+        } else {
+            CRcf::reqLoadRCF(0xe, nID, 0x100, NULL, 0);
+            m_nConstWorldRsrcLoaded = nWorld;
+            TRACE_COL(_TTY_RED, "[CGameMain]: --- Load Const-World-Rsrc --- : World = %d\n", nWorld);
+        }
+    }
+}
+void CGameMain::removeConstWorldRsrc() {
+    if (m_nConstWorldRsrcLoaded >= 0) {
+        INT nID = _getConstWorldRsrcID(m_nConstWorldRsrcLoaded);
+        if (nID >= 0) {
+            CRsrcDB::removeGroup(0xe, nID);
+            TRACE_COL(_TTY_RED, "[CGameMain]: --- Remove Const-World-Rsrc --- : World = %d\n", m_nConstWorldRsrcLoaded);
+            m_nConstWorldRsrcLoaded = -1;
+        }
+    }
+}
 void CGameMain::reqLoadInconstGameRsrc() {
     if (!m_bInconstGameRsrcLoaded) {
         CRcf::reqLoadRCF(0, 3, 0x100, NULL, 0);
@@ -320,10 +378,38 @@ void CGameMain::reqLoadInconstGameRsrc() {
         TRACE_COL(_TTY_RED, "[CGameMain]: --- Load Inconst GameRsrc ---\n");
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqLoadInconstWorldRsrc__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x5B818F83\n.word 0x68838B83\n.word 0x27BC9427\n.word 0x9392ED8F\n.word 0x5C838A83\n.word 0x58835B81\n.word 0x778ECC82\n.word 0xAA82E892\n.word 0xCD88CD94\n.word 0xC8824F8A\n.word 0xC582CC82\n.word 0x4C835883\n.word 0x76836283\n.word 0xDC82B582\n.word 0x4281B782\n.word 0x0000000A\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x616F4C20\n.word 0x6E492064\n.word 0x736E6F63\n.word 0x6F572D74\n.word 0x2D646C72\n.word 0x63727352\n.word 0x2D2D2D20\n.word 0x57203A20\n.word 0x646C726F\n.word 0x25203D20\n.word 0x00000A64\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", removeInconstWorldRsrc__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x6D655220\n.word 0x2065766F\n.word 0x6F636E49\n.word 0x2D74736E\n.word 0x6C726F57\n.word 0x73522D64\n.word 0x2D206372\n.word 0x3A202D2D\n.word 0x726F5720\n.word 0x3D20646C\n.word 0x0A642520\n.word 0x00000000\n.text\n");
+static inline INT _getInconstWorldRsrcID(UINT nWorld) {
+    if (nWorld >= 14) {
+        if (nWorld == 23 || nWorld == 24) return -1;
+        nWorld = 1;
+    }
+    return CSceneInfo::getInconstWorldRsrcID(nWorld, CGame::isSoraGame());
+}
+
+void CGameMain::reqLoadInconstWorldRsrc() {
+    INT nWorld = CSceneInfo::getCurrentWorldID(TRUE);
+    if (nWorld != m_nInconstWorldRsrcLoaded) {
+        if (m_nInconstWorldRsrcLoaded >= 0) removeInconstWorldRsrc();
+        INT nID = _getInconstWorldRsrcID(nWorld);
+        if (nID < 0) {
+            TRACE_COL(_TTY_RED, "\x83\x8f\x81[\x83\x8b\x83h'\x94\xbc'\x8f\xed\x92\x93\x83\x8a\x83\\\x81[\x83X\x82\xcc\x8ew\x92\xe8\x82\xaa\x94\xcd\x88\xcd\x8aO\x82\xc8\x82\xcc\x82\xc5\x83X\x83L\x83" "b\x83v\x82\xb5\x82\xdc\x82\xb7\x81" "B\n");
+        } else {
+            CRcf::reqLoadRCF(0xe, nID, 0x100, NULL, 0);
+            m_nInconstWorldRsrcLoaded = nWorld;
+            TRACE_COL(_TTY_RED, "[CGameMain]: --- Load Inconst-World-Rsrc --- : World = %d\n", nWorld);
+        }
+    }
+}
+void CGameMain::removeInconstWorldRsrc() {
+    if (m_nInconstWorldRsrcLoaded >= 0) {
+        INT nID = _getInconstWorldRsrcID(m_nInconstWorldRsrcLoaded);
+        if (nID >= 0) {
+            CRsrcDB::removeGroup(0xe, nID);
+            TRACE_COL(_TTY_RED, "[CGameMain]: --- Remove Inconst-World-Rsrc --- : World = %d\n", m_nInconstWorldRsrcLoaded);
+            m_nInconstWorldRsrcLoaded = -1;
+        }
+    }
+}
 void CGameMain::removeInconstRsrc() {
     removeInconstWorldRsrc();
     if (m_bInconstGameRsrcLoaded) {

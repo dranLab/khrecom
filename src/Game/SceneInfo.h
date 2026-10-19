@@ -301,6 +301,8 @@ public:
     static UINT getCurrentSceneCacheID();
     static BOOL hasAnyRequest(); // PARTIAL: added for Game/Game
     static INT getNextFloorIndex(); // PARTIAL: added for Game/Game
+    static INT getConstWorldRsrcID(INT nWorld, BOOL bSora); // PARTIAL: added for Game/Game
+    static INT getInconstWorldRsrcID(INT nWorld, BOOL bSora); // PARTIAL: added for Game/Game
     static BOOL reqChangeBackupRoom(); // PARTIAL: added for Game/Game
     static INT getNextRoomID();
     static BOOL isLastFloorScene();
