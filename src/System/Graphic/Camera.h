@@ -65,6 +65,10 @@ public:
     }
     void recalcWorldMatrix(); // PARTIAL: added for Form/Menu/WorldSelect
     // PARTIAL: added for System/Coord
+    void getRotTransPersMatrix(FMATRIX& outMat);
+    void getRotTransPersMatrix_VF04_07();
+    void RotTransPers(IVECTOR& outV, const FVECTOR& inV);
+    void RotTransPers(FVECTOR& outV, const FVECTOR& inV);
     void resetTimeStamp() {
         m_FixTimestamp = -1;
         m_WorldTimestamp = -1;
