@@ -42,6 +42,8 @@ public:
 #endif
 
 class CEntity : public CTask, public CFSM {
+    friend class CSEMotionCtrl; // PARTIAL: added for Game/SEMotion
+    friend class CSEMotion;
 protected:
     // PARTIAL: m_pMove split out for Game/Gimmick/GimmickBreakable
     // PARTIAL: m_pModels, m_iModelCount split out for Game/Gimmick/GimmickPlantChild

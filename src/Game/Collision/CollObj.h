@@ -193,6 +193,21 @@ public:
     void setShiftY(FLOAT inShiftY);
     FLOAT getShiftY() { return m_pCollision ? m_pCollision->m_shiftY : 0.0f; }
     FLOAT getRadius() { return m_pCollision ? m_pCollision->m_Radius : 0.0f; }
+#ifdef COLLOBJ_H_INFO_UNION
+    /* PARTIAL: the original's return type (COLL_INFO_UNION, defined by the includer), for Game/SEMotion */
+    COLL_INFO_UNION getDetectInfo() {
+        COLL_INFO_UNION info;
+        if (m_pCollision) info.info = m_pCollision->m_outInfo;
+        else info.info = 0;
+        return info;
+    }
+    COLL_INFO_UNION getDetectInfoO() {
+        COLL_INFO_UNION info;
+        if (m_pCollision) info.info = m_pCollision->m_outInfoO;
+        else info.info = 0;
+        return info;
+    }
+#else
     INT getDetectInfo() {
         if (m_pCollision) return m_pCollision->m_outInfo;
         return 0;
@@ -201,6 +216,7 @@ public:
         if (m_pCollision) return m_pCollision->m_outInfoO;
         return 0;
     }
+#endif
     INT getOutStatus() { return m_pCollision ? m_pCollision->m_outStatus : 0; }
     void enableSliding(INT inFlag) {
         if (m_pCollision) m_pCollision->m_fgStatus = (m_pCollision->m_fgStatus & ~1) | (inFlag != 0);
