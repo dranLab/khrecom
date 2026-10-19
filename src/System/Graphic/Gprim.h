@@ -60,6 +60,10 @@ union QWdata {
 struct G_XY {
     FIX4 x;
     FIX4 y;
+    void set(FIX4 _x, FIX4 _y) { // PARTIAL: added for System/Wnd
+        x = _x;
+        y = _y;
+    }
 };
 
 struct G_XYZ {
@@ -209,6 +213,8 @@ public:
     static INT m_nTmpTexArea;
     static void clearTexCache() { m_pTexCache = NULL; }
     void setTPage(struct TexInfo* pInInfo) { m_pTexInfo = pInInfo; }
+    void setTPage(const CHAR* pTexName); // PARTIAL: added for System/Wnd
+    struct TexInfo* getTexInfo() const { return m_pTexInfo; } // PARTIAL: added for System/Wnd (name unknown)
     virtual ~CGTexPrim();
     virtual UINT getPacketSize() const;
 };

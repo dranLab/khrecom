@@ -254,6 +254,7 @@ struct TaskMainParam;
 
 /* All inline members are emitted (weak) in Task.cpp, in declaration order: keep the order. */
 class CTask {
+    friend class CBaseWnd; // PARTIAL: added for System/Wnd (its ignorePause/ignorePlaySpeed set m_nInfo directly)
 private:
     union {
         u_long128 _nZeroMember128;
