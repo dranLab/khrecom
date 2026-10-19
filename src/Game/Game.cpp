@@ -56,6 +56,37 @@ public:
     static void initialize();
 };
 
+class CPause : public CTask {
+private:
+    BYTE _pad[0x100 - 0x40];
+
+public:
+    CPause(CTask* pParent, INT nMode);
+    static INT m_nResult;
+};
+
+class CCamp : public CTask {
+private:
+    BYTE _pad[0x1b80 - 0x40];
+
+public:
+    CCamp(CTask* pParent, INT nMode);
+};
+
+enum SAVELOAD { SAVELOAD_SAVE = 0 };
+enum GAMECLEAR { GAMECLEAR_NO = 0 };
+
+class CSaveLoad : public CTask {
+private:
+    BYTE _pad[0x50 - 0x40];
+
+public:
+    CSaveLoad(CTask* pParent, SAVELOAD nMode, GAMECLEAR nClear);
+};
+
+extern "C" void TsSdDebugPrint();
+extern "C" char D_0047E328[];
+
 class CGameOver : public CTask {
 private:
     BYTE _pad[0xe0 - 0x40];
@@ -66,9 +97,7 @@ public:
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define GAME_NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
-/* PARTIAL: __FILE__ is emitted with pause() (INCLUDE_ASM): reference that copy until it is C */
-extern "C" char D_0047DFD0[];
-#define ASSERT(e) if (!(e)) AssertApp(D_0047DFD0, __LINE__, #e, 0)
+#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
 class CGameSub;
 
@@ -288,15 +317,70 @@ void CGameMain::resumeTaskInGame(INT nFlag) {
     CTask* p = getSysTask(0xb);
     if (p) p->setActive(TRUE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", pause__9CGameMainii);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x35287070\n.word 0x00293332\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x00007070\n.word 0x00000070\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", camp__9CGameMaini);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x35287070\n.word 0x00293335\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", worldMap__9CGameMaini);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x35287070\n.word 0x00293837\n.word 0x00000000\n.text\n");
+void CGameMain::pause(BOOL bOn, INT nMode) {
+    if (bOn) {
+        CSound::pauseAllSE();
+#line 523
+        CPause* p = GAME_NEW(523, CPause)(this, nMode);
+        ASSERT(p);
+        m_hPause = p->getHandle();
+        m_nGameProcFlag |= 0x400;
+    } else {
+        resumeTaskInGame(2);
+        m_hPause = 0;
+        CSound::startAllPausedSE();
+        m_nGameProcFlag |= 0x800;
+    }
+}
+void CGameMain::camp(BOOL bOn) {
+    if (bOn) {
+        CSound::pauseAllSE();
+        if (CGame::isSoraGame()) PLM::removeBattlePlayerRsrc(0);
+#line 553
+        CCamp* p = GAME_NEW(553, CCamp)(this, 0);
+        ASSERT(p);
+        m_hCamp = p->getHandle();
+        m_nGameProcFlag |= 0x400;
+    } else {
+        resumeTaskInGame(2);
+        m_hCamp = 0;
+        CSound::startAllPausedSE();
+        m_nGameProcFlag |= 0x800;
+    }
+}
+void CGameMain::worldMap(BOOL bOn) {
+    if (bOn) {
+        CSound::pauseAllSE();
+#line 578
+        CCamp* p = GAME_NEW(578, CCamp)(this, 1);
+        ASSERT(p);
+        m_hWorldMap = p->getHandle();
+        m_nGameProcFlag |= 0x400;
+    } else {
+        resumeTaskInGame(2);
+        m_hWorldMap = 0;
+        CSound::startAllPausedSE();
+        m_nGameProcFlag |= 0x800;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", checkStartFieldMenu__9CGameMain);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", procFieldMenu__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", checkStartBattleMenu__9CGameMain);
+void CGameMain::checkStartBattleMenu() {
+    if (CPadHandler::isButtonTrg(0x800, 0)) {
+        INT nMode = 0;
+        if (CSceneInfo::isMinigameScene()) {
+            nMode = 2;
+        } else {
+            if (CSceneInfo::getCurrentWorldID(TRUE) == 5) {
+                nMode = 4;
+                if (CSceneInfo::getCurrentSceneNum() != 0x41b) nMode = 0;
+            }
+            TsSdDebugPrint();
+        }
+        pause(TRUE, nMode);
+        suspendTaskInGame(2);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", procBattleMenu__9CGameMain);
 BOOL CGameMain::checkExitPause() {
     if (m_nGameProcFlag & 0x800) {
@@ -435,7 +519,25 @@ __asm__(".rdata\n.align 3\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\
 void CGameMain::preSetupBattleRsrc() { m_nStep = 0; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupBattleRsrc__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x31287070\n.word 0x29363630\n.word 0x00000000\n.word 0x53705F6D\n.word 0x61426275\n.word 0x656C7474\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preSetupField__9CGameMain);
+static inline BOOL _isStartRoom(INT nRoom) { return nRoom == 0 || nRoom == 0x63; }
+
+void CGameMain::preSetupField() {
+    if ((USHORT)(CSceneInfo::getPrevSceneNum() - 1000) < 50) {
+        m_nStep = 0;
+        return;
+    }
+    INT nRoom = CSceneInfo::getCurrentRoomID();
+    if (nRoom >= 0) {
+        BOOL bStart = _isStartRoom(nRoom);
+        INT nPrev = CSceneInfo::getPrevRoomID();
+        if (nPrev < 0 || _isStartRoom(nPrev) != bStart) CCard::initCardWorld();
+    }
+    if (!CSceneInfo::isEventScene()) {
+        CSceneInfo::backupEventDoorState();
+        CGameWork::backup(CGameWork::BACKUP_PRIMARY);
+    }
+    m_nStep = 0;
+}
 void CGameMain::preSetupField2() { m_nStep = 2; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupField__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x31287070\n.word 0x29363531\n.word 0x00000000\n.text\n");
@@ -477,7 +579,12 @@ void CGameMain::retryField() {
         endFieldSub();
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preSetupBattle__9CGameMain);
+void CGameMain::preSetupBattle() {
+#line 1627
+    if (!(m_pSubBattle)) AssertApp(__FILE__, __LINE__, D_0047E328, 0); /* PARTIAL: string of setupBattleRsrc (INCLUDE_ASM) */
+    resumeTaskInGame(1);
+    if (m_pSubBattle->getGameSubState() == 6) m_pSubBattle->reqChangeGameSubState(3);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupBattle__9CGameMain);
 void CGameMain::prePlayBattle() {
     m_bPauseEnable = TRUE;
@@ -511,13 +618,31 @@ void CGameMain::preRetryBattle() {
     m_pSubBattle->reqChangeGameSubState(4);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", retryBattle__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqPlayMovie__9CGameMainPCci);
-__asm__(".rdata\n.align 3\n.word 0xA982BD89\n.word 0xCC82BC91\n.word 0x4E838A83\n.word 0x58834783\n.word 0xAA826783\n.word 0xC182FC93\n.word 0xA282C482\n.word 0xCC82E982\n.word 0x8083C582\n.word 0x72835B81\n.word 0xC48D5B81\n.word 0xD682B690\n.word 0x738DDA88\n.word 0xAB82C582\n.word 0xB982DC82\n.word 0x000AF182\n.word 0x5B818083\n.word 0x5B817283\n.word 0x40837483\n.word 0x8B834383\n.word 0x778EAA82\n.word 0xB382E892\n.word 0xC482EA82\n.word 0xDC82A282\n.word 0xF182B982\n.word 0x0000000A\n.text\n");
+BOOL CGameMain::reqPlayMovie(const CHAR* pszMovieFile, BOOL bSkipEnable) {
+    if (m_nGameProcFlag & 0xc01f003f) {
+        TRACE_USER(TGOTO, "\x89\xbd\x82\xa9\x91\xbc\x82\xcc\x83\x8a\x83N\x83G\x83X\x83g\x82\xaa\x93\xfc\x82\xc1\x82\xc4\x82\xa2\x82\xe9\x82\xcc\x82\xc5\x83\x80\x81[\x83r\x81[\x8d\xc4\x90\xb6\x82\xd6\x88\xda\x8ds\x82\xc5\x82\xab\x82\xdc\x82\xb9\x82\xf1\n");
+        return FALSE;
+    }
+    if (!pszMovieFile || !*pszMovieFile) {
+        TRACE_USER(TGOTO, "\x83\x80\x81[\x83r\x81[\x83t\x83@\x83" "C\x83\x8b\x82\xaa\x8ew\x92\xe8\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb9\x82\xf1\n");
+        return FALSE;
+    }
+    strcpy(m_szMovieFileName, pszMovieFile);
+    INT nFlag = 0x10000;
+    if (bSkipEnable) nFlag = 0x30000;
+    m_nGameProcFlag |= nFlag;
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", prePlayMovie__9CGameMain);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", playMovie__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x5B818083\n.word 0x5B817283\n.word 0x4983CC82\n.word 0x76835B81\n.word 0xC9829383\n.word 0x7394B88E\n.word 0xDC82B582\n.word 0xBD82B582\n.word 0x58834281\n.word 0x62834C83\n.word 0xB5827683\n.word 0xB782DC82\n.word 0x000A4281\n.word 0x00000000\n.word 0x6D614743\n.word 0x69614D65\n.word 0x203A206E\n.word 0x69766F4D\n.word 0x3E2D2065\n.word 0x726F4E20\n.word 0x0A6C616D\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001F8580\n.word 0x001F85E0\n.word 0x001F8638\n.word 0x001F865C\n.word 0x001F8694\n.word 0x001F8700\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F8720\n.word 0x001F8734\n.word 0x001F875C\n.word 0x001F8768\n.word 0x001F87E4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F888C\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqSave__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x32287070\n.word 0x29303931\n.word 0x00000000\n.text\n");
+BOOL CGameMain::reqSave() {
+    if (!isPauseEnable()) return FALSE;
+    m_nGameProcFlag |= 0x1000;
+#line 2190
+    GAME_NEW(2190, CSaveLoad)(this, (SAVELOAD)0, (GAMECLEAR)0);
+    return TRUE;
+}
 BOOL CGameMain::reqGameOver(BOOL bHeartless) {
     m_nGameProcFlag |= 1;
     if (bHeartless) m_nGameProcFlag |= 2;
