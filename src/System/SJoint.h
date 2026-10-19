@@ -16,6 +16,7 @@ public:
     CSJointT() : m_pNext(0) {}
     virtual ~CSJointT() {}
     T* getNext() { return (T*)m_pNext; }
+    T* getNext() const { return (T*)m_pNext; } // PARTIAL: added for System/RsrcData
 protected:
     void setNext(CSJointT<T>* pNext) { m_pNext = pNext; }
 };
@@ -33,7 +34,9 @@ public:
     virtual ~CSJointListT() {}
     T* getHead() { return m_pHead; }
     T* getTail() { return m_pTail; }
-    INT getListSize() { return m_nListSize; }
+    T* getHead() const { return m_pHead; } // PARTIAL: const overloads added for System/RsrcData
+    T* getTail() const { return m_pTail; }
+    INT getListSize() const { return m_nListSize; }
     void pushBack(T& inEntry) {
         if (inEntry.getNext() == NULL) {
             if (m_pHead == NULL) m_pHead = &inEntry;

@@ -85,6 +85,10 @@ struct TexInfo {
     ULONGLONG getTPage() { return _nTPage; }
     BOOL isFixTex() const { return !_TexInfo._pImage || (_nFlag & 1); }
     BOOL isFixClut() const { return !_ClutInfo._pImage || (_nFlag & 2); }
+    BOOL isFix() const { return isFixTex() && isFixClut(); } // PARTIAL: added for System/RsrcData
+#ifdef MODELDATA_H_TEXINFO_CTOR // PARTIAL: added for System/RsrcData (new TexInfo)
+    TexInfo() { memset(this, 0, sizeof(TexInfo)); }
+#endif
 };
 
 #line 190

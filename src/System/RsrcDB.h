@@ -31,36 +31,6 @@ struct PackedRsrcHeader {
     static void coodinateVersion(void* pHead);
 };
 
-class CRsrcList : public CSLCListT<CRsrcData> {
-public:
-    CRsrcList(ISLCManagerT<CRsrcData>& inManager) : CSLCListT<CRsrcData>(inManager) {}
-    virtual ~CRsrcList() {
-        for (SLContainerT<CRsrcData>* __p = getHead(); __p; __p = __p->getNext()) {
-            if (__p->getValue()) {
-                delete __p->getValue();
-                __p->setValue(NULL);
-            }
-        }
-        removeAll();
-    }
-};
-
-class CRsrcVSV : public CRsrcData {
-private:
-    UINT m_nStartSect; /* 0x48 */
-    UINT m_nSectSize;  /* 0x4c */
-    UINT m_nBgmID;     /* 0x50 */
-
-    void _setupVSV();
-
-public:
-    CRsrcVSV(const RsrcInfo& info, UINT nStartSect, UINT nSectSize) : CRsrcData(info) {
-        m_nStartSect = nStartSect;
-        m_nSectSize = nSectSize;
-        _setupVSV();
-    }
-};
-
 class CRsrcIMZ : public CRsrcData {
 public:
     CRsrcIMZ(const RsrcInfo& info, CBuf& data) : CRsrcData(info, data) {}
