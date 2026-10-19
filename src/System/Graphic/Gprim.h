@@ -37,6 +37,7 @@ union ALPHA {
     operator INT() const { return _value; }
     // PARTIAL: added for System/Graphic/ScreenMask (the result is materialized: xori + bnez)
     BOOL operator==(_ALPHA nMode) const { return _value == nMode; }
+    BOOL operator!=(_ALPHA nMode) const { return _value != nMode; } // PARTIAL: added for System/Graphic/2d/2DSprObj
     ALPHA& operator=(const ALPHA& a) {
         _value = a._value;
         return *this;
@@ -178,6 +179,7 @@ public:
     }
     void setLayerFG(USHORT nDepth) { setLayer(3, nDepth); }
     void setSemiTrans(ALPHA nInAlpha) { m_nAlphaMode = nInAlpha; }
+    USHORT getLayerDepth() const { return m_LayerInfo._nDepth; } // PARTIAL: added for System/Graphic/2d/2DSprObj
     virtual void disp();
     virtual UINT getPacketSize() const;
 private:
@@ -202,7 +204,7 @@ public:
     }
     void setSemiTrans(ALPHA nInAlpha) {
         CDrawable::setSemiTrans(nInAlpha);
-        if (nInAlpha) {
+        if (nInAlpha != ALPHA_OFF) {
             m_nAttribute |= 1;
         } else {
             m_nAttribute &= ~1;
@@ -238,9 +240,16 @@ public:
     virtual UINT getPacketSize() const;
 };
 
-// PARTIAL: added for System/Graphic/ModelMan (only the texture cache)
-class CGTexPrim2D {
+// PARTIAL: added for System/Graphic/ModelMan (the texture cache), class body for System/Graphic/2d/2DSprObj
+class CGTexPrim2D : public CGPrim {
+protected:
+    struct TexInfo* m_pTexInfo;
 public:
+    CGTexPrim2D() { m_pTexInfo = NULL; }
+    void setTPage(struct TexInfo* pInInfo) { m_pTexInfo = pInInfo; }
+    struct TexInfo* getTPage() const { return m_pTexInfo; }
+    virtual UINT getPacketSize() const;
+
     static struct TexInfo* m_pTexCache[28];
     static USHORT m_nCacheIdx;
     static void clearTexCache() {
@@ -417,12 +426,39 @@ public:
     CScissoring() {}
     virtual ~CScissoring();
     void setDefault();
+    void setRect(G_XY& p0, G_XY& p1); // PARTIAL: added for System/Graphic/2d/2DSprObj
 };
 
 // PARTIAL: added for Form/DebugWindow
 struct G_ST {
     FLOAT s;
     FLOAT t;
+    void set(FLOAT _s, FLOAT _t) { // PARTIAL: added for System/Graphic/2d/2DSprObj
+        s = _s;
+        t = _t;
+    }
+};
+
+// PARTIAL: added for System/Graphic/2d/2DSprObj
+class CPolyGT4ST : public CGTexPrim2D {
+public:
+    G_XY m_P0;
+    G_XY m_P1;
+    G_XY m_P2;
+    G_XY m_P3;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    G_RGBA m_C2;
+    G_RGBA m_C3;
+    G_ST m_T0;
+    G_ST m_T1;
+    G_ST m_T2;
+    G_ST m_T3;
+
+    CPolyGT4ST() {}
+    virtual UINT getPacketSize() const;
+private:
+    virtual void makePkt();
 };
 
 struct G_STRIP {
