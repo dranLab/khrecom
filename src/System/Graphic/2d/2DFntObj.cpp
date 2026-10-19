@@ -69,11 +69,11 @@ void C2DFntObj::move() {
         mat.setTrans(m_vPos);
         ScaleVector(vCol, m_vCol, 128.0f);
         if (m_pSeqControl) {
-            MulMatrix(mat, *(FMATRIX*)&m_pSeqControl->_m_0x000[0x80 / 16], mat);
+            MulMatrix(mat, m_pSeqControl->controlMatrix, mat);
             if (m_pSeqControl->fgFntScale) {
                 m_p2DFnt->m_Size = (FIX4)(m_p2DFnt->m_seqFntSize * mat.m[0][0]);
             }
-            MulVector(vCol, vCol, *(FVECTOR*)&m_pSeqControl->_m_0x000[0xd0 / 16]);
+            MulVector(vCol, vCol, m_pSeqControl->controlColor);
         }
         _clampVector(vCol, vCol, 0.0f, 256.0f);
         m_p2DFnt->setPositionF(mat.m[3][0] * 16.0f, mat.m[3][1] * 16.0f);

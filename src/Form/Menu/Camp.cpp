@@ -2340,7 +2340,7 @@ void CCamp::setDeckCard(INT nSetCmd) {
                 _setCardNK(card, m_kindTbl[idx], -1);
                 p2DCard->create(card);
                 if (card.m_fgPremium || card.m_nKind == 0x7D || card.m_nKind == 0x7E) {
-                    p2DCard->restart(p2DCard->getSeqMax() - 1, m_iFrame60);
+                    p2DCard->restart(p2DCard->getNumSeq() - 1, m_iFrame60);
                 }
             }
         }
@@ -2499,7 +2499,7 @@ INT CCamp::setDeckDeck(INT nSetCmd) {
                 }
                 p2DCard->create(card);
                 if (card.m_fgPremium || card.m_nKind == 0x7D || card.m_nKind == 0x7E) {
-                    p2DCard->restart(p2DCard->getSeqMax() - 1, m_iFrame60);
+                    p2DCard->restart(p2DCard->getNumSeq() - 1, m_iFrame60);
                 }
                 if (idx == m_nSCIndex[m_nDeckCategorySelect]) {
                     p2DCard->addSeq(m_pSeqName, 0x117);
