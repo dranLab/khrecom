@@ -22,6 +22,7 @@ public:
     static void setLayer(INT nLayer);
     static HANDLE create(const CHAR* pszLad, UINT nSeq);
     static BOOL isEnd(HANDLE h);
+    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal); /* PARTIAL: added for Form/Menu/WorldCard */
 };
 }
 

@@ -231,3 +231,5 @@ getObjGroup__13OBJ_FORMATIONii_002D5520 = 0x002D5520; // type:func size:0x80
 clear__10OSD_HEADER_002D55A0 = 0x002D55A0; // type:func size:0xC0
 _$_4CBuf_001BDCB0 = 0x001BDCB0; // type:func size:0x54
 _vt$4CBuf_0046DA28 = 0x0046DA28; // size:0x18
+_$_6CState_003580A0 = 0x003580A0; // type:func size:0x30
+_vt$6CState_004F6C08 = 0x004F6C08; // size:0x30
