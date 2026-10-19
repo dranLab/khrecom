@@ -222,6 +222,7 @@ inline void _animCheckFlagIdx(UINT idx) {
 typedef ULONG ANIMID;
 class CTask;
 class CRsrcANN;  // PARTIAL: added for Game/ModelObj
+union FVECTOR;   // PARTIAL: added for Game/Atel/Avatar
 struct MODELDATA; // PARTIAL: added for Game/ModelObj
 class CAnim {
 private:
@@ -248,6 +249,8 @@ public:
     void play(TIMEQ tq, INT n);
     void changeEx(INT nRsrcID, ANIMID inId, TIMEQ inTq, BOOL inLoop);
     void setSpeed(FLOAT s) { m_Speed = s; }
+    void endLookPosition(FLOAT fFrame); // PARTIAL: added for Game/Atel/Avatar
+    void updateLookPosition(const FVECTOR& vLook, FLOAT fRate, UINT iFlags); // PARTIAL: added for Game/Atel/Avatar
     BOOL isMotionEnd() { return m_Flags[0] & 3; }
 
     ULONG getFlag(UINT idx) const;

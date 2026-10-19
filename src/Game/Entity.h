@@ -151,7 +151,11 @@ public:
     // Entity.cpp also emits this out of line (setEntityFlag__7CEntityUiUi): or inSet, then clear inMask.
     // PARTIAL: changed for Game/Gimmick/GimmickSavePoint - the store goes through a reference (not a struct
     // member access), so the scheduler does not move a following global load above it.
+#ifdef ENTITY_H_SETFLAG_DIRECT // PARTIAL: the plain form, for Game/Atel/Avatar
+    void setEntityFlag(UINT inSet, UINT inMask) { m_uiEntityFlag = (m_uiEntityFlag | inSet) & ~inMask; }
+#else
     void setEntityFlag(UINT inSet, UINT inMask) { UINT& f = m_uiEntityFlag; f = (f | inSet) & ~inMask; }
+#endif
     void clearEntityFlag(INT inFlag) { m_uiEntityFlag &= ~inFlag; } // PARTIAL: added for Game/Atel/Atel (name unknown)
     // PARTIAL: added for Game/Gimmick/GimmickStatue (also out of line: setCheckEyeOffFlag__7CEntityUiUi)
     void setCheckEyeOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiCheckEyeOffFlag; f = (f | inSet) & ~inMask; }
@@ -192,6 +196,7 @@ public:
     void endTargetChase();
     INT setTexAnmSeq(INT nAnmNo, INT nSeqNo);
     INT setTexAnmSeq(INT nAnmNo, const CHAR* pszSeqName); // PARTIAL: added for Game/Enemy/BossDeadDemo
+    void enableNotSemiModel(INT inModel, UINT inFlag); // PARTIAL: added for Game/Atel/Avatar (parameter names guessed)
     void playVoice(INT inFileID, INT inID, INT inPriority); // PARTIAL: added for Game/Enemy/HumanBoss
     void loadModelColor_(); // PARTIAL: added for Game/Enemy/EnemyHeartsoldier
     FLOAT getHeight() const; // PARTIAL: added for Game/Enemy/EnemyTornadostep
