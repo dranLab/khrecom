@@ -69,6 +69,66 @@ public:
 
 extern FVECTOR ONE_VECTOR;
 extern "C" float atan2f(float y, float x);
+static inline FVECTOR _subVector(const FVECTOR& v0, const FVECTOR& v1) {
+    FVECTOR vec = v0;
+    vec.x -= v1.x;
+    vec.y -= v1.y;
+    vec.z -= v1.z;
+    vec.w -= v1.w;
+    return vec;
+}
+
+static inline void _addVector(FVECTOR& v0, const FVECTOR& v1) {
+    v0.x += v1.x;
+    v0.y += v1.y;
+    v0.z += v1.z;
+    v0.w += v1.w;
+}
+
+static inline FLOAT _limitRot(FLOAT r) {
+    if (r < -3.1415927f) {
+        return r + 6.2831855f;
+    }
+    if (r > 3.1415927f) {
+        return r - 6.2831855f;
+    }
+    return r;
+}
+
+static inline FVECTOR operator-(const FVECTOR& v0, const FVECTOR& inV) {
+    FVECTOR vec = v0;
+    vec.x -= inV.x;
+    vec.y -= inV.y;
+    vec.z -= inV.z;
+    vec.w -= inV.w;
+    return vec;
+}
+
+static inline FVECTOR operator+(const FVECTOR& v0, const FVECTOR& inV) {
+    FVECTOR vec = v0;
+    vec.x += inV.x;
+    vec.y += inV.y;
+    vec.z += inV.z;
+    vec.w += inV.w;
+    return vec;
+}
+
+static inline FVECTOR operator*(const FVECTOR& v0, FLOAT inF) {
+    FVECTOR vec = v0;
+    vec.x *= inF;
+    vec.y *= inF;
+    vec.z *= inF;
+    vec.w *= inF;
+    return vec;
+}
+
+static inline void _setOne(FVECTOR& v) {
+    v.x = 1.0f;
+    v.y = 1.0f;
+    v.z = 1.0f;
+    v.w = 1.0f;
+}
+
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
     asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
@@ -84,6 +144,10 @@ void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
 void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
 void sceVu0RotMatrixZ(FMATRIX& m0, FMATRIX& m1, float rz);
 }
+
+static inline void _unitMatrix(FMATRIX& m) { sceVu0UnitMatrix(m); }
+static inline void _rotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry) { sceVu0RotMatrixY(m0, m1, ry); }
+
 
 class CRsrcDB {
 public:
@@ -535,6 +599,8 @@ void CAnim::play(TIMEQ inAddTq, BOOL bClipped) {
     }
     setMotion(m_Tq, inAddTq, bClipped);
 }
+/* Near-match: register choice for m_pMotData (a0 vs t0) and the operand order of one addu */
+#if 0
 void CAnim::setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped) {
     TIMEQ tq;
     INT nFrame;
@@ -606,8 +672,142 @@ void CAnim::setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped) {
     m_Tq = tq;
     _setUpdate(m_nSkl, inPlus, bClipped);
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", setMotion__5CAnimiii);
+#endif
+/* Near-match: the fixed-quaternion test (original sets 1 by default, then tests the second word) */
+#if 0
+void CAnim::_setUpdate(int nSkl, TIMEQ tqFr, BOOL bClipped) {
+    FLOAT frm0;
+    CMotData* md;
+    FMATRIX t0;
+    FMATRIX t1;
+    FMATRIX t2;
+    FLOAT racio;
+    INT start_skl;
+    QUATERNION_DT* pQuat;
+    QUATERNION_DT* pQuatHokan;
+    BOOL bDoScaleAnime;
+    BOOL bClipOut;
+    INT end_skl;
+
+    md = m_pMotData;
+    frm0 = (FLOAT)m_Tq * (FLOAT)m_nFps / 3000.0f;
+    start_skl = isRootMove() ? 0 : 1;
+    pQuat = &m_pQuatNow[start_skl];
+    pQuatHokan = &m_pQuatHokan[start_skl];
+    bDoScaleAnime = md->DoScaleAnime();
+    bClipOut = isNowClipCheck() && bClipped;
+    if (!bClipOut) {
+        end_skl = nSkl;
+    } else {
+        m_HokanTq = 0;
+        end_skl = isRootMove();
+    }
+    if (m_HokanTq <= 0) {
+        m_Flags[1] &= ~0x800;
+    } else {
+        m_Flags[1] |= 0x800;
+    }
+    if (isRootMove()) {
+        m_BufRootMtx = m_pCrds->Crd(0).getLocalMatrix();
+    }
+    for (INT i = start_skl; i < end_skl; i++, pQuat++, pQuatHokan++) {
+        CCoord& crd = m_pCrds->Crd(i);
+        FVECTOR vScale;
+        INT fix_no = -1;
+        if (!m_pFixQuat[i].vQuatRotate.isZero()) {
+            fix_no = i;
+        }
+        if (fix_no != -1) {
+            if (m_HokanTq <= 0) {
+                vScale = m_pFixQuat[fix_no].vScale;
+                Quaternion::QuaternionToMatrix(crd.getLocalMatrix(), m_pFixQuat[fix_no].vQuatRotate,
+                                               m_pFixQuat[fix_no].vTrans);
+                *pQuat = m_pFixQuat[fix_no];
+                crd.setScale(vScale);
+                continue;
+            }
+            *pQuat = m_pFixQuat[fix_no];
+        } else {
+            md->GetQuaternionDt(*pQuat, i, frm0);
+        }
+        if (i == 0 || m_HokanTq <= 0) {
+            Quaternion::QuaternionToMatrix(crd.getLocalMatrix(), pQuat->vQuatRotate, pQuat->vTrans);
+            if (bDoScaleAnime) {
+                vScale = pQuat->vScale;
+            } else {
+                _setOne(vScale);
+            }
+        } else {
+            racio = (FLOAT)m_HokanTq / (FLOAT)m_HokanMaxTq;
+            if (racio >= 1.0f) {
+                Quaternion::QuaternionToMatrix(crd.getLocalMatrix(), pQuatHokan->vQuatRotate, pQuatHokan->vTrans);
+                vScale = pQuatHokan->vScale;
+                *pQuat = *pQuatHokan;
+            } else {
+                Quaternion::QuaternionSlerp(pQuat->vQuatRotate, pQuat->vQuatRotate, pQuatHokan->vQuatRotate, racio);
+                pQuat->vTrans = pQuat->vTrans + (pQuatHokan->vTrans - pQuat->vTrans) * racio;
+                pQuat->vScale = pQuat->vScale + (pQuatHokan->vScale - pQuat->vScale) * racio;
+                Quaternion::QuaternionToMatrix(crd.getLocalMatrix(), pQuat->vQuatRotate, pQuat->vTrans);
+                vScale = pQuat->vScale;
+            }
+        }
+        crd.setScale(vScale);
+    }
+    if (!isNowFirstRootMove()) {
+        _updateLookPosition((FLOAT)tqFr * 0.020000001f);
+    }
+    _exeRootMove();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _setUpdate__5CAnimiii);
+#endif
+/* Near-match: the angle limit keeps the argument in another FP register (mov.s copy) */
+#if 0
+void CAnim::_exeRootMove() {
+    FVECTOR trs1;
+    FLOAT rot1;
+    FLOAT rot0;
+    FVECTOR trs0;
+    INT nRM;
+    FVECTOR trs2;
+    FLOAT rot2;
+
+    if (!isRootMove()) {
+        return;
+    }
+    CCoord& crd = m_pCrds->Crd(0);
+    trs1 = crd.getLocalMatrix().v[3];
+    rot1 = -atan2f(crd.getLocalMatrix().m[0][2], crd.getLocalMatrix().m[0][0]);
+    rot0 = -atan2f(m_BufRootMtx.m[0][2], m_BufRootMtx.m[0][0]);
+    trs0 = m_BufRootMtx.v[3];
+    nRM = isNowFirstRootMove();
+    if (nRM == 1) {
+        m_vRootMovePreTrs.init();
+        m_vRootMovePreRot.init();
+        m_vRootMoveRot.init();
+    } else if (nRM == 2) {
+        m_vRootMovePreTrs = trs1;
+        m_vRootMoveRot.init();
+        m_vRootMovePreRot.y = rot1;
+    }
+    trs2 = _subVector(trs1, m_vRootMovePreTrs);
+    rot2 = rot0 + (rot1 - m_vRootMovePreRot.y);
+    m_vRootMoveRot.y = _limitRot(rot2);
+    FMATRIX tmp0;
+    FMATRIX tmp1;
+    _unitMatrix(tmp0);
+    _rotMatrixY(tmp1, tmp0, _limitRot(rot0 - m_vRootMovePreRot.y));
+    ApplyMatrix(m_vRootMoveTrs, tmp1, trs2);
+    _addVector(m_vRootMoveTrs, trs0);
+    m_vRootMovePreTrs = trs1;
+    m_vRootMovePreRot.y = rot1;
+    crd.getLocalMatrix() = m_BufRootMtx;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _exeRootMove__5CAnim);
+#endif
 void CAnim::getRootMove(FVECTOR& outTrs, FLOAT& outRotY) {
     outTrs = m_vRootMoveTrs;
     outRotY = m_vRootMoveRot.y;
@@ -732,11 +932,18 @@ static inline float _limitPI(float fSa) {
     return fSa;
 }
 
+float _hokanRot(float fData0, float fData1, float fRate);
+
+/* Near-match: the angle difference is copied into another FP register before it is limited */
+#if 0
 static float _hokanRot(float fData0, float fData1, float fRate) {
     float fT = 1.0f / fRate;
     float fSa = fData1 - fData0;
     return fData0 + _limitPI(fSa) * fT;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _hokanRot__Ffff);
+#endif
 void CAnim::_updateLookPosition(FLOAT fR) {
     FVECTOR fvAng;
     FVECTOR fvDir;
