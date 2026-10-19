@@ -85,6 +85,8 @@ public:
     void playBigDamageSE();
     INT selectDamageMotion_();
     INT getParam() { return *(INT*)&_m_0x218[0x1c]; } /* m_iParam 0x234 */
+    void makeExpPrize();              // PARTIAL: added for Game/Enemy/BossDeadDemo
+    static void setBossKilledFlag();
     void setParam(INT inParam) { *(INT*)&_m_0x218[0x1c] = inParam; } // PARTIAL: added for Game/Enemy/CreateEnemy
     INT getHpMax() const;
     // PARTIAL: added for Game/Enemy/EnemyAirpirate
