@@ -9,6 +9,14 @@
 #include "System/Graphic/2d/2DSpr.h"
 #include "System/Graphic/2d/2DSeqObj.h"
 
+namespace D2 {
+class C2DMan { /* System/Graphic/2d/2DMan.h */
+public:
+    static INT m_nLayer;
+    static INT m_fg2DViewer;
+};
+}
+
 using namespace D2;
 
 /* System/Graphic/modeldata.h (its inline functions' strings are not in this object) */
@@ -34,7 +42,10 @@ struct TexInfo {
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-extern "C" char D_004672C0[], D_004672F0[]; /* PARTIAL */
+inline void* operator new(size_t, void* p) throw() { return p; }
+
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 static inline void _itof0(FVECTOR& fVec, const IVECTOR& iVec) {
@@ -148,8 +159,60 @@ C2DSprObj::~C2DSprObj() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", init__Q22D29C2DSprObjUi);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x322F6432\n.word 0x72705344\n.word 0x2E6A624F\n.word 0x28707063\n.word 0x29343531\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", initSprite__Q22D29C2DSprObjiPQ22D29SPR_GROUPPQ22D29SPR_PARTS);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x322F6432\n.word 0x72705344\n.word 0x2E6A624F\n.word 0x00707063\n.word 0x754E6E69\n.word 0x3D3E206D\n.word 0x00003020\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x322F6432\n.word 0x72705344\n.word 0x2E6A624F\n.word 0x28707063\n.word 0x29343931\n.word 0x00000000\n.text\n");
+void C2DSprObj::initSprite(INT inNum, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprParts) {
+    if (!m_pSprPrim) return;
+    if (inNum >= m_nPoly) return;
+#line 168
+    ASSERT(inNum >= 0);
+    INT nLayerFG = C2DMan::m_nLayer;
+    SprPrim* pSprPrim = &m_pSprPrim[inNum];
+    pSprPrim->polyGT4.setLayerFG(nLayerFG);
+    pSprPrim->polyGT4.setTPage((TexInfo*)m_pTexInfo);
+    pSprPrim->polyGT4.setSemiTrans(ALPHA_BLEND);
+    pSprPrim->pSprGroupe = pSprGroupe;
+    pSprPrim->pSprParts = pSprParts;
+    const VTransInfo& transInfo = m_pTexInfo->_TexInfo;
+    FLOAT fW;
+    FLOAT fH;
+    USHORT nW = transInfo._nDistW;
+    if (transInfo._nFormat == 0) {
+        fW = nW * 2;
+    } else {
+        fW = nW;
+    }
+    USHORT nH = transInfo._nDistH;
+    if (transInfo._nFormat == 0) {
+        fH = nH * 2;
+    } else {
+        fH = nH;
+    }
+    FLOAT fU0 = pSprParts->u0 / fW;
+    FLOAT fU1 = pSprParts->u1 / fW;
+    FLOAT fV0 = pSprParts->v0 / fH;
+    FLOAT fV1 = pSprParts->v1 / fH;
+    pSprPrim->polyGT4.m_T0.set(fU0, fV0);
+    pSprPrim->polyGT4.m_T1.set(fU1, fV0);
+    pSprPrim->polyGT4.m_T2.set(fU0, fV1);
+    pSprPrim->polyGT4.m_T3.set(fU1, fV1);
+    if (pSprParts->u0 == 0 && pSprParts->v0 == 0 && pSprParts->u1 == 0 && pSprParts->v1 == 0 && m_nPoly == 1) {
+#line 194
+        m_pScissoring = new (com_malloc_d(sizeof(CScissoring), __FILE__ "(194)", RET_ADDR())) CScissoring;
+        m_pScissoring->setLayerFG(nLayerFG);
+        m_pScissoring->setSemiTrans(ALPHA_BLEND);
+    }
+    pSprPrim->polyGT4.m_P0.x = 0;
+    pSprPrim->polyGT4.m_P0.y = 0;
+    pSprPrim->polyGT4.m_P1.x = 0;
+    pSprPrim->polyGT4.m_P1.y = 0;
+    pSprPrim->polyGT4.m_P2.x = 0;
+    pSprPrim->polyGT4.m_P2.y = 0;
+    pSprPrim->polyGT4.m_P3.x = 0;
+    pSprPrim->polyGT4.m_P3.y = 0;
+    pSprPrim->polyGT4.m_C0.col = 0;
+    pSprPrim->polyGT4.m_C1.col = 0;
+    pSprPrim->polyGT4.m_C2.col = 0;
+    pSprPrim->polyGT4.m_C3.col = 0;
+}
 void C2DSprObj::setFukidasiSize(FLOAT fSizeX, FLOAT fSizeY) {
     FVECTOR vS;
     FVECTOR vDiff;
@@ -222,7 +285,8 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", _disp__Q2
 void C2DSprObj::changeTexture(INT inNum, const TexInfo* pTexInfo, G_UV* pStart, G_UV* pEnd) {
     if (!m_pSprPrim) return;
     if (inNum >= m_nPoly) return;
-    if (!(inNum >= 0)) AssertApp(D_004672C0, 731, D_004672F0, 0); /* PARTIAL: strings owned by INCLUDE_ASM'd initSprite */
+#line 731
+    ASSERT(inNum >= 0);
     SprPrim* pSprPrim = &m_pSprPrim[inNum];
     const VTransInfo* pTransInfo;
     if (pTexInfo) {
