@@ -7,6 +7,7 @@
 #include <string.h>
 #include "System/MainApp.h"
 #include "System/TaskMan.h"
+#include "System/Graphic/HermitePath.h"
 #include "include_asm.h"
 
 static inline FLOAT _fabs(FLOAT inValue) {
@@ -38,6 +39,7 @@ void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);
 void FTOI15Vector(IVECTOR& v0, const FVECTOR& v1);
@@ -61,6 +63,8 @@ public:
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+
+inline void* operator new[](size_t n, char* pszFile) throw() { return com_malloc_d(n, pszFile, RET_ADDR()); }
 
 CPathVector::~CPathVector() {
     if (m_iStatus & 1) {
@@ -89,8 +93,58 @@ void CPathVector::init(const PATH_VECTOR* pPathData, BOOL bAlloc) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PathData", _init__11CPathVectorPC7FVECTORii);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x68746150\n.word 0x61746144\n.word 0x7070632E\n.word 0x29343928\n.word 0x00000000\n.word 0x00000000\n.word 0x56705F6D\n.word 0x00006365\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x68746150\n.word 0x61746144\n.word 0x7070632E\n.word 0x32323128\n.word 0x00000029\n.word 0x00000000\n.word 0x74615070\n.word 0x00000068\n.word 0x50692821\n.word 0x4D687461\n.word 0x3C207861\n.word 0x2930203D\n.word 0x00000000\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x68746150\n.word 0x61746144\n.word 0x7070632E\n.word 0x37333128\n.word 0x00000029\n.word 0x00000000\n.word 0x62837D83\n.word 0xAA827683\n.word 0xE882A082\n.word 0xB982DC82\n.word 0x000AF182\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PathData", makeVertexSpeedAll__11CPathVector);
-__asm__(".rdata\n.align 3\n.word 0x20647053\n.word 0x252C6425\n.word 0x00000A66\n.word 0x00000000\n.word 0x2077654E\n.word 0x252C6425\n.word 0x00000A66\n.word 0x00000000\n.text\n");
+void CPathVector::makeVertexSpeedAll() {
+    INT i;
+    INT j;
+    INT iNCnt = 0;
+    INT iUCnt = 0;
+    INT iNum = m_iVecMax;
+    float fVSpeed[iNum];
+    if (iNum >= 2) {
+        for (i = 0; i < iNum; i++) {
+            fVSpeed[i] = getPathSpeed(i);
+            if (fVSpeed[i] > 0.0f) iUCnt++;
+            if (fVSpeed[i] <= 0.0f) iNCnt++;
+            TRACE("Spd %d,%f\n", i, fVSpeed[i]);
+        }
+    }
+    if (iUCnt > 0 && iNCnt > 0) {
+        CHermitePath cHPath;
+        cHPath.makePathFromPathVector(this);
+        FLOAT fBeforeSpeed;
+        INT iBefore = 0;
+        TRACE("New %d,%f\n", 0, fVSpeed[0]);
+        fBeforeSpeed = fVSpeed[0];
+        for (i = 1; i < iNum; i++) {
+            if (fVSpeed[i] <= 0.0f) {
+                FLOAT fNextSpeed;
+                INT iNext;
+                FLOAT fNextDis;
+                FLOAT t;
+                for (j = i + 1; j < iNum; j++) {
+                    if (fVSpeed[j] > 0.0f) {
+                        fNextSpeed = fVSpeed[j];
+                        iNext = j;
+                        break;
+                    }
+                }
+                if (j >= iNum) {
+                    fNextSpeed = fBeforeSpeed;
+                    iNext = iNum - 1;
+                }
+                fNextDis = cHPath.getHermiteDistanceBlockToBlock(i, iNext);
+                t = cHPath.getHermiteDistanceBlockToBlock(iBefore, i);
+                fNextDis += t;
+                t = t / fNextDis;
+                fVSpeed[i] = (fNextSpeed - fBeforeSpeed) * t + fBeforeSpeed;
+                _setPathVectorConvWSpeed(&m_pVec[i].w, fVSpeed[i]);
+            }
+            TRACE("New %d,%f\n", i, fVSpeed[i]);
+            iBefore = i;
+            fBeforeSpeed = fVSpeed[i];
+        }
+    }
+}
 FLOAT CPathVector::getPathRoll(INT iNum) const {
     FLOAT fRoll;
     if (iNum >= m_iVecMax) iNum = m_iVecMax - 1;
@@ -380,8 +434,56 @@ void CPathVector::__delPathCopy(FVECTOR*& pVec, INT iVecMax, INT iNum) {
     iVecMax--;
     memcpy(&pVec[iNum], &pVec[iNum + 1], (iVecMax - iNum) * sizeof(FVECTOR));
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PathData", addPath__11CPathVectori);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x68746150\n.word 0x61746144\n.word 0x7070632E\n.word 0x32313128\n.word 0x00002931\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x68746150\n.word 0x61746144\n.word 0x7070632E\n.word 0x33313128\n.word 0x00002931\n.word 0x00000000\n.text\n");
+BOOL CPathVector::addPath(INT iNum) {
+    FVECTOR vTmp;
+    if (m_iStatus & 1) {
+        if (iNum < 0) return FALSE;
+        if (iNum < m_iVecMax) {
+            if (m_iVecMemMax < m_iVecMax + 1) {
+                m_iVecMemMax += 8;
+#line 1121
+                FVECTOR* p = (FVECTOR*)com_malloc_d(m_iVecMemMax * sizeof(FVECTOR), __FILE__ "(1121)", RET_ADDR());
+                memcpy(p, m_pVec, m_iVecMax * sizeof(FVECTOR));
+                if (m_pVec) com_free(m_pVec);
+                m_pVec = p;
+                if (m_pCube) delete[] m_pCube;
+                m_pCube = NULL;
+#line 1131
+                m_pCube = new (__FILE__ "(1131)") CDbgCube[m_iVecMemMax];
+                for (INT i = 0; i < m_iVecMemMax; i++) {
+                    m_pCube[i].setCoord(NULL, NULL);
+                }
+            }
+            INT iVecMax = m_iVecMax;
+            iVecMax--;
+            memmove(&m_pVec[iNum + 2], &m_pVec[iNum + 1], (iVecMax - iNum) * sizeof(FVECTOR));
+            m_iVecMax++;
+            if (iNum + 2 >= m_iVecMax) {
+                if (iNum - 1 < 0) {
+                    vTmp = m_pVec[iNum];
+                    vTmp.z += 2.0f;
+                } else {
+                    SubVector(vTmp, m_pVec[iNum], m_pVec[iNum - 1]);
+                    Normalize(vTmp, vTmp);
+                    ScaleVector(vTmp, vTmp, 2.0f);
+                    AddVector(vTmp, vTmp, m_pVec[iNum]);
+                    vTmp.y = m_pVec[iNum].y;
+                }
+            } else {
+                vTmp = m_pVec[iNum + 2];
+            }
+            AddVectorXYZ(m_pVec[iNum + 1], vTmp, m_pVec[iNum]);
+            ScaleVectorXYZ(m_pVec[iNum + 1], m_pVec[iNum + 1], 0.5f);
+            m_pVec[iNum + 1].w = 0.0f;
+            for (INT i = 0; i < m_iVecMax; i++) {
+                m_pCube[i].setCoord(&m_pVec[i], NULL);
+            }
+            return TRUE;
+        }
+        return FALSE;
+    }
+    return FALSE;
+}
 BOOL CPathVector::delPath(INT iNum) {
     if (m_iStatus & 1) {
         if (iNum < 0) return FALSE;
@@ -465,8 +567,34 @@ INT CPathData::getLinkChild(INT iPathNum, INT iIdx) {
     }
     return i < m_iPathMax ? i : -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PathData", addPath__9CPathDataPC7FVECTORi);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x68746150\n.word 0x61746144\n.word 0x7070632E\n.word 0x30353128\n.word 0x00002933\n.word 0x00000000\n.text\n");
+BOOL CPathData::addPath(const FVECTOR* pVec, INT iNum) {
+    FVECTOR vTmp;
+    if (m_iStatus & 1) {
+        if (m_iPathMemMax < m_iPathMax + 1) {
+            m_iPathMemMax++;
+#line 1503
+            CPathVector* p = (CPathVector*)com_malloc_d(m_iPathMemMax * sizeof(CPathVector), __FILE__ "(1503)", (UINT)-1);
+            memcpy(p, m_pPath, m_iPathMax * sizeof(CPathVector));
+            com_free(m_pPath);
+            m_pPath = p;
+        }
+        if (pVec && iNum > 0) {
+            new (&m_pPath[m_iPathMax]) CPathVector;
+            m_pPath[m_iPathMax].init(pVec, iNum, 1);
+            for (INT i = 0; i < m_pPath[m_iPathMax].getPathVectorNum(); i++) {
+                vTmp = m_pPath[m_iPathMax].getPathPosition(i);
+                vTmp.x += 1.0f;
+                m_pPath[m_iPathMax].getPathVector()[i] = vTmp;
+            }
+        } else {
+            new (&m_pPath[m_iPathMax]) CPathVector;
+            m_pPath[m_iPathMax].init(NULL, 1, 1);
+        }
+        m_iPathMax++;
+        return TRUE;
+    }
+    return FALSE;
+}
 BOOL CPathData::delPath(INT iNum) {
     PATH_PARAM sParam;
     if (m_iStatus & 1) {
@@ -498,7 +626,46 @@ BOOL CPathData::delPath(INT iNum) {
     }
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PathData", dispDebugLine__9CPathData);
+static inline INT _max(INT a, INT b) { return a > b ? a : b; }
+
+void CPathData::dispDebugLine() {
+    PATH_PARAM sParam;
+    G_STRIP Line[2];
+    FVECTOR* pv[2];
+    m_DDLinkLines.m_vVERT.clear();
+    for (INT i = 0; i < m_iPathMax; i++) {
+        if (i == m_iActive) {
+            m_pPath[i].dispDebugLine(1);
+        } else {
+            m_pPath[i].dispDebugLine(0);
+        }
+        m_pPath[i].getPathParam(sParam);
+        if (sParam.iFlags & 0x10) {
+            Line[0].C.col = 0x40002020;
+            Line[0].Term = 0;
+            Line[1].C.col = 0x4000ffff;
+            Line[1].Term = 1;
+            INT n0 = m_pPath[i].getPathVectorNum();
+            INT n1 = m_pPath[sParam.iParentLink].getPathVectorNum();
+            pv[0] = m_pPath[i].getPathVector();
+            pv[1] = m_pPath[sParam.iParentLink].getPathVector();
+            INT n = _max(n1, n0);
+            for (INT j = 0; j < n; j++) {
+                INT k0 = j;
+                if (k0 >= n0) k0 = n0 - 1;
+                Line[0].P = pv[0][k0];
+                Line[0].P.w = 1.0f;
+                INT k1 = j;
+                if (k1 >= n1) k1 = n1 - 1;
+                Line[1].P = pv[1][k1];
+                Line[1].P.w = 1.0f;
+                m_DDLinkLines.m_vVERT.push_back(Line[0]);
+                m_DDLinkLines.m_vVERT.push_back(Line[1]);
+            }
+        }
+    }
+    m_DDLinkLines.CGPrim::disp();
+}
 CDbgCube::CDbgCube() { init(NULL); }
 
 CDbgCube::CDbgCube(CCoord* pCrd) { init(pCrd); }
