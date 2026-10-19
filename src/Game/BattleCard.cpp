@@ -59,7 +59,13 @@ void CBattleCard::setPlayEnd() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateUse__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateUse__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setRefrect__Q210CardBattle11CBattleCard);
+void CBattleCard::setRefrect() {
+    changeState(3);
+    if (m_uiMode == 16) m_iState = 8;
+    m_uiMode = 4;
+    m_uiFlag = (INT)m_uiFlag & ~0x2;
+    if (m_iStock && m_cardData.m_nCategory1 == 4) m_uiFlag = (INT)m_uiFlag & ~0x20;
+}
 void CBattleCard::setBreak(INT inFlag) {
     changeState(3);
     m_uiMode = 6;
@@ -117,27 +123,128 @@ void CBattleCard::updateReload(INT inNum) {
     if (m_cardData.m_nKind == 0xa0) m_pCard->changeTime(inNum);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", resetHand__Q210CardBattle11CBattleCardii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setSelect__Q210CardBattle11CBattleCardi);
+void CBattleCard::setSelect(INT inFlag) {
+    if (m_pCard) {
+        if (inFlag) {
+            if (isPlayNG()) m_pCard->select(TRUE);
+            else m_pCard->select(FALSE);
+        } else {
+            m_pCard->unselect();
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setRoomEffect__Q210CardBattle11CBattleCardPC4CARD);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setEnchantEffect__Q210CardBattle11CBattleCardiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", resetEnchantEffect__Q210CardBattle11CBattleCardi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setNumberBreak__Q210CardBattle11CBattleCardi);
+void CBattleCard::resetEnchantEffect(INT inKind) {
+    UINT uiMask;
+    switch (inKind) {
+    case 0x52: uiMask = 0x400; break;
+    case 0x4b: uiMask = 0x800; break;
+    case 0x57: uiMask = 0x1000; break;
+    case 0: uiMask = 0x1e00; break;
+    default: uiMask = 0x200; break;
+    }
+    if (m_uiFlag & uiMask) {
+        if (!(m_uiFlag & 0x100)) {
+            m_cardData.m_nNumber = m_nNumber;
+            m_pCard->replaceNumberNormal(m_nNumber);
+        } else {
+            m_cardData.m_nNumber = m_nNumberR;
+            m_pCard->replaceNumberBlue(m_nNumberR);
+        }
+        m_uiFlag &= ~uiMask;
+    }
+}
+void CBattleCard::setNumberBreak(INT inNum) {
+    m_cardData.m_nNumber -= inNum;
+    if (m_cardData.m_nNumber < 0) m_cardData.m_nNumber = 0;
+    m_nNumberE = m_cardData.m_nNumber;
+    m_pCard->replaceNumberBlue(m_nNumberE);
+    m_uiFlag |= 0x200;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", updateNumberEffect__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setDuel__Q210CardBattle11CBattleCardi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setDuelRefrect__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setDuelStock__Q210CardBattle11CBattleCardUi);
+void CBattleCard::setDuel(INT inMode) {
+    changeState(4);
+    if (!inMode) m_uiMode = 16;
+}
+void CBattleCard::setDuelRefrect() {
+    changeState(3);
+    m_tqTimer = 1000;
+    m_uiMode = 5;
+    m_uiFlag = (INT)m_uiFlag & ~0x2;
+    if (m_iStock && m_cardData.m_nCategory1 == 4) m_uiFlag = (INT)m_uiFlag & ~0x20;
+}
+void CBattleCard::setDuelStock(UINT inPri) {
+    if (m_pRevolver) {
+        changeState(4);
+        m_iStock = inPri;
+        m_uiMode = 8;
+        m_iHand = -1;
+        m_uiFlag = (INT)(m_uiFlag | 0x200000) & ~0x2;
+        m_pRevolver->setPlayerDuelStock(this, m_iStock);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setPlayDuelStock__Q210CardBattle11CBattleCardi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateDuel__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateDuel__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setSnatch__Q210CardBattle11CBattleCardi);
+void CBattleCard::setSnatch(HANDLE inHandle) {
+    changeState(5);
+    m_uiMode = 17;
+    m_hTarget = inHandle;
+    m_tqTimer = 800;
+    m_iHand = -1;
+    m_uiFlag |= 0x20;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", resetSnatch__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateSnatch__Q210CardBattle11CBattleCard);
+void CBattleCard::preStateSnatch() {
+    m_iState = 5;
+    m_uiFlag |= 0x1;
+    CB_LAYOUT& lay = g_LayoutData[7];
+    m_StartPos.set(lay.x, lay.y);
+    m_fStartScale = lay.scale * 0.01f;
+    m_EndPos.set(lay.x + 50, lay.y - 100);
+    m_fEndScale = m_fStartScale;
+    m_tqTimer = 800;
+    m_Pos = m_StartPos;
+    m_vRot.w = m_fStartScale;
+    m_iLayer = lay.layer;
+    m_pCard->changeLayer(m_iLayer);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateSnatch__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setPronounce__Q210CardBattle11CBattleCardUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setPlayPronounce__Q210CardBattle11CBattleCard);
+void CBattleCard::setPronounce(UINT inPri) {
+    changeState(6);
+    m_uiMode = 8;
+    m_iStock = inPri;
+    m_iHand = -1;
+    m_uiFlag = (INT)m_uiFlag & ~0x2;
+}
+void CBattleCard::setPlayPronounce() {
+    m_uiMode = 1;
+    m_StartPos = m_Pos;
+    m_fStartScale = m_vRot.w;
+    CB_LAYOUT& lay = g_LayoutData[1];
+    m_EndPos.set(lay.x, lay.y);
+    m_fEndScale = lay.scale * 0.01f;
+    m_tqTimer = 400;
+    m_uiFlag = (INT)(m_uiFlag | 0x40) & ~0x2;
+    if (m_uiFlag & 0x10) {
+        m_uiFlag = (INT)m_uiFlag & ~0x10;
+        m_pCard->m_seqControl.fgColor = 0;
+    }
+    m_uiFlag |= 0x20020;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStatePronounce__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", statePronounce__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setDiscard__Q210CardBattle11CBattleCardi);
+void CBattleCard::setDiscard(INT inFlag) {
+    m_uiMode = 20;
+    if (inFlag) {
+        m_uiOwner = 2;
+        m_uiFlag |= 0x20;
+        destroy(0);
+    } else {
+        outHand();
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", __static_initialization_and_destruction_0_001D3370);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", func_001D3E70);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", _$_t14CStateTemplate1ZQ210CardBattle11CBattleCard);

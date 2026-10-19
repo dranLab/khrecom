@@ -112,6 +112,7 @@ public:
     void changeMode(INT inMode, INT inFlag);
     INT chargeReloadCard(INT inFlag);
     INT setPlayerDuelPlayStock();
+    INT setPlayerDuelStock(class CBattleCard* inCard, UINT inPri); // PARTIAL: added for Game/BattleCard
     INT setPlayerDuelCard(INT inNo);
     void setAction(INT inAction, INT inParam);
     // PARTIAL: added for Game/Player/FriendPluto
