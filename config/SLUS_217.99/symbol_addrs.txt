@@ -88,6 +88,9 @@ _vt$10CLightUnit_004978B8 = 0x004978B8; // size:0x38
 // System/VramMan: CBuf's inline destructor and an unnamed copy of its vtable
 _$_4CBuf_0011D368 = 0x0011D368; // type:func size:0x54
 _vt$4CBuf_0045EFF8 = 0x0045EFF8; // size:0x18
+// System/Graphic/FrecFont: the same
+_$_4CBuf_001274C0 = 0x001274C0; // type:func size:0x54
+_vt$4CBuf_0045FED0 = 0x0045FED0; // size:0x18
 
 // Game/EffectMotion: CAttachMotion's inline destructor and an unnamed copy of its vtable
 _$_13CAttachMotion_001EDB28 = 0x001EDB28; // type:func size:0x30
