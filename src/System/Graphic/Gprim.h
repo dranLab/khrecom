@@ -430,6 +430,10 @@ public:
 struct G_ST {
     FLOAT s;
     FLOAT t;
+    void set(FLOAT _s, FLOAT _t) { // PARTIAL: added for System/Graphic/2d/2DSprObj
+        s = _s;
+        t = _t;
+    }
 };
 
 // PARTIAL: added for System/Graphic/2d/2DSprObj

@@ -106,7 +106,7 @@ private:
     virtual void changeTexture(INT inNum, const TexInfo* pTexInfo, G_UV* pStart, G_UV* pEnd);
     virtual void changeLayer(INT nLayer);
     void getRect(FVECTOR2* pvOut4, SprPrim& rSprPrim);
-    void getFukidasiRect(FVECTOR2 (*vOut)[3]);
+    void getFukidasiRect(FVECTOR2 (*vOut)[4]);
     void setBilinear(BOOL bVal) {
         if (bVal) {
             m_Flg |= 2;

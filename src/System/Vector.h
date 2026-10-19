@@ -52,6 +52,13 @@ union IVECTOR {
         INT w;
     };
     u_long128 _q;
+    // PARTIAL: added for System/Graphic/2d/2DSprObj
+    void set(INT _x, INT _y, INT _z, INT _w) {
+        x = _x;
+        y = _y;
+        z = _z;
+        w = _w;
+    }
 };
 
 typedef float _FMATRIX[4][4];
