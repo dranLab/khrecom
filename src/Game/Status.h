@@ -35,6 +35,7 @@ struct STATUS_INFO {
 class CStatus {
 private:
     friend struct MainAppSingletons; // PARTIAL: System/MainApp creates and deletes the instance
+    friend class CCard; // PARTIAL: added for Game/Card
     static CStatus* m_pInstance;
     static STATUS_INFO* m_pStatusInfo;
     /* read through a reference: the original reloads m_pStatusInfo after every store into it */

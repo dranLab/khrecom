@@ -9,6 +9,13 @@
 #include "Game/CardKind.h" // PARTIAL: added for Form/Menu/Roulette
 struct TexInfo;  // PARTIAL: added for Game/AttachCard
 union FVECTOR;   // PARTIAL: added for Game/AttachCard
+union IVECTOR;   // PARTIAL: added for Game/Card
+
+/* PARTIAL: added for Game/Card */
+struct CARD_INFO2 {
+    USHORT _nKeyTotal;
+    char _nKey[4];
+};
 
 /* PARTIAL: added for Form/Menu/Roulette */
 struct CARD_INFO {
@@ -57,29 +64,80 @@ public:
         com_malloc_d(4, __FILE__ "(66)", (UINT)-1);
     }
 
+    // PARTIAL: complete for Game/Card
+    static void setCard(unsigned char (*pInitCardTbl)[2], INT cnt);
+    static void initCardWorld();
+    static INT deleteCard(USHORT inID, SHORT inNumber);
     static INT searchCard(USHORT inID, SHORT inNumber);
-    static TexInfo* getCardTexInfo(CARD inCard, CHAR* pTexName, FVECTOR& outST); // PARTIAL: added for Game/AttachCard
     static INT searchCardKind(USHORT inID, SHORT inNumber);
-    static BOOL isHaveMapCard(INT inNumber); // PARTIAL: added for Game/Gimmick/GimmickManager
-    static CARD correctCardRank(CARD inCard); // PARTIAL: added for Game/Gimmick/GimmickManager
-    static BOOL canPremium(USHORT inKind); // PARTIAL: added for Form/Menu/Roulette
-    static INT makePremiereDeck(USHORT inDeck, SHORT inIdx); // PARTIAL: added for Form/Menu/Roulette
-    static BOOL addCard(USHORT inID, SHORT inNumber);        // PARTIAL: added for Form/Menu/Roulette
-    static BOOL deleteCard(USHORT inID, SHORT inNumber);     // PARTIAL: added for Form/Menu/RoomCreation
-    static void setDeckName(INT inDeck, const CHAR* inpName); // PARTIAL: added for Form/Menu/DecknameEdit
-    static BOOL addCard(CARD inCard);                         // PARTIAL: added for Form/DebugWindowTBL
-    static BOOL isMapCardFull();                              // PARTIAL: added for Form/DebugWindowTBL
-    static BOOL isCurrentDeckPremiumFull();                   // PARTIAL: added for Game/Enemy/BattleEnemyManager
-    static INT removeDeck(USHORT inDeck, SHORT inIdx);       // PARTIAL: added for Form/Menu/Camp
-    static BOOL getAttribute(CARD inCard, const CHAR** ppAttack, const CHAR** ppAttribute, const CHAR** ppSpeed, const CHAR** ppHelp); // PARTIAL: added for Form/Menu/Camp
-    static INT getCP(CARD inCard);                           // PARTIAL: added for Form/Menu/Camp
-    static INT searchDeck(CARD inCard, USHORT inDeck, SHORT inStart); // PARTIAL: added for Form/Menu/Camp
-    static INT getShortCut(USHORT inDeck);                   // PARTIAL: added for Form/Menu/Camp
-    static void clearShortCut(USHORT inDeck);                // PARTIAL: added for Form/Menu/Camp
-    static void setShortCut(USHORT inDeck, USHORT inIdx);    // PARTIAL: added for Form/Menu/Camp
-    static void clearDeck(USHORT inDeck);                    // PARTIAL: added for Form/Menu/Camp
-    static void packDeck(USHORT inDeck);                     // PARTIAL: added for Form/Menu/Camp
+    static INT addDeck(CARD inCard, USHORT inDeckNum);
+    static INT insertDeck(CARD inCard, USHORT inDeckNum, SHORT inIdx, BOOL bShortCut);
+    static CARD* getCurrentDeck();
+    static void packCurrentDeck(USHORT inDeckNum);
+    static INT getCurrentShortCut();
+    static void packDeck(USHORT inDeckNum);
+    static INT removeDeck(USHORT inDeckNum, SHORT inIdx);
+    static INT searchDeck(CARD inCard, USHORT inDeckNum, SHORT nFrom);
+    static INT makePremiereDeck(USHORT inDeckNum, SHORT inIdx);
+    static void clearDeck(USHORT inDeckNum);
+    static INT checkCurrentDeck();
+    static BOOL isCurrentDeckPremiumFull();
+    static INT getCP(CARD card);
+    static INT getMP(CARD card);
+    static BOOL getAttribute(CARD card, const CHAR** pOutStrAttack, const CHAR** pOutStrAttribute, const CHAR** pOutStrSpeed,
+                             const CHAR** pOutHelp);
+    static void setShortCut(USHORT inDeckNum, USHORT nIndex);
+    static INT getShortCut(USHORT inDeckNum);
+    static void clearShortCut(USHORT inDeckNum);
+    static UINT getCardMax();
+    static UINT getCardMax(USHORT nCategory);
+    static UINT getAttackCardMax(USHORT nCategory);
+    static void setDeckName(INT inDeckIdx, const CHAR* pDeckName);
+    static void getCardTexInfo(CARD inCard, CHAR* outTexName, FVECTOR& outST);
+    static void getCardTexInfo(CARD inCard, CHAR* outTexName, IVECTOR& outUV);
+    static TexInfo* getCardTexInfo(CARD inCARD, FVECTOR& outST);
+    static TexInfo* getCardTexInfo(CARD inCard, IVECTOR& outUV);
+    static BOOL addCard(CARD card);
+    static BOOL addCard(USHORT inID, SHORT inNumber);
+    static BOOL canAddCard(CARD card);
+    static BOOL canAddCard(USHORT inID, SHORT inNumber);
+    static BOOL isAddCardValid(USHORT inID, SHORT inNumber);
+    static BOOL isBattleCardFull();
+    static BOOL isMapCardFull();
+    static BOOL isKeyCardFull();
+    static BOOL shouldDispBattleCardFullMessage();
+    static void finishBattleCardFullMessage();
+    static void resetBattleCardFullMessage();
+    static BOOL shouldDispMapCardFullMessage();
+    static void finishMapCardFullMessage();
+    static void resetMapCardFullMessage();
+    static CARD correctCardRank(CARD card);
+    static BOOL isHaveMapCard(INT nRank);
+    static BOOL isSoraValid(USHORT inID);
+    static BOOL isRikuValid(USHORT inID);
+    static BOOL isValid(USHORT inID);
+    static BOOL canPremium(USHORT inID);
+    static LPCSTR getName(USHORT inID);
+    static void initCardAppearance();
+    static void setCardPossible(USHORT usKind2);
+    static BOOL isCardPossible(USHORT usKind2);
+    static void setCardPossibleWorld(INT nWorldID);
+    static void setCardNew(USHORT usKind2);
+    static BOOL isCardNew(USHORT usKind2);
+    static BOOL setCardNewFinish(USHORT usKind2);
+    static BOOL isCardAlreadyGet(USHORT usKind2);
+    static BOOL isBattleTotalMaxUpCard(USHORT usKind2);
+    static BOOL isCardForTotalMaxUp(USHORT usKind2);
+    static BOOL tryAddBattleCardAppearance(USHORT usKind2);
+    static BOOL tryAddMapCardAppearance(USHORT usKind2);
+    static BOOL tryAddKeyCardAppearance(USHORT usKind2);
+    static INT getCardAppearance(USHORT usKind2);
+    static void setCardAppearance(USHORT usKind2, INT nAppear);
     static CARD_INFO* m_pCardInfo;         // PARTIAL: added for Form/Menu/Roulette (private in the original)
+    static CARD_INFO2* m_pCardInfo2;
+    static CARD m_deckCurrent[99];
+    static void* m_pCardInitRsrc;
+    static struct BC_PARAM* m_pBCParam;
 #ifdef GAME_SCENEINFO_H
     static void initCard(USHORT nDeck, WORLD_ID nWorld, SHORT nFloor); // PARTIAL: added for Form/DebugMenu
 #endif
