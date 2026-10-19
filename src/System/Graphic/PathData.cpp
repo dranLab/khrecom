@@ -51,9 +51,6 @@ inline void operator delete[](void* mem) { com_free(mem); }
 inline void* operator new(size_t, void* p) throw() { return p; }
 #endif
 
-/* strings of CPathVector::_init (INCLUDE_ASM) that CPathData::_init uses too */
-extern "C" const char D_00462128[];
-extern "C" const char D_00462178[];
 
 // PARTIAL: System/RsrcDB.h would add RsrcData.h's string to .rodata
 class CRsrcDB {
@@ -91,8 +88,98 @@ void CPathVector::init(const PATH_VECTOR* pPathData, BOOL bAlloc) {
     }
     _init(pPath, iPathMax, bAlloc);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PathData", _init__11CPathVectorPC7FVECTORii);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x68746150\n.word 0x61746144\n.word 0x7070632E\n.word 0x29343928\n.word 0x00000000\n.word 0x00000000\n.word 0x56705F6D\n.word 0x00006365\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x68746150\n.word 0x61746144\n.word 0x7070632E\n.word 0x32323128\n.word 0x00000029\n.word 0x00000000\n.word 0x74615070\n.word 0x00000068\n.word 0x50692821\n.word 0x4D687461\n.word 0x3C207861\n.word 0x2930203D\n.word 0x00000000\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x68746150\n.word 0x61746144\n.word 0x7070632E\n.word 0x37333128\n.word 0x00000029\n.word 0x00000000\n.word 0x62837D83\n.word 0xAA827683\n.word 0xE882A082\n.word 0xB982DC82\n.word 0x000AF182\n.word 0x00000000\n.text\n");
+void CPathVector::_init(const FVECTOR* pPath, INT iPathMax, BOOL bAlloc) {
+    CTask* pMap;
+    G_STRIP Line;
+    m_iStatus = 2;
+    m_pVec = NULL;
+    m_iActive = 0;
+    if (bAlloc) {
+        getPathParam(m_sParam);
+        m_iVecMax = iPathMax;
+        if (iPathMax <= 0) m_iVecMax = 1;
+        m_iVecMemMax = m_iVecMax + 8;
+#line 94
+        m_pVec = (FVECTOR*)com_malloc_d(m_iVecMemMax * sizeof(FVECTOR), __FILE__ "(94)", RET_ADDR());
+        ASSERT(m_pVec);
+        if (pPath) {
+            memcpy(m_pVec, pPath, m_iVecMax * sizeof(FVECTOR));
+            if (m_pPathData && m_pPathData->sParam.iVer < 2) {
+                for (INT i = 0; i < m_iVecMax; i++) {
+                    FLOAT fRoll = m_pVec[i].w;
+                    m_pVec[i].w = 0.0f;
+                    _setPathVectorConvWRoll(&m_pVec[i].w, fRoll);
+                    _setPathVectorConvWSpeed(&m_pVec[i].w, 0.0f);
+                }
+            }
+        } else {
+            for (INT i = 0; i < m_iVecMax; i++) {
+                m_pVec[i].set(0.0f, 1.0f, (FLOAT)i, 0.0f);
+            }
+        }
+        m_iStatus |= 1;
+#line 122
+        m_pCube = new (__FILE__ "(122)") CDbgCube[m_iVecMemMax];
+        for (INT i = 0; i < m_iVecMemMax; i++) {
+            m_pCube[i].setCoord(NULL, NULL);
+        }
+    } else {
+#line 131
+        ASSERT(pPath);
+        ASSERT(!(iPathMax <= 0));
+        m_pVec = (FVECTOR*)pPath;
+        m_iVecMax = iPathMax;
+#line 137
+        m_pCube = new (__FILE__ "(137)") CDbgCube[iPathMax];
+        for (INT i = 0; i < m_iVecMax; i++) {
+            m_pCube[i].setCoord(&m_pVec[i], NULL);
+        }
+    }
+    m_vRot.set(0.0f, 0.0f, 0.0f, 2.0f);
+    pMap = CTaskMan::getSysTask(2);
+    if (pMap) {
+        m_DDPathLines.setCoord(&pMap->Crd(0));
+        m_DDPathPolys.setCoord(&pMap->Crd(0));
+        m_DDPathPolys.setSemiTrans(ALPHA_BLEND);
+    } else {
+        TRACE("\x83\x7d\x83\x62\x83\x76\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1\n");
+    }
+    CCoord* pCrd = &m_DDXYZCoord;
+    _unitMatrixVu0(pCrd->m_Local);
+    pCrd->m_Flag = 1;
+    m_DDXYZLines.setCoord(&m_DDXYZCoord);
+    Line.Term = 0;
+    for (INT i = 0; i <= 40; i++) {
+        Line.P.set(0.0f, (FLOAT)(i - 30), 0.0f);
+        Line.C.set(8, i * 5 + 0x37, 8, 0xff);
+        if (i >= 40) Line.Term = 1;
+        m_DDXYZLines.m_vVERT.push_back(Line);
+    }
+    Line.P.set(-1.0f, 0.0f, 0.0f);
+    Line.C.set(0x40, 8, 8, 0xff);
+    Line.Term = 0;
+    m_DDXYZLines.m_vVERT.push_back(Line);
+    Line.P.set(0.0f, 0.0f, 0.0f);
+    Line.C.set(0xa0, 8, 8, 0xff);
+    Line.Term = 0;
+    m_DDXYZLines.m_vVERT.push_back(Line);
+    Line.P.set(1.0f, 0.0f, 0.0f);
+    Line.C.set(0xff, 8, 8, 0xff);
+    Line.Term = 1;
+    m_DDXYZLines.m_vVERT.push_back(Line);
+    Line.P.set(0.0f, 0.0f, -1.0f);
+    Line.C.set(8, 8, 0x40, 0xff);
+    Line.Term = 0;
+    m_DDXYZLines.m_vVERT.push_back(Line);
+    Line.P.set(0.0f, 0.0f, 0.0f);
+    Line.C.set(8, 0x28, 0xa0, 0xff);
+    Line.Term = 0;
+    m_DDXYZLines.m_vVERT.push_back(Line);
+    Line.P.set(0.0f, 0.0f, 1.0f);
+    Line.C.set(8, 0x48, 0xff, 0xff);
+    Line.Term = 1;
+    m_DDXYZLines.m_vVERT.push_back(Line);
+}
 void CPathVector::makeVertexSpeedAll() {
     INT i;
     INT j;
@@ -539,7 +626,7 @@ void CPathData::_init(const PATH_DATA* pPathData, BOOL bAlloc) {
     } else {
 #line 1435
         ASSERT(pPathData);
-        if (!(!(iPathMax <= 0))) AssertApp(__FILE__, __LINE__, (char*)D_00462128, 0);
+        ASSERT(!(iPathMax <= 0));
     }
     m_iPathMax = iPathMax;
 #line 1441
@@ -553,7 +640,7 @@ void CPathData::_init(const PATH_DATA* pPathData, BOOL bAlloc) {
     if (pMap) {
         m_DDLinkLines.setCoord(&pMap->Crd(0));
     } else {
-        TRACE((char*)D_00462178);
+        TRACE("\x83\x7d\x83\x62\x83\x76\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1\n");
     }
 }
 INT CPathData::getLinkChild(INT iPathNum, INT iIdx) {
