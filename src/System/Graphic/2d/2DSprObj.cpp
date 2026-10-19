@@ -8,6 +8,8 @@
 
 #include "System/Graphic/2d/2DSpr.h"
 #include "System/Graphic/2d/2DSeqObj.h"
+#include "System/Graphic/2d/2DSeqCtrl.h"
+#include "System/Math3D.h"
 
 namespace D2 {
 class C2DMan { /* System/Graphic/2d/2DMan.h */
@@ -55,6 +57,9 @@ extern SeqControl s_ViewerSeqControl;
 /* Ps2EeAs makes undefined weak symbols global: define it as weak absolute 0 (as Game/Enemy/CreateEnemy does) */
 __asm__(".weak s_ViewerSeqControl\ns_ViewerSeqControl = 0\n");
 
+extern "C" float sinf(float x);
+extern "C" float cosf(float x);
+extern "C" void sceVu0InterVector(float* v0, float* v1, float* v2, float t);
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 static inline void _itof0(FVECTOR& fVec, const IVECTOR& iVec) {
@@ -282,7 +287,77 @@ void C2DSprObj::getFukidasiRect(FVECTOR2 (*vOut)[4]) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", initForSeq__Q22D29C2DSprObjPQ22D213SEQ_ANIMATIONPQ22D210LAY_SCREEN);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", _main__Q22D29C2DSprObji);
+void C2DSprObj::_main(TIMEQ qTime) {
+    FLOAT fRate;
+    FVECTOR vec0;
+    switch (m_iStep) {
+    case 0:
+        break;
+    case 1:
+        if (qTime < m_qTime[0]) break;
+        m_fgDisp = 1;
+        m_iStep = 2;
+    case 2:
+        if (qTime >= m_qTime[1] + (m_status.last_cut ? 0 : 50)) {
+            m_iStep = 4;
+            m_fgDisp = 0;
+            if (!(m_Flg & 4)) break;
+        }
+        if (qTime >= m_qTime[1]) {
+            fRate = 1.0f;
+        } else {
+            fRate = (FLOAT)(qTime - m_qTime[0]) / (FLOAT)(m_qTime[1] - m_qTime[0]);
+        }
+        if (!m_status.curve_disable) {
+            float t2 = fRate * fRate;
+            float t3 = t2 * fRate;
+            float r = 1.0f - fRate;
+            float r2 = r * r;
+            float r3 = r2 * r;
+            fRate = 1.0f - (r3 + 3.0f * r2 * fRate * (1.0f - m_vCurve.y) + 3.0f * r * t2 * (1.0f - m_vCurve.z) + t3 * 0.0f);
+        }
+        if (!m_status.base_disable) InterVector2(m_vPos, m_vBase[1], m_vBase[0], fRate);
+        if (!m_status.ofs_disable) InterVector2(m_vOfs, m_vOffset[1], m_vOffset[0], fRate);
+        if (!m_status.rotate_disable) {
+            sceVu0InterVector((float*)&m_vRot, (float*)&m_vRotate[1], (float*)&m_vRotate[0], fRate);
+            Math3D::LimitPIVector(m_vRot);
+        }
+        if (!m_status.scale_disable) InterVector2(m_vScl, m_vScale[1], m_vScale[0], fRate);
+        if (!m_status.color_disable) sceVu0InterVector((float*)&m_vCol, (float*)&m_vColor[1], (float*)&m_vColor[0], fRate);
+        if (!m_status.sway_disable) {
+            InterVector2(m_vSwy, m_vSway[1], m_vSway[0], fRate);
+            if (!m_status.sway_lag) {
+                FLOAT f = fRate * 3.1415927f;
+                m_vSwy.x *= sinf(f * m_vRotate[0].w);
+                m_vSwy.y *= sinf(f * m_vRotate[1].w);
+            } else {
+                FLOAT f = fRate * 3.1415927f;
+                m_vSwy.x *= cosf(f * m_vRotate[0].w);
+                m_vSwy.y *= cosf(f * m_vRotate[1].w);
+            }
+        }
+        m_Flg |= 1;
+        break;
+    }
+    if (!(m_Flg & 1)) return;
+    {
+        if (!m_pSeqControl || !m_pSeqControl->fg3D) {
+            move();
+        } else if (m_fgParent == 0) {
+            m_fgRotTransPers = 0;
+            m_pSeqControl->fg3D = 1;
+            if (!m_fgDisp) move();
+            m_fgParent = 1;
+        } else {
+            if (m_fgParent > 0) {
+                m_fgRotTransPers = 1;
+            } else {
+                m_fgRotTransPers = 2;
+            }
+        }
+        m_Flg &= ~1;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", move__Q22D29C2DSprObj);
 void C2DSprObj::getRect(FVECTOR2* pvOut4, SprPrim& rSprPrim) {
     FVECTOR fVec;
