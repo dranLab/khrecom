@@ -115,8 +115,32 @@ public:
     void dispose(); // PARTIAL: added for Game/GameSubField
     INT distanceSphereO(FVECTOR* pP0);
     INT _detectColumnColumnR(class CColumnCollision& coll0, class CColumnCollision& coll1);
+    // PARTIAL: added for Game/Collision/CollUtil
+    CCollUtil();
+    ~CCollUtil();
+    void setup();
+    INT mappingData(MC_DATA* pDtHead);
+    static void recalcChipCollision(MC_CHIP* pChip);
+    void _enableChipCollision(FVECTOR& vChipCenter, BOOL fg);
+    void _backupChipStatus();
+    void _restoreChipStatus();
+    MC_CHIP* _searchChipCollisionFirst(FVECTOR& vChipCenter, FLOAT fRange);
+    MC_CHIP* _searchChipCollisionNext();
+    INT __detectMCInitInit(MC_CHIP* pChip);
+    void detectMCInit(MC_CHIP* pChip, INT iArea);
+    INT detectMap(FVECTOR* pP0, FVECTOR* pP1);
+    INT detectPolygon();
+    INT detectPLine();
+    INT distanceLine(FVECTOR* pP0, FVECTOR* pP1);
+    INT detectPSphere();
+    INT distanceSphere(FVECTOR* pP0);
+    INT slidingHosei(FVECTOR& v0, FVECTOR& v1, FVECTOR& v2);
+    void _initDbg();
 
-    /* 0x000 */ char _pad000[0x30];
+    /* 0x000 */ char m_MCDInfo[0x20]; /* MCD_INFO (Game/Collision/Ride.h) */
+    /* 0x020 */ struct MCD_INFO* m_pMCDInfo;
+    /* 0x024 */ struct MCD_INFO* m_pOCDInfo;
+    /* 0x028 */ char _pad028[0x8];
     /* 0x030 */ FVECTOR m_vCkS;
     /* 0x040 */ FLOAT m_fMDVal;
     /* 0x044 */ FLOAT m_Radius;
