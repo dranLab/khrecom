@@ -28,12 +28,21 @@ struct ENEMY_PARAM {
     struct ENEMY_CARD* pCards; /* 0x48 */
     INT iActCount;       /* 0x4c */
     ENEMY_ACT* pActs;    /* 0x50 */
-    UBYTE _m_0x54[0x30]; /* 0x54 iEnemyCard .. */
+    UBYTE _m_0x54[0x8];  /* 0x54 iEnemyCard, byEnemyCards */
+    int iDamageMotionIndex[10]; /* 0x5c */ // PARTIAL: added for Game/SEMotion
     int iFaintMotionIndex[3]; /* 0x84 */ // PARTIAL: added for Game/Enemy/EnemyNeoshadow
     UBYTE _m_0x90[0x10]; /* 0x90 iExtraParamCount .. 0x98 iAttackRate */
     INT iAppearMotionIndex;    /* 0xa0 */ // PARTIAL: added for Game/Enemy/MapEnemyMushroom
     INT iDisappearMotionIndex; /* 0xa4 */
     INT pad[2];                /* 0xa8 */
+
+    // PARTIAL: added for Game/SEMotion
+    BOOL isDamageMotion(INT inIndex) const {
+        for (INT i = 0; i < 10; i++) {
+            if (iDamageMotionIndex[i] == inIndex) return TRUE;
+        }
+        return FALSE;
+    }
 };
 
 /* Placeholders for the original header's inline functions: their strings ("@ENP", the parameter file's

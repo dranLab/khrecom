@@ -7,6 +7,7 @@ _$_10CCollision_0022BFD0 = 0x0022BFD0; // type:func size:0x30
 // Addresses that still-assembly data holds as plain words (string bytes), not pointers: without this splat makes
 // them references to labels inside objects whose data now comes from source.
 D_00495350 = 0x00495350; // can_be_referenced:False
+D_00485444 = 0x00485444; // can_be_referenced:False
 D_00495564 = 0x00495564; // can_be_referenced:False
 D_00677562 = 0x00677562; // can_be_referenced:False
 D_00678358 = 0x00678358; // can_be_referenced:False
@@ -91,6 +92,9 @@ _vt$4CBuf_0045EFF8 = 0x0045EFF8; // size:0x18
 // Game/EffectMotion: CAttachMotion's inline destructor and an unnamed copy of its vtable
 _$_13CAttachMotion_001EDB28 = 0x001EDB28; // type:func size:0x30
 _vt$13CAttachMotion_0047CDF8 = 0x0047CDF8; // size:0x30
+// Game/SEMotion: the same
+_$_13CAttachMotion_00218F98 = 0x00218F98; // type:func size:0x30
+_vt$13CAttachMotion_004856C8 = 0x004856C8; // size:0x30
 
 // Game/Gimmick/GimmickSearchLaser: CCollision's and CSphereCollision's inline destructors, CSphereCollision::collideMap
 // and unnamed copies of their vtables
