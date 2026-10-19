@@ -14,6 +14,8 @@
 #include "System/SJoint.h"
 #include "include_asm.h"
 
+inline void operator delete[](void* pv) { com_free(pv); }
+
 #define SJ_FOREACH(T, pEntry, list) \
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL)
@@ -34,9 +36,15 @@ class CMapModel : public CModel {
 
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
-class CSky : public CTask {
+class CModelBG : public CModel {}; /* System/Graphic/ModelBG.h */
+
+class CSky : public CTaskSecondary {
 public:
-    FVECTOR m_vColor; /* 0x40 */
+    FVECTOR m_vColor;       /* 0x40 */
+    CModelBG* m_pModel;     /* 0x50 */
+    INT m_modelSuu;         /* 0x54 */
+    FVECTOR* m_pRot;        /* 0x58 */
+    FVECTOR* m_pRotShift;   /* 0x5c */
     CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone);
     virtual ~CSky();
     virtual void main();
@@ -219,13 +227,20 @@ void CMap::createEnvSE(const ZONEPARTS& inParts) {
     if (unitId.c[1] == '0') CGame::playConstEnvSE(nFile * 1000 + nID, -1, FALSE);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", __4CSkyP5CTaskPvP8ZONEDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _$_4CSky);
+CSky::~CSky() {
+    if (m_pModel) delete[] m_pModel;
+    m_pModel = NULL;
+    if (m_pRot) delete m_pRot;
+    m_pRot = NULL;
+    if (m_pRotShift) delete m_pRotShift;
+    m_pRotShift = NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", main__4CSky);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", disp__4CSky);
 void CSky::setColorScale(FVECTOR& inColorScale) { m_vColor = inColorScale; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", __getSize__t7CVector1Z7G_STRIPi_00206010);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", __alloc__t7CVector1Z7G_STRIPi_00206028);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _$_t7CVector1Z7G_STRIP_002060F8);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", func_00206010);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", func_00206028);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", func_002060F8);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _$_8CMapGrid);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _$_9CMapModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", getMapID__C4CMap);
