@@ -734,7 +734,78 @@ void CGameMain::endBattle() {
     m_pSubBattle->update();
     if (m_pSubBattle->getGameSubState() == 6) endBattleSub();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", endBattleSub__9CGameMain);
+void CGameMain::endBattleSub() {
+    BOOL bChangeWorld = FALSE;
+    SHORT nCurArea = CSceneInfo::getCurrentAreaNum();
+    SHORT nNextArea = CSceneInfo::getNextAreaNum();
+    SHORT nNextScene = CSceneInfo::getNextSceneNum();
+    BOOL bNextEvent = (USHORT)(nNextScene - 2000) < 1000;
+    BOOL bChangeFloor = CSceneInfo::hasReqChangeFloor();
+    BOOL bChangeArea = (nCurArea != nNextArea);
+    if (bChangeArea && (nCurArea == 0 || nNextArea == 0)) bChangeWorld = TRUE;
+    if (bNextEvent || bChangeFloor || bChangeArea ||
+        (!CGame::isDbgStartFromBattle() && (USHORT)(CSceneInfo::getCurrentSceneNum() - 1050) < 149)) {
+        m_pSubBattle->terminate();
+        delete m_pSubBattle;
+        m_pSubBattle = NULL;
+        BOOL bRemovePlayer = FALSE;
+        BOOL bRemoveBattlePlayer = FALSE;
+        BOOL bWorld10 = CSceneInfo::getCurrentWorldID(TRUE) == 10;
+        if (CSceneInfo::getCurrentSceneNum() != nNextScene || bChangeArea || bChangeFloor) {
+            if (m_pSubField) {
+                m_pSubField->terminate();
+                delete m_pSubField;
+                m_pSubField = NULL;
+            }
+            if (CSceneInfo::checkMapRsrcCache(CRcf::getMapID(nNextArea, nNextScene), 1) < 0) {
+                CSceneInfo::removeMapRsrcCache(1);
+            }
+            bRemoveBattlePlayer = CGame::isSoraGame() != 0;
+            if (bChangeWorld) {
+                INT nWorld = CSceneInfo::getCurrentWorldID(FALSE);
+                if (nWorld == 6 || nWorld == 10) {
+                    bRemovePlayer = TRUE;
+                    bRemoveBattlePlayer = TRUE;
+                }
+            }
+        }
+        if (!bWorld10) {
+            CSceneInfo::removeMapRsrcCache(2);
+            if (bNextEvent) {
+                if (CGame::isSoraGame()) {
+                    bRemovePlayer = TRUE;
+                    bRemoveBattlePlayer = TRUE;
+                }
+                removeInconstRsrc();
+            }
+        }
+        if (bRemovePlayer) PLM::removePlayerRsrc(0);
+        if (bRemoveBattlePlayer) PLM::removeBattlePlayerRsrc(0);
+        if (bChangeWorld) {
+            removeInconstWorldRsrc();
+            removeConstWorldRsrc();
+        }
+        if (bNextEvent) CSound::clearForBattleScene();
+    }
+    CSceneInfo::update();
+    CPlaySpeedCtrl::setPlaySpeed(1.0f);
+    CPackMan::setFrameEffect(0, 0, 0, 0);
+    if (m_pSubField && CGame::isDbgStartFromBattle()) {
+        CGameWork::rollback(CGameWork::BACKUP_PRIMARY);
+    } else if (bChangeFloor) {
+        removeConstFloorRsrc();
+        initNextFloor();
+    }
+    INT nState;
+    if (bChangeWorld) {
+        nState = 1;
+    } else if (m_pSubBattle || (USHORT)(nNextScene - 2000) < 1000) {
+        nState = 3;
+    } else {
+        nState = 2;
+    }
+    changeState(nState);
+}
 void CGameMain::gotoRetryBattle() {
     if (CSceneInfo::isMinigameScene()) CMinigameManager::sendEvent(2, NULL);
     changeState(11);
