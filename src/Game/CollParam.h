@@ -83,6 +83,8 @@ struct ATK_COLL_PARAM { // 0xa0
     /* 0x9c */ UINT uiFlag;
 
     ATK_KIND getAtkKind() const;
+    UINT isNoLoop() const { return uiFlag & 1; }   // PARTIAL: added for Game/AttackMotion
+    UINT isFinish() const { return uiFlag & 2; }
 };
 
 struct OTHER_PARAM; // 0xc0
