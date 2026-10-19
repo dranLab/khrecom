@@ -38,7 +38,16 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/GameWork.h"
 #include "Game/StorageWork.h"
 #include "System/PadIO.h"
+#include "System/Rcf.h"
+#include "Game/MinigameManager.h"
+#include "Game/SceneEnv.h"
 #include "include_asm.h"
+
+// PARTIAL: System/RsrcDB.h would add RsrcData.h's string to .rodata
+class CRsrcDB {
+public:
+    static void removeGroup(INT nGroupID, INT nMemberID);
+};
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define GAME_NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
@@ -245,7 +254,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", checkStartFieldMenu__9CGam
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", procFieldMenu__9CGameMain);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", checkStartBattleMenu__9CGameMain);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", procBattleMenu__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", checkExitPause__9CGameMain);
+BOOL CGameMain::checkExitPause() {
+    if (m_nGameProcFlag & 0x800) {
+        m_nGameProcFlag &= ~0xc00;
+        return TRUE;
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqLoadConstFloorRsrc__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x8D837483\n.word 0xED8F4183\n.word 0x8A839392\n.word 0x5B815C83\n.word 0xCC825883\n.word 0xE892778E\n.word 0xCD94AA82\n.word 0x4F8ACD88\n.word 0xB782C582\n.word 0x000A4281\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x616F4C20\n.word 0x6F432064\n.word 0x2D74736E\n.word 0x6F6F6C46\n.word 0x73522D72\n.word 0x2D206372\n.word 0x3A202D2D\n.word 0x6F6C4620\n.word 0x3D20726F\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", removeConstFloorRsrc__9CGameMain);
@@ -254,29 +269,45 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqLoadConstWolrdRsrc__9CG
 __asm__(".rdata\n.align 3\n.word 0x5B818F83\n.word 0x68838B83\n.word 0x9392ED8F\n.word 0x5C838A83\n.word 0x58835B81\n.word 0x778ECC82\n.word 0xAA82E892\n.word 0xCD88CD94\n.word 0xC8824F8A\n.word 0xC582CC82\n.word 0x4C835883\n.word 0x76836283\n.word 0xDC82B582\n.word 0x4281B782\n.word 0x0000000A\n.word 0x00000000\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x616F4C20\n.word 0x6F432064\n.word 0x2D74736E\n.word 0x6C726F57\n.word 0x73522D64\n.word 0x2D206372\n.word 0x3A202D2D\n.word 0x726F5720\n.word 0x3D20646C\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", removeConstWorldRsrc__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x6D655220\n.word 0x2065766F\n.word 0x736E6F43\n.word 0x6F572D74\n.word 0x2D646C72\n.word 0x63727352\n.word 0x2D2D2D20\n.word 0x57203A20\n.word 0x646C726F\n.word 0x25203D20\n.word 0x00000A64\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqLoadInconstGameRsrc__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x616F4C20\n.word 0x6E492064\n.word 0x736E6F63\n.word 0x61472074\n.word 0x7352656D\n.word 0x2D206372\n.word 0x000A2D2D\n.word 0x00000000\n.text\n");
+void CGameMain::reqLoadInconstGameRsrc() {
+    if (!m_bInconstGameRsrcLoaded) {
+        CRcf::reqLoadRCF(0, 3, 0x100, NULL, 0);
+        m_bInconstGameRsrcLoaded = TRUE;
+        TRACE_COL(_TTY_RED, "[CGameMain]: --- Load Inconst GameRsrc ---\n");
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqLoadInconstWorldRsrc__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x5B818F83\n.word 0x68838B83\n.word 0x27BC9427\n.word 0x9392ED8F\n.word 0x5C838A83\n.word 0x58835B81\n.word 0x778ECC82\n.word 0xAA82E892\n.word 0xCD88CD94\n.word 0xC8824F8A\n.word 0xC582CC82\n.word 0x4C835883\n.word 0x76836283\n.word 0xDC82B582\n.word 0x4281B782\n.word 0x0000000A\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x616F4C20\n.word 0x6E492064\n.word 0x736E6F63\n.word 0x6F572D74\n.word 0x2D646C72\n.word 0x63727352\n.word 0x2D2D2D20\n.word 0x57203A20\n.word 0x646C726F\n.word 0x25203D20\n.word 0x00000A64\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", removeInconstWorldRsrc__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x6D655220\n.word 0x2065766F\n.word 0x6F636E49\n.word 0x2D74736E\n.word 0x6C726F57\n.word 0x73522D64\n.word 0x2D206372\n.word 0x3A202D2D\n.word 0x726F5720\n.word 0x3D20646C\n.word 0x0A642520\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", removeInconstRsrc__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x6D655220\n.word 0x2065766F\n.word 0x6F636E49\n.word 0x2074736E\n.word 0x656D6147\n.word 0x63727352\n.word 0x2D2D2D20\n.word 0x0000000A\n.text\n");
+void CGameMain::removeInconstRsrc() {
+    removeInconstWorldRsrc();
+    if (m_bInconstGameRsrcLoaded) {
+        CRsrcDB::removeGroup(0, 3);
+        m_bInconstGameRsrcLoaded = FALSE;
+        TRACE_COL(_TTY_RED, "[CGameMain]: --- Remove Inconst GameRsrc ---\n");
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preSetupCommon__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupCommon__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preSetupWorld__9CGameMain);
+void CGameMain::setupCommon() {
+    if (CRcf::isCompleteLoadRCF(0, 0)) changeState(1);
+}
+void CGameMain::preSetupWorld() { m_nStep = 0; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupWorld__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\n.word 0x2D2D2D20\n.word 0x696B5320\n.word 0x6F4C2070\n.word 0x3A206461\n.word 0x74614220\n.word 0x20656C74\n.word 0x63727352\n.word 0x2D2D2D20\n.word 0x0000000A\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preSetupBattleRsrc__9CGameMain);
+void CGameMain::preSetupBattleRsrc() { m_nStep = 0; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupBattleRsrc__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x31287070\n.word 0x29363630\n.word 0x00000000\n.word 0x53705F6D\n.word 0x61426275\n.word 0x656C7474\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preSetupField__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preSetupField2__9CGameMain);
+void CGameMain::preSetupField2() { m_nStep = 2; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupField__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x31287070\n.word 0x29363531\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", prePlayField__9CGameMain);
+void CGameMain::prePlayField() {
+    m_bPauseEnable = TRUE;
+    CMainApp::enableDbgUsrPause(TRUE, FALSE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", playField__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preEndField__9CGameMain);
+void CGameMain::preEndField() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", endField__9CGameMain);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", endFieldSub__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x41835683\n.word 0x5B815E83\n.word 0x5B818283\n.word 0x498F6883\n.word 0x6081B997\n.word 0x0000000A\n.text\n");
@@ -287,13 +318,27 @@ __asm__(".rdata\n.align 3\n.word 0x73655262\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", retryField__9CGameMain);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preSetupBattle__9CGameMain);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupBattle__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", prePlayBattle__9CGameMain);
+void CGameMain::prePlayBattle() {
+    m_bPauseEnable = TRUE;
+    CMainApp::enableDbgUsrPause(TRUE, FALSE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", playBattle__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", gotoEndBattle__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preEndBattle__9CGameMain);
+void CGameMain::gotoEndBattle() {
+    if (CSceneInfo::isMinigameScene()) CMinigameManager::sendEvent(1, NULL);
+    changeState(10);
+}
+void CGameMain::preEndBattle() {
+    m_bPauseEnable = FALSE;
+    CMainApp::enableDbgUsrPause(FALSE, TRUE);
+    suspendTaskInGame(1);
+    m_pSubBattle->reqChangeGameSubState(4);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", endBattle__9CGameMain);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", endBattleSub__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", gotoRetryBattle__9CGameMain);
+void CGameMain::gotoRetryBattle() {
+    if (CSceneInfo::isMinigameScene()) CMinigameManager::sendEvent(2, NULL);
+    changeState(11);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preRetryBattle__9CGameMain);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", retryBattle__9CGameMain);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqPlayMovie__9CGameMainPCci);
@@ -303,22 +348,58 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", playMovie__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x5B818083\n.word 0x5B817283\n.word 0x4983CC82\n.word 0x76835B81\n.word 0xC9829383\n.word 0x7394B88E\n.word 0xDC82B582\n.word 0xBD82B582\n.word 0x58834281\n.word 0x62834C83\n.word 0xB5827683\n.word 0xB782DC82\n.word 0x000A4281\n.word 0x00000000\n.word 0x6D614743\n.word 0x69614D65\n.word 0x203A206E\n.word 0x69766F4D\n.word 0x3E2D2065\n.word 0x726F4E20\n.word 0x0A6C616D\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001F8580\n.word 0x001F85E0\n.word 0x001F8638\n.word 0x001F865C\n.word 0x001F8694\n.word 0x001F8700\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F8720\n.word 0x001F8734\n.word 0x001F875C\n.word 0x001F8768\n.word 0x001F87E4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F88A4\n.word 0x001F888C\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqSave__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x32287070\n.word 0x29303931\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqGameOver__9CGameMaini);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqContinue_GameOver__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqExit_GameOver__9CGameMain);
+BOOL CGameMain::reqGameOver(BOOL bHeartless) {
+    m_nGameProcFlag |= 1;
+    if (bHeartless) m_nGameProcFlag |= 2;
+    return TRUE;
+}
+BOOL CGameMain::reqContinue_GameOver() {
+    if (m_nGameProcFlag & 8) {
+        m_nGameProcFlag |= 0x10;
+        return TRUE;
+    }
+    return FALSE;
+}
+BOOL CGameMain::reqExit_GameOver() {
+    if (m_nGameProcFlag & 8) {
+        m_nGameProcFlag |= 0x20;
+        return TRUE;
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preGameover__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x3D3D2030\n.word 0x5F6D2820\n.word 0x6D61476E\n.word 0x6F725065\n.word 0x616C4663\n.word 0x20262067\n.word 0x4F52505F\n.word 0x414C4643\n.word 0x41475F47\n.word 0x564F454D\n.word 0x505F5245\n.word 0x29434F52\n.word 0x00000000\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x32287070\n.word 0x29393332\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", gameover__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", resetSceneEnv__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preExit__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", exit__9CGameMain);
+void CGameMain::resetSceneEnv() {
+    FVECTOR v;
+    v.set(1.0f, 1.0f, 1.0f);
+    CSceneEnv::setColor((ObjType::eObjBit)0xfffeffff, 0.0f, v, NULL, 0);
+    CSceneEnv::setStop((ObjType::eObjBit)0);
+}
+void CGameMain::preExit() {
+    CGame::setFadeMaskProcPrio(CGame::FADE_PROC_PRIO_1);
+    CGame::reqBlackFadeOut(60);
+}
+void CGameMain::exit() {
+    if (CGame::isFadeDone()) CMainApp::reqSoftReset(SOFTRESET_SKIP_LOGO);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", reqCompleteGame__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preCompleteGame__9CGameMain);
+void CGameMain::preCompleteGame() {
+    if (!CAtel::isFadeActive()) {
+        CGame::reqBlackFadeOut(60);
+        CSound::fadeoutAllBGM(40);
+        CSound::fadeoutAllSE(40, TRUE);
+        CSound::fadeoutAllVoice(40);
+        m_nStep = 0;
+    } else {
+        m_nStep = 1;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", completeGame__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", preExitTheaterMode__9CGameMain);
+void CGameMain::preExitTheaterMode() { m_nStep = 0; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", exitTheaterMode__9CGameMain);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setBlackBeforeEncount__9CGameMaini);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", isBlackBeforeEncount__C9CGameMain);
+void CGameMain::setBlackBeforeEncount(BOOL bBlack) { m_bBlackBeforeEncount = bBlack; }
+BOOL CGameMain::isBlackBeforeEncount() const { return m_bBlackBeforeEncount; }
 CGame::CGame(CTask* pParent, INT nMode) : CTask(pParent, 0x8000) {
     ignorePlaySpeed(TRUE);
     CNowLoading::setMode(0);
