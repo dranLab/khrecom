@@ -30,6 +30,15 @@ public:
     static void reqGameOver(INT inFlag);
     static void suspendGameTask(); // PARTIAL: added for System/TaskMan
     static void checkPause();
+    // PARTIAL: added for Game/GameSubField
+    enum _FADE_PROC_PRIO { FADE_PROC_PRIO_0 = 0, FADE_PROC_PRIO_1 = 1 };
+    static BOOL isDbgStartFromBattle();
+    static BOOL isBlackBeforeEncount();
+    static void reqBlackFadeIn(USHORT inTime);
+    static void reqBlackFadeOut(USHORT inTime);
+    static BOOL reqPlayMovie(const CHAR* pszName, INT nMode);
+    static void setBlack();
+    static void setFadeMaskProcPrio(_FADE_PROC_PRIO ePrio);
 };
 
 #endif /* GAME_GAME_H */

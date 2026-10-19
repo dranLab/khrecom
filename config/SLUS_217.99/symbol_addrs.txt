@@ -247,3 +247,6 @@ _vt$6CState_004F6C08 = 0x004F6C08; // size:0x30
 _$_10CCollision_0022DF10 = 0x0022DF10; // type:func size:0x30
 _$_16CSphereCollision_0022DF40 = 0x0022DF40; // type:func size:0x30
 collideMap__16CSphereCollision_0022DF70 = 0x0022DF70; // type:func size:0x5C
+// Game/GameSubField: CState's inline destructor and an unnamed copy of its vtable
+_$_6CState_001FEF30 = 0x001FEF30; // type:func size:0x30
+_vt$6CState_0047FF60 = 0x0047FF60; // size:0x30
