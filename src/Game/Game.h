@@ -7,6 +7,8 @@
 
 class CGame : public CTask {
 public:
+    virtual ~CGame();
+    virtual void main();
     CGame();
     CGame(CTask* pParent);              // PARTIAL: added for System/MainTaskFactory
     CGame(CTask* pParent, INT nMode);   // PARTIAL: added for System/MainTaskFactory
@@ -19,6 +21,7 @@ public:
     static BOOL reqContinue_GameOver();    // PARTIAL: added for Form/Menu/GameOver
     static BOOL reqExit_GameOver();        // PARTIAL: added for Form/Menu/GameOver
     static BOOL isSuspended();             // PARTIAL: added for Game/SceneEnv
+    static BOOL isPause() { return isSuspended(); } // PARTIAL: added for Game/Game
     static INT getMapID();                 // PARTIAL: added for System/DebugProcInfo
     static void dbgStartFromBattle(BOOL bBattle); // PARTIAL: added for Form/DebugMenu
     static void startFromLoadGame();              // PARTIAL: added for Form/DebugMenu

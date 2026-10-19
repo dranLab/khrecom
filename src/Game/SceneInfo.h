@@ -298,6 +298,7 @@ public:
     static void updateMapRsrcCache(INT nMapID, INT nMode);
     static SHORT getPrevSceneNum();
     static UINT getCurrentSceneCacheID();
+    static BOOL hasAnyRequest(); // PARTIAL: added for Game/Game
     static INT getNextRoomID();
     static BOOL isLastFloorScene();
     static SHORT getNextAreaNum();
