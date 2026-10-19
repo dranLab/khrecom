@@ -7,6 +7,7 @@ typedef char _instCSJointLinkedPtr[sizeof(CSJointT<CLinkedPtr>)];
 #include "System/LinkedBuf.h"
 #include "System/CoordMan.h"
 #include "System/Debug.h"
+#include "System/Tsin.h"
 #include "include_asm.h"
 
 /* .data (the VU0 library's sin/cos table) still comes from the original assembly. */
@@ -15,6 +16,78 @@ extern const FMATRIX ONE_MATRIX = { { { 1.0f, 0.0f, 0.0f, 0.0f },
                                       { 0.0f, 1.0f, 0.0f, 0.0f },
                                       { 0.0f, 0.0f, 1.0f, 0.0f },
                                       { 0.0f, 0.0f, 0.0f, 1.0f } } };
+
+void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
+BOOL ClipDispBBox(const FVECTOR* v);
+BOOL ClipDispBBoxMaxMin(const FVECTOR* v);
+float vu0Sinf(float x);
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
+extern "C" {
+void sceVu0ApplyMatrix(float *v0, float (*m0)[4], float *v1);
+void sceVu0MulMatrix(float (*m0)[4], float (*m1)[4], float (*m2)[4]);
+void sceVu0OuterProduct(float *v0, float *v1, float *v2);
+float sceVu0InnerProduct(float *v0, float *v1);
+void sceVu0Normalize(float *v0, float *v1);
+void sceVu0TransposeMatrix(float (*m0)[4], float (*m1)[4]);
+void sceVu0InversMatrix(float (*m0)[4], float (*m1)[4]);
+void sceVu0DivVector(float *v0, float *v1, float q);
+void sceVu0DivVectorXYZ(float *v0, float *v1, float q);
+void sceVu0InterVector(float *v0, float *v1, float *v2, float t);
+void sceVu0AddVector(float *v0, float *v1, float *v2);
+void sceVu0SubVector(float *v0, float *v1, float *v2);
+void sceVu0MulVector(float *v0, float *v1, float *v2);
+void sceVu0ScaleVector(float *v0, float *v1, float t);
+void sceVu0TransMatrix(float (*m0)[4], float (*m1)[4], float *tv);
+void sceVu0CopyVector(float *v0, float *v1);
+void sceVu0CopyMatrix(float (*m0)[4], float (*m1)[4]);
+void sceVu0FTOI4Vector(int *v0, float *v1);
+void sceVu0FTOI0Vector(int *v0, float *v1);
+void sceVu0ITOF4Vector(float *v0, int *v1);
+void sceVu0ITOF0Vector(float *v0, int *v1);
+void sceVu0UnitMatrix(float (*m0)[4]);
+void sceVu0RotMatrixZ(float (*m0)[4], float (*m1)[4], float rz);
+void sceVu0RotMatrixX(float (*m0)[4], float (*m1)[4], float rx);
+void sceVu0RotMatrixY(float (*m0)[4], float (*m1)[4], float ry);
+void sceVu0RotMatrix(float (*m0)[4], float (*m1)[4], float *rot);
+void sceVu0ClampVector(float *v0, float *v1, float min, float max);
+void sceVu0CameraMatrix(float (*m)[4], float *p, float *zd, float *yd);
+void sceVu0NormalLightMatrix(float (*m)[4], float *l0, float *l1, float *l2);
+void sceVu0LightColorMatrix(float (*m)[4], float *c0, float *c1, float *c2, float *a);
+void sceVu0ViewScreenMatrix(float (*m)[4], float scrz, float ax, float ay, float cx, float cy, float zmin, float zmax, float nearz, float farz);
+void sceVu0DropShadowMatrix(float (*m)[4], float *lp, float a, float b, float c, int mode);
+void sceVu0RotTransPersN(int (*v0)[4], float (*m0)[4], float (*v1)[4], int n, int mode);
+void sceVu0RotTransPers(int *v0, float (*m0)[4], float *v1, int mode);
+void sceVu0CopyVectorXYZ(float *v0, float *v1);
+void sceVu0InterVectorXYZ(float *v0, float *v1, float *v2, float r);
+void sceVu0ScaleVectorXYZ(float *v0, float *v1, float s);
+int sceVu0ClipScreen(float *v0);
+int sceVu0ClipScreen3(float *v0, float *v1, float *v2);
+int sceVu0ClipAll(float *minv, float *maxv, float (*ms)[4], float (*vm)[4], int n);
+}
+extern "C" float sinf(float x);
+extern "C" float cosf(float x);
+extern "C" float atan2f(float y, float x);
+
+static inline void operator*=(FVECTOR& v, FLOAT inF) {
+    v.x *= inF;
+    v.y *= inF;
+    v.z *= inF;
+    v.w *= inF;
+}
+
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
@@ -314,20 +387,145 @@ FLOAT InnerProduct4(const FVECTOR& p0, const FVECTOR& p1) {
                  "qmfc2.ni $2, $vf5\n"
                  "mtc1 $2, $f0\n");
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", spinMatrixX__FR7FMATRIXRC7FMATRIXf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", spinMatrixY__FR7FMATRIXRC7FMATRIXf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", spinMatrixZ__FR7FMATRIXRC7FMATRIXf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", spinMatrixX__FR7FMATRIXRC7FMATRIXi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", spinMatrixY__FR7FMATRIXRC7FMATRIXi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", spinMatrixZ__FR7FMATRIXRC7FMATRIXi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", rotMatrixX__FR7FMATRIXRC7FMATRIXi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", rotMatrixY__FR7FMATRIXRC7FMATRIXi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", rotMatrixZ__FR7FMATRIXRC7FMATRIXi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", scaleMatrixSelf__FR7FMATRIXf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", scaleMatrixSelf__FR7FMATRIXR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", World2Local__FR7FVECTORRC7FMATRIXRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", cossin2deg__Fff);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", World2Eurar__FRsT0RC7FMATRIXRC7FVECTOR);
+void spinMatrixX(FMATRIX& matOut, const FMATRIX& matIn, FLOAT fInDeg) {
+    FLOAT sn = sinf(fInDeg);
+    FLOAT cs = cosf(fInDeg);
+    FMATRIX t;
+
+    _unitMatrixVu0(t);
+    t.m[1][1] = cs;
+    t.m[1][2] = sn;
+    t.m[2][1] = -sn;
+    t.m[2][2] = cs;
+    MulMatrix(matOut, matIn, t);
+}
+void spinMatrixY(FMATRIX& matOut, const FMATRIX& matIn, FLOAT fInDeg) {
+    FLOAT sn = sinf(fInDeg);
+    FLOAT cs = cosf(fInDeg);
+    FMATRIX t;
+
+    _unitMatrixVu0(t);
+    t.m[2][2] = cs;
+    t.m[2][0] = sn;
+    t.m[0][0] = cs;
+    t.m[0][2] = -sn;
+    MulMatrix(matOut, matIn, t);
+}
+void spinMatrixZ(FMATRIX& matOut, const FMATRIX& matIn, FLOAT fInDeg) {
+    FLOAT sn = sinf(fInDeg);
+    FLOAT cs = cosf(fInDeg);
+    FMATRIX t;
+
+    _unitMatrixVu0(t);
+    t.m[0][0] = cs;
+    t.m[0][1] = sn;
+    t.m[1][0] = -sn;
+    t.m[1][1] = cs;
+    MulMatrix(matOut, matIn, t);
+}
+void spinMatrixX(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
+    FLOAT sn = tsin(nInDeg);
+    FLOAT cs = tcos(nInDeg);
+    FMATRIX t;
+
+    _unitMatrixVu0(t);
+    t.m[1][1] = cs;
+    t.m[1][2] = sn;
+    t.m[2][1] = -sn;
+    t.m[2][2] = cs;
+    MulMatrix(matOut, matIn, t);
+}
+void spinMatrixY(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
+    FLOAT sn = tsin(nInDeg);
+    FLOAT cs = tcos(nInDeg);
+    FMATRIX t;
+
+    _unitMatrixVu0(t);
+    t.m[2][2] = cs;
+    t.m[2][0] = sn;
+    t.m[0][0] = cs;
+    t.m[0][2] = -sn;
+    MulMatrix(matOut, matIn, t);
+}
+void spinMatrixZ(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
+    FLOAT sn = tsin(nInDeg);
+    FLOAT cs = tcos(nInDeg);
+    FMATRIX t;
+
+    _unitMatrixVu0(t);
+    t.m[0][0] = cs;
+    t.m[0][1] = sn;
+    t.m[1][0] = -sn;
+    t.m[1][1] = cs;
+    MulMatrix(matOut, matIn, t);
+}
+void rotMatrixX(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
+    FLOAT sn = tsin(nInDeg);
+    FLOAT cs = tcos(nInDeg);
+    FMATRIX t;
+
+    _unitMatrixVu0(t);
+    t.m[1][1] = cs;
+    t.m[1][2] = sn;
+    t.m[2][1] = -sn;
+    t.m[2][2] = cs;
+    MulMatrix(matOut, t, matIn);
+}
+void rotMatrixY(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
+    FLOAT sn = tsin(nInDeg);
+    FLOAT cs = tcos(nInDeg);
+    FMATRIX t;
+
+    _unitMatrixVu0(t);
+    t.m[2][2] = cs;
+    t.m[2][0] = sn;
+    t.m[0][0] = cs;
+    t.m[0][2] = -sn;
+    MulMatrix(matOut, t, matIn);
+}
+void rotMatrixZ(FMATRIX& matOut, const FMATRIX& matIn, INT nInDeg) {
+    FLOAT sn = tsin(nInDeg);
+    FLOAT cs = tcos(nInDeg);
+    FMATRIX t;
+
+    _unitMatrixVu0(t);
+    t.m[0][0] = cs;
+    t.m[0][1] = sn;
+    t.m[1][0] = -sn;
+    t.m[1][1] = cs;
+    MulMatrix(matOut, t, matIn);
+}
+void scaleMatrixSelf(FMATRIX& self, FLOAT f) {
+    self.v[0] *= f;
+    self.v[1] *= f;
+    self.v[2] *= f;
+}
+void scaleMatrixSelf(FMATRIX& self, FVECTOR& v) {
+    ScaleVector(self.v[0], self.v[0], v.x);
+    ScaleVector(self.v[1], self.v[1], v.y);
+    ScaleVector(self.v[2], self.v[2], v.z);
+}
+void World2Local(FVECTOR& out_v, const FMATRIX& world, const FVECTOR& in_v) {
+    FMATRIX t;
+
+    sceVu0InversMatrix(t.m, (float(*)[4])world.m);
+    ApplyMatrix(out_v, t, in_v);
+}
+TDEG cossin2deg(FLOAT cs, FLOAT sn) {
+    return (TDEG)(FLOAT)(atan2f(sn, cs) * 1800.0f / 3.14159265358979323846);
+}
+void World2Eurar(TDEG& swivel, TDEG& tilt, const FMATRIX& world, const FVECTOR& in_v) {
+    FVECTOR v;
+    FVECTOR t;
+    FMATRIX m;
+
+    World2Local(v, world, in_v);
+    swivel = cossin2deg(v.z, v.x);
+    _unitMatrixVu0(m);
+    spinMatrixY(m, m, -swivel);
+    ApplyMatrix(t, m, v);
+    tilt = -cossin2deg(t.z, t.y);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", roundPI__FR7FVECTORi);
 void getMaxMinToVector8(FVECTOR* p0, const FVECTOR& p1, const FVECTOR& p2) {
     asm volatile(
@@ -354,7 +552,19 @@ void getMaxMinToVector8(FVECTOR* p0, const FVECTOR& p1, const FVECTOR& p2) {
                  "sqc2 $vf5, 0x60($4)\n"
                  "sqc2 $vf11, 0x70($4)\n");
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", ViewClipMatrix__FR7FMATRIXfffff);
+void ViewClipMatrix(FMATRIX& outVC, FLOAT scrw, FLOAT scrh, FLOAT scrz, FLOAT zmin, FLOAT zmax) {
+    asm volatile("sq $0, 0x0(%0)\n"
+                 "sq $0, 0x10(%0)\n"
+                 "sqc2 $vf0, 0x20(%0)\n"
+                 "sq $0, 0x30(%0)\n"
+                 :
+                 : "r"(&outVC)
+                 : "memory");
+    outVC.m[0][0] = (scrz + scrz) / scrw;
+    outVC.m[1][1] = (scrz + scrz) / scrh;
+    outVC.m[2][2] = (zmax + zmin) / (zmax - zmin);
+    outVC.m[3][2] = (zmax * -2.0f * zmin) / (zmax - zmin);
+}
 INT ClipDisp(const FMATRIX& p0, const FVECTOR& p1) {
     asm volatile(
                  "lqc2 $vf8, 0x0($5)\n"
@@ -374,12 +584,128 @@ INT ClipDisp(const FMATRIX& p0, const FVECTOR& p1) {
                  "vnop\n"
                  "cfc2.ni $2, $vi18\n");
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", ClipDispBBox__FRC7FMATRIXPC7FVECTOR);
+BOOL ClipDispBBox(const FMATRIX& lc, const FVECTOR* v) {
+    asm volatile(
+                 "lqc2 $vf4, 0x0(%0)\n"
+                 "lqc2 $vf5, 0x10(%0)\n"
+                 "lqc2 $vf6, 0x20(%0)\n"
+                 "lqc2 $vf7, 0x30(%0)\n"
+                 :
+                 : "r"(&lc));
+    return ClipDispBBox(v);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", ClipDispBBox__FPC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", ClipDispBBox__FRC7FMATRIXT0PC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", ClipDispBBox__FRC7FMATRIXN20PC7FVECTOR);
+BOOL ClipDispBBox(const FMATRIX& wc, const FMATRIX& lw, const FVECTOR* v) {
+    asm volatile(
+                 "lqc2 $vf8, 0x0(%0)\n"
+                 "lqc2 $vf9, 0x10(%0)\n"
+                 "lqc2 $vf10, 0x20(%0)\n"
+                 "lqc2 $vf11, 0x30(%0)\n"
+                 "lqc2 $vf4, 0x0(%1)\n"
+                 "lqc2 $vf5, 0x10(%1)\n"
+                 "lqc2 $vf6, 0x20(%1)\n"
+                 "lqc2 $vf7, 0x30(%1)\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf4x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf4y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf4z\n"
+                 "vmaddw.xyzw $vf4, $vf11, $vf4w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf5x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf5y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf5z\n"
+                 "vmaddw.xyzw $vf5, $vf11, $vf5w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf6x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf6y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf6z\n"
+                 "vmaddw.xyzw $vf6, $vf11, $vf6w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf7x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf7y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf7z\n"
+                 "vmaddw.xyzw $vf7, $vf11, $vf7w\n"
+                 :
+                 : "r"(&wc), "r"(&lw));
+    return ClipDispBBox(v);
+}
+BOOL ClipDispBBox(const FMATRIX& vc, const FMATRIX& wv, const FMATRIX& lw, const FVECTOR* v) {
+    asm volatile(
+                 "lqc2 $vf8, 0x0(%1)\n"
+                 "lqc2 $vf9, 0x10(%1)\n"
+                 "lqc2 $vf10, 0x20(%1)\n"
+                 "lqc2 $vf11, 0x30(%1)\n"
+                 "lqc2 $vf4, 0x0(%2)\n"
+                 "lqc2 $vf5, 0x10(%2)\n"
+                 "lqc2 $vf6, 0x20(%2)\n"
+                 "lqc2 $vf7, 0x30(%2)\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf4x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf4y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf4z\n"
+                 "vmaddw.xyzw $vf4, $vf11, $vf4w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf5x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf5y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf5z\n"
+                 "vmaddw.xyzw $vf5, $vf11, $vf5w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf6x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf6y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf6z\n"
+                 "vmaddw.xyzw $vf6, $vf11, $vf6w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf7x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf7y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf7z\n"
+                 "vmaddw.xyzw $vf7, $vf11, $vf7w\n"
+                 "lqc2 $vf8, 0x0(%0)\n"
+                 "lqc2 $vf9, 0x10(%0)\n"
+                 "lqc2 $vf10, 0x20(%0)\n"
+                 "lqc2 $vf11, 0x30(%0)\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf4x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf4y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf4z\n"
+                 "vmaddw.xyzw $vf4, $vf11, $vf4w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf5x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf5y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf5z\n"
+                 "vmaddw.xyzw $vf5, $vf11, $vf5w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf6x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf6y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf6z\n"
+                 "vmaddw.xyzw $vf6, $vf11, $vf6w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf7x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf7y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf7z\n"
+                 "vmaddw.xyzw $vf7, $vf11, $vf7w\n"
+                 :
+                 : "r"(&vc), "r"(&wv), "r"(&lw));
+    return ClipDispBBox(v);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", ClipDispBBoxMaxMin__FPC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", ClipDispBBoxMaxMin__FRC7FMATRIXT0PC7FVECTOR);
+BOOL ClipDispBBoxMaxMin(const FMATRIX& wc, const FMATRIX& lw, const FVECTOR* v) {
+    asm volatile(
+                 "lqc2 $vf8, 0x0(%0)\n"
+                 "lqc2 $vf9, 0x10(%0)\n"
+                 "lqc2 $vf10, 0x20(%0)\n"
+                 "lqc2 $vf11, 0x30(%0)\n"
+                 "lqc2 $vf4, 0x0(%1)\n"
+                 "lqc2 $vf5, 0x10(%1)\n"
+                 "lqc2 $vf6, 0x20(%1)\n"
+                 "lqc2 $vf7, 0x30(%1)\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf4x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf4y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf4z\n"
+                 "vmaddw.xyzw $vf4, $vf11, $vf4w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf5x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf5y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf5z\n"
+                 "vmaddw.xyzw $vf5, $vf11, $vf5w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf6x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf6y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf6z\n"
+                 "vmaddw.xyzw $vf6, $vf11, $vf6w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf7x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf7y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf7z\n"
+                 "vmaddw.xyzw $vf7, $vf11, $vf7w\n"
+                 :
+                 : "r"(&wc), "r"(&lw));
+    return ClipDispBBoxMaxMin(v);
+}
 void ApplyMatrix(FVECTOR& p0, const FMATRIX& p1, const FVECTOR& p2) {
     asm volatile(
                  "lqc2 $vf8, 0x0($6)\n"
@@ -635,7 +961,13 @@ void ApplyMatrixXYZ(FVECTOR& p0, const FMATRIX& p1, const FVECTOR& p2) {
                  "vmaddw.xyz $vf4, $vf8, $vf0w\n"
                  "sqc2 $vf4, 0x0($4)\n");
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", vu0Cosf__Ff);
+float vu0Cosf(float x) {
+    x += 1.5707964f;
+    if (x > 3.1415927f) {
+        x -= 6.2831855f;
+    }
+    return vu0Sinf(x);
+}
 float vu0Sinf(float x) {
     static const float r[4] __attribute__((aligned(16))) = { 2.60188699e-06f, -0.000198074136f, 0.0083330255f,
                                                              -0.166666567f };
@@ -680,7 +1012,7 @@ float vu0SinfToCosf(float p0) {
                  "cfc2.ni $8, $vi22\n"
                  "mtc1 $8, $f0\n");
 }
-extern "C" void sceVu0ApplyMatrix(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0ApplyMatrix(float *v0, float (*m0)[4], float *v1) {
     asm volatile(
                  "lqc2 $vf8, 0x0($6)\n"
                  "lqc2 $vf4, 0x0($5)\n"
@@ -693,7 +1025,7 @@ extern "C" void sceVu0ApplyMatrix(void* p0, void* p1, void* p2) {
                  "vmaddw.xyzw $vf9, $vf7, $vf8w\n"
                  "sqc2 $vf9, 0x0($4)\n");
 }
-extern "C" void sceVu0MulMatrix(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0MulMatrix(float (*m0)[4], float (*m1)[4], float (*m2)[4]) {
     asm volatile(
                  "lqc2 $vf8, 0x0($5)\n"
                  "lqc2 $vf9, 0x10($5)\n"
@@ -724,7 +1056,7 @@ extern "C" void sceVu0MulMatrix(void* p0, void* p1, void* p2) {
                  "sqc2 $vf6, 0x20($4)\n"
                  "sqc2 $vf7, 0x30($4)\n");
 }
-extern "C" void sceVu0OuterProduct(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0OuterProduct(float *v0, float *v1, float *v2) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "lqc2 $vf5, 0x0($6)\n"
@@ -733,7 +1065,7 @@ extern "C" void sceVu0OuterProduct(void* p0, void* p1, void* p2) {
                  "vopmsub.xyz $vf6, $vf5, $vf4\n"
                  "sqc2 $vf6, 0x0($4)\n");
 }
-extern "C" float sceVu0InnerProduct(void* p0, void* p1, void* p2) {
+extern "C" float sceVu0InnerProduct(float *v0, float *v1) {
     asm volatile(
                  "lqc2 $vf4, 0x0($4)\n"
                  "lqc2 $vf5, 0x0($5)\n"
@@ -744,7 +1076,7 @@ extern "C" float sceVu0InnerProduct(void* p0, void* p1, void* p2) {
                  "qmfc2.ni $2, $vf5\n"
                  "mtc1 $2, $f0\n");
 }
-extern "C" void sceVu0Normalize(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0Normalize(float *v0, float *v1) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "vmaxw.xyzw $vf6, $vf0, $vf0w\n"
@@ -762,7 +1094,7 @@ extern "C" void sceVu0Normalize(void* p0, void* p1, void* p2) {
                  "vmulq.xyz $vf6, $vf4, $Q\n"
                  "sqc2 $vf6, 0x0($4)\n");
 }
-extern "C" void sceVu0TransposeMatrix(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0TransposeMatrix(float (*m0)[4], float (*m1)[4]) {
     asm volatile(
                  "lq $8, 0x0($5)\n"
                  "lq $9, 0x10($5)\n"
@@ -781,7 +1113,7 @@ extern "C" void sceVu0TransposeMatrix(void* p0, void* p1, void* p2) {
                  "sq $10, 0x20($4)\n"
                  "sq $11, 0x30($4)\n");
 }
-extern "C" void sceVu0InversMatrix(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0InversMatrix(float (*m0)[4], float (*m1)[4]) {
     asm volatile(
                  "lq $8, 0x0($5)\n"
                  "lq $9, 0x10($5)\n"
@@ -810,7 +1142,7 @@ extern "C" void sceVu0InversMatrix(void* p0, void* p1, void* p2) {
                  "sq $10, 0x20($4)\n"
                  "sqc2 $vf4, 0x30($4)\n");
 }
-extern "C" void sceVu0DivVector(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0DivVector(float *v0, float *v1, float q) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "mfc1 $8, $f12\n"
@@ -820,7 +1152,7 @@ extern "C" void sceVu0DivVector(void* p0, void* p1, void* p2) {
                  "vmulq.xyzw $vf4, $vf4, $Q\n"
                  "sqc2 $vf4, 0x0($4)\n");
 }
-extern "C" void sceVu0DivVectorXYZ(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0DivVectorXYZ(float *v0, float *v1, float q) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "mfc1 $8, $f12\n"
@@ -830,7 +1162,7 @@ extern "C" void sceVu0DivVectorXYZ(void* p0, void* p1, void* p2) {
                  "vmulq.xyz $vf4, $vf4, $Q\n"
                  "sqc2 $vf4, 0x0($4)\n");
 }
-extern "C" void sceVu0InterVector(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0InterVector(float *v0, float *v1, float *v2, float t) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "lqc2 $vf5, 0x0($6)\n"
@@ -841,28 +1173,28 @@ extern "C" void sceVu0InterVector(void* p0, void* p1, void* p2) {
                  "vmaddx.xyzw $vf4, $vf4, $vf6x\n"
                  "sqc2 $vf4, 0x0($4)\n");
 }
-extern "C" void sceVu0AddVector(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0AddVector(float *v0, float *v1, float *v2) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "lqc2 $vf5, 0x0($6)\n"
                  "vadd.xyzw $vf6, $vf4, $vf5\n"
                  "sqc2 $vf6, 0x0($4)\n");
 }
-extern "C" void sceVu0SubVector(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0SubVector(float *v0, float *v1, float *v2) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "lqc2 $vf5, 0x0($6)\n"
                  "vsub.xyzw $vf6, $vf4, $vf5\n"
                  "sqc2 $vf6, 0x0($4)\n");
 }
-extern "C" void sceVu0MulVector(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0MulVector(float *v0, float *v1, float *v2) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "lqc2 $vf5, 0x0($6)\n"
                  "vmul.xyzw $vf6, $vf4, $vf5\n"
                  "sqc2 $vf6, 0x0($4)\n");
 }
-extern "C" void sceVu0ScaleVector(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0ScaleVector(float *v0, float *v1, float t) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "mfc1 $8, $f12\n"
@@ -870,7 +1202,7 @@ extern "C" void sceVu0ScaleVector(void* p0, void* p1, void* p2) {
                  "vmulx.xyzw $vf6, $vf4, $vf5x\n"
                  "sqc2 $vf6, 0x0($4)\n");
 }
-extern "C" void sceVu0TransMatrix(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0TransMatrix(float (*m0)[4], float (*m1)[4], float *tv) {
     asm volatile(
                  "lqc2 $vf4, 0x0($6)\n"
                  "lqc2 $vf5, 0x30($5)\n"
@@ -883,12 +1215,12 @@ extern "C" void sceVu0TransMatrix(void* p0, void* p1, void* p2) {
                  "sq $9, 0x20($4)\n"
                  "sqc2 $vf5, 0x30($4)\n");
 }
-extern "C" void sceVu0CopyVector(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0CopyVector(float *v0, float *v1) {
     asm volatile(
                  "lq $6, 0x0($5)\n"
                  "sq $6, 0x0($4)\n");
 }
-extern "C" void sceVu0CopyMatrix(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0CopyMatrix(float (*m0)[4], float (*m1)[4]) {
     asm volatile(
                  "lq $6, 0x0($5)\n"
                  "lq $7, 0x10($5)\n"
@@ -899,31 +1231,31 @@ extern "C" void sceVu0CopyMatrix(void* p0, void* p1, void* p2) {
                  "sq $8, 0x20($4)\n"
                  "sq $9, 0x30($4)\n");
 }
-extern "C" void sceVu0FTOI4Vector(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0FTOI4Vector(int *v0, float *v1) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "vftoi4.xyzw $vf5, $vf4\n"
                  "sqc2 $vf5, 0x0($4)\n");
 }
-extern "C" void sceVu0FTOI0Vector(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0FTOI0Vector(int *v0, float *v1) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "vftoi0.xyzw $vf5, $vf4\n"
                  "sqc2 $vf5, 0x0($4)\n");
 }
-extern "C" void sceVu0ITOF4Vector(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0ITOF4Vector(float *v0, int *v1) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "vitof4.xyzw $vf5, $vf4\n"
                  "sqc2 $vf5, 0x0($4)\n");
 }
-extern "C" void sceVu0ITOF0Vector(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0ITOF0Vector(float *v0, int *v1) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "vitof0.xyzw $vf5, $vf4\n"
                  "sqc2 $vf5, 0x0($4)\n");
 }
-extern "C" void sceVu0UnitMatrix(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0UnitMatrix(float (*m0)[4]) {
     asm volatile(
                  "vmr32.xyzw $vf5, $vf0\n"
                  "vmr32.xyzw $vf6, $vf5\n"
@@ -933,12 +1265,172 @@ extern "C" void sceVu0UnitMatrix(void* p0, void* p1, void* p2) {
                  "sqc2 $vf6, 0x10($4)\n"
                  "sqc2 $vf7, 0x0($4)\n");
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", _sceVu0ecossin);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0RotMatrixZ);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0RotMatrixX);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0RotMatrixY);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0RotMatrix);
-extern "C" void sceVu0ClampVector(void* p0, void* p1, void* p2) {
+/* static in the SDK; called only from the asm below (non-static here, so that it is kept) */
+extern "C" void _sceVu0ecossin(float t) {
+    asm volatile(
+                 "vmul.x $vf7, $vf6, $vf6\n"
+                 "la $8, D_003920A0\n"
+                 "lqc2 $vf5, 0x0($8)\n"
+                 "vmul.x $vf8, $vf7, $vf7\n"
+                 "vadda.x $ACC, $vf6, $vf0\n"
+                 "vmul.x $vf9, $vf7, $vf8\n"
+                 "vmul.x $vf10, $vf8, $vf8\n"
+                 "vmul.x $vf7, $vf7, $vf6\n"
+                 "vmul.x $vf8, $vf8, $vf6\n"
+                 "vmul.x $vf9, $vf9, $vf6\n"
+                 "vmul.x $vf10, $vf10, $vf6\n"
+                 "vmaddaw.x $ACC, $vf7, $vf5w\n"
+                 "vmaddaz.x $ACC, $vf8, $vf5z\n"
+                 "vmadday.x $ACC, $vf9, $vf5y\n"
+                 "vmaddx.x $vf4, $vf10, $vf5x\n"
+                 "vaddaw.x $ACC, $vf0, $vf0w\n"
+                 "vmsub.x $vf7, $vf4, $vf4\n"
+                 ".word 0x4A0703BD\n"
+                 "vaddx.xy $vf4, $vf0, $vf4x\n"
+                 "bnez $7, 1f\n"
+                 "vaddw.x $vf7, $vf0, $vf0w\n"
+                 "b 2f\n"
+                 "1:\n"
+                 "vsubw.x $vf7, $vf0, $vf0w\n"
+                 "2:\n"
+                 "vwaitq\n"
+                 "vmulq.x $vf4, $vf7, $Q\n"
+                 :
+                 :
+                 : "$8");
+}
+extern "C" void sceVu0RotMatrixZ(float (*m0)[4], float (*m1)[4], float rz) {
+    asm volatile(
+                 "mtc1 $0, $f0\n"
+                 "c.lt.s $f12, $f0\n"
+                 "li.s $f0, 1.57079637050628662109e0\n"
+                 "bc1f 1f\n"
+                 "add.s $f12, $f0, $f12\n"
+                 "li $7, 1\n"
+                 "j 2f\n"
+                 "1:\n"
+                 "sub.s $f12, $f0, $f12\n"
+                 "move $7, $0\n"
+                 "2:\n"
+                 "mfc1 $8, $f12\n"
+                 "qmtc2.ni $8, $vf6\n"
+                 "move $6, $31\n"
+                 "jal _sceVu0ecossin\n"
+                 "daddu $31, $6, $zero\n"
+                 "lqc2 $vf7, 0x0($5)\n"
+                 "lqc2 $vf8, 0x10($5)\n"
+                 "vaddx.y $vf5, $vf0, $vf4x\n"
+                 "vaddy.x $vf5, $vf0, $vf4y\n"
+                 "vsubx.x $vf6, $vf0, $vf4x\n"
+                 "vaddy.y $vf6, $vf0, $vf4y\n"
+                 "lqc2 $vf9, 0x20($5)\n"
+                 "lqc2 $vf10, 0x30($5)\n"
+                 "vmulax.xy $ACC, $vf5, $vf7x\n"
+                 "vmaddy.xy $vf7, $vf6, $vf7y\n"
+                 "vmulax.xy $ACC, $vf5, $vf8x\n"
+                 "vmaddy.xy $vf8, $vf6, $vf8y\n"
+                 "vmulax.xy $ACC, $vf5, $vf9x\n"
+                 "vmaddy.xy $vf9, $vf6, $vf9y\n"
+                 "vmulax.xy $ACC, $vf5, $vf10x\n"
+                 "vmaddy.xy $vf10, $vf6, $vf10y\n"
+                 "sqc2 $vf7, 0x0($4)\n"
+                 "sqc2 $vf8, 0x10($4)\n"
+                 "sqc2 $vf9, 0x20($4)\n"
+                 "sqc2 $vf10, 0x30($4)\n"
+                 :
+                 :
+                 : "$6", "$7", "$8", "$f0");
+}
+extern "C" void sceVu0RotMatrixX(float (*m0)[4], float (*m1)[4], float rx) {
+    asm volatile(
+                 "mtc1 $0, $f0\n"
+                 "c.lt.s $f12, $f0\n"
+                 "li.s $f0, 1.57079637050628662109e0\n"
+                 "bc1f 1f\n"
+                 "add.s $f12, $f0, $f12\n"
+                 "li $7, 1\n"
+                 "j 2f\n"
+                 "1:\n"
+                 "sub.s $f12, $f0, $f12\n"
+                 "move $7, $0\n"
+                 "2:\n"
+                 "mfc1 $8, $f12\n"
+                 "qmtc2.ni $8, $vf6\n"
+                 "move $6, $31\n"
+                 "jal _sceVu0ecossin\n"
+                 "daddu $31, $6, $zero\n"
+                 "lqc2 $vf7, 0x0($5)\n"
+                 "lqc2 $vf8, 0x10($5)\n"
+                 "vaddx.z $vf5, $vf0, $vf4x\n"
+                 "vaddy.y $vf5, $vf0, $vf4y\n"
+                 "vsubx.y $vf6, $vf0, $vf4x\n"
+                 "vaddy.z $vf6, $vf0, $vf4y\n"
+                 "lqc2 $vf9, 0x20($5)\n"
+                 "lqc2 $vf10, 0x30($5)\n"
+                 "vmulay.yz $ACC, $vf5, $vf7y\n"
+                 "vmaddz.yz $vf7, $vf6, $vf7z\n"
+                 "vmulay.yz $ACC, $vf5, $vf8y\n"
+                 "vmaddz.yz $vf8, $vf6, $vf8z\n"
+                 "vmulay.yz $ACC, $vf5, $vf9y\n"
+                 "vmaddz.yz $vf9, $vf6, $vf9z\n"
+                 "vmulay.yz $ACC, $vf5, $vf10y\n"
+                 "vmaddz.yz $vf10, $vf6, $vf10z\n"
+                 "sqc2 $vf7, 0x0($4)\n"
+                 "sqc2 $vf8, 0x10($4)\n"
+                 "sqc2 $vf9, 0x20($4)\n"
+                 "sqc2 $vf10, 0x30($4)\n"
+                 :
+                 :
+                 : "$6", "$7", "$8", "$f0");
+}
+extern "C" void sceVu0RotMatrixY(float (*m0)[4], float (*m1)[4], float ry) {
+    asm volatile(
+                 "mtc1 $0, $f0\n"
+                 "c.lt.s $f12, $f0\n"
+                 "li.s $f0, 1.57079637050628662109e0\n"
+                 "bc1f 1f\n"
+                 "add.s $f12, $f0, $f12\n"
+                 "li $7, 1\n"
+                 "j 2f\n"
+                 "1:\n"
+                 "sub.s $f12, $f0, $f12\n"
+                 "move $7, $0\n"
+                 "2:\n"
+                 "mfc1 $8, $f12\n"
+                 "qmtc2.ni $8, $vf6\n"
+                 "move $6, $31\n"
+                 "jal _sceVu0ecossin\n"
+                 "daddu $31, $6, $zero\n"
+                 "lqc2 $vf7, 0x0($5)\n"
+                 "lqc2 $vf8, 0x10($5)\n"
+                 "vsubx.z $vf5, $vf0, $vf4x\n"
+                 "vaddy.x $vf5, $vf0, $vf4y\n"
+                 "vaddx.x $vf6, $vf0, $vf4x\n"
+                 "vaddy.z $vf6, $vf0, $vf4y\n"
+                 "lqc2 $vf9, 0x20($5)\n"
+                 "lqc2 $vf10, 0x30($5)\n"
+                 "vmulax.xz $ACC, $vf5, $vf7x\n"
+                 "vmaddz.xz $vf7, $vf6, $vf7z\n"
+                 "vmulax.xz $ACC, $vf5, $vf8x\n"
+                 "vmaddz.xz $vf8, $vf6, $vf8z\n"
+                 "vmulax.xz $ACC, $vf5, $vf9x\n"
+                 "vmaddz.xz $vf9, $vf6, $vf9z\n"
+                 "vmulax.xz $ACC, $vf5, $vf10x\n"
+                 "vmaddz.xz $vf10, $vf6, $vf10z\n"
+                 "sqc2 $vf7, 0x0($4)\n"
+                 "sqc2 $vf8, 0x10($4)\n"
+                 "sqc2 $vf9, 0x20($4)\n"
+                 "sqc2 $vf10, 0x30($4)\n"
+                 :
+                 :
+                 : "$6", "$7", "$8", "$f0");
+}
+extern "C" void sceVu0RotMatrix(float (*m0)[4], float (*m1)[4], float* rot) {
+    sceVu0RotMatrixZ(m0, m1, rot[2]);
+    sceVu0RotMatrixY(m0, m0, rot[1]);
+    sceVu0RotMatrixX(m0, m0, rot[0]);
+}
+extern "C" void sceVu0ClampVector(float *v0, float *v1, float min, float max) {
     asm volatile(
                  "mfc1 $8, $f12\n"
                  "mfc1 $9, $f13\n"
@@ -949,15 +1441,138 @@ extern "C" void sceVu0ClampVector(void* p0, void* p1, void* p2) {
                  "vminix.xyzw $vf6, $vf6, $vf5x\n"
                  "sqc2 $vf6, 0x0($4)\n");
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0CameraMatrix);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0NormalLightMatrix);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0LightColorMatrix);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0ViewScreenMatrix);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0DropShadowMatrix);
+extern "C" void sceVu0CameraMatrix(float (*m)[4], float* p, float* zd, float* yd) {
+    float m0[4][4] __attribute__((aligned(16)));
+    float xd[4] __attribute__((aligned(16)));
+
+    sceVu0UnitMatrix(m0);
+    sceVu0OuterProduct(xd, yd, zd);
+    sceVu0Normalize(m0[0], xd);
+    sceVu0Normalize(m0[2], zd);
+    sceVu0OuterProduct(m0[1], m0[2], m0[0]);
+    sceVu0TransMatrix(m0, m0, p);
+    sceVu0InversMatrix(m, m0);
+}
+extern "C" void sceVu0NormalLightMatrix(float (*m)[4], float* l0, float* l1, float* l2) {
+    float mone = -1.0f;
+    float t[4] __attribute__((aligned(16)));
+
+    sceVu0ScaleVector(t, l0, mone);
+    sceVu0Normalize(m[0], t);
+    sceVu0ScaleVector(t, l1, mone);
+    sceVu0Normalize(m[1], t);
+    sceVu0ScaleVector(t, l2, mone);
+    sceVu0Normalize(m[2], t);
+    m[3][0] = m[3][1] = m[3][2] = 0.0f;
+    m[3][3] = 1.0f;
+    sceVu0TransposeMatrix(m, m);
+}
+extern "C" void sceVu0LightColorMatrix(float (*m)[4], float* c0, float* c1, float* c2, float* a) {
+    sceVu0CopyVector(m[0], c0);
+    sceVu0CopyVector(m[1], c1);
+    sceVu0CopyVector(m[2], c2);
+    sceVu0CopyVector(m[3], a);
+}
+extern "C" void sceVu0ViewScreenMatrix(float (*m)[4], float scrz, float ax, float ay, float cx, float cy, float zmin,
+                                       float zmax, float nearz, float farz) {
+    float az, cz;
+    float mt[4][4] __attribute__((aligned(16)));
+
+    cz = (-zmax * nearz + zmin * farz) / (-nearz + farz);
+    az = farz * nearz * (-zmin + zmax) / (-nearz + farz);
+
+    sceVu0UnitMatrix(m);
+    m[0][0] = scrz;
+    m[1][1] = scrz;
+    m[2][2] = 0;
+    m[3][3] = 0;
+    m[3][2] = 1;
+    m[2][3] = 1;
+
+    sceVu0UnitMatrix(mt);
+    mt[0][0] = ax;
+    mt[1][1] = ay;
+    mt[2][2] = az;
+    mt[3][0] = cx;
+    mt[3][1] = cy;
+    mt[3][2] = cz;
+
+    sceVu0MulMatrix(m, mt, m);
+}
+extern "C" void sceVu0DropShadowMatrix(float (*m)[4], float* lp, float a, float b, float c, int mode) {
+    if (mode) {
+        float x = lp[0];
+        float y = lp[1];
+        float z = lp[2];
+        float e = (float)1.0 - (a * x + b * y + c * z);
+
+        m[0][0] = a * x + e;
+        m[1][0] = b * x;
+        m[2][0] = c * x;
+        m[3][0] = -x;
+        m[0][1] = a * y;
+        m[1][1] = b * y + e;
+        m[2][1] = c * y;
+        m[3][1] = -y;
+        m[0][2] = a * z;
+        m[1][2] = b * z;
+        m[2][2] = c * z + e;
+        m[3][2] = -z;
+        m[0][3] = a;
+        m[1][3] = b;
+        m[2][3] = c;
+        m[3][3] = e - (float)1.0;
+    } else {
+        float x = lp[0];
+        float y = lp[1];
+        float z = lp[2];
+        float d = a * x + b * y + c * z;
+        float e = (float)-1.0 / d;
+
+        m[0][0] = e * (a * x - d);
+        m[1][0] = e * (b * x);
+        m[2][0] = e * (c * x);
+        m[3][0] = e * -x;
+        m[0][1] = e * (a * y);
+        m[1][1] = e * (b * y - d);
+        m[2][1] = e * (c * y);
+        m[3][1] = e * -y;
+        m[0][2] = e * (a * z);
+        m[1][2] = e * (b * z);
+        m[2][2] = e * (c * z - d);
+        m[3][2] = e * -z;
+        m[0][3] = 0;
+        m[1][3] = 0;
+        m[2][3] = 0;
+        m[3][3] = e * -d;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0RotTransPersN);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0RotTransPers);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0CopyVectorXYZ);
-extern "C" void sceVu0InterVectorXYZ(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0RotTransPers(int* v0, float (*m0)[4], float* v1, int mode) {
+    asm volatile("lqc2 $vf4, 0x0($5)\n"
+                 "lqc2 $vf5, 0x10($5)\n"
+                 "lqc2 $vf6, 0x20($5)\n"
+                 "lqc2 $vf7, 0x30($5)\n"
+                 "lqc2 $vf8, 0x0($6)\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf8x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf8y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                 "vmaddw.xyzw $vf9, $vf7, $vf8w\n"
+                 "vdiv $Q, $vf0w, $vf9w\n"
+                 "vwaitq\n"
+                 "vmulq.xyz $vf9, $vf9, $Q\n"
+                 "vftoi4.xyzw $vf10, $vf9\n"
+                 "beqz $7, 0f\n"
+                 "vftoi0.zw $vf10, $vf9\n"
+                 "0:\n"
+                 "sqc2 $vf10, 0x0($4)\n");
+}
+extern "C" void sceVu0CopyVectorXYZ(float* v0, float* v1) {
+    v0[0] = v1[0];
+    v0[1] = v1[1];
+    v0[2] = v1[2];
+}
+extern "C" void sceVu0InterVectorXYZ(float *v0, float *v1, float *v2, float r) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "lqc2 $vf5, 0x0($6)\n"
@@ -968,7 +1583,7 @@ extern "C" void sceVu0InterVectorXYZ(void* p0, void* p1, void* p2) {
                  "vmaddx.xyz $vf4, $vf4, $vf6x\n"
                  "sqc2 $vf4, 0x0($4)\n");
 }
-extern "C" void sceVu0ScaleVectorXYZ(void* p0, void* p1, void* p2) {
+extern "C" void sceVu0ScaleVectorXYZ(float *v0, float *v1, float s) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
                  "mfc1 $8, $f12\n"
@@ -976,7 +1591,7 @@ extern "C" void sceVu0ScaleVectorXYZ(void* p0, void* p1, void* p2) {
                  "vmulx.xyz $vf4, $vf4, $vf5x\n"
                  "sqc2 $vf4, 0x0($4)\n");
 }
-extern "C" int sceVu0ClipScreen(void* p0, void* p1, void* p2) {
+extern "C" int sceVu0ClipScreen(float *v0) {
     asm volatile(
                  "vsub.xyzw $vf4, $vf0, $vf0\n"
                  "ori $2, $zero, 0x8B00\n"
