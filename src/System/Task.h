@@ -38,6 +38,7 @@ public:
     SLContainerT<T>* getNext() { return _pNextContainer; }
     void setValue(T* pValue) { _pValue = pValue; } // PARTIAL: added for System/Task
     void setGeneral(int nGeneral) { _nGeneral = nGeneral; } // PARTIAL: added for System/Graphic/2d/2DSpr (name unknown)
+    int getGeneral() { return _nGeneral; } // PARTIAL: added for System/Graphic/2d/2DMan (name unknown)
 };
 
 template <class T>
