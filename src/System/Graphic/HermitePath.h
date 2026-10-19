@@ -37,6 +37,13 @@ public:
     FLOAT getNowRoll();
     void setSpeed(FLOAT fSpeed);
     void update(FLOAT fr);
+    // PARTIAL: added for System/Graphic/HermitePathCamera
+    FLOAT getHermiteDistanceAll();
+    void goStartPos();
+    void goEndPos();
+    BOOL isEnd();
+    FLOAT getSpeed() { return m_fSpeed; }
+    void setDataSpeed() { m_fDataSpeed = m_fSpeed; }
     INT getNowBlock() { return m_iNowBlock; }
     FLOAT getProgress() { return m_fProgress; }
     CPathVector* getPathVector() { return m_pPathVect; }

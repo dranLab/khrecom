@@ -423,6 +423,12 @@ protected:
     INT m_nType;
 
 public:
+    // PARTIAL: constructor added for System/Graphic/HermitePathCamera (the derived ones set m_nType)
+    C3DStripBase() {
+        m_pCrd = NULL;
+        m_pObj = NULL;
+        m_fGeta = 0.0f;
+    }
     virtual UINT getPacketSize() const;
 private:
     virtual FIX4 calcZ();
@@ -432,13 +438,18 @@ private:
 
 class C3DLineStrip : public C3DStripBase {
 public:
-    C3DLineStrip() {
-        m_pCrd = NULL;
-        m_pObj = NULL;
-        m_fGeta = 0.0f;
-        m_nType = 2;
-    }
+    C3DLineStrip() { m_nType = 2; }
     void setCoord(CCoord* pCrd) { m_pCrd = pCrd; }
+private:
+    virtual QWdata* makePktSub();
+};
+
+// PARTIAL: added for System/Graphic/HermitePathCamera
+class C3DPolyStrip : public C3DStripBase {
+public:
+    C3DPolyStrip() { m_nType = 4; }
+    void setCoord(CCoord* pCrd) { m_pCrd = pCrd; }
+    CCoord* getCoord() { return m_pCrd; }
 private:
     virtual QWdata* makePktSub();
 };
