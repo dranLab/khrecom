@@ -8,9 +8,7 @@ typedef char _instCSJointLinkedPtr[sizeof(CSJointT<CLinkedPtr>)];
 #include "System/CoordMan.h"
 #include "System/Debug.h"
 #include "System/Tsin.h"
-#include "include_asm.h"
 
-/* .data (the VU0 library's sin/cos table) still comes from the original assembly. */
 extern const FVECTOR ONE_VECTOR = { { 1.0f, 1.0f, 1.0f, 1.0f } };
 extern const FMATRIX ONE_MATRIX = { { { 1.0f, 0.0f, 0.0f, 0.0f },
                                       { 0.0f, 1.0f, 0.0f, 0.0f },
@@ -23,6 +21,8 @@ BOOL ClipDispBBoxMaxMin(const FVECTOR* v);
 float vu0Sinf(float x);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
+void DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q);
+void MulMatrix33(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 extern "C" {
 void sceVu0ApplyMatrix(float *v0, float (*m0)[4], float *v1);
 void sceVu0MulMatrix(float (*m0)[4], float (*m1)[4], float (*m2)[4]);
@@ -104,12 +104,76 @@ void CCoords::_coord_nullalart() const {
     TRACE("*** CCoords:: Coord \x82\xaa\x91\xb6\x8d\xdd\x82\xb5\x82\xdc\x82\xb9\x82\xf1 this:%08x pCrdArray:%08x CrdNum:%d ***\n", this,
           m_pCrdArray, m_nCrdNum);
 }
-/* Placeholder (in .sdata, stripped) for the string of the INCLUDE_ASM functions below */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _fix_placeholder(INT n) {
-    TRACE(" CCoord : \x83" "A\x83^\x83" "b\x83`\x90\xe6\x82\xcc\x90" "e\x82\xaa\x82\xa2\x82\xc8\x82\xad\x82\xc8\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7!! this:%08x Parent:%08x Ex:%08x ExP:%08x\n");
+void CCoord::fix(TIMEQ tq) {
+    CCoord* pParent = m_pParent;
+
+    if (pParent && pParent->m_hHandle != m_hHandle) {
+        CCoords* pCrds = CCoordMan::getCoords(pParent->m_hHandle);
+        if (!pCrds || !pCrds->Crd()) {
+            TRACE(" CCoord : \x83" "A\x83^\x83" "b\x83`\x90\xe6\x82\xcc\x90" "e\x82\xaa\x82\xa2\x82\xc8\x82\xad\x82\xc8\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7!! this:%08x Parent:%08x Ex:%08x ExP:%08x\n",
+                  this, pParent, &CCoordMan::getExceptCoord(FALSE), CCoordMan::getExceptCoord(FALSE).m_pParent);
+            m_pParent = __null;
+            m_Local = m_World;
+            m_Rot.v[0] = m_World.v[0];
+            m_Rot.v[1] = m_World.v[1];
+            m_Rot.v[2] = m_World.v[2];
+        }
+    }
+    if (pParent) {
+        if (pParent->m_FixTimestamp < tq) {
+            pParent->fix(tq);
+        }
+        if (pParent->m_WorldTimestamp >= tq || m_Flag) {
+            asm volatile(
+                 "lqc2 $vf2, 0x50(%1)\n"
+                 "lqc2 $vf3, 0x60(%1)\n"
+                 "lqc2 $vf4, 0x70(%1)\n"
+                 "lqc2 $vf6, 0x0(%0)\n"
+                 "lqc2 $vf7, 0x10(%0)\n"
+                 "lqc2 $vf8, 0x20(%0)\n"
+                 "lqc2 $vf9, 0x30(%0)\n"
+                 "vmulax.xyzw $ACC, $vf2, $vf6x\n"
+                 "vmadday.xyzw $ACC, $vf3, $vf6y\n"
+                 "vmaddz.xyzw $vf6, $vf4, $vf6z\n"
+                 "vmulax.xyzw $ACC, $vf2, $vf7x\n"
+                 "vmadday.xyzw $ACC, $vf3, $vf7y\n"
+                 "vmaddz.xyzw $vf7, $vf4, $vf7z\n"
+                 "vmulax.xyzw $ACC, $vf2, $vf8x\n"
+                 "vmadday.xyzw $ACC, $vf3, $vf8y\n"
+                 "vmaddz.xyzw $vf8, $vf4, $vf8z\n"
+                 "lqc2 $vf5, 0x80(%0)\n"
+                 "sqc2 $vf6, 0x50(%0)\n"
+                 "sqc2 $vf7, 0x60(%0)\n"
+                 "sqc2 $vf8, 0x70(%0)\n"
+                 "vmulx.xyzw $vf6, $vf6, $vf5x\n"
+                 "vmuly.xyzw $vf7, $vf7, $vf5y\n"
+                 "vmulz.xyzw $vf8, $vf8, $vf5z\n"
+                 "lqc2 $vf2, 0x90(%1)\n"
+                 "lqc2 $vf3, 0xA0(%1)\n"
+                 "lqc2 $vf4, 0xB0(%1)\n"
+                 "lqc2 $vf5, 0xC0(%1)\n"
+                 "vmulax.xyzw $ACC, $vf2, $vf9x\n"
+                 "vmadday.xyzw $ACC, $vf3, $vf9y\n"
+                 "vmaddaz.xyzw $ACC, $vf4, $vf9z\n"
+                 "vmaddw.xyzw $vf9, $vf5, $vf9w\n"
+                 "sqc2 $vf6, 0x90(%0)\n"
+                 "sqc2 $vf7, 0xA0(%0)\n"
+                 "sqc2 $vf8, 0xB0(%0)\n"
+                 "sqc2 $vf9, 0xC0(%0)\n"
+                         :
+                         : "r"(this), "r"(pParent)
+                         : "memory");
+            m_WorldTimestamp = tq;
+        }
+    } else if (m_Flag) {
+        m_Rot.v[0] = m_Local.v[0];
+        m_Rot.v[1] = m_Local.v[1];
+        m_Rot.v[2] = m_Local.v[2];
+        m_World = m_Local;
+        m_WorldTimestamp = tq;
+    }
+    _ulFixTimestamp = tq;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", fix__6CCoordi);
 void CCoord::getRotTransPersMatrix(FMATRIX& p0) {
     asm volatile(
                  "addiu $4, $4, 0x90\n"
@@ -231,8 +295,102 @@ void CCoord::RotTransPers(FVECTOR& p0, const FVECTOR& p1) {
                  "vmulq.xyzw $vf8, $vf8, $Q\n"
                  "sqc2 $vf8, 0x0($5)\n");
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", recalcWorldMatrix__6CCoord);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", recalcLocalMatrix__6CCoord);
+void CCoord::recalcWorldMatrix() {
+    CCoord* pParent = m_pParent;
+
+    if (pParent && pParent->m_hHandle != m_hHandle) {
+        CCoords* pCrds = CCoordMan::getCoords(pParent->m_hHandle);
+        if (!pCrds || !pCrds->Crd()) {
+            TRACE(" CCoord : \x83" "A\x83^\x83" "b\x83`\x90\xe6\x82\xcc\x90" "e\x82\xaa\x82\xa2\x82\xc8\x82\xad\x82\xc8\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7!! this:%08x Parent:%08x Ex:%08x ExP:%08x\n",
+                  this, pParent, &CCoordMan::getExceptCoord(FALSE), CCoordMan::getExceptCoord(FALSE).m_pParent);
+            m_pParent = __null;
+            m_Local = m_World;
+            m_Rot.v[0] = m_World.v[0];
+            m_Rot.v[1] = m_World.v[1];
+            m_Rot.v[2] = m_World.v[2];
+        }
+    }
+    if (pParent) {
+        asm volatile(
+                     "lqc2 $vf2, 0x50(%1)\n"
+                     "lqc2 $vf3, 0x60(%1)\n"
+                     "lqc2 $vf4, 0x70(%1)\n"
+                     "lqc2 $vf6, 0x0(%0)\n"
+                     "lqc2 $vf7, 0x10(%0)\n"
+                     "lqc2 $vf8, 0x20(%0)\n"
+                     "lqc2 $vf9, 0x30(%0)\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf6x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf6y\n"
+                     "vmaddz.xyzw $vf6, $vf4, $vf6z\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf7x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf7y\n"
+                     "vmaddz.xyzw $vf7, $vf4, $vf7z\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf8x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf8y\n"
+                     "vmaddz.xyzw $vf8, $vf4, $vf8z\n"
+                     "lqc2 $vf5, 0x80(%0)\n"
+                     "sqc2 $vf6, 0x50(%0)\n"
+                     "sqc2 $vf7, 0x60(%0)\n"
+                     "sqc2 $vf8, 0x70(%0)\n"
+                     "vmulx.xyzw $vf6, $vf6, $vf5x\n"
+                     "vmuly.xyzw $vf7, $vf7, $vf5y\n"
+                     "vmulz.xyzw $vf8, $vf8, $vf5z\n"
+                     "lqc2 $vf2, 0x90(%1)\n"
+                     "lqc2 $vf3, 0xA0(%1)\n"
+                     "lqc2 $vf4, 0xB0(%1)\n"
+                     "lqc2 $vf5, 0xC0(%1)\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf9x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf9y\n"
+                     "vmaddaz.xyzw $ACC, $vf4, $vf9z\n"
+                     "vmaddw.xyzw $vf9, $vf5, $vf9w\n"
+                     "sqc2 $vf6, 0x90(%0)\n"
+                     "sqc2 $vf7, 0xA0(%0)\n"
+                     "sqc2 $vf8, 0xB0(%0)\n"
+                     "sqc2 $vf9, 0xC0(%0)\n"
+                     :
+                     : "r"(this), "r"(pParent)
+                     : "memory");
+    } else {
+        m_Rot.v[0] = m_Local.v[0];
+        m_Rot.v[1] = m_Local.v[1];
+        m_Rot.v[2] = m_Local.v[2];
+        m_World = m_Local;
+    }
+    m_Flag = 0;
+}
+void CCoord::recalcLocalMatrix() {
+    FMATRIX mMat;
+    FVECTOR vScl;
+
+    CCoord* pParent = m_pParent;
+
+    if (pParent && pParent->m_hHandle != m_hHandle) {
+        CCoords* pCrds = CCoordMan::getCoords(pParent->m_hHandle);
+        if (!pCrds || !pCrds->Crd()) {
+            TRACE(" CCoord : \x83" "A\x83^\x83" "b\x83`\x90\xe6\x82\xcc\x90" "e\x82\xaa\x82\xa2\x82\xc8\x82\xad\x82\xc8\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7!! this:%08x Parent:%08x Ex:%08x ExP:%08x\n",
+                  this, pParent, &CCoordMan::getExceptCoord(FALSE), CCoordMan::getExceptCoord(FALSE).m_pParent);
+            m_pParent = __null;
+            m_Local = m_World;
+            m_Rot.v[0] = m_World.v[0];
+            m_Rot.v[1] = m_World.v[1];
+            m_Rot.v[2] = m_World.v[2];
+        }
+    }
+    if (pParent) {
+        DivVector(m_Rot.v[0], m_World.v[0], m_fScaleX);
+        DivVector(m_Rot.v[1], m_World.v[1], m_fScaleY);
+        DivVector(m_Rot.v[2], m_World.v[2], m_fScaleZ);
+        sceVu0InversMatrix(mMat.m, pParent->m_Rot.m);
+        MulMatrix33(m_Local, mMat, m_Rot);
+        sceVu0InversMatrix(mMat.m, pParent->m_World.m);
+        ApplyMatrix(m_Local.v[3], mMat, m_World.v[3]);
+    } else {
+        m_Local = m_World;
+        m_Rot.v[0] = m_World.v[0];
+        m_Rot.v[1] = m_World.v[1];
+        m_Rot.v[2] = m_World.v[2];
+    }
+}
 CCoords::CCoords(_PROC_PRIO pp) {
     m_pCrdArray = __null;
     m_nCrdNum = 0;
@@ -526,7 +684,50 @@ void World2Eurar(TDEG& swivel, TDEG& tilt, const FMATRIX& world, const FVECTOR& 
     ApplyMatrix(t, m, v);
     tilt = -cossin2deg(t.z, t.y);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", roundPI__FR7FVECTORi);
+void roundPI(FVECTOR& vInOut, INT nInClip) {
+    if (nInClip & 0x3) {
+        FLOAT& f = vInOut.x;
+        if (nInClip & 0x1) {
+            f = f - (INT)(f * 0.15915494f) * 6.2831855f;
+            if (f > 3.1415927f) {
+                f -= 6.2831855f;
+            }
+        } else {
+            f = f - (INT)(f * 0.15915494f) * 6.2831855f;
+            if (f < -3.1415927f) {
+                f += 6.2831855f;
+            }
+        }
+    }
+    if (nInClip & 0xC) {
+        FLOAT& f = vInOut.y;
+        if (nInClip & 0x4) {
+            f = f - (INT)(f * 0.15915494f) * 6.2831855f;
+            if (f > 3.1415927f) {
+                f -= 6.2831855f;
+            }
+        } else {
+            f = f - (INT)(f * 0.15915494f) * 6.2831855f;
+            if (f < -3.1415927f) {
+                f += 6.2831855f;
+            }
+        }
+    }
+    if (nInClip & 0x30) {
+        FLOAT& f = vInOut.z;
+        if (nInClip & 0x10) {
+            f = f - (INT)(f * 0.15915494f) * 6.2831855f;
+            if (f > 3.1415927f) {
+                f -= 6.2831855f;
+            }
+        } else {
+            f = f - (INT)(f * 0.15915494f) * 6.2831855f;
+            if (f < -3.1415927f) {
+                f += 6.2831855f;
+            }
+        }
+    }
+}
 void getMaxMinToVector8(FVECTOR* p0, const FVECTOR& p1, const FVECTOR& p2) {
     asm volatile(
                  "lqc2 $vf4, 0x0($5)\n"
@@ -594,7 +795,35 @@ BOOL ClipDispBBox(const FMATRIX& lc, const FVECTOR* v) {
                  : "r"(&lc));
     return ClipDispBBox(v);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", ClipDispBBox__FPC7FVECTOR);
+BOOL ClipDispBBox(const FVECTOR* v) {
+    asm volatile(
+                 "lqc2 $vf8, 0x0($4)\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf8x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf8y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                 "vmaddw.xyzw $vf9, $vf7, $vf0w\n"
+                 "addiu $2, $0, 0x3F\n"
+                 "addiu $8, $0, 0x8\n"
+                 "0:\n"
+                 ".word 0x4BC949FF\n"
+                 "lqc2 $vf8, 0x10($4)\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf8x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf8y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                 "vmaddw.xyzw $vf9, $vf7, $vf0w\n"
+                 "cfc2.ni $3, $vi18\n"
+                 "and $2, $2, $3\n"
+                 ".set noreorder\n"
+                 "beq $0, $2, 1f\n"
+                 "addiu $8, $8, -0x1\n"
+                 "bne $0, $8, 0b\n"
+                 "addiu $4, $4, 0x10\n"
+                 ".set reorder\n"
+                 "1:\n"
+                 :
+                 :
+                 : "$2", "$3", "$4", "$8");
+}
 BOOL ClipDispBBox(const FMATRIX& wc, const FMATRIX& lw, const FVECTOR* v) {
     asm volatile(
                  "lqc2 $vf8, 0x0(%0)\n"
@@ -675,7 +904,74 @@ BOOL ClipDispBBox(const FMATRIX& vc, const FMATRIX& wv, const FMATRIX& lw, const
                  : "r"(&vc), "r"(&wv), "r"(&lw));
     return ClipDispBBox(v);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", ClipDispBBoxMaxMin__FPC7FVECTOR);
+BOOL ClipDispBBoxMaxMin(const FVECTOR* v) {
+    asm volatile(
+                 "lqc2 $vf8, 0x0($4)\n"
+                 "lqc2 $vf9, 0x10($4)\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf8x\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                 "vmaddaw.xyzw $ACC, $vf7, $vf0w\n"
+                 "vmaddy.xyzw $vf10, $vf5, $vf8y\n"
+                 "vmaddy.xyzw $vf11, $vf5, $vf9y\n"
+                 "addiu $2, $zero, 0x3F\n"
+                 ".word   0x4BCA51FF\n"
+                 ".word   0x4BCB59FF\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf9x\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                 "vmaddaw.xyzw $ACC, $vf7, $vf0w\n"
+                 "vmaddy.xyzw $vf10, $vf5, $vf8y\n"
+                 "vmaddy.xyzw $vf11, $vf5, $vf9y\n"
+                 "cfc2.ni $3, $vi18\n"
+                 "dsrl $8, $3, 6\n"
+                 "and $2, $2, $3\n"
+                 "and $2, $2, $8\n"
+                 ".set noreorder\n"
+                 "beq $0, $2, 1f\n"
+                 ".word   0x4BCA51FF\n"
+                 ".set reorder\n"
+                 ".word   0x4BCB59FF\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf8x\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf9z\n"
+                 "vmaddaw.xyzw $ACC, $vf7, $vf0w\n"
+                 "vmaddy.xyzw $vf10, $vf5, $vf8y\n"
+                 "vmaddy.xyzw $vf11, $vf5, $vf9y\n"
+                 "cfc2.ni $3, $vi18\n"
+                 "dsrl $8, $3, 6\n"
+                 "and $2, $2, $3\n"
+                 "and $2, $2, $8\n"
+                 ".set noreorder\n"
+                 "beq $0, $2, 1f\n"
+                 ".word   0x4BCA51FF\n"
+                 ".set reorder\n"
+                 ".word   0x4BCB59FF\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf9x\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf9z\n"
+                 "vmaddaw.xyzw $ACC, $vf7, $vf0w\n"
+                 "vmaddy.xyzw $vf10, $vf5, $vf8y\n"
+                 "vmaddy.xyzw $vf11, $vf5, $vf9y\n"
+                 "cfc2.ni $3, $vi18\n"
+                 "dsrl $8, $3, 6\n"
+                 "and $2, $2, $3\n"
+                 "and $2, $2, $8\n"
+                 ".set noreorder\n"
+                 "beq $0, $2, 1f\n"
+                 ".word   0x4BCA51FF\n"
+                 ".set reorder\n"
+                 ".word   0x4BCB59FF\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "cfc2.ni $3, $vi18\n"
+                 "dsrl $8, $3, 6\n"
+                 "and $2, $2, $3\n"
+                 "and $2, $2, $8\n"
+                 "1:\n"
+                 :
+                 :
+                 : "$2", "$3", "$8");
+}
 BOOL ClipDispBBoxMaxMin(const FMATRIX& wc, const FMATRIX& lw, const FVECTOR* v) {
     asm volatile(
                  "lqc2 $vf8, 0x0(%0)\n"
@@ -1265,11 +1561,14 @@ extern "C" void sceVu0UnitMatrix(float (*m0)[4]) {
                  "sqc2 $vf6, 0x10($4)\n"
                  "sqc2 $vf7, 0x0($4)\n");
 }
+/* the VU0 library's sin/cos coefficients (static in the SDK, referenced only from asm: kept global here) */
+float S5432[4] __attribute__((aligned(16))) = { 2.60188699e-06f, -0.000198074136f, 0.0083330255f, -0.166666567f };
+
 /* static in the SDK; called only from the asm below (non-static here, so that it is kept) */
 extern "C" void _sceVu0ecossin(float t) {
     asm volatile(
                  "vmul.x $vf7, $vf6, $vf6\n"
-                 "la $8, D_003920A0\n"
+                 "la $8, S5432\n"
                  "lqc2 $vf5, 0x0($8)\n"
                  "vmul.x $vf8, $vf7, $vf7\n"
                  "vadda.x $ACC, $vf6, $vf0\n"
@@ -1547,7 +1846,32 @@ extern "C" void sceVu0DropShadowMatrix(float (*m)[4], float* lp, float a, float 
         m[3][3] = e * -d;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0RotTransPersN);
+extern "C" void sceVu0RotTransPersN(int (*v0)[4], float (*m0)[4], float (*v1)[4], int n, int mode) {
+    asm volatile(
+                 "lqc2 $vf4, 0x0($5)\n"
+                 "lqc2 $vf5, 0x10($5)\n"
+                 "lqc2 $vf6, 0x20($5)\n"
+                 "lqc2 $vf7, 0x30($5)\n"
+                 "0:\n"
+                 "lqc2 $vf8, 0x0($6)\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf8x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf8y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                 "vmaddw.xyzw $vf9, $vf7, $vf8w\n"
+                 "vdiv $Q, $vf0w, $vf9w\n"
+                 "vwaitq\n"
+                 "vmulq.xyz $vf9, $vf9, $Q\n"
+                 "vftoi4.xyzw $vf10, $vf9\n"
+                 "beqz $8, 1f\n"
+                 "vftoi0.zw $vf10, $vf9\n"
+                 "1:\n"
+                 "sqc2 $vf10, 0x0($4)\n"
+                 "addi $7, $7, -0x1\n"
+                 "addi $6, $6, 0x10\n"
+                 "addi $4, $4, 0x10\n"
+                 "bne $0, $7, 0b\n"
+);
+}
 extern "C" void sceVu0RotTransPers(int* v0, float (*m0)[4], float* v1, int mode) {
     asm volatile("lqc2 $vf4, 0x0($5)\n"
                  "lqc2 $vf5, 0x10($5)\n"
@@ -1611,6 +1935,72 @@ extern "C" int sceVu0ClipScreen(float *v0) {
                  "cfc2.ni $2, $vi16\n"
                  "andi $2, $2, 0xC0\n");
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0ClipScreen3);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Coord", sceVu0ClipAll);
-// SOURCE DATA: .rodata
+extern "C" int sceVu0ClipScreen3(float* v0, float* v1, float* v2) {
+    asm volatile(
+                 "vsub.xyzw $vf4, $vf0, $vf0\n"
+                 "ori $2, $zero, 0x8B00\n"
+                 "dsll32 $2, $2, 0\n"
+                 "ori $2, $2, 0x8B00\n"
+                 "dsll $2, $2, 15\n"
+                 "lqc2 $vf6, 0x0($4)\n"
+                 "lqc2 $vf8, 0x0($5)\n"
+                 "lqc2 $vf9, 0x0($6)\n"
+                 "qmtc2.ni $2, $vf7\n"
+                 "ctc2.ni $zero, $vi16\n"
+                 "vsub.xyzw $vf5, $vf6, $vf4\n"
+                 "vsub.xy $vf5, $vf7, $vf6\n"
+                 "vsub.xyzw $vf5, $vf8, $vf4\n"
+                 "vsub.xy $vf5, $vf7, $vf8\n"
+                 "vsub.xyzw $vf5, $vf9, $vf4\n"
+                 "vsub.xy $vf5, $vf7, $vf9\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "cfc2.ni $2, $vi16\n"
+                 "andi $2, $2, 0xC0\n"
+                 :
+                 :
+                 : "$2");
+}
+extern "C" int sceVu0ClipAll(float* minv, float* maxv, float (*ms)[4], float (*vm)[4], int n) {
+    asm volatile(
+                 "lqc2 $vf8, 0x0($7)\n"
+                 "lqc2 $vf4, 0x0($6)\n"
+                 "lqc2 $vf5, 0x10($6)\n"
+                 "lqc2 $vf6, 0x20($6)\n"
+                 "lqc2 $vf7, 0x30($6)\n"
+                 "lqc2 $vf9, 0x0($4)\n"
+                 "lqc2 $vf10, 0x0($5)\n"
+                 "lqc2 $vf11, 0x0($4)\n"
+                 "lqc2 $vf12, 0x0($5)\n"
+                 "0:\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf8x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf8y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                 "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
+                 "vmulw.xyz $vf11, $vf9, $vf8w\n"
+                 "vmulw.xyz $vf12, $vf10, $vf8w\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "ctc2.ni $0, $vi16\n"
+                 "vsub.xyw $vf11, $vf8, $vf11\n"
+                 "vsub.xyw $vf12, $vf12, $vf8\n"
+                 "vmove.w $vf11, $vf9\n"
+                 "vmove.w $vf12, $vf10\n"
+                 "vnop\n"
+                 "addi $7, $7, 0x10\n"
+                 "lqc2 $vf8, 0x0($7)\n"
+                 "addi $8, $8, -0x1\n"
+                 "cfc2.ni $2, $vi16\n"
+                 "andi $2, $2, 0xC0\n"
+                 "beqz $2, 1f\n"
+                 "bne $0, $8, 0b\n"
+                 "addi $2, $0, 0x1\n"
+                 "1:\n"
+                 :
+                 :
+                 : "$2");
+}
+// SOURCE DATA: .data .rodata
