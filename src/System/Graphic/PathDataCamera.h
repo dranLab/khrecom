@@ -48,7 +48,10 @@ public:
         _run();
         m_pHPC->run();
     }
-#line 58 "c:/KHCOM/MainApp/System/Graphic/PathDataCamera.h"
+#ifndef PATHDATACAMERA_H_PATH // PARTIAL: path override added for Game/Atel/CameraMan ("System/Graphic/PathDataCamera.h")
+#define PATHDATACAMERA_H_PATH "c:/KHCOM/MainApp/System/Graphic/PathDataCamera.h"
+#endif
+#line 58 PATHDATACAMERA_H_PATH
     void initBGCheck(BOOL fgTransparency) {
         if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);
         m_pHPC->initBGCheck(fgTransparency);
