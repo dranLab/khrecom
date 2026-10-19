@@ -58,7 +58,7 @@ struct PATH_PARAM {
     FLOAT fLearpIn;
     FLOAT fLearpOut;
     FLOAT fProj2;
-};
+} __attribute__((aligned(16))); /* 0x30 */
 
 class CPathVector {
 private:
@@ -70,9 +70,21 @@ private:
     INT m_iVecMemMax;              /* 0x044 */
     INT m_iActive;                 /* 0x048 */
     FVECTOR m_vRot;                /* 0x050 */
-    UBYTE _m_0x60[0x1b0];          /* 0x060 m_DDPathLines .. m_DDPathPolys */
+    C3DLineStrip m_DDPathLines;    /* 0x060 */
+    C3DLineStrip m_DDXYZLines;     /* 0x0a4 */
+    CCoord m_DDXYZCoord;           /* 0x0f0 */
+    class CDbgCube* m_pCube;       /* 0x1c0 */
+    C3DPolyStrip m_DDPathPolys;    /* 0x1c4 */
 
 public:
+    // PARTIAL: added for System/Graphic/HermitePathCamera
+    CPathVector(const FVECTOR* pPath, INT iPathMax) { init(pPath, iPathMax, 0); }
+    ~CPathVector();
+    void init(const FVECTOR* pPath, INT iPathMax, INT iMode);
+    FLOAT getPathRoll(INT iIdx) const;
+    float getTargetDistanceToPathStep(const FVECTOR& vTarget, float fStep);
+    void getPathStepToPosition(FVECTOR& vPos, float fStep, BOOL bLoop);
+    FLOAT getPathStepToRoll(float fStep);
     INT getPathVectorNum() { return m_iVecMax; }
     FVECTOR* getPathVector() { return m_pVec; }
     FVECTOR& getPathPosition(INT iIdx) { return m_pVec[iIdx]; }
