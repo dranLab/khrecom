@@ -82,6 +82,7 @@ private:
 
 public:
     CSaveLoad(CTask* pParent, SAVELOAD nMode, GAMECLEAR nClear);
+    static BOOL isExited();
 };
 
 extern "C" void TsSdDebugPrint();
@@ -363,7 +364,24 @@ void CGameMain::worldMap(BOOL bOn) {
         m_nGameProcFlag |= 0x800;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", checkStartFieldMenu__9CGameMain);
+static inline BOOL _isStartRoom(INT nRoom) { return nRoom == 0 || nRoom == 0x63; }
+
+void CGameMain::checkStartFieldMenu() {
+    BOOL bFlag = CGameWork::getFlag(1, 0x33);
+    if (CPadHandler::isButtonTrg(0x800, 0)) {
+        if (CGameWork::getFlag(1, 4) || bFlag) {
+            pause(TRUE, !CGameWork::getFlag(1, 3));
+        } else {
+            camp(TRUE);
+        }
+    } else if (CPadHandler::isButtonTrg(0x100, 0)) {
+        if (!CGameWork::getFlag(1, 4) && !_isStartRoom(CSceneInfo::getCurrentRoomID()) && !bFlag &&
+            CSceneInfo::getCurrentFloorIndex() < 16) {
+            worldMap(TRUE);
+        }
+    }
+    if (m_nGameProcFlag & 0x400) suspendTaskInGame(2);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", procFieldMenu__9CGameMain);
 void CGameMain::checkStartBattleMenu() {
     if (CPadHandler::isButtonTrg(0x800, 0)) {
@@ -519,8 +537,6 @@ __asm__(".rdata\n.align 3\n.word 0x6147435B\n.word 0x614D656D\n.word 0x3A5D6E69\
 void CGameMain::preSetupBattleRsrc() { m_nStep = 0; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupBattleRsrc__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x31287070\n.word 0x29363630\n.word 0x00000000\n.word 0x53705F6D\n.word 0x61426275\n.word 0x656C7474\n.word 0x00000000\n.text\n");
-static inline BOOL _isStartRoom(INT nRoom) { return nRoom == 0 || nRoom == 0x63; }
-
 void CGameMain::preSetupField() {
     if ((USHORT)(CSceneInfo::getPrevSceneNum() - 1000) < 50) {
         m_nStep = 0;
