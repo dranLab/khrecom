@@ -22,6 +22,7 @@ class CModel : public CDrawable {
 public:
     // PARTIAL: added for System/Graphic/ModelMan
     static void resetSendCtrl(INT nMode);
+    static void setSendCtrl(INT nMode); // PARTIAL: added for System/Graphic/ShadowModel
     static void resetWorldScreenMatrix();
     static void resetMicroProgram();
 private:
