@@ -26,39 +26,51 @@ enum SOFTRESET_MODE {
 
 class CMainApp {
 public:
-    static void reqSoftReset(SOFTRESET_MODE mode); // PARTIAL: added for Form/Menu/TitleReportDllStarter
-    static void initialize(int mode); // PARTIAL: added for main
-    static INT run();
+    static void initialize(BOOL bNTSC);
     static void finalize();
+    static INT run();
+    static BOOL isEnableSoftReset();
+    static BOOL reqSoftReset(SOFTRESET_MODE mode);
+    static void enableSoftReset(BOOL bEnable);
+    static BOOL isSkipLogo();
+    static void resetPlayTime(UINT nTime);
+    static UINT getPlayTime();
+    static void startCountPlayTime();
+    static void pauseCountPlayTime();
     static void setFpsFull();
     static void setFpsHalf();
     static BOOL isFpsHalf();
-    static void setSysPause(BOOL bPause); // PARTIAL: added for Game/Atel/ChatMan
+    static BOOL isNTSC();
     static BOOL isPAL();
-    static void enableSoftReset(BOOL bEnable); // PARTIAL: added for System/RootTask
-    static BOOL isSkipLogo();
+    static void setBackToFullFpsLag(INT nLag);
+    static INT getBackToFullFpsLag();
+    static BOOL isSysPauseNow();
+    static void setSysPause(BOOL bFlag);
+    static BOOL isWarningPauseNow();
     static void enableWarningPause(BOOL bEnable);
-    // PARTIAL: added for System/DebugProcInfo
+    static BOOL isWarningPauseDisable();
+    static BOOL isDbgUsrPauseNow();
+    static void enableDbgUsrPause(BOOL bFlag, BOOL bPause);
+    static BOOL isDbgUsrPauseDisable();
+    static BOOL reqBlackIn(USHORT nTime);
+    static BOOL reqBlackOut(USHORT nTime);
+    static BOOL reqWhiteIn(USHORT nTime);
+    static BOOL reqWhiteOut(USHORT nTime);
+    static void changeDrawModeNormal();
+    static TIMEQ getTickCount();
     static TIMEQ getMainCount();
+    static TIMEQ getDispFrameRate();
+    static UINT getFrameCount();
+    static UINT getVSyncCount();
     static INT getObjCount();
+    static void incObjCount();
+    static void decObjCount();
     static INT getProcCount();
     static INT getDrawCount();
     static INT getDraw2Count();
     static INT getProcCountMax();
-    // PARTIAL: added for System/Task
-    static TIMEQ getTickCount();
-    static TIMEQ getDispFrameRate();
-    static void incObjCount();
-    static void decObjCount();
-    // PARTIAL: added for System/Movie/MSVideo
-    static INT getFrameCount();
-    static BOOL isWarningPauseNow();
-    // PARTIAL: added for Form/Menu/SaveLoadUtil
-    static UINT getPlayTime();
-    static void resetPlayTime(UINT nTime);
-    // PARTIAL: added for Form/DebugMenu
-    static void startCountPlayTime();
-    static void enableDbgUsrPause(BOOL bEnable, BOOL bFlag);
+    static void resetProcCountMax();
+    static void halt(const CHAR* pszFile, INT nLine, const CHAR* pszMsg, const CHAR* pszExp);
 };
 #endif
 
