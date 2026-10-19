@@ -229,3 +229,5 @@ _vt$10CCollision_004882D0 = 0x004882D0; // size:0x18
 // Game/Enemy/MonstroEventBattle: OBJ_FORMATION's and OSD_HEADER's inline functions (copies of Game/Enemy/MapEnemyManager's)
 getObjGroup__13OBJ_FORMATIONii_002D5520 = 0x002D5520; // type:func size:0x80
 clear__10OSD_HEADER_002D55A0 = 0x002D55A0; // type:func size:0xC0
+_$_4CBuf_001BDCB0 = 0x001BDCB0; // type:func size:0x54
+_vt$4CBuf_0046DA28 = 0x0046DA28; // size:0x18
