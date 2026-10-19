@@ -3,6 +3,7 @@
 
 typedef unsigned int u_int;
 typedef unsigned long u_long;
+typedef unsigned short u_short;
 
 union QWdata { /* System/Graphic/Gprim.h */
     u_long ul64[2];
@@ -144,6 +145,20 @@ public:
     static INT getPkUseSize();
     static INT getPkTotalSize();
     static void pkReset();
+    static INT getDrawMode();
+    static BOOL isOverFlow(UINT nSize);
+    static u_int* pkOpenUpkCodeV4_32(u_short vuaddr, UINT cl, UINT wl);
+    static void pkRefMpg(u_short vuaddr, u_long128* pMicro, UINT size, UINT opt1);
+    static void pkInit(u_long128* pBase, pacVif1Packet* pPkt, UINT nMax);
+    static u_int* pkOpenUpkCode(u_short vuaddr, UINT upkcmd, UINT cl, UINT wl);
+    static void saveScreen();
+    static void pkOpenDirectCode(INT stall);
+    static void pkCloseDirectCode();
+    static void pkCloseDirectHLCode();
+    static void pkTerminate();
+    static void pkCnt(UINT flag);
+    static void pkCall(u_long128* pCall, UINT flag);
+    static void pkRef(u_long128* pRef, UINT size, UINT opt1, UINT opt2, UINT flag);
     static UINT pkSize();
     static void* pkGetCurrentPointer();
     static void pkSetCurrentPointer(void* p);
@@ -203,6 +218,21 @@ void sceVif1PkAddGsDataN(pacVif1Packet* pPacket, u_long* pData, u_int count);
 void sceVif1PkAddGsPacked(pacVif1Packet* pPacket, u_long128 data);
 void sceVif1PkAddGsPackedN(pacVif1Packet* pPacket, u_long128* pData, u_int count);
 void sceVif1PkAddGsAD(pacVif1Packet* pPacket, u_int addr, u_long data);
+u_long128* sceVif1PkTerminate(pacVif1Packet* pPacket);
+void sceVif1PkCnt(pacVif1Packet* pPacket, u_int flag);
+void sceVif1PkCall(pacVif1Packet* pPacket, u_long128* pCall, u_int flag);
+void sceVif1PkRef(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt1, u_int opt2, u_int flag);
+void sceVif1PkRefMpg(pacVif1Packet* pPacket, u_short vuaddr, u_long128* pMicro, u_int size, u_int opt1);
+void sceVif1PkOpenUpkCode(pacVif1Packet* pPacket, u_short vuaddr, u_int upkcmd, u_int cl, u_int wl);
+void sceVif1PkOpenUpkCodeV4_32(pacVif1Packet* pPacket, u_short vuaddr, u_int cl, u_int wl);
+void sceVif1PkOpenDirectCode(pacVif1Packet* pPacket, int stall);
+void sceVif1PkCloseDirectCode(pacVif1Packet* pPacket);
+void sceVif1PkCloseDirectHLCode(pacVif1Packet* pPacket);
+void _makePkt_SaveScreen(); /* static in the original (still INCLUDE_ASM) */
+extern "C" int FlushCache(int op);
+extern "C" void sceDmaSend(sceDmaChan* d, void* tag);
+extern "C" void AssertApp(const char* pFile, int nLine, const char* pExpr, int n);
+extern "C" char D_00461BE0[], D_00461C10[]; /* PARTIAL: __FILE__ and the assert text (data still asm) */
 void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv); /* static in the original (still INCLUDE_ASM) */
 
 static inline u_long _upper(u_long128 q) {
@@ -217,9 +247,23 @@ static inline u_long128 _pack(u_long lo, u_long hi) {
     return r;
 }
 
+namespace {
+extern pacVif1Packet* s_pPktVif1;
+}
+
+#line 179
+static inline void _checkSize(UINT iSize) {
+    if (!(!(iSize >= 0x10000))) AssertApp(D_00461BE0, __LINE__, D_00461C10, 0);
+}
+static inline void _checkDmaTag() {
+    pacVif1Packet* pPkt = s_pPktVif1;
+    if (pPkt->pDmaTag) _checkSize((u_long128*)(((UINT)pPkt->pCurrent + 15) & ~15) - pPkt->pDmaTag - 1);
+}
+
 /* The file's statics; the data still comes from the original (no SOURCE DATA yet) */
 namespace {
 extern u_long s_pPktBufVif1Frame[320];
+extern pacVif1Packet s_pktVif1;
 extern pacVif1Packet s_pktVif1BG;
 extern sceDmaChan* s_pDmaChanVif1;
 extern pacVif1Packet* s_pPktVif1;
@@ -247,36 +291,74 @@ extern UINT s_nMovieDispH;
 extern INT s_nPkUseSize;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkInit__8CPackManPUxP13pacVif1PacketUi);
+void CPackMan::pkInit(u_long128* pBase, pacVif1Packet* pPkt, UINT nMax) {
+    UINT nSize = nMax ? nMax : 0x8000;
+    s_pPktVif1 = pPkt ? pPkt : &s_pktVif1;
+    s_nMaxPktSizeVif1 = nSize;
+    sceVif1PkInit(s_pPktVif1, pBase);
+}
 void CPackMan::pkReset() { sceVif1PkReset(s_pPktVif1); }
 UINT CPackMan::pkSize() { return sceVif1PkSize(s_pPktVif1); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkTerminate__8CPackMan);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkCnt__8CPackManUi);
+void CPackMan::pkTerminate() {
+    _checkDmaTag();
+    sceVif1PkTerminate(s_pPktVif1);
+}
+void CPackMan::pkCnt(UINT flag) {
+    _checkDmaTag();
+    sceVif1PkCnt(s_pPktVif1, flag);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRet__8CPackManUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkEnd__8CPackManUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkNext__8CPackManPUxUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkCall__8CPackManPUxUi);
+void CPackMan::pkCall(u_long128* pCall, UINT flag) {
+    _checkDmaTag();
+    sceVif1PkCall(s_pPktVif1, pCall, flag);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefe__8CPackManPUxUiUiUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRef__8CPackManPUxUiUiUiUi);
+void CPackMan::pkRef(u_long128* pRef, UINT size, UINT opt1, UINT opt2, UINT flag) {
+    _checkDmaTag();
+    _checkSize(size);
+    sceVif1PkRef(s_pPktVif1, pRef, size, opt1, opt2, flag);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefs__8CPackManPUxUiUiUiUi);
 void* CPackMan::pkGetCurrentPointer() { return s_pPktVif1->pCurrent; }
 void CPackMan::pkSetCurrentPointer(void* p) { s_pPktVif1->pCurrent = (u_int*)p; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkOpenUpkCode__8CPackManUsUiUiUi);
+u_int* CPackMan::pkOpenUpkCode(u_short vuaddr, UINT upkcmd, UINT cl, UINT wl) {
+    pacVif1Packet* pPkt = s_pPktVif1;
+    sceVif1PkOpenUpkCode(pPkt, vuaddr, upkcmd, cl, wl);
+    return pPkt->pCurrent;
+}
 void CPackMan::pkCloseUpkCode(void* p) {
     s_pPktVif1->pCurrent = (u_int*)p;
     sceVif1PkCloseUpkCode(s_pPktVif1);
 }
 void CPackMan::pkCloseUpkCode() { sceVif1PkCloseUpkCode(s_pPktVif1); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkOpenUpkCodeV4_32__8CPackManUsUiUi);
+u_int* CPackMan::pkOpenUpkCodeV4_32(u_short vuaddr, UINT cl, UINT wl) {
+    pacVif1Packet* pPkt = s_pPktVif1;
+    sceVif1PkOpenUpkCodeV4_32(pPkt, vuaddr, cl, wl);
+    return pPkt->pCurrent;
+}
 void CPackMan::pkCloseUpkCodeV4_32(void* p) {
     s_pPktVif1->pCurrent = (u_int*)p;
     sceVif1PkCloseUpkCodeV4_32(s_pPktVif1);
 }
 void CPackMan::pkCloseUpkCodeV4_32() { sceVif1PkCloseUpkCodeV4_32(s_pPktVif1); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkOpenDirectCode__8CPackMani);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkCloseDirectCode__8CPackMan);
+void CPackMan::pkOpenDirectCode(INT stall) {
+    sceVif1PkOpenDirectCode(s_pPktVif1, stall);
+    *(u_long*)s_pPktVif1->pCurrent = 0x8000;
+    s_pPktVif1->pCurrent += 4;
+}
+void CPackMan::pkCloseDirectCode() {
+    u_int* pEnd = s_pPktVif1->pCurrent - 1;
+    _checkSize((u_long128*)pEnd - (u_long128*)s_pPktVif1->pVifCode);
+    sceVif1PkCloseDirectCode(s_pPktVif1);
+}
 void CPackMan::pkOpenDirectHLCode(INT stall) { sceVif1PkOpenDirectHLCode(s_pPktVif1, stall); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkCloseDirectHLCode__8CPackMan);
+void CPackMan::pkCloseDirectHLCode() {
+    u_int* pEnd = s_pPktVif1->pCurrent - 1;
+    _checkSize((u_long128*)pEnd - (u_long128*)s_pPktVif1->pVifCode);
+    sceVif1PkCloseDirectHLCode(s_pPktVif1);
+}
 u_long128* CPackMan::pkOpenGifTag(u_long128 tag) {
     pacVif1Packet* pPkt = s_pPktVif1;
     sceVif1PkOpenGifTag(pPkt, tag);
@@ -314,7 +396,7 @@ void CPackMan::pkAddGsAD(UINT addr, u_long data) { sceVif1PkAddGsAD(s_pPktVif1, 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefLoadImage__8CPackManUsUcUsPUxUiUiUiUiUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefLoadImage__8CPackManRC10VTransInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefLoadImage__8CPackManUsRC10VTransInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefMpg__8CPackManUsPUxUiUi);
+void CPackMan::pkRefMpg(u_short vuaddr, u_long128* pMicro, UINT size, UINT opt1) { sceVif1PkRefMpg(s_pPktVif1, vuaddr, pMicro, size, opt1); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initialize__8CPackMan);
 void CPackMan::finalize() { CDelayedFree::disposeFreeList(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initGsDefDrawEnv__FR12sceGsDBuffDc12_GS_BUF_SIDEsssssUiUii);
@@ -402,7 +484,19 @@ void CPackMan::enableDraw(INT nBit) { s_nDawEnableBit |= nBit; }
 void CPackMan::disableDraw(INT nBit) { s_nDawEnableBit &= ~nBit; }
 UINT CPackMan::getEnableDraw() { return s_nDawEnableBit; }
 void CPackMan::changeDrawMode(INT nMode) { s_nReqDrawMode = nMode; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", getDrawMode__8CPackMan);
+INT CPackMan::getDrawMode() {
+    INT nMode = s_nDrawMode;
+    switch (nMode) {
+    case 3:
+    case 4:
+        nMode = 1;
+        break;
+    case 5:
+        nMode = 2;
+        break;
+    }
+    return nMode;
+}
 BOOL CPackMan::isSkipPacketDMA() { return s_nDrawMode == 3; }
 void CPackMan::changePcrtcMode(INT nMode) { s_nReqPcrtcMode = nMode; }
 INT CPackMan::getPcrtcMode() { return s_nPcrtcMode; }
@@ -410,7 +504,7 @@ void CPackMan::setBGColor(INT nColor) { s_nBGColor = nColor; }
 INT CPackMan::getBGColor() { return s_nBGColor; }
 void CPackMan::setDisp1Alpha(INT nAlpha) { s_nDisp1Alpha = nAlpha; }
 INT CPackMan::getDisp1Alpha() { return s_nDisp1Alpha; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", isOverFlow__8CPackManUi);
+BOOL CPackMan::isOverFlow(UINT nSize) { return sceVif1PkSize(s_pPktVif1) + nSize >= s_nMaxPktSizeVif1; }
 void CPackMan::startCountTmpSize() { s_nTmpPacketSize = sceVif1PkSize(s_pPktVif1); }
 UINT CPackMan::getTmpCountSize() { return sceVif1PkSize(s_pPktVif1) - s_nTmpPacketSize; }
 void CPackMan::setFGPacketMaxNorml() {
