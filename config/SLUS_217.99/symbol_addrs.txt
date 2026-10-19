@@ -353,3 +353,10 @@ _vt$6CState_0048A190 = 0x0048A190; // size:0x30
 // System/Graphic/PathData: CVector<G_STRIP>'s inline destructor and an unnamed copy of its vtable
 _$_t7CVector1Z7G_STRIP_00143D78 = 0x00143D78; // type:func size:0x8C
 _vt$t7CVector1Z7G_STRIP_00462378 = 0x00462378; // size:0x18
+
+// Game/Game: CState's and CFnt's inline destructors, CFnt::setStyle and unnamed copies of their vtables
+_$_6CState_001F9D88 = 0x001F9D88; // type:func size:0x30
+_$_4CFnt_001F9DB8 = 0x001F9DB8; // type:func size:0x28
+setStyle__4CFntUi_001F9DE0 = 0x001F9DE0; // type:func size:0xC
+_vt$4CFnt_0047E7A8 = 0x0047E7A8; // size:0x48
+_vt$6CState_0047E7F0 = 0x0047E7F0; // size:0x30

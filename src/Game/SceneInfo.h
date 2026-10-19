@@ -272,6 +272,7 @@ public:
     // PARTIAL: added for Form/Menu/SaveLoadUtil
     static USHORT getFloorIndex(SHORT nFloor, BOOL bSora);
     static void initFloor(INT nFloorIndex, WORLD_ID nWorldID);
+    static void initFloor(); // PARTIAL: added for Game/Game
     static INT getCurrentAreaScene();
     static void backupEventDoorState();
     // PARTIAL: added for Form/Menu/WorldWarp
@@ -298,6 +299,19 @@ public:
     static void updateMapRsrcCache(INT nMapID, INT nMode);
     static SHORT getPrevSceneNum();
     static UINT getCurrentSceneCacheID();
+    static BOOL hasAnyRequest(); // PARTIAL: added for Game/Game
+    static INT getNextFloorIndex(); // PARTIAL: added for Game/Game
+    static INT getPrevRoomID(); // PARTIAL: added for Game/Game
+    static BOOL isNextBattleRsrcUpdate(); // PARTIAL: added for Game/Game
+    static void* getMapRsrcCache(INT nMode); // PARTIAL: added for Game/Game
+    static BOOL hasReqChangeFloor(); // PARTIAL: added for Game/Game
+    static void removeMapRsrcCache(INT nMode); // PARTIAL: added for Game/Game
+    static BOOL hasReqExitBattle(); // PARTIAL: added for Game/Game
+    static BOOL hasReqRetryBattle(); // PARTIAL: added for Game/Game
+    static SHORT getCurrentFieldSceneNum(); // PARTIAL: added for Game/Game
+    static INT getConstWorldRsrcID(INT nWorld, BOOL bSora); // PARTIAL: added for Game/Game
+    static INT getInconstWorldRsrcID(INT nWorld, BOOL bSora); // PARTIAL: added for Game/Game
+    static BOOL reqChangeBackupRoom(); // PARTIAL: added for Game/Game
     static INT getNextRoomID();
     static BOOL isLastFloorScene();
     static SHORT getNextAreaNum();
