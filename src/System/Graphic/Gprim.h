@@ -41,6 +41,8 @@ union ALPHA {
         _value = a._value;
         return *this;
     }
+    BYTE getAlphaMode() const { return alphaMode; }   // PARTIAL: added for System/Graphic/DispList
+    BYTE getAlphaValue() const { return alphaValue; } // PARTIAL: added for System/Graphic/DispList
 };
 
 // PARTIAL: added for Game/AtWater

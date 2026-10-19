@@ -50,26 +50,14 @@ static inline void _memclr(void* pDst, UINT nSize, BOOL bUncached) {
     for (i = 0; i < nSize; i++) *pb++ = 0;
 }
 
-/* GS ALPHA register for a primitive's alpha mode (original name unknown) */
-static inline ULONGLONG _getAlphaReg(const ALPHA& rMode, const ALPHA& alpha) {
-    ULONGLONG nC = 0;
-    ULONGLONG nFix = 0;
-    if (rMode._value & 0x80) {
-        nC = 1;
-    } else if (rMode._value & 0x40) {
-        nC = 2;
-        nFix = alpha.alphaValue;
-    }
-    switch (alpha.alphaMode & 0xf) {
-    case 2:
-        return 0x48 | (nC << 4) | (nFix << 32);
-    case 3:
-        return 0x42 | (nC << 4) | (nFix << 32);
-    case 4:
-        return 0x89;
-    default:
-        return 0x44 | (nC << 4) | (nFix << 32);
-    }
+/* libgraph.h */
+#define SCE_GS_SET_ALPHA(a, b, c, d, fix) \
+    ((u_long)(a) | ((u_long)(b) << 2) | ((u_long)(c) << 4) | ((u_long)(d) << 6) | ((u_long)(fix) << 32))
+
+/* semi-transparent primitives never write Z: ZTST forced to GEQUAL unless already set (original name unknown) */
+static inline void _fixTestReg(ULONGLONG& nTest) {
+    if (nTest & 0x10000) return;
+    nTest = (nTest & ~0x70000) | 0x30000;
 }
 
 static inline u_long128 _pack(u_long lo, u_long hi) {
@@ -384,7 +372,62 @@ void CDispListSemiBase::_drawOT(OTtag& inOT) {
     }
 }
 void CDispListSemiBase::_endDraw() { _endDirectMode(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", _updateTestMode__17CDispListSemiBasePC9CDrawable);
+void CDispListSemiBase::_updateTestMode(const CDrawable* pInPrim) {
+    ALPHA nAlphaMode;
+    ULONGLONG nAlpha;
+    ULONGLONG nTest;
+    BOOL bWriteZ;
+    INT c;
+    INT nFixValue;
+    ULONGLONG nZbuf;
+    if (pInPrim) {
+        nAlphaMode = pInPrim->m_nAlphaMode;
+        m_nTestFlag = pInPrim->m_nTestFlag;
+    } else {
+        nAlphaMode._value = 0;
+        m_nTestFlag = 0x5000d;
+    }
+    m_nAlphaMode = nAlphaMode;
+    nTest = m_nTestFlag;
+    _fixTestReg(nTest);
+    bWriteZ = FALSE;
+    c = 0;
+    nFixValue = 0;
+    if ((INT)m_nAlphaMode & 0x80) {
+        c = 1;
+    } else if ((INT)m_nAlphaMode & 0x40) {
+        c = 2;
+        nFixValue = nAlphaMode.getAlphaValue();
+    }
+    switch (nAlphaMode.alphaMode & 0xf) {
+    case 1:
+        nAlpha = SCE_GS_SET_ALPHA(0, 1, c, 1, nFixValue);
+        break;
+    case 2:
+        nAlpha = SCE_GS_SET_ALPHA(0, 2, c, 1, nFixValue);
+        break;
+    case 3:
+        nAlpha = SCE_GS_SET_ALPHA(2, 0, c, 1, nFixValue);
+        break;
+    case 4:
+        nAlpha = SCE_GS_SET_ALPHA(1, 2, 0, 2, 0);
+        break;
+    default:
+        nAlpha = SCE_GS_SET_ALPHA(0, 1, c, 1, nFixValue);
+        bWriteZ = TRUE;
+        break;
+    }
+    nZbuf = (ULONGLONG)(VRAM::_ZBUF_START / 32) | 0x31000000;
+    if (!bWriteZ) nZbuf |= (ULONGLONG)1 << 32;
+    CPackMan::setDefault_TEST_2(nTest);
+    CPackMan::setDefault_ALPHA_2(nAlpha);
+    CPackMan::setDefault_ZBUF_2(nZbuf);
+    u_long128* qp = CPackMan::pkOpenGifTagManual(_pack(0x1000800000008003, 0xe));
+    qp[0] = _pack(nTest, 0x48);
+    qp[1] = _pack(nAlpha, 0x43);
+    qp[2] = _pack(nZbuf, 0x4f);
+    CPackMan::pkCloseGifTagManual((UINT*)(qp + 3));
+}
 void CDispListSemi::insert(CDrawable& inPrim, FIX4 inZ) {
     if (inZ < 0) {
         inZ = 0x7fffff0;
@@ -437,7 +480,38 @@ void CDispListWithoutZ::_enableZTest(BOOL bEnable) {
     p[1] = _pack(nZbuf, 0x4f);
     CPackMan::pkCloseGifTagManual((UINT*)(p + 2));
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", _updateAlphaMode__17CDispListWithoutZG5ALPHA);
+void CDispListWithoutZ::_updateAlphaMode(ALPHA inAlpha) {
+    ULONGLONG nAlpha;
+    INT c;
+    INT nFixValue;
+    m_nAlphaMode = inAlpha;
+    c = 0;
+    nFixValue = 0;
+    if ((INT)m_nAlphaMode & 0x80) {
+        c = 1;
+    } else if ((INT)m_nAlphaMode & 0x40) {
+        c = 2;
+        nFixValue = inAlpha.getAlphaValue();
+    }
+    switch (inAlpha.alphaMode & 0xf) {
+    case 2:
+        nAlpha = SCE_GS_SET_ALPHA(0, 2, c, 1, nFixValue);
+        break;
+    case 3:
+        nAlpha = SCE_GS_SET_ALPHA(2, 0, c, 1, nFixValue);
+        break;
+    case 4:
+        nAlpha = SCE_GS_SET_ALPHA(1, 2, 0, 2, 0);
+        break;
+    default:
+        nAlpha = SCE_GS_SET_ALPHA(0, 1, c, 1, nFixValue);
+        break;
+    }
+    CPackMan::setDefault_ALPHA_2(nAlpha);
+    u_long128* qp = CPackMan::pkOpenGifTagManual(_pack(0x1000800000008001, 0xe));
+    qp[0] = _pack(nAlpha, 0x43);
+    CPackMan::pkCloseGifTagManual((UINT*)(qp + 1));
+}
 void CDispListBG::_beginDraw() {
     CPackMan::changeLayer(1);
     _startDirectMode();
