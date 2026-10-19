@@ -81,6 +81,7 @@ public: // PARTIAL: inline (weak in the original) and public as in the debug inf
 
 class C2DSeqObj : public C2DO {
     friend class ::C2DCard; // PARTIAL: System/Graphic/2d/2DCard sets m_fgMainSkip
+    friend class C2DSeqCtrl; // PARTIAL: System/Graphic/2d/2DSeqCtrl clears m_fgParent
 private:
     static UINT m_uiID;
     CScissoring* m_pScissoringEnd;  /* 0x0c */

@@ -446,7 +446,7 @@ void C2DCard::setRot(FVECTOR& vRot) {
 void C2DCard::checkBack() {
     if (!m_nSeq) return;
     if (m_seqControl.pParentSeqControl) {
-        int* pHandle = m_pParentCtrl->getSeqHandles();
+        int* pHandle = m_pParentCtrl->getHandle();
         if (!pHandle) return;
         C2DSeqObj* pObj = C2DMan::getSeqObj(*pHandle);
         if (!pObj) return;

@@ -33,6 +33,7 @@ struct SEQ_SEQUENCE {
 };
 
 class C2DSeq : public C2DSpr {
+    friend class C2DSeqCtrl; // PARTIAL: System/Graphic/2d/2DSeqCtrl reads m_pCurrent2DSeqObj
 private:
     SEQ_ANIMATION* m_pSeqAnimation; /* 0xd0 */
     SEQ_SEQUENCE* m_pSeqSequence;   /* 0xd4 */
