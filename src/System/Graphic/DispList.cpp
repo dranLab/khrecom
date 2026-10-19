@@ -8,12 +8,17 @@
 #include "System/HeapMan.h"
 #include "System/Debug.h"
 #include <string.h>
+extern "C" void qsort(void* base, size_t num, size_t size, int (*cmp)(const void*, const void*));
 #include "System/Graphic/ModelMan.h"
 #include "System/VramMan.h"
+#define TASK_H_NO_SLC_OVERFLOW_MSG
+#include "System/Coord.h"
+#include "System/Graphic/ShadowModel.h"
 #include "include_asm.h"
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
+class CShadowModel;
 class CPackMan { /* System/Graphic/PackMan.h */
 public:
     static void pkCnt(UINT n);
@@ -462,10 +467,119 @@ void CDispListFG::_endDraw() {
     CPackMan::changeLayer(0);
 }
 void CDispListShadowDraw::_beginDraw() { _startDirectMode(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", ShadowModel_QSortComp__FPCvT0);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", getCShadowModelCoordsHandle__FP6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", sortCShadowModel__FP14SHADOWMODELBUFi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", chackBBOX__FRC7FVECTORN30);
+/* PARTIAL: only what this file needs (System/Graphic/SemiModel.h, FadeModel.h, ShadowModel.h) */
+class CShadowModel : public CDrawable {
+protected:
+    CModel* m_pModel; /* 0x18 CSemiModel::m_pModel */
+public:
+    CModel* getModel() { return m_pModel; }
+};
+/* VU0 helpers (original names unknown) */
+static inline void _vecAdd(FVECTOR& vOut, const FVECTOR& v0, const FVECTOR& v1) {
+    asm volatile("lqc2 $vf4, 0x0(%1)\n"
+                 "lqc2 $vf5, 0x0(%2)\n"
+                 "vadd.xyz $vf4, $vf4, $vf5\n"
+                 "sqc2 $vf4, 0x0(%0)\n"
+                 :
+                 : "r"(&vOut), "r"(&v0), "r"(&v1)
+                 : "memory");
+}
+static inline void _vecSub(FVECTOR& vOut, const FVECTOR& v0, const FVECTOR& v1) {
+    asm volatile("lqc2 $vf4, 0x0(%1)\n"
+                 "lqc2 $vf5, 0x0(%2)\n"
+                 "vsub.xyz $vf4, $vf4, $vf5\n"
+                 "sqc2 $vf4, 0x0(%0)\n"
+                 :
+                 : "r"(&vOut), "r"(&v0), "r"(&v1)
+                 : "memory");
+}
+static inline void _vecScale(FVECTOR& vOut, const FVECTOR& v0, FLOAT f) {
+    asm volatile("lqc2 $vf4, 0x0(%1)\n"
+                 "mfc1 $3, %2\n"
+                 "qmtc2.ni $3, $vf5\n"
+                 "vmulx.xyz $vf4, $vf4, $vf5x\n"
+                 "sqc2 $vf4, 0x0(%0)\n"
+                 :
+                 : "r"(&vOut), "r"(&v0), "f"(f)
+                 : "$3", "memory");
+}
+/* the original keeps the integer copy in s5/s6 and the result in f0/f1: a macro over explicit register locals */
+#define _LENGTH_SQ(ret, iTmp, v0)                                    \
+    asm volatile("lqc2 $vf4, 0x0(%1)\n"                              \
+                 "vaddy.x $vf6, $vf0, $vf4y\n"                       \
+                 "vaddz.x $vf7, $vf0, $vf4z\n"                       \
+                 "vmulax.x $ACC, $vf4, $vf4x\n"                      \
+                 "vmadday.x $ACC, $vf6, $vf4y\n"                     \
+                 "vmaddz.x $vf5, $vf7, $vf4z\n"                      \
+                 "qmfc2.ni %0, $vf5\n"                               \
+                 : "=r"(iTmp)                                        \
+                 : "r"(&(v0)));                                      \
+    asm volatile("mtc1 %1, %0\n"                                     \
+                 "nop\n"                                             \
+                 : "=f"(ret)                                         \
+                 : "r"(iTmp))
+struct SHADOWMODELBUF {
+    CShadowModel* pModel;
+    HANDLE hHnd;
+    INT nNum;
+};
+static int ShadowModel_QSortComp(const void* ax, const void* ay) {
+    return ((SHADOWMODELBUF*)ax)->hHnd - ((SHADOWMODELBUF*)ay)->hHnd;
+}
+static HANDLE getCShadowModelCoordsHandle(CModel* pModel) {
+    HANDLE hHnd = -1;
+    if (pModel) {
+        CCoords* pCrds = pModel->getCoords();
+        if (pCrds) {
+            CCoord* pCrd = pCrds->Crd();
+            if (pCrd) {
+                if (pCrd->getParent()) {
+                    hHnd = pCrd->getParent()->m_hHandle;
+                } else {
+                    hHnd = pCrds->getSysHandle();
+                }
+            }
+        }
+    }
+    return hHnd;
+}
+static void sortCShadowModel(SHADOWMODELBUF* pBuf, INT nEntryNum) {
+    INT i;
+    INT j;
+    for (i = 0; i < nEntryNum; i++) {
+        CShadowModel* pSdw = pBuf[i].pModel;
+        HANDLE hHnd = getCShadowModelCoordsHandle(pSdw->getModel());
+        if (hHnd != -1) {
+            pBuf[i].hHnd = hHnd;
+        } else {
+            pBuf[i].pModel = NULL;
+            pBuf[i].hHnd = 0;
+        }
+    }
+    if (nEntryNum > 1) qsort(pBuf, nEntryNum, sizeof(SHADOWMODELBUF), ShadowModel_QSortComp);
+    for (i = 0; i < nEntryNum; i++) {
+        HANDLE hHnd = pBuf[i].hHnd;
+        if (hHnd == 0) {
+            pBuf[i].nNum = 1;
+        } else {
+            INT nNum = 1;
+            for (j = i + 1; j < nEntryNum; j++) {
+                if (hHnd != pBuf[j].hHnd) break;
+                nNum++;
+            }
+            pBuf[i].nNum = nNum;
+        }
+    }
+}
+static BOOL chackBBOX(const FVECTOR& vMax, const FVECTOR& vMin, const FVECTOR& vSMMax, const FVECTOR& vSMMin) {
+    if (vMax.y < vSMMin.y) return FALSE;
+    if (vMin.y > vSMMax.y) return FALSE;
+    if (vMax.x < vSMMin.x) return FALSE;
+    if (vMin.x > vSMMax.x) return FALSE;
+    if (vMax.z < vSMMin.z) return FALSE;
+    if (vMin.z > vSMMax.z) return FALSE;
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", _drawOT__19CDispListShadowDrawR5OTtag);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x70736944\n.word 0x7473694C\n.word 0x7070632E\n.word 0x35393828\n.word 0x00000029\n.word 0x00000000\n.word 0x77645370\n.word 0x00667542\n.word 0x69282021\n.word 0x203D2120\n.word 0x746E456E\n.word 0x754E7972\n.word 0x0000296D\n.word 0xFF000000\n.word 0x7F000000\n.word 0x00000000\n.text\n");
 void CDispListShadowDraw::_endDraw() {
@@ -474,9 +588,45 @@ void CDispListShadowDraw::_endDraw() {
     CGTexPrim2D::clearTexCache();
     _endDirectMode();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", insert__18CDispListShadowMapR9CDrawablei);
+void CDispListShadowMap::insert(CDrawable& inPrim, FIX4 inZ) {
+    CModel* pModel = ((CShadowModel&)inPrim).getModel();
+    if (pModel) {
+        FVECTOR v[2];
+        FVECTOR& vCamPos = CShadowModelMan::m_vCamPos;
+        FLOAT fClip = CShadowModelMan::m_fClipDistSq;
+        pModel->getWorldBBox(v[0], v[1]);
+        _vecAdd(v[1], v[0], v[1]);
+        _vecScale(v[1], v[1], 0.5f);
+        _vecSub(v[0], v[0], v[1]);
+        register INT iTmp asm("$21");
+        register FLOAT ret asm("$f0");
+        _LENGTH_SQ(ret, iTmp, v[0]);
+        FLOAT fLen2 = ret + fClip;
+        _vecSub(v[0], vCamPos, v[1]);
+        register INT iTmp2 asm("$22");
+        register FLOAT ret2 asm("$f1");
+        _LENGTH_SQ(ret2, iTmp2, v[0]);
+        if (ret2 < fLen2) {
+            OTtag& tag = getOTtagTbl()[0];
+            tag.addTail(&inPrim);
+            inPrim.m_nZ = inZ;
+            m_nEntryCount++;
+        }
+    }
+}
 void CDispListShadowMap::_beginDraw() { _startDirectMode(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", _drawOT__18CDispListShadowMapR5OTtag);
+void CDispListShadowMap::_drawOT(OTtag& inOT) {
+    CDrawable* pPrim = inOT._pHeadPrim;
+    G_LAYER nNowLayer = CModelMan::getLayerInfo();
+    while (pPrim) {
+        if (CPackMan::isOverFlow(pPrim->getPacketSize())) {
+            pPrim = pPrim->m_pNext;
+        } else {
+            nNowLayer = checkCache(*pPrim, nNowLayer);
+            pPrim = _draw(*pPrim);
+        }
+    }
+}
 void CDispListShadowMap::_endDraw() {
     CModelMan::clearTexCache();
     CGTexPrim::clearTexCache();
