@@ -8,6 +8,7 @@ namespace D2 {
 struct LAY_SCREEN;
 
 class C2DLayObj : public C2DO {
+    friend class C2DMan; // PARTIAL: System/Graphic/2d/2DMan resets m_uiID
 private:
     static UINT m_uiID;
     HANDLE* m_pSeqObjHandle; /* 0xc */
