@@ -23,6 +23,8 @@ class CAtel;
 namespace ATEL {
 
 #ifdef GAME_ATEL_AVATAR_CPP
+extern "C" char D_0048AB50[]; /* "c:/KHCOM/MainApp/Game/Atel/Avatar.h" (PARTIAL: no SOURCE DATA yet) */
+extern "C" char D_0048AB88[];
 struct ETMoveInfo;
 class CVSM;
 
@@ -43,6 +45,11 @@ struct AvatarMoveStruct { // 0x70
     USHORT _nMoveType;             /* 0x64 */
     USHORT _nMoveMotion;           /* 0x66 */
 
+    AvatarMoveStruct() {
+        _pMatRide = NULL;
+        _pPathData = NULL;
+        _pHermiteHelper = NULL;
+    }
     ~AvatarMoveStruct();
     BOOL setupPath(const CHAR* pszName, USHORT nType);
     void getPosOnPath(FVECTOR& vPos);
@@ -59,6 +66,7 @@ struct AvatarRotateStruct { // 0x50
     TIMEQ _nRotIntervalTimeCount;  /* 0x3c */
     UINT _nRotTargetRegularly;     /* 0x40 */
     USHORT _nRotateType;           /* 0x44 */
+    AvatarRotateStruct() { _nRotIntervalTime = 0; }
 };
 
 struct AvatarScaleStruct { // 0x30
@@ -130,6 +138,12 @@ public:
     BOOL isAvatarFadeing() const { return m_nState & 0x200; }
     virtual INT reqCommand(INT nCmd, void* pParam, INT nID);
 
+private:
+    BOOL createMoveStruct();
+    BOOL createRotateStruct();
+    BOOL createScaleStruct();
+    AvatarFadeStruct* createFadeStruct();
+
 protected:
     CAtel& getAtel();
     CVSM& getVSM();
@@ -192,6 +206,12 @@ public:
     void setRotAhead();
     void MoveAvatarEnd();
     void setAvatarGravity(BOOL bOn);
+    void setAvatarRotTimeLimit(TIMEQ nTime);
+    void clearAvatarScaleSpeed() {
+#line 582 AVATAR_H_PATH
+        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        m_pScaleStruct->_vScaleSpeed._q = 0;
+    }
     BOOL updateAvatarPosOnPath(TIMEQ nTime);
     FVECTOR* getPathStartPos(const CHAR* pszName) const;
 };

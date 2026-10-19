@@ -250,6 +250,8 @@ public:
     void changeEx(INT nRsrcID, ANIMID inId, TIMEQ inTq, BOOL inLoop);
     void setSpeed(FLOAT s) { m_Speed = s; }
     void endLookPosition(FLOAT fFrame); // PARTIAL: added for Game/Atel/Avatar
+    void setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped); // PARTIAL: added for Game/Atel/Avatar
+    void setLookPosition(const FVECTOR& vLook, const FVECTOR& vMax, const FVECTOR& vMin, INT nBoneNum, FLOAT fRate, UINT iFlags); // PARTIAL: added for Game/Atel/Avatar
     void updateLookPosition(const FVECTOR& vLook, FLOAT fRate, UINT iFlags); // PARTIAL: added for Game/Atel/Avatar
     BOOL isMotionEnd() { return m_Flags[0] & 3; }
 
