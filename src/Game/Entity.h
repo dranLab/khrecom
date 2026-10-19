@@ -49,6 +49,7 @@ public:
 class CEntity : public CTask, public CFSM {
     friend class CSEMotionCtrl; // PARTIAL: added for Game/SEMotion
     friend class CSEMotion;
+    friend class CMovement; // PARTIAL: added for Game/Movement
 protected:
     // PARTIAL: m_pMove split out for Game/Gimmick/GimmickBreakable
     // PARTIAL: m_pModels, m_iModelCount split out for Game/Gimmick/GimmickPlantChild
@@ -136,6 +137,7 @@ public:
     UINT isHeartless() const { return m_uiEntityFlag & 0x20000; } // PARTIAL: added for Game/Bullet/CreateBullet
     // PARTIAL: added for Game/Gimmick/GimmickPlantChild (getModel needs CModel's definition: System/Graphic/Model.h)
     INT getID() { return m_iID; } // PARTIAL: added for Game/Gimmick/GimmickToldPipe
+    INT isFirstStandsGroundIK(); // PARTIAL: added for Game/Movement
     INT getModelCount() { return m_iModelCount; }
     inline CModel* getModel();
     inline CModel* getModel(INT inIndex);
