@@ -227,6 +227,7 @@ union AREA_SCENE {
         SHORT _nArea;
     };
     INT _nAreaScene;
+    AREA_SCENE(INT nAreaScene) { _nAreaScene = nAreaScene; } // PARTIAL: added for System/RsrcDB
     AREA_SCENE(SHORT nArea, SHORT nScene) {
         _nArea = nArea;
         _nScene = nScene;
