@@ -218,7 +218,11 @@ public:
     void setFootEffectIK(const CHAR* inName, INT inFlag);
     void setGroundIK(INT inFlag);
     // PARTIAL: added for Game/Player/FriendKing (also out of line: setDispOffFlag__7CEntityUiUi)
+#ifdef ENTITY_H_SETFLAG_DIRECT // PARTIAL: the plain form, for Game/Atel/Avatar
+    void setDispOffFlag(UINT inSet, UINT inMask) { m_uiDispOffFlag = (m_uiDispOffFlag | inSet) & ~inMask; }
+#else
     void setDispOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiDispOffFlag; f = (f | inSet) & ~inMask; }
+#endif
     TIMEQ getMotionCurrentTime() const;
     void userBodyCollOn(INT inIndex);
     void userBodyCollOnBody(INT inIndex);

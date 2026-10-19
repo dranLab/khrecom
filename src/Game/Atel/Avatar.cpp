@@ -42,7 +42,16 @@ void CAvatar::changeAvatarMainState(INT nState) {
     if (!((0 <= nState) && (2 > nState))) AssertApp(D_0048AD68, 154, D_0048AD90, 0);
     gotoState(m_MainState[nState]);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", beginStateMain__Q24ATEL7CAvatar);
+void CAvatar::beginStateMain() {
+    if (isAvatarRotating()) setAvatarState(0x40, FALSE);
+    if (isAvatarMoving()) setAvatarState(0x30, FALSE);
+    if (isAvatarScaling()) setAvatarState(0x80, FALSE);
+    if (isAvatarFadeing()) setAvatarState(0x200, FALSE);
+    if (isAvatarRotatingFuture()) setAvatarState(0x1000, FALSE);
+    if (isAvatarMovingFuture()) setAvatarState(0xc00, FALSE);
+    if (isAvatarScalingFuture()) setAvatarState(0x2000, FALSE);
+    if (isAvatarFadeingFuture()) setAvatarState(0x8000, FALSE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", stateMain__Q24ATEL7CAvatar);
 void CAvatar::stateMainEnd() {}
 void CAvatar::stateSkipMain() {}
@@ -117,7 +126,19 @@ AvatarFadeStruct* CAvatar::createFadeStruct() {
     }
     return NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onInit__Q24ATEL7CAvatariPvi);
+INT CAvatar::onInit(INT nCmd, void* pParam, INT nID) {
+    BYTE* p = (BYTE*)pParam;
+    setPos(*(FVECTOR*)p);
+    setRot(*(FVECTOR*)(p + 0x10));
+    warp(getPos());
+    if (*(INT*)(p + 0x20)) {
+        m_pMove->enableGravity(TRUE);
+        m_pMove->land(5.0f, 1.0f, FALSE);
+    }
+    updateCoord();
+    coordFix();
+    return -1;
+}
 INT CAvatar::onSetActive(INT nCmd, void* pParam, INT nID) { return -1; }
 INT CAvatar::onSetVisible(INT nCmd, void* pParam, INT nID) {
     if (nID) setEntityFlag(1, 0x10000);
@@ -127,7 +148,19 @@ INT CAvatar::onSetVisible(INT nCmd, void* pParam, INT nID) {
     }
     return -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onSetVisibleModel__Q24ATEL7CAvatariPvi);
+INT CAvatar::onSetVisibleModel(INT nCmd, void* pParam, INT nID) {
+    INT* param = (INT*)pParam;
+    if (param[0] == -1) {
+        for (int i = 0; i < getModelCount(); i++) {
+            if (param[1] == 3) setDispOffFlag(1 << i, 0);
+            else setDispOffFlag(0, 1 << i);
+        }
+    } else {
+        if (param[1] == 3) setDispOffFlag(1 << param[0], 0);
+        else setDispOffFlag(0, 1 << param[0]);
+    }
+    return -1;
+}
 INT CAvatar::onSetGravity(INT nCmd, void* pParam, INT nID) {
     if (nID) m_pMove->enableGravity(TRUE);
     else m_pMove->enableGravity(FALSE);
@@ -168,8 +201,23 @@ INT CAvatar::onSetNearClip(INT nCmd, void* pParam, INT nID) {
     else setEntityFlag(0x1000, 0);
     return -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onSetPosistion__Q24ATEL7CAvatariPvi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onSetPosPathTop__Q24ATEL7CAvatariPvi);
+INT CAvatar::onSetPosistion(INT nCmd, void* pParam, INT nID) {
+    if (!isAvatarMoving()) setAvatarState(0x30, FALSE);
+    FVECTOR v = *(FVECTOR*)pParam;
+    setPos(v);
+    warp(getPos());
+    if (m_pMove->isGravity()) m_pMove->land(5.0f, 1.0f, FALSE);
+    updateCoord();
+    coordFix();
+    return -1;
+}
+INT CAvatar::onSetPosPathTop(INT nCmd, void* pParam, INT nID) {
+    if (!m_pMoveStruct && !createMoveStruct()) return -1;
+    FVECTOR* pV = getPathStartPos((const CHAR*)pParam);
+    if (!pV) return -1;
+    setAvatarTargetPos(*pV);
+    return -1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onMove__Q24ATEL7CAvatariPvi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", calcAvatarMoveSpeed__Q24ATEL7CAvatarR7FVECTOR);
 void CAvatar::setAvatarGravity(BOOL bOn) {

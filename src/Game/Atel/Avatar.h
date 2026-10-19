@@ -25,6 +25,7 @@ namespace ATEL {
 #ifdef GAME_ATEL_AVATAR_CPP
 extern "C" char D_0048AB50[]; /* "c:/KHCOM/MainApp/Game/Atel/Avatar.h" (PARTIAL: no SOURCE DATA yet) */
 extern "C" char D_0048AB88[];
+extern "C" char D_0048ABA8[];
 struct ETMoveInfo;
 class CVSM;
 
@@ -136,6 +137,12 @@ public:
     BOOL isAvatarScaling() const { return m_nState & 0x80; }
     BOOL isAvatarAnimating() const { return m_nState & 0x100; }
     BOOL isAvatarFadeing() const { return m_nState & 0x200; }
+    BOOL isAvatarMovingFuture() const { return m_nState & 0x400; }
+    BOOL isAvatarSuspendingMoveFuture() const { return m_nState & 0x800; }
+    BOOL isAvatarRotatingFuture() const { return m_nState & 0x1000; }
+    BOOL isAvatarScalingFuture() const { return m_nState & 0x2000; }
+    BOOL isAvatarAnimatingFuture() const { return m_nState & 0x4000; }
+    BOOL isAvatarFadeingFuture() const { return m_nState & 0x8000; }
     virtual INT reqCommand(INT nCmd, void* pParam, INT nID);
 
 private:
@@ -207,6 +214,12 @@ public:
     void MoveAvatarEnd();
     void setAvatarGravity(BOOL bOn);
     void setAvatarRotTimeLimit(TIMEQ nTime);
+    void setAvatarTargetPos(const FVECTOR& inV) {
+#line 674 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(D_0048AB50, __LINE__, D_0048ABA8, 0);
+        m_pMoveStruct->_vTargetPos = inV;
+        m_pMoveStruct->_vTargetPos.w = 1.0f;
+    }
     void clearAvatarScaleSpeed() {
 #line 582 AVATAR_H_PATH
         if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
