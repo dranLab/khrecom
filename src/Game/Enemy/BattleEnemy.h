@@ -96,8 +96,11 @@ public:
     HANDLE getNearestChild(FLOAT& outDist, CEntity& inEntity);
     ULONGLONG isPermissionCardBattle() const { return m_ullBtlEnemyFlag & 0x200; }
     INT getHpMax() const;
+    BOOL isCurrentState(INT inState); // PARTIAL: added for Game/Enemy/HumanBoss
+    INT getPlayerState();             // PARTIAL: added for Game/Enemy/HumanBoss
     // PARTIAL: added for Game/Enemy/EnemyAirpirate
     ENEMY_PARAM* getEnemyParam() { return *(ENEMY_PARAM**)&_m_0x284[0x1c]; } /* m_pEnemyParam 0x2a0 */
+    ENEMY_PARAM* getEnemyParam() const { return *(ENEMY_PARAM* const*)&_m_0x284[0x1c]; } // PARTIAL: added for Game/Enemy/HumanBoss
     INT getAttackRate() const;
     INT getAttackState() const { return *(const INT*)&_m_0x218[0]; } // PARTIAL: added for Game/Enemy/Heartless
     BOOL canAttack_(const ENEMY_ACT* inAct);

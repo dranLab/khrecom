@@ -177,6 +177,7 @@ public:
     void endTargetChase();
     INT setTexAnmSeq(INT nAnmNo, INT nSeqNo);
     INT setTexAnmSeq(INT nAnmNo, const CHAR* pszSeqName); // PARTIAL: added for Game/Enemy/BossDeadDemo
+    void playVoice(INT inFileID, INT inID, INT inPriority); // PARTIAL: added for Game/Enemy/HumanBoss
     void loadModelColor_(); // PARTIAL: added for Game/Enemy/EnemyHeartsoldier
     FLOAT getHeight() const; // PARTIAL: added for Game/Enemy/EnemyTornadostep
     void warp(const FVECTOR& inPos);

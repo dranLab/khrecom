@@ -1,10 +1,10 @@
 // PARTIAL: added for Game/Player/SummonSinba
-#ifndef GAME_COLLISION_COLLOBJ_H
-#define GAME_COLLISION_COLLOBJ_H
+/* PARTIAL: with COLLOBJ_H_ENUMS_ONLY defined, only the enums (Game/Enemy/HumanBoss: its includers get the
+ * collision classes later, after their own classes, for the order of the vtables) */
+#ifndef GAME_COLLISION_COLLOBJ_H_ENUMS
+#define GAME_COLLISION_COLLOBJ_H_ENUMS
 
 #include "khtypes.h"
-#include "System/Vector.h"
-#include "System/SJoint.h"
 
 // PARTIAL: added for Game/Player/PlayerWeapon
 enum COLL_TYPE {
@@ -44,6 +44,15 @@ enum COLL_KIND {
     COLL_KIND_CK_PE = 14,
     COLL_KIND_CK_BA = 1
 };
+
+#endif /* GAME_COLLISION_COLLOBJ_H_ENUMS */
+
+#if !defined(GAME_COLLISION_COLLOBJ_H) && !defined(COLLOBJ_H_ENUMS_ONLY)
+#define GAME_COLLISION_COLLOBJ_H
+
+#include "System/Vector.h"
+#include "System/SJoint.h"
+
 
 class CCollision {
 public:
