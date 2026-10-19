@@ -363,3 +363,7 @@ _vt$6CState_0047E7F0 = 0x0047E7F0; // size:0x30
 _$_t8CSJointT1ZQ22D26C2DObj_00163BA0 = 0x00163BA0; // type:func size:0x30
 enableDisp__Q22D26C2DObji_00163BD0 = 0x00163BD0; // type:func size:0x8
 _vt$t8CSJointT1ZQ22D26C2DObj_00467398 = 0x00467398; // size:0x18
+__getSize__t7CVector1Z7G_STRIPi_00206010 = 0x00206010; // type:func size:0x18
+__alloc__t7CVector1Z7G_STRIPi_00206028 = 0x00206028; // type:func size:0xCC
+_$_t7CVector1Z7G_STRIP_002060F8 = 0x002060F8; // type:func size:0x8C
+_vt$t7CVector1Z7G_STRIP_00481140 = 0x00481140; // size:0x18
