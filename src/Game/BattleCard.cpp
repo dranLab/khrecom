@@ -102,7 +102,26 @@ void CBattleCard::setPlayEnd() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateUse__Q210CardBattle11CBattleCard);
+void CBattleCard::preStateUse() {
+    CB_LAYOUT* pLayout;
+    m_iState = 0;
+    m_uiFlag |= 0x1;
+    switch (m_uiUser) {
+    case 1: pLayout = &g_LayoutData[7]; break;
+    case 2: pLayout = &g_LayoutData[16]; break;
+    }
+    m_StartPos.set(pLayout->x, pLayout->y);
+    m_fStartScale = pLayout->scale * 0.01f;
+    if (getCardCategory() == 14) pLayout = &g_LayoutData[58];
+    else pLayout = &g_LayoutData[1];
+    m_EndPos.set(pLayout->x, pLayout->y);
+    m_fEndScale = pLayout->scale * 0.01f;
+    m_tqTimer = 400;
+    m_Pos = m_StartPos;
+    m_vRot.w = m_fStartScale;
+    m_iLayer = pLayout->layer;
+    m_pCard->changeLayer(m_iLayer);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateUse__Q210CardBattle11CBattleCard);
 void CBattleCard::setRefrect() {
     changeState(3);
