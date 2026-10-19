@@ -267,3 +267,10 @@ _vt$10CLightUnit_004677C0 = 0x004677C0; // size:0x38
 _$_4CFnt_00108B88 = 0x00108B88; // type:func size:0x28
 setStyle__4CFntUi_00108BB0 = 0x00108BB0; // type:func size:0xC
 _vt$4CFnt_0045C0F0 = 0x0045C0F0; // size:0x48
+
+// Game/Enemy/HumanBoss: CCollision's and CPointCollision's inline destructors, CPointCollision::collideMap and vtables
+_$_10CCollision_002CDFF0 = 0x002CDFF0; // type:func size:0x30
+_$_15CPointCollision_002CE020 = 0x002CE020; // type:func size:0x30
+collideMap__15CPointCollision_002CE050 = 0x002CE050; // type:func size:0x5C
+_vt$15CPointCollision_004C3D68 = 0x004C3D68; // size:0x20
+_vt$10CCollision_004C3D88 = 0x004C3D88; // size:0x18

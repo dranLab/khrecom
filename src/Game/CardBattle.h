@@ -52,6 +52,7 @@ struct SS_PARAM {
     LPCSTR NAME;
 };
 
+struct CARD; // PARTIAL: added for Game/Enemy/HumanBoss
 namespace CardBattle {
 extern BC_PARAM* g_pBattleCardList;
 extern SS_PARAM* g_pStockSkillList; // PARTIAL: added for Game/Player/SummonDumbo
@@ -72,6 +73,8 @@ public:
     HANDLE m_hDuelEnemy;      /* 0x1a4 */
     // PARTIAL: added for Game/Player/PlayerRiku
     INT getEnchantKind() { return m_cardEnchant[0][0] < 0x44 ? 0 : m_cardEnchant[0][0] - 0x43; }
+    // PARTIAL: added for Game/Enemy/HumanBoss (the enemy side's enchant)
+    INT getEnchantKind(INT inSide) { return m_cardEnchant[inSide][0] < 0x44 ? 0 : m_cardEnchant[inSide][0] - 0x43; }
     HANDLE getDuelEnemy() { return m_hDuelEnemy; }
     void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
     void destroyPlayCard(INT inFlag, INT inP1);
@@ -87,7 +90,21 @@ public:
 
 // PARTIAL: added for Game/Player/FriendKing
 class CCardRevolver {
+    UBYTE _m_0x00[0x4c]; // PARTIAL: added for Game/Enemy/HumanBoss
+    SHORT m_sMode;       /* 0x4c */ // PARTIAL: name unknown
 public:
+    // PARTIAL: added for Game/Enemy/HumanBoss
+    INT getMode() const { return m_sMode; } // PARTIAL: name unknown
+    INT getRemain(INT inKind, INT inCardKind, INT inFlag);
+    BOOL isEnableCharge();
+    CARD* getActiveCardData();
+    void destroy();
+    INT getStock(INT inFlag);
+    BOOL returnStockCard(INT inFlag);
+    void rollDeck(INT inFlag, INT inParam, TIMEQ inTime);
+    BOOL setPlayCard(INT inA, INT inB);
+    BOOL setPlayStock(INT inA, INT inB);
+    void setStockCard();
     // PARTIAL: added for Game/Player/PlayerRiku
     void changeDarkMode(HANDLE inHandle, INT inFlag);
     // PARTIAL: added for Game/Player/PlayerDRiku
