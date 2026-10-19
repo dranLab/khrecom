@@ -22,8 +22,13 @@ struct OBJ_INFO {
     FLOAT z;
     FLOAT height;
     FLOAT dir;
-    SHORT sGroupID;
-    SHORT sID;
+    union { // PARTIAL: union added for Game/Enemy/BattleEnemyManager (compares both IDs as one word; name unknown)
+        struct {
+            SHORT sGroupID;
+            SHORT sID;
+        };
+        INT iGroupRsrcID;
+    };
     UINT uiFlag;
     SHORT sFormation1;
     SHORT sFormation2;

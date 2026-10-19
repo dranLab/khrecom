@@ -67,6 +67,7 @@ public:
     static void setDeckName(INT inDeck, const CHAR* inpName); // PARTIAL: added for Form/Menu/DecknameEdit
     static BOOL addCard(CARD inCard);                         // PARTIAL: added for Form/DebugWindowTBL
     static BOOL isMapCardFull();                              // PARTIAL: added for Form/DebugWindowTBL
+    static BOOL isCurrentDeckPremiumFull();                   // PARTIAL: added for Game/Enemy/BattleEnemyManager
     static INT removeDeck(USHORT inDeck, SHORT inIdx);       // PARTIAL: added for Form/Menu/Camp
     static BOOL getAttribute(CARD inCard, const CHAR** ppAttack, const CHAR** ppAttribute, const CHAR** ppSpeed, const CHAR** ppHelp); // PARTIAL: added for Form/Menu/Camp
     static INT getCP(CARD inCard);                           // PARTIAL: added for Form/Menu/Camp
