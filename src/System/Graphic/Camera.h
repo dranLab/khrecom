@@ -63,6 +63,13 @@ public:
         outScale.z = m_fScaleZ;
     }
     void recalcWorldMatrix(); // PARTIAL: added for Form/Menu/WorldSelect
+    // PARTIAL: added for System/Graphic/Anim (name guessed)
+    void setScale(const FVECTOR& inScale) {
+        m_fScaleX = inScale.x;
+        m_fScaleY = inScale.y;
+        m_fScaleZ = inScale.z;
+        m_Flag = 1;
+    }
 };
 
 class CCamera : public CTaskSecondary {

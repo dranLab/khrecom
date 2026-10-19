@@ -140,6 +140,7 @@ public:
     INT GetNbFrame() { return m_nFrame; }
     INT GetFps() { return m_Fps; }
     INT GetHokan() { return m_Hokan; }
+    USHORT GetRetFrame() { return m_nRetFrame; } // PARTIAL: added for System/Graphic/Anim (name guessed)
     BOOL IsKeyFrameShort() { return m_nFrame >= 256; }
     BOOL IsLoop() { return m_nRetFrame > 0; }
     FLOAT GetCmpData(INT inAtr, INT inSkl, FLOAT inFrame);

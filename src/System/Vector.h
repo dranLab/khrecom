@@ -35,6 +35,8 @@ union FVECTOR {
     }
     // PARTIAL: added for System/Graphic/Camera
     BOOL operator!=(const FVECTOR& inV) const { return _ul[0] != inV._ul[0] || _ul[1] != inV._ul[1]; }
+    // PARTIAL: added for System/Graphic/Anim (name guessed)
+    BOOL isZero() const { return _ul[0] == 0 && _ul[1] == 0; }
     // PARTIAL: added for Game/Collision/CollMapCamera
     BOOL operator==(const FVECTOR& inV) const { return _ul[0] == inV._ul[0] && _ul[1] == inV._ul[1]; }
 };
