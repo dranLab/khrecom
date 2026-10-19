@@ -349,7 +349,9 @@ public:
     // PARTIAL: added for Game/Gimmick/GimmickJumpStand
     INT getJumpState() const;
     static void notifyGimmickJump(HANDLE inHandle, INT inPower);
-    static void notifyGetPrize(INT inKind, INT inNumber, INT inState); // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
+    static void notifyGetPrize(INT inKind, INT inNumber, INT inState);
+    static BOOL notifyBossDead(INT inStep);   // PARTIAL: added for Game/Enemy/BossDeadDemo
+    static HANDLE getLevelUpEffect(); // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
     // PARTIAL: added for Game/Player/FriendBeast (also out of line: setPlayerFlag__7CPlayerUiUi)
     void setPlayerFlag(UINT inSet, UINT inMask) { UINT& f = m_uiPlayerFlag; f = (f | inSet) & ~inMask; }
     void setTrgFlag(UINT inSet, UINT inMask) { UINT& f = m_uiTrgFlag; f = (f | inSet) & ~inMask; } // PARTIAL: added for Form/Menu/WorldSelect

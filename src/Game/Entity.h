@@ -173,7 +173,9 @@ public:
     // PARTIAL: added for Game/Enemy/MapEnemyGround
     INT getMotionCurrentID(); /* inline in the original; defined where CAnim is complete (Game/Enemy/MapEnemyGround.cpp) */
     void endTargetChase();
-    INT setTexAnmSeq(INT nAnmNo, INT nSeqNo); // PARTIAL: added for Game/Enemy/EnemyHeartsoldier
+    INT setTexAnmSeq(INT nAnmNo, INT nSeqNo);
+    INT setTexAnmSeq(INT nAnmNo, const CHAR* pszSeqName); // PARTIAL: added for Game/Enemy/BossDeadDemo
+    void loadModelColor_(); // PARTIAL: added for Game/Enemy/EnemyHeartsoldier
     FLOAT getHeight() const; // PARTIAL: added for Game/Enemy/EnemyTornadostep
     void warp(const FVECTOR& inPos);
     // PARTIAL: added for Game/Player/SummonDumbo
