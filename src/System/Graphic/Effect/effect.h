@@ -80,6 +80,7 @@ struct EFFECT_SE {
 /* Every inline member is emitted (weak) in effect.cpp, in declaration order: keep the order. */
 /* The inline members are defined in effect_inl.h, in the order effect.cpp emits them (weak). */
 class CEffect {
+    friend class CEffectMan; // PARTIAL: added for System/Graphic/Effect/EffectMan
     FVECTOR m_vScale;       /* 0x00 */
     FVECTOR m_vColor;       /* 0x10 */
     HANDLE m_hHandle;       /* 0x20 */
