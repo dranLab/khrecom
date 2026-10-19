@@ -12,6 +12,8 @@
 #include "System/VramMan.h"
 #include "include_asm.h"
 
+#define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
+
 class CPackMan { /* System/Graphic/PackMan.h */
 public:
     static void pkCnt(UINT n);
@@ -19,12 +21,29 @@ public:
     static void pkOpenDirectCode(INT n);
     static void pkCloseDirectCode();
     static void changeLayer(INT nLayer);
+    static void* pkGetCurrentPointer();
+    static BOOL isOverFlow(UINT nSize);
     static void setDefault_TEST_2(ULONGLONG n);
     static void setDefault_ALPHA_2(ULONGLONG n);
     static void setDefault_ZBUF_2(ULONGLONG n);
     static u_long128* pkOpenGifTagManual(u_long128 tag);
     static void pkCloseGifTagManual(UINT* p);
 };
+
+/* clears memory in quadwords (through the uncached segment if asked), then bytes (original name unknown) */
+static inline void _memclr(void* pDst, UINT nSize, BOOL bUncached) {
+    UINT nQw = nSize >> 4;
+    nSize -= nQw << 4;
+    UINT i;
+    if (nQw) {
+        u_long128* p = (u_long128*)pDst;
+        if (bUncached) p = (u_long128*)((UINT)pDst | 0x20000000);
+        for (i = 0; i < nQw; i++) *p++ = 0;
+        pDst = p;
+    }
+    BYTE* pb = (BYTE*)pDst;
+    for (i = 0; i < nSize; i++) *pb++ = 0;
+}
 
 /* GS ALPHA register for a primitive's alpha mode (original name unknown) */
 static inline ULONGLONG _getAlphaReg(const ALPHA& rMode, const ALPHA& alpha) {
@@ -263,9 +282,23 @@ void CDispListBase::setupOTtagTbl(UINT nInSize) {
     }
     m_nOTtagTblSize = nInSize;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", clear__13CDispListBasei);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x70736944\n.word 0x7473694C\n.word 0x7070632E\n.word 0x00000000\n.word 0x4F705F6D\n.word 0x67617454\n.word 0x006C6254\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", draw__13CDispListBaseii);
+void CDispListBase::clear(BOOL bUncached) {
+#line 49
+    ASSERT(m_pOTtagTbl);
+    _memclr(m_pOTtagTbl, m_nOTtagTblSize * sizeof(OTtag), bUncached);
+}
+void CDispListBase::draw(INT nStart, INT nSize) {
+#line 74
+    ASSERT(m_pOTtagTbl);
+    _beginDraw();
+    if (nStart < 0) nStart = 0;
+    INT nEnd = (nSize < 0) ? m_nOTtagTblSize : nStart + nSize;
+    OTtag* pTag = &m_pOTtagTbl[nStart];
+    for (INT i = nStart; i < nEnd; i++, pTag++) {
+        if (pTag->_pHeadPrim) _drawOT(*pTag);
+    }
+    _endDraw();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", getHeadPrim__13CDispListBasei);
 void CDispListBase::_startDirectMode() {
     CPackMan::pkCnt(0);
@@ -273,9 +306,35 @@ void CDispListBase::_startDirectMode() {
     CPackMan::pkOpenDirectCode(0);
 }
 void CDispListBase::_endDirectMode() { CPackMan::pkCloseDirectCode(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", checkCache__13CDispListBaseR9CDrawableG7G_LAYER);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", _draw__13CDispListBaseR9CDrawable);
-__asm__(".rdata\n.align 3\n.word 0x24242424\n.word 0x24242424\n.word 0x24242424\n.word 0x616D2024\n.word 0x6B50656B\n.word 0x8A292874\n.word 0x829490D6\n.word 0x82D495CC\n.word 0x835483B7\n.word 0x82598343\n.word 0x82AD8FAA\n.word 0x82A282C8\n.word 0x21B782C5\n.word 0x3E2D2121\n.word 0x29642528\n.word 0x8DC08E20\n.word 0x8ECC82DB\n.word 0x83709767\n.word 0x83438354\n.word 0x64252859\n.word 0x24242029\n.word 0x24242424\n.word 0x24242424\n.word 0x0A242424\n.word 0x00000000\n.word 0x00000000\n.text\n");
+G_LAYER CDispListBase::checkCache(CDrawable& inPrim, G_LAYER nLayer) {
+    G_LAYER nPrimLayer = inPrim.m_LayerInfo;
+    if ((nPrimLayer._nInfo ^ nLayer._nInfo) & 0x10) {
+        if (nPrimLayer._nInfo & 0x10) {
+            CModelMan::clearTexCache();
+        } else {
+            CGTexPrim2D::clearTexCache();
+        }
+        CModelMan::setLayerInfo(nPrimLayer);
+        nLayer = nPrimLayer;
+    }
+    return nLayer;
+}
+CDrawable* CDispListBase::_draw(CDrawable& inPrim) {
+    UINT nStart = (UINT)CPackMan::pkGetCurrentPointer();
+    inPrim.makePkt();
+    if (dbgButtonDown(USR_SYSTEM, 0x10, 1)) m_iDebugFlags &= ~1;
+    if (!(m_iDebugFlags & 1)) {
+        UINT nUsed = ((UINT)CPackMan::pkGetCurrentPointer() - nStart) >> 4;
+        INT nSize = inPrim.getPacketSize();
+        if (nSize < (INT)nUsed) {
+            TRACE("$$$$$$$$$$$$$ makePkt()\x8a\xd6\x90\x94\x82\xcc\x95\xd4\x82\xb7\x83T\x83" "C\x83Y\x82\xaa\x8f\xad\x82\xc8\x82\xa2\x82\xc5\x82\xb7!!!->(%d) \x8e\xc0\x8d\xdb\x82\xcc\x8eg\x97p\x83T\x83" "C\x83Y(%d) $$$$$$$$$$$$$\n",
+                  nSize, nUsed);
+            inPrim.getPacketSize();
+            m_iDebugFlags |= 1;
+        }
+    }
+    return _getNextDrawable(inPrim);
+}
 void CDispList::insert(CDrawable& inPrim, FIX4 inZ) {
     INT nIdx = inPrim.m_LayerInfo._nDepth;
     if (nIdx >= getOTtagTblSize()) {
@@ -289,13 +348,36 @@ void CDispList::insert(CDrawable& inPrim, FIX4 inZ) {
     m_nEntryCount++;
 }
 void CDispList::_beginDraw() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", _drawOT__9CDispListR5OTtag);
+void CDispList::_drawOT(OTtag& inOT) {
+    CDrawable* pPrim = inOT._pHeadPrim;
+    G_LAYER nLayer = CModelMan::getLayerInfo();
+    while (pPrim) {
+        if (CPackMan::isOverFlow(pPrim->getPacketSize())) {
+            pPrim = pPrim->m_pNext;
+        } else {
+            nLayer = checkCache(*pPrim, nLayer);
+            pPrim = _draw(*pPrim);
+        }
+    }
+}
 void CDispList::_endDraw() {}
 void CDispListSemiBase::_beginDraw() {
     _startDirectMode();
     _updateTestMode(NULL);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", _drawOT__17CDispListSemiBaseR5OTtag);
+void CDispListSemiBase::_drawOT(OTtag& inOT) {
+    CDrawable* pPrim = inOT._pHeadPrim;
+    G_LAYER nLayer = CModelMan::getLayerInfo();
+    while (pPrim) {
+        if (CPackMan::isOverFlow(pPrim->getPacketSize())) {
+            pPrim = pPrim->m_pNext;
+        } else {
+            if (_checkTestMode(*pPrim)) _updateTestMode(pPrim);
+            nLayer = checkCache(*pPrim, nLayer);
+            pPrim = _draw(*pPrim);
+        }
+    }
+}
 void CDispListSemiBase::_endDraw() { _endDirectMode(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", _updateTestMode__17CDispListSemiBasePC9CDrawable);
 void CDispListSemi::insert(CDrawable& inPrim, FIX4 inZ) {
@@ -317,8 +399,24 @@ void CDispListWithoutZ::_beginDraw() {
     _enableZTest(FALSE);
     _updateAlphaMode((ALPHA)0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", _drawOT__17CDispListWithoutZR5OTtag);
-__asm__(".rdata\n.align 3\n.word 0x73694443\n.word 0x73694C70\n.word 0x74695774\n.word 0x74756F68\n.word 0x203A205A\n.word 0x50837083\n.word 0x67836283\n.word 0x5B814983\n.word 0x5B816F83\n.word 0xBD82CC82\n.word 0x6095DF82\n.word 0x5883E689\n.word 0x62834C83\n.word 0x5B207683\n.word 0x0A5D6425\n.word 0x00000000\n.text\n");
+void CDispListWithoutZ::_drawOT(OTtag& inOT) {
+    CDrawable* pPrim = inOT._pHeadPrim;
+    G_LAYER nLayer = CModelMan::getLayerInfo();
+    while (pPrim) {
+        if (CPackMan::isOverFlow(pPrim->getPacketSize())) {
+            TRACE("CDispListWithoutZ : \x83p\x83P\x83" "b\x83g\x83I\x81[\x83o\x81[\x82\xcc\x82\xbd\x82\xdf\x95`\x89\xe6\x83X\x83L\x83" "b\x83v [%d]\n",
+                  pPrim->getPacketSize());
+            pPrim = pPrim->m_pNext;
+        } else {
+            ALPHA a = pPrim->m_nAlphaMode;
+            if (!((BYTE)pPrim->m_LayerInfo._nID & 0x10) && a != m_nAlphaMode) {
+                _updateAlphaMode(pPrim->m_nAlphaMode);
+            }
+            nLayer = checkCache(*pPrim, nLayer);
+            pPrim = _draw(*pPrim);
+        }
+    }
+}
 void CDispListWithoutZ::_endDraw() {
     _enableZTest(TRUE);
     _endDirectMode();
