@@ -9,6 +9,7 @@
 #include "Game/AttackMotion.h" // PARTIAL: added for Game/Enemy/EnemyBluerhapsody (ATK_ATTR)
 
 struct ENEMY_PARAM; // PARTIAL: added for Game/Enemy/EnemyAirpirate
+struct ENEMY_ACT;   // PARTIAL: added for Game/Enemy/Heartless
 
 enum CARD_KIND {
     CARD_KIND_None = 0 /* values not needed yet */
@@ -92,6 +93,8 @@ public:
     // PARTIAL: added for Game/Enemy/EnemyAirpirate
     ENEMY_PARAM* getEnemyParam() { return *(ENEMY_PARAM**)&_m_0x284[0x1c]; } /* m_pEnemyParam 0x2a0 */
     INT getAttackRate() const;
+    INT getAttackState() const { return *(const INT*)&_m_0x218[0]; } // PARTIAL: added for Game/Enemy/Heartless
+    BOOL canAttack_(const ENEMY_ACT* inAct);
     void destroyCard(); // PARTIAL: added for Game/Enemy/EnemyBarrelspider
     // PARTIAL: added for Game/Enemy/EnemyWhitemushroom
     void changeBattleEnemyState(INT inState);
@@ -228,6 +231,8 @@ protected:
     virtual void commonBeginAttack();
     virtual void commonEndAttack();
 
+public:
+    void setAttackState_(INT inState) { *(INT*)&_m_0x218[0] = inState; } // PARTIAL: added for Game/Enemy/Heartless (no range check)
 public:
     // PARTIAL: added for Game/Enemy/EnemyAirpirate (last in the class: it sets the original line number)
 #line 673 BATTLEENEMY_H_PATH
