@@ -34,6 +34,30 @@ public:
         _coord_alart(nIndex);
         return getExceptCoord();
     }
+    // PARTIAL: the overloads below added for System/Coord
+    CCoord& Crd(UINT nIndex) const {
+        if (m_nCrdNum && m_pCrdArray && nIndex < m_nCrdNum) {
+            return m_pCrdArray[nIndex];
+        }
+        _coord_alart(nIndex);
+        return getExceptCoord();
+    }
+    CCoord* Crd() {
+        if (m_nCrdNum && m_pCrdArray) {
+            return m_pCrdArray;
+        }
+        _coord_nullalart();
+        return __null;
+    }
+    CCoord* Crd() const {
+        if (m_nCrdNum && m_pCrdArray) {
+            return m_pCrdArray;
+        }
+        _coord_nullalart();
+        return __null;
+    }
+    FMATRIX& getLocalMatrix(UINT nIndex) { return Crd(nIndex).m_Local; }
+    FMATRIX& getWorldMatrix(UINT nIndex) const { return Crd(nIndex).m_World; }
     void update(TIMEQ nTQ);
     void touch();
     void resetTimeStamp();
@@ -43,6 +67,7 @@ private:
     BOOL isSysUpdate(_PROC_PRIO pp) { return m_iFlags & pp; }
     void setSysHandle(HANDLE h);
     CCoord& getExceptCoord();
+    CCoord& getExceptCoord() const;
     void _coord_alart(UINT nIndex) const;
     void _coord_nullalart() const;
 

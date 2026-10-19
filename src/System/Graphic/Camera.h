@@ -20,6 +20,7 @@ public:
             CCoord* m_pParent;      /* 0x4c */
         };
         u_long128 _q40; // PARTIAL: added for Game/Atel/EventTrap (the constructor clears 0x40..0x4f at once)
+        ULONGLONG _ulFixTimestamp; // PARTIAL: added for System/Coord (0x40, with m_Flag)
     };
     // PARTIAL: m_Rot added for System/Graphic/TriangleIK
     union {
@@ -63,6 +64,12 @@ public:
         outScale.z = m_fScaleZ;
     }
     void recalcWorldMatrix(); // PARTIAL: added for Form/Menu/WorldSelect
+    // PARTIAL: added for System/Coord
+    void resetTimeStamp() {
+        m_FixTimestamp = -1;
+        m_WorldTimestamp = -1;
+    }
+    void setHandle(HANDLE h) { m_hHandle = h; }
     // PARTIAL: added for System/Graphic/Anim (name guessed)
     void setScale(const FVECTOR& inScale) {
         m_fScaleX = inScale.x;
