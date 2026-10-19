@@ -39,6 +39,7 @@ struct MODELDATA {
 
     BOOL enablePointLight() const;
     BOOL enableLight() const;
+    INT getBoneIndex(const CHAR* pName) const; // PARTIAL: added for System/Graphic/TriangleIK
     // PARTIAL: added for Game/AttachCard
     static BOOL isNormal(UINT mode);
     static BOOL isColorI(UINT mode);
