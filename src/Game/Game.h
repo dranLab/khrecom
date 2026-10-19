@@ -42,6 +42,7 @@ public:
     // PARTIAL: added for Game/GameSubBattle
     static void setWhite();
     static void dispOffFadeMask();
+    static INT getFadeMaskProcPrio(); // PARTIAL: added for Game/Atel/Atel
     static void setBlackBeforeEncount(BOOL bFlag);
 };
 

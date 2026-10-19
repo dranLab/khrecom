@@ -343,3 +343,9 @@ _vt$4CBuf_0046F760 = 0x0046F760; // size:0x18
 _vt$t8CSJointT1Z10CLinkedPtr_0046F7A8 = 0x0046F7A8; // size:0x18
 _$_4CBuf_001C16A8 = 0x001C16A8; // type:func size:0x54
 _vt$4CBuf_0046EB68 = 0x0046EB68; // size:0x18
+
+// Game/Atel/Atel: CState's and CVector<G_LINE>'s inline destructors and unnamed copies of their vtables
+_$_6CState_002332C8 = 0x002332C8; // type:func size:0x30
+_$_t7CVector1Z6G_LINE_00233338 = 0x00233338; // type:func size:0x8C
+_vt$t7CVector1Z6G_LINE_0048A0B8 = 0x0048A0B8; // size:0x18
+_vt$6CState_0048A190 = 0x0048A190; // size:0x30

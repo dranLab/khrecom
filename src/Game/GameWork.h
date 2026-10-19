@@ -119,6 +119,7 @@ public:
 };
 
 class CGameWork {
+    friend class CAtel; // PARTIAL: added for Game/Atel/Atel (_ref(m_pMCWork) keeps the original's reload after each store)
 public:
     enum BACKUP {
         BACKUP_PRIMARY = 0,

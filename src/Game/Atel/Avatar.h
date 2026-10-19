@@ -17,6 +17,9 @@ namespace ATEL {
 class CAvatar : public ICommandAccepter, public CTask {
 public:
     CAvatar();
+    CAvatar(CTask* pParent); // PARTIAL: added for Game/Atel/Atel
+    void InitAvatar(INT flag); // PARTIAL: added for Game/Atel/Atel
+    virtual INT reqCommand(INT nCmd, void* pParam, INT nID); // PARTIAL: added for Game/Atel/Atel
 };
 
 /* Placeholder for the original header's inline functions: their assert strings are in .rodata of every
