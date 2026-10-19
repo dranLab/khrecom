@@ -28,6 +28,8 @@ public:
     static BOOL isFadeDone();
     static void recoverBGM(INT inFlag);
     static void reqGameOver(INT inFlag);
+    static void suspendGameTask(); // PARTIAL: added for System/TaskMan
+    static void checkPause();
 };
 
 #endif /* GAME_GAME_H */
