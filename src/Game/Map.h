@@ -49,6 +49,16 @@ struct AMBIENTLIGHT {
     FVECTOR col;
 };
 
+struct ALF_DATA { // PARTIAL: added for Game/Map
+    USHORT infinite_suu;
+    USHORT nVer;
+    USHORT point_suu;
+    USHORT nPad0;
+    USHORT spot_suu;
+    USHORT nPad1;
+    INT dum0;
+};
+
 struct LIGHTDATA {
     INT infinite_suu;
     INT point_suu;
@@ -58,8 +68,58 @@ struct LIGHTDATA {
     POINTLIGHT* point;
     SPOTLIGHT* spot;
     AMBIENTLIGHT* ambient;
+    void set(const ALF_DATA* pData); // PARTIAL: added for Game/Map
 };
 
+#ifdef GAME_MAP_CPP
+/* The complete class, for Game/Map (graphics members as padding). */
+struct FOGDATA;
+struct ZONEDATA;
+class CSky;
+class CMapLightUnit;
+class CTexAnm;
+class CMapModel;
+
+class CMap : public CTask {
+private:
+    FVECTOR m_vColor;         /* 0x040 */
+    INT m_nRsrcGrpID;         /* 0x050 */
+    CTexAnm* m_pTexAnm;       /* 0x054 */
+    INT m_nTexAnmNum;         /* 0x058 */
+    CMapModel* m_pModelTbl;   /* 0x05c */
+    INT m_nModelMax;          /* 0x060 */
+    FLOAT m_Deg;              /* 0x064 */
+    UINT m_uiMapFlag;         /* 0x068 */
+    UBYTE _m_0x6c[0x1574];    /* 0x06c m_LightMarker[8], m_Back[4], m_grid[64] */
+    FOGDATA* m_pFog;          /* 0x15e0 */
+    ZONEDATA* m_pZone;        /* 0x15e4 */
+    LIGHTDATA m_Light;        /* 0x15e8 */
+    LIGHTDATA m_MapLight;     /* 0x1608 */
+    CSky* m_pSky;             /* 0x1628 */
+    CMapLightUnit* m_LightUnit; /* 0x162c */
+    UBYTE _m_0x1630[0x50];    /* 0x1630 m_gpPosDir */
+
+public:
+    CMap(CTask* p, UINT nRsrcGrpID);
+    virtual ~CMap();
+    void init(BOOL bUseMapUnit, BOOL bTexClampRepeat);
+    virtual void main();
+    virtual void disp();
+    void resetFog();
+    LIGHTDATA* getLightData() { return &m_Light; }
+    LIGHTDATA* getMapLightData() { return &m_MapLight; }
+    void getBBoxMax(FVECTOR& outMax);
+    void getBBoxMin(FVECTOR& outMin);
+    void setColorScale(FVECTOR& inColorScale);
+    void setSkyColorScale(FVECTOR& inColorScale);
+private:
+    HANDLE createMapEffect_(const ZONEPARTS& inParts);
+    void createEnvSE(const ZONEPARTS& inParts);
+    void _exclusiveSetup(BOOL bUseMapUnit);
+    INT _checkEffId(ZONEPARTS* parts, BOOL bUseMapUnit);
+    void _createEffIdProc(ZONEPARTS* parts, INT nEType);
+};
+#else
 // PARTIAL: added for System/Graphic/LightUnit (only the members it uses). The original derives from CTask;
 // the base is left out (as padding) so that includers without System/Task.h (Game/MapUnitTable) don't get its
 // .rodata string: cast CTaskMan::getSysTask()'s result.
@@ -76,5 +136,7 @@ public:
     LIGHTDATA* getLightData() { return &m_Light; }
     LIGHTDATA* getMapLightData() { return &m_MapLight; }
 };
+
+#endif /* GAME_MAP_CPP */
 
 #endif // GAME_MAP_H
