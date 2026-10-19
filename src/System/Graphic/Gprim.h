@@ -198,6 +198,15 @@ public:
             m_nAttribute &= ~1;
         }
     }
+    // PARTIAL: added for System/Graphic/PathData (names unknown)
+    void setIIP(BOOL b) {
+        if (b) m_nAttribute |= 2;
+        else m_nAttribute &= ~2;
+    }
+    void setBackClip(BOOL b) {
+        if (b) m_nAttribute |= 4;
+        else m_nAttribute &= ~4;
+    }
     virtual ~CGPrim() {} // PARTIAL: inline (Game/AtWater: no out-of-line _$_6CGPrim exists)
     virtual void disp();
     virtual FIX4 calcZ();
