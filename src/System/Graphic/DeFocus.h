@@ -95,15 +95,19 @@ public:
     ULONGLONG getAlphaMode() { return ((ULONGLONG)m_iAlpha << 16) | m_iAlpha; }
     UINT getAlphaModeINT() { return m_iAlpha; }
     virtual UINT getPacketSize() const {
-        UINT nSize;
+        UINT nSize = 0x48;
         if (!m_iKind) return 0;
-        nSize = 0x48;
+        /* the original multiplies the 0x48 held in a register (not folded into the default arm): an empty asm
+         * hides the constant from CSE (original form unknown) */
+        __asm__("" : "=r"(nSize) : "0"(nSize));
         if (m_iKind == 1 || m_iKind == 2) {
             nSize = 0x120;
         } else if (m_iKind == 5 || m_iKind == 6) {
             nSize = 0x240;
         } else {
-            nSize = m_iRate * 3 * nSize;
+            UINT nNum = m_iRate * 3;
+            UINT nTmp = nNum * nSize;
+            nSize = nTmp;
         }
         return (nSize * 16 + 0x250) >> 4;
     }
