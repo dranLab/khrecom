@@ -1,7 +1,21 @@
 #include "khtypes.h"
 #include "Game/SceneInfo.h"
 #include "Game/GameWork.h"
+#include "Game/Game.h"
+#include "System/Rcf.h"
+#include "System/Debug.h"
 #include "include_asm.h"
+
+/* PARTIAL: System/RsrcDB.h needs the full RsrcData.h classes */
+class CRsrcData;
+enum NAME_CASE { NAME_CASE_SENSITIVE = 0 };
+class CRsrcDB {
+public:
+    static BOOL isSceneAttachMode();
+    static UINT getSceneAttachNum();
+    static CRsrcData* getRsrc(INT nRsrcType, const CHAR* pszName, NAME_CASE nc);
+    static void* getRsrcData(const CRsrcData& data);
+};
 
 /* AREA_SCENE without its constructors (built in a register; PARTIAL) */
 union _AREA_SCENE_REG {
@@ -14,9 +28,28 @@ union _AREA_SCENE_REG {
 
 enum GAMEMODE { GAMEMODE_FIELD = 0, GAMEMODE_BATTLE = 1 };
 
-struct FloorLayoutDataHeader {
-    UBYTE _m_0x00[6];
-    USHORT nCount; /* 0x06 */
+struct FloorLayoutDataHeader { // 0x10
+    CHAR _cSig[4];       /* 0x0 */
+    USHORT _nVersion;    /* 0x4 */
+    USHORT nCount;       /* 0x6 */
+    INT* _pFloorOfsTbl;  /* 0x8 */
+    void* _pFloorData;   /* 0xc */
+};
+struct NormaDataHeader { // 0x7c
+    CHAR _cSig[4];                     /* 0x04 */
+    USHORT _nVersion;                  /* 0x04 */
+    USHORT _nFloorCount;               /* 0x06 */
+    RCNORMA::FloorNormaSrc _FloorSrc[1]; /* 0x08 */
+};
+struct _SceneInfo {
+    _AREA_SCENE_REG _as;
+    BYTE _nReverb;
+    BYTE _nSeRangeRatio;
+    void clear() {
+        _as._nAreaScene = -1;
+        _nReverb = 20;
+        _nSeRangeRatio = 10;
+    }
 };
 struct EventRoomData;
 
@@ -34,14 +67,16 @@ struct ROOM_STORAGE2 {
 };
 struct DOOR_STORAGE {
     BYTE _nStat;
-    UBYTE _m_0x01[6];
-    BYTE _nNextNorma;    /* 0x07 */
+    UBYTE __nFiller[3];
+    UBYTE _nNormaNums[3]; /* 0x04 */
+    BYTE _nNextNorma;    /* 0x07 _nClearedNorma */
     BYTE _nFirstCardID;  /* 0x08 */
     BYTE _nFirstCardNum; /* 0x09 */
 };
 
 struct _SceneInfoWork {
     static STORAGE::MCWork* mc() { return CGameWork::m_pMCWork; }
+    static STORAGE::MCWork2* mc2() { return CGameWork::m_pMCWork2; }
 };
 
 void _setGoalRoomScene(WORLD_ID w, USHORT nScene);
@@ -59,6 +94,8 @@ extern FloorLayoutDataHeader* s_pFloorFile_Sora;
 extern FloorLayoutDataHeader* s_pFloorFile_Riku;
 extern EventRoomData* s_pEventRoomFile_Sora;
 extern EventRoomData* s_pEventRoomFile_Riku;
+extern NormaDataHeader* s_pFloorNormaFile_Sora;
+extern NormaDataHeader* s_pFloorNormaFile_Riku;
 extern AREA_SCENE s_NextAreaScene;
 extern SHORT s_nNextBattleScene;
 extern SHORT s_nCurrentBattleScene;
@@ -71,11 +108,22 @@ extern DOOR_ID s_nNextDoorID;
 extern INT s_nCurrentSceneCacheID;
 extern INT s_nMapCacheField;
 extern INT s_nMapCacheBattle;
+extern _SceneInfo s_SceneCacheTbl[7];
+extern INT s_nAvailableSceneCache;
+extern _SceneInfo s_GlobalScene;
 }
+extern "C" char D_00484EC8[];
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", clear__10CSceneInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initNewGame__10CSceneInfoi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", dispose__10CSceneInfo);
+void CSceneInfo::dispose() {
+    s_pFloorFile_Sora = NULL;
+    s_pFloorFile_Riku = NULL;
+    s_pEventRoomFile_Sora = NULL;
+    s_pEventRoomFile_Riku = NULL;
+    s_pFloorNormaFile_Sora = NULL;
+    s_pFloorNormaFile_Riku = NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _getEventRoomSceneIndex__Fs);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _initEntranceSceneTbl__Fi);
 void _setGoalRoomScene(WORLD_ID w, USHORT nScene) {
@@ -107,18 +155,40 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initFloor__10CSceneIn
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initFloor__10CSceneInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _initDoor__FR8DoorInfoPCQ25FLOOR11DoorSrcInfo7DOOR_IDPCQ25FLOOR11FloorLayoutPCQ27RCNORMA13FloorNormaSrcRQ37STORAGE7MCWork29_DoorInfoRC8RoomInfoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _initRoomInfo__FR8RoomInfoRQ37STORAGE6MCWork9_RoomInfoRQ37STORAGE7MCWork210_RoomInfo2PCQ25FLOOR11RoomSrcInfoPCQ25FLOOR11FloorLayoutPCQ27RCNORMA13FloorNormaSrci);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _getDstDoorID__F7DOOR_ID);
+DOOR_ID _getDstDoorID(DOOR_ID door) {
+    switch (door) {
+    case 1: return (DOOR_ID)3;
+    case 2: return (DOOR_ID)0;
+    case 3: return (DOOR_ID)1;
+    }
+    return (DOOR_ID)2;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _setWorldEntrance__F8WORLD_IDssi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", makeRoom__10CSceneInfoRC8RoomInfo7DOOR_IDsUcUc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", makeRoom__10CSceneInfoR8DoorInfoi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", hasAnyRequest__10CSceneInfo);
+BOOL CSceneInfo::hasAnyRequest() {
+    BOOL b = FALSE;
+    if (hasReqChangeScene() || s_nReqEnterBattle || s_nReqExitBattle) b = TRUE;
+    return b;
+}
 void CSceneInfo::setNextAreaScene(SHORT nArea, SHORT nField, SHORT nScene) {
     s_NextAreaScene._nScene = nField;
     s_NextAreaScene._nArea = nArea;
     setNextBattleScene(nScene);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setNextScene__10CSceneInfoss);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setNextBattleScene__10CSceneInfos);
+void CSceneInfo::setNextScene(SHORT nScene, SHORT nBtlScene) {
+    SHORT nArea = getCurrentAreaNum();
+    s_NextAreaScene._nScene = nScene;
+    s_NextAreaScene._nArea = nArea;
+    setNextBattleScene(nBtlScene);
+}
+void CSceneInfo::setNextBattleScene(SHORT nScene) {
+    if (nScene <= 0) {
+        if (s_nNextBattleScene > 0) return;
+        nScene = CRcf::getBattleScene(s_NextAreaScene._nArea, s_NextAreaScene._nScene);
+    }
+    s_nNextBattleScene = nScene;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _checkAvailableDoorID__FRC8DoorInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _checkAvailableDoorID__Fi7DOOR_ID);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setEventRoomSceneNum__10CSceneInfoUis);
@@ -129,7 +199,9 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqChangeEventRoom__1
 void CSceneInfo::reqChangeGoalRoom() { reqChangeEventRoom(4, (DOOR_ID)4, -1); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqChangeBackupRoom__10CSceneInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqEnterDoor__10CSceneInfo7DOOR_ID);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _acceptReqEnterBattle__Fv);
+void _acceptReqEnterBattle() {
+    s_nReqEnterBattle = CSceneInfo::getCurrentWorldID(TRUE) != 10 ? GAMEMODE_BATTLE : (GAMEMODE)2;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqEnterBattle__10CSceneInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqEnterBattle__10CSceneInfos);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqExitBattle__10CSceneInfo);
@@ -143,7 +215,11 @@ void CSceneInfo::cancelBattleRequest() {
 BOOL CSceneInfo::reqEnterMinigame() { return reqEnterBattle(); }
 BOOL CSceneInfo::reqEnterMinigame(SHORT inID) { return reqEnterBattle(inID); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqExitMinigame__10CSceneInfos);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqRetryMinigame__10CSceneInfo);
+BOOL CSceneInfo::reqRetryMinigame() {
+    BOOL b = reqExitBattle();
+    if (b) s_nReqExitBattle = 2;
+    return b;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqChangeScene__10CSceneInfosssii);
 SHORT CSceneInfo::getCurrentAreaNum() { return CGameWork::m_pMCWork->_nArea; }
 SHORT CSceneInfo::getCurrentSceneNum() { return CGameWork::m_pMCWork->_nScene; }
@@ -178,8 +254,18 @@ INT CSceneInfo::getNextFloorIndex() { return s_nNextFloorIdx; }
 INT CSceneInfo::getNextAtelSrcID() { return s_nAtelSrcID; }
 SHORT CSceneInfo::getCurrentFloorNumber() { return s_nCurrentFloorNumber; }
 USHORT CSceneInfo::getCurrentFloorIndex() { return CGameWork::m_pMCWork->_nFloorIdx; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isTgsFloor__10CSceneInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isJFestaFloor__10CSceneInfo);
+BOOL CSceneInfo::isTgsFloor() {
+    BOOL b = FALSE;
+    USHORT n = getCurrentFloorIndex();
+    if (CGame::isSoraGame()) b = n == 14;
+    return b;
+}
+BOOL CSceneInfo::isJFestaFloor() {
+    BOOL b = FALSE;
+    USHORT n = getCurrentFloorIndex();
+    if (CGame::isSoraGame()) b = n == 13;
+    return b;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getCurrentWorldID__10CSceneInfoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getWorldID__10CSceneInfoUs);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setupCompleteFloorWorld__10CSceneInfo8WORLD_ID);
@@ -189,63 +275,169 @@ void CSceneInfo::ignoreFloorInfo() {
     CGameWork::m_pMCWork->_nFloorIdx = 0xff;
     s_nCurrentFloorNumber = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getCurrentRoomID__10CSceneInfo);
+INT CSceneInfo::getCurrentRoomID() {
+    INT n = CGameWork::m_pMCWork->_nRoomID;
+    BOOL b = FALSE;
+    if (n == 0 || n == 99) b = TRUE;
+    if (b) return n;
+    return (UINT)n < 32 ? n : -1;
+}
 INT CSceneInfo::getNextRoomID() { return s_nNextRoomID; }
 INT CSceneInfo::getPrevRoomID() { return CGameWork::m_pMCWork->_nPrevRoomID; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getEnteredDoorID__10CSceneInfo);
 DOOR_ID CSceneInfo::getNextDoorID() { return s_nNextDoorID; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isFieldScene__10CSceneInfo);
+BOOL CSceneInfo::isFieldScene() {
+    BOOL b = FALSE;
+    if (s_nGameMode == GAMEMODE_FIELD) b = !isEventScene();
+    return b;
+}
 BOOL CSceneInfo::isBattleScene() { return s_nGameMode == GAMEMODE_BATTLE; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isBossBattleScene__10CSceneInfoi);
 BOOL CSceneInfo::isEventScene() { return (USHORT)(getCurrentSceneNum() - 2000) < 1000; }
 BOOL CSceneInfo::isMinigameScene() { return (USHORT)(getCurrentSceneNum() - 1200) < 56; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isLastFloorScene__10CSceneInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getCurrentRoomGimmickInfo__10CSceneInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getCurrentRoomMapEnemyInfo__10CSceneInfo);
+BOOL CSceneInfo::isLastFloorScene() {
+    BOOL b = FALSE;
+    if (CGame::isSoraGame() && getCurrentWorldID(TRUE) == 13) b = (USHORT)getCurrentSceneNum() == 90;
+    return b;
+}
+_GimmickRoomInfo* CSceneInfo::getCurrentRoomGimmickInfo() {
+    INT nID = getCurrentRoomID();
+    if (nID < 0) return NULL;
+    INT i = getRoomIndex(nID);
+    if (i < 0) return NULL;
+    return (_GimmickRoomInfo*)((BYTE*)&CGameWork::m_pMCWork->_roomInfo[i] + 0x8);
+}
+_MapEnemyRoomInfo* CSceneInfo::getCurrentRoomMapEnemyInfo() {
+    INT nID = getCurrentRoomID();
+    if (nID < 0) return NULL;
+    INT i = getRoomIndex(nID);
+    if (i < 0) return NULL;
+    return (_MapEnemyRoomInfo*)((BYTE*)&CGameWork::m_pMCWork->_roomInfo[i] + 0x6a);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", doneChangeScene__10CSceneInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", update__10CSceneInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", updateBattleScene__10CSceneInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _updateRoomInfo__Fv);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", clearSceneCache__10CSceneInfo);
+void CSceneInfo::clearSceneCache() {
+    for (INT i = 0; i < 7; i++) s_SceneCacheTbl[i].clear();
+    s_nAvailableSceneCache = 7;
+    s_nCurrentSceneCacheID = -1;
+}
 UINT CSceneInfo::getCurrentSceneCacheID() { return s_nCurrentSceneCacheID; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getSceneCacheID__10CSceneInfoRC10AREA_SCENE);
+INT CSceneInfo::getSceneCacheID(const AREA_SCENE& as) {
+    if (as._nAreaScene < 0) return -1;
+    for (INT i = 0; i < 7; i++) {
+        if (s_SceneCacheTbl[i]._as._nAreaScene == as._nAreaScene) return i;
+    }
+    return -1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", addToSceneCache__10CSceneInfoRC10AREA_SCENE);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", removeFromSceneCache__10CSceneInfoRC10AREA_SCENE);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", removeFromSceneCacheWithRsrc__10CSceneInfoRC10AREA_SCENE);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", removeCurrentFieldSceneRsrc__10CSceneInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", removeCurrentBattleSceneRsrc__10CSceneInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setReverbVal__10CSceneInfoUc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getReverbVal__10CSceneInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getReverbVal__10CSceneInfoRC10AREA_SCENE);
+void CSceneInfo::removeCurrentFieldSceneRsrc() {
+    if (s_nCurrentFieldScene > 0) {
+        AREA_SCENE as(getCurrentAreaNum(), s_nCurrentFieldScene);
+        removeFromSceneCacheWithRsrc(as);
+    }
+}
+void CSceneInfo::removeCurrentBattleSceneRsrc() {
+    if (s_nCurrentBattleRsrc > 0) {
+        AREA_SCENE as(getCurrentAreaNum(), s_nCurrentBattleRsrc);
+        removeFromSceneCacheWithRsrc(as);
+        s_nCurrentBattleRsrc = 0;
+    }
+}
+void CSceneInfo::setReverbVal(BYTE nRev) {
+    if (CRsrcDB::isSceneAttachMode()) s_SceneCacheTbl[CRsrcDB::getSceneAttachNum()]._nReverb = nRev;
+    else s_GlobalScene._nReverb = nRev;
+}
+BYTE CSceneInfo::getReverbVal() {
+    INT i = getCurrentSceneCacheID();
+    return i < 0 ? s_GlobalScene._nReverb : s_SceneCacheTbl[i]._nReverb;
+}
+BYTE CSceneInfo::getReverbVal(const AREA_SCENE& as) {
+    INT i = getSceneCacheID(as);
+    return i < 0 ? s_GlobalScene._nReverb : s_SceneCacheTbl[i]._nReverb;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setSeRangeRatio__10CSceneInfoUc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getSeRangeRatio__10CSceneInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getSeRangeRatio__10CSceneInfoRC10AREA_SCENE);
+BYTE CSceneInfo::getSeRangeRatio() {
+    INT i = getCurrentSceneCacheID();
+    return i < 0 ? s_GlobalScene._nSeRangeRatio : s_SceneCacheTbl[i]._nSeRangeRatio;
+}
+BYTE CSceneInfo::getSeRangeRatio(const AREA_SCENE& as) {
+    INT i = getSceneCacheID(as);
+    return i < 0 ? s_GlobalScene._nSeRangeRatio : s_SceneCacheTbl[i]._nSeRangeRatio;
+}
 void _clearMapRsrcCache() {
     s_nMapCacheField = 0;
     s_nMapCacheBattle = 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", checkMapRsrcCache__10CSceneInfoii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getMapRsrcCache__10CSceneInfoi);
+void* CSceneInfo::getMapRsrcCache(INT nSlot) {
+    switch (nSlot) {
+    case 1: return (void*)s_nMapCacheField;
+    case 2: return (void*)s_nMapCacheBattle;
+    }
+    return NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", updateMapRsrcCache__10CSceneInfoii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", removeMapRsrcCache__10CSceneInfoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _linkFloorData__FPCc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _linkEventRoomData__FPCc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _linkNormaData__FPCc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _isValidFloorIdx__FUsi);
+EventRoomData* _linkEventRoomData(const CHAR* pszFile) {
+    CRsrcData* pData = CRsrcDB::getRsrc(1, pszFile, NAME_CASE_SENSITIVE);
+    if (!pData) return NULL;
+    return (EventRoomData*)CRsrcDB::getRsrcData(*pData);
+}
+NormaDataHeader* _linkNormaData(const CHAR* pszFile) {
+    CRsrcData* pData = CRsrcDB::getRsrc(1, pszFile, NAME_CASE_SENSITIVE);
+    if (!pData) return NULL;
+    return (NormaDataHeader*)CRsrcDB::getRsrcData(*pData);
+}
+FloorLayoutDataHeader* _isValidFloorIdx(USHORT nIdx, BOOL bSora) {
+    FloorLayoutDataHeader* pHeader = bSora ? s_pFloorFile_Sora : s_pFloorFile_Riku;
+    FloorLayoutDataHeader* pRet = NULL;
+    if (pHeader) pRet = nIdx < pHeader->nCount ? pHeader : NULL;
+    return pRet;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getCurrentFloorDataSrc__10CSceneInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getFloorDataSrc__10CSceneInfoUsi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getFloorNormaDataSrc__10CSceneInfoUsi);
+FLOOR::FloorLayout* CSceneInfo::getFloorDataSrc(USHORT nIdx, BOOL bSora) {
+    FloorLayoutDataHeader* pHeader = _isValidFloorIdx(nIdx, bSora);
+    if (!pHeader) return NULL;
+    FLOOR::FloorLayout* pSrc = (FLOOR::FloorLayout*)((BYTE*)pHeader->_pFloorData + pHeader->_pFloorOfsTbl[nIdx]);
+    return pHeader->_nVersion == 4 ? pSrc : NULL;
+}
+RCNORMA::FloorNormaSrc* CSceneInfo::getFloorNormaDataSrc(USHORT nIdx, BOOL bSora) {
+    NormaDataHeader* pHeader = bSora ? s_pFloorNormaFile_Sora : s_pFloorNormaFile_Riku;
+    if (!pHeader) return NULL;
+    return &pHeader->_FloorSrc[nIdx];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getRoomInfo__10CSceneInfoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getEventRoomInfo__10CSceneInfoUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getRoomIndex__10CSceneInfoi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getDoorInfo__10CSceneInfo7DOOR_IDi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setDoorStat__10CSceneInfo9DOOR_STAT7DOOR_IDi);
+DoorInfo* CSceneInfo::getDoorInfo(DOOR_ID id, INT nRoomID) {
+    RoomInfo* pRoom = getRoomInfo(nRoomID);
+    if (!pRoom) return NULL;
+    return &pRoom->_doors[id];
+}
+BOOL CSceneInfo::setDoorStat(DOOR_STAT stat, DOOR_ID id, INT nRoomID) {
+    DoorInfo* pDoor = getDoorInfo(id, nRoomID);
+    if (pDoor) return pDoor->setDoorState(stat);
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _openGoalDoor__FRC8RoomInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", openGoalDoor__10CSceneInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", backupEventDoorState__10CSceneInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", rollbackEventDoorState__10CSceneInfoi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _setOpenFlagEventDoor__FRC8DoorInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _getOpenFlagEventDoor__FRC8DoorInfo);
+void _setOpenFlagEventDoor(const DoorInfo& door) {
+    USHORT nFloor = CSceneInfo::getCurrentFloorIndex();
+    INT nEvIdx = door._type - 1;
+    _SceneInfoWork::mc2()->_nEventDoorOpenTbl[nFloor][nEvIdx] = 1;
+}
+BYTE _getOpenFlagEventDoor(const DoorInfo& door) {
+    USHORT nFloor = CSceneInfo::getCurrentFloorIndex();
+    INT nEvIdx = door._type - 1;
+    return _SceneInfoWork::mc2()->_nEventDoorOpenTbl[nFloor][nEvIdx];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isCreated__C8RoomInfo);
 BOOL RoomInfo::isFirstTimeAfterRC() const {
     ROOM_STORAGE* p = (ROOM_STORAGE*)_pStorageInfo;
@@ -307,12 +499,31 @@ BOOL DoorInfo::setDoorState(DOOR_STAT nStat) {
     p->_nStat = nStat;
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isSpecialDoor__C8DoorInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", canSelectWorld__C8DoorInfo);
+BOOL DoorInfo::isSpecialDoor() const {
+    if (getNormaKeyCardID()) return TRUE;
+    return isEventDoor();
+}
+BOOL DoorInfo::canSelectWorld() const {
+    if (CSceneInfo::hasReqChangeScene()) return FALSE;
+    if (_type != DOOR_TYPE_SELECT_WORLD) return FALSE;
+    return getDoorState() == 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", canCreateRoom__C8DoorInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getNormaKeyCardID__C8DoorInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getNormaCount__C8DoorInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isValidNormaIndex__C8DoorInfoUs);
+INT DoorInfo::getNormaKeyCardID() const {
+    if (isEventDoor() && _getOpenFlagEventDoor(*this)) return 0;
+    RCNORMA::DoorNormaSrc* p = (RCNORMA::DoorNormaSrc*)_pNormaSrcInfo;
+    if (!p) return 0;
+    return p->_nDoorType + 0xba;
+}
+USHORT DoorInfo::getNormaCount() const {
+    if (!getNormaKeyCardID()) return 1;
+    return ((RCNORMA::DoorNormaSrc*)_pNormaSrcInfo)->_nCount + 1;
+}
+BOOL DoorInfo::isValidNormaIndex(USHORT nIndex) const {
+    if (nIndex < getNormaCount()) return TRUE;
+    TRACE(D_00484EC8);
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getNormaColor__C8DoorInfoUs);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getNormaNumber__C8DoorInfoUs);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getNormaOperation__C8DoorInfoUs);
@@ -341,17 +552,45 @@ BYTE DoorInfo::getFirstUsedCardNumForNorma() const {
     if (p) n = p->_nFirstCardNum;
     return n;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", clearOneNorma__8DoorInfo);
+BOOL DoorInfo::clearOneNorma() {
+    DOOR_STORAGE* p = (DOOR_STORAGE*)_pStorageInfo;
+    if (p) {
+        if (!isValidNormaIndex(p->_nNextNorma)) return FALSE;
+        p->_nNextNorma++;
+        return isNormaCleared();
+    }
+    return FALSE;
+}
 USHORT DoorInfo::getNextNormaIndex() const {
     DOOR_STORAGE* p = (DOOR_STORAGE*)_pStorageInfo;
     USHORT n = 3;
     if (p) n = p->_nNextNorma;
     return n;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isNextNormaKeyCard__C8DoorInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isNormaCleared__C8DoorInfo);
+BOOL DoorInfo::isNextNormaKeyCard() const {
+    if (!getNormaKeyCardID()) return FALSE;
+    DOOR_STORAGE* p = (DOOR_STORAGE*)_pStorageInfo;
+    BOOL b;
+    if (p) b = p->_nNextNorma == ((RCNORMA::DoorNormaSrc*)_pNormaSrcInfo)->_nCount;
+    else b = FALSE;
+    return b;
+}
+BOOL DoorInfo::isNormaCleared() const {
+    DOOR_STORAGE* p = (DOOR_STORAGE*)_pStorageInfo;
+    BOOL b = FALSE;
+    if (p) b = getNormaCount() == p->_nNextNorma;
+    return b;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", useNormaCard__8DoorInfoRC4CARD);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initNorma__8DoorInfo);
+void DoorInfo::initNorma() {
+    DOOR_STORAGE* p = (DOOR_STORAGE*)_pStorageInfo;
+    if (p) {
+        for (INT i = 0; i < 3; i++) p->_nNormaNums[i] = 0;
+        p->_nNextNorma = 0;
+        p->_nFirstCardID = 0;
+        p->_nFirstCardNum = 0xff;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", resetNorma__8DoorInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getSceneNumFromCardID__10CSceneInfoUc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getCardIDFromSceneNum__10CSceneInfos);

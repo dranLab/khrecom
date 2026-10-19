@@ -84,6 +84,17 @@ struct NormaSrc { // 0x8
     SHORT _nColor;   /* 0x4 */
     SHORT __nDummy;  /* 0x6 */
 };
+// PARTIAL: added for Game/SceneInfo
+struct DoorNormaSrc { // 0x1c
+    SHORT _nDoorType;      /* 0x00 */
+    SHORT _nCount;         /* 0x02 */
+    NormaSrc _normas[3];   /* 0x04 */
+};
+struct FloorNormaSrc { // 0x74
+    SHORT _nID;            /* 0x00 */
+    SHORT __nDummy;        /* 0x02 */
+    DoorNormaSrc _normas[4]; /* 0x04 */
+};
 }
 
 // PARTIAL: added for Form/Menu/RoomCreation
@@ -129,6 +140,12 @@ struct DoorInfo { // 0x18
     void setFirstUsedCardInfo(BYTE nCardID, BYTE nCardNum);
     BYTE getFirstUsedCardIDForNorma() const;
     BYTE getFirstUsedCardNumForNorma() const;
+    BOOL canSelectWorld() const;
+    BOOL isValidNormaIndex(USHORT nIndex) const;
+    BOOL clearOneNorma();
+    BOOL isNextNormaKeyCard() const;
+    BOOL isNormaCleared() const;
+    void initNorma();
 };
 
 // PARTIAL: added for Form/DebugMenu
@@ -251,10 +268,10 @@ public:
     static BYTE getSeRangeRatio(); // PARTIAL: added for System/Graphic/WorldEnv
     static BYTE getReverbVal();
     static SHORT getCurrentAreaNum(); // PARTIAL: added for System/DebugProcInfo
-    static void reqExitBattle(); // PARTIAL: added for Game/Enemy/BattleEnemyManager
+    static BOOL reqExitBattle(); // PARTIAL: added for Game/Enemy/BattleEnemyManager
     static SHORT getCurrentBattleSceneNum(); // PARTIAL: added for Game/MinigameManager
-    static void reqExitMinigame(SHORT inNextScene); // PARTIAL: added for Game/MinigameManager
-    static void reqRetryMinigame(); // PARTIAL: added for Game/MinigameManager
+    static BOOL reqExitMinigame(SHORT inNextScene); // PARTIAL: added for Game/MinigameManager
+    static BOOL reqRetryMinigame(); // PARTIAL: added for Game/MinigameManager
     static BOOL hasReqChangeScene(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
     static INT getCurrentRoomID();
     static RoomInfo* getRoomInfo(INT nRoomID);
@@ -351,6 +368,16 @@ public:
     static INT getNextAtelSrcID();
     static DOOR_ID getNextDoorID();
     static BYTE getCardIDFromSceneNum(SHORT nScene);
+    static void setNextScene(SHORT nScene, SHORT nBtlScene);
+    static BOOL isTgsFloor();
+    static BOOL isJFestaFloor();
+    static void clearSceneCache();
+    static BOOL removeFromSceneCacheWithRsrc(const union AREA_SCENE& as);
+    static void setReverbVal(BYTE nRev);
+    static BYTE getReverbVal(const union AREA_SCENE& as);
+    static BYTE getSeRangeRatio(const union AREA_SCENE& as);
+    static RCNORMA::FloorNormaSrc* getFloorNormaDataSrc(USHORT nIdx, BOOL bSora);
+    static BOOL setDoorStat(DOOR_STAT stat, DOOR_ID id, INT nRoomID);
 };
 
 #endif /* GAME_SCENEINFO_H */
