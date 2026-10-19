@@ -83,6 +83,7 @@ public:
     void setDuelStart(INT inFlag);
     static void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inUpKind);
     static CCardBattle* getInstance(); // PARTIAL: added for Game/Player/PlayerManager
+    static INT getGimmickCount(); // PARTIAL: added for Game/Prize
     // PARTIAL: added for Game/Enemy/Heartless
     INT setEnemyCard(HANDLE inEnemy, INT inParam, INT inNumber);
     static INT getPlayingCardPoint(INT inSide);

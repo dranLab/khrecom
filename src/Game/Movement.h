@@ -89,6 +89,7 @@ public:
     void enableSliding(INT inFlag);
     void setCollKind(COLL_KIND inKind);
     FVECTOR& getDetectNormal() { return *(FVECTOR*)&_m_0x00[0xa0]; }
+    void update(); // PARTIAL: added for Game/Prize
 };
 
 // PARTIAL: added for Game/Player/SummonDumbo
