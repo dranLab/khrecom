@@ -37,28 +37,37 @@ enum MC_DATATYPE {
 
 class CMemoca {
 public:
-    static BOOL reqLoad(INT nPort, const CHAR* pszFile, CBuf& buf, MC_DATATYPE type);
-    static INT loadProc();
-    static BOOL reqSave(INT nPort, const CHAR* pszFile, const CBuf& buf, MC_DATATYPE type, const CHAR* pszTitle,
-                        USHORT nIconID);
-    static INT saveProc();
-    static BOOL reqGetFreeSize(INT nPort, sceMcTblGetDir* pDirBuf, INT nMax);
+    static void initialize();
+    static void setupMcName(BOOL bNTSC);
+    static void finalize();
+    static BOOL reqLoad(INT nPort, const CHAR* pszName, BYTE* pOutBuf, INT nSize, MC_DATATYPE type);
+    static BOOL reqLoad(INT nPort, const CHAR* pszName, CBuf& dst, MC_DATATYPE type);
+    static BOOL reqSave(INT nPort, const CHAR* pszName, const BYTE* pBuf, INT nSize, MC_DATATYPE type,
+                        const CHAR* pszTitle, USHORT nOffsLF);
+    static BOOL reqSave(INT nPort, const CHAR* pszName, const CBuf& src, MC_DATATYPE type, const CHAR* pszTitle,
+                        USHORT nOffsLF);
+    static BOOL reqGetFreeSize(INT nPort, sceMcTblGetDir* pOutBuf, INT nMaxEnt);
     static INT getFreeSize();
     static INT getRootDirCount();
     static INT getFreeEntSpace();
+    static BOOL reqFormat(INT nPort);
+    static INT formatProc();
+    static INT saveProc();
+    static INT loadProc();
+    static INT checkDataFileAttr(INT nMode, const CHAR* pszName, INT nPort);
     static BOOL reqGetDirSize(INT nPort, const CHAR* pszDir);
     static INT getDirSize();
-    static INT checkDataFileAttr(INT nPort, const CHAR* pszDir, INT nSlot);
     static INT getDirSizeAfterCheckDir();
     static sceMcStDateTime getLastCheckFileTime();
     static INT idleCheckCard(INT nPort);
     static CHAR* getSysFileNameCOM();
     static CHAR* getGameDataFileName();
-    // PARTIAL: added for Form/DebugMenu
-    static BOOL reqLoad(DebugParam& param);
     static BOOL reqSave(const DebugParam& param);
+    static BOOL reqLoad(DebugParam& param);
     static BOOL reqSaveSysTest(BOOL bSora, BOOL bRiku, BOOL bFlag);
     static BOOL reqLoadSysTest(CBuf& buf);
+    static BOOL reqUnformat(INT nPort);
+    static INT unformatProc();
 };
 
 #endif /* SYSTEM_MEMOCA_H */
