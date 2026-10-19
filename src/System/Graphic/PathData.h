@@ -61,6 +61,7 @@ struct PATH_PARAM {
 } __attribute__((aligned(16))); /* 0x30 */
 
 class CPathVector {
+    friend class CHermitePath;
 private:
     FVECTOR* m_pVec;               /* 0x000 */
     INT m_iVecMax;                 /* 0x004 */
