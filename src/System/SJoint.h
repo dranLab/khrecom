@@ -80,6 +80,16 @@ public:
         }
         return FALSE;
     }
+    // PARTIAL: added for Game/Collision/CollDisp
+    void removeAll() {
+        T* pEntry = m_pHead;
+        while (pEntry != NULL) {
+            T* pNextEntry = pEntry->getNext();
+            pEntry->setNext(NULL);
+            pEntry = pNextEntry;
+        }
+        resetParam();
+    }
     void resetParam() {
         m_pHead = NULL;
         m_pTail = NULL;
