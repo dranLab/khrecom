@@ -58,6 +58,7 @@ public:
     CCoord& getCrd(INT nIndex);                       // PARTIAL: added for Form/Menu/MenuModel
     CCoords* getCoords() { return m_pCrds; }          // PARTIAL: added for System/Graphic/DispList
     void getWorldBBox(FVECTOR& vMax, FVECTOR& vMin);  // PARTIAL: added for System/Graphic/DispList
+    u_long128* getMicroProg();                        // PARTIAL: added for System/Graphic/DispList
     INT getBoneIndex(const CHAR* pName) const;        // PARTIAL: added for Form/Menu/MenuModel
     void linkTexAnm(CTexAnm* pTexAnm, INT nTexAnm);   // PARTIAL: added for Form/Menu/MenuModel
     void setColorScale(const FVECTOR& vColor);        // PARTIAL: added for Form/Menu/MenuModel

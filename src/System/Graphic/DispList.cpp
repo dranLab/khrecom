@@ -14,11 +14,11 @@ extern "C" void qsort(void* base, size_t num, size_t size, int (*cmp)(const void
 #define TASK_H_NO_SLC_OVERFLOW_MSG
 #include "System/Coord.h"
 #include "System/Graphic/ShadowModel.h"
+#include "System/Graphic/WorldEnv.h"
 #include "include_asm.h"
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-class CShadowModel;
 class CPackMan { /* System/Graphic/PackMan.h */
 public:
     static void pkCnt(UINT n);
@@ -33,7 +33,27 @@ public:
     static void setDefault_ZBUF_2(ULONGLONG n);
     static u_long128* pkOpenGifTagManual(u_long128 tag);
     static void pkCloseGifTagManual(UINT* p);
+    static void pkRet(UINT n);
+    static void pkTerminate();
 };
+
+/* PARTIAL: only what this file needs (System/Graphic/SemiModel.h, FadeModel.h, ShadowModel.h) */
+class CSemiModel : public CDrawable {
+protected:
+    CModel* m_pModel; /* 0x18 */
+public:
+    CModel* getModel() { return m_pModel; }
+};
+class CShadowModel : public CSemiModel {};
+
+static inline void _loadMatrixVf28(const FMATRIX& m) {
+    asm volatile("lqc2 $vf28, 0x0(%0)\n"
+                 "lqc2 $vf29, 0x10(%0)\n"
+                 "lqc2 $vf30, 0x20(%0)\n"
+                 "lqc2 $vf31, 0x30(%0)\n"
+                 :
+                 : "r"(&m));
+}
 
 /* clears memory in quadwords (through the uncached segment if asked), then bytes (original name unknown) */
 static inline void _memclr(void* pDst, UINT nSize, BOOL bUncached) {
@@ -292,7 +312,13 @@ void CDispListBase::draw(INT nStart, INT nSize) {
     }
     _endDraw();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", getHeadPrim__13CDispListBasei);
+CDrawable* CDispListBase::getHeadPrim(INT nTblIdx) {
+    OTtag* pOT = getOTtagTbl();
+    if (!pOT) return NULL;
+    if ((UINT)nTblIdx >= getOTtagTblSize()) return NULL;
+    pOT = &pOT[nTblIdx];
+    return pOT->_pHeadPrim;
+}
 void CDispListBase::_startDirectMode() {
     CPackMan::pkCnt(0);
     CPackMan::pkAddCode(0x13000000);
@@ -439,8 +465,50 @@ void CDispListSemi::insert(CDrawable& inPrim, FIX4 inZ) {
     tag.addTail(&inPrim);
     inPrim.m_nZ = inZ;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DispList", draw__23CDispListSemiSingleSortP16SEMI_PACKET_LIST);
-__asm__(".rdata\n.align 3\n.word 0x00544F70\n.word 0x00000000\n.text\n");
+UINT CDispListSemiSingleSort::draw(SEMI_PACKET_LIST* pList) {
+    INT nIdx = 0;
+    CModel::setSendCtrl(0xe01);
+    _loadMatrixVf28(CWorldEnv::getWorldScreenMatrix());
+    OTtag* pOT = getOTtagTbl();
+#line 421
+    ASSERT(pOT);
+    UINT nMax = getOTtagTblSize();
+    for (INT i = 0; i < nMax; i++, pOT++) {
+        if (pOT->isEmpty()) continue;
+        CDrawable* pPrim = pOT->_pHeadPrim;
+        while (pPrim) {
+            if (CPackMan::isOverFlow(pPrim->getPacketSize())) {
+                pPrim = pPrim->m_pNext;
+                continue;
+            }
+            pList[nIdx].pPkt = (void*)((UINT)CPackMan::pkGetCurrentPointer() & 0xfffffff);
+            pList[nIdx].sLayerInfo = pPrim->m_LayerInfo;
+            pList[nIdx].nZ = pPrim->m_nZ;
+            CPackMan::pkCnt(0);
+            CPackMan::pkAddCode(0x13000000);
+            CPackMan::pkOpenDirectCode(0);
+            if (pPrim->m_LayerInfo._nID & 0x10) {
+                pList[nIdx].pMProg = ((CSemiModel*)pPrim)->getModel()->getMicroProg();
+            } else {
+                pList[nIdx].pMProg = NULL;
+                CGTexPrim::clearTexCache();
+                CGTexPrim2D::clearTexCache();
+                _updateTestMode(pPrim);
+            }
+            nIdx++;
+            pPrim = _draw(*pPrim);
+            CPackMan::pkCloseDirectCode();
+            CPackMan::pkRet(0);
+            CPackMan::pkAddCode(0x13000000);
+            CPackMan::pkTerminate();
+        }
+    }
+    CModel::resetWorldScreenMatrix();
+    CModelMan::clearTexCache();
+    CModel::resetMicroProgram();
+    CModel::resetSendCtrl(-1);
+    return nIdx;
+}
 void CDispListWithoutZ::insert(CDrawable& inPrim, FIX4 inZ) { CDispList::insert(inPrim, inZ); }
 void CDispListWithoutZ::_beginDraw() {
     _startDirectMode();
@@ -541,13 +609,6 @@ void CDispListFG::_endDraw() {
     CPackMan::changeLayer(0);
 }
 void CDispListShadowDraw::_beginDraw() { _startDirectMode(); }
-/* PARTIAL: only what this file needs (System/Graphic/SemiModel.h, FadeModel.h, ShadowModel.h) */
-class CShadowModel : public CDrawable {
-protected:
-    CModel* m_pModel; /* 0x18 CSemiModel::m_pModel */
-public:
-    CModel* getModel() { return m_pModel; }
-};
 /* VU0 helpers (original names unknown) */
 static inline void _vecAdd(FVECTOR& vOut, const FVECTOR& v0, const FVECTOR& v1) {
     asm volatile("lqc2 $vf4, 0x0(%1)\n"
