@@ -46,6 +46,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "System/Movie/Movie.h"
 #include "Game/GameSubBattle.h"
 #include "Game/GameSubField.h"
+#include "Form/Menu/JMemoFlag.h"
 #include "include_asm.h"
 
 class CPackMan {
@@ -58,6 +59,12 @@ class CRsrcDB {
 public:
     static void removeGroup(INT nGroupID, INT nMemberID);
     static void clearSceneAttachMode();
+    static void resetRsrc(INT nRsrcType, INT nArg);
+};
+
+class CRoomCreation {
+public:
+    static void removeRsrc();
 };
 
 class CPause : public CTask {
@@ -75,6 +82,7 @@ private:
 
 public:
     CCamp(CTask* pParent, INT nMode);
+    static void removeRsrc();
 };
 
 enum SAVELOAD { SAVELOAD_SAVE = 0 };

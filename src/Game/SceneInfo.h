@@ -302,6 +302,8 @@ public:
     static BOOL hasAnyRequest(); // PARTIAL: added for Game/Game
     static INT getNextFloorIndex(); // PARTIAL: added for Game/Game
     static INT getPrevRoomID(); // PARTIAL: added for Game/Game
+    static BOOL isNextBattleRsrcUpdate(); // PARTIAL: added for Game/Game
+    static void* getMapRsrcCache(INT nMode); // PARTIAL: added for Game/Game
     static BOOL hasReqChangeFloor(); // PARTIAL: added for Game/Game
     static void removeMapRsrcCache(INT nMode); // PARTIAL: added for Game/Game
     static BOOL hasReqExitBattle(); // PARTIAL: added for Game/Game
