@@ -46,6 +46,15 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
+inline void* operator new[](size_t size, char* msg) throw() {
+    return com_malloc_d(size, msg, RET_ADDR());
+}
+
+/* PARTIAL: the 2D viewer's SeqControl is not linked into the game: lui/addiu of address 0 (name unknown) */
+extern SeqControl s_ViewerSeqControl;
+/* Ps2EeAs makes undefined weak symbols global: define it as weak absolute 0 (as Game/Enemy/CreateEnemy does) */
+__asm__(".weak s_ViewerSeqControl\ns_ViewerSeqControl = 0\n");
+
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 static inline void _itof0(FVECTOR& fVec, const IVECTOR& iVec) {
@@ -157,8 +166,13 @@ C2DSprObj::~C2DSprObj() {
     if (m_pScissoring) delete m_pScissoring;
     m_pScissoring = NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", init__Q22D29C2DSprObjUi);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x7379532F\n.word 0x2F6D6574\n.word 0x70617247\n.word 0x2F636968\n.word 0x322F6432\n.word 0x72705344\n.word 0x2E6A624F\n.word 0x28707063\n.word 0x29343531\n.word 0x00000000\n.text\n");
+void C2DSprObj::init(UINT nSpr) {
+    m_nPoly = nSpr;
+#line 154
+    m_pSprPrim = new (__FILE__ "(154)") SprPrim[nSpr];
+    INT& rViewer = C2DMan::m_fg2DViewer;
+    if (rViewer) m_pSeqControl = &s_ViewerSeqControl;
+}
 void C2DSprObj::initSprite(INT inNum, SPR_GROUP* pSprGroupe, SPR_PARTS* pSprParts) {
     if (!m_pSprPrim) return;
     if (inNum >= m_nPoly) return;
