@@ -8,17 +8,36 @@
 
 /* PARTIAL: added for System/Graphic/PathDataCamera (layouts from the debug info; members as needed) */
 
+class CDbgCube {
+private:
+    CCoord m_Coord;                /* 0x000 */
+    C3DPolyStrip m_gpPolyStrip;    /* 0x0d0 */
+
+public:
+    CDbgCube(CCoord* pCrd);
+    CDbgCube();
+    ~CDbgCube();
+    void disp();
+    void setCoord(FVECTOR* pvPos, FVECTOR* pvRot);
+    CCoord& getCoord() { return m_Coord; }
+private:
+    void init(CCoord* pCrd);
+};
+
 class CDbgArrow {
 private:
     CCoord m_Coord;                /* 0x000 */
-    UBYTE m_gpPolyStrip[0x50];     /* 0x0d0 C3DPolyStrip */
+    C3DPolyStrip m_gpPolyStrip;    /* 0x0d0 */
 
 public:
+    CDbgArrow(CCoord* pCrd);
     CDbgArrow();
     ~CDbgArrow();
     void disp();
     void setCoord(FVECTOR* pvPos, FVECTOR* pvRot);
     CCoord& getCoord() { return m_Coord; }
+private:
+    void init(CCoord* pCrd);
 };
 
 struct PATH_DATA_HEAD {
@@ -80,18 +99,34 @@ private:
 public:
     // PARTIAL: added for System/Graphic/HermitePathCamera
     CPathVector(const FVECTOR* pPath, INT iPathMax) { init(pPath, iPathMax, 0); }
+    CPathVector() : m_pVec(NULL), m_iVecMax(0), m_pPathData(NULL) {} // PARTIAL: added for System/Graphic/PathData
     ~CPathVector();
     void init(const FVECTOR* pPath, INT iPathMax, INT iMode);
-    FLOAT getPathRoll(INT iIdx) const;
-    float getTargetDistanceToPathStep(const FVECTOR& vTarget, float fStep);
-    void getPathStepToPosition(FVECTOR& vPos, float fStep, BOOL bLoop);
-    FLOAT getPathStepToRoll(float fStep);
+    void init(const PATH_VECTOR* pPathData, BOOL bAlloc);
     INT getPathVectorNum() { return m_iVecMax; }
     FVECTOR* getPathVector() { return m_pVec; }
     FVECTOR& getPathPosition(INT iIdx) { return m_pVec[iIdx]; }
-    FLOAT getPathSpeed(INT iIdx) const;
+    FLOAT getPathRoll(INT iNum) const;
+    FLOAT getPathSpeed(INT iNum) const;
     void getPathParam(PATH_PARAM& sParam) const;
-    void dispDebugLine(INT iMode);
+    void makeVertexSpeedAll();
+    float getTargetDistanceToPathStep(const FVECTOR& tpos, float distance);
+    float getTargetToPathStep(const FVECTOR& tpos);
+    void getPathStepToPosition(FVECTOR& mpos, float fstep, BOOL iTcb);
+    FLOAT getPathStepToRoll(float fStep);
+    float getPathStepToVectorIdx4(int* pv, float fstep);
+    float getPathStepToVector4(const FVECTOR** pv, float fstep);
+    void setPathParam(PATH_PARAM& sParam);
+    BOOL addPath(INT iNum);
+    BOOL delPath(INT iNum);
+    void dispDebugLine(INT iFlg);
+private:
+    void _init(const FVECTOR* pPath, INT iPathMax, BOOL bAlloc);
+    void getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int* outiStep, const FVECTOR& vTarget,
+                     const FVECTOR* pathv, int path_max, float hashi);
+    void __addPathAlloc(FVECTOR*& pVec, INT iVecMax, INT iVecMemMax);
+    void __addPathCopy(FVECTOR*& pVec, INT iVecMax, INT iNum);
+    void __delPathCopy(FVECTOR*& pVec, INT iVecMax, INT iNum);
 };
 
 class CPathData {
@@ -108,8 +143,8 @@ public:
     CPathData(const CHAR* pszName) { init(pszName, 0); }
     CPathData(const PATH_DATA* pPathData) { init(pPathData, 0); }
     ~CPathData();
-    void init(const CHAR* pszName, INT iMode);
     void init(const PATH_DATA* pPathData, INT iMode);
+    void init(const CHAR* pszName, INT iMode);
     INT getPathNum() { return m_iPathMax; }
     CPathVector* getPathVectorData(INT iPathNum) {
         if (iPathNum >= m_iPathMax) return NULL;
@@ -119,6 +154,16 @@ public:
     FVECTOR& getPathPosition(INT iPathNum, INT iIdx) { return m_pPath[iPathNum].getPathPosition(iIdx); }
     void getPathParam(INT iPathNum, PATH_PARAM& sParam) { m_pPath[iPathNum].getPathParam(sParam); }
     INT getLinkChild(INT iPathNum, INT iStart);
+    BOOL addPath(const FVECTOR* pVec, INT iNum);
+    BOOL delPath(INT iNum);
+    void dispDebugLine();
+private:
+    void _init(const PATH_DATA* pPathData, BOOL bAlloc);
 };
+
+FLOAT _getPathVectorConvWRoll(FLOAT w);
+void _setPathVectorConvWRoll(FLOAT* fW, FLOAT fRoll);
+FLOAT _getPathVectorConvWSpeed(FLOAT w);
+void _setPathVectorConvWSpeed(FLOAT* fW, FLOAT fSpeed);
 
 #endif /* SYSTEM_GRAPHIC_PATHDATA_H */

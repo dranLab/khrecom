@@ -349,3 +349,7 @@ _$_6CState_002332C8 = 0x002332C8; // type:func size:0x30
 _$_t7CVector1Z6G_LINE_00233338 = 0x00233338; // type:func size:0x8C
 _vt$t7CVector1Z6G_LINE_0048A0B8 = 0x0048A0B8; // size:0x18
 _vt$6CState_0048A190 = 0x0048A190; // size:0x30
+
+// System/Graphic/PathData: CVector<G_STRIP>'s inline destructor and an unnamed copy of its vtable
+_$_t7CVector1Z7G_STRIP_00143D78 = 0x00143D78; // type:func size:0x8C
+_vt$t7CVector1Z7G_STRIP_00462378 = 0x00462378; // size:0x18
