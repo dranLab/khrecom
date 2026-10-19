@@ -10,6 +10,7 @@
 #include "System/Graphic/2d/2DSeqObj.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Math3D.h"
+#include "System/Graphic/WorldEnv.h"
 
 namespace D2 {
 class C2DMan { /* System/Graphic/2d/2DMan.h */
@@ -60,6 +61,20 @@ __asm__(".weak s_ViewerSeqControl\ns_ViewerSeqControl = 0\n");
 extern "C" float sinf(float x);
 extern "C" float cosf(float x);
 extern "C" void sceVu0InterVector(float* v0, float* v1, float* v2, float t);
+extern INT SCREEN_HEIGHT;
+void RotTransPersClipW(IVECTOR& iVec, const FVECTOR& fVec);
+void ITOF4Vector(FVECTOR& fVec, const IVECTOR& iVec);
+
+static inline void _loadRotTransPersMatrix(const FMATRIX& m) {
+    asm volatile("vsub.xyzw $vf3, $vf0, $vf0\n"
+                 "lqc2 $vf4, 0x0(%0)\n"
+                 "lqc2 $vf5, 0x10(%0)\n"
+                 "lqc2 $vf6, 0x20(%0)\n"
+                 "lqc2 $vf7, 0x30(%0)\n"
+                 :
+                 : "r"(&m));
+}
+
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 static inline void _itof0(FVECTOR& fVec, const IVECTOR& iVec) {
@@ -370,7 +385,85 @@ void C2DSprObj::getRect(FVECTOR2* pvOut4, SprPrim& rSprPrim) {
     pvOut4[2].set(fVec.x, fVec.w);
     pvOut4[3].set(fVec.z, fVec.w);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", _disp__Q22D29C2DSprObj);
+INT C2DSprObj::_disp() {
+    IVECTOR iVec;
+    FVECTOR fVec;
+    if (!m_fgDisp) return 0;
+    if (m_fgRotTransPers >= 0) {
+        if (m_fgRotTransPers == 0) {
+            _loadRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
+            RotTransPersClipW(iVec, m_pSeqControl->vPos);
+            if (iVec.w != 0 || iVec.x < 0x5000 || iVec.x > 0xb000 || iVec.y < 0x5000 || iVec.y > 0xb000) {
+                m_pSeqControl->fg3D = -1;
+                return 0;
+            }
+            ITOF4Vector(fVec, iVec);
+            m_pSeqControl->matrix.v[3].set(fVec.x - 2048.0f, fVec.y - 2048.0f, 0.0f, 1.0f);
+            m_fgParent = 0;
+            move();
+        } else {
+            if (m_pSeqControl->fg3D < 0) return 0;
+            m_fgParent = (m_fgRotTransPers == 1) ? 1 : -1;
+            move();
+        }
+    }
+    if (!m_pScissoring) {
+        for (INT i = 0; i < m_nPoly; i++) {
+            SprPrim* pSprPrim = &m_pSprPrim[i];
+            CPolyGT4ST* pPrim = &pSprPrim->polyGT4;
+            INT w0;
+            INT w1;
+            if (pPrim->m_P0.x < pPrim->m_P1.x) {
+                w0 = pPrim->m_P0.x;
+                w1 = pPrim->m_P1.x;
+            } else {
+                w1 = pPrim->m_P0.x;
+                w0 = pPrim->m_P1.x;
+            }
+            if (pPrim->m_P2.x < pPrim->m_P3.x) {
+                if (pPrim->m_P2.x < w0) w0 = pPrim->m_P2.x;
+                if (w1 < pPrim->m_P3.x) w1 = pPrim->m_P3.x;
+            } else {
+                if (pPrim->m_P3.x < w0) w0 = pPrim->m_P3.x;
+                if (w1 < pPrim->m_P2.x) w1 = pPrim->m_P2.x;
+            }
+            if (w1 < -0x1000 || w0 > 0x1000) continue;
+            if (pPrim->m_P0.y < pPrim->m_P1.y) {
+                w0 = pPrim->m_P0.y;
+                w1 = pPrim->m_P1.y;
+            } else {
+                w1 = pPrim->m_P0.y;
+                w0 = pPrim->m_P1.y;
+            }
+            if (pPrim->m_P2.y < pPrim->m_P3.y) {
+                if (pPrim->m_P2.y < w0) w0 = pPrim->m_P2.y;
+                if (w1 < pPrim->m_P3.y) w1 = pPrim->m_P3.y;
+            } else {
+                if (pPrim->m_P3.y < w0) w0 = pPrim->m_P3.y;
+                if (w1 < pPrim->m_P2.y) w1 = pPrim->m_P2.y;
+            }
+            if (w1 < -((SCREEN_HEIGHT >> 1) << 4) || w0 > ((SCREEN_HEIGHT >> 1) << 4)) continue;
+            pSprPrim->polyGT4.CGPrim::disp();
+        }
+        return 0;
+    }
+    SprPrim* pSprPrim = m_pSprPrim;
+    G_XY p0;
+    G_XY p1;
+    p0.set((pSprPrim->polyGT4.m_P0.x >> 4) + 256, (pSprPrim->polyGT4.m_P0.y >> 4) + SCREEN_HEIGHT / 2);
+    p1.set((pSprPrim->polyGT4.m_P3.x >> 4) + 256, (pSprPrim->polyGT4.m_P3.y >> 4) + SCREEN_HEIGHT / 2);
+    if (p0.x < 0) p0.x = 0;
+    if (p0.x >= 0x200) p0.x = 0x1ff;
+    if (p0.y < 0) p0.y = 0;
+    if (p0.y > SCREEN_HEIGHT - 1) p0.y = SCREEN_HEIGHT - 1;
+    if (p1.x < 0) p1.x = 0;
+    if (p1.x >= 0x200) p1.x = 0x1ff;
+    if (p1.y < 0) p1.y = 0;
+    if (p1.y > SCREEN_HEIGHT - 1) p1.y = SCREEN_HEIGHT - 1;
+    m_pScissoring->setRect(p0, p1);
+    m_pScissoring->disp();
+    return m_pScissoring->getLayerDepth();
+}
 void C2DSprObj::changeTexture(INT inNum, const TexInfo* pTexInfo, G_UV* pStart, G_UV* pEnd) {
     if (!m_pSprPrim) return;
     if (inNum >= m_nPoly) return;

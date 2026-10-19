@@ -178,6 +178,7 @@ public:
     }
     void setLayerFG(USHORT nDepth) { setLayer(3, nDepth); }
     void setSemiTrans(ALPHA nInAlpha) { m_nAlphaMode = nInAlpha; }
+    USHORT getLayerDepth() const { return m_LayerInfo._nDepth; } // PARTIAL: added for System/Graphic/2d/2DSprObj
     virtual void disp();
     virtual UINT getPacketSize() const;
 private:
@@ -424,6 +425,7 @@ public:
     CScissoring() {}
     virtual ~CScissoring();
     void setDefault();
+    void setRect(G_XY& p0, G_XY& p1); // PARTIAL: added for System/Graphic/2d/2DSprObj
 };
 
 // PARTIAL: added for Form/DebugWindow
