@@ -104,7 +104,7 @@ HANDLE C2DSeqObj::create(HANDLE handle, const TexInfo* pTexInfo, SEQ_SEQUENCE* p
             p2DSprObjLast = p2DSprObj;
         }
     }
-    if (p2DSprObjLast) p2DSprObjLast->setLastFlag();
+    if (p2DSprObjLast) p2DSprObjLast->setLast(TRUE);
     m_hBaseHandle = handle;
     C2DSpr::addList(*this);
     return _getHandle();

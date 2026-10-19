@@ -360,3 +360,6 @@ _$_4CFnt_001F9DB8 = 0x001F9DB8; // type:func size:0x28
 setStyle__4CFntUi_001F9DE0 = 0x001F9DE0; // type:func size:0xC
 _vt$4CFnt_0047E7A8 = 0x0047E7A8; // size:0x48
 _vt$6CState_0047E7F0 = 0x0047E7F0; // size:0x30
+_$_t8CSJointT1ZQ22D26C2DObj_00163BA0 = 0x00163BA0; // type:func size:0x30
+enableDisp__Q22D26C2DObji_00163BD0 = 0x00163BD0; // type:func size:0x8
+_vt$t8CSJointT1ZQ22D26C2DObj_00467398 = 0x00467398; // size:0x18

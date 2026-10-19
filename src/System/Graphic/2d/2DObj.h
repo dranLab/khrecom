@@ -20,6 +20,7 @@ protected:
     CHAR m_fgDisp;             /* 0xc */
 
 public:
+    C2DObj() {} // PARTIAL: added for System/Graphic/2d/2DSprObj (sets m_pSeqControl itself)
     C2DObj(SeqControl* pSeqControl) : m_pSeqControl(pSeqControl) {}
     virtual ~C2DObj() {}
     virtual void _main(TIMEQ qTime) = 0;
@@ -27,7 +28,7 @@ public:
     virtual void enableDisp(BOOL bEnable) { m_fgDisp = bEnable; }
     virtual void restart() {}
     virtual void shiftBase(FLOAT fX, FLOAT fY) = 0;
-    virtual void shiftColor(FLOAT fR, FLOAT fG, FLOAT fB, FLOAT fA) = 0;
+    virtual void shiftColor(FLOAT fR, FLOAT fG, FLOAT fB, FLOAT fA) {}
     virtual void setFukidasiSize(FLOAT fSizeX, FLOAT fSizeY) {}
 protected:
     virtual void changeTexture(INT inNum, const TexInfo* pTexInfo, G_UV* pStart, G_UV* pEnd) {}
