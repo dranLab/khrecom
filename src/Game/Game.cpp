@@ -44,6 +44,8 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "System/Graphic/WorldEnv.h"
 #include "System/PlaySpeedCtrl.h"
 #include "System/Movie/Movie.h"
+#include "Game/GameSubBattle.h"
+#include "Game/GameSubField.h"
 #include "include_asm.h"
 
 class CPackMan {
@@ -56,11 +58,6 @@ class CRsrcDB {
 public:
     static void removeGroup(INT nGroupID, INT nMemberID);
     static void clearSceneAttachMode();
-};
-
-class CEncountEffect {
-public:
-    static void initialize();
 };
 
 class CPause : public CTask {
@@ -571,8 +568,37 @@ void CGameMain::setupWorld() {
     }
 }
 void CGameMain::preSetupBattleRsrc() { m_nStep = 0; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupBattleRsrc__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x31287070\n.word 0x29363630\n.word 0x00000000\n.word 0x53705F6D\n.word 0x61426275\n.word 0x656C7474\n.word 0x00000000\n.text\n");
+void CGameMain::setupBattleRsrc() {
+    switch (m_nStep) {
+    case 0:
+        m_nStep = 1;
+        break;
+    case 1:
+        if (m_nGameProcFlag & 0x10000000) {
+            CEncountEffect::start();
+            m_nGameProcFlag &= ~0x10000000;
+        }
+        if (!m_pSubBattle) {
+#line 1066
+            m_pSubBattle = GAME_NEW(1066, CGameSubBattle)();
+            ASSERT(m_pSubBattle);
+        }
+        reqLoadInconstGameRsrc();
+        if (!CSceneInfo::isBossBattleScene(-1)) {
+            if (!CGame::isDbgStartFromBattle() || (USHORT)(CSceneInfo::getCurrentBattleSceneNum() - 1050) >= 149) {
+                reqLoadInconstWorldRsrc();
+            }
+        }
+        m_nStep++;
+        break;
+    case 2:
+        m_pSubBattle->update();
+        if (m_pSubBattle->getGameSubState() == 6) {
+            changeState((CSceneInfo::isBattleScene() || CSceneInfo::isMinigameScene()) ? 8 : 3);
+        }
+        break;
+    }
+}
 void CGameMain::preSetupField() {
     if ((USHORT)(CSceneInfo::getPrevSceneNum() - 1000) < 50) {
         m_nStep = 0;
@@ -591,8 +617,47 @@ void CGameMain::preSetupField() {
     m_nStep = 0;
 }
 void CGameMain::preSetupField2() { m_nStep = 2; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", setupField__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61472F65\n.word 0x632E656D\n.word 0x31287070\n.word 0x29363531\n.word 0x00000000\n.text\n");
+void CGameMain::setupField() {
+    switch (m_nStep) {
+    case 0:
+        m_nStep = 1;
+        break;
+    case 1:
+        resumeTaskInGame(1);
+        if (!m_pSubField) {
+#line 1156
+            m_pSubField = GAME_NEW(1156, CGameSubField)();
+            if (!CSceneInfo::isEventScene()) {
+                reqLoadInconstGameRsrc();
+                reqLoadInconstWorldRsrc();
+            }
+        } else {
+            m_pSubField->reqChangeGameSubState(4);
+        }
+        m_nStep++;
+        break;
+    case 2: {
+        m_pSubField->update();
+        INT nState = m_pSubField->getGameSubState();
+        if (m_nGameProcFlag & 0x10000) {
+            if (m_pSubField->isAtelStarted()) {
+                if (nState != 2) {
+                    nState = 2;
+                    m_pSubField->reqChangeGameSubState(2);
+                    m_pSubField->update();
+                }
+                m_nGameProcFlag |= 0x40000000;
+            } else {
+                m_nGameProcFlag |= 0x80000;
+                changeState(12);
+                break;
+            }
+        }
+        if (nState == 2) changeState(5);
+        break;
+    }
+    }
+}
 void CGameMain::prePlayField() {
     m_bPauseEnable = TRUE;
     CMainApp::enableDbgUsrPause(TRUE, FALSE);
@@ -633,7 +698,7 @@ void CGameMain::retryField() {
 }
 void CGameMain::preSetupBattle() {
 #line 1627
-    if (!(m_pSubBattle)) AssertApp(__FILE__, __LINE__, D_0047E328, 0); /* PARTIAL: string of setupBattleRsrc (INCLUDE_ASM) */
+    ASSERT(m_pSubBattle);
     resumeTaskInGame(1);
     if (m_pSubBattle->getGameSubState() == 6) m_pSubBattle->reqChangeGameSubState(3);
 }
@@ -815,7 +880,35 @@ void CGameMain::preCompleteGame() {
         m_nStep = 1;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", completeGame__9CGameMain);
+void CGameMain::completeGame() {
+    switch (m_nStep) {
+    case 0:
+        if (!CGame::isFadeDone()) return;
+        CWorldEnv::setFogColor(0, 0, 0);
+        break;
+    case 1:
+        if (m_pSubField) {
+            m_pSubField->terminate();
+            delete m_pSubField;
+            m_pSubField = NULL;
+        }
+        if (m_pSubBattle) {
+            m_pSubBattle->terminate();
+            delete m_pSubBattle;
+            m_pSubBattle = NULL;
+        }
+        break;
+    case 2:
+        CAtel::clearScreenFader(-1);
+        CGame::setFadeMaskProcPrio(CGame::FADE_PROC_PRIO_0);
+        CGame::dispOffFadeMask();
+        CTitleReportDllStarter::create(CTaskMan::getSysTask(1), 2, 0);
+        break;
+    default:
+        return;
+    }
+    m_nStep++;
+}
 void CGameMain::preExitTheaterMode() { m_nStep = 0; }
 void CGameMain::exitTheaterMode() {
     if (m_nStep == 0) {
