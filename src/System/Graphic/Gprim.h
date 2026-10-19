@@ -37,6 +37,7 @@ union ALPHA {
     operator INT() const { return _value; }
     // PARTIAL: added for System/Graphic/ScreenMask (the result is materialized: xori + bnez)
     BOOL operator==(_ALPHA nMode) const { return _value == nMode; }
+    BOOL operator!=(_ALPHA nMode) const { return _value != nMode; } // PARTIAL: added for System/Graphic/2d/2DSprObj
     ALPHA& operator=(const ALPHA& a) {
         _value = a._value;
         return *this;
@@ -203,7 +204,7 @@ public:
     }
     void setSemiTrans(ALPHA nInAlpha) {
         CDrawable::setSemiTrans(nInAlpha);
-        if (nInAlpha) {
+        if (nInAlpha != ALPHA_OFF) {
             m_nAttribute |= 1;
         } else {
             m_nAttribute &= ~1;

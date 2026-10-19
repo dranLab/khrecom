@@ -4,6 +4,7 @@
 #include "System/Graphic/2d/2DObj.h"
 #include "System/Vector.h"
 #include "System/Graphic/Gprim.h"
+#include "System/Graphic/2d/2DSeqObj.h"
 
 union FVECTOR2 {
     float v[2];
@@ -27,28 +28,6 @@ struct SPR_PARTS;
 struct SEQ_ANIMATION;
 struct LAY_SCREEN;
 
-struct SEQ_STATUS {
-    UINT curve_disable : 1;
-    UINT active : 1;
-    UINT bilinear_disable : 1;
-    UINT sway_lag : 1;
-    UINT sway_disable : 1;
-    UINT rotate_disable : 1;
-    UINT scale_disable : 1;
-    UINT color_stop : 1;
-    UINT rotate_stop : 1;
-    UINT scale_stop : 1;
-    UINT color_disable : 1;
-    UINT sway_stop : 1;
-    UINT base_stop : 1;
-    UINT ofs_stop : 1;
-    UINT ofs_disable : 1;
-    UINT last_cut : 1;
-    UINT base_disable : 1;
-    UINT base_ofs_disable : 1;
-    UINT pos_disable : 1;
-    UINT tag : 1;
-};
 
 struct SprPrim {
     SPR_GROUP* pSprGroupe;

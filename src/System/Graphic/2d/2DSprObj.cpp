@@ -9,6 +9,7 @@
 #include "System/Graphic/2d/2DSpr.h"
 #include "System/Graphic/2d/2DSeqObj.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
+#include "System/Graphic/2d/2DLay.h"
 #include "System/Math3D.h"
 #include "System/Graphic/WorldEnv.h"
 
@@ -75,6 +76,9 @@ static inline void _loadRotTransPersMatrix(const FMATRIX& m) {
                  : "r"(&m));
 }
 
+void ITOF0Vector(FVECTOR& fVec, const IVECTOR& iVec);
+void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, float s);
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 static inline void _itof0(FVECTOR& fVec, const IVECTOR& iVec) {

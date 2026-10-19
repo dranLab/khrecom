@@ -33,10 +33,54 @@ struct SPR_PARTS { // PARTIAL: added for System/Graphic/2d/2DSeqObj
     BYTE r3, g3, b3, a3;
 };
 
-struct SEQ_ANIMATION { // PARTIAL: added for System/Graphic/2d/2DSeqObj (members after sprite_id as padding)
-    UINT status;
+struct SEQ_STATUS {
+    UINT curve_disable : 1;
+    UINT active : 1;
+    UINT bilinear_disable : 1;
+    UINT sway_lag : 1;
+    UINT sway_disable : 1;
+    UINT rotate_disable : 1;
+    UINT scale_disable : 1;
+    UINT color_stop : 1;
+    UINT rotate_stop : 1;
+    UINT scale_stop : 1;
+    UINT color_disable : 1;
+    UINT sway_stop : 1;
+    UINT base_stop : 1;
+    UINT ofs_stop : 1;
+    UINT ofs_disable : 1;
+    UINT last_cut : 1;
+    UINT base_disable : 1;
+    UINT base_ofs_disable : 1;
+    UINT pos_disable : 1;
+    UINT tag : 1;
+};
+struct SEQ_ANIMATION {
+    SEQ_STATUS status;
     INT sprite_id;
-    UBYTE _m_0x08[0x88];
+    int time[2];
+    int x_base[2];
+    int y_base[2];
+    int x_ofs[2];
+    int y_ofs[2];
+    float x_rotate[2];
+    float y_rotate[2];
+    float z_rotate[2];
+    float scale[2];
+    float scale_x[2];
+    float scale_y[2];
+    float curve[2][2];
+    float x_sway[2];
+    float y_sway[2];
+    USHORT x_sway_count;
+    USHORT y_sway_count;
+    UINT alpha_blend;
+    struct {
+        BYTE r;
+        BYTE g;
+        BYTE b;
+        BYTE a;
+    } color[2];
 };
 }
 
