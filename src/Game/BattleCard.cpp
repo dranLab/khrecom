@@ -1,7 +1,31 @@
 #include "khtypes.h"
+#include "Game/BattleCard.h"
 #include "include_asm.h"
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", initLayoutData__10CardBattlev);
+using namespace CardBattle;
+
+extern INT SCREEN_HEIGHT;
+namespace D2 {
+class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the class only for its own unit */
+public:
+    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
+};
+}
+namespace CardBattle {
+extern LPCSTR g_szLadLayoutCard;
+}
+extern "C" char D_00473530[]; /* __FILE__ */
+extern "C" char D_00473558[];
+
+void CardBattle::initLayoutData() {
+    FVECTOR vPos;
+    for (INT i = 0; i < 26; i++) {
+        D2::C2DMan::getLayPosition(g_szLadLayoutCard, 0, i, vPos, FALSE);
+        CB_LAYOUT& lay = g_LayoutData[g_Seq_toLayout[i]];
+        lay.x = (INT)vPos.x;
+        lay.y = (INT)vPos.y;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", __Q210CardBattle11CBattleCardP5CTaskiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", _$_Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", _initialize__Q210CardBattle11CBattleCard);
@@ -9,31 +33,89 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", changeData__Q210Card
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", main__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", dispCard__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", testDisp__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", changeState__Q210CardBattle11CBattleCardi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setPlayCard__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setUseEnd__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setPlayEnd__Q210CardBattle11CBattleCard);
+void CBattleCard::changeState(INT inState) {
+    if (!(inState >= 0 && inState < 7)) AssertApp(D_00473530, 492, D_00473558, 0);
+    gotoState(m_State[inState]);
+}
+void CBattleCard::setPlayCard() {
+    changeState(0);
+    m_uiMode = 1;
+    m_iHand = -1;
+    m_uiFlag = (INT)(m_uiFlag | 0x40) & ~0x2;
+}
+void CBattleCard::setUseEnd() { setPlayEnd(); }
+void CBattleCard::setPlayEnd() {
+    switch (m_iState) {
+    case 0:
+    case 1:
+    case 4:
+    case 6:
+        changeState(3);
+        m_uiMode = 3;
+        m_tqTimer = 400;
+        m_uiFlag = (INT)m_uiFlag & ~0x2;
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateUse__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateUse__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setRefrect__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setBreak__Q210CardBattle11CBattleCardi);
+void CBattleCard::setBreak(INT inFlag) {
+    changeState(3);
+    m_uiMode = 6;
+    m_tqTimer = 1200;
+    m_uiFlag = (INT)m_uiFlag & ~0x2;
+    if (inFlag > 0) m_uiFlag |= 0x20;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", destroy__Q210CardBattle11CBattleCardi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setEnchant__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setStock__Q210CardBattle11CBattleCardUi);
+void CBattleCard::setEnchant() {
+    changeState(3);
+    m_uiMode = 7;
+    m_tqTimer = 1200;
+    m_iHand = -1;
+}
+void CBattleCard::setStock(UINT inPri) {
+    changeState(1);
+    m_iStock = inPri;
+    m_uiMode = 8;
+    m_iHand = -1;
+    m_uiFlag = (INT)m_uiFlag & ~0x2;
+    setEnchantEffect(0x44, 0);
+    setEnchantEffect(0x52, 0);
+    setEnchantEffect(0x53, 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setPlayStock__Q210CardBattle11CBattleCardi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateStock__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateStock__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateHand__Q210CardBattle11CBattleCard);
+void CBattleCard::preStateHand() { m_iState = 2; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateHand__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateDestroy__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateDestroy__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", moveCard__Q210CardBattle11CBattleCardii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", isNowSelect__Q210CardBattle11CBattleCard);
+INT CBattleCard::isNowSelect() {
+    if (m_uiMode != 11) return FALSE;
+    return m_iHand == 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setHand__Q210CardBattle11CBattleCardRC4CARDiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setHandLocate__Q210CardBattle11CBattleCardii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", hideHand__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", outHand__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", updateReload__Q210CardBattle11CBattleCardi);
+void CBattleCard::hideHand() {
+    m_uiMode = 13;
+    m_tqTimer = 400;
+    m_StartPos = m_Pos;
+    m_fStartScale = m_vRot.w;
+    CB_LAYOUT* pLay = m_uiUser == 1 ? &g_LayoutData[13] : &g_LayoutData[21];
+    m_EndPos.set(pLay->x, pLay->y);
+    m_fEndScale = pLay->scale * 0.01f;
+}
+void CBattleCard::outHand() {
+    m_uiMode = 14;
+    m_iHand = -1;
+    m_uiFlag = (INT)m_uiFlag & ~0x1;
+    m_uiFlag = (INT)m_uiFlag & ~0x2008;
+}
+void CBattleCard::updateReload(INT inNum) {
+    if (m_cardData.m_nKind == 0xa0) m_pCard->changeTime(inNum);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", resetHand__Q210CardBattle11CBattleCardii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setSelect__Q210CardBattle11CBattleCardi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setRoomEffect__Q210CardBattle11CBattleCardPC4CARD);
