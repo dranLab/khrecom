@@ -7,7 +7,10 @@
 #include "System/HeapMan.h"
 #include "System/SJoint.h"
 
+#ifndef KH_PLACEMENT_NEW_DEFINED // PARTIAL: guard added for System/RsrcData
+#define KH_PLACEMENT_NEW_DEFINED
 inline void* operator new(size_t, void* p) throw() { return p; }
+#endif
 
 class CLinkedPtr : public CSJointT<CLinkedPtr> {
 protected:
@@ -79,9 +82,10 @@ private:
 public:
     CNewPtrT(T* pInBuf, BOOL bInArray) : CLinkedPtr(pInBuf) { m_bArray = bInArray; }
     virtual ~CNewPtrT() {
-        if (m_pPtr) {
-            if (m_bArray) delete[] (T*)m_pPtr;
-            else delete (T*)m_pPtr;
+        T* p = (T*)m_pPtr;
+        if (p) {
+            if (m_bArray) delete[] p;
+            else delete p;
         }
     }
 };
