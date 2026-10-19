@@ -196,6 +196,7 @@ protected:
     INT onAvatarLookStop(INT nCmd, void* pParam, INT nID);
     INT onAvatarLookEnd(INT nCmd, void* pParam, INT nID);
     INT onAvatarChangeTexture(INT nCmd, void* pParam, INT nID);
+    void TexAnimTalk(INT nMotion);
     void changeAvatarMainState(INT nState);
     void beginStateMain();
     void stateMain();

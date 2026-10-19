@@ -29,6 +29,19 @@ class CVSM {
 public:
     Actor m_ActorTbl[64]; /* 0x70 */
 };
+struct AvatarMotionParam { // 0xc
+    FLOAT _fPlaySpeed;        /* 0x0 */
+    INT _iChangeHokanRate;    /* 0x4 */
+    SHORT _nMotionID;         /* 0x8 */
+    SHORT _nFlag;             /* 0xa */
+};
+struct AvatarMotionParamEx2 { // 0x14
+    UINT _nRsrcID;      /* 0x00 */
+    UINT _nInfo;        /* 0x04 */
+    UINT _nMotionID;    /* 0x08 */
+    FLOAT _fPlaySpeed;  /* 0x0c */
+    UINT _nHokanFrame;  /* 0x10 */
+};
 struct AvatarSetLook { // 0x30
     FVECTOR LookMin;   /* 0x00 */
     FVECTOR LookMax;   /* 0x10 */
@@ -44,6 +57,7 @@ extern "C" float atan2f(float, float);
 class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs the full RsrcData.h classes */
 public:
     static BYTE* getRsrcPTD(const CHAR* pszName);
+    static void removeRsrc(INT nID);
 };
 extern "C" char D_0048AD68[]; /* __FILE__ */
 extern "C" char D_0048ADC0[];
@@ -111,7 +125,12 @@ void CAvatar::getPrevPosition(FVECTOR& vPos) const { vPos = getOldPos(); }
 void CAvatar::getMoveInfo(ETMoveInfo& info) const {}
 void CAvatar::getRotation(FVECTOR& vRot) const { vRot = getRot(); }
 void CAvatar::getScale(FVECTOR& vScale) const { vScale = CEntity::getScale(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getFade__CQ24ATEL7CAvatariRf);
+void CAvatar::getFade(INT nModel, FLOAT& fFade) const {
+    CModel* pModel;
+    if (nModel == -1) pModel = m_pModels;
+    else pModel = (CModel*)(nModel * sizeof(CModel) + (UINT)m_pModels);
+    fFade = pModel->getAlphaScale();
+}
 FLOAT CAvatar::getDirection() const { return 0.0f; }
 INT CAvatar::getTypeID() const { return 0x4000; }
 BOOL CAvatar::createMoveStruct() {
@@ -292,11 +311,68 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", ScaleAvatarMain__Q2
 void CAvatar::ScaleAvatarEnd() { clearAvatarScaleSpeed(); }
 void CAvatar::cancelScaleAvatar() { ScaleAvatarEnd(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", TexAnimTalk__Q24ATEL7CAvatari);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onPlayMotion__Q24ATEL7CAvatariPvi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onPlayMotionDx__Q24ATEL7CAvatariPvi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onPlayMotionEx__Q24ATEL7CAvatariPvi);
+INT CAvatar::onPlayMotion(INT nCmd, void* pParam, INT nID) {
+    AvatarMotionParam* p = (AvatarMotionParam*)pParam;
+    if (!p) {
+        changeMotion(nID, 0, FALSE, -1, 0, 0);
+    } else {
+        if (m_nMotInValidFlag) {
+            changeMotion(p->_nMotionID, 0, p->_nFlag & 1, 0, 0, 0);
+            m_pAnim->setSpeed(p->_fPlaySpeed);
+            m_pAnim->clearFlag1(3);
+            setAvatarState(0x4100, TRUE);
+            m_pAnim->setZeroHokan(p->_nFlag & 4);
+        } else {
+            changeMotion(p->_nMotionID, 0, p->_nFlag & 1, -1, 0, 0);
+            m_pAnim->setSpeed(p->_fPlaySpeed);
+            setAvatarState(0x4100, TRUE);
+            m_pAnim->setZeroHokan(p->_nFlag & 4);
+        }
+    }
+    TexAnimTalk(p->_nMotionID);
+    return -1;
+}
+INT CAvatar::onPlayMotionDx(INT nCmd, void* pParam, INT nID) {
+    AvatarMotionParam* p = (AvatarMotionParam*)pParam;
+    if (!p) {
+        changeMotion(nID, 0, FALSE, -1, 0, 0);
+    } else if (m_pAnim) {
+        changeMotion(p->_nMotionID, 0, p->_nFlag & 1, p->_iChangeHokanRate * 50, 0, 0);
+        m_pAnim->setSpeed(p->_fPlaySpeed);
+        m_pAnim->clearFlag1(3);
+        setAvatarState(0x4100, TRUE);
+        m_pAnim->setZeroHokan(p->_nFlag & 4);
+    }
+    TexAnimTalk(p->_nMotionID);
+    return -1;
+}
+INT CAvatar::onPlayMotionEx(INT nCmd, void* pParam, INT nID) {
+    AvatarMotionParamEx2* p = (AvatarMotionParamEx2*)pParam;
+    if (!p) {
+        changeMotion(nID, 0, FALSE, -1, 0, 0);
+    } else {
+        changeMotionEx(p->_nRsrcID, p->_nMotionID, 0, p->_nInfo & 1, -1, 0, 0);
+        m_pAnim->setSpeed(p->_fPlaySpeed);
+        setAvatarState(0x4100, TRUE);
+        m_pAnim->setZeroHokan(p->_nInfo & 4);
+    }
+    return -1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onPlayMotionEfx__Q24ATEL7CAvatariPvi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onPlayMotionExDx__Q24ATEL7CAvatariPvi);
+INT CAvatar::onPlayMotionExDx(INT nCmd, void* pParam, INT nID) {
+    AvatarMotionParamEx2* p = (AvatarMotionParamEx2*)pParam;
+    if (!p) {
+        changeMotion(nID, 0, FALSE, -1, 0, 0);
+    } else {
+        changeMotionEx(p->_nRsrcID, p->_nMotionID, 0, p->_nInfo & 1, p->_nHokanFrame * 50, 0, 0);
+        m_pAnim->setSpeed(p->_fPlaySpeed);
+        m_pAnim->clearFlag1(3);
+        setAvatarState(0x4100, TRUE);
+        m_pAnim->setZeroHokan(p->_nInfo & 4);
+    }
+    TexAnimTalk(p->_nMotionID);
+    return -1;
+}
 INT CAvatar::onSetMotionFrame(INT nCmd, void* pParam, INT nID) {
     if (m_pAnim) {
         m_pAnim->setMotion(*(INT*)pParam * 50, 0, FALSE);
@@ -310,7 +386,11 @@ INT CAvatar::onSetMakeUpMotionInValid(INT nCmd, void* pParam, INT nID) {
     else m_nMotInValidFlag = 0;
     return -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onRemoveAvatar__Q24ATEL7CAvatariPvi);
+INT CAvatar::onRemoveAvatar(INT nCmd, void* pParam, INT nID) {
+    CRsrcDB::removeRsrc(getID());
+    out();
+    return -1;
+}
 INT CAvatar::onAvatarStop(INT nCmd, void* pParam, INT nID) {
     changeAvatarMainState(1);
     return -1;
