@@ -15,6 +15,12 @@ private:
     float m_fLen[2];
 
 public:
+    // PARTIAL: constructors added for System/Graphic/Anim
+    CTriangleIK() {
+        m_nIdxAll = -1;
+        m_fLen[1] = 0.0f;
+        m_fLen[0] = 0.0f;
+    }
     virtual ~CTriangleIK() {}
     void calc(CCoords& Crds, BOOL bDirF, const FVECTOR& vPos);
     BOOL setBoneIdx(INT nIdx0, INT nIdx1, INT nIdx2);
@@ -49,6 +55,13 @@ private:
     float m_fPosY[2];
 
 public:
+    CLegIK() {
+        m_iStatus = 0;
+        m_pszEffName = __null;
+        m_nToesIdx[1] = -1;
+        m_nToesIdx[0] = -1;
+        clearOldFootPos();
+    }
     virtual ~CLegIK() {}
     BOOL init(CCoords& Crds, const MODELDATA& Model, FLOAT fFootLen, FLOAT fToesLen);
     void update(CCoords& Crds, const FVECTOR* pvPosL, const FVECTOR* pvPosR);

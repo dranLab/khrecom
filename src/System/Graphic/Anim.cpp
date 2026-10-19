@@ -67,6 +67,24 @@ public:
     }
 };
 
+extern FVECTOR ONE_VECTOR;
+extern "C" float atan2f(float y, float x);
+static inline FLOAT _sqrtf(FLOAT x) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
+    return ret;
+}
+void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void Normalize(FVECTOR& v0, const FVECTOR& v1);
+void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+extern "C" {
+void sceVu0UnitMatrix(FMATRIX& m);
+void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
+void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
+void sceVu0RotMatrixZ(FMATRIX& m0, FMATRIX& m1, float rz);
+}
+
 class CRsrcDB {
 public:
     static CRsrcANN* getRsrcANN(const CHAR* name, NAME_CASE nc);
@@ -224,16 +242,80 @@ void CAnim::_init(ANIMID id, TIMEQ tq, BOOL inExFg) {
 void CAnim::init(ANIMID id, TIMEQ tq) {
     _init(id, tq, FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _change__5CAnimUiiii);
+void CAnim::_change(ANIMID id, TIMEQ tq, TIMEQ gr, BOOL inExFg) {
+    if (!m_pCrds) {
+        return;
+    }
+    setExFlag(inExFg);
+    if (gr < 0) {
+        if (!inExFg) {
+            m_pMotData = m_pANN->getMotData(id);
+        } else {
+            if (!m_pANNEx) {
+                return;
+            }
+            m_pMotData = m_pANNEx->getMotData(id);
+        }
+        if (!m_pMotData) {
+            return;
+        }
+        gr = m_pMotData->GetHokan() * 50;
+    }
+    m_HokanTq = gr;
+    m_HokanMaxTq = gr;
+    memcpy(m_pQuatHokan, m_pQuatNow, m_nSkl * sizeof(QUATERNION_DT));
+    setup(id, tq);
+}
 void CAnim::change(ANIMID id, TIMEQ tq, TIMEQ gr) {
     _change(id, tq, gr, FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", save_hokan_by_mtx__5CAnim);
+void CAnim::save_hokan_by_mtx() {
+    QUATERNION_DT* q0;
+    INT i;
+    FVECTOR vScale;
+
+    if (!isLinked()) {
+        return;
+    }
+    q0 = m_pQuatNow;
+    for (i = 0; i < m_nSkl; i++, q0++) {
+        if (i == 0) {
+            continue;
+        }
+        CCoord& crd = m_pCrds->Crd(i);
+        crd.getScale(vScale);
+        Quaternion::MatrixToQuaternion(q0->vQuatRotate, crd.getLocalMatrix());
+        FVECTOR vTrans = crd.getLocalMatrix().v[3];
+        q0->vTrans = vTrans;
+        q0->vScale.set(vScale.x, vScale.y, vScale.z);
+    }
+}
 void CAnim::change_by_mtx(ANIMID id, TIMEQ tq, TIMEQ gr) {
     save_hokan_by_mtx();
     change(id, tq, gr);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _start__5CAnimUiii);
+void CAnim::_start(ANIMID id, TIMEQ tq, BOOL inExFg) {
+    if (!m_pCrds) {
+        return;
+    }
+    if (!inExFg) {
+        m_pMotData = m_pANN->getMotData(id);
+    } else {
+        if (!m_pANNEx) {
+            return;
+        }
+        m_pMotData = m_pANNEx->getMotData(id);
+    }
+    if (!m_pMotData) {
+        return;
+    }
+    setExFlag(inExFg);
+    if (m_pMotData->GetHokan() > 0) {
+        _change(id, tq, m_pMotData->GetHokan() * 50, inExFg);
+    } else {
+        _change(id, tq, 0, inExFg);
+    }
+}
 void CAnim::start(ANIMID id, TIMEQ tq) {
     _start(id, tq, FALSE);
 }
@@ -323,21 +405,207 @@ BOOL CAnim::changeEx(INT inRsrcId, ANIMID id, TIMEQ tq, TIMEQ gr) {
     _change(id, tq, gr, TRUE);
     return TRUE;
 }
-__attribute__((section(".sdata"))) void _setup_placeholder(INT n) {
-    if (!n) AssertApp(__FILE__, 0, "m_pANNEx", 0);
-    if (!n) AssertApp(__FILE__, 0, "m_pANN", 0);
-    TRACE("\x83\x82\x81[\x83V\x83\x87\x83\x93\x83" "f\x81[\x83^\x82\xcc\x83{\x81[\x83\x93\x90\x94\x82\xaa\x83\x82\x83" "f\x83\x8b\x82\xcc\x83{\x81[\x83\x93\x82\xc6\x88\xea\x92v\x82\xb5\x82\xdc\x82\xb9\x82\xf1\n");
-    TRACE("\x8d\xc4\x90\xb6\x83" "A\x83j\x83\x81\x94\xd4\x8d\x86%d \x83\x82\x81[\x83V\x83\x87\x83\x93\x83{\x81[\x83\x93\x90\x94%d \x83\x82\x83" "f\x83\x8b\x83{\x81[\x83\x93\x90\x94%d\n");
+void CAnim::setup(ANIMID id, TIMEQ tq) {
+    INT i;
+    CMotData* md;
+    INT nFixAll;
+
+    if (!isLinked()) {
+        return;
+    }
+    m_noId = id;
+    m_Tq = (TIMEQ)(tq * m_Speed);
+    if (isNowExAnim()) {
+#line 702
+        ASSERT(m_pANNEx);
+        m_pMotData = m_pANNEx->getMotData(id);
+    } else {
+#line 706
+        ASSERT(m_pANN);
+        m_pMotData = m_pANN->getMotData(id);
+    }
+    if (!isNowEffective()) {
+        return;
+    }
+    if (m_pMotData->GetNbSkl() != m_nSkl) {
+        TRACE("\x83\x82\x81[\x83V\x83\x87\x83\x93\x83" "f\x81[\x83^\x82\xcc\x83{\x81[\x83\x93\x90\x94\x82\xaa\x83\x82\x83" "f\x83\x8b\x82\xcc\x83{\x81[\x83\x93\x82\xc6\x88\xea\x92v\x82\xb5\x82\xdc\x82\xb9\x82\xf1\n");
+        TRACE("\x8d\xc4\x90\xb6\x83" "A\x83j\x83\x81\x94\xd4\x8d\x86%d \x83\x82\x81[\x83V\x83\x87\x83\x93\x83{\x81[\x83\x93\x90\x94%d \x83\x82\x83" "f\x83\x8b\x83{\x81[\x83\x93\x90\x94%d\n", id, m_pMotData->GetNbSkl(), m_nSkl);
+        return;
+    }
+    m_nFps = m_pMotData->GetFps();
+    m_nMaxFrame = m_pMotData->GetNbFrame();
+    if (m_pMotData->IsLoop()) {
+        m_nMaxTq = m_nMaxFrame * 3000 / m_nFps;
+    } else {
+        m_nMaxTq = (m_nMaxFrame - 1) * 3000 / m_nFps;
+    }
+    m_FlagsB[1].l = 0;
+    m_Flags[0] = 0;
+    setNowFirst();
+    m_ZeroHokan = FALSE;
+    _setRootMoveFg(FALSE);
+    for (i = 0; i < m_nSkl; i++) {
+        m_pFixQuat[i].vQuatRotate._q = 0;
+    }
+    m_pMotData->PrepareGetDataHS(0.0f);
+    nFixAll = 0;
+    md = m_pMotData;
+    for (i = 0; i < m_nSkl; i++) {
+        if (md->IsFixSkl(i)) {
+            nFixAll++;
+        }
+    }
+    if (nFixAll > 0) {
+        for (i = 0; i < m_nSkl; i++) {
+            if (md->IsFixSkl(i)) {
+                QUATERNION_DT& quat0 = m_pFixQuat[i];
+                Quaternion::MakeQuaternion(quat0.vQuatRotate, md->GetCmpData(3, i, 0.0f), md->GetCmpData(4, i, 0.0f),
+                                           md->GetCmpData(5, i, 0.0f));
+                quat0.vTrans.set(md->GetCmpData(0, i, 0.0f), md->GetCmpData(1, i, 0.0f), md->GetCmpData(2, i, 0.0f));
+                if (md->DoScaleAnime()) {
+                    quat0.vScale.set(md->GetCmpData(6, i, 0.0f), md->GetCmpData(7, i, 0.0f),
+                                     md->GetCmpData(8, i, 0.0f));
+                } else {
+                    quat0.vScale = ONE_VECTOR;
+                }
+            }
+        }
+    }
+    setMotion(tq, 0, FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", setup__5CAnimUii);
 void CAnim::setRootMove(BOOL inRootMove, BOOL bContinue) {
     if (isLinked() && isNowEffective() && m_pMotData->GetNbSkl() == getSklNum()) {
         _setupRootMove(inRootMove, bContinue);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _setupRootMove__5CAnimii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", play__5CAnimii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", setMotion__5CAnimiii);
+void CAnim::_setupRootMove(BOOL inRootMove, BOOL bContinue) {
+    QUATERNION_DT* q0;
+    QUATERNION_DT* q1;
+
+    _setRootMoveFg(inRootMove);
+    if (inRootMove) {
+        q0 = m_pQuatNow;
+        q0->vQuatRotate.init();
+        q0->vTrans.init();
+        q0->vScale = ONE_VECTOR;
+        q1 = m_pQuatHokan;
+        *q1 = *q0;
+        m_BufRootMtx = m_pCrds->Crd(0).getLocalMatrix();
+        if (bContinue) {
+            setNowFirstRootMoveContinue();
+        } else {
+            setNowFirstRootMove();
+        }
+        _setUpdate(1, 0, FALSE);
+    } else {
+        clearNowFirstRootMove();
+    }
+}
+void CAnim::play(TIMEQ inAddTq, BOOL bClipped) {
+    TIMEQ HoAddTq;
+
+    if (!isNowEffective()) {
+        return;
+    }
+    if (m_Speed == 0.0f) {
+        return;
+    }
+    HoAddTq = inAddTq;
+    if (isNowFirst()) {
+        clearNowFirst();
+        inAddTq = 0;
+        if (m_HokanTq <= 0) {
+            return;
+        }
+    }
+    inAddTq = (TIMEQ)(inAddTq * m_Speed);
+    if (m_HokanTq > 0) {
+        HoAddTq = (TIMEQ)(HoAddTq * m_Speed);
+        if (HoAddTq >= 0.0f) {
+            m_HokanTq -= HoAddTq;
+        } else {
+            m_HokanTq += HoAddTq;
+        }
+        if (m_HokanTq < 0) {
+            m_HokanTq = 0;
+        }
+    }
+    if (m_HokanTq <= 0) {
+        m_ZeroHokan = FALSE;
+    }
+    setMotion(m_Tq, inAddTq, bClipped);
+}
+void CAnim::setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped) {
+    TIMEQ tq;
+    INT nFrame;
+
+    if (!isLinked()) {
+        return;
+    }
+    if (!isNowEffective()) {
+        return;
+    }
+    if (m_pMotData->GetNbSkl() != m_nSkl) {
+        return;
+    }
+    m_Flags[0] = 0;
+    tq = inTq + inPlus;
+    if (m_ZeroHokan) {
+        tq = 0;
+    }
+    if (m_pMotData->IsLoop()) {
+        if (m_Speed >= 0.0f) {
+            nFrame = (m_nMaxFrame - 1) * 3000 / m_nFps;
+            if (tq >= nFrame) {
+                if (!(m_Flags[1] & 0x40)) {
+                    m_Flags[0] = 1;
+                    m_Flags[1] |= 0x41;
+                    tq = nFrame;
+                }
+            } else {
+                m_Flags[1] &= ~0x40;
+            }
+            if (tq >= m_nMaxTq) {
+                tq = (SHORT)(m_pMotData->GetRetFrame() - 1) * 3000 / m_nFps + tq % m_nMaxTq;
+                if (tq >= m_nMaxTq) {
+                    tq = m_nMaxTq - 3000 / m_nFps;
+                }
+                m_Flags[0] |= 0x80;
+                m_Flags[1] |= 0x80;
+            } else if (tq < 0) {
+                tq = m_nMaxTq - (-tq % m_nMaxTq);
+            }
+        } else {
+            if (tq < 0) {
+                tq = m_nMaxTq - (-tq % m_nMaxTq);
+                m_Flags[0] = 0x81;
+                m_Flags[1] |= 0x81;
+            } else if (tq >= m_nMaxTq) {
+                tq = tq % m_nMaxTq;
+            }
+        }
+    } else {
+        if (m_Speed >= 0.0f) {
+            if (tq < 0) {
+                tq = 0;
+            } else if (tq >= m_nMaxTq) {
+                m_Flags[0] = 2;
+                m_Flags[1] |= 2;
+                tq = m_nMaxTq;
+            }
+        } else {
+            if (tq < 0) {
+                m_Flags[0] = 2;
+                m_Flags[1] |= 2;
+                tq = 0;
+            } else if (tq >= m_nMaxTq) {
+                tq = m_nMaxTq;
+            }
+        }
+    }
+    m_Tq = tq;
+    _setUpdate(m_nSkl, inPlus, bClipped);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _setUpdate__5CAnimiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _exeRootMove__5CAnim);
 void CAnim::getRootMove(FVECTOR& outTrs, FLOAT& outRotY) {
@@ -455,20 +723,135 @@ void CAnim::updateLookPosition(const FVECTOR& vLook, FLOAT fRate, UINT iFlags) {
     }
     m_iLookFlags = iFlags;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _hokanRot__Ffff);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _updateLookPosition__5CAnimf);
-__attribute__((section(".sdata"))) void _createLegIK_placeholder(INT n) {
-    TRACE(__FILE__ "(1831)");
-    if (!n) AssertApp(__FILE__, 0, "m_pLegIK", 0);
-    CLegIK* pLeg = new CLegIK;
+static inline float _limitPI(float fSa) {
+    if (fSa > 3.1415927f) {
+        fSa -= 6.2831855f;
+    } else if (fSa < -3.1415927f) {
+        fSa += 6.2831855f;
+    }
+    return fSa;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", createLegIK__5CAnimff);
-__attribute__((section(".sdata"))) void _createArmIK_placeholder(INT n) {
-    TRACE(__FILE__ "(1847)");
-    if (!n) AssertApp(__FILE__, 0, "m_pArmIK", 0);
-    CArmIK* pArm = new CArmIK;
+
+static float _hokanRot(float fData0, float fData1, float fRate) {
+    float fT = 1.0f / fRate;
+    float fSa = fData1 - fData0;
+    return fData0 + _limitPI(fSa) * fT;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", createArmIK__5CAnim);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", updateIK__5CAnimiif);
+void CAnim::_updateLookPosition(FLOAT fR) {
+    FVECTOR fvAng;
+    FVECTOR fvDir;
+    FVECTOR vMax;
+    FVECTOR vMin;
+
+    if (m_nLookBoneNum < 0) {
+        return;
+    }
+    FLOAT& fRate = m_fRate;
+    CCoord& crd = m_pCrds->Crd(m_nLookBoneNum);
+    CCoord& crdRoot = m_pCrds->Crd(0);
+    if (!(m_iLookStatus & 1)) {
+        m_fTimer += fR * (1.0f / fRate);
+        if (m_fTimer >= 1.0f) {
+            m_fTimer = 0.0f;
+            m_nLookBoneNum = -1;
+            return;
+        }
+        fvAng.x = m_fLookRot[0] * (1.0f - m_fTimer);
+        fvAng.y = m_fLookRot[1] * (1.0f - m_fTimer);
+    } else {
+        FMATRIX* pmRoot = &crdRoot.getWorldMatrix();
+        if (!(m_iLookFlags & 1)) {
+            fvDir = crd.m_World.v[3];
+            SubVector(fvDir, m_vLookPos, fvDir);
+            Normalize(fvDir, fvDir);
+            fvAng.x = -atan2f(fvDir.y, _sqrtf(fvDir.z * fvDir.z + fvDir.x * fvDir.x));
+            fvAng.y = atan2f(fvDir.x, fvDir.z);
+            fvAng.z = 0.0f;
+            fvAng.w = 1.0f;
+            FLOAT fRy = -atan2f(pmRoot->m[0][2], pmRoot->m[0][0]);
+            fvAng.y = Math3D::LimitPI(fvAng.y - fRy);
+        } else {
+            fvAng.set(m_fLookPos[0], m_fLookPos[1], 0.0f);
+        }
+        vMax.set(m_vLookMaxMin.x, m_vLookMaxMin.y, 0.0f);
+        vMin.set(m_vLookMaxMin.z, m_vLookMaxMin.w, 0.0f);
+        Math3D::VectorMaximizeXYZ(fvAng, fvAng, vMin);
+        Math3D::VectorMinimizeXYZ(fvAng, fvAng, vMax);
+        fvAng.x = Math3D::LimitPI(_hokanRot(m_fLookRot[0], fvAng.x, fRate));
+        fvAng.y = Math3D::LimitPI(_hokanRot(m_fLookRot[1], fvAng.y, fRate));
+        m_fLookRot[0] = fvAng.x;
+        m_fLookRot[1] = fvAng.y;
+    }
+    FMATRIX mMat;
+    _unitMatrixVu0(mMat);
+    sceVu0RotMatrixZ(mMat, mMat, fvAng.x);
+    sceVu0RotMatrixX(mMat, mMat, fvAng.y);
+    MulMatrix(crd.getLocalMatrix(), crd.getLocalMatrix(), mMat);
+    crdRoot.m_Flag = 1;
+}
+BOOL CAnim::createLegIK(FLOAT fFootLen, FLOAT fToesLen) {
+    if (m_pModelData && !m_pLegIK) {
+        if (CLegIK::isIK(*m_pModelData)) {
+#line 1831
+            m_pLegIK = new (__FILE__ "(1831)") CLegIK;
+            ASSERT(m_pLegIK);
+            m_pLegIK->init(*m_pCrds, *m_pModelData, fFootLen, fToesLen);
+            m_Flags[1] |= 0x400;
+        }
+    }
+    return FALSE;
+}
+BOOL CAnim::createArmIK() {
+    if (m_pModelData && !m_pArmIK) {
+        if (CArmIK::isIK(*m_pModelData)) {
+#line 1847
+            m_pArmIK = new (__FILE__ "(1847)") CArmIK;
+            ASSERT(m_pArmIK);
+            m_pArmIK->init(*m_pCrds, *m_pModelData);
+            m_Flags[1] |= 0x400;
+        }
+    }
+    return FALSE;
+}
+void CAnim::updateIK(BOOL bBeforeCoordFix, BOOL bAfterCoordFix, FLOAT fr) {
+    FVECTOR* pvPosL;
+    FVECTOR* pvPosR;
+    FVECTOR vPos[2];
+
+    if (bBeforeCoordFix && (m_pLegIK || m_pArmIK) && (m_Flags[1] & 0x3800)) {
+        INT nNum = m_pCrds->getCoordNum();
+        CCoord* pCrd = &m_pCrds->Crd(0);
+        TIMEQ tq = CMainApp::getTickCount();
+        for (INT i = 0; i < nNum; i++) {
+            pCrd[i].fix(tq);
+        }
+    }
+    pvPosL = __null;
+    if (m_pLegIK) {
+        pvPosR = __null;
+        if (m_Flags[1] & 0x2000) {
+            pvPosL = &vPos[0];
+            pvPosR = &vPos[1];
+            m_pLegIK->getFootPos(pvPosL, pvPosR, *m_pCrds, fr);
+        } else {
+            m_pLegIK->clearOldFootPos();
+        }
+        if (m_Flags[1] & 0x3800) {
+            m_pLegIK->update(*m_pCrds, pvPosL, pvPosR);
+        }
+        m_pLegIK->updateFootEffect(*m_pCrds);
+    }
+    if (m_pArmIK && (m_Flags[1] & 0x1800)) {
+        m_pArmIK->update(*m_pCrds, __null, __null);
+    }
+    if (bAfterCoordFix && (m_pLegIK || m_pArmIK) && (m_Flags[1] & 0x3800)) {
+        INT nNum = m_pCrds->getCoordNum();
+        CCoord* pCrd = &m_pCrds->Crd(0);
+        TIMEQ tq = CMainApp::getTickCount();
+        for (INT i = 0; i < nNum; i++) {
+            pCrd[i].fix(tq);
+        }
+    }
+}
 
 // SOURCE DATA: .data .rodata
