@@ -369,6 +369,8 @@ public:
     static DOOR_ID getNextDoorID();
     static BYTE getCardIDFromSceneNum(SHORT nScene);
     static void setNextScene(SHORT nScene, SHORT nBtlScene);
+    static INT removeFromSceneCache(const union AREA_SCENE& as);
+    static SHORT getSceneNumFromCardID(BYTE nCardID);
     static BOOL isTgsFloor();
     static BOOL isJFestaFloor();
     static void clearSceneCache();
