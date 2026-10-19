@@ -33,6 +33,7 @@ public:
     static void setFpsFull();
     static void setFpsHalf();
     static BOOL isFpsHalf();
+    static void setSysPause(BOOL bPause); // PARTIAL: added for Game/Atel/ChatMan
     static BOOL isPAL();
     static void enableSoftReset(BOOL bEnable); // PARTIAL: added for System/RootTask
     static BOOL isSkipLogo();
