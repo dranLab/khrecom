@@ -19,6 +19,11 @@ struct MODELDATA;
 // PARTIAL: CModel derives from CDrawable (System/Graphic/Gprim.h, which every includer includes first) and
 // its virtual functions added for Form/Menu/MenuModel
 class CModel : public CDrawable {
+public:
+    // PARTIAL: added for System/Graphic/ModelMan
+    static void resetSendCtrl(INT nMode);
+    static void resetWorldScreenMatrix();
+    static void resetMicroProgram();
 private:
     UBYTE _m_0x18[0x14]; /* 0x018 .. m_ColorScale.z */
     FLOAT m_fAlphaScale; /* 0x02c m_ColorScale.w */
