@@ -4,6 +4,22 @@
 typedef unsigned int u_int;
 typedef unsigned long u_long;
 typedef unsigned short u_short;
+typedef unsigned char u_char;
+
+struct VTransInfo { /* System/Graphic/modeldata.h */
+    UINT _nDistPos;
+    USHORT _nFormat;
+    USHORT _nDistBufW;
+    ULONGLONG* _pImage;
+    UINT _qwImage;
+    USHORT _nDistX;
+    USHORT _nDistY;
+    USHORT _nDistW;
+    USHORT _nDistH;
+    USHORT _nTw;
+    USHORT _nTh;
+    UINT _nTransSize;
+};
 
 union QWdata { /* System/Graphic/Gprim.h */
     u_long ul64[2];
@@ -145,6 +161,14 @@ public:
     static INT getPkUseSize();
     static INT getPkTotalSize();
     static void pkReset();
+    static void pkNext(u_long128* pNext, UINT flag);
+    static void pkRet(UINT flag);
+    static void pkEnd(UINT flag);
+    static void pkRefe(u_long128* pRef, UINT size, UINT opt1, UINT opt2, UINT flag);
+    static void pkRefs(u_long128* pRef, UINT size, UINT opt1, UINT opt2, UINT flag);
+    static void pkRefLoadImage(const VTransInfo& info);
+    static void pkRefLoadImage(u_short bp, const VTransInfo& info);
+    static void pkRefLoadImage(u_short bp, u_char psm, u_short bw, u_long128* image, UINT size, UINT x, UINT y, UINT w, UINT h);
     static INT getDrawMode();
     static BOOL isOverFlow(UINT nSize);
     static u_int* pkOpenUpkCodeV4_32(u_short vuaddr, UINT cl, UINT wl);
@@ -228,6 +252,12 @@ void sceVif1PkOpenUpkCodeV4_32(pacVif1Packet* pPacket, u_short vuaddr, u_int cl,
 void sceVif1PkOpenDirectCode(pacVif1Packet* pPacket, int stall);
 void sceVif1PkCloseDirectCode(pacVif1Packet* pPacket);
 void sceVif1PkCloseDirectHLCode(pacVif1Packet* pPacket);
+void sceVif1PkNext(pacVif1Packet* pPacket, u_long128* pNext, u_int flag);
+void sceVif1PkRet(pacVif1Packet* pPacket, u_int flag);
+void sceVif1PkEnd(pacVif1Packet* pPacket, u_int flag);
+void sceVif1PkRefe(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt1, u_int opt2, u_int flag);
+void sceVif1PkRefs(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt1, u_int opt2, u_int flag);
+void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_short bw, u_long128* image, u_int size, u_int x, u_int y, u_int w, u_int h);
 void _makePkt_SaveScreen(); /* static in the original (still INCLUDE_ASM) */
 extern "C" int FlushCache(int op);
 extern "C" void sceDmaSend(sceDmaChan* d, void* tag);
@@ -307,20 +337,37 @@ void CPackMan::pkCnt(UINT flag) {
     _checkDmaTag();
     sceVif1PkCnt(s_pPktVif1, flag);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRet__8CPackManUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkEnd__8CPackManUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkNext__8CPackManPUxUi);
+void CPackMan::pkRet(UINT flag) {
+    _checkDmaTag();
+    sceVif1PkRet(s_pPktVif1, flag);
+}
+void CPackMan::pkEnd(UINT flag) {
+    _checkDmaTag();
+    sceVif1PkEnd(s_pPktVif1, flag);
+}
+void CPackMan::pkNext(u_long128* pNext, UINT flag) {
+    _checkDmaTag();
+    sceVif1PkNext(s_pPktVif1, pNext, flag);
+}
 void CPackMan::pkCall(u_long128* pCall, UINT flag) {
     _checkDmaTag();
     sceVif1PkCall(s_pPktVif1, pCall, flag);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefe__8CPackManPUxUiUiUiUi);
+void CPackMan::pkRefe(u_long128* pRef, UINT size, UINT opt1, UINT opt2, UINT flag) {
+    _checkDmaTag();
+    _checkSize(size);
+    sceVif1PkRefe(s_pPktVif1, pRef, size, opt1, opt2, flag);
+}
 void CPackMan::pkRef(u_long128* pRef, UINT size, UINT opt1, UINT opt2, UINT flag) {
     _checkDmaTag();
     _checkSize(size);
     sceVif1PkRef(s_pPktVif1, pRef, size, opt1, opt2, flag);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefs__8CPackManPUxUiUiUiUi);
+void CPackMan::pkRefs(u_long128* pRef, UINT size, UINT opt1, UINT opt2, UINT flag) {
+    _checkDmaTag();
+    _checkSize(size);
+    sceVif1PkRefs(s_pPktVif1, pRef, size, opt1, opt2, flag);
+}
 void* CPackMan::pkGetCurrentPointer() { return s_pPktVif1->pCurrent; }
 void CPackMan::pkSetCurrentPointer(void* p) { s_pPktVif1->pCurrent = (u_int*)p; }
 u_int* CPackMan::pkOpenUpkCode(u_short vuaddr, UINT upkcmd, UINT cl, UINT wl) {
@@ -393,7 +440,9 @@ void CPackMan::pkAddGsDataN(u_long* pData, UINT count) { sceVif1PkAddGsDataN(s_p
 void CPackMan::pkAddGsPacked(u_long128 data) { sceVif1PkAddGsPacked(s_pPktVif1, data); }
 void CPackMan::pkAddGsPackedN(u_long128* pData, UINT count) { sceVif1PkAddGsPackedN(s_pPktVif1, pData, count); }
 void CPackMan::pkAddGsAD(UINT addr, u_long data) { sceVif1PkAddGsAD(s_pPktVif1, addr, data); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefLoadImage__8CPackManUsUcUsPUxUiUiUiUiUi);
+void CPackMan::pkRefLoadImage(u_short bp, u_char psm, u_short bw, u_long128* image, UINT size, UINT x, UINT y, UINT w, UINT h) {
+    sceVif1PkRefLoadImage(s_pPktVif1, bp, psm, bw, image, size, x, y, w, h);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefLoadImage__8CPackManRC10VTransInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefLoadImage__8CPackManUsRC10VTransInfo);
 void CPackMan::pkRefMpg(u_short vuaddr, u_long128* pMicro, UINT size, UINT opt1) { sceVif1PkRefMpg(s_pPktVif1, vuaddr, pMicro, size, opt1); }
