@@ -12,6 +12,7 @@
 
 class CTask;
 class CCoord;
+class CCoords; // PARTIAL: added for System/Graphic/DispList
 class CTexAnm;
 class CLightUnit; // PARTIAL: added for Game/ModelObj
 struct MODELDATA;
@@ -37,7 +38,8 @@ public:
 private:
     UBYTE _m_0x32[0xa];  /* 0x032 m_nPacketSize .. 0x03c */
     CLightUnit* m_pLightUnit; /* 0x03c PARTIAL: split out for Game/ModelObj */
-    UBYTE _m_0x40[0x18]; /* 0x040 .. 0x058 */
+    UBYTE _m_0x40[0x14]; /* 0x040 .. 0x054 */
+    CCoords* m_pCrds;    /* 0x054 PARTIAL: split out for System/Graphic/DispList */
     const MODELDATA* m_pData; /* 0x058 */
     UBYTE _m_0x5c[0x98]; /* 0x05c m_Mode .. 0x0f4 */
     FMATRIX* m_pWSMat;   /* 0x0f4 */
@@ -54,6 +56,9 @@ public:
         return link(p);
     }
     CCoord& getCrd(INT nIndex);                       // PARTIAL: added for Form/Menu/MenuModel
+    CCoords* getCoords() { return m_pCrds; }          // PARTIAL: added for System/Graphic/DispList
+    void getWorldBBox(FVECTOR& vMax, FVECTOR& vMin);  // PARTIAL: added for System/Graphic/DispList
+    u_long128* getMicroProg();                        // PARTIAL: added for System/Graphic/DispList
     INT getBoneIndex(const CHAR* pName) const;        // PARTIAL: added for Form/Menu/MenuModel
     void linkTexAnm(CTexAnm* pTexAnm, INT nTexAnm);   // PARTIAL: added for Form/Menu/MenuModel
     void setColorScale(const FVECTOR& vColor);        // PARTIAL: added for Form/Menu/MenuModel

@@ -16,6 +16,7 @@ typedef RECT_T<int> IRECT;
 struct SCREEN;
 
 class CShadowModelMan {
+    friend class CDispListShadowMap; // PARTIAL: added for System/Graphic/DispList
 private:
     static FMATRIX m_mWorldTexture;
     static FMATRIX m_mWorldScreen;

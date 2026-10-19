@@ -41,6 +41,8 @@ union ALPHA {
         _value = a._value;
         return *this;
     }
+    BYTE getAlphaMode() const { return alphaMode; }   // PARTIAL: added for System/Graphic/DispList
+    BYTE getAlphaValue() const { return alphaValue; } // PARTIAL: added for System/Graphic/DispList
 };
 
 // PARTIAL: added for Game/AtWater
@@ -149,6 +151,14 @@ struct FTVERTEX {
 
 class CDrawable {
     friend class CDispListBase; // PARTIAL: System/Graphic/DispList links primitives
+    friend class CDispList;           // PARTIAL: System/Graphic/DispList
+    friend class CDispListSemi;
+    friend class CDispListSemiBase;
+    friend class CDispListSemiSingleSort;
+    friend class CDispListWithoutZ;
+    friend class CDispListShadowDraw;
+    friend class CDispListShadowMap;
+    friend struct OTtag;
     friend class CModelMan;     // PARTIAL: System/Graphic/ModelMan reads the layer and calls makePkt
 private:
     CDrawable* m_pNext;
