@@ -39,6 +39,10 @@ public:
     static BOOL reqPlayMovie(const CHAR* pszName, INT nMode);
     static void setBlack();
     static void setFadeMaskProcPrio(_FADE_PROC_PRIO ePrio);
+    // PARTIAL: added for Game/GameSubBattle
+    static void setWhite();
+    static void dispOffFadeMask();
+    static void setBlackBeforeEncount(BOOL bFlag);
 };
 
 #endif /* GAME_GAME_H */

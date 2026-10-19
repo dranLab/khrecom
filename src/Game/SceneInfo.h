@@ -220,6 +220,19 @@ struct _MapEnemyRoomInfo {
     BYTE _byAppearType;
 };
 
+// PARTIAL: added for Form/DebugMenu, Game/GameSubBattle
+union AREA_SCENE {
+    struct {
+        SHORT _nScene;
+        SHORT _nArea;
+    };
+    INT _nAreaScene;
+    AREA_SCENE(SHORT nArea, SHORT nScene) {
+        _nArea = nArea;
+        _nScene = nScene;
+    }
+};
+
 class CSceneInfo {
 public:
     static SHORT getCurrentFloorNumber();
@@ -269,6 +282,12 @@ public:
     static INT getFloorDataCount(BOOL bSora);
     static WorldSelTable* getSelectableWorldTable(INT nFloorIndex, BOOL bSora);
     static SHORT getNextSceneNum();
+    // PARTIAL: added for Game/GameSubBattle
+    static void removeCurrentBattleSceneRsrc();
+    static INT getSceneCacheID(const union AREA_SCENE& as);
+    static INT addToSceneCache(const union AREA_SCENE& as);
+    static BOOL isBossBattleScene(INT nScene);
+    static INT hasReqEnterBattle();
     // PARTIAL: added for Game/GameSubField
     static void removeCurrentFieldSceneRsrc();
     static BOOL isEventScene();

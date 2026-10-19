@@ -100,18 +100,6 @@ public:
     static void setSceneDeSelectInitFlags();
 };
 
-union AREA_SCENE {
-    struct {
-        SHORT _nScene;
-        SHORT _nArea;
-    };
-    INT _nAreaScene;
-    AREA_SCENE(SHORT nArea, SHORT nScene) {
-        _nArea = nArea;
-        _nScene = nScene;
-    }
-};
-
 struct RoomStorageInfo {
     BYTE _pad[5];
     BYTE _bOpen;
