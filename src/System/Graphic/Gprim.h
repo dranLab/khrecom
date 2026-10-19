@@ -144,6 +144,8 @@ struct FTVERTEX {
 };
 
 class CDrawable {
+    friend class CDispListBase; // PARTIAL: System/Graphic/DispList links primitives
+    friend class CModelMan;     // PARTIAL: System/Graphic/ModelMan reads the layer and calls makePkt
 private:
     CDrawable* m_pNext;
 protected:
@@ -202,9 +204,26 @@ protected:
     struct TexInfo* m_pTexInfo;
 public:
     CGTexPrim() { m_pTexInfo = 0; } // PARTIAL: added for Game/NowLoading
+    // PARTIAL: added for System/Graphic/ModelMan
+    static struct TexInfo* m_pTexCache;
+    static INT m_nTmpTexArea;
+    static void clearTexCache() { m_pTexCache = NULL; }
     void setTPage(struct TexInfo* pInInfo) { m_pTexInfo = pInInfo; }
     virtual ~CGTexPrim();
     virtual UINT getPacketSize() const;
+};
+
+// PARTIAL: added for System/Graphic/ModelMan (only the texture cache)
+class CGTexPrim2D {
+public:
+    static struct TexInfo* m_pTexCache[28];
+    static USHORT m_nCacheIdx;
+    static void clearTexCache() {
+        m_nCacheIdx = 0;
+        for (INT i = 27; i >= 0; i--) {
+            m_pTexCache[i] = NULL;
+        }
+    }
 };
 
 class CCPrim : public CGPrim {
