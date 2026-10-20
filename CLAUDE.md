@@ -87,6 +87,9 @@ A *unit* is one original object file, named after its source path, e.g. `System/
   (ee-gcc2.9-990721; adds them). Sony's code has inline asm blocks with their own `.set noreorder` loops (DIntr).
 - Register/scheduling levers that worked in libkernl: `volatile` on single struct fields (reloads), reusing a
   parameter as loop index/result (shares its s-register), a callee declared `void` vs `int` (v0 free or not).
+- Open in sifrpc (9 functions parked, C under `#if 0`): the original copies packet fields load/store pair by pair,
+  ours lets the scheduler hoist loads above stores of other pointer/int types (alias sets); -fno-strict-aliasing
+  and scheduling flags don't reproduce it either. Same family: sifcmd's _sceSifCmdIntrHdlr (registers only).
 - GNU as fills an open delay slot only when no label precedes the branch: -g's `$LM` line labels count. A `j $31`
   left unfilled where the original filled it: put the last statement and `}` on one line (lib/init).
 
