@@ -1,6 +1,5 @@
 #include "pppRyjMegaBirthPrize.h"
 #include "System/Graphic/Effect/libppp/draw/shape.h"
-#include "include_asm.h"
 
 typedef struct { /* 0x10 */
     float X;
@@ -18,13 +17,6 @@ typedef struct _PRIZE_SHAPE { /* 0xc */
     float fScale;
 } PRIZE_SHAPE;
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthPrize", pppRyjDrawMegaBirthPrize);
-
-/* All but the block before the asm matches: there the original keeps the pos loads after the scale store
- * and puts 255.0f in f0 / Scale in f1. The empty asm with a memory clobber stands in for the original
- * reload of ah->seqc after the random asm, the volatile store for the original keeping flag = 10 before
- * the ppvUserStopPartF load. */
-#if 0
 void pppRyjDrawMegaBirthPrize(pppPObject *pobj, PRyjMegaBirthPrize *param, pppCtrlTable *ctbl) {
     PRIZE_SHAPE *prize_shape_list;
     sceVu0FMATRIX prize_type_mat_list[10];
@@ -101,12 +93,15 @@ void pppRyjDrawMegaBirthPrize(pppPObject *pobj, PRyjMegaBirthPrize *param, pppCt
                 prize_data->SeqCt = anm_seq;
             }
         }
-        scale = prize_data->Scale / 255.0f;
+        /* seq before scale: SeqCt loads before the division and Scale gets v1/f1. The pos loads as scalar
+         * accesses: a struct member load through a pointer may pass the store of a scalar local (scale), a
+         * scalar one may not, and the original loads X, Y, Z after the scale store. */
         seq = &ah->seq[prize_data->SeqCt];
         sh = (OSHAPE_VU1 *)((char *)ah + seq->sha);
-        pos[1] = prize_data->Y;
-        pos[0] = prize_data->X;
-        pos[2] = prize_data->Z;
+        scale = prize_data->Scale / 255.0f;
+        pos[0] = *(float *)((char *)prize_data + 0);
+        pos[1] = *(float *)((char *)prize_data + 4);
+        pos[2] = *(float *)((char *)prize_data + 8);
         pos[3] = 1.0f;
         __asm__ __volatile__(
             "lqc2 $vf1, 0x0(%0)\n"
@@ -178,7 +173,6 @@ void pppRyjDrawMegaBirthPrize(pppPObject *pobj, PRyjMegaBirthPrize *param, pppCt
     pppWaitVif1();
     op_ztest_init();
 }
-#endif
 
 void pppRyjMegaBirthPrizeCon(pppPObject *pobj, pppCtrlTable *ctbl) {
     ppvMng->bBoolNoViewClip = 1;
