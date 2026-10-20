@@ -7,6 +7,7 @@
 #include "Game/Player/Player.h"
 #include "System/Debug.h"
 #include "System/HeapMan.h"
+#include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
 
 using namespace CardBattle;
@@ -16,6 +17,18 @@ inline void* operator new(unsigned int, void* p) throw() { return p; }
 
 extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039B2E4");
 template <class T> static inline T& _ref(T& v) { return v; }
+extern "C" char D_00479D40[]; /* "Game/CardBattle.h" */
+extern "C" char D_00479D68[]; /* "inUser" */
+/* CCardBattle's m_cardEnchant as the original's CARD[2] (Game/CardBattle.h declares bytes) */
+struct CB_ENCHANT_VIEW {
+    BYTE _pad[0x17C];
+    CARD m_cardEnchant[2];
+};
+/* CCardBattle::getEnchantKind(INT inUser), an inline in Game/CardBattle.h */
+inline INT CCardRevolver::_getEnchantKind(CCardBattle* p, INT inUser) {
+    if (!inUser) AssertApp(D_00479D40, 641, D_00479D68, 0);
+    return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
+}
 static inline BOOL _isEqual(UINT a, UINT b) { return a == b; }
 namespace CardBattle {
 extern char* g_szStockSkillName[150];
@@ -140,7 +153,72 @@ void CCardRevolver::_initCounter() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeWait__Q210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeMain__Q210CardBattle13CCardRevolver);
+void CCardRevolver::exeMain() {
+    if (DebugWork::g_dw.player.iDeckDbgDisp) {
+        if (!(m_uiFlag & 0x10)) rollDeck(0, 0, 300);
+        m_uiFlag |= 0x10;
+    } else {
+        if (m_uiFlag & 0x10) rollDeck(0, 0, 300);
+        m_uiFlag = (INT)m_uiFlag & ~0x10;
+    }
+    INT mode = m_iMode;
+    INT nActive = m_nActive[mode];
+    INT nRemain = m_nRemain[mode];
+    CBattleCard* pCards;
+    if (mode == 0) {
+        nRemain += m_nReloadCard;
+        pCards = m_pCards;
+    } else {
+        pCards = m_pCardsE;
+    }
+    if (pCards) {
+        if (nRemain > 0) m_bActive = pCards[nActive].isNowSelect();
+        else m_bActive = TRUE;
+    } else {
+        changeMode(0, 1);
+        return;
+    }
+    if (m_uiUser == 1) {
+        if (m_bActive) {
+            CBattleCard* pCard = &pCards[nActive];
+            pCard->setSelect(1);
+            pCard->setEnchantEffect(0x52, 1);
+            if (m_pActiveCard && m_pActiveCard != pCard) {
+                m_pActiveCard->setSelect(0);
+                m_pActiveCard->resetEnchantEffect(0x52);
+            }
+            m_pActiveCard = &pCards[nActive];
+        } else {
+            if (m_pActiveCard) {
+                m_pActiveCard->setSelect(0);
+                m_pActiveCard->resetEnchantEffect(0x52);
+            }
+            m_pActiveCard = NULL;
+        }
+    } else {
+        if (m_bActive) {
+            CBattleCard* pCard = &pCards[nActive];
+            pCard->setEnchantEffect(0x52, 1);
+            if (m_pActiveCard && m_pActiveCard != pCard) m_pActiveCard->resetEnchantEffect(0x52);
+            m_pActiveCard = &pCards[nActive];
+        } else {
+            if (m_pActiveCard) m_pActiveCard->resetEnchantEffect(0x52);
+            m_pActiveCard = NULL;
+        }
+    }
+    if (!m_bActive) return;
+    if (m_nReloadCard <= 0) return;
+    if (DebugWork::g_dw.player.iAutoReload && m_iMode == 0 && nRemain == m_nReloadCard && m_iStock == 0) {
+        initReload(0);
+        return;
+    }
+    CCardBattle* pBattle = (CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (_getEnchantKind(pBattle, m_uiUser) != 0x11) return;
+    if (pBattle->isExecutingCard(m_uiUser)) return;
+    if (m_iMode != 0) return;
+    if (nRemain != m_nReloadCard) return;
+    initReload(0);
+}
 void CCardRevolver::destroy() {
     initHide();
 }
