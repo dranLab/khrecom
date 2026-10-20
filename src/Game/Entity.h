@@ -356,6 +356,10 @@ public:
     BOOL initSE_(INT inID);
     void rideModelAdjustRiders_();
     void setMoveFlag(UINT inSet, UINT inMask);
+    void setModelColorScale(const FVECTOR& inColor, INT inIndex);
+    void changeMotionFileNameWithSameCheck(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
+    void changeMotionWithSameCheck(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
+    HANDLE setRecoverEffect(const CHAR* inName, INT inNo);
     void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel) {
         setEntityFlag(0x40000000, 0);
         m_fStartAlpha = inStart;
