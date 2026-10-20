@@ -146,6 +146,11 @@ public:
     static INT calcStockFolderEnemyStockSkill();
     static void setStockFolderStockInfo(INT inSide);
     static BOOL isDuelEntryingCard(INT inSide);
+    BOOL checkNowPlaying(INT inSide, class CBattleCard* pCard);
+    static BOOL isPlayingCardStandNow(INT inSide);
+    static void setBattleEnd();
+    void initCardBreak(INT n, UINT f);
+    void resetEnchantCard(INT inSide);
 };
 
 // PARTIAL: added for Game/Player/FriendKing

@@ -16,6 +16,7 @@ void calcFreezeDamage(INT& ioDamage);
 extern "C" char D_00476980[]; /* __FILE__ */
 extern "C" char D_00476730[];
 extern "C" int abs(int);
+template <class T> static inline T& _ref(T& v) { return v; }
 
 void CardBattle::calcFreezeDamage(INT& ioDamage) {
     INT nPower = g_pStockSkillList[35].POWER[1];
@@ -30,7 +31,13 @@ void CCardBattle::disp() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcPlayingCard__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exePlaying__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setNumberBreak__Q210CardBattle11CCardBattleUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", checkNowPlaying__Q210CardBattle11CCardBattleiPQ210CardBattle11CBattleCard);
+BOOL CCardBattle::checkNowPlaying(INT inSide, CBattleCard* pCard) {
+    if (!(inSide)) AssertApp(D_00476980, 1425, D_00476730, 0);
+    for (INT i = 0; i < 7; i++) {
+        if (m_pCard[inSide - 1][i] == pCard) return TRUE;
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testPlayingCard__Q210CardBattle11CCardBattleUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testBreakingCard__Q210CardBattle11CCardBattleUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayCard__Q210CardBattle11CCardBattleiiPQ210CardBattle11CBattleCardP4CARDi);
@@ -47,7 +54,26 @@ HANDLE CCardBattle::getPlayingHandle(INT inSide) {
     return 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isStandingCard__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isPlayingCardStandNow__Q210CardBattle11CCardBattlei);
+BOOL CCardBattle::isPlayingCardStandNow(INT inSide) {
+    if (!m_pInstance) return FALSE;
+    if ((UINT)inSide < 2) {
+        switch (m_pInstance->m_uiState[0]) {
+        case 2:
+        case 10:
+        case 15:
+            return TRUE;
+        }
+    }
+    if (inSide == 0 || inSide == 2) {
+        switch (m_pInstance->m_uiState[1]) {
+        case 2:
+        case 10:
+        case 15:
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isExecutingCard__Q210CardBattle11CCardBattlei);
 BOOL CCardBattle::isPlayingCard(INT inSide) {
     if (!m_pInstance) return FALSE;
