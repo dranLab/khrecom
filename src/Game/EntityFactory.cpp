@@ -121,21 +121,6 @@ CEntity* CEntityFactory::createEntity(INT inGroupID, INT inRsrcID, CTask* inPare
     return entity;
 }
 
-#include "include_asm.h"
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/EntityFactory", createPrize__14CEntityFactoryRC11PRIZE_PARAMP5CTask);
-
-/* Placeholder: re-emits createPrize's string literals (it is INCLUDE_ASM'd), in their place in .rodata. */
-inline void _createPrizeStrings() {
-    com_malloc_d(0, "c:/KHCOM/MainApp/Game/EntityFactory.cpp(198)", 0);
-    TRACE("Create prize failed!!\n");
-}
-
-/* Near-match: the first null test (of the new-expression) branches to the second test instead of straight to
- * the TRACE; written without the CEntity* copy, the branch is threaded but reorg fills its delay slot from the
- * target (one more instruction). */
-#if 0
-#line 187
 CEntity* CEntityFactory::createPrize(const PRIZE_PARAM& inParam, CTask* inParent) {
     CTask* parent;
     if (!inParent) {
@@ -144,17 +129,20 @@ CEntity* CEntityFactory::createPrize(const PRIZE_PARAM& inParam, CTask* inParent
     } else {
         parent = inParent;
     }
-    CPrize* prize = new (com_malloc_d(sizeof(CPrize) /* 0x260 */, __FILE__ "(198)", RET_ADDR())) CPrize(parent);
-    CEntity* entity = prize;
-    if (entity) {
-        if (prize->setup(inParam)) return entity;
-        entity->out();
+    CPrize* prize = new (com_malloc_d(sizeof(CPrize), __FILE__ "(198)", RET_ADDR())) CPrize(parent);
+    /* two failure paths with their own TRACE (cross-jumped): with one shared tail the first null test's
+     * delay slot is filled from the target instead of the fallthrough */
+    if (prize == NULL) {
+        TRACE("Create prize failed!!\n");
+        return NULL;
     }
-    TRACE("Create prize failed!!\n");
-    return NULL;
+    if (!prize->setup(inParam)) {
+        prize->out();
+        TRACE("Create prize failed!!\n");
+        return NULL;
+    }
+    return prize;
 }
-
-#endif
 
 static BOOL LoadEnemy() {
     return TRUE;
