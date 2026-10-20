@@ -181,10 +181,10 @@ public:
     BOOL isMotionEnd() const;
     BOOL isHangOnPlayer();
     void rideModelEnableChipCollision(INT inIdx, BOOL inSw);
+    void rideModelSetChipLocalMatrix(INT inIndex, const FMATRIX* in_pMatrix);
     // PARTIAL: added for Game/Player/FriendJack
     void setTimer(TIMEQ inTq) { m_tqTimer = inTq; }
     TIMEQ getTimer() { return m_tqTimer; }
-    void rideModelSetChipLocalMatrix(INT inIndex, const FMATRIX* in_pMatrix);
     void rideModelSetAttachMatrix(const FMATRIX* inpMat); // PARTIAL: added for Game/Gimmick/GimmickRideOn
     // PARTIAL: added for Game/Enemy/MapEnemyShadow
     FLOAT calcDistanceSq(const CEntity* inEntity) const;
@@ -346,6 +346,16 @@ public:
     BOOL startTargetEvade(CEntity* inTarget, FLOAT inSpeed, FLOAT inRate);
     BOOL startTargetIntercept(CEntity* inTarget, FLOAT inSpeed, FLOAT inRate);
     INT isStandsGroundIK();
+    void storeModelColor_();
+    void targetMoveXZ_();
+    void targetMove_();
+    BOOL initEffectEx_(const CHAR* inRsrcName);
+    BOOL initEffectEx_(INT inID);
+    BOOL initEffect_(INT inID);
+    BOOL initSEEx_(INT inID);
+    BOOL initSE_(INT inID);
+    void rideModelAdjustRiders_();
+    void setMoveFlag(UINT inSet, UINT inMask);
     void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel) {
         setEntityFlag(0x40000000, 0);
         m_fStartAlpha = inStart;
