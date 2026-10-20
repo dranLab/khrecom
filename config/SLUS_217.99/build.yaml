@@ -6,6 +6,11 @@ source_root: c:/KHCOM/MainApp/   # original path prefix of __FILE__ (src/ in thi
 # Per-unit toolchains (the libraries were built with other compilers than the game): the first entry whose `match`
 # (an fnmatch pattern on the unit name) matches overrides compiler / cflags / source_root. More specific first.
 overrides:
+  - match: lib/hncAt3dec        # ATRAC3 decoder front end: saves registers 8 bytes apart like 2.96
+    compiler: ee-gcc2.96
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
   - match: lib/init             # libat3dec (ATRAC3 decoder): atrac2_mode_* only match 2.96
     compiler: ee-gcc2.96
     cflags: -O2 -G0 -g

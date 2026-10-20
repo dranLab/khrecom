@@ -112,13 +112,15 @@ A *unit* is one original object file, named after its source path, e.g. `System/
   pad2_info base (lui) after the 820 multiplier; GetButtonInfo needs `if (valid) { switch ... }` and keeps the
   button type in a1 instead of a3. Levers that worked here: `if (x < 0) return x;` early returns, the shared
   `return state` with the fail block inside the else branch (goto into it).
+- Open in hncAt3dec (hncAt3dec_Idle parked): structure matches (per-channel `final_dout` loops counting down);
+  only the register assignment differs. Init matched once each switch case sets all three values itself.
 - GNU as fills an open delay slot only when no label precedes the branch: -g's `$LM` line labels count. A `j $31`
   left unfilled where the original filled it: put the last statement and `}` on one line (lib/init).
 
 | Family | Toolchain (verified on) |
 |---|---|
 | Sony SDK (`lib/*`: libkernl, libmpeg, libdma, ...) | ee-gcc2.9-991111 + ee-as 2.10 (`assembler: ee-gcc2.96`), `-O2 -G0 -g`: one toolchain for all Sony libs (alarm: kCopy only matches 991111; libmpeg error.c saves with `sd`, 2.95.3 with `sq`). A function that only matches another compiler usually needs a source change (alalc: an inverted `if`) |
-| libat3dec (`lib/init`, ...) | ee-gcc2.96 + its ee-as 2.10, `-O2 -G0 -g` (atrac2_mode_* only match 2.96) |
+| libat3dec (`lib/init`, `lib/hncAt3dec`) | ee-gcc2.96 + its ee-as 2.10, `-O2 -G0 -g` (atrac2_mode_* only match 2.96; hncAt3dec saves registers 8 bytes apart, the Sony 991111 builds 16) |
 
 ## Pitfalls
 
