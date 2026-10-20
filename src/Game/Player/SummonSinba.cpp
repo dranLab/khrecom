@@ -26,7 +26,6 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/Player/PlayerAttack.h"
 #include "Game/Movement.h"
 #include "Game/Collision/CollMap.h"
-#include "include_asm.h"
 
 extern "C" {
 void sceVu0UnitMatrix(FMATRIX& m);
@@ -46,16 +45,6 @@ static inline FVECTOR _makeVector(FLOAT inX, FLOAT inY, FLOAT inZ) {
     v.set(inX, inY, inZ);
     return v;
 }
-static inline FVECTOR _copyVector(const FVECTOR& a) {
-    FVECTOR v;
-    v.x = a.x; v.y = a.y; v.z = a.z; v.w = 1.0f;
-    return v;
-}
-static inline FVECTOR _addVector(const FVECTOR& a, const FVECTOR& b) {
-    FVECTOR v;
-    v.x = a.x + b.x; v.y = a.y + b.y; v.z = a.z + b.z; v.w = 1.0f;
-    return v;
-}
 
 namespace Summon {
 
@@ -67,10 +56,6 @@ CSummonSinba::CSummonSinba(CTask* inParent) : CSummon(inParent, 1) {
 CSummonSinba::~CSummonSinba() {
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/SummonSinba", stateAppear__Q26Summon12CSummonSinba);
-#if 0
-/* Scheduling/regalloc only: the original reuses pos.x in a register for vEnd.x and stores vStart's temp
- * before computing vEnd; this builds vEnd first and reloads pos.x (block after ApplyMatrixXYZ). */
 void CSummonSinba::stateAppear() {
     m_uiFlag |= 8;
     homingPlayerTargetXZ(0, 0.1f);
@@ -97,8 +82,8 @@ void CSummonSinba::stateAppear() {
     _unitMatrix(m);
     _rotMatrixY(m, rot.y);
     ApplyMatrixXYZ(ofs, m, ofs);
-    FVECTOR vStart = _copyVector(pos);
-    FVECTOR vEnd = _addVector(pos, ofs);
+    FVECTOR vStart = { { pos.x, pos.y, pos.z, 1.0f } };
+    FVECTOR vEnd = { { pos.x + ofs.x, pos.y + ofs.y, pos.z + ofs.z, 1.0f } };
     CCollMap* coll = m_pMove->getMapCollision();
     coll->setStartPos(vStart);
     coll->setEndPos(vEnd);
@@ -122,7 +107,6 @@ void CSummonSinba::stateAppear() {
         changeState(1);
     }
 }
-#endif
 
 INT CSummonSinba::setSkill(INT inID) {
     if (m_iState != 1) return 0;
