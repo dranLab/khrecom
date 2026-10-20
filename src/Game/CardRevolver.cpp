@@ -41,6 +41,7 @@ extern "C" char D_0047B710[];
 extern "C" char D_0047B740[];
 extern "C" char D_0047B348[];
 extern "C" char D_0047B378[];
+extern "C" char D_0047AE78[];
 extern "C" char D_0047B070[];
 extern "C" char D_0047B1E0[];
 extern "C" char D_0047B210[];
@@ -143,7 +144,44 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeMain__Q210CardB
 void CCardRevolver::destroy() {
     initHide();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initHide__Q210CardBattle13CCardRevolver);
+void CCardRevolver::initHide() {
+    if (m_iState == 4) return;
+    m_iState = 4;
+    CBattleCard* pCards = m_iMode == 0 ? m_pCards : m_pCardsE;
+    INT n = m_iMode == 0 ? m_nLimit : m_nTotal[m_iMode];
+    INT i;
+    for (i = 0; i < n; i++) {
+        CBattleCard* pCard = &pCards[i];
+        if (!pCard) continue;
+        if (pCard->getHand() != -1) pCard->hideHand();
+        if (pCard->getStock() != -1) pCard->destroy(1);
+    }
+    for (i = 0; i < m_iStock; i++) {
+        m_pCardsS[i] = NULL;
+        m_pDataS[i] = NULL;
+    }
+    m_iStock = 0;
+    m_iStockSum = 0;
+    m_iStockSkill = 0;
+    m_iExtraSkill = 0;
+    m_iFirstSkill = 0;
+    m_uiStockState = 0;
+    m_uiStockCategory = 0;
+    m_pSeqCtrlStock->enableDisp(FALSE);
+    m_uiStockFlag = (INT)m_uiStockFlag & ~1;
+    m_pSeqCtrlStock_Num01->enableDisp(0, FALSE);
+    m_pSeqCtrlStock_Num10->enableDisp(0, FALSE);
+    destroyCounter();
+    if (m_pEmpty) m_pEmpty->enableDisp(FALSE);
+    if (m_hPlaySE > 0) {
+        CSound::stopSE(m_hPlaySE, m_iReloadSEID);
+        m_hPlaySE = 0;
+    }
+    if (m_hChargeSE > 0) {
+        CSound::stopSE(m_hChargeSE, 0x13);
+        m_hChargeSE = 0;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setDeck__Q210CardBattle13CCardRevolverP4CARDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", rollDeck__Q210CardBattle13CCardRevolveriii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", changeMode__Q210CardBattle13CCardRevolverii);
@@ -209,7 +247,42 @@ INT CCardRevolver::isEnableCharge() {
     return 1;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", chargeReloadCard__Q210CardBattle13CCardRevolveri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initReload__Q210CardBattle13CCardRevolveri);
+void CCardRevolver::initReload(INT inMode) {
+    TRACE(D_0047AE78, inMode);
+    m_iState = 2;
+    m_bActive = FALSE;
+    m_tqTimer = 0;
+    m_nRemain[0] = 0;
+    m_iMax = 0;
+    m_nActive[0] = 0;
+    m_nReloadCount = 0;
+    for (INT i = 0; i < m_nLimit; i++) {
+        CBattleCard* pCard = &m_pCards[i];
+        if (!pCard) continue;
+        if (pCard->isNowPlaying()) continue;
+        if (pCard->isDuelStock()) continue;
+        pCard->resetReloadSet();
+        if (pCard->getHand() >= 0) {
+            pCard->hideHand();
+            pCard->outHand();
+        }
+        if (pCard->getHand() != -1) continue;
+        if (pCard->getStock() != -1) continue;
+        if (pCard->isReloadNG()) continue;
+        if ((m_uiFlag & 0x100) && pCard->isDModeNG()) continue;
+        pCard->setReloadSet();
+        m_iMax++;
+    }
+    m_tqTimer = 400;
+    m_uiFlag = (INT)m_uiFlag & ~8;
+    if (m_hPlaySE > 0) {
+        CSound::stopSE(m_hPlaySE, m_iReloadSEID);
+        m_hPlaySE = 0;
+    }
+    m_hPlaySE = CSound::playSE(m_iReloadSEID, -1, 64);
+    if (inMode != 2) CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+    m_uiFlag &= ~0x20000;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeReload__Q210CardBattle13CCardRevolver);
 INT CCardRevolver::getRemain(INT inMode, INT inKind, INT inCategory) {
     if (inMode < 0) return m_nRemain[m_iMode];
