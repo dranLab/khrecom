@@ -122,6 +122,7 @@ public:
     static BOOL isExecutingCard(INT inSide);
     INT setPlayCard(HANDLE inOwner, INT inSide, class CBattleCard* inCard, CARD* inData, INT inTest);
     INT setDuelPlayStock(class CBattleCard** inCards, INT inSkill);
+    INT setEnemyPronounceCard(HANDLE inOwner, class CBattleCard* inCard);
     friend class CCardRevolver;
     INT setPlayStock(HANDLE inOwner, INT inSide, class CBattleCard** inCards, INT inSkill, INT inExtra, INT inFirst, INT inTest);
     static HANDLE getPlayingHandle(INT inSide);

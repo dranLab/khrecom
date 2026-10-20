@@ -22,6 +22,8 @@ extern char* g_szStockSkillName[150];
 }
 extern "C" char D_0047B438[];
 extern "C" char D_0047B678[];
+extern "C" char D_0047B710[];
+extern "C" char D_0047B740[];
 extern "C" char D_0047B348[];
 extern "C" char D_0047B378[];
 extern "C" char D_0047B070[];
@@ -683,12 +685,113 @@ void CStockFolder::deleteGauge() {
     m_pSeqCtrl_Num10 = NULL;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockInfo__Q210CardBattle12CStockFolder);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockCard__Q210CardBattle12CStockFolderii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", calcEnemyStockSkill__Q210CardBattle12CStockFolder);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", returnStockCard__Q210CardBattle12CStockFolder);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getStock__Q210CardBattle12CStockFolderi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayStock__Q210CardBattle12CStockFolderii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPronounceCard__Q210CardBattle12CStockFolderii);
+INT CStockFolder::setStockCard(INT inKind, INT inNumber) {
+    if (CGameWork::getFlag(1, 10)) return 0;
+    if (m_uiFlag & 2) return 0;
+    CCardBattle* pBattle = (CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (!pBattle) return 0;
+    if (pBattle->isPlayingCard(m_uiUser)) return 0;
+    if (m_iStock == 3) return 0;
+    m_pCards[m_iStock] = new (com_malloc_d(sizeof(CBattleCard), D_0047B710, RET_ADDR())) CBattleCard(this, inKind, inNumber, m_uiUser, 0);
+    CBattleCard* pCard = m_pCards[m_iStock];
+    pCard->setFolderON();
+    pCard->setRoomEffect(NULL);
+    m_pData[m_iStock] = pCard->getCardData();
+    pCard->setStock(m_iStock);
+    m_iStock++;
+    CSound::playSE(15, -1, 64);
+    return 1;
+}
+INT CStockFolder::calcEnemyStockSkill() {
+    UINT uiKinds = 0;
+    INT nSum = 0;
+    m_iStockSkill = m_iStock;
+    for (INT i = 0; i < m_iStock; i++) {
+        uiKinds |= m_pData[i]->m_nKind << (i * 8);
+        nSum += m_pData[i]->m_nNumber;
+    }
+    if (uiKinds == 0x989898) {
+        if (nSum == 12) m_iStockSkill = 0x84;
+        else if (nSum == 15) m_iStockSkill = 0x85;
+        else if (nSum == 18) m_iStockSkill = 0x86;
+        else if (nSum == 21) m_iStockSkill = 0x87;
+        else if (nSum == 24) m_iStockSkill = 0x88;
+        else m_iStockSkill = 0x6E;
+    } else {
+        m_iStockSkill = 0x6E;
+    }
+    m_iStockSum = nSum;
+    if (m_iStock < 3) {
+        m_iStockSkill = 0x6E;
+        setStockInfo();
+        m_iStockSkill = m_iStock;
+    } else {
+        setStockInfo();
+    }
+    return m_iStockSkill;
+}
+INT CStockFolder::returnStockCard() {
+    if (m_iStock == 0) return 0;
+    for (INT i = 0; i < m_iStock; i++) {
+        if (m_pCards[i]) m_pCards[i]->destroy(1);
+        m_pCards[i] = NULL;
+        m_pData[i] = NULL;
+    }
+    m_iStock = 0;
+    m_iStockSum = 0;
+    m_iStockSkill = 0;
+    m_iExtraSkill = 0;
+    m_iFirstSkill = 0;
+    return 1;
+}
+INT CStockFolder::getStock(INT inFlag) {
+    if (!inFlag) return m_iStock;
+    INT n = 0;
+    for (INT i = 0; i < 7; i++) {
+        if (!m_pCards[i]) break;
+        if (!m_pCards[i]->isNowStock()) break;
+        n++;
+    }
+    return n;
+}
+INT CStockFolder::setPlayStock(INT inFlag, INT inTest) {
+    if (CGameWork::getFlag(1, 0x2f)) return 0;
+    UINT uiEnd = CCardBattle::m_pInstance ? CCardBattle::m_pInstance->m_uiFlag & 0xC0000000 : 0;
+    if (uiEnd) return 0;
+    if (m_iStock <= 0) return 0;
+    if (m_uiUser == 2 && getStock(1) != 3) return 0;
+    CCardBattle* pBattle = (CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (pBattle->isPlayingGimmickCard()) return 0;
+    if (inFlag) pBattle->resetNowPlaying(m_uiUser);
+    INT ret = pBattle->setPlayStock(m_hOwner, m_uiUser, m_pCards, m_iStockSkill, m_iExtraSkill, m_iFirstSkill, inTest);
+    if (!ret) return 0;
+    for (INT i = 0; i < m_iStock; i++) {
+        m_pCards[i] = NULL;
+        m_pData[i] = NULL;
+    }
+    m_iStock = 0;
+    m_iStockSum = 0;
+    m_iStockSkill = 0;
+    m_iExtraSkill = 0;
+    m_iFirstSkill = 0;
+    return ret;
+}
+INT CStockFolder::setPronounceCard(INT inKind, INT inNumber) {
+    if (m_uiState >= 6) {
+        CCardBattle* pBattle = (CCardBattle*)CTaskMan::getSysTask(0x16);
+        if (!pBattle) return 0;
+        if (!_isEqual(pBattle->m_uiDuelState, 11) && m_iStock != 6) goto ok;
+    }
+    return 0;
+ok:
+    m_pCards[m_iStock] = new (com_malloc_d(sizeof(CBattleCard), D_0047B740, RET_ADDR())) CBattleCard(this, inKind, inNumber, m_uiUser, 0);
+    CBattleCard* pCard = m_pCards[m_iStock];
+    pCard->setRoomEffect(NULL);
+    m_pData[m_iStock] = pCard->getCardData();
+    pCard->setPronounce(m_iStock);
+    m_iStock++;
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayPronounce__Q210CardBattle12CStockFolder);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getRollSpeed__CQ210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", isActive__CQ210CardBattle13CCardRevolver);
