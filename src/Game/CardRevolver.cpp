@@ -313,7 +313,69 @@ INT CCardRevolver::getRemain(INT inMode, INT inKind, INT inCategory) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockCard__Q210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", returnStockCard__Q210CardBattle13CCardRevolveri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", calcStockSkill__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", calcEnemyStockSkill__Q210CardBattle13CCardRevolver);
+INT CCardRevolver::calcEnemyStockSkill() {
+    UINT uiKinds = 0;
+    INT nSum = 0;
+    m_iStockSkill = m_iStock;
+    for (INT i = 0; i < m_iStock; i++) {
+        uiKinds |= m_pDataS[i]->m_nKind << (i * 8);
+        nSum += m_pDataS[i]->m_nNumber;
+    }
+    switch (uiKinds) {
+    case 0x818181: m_iStockSkill = 0x6F; break;
+    case 0x828282: m_iStockSkill = 0x70; break;
+    case 0x838383: m_iStockSkill = 0x71; break;
+    case 0x848484: m_iStockSkill = 0x72; break;
+    case 0x878585: m_iStockSkill = 0x73; break;
+    case 0x878686: m_iStockSkill = 0x74; break;
+    case 0x898989: m_iStockSkill = 0x75; break;
+    case 0x8A8A8A: m_iStockSkill = 0x76; break;
+    case 0x8B8C8C: m_iStockSkill = 0x77; break;
+    case 0x8D8D8C: m_iStockSkill = 0x78; break;
+    case 0x8D8D8D: m_iStockSkill = 0x79; break;
+    case 0x908E8E: m_iStockSkill = 0x7A; break;
+    case 0x919191: m_iStockSkill = 0x7B; break;
+    case 0x918F8F: m_iStockSkill = 0x7C; break;
+    case 0x929392: m_iStockSkill = 0x7D; break;
+    case 0x939393: m_iStockSkill = 0x7E; break;
+    case 0x929393: m_iStockSkill = 0x7F; break;
+    case 0x939392: m_iStockSkill = 0x80; break;
+    case 0x959694: m_iStockSkill = 0x81; break;
+    case 0x969496: m_iStockSkill = 0x82; break;
+    case 0x959495: m_iStockSkill = 0x83; break;
+    case 0x989898:
+        if (nSum == 12) m_iStockSkill = 0x84;
+        else if (nSum == 15) m_iStockSkill = 0x85;
+        else if (nSum == 18) m_iStockSkill = 0x86;
+        else if (nSum == 21) m_iStockSkill = 0x87;
+        else if (nSum == 24) m_iStockSkill = 0x88;
+        else m_iStockSkill = 0x6E;
+        break;
+    case 0x9B999A: m_iStockSkill = 0x89; break;
+    case 0x999B9A: m_iStockSkill = 0x8A; break;
+    case 0x9B9A99: m_iStockSkill = 0x8B; break;
+    case 0x9C9D9D: m_iStockSkill = 0x8C; break;
+    case 0x9C9C9C: m_iStockSkill = 0x8D; break;
+    case 0x9D9C9D: m_iStockSkill = 0x8E; break;
+    case 0x9E9E9E: m_iStockSkill = 0x8F; break;
+    case 0x121212:
+        if (nSum < 11) m_iStockSkill = 0x90;
+        else m_iStockSkill = 0x91;
+        break;
+    default:
+        m_iStockSkill = 0x6E;
+        break;
+    }
+    m_iStockSum = nSum;
+    if (m_iStock < 3) {
+        m_iStockSkill = 0x6E;
+        setStockInfo();
+        m_iStockSkill = m_iStock;
+    } else {
+        setStockInfo();
+    }
+    return m_iStockSkill;
+}
 INT CCardRevolver::getStock(INT inFlag) {
     if (!inFlag) return m_iStock;
     INT n = 0;
