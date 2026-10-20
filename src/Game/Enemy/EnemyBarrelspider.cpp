@@ -60,19 +60,16 @@ void CEnemyBarrelspider::beginStateAttack1() {
     setTimer(3000);
 }
 
-#include "include_asm.h"
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/EnemyBarrelspider", stateAttack1__18CEnemyBarrelspider);
-
-/* Near-match: only the register of the m_iStep increment in case 0 differs (v0 here, v1 in the original). */
-#if 0
 void CEnemyBarrelspider::stateAttack1() {
     switch (m_iStep) {
     case 0:
         if (getTimer() > 0) break;
         createExplode_(0);
         destroyCard();
-        m_iStep++;
+        {
+            register INT step asm("$3") = m_iStep + 1; /* the increment uses v1 (v0 with a plain m_iStep++) */
+            m_iStep = step;
+        }
         break;
     case 1:
         if (!isFade()) {
@@ -82,9 +79,6 @@ void CEnemyBarrelspider::stateAttack1() {
         break;
     }
 }
-
-#endif
-
 void CEnemyBarrelspider::beginStateAttack2() {
     changeMotionFileName(Barrelspider::Tackle1Motion, 0, TRUE, -1, 0, 0);
     m_iStep = 0;

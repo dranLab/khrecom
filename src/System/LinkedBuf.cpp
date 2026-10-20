@@ -83,27 +83,18 @@ BOOL CDelayedFree::isFreeListEmpty() {
     return TRUE;
 }
 
-/* flipFreeList: the source below matches except that the original keeps a second (redundant) null test of
- * the list head before the loop. */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/LinkedBuf", flipFreeList__12CDelayedFreei);
-#if 0
 void CDelayedFree::flipFreeList(INT nID) {
     BOOL bLocked = !s_bEnableFreeList;
     if (!bLocked) lockFreeList();
     CPtrList*& rCurrent = s_pFreeListCurrent;
     rCurrent = &s_pFreeListTbl[nID & 1];
-    {
-        CLinkedPtr* __p;
-        CLinkedPtr* __pn;
-        if ((__p = s_pFreeListCurrent->getHead()) != NULL) {
-            for (__pn = __p ? __p->getNext() : NULL; __p != NULL; __p = __pn, __pn = __p ? __p->getNext() : NULL) {
-                delete __p;
-            }
-        }
+    /* the list iteration macro form (next-next from __pn): one getHead, two getNext inlines in the ref */
+    for (CLinkedPtr *__p = s_pFreeListCurrent->getHead(), *__pn = __p ? __p->getNext() : NULL; __p;
+         __p = __pn, __pn = __pn ? __pn->getNext() : NULL) {
+        delete __p;
     }
     s_pFreeListCurrent->resetParam();
     if (!bLocked) unlockFreeList();
 }
-#endif
 
 // SOURCE DATA: .rodata .bss

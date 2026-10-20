@@ -42,19 +42,17 @@ void CAtelFog::main() {
     if (m_nState & 0x10) AnimMin();
 }
 
-/* not matching: the original loads the three bytes in argument order without copying pParam (ours loads p[0]
- * first and copies a2) */
-#if 0
 INT CAtelFog::onSetFogRGBA(INT nCmd, void* pParam, INT nID) {
     BYTE* p = (BYTE*)pParam;
     INT r = p[2];
     INT g = p[1];
+    /* keeps p alive past the first two loads: without it the scheduler puts the load that kills p (p[0], a2)
+     * first and the pointer needs a copy */
+    __asm__ volatile("" : : "r"(p));
     INT b = p[0];
     CWorldEnv::setFogColor(r, g, b);
     return -1;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/AtelFog", onSetFogRGBA__Q24ATEL8CAtelFogiPvi);
 
 INT CAtelFog::onSetFogRGBA_Anim(INT nCmd, void* pParam, INT nID) {
     BYTE* p = (BYTE*)pParam;

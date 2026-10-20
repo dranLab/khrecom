@@ -368,8 +368,10 @@ void C2DCard::createEmpty() {
     addSeq(m_pSeqName, 1);
 }
 
-/* not matching: the original passes inNorma to createNorma as four halfword loads combined into a1 (ours loads
- * the copy with one ld) */
+/* Not matching: the original passes inNorma to createNorma as four lhu from the parameter's stack slot combined
+ * with dsll/or into a1 (extract_bit_field in 16-bit pieces); ours copies the struct to an 8-aligned temporary
+ * and loads it with one ld. No struct shape tried (bitfields, arrays, nested, packed, union, ctor/dtor/copy
+ * ctor - these drop the temporary but give ldl/ldr) and no installed compiler gives the halfword form. */
 #if 0
 void C2DCard::replaceNorma(RCNORMA::NormaSrc inNorma, INT inStatus) {
     destroy();
