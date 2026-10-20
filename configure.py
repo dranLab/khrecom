@@ -130,7 +130,7 @@ SOURCE_SUFFIXES = (".c", ".cpp", ".s")
 def unit_toolchain(build_cfg: dict, unit: str) -> dict:
     """compiler, cflags, source_root and assembler for one unit: build.yaml's defaults, overridden by the first entry
     of its `overrides:` list whose `match` (an fnmatch pattern, e.g. lib/graphdev_*) matches the unit name.
-    `assembler` names a package in tools/compilers/ whose bin/ee-as (GNU as) assembles the compiler's output instead
+    `assembler` names a package in tools/compilers/ whose bin/ee-as or ee/bin/as (GNU as) assembles the compiler's output instead
     of the compiler package's own assembler."""
     tc = {key: build_cfg.get(key) for key in ("compiler", "cflags", "source_root", "assembler")}
     for override in build_cfg.get("overrides") or []:
@@ -306,7 +306,9 @@ def toolchain_variables(tc: dict) -> dict[str, str]:
     cc, snas = compiler_commands(tc["compiler"])
     extra = f"--source-root {tc['source_root']}" if tc.get("source_root") else ""
     if tc.get("assembler"):
-        assemble = f"tools/compilers/{tc['assembler']}/bin/ee-as -EL -G{gp.group(1) if gp else 0} -I include"
+        package = f"tools/compilers/{tc['assembler']}"
+        as_path = f"{package}/bin/ee-as" if (ROOT / package / "bin/ee-as").exists() else f"{package}/ee/bin/as"
+        assemble = f"{as_path} -EL -G{gp.group(1) if gp else 0} -I include"
     elif snas:
         assemble = f"{snas} --stdout -G{gp.group(1) if gp else 0}"
         extra += " --assembler snas" if extra else "--assembler snas"

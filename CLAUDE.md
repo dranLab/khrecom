@@ -90,6 +90,11 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 - Open in sifrpc (9 functions parked, C under `#if 0`): the original copies packet fields load/store pair by pair,
   ours lets the scheduler hoist loads above stores of other pointer/int types (alias sets); -fno-strict-aliasing
   and scheduling flags don't reproduce it either. Same family: sifcmd's _sceSifCmdIntrHdlr (registers only).
+- Open in kprintf2 (ftoi, printfloat, _sceSnprintf parked; C under `#if 0`, rodata stays asm): _sceSnprintf is
+  off only by a `nop` between `c.eq.s` and `bc1f` (gcc writes `#nop`). No assembler here gives that nop together
+  with the unit's other code: 2.9 gas inserts it but also one after `mtc1` and fills no `j $31`; 2.10/2.12 insert
+  none. printf levers: one variable for several roles (the original's `n`/`p`/`uval` share s-registers), the tail
+  `start = p + 1; len = bufend - p; goto output;` per case, `if (val >= 0) {...} else '-'` arm order.
 - GNU as fills an open delay slot only when no label precedes the branch: -g's `$LM` line labels count. A `j $31`
   left unfilled where the original filled it: put the last statement and `}` on one line (lib/init).
 
