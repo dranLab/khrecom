@@ -1,3 +1,4 @@
+#define SYSTEM_GRAPHIC_GPRIM_CPP
 #include "khtypes.h"
 #include "System/Graphic/Gprim.h"
 #include "include_asm.h"
@@ -256,12 +257,16 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _init__8C3DTPri
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _create__8C3DTPrimUliP6CCoordP7CCoordsi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DTPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DTPrim);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_None__8C3DTPrimP6QWdata);
+QWdata* C3DTPrim::makePkt_None(QWdata* pQw) {
+    return pQw;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Line0__8C3DTPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Line1__8C3DTPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle0__8C3DTPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle1__8C3DTPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_None__8C3DCPrimP6QWdata);
+QWdata* C3DCPrim::makePkt_None(QWdata* pQw) {
+    return pQw;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Line0__8C3DCPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Line1__8C3DCPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle0__8C3DCPrimP6QWdata);
