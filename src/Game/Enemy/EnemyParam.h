@@ -29,8 +29,22 @@ struct EXTRA_ENEMY_PARAM {
     FLOAT fValue;    /* 0xc */
 };
 
+struct BASIC_ENEMY_PARAM { // PARTIAL: added for Game/Enemy/BattleEnemy
+    INT iHP;  /* 0x0 */
+    INT iAP;  /* 0x4 */
+    INT iExp; /* 0x8 */
+    INT pad;  /* 0xc */
+};
+
 struct ENEMY_PARAM {
-    UBYTE _m_0x00[0x44]; /* 0x00 szCode .. */
+    // PARTIAL: split out for Game/Enemy/BattleEnemy
+    char szCode[4];              /* 0x00 */
+    UINT uiVersion;              /* 0x04 */
+    struct BASIC_ENEMY_PARAM* pBasic; /* 0x08 */
+    UINT uiSize;                 /* 0x0c */
+    UINT uiEnemyCardDrop;        /* 0x10 */
+    float fAttr[5];              /* 0x14 */
+    int iSpecialEffect[7];       /* 0x28 */
     INT iCardCount;      /* 0x44 */ // PARTIAL: added for Game/Enemy/Heartless
     struct ENEMY_CARD* pCards; /* 0x48 */
     INT iActCount;       /* 0x4c */

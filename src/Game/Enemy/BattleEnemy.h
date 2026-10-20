@@ -10,6 +10,9 @@
 
 struct ENEMY_PARAM; // PARTIAL: added for Game/Enemy/EnemyAirpirate
 struct ENEMY_ACT;   // PARTIAL: added for Game/Enemy/Heartless
+namespace BattleEnemy {
+INT GameModeHp(INT inHp); // PARTIAL: added for Game/Enemy/BattleEnemy
+}
 
 enum CARD_KIND {
     CARD_KIND_None = 0 /* values not needed yet */
@@ -275,6 +278,9 @@ protected:
     virtual void commonEndAttack();
 
 public: // PARTIAL: state wrappers added for Game/Enemy/BattleEnemy
+    INT getSize() const;
+    FLOAT getDamageRate_() const;
+    void changeMainState(INT inState);
     BOOL isPlayingCardBattle();
     void addEnemyKillCount_();
     void beginStateAppear_();
