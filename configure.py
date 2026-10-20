@@ -398,6 +398,8 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
                 compiled[entries[0].segment.name] = (obj, src)
             elif suffix == ".s":
                 n.build(obj, "as", src, variables=align)
+                if src.startswith("src/"):
+                    compiled[unit] = (obj, src)
             elif suffix == ".bin":
                 n.build(obj, "bin", src)
             else:

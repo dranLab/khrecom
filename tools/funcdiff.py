@@ -12,6 +12,7 @@ Usage:
 
 import argparse
 import difflib
+import json
 import os
 import re
 import subprocess
@@ -91,6 +92,9 @@ def main() -> None:
     opts = yaml.safe_load((ROOT / "config" / version / f"{version}.yaml").read_text(encoding="utf-8"))["options"]
     build = Path(opts["build_path"])
     target, base = build / "expected" / "units" / f"{args.unit}.o", build / "src" / f"{args.unit}.o"
+    # A hand-written .s source builds splat's object path instead: objdiff.json knows it.
+    unit = next((u for u in json.loads((ROOT / "objdiff.json").read_text())["units"] if u["name"] == args.unit), {})
+    base = Path(unit.get("base_path", base))
     result = subprocess.run(["ninja", str(target), str(base)], cwd=ROOT, capture_output=True, text=True)
     if result.returncode != 0:
         sys.exit(result.stdout[-3000:] + result.stderr[-1000:])
