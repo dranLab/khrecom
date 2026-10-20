@@ -16,6 +16,11 @@ overrides:
     cflags: -O2 -G0 -g
     source_root: null
     assembler: ee-gcc2.96
+  - match: lib/src/gcc/*        # libgcc (GCC 2.9 libgcc2.c): __floatdisf's open jal delay slot needs the 2.9 assembler
+    compiler: ee-gcc2.9-991111
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.9-990721
   - match: lib/*                # Sony SDK: libkernl, libmpeg, libdma, ... (one toolchain; the libs that matched 2.95.3 match it too)
     compiler: ee-gcc2.9-991111  # kCopy in alarm.c only matches the 991111 family; libmpeg error.c saves with sd (2.95.3: sq)
     cflags: -O2 -G0 -g
