@@ -19,7 +19,20 @@ template <class T> static inline T& _ref(T& v) { return v; }
 static inline BOOL _isEqual(UINT a, UINT b) { return a == b; }
 namespace CardBattle {
 extern char* g_szStockSkillName[150];
+extern LPCSTR g_szLadCockpit;
 }
+namespace D2 {
+class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the class only for its own unit */
+public:
+    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
+};
+}
+extern "C" char D_0047B3A8[];
+extern "C" char D_0047B3D8[];
+extern "C" char D_0047B408[];
+extern "C" char D_0047B5E8[];
+extern "C" char D_0047B618[];
+extern "C" char D_0047B648[];
 extern "C" char D_0047B438[];
 extern "C" char D_0047B678[];
 extern "C" char D_0047B710[];
@@ -395,7 +408,51 @@ INT CCardRevolver::exeTrapEffect(INT inFlag) {
     }
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initStock__Q210CardBattle13CCardRevolver);
+void CCardRevolver::initStock() {
+    FVECTOR vPos;
+    m_uiStockState = 0;
+    m_uiStockFlag = 0;
+    m_uiStockCategory = 0;
+    m_pSeqCtrlStock = NULL;
+    m_pSeqCtrlStock_Num01 = NULL;
+    m_pSeqCtrlStock_Num10 = NULL;
+    m_pSeqCtrlStock = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B3A8, RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrlStock_Num10 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B3D8, RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrlStock_Num01 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B408, RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrlStock->setLayer(7);
+    m_pSeqCtrlStock_Num01->setLayer(8);
+    m_pSeqCtrlStock_Num10->setLayer(8);
+    if (m_uiUser == 1) {
+        m_pSeqCtrlStock->addSeq(g_szSeqCockpit, 0x1B);
+        D2::C2DMan::getLayPosition(g_szLadCockpit, 4, 0, vPos, FALSE);
+        FVECTOR vNum = vPos;
+        m_pSeqCtrlStock_Num01->addSeq(g_szSeqCockpit, 0xE);
+        vNum.x = 41.0f;
+        vNum.y = -11.0f;
+        m_pSeqCtrlStock_Num01->setPos(vNum);
+        m_pSeqCtrlStock_Num01->enableDisp(0, FALSE);
+        m_pSeqCtrlStock_Num10->addSeq(g_szSeqCockpit, 0xE);
+        vNum.x = 26.0f;
+        m_pSeqCtrlStock_Num10->setPos(vNum);
+        m_pSeqCtrlStock_Num10->enableDisp(0, FALSE);
+    } else {
+        m_pSeqCtrlStock->addSeq(g_szSeqCockpit, 0x18);
+        D2::C2DMan::getLayPosition(g_szLadCockpit, 3, 0, vPos, FALSE);
+        FVECTOR vNum = vPos;
+        m_pSeqCtrlStock_Num01->addSeq(g_szSeqCockpit, 0xE);
+        vNum.x = -13.0f;
+        vNum.y = -12.0f;
+        m_pSeqCtrlStock_Num01->setPos(vNum);
+        m_pSeqCtrlStock_Num01->enableDisp(0, FALSE);
+        m_pSeqCtrlStock_Num10->addSeq(g_szSeqCockpit, 0xE);
+        vNum.x = -28.0f;
+        m_pSeqCtrlStock_Num10->setPos(vNum);
+        m_pSeqCtrlStock_Num10->enableDisp(0, FALSE);
+    }
+    m_pSeqCtrlStock->setPos(vPos);
+    initStockSkillName(m_pSeqCtrlStock);
+    m_pSeqCtrlStock->enableDisp(FALSE);
+}
 void CCardRevolver::initStockSkillName(D2::C2DSeqCtrl* inSeq) {
     G_RGBA rgba;
     rgba.col = 0x80808080;
@@ -665,7 +722,38 @@ void CStockFolder::destroy() {
     m_pSeqCtrl_Num01->enableDisp(0, FALSE);
     m_pSeqCtrl_Num10->enableDisp(0, FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initGauge__Q210CardBattle12CStockFolder);
+void CStockFolder::initGauge() {
+    FVECTOR vPos;
+    m_uiState = 0;
+    m_uiFlag = 0;
+    m_uiCategory = 0;
+    m_pSeqCtrl = NULL;
+    m_pSeqCtrl_Num01 = NULL;
+    m_pSeqCtrl_Num10 = NULL;
+    m_nNumTexID = 0;
+    m_pSeqCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B5E8, RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrl_Num10 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B618, RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrl_Num01 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B648, RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrl->setLayer(7);
+    m_pSeqCtrl_Num01->setLayer(8);
+    m_pSeqCtrl_Num10->setLayer(8);
+    m_pSeqCtrl->addSeq(g_szSeqCockpit, 0x18);
+    D2::C2DMan::getLayPosition(g_szLadCockpit, 3, 0, vPos, FALSE);
+    vPos.x += -8.0f;
+    FVECTOR vNum = vPos;
+    m_pSeqCtrl_Num01->addSeq(g_szSeqCockpit, 0xE);
+    vNum.x = -13.0f;
+    vNum.y = -12.0f;
+    m_pSeqCtrl_Num01->setPos(vNum);
+    m_pSeqCtrl_Num01->enableDisp(0, FALSE);
+    m_pSeqCtrl_Num10->addSeq(g_szSeqCockpit, 0xE);
+    vNum.x = -28.0f;
+    m_pSeqCtrl_Num10->setPos(vNum);
+    m_pSeqCtrl_Num10->enableDisp(0, FALSE);
+    m_pSeqCtrl->setPos(vPos);
+    initName(m_pSeqCtrl);
+    m_pSeqCtrl->enableDisp(FALSE);
+}
 void CStockFolder::initName(D2::C2DSeqCtrl* inSeq) {
     G_RGBA rgba;
     rgba.col = 0x80808080;
