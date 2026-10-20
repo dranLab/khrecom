@@ -99,6 +99,9 @@ A *unit* is one original object file, named after its source path, e.g. `System/
   swapped registers around the `ee_retbuf_sel` store (an empty `asm volatile` barrier moves it, but isn't source).
   ~/kh1/src/lib/libkernl/filestub.c (an older libkernl, matched) was the base; ours adds named semaphores,
   sceFsSifCallRpc retries, double-buffered replies.
+- Open in graphdev_sceGsExecStoreImage (parked, C under `#if 0`): the per-PSM switch matches once each case is
+  `if (bytes == 0) {...} else {...}` (gcc merges the identical then-parts); left: registers in the PSMCT24 tail
+  and the original keeping the raw trxreg (t1) for the final TRXREG write.
 - GNU as fills an open delay slot only when no label precedes the branch: -g's `$LM` line labels count. A `j $31`
   left unfilled where the original filled it: put the last statement and `}` on one line (lib/init).
 
