@@ -95,6 +95,10 @@ A *unit* is one original object file, named after its source path, e.g. `System/
   with the unit's other code: 2.9 gas inserts it but also one after `mtc1` and fills no `j $31`; 2.10/2.12 insert
   none. printf levers: one variable for several roles (the original's `n`/`p`/`uval` share s-registers), the tail
   `start = p + 1; len = bufend - p; goto output;` per case, `if (val >= 0) {...} else '-'` arm order.
+- Open in filestub (_sceFs_Rcv_Intr parked, jump table as file-scope asm): only the prologue differs, two
+  swapped registers around the `ee_retbuf_sel` store (an empty `asm volatile` barrier moves it, but isn't source).
+  ~/kh1/src/lib/libkernl/filestub.c (an older libkernl, matched) was the base; ours adds named semaphores,
+  sceFsSifCallRpc retries, double-buffered replies.
 - GNU as fills an open delay slot only when no label precedes the branch: -g's `$LM` line labels count. A `j $31`
   left unfilled where the original filled it: put the last statement and `}` on one line (lib/init).
 
