@@ -248,6 +248,7 @@ public:
     CGTexPrim2D() { m_pTexInfo = NULL; }
     void setTPage(struct TexInfo* pInInfo) { m_pTexInfo = pInInfo; }
     struct TexInfo* getTPage() const { return m_pTexInfo; }
+    void setTPage(const CHAR* pTexName); // PARTIAL: added for System/Graphic/Gprim
     virtual UINT getPacketSize() const;
 
     static struct TexInfo* m_pTexCache[28];
@@ -280,6 +281,7 @@ public:
         if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
     }
     void remove();
+    BOOL isRect(INT i, const FVECTOR* vRect); // PARTIAL: added for System/Graphic/Gprim
 };
 
 class CTPrim : public CGTexPrim {
@@ -302,6 +304,7 @@ public:
         if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
     }
     void remove();
+    BOOL isRect(INT i, const FVECTOR* vRect); // PARTIAL: added for System/Graphic/Gprim
 };
 
 // PARTIAL: added for System/DebugProcInfo
@@ -514,5 +517,50 @@ public:
 private:
     virtual QWdata* makePktSub();
 };
+
+#ifdef SYSTEM_GRAPHIC_GPRIM_CPP /* PARTIAL: full classes for System/Graphic/Gprim only */
+class C3DCPrim : public CGPrim {
+private:
+    UINT m_PRIM;
+    UINT m_TEST;
+    ULONGLONG m_CLAMP;
+    ULONGLONG m_SCISSOR;
+    UINT m_ALPHA;
+    UINT m_ZBUF;
+    CCoord* m_pCrd;
+    CCoords* m_pObj;
+    FLOAT m_fGetaZ;
+    INT m_iZ;
+public:
+    FLOAT m_fGeta;
+    USHORT m_iRep;
+    USHORT m_iMax;
+    G_STRIP* m_V;
+
+private:
+    QWdata* makePkt_None(QWdata* pQw);
+};
+class C3DTPrim : public CGTexPrim {
+private:
+    UINT m_PRIM;
+    UINT m_TEST;
+    ULONGLONG m_CLAMP;
+    ULONGLONG m_SCISSOR;
+    UINT m_ALPHA;
+    UINT m_ZBUF;
+    CCoord* m_pCrd;
+    CCoords* m_pObj;
+    FLOAT m_fGetaZ;
+    INT m_iZ;
+public:
+    FLOAT m_fGeta;
+    USHORT m_iRep;
+    USHORT m_iMax;
+    G_STRIP* m_V;
+
+private:
+    QWdata* makePkt_None(QWdata* pQw);
+};
+#endif
 
 #endif /* SYSTEM_GRAPHIC_GPRIM_H */
