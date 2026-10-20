@@ -7,6 +7,6 @@ source_root: c:/KHCOM/MainApp/   # original path prefix of __FILE__ (src/ in thi
 # (an fnmatch pattern on the unit name) matches overrides compiler / cflags / source_root. More specific first.
 overrides:
   - match: lib/*                # Sony SDK (provisional until Phase 1 of docs/plan-library-decompilation.md)
-    compiler: ee-gcc2.9-991111  # Cygnus/Sony ee-gcc, assembled with GNU as
+    compiler: ee-gcc2.95.3-136  # as the game (libmpeg: alalc, defhandler); others lay out branches differently
     cflags: -O2 -G0 -g
     source_root: null

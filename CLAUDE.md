@@ -81,7 +81,7 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 
 | Family | Toolchain (verified on) |
 |---|---|
-| Sony SDK (provisional: `lib/*`) | ee-gcc2.9-991111, `-O2 -G0 -g` (lib/defhandler; also matches 2.9-990721/991111a, 2.95.3-136, 3.2) |
+| Sony SDK (provisional: `lib/*`) | ee-gcc2.95.3-136 + Ps2EeAs, `-O2 -G0 -g` (libmpeg: defhandler, alalc - only 136 gets `_sceMpegAlalcAlloc`'s branch layout) |
 
 ## Pitfalls
 
