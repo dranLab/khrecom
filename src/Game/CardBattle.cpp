@@ -1,13 +1,32 @@
 #include "khtypes.h"
+#include "Game/CardBattle.h"
 #include "include_asm.h"
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcFreezeDamage__10CardBattleRi);
+using namespace CardBattle;
+
+namespace CardBattle {
+class CStockFolder {
+public:
+    void destroy();
+    INT calcEnemyStockSkill();
+    void setStockInfo();
+};
+void calcFreezeDamage(INT& ioDamage);
+}
+extern "C" char D_00476980[]; /* __FILE__ */
+extern "C" char D_00476730[];
+extern "C" int abs(int);
+
+void CardBattle::calcFreezeDamage(INT& ioDamage) {
+    INT nPower = g_pStockSkillList[35].POWER[1];
+    ioDamage += nPower / 10;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", __Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _$_Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getInstance__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", init__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", main__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", disp__Q210CardBattle11CCardBattle);
+void CCardBattle::disp() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcPlayingCard__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exePlaying__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setNumberBreak__Q210CardBattle11CCardBattleUiUi);
@@ -18,51 +37,153 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayCard__Q210Car
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayStock__Q210CardBattle11CCardBattleiiPPQ210CardBattle11CBattleCardiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnchantCard__Q210CardBattle11CCardBattleiiPQ210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", decEnchantTime__Q210CardBattle11CCardBattleiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", destroyPlayCard__Q210CardBattle11CCardBattleii);
+void CCardBattle::destroyPlayCard(INT inFlag, INT inP1) { resetNowPlaying(inFlag); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", resetNowPlaying__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", resetEnchantCard__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getPlayingHandle__Q210CardBattle11CCardBattlei);
+HANDLE CCardBattle::getPlayingHandle(INT inSide) {
+    if (!m_pInstance) return 0;
+    if ((UINT)inSide < 2 && m_pInstance->m_uiState[0]) return m_pInstance->m_hOwner[0];
+    if ((inSide == 0 || inSide == 2) && m_pInstance->m_uiState[1]) return m_pInstance->m_hOwner[1];
+    return 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isStandingCard__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isPlayingCardStandNow__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isExecutingCard__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isPlayingCard__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isPlayingEnemyCard__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getPlayingCardPoint__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getPlayingCardID__Q210CardBattle11CCardBattleii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", addGimmickCount__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getGimmickCount__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", addFriendCount__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getFriendCount__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", addPlutoCount__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getPlutoCount__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setGimmickOwner__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getGimmickOwner__Q210CardBattle11CCardBattle);
+BOOL CCardBattle::isPlayingCard(INT inSide) {
+    if (!m_pInstance) return FALSE;
+    if ((UINT)inSide < 2 && !m_pInstance->m_uiState[0]) return FALSE;
+    if (inSide == 0 || inSide == 2) {
+        if (!m_pInstance->m_uiState[1]) return FALSE;
+    }
+    return TRUE;
+}
+BOOL CCardBattle::isPlayingEnemyCard() {
+    if (!m_pInstance) return FALSE;
+    return m_pInstance->m_uiState[1] != 0;
+}
+INT CCardBattle::getPlayingCardPoint(INT inSide) {
+    if (!m_pInstance) return -1;
+    if ((UINT)inSide < 2 && m_pInstance->m_uiState[0]) return m_pInstance->m_iPoint[0];
+    if ((inSide == 0 || inSide == 2) && m_pInstance->m_uiState[1]) return m_pInstance->m_iPoint[1];
+    return -1;
+}
+INT CCardBattle::getPlayingCardID(INT inSide, INT inIdx) {
+    if (!m_pInstance) return -1;
+    if ((UINT)inSide < 2 && m_pInstance->m_uiState[0]) return m_pInstance->m_cardData[0][inIdx][0];
+    if ((inSide == 0 || inSide == 2) && m_pInstance->m_uiState[1]) return m_pInstance->m_cardData[1][inIdx][0];
+    return -1;
+}
+void CCardBattle::addGimmickCount(INT n) {
+    if (m_pInstance) m_pInstance->m_iCountGimmick += n;
+}
+INT CCardBattle::getGimmickCount() {
+    if (!m_pInstance) return -1;
+    return m_pInstance->m_iCountGimmick;
+}
+void CCardBattle::addFriendCount(INT n) {
+    if (m_pInstance) m_pInstance->m_iCountFriend += n;
+}
+INT CCardBattle::getFriendCount() {
+    if (!m_pInstance) return -1;
+    return m_pInstance->m_iCountFriend;
+}
+void CCardBattle::addPlutoCount(INT n) {
+    if (m_pInstance) m_pInstance->m_iCountPluto += n;
+}
+INT CCardBattle::getPlutoCount() {
+    if (!m_pInstance) return -1;
+    return m_pInstance->m_iCountPluto;
+}
+void CCardBattle::setGimmickOwner(HANDLE h) {
+    if (m_pInstance) m_pInstance->m_hGimmickOwner = h;
+}
+HANDLE CCardBattle::getGimmickOwner() {
+    if (!m_pInstance) return 0;
+    return m_pInstance->m_hGimmickOwner;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", notifyMakeGimmick__Q210CardBattle11CCardBattleP4CARDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", notifyCompleteGimmick__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isPlayingGimmickCard__Q210CardBattle11CCardBattle);
+BOOL CCardBattle::isPlayingGimmickCard() {
+    if (!m_pInstance) return FALSE;
+    return m_pInstance->m_cardGimmick[0];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", initPlayingEnemy__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", dispPlayingEnemy__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", initCardBreak__Q210CardBattle11CCardBattleiUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", dispCardBreak__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcPointBreak__Q210CardBattle11CCardBattleii);
+INT CCardBattle::calcPointBreak(INT a, INT b) {
+    INT d = abs(a - b);
+    return d < 10 ? d : 9;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnemyCard__Q210CardBattle11CCardBattleiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", destroyEnemyCard__Q210CardBattle11CCardBattlei);
+void CCardBattle::destroyEnemyCard(INT inHandle) {
+    if (inHandle == m_hOwner[1]) destroyPlayCard(2, inHandle);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", destroyRevolver__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setRevolver__Q210CardBattle11CCardBattleiPQ210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getRevolver__Q210CardBattle11CCardBattlei);
+void CCardBattle::setRevolver(INT inSide, CCardRevolver* pRevolver) {
+    if (!(inSide)) AssertApp(D_00476980, 2774, D_00476730, 0);
+    m_pRevolver[inSide - 1] = pRevolver;
+}
+CCardRevolver* CCardBattle::getRevolver(INT inSide) {
+    if (!(inSide)) AssertApp(D_00476980, 2779, D_00476730, 0);
+    return m_pRevolver[inSide - 1];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setBattleEnd__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isBattleEnd__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setSuspend__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isSuspend__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isLevitate__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setBlack__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isBlack__Q210CardBattle11CCardBattle);
+BOOL CCardBattle::isBattleEnd() {
+    if (!m_pInstance) return TRUE;
+    return (m_pInstance->m_uiFlag & 0xc0000004) != 0;
+}
+void CCardBattle::setSuspend(BOOL b) {
+    if (m_pInstance) {
+        if (b) m_pInstance->m_uiFlag |= 0x10000;
+        else m_pInstance->m_uiFlag &= ~0x10000;
+    }
+}
+BOOL CCardBattle::isSuspend() {
+    if (!m_pInstance) return FALSE;
+    UINT uiMask = 0x10000;
+    return (m_pInstance->m_uiFlag & uiMask) != 0;
+}
+BOOL CCardBattle::isLevitate() {
+    if (!m_pInstance) return FALSE;
+    UINT uiMask = 0x4000;
+    return (m_pInstance->m_uiFlag & uiMask) != 0;
+}
+void CCardBattle::setBlack(BOOL b) {
+    if (m_pInstance) {
+        if (b) m_pInstance->m_uiFlag |= 0x40000;
+        else m_pInstance->m_uiFlag &= ~0x40000;
+    }
+}
+BOOL CCardBattle::isBlack() {
+    if (!m_pInstance) return FALSE;
+    UINT uiMask = 0x40000;
+    return (m_pInstance->m_uiFlag & uiMask) != 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setStockFolder__Q210CardBattle11CCardBattleP5CTaski);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", destroyStockFolder__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getStockFolder__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getStockFolderStockSkill__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcStockFolderEnemyStockSkill__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setStockFolderStockInfo__Q210CardBattle11CCardBattlei);
+CStockFolder* CCardBattle::getStockFolder(INT inSide) {
+    if (!m_pInstance) return NULL;
+    return m_pInstance->m_pStockFolder[inSide - 1];
+}
+INT CCardBattle::getStockFolderStockSkill(INT inSide) {
+    if (!m_pInstance) return 0;
+    CStockFolder* p = m_pInstance->m_pStockFolder[inSide - 1];
+    if (!p) return 0;
+    return *(SHORT*)((BYTE*)p + 0x84);
+}
+INT CCardBattle::calcStockFolderEnemyStockSkill() {
+    if (!m_pInstance) return 0;
+    CStockFolder* p = m_pInstance->m_pStockFolder[1];
+    if (!p) return 0;
+    return p->calcEnemyStockSkill();
+}
+void CCardBattle::setStockFolderStockInfo(INT inSide) {
+    if (m_pInstance) {
+        CStockFolder* p = m_pInstance->m_pStockFolder[inSide - 1];
+        if (p) p->setStockInfo();
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", init__Q210CardBattle13ENCHANT_PARAMiUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcEnchantParam__Q210CardBattle11CCardBattleRQ210CardBattle13ENCHANT_PARAM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcEnchant_AttackPoint__Q210CardBattle11CCardBattleRiR8ATK_KIND8ATK_ATTRUi);
@@ -80,7 +201,22 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelBreakCount__Q
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnemyDuelCard__Q210CardBattle11CCardBattleiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelEnd__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelPlayStock__Q210CardBattle11CCardBattlePPQ210CardBattle11CBattleCardi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isDuelEntryingCard__Q210CardBattle11CCardBattlei);
+BOOL CCardBattle::isDuelEntryingCard(INT inSide) {
+    if (!m_pInstance) return FALSE;
+    if ((UINT)inSide < 2) {
+        UINT s = m_pInstance->m_uiState[0];
+        if (s < 9) {
+            if (s >= 6) return TRUE;
+        }
+    }
+    if (inSide == 0 || inSide == 2) {
+        UINT s = m_pInstance->m_uiState[1];
+        if (s < 9) {
+            if (s >= 6) return TRUE;
+        }
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", __Q210CardBattle10CDuelGaugeP5CTask);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _$_Q210CardBattle10CDuelGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _initialize__Q210CardBattle10CDuelGauge);
