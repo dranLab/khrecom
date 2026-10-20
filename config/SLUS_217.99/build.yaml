@@ -16,11 +16,11 @@ overrides:
     cflags: -O2 -G0 -g
     source_root: null
     assembler: ee-gcc2.96
-  - match: lib/src/newlib/*     # newlib libm: the 991111a as inserts hazard nops only before .set noreorder (kf_sin, wf_sqrt)
-    compiler: ee-gcc2.9-991111
+  - match: lib/src/newlib/*     # newlib libm: the 991111-01 compiler pads div.s (EE erratum, ef_fmod); its as adds hazard nops only before .set noreorder
+    compiler: ee-gcc2.9-991111-01
     cflags: -O2 -G0 -g -fno-builtin
     source_root: null
-    assembler: ee-gcc2.9-991111a
+    assembler: ee-gcc2.9-991111-01
   - match: lib/src/gcc/*        # libgcc (GCC 2.9 libgcc2.c): __floatdisf's open jal delay slot needs the 2.9 assembler
     compiler: ee-gcc2.9-991111
     cflags: -O2 -G0 -g

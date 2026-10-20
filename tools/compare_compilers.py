@@ -126,7 +126,10 @@ def compile_with(compiler: Path, source: Path, cflags: str, symbols: Path, out: 
     compat = [sys.executable, "tools/ee_asm_compat.py", str(gcc_s), str(compat_s), "--source", str(source),
               "--symbols", str(symbols)]
     if assembler:
-        assemble = [f"tools/compilers/{assembler}/bin/ee-as", "-EL", gp, "-I", "include", "-o", str(out), str(compat_s)]
+        as_path = f"tools/compilers/{assembler}/bin/ee-as"
+        if not Path(as_path).exists():
+            as_path = f"tools/compilers/{assembler}/ee/bin/as"
+        assemble = [as_path, "-EL", gp, "-I", "include", "-o", str(out), str(compat_s)]
     elif snas:
         assemble = snas.split() + ["--stdout", gp, "-o", str(out), str(compat_s)]
         compat += ["--assembler", "snas"]
