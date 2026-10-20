@@ -8,6 +8,7 @@ Run inside WSL/Linux from the repo root:
 """
 
 import argparse
+import fnmatch
 import json
 import os
 import re
@@ -121,7 +122,19 @@ def compiler_commands(compiler: str) -> tuple[str, str | None]:
     return f"{wibo} {rel}/bin/ee-gcc.exe", f"{wibo} {snas.relative_to(ROOT).as_posix()}" if snas else None
 
 
-SOURCE_DATA = re.compile(r"^\s*//\s*SOURCE DATA:\s*(.*?)\s*$", re.MULTILINE)
+SOURCE_DATA = re.compile(r"^\s*(?://|#)\s*SOURCE DATA:\s*(.*?)\s*$", re.MULTILINE)
+SOURCE_SUFFIXES = (".c", ".cpp", ".s")
+
+
+def unit_toolchain(build_cfg: dict, unit: str) -> dict:
+    """compiler, cflags and source_root for one unit: build.yaml's defaults, overridden by the first entry of its
+    `overrides:` list whose `match` (an fnmatch pattern, e.g. lib/graphdev_*) matches the unit name."""
+    tc = {key: build_cfg.get(key) for key in ("compiler", "cflags", "source_root")}
+    for override in build_cfg.get("overrides") or []:
+        if fnmatch.fnmatchcase(unit, override["match"]):
+            tc.update({key: override[key] for key in tc if key in override})
+            break
+    return tc
 DATA_TYPES = {".data": "data", ".rodata": "rodata", ".bss": "bss", ".sdata": "sdata", ".sbss": "sbss"}
 
 
@@ -129,20 +142,21 @@ def source_config(splat_yaml: Path, opts: dict) -> tuple[Path, dict[str, list[st
     """The splat config with every file that has a source in src/ switched to C/C++.
 
     config/<VERSION>/<VERSION>.yaml stays as tools/split_objects.py writes it (all asm), so parallel branches never
-    edit it. A file's code comes from src/<unit>.cpp (or .c) as soon as that file exists; its data sections come
+    edit it. A file's code comes from src/<unit>.cpp (or .c, or .s for hand-written assembly: its subsegment stays
+    asm, write_ninja() assembles the source instead of splat's output) as soon as that file exists; its data sections come
     from the compiled object only when the source lists them in a comment, e.g. as its last line
         // SOURCE DATA: .data .rodata
     (until then they stay assembly, e.g. while INCLUDE_ASM'd functions still reference them). At the end of the
     file it shifts no line numbers, which matter wherever __LINE__ ends up in assert or allocation messages.
-    Returns (the generated yaml, unit -> data sections from source).
+    Returns (the generated yaml, unit -> data sections from source; every unit with a source is a key).
     """
     text = splat_yaml.read_text(encoding="utf-8")
     sources: dict[str, list[str]] = {}
     for path in sorted((ROOT / "src").rglob("*")):
-        if path.suffix not in (".c", ".cpp"):
+        if path.suffix not in SOURCE_SUFFIXES:
             continue
         unit = path.relative_to(ROOT / "src").with_suffix("").as_posix()
-        kind = path.suffix.lstrip(".")
+        kind = "asm" if path.suffix == ".s" else path.suffix.lstrip(".")
         name = re.escape(unit)
         text, count = re.subn(rf"^(      - \[0x[0-9A-F]+, )(?:asm|c|cpp)(, {name}\])", rf"\g<1>{kind}\2", text,
                               flags=re.MULTILINE)
@@ -249,7 +263,8 @@ def write_objdiff(opts: dict, build_cfg: dict, units: dict[str, list[str]], comp
         if name in compiled:
             unit["base_path"], source = compiled[name]
             unit["metadata"] = {"source_path": source}
-        unit["scratch"] = {"platform": "ps2", "compiler": build_cfg["compiler"], "c_flags": build_cfg["cflags"]}
+        tc = unit_toolchain(build_cfg, name)
+        unit["scratch"] = {"platform": "ps2", "compiler": tc["compiler"], "c_flags": tc["cflags"]}
         config["units"].append(unit)
     (ROOT / "objdiff.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8", newline="\n")
 
@@ -281,6 +296,20 @@ def write_original_labels(opts: dict) -> str:
     return out.as_posix()
 
 
+def toolchain_variables(tc: dict) -> dict[str, str]:
+    """The cc rule's per-toolchain variables (see unit_toolchain()): compiler command, flags, assembler command
+    (without -o) and the extra arguments for ee_asm_compat.py."""
+    gp = re.search(r"-G\s*(\d+)", tc["cflags"])
+    cc, snas = compiler_commands(tc["compiler"])
+    extra = f"--source-root {tc['source_root']}" if tc.get("source_root") else ""
+    if snas:
+        assemble = f"{snas} --stdout -G{gp.group(1) if gp else 0}"
+        extra += " --assembler snas" if extra else "--assembler snas"
+    else:
+        assemble = f"{CROSS}as {AS_FLAGS} -G{gp.group(1) if gp else 0}"
+    return {"cc": cc, "cflags": tc["cflags"], "assemble": assemble, "compat_extra": extra}
+
+
 def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg: dict,
                 units: dict[str, list[str]]) -> dict[str, str]:
     cfg_dir = f"config/{version}"
@@ -289,9 +318,8 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
     rom_out = str(Path(elf_out).with_suffix(".rom"))
     ld_script = opts["ld_script_path"]
 
-    cflags = build_cfg["cflags"]
-    gp_match = re.search(r"-G\s*(\d+)", cflags)
-    cc_dir = f"tools/compilers/{build_cfg['compiler']}"
+    symbols = f"{cfg_dir}/elf_symbol_addrs.txt"
+    default_tc = toolchain_variables(unit_toolchain({**build_cfg, "overrides": []}, ""))
 
     extra_scripts = [f"{cfg_dir}/linker_script_extra.ld"] + [
         f"{cfg_dir}/{name}" for name in ("undefined_funcs_auto.txt", "undefined_syms_auto.txt")
@@ -302,33 +330,26 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         n = ninja_syntax.Writer(f, width=120)
         n.comment(f"Generated by configure.py for {version} - do not edit.")
         n.variable("asflags", f"{AS_FLAGS} -G0")
-        n.variable("cc_asflags", f"{AS_FLAGS} -G{gp_match.group(1) if gp_match else 0}")
-        n.variable("cflags", cflags)
-        n.variable("cc_dir", cc_dir)
+        # The default toolchain (build.yaml); units matched by its `overrides:` set their own (see unit_toolchain).
+        for key, value in default_tc.items():
+            n.variable(key, value)
         n.newline()
 
         # See alignment_flags().
         set_align = f"{CROSS}objcopy $align_flags $out"
         n.rule("as", f"{CROSS}as $asflags -o $out $in && {set_align}", description="AS $in")
-        # Compile to assembly with the original compiler, post-process it with tools/ee_asm_compat.py and
+        # Compile to assembly with the unit's compiler, post-process it with tools/ee_asm_compat.py and
         # assemble it with the original assembler when the package has one (SN Systems' Ps2EeAs: it inserts
         # the EE's hazard and erratum nops, guided by -g's line labels), otherwise with modern binutils.
         # Windows-only tools (SN Systems' ee-gcc 2.95.x) run under wibo.
-        cc, snas = compiler_commands(build_cfg["compiler"])
-        symbols = f"{cfg_dir}/elf_symbol_addrs.txt"
         compat_args = f" --source $in --symbols {symbols} --own-data $own_data --unit-data $unit_data" if (ROOT / symbols).exists() else ""
-        if build_cfg.get("source_root"):
-            compat_args += f" --source-root {build_cfg['source_root']}"
-        if snas:
-            assemble = f"{snas} --stdout -G{gp_match.group(1) if gp_match else 0} -o $out $out.s"
-            compat_args += " --assembler snas"
-        else:
-            assemble = f"{CROSS}as $cc_asflags -o $out $out.s"
+        compat_args += " $compat_extra"
+        assemble = "$assemble -o $out $out.s"
         # The preprocessor writes the included headers to $out.d (gcc 2.95 has no -MT: its target is the bare
         # object name, so it is replaced by $out), which ninja reads to rebuild the object when a header changes.
         n.rule(
             "cc",
-            f"{cc} -S $cflags -I include -I src -Wp,-MD,$out.d -o $out.gcc.s $in"
+            f"$cc -S $cflags -I include -I src -Wp,-MD,$out.d -o $out.gcc.s $in"
             f" && sed -i '1s|^[^:]*:|$out:|' $out.d"
             f" && {sys.executable} tools/ee_asm_compat.py $out.gcc.s $out.s{compat_args}"
             f" && {assemble} && {set_align}",
@@ -364,10 +385,15 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
         for obj, entries in by_object.items():
             src = entries[0].src_paths[0].as_posix()
             suffix = entries[0].src_paths[0].suffix
+            unit = entries[0].segment.name
+            if suffix == ".s" and (ROOT / "src" / f"{unit}.s").exists():  # hand-written assembly as source
+                src = f"src/{unit}.s"
             align = {"align_flags": object_fixups(entries, compiled=suffix in (".c", ".cpp", ".cc"))}
             if suffix in (".c", ".cpp", ".cc"):  # ee-gcc picks cc1 / cc1plus from the extension
+                tc = toolchain_variables(unit_toolchain(build_cfg, unit))
                 n.build(obj, "cc", src, variables={**align, "own_data": own_data_ranges(entries),
-                                                 "unit_data": unit_data.get(entries[0].segment.name, "none")},
+                                                 "unit_data": unit_data.get(unit, "none"),
+                                                 **{k: v for k, v in tc.items() if v != default_tc[k]}},
                         implicit=["tools/ee_asm_compat.py"])
                 compiled[entries[0].segment.name] = (obj, src)
             elif suffix == ".s":

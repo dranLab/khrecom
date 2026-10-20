@@ -3,3 +3,10 @@ elf: iso/SLUS_217.99            # original ELF (not committed)
 compiler: ee-gcc2.95.3-136   # SN Systems ProDG build (Windows, runs under wibo)
 cflags: -O2 -G0 -fno-exceptions -fno-rtti -g   # -g: its line labels steer Ps2EeAs's erratum nops; only build.cpp has exception tables
 source_root: c:/KHCOM/MainApp/   # original path prefix of __FILE__ (src/ in this repo)
+# Per-unit toolchains (the libraries were built with other compilers than the game): the first entry whose `match`
+# (an fnmatch pattern on the unit name) matches overrides compiler / cflags / source_root. More specific first.
+overrides:
+  - match: lib/*                # Sony SDK (provisional until Phase 1 of docs/plan-library-decompilation.md)
+    compiler: ee-gcc2.9-991111  # Cygnus/Sony ee-gcc, assembled with GNU as
+    cflags: -O2 -G0 -g
+    source_root: null

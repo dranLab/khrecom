@@ -24,7 +24,7 @@ from elftools.elf.relocation import RelocationSection
 ROOT = Path(__file__).resolve().parent.parent
 CROSS = "mips-linux-gnu-"
 sys.path.insert(0, str(ROOT))
-from configure import compiler_commands  # noqa: E402  (the build's exact commands)
+from configure import compiler_commands, unit_toolchain  # noqa: E402  (the build's exact commands)
 # R_MIPS_26, R_MIPS_HI16, R_MIPS_LO16, R_MIPS_PC16 (branches to global labels)
 RELOC_MASKS = {4: 0x03FFFFFF, 5: 0xFFFF, 6: 0xFFFF, 10: 0xFFFF}
 
@@ -118,15 +118,17 @@ def functions(obj: Path) -> dict[str, Function]:
 def compile_with(compiler: Path, source: Path, cflags: str, symbols: Path, out: Path) -> str | None:
     """Same pipeline as configure.py's cc rule. Returns an error message, or None on success."""
     gcc_s, compat_s = out.with_suffix(".gcc.s"), out.with_suffix(".s")
+    gp = re.search(r"-G\s*(\d+)", cflags)
+    gp = f"-G{gp.group(1) if gp else 0}"
     cc, snas = compiler_commands(compiler.name)
     compat = [sys.executable, "tools/ee_asm_compat.py", str(gcc_s), str(compat_s), "--source", str(source),
               "--symbols", str(symbols)]
     if snas:
-        assemble = snas.split() + ["--stdout", "-G0", "-o", str(out), str(compat_s)]
+        assemble = snas.split() + ["--stdout", gp, "-o", str(out), str(compat_s)]
         compat += ["--assembler", "snas"]
     else:
         assemble = [f"{CROSS}as", "-EL", "-march=r5900", "-mabi=eabi", "-no-pad-sections", "-I", "include",
-                    "-G0", "-o", str(out), str(compat_s)]
+                    gp, "-o", str(out), str(compat_s)]
     steps = [cc.split() + ["-S", *cflags.split(), "-I", "include", "-I", "src", "-o", str(gcc_s), str(source)],
              compat, assemble]
     for step in steps:
@@ -141,14 +143,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("version")
     parser.add_argument("source", type=Path, help="e.g. src/System/Graphic/ColorFader.cpp")
-    parser.add_argument("--cflags", help="override the flags from build.yaml")
+    parser.add_argument("--cflags", help="override the unit's flags from build.yaml (its default or `overrides:`)")
     args = parser.parse_args()
 
     cfg_dir = ROOT / "config" / args.version
     opts = yaml.safe_load((cfg_dir / f"{args.version}.yaml").read_text(encoding="utf-8"))["options"]
     build_cfg = yaml.safe_load((cfg_dir / "build.yaml").read_text(encoding="utf-8"))
-    cflags = args.cflags or build_cfg["cflags"]
     unit = args.source.relative_to("src").with_suffix("").as_posix()
+    cflags = args.cflags or unit_toolchain(build_cfg, unit)["cflags"]
     target_obj = ROOT / opts["build_path"] / "expected" / "units" / f"{unit}.o"
     if not target_obj.exists():
         subprocess.run(["ninja", target_obj.relative_to(ROOT).as_posix()], cwd=ROOT, check=True,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""List game files that are not decompiled yet, as work for (sub-)agents.
+"""List game files (or with --lib, library files) that are not decompiled yet, as work for (sub-)agents.
 
 Per file: code size, functions (and how many are weak, i.e. inline functions emitted here), vtables, and the
 headers whose inline functions left strings in its .rodata (assert/allocation messages). Such headers must be
@@ -11,6 +11,7 @@ Needs a configured tree (configure.py) for the original assembly in build/<VERSI
 Usage:
     python3 tools/candidates.py SLUS_217.99                     # smallest first
     python3 tools/candidates.py SLUS_217.99 --no-headers --max-size 0x400 --limit 20
+    python3 tools/candidates.py SLUS_217.99 --lib               # SDK / runtime units (lib/...)
 """
 
 import argparse
@@ -29,6 +30,7 @@ def main() -> None:
     parser.add_argument("version")
     parser.add_argument("--max-size", type=lambda s: int(s, 0), default=None, help="largest code size")
     parser.add_argument("--no-headers", action="store_true", help="only files without header strings in .rodata")
+    parser.add_argument("--lib", action="store_true", help="only the library units (lib/...) instead of the game's")
     parser.add_argument("--limit", type=int, default=40)
     args = parser.parse_args()
 
@@ -52,7 +54,7 @@ def main() -> None:
 
     rows = []
     for (start, unit), (end, _) in zip(code, code[1:] + [(code_end, "")]):
-        if unit.startswith("lib/") or (ROOT / "src" / f"{unit}.cpp").exists() or (ROOT / "src" / f"{unit}.c").exists():
+        if unit.startswith("lib/") != args.lib or any((ROOT / "src" / f"{unit}{ext}").exists() for ext in (".cpp", ".c", ".s")):
             continue
         size = end - start
         if args.max_size is not None and size > args.max_size:

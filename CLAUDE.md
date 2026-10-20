@@ -21,7 +21,7 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
 - `tools/setup_worktree.sh` - prepare a fresh git worktree (links game files and tools, runs configure).
 
 A *unit* is one original object file, named after its source path, e.g. `System/Graphic/ColorFader`
-(from `c:/KHCOM/MainApp/System/Graphic/ColorFader.cpp`). Libraries are `lib/...`; skip them.
+(from `c:/KHCOM/MainApp/System/Graphic/ColorFader.cpp`). Libraries are `lib/...`: see "Library units" below.
 
 ## Where things are
 
@@ -68,6 +68,20 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 - Asserts: `AssertApp(__FILE__, __LINE__, "<expanded expression>", 0)`; debug allocations:
   `com_malloc_d(size, __FILE__ "(" line ")", -1)` (see `System/HeapMan.h`, `System/MainApp.h` in `ref/`).
 - `long` is 64-bit; `int`, `LONG`, `INT` are 32-bit.
+
+## Library units (`lib/...`, branch `sdk-decomp`; plan: `docs/plan-library-decompilation.md`)
+
+- Sony SDK, libgcc, newlib, libsn: built with other toolchains. `build.yaml`'s `overrides:` (fnmatch on the unit
+  name, first match wins) sets `compiler`/`cflags`/`source_root` per unit; a compiler package without Ps2EeAs is
+  assembled with GNU as (gcc schedules the delay slots, no erratum nops). `compare_compilers.py` uses the override.
+- No `ref/`, no `__LINE__`/assert strings. SDK declarations go in `include/sdk/*.h` (`#include "sdk/libmpeg.h"`),
+  written from call sites and the asm; library-internal structs in the unit's own source or `src/lib/*.h`.
+- Hand-written assembly: `src/lib/<unit>.s` replaces splat's `.s` for that unit (same object, GNU as).
+- `candidates.py --lib` lists the open library units; `check.sh` reports library progress separately.
+
+| Family | Toolchain (verified on) |
+|---|---|
+| Sony SDK (provisional: `lib/*`) | ee-gcc2.9-991111, `-O2 -G0 -g` (lib/defhandler; also matches 2.9-990721/991111a, 2.95.3-136, 3.2) |
 
 ## Pitfalls
 

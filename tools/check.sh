@@ -70,6 +70,7 @@ def objdiff_only(unit, names):
     pairs = pair_unnamed(t, b)
     return {n for n in names if n in t and pairs.get(n, n) in b and t[n].difference(b[pairs.get(n, n)]) is None}
 total = decompiled = 0
+lib = {"files": 0, "complete": 0, "total": 0, "decompiled": 0}  # library units (lib/...), counted separately too
 for u in sorted(json.load(open("build/report.json"))["units"], key=lambda u: u["name"]):
     if u["name"] not in units:
         continue
@@ -90,6 +91,8 @@ for u in sorted(json.load(open("build/report.json"))["units"], key=lambda u: u["
     lines.append(line)
     is_complete = len(done) == len(fns)
     complete += is_complete
+    if u["name"].startswith("lib/"):
+        lib["files"] += 1; lib["complete"] += is_complete; lib["total"] += len(fns); lib["decompiled"] += len(done)
     if full or not is_complete or units[u["name"]] in changed:
         shown.append(line)
 summary = f"  total: {decompiled} functions decompiled in {len(units)} files"
@@ -99,6 +102,9 @@ if shown:
 if len(shown) < len(lines):
     print(f"  ({len(lines) - len(shown)} more files, all complete, not listed; every file: build/check.overview.txt)")
 print(f"{summary}; {complete} files complete, {len(units) - complete} not")
+if lib["files"]:
+    print(f"  of these, libraries (lib/): {lib['decompiled']}/{lib['total']} functions in {lib['files']} files;"
+          f" {lib['complete']} complete, {lib['files'] - lib['complete']} not")
 PY
 else
     echo "  (objdiff report failed)"
