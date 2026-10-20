@@ -1,5 +1,4 @@
 #include "Game/Collision/CollUtilA.h"
-#include "include_asm.h"
 
 // PARTIAL: from System/Coord.h
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -113,14 +112,6 @@ INT CCollUtil::_detectActorTrapXZ(const ETMoveData& moveData, const EventTrapDat
     return ret;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilA", detect2DLineLine__9CCollUtilRC7FVECTORT1);
-// Nonmatching: the final 4/1 choice becomes "li v1,1; ... movn v0,v1,s5" instead of
-// "beqz s5 (li v0,4); b (li v0,1)" (jump-pass conditional move); everything else matches.
-// Tried (2026-10-20): all 6 orders of the three tests, nested ifs, else-if chain, a ret variable, the
-// last value as an expression. "if (fg0 == 0 || fg1 == 0) return 0; return 1;" as the last test gives the
-// branch form (no movn) but with the arms mirrored (bnez s5; li v0,1 / b; li v0,4); the mirrored source
-// ("... return 1;" test then "if (fg0 == 0 || fg1 != 0) return 0; return 4;") is 8 bytes longer.
-#if 0
 INT CCollUtil::detect2DLineLine(const FVECTOR& vP0, const FVECTOR& vP1) {
     INT fg0;
     INT fg1;
@@ -144,16 +135,16 @@ INT CCollUtil::detect2DLineLine(const FVECTOR& vP0, const FVECTOR& vP1) {
     if (fg0 == 0 && fg1 != 0) {
         return 2;
     }
+    if (fg0 != 0 && fg1 != 0) {
+        /* through the local: a two-insn arm keeps the jump pass from turning the 4/1 choice into a movn */
+        fg0 = 1;
+        return fg0;
+    }
     if (fg0 != 0 && fg1 == 0) {
         return 4;
     }
-    if (fg0 != 0 && fg1 != 0) {
-        return 1;
-    }
     return 0;
 }
-#endif
-
 INT CCollUtil::detect2DLinePoint(const FVECTOR& vP0, const FVECTOR& vP1, const FVECTOR& vPC) {
     FVECTOR vec0;
     FVECTOR vec1;
