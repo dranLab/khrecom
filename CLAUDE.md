@@ -76,7 +76,8 @@ A *unit* is one original object file, named after its source path, e.g. `System/
   assembled with GNU as (gcc schedules the delay slots, no erratum nops). `compare_compilers.py` uses the override.
 - No `ref/`, no `__LINE__`/assert strings. SDK declarations go in `include/sdk/*.h` (`#include "sdk/libmpeg.h"`),
   written from call sites and the asm; library-internal structs in the unit's own source or `src/lib/*.h`.
-- Hand-written assembly: `src/lib/<unit>.s` replaces splat's `.s` for that unit (same object, GNU as).
+- Hand-written assembly: `src/lib/<unit>.s` replaces splat's `.s` for that unit (same object, GNU as); its data
+  from source with a last line `# SOURCE DATA: .data` (klib.s).
 - `candidates.py --lib` lists the open library units; `check.sh` reports library progress separately.
 
 | Family | Toolchain (verified on) |
