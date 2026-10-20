@@ -137,6 +137,7 @@ private:
     FVECTOR m_vTargetPos;    /* 0x90 */
     TIMEQ m_nMoveTime;       /* 0xa0 */
     INT m_nFlag;             /* 0xa4 */
+    friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
     C2DSeqLightMarkAgent(CTask* pParent);
