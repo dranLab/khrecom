@@ -39,7 +39,9 @@ inline void _battleEnemyCheckIndex(INT inIndex, INT inState) {
 class CBattleEnemy : public CEntity {
 private:
     // PARTIAL: split into the original members for Game/Enemy/BattleEnemy (same layout)
-    UBYTE _m_0x1d0[0x30]; /* 0x1d0 m_vHitBackVel, m_vConfusePlayerPos, m_vBackupVel */
+    FVECTOR m_vHitBackVel;       /* 0x1d0 */
+    FVECTOR m_vConfusePlayerPos; /* 0x1e0 */
+    FVECTOR m_vBackupVel;        /* 0x1f0 */
     ULONGLONG m_ullBtlEnemyFlag; /* 0x200 */
     ULONGLONG m_ullBackupFlag;   /* 0x208 */
     INT m_iSysStep;              /* 0x210 */
@@ -278,6 +280,10 @@ protected:
     virtual void commonEndAttack();
 
 public: // PARTIAL: state wrappers added for Game/Enemy/BattleEnemy
+    void updateDamageTimer_();
+    void updateBindTimer_();
+    void enableBind_(BOOL inEnable);
+    void homingToPlayer(FLOAT inRate);
     INT getSize() const;
     FLOAT getDamageRate_() const;
     void changeMainState(INT inState);
