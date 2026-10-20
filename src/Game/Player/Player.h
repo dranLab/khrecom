@@ -131,6 +131,7 @@ using PL::DBGWAIT;
 class CPlayer : public CEntity, public CPlayerPad {
 public: // PARTIAL: members public for Game/Player/PlayerRiku
     void cmdState_setEncountWait(); // PARTIAL: added for Game/Enemy/MapEnemy
+    void setCardSnatch(INT inFlag); // PARTIAL: added for Game/CardRevolver
     UBYTE _m_0x21c[0x80];        /* 0x21c CStateTemplate<CPlayer> m_State[4] */
 public:
     INT m_iState;                /* 0x29c */

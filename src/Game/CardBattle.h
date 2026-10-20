@@ -117,6 +117,15 @@ public:
     virtual void main();
     virtual void disp();
     void resetNowPlaying(INT inFlag);
+    // PARTIAL: added for Game/CardRevolver
+    BOOL testBreakingCard(UINT inSide);
+    static BOOL isExecutingCard(INT inSide);
+    INT setPlayCard(HANDLE inOwner, INT inSide, class CBattleCard* inCard, CARD* inData, INT inTest);
+    INT setDuelPlayStock(class CBattleCard** inCards, INT inSkill);
+    INT setEnemyPronounceCard(HANDLE inOwner, class CBattleCard* inCard);
+    static void decEnchantTime(INT inSide, INT inKind, INT inFlag);
+    friend class CCardRevolver;
+    INT setPlayStock(HANDLE inOwner, INT inSide, class CBattleCard** inCards, INT inSkill, INT inExtra, INT inFirst, INT inTest);
     static HANDLE getPlayingHandle(INT inSide);
     static BOOL isPlayingCard(INT inSide);
     static BOOL isPlayingEnemyCard();
@@ -153,6 +162,7 @@ public:
     void resetEnchantCard(INT inSide);
 };
 
+#ifndef GAME_CARDREVOLVER_CPP /* full class in Game/CardRevolver.h */
 // PARTIAL: added for Game/Player/FriendKing
 class CCardRevolver {
     UBYTE _m_0x00[0x4c]; // PARTIAL: added for Game/Enemy/HumanBoss
@@ -184,6 +194,7 @@ public:
     INT calcPlutoMark();
     void dropPlutoMarkCard(const FVECTOR* inPos);
 };
+#endif
 }
 
 #endif /* GAME_CARDBATTLE_H */
