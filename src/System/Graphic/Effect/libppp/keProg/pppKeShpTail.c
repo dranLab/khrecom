@@ -2,7 +2,6 @@
 #include "Ke.h"
 #include "System/Graphic/Effect/libppp/eiProg/pppColor.h"
 #include "System/Graphic/Effect/libppp/draw/shape.h"
-#include "include_asm.h"
 
 void pppKeShpTail(pppPObject *pobj, PKeShpTail *dat, pppCtrlTable *ctbl) {
     VKeShpTail *pThis;
@@ -64,11 +63,6 @@ void pppKeShpTail(pppPObject *pobj, PKeShpTail *dat, pppCtrlTable *ctbl) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/keProg/pppKeShpTail", pppKeShpTailDraw);
-
-/* 4 lines differ: the original computes e = d * sclSft before the "d == 0" test (mul.s in the bc1f delay
- * slot); writing it there makes global-alloc give s8 to the fv0 address instead of %hi(ppvCurPrimp). */
-#if 0
 /* VU0 macro-mode helpers (vf26..vf31 as scratch, as in the original) */
 #define TAIL_SCALE_XYZ(d, s, v)                                                         \
     {                                                                                   \
@@ -247,10 +241,10 @@ void pppKeShpTailDraw(pppPObject *pobj, PKeShpTail *dat, pppCtrlTable *ctbl) {
     if (dat->World) {
         d *= 0.01f;
     }
+    e = d * sclSft;
     if (d == 0.0f) {
         i = 0;
     }
-    e = d * sclSft;
     pFv0 = pThis->Stk;
     j = pThis->Cur;
     m = pThis->StkNum - 1;
@@ -263,6 +257,9 @@ void pppKeShpTailDraw(pppPObject *pobj, PKeShpTail *dat, pppCtrlTable *ctbl) {
     }
     sceVu0CopyVector(fv3, pFv0[j]);
     b = d;
+    /* Hack: an empty asm takes an issue slot in this block, which keeps sched1 from moving the hoisted
+     * %hi(ppvCurPrimp) up; with it, global-alloc gives s8 to that instead of to &fv0. */
+    __asm__("" : "+f"(sclSft));
     sceVu0SubVector(fv2, fv3, fv1);
     c = KeVu0VecLen(fv2);
     f = c;
@@ -311,7 +308,6 @@ void pppKeShpTailDraw(pppPObject *pobj, PKeShpTail *dat, pppCtrlTable *ctbl) {
         }
     }
 }
-#endif
 
 void pppKeShpTailCon(pppPObject *pobj, pppCtrlTable *ctbl) {
     VKeShpTail *pThis = (VKeShpTail *)&pobj->val[ctbl->useVal[IKeShpTail_This]];
