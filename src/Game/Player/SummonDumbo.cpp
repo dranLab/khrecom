@@ -23,7 +23,6 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/Player/PlayerCamera.h"
 #include "Game/Player/PlayerAttack.h"
 #include "Game/Movement.h"
-#include "include_asm.h"
 
 namespace Summon {
 
@@ -108,11 +107,6 @@ void CSummonDumbo::beginStateAction1() {
     homingPlayerTargetY(0, m_fMoveSpdXZ);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/SummonDumbo", stateAction1__Q26Summon12CSummonDumbo);
-
-/* Best attempt: same size, differs in register allocation / scheduling of the stick-turn block (the original
- * keeps x and the dead-zone-adjusted value in separate registers and loads WORK0 before the x < 0 branch). */
-#if 0
 } // namespace Summon
 
 static inline FLOAT _abs(FLOAT inValue) {
@@ -148,15 +142,11 @@ void CSummonDumbo::stateAction1() {
     }
     FVECTOR rot = getRot();
     FLOAT x = getAnalogLX(0) * (1.0f / 4096.0f);
-    PATK_DATA* atk = m_pAtkData;
-    FLOAT speed = atk->MAX_SPEED * 0.01f;
+    FLOAT speed = m_pAtkData->MAX_SPEED * 0.01f;
     if (_abs(x) > 0.25f) {
-        if (x < 0.0f) x += 0.25f;
-        else x -= 0.25f;
-        FLOAT r = rot.y - x * atk->WORK0 * 0.1f * getFrameRateF() * 0.017453292f;
-        if (r < -3.1415927f) r += 6.2831855f;
-        else if (r > 3.1415927f) r -= 6.2831855f;
-        rot.y = r;
+        if (x < 0.0f) x = (x + 0.25f) * m_pAtkData->WORK0 * 0.1f * getFrameRateF() * 0.017453292f;
+        else x = (x - 0.25f) * m_pAtkData->WORK0 * 0.1f * getFrameRateF() * 0.017453292f;
+        rot.y = _limitPI(rot.y - x);
         speed *= 0.5f;
         m_pPlayer->getPlayerCamera()->setFlag(0x800, 1);
     }
@@ -171,7 +161,6 @@ void CSummonDumbo::stateAction1() {
     }
     if (getTimer() <= 0) changeMotion(5, 0, 1, -1, 0, 0, 0);
 }
-#endif
 
 void CSummonDumbo::beginStateExit() {
     m_iState = 5;
