@@ -122,6 +122,7 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 | Sony SDK (`lib/*`: libkernl, libmpeg, libdma, ...) | ee-gcc2.9-991111 + ee-as 2.10 (`assembler: ee-gcc2.96`), `-O2 -G0 -g`: one toolchain for all Sony libs (alarm: kCopy only matches 991111; libmpeg error.c saves with `sd`, 2.95.3 with `sq`). A function that only matches another compiler usually needs a source change (alalc: an inverted `if`) |
 | libat3dec (`lib/init`, `lib/hncAt3dec`) | ee-gcc2.96 + its ee-as 2.10, `-O2 -G0 -g` (atrac2_mode_* only match 2.96; hncAt3dec saves registers 8 bytes apart, the Sony 991111 builds 16) |
 | libgcc (`lib/src/gcc/*`, from GCC 2.9's libgcc2.c) | ee-gcc2.9-991111 + the 2.9 ee-as of ee-gcc2.9-990721 (`assembler: ee-gcc2.9-990721`): __floatdisf leaves a `jal` delay slot open that GNU as 2.10 would fill. Source is GCC's own (`src/lib/src/gcc/libgcc2.h` has the types and `umul_ppmm`) |
+| newlib libm (`lib/src/newlib/*`, fdlibm) | the `lib/*` default (991111 + ee-as 2.10; the 2.9 assembler adds an `mfc1` hazard nop the original lacks). Source is newlib's own; `src/lib/src/newlib/libm/fdlibm.h` has the word-access macros |
 
 ## Pitfalls
 
