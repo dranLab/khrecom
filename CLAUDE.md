@@ -105,6 +105,9 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 - Open in graphdev_checkModelVersion (sceGsSetDefDispEnv parked): structure matches (if/else if chain, not switch;
   DX = dx*magh + ((long)off[0] + 636) through a `long` temp); left: the original computes DY and off[0]+636
   before magh and ORs the DISPLAY fields in another order. String kept by an unused static inline placeholder.
+- Open in csc (_doCSC2, _sceMpegCscStoreRefImage parked; handlers match): sceMpegCbData must be the 32-byte union
+  (stack layout); the IPU command store + cmd-type check is an inline taking cmd as parameter; left: 2-register
+  swaps (0xffc0 vs D3_CHCR address in _doCSC2, rgb/qwc s1/s2 in the inlined small-picture CSC block).
 - GNU as fills an open delay slot only when no label precedes the branch: -g's `$LM` line labels count. A `j $31`
   left unfilled where the original filled it: put the last statement and `}` on one line (lib/init).
 
