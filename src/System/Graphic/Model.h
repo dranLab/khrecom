@@ -36,14 +36,31 @@ public:
     // directly (an inline CModel setter adds an addiu per model and does not match)
     SHORT m_nFlag;       /* 0x030 */
 private:
-    UBYTE _m_0x32[0xa];  /* 0x032 m_nPacketSize .. 0x03c */
+    USHORT m_nPacketSize;     /* 0x032 */ // PARTIAL: split out for System/Graphic/Model
+    class CSemiModel* m_pSemiModel; /* 0x034 */
+    class CFadeModel* m_pFadeModel; /* 0x038 */
     CLightUnit* m_pLightUnit; /* 0x03c PARTIAL: split out for Game/ModelObj */
     UBYTE _m_0x40[0x14]; /* 0x040 .. 0x054 */
     CCoords* m_pCrds;    /* 0x054 PARTIAL: split out for System/Graphic/DispList */
     const MODELDATA* m_pData; /* 0x058 */
-    UBYTE _m_0x5c[0x98]; /* 0x05c m_Mode .. 0x0f4 */
+    USHORT m_Mode;       /* 0x05c */ // PARTIAL: split out for System/Graphic/Model
+    USHORT m_ShaderOption; /* 0x05e */
+    INT m_BBoxFlag;        /* 0x060 */
+    BYTE m_TransTexCount;  /* 0x064 */
+    SBYTE m_BoneSkip;      /* 0x065 */
+    unsigned char m_Pad[2];
+    struct { BYTE* m_pTex; INT m_n; } m_TexInfo[16]; /* 0x068 TexInfoStub */
+    void* m_TexUV;         /* 0x0e8 _TEX_UV_OFFSET* */
+    void* m_pTexAnm;       /* 0x0ec CModelTexAnm* */
+    CTask* m_pTask;      /* 0x0f0 */
     FMATRIX* m_pWSMat;   /* 0x0f4 */
-    UBYTE _m_0xf8[0x28]; /* 0x0f8 m_pShadowMapModel .. 0x120 */
+    void* m_pShadowMapModel; /* 0x0f8 */
+    BBOX m_BBox;         /* 0x0fc */
+    struct SHADERDESC* m_pShader; /* 0x114 */
+    UBYTE _m_0x118[0x8];
+    static FMATRIX* m_pWSMatCache;
+    static u_long128* m_pMpg;
+    static INT m_iSendFlg;
 
 public:
     CModel(const MODELDATA* pData = NULL); // PARTIAL: added for Form/Menu/MenuModel
@@ -74,6 +91,28 @@ public:
     void setLightUnit(CLightUnit* p) { m_pLightUnit = p; } // PARTIAL: added for Game/ModelObj
     void setAlphaScale(FLOAT inScale);
     void changeTexture(const CHAR* inSrc, const CHAR* inDst); // PARTIAL: added for Game/Enemy/MapEnemyShadow
+    // PARTIAL: added for System/Graphic/Model
+    void setColorScale(FLOAT r, FLOAT g, FLOAT b, FLOAT a);
+    void setShadowSize(INT nSize);
+    void setModelData(const MODELDATA* pData);
+    void releaseData();
+    void sendTexture(u_long* pTag);
+    void _disp0_SetTexture(INT nFlag, u_long* pTag);
+    u_long* _disp0_GetData(UINT& nSize, INT nFlag);
+    void disp(FLOAT fRate);
+    INT getCoordNum() const;
+    INT link(CCoords& crds);
+    void calcWorldBBox(INT n);
+    void* getExtendClut(INT nTex, INT nType);
+    INT getTextureIndex(const CHAR* pName) const;
+    INT link(CTask* p, const CHAR* pName);
+    INT link(CCoords& crds, const CHAR* pName);
+    INT assign(CTask* p, INT n);
+    INT assign(CCoords& crds, INT n);
+    INT assign(CCoords& crds, const CHAR* pName, INT n);
+    INT assign(CTask* p, const CHAR* pName, INT n);
+    void changeTextureSub(INT nIdx, const struct TexInfo* pTex);
+    void setupUVScroll(INT n);
 };
 
 #ifdef GAME_ENTITY_H

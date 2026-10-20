@@ -1,0 +1,435 @@
+#include "khtypes.h"
+#include "System/Graphic/Model.h"
+#include "System/Task.h"
+#include "include_asm.h"
+
+class CRsrcData;
+enum NAME_CASE { NAME_CASE_SENSITIVE = 0 };
+class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs the full RsrcData.h classes */
+public:
+    static MODELDATA** getRsrcMDL(const CHAR* pszName, NAME_CASE nc);
+    static MODELDATA** getRsrcMDL(INT nGroup);
+    static TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
+    static MODELDATA* getRsrcAMF(const CHAR* pszName, NAME_CASE nc);
+};
+extern "C" char D_00460EB8[]; /* __FILE__ */
+extern "C" char D_00460EE8[];
+extern "C" char D_00460F18[];
+extern "C" char D_00460F58[];
+extern "C" char D_00460EF0[];
+extern "C" char D_00460F10[];
+extern "C" char D_00460F20[];
+extern "C" char D_00460F28[];
+extern "C" int strcmp(const char*, const char*);
+extern "C" int strncasecmp(const char*, const char*, unsigned int);
+struct TexInfo;
+
+class CShader;
+
+CShader* createDummyShader() { return NULL; }
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __6CModelPC9MODELDATA);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_6CModel);
+void CModel::resetWorldScreenMatrix() { m_pWSMatCache = NULL; }
+void CModel::resetMicroProgram() { m_pMpg = NULL; }
+void CModel::resetSendCtrl(INT nMode) { m_iSendFlg &= ~nMode; }
+void CModel::setSendCtrl(INT nMode) { m_iSendFlg |= nMode; }
+u_long128* CModel::getMicroProg() {
+    if (m_pShader) return *(u_long128**)((BYTE*)m_pShader + 4);
+    return NULL;
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", searchShaderDesc__FUs);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", releaseData__6CModel);
+INT CModel::link(CTask* p, const CHAR* pName) {
+    if (!(p)) AssertApp(D_00460EB8, 451, D_00460EE8, 0);
+    CCoords* pCrds = p->getCoords();
+    if (!pCrds) {
+        p->createCoords();
+        pCrds = p->getCoords();
+    }
+    m_pTask = p;
+    return link(*pCrds, pName);
+}
+INT CModel::link(CCoords& crds, const CHAR* pName) {
+    MODELDATA* m = CRsrcDB::getRsrcAMF(pName, NAME_CASE_SENSITIVE);
+    if (!m) {
+        TRACE(D_00460EF0, pName);
+        AssertApp(D_00460EB8, 469, D_00460F10, 0);
+    }
+    m_pData = m;
+    return link(crds);
+}
+INT MODELDATA::getBoneIndex(const CHAR* pName) const {
+    if (pName) {
+        for (INT i = 0; i < m_nBoneNum; i++) {
+            if (!strncasecmp(pName, (CHAR*)m_pBoneLabel + i * 0x14, 16)) return i;
+        }
+    }
+    return -1;
+}
+INT CModel::getBoneIndex(const CHAR* pName) const {
+    INT n = -1;
+    if (m_pData) n = m_pData->getBoneIndex(pName);
+    return n;
+}
+MODELDATA* AMFfromMDL(const CHAR* pszName, INT nIdx) {
+    MODELDATA** ret = CRsrcDB::getRsrcMDL(pszName, NAME_CASE_SENSITIVE);
+    if (!(ret)) AssertApp(D_00460EB8, 500, D_00460F18, 0);
+    return ret[nIdx];
+}
+MODELDATA* AMFfromMDL(INT nGroup, INT nIdx) {
+    MODELDATA** ret = CRsrcDB::getRsrcMDL(nGroup);
+    if (!(ret)) AssertApp(D_00460EB8, 508, D_00460F18, 0);
+    return ret[nIdx];
+}
+INT CModel::assign(CTask* p, const CHAR* pName, INT n) {
+    if (!(p)) AssertApp(D_00460EB8, 516, D_00460EE8, 0);
+    CCoords* pCrds = p->getCoords();
+    if (!(pCrds)) AssertApp(D_00460EB8, 518, D_00460F20, 0);
+    m_pTask = p;
+    return assign(*pCrds, pName, n);
+}
+INT CModel::assign(CCoords& crds, const CHAR* pName, INT n) {
+    MODELDATA* d = CRsrcDB::getRsrcAMF(pName, NAME_CASE_SENSITIVE);
+    if (!d) {
+        TRACE(D_00460EF0, pName);
+        AssertApp(D_00460EB8, 530, D_00460F28, 0);
+    }
+    m_pData = d;
+    return assign(crds, n);
+}
+INT CModel::assign(CTask* p, INT n) {
+    if (!(p)) AssertApp(D_00460EB8, 537, D_00460EE8, 0);
+    CCoords* pCrds = p->getCoords();
+    if (!(pCrds)) AssertApp(D_00460EB8, 539, D_00460F20, 0);
+    m_pTask = p;
+    return assign(*pCrds, n);
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsi);
+void CModel::setModelData(const MODELDATA* pData) {
+    releaseData();
+    m_pData = pData;
+    link(m_pTask);
+}
+INT CModel::link(CTask* p) {
+    if (!(p)) AssertApp(D_00460EB8, 620, D_00460EE8, 0);
+    CCoords* pCrds = p->getCoords();
+    if (!pCrds) {
+        p->createCoords();
+        pCrds = p->getCoords();
+    }
+    m_pTask = p;
+    return link(*pCrds);
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoords);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getCrd__6CModeli);
+INT CModel::getCoordNum() const {
+    if (!(m_pCrds)) AssertApp(D_00460EB8, 737, D_00460F58, 0);
+    return *(INT*)((BYTE*)m_pCrds + 4);
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLocal__6CModeli);
+INT CModel::getTextureIndex(const CHAR* pName) const {
+    INT n = -1;
+    if (pName) {
+        for (INT i = 0; i < m_pData->m_nTexNum; i++) {
+            if (!strcmp(pName, (CHAR*)m_pData->m_pTexParam + i * 0x20)) {
+                n = i;
+                break;
+            }
+        }
+    }
+    return n;
+}
+void CModel::changeTexture(const CHAR* inSrc, const CHAR* inDst) {
+    INT nIdx = getTextureIndex(inSrc);
+    if (nIdx >= 0) {
+        TexInfo* pTex;
+        if (inDst) pTex = CRsrcDB::getRsrcTex(inDst, NAME_CASE_SENSITIVE);
+        else pTex = CRsrcDB::getRsrcTex((CHAR*)m_pData->m_pTexParam + nIdx * 0x20, NAME_CASE_SENSITIVE);
+        changeTextureSub(nIdx, pTex);
+    }
+    setupUVScroll(0);
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTextureSub__6CModeliPC7TexInfo);
+void CModel::setShadowSize(INT nSize) {
+    if (m_Mode == 0x10 && m_pFadeModel) *(INT*)((BYTE*)m_pFadeModel + 0x28) = nSize;
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getSemiZ__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getOldSemiZ__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getWorldBBoxScr__6CModelR7IVECTORPC7FMATRIX);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcWorldBBox__6CModeli);
+void CModel::getWorldBBox(FVECTOR& vMax, FVECTOR& vMin) {
+    calcWorldBBox(0);
+    vMax.x = m_BBox.x[1];
+    vMax.y = m_BBox.y[1];
+    vMax.z = m_BBox.z[1];
+    vMin.x = m_BBox.x[0];
+    vMin.y = m_BBox.y[0];
+    vMin.z = m_BBox.z[0];
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBSphere__FR6CCoordRC7FVECTORf);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBSphere__FR6CCoordPC4BBOX);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__FRC7FMATRIXPC4BBOX);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resultCheckBBox__FR7FVECTORT0);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resultCheckBBox__FR6CCoordPC4BBOX);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__6CModel);
+void CModel::setColorScale(const FVECTOR& vColor) { getColorScale() = vColor; }
+void CModel::setColorScale(FLOAT r, FLOAT g, FLOAT b, FLOAT a) { getColorScale().set(r, g, b, a); }
+void CModel::setAlphaScale(FLOAT inScale) { m_fAlphaScale = inScale; }
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", linksub__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", addTexture__6CModelPCci);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShadowMapModel__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", attachSemiModel__6CModelR10CSemiModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", sendTexture__6CModelPUl);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTexParam__6CModelPUl);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispUpdate__6CModelf);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispCheck__6CModel);
+void CModel::disp() { disp(m_pTask ? m_pTask->getFrameRate() * 0.020000001f : 1.0f); }
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__6CModelf);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispImpl__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp0__6CModeliUli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_GetData__6CModelRUii);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp0_SetMicroCode__6CModelPUx);
+void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
+    if (!(nFlag & 6)) sendTexture(pTag);
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_SetPacket__6CModelUiPA3_CiiUliPUl);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__10CSemiModelP6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", initSemiZModel__10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", releaseSemiZModel__10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__10CSemiModelii);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getPacketSize__C10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiTrans__10CSemiModelG5ALPHA);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispDirect__10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__11CSemiZModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__10CFadeModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getPacketSize__C10CFadeModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__8CModelBG);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__5CBBox);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__5CBBox);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", linkTexAnm__6CModelP7CTexAnmi);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setupUVScroll__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateUVScroll__6CModelf);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setUVScrollOffset__6CModeliff);
+void* CModel::getExtendClut(INT nTex, INT nType) {
+    if (nTex >= 0 && nTex < m_pData->m_nTexNum) {
+        BYTE* p = m_TexInfo[nTex].m_pTex;
+        if (nType == 1) return *(void**)(p + 0x48);
+        if (nType == 2) return *(void**)(p + 0x4c);
+        if (nType == 3) goto ret3;
+    }
+    return NULL;
+ret3:
+    return *(void**)(m_TexInfo[nTex].m_pTex + 0x50);
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getChangeClut__6CModelii);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", enablePointLight__C9MODELDATA);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", enableLight__C9MODELDATA);
+BOOL MODELDATA::isCharacter(UINT mode) {
+    switch (mode) {
+    case 5:
+    case 6:
+    case 0x406:
+    case 0x400b:
+    case 0x406e:
+        return TRUE;
+    }
+    return FALSE;
+}
+BOOL MODELDATA::isMap(UINT mode) {
+    switch (mode) {
+    case 0:
+    case 0x200:
+    case 0x40ee:
+        return TRUE;
+    }
+    return FALSE;
+}
+BOOL MODELDATA::isSky(UINT mode) { return mode == 0x24; }
+BOOL MODELDATA::isCharacterAndMap(UINT mode) {
+    switch (mode) {
+    case 0:
+    case 5:
+    case 6:
+    case 0x200:
+    case 0x406:
+    case 0x400b:
+    case 0x406e:
+    case 0x40ee:
+        return TRUE;
+    }
+    return FALSE;
+}
+BOOL MODELDATA::isNormal(UINT mode) {
+    switch (mode) {
+    case 0:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 0x10:
+    case 0x200:
+    case 0x406:
+    case 0x4009:
+    case 0x400b:
+    case 0x4109:
+    case 0x4123:
+        return FALSE;
+    }
+    return TRUE;
+}
+BOOL MODELDATA::isColorI(UINT mode) {
+    switch (mode) {
+    case 2:
+    case 6:
+    case 0x10:
+    case 0x102:
+    case 0x108:
+    case 0x406:
+    case 0x4005:
+    case 0x4009:
+    case 0x400b:
+    case 0x4109:
+    case 0x4123:
+    case 0x4205:
+        return FALSE;
+    }
+    return TRUE;
+}
+BOOL MODELDATA::isColorF(UINT mode) {
+    switch (mode) {
+    case 0x406:
+    case 0x4009:
+    case 0x400b:
+    case 0x4109:
+        return TRUE;
+    }
+    return FALSE;
+}
+BOOL MODELDATA::isTexture(UINT mode) {
+    switch (mode) {
+    case 0x10:
+    case 0x4005:
+    case 0x4009:
+    case 0x4109:
+    case 0x4205:
+        return FALSE;
+    }
+    return TRUE;
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getModelAttachData__3MadPPCQ23Mad17MODEL_ATTACH_DATAi);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __static_initialization_and_destruction_0_00133620);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", reset__10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", relink__10CSemiModelP6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiSort__10CSemiModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getParentModel__10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setOldZ__10CSemiModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getOldZ__10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setDefaultSemiTrans__10CSemiModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", replaceParentModel__10CSemiModelP6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setPacketSize__10CSemiModelUs);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_10CFadeModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __10CFadeModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_11CSemiZModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __11CSemiZModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__11CSemiZModelii);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__11CSemiZModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelP5CTaskRC9MODELDATA);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelP5CTaskPC9MODELDATA);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoordsRC9MODELDATA);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoordsPC9MODELDATA);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaskR9MODELDATAi);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaskP9MODELDATAi);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsR9MODELDATAi);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsP9MODELDATAi);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiTrans__6CModelG5ALPHA);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getSemiModel__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiSort__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLightUnit__6CModelR10CLightUnit);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLightUnit__6CModelP10CLightUnit);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getCoords__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getPacketSize__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDataEmpty__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isSemiDataEmpty__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTexture__6CModeliPC7TexInfo);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBoneName__C6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getParentBoneName__C6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getMode__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBBoxFlag__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setBBoxFlag__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBBox__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getModelData__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTextureInfo__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setTextureInfo__6CModeliPC11TexInfoStub);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateTextureInfo__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTextureNum__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTransTextureNum__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", fade2Path__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isFade2Path__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", notSemi__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isNotSemi__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispOff__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDispOff__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDisp__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setBeforeDirect__6CModelPCUxi);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", clearBeforeDirect__6CModelPCUxi);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBeforeDirectNum__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setAfterDirect__6CModelPCUxi);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", clearAfterDirect__6CModelPCUxi);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getAfterDirectNum__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getOTZ__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setOTZ__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getColorScale__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getAlphaScale__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispWireframe__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDispWireframe__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setWorldScreenMatrix__6CModelPC7FMATRIX);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", defaultShaderOption__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShaderOption__6CModelUs);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resetShaderOption__6CModelUs);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__6CModelii);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isClampRepeat__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setClampRepeat__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isShadowMap__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShadowMap__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isAutoEffSemiSort__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setAutoEffSemiSort__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isRootZSort__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setRootZSort__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isShadow__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isMap__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", createSemiModel__6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isManagedSemiModel__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", manageSemiModel__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isAvailableSemiModel__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", availableSemiModel__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setDispFlag__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isOTZFlag__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setOTZFlag__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateOTZ__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isUVScroll__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setUVScroll__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isWBBox__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setWBBox__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isSemiSortFlag__C6CModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiSortFlag__6CModeli);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_8CModelBG);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __8CModelBGUs);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__8CModelBG);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLayerFG__8CModelBGUc);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_5CBBox);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __5CBBox);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getPacketSize__C5CBBox);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_12CShadowModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__12CShadowModelii);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__12CShadowModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_15CShadowMapModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__15CShadowMapModelii);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__15CShadowMapModel);
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _GLOBAL_$I$c__KHCOM_MainApp_System_Graphic_Model.cppI3aaaa);
