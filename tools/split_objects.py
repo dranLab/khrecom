@@ -246,7 +246,7 @@ def is_text(data: bytes) -> bool:
     return len(data) >= 4 and all(c.isprintable() or c in "\t\n\r" for c in text)
 
 
-def split_data(section, lo, hi, order, files, owner, refs, elf_named, sizes=None, read=None
+def split_data(section, lo, hi, order, files, owner, refs, elf_named, sizes=None, read=None, text_range=(0, 0)
                ) -> tuple[list[tuple[int, str]], dict]:
     """Returns ([(start, name)], stats)."""
     sc = DATA_SECTIONS[section]
@@ -294,6 +294,11 @@ def split_data(section, lo, hi, order, files, owner, refs, elf_named, sizes=None
             end = item_end(cuts[k - 1][2], sizes or {}, read)
             # Named data nobody claims belongs to an object without debug info (handled below): stop there.
             end = max([end] + [item_end(a, sizes or {}, read) for a in named if end <= a < cuts[k][0]])
+            # Words that are code addresses continue the previous object's jump table (a table of an object
+            # without debug info is only known by its first entry; "8:8\0" = 0x00383A38 is no string).
+            end = (end + 3) & ~3
+            while end < cuts[k][0] and text_range[0] <= int.from_bytes(read(end, 4), "little") < text_range[1]:
+                end += 4
             # The leading data are string literals; anything else before the first one (e.g. the vtable of a
             # template class, which has no symbol) is the previous object's trailing data.
             first = next((p for p in range((end + 3) & ~3, cuts[k][0], 4) if starts_text(p, cuts[k][0], read)), None)
@@ -427,7 +432,8 @@ def main() -> None:
         for section in DATA_SECTIONS:
             lo, hi = ranges[section]
             common = common_start(files, owner, lo, hi) if section == ".bss" else hi
-            cuts, stats = split_data(section, lo, common, order, files, owner, refs, elf_named, sizes, read)
+            cuts, stats = split_data(section, lo, common, order, files, owner, refs, elf_named, sizes, read,
+                                     (text_start, text_end))
             if common < hi:
                 cuts.append((common, "common"))
                 stats["units"] += 1
