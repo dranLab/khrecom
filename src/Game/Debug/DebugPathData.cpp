@@ -1,13 +1,48 @@
 #include "khtypes.h"
+#define GAME_DEBUG_DEBUGPATHDATA_CPP
+#include "Game/Debug/DebugPathData.h"
+#include "Form/DebugWindow.h"
+#include "System/TaskMan.h"
 #include "include_asm.h"
+
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+inline void* operator new(unsigned int, void* p) throw() { return p; }
+extern "C" char* strcpy(char*, const char*);
+class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs the full RsrcData.h classes */
+public:
+    static CHAR* getRsrcPTDName(INT nPtdNo);
+};
+class CDbgArrow {
+public:
+    void disp();
+};
+class CHermitePathMoveS : public CTask {
+    UBYTE _m_0x40[0x50];
+    CDbgArrow m_cArrow; /* 0x90 */
+public:
+    CHermitePathMoveS(CTask* p, const class CPathVector* pVec);
+    virtual ~CHermitePathMoveS();
+    virtual void disp();
+};
+extern "C" char D_004870B0[];
+extern "C" char D_00487158[];
+extern "C" char D_00487168[];
+extern "C" char D_00486F18[];
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __17CHermitePathMoveSP5CTaskPC11CPathVector);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", _$_17CHermitePathMoveS);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", main__17CHermitePathMoveS);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", disp__17CHermitePathMoveS);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEndOneCall__FP12CDebugWindowii);
+void CHermitePathMoveS::disp() { m_cArrow.disp(); }
+INT debugWinPathEndOneCall(CDebugWindow* pWin, INT iMes, INT iParam) {
+    if (iParam & 0x20) pWin->sendMessage(2, 0);
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEndOneYNCall__FP12CDebugWindowii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineAddSubCall__FP12CDebugWindowii);
+INT debugWinPathLineAddSubCall(CDebugWindow* pWin, INT iMes, INT iParam) {
+    if (iParam & 0x80) pWin->addValue(-1, NULL, NULL, &CDebugPathData::m_fValuePlus, NULL);
+    else if (iParam & 0x100) pWin->addValue(1, NULL, NULL, &CDebugPathData::m_fValuePlus, NULL);
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __simuCamPause__FP15CPathDataCamera);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditSimulateLineCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditSimulateSpeedLineCall__FP12CDebugWindowii);
@@ -32,20 +67,54 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPat
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditDispCall__FPciPCv);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditAllCall__FP12CDebugWindowi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathListLineCall__FP12CDebugWindowii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathListDispCall__FPciPCv);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathListAllCall__FP12CDebugWindowi);
+INT debugWinPathListDispCall(char* pBuf, INT iIdx, const void* pParam) {
+    sprintf(pBuf, D_00486F18, CDebugPathData::m_szNames[iIdx]);
+    return 1;
+}
+INT debugWinPathListAllCall(CDebugWindow* pWin, INT iMes) {
+    if (iMes & 1) {
+        INT i;
+        for (i = 0; i < 128; i++) {
+            CHAR* pName = CRsrcDB::getRsrcPTDName(i + 1);
+            if (!pName) break;
+            strcpy(CDebugPathData::m_szNames[i], pName);
+        }
+        return i;
+    }
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineNewCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineNameLoadCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __14CDebugPathDataP5CTaski);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", _$_14CDebugPathData);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", create__14CDebugPathDataP5CTaski);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", main__14CDebugPathData);
+void CDebugPathData::main() {
+    if (isEnd()) out();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", disp__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", isEnd__14CDebugPathData);
+BOOL CDebugPathData::isEnd() {
+    if (m_hChildWnd) {
+        CTask* pTask = CTaskMan::getTask(m_hChildWnd);
+        if (!pTask || pTask->isOut()) {
+            m_hChildWnd = 0;
+            return TRUE;
+        }
+        return FALSE;
+    }
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", entryCam__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getCam__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", removeCam__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", makeFileName__14CDebugPathDataPCci);
+CNakCamera* CDebugPathData::getCam() { return getInstance()->m_pDCam; }
+void CDebugPathData::removeCam() {
+    CDebugPathData* pThis = getInstance();
+    ((CTask*)pThis->m_pDCam)->out();
+    pThis->m_pDCam = NULL;
+}
+void CDebugPathData::makeFileName(const CHAR* pszName, BOOL bExt) {
+    CDebugPathData* pThis = getInstance();
+    if (bExt) sprintf(pThis->m_szFileName, D_00487158, pszName);
+    else sprintf(pThis->m_szFileName, D_00487168, pszName);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", newPath__14CDebugPathDataPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", entryPath__14CDebugPathDataPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", loadPath__14CDebugPathDataPCc);
