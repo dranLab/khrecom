@@ -9,6 +9,7 @@
 #include "Game/BodyCollision.h"
 #include "System/Graphic/Anim.h"
 #include "System/Graphic/Str.h"
+#include "Game/Collision/CollAttack.h"
 #include "System/Graphic/Effect/effect.h"
 #include "Game/Enemy/EnemyParam.h"
 #include "Game/EntityFactory.h"
@@ -32,24 +33,18 @@ public:
 };
 }
 
-/* The unit's data still comes from the original assembly (damage_ is INCLUDE_ASM'd and uses the jump table in
- * .rodata), so the data is only declared here, and the asserts use the original's strings. */
 namespace Whitemushroom {
-extern CHAR* IdlingMotion;     /* "e016_001" */
-extern CHAR* MoveMotion;       /* "e016_002" */
-extern CHAR* GladMotion;       /* "e016_050" */
-extern CHAR* AngryMotion;      /* "e016_051" */
-extern CHAR* DisappearMotion;  /* "e016_074" */
-extern CHAR* Disappear2Motion; /* "e016_075" */
-extern CHAR* g_pNeedMotTbl[3];  /* "e016_052", "e016_054", "e016_056" */
-extern CHAR* g_pHappyMotTbl[3]; /* "e016_053", "e016_055", "e016_057" */
-extern CHAR* EffectName;        /* "_ex_2350" */
-extern const ATK_ATTR g_pHappyAttr[3]; /* ATK_ATTR_FIRE, ATK_ATTR_ICE, ATK_ATTR_THUNDER */
+static CHAR* IdlingMotion = "e016_001";
+static CHAR* MoveMotion = "e016_002";
+static CHAR* GladMotion = "e016_050";
+static CHAR* AngryMotion = "e016_051";
+static CHAR* DisappearMotion = "e016_074";
+static CHAR* Disappear2Motion = "e016_075";
+static CHAR* g_pNeedMotTbl[3] = { "e016_052", "e016_054", "e016_056" };
+static CHAR* g_pHappyMotTbl[3] = { "e016_053", "e016_055", "e016_057" };
+CHAR* EffectName = "_ex_2350";
+static const ATK_ATTR g_pHappyAttr[3] = { ATK_ATTR_FIRE, ATK_ATTR_ICE, ATK_ATTR_THUNDER };
 }
-extern "C" CHAR D_004C01E8[]; /* __FILE__ */
-extern "C" CHAR D_004C0220[]; /* "hit" */
-#undef ASSERT
-#define ASSERT(e) if (!(e)) AssertApp(D_004C01E8, __LINE__, D_004C0220, 0)
 
 CEnemyWhitemushroom::CEnemyWhitemushroom(CTask* inParent) : CHeartless(inParent, 0, 0) {
     m_iHappyCount = 0;
@@ -184,9 +179,30 @@ void CEnemyWhitemushroom::beginDamage_() {
 #include "include_asm.h"
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/EnemyWhitemushroom", damage___19CEnemyWhitemushroom);
+/* placeholder for damage_'s data: its static local and string (code in the stripped .sdata), then its jump table
+ * (labels of the included assembly) */
+__asm__(".section .sdata\n");
+static void __attribute__((section(".sdata"))) _damagePH() {
+    static CHAR* MemoIDParamName = "MemoID";
+    CJiminyMemoFlag::checkEvent(3, (INT)MemoIDParamName, 1);
+}
+__asm__(
+    ".rdata\n"
+    ".align 2\n"
+    ".word .L002C7660\n"
+    ".word .L002C7698\n"
+    ".word .L002C76B8\n"
+    ".word .L002C76F4\n"
+    ".word .L002C77D4\n"
+    ".word .L002C7854\n"
+    ".text\n");
 
-/* Near-match: in case 4 the original loads the vtable pointer for getLockOnPos before setupFade's stores (here
- * after them, and the flag store moves up). */
+/* Near-match (3 lines): in case 4 the original loads the vtable pointer for getLockOnPos right after the two
+ * TIMEQ stores of setupFade; here the vtable entry loads depend on all six setupFade stores (unknown alias), so
+ * the vptr load ranks below them and comes last. Tried (~45 min): setupFade store orders (all 720, plain/
+ * reference/|= flag forms, also written out in place), reference stores, local placement, this casts,
+ * explicit temporaries, empty-asm fillers and barriers, ENTITY_H_SETFLAG_DIRECT. -fstrict-aliasing moves the
+ * load up (so it is an aliasing question) but is not the build's flag. */
 #if 0
 void CEnemyWhitemushroom::damage_() {
     static CHAR* MemoIDParamName = "MemoID";
@@ -243,7 +259,6 @@ void CEnemyWhitemushroom::damage_() {
         break;
     }
 }
-
 #endif
 
 void CEnemyWhitemushroom::endDamage_() {
@@ -259,3 +274,4 @@ void CEnemyWhitemushroom::setupDisappear_() {
     }
 }
 
+// SOURCE DATA: .data .rodata
