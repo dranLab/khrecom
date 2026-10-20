@@ -27,6 +27,8 @@ public:
     static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
 };
 }
+extern INT SCREEN_HEIGHT;
+extern "C" char D_0047AAC0[];
 extern "C" char D_0047B3A8[];
 extern "C" char D_0047B3D8[];
 extern "C" char D_0047B408[];
@@ -124,7 +126,17 @@ void CCardRevolver::_init() {
     m_pEmpty = NULL;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _initialize__Q210CardBattle13CCardRevolverP4CARDi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _initCounter__Q210CardBattle13CCardRevolver);
+void CCardRevolver::_initCounter() {
+    initCounter();
+    m_pEmpty = new (com_malloc_d(sizeof(C2DCard), D_0047AAC0, RET_ADDR())) C2DCard;
+    m_pEmpty->setLayer(2);
+    m_pEmpty->createEmpty();
+    FVECTOR vPos;
+    if (m_uiUser == 1) vPos.set(64.0f, (FLOAT)SCREEN_HEIGHT - 96.0f, 0.0f, 1.0f);
+    else vPos.set(448.0f, (FLOAT)SCREEN_HEIGHT - 96.0f, 0.0f, 1.0f);
+    m_pEmpty->setPos(vPos);
+    m_pEmpty->enableDisp(FALSE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeWait__Q210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeMain__Q210CardBattle13CCardRevolver);
@@ -360,7 +372,29 @@ void CCardRevolver::deleteCounter() {
     delete m_pSeqCtrlTrap;
     m_pSeqCtrlTrap = NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setNumberEffect__Q210CardBattle13CCardRevolveri);
+void CCardRevolver::setNumberEffect(INT inKind) {
+    FVECTOR vPos;
+    switch (inKind) {
+    case 0x44:
+        m_pSeqCtrlNumEff->destroy();
+        m_pSeqCtrlNumEff->setLayer(8);
+        m_pSeqCtrlNumEff->addSeq(g_szSeqCockpit, 0x78);
+        m_uiNumEffState = 1;
+        D2::C2DMan::getLayPosition(_ref(g_szLadCockpit), 0x13, 0, vPos, FALSE);
+        break;
+    case 0x53:
+        m_pSeqCtrlNumEff->destroy();
+        m_pSeqCtrlNumEff->setLayer(8);
+        m_pSeqCtrlNumEff->addSeq(g_szSeqCockpit, 0x76);
+        m_uiNumEffState = 2;
+        D2::C2DMan::getLayPosition(_ref(g_szLadCockpit), 0x12, 0, vPos, FALSE);
+        break;
+    default:
+        return;
+    }
+    if (m_uiUser != 1) vPos.x += 320.0f;
+    m_pSeqCtrlNumEff->setPos(vPos);
+}
 void CCardRevolver::_initNumEffect() {
     m_uiNumEffState = 0;
     m_pSeqCtrlNumEff = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B348, RET_ADDR())) D2::C2DSeqCtrl;
