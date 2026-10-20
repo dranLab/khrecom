@@ -124,5 +124,6 @@ extern float __ieee754_atan2f(float y, float x);
 extern float __ieee754_fmodf(float x, float y);
 extern float fabsf(float x) __attribute__((const));
 extern float atanf(float x);
+extern double fabs(double x) __attribute__((const));
 
 #endif
