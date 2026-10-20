@@ -124,6 +124,9 @@ extern float __ieee754_atan2f(float y, float x);
 extern float __ieee754_fmodf(float x, float y);
 extern float fabsf(float x) __attribute__((const));
 extern float atanf(float x);
+extern float scalbnf(float x, int n);
+extern float floorf(float x);
+extern int __kernel_rem_pio2f(float *x, float *y, int e0, int nx, int prec, const __int32_t *ipio2);
 extern double fabs(double x) __attribute__((const));
 
 #endif
