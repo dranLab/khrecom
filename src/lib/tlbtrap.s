@@ -37,7 +37,7 @@
 
     .text
 
-    .align 3
+    .align 7
     .globl _kTLBException
     .type _kTLBException, @function
     .ent _kTLBException

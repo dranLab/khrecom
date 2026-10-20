@@ -58,7 +58,7 @@ SECTION_ALIGN_CAP = {".text": 8}
 DEFAULT_ALIGN_CAP = 128
 
 
-def object_fixups(entries: list, compiled: bool) -> str:
+def object_fixups(entries: list, compiled: bool, text_cap: int = SECTION_ALIGN_CAP[".text"]) -> str:
     """objcopy flags for one object (see the comment above TYPE_SECTION for the alignments).
 
     splat links every object under every section ("auto_link_sections"), interleaved with the real data. In
@@ -74,7 +74,8 @@ def object_fixups(entries: list, compiled: bool) -> str:
         # Skip the auto-linked entries, e.g. a code object listed under .data.
         if section is None or section != entry.section_order_type or not start:
             continue
-        owned[section] = min(SECTION_ALIGN_CAP.get(section, DEFAULT_ALIGN_CAP), start & -start)
+        cap = text_cap if section == ".text" else SECTION_ALIGN_CAP.get(section, DEFAULT_ALIGN_CAP)
+        owned[section] = min(cap, start & -start)
     flags = [f"--set-section-alignment {s}={a}" for s, a in sorted(owned.items())]
     for section in sorted(set(TYPE_SECTION.values()) - set(owned)):
         flags += [f"-R {section} -R .rel{section}"] if compiled else [f"--set-section-alignment {section}=1"]
@@ -390,9 +391,11 @@ def write_ninja(version: str, splat_yaml: Path, opts: dict, sha1: str, build_cfg
             src = entries[0].src_paths[0].as_posix()
             suffix = entries[0].src_paths[0].suffix
             unit = entries[0].segment.name
+            text_cap = SECTION_ALIGN_CAP[".text"]
             if suffix == ".s" and (ROOT / "src" / f"{unit}.s").exists():  # hand-written assembly as source
                 src = f"src/{unit}.s"
-            align = {"align_flags": object_fixups(entries, compiled=suffix in (".c", ".cpp", ".cc"))}
+                text_cap = DEFAULT_ALIGN_CAP  # its code may be aligned further (tlbtrap.s: 128), unlike gcc's
+            align = {"align_flags": object_fixups(entries, compiled=suffix in (".c", ".cpp", ".cc"), text_cap=text_cap)}
             if suffix in (".c", ".cpp", ".cc"):  # ee-gcc picks cc1 / cc1plus from the extension
                 tc = toolchain_variables(unit_toolchain(build_cfg, unit))
                 n.build(obj, "cc", src, variables={**align, "own_data": own_data_ranges(entries),
