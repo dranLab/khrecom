@@ -92,11 +92,10 @@ void pppKeShpTail3X(pppPObject *pobj, PKeShpTail3X *dat, pppCtrlTable *ctbl) {
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/keProg/pppKeShpTail3X", pppKeShpTail3XDraw);
 
-/* ~67 lines differ, the same as pppKeShpTail3Draw: pw lives on the stack in the original (forced here with an
- * empty asm taking "m"(pw) - a hack), and the original addresses it through a copy of sp in $a3
- * ("move a3,sp"; "lw a1,288(a3)") from the ScreenMatrix copy to the CMat asm, which shifts the fv3 copy to
- * $t0, the reload register of cnt in the loop and the float registers of fRnd. No source for that copy of the
- * soft frame pointer found (tried: inline helpers taking pw / &pw, volatile pw, "m" operands). */
+/* 37 lines differ, as in pppKeShpTail3Draw (see the note there): only the pw loads between the ScreenMatrix copy
+ * and the CMat asm, which the original addresses through $a3 (a copy of the soft frame pointer, &mat0). The
+ * "m"(pw) asm after UnitMatrix, the dummy mat0 pointer and fRnd = 1 - fRnd * RndScl are hacks/forms that bring it
+ * from 67 to 37 lines. */
 #if 0
 /* VU0 macro-mode helpers (vf26..vf31 as scratch, as in the original) */
 #define TAIL_SUB(d, t, s)                                                               \
@@ -254,6 +253,7 @@ void pppKeShpTail3XDraw(pppPObject *pobj, PKeShpTail3X *dat, pppCtrlTable *ctbl)
     ah = (OANM_HEADER *)shp->shape;
     sceVu0CopyMatrix(mat0, ppvPObj->cmat);
     sceVu0UnitMatrix(mat1);
+    __asm__ __volatile__("" : : "m"(*&pw)); /* hack: keeps pw in memory, as in the original */
     scl = dat->Scl0;
     sclSft = (scl - dat->Scl1) / f;
     d = dat->Sep;
@@ -282,6 +282,7 @@ void pppKeShpTail3XDraw(pppPObject *pobj, PKeShpTail3X *dat, pppCtrlTable *ctbl)
     cntBas = ah->seq[0].wait;
     seqBas = ah->seqc;
     rnd = pThis->Seed;
+    { sceVu0FVECTOR *m = mat0;
     if (dat->World) {
         TAIL3X_COPYMAT(pw->WMat, ppvCameraMatrix);
     } else {
@@ -298,6 +299,7 @@ void pppKeShpTail3XDraw(pppPObject *pobj, PKeShpTail3X *dat, pppCtrlTable *ctbl)
                          "\tsqc2 $vf28, 0x80(%0)\n"
                          "\tsqc2 $vf27, 0x90(%0)"
                          : : "r"(pw), "r"(ppvParScl), "r"(ppvPObj->cmat));
+    __asm__ __volatile__("" : : "r"(m)); }
     TAIL3X_LOAD(pw);
     __asm__ __volatile__("lqc2 $vf29, 0x0(%0)\n"
                          "\tlqc2 $vf28, 0x0(%1)\n"
@@ -317,7 +319,8 @@ void pppKeShpTail3XDraw(pppPObject *pobj, PKeShpTail3X *dat, pppCtrlTable *ctbl)
         cntRnd = (cnt + rnd) / cntBas % seqBas;
         sh = (OSHAPE_VU1 *)((char *)ah + ah->seq[cntRnd].sha);
         TAIL_FTOI_COL(&shi.r, col);
-        fvw[0] = scl * (1.0f - fRnd * dat->RndScl);
+        fRnd = 1.0f - fRnd * dat->RndScl;
+        fvw[0] = scl * fRnd;
         __asm__ __volatile__("lqc2 $vf31, 0x0(%0)\n"
                              "\tvmulx.xyz $vf2, $vf6, $vf31x\n"
                              "\tvmulx.xyz $vf3, $vf7, $vf31x\n"
@@ -397,7 +400,6 @@ end:
         pThis->Cnt += dat->AnmSpd;
     }
     op_spr_free(0x180);
-    __asm__ __volatile__("" : : "m"(*&pw)); /* hack: keeps pw in memory, as in the original */
 }
 #endif
 
