@@ -125,7 +125,12 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickPlantParent", begi
 /* Only the scheduling before saveStat differs: ours puts "sb m_Stat" before "li a1,1" (delay slot gets li a1).
  * Both issue in the same cycle (sched2 log); the emission order is sched1's, where the store with its dying
  * source goes first. Tried (2026-10-20): saveStat(m_Stat = 1), an INT/BYTE local for both, saveStat(m_Stat),
- * a comma expression, a volatile store, _ref(m_Stat) = 1 - none moves the store after li a1. */
+ * a comma expression, a volatile store, _ref(m_Stat) = 1 - none moves the store after li a1.
+ * Second round (sched dumps): the store and li a1 both depend only on the call (store: anti, cost 0), so they
+ * tie on priority and sched1's register-weight rule picks the store (its source dies) first; sched2 keeps
+ * that order. 58 spellings of the two statements (this->, _ref, TRUE, (BYTE), saveStat(m_Stat), reversed
+ * order), a register-asm a1, an asm "m"(m_Stat) after the call: no change. Needs a form where the store is
+ * not ready together with li a1, or the arg move precedes the store in RTL. ~20 min in total. */
 void CGimmickPlantParent::beginStateHitAttack() {
     CGimmickManager* pGM;
     RoomInfo* pRoom;
