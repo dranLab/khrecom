@@ -1,5 +1,4 @@
 #define TASK_H_NO_SLC_OVERFLOW_MSG
-#include "include_asm.h"
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"
 #define TECHNIC_H_PATH "c:/KHCOM/MainApp/Game/Technic.h"
@@ -61,10 +60,7 @@ CStatus::CStatus() {
 
 CStatus::~CStatus() {}
 
-/* initStatus: the source below matches except for one delay slot (bnez s0 in the world branch takes
- * "addiu v0,s0,-1" instead of the original's "addiu a2,s0,14"); it needs lines 43 and 46 for its asserts. */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Status", initStatus__7CStatusUs8WORLD_IDs);
-#if 0
+#line 36
 void CStatus::initStatus(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFloorNumber) {
     USHORT* pIdxTbl;
     unsigned char (*pInitCardTbl)[2];
@@ -84,11 +80,13 @@ void CStatus::initStatus(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFl
         if (CGame::isSoraGame()) {
             idx = inCurrentFloorNumber - 1;
             _clampIdx(idx, inCurrentFloorNumber, 13);
-        } else if (inDebugWorldID == 0) {
-            idx = 27;
         } else {
-            idx = inDebugWorldID + 14;
-            _clampIdx(idx, inDebugWorldID, 28);
+            idx = inDebugWorldID + 14; /* before the test: fills the bnez delay slot */
+            if (inDebugWorldID == 0) {
+                idx = 27;
+            } else {
+                _clampIdx(idx, inDebugWorldID, 28);
+            }
         }
         idx += 1;
         idxCard = pIdxTbl[idx - 1];
@@ -122,14 +120,6 @@ void CStatus::initStatus(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFl
             setStatus((unsigned char (*)[2])((BYTE*)pCIHeader + pCIHeader->cardOfs) + idxCard);
         }
     }
-}
-#endif
-
-/* Placeholder while initStatus is INCLUDE_ASM'd: its string literals, in their .rodata position. */
-inline void _initStatusStrings(CARD_INIT_HEADER* pCardInitRsrc) {
-    CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_NONE);
-    if (!pCardInitRsrc) AssertApp(__FILE__, __LINE__, "pCardInitRsrc", 0);
-    if (!(*(UINT*)&pCardInitRsrc->sig == 0x00494340)) AssertApp(__FILE__, __LINE__, "*(UINT*)&pCIHeader->sig == 0x00494340", 0);
 }
 
 void CStatus::setStatus(unsigned char (*pInitCardTbl)[2]) {
