@@ -17,6 +17,11 @@ inline void* operator new(unsigned int, void* p) throw() { return p; }
 extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039B2E4");
 template <class T> static inline T& _ref(T& v) { return v; }
 static inline BOOL _isEqual(UINT a, UINT b) { return a == b; }
+namespace CardBattle {
+extern char* g_szStockSkillName[150];
+}
+extern "C" char D_0047B438[];
+extern "C" char D_0047B678[];
 extern "C" char D_0047B348[];
 extern "C" char D_0047B378[];
 extern "C" char D_0047B070[];
@@ -316,7 +321,18 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", addCard__Q210CardB
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeAddCard__Q210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initCounter__Q210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeCounter__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", destroyCounter__Q210CardBattle13CCardRevolver);
+void CCardRevolver::destroyCounter() {
+    if (!m_pSeqCtrlCounter) return;
+    m_uiCounterState = 3;
+    m_pSeqCtrlCounter->replaceSeq(0, _ref(g_szSeqCockpit), 0x44);
+    m_uiCounterFlag |= 1;
+    m_pSeqCtrlCounter->enableDisp(2, FALSE);
+    m_pSeqCtrlCounter_Num01->enableDisp(FALSE);
+    m_pSeqCtrlCounter_Num10->enableDisp(FALSE);
+    m_uiScutState = 4;
+    m_pSeqCtrlCounter->replaceSeq(1, _ref(g_szSeqCockpit), 0x40);
+    m_uiCounterFlag |= 2;
+}
 void CCardRevolver::deleteCounter() {
     delete m_pSeqCtrlCounter;
     m_pSeqCtrlCounter = NULL;
@@ -334,7 +350,30 @@ void CCardRevolver::_initNumEffect() {
     m_uiNumEffState = 0;
     m_pSeqCtrlNumEff = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B348, RET_ADDR())) D2::C2DSeqCtrl;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeNumEffect__Q210CardBattle13CCardRevolver);
+void CCardRevolver::exeNumEffect() {
+    switch (m_uiNumEffState) {
+    case 0:
+        break;
+    case 1:
+        if (m_pSeqCtrlNumEff->isEnd(0)) {
+            m_uiNumEffState = 3;
+            m_pSeqCtrlNumEff->replaceSeq(0, _ref(g_szSeqCockpit), 0x79);
+        }
+        break;
+    case 2:
+        if (m_pSeqCtrlNumEff->isEnd(0)) {
+            m_uiNumEffState = 3;
+            m_pSeqCtrlNumEff->replaceSeq(0, _ref(g_szSeqCockpit), 0x77);
+        }
+        break;
+    case 3:
+        if (m_pSeqCtrlNumEff->isEnd(0)) {
+            m_uiNumEffState = 0;
+            m_pSeqCtrlNumEff->destroy();
+        }
+        break;
+    }
+}
 void CCardRevolver::setTrapEffect() {
     if (!m_pSeqCtrlTrap) {
         m_pSeqCtrlTrap = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B378, RET_ADDR())) D2::C2DSeqCtrl;
@@ -355,7 +394,15 @@ INT CCardRevolver::exeTrapEffect(INT inFlag) {
     return 1;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initStock__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initStockSkillName__Q210CardBattle13CCardRevolverPQ22D210C2DSeqCtrl);
+void CCardRevolver::initStockSkillName(D2::C2DSeqCtrl* inSeq) {
+    G_RGBA rgba;
+    rgba.col = 0x80808080;
+    m_p2DFntStockName = new (com_malloc_d(sizeof(D2::C2DFnt), D_0047B438, RET_ADDR()))
+        D2::C2DFnt(0, 0, &rgba, 14, g_szStockSkillName[m_iStockSkill], 0x80);
+    inSeq->addFntShift(g_szSeqCockpit, m_p2DFntStockName, -4.0f, 0.0f);
+    inSeq->m_seqControl.fgColor = 1;
+    inSeq->m_seqControl.fgFntScale = 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeStock__Q210CardBattle13CCardRevolver);
 void CCardRevolver::deleteStock() {
     delete m_pSeqCtrlStock;
@@ -546,22 +593,95 @@ void CCardRevolver::setPlayNG(INT inFlag, INT inCategory) {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", __Q210CardBattle13CEnchantGaugeP5CTaskiR4CARD);
+CEnchantGauge::CEnchantGauge(CTask* pParent, INT inUser, CARD& inCard) : CTask(pParent, 0x4000) {
+    m_uiUser = inUser;
+    m_cardData = inCard;
+    m_pSeqCtrls = NULL;
+    m_pFntName = NULL;
+    _initialize();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _$_Q210CardBattle13CEnchantGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _initialize__Q210CardBattle13CEnchantGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setText__Q210CardBattle13CEnchantGauge);
+void CEnchantGauge::setText() {
+    if (!m_pSeqCtrls) return;
+    if (!m_pFntName) return;
+    if (m_cardData.m_nKind < 0x43) return;
+    m_pFntName->setText(g_szEnemyCardEffName[m_cardData.m_nKind - 0x43]);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle13CEnchantGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", changeCount__Q210CardBattle13CEnchantGaugei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", destroy__Q210CardBattle13CEnchantGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", __Q210CardBattle12CStockFolderP5CTaski);
+void CEnchantGauge::destroy() {
+    m_nNext = 0;
+    CCardBattle* pBattle = _ref(CCardBattle::m_pInstance);
+    UINT uiEnd = pBattle ? pBattle->m_uiFlag & 4 : 0;
+    if (uiEnd) {
+        out();
+        return;
+    }
+    if (m_uiState == 3 || m_uiState == 4) return;
+    m_uiState = 4;
+    m_pSeqCtrls[0].replaceSeq(0, _ref(g_szSeqCockpit), 0x38);
+    m_pSeqCtrls[0].enableDisp(1, FALSE);
+    m_pSeqCtrls[2].enableDisp(0, FALSE);
+    m_pSeqCtrls[1].enableDisp(0, FALSE);
+}
+CStockFolder::CStockFolder(CTask* pParent, INT inUser) : CTask(pParent, 0x4000) {
+    m_uiUser = inUser;
+    m_hOwner = pParent->getHandle();
+    _init();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _$_Q210CardBattle12CStockFolder);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _init__Q210CardBattle12CStockFolder);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle12CStockFolder);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", destroy__Q210CardBattle12CStockFolder);
+void CStockFolder::_init() {
+    m_iStock = 0;
+    m_iStockSum = 0;
+    m_iStockSkill = 0;
+    m_iExtraSkill = 0;
+    m_iFirstSkill = 0;
+    for (INT i = 0; i < 7; i++) {
+        m_pCards[i] = NULL;
+        m_pData[i] = NULL;
+    }
+    initGauge();
+}
+void CStockFolder::main() {
+    exeGauge();
+}
+void CStockFolder::destroy() {
+    for (INT i = 0; i < m_iStock; i++) {
+        m_pCards[i] = NULL;
+        m_pData[i] = NULL;
+    }
+    m_iStock = 0;
+    m_iStockSum = 0;
+    m_iStockSkill = 0;
+    m_iExtraSkill = 0;
+    m_iFirstSkill = 0;
+    m_uiState = 5;
+    m_pSeqCtrl->enableDisp(FALSE);
+    m_uiFlag = (INT)m_uiFlag & ~1;
+    m_uiCategory = 0;
+    m_pSeqCtrl_Num01->enableDisp(0, FALSE);
+    m_pSeqCtrl_Num10->enableDisp(0, FALSE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initGauge__Q210CardBattle12CStockFolder);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initName__Q210CardBattle12CStockFolderPQ22D210C2DSeqCtrl);
+void CStockFolder::initName(D2::C2DSeqCtrl* inSeq) {
+    G_RGBA rgba;
+    rgba.col = 0x80808080;
+    m_p2DFntStockName = new (com_malloc_d(sizeof(D2::C2DFnt), D_0047B678, RET_ADDR()))
+        D2::C2DFnt(0, 0, &rgba, 14, g_szStockSkillName[m_iStockSkill], 0x80);
+    inSeq->addFntShift(g_szSeqCockpit, m_p2DFntStockName, -4.0f, 0.0f);
+    inSeq->m_seqControl.fgColor = 1;
+    inSeq->m_seqControl.fgFntScale = 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeGauge__Q210CardBattle12CStockFolder);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", deleteGauge__Q210CardBattle12CStockFolder);
+void CStockFolder::deleteGauge() {
+    delete m_pSeqCtrl;
+    m_pSeqCtrl = NULL;
+    delete m_pSeqCtrl_Num01;
+    m_pSeqCtrl_Num01 = NULL;
+    delete m_pSeqCtrl_Num10;
+    m_pSeqCtrl_Num10 = NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockInfo__Q210CardBattle12CStockFolder);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockCard__Q210CardBattle12CStockFolderii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", calcEnemyStockSkill__Q210CardBattle12CStockFolder);
