@@ -122,7 +122,10 @@ void CGimmickPlantParent::endStateMain() {}
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickPlantParent", beginStateHitAttack__19CGimmickPlantParent);
 #if 0
-/* Only the scheduling before saveStat differs: ours puts "sb m_Stat" before "li a1,1" (delay slot gets li a1). */
+/* Only the scheduling before saveStat differs: ours puts "sb m_Stat" before "li a1,1" (delay slot gets li a1).
+ * Both issue in the same cycle (sched2 log); the emission order is sched1's, where the store with its dying
+ * source goes first. Tried (2026-10-20): saveStat(m_Stat = 1), an INT/BYTE local for both, saveStat(m_Stat),
+ * a comma expression, a volatile store, _ref(m_Stat) = 1 - none moves the store after li a1. */
 void CGimmickPlantParent::beginStateHitAttack() {
     CGimmickManager* pGM;
     RoomInfo* pRoom;
