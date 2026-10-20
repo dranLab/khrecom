@@ -16,5 +16,7 @@ typedef struct {
 void FlushCache(int operation);
 void SetOsdConfigParam(sceOsdConfigParam *addr);
 int GetOsdConfigParam(sceOsdConfigParam *addr);
+int DIntr(void);
+int EIntr(void);
 
 #endif
