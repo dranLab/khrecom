@@ -1,16 +1,6 @@
 /* _InitSys: the libkernl start-up (semaphores for libc, the kernel's system call table, the sub-systems). */
 #include "sdk/eekernel.h"
 
-struct SemaParam {
-    int currentCount;
-    int maxCount;
-    int initCount;
-    int numWaitThreads;
-    unsigned int attr;
-    unsigned int option;
-};
-
-int CreateSema(struct SemaParam *sema);
 void InitAlarm(void);
 void InitTimer(int mode);
 void StartTimerSystemTime(void);

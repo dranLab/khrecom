@@ -13,6 +13,42 @@ typedef struct {
     unsigned int timezoneOffset : 11;
 } sceOsdConfigParam;
 
+struct SemaParam {
+    int currentCount;
+    int maxCount;
+    int initCount;
+    int numWaitThreads;
+    unsigned int attr;
+    unsigned int option;
+};
+
+struct ThreadParam {
+    int status;
+    void (*entry)(void *);
+    void *stack;
+    int stackSize;
+    void *gpReg;
+    int initPriority;
+    int currentPriority;
+    unsigned int attr;
+    unsigned int option;
+    int waitType;
+    int waitId;
+    int wakeupCount;
+};
+
+#define THS_DORMANT 0x10
+
+int CreateSema(struct SemaParam *sema);
+int DeleteSema(int sema);
+int WaitSema(int sema);
+int iSignalSema(int sema);
+int CreateThread(struct ThreadParam *param);
+int ReferThreadStatus(int tid, struct ThreadParam *info);
+int GetThreadId(void);
+int ChangeThreadPriority(int tid, int priority);
+int QueryIntrContext(void);
+
 void FlushCache(int operation);
 void SetOsdConfigParam(sceOsdConfigParam *addr);
 int GetOsdConfigParam(sceOsdConfigParam *addr);
