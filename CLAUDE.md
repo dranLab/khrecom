@@ -85,6 +85,8 @@ A *unit* is one original object file, named after its source path, e.g. `System/
   functions in order, `static` exactly for the file-local ones (everything else is global: other data may point
   at it). Assemblers: `ee-as` 2.10 (ee-gcc2.96 package; no mfc0 hazard nops) and 2.9
   (ee-gcc2.9-990721; adds them). Sony's code has inline asm blocks with their own `.set noreorder` loops (DIntr).
+- Register/scheduling levers that worked in libkernl: `volatile` on single struct fields (reloads), reusing a
+  parameter as loop index/result (shares its s-register), a callee declared `void` vs `int` (v0 free or not).
 - GNU as fills an open delay slot only when no label precedes the branch: -g's `$LM` line labels count. A `j $31`
   left unfilled where the original filled it: put the last statement and `}` on one line (lib/init).
 
