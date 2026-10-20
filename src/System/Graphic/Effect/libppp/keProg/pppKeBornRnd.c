@@ -1,12 +1,5 @@
 #include "pppKeBornRnd.h"
-#include "include_asm.h"
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/keProg/pppKeBornRnd", pppKeBornRnd);
-
-/* Same code except register allocation: the original lets k and pMv share s1, so md stays in fp; ours
- * keeps them apart and spills md (12 bytes longer). Tried: pMv/pVert statement positions, with and
- * without pVert, pdv scope, loop forms, md types. */
-#if 0
 void pppKeBornRnd(pppPObject *pobj, PKeBornRnd *dat, pppCtrlTable *ctbl) {
     int r;
     sceVu0FMATRIX mat;
@@ -54,8 +47,8 @@ void pppKeBornRnd(pppPObject *pobj, PKeBornRnd *dat, pppCtrlTable *ctbl) {
         pTblVert = ppvEnv->lpModel[pVsf->modelno].vert;
     }
     fv0[3] = 1.0f;
+    md = dat->Mode; /* before the call: keeps md in s8 */
     sceVu0CopyMatrix(mat, ppvPObj->cmat);
-    md = dat->Mode;
     if (md) {
         j = r % pVsf->indexn;
     } else {
@@ -75,12 +68,15 @@ void pppKeBornRnd(pppPObject *pobj, PKeBornRnd *dat, pppCtrlTable *ctbl) {
             }
         }
         if (pObj != NULL) {
+            float *pPos;
             pVert = &pTblVert[k];
-            pMv = (VMove *)&pObj->val[dat->Mv.valoff];
             fv0[0] = pVert->x;
             fv0[1] = pVert->y;
             fv0[2] = pVert->z;
-            sceVu0ApplyMatrix((float *)&pObj->val[dat->Pos.valoff], ppvPObj->cmat, fv0);
+            /* pPos before pMv: Mv.valoff is then loaded after k's last use and pMv shares k's register */
+            pPos = (float *)&pObj->val[dat->Pos.valoff];
+            pMv = (VMove *)&pObj->val[dat->Mv.valoff];
+            sceVu0ApplyMatrix(pPos, ppvPObj->cmat, fv0);
             pVert = &pTblVertS[k];
             fv0[0] = pVert->x;
             fv0[1] = pVert->y;
@@ -100,7 +96,6 @@ void pppKeBornRnd(pppPObject *pobj, PKeBornRnd *dat, pppCtrlTable *ctbl) {
     _t->NextIdx = j;
 }
 
-#endif
 
 void pppKeBornRndCon(pppPObject *pobj, pppCtrlTable *ctbl) {
     VKeBornRnd *_t = (VKeBornRnd *)&pobj->val[ctbl->useVal[IKeBornRnd_This]];
