@@ -78,4 +78,45 @@ typedef union {
         (d) = sf_u.value;                \
     } while (0)
 
+#define FLT_UWORD_MAX 0x7f7fffffL
+#define FLT_UWORD_IS_FINITE(x) ((x) <= FLT_UWORD_MAX)
+
+float __kernel_sinf(float x, float y, int iy);
+float __kernel_cosf(float x, float y);
+float __kernel_tanf(float x, float y, int iy);
+__int32_t __ieee754_rem_pio2f(float x, float *y);
+
+/* math.h / fdlibm.h: the error-handling wrappers. */
+struct exception {
+    int type;
+    char *name;
+    double arg1;
+    double arg2;
+    double retval;
+    int err;
+};
+
+#define DOMAIN 1
+#define SING 2
+#define OVERFLOW 3
+#define UNDERFLOW 4
+
+typedef enum { __fdlibm_ieee = -1, __fdlibm_svid, __fdlibm_xopen, __fdlibm_posix } __fdlibm_version;
+extern __fdlibm_version __fdlib_version;
+#define _LIB_VERSION __fdlib_version
+#define _IEEE_ __fdlibm_ieee
+#define _SVID_ __fdlibm_svid
+#define _XOPEN_ __fdlibm_xopen
+#define _POSIX_ __fdlibm_posix
+
+extern int *__errno(void);
+#define errno (*__errno())
+#define EDOM 33
+#define ERANGE 34
+
+extern int matherr(struct exception *e);
+extern int isnanf(float x) __attribute__((const));
+extern int finitef(float x) __attribute__((const));
+extern float __ieee754_sqrtf(float x);
+
 #endif
