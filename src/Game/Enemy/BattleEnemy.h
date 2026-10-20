@@ -10,6 +10,11 @@
 
 struct ENEMY_PARAM; // PARTIAL: added for Game/Enemy/EnemyAirpirate
 struct ENEMY_ACT;   // PARTIAL: added for Game/Enemy/Heartless
+namespace BattleEnemy {
+INT GameModeHp(INT inHp); // PARTIAL: added for Game/Enemy/BattleEnemy
+extern CHAR* SynchroParamName;
+extern INT GameModeParamHp[];
+}
 
 enum CARD_KIND {
     CARD_KIND_None = 0 /* values not needed yet */
@@ -35,18 +40,54 @@ inline void _battleEnemyCheckIndex(INT inIndex, INT inState) {
 
 class CBattleEnemy : public CEntity {
 private:
-    UBYTE _m_0x1d0[0x30]; /* 0x1d0 m_vHitBackVel .. 0x1f0 m_vBackupVel */
-    ULONGLONG m_ullBtlEnemyFlag; /* 0x200 */ // PARTIAL: split out for Game/Player/FriendBeast
-    UBYTE _m_0x208[0xc];   /* 0x208 m_ullBackupFlag, 0x210 m_iSysStep */
-    INT m_iHp;             /* 0x214 */
-    UBYTE _m_0x218[0x20];  /* 0x218 m_iAttackState .. 0x234 m_iParam */
-    INT m_iFallMotionIndex; /* 0x238 */ // PARTIAL: split out for Game/Enemy/EnemyPirate
-    INT m_iLandMotionIndex; /* 0x23c */
-    UBYTE _m_0x240[0x40];  /* 0x240 .. 0x27c m_fDamage */
-protected: // PARTIAL: split out for Game/Enemy/EnemyLargebody
+    // PARTIAL: split into the original members for Game/Enemy/BattleEnemy (same layout)
+    FVECTOR m_vHitBackVel;       /* 0x1d0 */
+    FVECTOR m_vConfusePlayerPos; /* 0x1e0 */
+    FVECTOR m_vBackupVel;        /* 0x1f0 */
+    ULONGLONG m_ullBtlEnemyFlag; /* 0x200 */
+    ULONGLONG m_ullBackupFlag;   /* 0x208 */
+    INT m_iSysStep;              /* 0x210 */
+    INT m_iHp;                   /* 0x214 */
+    INT m_iAttackState;          /* 0x218 */
+    INT m_iGroupNo;              /* 0x21c */
+    INT m_iActiveAttackRate;     /* 0x220 */
+    INT m_iDamageCounter;        /* 0x224 */
+    INT m_iHitCount;             /* 0x228 */
+    TIMEQ m_tqDamageTimer;       /* 0x22c */
+    FLOAT m_fDamageRate;         /* 0x230 */
+    INT m_iParam;                /* 0x234 */
+    INT m_iFallMotionIndex;      /* 0x238 */
+    INT m_iLandMotionIndex;      /* 0x23c */
+    CARD_KIND m_CardKind;        /* 0x240 */
+    CARD_KIND m_DuelCardKind;    /* 0x244 */
+    HANDLE m_hBadStatus;         /* 0x248 */
+    HANDLE m_hDision;            /* 0x24c */
+    HANDLE m_hFreeze;            /* 0x250 */
+    HANDLE m_hRecover;           /* 0x254 */
+    HANDLE m_hDeath;             /* 0x258 */
+    HANDLE m_hHitEffect;         /* 0x25c */
+    HANDLE m_hSpotLight[2];      /* 0x260 */
+    TIMEQ m_tqCancelTimer;       /* 0x268 */
+    TIMEQ m_tqBindTimer;         /* 0x26c */
+    TIMEQ m_tqConfuseTimer;      /* 0x270 */
+    TIMEQ m_tqHitBackTimer;      /* 0x274 */
+    TIMEQ m_tqTime;              /* 0x278 */
+    FLOAT m_fDamage;             /* 0x27c */
+protected:
     FLOAT m_fBodyRviseCoefficient; /* 0x280 */
 private:
-    UBYTE _m_0x284[0x5ac]; /* 0x284 m_iExp .. 0x450 m_EnemyState[31] */
+    INT m_iExp;                  /* 0x284 */
+    short m_sAttrDmgSeIdentifyNo[6]; /* 0x288 */
+    INT m_iCardBreakSeIdentifyNo; /* 0x294 */
+    CState* m_pDefaultState;     /* 0x298 */
+    CState* m_pMainState;        /* 0x29c */
+    ENEMY_PARAM* m_pEnemyParam;  /* 0x2a0 */
+    struct BASIC_ENEMY_PARAM* m_pBasicParam; /* 0x2a4 */
+    UBYTE m_MesCardInfo[0x24];   /* 0x2a8 MES_CARD_INFO */
+    SHORT m_sStopDamageCount;    /* 0x2cc */
+    SHORT m_sStopDamagePtr;      /* 0x2ce */
+    UBYTE m_StopDamage[0x180];   /* 0x2d0 STOP_DAMAGE[8] */
+    UBYTE m_EnemyState[0x3e0];   /* 0x450 CStateTemplate<CBattleEnemy>[31] */
 
 public:
     CBattleEnemy(CTask* inParent, CState* inDefaultState, CState* inMainState);
@@ -85,24 +126,24 @@ public:
     void playSmallDamageSE();
     void playBigDamageSE();
     INT selectDamageMotion_();
-    INT getParam() { return *(INT*)&_m_0x218[0x1c]; } /* m_iParam 0x234 */
+    INT getParam() { return m_iParam; }
     void makeExpPrize();              // PARTIAL: added for Game/Enemy/BossDeadDemo
     static void setBossKilledFlag();
-    void setParam(INT inParam) { *(INT*)&_m_0x218[0x1c] = inParam; } // PARTIAL: added for Game/Enemy/CreateEnemy
+    void setParam(INT inParam) { m_iParam = inParam; } // PARTIAL: added for Game/Enemy/CreateEnemy
     // PARTIAL: added for Game/Enemy/BattleEnemyManager
     UINT getBattleEnemyFlag() const { return m_ullBtlEnemyFlag; }
-    void setGroupNo(INT inNo) { *(INT*)&_m_0x218[4] = inNo; } /* m_iGroupNo 0x21c */
-    INT getGroupNo() const { return *(const INT*)&_m_0x218[4]; }
+    void setGroupNo(INT inNo) { m_iGroupNo = inNo; }
+    INT getGroupNo() const { return m_iGroupNo; }
     HANDLE getNearestChild(FLOAT& outDist, CEntity& inEntity);
     ULONGLONG isPermissionCardBattle() const { return m_ullBtlEnemyFlag & 0x200; }
     INT getHpMax() const;
     BOOL isCurrentState(INT inState); // PARTIAL: added for Game/Enemy/HumanBoss
     INT getPlayerState();             // PARTIAL: added for Game/Enemy/HumanBoss
     // PARTIAL: added for Game/Enemy/EnemyAirpirate
-    ENEMY_PARAM* getEnemyParam() { return *(ENEMY_PARAM**)&_m_0x284[0x1c]; } /* m_pEnemyParam 0x2a0 */
-    ENEMY_PARAM* getEnemyParam() const { return *(ENEMY_PARAM* const*)&_m_0x284[0x1c]; } // PARTIAL: added for Game/Enemy/HumanBoss
+    ENEMY_PARAM* getEnemyParam() { return m_pEnemyParam; }
+    ENEMY_PARAM* getEnemyParam() const { return m_pEnemyParam; } // PARTIAL: added for Game/Enemy/HumanBoss
     INT getAttackRate() const;
-    INT getAttackState() const { return *(const INT*)&_m_0x218[0]; } // PARTIAL: added for Game/Enemy/Heartless
+    INT getAttackState() const { return m_iAttackState; } // PARTIAL: added for Game/Enemy/Heartless
     BOOL canAttack_(const ENEMY_ACT* inAct);
     void destroyCard(); // PARTIAL: added for Game/Enemy/EnemyBarrelspider
     // PARTIAL: added for Game/Enemy/EnemyWhitemushroom
@@ -240,14 +281,125 @@ protected:
     virtual void commonBeginAttack();
     virtual void commonEndAttack();
 
+public: // PARTIAL: state wrappers added for Game/Enemy/BattleEnemy
+    BOOL isValidSynchro();
+    BOOL canKill();
+    void homingToPlayerY(FLOAT inRate);
+    void homingMoveToPlayer(FLOAT inRate, FLOAT inSpeed);
+    void kill();
+    void notifyDead();
+    void enableConfuse_(BOOL inEnable);
+    void updateDamageTimer_();
+    void updateBindTimer_();
+    void updateConfuseTimer_();
+    void enableBind_(BOOL inEnable);
+    void homingToPlayer(FLOAT inRate);
+    INT getSize() const;
+    FLOAT getDamageRate_() const;
+    void changeMainState(INT inState);
+    BOOL isPlayingCardBattle();
+    void addEnemyKillCount_();
+    void beginStateAppear_();
+    void stateAppear_();
+    void endStateAppear_();
+    void beginStateMain_();
+    void stateMain_();
+    void endStateMain_();
+    void beginStateAttack1_();
+    void stateAttack1_();
+    void endStateAttack1_();
+    void beginStateAttack2_();
+    void stateAttack2_();
+    void endStateAttack2_();
+    void beginStateAttack3_();
+    void stateAttack3_();
+    void endStateAttack3_();
+    void beginStateAttack4_();
+    void stateAttack4_();
+    void endStateAttack4_();
+    void beginStateAttack5_();
+    void stateAttack5_();
+    void endStateAttack5_();
+    void beginStateAttack6_();
+    void stateAttack6_();
+    void endStateAttack6_();
+    void beginStateAttack7_();
+    void stateAttack7_();
+    void endStateAttack7_();
+    void beginStateAttack8_();
+    void stateAttack8_();
+    void endStateAttack8_();
+    void beginStateItem_();
+    void stateItem_();
+    void endStateItem_();
+    void beginStateSmallDamage_();
+    void stateSmallDamage_();
+    void endStateSmallDamage_();
+    void beginStateBigDamage_();
+    void stateBigDamage_();
+    void endStateBigDamage_();
+    void beginStateCardBreak_();
+    void stateCardBreak_();
+    void endStateCardBreak_();
+    void beginStateZero_();
+    void stateZero_();
+    void endStateZero_();
+    void beginStateDuel_();
+    void stateDuel_();
+    void endStateDuel_();
+    void beginStateDuelSuccess_();
+    void stateDuelSuccess_();
+    void endStateDuelSuccess_();
+    void beginStateFaint_();
+    void stateFaint_();
+    void endStateFaint_();
+    void beginStateStop_();
+    void stateStop_();
+    void endStateStop_();
+    void beginStateTerror_();
+    void stateTerror_();
+    void endStateTerror_();
+    void beginStateFreeze_();
+    void stateFreeze_();
+    void endStateFreeze_();
+    void beginStateShock_();
+    void stateShock_();
+    void endStateShock_();
+    void beginStateTornado_();
+    void stateTornado_();
+    void endStateTornado_();
+    void beginStateDegenerator_();
+    void stateDegenerator_();
+    void endStateDegenerator_();
+    void beginStateGravity_();
+    void stateGravity_();
+    void endStateGravity_();
+    void beginStateToss_();
+    void stateToss_();
+    void endStateToss_();
+    void beginStateBeat_();
+    void stateBeat_();
+    void endStateBeat_();
+    void beginStateMagnet_();
+    void stateMagnet_();
+    void endStateMagnet_();
+    void beginStateSuspend_();
+    void stateSuspend_();
+    void endStateSuspend_();
+    void beginStateVolley_();
+    void stateVolley_();
+    void endStateVolley_();
+    void beginStateDead_();
+    void stateDead_();
+    void endStateDead_();
 public:
-    void setAttackState_(INT inState) { *(INT*)&_m_0x218[0] = inState; } // PARTIAL: added for Game/Enemy/Heartless (no range check)
+    void setAttackState_(INT inState) { m_iAttackState = inState; } // PARTIAL: added for Game/Enemy/Heartless (no range check)
 public:
     // PARTIAL: added for Game/Enemy/EnemyAirpirate (last in the class: it sets the original line number)
 #line 673 BATTLEENEMY_H_PATH
     void setAttackState(INT inState) {
         if (!(2 <= inState && inState < 10)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);
-        *(INT*)&_m_0x218[0] = inState; /* m_iAttackState 0x218 */
+        m_iAttackState = inState;
     }
 };
 

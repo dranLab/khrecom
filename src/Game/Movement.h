@@ -274,7 +274,8 @@ public:
     BOOL turnToTargetY(const FVECTOR& inTarget, FLOAT inRate); // PARTIAL: added for Game/Player/Summon
     void turnToTargetY(const CEntity* inTarget, FLOAT inRate); // PARTIAL: added for Game/Enemy/EnemyWightnight
     // PARTIAL: added for Game/Bullet/Bullet (m_vDetectNormal 0xa0)
-    void turnToTarget(const FVECTOR& inTarget, FLOAT inRate);
+    BOOL turnToTarget(const FVECTOR& inTarget, FLOAT inRate);
+    void homing(const FVECTOR& inTarget, FLOAT inRate); // PARTIAL: added for Game/Enemy/BattleEnemy
     void homingMove(const FVECTOR& inTarget, FLOAT inRate, FLOAT inSpeed);
     void homingMove(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed); // PARTIAL: added for Game/Enemy/MapEnemyAir
     void setShiftY(FLOAT inShiftY);
