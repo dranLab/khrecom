@@ -9,13 +9,24 @@
 #include "Game/Movement.h"
 #include "Game/Status.h"
 #include "Game/SceneEnv.h"
+#include "Game/Bullet/BulletManager.h"
+#include "System/TaskMan.h"
 #include "include_asm.h"
+
+extern "C" char D_004997C0[];
+extern "C" char D_00499828[];
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_0025F688);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerAttack__9DWTPlayerP12CDebugWindowii_0025F798);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugWinPlayer__9DWTPlayerP12CDebugWindowii_0025FA48);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getPlayerPos__Fi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcNextEXP__7CPlayeri);
+INT CPlayer::calcNextEXP(INT inLv) {
+    INT nExp = 25;
+    for (INT i = 3; i <= inLv + 1; i++) {
+        nExp += i * i * 4;
+    }
+    return nExp;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getNowNextEXP__7CPlayer);
 INT CPlayer::getNowTotalMP() {
     if (!m_pInstance) return CStatus::getMP();
@@ -34,7 +45,10 @@ void CPlayer::lastUpdate() {
     m_hGimmickJump = 0;
     updateFooting();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", changeState__7CPlayeri);
+void CPlayer::changeState(INT inState) {
+    if (!((UINT)inState < 4)) AssertApp(D_004997C0, 941, D_00499828, 0);
+    gotoState(*(CState*)&_m_0x21c[inState * 0x20]);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateInitial__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStartPos__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeWeapon__7CPlayer);
@@ -61,8 +75,14 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimRsrcEx__7C
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowIdleAnim__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setFaceAnim__7CPlayerii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setTransOff__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onWeapon__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", offWeapon__7CPlayer);
+void CPlayer::onWeapon(INT inEffect) {
+    if (m_pWeapon) m_pWeapon->onWeapon(inEffect);
+    m_uiPlayerFlag = (INT)m_uiPlayerFlag & ~2;
+}
+void CPlayer::offWeapon() {
+    if (m_pWeapon) m_pWeapon->offWeapon();
+    m_uiPlayerFlag |= 2;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onAttack__7CPlayer);
 void CPlayer::offAttack() {
     if (m_pWeapon) m_pWeapon->offAttack();
@@ -71,7 +91,11 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getWeaponTopPos__
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCaskPos__7CPlayerR7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyColl__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyCollPos__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isMuteki__C7CPlayer);
+BOOL CPlayer::isMuteki() const {
+    if (m_uiPlayerFlag & 1) return TRUE;
+    if (m_tqMutekiTimer > 0) return TRUE;
+    return m_bDmgMuteki != 0;
+}
 void CPlayer::exeMutekiTimer() {
     m_tqMutekiTimer -= m_tqFrameRate;
     if (m_tqMutekiTimer < 0) m_tqMutekiTimer = 0;
@@ -178,7 +202,14 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackMove__7
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackCollision__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procGravity__7CPlayeriii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procSkillEnd__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkExtraSkill__7CPlayer);
+BOOL CPlayer::chkExtraSkill() {
+    if (m_iExtraSkill) {
+        m_iStepStockSkill = 2;
+        m_iExtraSkill = 0;
+        if (exeUseStock(1)) return TRUE;
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcEnchant_AttackPoint__7CPlayerRiR8ATK_KIND8ATK_ATTRUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcEnchant_DamagePoint__7CPlayerRi8ATK_ATTR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setUseRsrcBlock__7CPlayeri);
@@ -202,7 +233,12 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyDead__7CPla
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initBadCondition__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBadCondition__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setConfuse__7CPlayerii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeConfuse__7CPlayer);
+void CPlayer::exeConfuse() {
+    if (m_uiConditionFlag & 8) {
+        m_tqConfuse -= m_tqFrameRate;
+        if (m_tqConfuse <= 0) setConfuse(0, 0);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initItem__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeItem__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStandUp_inFriend__7CPlayer);
@@ -218,7 +254,11 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPosFS_t
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkEscape__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initEscape__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeEscape__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setBGFade__7CPlayerffi);
+void CPlayer::setBGFade(FLOAT inRate, FLOAT inTime, INT inFlag) {
+    FVECTOR v;
+    v.set(inRate, inRate, inRate, 1.0f);
+    setBGFade(v, inTime, inFlag);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setBGFade__7CPlayerR7FVECTORfi);
 void CPlayer::setObjStop(UINT inFlag) {
     if (!inFlag) CSceneEnv::setStop((ObjType::eObjBit)0);
@@ -256,15 +296,36 @@ HANDLE CPlayer::getLevelUpEffect() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initEnd__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeEnd__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isEnableBattleEnd__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowExterminate__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", killBullet__7CPlayer);
+BOOL CPlayer::isEnableBattleEnd() {
+    if (!m_pInstance) return TRUE;
+    if (m_pInstance->m_bIsDead) return FALSE;
+    if (m_pInstance->m_PlayerState != 0x1C) return FALSE;
+    return m_pInstance->m_iSubState >= 3;
+}
+BOOL CPlayer::isNowExterminate() {
+    if (!m_pInstance) return TRUE;
+    if (!m_pInstance->m_bIsDead) return FALSE;
+    UINT m = 4;
+    return (m_pInstance->m_uiBattleFlag & m) != 0;
+}
+void CPlayer::killBullet() {
+    CBulletManager* p = (CBulletManager*)CTaskMan::getSysTask(0x1B);
+    if (p) p->kill(getHandle());
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEnemyStop__7CPlayeriUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setMDFooting__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFooting__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeFooting__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateFooting__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCardSnatch__7CPlayeri);
+void CPlayer::setCardSnatch(INT inFlag) {
+    if (m_pRevolver) {
+        m_hSnatch = inFlag;
+        if (inFlag > 0) {
+            m_uiBattleFlag = (INT)m_uiBattleFlag & ~8;
+            m_pRevolver->setSnatch(inFlag);
+        }
+    }
+}
 void CPlayer::addWind(FVECTOR* inVel) {
     if (m_pPLM) m_pPLM->addWindXYZ(inVel);
 }
@@ -278,18 +339,42 @@ void CPlayer::cmdMove_WaterSurfaceCheck(INT inFlag) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdState_initWorldSelect__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdState_setEncountWait__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateField___7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateField___7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateField___7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateBattle___7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateBattle___7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateBattle___7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateWait___7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateWait___7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateWait___7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateHide___7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateHide___7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateHide___7CPlayer);
+void CPlayer::beginStateField_() {
+    beginStateField();
+}
+void CPlayer::stateField_() {
+    stateField();
+}
+void CPlayer::endStateField_() {
+    endStateField();
+}
+void CPlayer::beginStateBattle_() {
+    beginStateBattle();
+}
+void CPlayer::stateBattle_() {
+    stateBattle();
+}
+void CPlayer::endStateBattle_() {
+    endStateBattle();
+}
+void CPlayer::beginStateWait_() {
+    beginStateWait();
+}
+void CPlayer::stateWait_() {
+    stateWait();
+}
+void CPlayer::endStateWait_() {
+    endStateWait();
+}
+void CPlayer::beginStateHide_() {
+    beginStateHide();
+}
+void CPlayer::stateHide_() {
+    stateHide();
+}
+void CPlayer::endStateHide_() {
+    endStateHide();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", __12CPlayerDebugP5CTask);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _$_12CPlayerDebug);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", main__12CPlayerDebug);

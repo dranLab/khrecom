@@ -193,6 +193,7 @@ public:
     INT getHave(INT inKind, INT inA, INT inB, INT inC, INT inD);
     INT calcPlutoMark();
     void dropPlutoMarkCard(const FVECTOR* inPos);
+    void setSnatch(HANDLE inHandle); // PARTIAL: added for Game/Player/Player
 };
 #endif
 }

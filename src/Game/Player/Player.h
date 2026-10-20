@@ -468,6 +468,25 @@ public:
     static INT importStatus();
     void setDefAttr(FLOAT* inAttr);
     // PARTIAL: added for Game/Player/Player
+    static INT calcNextEXP(INT inLv);
+    BOOL isMuteki() const;
+    void killBullet();
+    void exeConfuse();
+    static BOOL isNowExterminate();
+    static BOOL isEnableBattleEnd();
+    BOOL chkExtraSkill();
+    void beginStateBattle_();
+    void stateBattle_();
+    void endStateBattle_();
+    void beginStateField_();
+    void stateField_();
+    void endStateField_();
+    void beginStateHide_();
+    void stateHide_();
+    void endStateHide_();
+    void beginStateWait_();
+    void stateWait_();
+    void endStateWait_();
     void exeAttackTimer();
     void exeMutekiTimer();
     FLOAT getDefAttr(ATK_ATTR inAttr) const;
