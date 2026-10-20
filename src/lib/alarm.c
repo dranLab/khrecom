@@ -1,6 +1,6 @@
 /* InitAlarm: install the kernel's alarm handlers (code copied into kernel memory, then system calls patched). */
 
-void FlushCache(int operation);
+#include "sdk/eekernel.h"
 
 struct syscall_entry {
     int number;
