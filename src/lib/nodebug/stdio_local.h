@@ -51,11 +51,21 @@ typedef struct __sFILE {
     struct _reent *_data;
 } FILE;
 
+struct _glue {
+    struct _glue *_next;
+    int _niobs;
+    FILE *_iobs;
+};
+
 struct _reent {
     int _errno;
     FILE *_stdin, *_stdout, *_stderr;
     char _pad[0x38 - 0x10];
     int __sdidinit;
+    void (*__cleanup)(struct _reent *);
+    char _pad2[0x1d8 - 0x40];
+    struct _glue __sglue;
+    FILE __sf[3];
 };
 
 extern struct _reent *_impure_ptr;
