@@ -79,6 +79,9 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 - Hand-written assembly: `src/lib/<unit>.s` replaces splat's `.s` for that unit (same object, GNU as); its data
   from source with a last line `# SOURCE DATA: .data` (klib.s).
 - `candidates.py --lib` lists the open library units; `check.sh` reports library progress separately.
+- The libs' .mdebug has only names, no types: `stdump functions iso/SLUS_217.99` (tools/ccc) lists each lib file's
+  functions incl. statics, in order. Other assemblers to try: `ee-as` 2.10 (ee-gcc2.96 package; no mfc0 hazard
+  nops, pads short loops) and 2.9 (ee-gcc2.9-990721).
 
 | Family | Toolchain (verified on) |
 |---|---|
