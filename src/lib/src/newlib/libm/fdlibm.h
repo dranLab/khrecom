@@ -118,5 +118,10 @@ extern int matherr(struct exception *e);
 extern int isnanf(float x) __attribute__((const));
 extern int finitef(float x) __attribute__((const));
 extern float __ieee754_sqrtf(float x);
+extern float __ieee754_acosf(float x);
+extern float __ieee754_asinf(float x);
+extern float __ieee754_atan2f(float y, float x);
+extern float __ieee754_fmodf(float x, float y);
+extern float fabsf(float x) __attribute__((const));
 
 #endif
