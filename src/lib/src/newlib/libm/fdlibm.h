@@ -102,7 +102,7 @@ struct exception {
 #define UNDERFLOW 4
 
 typedef enum { __fdlibm_ieee = -1, __fdlibm_svid, __fdlibm_xopen, __fdlibm_posix } __fdlibm_version;
-extern __fdlibm_version __fdlib_version;
+extern const __fdlibm_version __fdlib_version;
 #define _LIB_VERSION __fdlib_version
 #define _IEEE_ __fdlibm_ieee
 #define _SVID_ __fdlibm_svid
@@ -122,6 +122,7 @@ extern float __ieee754_acosf(float x);
 extern float __ieee754_asinf(float x);
 extern float __ieee754_atan2f(float y, float x);
 extern float __ieee754_fmodf(float x, float y);
+extern float __ieee754_powf(float x, float y);
 extern float fabsf(float x) __attribute__((const));
 extern float atanf(float x);
 extern float scalbnf(float x, int n);
