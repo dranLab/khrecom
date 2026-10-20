@@ -26,6 +26,10 @@ overrides:
     cflags: -O2 -G0 -g
     source_root: null
     assembler: ee-gcc2.9-990721
+  - match: lib/nodebug/*        # newlib libc / libsn without debug info: the game's toolchain (ProDG 2.95.3-136 + Ps2EeAs; strstr's loop-head nops)
+    compiler: ee-gcc2.95.3-136
+    cflags: -O2 -G0
+    source_root: null
   - match: lib/*                # Sony SDK: libkernl, libmpeg, libdma, ... (one toolchain; the libs that matched 2.95.3 match it too)
     compiler: ee-gcc2.9-991111  # kCopy in alarm.c only matches the 991111 family; libmpeg error.c saves with sd (2.95.3: sq)
     cflags: -O2 -G0 -g

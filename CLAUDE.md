@@ -123,6 +123,7 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 | libat3dec (`lib/init`, `lib/hncAt3dec`) | ee-gcc2.96 + its ee-as 2.10, `-O2 -G0 -g` (atrac2_mode_* only match 2.96; hncAt3dec saves registers 8 bytes apart, the Sony 991111 builds 16) |
 | libgcc (`lib/src/gcc/*`, from GCC 2.9's libgcc2.c) | ee-gcc2.9-991111 + the 2.9 ee-as of ee-gcc2.9-990721 (`assembler: ee-gcc2.9-990721`): __floatdisf leaves a `jal` delay slot open that GNU as 2.10 would fill. Source is GCC's own (`src/lib/src/gcc/libgcc2.h` has the types and `umul_ppmm`) |
 | newlib libm (`lib/src/newlib/*`, fdlibm) | ee-gcc2.9-991111-01 `-O2 -G0 -g -fno-builtin` + its own 2.9 as (`assembler: ee-gcc2.9-991111-01`): this compiler pads `div.s` with nops (EE erratum; ef_fmod, kf_tan), -fno-builtin keeps fabsf a call, its as adds hazard nops (mfc1, c.cond) only where gcc enters `.set noreorder` and moves no stores into `jr` slots. Source is newlib's own; `src/lib/src/newlib/libm/fdlibm.h` has the macros |
+| `lib/nodebug/*` (newlib libc, libsn; no debug info) | the game's own toolchain: ee-gcc2.95.3-136 `-O2 -G0` + Ps2EeAs (no `assembler:`); only 990721 and 2.95.3-136 matched the first str*/stdlib functions, and only Ps2EeAs gives strstr's loop-head nops. Source is newlib libc's |
 
 ## Pitfalls
 
