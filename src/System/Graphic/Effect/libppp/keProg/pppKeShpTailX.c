@@ -3,7 +3,6 @@
 #include "System/Graphic/Effect/libppp/eiProg/pppColor.h"
 #include "System/Graphic/Effect/libppp/keProg/pppKeZCrctShp.h"
 #include "System/Graphic/Effect/libppp/draw/shape.h"
-#include "include_asm.h"
 
 void pppKeShpTailX(pppPObject *pobj, PKeShpTailX *dat, pppCtrlTable *ctbl) {
     VKeShpTailX *pThis;
@@ -66,13 +65,6 @@ void pppKeShpTailX(pppPObject *pobj, PKeShpTailX *dat, pppCtrlTable *ctbl) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/keProg/pppKeShpTailX", pppKeShpTailXDraw);
-
-/* 5 lines differ: the loop-invariant col address (r = col copy, gets s1) is scheduled before the
- * KeVu0VecLen call (filling its delay slot) instead of after it; everything else matches, including the
- * stack slots of the spilled invariants (those need the inline-function argument copies: gcse sizes its
- * hash table from the insn count, which orders the invariant pseudos). */
-#if 0
 /* VU0 macro-mode helpers (vf26..vf31 as scratch, as in the original). The original used inline functions:
  * their parameters show up as locals in the debug info (Src, _s), and their argument copies change the
  * insn count gcse sees, which decides the stack slots of the loop's spilled invariants. */
@@ -282,6 +274,9 @@ void pppKeShpTailXDraw(pppPObject *pobj, PKeShpTailX *dat, pppCtrlTable *ctbl) {
     }
     sceVu0CopyVector(fv3, pFv0[j]);
     b = d;
+    /* Hack (as in pppKeShpTail): an empty asm takes an issue slot here, so sched1 keeps the loop-invariant
+     * col address after the KeVu0VecLen call. */
+    __asm__("" : "+f"(sclSft));
     sceVu0SubVector(fv2, fv3, fv1);
     f = KeVu0VecLen(fv2);
     c = f;
@@ -335,7 +330,6 @@ void pppKeShpTailXDraw(pppPObject *pobj, PKeShpTailX *dat, pppCtrlTable *ctbl) {
     }
 }
 
-#endif
 
 void pppKeShpTailXCon(pppPObject *pobj, pppCtrlTable *ctbl) {
     VKeShpTailX *pThis = (VKeShpTailX *)&pobj->val[ctbl->useVal[IKeShpTailX_This]];
