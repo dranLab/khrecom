@@ -926,7 +926,13 @@ mspace create_mspace_with_base(void* base, size_t capacity, int locked) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/dlmalloc", destroy_mspace);
 
 #if 0
-/* The original has the first ->next step and one loop test before the loop (bnezl; lw); this gives a single loop. */
+/* Not matching. The original is: lw seg.next; beqz; lw next (A); bnezl L, lw (entry test + body); L: bnezl L, lw.
+ * That is "if (sp) { sp = sp->next; while (sp) sp = sp->next; }" with the loop exit test duplicated, but jump2
+ * cross-jumps the peeled "lw; beqz" into the loop (the insn before both tests is the same lw), giving an
+ * unrotated loop (40 bytes). An asm statement between them (volatile or "=r"/"0" pass-through) stops the merge
+ * but then reorg leaves the second test's delay slot unfilled (64 bytes). The do-while below (one loop test,
+ * 48 bytes), the real dlmalloc loop over &ms->seg (tests &seg, addiu), for/while forms and a volatile load
+ * for the peeled step were tried too. */
 size_t destroy_mspace(mspace msp) {
     mstate ms = (mstate)msp;
     msegmentptr sp = ms->seg.next;

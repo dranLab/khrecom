@@ -197,11 +197,6 @@ void op_oef2_set2_16(char *oef2_16) {
     op_oef2_set(table, (char *)table + table->table);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/global", op_oef2_a_get);
-
-/* Same code except register allocation: the original keeps table in a0 and computes number * 4 last;
- * ours copies table to a3. Tried if/switch forms, pointer/integer arithmetic and temporaries. */
-#if 0
 void *op_oef2_a_get(OEF2_HEADER *table, int code, int number) {
     OEF2_TEXINFO *ti;
     OEF2_CLUTINFO *ci;
@@ -216,11 +211,13 @@ void *op_oef2_a_get(OEF2_HEADER *table, int code, int number) {
         ci = (OEF2_CLUTINFO *)(table->clut + (word)table);
         return &ci[number];
     default:
-        w = ((u_word *)table)[code] + (word)table;
+        /* one variable reassigned step by step: a single expression gives the temporaries other registers */
+        w = (word)table + code * 4;
+        w = *(u_word *)w;
+        w = w + (word)table;
         return ((void **)w)[number];
     }
 }
-#endif
 
 float op_random(float ran) {
     __asm__ __volatile__(

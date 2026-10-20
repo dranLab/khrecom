@@ -73,21 +73,20 @@ void CFadeIOMask::main() {
     }
 }
 
-#include "include_asm.h"
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/ScreenMask", disp__11CFadeIOMask);
-
-/* Near-match: the original keeps an andi 0xFF on the alpha byte, loads 255.0f before the alpha and uses a0 itself
- * for m_Prim (here a copy in v1). */
-#if 0
 void CFadeIOMask::disp() {
-    FLOAT fScale = 255.0f;
-    if (m_Prim.m_nAlphaMode == ALPHA_MUL) fScale = 128.0f;
-    m_Prim.setAlpha((INT)(getAlpha() * fScale) & 0xFF);
+    /* the compare before the constant and the barrier keep 255.0f after the xori (the scheduler otherwise hoists
+     * it to the top); the register variables give the constant f0 and the alpha f1; the barrier on a keeps the
+     * andi and makes the store use the a0 the call gets */
+    INT x = m_Prim.m_nAlphaMode ^ ALPHA_MUL;
+    __asm__ volatile("" : : "r"(x));
+    register FLOAT fScale __asm__("$f0") = 255.0f;
+    if (x == 0) fScale = 128.0f;
+    register FLOAT fAlpha __asm__("$f1") = getAlpha();
+    INT a = (INT)(fAlpha * fScale) & 0xFF;
+    __asm__ volatile("" : : "r"(a));
+    m_Prim.setAlpha(a);
     m_Prim.CGPrim::disp();
 }
-
-#endif
 
 CScreenMaskPrim::CScreenMaskPrim() {
     m_nFlag = 0;
