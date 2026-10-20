@@ -164,6 +164,7 @@ private:
     C2DSeqLightMarkAgent* m_pLightMark; /* 0x84 */
     FPOINT m_fptLightOfs;             /* 0x88 */
     SHORT m_nActiveLoopSeq;           /* 0x90 */
+    friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
     C2DSeqSelectable(CTask* pParent);

@@ -119,7 +119,7 @@ public:
     }
 
 private:
-    INT getRsrcType() const;
+    INT getRsrcType() const { return m_mode != SLMODE_SAVE; }
     void continueProc() { m_nFlag |= 1; }
     void preInit();
     void exeInit();
@@ -246,6 +246,14 @@ public:
     void abort() { m_nFlag |= 1; }
 };
 
+/* constant tables of the original (initializers in .rodata) */
+struct SEQTBL2 {
+    C2DSeqAgent::SeqTbl t[2];
+};
+extern "C" const SEQTBL2 D_004F3358;
+extern "C" char D_004F3120[];
+extern "C" char D_004F3368[];
+
 static inline BOOL _isFadeDone() { return s_pFadeMask ? s_pFadeMask->isFadeDone() : TRUE; }
 static inline BOOL _isAgentState(C2DSeqAgent* p, INT nState) { return p->getState() == nState; }
 
@@ -263,7 +271,22 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_11CSaveLoadUI)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preInit__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeInit__11CSaveLoadUI);
 void CSaveLoadUI::endInit() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckBoot__11CSaveLoadUI);
+void CSaveLoadUI::preCheckBoot() {
+    TRACE_COL((TtyColor)0x1F, D_004F3120);
+    m_pMessageDlgAgent = createMessageDlg(m_pMessageDlgCtrl, m_pMessageDlgFntInf);
+    for (INT i = 0; i < 2; i++) {
+        m_pMessageDlgBtnAgent[i] = createMessageDlgBtn(m_pMessageDlgCtrl, i);
+    }
+    m_pMessageDlgCursor = createCursor();
+    m_pMessageDlgCursor->changeLayer(14);
+    m_pMainLightMark = createLightMark(LIGHTMARK_TYPE_CURSOR, 16, TRUE);
+    for (INT j = 0; j < 2; j++) {
+        m_pMessageDlgBtnAgent[j]->m_pCursor = m_pMessageDlgCursor;
+        m_pMessageDlgBtnAgent[j]->m_pLightMark = m_pMainLightMark;
+    }
+    m_nStep = 0;
+    m_nTimer = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckBoot__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLayIn__11CSaveLoadUI);
 void CSaveLoadUI::exeLayIn() {}
@@ -403,7 +426,13 @@ void CSaveLoadUI::exeConfirmExecErr() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preMessageOnly__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeMessageOnly__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMainFrame__11CSaveLoadUI);
+C2DSeqAgent* CSaveLoadUI::createMainFrame() {
+    SEQTBL2 tbl = D_004F3358;
+    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), D_004F3368, RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(m_pszLad, 11);
+    pAgent->setupState(tbl.t[getRsrcType()], callbackMainFrame, callbackMainFrame);
+    return pAgent;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createWorldIcon__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createRoomName__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createCursor__11CSaveLoadUI);
