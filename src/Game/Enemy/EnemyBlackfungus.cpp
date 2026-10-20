@@ -18,18 +18,16 @@ inline void _enemyBlackfungusEmptyString() {
 #include "Game/Movement.h"
 #include "System/Rnd.h"
 
-/* The unit's data still comes from the original assembly (stateMain is INCLUDE_ASM'd and uses the jump table in
- * .rodata), so the motion names are only declared here. */
 namespace Blackfungus {
-extern CHAR* IdlingMotion;     /* "e017_001" */
-extern CHAR* MoveMotion;       /* "e017_002" */
-extern CHAR* DarkPoisonMotion; /* "e017_050" */
-extern CHAR* PoisonTouchMotion;        /* "e017_051" */
-extern CHAR* PoisonTouchFailedMotion;  /* "e017_052" */
-extern CHAR* PoisonTouchSuccessMotion; /* "e017_053" */
-extern CHAR* MetalMotion;              /* "e017_054" */
-extern CHAR* ReturnMotion;             /* "e017_055" */
-extern CHAR* MetalmodeParamName;       /* "Metalmode" */
+static CHAR* IdlingMotion = "e017_001";
+static CHAR* MoveMotion = "e017_002";
+static CHAR* DarkPoisonMotion = "e017_050";
+static CHAR* PoisonTouchMotion = "e017_051";
+static CHAR* PoisonTouchFailedMotion = "e017_052";
+static CHAR* PoisonTouchSuccessMotion = "e017_053";
+static CHAR* MetalMotion = "e017_054";
+static CHAR* ReturnMotion = "e017_055";
+static CHAR* MetalmodeParamName = "Metalmode";
 }
 
 CEnemyBlackfungus::CEnemyBlackfungus(CTask* inParent) : CHeartless(inParent, 0, 0) {
@@ -60,13 +58,10 @@ void CEnemyBlackfungus::beginStateMain() {
     m_iBlackfungusStep = 0;
 }
 
-#include "include_asm.h"
+/* _ref: a global read through a reference stays after a member store (the original loads the motion names
+ * after the flag store and the parameter name after the step store) */
+template <class T> static inline T& _ref(T& x) { return x; }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/EnemyBlackfungus", stateMain__17CEnemyBlackfungus);
-
-/* Near-match: in case 2 the original stores the flag before the argument setup for commonMoveInit (here it
- * lands in the call's delay slot). */
-#if 0
 void CEnemyBlackfungus::stateMain() {
     switch (m_iBlackfungusStep) {
     case 0:
@@ -101,9 +96,9 @@ void CEnemyBlackfungus::stateMain() {
     case 2:
         if (isMotionEnd()) {
             setBtlEnemyFlag(0x10);
-            commonMoveInit(Blackfungus::IdlingMotion, Blackfungus::MoveMotion, 1.5f);
+            commonMoveInit(_ref(Blackfungus::IdlingMotion), _ref(Blackfungus::MoveMotion), 1.5f);
             m_iBlackfungusStep = 0;
-            m_tqMetalTimer = (TIMEQ)(getExtraParam(Blackfungus::MetalmodeParamName) * 60.0f * 50.0f);
+            m_tqMetalTimer = (TIMEQ)(getExtraParam(_ref(Blackfungus::MetalmodeParamName)) * 60.0f * 50.0f);
         }
         break;
     case 3:
@@ -123,8 +118,6 @@ void CEnemyBlackfungus::stateMain() {
         break;
     }
 }
-
-#endif
 
 void CEnemyBlackfungus::endStateMain() {
     if (!m_bMetal) {
@@ -173,3 +166,4 @@ void CEnemyBlackfungus::stateAttack2() {
     }
 }
 
+// SOURCE DATA: .data .rodata
