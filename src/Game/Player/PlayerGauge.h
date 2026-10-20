@@ -74,8 +74,20 @@ public:
     static BOOL m_bBattleEnd;
 };
 class CFriendGauge;
-class CCommonGauge;
 class CPrizeGauge;
+
+class CCommonGauge : public CTask {
+public:
+    static CCommonGauge* m_pInstance;
+    UINT m_uiFlag;               /* 0x40 */
+    D2::C2DSeqCtrl* m_pSeqCtrls; /* 0x44 */
+    FVECTOR m_vPos[7];           /* 0x50 */
+    INT m_hOwner[7];             /* 0xc0 */
+    CCommonGauge(CTask* p);
+    virtual ~CCommonGauge();
+    virtual void main();
+    void _initialize();
+};
 
 class CPlayerGauge : public CTask {
     CNaviMap* m_pNaviMap;        /* 0x40 */
@@ -105,6 +117,8 @@ public:
     static void setBattleEnd();
     void setMaxHP(INT n);
     void changeTimeHP(D2::C2DSeqCtrl* p, UINT nIdx, UINT nHP);
+    void exeDPGauge();
+    void setDPGauge(INT n);
 };
 
 class CEnemyGauge : public CTask {
@@ -123,6 +137,7 @@ public:
     FVECTOR m_vPos;              /* 0x60 */
     CEnemyGauge(CTask* p);
     virtual ~CEnemyGauge();
+    void _initialize();
     static void resetHP();
     static HANDLE getNowTarget();
 };
@@ -148,6 +163,7 @@ class CFriendGauge : public CTask {
 public:
     CFriendGauge(CTask* p);
     virtual ~CFriendGauge();
+    void _initialize();
     virtual void main();
     void setGauge(INT n);
 };
@@ -169,7 +185,12 @@ public:
     D2::C2DSeqCtrl* m_pMogSeqCtrls; /* 0x78 */
     INT m_iDropMp;               /* 0x7c */
     UINT m_uiCardState;          /* 0x80 */
+    UINT m_cardData;             /* 0x84 CARD */
+    D2::C2DSeqCtrl* m_pCardSeqCtrls; /* 0x88 */
+    class C2DCard* m_pCard;      /* 0x8c */
+    TIMEQ m_tqTimer;             /* 0x90 */
     CPrizeGauge(CTask* p);
+    void _initialize();
     virtual ~CPrizeGauge();
     static BOOL isNowDispCard();
 };

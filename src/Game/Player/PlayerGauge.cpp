@@ -5,6 +5,8 @@
 #include "System/TaskMan.h"
 #include "Game/GameWork.h"
 #include "Game/SceneEnv.h"
+#include "Game/Game.h"
+#include "Game/Entity.h"
 #include "include_asm.h"
 
 using namespace Gauge;
@@ -37,13 +39,53 @@ void CPlayerGauge::setBattleEnd() { CNaviMap::m_bBattleEnd = TRUE; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDPGauge__Q25Gauge12CPlayerGaugei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDP__Q25Gauge12CPlayerGaugeii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDMode__Q25Gauge12CPlayerGaugeiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", exeDPGauge__Q25Gauge12CPlayerGauge);
+void CPlayerGauge::exeDPGauge() {
+    if (!m_pSeqCtrlDP) return;
+    if (!(m_uiFlag & 4)) {
+        if (CGame::isRikuGame() && (CGameWork::getInt(0, 0x24) & 8)) m_uiFlag |= 4;
+    } else {
+        INT n = m_nStateDP;
+        if (n >= 10) return;
+        if (n >= 8 && m_pSeqCtrl->isEnd(5)) {
+            m_pSeqCtrl->destroyIndexToLast(5);
+            m_pSeqCtrlDP->destroyIndexToLast(2);
+            setDPGauge(2);
+        }
+    }
+}
 CLockonMarker::CLockonMarker(CTask* inParent, BOOL inFlag) : CTask(inParent, 0x4000), m_pGauge(NULL), m_bFlag(inFlag) { _initialize(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge13CLockonMarker);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge13CLockonMarker);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge13CLockonMarker);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", calcMarkerScale__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setTarget__Q25Gauge13CLockonMarkeri);
+void CLockonMarker::setTarget(HANDLE inTarget) {
+    m_hTarget = inTarget;
+    m_bLockon = FALSE;
+    m_bTarget = FALSE;
+    m_iDist = 0;
+    if (!inTarget && (m_uiFlag & 1)) {
+        m_uiFlag = (INT)m_uiFlag & ~1;
+        m_pSeqCtrl->enableDisp(0, TRUE);
+        m_pSeqCtrl->restart(0, 0.0f);
+    }
+    m_uiFlag = (INT)m_uiFlag & ~0x10;
+    if (m_hTarget > 0) {
+        CEntity* pTarget = (CEntity*)CTaskMan::getTask(m_hTarget);
+        if (pTarget) {
+            switch (pTarget->getTypeID()) {
+            case 0x1006:
+            case 0x2000:
+            case 0x2003:
+            case 0x2004:
+            case 0x2005:
+            case 0x4000:
+                if (!(m_uiFlag & 0x80)) m_uiFlag |= 0x10;
+                break;
+            }
+            m_bTarget = TRUE;
+        }
+    }
+}
 void CLockonMarker::setLockon(HANDLE inTarget, INT inDist) {
     m_iDist = inDist;
     m_hTarget = inTarget;
@@ -75,7 +117,10 @@ void CLockonMarker::holdTarget(INT inFlag) {
         m_uiFlag = (INT)m_uiFlag & ~8;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", __Q25Gauge11CEnemyGaugeP5CTask);
+CEnemyGauge::CEnemyGauge(CTask* p) : CTask(p, 0x4000) {
+    m_pInstance = this;
+    _initialize();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge11CEnemyGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge11CEnemyGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge11CEnemyGauge);
@@ -87,13 +132,22 @@ HANDLE CEnemyGauge::getNowTarget() {
     if (CGameWork::getInt(1, 0xe2) & 0x10) return 0;
     return m_pInstance->m_hTarget;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", __Q25Gauge12CCommonGaugeP5CTask);
+CCommonGauge::CCommonGauge(CTask* p) : CTask(p, 0x4000) {
+    m_pInstance = this;
+    _initialize();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge12CCommonGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge12CCommonGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge12CCommonGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", dispSeqCtrl__Q25Gauge12CCommonGaugeiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispSeq__Q25Gauge12CCommonGaugeii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", __Q25Gauge11CPrizeGaugeP5CTask);
+CPrizeGauge::CPrizeGauge(CTask* p) : CTask(p ? p : getSysTask(1), 0x4000) {
+    m_pInstance = this;
+    if (p) m_uiMode = 1;
+    else m_uiMode = 0;
+    m_tqTimer = 0;
+    _initialize();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge11CPrizeGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge11CPrizeGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge11CPrizeGauge);
@@ -119,7 +173,7 @@ void CEscapeGauge::_initialize() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge12CEscapeGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setCharge__Q25Gauge12CEscapeGaugef);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", destroy__Q25Gauge12CEscapeGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", __Q25Gauge12CFriendGaugeP5CTask);
+CFriendGauge::CFriendGauge(CTask* p) : CTask(p, 0x4000) { _initialize(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge12CFriendGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge12CFriendGauge);
 void CFriendGauge::main() {
