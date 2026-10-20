@@ -1044,7 +1044,7 @@ BOOL CPrize::initReloadCard_() {
     }
     for (i = 0; i < m_iModelCount; i++) {
         m_pModels[i].link(this, pModelTbl[i]);
-        m_pModels[i].linkTexAnm(*(CTexAnm**)&_m_0x98[0], *(INT*)&_m_0x98[4]);
+        m_pModels[i].linkTexAnm(m_pTexAnm, m_nTexAnmNum);
         if (pModelTbl[i]->enablePointLight()) {
             m_pModels[i].setLightUnit(m_pGLight);
         } else if (pModelTbl[i]->enableLight()) {

@@ -19,6 +19,7 @@ class CAnim;     // PARTIAL: added for Game/Gimmick/GimmickLotusLeaf
 class CBodyCollision; // PARTIAL: added for Game/Gimmick/GimmickGuillotine
 class CEffectMotion;  // PARTIAL: added for Game/Player/PlayerWeapon
 class CAttachMotion; // PARTIAL: added for Game/Player/Summon
+class CTexAnm; // PARTIAL: added for Game/Entity
 
 enum eObjType {
     eObjType_dummy = 0 /* values not needed yet */
@@ -65,7 +66,8 @@ protected:
     CLightUnit* m_pNLight;        /* 0x08c */
     CLightUnit* m_pGLight;        /* 0x090 */
     CAnim* m_pAnim;               /* 0x094 */
-    UBYTE _m_0x98[0x8];           /* 0x098 m_pTexAnm, m_nTexAnmNum */
+    CTexAnm* m_pTexAnm;           /* 0x098 */ // PARTIAL: split out for Game/Entity
+    INT m_nTexAnmNum;             /* 0x09c */
     CMovement* m_pMove;  /* 0x0a0 */
     // PARTIAL: m_pAttack, m_iID split out for Game/Gimmick/GimmickToldPipe
     CBodyCollision* m_pBodyColl; /* 0x0a4 */ // PARTIAL: split out for Game/Gimmick/GimmickGuillotine
@@ -73,11 +75,12 @@ protected:
     // PARTIAL: m_pEffect split out for Game/Player/PlayerWeapon
     CEffectMotion* m_pEffect; /* 0x0ac */
     // PARTIAL: m_pSE split out for Game/Player/Summon
-    UBYTE _m_0xb0[0x4];  /* 0x0b0 m_pEffectEx */
+    CEffectMotion* m_pEffectEx; /* 0x0b0 */ // PARTIAL: split out for Game/Entity
     CAttachMotion* m_pSE; /* 0x0b4 CSEMotion* */
-    UBYTE _m_0xb8[0x4];  /* 0x0b8 m_pSEEx */
+    CAttachMotion* m_pSEEx; /* 0x0b8 CSEMotion* */ // PARTIAL: split out for Game/Entity
     INT m_iID;           /* 0x0bc */
-    UBYTE _m_0xc0[0x20]; /* 0x0c0 m_vTargetPos .. 0x0d0 m_vRootMoveScale */
+    FVECTOR m_vTargetPos;     /* 0x0c0 */ // PARTIAL: split out for Game/Entity
+    FVECTOR m_vRootMoveScale; /* 0x0d0 */
 private:
     eObjType m_EntityType; /* 0x0e0 */
     UINT m_uiEntityFlag;   /* 0x0e4 */
@@ -101,7 +104,9 @@ private:
     TIMEQ m_tqFadeTimer;   /* 0x118 */
     TIMEQ m_tqFadeTime;    /* 0x11c */
     INT m_iFadeModel;      /* 0x120 */
-    UBYTE _m_0x124[0xac];  /* 0x124 m_pCollParam .. 0x1c4 m_pDamageString */
+    struct COLL_PARAM_HEADER* m_pCollParam; /* 0x124 */ // PARTIAL: split out for Game/Entity
+    class CRideModel* m_pRideModel;         /* 0x128 */
+    UBYTE _m_0x12c[0xa4];  /* 0x12c .. 0x1c4 m_pDamageString */
 
 public:
     CEntity(CTask* inParent);
@@ -284,6 +289,34 @@ public:
     HANDLE playSEPanAndVol(INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
     void setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
     void fadeoutSE(HANDLE inHandle, INT inFile, INT inID, INT inTime, INT inFlag);
+    // PARTIAL: added for Game/Entity
+    INT getMotionCurrentID() const;
+    INT getMotionCount() const;
+    INT getRideCollisionNum() const;
+    BOOL isMotionLooped() const;
+    BOOL isMotionLoopData(INT inIndex) const;
+    const CHAR* getMotionName(INT inIndex) const;
+    FLOAT calcDistance(const CEntity& inEntity) const;
+    FLOAT calcDistanceXZSq(const CEntity& inEntity) const;
+    FLOAT calcDirection(const CEntity& inEntity) const;
+    void calcDirection(FVECTOR& outRot, const CEntity& inEntity) const;
+    void calcDirection(FVECTOR& outRot, const CEntity* inEntity) const;
+    BOOL testFront(const CEntity& inEntity) const;
+    BOOL testFront(const CEntity* inEntity) const;
+    BOOL entityVisible(const CEntity& inEntity, FLOAT inAngle, FLOAT inDist);
+    BOOL entityVisible(const CEntity* inEntity, FLOAT inAngle, FLOAT inDist);
+    BOOL entityVisibleAxisX(const CEntity& inEntity, FLOAT inAngle);
+    BOOL entityVisibleAxisX(const CEntity* inEntity, FLOAT inAngle);
+    BOOL entityVisibleAxisY(const CEntity& inEntity, FLOAT inAngle);
+    void setMotion(TIMEQ inTq);
+    BOOL createArmIK();
+    void endTargetEvade();
+    void endTargetIntercept();
+    void endTargetMove();
+    BOOL startTargetMove(const FVECTOR& inPos, FLOAT inSpeed, FLOAT inAccel, FLOAT inRange);
+    void rideModelChangeListR();
+    void updateTimer_();
+    void saveRideModelMatrix_();
     void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel) {
         setEntityFlag(0x40000000, 0);
         m_fStartAlpha = inStart;

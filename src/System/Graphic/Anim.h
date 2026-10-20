@@ -250,6 +250,11 @@ public:
     void changeEx(INT nRsrcID, ANIMID inId, TIMEQ inTq, BOOL inLoop);
     void setSpeed(FLOAT s) { m_Speed = s; }
     void endLookPosition(FLOAT fFrame); // PARTIAL: added for Game/Atel/Avatar
+    // PARTIAL: added for Game/Entity
+    INT getMotCount();
+    const CHAR* getMotFilename(INT nIdx);
+    BOOL createLegIK(FLOAT fP0, FLOAT fP1);
+    BOOL createArmIK();
     void setZeroHokan(BOOL b) { _m_0x1c[5] = b; } // PARTIAL: added for Game/Atel/Avatar (m_ZeroHokan at 0x021, name guessed)
     void setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped); // PARTIAL: added for Game/Atel/Avatar
     void setLookPosition(const FVECTOR& vLook, const FVECTOR& vMax, const FVECTOR& vMin, INT nBoneNum, FLOAT fRate, UINT iFlags); // PARTIAL: added for Game/Atel/Avatar
