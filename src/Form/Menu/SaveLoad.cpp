@@ -262,11 +262,11 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", __11CSaveLoadUIR9
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preInit__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeInit__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", endInit__11CSaveLoadUI);
+void CSaveLoadUI::endInit() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckBoot__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckBoot__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLayIn__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeLayIn__11CSaveLoadUI);
+void CSaveLoadUI::exeLayIn() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLayOut__11CSaveLoadUI);
 void CSaveLoadUI::exeLayOut() {
     if (m_mode != SLMODE_LOAD) return;
@@ -280,15 +280,15 @@ void CSaveLoadUI::preExit() {
     CGameWork::setByte(1, 0x140, 0);
     out();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeExit__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preNop__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeNop__11CSaveLoadUI);
+void CSaveLoadUI::exeExit() {}
+void CSaveLoadUI::preNop() {}
+void CSaveLoadUI::exeNop() {}
 void CSaveLoadUI::preOpenSlot() {
     for (INT i = 0; i < 2; i++) {
         m_pSelSlotPlate[i]->startOrRestart();
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeOpenSlot__11CSaveLoadUI);
+void CSaveLoadUI::exeOpenSlot() {}
 void CSaveLoadUI::preSelSlot() {
     setActiveSlotPlate(m_nSlot);
     m_pMainLightMark->m_nFlag &= ~2;
@@ -329,9 +329,9 @@ void CSaveLoadUI::preCheckSlot() {
     m_nTargetIndex = 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckSlot__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", endCheckSlot__11CSaveLoadUI);
+void CSaveLoadUI::endCheckSlot() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preOpenDataList__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeOpenDataList__11CSaveLoadUI);
+void CSaveLoadUI::exeOpenDataList() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preSelDataList__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeSelDataList__11CSaveLoadUI);
 void CSaveLoadUI::endSelDataList() {
@@ -349,11 +349,58 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckOverwrite
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckNoMemory__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckNoMemory__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckNoCard__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckNoCard__11CSaveLoadUI);
+void CSaveLoadUI::exeCheckNoCard() {
+    INT nResult = -9999;
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqIdleCheckCard()) m_nStep++;
+        break;
+    case 1:
+        if (m_pMemoca->isCompleteReq(NULL)) {
+            nResult = m_pMemoca->getLastResult();
+            m_nStep = 0;
+        }
+        break;
+    default:
+        return;
+    }
+    if (nResult == 0) {
+        closeMessageDlg();
+        outDataList(8);
+        m_nStep = 99;
+        return;
+    }
+    if (m_nDlgResult) {
+        m_nStep = 99;
+        closeMessageDlg();
+        backtoSelSlot();
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckUnformat__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckUnformat__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preConfirmExecErr__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeConfirmExecErr__11CSaveLoadUI);
+void CSaveLoadUI::exeConfirmExecErr() {
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqIdleCheckCard()) m_nStep++;
+        break;
+    case 1:
+        if (m_pMemoca->isCompleteReq(NULL)) m_nStep = 0;
+        break;
+    }
+    switch (m_nStep) {
+    case 0:
+    case 1:
+        if (m_nDlgResult) {
+            closeMessageDlg();
+            m_nStep = 2;
+        }
+        break;
+    case 2:
+        if (isPadEnable()) backtoSelSlot();
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preMessageOnly__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeMessageOnly__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMainFrame__11CSaveLoadUI);
@@ -399,12 +446,74 @@ void CSaveLoadUI::closeMessageDlg() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeMessageDlg__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", outAllAgent__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", outDataList__11CSaveLoadUIi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackMainFrame__11CSaveLoadUIR11C2DSeqAgent);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackSlotPlateIn__11CSaveLoadUIR11C2DSeqAgent);
+void CSaveLoadUI::outDataList(INT nNextState) {
+    if (m_pResultPlateAgent[1]->getState() < C2DSeqAgent::STATE_OUT) {
+        m_pResultPlateAgent[1]->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+        m_pResultLightAgent[1]->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+    }
+    if (m_pDataListContainerAgent && m_pDataListContainerAgent->getState() < C2DSeqAgent::STATE_OUT) {
+        if (m_pMemocaInfoAgent) {
+            m_pMemocaInfoAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+            for (INT i = 2; i >= 0; i--) {
+                m_szMemocaInfoStr[i][0] = 0;
+            }
+        }
+        m_pDataListContainerAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+        C2DSeqScrollbarCtrl* pScrollbar = m_pDataListScrollbar;
+        for (INT i = 0; i < 3; i++) {
+            pScrollbar->m_pParts[i]->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+        }
+        for (INT i = 0; i < 4; i++) {
+            m_pDataItemPlate[i]->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+        }
+        m_nNextState = nNextState;
+        if (m_pMainCursor) m_pMainCursor->enableDisp(FALSE);
+        if (m_pMainLightMark && m_pMainLightMark->isSeqCtrlVisible()) {
+            m_pMainLightMark->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+            m_pMainLightMark->m_nFlag |= 2;
+        }
+    } else {
+        if (nNextState >= 0) changeState(nNextState);
+    }
+}
+void CSaveLoadUI::callbackMainFrame(C2DSeqAgent& agent) {
+    CSaveLoadUI* p = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
+    if (!p) return;
+    switch (agent.getState()) {
+    case C2DSeqAgent::STATE_IN:
+        CSound::setBGMMasterVolume(64, -1);
+        p->changeState(6);
+        if (p->m_pRoomNameCtrl) p->m_pRoomNameCtrl->enableDisp(TRUE);
+        if (p->m_pWorldIconCtrl) p->m_pWorldIconCtrl->enableDisp(TRUE);
+        if (p->m_pTimeCtrl) p->m_pTimeCtrl->show();
+        if (p->m_pMPCtrl) p->m_pMPCtrl->show();
+        break;
+    case C2DSeqAgent::STATE_OUT:
+        p->changeState(4);
+        break;
+    }
+}
+void CSaveLoadUI::callbackSlotPlateIn(C2DSeqAgent& agent) {
+    CSaveLoadUI* p = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
+    if (p) p->changeState(7);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackResultPlate__11CSaveLoadUIR11C2DSeqAgent);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackDataList__11CSaveLoadUIR11C2DSeqAgent);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackMemocaInfo__11CSaveLoadUIR11C2DSeqAgent);
+void CSaveLoadUI::callbackMemocaInfo(C2DSeqAgent& agent) {
+    CSaveLoadUI* p = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
+    if (!p) return;
+    switch (agent.getState()) {
+    case C2DSeqAgent::STATE_IN:
+        p->updateMemocaInfoStr();
+        p->updateMemocaInfoBar();
+        break;
+    case C2DSeqAgent::STATE_OUT:
+        for (INT i = 0; i < 3; i++) {
+            p->m_pMemocaInfoBar[i]->enableDisp(FALSE);
+        }
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackMessageDlg__11CSaveLoadUIR11C2DSeqAgent);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", checkSelector__11CSaveLoadUIRssiisii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createBootInfoMsg__11CSaveLoadUIiPc);

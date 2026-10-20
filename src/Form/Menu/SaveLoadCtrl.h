@@ -186,6 +186,7 @@ private:
     FLOAT m_fScrollPos;           /* 0x2c */
     USHORT m_nAllItemCount;       /* 0x30 */
     USHORT m_nDispItemCount;      /* 0x32 */
+    friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
     void setupSeq(D2::C2DSeqCtrl* pParent, const C2DSeqAgent::SeqTbl* pTbl, const CHAR* pszLad, SHORT nUnit,
