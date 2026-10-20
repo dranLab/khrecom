@@ -64,9 +64,33 @@ extern char* g_szEnemyCardEffName[60];
 // PARTIAL: added for Game/Player/SummonDumbo
 class CCardBattle {
     // PARTIAL: members added for Game/Player/PlayerRiku
-    UBYTE _m_0x0[0x17c];      /* 0x000 CTask .. 0x178 m_cardGimmick */
+    // PARTIAL: split out for Game/CardBattle
+    UBYTE _m_0x0[0x94];       /* 0x000 CTask .. 0x090 m_tqSubTimer */
+    HANDLE m_hOwner[2];       /* 0x094 */
+    UINT m_uiState[2];        /* 0x09c */
+    UINT m_uiResult[2];       /* 0x0a4 */
+    INT m_tqPlayTimer[2];     /* 0x0ac */
+    BYTE m_cardData[2][7][4]; /* 0x0b4 CARD */
+    class CBattleCard* m_pCard[2][7]; /* 0x0ec */
+    class CBattleCard* m_pEnchant[2]; /* 0x124 */
+    class CCardRevolver* m_pRevolver[2]; /* 0x12c */
+    class CStockFolder* m_pStockFolder[2]; /* 0x134 */
+    INT m_iCount[2];          /* 0x13c */
+    INT m_iPoint[2];          /* 0x144 */
+    INT m_iStock[2];          /* 0x14c */
+    INT m_iExtra[2];          /* 0x154 */
+    INT m_iFirst[2];          /* 0x15c */
+    INT m_iCountGimmick;      /* 0x164 */
+    INT m_iCountFriend;       /* 0x168 */
+    INT m_iCountPluto;        /* 0x16c */
+    INT m_iPointBreak;        /* 0x170 */
+    INT m_iPointBonus;        /* 0x174 */
+    BYTE m_cardGimmick[4];    /* 0x178 CARD */
     BYTE m_cardEnchant[2][4]; /* 0x17c CARD[2] */
-    UBYTE _m_0x184[0x18];     /* 0x184 m_nEnchantTime .. 0x198 m_cardRoom */
+    INT m_nEnchantTime[2];    /* 0x184 */
+    INT m_tqEnchantTimer[2];  /* 0x18c */
+    HANDLE m_hGimmickOwner;   /* 0x194 */
+    BYTE m_cardRoom[4];       /* 0x198 CARD */
 public:
     UINT m_uiFlag;            /* 0x19c */
     UINT m_uiDuelState;       /* 0x1a0 */
@@ -87,6 +111,46 @@ public:
     // PARTIAL: added for Game/Enemy/Heartless
     INT setEnemyCard(HANDLE inEnemy, INT inParam, INT inNumber);
     static INT getPlayingCardPoint(INT inSide);
+    // PARTIAL: added for Game/CardBattle
+    static CCardBattle* m_pInstance;
+    virtual ~CCardBattle();
+    virtual void main();
+    virtual void disp();
+    void resetNowPlaying(INT inFlag);
+    static HANDLE getPlayingHandle(INT inSide);
+    static BOOL isPlayingCard(INT inSide);
+    static BOOL isPlayingEnemyCard();
+    static INT getPlayingCardID(INT inSide, INT inIdx);
+    static void addGimmickCount(INT n);
+    static void addFriendCount(INT n);
+    static INT getFriendCount();
+    static void addPlutoCount(INT n);
+    static INT getPlutoCount();
+    static void setGimmickOwner(HANDLE h);
+    static HANDLE getGimmickOwner();
+    static BOOL isPlayingGimmickCard();
+    INT calcPointBreak(INT a, INT b);
+    void destroyEnemyCard(INT inHandle);
+    void destroyRevolver(INT inSide);
+    void setRevolver(INT inSide, CCardRevolver* pRevolver);
+    CCardRevolver* getRevolver(INT inSide);
+    static BOOL isBattleEnd();
+    static void setSuspend(BOOL b);
+    static BOOL isSuspend();
+    static BOOL isLevitate();
+    static void setBlack(BOOL b);
+    static BOOL isBlack();
+    void destroyStockFolder(INT inSide);
+    static class CStockFolder* getStockFolder(INT inSide);
+    static INT getStockFolderStockSkill(INT inSide);
+    static INT calcStockFolderEnemyStockSkill();
+    static void setStockFolderStockInfo(INT inSide);
+    static BOOL isDuelEntryingCard(INT inSide);
+    BOOL checkNowPlaying(INT inSide, class CBattleCard* pCard);
+    static BOOL isPlayingCardStandNow(INT inSide);
+    static void setBattleEnd();
+    void initCardBreak(INT n, UINT f);
+    void resetEnchantCard(INT inSide);
 };
 
 // PARTIAL: added for Game/Player/FriendKing
