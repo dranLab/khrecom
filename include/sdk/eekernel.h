@@ -2,6 +2,10 @@
 #ifndef SDK_EEKERNEL_H
 #define SDK_EEKERNEL_H
 
+#ifndef KHTYPES_H
+typedef unsigned int u_long128 __attribute__((mode(TI)));
+#endif
+
 typedef struct {
     unsigned int spdifMode : 1;
     unsigned int screenType : 2;
