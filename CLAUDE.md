@@ -108,6 +108,10 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 - Open in csc (_doCSC2, _sceMpegCscStoreRefImage parked; handlers match): sceMpegCbData must be the 32-byte union
   (stack layout); the IPU command store + cmd-type check is an inline taking cmd as parameter; left: 2-register
   swaps (0xffc0 vs D3_CHCR address in _doCSC2, rgb/qwc s1/s2 in the inlined small-picture CSC block).
+- Open in libpad2 (scePad2CreateSocket, scePad2GetButtonInfo parked): CreateSocket only schedules the
+  pad2_info base (lui) after the 820 multiplier; GetButtonInfo needs `if (valid) { switch ... }` and keeps the
+  button type in a1 instead of a3. Levers that worked here: `if (x < 0) return x;` early returns, the shared
+  `return state` with the fail block inside the else branch (goto into it).
 - GNU as fills an open delay slot only when no label precedes the branch: -g's `$LM` line labels count. A `j $31`
   left unfilled where the original filled it: put the last statement and `}` on one line (lib/init).
 
