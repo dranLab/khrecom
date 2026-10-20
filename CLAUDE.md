@@ -104,10 +104,8 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 
 | Family | Toolchain (verified on) |
 |---|---|
-| Sony SDK (provisional: `lib/*`) | ee-gcc2.95.3-136 + ee-as 2.10 (`assembler: ee-gcc2.96`), `-O2 -G0 -g` (libmpeg: defhandler, alalc) |
+| Sony SDK (`lib/*`: libkernl, libmpeg, libdma, ...) | ee-gcc2.9-991111 + ee-as 2.10 (`assembler: ee-gcc2.96`), `-O2 -G0 -g`: one toolchain for all Sony libs (alarm: kCopy only matches 991111; libmpeg error.c saves with `sd`, 2.95.3 with `sq`). A function that only matches another compiler usually needs a source change (alalc: an inverted `if`) |
 | libat3dec (`lib/init`, ...) | ee-gcc2.96 + its ee-as 2.10, `-O2 -G0 -g` (atrac2_mode_* only match 2.96) |
-| libkernl (listed one by one in `build.yaml`) | ee-gcc2.9-991111 + ee-as 2.10, `-O2 -G0 -g` (alarm: kCopy only matches the 991111 family; diei) |
-| libmpeg error.c (`lib/error`) | ee-gcc2.9-991111 too (sd saves and tail calls; 2.95.3 saves with sq): check this for the other libmpeg units |
 
 ## Pitfalls
 

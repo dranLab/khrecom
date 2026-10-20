@@ -32,12 +32,12 @@ unsigned char *_sceMpegAlalcAlloc(sceMpeg *mp, _sceMpegAlalc *a, int size, unsig
 {
     unsigned char *p = (unsigned char *)(((unsigned int)a->cur + align - 1) / align * align);
 
-    if (a->start + a->size < p + size) {
-        _sceMpegError(mp, "work area size is too small");
-        return 0;
+    if (a->start + a->size >= p + size) {
+        a->cur = p + size;
+        return p;
     }
-    a->cur = p + size;
-    return p;
+    _sceMpegError(mp, "work area size is too small");
+    return 0;
 }
 
 int _sceMpegAlalcReset(_sceMpegAlalc *a)
