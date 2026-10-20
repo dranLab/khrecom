@@ -255,6 +255,7 @@ public:
     const CHAR* getMotFilename(INT nIdx);
     BOOL createLegIK(FLOAT fP0, FLOAT fP1);
     BOOL createArmIK();
+    void updateIK(BOOL bBeforeCoordFix, BOOL bAfterCoordFix, FLOAT fr); // PARTIAL: added for Game/Entity
     void setZeroHokan(BOOL b) { _m_0x1c[5] = b; } // PARTIAL: added for Game/Atel/Avatar (m_ZeroHokan at 0x021, name guessed)
     void setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped); // PARTIAL: added for Game/Atel/Avatar
     void setLookPosition(const FVECTOR& vLook, const FVECTOR& vMax, const FVECTOR& vMin, INT nBoneNum, FLOAT fRate, UINT iFlags); // PARTIAL: added for Game/Atel/Avatar

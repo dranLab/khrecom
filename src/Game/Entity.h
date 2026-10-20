@@ -317,6 +317,17 @@ public:
     void rideModelChangeListR();
     void updateTimer_();
     void saveRideModelMatrix_();
+    const FVECTOR& getQuat() const;
+    FVECTOR& getQuat();
+    void setQuat(const FVECTOR& inQuat);
+    void setHitBackVel(const FVECTOR& inVel);
+    BOOL isRideOnEnemy();
+    BOOL isHangOnEnemy();
+    void updateIK_();
+    void chase_();
+    void evade_();
+    void intercept_();
+    void updateEffect_();
     void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel) {
         setEntityFlag(0x40000000, 0);
         m_fStartAlpha = inStart;
