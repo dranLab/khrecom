@@ -104,6 +104,15 @@ public:
     INT link(CCoords& crds);
     void calcWorldBBox(INT n);
     void* getExtendClut(INT nTex, INT nType);
+    INT getTextureIndex(const CHAR* pName) const;
+    INT link(CTask* p, const CHAR* pName);
+    INT link(CCoords& crds, const CHAR* pName);
+    INT assign(CTask* p, INT n);
+    INT assign(CCoords& crds, INT n);
+    INT assign(CCoords& crds, const CHAR* pName, INT n);
+    INT assign(CTask* p, const CHAR* pName, INT n);
+    void changeTextureSub(INT nIdx, const struct TexInfo* pTex);
+    void setupUVScroll(INT n);
 };
 
 #ifdef GAME_ENTITY_H

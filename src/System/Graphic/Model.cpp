@@ -9,11 +9,20 @@ class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs the full RsrcData.h classes */
 public:
     static MODELDATA** getRsrcMDL(const CHAR* pszName, NAME_CASE nc);
     static MODELDATA** getRsrcMDL(INT nGroup);
+    static TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
+    static MODELDATA* getRsrcAMF(const CHAR* pszName, NAME_CASE nc);
 };
 extern "C" char D_00460EB8[]; /* __FILE__ */
 extern "C" char D_00460EE8[];
 extern "C" char D_00460F18[];
 extern "C" char D_00460F58[];
+extern "C" char D_00460EF0[];
+extern "C" char D_00460F10[];
+extern "C" char D_00460F20[];
+extern "C" char D_00460F28[];
+extern "C" int strcmp(const char*, const char*);
+extern "C" int strncasecmp(const char*, const char*, unsigned int);
+struct TexInfo;
 
 class CShader;
 
@@ -30,9 +39,33 @@ u_long128* CModel::getMicroProg() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", searchShaderDesc__FUs);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", releaseData__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelP5CTaskPCc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoordsPCc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBoneIndex__C9MODELDATAPCc);
+INT CModel::link(CTask* p, const CHAR* pName) {
+    if (!(p)) AssertApp(D_00460EB8, 451, D_00460EE8, 0);
+    CCoords* pCrds = p->getCoords();
+    if (!pCrds) {
+        p->createCoords();
+        pCrds = p->getCoords();
+    }
+    m_pTask = p;
+    return link(*pCrds, pName);
+}
+INT CModel::link(CCoords& crds, const CHAR* pName) {
+    MODELDATA* m = CRsrcDB::getRsrcAMF(pName, NAME_CASE_SENSITIVE);
+    if (!m) {
+        TRACE(D_00460EF0, pName);
+        AssertApp(D_00460EB8, 469, D_00460F10, 0);
+    }
+    m_pData = m;
+    return link(crds);
+}
+INT MODELDATA::getBoneIndex(const CHAR* pName) const {
+    if (pName) {
+        for (INT i = 0; i < m_nBoneNum; i++) {
+            if (!strncasecmp(pName, (CHAR*)m_pBoneLabel + i * 0x14, 16)) return i;
+        }
+    }
+    return -1;
+}
 INT CModel::getBoneIndex(const CHAR* pName) const {
     INT n = -1;
     if (m_pData) n = m_pData->getBoneIndex(pName);
@@ -48,9 +81,29 @@ MODELDATA* AMFfromMDL(INT nGroup, INT nIdx) {
     if (!(ret)) AssertApp(D_00460EB8, 508, D_00460F18, 0);
     return ret[nIdx];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaskPCci);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsPCci);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaski);
+INT CModel::assign(CTask* p, const CHAR* pName, INT n) {
+    if (!(p)) AssertApp(D_00460EB8, 516, D_00460EE8, 0);
+    CCoords* pCrds = p->getCoords();
+    if (!(pCrds)) AssertApp(D_00460EB8, 518, D_00460F20, 0);
+    m_pTask = p;
+    return assign(*pCrds, pName, n);
+}
+INT CModel::assign(CCoords& crds, const CHAR* pName, INT n) {
+    MODELDATA* d = CRsrcDB::getRsrcAMF(pName, NAME_CASE_SENSITIVE);
+    if (!d) {
+        TRACE(D_00460EF0, pName);
+        AssertApp(D_00460EB8, 530, D_00460F28, 0);
+    }
+    m_pData = d;
+    return assign(crds, n);
+}
+INT CModel::assign(CTask* p, INT n) {
+    if (!(p)) AssertApp(D_00460EB8, 537, D_00460EE8, 0);
+    CCoords* pCrds = p->getCoords();
+    if (!(pCrds)) AssertApp(D_00460EB8, 539, D_00460F20, 0);
+    m_pTask = p;
+    return assign(*pCrds, n);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsi);
 void CModel::setModelData(const MODELDATA* pData) {
     releaseData();
@@ -74,8 +127,28 @@ INT CModel::getCoordNum() const {
     return *(INT*)((BYTE*)m_pCrds + 4);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLocal__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTextureIndex__C6CModelPCc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTexture__6CModelPCcT1);
+INT CModel::getTextureIndex(const CHAR* pName) const {
+    INT n = -1;
+    if (pName) {
+        for (INT i = 0; i < m_pData->m_nTexNum; i++) {
+            if (!strcmp(pName, (CHAR*)m_pData->m_pTexParam + i * 0x20)) {
+                n = i;
+                break;
+            }
+        }
+    }
+    return n;
+}
+void CModel::changeTexture(const CHAR* inSrc, const CHAR* inDst) {
+    INT nIdx = getTextureIndex(inSrc);
+    if (nIdx >= 0) {
+        TexInfo* pTex;
+        if (inDst) pTex = CRsrcDB::getRsrcTex(inDst, NAME_CASE_SENSITIVE);
+        else pTex = CRsrcDB::getRsrcTex((CHAR*)m_pData->m_pTexParam + nIdx * 0x20, NAME_CASE_SENSITIVE);
+        changeTextureSub(nIdx, pTex);
+    }
+    setupUVScroll(0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTextureSub__6CModeliPC7TexInfo);
 void CModel::setShadowSize(INT nSize) {
     if (m_Mode == 0x10 && m_pFadeModel) *(INT*)((BYTE*)m_pFadeModel + 0x28) = nSize;
@@ -176,9 +249,56 @@ BOOL MODELDATA::isMap(UINT mode) {
     return FALSE;
 }
 BOOL MODELDATA::isSky(UINT mode) { return mode == 0x24; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isCharacterAndMap__9MODELDATAUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isNormal__9MODELDATAUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isColorI__9MODELDATAUi);
+BOOL MODELDATA::isCharacterAndMap(UINT mode) {
+    switch (mode) {
+    case 0:
+    case 5:
+    case 6:
+    case 0x200:
+    case 0x406:
+    case 0x400b:
+    case 0x406e:
+    case 0x40ee:
+        return TRUE;
+    }
+    return FALSE;
+}
+BOOL MODELDATA::isNormal(UINT mode) {
+    switch (mode) {
+    case 0:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 0x10:
+    case 0x200:
+    case 0x406:
+    case 0x4009:
+    case 0x400b:
+    case 0x4109:
+    case 0x4123:
+        return FALSE;
+    }
+    return TRUE;
+}
+BOOL MODELDATA::isColorI(UINT mode) {
+    switch (mode) {
+    case 2:
+    case 6:
+    case 0x10:
+    case 0x102:
+    case 0x108:
+    case 0x406:
+    case 0x4005:
+    case 0x4009:
+    case 0x400b:
+    case 0x4109:
+    case 0x4123:
+    case 0x4205:
+        return FALSE;
+    }
+    return TRUE;
+}
 BOOL MODELDATA::isColorF(UINT mode) {
     switch (mode) {
     case 0x406:

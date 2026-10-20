@@ -49,6 +49,7 @@ struct MODELDATA {
     static BOOL isSky(UINT mode);
     static BOOL isMap(UINT mode);
     static BOOL isCharacter(UINT mode);
+    static BOOL isCharacterAndMap(UINT mode);
 };
 
 /* PARTIAL: added for System/Graphic/ModelMan, which defines MODELDATA_H_TEXINFO (System/Graphic/TexCtrl and
