@@ -12,6 +12,8 @@ struct ENEMY_PARAM; // PARTIAL: added for Game/Enemy/EnemyAirpirate
 struct ENEMY_ACT;   // PARTIAL: added for Game/Enemy/Heartless
 namespace BattleEnemy {
 INT GameModeHp(INT inHp); // PARTIAL: added for Game/Enemy/BattleEnemy
+extern CHAR* SynchroParamName;
+extern INT GameModeParamHp[];
 }
 
 enum CARD_KIND {
@@ -280,8 +282,16 @@ protected:
     virtual void commonEndAttack();
 
 public: // PARTIAL: state wrappers added for Game/Enemy/BattleEnemy
+    BOOL isValidSynchro();
+    BOOL canKill();
+    void homingToPlayerY(FLOAT inRate);
+    void homingMoveToPlayer(FLOAT inRate, FLOAT inSpeed);
+    void kill();
+    void notifyDead();
+    void enableConfuse_(BOOL inEnable);
     void updateDamageTimer_();
     void updateBindTimer_();
+    void updateConfuseTimer_();
     void enableBind_(BOOL inEnable);
     void homingToPlayer(FLOAT inRate);
     INT getSize() const;
