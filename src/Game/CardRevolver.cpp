@@ -557,7 +557,51 @@ void CCardRevolver::exeAction() {
         TRACE(D_0047B210);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", addCard__Q210CardBattle13CCardRevolverP4CARDi);
+void CCardRevolver::addCard(CARD* pData, INT inReturn) {
+    INT i;
+    if (m_uiUser == 1) {
+        if (inReturn) {
+            m_cardAdd[m_nReturn + 9] = *pData;
+            m_nReturn++;
+            m_uiFlag |= 0x4000;
+            return;
+        }
+        switch ((INT)(pData->m_nId >> 28)) {
+        case 6:
+        case 14:
+            if (CCardBattle::getGimmickCount() > 0) return;
+            m_cardAdd[0] = *pData;
+            CCardBattle::addGimmickCount(1);
+            break;
+        case 5:
+            if (pData->m_nKind != 0x39) {
+                i = CCardBattle::getFriendCount();
+                if (i >= 5) return;
+                m_cardAdd[i + 1] = *pData;
+                CCardBattle::addFriendCount(1);
+            } else {
+                if (CCardBattle::getPlutoCount() >= 3) return;
+                for (i = 6; i < 9; i++) {
+                    CBattleCard* pCard = &m_pCards[m_nReloadID + 1 + i];
+                    if (!pCard) continue;
+                    if (!pCard->isReloadNG()) continue;
+                    if (pCard->isNowPlaying()) continue;
+                    m_cardAdd[i] = *pData;
+                    CCardBattle::addPlutoCount(1);
+                    break;
+                }
+            }
+            break;
+        }
+        m_uiFlag |= 0x400;
+    } else {
+        if (!(m_uiFlag & 0x2000)) return;
+        if (m_nAdd >= 24) return;
+        m_cardAdd[m_nAdd] = *pData;
+        m_nAdd++;
+        m_uiFlag |= 0x400;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeAddCard__Q210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initCounter__Q210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeCounter__Q210CardBattle13CCardRevolver);
