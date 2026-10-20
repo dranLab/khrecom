@@ -1,27 +1,41 @@
 #include "khtypes.h"
+#include "System/Graphic/Model.h"
 #include "include_asm.h"
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", createDummyShader__Fv);
+class CShader;
+
+CShader* createDummyShader() { return NULL; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __6CModelPC9MODELDATA);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resetWorldScreenMatrix__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resetMicroProgram__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resetSendCtrl__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSendCtrl__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getMicroProg__6CModel);
+void CModel::resetWorldScreenMatrix() { m_pWSMatCache = NULL; }
+void CModel::resetMicroProgram() { m_pMpg = NULL; }
+void CModel::resetSendCtrl(INT nMode) { m_iSendFlg &= ~nMode; }
+void CModel::setSendCtrl(INT nMode) { m_iSendFlg |= nMode; }
+u_long128* CModel::getMicroProg() {
+    if (m_pShader) return *(u_long128**)((BYTE*)m_pShader + 4);
+    return NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", searchShaderDesc__FUs);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", releaseData__6CModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelP5CTaskPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoordsPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBoneIndex__C9MODELDATAPCc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBoneIndex__C6CModelPCc);
+INT CModel::getBoneIndex(const CHAR* pName) const {
+    INT n = -1;
+    if (m_pData) n = m_pData->getBoneIndex(pName);
+    return n;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", AMFfromMDL__FPCci);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", AMFfromMDL__Fii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaskPCci);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsPCci);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaski);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setModelData__6CModelPC9MODELDATA);
+void CModel::setModelData(const MODELDATA* pData) {
+    releaseData();
+    m_pData = pData;
+    link(m_pTask);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelP5CTask);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoords);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getCrd__6CModeli);
@@ -30,7 +44,9 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLocal__6CMod
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTextureIndex__C6CModelPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTexture__6CModelPCcT1);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTextureSub__6CModeliPC7TexInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShadowSize__6CModeli);
+void CModel::setShadowSize(INT nSize) {
+    if (m_Mode == 0x10 && m_pFadeModel) *(INT*)((BYTE*)m_pFadeModel + 0x28) = nSize;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getSemiZ__6CModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getOldSemiZ__6CModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getWorldBBoxScr__6CModelR7IVECTORPC7FMATRIX);
@@ -43,9 +59,9 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__FRC7
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resultCheckBBox__FR7FVECTORT0);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resultCheckBBox__FR6CCoordPC4BBOX);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setColorScale__6CModelRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setColorScale__6CModelffff);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setAlphaScale__6CModelf);
+void CModel::setColorScale(const FVECTOR& vColor) { getColorScale() = vColor; }
+void CModel::setColorScale(FLOAT r, FLOAT g, FLOAT b, FLOAT a) { getColorScale().set(r, g, b, a); }
+void CModel::setAlphaScale(FLOAT inScale) { m_fAlphaScale = inScale; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", linksub__6CModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", addTexture__6CModelPCci);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShadowMapModel__6CModel);
@@ -61,7 +77,9 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__6CMode
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp0__6CModeliUli);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_GetData__6CModelRUii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp0_SetMicroCode__6CModelPUx);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_SetTexture__6CModeliPUl);
+void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
+    if (!(nFlag & 6)) sendTexture(pTag);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_SetPacket__6CModelUiPA3_CiiUliPUl);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__10CSemiModelP6CModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", initSemiZModel__10CSemiModel);
@@ -87,12 +105,29 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getChangeClut__
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", enablePointLight__C9MODELDATA);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", enableLight__C9MODELDATA);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isCharacter__9MODELDATAUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isMap__9MODELDATAUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isSky__9MODELDATAUi);
+BOOL MODELDATA::isMap(UINT mode) {
+    switch (mode) {
+    case 0:
+    case 0x200:
+    case 0x40ee:
+        return TRUE;
+    }
+    return FALSE;
+}
+BOOL MODELDATA::isSky(UINT mode) { return mode == 0x24; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isCharacterAndMap__9MODELDATAUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isNormal__9MODELDATAUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isColorI__9MODELDATAUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isColorF__9MODELDATAUi);
+BOOL MODELDATA::isColorF(UINT mode) {
+    switch (mode) {
+    case 0x406:
+    case 0x4009:
+    case 0x400b:
+    case 0x4109:
+        return TRUE;
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isTexture__9MODELDATAUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getModelAttachData__3MadPPCQ23Mad17MODEL_ATTACH_DATAi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __static_initialization_and_destruction_0_00133620);

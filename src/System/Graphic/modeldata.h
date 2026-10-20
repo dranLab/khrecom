@@ -45,6 +45,10 @@ struct MODELDATA {
     static BOOL isColorI(UINT mode);
     static BOOL isColorF(UINT mode);
     static BOOL isTexture(UINT mode);
+    // PARTIAL: added for System/Graphic/Model
+    static BOOL isSky(UINT mode);
+    static BOOL isMap(UINT mode);
+    static BOOL isCharacter(UINT mode);
 };
 
 /* PARTIAL: added for System/Graphic/ModelMan, which defines MODELDATA_H_TEXINFO (System/Graphic/TexCtrl and
