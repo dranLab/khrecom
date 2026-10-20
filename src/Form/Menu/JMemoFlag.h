@@ -8,6 +8,7 @@ class CTask;
 class CJiminyMemo;
 
 class CJiminyMemoFlag {
+    friend class CJiminyMemo; // PARTIAL: a base class of CJiminyMemo in the original
 private:
     static CJiminyMemo* s_pTask;
     static HANDLE s_hTask;

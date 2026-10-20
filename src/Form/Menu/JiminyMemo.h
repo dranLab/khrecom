@@ -14,6 +14,7 @@ inline void _jiminyMemoCheckId(INT inId) {
     if (!(inId < 8)) AssertApp(__FILE__, __LINE__, "inId < PARAM_NUM", 0);
 }
 
+#ifndef FORM_MENU_JIMINYMEMO_CPP /* full class in Form/Menu/JiminyMemo.cpp */
 class CJiminyMemo : public CTask {
 public:
     CJiminyMemo(CTask* inParent, INT inMode);
@@ -21,5 +22,6 @@ public:
 private:
     BYTE _pad[0x570 - sizeof(CTask)]; // members not known yet
 };
+#endif
 
 #endif // FORM_MENU_JIMINYMEMO_H
