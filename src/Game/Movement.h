@@ -246,6 +246,10 @@ public:
     void homingMoveXZ(const FVECTOR& inTarget, FLOAT inRate, FLOAT inSpeed);
     void homingMoveXZ(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed);
     void chase(const CEntity* inTarget, FLOAT inRate, FLOAT inSpeed); // PARTIAL: added for Game/Enemy/MapEnemyGround
+    // PARTIAL: added for Game/Entity
+    void chase(const CEntity& inTarget, FLOAT inRate, FLOAT inSpeed);
+    void evade(const CEntity& inTarget, FLOAT inRate, FLOAT inSpeed);
+    void intercept(const CEntity& inTarget, FLOAT inRate, FLOAT inSpeed);
     void calcVelocityXZ(FLOAT inSpeed); // PARTIAL: added for Game/Player/SummonDumbo
     // PARTIAL: added for Game/Player/FriendPan
     void homing(const CEntity* inTarget, FLOAT inRate);

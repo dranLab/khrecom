@@ -245,11 +245,18 @@ public:
     void link(CTask* pTask, const CRsrcANN* pANN, MODELDATA* pData); // PARTIAL: added for Game/ModelObj
     // PARTIAL: added for Game/ModelObj (name guessed: clears a bit of m_Flags[1] inline)
     void clearFlag1(USHORT nBit) { m_Flags[1] &= ~nBit; }
+    void setFlag1(USHORT nBit) { m_Flags[1] |= nBit; } // PARTIAL: added for Game/Entity (name guessed)
     void init(UINT nId, INT n);
     void play(TIMEQ tq, INT n);
     void changeEx(INT nRsrcID, ANIMID inId, TIMEQ inTq, BOOL inLoop);
     void setSpeed(FLOAT s) { m_Speed = s; }
     void endLookPosition(FLOAT fFrame); // PARTIAL: added for Game/Atel/Avatar
+    // PARTIAL: added for Game/Entity
+    INT getMotCount();
+    const CHAR* getMotFilename(INT nIdx);
+    BOOL createLegIK(FLOAT fP0, FLOAT fP1);
+    BOOL createArmIK();
+    void updateIK(BOOL bBeforeCoordFix, BOOL bAfterCoordFix, FLOAT fr); // PARTIAL: added for Game/Entity
     void setZeroHokan(BOOL b) { _m_0x1c[5] = b; } // PARTIAL: added for Game/Atel/Avatar (m_ZeroHokan at 0x021, name guessed)
     void setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped); // PARTIAL: added for Game/Atel/Avatar
     void setLookPosition(const FVECTOR& vLook, const FVECTOR& vMax, const FVECTOR& vMin, INT nBoneNum, FLOAT fRate, UINT iFlags); // PARTIAL: added for Game/Atel/Avatar
