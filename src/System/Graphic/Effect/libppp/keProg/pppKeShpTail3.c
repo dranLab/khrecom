@@ -90,10 +90,13 @@ void pppKeShpTail3(pppPObject *pobj, PKeShpTail3 *dat, pppCtrlTable *ctbl) {
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/keProg/pppKeShpTail3", pppKeShpTail3Draw);
 
-/* ~67 lines differ: pw lives on the stack in the original (forced here with an empty asm taking "m"(pw) - a hack),
- * and the original addresses it through a copy of sp in $a3 ("move a3,sp"; "lw a1,288(a3)") between the World
- * test and the CMat asm, which shifts the fv3 copy to $t0, the reload register of cnt in the loop (a0 vs v0) and
- * the float registers of fRnd. No natural source for that $a3 copy found. */
+/* 37 lines differ, all between the ScreenMatrix copy and the CMat asm: the original addresses the stack-resident
+ * pw through $a3 ("move a3,sp", a copy of the soft frame pointer, i.e. &mat0) instead of sp. The dummy pointer m
+ * (set to mat0, kept by an empty asm) reproduces the "move a3,sp" and everything before, but CSE keeps the fixed
+ * frame register canonical, so pw's address never uses it. Other hacks: the "m"(pw) asm after UnitMatrix gives
+ * the original size (pw lives on the stack in the original), and fRnd = 1 - fRnd * RndScl fixes the float
+ * registers. Tried (~45 min): asm positions/forms for pw and mat0, volatile pw, statement-order hill climbs,
+ * ternary/macro forms of the matrix copies. */
 #if 0
 /* VU0 macro-mode helpers (vf26..vf31 as scratch, as in the original) */
 #define TAIL_SUB(d, t, s)                                                               \
@@ -239,6 +242,7 @@ void pppKeShpTail3Draw(pppPObject *pobj, PKeShpTail3 *dat, pppCtrlTable *ctbl) {
     ah = (OANM_HEADER *)shp->shape;
     sceVu0CopyMatrix(mat0, ppvPObj->cmat);
     sceVu0UnitMatrix(mat1);
+    __asm__ __volatile__("" : : "m"(*&pw)); /* hack: keeps pw in memory, as in the original */
     scl = dat->Scl0;
     sclSft = (scl - dat->Scl1) / f;
     d = dat->Sep;
@@ -256,9 +260,7 @@ void pppKeShpTail3Draw(pppPObject *pobj, PKeShpTail3 *dat, pppCtrlTable *ctbl) {
     j++;
     b = d;
     sceVu0CopyVector(fv1, fv0);
-    if (k == 27) {
-        j = 0;
-    }
+    if (k == 27) j = 0;
     sceVu0CopyVector(fv3, pFv0[j]);
     sceVu0SubVector(fv2, fv3, fv1);
     c = KeVu0VecLen(fv2);
@@ -267,6 +269,7 @@ void pppKeShpTail3Draw(pppPObject *pobj, PKeShpTail3 *dat, pppCtrlTable *ctbl) {
     cntBas = ah->seq[0].wait;
     seqBas = ah->seqc;
     rnd = pThis->Seed;
+    { sceVu0FVECTOR *m = mat0;
     if (dat->World) {
         TAIL3_COPYMAT(pw->WMat, ppvCameraMatrix);
     } else {
@@ -283,6 +286,7 @@ void pppKeShpTail3Draw(pppPObject *pobj, PKeShpTail3 *dat, pppCtrlTable *ctbl) {
                          "\tsqc2 $vf28, 0x80(%0)\n"
                          "\tsqc2 $vf27, 0x90(%0)"
                          : : "r"(pw), "r"(ppvParScl), "r"(ppvPObj->cmat));
+    __asm__ __volatile__("" : : "r"(m)); }
     TAIL3_LOAD(pw);
     __asm__ __volatile__("lqc2 $vf29, 0x0(%0)\n"
                          "\tlqc2 $vf28, 0x0(%1)\n"
@@ -302,7 +306,8 @@ void pppKeShpTail3Draw(pppPObject *pobj, PKeShpTail3 *dat, pppCtrlTable *ctbl) {
         cntRnd = (cnt + rnd) / cntBas % seqBas;
         sh = (OSHAPE_VU1 *)((char *)ah + ah->seq[cntRnd].sha);
         TAIL_FTOI_COL(&shi.r, col);
-        fvw[0] = scl * (1.0f - fRnd * dat->RndScl);
+        fRnd = 1.0f - fRnd * dat->RndScl;
+        fvw[0] = scl * fRnd;
         __asm__ __volatile__("lqc2 $vf31, 0x0(%0)\n"
                              "\tvmulx.xyz $vf2, $vf6, $vf31x\n"
                              "\tvmulx.xyz $vf3, $vf7, $vf31x\n"
@@ -382,7 +387,6 @@ end:
         pThis->Cnt += dat->AnmSpd;
     }
     op_spr_free(0x180);
-    __asm__ __volatile__("" : : "m"(*&pw)); /* hack: keeps pw in memory, as in the original */
 }
 #endif
 
