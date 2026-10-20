@@ -44,10 +44,18 @@ private:
     CCoords* m_pCrds;    /* 0x054 PARTIAL: split out for System/Graphic/DispList */
     const MODELDATA* m_pData; /* 0x058 */
     USHORT m_Mode;       /* 0x05c */ // PARTIAL: split out for System/Graphic/Model
-    UBYTE _m_0x5e[0x92]; /* 0x05e m_ShaderOption .. 0x0f0 */
+    USHORT m_ShaderOption; /* 0x05e */
+    INT m_BBoxFlag;        /* 0x060 */
+    BYTE m_TransTexCount;  /* 0x064 */
+    SBYTE m_BoneSkip;      /* 0x065 */
+    unsigned char m_Pad[2];
+    struct { BYTE* m_pTex; INT m_n; } m_TexInfo[16]; /* 0x068 TexInfoStub */
+    void* m_TexUV;         /* 0x0e8 _TEX_UV_OFFSET* */
+    void* m_pTexAnm;       /* 0x0ec CModelTexAnm* */
     CTask* m_pTask;      /* 0x0f0 */
     FMATRIX* m_pWSMat;   /* 0x0f4 */
-    UBYTE _m_0xf8[0x1c]; /* 0x0f8 m_pShadowMapModel, m_BBox */
+    void* m_pShadowMapModel; /* 0x0f8 */
+    BBOX m_BBox;         /* 0x0fc */
     struct SHADERDESC* m_pShader; /* 0x114 */
     UBYTE _m_0x118[0x8];
     static FMATRIX* m_pWSMatCache;
@@ -91,6 +99,11 @@ public:
     void sendTexture(u_long* pTag);
     void _disp0_SetTexture(INT nFlag, u_long* pTag);
     u_long* _disp0_GetData(UINT& nSize, INT nFlag);
+    void disp(FLOAT fRate);
+    INT getCoordNum() const;
+    INT link(CCoords& crds);
+    void calcWorldBBox(INT n);
+    void* getExtendClut(INT nTex, INT nType);
 };
 
 #ifdef GAME_ENTITY_H

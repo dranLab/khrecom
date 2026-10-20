@@ -1,6 +1,19 @@
 #include "khtypes.h"
 #include "System/Graphic/Model.h"
+#include "System/Task.h"
 #include "include_asm.h"
+
+class CRsrcData;
+enum NAME_CASE { NAME_CASE_SENSITIVE = 0 };
+class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs the full RsrcData.h classes */
+public:
+    static MODELDATA** getRsrcMDL(const CHAR* pszName, NAME_CASE nc);
+    static MODELDATA** getRsrcMDL(INT nGroup);
+};
+extern "C" char D_00460EB8[]; /* __FILE__ */
+extern "C" char D_00460EE8[];
+extern "C" char D_00460F18[];
+extern "C" char D_00460F58[];
 
 class CShader;
 
@@ -25,8 +38,16 @@ INT CModel::getBoneIndex(const CHAR* pName) const {
     if (m_pData) n = m_pData->getBoneIndex(pName);
     return n;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", AMFfromMDL__FPCci);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", AMFfromMDL__Fii);
+MODELDATA* AMFfromMDL(const CHAR* pszName, INT nIdx) {
+    MODELDATA** ret = CRsrcDB::getRsrcMDL(pszName, NAME_CASE_SENSITIVE);
+    if (!(ret)) AssertApp(D_00460EB8, 500, D_00460F18, 0);
+    return ret[nIdx];
+}
+MODELDATA* AMFfromMDL(INT nGroup, INT nIdx) {
+    MODELDATA** ret = CRsrcDB::getRsrcMDL(nGroup);
+    if (!(ret)) AssertApp(D_00460EB8, 508, D_00460F18, 0);
+    return ret[nIdx];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaskPCci);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsPCci);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaski);
@@ -36,10 +57,22 @@ void CModel::setModelData(const MODELDATA* pData) {
     m_pData = pData;
     link(m_pTask);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelP5CTask);
+INT CModel::link(CTask* p) {
+    if (!(p)) AssertApp(D_00460EB8, 620, D_00460EE8, 0);
+    CCoords* pCrds = p->getCoords();
+    if (!pCrds) {
+        p->createCoords();
+        pCrds = p->getCoords();
+    }
+    m_pTask = p;
+    return link(*pCrds);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoords);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getCrd__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getCoordNum__C6CModel);
+INT CModel::getCoordNum() const {
+    if (!(m_pCrds)) AssertApp(D_00460EB8, 737, D_00460F58, 0);
+    return *(INT*)((BYTE*)m_pCrds + 4);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLocal__6CModeli);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTextureIndex__C6CModelPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTexture__6CModelPCcT1);
@@ -52,7 +85,15 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getOldSemiZ__6C
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getWorldBBoxScr__6CModelR7IVECTORPC7FMATRIX);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcWorldBBox__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getWorldBBox__6CModelR7FVECTORT1);
+void CModel::getWorldBBox(FVECTOR& vMax, FVECTOR& vMin) {
+    calcWorldBBox(0);
+    vMax.x = m_BBox.x[1];
+    vMax.y = m_BBox.y[1];
+    vMax.z = m_BBox.z[1];
+    vMin.x = m_BBox.x[0];
+    vMin.y = m_BBox.y[0];
+    vMin.z = m_BBox.z[0];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBSphere__FR6CCoordRC7FVECTORf);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBSphere__FR6CCoordPC4BBOX);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__FRC7FMATRIXPC4BBOX);
@@ -70,7 +111,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", sendTexture__6C
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTexParam__6CModelPUl);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispUpdate__6CModelf);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispCheck__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__6CModel);
+void CModel::disp() { disp(m_pTask ? m_pTask->getFrameRate() * 0.020000001f : 1.0f); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__6CModelf);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispImpl__6CModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__6CModel);
@@ -100,11 +141,31 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", linkTexAnm__6CM
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setupUVScroll__6CModeli);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateUVScroll__6CModelf);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setUVScrollOffset__6CModeliff);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getExtendClut__6CModelii);
+void* CModel::getExtendClut(INT nTex, INT nType) {
+    if (nTex >= 0 && nTex < m_pData->m_nTexNum) {
+        BYTE* p = m_TexInfo[nTex].m_pTex;
+        if (nType == 1) return *(void**)(p + 0x48);
+        if (nType == 2) return *(void**)(p + 0x4c);
+        if (nType == 3) goto ret3;
+    }
+    return NULL;
+ret3:
+    return *(void**)(m_TexInfo[nTex].m_pTex + 0x50);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getChangeClut__6CModelii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", enablePointLight__C9MODELDATA);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", enableLight__C9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isCharacter__9MODELDATAUi);
+BOOL MODELDATA::isCharacter(UINT mode) {
+    switch (mode) {
+    case 5:
+    case 6:
+    case 0x406:
+    case 0x400b:
+    case 0x406e:
+        return TRUE;
+    }
+    return FALSE;
+}
 BOOL MODELDATA::isMap(UINT mode) {
     switch (mode) {
     case 0:
@@ -128,7 +189,17 @@ BOOL MODELDATA::isColorF(UINT mode) {
     }
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isTexture__9MODELDATAUi);
+BOOL MODELDATA::isTexture(UINT mode) {
+    switch (mode) {
+    case 0x10:
+    case 0x4005:
+    case 0x4009:
+    case 0x4109:
+    case 0x4205:
+        return FALSE;
+    }
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getModelAttachData__3MadPPCQ23Mad17MODEL_ATTACH_DATAi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __static_initialization_and_destruction_0_00133620);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __10CSemiModel);
