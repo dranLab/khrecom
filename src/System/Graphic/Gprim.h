@@ -248,6 +248,7 @@ public:
     CGTexPrim2D() { m_pTexInfo = NULL; }
     void setTPage(struct TexInfo* pInInfo) { m_pTexInfo = pInInfo; }
     struct TexInfo* getTPage() const { return m_pTexInfo; }
+    void setTPage(const CHAR* pTexName); // PARTIAL: added for System/Graphic/Gprim
     virtual UINT getPacketSize() const;
 
     static struct TexInfo* m_pTexCache[28];
@@ -280,6 +281,7 @@ public:
         if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
     }
     void remove();
+    BOOL isRect(INT i, const FVECTOR* vRect); // PARTIAL: added for System/Graphic/Gprim
 };
 
 class CTPrim : public CGTexPrim {
@@ -302,6 +304,7 @@ public:
         if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
     }
     void remove();
+    BOOL isRect(INT i, const FVECTOR* vRect); // PARTIAL: added for System/Graphic/Gprim
 };
 
 // PARTIAL: added for System/DebugProcInfo

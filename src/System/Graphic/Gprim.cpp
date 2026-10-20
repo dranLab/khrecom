@@ -2,16 +2,39 @@
 #include "System/Graphic/Gprim.h"
 #include "include_asm.h"
 
+extern INT SCREEN_HEIGHT;
+enum NAME_CASE { NAME_CASE_SENSITIVE = 0 }; /* PARTIAL: System/RsrcData.h */
+class CRsrcDB { /* PARTIAL: System/RsrcDB.h does not compile on its own here */
+public:
+    static struct TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
+};
+BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect);
+
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", disp__6CGPrim);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setTPage__9CGTexPrimPCc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setTPage__11CGTexPrim2DPCc);
+void CGTexPrim::setTPage(const CHAR* pTexName) {
+    m_pTexInfo = CRsrcDB::getRsrcTex(pTexName, NAME_CASE_SENSITIVE);
+}
+void CGTexPrim2D::setTPage(const CHAR* pTexName) {
+    m_pTexInfo = CRsrcDB::getRsrcTex(pTexName, NAME_CASE_SENSITIVE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setTexture__9CGTexPrimPC7TexInfoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setTexture__11CGTexPrim2DPC7TexInfoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPacketSize__C9CGTexPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPacketSize__C11CGTexPrim2D);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__11CScissoring);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setRect__11CScissoringR4G_XYT1);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setDefault__11CScissoring);
+void CScissoring::setRect(G_XY& p0, G_XY& p1) {
+    m_P0 = p0;
+    m_P1 = p1;
+}
+void CScissoring::setDefault() {
+    G_XY p0;
+    G_XY p1;
+    p0.x = 0;
+    p0.y = 0;
+    p1.x = 511;
+    p1.y = SCREEN_HEIGHT - 1;
+    setRect(p0, p1);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CZFill);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__5CTile);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__5CSprt);
@@ -24,9 +47,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", __18CScreenColo
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CRotSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", __isRect__FRC7FVECTORPC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CCPrim);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", isRect__6CCPrimiPC7FVECTOR);
+BOOL CCPrim::isRect(INT i, const FVECTOR* vRect) {
+    return __isRect(*(FVECTOR*)&m_V[i], vRect);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CTPrim);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", isRect__6CTPrimiPC7FVECTOR);
+BOOL CTPrim::isRect(INT i, const FVECTOR* vRect) {
+    return __isRect(*(FVECTOR*)m_V[i].fP, vRect);
+}
 FLOAT RotTransPers(FVECTOR& out_v, const FMATRIX& in_m, const FVECTOR& in_v) {
     __asm__ volatile(
         "lqc2 $vf8, 0x0($6)\n"
