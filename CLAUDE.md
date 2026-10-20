@@ -84,10 +84,13 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 - The libs' .mdebug has only names, no types: `stdump functions iso/SLUS_217.99` (tools/ccc) lists each lib file's
   functions incl. statics, in order. Assemblers: `ee-as` 2.10 (ee-gcc2.96 package; no mfc0 hazard nops) and 2.9
   (ee-gcc2.9-990721; adds them). Sony's code has inline asm blocks with their own `.set noreorder` loops (DIntr).
+- GNU as fills an open delay slot only when no label precedes the branch: -g's `$LM` line labels count. A `j $31`
+  left unfilled where the original filled it: put the last statement and `}` on one line (lib/init).
 
 | Family | Toolchain (verified on) |
 |---|---|
 | Sony SDK (provisional: `lib/*`) | ee-gcc2.95.3-136 + ee-as 2.10 (`assembler: ee-gcc2.96`), `-O2 -G0 -g` (libmpeg: defhandler, alalc) |
+| libat3dec (`lib/init`, ...) | ee-gcc2.96 + its ee-as 2.10, `-O2 -G0 -g` (atrac2_mode_* only match 2.96) |
 | libkernl (listed one by one in `build.yaml`) | ee-gcc2.9-991111 + ee-as 2.10, `-O2 -G0 -g` (alarm: kCopy only matches the 991111 family; diei) |
 
 ## Pitfalls
