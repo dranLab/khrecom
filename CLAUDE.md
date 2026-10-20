@@ -87,7 +87,8 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 
 | Family | Toolchain (verified on) |
 |---|---|
-| Sony SDK (provisional: `lib/*`) | ee-gcc2.95.3-136 + ee-as 2.10 (`assembler: ee-gcc2.96`), `-O2 -G0 -g` (libmpeg: defhandler, alalc; libkernl: diei) |
+| Sony SDK (provisional: `lib/*`) | ee-gcc2.95.3-136 + ee-as 2.10 (`assembler: ee-gcc2.96`), `-O2 -G0 -g` (libmpeg: defhandler, alalc) |
+| libkernl (listed one by one in `build.yaml`) | ee-gcc2.9-991111 + ee-as 2.10, `-O2 -G0 -g` (alarm: kCopy only matches the 991111 family; diei) |
 
 ## Pitfalls
 

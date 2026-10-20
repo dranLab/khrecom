@@ -6,6 +6,126 @@ source_root: c:/KHCOM/MainApp/   # original path prefix of __FILE__ (src/ in thi
 # Per-unit toolchains (the libraries were built with other compilers than the game): the first entry whose `match`
 # (an fnmatch pattern on the unit name) matches overrides compiler / cflags / source_root. More specific first.
 overrides:
+  - match: lib/table
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/init
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/glue
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/cache
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/intr
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/thread
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/tty
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/kprintf2
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/sifcmd
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/sifrpc
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/filestub
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/iopheap
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/eeloadfile
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/iopreset
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/diei
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/initsys
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/libosd
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/exit
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/alarm
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/timer
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/timeralarm
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/iopnotify
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/deci2
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
+  - match: lib/tlbfunc
+    compiler: ee-gcc2.9-991111  # libkernl (kCopy in alarm.c: only the 991111 family)
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
   - match: lib/*                # Sony SDK (provisional until Phase 1 of docs/plan-library-decompilation.md)
     compiler: ee-gcc2.95.3-136  # as the game (libmpeg: alalc, defhandler); others lay out branches differently
     cflags: -O2 -G0 -g
