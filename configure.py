@@ -127,9 +127,11 @@ SOURCE_SUFFIXES = (".c", ".cpp", ".s")
 
 
 def unit_toolchain(build_cfg: dict, unit: str) -> dict:
-    """compiler, cflags and source_root for one unit: build.yaml's defaults, overridden by the first entry of its
-    `overrides:` list whose `match` (an fnmatch pattern, e.g. lib/graphdev_*) matches the unit name."""
-    tc = {key: build_cfg.get(key) for key in ("compiler", "cflags", "source_root")}
+    """compiler, cflags, source_root and assembler for one unit: build.yaml's defaults, overridden by the first entry
+    of its `overrides:` list whose `match` (an fnmatch pattern, e.g. lib/graphdev_*) matches the unit name.
+    `assembler` names a package in tools/compilers/ whose bin/ee-as (GNU as) assembles the compiler's output instead
+    of the compiler package's own assembler."""
+    tc = {key: build_cfg.get(key) for key in ("compiler", "cflags", "source_root", "assembler")}
     for override in build_cfg.get("overrides") or []:
         if fnmatch.fnmatchcase(unit, override["match"]):
             tc.update({key: override[key] for key in tc if key in override})
@@ -302,7 +304,9 @@ def toolchain_variables(tc: dict) -> dict[str, str]:
     gp = re.search(r"-G\s*(\d+)", tc["cflags"])
     cc, snas = compiler_commands(tc["compiler"])
     extra = f"--source-root {tc['source_root']}" if tc.get("source_root") else ""
-    if snas:
+    if tc.get("assembler"):
+        assemble = f"tools/compilers/{tc['assembler']}/bin/ee-as -EL -G{gp.group(1) if gp else 0} -I include"
+    elif snas:
         assemble = f"{snas} --stdout -G{gp.group(1) if gp else 0}"
         extra += " --assembler snas" if extra else "--assembler snas"
     else:

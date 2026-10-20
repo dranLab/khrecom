@@ -72,20 +72,22 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 ## Library units (`lib/...`, branch `sdk-decomp`; plan: `docs/plan-library-decompilation.md`)
 
 - Sony SDK, libgcc, newlib, libsn: built with other toolchains. `build.yaml`'s `overrides:` (fnmatch on the unit
-  name, first match wins) sets `compiler`/`cflags`/`source_root` per unit; a compiler package without Ps2EeAs is
-  assembled with GNU as (gcc schedules the delay slots, no erratum nops). `compare_compilers.py` uses the override.
+  name, first match wins) sets `compiler`/`cflags`/`source_root`/`assembler` per unit. `assembler: <package>` uses
+  that package's GNU `bin/ee-as` instead of the compiler's own (Ps2EeAs, or modern GNU as for packages without
+  one). GNU as in `.set reorder` fills delay slots gcc left open and pads short loops itself.
+  `compare_compilers.py` uses the unit's override (`--assembler none` for each compiler's own).
 - No `ref/`, no `__LINE__`/assert strings. SDK declarations go in `include/sdk/*.h` (`#include "sdk/libmpeg.h"`),
   written from call sites and the asm; library-internal structs in the unit's own source or `src/lib/*.h`.
 - Hand-written assembly: `src/lib/<unit>.s` replaces splat's `.s` for that unit (same object, GNU as); its data
   from source with a last line `# SOURCE DATA: .data` (klib.s).
 - `candidates.py --lib` lists the open library units; `check.sh` reports library progress separately.
 - The libs' .mdebug has only names, no types: `stdump functions iso/SLUS_217.99` (tools/ccc) lists each lib file's
-  functions incl. statics, in order. Other assemblers to try: `ee-as` 2.10 (ee-gcc2.96 package; no mfc0 hazard
-  nops, pads short loops) and 2.9 (ee-gcc2.9-990721).
+  functions incl. statics, in order. Assemblers: `ee-as` 2.10 (ee-gcc2.96 package; no mfc0 hazard nops) and 2.9
+  (ee-gcc2.9-990721; adds them). Sony's code has inline asm blocks with their own `.set noreorder` loops (DIntr).
 
 | Family | Toolchain (verified on) |
 |---|---|
-| Sony SDK (provisional: `lib/*`) | ee-gcc2.95.3-136 + Ps2EeAs, `-O2 -G0 -g` (libmpeg: defhandler, alalc - only 136 gets `_sceMpegAlalcAlloc`'s branch layout) |
+| Sony SDK (provisional: `lib/*`) | ee-gcc2.95.3-136 + ee-as 2.10 (`assembler: ee-gcc2.96`), `-O2 -G0 -g` (libmpeg: defhandler, alalc; libkernl: diei) |
 
 ## Pitfalls
 

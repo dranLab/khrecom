@@ -115,15 +115,19 @@ def functions(obj: Path) -> dict[str, Function]:
         return out
 
 
-def compile_with(compiler: Path, source: Path, cflags: str, symbols: Path, out: Path) -> str | None:
-    """Same pipeline as configure.py's cc rule. Returns an error message, or None on success."""
+def compile_with(compiler: Path, source: Path, cflags: str, symbols: Path, out: Path,
+                 assembler: str | None = None) -> str | None:
+    """Same pipeline as configure.py's cc rule (assembler: a package whose bin/ee-as to use, as build.yaml's
+    `assembler:`). Returns an error message, or None on success."""
     gcc_s, compat_s = out.with_suffix(".gcc.s"), out.with_suffix(".s")
     gp = re.search(r"-G\s*(\d+)", cflags)
     gp = f"-G{gp.group(1) if gp else 0}"
     cc, snas = compiler_commands(compiler.name)
     compat = [sys.executable, "tools/ee_asm_compat.py", str(gcc_s), str(compat_s), "--source", str(source),
               "--symbols", str(symbols)]
-    if snas:
+    if assembler:
+        assemble = [f"tools/compilers/{assembler}/bin/ee-as", "-EL", gp, "-I", "include", "-o", str(out), str(compat_s)]
+    elif snas:
         assemble = snas.split() + ["--stdout", gp, "-o", str(out), str(compat_s)]
         compat += ["--assembler", "snas"]
     else:
@@ -144,13 +148,17 @@ def main() -> None:
     parser.add_argument("version")
     parser.add_argument("source", type=Path, help="e.g. src/System/Graphic/ColorFader.cpp")
     parser.add_argument("--cflags", help="override the unit's flags from build.yaml (its default or `overrides:`)")
+    parser.add_argument("--assembler", help="package whose ee-as assembles every compiler's output (default: the unit's "
+                        "`assembler:` from build.yaml; 'none': each compiler's own)")
     args = parser.parse_args()
 
     cfg_dir = ROOT / "config" / args.version
     opts = yaml.safe_load((cfg_dir / f"{args.version}.yaml").read_text(encoding="utf-8"))["options"]
     build_cfg = yaml.safe_load((cfg_dir / "build.yaml").read_text(encoding="utf-8"))
     unit = args.source.relative_to("src").with_suffix("").as_posix()
-    cflags = args.cflags or unit_toolchain(build_cfg, unit)["cflags"]
+    tc = unit_toolchain(build_cfg, unit)
+    cflags = args.cflags or tc["cflags"]
+    assembler = None if args.assembler == "none" else args.assembler or tc.get("assembler")
     target_obj = ROOT / opts["build_path"] / "expected" / "units" / f"{unit}.o"
     if not target_obj.exists():
         subprocess.run(["ninja", target_obj.relative_to(ROOT).as_posix()], cwd=ROOT, check=True,
@@ -162,7 +170,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         for compiler in compilers:
             obj = Path(tmp) / f"{compiler.name}.o"
-            error = compile_with(compiler, args.source, cflags, cfg_dir / "elf_symbol_addrs.txt", obj)
+            error = compile_with(compiler, args.source, cflags, cfg_dir / "elf_symbol_addrs.txt", obj, assembler)
             results[compiler.name] = error or functions(obj)
 
     width = max(len(n) for n in target)
@@ -177,7 +185,7 @@ def main() -> None:
     for compiler in compilers:
         if isinstance(results[compiler.name], str):
             print(f"{compiler.name}: {results[compiler.name]}")
-    print(f"(flags: {cflags})")
+    print(f"(flags: {cflags}" + (f", assembler: {assembler} ee-as)" if assembler else ")"))
 
 
 if __name__ == "__main__":

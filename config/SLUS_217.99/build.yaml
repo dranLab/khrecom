@@ -10,3 +10,4 @@ overrides:
     compiler: ee-gcc2.95.3-136  # as the game (libmpeg: alalc, defhandler); others lay out branches differently
     cflags: -O2 -G0 -g
     source_root: null
+    assembler: ee-gcc2.96       # GNU ee-as 2.10, not Ps2EeAs: it fills open delay slots, pads short loops (lib/diei)
