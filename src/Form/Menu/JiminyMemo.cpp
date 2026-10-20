@@ -6,12 +6,19 @@
 #include "System/Graphic/2d/2DFnt.h"
 #include "System/Sound/SoundMan.h"
 #include "Game/GameWork.h"
+#include "Form/Menu/JMemoFlag.h"
+#include "System/HeapMan.h"
+#include "System/Debug.h"
 #include "include_asm.h"
+
+extern "C" char D_004E7A30[];
 
 namespace D2 {
 class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the class only for its own unit */
 public:
     static void destroy(HANDLE hHandle);
+    static HANDLE create(const CHAR* pBaseName, UINT inNo);
+    static void setLayer(INT inLayer);
 };
 }
 
@@ -60,12 +67,93 @@ public:
     UINT isStateFlag(UINT inFlags) { return m_uiStateFlags & inFlags; }
     D2::C2DSeqCtrl* getSeqCtrl(INT inSeqNo);
     D2::C2DFnt* getFnt(INT inSeqNo);
+    D2::C2DFnt* setSeqText(UINT inSeqNo, const CHAR* inText);
 };
 
-class CMemo2DCursor;
 struct CursorPosition {
     FLOAT x;
     FLOAT y;
+};
+
+void AddVectorXYZ(FVECTOR& out, const FVECTOR& a, const FVECTOR& b);
+void ScaleVectorXYZ(FVECTOR& out, const FVECTOR& a, FLOAT s);
+
+class CMemo2DCursor;
+class CMemo2DSequence : public D2::C2DSeqCtrl {
+private:
+    FVECTOR m_vBasePosition;  /* 0x160 */
+    FVECTOR m_vShiftPosition; /* 0x170 */
+    FVECTOR m_vAimPosition;   /* 0x180 */
+    FVECTOR m_vPosition;      /* 0x190 */
+    SHORT m_iState;           /* 0x1a0 */
+    USHORT m_iStateFlag;      /* 0x1a2 */
+    int m_SeqTbl[5];          /* 0x1a4 */
+    char m_LayoutName[32];    /* 0x1b8 */
+    FLOAT m_fScale;           /* 0x1d8 */
+    FLOAT m_fMoveTimer;       /* 0x1dc */
+    BOOL m_bMoveSlideEnable;  /* 0x1e0 */
+
+public:
+    virtual ~CMemo2DSequence();
+    void setPosition();
+    void setLocalPosition();
+    void setScale(FLOAT inScale);
+    void replaceSequence(INT inSeqNo);
+    void replaceSequenceId(INT inSeqId);
+    void setInState(INT inSeqId);
+    void setOutState(INT inSeqId);
+};
+
+class CMemo2DCursor : public D2::C2DSeqCtrl {
+private:
+    INT m_iPosiNum;           /* 0x160 */
+    CursorPosition* m_pPosiTbl; /* 0x164 */
+    float m_fSpacing[4];      /* 0x168 */
+    INT m_iStartNo;           /* 0x178 */
+    int m_iLadTbl[4];         /* 0x17c */
+    INT m_iLadSeq;            /* 0x18c */
+    LPCTSTR m_lpctLayoutName; /* 0x190 */
+    FVECTOR m_vPosi;          /* 0x1a0 */
+    FVECTOR m_vAimPosi;       /* 0x1b0 */
+    FVECTOR m_vShiftPosi;     /* 0x1c0 */
+    INT m_iPosiId;            /* 0x1d0 */
+    BOOL m_bMoveSlideEnable;  /* 0x1d4 */
+    FLOAT m_fMoveTimer;       /* 0x1d8 */
+    HANDLE m_hParent;         /* 0x1dc */
+    INT m_iState;             /* 0x1e0 */
+    CursorPosition m_ScreenLimit[2]; /* 0x1e4 */
+    FLOAT m_fScale;           /* 0x1f4 */
+    UINT m_uiSize;            /* 0x1f8 */
+
+public:
+    virtual ~CMemo2DCursor();
+
+private:
+    void finalise();
+
+public:
+    INT setPosiId(INT inPosiId);
+    void setScale(FLOAT inScale);
+    void getSubVector(CursorPosition& outSub, INT inId0, INT inId1);
+    void setLimitPosi(CursorPosition& inPosi, INT inId);
+    CursorPosition* getLimitPosi(INT inId);
+};
+
+class CMemo2DCard : public D2::C2DSeqCtrl {
+private:
+    FVECTOR m_vBasePosition;  /* 0x160 */
+    FVECTOR m_vShiftPosition; /* 0x170 */
+    INT m_iState;             /* 0x180 */
+    FLOAT m_fScale;           /* 0x184 */
+    UINT m_iTexNo;            /* 0x188 */
+    UINT m_iTexPos;           /* 0x18c */
+    UINT m_iFrameSeqNo;       /* 0x190 */
+    CHAR* m_pEmptySeqName;    /* 0x194 */
+
+public:
+    virtual ~CMemo2DCard();
+    void setPosition();
+    void setLocalPosition();
 };
 
 class CJiminyMemo : public CMenu {
@@ -102,6 +190,7 @@ private:
     INT getNextContentId(INT inId, INT inNum, INT inMax);
     BOOL nextPage(INT* ioTop, INT inMax, INT inDisp);
     BOOL prevPage(INT* ioTop, INT inMin, INT inDisp);
+    BOOL haveSpecialCard();
     INT getNextCardId(INT inId);
     INT getPrevCardId(INT inId);
     INT getNextCharaId(INT inId);
@@ -149,7 +238,11 @@ void CMemo2DLayout::setState(INT inState) {
 INT CMemo2DLayout::getState() {
     return m_iState;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createLayer__13CMemo2DLayouti);
+void CMemo2DLayout::createLayer(INT inKind) {
+    D2::C2DMan::setLayer(m_iLayerLevel);
+    m_hLayer = D2::C2DMan::create(m_pLayoutFileName, m_pLayoutNoTbl[inKind]);
+    if (!m_hLayer) TRACE_USER((USER)10, D_004E7A30, inKind);
+}
 void CMemo2DLayout::destroyLayer() {
     D2::C2DMan::destroy(m_hLayer);
     m_hLayer = 0;
@@ -165,40 +258,94 @@ D2::C2DFnt* CMemo2DLayout::getFnt(INT inSeqNo) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setSeqState__13CMemo2DLayoutUii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getSeqState__13CMemo2DLayoutUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setSeqText__13CMemo2DLayoutUiPCc);
+D2::C2DFnt* CMemo2DLayout::setSeqText(UINT inSeqNo, const CHAR* inText) {
+    if (inSeqNo >= m_iSeqNum) return NULL;
+    D2::C2DFnt* pFnt = m_pSeqFntArray[inSeqNo];
+    if (pFnt) pFnt->setText(inText);
+    return pFnt;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __15CMemo2DSequence);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_15CMemo2DSequence);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setup__15CMemo2DSequencePCcPCii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setup__15CMemo2DSequencePCcii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPosition__15CMemo2DSequence);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setLocalPosition__15CMemo2DSequence);
+void CMemo2DSequence::setPosition() {
+    FVECTOR v;
+    AddVectorXYZ(v, m_vBasePosition, m_vShiftPosition);
+    setPos(v);
+}
+void CMemo2DSequence::setLocalPosition() {
+    FVECTOR v;
+    AddVectorXYZ(v, m_vBasePosition, m_vShiftPosition);
+    setLocalPos(v);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__15CMemo2DSequencef);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setSlideMoveParam__15CMemo2DSequenceP13CMemo2DCursor);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setScale__15CMemo2DSequencef);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceSequence__15CMemo2DSequencei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceSequenceId__15CMemo2DSequencei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setInState__15CMemo2DSequencei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setOutState__15CMemo2DSequencei);
+void CMemo2DSequence::setScale(FLOAT inScale) {
+    m_fScale = inScale;
+    if (inScale < 0.01f) m_fScale = 0.01f;
+    if (m_iStateFlag & 2) setScl(m_fScale);
+}
+void CMemo2DSequence::replaceSequence(INT inSeqNo) {
+    replaceSeq(0, m_LayoutName, inSeqNo);
+}
+void CMemo2DSequence::replaceSequenceId(INT inSeqId) {
+    replaceSeq(0, m_LayoutName, m_SeqTbl[inSeqId]);
+}
+void CMemo2DSequence::setInState(INT inSeqId) {
+    if (m_nSeq == 0) {
+        addSeq(m_LayoutName, m_SeqTbl[inSeqId]);
+        enableDisp(TRUE);
+    } else {
+        replaceSequenceId(inSeqId);
+    }
+    m_iState = 1;
+}
+void CMemo2DSequence::setOutState(INT inSeqId) {
+    replaceSequenceId(inSeqId);
+    m_iState = 3;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __13CMemo2DCursori);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DCursor);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setup__13CMemo2DCursorR15CursorDataParam);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", finalise__13CMemo2DCursor);
+void CMemo2DCursor::finalise() {
+    if (m_pPosiTbl) com_free(m_pPosiTbl);
+    m_pPosiTbl = NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setReplaceSeq__13CMemo2DCursori);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setState__13CMemo2DCursori);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPosiId__13CMemo2DCursori);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__13CMemo2DCursor);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getFrameRateF__13CMemo2DCursor);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setLimitPosi__13CMemo2DCursorR14CursorPositioni);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getLimitPosi__13CMemo2DCursori);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setScale__13CMemo2DCursorf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getSubVector__13CMemo2DCursorR14CursorPositionii);
+void CMemo2DCursor::setLimitPosi(CursorPosition& inPosi, INT inId) {}
+CursorPosition* CMemo2DCursor::getLimitPosi(INT inId) {
+    return NULL;
+}
+void CMemo2DCursor::setScale(FLOAT inScale) {
+    m_fScale = inScale;
+    if (m_iState & 0x4000000) setScl(inScale);
+    setPosiId(m_iPosiId);
+}
+void CMemo2DCursor::getSubVector(CursorPosition& outSub, INT inId0, INT inId1) {
+    outSub.x = m_pPosiTbl[inId0].x - m_pPosiTbl[inId1].x;
+    outSub.y = m_pPosiTbl[inId0].y - m_pPosiTbl[inId1].y;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __11CMemo2DCardPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_11CMemo2DCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", create__11CMemo2DCardG4CARDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createPicture__11CMemo2DCardUiUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", changePicture__11CMemo2DCardPQ22D29C2DSeqObj);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPosition__11CMemo2DCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setLocalPosition__11CMemo2DCard);
+void CMemo2DCard::setPosition() {
+    FVECTOR v;
+    AddVectorXYZ(v, m_vBasePosition, m_vShiftPosition);
+    ScaleVectorXYZ(v, v, m_fScale);
+    setPos(v);
+}
+void CMemo2DCard::setLocalPosition() {
+    FVECTOR v;
+    AddVectorXYZ(v, m_vBasePosition, m_vShiftPosition);
+    ScaleVectorXYZ(v, v, m_fScale);
+    setLocalPos(v);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setState__11CMemo2DCardi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__11CMemo2DCardf);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __11CJiminyMemoP5CTaski);
@@ -279,7 +426,13 @@ BOOL CJiminyMemo::prevPage(INT* ioTop, INT inMin, INT inDisp) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", nextPage__11CJiminyMemoP13CMemo2DCursorPiiif);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", prevPage__11CJiminyMemoP13CMemo2DCursorPiiif);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", isButtonRptLimitStop__11CJiminyMemoUiUii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", haveSpecialCard__11CJiminyMemo);
+BOOL CJiminyMemo::haveSpecialCard() {
+    BOOL bRet = FALSE;
+    if (!m_iPlayerMode) {
+        if (CJiminyMemoFlag::isContentOpen(0x14D) || CJiminyMemoFlag::isContentOpen(0x14E)) bRet = TRUE;
+    }
+    return bRet;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentMenu__11CJiminyMemo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentStory__11CJiminyMemo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentStoryView__11CJiminyMemo);
