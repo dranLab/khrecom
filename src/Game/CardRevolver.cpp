@@ -4,6 +4,7 @@
 #include "System/TaskMan.h"
 #include "System/Sound/SoundMan.h"
 #include "Game/GameWork.h"
+#include "Game/Player/Player.h"
 #include "System/Debug.h"
 #include "System/HeapMan.h"
 #include "include_asm.h"
@@ -14,6 +15,8 @@ inline void* operator new(unsigned int, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039B2E4");
+template <class T> static inline T& _ref(T& v) { return v; }
+static inline BOOL _isEqual(UINT a, UINT b) { return a == b; }
 extern "C" char D_0047B348[];
 extern "C" char D_0047B378[];
 extern "C" char D_0047B070[];
@@ -369,24 +372,180 @@ void CCardRevolver::changeDarkMode(HANDLE inHandle, INT inFlag) {
     else m_uiFlag = (INT)m_uiFlag & ~0x100;
     calcStockSkill();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayerDuelCard__Q210CardBattle13CCardRevolveri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayerDuelStock__Q210CardBattle13CCardRevolverPQ210CardBattle11CBattleCardUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayerDuelPlayStock__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setSnatch__Q210CardBattle13CCardRevolveri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeSnatchCard__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", snatchCard__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", returnSnatch__Q210CardBattle13CCardRevolveri);
+INT CCardRevolver::setPlayerDuelCard(INT inTest) {
+    if (m_iState != 1) return 0;
+    if (CGameWork::getFlag(1, 8)) return 0;
+    if (CGameWork::getInt(1, 0xE2) & 2) return 0;
+    CCardBattle* pBattle = (CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (!_isEqual(pBattle->m_uiDuelState, 5)) return 0;
+    if (!_isEqual(pBattle->m_uiState[1], 10)) return 0;
+    if (pBattle->isExecutingCard(1)) return 0;
+    CBattleCard* pCard = getActiveCard();
+    if (!pCard) return 0;
+    INT cat = pCard->getCardData()->m_nId >> 28;
+    if (cat >= 6) {
+        if (cat < 9) return 0;
+        if (cat == 14) return 0;
+    }
+    INT ret = pBattle->setPlayCard(m_hOwner, m_uiUser, pCard, NULL, inTest);
+    if (!ret) return 0;
+    m_nRemain[m_iMode]--;
+    m_tqRollSpeed = 300;
+    rollDeck(1, 1, 300);
+    return ret;
+}
+void CCardRevolver::setPlayerDuelStock(CBattleCard* inCard, UINT inPri) {
+    m_iStock = inPri;
+    m_uiFlag |= 0x200;
+    m_pCardsS[m_iStock] = inCard;
+    m_pDataS[m_iStock] = inCard->getCardData();
+    m_iStock++;
+    CSound::playSE(15, -1, 64);
+}
+INT CCardRevolver::setPlayerDuelPlayStock() {
+    CCardBattle* pBattle = (CCardBattle*)CTaskMan::getSysTask(0x16);
+    pBattle->setDuelPlayStock(m_pCardsS, m_iStockSkill);
+    for (INT i = 0; i < m_iStock; i++) {
+        m_pCardsS[i] = NULL;
+        m_pDataS[i] = NULL;
+    }
+    m_iStockSum = 0;
+    m_uiFlag = (INT)m_uiFlag & ~0x200;
+    m_iStockSkill = 0;
+    m_iExtraSkill = 0;
+    m_iFirstSkill = 0;
+    m_iStock = 0;
+    return 1;
+}
+void CCardRevolver::setSnatch(HANDLE inHandle) {
+    m_hSnatch = inHandle;
+    m_nSnatchCount++;
+    if (!(m_uiFlag & 0x1000)) {
+        m_tqSnatch = 0;
+        if (m_iMode > 0) changeMode(0, 1);
+        else m_pEmpty->enableDisp(FALSE);
+    }
+    if (m_tqSnatch > 0) m_tqSnatch = 100;
+    m_uiFlag |= 0x1000;
+}
+INT CCardRevolver::exeSnatchCard() {
+    if (!(m_uiFlag & 0x1000)) return 0;
+    if (!(m_uiFlag & 0x20000)) return 0;
+    TIMEQ tq = getFrameRate();
+    m_tqSnatch -= tq;
+    if (m_tqSnatch > 0) {
+        m_tqTimer -= tq;
+        if (m_tqTimer <= 0) {
+            m_tqTimer = 200;
+            rollDeck(-1, 0, 200);
+        }
+        return 0;
+    }
+    if (m_nSnatchCount > 0) {
+        snatchCard();
+        m_nSnatchCount--;
+        return 0;
+    }
+    m_tqSnatch = 0;
+    m_hSnatch = 0;
+    m_uiFlag = (INT)m_uiFlag & ~0x1000;
+    CPlayer* pPlayer = _ref(g_pPlayer);
+    if (pPlayer) pPlayer->setCardSnatch(0);
+    return 1;
+}
+void CCardRevolver::snatchCard() {
+    if (getHave(1, 1, 0, 0, 0) < 7) return;
+    m_tqSnatch = 1000;
+    if (m_iMode > 0) changeMode(0, 1);
+    else m_pEmpty->enableDisp(FALSE);
+    for (INT i = 0; i < m_nLimit; i++) {
+        CBattleCard* pCard = &m_pCards[i];
+        if (!pCard) continue;
+        if (pCard->getCardKind() != 0x12) continue;
+        if (pCard->isNowPlaying()) continue;
+        INT stock = pCard->getStock();
+        if (stock != -1) continue;
+        if (pCard->isReloadNG()) continue;
+        if (pCard->getCardOwner() != 1) continue;
+        INT hand = pCard->getHand();
+        pCard->setSnatch(m_hSnatch);
+        if (hand != stock) m_nRemain[m_iMode]--;
+        break;
+    }
+    m_tqTimer = 200;
+    rollDeck(-1, 1, 200);
+}
+INT CCardRevolver::returnSnatch(INT inNum) {
+    return returnSnatchCard(inNum);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", returnSnatchCard__Q210CardBattle13CCardRevolveri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeReturnCard__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", canSnatch__Q210CardBattle13CCardRevolver);
+INT CCardRevolver::canSnatch() {
+    if (getHave(1, 1, 0, 0, 0) > 6) return TRUE;
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayerPronounceCard__Q210CardBattle13CCardRevolveri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setDiscard__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeDiscard__Q210CardBattle13CCardRevolver);
+void CCardRevolver::setDiscard() {
+    if (isDiscard()) return;
+    discard();
+    m_uiFlag |= 0x8000;
+}
+INT CCardRevolver::exeDiscard() {
+    if (!isDiscard()) return 0;
+    m_tqDiscard -= getFrameRate();
+    if (m_tqDiscard > 0) return 0;
+    m_tqDiscard = 0;
+    m_uiFlag &= ~0x8000;
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", discard__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", resetCardOwner__Q210CardBattle13CCardRevolverii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", calcPlutoMark__Q210CardBattle13CCardRevolver);
+void CCardRevolver::resetCardOwner(INT inOld, INT inNew) {
+    for (INT i = 0; i < m_nLimit; i++) {
+        CBattleCard* pCard = &m_pCards[i];
+        if (!pCard) continue;
+        if (pCard->getCardOwner() != inOld) continue;
+        if (pCard->getCardCategory() == 8 && inNew == 0) continue;
+        pCard->setCardOwner(inNew);
+    }
+}
+INT CCardRevolver::calcPlutoMark() {
+    m_nPlutoMark = 0;
+    for (INT i = 0; i < m_nReloadID; i++) {
+        CBattleCard* pCard = &m_pCards[i];
+        if (!pCard) continue;
+        BOOL bOn = FALSE;
+        if (pCard->getCardOwner() == 1 && pCard->isReloadNG() && pCard->getHand() == -1 && !pCard->isNowPlaying() &&
+            pCard->getStock() == -1 && pCard->getCardKind() != 0) {
+            INT cat = pCard->getCardCategory();
+            if (cat < 5 && cat != 0) {
+                bOn = TRUE;
+                pCard->setPlutoON();
+                m_nPlutoMark++;
+            }
+        }
+        if (!bOn) pCard->resetPlutoON();
+    }
+    return m_nPlutoMark;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", dropPlutoMarkCard__Q210CardBattle13CCardRevolverPC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayNG__Q210CardBattle13CCardRevolverii);
+void CCardRevolver::setPlayNG(INT inFlag, INT inCategory) {
+    INT i;
+    if (inFlag) {
+        for (i = 0; i < m_nReloadID; i++) {
+            CBattleCard* pCard = &m_pCards[i];
+            if (!pCard) continue;
+            if (!inCategory || pCard->getCardCategory() == inCategory) pCard->setPlayNG();
+            else pCard->resetPlayNG();
+        }
+    } else {
+        for (i = 0; i < m_nReloadID; i++) {
+            CBattleCard* pCard = &m_pCards[i];
+            if (!pCard) continue;
+            if (inCategory && pCard->getCardCategory() != inCategory) continue;
+            pCard->resetPlayNG();
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", __Q210CardBattle13CEnchantGaugeP5CTaskiR4CARD);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _$_Q210CardBattle13CEnchantGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _initialize__Q210CardBattle13CEnchantGauge);
