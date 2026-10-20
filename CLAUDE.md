@@ -82,7 +82,8 @@ A *unit* is one original object file, named after its source path, e.g. `System/
   from source with a last line `# SOURCE DATA: .data` (klib.s).
 - `candidates.py --lib` lists the open library units; `check.sh` reports library progress separately.
 - The libs' .mdebug has only names, no types: `stdump functions iso/SLUS_217.99` (tools/ccc) lists each lib file's
-  functions incl. statics, in order. Assemblers: `ee-as` 2.10 (ee-gcc2.96 package; no mfc0 hazard nops) and 2.9
+  functions in order, `static` exactly for the file-local ones (everything else is global: other data may point
+  at it). Assemblers: `ee-as` 2.10 (ee-gcc2.96 package; no mfc0 hazard nops) and 2.9
   (ee-gcc2.9-990721; adds them). Sony's code has inline asm blocks with their own `.set noreorder` loops (DIntr).
 - GNU as fills an open delay slot only when no label precedes the branch: -g's `$LM` line labels count. A `j $31`
   left unfilled where the original filled it: put the last statement and `}` on one line (lib/init).
