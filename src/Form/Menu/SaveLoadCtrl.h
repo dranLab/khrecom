@@ -137,6 +137,7 @@ private:
     FVECTOR m_vTargetPos;    /* 0x90 */
     TIMEQ m_nMoveTime;       /* 0xa0 */
     INT m_nFlag;             /* 0xa4 */
+    friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
     C2DSeqLightMarkAgent(CTask* pParent);
@@ -163,6 +164,7 @@ private:
     C2DSeqLightMarkAgent* m_pLightMark; /* 0x84 */
     FPOINT m_fptLightOfs;             /* 0x88 */
     SHORT m_nActiveLoopSeq;           /* 0x90 */
+    friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
     C2DSeqSelectable(CTask* pParent);
@@ -185,6 +187,7 @@ private:
     FLOAT m_fScrollPos;           /* 0x2c */
     USHORT m_nAllItemCount;       /* 0x30 */
     USHORT m_nDispItemCount;      /* 0x32 */
+    friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
     void setupSeq(D2::C2DSeqCtrl* pParent, const C2DSeqAgent::SeqTbl* pTbl, const CHAR* pszLad, SHORT nUnit,
