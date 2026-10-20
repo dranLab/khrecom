@@ -261,12 +261,15 @@ ADDRESS_LABEL = re.compile(r"(?<![\w$.])([A-Za-z_$][\w$.]*?_([0-9A-F]{8}))(?![\w
 
 def write_original_labels(opts: dict) -> str:
     """A linker script that PROVIDEs, at its original address, every address-named label that INCLUDE_ASM'd
-    functions reference. Compiled code names a static, string literal or jump table its own way (get_st, $LC12), and
-    with the unit's data from source the original data's labels are gone; Ps2EeAs crashes on aliases (.set, =), so
+    functions or the data's assembly reference. Compiled code names a static, string literal or jump table its own
+    way (get_st, $LC12), and with the unit's data from source the original data's labels are gone; Ps2EeAs crashes on aliases (.set, =), so
     the source can't define them either. PROVIDE only defines a label nothing else defines, and the checksum proves
     the data really is at that address."""
     labels: dict[str, int] = {}
-    for path in sorted((ROOT / opts["asm_path"] / "nonmatchings").rglob("*.s")):
+    # The data's assembly too: where splat read string bytes as label + addend (.word D_0063696C + 0x2), that label
+    # may be defined nowhere once the data around its address comes from source.
+    for path in sorted([*(ROOT / opts["asm_path"] / "nonmatchings").rglob("*.s"),
+                        *(ROOT / opts["asm_path"] / "data").rglob("*.s")]):
         for m in ADDRESS_LABEL.finditer(path.read_text(encoding="utf-8")):
             labels[m.group(1)] = int(m.group(2), 16)
     out = Path(opts["build_path"]) / "original_labels.ld"
