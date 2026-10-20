@@ -245,6 +245,7 @@ public:
     void link(CTask* pTask, const CRsrcANN* pANN, MODELDATA* pData); // PARTIAL: added for Game/ModelObj
     // PARTIAL: added for Game/ModelObj (name guessed: clears a bit of m_Flags[1] inline)
     void clearFlag1(USHORT nBit) { m_Flags[1] &= ~nBit; }
+    void setFlag1(USHORT nBit) { m_Flags[1] |= nBit; } // PARTIAL: added for Game/Entity (name guessed)
     void init(UINT nId, INT n);
     void play(TIMEQ tq, INT n);
     void changeEx(INT nRsrcID, ANIMID inId, TIMEQ inTq, BOOL inLoop);

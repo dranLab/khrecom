@@ -9,6 +9,7 @@
 #include "System/Graphic/TexAnm.h"
 #include "System/TaskMan.h"
 #include "System/MainApp.h"
+#include "System/Sound/SoundMan.h"
 #include "include_asm.h"
 
 extern "C" char D_0047D330[]; /* __FILE__ */
@@ -105,7 +106,10 @@ const FVECTOR& CEntity::getVel() const {
     return *(FVECTOR*)((BYTE*)m_pMove + 0x70);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getBoneIndex__C7CEntityPCci);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getBoneName__C7CEntityii);
+const CHAR* CEntity::getBoneName(INT inBone, INT inModel) const {
+    if (m_pModels) return (const CHAR*)(*(BYTE**)(*(BYTE**)((BYTE*)&m_pModels[inModel] + 0x58) + 4) + inBone * 0x14);
+    return NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getBoneMatrix__C7CEntityPCc);
 TIMEQ CEntity::getMotionCurrentTime() const {
     if (m_pAnim) return m_pAnim->getCurrentTqCrd();
@@ -229,7 +233,10 @@ FLOAT CEntity::calcDirection(const CEntity* inEntity) const {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", calcDirection__C7CEntityRC7FVECTOR);
 void CEntity::calcDirection(FVECTOR& outRot, const CEntity& inEntity) const { calcDirection(outRot, inEntity.m_pMove->getPos()); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", calcDirection__C7CEntityR7FVECTORPC7CEntity);
+void CEntity::calcDirection(FVECTOR& outRot, const CEntity* inEntity) const {
+    if (inEntity) calcDirection(outRot, inEntity->m_pMove->getPos());
+    else outRot = inEntity->getRot();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", calcDirection__C7CEntityR7FVECTORRC7FVECTOR);
 BOOL CEntity::testFront(const CEntity& inEntity) const { return testFront(inEntity.getPos()); }
 BOOL CEntity::testFront(const CEntity* inEntity) const {
@@ -288,27 +295,74 @@ BOOL CEntity::createArmIK() {
     if (m_pAnim) return m_pAnim->createArmIK();
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setGroundIK__7CEntityi);
+void CEntity::setGroundIK(INT inFlag) {
+    if (m_pAnim) {
+        if (inFlag) m_pAnim->setFlag1(0x2000);
+        else m_pAnim->clearFlag1(0x2000);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setFootEffectIK__7CEntityPCci);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isStandsGroundIK__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isFirstStandsGroundIK__7CEntity);
+INT CEntity::isStandsGroundIK() {
+    if (m_pAnim) {
+        BYTE* pIK = *(BYTE**)((BYTE*)m_pAnim + 0x100);
+        if (pIK) return *(UINT*)(pIK + 0x24) & 3;
+    }
+    return 0;
+}
+INT CEntity::isFirstStandsGroundIK() {
+    if (m_pAnim) {
+        BYTE* pIK = *(BYTE**)((BYTE*)m_pAnim + 0x100);
+        if (pIK) {
+            INT f = *(INT*)(pIK + 0x24);
+            BOOL b = f & 4;
+            INT n = b != 0;
+            if (f & 8) n |= 2;
+            return n;
+        }
+    }
+    return 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", warp__7CEntityRC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", land__7CEntityffi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", initalizeModel__7CEntityii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateAnimation__7CEntity);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateBadStatusEffect__7CEntityi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setDamageNumber__7CEntityRC7FVECTORi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", startTargetChase__7CEntityP7CEntityff);
+BOOL CEntity::startTargetChase(CEntity* inTarget, FLOAT inSpeed, FLOAT inRate) {
+    if (m_uiEntityFlag & 0x78) return FALSE;
+    if (!inTarget) return FALSE;
+    m_fSpeed = inSpeed;
+    m_uiEntityFlag |= 4;
+    m_fRate = inRate;
+    m_hTarget = inTarget->getHandle();
+    return TRUE;
+}
 void CEntity::endTargetChase() {
     m_uiEntityFlag = (INT)m_uiEntityFlag & ~4;
     clearSpeed();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", startTargetEvade__7CEntityP7CEntityff);
+BOOL CEntity::startTargetEvade(CEntity* inTarget, FLOAT inSpeed, FLOAT inRate) {
+    if (m_uiEntityFlag & 0x74) return FALSE;
+    if (!inTarget) return FALSE;
+    m_fSpeed = inSpeed;
+    m_uiEntityFlag |= 8;
+    m_fRate = inRate;
+    m_hTarget = inTarget->getHandle();
+    return TRUE;
+}
 void CEntity::endTargetEvade() {
     m_uiEntityFlag = (INT)m_uiEntityFlag & ~8;
     clearSpeed();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", startTargetIntercept__7CEntityP7CEntityff);
+BOOL CEntity::startTargetIntercept(CEntity* inTarget, FLOAT inSpeed, FLOAT inRate) {
+    if (m_uiEntityFlag & 0x6c) return FALSE;
+    if (!inTarget) return FALSE;
+    m_fSpeed = inSpeed;
+    m_uiEntityFlag |= 0x10;
+    m_fRate = inRate;
+    m_hTarget = inTarget->getHandle();
+    return TRUE;
+}
 void CEntity::endTargetIntercept() {
     m_uiEntityFlag = (INT)m_uiEntityFlag & ~0x10;
     clearSpeed();
@@ -390,8 +444,18 @@ void CEntity::rideModelChangeListRC() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", playSEPanAndVol__7CEntityiiiPC7FVECTORi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", playSEPan__7CEntityiiiiPC7FVECTORi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", stopSE__7CEntityiiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", fadeoutSE__7CEntityiiiii);
+void CEntity::stopSE(HANDLE inHandle, INT inFile, INT inID, INT inFlag) {
+    INT nSeq;
+    if (!inFlag) nSeq = inFile * 1000 + inID;
+    else nSeq = (inFile * 1000 + inID) | 0x10000000;
+    CSound::stopSE(inHandle, nSeq);
+}
+void CEntity::fadeoutSE(HANDLE inHandle, INT inFile, INT inID, INT inTime, INT inFlag) {
+    INT nSeq;
+    if (!inFlag) nSeq = inFile * 1000 + inID;
+    else nSeq = (inFile * 1000 + inID) | 0x10000000;
+    CSound::fadeoutSE(inHandle, nSeq, inTime);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setSEPanAndVol__7CEntityiiiiPC7FVECTORi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setSEPan__7CEntityiiiiiPC7FVECTORi);
 void CEntity::playVoice(INT inFileID, INT inID, INT inPriority) {
@@ -445,25 +509,68 @@ void CEntity::intercept_() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", targetMove___7CEntity);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", targetMoveXZ___7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", loadModelColor___7CEntity);
+void CEntity::loadModelColor_() {
+    if (m_pvModelColor) {
+        FVECTOR* pColor = m_pvModelColor;
+        INT n = m_iModelCount;
+        CModel* pModel = m_pModels;
+        for (INT i = 0; i < n; i++) {
+            *pColor = pModel->getColorScale();
+            pModel++;
+            pColor++;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", storeModelColor___7CEntity);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", translucence___7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setEffect__7CEntityPCcUiPC7FVECTORT3f);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setEffect__7CEntityRC11EFFECT_DATAUiPC7FVECTORT3f);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setEffect__7CEntityPCcUiPC7FMATRIXf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setEffect__7CEntityRC11EFFECT_DATAUiPC7FMATRIXf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect__7CEntityPCcUiPC6CCoordPC7FVECTORT4f);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect__7CEntityRC11EFFECT_DATAUiPC6CCoordPC7FVECTORT4f);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect__7CEntityPCcUiPC6CCoordPC7FMATRIXf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect__7CEntityRC11EFFECT_DATAUiPC6CCoordPC7FMATRIXf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect2__7CEntityPCcUiPC6CCoordT3PC7FVECTORT5f);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect2__7CEntityRC11EFFECT_DATAUiPC6CCoordT3PC7FVECTORT5f);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect2__7CEntityPCcUiPC6CCoordT3PC7FMATRIXT5f);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect2__7CEntityRC11EFFECT_DATAUiPC6CCoordT3PC7FMATRIXT5f);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect3__7CEntityPCcUiPC6CCoordN23PC7FVECTORN26f);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect3__7CEntityRC11EFFECT_DATAUiPC6CCoordN23PC7FVECTORN26f);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect3__7CEntityPCcUiPC6CCoordN23PC7FMATRIXN26f);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", attachEffect3__7CEntityRC11EFFECT_DATAUiPC6CCoordN23PC7FMATRIXN26f);
+HANDLE CEntity::setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale) {
+    return CEffectMan::setEffect(inName, inFlag, (ObjType::eObjType)getEntityType(), inPos, inRot, inScale);
+}
+HANDLE CEntity::setEffect(const EFFECT_DATA& inData, UINT inNo, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inWait) {
+    return CEffectMan::setEffect(inData, inNo, (ObjType::eObjType)getEntityType(), inPos, inRot, inWait, NULL);
+}
+HANDLE CEntity::setEffect(const CHAR* inName, UINT inFlag, const FMATRIX* inMat, FLOAT inScale) {
+    return CEffectMan::setEffect(inName, inFlag, (ObjType::eObjType)getEntityType(), inMat, inScale);
+}
+HANDLE CEntity::setEffect(const EFFECT_DATA& inData, UINT inNo, const FMATRIX* inMat, FLOAT inWait) {
+    return CEffectMan::setEffect(inData, inNo, (ObjType::eObjType)getEntityType(), inMat, inWait, NULL);
+}
+HANDLE CEntity::attachEffect(const CHAR* inName, UINT inNo, const CCoord* inParent, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inWait) {
+    return CEffectMan::attachEffect(inName, inNo, (ObjType::eObjType)getEntityType(), inParent, inPos, inRot, inWait);
+}
+HANDLE CEntity::attachEffect(const EFFECT_DATA& inData, UINT inNo, const CCoord* inParent, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inWait) {
+    return CEffectMan::attachEffect(inData, inNo, (ObjType::eObjType)getEntityType(), inParent, inPos, inRot, inWait, NULL);
+}
+HANDLE CEntity::attachEffect(const CHAR* inName, UINT inNo, const CCoord* inParent, const FMATRIX* inMat, FLOAT inWait) {
+    return CEffectMan::attachEffect(inName, inNo, (ObjType::eObjType)getEntityType(), inParent, inMat, inWait);
+}
+HANDLE CEntity::attachEffect(const EFFECT_DATA& inData, UINT inNo, const CCoord* inParent, const FMATRIX* inMat, FLOAT inWait) {
+    return CEffectMan::attachEffect(inData, inNo, (ObjType::eObjType)getEntityType(), inParent, inMat, inWait, NULL);
+}
+HANDLE CEntity::attachEffect2(const CHAR* inName, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const FVECTOR* inPos1, const FVECTOR* inPos2, FLOAT inWait) {
+    return CEffectMan::attachEffect2(inName, inNo, (ObjType::eObjType)getEntityType(), inParent1, inParent2, inPos1, inPos2, inWait);
+}
+HANDLE CEntity::attachEffect2(const EFFECT_DATA& inData, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const FVECTOR* inPos1, const FVECTOR* inPos2, FLOAT inWait) {
+    return CEffectMan::attachEffect2(inData, inNo, (ObjType::eObjType)getEntityType(), inParent1, inParent2, inPos1, inPos2, inWait, NULL);
+}
+HANDLE CEntity::attachEffect2(const CHAR* inName, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const FMATRIX* inMat1, const FMATRIX* inMat2, FLOAT inWait) {
+    return CEffectMan::attachEffect2(inName, inNo, (ObjType::eObjType)getEntityType(), inParent1, inParent2, inMat1, inMat2, inWait);
+}
+HANDLE CEntity::attachEffect2(const EFFECT_DATA& inData, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const FMATRIX* inMat1, const FMATRIX* inMat2, FLOAT inWait) {
+    return CEffectMan::attachEffect2(inData, inNo, (ObjType::eObjType)getEntityType(), inParent1, inParent2, inMat1, inMat2, inWait, NULL);
+}
+HANDLE CEntity::attachEffect3(const CHAR* inName, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const CCoord* inParent3, const FVECTOR* inPos1, const FVECTOR* inPos2, const FVECTOR* inPos3, FLOAT inWait) {
+    return CEffectMan::attachEffect3(inName, inNo, (ObjType::eObjType)getEntityType(), inParent1, inParent2, inParent3, inPos1, inPos2, inPos3, inWait);
+}
+HANDLE CEntity::attachEffect3(const EFFECT_DATA& inData, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const CCoord* inParent3, const FVECTOR* inPos1, const FVECTOR* inPos2, const FVECTOR* inPos3, FLOAT inWait) {
+    return CEffectMan::attachEffect3(inData, inNo, (ObjType::eObjType)getEntityType(), inParent1, inParent2, inParent3, inPos1, inPos2, inPos3, inWait, NULL);
+}
+HANDLE CEntity::attachEffect3(const CHAR* inName, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const CCoord* inParent3, const FMATRIX* inMat1, const FMATRIX* inMat2, const FMATRIX* inMat3, FLOAT inWait) {
+    return CEffectMan::attachEffect3(inName, inNo, (ObjType::eObjType)getEntityType(), inParent1, inParent2, inParent3, inMat1, inMat2, inMat3, inWait);
+}
+HANDLE CEntity::attachEffect3(const EFFECT_DATA& inData, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const CCoord* inParent3, const FMATRIX* inMat1, const FMATRIX* inMat2, const FMATRIX* inMat3, FLOAT inWait) {
+    return CEffectMan::attachEffect3(inData, inNo, (ObjType::eObjType)getEntityType(), inParent1, inParent2, inParent3, inMat1, inMat2, inMat3, inWait, NULL);
+}
 void CEntity::killLoopEffect(INT inNo) {
     if (m_pEffect) m_pEffect->killLoopEffect(inNo, 0);
     if (m_pEffectEx) m_pEffectEx->killLoopEffect(inNo, 0);

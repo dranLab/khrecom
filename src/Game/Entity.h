@@ -328,6 +328,24 @@ public:
     void evade_();
     void intercept_();
     void updateEffect_();
+    HANDLE attachEffect2(const CHAR* inName, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const FMATRIX* inMat1, const FMATRIX* inMat2, FLOAT inWait);
+    HANDLE attachEffect2(const CHAR* inName, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const FVECTOR* inPos1, const FVECTOR* inPos2, FLOAT inWait);
+    HANDLE attachEffect(const CHAR* inName, UINT inNo, const CCoord* inParent, const FMATRIX* inMat, FLOAT inWait);
+    HANDLE attachEffect2(const struct EFFECT_DATA& inData, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const FMATRIX* inMat1, const FMATRIX* inMat2, FLOAT inWait);
+    HANDLE attachEffect2(const struct EFFECT_DATA& inData, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const FVECTOR* inPos1, const FVECTOR* inPos2, FLOAT inWait);
+    HANDLE attachEffect3(const CHAR* inName, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const CCoord* inParent3, const FMATRIX* inMat1, const FMATRIX* inMat2, const FMATRIX* inMat3, FLOAT inWait);
+    HANDLE attachEffect(const struct EFFECT_DATA& inData, UINT inNo, const CCoord* inParent, const FMATRIX* inMat, FLOAT inWait);
+    HANDLE attachEffect(const struct EFFECT_DATA& inData, UINT inNo, const CCoord* inParent, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inWait);
+    HANDLE setEffect(const struct EFFECT_DATA& inData, UINT inNo, const FMATRIX* inMat, FLOAT inWait);
+    HANDLE setEffect(const struct EFFECT_DATA& inData, UINT inNo, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inWait);
+    HANDLE attachEffect3(const struct EFFECT_DATA& inData, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const CCoord* inParent3, const FMATRIX* inMat1, const FMATRIX* inMat2, const FMATRIX* inMat3, FLOAT inWait);
+    HANDLE attachEffect3(const struct EFFECT_DATA& inData, UINT inNo, const CCoord* inParent1, const CCoord* inParent2, const CCoord* inParent3, const FVECTOR* inPos1, const FVECTOR* inPos2, const FVECTOR* inPos3, FLOAT inWait);
+    const CHAR* getBoneName(INT inBone, INT inModel) const;
+    void stopSE(HANDLE inHandle, INT inFile, INT inID, INT inFlag);
+    BOOL startTargetChase(CEntity* inTarget, FLOAT inSpeed, FLOAT inRate);
+    BOOL startTargetEvade(CEntity* inTarget, FLOAT inSpeed, FLOAT inRate);
+    BOOL startTargetIntercept(CEntity* inTarget, FLOAT inSpeed, FLOAT inRate);
+    INT isStandsGroundIK();
     void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel) {
         setEntityFlag(0x40000000, 0);
         m_fStartAlpha = inStart;
