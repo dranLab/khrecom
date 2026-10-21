@@ -33,6 +33,7 @@ static void dmaRefImage(_sceMpegDecoder *d);
 void _copyRefImage(unsigned int dst, unsigned int src);
 void _copyAddRefImage(unsigned int dst, unsigned int src, unsigned int buf);
 static void _flushBuf(_sceMpegDecoder *d, int n);
+static void receiveDataFromIPU(unsigned int addr, int size);
 
 /* issues an IPU command; the bit buffer is kept valid only across BDEC, VDEC and FDEC */
 #define _setIpuCmd(d, cmd)                                                              \
@@ -530,12 +531,113 @@ static void _motionVectors(_sceMpegDecoder *d, int (*pmv)[2][2], int *dmvector, 
     }
 }
 
-/* _decMB0's strings */
-__asm__(".rdata\n"
-        ".align 3\n.asciz \"Invalid macroblock_type code: 0\"\n"
-        ".text\n");
+static int _decMB0(_sceMpegDecoder *d, int *mbtype, int *motion_type, int *dct_type, int (*pmv)[2][2], int (*mvfs)[2],
+                   int *dmv)
+{
+    int mvcount;
+    int mvformat;
+    int dmvflag;
+    int mvscale;
+    unsigned int cmd;
+    unsigned int dtdcr;
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _decMB0);
+    REG(IPU_CTRL) = (REG(IPU_CTRL) & ~0x07000000) | (d->x160 << 24);
+    *mbtype = _getVlc(d, 0x34000000);
+    if (*mbtype == 0) {
+        _sceMpegError(d, "Invalid macroblock_type code: 0");
+        d->x12C = 1;
+        return 0;
+    }
+    if (*mbtype & 0xC) {
+        if (d->x184 == 3 && d->x18C) {
+            *motion_type = 2;
+        } else {
+            *motion_type = _sceMpegNextBit(d, 2);
+        }
+    } else if (*mbtype & 1) {
+        if (d->x190) {
+            *motion_type = (d->x184 == 3) ? 2 : 1;
+        }
+    }
+    if (d->x184 == 3) {
+        mvcount = (*motion_type == 1) ? 2 : 1;
+        mvformat = *motion_type == 2;
+    } else {
+        mvcount = (*motion_type == 2) ? 2 : 1;
+        mvformat = 0;
+    }
+    dmvflag = *motion_type == 3;
+    mvscale = 0;
+    if (!mvformat) {
+        mvscale = d->x184 == 3;
+    }
+    *dct_type = (d->x184 == 3 && !d->x18C && (*mbtype & 3)) ? _sceMpegNextBit(d, 1) : 0;
+    if (*mbtype & 0x10) {
+        d->x1C4 = _sceMpegNextBit(d, 5);
+    }
+    if ((*mbtype & 8) || ((*mbtype & 1) && d->x190)) {
+        if (d->x858) {
+            _motionVectors(d, pmv, dmv, mvfs, 0, mvcount, mvformat, d->x174 - 1, d->x178 - 1, dmvflag, mvscale);
+        } else {
+            _motionVector(d, pmv[0][0], dmv, d->x168 - 1, d->x168 - 1, 0, 0, d->x164);
+        }
+    }
+    if (d->x12C) {
+        return 0;
+    }
+    if (*mbtype & 4) {
+        if (d->x858) {
+            _motionVectors(d, pmv, dmv, mvfs, 1, mvcount, mvformat, d->x17C - 1, d->x180 - 1, 0, mvscale);
+        } else {
+            _motionVector(d, pmv[0][1], dmv, d->x170 - 1, d->x170 - 1, 0, 0, d->x16C);
+        }
+    }
+    if (d->x12C) {
+        return 0;
+    }
+    if ((*mbtype & 1) && d->x190) {
+        _flushBuf(d, 1);
+    }
+    if (*mbtype & 3) {
+        receiveDataFromIPU(d->spr[d->x820].buf, 0x300);
+        _waitIpuIdle(d);
+        dtdcr = (*dct_type << 25) | (d->x1C0 << 26);
+        cmd = ((*mbtype & 1) << 27) | dtdcr | 0x20000000 | (d->x1C4 << 16);
+        _setIpuCmd(d, cmd);
+    } else {
+        d->spr[d->x820].skip = 1;
+    }
+    d->x1C0 = 0;
+    if (d->x12C) {
+        return 0;
+    }
+    if (!(*mbtype & 1)) {
+        d->x1C0 = 1;
+    }
+    if ((*mbtype & 1) && !d->x190) {
+        pmv[1][0][1] = 0;
+        pmv[1][0][0] = 0;
+        pmv[0][0][1] = 0;
+        pmv[0][0][0] = 0;
+        pmv[1][1][1] = 0;
+        pmv[1][1][0] = 0;
+        pmv[0][1][1] = 0;
+        pmv[0][1][0] = 0;
+    }
+    if (d->x160 == 2 && !(*mbtype & 9)) {
+        pmv[1][0][1] = 0;
+        pmv[1][0][0] = 0;
+        pmv[0][0][1] = 0;
+        pmv[0][0][0] = 0;
+        if (d->x184 == 3) {
+            *motion_type = 2;
+        } else {
+            *motion_type = 1;
+            mvfs[0][0] = d->x184 == 2;
+        }
+    }
+    return 1;
+}
 
 
 /* Parked: the loop keeps the IPU_CMD address in a saved register here (the original rebuilds it each pass) */
