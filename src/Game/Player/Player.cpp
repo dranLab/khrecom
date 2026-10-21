@@ -20,6 +20,7 @@
 #include "Game/GameWork.h"
 #include "Form/Menu/WorldSelect.h"
 #include "Game/Player/PlayerCamera.h"
+#include "Game/SceneInfo.h"
 #include "System/HeapMan.h"
 #include "include_asm.h"
 
@@ -412,7 +413,16 @@ void CPlayer::calcAppearPosFS_toAttackID() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkEscape__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initEscape__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeEscape__7CPlayer);
+void CPlayer::exeEscape() {
+    setPlayerFlag(0x400000, 0);
+    m_pCam->setFlag(0x1000, TRUE); /* the partial CPlayerCamera keeps (flag, on/off): the original is setFlag(0x1000, 0) */
+    if (!m_iSubState) {
+        m_tqEscape += m_tqFrameRate;
+        if (m_tqEscape >= 2501) {
+            if (CSceneInfo::reqExitBattle()) m_iSubState = 1;
+        }
+    }
+}
 void CPlayer::setBGFade(FLOAT inRate, FLOAT inTime, INT inFlag) {
     FVECTOR v;
     v.set(inRate, inRate, inRate, 1.0f);
