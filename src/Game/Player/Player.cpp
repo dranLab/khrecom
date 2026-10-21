@@ -18,12 +18,17 @@
 #include "System/Coord.h"
 #include "Game/Player/PlayerAnim.h"
 #include "Game/GameWork.h"
+#include "Form/Menu/WorldSelect.h"
+#include "System/HeapMan.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
 extern "C" char D_00499828[];
 extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+extern "C" char D_0049B308[];
+inline void* operator new(size_t, void* p) throw() { return p; }
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_0025F688);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerAttack__9DWTPlayerP12CDebugWindowii_0025F798);
@@ -517,7 +522,12 @@ void CPlayer::cmdMove_WaterSurfaceCheck(INT inFlag) {
     if (inFlag) m_pMove->setFlag(0x80, TRUE);
     else m_pMove->setFlag(0x80, FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdState_initWorldSelect__7CPlayeri);
+void CPlayer::cmdState_initWorldSelect(HANDLE inDoor) {
+    m_hGimmick = inDoor;
+    m_pMarker->holdTarget(8);
+    initWorldSelect();
+    new (com_malloc_d(sizeof(CWorldSelect), D_0049B308, RET_ADDR())) CWorldSelect(CTaskMan::getSysTask(1), m_hGimmick);
+}
 void CPlayer::cmdState_setEncountWait() {
     setPlayerFlag(0x100, 0);
     changeState(2);
