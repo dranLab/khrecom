@@ -444,7 +444,18 @@ void CPlayer::fadeEffCharge() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCure__7CPlayerii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCastEffect__7CPlayerPCciP6CCoordP7FVECTOR);
+void CPlayer::setCastEffect(const CHAR* inName, INT inNo, CCoord* inCrd, FVECTOR* inOfs) {
+    FVECTOR pos;
+    if (inOfs) {
+        pos = *inOfs;
+    } else {
+        pos._q = 0;
+        pos.w = 1.0f;
+    }
+    m_hEffCast = attachEffect(inName, inNo, inCrd, &pos, NULL, 0.0f);
+    CEffect* effect = CEffectMan::getEffect(m_hEffCast);
+    if (effect) effect->m_iFlag |= 4;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPos__7CPlayerffP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPosFS__7CPlayerff);
 void CPlayer::calcAppearPosFS_toAttackID() {
