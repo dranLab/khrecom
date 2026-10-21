@@ -27,6 +27,7 @@ typedef struct {
 int unpack_mddata(char *ch, int rev, At3Work *w);
 void iqmf(char *ch);
 extern short a_wind[];
+extern unsigned short subgaintable[];
 extern const int a_qtstart[];
 void __assert(const char *file, int line, const char *expr);
 
@@ -141,7 +142,60 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", channel_conv_joint);
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", imdct);
 
+/* 23 lines off: the original sets the return value -1 at the top of the loop (the conditional returns branch
+   straight to the epilogue) */
+#if 0
+#define GAINC_STEP()                                                    \
+    *p = ((*p >> 11) * subgaintable[sh & 7]) >> ((sh >> 3) + 4);        \
+    p++;                                                                \
+    sh += step
+
+static int gainc_window(char *ch, int band)
+{
+    int *g = (int *)(ch + 0x32D4) + band * 16;
+    int *end = ((At3Band *)ch)[band].ov;
+    int *p = ((At3Band *)ch)[band].spec;
+    unsigned int sh;
+    unsigned int step;
+
+    if (band >= 4) {
+        return -1;
+    }
+    do {
+        if (end < ((At3Band *)ch)[band].spec + g[0] + 1) {
+            return -1;
+        }
+        sh = g[1];
+        if (!(p < ((At3Band *)ch)[band].spec + g[0] + 1)) {
+            return -1;
+        }
+        if (sh >= 16) {
+            return -1;
+        }
+        do {
+            *p = *p >> sh;
+            p++;
+        } while (p < ((At3Band *)ch)[band].spec + g[0] + 1);
+        if (!(p < end)) {
+            return 0;
+        }
+        g += 2;
+        step = g[1] - sh;
+        sh <<= 3;
+        sh += step;
+        GAINC_STEP();
+        GAINC_STEP();
+        GAINC_STEP();
+        GAINC_STEP();
+        GAINC_STEP();
+        GAINC_STEP();
+        GAINC_STEP();
+    } while (p < end);
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", gainc_window);
+#endif
 
 void iqmf(char *ch)
 {
