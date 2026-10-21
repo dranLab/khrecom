@@ -287,7 +287,15 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCure__7CPlayer
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCastEffect__7CPlayerPCciP6CCoordP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPos__7CPlayerffP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPosFS__7CPlayerff);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPosFS_toAttackID__7CPlayer);
+void CPlayer::calcAppearPosFS_toAttackID() {
+    if (m_uiAttackID < 0x78) {
+        if (m_uiAttackID >= 0x76) {
+            calcAppearPosFS(0.0f, m_fWallRadius);
+            return;
+        }
+    }
+    calcAppearPosFS(2.0f, m_fWallRadius);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkEscape__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initEscape__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeEscape__7CPlayer);

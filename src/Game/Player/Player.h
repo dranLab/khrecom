@@ -353,6 +353,7 @@ public:
     FLOAT getDir() { return m_fDir; }
     Gauge::CLockonMarker* getMarker() { return m_pMarker; }
     void calcAppearPos(FLOAT inX, FLOAT inZ, FVECTOR* inTarget);
+    void calcAppearPosFS(FLOAT inDist, FLOAT inRadius);
     HANDLE isNowMark() { return m_hMark; } // PARTIAL: added for Game/Player/FriendGoofy (original name/type unknown)
     // PARTIAL: added for Game/Player/PlayerCamera
     HANDLE isNowLockon() { return m_hLockon; }
