@@ -330,7 +330,11 @@ void CPlayer::addWind(FVECTOR* inVel) {
     if (m_pPLM) m_pPLM->addWindXYZ(inVel);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWind__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdRevolver_rollDeck__7CPlayeri);
+BOOL CPlayer::cmdRevolver_rollDeck(INT inNum) {
+    if (!m_pRevolver) return FALSE;
+    m_pRevolver->rollDeck(inNum, 0, 300);
+    return TRUE;
+}
 BOOL CPlayer::cmdRevolver_isEmpty() {
     if (!m_pRevolver) return TRUE;
     return m_pRevolver->getRemain(0, 0, 0) == 0;
