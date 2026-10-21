@@ -331,7 +331,10 @@ void CPlayer::addWind(FVECTOR* inVel) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWind__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdRevolver_rollDeck__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdRevolver_isEmpty__7CPlayer);
+BOOL CPlayer::cmdRevolver_isEmpty() {
+    if (!m_pRevolver) return TRUE;
+    return m_pRevolver->getRemain(0, 0, 0) == 0;
+}
 INT CPlayer::cmdRevolver_isActive() {
     if (!m_pRevolver) return 0;
     return m_pRevolver->isActive();
