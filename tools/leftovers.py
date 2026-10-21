@@ -24,6 +24,7 @@ functions. Needs a configured tree (configure.py).
 Usage:
     python3 tools/leftovers.py lib|game                 # print the list
     python3 tools/leftovers.py lib --update docs/sdk-leftovers.md   # replace the part between the markers
+    python3 tools/leftovers.py game --unit Game/Player/PlayerSora   # one unit, every function left
 """
 
 import argparse
@@ -275,8 +276,16 @@ def main():
     parser.add_argument("part", choices=("lib", "game"))
     parser.add_argument("--version", help="folder name under config/ (default: the only one)")
     parser.add_argument("--update", metavar="FILE", help="replace the text between the part's markers in FILE")
+    parser.add_argument("--unit", help="only this unit: every INCLUDE_ASM'd function (instructions, state, note)")
     args = parser.parse_args()
     collected = collect(version_dir(args.version))
+    if args.unit:
+        rows = [r for r in collected[0] if r[0] == args.unit]
+        for _, name, size, state, note in rows:
+            print(f"{state:13} {name} ({size} instr)" + (f": {note}" if note else ""))
+        data = [s for u, s in collected[2] if u == args.unit]
+        print(f"{len(rows)} functions still INCLUDE_ASM; data from asm: {' '.join(data[0]) if data else 'none'}")
+        return
     report = (lib_report if args.part == "lib" else game_report)(*collected)
     if not args.update:
         print(report)

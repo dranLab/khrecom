@@ -23,7 +23,8 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
 - `.venv/bin/python tools/compare_compilers.py SLUS_217.99 src/<unit>.cpp` - per function, with every installed compiler.
 - `.venv/bin/python tools/candidates.py SLUS_217.99` - files not decompiled yet (size, functions, header strings).
 - `.venv/bin/python tools/leftovers.py lib|game [--update docs/sdk-leftovers.md|docs/asm-leftovers.md]` - what is left
-  per function (parked `#if 0` drafts with their `Parked:` notes, hand-written, not attempted), asm data sections.
+  per function (parked `#if 0` drafts with their `Parked:` notes, hand-written, not attempted), asm data sections;
+  `game --unit <unit>` lists every function of one unit that is still INCLUDE_ASM.
 - `tools/setup_worktree.sh` - prepare a fresh git worktree (links game files and tools, runs configure).
 
 A *unit* is one original object file, named after its source path, e.g. `System/Graphic/ColorFader`
@@ -40,6 +41,9 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 - Base types (INT, BOOL, FLOAT, TIMEQ, ...): `include/khtypes.h`.
 
 ## Decompiling a unit
+
+Current work (finishing the big game units function by function, with the validation workflow):
+`docs/plan-big-units.md`.
 
 1. Create `src/<unit>.cpp` (or `.c`: see the source path in the yaml comment, or `candidates.py`). Its existence
    alone switches the unit's code to the compiled object (`configure.py` does it; never edit the yaml).
