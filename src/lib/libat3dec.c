@@ -24,9 +24,12 @@ typedef struct {
     int bitpos; /* 0x68C8 */
 } At3Work;
 
-int unpack_mddata(char *ch, int rev, At3Work *w);
 void iqmf(char *ch);
 extern short a_wind[];
+extern unsigned short chswTable[][2];
+extern unsigned short chwtTable[][2];
+void *memset(void *dst, int c, unsigned int n);
+int imdct(char *ch, int band, int gain);
 extern unsigned short subgaintable[];
 extern const int a_qtstart[];
 void __assert(const char *file, int line, const char *expr);
@@ -48,7 +51,7 @@ typedef struct {
     int w[23];
 } At3Blk23;
 
-/* one of the 4 QMF bands of a channel */
+/* one of the 4 QMF bands of a channel (At3Chan.band) */
 typedef struct {
     At3Blk23 hdr; /* 0x000 */
     int spec[233]; /* 0x05C */
@@ -56,9 +59,28 @@ typedef struct {
     int ov[128]; /* 0x45C */
     int x65C;
 } At3Band;
+
+/* the state of one channel (At3Work.ch) */
+typedef struct {
+    At3Band band[4]; /* 0x0000 */
+    char _pad1980[0x1A40 - 0x1980];
+    int spec[1024]; /* 0x1A40 */
+    char _pad2A40[0x2A60 - 0x2A40];
+    At3Blk23 qmfhead; /* 0x2A60 */
+    char _pad2ABC[0x3260 - 0x2ABC];
+    At3Blk23 qmfsave; /* 0x3260 */
+    char _pad32BC[0x32D4 - 0x32BC];
+    int gain[4][8][2]; /* 0x32D4 */
+    char _pad33D4[0x33E0 - 0x33D4];
+} At3Chan;
+
 void h_d_make(float *a, float *b, float *c, float *d);
 void h_iqmf_fb1(float *in, float *out, int odd);
 void h_iqmf_fb2(float *p);
+
+static void channel_conv_joint(At3Work *w);
+static int gainc_window(char *ch, int band);
+static void f2t_nodata(At3Band *bands, int band);
 
 /* close: loop.c bases the inner loop on the channel 0 samples (the original on channel 1) and strength-reduces the
    band offset (the original recomputes (3 * band) * 136 from a counter) */
@@ -421,7 +443,87 @@ static void f2t_nodata(At3Band *bands, int band)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", f2t_nodata);
 #endif
 
+/* structure right; the gain loops keep &gain[0][0][1] in a register and reload 255 (ours hoists it) */
+#if 0
+static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
+{
+    int gain[4][8][2];
+    int jw[4];
+    int jg;
+    int nbands;
+    int band;
+    int n;
+    int i;
+
+    jg = 0;
+    if (rev) {
+        jg = read_unpack_from_msb(4, w);
+        for (i = 0; i < 4; i++) {
+            jw[i] = read_unpack_from_msb(2, w);
+        }
+        w->bitpos += 2;
+    } else {
+        w->bitpos += 6;
+    }
+    nbands = read_unpack_from_msb(2, w) + 1;
+    band = 0;
+    do {
+        n = read_unpack_from_msb(3, w);
+        for (i = 0; i < n; i++) {
+            gain[band][i][1] = read_unpack_from_msb(4, w);
+            gain[band][i][0] = read_unpack_from_msb(5, w) << 3;
+        }
+        gain[band][n][1] = 4;
+        gain[band][n][0] = 0xFF;
+    } while (++band < nbands);
+    for (; band < 4; band++) {
+        gain[band][0][1] = 4;
+        gain[band][0][0] = 0xFF;
+    }
+    memcpy(&ch->qmfhead, &ch->qmfsave, sizeof(At3Blk23));
+    memset(ch->spec, 0, sizeof(ch->spec));
+    w->maxpos = nbands << 8;
+    n = read_unpack_from_msb(5, w);
+    if (n && getToneSpectrum((char *)ch, n, nbands, w) == -1) {
+        return -1;
+    }
+    if (getNoiseSpectrum((char *)ch, read_unpack_from_msb(5, w) + 1, w) == -1) {
+        return -1;
+    }
+    n = nbands;
+    if (nbands << 8 < w->maxpos) {
+        n = (w->maxpos + 0xF7) / 256;
+    }
+    band = 0;
+    do {
+        if (imdct((char *)ch, band, gain[band][0][0])) {
+            f2t_nodata(ch->band, band);
+        }
+        if (gainc_window((char *)ch, band) == -1) {
+            return -1;
+        }
+    } while (++band < n);
+    for (; band < 4; band++) {
+        f2t_nodata(ch->band, band);
+        if (gainc_window((char *)ch, band) == -1) {
+            return -1;
+        }
+    }
+    if (rev) {
+        channel_conv_joint(w);
+        w->joint[1] = w->joint[0];
+        w->joint[0].n = nbands;
+        w->joint[0].g = chwtTable[jg];
+        for (i = 0; i < 4; i++) {
+            w->joint[0].w[i] = chswTable[jw[i]];
+        }
+    }
+    memcpy(ch->gain, gain, sizeof(gain));
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", unpack_mddata);
+#endif
 
 /* 20 lines off: the original enters the copy loop with the byte the skip loop loaded (reorg), registers differ */
 #if 0
@@ -458,7 +560,7 @@ int at3dec_proc(At3Work *w)
             w->stream = w->buf;
             w->bitpos = 0;
         }
-        if (unpack_mddata(w->ch[i], rev, w) == -1) {
+        if (unpack_mddata((At3Chan *)w->ch[i], rev, w) == -1) {
             return -1;
         }
         off += w->frameSize;
