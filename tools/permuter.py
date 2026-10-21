@@ -94,9 +94,23 @@ def enable_draft(text: str, name: str) -> str:
             if opened and depth == opened[2]:
                 opened = None
             depth -= 1
+    names = {name}
     if opened:
         text = text[:opened[0]] + re.sub(r"#\s*if\s+0", "#if 1", text[opened[0]:opened[1]]) + text[opened[1]:]
-    return re.sub(r"^\s*INCLUDE_ASM\([^)]*,\s*" + re.escape(name) + r"\s*\);\s*$", "", text, flags=re.M)
+        depth, end = 0, len(text)  # the block's end: its #else or #endif
+        for m in re.finditer(r"^\s*#\s*(if|ifdef|ifndef|else|elif|endif)\b", text[opened[0]:], re.M):
+            if m.group(1).startswith("if"):
+                depth += 1
+            elif depth == 1:
+                end = opened[0] + m.start()
+                break
+            elif m.group(1) == "endif":
+                depth -= 1
+        names |= {m.group(1) for m in re.finditer(r"^[A-Za-z_][^;{}]*?\b([A-Za-z_]\w*)\s*\([^;{}]*\)\s*\{",
+                                                   text[opened[0]:end], re.M)}
+    for n in names:
+        text = re.sub(r"^\s*INCLUDE_ASM\([^)]*,\s*" + re.escape(n) + r"\s*\);\s*$", "", text, flags=re.M)
+    return text
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -121,45 +135,56 @@ def is_declaration(line: str) -> bool:
         and IDENT.match(s).group(0) not in {"return", "goto"}
 
 
-def accesses(stmt: str) -> tuple[set[str], set[str], bool, bool]:
-    """(written names, read names, stores to memory, calls or reads memory)."""
+LOCALS: set[str] = set()  # the function's parameters and locals (main() fills it in)
+
+
+def accesses(stmt: str) -> tuple[set[str], set[str], set[str], set[str], bool]:
+    """(locals written, locals read, memory written, memory read, calls). Memory is a non-local name (a global) or
+    "*" for anything through a pointer, an array or a member."""
     s = stmt.strip().rstrip(";")
     m = re.match(r"^(.*?)(?<![=!<>])([-+*/%&|^]|<<|>>)?=(?!=)(.*)$", s)
-    if m:
-        lhs, op, rhs = m.group(1), m.group(2), m.group(3)
-    else:
-        lhs, op, rhs = "", None, s
-    written = set()
-    mem_store = False
+    lhs, op, rhs = (m.group(1), m.group(2), m.group(3)) if m else ("", None, s)
+    calls = bool(re.search(r"\b[A-Za-z_]\w*\s*\(", s)) or "asm" in s
+    lw, lr, mw, mr = set(), set(), set(), set()
+
+    def names(text: str) -> list[str]:  # variables, not called functions, keywords or macro constants
+        return [w.group(0) for w in IDENT.finditer(text) if w.group(0) not in KEYWORDS
+                and not re.match(r"\s*\(", text[w.end():]) and not w.group(0).isupper()]
     if lhs:
         if re.search(r"[\[*]|->|\.", lhs):
-            mem_store = True
-        base = IDENT.findall(lhs)
-        if base and not mem_store:
-            written.add(base[-1])
-    incdec = re.findall(r"(\b[A-Za-z_]\w*)\s*(?:\+\+|--)|(?:\+\+|--)\s*([A-Za-z_]\w*)", s)
-    for a, b in incdec:
-        written.add(a or b)
-    read = {w for w in IDENT.findall(rhs + " " + lhs) if w not in KEYWORDS}
+            mw.add("*")
+            for n in names(lhs):  # the index or base pointer is read
+                (lr if n in LOCALS else mr).add(n)
+        else:
+            base = names(lhs)
+            if base:
+                (lw if base[-1] in LOCALS else mw).add(base[-1])
+    for a, b in re.findall(r"(\b[A-Za-z_]\w*)\s*(?:\+\+|--)|(?:\+\+|--)\s*([A-Za-z_]\w*)", s):
+        n = a or b
+        (lw if n in LOCALS else mw).add(n)
+    for n in names(rhs):
+        (lr if n in LOCALS else mr).add(n)
+    if re.search(r"[\[*]|->", rhs):
+        mr.add("*")
     if op:
-        read |= written
-    calls = bool(re.search(r"\b[A-Za-z_]\w*\s*\(", rhs + lhs)) or "asm" in s
-    mem_read = bool(re.search(r"[\[*]|->", rhs)) or (mem_store and bool(re.search(r"[\[*]|->", lhs)))
-    return written, read, mem_store, calls or mem_read
+        lr |= lw
+        mr |= mw
+    return lw, lr, mw, mr, calls
 
 
 def independent(a: str, b: str) -> bool:
-    wa, ra, sa, ma = accesses(a)
-    wb, rb, sb, mb = accesses(b)
-    if wa & (rb | wb) or wb & ra:
-        return False
-    if (sa and (sb or mb)) or (sb and ma):
-        return False
     if "asm" in a or "asm" in b or "volatile" in a or "volatile" in b:
         return False
-    calls_a = bool(re.search(r"\b[A-Za-z_]\w*\s*\(", a))
-    calls_b = bool(re.search(r"\b[A-Za-z_]\w*\s*\(", b))
-    if (calls_a and (calls_b or sb or mb)) or (calls_b and (sa or ma)):
+    lwa, lra, mwa, mra, ca = accesses(a)
+    lwb, lrb, mwb, mrb, cb = accesses(b)
+    if lwa & (lrb | lwb) or lwb & lra:
+        return False
+
+    def clash(x: set[str], y: set[str]) -> bool:
+        return bool(x & y) or ("*" in x and bool(y)) or ("*" in y and bool(x))
+    if clash(mwa, mwb | mrb) or clash(mwb, mra):
+        return False
+    if (ca and (cb or mwb or mrb)) or (cb and (mwa or mra)):
         return False
     return True
 
@@ -187,13 +212,20 @@ def indent(line: str) -> int:
 OPERAND = r"(?:[A-Za-z_]\w*(?:(?:->|\.)[A-Za-z_]\w*|\[[^\[\]]*\])*|\d+|0x[0-9A-Fa-f]+)"
 
 
+def delimited(body: str, start: int, end: int) -> bool:
+    """Is body[start:end] a whole operand: between ( , = ; ? : [ && || return and ) , ; ? : ] && ||?"""
+    before = body[:start].rstrip()
+    after = body[end:].lstrip()
+    ok_before = (before.endswith(("(", ",", ";", "?", ":", "[", "&&", "||", "{")) or re.search(r"\breturn$", before)
+                 or (before.endswith("=") and not before.endswith(("==", "!=", "<=", ">="))))
+    ok_after = after.startswith((")", ",", ";", "?", ":", "]", "&&", "||"))
+    return bool(ok_before and ok_after)
+
+
 def m_commute(body: str, rnd: random.Random, unsafe: bool) -> str | None:
     pat = re.compile(r"(?<![\w\]\)>.])(" + OPERAND + r")\s*(\+|\*|&(?!&)|\|(?!\|)|\^|==|!=)\s*(" + OPERAND
                      + r")(?![\w\[(.]|->)")
-    found = [m for m in pat.finditer(body)
-             if not body[max(0, m.start() - 1):m.start()] in ("&", "|", "-", "*", "/", "%", "<", ">")
-             and not re.match(r"\s*[*/%]", body[m.end():m.end() + 2])
-             and body[m.end():m.end() + 1] not in ("=",)]
+    found = [m for m in pat.finditer(body) if delimited(body, m.start(), m.end())]
     if not found:
         return None
     m = rnd.choice(found)
@@ -229,7 +261,7 @@ def m_compound(body: str, rnd: random.Random, unsafe: bool) -> str | None:
 def m_flip_compare(body: str, rnd: random.Random, unsafe: bool) -> str | None:
     pat = re.compile(r"(?<![\w\])>.])(" + OPERAND + r")\s*(<=|>=|<(?![<=])|>(?![>=]))\s*(" + OPERAND
                      + r")(?![\w\[(.]|->)")
-    found = [m for m in pat.finditer(body) if body[max(0, m.start() - 1):m.start()] not in ("<", ">", "-")]
+    found = [m for m in pat.finditer(body) if delimited(body, m.start(), m.end())]
     if not found:
         return None
     m = rnd.choice(found)
@@ -350,6 +382,9 @@ class Scorer:
         cmd = re.sub(r"(?<=\s)" + re.escape(str(self.source.relative_to(ROOT))) + r"(?=\s|$)", str(src), cmd)
         # quoted includes of the original directory still resolve (the copy lives elsewhere)
         cmd = cmd.replace(" -I src", f" -I {self.source.parent.relative_to(ROOT)} -I src", 1)
+        # keep the data sections: a draft's string literals in a unit whose .rodata still comes from the original
+        # would otherwise leave relocations to a stripped section (only the function's code is compared)
+        cmd = re.sub(r" -R \S+", "", cmd)
         env = dict(os.environ, TMPDIR=str(d))
         r = subprocess.run(cmd, shell=True, cwd=ROOT, capture_output=True, text=True, env=env)
         if r.returncode != 0 or not obj.exists():
@@ -416,6 +451,10 @@ def main() -> None:
     text = enable_draft(start_text, args.function)
     start, end = find_function(text, args.function)
     head, body, tail = text[:start], text[start:end], text[end:]
+    header = head[head.rfind(args.function):]
+    LOCALS.update(w for w in IDENT.findall(header[header.find("("):]) if w not in KEYWORDS)
+    LOCALS.update(m.group(1) for line in body.split("\n") if is_declaration(line)
+                  for m in [re.search(r"([A-Za-z_]\w*)\s*(?:\[[^\]]*\])*\s*(?:=[^;]*)?;$", line.strip())] if m)
     workdir = ROOT / "build" / "permuter" / args.function
     shutil.rmtree(workdir, ignore_errors=True)
     workdir.mkdir(parents=True)
