@@ -22,6 +22,7 @@
 extern "C" char D_004997C0[];
 extern "C" char D_00499828[];
 extern "C" char D_00499A18[];
+void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_0025F688);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerAttack__9DWTPlayerP12CDebugWindowii_0025F798);
@@ -126,7 +127,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onAttack__7CPlaye
 void CPlayer::offAttack() {
     if (m_pWeapon) m_pWeapon->offAttack();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getWeaponTopPos__7CPlayerR7FVECTOR);
+void CPlayer::getWeaponTopPos(FVECTOR& inVec) {
+    if (m_pWeapon) {
+        FVECTOR ofs = PlayerWeapon::g_fWeaponTopOffset;
+        FMATRIX m = m_pWeapon->getMatrixWep0();
+        ApplyMatrixXYZ(inVec, m, ofs);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCaskPos__7CPlayerR7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyColl__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyCollPos__7CPlayer);
