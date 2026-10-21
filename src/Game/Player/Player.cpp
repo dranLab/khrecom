@@ -30,6 +30,13 @@ extern "C" char D_00499828[];
 extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 extern "C" char D_0049B308[];
+inline void* operator new(size_t, void* p) throw() { return p; }
+/* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
+enum NAME_CASE { NAME_CASE_SENSITIVE = 0, NAME_CASE_UPPER = 1, NAME_CASE_LOWER = 2 };
+class CRsrcDB {
+public:
+    static INT getMotionIdxFromMotName(const CHAR* pszName, const CHAR* pszMotName, NAME_CASE nc);
+};
 namespace PL {
 extern FVECTOR g_vDummyPlayerPos; // data from the asm until SOURCE DATA
 extern FVECTOR g_vBanishPos;
@@ -41,7 +48,6 @@ public:
     static void setPrizeMp(INT inMP);
 };
 }
-inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_0025F688);
@@ -136,7 +142,16 @@ void CPlayer::setPlayerState(PlayerState inState) {
     m_iSubState = 0;
     m_tqStateTimer = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeAnimIndex__7CPlayeri);
+void CPlayer::makeAnimIndex(INT inChara) {
+    if (inChara) {
+        MOT_NAME_TBL* tbl = PL_ANIM::g_MotNameTbl[inChara];
+        LPCSTR file = PL_ANIM::g_pPlayerModelName[inChara];
+        while (tbl->pFileName) {
+            tbl->iIndex = CRsrcDB::getMotionIdxFromMotName(file, tbl->pFileName, NAME_CASE_SENSITIVE);
+            tbl++;
+        }
+    }
+}
 INT CPlayer::getMotIndex(INT inChara, INT inIndex) {
     if (!(0 <= inIndex && inIndex < ANIM_MAX)) AssertApp(D_004997C0, 1361, D_00499A18, 0);
     return PL_ANIM::g_MotNameTbl[inChara][inIndex].iIndex;
