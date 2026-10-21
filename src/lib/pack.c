@@ -25,7 +25,8 @@ typedef struct {
 
 typedef struct {
     unsigned long id; /* 0x00 */
-    int _pad08[2];
+    int length; /* 0x08: PES_packet_length */
+    int scrambling; /* 0x0C */
     long pts; /* 0x10 */
     long dts; /* 0x18 */
     int data; /* 0x20: bit offset of the payload */
@@ -64,6 +65,7 @@ typedef struct {
 
 int sceMpegDemuxPssRing(sceMpeg *mp, unsigned char *pss, int size, unsigned char *ring, int ringsize);
 static int _PES_packet(_sceMpegDecoder *d, _sceMpegBs *bs, _sceMpegPes *pes);
+void _sceMpegError(_sceMpegDecoder *d, const char *msg);
 
 static _sceMpegStrMap _strmap[10] = {
     { 0xE000000000, 0xFF00000000 },
@@ -216,13 +218,145 @@ static int _pack_header(_sceMpegBs *bs, _sceMpegPackHeader *ph)
     return 1;
 }
 
-/* _PES_packet's constants */
-__asm__(".rdata\n"
-        ".align 3\n.byte 0x00,0x10,0x08,0x18,0x08,0x18,0x10,0x20,0x18,0x28,0x20,0x30,0x20,0x30,0x28,0x38\n"
-        ".align 3\n.asciz \"pack_header_field_flag needs to be '0' in PS\\n\"\n"
-        ".text\n");
+/* moves the reader n bytes forward */
+static inline void _skipBytes(_sceMpegBs *bs, int n)
+{
+    long pos;
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/pack", _PES_packet);
+    if (n) {
+        pos = bs->pos + n * 8;
+        bs->buf = 0;
+        bs->count = 0;
+        bs->pos = pos;
+        bs->ptr = bs->start + (int)(pos >> 3);
+        if (bs->ptr >= bs->end) {
+            bs->ptr -= bs->size;
+        }
+        _flushBits(bs, 0);
+    }
+}
+
+/* a 33-bit PTS/DTS with its marker bits */
+static inline long _getTimeStamp(_sceMpegBs *bs)
+{
+    unsigned int hi;
+    unsigned int mid;
+    unsigned int lo;
+    unsigned int top;
+
+    _flushBits(bs, 4);
+    hi = _getBits(bs, 3);
+    _flushBits(bs, 1);
+    mid = _getBits(bs, 15);
+    _flushBits(bs, 1);
+    lo = _getBits(bs, 15);
+    _flushBits(bs, 1);
+    mid = (hi << 30) | (mid << 15) | lo;
+    return ((long)(hi >> 2) << 32) | mid;
+}
+
+static int _PES_packet(_sceMpegDecoder *d, _sceMpegBs *bs, _sceMpegPes *pes)
+{
+    unsigned char flagBits[16] = { 0x00, 0x10, 0x08, 0x18, 0x08, 0x18, 0x10, 0x20,
+                                   0x18, 0x28, 0x20, 0x30, 0x20, 0x30, 0x28, 0x38 };
+    unsigned int ptsDts;
+    unsigned int escr;
+    unsigned int flags;
+    unsigned int ext;
+    int hdrLen;
+    int hdrPos;
+    unsigned int priv;
+    unsigned int pack;
+    unsigned int seq;
+    unsigned int pstd;
+    unsigned int ext2;
+    unsigned int n;
+    unsigned int i;
+    int m;
+
+    pes->header = (int)bs->pos;
+    _flushBits(bs, 24);
+    pes->id = (unsigned long)_getBits(bs, 8) << 32;
+    pes->length = _getBits(bs, 16);
+    pes->dts = -1;
+    pes->pts = -1;
+    if (pes->id != 0xBC00000000 && pes->id != 0xBE00000000 && pes->id != 0xBF00000000 && pes->id != 0xF000000000 &&
+        pes->id != 0xF100000000 && pes->id != 0xFF00000000 && pes->id != 0xF200000000 && pes->id != 0xF800000000) {
+        _flushBits(bs, 2);
+        pes->scrambling = _getBits(bs, 2);
+        _flushBits(bs, 4);
+        ptsDts = _getBits(bs, 2);
+        escr = _getBits(bs, 1);
+        flags = _getBits(bs, 4);
+        ext = _getBits(bs, 1);
+        hdrLen = _getBits(bs, 8);
+        hdrPos = (int)bs->pos;
+        if (ptsDts & 2) {
+            pes->pts = _getTimeStamp(bs);
+        }
+        if (ptsDts == 3) {
+            pes->dts = _getTimeStamp(bs);
+        }
+        if (escr == 1) {
+            _flushBits(bs, 48);
+        }
+        if (flags) {
+            _flushBits(bs, flagBits[flags]);
+        }
+        if (ext == 1) {
+            priv = _getBits(bs, 1);
+            pack = _getBits(bs, 1);
+            seq = _getBits(bs, 1);
+            pstd = _getBits(bs, 1);
+            _flushBits(bs, 3);
+            ext2 = _getBits(bs, 1);
+            if (priv == 1) {
+                _flushBits(bs, 48);
+                _flushBits(bs, 48);
+                _flushBits(bs, 32);
+            }
+            if (pack == 1) {
+                _sceMpegError(d, "pack_header_field_flag needs to be '0' in PS\n");
+                return 0;
+            }
+            if (seq == 1) {
+                _flushBits(bs, 16);
+            }
+            if (pstd == 1) {
+                _flushBits(bs, 16);
+            }
+            if (ext2 == 1) {
+                _flushBits(bs, 1);
+                n = _getBits(bs, 7);
+                for (i = 0; i < n; i++) {
+                    _flushBits(bs, 8);
+                }
+            }
+        }
+        _skipBytes(bs, hdrLen - (int)((bs->pos - hdrPos) >> 3));
+        m = pes->length - hdrLen;
+        n = m - 3;
+        pes->len = n;
+        pes->data = (int)bs->pos;
+        if (pes->id == 0xBD00000000) {
+            pes->id |= (unsigned long)_getBits(bs, 32);
+            n = m - 7;
+        }
+        _skipBytes(bs, n);
+    } else if (pes->id == 0xBC00000000 || pes->id == 0xBF00000000 || pes->id == 0xF000000000 ||
+               pes->id == 0xF100000000 || pes->id == 0xFF00000000 || pes->id == 0xF200000000 ||
+               pes->id == 0xF800000000) {
+        m = pes->length;
+        if (pes->id == 0xBF00000000) {
+            pes->id |= (unsigned long)_getBits(bs, 32);
+            m -= 4;
+        }
+        _skipBytes(bs, m);
+    } else if (pes->id == 0xBE00000000) {
+        _skipBytes(bs, pes->length);
+    }
+    return 1;
+}
 
 static inline void _bsInit(_sceMpegBs *bs, unsigned char *pss, unsigned char *ring, int ringsize)
 {
