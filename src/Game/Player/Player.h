@@ -334,6 +334,7 @@ public:
     INT getMotIndex(INT inChara, INT inIndex);
     void setReflectGuard(INT inFlag);
     void setTransOff(INT inFlag);
+    void chkAtelHide(INT inFlag);
     void cancelLockon();
     void autoLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial

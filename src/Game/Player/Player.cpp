@@ -17,6 +17,7 @@
 #include "System/Graphic/Effect/effect.h"
 #include "System/Coord.h"
 #include "Game/Player/PlayerAnim.h"
+#include "Game/GameWork.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -182,7 +183,13 @@ void CPlayer::beginStateWait() {
     m_iState = 2;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateHide__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateHide__7CPlayer);
+void CPlayer::stateHide() {
+    setPlayerFlag(0x400000, 0);
+    if (dbgCheckUser(KKIKUCHI) && dbgButtonTrg(USR_SYSTEM, 0x10, 1)) {
+        CGameWork::setInt(1, 0xE2, 0);
+    }
+    chkAtelHide(0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateHide__7CPlayer);
 BOOL CPlayer::isNowInAir() {
     m_bAirCheck = FALSE;
