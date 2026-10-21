@@ -14,18 +14,29 @@ typedef struct {
 typedef struct {
     At3Joint joint[2]; /* 0x0000 */
     char ch[2][0x33E0]; /* 0x0030: per-channel state */
-    int x67F0;
+    int maxpos; /* 0x67F0: highest coefficient written */
     int nch; /* 0x67F4 */
     int mode; /* 0x67F8 */
     int frameSize; /* 0x67FC */
     unsigned char *stream; /* 0x6800 */
-    unsigned char buf[0xC4]; /* 0x6804: byte-reversed second channel */
+    unsigned char buf[0xC0]; /* 0x6804: byte-reversed second channel */
+    int qoff; /* 0x68C4 */
     int bitpos; /* 0x68C8 */
 } At3Work;
 
 int unpack_mddata(char *ch, int rev, At3Work *w);
 void iqmf(char *ch);
 extern short a_wind[];
+extern const int a_qtstart[];
+void __assert(const char *file, int line, const char *expr);
+
+/* the unit's .rodata still comes from the original: the assert strings by their labels ("libat3dec.c",
+   "(unsigned int)iqt < AT2_NQUS+1", "(unsigned int)iqt+1 < AT2_NQUS+1") */
+extern const char D_004FD000[];
+extern const char D_004FD010[];
+extern const char D_004FD030[];
+#define AT2_NQUS 32
+#define QTSTART_(i, s) (((unsigned int)i < AT2_NQUS+1) ? (void)0 : __assert(D_004FD000, __LINE__, s), a_qtstart[i])
 extern signed char huf_maxlen[7][2];
 extern signed char *huf_prefixtbl[7][2];
 extern signed char *huf_lentbl[7][2];
@@ -228,9 +239,109 @@ static int unpack_specs(char *ch, unsigned int sel, int cb, int start, int end, 
     return 0;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", getToneSpectrum);
+static int getToneSpectrum(char *ch, int n, int nbands, At3Work *w)
+{
+    int mode;
+    int len;
+    int mask;
+    int cb;
+    int sel;
+    int band;
+    int pos;
+    int cnt;
+    int q;
+    int start;
+    int end;
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", getNoiseSpectrum);
+    mode = read_unpack_from_msb(2, w);
+    if (mode == 2) {
+        return -1;
+    }
+    do {
+        mask = get_unpack_from_msb(4, w);
+        w->bitpos += nbands;
+        len = read_unpack_from_msb(3, w) + 1;
+        cb = read_unpack_from_msb(3, w);
+        if (cb < 2) {
+            return -1;
+        }
+        sel = mode;
+        if (mode == 3) {
+            sel = read_unpack_from_msb(1, w);
+        }
+        band = 0;
+        do {
+            if (mask & (8 >> band)) {
+                for (pos = 0; pos < 256; pos += 64) {
+                    for (cnt = read_unpack_from_msb(3, w) - 1; cnt >= 0; cnt--) {
+                        q = read_unpack_from_msb(6, w);
+                        if (w->qoff > 0) {
+                            q = (q > w->qoff) ? q - w->qoff : 0;
+                        }
+                        start = read_unpack_from_msb(6, w) + (band << 8) + pos;
+                        end = len + start;
+                        if (end > 1024) {
+                            end = 1024;
+                        }
+                        if (w->maxpos < end) {
+                            w->maxpos = end;
+                        }
+                        if (unpack_specs(ch, sel, cb, start, end, q, w) == -1) {
+                            return -1;
+                        }
+                    }
+                }
+            }
+        } while (++band < nbands);
+    } while (--n > 0);
+    return 0;
+}
+
+static int getNoiseSpectrum(char *ch, int nqus, At3Work *w)
+{
+    int cb[32];
+    int q[32];
+    int sel;
+    int iqt;
+    int v;
+
+    if ((unsigned int)(nqus - 1) >= 32) {
+        return -1;
+    }
+    sel = read_unpack_from_msb(1, w);
+    iqt = 0;
+    do {
+        cb[iqt] = read_unpack_from_msb(3, w);
+    } while (++iqt < nqus);
+    iqt = 0;
+    do {
+        if (cb[iqt]) {
+            v = read_unpack_from_msb(6, w);
+            q[iqt] = v;
+            if (w->qoff > 0) {
+                if (v > w->qoff) {
+                    q[iqt] = v - w->qoff;
+                } else {
+                    q[iqt] = 0;
+                }
+            }
+        }
+    } while (++iqt < nqus);
+    iqt = 0;
+    do {
+        if (cb[iqt]) {
+#line 1057 "libat3dec.c"
+            if (unpack_specs(ch, sel, cb[iqt], QTSTART_(iqt, D_004FD010), QTSTART_(iqt+1, D_004FD030), q[iqt], w) == -1) {
+                return -1;
+            }
+        }
+    } while (++iqt < nqus);
+#line 1063 "libat3dec.c"
+    if (w->maxpos < QTSTART_(iqt, D_004FD010)) {
+        w->maxpos = QTSTART_(iqt, D_004FD010);
+    }
+    return 0;
+}
 
 /* 5 lines off: the band address of the loop is (x << 4) + x with swapped registers */
 #if 0
