@@ -102,7 +102,17 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeWeapon__7CPla
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeCockpit__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeRevolver__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initActionSkill__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", importStatus__7CPlayer);
+INT CPlayer::importStatus() {
+    if (!_instance()) return 0;
+    _instance()->setMaxHP(CStatus::getStaus().HPMax);
+    _instance()->setHP(CStatus::getStaus().HP);
+    _instance()->setAP(CStatus::getStaus().AP);
+    _instance()->setEXP(CStatus::getStaus().EXP);
+    _instance()->setLV(CStatus::getStaus().LV);
+    _instance()->setMP(CStatus::getStaus().MP);
+    _instance()->setMaxDP(CStatus::getStaus().DPMax);
+    return 1;
+}
 INT CPlayer::exportStatus() {
     if (!_instance()) return 0;
     CStatus::setHPMax(_instance()->m_iMaxHP);
