@@ -223,7 +223,16 @@ void CPlayer::cancelLockon() {
 void CPlayer::autoLockon() {
     if (m_bIsBattleScene && !m_hLockon) m_pMarker->setMode(1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPushon__7CPlayeri);
+void CPlayer::setPushon(INT inFlag) {
+    if (m_bIsBattleScene) {
+        if (inFlag) {
+            m_pMarker->onPush(inFlag);
+        } else {
+            m_pMarker->offPush();
+            m_uiTrgFlag &= ~0x40000;
+        }
+    }
+}
 void CPlayer::setTrgFlagRendaNG(const CHAR* inName) {
     if (!DebugWork::g_dw.player.iRenda) m_uiTrgFlag |= 0x40000;
 }
