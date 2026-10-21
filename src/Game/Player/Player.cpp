@@ -13,6 +13,7 @@
 #include "Game/SceneEnv.h"
 #include "Game/Bullet/BulletManager.h"
 #include "System/TaskMan.h"
+#include "Game/SEMotion.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -278,7 +279,13 @@ void CPlayer::exeConfuse() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initItem__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeItem__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStandUp_inFriend__7CPlayer);
+void CPlayer::exeStandUp_inFriend() {
+    INT oldMode = m_WalkMode;
+    INT mode = chkWalkMode();
+    m_WalkMode = mode;
+    if (!mode && oldMode && m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
+    exeWalk();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initCharge__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCharge__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkChargeMove__7CPlayeri);
