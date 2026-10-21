@@ -11,6 +11,11 @@ overrides:
     cflags: -O2 -G0 -g
     source_root: null
     assembler: ee-gcc2.96
+  - match: lib/libat3dec        # ATRAC3 decoder core: saves registers 8 bytes apart like 2.96
+    compiler: ee-gcc2.96
+    cflags: -O2 -G0 -g
+    source_root: null
+    assembler: ee-gcc2.96
   - match: lib/init             # libat3dec (ATRAC3 decoder): atrac2_mode_* only match 2.96
     compiler: ee-gcc2.96
     cflags: -O2 -G0 -g
