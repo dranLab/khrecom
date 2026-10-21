@@ -14,6 +14,7 @@
 #include "Game/Bullet/BulletManager.h"
 #include "System/TaskMan.h"
 #include "Game/SEMotion.h"
+#include "System/Graphic/Effect/effect.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -364,7 +365,19 @@ void CPlayer::exeQuickBarrier() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAeroGuard__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAeroGuard__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPrizeHealing__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exePrizeHealing__7CPlayer);
+void CPlayer::exePrizeHealing() {
+    if (m_hEffPrize) {
+        m_tqPrize -= m_tqFrameRate;
+        if (m_tqPrize <= 0) {
+            if (m_hEffPrize > 0) {
+                CEffect* effect = CEffectMan::getEffect(m_hEffPrize);
+                if (effect) effect->loopEnd();
+                m_hEffPrize = 0;
+            }
+            m_tqPrize = 0;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initGimmickCard__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickCard__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setTrapDamage__7CPlayeriPCcUi);
