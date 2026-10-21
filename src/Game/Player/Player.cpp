@@ -30,6 +30,7 @@ extern "C" char D_00499828[];
 extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 extern "C" char D_0049B308[];
+extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 inline void* operator new(size_t, void* p) throw() { return p; }
 /* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
 enum NAME_CASE { NAME_CASE_SENSITIVE = 0, NAME_CASE_UPPER = 1, NAME_CASE_LOWER = 2 };
@@ -593,7 +594,17 @@ void CPlayer::addMP(INT inMP) {
     Gauge::CPrizeGauge::setPrizeMp(inMP);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procDropMP__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyExterminate__7CPlayer);
+void CPlayer::notifyExterminate() {
+    if (!_instance()) return;
+    if (_instance()->m_bIsDead) {
+        TRACE(D_0049B238);
+        return;
+    }
+    if (_instance()->m_PlayerState == PL::ESCAPE) return;
+    PLM::calcFavoriteStockCount();
+    _instance()->setBattleFlag(4, 0);
+    _instance()->setConditionFlag(0x2000, 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyBossDead__7CPlayeri);
 HANDLE CPlayer::getLevelUpEffect() {
     if (!m_pInstance) return 0;

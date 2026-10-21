@@ -505,6 +505,7 @@ public:
     static INT importStatus();
     static INT exportStatus();
     static void addMP(INT inMP);
+    static void notifyExterminate();
     void setDefAttr(FLOAT* inAttr);
     // PARTIAL: added for Game/Player/Player
     static INT calcNextEXP(INT inLv) __attribute__((const));
