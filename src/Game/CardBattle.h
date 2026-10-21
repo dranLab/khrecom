@@ -167,7 +167,10 @@ public:
 class CCardRevolver {
     UBYTE _m_0x00[0x4c]; // PARTIAL: added for Game/Enemy/HumanBoss
     SHORT m_sMode;       /* 0x4c */ // PARTIAL: name unknown
+    UBYTE _m_0x4e[0x26]; // PARTIAL: added for Game/Player/Player
+    BOOL m_bActive;      /* 0x74 */ // PARTIAL: added for Game/Player/Player
 public:
+    INT isActive() const { return m_bActive; } // PARTIAL: added for Game/Player/Player
     // PARTIAL: added for Game/Enemy/HumanBoss
     INT getMode() const { return m_sMode; } // PARTIAL: name unknown
     INT getRemain(INT inKind, INT inCardKind, INT inFlag);

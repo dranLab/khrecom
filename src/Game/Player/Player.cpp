@@ -332,7 +332,10 @@ void CPlayer::addWind(FVECTOR* inVel) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWind__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdRevolver_rollDeck__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdRevolver_isEmpty__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdRevolver_isActive__7CPlayer);
+INT CPlayer::cmdRevolver_isActive() {
+    if (!m_pRevolver) return 0;
+    return m_pRevolver->isActive();
+}
 void CPlayer::cmdMove_WaterSurfaceCheck(INT inFlag) {
     if (inFlag) m_pMove->setFlag(0x80, TRUE);
     else m_pMove->setFlag(0x80, FALSE);

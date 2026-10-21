@@ -325,6 +325,7 @@ public:
     void setPrizeHealing(INT inTime); // PARTIAL: added for Game/Player/SummonTink
     void cancelLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
+    INT cmdRevolver_isActive();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
     void setConditionFlag(UINT inSet, UINT inMask) { m_uiConditionFlag = (m_uiConditionFlag | inSet) & ~inMask; }
     // PARTIAL: added for Game/Player/FriendKing
