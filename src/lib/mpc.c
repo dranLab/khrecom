@@ -28,7 +28,10 @@ unsigned long _sceMpegWaitIpuIdle64(_sceMpegDecoder *d);
 unsigned int _sceMpegNextBit(_sceMpegDecoder *d, int n);
 unsigned int _sceMpegPeepBit(_sceMpegDecoder *d, int n);
 static void _waitIpuIdle(_sceMpegDecoder *d);
-static void _getAllRefs(_sceMpegDecoder *d, int x, int y, int mbtype, int motion_type, int (*pmv)[2][2], int (*mvfs)[2]);
+static void _getAllRefs(_sceMpegDecoder *d, int x, int y, int mbtype, int motion_type, int (*pmv)[2][2], int (*mvfs)[2],
+                        int *dmv);
+static void _getRef0(_sceMpegDecoder *d, _sceMpegPicture *pic, int sel, int dblk, int yblk, int h, int x, int y,
+                     int mvx, int mvy, int fld, int avg);
 static void dmaRefImage(_sceMpegDecoder *d);
 void _copyRefImage(unsigned int dst, unsigned int src);
 void _copyAddRefImage(unsigned int dst, unsigned int src, unsigned int buf);
@@ -120,6 +123,95 @@ static void _dualPrimeVector(_sceMpegDecoder *d, int *out, int *dmv, int mvx, in
     }
 }
 
+/* all but the field-picture setup matches: there the original schedules the constant 2 of the x160 test before
+   sel = 0 (registers a1/a0/a2 of the refs loads differ) */
+#if 0
+static void _getAllRefs(_sceMpegDecoder *d, int x, int y, int mbtype, int motion_type, int (*pmv)[2][2], int (*mvfs)[2],
+                        int *dmv)
+{
+    int dmvec[4];
+    _sceMpegPicture *refs[2][2];
+    int avg;
+    int bf;
+    int sel;
+
+    sel = 1;
+    d->spr[d->x820].count = 0;
+    avg = 0;
+    if ((mbtype & 8) || d->x160 == 2) {
+        if (d->x184 == 3) {
+            if (motion_type == 2 || !(mbtype & 8)) {
+                _getRef0(d, d->frame[0], 0, 0, 0, 16, x, y, pmv[0][0][0], pmv[0][0][1], 0, 0);
+            } else if (motion_type == 1) {
+                _getRef0(d, d->frame[0], mvfs[0][0], 0, 0, 8, x, y, pmv[0][0][0], pmv[0][0][1] >> 1, 1, 0);
+                _getRef0(d, d->frame[0], mvfs[1][0], 1, 0, 8, x, y, pmv[1][0][0], pmv[1][0][1] >> 1, 1, 0);
+            } else if (motion_type == 3) {
+                _dualPrimeVector(d, dmvec, dmv, pmv[0][0][0], pmv[0][0][1] >> 1);
+                _getRef0(d, d->frame[0], 0, 0, 0, 8, x, y, pmv[0][0][0], pmv[0][0][1] >> 1, 1, 0);
+                _getRef0(d, d->frame[0], 1, 0, 0, 8, x, y, dmvec[0], dmvec[1], 1, 1);
+                _getRef0(d, d->frame[0], 1, 1, 0, 8, x, y, pmv[0][0][0], pmv[0][0][1] >> 1, 1, 0);
+                _getRef0(d, d->frame[0], 0, 1, 0, 8, x, y, dmvec[2], dmvec[3], 1, 1);
+            } else {
+                _sceMpegError1(d, "(a) invalid motion_type(%d)-0", motion_type);
+            }
+        } else {
+            refs[0][0] = d->top[0];
+            refs[0][1] = d->bottom[0];
+            refs[1][0] = d->top[1];
+            refs[1][1] = d->bottom[1];
+            bf = d->x184 == 2;
+            sel = 0;
+            if (d->x160 == 2 && d->x130) {
+                sel = bf != mvfs[0][0];
+            }
+            if (motion_type == 1 || !(mbtype & 8)) {
+                _getRef0(d, refs[sel][mvfs[0][0]], 0, 0, 0, 16, x, y, pmv[0][0][0], pmv[0][0][1], 0, 0);
+            } else if (motion_type == 2) {
+                _getRef0(d, refs[sel][mvfs[0][0]], 0, 0, 0, 8, x, y, pmv[0][0][0], pmv[0][0][1], 0, 0);
+                sel = 0;
+                if (d->x160 == 2 && d->x130) {
+                    if (bf ^ mvfs[1][0]) {
+                        sel = 1;
+                    } else {
+                        sel = 0;
+                    }
+                }
+                _getRef0(d, refs[sel][mvfs[1][0]], 0, 0, 8, 8, x, y, pmv[1][0][0], pmv[1][0][1], 0, 0);
+            } else if (motion_type == 3) {
+                if (d->x130) {
+                    sel = 1;
+                } else {
+                    sel = 0;
+                }
+                _dualPrimeVector(d, dmvec, dmv, pmv[0][0][0], pmv[0][0][1]);
+                _getRef0(d, refs[0][bf], 0, 0, 0, 16, x, y, pmv[0][0][0], pmv[0][0][1], 0, 0);
+                _getRef0(d, refs[sel][!bf], 0, 0, 0, 16, x, y, dmvec[0], dmvec[1], 0, 1);
+            } else {
+                _sceMpegError1(d, "(b) invalid motion_type(%d)-1", motion_type);
+            }
+        }
+        avg = 1;
+    }
+    if (mbtype & 4) {
+        if (d->x184 == 3) {
+            sel = 1;
+            if (motion_type == 2) {
+                _getRef0(d, d->frame[1], 0, 0, 0, 16, x, y, pmv[0][1][0], pmv[0][1][1], 0, avg);
+            } else {
+                _getRef0(d, d->frame[1], mvfs[0][1], 0, 0, 8, x, y, pmv[0][1][0], pmv[0][1][1] >> 1, 1, avg);
+                _getRef0(d, d->frame[1], mvfs[1][1], 1, 0, 8, x, y, pmv[1][1][0], pmv[1][1][1] >> 1, 1, avg);
+            }
+        } else if (motion_type == 1) {
+            _getRef0(d, mvfs[0][1] ? d->bottom[1] : d->top[1], 0, 0, 0, 16, x, y, pmv[0][1][0], pmv[0][1][1], 0, avg);
+        } else if (motion_type == 2) {
+            _getRef0(d, mvfs[0][1] ? d->bottom[1] : d->top[1], 0, 0, 0, 8, x, y, pmv[0][1][0], pmv[0][1][1], 0, avg);
+            _getRef0(d, mvfs[1][1] ? d->bottom[1] : d->top[1], 0, 0, 8, 8, x, y, pmv[1][1][0], pmv[1][1][1], 0, avg);
+        } else {
+            _sceMpegError1(d, "(c) invalid motion_type(%d)-2", motion_type);
+        }
+    }
+}
+#else
 /* _getAllRefs's strings */
 __asm__(".rdata\n"
         ".align 3\n.asciz \"(a) invalid motion_type(%d)-0\"\n"
@@ -128,6 +220,7 @@ __asm__(".rdata\n"
         ".text\n");
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _getAllRefs);
+#endif
 
 
 static int _motionComp0(_sceMpegDecoder *d, int mbaddr, int dct_type, int mbtype, int motion_type, int (*pmv)[2][2],
@@ -150,7 +243,7 @@ static int _motionComp0(_sceMpegDecoder *d, int mbaddr, int dct_type, int mbtype
             d->x12C = 1;
             return 0;
         }
-        _getAllRefs(d, x, y, mbtype, motion_type, pmv, mvfs);
+        _getAllRefs(d, x, y, mbtype, motion_type, pmv, mvfs, dmv);
         while ((REG(D9_CHCR) >> 8) & 1)
             ;
         dmaRefImage(d);
