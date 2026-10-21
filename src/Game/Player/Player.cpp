@@ -16,10 +16,12 @@
 #include "Game/SEMotion.h"
 #include "System/Graphic/Effect/effect.h"
 #include "System/Coord.h"
+#include "Game/Player/PlayerAnim.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
 extern "C" char D_00499828[];
+extern "C" char D_00499A18[];
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_0025F688);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerAttack__9DWTPlayerP12CDebugWindowii_0025F798);
@@ -90,7 +92,10 @@ void CPlayer::setPlayerState(PlayerState inState) {
     m_tqStateTimer = 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeAnimIndex__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getMotIndex__7CPlayerii);
+INT CPlayer::getMotIndex(INT inChara, INT inIndex) {
+    if (!(0 <= inIndex && inIndex < ANIM_MAX)) AssertApp(D_004997C0, 1361, D_00499A18, 0);
+    return PL_ANIM::g_MotNameTbl[inChara][inIndex].iIndex;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimForce__7CPlayeriiiiii);
 void CPlayer::setAnim(INT inID, INT inTq, INT inGr) {
     if (m_iNowAnimID != inID) setAnimForce(inID, inTq, inGr, 0, 0, 0);

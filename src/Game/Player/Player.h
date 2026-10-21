@@ -331,6 +331,7 @@ public:
     void setPrizeHealing(INT inTime); // PARTIAL: added for Game/Player/SummonTink
     void exePrizeHealing();
     void fadeEffCharge();
+    INT getMotIndex(INT inChara, INT inIndex);
     void cancelLockon();
     void autoLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
