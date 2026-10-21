@@ -13,6 +13,7 @@ enum Houkou {
 };
 
 class CPlayerPad : public CPadHandler {
+    friend class CPlayer; // PARTIAL: added for Game/Player/Player (enablePadControl writes m_uiPadFlag)
 private:
     UINT m_uiPadFlag;
     FLOAT m_fDir;

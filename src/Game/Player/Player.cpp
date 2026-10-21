@@ -1,4 +1,6 @@
+#define GAME_PLAYER_PLAYER_CPP
 #include "khtypes.h"
+#include "Game/Collision/CollBody.h"
 #include "Game/CardBattle.h"
 #include "Game/Player/Player.h"
 #include "Game/Player/PlayerManager.h"
@@ -32,8 +34,19 @@ INT CPlayer::getNowTotalMP() {
     if (!m_pInstance) return CStatus::getMP();
     return m_pInstance->m_iMP;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", enablePadControl__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", enableDbgPadControl__7CPlayeri);
+void CPlayer::enablePadControl(INT inFlag) {
+    if (m_pInstance) {
+        UINT bit = 1;
+        m_pInstance->m_uiPadFlag = (m_pInstance->m_uiPadFlag | inFlag) & ~(inFlag ^ bit);
+    }
+}
+void CPlayer::enableDbgPadControl(INT inFlag) {
+    if (m_pInstance) {
+        UINT bit = 2;
+        inFlag <<= 1;
+        m_pInstance->m_uiPadFlag = (m_pInstance->m_uiPadFlag | inFlag) & ~(inFlag ^ bit);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", __7CPlayerP5CTaskUii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _$_7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFSM___7CPlayer);
@@ -146,7 +159,9 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkWallBottom__7C
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initWall__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWall__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkLadderStepNow__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getLadderStepNow__7CPlayerf);
+INT CPlayer::getLadderStepNow(FLOAT inHeight) {
+    return (INT)((inHeight - m_vLadderPos.y + 0.0035f) / 0.375f);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initLadder__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeLadder__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isStartLadderJump__7CPlayer);
@@ -183,13 +198,35 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkLockon__7CPlay
 void CPlayer::cancelLockon() {
     m_pMarker->cancelLockon(m_hLockon, TRUE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", autoLockon__7CPlayer);
+void CPlayer::autoLockon() {
+    if (m_bIsBattleScene && !m_hLockon) m_pMarker->setMode(1);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPushon__7CPlayeri);
 void CPlayer::setTrgFlagRendaNG(const CHAR* inName) {
     if (!DebugWork::g_dw.player.iRenda) m_uiTrgFlag |= 0x40000;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkPlayCard__7CPlayer);
+/* Parked: the switch's jump table goes to .rodata, which is stripped until the unit's data comes from source
+   (objcopy: symbol `.rodata' required but not present); tried: C switch over PL::ATTACK/ITEM/MAGIC/SKILL/
+   GIMMICKCARD/FRIEND/SUMMON/DUEL (the code apart from the table is the original's shape) */
+#if 0
+INT CPlayer::isNowCardActionState() {
+    switch (m_PlayerState) {
+    case PL::ATTACK:
+    case PL::ITEM:
+    case PL::MAGIC:
+    case PL::SKILL:
+    case PL::GIMMICKCARD:
+    case PL::FRIEND:
+    case PL::SUMMON:
+    case PL::DUEL:
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowCardActionState__7CPlayer);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkPlayCardCombo__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onMsg__7CPlayeriPv);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeUseStock__7CPlayeri);
@@ -250,7 +287,15 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCure__7CPlayer
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCastEffect__7CPlayerPCciP6CCoordP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPos__7CPlayerffP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPosFS__7CPlayerff);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPosFS_toAttackID__7CPlayer);
+void CPlayer::calcAppearPosFS_toAttackID() {
+    if (m_uiAttackID < 0x78) {
+        if (m_uiAttackID >= 0x76) {
+            calcAppearPosFS(0.0f, m_fWallRadius);
+            return;
+        }
+    }
+    calcAppearPosFS(2.0f, m_fWallRadius);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkEscape__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initEscape__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeEscape__7CPlayer);
@@ -269,7 +314,16 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setBanish__7CPlay
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBanish__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setReflectGuard__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setQuickBarrier__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeQuickBarrier__7CPlayer);
+void CPlayer::exeQuickBarrier() {
+    if (m_tqBarrier) {
+        m_tqBarrier -= m_tqFrameRate;
+        if (m_tqBarrier <= 0) {
+            m_collBody.m_uiFlag = (INT)m_collBody.m_uiFlag & ~2;
+            m_tqBarrier = 0;
+            m_collBody.m_GuardAttrFlag = 0;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAeroGuard__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAeroGuard__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPrizeHealing__7CPlayeri);
@@ -330,15 +384,31 @@ void CPlayer::addWind(FVECTOR* inVel) {
     if (m_pPLM) m_pPLM->addWindXYZ(inVel);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWind__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdRevolver_rollDeck__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdRevolver_isEmpty__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdRevolver_isActive__7CPlayer);
+BOOL CPlayer::cmdRevolver_rollDeck(INT inNum) {
+    if (!m_pRevolver) return FALSE;
+    m_pRevolver->rollDeck(inNum, 0, 300);
+    return TRUE;
+}
+BOOL CPlayer::cmdRevolver_isEmpty() {
+    if (!m_pRevolver) return TRUE;
+    return m_pRevolver->getRemain(0, 0, 0) == 0;
+}
+INT CPlayer::cmdRevolver_isActive() {
+    if (!m_pRevolver) return 0;
+    return m_pRevolver->isActive();
+}
 void CPlayer::cmdMove_WaterSurfaceCheck(INT inFlag) {
     if (inFlag) m_pMove->setFlag(0x80, TRUE);
     else m_pMove->setFlag(0x80, FALSE);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdState_initWorldSelect__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdState_setEncountWait__7CPlayer);
+void CPlayer::cmdState_setEncountWait() {
+    setPlayerFlag(0x100, 0);
+    changeState(2);
+    setPlayerFlag(0x1001, 0);
+    m_collBody.off();
+    m_collBody.offBody();
+}
 void CPlayer::beginStateField_() {
     beginStateField();
 }

@@ -268,7 +268,11 @@ public:
     HANDLE m_hFooting;           /* 0x55c */
     HANDLE m_hSnatch;            /* 0x560 */
 public: // PARTIAL: members public for Game/Player/PlayerRiku
+#ifdef GAME_PLAYER_PLAYER_CPP
+    CCollBody m_collBody;        /* 0x570 */
+#else
     UBYTE m_collBody[0x110] __attribute__((aligned(16))); /* 0x570 CCollBody */
+#endif
     BOOL m_bIsDead;              /* 0x680 */
     BOOL m_bDmgMuteki;           /* 0x684 */
     BOOL m_bDmgInAir;            /* 0x688 */
@@ -324,7 +328,13 @@ public:
     void addHP(INT inHP, INT inFlag, INT inEffect);
     void setPrizeHealing(INT inTime); // PARTIAL: added for Game/Player/SummonTink
     void cancelLockon();
+    void autoLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
+    INT cmdRevolver_isActive();
+    BOOL cmdRevolver_rollDeck(INT inNum);
+    INT getLadderStepNow(FLOAT inHeight);
+    void exeQuickBarrier();
+    INT isNowCardActionState();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
     void setConditionFlag(UINT inSet, UINT inMask) { m_uiConditionFlag = (m_uiConditionFlag | inSet) & ~inMask; }
     // PARTIAL: added for Game/Player/FriendKing
@@ -343,6 +353,7 @@ public:
     FLOAT getDir() { return m_fDir; }
     Gauge::CLockonMarker* getMarker() { return m_pMarker; }
     void calcAppearPos(FLOAT inX, FLOAT inZ, FVECTOR* inTarget);
+    void calcAppearPosFS(FLOAT inDist, FLOAT inRadius);
     HANDLE isNowMark() { return m_hMark; } // PARTIAL: added for Game/Player/FriendGoofy (original name/type unknown)
     // PARTIAL: added for Game/Player/PlayerCamera
     HANDLE isNowLockon() { return m_hLockon; }
@@ -425,6 +436,8 @@ public:
     INT isActionFlag(UINT inFlag) { return m_uiActionFlag & inFlag; }
     INT isTrgFlag(UINT inFlag) { return m_uiTrgFlag & inFlag; }
     static CPlayer* m_pInstance;
+    static void enablePadControl(INT inFlag);
+    static void enableDbgPadControl(INT inFlag);
     void changeState(INT inState);
     void initActionSkill();
     void setPlayerState(PlayerState inState);
