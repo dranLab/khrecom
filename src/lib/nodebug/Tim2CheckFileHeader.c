@@ -8,10 +8,62 @@ extern char D_004FF690[]; /* "CLT2" (in .sdata) */
 extern char D_004FC9C0[]; /* "Tim2CheckFileHeaer: TIM2 is broken %02X,%02X,%02X,%02X\n" */
 extern char D_004FC9F8[]; /* "Tim2CheckFileHeaer: TIM2 is broken (2)\n" */
 extern char D_004FCA20[]; /* "Tim2GetPictureHeader: Illegal image no.(%d)\n" */
+extern char D_004FCAF0[]; /* "Illegal clut and texture combination. ($%02X,$%02X)\n" */
+extern char D_004FCB28[]; /* "Illegal pixel format.\n" */
+extern char D_004FCB40[]; /* "file create failure.\n" */
 extern const char mmsize_24[] __asm__("mmsize.24");
 extern const char mmsize_28[] __asm__("mmsize.28");
 
 extern int printf(const char *, ...);
+
+typedef struct {
+    u_long128 _data[6];
+} sceGsLoadImage;
+typedef struct {
+    u_long128 _data[7];
+} sceGsStoreImage;
+#define WRITEBACK_DCACHE 0
+extern int sceGsSetDefLoadImage(sceGsLoadImage *lp, short dbp, short dbw, short dpsm, short x, short y, short w, short h);
+extern int sceGsExecLoadImage(sceGsLoadImage *lp, u_long128 *srcaddr);
+extern int sceGsSetDefStoreImage(sceGsStoreImage *sp, short sbp, short sbw, short spsm, short x, short y, short w, short h);
+extern int sceGsExecStoreImage(sceGsStoreImage *sp, u_long128 *dstaddr);
+extern int sceGsSyncPath(int mode, u_short timeout);
+extern void FlushCache(int);
+extern void *memset(void *, int, size_t);
+#define SCE_WRONLY 0x0002
+#define SCE_CREAT 0x0200
+extern int sceOpen(const char *filename, int flag, ...);
+extern int sceClose(int fd);
+extern int sceWrite(int fd, const void *buf, int nbyte);
+
+typedef struct {
+    u_int FBP : 9;
+    u_int FBW : 6;
+    u_int PSM : 5;
+    u_int pad00 : 12;
+    u_int DBX : 11;
+    u_int DBY : 11;
+    u_int pad01 : 10;
+} sceGsDispfb;
+
+typedef struct {
+    u_int DX : 12;
+    u_int DY : 11;
+    u_int MAGH : 4;
+    u_int MAGV : 2;
+    u_int pad00 : 3;
+    u_int DW : 12;
+    u_int DH : 11;
+    u_int pad01 : 9;
+} sceGsDisplay;
+
+typedef struct {
+    u_int pmode[2]; /* tGS_PMODE */
+    u_int smode2[2]; /* tGS_SMODE2 */
+    sceGsDispfb dispfb;
+    sceGsDisplay display;
+    u_int bgcolor[2]; /* tGS_BGCOLOR */
+} sceGsDispEnv;
 
 static int Tim2CalcBufWidth(int psm, int w);
 static int Tim2CalcBufSize(int psm, int w, int h);
@@ -573,10 +625,324 @@ u_int Tim2LoadImage(TIM2_PICTUREHEADER *ph, u_int tbp)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2LoadPicture);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2LoadImage);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2LoadClut);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2TakeSnapshot);
+u_int Tim2LoadClut(TIM2_PICTUREHEADER *ph, u_int cbp)
+{
+    int i;
+    sceGsLoadImage li;
+    u_long128 *pClut;
+    int cpsm;
+
+    /* the CLUT's pixel format */
+    if (ph->ClutType == TIM2_NONE) {
+        /* no CLUT data */
+        return (1);
+    } else if ((ph->ClutType & 0x3F) == TIM2_RGB16) {
+        cpsm = SCE_GS_PSMCT16;
+    } else if ((ph->ClutType & 0x3F) == TIM2_RGB24) {
+        cpsm = SCE_GS_PSMCT24;
+    } else {
+        cpsm = SCE_GS_PSMCT32;
+    }
+    ((sceGsTex0 *)&ph->GsTex0)->CPSM = cpsm; /* CLUT pixel format */
+    ((sceGsTex0 *)&ph->GsTex0)->CSM = 0; /* CLUT storage mode (always CSM1) */
+    ((sceGsTex0 *)&ph->GsTex0)->CSA = 0; /* CLUT entry offset (always 0) */
+    ((sceGsTex0 *)&ph->GsTex0)->CLD = 1; /* CLUT buffer load control (always load) */
+
+    if (cbp == -1) {
+        /* no cbp given: take it from the header's GsTex0 */
+        cbp = ((sceGsTex0 *)&ph->GsTex0)->CBP;
+    } else {
+        /* cbp given: override the header's GsTex0 */
+        ((sceGsTex0 *)&ph->GsTex0)->CBP = cbp;
+    }
+
+    /* address of the CLUT data */
+    pClut = (u_long128 *)((char *)ph + ph->HeaderSize + ph->ImageSize);
+
+    /* send the CLUT data to the GS local memory; its layout depends on the CLUT and texture formats */
+    switch ((ph->ClutType << 8) | ph->ImageType) {
+    case (((TIM2_RGB16 | 0x40) << 8) | TIM2_IDTEX4):
+    case (((TIM2_RGB24 | 0x40) << 8) | TIM2_IDTEX4):
+    case (((TIM2_RGB32 | 0x40) << 8) | TIM2_IDTEX4):
+    case ((TIM2_RGB16 << 8) | TIM2_IDTEX8):
+    case ((TIM2_RGB24 << 8) | TIM2_IDTEX8):
+    case ((TIM2_RGB32 << 8) | TIM2_IDTEX8):
+        /* already in CSM1 order: send as is */
+        Tim2LoadTexture(cpsm, cbp, 1, 16, (ph->ClutColors / 16), pClut);
+        break;
+
+    case ((TIM2_RGB16 << 8) | TIM2_IDTEX4):
+    case ((TIM2_RGB24 << 8) | TIM2_IDTEX4):
+    case ((TIM2_RGB32 << 8) | TIM2_IDTEX4):
+    case (((TIM2_RGB16 | 0x80) << 8) | TIM2_IDTEX4):
+    case (((TIM2_RGB24 | 0x80) << 8) | TIM2_IDTEX4):
+    case (((TIM2_RGB32 | 0x80) << 8) | TIM2_IDTEX4):
+    case (((TIM2_RGB16 | 0x80) << 8) | TIM2_IDTEX8):
+    case (((TIM2_RGB24 | 0x80) << 8) | TIM2_IDTEX8):
+    case (((TIM2_RGB32 | 0x80) << 8) | TIM2_IDTEX8):
+        /* linear order: reorder to CSM1 while sending */
+        for (i = 0; i < (ph->ClutColors / 16); i++) {
+            sceGsSetDefLoadImage(&li, cbp, 1, cpsm, (i & 1) * 8, (i >> 1) * 2, 8, 2);
+            FlushCache(WRITEBACK_DCACHE);
+            sceGsExecLoadImage(&li, pClut);
+            sceGsSyncPath(0, 0);
+
+            /* next 16 colors */
+            if ((ph->ClutType & 0x3F) == TIM2_RGB16) {
+                pClut = (u_long128 *)((char *)pClut + 2 * 16);
+            } else if ((ph->ClutType & 0x3F) == TIM2_RGB24) {
+                pClut = (u_long128 *)((char *)pClut + 3 * 16);
+            } else {
+                pClut = (u_long128 *)((char *)pClut + 4 * 16);
+            }
+        }
+        break;
+
+    default:
+        printf(D_004FCAF0, ph->ClutType, ph->ImageType);
+        return (0);
+    }
+    return (1);
+}
+int Tim2TakeSnapshot(sceGsDispEnv *d0, sceGsDispEnv *d1, char *pszFname)
+{
+    int i;
+
+    int h; /* file handle */
+    int nWidth, nHeight; /* image size */
+    int nImageType; /* image type */
+    int psm; /* pixel format */
+    int nBytes; /* bytes per raster */
+
+    /* image size and pixel format */
+    nWidth = d0->display.DW / (d0->display.MAGH + 1);
+    nHeight = d0->display.DH + 1;
+    psm = d0->dispfb.PSM;
+
+    /* bytes per raster and TIM2 image type from the pixel format */
+    switch (psm) {
+    case SCE_GS_PSMCT32:
+        nBytes = nWidth * 4;
+        nImageType = TIM2_RGB32;
+        break;
+    case SCE_GS_PSMCT24:
+        nBytes = nWidth * 3;
+        nImageType = TIM2_RGB24;
+        break;
+    case SCE_GS_PSMCT16:
+        nBytes = nWidth * 2;
+        nImageType = TIM2_RGB16;
+        break;
+    case SCE_GS_PSMCT16S:
+        nBytes = nWidth * 2;
+        nImageType = TIM2_RGB16;
+        break;
+    default:
+        /* illegal pixel format (GS_PSGPU24 is not supported) */
+        printf(D_004FCB28);
+        return (0);
+    }
+
+    /* open the TIM2 file */
+    h = sceOpen(pszFname, SCE_WRONLY | SCE_CREAT);
+    if (h == -1) {
+        printf(D_004FCB40);
+        return (0);
+    }
+
+    /* the file header */
+    {
+        TIM2_FILEHEADER fhdr;
+
+        fhdr.FileId[0] = 'T';
+        fhdr.FileId[1] = 'I';
+        fhdr.FileId[2] = 'M';
+        fhdr.FileId[3] = '2';
+        fhdr.FormatVersion = 3;
+        fhdr.FormatId = 0; /* 16 byte alignment */
+        fhdr.Pictures = 1;
+        for (i = 0; i < 8; i++) {
+            fhdr.Reserved[i] = 0;
+        }
+
+        sceWrite(h, &fhdr, sizeof(TIM2_FILEHEADER));
+    }
+
+    /* the picture header */
+    {
+        TIM2_PICTUREHEADER phdr;
+        int nImageSize = nBytes * nHeight;
+
+        phdr.TotalSize = sizeof(TIM2_PICTUREHEADER) + nImageSize;
+        phdr.ClutSize = 0;
+        phdr.ImageSize = nImageSize;
+        phdr.HeaderSize = sizeof(TIM2_PICTUREHEADER);
+        phdr.ClutColors = 0;
+        phdr.PictFormat = 0;
+        phdr.MipMapTextures = 1;
+        phdr.ClutType = TIM2_NONE;
+        phdr.ImageType = nImageType;
+        phdr.ImageWidth = nWidth;
+        phdr.ImageHeight = nHeight;
+
+        /* all GS registers 0 */
+        phdr.GsTex0 = 0;
+        ((sceGsTex0 *)&phdr.GsTex0)->TBW = Tim2CalcBufWidth(psm, nWidth);
+        ((sceGsTex0 *)&phdr.GsTex0)->PSM = psm;
+        ((sceGsTex0 *)&phdr.GsTex0)->TW = Tim2GetLog2(nWidth);
+        ((sceGsTex0 *)&phdr.GsTex0)->TH = Tim2GetLog2(nHeight);
+        phdr.GsTex1 = 0;
+        phdr.GsRegs = 0;
+        phdr.GsTexClut = 0;
+
+        sceWrite(h, &phdr, sizeof(TIM2_PICTUREHEADER));
+    }
+
+    /* the image data */
+    for (i = 0; i < nHeight; i++) {
+        u_char buf[4096]; /* raster buffer */
+        sceGsStoreImage si;
+
+        memset(buf, 0, sizeof(buf));
+        if (d1) {
+            /* interlaced */
+            if (!(i & 1)) {
+                /* even raster */
+                sceGsSetDefStoreImage(&si, d0->dispfb.FBP * 32, d0->dispfb.FBW, psm, d0->dispfb.DBX,
+                                      (d0->dispfb.DBY + i / 2), nWidth, 1);
+            } else {
+                /* odd raster */
+                sceGsSetDefStoreImage(&si, d1->dispfb.FBP * 32, d1->dispfb.FBW, psm, d1->dispfb.DBX,
+                                      (d1->dispfb.DBY + i / 2), nWidth, 1);
+            }
+        } else {
+            /* non-interlaced */
+            sceGsSetDefStoreImage(&si, d0->dispfb.FBP * 32, d0->dispfb.FBW, psm, d0->dispfb.DBX,
+                                  (d0->dispfb.DBY + i), nWidth, 1);
+        }
+        FlushCache(WRITEBACK_DCACHE);
+
+        sceGsExecStoreImage(&si, (u_long128 *)buf); /* request the VRAM transfer */
+        sceGsSyncPath(0, 0); /* wait for it */
+
+        sceWrite(h, buf, nBytes); /* write one raster */
+    }
+
+    sceClose(h);
+    return (1);
+}
+#ifdef TIM2_C_JT /* jump tables: need the data from source */
+void Tim2LoadTexture(int psm, u_int tbp, int tbw, int w, int h, u_long128 *pImage)
+{
+    sceGsLoadImage li;
+    int i, l, n;
+    u_long128 *p;
+
+    switch (psm) {
+    case SCE_GS_PSMZ32:
+    case SCE_GS_PSMCT32:
+        n = w * 4;
+        break;
+
+    case SCE_GS_PSMZ24:
+    case SCE_GS_PSMCT24:
+        n = w * 3;
+        break;
+
+    case SCE_GS_PSMZ16:
+    case SCE_GS_PSMZ16S:
+    case SCE_GS_PSMCT16:
+    case SCE_GS_PSMCT16S:
+        n = w * 2;
+        break;
+
+    case SCE_GS_PSMT8H:
+    case SCE_GS_PSMT8:
+        n = w;
+        break;
+
+    case SCE_GS_PSMT4HL:
+    case SCE_GS_PSMT4HH:
+    case SCE_GS_PSMT4:
+        n = w / 2;
+        break;
+
+    default:
+        return;
+    }
+
+    /* send in pieces below the 512KB DMA limit */
+    l = 32764 * 16 / n;
+    for (i = 0; i < h; i += l) {
+        p = (u_long128 *)((char *)pImage + n * i);
+        if ((i + l) > h) {
+            l = h - i;
+        }
+
+        sceGsSetDefLoadImage(&li, tbp, tbw, psm, 0, i, w, l);
+        FlushCache(WRITEBACK_DCACHE);
+        sceGsExecLoadImage(&li, p);
+        sceGsSyncPath(0, 0);
+    }
+}
+
+void Tim2StoreTexture(int psm, u_int tbp, int tbw, int w, int h, u_long128 *pImage)
+{
+    sceGsStoreImage si;
+    int i, l, n;
+    u_long128 *p;
+
+    switch (psm) {
+    case SCE_GS_PSMZ32:
+    case SCE_GS_PSMCT32:
+        n = w * 4;
+        break;
+
+    case SCE_GS_PSMZ24:
+    case SCE_GS_PSMCT24:
+        n = w * 3;
+        break;
+
+    case SCE_GS_PSMZ16:
+    case SCE_GS_PSMZ16S:
+    case SCE_GS_PSMCT16:
+    case SCE_GS_PSMCT16S:
+        n = w * 2;
+        break;
+
+    case SCE_GS_PSMT8H:
+    case SCE_GS_PSMT8:
+        n = w;
+        break;
+
+    case SCE_GS_PSMT4HL:
+    case SCE_GS_PSMT4HH:
+    case SCE_GS_PSMT4:
+        n = w / 2;
+        break;
+
+    default:
+        return;
+    }
+
+    /* read in pieces below the 512KB DMA limit */
+    l = 32764 * 16 / n;
+    for (i = 0; i < h; i += l) {
+        p = (u_long128 *)((char *)pImage + n * i);
+        if ((i + l) > h) {
+            l = h - i;
+        }
+
+        sceGsSetDefStoreImage(&si, tbp, tbw, psm, 0, i, w, l);
+        FlushCache(WRITEBACK_DCACHE);
+        sceGsExecStoreImage(&si, p);
+        sceGsSyncPath(0, 0);
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2LoadTexture);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2StoreTexture);
+#endif
 
 #ifdef TIM2_C_JT /* jump table: needs the data from source */
 /* buffer width in units of 64 pixels */

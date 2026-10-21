@@ -90,7 +90,7 @@ typedef struct {
 
 u_int Tim2LoadImage(TIM2_PICTUREHEADER *ph, u_int tbp);
 u_int Tim2LoadClut(TIM2_PICTUREHEADER *ph, u_int cbp);
-int Tim2LoadTexture(int psm, u_int tbp, int tbw, int w, int h, u_long128 *pImage);
+void Tim2LoadTexture(int psm, u_int tbp, int tbw, int w, int h, u_long128 *pImage);
 void *Tim2GetImage(TIM2_PICTUREHEADER *ph, int mipmap);
 void *Tim2GetClut(TIM2_PICTUREHEADER *ph);
 int Tim2GetMipMapPictureSize(TIM2_PICTUREHEADER *ph, int mipmap, int *pWidth, int *pHeight);
