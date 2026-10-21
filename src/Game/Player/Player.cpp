@@ -183,7 +183,9 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkLockon__7CPlay
 void CPlayer::cancelLockon() {
     m_pMarker->cancelLockon(m_hLockon, TRUE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", autoLockon__7CPlayer);
+void CPlayer::autoLockon() {
+    if (m_bIsBattleScene && !m_hLockon) m_pMarker->setMode(1);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPushon__7CPlayeri);
 void CPlayer::setTrgFlagRendaNG(const CHAR* inName) {
     if (!DebugWork::g_dw.player.iRenda) m_uiTrgFlag |= 0x40000;
