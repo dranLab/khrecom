@@ -93,7 +93,15 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimForce__7CP
 void CPlayer::setAnim(INT inID, INT inTq, INT inGr) {
     if (m_iNowAnimID != inID) setAnimForce(inID, inTq, inGr, 0, 0, 0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimSpeed__7CPlayerf);
+void CPlayer::setAnimSpeed(FLOAT inSpeed) {
+    if (m_fAnimSpeed != inSpeed) {
+        m_fAnimSpeed = inSpeed;
+        CEntity::setAnimSpeed(inSpeed);
+        if (isPlayerFlag(0x40000000)) {
+            m_pWeapon->setAnimSpeed(m_fAnimSpeed);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimSkillEx__7CPlayeriiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimRsrcEx__7CPlayeriiiiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowIdleAnim__7CPlayer);
