@@ -22,6 +22,7 @@
 #include "Game/Player/PlayerCamera.h"
 #include "Game/SceneInfo.h"
 #include "Game/Gimmick/BaseGimmick.h"
+#include "Game/Collision/CollMap.h"
 #include "System/HeapMan.h"
 #include "include_asm.h"
 
@@ -226,7 +227,14 @@ void CPlayer::getCameraTargetPos(FVECTOR& outPos) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBodyRevise__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", recoverCollMap__7CPlayer);
+void CPlayer::recoverCollMap() {
+    if (m_pCollMap) {
+        m_pCollMap->setType(COLL_TYPE_SPHERE);
+        m_pCollMap->enableSliding(1);
+        m_pMove->setFootRadius(m_fFootRadius);
+        m_pMove->setWallRadius(m_fWallRadius);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setDownForce__7CPlayer);
 void CPlayer::setLand(FLOAT inDownLEngth, FLOAT inUpLength, BOOL inFirstHit) {
     recoverCollMap();
