@@ -339,6 +339,7 @@ public:
     INT isNowCardActionState();
     INT chkWalkMode();
     void exeWalk();
+    void recoverCollMap();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
     void setConditionFlag(UINT inSet, UINT inMask) { m_uiConditionFlag = (m_uiConditionFlag | inSet) & ~inMask; }
     // PARTIAL: added for Game/Player/FriendKing
