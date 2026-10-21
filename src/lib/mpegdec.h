@@ -62,6 +62,34 @@ typedef struct {
     int _w[4];
 } _sceMpegAlalc;
 
+/* arguments of one hand-written reference copy (_rix_* / _ri0_*) */
+typedef struct {
+    void *dst;
+    int shift;
+    int count;
+    int count2;
+    int stride;
+    void *src0;
+    void *src1;
+} _sceMpegRiArg;
+
+/* one macroblock's motion compensation work (double-buffered) */
+typedef struct {
+    unsigned int sadr; /* 0x000 */
+    unsigned int buf; /* 0x004 */
+    unsigned int addr[8]; /* 0x008: DMA sources */
+    void (*rix[4])(void *); /* 0x028 */
+    void (*ri0[4])(void *); /* 0x038 */
+    _sceMpegRiArg rixArg[4]; /* 0x048 */
+    _sceMpegRiArg ri0Arg[4]; /* 0x0B8 */
+    unsigned int dst; /* 0x128 */
+    int count; /* 0x12C */
+    int intra; /* 0x130 */
+    int x134;
+    int mc; /* 0x138 */
+    int skip; /* 0x13C */
+} _sceMpegSpr;
+
 struct _sceMpegDecoder {
     int isEnd; /* 0x00 */
     int x4;
@@ -143,12 +171,7 @@ struct _sceMpegDecoder {
     _sceMpegPicture *top[4]; /* 0x1D8 */
     _sceMpegPicture *bottom[4]; /* 0x1E8 */
     _sceMpegPicture pict[9]; /* 0x1F8 */
-    unsigned int x5A0;
-    unsigned int x5A4;
-    char _pad5A8[0x6E0 - 0x5A8];
-    unsigned int x6E0;
-    unsigned int x6E4;
-    char _pad6E8[0x820 - 0x6E8];
+    _sceMpegSpr spr[2]; /* 0x5A0 */
     int x820;
     int _pad824;
     int x828;

@@ -10,6 +10,7 @@ void _sceMpegFlushBuf(_sceMpegDecoder *d, int n);
 #define IPU_BP 0x10002020
 #define IPU_TOP 0x10002030
 #define D3_MADR 0x1000B010
+#define D9_CHCR 0x1000D400
 
 int DIntr(void);
 int EIntr(void);
@@ -21,6 +22,10 @@ unsigned long _sceMpegWaitIpuIdle64(_sceMpegDecoder *d);
 unsigned int _sceMpegNextBit(_sceMpegDecoder *d, int n);
 unsigned int _sceMpegPeepBit(_sceMpegDecoder *d, int n);
 static void _waitIpuIdle(_sceMpegDecoder *d);
+static void _getAllRefs(_sceMpegDecoder *d, int x, int y, int mbtype, int motion_type, int (*pmv)[2][2], int (*mvfs)[2]);
+static void dmaRefImage(_sceMpegDecoder *d);
+void _copyRefImage(unsigned int dst, unsigned int src);
+void _copyAddRefImage(unsigned int dst, unsigned int src, unsigned int buf);
 static void _flushBuf(_sceMpegDecoder *d, int n);
 
 /* issues an IPU command; the bit buffer is kept valid only across BDEC, VDEC and FDEC */
@@ -117,21 +122,72 @@ __asm__(".rdata\n"
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _getAllRefs);
 
-/* _motionComp0's strings */
-__asm__(".rdata\n"
-        ".align 3\n.asciz \"Invalid modion type -- ignored(%d)\"\n"
-        ".text\n");
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _motionComp0);
+static int _motionComp0(_sceMpegDecoder *d, int mbaddr, int dct_type, int mbtype, int motion_type, int (*pmv)[2][2],
+                        int (*mvfs)[2])
+{
+    int intra = mbtype & 1;
+    int mby = mbaddr / d->x13C;
+    int mbx = mbaddr % d->x13C;
+    int x = mbx << 4;
+    int y = mby << 4;
+    _sceMpegPicture *p;
+
+    if (intra) {
+        while ((REG(D9_CHCR) >> 8) & 1)
+            ;
+        d->spr[d->x820].mc = 0;
+    } else {
+        if ((unsigned int)(motion_type - 1) >= 3) {
+            _sceMpegError1(d, "Invalid modion type -- ignored(%d)", motion_type);
+            d->x12C = 1;
+            return 0;
+        }
+        _getAllRefs(d, x, y, mbtype, motion_type, pmv, mvfs);
+        while ((REG(D9_CHCR) >> 8) & 1)
+            ;
+        dmaRefImage(d);
+        d->spr[d->x820].mc = 1;
+    }
+    if (dct_type == 1 && (mbtype & 2)) {
+        d->spr[d->x820].x134 = dct_type;
+    } else {
+        d->spr[d->x820].x134 = 0;
+    }
+    d->spr[d->x820].intra = intra;
+    if (d->x184 == 3) {
+        d->spr[d->x820].dst = d->frame[2]->buf + (mbx * d->frame[2]->mbh + mby) * 0x180;
+    } else {
+        p = (d->x184 == 2) ? d->bottom[2] : d->top[2];
+        d->spr[d->x820].dst = p->buf + (mbx * p->mbh + mby) * 0x180;
+    }
+    return 1;
+}
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _getRef0);
 
-/* _doMC's strings */
-__asm__(".rdata\n"
-        ".align 3\n.asciz \"intra && skip MB\"\n"
-        ".text\n");
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _doMC);
+static void _doMC(_sceMpegDecoder *d, int idx)
+{
+    int i;
+
+    if (d->spr[idx].mc) {
+        for (i = 0; i < d->spr[idx].count; i++) {
+            d->spr[idx].rix[i](&d->spr[idx].rixArg[i]);
+            d->spr[idx].ri0[i](&d->spr[idx].ri0Arg[i]);
+        }
+    }
+    if (d->spr[idx].intra && d->spr[idx].skip) {
+        _sceMpegError(d, "intra && skip MB");
+    }
+    if (d->spr[idx].intra) {
+        _copyRefImage(d->spr[idx].dst, d->spr[idx].buf);
+    } else if (d->spr[idx].skip) {
+        _copyRefImage(d->spr[idx].dst, d->x830);
+    } else {
+        _copyAddRefImage(d->spr[idx].dst, d->x830, d->spr[idx].buf);
+    }
+}
 
 /* _sceMpegPictureData0's strings */
 __asm__(".rdata\n"

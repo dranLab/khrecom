@@ -31,7 +31,7 @@ static inline int _decPicture(_sceMpegDecoder *d);
 
 typedef char _check_size[sizeof(_sceMpegDecoder) == 0x19A0 ? 1 : -1];
 typedef char _check_pict[(unsigned int)&((_sceMpegDecoder *)0)->pict == 0x1F8 ? 1 : -1];
-typedef char _check_5a0[(unsigned int)&((_sceMpegDecoder *)0)->x5A0 == 0x5A0 ? 1 : -1];
+typedef char _check_5a0[(unsigned int)&((_sceMpegDecoder *)0)->spr == 0x5A0 ? 1 : -1];
 typedef char _check_878[(unsigned int)&((_sceMpegDecoder *)0)->abort == 0x878 ? 1 : -1];
 typedef char _check_128[(unsigned int)&((_sceMpegDecoder *)0)->x128 == 0x128 ? 1 : -1];
 
@@ -60,17 +60,17 @@ static void _clearOnce(_sceMpegDecoder *d)
         unsigned char *spr = (unsigned char *)0x70000000;
 
         d->x830 = (unsigned int)(spr + 0x3600);
-        d->x5A0 = (unsigned int)spr;
-        d->x5A4 = (unsigned int)(spr + 0x1800);
-        d->x6E0 = (unsigned int)(spr + 0x1B00);
-        d->x6E4 = (unsigned int)(spr + 0x3300);
+        d->spr[0].sadr = (unsigned int)spr;
+        d->spr[0].buf = (unsigned int)(spr + 0x1800);
+        d->spr[1].sadr = (unsigned int)(spr + 0x1B00);
+        d->spr[1].buf = (unsigned int)(spr + 0x3300);
         d->x820 = 0;
     } else if (d->buffType == 1) {
         d->x830 = (unsigned int)d->xE80;
-        d->x5A4 = ((unsigned int)d->bstag & 0x0FFFFFFF) | 0x30000000;
-        d->x5A0 = 0;
-        d->x6E4 = ((unsigned int)d->idct & 0x0FFFFFFF) | 0x30000000;
-        d->x6E0 = 0;
+        d->spr[0].buf = ((unsigned int)d->bstag & 0x0FFFFFFF) | 0x30000000;
+        d->spr[0].sadr = 0;
+        d->spr[1].buf = ((unsigned int)d->idct & 0x0FFFFFFF) | 0x30000000;
+        d->spr[1].sadr = 0;
         d->x820 = 0;
     } else {
         _sceMpegError(d, "Unknown buff type.");
