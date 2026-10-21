@@ -450,6 +450,7 @@ public:
     INT isActionFlag(UINT inFlag) { return m_uiActionFlag & inFlag; }
     INT isTrgFlag(UINT inFlag) { return m_uiTrgFlag & inFlag; }
     static CPlayer* m_pInstance;
+    static CPlayer*& _instance() { return m_pInstance; } // PARTIAL: reference accessor (as CStatus::_info): the original reloads m_pInstance after every store
     static void enablePadControl(INT inFlag);
     static void enableDbgPadControl(INT inFlag);
     void changeState(INT inState);
@@ -494,6 +495,7 @@ public:
     void setCastEffect(const CHAR* inName, INT inNo, CCoord* inCoord, FVECTOR* inPos);
     // PARTIAL: added for Game/Player/PlayerDRiku
     static INT importStatus();
+    static INT exportStatus();
     void setDefAttr(FLOAT* inAttr);
     // PARTIAL: added for Game/Player/Player
     static INT calcNextEXP(INT inLv) __attribute__((const));
