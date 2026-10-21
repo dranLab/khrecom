@@ -29,13 +29,23 @@ extern "C" char D_00499828[];
 extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 extern "C" char D_0049B308[];
+namespace PL {
+extern FVECTOR g_vDummyPlayerPos; // data from the asm until SOURCE DATA
+extern FVECTOR g_vBanishPos;
+}
 inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_0025F688);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerAttack__9DWTPlayerP12CDebugWindowii_0025F798);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugWinPlayer__9DWTPlayerP12CDebugWindowii_0025FA48);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getPlayerPos__Fi);
+FVECTOR getPlayerPos(BOOL flag) {
+    if (g_pPlayer) {
+        if (!flag && g_pPlayer->isConditionFlag(0x40)) return PL::g_vBanishPos;
+        return g_pPlayer->getPos();
+    }
+    return PL::g_vDummyPlayerPos;
+}
 INT CPlayer::calcNextEXP(INT inLv) {
     INT nExp = 25;
     for (INT i = 3; i <= inLv + 1; i++) {

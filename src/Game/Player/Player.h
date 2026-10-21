@@ -545,6 +545,7 @@ public:
 };
 
 extern CPlayer* g_pPlayer;
+FVECTOR getPlayerPos(BOOL flag);
 
 // PARTIAL: added for Game/Player/PlayerManager
 struct PL_PARAM {
