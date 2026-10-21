@@ -402,7 +402,13 @@ void CPlayer::cmdMove_WaterSurfaceCheck(INT inFlag) {
     else m_pMove->setFlag(0x80, FALSE);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdState_initWorldSelect__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdState_setEncountWait__7CPlayer);
+void CPlayer::cmdState_setEncountWait() {
+    setPlayerFlag(0x100, 0);
+    changeState(2);
+    setPlayerFlag(0x1001, 0);
+    m_collBody.off();
+    m_collBody.offBody();
+}
 void CPlayer::beginStateField_() {
     beginStateField();
 }
