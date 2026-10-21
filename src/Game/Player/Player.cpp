@@ -19,6 +19,7 @@
 #include "Game/Player/PlayerAnim.h"
 #include "Game/GameWork.h"
 #include "Form/Menu/WorldSelect.h"
+#include "Game/Player/PlayerCamera.h"
 #include "System/HeapMan.h"
 #include "include_asm.h"
 
@@ -205,7 +206,13 @@ void CPlayer::stateHide() {
     }
     chkAtelHide(0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateHide__7CPlayer);
+void CPlayer::endStateHide() {
+    setEntityFlag(0, 1);
+    setPlayerFlag(0, 0x1001);
+    setLand(5.0f, 0.5f, 1);
+    clearSpeed();
+    m_pCam->setFlag(1, FALSE); /* the partial CPlayerCamera keeps (flag, on/off): the original is setFlag(0, 1) */
+}
 BOOL CPlayer::isNowInAir() {
     m_bAirCheck = FALSE;
     return isAir();
