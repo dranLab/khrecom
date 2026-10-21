@@ -32,7 +32,12 @@ INT CPlayer::getNowTotalMP() {
     if (!m_pInstance) return CStatus::getMP();
     return m_pInstance->m_iMP;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", enablePadControl__7CPlayeri);
+void CPlayer::enablePadControl(INT inFlag) {
+    if (m_pInstance) {
+        UINT bit = 1;
+        m_pInstance->m_uiPadFlag = (m_pInstance->m_uiPadFlag | inFlag) & ~(inFlag ^ bit);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", enableDbgPadControl__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", __7CPlayerP5CTaskUii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _$_7CPlayer);

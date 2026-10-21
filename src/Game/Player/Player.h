@@ -428,6 +428,8 @@ public:
     INT isActionFlag(UINT inFlag) { return m_uiActionFlag & inFlag; }
     INT isTrgFlag(UINT inFlag) { return m_uiTrgFlag & inFlag; }
     static CPlayer* m_pInstance;
+    static void enablePadControl(INT inFlag);
+    static void enableDbgPadControl(INT inFlag);
     void changeState(INT inState);
     void initActionSkill();
     void setPlayerState(PlayerState inState);
