@@ -18,6 +18,12 @@ void _sceMpegError(_sceMpegDecoder *d, const char *msg);
 void _sceMpegError1(_sceMpegDecoder *d, const char *fmt, int arg);
 int _sceMpegDispatchMpegCbNodata(sceMpeg *mp);
 void _sceMpegStopIpuDma(void);
+void _sceMpegErrorBdec(_sceMpegDecoder *d);
+static int _slice0(_sceMpegDecoder *d, int n);
+int _sceMpegSliceA0(_sceMpegDecoder *d, int n, int *mbaddr, int *mbinc, int (*pmv)[2][2]);
+static int _decMB0(_sceMpegDecoder *d, int *mbtype, int *motion_type, int *dct_type, int (*pmv)[2][2], int (*mvfs)[2],
+                   int *dmv);
+static int _skipMB0(_sceMpegDecoder *d, int (*pmv)[2][2], int *motion_type, int (*mvfs)[2], int *mbtype);
 unsigned long _sceMpegWaitIpuIdle64(_sceMpegDecoder *d);
 unsigned int _sceMpegNextBit(_sceMpegDecoder *d, int n);
 unsigned int _sceMpegPeepBit(_sceMpegDecoder *d, int n);
@@ -124,7 +130,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _getAllRefs);
 
 
 static int _motionComp0(_sceMpegDecoder *d, int mbaddr, int dct_type, int mbtype, int motion_type, int (*pmv)[2][2],
-                        int (*mvfs)[2])
+                        int (*mvfs)[2], int *dmv)
 {
     int intra = mbtype & 1;
     int mby = mbaddr / d->x13C;
@@ -164,6 +170,140 @@ static int _motionComp0(_sceMpegDecoder *d, int mbaddr, int dct_type, int mbtype
     return 1;
 }
 
+/* same structure and size as the original; register allocation differs (the original keeps y in s1, n in t9 and
+   spills avg << 2) */
+#if 0
+/* sets up the copies of one reference block: luminance (_rix_*) and chrominance (_ri0_*) */
+static void _getRef0(_sceMpegDecoder *d, _sceMpegPicture *pic, int sel, int dblk, int yblk, int h, int x, int y,
+                     int mvx, int mvy, int fld, int avg)
+{
+    int n;
+    unsigned int dst;
+    _sceMpegRiArg *ra;
+    _sceMpegRiArg *ra0;
+    int lx;
+    int ly;
+    int mbx;
+    int mby;
+    int cx;
+    int cy;
+    int cbx;
+    int cby;
+    int cyb;
+    int cmx;
+    int hx;
+    int hy;
+    int c;
+    int li;
+    int off;
+    unsigned char *src0;
+    unsigned char *src1;
+    unsigned char *base;
+
+    n = d->spr[d->x820].count;
+    dst = d->x830;
+    ra = &d->spr[d->x820].rixArg[n];
+    ra0 = &d->spr[d->x820].ri0Arg[n];
+
+    lx = (mvx >> 1) + x;
+    if (fld) {
+        ly = (mvy >> 1) * 2 + (y + (yblk + sel));
+    } else {
+        ly = (mvy >> 1) + (y + (yblk + sel));
+    }
+    mbx = lx >> 4;
+    mby = ly >> 4;
+    src0 = (unsigned char *)pic->buf + (mbx * pic->mbh + mby) * 0x180;
+    src1 = (unsigned char *)pic->buf + (mbx * pic->mbh + mby + pic->mbh) * 0x180;
+    d->spr[d->x820].addr0[n] = src0;
+    d->spr[d->x820].addr1[n] = src1;
+    ra->dst = dst + (dblk + yblk) * 32;
+    ra->shift = lx - (mbx << 4);
+    hx = mvx & 1;
+    hy = mvy & 1;
+    ly -= mby << 4;
+    if (hy) {
+        if (ly + (h << fld) < 16) {
+            ra->count = h;
+            ra->count2 = 0;
+        } else {
+            c = (16 >> fld) - (ly >> fld) - 1;
+            ra->count = c;
+            ra->count2 = h - c;
+        }
+    } else {
+        if (ly + (h << fld) > 16) {
+            c = (16 >> fld) - (ly >> fld);
+            ra->count = c;
+            ra->count2 = h - c;
+        } else {
+            ra->count = h;
+            ra->count2 = 0;
+        }
+    }
+    if (d->buffType == 0) {
+        base = (unsigned char *)d->spr[d->x820].sadr + n * 0x600;
+        ra->src0 = base + ly * 16;
+        ra->src1 = base + (ly * 16 + 0x300);
+    } else {
+        base = src0;
+        ra->src0 = src0 + ly * 16;
+        ra->src1 = src1 + ly * 16;
+    }
+    ra->stride = 16 << fld;
+    li = (avg << 2) | (hx << 1);
+    li |= hy;
+    cmx = mvx / 2;
+    mvy /= 2;
+    h >>= 1;
+    cyb = yblk >> 1;
+    cx = (cmx >> 1) + (x >> 1);
+    if (fld) { cy = (mvy >> 1) * 2 + ((y >> 1) + (cyb + sel)); } else { cy = (mvy >> 1) + ((y >> 1) + (cyb + sel)); }
+    cbx = cx >> 3;
+    cby = cy >> 3;
+    ra0->dst = dst + (dblk + cyb) * 16 + 0x200;
+    ra0->shift = cx - (cbx << 3);
+    hx = cmx & 1;
+    hy = mvy & 1;
+    cy -= cby << 3;
+    if (hy) {
+        if (cy + (h << fld) < 8) {
+            ra0->count = h;
+            ra0->count2 = 0;
+        } else {
+            c = (8 >> fld) - (cy >> fld) - 1;
+            ra0->count = c;
+            ra0->count2 = h - c;
+        }
+    } else {
+        if (cy + (h << fld) > 8) {
+            c = (8 >> fld) - (cy >> fld);
+            ra0->count = c;
+            ra0->count2 = h - c;
+        } else {
+            ra0->count = h;
+            ra0->count2 = 0;
+        }
+    }
+    off = ((cbx - mbx) * 2 + (cby - mby)) * 0x180;
+    base += off;
+    if (d->buffType == 0) {
+        ra0->src0 = base + (cy * 8 + 0x100);
+        ra0->src1 = base + (cy * 8 + 0x400);
+    } else {
+        if ((unsigned int)(off + ({ cy * 8 + 0x100; })) <= 0x300) {
+            ra0->src0 = src0 + off + ({ cy * 8 + 0x100; });
+        } else {
+            ra0->src0 = src1 + off + ({ cy * 8 + 0x100; }) - 0x300;
+        }
+        ra0->src1 = src1 + off + ({ cy * 8 + 0x100; });
+    }
+    ra0->stride = 8 << fld;
+    d->spr[d->x820].rix[n] = _rix[li];
+    d->spr[d->x820].ri0[n] = _ri0[(avg << 2) | (hx << 1) | hy];
+    d->spr[d->x820].count++;
+}
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _getRef0);
 
 
@@ -189,19 +329,135 @@ static void _doMC(_sceMpegDecoder *d, int idx)
     }
 }
 
-/* _sceMpegPictureData0's strings */
-__asm__(".rdata\n"
-        ".align 3\n.asciz \"= Skip to the next picture =\"\n"
-        ".text\n");
+/* waits until the IPU output DMA has drained; FALSE on abort or a decoding error */
+static inline int _waitIpuDma(_sceMpegDecoder *d)
+{
+    unsigned int bp;
+    long top;
+    int ret = 1;
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _sceMpegPictureData0);
+    while (REG(D3_QWC) != 0 && !(REG(IPU_CTRL) & 0x4000)) {
+        if (REG(D4_QWC) == 0 && !(REG(D4_CHCR) & 0x100)) {
+            _sceMpegDispatchMpegCbNodata(d->mp);
+        }
+        if (d->abort) {
+            _sceMpegStopIpuDma();
+            return 0;
+        }
+    }
+    bp = REG(IPU_BP);
+    top = *(volatile long *)IPU_TOP;
+    d->x848 = (int)top;
+    if (top < 0) {
+        d->x84C = (bp & 0x1F) ? 32 - (bp & 0x1F) : 0;
+    } else {
+        d->x84C = 32;
+    }
+    if (REG(IPU_CTRL) & 0x4000) {
+        _sceMpegErrorBdec(d);
+        ret = 0;
+    }
+    return ret;
+}
 
-/* _slice0's strings */
-__asm__(".rdata\n"
-        ".align 3\n.asciz \"Too many macroblocks in picture\"\n"
-        ".text\n");
+int _sceMpegPictureData0(_sceMpegDecoder *d)
+{
+    int n;
+    int r;
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _slice0);
+    d->x820 = 0;
+    d->x824 = 0;
+    n = d->x13C * d->x140;
+    if (d->x184 != 3) {
+        n >>= 1;
+    }
+    while ((r = _slice0(d, n)) == 1 || r == 3);
+    _waitIpuIdle(d);
+    _waitIpuIdle(d);
+    if (!_waitIpuDma(d)) {
+        if (d->abort) {
+            return 4;
+        }
+        r = 2;
+    }
+    while ((REG(D9_CHCR) >> 8) & 1);
+    if (r == 0) {
+        _doMC(d, d->x820 == 0);
+    }
+    if (r == 1 || r == 2) {
+        _sceMpegError(d, "= Skip to the next picture =");
+    }
+    return r == 0;
+}
+
+static int _slice0(_sceMpegDecoder *d, int n)
+{
+    int pmv[2][2][2];
+    int mvfs[2][2];
+    int dmv[4];
+    int mbaddr;
+    int incr;
+    int mbtype;
+    int motion_type;
+    int dct_type;
+    int r;
+
+    mbaddr = 0;
+    incr = 0;
+    if ((r = _sceMpegSliceA0(d, n, &mbaddr, &incr, pmv)) != 0) {
+        return r;
+    }
+    d->x12C = 0;
+    for (;;) {
+        if (mbaddr >= n) {
+            return 0;
+        }
+        d->spr[d->x820].skip = 0;
+        _waitIpuIdle(d);
+        if (!_waitIpuDma(d)) {
+            if (d->abort) {
+                return 4;
+            }
+            return 2;
+        }
+        if (incr == 0) {
+            if (_sceMpegPeepBit(d, 23) == 0 || d->x12C) {
+                d->x12C = 0;
+                return 3;
+            }
+            incr = _sceMpegMbAddressIncrement(d);
+            if (d->x12C) {
+                d->x12C = 0;
+                return 1;
+            }
+        }
+        if (mbaddr >= n) {
+            _sceMpegError(d, "Too many macroblocks in picture");
+            return 2;
+        }
+        if (incr == 1) {
+            if (!_decMB0(d, &mbtype, &motion_type, &dct_type, pmv, mvfs, dmv)) {
+                d->x12C = 0;
+                return 1;
+            }
+        } else {
+            if (!_skipMB0(d, pmv, &motion_type, mvfs, &mbtype)) {
+                d->x12C = 0;
+                return 2;
+            }
+        }
+        if (!_motionComp0(d, mbaddr, incr, mbtype, motion_type, pmv, mvfs, dmv)) {
+            d->x12C = 0;
+            return 2;
+        }
+        if (mbaddr) {
+            _doMC(d, d->x820 ^ 1);
+        }
+        mbaddr++;
+        d->x820 ^= 1;
+        incr--;
+    }
+}
 /* _skipMB0's strings */
 __asm__(".rdata\n"
         ".align 3\n.asciz \"skiped macroblock in I picure is not allowed\"\n"

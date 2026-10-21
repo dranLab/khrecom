@@ -64,20 +64,21 @@ typedef struct {
 
 /* arguments of one hand-written reference copy (_rix_* / _ri0_*) */
 typedef struct {
-    void *dst;
+    unsigned int dst;
     int shift;
     int count;
     int count2;
     int stride;
-    void *src0;
-    void *src1;
+    unsigned char *src0;
+    unsigned char *src1;
 } _sceMpegRiArg;
 
 /* one macroblock's motion compensation work (double-buffered) */
 typedef struct {
     unsigned int sadr; /* 0x000 */
     unsigned int buf; /* 0x004 */
-    unsigned int addr[8]; /* 0x008: DMA sources */
+    unsigned char *addr0[4]; /* 0x008: DMA sources, first half */
+    unsigned char *addr1[4]; /* 0x018: second half */
     void (*rix[4])(void *); /* 0x028 */
     void (*ri0[4])(void *); /* 0x038 */
     _sceMpegRiArg rixArg[4]; /* 0x048 */
@@ -173,7 +174,7 @@ struct _sceMpegDecoder {
     _sceMpegPicture pict[9]; /* 0x1F8 */
     _sceMpegSpr spr[2]; /* 0x5A0 */
     int x820;
-    int _pad824;
+    int x824;
     int x828;
     int x82C;
     unsigned int x830;
