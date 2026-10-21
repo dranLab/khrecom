@@ -118,3 +118,59 @@ These have no `src/` file, so their code or data comes entirely from the origina
 - 22 units with a source file but functions or data still from assembly: 43 parked functions, 6 not
   attempted (`imdct`, `_vfprintf_r`, `sceSifInitRpc`, and the 3 `lib/output` display functions) and 27
   hand-written. 5 of the 22 units take a data section from assembly (2 of them have no functions left).
+
+## Permuter sweep (2026-10-21)
+
+`tools/permuter.py`, 5 minutes per parked function (18 parallel compiles). Score: differing instruction lines,
+0 = match. No function reached a match; the improved variants only reorder independent statements, swap operands
+or add temporaries, and were not adopted into the drafts (rerun the permuter to get them back).
+
+| unit | function | start | best | candidates |
+|---|---|---|---|---|
+| `lib/libpad2` | `scePad2CreateSocket` | 2 | 2 | 36071 |
+| `lib/nodebug/check_dll` | `snDllUnload` | 3 | 3 | 28149 |
+| `lib/kprintf2` | `_sceSnprintf` | 4 | 4 | 24377 |
+| `lib/libat3dec` | `f2t_nodata` | 5 | 5 | 40707 |
+| `lib/sifrpc` | `_sceRpcGetPacket` | 5 | 5 | 43216 |
+| `lib/nodebug/check_dll` | `relocate_dll` | 5 | 5 | 26540 |
+| `lib/csc` | `_doCSC2` | 7 | 7 | 40714 |
+| `lib/mpc` | `_getAllRefs` | 9 | 9 | 14356 |
+| `lib/csc` | `_sceMpegCscStoreRefImage` | 9 | 9 | 41037 |
+| `lib/timer` | `TimerBusClock2Freq` | 10 | 10 | 0 |
+| `lib/sifrpc` | `_request_rdata` | 11 | 11 | 57190 |
+| `lib/nodebug/strround` | `add_separators` | 11 | 11 | 34164 |
+| `lib/sifrpc` | `sceSifCallRpc` | 12 | 12 | 37453 |
+| `lib/libpad2` | `scePad2GetButtonInfo` | 12 | 12 | 27728 |
+| `lib/pack` | `sceMpegDemuxPssRing` | 14 | 14 | 13932 |
+| `lib/filestub` | `_sceFs_Rcv_Intr` | 14 | 14 | 12407 |
+| `lib/timer` | `SetNextComp` | 15 | 15 | 32159 |
+| `lib/nodebug/__errno` | `memcpy` | 15 | 15 | 48759 |
+| `lib/timer` | `TimerFreq2BusClock` | 16 | 16 | 0 |
+| `lib/kprintf2` | `printfloat` | 16 | 16 | 41578 |
+| `lib/libat3dec` | `at3dec_proc` | 20 | 20 | 40065 |
+| `lib/eecdvd_sceCdCallback` | `_sceCd_cbLoop` | 20 | 20 | 29755 |
+| `lib/sifrpc` | `_request_bind` | 21 | 21 | 46065 |
+| `lib/kprintf2` | `ftoi` | 21 | 21 | 29054 |
+| `lib/sifrpc` | `sceSifCheckStatRpc` | 25 | 25 | 11 |
+| `lib/mpc` | `_sceMpegMbAddressIncrement` | 28 | 28 | 19223 |
+| `lib/sifrpc` | `sceSifExecRequest` | 28 | 28 | 41720 |
+| `lib/libat3dec` | `gainc_window` | 31 | 29 | 35959 |
+| `lib/hncAt3dec` | `hncAt3dec_Idle` | 36 | 36 | 53651 |
+| `lib/sifcmd` | `_sceSifCmdIntrHdlr` | 36 | 36 | 44663 |
+| `lib/eecdvd_sceCdCallback` | `sceCdLayerSearchFile` | 37 | 37 | 22756 |
+| `lib/eecdvd_sceCdCallback` | `sceCdInit` | 42 | 38 | 24252 |
+| `lib/sifrpc` | `_request_call` | 45 | 45 | 48696 |
+| `lib/timer` | `cbTimerHandler` | 53 | 51 | 29222 |
+| `lib/sifrpc` | `_request_end` | 62 | 62 | 58153 |
+| `lib/nodebug/__errno` | `memmove` | 62 | 62 | 47810 |
+| `lib/graphdev_sceGsExecStoreImage` | `sceGsExecStoreImage` | 88 | 66 | 32270 |
+| `lib/eecdvd_sceCdCallback` | `_sceCdSC` | 73 | 73 | 51205 |
+| `lib/libat3dec` | `channel_conv_joint` | 95 | 79 | 36362 |
+| `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 113 | 113 | 47180 |
+| `lib/libat3dec` | `unpack_mddata` | 162 | 162 | 33164 |
+| `lib/nodebug/strround` | `fftoa` | 199 | 162 | 25625 |
+| `lib/mpc` | `_getRef0` | 182 | 181 | 16990 |
+
+Not searchable this way: `TimerBusClock2Freq`, `TimerFreq2BusClock`, `sceSifCheckStatRpc` (too small for the
+mutations; the timer pair differs in where div.s is placed). The drafts that are stuck at a low score differ in
+register choices that no statement-level mutation reaches.
