@@ -3,9 +3,16 @@
 
 void *memcpy(void *dst, const void *src, unsigned int n);
 
+/* joint stereo weights of the previous (0) and the current (1) frame */
+typedef struct {
+    unsigned short *w[4]; /* per band: weights of the two channels */
+    unsigned short *g; /* gains */
+    int n; /* bands below n use gain 0x8000 */
+} At3Joint;
+
 /* decoder work area (no type information: fields named by use) */
 typedef struct {
-    char _pad0[0x30];
+    At3Joint joint[2]; /* 0x0000 */
     char ch[2][0x33E0]; /* 0x0030: per-channel state */
     int x67F0;
     int nch; /* 0x67F4 */
@@ -36,7 +43,85 @@ void h_d_make(float *a, float *b, float *c, float *d);
 void h_iqmf_fb1(float *in, float *out, int odd);
 void h_iqmf_fb2(float *p);
 
+/* close: loop.c bases the inner loop on the channel 0 samples (the original on channel 1) and strength-reduces the
+   band offset (the original recomputes (3 * band) * 136 from a counter) */
+#if 0
+static void channel_conv_joint(At3Work *w)
+{
+    int band;
+    int k;
+    unsigned short w0, w1, g0, g1;
+    unsigned short n0, n1, h0, h1;
+    unsigned short dw0, dw1, dg0, dg1;
+    int cw0, cw1, cg0, cg1;
+    int ndw0, ndw1, ndg0, ndg1;
+    unsigned short *pw;
+    unsigned short *nw;
+    int (*sp)[3320];
+    int idx;
+    int *pr;
+    int x;
+    int y;
+    int m;
+
+    sp = (int (*)[3320])w->ch;
+    for (band = 0; band < 4; band++) {
+        g1 = 0x8000;
+        g0 = 0x8000;
+        h1 = 0x8000;
+        h0 = 0x8000;
+        if (band >= w->joint[1].n) {
+            h1 = w->joint[1].g[1];
+            h0 = w->joint[1].g[0];
+        }
+        if (band >= w->joint[0].n) {
+            g1 = w->joint[0].g[1];
+            g0 = w->joint[0].g[0];
+        }
+        pw = w->joint[0].w[band];
+        nw = w->joint[1].w[band];
+        w0 = pw[0];
+        w1 = pw[1];
+        dw0 = (nw[0] - w0) >> 3;
+        dw1 = (nw[1] - w1) >> 3;
+        dg0 = (short)(h0 - g0) >> 3;
+        dg1 = (short)(h1 - g1) >> 3;
+        cw0 = (dw0 << 3) + w0;
+        cw1 = (dw1 << 3) + w1;
+        cg0 = (dg0 << 3) + g0;
+        cg1 = (dg1 << 3) + g1;
+        idx = band * 408 + 35;
+        ndw0 = -dw0;
+        ndw1 = -dw1;
+        ndg0 = -dg0;
+        ndg1 = -dg1;
+        pr = &((int (*)[136])(w->ch[1]))[band * 3][23];
+        for (k = 0; k < 256; k++) {
+            n0 = w0;
+            h0 = g0;
+            n1 = w1;
+            h1 = g1;
+            if (k - 8 < 0) {
+                n0 = cw0;
+                h0 = cg0;
+                n1 = cw1;
+                h1 = cg1;
+            }
+            cw0 += ndw0;
+            cw1 += ndw1;
+            cg0 += ndg0;
+            cg1 += ndg1;
+            x = pr[k - 3320];
+            y = pr[k];
+            m = n0 * (x >> 4) + n1 * (y >> 4);
+            pr[k - 3320] = ((m >> 8) * h0) >> 6;
+            pr[k] = (((x - m) >> 8) * h1) >> 6;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", channel_conv_joint);
+#endif
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", imdct);
 
