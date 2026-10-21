@@ -504,6 +504,7 @@ public:
     // PARTIAL: added for Game/Player/PlayerDRiku
     static INT importStatus();
     static INT exportStatus();
+    static void addMP(INT inMP);
     void setDefAttr(FLOAT* inAttr);
     // PARTIAL: added for Game/Player/Player
     static INT calcNextEXP(INT inLv) __attribute__((const));

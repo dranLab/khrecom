@@ -35,6 +35,12 @@ extern FVECTOR g_vDummyPlayerPos; // data from the asm until SOURCE DATA
 extern FVECTOR g_vBanishPos;
 extern FLOAT g_fGimmickJumpPower[8];
 }
+namespace Gauge {
+class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
+public:
+    static void setPrizeMp(INT inMP);
+};
+}
 inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
@@ -544,7 +550,17 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyReturnCard_
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyGetPrize__7CPlayeriii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addEXP__7CPlayerii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addHP__7CPlayeriii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addMP__7CPlayeri);
+void CPlayer::addMP(INT inMP) {
+    if (_instance()) {
+        _instance()->m_iMP += inMP;
+        if (_instance()->m_iMP > 99999) _instance()->m_iMP = 99999;
+    } else {
+        INT mp = CStatus::getMP() + inMP;
+        if (mp > 99999) mp = 99999;
+        CStatus::setHP(mp);
+    }
+    Gauge::CPrizeGauge::setPrizeMp(inMP);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procDropMP__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyExterminate__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyBossDead__7CPlayeri);
