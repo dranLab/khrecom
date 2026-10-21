@@ -11,6 +11,8 @@ void _sceMpegFlushBuf(_sceMpegDecoder *d, int n);
 #define IPU_TOP 0x10002030
 #define D3_MADR 0x1000B010
 #define D9_CHCR 0x1000D400
+#define D9_TADR 0x1000D430
+#define D9_SADR 0x1000D480
 
 int DIntr(void);
 int EIntr(void);
@@ -552,10 +554,12 @@ static int _slice0(_sceMpegDecoder *d, int n)
         incr--;
     }
 }
-/* _skipMB0's strings */
+
+/* _skipMB0 is emitted at the end of the file, its string here */
 __asm__(".rdata\n"
-        ".align 3\n.asciz \"skiped macroblock in I picure is not allowed\"\n"
+        ".align 3\n_skipMB0_msg:\n.asciz \"skiped macroblock in I picure is not allowed\"\n"
         ".text\n");
+extern const char _skipMB0_msg[];
 
 /* decodes one motion vector component into *pred */
 static inline void _mvComponent(int *pred, int r_size, int code, int residual, int full_pel)
@@ -894,7 +898,31 @@ static void _flushBuf(_sceMpegDecoder *d, int n)
 }
 
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _skipMB0);
+static int _skipMB0(_sceMpegDecoder *d, int (*pmv)[2][2], int *motion_type, int (*mvfs)[2], int *mbtype)
+{
+    int ret = 1;
+
+    d->spr[d->x820].skip = 1;
+    d->x1C0 = 1;
+    if (d->x160 == 2) {
+        pmv[1][0][1] = 0;
+        pmv[1][0][0] = 0;
+        pmv[0][0][1] = 0;
+        pmv[0][0][0] = 0;
+    }
+    if (d->x184 == 3) {
+        *motion_type = 2;
+    } else {
+        *motion_type = 1;
+        mvfs[0][0] = mvfs[0][1] = d->x184 == 2;
+    }
+    if (d->x160 == 1) {
+        _sceMpegError(d, _skipMB0_msg);
+        ret = 0;
+    }
+    *mbtype &= ~1;
+    return ret;
+}
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _copyAddRefImage);
 
@@ -956,7 +984,39 @@ __asm__(".text\n"
     ".end _copyRefImage\n"
     ".set reorder\n");
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", dmaRefImage);
+/* a DMA tag: id 3 (REF) or 0 (REFE) */
+static inline unsigned long _dmaTag(unsigned int addr, int id, int qwc)
+{
+    return ((unsigned long)(addr & 0x0FFFFFFF) << 32) | ((unsigned long)id << 28) | qwc;
+}
+
+/* chains the reference blocks into the scratchpad: two REF tags per block, the last one ends the chain */
+static void dmaRefImage(_sceMpegDecoder *d)
+{
+    unsigned long *p;
+    int i;
+    int n;
+    int r;
+
+    if (d->buffType == 0) {
+        n = d->spr[d->x820].count;
+        p = (unsigned long *)(((unsigned int)_sprtagdata & 0x0FFFFFFF) | 0x20000000);
+        for (i = 0; i < n; i++) {
+            p[0] = _dmaTag((unsigned int)d->spr[d->x820].addr0[i], 3, 0x30);
+            p[2] = _dmaTag((unsigned int)d->spr[d->x820].addr1[i], i == n - 1 ? 0 : 3, 0x30);
+            p += 4;
+        }
+        r = DIntr();
+        __asm__ volatile("sync.l");
+        REG(D9_SADR) = d->spr[d->x820].sadr;
+        REG(D9_TADR) = (unsigned int)_sprtagdata;
+        REG(D9_QWC) = 0;
+        REG(D9_CHCR) = 0x105;
+        if (r) {
+            EIntr();
+        }
+    }
+}
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _rix_000);
 
@@ -990,7 +1050,23 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _rix_111);
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _ri0_111);
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", receiveDataFromIPU);
+static void receiveDataFromIPU(unsigned int addr, int size)
+{
+    int r = DIntr();
+
+    if ((addr >> 28) == 7) {
+        addr &= 0x0FFFFFFF;
+        addr |= 0x80000000;
+    } else {
+        addr &= 0x0FFFFFFF;
+    }
+    REG(D3_MADR) = addr;
+    REG(D3_QWC) = size >> 4;
+    REG(D3_CHCR) = 0x100;
+    if (r) {
+        EIntr();
+    }
+}
 
 
 // SOURCE DATA: .data .rodata .bss
