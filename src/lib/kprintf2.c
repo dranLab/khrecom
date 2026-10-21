@@ -47,6 +47,7 @@ static void serialPutchar(int c)
 }
 
 /* The integer value of x * 1e6 (x: the bits of a double) for "0.%d". */
+/* Parked: 21 lines differ (permuter score) */
 #if 0
 int ftoi(unsigned long x)
 {
@@ -78,6 +79,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", ftoi);
 
 static int _sceSnprintf_pf(PutcFunc func, void *ctx, unsigned int *size, const char *fmt, ...);
 
+/* Parked: 16 lines differ (permuter score) */
 #if 0
 int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d)
 {
@@ -125,6 +127,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", printfloat);
 #define F_SHORT 0x80
 #define F_CHAR 0x100
 
+/* Parked: 4 lines differ (permuter score) */
 #if 0
 int _sceSnprintf(PutcFunc func, void *ctx, unsigned int size, const char *fmt, va_list ap)
 {

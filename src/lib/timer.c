@@ -214,6 +214,7 @@ int StopTimerSystemTime(void)
 #define ALARM_TIME(c) ((c)->schedule + (c)->base - (c)->count)
 
 /* Program the compare register for the next alarm (alarms closer than 0x7333 to it are merged). */
+/* Parked: loop shape (15 lines differ) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/timer", SetNextComp);
 #if 0
 static void SetNextComp(unsigned long now)
@@ -290,6 +291,7 @@ static Counter *UnlinkAlarm(Counter *c)
     return next;
 }
 
+/* Parked: scheduling (53 lines differ) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/timer", cbTimerHandler);
 #if 0
 static int cbTimerHandler(int cause, void *arg, void *addr)
@@ -702,6 +704,7 @@ unsigned long TimerUSec2BusClock(unsigned int sec, unsigned int usec)
     return (unsigned long)sec * BUSCLK + (unsigned long)usec * BUSCLK / 1000000;
 }
 
+/* Parked: the original keeps div.s out of the call's delay slot (only ee-gcc2.96 does that) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/timer", TimerBusClock2Freq);
 #if 0
 float TimerBusClock2Freq(unsigned long clock)
@@ -710,6 +713,7 @@ float TimerBusClock2Freq(unsigned long clock)
 }
 #endif
 
+/* Parked: as TimerBusClock2Freq */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/timer", TimerFreq2BusClock);
 #if 0
 unsigned long TimerFreq2BusClock(float freq)

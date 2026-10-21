@@ -24,8 +24,8 @@ int *__errno(void)
     return &_REENT->_errno;
 }
 
-/* memcpy/memmove: only register allocation differs (the original moves dst0 out of a0 into t0,
-   a0 then holds the loop temporaries); kept asm for now */
+/* Parked: memcpy/memmove: only register allocation differs (the original moves dst0 out of a0 into t0,
+   a0 then holds the loop temporaries) */
 #if 0
 void *memcpy(void *dst0, const void *src0, size_t len0)
 {
@@ -119,6 +119,7 @@ void *memmove(void *dst_void, const void *src_void, size_t length)
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", memcpy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", memmove);
+/* Hand-written: MMI string routines (128-bit loads and compares) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", memset);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", strcat);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/__errno", strchr);

@@ -22,6 +22,8 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
   under `#if 0` are switched on in its copies; the real source is never touched. Check a result's semantics.
 - `.venv/bin/python tools/compare_compilers.py SLUS_217.99 src/<unit>.cpp` - per function, with every installed compiler.
 - `.venv/bin/python tools/candidates.py SLUS_217.99` - files not decompiled yet (size, functions, header strings).
+- `.venv/bin/python tools/leftovers.py lib|game [--update docs/sdk-leftovers.md|docs/asm-leftovers.md]` - what is left
+  per function (parked `#if 0` drafts with their `Parked:` notes, hand-written, not attempted), asm data sections.
 - `tools/setup_worktree.sh` - prepare a fresh git worktree (links game files and tools, runs configure).
 
 A *unit* is one original object file, named after its source path, e.g. `System/Graphic/ColorFader`

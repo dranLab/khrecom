@@ -444,6 +444,7 @@ static _sceFsIob* get_iob(s32 fd) {
     return ret;
 }
 
+/* Parked: 14 lines differ (permuter score) */
 #if 0
 void _sceFs_Rcv_Intr(void* pkt, void* data) {
     s32 ee_semid;

@@ -1,123 +1,148 @@
 # SDK (lib/) leftovers
 
-The `lib/` units that are not fully decompiled, as of branch `sdk-decomp` at 2026-10-21. All 167 lib units build
-byte-identical. The entries below are what still comes from the original assembly, as a whole unit, a function
-or a data section. Counts are instructions (`tools/asm.py <unit>`).
+The `lib/` units that are not fully decompiled. All 167 lib units build byte-identical. The list below is what
+still comes from the original assembly, as a whole unit, a function or a data section. It is generated from the
+sources by `tools/leftovers.py lib --update docs/sdk-leftovers.md`: the status and the "what differs" text come
+from the `Parked:` / `Hand-written:` / `Not attempted:` note above each function (see the tool's help).
 
 Status:
 - **not attempted**: no C written yet.
-- **parked**: C written, kept under `#if 0` next to the `INCLUDE_ASM`, with a comment on what still differs.
+- **parked**: C written, kept under `#if 0` next to the `INCLUDE_ASM`, with a note on what still differs.
   It was parked after many variants stopped improving the diff.
 - **hand-written**: no compiler output to match (MMI, trap handlers, `.s` sources). These stay assembly.
 
 To re-check: `tools/check.sh` lists every unit with INCLUDE_ASM functions left. `tools/funcdiff.py <unit>`
 shows a draft's diff after you switch its `#if 0` to `#if 1`.
 
-## Units with no source file
+## Inventory
 
-These have no `src/` file, so their code or data comes entirely from the original assembly.
+<!-- leftovers:lib:start -->
+### Units with no source file
 
-| unit | kind | status |
+Their code or data comes entirely from the original assembly.
+
+| unit | functions (instr) | data |
 |---|---|---|
-| `lib/nodebug/memcmp` | code (37 + 6 + 3 instr: memcmp, sn_reg_frame, sn_dereg_frame), bss | not attempted (no debug info) |
-| `lib/table` | rodata (libat3dec Huffman/dequant tables) | not attempted |
-| `lib/nodebug/_ctype_` | rodata | not attempted |
-| `lib/nodebug/blanks.12` | rodata | not attempted |
-| `lib/nodebug/lconv` | rodata | not attempted |
-| `lib/nodebug/huge` | rodata | not attempted |
-| `lib/nodebug/sn___infinity` | rodata | not attempted |
-| `lib/src/newlib/libm/math/s_infconst` | rodata | not attempted |
-| `lib/src/newlib/libm/common/s_lib_ver` | rodata | not attempted |
-| `lib/nodebug/impure_data` | data | not attempted |
-| `lib/nodebug/SN_LOADED_RELMODS` | data | not attempted |
-| `lib/nodebug/__CTOR_LIST__` | data | not attempted |
-| `lib/nodebug/__FRAME_BEGIN__0` | data | not attempted |
-| `lib/nodebug/_GLOBAL__F_0build.cppF7aaaa` | data | not attempted |
+| `lib/nodebug/memcmp` | `memcmp` (37), `sn_reg_frame` (5), `sn_dereg_frame` (3), `func_00392060` (1) | .bss |
+| `lib/nodebug/SN_LOADED_RELMODS` | - | .data |
+| `lib/nodebug/_GLOBAL__F_0build.cppF7aaaa` | - | .data |
+| `lib/nodebug/__CTOR_LIST__` | - | .data |
+| `lib/nodebug/__FRAME_BEGIN__0` | - | .data |
+| `lib/nodebug/__SN_Libsn_version_v26` | - | .bss |
+| `lib/nodebug/_ctype_` | - | .rodata |
+| `lib/nodebug/blanks.12` | - | .rodata |
+| `lib/nodebug/errno` | - | .bss |
+| `lib/nodebug/huge` | - | .rodata |
+| `lib/nodebug/impure_data` | - | .data |
+| `lib/nodebug/lconv` | - | .rodata |
+| `lib/nodebug/sn___infinity` | - | .rodata |
+| `lib/src/newlib/libm/common/s_lib_ver` | - | .rodata |
+| `lib/src/newlib/libm/math/s_infconst` | - | .rodata |
+| `lib/table` | - | .rodata |
 
-## Functions still assembly in units with a source file
+### Functions still INCLUDE_ASM
 
-### Middleware (libmpeg, ATRAC3)
-
-| unit | function | instr | status | what differs |
-|---|---|---|---|---|
-| `lib/mpc` | `_getAllRefs` | 450 | parked | 7 lines: in the field-picture setup the original schedules the constant 2 of the `x160 == 2` test before `sel = 0` (registers of the refs loads) |
-| `lib/mpc` | `_getRef0` | 290 | parked | same structure and size; register allocation (original keeps y in s1, n in t9, spills `avg << 2`) |
-| `lib/mpc` | `_sceMpegMbAddressIncrement` | 94 | parked | the loop keeps the IPU_CMD address in a saved register (original rebuilds it each pass) |
-| `lib/mpc` | `_copyAddRefImage`, `_rix_000`..`_rix_111`, `_ri0_000`..`_ri0_111` (17 functions) | 31-73 each | hand-written | MMI reference-copy routines |
-| `lib/pack` | `sceMpegDemuxPssRing` | 248 | parked | 6 lines: the zero store of allData, the delay slot of the first pack-header test, the reload register of allGp |
-| `lib/libat3dec` | `imdct` | 390 | not attempted | keeps t9 live across the calls into at3core.s with sq/lq caller-saves; parameters go through the stack |
-| `lib/libat3dec` | `unpack_mddata` | 316 | parked | gain loops: the original keeps `&gain[0][0][1]` in a register and reloads 255 (ours hoists it) |
-| `lib/libat3dec` | `gainc_window` | 162 | parked | 23 lines: the original sets the return value -1 at the top of the loop (conditional returns branch straight to the epilogue) |
-| `lib/libat3dec` | `channel_conv_joint` | 122 | parked | loop.c bases the inner loop on channel 0 (original: channel 1) and strength-reduces the band offset (original recomputes `(3 * band) * 136`) |
-| `lib/libat3dec` | `at3dec_proc` | 97 | parked | 20 lines: the original enters the copy loop with the byte the 0xF8-skip loop loaded; registers differ |
-| `lib/libat3dec` | `f2t_nodata` | 90 | parked | 5 lines: the band address `(x << 4) + x` with swapped registers |
-| `lib/libat3dec` | data | - | data from asm | `.data` (coefpost, cbi) and `.rodata` (qmf tables, scaleDiv, assert strings) not from source; the C refers to the assert strings by their `D_` labels |
-| `lib/hncAt3dec` | `hncAt3dec_Idle` | 72 | parked | same structure; registers (original: out s1, out2 s0, stereo/count s3, i s2) |
-| `lib/output` | `_dispRefImageField` | 264 | not attempted | |
-| `lib/output` | `_dispRefImage` | 176 | not attempted | |
-| `lib/output` | `_cpr8` | 164 | not attempted | |
-| `lib/csc` | `_sceMpegCscStoreRefImage` | 311 | parked | registers of the inlined CSC block (rgb/qwc in s1/s2) |
-| `lib/csc` | `_doCSC2` | 112 | parked | two registers (0xffc0 / D3_CHCR) |
-
-### Sony kernel and device libraries
+Sorted by unit, then size. `instr`: instructions in the original.
 
 | unit | function | instr | status | what differs |
-|---|---|---|---|---|
-| `lib/sifrpc` | `sceSifCallRpc` | 128 | parked | the original copies packet fields in strict load/store order; ours lets the scheduler hoist loads (applies to all sifrpc drafts) |
-| `lib/sifrpc` | `sceSifExecRequest` | 114 | parked | same |
-| `lib/sifrpc` | `sceSifInitRpc` | 104 | not attempted | |
-| `lib/sifrpc` | `_request_end` | 52 | parked | load/store order |
-| `lib/sifrpc` | `_request_rdata` | 52 | parked | load/store order |
-| `lib/sifrpc` | `_request_bind` | 52 | parked | load/store order |
-| `lib/sifrpc` | `_sceRpcGetPacket` | 42 | parked | load/store order |
-| `lib/sifrpc` | `_request_call` | 36 | parked | load/store order |
-| `lib/sifrpc` | `sceSifCheckStatRpc` | 16 | parked | load/store order |
-| `lib/sifcmd` | `_sceSifCmdIntrHdlr` | 83 | parked | same shape and size; pkt/size in a2/a0 (original a3/a1), scaled index kept apart from id |
-| `lib/timer` | `cbTimerHandler` | 174 | parked | scheduling |
-| `lib/timer` | `SetNextComp` | 100 | parked | loop shape |
-| `lib/timer` | `TimerBusClock2Freq` | 22 | parked | the original keeps div.s out of the call's delay slot (only ee-gcc2.96 does that) |
-| `lib/timer` | `TimerFreq2BusClock` | 14 | parked | same |
-| `lib/filestub` | `_sceFs_Rcv_Intr` | 243 | parked | |
-| `lib/eecdvd_sceCdCallback` | `sceCdLayerSearchFile` | 192 | parked | the 2nd/3rd SCE_CD_debug reloads land in v0 in the original, v1 here |
-| `lib/eecdvd_sceCdCallback` | `sceCdInit` | 186 | parked | t0/t1 swapped for the `_scmd_dr_bind`/`_sceCd_ee_read_mode` %hi; order of li/lui before the `_sceCd_CdInit_ON` store |
-| `lib/eecdvd_sceCdCallback` | `_sceCd_cbLoop` | 52 | parked | exit block: the original keeps cb_flag for the delay slot, ours schedules it earlier |
-| `lib/eecdvd_sceCdCallback` | `_sceCdSC` | 44 | parked | the original is a compare chain with arms in reverse case order; a switch gives a jump table |
-| `lib/libpad2` | `scePad2CreateSocket` | 66 | parked | the pad2_info address (lui) is scheduled before the 820 multiplier |
-| `lib/libpad2` | `scePad2GetButtonInfo` | 56 | parked | button type in a1 (original a3), movz instead of movn for the digital case |
-| `lib/graphdev_sceGsExecStoreImage` | `sceGsExecStoreImage` | 426 | parked | register allocation (PSMCT24 tail, trxreg.RRW kept extracted); also `.data`/`.rodata` not from source |
-| `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 222 | parked | register order in the DISPLAY computation (original: DY and off[0] + 636 first) |
-| `lib/kprintf2` | `_sceSnprintf` | 857 | parked | |
-| `lib/kprintf2` | `printfloat` | 118 | parked | |
-| `lib/kprintf2` | `ftoi` | 36 | parked | |
-| `lib/kprintf2` | data | - | data from asm | `.rodata` not from source |
+|---|---|---:|---|---|
+| `lib/nodebug/check_dll` | `relocate_dll` | 251 | parked | only the scheduling of the HI16 patch() call's arguments differs |
+| `lib/nodebug/check_dll` | `snDllUnload` | 72 | parked | only the register of notify's address differs |
+| `lib/nodebug/snDebugInit` | `snTeq` | 26 | hand-written | trap handler |
+| `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 221 | parked | matches except register order in the DISPLAY computation (orig: DY and off[0] + 636 first). |
+| `lib/graphdev_sceGsExecStoreImage` | `sceGsExecStoreImage` | 419 | parked | close, but register allocation differs (the PSMCT24 tail, trxreg.RRW kept extracted instead of raw). |
+| `lib/libpad2` | `scePad2CreateSocket` | 66 | parked | the pad2_info address (lui) is scheduled before the 820 multiplier. |
+| `lib/libpad2` | `scePad2GetButtonInfo` | 56 | parked | button type kept in a1 (orig a3), movz instead of movn for the digital case. |
+| `lib/output` | `_dispRefImageField` | 264 | not attempted |  |
+| `lib/output` | `_dispRefImage` | 176 | not attempted |  |
+| `lib/output` | `_cpr8` | 164 | not attempted |  |
+| `lib/csc` | `_sceMpegCscStoreRefImage` | 310 | parked | _doCSC2 differs only in two registers (0xffc0 / D3_CHCR); _sceMpegCscStoreRefImage in s1/s2 for the inlined CSC block's rgb/qwc. |
+| `lib/csc` | `_doCSC2` | 112 | parked | _doCSC2 differs only in two registers (0xffc0 / D3_CHCR); _sceMpegCscStoreRefImage in s1/s2 for the inlined CSC block's rgb/qwc. |
+| `lib/pack` | `sceMpegDemuxPssRing` | 248 | parked | 6 lines off: the zero store of allData, the delay slot of the first pack header test, the reload register of allGp |
+| `lib/mpc` | `_getAllRefs` | 449 | parked | all but the field-picture setup matches: there the original schedules the constant 2 of the x160 test before sel = 0 (registers a1/a0/a2 of the refs loads differ) |
+| `lib/mpc` | `_getRef0` | 290 | parked | same structure and size as the original; register allocation differs (the original keeps y in s1, n in t9 and spills avg << 2) |
+| `lib/mpc` | `_sceMpegMbAddressIncrement` | 94 | parked | the loop keeps the IPU_CMD address in a saved register here (the original rebuilds it each pass) |
+| `lib/mpc` | `_rix_111` | 72 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_ri0_111` | 69 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_ri0_011` | 63 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_rix_011` | 62 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_copyAddRefImage` | 59 | hand-written | MMI reference-copy routine |
+| `lib/mpc` | `_ri0_101` | 57 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_rix_101` | 55 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_rix_110` | 53 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_ri0_110` | 52 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_ri0_001` | 51 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_ri0_010` | 46 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_rix_001` | 45 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_rix_010` | 43 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_ri0_100` | 43 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_rix_100` | 39 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_ri0_000` | 37 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/mpc` | `_rix_000` | 29 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
+| `lib/eecdvd_sceCdCallback` | `sceCdLayerSearchFile` | 191 | parked | the 2nd/3rd SCE_CD_debug reloads land in v0 in the original, v1 here. |
+| `lib/eecdvd_sceCdCallback` | `sceCdInit` | 186 | parked | t0/t1 swapped for the _scmd_dr_bind/_sceCd_ee_read_mode %hi, and the order of li/lui before the _sceCd_CdInit_ON store. |
+| `lib/eecdvd_sceCdCallback` | `_sceCd_cbLoop` | 52 | parked | the exit block stores _sceCd_c_cb_sem, sceCdCbfunc_num, cb_thid and keeps cb_flag for the delay slot; ours schedules cb_flag earlier. |
+| `lib/eecdvd_sceCdCallback` | `_sceCdSC` | 44 | parked | the original is a compare chain (no jump table) with the arms in reverse case order; a switch here gives a table. |
+| `lib/hncAt3dec` | `hncAt3dec_Idle` | 72 | parked | same structure, but the registers differ (orig: out s1, out2 s0, stereo/count s3, i s2). |
+| `lib/libat3dec` | `unpack_mddata` | 316 | parked | structure right; the gain loops keep &gain[0][0][1] in a register and reload 255 (ours hoists it) |
+| `lib/libat3dec` | `gainc_window` | 161 | parked | 23 lines off: the original sets the return value -1 at the top of the loop (the conditional returns branch straight to the epilogue) |
+| `lib/libat3dec` | `channel_conv_joint` | 122 | parked | close: loop.c bases the inner loop on the channel 0 samples (the original on channel 1) and strength-reduces the band offset (the original recomputes (3 band) 136 from a counter) |
+| `lib/libat3dec` | `at3dec_proc` | 97 | parked | 20 lines off: the original enters the copy loop with the byte the skip loop loaded (reorg), registers differ |
+| `lib/libat3dec` | `f2t_nodata` | 90 | parked | 5 lines off: the band address of the loop is (x << 4) + x with swapped registers |
+| `lib/libat3dec` | `imdct` | 389 | not attempted | keeps t9 live across the calls into at3core.s with sq/lq caller-saves; parameters go through the stack |
+| `lib/nodebug/__errno` | `memmove` | 63 | parked | memcpy/memmove: only register allocation differs (the original moves dst0 out of a0 into t0, a0 then holds the loop temporaries) |
+| `lib/nodebug/__errno` | `memcpy` | 43 | parked | memcpy/memmove: only register allocation differs (the original moves dst0 out of a0 into t0, a0 then holds the loop temporaries) |
+| `lib/nodebug/__errno` | `strncmp` | 114 | hand-written | MMI string routines (128-bit loads and compares) |
+| `lib/nodebug/__errno` | `strncpy` | 114 | hand-written | MMI string routines (128-bit loads and compares) |
+| `lib/nodebug/__errno` | `strchr` | 104 | hand-written | MMI string routines (128-bit loads and compares) |
+| `lib/nodebug/__errno` | `strcmp` | 83 | hand-written | MMI string routines (128-bit loads and compares) |
+| `lib/nodebug/__errno` | `strlen` | 81 | hand-written | MMI string routines (128-bit loads and compares) |
+| `lib/nodebug/__errno` | `strcat` | 76 | hand-written | MMI string routines (128-bit loads and compares) |
+| `lib/nodebug/__errno` | `strcpy` | 70 | hand-written | MMI string routines (128-bit loads and compares) |
+| `lib/nodebug/__errno` | `memset` | 46 | hand-written | MMI string routines (128-bit loads and compares) |
+| `lib/nodebug/strround` | `fftoa` | 367 | parked | fftoa: register allocation still differs (x, exp, n, ... one s-register off) |
+| `lib/nodebug/strround` | `add_separators` | 108 | parked | add_separators: count and the constant 2 swap t0/t1 |
+| `lib/nodebug/strround` | `_vfprintf_r` | 1041 | not attempted |  |
+| `lib/nodebug/_setlocale_r` | `memchr` | 59 | hand-written | MMI (128-bit compares) |
+| `lib/kprintf2` | `_sceSnprintf` | 837 | parked | 4 lines differ (permuter score) |
+| `lib/kprintf2` | `printfloat` | 118 | parked | 16 lines differ (permuter score) |
+| `lib/kprintf2` | `ftoi` | 36 | parked | 21 lines differ (permuter score) |
+| `lib/sifcmd` | `_sceSifCmdIntrHdlr` | 82 | parked | the C below has the original's shape and size, but its registers differ (pkt/size in a2/a0 instead of a3/a1, the scaled index kept apart from id) |
+| `lib/sifrpc` | `sceSifCallRpc` | 128 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
+| `lib/sifrpc` | `sceSifExecRequest` | 113 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
+| `lib/sifrpc` | `sceSifInitRpc` | 103 | parked | 62 lines differ (permuter score) |
+| `lib/sifrpc` | `_request_rdata` | 52 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
+| `lib/sifrpc` | `_request_end` | 51 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
+| `lib/sifrpc` | `_request_bind` | 51 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
+| `lib/sifrpc` | `_sceRpcGetPacket` | 42 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
+| `lib/sifrpc` | `_request_call` | 35 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
+| `lib/sifrpc` | `sceSifCheckStatRpc` | 15 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
+| `lib/filestub` | `_sceFs_Rcv_Intr` | 237 | parked | 14 lines differ (permuter score) |
+| `lib/timer` | `cbTimerHandler` | 173 | parked | scheduling (53 lines differ) |
+| `lib/timer` | `SetNextComp` | 100 | parked | loop shape (15 lines differ) |
+| `lib/timer` | `TimerBusClock2Freq` | 21 | parked | the original keeps div.s out of the call's delay slot (only ee-gcc2.96 does that) |
+| `lib/timer` | `TimerFreq2BusClock` | 13 | parked | as TimerBusClock2Freq |
 
-### libsn / newlib (`lib/nodebug`) and libgcc
+### Data sections from the original assembly
 
-| unit | function | instr | status | what differs |
-|---|---|---|---|---|
-| `lib/nodebug/strround` | `_vfprintf_r` | 1069 | not attempted | |
-| `lib/nodebug/strround` | `fftoa` | 368 | parked | register allocation, one s-register off |
-| `lib/nodebug/strround` | `add_separators` | 108 | parked | count and the constant 2 swap t0/t1 |
-| `lib/nodebug/check_dll` | `relocate_dll` | 257 | parked | scheduling |
-| `lib/nodebug/check_dll` | `snDllUnload` | 72 | parked | one register |
-| `lib/nodebug/__errno` | `memcpy` | 43 | parked | register allocation (the original moves dst0 from a0 to t0) |
-| `lib/nodebug/__errno` | `memmove` | 63 | parked | same |
-| `lib/nodebug/__errno` | `memset`, `strcat`, `strchr`, `strcmp`, `strcpy`, `strlen`, `strncmp`, `strncpy` | 46-114 | hand-written | MMI string routines |
-| `lib/nodebug/_setlocale_r` | `memchr` | 60 | hand-written | MMI |
-| `lib/nodebug/snDebugInit` | `snTeq` | 27 | hand-written | trap handler |
-| `lib/nodebug/__assert` | data | - | data from asm | `.rodata` not from source |
-| `lib/src/gcc/libgcc2___umoddi3` | data | - | data from asm | `.rodata` ends the section; the padding up to `.sdata` is the original link's alignment |
+Not listed in the unit's `// SOURCE DATA:` line.
+
+| unit | sections |
+|---|---|
+| `lib/graphdev_sceGsExecStoreImage` | .data .rodata |
+| `lib/libat3dec` | .data .rodata |
+| `lib/nodebug/__assert` | .rodata |
+| `lib/kprintf2` | .rodata |
+| `lib/src/gcc/libgcc2___umoddi3` | .rodata |
+
+Totals: 16 units without a source file (1 with code); 20 units with INCLUDE_ASM functions: 44 parked, 5 not attempted, 27 hand-written; 5 units take a data section from assembly.
+
+Generated by `tools/leftovers.py lib`.
+<!-- leftovers:lib:end -->
 
 ## Hand-written `.s` sources (done, listed for completeness)
 
 `src/lib/at3core.s`, `src/lib/klib.s`, `src/lib/tlbtrap.s`, `src/lib/nodebug/_init.s`.
-
-## Totals
-
-- 14 units without a source file (1 with code, 13 data-only).
-- 22 units with a source file but functions or data still from assembly: 43 parked functions, 6 not
-  attempted (`imdct`, `_vfprintf_r`, `sceSifInitRpc`, and the 3 `lib/output` display functions) and 27
-  hand-written. 5 of the 22 units take a data section from assembly (2 of them have no functions left).
 
 ## Permuter sweep (2026-10-21)
 

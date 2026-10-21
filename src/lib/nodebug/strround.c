@@ -72,7 +72,7 @@ char *itoa(int value, char *s, int base)
 
 static char fbuf[168] __attribute__((aligned(8)));
 
-/* fftoa: register allocation still differs (x, exp, n, ... one s-register off); kept asm */
+/* Parked: fftoa: register allocation still differs (x, exp, n, ... one s-register off) */
 #if 0
 /* x as a string of fmt 'e', 'E' or 'f' with prec digits after the point; strip removes trailing zeros;
    the sign goes to *signp (or the string) */
@@ -282,7 +282,7 @@ __asm__(".rdata\n.align 4\njtbl_004FE710:\n"
         ".text\n");
 
 
-/* add_separators: count and the constant 2 swap t0/t1; kept asm */
+/* Parked: add_separators: count and the constant 2 swap t0/t1 */
 #if 0
 /* insert ',' between groups of 3 integer digits; the result goes to buf */
 char *add_separators(char *buf, char *cp, char *end, int *size)

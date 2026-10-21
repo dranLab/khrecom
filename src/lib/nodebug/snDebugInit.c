@@ -84,6 +84,7 @@ static void snGetBootParams(void)
     }
 }
 
+/* Hand-written: trap handler */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/snDebugInit", snTeq);
 
 u_int *snGetEEBootParams(void)

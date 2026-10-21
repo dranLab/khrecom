@@ -82,7 +82,7 @@ static void channel_conv_joint(At3Work *w);
 static int gainc_window(char *ch, int band);
 static void f2t_nodata(At3Band *bands, int band);
 
-/* close: loop.c bases the inner loop on the channel 0 samples (the original on channel 1) and strength-reduces the
+/* Parked: close: loop.c bases the inner loop on the channel 0 samples (the original on channel 1) and strength-reduces the
    band offset (the original recomputes (3 * band) * 136 from a counter) */
 #if 0
 static void channel_conv_joint(At3Work *w)
@@ -162,9 +162,11 @@ static void channel_conv_joint(At3Work *w)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", channel_conv_joint);
 #endif
 
+/* Not attempted: keeps t9 live across the calls into at3core.s with sq/lq caller-saves; parameters go
+   through the stack */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", imdct);
 
-/* 23 lines off: the original sets the return value -1 at the top of the loop (the conditional returns branch
+/* Parked: 23 lines off: the original sets the return value -1 at the top of the loop (the conditional returns branch
    straight to the epilogue) */
 #if 0
 #define GAINC_STEP()                                                    \
@@ -419,7 +421,7 @@ static int getNoiseSpectrum(char *ch, int nqus, At3Work *w)
     return 0;
 }
 
-/* 5 lines off: the band address of the loop is (x << 4) + x with swapped registers */
+/* Parked: 5 lines off: the band address of the loop is (x << 4) + x with swapped registers */
 #if 0
 static void f2t_nodata(At3Band *bands, int band)
 {
@@ -443,7 +445,7 @@ static void f2t_nodata(At3Band *bands, int band)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", f2t_nodata);
 #endif
 
-/* structure right; the gain loops keep &gain[0][0][1] in a register and reload 255 (ours hoists it) */
+/* Parked: structure right; the gain loops keep &gain[0][0][1] in a register and reload 255 (ours hoists it) */
 #if 0
 static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
 {
@@ -525,7 +527,7 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", unpack_mddata);
 #endif
 
-/* 20 lines off: the original enters the copy loop with the byte the skip loop loaded (reorg), registers differ */
+/* Parked: 20 lines off: the original enters the copy loop with the byte the skip loop loaded (reorg), registers differ */
 #if 0
 static inline int _before(unsigned char *a, unsigned char *b)
 {

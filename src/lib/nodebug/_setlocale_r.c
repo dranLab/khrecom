@@ -87,5 +87,6 @@ struct lconv *localeconv(void)
     return _localeconv_r(_REENT);
 }
 
+/* Hand-written: MMI (128-bit compares) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/_setlocale_r", memchr);
 // SOURCE DATA: .rodata

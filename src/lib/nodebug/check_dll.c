@@ -273,7 +273,7 @@ static int undefine_symbol(char *name, u_short hash)
     (p) = (void *)((char *)(p) + delta)
 
 #if 0
-/* only the scheduling of the HI16 patch() call's arguments differs */
+/* Parked: only the scheduling of the HI16 patch() call's arguments differs */
 static int relocate_dll(SN_DLL_HEADER *h, u_int delta)
 {
     SN_SYMBOL *s;
@@ -499,7 +499,7 @@ int snDllLoaded(SN_DLL_HEADER *h, u_int *ptable)
 }
 
 #if 0
-/* only the register of notify's address differs */
+/* Parked: only the register of notify's address differs */
 int snDllUnload(SN_DLL_HEADER *h)
 {
     SN_DLL_HEADER **pp;

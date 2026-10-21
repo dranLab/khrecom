@@ -329,8 +329,9 @@ int isceSifSendCmd(int cid, void *pkt, int pktsize, void *src, void *dest, int s
 }
 
 /* DMA channel 5: a command packet arrived in _pckt_buffer; copy it out, restart the chain, run its handler.
- * Still the original assembly: the C below has the original's shape and size, but its registers differ (pkt/size
- * in a2/a0 instead of a3/a1, the scaled index kept apart from id). */
+ */
+/* Parked: the C below has the original's shape and size, but its registers differ (pkt/size in a2/a0 instead of
+   a3/a1, the scaled index kept apart from id) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifcmd", _sceSifCmdIntrHdlr);
 #if 0
 static int _sceSifCmdIntrHdlr(int channel)

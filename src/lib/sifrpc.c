@@ -139,6 +139,7 @@ void _request_bind(RpcBindPkt *bind, struct rpc_data *rd);
 void _request_call(RpcCallPkt *call, struct rpc_data *rd);
 void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd);
 
+/* Parked: 62 lines differ (permuter score) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifInitRpc);
 #if 0
 void sceSifInitRpc(unsigned int mode)
@@ -183,6 +184,7 @@ void sceSifExitRpc(void)
     _sceSifInitCheck = 0;
 }
 
+/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _sceRpcGetPacket);
 #if 0
 static void *_sceRpcGetPacket(struct rpc_data *rd)
@@ -235,6 +237,7 @@ static void *_sceRpcGetFPacket2(struct rpc_data *rd, int rid)
     return (char *)rd->client_table + rid * 0x40;
 }
 
+/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_end);
 #if 0
 static void _request_end(RpcRendPkt *rend, struct rpc_data *rd)
@@ -272,6 +275,7 @@ static unsigned long _alarm_rdata(int id, unsigned long schedule, unsigned long 
     return 0x800;
 }
 
+/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_rdata);
 #if 0
 static void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd)
@@ -360,6 +364,7 @@ static unsigned long _alarm_bind(int id, unsigned long schedule, unsigned long a
     return 0x800;
 }
 
+/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_bind);
 #if 0
 static void _request_bind(RpcBindPkt *bind, struct rpc_data *rd)
@@ -428,6 +433,7 @@ int sceSifBindRpc(sceSifClientData *cd, unsigned int request, unsigned int mode)
 }
 
 /* A call for an EE server: queue it for its thread. */
+/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_call);
 #if 0
 static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
@@ -455,6 +461,7 @@ static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
 }
 #endif
 
+/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifCallRpc);
 #if 0
 int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, void *send, int ssize, void *receive,
@@ -524,6 +531,7 @@ int sceSifCallRpc(sceSifClientData *cd, unsigned int fno, unsigned int mode, voi
 }
 #endif
 
+/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifCheckStatRpc);
 #if 0
 int sceSifCheckStatRpc(sceSifClientData *cd)
@@ -642,6 +650,7 @@ sceSifServeData *sceSifGetNextRequest(sceSifQueueData *qd)
     return sd;
 }
 
+/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", sceSifExecRequest);
 #if 0
 void sceSifExecRequest(sceSifServeData *sd)

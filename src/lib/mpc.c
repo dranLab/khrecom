@@ -125,7 +125,7 @@ static void _dualPrimeVector(_sceMpegDecoder *d, int *out, int *dmv, int mvx, in
     }
 }
 
-/* all but the field-picture setup matches: there the original schedules the constant 2 of the x160 test before
+/* Parked: all but the field-picture setup matches: there the original schedules the constant 2 of the x160 test before
    sel = 0 (registers a1/a0/a2 of the refs loads differ) */
 #if 0
 static void _getAllRefs(_sceMpegDecoder *d, int x, int y, int mbtype, int motion_type, int (*pmv)[2][2], int (*mvfs)[2],
@@ -266,7 +266,7 @@ static int _motionComp0(_sceMpegDecoder *d, int mbaddr, int dct_type, int mbtype
     return 1;
 }
 
-/* same structure and size as the original; register allocation differs (the original keeps y in s1, n in t9 and
+/* Parked: same structure and size as the original; register allocation differs (the original keeps y in s1, n in t9 and
    spills avg << 2) */
 #if 0
 /* sets up the copies of one reference block: luminance (_rix_*) and chrominance (_ri0_*) */
@@ -924,6 +924,7 @@ static int _skipMB0(_sceMpegDecoder *d, int (*pmv)[2][2], int *motion_type, int 
     return ret;
 }
 
+/* Hand-written: MMI reference-copy routine */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _copyAddRefImage);
 
 /* hand-written: its 0x00FF00FF constants (used by _copyAddRefImage) sit inside the code */
@@ -1018,6 +1019,7 @@ static void dmaRefImage(_sceMpegDecoder *d)
     }
 }
 
+/* Hand-written: MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _rix_000);
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _ri0_000);
