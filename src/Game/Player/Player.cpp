@@ -254,7 +254,23 @@ BOOL CPlayer::isNowInAir() {
     m_bAirCheck = FALSE;
     return isAir();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isAir__7CPlayer);
+BOOL CPlayer::isAir() {
+    if (m_bAirCheck) return m_bAir;
+    m_bAirCheck = TRUE;
+    if (m_pMove->isGround()) {
+        m_bAir = FALSE;
+        return FALSE;
+    }
+    FVECTOR pos = m_pMove->getPos();
+    if (pos.y <= m_fJumpLandLimit) {
+        pos.y = m_fJumpLandLimit;
+        m_pMove->getPos() = pos;
+        m_bAir = FALSE;
+        return FALSE;
+    }
+    m_bAir = TRUE;
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getAirHeight__7CPlayerP7FVECTORfi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getFrontAirHeight__7CPlayerP7FVECTORfff);
 void CPlayer::exeAttackTimer() {
