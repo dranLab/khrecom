@@ -35,6 +35,11 @@ typedef struct {
 } _sceMpegPes;
 
 typedef struct {
+    _sceMpegPackHeader ph;
+    _sceMpegPes pes;
+} _sceMpegHdr;
+
+typedef struct {
     int type;
     unsigned char *header;
     unsigned char *data;
@@ -219,7 +224,125 @@ __asm__(".rdata\n"
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/pack", _PES_packet);
 
+static inline void _bsInit(_sceMpegBs *bs, unsigned char *pss, unsigned char *ring, int ringsize)
+{
+    bs->start = pss;
+    bs->ptr = pss;
+    bs->size = ringsize;
+    bs->pos = 0;
+    bs->ring = ring;
+    bs->end = ring + ringsize;
+    bs->buf = 0;
+    bs->count = 0;
+    do {
+        bs->buf |= (unsigned long)*bs->ptr++ << (56 - bs->count);
+        if (bs->ptr >= bs->end) {
+            bs->ptr = bs->ring;
+        }
+        bs->count += 8;
+    } while (bs->count <= 56);
+    bs->pos = 0;
+}
+
+/* address of a bit offset in the ring */
+static inline unsigned char *_bsAddr(_sceMpegBs *bs, int bits)
+{
+    unsigned char *p = bs->start + (bits >> 3);
+
+    if (p >= bs->end) {
+        p -= bs->size;
+    }
+    return p;
+}
+
+/* calls a stream callback with its own $gp */
+#define _callStrCallback(r_, mp, bs, h, cbs, func_, data_, gp_)                                 \
+    ({                                                                                          \
+        int __old;                                                                              \
+        unsigned char *__p;                                                                     \
+                                                                                                \
+        __p = (bs)->start + ((h)->pes.header >> 3);                                             \
+        (cbs)->type = 6;                                                                        \
+        if (__p >= (bs)->end) {                                                                 \
+            __p -= (bs)->size;                                                                  \
+        }                                                                                       \
+        (cbs)->header = __p;                                                                    \
+        (cbs)->data = _bsAddr(bs, (h)->pes.data);                                               \
+        (cbs)->len = (h)->pes.len;                                                              \
+        (cbs)->pts = (h)->pes.pts;                                                              \
+        (cbs)->dts = (h)->pes.dts;                                                              \
+        __asm__ volatile("move %0, $gp\n\tmove $gp, %1" : "=&r"(__old) : "r"(gp_));             \
+        r_ = (func_)(mp, (sceMpegCbData *)(cbs), (void *)(data_));                             \
+        __asm__ volatile("move %0, $gp\n\tmove $gp, %1" : "=&r"(__old) : "r"(__old));           \
+    })
+
+/* 6 lines off: the zero store of allData, the delay slot of the first pack header test, the register of allGp */
+#if 0
+int sceMpegDemuxPssRing(sceMpeg *mp, unsigned char *pss, int size, unsigned char *ring, int ringsize)
+{
+    _sceMpegBs bsBody;
+    _sceMpegHdr hdr;
+    sceMpegCbDataStr cbs;
+    _sceMpegBs *bs;
+    _sceMpegHdr *h = &hdr;
+    _sceMpegDecoder *d = mp->sys;
+    int allData;
+    _sceMpegStrCb *cb = (_sceMpegStrCb *)d->x60;
+    int ret;
+    int allGp;
+    sceMpegCallback allFunc = 0;
+    int cont = 1;
+    int end = size * 8;
+    int i;
+
+    ret = 0;
+    allData = 0;
+    allGp = 0;
+    _bsInit(&bsBody, pss, ring, ringsize);
+    bs = &bsBody;
+
+    for (i = 0; !allFunc && i < d->x64; i++) {
+        if (cb[i].id == 0xBDFF000000) {
+            allFunc = cb[i].func;
+            allData = cb[i].data;
+            allGp = (int)cb[i].gp;
+        }
+    }
+    for (;;) {
+        if (_showBits(bs, 32) == 0x1BA) {
+            _pack_header(bs, &h->ph);
+        }
+        while ((bs->buf >> 40) == 1 && _showBits(bs, 32) != 0x1BA && _showBits(bs, 32) != 0x1B9) {
+            if ((int)bs->pos >= end || !cont) {
+                goto done;
+            }
+            _PES_packet(d, bs, &h->pes);
+            if ((int)bs->pos > end) {
+                continue;
+            }
+            for (i = 0; i < d->x64; i++) {
+                if (cb[i].id == (h->pes.id & cb[i].mask)) {
+                    _callStrCallback(cont, mp, bs, h, &cbs, cb[i].func, cb[i].data, (int)cb[i].gp);
+                    break;
+                }
+            }
+            if (i == d->x64 && allFunc) {
+                _callStrCallback(cont, mp, bs, h, &cbs, allFunc, allData, allGp);
+            }
+            if (cont) {
+                ret = (int)(bs->pos >> 3);
+            }
+        }
+    done:
+        if ((int)bs->pos > end || _showBits(bs, 32) != 0x1BA) {
+            break;
+        }
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/pack", sceMpegDemuxPssRing);
+#endif
 
 int sceMpegDemuxPss(sceMpeg *mp, unsigned char *pss, int size)
 {
