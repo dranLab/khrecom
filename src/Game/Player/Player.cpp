@@ -21,6 +21,7 @@
 #include "Form/Menu/WorldSelect.h"
 #include "Game/Player/PlayerCamera.h"
 #include "Game/SceneInfo.h"
+#include "Game/Gimmick/BaseGimmick.h"
 #include "System/HeapMan.h"
 #include "include_asm.h"
 
@@ -32,6 +33,7 @@ extern "C" char D_0049B308[];
 namespace PL {
 extern FVECTOR g_vDummyPlayerPos; // data from the asm until SOURCE DATA
 extern FVECTOR g_vBanishPos;
+extern FLOAT g_fGimmickJumpPower[8];
 }
 inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
@@ -299,7 +301,15 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initHang__7CPlaye
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeHang__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAvoid__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickRide__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyGimmickJump__7CPlayerii);
+void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
+    if (!_instance()) return;
+    _instance()->m_hGimmickJump = inHandle;
+    if (inPow == -1) {
+        _instance()->m_fGimmickJumpPow = PL::g_fGimmickJumpPower[((CBaseGimmick*)CTaskMan::getTask(inHandle))->getParam()];
+    } else {
+        _instance()->m_fGimmickJumpPow = PL::g_fGimmickJumpPower[inPow];
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkGimmick__7CPlayerUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initTreasureBox__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeTreasureBox__7CPlayer);
