@@ -1,4 +1,6 @@
+#define GAME_PLAYER_PLAYER_CPP
 #include "khtypes.h"
+#include "Game/Collision/CollBody.h"
 #include "Game/CardBattle.h"
 #include "Game/Player/Player.h"
 #include "Game/Player/PlayerManager.h"
@@ -284,7 +286,16 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setBanish__7CPlay
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBanish__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setReflectGuard__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setQuickBarrier__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeQuickBarrier__7CPlayer);
+void CPlayer::exeQuickBarrier() {
+    if (m_tqBarrier) {
+        m_tqBarrier -= m_tqFrameRate;
+        if (m_tqBarrier <= 0) {
+            m_collBody.m_uiFlag = (INT)m_collBody.m_uiFlag & ~2;
+            m_tqBarrier = 0;
+            m_collBody.m_GuardAttrFlag = 0;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAeroGuard__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAeroGuard__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPrizeHealing__7CPlayeri);

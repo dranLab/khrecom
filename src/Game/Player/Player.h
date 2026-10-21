@@ -268,7 +268,11 @@ public:
     HANDLE m_hFooting;           /* 0x55c */
     HANDLE m_hSnatch;            /* 0x560 */
 public: // PARTIAL: members public for Game/Player/PlayerRiku
+#ifdef GAME_PLAYER_PLAYER_CPP
+    CCollBody m_collBody;        /* 0x570 */
+#else
     UBYTE m_collBody[0x110] __attribute__((aligned(16))); /* 0x570 CCollBody */
+#endif
     BOOL m_bIsDead;              /* 0x680 */
     BOOL m_bDmgMuteki;           /* 0x684 */
     BOOL m_bDmgInAir;            /* 0x688 */
@@ -329,6 +333,7 @@ public:
     INT cmdRevolver_isActive();
     BOOL cmdRevolver_rollDeck(INT inNum);
     INT getLadderStepNow(FLOAT inHeight);
+    void exeQuickBarrier();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
     void setConditionFlag(UINT inSet, UINT inMask) { m_uiConditionFlag = (m_uiConditionFlag | inSet) & ~inMask; }
     // PARTIAL: added for Game/Player/FriendKing
