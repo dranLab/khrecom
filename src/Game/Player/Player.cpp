@@ -183,7 +183,17 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateField__7CPla
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateField__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateBattle__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateBattle__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateBattle__7CPlayer);
+void CPlayer::endStateBattle() {
+    setActionFlag(0, m_pParam->USE_BTL_ACTION);
+    m_collBody.offBody();
+    offAttack();
+    setBattleFlag(0, 1);
+    offWeapon();
+    m_uiAttackKind = 0;
+    m_uiPreAttackKind = 0;
+    m_uiAttackID = 0;
+    m_pMarker->setFlag(FALSE);
+}
 void CPlayer::beginStateWait() {
     m_iState = 2;
 }
