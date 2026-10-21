@@ -15,6 +15,7 @@
 #include "System/TaskMan.h"
 #include "Game/SEMotion.h"
 #include "System/Graphic/Effect/effect.h"
+#include "System/Coord.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -136,7 +137,14 @@ void CPlayer::exeMutekiTimer() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setControl__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkAtelHide__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkAtelControl__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCameraTargetPos__7CPlayerR7FVECTOR);
+void CPlayer::getCameraTargetPos(FVECTOR& outPos) {
+    if (m_PlayerState == PL::TRANSFORM) {
+        outPos = Crd(m_iBoneCenter).getWorldMatrix().v[3];
+    } else {
+        outPos = Crd(0).getWorldMatrix().v[3];
+        outPos.y += 0.5f;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBodyRevise__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", recoverCollMap__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setDownForce__7CPlayer);
