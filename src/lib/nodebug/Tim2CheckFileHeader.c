@@ -1,18 +1,8 @@
 /* SCE sample library tim2.c (TIM2 texture files) */
-#include "include_asm.h"
 #include "Tim2CheckFileHeader.h"
 
-/* .rodata stays asm until every function is C: its strings and tables by label */
 extern char D_004FF688[]; /* "TIM2" (in .sdata) */
 extern char D_004FF690[]; /* "CLT2" (in .sdata) */
-extern char D_004FC9C0[]; /* "Tim2CheckFileHeaer: TIM2 is broken %02X,%02X,%02X,%02X\n" */
-extern char D_004FC9F8[]; /* "Tim2CheckFileHeaer: TIM2 is broken (2)\n" */
-extern char D_004FCA20[]; /* "Tim2GetPictureHeader: Illegal image no.(%d)\n" */
-extern char D_004FCAF0[]; /* "Illegal clut and texture combination. ($%02X,$%02X)\n" */
-extern char D_004FCB28[]; /* "Illegal pixel format.\n" */
-extern char D_004FCB40[]; /* "file create failure.\n" */
-extern const char mmsize_24[] __asm__("mmsize.24");
-extern const char mmsize_28[] __asm__("mmsize.28");
 
 extern int printf(const char *, ...);
 
@@ -81,14 +71,14 @@ int Tim2CheckFileHeader(void *pTim2)
     } else if (strncmp((char *)pFileHdr->FileId, D_004FF690, 4) == 0) {
         i = 2; /* CLUT2 */
     } else {
-        printf(D_004FC9C0, pFileHdr->FileId[0], pFileHdr->FileId[1], pFileHdr->FileId[2], pFileHdr->FileId[3]);
+        printf("Tim2CheckFileHeaer: TIM2 is broken %02X,%02X,%02X,%02X\n", pFileHdr->FileId[0], pFileHdr->FileId[1], pFileHdr->FileId[2], pFileHdr->FileId[3]);
         return (0);
     }
 
     /* check the format version and id */
     if (!(pFileHdr->FormatVersion == 0x03 ||
           (pFileHdr->FormatVersion == 0x04 && (pFileHdr->FormatId == 0x00 || pFileHdr->FormatId == 0x01)))) {
-        printf(D_004FC9F8);
+        printf("Tim2CheckFileHeaer: TIM2 is broken (2)\n");
         return (0);
     }
     return (i);
@@ -101,7 +91,7 @@ TIM2_PICTUREHEADER *Tim2GetPictureHeader(void *pTim2, int imgno)
     int i;
 
     if (imgno >= pFileHdr->Pictures) {
-        printf(D_004FCA20, imgno);
+        printf("Tim2GetPictureHeader: Illegal image no.(%d)\n", imgno);
         return (NULL);
     }
 
@@ -126,7 +116,6 @@ int Tim2IsClut2(TIM2_PICTUREHEADER *ph)
     }
 }
 
-#ifdef TIM2_C_JT /* jump table: needs the data from source */
 int Tim2GetMipMapPictureSize(TIM2_PICTUREHEADER *ph, int mipmap, int *pWidth, int *pHeight)
 {
     int w, h, n;
@@ -161,13 +150,20 @@ int Tim2GetMipMapPictureSize(TIM2_PICTUREHEADER *ph, int mipmap, int *pWidth, in
     n = (n + 15) & ~15;
     return (n);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2GetMipMapPictureSize);
-#endif
 
 TIM2_MIPMAPHEADER *Tim2GetMipMapHeader(TIM2_PICTUREHEADER *ph, int *pSize)
 {
     TIM2_MIPMAPHEADER *pMmHdr;
+    static const char mmsize[] = {
+        0, /* no texture (CLUT2 data) */
+        0, /* LV0 texture only (no MIPMAP header) */
+        32, /* LV0..LV1 */
+        32, /* LV0..LV2 */
+        32, /* LV0..LV3 */
+        48, /* LV0..LV4 */
+        48, /* LV0..LV5 */
+        48 /* LV0..LV6 */
+    };
 
     if (ph->MipMapTextures > 1) {
         pMmHdr = (TIM2_MIPMAPHEADER *)((char *)ph + sizeof(TIM2_PICTUREHEADER));
@@ -176,7 +172,7 @@ TIM2_MIPMAPHEADER *Tim2GetMipMapHeader(TIM2_PICTUREHEADER *ph, int *pSize)
     }
 
     if (pSize) {
-        *pSize = mmsize_24[ph->MipMapTextures];
+        *pSize = mmsize[ph->MipMapTextures];
     }
     return (pMmHdr);
 }
@@ -184,19 +180,29 @@ TIM2_MIPMAPHEADER *Tim2GetMipMapHeader(TIM2_PICTUREHEADER *ph, int *pSize)
 void *Tim2GetUserSpace(TIM2_PICTUREHEADER *ph, int *pSize)
 {
     void *pUserSpace;
+    static const char mmsize[] = {
+        sizeof(TIM2_PICTUREHEADER), /* no texture (CLUT2 data) */
+        sizeof(TIM2_PICTUREHEADER), /* LV0 texture only (no MIPMAP header) */
+        sizeof(TIM2_PICTUREHEADER) + 32, /* LV0..LV1 */
+        sizeof(TIM2_PICTUREHEADER) + 32, /* LV0..LV2 */
+        sizeof(TIM2_PICTUREHEADER) + 32, /* LV0..LV3 */
+        sizeof(TIM2_PICTUREHEADER) + 48, /* LV0..LV4 */
+        sizeof(TIM2_PICTUREHEADER) + 48, /* LV0..LV5 */
+        sizeof(TIM2_PICTUREHEADER) + 48 /* LV0..LV6 */
+    };
     TIM2_EXHEADER *pExHdr;
 
-    if (ph->HeaderSize == mmsize_28[ph->MipMapTextures]) {
+    if (ph->HeaderSize == mmsize[ph->MipMapTextures]) {
         if (pSize)
             *pSize = 0;
         return (NULL);
     }
 
-    pUserSpace = (void *)((char *)ph + mmsize_28[ph->MipMapTextures]);
+    pUserSpace = (void *)((char *)ph + mmsize[ph->MipMapTextures]);
     if (pSize) {
         pExHdr = (TIM2_EXHEADER *)pUserSpace;
         if (*(u_int *)pExHdr->ExHeaderId != 0x00745865) {
-            *pSize = ph->HeaderSize - mmsize_28[ph->MipMapTextures];
+            *pSize = ph->HeaderSize - mmsize[ph->MipMapTextures];
         } else {
             *pSize = pExHdr->UserSpaceSize;
         }
@@ -450,7 +456,6 @@ u_int Tim2SetClutColor(TIM2_PICTUREHEADER *ph, int clut, int no, u_int newcolor)
     return ((a << 24) | (g << 16) | (b << 8) | r);
 }
 
-#ifdef TIM2_C_JT /* jump tables: need the data from source */
 u_int Tim2GetTexel(TIM2_PICTUREHEADER *ph, int mipmap, int x, int y)
 {
     unsigned char *pImage;
@@ -578,12 +583,6 @@ u_int Tim2GetTextureColor(TIM2_PICTUREHEADER *ph, int mipmap, int clut, int x, i
     }
     return (0);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2GetTexel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2SetTexel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2GetTextureColor);
-#endif
-#ifdef TIM2_C_JT /* psmtbl: needs the data from source */
 u_int Tim2LoadPicture(TIM2_PICTUREHEADER *ph, u_int tbp, u_int cbp)
 {
     tbp = Tim2LoadImage(ph, tbp);
@@ -621,10 +620,6 @@ u_int Tim2LoadImage(TIM2_PICTUREHEADER *ph, u_int tbp)
     }
     return (tbp);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2LoadPicture);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2LoadImage);
-#endif
 u_int Tim2LoadClut(TIM2_PICTUREHEADER *ph, u_int cbp)
 {
     int i;
@@ -699,7 +694,7 @@ u_int Tim2LoadClut(TIM2_PICTUREHEADER *ph, u_int cbp)
         break;
 
     default:
-        printf(D_004FCAF0, ph->ClutType, ph->ImageType);
+        printf("Illegal clut and texture combination. ($%02X,$%02X)\n", ph->ClutType, ph->ImageType);
         return (0);
     }
     return (1);
@@ -739,14 +734,14 @@ int Tim2TakeSnapshot(sceGsDispEnv *d0, sceGsDispEnv *d1, char *pszFname)
         break;
     default:
         /* illegal pixel format (GS_PSGPU24 is not supported) */
-        printf(D_004FCB28);
+        printf("Illegal pixel format.\n");
         return (0);
     }
 
     /* open the TIM2 file */
     h = sceOpen(pszFname, SCE_WRONLY | SCE_CREAT);
     if (h == -1) {
-        printf(D_004FCB40);
+        printf("file create failure.\n");
         return (0);
     }
 
@@ -831,7 +826,6 @@ int Tim2TakeSnapshot(sceGsDispEnv *d0, sceGsDispEnv *d1, char *pszFname)
     sceClose(h);
     return (1);
 }
-#ifdef TIM2_C_JT /* jump tables: need the data from source */
 void Tim2LoadTexture(int psm, u_int tbp, int tbw, int w, int h, u_long128 *pImage)
 {
     sceGsLoadImage li;
@@ -939,12 +933,7 @@ void Tim2StoreTexture(int psm, u_int tbp, int tbw, int w, int h, u_long128 *pIma
         sceGsSyncPath(0, 0);
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2LoadTexture);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2StoreTexture);
-#endif
 
-#ifdef TIM2_C_JT /* jump table: needs the data from source */
 /* buffer width in units of 64 pixels */
 static int Tim2CalcBufWidth(int psm, int w)
 {
@@ -972,9 +961,6 @@ static int Tim2CalcBufWidth(int psm, int w)
     }
     return (0);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/Tim2CheckFileHeader", Tim2CalcBufWidth);
-#endif
 
 /* buffer size in units of 256 bytes (64 words) */
 static int Tim2CalcBufSize(int psm, int w, int h)
@@ -997,3 +983,4 @@ static int Tim2GetLog2(int n)
     }
     return (i);
 }
+// SOURCE DATA: .rodata
