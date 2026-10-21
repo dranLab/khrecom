@@ -26,6 +26,11 @@ typedef struct {
 int unpack_mddata(char *ch, int rev, At3Work *w);
 void iqmf(char *ch);
 extern short a_wind[];
+extern signed char huf_maxlen[7][2];
+extern signed char *huf_prefixtbl[7][2];
+extern signed char *huf_lentbl[7][2];
+extern int *huf_deqtbl[3][7];
+extern const int scaleDiv[] __asm__("scaleDiv.0");
 
 typedef struct {
     int w[23];
@@ -178,7 +183,50 @@ static unsigned int read_unpack_from_msb(int n, At3Work *w)
     return v;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", unpack_specs);
+static int unpack_specs(char *ch, unsigned int sel, int cb, int start, int end, int q, At3Work *w)
+{
+    int bits = huf_maxlen[cb - 1][sel];
+    signed char *len = huf_lentbl[cb - 1][sel];
+    signed char *prefix = huf_prefixtbl[cb - 1][sel];
+    int shift;
+    int *deq;
+    int *p;
+    int c;
+    int c2;
+
+    if (sel >= 2) {
+        return -1;
+    }
+    if ((unsigned int)(cb - 1) >= 7) {
+        return -1;
+    }
+    if (end == start) {
+        return -1;
+    }
+    shift = scaleDiv[q];
+    p = (int *)(ch + 0x1A40) + start;
+    deq = huf_deqtbl[q - (21 - shift) * 3][cb - 1];
+    end -= start;
+    if (cb == 1) {
+        do {
+            c = prefix[get_unpack_from_msb(bits, w)];
+            w->bitpos += len[c];
+            *p++ += deq[c * 2] >> shift;
+            if (end != 1) {
+                *p++ += deq[c * 2 + 1] >> shift;
+            }
+            end -= 2;
+        } while (end > 0);
+    } else {
+        do {
+            c2 = prefix[get_unpack_from_msb(bits, w)];
+            end--;
+            w->bitpos += len[c2];
+            *p++ += deq[c2] >> shift;
+        } while (end > 0);
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", getToneSpectrum);
 
