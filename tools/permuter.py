@@ -56,7 +56,7 @@ IDENT = re.compile(r"\b[A-Za-z_]\w*\b")
 
 def find_function(text: str, name: str) -> tuple[int, int]:
     """(start, end) of the function's body braces, end exclusive (just after the closing brace)."""
-    for m in re.finditer(r"^[^\s#/][^;{}]*\b" + re.escape(name) + r"\s*\([^;{}]*\)\s*\{", text, re.M):
+    for m in re.finditer(r"^[A-Za-z_][^;{}]*\b" + re.escape(name) + r"\s*\([^;{}]*\)\s*\{", text, re.M):
         start = m.end() - 1
         depth = 0
         i = start
@@ -79,12 +79,24 @@ def find_function(text: str, name: str) -> tuple[int, int]:
 
 
 def enable_draft(text: str, name: str) -> str:
-    """Switch a parked draft on: the #if 0 before the function whose #else has its INCLUDE_ASM becomes #if 1."""
-    m = re.search(r"#else\s*\n\s*INCLUDE_ASM\([^)]*\b" + re.escape(name) + r"\)", text)
-    if not m:
+    """Switch a parked draft on: the #if 0 block around the function's definition becomes #if 1, and the
+    function's INCLUDE_ASM (in the #else, or after the #endif) goes away."""
+    d = re.search(r"^[A-Za-z_][^;{}]*\b" + re.escape(name) + r"\s*\([^;{}]*\)\s*\{", text, re.M)
+    if not d:
         return text
-    i = text.rfind("#if 0", 0, m.start())
-    return text if i < 0 else text[:i] + "#if 1" + text[i + 5:]
+    depth, opened = 0, None
+    for m in re.finditer(r"^\s*#\s*(if|ifdef|ifndef|endif)\b(.*)$", text[:d.start()], re.M):
+        if m.group(1).startswith("if"):
+            depth += 1
+            if m.group(1) == "if" and m.group(2).strip() == "0":
+                opened = (m.start(), m.end(), depth)
+        else:
+            if opened and depth == opened[2]:
+                opened = None
+            depth -= 1
+    if opened:
+        text = text[:opened[0]] + re.sub(r"#\s*if\s+0", "#if 1", text[opened[0]:opened[1]]) + text[opened[1]:]
+    return re.sub(r"^\s*INCLUDE_ASM\([^)]*,\s*" + re.escape(name) + r"\s*\);\s*$", "", text, flags=re.M)
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -410,6 +422,8 @@ def main() -> None:
 
     Scorer.build = build
     scorer = Scorer(args.unit, args.function, source, build_command(f"{build}/src/{args.unit}.o"), expected, workdir)
+    if re.search(r"INCLUDE_ASM\([^)]*,\s*" + re.escape(args.function) + r"\s*\)", head + tail):
+        sys.exit(f"{args.function} is still INCLUDE_ASM'd outside its draft")
     base, err = scorer.score(text, "base")
     if base >= 1 << 30:
         sys.exit("the unmodified source does not compile here:\n" + err)
