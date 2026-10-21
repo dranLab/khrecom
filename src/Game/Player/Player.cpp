@@ -307,7 +307,14 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initRoomCreation_
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeRoomCreation__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initWorldSelect__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWorldSelect__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initCarry__7CPlayer);
+void CPlayer::initCarry() {
+    setPlayerState(PL::CARRY);
+    m_iSubState = 0;
+    clearSpeed();
+    offWeapon();
+    setAnimForce(0x17, 0, 0, 0, 0, 0);
+    m_pCam->setFlag(0x800, TRUE); /* the partial CPlayerCamera keeps (flag, on/off): the original is setFlag(0x800, 0) */
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCarry__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", resetAction__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttackField__7CPlayeri);

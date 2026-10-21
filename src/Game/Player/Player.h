@@ -345,6 +345,7 @@ public:
     void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
     void exeEscape();
+    void initCarry();
     void cancelLockon();
     void autoLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
