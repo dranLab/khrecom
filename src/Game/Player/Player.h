@@ -332,6 +332,12 @@ public:
     void exePrizeHealing();
     void fadeEffCharge();
     INT getMotIndex(INT inChara, INT inIndex);
+    void setReflectGuard(INT inFlag);
+    void setTransOff(INT inFlag);
+    void chkAtelHide(INT inFlag);
+    void initWorldSelect();
+    void cmdState_initWorldSelect(HANDLE inDoor);
+    void exeEscape();
     void cancelLockon();
     void autoLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
@@ -444,6 +450,7 @@ public:
     INT isActionFlag(UINT inFlag) { return m_uiActionFlag & inFlag; }
     INT isTrgFlag(UINT inFlag) { return m_uiTrgFlag & inFlag; }
     static CPlayer* m_pInstance;
+    static CPlayer*& _instance() { return m_pInstance; } // PARTIAL: reference accessor (as CStatus::_info): the original reloads m_pInstance after every store
     static void enablePadControl(INT inFlag);
     static void enableDbgPadControl(INT inFlag);
     void changeState(INT inState);
@@ -456,6 +463,7 @@ public:
     void setFaceAnim(INT inID, INT inFlag);
     void initStartWait();
     void initStandUp(INT inFlag);
+    void initFall();
     INT initIdle(INT inAnim, INT inFlag);
     INT procFlowIdle(INT inFlag);
     void initEnd();
@@ -487,6 +495,7 @@ public:
     void setCastEffect(const CHAR* inName, INT inNo, CCoord* inCoord, FVECTOR* inPos);
     // PARTIAL: added for Game/Player/PlayerDRiku
     static INT importStatus();
+    static INT exportStatus();
     void setDefAttr(FLOAT* inAttr);
     // PARTIAL: added for Game/Player/Player
     static INT calcNextEXP(INT inLv) __attribute__((const));
@@ -536,6 +545,7 @@ public:
 };
 
 extern CPlayer* g_pPlayer;
+FVECTOR getPlayerPos(BOOL flag);
 
 // PARTIAL: added for Game/Player/PlayerManager
 struct PL_PARAM {

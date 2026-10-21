@@ -17,17 +17,35 @@
 #include "System/Graphic/Effect/effect.h"
 #include "System/Coord.h"
 #include "Game/Player/PlayerAnim.h"
+#include "Game/GameWork.h"
+#include "Form/Menu/WorldSelect.h"
+#include "Game/Player/PlayerCamera.h"
+#include "Game/SceneInfo.h"
+#include "System/HeapMan.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
 extern "C" char D_00499828[];
 extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+extern "C" char D_0049B308[];
+namespace PL {
+extern FVECTOR g_vDummyPlayerPos; // data from the asm until SOURCE DATA
+extern FVECTOR g_vBanishPos;
+}
+inline void* operator new(size_t, void* p) throw() { return p; }
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_0025F688);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerAttack__9DWTPlayerP12CDebugWindowii_0025F798);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugWinPlayer__9DWTPlayerP12CDebugWindowii_0025FA48);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getPlayerPos__Fi);
+FVECTOR getPlayerPos(BOOL flag) {
+    if (g_pPlayer) {
+        if (!flag && g_pPlayer->isConditionFlag(0x40)) return PL::g_vBanishPos;
+        return g_pPlayer->getPos();
+    }
+    return PL::g_vDummyPlayerPos;
+}
 INT CPlayer::calcNextEXP(INT inLv) {
     INT nExp = 25;
     for (INT i = 3; i <= inLv + 1; i++) {
@@ -85,7 +103,15 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeCockpit__7CPl
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeRevolver__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initActionSkill__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", importStatus__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exportStatus__7CPlayer);
+INT CPlayer::exportStatus() {
+    if (!_instance()) return 0;
+    CStatus::setHPMax(_instance()->m_iMaxHP);
+    CStatus::setHP(_instance()->m_iHP);
+    CStatus::setAP(_instance()->m_iAP);
+    CStatus::setEXP(_instance()->m_iEXP);
+    CStatus::setMP(_instance()->m_iMP);
+    return 1;
+}
 void CPlayer::setPlayerState(PlayerState inState) {
     m_PrePlayerState = m_PlayerState;
     m_PlayerState = inState;
@@ -114,7 +140,15 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimSkillEx__7
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimRsrcEx__7CPlayeriiiiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowIdleAnim__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setFaceAnim__7CPlayerii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setTransOff__7CPlayeri);
+void CPlayer::setTransOff(INT inFlag) {
+    if (inFlag) {
+        setEntityFlag(0x1000, 0);
+        if (isPlayerFlag(0x40000000)) m_pWeapon->setEntityFlag(0x1000, 0);
+    } else {
+        setEntityFlag(0, 0x1000);
+        if (isPlayerFlag(0x40000000)) m_pWeapon->setEntityFlag(0, 0x1000);
+    }
+}
 void CPlayer::onWeapon(INT inEffect) {
     if (m_pWeapon) m_pWeapon->onWeapon(inEffect);
     m_uiPlayerFlag = (INT)m_uiPlayerFlag & ~2;
@@ -169,13 +203,35 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateField__7CPla
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateField__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateBattle__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateBattle__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateBattle__7CPlayer);
+void CPlayer::endStateBattle() {
+    setActionFlag(0, m_pParam->USE_BTL_ACTION);
+    m_collBody.offBody();
+    offAttack();
+    setBattleFlag(0, 1);
+    offWeapon();
+    m_uiAttackKind = 0;
+    m_uiPreAttackKind = 0;
+    m_uiAttackID = 0;
+    m_pMarker->setFlag(FALSE);
+}
 void CPlayer::beginStateWait() {
     m_iState = 2;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateHide__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateHide__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateHide__7CPlayer);
+void CPlayer::stateHide() {
+    setPlayerFlag(0x400000, 0);
+    if (dbgCheckUser(KKIKUCHI) && dbgButtonTrg(USR_SYSTEM, 0x10, 1)) {
+        CGameWork::setInt(1, 0xE2, 0);
+    }
+    chkAtelHide(0);
+}
+void CPlayer::endStateHide() {
+    setEntityFlag(0, 1);
+    setPlayerFlag(0, 0x1001);
+    setLand(5.0f, 0.5f, 1);
+    clearSpeed();
+    m_pCam->setFlag(1, FALSE); /* the partial CPlayerCamera keeps (flag, on/off): the original is setFlag(0, 1) */
+}
 BOOL CPlayer::isNowInAir() {
     m_bAirCheck = FALSE;
     return isAir();
@@ -196,7 +252,16 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setWalkAnim__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBattleIdle__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procFlowIdle__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initIdle__7CPlayerii);
+INT CPlayer::initIdle(INT inAir, INT inStand) {
+    INT bAir = inAir;
+    if (bAir < 0) bAir = isAir();
+    if (!bAir) {
+        initStandUp(inStand);
+    } else {
+        initFall();
+    }
+    return bAir;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkWall__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkWallBottom__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initWall__7CPlayer);
@@ -366,7 +431,16 @@ void CPlayer::calcAppearPosFS_toAttackID() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkEscape__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initEscape__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeEscape__7CPlayer);
+void CPlayer::exeEscape() {
+    setPlayerFlag(0x400000, 0);
+    m_pCam->setFlag(0x1000, TRUE); /* the partial CPlayerCamera keeps (flag, on/off): the original is setFlag(0x1000, 0) */
+    if (!m_iSubState) {
+        m_tqEscape += m_tqFrameRate;
+        if (m_tqEscape >= 2501) {
+            if (CSceneInfo::reqExitBattle()) m_iSubState = 1;
+        }
+    }
+}
 void CPlayer::setBGFade(FLOAT inRate, FLOAT inTime, INT inFlag) {
     FVECTOR v;
     v.set(inRate, inRate, inRate, 1.0f);
@@ -380,7 +454,19 @@ void CPlayer::setObjStop(UINT inFlag) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWarp__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setBanish__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBanish__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setReflectGuard__7CPlayeri);
+void CPlayer::setReflectGuard(INT inFlag) {
+    if (!inFlag) {
+        setConditionFlag(0, 0x200);
+        m_collBody.m_GuardAttrFlag = 0;
+        m_collBody.m_uiFlag = (INT)m_collBody.m_uiFlag & ~2;
+    } else {
+        setConditionFlag(0x200, 0);
+        m_collBody.m_uiFlag |= 2;
+        CCollBody& body = m_collBody;
+        body.setGuardDir(1.5707964f);
+        body.m_GuardAttrFlag |= 1;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setQuickBarrier__7CPlayeri);
 void CPlayer::exeQuickBarrier() {
     if (m_tqBarrier) {
@@ -481,7 +567,12 @@ void CPlayer::cmdMove_WaterSurfaceCheck(INT inFlag) {
     if (inFlag) m_pMove->setFlag(0x80, TRUE);
     else m_pMove->setFlag(0x80, FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", cmdState_initWorldSelect__7CPlayeri);
+void CPlayer::cmdState_initWorldSelect(HANDLE inDoor) {
+    m_hGimmick = inDoor;
+    m_pMarker->holdTarget(8);
+    initWorldSelect();
+    new (com_malloc_d(sizeof(CWorldSelect), D_0049B308, RET_ADDR())) CWorldSelect(CTaskMan::getSysTask(1), m_hGimmick);
+}
 void CPlayer::cmdState_setEncountWait() {
     setPlayerFlag(0x100, 0);
     changeState(2);
