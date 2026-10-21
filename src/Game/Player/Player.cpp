@@ -13,10 +13,16 @@
 #include "Game/SceneEnv.h"
 #include "Game/Bullet/BulletManager.h"
 #include "System/TaskMan.h"
+#include "Game/SEMotion.h"
+#include "System/Graphic/Effect/effect.h"
+#include "System/Coord.h"
+#include "Game/Player/PlayerAnim.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
 extern "C" char D_00499828[];
+extern "C" char D_00499A18[];
+void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_0025F688);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerAttack__9DWTPlayerP12CDebugWindowii_0025F798);
@@ -29,7 +35,17 @@ INT CPlayer::calcNextEXP(INT inLv) {
     }
     return nExp;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getNowNextEXP__7CPlayer);
+INT CPlayer::getNowNextEXP() {
+    INT next;
+    if (m_pInstance) {
+        next = calcNextEXP(m_pInstance->getLV());
+        __asm__ __volatile__("" : : : "memory"); /* matching lever: the original re-reads m_pInstance after the const call */
+        return next - m_pInstance->getEXP();
+    } else {
+        next = calcNextEXP(CStatus::getLV());
+        return next - CStatus::getEXP();
+    }
+}
 INT CPlayer::getNowTotalMP() {
     if (!m_pInstance) return CStatus::getMP();
     return m_pInstance->m_iMP;
@@ -77,12 +93,23 @@ void CPlayer::setPlayerState(PlayerState inState) {
     m_tqStateTimer = 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeAnimIndex__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getMotIndex__7CPlayerii);
+INT CPlayer::getMotIndex(INT inChara, INT inIndex) {
+    if (!(0 <= inIndex && inIndex < ANIM_MAX)) AssertApp(D_004997C0, 1361, D_00499A18, 0);
+    return PL_ANIM::g_MotNameTbl[inChara][inIndex].iIndex;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimForce__7CPlayeriiiiii);
 void CPlayer::setAnim(INT inID, INT inTq, INT inGr) {
     if (m_iNowAnimID != inID) setAnimForce(inID, inTq, inGr, 0, 0, 0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimSpeed__7CPlayerf);
+void CPlayer::setAnimSpeed(FLOAT inSpeed) {
+    if (m_fAnimSpeed != inSpeed) {
+        m_fAnimSpeed = inSpeed;
+        CEntity::setAnimSpeed(inSpeed);
+        if (isPlayerFlag(0x40000000)) {
+            m_pWeapon->setAnimSpeed(m_fAnimSpeed);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimSkillEx__7CPlayeriiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimRsrcEx__7CPlayeriiiiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowIdleAnim__7CPlayer);
@@ -100,7 +127,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onAttack__7CPlaye
 void CPlayer::offAttack() {
     if (m_pWeapon) m_pWeapon->offAttack();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getWeaponTopPos__7CPlayerR7FVECTOR);
+void CPlayer::getWeaponTopPos(FVECTOR& inVec) {
+    if (m_pWeapon) {
+        FVECTOR ofs = PlayerWeapon::g_fWeaponTopOffset;
+        FMATRIX m = m_pWeapon->getMatrixWep0();
+        ApplyMatrixXYZ(inVec, m, ofs);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCaskPos__7CPlayerR7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyColl__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyCollPos__7CPlayer);
@@ -116,11 +149,21 @@ void CPlayer::exeMutekiTimer() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setControl__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkAtelHide__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkAtelControl__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCameraTargetPos__7CPlayerR7FVECTOR);
+void CPlayer::getCameraTargetPos(FVECTOR& outPos) {
+    if (m_PlayerState == PL::TRANSFORM) {
+        outPos = Crd(m_iBoneCenter).getWorldMatrix().v[3];
+    } else {
+        outPos = Crd(0).getWorldMatrix().v[3];
+        outPos.y += 0.5f;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBodyRevise__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", recoverCollMap__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setDownForce__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setLand__7CPlayerffi);
+void CPlayer::setLand(FLOAT inDownLEngth, FLOAT inUpLength, BOOL inFirstHit) {
+    recoverCollMap();
+    land(inDownLEngth, inUpLength, inFirstHit);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateField__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateField__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateField__7CPlayer);
@@ -201,7 +244,16 @@ void CPlayer::cancelLockon() {
 void CPlayer::autoLockon() {
     if (m_bIsBattleScene && !m_hLockon) m_pMarker->setMode(1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPushon__7CPlayeri);
+void CPlayer::setPushon(INT inFlag) {
+    if (m_bIsBattleScene) {
+        if (inFlag) {
+            m_pMarker->onPush(inFlag);
+        } else {
+            m_pMarker->offPush();
+            m_uiTrgFlag &= ~0x40000;
+        }
+    }
+}
 void CPlayer::setTrgFlagRendaNG(const CHAR* inName) {
     if (!DebugWork::g_dw.player.iRenda) m_uiTrgFlag |= 0x40000;
 }
@@ -278,11 +330,27 @@ void CPlayer::exeConfuse() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initItem__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeItem__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStandUp_inFriend__7CPlayer);
+void CPlayer::exeStandUp_inFriend() {
+    INT oldMode = m_WalkMode;
+    INT mode = chkWalkMode();
+    m_WalkMode = mode;
+    if (!mode && oldMode && m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
+    exeWalk();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initCharge__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCharge__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkChargeMove__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", fadeEffCharge__7CPlayer);
+void CPlayer::fadeEffCharge() {
+    if (m_hEffCharge > 0) {
+        m_tqEffCharge -= getFrameRate();
+        if (m_tqEffCharge <= 0) {
+            m_tqEffCharge = 0;
+            CEffect* effect = CEffectMan::getEffect(m_hEffCharge);
+            if (effect) effect->fadeout(8.0f);
+            m_hEffCharge = 0;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCure__7CPlayerii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCastEffect__7CPlayerPCciP6CCoordP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPos__7CPlayerffP7FVECTOR);
@@ -327,7 +395,19 @@ void CPlayer::exeQuickBarrier() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAeroGuard__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAeroGuard__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPrizeHealing__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exePrizeHealing__7CPlayer);
+void CPlayer::exePrizeHealing() {
+    if (m_hEffPrize) {
+        m_tqPrize -= m_tqFrameRate;
+        if (m_tqPrize <= 0) {
+            if (m_hEffPrize > 0) {
+                CEffect* effect = CEffectMan::getEffect(m_hEffPrize);
+                if (effect) effect->loopEnd();
+                m_hEffPrize = 0;
+            }
+            m_tqPrize = 0;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initGimmickCard__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickCard__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setTrapDamage__7CPlayeriPCcUi);

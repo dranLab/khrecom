@@ -324,9 +324,14 @@ public:
     PlayerCamera::CPlayerCamera* getPlayerCamera() { return m_pCam; } // PARTIAL: added for Game/Player/FriendJack
     INT getPlayerState() { return m_PlayerState; }
     INT getHP() { return m_iHP; }
+    INT getLV() { return m_iLV; }
+    INT getEXP() { return m_iEXP; }
     INT getMaxHP() { return m_iMaxHP; }
     void addHP(INT inHP, INT inFlag, INT inEffect);
     void setPrizeHealing(INT inTime); // PARTIAL: added for Game/Player/SummonTink
+    void exePrizeHealing();
+    void fadeEffCharge();
+    INT getMotIndex(INT inChara, INT inIndex);
     void cancelLockon();
     void autoLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
@@ -335,6 +340,9 @@ public:
     INT getLadderStepNow(FLOAT inHeight);
     void exeQuickBarrier();
     INT isNowCardActionState();
+    INT chkWalkMode();
+    void exeWalk();
+    void recoverCollMap();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
     void setConditionFlag(UINT inSet, UINT inMask) { m_uiConditionFlag = (m_uiConditionFlag | inSet) & ~inMask; }
     // PARTIAL: added for Game/Player/FriendKing
@@ -481,7 +489,8 @@ public:
     static INT importStatus();
     void setDefAttr(FLOAT* inAttr);
     // PARTIAL: added for Game/Player/Player
-    static INT calcNextEXP(INT inLv);
+    static INT calcNextEXP(INT inLv) __attribute__((const));
+    static INT getNowNextEXP();
     BOOL isMuteki() const;
     void killBullet();
     void exeConfuse();
