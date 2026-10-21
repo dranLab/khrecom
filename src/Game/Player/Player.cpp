@@ -114,7 +114,15 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimSkillEx__7
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimRsrcEx__7CPlayeriiiiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowIdleAnim__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setFaceAnim__7CPlayerii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setTransOff__7CPlayeri);
+void CPlayer::setTransOff(INT inFlag) {
+    if (inFlag) {
+        setEntityFlag(0x1000, 0);
+        if (isPlayerFlag(0x40000000)) m_pWeapon->setEntityFlag(0x1000, 0);
+    } else {
+        setEntityFlag(0, 0x1000);
+        if (isPlayerFlag(0x40000000)) m_pWeapon->setEntityFlag(0, 0x1000);
+    }
+}
 void CPlayer::onWeapon(INT inEffect) {
     if (m_pWeapon) m_pWeapon->onWeapon(inEffect);
     m_uiPlayerFlag = (INT)m_uiPlayerFlag & ~2;
