@@ -332,6 +332,7 @@ public:
     void exePrizeHealing();
     void fadeEffCharge();
     INT getMotIndex(INT inChara, INT inIndex);
+    void setReflectGuard(INT inFlag);
     void cancelLockon();
     void autoLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial

@@ -389,7 +389,19 @@ void CPlayer::setObjStop(UINT inFlag) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWarp__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setBanish__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBanish__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setReflectGuard__7CPlayeri);
+void CPlayer::setReflectGuard(INT inFlag) {
+    if (!inFlag) {
+        setConditionFlag(0, 0x200);
+        m_collBody.m_GuardAttrFlag = 0;
+        m_collBody.m_uiFlag = (INT)m_collBody.m_uiFlag & ~2;
+    } else {
+        setConditionFlag(0x200, 0);
+        m_collBody.m_uiFlag |= 2;
+        CCollBody& body = m_collBody;
+        body.setGuardDir(1.5707964f);
+        body.m_GuardAttrFlag |= 1;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setQuickBarrier__7CPlayeri);
 void CPlayer::exeQuickBarrier() {
     if (m_tqBarrier) {
