@@ -45,6 +45,7 @@ private:
     static void setStatus(unsigned char (*pInitCardTbl)[2]);
 
 public:
+    static STATUS_INFO& getStaus() { return *m_pStatusInfo; } // PARTIAL: added for Game/Player/Player (name as in the original; plain read, no reload)
     static INT getHP() { return _info()->HP; }
     static void setHP(INT n) { _info()->HP = n; }
     static INT getHPMax() { return _info()->HPMax; }

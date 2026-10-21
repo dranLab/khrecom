@@ -326,6 +326,13 @@ public:
     INT getHP() { return m_iHP; }
     INT getLV() { return m_iLV; }
     INT getEXP() { return m_iEXP; }
+    void setHP(INT inHP) { m_iHP = inHP; }
+    void setMaxHP(INT inHP) { m_iMaxHP = inHP; }
+    void setAP(INT inAP) { m_iAP = inAP; }
+    void setLV(INT inLV) { m_iLV = inLV; }
+    void setEXP(INT inEXP) { m_iEXP = inEXP; }
+    void setMP(INT inMP) { m_iMP = inMP; }
+    void setMaxDP(INT inDP) { m_iMaxDP = inDP; }
     INT getMaxHP() { return m_iMaxHP; }
     void addHP(INT inHP, INT inFlag, INT inEffect);
     void setPrizeHealing(INT inTime); // PARTIAL: added for Game/Player/SummonTink
@@ -338,6 +345,7 @@ public:
     void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
     void exeEscape();
+    void initCarry();
     void cancelLockon();
     void autoLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
@@ -496,6 +504,8 @@ public:
     // PARTIAL: added for Game/Player/PlayerDRiku
     static INT importStatus();
     static INT exportStatus();
+    static void addMP(INT inMP);
+    static void notifyExterminate();
     void setDefAttr(FLOAT* inAttr);
     // PARTIAL: added for Game/Player/Player
     static INT calcNextEXP(INT inLv) __attribute__((const));
