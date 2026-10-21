@@ -320,7 +320,17 @@ void CPlayer::exeStandUp_inFriend() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initCharge__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCharge__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkChargeMove__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", fadeEffCharge__7CPlayer);
+void CPlayer::fadeEffCharge() {
+    if (m_hEffCharge > 0) {
+        m_tqEffCharge -= getFrameRate();
+        if (m_tqEffCharge <= 0) {
+            m_tqEffCharge = 0;
+            CEffect* effect = CEffectMan::getEffect(m_hEffCharge);
+            if (effect) effect->fadeout(8.0f);
+            m_hEffCharge = 0;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCure__7CPlayerii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCastEffect__7CPlayerPCciP6CCoordP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPos__7CPlayerffP7FVECTOR);

@@ -330,6 +330,7 @@ public:
     void addHP(INT inHP, INT inFlag, INT inEffect);
     void setPrizeHealing(INT inTime); // PARTIAL: added for Game/Player/SummonTink
     void exePrizeHealing();
+    void fadeEffCharge();
     void cancelLockon();
     void autoLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
