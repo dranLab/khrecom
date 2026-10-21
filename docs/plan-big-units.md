@@ -182,6 +182,26 @@ To park:
 The `Parked:` prefix is what `tools/leftovers.py` reads. Keep this exact form. Then update the existing note
 of an old draft instead of adding a second one.
 
+## Structural blockers
+
+Sometimes one cause blocks many functions of a unit at once, rather than one function being hard. Example
+(Game/Player/Player, 2026-10-21): 30 of the remaining functions use a switch jump table; a compiled switch puts
+its table in `.rodata`, which the build strips until the unit has `// SOURCE DATA`, so objcopy rejects the
+object (`symbol .rodata required but not present`). Parking each of them one by one only defers the real work.
+
+When you hit such a blocker:
+
+1. Name it in `build/progress/<unit>.md` with the list of affected functions (e.g. the jump-table scan
+   `awk '/^glabel /{fn=$2} /jtbl_/{print fn}' build/SLUS_217.99/expected/asm/<unit>.s | sort -u`).
+2. Consider resolving the cause itself, even if the plan would normally do it later (for the jump-table case:
+   bring the unit's data from source early, with the placeholder recipes under "Finishing a unit" and the
+   `// SOURCE DATA` validation V6). Weigh the size of that work against the number of functions it unblocks,
+   and do it on the unit branch like any other change.
+3. Whatever you decide, the gate still runs: `tools/check.sh` must exit 0 before the merge into `main`, and
+   V3 (`ninja`, the SHA-1) must pass at every commit. A data step that is only partly done is not committed.
+4. If the resolution needs `tools/`, `configure.py` or `config/` changes, stop and ask (see "When to stop and
+   ask the user").
+
 ## Finishing a unit
 
 Once every function is matched or parked:
