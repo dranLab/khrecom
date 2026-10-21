@@ -410,7 +410,8 @@ static inline unsigned char *_bsAddr(_sceMpegBs *bs, int bits)
         __asm__ volatile("move %0, $gp\n\tmove $gp, %1" : "=&r"(__old) : "r"(__old));           \
     })
 
-/* 6 lines off: the zero store of allData, the delay slot of the first pack header test, the register of allGp */
+/* 6 lines off: the zero store of allData, the delay slot of the first pack header test, the reload register of
+   allGp */
 #if 0
 int sceMpegDemuxPssRing(sceMpeg *mp, unsigned char *pss, int size, unsigned char *ring, int ringsize)
 {
