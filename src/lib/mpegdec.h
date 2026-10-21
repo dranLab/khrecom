@@ -157,7 +157,8 @@ struct _sceMpegDecoder {
     int x834;
     long x838;
     long x840;
-    char _pad848[0x850 - 0x848];
+    int x848; /* bit buffer */
+    int x84C; /* bits left in it */
     int x850;
     int x854;
     int x858;
