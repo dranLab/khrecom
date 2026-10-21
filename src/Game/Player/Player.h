@@ -324,6 +324,8 @@ public:
     PlayerCamera::CPlayerCamera* getPlayerCamera() { return m_pCam; } // PARTIAL: added for Game/Player/FriendJack
     INT getPlayerState() { return m_PlayerState; }
     INT getHP() { return m_iHP; }
+    INT getLV() { return m_iLV; }
+    INT getEXP() { return m_iEXP; }
     INT getMaxHP() { return m_iMaxHP; }
     void addHP(INT inHP, INT inFlag, INT inEffect);
     void setPrizeHealing(INT inTime); // PARTIAL: added for Game/Player/SummonTink
@@ -483,7 +485,8 @@ public:
     static INT importStatus();
     void setDefAttr(FLOAT* inAttr);
     // PARTIAL: added for Game/Player/Player
-    static INT calcNextEXP(INT inLv);
+    static INT calcNextEXP(INT inLv) __attribute__((const));
+    static INT getNowNextEXP();
     BOOL isMuteki() const;
     void killBullet();
     void exeConfuse();

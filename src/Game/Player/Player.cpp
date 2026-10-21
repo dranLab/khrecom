@@ -30,7 +30,17 @@ INT CPlayer::calcNextEXP(INT inLv) {
     }
     return nExp;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getNowNextEXP__7CPlayer);
+INT CPlayer::getNowNextEXP() {
+    INT next;
+    if (m_pInstance) {
+        next = calcNextEXP(m_pInstance->getLV());
+        __asm__ __volatile__("" : : : "memory"); /* matching lever: the original re-reads m_pInstance after the const call */
+        return next - m_pInstance->getEXP();
+    } else {
+        next = calcNextEXP(CStatus::getLV());
+        return next - CStatus::getEXP();
+    }
+}
 INT CPlayer::getNowTotalMP() {
     if (!m_pInstance) return CStatus::getMP();
     return m_pInstance->m_iMP;
