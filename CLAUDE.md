@@ -16,6 +16,10 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
   symbol); `check.sh` runs it when the checksum fails. funcdiff ignores data: wrong data from source shows here.
 - `.venv/bin/python tools/asm.py <unit> [<function>...]` - the original's functions (size, weak/global) or their
   assembly, compact (a third of the raw `.s`); `--data` for the unit's data.
+- `.venv/bin/python tools/permuter.py <unit> <function> [--minutes N] [-j N]` - random source mutations of one nearly
+  matching function (statement/declaration order, operand order, temporaries, ...), compiled in parallel and scored
+  against the original; the best variant goes to `build/permuter/<function>/best.c` (+ `best.diff`). Parked drafts
+  under `#if 0` are switched on in its copies; the real source is never touched. Check a result's semantics.
 - `.venv/bin/python tools/compare_compilers.py SLUS_217.99 src/<unit>.cpp` - per function, with every installed compiler.
 - `.venv/bin/python tools/candidates.py SLUS_217.99` - files not decompiled yet (size, functions, header strings).
 - `tools/setup_worktree.sh` - prepare a fresh git worktree (links game files and tools, runs configure).
