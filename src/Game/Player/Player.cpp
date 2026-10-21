@@ -206,7 +206,27 @@ void CPlayer::setTrgFlagRendaNG(const CHAR* inName) {
     if (!DebugWork::g_dw.player.iRenda) m_uiTrgFlag |= 0x40000;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkPlayCard__7CPlayer);
+/* Parked: the switch's jump table goes to .rodata, which is stripped until the unit's data comes from source
+   (objcopy: symbol `.rodata' required but not present); tried: C switch over PL::ATTACK/ITEM/MAGIC/SKILL/
+   GIMMICKCARD/FRIEND/SUMMON/DUEL (the code apart from the table is the original's shape) */
+#if 0
+INT CPlayer::isNowCardActionState() {
+    switch (m_PlayerState) {
+    case PL::ATTACK:
+    case PL::ITEM:
+    case PL::MAGIC:
+    case PL::SKILL:
+    case PL::GIMMICKCARD:
+    case PL::FRIEND:
+    case PL::SUMMON:
+    case PL::DUEL:
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowCardActionState__7CPlayer);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkPlayCardCombo__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onMsg__7CPlayeriPv);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeUseStock__7CPlayeri);
