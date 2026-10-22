@@ -424,7 +424,16 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", startSingleAction
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttack__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAttack__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procTargetMark__7CPlayer);
+void CPlayer::procTargetMark() {
+    CEntity* pTarget = m_hTarget > 0 ? (CEntity*)CTaskMan::getTask(m_hTarget) : NULL;
+    if (pTarget) {
+        m_hMark = m_hTarget;
+        pTarget->getLockOnPos(m_vMarkPos);
+    } else {
+        m_hMark = 0;
+        m_vMarkPos.set(0.0f, 0.0f, 0.0f);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackMove__7CPlayeriffif);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackCollision__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procGravity__7CPlayeriii);
