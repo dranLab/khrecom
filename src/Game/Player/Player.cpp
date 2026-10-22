@@ -703,7 +703,19 @@ void CPlayer::fadeEffect(INT& ioHandle, INT inLoop) {
         ioHandle = 0;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", fadeEffAttack__7CPlayeri);
+void CPlayer::fadeEffAttack(INT inLoop) {
+    INT i;
+    for (i = 0; i < 4; i++) {
+        if (m_hEffAttack[i] > 0) {
+            CEffect* effect = CEffectMan::getEffect(m_hEffAttack[i]);
+            if (effect) {
+                if (inLoop && effect->isLoop()) effect->loopEnd();
+                else effect->fadeout(8.0f);
+            }
+            m_hEffAttack[i] = 0;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEffAttack__7CPlayeriPCciiP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateSpotLight__7CPlayeri);
 void CPlayer::setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime) {
