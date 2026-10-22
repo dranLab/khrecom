@@ -29,6 +29,7 @@
 #include "System/Graphic/Camera.h"
 #include "System/Graphic/WorldEnv.h"
 #include "Game/Game.h"
+#include "Game/Bullet/Bullet.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -797,7 +798,26 @@ void CPlayer::exeQuickBarrier() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAeroGuard__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAeroGuard__7CPlayer);
+void CPlayer::exeAeroGuard() {
+    if (isConditionFlag(0x80000000)) {
+        CBullet* pBullet = (CBullet*)CTaskMan::getTask(m_hEffGuard);
+        if (isConditionFlag(0x1000000)) {
+            if (pBullet) {
+                pBullet->out();
+                m_hEffGuard = 0;
+            }
+        } else if (!pBullet) {
+            setAeroGuard(1);
+        } else {
+            m_tqBarrier -= m_tqFrameRate;
+            if (m_tqBarrier <= 0) {
+                m_tqBarrier = 6000;
+                pBullet->updateAttackID();
+            }
+            pBullet->warp(m_vCenterPos);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPrizeHealing__7CPlayeri);
 void CPlayer::exePrizeHealing() {
     if (m_hEffPrize) {

@@ -352,7 +352,7 @@ public:
     INT cmdRevolver_isActive();
     BOOL cmdRevolver_rollDeck(INT inNum);
     INT getLadderStepNow(FLOAT inHeight);
-    void exeQuickBarrier();
+    void exeQuickBarrier(); void exeAeroGuard(); void setAeroGuard(INT inFlag);
     INT isNowCardActionState();
     INT chkWalkMode();
     void exeWalk();
