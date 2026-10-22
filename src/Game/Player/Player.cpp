@@ -30,6 +30,7 @@
 #include "System/Graphic/WorldEnv.h"
 #include "Game/Game.h"
 #include "Game/Bullet/Bullet.h"
+#include "Game/Player/PlayerAttack.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -684,7 +685,31 @@ void CPlayer::procTargetMark() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackMove__7CPlayeriffif);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackCollision__7CPlayeri);
+INT CPlayer::procAttackCollision(TIMEQ inNowFrame) {
+    if (inNowFrame >= m_pAtkData->COLL_START_FRAME) {
+        if (inNowFrame < m_pAtkData->COLL_END_FRAME) {
+            if (!m_pWeapon->isOnAttack()) onAttack();
+            switch (m_pWeapon->isHit()) {
+            case 1:
+            case 2:
+                m_bIsAttackHit = TRUE;
+                setPlayerFlag(0, 0x100000);
+                break;
+            case 3:
+                if (m_pCB) {
+                    m_pCB->destroyPlayCard(1, 0);
+                    setBattleFlag(0, 0x10200000);
+                }
+                initFlip(0);
+                return TRUE;
+            }
+        } else {
+            offAttack();
+            setPlayerFlag(0, 0x100000);
+        }
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procGravity__7CPlayeriii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procSkillEnd__7CPlayeri);
 BOOL CPlayer::chkExtraSkill() {

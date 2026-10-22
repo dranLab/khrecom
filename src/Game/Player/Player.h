@@ -492,7 +492,7 @@ public:
     void updateSpotLight(INT inFlag);
     void resetAction(INT inFlag);
     void procAttackMove(INT inFlag, FLOAT inSpeed, FLOAT inRate, INT inP3, FLOAT inP4);
-    INT procAttackCollision(INT inFlag);
+    INT procAttackCollision(TIMEQ inNowFrame);
     void procTargetMark();
     void procGravity(INT inP0, INT inP1, INT inP2);
     void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inFlag);
