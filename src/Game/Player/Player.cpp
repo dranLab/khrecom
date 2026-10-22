@@ -34,6 +34,7 @@ extern "C" char D_004997C0[];
 extern "C" char D_00499828[];
 extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" char D_0049B308[];
 extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)" */
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
@@ -868,7 +869,18 @@ void CPlayer::setCardSnatch(INT inFlag) {
 void CPlayer::addWind(FVECTOR* inVel) {
     if (m_pPLM) m_pPLM->addWindXYZ(inVel);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWind__7CPlayer);
+void CPlayer::exeWind() {
+    if (dbgCheckUser(KKIKUCHI) && DebugWork::g_dw.player.iTemp == 5) {
+        if (!m_pPLM) return;
+        m_pPLM->addWindXYZ(&DebugWork::g_dw.player.vTemp);
+    }
+    if (m_pPLM && m_pPLM->isEnableWind() && m_PlayerState != PL::GLIDE) {
+        FVECTOR vel = getVel();
+        FVECTOR wind = m_pPLM->getWind();
+        AddVectorXYZ(vel, vel, wind);
+        setVel(vel);
+    }
+}
 BOOL CPlayer::cmdRevolver_rollDeck(INT inNum) {
     if (!m_pRevolver) return FALSE;
     m_pRevolver->rollDeck(inNum, 0, 300);

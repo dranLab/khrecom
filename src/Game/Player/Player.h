@@ -344,7 +344,7 @@ public:
     INT chkAtelHide(INT inFlag); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
     void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
-    void exeEscape(); void exeTreasureBox(); void setBanish(INT inFlag);
+    void exeEscape(); void exeTreasureBox(); void setBanish(INT inFlag); void exeWind();
     void initCarry();
     void cancelLockon();
     void autoLockon();
