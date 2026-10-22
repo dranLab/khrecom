@@ -1330,7 +1330,35 @@ void CPlayer::killBullet() {
     CBulletManager* p = (CBulletManager*)CTaskMan::getSysTask(0x1B);
     if (p) p->kill(getHandle());
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEnemyStop__7CPlayeriUi);
+void CPlayer::setEnemyStop(HANDLE inEnemy, UINT inSet) {
+    SLContainerT<CTask>* container;
+    CTask* task;
+    CEntity* pEntity;
+    CBattleEnemyManager* pBEM = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+    if (!pBEM) return;
+    container = pBEM->getFirstBattleEnemy();
+    if (inSet) {
+        for (; container; container = container->getNext()) {
+            task = container->getValue();
+            if (task && task->getTypeID() == 0x1004) {
+                if (task->getHandle() != inEnemy) {
+                    pEntity = (CEntity*)task;
+                    pEntity->setEntityFlag(0x80000000, 0);
+                }
+            }
+        }
+        CSceneEnv::setStop((ObjType::eObjBit)8);
+    } else {
+        for (; container; container = container->getNext()) {
+            task = container->getValue();
+            if (task && task->getTypeID() == 0x1004) {
+                pEntity = (CEntity*)task;
+                pEntity->setEntityFlag(0, 0x80000000);
+            }
+        }
+        CSceneEnv::setStop((ObjType::eObjBit)0);
+    }
+}
 INT CPlayer::setMDFooting(HANDLE inFooting) {
     if (!inFooting) {
         setConditionFlag(0, 0x10000000);

@@ -486,7 +486,7 @@ public:
     void setBGFade(FLOAT inRate, FLOAT inTime, INT inFlag);
     void setBGFade(FVECTOR& inColor, FLOAT inTime, INT inFlag);
     void setObjStop(UINT inFlag);
-    void setEnemyStop(INT inFlag, UINT inMask);
+    void setEnemyStop(HANDLE inEnemy, UINT inSet);
     void setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime);
     void setLand(FLOAT inP0, FLOAT inP1, INT inFlag); void setDownForce();
     void updateSpotLight(INT inFlag);
