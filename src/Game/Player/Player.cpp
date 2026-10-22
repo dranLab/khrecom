@@ -357,7 +357,26 @@ void CPlayer::exeAttackTimer() {
     m_tqAttackTimer -= m_tqFrameRate;
     if (m_tqAttackTimer < 0) m_tqAttackTimer = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStartWait__7CPlayer);
+void CPlayer::initStartWait() {
+    setPlayerState(START_WAIT);
+    setTimer(1500);
+    setLand(2.0f, 0.5f, 1);
+    m_bAirCheck = FALSE;
+    m_bAir = FALSE;
+    m_fJumpSpdY = 0.0f;
+    m_uiPreAttackKind = 0;
+    m_uiAttackKind = 0;
+    m_uiAttackID = 0;
+    m_tqAttackTimer = 0;
+    setPlayerFlag(0x400001, 0);
+    offAttack();
+    m_WalkMode = 0;
+    m_uiPadFlag = (INT)m_uiPadFlag & ~1;
+    m_hTarget = 0;
+    m_hLockon = 0;
+    m_hGimmick = 0;
+    m_pCam->setFlag(1, TRUE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStartWait__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStandUp__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStandUp__7CPlayer);
