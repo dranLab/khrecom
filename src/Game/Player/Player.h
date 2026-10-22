@@ -504,7 +504,7 @@ public:
     // PARTIAL: added for Game/Player/PlayerDRiku
     static INT importStatus();
     static INT exportStatus();
-    static void addMP(INT inMP); static void addEXP(INT inEXP, INT inMode);
+    static void addMP(INT inMP); static void addEXP(INT inEXP, INT inMode); void setTrapDamage(INT inPower, const CHAR* lpszInName, UINT nNo);
     static void notifyExterminate();
     void setDefAttr(FLOAT* inAttr);
     // PARTIAL: added for Game/Player/Player

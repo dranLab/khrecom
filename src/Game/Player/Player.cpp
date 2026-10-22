@@ -51,6 +51,10 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
+extern "C" char D_0049AFA8[]; /* TRACE messages of setTrapDamage */
+extern "C" char D_0049A920[];
+extern "C" char D_0049A988[];
+extern "C" char D_0049AA00[];
 extern "C" char D_0049AC10[]; /* TRACE messages of initFlip */
 extern "C" char D_0049AC30[];
 inline void* operator new(size_t, void* p) throw() { return p; }
@@ -125,7 +129,7 @@ class CPlayerGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class on
     UBYTE _m_0x00[0x80];
 public:
     CPlayerGauge(CTask* p);
-    void setMaxHP(INT n);
+    void setMaxHP(INT n); void setDamage(INT inHP, INT inFlag);
     void setHP(INT inHP, INT inFlag);
     void setDP(INT inDP, INT inFlag);
 };
@@ -1848,7 +1852,42 @@ void CPlayer::initGimmickCard(INT inNo) {
     m_fWalkSpeed = 0.0f;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickCard__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setTrapDamage__7CPlayeriPCcUi);
+void CPlayer::setTrapDamage(INT inPower, const CHAR* lpszInName, UINT nNo) {
+    INT face;
+    INT hp0;
+    TRACE(D_0049AFA8);
+    if (DebugWork::g_dw.player.iMuteki) return;
+    if (lpszInName) setEffect(lpszInName, nNo, &m_vCenterPos, NULL, 0.0f);
+    face = 1;
+    hp0 = m_iHP;
+    hp0 -= inPower;
+    if (m_pCB && m_pCB->getEnchantKind() == 0x3B) {
+        hp0 += inPower;
+    } else {
+        hp0 += (DebugWork::g_dw.player.iDamage0 > 0) * inPower;
+        setDamageNumber(m_vHeadPos, inPower);
+    }
+    if (m_pCB) {
+        if (hp0 <= 0 && m_iHP >= 2 && m_pCB->getEnchantKind() == 0x29) {
+            hp0 = 1;
+            CardBattle::CCardBattle::decEnchantTime(1, 0x28, 0x29);
+        }
+        CardBattle::CCardBattle::decEnchantTime(1, 0x27, 0);
+    }
+    if (hp0 < 0) hp0 = 0;
+    m_iHP = hp0;
+    TRACE(D_0049A920);
+    TRACE(D_0049A988, m_iHP, m_iMaxHP);
+    TRACE(D_0049AA00);
+    if (hp0 <= 0) {
+        m_bIsDead = TRUE;
+        face = 2;
+        m_pPLM->notifyDeadSE(CSound::playSE(0x4C, -1, 0x40));
+        CGameWork::setFlag(1, 6, TRUE);
+    }
+    if (m_pGauge) m_pGauge->setDamage(m_iHP, 0);
+    setFaceAnim(face, 1);
+}
 void CPlayer::fadeEffect(INT& ioHandle, INT inLoop) {
     if (ioHandle > 0) {
         CEffect* effect = CEffectMan::getEffect(ioHandle);
