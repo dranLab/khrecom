@@ -30,6 +30,7 @@
 #include "System/Graphic/WorldEnv.h"
 #include "Game/Game.h"
 #include "Game/Bullet/Bullet.h"
+#include "Game/EntityFactory.h"
 #include "Game/Player/PlayerAttack.h"
 #include "System/Graphic/Anim.h"
 #include "include_asm.h"
@@ -1216,7 +1217,36 @@ void CPlayer::exeQuickBarrier() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAeroGuard__7CPlayeri);
+void CPlayer::setAeroGuard(INT inFlag) {
+    CBullet* pBullet;
+    BULLET_PARAM param;
+    if (!inFlag) {
+        setConditionFlag(0, 0x80000000);
+        m_tqGuard = 0;
+        pBullet = (CBullet*)CTaskMan::getTask(m_hEffGuard);
+        if (pBullet) pBullet->out();
+    } else {
+        setConditionFlag(0x80000000, 0);
+        m_tqGuard = 6000;
+        param.init(1, 3);
+        param.fSpeed = 0.0f;
+        param.CollKind = 0x80000000;
+        param.uiFlag = 3;
+        param.AtkKind = 1;
+        param.AtkAttr = 1;
+        param.iAttackPoint = m_iAP;
+        param.fMaxDist = 50.0f;
+        param.vPos = m_vCenterPos;
+        param.fCollRadius = 0.8f;
+        param.fShiftY = 0.0f;
+        param.pEffectTbl = PL::g_EffTbl_Skill[66];
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        m_hEffGuard = pBullet->getHandle();
+        pBullet->setBodyRadius(0.0f, 0.0f, 0, (COLL_KIND)0);
+        pBullet->userBodyCollOffBody(-1);
+        pBullet->userBodyCollOff(-1);
+    }
+}
 void CPlayer::exeAeroGuard() {
     if (isConditionFlag(0x80000000)) {
         CBullet* pBullet = (CBullet*)CTaskMan::getTask(m_hEffGuard);
