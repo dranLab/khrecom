@@ -1083,7 +1083,39 @@ void CPlayer::initCharge() {
         if (effect) effect->m_iFlag |= 4;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCharge__7CPlayer);
+void CPlayer::exeCharge() {
+    INT result;
+    m_tqEffCharge = 1000;
+    switch (m_iSubState) {
+    case 0:
+        if (isTrgFlag(0x10)) {
+            if (!isActionFlag(0x2000000) && isAir()) {
+                initFall();
+                return;
+            }
+            result = m_pRevolver->chargeReloadCard(0);
+            if (result == 1) {
+                FVECTOR pos;
+                pos._q = 0;
+                pos.w = 1.0f;
+                CCoord* crd = &Crd(0);
+                CEffect* effect = CEffectMan::getEffect(attachEffect(PL::g_szDpxReload, 1, crd, &pos, NULL, 0.0f));
+                if (effect) effect->m_iFlag |= 4;
+                setAnimForce(0x2F, -1, 0, 0, 0, 0);
+                m_iSubState = result;
+                fadeEffect(m_hEffCharge, 1);
+            } else if (result < 0) {
+                initStandUp(0);
+            }
+        } else {
+            initStandUp(0);
+        }
+        break;
+    case 1:
+        if (isMotionEnd()) initStandUp(0);
+        break;
+    }
+}
 /* Parked: only the block before chargeReloadCard is scheduled differently: the original zeroes pos with v1
    after the flag 'and' and loads m_pRevolver after the flag store; ours zeroes pos in a0 first and loads
    m_pRevolver before the store. tried: all orders of setPlayerFlag/pos._q/pos.w (the 5-line ones zero w and
