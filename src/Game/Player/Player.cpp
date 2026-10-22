@@ -323,7 +323,17 @@ void CPlayer::endStateBattle() {
 void CPlayer::beginStateWait() {
     m_iState = 2;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateHide__7CPlayer);
+void CPlayer::beginStateHide() {
+    m_iState = 3;
+    setPlayerState(PL::HIDE);
+    clearSpeed();
+    setEntityFlag(1, 0);
+    m_WalkMode = 0;
+    if (m_bIsBattleScene) setAnimForce(0x2A, 0, 0, 0, 0, 0);
+    else setAnimForce(1, 0, 0, 0, 0, 0);
+    setPlayerFlag(0x401001, 0);
+    m_pCam->setFlag(1, TRUE);
+}
 void CPlayer::stateHide() {
     setPlayerFlag(0x400000, 0);
     if (dbgCheckUser(KKIKUCHI) && dbgButtonTrg(USR_SYSTEM, 0x10, 1)) {
