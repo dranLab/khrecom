@@ -619,7 +619,18 @@ void CPlayer::setObjStop(UINT inFlag) {
     else CSceneEnv::setStop((ObjType::eObjBit)0x7C);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWarp__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setBanish__7CPlayeri);
+void CPlayer::setBanish(INT inFlag) {
+    if (!inFlag) {
+        setConditionFlag(0, 0x40);
+        FVECTOR vColor;
+        vColor.set(1.0f, 1.0f, 1.0f);
+        CSceneEnv::setColor((ObjType::eObjBit)2, 30.0f, vColor, NULL, 2);
+    } else {
+        setConditionFlag(0x40, 0);
+        m_tqBanish = 0;
+        PL::g_vBanishPos = getPos();
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBanish__7CPlayer);
 void CPlayer::setReflectGuard(INT inFlag) {
     if (!inFlag) {
