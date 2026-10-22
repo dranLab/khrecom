@@ -31,6 +31,7 @@
 #include "Game/Game.h"
 #include "Game/Bullet/Bullet.h"
 #include "Game/Player/PlayerAttack.h"
+#include "System/Graphic/Anim.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -65,6 +66,10 @@ namespace Gauge {
 class CPlayerGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
 public:
     void setHP(INT inHP, INT inFlag);
+};
+class CEscapeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
+public:
+    void destroy();
 };
 class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
 public:
@@ -1237,7 +1242,35 @@ HANDLE CPlayer::getLevelUpEffect() {
     if (!m_pInstance) return 0;
     return m_pInstance->m_hEffLevelUp;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initEnd__7CPlayer);
+void CPlayer::initEnd() {
+    setPlayerState(PL::END_BTL);
+    if (isBattleFlag(0x4000000)) {
+        resetAction(9);
+        m_iSubState = 1;
+    } else {
+        resetAction(8);
+        m_iSubState = 2;
+        m_pAnim->setRootMove(FALSE, FALSE);
+        setConditionFlag(0x2000, 0);
+        CardBattle::CCardBattle::setBattleEnd();
+        if (m_pRevolver) {
+            m_pRevolver->destroy();
+            m_pRevolver = NULL;
+        }
+    }
+    setPlayerFlag(0, 0x02800000);
+    clearSpeed();
+    m_bDmgMuteki = TRUE;
+    m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+    m_fMoveSpdXZ = 0.0f;
+    m_JumpState = 3;
+    if (m_fJumpSpdY > m_fMoveSpdXZ) m_fJumpSpdY = m_fMoveSpdXZ;
+    if (isBattleFlag(2)) {
+        setBattleFlag(0, 2);
+        m_tqEscape = 0;
+        if (m_pEscape) m_pEscape->destroy();
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeEnd__7CPlayer);
 BOOL CPlayer::isEnableBattleEnd() {
     if (!m_pInstance) return TRUE;
