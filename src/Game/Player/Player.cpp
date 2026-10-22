@@ -31,6 +31,8 @@
 #include "Game/Game.h"
 #include "Game/Bullet/Bullet.h"
 #include "Game/EntityFactory.h"
+#include "System/Math3D.h"
+#include "System/Rnd.h"
 #include "Game/Player/PlayerAttack.h"
 #include "System/Graphic/Anim.h"
 #include "include_asm.h"
@@ -131,7 +133,7 @@ public:
 };
 class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
 public:
-    static void setPrizeMp(INT inMP);
+    static void setPrizeMp(INT inMP); static void setDropMp(INT inMP);
 };
 }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
@@ -1691,7 +1693,36 @@ void CPlayer::addMP(INT inMP) {
     }
     Gauge::CPrizeGauge::setPrizeMp(inMP);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procDropMP__7CPlayer);
+void CPlayer::procDropMP() {
+    INT dropMP;
+    PRIZE_PARAM param;
+    INT mp;
+    dropMP = m_iMP / 10;
+    if (dropMP > 500) dropMP = 500;
+    else if (dropMP < 4 && m_iMP >= 4) dropMP = 4;
+    param.vPos = m_vCenterPos;
+    param.fSpeed = 0.2f;
+    param.uiFlag = 0;
+    param.uiPrizeFlag = 0;
+    for (mp = dropMP; mp >= 4;) {
+        if (mp >= 10) {
+            param.PrizeKind = 0xD5;
+            mp -= 10;
+        } else if (mp >= 4) {
+            param.PrizeKind = 0xD4;
+            mp -= 4;
+        } else {
+            param.PrizeKind = 0;
+        }
+        if (param.PrizeKind) {
+            param.vRot.set((-50.0f - RND::genrand_real1() * 10.0f) * 0.017453292f, RND::genrand_real1() * 360.0f * 0.017453292f, 0.0f);
+            Math3D::LimitPIVector(param.vRot);
+            CEntityFactory::getInstance()->createPrize(param, NULL);
+        }
+    }
+    m_iMP -= dropMP - mp;
+    Gauge::CPrizeGauge::setDropMp(dropMP - mp);
+}
 void CPlayer::notifyExterminate() {
     if (!_instance()) return;
     if (_instance()->m_bIsDead) {
