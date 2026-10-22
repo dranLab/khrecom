@@ -730,7 +730,43 @@ void CPlayer::initCarry() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCarry__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", resetAction__7CPlayeri);
+/* Parked: registers match; only the stores after the g_fGravity load are scheduled differently (the original
+   stores m_JumpState right after the load and m_fJumpGravity before the g_CardBreakTime load; ours stores
+   them later). tried: all 24 orders of the JumpState/CardBreakTime/JumpGravity/JumpSpdY block, cast loads
+   (*(FLOAT*)&g_fGravity, *(INT*)&g_CardBreakTime[7]) and cast stores, gravity via a local / *=, moving
+   statements before isAir(), asm barriers; best 6 lines. The *(FLOAT*)& store on m_fMoveSpdXZ and the
+   chained m_fDistXZ = m_fDistY = 0.0f fixed the rest. tools/permuter.py can't run on C++ methods. */
+#if 0
+void CPlayer::initAttackField(INT inNo) {
+    setPlayerState(PL::ATTACK_FLD);
+    m_iAerialAnimShift = 0;
+    setTrgFlag(0, 4);
+    setPlayerFlag(0x100000, 0);
+    m_pMarker->holdTarget(8);
+    m_uiCardID = 0;
+    m_iAttackNo = inNo;
+    if (!inNo) m_uiPreAttackKind = 0;
+    m_bIsAttackHit = FALSE;
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    *(FLOAT*)&m_fMoveSpdXZ = isAir() ? m_fJumpSpdXZ : m_fWalkSpeed;
+    m_JumpState = 3;
+    m_tqCardBreakTime = PL::g_CardBreakTime[7];
+    m_fJumpGravity = PL::g_fGravity * 0.16f;
+    m_fJumpSpdY = 0.0f;
+    setAttack();
+    m_fDistXZ = m_fDistY = 0.0f;
+    if (m_pAtkData->FLAG & 8) {
+        setPlayerFlag(0x2800000, 0);
+    } else {
+        setPlayerFlag(0, 0x2800000);
+        m_fJumpGravity = PL::g_fGravity;
+    }
+    onWeapon(1);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttackField__7CPlayeri);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAttackField__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkLockon__7CPlayer);
 void CPlayer::cancelLockon() {
