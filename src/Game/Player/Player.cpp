@@ -216,7 +216,21 @@ void CPlayer::exeMutekiTimer() {
     if (m_tqMutekiTimer < 0) m_tqMutekiTimer = 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setControl__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkAtelHide__7CPlayeri);
+INT CPlayer::chkAtelHide(INT inFlag) {
+    if (inFlag) {
+        if (CGameWork::getFlag(1, 0)) {
+            changeState(3);
+            return TRUE;
+        }
+    } else {
+        if (!CGameWork::getFlag(1, 0)) {
+            if (!m_bIsBattleScene) changeState(0);
+            else changeState(1);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
 void CPlayer::chkAtelControl() {
     if (CGameWork::getFlag(1, 5)) {
         if (isControl()) {
