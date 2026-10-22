@@ -205,7 +205,17 @@ void CPlayer::offWeapon() {
     if (m_pWeapon) m_pWeapon->offWeapon();
     m_uiPlayerFlag |= 2;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onAttack__7CPlayer);
+void CPlayer::onAttack() {
+    if (m_pWeapon) {
+        m_pWeapon->onAttack(m_uiAttackID, m_iAttackPower, m_AtkKind, m_AtkAttr);
+        onWeapon(1);
+        if (m_uiAttackID < 8 || m_uiAttackID - 0x97 < 14) {
+            if (isConditionFlag(0x80)) m_pWeapon->setWideAttack(1);
+            if (isConditionFlag(0x100000)) m_pWeapon->setBackAttack(1);
+            if (isConditionFlag(0x20000000)) m_pWeapon->setDoubleHit(1, NULL);
+        }
+    }
+}
 void CPlayer::offAttack() {
     if (m_pWeapon) m_pWeapon->offAttack();
 }
