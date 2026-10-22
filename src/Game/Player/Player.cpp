@@ -533,7 +533,26 @@ INT CPlayer::chkWalkMode() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setWalkAnim__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBattleIdle__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procFlowIdle__7CPlayeri);
+INT CPlayer::procFlowIdle(INT inFlag) {
+    if (isAir()) {
+        setAnim(6, 800, 0);
+        setPlayerFlag(0x800000, 0);
+        FVECTOR vel = m_pMove->getVel();
+        m_fJumpSpdY += m_fGravity * m_fFrameRate;
+        vel.y = m_fJumpSpdY;
+        m_pMove->setVel(vel);
+        return FALSE;
+    }
+    if (isPlayerFlag(0x800000)) {
+        setPlayerFlag(0, 0x800000);
+        setAnim(7, -1, 0);
+        return FALSE;
+    }
+    if (m_iNowAnimID == 7 && !isMotionEnd()) return FALSE;
+    setAnim(inFlag ? 0x2A : 1, -1, 0);
+    clearSpeed();
+    return TRUE;
+}
 INT CPlayer::initIdle(INT inAir, INT inStand) {
     INT bAir = inAir;
     if (bAir < 0) bAir = isAir();
