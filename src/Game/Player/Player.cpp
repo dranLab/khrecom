@@ -1174,7 +1174,39 @@ void CPlayer::initAttackField(INT inNo) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttackField__7CPlayeri);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAttackField__7CPlayer);
+void CPlayer::exeAttackField() {
+    TIMEQ frameTQ = getMotionCurrentTime();
+    TIMEQ frame = frameTQ / 50;
+    procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
+    if (frame <= m_pAtkData->MOVE_START_FRAME) {
+        procTargetMark();
+        procAttackMove(frame, 1.0f, 4.0f, 2, 1.0f);
+    } else {
+        FLOAT rate = 0.0f;
+        if (frame < 6 && (m_pAtkData->FLAG & 8)) {
+            procTargetMark();
+            rate = 1.0f;
+        }
+        procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, !m_bIsAttackHit, rate);
+    }
+    if (frame > m_pAtkData->COLL_START_FRAME && frameTQ > 500) {
+        if (m_iNextAttack) {
+            offAttack();
+            initAttackField(m_iAttackNo);
+            return;
+        }
+        if (m_bIsCanCombo && m_bIsAttackHit && m_iAttackNo < m_iMaxCombo && isTrgAttack()) {
+            m_iNextAttack = 1;
+            return;
+        }
+    }
+    if (procAttackCollision(frame)) return;
+    if (isPlayerFlag(0x800000) && !isAir() && frame > m_pAtkData->COLL_END_FRAME) {
+        procSkillEnd(1);
+        return;
+    }
+    if (isMotionEnd()) procSkillEnd(-1);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkLockon__7CPlayer);
 void CPlayer::cancelLockon() {
     m_pMarker->cancelLockon(m_hLockon, TRUE);
