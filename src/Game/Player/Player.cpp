@@ -1398,7 +1398,43 @@ void CPlayer::calcAppearPosFS_toAttackID() {
     calcAppearPosFS(2.0f, m_fWallRadius);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkEscape__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initEscape__7CPlayer);
+void CPlayer::initEscape() {
+    FVECTOR rot;
+    setPlayerState(PL::ESCAPE);
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x00443F90);
+    setBattleFlag(0, 0x10200000);
+    setBattleFlag(0, 0x4060);
+    setBattleFlag(0, 0x00130000);
+    setPlayerFlag(0, 0x020C2000);
+    setBattleFlag(0, 0x03000000);
+    clearSpeed();
+    m_collBody.setDamage(0);
+    m_collBody.off();
+    m_collBody.offBody();
+    m_bDmgMuteki = TRUE;
+    resetAction(7);
+    m_fDir = m_fWallDir;
+    rot = getRot();
+    rot.y = m_fDir;
+    setRot(rot);
+    m_pMove->setFlag(1, TRUE); // partial CMovement: (flag, on)
+    setPlayerFlag(0x400001, 0);
+    setAnim(0x2C, -1, 0);
+    m_WalkMode = 2;
+    m_fMovePower = 1.0f;
+    m_fWalkSpeed = m_pParam->MAX_RUN_SPEED / 60.0f;
+    m_pMove->calcVelocityXZ(m_fWalkSpeed);
+    m_tqEscape = 0;
+    m_pEscape->destroy();
+    CardBattle::CCardBattle::setBattleEnd();
+    m_pRevolver = NULL;
+    CGameWork::setInt(1, 0xE2, -1);
+    setBGFade(0.0f, 60.0f, 1);
+    m_pCam->setFlag(1, TRUE);      // partial CPlayerCamera: (flag, on)
+    m_pCam->setFlag(0x1000, TRUE);
+    if (getPos().z < 0.0f) m_vStartPos.z = 0.0f;
+}
 void CPlayer::exeEscape() {
     setPlayerFlag(0x400000, 0);
     m_pCam->setFlag(0x1000, TRUE); /* the partial CPlayerCamera keeps (flag, on/off): the original is setFlag(0x1000, 0) */
