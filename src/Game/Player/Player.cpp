@@ -55,6 +55,8 @@ extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the origin
 extern LPCSTR g_szDpxAlways; // static in the original; data from the asm until SOURCE DATA
 extern LPCSTR g_szDpxReload; // static in the original
 extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
+extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_szTexEyeKizetsu; // static in the original
+extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
 extern FLOAT g_fGimmickJumpPower[8];
 }
 namespace Gauge {
@@ -214,7 +216,30 @@ void CPlayer::setAnimRsrcEx(INT inRcid, INT inAnimID, TIMEQ inChangeTime, BOOL i
     setAnimSpeed(1.0f);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowIdleAnim__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setFaceAnim__7CPlayerii);
+void CPlayer::setFaceAnim(INT inID, INT inFlag) {
+    if (!inFlag && m_iNowFaceID == inID) return;
+    m_iNowFaceID = inID;
+    switch (inID) {
+    case 1:
+        setTexAnmSeq(0, PL::g_szTexEyeDamage);
+        setTexAnmSeq(1, PL::g_szTexLipDamage);
+        break;
+    case 2:
+        setTexAnmSeq(0, PL::g_szTexEyeShut);
+        setTexAnmSeq(1, PL::g_szTexLipDamage);
+        break;
+    case 3:
+        setTexAnmSeq(0, PL::g_szTexEyeKizetsu);
+        setTexAnmSeq(1, PL::g_szTexLipDefault);
+        break;
+    case 0:
+    default:
+        m_iNowFaceID = 0;
+        setTexAnmSeq(0, -1);
+        setTexAnmSeq(1, -1);
+        break;
+    }
+}
 void CPlayer::setTransOff(INT inFlag) {
     if (inFlag) {
         setEntityFlag(0x1000, 0);
