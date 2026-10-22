@@ -497,7 +497,7 @@ public:
     void procGravity(INT inP0, INT inP1, INT inP2);
     void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inFlag);
     void setUseRsrcBlock(INT inBlock);
-    INT exeUseStock(INT inFlag);
+    INT exeUseStock(INT inFlag); INT startSingleAction();
     INT chkChargeMove(INT inFlag);
     void setPushon(INT inFlag);
     void setCastEffect(const CHAR* inName, INT inNo, CCoord* inCoord, FVECTOR* inPos); void setEffAttack(INT inNum, const CHAR* inName, INT inNo, INT inBone, FVECTOR* inOfs);

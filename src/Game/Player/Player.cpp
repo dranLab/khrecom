@@ -616,7 +616,23 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowCardActionSt
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkPlayCardCombo__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onMsg__7CPlayeriPv);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeUseStock__7CPlayeri);
+INT CPlayer::exeUseStock(INT inFlag) {
+    if (isBattleFlag(4) || m_bIsDead) return FALSE;
+    switch (m_iStepStockSkill) {
+    case 0:
+        if (m_iFirstSkill <= 0 && startStockSkillAction()) return TRUE;
+        return startSingleAction();
+    case 1:
+        if (!inFlag) return FALSE;
+        if (startStockSkillAction()) return TRUE;
+        return startSingleAction();
+    case 2:
+        if (!inFlag) return FALSE;
+        return startSingleAction();
+    default:
+        return FALSE;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", startSingleAction__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttack__7CPlayer);
