@@ -661,7 +661,40 @@ void CPlayer::exeStartWait() {
         setBattleFlag(0x80000000, 0);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStandUp__7CPlayeri);
+void CPlayer::initStandUp(INT inFlag) {
+    if (isConditionFlag(0x10000000)) {
+        initFooting(0);
+        return;
+    }
+    if (!inFlag) {
+        setPlayerState(PL::STAND);
+        setAnimForce(chkBattleIdle() ? 0x2A : 1, -1, 0, 0, 0, 0);
+    } else {
+        m_WalkMode = chkWalkMode();
+        switch (m_WalkMode) {
+        case 0:
+            setPlayerState(PL::STAND);
+            break;
+        case 1:
+            setPlayerState(PL::WALK);
+            break;
+        case 2:
+            setPlayerState(PL::RUN);
+            break;
+        }
+        setWalkAnim();
+        m_fMovePower = 0.5f;
+        m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower;
+    }
+    offAttack();
+    setPlayerFlag(0, 0x024C2000);
+    m_JumpState = 0;
+    m_fJumpSpdY = 0.0f;
+    setConditionFlag(0, 0x08810023);
+    setBattleFlag(0, 0x00443F90);
+    setFaceAnim(0, 0);
+    m_pMove->setFlag(0x40, TRUE); // partial CMovement: (flag, on)
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStandUp__7CPlayer);
 INT CPlayer::chkWalkMode() {
     FLOAT aim_power = m_fAnalogPower;
