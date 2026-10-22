@@ -1673,7 +1673,44 @@ void CPlayer::setObjStop(UINT inFlag) {
     if (!inFlag) CSceneEnv::setStop((ObjType::eObjBit)0);
     else CSceneEnv::setStop((ObjType::eObjBit)0x7C);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWarp__7CPlayeri);
+INT CPlayer::exeWarp(INT inSet) {
+    if (inSet) {
+        if (isDispOFF()) return TRUE;
+        if (!(m_fScale > 0.0f)) return TRUE;
+        m_fScale -= getFrameRateF() * 0.05f;
+        if (m_fScale <= 0.0f) {
+            setEntityFlag(1, 0);
+            m_fScale = 1.0f;
+            offWeapon();
+        }
+        FVECTOR vScale = getScale();
+        vScale.x = m_fScale;
+        vScale.y = 2.0f - m_fScale;
+        vScale.z = m_fScale;
+        setScale(vScale);
+        setConditionFlag(0x1000000, 0);
+        setPlayerFlag(1, 0);
+        return FALSE;
+    }
+    if (isDispOFF()) {
+        m_fScale = 0.0f;
+        setEntityFlag(0, 1);
+        onWeapon(0);
+    }
+    if (m_fScale < 1.0f) {
+        m_fScale += getFrameRateF() * 0.05f;
+        if (m_fScale > 1.0f) m_fScale = 1.0f;
+        FVECTOR vScale = getScale();
+        vScale.x = m_fScale;
+        vScale.y = 2.0f - m_fScale;
+        vScale.z = m_fScale;
+        setScale(vScale);
+        return FALSE;
+    }
+    setConditionFlag(0, 0x1000000);
+    setPlayerFlag(0, 1);
+    return TRUE;
+}
 void CPlayer::setBanish(INT inFlag) {
     if (!inFlag) {
         setConditionFlag(0, 0x40);
