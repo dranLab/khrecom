@@ -24,6 +24,10 @@
 #include "Game/Gimmick/BaseGimmick.h"
 #include "Game/Collision/CollMap.h"
 #include "System/HeapMan.h"
+#include "Game/Enemy/BattleEnemyManager.h"
+#include "Game/CardKind.h"
+#include "System/Graphic/Camera.h"
+#include "System/Graphic/WorldEnv.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -31,6 +35,7 @@ extern "C" char D_00499828[];
 extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 extern "C" char D_0049B308[];
+extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)" */
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 inline void* operator new(size_t, void* p) throw() { return p; }
 /* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
@@ -101,7 +106,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", __7CPlayerP5CTask
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _$_7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFSM___7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _init__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBefore__7CPlayer);
+void CPlayer::updateBefore() {
+    *(BOOL*)&m_bPreAir = m_bAir;
+    m_fWeight = PL::g_fWeight;
+    PL::g_fAntiGravity = PL::g_fWeight * 0.008166667f;
+    if (CardBattle::CCardBattle::isLevitate()) m_fWeight *= 0.5f;
+    PL::g_fGravity = m_fWeight * -0.008166667f;
+}
 void CPlayer::updateAfter() {}
 void CPlayer::lastUpdate() {
     updateBodyColl();
@@ -204,7 +215,16 @@ void CPlayer::getWeaponTopPos(FVECTOR& inVec) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCaskPos__7CPlayerR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyColl__7CPlayer);
+void CPlayer::updateBodyColl() {
+    updateBodyCollPos();
+    m_collBody.m_uiFlag = (INT)m_collBody.m_uiFlag & ~8;
+    m_collBody.m_uiFlag = (INT)m_collBody.m_uiFlag & ~0x20;
+    CCollBody& body = m_collBody;
+    if (isPlayerFlag(1)) body.CCollBody::off();
+    else body.CCollBody::on();
+    if (isPlayerFlag(0x1000)) m_collBody.m_enableBody = 0;
+    else m_collBody.m_enableBody = 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyCollPos__7CPlayer);
 BOOL CPlayer::isMuteki() const {
     if (m_uiPlayerFlag & 1) return TRUE;
@@ -216,8 +236,34 @@ void CPlayer::exeMutekiTimer() {
     if (m_tqMutekiTimer < 0) m_tqMutekiTimer = 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setControl__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkAtelHide__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkAtelControl__7CPlayer);
+INT CPlayer::chkAtelHide(INT inFlag) {
+    if (inFlag) {
+        if (CGameWork::getFlag(1, 0)) {
+            changeState(3);
+            return TRUE;
+        }
+    } else {
+        if (!CGameWork::getFlag(1, 0)) {
+            if (!m_bIsBattleScene) changeState(0);
+            else changeState(1);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+void CPlayer::chkAtelControl() {
+    if (CGameWork::getFlag(1, 5)) {
+        if (isControl()) {
+            m_uiPadFlag = (INT)m_uiPadFlag & ~1;
+            m_pCam->setFlag(1, TRUE);
+        }
+    } else {
+        if (!isControl()) {
+            enableControl();
+            m_pCam->setFlag(1, FALSE);
+        }
+    }
+}
 void CPlayer::getCameraTargetPos(FVECTOR& outPos) {
     if (m_PlayerState == PL::TRANSFORM) {
         outPos = Crd(m_iBoneCenter).getWorldMatrix().v[3];
@@ -242,7 +288,17 @@ void CPlayer::setLand(FLOAT inDownLEngth, FLOAT inUpLength, BOOL inFirstHit) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateField__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateField__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateField__7CPlayer);
+void CPlayer::endStateField() {
+    setActionFlag(0, m_pParam->USE_MAP_ACTION);
+    setBattleFlag(0, 1);
+    if (CGameWork::getFlag(1, 0)) offWeapon();
+    m_collBody.offBody();
+    offAttack();
+    m_uiAttackKind = 0;
+    m_uiPreAttackKind = 0;
+    m_uiAttackID = 0;
+    m_pMarker->setFlag(FALSE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateBattle__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateBattle__7CPlayer);
 void CPlayer::endStateBattle() {
@@ -333,7 +389,17 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeLadder__7CPlay
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isStartLadderJump__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getJumpState__C7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initJump__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFall__7CPlayer);
+void CPlayer::initFall() {
+    initJump(1);
+    *(INT*)&m_JumpState = 3;
+    m_fJumpGravity = PL::g_fGravity;
+    setAnimForce(6, 800, 0, 0, 0, 0);
+    offAttack();
+    setPlayerFlag(0, 0x020C2000);
+    setBattleFlag(0, 0x00443F90);
+    setFaceAnim(0, 0);
+    m_pMove->setFlag(0x40, TRUE); // partial CMovement: (flag, on)
+}
 void CPlayer::setFallFloat() {
     FVECTOR v = m_pMove->getVel();
     m_fJumpSpdY = 0.0f;
@@ -358,7 +424,17 @@ void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkGimmick__7CPlayerUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initTreasureBox__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeTreasureBox__7CPlayer);
+void CPlayer::exeTreasureBox() {
+    setPlayerFlag(0x400000, 0);
+    if (isMotionEnd()) {
+        m_bDmgMuteki = FALSE;
+        setPlayerFlag(0, 1);
+        m_collBody.on();
+        initStandUp(0);
+        m_pMarker->setFlag(TRUE);
+        m_pMarker->holdTarget(0);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initRoomCreation__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeRoomCreation__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initWorldSelect__7CPlayer);
@@ -424,7 +500,16 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", startSingleAction
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttack__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAttack__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procTargetMark__7CPlayer);
+void CPlayer::procTargetMark() {
+    CEntity* pTarget = m_hTarget > 0 ? (CEntity*)CTaskMan::getTask(m_hTarget) : NULL;
+    if (pTarget) {
+        m_hMark = m_hTarget;
+        pTarget->getLockOnPos(m_vMarkPos);
+    } else {
+        m_hMark = 0;
+        m_vMarkPos.set(0.0f, 0.0f, 0.0f);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackMove__7CPlayeriffif);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackCollision__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procGravity__7CPlayeriii);
@@ -438,7 +523,18 @@ BOOL CPlayer::chkExtraSkill() {
     return FALSE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcEnchant_AttackPoint__7CPlayerRiR8ATK_KIND8ATK_ATTRUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcEnchant_DamagePoint__7CPlayerRi8ATK_ATTR);
+void CPlayer::calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr) {
+    if (m_pCB) {
+        CardBattle::ENCHANT_PARAM param;
+        param.init(getHandle(), 1);
+        param.uiState = 2;
+        param.AtkAttr = inAttr;
+        param.iAttackPoint = inPoint;
+        m_pCB->calcEnchantParam(param);
+        inPoint = param.iAttackPoint;
+        if (param.iGuard > 0) Gauge::CCommonGauge::setDispSeq(getHandle(), 2);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setUseRsrcBlock__7CPlayeri);
 void CPlayer::setDefAttr(FLOAT* inAttr) {
     for (INT i = 0; i < 6; i++) {
@@ -451,7 +547,22 @@ FLOAT CPlayer::getDefAttr(ATK_ATTR inAttr) const {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkDamage__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFlip__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setFlipForce__7CPlayerPC7FVECTOR);
+void CPlayer::setFlipForce(const FVECTOR* inPos) {
+    FVECTOR pos;
+    if (inPos) {
+        pos = *inPos;
+    } else {
+        pos = m_vStartPos;
+        pos.y = getPos().y + 0.0035f;
+    }
+    warp(pos);
+    updateCoord();
+    coordFix();
+    clearSpeed();
+    initFlip(0);
+    CardBattle::CCardBattle::notifyCompleteGimmick();
+    PLM::setVibration(3);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDamage__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkTrgAction__7CPlayeriUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initDead__7CPlayer);
@@ -536,7 +647,18 @@ void CPlayer::setObjStop(UINT inFlag) {
     else CSceneEnv::setStop((ObjType::eObjBit)0x7C);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWarp__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setBanish__7CPlayeri);
+void CPlayer::setBanish(INT inFlag) {
+    if (!inFlag) {
+        setConditionFlag(0, 0x40);
+        FVECTOR vColor;
+        vColor.set(1.0f, 1.0f, 1.0f);
+        CSceneEnv::setColor((ObjType::eObjBit)2, 30.0f, vColor, NULL, 2);
+    } else {
+        setConditionFlag(0x40, 0);
+        m_tqBanish = 0;
+        PL::g_vBanishPos = getPos();
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBanish__7CPlayer);
 void CPlayer::setReflectGuard(INT inFlag) {
     if (!inFlag) {
@@ -581,12 +703,52 @@ void CPlayer::exePrizeHealing() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initGimmickCard__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickCard__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setTrapDamage__7CPlayeriPCcUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", fadeEffect__7CPlayerRii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", fadeEffAttack__7CPlayeri);
+void CPlayer::fadeEffect(INT& ioHandle, INT inLoop) {
+    if (ioHandle > 0) {
+        CEffect* effect = CEffectMan::getEffect(ioHandle);
+        if (effect) {
+            if (inLoop && effect->isLoop()) effect->loopEnd();
+            else effect->fadeout(8.0f);
+        }
+        ioHandle = 0;
+    }
+}
+void CPlayer::fadeEffAttack(INT inLoop) {
+    INT i;
+    for (i = 0; i < 4; i++) {
+        if (m_hEffAttack[i] > 0) {
+            CEffect* effect = CEffectMan::getEffect(m_hEffAttack[i]);
+            if (effect) {
+                if (inLoop && effect->isLoop()) effect->loopEnd();
+                else effect->fadeout(8.0f);
+            }
+            m_hEffAttack[i] = 0;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEffAttack__7CPlayeriPCciiP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateSpotLight__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setQuake__7CPlayerffUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyReturnCard__7CPlayerPC4CARD);
+void CPlayer::setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime) {
+    CCamera* cam = CWorldEnv::getActiveCamera();
+    CameraQuakeParam cqp;
+    cqp._fCycle = inCycle;
+    cqp._nTime = inTime;
+    cqp._fPower = inPower;
+    new (com_malloc_d(sizeof(CCameraQuakeV), D_0049AFC0, RET_ADDR())) CCameraQuakeV(*cam, &cqp, inPower);
+}
+void CPlayer::notifyReturnCard(const CARD* inCard) {
+    if (!m_pInstance) return;
+    if (m_pRevolver) {
+        if (!inCard) {
+            m_pRevolver->resetCardOwner(2, 0);
+            CBattleEnemyManager* pBEM = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+            if (pBEM) pBEM->allGetPrize(2);
+        } else if (inCard->m_nKind < 0xCB) {
+            INT cat = inCard->m_nCategory0;
+            if (cat && (cat < 7 || cat == 8)) m_pRevolver->addCard((CARD*)inCard, 1);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyGetPrize__7CPlayeriii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addEXP__7CPlayerii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addHP__7CPlayeriii);

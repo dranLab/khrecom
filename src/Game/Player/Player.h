@@ -341,10 +341,10 @@ public:
     INT getMotIndex(INT inChara, INT inIndex);
     void setReflectGuard(INT inFlag);
     void setTransOff(INT inFlag);
-    void chkAtelHide(INT inFlag);
+    INT chkAtelHide(INT inFlag); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
     void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
-    void exeEscape();
+    void exeEscape(); void exeTreasureBox(); void setBanish(INT inFlag);
     void initCarry();
     void cancelLockon();
     void autoLockon();
@@ -471,7 +471,7 @@ public:
     void setFaceAnim(INT inID, INT inFlag);
     void initStartWait();
     void initStandUp(INT inFlag);
-    void initFall();
+    void initFall(); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
     INT initIdle(INT inAnim, INT inFlag);
     INT procFlowIdle(INT inFlag);
     void initEnd();
@@ -487,7 +487,7 @@ public:
     void setBGFade(FVECTOR& inColor, FLOAT inTime, INT inFlag);
     void setObjStop(UINT inFlag);
     void setEnemyStop(INT inFlag, UINT inMask);
-    void setQuake(FLOAT inPow, FLOAT inTime, UINT inFlag);
+    void setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime);
     void setLand(FLOAT inP0, FLOAT inP1, INT inFlag);
     void updateSpotLight(INT inFlag);
     void resetAction(INT inFlag);
@@ -538,7 +538,7 @@ public:
     void setTrgFlagRendaNG(const CHAR* inName);
     void cmdMove_WaterSurfaceCheck(INT inFlag);
     void setFallFloat();
-    void updateBodyColl();
+    void updateBodyColl(); void updateBodyCollPos();
     void updateFooting();
     void makeAnimIndex(INT inID);
     void initStartPos();
@@ -574,7 +574,7 @@ struct PL_PARAM {
 };
 
 namespace PL {
-extern FLOAT g_fWeight;
+extern FLOAT g_fWeight; extern FLOAT g_fGravity; extern FLOAT g_fAntiGravity;
 extern FLOAT g_fJumpStopRate;
 extern FLOAT g_fGlideWeight;
 extern FLOAT g_fGlideSpeedLow;

@@ -67,6 +67,14 @@ public:
     }
 };
 
+#ifndef GAME_PLAYER_PLAYERGAUGE_CPP
+// PARTIAL: added for Game/Player/Player
+class CCommonGauge {
+public:
+    static void setDispSeq(HANDLE inOwner, INT inSeq);
+};
+#endif
+
 #ifdef GAME_PLAYER_PLAYERGAUGE_CPP
 /* PARTIAL: the other gauge classes, for Game/Player/PlayerGauge only */
 class CNaviMap {

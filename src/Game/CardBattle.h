@@ -61,6 +61,23 @@ extern unsigned char g_DropFriendCardList[32][8]; // PARTIAL: added for Game/Pla
 extern char* g_szDbgDeckName[10];
 extern char* g_szEnemyCardEffName[60];
 
+// PARTIAL: added for Game/Player/Player
+struct ENCHANT_PARAM {
+    UINT uiUser;        /* 0x00 */
+    HANDLE hOwner;      /* 0x04 */
+    ATK_KIND AtkKind;   /* 0x08 */
+    ATK_ATTR AtkAttr;   /* 0x0c */
+    USHORT uiState;     /* 0x10 */
+    USHORT UpKind;      /* 0x12 */
+    SHORT iAttackPoint; /* 0x14 */
+    SHORT iHp;          /* 0x16 */
+    SHORT iHpMax;       /* 0x18 */
+    SHORT iFinish;      /* 0x1a */
+    SHORT iGuard;       /* 0x1c */
+    SHORT iNormal;      /* 0x1e */
+    void init(INT inOwner, UINT inUser);
+};
+
 // PARTIAL: added for Game/Player/SummonDumbo
 class CCardBattle {
     // PARTIAL: members added for Game/Player/PlayerRiku
@@ -146,7 +163,8 @@ public:
     static BOOL isBattleEnd();
     static void setSuspend(BOOL b);
     static BOOL isSuspend();
-    static BOOL isLevitate();
+    static BOOL isLevitate(); static void notifyCompleteGimmick(); // PARTIAL: notifyCompleteGimmick added for Game/Player/Player
+    void calcEnchantParam(ENCHANT_PARAM& ioParam); // PARTIAL: added for Game/Player/Player
     static void setBlack(BOOL b);
     static BOOL isBlack();
     void destroyStockFolder(INT inSide);
@@ -197,6 +215,7 @@ public:
     INT calcPlutoMark();
     void dropPlutoMarkCard(const FVECTOR* inPos);
     void setSnatch(HANDLE inHandle); // PARTIAL: added for Game/Player/Player
+    void addCard(CARD* pData, INT inReturn); void resetCardOwner(INT inOld, INT inNew); // PARTIAL: added for Game/Player/Player
 };
 #endif
 }
