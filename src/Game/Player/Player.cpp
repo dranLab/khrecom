@@ -46,6 +46,16 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 inline void* operator new(size_t, void* p) throw() { return p; }
+static inline FLOAT _abs(FLOAT inValue) {
+    FLOAT ret;
+    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
+    return ret;
+}
+static inline FLOAT _limitPI(FLOAT r) {
+    if (r < -3.1415927f) r += 6.2831855f;
+    else if (r > 3.1415927f) r -= 6.2831855f;
+    return r;
+}
 /* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
 enum NAME_CASE { NAME_CASE_SENSITIVE = 0, NAME_CASE_UPPER = 1, NAME_CASE_LOWER = 2 };
 class CRsrcDB {
@@ -577,7 +587,30 @@ INT CPlayer::chkWalkMode() {
     m_fWalkSpeed = aim_power * m_pParam->MAX_RUN_SPEED * dash;
     return 2;
 }
+/* Parked: only the angle-wrap register differs: the original keeps r (aim_dir - dirY, wrapped to +-PI) in $f1,
+   ours in $f13 (global alloc, pseudo set 3 times). tried: _limitPI/_abs helper bodies (return forms, ret local,
+   if/if, volatile/non-volatile asm, fabsf), r as an explicit local first/last, the ref's locals at the top,
+   folded calcVelocityXZ argument; best 6 lines. tools/permuter.py can't run on C++ methods. */
+#if 0
+void CPlayer::exeWalk() {
+    FLOAT aim_dir = m_fAnalogViewDir;
+    FLOAT d0 = Movement::Homing(m_fDir, aim_dir, 0.2f, m_fFrameRate);
+    if (m_WalkMode) m_fDir = d0;
+    setWalkAnim();
+    FLOAT dirY = m_fDir;
+    FVECTOR v;
+    v._q = 0;
+    v.y = aim_dir;
+    m_pMove->getRot() = v;
+    m_fMovePower = 1.0f - _abs(_limitPI(aim_dir - dirY)) / 3.1415927f;
+    m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower;
+    m_pMove->calcVelocityXZ(m_fWalkSpeed);
+    v.y = dirY;
+    m_pMove->getRot() = v;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setWalkAnim__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBattleIdle__7CPlayer);
 INT CPlayer::procFlowIdle(INT inFlag) {
