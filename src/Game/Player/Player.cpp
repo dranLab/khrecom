@@ -641,7 +641,14 @@ void CPlayer::setBGFade(FLOAT inRate, FLOAT inTime, INT inFlag) {
     v.set(inRate, inRate, inRate, 1.0f);
     setBGFade(v, inTime, inFlag);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setBGFade__7CPlayerR7FVECTORfi);
+void CPlayer::setBGFade(FVECTOR& inColor, FLOAT inFrame, INT inFlag) {
+    INT iObjType = 0x1808;
+    if (inFlag & 1) iObjType = 0x187C;
+    if (inColor.x + inColor.y + inColor.z == 3.0f) setPlayerFlag(0, 0x80000000);
+    else setPlayerFlag(0x80000000, 0);
+    CSceneEnv::setColor((ObjType::eObjBit)iObjType, inFrame, inColor, NULL, 0);
+    if (inFlag & 2) CSceneEnv::setStop((ObjType::eObjBit)iObjType);
+}
 void CPlayer::setObjStop(UINT inFlag) {
     if (!inFlag) CSceneEnv::setStop((ObjType::eObjBit)0);
     else CSceneEnv::setStop((ObjType::eObjBit)0x7C);
