@@ -73,6 +73,15 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
 }
 extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
 extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
+extern "C" void sceVu0UnitMatrix(FMATRIX& m);
+/* Through inline wrappers: called directly, cse keeps the matrix address in a saved register across the
+ * calls; the original recomputes it for each call (as in Game/Player/FriendKing). */
+static inline void _unitMatrix(FMATRIX& m) {
+    sceVu0UnitMatrix(m);
+}
+static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
+    sceVu0RotMatrixY(m, m, r);
+}
 extern "C" float atan2f(float y, float x);
 static inline FLOAT _limitPI(FLOAT r) {
     if (r < -3.1415927f) r += 6.2831855f;
@@ -95,6 +104,7 @@ extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_szTexEyeKizetsu; // static in the original
 extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
 extern LPCSTR g_szDpxAbnormal; // static in the original
+extern FVECTOR HANG_HAND_LOCAL_OFS; // static in the original
 extern LPCSTR g_szDpxAsiato __asm__("_2PL$g_szDpxAsiato_003A2298"); // static in the original (PlayerDRiku has one too)
 extern FLOAT g_fDefAttr[];
 extern FLOAT g_fGimmickJumpPower[8];
@@ -811,7 +821,42 @@ void CPlayer::setFallFloat() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeJump__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeJumpLand__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkHang__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initHang__7CPlayer);
+void CPlayer::initHang() {
+    FVECTOR rot;
+    FVECTOR ofs;
+    FMATRIX m;
+    m_vOldSafeField = getPos();
+    setPlayerState(PL::HANG);
+    m_iSubState = 0;
+    setPlayerFlag(0x400000, 0);
+    setBattleFlag(0, 8);
+    rot = getRot();
+    FLOAT dir = m_fDir;
+    rot.y = dir;
+    setRot(rot);
+    _unitMatrix(m);
+    _rotMatrixY(m, dir);
+    ApplyMatrixXYZ(ofs, m, PL::HANG_HAND_LOCAL_OFS);
+    SubVectorXYZ(m_vHangPos, m_vHangPos, ofs);
+    m_vHangPos.w = 1.0f;
+    if (isPlayerFlag(0x8000)) {
+        setPos(m_vHangPos);
+        setConditionFlag(0, 0x40000);
+        m_pCollMap->registerLastHang(getHandle());
+        m_pCollMap->setHangPosition(rot, m_vHangPos);
+    } else {
+        warp(m_vHangPos);
+    }
+    setAnimForce(0xF, 0, 0, 0, 0, 100);
+    updateCoord();
+    coordFix();
+    m_pMove->setFlag(0x40, FALSE); // partial CMovement: (flag, on)
+    m_pCam->setFlag(2, TRUE);      // partial CPlayerCamera: (flag, on)
+    m_JumpState = 6;
+    clearSpeed();
+    m_fJumpSpdY = 0.0f;
+    if (m_pMarker) m_pMarker->cancelLockon(m_hLockon, 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeHang__7CPlayer);
 void CPlayer::initAvoid() {
     if (isConditionFlag(0x10000000) && !isConditionFlag(0x400000)) {
