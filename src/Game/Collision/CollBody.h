@@ -49,9 +49,9 @@ public:
     CCollBody();
     virtual ~CCollBody();
     virtual void on() {
-        m_Enable = 1;
         m_fgHit = 0;
         m_Damage = 0;
+        CCollObj::on();
         setCritical(0);
     }
     void setDamage(INT damage) { m_Damage = damage; }

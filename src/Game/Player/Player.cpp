@@ -409,7 +409,17 @@ void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkGimmick__7CPlayerUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initTreasureBox__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeTreasureBox__7CPlayer);
+void CPlayer::exeTreasureBox() {
+    setPlayerFlag(0x400000, 0);
+    if (isMotionEnd()) {
+        m_bDmgMuteki = FALSE;
+        setPlayerFlag(0, 1);
+        m_collBody.on();
+        initStandUp(0);
+        m_pMarker->setFlag(TRUE);
+        m_pMarker->holdTarget(0);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initRoomCreation__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeRoomCreation__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initWorldSelect__7CPlayer);
