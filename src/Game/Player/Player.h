@@ -341,10 +341,10 @@ public:
     INT getMotIndex(INT inChara, INT inIndex);
     void setReflectGuard(INT inFlag); void setQuickBarrier(INT inFlag);
     void setTransOff(INT inFlag);
-    INT chkAtelHide(INT inFlag); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
+    INT chkAtelHide(INT inFlag); void initFSM_(); static void (CPlayer::*m_pBeginStateTbl[4])(); static void (CPlayer::*m_pStateTbl[4])(); static void (CPlayer::*m_pEndStateTbl[4])(); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
     void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
-    void exeEscape(); void exeGimmickRide(); INT chkGimmick(UINT inID); void exeTreasureBox(); void setBanish(INT inFlag); void exeWind();
+    void exeEscape(); void exeGimmickRide(); INT chkGimmick(UINT inID); void exeTreasureBox(); void setBanish(INT inFlag); void exeBanish(); void exeWind();
     void initCarry();
     void cancelLockon();
     void autoLockon();
@@ -355,7 +355,7 @@ public:
     void exeQuickBarrier(); void exeAeroGuard(); void setAeroGuard(INT inFlag);
     INT isNowCardActionState();
     INT chkWalkMode();
-    void exeWalk(); void setWalkAnim(); void exeStartWait();
+    void exeWalk(); void setWalkAnim(); void exeStartWait(); INT isStartLadderJump(); void procDropMP(); INT chkBattleIdle(); FLOAT getAirHeight(FVECTOR* inPos, FLOAT inHeight, INT inLimit);
     void recoverCollMap();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
     void setConditionFlag(UINT inSet, UINT inMask) { m_uiConditionFlag = (m_uiConditionFlag | inSet) & ~inMask; }
@@ -471,7 +471,7 @@ public:
     void setFaceAnim(INT inID, INT inFlag);
     void initStartWait();
     void initStandUp(INT inFlag);
-    void initFall(); void initWall(); void initAttackField(INT inNo); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void exeCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
+    void initFall(); void initWall(); void initHang(); void initEscape(); void initAttackField(INT inNo); void initAttack(INT inNo); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void exeCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
     INT initIdle(INT inAnim, INT inFlag);
     INT procFlowIdle(INT inFlag);
     void initEnd();
@@ -489,12 +489,12 @@ public:
     void setEnemyStop(HANDLE inEnemy, UINT inSet);
     void setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime);
     void setLand(FLOAT inP0, FLOAT inP1, INT inFlag); void setDownForce();
-    void updateSpotLight(INT inFlag);
+    void updateSpotLight(HANDLE inHandle);
     void resetAction(INT inFlag);
     void procAttackMove(INT inFlag, FLOAT inSpeed, FLOAT inRate, INT inP3, FLOAT inP4);
     INT procAttackCollision(TIMEQ inNowFrame);
     void procTargetMark();
-    void procGravity(INT inP0, INT inP1, INT inP2);
+    void procGravity(TIMEQ inNowFrame, TIMEQ inEndFrame, INT inFlag);
     void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inFlag);
     void setUseRsrcBlock(INT inBlock);
     INT exeUseStock(INT inFlag); INT startSingleAction();
