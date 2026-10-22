@@ -107,6 +107,7 @@ extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_sz
 extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
 extern LPCSTR g_szDpxAbnormal; // static in the original
 extern FVECTOR HANG_HAND_LOCAL_OFS; // static in the original
+extern FVECTOR LADDER_LOCAL_OFS; // static in the original
 extern LPCSTR g_szDpxAsiato __asm__("_2PL$g_szDpxAsiato_003A2298"); // static in the original (PlayerDRiku has one too)
 extern FLOAT g_fDefAttr[];
 extern FLOAT g_fGimmickJumpPower[8];
@@ -818,7 +819,64 @@ INT CPlayer::getLadderStepNow(FLOAT inHeight) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initLadder__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeLadder__7CPlayer);
+/* Parked: frame and structure match (rot and vel in sibling blocks share the 0x60 slot); left: the original
+   computes dir - PI into $f12 and copies the wrapped angle into $f20 (ours wraps in $f20), and loads
+   LADDER_LOCAL_OFS.z after the getPos result with other registers. tried: inline/static-inline/_limitPI/
+   ternary/if-else forms of the wrap with fInRot and r, ofs via set()/field stores/brace init, all orders of
+   the pos/ofs block (perm.py); best 20 lines. tools/permuter.py can't run on C++ methods. */
+#if 0
+/* A CPlayer inline of the original (ref locals fInRot, rot, r): sets the facing direction, wrapped to +-PI. */
+static inline void _setDirY(CPlayer* p, FLOAT fInRot) {
+    FVECTOR rot = p->getRot();
+    FLOAT r = fInRot;
+    if (r < -3.1415927f) r += 6.2831855f;
+    else if (r > 3.1415927f) r -= 6.2831855f;
+    p->m_fDir = r;
+    rot.y = r;
+    p->setRot(rot);
+}
+INT CPlayer::isStartLadderJump() {
+    FLOAT dir;
+    FVECTOR pos;
+    FVECTOR ofs;
+    FMATRIX m;
+    if (!isTrgFlag(1)) return FALSE;
+    dir = m_fDir;
+    pos = getPos();
+    ofs.x = 0.0f;
+    ofs.y = 0.0f;
+    ofs.z = PL::LADDER_LOCAL_OFS.z;
+    ofs.w = 1.0f;
+    _unitMatrix(m);
+    _rotMatrixY(m, dir);
+    ApplyMatrixXYZ(ofs, m, ofs);
+    AddVectorXYZ(pos, pos, ofs);
+    setPos(pos);
+    {
+        FVECTOR rot = getRot();
+        FLOAT r = dir - 3.1415927f;
+        if (r < -3.1415927f) r += 6.2831855f;
+        else if (r > 3.1415927f) r -= 6.2831855f;
+        m_fDir = r;
+        rot.y = r;
+        setRot(rot);
+    }
+    setAnimForce(5, 0, 0, 0, 0, 0);
+    initFall();
+    m_fWalkSpeed = m_pParam->MAX_WALK_SPEED / 60.0f;
+    m_pMove->calcVelocityXZ(m_fWalkSpeed);
+    {
+        FVECTOR vel = m_pMove->getVel();
+        vel.y = PL::g_fAntiGravity * 18.0f;
+        m_fJumpSpdY = vel.y;
+        m_pMove->setVel(vel);
+    }
+    m_pMove->setFlag(0x40, TRUE); // partial CMovement: (flag, on)
+    return TRUE;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isStartLadderJump__7CPlayer);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getJumpState__C7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initJump__7CPlayeri);
 void CPlayer::initFall() {
