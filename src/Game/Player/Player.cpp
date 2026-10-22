@@ -307,7 +307,20 @@ void CPlayer::endStateField() {
     m_uiAttackID = 0;
     m_pMarker->setFlag(FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateBattle__7CPlayer);
+void CPlayer::beginStateBattle() {
+    m_iState = 1;
+    m_uiStep = 0;
+    setActionFlag(m_pParam->USE_BTL_ACTION, 0);
+    initActionSkill();
+    setBattleFlag(1, 0);
+    setAnimForce(0x2A, -1, 0, 0, 0, 0);
+    onWeapon(0);
+    m_pPLM->setReqLoadFirst();
+    initStartWait();
+    if (PL::g_uiStartCondition & 8) setConfuse(1, 0);
+    PL::g_uiStartCondition = 0;
+    m_szEffectName = NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateBattle__7CPlayer);
 void CPlayer::endStateBattle() {
     setActionFlag(0, m_pParam->USE_BTL_ACTION);
