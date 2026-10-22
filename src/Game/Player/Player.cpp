@@ -803,7 +803,29 @@ void CPlayer::setReflectGuard(INT inFlag) {
         body.m_GuardAttrFlag |= 1;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setQuickBarrier__7CPlayeri);
+void CPlayer::setQuickBarrier(INT inFlag) {
+    if (m_tqBarrier > 0) {
+        m_collBody.m_uiFlag = (INT)m_collBody.m_uiFlag & ~2;
+        m_tqBarrier = 0;
+        m_collBody.m_GuardAttrFlag = 0;
+    } else {
+        m_tqBarrier = 6000;
+        CCollBody& body = m_collBody;
+        m_collBody.m_uiFlag |= 2;
+        body.m_GuardAttrFlag |= 1;
+        m_collBody.m_uiFlag |= 2;
+        body.m_GuardAttrFlag |= 2;
+        m_collBody.m_uiFlag |= 2;
+        body.m_GuardAttrFlag |= 4;
+        m_collBody.m_uiFlag |= 2;
+        body.m_GuardAttrFlag |= 8;
+        m_collBody.m_uiFlag |= 2;
+        body.m_GuardAttrFlag |= 0x10;
+        m_collBody.m_uiFlag |= 2;
+        body.setGuardDir(3.1415927f);
+        body.m_GuardAttrFlag |= 0x20;
+    }
+}
 void CPlayer::exeQuickBarrier() {
     if (m_tqBarrier) {
         m_tqBarrier -= m_tqFrameRate;

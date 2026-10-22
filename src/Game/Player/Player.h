@@ -339,7 +339,7 @@ public:
     void exePrizeHealing();
     void fadeEffCharge();
     INT getMotIndex(INT inChara, INT inIndex);
-    void setReflectGuard(INT inFlag);
+    void setReflectGuard(INT inFlag); void setQuickBarrier(INT inFlag);
     void setTransOff(INT inFlag);
     INT chkAtelHide(INT inFlag); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
     void initWorldSelect();
