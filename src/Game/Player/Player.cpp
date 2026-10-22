@@ -893,7 +893,32 @@ void CPlayer::killBullet() {
     if (p) p->kill(getHandle());
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEnemyStop__7CPlayeriUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setMDFooting__7CPlayeri);
+INT CPlayer::setMDFooting(HANDLE inFooting) {
+    if (!inFooting) {
+        setConditionFlag(0, 0x10000000);
+        setTrgFlag(0, 0x400);
+        m_fJumpLandLimit = -100.0f;
+        m_hFooting = 0;
+        m_pMove->setFlag(0x200, FALSE); // partial CMovement: (flag, on)
+        return 0;
+    }
+    switch (m_PlayerState) {
+    case PL::STAND:
+    case PL::JUMP:
+    case PL::FOOTING:
+        break;
+    default:
+        return 0;
+    }
+    if (!isConditionFlag(0x10000000)) {
+        setTrgFlag(0x400, 0);
+        m_hFooting = inFooting;
+        m_fJumpLandLimit = 2.0f;
+        return 0;
+    }
+    m_pMove->setFlag(0x200, TRUE);
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFooting__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeFooting__7CPlayer);
 void CPlayer::updateFooting() {

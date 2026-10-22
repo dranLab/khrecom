@@ -477,7 +477,7 @@ public:
     void initEnd();
     void initBadCondition();
     void setConfuse(INT inFlag, INT inTime);
-    INT setMDFooting(INT inFlag);
+    INT setMDFooting(HANDLE inFooting);
     void fadeEffAttack(INT inFlag);
     void fadeEffect(INT& ioHandle, INT inTime);
     void procSkillEnd(INT inFlag);
