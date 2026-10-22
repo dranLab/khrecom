@@ -389,7 +389,17 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeLadder__7CPlay
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isStartLadderJump__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getJumpState__C7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initJump__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFall__7CPlayer);
+void CPlayer::initFall() {
+    initJump(1);
+    *(INT*)&m_JumpState = 3;
+    m_fJumpGravity = PL::g_fGravity;
+    setAnimForce(6, 800, 0, 0, 0, 0);
+    offAttack();
+    setPlayerFlag(0, 0x020C2000);
+    setBattleFlag(0, 0x00443F90);
+    setFaceAnim(0, 0);
+    m_pMove->setFlag(0x40, TRUE); // partial CMovement: (flag, on)
+}
 void CPlayer::setFallFloat() {
     FVECTOR v = m_pMove->getVel();
     m_fJumpSpdY = 0.0f;
