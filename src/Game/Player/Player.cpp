@@ -72,6 +72,8 @@ extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_szTexEyeKizetsu; // static in the original
 extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
 extern LPCSTR g_szDpxAbnormal; // static in the original
+extern LPCSTR g_szDpxAsiato __asm__("_2PL$g_szDpxAsiato_003A2298"); // static in the original (PlayerDRiku has one too)
+extern FLOAT g_fDefAttr[];
 extern FLOAT g_fGimmickJumpPower[8];
 }
 class CPlayerDebug { /* PARTIAL: size and ctor for makeCockpit; CPlayerDebug's members are still INCLUDE_ASM */
@@ -167,7 +169,29 @@ void CPlayer::changeState(INT inState) {
     if (!((UINT)inState < 4)) AssertApp(D_004997C0, 941, D_00499828, 0);
     gotoState(*(CState*)&_m_0x21c[inState * 0x20]);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateInitial__7CPlayer);
+void CPlayer::stateInitial() {
+    setPlayerState(PL::INIT);
+    m_uiStep = 0;
+    importStatus();
+    setDefAttr(PL::g_fDefAttr);
+    m_fPrizeDraw = 5.0f;
+    m_fCardDraw = 5.0f;
+    createLegIK(-1.0f, -1.0f);
+    setFootEffectIK(PL::g_szDpxAsiato, 0);
+    setGroundIK(1);
+    makeAnimIndex(m_uiCharaID);
+    initStartPos();
+    makeWeapon();
+    if (!isPlayerFlag(0x20000000)) makeCockpit();
+    if (!m_bIsBattleScene) {
+        setAnimForce(1, 0, 0, 0, 0, 0);
+    } else {
+        setAnimForce(0x2A, 0, 0, 0, 0, 0);
+        if (!isPlayerFlag(0x20000000)) makeRevolver();
+    }
+    initActionSkill();
+    if (CGameWork::getFlag(1, 0)) changeState(3);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStartPos__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeWeapon__7CPlayer);
 void CPlayer::makeCockpit() {
