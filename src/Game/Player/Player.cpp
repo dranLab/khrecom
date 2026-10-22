@@ -593,7 +593,27 @@ void CPlayer::initStartWait() {
     m_hGimmick = 0;
     m_pCam->setFlag(1, TRUE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStartWait__7CPlayer);
+void CPlayer::exeStartWait() {
+    if (m_bIsBattleScene) {
+        setPlayerFlag(0x400000, 0);
+    } else if (getTimer() < 1100) {
+        if (isAir()) setAnim(6, -1, 0);
+        else setAnim(1, -1, 0);
+    }
+    if (m_pRevolver) setBattleFlag(0, 8);
+    if (getTimer() > 0) return;
+    if (CGameWork::getFlag(1, 5)) return;
+    enableControl();
+    m_pCam->setFlag(1, FALSE); // partial CPlayerCamera: (flag, on)
+    setPlayerFlag(0, 1);
+    m_pMarker->setFlag(TRUE);
+    if (!isAir()) initStandUp(0);
+    else initFall();
+    if (isBattleFlag(1) && !isBattleFlag(0x80000000)) {
+        m_vStartPos = getPos();
+        setBattleFlag(0x80000000, 0);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStandUp__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStandUp__7CPlayer);
 INT CPlayer::chkWalkMode() {
