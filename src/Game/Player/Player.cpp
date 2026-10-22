@@ -58,6 +58,7 @@ extern LPCSTR g_szDpxReload; // static in the original
 extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_szTexEyeKizetsu; // static in the original
 extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
+extern LPCSTR g_szDpxAbnormal; // static in the original
 extern FLOAT g_fGimmickJumpPower[8];
 }
 namespace Gauge {
@@ -808,7 +809,32 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDead__7CPlayer
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyDead__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initBadCondition__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBadCondition__7CPlayer);
+/* Parked: in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets
+   the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but
+   swaps v0/a2 (tq/pad). tried: all 6 statement orders x tq forms (ternary, param default, ==0), UINT& pad,
+   (INT) casts, temporaries in both load orders, nested-if structure, asm barriers on tq; best 6 lines.
+   tools/permuter.py can't run on C++ methods. */
+#if 0
+void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
+    if (!inFlag) {
+        setConditionFlag(0, 8);
+        m_tqConfuse = 0;
+        m_uiPadFlag = (INT)m_uiPadFlag & ~4;
+        fadeEffect(m_hEffBad, 0);
+    } else if (m_tqConfuse <= 0) {
+        m_tqConfuse = inTime ? inTime : 21000;
+        m_uiPadFlag |= 4;
+        setConditionFlag(8, 0);
+        FVECTOR pos;
+        pos.set(0.0f, 0.65f, 0.0f);
+        m_hEffBad = attachEffect(PL::g_szDpxAbnormal, 2, &Crd(m_iBoneCenter), &pos, NULL, 0.0f);
+        CEffect* effect = CEffectMan::getEffect(m_hEffBad);
+        if (effect) effect->m_iFlag |= 4;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setConfuse__7CPlayerii);
+#endif
 void CPlayer::exeConfuse() {
     if (m_uiConditionFlag & 8) {
         m_tqConfuse -= m_tqFrameRate;
