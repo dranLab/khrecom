@@ -630,7 +630,23 @@ void CPlayer::initAvoid() {
     m_JumpState = 3;
     m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickRide__7CPlayer);
+void CPlayer::exeGimmickRide() {
+    if (m_pMove->isObjRide() && chkGimmick(0x2002) == 7 && !CGameWork::getFlag(1, 0x27)) {
+        CEntity* pEntity = (CEntity*)CTaskMan::getTask(m_hGimmick);
+        if (pEntity) {
+            FVECTOR target = pEntity->getPos();
+            FVECTOR pos = getPos();
+            if (calcDistanceXZSq(target) < 0.010000001f) {
+                pos.x = target.x;
+                pos.z = target.z;
+            } else {
+                pos.x = Movement::Approach(pos.x, target.x, 0.1f, m_fFrameRate);
+                pos.z = Movement::Approach(pos.z, target.z, 0.1f, m_fFrameRate);
+            }
+            setPos(pos);
+        }
+    }
+}
 void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
     if (!_instance()) return;
     _instance()->m_hGimmickJump = inHandle;
