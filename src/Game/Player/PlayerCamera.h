@@ -182,6 +182,7 @@ public:
     }
     void changeNowPlayer(HANDLE inPlayer, HANDLE inTarget);
     void changeCamMode(INT inMode, INT inReset);
+    void initCamera(INT inMode, INT inReset, FVECTOR* inDir); // PARTIAL: added for Game/Player/Player
     void enableRikuShiftY(); // PARTIAL: added for Game/Player/PlayerRiku
     // PARTIAL: added for Game/Player/PlayerRiku (through a reference: the original reloads m_pInstance after stores)
     static CPlayerCamera*& getInstanceRef() { return m_pInstance; }
