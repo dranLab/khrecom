@@ -344,7 +344,7 @@ public:
     INT chkAtelHide(INT inFlag); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
     void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
-    void exeEscape(); void exeTreasureBox(); void setBanish(INT inFlag);
+    void exeEscape(); void exeTreasureBox(); void setBanish(INT inFlag); void exeWind();
     void initCarry();
     void cancelLockon();
     void autoLockon();
@@ -352,7 +352,7 @@ public:
     INT cmdRevolver_isActive();
     BOOL cmdRevolver_rollDeck(INT inNum);
     INT getLadderStepNow(FLOAT inHeight);
-    void exeQuickBarrier();
+    void exeQuickBarrier(); void exeAeroGuard(); void setAeroGuard(INT inFlag);
     INT isNowCardActionState();
     INT chkWalkMode();
     void exeWalk();
@@ -368,7 +368,7 @@ public:
     INT isBattleFlag(UINT inFlag) { return m_uiBattleFlag & inFlag; } // PARTIAL: added for Game/Player/SummonMushu
     // PARTIAL: added for Game/Player/FriendDonald
     PlayerWeapon::CPlayerWeapon* getWeapon() { return m_pWeapon; }
-    void getWeaponTopPos(FVECTOR& outPos);
+    void getWeaponTopPos(FVECTOR& outPos); void getCaskPos(FVECTOR& inVec);
     // PARTIAL: added for Game/Player/SummonCloud
     void setDir(FLOAT inDir) { m_fDir = inDir; }
     // PARTIAL: added for Game/Player/Summon
@@ -471,13 +471,13 @@ public:
     void setFaceAnim(INT inID, INT inFlag);
     void initStartWait();
     void initStandUp(INT inFlag);
-    void initFall(); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
+    void initFall(); void initWall(); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
     INT initIdle(INT inAnim, INT inFlag);
     INT procFlowIdle(INT inFlag);
     void initEnd();
     void initBadCondition();
     void setConfuse(INT inFlag, INT inTime);
-    INT setMDFooting(INT inFlag);
+    INT setMDFooting(HANDLE inFooting);
     void fadeEffAttack(INT inFlag);
     void fadeEffect(INT& ioHandle, INT inTime);
     void procSkillEnd(INT inFlag);
@@ -488,7 +488,7 @@ public:
     void setObjStop(UINT inFlag);
     void setEnemyStop(INT inFlag, UINT inMask);
     void setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime);
-    void setLand(FLOAT inP0, FLOAT inP1, INT inFlag);
+    void setLand(FLOAT inP0, FLOAT inP1, INT inFlag); void setDownForce();
     void updateSpotLight(INT inFlag);
     void resetAction(INT inFlag);
     void procAttackMove(INT inFlag, FLOAT inSpeed, FLOAT inRate, INT inP3, FLOAT inP4);
@@ -500,7 +500,7 @@ public:
     INT exeUseStock(INT inFlag);
     INT chkChargeMove(INT inFlag);
     void setPushon(INT inFlag);
-    void setCastEffect(const CHAR* inName, INT inNo, CCoord* inCoord, FVECTOR* inPos);
+    void setCastEffect(const CHAR* inName, INT inNo, CCoord* inCoord, FVECTOR* inPos); void setEffAttack(INT inNum, const CHAR* inName, INT inNo, INT inBone, FVECTOR* inOfs);
     // PARTIAL: added for Game/Player/PlayerDRiku
     static INT importStatus();
     static INT exportStatus();
@@ -574,7 +574,7 @@ struct PL_PARAM {
 };
 
 namespace PL {
-extern FLOAT g_fWeight; extern FLOAT g_fGravity; extern FLOAT g_fAntiGravity;
+extern FLOAT g_fWeight; extern FLOAT g_fGravity; extern FLOAT g_fAntiGravity; extern UINT g_uiStartCondition;
 extern FLOAT g_fJumpStopRate;
 extern FLOAT g_fGlideWeight;
 extern FLOAT g_fGlideSpeedLow;
