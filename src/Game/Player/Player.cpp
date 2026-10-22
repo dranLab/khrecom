@@ -300,7 +300,26 @@ void CPlayer::recoverCollMap() {
         m_pMove->setWallRadius(m_fWallRadius);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setDownForce__7CPlayer);
+void CPlayer::setDownForce() {
+    if (!isConditionFlag(0x10000000)) {
+        if (!getJumpState()) {
+            FVECTOR vel = m_pMove->getVel();
+            vel.y = -0.05f;
+            m_pMove->setVel(vel);
+        }
+    } else {
+        FVECTOR vel = m_pMove->getVel();
+        FVECTOR pos = m_pMove->getPos();
+        pos.y += vel.y;
+        if (pos.y <= m_fJumpLandLimit) {
+            pos.y = m_fJumpLandLimit;
+            if (vel.y < 0.0f) vel.y = 0.0f;
+            m_pMove->getPos() = pos;
+            m_pMove->setVel(vel);
+            m_bAir = FALSE;
+        }
+    }
+}
 void CPlayer::setLand(FLOAT inDownLEngth, FLOAT inUpLength, BOOL inFirstHit) {
     recoverCollMap();
     land(inDownLEngth, inUpLength, inFirstHit);

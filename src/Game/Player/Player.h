@@ -488,7 +488,7 @@ public:
     void setObjStop(UINT inFlag);
     void setEnemyStop(INT inFlag, UINT inMask);
     void setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime);
-    void setLand(FLOAT inP0, FLOAT inP1, INT inFlag);
+    void setLand(FLOAT inP0, FLOAT inP1, INT inFlag); void setDownForce();
     void updateSpotLight(INT inFlag);
     void resetAction(INT inFlag);
     void procAttackMove(INT inFlag, FLOAT inSpeed, FLOAT inRate, INT inP3, FLOAT inP4);
