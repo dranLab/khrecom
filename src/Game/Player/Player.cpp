@@ -28,6 +28,7 @@
 #include "Game/CardKind.h"
 #include "System/Graphic/Camera.h"
 #include "System/Graphic/WorldEnv.h"
+#include "Game/Game.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -442,7 +443,18 @@ INT CPlayer::initIdle(INT inAir, INT inStand) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkWall__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkWallBottom__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initWall__7CPlayer);
+void CPlayer::initWall() {
+    setPlayerState(PL::WALL);
+    clearSpeed();
+    offWeapon();
+    m_iSubState = 0;
+    if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 0, -1, 0, 0, 0, 1);
+    else setAnimRsrcEx(0xFD4, 0, -1, 0, 0, 0, 1);
+    setPos(m_vWallPos);
+    m_JumpState = 6;
+    m_pMove->setFlag(0x40, FALSE); // partial CMovement: (flag, on)
+    m_fFootRadius = 0.5f;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWall__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkLadderStepNow__7CPlayeri);
 INT CPlayer::getLadderStepNow(FLOAT inHeight) {
