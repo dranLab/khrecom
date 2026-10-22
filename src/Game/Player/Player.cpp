@@ -30,6 +30,7 @@
 #include "System/Graphic/WorldEnv.h"
 #include "Game/Game.h"
 #include "Game/Bullet/Bullet.h"
+#include "Game/Player/PlayerAttack.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -40,6 +41,7 @@ void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" char D_0049B308[];
 extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)" */
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
+extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 inline void* operator new(size_t, void* p) throw() { return p; }
 /* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
 enum NAME_CASE { NAME_CASE_SENSITIVE = 0, NAME_CASE_UPPER = 1, NAME_CASE_LOWER = 2 };
@@ -50,9 +52,20 @@ public:
 namespace PL {
 extern FVECTOR g_vDummyPlayerPos; // data from the asm until SOURCE DATA
 extern FVECTOR g_vBanishPos;
+extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the original
+extern LPCSTR g_szDpxAlways; // static in the original; data from the asm until SOURCE DATA
+extern LPCSTR g_szDpxReload; // static in the original
+extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
+extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_szTexEyeKizetsu; // static in the original
+extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
+extern LPCSTR g_szDpxAbnormal; // static in the original
 extern FLOAT g_fGimmickJumpPower[8];
 }
 namespace Gauge {
+class CPlayerGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
+public:
+    void setHP(INT inHP, INT inFlag);
+};
 class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
 public:
     static void setPrizeMp(INT inMP);
@@ -172,7 +185,16 @@ INT CPlayer::getMotIndex(INT inChara, INT inIndex) {
     if (!(0 <= inIndex && inIndex < ANIM_MAX)) AssertApp(D_004997C0, 1361, D_00499A18, 0);
     return PL_ANIM::g_MotNameTbl[inChara][inIndex].iIndex;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimForce__7CPlayeriiiiii);
+void CPlayer::setAnimForce(INT inAnimID, TIMEQ inChangeTime, BOOL inRootMove, INT inEffSeq, INT inSESeq, TIMEQ inStart) {
+    m_iPreAnimID = m_iNowAnimID;
+    m_iNowAnimID = inAnimID;
+    INT animID = getMotIndex(m_uiCharaID, inAnimID);
+    changeMotion(animID, inStart, inRootMove, inChangeTime, inEffSeq, inSESeq);
+    if (isPlayerFlag(0x40000000)) {
+        m_pWeapon->changeMotion(animID, inStart, FALSE, inChangeTime, inEffSeq, inSESeq);
+    }
+    setAnimSpeed(1.0f);
+}
 void CPlayer::setAnim(INT inID, INT inTq, INT inGr) {
     if (m_iNowAnimID != inID) setAnimForce(inID, inTq, inGr, 0, 0, 0);
 }
@@ -185,7 +207,17 @@ void CPlayer::setAnimSpeed(FLOAT inSpeed) {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimSkillEx__7CPlayeriiiii);
+void CPlayer::setAnimSkillEx(INT inAnimID, TIMEQ inChangeTime, BOOL inRootMove, INT inEffSeq, INT inSESeq) {
+    UINT rcid = m_pPLM->getRCID_toSkill(m_iStockSkill);
+    if (rcid) {
+        m_iNowAnimID = -1;
+        changeMotionEx(rcid + 10000, inAnimID, 0, inRootMove, inChangeTime, inEffSeq, inSESeq);
+        if (isPlayerFlag(0x40000000)) {
+            m_pWeapon->changeMotionEx(rcid + 11000, inAnimID, 0, FALSE, inChangeTime, inEffSeq, inSESeq);
+        }
+        setAnimSpeed(1.0f);
+    }
+}
 void CPlayer::setAnimRsrcEx(INT inRcid, INT inAnimID, TIMEQ inChangeTime, BOOL inRootMove, INT inEffSeq, INT inSESeq, INT inWep) {
     m_iNowAnimID = -1;
     changeMotionEx(inRcid + 10000, inAnimID, 0, inRootMove, inChangeTime, inEffSeq, inSESeq);
@@ -195,7 +227,30 @@ void CPlayer::setAnimRsrcEx(INT inRcid, INT inAnimID, TIMEQ inChangeTime, BOOL i
     setAnimSpeed(1.0f);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowIdleAnim__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setFaceAnim__7CPlayerii);
+void CPlayer::setFaceAnim(INT inID, INT inFlag) {
+    if (!inFlag && m_iNowFaceID == inID) return;
+    m_iNowFaceID = inID;
+    switch (inID) {
+    case 1:
+        setTexAnmSeq(0, PL::g_szTexEyeDamage);
+        setTexAnmSeq(1, PL::g_szTexLipDamage);
+        break;
+    case 2:
+        setTexAnmSeq(0, PL::g_szTexEyeShut);
+        setTexAnmSeq(1, PL::g_szTexLipDamage);
+        break;
+    case 3:
+        setTexAnmSeq(0, PL::g_szTexEyeKizetsu);
+        setTexAnmSeq(1, PL::g_szTexLipDefault);
+        break;
+    case 0:
+    default:
+        m_iNowFaceID = 0;
+        setTexAnmSeq(0, -1);
+        setTexAnmSeq(1, -1);
+        break;
+    }
+}
 void CPlayer::setTransOff(INT inFlag) {
     if (inFlag) {
         setEntityFlag(0x1000, 0);
@@ -299,7 +354,18 @@ void CPlayer::getCameraTargetPos(FVECTOR& outPos) {
         outPos.y += 0.5f;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBodyRevise__7CPlayer);
+void CPlayer::chkBodyRevise() {
+    setPlayerFlag(0, 0x200000);
+    if (!isPlayerFlag(0x9000) && m_collBody.collideBody(0) && !isPlayerFlag(0x400000)) {
+        FVECTOR pos = getPos();
+        setOldPos(pos);
+        pos.x += (m_collBody.getOutPos()->x - m_vCenterPos.x) * 0.5f;
+        pos.z += (m_collBody.getOutPos()->z - m_vCenterPos.z) * 0.5f;
+        setPos(pos);
+        setPlayerFlag(0x200000, 0);
+    }
+    setPlayerFlag(0, 0x400000);
+}
 void CPlayer::recoverCollMap() {
     if (m_pCollMap) {
         m_pCollMap->setType(COLL_TYPE_SPHERE);
@@ -524,7 +590,27 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeJumpLand__7CPl
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkHang__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initHang__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeHang__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAvoid__7CPlayer);
+void CPlayer::initAvoid() {
+    if (isConditionFlag(0x10000000) && !isConditionFlag(0x400000)) {
+        initFooting(2);
+        return;
+    }
+    setPlayerState(PL::AVOID);
+    setBattleFlag(0, 8);
+    setPlayerFlag(1, 0);
+    clearSpeed();
+    if (m_fAnalogPower >= 0.3f) {
+        m_fDir = m_fAnalogViewDir;
+        FVECTOR rot = getRot();
+        rot.y = m_fDir;
+        setRot(rot);
+    }
+    updateCoord();
+    setAnimForce(0x16, -1, TRUE, 0, 0, 0);
+    m_fJumpSpdY = 0.0f;
+    m_JumpState = 3;
+    m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickRide__7CPlayer);
 void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
     if (!_instance()) return;
@@ -608,7 +694,23 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowCardActionSt
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkPlayCardCombo__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onMsg__7CPlayeriPv);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeUseStock__7CPlayeri);
+INT CPlayer::exeUseStock(INT inFlag) {
+    if (isBattleFlag(4) || m_bIsDead) return FALSE;
+    switch (m_iStepStockSkill) {
+    case 0:
+        if (m_iFirstSkill <= 0 && startStockSkillAction()) return TRUE;
+        return startSingleAction();
+    case 1:
+        if (!inFlag) return FALSE;
+        if (startStockSkillAction()) return TRUE;
+        return startSingleAction();
+    case 2:
+        if (!inFlag) return FALSE;
+        return startSingleAction();
+    default:
+        return FALSE;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", startSingleAction__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttack__7CPlayer);
@@ -624,7 +726,31 @@ void CPlayer::procTargetMark() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackMove__7CPlayeriffif);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackCollision__7CPlayeri);
+INT CPlayer::procAttackCollision(TIMEQ inNowFrame) {
+    if (inNowFrame >= m_pAtkData->COLL_START_FRAME) {
+        if (inNowFrame < m_pAtkData->COLL_END_FRAME) {
+            if (!m_pWeapon->isOnAttack()) onAttack();
+            switch (m_pWeapon->isHit()) {
+            case 1:
+            case 2:
+                m_bIsAttackHit = TRUE;
+                setPlayerFlag(0, 0x100000);
+                break;
+            case 3:
+                if (m_pCB) {
+                    m_pCB->destroyPlayCard(1, 0);
+                    setBattleFlag(0, 0x10200000);
+                }
+                initFlip(0);
+                return TRUE;
+            }
+        } else {
+            offAttack();
+            setPlayerFlag(0, 0x100000);
+        }
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procGravity__7CPlayeriii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procSkillEnd__7CPlayeri);
 BOOL CPlayer::chkExtraSkill() {
@@ -683,14 +809,59 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDead__7CPlayer
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyDead__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initBadCondition__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBadCondition__7CPlayer);
+/* Parked: in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets
+   the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but
+   swaps v0/a2 (tq/pad). tried: all 6 statement orders x tq forms (ternary, param default, ==0), UINT& pad,
+   (INT) casts, temporaries in both load orders, nested-if structure, asm barriers on tq; best 6 lines.
+   tools/permuter.py can't run on C++ methods. */
+#if 0
+void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
+    if (!inFlag) {
+        setConditionFlag(0, 8);
+        m_tqConfuse = 0;
+        m_uiPadFlag = (INT)m_uiPadFlag & ~4;
+        fadeEffect(m_hEffBad, 0);
+    } else if (m_tqConfuse <= 0) {
+        m_tqConfuse = inTime ? inTime : 21000;
+        m_uiPadFlag |= 4;
+        setConditionFlag(8, 0);
+        FVECTOR pos;
+        pos.set(0.0f, 0.65f, 0.0f);
+        m_hEffBad = attachEffect(PL::g_szDpxAbnormal, 2, &Crd(m_iBoneCenter), &pos, NULL, 0.0f);
+        CEffect* effect = CEffectMan::getEffect(m_hEffBad);
+        if (effect) effect->m_iFlag |= 4;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setConfuse__7CPlayerii);
+#endif
 void CPlayer::exeConfuse() {
     if (m_uiConditionFlag & 8) {
         m_tqConfuse -= m_tqFrameRate;
         if (m_tqConfuse <= 0) setConfuse(0, 0);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initItem__7CPlayeri);
+void CPlayer::initItem(INT inNo) {
+    setPlayerState(PL::ITEM);
+    clearSpeed();
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x80);
+    setBattleFlag(0, 0x80000);
+    setTrgFlag(0, 8);
+    setPlayerFlag(0, 0x02800000);
+    m_iAttackNo = inNo;
+    m_uiPreAttackKind = 0;
+    m_bIsAttackHit = FALSE;
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    m_bDmgMuteki = FALSE;
+    m_bIsCanCombo = FALSE;
+    m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+    m_JumpState = 3;
+    m_iSubState = 1;
+    m_fMoveSpdXZ = 0.0f;
+    m_tqCardBreakTime = PL::g_CardBreakTime[(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].BREAK];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeItem__7CPlayer);
 void CPlayer::exeStandUp_inFriend() {
     INT oldMode = m_WalkMode;
@@ -699,7 +870,23 @@ void CPlayer::exeStandUp_inFriend() {
     if (!mode && oldMode && m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
     exeWalk();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initCharge__7CPlayer);
+void CPlayer::initCharge() {
+    setPlayerState(PL::CHARGE);
+    clearSpeed();
+    setTrgFlag(0, 0x10);
+    setAnimForce(0x2E, -1, 0, 0, 0, 0);
+    m_tqEffCharge = 1000;
+    m_bDmgMuteki = FALSE;
+    if (m_hEffCharge <= 0) {
+        FVECTOR pos;
+        pos._q = 0;
+        pos.w = 1.0f;
+        CCoord* crd = &Crd(0);
+        m_hEffCharge = attachEffect(PL::g_szDpxReload, 0, crd, &pos, NULL, 0.0f);
+        CEffect* effect = CEffectMan::getEffect(m_hEffCharge);
+        if (effect) effect->m_iFlag |= 4;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCharge__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkChargeMove__7CPlayeri);
 void CPlayer::fadeEffCharge() {
@@ -713,7 +900,15 @@ void CPlayer::fadeEffCharge() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCure__7CPlayerii);
+void CPlayer::setCure(INT inID, INT inPow) {
+    FVECTOR pos;
+    INT no = inID - 14;
+    if (inID == 0x33) no = 0;
+    pos.set(0.0f, 0.85f, 0.0f);
+    CEffect* effect = CEffectMan::getEffect(attachEffect(PL::g_EffTbl_Skill[inID][1].pEffectName, no, &Crd(0), &pos, NULL, 0.0f));
+    if (effect) effect->m_iFlag |= 4;
+    addHP(inPow, 0, 1);
+}
 void CPlayer::setCastEffect(const CHAR* inName, INT inNo, CCoord* inCrd, FVECTOR* inOfs) {
     FVECTOR pos;
     if (inOfs) {
@@ -793,7 +988,29 @@ void CPlayer::setReflectGuard(INT inFlag) {
         body.m_GuardAttrFlag |= 1;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setQuickBarrier__7CPlayeri);
+void CPlayer::setQuickBarrier(INT inFlag) {
+    if (m_tqBarrier > 0) {
+        m_collBody.m_uiFlag = (INT)m_collBody.m_uiFlag & ~2;
+        m_tqBarrier = 0;
+        m_collBody.m_GuardAttrFlag = 0;
+    } else {
+        m_tqBarrier = 6000;
+        CCollBody& body = m_collBody;
+        m_collBody.m_uiFlag |= 2;
+        body.m_GuardAttrFlag |= 1;
+        m_collBody.m_uiFlag |= 2;
+        body.m_GuardAttrFlag |= 2;
+        m_collBody.m_uiFlag |= 2;
+        body.m_GuardAttrFlag |= 4;
+        m_collBody.m_uiFlag |= 2;
+        body.m_GuardAttrFlag |= 8;
+        m_collBody.m_uiFlag |= 2;
+        body.m_GuardAttrFlag |= 0x10;
+        m_collBody.m_uiFlag |= 2;
+        body.setGuardDir(3.1415927f);
+        body.m_GuardAttrFlag |= 0x20;
+    }
+}
 void CPlayer::exeQuickBarrier() {
     if (m_tqBarrier) {
         m_tqBarrier -= m_tqFrameRate;
@@ -825,7 +1042,24 @@ void CPlayer::exeAeroGuard() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPrizeHealing__7CPlayeri);
+void CPlayer::setPrizeHealing(TIMEQ inTime) {
+    if (!m_pInstance) return;
+    if (!inTime) {
+        if (m_hEffPrize > 0) {
+            CEffect* effect = CEffectMan::getEffect(m_hEffPrize);
+            if (effect) effect->loopEnd();
+            m_hEffPrize = 0;
+        }
+        m_tqPrize = 0;
+    } else {
+        if (!m_tqPrize) {
+            m_hEffPrize = attachEffect(PL::g_szDpxAlways, 0x16, &Crd(m_iBoneCenter), NULL, NULL, 0.0f);
+            CEffect* effect = CEffectMan::getEffect(m_hEffPrize);
+            if (effect) effect->m_iFlag |= 4;
+        }
+        m_tqPrize = inTime;
+    }
+}
 void CPlayer::exePrizeHealing() {
     if (m_hEffPrize) {
         m_tqPrize -= m_tqFrameRate;
@@ -839,7 +1073,31 @@ void CPlayer::exePrizeHealing() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initGimmickCard__7CPlayeri);
+void CPlayer::initGimmickCard(INT inNo) {
+    TRACE(D_0049AEC0);
+    setPlayerState(PL::GIMMICKCARD);
+    m_iSubState = 1;
+    clearSpeed();
+    setPlayerFlag(1, 0);
+    offAttack();
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x200);
+    setBattleFlag(0, 0x80000);
+    setTrgFlag(0, 0x40);
+    m_iAttackNo = inNo;
+    m_uiPreAttackKind = 0;
+    m_uiAttackKind = 0;
+    m_bIsAttackHit = FALSE;
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    m_bDmgMuteki = FALSE;
+    m_bIsCanCombo = FALSE;
+    m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+    m_JumpState = 3;
+    m_fMoveSpdXZ = 0.0f;
+    m_tqCardBreakTime = 0;
+    m_fWalkSpeed = 0.0f;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickCard__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setTrapDamage__7CPlayeriPCcUi);
 void CPlayer::fadeEffect(INT& ioHandle, INT inLoop) {
@@ -901,7 +1159,21 @@ void CPlayer::notifyReturnCard(const CARD* inCard) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyGetPrize__7CPlayeriii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addEXP__7CPlayerii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addHP__7CPlayeriii);
+void CPlayer::addHP(INT inHP, TIMEQ inDispEFF, INT inDispREC) {
+    if (_instance()) {
+        if (inDispEFF > 0) _instance()->setPrizeHealing(inDispEFF);
+        if (inDispREC > 0) Gauge::CCommonGauge::setDispSeq(_instance()->getHandle(), 0);
+        _instance()->m_iHP += inHP;
+        CPlayer* p = _instance();
+        if (p->m_iHP > p->m_iMaxHP) p->m_iHP = p->m_iMaxHP;
+        if (_instance()->m_pGauge) _instance()->m_pGauge->setHP(m_iHP, 0);
+    } else {
+        STATUS_INFO& st = CStatus::getStaus();
+        INT hp = st.HP + inHP;
+        if (hp > st.HPMax) hp = st.HPMax;
+        st.HP = hp;
+    }
+}
 void CPlayer::addMP(INT inMP) {
     if (_instance()) {
         _instance()->m_iMP += inMP;

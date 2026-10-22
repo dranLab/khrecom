@@ -335,11 +335,11 @@ public:
     void setMaxDP(INT inDP) { m_iMaxDP = inDP; }
     INT getMaxHP() { return m_iMaxHP; }
     void addHP(INT inHP, INT inFlag, INT inEffect);
-    void setPrizeHealing(INT inTime); // PARTIAL: added for Game/Player/SummonTink
+    void setPrizeHealing(TIMEQ inTime); // PARTIAL: added for Game/Player/SummonTink
     void exePrizeHealing();
     void fadeEffCharge();
     INT getMotIndex(INT inChara, INT inIndex);
-    void setReflectGuard(INT inFlag);
+    void setReflectGuard(INT inFlag); void setQuickBarrier(INT inFlag);
     void setTransOff(INT inFlag);
     INT chkAtelHide(INT inFlag); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
     void initWorldSelect();
@@ -464,14 +464,14 @@ public:
     void changeState(INT inState);
     void initActionSkill();
     void setPlayerState(PlayerState inState);
-    void setAnimForce(INT inID, INT inTq, INT inGr, INT inP3, INT inP4, INT inP5);
+    void setAnimForce(INT inAnimID, TIMEQ inChangeTime, BOOL inRootMove, INT inEffSeq, INT inSESeq, TIMEQ inStart);
     void setAnim(INT inID, INT inTq, INT inGr);
-    void setAnimSkillEx(INT inID, INT inP1, INT inP2, INT inP3, INT inP4);
+    void setAnimSkillEx(INT inAnimID, TIMEQ inChangeTime, BOOL inRootMove, INT inEffSeq, INT inSESeq);
     void setAnimRsrcEx(INT inRsrc, INT inID, INT inP2, INT inP3, INT inP4, INT inP5, INT inP6);
     void setFaceAnim(INT inID, INT inFlag);
     void initStartWait();
     void initStandUp(INT inFlag);
-    void initFall(); void initWall(); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
+    void initFall(); void initWall(); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
     INT initIdle(INT inAnim, INT inFlag);
     INT procFlowIdle(INT inFlag);
     void initEnd();
@@ -492,12 +492,12 @@ public:
     void updateSpotLight(INT inFlag);
     void resetAction(INT inFlag);
     void procAttackMove(INT inFlag, FLOAT inSpeed, FLOAT inRate, INT inP3, FLOAT inP4);
-    INT procAttackCollision(INT inFlag);
+    INT procAttackCollision(TIMEQ inNowFrame);
     void procTargetMark();
     void procGravity(INT inP0, INT inP1, INT inP2);
     void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inFlag);
     void setUseRsrcBlock(INT inBlock);
-    INT exeUseStock(INT inFlag);
+    INT exeUseStock(INT inFlag); INT startSingleAction();
     INT chkChargeMove(INT inFlag);
     void setPushon(INT inFlag);
     void setCastEffect(const CHAR* inName, INT inNo, CCoord* inCoord, FVECTOR* inPos); void setEffAttack(INT inNum, const CHAR* inName, INT inNo, INT inBone, FVECTOR* inOfs);
@@ -538,7 +538,7 @@ public:
     void setTrgFlagRendaNG(const CHAR* inName);
     void cmdMove_WaterSurfaceCheck(INT inFlag);
     void setFallFloat();
-    void updateBodyColl(); void updateBodyCollPos();
+    void updateBodyColl(); void updateBodyCollPos(); void chkBodyRevise();
     void updateFooting();
     void makeAnimIndex(INT inID);
     void initStartPos();
