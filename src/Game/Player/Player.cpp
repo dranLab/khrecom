@@ -283,7 +283,17 @@ void CPlayer::setLand(FLOAT inDownLEngth, FLOAT inUpLength, BOOL inFirstHit) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateField__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateField__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateField__7CPlayer);
+void CPlayer::endStateField() {
+    setActionFlag(0, m_pParam->USE_MAP_ACTION);
+    setBattleFlag(0, 1);
+    if (CGameWork::getFlag(1, 0)) offWeapon();
+    m_collBody.offBody();
+    offAttack();
+    m_uiAttackKind = 0;
+    m_uiPreAttackKind = 0;
+    m_uiAttackID = 0;
+    m_pMarker->setFlag(FALSE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateBattle__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateBattle__7CPlayer);
 void CPlayer::endStateBattle() {
