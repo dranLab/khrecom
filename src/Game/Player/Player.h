@@ -489,7 +489,7 @@ public:
     void setEnemyStop(HANDLE inEnemy, UINT inSet);
     void setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime);
     void setLand(FLOAT inP0, FLOAT inP1, INT inFlag); void setDownForce();
-    void updateSpotLight(INT inFlag);
+    void updateSpotLight(HANDLE inHandle);
     void resetAction(INT inFlag);
     void procAttackMove(INT inFlag, FLOAT inSpeed, FLOAT inRate, INT inP3, FLOAT inP4);
     INT procAttackCollision(TIMEQ inNowFrame);

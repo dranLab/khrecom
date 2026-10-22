@@ -52,6 +52,26 @@ static inline FLOAT _abs(FLOAT inValue) {
     __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
     return ret;
 }
+static inline FLOAT _sqrtf(FLOAT x) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
+    return ret;
+}
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
+extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
+extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
+extern "C" float atan2f(float y, float x);
 static inline FLOAT _limitPI(FLOAT r) {
     if (r < -3.1415927f) r += 6.2831855f;
     else if (r > 3.1415927f) r -= 6.2831855f;
@@ -1424,7 +1444,21 @@ void CPlayer::setEffAttack(INT inNum, const CHAR* inName, INT inNo, INT inBone, 
     CEffect* effect = CEffectMan::getEffect(m_hEffAttack[inNum]);
     if (effect) effect->m_iFlag |= 4;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateSpotLight__7CPlayeri);
+void CPlayer::updateSpotLight(HANDLE inHandle) {
+    CEffect* effect = CEffectMan::getEffect(inHandle);
+    if (effect) {
+        FVECTOR n = m_pMove->getDetectNormal();
+        FMATRIX m;
+        _unitMatrixVu0(m);
+        sceVu0RotMatrixX(m, m, atan2f(_sqrtf(n.z * n.z + n.x * n.x), n.y));
+        sceVu0RotMatrixY(m, m, atan2f(n.x, n.z));
+        FVECTOR pos = getPos();
+        pos.w = 1.0f;
+        m.v[3] = pos;
+        effect->getCoords()->getLocalMatrix(0) = m;
+        effect->getCoords()->Crd(0).m_Flag = 1;
+    }
+}
 void CPlayer::setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime) {
     CCamera* cam = CWorldEnv::getActiveCamera();
     CameraQuakeParam cqp;
