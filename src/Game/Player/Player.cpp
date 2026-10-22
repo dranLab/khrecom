@@ -479,7 +479,18 @@ BOOL CPlayer::chkExtraSkill() {
     return FALSE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcEnchant_AttackPoint__7CPlayerRiR8ATK_KIND8ATK_ATTRUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcEnchant_DamagePoint__7CPlayerRi8ATK_ATTR);
+void CPlayer::calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr) {
+    if (m_pCB) {
+        CardBattle::ENCHANT_PARAM param;
+        param.init(getHandle(), 1);
+        param.uiState = 2;
+        param.AtkAttr = inAttr;
+        param.iAttackPoint = inPoint;
+        m_pCB->calcEnchantParam(param);
+        inPoint = param.iAttackPoint;
+        if (param.iGuard > 0) Gauge::CCommonGauge::setDispSeq(getHandle(), 2);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setUseRsrcBlock__7CPlayeri);
 void CPlayer::setDefAttr(FLOAT* inAttr) {
     for (INT i = 0; i < 6; i++) {

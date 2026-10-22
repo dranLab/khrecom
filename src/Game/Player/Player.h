@@ -341,7 +341,7 @@ public:
     INT getMotIndex(INT inChara, INT inIndex);
     void setReflectGuard(INT inFlag);
     void setTransOff(INT inFlag);
-    INT chkAtelHide(INT inFlag); void chkAtelControl();
+    INT chkAtelHide(INT inFlag); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
     void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
     void exeEscape();
