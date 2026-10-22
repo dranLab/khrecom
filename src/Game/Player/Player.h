@@ -344,7 +344,7 @@ public:
     INT chkAtelHide(INT inFlag); void initFSM_(); static void (CPlayer::*m_pBeginStateTbl[4])(); static void (CPlayer::*m_pStateTbl[4])(); static void (CPlayer::*m_pEndStateTbl[4])(); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
     void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
-    void exeEscape(); void exeGimmickRide(); INT chkGimmick(UINT inID); void exeTreasureBox(); void setBanish(INT inFlag); void exeBanish(); void exeWind();
+    void exeEscape(); void exeGimmickRide(); INT chkGimmick(UINT inID); void initTreasureBox(); void exeTreasureBox(); void setBanish(INT inFlag); void exeBanish(); INT exeWarp(INT inSet); void exeWind();
     void initCarry();
     void cancelLockon();
     void autoLockon();
@@ -471,7 +471,7 @@ public:
     void setFaceAnim(INT inID, INT inFlag);
     void initStartWait();
     void initStandUp(INT inFlag);
-    void initFall(); void initWall(); void initHang(); void initEscape(); void initAttackField(INT inNo); void initAttack(INT inNo); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void exeCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
+    void initFall(); void initWall(); INT chkWallBottom(); void initHang(); void initEscape(); void initAttackField(INT inNo); void initAttack(INT inNo); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void exeCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
     INT initIdle(INT inAnim, INT inFlag);
     INT procFlowIdle(INT inFlag);
     void initEnd();
@@ -493,7 +493,7 @@ public:
     void resetAction(INT inFlag);
     void procAttackMove(INT inFlag, FLOAT inSpeed, FLOAT inRate, INT inP3, FLOAT inP4);
     INT procAttackCollision(TIMEQ inNowFrame);
-    void procTargetMark();
+    void procTargetMark(); void exeAttackField();
     void procGravity(TIMEQ inNowFrame, TIMEQ inEndFrame, INT inFlag);
     void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inFlag);
     void setUseRsrcBlock(INT inBlock);
@@ -504,7 +504,7 @@ public:
     // PARTIAL: added for Game/Player/PlayerDRiku
     static INT importStatus();
     static INT exportStatus();
-    static void addMP(INT inMP);
+    static void addMP(INT inMP); static void addEXP(INT inEXP, INT inMode); void setTrapDamage(INT inPower, const CHAR* lpszInName, UINT nNo);
     static void notifyExterminate();
     void setDefAttr(FLOAT* inAttr);
     // PARTIAL: added for Game/Player/Player

@@ -174,7 +174,7 @@ public:
     FLOAT calcDistance(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickDeceive
     FLOAT calcDirection(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickFallTomb
     void calcDirection(FVECTOR& outRot, const FVECTOR& inPos) const; // PARTIAL: added for Game/Player/SummonMushu
-    HANDLE setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale);
+    HANDLE setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale); void setDamageNumber(const FVECTOR& inPos, INT inDamage); // PARTIAL: setDamageNumber added for Game/Player/Player
     BOOL isRideOnPlayer();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
     INT getBoneIndex(const CHAR* inBoneName, INT inModelIndex) const;
