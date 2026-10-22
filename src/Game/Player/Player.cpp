@@ -51,6 +51,8 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
+extern "C" char D_0049AC10[]; /* TRACE messages of initFlip */
+extern "C" char D_0049AC30[];
 inline void* operator new(size_t, void* p) throw() { return p; }
 static inline FLOAT _abs(FLOAT inValue) {
     FLOAT ret;
@@ -1315,7 +1317,58 @@ FLOAT CPlayer::getDefAttr(ATK_ATTR inAttr) const {
     return m_fDefAttr[5];
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkDamage__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFlip__7CPlayeri);
+void CPlayer::initFlip(INT inBreak) {
+    FLOAT speed;
+    INT animID;
+    setBattleFlag(0, 8);
+    setPlayerState(FLICKS);
+    if (inBreak) {
+        TRACE(D_0049AC10);
+        speed = -8.0f;
+        m_iComboBoost = 0;
+        m_iSubState = 2;
+    } else {
+        TRACE(D_0049AC30);
+        speed = -4.0f;
+        m_iSubState = 1;
+        m_tqCardBreakTime = PL::g_CardBreakTime[5];
+    }
+    setBattleFlag(0, 0x40);
+    PLM::setVibration(3);
+    resetAction(5);
+    m_fWalkSpeed = 0.0f;
+    m_bDmgInAir = isAir();
+    if (m_bDmgInAir) {
+        if (getAirHeight(NULL, 10.0f, 1) < 0.7f) {
+            setLand(1.0f, 0.5f, 1);
+            animID = inBreak ? 0x25 : 0x24;
+            m_bDmgInAir = FALSE;
+        } else {
+            animID = 0x26;
+        }
+    } else {
+        animID = inBreak ? 0x25 : 0x24;
+    }
+    switch (m_uiAttackID) {
+    case 0xD:
+    case 0x30:
+    case 0x31:
+    case 0x32:
+    case 0x33:
+    case 0x34:
+        setAnimForce(0x42, 0, 0, 0, 0, 0);
+        speed = 0.0f;
+        break;
+    default:
+        setAnimForce(animID, 0, 1, 0, 0, 0);
+        break;
+    }
+    m_fJumpSpdY = 0.0f;
+    m_fJumpSpdXZ = speed / 60.0f;
+    m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+    m_pMove->calcVelocityXZ(m_fJumpSpdXZ);
+    m_JumpState = 3;
+}
 void CPlayer::setFlipForce(const FVECTOR* inPos) {
     FVECTOR pos;
     if (inPos) {
