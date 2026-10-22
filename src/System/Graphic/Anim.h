@@ -251,6 +251,7 @@ public:
     void changeEx(INT nRsrcID, ANIMID inId, TIMEQ inTq, BOOL inLoop);
     void setSpeed(FLOAT s) { m_Speed = s; }
     void endLookPosition(FLOAT fFrame); // PARTIAL: added for Game/Atel/Avatar
+    void setRootMove(BOOL inRootMove, BOOL bContinue); // PARTIAL: added for Game/Player/Player
     // PARTIAL: added for Game/Entity
     INT getMotCount();
     const CHAR* getMotFilename(INT nIdx);

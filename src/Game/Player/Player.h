@@ -344,7 +344,7 @@ public:
     INT chkAtelHide(INT inFlag); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
     void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
-    void exeEscape(); void exeTreasureBox(); void setBanish(INT inFlag); void exeWind();
+    void exeEscape(); void exeGimmickRide(); INT chkGimmick(UINT inID); void exeTreasureBox(); void setBanish(INT inFlag); void exeWind();
     void initCarry();
     void cancelLockon();
     void autoLockon();
@@ -355,7 +355,7 @@ public:
     void exeQuickBarrier(); void exeAeroGuard(); void setAeroGuard(INT inFlag);
     INT isNowCardActionState();
     INT chkWalkMode();
-    void exeWalk();
+    void exeWalk(); void setWalkAnim(); void exeStartWait();
     void recoverCollMap();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
     void setConditionFlag(UINT inSet, UINT inMask) { m_uiConditionFlag = (m_uiConditionFlag | inSet) & ~inMask; }
@@ -471,7 +471,7 @@ public:
     void setFaceAnim(INT inID, INT inFlag);
     void initStartWait();
     void initStandUp(INT inFlag);
-    void initFall(); void initWall(); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
+    void initFall(); void initWall(); void initAttackField(INT inNo); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void exeCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
     INT initIdle(INT inAnim, INT inFlag);
     INT procFlowIdle(INT inFlag);
     void initEnd();
@@ -486,7 +486,7 @@ public:
     void setBGFade(FLOAT inRate, FLOAT inTime, INT inFlag);
     void setBGFade(FVECTOR& inColor, FLOAT inTime, INT inFlag);
     void setObjStop(UINT inFlag);
-    void setEnemyStop(INT inFlag, UINT inMask);
+    void setEnemyStop(HANDLE inEnemy, UINT inSet);
     void setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime);
     void setLand(FLOAT inP0, FLOAT inP1, INT inFlag); void setDownForce();
     void updateSpotLight(INT inFlag);

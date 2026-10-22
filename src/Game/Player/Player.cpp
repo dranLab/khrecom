@@ -30,7 +30,9 @@
 #include "System/Graphic/WorldEnv.h"
 #include "Game/Game.h"
 #include "Game/Bullet/Bullet.h"
+#include "Game/EntityFactory.h"
 #include "Game/Player/PlayerAttack.h"
+#include "System/Graphic/Anim.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -39,10 +41,22 @@ extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" char D_0049B308[];
+extern "C" char D_00499898[]; extern "C" char D_004998C8[]; extern "C" char D_004998F8[]; /* "...Player.cpp(1103)", (1106), (1112) */
+extern "C" char D_00499928[]; extern "C" char D_00499958[]; /* "...Player.cpp(1117)", (1124) */
 extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)" */
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 inline void* operator new(size_t, void* p) throw() { return p; }
+static inline FLOAT _abs(FLOAT inValue) {
+    FLOAT ret;
+    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
+    return ret;
+}
+static inline FLOAT _limitPI(FLOAT r) {
+    if (r < -3.1415927f) r += 6.2831855f;
+    else if (r > 3.1415927f) r -= 6.2831855f;
+    return r;
+}
 /* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
 enum NAME_CASE { NAME_CASE_SENSITIVE = 0, NAME_CASE_UPPER = 1, NAME_CASE_LOWER = 2 };
 class CRsrcDB {
@@ -59,12 +73,29 @@ extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_szTexEyeKizetsu; // static in the original
 extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
 extern LPCSTR g_szDpxAbnormal; // static in the original
+extern LPCSTR g_szDpxAsiato __asm__("_2PL$g_szDpxAsiato_003A2298"); // static in the original (PlayerDRiku has one too)
+extern FLOAT g_fDefAttr[];
 extern FLOAT g_fGimmickJumpPower[8];
 }
+class CPlayerDebug { /* PARTIAL: size and ctor for makeCockpit; CPlayerDebug's members are still INCLUDE_ASM */
+    UBYTE _m_0x00[0x120];
+public:
+    CPlayerDebug(CTask* inParent);
+};
 namespace Gauge {
 class CPlayerGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
+    UBYTE _m_0x00[0x80];
 public:
+    CPlayerGauge(CTask* p);
+    void setMaxHP(INT n);
     void setHP(INT inHP, INT inFlag);
+    void setDP(INT inDP, INT inFlag);
+};
+class CEscapeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
+    UBYTE _m_0x00[0x50];
+public:
+    CEscapeGauge(CTask* p);
+    void destroy();
 };
 class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
 public:
@@ -139,10 +170,43 @@ void CPlayer::changeState(INT inState) {
     if (!((UINT)inState < 4)) AssertApp(D_004997C0, 941, D_00499828, 0);
     gotoState(*(CState*)&_m_0x21c[inState * 0x20]);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateInitial__7CPlayer);
+void CPlayer::stateInitial() {
+    setPlayerState(PL::INIT);
+    m_uiStep = 0;
+    importStatus();
+    setDefAttr(PL::g_fDefAttr);
+    m_fPrizeDraw = 5.0f;
+    m_fCardDraw = 5.0f;
+    createLegIK(-1.0f, -1.0f);
+    setFootEffectIK(PL::g_szDpxAsiato, 0);
+    setGroundIK(1);
+    makeAnimIndex(m_uiCharaID);
+    initStartPos();
+    makeWeapon();
+    if (!isPlayerFlag(0x20000000)) makeCockpit();
+    if (!m_bIsBattleScene) {
+        setAnimForce(1, 0, 0, 0, 0, 0);
+    } else {
+        setAnimForce(0x2A, 0, 0, 0, 0, 0);
+        if (!isPlayerFlag(0x20000000)) makeRevolver();
+    }
+    initActionSkill();
+    if (CGameWork::getFlag(1, 0)) changeState(3);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStartPos__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeWeapon__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeCockpit__7CPlayer);
+void CPlayer::makeCockpit() {
+    m_pCam = new (com_malloc_d(sizeof(PlayerCamera::CPlayerCamera), D_00499898, RET_ADDR())) PlayerCamera::CPlayerCamera(this);
+    m_pMarker = new (com_malloc_d(sizeof(Gauge::CLockonMarker), D_004998C8, RET_ADDR())) Gauge::CLockonMarker(this, FALSE);
+    if (m_bIsBattleScene) {
+        m_pEscape = new (com_malloc_d(sizeof(Gauge::CEscapeGauge), D_004998F8, RET_ADDR())) Gauge::CEscapeGauge(this);
+    }
+    m_pGauge = new (com_malloc_d(sizeof(Gauge::CPlayerGauge), D_00499928, RET_ADDR())) Gauge::CPlayerGauge(this);
+    m_pGauge->setMaxHP(m_iMaxHP);
+    m_pGauge->setHP(m_iHP, 1);
+    m_pGauge->setDP(m_iDP, 30);
+    m_pDebug = new (com_malloc_d(sizeof(CPlayerDebug), D_00499958, RET_ADDR())) CPlayerDebug(this);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeRevolver__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initActionSkill__7CPlayer);
 INT CPlayer::importStatus() {
@@ -307,7 +371,25 @@ void CPlayer::updateBodyColl() {
     if (isPlayerFlag(0x1000)) m_collBody.m_enableBody = 0;
     else m_collBody.m_enableBody = 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyCollPos__7CPlayer);
+void CPlayer::updateBodyCollPos() {
+    FVECTOR top;
+    FVECTOR bottom;
+    m_vCenterPos = Crd(m_iBoneCenter).getWorldMatrix().v[3];
+    m_vHeadPos = Crd(m_iBoneHead).getWorldMatrix().v[3];
+    FLOAT _x = m_vCenterPos.x;
+    FLOAT _y = m_vHeadPos.y + 0.2f;
+    FLOAT _z = m_vCenterPos.z;
+    m_vHeadPos.x = _x;
+    m_vHeadPos.y = _y;
+    m_vHeadPos.z = _z;
+    top.set(_x, _y, _z);
+    FLOAT y = (Crd(m_iBoneLFoot).getWorldMatrix().getTrans().y + Crd(m_iBoneRFoot).getWorldMatrix().getTrans().y) * 0.5f;
+    bottom.set(m_vCenterPos.x, y, m_vCenterPos.z);
+    m_collBody.setTopPos(top);
+    m_collBody.setBottomPos(bottom);
+    m_collBody.setRadius(m_pParam->BODY_COLL_RADIUS);
+    m_collBody.setDir(m_fDir);
+}
 BOOL CPlayer::isMuteki() const {
     if (m_uiPlayerFlag & 1) return TRUE;
     if (m_tqMutekiTimer > 0) return TRUE;
@@ -512,7 +594,27 @@ void CPlayer::initStartWait() {
     m_hGimmick = 0;
     m_pCam->setFlag(1, TRUE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStartWait__7CPlayer);
+void CPlayer::exeStartWait() {
+    if (m_bIsBattleScene) {
+        setPlayerFlag(0x400000, 0);
+    } else if (getTimer() < 1100) {
+        if (isAir()) setAnim(6, -1, 0);
+        else setAnim(1, -1, 0);
+    }
+    if (m_pRevolver) setBattleFlag(0, 8);
+    if (getTimer() > 0) return;
+    if (CGameWork::getFlag(1, 5)) return;
+    enableControl();
+    m_pCam->setFlag(1, FALSE); // partial CPlayerCamera: (flag, on)
+    setPlayerFlag(0, 1);
+    m_pMarker->setFlag(TRUE);
+    if (!isAir()) initStandUp(0);
+    else initFall();
+    if (isBattleFlag(1) && !isBattleFlag(0x80000000)) {
+        m_vStartPos = getPos();
+        setBattleFlag(0x80000000, 0);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStandUp__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStandUp__7CPlayer);
 INT CPlayer::chkWalkMode() {
@@ -530,10 +632,52 @@ INT CPlayer::chkWalkMode() {
     m_fWalkSpeed = aim_power * m_pParam->MAX_RUN_SPEED * dash;
     return 2;
 }
+/* Parked: only the angle-wrap register differs: the original keeps r (aim_dir - dirY, wrapped to +-PI) in $f1,
+   ours in $f13 (global alloc, pseudo set 3 times). tried: _limitPI/_abs helper bodies (return forms, ret local,
+   if/if, volatile/non-volatile asm, fabsf), r as an explicit local first/last, the ref's locals at the top,
+   folded calcVelocityXZ argument; best 6 lines. tools/permuter.py can't run on C++ methods. */
+#if 0
+void CPlayer::exeWalk() {
+    FLOAT aim_dir = m_fAnalogViewDir;
+    FLOAT d0 = Movement::Homing(m_fDir, aim_dir, 0.2f, m_fFrameRate);
+    if (m_WalkMode) m_fDir = d0;
+    setWalkAnim();
+    FLOAT dirY = m_fDir;
+    FVECTOR v;
+    v._q = 0;
+    v.y = aim_dir;
+    m_pMove->getRot() = v;
+    m_fMovePower = 1.0f - _abs(_limitPI(aim_dir - dirY)) / 3.1415927f;
+    m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower;
+    m_pMove->calcVelocityXZ(m_fWalkSpeed);
+    v.y = dirY;
+    m_pMove->getRot() = v;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setWalkAnim__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBattleIdle__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procFlowIdle__7CPlayeri);
+INT CPlayer::procFlowIdle(INT inFlag) {
+    if (isAir()) {
+        setAnim(6, 800, 0);
+        setPlayerFlag(0x800000, 0);
+        FVECTOR vel = m_pMove->getVel();
+        m_fJumpSpdY += m_fGravity * m_fFrameRate;
+        vel.y = m_fJumpSpdY;
+        m_pMove->setVel(vel);
+        return FALSE;
+    }
+    if (isPlayerFlag(0x800000)) {
+        setPlayerFlag(0, 0x800000);
+        setAnim(7, -1, 0);
+        return FALSE;
+    }
+    if (m_iNowAnimID == 7 && !isMotionEnd()) return FALSE;
+    setAnim(inFlag ? 0x2A : 1, -1, 0);
+    clearSpeed();
+    return TRUE;
+}
 INT CPlayer::initIdle(INT inAir, INT inStand) {
     INT bAir = inAir;
     if (bAir < 0) bAir = isAir();
@@ -611,7 +755,23 @@ void CPlayer::initAvoid() {
     m_JumpState = 3;
     m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickRide__7CPlayer);
+void CPlayer::exeGimmickRide() {
+    if (m_pMove->isObjRide() && chkGimmick(0x2002) == 7 && !CGameWork::getFlag(1, 0x27)) {
+        CEntity* pEntity = (CEntity*)CTaskMan::getTask(m_hGimmick);
+        if (pEntity) {
+            FVECTOR target = pEntity->getPos();
+            FVECTOR pos = getPos();
+            if (calcDistanceXZSq(target) < 0.010000001f) {
+                pos.x = target.x;
+                pos.z = target.z;
+            } else {
+                pos.x = Movement::Approach(pos.x, target.x, 0.1f, m_fFrameRate);
+                pos.z = Movement::Approach(pos.z, target.z, 0.1f, m_fFrameRate);
+            }
+            setPos(pos);
+        }
+    }
+}
 void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
     if (!_instance()) return;
     _instance()->m_hGimmickJump = inHandle;
@@ -648,7 +808,43 @@ void CPlayer::initCarry() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCarry__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", resetAction__7CPlayeri);
+/* Parked: registers match; only the stores after the g_fGravity load are scheduled differently (the original
+   stores m_JumpState right after the load and m_fJumpGravity before the g_CardBreakTime load; ours stores
+   them later). tried: all 24 orders of the JumpState/CardBreakTime/JumpGravity/JumpSpdY block, cast loads
+   (*(FLOAT*)&g_fGravity, *(INT*)&g_CardBreakTime[7]) and cast stores, gravity via a local / *=, moving
+   statements before isAir(), asm barriers; best 6 lines. The *(FLOAT*)& store on m_fMoveSpdXZ and the
+   chained m_fDistXZ = m_fDistY = 0.0f fixed the rest. tools/permuter.py can't run on C++ methods. */
+#if 0
+void CPlayer::initAttackField(INT inNo) {
+    setPlayerState(PL::ATTACK_FLD);
+    m_iAerialAnimShift = 0;
+    setTrgFlag(0, 4);
+    setPlayerFlag(0x100000, 0);
+    m_pMarker->holdTarget(8);
+    m_uiCardID = 0;
+    m_iAttackNo = inNo;
+    if (!inNo) m_uiPreAttackKind = 0;
+    m_bIsAttackHit = FALSE;
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    *(FLOAT*)&m_fMoveSpdXZ = isAir() ? m_fJumpSpdXZ : m_fWalkSpeed;
+    m_JumpState = 3;
+    m_tqCardBreakTime = PL::g_CardBreakTime[7];
+    m_fJumpGravity = PL::g_fGravity * 0.16f;
+    m_fJumpSpdY = 0.0f;
+    setAttack();
+    m_fDistXZ = m_fDistY = 0.0f;
+    if (m_pAtkData->FLAG & 8) {
+        setPlayerFlag(0x2800000, 0);
+    } else {
+        setPlayerFlag(0, 0x2800000);
+        m_fJumpGravity = PL::g_fGravity;
+    }
+    onWeapon(1);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttackField__7CPlayeri);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAttackField__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkLockon__7CPlayer);
 void CPlayer::cancelLockon() {
@@ -887,8 +1083,72 @@ void CPlayer::initCharge() {
         if (effect) effect->m_iFlag |= 4;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCharge__7CPlayer);
+void CPlayer::exeCharge() {
+    INT result;
+    m_tqEffCharge = 1000;
+    switch (m_iSubState) {
+    case 0:
+        if (isTrgFlag(0x10)) {
+            if (!isActionFlag(0x2000000) && isAir()) {
+                initFall();
+                return;
+            }
+            result = m_pRevolver->chargeReloadCard(0);
+            if (result == 1) {
+                FVECTOR pos;
+                pos._q = 0;
+                pos.w = 1.0f;
+                CCoord* crd = &Crd(0);
+                CEffect* effect = CEffectMan::getEffect(attachEffect(PL::g_szDpxReload, 1, crd, &pos, NULL, 0.0f));
+                if (effect) effect->m_iFlag |= 4;
+                setAnimForce(0x2F, -1, 0, 0, 0, 0);
+                m_iSubState = result;
+                fadeEffect(m_hEffCharge, 1);
+            } else if (result < 0) {
+                initStandUp(0);
+            }
+        } else {
+            initStandUp(0);
+        }
+        break;
+    case 1:
+        if (isMotionEnd()) initStandUp(0);
+        break;
+    }
+}
+/* Parked: only the block before chargeReloadCard is scheduled differently: the original zeroes pos with v1
+   after the flag 'and' and loads m_pRevolver after the flag store; ours zeroes pos in a0 first and loads
+   m_pRevolver before the store. tried: all orders of setPlayerFlag/pos._q/pos.w (the 5-line ones zero w and
+   are wrong), pos.init()/set()/copy, direct and cast flag stores, cast and volatile-reference m_pRevolver
+   loads, memory asm barriers (best 6); best clean draft 8 lines. tools/permuter.py can't run on C++ methods. */
+#if 0
+INT CPlayer::chkChargeMove(INT inFlag) {
+    FVECTOR pos;
+    CEffect* effect;
+    if (CGameWork::getFlag(1, 8)) return TRUE;
+    if (!inFlag && CGame::isSoraGame()) {
+        if (!m_pCB) return FALSE;
+        if (m_pCB->getEnchantKind() != 10) return FALSE;
+    }
+    setPlayerFlag(0, 0x10);
+    pos._q = 0;
+    pos.w = 1.0f;
+    if (m_pRevolver->chargeReloadCard(0) != 1) {
+        m_tqEffCharge = 1000;
+        if (m_hEffCharge) return TRUE;
+        m_hEffCharge = attachEffect(PL::g_szDpxReload, 0, &Crd(0), &pos, NULL, 0.0f);
+        effect = CEffectMan::getEffect(m_hEffCharge);
+        if (effect) effect->m_iFlag |= 4;
+    } else {
+        fadeEffect(m_hEffCharge, 1);
+        effect = CEffectMan::getEffect(attachEffect(PL::g_szDpxReload, 1, &Crd(0), &pos, NULL, 0.0f));
+        if (effect) effect->m_iFlag |= 4;
+    }
+    return TRUE;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkChargeMove__7CPlayeri);
+#endif
 void CPlayer::fadeEffCharge() {
     if (m_hEffCharge > 0) {
         m_tqEffCharge -= getFrameRate();
@@ -1021,7 +1281,36 @@ void CPlayer::exeQuickBarrier() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAeroGuard__7CPlayeri);
+void CPlayer::setAeroGuard(INT inFlag) {
+    CBullet* pBullet;
+    BULLET_PARAM param;
+    if (!inFlag) {
+        setConditionFlag(0, 0x80000000);
+        m_tqGuard = 0;
+        pBullet = (CBullet*)CTaskMan::getTask(m_hEffGuard);
+        if (pBullet) pBullet->out();
+    } else {
+        setConditionFlag(0x80000000, 0);
+        m_tqGuard = 6000;
+        param.init(1, 3);
+        param.fSpeed = 0.0f;
+        param.CollKind = 0x80000000;
+        param.uiFlag = 3;
+        param.AtkKind = 1;
+        param.AtkAttr = 1;
+        param.iAttackPoint = m_iAP;
+        param.fMaxDist = 50.0f;
+        param.vPos = m_vCenterPos;
+        param.fCollRadius = 0.8f;
+        param.fShiftY = 0.0f;
+        param.pEffectTbl = PL::g_EffTbl_Skill[66];
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        m_hEffGuard = pBullet->getHandle();
+        pBullet->setBodyRadius(0.0f, 0.0f, 0, (COLL_KIND)0);
+        pBullet->userBodyCollOffBody(-1);
+        pBullet->userBodyCollOff(-1);
+    }
+}
 void CPlayer::exeAeroGuard() {
     if (isConditionFlag(0x80000000)) {
         CBullet* pBullet = (CBullet*)CTaskMan::getTask(m_hEffGuard);
@@ -1202,7 +1491,35 @@ HANDLE CPlayer::getLevelUpEffect() {
     if (!m_pInstance) return 0;
     return m_pInstance->m_hEffLevelUp;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initEnd__7CPlayer);
+void CPlayer::initEnd() {
+    setPlayerState(PL::END_BTL);
+    if (isBattleFlag(0x4000000)) {
+        resetAction(9);
+        m_iSubState = 1;
+    } else {
+        resetAction(8);
+        m_iSubState = 2;
+        m_pAnim->setRootMove(FALSE, FALSE);
+        setConditionFlag(0x2000, 0);
+        CardBattle::CCardBattle::setBattleEnd();
+        if (m_pRevolver) {
+            m_pRevolver->destroy();
+            m_pRevolver = NULL;
+        }
+    }
+    setPlayerFlag(0, 0x02800000);
+    clearSpeed();
+    m_bDmgMuteki = TRUE;
+    m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+    m_fMoveSpdXZ = 0.0f;
+    m_JumpState = 3;
+    if (m_fJumpSpdY > m_fMoveSpdXZ) m_fJumpSpdY = m_fMoveSpdXZ;
+    if (isBattleFlag(2)) {
+        setBattleFlag(0, 2);
+        m_tqEscape = 0;
+        if (m_pEscape) m_pEscape->destroy();
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeEnd__7CPlayer);
 BOOL CPlayer::isEnableBattleEnd() {
     if (!m_pInstance) return TRUE;
@@ -1220,7 +1537,35 @@ void CPlayer::killBullet() {
     CBulletManager* p = (CBulletManager*)CTaskMan::getSysTask(0x1B);
     if (p) p->kill(getHandle());
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEnemyStop__7CPlayeriUi);
+void CPlayer::setEnemyStop(HANDLE inEnemy, UINT inSet) {
+    SLContainerT<CTask>* container;
+    CTask* task;
+    CEntity* pEntity;
+    CBattleEnemyManager* pBEM = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+    if (!pBEM) return;
+    container = pBEM->getFirstBattleEnemy();
+    if (inSet) {
+        for (; container; container = container->getNext()) {
+            task = container->getValue();
+            if (task && task->getTypeID() == 0x1004) {
+                if (task->getHandle() != inEnemy) {
+                    pEntity = (CEntity*)task;
+                    pEntity->setEntityFlag(0x80000000, 0);
+                }
+            }
+        }
+        CSceneEnv::setStop((ObjType::eObjBit)8);
+    } else {
+        for (; container; container = container->getNext()) {
+            task = container->getValue();
+            if (task && task->getTypeID() == 0x1004) {
+                pEntity = (CEntity*)task;
+                pEntity->setEntityFlag(0, 0x80000000);
+            }
+        }
+        CSceneEnv::setStop((ObjType::eObjBit)0);
+    }
+}
 INT CPlayer::setMDFooting(HANDLE inFooting) {
     if (!inFooting) {
         setConditionFlag(0, 0x10000000);

@@ -236,7 +236,7 @@ public:
     FVECTOR& getVel() { return *(FVECTOR*)&_m_0x00[0x70]; }
     // PARTIAL: added for Game/Enemy/EnemyBluerhapsody
     void setVel(const FVECTOR& inVel) { getVel() = inVel; }
-    UINT isGround() { return m_uiCollisionFlag & 5; }
+    UINT isGround() { return m_uiCollisionFlag & 5; } UINT isObjRide() const { return m_uiCollisionFlag & 4; } // PARTIAL: isObjRide added for Game/Player/Player
     UINT isGravity() const { return m_uiFlag & 4; } // PARTIAL: added for Game/Atel/Avatar
     UINT isWall() { return m_uiCollisionFlag & 0xa; } // PARTIAL: added for Game/Enemy/EnemyYellowopera
     // PARTIAL: added for Game/Enemy/MapEnemyShadow (m_vScale 0x60)
