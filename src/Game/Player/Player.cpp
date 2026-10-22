@@ -380,7 +380,21 @@ void CPlayer::initStartWait() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStartWait__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStandUp__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStandUp__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkWalkMode__7CPlayer);
+INT CPlayer::chkWalkMode() {
+    FLOAT aim_power = m_fAnalogPower;
+    if (aim_power < 0.3f) {
+        m_fWalkSpeed = 0.0f;
+        return 0;
+    }
+    FLOAT dash = 1.0f;
+    if (m_pCB && m_pCB->getEnchantKind() == 0x2D) dash = 1.7f;
+    if (aim_power < 0.9f) {
+        m_fWalkSpeed = m_pParam->MAX_WALK_SPEED * dash;
+        return 1;
+    }
+    m_fWalkSpeed = aim_power * m_pParam->MAX_RUN_SPEED * dash;
+    return 2;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setWalkAnim__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBattleIdle__7CPlayer);
