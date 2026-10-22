@@ -50,6 +50,7 @@ extern "C" char D_00499928[]; extern "C" char D_00499958[]; /* "...Player.cpp(11
 extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)" */
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
+extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
 inline void* operator new(size_t, void* p) throw() { return p; }
 static inline FLOAT _abs(FLOAT inValue) {
     FLOAT ret;
@@ -1211,7 +1212,45 @@ void CPlayer::procGravity(TIMEQ inNowFrame, TIMEQ inEndFrame, INT inFlag) {
     vel.y = m_fJumpSpdY;
     m_pMove->setVel(vel);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procSkillEnd__7CPlayeri);
+void CPlayer::procSkillEnd(INT inAir) {
+    INT bAir = inAir;
+    if (bAir < 0) bAir = isAir();
+    offAttack();
+    setPushon(0);
+    m_pMarker->holdTarget(0);
+    if (isPlayerFlag(0x80000000)) setBGFade(1.0f, 20.0f, 0);
+    fadeEffAttack(0);
+    setBattleFlag(0, 0x00480F90);
+    setBattleFlag(0, 0x00041000);
+    setBattleFlag(0, 0x10200000);
+    setBattleFlag(0, 0x00130000);
+    setBattleFlag(0, 0x03000000);
+    m_fWalkSpeed = m_fJumpSpdXZ = m_fMoveSpdXZ;
+    if (m_PlayerState == 0x22) setPlayerFlag(0, 1);
+    setUseRsrcBlock(0);
+    if (isBattleFlag(4)) {
+        initEnd();
+    } else if (chkExtraSkill()) {
+    } else if (isBattleFlag(0x2000)) {
+        initIdle(bAir, 0);
+        setBattleFlag(0x41000, 0x2000);
+        m_iStepStockSkill = 0;
+        TRACE(D_0049A888);
+    } else {
+        if (m_pCB) {
+            m_pCB->destroyPlayCard(1, 0);
+            setBattleFlag(0, 0x10200000);
+        }
+        initIdle(bAir, 0);
+        m_uiAttackKind = 0;
+        m_uiAttackID = 0;
+        if (!m_iNextAttack) m_iAttackNo = 0;
+        m_bIsAttackHit = FALSE;
+        m_bNextTrg = FALSE;
+        m_iNextAttack = 0;
+        m_bIsCanCombo = FALSE;
+    }
+}
 BOOL CPlayer::chkExtraSkill() {
     if (m_iExtraSkill) {
         m_iStepStockSkill = 2;
