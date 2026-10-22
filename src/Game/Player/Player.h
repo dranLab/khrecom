@@ -538,7 +538,7 @@ public:
     void setTrgFlagRendaNG(const CHAR* inName);
     void cmdMove_WaterSurfaceCheck(INT inFlag);
     void setFallFloat();
-    void updateBodyColl(); void updateBodyCollPos();
+    void updateBodyColl(); void updateBodyCollPos(); void chkBodyRevise();
     void updateFooting();
     void makeAnimIndex(INT inID);
     void initStartPos();

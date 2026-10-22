@@ -353,7 +353,18 @@ void CPlayer::getCameraTargetPos(FVECTOR& outPos) {
         outPos.y += 0.5f;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBodyRevise__7CPlayer);
+void CPlayer::chkBodyRevise() {
+    setPlayerFlag(0, 0x200000);
+    if (!isPlayerFlag(0x9000) && m_collBody.collideBody(0) && !isPlayerFlag(0x400000)) {
+        FVECTOR pos = getPos();
+        setOldPos(pos);
+        pos.x += (m_collBody.getOutPos()->x - m_vCenterPos.x) * 0.5f;
+        pos.z += (m_collBody.getOutPos()->z - m_vCenterPos.z) * 0.5f;
+        setPos(pos);
+        setPlayerFlag(0x200000, 0);
+    }
+    setPlayerFlag(0, 0x400000);
+}
 void CPlayer::recoverCollMap() {
     if (m_pCollMap) {
         m_pCollMap->setType(COLL_TYPE_SPHERE);
