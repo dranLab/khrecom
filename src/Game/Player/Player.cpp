@@ -26,6 +26,8 @@
 #include "System/HeapMan.h"
 #include "Game/Enemy/BattleEnemyManager.h"
 #include "Game/CardKind.h"
+#include "System/Graphic/Camera.h"
+#include "System/Graphic/WorldEnv.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -33,6 +35,7 @@ extern "C" char D_00499828[];
 extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 extern "C" char D_0049B308[];
+extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)" */
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 inline void* operator new(size_t, void* p) throw() { return p; }
 /* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
@@ -703,7 +706,14 @@ void CPlayer::fadeEffect(INT& ioHandle, INT inLoop) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", fadeEffAttack__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEffAttack__7CPlayeriPCciiP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateSpotLight__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setQuake__7CPlayerffUi);
+void CPlayer::setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime) {
+    CCamera* cam = CWorldEnv::getActiveCamera();
+    CameraQuakeParam cqp;
+    cqp._fCycle = inCycle;
+    cqp._nTime = inTime;
+    cqp._fPower = inPower;
+    new (com_malloc_d(sizeof(CCameraQuakeV), D_0049AFC0, RET_ADDR())) CCameraQuakeV(*cam, &cqp, inPower);
+}
 void CPlayer::notifyReturnCard(const CARD* inCard) {
     if (!m_pInstance) return;
     if (m_pRevolver) {
