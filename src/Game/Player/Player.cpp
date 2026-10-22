@@ -186,7 +186,14 @@ void CPlayer::setAnimSpeed(FLOAT inSpeed) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimSkillEx__7CPlayeriiiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimRsrcEx__7CPlayeriiiiiii);
+void CPlayer::setAnimRsrcEx(INT inRcid, INT inAnimID, TIMEQ inChangeTime, BOOL inRootMove, INT inEffSeq, INT inSESeq, INT inWep) {
+    m_iNowAnimID = -1;
+    changeMotionEx(inRcid + 10000, inAnimID, 0, inRootMove, inChangeTime, inEffSeq, inSESeq);
+    if (isPlayerFlag(0x40000000) && inWep > 0) {
+        m_pWeapon->changeMotionEx(inRcid + inWep + 10000, inAnimID, 0, FALSE, inChangeTime, inEffSeq, inSESeq);
+    }
+    setAnimSpeed(1.0f);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowIdleAnim__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setFaceAnim__7CPlayerii);
 void CPlayer::setTransOff(INT inFlag) {
