@@ -809,7 +809,32 @@ INT CPlayer::initIdle(INT inAir, INT inStand) {
     return bAir;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkWall__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkWallBottom__7CPlayer);
+INT CPlayer::chkWallBottom() {
+    FVECTOR vStart;
+    FVECTOR vEnd;
+    FVECTOR vNormal;
+    FVECTOR ofs;
+    FMATRIX m;
+    FLOAT _x = m_vWallPos.x;
+    FLOAT _z = m_vWallPos.z;
+    vStart.set(_x, m_vWallPos.y + 0.25f, _z);
+    vEnd.set(_x, m_vWallPos.y - 0.25f, _z);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    if (!m_pCollMap->collideMap()) return FALSE;
+    vNormal = *m_pCollMap->getDetectNormal();
+    if (vNormal.y < 0.64278764f) return FALSE;
+    m_vWallPos.y = m_pCollMap->getDetectPos()->y + 0.0035f;
+    ofs.set(0.0f, 0.0f, 0.375f);
+    _unitMatrix(m);
+    _rotMatrixY(m, m_fWallDir);
+    ApplyMatrixXYZ(ofs, m, ofs);
+    vStart.set(m_vWallPos.x + ofs.x, m_vWallPos.y + 0.25f, m_vWallPos.z + ofs.z);
+    vEnd.set(m_vWallPos.x + ofs.x, m_vWallPos.y - 0.25f, m_vWallPos.z + ofs.z);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    return !m_pCollMap->collideMap();
+}
 void CPlayer::initWall() {
     setPlayerState(PL::WALL);
     clearSpeed();
