@@ -40,6 +40,7 @@ void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" char D_0049B308[];
 extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)" */
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
+extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 inline void* operator new(size_t, void* p) throw() { return p; }
 /* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
 enum NAME_CASE { NAME_CASE_SENSITIVE = 0, NAME_CASE_UPPER = 1, NAME_CASE_LOWER = 2 };
@@ -905,7 +906,31 @@ void CPlayer::exePrizeHealing() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initGimmickCard__7CPlayeri);
+void CPlayer::initGimmickCard(INT inNo) {
+    TRACE(D_0049AEC0);
+    setPlayerState(PL::GIMMICKCARD);
+    m_iSubState = 1;
+    clearSpeed();
+    setPlayerFlag(1, 0);
+    offAttack();
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x200);
+    setBattleFlag(0, 0x80000);
+    setTrgFlag(0, 0x40);
+    m_iAttackNo = inNo;
+    m_uiPreAttackKind = 0;
+    m_uiAttackKind = 0;
+    m_bIsAttackHit = FALSE;
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    m_bDmgMuteki = FALSE;
+    m_bIsCanCombo = FALSE;
+    m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+    m_JumpState = 3;
+    m_fMoveSpdXZ = 0.0f;
+    m_tqCardBreakTime = 0;
+    m_fWalkSpeed = 0.0f;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickCard__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setTrapDamage__7CPlayeriPCcUi);
 void CPlayer::fadeEffect(INT& ioHandle, INT inLoop) {
