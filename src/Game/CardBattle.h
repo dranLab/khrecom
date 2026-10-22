@@ -187,7 +187,9 @@ class CCardRevolver {
     SHORT m_sMode;       /* 0x4c */ // PARTIAL: name unknown
     UBYTE _m_0x4e[0x26]; // PARTIAL: added for Game/Player/Player
     BOOL m_bActive;      /* 0x74 */ // PARTIAL: added for Game/Player/Player
+    UBYTE _m_0x78[0x168]; /* 0x078 .. sizeof 0x1e0 */ // PARTIAL: added for Game/Player/Player (makeRevolver)
 public:
+    CCardRevolver(class CTask* pParent, CARD* inDeck, INT inUser, INT inShortCut); // PARTIAL: added for Game/Player/Player
     INT isActive() const { return m_bActive; } // PARTIAL: added for Game/Player/Player
     // PARTIAL: added for Game/Enemy/HumanBoss
     INT getMode() const { return m_sMode; } // PARTIAL: name unknown

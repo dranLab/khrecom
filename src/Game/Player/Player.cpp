@@ -35,6 +35,7 @@
 #include "System/Rnd.h"
 #include "Game/Player/PlayerAttack.h"
 #include "System/Graphic/Anim.h"
+#include "Game/Card.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -51,6 +52,8 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
+extern "C" char D_00499988[]; extern "C" char D_004999B8[]; extern "C" char D_004999E8[]; /* "...Player.cpp(1156)", (1172), (1181) */
+extern "C" const CARD_DATA cardDataTbl_0049E190[224];
 extern "C" char D_0049AFA8[]; /* TRACE messages of setTrapDamage */
 extern "C" char D_0049A920[];
 extern "C" char D_0049A988[];
@@ -277,7 +280,38 @@ void CPlayer::makeCockpit() {
     m_pGauge->setDP(m_iDP, 30);
     m_pDebug = new (com_malloc_d(sizeof(CPlayerDebug), D_00499958, RET_ADDR())) CPlayerDebug(this);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeRevolver__7CPlayer);
+static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
+    c.m_nId = 0;
+    c.m_nKind2 = kind;
+    c.m_nNumber2 = num;
+    c.m_nCategory20 = cardDataTbl_0049E190[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl_0049E190[c.m_nKind].nCategory1;
+}
+void CPlayer::makeRevolver() {
+    if (!m_pRevolver) {
+        CARD* pDeck = NULL;
+        CARD* deck = CCard::getCurrentDeck();
+        if (!DebugWork::g_dw.player.iUseDbgDeck) pDeck = deck;
+        if (CGameWork::getFlag(1, 0x2C)) pDeck = NULL;
+        if (m_bIsMinigameScene) pDeck = NULL;
+        if (!pDeck) {
+            m_pRevolver = new (com_malloc_d(sizeof(CardBattle::CCardRevolver), D_00499988, RET_ADDR())) CardBattle::CCardRevolver(this, NULL, 1, -1);
+        } else {
+            INT max = CCard::m_pCardInfo->_nDeck[CCard::m_pCardInfo->_nCurrentDeck];
+            INT sc = CCard::getCurrentShortCut();
+            if (dbgCheckUser(KKIKUCHI) && sc == -1) sc = DebugWork::g_dw.player.iTemp;
+            deck = (CARD*)com_malloc_d((max + 1) * sizeof(CARD), D_004999B8, RET_ADDR());
+            for (INT i = 0; i < max; i++) {
+                deck[i] = pDeck[i];
+                if (deck[i].m_nCategory1 == 7) deck[i].m_nNumber = -1;
+            }
+            _setCard(deck[max], 0xFF, 0);
+            m_pRevolver = new (com_malloc_d(sizeof(CardBattle::CCardRevolver), D_004999E8, RET_ADDR())) CardBattle::CCardRevolver(this, deck, 1, sc);
+            if (deck) com_free(deck);
+        }
+    }
+    m_pCB = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+}
 void CPlayer::initActionSkill() {
     UINT uiActionSkill = CGameWork::getInt(0, 0x24);
     if (uiActionSkill & 1) setActionFlag(0x200000, 0);
