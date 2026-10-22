@@ -312,7 +312,25 @@ void CPlayer::updateBodyColl() {
     if (isPlayerFlag(0x1000)) m_collBody.m_enableBody = 0;
     else m_collBody.m_enableBody = 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyCollPos__7CPlayer);
+void CPlayer::updateBodyCollPos() {
+    FVECTOR top;
+    FVECTOR bottom;
+    m_vCenterPos = Crd(m_iBoneCenter).getWorldMatrix().v[3];
+    m_vHeadPos = Crd(m_iBoneHead).getWorldMatrix().v[3];
+    FLOAT _x = m_vCenterPos.x;
+    FLOAT _y = m_vHeadPos.y + 0.2f;
+    FLOAT _z = m_vCenterPos.z;
+    m_vHeadPos.x = _x;
+    m_vHeadPos.y = _y;
+    m_vHeadPos.z = _z;
+    top.set(_x, _y, _z);
+    FLOAT y = (Crd(m_iBoneLFoot).getWorldMatrix().getTrans().y + Crd(m_iBoneRFoot).getWorldMatrix().getTrans().y) * 0.5f;
+    bottom.set(m_vCenterPos.x, y, m_vCenterPos.z);
+    m_collBody.setTopPos(top);
+    m_collBody.setBottomPos(bottom);
+    m_collBody.setRadius(m_pParam->BODY_COLL_RADIUS);
+    m_collBody.setDir(m_fDir);
+}
 BOOL CPlayer::isMuteki() const {
     if (m_uiPlayerFlag & 1) return TRUE;
     if (m_tqMutekiTimer > 0) return TRUE;
