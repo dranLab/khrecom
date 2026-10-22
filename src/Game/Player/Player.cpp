@@ -52,6 +52,7 @@ extern FVECTOR g_vDummyPlayerPos; // data from the asm until SOURCE DATA
 extern FVECTOR g_vBanishPos;
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the original
 extern LPCSTR g_szDpxAlways; // static in the original; data from the asm until SOURCE DATA
+extern LPCSTR g_szDpxReload; // static in the original
 extern FLOAT g_fGimmickJumpPower[8];
 }
 namespace Gauge {
@@ -701,7 +702,23 @@ void CPlayer::exeStandUp_inFriend() {
     if (!mode && oldMode && m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
     exeWalk();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initCharge__7CPlayer);
+void CPlayer::initCharge() {
+    setPlayerState(PL::CHARGE);
+    clearSpeed();
+    setTrgFlag(0, 0x10);
+    setAnimForce(0x2E, -1, 0, 0, 0, 0);
+    m_tqEffCharge = 1000;
+    m_bDmgMuteki = FALSE;
+    if (m_hEffCharge <= 0) {
+        FVECTOR pos;
+        pos._q = 0;
+        pos.w = 1.0f;
+        CCoord* crd = &Crd(0);
+        m_hEffCharge = attachEffect(PL::g_szDpxReload, 0, crd, &pos, NULL, 0.0f);
+        CEffect* effect = CEffectMan::getEffect(m_hEffCharge);
+        if (effect) effect->m_iFlag |= 4;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCharge__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkChargeMove__7CPlayeri);
 void CPlayer::fadeEffCharge() {
