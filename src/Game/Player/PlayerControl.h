@@ -78,7 +78,7 @@ public:
     BOOL isTrgWarpStartPos();
     BOOL isDownDebugMode();
     void enableControl() { UINT& f = m_uiPadFlag; f |= 1; } // PARTIAL: inline body added for Game/Player/PlayerRiku
-    BOOL isControl();
+    BOOL isControl() { return m_uiPadFlag & 1; } // PARTIAL: inline body added for Game/Player/Player
     BOOL isTrgAnyPad();
 };
 

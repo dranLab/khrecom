@@ -217,7 +217,19 @@ void CPlayer::exeMutekiTimer() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setControl__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkAtelHide__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkAtelControl__7CPlayer);
+void CPlayer::chkAtelControl() {
+    if (CGameWork::getFlag(1, 5)) {
+        if (isControl()) {
+            m_uiPadFlag = (INT)m_uiPadFlag & ~1;
+            m_pCam->setFlag(1, TRUE);
+        }
+    } else {
+        if (!isControl()) {
+            enableControl();
+            m_pCam->setFlag(1, FALSE);
+        }
+    }
+}
 void CPlayer::getCameraTargetPos(FVECTOR& outPos) {
     if (m_PlayerState == PL::TRANSFORM) {
         outPos = Crd(m_iBoneCenter).getWorldMatrix().v[3];

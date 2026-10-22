@@ -341,7 +341,7 @@ public:
     INT getMotIndex(INT inChara, INT inIndex);
     void setReflectGuard(INT inFlag);
     void setTransOff(INT inFlag);
-    void chkAtelHide(INT inFlag);
+    void chkAtelHide(INT inFlag); void chkAtelControl();
     void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
     void exeEscape();
