@@ -1084,7 +1084,39 @@ void CPlayer::initCharge() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCharge__7CPlayer);
+/* Parked: only the block before chargeReloadCard is scheduled differently: the original zeroes pos with v1
+   after the flag 'and' and loads m_pRevolver after the flag store; ours zeroes pos in a0 first and loads
+   m_pRevolver before the store. tried: all orders of setPlayerFlag/pos._q/pos.w (the 5-line ones zero w and
+   are wrong), pos.init()/set()/copy, direct and cast flag stores, cast and volatile-reference m_pRevolver
+   loads, memory asm barriers (best 6); best clean draft 8 lines. tools/permuter.py can't run on C++ methods. */
+#if 0
+INT CPlayer::chkChargeMove(INT inFlag) {
+    FVECTOR pos;
+    CEffect* effect;
+    if (CGameWork::getFlag(1, 8)) return TRUE;
+    if (!inFlag && CGame::isSoraGame()) {
+        if (!m_pCB) return FALSE;
+        if (m_pCB->getEnchantKind() != 10) return FALSE;
+    }
+    setPlayerFlag(0, 0x10);
+    pos._q = 0;
+    pos.w = 1.0f;
+    if (m_pRevolver->chargeReloadCard(0) != 1) {
+        m_tqEffCharge = 1000;
+        if (m_hEffCharge) return TRUE;
+        m_hEffCharge = attachEffect(PL::g_szDpxReload, 0, &Crd(0), &pos, NULL, 0.0f);
+        effect = CEffectMan::getEffect(m_hEffCharge);
+        if (effect) effect->m_iFlag |= 4;
+    } else {
+        fadeEffect(m_hEffCharge, 1);
+        effect = CEffectMan::getEffect(attachEffect(PL::g_szDpxReload, 1, &Crd(0), &pos, NULL, 0.0f));
+        if (effect) effect->m_iFlag |= 4;
+    }
+    return TRUE;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkChargeMove__7CPlayeri);
+#endif
 void CPlayer::fadeEffCharge() {
     if (m_hEffCharge > 0) {
         m_tqEffCharge -= getFrameRate();
