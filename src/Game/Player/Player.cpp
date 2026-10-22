@@ -50,6 +50,7 @@ public:
 namespace PL {
 extern FVECTOR g_vDummyPlayerPos; // data from the asm until SOURCE DATA
 extern FVECTOR g_vBanishPos;
+extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the original
 extern FLOAT g_fGimmickJumpPower[8];
 }
 namespace Gauge {
@@ -713,7 +714,15 @@ void CPlayer::fadeEffCharge() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCure__7CPlayerii);
+void CPlayer::setCure(INT inID, INT inPow) {
+    FVECTOR pos;
+    INT no = inID - 14;
+    if (inID == 0x33) no = 0;
+    pos.set(0.0f, 0.85f, 0.0f);
+    CEffect* effect = CEffectMan::getEffect(attachEffect(PL::g_EffTbl_Skill[inID][1].pEffectName, no, &Crd(0), &pos, NULL, 0.0f));
+    if (effect) effect->m_iFlag |= 4;
+    addHP(inPow, 0, 1);
+}
 void CPlayer::setCastEffect(const CHAR* inName, INT inNo, CCoord* inCrd, FVECTOR* inOfs) {
     FVECTOR pos;
     if (inOfs) {
