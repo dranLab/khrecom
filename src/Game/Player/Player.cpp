@@ -215,7 +215,14 @@ void CPlayer::getWeaponTopPos(FVECTOR& inVec) {
         ApplyMatrixXYZ(inVec, m, ofs);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCaskPos__7CPlayerR7FVECTOR);
+void CPlayer::getCaskPos(FVECTOR& inVec) {
+    if (m_pWeapon) {
+        FVECTOR ofs = { { -0.06f, -0.27f, 0.03f, 1.0f } };
+        if (DebugWork::g_dw.player.iTemp == 1) ofs = DebugWork::g_dw.player.vTemp;
+        FMATRIX m = m_pWeapon->getMatrixWep0();
+        ApplyMatrixXYZ(inVec, m, ofs);
+    }
+}
 void CPlayer::updateBodyColl() {
     updateBodyCollPos();
     m_collBody.m_uiFlag = (INT)m_collBody.m_uiFlag & ~8;

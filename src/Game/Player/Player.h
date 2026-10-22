@@ -368,7 +368,7 @@ public:
     INT isBattleFlag(UINT inFlag) { return m_uiBattleFlag & inFlag; } // PARTIAL: added for Game/Player/SummonMushu
     // PARTIAL: added for Game/Player/FriendDonald
     PlayerWeapon::CPlayerWeapon* getWeapon() { return m_pWeapon; }
-    void getWeaponTopPos(FVECTOR& outPos);
+    void getWeaponTopPos(FVECTOR& outPos); void getCaskPos(FVECTOR& inVec);
     // PARTIAL: added for Game/Player/SummonCloud
     void setDir(FLOAT inDir) { m_fDir = inDir; }
     // PARTIAL: added for Game/Player/Summon
