@@ -54,6 +54,7 @@ extern FVECTOR g_vBanishPos;
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the original
 extern LPCSTR g_szDpxAlways; // static in the original; data from the asm until SOURCE DATA
 extern LPCSTR g_szDpxReload; // static in the original
+extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 extern FLOAT g_fGimmickJumpPower[8];
 }
 namespace Gauge {
@@ -724,7 +725,27 @@ void CPlayer::exeConfuse() {
         if (m_tqConfuse <= 0) setConfuse(0, 0);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initItem__7CPlayeri);
+void CPlayer::initItem(INT inNo) {
+    setPlayerState(PL::ITEM);
+    clearSpeed();
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x80);
+    setBattleFlag(0, 0x80000);
+    setTrgFlag(0, 8);
+    setPlayerFlag(0, 0x02800000);
+    m_iAttackNo = inNo;
+    m_uiPreAttackKind = 0;
+    m_bIsAttackHit = FALSE;
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    m_bDmgMuteki = FALSE;
+    m_bIsCanCombo = FALSE;
+    m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+    m_JumpState = 3;
+    m_iSubState = 1;
+    m_fMoveSpdXZ = 0.0f;
+    m_tqCardBreakTime = PL::g_CardBreakTime[(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].BREAK];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeItem__7CPlayer);
 void CPlayer::exeStandUp_inFriend() {
     INT oldMode = m_WalkMode;
