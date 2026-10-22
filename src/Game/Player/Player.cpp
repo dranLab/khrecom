@@ -24,6 +24,8 @@
 #include "Game/Gimmick/BaseGimmick.h"
 #include "Game/Collision/CollMap.h"
 #include "System/HeapMan.h"
+#include "Game/Enemy/BattleEnemyManager.h"
+#include "Game/CardKind.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -676,7 +678,19 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", fadeEffAttack__7C
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEffAttack__7CPlayeriPCciiP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateSpotLight__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setQuake__7CPlayerffUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyReturnCard__7CPlayerPC4CARD);
+void CPlayer::notifyReturnCard(const CARD* inCard) {
+    if (!m_pInstance) return;
+    if (m_pRevolver) {
+        if (!inCard) {
+            m_pRevolver->resetCardOwner(2, 0);
+            CBattleEnemyManager* pBEM = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+            if (pBEM) pBEM->allGetPrize(2);
+        } else if (inCard->m_nKind < 0xCB) {
+            INT cat = inCard->m_nCategory0;
+            if (cat && (cat < 7 || cat == 8)) m_pRevolver->addCard((CARD*)inCard, 1);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyGetPrize__7CPlayeriii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addEXP__7CPlayerii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addHP__7CPlayeriii);

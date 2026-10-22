@@ -215,6 +215,7 @@ public:
     INT calcPlutoMark();
     void dropPlutoMarkCard(const FVECTOR* inPos);
     void setSnatch(HANDLE inHandle); // PARTIAL: added for Game/Player/Player
+    void addCard(CARD* pData, INT inReturn); void resetCardOwner(INT inOld, INT inNew); // PARTIAL: added for Game/Player/Player
 };
 #endif
 }
