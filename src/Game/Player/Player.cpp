@@ -278,7 +278,33 @@ void CPlayer::makeCockpit() {
     m_pDebug = new (com_malloc_d(sizeof(CPlayerDebug), D_00499958, RET_ADDR())) CPlayerDebug(this);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeRevolver__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initActionSkill__7CPlayer);
+void CPlayer::initActionSkill() {
+    UINT uiActionSkill = CGameWork::getInt(0, 0x24);
+    if (uiActionSkill & 1) setActionFlag(0x200000, 0);
+    else setActionFlag(0, 0x200000);
+    DebugWork::g_dw.player.iHiJump = isActionFlag(0x200000) != 0;
+    if (CGame::isSoraGame()) {
+        if (uiActionSkill & 4) setActionFlag(0x800000, 0);
+        else setActionFlag(0, 0x800000);
+        if (uiActionSkill & 2) setActionFlag(0x400000, 0);
+        else setActionFlag(0, 0x400000);
+        DebugWork::g_dw.player.iGlide = isActionFlag(0x400000) != 0;
+        DebugWork::g_dw.player.iGlideSP = isActionFlag(0x800000) != 0;
+    }
+    setActionFlag(0, 0x4000000);
+    if (CGame::isRikuGame() && m_bIsBattleScene) {
+        if ((CGameWork::getInt(0, 0x24) & 8) && !m_pPLM->isZexionBattle()) setActionFlag(0x4000000, 0);
+    }
+    if (!m_bIsBattleScene) {
+        if (m_pPLM->isTraverseTown()) setActionFlag(0x10000, 0);
+        else setActionFlag(0, 0x10000);
+    }
+    if (CSceneInfo::getCurrentWorldID(0) == 10) {
+        setActionFlag(0, 0x20);
+    } else if (m_bIsBattleScene && CGameWork::getFlag(1, 0x31)) {
+        setActionFlag(0x20, 0);
+    }
+}
 INT CPlayer::importStatus() {
     if (!_instance()) return 0;
     _instance()->setMaxHP(CStatus::getStaus().HPMax);
