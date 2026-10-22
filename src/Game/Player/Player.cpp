@@ -40,6 +40,7 @@ extern "C" char D_00499828[];
 extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" char D_0049B308[];
 extern "C" char D_00499898[]; extern "C" char D_004998C8[]; extern "C" char D_004998F8[]; /* "...Player.cpp(1103)", (1106), (1112) */
 extern "C" char D_00499928[]; extern "C" char D_00499958[]; /* "...Player.cpp(1117)", (1124) */
@@ -967,7 +968,31 @@ INT CPlayer::procAttackCollision(TIMEQ inNowFrame) {
     }
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procGravity__7CPlayeriii);
+void CPlayer::procGravity(TIMEQ inNowFrame, TIMEQ inEndFrame, INT inFlag) {
+    FVECTOR vel = m_pMove->getVel();
+    m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+    if (inFlag && isPlayerFlag(0x2000000)) m_fJumpGravity = PL::g_fGravity * 0.16f;
+    else m_fJumpGravity = PL::g_fGravity;
+    if (isPlayerFlag(0x800000) && inNowFrame < inEndFrame) {
+        BOOL bFloat = TRUE;
+        if (m_hMark > 0) {
+            FVECTOR vec;
+            SubVectorXYZ(vec, m_vMarkPos, m_vCenterPos);
+            m_fDistY = _abs(vec.y);
+            if (vec.y < 0.0f) {
+                if (m_fJumpSpdY > 0.0f) {
+                    if (m_fDistY < 0.5f) m_fJumpSpdY *= PL::g_fJumpStopRate;
+                    else m_fJumpSpdY = 0.0f;
+                }
+                bFloat = FALSE;
+            }
+        }
+        if (bFloat && m_fJumpSpdY < 0.0f) m_fJumpSpdY = 0.0f;
+    }
+    if (!(inNowFrame < inEndFrame) && m_fJumpSpdY > 0.0f) m_fJumpSpdY = 0.0f;
+    vel.y = m_fJumpSpdY;
+    m_pMove->setVel(vel);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procSkillEnd__7CPlayeri);
 BOOL CPlayer::chkExtraSkill() {
     if (m_iExtraSkill) {

@@ -494,7 +494,7 @@ public:
     void procAttackMove(INT inFlag, FLOAT inSpeed, FLOAT inRate, INT inP3, FLOAT inP4);
     INT procAttackCollision(TIMEQ inNowFrame);
     void procTargetMark();
-    void procGravity(INT inP0, INT inP1, INT inP2);
+    void procGravity(TIMEQ inNowFrame, TIMEQ inEndFrame, INT inFlag);
     void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inFlag);
     void setUseRsrcBlock(INT inBlock);
     INT exeUseStock(INT inFlag); INT startSingleAction();
