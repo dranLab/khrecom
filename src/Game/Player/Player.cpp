@@ -101,7 +101,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", __7CPlayerP5CTask
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _$_7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFSM___7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _init__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBefore__7CPlayer);
+void CPlayer::updateBefore() {
+    *(BOOL*)&m_bPreAir = m_bAir;
+    m_fWeight = PL::g_fWeight;
+    PL::g_fAntiGravity = PL::g_fWeight * 0.008166667f;
+    if (CardBattle::CCardBattle::isLevitate()) m_fWeight *= 0.5f;
+    PL::g_fGravity = m_fWeight * -0.008166667f;
+}
 void CPlayer::updateAfter() {}
 void CPlayer::lastUpdate() {
     updateBodyColl();

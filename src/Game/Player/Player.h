@@ -574,7 +574,7 @@ struct PL_PARAM {
 };
 
 namespace PL {
-extern FLOAT g_fWeight;
+extern FLOAT g_fWeight; extern FLOAT g_fGravity; extern FLOAT g_fAntiGravity;
 extern FLOAT g_fJumpStopRate;
 extern FLOAT g_fGlideWeight;
 extern FLOAT g_fGlideSpeedLow;
