@@ -500,7 +500,7 @@ public:
     INT exeUseStock(INT inFlag);
     INT chkChargeMove(INT inFlag);
     void setPushon(INT inFlag);
-    void setCastEffect(const CHAR* inName, INT inNo, CCoord* inCoord, FVECTOR* inPos);
+    void setCastEffect(const CHAR* inName, INT inNo, CCoord* inCoord, FVECTOR* inPos); void setEffAttack(INT inNum, const CHAR* inName, INT inNo, INT inBone, FVECTOR* inOfs);
     // PARTIAL: added for Game/Player/PlayerDRiku
     static INT importStatus();
     static INT exportStatus();

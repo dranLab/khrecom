@@ -784,7 +784,18 @@ void CPlayer::fadeEffAttack(INT inLoop) {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEffAttack__7CPlayeriPCciiP7FVECTOR);
+void CPlayer::setEffAttack(INT inNum, const CHAR* inName, INT inNo, INT inBone, FVECTOR* inOfs) {
+    FVECTOR pos;
+    if (inOfs) {
+        pos = *inOfs;
+    } else {
+        pos._q = 0;
+        pos.w = 1.0f;
+    }
+    m_hEffAttack[inNum] = attachEffect(inName, inNo, &Crd(inBone), &pos, NULL, 0.0f);
+    CEffect* effect = CEffectMan::getEffect(m_hEffAttack[inNum]);
+    if (effect) effect->m_iFlag |= 4;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateSpotLight__7CPlayeri);
 void CPlayer::setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime) {
     CCamera* cam = CWorldEnv::getActiveCamera();
