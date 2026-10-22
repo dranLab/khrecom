@@ -534,7 +534,22 @@ FLOAT CPlayer::getDefAttr(ATK_ATTR inAttr) const {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkDamage__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFlip__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setFlipForce__7CPlayerPC7FVECTOR);
+void CPlayer::setFlipForce(const FVECTOR* inPos) {
+    FVECTOR pos;
+    if (inPos) {
+        pos = *inPos;
+    } else {
+        pos = m_vStartPos;
+        pos.y = getPos().y + 0.0035f;
+    }
+    warp(pos);
+    updateCoord();
+    coordFix();
+    clearSpeed();
+    initFlip(0);
+    CardBattle::CCardBattle::notifyCompleteGimmick();
+    PLM::setVibration(3);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDamage__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkTrgAction__7CPlayeriUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initDead__7CPlayer);

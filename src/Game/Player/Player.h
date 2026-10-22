@@ -471,7 +471,7 @@ public:
     void setFaceAnim(INT inID, INT inFlag);
     void initStartWait();
     void initStandUp(INT inFlag);
-    void initFall();
+    void initFall(); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
     INT initIdle(INT inAnim, INT inFlag);
     INT procFlowIdle(INT inFlag);
     void initEnd();
