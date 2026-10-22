@@ -51,6 +51,7 @@ namespace PL {
 extern FVECTOR g_vDummyPlayerPos; // data from the asm until SOURCE DATA
 extern FVECTOR g_vBanishPos;
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the original
+extern LPCSTR g_szDpxAlways; // static in the original; data from the asm until SOURCE DATA
 extern FLOAT g_fGimmickJumpPower[8];
 }
 namespace Gauge {
@@ -834,7 +835,24 @@ void CPlayer::exeAeroGuard() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPrizeHealing__7CPlayeri);
+void CPlayer::setPrizeHealing(TIMEQ inTime) {
+    if (!m_pInstance) return;
+    if (!inTime) {
+        if (m_hEffPrize > 0) {
+            CEffect* effect = CEffectMan::getEffect(m_hEffPrize);
+            if (effect) effect->loopEnd();
+            m_hEffPrize = 0;
+        }
+        m_tqPrize = 0;
+    } else {
+        if (!m_tqPrize) {
+            m_hEffPrize = attachEffect(PL::g_szDpxAlways, 0x16, &Crd(m_iBoneCenter), NULL, NULL, 0.0f);
+            CEffect* effect = CEffectMan::getEffect(m_hEffPrize);
+            if (effect) effect->m_iFlag |= 4;
+        }
+        m_tqPrize = inTime;
+    }
+}
 void CPlayer::exePrizeHealing() {
     if (m_hEffPrize) {
         m_tqPrize -= m_tqFrameRate;

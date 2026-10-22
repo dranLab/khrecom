@@ -335,7 +335,7 @@ public:
     void setMaxDP(INT inDP) { m_iMaxDP = inDP; }
     INT getMaxHP() { return m_iMaxHP; }
     void addHP(INT inHP, INT inFlag, INT inEffect);
-    void setPrizeHealing(INT inTime); // PARTIAL: added for Game/Player/SummonTink
+    void setPrizeHealing(TIMEQ inTime); // PARTIAL: added for Game/Player/SummonTink
     void exePrizeHealing();
     void fadeEffCharge();
     INT getMotIndex(INT inChara, INT inIndex);
