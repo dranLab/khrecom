@@ -52,6 +52,7 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
+extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */
 extern "C" char D_00499988[]; extern "C" char D_004999B8[]; extern "C" char D_004999E8[]; /* "...Player.cpp(1156)", (1172), (1181) */
 extern "C" const CARD_DATA cardDataTbl_0049E190[224];
 extern "C" char D_0049AFA8[]; /* TRACE messages of setTrapDamage */
@@ -1261,7 +1262,55 @@ void CPlayer::setPushon(INT inFlag) {
 void CPlayer::setTrgFlagRendaNG(const CHAR* inName) {
     if (!DebugWork::g_dw.player.iRenda) m_uiTrgFlag |= 0x40000;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkPlayCard__7CPlayer);
+void CPlayer::chkPlayCard() {
+    if (m_bIsDead) return;
+    if (!m_pRevolver) return;
+    BOOL bExeSkill = FALSE;
+    INT iStock = m_pRevolver->getStock(1);
+    if (isTrgStock()) {
+        if (iStock < 3) m_pRevolver->setStockCard();
+        else bExeSkill = TRUE;
+    }
+    if (!isBattleFlag(8)) {
+        setBattleFlag(8, 0);
+        return;
+    }
+    if (bExeSkill || (isTrgStockSkill() && iStock > 0)) {
+        INT result = m_pRevolver->setPlayStock(0, 1);
+        if (result) {
+            TRACE(D_00499F48);
+            setBattleFlag(0, 8);
+            if (result == 1) {
+                setBattleFlag(0x10200000, 0x20);
+            } else {
+                TRACE(D_00499F70);
+                setBattleFlag(0, 0x10200000); setBattleFlag(0x20, 0);
+            }
+            return;
+        }
+    }
+    if (!isTrgAttack()) return;
+    if (isBattleFlag(0x10)) return;
+    if (isBattleFlag(0x100)) return;
+    if (isBattleFlag(0x80)) return;
+    if (isBattleFlag(0x200)) return;
+    if (isBattleFlag(0x400)) return;
+    if (isBattleFlag(0x800)) return;
+    if (m_tqAttackTimer > 0) return;
+    if (!isActionFlag(0x40)) return;
+    INT mode = m_pRevolver->getMode();
+    INT result = m_pRevolver->setPlayCard(0, 1);
+    if (!result) return;
+    setBattleFlag(0, 8);
+    if (mode) return;
+    if (result == 1) {
+        TRACE(D_00499F80);
+        setBattleFlag(0x10200000, 0x20);
+    } else {
+        TRACE(D_00499FA0);
+        setBattleFlag(0, 0x10200000); setBattleFlag(0x20, 0);
+    }
+}
 /* Parked: the switch's jump table goes to .rodata, which is stripped until the unit's data comes from source
    (objcopy: symbol `.rodata' required but not present); tried: C switch over PL::ATTACK/ITEM/MAGIC/SKILL/
    GIMMICKCARD/FRIEND/SUMMON/DUEL (the code apart from the table is the original's shape) */
