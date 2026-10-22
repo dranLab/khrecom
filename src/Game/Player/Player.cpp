@@ -42,6 +42,7 @@ void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" char D_0049B308[];
+extern "C" char D_004997F8[]; extern "C" char D_00499808[]; extern "C" char D_00499818[]; /* "System/Fsm.h", "pInstance", "pfnBeginState" */
 extern "C" char D_00499898[]; extern "C" char D_004998C8[]; extern "C" char D_004998F8[]; /* "...Player.cpp(1103)", (1106), (1112) */
 extern "C" char D_00499928[]; extern "C" char D_00499958[]; /* "...Player.cpp(1117)", (1124) */
 extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)" */
@@ -172,7 +173,31 @@ void CPlayer::enableDbgPadControl(INT inFlag) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", __7CPlayerP5CTaskUii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _$_7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFSM___7CPlayer);
+/* CStateTemplate<CPlayer> (System/Fsm.h) layout; set() is copied here with the original's string labels
+ * because the unit's .rodata still comes from the assembly. */
+struct PLAYER_STATE {
+    void* m_pVtbl; // CState vptr
+    CPlayer* m_pInstance;
+    void (CPlayer::*m_pfnBeginState)();
+    void (CPlayer::*m_pfnState)();
+    void (CPlayer::*m_pfnEndState)();
+};
+static inline void _setState(PLAYER_STATE& s, CPlayer* pInstance, void (CPlayer::*pfnBeginState)(), void (CPlayer::*pfnState)(), void (CPlayer::*pfnEndState)()) {
+    if (!pInstance) AssertApp(D_004997F8, 41, D_00499808, 0);
+    s.m_pInstance = pInstance;
+    if (!pfnBeginState) AssertApp(D_004997F8, 44, D_00499818, 0);
+    s.m_pfnBeginState = pfnBeginState;
+    if (!pfnBeginState) AssertApp(D_004997F8, 46, D_00499818, 0);
+    s.m_pfnState = pfnState;
+    if (!pfnBeginState) AssertApp(D_004997F8, 48, D_00499818, 0);
+    s.m_pfnEndState = pfnEndState;
+}
+void CPlayer::initFSM_() {
+    for (INT i = 0; i < 4; i++) {
+        _setState(((PLAYER_STATE*)_m_0x21c)[i], this, m_pBeginStateTbl[i], m_pStateTbl[i], m_pEndStateTbl[i]);
+    }
+    m_iState = -1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _init__7CPlayer);
 void CPlayer::updateBefore() {
     *(BOOL*)&m_bPreAir = m_bAir;
