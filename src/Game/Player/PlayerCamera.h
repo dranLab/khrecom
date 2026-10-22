@@ -170,8 +170,9 @@ private:
     UBYTE _m_0x104[0xc];   /* 0x104 m_iPreMode .. 0x10c m_iModeFieldFar */
     UINT m_uiFlag;         /* 0x110 */
     UBYTE _m_0x114[0x1bc]; /* 0x114 .. 0x2c0 m_vAim */ // PARTIAL: added for Game/Gimmick/GimmickCarry
-    FVECTOR m_vEye;        /* 0x2d0 */
+    FVECTOR m_vEye;        /* 0x2d0 */ UBYTE _m_0x2e0[0xd0]; /* 0x2e0 .. 0x3ac */ // PARTIAL: padding to sizeof 0x3b0 added for Game/Player/Player
 public:
+    CPlayerCamera(CTask* pParent); // PARTIAL: added for Game/Player/Player
     FVECTOR getNowCamEye() { return m_vEye; } // PARTIAL: added for Game/Gimmick/GimmickCarry
     // PARTIAL: added for Game/Player/SummonDumbo (the original is setFlag(UINT inSet, UINT inMask); these callers
     // pass (flag, on/off) - kept as they were matched with it)

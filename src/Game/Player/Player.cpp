@@ -40,6 +40,8 @@ extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" char D_0049B308[];
+extern "C" char D_00499898[]; extern "C" char D_004998C8[]; extern "C" char D_004998F8[]; /* "...Player.cpp(1103)", (1106), (1112) */
+extern "C" char D_00499928[]; extern "C" char D_00499958[]; /* "...Player.cpp(1117)", (1124) */
 extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)" */
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
@@ -62,13 +64,24 @@ extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
 extern LPCSTR g_szDpxAbnormal; // static in the original
 extern FLOAT g_fGimmickJumpPower[8];
 }
+class CPlayerDebug { /* PARTIAL: size and ctor for makeCockpit; CPlayerDebug's members are still INCLUDE_ASM */
+    UBYTE _m_0x00[0x120];
+public:
+    CPlayerDebug(CTask* inParent);
+};
 namespace Gauge {
 class CPlayerGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
+    UBYTE _m_0x00[0x80];
 public:
+    CPlayerGauge(CTask* p);
+    void setMaxHP(INT n);
     void setHP(INT inHP, INT inFlag);
+    void setDP(INT inDP, INT inFlag);
 };
 class CEscapeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
+    UBYTE _m_0x00[0x50];
 public:
+    CEscapeGauge(CTask* p);
     void destroy();
 };
 class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
@@ -147,7 +160,18 @@ void CPlayer::changeState(INT inState) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateInitial__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStartPos__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeWeapon__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeCockpit__7CPlayer);
+void CPlayer::makeCockpit() {
+    m_pCam = new (com_malloc_d(sizeof(PlayerCamera::CPlayerCamera), D_00499898, RET_ADDR())) PlayerCamera::CPlayerCamera(this);
+    m_pMarker = new (com_malloc_d(sizeof(Gauge::CLockonMarker), D_004998C8, RET_ADDR())) Gauge::CLockonMarker(this, FALSE);
+    if (m_bIsBattleScene) {
+        m_pEscape = new (com_malloc_d(sizeof(Gauge::CEscapeGauge), D_004998F8, RET_ADDR())) Gauge::CEscapeGauge(this);
+    }
+    m_pGauge = new (com_malloc_d(sizeof(Gauge::CPlayerGauge), D_00499928, RET_ADDR())) Gauge::CPlayerGauge(this);
+    m_pGauge->setMaxHP(m_iMaxHP);
+    m_pGauge->setHP(m_iHP, 1);
+    m_pGauge->setDP(m_iDP, 30);
+    m_pDebug = new (com_malloc_d(sizeof(CPlayerDebug), D_00499958, RET_ADDR())) CPlayerDebug(this);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeRevolver__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initActionSkill__7CPlayer);
 INT CPlayer::importStatus() {
