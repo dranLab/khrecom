@@ -748,9 +748,12 @@ INT CPlayer::chkWalkMode() {
     return 2;
 }
 /* Parked: only the angle-wrap register differs: the original keeps r (aim_dir - dirY, wrapped to +-PI) in $f1,
-   ours in $f13 (global alloc, pseudo set 3 times). tried: _limitPI/_abs helper bodies (return forms, ret local,
-   if/if, volatile/non-volatile asm, fabsf), r as an explicit local first/last, the ref's locals at the top,
-   folded calcVelocityXZ argument; best 6 lines. tools/permuter.py can't run on C++ methods. */
+   ours in $f13. Cause (greg dump): aim_dir dies at the subtraction (sched1 issues the v.y store first), so
+   global.c's expand_preferences hands r aim_dir's $f13 preference (from the Homing argument copy). tried:
+   _limitPI/_abs helper bodies (return forms, ret local, if/if, volatile/non-volatile asm, fabsf), r as an
+   explicit local first/last, the ref's locals at the top, folded calcVelocityXZ argument, the else-block and
+   in-place wrap forms, r computed before/between the v stores; best 6 lines. tools/permuter.py can't run on
+   C++ methods. */
 #if 0
 void CPlayer::exeWalk() {
     FLOAT aim_dir = m_fAnalogViewDir;
