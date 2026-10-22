@@ -1572,7 +1572,19 @@ void CPlayer::setBanish(INT inFlag) {
         PL::g_vBanishPos = getPos();
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBanish__7CPlayer);
+void CPlayer::exeBanish() {
+    if (isConditionFlag(0x40)) {
+        FVECTOR vColor;
+        vColor.set(1.0f, 1.0f, 1.0f, 0.5f);
+        vColor.w = (cosf((FLOAT)m_tqBanish * 0.0006f) + 1.0f) * 0.5f * 0.85f + 0.1f;
+        CSceneEnv::setColor((ObjType::eObjBit)2, 0.0f, vColor, NULL, 2);
+        m_tqBanish += m_tqFrameRate;
+        if (vColor.w > 0.8f) {
+            m_tqBanish += m_tqFrameRate;
+            if (vColor.w > 0.9f) PL::g_vBanishPos = getPos();
+        }
+    }
+}
 void CPlayer::setReflectGuard(INT inFlag) {
     if (!inFlag) {
         setConditionFlag(0, 0x200);
