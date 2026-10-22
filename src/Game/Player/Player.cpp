@@ -135,9 +135,13 @@ public:
 };
 class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
 public:
-    static void setPrizeMp(INT inMP); static void setDropMp(INT inMP);
+    static void setPrizeMp(INT inMP); static void setDropMp(INT inMP); static void setPrizeExp(INT inEXP);
 };
 }
+class CSound { /* PARTIAL: System/Sound.h is not written yet */
+public:
+    static HANDLE playSE(INT nID, INT nCh, INT nVol);
+};
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_0025F688);
@@ -1811,7 +1815,49 @@ void CPlayer::notifyReturnCard(const CARD* inCard) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyGetPrize__7CPlayeriii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addEXP__7CPlayerii);
+static inline BOOL _isLevelMax() {
+    BOOL ret = FALSE;
+    if (CPlayer::_instance()) {
+        if (CPlayer::_instance()->m_iLV >= 99) {
+            CPlayer::_instance()->m_iLV = 99;
+            ret = TRUE;
+        }
+    } else {
+        ret = CStatus::getLV() >= 99;
+    }
+    return ret;
+}
+static inline void _addEXP(INT inEXP) {
+    if (CPlayer::_instance()) CPlayer::_instance()->m_iEXP += inEXP;
+    else CStatus::getStaus().EXP += inEXP;
+}
+static inline void _addLV(INT inLV) {
+    if (CPlayer::_instance()) CPlayer::_instance()->m_iLV += inLV;
+    else CStatus::getStaus().LV += inLV;
+}
+void CPlayer::addEXP(INT inEXP, INT inMode) {
+    BOOL bLevelMax = _isLevelMax();
+    BOOL levelup = FALSE;
+    if (!bLevelMax) {
+        _addEXP(inEXP);
+        while (getNowNextEXP() <= 0) {
+            _addLV(1);
+            levelup = TRUE;
+        }
+    }
+    if (levelup) {
+        CGameWork::setFlag(1, 0x2D, TRUE);
+        if (inMode && _instance()) {
+            Gauge::CCommonGauge::setDispSeq(_instance()->getHandle(), 4);
+            CSound::playSE(0x36, -1, 0x40);
+            FVECTOR pos = {{0.0f, 0.85f, 0.0f, 1.0f}};
+            _instance()->m_hEffLevelUp = m_pInstance->attachEffect(PL::g_szDpxAlways, 0x15, &_instance()->Crd(0), &pos, NULL, 0.0f);
+            CEffect* effect = CEffectMan::getEffect(_instance()->m_hEffLevelUp);
+            if (effect) effect->m_iFlag |= 4;
+        }
+    }
+    Gauge::CPrizeGauge::setPrizeExp(inEXP);
+}
 void CPlayer::addHP(INT inHP, TIMEQ inDispEFF, INT inDispREC) {
     if (_instance()) {
         if (inDispEFF > 0) _instance()->setPrizeHealing(inDispEFF);
