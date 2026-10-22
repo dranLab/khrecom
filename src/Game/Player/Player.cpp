@@ -987,7 +987,44 @@ INT CPlayer::exeUseStock(INT inFlag) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", startSingleAction__7CPlayer);
+/* Parked: same spot as initAttackField: around the g_fGravity load the original keeps the %hi in v0 (later
+   s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi
+   moves. The flag block (battle 0x10/0x80000/8, then trg 4) and the ternary m_iComboBoost match.
+   tried: block perms (perm.py, hillmove.py), cast loads/stores on g_fGravity/g_CardBreakTime/
+   m_JumpState/m_fJumpGravity, gravity via a local; best 13 lines. tools/permuter.py can't run on C++ methods. */
+#if 0
+void CPlayer::initAttack(INT inNo) {
+    setPlayerState(PL::ATTACK);
+    setBattleFlag(0, 0x10);
+    setBattleFlag(0, 0x80000);
+    setBattleFlag(0, 8);
+    setTrgFlag(0, 4);
+    setPlayerFlag(0x100000, 0);
+    fadeEffAttack(0);
+    m_iAerialAnimShift = 0;
+    m_pMarker->holdTarget(8);
+    m_iAttackNo = inNo;
+    if (!inNo) m_uiPreAttackKind = 0;
+    m_bIsAttackHit = FALSE;
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    *(FLOAT*)&m_fMoveSpdXZ = isAir() ? m_fJumpSpdXZ : m_fWalkSpeed;
+    m_JumpState = 3;
+    m_fJumpGravity = PL::g_fGravity * 0.16f;
+    m_tqCardBreakTime = PL::g_CardBreakTime[(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].BREAK];
+    m_iComboBoost = isConditionFlag(0x40000000) ? m_iComboBoost + 20 : 0;
+    setAttack();
+    m_fDistXZ = m_fDistY = 0.0f;
+    if (m_pAtkData->FLAG & 8) {
+        setPlayerFlag(0x2800000, 0);
+    } else {
+        setPlayerFlag(0, 0x2800000);
+        m_fJumpGravity = PL::g_fGravity;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttack__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAttack__7CPlayer);
 void CPlayer::procTargetMark() {
