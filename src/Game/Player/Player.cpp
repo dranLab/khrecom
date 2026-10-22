@@ -633,7 +633,16 @@ void CPlayer::exePrizeHealing() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initGimmickCard__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickCard__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setTrapDamage__7CPlayeriPCcUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", fadeEffect__7CPlayerRii);
+void CPlayer::fadeEffect(INT& ioHandle, INT inLoop) {
+    if (ioHandle > 0) {
+        CEffect* effect = CEffectMan::getEffect(ioHandle);
+        if (effect) {
+            if (inLoop && effect->isLoop()) effect->loopEnd();
+            else effect->fadeout(8.0f);
+        }
+        ioHandle = 0;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", fadeEffAttack__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEffAttack__7CPlayeriPCciiP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateSpotLight__7CPlayeri);
