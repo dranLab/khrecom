@@ -624,7 +624,25 @@ BOOL CPlayer::isAir() {
     m_bAir = TRUE;
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getAirHeight__7CPlayerP7FVECTORfi);
+FLOAT CPlayer::getAirHeight(FVECTOR* inPos, FLOAT inHeight, INT inLimit) {
+    FVECTOR pos;
+    if (inPos) pos = *inPos;
+    else pos = getPos();
+    FLOAT fHeight = inHeight;
+    FVECTOR vStart = {{ pos.x, pos.y, pos.z, 1.0f }};
+    FVECTOR vEnd = {{ pos.x, pos.y - fHeight, pos.z, 1.0f }};
+    m_pCollMap->setType(COLL_TYPE_POINT);
+    m_pCollMap->enableSliding(0);
+    m_pCollMap->setShiftY(0.0f);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    FLOAT fRideH = fHeight;
+    if (m_pCollMap->collideRide(0)) fRideH = pos.y - m_pCollMap->getDetectPos()->y;
+    if (m_pCollMap->collideMap()) fHeight = pos.y - m_pCollMap->getDetectPos()->y;
+    if (fHeight < fRideH) fHeight = fRideH;
+    if (inLimit && pos.y + fHeight <= m_fJumpLandLimit) fHeight = pos.y - (FLOAT)inLimit;
+    return fHeight;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getFrontAirHeight__7CPlayerP7FVECTORfff);
 void CPlayer::exeAttackTimer() {
     m_tqAttackTimer -= m_tqFrameRate;
