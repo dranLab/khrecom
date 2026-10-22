@@ -589,7 +589,27 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeJumpLand__7CPl
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkHang__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initHang__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeHang__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAvoid__7CPlayer);
+void CPlayer::initAvoid() {
+    if (isConditionFlag(0x10000000) && !isConditionFlag(0x400000)) {
+        initFooting(2);
+        return;
+    }
+    setPlayerState(PL::AVOID);
+    setBattleFlag(0, 8);
+    setPlayerFlag(1, 0);
+    clearSpeed();
+    if (m_fAnalogPower >= 0.3f) {
+        m_fDir = m_fAnalogViewDir;
+        FVECTOR rot = getRot();
+        rot.y = m_fDir;
+        setRot(rot);
+    }
+    updateCoord();
+    setAnimForce(0x16, -1, TRUE, 0, 0, 0);
+    m_fJumpSpdY = 0.0f;
+    m_JumpState = 3;
+    m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickRide__7CPlayer);
 void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
     if (!_instance()) return;

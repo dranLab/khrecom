@@ -471,7 +471,7 @@ public:
     void setFaceAnim(INT inID, INT inFlag);
     void initStartWait();
     void initStandUp(INT inFlag);
-    void initFall(); void initWall(); void initCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
+    void initFall(); void initWall(); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
     INT initIdle(INT inAnim, INT inFlag);
     INT procFlowIdle(INT inFlag);
     void initEnd();
