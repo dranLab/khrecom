@@ -210,7 +210,16 @@ void CPlayer::getWeaponTopPos(FVECTOR& inVec) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCaskPos__7CPlayerR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyColl__7CPlayer);
+void CPlayer::updateBodyColl() {
+    updateBodyCollPos();
+    m_collBody.m_uiFlag = (INT)m_collBody.m_uiFlag & ~8;
+    m_collBody.m_uiFlag = (INT)m_collBody.m_uiFlag & ~0x20;
+    CCollBody& body = m_collBody;
+    if (isPlayerFlag(1)) body.CCollBody::off();
+    else body.CCollBody::on();
+    if (isPlayerFlag(0x1000)) m_collBody.m_enableBody = 0;
+    else m_collBody.m_enableBody = 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateBodyCollPos__7CPlayer);
 BOOL CPlayer::isMuteki() const {
     if (m_uiPlayerFlag & 1) return TRUE;
