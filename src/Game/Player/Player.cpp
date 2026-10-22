@@ -57,6 +57,10 @@ extern LPCSTR g_szDpxReload; // static in the original
 extern FLOAT g_fGimmickJumpPower[8];
 }
 namespace Gauge {
+class CPlayerGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
+public:
+    void setHP(INT inHP, INT inFlag);
+};
 class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
 public:
     static void setPrizeMp(INT inMP);
@@ -992,7 +996,21 @@ void CPlayer::notifyReturnCard(const CARD* inCard) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyGetPrize__7CPlayeriii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addEXP__7CPlayerii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", addHP__7CPlayeriii);
+void CPlayer::addHP(INT inHP, TIMEQ inDispEFF, INT inDispREC) {
+    if (_instance()) {
+        if (inDispEFF > 0) _instance()->setPrizeHealing(inDispEFF);
+        if (inDispREC > 0) Gauge::CCommonGauge::setDispSeq(_instance()->getHandle(), 0);
+        _instance()->m_iHP += inHP;
+        CPlayer* p = _instance();
+        if (p->m_iHP > p->m_iMaxHP) p->m_iHP = p->m_iMaxHP;
+        if (_instance()->m_pGauge) _instance()->m_pGauge->setHP(m_iHP, 0);
+    } else {
+        STATUS_INFO& st = CStatus::getStaus();
+        INT hp = st.HP + inHP;
+        if (hp > st.HPMax) hp = st.HPMax;
+        st.HP = hp;
+    }
+}
 void CPlayer::addMP(INT inMP) {
     if (_instance()) {
         _instance()->m_iMP += inMP;
