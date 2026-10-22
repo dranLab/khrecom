@@ -828,7 +828,20 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEnemyStop__7CP
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setMDFooting__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFooting__7CPlayeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeFooting__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", updateFooting__7CPlayer);
+void CPlayer::updateFooting() {
+    if (isConditionFlag(0x10000000)) {
+        CEntity* pEntity = m_hFooting > 0 ? (CEntity*)CTaskMan::getTask(m_hFooting) : NULL;
+        if (pEntity) {
+            FVECTOR pos = Crd(0).getWorldMatrix().v[3];
+            pos.y = 2.0f;
+            pEntity->warp(pos);
+            FVECTOR rot = getRot();
+            pEntity->setRot(rot);
+            pEntity->updateCoord();
+            pEntity->coordFix();
+        }
+    }
+}
 void CPlayer::setCardSnatch(INT inFlag) {
     if (m_pRevolver) {
         m_hSnatch = inFlag;
