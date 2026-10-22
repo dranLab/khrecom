@@ -464,7 +464,7 @@ public:
     void changeState(INT inState);
     void initActionSkill();
     void setPlayerState(PlayerState inState);
-    void setAnimForce(INT inID, INT inTq, INT inGr, INT inP3, INT inP4, INT inP5);
+    void setAnimForce(INT inAnimID, TIMEQ inChangeTime, BOOL inRootMove, INT inEffSeq, INT inSESeq, TIMEQ inStart);
     void setAnim(INT inID, INT inTq, INT inGr);
     void setAnimSkillEx(INT inAnimID, TIMEQ inChangeTime, BOOL inRootMove, INT inEffSeq, INT inSESeq);
     void setAnimRsrcEx(INT inRsrc, INT inID, INT inP2, INT inP3, INT inP4, INT inP5, INT inP6);

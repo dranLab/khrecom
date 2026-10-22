@@ -184,7 +184,16 @@ INT CPlayer::getMotIndex(INT inChara, INT inIndex) {
     if (!(0 <= inIndex && inIndex < ANIM_MAX)) AssertApp(D_004997C0, 1361, D_00499A18, 0);
     return PL_ANIM::g_MotNameTbl[inChara][inIndex].iIndex;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAnimForce__7CPlayeriiiiii);
+void CPlayer::setAnimForce(INT inAnimID, TIMEQ inChangeTime, BOOL inRootMove, INT inEffSeq, INT inSESeq, TIMEQ inStart) {
+    m_iPreAnimID = m_iNowAnimID;
+    m_iNowAnimID = inAnimID;
+    INT animID = getMotIndex(m_uiCharaID, inAnimID);
+    changeMotion(animID, inStart, inRootMove, inChangeTime, inEffSeq, inSESeq);
+    if (isPlayerFlag(0x40000000)) {
+        m_pWeapon->changeMotion(animID, inStart, FALSE, inChangeTime, inEffSeq, inSESeq);
+    }
+    setAnimSpeed(1.0f);
+}
 void CPlayer::setAnim(INT inID, INT inTq, INT inGr) {
     if (m_iNowAnimID != inID) setAnimForce(inID, inTq, inGr, 0, 0, 0);
 }
