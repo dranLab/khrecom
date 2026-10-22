@@ -989,7 +989,41 @@ void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkGimmick__7CPlayerUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initTreasureBox__7CPlayer);
+void CPlayer::initTreasureBox() {
+    CEntity* pTarget;
+    FVECTOR rot;
+    FVECTOR pos;
+    setPlayerState(TREASUREBOX);
+    setPlayerFlag(0x400001, 0);
+    clearSpeed();
+    m_collBody.off();
+    onWeapon(1);
+    m_pMarker->setFlag(FALSE);
+    setAnimRsrcEx(0xFDC, 0, 0, 0, 0, 0, 1);
+    m_bDmgMuteki = TRUE;
+    pTarget = (CEntity*)CTaskMan::getTask(m_hGimmick);
+    FLOAT d = pTarget->getRot().y + 3.1415927f;
+    FLOAT r;
+    if (d < -3.1415927f) r = d + 6.2831855f;
+    else {
+        r = d;
+        if (r > 3.1415927f) r -= 6.2831855f;
+    }
+    m_fDir = r;
+    rot = getRot();
+    rot.y = m_fDir;
+    setRot(rot);
+    pos = pTarget->getPos();
+    FVECTOR ofs = {{0.0f, 0.0f, -1.457f, 1.0f}};
+    FMATRIX m;
+    _unitMatrix(m);
+    _rotMatrixY(m, m_fDir);
+    ApplyMatrixXYZ(ofs, m, ofs);
+    AddVectorXYZ(pos, pos, ofs);
+    pos.y += 0.0035f;
+    setPos(pos);
+    setOldPos(pos);
+}
 void CPlayer::exeTreasureBox() {
     setPlayerFlag(0x400000, 0);
     if (isMotionEnd()) {

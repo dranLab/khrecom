@@ -344,7 +344,7 @@ public:
     INT chkAtelHide(INT inFlag); void initFSM_(); static void (CPlayer::*m_pBeginStateTbl[4])(); static void (CPlayer::*m_pStateTbl[4])(); static void (CPlayer::*m_pEndStateTbl[4])(); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
     void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
-    void exeEscape(); void exeGimmickRide(); INT chkGimmick(UINT inID); void exeTreasureBox(); void setBanish(INT inFlag); void exeBanish(); void exeWind();
+    void exeEscape(); void exeGimmickRide(); INT chkGimmick(UINT inID); void initTreasureBox(); void exeTreasureBox(); void setBanish(INT inFlag); void exeBanish(); void exeWind();
     void initCarry();
     void cancelLockon();
     void autoLockon();
