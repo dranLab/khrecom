@@ -147,7 +147,7 @@ class CEscapeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class on
     UBYTE _m_0x00[0x50];
 public:
     CEscapeGauge(CTask* p);
-    void destroy();
+    void destroy(); void setCharge(FLOAT inCharge);
 };
 class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
 public:
@@ -1988,7 +1988,51 @@ void CPlayer::calcAppearPosFS_toAttackID() {
     }
     calcAppearPosFS(2.0f, m_fWallRadius);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkEscape__7CPlayer);
+INT CPlayer::chkEscape() {
+    BOOL bPlay;
+    FVECTOR vNormal;
+    if (m_PlayerState == PL::ESCAPE) return FALSE;
+    bPlay = FALSE;
+    if (m_pCB && (CardBattle::CCardBattle::isPlayingCard(1) || isBattleFlag(0x10200000))) bPlay = TRUE;
+    if (m_fAnalogPower < 0.3f) bPlay = TRUE;
+    if (bPlay || isBattleFlag(4) || m_pMove->getWallCollATTR() != 5 || m_PlayerState == 0x20) {
+        if (isBattleFlag(2)) {
+            m_tqEscape = 0;
+            setBattleFlag(0, 2);
+            if (m_pEscape) m_pEscape->destroy();
+            setBGFade(1.0f, 0.0f, 0);
+        }
+        return FALSE;
+    }
+    if (!isBattleFlag(2)) {
+        setBattleFlag(2, 0);
+        m_tqEscape = 0;
+        if (m_pEscape) m_pEscape->setCharge(0.0f);
+        setBGFade(0.5f, 120.0f, 0);
+    }
+    vNormal = m_pMove->getEscapeNormal();
+    if (_abs(vNormal.x) > _abs(vNormal.z)) vNormal.z = 0.0f;
+    else vNormal.x = 0.0f;
+    FLOAT d = atan2f(vNormal.x, vNormal.z) + 3.1415927f;
+    FLOAT r;
+    if (d < -3.1415927f) r = d + 6.2831855f;
+    else {
+        r = d;
+        if (r > 3.1415927f) r -= 6.2831855f;
+    }
+    m_fWallDir = r;
+    m_tqEscape += m_tqFrameRate;
+    if (m_tqEscape < 6000) {
+        FLOAT charge = m_tqEscape * 100.0f / 6000.0f;
+        if (m_pEscape) m_pEscape->setCharge(charge);
+        return FALSE;
+    }
+    m_tqEscape = 6000;
+    if (m_pEscape) m_pEscape->setCharge(100.0f);
+    if (isAir()) return FALSE;
+    initEscape();
+    return TRUE;
+}
 void CPlayer::initEscape() {
     FVECTOR rot;
     setPlayerState(PL::ESCAPE);
