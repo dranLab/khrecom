@@ -1057,7 +1057,53 @@ INT CPlayer::isStartLadderJump() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isStartLadderJump__7CPlayer);
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getJumpState__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initJump__7CPlayeri);
+void CPlayer::initJump(INT inFlag) {
+    setPlayerState(PL::JUMP);
+    if (DebugWork::g_dw.player.iHiJump) setActionFlag(0x200000, 0);
+    else setActionFlag(0, 0x200000);
+    if (CGame::isSoraGame()) {
+        UINT uiActionSkill = CGameWork::getInt(0, 0x24);
+        if (uiActionSkill & 4) setActionFlag(0x800000, 0);
+        else setActionFlag(0, 0x800000);
+        if (uiActionSkill & 2) setActionFlag(0x400000, 0);
+        else setActionFlag(0, 0x400000);
+        if (DebugWork::g_dw.player.iGlide) setActionFlag(0x400000, 0);
+        if (DebugWork::g_dw.player.iGlideSP) setActionFlag(0x800000, 0);
+    }
+    if (m_fAnalogPower >= 0.3f) {
+        m_fDir = m_fAnalogViewDir;
+        FVECTOR rot = getRot();
+        rot.y = m_fDir;
+        setRot(rot);
+    }
+    setPlayerFlag(0, 0x1000000);
+    if (!inFlag) {
+        if (isActionFlag(0x20000) && chkGimmick(0x2002) == 7) {
+            setPlayerFlag(0x1000000, 0);
+            setAnimForce(0x14, -1, 0, 0, 0, 0);
+            m_fJumpPow = m_fGimmickJumpPow;
+        } else if (isActionFlag(0x200000)) {
+            setAnimForce(0x14, -1, 0, 0, 0, 0);
+            m_fJumpPow = m_pParam->HIJUMP_POWER;
+        } else {
+            setAnimForce(4, -1, 0, 0, 0, 0);
+            m_fJumpPow = m_pParam->JUMP_POWER;
+        }
+        m_vJumpStartPos = getPos();
+        m_fJumpSpdXZ = m_fWalkSpeed * 0.8f;
+        m_fJumpTop = 0.0f;
+        m_fJumpSpdY = 0.0f;
+    } else {
+        if (m_fJumpSpdY > 0.0f) m_fJumpSpdY = 0.0f;
+        m_fJumpPow = 0.0f;
+        m_fJumpSpdXZ = m_fWalkSpeed;
+    }
+    m_fJumpDir = m_fDir;
+    m_JumpState = 1;
+    m_fJumpGravity = 0.0f;
+    m_tqJumpTimer = 0;
+    m_fJumpHeight = 0.0f;
+}
 void CPlayer::initFall() {
     initJump(1);
     *(INT*)&m_JumpState = 3;
