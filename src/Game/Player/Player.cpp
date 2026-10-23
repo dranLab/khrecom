@@ -120,6 +120,8 @@ extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_szTexEyeKizetsu; // static in the original
 extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
 extern LPCSTR g_szDpxAbnormal; // static in the original
+extern FVECTOR g_vFieldPlayerPos; // static in the original
+extern FVECTOR g_vBattlePlayerPos; // static in the original
 extern FVECTOR HANG_HAND_LOCAL_OFS; // static in the original
 extern const FVECTOR LADDER_LOCAL_OFS; // static in the original
 extern LPCSTR g_szDpxAsiato __asm__("_2PL$g_szDpxAsiato_003A2298"); // static in the original (PlayerDRiku has one too)
@@ -273,7 +275,53 @@ void CPlayer::stateInitial() {
     initActionSkill();
     if (CGameWork::getFlag(1, 0)) changeState(3);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStartPos__7CPlayer);
+void CPlayer::initStartPos() {
+    FVECTOR v;
+    if (!m_bIsBattleScene) {
+        if (m_pPLM) m_pPLM->calcFieldStartPos();
+        m_vStartPos.set(PL::g_vFieldPlayerPos.x, PL::g_vFieldPlayerPos.y, PL::g_vFieldPlayerPos.z);
+        m_fStartDir = PL::g_vFieldPlayerPos.w * 0.017453292f;
+        setOldPos(m_vStartPos);
+        setPos(m_vStartPos);
+        m_fDir = m_fStartDir;
+        changeState(0);
+        m_pMove->setFlag(2, TRUE);
+    } else {
+        if (m_bIsMinigameScene) {
+            m_vStartPos.set(-19.54f, 3.01f, -8.96f);
+            m_fStartDir = -1.2217305f;
+        } else {
+            m_vStartPos.set(PL::g_vBattlePlayerPos.x, PL::g_vBattlePlayerPos.y, PL::g_vBattlePlayerPos.z);
+            m_fStartDir = PL::g_vBattlePlayerPos.w * 0.017453292f;
+        }
+        setOldPos(m_vStartPos);
+        setPos(m_vStartPos);
+        m_fDir = m_fStartDir;
+        changeState(1);
+        setBattleFlag(1, 0);
+    }
+    {
+        FVECTOR r;
+        r._q = 0;
+        r.y = m_fDir;
+        v = r;
+    }
+    m_pMove->getRot() = v;
+    updateCoord();
+    coordFix();
+    m_pMove->setFlag(0x40, TRUE);
+    m_pMove->setFlag(0x10, TRUE);
+    m_pMove->setFootRadius(0.25f);
+    m_pMove->setWallRadius(0.5f);
+    m_pMove->land(5.0f, 1.0f, 0);
+    m_vCenterPos = Crd(m_iBoneCenter).getWorldMatrix().v[3];
+    m_vHeadPos = Crd(m_iBoneHead).getWorldMatrix().v[3];
+    m_vJumpStartPos = getPos();
+    m_pCollMap = m_pMove->getMapCollision();
+    m_collBody.init((COLL_KIND)0, (COLL_TYPE)4, getHandle(), 0);
+    m_collBody.setRadius(m_pParam->BODY_COLL_RADIUS);
+    m_collBody.off();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeWeapon__7CPlayer);
 void CPlayer::makeCockpit() {
     m_pCam = new (com_malloc_d(sizeof(PlayerCamera::CPlayerCamera), D_00499898, RET_ADDR())) PlayerCamera::CPlayerCamera(this);
