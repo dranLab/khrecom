@@ -7,11 +7,13 @@
 #include "System/Vector.h"
 
 namespace D2 { class C2DSeqCtrl; }
+class CPlayer;
 
 namespace Gauge {
 class CEnemyGauge;
 
 class CLockonMarker : public CTask {
+    friend class ::CPlayer; // PARTIAL: added for Game/Player/Player (chkLockon reads the marker state)
 private:
     CEnemyGauge* m_pGauge;          /* 0x40 */ // PARTIAL: split out for Game/Player/PlayerGauge
     D2::C2DSeqCtrl* m_pSeqCtrl;     /* 0x44 */

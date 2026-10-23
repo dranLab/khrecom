@@ -36,6 +36,7 @@
 #include "Game/Player/PlayerAttack.h"
 #include "System/Graphic/Anim.h"
 #include "Game/Card.h"
+#include "Game/LockOnManager.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -1283,7 +1284,53 @@ void CPlayer::exeAttackField() {
     }
     if (isMotionEnd()) procSkillEnd(-1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkLockon__7CPlayer);
+void CPlayer::chkLockon() {
+    HANDLE near;
+    INT bCheck;
+    if (!m_pMarker->m_bFlag) return;
+    if (isPlayerFlag(0x10000)) return;
+    if (m_PlayerState == 0x1E) near = LockOnManager::CLockOnManager::getLockOnMapEnemy(*this);
+    else near = LockOnManager::CLockOnManager::getLockOnObject(*this);
+    if (near == -1) near = 0;
+    m_hTarget = near;
+    bCheck = FALSE;
+    if (m_bIsBattleScene && m_PlayerState != HANG && !CGameWork::getFlag(1, 0xC)) {
+        if (!m_pMarker->m_iMode) {
+            if (isTrgLockon()) {
+                m_pMarker->changeMode(m_pMarker->m_iMode ^ 1);
+                bCheck = TRUE;
+                m_pMarker->chkLockon(m_hTarget);
+                if (m_hTarget > 0) CSound::playSE(7, -1, 0x40);
+                setTrgFlag(0, 0x1000);
+            }
+        } else if (isRTrgLockon() && (m_uiTrgFlag & 0x1000)) {
+            m_pMarker->changeMode(m_pMarker->m_iMode ^ 1);
+            bCheck = TRUE;
+            m_pMarker->chkLockon(m_hTarget);
+            if (m_hTarget > 0) CSound::playSE(8, -1, 0x40);
+        } else if (isDownLockon()) {
+            if (isTrgLockon()) setTrgFlag(0x1000, 0);
+            if (isChangeHoukouR()) {
+                HANDLE hChange = LockOnManager::CLockOnManager::changeLockOnObject(m_hLockon);
+                if (hChange > 0) {
+                    m_hTarget = hChange;
+                    m_pMarker->setMode(1);
+                    bCheck = TRUE;
+
+                    m_pMarker->chkLockon(m_hTarget);
+                    CSound::playSE(7, -1, 0x40);
+                }
+            }
+            setTrgFlag(0x800, 0);
+        } else {
+            setTrgFlag(0, 0x1000);
+        }
+    }
+    if (!bCheck) m_pMarker->chkLockon(m_hTarget);
+    m_hLockon = m_pMarker->m_hLockon;
+    m_vLockonPos = m_pMarker->m_vCameraTargetPos;
+    if (m_hLockon > 0) m_hTarget = m_hLockon;
+}
 void CPlayer::cancelLockon() {
     m_pMarker->cancelLockon(m_hLockon, TRUE);
 }
