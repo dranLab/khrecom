@@ -1121,7 +1121,45 @@ void CPlayer::exeTreasureBox() {
         m_pMarker->holdTarget(0);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initRoomCreation__7CPlayer);
+void CPlayer::initRoomCreation() {
+    CEntity* pTarget;
+    FVECTOR rot;
+    FVECTOR pos;
+    setTrgFlag(0, 0x18000);
+    setPlayerState(ROOMCREATION);
+    m_iSubState = 0;
+    clearSpeed();
+    m_collBody.off();
+    m_bDmgMuteki = TRUE;
+    offWeapon();
+    m_pMarker->setFlag(FALSE);
+    setAnimForce(1, -1, 0, 0, 0, 0);
+    pTarget = (CEntity*)CTaskMan::getTask(m_hGimmick);
+    FLOAT d = pTarget->getRot().y + 3.1415927f;
+    FLOAT r;
+    if (d < -3.1415927f) r = d + 6.2831855f;
+    else {
+        r = d;
+        if (r > 3.1415927f) r -= 6.2831855f;
+    }
+    m_fDir = r;
+    rot = getRot();
+    rot.y = m_fDir;
+    setRot(rot);
+    pos = pTarget->getPos();
+    FVECTOR ofs = {{0.0f, 0.0f, -2.0f, 1.0f}};
+    FMATRIX m;
+    _unitMatrix(m);
+    _rotMatrixY(m, m_fDir);
+    ApplyMatrixXYZ(ofs, m, ofs);
+    AddVectorXYZ(pos, pos, ofs);
+    pos.y += 0.0035f;
+    setOldPos(pos);
+    setPos(pos);
+    setLand(1.0f, 0.5f, 1);
+    m_pCam->initCamera(1, 1, NULL);
+    m_pCam->setFlag(1, TRUE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeRoomCreation__7CPlayer);
 void CPlayer::initWorldSelect() {
     CEntity* pTarget;

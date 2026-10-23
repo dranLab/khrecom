@@ -342,7 +342,7 @@ public:
     void setReflectGuard(INT inFlag); void setQuickBarrier(INT inFlag);
     void setTransOff(INT inFlag);
     INT chkAtelHide(INT inFlag); void initFSM_(); static void (CPlayer::*m_pBeginStateTbl[4])(); static void (CPlayer::*m_pStateTbl[4])(); static void (CPlayer::*m_pEndStateTbl[4])(); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
-    void initWorldSelect();
+    void initRoomCreation(); void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
     void exeEscape(); void exeGimmickRide(); INT chkGimmick(UINT inID); void initTreasureBox(); void exeTreasureBox(); void setBanish(INT inFlag); void exeBanish(); INT exeWarp(INT inSet); void exeWind();
     void initCarry();
