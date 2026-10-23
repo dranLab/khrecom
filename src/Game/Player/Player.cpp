@@ -45,6 +45,8 @@ extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void Normalize(FVECTOR& outV, const FVECTOR& inV);
+FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
 extern "C" char D_0049B308[];
 extern "C" char D_004997F8[]; extern "C" char D_00499808[]; extern "C" char D_00499818[]; /* "System/Fsm.h", "pInstance", "pfnBeginState" */
 extern "C" char D_00499898[]; extern "C" char D_004998C8[]; extern "C" char D_004998F8[]; /* "...Player.cpp(1103)", (1106), (1112) */
@@ -1524,7 +1526,42 @@ void CPlayer::procTargetMark() {
         m_vMarkPos.set(0.0f, 0.0f, 0.0f);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackMove__7CPlayeriffif);
+void CPlayer::procAttackMove(TIMEQ inNowFrame, FLOAT inRadius, FLOAT inMaxSpeed, INT inHomingFlag, FLOAT inRate) {
+    FLOAT speed = 0.0f;
+    FVECTOR vec;
+    FVECTOR dir;
+    if (inHomingFlag && m_hMark > 0) {
+        SubVectorXYZ(vec, m_vMarkPos, m_vCenterPos);
+        Normalize(dir, vec);
+        vec.y = 0.0f;
+        m_fDistXZ = _sqrtf(InnerProduct(vec, vec));
+        FLOAT d = Movement::Homing(m_fDir, atan2f(dir.x, dir.z), inRate, m_fFrameRate);
+        vec.y = d;
+        vec.x = 0.0f;
+        vec.z = 0.0f;
+        vec.w = 1.0f;
+        m_fDir = d;
+        m_pMove->getRot() = vec;
+        if (inHomingFlag != 2 && inNowFrame >= m_pAtkData->MOVE_START_FRAME && inNowFrame < m_pAtkData->MOVE_END_FRAME) {
+            if (inRadius < m_fDistXZ) speed = inMaxSpeed / 60.0f;
+            else if (m_pAtkData->FLAG & 4) m_hMark = 0;
+        }
+    }
+    if ((m_pAtkData->FLAG & 0x10) && inNowFrame < m_pAtkData->MOVE_END_FRAME) {
+        speed += (SBYTE)m_pAtkData->WORK0 / 60.0f;
+    }
+    if (isPlayerFlag(0x800000)) {
+        if (speed > 0.0f) m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.2f, m_fFrameRate);
+        else m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.1f, m_fFrameRate);
+    } else if (m_pAtkData->FLAG & 4) {
+        if (speed > 0.0f) m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.2f, m_fFrameRate);
+        else m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.05f, m_fFrameRate);
+    } else {
+        if (speed > 0.0f) m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.2f, m_fFrameRate);
+        else m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.4f, m_fFrameRate);
+    }
+    m_pMove->calcVelocityXZ(m_fMoveSpdXZ);
+}
 INT CPlayer::procAttackCollision(TIMEQ inNowFrame) {
     if (inNowFrame >= m_pAtkData->COLL_START_FRAME) {
         if (inNowFrame < m_pAtkData->COLL_END_FRAME) {
