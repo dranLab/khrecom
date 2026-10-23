@@ -917,7 +917,41 @@ void CPlayer::initWall() {
     m_fFootRadius = 0.5f;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWall__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkLadderStepNow__7CPlayeri);
+/* FVECTOR::operator-(const FVECTOR&) of the original (ref locals: FVECTOR* this, FVECTOR vec). */
+static inline FVECTOR _subVec(const FVECTOR& a, const FVECTOR& inV) {
+    FVECTOR vec = a;
+    vec.x -= inV.x;
+    vec.y -= inV.y;
+    vec.z -= inV.z;
+    vec.w -= inV.w;
+    return vec;
+}
+INT CPlayer::chkLadderStepNow(BOOL inAir) {
+    const FVECTOR* pos;
+    const FVECTOR* nor;
+    FVECTOR dif;
+    INT step;
+    INT max;
+    if (!isActionFlag(0x1000)) return -1;
+    if (!inAir && m_fAnalogPower < 0.3f) return -1;
+    pos = m_pMove->getLadderPos();
+    nor = m_pMove->getLadderNormal();
+    if (!pos || !nor) return -1;
+    dif = _subVec(*pos, getPos());
+    dif.y = 0.0f;
+    dif.w = 1.0f;
+    if (Math3D::VectorLength(dif) > 0.75f) return -1;
+    setPlayerFlag(0x2000, 0);
+    FLOAT r = atan2f(nor->x, nor->z) - m_fDir;
+    if (r < -3.1415927f) r += 6.2831855f;
+    else if (r > 3.1415927f) r -= 6.2831855f;
+    if (getHoukouFromAngle(r) != 1) return -1;
+    step = (INT)((getPos().y - pos->y) / 0.375f);
+    max = (INT)(m_pMove->getLadderHeight() / 0.375f) - 4;
+    if (step >= max) return -1;
+    dbgCheckUser(KKIKUCHI);
+    return step;
+}
 INT CPlayer::getLadderStepNow(FLOAT inHeight) {
     return (INT)((inHeight - m_vLadderPos.y + 0.0035f) / 0.375f);
 }

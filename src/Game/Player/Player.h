@@ -351,7 +351,7 @@ public:
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
     INT cmdRevolver_isActive();
     BOOL cmdRevolver_rollDeck(INT inNum);
-    INT getLadderStepNow(FLOAT inHeight);
+    INT chkLadderStepNow(BOOL inAir); INT getLadderStepNow(FLOAT inHeight);
     void exeQuickBarrier(); void exeAeroGuard(); void setAeroGuard(INT inFlag);
     INT isNowCardActionState();
     INT chkWalkMode();
