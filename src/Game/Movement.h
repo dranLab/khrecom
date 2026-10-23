@@ -200,7 +200,20 @@ private:
 #else
 class CMovement {
 private:
-    UBYTE _m_0x00[0x108] __attribute__((aligned(16))); /* 0x000 m_vOldPos .. 0x104 m_WallCollInfoO */
+    UBYTE _m_0x00[0xc0] __attribute__((aligned(16))); /* 0x000 m_vOldPos .. 0x0b0 m_vWallNormal */
+    FVECTOR m_vEscapeNormal;    /* 0x0c0 */ // PARTIAL: split out for Game/Player/Player
+    // PARTIAL: ladder members split out for Game/Player/Player
+    FVECTOR m_vLadderPos;       /* 0x0d0 */
+    FVECTOR m_vLadderNormal;    /* 0x0e0 */
+    FLOAT m_fLadderHeight;      /* 0x0f0 */
+    UBYTE _m_0xf4[0x8];         /* 0x0f4 m_JumpCollInfo, 0x0f8 m_CollInfo */
+    struct {                    /* 0x0fc m_WallCollInfo (COLL_INFO_UNION) */ // PARTIAL: split out for Game/Player/Player
+        BYTE infoID;
+        BYTE infoATTR;
+        BYTE infoPID;
+        BYTE infoSTAT;
+    } m_WallCollInfo;
+    UBYTE _m_0x100[0x8];        /* 0x100 m_CollInfoO, 0x104 m_WallCollInfoO */
     UINT m_uiFlag;              /* 0x108 */
     UINT m_uiOldCollisionFlag;  /* 0x10c */
     UINT m_uiCollisionFlag;     /* 0x110 */
@@ -236,6 +249,19 @@ public:
     FVECTOR& getVel() { return *(FVECTOR*)&_m_0x00[0x70]; }
     // PARTIAL: added for Game/Enemy/EnemyBluerhapsody
     void setVel(const FVECTOR& inVel) { getVel() = inVel; }
+    // PARTIAL: added for Game/Player/Player (isLadder is out of line in the original)
+    UINT isLadder() const;
+    const FVECTOR& getEscapeNormal() const { return m_vEscapeNormal; } // PARTIAL: added for Game/Player/Player
+    BYTE getWallCollATTR() const { return m_WallCollInfo.infoATTR; } // PARTIAL: added for Game/Player/Player (the original reads getWallCollInfo().infoATTR)
+    const FVECTOR* getLadderPos() const {
+        if (isLadder()) return &m_vLadderPos;
+        return NULL;
+    }
+    const FVECTOR* getLadderNormal() const {
+        if (isLadder()) return &m_vLadderNormal;
+        return NULL;
+    }
+    FLOAT getLadderHeight() const { return isLadder() ? m_fLadderHeight : -1.0f; }
     UINT isGround() { return m_uiCollisionFlag & 5; } UINT isObjRide() const { return m_uiCollisionFlag & 4; } // PARTIAL: isObjRide added for Game/Player/Player
     UINT isGravity() const { return m_uiFlag & 4; } // PARTIAL: added for Game/Atel/Avatar
     UINT isWall() { return m_uiCollisionFlag & 0xa; } // PARTIAL: added for Game/Enemy/EnemyYellowopera

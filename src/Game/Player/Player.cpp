@@ -36,6 +36,7 @@
 #include "Game/Player/PlayerAttack.h"
 #include "System/Graphic/Anim.h"
 #include "Game/Card.h"
+#include "Game/LockOnManager.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -44,6 +45,8 @@ extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void Normalize(FVECTOR& outV, const FVECTOR& inV);
+FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
 extern "C" char D_0049B308[];
 extern "C" char D_004997F8[]; extern "C" char D_00499808[]; extern "C" char D_00499818[]; /* "System/Fsm.h", "pInstance", "pfnBeginState" */
 extern "C" char D_00499898[]; extern "C" char D_004998C8[]; extern "C" char D_004998F8[]; /* "...Player.cpp(1103)", (1106), (1112) */
@@ -52,6 +55,7 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
+extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */
 extern "C" char D_00499988[]; extern "C" char D_004999B8[]; extern "C" char D_004999E8[]; /* "...Player.cpp(1156)", (1172), (1181) */
 extern "C" const CARD_DATA cardDataTbl_0049E190[224];
 extern "C" char D_0049AFA8[]; /* TRACE messages of setTrapDamage */
@@ -116,9 +120,14 @@ extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_szTexEyeKizetsu; // static in the original
 extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
 extern LPCSTR g_szDpxAbnormal; // static in the original
+extern FVECTOR g_vFieldPlayerPos; // static in the original
+extern FVECTOR g_vBattlePlayerPos; // static in the original
 extern FVECTOR HANG_HAND_LOCAL_OFS; // static in the original
 extern const FVECTOR LADDER_LOCAL_OFS; // static in the original
 extern LPCSTR g_szDpxAsiato __asm__("_2PL$g_szDpxAsiato_003A2298"); // static in the original (PlayerDRiku has one too)
+extern LPCSTR g_szDpxSpeedBreak __asm__("_2PL$g_szDpxSpeedBreak_003A229C"); // static in the original
+extern LPCSTR g_szDpxBreak; // static in the original
+extern LPCSTR g_szDpxHitWall; // static in the original
 extern FLOAT g_fDefAttr[];
 extern FLOAT g_fGimmickJumpPower[8];
 }
@@ -140,7 +149,7 @@ class CEscapeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class on
     UBYTE _m_0x00[0x50];
 public:
     CEscapeGauge(CTask* p);
-    void destroy();
+    void destroy(); void setCharge(FLOAT inCharge);
 };
 class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
 public:
@@ -266,7 +275,53 @@ void CPlayer::stateInitial() {
     initActionSkill();
     if (CGameWork::getFlag(1, 0)) changeState(3);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStartPos__7CPlayer);
+void CPlayer::initStartPos() {
+    FVECTOR v;
+    if (!m_bIsBattleScene) {
+        if (m_pPLM) m_pPLM->calcFieldStartPos();
+        m_vStartPos.set(PL::g_vFieldPlayerPos.x, PL::g_vFieldPlayerPos.y, PL::g_vFieldPlayerPos.z);
+        m_fStartDir = PL::g_vFieldPlayerPos.w * 0.017453292f;
+        setOldPos(m_vStartPos);
+        setPos(m_vStartPos);
+        m_fDir = m_fStartDir;
+        changeState(0);
+        m_pMove->setFlag(2, TRUE);
+    } else {
+        if (m_bIsMinigameScene) {
+            m_vStartPos.set(-19.54f, 3.01f, -8.96f);
+            m_fStartDir = -1.2217305f;
+        } else {
+            m_vStartPos.set(PL::g_vBattlePlayerPos.x, PL::g_vBattlePlayerPos.y, PL::g_vBattlePlayerPos.z);
+            m_fStartDir = PL::g_vBattlePlayerPos.w * 0.017453292f;
+        }
+        setOldPos(m_vStartPos);
+        setPos(m_vStartPos);
+        m_fDir = m_fStartDir;
+        changeState(1);
+        setBattleFlag(1, 0);
+    }
+    {
+        FVECTOR r;
+        r._q = 0;
+        r.y = m_fDir;
+        v = r;
+    }
+    m_pMove->getRot() = v;
+    updateCoord();
+    coordFix();
+    m_pMove->setFlag(0x40, TRUE);
+    m_pMove->setFlag(0x10, TRUE);
+    m_pMove->setFootRadius(0.25f);
+    m_pMove->setWallRadius(0.5f);
+    m_pMove->land(5.0f, 1.0f, 0);
+    m_vCenterPos = Crd(m_iBoneCenter).getWorldMatrix().v[3];
+    m_vHeadPos = Crd(m_iBoneHead).getWorldMatrix().v[3];
+    m_vJumpStartPos = getPos();
+    m_pCollMap = m_pMove->getMapCollision();
+    m_collBody.init((COLL_KIND)0, (COLL_TYPE)4, getHandle(), 0);
+    m_collBody.setRadius(m_pParam->BODY_COLL_RADIUS);
+    m_collBody.off();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeWeapon__7CPlayer);
 void CPlayer::makeCockpit() {
     m_pCam = new (com_malloc_d(sizeof(PlayerCamera::CPlayerCamera), D_00499898, RET_ADDR())) PlayerCamera::CPlayerCamera(this);
@@ -912,7 +967,41 @@ void CPlayer::initWall() {
     m_fFootRadius = 0.5f;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWall__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkLadderStepNow__7CPlayeri);
+/* FVECTOR::operator-(const FVECTOR&) of the original (ref locals: FVECTOR* this, FVECTOR vec). */
+static inline FVECTOR _subVec(const FVECTOR& a, const FVECTOR& inV) {
+    FVECTOR vec = a;
+    vec.x -= inV.x;
+    vec.y -= inV.y;
+    vec.z -= inV.z;
+    vec.w -= inV.w;
+    return vec;
+}
+INT CPlayer::chkLadderStepNow(BOOL inAir) {
+    const FVECTOR* pos;
+    const FVECTOR* nor;
+    FVECTOR dif;
+    INT step;
+    INT max;
+    if (!isActionFlag(0x1000)) return -1;
+    if (!inAir && m_fAnalogPower < 0.3f) return -1;
+    pos = m_pMove->getLadderPos();
+    nor = m_pMove->getLadderNormal();
+    if (!pos || !nor) return -1;
+    dif = _subVec(*pos, getPos());
+    dif.y = 0.0f;
+    dif.w = 1.0f;
+    if (Math3D::VectorLength(dif) > 0.75f) return -1;
+    setPlayerFlag(0x2000, 0);
+    FLOAT r = atan2f(nor->x, nor->z) - m_fDir;
+    if (r < -3.1415927f) r += 6.2831855f;
+    else if (r > 3.1415927f) r -= 6.2831855f;
+    if (getHoukouFromAngle(r) != 1) return -1;
+    step = (INT)((getPos().y - pos->y) / 0.375f);
+    max = (INT)(m_pMove->getLadderHeight() / 0.375f) - 4;
+    if (step >= max) return -1;
+    dbgCheckUser(KKIKUCHI);
+    return step;
+}
 INT CPlayer::getLadderStepNow(FLOAT inHeight) {
     return (INT)((inHeight - m_vLadderPos.y + 0.0035f) / 0.375f);
 }
@@ -1120,7 +1209,45 @@ void CPlayer::exeTreasureBox() {
         m_pMarker->holdTarget(0);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initRoomCreation__7CPlayer);
+void CPlayer::initRoomCreation() {
+    CEntity* pTarget;
+    FVECTOR rot;
+    FVECTOR pos;
+    setTrgFlag(0, 0x18000);
+    setPlayerState(ROOMCREATION);
+    m_iSubState = 0;
+    clearSpeed();
+    m_collBody.off();
+    m_bDmgMuteki = TRUE;
+    offWeapon();
+    m_pMarker->setFlag(FALSE);
+    setAnimForce(1, -1, 0, 0, 0, 0);
+    pTarget = (CEntity*)CTaskMan::getTask(m_hGimmick);
+    FLOAT d = pTarget->getRot().y + 3.1415927f;
+    FLOAT r;
+    if (d < -3.1415927f) r = d + 6.2831855f;
+    else {
+        r = d;
+        if (r > 3.1415927f) r -= 6.2831855f;
+    }
+    m_fDir = r;
+    rot = getRot();
+    rot.y = m_fDir;
+    setRot(rot);
+    pos = pTarget->getPos();
+    FVECTOR ofs = {{0.0f, 0.0f, -2.0f, 1.0f}};
+    FMATRIX m;
+    _unitMatrix(m);
+    _rotMatrixY(m, m_fDir);
+    ApplyMatrixXYZ(ofs, m, ofs);
+    AddVectorXYZ(pos, pos, ofs);
+    pos.y += 0.0035f;
+    setOldPos(pos);
+    setPos(pos);
+    setLand(1.0f, 0.5f, 1);
+    m_pCam->initCamera(1, 1, NULL);
+    m_pCam->setFlag(1, TRUE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeRoomCreation__7CPlayer);
 void CPlayer::initWorldSelect() {
     CEntity* pTarget;
@@ -1241,7 +1368,53 @@ void CPlayer::exeAttackField() {
     }
     if (isMotionEnd()) procSkillEnd(-1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkLockon__7CPlayer);
+void CPlayer::chkLockon() {
+    HANDLE near;
+    INT bCheck;
+    if (!m_pMarker->m_bFlag) return;
+    if (isPlayerFlag(0x10000)) return;
+    if (m_PlayerState == 0x1E) near = LockOnManager::CLockOnManager::getLockOnMapEnemy(*this);
+    else near = LockOnManager::CLockOnManager::getLockOnObject(*this);
+    if (near == -1) near = 0;
+    m_hTarget = near;
+    bCheck = FALSE;
+    if (m_bIsBattleScene && m_PlayerState != HANG && !CGameWork::getFlag(1, 0xC)) {
+        if (!m_pMarker->m_iMode) {
+            if (isTrgLockon()) {
+                m_pMarker->changeMode(m_pMarker->m_iMode ^ 1);
+                bCheck = TRUE;
+                m_pMarker->chkLockon(m_hTarget);
+                if (m_hTarget > 0) CSound::playSE(7, -1, 0x40);
+                setTrgFlag(0, 0x1000);
+            }
+        } else if (isRTrgLockon() && (m_uiTrgFlag & 0x1000)) {
+            m_pMarker->changeMode(m_pMarker->m_iMode ^ 1);
+            bCheck = TRUE;
+            m_pMarker->chkLockon(m_hTarget);
+            if (m_hTarget > 0) CSound::playSE(8, -1, 0x40);
+        } else if (isDownLockon()) {
+            if (isTrgLockon()) setTrgFlag(0x1000, 0);
+            if (isChangeHoukouR()) {
+                HANDLE hChange = LockOnManager::CLockOnManager::changeLockOnObject(m_hLockon);
+                if (hChange > 0) {
+                    m_hTarget = hChange;
+                    m_pMarker->setMode(1);
+                    bCheck = TRUE;
+
+                    m_pMarker->chkLockon(m_hTarget);
+                    CSound::playSE(7, -1, 0x40);
+                }
+            }
+            setTrgFlag(0x800, 0);
+        } else {
+            setTrgFlag(0, 0x1000);
+        }
+    }
+    if (!bCheck) m_pMarker->chkLockon(m_hTarget);
+    m_hLockon = m_pMarker->m_hLockon;
+    m_vLockonPos = m_pMarker->m_vCameraTargetPos;
+    if (m_hLockon > 0) m_hTarget = m_hLockon;
+}
 void CPlayer::cancelLockon() {
     m_pMarker->cancelLockon(m_hLockon, TRUE);
 }
@@ -1261,7 +1434,55 @@ void CPlayer::setPushon(INT inFlag) {
 void CPlayer::setTrgFlagRendaNG(const CHAR* inName) {
     if (!DebugWork::g_dw.player.iRenda) m_uiTrgFlag |= 0x40000;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkPlayCard__7CPlayer);
+void CPlayer::chkPlayCard() {
+    if (m_bIsDead) return;
+    if (!m_pRevolver) return;
+    BOOL bExeSkill = FALSE;
+    INT iStock = m_pRevolver->getStock(1);
+    if (isTrgStock()) {
+        if (iStock < 3) m_pRevolver->setStockCard();
+        else bExeSkill = TRUE;
+    }
+    if (!isBattleFlag(8)) {
+        setBattleFlag(8, 0);
+        return;
+    }
+    if (bExeSkill || (isTrgStockSkill() && iStock > 0)) {
+        INT result = m_pRevolver->setPlayStock(0, 1);
+        if (result) {
+            TRACE(D_00499F48);
+            setBattleFlag(0, 8);
+            if (result == 1) {
+                setBattleFlag(0x10200000, 0x20);
+            } else {
+                TRACE(D_00499F70);
+                setBattleFlag(0, 0x10200000); setBattleFlag(0x20, 0);
+            }
+            return;
+        }
+    }
+    if (!isTrgAttack()) return;
+    if (isBattleFlag(0x10)) return;
+    if (isBattleFlag(0x100)) return;
+    if (isBattleFlag(0x80)) return;
+    if (isBattleFlag(0x200)) return;
+    if (isBattleFlag(0x400)) return;
+    if (isBattleFlag(0x800)) return;
+    if (m_tqAttackTimer > 0) return;
+    if (!isActionFlag(0x40)) return;
+    INT mode = m_pRevolver->getMode();
+    INT result = m_pRevolver->setPlayCard(0, 1);
+    if (!result) return;
+    setBattleFlag(0, 8);
+    if (mode) return;
+    if (result == 1) {
+        TRACE(D_00499F80);
+        setBattleFlag(0x10200000, 0x20);
+    } else {
+        TRACE(D_00499FA0);
+        setBattleFlag(0, 0x10200000); setBattleFlag(0x20, 0);
+    }
+}
 /* Parked: the switch's jump table goes to .rodata, which is stripped until the unit's data comes from source
    (objcopy: symbol `.rodata' required but not present); tried: C switch over PL::ATTACK/ITEM/MAGIC/SKILL/
    GIMMICKCARD/FRIEND/SUMMON/DUEL (the code apart from the table is the original's shape) */
@@ -1353,7 +1574,42 @@ void CPlayer::procTargetMark() {
         m_vMarkPos.set(0.0f, 0.0f, 0.0f);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", procAttackMove__7CPlayeriffif);
+void CPlayer::procAttackMove(TIMEQ inNowFrame, FLOAT inRadius, FLOAT inMaxSpeed, INT inHomingFlag, FLOAT inRate) {
+    FLOAT speed = 0.0f;
+    FVECTOR vec;
+    FVECTOR dir;
+    if (inHomingFlag && m_hMark > 0) {
+        SubVectorXYZ(vec, m_vMarkPos, m_vCenterPos);
+        Normalize(dir, vec);
+        vec.y = 0.0f;
+        m_fDistXZ = _sqrtf(InnerProduct(vec, vec));
+        FLOAT d = Movement::Homing(m_fDir, atan2f(dir.x, dir.z), inRate, m_fFrameRate);
+        vec.y = d;
+        vec.x = 0.0f;
+        vec.z = 0.0f;
+        vec.w = 1.0f;
+        m_fDir = d;
+        m_pMove->getRot() = vec;
+        if (inHomingFlag != 2 && inNowFrame >= m_pAtkData->MOVE_START_FRAME && inNowFrame < m_pAtkData->MOVE_END_FRAME) {
+            if (inRadius < m_fDistXZ) speed = inMaxSpeed / 60.0f;
+            else if (m_pAtkData->FLAG & 4) m_hMark = 0;
+        }
+    }
+    if ((m_pAtkData->FLAG & 0x10) && inNowFrame < m_pAtkData->MOVE_END_FRAME) {
+        speed += (SBYTE)m_pAtkData->WORK0 / 60.0f;
+    }
+    if (isPlayerFlag(0x800000)) {
+        if (speed > 0.0f) m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.2f, m_fFrameRate);
+        else m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.1f, m_fFrameRate);
+    } else if (m_pAtkData->FLAG & 4) {
+        if (speed > 0.0f) m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.2f, m_fFrameRate);
+        else m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.05f, m_fFrameRate);
+    } else {
+        if (speed > 0.0f) m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.2f, m_fFrameRate);
+        else m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.4f, m_fFrameRate);
+    }
+    m_pMove->calcVelocityXZ(m_fMoveSpdXZ);
+}
 INT CPlayer::procAttackCollision(TIMEQ inNowFrame) {
     if (inNowFrame >= m_pAtkData->COLL_START_FRAME) {
         if (inNowFrame < m_pAtkData->COLL_END_FRAME) {
@@ -1547,7 +1803,50 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDamage__7CPlay
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkTrgAction__7CPlayeriUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initDead__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDead__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyDead__7CPlayeri);
+void CPlayer::notifyDead(INT inCmd) {
+    switch (inCmd) {
+    case 0:
+        clearSpeed();
+        setBattleFlag(0, 0x00443F90);
+        setBattleFlag(0, 0x10200000);
+        setBattleFlag(0, 0x4060);
+        setBattleFlag(0, 0x00130000);
+        setPlayerFlag(0, 0x020C2000);
+        setBattleFlag(0, 0x03000000);
+        CEffectMan::killAll((ObjType::eObjBit)2, 0.0f);
+        m_pMove->setFlag(0x10, TRUE);
+        CEffectMan::killAll(*(LPCSTR*)&PL::g_szDpxBreak, 0.0f);
+
+        CEffectMan::killAll(PL::g_szDpxSpeedBreak, 0.0f);
+        CEffectMan::killAll(PL::g_szDpxHitWall, 0.0f);
+        if (isConditionFlag(0x20000)) setAnimForce(0x11, 0, 0, 0, 0, 0);
+        else setAnimForce(0x11, 0, 0, 1, 0, 0);
+        importStatus();
+        m_iHP = m_iMaxHP;
+        if (m_pCB) {
+            CardBattle::CCardBattle::setBattleEnd();
+            m_pRevolver = NULL;
+        }
+        m_iSubState = 1;
+        m_bDmgMuteki = TRUE;
+        m_pMove->setFlag(1, TRUE);
+        setPlayerFlag(1, 0);
+        m_collBody.off();
+        m_collBody.offBody();
+        break;
+    case 1:
+        m_iSubState = 3;
+        setAnimForce(0x27, -1, 0, 0, 0, 0);
+        setPlayerFlag(1, 0);
+        m_collBody.off();
+        m_pCB->destroyPlayCard(1, 0);
+        setBattleFlag(0, 0x10200000);
+        onWeapon(0);
+        setLand(5.0f, 0.5f, 1);
+        CSceneEnv::setStop((ObjType::eObjBit)4);
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initBadCondition__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBadCondition__7CPlayer);
 /* Parked: in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets
@@ -1727,7 +2026,43 @@ void CPlayer::setCastEffect(const CHAR* inName, INT inNo, CCoord* inCrd, FVECTOR
     if (effect) effect->m_iFlag |= 4;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPos__7CPlayerffP7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPosFS__7CPlayerff);
+void CPlayer::calcAppearPosFS(FLOAT inDist, FLOAT inRadius) {
+    FVECTOR pos;
+    BOOL hit;
+    FLOAT height;
+    pos = getPos();
+    FVECTOR zero = {{m_vStartPos.x, pos.y, m_vStartPos.z, 1.0f}};
+    FLOAT dir0 = calcDirection(zero);
+    FMATRIX m;
+    _unitMatrix(m);
+    _rotMatrixY(m, dir0);
+    FVECTOR start = {{0.0f, 0.0f, inDist, 1.0f}};
+    ApplyMatrixXYZ(start, m, start);
+    AddVectorXYZ(pos, pos, start);
+    FVECTOR vStart = {{pos.x, pos.y + 0.5f, pos.z, 1.0f}};
+    FVECTOR vEnd = {{pos.x, -2.0f, pos.z, 1.0f}};
+    if (m_pPLM->isJaferBattle()) vStart.y = 7.0f;
+    else if (m_pPLM->isTricksterBattle()) vStart.y = 3.0f;
+    m_pCollMap->setType(COLL_TYPE_SPHERE);
+    m_pCollMap->enableSliding(0);
+    m_pCollMap->setRadius(inRadius);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    hit = FALSE;
+    height = vEnd.y;
+    if (m_pCollMap->collideRide(0)) {
+        FLOAT detectH = m_pCollMap->getDetectPos()->y;
+        hit = TRUE;
+        if (height < detectH) height = detectH;
+    }
+    if (m_pCollMap->collideMap()) {
+        FLOAT detectH = m_pCollMap->getDetectPos()->y;
+        hit = TRUE;
+        if (height < detectH) height = detectH;
+    }
+    if (!hit) height = 0.0f;
+    m_vAppearPos.set(pos.x, height + 0.0035f, pos.z);
+}
 void CPlayer::calcAppearPosFS_toAttackID() {
     if (m_uiAttackID < 0x78) {
         if (m_uiAttackID >= 0x76) {
@@ -1737,7 +2072,51 @@ void CPlayer::calcAppearPosFS_toAttackID() {
     }
     calcAppearPosFS(2.0f, m_fWallRadius);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkEscape__7CPlayer);
+INT CPlayer::chkEscape() {
+    BOOL bPlay;
+    FVECTOR vNormal;
+    if (m_PlayerState == PL::ESCAPE) return FALSE;
+    bPlay = FALSE;
+    if (m_pCB && (CardBattle::CCardBattle::isPlayingCard(1) || isBattleFlag(0x10200000))) bPlay = TRUE;
+    if (m_fAnalogPower < 0.3f) bPlay = TRUE;
+    if (bPlay || isBattleFlag(4) || m_pMove->getWallCollATTR() != 5 || m_PlayerState == 0x20) {
+        if (isBattleFlag(2)) {
+            m_tqEscape = 0;
+            setBattleFlag(0, 2);
+            if (m_pEscape) m_pEscape->destroy();
+            setBGFade(1.0f, 0.0f, 0);
+        }
+        return FALSE;
+    }
+    if (!isBattleFlag(2)) {
+        setBattleFlag(2, 0);
+        m_tqEscape = 0;
+        if (m_pEscape) m_pEscape->setCharge(0.0f);
+        setBGFade(0.5f, 120.0f, 0);
+    }
+    vNormal = m_pMove->getEscapeNormal();
+    if (_abs(vNormal.x) > _abs(vNormal.z)) vNormal.z = 0.0f;
+    else vNormal.x = 0.0f;
+    FLOAT d = atan2f(vNormal.x, vNormal.z) + 3.1415927f;
+    FLOAT r;
+    if (d < -3.1415927f) r = d + 6.2831855f;
+    else {
+        r = d;
+        if (r > 3.1415927f) r -= 6.2831855f;
+    }
+    m_fWallDir = r;
+    m_tqEscape += m_tqFrameRate;
+    if (m_tqEscape < 6000) {
+        FLOAT charge = m_tqEscape * 100.0f / 6000.0f;
+        if (m_pEscape) m_pEscape->setCharge(charge);
+        return FALSE;
+    }
+    m_tqEscape = 6000;
+    if (m_pEscape) m_pEscape->setCharge(100.0f);
+    if (isAir()) return FALSE;
+    initEscape();
+    return TRUE;
+}
 void CPlayer::initEscape() {
     FVECTOR rot;
     setPlayerState(PL::ESCAPE);
@@ -2342,7 +2721,58 @@ INT CPlayer::setMDFooting(HANDLE inFooting) {
     m_pMove->setFlag(0x200, TRUE);
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFooting__7CPlayeri);
+void CPlayer::initFooting(INT inFlag) {
+    setPlayerState(PL::FOOTING);
+    setTrgFlag(0, 0x400);
+    if (inFlag == 1) {
+        clearSpeed();
+        setBattleFlag(0, 8);
+        setBattleFlag(0, 0x80000);
+        setPlayerFlag(0, 0x02800000);
+        m_iAttackNo = 0;
+        m_uiPreAttackKind = 0;
+        m_bIsAttackHit = FALSE;
+        m_bNextTrg = FALSE;
+        m_iNextAttack = 0;
+        m_bDmgMuteki = FALSE;
+        m_bIsCanCombo = FALSE;
+        m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+        m_JumpState = 3;
+        m_fMoveSpdXZ = 0.0f;
+    } else if (inFlag == 2) {
+        setBattleFlag(0, 8);
+        m_iSubState = inFlag;
+        setPlayerFlag(1, 0);
+        clearSpeed();
+        if (m_fAnalogPower >= 0.3f) {
+            m_fDir = m_fAnalogViewDir;
+            FVECTOR rot = getRot();
+            rot.y = m_fDir;
+            setRot(rot);
+        }
+        updateCoord();
+        if (CGame::isSoraGame()) setAnimRsrcEx(0xFAA, 0, -1, 0, 0, 0, 1);
+        else if (!isConditionFlag(0x400000)) setAnimRsrcEx(0xFAC, 0, -1, 0, 0, 0, 1);
+        else setAnimRsrcEx(0xFAD, 0, -1, 0, 0, 0, 1);
+        m_fJumpSpdY = 0.0f;
+        m_JumpState = 3;
+        m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+    } else {
+        m_iSubState = 1;
+        m_WalkMode = chkWalkMode();
+        setAnim(0x2A, -1, 0);
+        m_fMovePower = 0.5f;
+        m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower;
+        offAttack();
+        setPlayerFlag(0, 0x024C2000);
+        m_JumpState = 0;
+        m_fJumpSpdY = 0.0f;
+        setConditionFlag(0, 0x08810023);
+        setBattleFlag(0, 0x00443F90);
+        setFaceAnim(0, 0);
+        m_pMove->setFlag(0x40, TRUE);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeFooting__7CPlayer);
 void CPlayer::updateFooting() {
     if (isConditionFlag(0x10000000)) {

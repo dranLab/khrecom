@@ -342,16 +342,16 @@ public:
     void setReflectGuard(INT inFlag); void setQuickBarrier(INT inFlag);
     void setTransOff(INT inFlag);
     INT chkAtelHide(INT inFlag); void initFSM_(); static void (CPlayer::*m_pBeginStateTbl[4])(); static void (CPlayer::*m_pStateTbl[4])(); static void (CPlayer::*m_pEndStateTbl[4])(); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
-    void initWorldSelect();
+    void initRoomCreation(); void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
-    void exeEscape(); void exeGimmickRide(); INT chkGimmick(UINT inID); void initTreasureBox(); void exeTreasureBox(); void setBanish(INT inFlag); void exeBanish(); INT exeWarp(INT inSet); void exeWind();
+    void exeEscape(); void exeGimmickRide(); INT chkGimmick(UINT inID); INT chkEscape(); void initTreasureBox(); void exeTreasureBox(); void setBanish(INT inFlag); void exeBanish(); INT exeWarp(INT inSet); void exeWind();
     void initCarry();
     void cancelLockon();
     void autoLockon();
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
     INT cmdRevolver_isActive();
     BOOL cmdRevolver_rollDeck(INT inNum);
-    INT getLadderStepNow(FLOAT inHeight);
+    INT chkLadderStepNow(BOOL inAir); INT getLadderStepNow(FLOAT inHeight);
     void exeQuickBarrier(); void exeAeroGuard(); void setAeroGuard(INT inFlag);
     INT isNowCardActionState();
     INT chkWalkMode();
@@ -493,7 +493,7 @@ public:
     void resetAction(INT inFlag);
     void procAttackMove(INT inFlag, FLOAT inSpeed, FLOAT inRate, INT inP3, FLOAT inP4);
     INT procAttackCollision(TIMEQ inNowFrame);
-    void procTargetMark(); void exeAttackField();
+    void procTargetMark(); void exeAttackField(); void chkPlayCard(); void chkLockon();
     void procGravity(TIMEQ inNowFrame, TIMEQ inEndFrame, INT inFlag);
     void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inFlag);
     void setUseRsrcBlock(INT inBlock);
