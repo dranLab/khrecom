@@ -1978,7 +1978,43 @@ void CPlayer::setCastEffect(const CHAR* inName, INT inNo, CCoord* inCrd, FVECTOR
     if (effect) effect->m_iFlag |= 4;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPos__7CPlayerffP7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPosFS__7CPlayerff);
+void CPlayer::calcAppearPosFS(FLOAT inDist, FLOAT inRadius) {
+    FVECTOR pos;
+    BOOL hit;
+    FLOAT height;
+    pos = getPos();
+    FVECTOR zero = {{m_vStartPos.x, pos.y, m_vStartPos.z, 1.0f}};
+    FLOAT dir0 = calcDirection(zero);
+    FMATRIX m;
+    _unitMatrix(m);
+    _rotMatrixY(m, dir0);
+    FVECTOR start = {{0.0f, 0.0f, inDist, 1.0f}};
+    ApplyMatrixXYZ(start, m, start);
+    AddVectorXYZ(pos, pos, start);
+    FVECTOR vStart = {{pos.x, pos.y + 0.5f, pos.z, 1.0f}};
+    FVECTOR vEnd = {{pos.x, -2.0f, pos.z, 1.0f}};
+    if (m_pPLM->isJaferBattle()) vStart.y = 7.0f;
+    else if (m_pPLM->isTricksterBattle()) vStart.y = 3.0f;
+    m_pCollMap->setType(COLL_TYPE_SPHERE);
+    m_pCollMap->enableSliding(0);
+    m_pCollMap->setRadius(inRadius);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    hit = FALSE;
+    height = vEnd.y;
+    if (m_pCollMap->collideRide(0)) {
+        FLOAT detectH = m_pCollMap->getDetectPos()->y;
+        hit = TRUE;
+        if (height < detectH) height = detectH;
+    }
+    if (m_pCollMap->collideMap()) {
+        FLOAT detectH = m_pCollMap->getDetectPos()->y;
+        hit = TRUE;
+        if (height < detectH) height = detectH;
+    }
+    if (!hit) height = 0.0f;
+    m_vAppearPos.set(pos.x, height + 0.0035f, pos.z);
+}
 void CPlayer::calcAppearPosFS_toAttackID() {
     if (m_uiAttackID < 0x78) {
         if (m_uiAttackID >= 0x76) {
