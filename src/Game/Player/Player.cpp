@@ -2556,7 +2556,58 @@ INT CPlayer::setMDFooting(HANDLE inFooting) {
     m_pMove->setFlag(0x200, TRUE);
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFooting__7CPlayeri);
+void CPlayer::initFooting(INT inFlag) {
+    setPlayerState(PL::FOOTING);
+    setTrgFlag(0, 0x400);
+    if (inFlag == 1) {
+        clearSpeed();
+        setBattleFlag(0, 8);
+        setBattleFlag(0, 0x80000);
+        setPlayerFlag(0, 0x02800000);
+        m_iAttackNo = 0;
+        m_uiPreAttackKind = 0;
+        m_bIsAttackHit = FALSE;
+        m_bNextTrg = FALSE;
+        m_iNextAttack = 0;
+        m_bDmgMuteki = FALSE;
+        m_bIsCanCombo = FALSE;
+        m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+        m_JumpState = 3;
+        m_fMoveSpdXZ = 0.0f;
+    } else if (inFlag == 2) {
+        setBattleFlag(0, 8);
+        m_iSubState = inFlag;
+        setPlayerFlag(1, 0);
+        clearSpeed();
+        if (m_fAnalogPower >= 0.3f) {
+            m_fDir = m_fAnalogViewDir;
+            FVECTOR rot = getRot();
+            rot.y = m_fDir;
+            setRot(rot);
+        }
+        updateCoord();
+        if (CGame::isSoraGame()) setAnimRsrcEx(0xFAA, 0, -1, 0, 0, 0, 1);
+        else if (!isConditionFlag(0x400000)) setAnimRsrcEx(0xFAC, 0, -1, 0, 0, 0, 1);
+        else setAnimRsrcEx(0xFAD, 0, -1, 0, 0, 0, 1);
+        m_fJumpSpdY = 0.0f;
+        m_JumpState = 3;
+        m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+    } else {
+        m_iSubState = 1;
+        m_WalkMode = chkWalkMode();
+        setAnim(0x2A, -1, 0);
+        m_fMovePower = 0.5f;
+        m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower;
+        offAttack();
+        setPlayerFlag(0, 0x024C2000);
+        m_JumpState = 0;
+        m_fJumpSpdY = 0.0f;
+        setConditionFlag(0, 0x08810023);
+        setBattleFlag(0, 0x00443F90);
+        setFaceAnim(0, 0);
+        m_pMove->setFlag(0x40, TRUE);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeFooting__7CPlayer);
 void CPlayer::updateFooting() {
     if (isConditionFlag(0x10000000)) {
