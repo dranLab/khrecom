@@ -120,6 +120,9 @@ extern LPCSTR g_szDpxAbnormal; // static in the original
 extern FVECTOR HANG_HAND_LOCAL_OFS; // static in the original
 extern const FVECTOR LADDER_LOCAL_OFS; // static in the original
 extern LPCSTR g_szDpxAsiato __asm__("_2PL$g_szDpxAsiato_003A2298"); // static in the original (PlayerDRiku has one too)
+extern LPCSTR g_szDpxSpeedBreak __asm__("_2PL$g_szDpxSpeedBreak_003A229C"); // static in the original
+extern LPCSTR g_szDpxBreak; // static in the original
+extern LPCSTR g_szDpxHitWall; // static in the original
 extern FLOAT g_fDefAttr[];
 extern FLOAT g_fGimmickJumpPower[8];
 }
@@ -1634,7 +1637,50 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDamage__7CPlay
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkTrgAction__7CPlayeriUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initDead__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDead__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyDead__7CPlayeri);
+void CPlayer::notifyDead(INT inCmd) {
+    switch (inCmd) {
+    case 0:
+        clearSpeed();
+        setBattleFlag(0, 0x00443F90);
+        setBattleFlag(0, 0x10200000);
+        setBattleFlag(0, 0x4060);
+        setBattleFlag(0, 0x00130000);
+        setPlayerFlag(0, 0x020C2000);
+        setBattleFlag(0, 0x03000000);
+        CEffectMan::killAll((ObjType::eObjBit)2, 0.0f);
+        m_pMove->setFlag(0x10, TRUE);
+        CEffectMan::killAll(*(LPCSTR*)&PL::g_szDpxBreak, 0.0f);
+
+        CEffectMan::killAll(PL::g_szDpxSpeedBreak, 0.0f);
+        CEffectMan::killAll(PL::g_szDpxHitWall, 0.0f);
+        if (isConditionFlag(0x20000)) setAnimForce(0x11, 0, 0, 0, 0, 0);
+        else setAnimForce(0x11, 0, 0, 1, 0, 0);
+        importStatus();
+        m_iHP = m_iMaxHP;
+        if (m_pCB) {
+            CardBattle::CCardBattle::setBattleEnd();
+            m_pRevolver = NULL;
+        }
+        m_iSubState = 1;
+        m_bDmgMuteki = TRUE;
+        m_pMove->setFlag(1, TRUE);
+        setPlayerFlag(1, 0);
+        m_collBody.off();
+        m_collBody.offBody();
+        break;
+    case 1:
+        m_iSubState = 3;
+        setAnimForce(0x27, -1, 0, 0, 0, 0);
+        setPlayerFlag(1, 0);
+        m_collBody.off();
+        m_pCB->destroyPlayCard(1, 0);
+        setBattleFlag(0, 0x10200000);
+        onWeapon(0);
+        setLand(5.0f, 0.5f, 1);
+        CSceneEnv::setStop((ObjType::eObjBit)4);
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initBadCondition__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBadCondition__7CPlayer);
 /* Parked: in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets
