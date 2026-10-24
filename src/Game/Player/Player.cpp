@@ -2916,10 +2916,52 @@ void CPlayer::initRoomCreation() {
     m_pCam->initCamera(1, 1, NULL);
     m_pCam->setFlag(1, TRUE);
 }
-/* placeholder: rodata of exeRoomCreation__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00269DEC\n.word .L00269DF4\n.word .L00269EDC\n.word .L00269F2C\n.word .L00269F90\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeRoomCreation__7CPlayer);
+void CPlayer::exeRoomCreation() {
+    setPlayerFlag(0x400000, 0);
+    switch (m_iSubState) {
+    case 0:
+        m_iSubState = 1;
+    case 1:
+        if (isTrgFlag(0x10000)) {
+            m_iSubState = 2;
+            setTrgFlag(0, 0x10000);
+            if (CGame::isSoraGame()) setAnimRsrcEx(0xFE6, 0, 0, 1, 0, 0, 1);
+            else setAnimRsrcEx(0xFE8, 0, 0, 1, 0, 0, 1);
+        } else if (isTrgFlag(0x8000)) {
+            m_iSubState = 4;
+            setTrgFlag(0, 0x8000);
+            m_WalkMode = 0;
+            m_pCam->setFlag(1, FALSE);
+            m_bDmgMuteki = FALSE;
+            m_collBody.on();
+            initStandUp(0);
+            m_pMarker->setFlag(TRUE);
+            m_pMarker->holdTarget(0);
+        }
+        break;
+    case 2:
+        if (isMotionEnd()) {
+            m_iSubState = 3;
+            m_pMove->setFlag(1, TRUE);
+            setPlayerFlag(1, 0);
+            setAnim(1, -1, 0);
+            m_tqStateTimer = 0;
+            m_fMovePower = 0.0f;
+        }
+        break;
+    case 3:
+        if (m_tqStateTimer > 3000) {
+            setAnim(2, -1, 0);
+            m_WalkMode = 1;
+            m_fMovePower = 1.0f;
+            m_fWalkSpeed = m_pParam->MAX_WALK_SPEED / 60.0f;
+            m_pMove->calcVelocityXZ(m_fWalkSpeed);
+        }
+        break;
+    case 4:
+        break;
+    }
+}
 void CPlayer::initWorldSelect() {
     CEntity* pTarget;
     FVECTOR rot;
