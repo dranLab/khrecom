@@ -1,5 +1,15 @@
 #define GAME_PLAYER_PLAYER_CPP
 #include "khtypes.h"
+#define COLLOBJ_H_INFO_UNION
+union COLL_INFO_UNION {
+    INT info;
+    struct {
+        BYTE infoID;
+        BYTE infoATTR;
+        BYTE infoPID;
+        BYTE infoSTAT;
+    };
+};
 #include "Game/Collision/CollBody.h"
 #include "Game/CardBattle.h"
 #include "Game/Player/Player.h"
@@ -117,6 +127,13 @@ static inline FLOAT _limitPI2(FLOAT d) {
         if (r > 3.1415927f) r -= 6.2831855f;
     }
     return r;
+}
+void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
+static inline void _addAssign(FVECTOR& a, const FVECTOR& b) {
+    a.x += b.x;
+    a.y += b.y;
+    a.z += b.z;
+    a.w += b.w;
 }
 /* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
 enum NAME_CASE { NAME_CASE_SENSITIVE = 0, NAME_CASE_UPPER = 1, NAME_CASE_LOWER = 2 };
@@ -1721,7 +1738,110 @@ void CPlayer::exeJumpLand() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkHang__7CPlayer);
+BOOL CPlayer::chkHang() {
+    FVECTOR vel;
+    FLOAT dir;
+    FVECTOR ofs;
+    FMATRIX m;
+    FVECTOR pos;
+    if (isBattleFlag(0x200000)) return FALSE;
+    if (!isActionFlag(0x20)) return FALSE;
+    if (isPlayerFlag(0x2000)) return FALSE;
+    setPlayerFlag(0, 0x8000);
+    vel = getVel();
+    if (m_JumpState == 2) {
+        if (!(vel.y < 0.0f)) return FALSE;
+    } else if (m_JumpState != 3) {
+        return FALSE;
+    }
+    if (!isAir()) return FALSE;
+    ofs.z = 0.5f;
+    ofs.x = 0.0f;
+    ofs.y = 0.0f;
+    ofs.w = 1.0f;
+    dir = m_fDir;
+    _unitMatrix(m);
+    _rotMatrixY(m, dir);
+    ApplyMatrixXYZ(ofs, m, ofs);
+    ApplyMatrixXYZ(pos, m, PL::HANG_HAND_LOCAL_OFS);
+    _addAssign(pos, getPos());
+    pos.y = m_vCenterPos.y + 0.05f + vel.y;
+    FVECTOR vStart = {{ pos.x, pos.y, pos.z, 1.0f }};
+    FVECTOR vEnd = {{ pos.x + ofs.x, pos.y + ofs.y, pos.z + ofs.z, 1.0f }};
+    m_pCollMap->setType(COLL_TYPE_POINT);
+    m_pCollMap->enableSliding(0);
+    m_pCollMap->setShiftY(0.0f);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    FVECTOR vNormal;
+    FVECTOR vec;
+    FVECTOR vDetect;
+    COLL_INFO_UNION info;
+    INT bRide = 0;
+    if (!m_pCollMap->collideRide(0)) {
+        if (!m_pCollMap->collideMap()) return FALSE;
+        info = m_pCollMap->getDetectInfo();
+    } else {
+        bRide = 1;
+        info = m_pCollMap->getDetectInfoO();
+    }
+    if (info.infoATTR == 1) return FALSE;
+    vNormal = *m_pCollMap->getDetectNormal();
+    if (vNormal.y >= 0.64278764f) return FALSE;
+    FLOAT fInRot = _limitPI2(atan2f(vNormal.x, vNormal.z) + 3.1415927f);
+    vec.x = 0.0f;
+    vec.y = 0.0f;
+    vec.z = 1.0f;
+    vec.w = 1.0f;
+    _unitMatrix(m);
+    _rotMatrixY(m, fInRot);
+    ApplyMatrixXYZ(vec, m, vec);
+    vDetect = *m_pCollMap->getDetectPos();
+    ScaleVectorXYZ(ofs, vec, 0.1f);
+    AddVectorXYZ(vDetect, vDetect, ofs);
+    vStart.set(vDetect.x, vDetect.y + 0.5f, vDetect.z);
+    vEnd.set(vDetect.x, vDetect.y, vDetect.z);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    if (bRide) {
+        if (!m_pCollMap->collideRide(0)) return FALSE;
+        info = m_pCollMap->getDetectInfoO();
+    } else {
+        if (!m_pCollMap->collideMap()) return FALSE;
+    }
+    if (info.infoATTR == 1) return FALSE;
+    vNormal = *m_pCollMap->getDetectNormal();
+    if (vNormal.y < 0.64278764f) return FALSE;
+    m_vHangPos = *m_pCollMap->getDetectPos();
+    SubVectorXYZ(m_vHangPos, m_vHangPos, ofs);
+    vStart.set(m_vHangPos.x - ofs.x, m_vHangPos.y + 0.1f, m_vHangPos.z - ofs.z);
+    vEnd.set(m_vHangPos.x + ofs.x, m_vHangPos.y + 0.1f, m_vHangPos.z + ofs.z);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) return FALSE;
+    ofs.set(0.0f, 0.0f, -0.2f);
+    ApplyMatrixXYZ(ofs, m, ofs);
+    vStart.set(m_vHangPos.x + ofs.x, m_vHangPos.y, m_vHangPos.z + ofs.z);
+    ofs.set(0.35f, 0.0f, 0.0f);
+    ApplyMatrixXYZ(ofs, m, ofs);
+    vEnd.set(vStart.x + ofs.x, vStart.y, vStart.z + ofs.z);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) return FALSE;
+    vEnd.set(vStart.x - ofs.x, vStart.y, vStart.z - ofs.z);
+    m_pCollMap->setEndPos(vEnd);
+    if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) return FALSE;
+    vEnd.y = vStart.y - 2.1f;
+    m_pCollMap->setEndPos(vEnd);
+    if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) return FALSE;
+    vEnd.x = vStart.x + ofs.x;
+    vEnd.z = vStart.z + ofs.z;
+    m_pCollMap->setEndPos(vEnd);
+    if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) return FALSE;
+    if (bRide) setPlayerFlag(0x8000, 0);
+    m_fDir = fInRot;
+    return TRUE;
+}
 void CPlayer::initHang() {
     FVECTOR rot;
     FVECTOR ofs;
