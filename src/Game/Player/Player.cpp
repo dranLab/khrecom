@@ -47,6 +47,7 @@ union COLL_INFO_UNION {
 #include "System/Graphic/Anim.h"
 #include "Game/Card.h"
 #include "Game/LockOnManager.h"
+#include "System/Graphic/Model.h"
 #include "Game/Gimmick/GimmickCarry.h"
 #include "Game/Gimmick/GimmickTreasureBox.h"
 #include "Game/Gimmick/GimmickDoor.h"
@@ -104,10 +105,14 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
 extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
 extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
 extern "C" void sceVu0UnitMatrix(FMATRIX& m);
+extern "C" void sceVu0InversMatrix(FMATRIX& m0, FMATRIX& m1);
 /* Through inline wrappers: called directly, cse keeps the matrix address in a saved register across the
  * calls; the original recomputes it for each call (as in Game/Player/FriendKing). */
 static inline void _unitMatrix(FMATRIX& m) {
     sceVu0UnitMatrix(m);
+}
+static inline void _inversMatrix(FMATRIX& m) {
+    sceVu0InversMatrix(m, m);
 }
 static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
     sceVu0RotMatrixY(m, m, r);
@@ -150,6 +155,7 @@ extern LPCSTR g_szDpxReload; // static in the original
 extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_szTexEyeKizetsu; // static in the original
 extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
+extern LPCSTR g_szBoneLHand; // static in the original
 extern LPCSTR g_szDpxAbnormal; extern LPCSTR g_szDpxVexen; // static in the original
 extern FVECTOR g_vFieldPlayerPos; // static in the original
 extern FVECTOR g_vBattlePlayerPos; // static in the original
@@ -1878,7 +1884,142 @@ void CPlayer::initHang() {
     m_fJumpSpdY = 0.0f;
     if (m_pMarker) m_pMarker->cancelLockon(m_hLockon, 0);
 }
+/* Parked: 23 lines differ, all FP-register/load-order of the two angle wraps: the original loads m_fDir first ($f0)
+   then m_fAnalogViewDir ($f1) for `view - dir + PI` (ours the reverse), and in the drop-off arm it loads dir into $f12
+   in the branch delay slots and copies it to $f22 after getPos (ours loads $f22 directly and lui/mtc1 the 0.5f after
+   the call); the second wrap (dir - PI) keeps d in $f1 and r in $f12 (ours both in $f12). Everything else matches
+   (frame, switch layout, collision sequences, FVECTOR::set() for the pointer-addressed w stores, getAnalogHoukou()
+   for the pad pointer in s0). tried: ~20 variants (dir as a local before/after the branch, a/b operand locals,
+   operand order, _limitPI2 vs explicit if/else, rot.y/m_fDir store orders, d0 copy before getPos) and
+   tools/permuter.py through the method alias wrapper (6 min; its best only commuted the vStart/vEnd sums, worse).
+   Same family as the parked exeWall / exeWalk wraps. */
+#if 0
+void CPlayer::exeHang() {
+    FLOAT dir;
+    Houkou houkou;
+    FVECTOR pos;
+    FVECTOR rot;
+    FVECTOR ofs;
+    FMATRIX m;
+    FLOAT r;
+    setPlayerFlag(0x400000, 0);
+    setBattleFlag(0, 8);
+    switch (m_iSubState) {
+    case 0:
+    case 1:
+        if (isPlayerFlag(0x8000)) {
+            if (isConditionFlag(0x40000) || m_pMove->isGround() || m_pMove->isWall()) {
+                setConditionFlag(0, 0x40000);
+                m_pCollMap->removeHang();
+                setPlayerFlag(0, 0x8000);
+                setTrgFlag(1, 0);
+                if (m_tqStateTimer < 1500) m_tqStateTimer = 1500;
+            } else if (m_pCollMap->getHangPosition(rot, pos)) {
+                setPos(pos);
+                setRot(rot);
+            }
+        }
+        if (m_iNowAnimID == 0xF) {
+            if (m_tqStateTimer < 1500) break;
+            if (isMotionEnd()) {
+                pos = Crd(getModel()->getBoneIndex(PL::g_szBoneLHand)).getWorldMatrix().v[3];
+                SubVectorXYZ(m_vHangHandPos, pos, getPos());
+                _unitMatrix(m);
+                _rotMatrixY(m, m_fDir);
+                _inversMatrix(m);
+                ApplyMatrixXYZ(m_vHangHandPos, m, m_vHangHandPos);
+                m_iSubState = 1;
+                setAnimForce(0xE, 400, 0, 0, 0, 0);
+            }
+        }
+        r = _limitPI2(m_fAnalogViewDir - m_fDir + 3.1415927f);
+        if (getAnalogHoukou()) houkou = getHoukouFromAngle(r);
+        else houkou = HOUKOU_NUTRAL;
+        if (isTrgFlag(1) || getAnalogHoukou() == HOUKOU_DOWN || houkou == HOUKOU_DOWN) {
+            dir = m_fDir;
+            pos = getPos();
+            ofs.set(0.0f, 0.0f, -0.6f);
+            _unitMatrix(m);
+            _rotMatrixY(m, dir);
+            ApplyMatrixXYZ(ofs, m, ofs);
+            AddVectorXYZ(pos, pos, ofs);
+            ofs.set(0.5f, 0.0f, 0.0f);
+            ApplyMatrixXYZ(ofs, m, ofs);
+            FVECTOR vStart = {{ pos.x + ofs.x, pos.y, pos.z + ofs.z, 1.0f }};
+            FVECTOR vEnd = {{ pos.x - ofs.x, pos.y, pos.z - ofs.z, 1.0f }};
+            m_pCollMap->setType(COLL_TYPE_SPHERE);
+            m_pCollMap->enableSliding(0);
+            m_pCollMap->setRadius(0.5f);
+            m_pCollMap->setStartPos(vStart);
+            m_pCollMap->setEndPos(vEnd);
+            if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) pos = *m_pCollMap->getDetectPos();
+            m_pCollMap->setStartPos(vEnd);
+            m_pCollMap->setEndPos(vStart);
+            if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) pos = *m_pCollMap->getDetectPos();
+            m_pCollMap->setStartPos(pos);
+            vEnd = getPos();
+            m_pCollMap->setEndPos(vEnd);
+            if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) pos = *m_pCollMap->getDetectPos();
+            setPos(pos);
+            rot = getRot();
+            r = _limitPI2(dir - 3.1415927f);
+            m_fDir = r;
+            rot.y = r;
+            setRot(rot);
+            setAnimForce(5, 0, 0, 0, 0, 0);
+            initFall();
+            m_fWalkSpeed = m_pParam->MAX_WALK_SPEED / 60.0f;
+            m_pMove->calcVelocityXZ(m_fWalkSpeed);
+            FVECTOR vel = m_pMove->getVel();
+            vel.y = PL::g_fAntiGravity * 12.0f;
+            m_fJumpSpdY = vel.y;
+            m_pMove->setVel(vel);
+            if (isPlayerFlag(0x8000)) {
+                m_pCollMap->removeHang();
+                setPlayerFlag(0, 0x8000);
+            }
+            return;
+        }
+        if (getAnalogHoukou() == HOUKOU_UP || houkou == HOUKOU_UP) {
+            m_iSubState = 2;
+            setAnimForce(0x10, 0, 0, 0, 0, 0);
+            m_pAnim->setRootMove(1, 1);
+            if (isPlayerFlag(0x8000)) {
+                m_pCollMap->removeHang();
+                setPlayerFlag(0, 0x8000);
+            }
+            m_vHangPos = getPos();
+        }
+        break;
+    case 2:
+        pos = getPos();
+        _unitMatrix(m);
+        _rotMatrixY(m, m_fDir);
+        ofs.set(0.0f, 2.564f, -1.0f);
+        ApplyMatrixXYZ(ofs, m, ofs);
+        AddVectorXYZ(ofs, m_vHangPos, ofs);
+        setOldPos(ofs);
+        if (isMotionEnd()) {
+            ofs.set(0.0f, 1.7f, 0.05f);
+            ApplyMatrixXYZ(ofs, m, ofs);
+            AddVectorXYZ(pos, pos, ofs);
+            setPos(pos);
+            setAnimForce(6, 0, 0, 0, 0, 0);
+            initFall();
+            setPlayerFlag(0, 0x8000);
+            return;
+        }
+        break;
+    }
+    if (isPlayerFlag(0x8000)) {
+        pos = getPos();
+        rot = getRot();
+        m_pCollMap->setHangPosition(rot, pos);
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeHang__7CPlayer);
+#endif
 void CPlayer::initAvoid() {
     if (isConditionFlag(0x10000000) && !isConditionFlag(0x400000)) {
         initFooting(2);
