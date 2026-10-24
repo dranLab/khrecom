@@ -37,6 +37,10 @@
 #include "System/Graphic/Anim.h"
 #include "Game/Card.h"
 #include "Game/LockOnManager.h"
+#include "Game/Gimmick/GimmickCarry.h"
+#include "Game/Gimmick/GimmickTreasureBox.h"
+#include "Game/Gimmick/GimmickDoor.h"
+#include "Form/Menu/RoomCreation.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -55,7 +59,7 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
-extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_0049B2D8[]; /* TRACE message of exeFooting */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
+extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_00499E60[]; extern "C" char D_00499E90[]; /* "...Player.cpp(n)" of chkGimmick's new CWorldSelect / CRoomCreation */ extern "C" char D_0049B2D8[]; /* TRACE message of exeFooting */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
 extern "C" char D_00499988[]; extern "C" char D_004999B8[]; extern "C" char D_004999E8[]; /* "...Player.cpp(1156)", (1172), (1181) */
 extern "C" const CARD_DATA cardDataTbl_0049E190[224];
 extern "C" char D_0049AFA8[]; /* TRACE messages of setTrapDamage */
@@ -102,6 +106,16 @@ extern "C" float atan2f(float y, float x);
 static inline FLOAT _limitPI(FLOAT r) {
     if (r < -3.1415927f) r += 6.2831855f;
     else if (r > 3.1415927f) r -= 6.2831855f;
+    return r;
+}
+/* the same wrap with a separate result variable (the original's mov.s copy into a second register) */
+static inline FLOAT _limitPI2(FLOAT d) {
+    FLOAT r;
+    if (d < -3.1415927f) r = d + 6.2831855f;
+    else {
+        r = d;
+        if (r > 3.1415927f) r -= 6.2831855f;
+    }
     return r;
 }
 /* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
@@ -1380,7 +1394,64 @@ void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
         _instance()->m_fGimmickJumpPow = PL::g_fGimmickJumpPower[inPow];
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkGimmick__7CPlayerUi);
+INT CPlayer::chkGimmick(UINT inID) {
+    INT result;
+    HANDLE handle = m_hGimmickJump;
+    CEntity* pEntity;
+    FLOAT dir;
+    if (handle <= 0) {
+        handle = m_hTarget;
+        if (handle <= 0) return 0;
+    }
+    pEntity = (CEntity*)CTaskMan::getTask(handle);
+    if (!pEntity) return 0;
+    if (inID && pEntity->getTypeID() != inID) return 0;
+    switch (pEntity->getTypeID()) {
+    case 0x2002:
+        result = m_pMove->isObjRide() ? 7 : 0;
+        break;
+    case 0x4000:
+        result = 0x1F;
+        break;
+    case 0x2003:
+        dir = calcDirection(pEntity->getPos());
+        if (_abs(_limitPI(dir - m_fDir)) * 57.295776f > 75.0f) return 0;
+        if (!((CGimmickCarry*)pEntity)->checkCarryPermission()) return 0;
+        procTargetMark();
+        result = 0x1E;
+        break;
+    case 0x2000:
+        if (((CGimmickTreasureBox*)pEntity)->isOpenTresureBox()) return 0;
+        if (_abs(_limitPI(pEntity->getRot().y - m_fDir)) < 1.5707964f) return 0;
+        dir = pEntity->calcDirection(m_vCenterPos);
+        if (_abs(_limitPI2(pEntity->getRot().y - dir)) * 57.295776f > 75.0f) return 0;
+        if (!((CGimmickTreasureBox*)pEntity)->checkOpenTresureBoxPermission()) return 0;
+        ((CGimmickTreasureBox*)pEntity)->OpenTreasureBox();
+        m_pMarker->holdTarget(8);
+        result = 0x11;
+        break;
+    case 0x1006:
+        if (CSceneInfo::getRoomInfo(-1)->_doors[((CGimmickDoor*)pEntity)->getDoorID()].canSelectWorld()) {
+            FLOAT r = _limitPI(pEntity->getRot().y - m_fDir);
+            if (getHoukouFromAngle(r) == 4) return 0;
+            new (com_malloc_d(sizeof(CWorldSelect), D_00499E60, RET_ADDR())) CWorldSelect(CTaskMan::getSysTask(1), handle);
+            m_pMarker->holdTarget(8);
+            result = 0x15;
+        } else {
+            if (!CSceneInfo::getRoomInfo(-1)->_doors[((CGimmickDoor*)pEntity)->getDoorID()].canCreateRoom()) return 0;
+            FLOAT r = _limitPI(pEntity->getRot().y - m_fDir);
+            if (getHoukouFromAngle(r) == 4) return 0;
+            new (com_malloc_d(sizeof(CRoomCreation), D_00499E90, RET_ADDR())) CRoomCreation(CTaskMan::getSysTask(1), handle);
+            m_pMarker->holdTarget(8);
+            result = 0x14;
+        }
+        break;
+    default:
+        return 0;
+    }
+    m_hGimmick = handle;
+    return result;
+}
 void CPlayer::initTreasureBox() {
     CEntity* pTarget;
     FVECTOR rot;

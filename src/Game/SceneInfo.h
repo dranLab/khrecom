@@ -140,7 +140,7 @@ struct DoorInfo { // 0x18
     void setFirstUsedCardInfo(BYTE nCardID, BYTE nCardNum);
     BYTE getFirstUsedCardIDForNorma() const;
     BYTE getFirstUsedCardNumForNorma() const;
-    BOOL canSelectWorld() const;
+    BOOL canSelectWorld() const; BOOL canCreateRoom() const;
     BOOL isValidNormaIndex(USHORT nIndex) const;
     BOOL clearOneNorma();
     BOOL isNextNormaKeyCard() const;
