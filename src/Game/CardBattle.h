@@ -199,7 +199,7 @@ public:
     void destroy();
     INT getStock(INT inFlag);
     BOOL returnStockCard(INT inFlag);
-    void rollDeck(INT inFlag, INT inParam, TIMEQ inTime);
+    void rollDeck(INT inFlag, INT inParam, TIMEQ inTime); void rollShortCut(INT inFlag); // PARTIAL: rollShortCut added for Game/Player/Player
     BOOL setPlayCard(INT inA, INT inB);
     BOOL setPlayStock(INT inA, INT inB);
     void setStockCard();

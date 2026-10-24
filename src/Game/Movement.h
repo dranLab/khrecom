@@ -276,7 +276,7 @@ public:
     void chase(const CEntity& inTarget, FLOAT inRate, FLOAT inSpeed);
     void evade(const CEntity& inTarget, FLOAT inRate, FLOAT inSpeed);
     void intercept(const CEntity& inTarget, FLOAT inRate, FLOAT inSpeed);
-    void calcVelocityXZ(FLOAT inSpeed); // PARTIAL: added for Game/Player/SummonDumbo
+    void calcVelocityXZ(FLOAT inSpeed); void calcVelocityXZ(FLOAT inSpeed, const FVECTOR& inDir); // PARTIAL: added for Game/Player/SummonDumbo (2-arg: Game/Player/Player)
     // PARTIAL: added for Game/Player/FriendPan
     void homing(const CEntity* inTarget, FLOAT inRate);
     void calcVelocity(FLOAT inSpeed);

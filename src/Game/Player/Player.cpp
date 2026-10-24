@@ -37,6 +37,10 @@
 #include "System/Graphic/Anim.h"
 #include "Game/Card.h"
 #include "Game/LockOnManager.h"
+#include "Game/Gimmick/GimmickCarry.h"
+#include "Game/Gimmick/GimmickTreasureBox.h"
+#include "Game/Gimmick/GimmickDoor.h"
+#include "Form/Menu/RoomCreation.h"
 #include "include_asm.h"
 
 extern "C" char D_004997C0[];
@@ -55,7 +59,7 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
-extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_0049B2D8[]; /* TRACE message of exeFooting */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
+extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_00498BF0[]; /* assert text of exeJump (m_JumpState) */ extern "C" char D_00499AE8[]; extern "C" char D_00499B18[]; /* TRACE messages of setControl */ extern "C" char D_00499E60[]; extern "C" char D_00499E90[]; /* "...Player.cpp(n)" of chkGimmick's new CWorldSelect / CRoomCreation */ extern "C" char D_0049B2D8[]; /* TRACE message of exeFooting */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
 extern "C" char D_00499988[]; extern "C" char D_004999B8[]; extern "C" char D_004999E8[]; /* "...Player.cpp(1156)", (1172), (1181) */
 extern "C" const CARD_DATA cardDataTbl_0049E190[224];
 extern "C" char D_0049AFA8[]; /* TRACE messages of setTrapDamage */
@@ -102,6 +106,16 @@ extern "C" float atan2f(float y, float x);
 static inline FLOAT _limitPI(FLOAT r) {
     if (r < -3.1415927f) r += 6.2831855f;
     else if (r > 3.1415927f) r -= 6.2831855f;
+    return r;
+}
+/* the same wrap with a separate result variable (the original's mov.s copy into a second register) */
+static inline FLOAT _limitPI2(FLOAT d) {
+    FLOAT r;
+    if (d < -3.1415927f) r = d + 6.2831855f;
+    else {
+        r = d;
+        if (r > 3.1415927f) r -= 6.2831855f;
+    }
     return r;
 }
 /* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
@@ -584,7 +598,122 @@ void CPlayer::exeMutekiTimer() {
     m_tqMutekiTimer -= m_tqFrameRate;
     if (m_tqMutekiTimer < 0) m_tqMutekiTimer = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setControl__7CPlayer);
+void CPlayer::setControl() {
+    INT iRev;
+    m_fDir = m_pMove->getRot().y;
+    m_uiTrgFlag &= 0xFFF7F400;
+    m_fAnalogPower = getAnalogPower();
+    m_fAnalogDir = getAnalogDir();
+    m_fAnalogViewDir = getAnalogViewDir();
+    if (!m_bIsBattleScene) {
+        if (isTrgAttack() && isActionFlag(0x40) && !m_tqAttackTimer) setTrgFlag(4, 0);
+    } else {
+        if (isPlayerFlag(0x40000)) {
+            initTransform(1);
+            return;
+        }
+        if (m_bIsDead) return;
+        if (isBattleFlag(4)) return;
+        if (isConditionFlag(0x2000000) || isTrgFlag(0x100000)) {
+            TRACE(D_00499AE8);
+            return;
+        }
+        if (m_pRevolver) {
+            iRev = 0;
+            if (m_hSnatch > 0) {
+                setBattleFlag(0, 8);
+            } else if (!isTrgStockSkill()) {
+                if (!CardBattle::CCardBattle::isExecutingCard(1) && !isBattleFlag(0x8000000)) {
+                    iRev = isDownReloadDeck();
+                    if (iRev) {
+                        if (m_pRevolver->isEnableCharge()) {
+                            if (!CGame::isRikuGame() || isTrgReloadDeck()) setTrgFlag(0x10, 0);
+                        }
+                    } else {
+                        iRev = isTrgChangeDeck();
+                        if (iRev) {
+                            m_pRevolver->changeMode(-1, 0);
+                        } else {
+                            iRev = isTrgCancelStock();
+                            if (iRev) {
+                                if (!CGameWork::getFlag(1, 0x30)) m_pRevolver->returnStockCard(0);
+                            }
+                        }
+                    }
+                }
+                if (!iRev) {
+                    iRev = 1;
+                    if (isTrgShortCutReload()) {
+                        iRev = 0;
+                        m_pRevolver->rollShortCut(1);
+                    } else if (isTrgShortCutCard()) {
+                        iRev = 0;
+                        m_pRevolver->rollShortCut(2);
+                    } else if (isDownRollDeckL() && isDownRollDeckR()) {
+                    } else if (isDownRollDeckL()) {
+                        iRev = 0;
+                        if (m_tqRevolverRoll > 0) m_tqRevolverRoll = 0;
+                        m_tqRevolverRoll -= m_tqFrameRate;
+                        if (isTrgRollDeckL()) {
+                            m_tqRevolverRoll = 0;
+                            m_tqRevolverSpeed = 300;
+                            m_pRevolver->rollDeck(-1, 0, 300);
+                        } else if (m_tqRevolverRoll < -4000) {
+                            m_tqRevolverSpeed = 100;
+                            m_pRevolver->rollDeck(-1, 0, 100);
+                        } else if (m_tqRevolverRoll < -2000) {
+                            m_tqRevolverSpeed = 200;
+                            m_pRevolver->rollDeck(-1, 0, 200);
+                        }
+                    } else if (isDownRollDeckR()) {
+                        iRev = 0;
+                        if (m_tqRevolverRoll < 0) m_tqRevolverRoll = 0;
+                        m_tqRevolverRoll += m_tqFrameRate;
+                        if (isTrgRollDeckR()) {
+                            m_tqRevolverRoll = 0;
+                            m_tqRevolverSpeed = 300;
+                            m_pRevolver->rollDeck(1, 0, 300);
+                        } else if (m_tqRevolverRoll > 4000) {
+                            m_tqRevolverSpeed = 100;
+                            m_pRevolver->rollDeck(1, 0, 100);
+                        } else if (m_tqRevolverRoll > 2000) {
+                            m_tqRevolverSpeed = 200;
+                            m_pRevolver->rollDeck(1, 0, 200);
+                        }
+                    }
+                }
+            }
+            if (iRev) {
+                m_tqRevolverRoll = 0;
+                m_tqRevolverSpeed = 300;
+            }
+        }
+        if (isBattleFlag(0x1000)) {
+            if (isConditionFlag(0x8810000)) {
+                if (isConditionFlag(0x8000000)) {
+                    TRACE(D_00499B18);
+                    m_pCB->setFlag(0, 0x400000);
+                }
+                setConditionFlag(0, 0x8810000);
+                m_pMove->setFlag(1, FALSE);
+                setOldPos(m_vCenterPos);
+            }
+            exeUseStock(0);
+            return;
+        }
+        if (isBattleFlag(0x10)) setTrgFlag(4, 0);
+        if (isBattleFlag(0x80)) setTrgFlag(8, 0);
+        if (isBattleFlag(0x100)) setTrgFlag(0x20, 0);
+        if (isBattleFlag(0x200)) setTrgFlag(0x40, 0);
+        if (isBattleFlag(0x400)) setTrgFlag(0x80, 0);
+        if (isBattleFlag(0x800)) setTrgFlag(0x100, 0);
+    }
+    if (isTrgDefense() && isActionFlag(8)) {
+        if (!m_pCB || !CardBattle::CCardBattle::isPlayingCard(1) || !isBattleFlag(0x10200000)) setTrgFlag(2, 0);
+    }
+    if (isTrgJump() && isActionFlag(0x10)) setTrgFlag(1, 0);
+    if (isTrgStock()) setTrgFlag(0x200, 0);
+}
 INT CPlayer::chkAtelHide(INT inFlag) {
     if (inFlag) {
         if (CGameWork::getFlag(1, 0)) {
@@ -1005,7 +1134,155 @@ void CPlayer::initWall() {
     m_pMove->setFlag(0x40, FALSE); // partial CMovement: (flag, on)
     m_fFootRadius = 0.5f;
 }
+/* Parked: 25 lines differ, all one register-allocation cascade: the original keeps cancel_speed in $f22 and the
+   0.5f constant (ofs.x / setRadius) in $f23, ours the reverse (global.c priority: the short-lived 0.5 constant
+   outranks the speed). Also left: the three vec stores come after `lw m_iSubState` and cancel_power is a load of
+   vec.y (original) vs a hoisted zero, the dir/view load order of the houkou wrap (dir first, then view, sub
+   view - dir in $f1), and the last ofs.w store goes through the shared &ofs register. tried: ~25 variants (declaration
+   order of cancel_*, a `half` local for 0.5f, statement order of the three arms, speed after/before the init calls,
+   vec store orders / set() / cancel_power = vec.y, _limitPI vs the copy form, houkou polarity and if/else layout,
+   cast read of g_fAntiGravity) and tools/permuter.py through the method alias wrapper (8 min, 5147 candidates,
+   its score does not see the register difference). The jump arms with initJump(0) before the speed/power stores
+   got the best diff (25). */
+#if 0
+void CPlayer::exeWall() {
+    FVECTOR pos;
+    FVECTOR rot;
+    FVECTOR vec;
+    FLOAT dir;
+    Houkou houkou;
+    FMATRIX m;
+    FLOAT cancel_power;
+    FLOAT cancel_speed;
+    FLOAT r;
+    setPlayerFlag(0x400000, 0);
+    pos = getPos();
+    rot = getRot();
+    vec.x = 1.0f;
+    vec.y = 0.0f;
+    vec.z = 0.0f;
+    vec.w = 1.0f;
+    cancel_power = vec.y;
+    if (!m_iSubState) {
+        FLOAT d0 = Movement::Homing(m_fDir, m_fWallDir, 0.15f, getFrameRateF());
+        m_fDir = d0;
+        rot.y = d0;
+        setRot(rot);
+        r = _limitPI(m_fWallDir - m_fDir);
+        if (_abs(r) < 0.03141593f) {
+            m_iSubState = 1;
+            m_fDir = m_fWallDir;
+        }
+        warp(m_vWallPos);
+        updateCoord();
+        coordFix();
+        return;
+    }
+    if (isTrgFlag(4)) {
+        m_pMove->setFlag(0x40, TRUE);
+        m_bAirCheck = TRUE;
+        m_bAir = TRUE;
+        initAttackField(0);
+        cancel_power = 2.5f;
+        cancel_speed = 2.0f;
+    } else if (isTrgFlag(1)) {
+        m_pMove->setFlag(0x40, TRUE);
+        initJump(0);
+        cancel_speed = 1.3f;
+    } else if (!chkWall(1)) {
+        m_pMove->setFlag(0x40, TRUE);
+        initJump(0);
+        cancel_power = 2.5f;
+        cancel_speed = 1.3f;
+    } else {
+        warp(m_vWallPos);
+        updateCoord();
+        coordFix();
+        dir = _limitPI2(m_fAnalogViewDir - m_fDir + 3.1415927f);
+        if (m_Houkou != HOUKOU_NUTRAL) {
+            if (dir < 0.0f) houkou = HOUKOU_LEFT;
+            else houkou = HOUKOU_RIGHT;
+        } else {
+            houkou = HOUKOU_NUTRAL;
+        }
+        switch (houkou) {
+        case HOUKOU_LEFT:
+            m_iSubState = 2;
+            if (m_pAnim->getAnimID() != 2) {
+                if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 2, -1, 0, 0, 0, 1);
+                else setAnimRsrcEx(0xFD4, 2, -1, 0, 0, 0, 1);
+            }
+            m_fWalkSpeed = 0.904f;
+            break;
+        case HOUKOU_RIGHT:
+            m_iSubState = 3;
+            if (m_pAnim->getAnimID() != 3) {
+                if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 1, -1, 0, 0, 0, 1);
+                else setAnimRsrcEx(0xFD4, 1, -1, 0, 0, 0, 1);
+            }
+            m_fWalkSpeed = -0.904f;
+            break;
+        default:
+            m_iSubState = 1;
+            if (m_pAnim->getAnimID() != 0) {
+                if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 0, -1, 0, 0, 0, 1);
+                else setAnimRsrcEx(0xFD4, 0, -1, 0, 0, 0, 1);
+            }
+            m_fWalkSpeed = 0.0f;
+            break;
+        }
+        m_fDir = m_fWallDir;
+        rot.y = m_fWallDir;
+        setRot(rot);
+        m_fWalkSpeed = m_fWalkSpeed / 60.0f;
+        m_fMovePower = 1.0f;
+        m_pMove->calcVelocityXZ(m_fWalkSpeed, vec);
+        return;
+    }
+    m_fFootRadius = 0.25f;
+    dir = m_fDir;
+    pos = getPos();
+    FVECTOR ofs;
+    ofs.z = 0.6f;
+    ofs.x = 0.0f;
+    ofs.y = 0.0f;
+    ofs.w = 1.0f;
+    _unitMatrix(m);
+    _rotMatrixY(m, dir);
+    ApplyMatrixXYZ(ofs, m, ofs);
+    AddVectorXYZ(pos, pos, ofs);
+    ofs.x = 0.5f;
+    ofs.y = 0.0f;
+    ofs.z = 0.0f;
+    ofs.w = 1.0f;
+    ApplyMatrixXYZ(ofs, m, ofs);
+    FVECTOR vStart = {{ pos.x + ofs.x, pos.y, pos.z + ofs.z, 1.0f }};
+    FVECTOR vEnd = {{ pos.x - ofs.x, pos.y, pos.z - ofs.z, 1.0f }};
+    m_pCollMap->setType(COLL_TYPE_SPHERE);
+    m_pCollMap->enableSliding(0);
+    m_pCollMap->setRadius(0.5f);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) pos = *m_pCollMap->getDetectPos();
+    m_pCollMap->setStartPos(vEnd);
+    m_pCollMap->setEndPos(vStart);
+    if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) pos = *m_pCollMap->getDetectPos();
+    m_pCollMap->setStartPos(pos);
+    vEnd = getPos();
+    m_pCollMap->setEndPos(vEnd);
+    if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) pos = *m_pCollMap->getDetectPos();
+    setPos(pos);
+    m_fWalkSpeed = cancel_speed / 60.0f;
+    m_pMove->calcVelocityXZ(m_fWalkSpeed);
+    m_fJumpSpdXZ = m_fMoveSpdXZ = m_fWalkSpeed;
+    FVECTOR vel = m_pMove->getVel();
+    vel.y = *(FLOAT*)&PL::g_fAntiGravity * cancel_power;
+    m_fJumpSpdY = vel.y;
+    m_pMove->setVel(vel);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWall__7CPlayer);
+#endif
 /* FVECTOR::operator-(const FVECTOR&) of the original (ref locals: FVECTOR* this, FVECTOR vec). */
 static inline FVECTOR _subVec(const FVECTOR& a, const FVECTOR& inV) {
     FVECTOR vec = a;
@@ -1207,7 +1484,156 @@ void CPlayer::setFallFloat() {
     v.y = m_fJumpSpdY;
     m_pMove->getVel() = v;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeJump__7CPlayer);
+void CPlayer::exeJump() {
+    FVECTOR vel = m_pMove->getVel();
+    INT step;
+    FLOAT aim_dir;
+    FLOAT d0;
+    FVECTOR v;
+    FLOAT r;
+    switch (m_JumpState) {
+    case 1:
+        clearSpeed();
+        if (m_tqJumpTimer < m_pParam->JUMP_TQ_START) goto timer_end;
+        m_JumpState = 2;
+        m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+        vel.y = *(FLOAT*)&PL::g_fAntiGravity * m_fJumpPow;
+        m_fJumpSpdY = vel.y;
+        m_pMove->setVel(vel);
+        goto timer_end;
+    case 2:
+        m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        switch (m_iNowAnimID) {
+        case 4:
+            if (!isDownJump() && m_tqJumpTimer >= m_pParam->JUMP_TQ_START + 600) {
+                m_JumpState = 3;
+                m_fJumpSpdY *= *(FLOAT*)&PL::g_fJumpStopRate;
+                setAnim(6, 800, 0);
+            } else if (m_fJumpSpdY < 0.0f) {
+                m_fJumpSpdY = 0.0f;
+                setAnim(5, -1, 0);
+            } else if (isMotionEnd()) {
+                setAnim(5, -1, 0);
+            }
+            break;
+        case 0x14:
+            if (isPlayerFlag(0x1000000)) {
+                if (m_fJumpSpdY < 0.0f) {
+                    m_fJumpSpdY = 0.0f;
+                    m_JumpState = 3;
+                    setAnim(0x15, -1, 0);
+                }
+            } else if (!isDownJump() && m_tqJumpTimer >= m_pParam->JUMP_TQ_START + 600) {
+                m_JumpState = 3;
+                m_fJumpSpdY *= *(FLOAT*)&PL::g_fJumpStopRate;
+            } else if (m_fJumpSpdY < 0.0f) {
+                m_fJumpSpdY = 0.0f;
+                m_JumpState = 3;
+                setAnim(0x15, -1, 0);
+            } else if (isMotionEnd()) {
+                setAnim(0x15, -1, 0);
+            }
+            break;
+        case 5:
+        case 0x15:
+            if (isMotionEnd()) {
+                m_JumpState = 3;
+                setAnim(6, -1, 0);
+            }
+            setGroundIK(1);
+            break;
+        }
+        break;
+    case 3:
+        m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        if (isMotionEnd()) setAnim(6, -1, 0);
+        if (m_iNowAnimID == 4 && m_fJumpSpdY < 0.0f) m_fJumpSpdY = 0.0f;
+        setGroundIK(1);
+        break;
+    case 6:
+        exeJumpLand();
+        setGroundIK(1);
+        return;
+    default:
+        AssertApp(D_004997C0, 0x1248, D_00498BF0, 0);
+        break;
+    }
+    if (isActionFlag(0x2000000)) {
+        if (isTrgFlag(0x10)) chkChargeMove(0);
+    }
+    if (isTrgFlag(0x20)) {
+        if (!m_bIsBattleScene) return;
+        initMagic(0);
+        return;
+    } else if (isTrgFlag(4)) {
+        if (!m_bIsBattleScene) initAttackField(0);
+        else initAttack(0);
+        return;
+    } else if (m_JumpState < 4) {
+        if (m_JumpState >= 2) {
+            if (isActionFlag(0x8000000) && isTrgFlag(1)) {
+                initJump2nd();
+                return;
+            }
+            if (isActionFlag(0xC00000) && m_tqStateTimer >= 901 && isTrgFlag(1)) {
+                initGlide(0);
+                return;
+            }
+        }
+    }
+    vel.y = m_fJumpSpdY;
+    m_pMove->setVel(vel);
+    m_WalkMode = chkWalkMode();
+    if (m_WalkMode) {
+        aim_dir = m_fAnalogViewDir;
+        d0 = Movement::Homing(m_fDir, aim_dir, 0.1f, m_fFrameRate);
+        v._q = 0;
+        v.y = aim_dir;
+        m_fDir = d0;
+        m_pMove->getRot() = v;
+        r = _limitPI2(aim_dir - d0);
+        m_fMovePower = 1.0f - _abs(r) / 3.1415927f;
+        m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower * 0.8f;
+        if (m_fJumpSpdXZ != m_fWalkSpeed) {
+            m_fJumpSpdXZ = m_fJumpSpdXZ + (m_fWalkSpeed - m_fJumpSpdXZ) * (m_fFrameRate * 0.05f);
+            if (m_fWalkSpeed < m_fJumpSpdXZ) m_fJumpSpdXZ *= m_fMovePower;
+        }
+        m_fWalkSpeed = m_fJumpSpdXZ;
+        m_pMove->calcVelocityXZ(m_fWalkSpeed);
+        v.y = d0;
+        m_pMove->getRot() = v;
+    } else {
+        m_fMovePower = 0.5f;
+        if (m_fJumpSpdXZ != m_fWalkSpeed) {
+            m_fJumpSpdXZ = m_fJumpSpdXZ + (m_fWalkSpeed - m_fJumpSpdXZ) * (m_fFrameRate * 0.05f);
+        }
+        m_fWalkSpeed = m_fJumpSpdXZ;
+        m_pMove->calcVelocityXZ(m_fWalkSpeed);
+    }
+    if (getJumpState() == 2 && !isAir()) {
+        m_JumpState = 6;
+        setAnimForce(7, -1, 0, 0, 0, 0);
+        m_fJumpSpdXZ = 0.0f;
+        clearSpeed();
+        setBattleFlag(0, 8);
+        m_fJumpGravity = 0.0f;
+        m_fJumpSpdY = 0.0f;
+        return;
+    }
+    m_fJumpHeight = getPos().y - m_vJumpStartPos.y;
+    if (m_fJumpTop < m_fJumpHeight) m_fJumpTop = m_fJumpHeight;
+    step = chkLadderStepNow(1);
+    if (step >= 2) {
+        initLadder(step);
+        return;
+    }
+    if (chkHang()) {
+        initHang();
+        return;
+    }
+timer_end:
+    m_tqJumpTimer += m_tqFrameRate;
+}
 void CPlayer::exeJumpLand() {
     FVECTOR vel;
     if (m_bIsBattleScene) {
@@ -1380,7 +1806,64 @@ void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
         _instance()->m_fGimmickJumpPow = PL::g_fGimmickJumpPower[inPow];
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkGimmick__7CPlayerUi);
+INT CPlayer::chkGimmick(UINT inID) {
+    INT result;
+    HANDLE handle = m_hGimmickJump;
+    CEntity* pEntity;
+    FLOAT dir;
+    if (handle <= 0) {
+        handle = m_hTarget;
+        if (handle <= 0) return 0;
+    }
+    pEntity = (CEntity*)CTaskMan::getTask(handle);
+    if (!pEntity) return 0;
+    if (inID && pEntity->getTypeID() != inID) return 0;
+    switch (pEntity->getTypeID()) {
+    case 0x2002:
+        result = m_pMove->isObjRide() ? 7 : 0;
+        break;
+    case 0x4000:
+        result = 0x1F;
+        break;
+    case 0x2003:
+        dir = calcDirection(pEntity->getPos());
+        if (_abs(_limitPI(dir - m_fDir)) * 57.295776f > 75.0f) return 0;
+        if (!((CGimmickCarry*)pEntity)->checkCarryPermission()) return 0;
+        procTargetMark();
+        result = 0x1E;
+        break;
+    case 0x2000:
+        if (((CGimmickTreasureBox*)pEntity)->isOpenTresureBox()) return 0;
+        if (_abs(_limitPI(pEntity->getRot().y - m_fDir)) < 1.5707964f) return 0;
+        dir = pEntity->calcDirection(m_vCenterPos);
+        if (_abs(_limitPI2(pEntity->getRot().y - dir)) * 57.295776f > 75.0f) return 0;
+        if (!((CGimmickTreasureBox*)pEntity)->checkOpenTresureBoxPermission()) return 0;
+        ((CGimmickTreasureBox*)pEntity)->OpenTreasureBox();
+        m_pMarker->holdTarget(8);
+        result = 0x11;
+        break;
+    case 0x1006:
+        if (CSceneInfo::getRoomInfo(-1)->_doors[((CGimmickDoor*)pEntity)->getDoorID()].canSelectWorld()) {
+            FLOAT r = _limitPI(pEntity->getRot().y - m_fDir);
+            if (getHoukouFromAngle(r) == 4) return 0;
+            new (com_malloc_d(sizeof(CWorldSelect), D_00499E60, RET_ADDR())) CWorldSelect(CTaskMan::getSysTask(1), handle);
+            m_pMarker->holdTarget(8);
+            result = 0x15;
+        } else {
+            if (!CSceneInfo::getRoomInfo(-1)->_doors[((CGimmickDoor*)pEntity)->getDoorID()].canCreateRoom()) return 0;
+            FLOAT r = _limitPI(pEntity->getRot().y - m_fDir);
+            if (getHoukouFromAngle(r) == 4) return 0;
+            new (com_malloc_d(sizeof(CRoomCreation), D_00499E90, RET_ADDR())) CRoomCreation(CTaskMan::getSysTask(1), handle);
+            m_pMarker->holdTarget(8);
+            result = 0x14;
+        }
+        break;
+    default:
+        return 0;
+    }
+    m_hGimmick = handle;
+    return result;
+}
 void CPlayer::initTreasureBox() {
     CEntity* pTarget;
     FVECTOR rot;
