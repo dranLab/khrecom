@@ -67,7 +67,7 @@ inline void _emptyStringPlaceholder0() {
 #include "System/Rnd.h"
 #include "Game/Player/PlayerAttack.h"
 #include "System/Graphic/Anim.h"
-#include "Game/Card.h"
+#include "Game/AttachMotion.h"
 #include "Game/LockOnManager.h"
 #include "System/Graphic/Model.h"
 #include "Game/Gimmick/GimmickCarry.h"
@@ -180,7 +180,7 @@ public:
     static void setPrizeMp(INT inMP); static void setDropMp(INT inMP); static void setPrizeExp(INT inEXP); static void setPrizeCard(CARD& inCard, INT inKind, INT inFlag);
 };
 }
-class CJiminyMemoFlag { public: static void checkEvent(INT inEvent, INT inParam0, INT inParam1); }; /* PARTIAL: Form/Menu/JMemoFlag.h is not included here */
+class CJiminyMemoFlag { public: static void checkEvent(INT inEvent, INT inParam0, INT inParam1); }; namespace Friend { class CFriend { public: void setExit(INT inFlag); }; } namespace Summon { class CSummon { public: void setExit(INT inFlag); }; } class CEffectMotion { public: void kill(FLOAT inFadeTime); }; namespace MG_SKILL { void killMGSkill(); } /* PARTIAL: the headers are not included here */
 class CSound { /* PARTIAL: System/Sound.h is not written yet */
 public:
     static HANDLE playSE(INT nID, INT nCh, INT nVol);
@@ -3365,10 +3365,137 @@ void CPlayer::exeCarry() {
         break;
     }
 }
-/* placeholder: rodata of resetAction__7CPlayeri */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026ADB4\n.word .L0026AAE4\n.word .L0026ADB4\n.word .L0026AAF8\n.word .L0026AAF8\n.word .L0026AAF8\n.word .L0026AAE0\n.word .L0026AC7C\n.word .L0026ACD0\n.word .L0026ACD0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", resetAction__7CPlayeri);
+void CPlayer::resetAction(INT inMode) {
+    setConditionFlag(0, 0x1000000);
+    if (m_fScale != 1.0f) {
+        FVECTOR scale;
+        m_fScale = 1.0f;
+        scale.x = 1.0f;
+        scale.y = 1.0f;
+        scale.z = 1.0f;
+        scale.w = 1.0f;
+        setScale(scale);
+    }
+    m_fWallRadius = 0.5f;
+    m_fFootRadius = 0.25f;
+    if (m_pPLM->getFriend()) m_pPLM->getFriend()->setExit(0);
+    if (m_pPLM->getSummon()) m_pPLM->getSummon()->setExit(1);
+    if (m_pPLM->getFriendEx()) m_pPLM->getFriendEx()->setExit(1);
+    if (isPlayerFlag(0x80000000)) setBGFade(1.0f, 0.0f, 0);
+    setupFade(0.0f, 1.0f, 50, -1);
+    setModelAlphaScale(1.0f, -1);
+    fadeEffect(m_hEffCharge, 0);
+    fadeEffect(m_hEffCast, 0);
+    fadeEffAttack(0);
+    m_pEffect->kill(10.0f);
+    m_pEffectEx->kill(10.0f);
+    m_pSE->stop();
+    m_pSEEx->stop();
+    killLoopEffect(0);
+    if (isPlayerFlag(0x40000000)) {
+        m_pWeapon->killEffect(10.0f);
+        m_pWeapon->killLoopEffect(0);
+    }
+    killBullet();
+    if (m_szEffectName) {
+        CEffectMan::killAll(m_szEffectName, 10.0f);
+        m_szEffectName = NULL;
+    }
+    if (isPlayerFlag(0x8000)) {
+        m_pCollMap->removeHang();
+        setPlayerFlag(0, 0x8000);
+    }
+    setConditionFlag(0, 0x40000);
+    setConditionFlag(0, 0x80000);
+    PlayerCamera::CPlayerCamera::setBattleCamData(0, NULL);
+    m_pCam->changeNowPlayer(0, 0);
+    m_pCam->changeCamMode(-1, 0);
+    setPlayerFlag(0, 0x10000);
+    setBattleFlag(0, 0x10200000);
+    setUseRsrcBlock(0);
+    switch (inMode) {
+    case 6:
+        m_iAttackNo = 0;
+    case 1:
+        setObjStop(0);
+        break;
+    case 3:
+    case 4:
+    case 5:
+        setObjStop(0);
+        m_uiAttackKind = 0;
+        m_uiAttackID = 0;
+        m_iAttackNo = 0;
+        m_bIsAttackHit = FALSE;
+        m_bNextTrg = FALSE;
+        m_iNextAttack = 0;
+        m_collBody.setDamage(0);
+        offAttack();
+        onWeapon(0);
+        setBattleFlag(0, 8);
+        setBattleFlag(0, 0x00443F90);
+        setBattleFlag(0, 0x80000);
+        setBattleFlag(0, 0x10200000);
+        setPlayerFlag(0, 0x020C2000);
+        setBattleFlag(0, 0x00130000);
+        setPlayerFlag(0, 0x00401001);
+        setBattleFlag(0, 0x03000000);
+        setEntityFlag(0, 1);
+        setPushon(0);
+        m_pMarker->holdTarget(0);
+        m_pMove->setFlag(1, FALSE);
+        m_pMove->setFlag(0x40, TRUE);
+        setConditionFlag(0, 0x200000);
+        if (m_bIsMinigameScene) MG_SKILL::killMGSkill();
+        switch (m_iStockSkill) {
+        case 0x61: {
+            FVECTOR pos;
+            warp(m_vStartPos);
+            pos = m_vStartPos;
+            pos.y = 7.0f;
+            setOldPos(pos);
+            break;
+        }
+        case 0x27:
+            setEnemyStop(0, 0);
+            break;
+        }
+        break;
+    case 7:
+        m_uiAttackKind = 0;
+        m_uiAttackID = 0;
+        m_bIsAttackHit = FALSE;
+        m_bNextTrg = FALSE;
+        m_iNextAttack = 0;
+        m_bIsCanCombo = FALSE;
+        offAttack();
+        m_pMarker->cancelLockon(m_hLockon, 0);
+        m_pMarker->setFlag(FALSE);
+        if (m_bIsMinigameScene) MG_SKILL::killMGSkill();
+        break;
+    case 8:
+    case 9:
+        setPlayerFlag(0, 0x020C2000);
+        setBattleFlag(0, 8);
+        setBattleFlag(0, 0x00443F90);
+        setBattleFlag(0, 0x4060);
+        setBattleFlag(0, 0x00130000);
+        setBattleFlag(0, 0x03000000);
+        m_pMarker->cancelLockon(m_hLockon, 0);
+        m_pMarker->setFlag(FALSE);
+        offAttack();
+        setPlayerFlag(1, 0x00401000);
+        setPushon(0);
+        m_pMarker->holdTarget(0);
+        m_pMove->setFlag(1, FALSE);
+        if (m_bIsMinigameScene) MG_SKILL::killMGSkill();
+        if (m_iStockSkill == 0x61) warp(m_vAppearPos);
+        break;
+    case 0:
+    case 2:
+        break;
+    }
+}
 /* Parked: registers match; only the stores after the g_fGravity load are scheduled differently (the original
    stores m_JumpState right after the load and m_fJumpGravity before the g_CardBreakTime load; ours stores
    them later). tried: all 24 orders of the JumpState/CardBreakTime/JumpGravity/JumpSpdY block, cast loads
