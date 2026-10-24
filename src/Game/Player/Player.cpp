@@ -2993,10 +2993,6 @@ void CPlayer::chkPlayCard() {
         setBattleFlag(0, 0x10200000); setBattleFlag(0x20, 0);
     }
 }
-/* Parked: the switch's jump table goes to .rodata, which is stripped until the unit's data comes from source
-   (objcopy: symbol `.rodata' required but not present); tried: C switch over PL::ATTACK/ITEM/MAGIC/SKILL/
-   GIMMICKCARD/FRIEND/SUMMON/DUEL (the code apart from the table is the original's shape) */
-#if 0
 INT CPlayer::isNowCardActionState() {
     switch (m_PlayerState) {
     case PL::ATTACK:
@@ -3011,12 +3007,6 @@ INT CPlayer::isNowCardActionState() {
     }
     return 0;
 }
-#else
-/* placeholder: rodata of isNowCardActionState__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6B4\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowCardActionState__7CPlayer);
-#endif
 __asm__(".rdata\n");
 INT CPlayer::chkPlayCardCombo() {
     if (!m_pRevolver) return FALSE;
