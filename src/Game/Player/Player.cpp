@@ -78,7 +78,7 @@ inline void _emptyStringPlaceholder0() {
 #include "Game/Player/DWTPlayer.h"
 #include "include_asm.h"
 
-void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1); void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& outV, const FVECTOR& inV);
@@ -121,7 +121,7 @@ static inline void _inversMatrix(FMATRIX& m) {
 static inline void _rotMatrixY(FMATRIX& m, FLOAT r) {
     sceVu0RotMatrixY(m, m, r);
 }
-extern "C" float atan2f(float y, float x);
+extern "C" float atan2f(float y, float x); extern "C" int rand();
 static inline FLOAT _limitPI(FLOAT r) {
     if (r < -3.1415927f) r += 6.2831855f;
     else if (r > 3.1415927f) r -= 6.2831855f;
@@ -1236,10 +1236,162 @@ void CPlayer::beginStateField() {
         CGameWork::setFlag(1, 0x380, 0);
     }
 }
-/* placeholder: rodata of stateField__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00262EA0\n.word .L00262EB0\n.word .L00262EB8\n.word .L00262EB8\n.word .L00262ED4\n.word .L00262F24\n.word .L00262EF4\n.word .L00262F04\n.word .L00262F14\n.word .L00262F40\n.word .L00262FB8\n.word .L00262F90\n.word .L00262F90\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262EE4\n.word .L00262F50\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262F60\n.word .L00262F70\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262FB0\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262FA0\n.word .L00262F80\n.word .L00262EB8\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateField__7CPlayer);
+void CPlayer::stateField() {
+    if (chkAtelHide(1)) return;
+    chkAtelControl();
+    m_tqFrameRate = getFrameRate();
+    m_fFrameRate = (FLOAT)m_tqFrameRate * 0.020000001f;
+    m_fGravity = *(FLOAT*)&PL::g_fGravity * m_fFrameRate;
+    m_bAirCheck = FALSE;
+    chkBodyRevise();
+    m_tqStateTimer += m_tqFrameRate;
+    getPadInfo();
+    setControl();
+    if (m_iHP >= 2 && DebugWork::g_dw.player.iHP1) {
+        m_iHP = 1;
+        if (m_pGauge) m_pGauge->setDamage(1, 0);
+    }
+    if (dbgButtonTrg(USR_SYSTEM, 0x200, 1)) {
+        m_pMove->setPos(m_vStartPos);
+        m_pMove->setOldPos(m_vStartPos);
+        return;
+    }
+    if (dbgButtonDown(USR_SYSTEM, 1, 1) && dbgButtonDown(USR_SYSTEM, 2, 1)) {
+        FVECTOR pos;
+        FVECTOR vec;
+        FMATRIX mat;
+        FLOAT x;
+        FLOAT y;
+        FLOAT dir;
+        FLOAT power;
+        DebugWork::g_dw.player.iPlayerInfo = 1;
+        pos = m_pMove->getPos();
+        pos.y -= (FLOAT)dbgAnalogRY(USR_SYSTEM, 1) * 0.00024414062f;
+        x = (FLOAT)CPadHandler::getAnalogLX(1) * 0.00024414062f;
+        y = (FLOAT)CPadHandler::getAnalogLY(1) * 0.00024414062f;
+        dir = atan2f(x, y);
+        power = _sqrtf(x * x + y * y);
+        if (power > 1.0f) power = 1.0f;
+        vec.x = 0.0f;
+        vec.y = 0.0f;
+        vec.z = power * 0.5f;
+        vec.w = 1.0f;
+        _unitMatrix(mat);
+        _rotMatrixY(mat, dir);
+        ApplyMatrix(vec, mat, vec);
+        pos.x = pos.x + vec.x;
+        pos.y = pos.y + vec.y;
+        pos.z = pos.z + vec.z;
+        pos.w = pos.w + vec.w;
+        m_pMove->setPos(pos);
+        m_pMove->setOldPos(pos);
+        vec.init();
+        m_pMove->setVel(vec);
+        m_fJumpSpdY = 0.0f;
+        m_pMove->setAcc(vec);
+        return;
+    }
+    if (isTrgBattleChange()) {
+        BOOL result;
+        if (CSceneInfo::isMinigameScene()) result = CSceneInfo::reqExitMinigame(0);
+        else result = CSceneInfo::reqEnterBattle();
+        if (result) {
+            changeState(2);
+            setPlayerState(DBGWAIT);
+            return;
+        }
+    }
+    if (dbgCheckUser(KKIKUCHI)) {
+        if (dbgButtonTrg(USR_SYSTEM, 0x10, 1)) {
+            if (CGameWork::getInt(1, 0xE2)) CGameWork::setInt(1, 0xE2, 0);
+            else CGameWork::setInt(1, 0xE2, -1);
+        }
+        if (dbgButtonTrg(USR_SYSTEM, 0x80, 1)) {
+            m_iHP = 1;
+            if (m_pGauge) m_pGauge->setDamage(1, 0);
+        }
+        if (dbgButtonTrg(USR_SYSTEM, 8, 1)) {
+            PRIZE_PARAM param;
+            param.vPos = m_vCenterPos;
+            param.PrizeKind = 1;
+            param.fSpeed = 0.25f;
+            param.uiFlag = 0;
+            param.uiPrizeFlag = 0;
+            param.iNumber = rand() % 10;
+            param.vRot.set((-70.0f - RND::genrand_real1() * 10.0f) * 0.017453292f, RND::genrand_real1() * 360.0f * 0.017453292f, 0.0f);
+            Math3D::LimitPIVector(param.vRot);
+            CEntityFactory::getInstance()->createPrize(param, NULL);
+        }
+    }
+    if (m_PlayerState != DEAD) {
+        if (chkDamage()) return;
+    }
+    chkLockon();
+    setGroundIK(0);
+    switch (m_PlayerState) {
+    case START_WAIT:
+        exeStartWait();
+        setGroundIK(1);
+        break;
+    case STAND:
+        exeGimmickRide();
+    case WALK:
+    case RUN:
+    case TALK:
+        exeStandUp();
+        setGroundIK(1);
+        break;
+    case WALL:
+        exeWall();
+        break;
+    case LADDER:
+        exeLadder();
+        break;
+    case JUMP:
+        exeJump();
+        break;
+    case GLIDE:
+        exeGlide();
+        break;
+    case HANG:
+        exeHang();
+        break;
+    case AVOID:
+        exeAvoid();
+        break;
+    case ATTACK_FLD:
+        exeAttackField();
+        break;
+    case TREASUREBOX:
+        exeTreasureBox();
+        break;
+    case ROOMCREATION:
+        exeRoomCreation();
+        break;
+    case WORLDSELECT:
+        exeWorldSelect();
+        break;
+    case CARRY:
+        exeCarry();
+        break;
+    case DAMAGE:
+    case FLICKS:
+        exeDamage();
+        break;
+    case DEAD:
+        exeDead();
+        break;
+    case BADCONDITION:
+        exeBadCondition();
+        break;
+    }
+    exeMutekiTimer();
+    exeAttackTimer();
+    exePrizeHealing();
+    setDownForce();
+    exeConfuse();
+    recoverCollMap();
+}
 void CPlayer::endStateField() {
     setActionFlag(0, m_pParam->USE_MAP_ACTION);
     setBattleFlag(0, 1);

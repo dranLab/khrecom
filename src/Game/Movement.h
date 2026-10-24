@@ -248,7 +248,7 @@ public:
     FVECTOR& getRot() { return *(FVECTOR*)&_m_0x00[0x40]; }
     FVECTOR& getVel() { return *(FVECTOR*)&_m_0x00[0x70]; }
     // PARTIAL: added for Game/Enemy/EnemyBluerhapsody
-    void setVel(const FVECTOR& inVel) { getVel() = inVel; }
+    void setVel(const FVECTOR& inVel) { getVel() = inVel; } void setPos(const FVECTOR& inPos) { getPos() = inPos; } void setOldPos(const FVECTOR& inPos) { *(FVECTOR*)&_m_0x00[0x00] = inPos; } void setAcc(const FVECTOR& inAcc) { *(FVECTOR*)&_m_0x00[0x80] = inAcc; } // setPos/setOldPos/setAcc: Game/Player/Player
     // PARTIAL: added for Game/Player/Player (isLadder is out of line in the original)
     UINT isLadder() const;
     const FVECTOR& getEscapeNormal() const { return m_vEscapeNormal; } // PARTIAL: added for Game/Player/Player
