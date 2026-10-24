@@ -3555,11 +3555,59 @@ void CPlayer::calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr) {
         if (param.iGuard > 0) Gauge::CCommonGauge::setDispSeq(getHandle(), 2);
     }
 }
-/* placeholder: rodata of setUseRsrcBlock__7CPlayeri */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026E0D0\n.word .L0026E0DC\n.word .L0026E0E8\n.word .L0026E0F4\n.word .L0026E100\n.word .L0026E10C\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026E184\n.word .L0026E190\n.word .L0026E19C\n.word .L0026E1A8\n.word .L0026E1B4\n.word .L0026E1DC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setUseRsrcBlock__7CPlayeri);
+void CPlayer::setUseRsrcBlock(INT inFlag) {
+    if (inFlag) {
+        setPlayerFlag(0x10000000, 0);
+        m_pPLM->setUseRsrcBlockSkill(m_iStockSkill, 1);
+        switch (m_iStockSkill) {
+        case 0x66:
+            m_pPLM->setUseRsrcBlockSkill(0x93, 1);
+            break;
+        case 0x67:
+            m_pPLM->setUseRsrcBlockSkill(0x94, 1);
+            break;
+        case 0x68:
+            m_pPLM->setUseRsrcBlockSkill(0x95, 1);
+            break;
+        case 0x69:
+            m_pPLM->setUseRsrcBlockSkill(0x93, 1);
+            break;
+        case 0x6A:
+            m_pPLM->setUseRsrcBlockSkill(0x94, 1);
+            m_pPLM->setUseRsrcBlockSkill(0x92, 1);
+            break;
+        case 0x6B:
+            m_pPLM->setUseRsrcBlockSkill(0x95, 1);
+            m_pPLM->setUseRsrcBlockSkill(0x92, 1);
+            break;
+        }
+    } else if (isPlayerFlag(0x10000000)) {
+        m_pPLM->setUseRsrcBlockSkill(m_iStockSkill, 0);
+        switch (m_iStockSkill) {
+        case 0x66:
+            m_pPLM->setUseRsrcBlockSkill(0x93, 0);
+            break;
+        case 0x67:
+            m_pPLM->setUseRsrcBlockSkill(0x94, 0);
+            break;
+        case 0x68:
+            m_pPLM->setUseRsrcBlockSkill(0x95, 0);
+            break;
+        case 0x69:
+            m_pPLM->setUseRsrcBlockSkill(0x93, 0);
+            break;
+        case 0x6A:
+            m_pPLM->setUseRsrcBlockSkill(0x94, 0);
+            m_pPLM->setUseRsrcBlockSkill(0x92, 0);
+            break;
+        case 0x6B:
+            m_pPLM->setUseRsrcBlockSkill(0x95, 0);
+            m_pPLM->setUseRsrcBlockSkill(0x92, 0);
+            break;
+        }
+        setPlayerFlag(0, 0x10000000);
+    }
+}
 void CPlayer::setDefAttr(FLOAT* inAttr) {
     for (INT i = 0; i < 6; i++) {
         m_fDefAttr[i] = inAttr[i];
