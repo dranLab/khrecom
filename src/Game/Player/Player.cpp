@@ -700,6 +700,44 @@ void CPlayer::initStartPos() {
     m_collBody.setRadius(m_pParam->BODY_COLL_RADIUS);
     m_collBody.off();
 }
+/* Parked: 20 lines differ, all in the scheduling of the last getBoneIndex calls (size, frame, switch, strings match):
+   the original fills the delay slot with the string load for the Chest, LToes and RToes calls (`move a0; lui; move a2; jal;
+   lw a1`) but not for Head (`lui; move a0; lw a1; jal; move a2`); ours has Chest and Head the other way round.
+   Found: the strings must be read through `*(LPCSTR*)&PL::g_sz...` (a plain read of the never-written static is hoisted
+   above the previous store: 57 lines), each case sets m_iBoneCenter itself (a shared `name` temp: 70 lines).
+   tried: all 128 cast/plain combinations of the 7 reads, a temp for the Chest result, FALSE for the 0, and tools/
+   permuter.py through the method wrapper (4 min, no better). */
+#if 0
+void CPlayer::makeWeapon() {
+    switch (m_uiCharaID) {
+    case 5:
+    case 6:
+        setPlayerFlag(0, 0x40000000);
+        m_iBoneWeapon = getBoneIndex(PL::g_szBoneWep0, 0);
+        m_iBoneCenter = getBoneIndex(*(LPCSTR*)&PL::g_szBoneEx1580sk, 0);
+        break;
+    case 3:
+    case 4:
+        setPlayerFlag(0, 0x40000000);
+        m_iBoneWeapon = getBoneIndex(PL::g_szBoneWep0, 0);
+        m_iBoneCenter = getBoneIndex(*(LPCSTR*)&PL::g_szBoneEx1010sk, 0);
+        break;
+    case 1:
+    case 2:
+    default:
+        setPlayerFlag(0x40000000, 0);
+        m_iBoneWeapon = getBoneIndex(PL::g_szBoneWeaponR, 0);
+        m_iBoneCenter = getBoneIndex(*(LPCSTR*)&PL::g_szBoneEx0010sk, 0);
+        break;
+    }
+    m_iBoneChest = getBoneIndex(*(LPCSTR*)&PL::g_szBoneChest1, 0);
+    m_iBoneHead = getBoneIndex(*(LPCSTR*)&PL::g_szBoneHead, 0);
+    m_iBoneLFoot = getBoneIndex(*(LPCSTR*)&PL::g_szBoneLToes, 0);
+    m_iBoneRFoot = getBoneIndex(*(LPCSTR*)&PL::g_szBoneRToes, 0);
+    m_pWeapon = new (com_malloc_d(sizeof(PlayerWeapon::CPlayerWeapon), __FILE__ "(1094)", RET_ADDR())) PlayerWeapon::CPlayerWeapon(this, m_uiCharaID, m_iBoneWeapon);
+    offWeapon();
+}
+#else
 /* placeholder: rodata of makeWeapon__7CPlayer */
 __asm__(".rdata\n");
 inline void _roPh1() {
@@ -707,6 +745,7 @@ inline void _roPh1() {
 }
 __asm__(".rdata\n.align 4\n.word .L00260C8C\n.word .L00260C8C\n.word .L00260C4C\n.word .L00260C4C\n.word .L00260C0C\n.word .L00260C0C\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeWeapon__7CPlayer);
+#endif
 __asm__(".rdata\n");
 void CPlayer::makeCockpit() {
     m_pCam = new (com_malloc_d(sizeof(PlayerCamera::CPlayerCamera), __FILE__ "(1103)", RET_ADDR())) PlayerCamera::CPlayerCamera(this);
@@ -862,10 +901,22 @@ void CPlayer::setAnimRsrcEx(INT inRcid, INT inAnimID, TIMEQ inChangeTime, BOOL i
     }
     setAnimSpeed(1.0f);
 }
-/* placeholder: rodata of isNowIdleAnim__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowIdleAnim__7CPlayer);
+BOOL CPlayer::isNowIdleAnim() {
+    if (m_pAnim->isFlag1Bit9()) return FALSE;
+    switch (m_iNowAnimID) {
+    case 1:
+    case 8:
+    case 0xE:
+    case 0x18:
+    case 0x2A:
+        return TRUE;
+    }
+    if (m_pPLM->getFriend() || m_pPLM->getSummon()) return TRUE;
+    if (m_PlayerState == 5) {
+        if (m_iSubState == 1) return TRUE;
+    }
+    return FALSE;
+}
 void CPlayer::setFaceAnim(INT inID, INT inFlag) {
     if (!inFlag && m_iNowFaceID == inID) return;
     m_iNowFaceID = inID;
@@ -1464,14 +1515,89 @@ void CPlayer::exeWalk() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer);
 #endif
-/* placeholder: rodata of setWalkAnim__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00264984\n.word .L0026499C\n.word .L002649BC\n.word .L00264AB4\n.word .L002649D4\n.word .L002649D4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264A6C\n.word .L00264984\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setWalkAnim__7CPlayer);
-/* placeholder: rodata of chkBattleIdle__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00264B30\n.word .L00264B30\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B30\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B30\n.word .L00264B30\n.word .L00264B30\n.word .L00264B30\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBattleIdle__7CPlayer);
+void CPlayer::setWalkAnim() {
+    INT anim;
+    switch (m_PlayerState) {
+    case STAND:
+    case TALK:
+        anim = chkBattleIdle() ? 0x2A : 1;
+        break;
+    case WALK:
+        if (isBattleFlag(1)) anim = 0x2B;
+        else anim = isPlayerFlag(2) ? 2 : 0x12;
+        break;
+    case RUN:
+        if (!isBattleFlag(1)) anim = isPlayerFlag(2) ? 3 : 0x13;
+        else anim = 0x2C;
+        break;
+    case AVOID:
+    case JUMP:
+        switch (m_WalkMode) {
+        case 0:
+            anim = isBattleFlag(1) ? 0x2A : 1;
+            break;
+        case 1:
+            if (isBattleFlag(1)) anim = 0x2B;
+            else anim = isPlayerFlag(2) ? 2 : 0x12;
+            break;
+        case 2:
+            if (!isBattleFlag(1)) anim = isPlayerFlag(2) ? 3 : 0x13;
+            else anim = 0x2C;
+            break;
+        }
+        break;
+    case CARRY:
+        switch (m_WalkMode) {
+        case 0:
+            anim = 0x18;
+            break;
+        case 1:
+            anim = 0x19;
+            break;
+        case 2:
+            anim = 0x19;
+            break;
+        }
+        break;
+    default:
+        switch (m_WalkMode) {
+        case 0:
+            anim = 0x2A;
+            break;
+        case 1:
+            anim = 0x2B;
+            break;
+        case 2:
+            anim = 0x2C;
+            break;
+        }
+        break;
+    }
+    setAnim(anim, -1, 0);
+}
+INT CPlayer::chkBattleIdle() {
+    if (!isBattleFlag(1)) goto check;
+ret_true:
+    return TRUE;
+check:
+    if (m_iPreAnimID >= 0x24) {
+        if (m_iPreAnimID < 0x26) goto ret_true;
+        if (m_iPreAnimID < 0x34) {
+            if (m_iPreAnimID >= 0x30) goto ret_true;
+        }
+    }
+    switch (m_iNowAnimID) {
+    case 0x24:
+    case 0x25:
+    case 0x2A:
+    case 0x30:
+    case 0x31:
+    case 0x32:
+    case 0x33:
+        goto ret_true;
+    }
+    return FALSE;
+}
 INT CPlayer::procFlowIdle(INT inFlag) {
     if (isAir()) {
         setAnim(6, 800, 0);
@@ -1972,11 +2098,56 @@ INT CPlayer::isStartLadderJump() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isStartLadderJump__7CPlayer);
 #endif
-/* placeholder: rodata of getJumpState__C7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00266F18\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266F18\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266F20\n.word .L00266F18\n.word .L00266F18\n.word .L00266F20\n.word .L00266ED8\n.word .L00266F18\n.word .L00266F18\n.word .L00266ED8\n.word .L00266F18\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266F18\n.word .L00266F18\n.word .L00266F20\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00266F00\n.word .L00266F08\n.word .L00266F08\n.word .L00266F10\n.word .L00266F10\n.word .L00266F08\n.word .L00266F18\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getJumpState__C7CPlayer);
+INT CPlayer::getJumpState() const {
+    switch (m_PlayerState) {
+    case 6:
+    case 7:
+    case 8:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 0x13:
+    case 0x16:
+    case 0x18:
+    case 0x19:
+    case 0x1A:
+    case 0x1B:
+    case 0x1F:
+    case 0x20:
+    case 0x21:
+    case 0x22:
+    case 0x23:
+    case 0x24:
+        switch (m_JumpState) {
+        case 0:
+        default:
+            return 0;
+        case 1:
+        case 2:
+        case 5:
+            return 1;
+        case 3:
+        case 4:
+            return 2;
+        case 6:
+            return 3;
+        }
+    case 5:
+    case 9:
+    case 0x10:
+    case 0x11:
+    case 0x14:
+    case 0x15:
+    case 0x17:
+    case 0x1C:
+    case 0x1D:
+        return 3;
+    default:
+        return 0;
+    }
+}
 void CPlayer::initJump(INT inFlag) {
     setPlayerState(PL::JUMP);
     if (DebugWork::g_dw.player.iHiJump) setActionFlag(0x200000, 0);
@@ -2745,10 +2916,52 @@ void CPlayer::initRoomCreation() {
     m_pCam->initCamera(1, 1, NULL);
     m_pCam->setFlag(1, TRUE);
 }
-/* placeholder: rodata of exeRoomCreation__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00269DEC\n.word .L00269DF4\n.word .L00269EDC\n.word .L00269F2C\n.word .L00269F90\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeRoomCreation__7CPlayer);
+void CPlayer::exeRoomCreation() {
+    setPlayerFlag(0x400000, 0);
+    switch (m_iSubState) {
+    case 0:
+        m_iSubState = 1;
+    case 1:
+        if (isTrgFlag(0x10000)) {
+            m_iSubState = 2;
+            setTrgFlag(0, 0x10000);
+            if (CGame::isSoraGame()) setAnimRsrcEx(0xFE6, 0, 0, 1, 0, 0, 1);
+            else setAnimRsrcEx(0xFE8, 0, 0, 1, 0, 0, 1);
+        } else if (isTrgFlag(0x8000)) {
+            m_iSubState = 4;
+            setTrgFlag(0, 0x8000);
+            m_WalkMode = 0;
+            m_pCam->setFlag(1, FALSE);
+            m_bDmgMuteki = FALSE;
+            m_collBody.on();
+            initStandUp(0);
+            m_pMarker->setFlag(TRUE);
+            m_pMarker->holdTarget(0);
+        }
+        break;
+    case 2:
+        if (isMotionEnd()) {
+            m_iSubState = 3;
+            m_pMove->setFlag(1, TRUE);
+            setPlayerFlag(1, 0);
+            setAnim(1, -1, 0);
+            m_tqStateTimer = 0;
+            m_fMovePower = 0.0f;
+        }
+        break;
+    case 3:
+        if (m_tqStateTimer > 3000) {
+            setAnim(2, -1, 0);
+            m_WalkMode = 1;
+            m_fMovePower = 1.0f;
+            m_fWalkSpeed = m_pParam->MAX_WALK_SPEED / 60.0f;
+            m_pMove->calcVelocityXZ(m_fWalkSpeed);
+        }
+        break;
+    case 4:
+        break;
+    }
+}
 void CPlayer::initWorldSelect() {
     CEntity* pTarget;
     FVECTOR rot;
@@ -2787,10 +3000,52 @@ void CPlayer::initWorldSelect() {
     m_pCam->initCamera(1, 1, NULL);
     m_pCam->setFlag(1, TRUE);
 }
-/* placeholder: rodata of exeWorldSelect__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026A1FC\n.word .L0026A204\n.word .L0026A2EC\n.word .L0026A33C\n.word .L0026A3A0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWorldSelect__7CPlayer);
+void CPlayer::exeWorldSelect() {
+    setPlayerFlag(0x400000, 0);
+    switch (m_iSubState) {
+    case 0:
+        m_iSubState = 1;
+    case 1:
+        if (isTrgFlag(0x10000)) {
+            m_iSubState = 2;
+            setTrgFlag(0, 0x10000);
+            if (CGame::isSoraGame()) setAnimRsrcEx(0xFBE, 0, 0, 1, 0, 0, 1);
+            else setAnimRsrcEx(0xFC0, 0, 0, 1, 0, 0, 1);
+        } else if (isTrgFlag(0x8000)) {
+            m_iSubState = 4;
+            setTrgFlag(0, 0x8000);
+            m_WalkMode = 0;
+            m_pCam->setFlag(1, FALSE);
+            m_bDmgMuteki = FALSE;
+            m_collBody.on();
+            initStandUp(0);
+            m_pMarker->setFlag(TRUE);
+            m_pMarker->holdTarget(0);
+        }
+        break;
+    case 2:
+        if (isMotionEnd()) {
+            m_iSubState = 3;
+            m_pMove->setFlag(1, TRUE);
+            setPlayerFlag(1, 0);
+            setAnim(1, -1, 0);
+            m_tqStateTimer = 0;
+            m_fMovePower = 0.0f;
+        }
+        break;
+    case 3:
+        if (m_tqStateTimer > 3000) {
+            setAnim(2, -1, 0);
+            m_WalkMode = 1;
+            m_fMovePower = 1.0f;
+            m_fWalkSpeed = m_pParam->MAX_WALK_SPEED / 60.0f;
+            m_pMove->calcVelocityXZ(m_fWalkSpeed);
+        }
+        break;
+    case 4:
+        break;
+    }
+}
 void CPlayer::initCarry() {
     setPlayerState(PL::CARRY);
     m_iSubState = 0;
@@ -2993,10 +3248,6 @@ void CPlayer::chkPlayCard() {
         setBattleFlag(0, 0x10200000); setBattleFlag(0x20, 0);
     }
 }
-/* Parked: the switch's jump table goes to .rodata, which is stripped until the unit's data comes from source
-   (objcopy: symbol `.rodata' required but not present); tried: C switch over PL::ATTACK/ITEM/MAGIC/SKILL/
-   GIMMICKCARD/FRIEND/SUMMON/DUEL (the code apart from the table is the original's shape) */
-#if 0
 INT CPlayer::isNowCardActionState() {
     switch (m_PlayerState) {
     case PL::ATTACK:
@@ -3011,12 +3262,6 @@ INT CPlayer::isNowCardActionState() {
     }
     return 0;
 }
-#else
-/* placeholder: rodata of isNowCardActionState__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6B4\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowCardActionState__7CPlayer);
-#endif
 __asm__(".rdata\n");
 INT CPlayer::chkPlayCardCombo() {
     if (!m_pRevolver) return FALSE;
@@ -3447,10 +3692,36 @@ BOOL CPlayer::chkExtraSkill() {
     }
     return FALSE;
 }
-/* placeholder: rodata of calcEnchant_AttackPoint__7CPlayerRiR8ATK_KIND8ATK_ATTRUi */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026DF8C\n.word .L0026DF8C\n.word .L0026DF8C\n.word .L0026DF94\n.word .L0026DF8C\n.word .L0026DF8C\n.word .L0026DF94\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcEnchant_AttackPoint__7CPlayerRiR8ATK_KIND8ATK_ATTRUi);
+void CPlayer::calcEnchant_AttackPoint(INT& inPoint, ATK_KIND& inAtkKind, ATK_ATTR inAttr, UINT inUpKind) {
+    if (m_pCB) {
+        CardBattle::ENCHANT_PARAM param;
+        param.init(getHandle(), 1);
+        param.uiState = 1;
+        param.AtkKind = inAtkKind;
+        param.UpKind = inUpKind;
+        param.AtkAttr = inAttr;
+        param.iAttackPoint = inPoint;
+        param.iHp = m_iHP;
+        param.iHpMax = m_iMaxHP;
+        switch (m_uiAttackKind) {
+        case 1:
+        case 2:
+        case 3:
+        case 5:
+        case 6:
+            param.iNormal = 1;
+            break;
+        case 4:
+        case 7:
+            param.iNormal = 1;
+            param.iFinish = 1;
+            break;
+        }
+        m_pCB->calcEnchantParam(param);
+        inPoint = param.iAttackPoint;
+        inAtkKind = param.AtkKind;
+    }
+}
 void CPlayer::calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr) {
     if (m_pCB) {
         CardBattle::ENCHANT_PARAM param;
@@ -3463,11 +3734,59 @@ void CPlayer::calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr) {
         if (param.iGuard > 0) Gauge::CCommonGauge::setDispSeq(getHandle(), 2);
     }
 }
-/* placeholder: rodata of setUseRsrcBlock__7CPlayeri */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026E0D0\n.word .L0026E0DC\n.word .L0026E0E8\n.word .L0026E0F4\n.word .L0026E100\n.word .L0026E10C\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026E184\n.word .L0026E190\n.word .L0026E19C\n.word .L0026E1A8\n.word .L0026E1B4\n.word .L0026E1DC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setUseRsrcBlock__7CPlayeri);
+void CPlayer::setUseRsrcBlock(INT inFlag) {
+    if (inFlag) {
+        setPlayerFlag(0x10000000, 0);
+        m_pPLM->setUseRsrcBlockSkill(m_iStockSkill, 1);
+        switch (m_iStockSkill) {
+        case 0x66:
+            m_pPLM->setUseRsrcBlockSkill(0x93, 1);
+            break;
+        case 0x67:
+            m_pPLM->setUseRsrcBlockSkill(0x94, 1);
+            break;
+        case 0x68:
+            m_pPLM->setUseRsrcBlockSkill(0x95, 1);
+            break;
+        case 0x69:
+            m_pPLM->setUseRsrcBlockSkill(0x93, 1);
+            break;
+        case 0x6A:
+            m_pPLM->setUseRsrcBlockSkill(0x94, 1);
+            m_pPLM->setUseRsrcBlockSkill(0x92, 1);
+            break;
+        case 0x6B:
+            m_pPLM->setUseRsrcBlockSkill(0x95, 1);
+            m_pPLM->setUseRsrcBlockSkill(0x92, 1);
+            break;
+        }
+    } else if (isPlayerFlag(0x10000000)) {
+        m_pPLM->setUseRsrcBlockSkill(m_iStockSkill, 0);
+        switch (m_iStockSkill) {
+        case 0x66:
+            m_pPLM->setUseRsrcBlockSkill(0x93, 0);
+            break;
+        case 0x67:
+            m_pPLM->setUseRsrcBlockSkill(0x94, 0);
+            break;
+        case 0x68:
+            m_pPLM->setUseRsrcBlockSkill(0x95, 0);
+            break;
+        case 0x69:
+            m_pPLM->setUseRsrcBlockSkill(0x93, 0);
+            break;
+        case 0x6A:
+            m_pPLM->setUseRsrcBlockSkill(0x94, 0);
+            m_pPLM->setUseRsrcBlockSkill(0x92, 0);
+            break;
+        case 0x6B:
+            m_pPLM->setUseRsrcBlockSkill(0x95, 0);
+            m_pPLM->setUseRsrcBlockSkill(0x92, 0);
+            break;
+        }
+        setPlayerFlag(0, 0x10000000);
+    }
+}
 void CPlayer::setDefAttr(FLOAT* inAttr) {
     for (INT i = 0; i < 6; i++) {
         m_fDefAttr[i] = inAttr[i];
@@ -3578,10 +3897,70 @@ inline void _roPh21() {
 }
 __asm__(".rdata\n.align 4\n.word .L0026F518\n.word .L0026F588\n.word .L0026F6AC\n.word .L0026F6D4\n.word .L0026F6AC\n.word .L0026F7B4\n.word .L0026F6AC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDamage__7CPlayer);
-/* placeholder: rodata of chkTrgAction__7CPlayeriUi */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026FB04\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB14\n.word .L0026FB24\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB34\n.word .L0026FBBC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkTrgAction__7CPlayeriUi);
+INT CPlayer::chkTrgAction(INT inAction, UINT inFlag) {
+    if (m_bIsBattleScene) {
+        setBattleFlag(8, 0);
+        if (isTrgFlag(0x10)) {
+            if (!chkChargeMove(0) && inAction) {
+                initCharge();
+                return TRUE;
+            }
+        }
+        if (isTrgFlag(8)) {
+            initItem(0);
+            return TRUE;
+        }
+        if (isTrgFlag(0x40)) {
+            initGimmickCard(0);
+            return TRUE;
+        }
+        if (isTrgFlag(0x20)) initMagic(0);
+        else if (isTrgFlag(0x80)) initFriend(0);
+        else if (isTrgFlag(0x100)) initSummon(0);
+        else if (isTrgFlag(4)) initAttack(0);
+        else goto tail;
+        return TRUE;
+    } else {
+        if (isTrgFlag(0x200) && !isAir()) {
+            switch (chkGimmick(0)) {
+            case 0x11:
+                initTreasureBox();
+                return TRUE;
+            case 0x14:
+                initRoomCreation();
+                return TRUE;
+            case 0x15:
+                initWorldSelect();
+                return TRUE;
+            case 0x1E:
+                initCarry();
+                return TRUE;
+            case 0x1F:
+                goto stand;
+            }
+        }
+        if (isTrgFlag(4)) {
+            initAttackField(0);
+            return TRUE;
+        }
+    }
+tail:
+    if (!inAction) return FALSE;
+    if (isAir()) return FALSE;
+    if (m_fAnalogPower >= 0.3f) {
+        if (isTrgFlag(2)) {
+            initAvoid();
+            return TRUE;
+        }
+        m_bDmgMuteki = FALSE;
+    stand:
+        initStandUp(0);
+        return TRUE;
+    }
+    if (!isTrgFlag(1)) return FALSE;
+    initJump(0);
+    return TRUE;
+}
 void CPlayer::initDead() {
     FVECTOR vScale;
     setPlayerState(DEAD);
@@ -4629,13 +5008,47 @@ void CPlayer::notifyExterminate() {
     _instance()->setBattleFlag(4, 0);
     _instance()->setConditionFlag(0x2000, 0);
 }
-/* placeholder: rodata of notifyBossDead__7CPlayeri */
-__asm__(".rdata\n");
-inline void _roPh28() {
-    TRACE("\x81\xa6\x83{\x83X\x8e\x80\x96S\x92\xca\x92m\x81" "E\x81" "E\x81" "E\x83v\x83\x8c\x83" "C\x83\x84\x81[\x8e\x80\x96S\x82\xcc\x88\xd7\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81I\n");
+INT CPlayer::notifyBossDead(INT inCmd) {
+    INT rcid;
+    if (!_instance()) return FALSE;
+    if (_instance()->m_bIsDead) {
+        TRACE("\x81\xa6\x83{\x83X\x8e\x80\x96S\x92\xca\x92m\x81" "E\x81" "E\x81" "E\x83v\x83\x8c\x83" "C\x83\x84\x81[\x8e\x80\x96S\x82\xcc\x88\xd7\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81I\n");
+        return FALSE;
+    }
+    rcid = 0xFA0;
+    if (CGame::isRikuGame()) rcid = _instance()->isConditionFlag(0x400000) ? 0xFA3 : 0xFA2;
+    switch (inCmd) {
+    case 0:
+        PLM::calcFavoriteStockCount();
+        _instance()->setBattleFlag(0x04000004, 0);
+        _instance()->initEnd();
+        CSceneEnv::setStop((ObjType::eObjBit)0x20002);
+        _instance()->m_pCam->setFlag(0x20, TRUE);
+        break;
+    case 1:
+        CSceneEnv::setStop((ObjType::eObjBit)0);
+        CardBattle::CCardBattle::setBattleEnd();
+        _instance()->m_pRevolver = NULL;
+        break;
+    case 2:
+        _instance()->setConditionFlag(0x2000, 0);
+        break;
+    case 3:
+        _instance()->setAnimRsrcEx(rcid, 3, -1, 0, 0, 0, 1);
+        return TRUE;
+    case 4:
+        _instance()->setAnimRsrcEx(rcid, 1, 0, 0, 0, 0, 1);
+        _instance()->offWeapon();
+        return TRUE;
+    case 5:
+        _instance()->setAnimRsrcEx(rcid, 2, -1, 0, 0, 0, 1);
+        break;
+    case 6:
+        _instance()->setAnimRsrcEx(rcid, 4, -1, 0, 0, 0, 1);
+        break;
+    }
+    return TRUE;
 }
-__asm__(".rdata\n.align 4\n.word .L002745B8\n.word .L00274608\n.word .L00274624\n.word .L00274638\n.word .L00274648\n.word .L0027468C\n.word .L002746B8\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyBossDead__7CPlayeri);
 HANDLE CPlayer::getLevelUpEffect() {
     if (!m_pInstance) return 0;
     return m_pInstance->m_hEffLevelUp;
@@ -4669,10 +5082,34 @@ void CPlayer::initEnd() {
         if (m_pEscape) m_pEscape->destroy();
     }
 }
-/* placeholder: rodata of exeEnd__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00274878\n.word .L00274880\n.word .L00274888\n.word .L002748FC\n.word .L002748FC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeEnd__7CPlayer);
+void CPlayer::exeEnd() {
+    setBattleFlag(0, 8);
+    switch (m_iSubState) {
+    case 0:
+        m_iSubState = 2;
+        break;
+    case 1:
+        m_iSubState = 2;
+        break;
+    case 2:
+        if (procFlowIdle(1)) {
+            if (isConditionFlag(0x2000)) {
+                onWeapon(0);
+                setEntityFlag(0, 1);
+                setDrawRadius(50.0f, 50.0f);
+                if (isBattleFlag(0x4000000)) {
+                    m_iSubState = 3;
+                } else {
+                    m_iSubState = 4;
+                }
+            }
+        }
+        break;
+    case 3:
+    case 4:
+        break;
+    }
+}
 BOOL CPlayer::isEnableBattleEnd() {
     if (!m_pInstance) return TRUE;
     if (m_pInstance->m_bIsDead) return FALSE;
