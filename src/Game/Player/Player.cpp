@@ -59,7 +59,7 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
-extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_00499E60[]; extern "C" char D_00499E90[]; /* "...Player.cpp(n)" of chkGimmick's new CWorldSelect / CRoomCreation */ extern "C" char D_0049B2D8[]; /* TRACE message of exeFooting */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
+extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_00499AE8[]; extern "C" char D_00499B18[]; /* TRACE messages of setControl */ extern "C" char D_00499E60[]; extern "C" char D_00499E90[]; /* "...Player.cpp(n)" of chkGimmick's new CWorldSelect / CRoomCreation */ extern "C" char D_0049B2D8[]; /* TRACE message of exeFooting */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
 extern "C" char D_00499988[]; extern "C" char D_004999B8[]; extern "C" char D_004999E8[]; /* "...Player.cpp(1156)", (1172), (1181) */
 extern "C" const CARD_DATA cardDataTbl_0049E190[224];
 extern "C" char D_0049AFA8[]; /* TRACE messages of setTrapDamage */
@@ -598,7 +598,122 @@ void CPlayer::exeMutekiTimer() {
     m_tqMutekiTimer -= m_tqFrameRate;
     if (m_tqMutekiTimer < 0) m_tqMutekiTimer = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setControl__7CPlayer);
+void CPlayer::setControl() {
+    INT iRev;
+    m_fDir = m_pMove->getRot().y;
+    m_uiTrgFlag &= 0xFFF7F400;
+    m_fAnalogPower = getAnalogPower();
+    m_fAnalogDir = getAnalogDir();
+    m_fAnalogViewDir = getAnalogViewDir();
+    if (!m_bIsBattleScene) {
+        if (isTrgAttack() && isActionFlag(0x40) && !m_tqAttackTimer) setTrgFlag(4, 0);
+    } else {
+        if (isPlayerFlag(0x40000)) {
+            initTransform(1);
+            return;
+        }
+        if (m_bIsDead) return;
+        if (isBattleFlag(4)) return;
+        if (isConditionFlag(0x2000000) || isTrgFlag(0x100000)) {
+            TRACE(D_00499AE8);
+            return;
+        }
+        if (m_pRevolver) {
+            iRev = 0;
+            if (m_hSnatch > 0) {
+                setBattleFlag(0, 8);
+            } else if (!isTrgStockSkill()) {
+                if (!CardBattle::CCardBattle::isExecutingCard(1) && !isBattleFlag(0x8000000)) {
+                    iRev = isDownReloadDeck();
+                    if (iRev) {
+                        if (m_pRevolver->isEnableCharge()) {
+                            if (!CGame::isRikuGame() || isTrgReloadDeck()) setTrgFlag(0x10, 0);
+                        }
+                    } else {
+                        iRev = isTrgChangeDeck();
+                        if (iRev) {
+                            m_pRevolver->changeMode(-1, 0);
+                        } else {
+                            iRev = isTrgCancelStock();
+                            if (iRev) {
+                                if (!CGameWork::getFlag(1, 0x30)) m_pRevolver->returnStockCard(0);
+                            }
+                        }
+                    }
+                }
+                if (!iRev) {
+                    iRev = 1;
+                    if (isTrgShortCutReload()) {
+                        iRev = 0;
+                        m_pRevolver->rollShortCut(1);
+                    } else if (isTrgShortCutCard()) {
+                        iRev = 0;
+                        m_pRevolver->rollShortCut(2);
+                    } else if (isDownRollDeckL() && isDownRollDeckR()) {
+                    } else if (isDownRollDeckL()) {
+                        iRev = 0;
+                        if (m_tqRevolverRoll > 0) m_tqRevolverRoll = 0;
+                        m_tqRevolverRoll -= m_tqFrameRate;
+                        if (isTrgRollDeckL()) {
+                            m_tqRevolverRoll = 0;
+                            m_tqRevolverSpeed = 300;
+                            m_pRevolver->rollDeck(-1, 0, 300);
+                        } else if (m_tqRevolverRoll < -4000) {
+                            m_tqRevolverSpeed = 100;
+                            m_pRevolver->rollDeck(-1, 0, 100);
+                        } else if (m_tqRevolverRoll < -2000) {
+                            m_tqRevolverSpeed = 200;
+                            m_pRevolver->rollDeck(-1, 0, 200);
+                        }
+                    } else if (isDownRollDeckR()) {
+                        iRev = 0;
+                        if (m_tqRevolverRoll < 0) m_tqRevolverRoll = 0;
+                        m_tqRevolverRoll += m_tqFrameRate;
+                        if (isTrgRollDeckR()) {
+                            m_tqRevolverRoll = 0;
+                            m_tqRevolverSpeed = 300;
+                            m_pRevolver->rollDeck(1, 0, 300);
+                        } else if (m_tqRevolverRoll > 4000) {
+                            m_tqRevolverSpeed = 100;
+                            m_pRevolver->rollDeck(1, 0, 100);
+                        } else if (m_tqRevolverRoll > 2000) {
+                            m_tqRevolverSpeed = 200;
+                            m_pRevolver->rollDeck(1, 0, 200);
+                        }
+                    }
+                }
+            }
+            if (iRev) {
+                m_tqRevolverRoll = 0;
+                m_tqRevolverSpeed = 300;
+            }
+        }
+        if (isBattleFlag(0x1000)) {
+            if (isConditionFlag(0x8810000)) {
+                if (isConditionFlag(0x8000000)) {
+                    TRACE(D_00499B18);
+                    m_pCB->setFlag(0, 0x400000);
+                }
+                setConditionFlag(0, 0x8810000);
+                m_pMove->setFlag(1, FALSE);
+                setOldPos(m_vCenterPos);
+            }
+            exeUseStock(0);
+            return;
+        }
+        if (isBattleFlag(0x10)) setTrgFlag(4, 0);
+        if (isBattleFlag(0x80)) setTrgFlag(8, 0);
+        if (isBattleFlag(0x100)) setTrgFlag(0x20, 0);
+        if (isBattleFlag(0x200)) setTrgFlag(0x40, 0);
+        if (isBattleFlag(0x400)) setTrgFlag(0x80, 0);
+        if (isBattleFlag(0x800)) setTrgFlag(0x100, 0);
+    }
+    if (isTrgDefense() && isActionFlag(8)) {
+        if (!m_pCB || !CardBattle::CCardBattle::isPlayingCard(1) || !isBattleFlag(0x10200000)) setTrgFlag(2, 0);
+    }
+    if (isTrgJump() && isActionFlag(0x10)) setTrgFlag(1, 0);
+    if (isTrgStock()) setTrgFlag(0x200, 0);
+}
 INT CPlayer::chkAtelHide(INT inFlag) {
     if (inFlag) {
         if (CGameWork::getFlag(1, 0)) {
