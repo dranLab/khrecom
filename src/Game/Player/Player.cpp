@@ -1417,10 +1417,192 @@ void CPlayer::beginStateBattle() {
     PL::g_uiStartCondition = 0;
     m_szEffectName = NULL;
 }
-/* placeholder: rodata of stateBattle__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00263660\n.word .L00263670\n.word .L00263670\n.word .L00263670\n.word .L002637F0\n.word .L002636C0\n.word .L00263680\n.word .L00263690\n.word .L002636B0\n.word .L002637F0\n.word .L002636D0\n.word .L002636E0\n.word .L002636E0\n.word .L00263700\n.word .L002637F0\n.word .L002637F0\n.word .L002637F0\n.word .L00263710\n.word .L00263720\n.word .L002637F0\n.word .L002637F0\n.word .L00263730\n.word .L00263770\n.word .L002636F0\n.word .L00263740\n.word .L00263750\n.word .L00263760\n.word .L00263780\n.word .L00263790\n.word .L002637F0\n.word .L002637F0\n.word .L002637A0\n.word .L002636A0\n.word .L002637B0\n.word .L002637CC\n.word .L002637DC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateBattle__7CPlayer);
+void CPlayer::stateBattle() {
+    if (chkAtelHide(1)) return;
+    chkAtelControl();
+    m_tqFrameRate = getFrameRate();
+    m_fFrameRate = (FLOAT)m_tqFrameRate * 0.020000001f;
+    m_fGravity = *(FLOAT*)&PL::g_fGravity * m_fFrameRate;
+    m_bAirCheck = FALSE;
+    chkBodyRevise();
+    m_tqStateTimer += m_tqFrameRate;
+    getPadInfo();
+    chkPlayCard();
+    setControl();
+    if (m_iHP >= 2 && DebugWork::g_dw.player.iHP1) {
+        m_iHP = 1;
+        if (m_pGauge) m_pGauge->setDamage(1, 0);
+    }
+    if (dbgButtonTrg(USR_SYSTEM, 0x200, 1)) {
+        m_pMove->setPos(m_vStartPos);
+        m_pMove->setOldPos(m_vStartPos);
+        return;
+    }
+    if (dbgButtonDown(USR_SYSTEM, 1, 1) && dbgButtonDown(USR_SYSTEM, 2, 1)) {
+        FVECTOR pos;
+        FVECTOR vec;
+        FMATRIX mat;
+        FLOAT x;
+        FLOAT y;
+        FLOAT dir;
+        FLOAT power;
+        DebugWork::g_dw.player.iPlayerInfo = 1;
+        pos = m_pMove->getPos();
+        pos.y -= (FLOAT)dbgAnalogRY(USR_SYSTEM, 1) * 0.00024414062f;
+        x = (FLOAT)CPadHandler::getAnalogLX(1) * 0.00024414062f;
+        y = (FLOAT)CPadHandler::getAnalogLY(1) * 0.00024414062f;
+        dir = atan2f(x, y);
+        power = _sqrtf(x * x + y * y);
+        if (power > 1.0f) power = 1.0f;
+        vec.x = 0.0f;
+        vec.y = 0.0f;
+        vec.z = power * 0.5f;
+        vec.w = 1.0f;
+        _unitMatrix(mat);
+        _rotMatrixY(mat, dir);
+        ApplyMatrix(vec, mat, vec);
+        pos.x = pos.x + vec.x;
+        pos.y = pos.y + vec.y;
+        pos.z = pos.z + vec.z;
+        pos.w = pos.w + vec.w;
+        m_pMove->setPos(pos);
+        m_pMove->setOldPos(pos);
+        vec.init();
+        m_pMove->setVel(vec);
+        m_fJumpSpdY = 0.0f;
+        m_pMove->setAcc(vec);
+        return;
+    }
+    if (isTrgBattleChange()) {
+        if (CSceneInfo::reqExitBattle()) {
+            resetAction(3);
+            CardBattle::CCardBattle::setBattleEnd();
+            m_pRevolver = NULL;
+            changeState(2);
+            setPlayerState(DBGWAIT);
+            return;
+        }
+    }
+    if (dbgCheckUser(KKIKUCHI)) {
+        if (dbgButtonTrg(USR_SYSTEM, 0x10, 1)) {
+            if (CGameWork::getInt(1, 0xE2)) CGameWork::setInt(1, 0xE2, 0);
+            else CGameWork::setInt(1, 0xE2, -1);
+        }
+        if (dbgButtonTrg(USR_SYSTEM, 0x80, 1)) {
+            m_iHP = 1;
+            if (m_pGauge) m_pGauge->setDamage(1, 0);
+        }
+        if (dbgButtonDown(USR_SYSTEM, 2, 1)) {
+            if (dbgButtonTrg(USR_SYSTEM, 0x8000, 1)) addMP(10);
+            if (dbgButtonTrg(USR_SYSTEM, 0x2000, 1)) addMP(4);
+            if (dbgButtonTrg(USR_SYSTEM, 0x1000, 1)) addMP(1000);
+            if (dbgButtonTrg(USR_SYSTEM, 0x4000, 1)) addMP(100);
+        }
+        if (dbgButtonDown(USR_SYSTEM, 0x400, 1)) setFlipForce(NULL);
+    }
+    switch (m_PlayerState) {
+    case ESCAPE:
+    case END_BTL:
+    case DEAD:
+        break;
+    case TRANSFORM:
+        if (!isConditionFlag(0x200000)) break;
+    default:
+        if (chkDamage()) return;
+        if (chkEscape()) return;
+        break;
+    }
+    chkLockon();
+    setGroundIK(0);
+    switch (m_PlayerState) {
+    case START_WAIT:
+        exeStartWait();
+        break;
+    case STAND:
+    case WALK:
+    case RUN:
+        exeStandUp();
+        break;
+    case JUMP:
+        exeJump();
+        break;
+    case GLIDE:
+        exeGlide();
+        break;
+    case JUMP_2ND:
+        exeJump2nd();
+        break;
+    case HANG:
+        exeHang();
+        break;
+    case AVOID:
+        exeAvoid();
+        break;
+    case ATTACK:
+        exeAttack();
+        break;
+    case DAMAGE:
+    case FLICKS:
+        exeDamage();
+        break;
+    case BADCONDITION:
+        exeBadCondition();
+        break;
+    case ITEM:
+        exeItem();
+        break;
+    case CHARGE:
+        exeCharge();
+        break;
+    case MAGIC:
+        exeMagic();
+        break;
+    case SKILL:
+        exeStockSkill();
+        break;
+    case GIMMICKCARD:
+        exeGimmickCard();
+        break;
+    case FRIEND:
+        exeFriend();
+        break;
+    case SUMMON:
+        exeSummon();
+        break;
+    case ESCAPE:
+        exeEscape();
+        break;
+    case END_BTL:
+        exeEnd();
+        break;
+    case DEAD:
+        exeDead();
+        break;
+    case TRANSFORM:
+        exeTransform();
+        break;
+    case DUEL:
+        exeDuel();
+        break;
+    case FOOTING:
+        exeFooting();
+        break;
+    case PRONOUNCE:
+        exePronounce();
+        break;
+    }
+    exeMutekiTimer();
+    exeAttackTimer();
+    exePrizeHealing();
+    setDownForce();
+    exeConfuse();
+    exeBanish();
+    exeQuickBarrier();
+    exeAeroGuard();
+    fadeEffCharge();
+    recoverCollMap();
+    exeWind();
+}
 void CPlayer::endStateBattle() {
     setActionFlag(0, m_pParam->USE_BTL_ACTION);
     m_collBody.offBody();
