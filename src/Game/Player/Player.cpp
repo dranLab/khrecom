@@ -119,7 +119,7 @@ extern LPCSTR g_szDpxReload; // static in the original
 extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_szTexEyeKizetsu; // static in the original
 extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
-extern LPCSTR g_szDpxAbnormal; // static in the original
+extern LPCSTR g_szDpxAbnormal; extern LPCSTR g_szDpxVexen; // static in the original
 extern FVECTOR g_vFieldPlayerPos; // static in the original
 extern FVECTOR g_vBattlePlayerPos; // static in the original
 extern FVECTOR HANG_HAND_LOCAL_OFS; // static in the original
@@ -2187,7 +2187,87 @@ void CPlayer::notifyDead(INT inCmd) {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initBadCondition__7CPlayer);
+void CPlayer::initBadCondition() {
+    setPlayerState(BADCONDITION);
+    clearSpeed();
+    if (isConditionFlag(1)) {
+        m_iSubState = 1;
+        setTimer(9000);
+        setAnimForce(0x27, -1, 1, 1, 0, 0);
+        m_JumpState = 3;
+        m_fJumpGravity = *(FLOAT*)&PL::g_fGravity * 5.0f;
+        m_fJumpSpdY = 0.0f;
+    } else if (isConditionFlag(0x20)) {
+        m_iSubState = 6;
+        setTimer(15000);
+        setAnimSpeed(0.0f);
+        fadeEffect(m_hEffBad, 1);
+        {
+            FVECTOR pos;
+            pos._q = 0;
+            pos.w = 1.0f;
+            m_hEffBad = attachEffect(PL::g_szDpxVexen, 2, &Crd(0), &pos, NULL, 0.0f);
+            CEffect* effect = CEffectMan::getEffect(m_hEffBad);
+            if (effect) effect->m_iFlag |= 4;
+        }
+        m_JumpState = 3;
+        m_fJumpGravity = *(FLOAT*)&PL::g_fGravity * 5.0f;
+        m_fJumpSpdY = 0.0f;
+    } else if (isConditionFlag(2)) {
+        m_iSubState = 2;
+        setAnimSpeed(0.0f);
+        fadeEffect(m_hEffBad, 1);
+        {
+            FVECTOR pos = {{ 0.0f, 0.65f, 0.0f, 1.0f }};
+            m_hEffBad = attachEffect(PL::g_szDpxAbnormal, 3, &Crd(m_iBoneCenter), &pos, NULL, 0.0f);
+            CEffect* effect = CEffectMan::getEffect(m_hEffBad);
+            if (effect) effect->m_iFlag |= 4;
+        }
+        m_JumpState = 3;
+        m_fJumpGravity = *(FLOAT*)&PL::g_fGravity * 5.0f;
+        m_fJumpSpdY = 0.0f;
+    } else if (isConditionFlag(0x10000)) {
+        m_iSubState = 7;
+        fadeEffect(m_hEffBad, 1);
+        setAnimForce(0x20, 0, 1, 0, 0, 0);
+        m_fJumpGravity = 0.0f;
+        m_JumpState = 3;
+        m_fJumpSpdY = 0.0f;
+        m_pMove->setFlag(1, TRUE);
+        setOldPos(m_vCenterPos);
+        setTrgFlag(0, 0x8000);
+    } else if (isConditionFlag(0x800000)) {
+        m_iSubState = 8;
+        fadeEffect(m_hEffBad, 1);
+        setFaceAnim(3, 0);
+        setAnimForce(0x21, 0, 0, 0, 0, 0);
+        m_fJumpGravity = 0.0f;
+        m_JumpState = 3;
+        m_fJumpSpdY = 0.0f;
+        m_pMove->setFlag(1, TRUE);
+        setOldPos(m_vCenterPos);
+        setTrgFlag(0, 0x8000);
+    } else if (isConditionFlag(0x8000000)) {
+        m_iSubState = 9;
+        fadeEffect(m_hEffBad, 1);
+        setAnimRsrcEx(0xFCB, 0, 0, 1, 0, 0, 0);
+        m_fJumpGravity = 0.0f;
+        m_JumpState = 3;
+        m_fJumpSpdY = 0.0f;
+        m_pMove->setFlag(1, TRUE);
+        setOldPos(m_vCenterPos);
+        setTrgFlag(0, 0x8000);
+        m_pCB->setFlag(0x400000, 0);
+    } else if (isConditionFlag(0x8000)) {
+        m_iSubState = 0xB;
+        setTimer(15000);
+        setAnimForce(0x27, -1, 0, 0, 0, 0);
+    } else {
+        m_iSubState = 0xC;
+        setAnimForce(0x28, -1, 0, 0, 0, 0);
+    }
+    setBattleFlag(0, 8);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBadCondition__7CPlayer);
 /* Parked: in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets
    the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but
