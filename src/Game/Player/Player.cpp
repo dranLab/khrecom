@@ -3897,10 +3897,70 @@ inline void _roPh21() {
 }
 __asm__(".rdata\n.align 4\n.word .L0026F518\n.word .L0026F588\n.word .L0026F6AC\n.word .L0026F6D4\n.word .L0026F6AC\n.word .L0026F7B4\n.word .L0026F6AC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDamage__7CPlayer);
-/* placeholder: rodata of chkTrgAction__7CPlayeriUi */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026FB04\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB14\n.word .L0026FB24\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB34\n.word .L0026FBBC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkTrgAction__7CPlayeriUi);
+INT CPlayer::chkTrgAction(INT inAction, UINT inFlag) {
+    if (m_bIsBattleScene) {
+        setBattleFlag(8, 0);
+        if (isTrgFlag(0x10)) {
+            if (!chkChargeMove(0) && inAction) {
+                initCharge();
+                return TRUE;
+            }
+        }
+        if (isTrgFlag(8)) {
+            initItem(0);
+            return TRUE;
+        }
+        if (isTrgFlag(0x40)) {
+            initGimmickCard(0);
+            return TRUE;
+        }
+        if (isTrgFlag(0x20)) initMagic(0);
+        else if (isTrgFlag(0x80)) initFriend(0);
+        else if (isTrgFlag(0x100)) initSummon(0);
+        else if (isTrgFlag(4)) initAttack(0);
+        else goto tail;
+        return TRUE;
+    } else {
+        if (isTrgFlag(0x200) && !isAir()) {
+            switch (chkGimmick(0)) {
+            case 0x11:
+                initTreasureBox();
+                return TRUE;
+            case 0x14:
+                initRoomCreation();
+                return TRUE;
+            case 0x15:
+                initWorldSelect();
+                return TRUE;
+            case 0x1E:
+                initCarry();
+                return TRUE;
+            case 0x1F:
+                goto stand;
+            }
+        }
+        if (isTrgFlag(4)) {
+            initAttackField(0);
+            return TRUE;
+        }
+    }
+tail:
+    if (!inAction) return FALSE;
+    if (isAir()) return FALSE;
+    if (m_fAnalogPower >= 0.3f) {
+        if (isTrgFlag(2)) {
+            initAvoid();
+            return TRUE;
+        }
+        m_bDmgMuteki = FALSE;
+    stand:
+        initStandUp(0);
+        return TRUE;
+    }
+    if (!isTrgFlag(1)) return FALSE;
+    initJump(0);
+    return TRUE;
+}
 void CPlayer::initDead() {
     FVECTOR vScale;
     setPlayerState(DEAD);
