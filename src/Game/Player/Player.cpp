@@ -1839,7 +1839,120 @@ void CPlayer::initAttack(INT inNo) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttack__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAttack__7CPlayer);
+void CPlayer::exeAttack() {
+    TIMEQ frameTQ = getMotionCurrentTime();
+    TIMEQ frame = frameTQ / 50;
+    setBattleFlag(0, 8);
+    if (m_iNowAnimID != 7) {
+        procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
+        if (frame <= m_pAtkData->MOVE_START_FRAME) {
+            procTargetMark();
+            procAttackMove(frame, 1.0f, 4.0f, 2, 1.0f);
+        } else {
+            FLOAT rate = 0.0f;
+            if (frame < 6 && (m_pAtkData->FLAG & 8)) {
+                procTargetMark();
+                rate = 1.0f;
+            }
+            procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, !m_bIsAttackHit, rate);
+        }
+    }
+    if (!isBattleFlag(0x1000)) {
+        if (isBattleFlag(0x10)) m_iNextAttack = 1;
+        else if (isBattleFlag(0x100)) m_iNextAttack = 2;
+        else if (isBattleFlag(0x80)) m_iNextAttack = 3;
+        else if (isBattleFlag(0x400)) m_iNextAttack = 4;
+        else if (isBattleFlag(0x800)) m_iNextAttack = 5;
+        else if (isBattleFlag(0x200)) m_iNextAttack = 6;
+        else if (isBattleFlag(0x40000)) m_iNextAttack = 7;
+        if (frame > m_pAtkData->COLL_START_FRAME && frameTQ > 500) {
+            if (m_iNextAttack == 1) {
+                offAttack();
+                initAttack(m_iAttackNo);
+                return;
+            } else if (m_iNextAttack == 2) {
+                offAttack();
+                initMagic(m_iAttackNo);
+                setBattleFlag(0, 0x80000);
+                fadeEffAttack(0);
+                return;
+            } else if (m_iNextAttack == 3) {
+                offAttack();
+                initItem(m_iAttackNo);
+                setBattleFlag(0, 0x80000);
+                fadeEffAttack(0);
+                return;
+            } else if (m_iNextAttack == 4) {
+                offAttack();
+                initFriend(m_iAttackNo);
+                setBattleFlag(0, 0x80000);
+                fadeEffAttack(0);
+                return;
+            } else if (m_iNextAttack == 5) {
+                offAttack();
+                initSummon(m_iAttackNo);
+                setBattleFlag(0, 0x80000);
+                fadeEffAttack(0);
+                return;
+            } else if (m_iNextAttack == 6) {
+                offAttack();
+                initGimmickCard(m_iAttackNo);
+                setBattleFlag(0, 0x80000);
+                fadeEffAttack(0);
+                return;
+            } else if (m_iNextAttack == 7) {
+                offAttack();
+                exeUseStock(0);
+                fadeEffAttack(0);
+                return;
+            } else {
+                if (chkPlayCardCombo()) return;
+            }
+        }
+    } else {
+        if ((m_iStepStockSkill == 3 || m_iStockSkill == m_iStepStockSkill) && !isBattleFlag(0x2000) && frame > m_pAtkData->COLL_START_FRAME && frameTQ > 500) {
+            if (chkPlayCardCombo()) {
+                setBattleFlag(0, 0x41000);
+                return;
+            }
+        }
+        if (frame >= m_pAtkData->COLL_END_FRAME) {
+            if (exeUseStock(1)) return;
+        }
+    }
+    if (m_iNowAnimID == 7) {
+        if (isMotionEnd()) {
+            procSkillEnd(-1);
+            fadeEffAttack(0);
+        }
+        return;
+    }
+    if (procAttackCollision(frame)) {
+        fadeEffAttack(0);
+        return;
+    }
+    if (isPlayerFlag(0x800000) && !isAir() && frame > m_pAtkData->COLL_END_FRAME) {
+        if (!isBattleFlag(0x80000)) {
+            procSkillEnd(1);
+        } else {
+            setPlayerFlag(0, 0x800000);
+            setAnim(7, -1, 0);
+        }
+        fadeEffAttack(0);
+        return;
+    }
+    if (isMotionEnd()) {
+        if (!isBattleFlag(0x80000)) {
+            procSkillEnd(-1);
+            fadeEffAttack(0);
+        } else if (isBattleFlag(4)) {
+            setBattleFlag(0, 0x80000);
+            setBattleFlag(0, 0x200000);
+            setBattleFlag(0, 0x10000000);
+            fadeEffAttack(0);
+        }
+    }
+}
 void CPlayer::procTargetMark() {
     CEntity* pTarget = m_hTarget > 0 ? (CEntity*)CTaskMan::getTask(m_hTarget) : NULL;
     if (pTarget) {
