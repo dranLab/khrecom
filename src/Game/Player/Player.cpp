@@ -862,10 +862,22 @@ void CPlayer::setAnimRsrcEx(INT inRcid, INT inAnimID, TIMEQ inChangeTime, BOOL i
     }
     setAnimSpeed(1.0f);
 }
-/* placeholder: rodata of isNowIdleAnim__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowIdleAnim__7CPlayer);
+BOOL CPlayer::isNowIdleAnim() {
+    if (m_pAnim->isFlag1Bit9()) return FALSE;
+    switch (m_iNowAnimID) {
+    case 1:
+    case 8:
+    case 0xE:
+    case 0x18:
+    case 0x2A:
+        return TRUE;
+    }
+    if (m_pPLM->getFriend() || m_pPLM->getSummon()) return TRUE;
+    if (m_PlayerState == 5) {
+        if (m_iSubState == 1) return TRUE;
+    }
+    return FALSE;
+}
 void CPlayer::setFaceAnim(INT inID, INT inFlag) {
     if (!inFlag && m_iNowFaceID == inID) return;
     m_iNowFaceID = inID;
@@ -1468,10 +1480,29 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L00264984\n.word .L0026499C\n.word .L002649BC\n.word .L00264AB4\n.word .L002649D4\n.word .L002649D4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264A6C\n.word .L00264984\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setWalkAnim__7CPlayer);
-/* placeholder: rodata of chkBattleIdle__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00264B30\n.word .L00264B30\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B30\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B30\n.word .L00264B30\n.word .L00264B30\n.word .L00264B30\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBattleIdle__7CPlayer);
+INT CPlayer::chkBattleIdle() {
+    if (!isBattleFlag(1)) goto check;
+ret_true:
+    return TRUE;
+check:
+    if (m_iPreAnimID >= 0x24) {
+        if (m_iPreAnimID < 0x26) goto ret_true;
+        if (m_iPreAnimID < 0x34) {
+            if (m_iPreAnimID >= 0x30) goto ret_true;
+        }
+    }
+    switch (m_iNowAnimID) {
+    case 0x24:
+    case 0x25:
+    case 0x2A:
+    case 0x30:
+    case 0x31:
+    case 0x32:
+    case 0x33:
+        goto ret_true;
+    }
+    return FALSE;
+}
 INT CPlayer::procFlowIdle(INT inFlag) {
     if (isAir()) {
         setAnim(6, 800, 0);
@@ -1972,11 +2003,56 @@ INT CPlayer::isStartLadderJump() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isStartLadderJump__7CPlayer);
 #endif
-/* placeholder: rodata of getJumpState__C7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00266F18\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266F18\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266F20\n.word .L00266F18\n.word .L00266F18\n.word .L00266F20\n.word .L00266ED8\n.word .L00266F18\n.word .L00266F18\n.word .L00266ED8\n.word .L00266F18\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266F18\n.word .L00266F18\n.word .L00266F20\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00266F00\n.word .L00266F08\n.word .L00266F08\n.word .L00266F10\n.word .L00266F10\n.word .L00266F08\n.word .L00266F18\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getJumpState__C7CPlayer);
+INT CPlayer::getJumpState() const {
+    switch (m_PlayerState) {
+    case 6:
+    case 7:
+    case 8:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 0x13:
+    case 0x16:
+    case 0x18:
+    case 0x19:
+    case 0x1A:
+    case 0x1B:
+    case 0x1F:
+    case 0x20:
+    case 0x21:
+    case 0x22:
+    case 0x23:
+    case 0x24:
+        switch (m_JumpState) {
+        case 0:
+        default:
+            return 0;
+        case 1:
+        case 2:
+        case 5:
+            return 1;
+        case 3:
+        case 4:
+            return 2;
+        case 6:
+            return 3;
+        }
+    case 5:
+    case 9:
+    case 0x10:
+    case 0x11:
+    case 0x14:
+    case 0x15:
+    case 0x17:
+    case 0x1C:
+    case 0x1D:
+        return 3;
+    default:
+        return 0;
+    }
+}
 void CPlayer::initJump(INT inFlag) {
     setPlayerState(PL::JUMP);
     if (DebugWork::g_dw.player.iHiJump) setActionFlag(0x200000, 0);
