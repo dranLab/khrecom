@@ -1208,7 +1208,93 @@ void CPlayer::setFallFloat() {
     m_pMove->getVel() = v;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeJump__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeJumpLand__7CPlayer);
+void CPlayer::exeJumpLand() {
+    FVECTOR vel;
+    if (m_bIsBattleScene) {
+        if (isTrgFlag(0x400)) {
+            initFooting(1);
+            return;
+        }
+        if (isTrgFlag(8)) {
+            initItem(0);
+            return;
+        }
+        if (isTrgFlag(0x40)) {
+            initGimmickCard(0);
+            return;
+        }
+        if (isTrgFlag(0x80)) {
+            initFriend(0);
+            return;
+        }
+        if (isTrgFlag(0x100)) {
+            initSummon(0);
+            return;
+        }
+    }
+    setBattleFlag(0, 8);
+    if (isMotionEnd()) {
+        initStandUp(0);
+        return;
+    }
+    if (getMotionCurrentTime() >= 700 && m_fAnalogPower >= 0.3f) {
+        if (isConditionFlag(0x10000000)) {
+            initFooting(0);
+            return;
+        }
+        m_WalkMode = chkWalkMode();
+        setWalkAnim();
+        switch (m_WalkMode) {
+        case 0:
+            setPlayerState(PL::STAND);
+            break;
+        case 1:
+            setPlayerState(PL::WALK);
+            break;
+        case 2:
+            setPlayerState(PL::RUN);
+            break;
+        }
+        setPlayerFlag(0, 0x024C2000);
+        setConditionFlag(0, 0x08810023);
+        setBattleFlag(0, 0x00443F90);
+        m_fMovePower = 0.5f;
+        m_JumpState = 0;
+        m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower;
+        m_fJumpSpdY = 0.0f;
+        return;
+    }
+    if (isTrgFlag(0x40)) {
+        if (!m_bIsBattleScene) return;
+        initGimmickCard(0);
+    } else if (isTrgFlag(0x20)) {
+        if (!m_bIsBattleScene) return;
+        initMagic(0);
+    } else if (isTrgFlag(4)) {
+        if (!m_bIsBattleScene) initAttackField(0);
+        else initAttack(0);
+    } else {
+        if (getMotionCurrentTime() >= 200 && isTrgFlag(1)) {
+            chkWalkMode();
+            FLOAT spd = m_fWalkSpeed / 60.0f;
+            m_fMovePower = 1.0f;
+            m_fJumpSpdXZ = spd;
+            m_fWalkSpeed = spd;
+            initJump(0);
+            return;
+        }
+        m_fMovePower = 0.0f;
+        m_fWalkSpeed = m_fJumpSpdXZ = Movement::Approach(m_fJumpSpdXZ, m_fMovePower, 0.1f, m_fFrameRate);
+        m_pMove->calcVelocityXZ(m_fWalkSpeed);
+        if (isAir()) {
+            vel = m_pMove->getVel();
+            vel.y = -0.05f;
+            m_pMove->setVel(vel);
+        } else {
+            exeGimmickRide();
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkHang__7CPlayer);
 void CPlayer::initHang() {
     FVECTOR rot;
