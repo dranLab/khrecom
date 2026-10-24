@@ -4329,10 +4329,75 @@ void CPlayer::initItem(INT inNo) {
     m_fMoveSpdXZ = 0.0f;
     m_tqCardBreakTime = PL::g_CardBreakTime[(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].BREAK];
 }
-/* placeholder: rodata of exeItem__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L002710EC\n.word .L00271114\n.word .L0027113C\n.word .L00271164\n.word .L0027118C\n.word .L002711B4\n.word .L002711DC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeItem__7CPlayer);
+void CPlayer::exeItem() {
+    HANDLE handle;
+    CEffect* effect;
+    INT frame = getMotionCurrentTime() / 50;
+    setBattleFlag(0, 8);
+    switch (m_iSubState) {
+    case 1:
+        if (isAir()) {
+            setAnim(6, 800, 0);
+            FVECTOR vel = m_pMove->getVel();
+            m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+            vel.y = m_fJumpSpdY;
+            m_pMove->setVel(vel);
+        } else {
+            m_iSubState = 2;
+            setAnimForce(0x2D, -1, 0, 1, 0, 0);
+            m_tqStateTimer = 0;
+        }
+        break;
+    case 2:
+        if (frame >= 56) {
+            FVECTOR pos;
+            pos.y = 0.85f;
+            m_iSubState = 3;
+            pos.x = 0.0f;
+            pos.w = 1.0f;
+            pos.z = 0.0f;
+            if (CGame::isRikuGame()) pos.y = 1.2f;
+            handle = 0;
+            switch (m_uiCardID) {
+            case 0x2A:
+                handle = attachEffect(PL::g_szDpxAlways, 3, &Crd(0), &pos, NULL, 0.0f);
+                break;
+            case 0x2B:
+                handle = attachEffect(PL::g_szDpxAlways, 4, &Crd(0), &pos, NULL, 0.0f);
+                break;
+            case 0x2C:
+                handle = attachEffect(PL::g_szDpxItemplus, 0, &Crd(0), &pos, NULL, 0.0f);
+                break;
+            case 0x2D:
+                handle = attachEffect(PL::g_szDpxAlways, 5, &Crd(0), &pos, NULL, 0.0f);
+                break;
+            case 0x2E:
+                handle = attachEffect(PL::g_szDpxItemplus, 1, &Crd(0), &pos, NULL, 0.0f);
+                break;
+            case 0x2F:
+                handle = attachEffect(PL::g_szDpxAlways, 6, &Crd(0), &pos, NULL, 0.0f);
+                break;
+            case 0x30:
+                handle = attachEffect(PL::g_szDpxItemplus, 2, &Crd(0), &pos, NULL, 0.0f);
+                break;
+            }
+            effect = CEffectMan::getEffect(handle);
+            if (effect) effect->m_iFlag |= 4;
+            if (m_pRevolver) {
+                if (m_iStepStockSkill > 0) m_pRevolver->setAction(0, m_iStepStockSkill - 1);
+                else m_pRevolver->setAction(0, 0);
+            }
+        }
+        break;
+    case 3:
+        if (isBattleFlag(0x1000) && exeUseStock(1)) {
+            if (isPlayerFlag(0x80000000)) setBGFade(1.0f, 20.0f, 0);
+        } else if (isMotionEnd()) {
+            procSkillEnd(-1);
+        }
+        break;
+    }
+}
 void CPlayer::exeStandUp_inFriend() {
     INT oldMode = m_WalkMode;
     INT mode = chkWalkMode();
