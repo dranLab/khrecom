@@ -154,10 +154,10 @@ namespace PL {
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the original
 extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 }
-class CPlayerDebug { /* PARTIAL: size and ctor for makeCockpit; CPlayerDebug's members are still INCLUDE_ASM */
-    UBYTE _m_0x00[0x120];
-public:
-    CPlayerDebug(CTask* inParent);
+class CPlayerDebug : public CTask { /* main() is still INCLUDE_ASM; the members are those the constructor touches */
+    CDebugWindow* m_pWin; INT m_iWork44; INT m_iWork48; INT m_iWork4C; INT m_iWork50; INT m_iWork54; CHAR m_szBuf[6][0x20];
+public: CPlayerDebug(CTask* inParent); virtual ~CPlayerDebug();
+    virtual void main();
 };
 namespace Gauge {
 class CPlayerGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
@@ -6478,14 +6478,34 @@ char* szPlayerCard[67] = {
     "G:\x83_\x81[\x83N\x83T\x83" "C\x83h",
     "G:ZexionTrapA"
 };
-/* placeholder: rodata of __12CPlayerDebugP5CTask */
-__asm__(".rdata\n");
-inline void _roPhB31() {
-    TRACE(" ");
-    TRACE(__FILE__ "(14052)");
+extern "C" int sprintf(char*, const char*, ...);
+CPlayerDebug::CPlayerDebug(CTask* pParent) : CTask(pParent, 0x4000) {
+    INT i;
+    UINT nRA;
+    m_pWin = NULL;
+    sprintf(m_szBuf[0], " ");
+    sprintf(m_szBuf[1], " ");
+    sprintf(m_szBuf[2], " ");
+    sprintf(m_szBuf[3], " ");
+    sprintf(m_szBuf[4], " ");
+    sprintf(m_szBuf[5], " ");
+    DebugWork::g_dw.player.m_szState[0] = m_szBuf[0];
+    DebugWork::g_dw.player.m_szState[1] = m_szBuf[1];
+    DebugWork::g_dw.player.m_szState[2] = m_szBuf[2];
+    DebugWork::g_dw.player.m_szState[3] = m_szBuf[3];
+    DebugWork::g_dw.player.m_szAnim[0] = m_szBuf[4];
+    DebugWork::g_dw.player.m_szAnim[1] = m_szBuf[5];
+    m_iWork4C = 0;
+    m_iWork50 = 0;
+    m_iWork54 = 0;
+#line 14052
+    m_pWin = new (com_malloc_d(sizeof(CDebugWindow), __FILE__ "(" "14052" ")", RET_ADDR())) CDebugWindow(this, DWTPlayer::debugPlayerInfo);
+    m_pWin->dispOff(0);
+    for (i = 0; i < 71; i++) szAtkAnimID[i] = PL_ANIM::g_MotNameTbl[PLM::g_uiPlayerID][i].pFileName;
+    m_iWork44 = 0;
+    m_iWork48 = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", __12CPlayerDebugP5CTask);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _$_12CPlayerDebug);
+CPlayerDebug::~CPlayerDebug() {}
 /* placeholder: rodata of main__12CPlayerDebug */
 __asm__(".rdata\n");
 inline void _roPhB32() {
@@ -6516,28 +6536,6 @@ inline void _roPhB32() {
     TRACE("TimeQ:% 5d/% 5d");
 }
 __asm__(".rdata\n.align 4\n.word .L00275AB0\n.word .L00275C3C\n.word .L00275C3C\n.word .L00275F80\n.word .L00275ED0\n.word .L00275CAC\n.word .L00275F80\n.word .L00275D2C\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275BA4\n.word .L00275E20\n.word .L00275F80\n.word .L00275F80\n.word .L00275ED0\n.word .L00275F80\n.word .L00275F80\n.word .L00275ED0\n.word .L00275F80\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275F24\n.word .L00275ED0\n.word .L00275F80\n.word .L00275F80\n.word .L00275AB0\n.word .L00275CAC\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.text\n");
-/* the vtables of CPlayerDebug / CPlayer (their key functions are still INCLUDE_ASM), then the CStateTemplate<CPlayer> assert string and vtable */
-__asm__(".rdata\n"
-    ".align 4\n"
-    ".globl _vt$12CPlayerDebug\n"
-    "_vt$12CPlayerDebug:\n"
-    ".word 0\n"
-    ".word 0\n"
-    ".word 0\n"
-    ".word _$_12CPlayerDebug\n"
-    ".word 0\n"
-    ".word main__12CPlayerDebug\n"
-    ".word 0\n"
-    ".word disp__5CTask\n"
-    ".word 0\n"
-    ".word after__5CTask\n"
-    ".word 0\n"
-    ".word onOut__5CTask\n"
-    ".word 0\n"
-    ".word getTypeID__C5CTask\n"
-    ".word 0\n"
-    ".word 0\n"
-    ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", main__12CPlayerDebug);
 /* the static initializer (DWT table titles) is generated after the last INCLUDE_ASM: gcc assumes .rdata for its strings */
 __asm__(".rdata\n");
