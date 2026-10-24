@@ -1134,7 +1134,155 @@ void CPlayer::initWall() {
     m_pMove->setFlag(0x40, FALSE); // partial CMovement: (flag, on)
     m_fFootRadius = 0.5f;
 }
+/* Parked: 25 lines differ, all one register-allocation cascade: the original keeps cancel_speed in $f22 and the
+   0.5f constant (ofs.x / setRadius) in $f23, ours the reverse (global.c priority: the short-lived 0.5 constant
+   outranks the speed). Also left: the three vec stores come after `lw m_iSubState` and cancel_power is a load of
+   vec.y (original) vs a hoisted zero, the dir/view load order of the houkou wrap (dir first, then view, sub
+   view - dir in $f1), and the last ofs.w store goes through the shared &ofs register. tried: ~25 variants (declaration
+   order of cancel_*, a `half` local for 0.5f, statement order of the three arms, speed after/before the init calls,
+   vec store orders / set() / cancel_power = vec.y, _limitPI vs the copy form, houkou polarity and if/else layout,
+   cast read of g_fAntiGravity) and tools/permuter.py through the method alias wrapper (8 min, 5147 candidates,
+   its score does not see the register difference). The jump arms with initJump(0) before the speed/power stores
+   got the best diff (25). */
+#if 0
+void CPlayer::exeWall() {
+    FVECTOR pos;
+    FVECTOR rot;
+    FVECTOR vec;
+    FLOAT dir;
+    Houkou houkou;
+    FMATRIX m;
+    FLOAT cancel_power;
+    FLOAT cancel_speed;
+    FLOAT r;
+    setPlayerFlag(0x400000, 0);
+    pos = getPos();
+    rot = getRot();
+    vec.x = 1.0f;
+    vec.y = 0.0f;
+    vec.z = 0.0f;
+    vec.w = 1.0f;
+    cancel_power = vec.y;
+    if (!m_iSubState) {
+        FLOAT d0 = Movement::Homing(m_fDir, m_fWallDir, 0.15f, getFrameRateF());
+        m_fDir = d0;
+        rot.y = d0;
+        setRot(rot);
+        r = _limitPI(m_fWallDir - m_fDir);
+        if (_abs(r) < 0.03141593f) {
+            m_iSubState = 1;
+            m_fDir = m_fWallDir;
+        }
+        warp(m_vWallPos);
+        updateCoord();
+        coordFix();
+        return;
+    }
+    if (isTrgFlag(4)) {
+        m_pMove->setFlag(0x40, TRUE);
+        m_bAirCheck = TRUE;
+        m_bAir = TRUE;
+        initAttackField(0);
+        cancel_power = 2.5f;
+        cancel_speed = 2.0f;
+    } else if (isTrgFlag(1)) {
+        m_pMove->setFlag(0x40, TRUE);
+        initJump(0);
+        cancel_speed = 1.3f;
+    } else if (!chkWall(1)) {
+        m_pMove->setFlag(0x40, TRUE);
+        initJump(0);
+        cancel_power = 2.5f;
+        cancel_speed = 1.3f;
+    } else {
+        warp(m_vWallPos);
+        updateCoord();
+        coordFix();
+        dir = _limitPI2(m_fAnalogViewDir - m_fDir + 3.1415927f);
+        if (m_Houkou != HOUKOU_NUTRAL) {
+            if (dir < 0.0f) houkou = HOUKOU_LEFT;
+            else houkou = HOUKOU_RIGHT;
+        } else {
+            houkou = HOUKOU_NUTRAL;
+        }
+        switch (houkou) {
+        case HOUKOU_LEFT:
+            m_iSubState = 2;
+            if (m_pAnim->getAnimID() != 2) {
+                if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 2, -1, 0, 0, 0, 1);
+                else setAnimRsrcEx(0xFD4, 2, -1, 0, 0, 0, 1);
+            }
+            m_fWalkSpeed = 0.904f;
+            break;
+        case HOUKOU_RIGHT:
+            m_iSubState = 3;
+            if (m_pAnim->getAnimID() != 3) {
+                if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 1, -1, 0, 0, 0, 1);
+                else setAnimRsrcEx(0xFD4, 1, -1, 0, 0, 0, 1);
+            }
+            m_fWalkSpeed = -0.904f;
+            break;
+        default:
+            m_iSubState = 1;
+            if (m_pAnim->getAnimID() != 0) {
+                if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 0, -1, 0, 0, 0, 1);
+                else setAnimRsrcEx(0xFD4, 0, -1, 0, 0, 0, 1);
+            }
+            m_fWalkSpeed = 0.0f;
+            break;
+        }
+        m_fDir = m_fWallDir;
+        rot.y = m_fWallDir;
+        setRot(rot);
+        m_fWalkSpeed = m_fWalkSpeed / 60.0f;
+        m_fMovePower = 1.0f;
+        m_pMove->calcVelocityXZ(m_fWalkSpeed, vec);
+        return;
+    }
+    m_fFootRadius = 0.25f;
+    dir = m_fDir;
+    pos = getPos();
+    FVECTOR ofs;
+    ofs.z = 0.6f;
+    ofs.x = 0.0f;
+    ofs.y = 0.0f;
+    ofs.w = 1.0f;
+    _unitMatrix(m);
+    _rotMatrixY(m, dir);
+    ApplyMatrixXYZ(ofs, m, ofs);
+    AddVectorXYZ(pos, pos, ofs);
+    ofs.x = 0.5f;
+    ofs.y = 0.0f;
+    ofs.z = 0.0f;
+    ofs.w = 1.0f;
+    ApplyMatrixXYZ(ofs, m, ofs);
+    FVECTOR vStart = {{ pos.x + ofs.x, pos.y, pos.z + ofs.z, 1.0f }};
+    FVECTOR vEnd = {{ pos.x - ofs.x, pos.y, pos.z - ofs.z, 1.0f }};
+    m_pCollMap->setType(COLL_TYPE_SPHERE);
+    m_pCollMap->enableSliding(0);
+    m_pCollMap->setRadius(0.5f);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) pos = *m_pCollMap->getDetectPos();
+    m_pCollMap->setStartPos(vEnd);
+    m_pCollMap->setEndPos(vStart);
+    if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) pos = *m_pCollMap->getDetectPos();
+    m_pCollMap->setStartPos(pos);
+    vEnd = getPos();
+    m_pCollMap->setEndPos(vEnd);
+    if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) pos = *m_pCollMap->getDetectPos();
+    setPos(pos);
+    m_fWalkSpeed = cancel_speed / 60.0f;
+    m_pMove->calcVelocityXZ(m_fWalkSpeed);
+    m_fJumpSpdXZ = m_fMoveSpdXZ = m_fWalkSpeed;
+    FVECTOR vel = m_pMove->getVel();
+    vel.y = *(FLOAT*)&PL::g_fAntiGravity * cancel_power;
+    m_fJumpSpdY = vel.y;
+    m_pMove->setVel(vel);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWall__7CPlayer);
+#endif
 /* FVECTOR::operator-(const FVECTOR&) of the original (ref locals: FVECTOR* this, FVECTOR vec). */
 static inline FVECTOR _subVec(const FVECTOR& a, const FVECTOR& inV) {
     FVECTOR vec = a;
