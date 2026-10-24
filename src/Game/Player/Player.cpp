@@ -59,7 +59,7 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
-extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_00499AE8[]; extern "C" char D_00499B18[]; /* TRACE messages of setControl */ extern "C" char D_00499E60[]; extern "C" char D_00499E90[]; /* "...Player.cpp(n)" of chkGimmick's new CWorldSelect / CRoomCreation */ extern "C" char D_0049B2D8[]; /* TRACE message of exeFooting */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
+extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_00498BF0[]; /* assert text of exeJump (m_JumpState) */ extern "C" char D_00499AE8[]; extern "C" char D_00499B18[]; /* TRACE messages of setControl */ extern "C" char D_00499E60[]; extern "C" char D_00499E90[]; /* "...Player.cpp(n)" of chkGimmick's new CWorldSelect / CRoomCreation */ extern "C" char D_0049B2D8[]; /* TRACE message of exeFooting */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
 extern "C" char D_00499988[]; extern "C" char D_004999B8[]; extern "C" char D_004999E8[]; /* "...Player.cpp(1156)", (1172), (1181) */
 extern "C" const CARD_DATA cardDataTbl_0049E190[224];
 extern "C" char D_0049AFA8[]; /* TRACE messages of setTrapDamage */
@@ -1336,7 +1336,156 @@ void CPlayer::setFallFloat() {
     v.y = m_fJumpSpdY;
     m_pMove->getVel() = v;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeJump__7CPlayer);
+void CPlayer::exeJump() {
+    FVECTOR vel = m_pMove->getVel();
+    INT step;
+    FLOAT aim_dir;
+    FLOAT d0;
+    FVECTOR v;
+    FLOAT r;
+    switch (m_JumpState) {
+    case 1:
+        clearSpeed();
+        if (m_tqJumpTimer < m_pParam->JUMP_TQ_START) goto timer_end;
+        m_JumpState = 2;
+        m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+        vel.y = *(FLOAT*)&PL::g_fAntiGravity * m_fJumpPow;
+        m_fJumpSpdY = vel.y;
+        m_pMove->setVel(vel);
+        goto timer_end;
+    case 2:
+        m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        switch (m_iNowAnimID) {
+        case 4:
+            if (!isDownJump() && m_tqJumpTimer >= m_pParam->JUMP_TQ_START + 600) {
+                m_JumpState = 3;
+                m_fJumpSpdY *= *(FLOAT*)&PL::g_fJumpStopRate;
+                setAnim(6, 800, 0);
+            } else if (m_fJumpSpdY < 0.0f) {
+                m_fJumpSpdY = 0.0f;
+                setAnim(5, -1, 0);
+            } else if (isMotionEnd()) {
+                setAnim(5, -1, 0);
+            }
+            break;
+        case 0x14:
+            if (isPlayerFlag(0x1000000)) {
+                if (m_fJumpSpdY < 0.0f) {
+                    m_fJumpSpdY = 0.0f;
+                    m_JumpState = 3;
+                    setAnim(0x15, -1, 0);
+                }
+            } else if (!isDownJump() && m_tqJumpTimer >= m_pParam->JUMP_TQ_START + 600) {
+                m_JumpState = 3;
+                m_fJumpSpdY *= *(FLOAT*)&PL::g_fJumpStopRate;
+            } else if (m_fJumpSpdY < 0.0f) {
+                m_fJumpSpdY = 0.0f;
+                m_JumpState = 3;
+                setAnim(0x15, -1, 0);
+            } else if (isMotionEnd()) {
+                setAnim(0x15, -1, 0);
+            }
+            break;
+        case 5:
+        case 0x15:
+            if (isMotionEnd()) {
+                m_JumpState = 3;
+                setAnim(6, -1, 0);
+            }
+            setGroundIK(1);
+            break;
+        }
+        break;
+    case 3:
+        m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        if (isMotionEnd()) setAnim(6, -1, 0);
+        if (m_iNowAnimID == 4 && m_fJumpSpdY < 0.0f) m_fJumpSpdY = 0.0f;
+        setGroundIK(1);
+        break;
+    case 6:
+        exeJumpLand();
+        setGroundIK(1);
+        return;
+    default:
+        AssertApp(D_004997C0, 0x1248, D_00498BF0, 0);
+        break;
+    }
+    if (isActionFlag(0x2000000)) {
+        if (isTrgFlag(0x10)) chkChargeMove(0);
+    }
+    if (isTrgFlag(0x20)) {
+        if (!m_bIsBattleScene) return;
+        initMagic(0);
+        return;
+    } else if (isTrgFlag(4)) {
+        if (!m_bIsBattleScene) initAttackField(0);
+        else initAttack(0);
+        return;
+    } else if (m_JumpState < 4) {
+        if (m_JumpState >= 2) {
+            if (isActionFlag(0x8000000) && isTrgFlag(1)) {
+                initJump2nd();
+                return;
+            }
+            if (isActionFlag(0xC00000) && m_tqStateTimer >= 901 && isTrgFlag(1)) {
+                initGlide(0);
+                return;
+            }
+        }
+    }
+    vel.y = m_fJumpSpdY;
+    m_pMove->setVel(vel);
+    m_WalkMode = chkWalkMode();
+    if (m_WalkMode) {
+        aim_dir = m_fAnalogViewDir;
+        d0 = Movement::Homing(m_fDir, aim_dir, 0.1f, m_fFrameRate);
+        v._q = 0;
+        v.y = aim_dir;
+        m_fDir = d0;
+        m_pMove->getRot() = v;
+        r = _limitPI2(aim_dir - d0);
+        m_fMovePower = 1.0f - _abs(r) / 3.1415927f;
+        m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower * 0.8f;
+        if (m_fJumpSpdXZ != m_fWalkSpeed) {
+            m_fJumpSpdXZ = m_fJumpSpdXZ + (m_fWalkSpeed - m_fJumpSpdXZ) * (m_fFrameRate * 0.05f);
+            if (m_fWalkSpeed < m_fJumpSpdXZ) m_fJumpSpdXZ *= m_fMovePower;
+        }
+        m_fWalkSpeed = m_fJumpSpdXZ;
+        m_pMove->calcVelocityXZ(m_fWalkSpeed);
+        v.y = d0;
+        m_pMove->getRot() = v;
+    } else {
+        m_fMovePower = 0.5f;
+        if (m_fJumpSpdXZ != m_fWalkSpeed) {
+            m_fJumpSpdXZ = m_fJumpSpdXZ + (m_fWalkSpeed - m_fJumpSpdXZ) * (m_fFrameRate * 0.05f);
+        }
+        m_fWalkSpeed = m_fJumpSpdXZ;
+        m_pMove->calcVelocityXZ(m_fWalkSpeed);
+    }
+    if (getJumpState() == 2 && !isAir()) {
+        m_JumpState = 6;
+        setAnimForce(7, -1, 0, 0, 0, 0);
+        m_fJumpSpdXZ = 0.0f;
+        clearSpeed();
+        setBattleFlag(0, 8);
+        m_fJumpGravity = 0.0f;
+        m_fJumpSpdY = 0.0f;
+        return;
+    }
+    m_fJumpHeight = getPos().y - m_vJumpStartPos.y;
+    if (m_fJumpTop < m_fJumpHeight) m_fJumpTop = m_fJumpHeight;
+    step = chkLadderStepNow(1);
+    if (step >= 2) {
+        initLadder(step);
+        return;
+    }
+    if (chkHang()) {
+        initHang();
+        return;
+    }
+timer_end:
+    m_tqJumpTimer += m_tqFrameRate;
+}
 void CPlayer::exeJumpLand() {
     FVECTOR vel;
     if (m_bIsBattleScene) {
