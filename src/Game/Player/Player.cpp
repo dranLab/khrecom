@@ -1515,10 +1515,66 @@ void CPlayer::exeWalk() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer);
 #endif
-/* placeholder: rodata of setWalkAnim__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00264984\n.word .L0026499C\n.word .L002649BC\n.word .L00264AB4\n.word .L002649D4\n.word .L002649D4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264A6C\n.word .L00264984\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setWalkAnim__7CPlayer);
+void CPlayer::setWalkAnim() {
+    INT anim;
+    switch (m_PlayerState) {
+    case STAND:
+    case TALK:
+        anim = chkBattleIdle() ? 0x2A : 1;
+        break;
+    case WALK:
+        if (isBattleFlag(1)) anim = 0x2B;
+        else anim = isPlayerFlag(2) ? 2 : 0x12;
+        break;
+    case RUN:
+        if (!isBattleFlag(1)) anim = isPlayerFlag(2) ? 3 : 0x13;
+        else anim = 0x2C;
+        break;
+    case AVOID:
+    case JUMP:
+        switch (m_WalkMode) {
+        case 0:
+            anim = isBattleFlag(1) ? 0x2A : 1;
+            break;
+        case 1:
+            if (isBattleFlag(1)) anim = 0x2B;
+            else anim = isPlayerFlag(2) ? 2 : 0x12;
+            break;
+        case 2:
+            if (!isBattleFlag(1)) anim = isPlayerFlag(2) ? 3 : 0x13;
+            else anim = 0x2C;
+            break;
+        }
+        break;
+    case CARRY:
+        switch (m_WalkMode) {
+        case 0:
+            anim = 0x18;
+            break;
+        case 1:
+            anim = 0x19;
+            break;
+        case 2:
+            anim = 0x19;
+            break;
+        }
+        break;
+    default:
+        switch (m_WalkMode) {
+        case 0:
+            anim = 0x2A;
+            break;
+        case 1:
+            anim = 0x2B;
+            break;
+        case 2:
+            anim = 0x2C;
+            break;
+        }
+        break;
+    }
+    setAnim(anim, -1, 0);
+}
 INT CPlayer::chkBattleIdle() {
     if (!isBattleFlag(1)) goto check;
 ret_true:
