@@ -4026,10 +4026,66 @@ void CPlayer::initDead() {
         }
     }
 }
-/* placeholder: rodata of exeDead__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026FF40\n.word .L00270004\n.word .L00270170\n.word .L00270070\n.word .L00270118\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDead__7CPlayer);
+void CPlayer::exeDead() {
+    FLOAT f;
+    FLOAT t;
+    setBattleFlag(0, 8);
+    switch (m_iSubState) {
+    case 0:
+        f = m_fJumpSpdXZ;
+        if (f != 0.0f) {
+            t = m_fFrameRate * 0.1f;
+            m_fJumpSpdXZ = f + -f * t;
+        }
+        m_pMove->calcVelocityXZ(m_fJumpSpdXZ);
+        if (m_tqStateTimer < 501) m_fJumpGravity = PL::g_fGravity * 0.16f;
+        else m_fJumpGravity = PL::g_fGravity;
+        if (isAir()) {
+            FVECTOR vel = m_pMove->getVel();
+            m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+            vel.y = m_fJumpSpdY;
+            m_pMove->setVel(vel);
+        }
+        break;
+    case 1: {
+        FVECTOR pos;
+        FVECTOR rot;
+        setPlayerFlag(1, 0);
+        clearSpeed();
+        pos.init();
+        warp(pos);
+        rot = getRot();
+        rot.y = -1.5707964f;
+        setRot(rot);
+        m_fDir = rot.y;
+        break;
+    }
+    case 2:
+        break;
+    case 3:
+        setPlayerFlag(0x1001, 0);
+        m_iSubState = 4;
+        addHP(m_iMaxHP / 4, 0x1770, 1);
+        m_pCam->setFlag(1, FALSE);
+        if (m_pCB) CardBattle::CCardBattle::decEnchantTime(1, 0x28, 0x2E);
+        CSound::playSE(0x5C, -1, 0x40);
+        setAnimForce(0x28, -1, 0, 0, 0, 0);
+        clearSpeed();
+        break;
+    case 4:
+        if (isMotionEnd()) {
+            CSceneEnv::setStop((ObjType::eObjBit)0);
+            m_iSubState = 2;
+            m_bIsDead = FALSE;
+            m_pMarker->setFlag(TRUE);
+            initStandUp(0);
+            m_bDmgMuteki = FALSE;
+            m_tqMutekiTimer = 3000;
+            setPlayerFlag(0, 0x1001);
+        }
+        break;
+    }
+}
 void CPlayer::notifyDead(INT inCmd) {
     switch (inCmd) {
     case 0:
