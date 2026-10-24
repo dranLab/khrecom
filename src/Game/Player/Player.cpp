@@ -1991,7 +1991,71 @@ void CPlayer::setFlipForce(const FVECTOR* inPos) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDamage__7CPlayer);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkTrgAction__7CPlayeriUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initDead__7CPlayer);
+void CPlayer::initDead() {
+    FVECTOR vScale;
+    setPlayerState(DEAD);
+    setTrgFlag(0, 0x10000);
+    m_bDmgMuteki = TRUE;
+    setPlayerFlag(0x1001, 0);
+    setBattleFlag(0, 8);
+    m_iSubState = 0;
+    if (m_pMarker) {
+        m_pMarker->cancelLockon(m_hLockon, 0);
+        m_pMarker->setFlag(FALSE);
+    }
+    m_tqEffCharge = 0;
+    fadeEffect(m_hEffCharge, 0);
+    fadeEffect(m_hEffCast, 0);
+    setConfuse(0, 0);
+    if (isConditionFlag(0x20)) {
+        setConditionFlag(0, 0x20);
+        fadeEffect(m_hEffBad, 0);
+    }
+    setConditionFlag(0, 0x0881803F);
+    m_pMove->setFlag(1, FALSE);
+    setOldPos(m_vCenterPos);
+    if (isConditionFlag(0x1000000)) {
+        setEntityFlag(0, 1);
+        m_fScale = 1.0f;
+        vScale = getScale();
+        vScale.x = m_fScale;
+        vScale.y = 2.0f - m_fScale;
+        vScale.z = m_fScale;
+        setScale(vScale);
+        onWeapon(1);
+        setConditionFlag(0, 0x1000000);
+    }
+    if (m_PrePlayerState == 0x22) {
+        setPushon(0);
+        if (m_pCB) m_pCB->setDuelEntry(0);
+        setPlayerFlag(0, 0x10000);
+    } else {
+        m_pPLM->notifyPlayerDead(1);
+        if (isBattleFlag(2)) {
+            setBattleFlag(0, 2);
+            m_tqEscape = 0;
+            if (m_pEscape) m_pEscape->destroy();
+            setBGFade(1.0f, 0.0f, 0);
+        }
+        CardBattle::CCardBattle* pCB = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+        if (pCB) {
+            if (pCB->getEnchantKind() != 0x2E) {
+                setPlayerFlag(0, 0x020C2000);
+                CardBattle::CCardBattle::setBattleEnd();
+                setBattleFlag(0, 8);
+                setBattleFlag(0, 0x00443F90);
+                setBattleFlag(0, 0x10200000);
+                setBattleFlag(0, 0x4060);
+                setBattleFlag(0, 0x00130000);
+                setBattleFlag(0, 0x03000000);
+                m_bDmgMuteki = TRUE;
+                setPlayerFlag(1, 0);
+                m_iNextAttack = 0;
+                m_pRevolver = NULL;
+            }
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDead__7CPlayer);
 void CPlayer::notifyDead(INT inCmd) {
     switch (inCmd) {
