@@ -631,7 +631,7 @@ public:
     void setFaceAnim(INT inID, INT inFlag);
     void initStartWait();
     void initStandUp(INT inFlag);
-    void initFall(); void exeHang(); void exeWall(); INT chkWall(INT inFlag); void exeJump(); BOOL chkHang(); void setControl(); void exeAttack(); void exeFooting(); void exeJumpLand(); void initDead(); void initWall(); INT chkWallBottom(); void initHang(); void initEscape(); void initAttackField(INT inNo); void initAttack(INT inNo); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void exeCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
+    void exeEnd(); void initFall(); void exeHang(); void exeWall(); INT chkWall(INT inFlag); void exeJump(); BOOL chkHang(); void setControl(); void exeAttack(); void exeFooting(); void exeJumpLand(); void initDead(); void initWall(); INT chkWallBottom(); void initHang(); void initEscape(); void initAttackField(INT inNo); void initAttack(INT inNo); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void exeCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
     INT initIdle(INT inAnim, INT inFlag);
     INT procFlowIdle(INT inFlag);
     void initEnd();

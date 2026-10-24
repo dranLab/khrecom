@@ -4735,10 +4735,34 @@ void CPlayer::initEnd() {
         if (m_pEscape) m_pEscape->destroy();
     }
 }
-/* placeholder: rodata of exeEnd__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00274878\n.word .L00274880\n.word .L00274888\n.word .L002748FC\n.word .L002748FC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeEnd__7CPlayer);
+void CPlayer::exeEnd() {
+    setBattleFlag(0, 8);
+    switch (m_iSubState) {
+    case 0:
+        m_iSubState = 2;
+        break;
+    case 1:
+        m_iSubState = 2;
+        break;
+    case 2:
+        if (procFlowIdle(1)) {
+            if (isConditionFlag(0x2000)) {
+                onWeapon(0);
+                setEntityFlag(0, 1);
+                setDrawRadius(50.0f, 50.0f);
+                if (isBattleFlag(0x4000000)) {
+                    m_iSubState = 3;
+                } else {
+                    m_iSubState = 4;
+                }
+            }
+        }
+        break;
+    case 3:
+    case 4:
+        break;
+    }
+}
 BOOL CPlayer::isEnableBattleEnd() {
     if (!m_pInstance) return TRUE;
     if (m_pInstance->m_bIsDead) return FALSE;
