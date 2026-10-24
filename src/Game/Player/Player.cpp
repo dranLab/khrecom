@@ -4808,13 +4808,47 @@ void CPlayer::notifyExterminate() {
     _instance()->setBattleFlag(4, 0);
     _instance()->setConditionFlag(0x2000, 0);
 }
-/* placeholder: rodata of notifyBossDead__7CPlayeri */
-__asm__(".rdata\n");
-inline void _roPh28() {
-    TRACE("\x81\xa6\x83{\x83X\x8e\x80\x96S\x92\xca\x92m\x81" "E\x81" "E\x81" "E\x83v\x83\x8c\x83" "C\x83\x84\x81[\x8e\x80\x96S\x82\xcc\x88\xd7\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81I\n");
+INT CPlayer::notifyBossDead(INT inCmd) {
+    INT rcid;
+    if (!_instance()) return FALSE;
+    if (_instance()->m_bIsDead) {
+        TRACE("\x81\xa6\x83{\x83X\x8e\x80\x96S\x92\xca\x92m\x81" "E\x81" "E\x81" "E\x83v\x83\x8c\x83" "C\x83\x84\x81[\x8e\x80\x96S\x82\xcc\x88\xd7\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81I\n");
+        return FALSE;
+    }
+    rcid = 0xFA0;
+    if (CGame::isRikuGame()) rcid = _instance()->isConditionFlag(0x400000) ? 0xFA3 : 0xFA2;
+    switch (inCmd) {
+    case 0:
+        PLM::calcFavoriteStockCount();
+        _instance()->setBattleFlag(0x04000004, 0);
+        _instance()->initEnd();
+        CSceneEnv::setStop((ObjType::eObjBit)0x20002);
+        _instance()->m_pCam->setFlag(0x20, TRUE);
+        break;
+    case 1:
+        CSceneEnv::setStop((ObjType::eObjBit)0);
+        CardBattle::CCardBattle::setBattleEnd();
+        _instance()->m_pRevolver = NULL;
+        break;
+    case 2:
+        _instance()->setConditionFlag(0x2000, 0);
+        break;
+    case 3:
+        _instance()->setAnimRsrcEx(rcid, 3, -1, 0, 0, 0, 1);
+        return TRUE;
+    case 4:
+        _instance()->setAnimRsrcEx(rcid, 1, 0, 0, 0, 0, 1);
+        _instance()->offWeapon();
+        return TRUE;
+    case 5:
+        _instance()->setAnimRsrcEx(rcid, 2, -1, 0, 0, 0, 1);
+        break;
+    case 6:
+        _instance()->setAnimRsrcEx(rcid, 4, -1, 0, 0, 0, 1);
+        break;
+    }
+    return TRUE;
 }
-__asm__(".rdata\n.align 4\n.word .L002745B8\n.word .L00274608\n.word .L00274624\n.word .L00274638\n.word .L00274648\n.word .L0027468C\n.word .L002746B8\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyBossDead__7CPlayeri);
 HANDLE CPlayer::getLevelUpEffect() {
     if (!m_pInstance) return 0;
     return m_pInstance->m_hEffLevelUp;

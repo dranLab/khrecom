@@ -271,6 +271,7 @@ public:
     TIMEQ getTotalTqCrd() { return m_nMaxTq; } // PARTIAL: added for Game/Gimmick/GimmickCarry
     // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy (name guessed: tests m_Flags[1] bit 1 inline)
     BOOL isMotionLooped() { return m_Flags[1] & 2; }
+    BOOL isFlag1Bit9() { return (m_Flags[1] >> 9) & 1; } // PARTIAL: added for Game/Player/Player (name unknown)
     void change(ANIMID inId, TIMEQ inTq, BOOL inLoop); // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy
 };
 
