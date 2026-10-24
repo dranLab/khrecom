@@ -700,6 +700,44 @@ void CPlayer::initStartPos() {
     m_collBody.setRadius(m_pParam->BODY_COLL_RADIUS);
     m_collBody.off();
 }
+/* Parked: 20 lines differ, all in the scheduling of the last getBoneIndex calls (size, frame, switch, strings match):
+   the original fills the delay slot with the string load for the Chest, LToes and RToes calls (`move a0; lui; move a2; jal;
+   lw a1`) but not for Head (`lui; move a0; lw a1; jal; move a2`); ours has Chest and Head the other way round.
+   Found: the strings must be read through `*(LPCSTR*)&PL::g_sz...` (a plain read of the never-written static is hoisted
+   above the previous store: 57 lines), each case sets m_iBoneCenter itself (a shared `name` temp: 70 lines).
+   tried: all 128 cast/plain combinations of the 7 reads, a temp for the Chest result, FALSE for the 0, and tools/
+   permuter.py through the method wrapper (4 min, no better). */
+#if 0
+void CPlayer::makeWeapon() {
+    switch (m_uiCharaID) {
+    case 5:
+    case 6:
+        setPlayerFlag(0, 0x40000000);
+        m_iBoneWeapon = getBoneIndex(PL::g_szBoneWep0, 0);
+        m_iBoneCenter = getBoneIndex(*(LPCSTR*)&PL::g_szBoneEx1580sk, 0);
+        break;
+    case 3:
+    case 4:
+        setPlayerFlag(0, 0x40000000);
+        m_iBoneWeapon = getBoneIndex(PL::g_szBoneWep0, 0);
+        m_iBoneCenter = getBoneIndex(*(LPCSTR*)&PL::g_szBoneEx1010sk, 0);
+        break;
+    case 1:
+    case 2:
+    default:
+        setPlayerFlag(0x40000000, 0);
+        m_iBoneWeapon = getBoneIndex(PL::g_szBoneWeaponR, 0);
+        m_iBoneCenter = getBoneIndex(*(LPCSTR*)&PL::g_szBoneEx0010sk, 0);
+        break;
+    }
+    m_iBoneChest = getBoneIndex(*(LPCSTR*)&PL::g_szBoneChest1, 0);
+    m_iBoneHead = getBoneIndex(*(LPCSTR*)&PL::g_szBoneHead, 0);
+    m_iBoneLFoot = getBoneIndex(*(LPCSTR*)&PL::g_szBoneLToes, 0);
+    m_iBoneRFoot = getBoneIndex(*(LPCSTR*)&PL::g_szBoneRToes, 0);
+    m_pWeapon = new (com_malloc_d(sizeof(PlayerWeapon::CPlayerWeapon), __FILE__ "(1094)", RET_ADDR())) PlayerWeapon::CPlayerWeapon(this, m_uiCharaID, m_iBoneWeapon);
+    offWeapon();
+}
+#else
 /* placeholder: rodata of makeWeapon__7CPlayer */
 __asm__(".rdata\n");
 inline void _roPh1() {
@@ -707,6 +745,7 @@ inline void _roPh1() {
 }
 __asm__(".rdata\n.align 4\n.word .L00260C8C\n.word .L00260C8C\n.word .L00260C4C\n.word .L00260C4C\n.word .L00260C0C\n.word .L00260C0C\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeWeapon__7CPlayer);
+#endif
 __asm__(".rdata\n");
 void CPlayer::makeCockpit() {
     m_pCam = new (com_malloc_d(sizeof(PlayerCamera::CPlayerCamera), __FILE__ "(1103)", RET_ADDR())) PlayerCamera::CPlayerCamera(this);
