@@ -772,7 +772,46 @@ FLOAT CPlayer::getAirHeight(FVECTOR* inPos, FLOAT inHeight, INT inLimit) {
     if (inLimit && pos.y + fHeight <= m_fJumpLandLimit) fHeight = pos.y - (FLOAT)inLimit;
     return fHeight;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getFrontAirHeight__7CPlayerP7FVECTORfff);
+FLOAT CPlayer::getFrontAirHeight(FVECTOR* inPos, FLOAT inLength, FLOAT inHeight, FLOAT inDir) {
+    FVECTOR pos;
+    if (inPos) pos = *inPos;
+    else {
+        pos = m_vCenterPos;
+        pos.y = getPos().y;
+    }
+    FLOAT fHeight = inHeight;
+    FVECTOR ofs = {{ 0.0f, 0.0f, inLength, 1.0f }};
+    FLOAT d = m_fDir + inDir;
+    FLOAT r;
+    if (d < -3.1415927f) r = d + 6.2831855f;
+    else {
+        r = d;
+        if (r > 3.1415927f) r -= 6.2831855f;
+    }
+    FMATRIX m;
+    _unitMatrix(m);
+    _rotMatrixY(m, r);
+    ApplyMatrixXYZ(ofs, m, ofs);
+    FVECTOR vStart = {{ pos.x, pos.y, pos.z, 1.0f }};
+    FVECTOR vEnd = {{ pos.x + ofs.x, pos.y + ofs.y, pos.z + ofs.z, 1.0f }};
+    m_pCollMap->setType(COLL_TYPE_POINT);
+    m_pCollMap->enableSliding(0);
+    m_pCollMap->setShiftY(0.0f);
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    if (m_pCollMap->collideRide(0)) return 0.0f;
+    if (m_pCollMap->collideMap()) return 0.0f;
+    vStart = vEnd;
+    vEnd.y -= inHeight;
+    m_pCollMap->setStartPos(vStart);
+    m_pCollMap->setEndPos(vEnd);
+    FLOAT fRideH = fHeight;
+    if (m_pCollMap->collideRide(0)) fRideH = pos.y - m_pCollMap->getDetectPos()->y;
+    if (m_pCollMap->collideMap()) fHeight = pos.y - m_pCollMap->getDetectPos()->y;
+    if (fRideH < fHeight) fHeight = fRideH;
+    if (pos.y + fHeight <= m_fJumpLandLimit) fHeight = pos.y - m_fJumpLandLimit;
+    return fHeight;
+}
 void CPlayer::exeAttackTimer() {
     m_tqAttackTimer -= m_tqFrameRate;
     if (m_tqAttackTimer < 0) m_tqAttackTimer = 0;
