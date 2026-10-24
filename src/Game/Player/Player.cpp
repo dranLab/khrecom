@@ -1,4 +1,5 @@
 #define GAME_PLAYER_PLAYER_CPP
+#define TASK_H_NO_SLC_OVERFLOW_MSG
 #include "khtypes.h"
 #define COLLOBJ_H_INFO_UNION
 union COLL_INFO_UNION {
@@ -10,8 +11,29 @@ union COLL_INFO_UNION {
         BYTE infoSTAT;
     };
 };
-#include "Game/Collision/CollBody.h"
+/* .rodata starts with the strings of the included headers' inline functions, in this order. */
+#include "System/Graphic/Gprim.h"
+#include "System/Graphic/Model.h"
+#include "System/Graphic/Anim.h"
+/* System/Task.h's container overflow message comes after Anim.h's strings here. */
+inline void _taskSLCOverflowMsg() {
+    TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
+}
+#include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
+#include "System/RsrcData.h"
+#include "Game/Collision/CollUtil.h"
+/* one empty string follows CollUtil.h's strings */
+inline void _emptyStringPlaceholder0() {
+    TRACE("");
+}
+#include "System/Graphic/Str.h"
+#include "Game/Enemy/BattleEnemyManager.h"
+#include "System/Graphic/Effect/effect.h"
+#include "Game/Card.h"
+#include "Game/Status.h"
+#include "Game/Collision/CollBody.h"
+#include "System/Fsm.h"
 #include "Game/Player/Player.h"
 #include "Game/Player/PlayerManager.h"
 #include "System/Debug.h"
@@ -52,33 +74,15 @@ union COLL_INFO_UNION {
 #include "Game/Gimmick/GimmickTreasureBox.h"
 #include "Game/Gimmick/GimmickDoor.h"
 #include "Form/Menu/RoomCreation.h"
+#include "Form/DebugWindow.h"
+#include "Game/Player/DWTPlayer.h"
 #include "include_asm.h"
 
-extern "C" char D_004997C0[];
-extern "C" char D_00499828[];
-extern "C" char D_00499A18[];
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& outV, const FVECTOR& inV);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
-extern "C" char D_0049B308[];
-extern "C" char D_004997F8[]; extern "C" char D_00499808[]; extern "C" char D_00499818[]; /* "System/Fsm.h", "pInstance", "pfnBeginState" */
-extern "C" char D_00499898[]; extern "C" char D_004998C8[]; extern "C" char D_004998F8[]; /* "...Player.cpp(1103)", (1106), (1112) */
-extern "C" char D_00499928[]; extern "C" char D_00499958[]; /* "...Player.cpp(1117)", (1124) */
-extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)" */
-extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
-extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
-extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
-extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_00498BF0[]; /* assert text of exeJump (m_JumpState) */ extern "C" char D_00499AE8[]; extern "C" char D_00499B18[]; /* TRACE messages of setControl */ extern "C" char D_00499E60[]; extern "C" char D_00499E90[]; /* "...Player.cpp(n)" of chkGimmick's new CWorldSelect / CRoomCreation */ extern "C" char D_0049B2D8[]; /* TRACE message of exeFooting */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
-extern "C" char D_00499988[]; extern "C" char D_004999B8[]; extern "C" char D_004999E8[]; /* "...Player.cpp(1156)", (1172), (1181) */
-extern "C" const CARD_DATA cardDataTbl_0049E190[224];
-extern "C" char D_0049AFA8[]; /* TRACE messages of setTrapDamage */
-extern "C" char D_0049A920[];
-extern "C" char D_0049A988[];
-extern "C" char D_0049AA00[];
-extern "C" char D_0049AC10[]; /* TRACE messages of initFlip */
-extern "C" char D_0049AC30[];
 inline void* operator new(size_t, void* p) throw() { return p; }
 static inline FLOAT _abs(FLOAT inValue) {
     FLOAT ret;
@@ -147,26 +151,8 @@ public:
     static INT getMotionIdxFromMotName(const CHAR* pszName, const CHAR* pszMotName, NAME_CASE nc);
 };
 namespace PL {
-extern FVECTOR g_vDummyPlayerPos; // data from the asm until SOURCE DATA
-extern FVECTOR g_vBanishPos;
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the original
-extern LPCSTR g_szDpxAlways; // static in the original; data from the asm until SOURCE DATA
-extern LPCSTR g_szDpxReload; // static in the original
 extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
-extern LPCSTR g_szTexEyeDamage; extern LPCSTR g_szTexEyeShut; extern LPCSTR g_szTexEyeKizetsu; // static in the original
-extern LPCSTR g_szTexLipDamage; extern LPCSTR g_szTexLipDefault;
-extern LPCSTR g_szBoneLHand; // static in the original
-extern LPCSTR g_szDpxAbnormal; extern LPCSTR g_szDpxVexen; // static in the original
-extern FVECTOR g_vFieldPlayerPos; // static in the original
-extern FVECTOR g_vBattlePlayerPos; // static in the original
-extern FVECTOR HANG_HAND_LOCAL_OFS; // static in the original
-extern const FVECTOR LADDER_LOCAL_OFS; // static in the original
-extern LPCSTR g_szDpxAsiato __asm__("_2PL$g_szDpxAsiato_003A2298"); // static in the original (PlayerDRiku has one too)
-extern LPCSTR g_szDpxSpeedBreak __asm__("_2PL$g_szDpxSpeedBreak_003A229C"); // static in the original
-extern LPCSTR g_szDpxBreak; // static in the original
-extern LPCSTR g_szDpxHitWall; // static in the original
-extern FLOAT g_fDefAttr[];
-extern FLOAT g_fGimmickJumpPower[8];
 }
 class CPlayerDebug { /* PARTIAL: size and ctor for makeCockpit; CPlayerDebug's members are still INCLUDE_ASM */
     UBYTE _m_0x00[0x120];
@@ -181,6 +167,7 @@ public:
     void setMaxHP(INT n); void setDamage(INT inHP, INT inFlag);
     void setHP(INT inHP, INT inFlag);
     void setDP(INT inDP, INT inFlag);
+    void setBattleEnd();
 };
 class CEscapeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
     UBYTE _m_0x00[0x50];
@@ -199,9 +186,322 @@ public:
 };
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_0025F688);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugPlayerAttack__9DWTPlayerP12CDebugWindowii_0025F798);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", DebugWinPlayer__9DWTPlayerP12CDebugWindowii_0025FA48);
+CPlayer* g_pPlayer = NULL;
+CPlayer* CPlayer::m_pInstance = NULL;
+namespace PL {
+static LPCSTR g_szDpxAsiato = "asiato";
+static LPCSTR g_szDpxSpeedBreak = "speed_break";
+static LPCSTR g_szDpxEX1580 = "ex_1580";
+static LPCSTR g_szDpxVexen = "vexen";
+static LPCSTR g_szDpxAbnormal = "abnormal";
+static LPCSTR g_szDpxAlways = "always";
+static LPCSTR g_szDpxItemplus = "itemplus";
+static LPCSTR g_szDpxReload = "reload";
+static LPCSTR g_szDpxZexion = "zexion";
+static LPCSTR g_szDpxWarpOut = "warp_out";
+static LPCSTR g_szDpxCureAll = "cure_all";
+static LPCSTR g_szDpxBreak = "break";
+static LPCSTR g_szDpxHitWall = "rec_wall";
+static LPCSTR g_szBoneWep0 = "wep0";
+static LPCSTR g_szBoneEx1580sk = "ex_1580_sk";
+static LPCSTR g_szBoneEx1010sk = "ex_1010_sk";
+static LPCSTR g_szBoneEx0010sk = "ex_0010_sk";
+static LPCSTR g_szBoneChest1 = "chest1";
+static LPCSTR g_szBoneWeaponR = "WeaponR";
+static LPCSTR g_szBoneHead = "head";
+static LPCSTR g_szBoneLToes = "l_toes";
+static LPCSTR g_szBoneRToes = "r_toes";
+static LPCSTR g_szBoneLHand = "l_hand";
+static LPCSTR g_szTexEyeDamage = "EYE_DAMAGE";
+static LPCSTR g_szTexEyeShut = "EYE_SHUT";
+static LPCSTR g_szTexEyeKizetsu = "EYE_KIZETSU";
+static LPCSTR g_szTexLipDamage = "LIP_DAMAGE";
+static LPCSTR g_szTexLipDefault = "LIP_DEFAULT";
+FVECTOR g_vFieldPlayerPos = {{ 0.0f, 0.0035f, 0.0f, 180.0f }};
+FVECTOR g_vBattlePlayerPos = {{ 0.0f, 0.0035f, 8.0f, 180.0f }};
+FVECTOR g_vDummyPlayerPos = {{ 0.0f, -1000.0f, 0.0f, 1.0f }};
+FVECTOR g_vBanishPos = {{ 0.0f, -1000.0f, 0.0f, 1.0f }};
+UINT g_uiStartCondition = 0;
+FLOAT g_fWeight = 0.6f;
+FLOAT g_fJumpStopRate = 0.43f;
+FLOAT g_fGlideWeight = 0.01f;
+FLOAT g_fGlideSpeedLow = 5.0f;
+FLOAT g_fGlideSpeedHigh = 8.0f;
+FLOAT g_fGlideTurnRate = 0.02f;
+PL_PARAM g_Param = { 135801, 601, 0.25f, 1.0f, 1.3f, 6.2f, 1.8f, 28.0f, 32.5f, 100, 600, 1400 };
+INT g_AttackResponse[6] = { 0, 400, 500, 600, 750, 900 };
+FLOAT g_fDefAttr[18][6] = {
+    { 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f },
+    { 100.0f, 100.0f, 1000.0f, 100.0f, 50.0f, 100.0f },
+    { 100.0f, 100.0f, 50.0f, 1000.0f, 100.0f, 100.0f },
+    { 100.0f, 100.0f, 50.0f, 50.0f, 50.0f, 100.0f },
+    { 100.0f, 100.0f, 0.0f, 1000.0f, 100.0f, 100.0f },
+    { 100.0f, 150.0f, 100.0f, 100.0f, 0.0f, 100.0f },
+    { 100.0f, 100.0f, 1000.0f, 0.0f, 100.0f, 100.0f },
+    { 150.0f, 50.0f, 50.0f, 50.0f, 50.0f, 100.0f },
+    { 100.0f, 100.0f, 50.0f, 50.0f, 50.0f, 100.0f },
+    { 50.0f, 150.0f, 100.0f, 0.0f, 100.0f, 100.0f },
+    { 100.0f, 50.0f, 50.0f, 50.0f, 50.0f, 100.0f },
+    { 100.0f, 50.0f, 50.0f, 50.0f, 50.0f, 100.0f },
+    { 100.0f, 50.0f, 50.0f, 50.0f, 50.0f, 100.0f },
+    { 100.0f, 50.0f, 50.0f, 50.0f, 50.0f, 100.0f },
+    { 100.0f, 50.0f, 50.0f, 50.0f, 50.0f, 100.0f },
+    { 100.0f, 50.0f, 100.0f, 0.0f, 50.0f, 100.0f },
+    { 100.0f, 50.0f, 50.0f, 50.0f, 50.0f, 100.0f },
+    { 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f }
+};
+FVECTOR g_vBGFadeColor[7] = {
+    {{ 0.5f, 0.5f, 0.5f, 1.0f }},
+    {{ 0.5f, 0.5f, 0.75f, 1.0f }},
+    {{ 0.75f, 0.5f, 0.6f, 1.0f }},
+    {{ 0.6f, 0.5f, 0.75f, 1.0f }},
+    {{ 0.75f, 0.75f, 0.6f, 1.0f }},
+    {{ 0.5f, 0.75f, 0.5f, 1.0f }},
+    {{ 0.3f, 0.25f, 0.375f, 1.0f }}
+};
+}
+void (CPlayer::*CPlayer::m_pBeginStateTbl[4])() = { &CPlayer::beginStateField_, &CPlayer::beginStateBattle_, &CPlayer::beginStateWait_, &CPlayer::beginStateHide_ };
+void (CPlayer::*CPlayer::m_pStateTbl[4])() = { &CPlayer::stateField_, &CPlayer::stateBattle_, &CPlayer::stateWait_, &CPlayer::stateHide_ };
+void (CPlayer::*CPlayer::m_pEndStateTbl[4])() = { &CPlayer::endStateField_, &CPlayer::endStateBattle_, &CPlayer::endStateWait_, &CPlayer::endStateHide_ };
+static const CARD_DATA cardDataTbl[224] = {
+    { { 0x00 }, 0, 0, 0, "" }, // 0
+    { { 0x11 }, 2, 0, 3, "Kingdom Key" }, // 1
+    { { 0x11 }, 2, 1, 3, "Three Wishes" }, // 2
+    { { 0x11 }, 2, 2, 3, "Crabclaw" }, // 3
+    { { 0x11 }, 2, 3, 3, "Pumpkinhead" }, // 4
+    { { 0x11 }, 2, 4, 3, "Fairy Harp" }, // 5
+    { { 0x11 }, 2, 5, 3, "Wishing Star" }, // 6
+    { { 0x11 }, 2, 6, 3, "Spellbinder" }, // 7
+    { { 0x11 }, 2, 7, 3, "Metal Chocobo" }, // 8
+    { { 0x11 }, 3, 0, 3, "Olympia" }, // 9
+    { { 0x11 }, 3, 1, 3, "Lionheart" }, // 10
+    { { 0x11 }, 3, 2, 3, "Lady Luck" }, // 11
+    { { 0x11 }, 3, 3, 3, "Divine Rose" }, // 12
+    { { 0x11 }, 3, 4, 3, "Oathkeeper" }, // 13
+    { { 0x11 }, 3, 5, 3, "Oblivion" }, // 14
+    { { 0x11 }, 3, 6, 3, "Ultima Weapon" }, // 15
+    { { 0x11 }, 3, 7, 3, "Diamond Dust" }, // 16
+    { { 0x11 }, 4, 0, 3, "One-Winged Angel" }, // 17
+    { { 0x11 }, 4, 1, 4, "Soul Eater" }, // 18
+    { { 0x11 }, 4, 2, 3, "Star Seeker" }, // 19
+    { { 0x11 }, 4, 3, 3, "Monochrome" }, // 20
+    { { 0x11 }, 4, 4, 3, "Follow the Wind" }, // 21
+    { { 0x11 }, 4, 5, 3, "Hidden Dragon" }, // 22
+    { { 0x11 }, 4, 6, 3, "Photon Debugger" }, // 23
+    { { 0x11 }, 4, 7, 3, "Bond of Flame" }, // 24
+    { { 0x11 }, 26, 0, 0, "-" }, // 25
+    { { 0x22 }, 5, 0, 3, "Fire" }, // 26
+    { { 0x22 }, 5, 1, 3, "Blizzard" }, // 27
+    { { 0x22 }, 5, 2, 3, "Thunder" }, // 28
+    { { 0x22 }, 5, 3, 3, "Cure" }, // 29
+    { { 0x22 }, 5, 4, 3, "Gravity" }, // 30
+    { { 0x22 }, 5, 5, 3, "Stop" }, // 31
+    { { 0x22 }, 5, 6, 3, "Aero" }, // 32
+    { { 0x22 }, 26, 2, 0, "-" }, // 33
+    { { 0x22 }, 26, 1, 0, "-" }, // 34
+    { { 0x33 }, 5, 7, 3, "Simba" }, // 35
+    { { 0x33 }, 6, 0, 3, "Genie" }, // 36
+    { { 0x33 }, 6, 1, 3, "Bambi" }, // 37
+    { { 0x33 }, 6, 2, 3, "Dumbo" }, // 38
+    { { 0x33 }, 6, 3, 3, "Tinker Bell" }, // 39
+    { { 0x33 }, 6, 4, 3, "Mushu" }, // 40
+    { { 0x33 }, 6, 5, 3, "Cloud" }, // 41
+    { { 0x44 }, 6, 6, 6, "Potion" }, // 42
+    { { 0x44 }, 6, 7, 6, "Hi-Potion" }, // 43
+    { { 0x44 }, 7, 0, 2, "Mega-Potion" }, // 44
+    { { 0x44 }, 7, 1, 2, "Ether" }, // 45
+    { { 0x44 }, 7, 2, 2, "Mega-Ether" }, // 46
+    { { 0x44 }, 7, 3, 2, "Elixir" }, // 47
+    { { 0x44 }, 7, 4, 2, "Megalixir" }, // 48
+    { { 0x55 }, 7, 5, 2, "Donald Duck" }, // 49
+    { { 0x55 }, 7, 6, 2, "Goofy" }, // 50
+    { { 0x55 }, 7, 7, 2, "Aladdin" }, // 51
+    { { 0x55 }, 8, 0, 2, "Ariel" }, // 52
+    { { 0x55 }, 8, 1, 2, "Jack" }, // 53
+    { { 0x55 }, 8, 2, 2, "Peter Pan" }, // 54
+    { { 0x55 }, 8, 3, 2, "The Beast" }, // 55
+    { { 0x55 }, 8, 4, 4, "The King" }, // 56
+    { { 0x55 }, 8, 5, 2, "Pluto" }, // 57
+    { { 0x66 }, 8, 6, 6, "Guard Armor" }, // 58
+    { { 0x66 }, 8, 6, 6, "Trickmaster" }, // 59
+    { { 0x66 }, 8, 6, 6, "Jafar" }, // 60
+    { { 0x66 }, 8, 6, 6, "Oogie Boogie" }, // 61
+    { { 0x66 }, 8, 6, 6, "Parasite Cage" }, // 62
+    { { 0x66 }, 8, 6, 6, "Ursula" }, // 63
+    { { 0x66 }, 8, 6, 6, "Dragon Maleficent" }, // 64
+    { { 0x66 }, 8, 6, 6, "Darkside" }, // 65
+    { { 0xe6 }, 8, 7, 4, "-" }, // 66
+    { { 0xe6 }, 9, 0, 0, "-" }, // 67
+    { { 0x77 }, 9, 1, 6, "Shadow" }, // 68
+    { { 0x77 }, 9, 2, 2, "Soldier" }, // 69
+    { { 0x77 }, 9, 3, 6, "Large Body" }, // 70
+    { { 0x77 }, 9, 4, 2, "Red Nocturne" }, // 71
+    { { 0x77 }, 9, 5, 2, "Blue Rhapsody" }, // 72
+    { { 0x77 }, 9, 6, 2, "Yellow Opera" }, // 73
+    { { 0x77 }, 9, 7, 2, "Green Requiem" }, // 74
+    { { 0x77 }, 10, 0, 6, "Powerwild" }, // 75
+    { { 0x77 }, 10, 1, 2, "Bouncywild" }, // 76
+    { { 0x77 }, 10, 2, 2, "Air Soldier" }, // 77
+    { { 0x77 }, 10, 3, 2, "Bandit" }, // 78
+    { { 0x77 }, 10, 4, 6, "Fat Bandit" }, // 79
+    { { 0x77 }, 10, 5, 2, "Barrel Spider" }, // 80
+    { { 0x77 }, 10, 6, 6, "Search Ghost" }, // 81
+    { { 0x77 }, 10, 7, 6, "Sea Neon" }, // 82
+    { { 0x77 }, 11, 0, 2, "Screwdiver" }, // 83
+    { { 0x77 }, 11, 1, 2, "Aquatank" }, // 84
+    { { 0x77 }, 11, 2, 6, "Wight Knight" }, // 85
+    { { 0x77 }, 11, 3, 2, "Gargoyle" }, // 86
+    { { 0x77 }, 11, 4, 6, "Pirate" }, // 87
+    { { 0x77 }, 11, 5, 2, "Air Pirate" }, // 88
+    { { 0x77 }, 11, 6, 4, "Darkball" }, // 89
+    { { 0x77 }, 11, 7, 6, "Defender" }, // 90
+    { { 0x77 }, 12, 0, 2, "Wyvern" }, // 91
+    { { 0x77 }, 12, 1, 2, "Wizard" }, // 92
+    { { 0x77 }, 12, 2, 2, "Neoshadow" }, // 93
+    { { 0x77 }, 12, 3, 2, "White Mushroom" }, // 94
+    { { 0x77 }, 12, 4, 2, "Black Fungus" }, // 95
+    { { 0x77 }, 12, 5, 2, "Creeper Plant" }, // 96
+    { { 0x77 }, 12, 6, 2, "Tornado Step" }, // 97
+    { { 0x77 }, 12, 7, 2, "Crescendo" }, // 98
+    { { 0x77 }, 13, 0, 6, "Guard Armor" }, // 99
+    { { 0x77 }, 13, 1, 6, "Parasite Cage" }, // 100
+    { { 0x77 }, 13, 2, 6, "Trickmaster" }, // 101
+    { { 0x77 }, 13, 3, 6, "Darkside" }, // 102
+    { { 0x77 }, 13, 4, 2, "Card Soldier" }, // 103
+    { { 0x77 }, 13, 5, 6, "Hades" }, // 104
+    { { 0x77 }, 13, 6, 6, "Jafar" }, // 105
+    { { 0x77 }, 13, 7, 6, "Oogie Boogie" }, // 106
+    { { 0x77 }, 14, 0, 6, "Ursula" }, // 107
+    { { 0x77 }, 14, 1, 6, "Hook" }, // 108
+    { { 0x77 }, 14, 2, 6, "Dragon Maleficent" }, // 109
+    { { 0x77 }, 14, 3, 2, "Riku" }, // 110
+    { { 0x77 }, 14, 4, 2, "Axel" }, // 111
+    { { 0x77 }, 14, 5, 2, "Larxene" }, // 112
+    { { 0x77 }, 14, 6, 2, "Vexen" }, // 113
+    { { 0x77 }, 14, 7, 2, "Marluxia" }, // 114
+    { { 0x77 }, 15, 0, 6, "Lexaeus" }, // 115
+    { { 0x77 }, 15, 1, 2, "Ansem" }, // 116
+    { { 0x77 }, 15, 3, 6, "Zexion" }, // 117
+    { { 0x77 }, 15, 4, 2, "Xemnas" }, // 118
+    { { 0x77 }, 15, 5, 2, "Xigbar" }, // 119
+    { { 0x77 }, 15, 6, 2, "Xaldin" }, // 120
+    { { 0x77 }, 15, 7, 2, "Sa\203\307x" }, // 121
+    { { 0x77 }, 16, 0, 2, "Demyx" }, // 122
+    { { 0x77 }, 16, 1, 2, "Luxord" }, // 123
+    { { 0x77 }, 16, 2, 2, "Roxas" }, // 124
+    { { 0x77 }, 21, 6, 2, "Gold Card" }, // 125
+    { { 0x77 }, 21, 7, 2, "Platinum Card" }, // 126
+    { { 0x77 }, 15, 2, 0, "Card Soldier Spade" }, // 127
+    { { 0x77 }, 13, 4, 0, "Card Soldier Heart" }, // 128
+    { { 0x17 }, 22, 0, 0, "\203N\203\211\203E\203hA" }, // 129
+    { { 0x17 }, 22, 1, 0, "\203N\203\211\203E\203hB" }, // 130
+    { { 0x17 }, 22, 2, 0, "\203n\203f\203XA" }, // 131
+    { { 0x27 }, 22, 3, 0, "\203n\203f\203XB" }, // 132
+    { { 0x17 }, 22, 4, 0, "\203t\203b\203NA" }, // 133
+    { { 0x17 }, 22, 5, 0, "\203t\203b\203NB" }, // 134
+    { { 0x17 }, 22, 6, 0, "\203t\203b\203NC" }, // 135
+    { { 0x27 }, 22, 7, 0, "\203t\203b\203ND" }, // 136
+    { { 0x17 }, 23, 0, 0, "\203A\203N\203Z\203\213A" }, // 137
+    { { 0x17 }, 23, 1, 0, "\203A\203N\203Z\203\213B" }, // 138
+    { { 0x17 }, 23, 2, 0, "\203\211\203N\203V\201[\203kA" }, // 139
+    { { 0x17 }, 23, 3, 0, "\203\211\203N\203V\201[\203kB" }, // 140
+    { { 0x27 }, 23, 4, 0, "\203\211\203N\203V\201[\203kC" }, // 141
+    { { 0x17 }, 23, 5, 0, "\203\212\203NA" }, // 142
+    { { 0x17 }, 23, 6, 0, "\203\212\203NB" }, // 143
+    { { 0x17 }, 23, 7, 0, "\203\212\203NC" }, // 144
+    { { 0x17 }, 24, 0, 0, "\203\212\203ND" }, // 145
+    { { 0x17 }, 24, 1, 0, "\203\224\203B\203N\203Z\203\223A" }, // 146
+    { { 0x27 }, 24, 2, 0, "\203\224\203B\203N\203Z\203\223B" }, // 147
+    { { 0x17 }, 24, 3, 0, "\203}\201[\203\213\201[\203V\203\203A" }, // 148
+    { { 0x17 }, 24, 4, 0, "\203}\201[\203\213\201[\203V\203\203B" }, // 149
+    { { 0x27 }, 24, 5, 0, "\203}\201[\203\213\201[\203V\203\203C" }, // 150
+    { { 0x77 }, 24, 6, 0, "\203}\201[\203\213\201[\203V\203\2032" }, // 151
+    { { 0x77 }, 24, 7, 0, "\203}\201[\203\213\201[\203V\203\2033" }, // 152
+    { { 0x17 }, 25, 0, 0, "\203\214\203N\203Z\203E\203XA" }, // 153
+    { { 0x17 }, 25, 1, 0, "\203\214\203N\203Z\203E\203XB" }, // 154
+    { { 0x27 }, 25, 2, 0, "\203\214\203N\203Z\203E\203XC" }, // 155
+    { { 0x17 }, 25, 3, 0, "\203A\203\223\203Z\203\200A" }, // 156
+    { { 0x27 }, 25, 4, 0, "\203A\203\223\203Z\203\200B" }, // 157
+    { { 0x27 }, 25, 5, 0, "\203[\203N\203V\203I\203\223A" }, // 158
+    { { 0x77 }, 26, 3, 0, "-" }, // 159
+    { { 0x88 }, 0, 0, 6, "\203\212\203\215\201[\203h" }, // 160
+    { { 0x99 }, 16, 3, 6, "Tranquil Darkness" }, // 161
+    { { 0x99 }, 16, 4, 6, "Teeming Darkness" }, // 162
+    { { 0x99 }, 16, 5, 6, "Feeble Darkness" }, // 163
+    { { 0x99 }, 16, 6, 6, "Almighty Darkness" }, // 164
+    { { 0x99 }, 16, 7, 6, "Sleeping Darkness" }, // 165
+    { { 0x99 }, 17, 0, 6, "Looming Darkness" }, // 166
+    { { 0x99 }, 17, 1, 2, "Premium Room" }, // 167
+    { { 0x99 }, 17, 2, 2, "White Room" }, // 168
+    { { 0x99 }, 17, 3, 6, "Black Room" }, // 169
+    { { 0x99 }, 17, 4, 6, "Bottomless Darkness" }, // 170
+    { { 0x99 }, 17, 5, 6, "Roulette Room" }, // 171
+    { { 0xa9 }, 17, 6, 6, "Martial Waking" }, // 172
+    { { 0xa9 }, 17, 7, 2, "Sorcerous Waking" }, // 173
+    { { 0xa9 }, 18, 0, 2, "Alchemic Waking" }, // 174
+    { { 0xa9 }, 18, 1, 6, "Meeting Ground" }, // 175
+    { { 0xa9 }, 18, 2, 6, "Stagnant Space" }, // 176
+    { { 0xa9 }, 18, 3, 6, "Strong Initiative" }, // 177
+    { { 0xa9 }, 18, 4, 6, "Lasting Daze" }, // 178
+    { { 0xb9 }, 18, 5, 2, "Calm Bounty" }, // 179
+    { { 0xb9 }, 18, 6, 2, "Guarded Trove" }, // 180
+    { { 0xb9 }, 18, 7, 2, "False Bounty" }, // 181
+    { { 0xb9 }, 19, 0, 6, "Moment's Reprieve" }, // 182
+    { { 0xb9 }, 19, 1, 6, "Mingling Worlds" }, // 183
+    { { 0xb9 }, 19, 2, 2, "Moogle Room" }, // 184
+    { { 0xb9 }, 19, 3, 6, "Random Joker" }, // 185
+    { { 0xca }, 19, 4, 6, "Key of Beginnings" }, // 186
+    { { 0xca }, 19, 5, 6, "Key of Guidance" }, // 187
+    { { 0xca }, 19, 6, 6, "Key to Truth" }, // 188
+    { { 0xca }, 19, 7, 2, "Key to Rewards" }, // 189
+    { { 0xdb }, 20, 0, 6, "Traverse Town" }, // 190
+    { { 0xdb }, 20, 3, 6, "Agrabah" }, // 191
+    { { 0xdb }, 20, 2, 6, "Olympus Coliseum" }, // 192
+    { { 0xdb }, 20, 1, 6, "Wonderland" }, // 193
+    { { 0xdb }, 20, 5, 6, "Monstro" }, // 194
+    { { 0xdb }, 20, 4, 6, "Halloween Town" }, // 195
+    { { 0xdb }, 20, 6, 6, "Atlantica" }, // 196
+    { { 0xdb }, 20, 7, 6, "Neverland" }, // 197
+    { { 0xdb }, 21, 0, 6, "Hollow Bastion" }, // 198
+    { { 0xdb }, 21, 1, 2, "100 Acre Woods" }, // 199
+    { { 0xdb }, 21, 2, 6, "Twilight Town" }, // 200
+    { { 0xdb }, 21, 3, 6, "Destiny Islands" }, // 201
+    { { 0xdb }, 21, 4, 4, "Castle Oblivion" }, // 202
+    { { 0x0d }, 0, 0, 0, "EXP\220\302\217\254" }, // 203
+    { { 0x0d }, 0, 1, 0, "EXP\220\302\222\206" }, // 204
+    { { 0x0d }, 0, 2, 0, "EXP\220\302\221\345" }, // 205
+    { { 0x0d }, 0, 3, 0, "EXP\220\324\217\254" }, // 206
+    { { 0x0d }, 0, 4, 0, "EXP\220\324\222\206" }, // 207
+    { { 0x0d }, 0, 5, 0, "EXP\220\324\221\345" }, // 208
+    { { 0x0d }, 0, 6, 0, "EXP\213\342" }, // 209
+    { { 0x0d }, 1, 0, 0, "HP\217\254" }, // 210
+    { { 0x0d }, 1, 1, 0, "HP\221\345" }, // 211
+    { { 0x0d }, 2, 0, 0, "MP\217\254" }, // 212
+    { { 0x0d }, 2, 1, 0, "MP\221\345" }, // 213
+    { { 0x0d }, 3, 0, 0, "P" }, // 214
+    { { 0x0d }, 4, 0, 0, "R" }, // 215
+    { { 0x0c }, 0, 0, 0, "Unknown Room" }, // 216
+    { { 0x0c }, 0, 0, 0, "Conqueror's Respite" }, // 217
+    { { 0x0c }, 0, 0, 0, "Room of Rewards" }, // 218
+    { { 0x0c }, 0, 0, 0, "" }, // 219
+    { { 0x0c }, 0, 0, 0, "" }, // 220
+    { { 0x00 }, 0, 0, 0, "" }, // 221
+    { { 0x00 }, 0, 0, 0, "" }, // 222
+    { { 0x00 }, 0, 0, 0, "" }, // 223
+};
+
+namespace PL {
+static const FLOAT g_fGimmickJumpPower[8] = { 39.0f, 45.9f, 52.2f, 57.6f, 62.7f, 67.3f, 71.6f, 75.8f };
+static const FVECTOR LADDER_LOCAL_OFS = {{ 0.0f, 0.0f, 0.84000003f, 1.0f }};
+static const FVECTOR HANG_HAND_LOCAL_OFS = {{ 0.0f, 1.2f, 0.11f, 1.0f }};
+FLOAT g_fGravity = g_fWeight * -0.008166667f;
+FLOAT g_fAntiGravity = g_fWeight * 0.008166667f;
+}
+char* szAtkAnimID[71];
+/* instantiates CStateTemplate<CPlayer> (the original's CPlayer constructor does): vtable and weak functions at the end */
+inline void _stateTemplateInstance() {
+    CStateTemplate<CPlayer> t;
+}
 FVECTOR getPlayerPos(BOOL flag) {
     if (g_pPlayer) {
         if (!flag && g_pPlayer->isConditionFlag(0x40)) return PL::g_vBanishPos;
@@ -244,30 +544,70 @@ void CPlayer::enableDbgPadControl(INT inFlag) {
         m_pInstance->m_uiPadFlag = (m_pInstance->m_uiPadFlag | inFlag) & ~(inFlag ^ bit);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", __7CPlayerP5CTaskUii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _$_7CPlayer);
-/* CStateTemplate<CPlayer> (System/Fsm.h) layout; set() is copied here with the original's string labels
- * because the unit's .rodata still comes from the assembly. */
-struct PLAYER_STATE {
-    void* m_pVtbl; // CState vptr
-    CPlayer* m_pInstance;
-    void (CPlayer::*m_pfnBeginState)();
-    void (CPlayer::*m_pfnState)();
-    void (CPlayer::*m_pfnEndState)();
-};
-static inline void _setState(PLAYER_STATE& s, CPlayer* pInstance, void (CPlayer::*pfnBeginState)(), void (CPlayer::*pfnState)(), void (CPlayer::*pfnEndState)()) {
-    if (!pInstance) AssertApp(D_004997F8, 41, D_00499808, 0);
-    s.m_pInstance = pInstance;
-    if (!pfnBeginState) AssertApp(D_004997F8, 44, D_00499818, 0);
-    s.m_pfnBeginState = pfnBeginState;
-    if (!pfnBeginState) AssertApp(D_004997F8, 46, D_00499818, 0);
-    s.m_pfnState = pfnState;
-    if (!pfnBeginState) AssertApp(D_004997F8, 48, D_00499818, 0);
-    s.m_pfnEndState = pfnEndState;
+__asm__(".rdata\n");
+CPlayer::CPlayer(CTask* inParent, UINT inChara, INT inEx) : CEntity(inParent, (ObjType::eObjType)1), m_uiCharaID(inChara), m_iState(0) {
+    m_pDebug = NULL;
+    declareSysTask(3);
+    _init();
+    m_uiRCID = PLM::g_uiPlayerRcid[m_uiCharaID];
+    m_pParam = &PL::g_Param;
+    if (!m_pParam) AssertApp(__FILE__, 0x240, "m_pParam", 0);
+    if (inEx) {
+        m_uiPlayerFlag |= 0x20000000;
+    } else {
+        g_pPlayer = this;
+        m_pInstance = this;
+    }
+    initalize(1, m_uiRCID);
+    initFSM_();
+    m_pPLM = (PLM::CPlayerManager*)CTaskMan::getSysTask(0x1F);
+    if (m_pPLM) m_pPLM->notifyPlayer(this, inEx);
+    m_bIsBattleScene = CSceneInfo::isBattleScene();
+    m_bIsMinigameScene = CSceneInfo::isMinigameScene();
+    m_bIsBattleScene |= m_bIsMinigameScene;
+    if (CSceneInfo::getCurrentWorldID(0) == 10) m_pMove->setFlag(0x80, TRUE);
+}
+CPlayer::~CPlayer() {
+    if (this == *(CPlayer**)&g_pPlayer) exportStatus();
+    fadeEffect(m_hEffPrize, 0);
+    fadeEffect(m_hEffCharge, 0);
+    fadeEffect(m_hEffCast, 0);
+    fadeEffect(m_hEffBad, 0);
+    fadeEffAttack(0);
+    if (!m_bIsBattleScene) {
+        FVECTOR pos = getPos();
+        switch (m_PlayerState) {
+        case HANG:
+        case WALL:
+        case LADDER:
+            pos = m_vOldSafeField;
+            break;
+        default:
+            break;
+        }
+        PL::g_vFieldPlayerPos.x = pos.x;
+        PL::g_vFieldPlayerPos.y = pos.y;
+        PL::g_vFieldPlayerPos.z = pos.z;
+        PL::g_vFieldPlayerPos.w = m_fDir / 3.1415927f * 180.0f;
+        PL::g_uiStartCondition = m_uiConditionFlag & 8;
+    } else {
+        if (m_pGauge) m_pGauge->setBattleEnd();
+        if (isBattleFlag(2)) {
+            setBattleFlag(0, 2);
+            m_tqEscape = 0;
+            setBGFade(1.0f, 0.0f, 3);
+            CSceneEnv::setStop((ObjType::eObjBit)0);
+            CGameWork::setInt(1, 0xE2, 0);
+        }
+        PL::g_uiStartCondition = 0;
+    }
+    if ((INT)m_uiPlayerFlag < 0) setBGFade(1.0f, 0.0f, 0);
+    if (this == m_pInstance) m_pInstance = NULL;
+    if (this == g_pPlayer) g_pPlayer = NULL;
 }
 void CPlayer::initFSM_() {
     for (INT i = 0; i < 4; i++) {
-        _setState(((PLAYER_STATE*)_m_0x21c)[i], this, m_pBeginStateTbl[i], m_pStateTbl[i], m_pEndStateTbl[i]);
+        m_State[i].set(this, m_pBeginStateTbl[i], m_pStateTbl[i], m_pEndStateTbl[i]);
     }
     m_iState = -1;
 }
@@ -285,15 +625,16 @@ void CPlayer::lastUpdate() {
     m_hGimmickJump = 0;
     updateFooting();
 }
+__asm__(".rdata\n");
 void CPlayer::changeState(INT inState) {
-    if (!((UINT)inState < 4)) AssertApp(D_004997C0, 941, D_00499828, 0);
-    gotoState(*(CState*)&_m_0x21c[inState * 0x20]);
+    if (!((UINT)inState < 4)) AssertApp(__FILE__, 941, "0 <= inState && inState < STATE_MAX", 0);
+    gotoState(m_State[inState]);
 }
 void CPlayer::stateInitial() {
     setPlayerState(PL::INIT);
     m_uiStep = 0;
     importStatus();
-    setDefAttr(PL::g_fDefAttr);
+    setDefAttr(PL::g_fDefAttr[0]);
     m_fPrizeDraw = 5.0f;
     m_fCardDraw = 5.0f;
     createLegIK(-1.0f, -1.0f);
@@ -359,26 +700,34 @@ void CPlayer::initStartPos() {
     m_collBody.setRadius(m_pParam->BODY_COLL_RADIUS);
     m_collBody.off();
 }
+/* placeholder: rodata of makeWeapon__7CPlayer */
+__asm__(".rdata\n");
+inline void _roPh1() {
+    TRACE(__FILE__ "(1094)");
+}
+__asm__(".rdata\n.align 4\n.word .L00260C8C\n.word .L00260C8C\n.word .L00260C4C\n.word .L00260C4C\n.word .L00260C0C\n.word .L00260C0C\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeWeapon__7CPlayer);
+__asm__(".rdata\n");
 void CPlayer::makeCockpit() {
-    m_pCam = new (com_malloc_d(sizeof(PlayerCamera::CPlayerCamera), D_00499898, RET_ADDR())) PlayerCamera::CPlayerCamera(this);
-    m_pMarker = new (com_malloc_d(sizeof(Gauge::CLockonMarker), D_004998C8, RET_ADDR())) Gauge::CLockonMarker(this, FALSE);
+    m_pCam = new (com_malloc_d(sizeof(PlayerCamera::CPlayerCamera), __FILE__ "(1103)", RET_ADDR())) PlayerCamera::CPlayerCamera(this);
+    m_pMarker = new (com_malloc_d(sizeof(Gauge::CLockonMarker), __FILE__ "(1106)", RET_ADDR())) Gauge::CLockonMarker(this, FALSE);
     if (m_bIsBattleScene) {
-        m_pEscape = new (com_malloc_d(sizeof(Gauge::CEscapeGauge), D_004998F8, RET_ADDR())) Gauge::CEscapeGauge(this);
+        m_pEscape = new (com_malloc_d(sizeof(Gauge::CEscapeGauge), __FILE__ "(1112)", RET_ADDR())) Gauge::CEscapeGauge(this);
     }
-    m_pGauge = new (com_malloc_d(sizeof(Gauge::CPlayerGauge), D_00499928, RET_ADDR())) Gauge::CPlayerGauge(this);
+    m_pGauge = new (com_malloc_d(sizeof(Gauge::CPlayerGauge), __FILE__ "(1117)", RET_ADDR())) Gauge::CPlayerGauge(this);
     m_pGauge->setMaxHP(m_iMaxHP);
     m_pGauge->setHP(m_iHP, 1);
     m_pGauge->setDP(m_iDP, 30);
-    m_pDebug = new (com_malloc_d(sizeof(CPlayerDebug), D_00499958, RET_ADDR())) CPlayerDebug(this);
+    m_pDebug = new (com_malloc_d(sizeof(CPlayerDebug), __FILE__ "(1124)", RET_ADDR())) CPlayerDebug(this);
 }
 static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
     c.m_nId = 0;
     c.m_nKind2 = kind;
     c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl_0049E190[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl_0049E190[c.m_nKind].nCategory1;
+    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
+__asm__(".rdata\n");
 void CPlayer::makeRevolver() {
     if (!m_pRevolver) {
         CARD* pDeck = NULL;
@@ -387,18 +736,18 @@ void CPlayer::makeRevolver() {
         if (CGameWork::getFlag(1, 0x2C)) pDeck = NULL;
         if (m_bIsMinigameScene) pDeck = NULL;
         if (!pDeck) {
-            m_pRevolver = new (com_malloc_d(sizeof(CardBattle::CCardRevolver), D_00499988, RET_ADDR())) CardBattle::CCardRevolver(this, NULL, 1, -1);
+            m_pRevolver = new (com_malloc_d(sizeof(CardBattle::CCardRevolver), __FILE__ "(1156)", RET_ADDR())) CardBattle::CCardRevolver(this, NULL, 1, -1);
         } else {
             INT max = CCard::m_pCardInfo->_nDeck[CCard::m_pCardInfo->_nCurrentDeck];
             INT sc = CCard::getCurrentShortCut();
             if (dbgCheckUser(KKIKUCHI) && sc == -1) sc = DebugWork::g_dw.player.iTemp;
-            deck = (CARD*)com_malloc_d((max + 1) * sizeof(CARD), D_004999B8, RET_ADDR());
+            deck = (CARD*)com_malloc_d((max + 1) * sizeof(CARD), __FILE__ "(1172)", RET_ADDR());
             for (INT i = 0; i < max; i++) {
                 deck[i] = pDeck[i];
                 if (deck[i].m_nCategory1 == 7) deck[i].m_nNumber = -1;
             }
             _setCard(deck[max], 0xFF, 0);
-            m_pRevolver = new (com_malloc_d(sizeof(CardBattle::CCardRevolver), D_004999E8, RET_ADDR())) CardBattle::CCardRevolver(this, deck, 1, sc);
+            m_pRevolver = new (com_malloc_d(sizeof(CardBattle::CCardRevolver), __FILE__ "(1181)", RET_ADDR())) CardBattle::CCardRevolver(this, deck, 1, sc);
             if (deck) com_free(deck);
         }
     }
@@ -467,8 +816,9 @@ void CPlayer::makeAnimIndex(INT inChara) {
         }
     }
 }
+__asm__(".rdata\n");
 INT CPlayer::getMotIndex(INT inChara, INT inIndex) {
-    if (!(0 <= inIndex && inIndex < ANIM_MAX)) AssertApp(D_004997C0, 1361, D_00499A18, 0);
+    if (!(0 <= inIndex && inIndex < ANIM_MAX)) AssertApp(__FILE__, 1361, "0<=inIndex && inIndex<ANIM_MAX", 0);
     return PL_ANIM::g_MotNameTbl[inChara][inIndex].iIndex;
 }
 void CPlayer::setAnimForce(INT inAnimID, TIMEQ inChangeTime, BOOL inRootMove, INT inEffSeq, INT inSESeq, TIMEQ inStart) {
@@ -512,6 +862,9 @@ void CPlayer::setAnimRsrcEx(INT inRcid, INT inAnimID, TIMEQ inChangeTime, BOOL i
     }
     setAnimSpeed(1.0f);
 }
+/* placeholder: rodata of isNowIdleAnim__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L00261874\n.word .L0026186C\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowIdleAnim__7CPlayer);
 void CPlayer::setFaceAnim(INT inID, INT inFlag) {
     if (!inFlag && m_iNowFaceID == inID) return;
@@ -621,6 +974,7 @@ void CPlayer::exeMutekiTimer() {
     m_tqMutekiTimer -= m_tqFrameRate;
     if (m_tqMutekiTimer < 0) m_tqMutekiTimer = 0;
 }
+__asm__(".rdata\n");
 void CPlayer::setControl() {
     INT iRev;
     m_fDir = m_pMove->getRot().y;
@@ -638,7 +992,7 @@ void CPlayer::setControl() {
         if (m_bIsDead) return;
         if (isBattleFlag(4)) return;
         if (isConditionFlag(0x2000000) || isTrgFlag(0x100000)) {
-            TRACE(D_00499AE8);
+            TRACE("CPlayer::setControl: DMODE End... Cancel!\n");
             return;
         }
         if (m_pRevolver) {
@@ -714,7 +1068,7 @@ void CPlayer::setControl() {
         if (isBattleFlag(0x1000)) {
             if (isConditionFlag(0x8810000)) {
                 if (isConditionFlag(0x8000000)) {
-                    TRACE(D_00499B18);
+                    TRACE("CPlayer::setControl(); DARKPUNISHER -> STOCK_SKILL ...enableDuelEntry\n");
                     m_pCB->setFlag(0, 0x400000);
                 }
                 setConditionFlag(0, 0x8810000);
@@ -817,7 +1171,22 @@ void CPlayer::setLand(FLOAT inDownLEngth, FLOAT inUpLength, BOOL inFirstHit) {
     recoverCollMap();
     land(inDownLEngth, inUpLength, inFirstHit);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", beginStateField__7CPlayer);
+void CPlayer::beginStateField() {
+    m_iState = 0;
+    m_uiStep = 0;
+    setActionFlag(m_pParam->USE_MAP_ACTION, 0);
+    initActionSkill();
+    setBattleFlag(0, 1);
+    setAnimForce(1, -1, 0, 0, 0, 0);
+    initStartWait();
+    if (CGameWork::getFlag(1, 0x380)) {
+        setEffect(PL::g_szDpxWarpOut, 0, &getPos(), NULL, 0.0f);
+        CGameWork::setFlag(1, 0x380, 0);
+    }
+}
+/* placeholder: rodata of stateField__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L00262EA0\n.word .L00262EB0\n.word .L00262EB8\n.word .L00262EB8\n.word .L00262ED4\n.word .L00262F24\n.word .L00262EF4\n.word .L00262F04\n.word .L00262F14\n.word .L00262F40\n.word .L00262FB8\n.word .L00262F90\n.word .L00262F90\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262EE4\n.word .L00262F50\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262F60\n.word .L00262F70\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262FB0\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262FB8\n.word .L00262FA0\n.word .L00262F80\n.word .L00262EB8\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateField__7CPlayer);
 void CPlayer::endStateField() {
     setActionFlag(0, m_pParam->USE_MAP_ACTION);
@@ -844,6 +1213,9 @@ void CPlayer::beginStateBattle() {
     PL::g_uiStartCondition = 0;
     m_szEffectName = NULL;
 }
+/* placeholder: rodata of stateBattle__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L00263660\n.word .L00263670\n.word .L00263670\n.word .L00263670\n.word .L002637F0\n.word .L002636C0\n.word .L00263680\n.word .L00263690\n.word .L002636B0\n.word .L002637F0\n.word .L002636D0\n.word .L002636E0\n.word .L002636E0\n.word .L00263700\n.word .L002637F0\n.word .L002637F0\n.word .L002637F0\n.word .L00263710\n.word .L00263720\n.word .L002637F0\n.word .L002637F0\n.word .L00263730\n.word .L00263770\n.word .L002636F0\n.word .L00263740\n.word .L00263750\n.word .L00263760\n.word .L00263780\n.word .L00263790\n.word .L002637F0\n.word .L002637F0\n.word .L002637A0\n.word .L002636A0\n.word .L002637B0\n.word .L002637CC\n.word .L002637DC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateBattle__7CPlayer);
 void CPlayer::endStateBattle() {
     setActionFlag(0, m_pParam->USE_BTL_ACTION);
@@ -1043,6 +1415,12 @@ void CPlayer::initStandUp(INT inFlag) {
     setFaceAnim(0, 0);
     m_pMove->setFlag(0x40, TRUE); // partial CMovement: (flag, on)
 }
+/* placeholder: rodata of exeStandUp__7CPlayer */
+__asm__(".rdata\n");
+inline void _roPh5() {
+    TRACE("CPlayer:: exeStandUp -> initTransform(0)\n");
+}
+__asm__(".rdata\n.align 4\n.word .L00264580\n.word .L002645D4\n.word .L002645D4\n.word .L00264590\n.word .L002645A0\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645B0\n.word .L002645C0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStandUp__7CPlayer);
 INT CPlayer::chkWalkMode() {
     FLOAT aim_power = m_fAnalogPower;
@@ -1086,7 +1464,13 @@ void CPlayer::exeWalk() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer);
 #endif
+/* placeholder: rodata of setWalkAnim__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L00264984\n.word .L0026499C\n.word .L002649BC\n.word .L00264AB4\n.word .L002649D4\n.word .L002649D4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264AB4\n.word .L00264A6C\n.word .L00264984\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setWalkAnim__7CPlayer);
+/* placeholder: rodata of chkBattleIdle__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L00264B30\n.word .L00264B30\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B30\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B8C\n.word .L00264B30\n.word .L00264B30\n.word .L00264B30\n.word .L00264B30\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkBattleIdle__7CPlayer);
 INT CPlayer::procFlowIdle(INT inFlag) {
     if (isAir()) {
@@ -1535,6 +1919,9 @@ void CPlayer::initLadder(INT inStep) {
     m_pMove->setFlag(0x40, FALSE);
     m_pCam->setFlag(8, TRUE);
 }
+/* placeholder: rodata of exeLadder__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L002668F0\n.word .L00266908\n.word .L002669DC\n.word .L00266B84\n.word .L00266A54\n.word .L00266C44\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeLadder__7CPlayer);
 /* Parked: everything but the ofs block matches (wrap: r wrapped in place, then dir = r); left: after getPos the
    original issues lq pos (v1) before lui LADDER_LOCAL_OFS (v0), ours schedules the lui first (sched1 priority:
@@ -1585,6 +1972,10 @@ INT CPlayer::isStartLadderJump() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isStartLadderJump__7CPlayer);
 #endif
+/* placeholder: rodata of getJumpState__C7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L00266F18\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266F18\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266F20\n.word .L00266F18\n.word .L00266F18\n.word .L00266F20\n.word .L00266ED8\n.word .L00266F18\n.word .L00266F18\n.word .L00266ED8\n.word .L00266F18\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266F18\n.word .L00266F18\n.word .L00266F20\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.word .L00266ED8\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L00266F00\n.word .L00266F08\n.word .L00266F08\n.word .L00266F10\n.word .L00266F10\n.word .L00266F08\n.word .L00266F18\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getJumpState__C7CPlayer);
 void CPlayer::initJump(INT inFlag) {
     setPlayerState(PL::JUMP);
@@ -1721,7 +2112,7 @@ void CPlayer::exeJump() {
         setGroundIK(1);
         return;
     default:
-        AssertApp(D_004997C0, 0x1248, D_00498BF0, 0);
+        AssertApp(__FILE__, 0x1248, "0", 0);
         break;
     }
     if (isActionFlag(0x2000000)) {
@@ -2210,6 +2601,7 @@ void CPlayer::notifyGimmickJump(HANDLE inHandle, INT inPow) {
         _instance()->m_fGimmickJumpPow = PL::g_fGimmickJumpPower[inPow];
     }
 }
+__asm__(".rdata\n");
 INT CPlayer::chkGimmick(UINT inID) {
     INT result;
     HANDLE handle = m_hGimmickJump;
@@ -2250,14 +2642,14 @@ INT CPlayer::chkGimmick(UINT inID) {
         if (CSceneInfo::getRoomInfo(-1)->_doors[((CGimmickDoor*)pEntity)->getDoorID()].canSelectWorld()) {
             FLOAT r = _limitPI(pEntity->getRot().y - m_fDir);
             if (getHoukouFromAngle(r) == 4) return 0;
-            new (com_malloc_d(sizeof(CWorldSelect), D_00499E60, RET_ADDR())) CWorldSelect(CTaskMan::getSysTask(1), handle);
+            new (com_malloc_d(sizeof(CWorldSelect), __FILE__ "(5804)", RET_ADDR())) CWorldSelect(CTaskMan::getSysTask(1), handle);
             m_pMarker->holdTarget(8);
             result = 0x15;
         } else {
             if (!CSceneInfo::getRoomInfo(-1)->_doors[((CGimmickDoor*)pEntity)->getDoorID()].canCreateRoom()) return 0;
             FLOAT r = _limitPI(pEntity->getRot().y - m_fDir);
             if (getHoukouFromAngle(r) == 4) return 0;
-            new (com_malloc_d(sizeof(CRoomCreation), D_00499E90, RET_ADDR())) CRoomCreation(CTaskMan::getSysTask(1), handle);
+            new (com_malloc_d(sizeof(CRoomCreation), __FILE__ "(5819)", RET_ADDR())) CRoomCreation(CTaskMan::getSysTask(1), handle);
             m_pMarker->holdTarget(8);
             result = 0x14;
         }
@@ -2353,6 +2745,9 @@ void CPlayer::initRoomCreation() {
     m_pCam->initCamera(1, 1, NULL);
     m_pCam->setFlag(1, TRUE);
 }
+/* placeholder: rodata of exeRoomCreation__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L00269DEC\n.word .L00269DF4\n.word .L00269EDC\n.word .L00269F2C\n.word .L00269F90\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeRoomCreation__7CPlayer);
 void CPlayer::initWorldSelect() {
     CEntity* pTarget;
@@ -2392,6 +2787,9 @@ void CPlayer::initWorldSelect() {
     m_pCam->initCamera(1, 1, NULL);
     m_pCam->setFlag(1, TRUE);
 }
+/* placeholder: rodata of exeWorldSelect__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L0026A1FC\n.word .L0026A204\n.word .L0026A2EC\n.word .L0026A33C\n.word .L0026A3A0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWorldSelect__7CPlayer);
 void CPlayer::initCarry() {
     setPlayerState(PL::CARRY);
@@ -2401,7 +2799,13 @@ void CPlayer::initCarry() {
     setAnimForce(0x17, 0, 0, 0, 0, 0);
     m_pCam->setFlag(0x800, TRUE); /* the partial CPlayerCamera keeps (flag, on/off): the original is setFlag(0x800, 0) */
 }
+/* placeholder: rodata of exeCarry__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L0026A4F4\n.word .L0026A5C4\n.word .L0026A608\n.word .L0026A714\n.word .L0026A7EC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCarry__7CPlayer);
+/* placeholder: rodata of resetAction__7CPlayeri */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L0026ADB4\n.word .L0026AAE4\n.word .L0026ADB4\n.word .L0026AAF8\n.word .L0026AAF8\n.word .L0026AAF8\n.word .L0026AAE0\n.word .L0026AC7C\n.word .L0026ACD0\n.word .L0026ACD0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", resetAction__7CPlayeri);
 /* Parked: registers match; only the stores after the g_fGravity load are scheduled differently (the original
    stores m_JumpState right after the load and m_fJumpGravity before the g_CardBreakTime load; ours stores
@@ -2539,6 +2943,7 @@ void CPlayer::setPushon(INT inFlag) {
 void CPlayer::setTrgFlagRendaNG(const CHAR* inName) {
     if (!DebugWork::g_dw.player.iRenda) m_uiTrgFlag |= 0x40000;
 }
+__asm__(".rdata\n");
 void CPlayer::chkPlayCard() {
     if (m_bIsDead) return;
     if (!m_pRevolver) return;
@@ -2555,12 +2960,12 @@ void CPlayer::chkPlayCard() {
     if (bExeSkill || (isTrgStockSkill() && iStock > 0)) {
         INT result = m_pRevolver->setPlayStock(0, 1);
         if (result) {
-            TRACE(D_00499F48);
+            TRACE("CPlayer::chkPlayCard(); Stock TRG!\n");
             setBattleFlag(0, 8);
             if (result == 1) {
                 setBattleFlag(0x10200000, 0x20);
             } else {
-                TRACE(D_00499F70);
+                TRACE("REFRECT\n");
                 setBattleFlag(0, 0x10200000); setBattleFlag(0x20, 0);
             }
             return;
@@ -2581,10 +2986,10 @@ void CPlayer::chkPlayCard() {
     setBattleFlag(0, 8);
     if (mode) return;
     if (result == 1) {
-        TRACE(D_00499F80);
+        TRACE("CPlayer::chkPlayCard(); TRG!\n");
         setBattleFlag(0x10200000, 0x20);
     } else {
-        TRACE(D_00499FA0);
+        TRACE("CPlayer::chkPlayCard(); TRG...REFRECT\n");
         setBattleFlag(0, 0x10200000); setBattleFlag(0x20, 0);
     }
 }
@@ -2607,8 +3012,12 @@ INT CPlayer::isNowCardActionState() {
     return 0;
 }
 #else
+/* placeholder: rodata of isNowCardActionState__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.word .L0026B6B4\n.word .L0026B6B4\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6BC\n.word .L0026B6B4\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowCardActionState__7CPlayer);
 #endif
+__asm__(".rdata\n");
 INT CPlayer::chkPlayCardCombo() {
     if (!m_pRevolver) return FALSE;
     if (m_bIsDead) return FALSE;
@@ -2627,7 +3036,7 @@ INT CPlayer::chkPlayCardCombo() {
     CARD* card = m_pRevolver->getActiveCardData();
     if (!card) return FALSE;
     if (bExeSkill && m_bIsCanCombo && !m_iNextAttack && m_bIsAttackHit && m_iAttackNo < m_iMaxCombo) {
-        TRACE(D_0049A030);
+        TRACE("CPlayer::chkPlayCardCombo(); Combo! > Stock!\n");
         INT result = m_pRevolver->setPlayStock(1, 1);
         if (result) {
             setBattleFlag(0, 8);
@@ -2636,19 +3045,19 @@ INT CPlayer::chkPlayCardCombo() {
                 setBattleFlag(0x10200000, 0);
                 m_iNextAttack = 8;
             } else {
-                TRACE(D_00499F70);
+                TRACE("REFRECT\n");
                 setBattleFlag(0, 0x80000);
                 setBattleFlag(0, 0x10200000);
                 m_iNextAttack = 0;
             }
             return TRUE;
         }
-        TRACE(D_0049A060);
+        TRACE("NG!!\n");
     }
     INT cat = card->m_nCategory1;
     if (cat && (cat < 7 || cat == 14)) {
         if (m_bIsCanCombo && !m_iNextAttack && m_bIsAttackHit && m_iAttackNo < m_iMaxCombo) {
-            TRACE(D_0049A068);
+            TRACE("CPlayer::chkPlayCardCombo(); Combo!\n");
             INT result = m_pRevolver->setPlayCard(1, 1);
             if (result) {
                 setBattleFlag(0, 8);
@@ -2656,18 +3065,60 @@ INT CPlayer::chkPlayCardCombo() {
                     setBattleFlag(0x80000, 0);
                     setBattleFlag(0x10200000, 0x20);
                 } else {
-                    TRACE(D_00499F70);
+                    TRACE("REFRECT\n");
                     setBattleFlag(0, 0x80000);
                     setBattleFlag(0, 0x10200000);
                     setBattleFlag(0x20, 0);
                 }
                 return TRUE;
             }
-            TRACE(D_0049A060);
+            TRACE("NG!!\n");
         }
     }
     return FALSE;
 }
+/* placeholder: rodata of onMsg__7CPlayeriPv */
+__asm__(".rdata\n");
+inline void _roPh15() {
+    TRACE("CPlayer::onMsg *** warning!! *** %d, inExtraInfo=NULL\n");
+    TRACE("CPlayer::onMsg *** warning!! *** %d, BATTLE_FLAG_ENEMY_EXTERMINATE\n");
+    TRACE("CPlayer::onMsg = CB_MES_PRONOUNCE ---- DEATH\n");
+    TRACE("CPlayer::onMsg = CB_MES_PRONOUNCE ---- CLEAR\n");
+    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- TOOSLOW\n");
+    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- SUCCESS ---- %d\n");
+    TRACE("CPlayer::onMsg = CB_MES_START ---- PLAY CARD ---- card = id:%d, no:%d,");
+    TRACE("  break!!=%d, DP:%d/%d,");
+    TRACE("  speed break!!=%d, DP:%d/%d,");
+    TRACE("\n");
+    TRACE("CPlayer::onMsg = CB_MES_START ---- PLAY CARD ---- card = id:%d, no:%d,\n");
+    TRACE("  speed break!!\n");
+    TRACE("CPlayer::onMsg *** error!! *** card category = ???\n");
+    TRACE("CPlayer::onMsg = CB_MES_SET ---- PLAY CARD ---- card = id:%d, no:%d,");
+    TRACE("  break!!=%d,");
+    TRACE("CPlayer::onMsg = CB_MES_BREAK ---- PLAY CARD ----  break!!=%d,");
+    TRACE(" DP:%d/%d, in DMODE\n");
+    TRACE(" DP:%d/%d,\n");
+    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- PLAY CARD ----\n");
+    TRACE("CPlayer::onMsg = CB_MES_ZERO\n");
+    TRACE("CPlayer::onMsg = CB_MES_REFRECT\n");
+    TRACE("CPlayer::onMsg = CB_MES_????:%d\n");
+    TRACE("CPlayer::onMsg = CB_MES_START ---- STOCK SKILL ----");
+    TRACE("CPlayer::onMsg = CB_MES_START ---- STOCK SKILL ----\n");
+    TRACE("CPlayer::onMsg = CB_MES_SET ---- STOCK SKILL ----  break!!=%d, DP:%d/%d,\n");
+    TRACE("CPlayer::onMsg = CB_MES_SET ---- STOCK SKILL ----");
+    TRACE("card[0]= id:%d, no:%d, sk:%d, ex:%d, fi:%d,\n");
+    TRACE("card[1]= id:%d, no:%d,\n");
+    TRACE("card[2]= id:%d, no:%d,\n");
+    TRACE("CPlayer::onMsg = CB_MES_BREAK ---- STOCK SKILL ----  break!!=%d\n");
+    TRACE(" DP:%d/%d, \n");
+    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- STOCK SKILL ----\n");
+}
+__asm__(".rdata\n.align 4\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026C558\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BAE4\n.word .L0026BB20\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L0026BB78\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026BBA8\n.word .L0026BBDC\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC90\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BC90\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L0026BD34\n.word .L0026BF94\n.word .L0026BFE8\n.word .L0026C514\n.word .L0026C118\n.word .L0026C118\n.word .L0026C0F4\n.word .L0026C0E8\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L0026BEEC\n.word .L0026BEFC\n.word .L0026BF0C\n.word .L0026BF1C\n.word .L0026BF2C\n.word .L0026BF4C\n.word .L0026BF5C\n.word .L0026C558\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF3C\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L0026C158\n.word .L0026C2A0\n.word .L0026C3C0\n.word .L0026C514\n.word .L0026C548\n.word .L0026C548\n.word .L0026C4F0\n.word .L0026C4D0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onMsg__7CPlayeriPv);
 INT CPlayer::exeUseStock(INT inFlag) {
     if (isBattleFlag(4) || m_bIsDead) return FALSE;
@@ -2686,6 +3137,15 @@ INT CPlayer::exeUseStock(INT inFlag) {
         return FALSE;
     }
 }
+/* placeholder: rodata of startSingleAction__7CPlayer */
+__asm__(".rdata\n");
+inline void _roPh16() {
+    TRACE("CPlayer:: startSingleAction :holdTarget(0); \x81\xa6\x81\xa6\x81\xa6 No.2993\x91\xce\x89\x9e\x8e\xc0\x8ds \x81\xa6\x81\xa6\x81\xa6\n");
+    TRACE("CPlayer:: startSingleAction W-STOCK !!\n");
+    TRACE("CPlayer:: startSingleAction END.\n");
+    TRACE("CPlayer:: startSingleAction *** Chain? ***\n");
+}
+__asm__(".rdata\n.align 4\n.word .L0026C6B0\n.word .L0026C6D8\n.word .L0026C700\n.word .L0026C6C4\n.word .L0026C6EC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", startSingleAction__7CPlayer);
 /* Parked: same spot as initAttackField: around the g_fGravity load the original keeps the %hi in v0 (later
    s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi
@@ -2725,6 +3185,9 @@ void CPlayer::initAttack(INT inNo) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
 #endif
+/* placeholder: rodata of setAttack__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L0026CBE4\n.word .L0026CBE4\n.word .L0026CC14\n.word .L0026CC30\n.word .L0026CC14\n.word .L0026CBE4\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttack__7CPlayer);
 void CPlayer::exeAttack() {
     TIMEQ frameTQ = getMotionCurrentTime();
@@ -2936,6 +3399,7 @@ void CPlayer::procGravity(TIMEQ inNowFrame, TIMEQ inEndFrame, INT inFlag) {
     vel.y = m_fJumpSpdY;
     m_pMove->setVel(vel);
 }
+__asm__(".rdata\n");
 void CPlayer::procSkillEnd(INT inAir) {
     INT bAir = inAir;
     if (bAir < 0) bAir = isAir();
@@ -2959,7 +3423,7 @@ void CPlayer::procSkillEnd(INT inAir) {
         initIdle(bAir, 0);
         setBattleFlag(0x41000, 0x2000);
         m_iStepStockSkill = 0;
-        TRACE(D_0049A888);
+        TRACE("CPlayer::procSkillEnd  W-STOCK !!\n");
     } else {
         if (m_pCB) {
             m_pCB->destroyPlayCard(1, 0);
@@ -2983,6 +3447,9 @@ BOOL CPlayer::chkExtraSkill() {
     }
     return FALSE;
 }
+/* placeholder: rodata of calcEnchant_AttackPoint__7CPlayerRiR8ATK_KIND8ATK_ATTRUi */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L0026DF8C\n.word .L0026DF8C\n.word .L0026DF8C\n.word .L0026DF94\n.word .L0026DF8C\n.word .L0026DF8C\n.word .L0026DF94\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcEnchant_AttackPoint__7CPlayerRiR8ATK_KIND8ATK_ATTRUi);
 void CPlayer::calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr) {
     if (m_pCB) {
@@ -2996,6 +3463,10 @@ void CPlayer::calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr) {
         if (param.iGuard > 0) Gauge::CCommonGauge::setDispSeq(getHandle(), 2);
     }
 }
+/* placeholder: rodata of setUseRsrcBlock__7CPlayeri */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L0026E0D0\n.word .L0026E0DC\n.word .L0026E0E8\n.word .L0026E0F4\n.word .L0026E100\n.word .L0026E10C\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L0026E184\n.word .L0026E190\n.word .L0026E19C\n.word .L0026E1A8\n.word .L0026E1B4\n.word .L0026E1DC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setUseRsrcBlock__7CPlayeri);
 void CPlayer::setDefAttr(FLOAT* inAttr) {
     for (INT i = 0; i < 6; i++) {
@@ -3006,19 +3477,41 @@ FLOAT CPlayer::getDefAttr(ATK_ATTR inAttr) const {
     if ((UINT)inAttr < 6) return m_fDefAttr[inAttr];
     return m_fDefAttr[5];
 }
+/* placeholder: rodata of chkDamage__7CPlayer */
+__asm__(".rdata\n");
+inline void _roPh20() {
+    TRACE("CPlayer:: (initDamage)\n");
+    TRACE("-------- Damege Info ------------------\n");
+    TRACE("Sora : HP = %d/%d\n");
+    TRACE("Riku : HP = %d/%d, DP = %d/%d,\n");
+    TRACE("Riku : HP = %d/%d\n");
+    TRACE("Flag PL  : 0x%08x\n");
+    TRACE("Flag CON : 0x%08x\n");
+    TRACE("Flag TRG : 0x%08x\n");
+    TRACE("Flag BTL : 0x%08x\n");
+    TRACE("---------------------------------------\n");
+    TRACE("CPlayer::chkDamage(); ++++ DEAD ++++\n");
+    TRACE("CPlayer::chkDamage(); NG = Now Card Play TRG!!\n");
+    TRACE("CPlayer::chkDamage(); NG = Now Card Play!\n");
+    TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play TRG)\n");
+    TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play)\n");
+    TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n");
+}
+__asm__(".rdata\n.align 4\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026F018\n.word .L0026F018\n.word .L0026ED28\n.word .L0026EEE8\n.word .L0026EF64\n.word .L0026F018\n.word .L0026EEB4\n.word .L0026F018\n.word .L0026EF3C\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF94\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC40\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF80\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026ECBC\n.word .L0026EFA8\n.word .L0026EFBC\n.word .L0026EC84\n.word .L0026EC70\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC30\n.word .L0026EEAC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkDamage__7CPlayer);
+__asm__(".rdata\n");
 void CPlayer::initFlip(INT inBreak) {
     FLOAT speed;
     INT animID;
     setBattleFlag(0, 8);
     setPlayerState(FLICKS);
     if (inBreak) {
-        TRACE(D_0049AC10);
+        TRACE("CPlayer:: initFlip(BREAK!!)\n");
         speed = -8.0f;
         m_iComboBoost = 0;
         m_iSubState = 2;
     } else {
-        TRACE(D_0049AC30);
+        TRACE("CPlayer:: initFlip()\n");
         speed = -4.0f;
         m_iSubState = 1;
         m_tqCardBreakTime = PL::g_CardBreakTime[5];
@@ -3075,7 +3568,19 @@ void CPlayer::setFlipForce(const FVECTOR* inPos) {
     CardBattle::CCardBattle::notifyCompleteGimmick();
     PLM::setVibration(3);
 }
+/* placeholder: rodata of exeDamage__7CPlayer */
+__asm__(".rdata\n");
+inline void _roPh21() {
+    TRACE("PL::exeDamage(); \x81\xa6\x83_\x83\x81\x81[\x83W\x92\x86\x82\xbe\x82\xaf\x82\xc7\x83M\x83~\x83" "b\x83N\x94\xad\x93\xae\x81I\n");
+    TRACE("CPlayer:: exeDamage -> initTransform(0)\n");
+    TRACE("PL::exeDamage(); \x81\xa6\x83_\x83\x81\x81[\x83W\x92\x86\x82\xc8\x82\xcc\x82\xc9\x83K\x81[\x83h\x82\xf0\x8eg\x97p\x92\x86\x82\xc5\x82\xb7\x81I\n");
+    TRACE("PL::exeDamage(); chkTrgAction=OK!\n");
+}
+__asm__(".rdata\n.align 4\n.word .L0026F518\n.word .L0026F588\n.word .L0026F6AC\n.word .L0026F6D4\n.word .L0026F6AC\n.word .L0026F7B4\n.word .L0026F6AC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDamage__7CPlayer);
+/* placeholder: rodata of chkTrgAction__7CPlayeriUi */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L0026FB04\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB14\n.word .L0026FB24\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB44\n.word .L0026FB34\n.word .L0026FBBC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkTrgAction__7CPlayeriUi);
 void CPlayer::initDead() {
     FVECTOR vScale;
@@ -3142,6 +3647,9 @@ void CPlayer::initDead() {
         }
     }
 }
+/* placeholder: rodata of exeDead__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L0026FF40\n.word .L00270004\n.word .L00270170\n.word .L00270070\n.word .L00270118\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDead__7CPlayer);
 void CPlayer::notifyDead(INT inCmd) {
     switch (inCmd) {
@@ -3268,6 +3776,14 @@ void CPlayer::initBadCondition() {
     }
     setBattleFlag(0, 8);
 }
+/* placeholder: rodata of exeBadCondition__7CPlayer */
+__asm__(".rdata\n");
+inline void _roPh24() {
+    TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : [TRG_GIMMICK]\n");
+    TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : [TRG_CANCEL]\n");
+    TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : chkTrgAction=OK! ...enableDuelEntry\n");
+}
+__asm__(".rdata\n.align 4\n.word .L00270804\n.word .L00270820\n.word .L00270D14\n.word .L00270D14\n.word .L00270D14\n.word .L00270884\n.word .L00270910\n.word .L002709D4\n.word .L00270B00\n.word .L00270D14\n.word .L00270CC0\n.word .L00270CFC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBadCondition__7CPlayer);
 /* Parked: in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets
    the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but
@@ -3322,6 +3838,9 @@ void CPlayer::initItem(INT inNo) {
     m_fMoveSpdXZ = 0.0f;
     m_tqCardBreakTime = PL::g_CardBreakTime[(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].BREAK];
 }
+/* placeholder: rodata of exeItem__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L002710EC\n.word .L00271114\n.word .L0027113C\n.word .L00271164\n.word .L0027118C\n.word .L002711B4\n.word .L002711DC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeItem__7CPlayer);
 void CPlayer::exeStandUp_inFriend() {
     INT oldMode = m_WalkMode;
@@ -3849,8 +4368,9 @@ void CPlayer::exePrizeHealing() {
         }
     }
 }
+__asm__(".rdata\n");
 void CPlayer::initGimmickCard(INT inNo) {
-    TRACE(D_0049AEC0);
+    TRACE("CPlayer:: initGimmickCard()\n");
     setPlayerState(PL::GIMMICKCARD);
     m_iSubState = 1;
     clearSpeed();
@@ -3874,11 +4394,20 @@ void CPlayer::initGimmickCard(INT inNo) {
     m_tqCardBreakTime = 0;
     m_fWalkSpeed = 0.0f;
 }
+/* placeholder: rodata of exeGimmickCard__7CPlayer */
+__asm__(".rdata\n");
+inline void _roPh26() {
+    TRACE("CPlayer:: exeGimmickCard() %d, \x81\xa6\x83G\x83\x89\x81[\x8f\x88\x97\x9d\n");
+    TRACE("CPlayer:: exeGimmickCard() notifyMakeGimmick\n");
+    TRACE("CPlayer:: exeGimmickCard() notifyCompleteGimmick, \x81\xa6\x83G\x83\x89\x81[\x8f\x88\x97\x9d GimmickOwner=0\n");
+}
+__asm__(".rdata\n.align 4\n.word .L00272FE4\n.word .L002730E8\n.word .L00273138\n.word .L002731F8\n.word .L00273270\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickCard__7CPlayer);
+__asm__(".rdata\n");
 void CPlayer::setTrapDamage(INT inPower, const CHAR* lpszInName, UINT nNo) {
     INT face;
     INT hp0;
-    TRACE(D_0049AFA8);
+    TRACE("PL:: setTrapDamage\n");
     if (DebugWork::g_dw.player.iMuteki) return;
     if (lpszInName) setEffect(lpszInName, nNo, &m_vCenterPos, NULL, 0.0f);
     face = 1;
@@ -3899,9 +4428,9 @@ void CPlayer::setTrapDamage(INT inPower, const CHAR* lpszInName, UINT nNo) {
     }
     if (hp0 < 0) hp0 = 0;
     m_iHP = hp0;
-    TRACE(D_0049A920);
-    TRACE(D_0049A988, m_iHP, m_iMaxHP);
-    TRACE(D_0049AA00);
+    TRACE("-------- Damege Info ------------------\n");
+    TRACE("Riku : HP = %d/%d\n", m_iHP, m_iMaxHP);
+    TRACE("---------------------------------------\n");
     if (hp0 <= 0) {
         m_bIsDead = TRUE;
         face = 2;
@@ -3961,13 +4490,14 @@ void CPlayer::updateSpotLight(HANDLE inHandle) {
         effect->getCoords()->Crd(0).m_Flag = 1;
     }
 }
+__asm__(".rdata\n");
 void CPlayer::setQuake(FLOAT inCycle, FLOAT inPower, UINT inTime) {
     CCamera* cam = CWorldEnv::getActiveCamera();
     CameraQuakeParam cqp;
     cqp._fCycle = inCycle;
     cqp._nTime = inTime;
     cqp._fPower = inPower;
-    new (com_malloc_d(sizeof(CCameraQuakeV), D_0049AFC0, RET_ADDR())) CCameraQuakeV(*cam, &cqp, inPower);
+    new (com_malloc_d(sizeof(CCameraQuakeV), __FILE__ "(12257)", RET_ADDR())) CCameraQuakeV(*cam, &cqp, inPower);
 }
 void CPlayer::notifyReturnCard(const CARD* inCard) {
     if (!m_pInstance) return;
@@ -3982,12 +4512,17 @@ void CPlayer::notifyReturnCard(const CARD* inCard) {
         }
     }
 }
+/* placeholder: rodata of notifyGetPrize__7CPlayeriii */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L00273B0C\n.word .L00273B0C\n.word .L00273B0C\n.word .L00273B0C\n.word .L00273BE8\n.word .L00273BE8\n.word .L00273A9C\n.word .L00273C38\n.word .L00273B0C\n.word .L00273B0C\n.word .L00273B0C\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L00273C94\n.word .L00273CA0\n.word .L00273FA0\n.word .L00273CAC\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273CB8\n.word .L00273CC4\n.word .L00273CD0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273DA0\n.word .L00273DA8\n.word .L00273DB0\n.word .L00273DB8\n.word .L00273DC0\n.word .L00273DC8\n.word .L00273FA0\n.word .L00273CDC\n.word .L00273FA0\n.word .L00273CE8\n.word .L00273FA0\n.word .L00273CF4\n.word .L00273D00\n.word .L00273D0C\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273D18\n.word .L00273D24\n.word .L00273D30\n.word .L00273D3C\n.word .L00273D44\n.word .L00273D4C\n.word .L00273D54\n.word .L00273FA0\n.word .L00273D5C\n.word .L00273D64\n.word .L00273D6C\n.word .L00273D74\n.word .L00273D7C\n.word .L00273D84\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273DD0\n.word .L00273DD8\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L00273E28\n.word .L00273E38\n.word .L00273E48\n.word .L00273E58\n.word .L00273E68\n.word .L00273E78\n.word .L00273E88\n.word .L00273E98\n.word .L00273ED8\n.word .L00273F2C\n.word .L00273F3C\n.word .L00273F4C\n.word .L00273F78\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyGetPrize__7CPlayeriii);
 static inline BOOL _isLevelMax() {
     BOOL ret = FALSE;
-    if (CPlayer::_instance()) {
-        if (CPlayer::_instance()->m_iLV >= 99) {
-            CPlayer::_instance()->m_iLV = 99;
+    if (_instance()) {
+        if (_instance()->m_iLV >= 99) {
+            _instance()->m_iLV = 99;
             ret = TRUE;
         }
     } else {
@@ -3996,11 +4531,11 @@ static inline BOOL _isLevelMax() {
     return ret;
 }
 static inline void _addEXP(INT inEXP) {
-    if (CPlayer::_instance()) CPlayer::_instance()->m_iEXP += inEXP;
+    if (_instance()) _instance()->m_iEXP += inEXP;
     else CStatus::getStaus().EXP += inEXP;
 }
 static inline void _addLV(INT inLV) {
-    if (CPlayer::_instance()) CPlayer::_instance()->m_iLV += inLV;
+    if (_instance()) _instance()->m_iLV += inLV;
     else CStatus::getStaus().LV += inLV;
 }
 void CPlayer::addEXP(INT inEXP, INT inMode) {
@@ -4082,10 +4617,11 @@ void CPlayer::procDropMP() {
     m_iMP -= dropMP - mp;
     Gauge::CPrizeGauge::setDropMp(dropMP - mp);
 }
+__asm__(".rdata\n");
 void CPlayer::notifyExterminate() {
     if (!_instance()) return;
     if (_instance()->m_bIsDead) {
-        TRACE(D_0049B238);
+        TRACE("\x81\xa6\x91S\x96\xc5\x92\xca\x92m\x81" "E\x81" "E\x81" "E\x83v\x83\x8c\x83" "C\x83\x84\x81[\x8e\x80\x96S\x82\xcc\x88\xd7\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81I\n");
         return;
     }
     if (_instance()->m_PlayerState == PL::ESCAPE) return;
@@ -4093,6 +4629,12 @@ void CPlayer::notifyExterminate() {
     _instance()->setBattleFlag(4, 0);
     _instance()->setConditionFlag(0x2000, 0);
 }
+/* placeholder: rodata of notifyBossDead__7CPlayeri */
+__asm__(".rdata\n");
+inline void _roPh28() {
+    TRACE("\x81\xa6\x83{\x83X\x8e\x80\x96S\x92\xca\x92m\x81" "E\x81" "E\x81" "E\x83v\x83\x8c\x83" "C\x83\x84\x81[\x8e\x80\x96S\x82\xcc\x88\xd7\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81I\n");
+}
+__asm__(".rdata\n.align 4\n.word .L002745B8\n.word .L00274608\n.word .L00274624\n.word .L00274638\n.word .L00274648\n.word .L0027468C\n.word .L002746B8\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyBossDead__7CPlayeri);
 HANDLE CPlayer::getLevelUpEffect() {
     if (!m_pInstance) return 0;
@@ -4127,6 +4669,9 @@ void CPlayer::initEnd() {
         if (m_pEscape) m_pEscape->destroy();
     }
 }
+/* placeholder: rodata of exeEnd__7CPlayer */
+__asm__(".rdata\n");
+__asm__(".rdata\n.align 4\n.word .L00274878\n.word .L00274880\n.word .L00274888\n.word .L002748FC\n.word .L002748FC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeEnd__7CPlayer);
 BOOL CPlayer::isEnableBattleEnd() {
     if (!m_pInstance) return TRUE;
@@ -4314,7 +4859,7 @@ void CPlayer::exeFooting() {
         return;
     }
     if (isTrgFlag(0x100000)) {
-        TRACE(D_0049B2D8);
+        TRACE("CPlayer:: exeFooting -> initTransform(0)\n");
         initTransform(0);
         return;
     }
@@ -4370,6 +4915,11 @@ void CPlayer::exeFooting() {
     }
 }
 #else
+/* placeholder: rodata of exeFooting__7CPlayer */
+__asm__(".rdata\n");
+inline void _roPh30() {
+    TRACE("CPlayer:: exeFooting -> initTransform(0)\n");
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeFooting__7CPlayer);
 #endif
 void CPlayer::updateFooting() {
@@ -4427,11 +4977,12 @@ void CPlayer::cmdMove_WaterSurfaceCheck(INT inFlag) {
     if (inFlag) m_pMove->setFlag(0x80, TRUE);
     else m_pMove->setFlag(0x80, FALSE);
 }
+__asm__(".rdata\n");
 void CPlayer::cmdState_initWorldSelect(HANDLE inDoor) {
     m_hGimmick = inDoor;
     m_pMarker->holdTarget(8);
     initWorldSelect();
-    new (com_malloc_d(sizeof(CWorldSelect), D_0049B308, RET_ADDR())) CWorldSelect(CTaskMan::getSysTask(1), m_hGimmick);
+    new (com_malloc_d(sizeof(CWorldSelect), __FILE__ "(13487)", RET_ADDR())) CWorldSelect(CTaskMan::getSysTask(1), m_hGimmick);
 }
 void CPlayer::cmdState_setEncountWait() {
     setPlayerFlag(0x100, 0);
@@ -4476,124 +5027,511 @@ void CPlayer::stateHide_() {
 void CPlayer::endStateHide_() {
     endStateHide();
 }
+/* the debug window / state name tables (after the last function with strings, before CPlayerDebug) */
+__asm__(".rdata\n");
+char* szPlayerState[38] = {
+    "INIT",
+    "START WAIT",
+    "STAND",
+    "WALK",
+    "RUN",
+    "WALL",
+    "AVOID",
+    "JUMP",
+    "GLIDE",
+    "HANG",
+    "ATTACK/FLD",
+    "ATTACK",
+    "DAMAGE",
+    "FLICKS",
+    "ITEM",
+    "HIDE",
+    "LADDER",
+    "TREASURE",
+    "CHARGE",
+    "MAGIC",
+    "ROOMCREAT",
+    "WORLDSLCT",
+    "SKILL",
+    "ESCAPE",
+    "BADCONDIT",
+    "GIMMICK",
+    "FRIEND",
+    "SUMMON",
+    "END/BTL",
+    "DEAD",
+    "CARRY",
+    "TALK",
+    "TRANSFORM",
+    "JUMP_2ND",
+    "DUEL",
+    "FOOTING",
+    "PRONOUNCE",
+    "DBG-WAIT"
+};
+char* szPlayerJumpState[4] = {
+    "JMP_STATE_NONE",
+    "JMP_STATE_RISE",
+    "JMP_STATE_FALL",
+    "JMP_STATE_LAND"
+};
+char* szPlayerLadderState[6] = {
+    "SST_LADDER_START",
+    "SST_LADDER",
+    "SST_LADDER_UP",
+    "SST_LADDER_DOWN",
+    "SST_LADDER_CLIMB",
+    "SST_LADDER_END"
+};
+char* szPlayerDamageState[8] = {
+    "SST_DAMAGE_NONE",
+    "SST_DAMAGE_FLICKS",
+    "SST_DAMAGE_BREAK",
+    "SST_DAMAGE_NORMAL",
+    "SST_DAMAGE_AERIAL",
+    "SST_DAMAGE_BLOWN",
+    "SST_DAMAGE_BANANA",
+    "SST_DAMAGE_VOLLEY"
+};
+char* szPlayerEndState[5] = {
+    "SST_END_START",
+    "SST_END_STOP",
+    "SST_END_WAIT",
+    "SST_END_WIN",
+    "SST_END_END"
+};
+char* szAttackData[188] = {
+    "0:NONE",
+    "1:VERTICAL",
+    "2:HORIZONTAL",
+    "3:STAB",
+    "4:TURN",
+    "5:RISE",
+    "6:AIR_VERTICAL",
+    "7:AIR_TURN",
+    "8:SLIDEDASH",
+    "9:FINALBREAK",
+    "10:FINALBREAK_FINISH",
+    "11:STUNIMPACT",
+    "12:ZANTETSUKEN",
+    "13:STRIKERAID",
+    "14:SONICRAVE_START",
+    "15:SONICRAVE",
+    "16:SONICRAVE_FINISH",
+    "17:LASTARCANUM",
+    "18:LASTARCANUM_1",
+    "19:LASTARCANUM_2",
+    "20:LASTARCANUM_3",
+    "21:LASTARCANUM_4",
+    "22:LASTARCANUM_5",
+    "23:LASTARCANUM_6",
+    "24:LASTARCANUM_7",
+    "25:LASTARCANUM_8",
+    "26:LASTARCANUM_9",
+    "27:LASTARCANUM_10",
+    "28:LASTARCANUM_11",
+    "29:LASTARCANUM_12",
+    "30:LASTARCANUM_FINISH",
+    "31:RAGNAROCK",
+    "32:RAGNAROCK_LASER",
+    "33:TRINITYLIMIT",
+    "34:FIRE",
+    "35:BLIZZARD",
+    "36:THUNDER",
+    "37:CURE",
+    "38:GRAVITY",
+    "39:STOP",
+    "40:AERO",
+    "41:FIRA",
+    "42:FIRAGA",
+    "43:BLIZZARA",
+    "44:BLIZZAGA",
+    "45:HOMINGBLIZZARA",
+    "46:THUNDRA",
+    "47:THUNDAGA",
+    "48:FIRERAID",
+    "49:BLIZZARDRAID",
+    "50:THUNDERRAID",
+    "51:JUDGEMENT",
+    "52:REFRECTRAID",
+    "53:REFRECTRAID_SUB",
+    "54:CURA",
+    "55:CURAGA",
+    "56:GRAVIRA",
+    "57:GRAVIGA",
+    "58:STOPRA",
+    "59:STOPGA",
+    "60:AERA",
+    "61:AEROGA",
+    "62:DEGENERATOR",
+    "63:DEGENERATE",
+    "64:BIND",
+    "65:CONFUSE",
+    "66:TERROR",
+    "67:SYNCHRO",
+    "68:TELEPORT",
+    "69:FIRAGABURST",
+    "70:FIRAGABURST_FLAME",
+    "71:RAGINGSTORM",
+    "72:MEGAFLARE",
+    "73:FREEZE",
+    "74:AQUASPLASH",
+    "75:MAGNESPIRAL",
+    "76:MAGNESPIRAL_ATK",
+    "77:LETHALFLAME",
+    "78:LETHALFLAME_ATK",
+    "79:LETHALFLAME_FIN",
+    "80:SHOCKIMPACT",
+    "81:TORNADO",
+    "82:QUAKE",
+    "83:MIRACLEGIFT",
+    "84:HOLY",
+    "85:DONALD",
+    "86:GOOFY",
+    "87:ALADDIN",
+    "88:ARIEL",
+    "89:JACK",
+    "90:PAN",
+    "91:BEAST",
+    "92:KING",
+    "93:PLUTO",
+    "94:DONALD_1",
+    "95:DONALD_2",
+    "96:DONALD_3",
+    "97:DONALD_3_ATK1",
+    "98:DONALD_3_ATK2",
+    "99:DONALD_3_ATK3",
+    "100:GOOFY_1",
+    "101:GOOFY_2",
+    "102:GOOFY_3",
+    "103:GOOFY_3_ATK",
+    "104:FRIEND_1",
+    "105:ALADDIN_1",
+    "106:ALADDIN_2",
+    "107:JACK_1",
+    "108:JACK_2",
+    "109:ARIEL_1",
+    "110:ARIEL_2",
+    "111:PAN_1",
+    "112:PAN_2",
+    "113:BEAST_1",
+    "114:BEAST_2",
+    "115:BEAST_ATK",
+    "116:KING_1",
+    "117:KING_2",
+    "118:KING_3",
+    "119:KING_3D",
+    "120:PLUTO_1",
+    "121:PLUTO_1",
+    "122:SINBA",
+    "123:GENIE",
+    "124:BAMBI",
+    "125:DUMBO",
+    "126:TINK",
+    "127:MUSHU",
+    "128:CLOUD",
+    "129:SINBA_1",
+    "130:SINBA_2",
+    "131:DUMBO_1",
+    "132:DUMBO_2",
+    "133:BAMBI_1",
+    "134:BAMBI_2",
+    "135:BAMBI_3",
+    "136:MUSHU_1",
+    "137:MUSHU_2",
+    "138:GENIE_1",
+    "139:GENIE_2",
+    "140:GENIE_THUNDRA",
+    "141:GENIE_GRAVIRA",
+    "142:GENIE_STOPRA",
+    "143:TINK_1",
+    "144:TINK_2",
+    "145:CLOUD_1",
+    "146:CLOUD_2",
+    "147:CLOUD_3",
+    "148:MG_BLAST",
+    "149:MG_HONEY",
+    "150:MG_TORNADO",
+    "151:RK_VERTICAL",
+    "152:RK_HORIZONTAL",
+    "153:RK_STAB",
+    "154:RK_TURN",
+    "155:RK_RISE",
+    "156:RK_AIR_VERTICAL",
+    "157:RK_AIR_TURN",
+    "158:DRK_VERTICAL",
+    "159:DRK_HORIZONTAL",
+    "160:DRK_STAB",
+    "161:DRK_TURN",
+    "162:DRK_RISE",
+    "163:DRK_AIR_VERTICAL",
+    "164:DRK_AIR_TURN",
+    "165:DRK_2ND_JUMP",
+    "166:DRK_DARKBREAK",
+    "167:DRK_DARKBREAK_FIN",
+    "168:DRK_DARKFIRAGA",
+    "169:DRK_DARKAURA",
+    "170:DRK_DARKAURA_FIN",
+    "171:DRK_DARKAURA_MAG",
+    "172:DS_DASH",
+    "173:DS_RUSH(BARRAGE)",
+    "174:DS_IMPULSE",
+    "175:DS_IMPULSE_FIN",
+    "176:DS_MAELSTROM",
+    "177:DS_MAELSTROM_FIN",
+    "178:DS_BARRAGE",
+    "179:DS_BARRAGE_2",
+    "180:DS_BARRAGE_FIN",
+    "181:DS_D_IMPULSE",
+    "182:DS_D_IMPULSE_FIN",
+    "183:DS_D_MAELSTROM",
+    "184:DS_D_MAELSTROM_FIN",
+    "185:DS_D_BARRAGE",
+    "186:DS_D_BARRAGE_2",
+    "187:DS_D_BARRAGE_FIN"
+};
+char* szPlayerSkill[110] = {
+    "OFF",
+    "1:OFF",
+    "2:OFF",
+    "3:OFF",
+    "\x83X\x83\x89\x83" "C\x83h\x83_\x83" "b\x83V\x83\x85",
+    "\x83t\x83@\x83" "C\x83i\x83\x8b\x83u\x83\x8c\x83" "C\x83N",
+    "\x83X\x83^\x83\x93\x83" "C\x83\x93\x83p\x83N\x83g",
+    "\x83U\x83\x93\x83" "e\x83" "c\x83P\x83\x93",
+    "\x83X\x83g\x83\x89\x83" "C\x83N\x83\x8c\x83" "C\x83h",
+    "\x83\\\x83j\x83" "b\x83N\x83\x8c\x83" "C\x83\x94",
+    "\x83\x89\x83X\x83g\x83" "A\x83\x8b\x83J\x83i\x83\x80",
+    "\x83\x89\x83O\x83i\x83\x8d\x83N",
+    "\x83g\x83\x8a\x83j\x83" "e\x83" "B\x83\x8a\x83~\x83" "b\x83g",
+    "\x83t\x83@\x83" "C\x83\x89",
+    "\x83u\x83\x8a\x83U\x83\x89",
+    "\x83T\x83\x93\x83_\x83\x89",
+    "\x83P\x83" "A\x83\x8b\x83\x89",
+    "\x83O\x83\x89\x83r\x83\x89",
+    "\x83X\x83g\x83v\x83\x89",
+    "\x83G\x83" "A\x83\x8d\x83\x89",
+    "\x83t\x83@\x83" "C\x83K",
+    "\x83u\x83\x8a\x83U\x83K",
+    "\x83T\x83\x93\x83_\x83K",
+    "\x83P\x83" "A\x83\x8b\x83K",
+    "\x83O\x83\x89\x83r\x83K",
+    "\x83X\x83g\x83v\x83K",
+    "\x83G\x83" "A\x83\x8d\x83K",
+    "\x83t\x83@\x83" "C\x83" "A\x83\x8c\x83" "C\x83h",
+    "\x83u\x83\x8a\x83U\x83h\x83\x8c\x83" "C\x83h",
+    "\x83T\x83\x93\x83_\x81[\x83\x8c\x83" "C\x83h",
+    "\x83\x8a\x83t\x83\x8c\x83N\x83g\x83\x8c\x83" "C\x83h",
+    "\x83W\x83\x83\x83" "b\x83W\x83\x81\x83\x93\x83g",
+    "\x83t\x83@\x83" "C\x83K\x83o\x81[\x83X\x83g",
+    "\x83\x8c\x83" "C\x83W\x83\x93\x83O\x83X\x83g\x81[\x83\x80",
+    "\x83\x81\x83K\x83t\x83\x8c\x83" "A",
+    "\x83t\x83\x8a\x81[\x83Y",
+    "\x83z\x81[\x83~\x83\x93\x83O\x83u\x83\x8a\x83U\x83\x89",
+    "\x83" "A\x83N\x83" "A\x83X\x83v\x83\x89\x83" "b\x83V\x83\x85",
+    "\x83}\x83O\x83l\x83X\x83p\x83" "C\x83\x89\x83\x8b",
+    "\x83\x8a\x81[\x83T\x83\x8b\x83t\x83\x8c\x81[\x83\x80",
+    "\x83V\x83\x87\x83" "b\x83N\x83" "C\x83\x93\x83p\x83N\x83g",
+    "\x83g\x83\x8b\x83l\x83h",
+    "\x83N\x83G\x83" "C\x83N",
+    "\x83" "f\x83W\x83\x87\x83l\x81[\x83^\x81[",
+    "\x83" "f\x83W\x83\x87\x83\x93",
+    "\x83o\x83" "C\x83\x93\x83h",
+    "\x83R\x83\x93\x83t\x83\x85",
+    "\x83" "e\x83\x89\x81[",
+    "\x83V\x83\x93\x83N\x83\x8d",
+    "\x83~\x83\x89\x83N\x83\x8b\x83M\x83t\x83g",
+    "\x83" "e\x83\x8c\x83|",
+    "\x83z\x81[\x83\x8a\x81[",
+    "\x83v\x83\x89\x83" "E\x83h\x83\x8d\x83" "A Lv2",
+    "\x83v\x83\x89\x83" "E\x83h\x83\x8d\x83" "A Lv3",
+    "\x83X\x83v\x83\x89\x83" "b\x83V\x83\x85 Lv2",
+    "\x83X\x83v\x83\x89\x83" "b\x83V\x83\x85 Lv3",
+    "\x83p\x83\x89\x83_\x83" "C\x83X Lv2",
+    "\x83p\x83\x89\x83_\x83" "C\x83X Lv3",
+    "\x83p\x83\x89\x83_\x83" "C\x83X\x83X\x83^\x83\x93\x83v",
+    "\x83t\x83\x8c\x83" "A\x83u\x83\x8c\x83X Lv2",
+    "\x83t\x83\x8c\x83" "A\x83u\x83\x8c\x83X Lv3",
+    "\x83V\x83\x87\x81[\x83^\x83" "C\x83\x80 Lv2",
+    "\x83V\x83\x87\x81[\x83^\x83" "C\x83\x80 Lv3",
+    "\x83" "c\x83" "C\x83\x93\x83N\x83\x8b Lv2",
+    "\x83" "c\x83" "C\x83\x93\x83N\x83\x8b Lv3",
+    "\x8b\xa5\x8e" "a\x82\xe8 Lv2",
+    "\x92\xb4\x8b\x86\x95\x90\x90_\x94" "e\x8e" "a",
+    "\x8b\xa5\x8e" "a\x82\xe8\x81" "E\x89\xfc",
+    "\x83}\x83W\x83" "b\x83N Lv2",
+    "\x83}\x83W\x83" "b\x83N Lv3",
+    "\x83X\x83^\x81[\x83_\x83X\x83g\x83u...",
+    "\x83O\x81[\x83t\x83" "B\x83g\x83\x8b...Lv2",
+    "\x83O\x81[\x83t\x83" "B\x83g\x83\x8b...Lv3",
+    "\x83O\x81[\x83t\x83" "B\x83X\x83}\x83" "b\x83V\x83\x85",
+    "\x83\x8f\x83" "C\x83\x8b\x83h\x83N\x83\x89\x83" "b\x83V\x83\x83",
+    "\x83X\x83g\x81[\x83\x80\x83\x8a\x81[...Lv2",
+    "\x83X\x83g\x81[\x83\x80\x83\x8a\x81[...Lv3",
+    "\x83T\x83v\x83\x89\x83" "C\x83YLv2",
+    "\x83T\x83v\x83\x89\x83" "C\x83YLv3",
+    "\x83X\x83p\x83" "C\x83\x89\x83\x8b\x83" "E...Lv2",
+    "\x83X\x83p\x83" "C\x83\x89\x83\x8b\x83" "E...Lv3",
+    "\x83X\x83\x89\x83X\x83g\x83X\x83\x89...Lv2",
+    "\x83X\x83\x89\x83X\x83g\x83X\x83\x89...Lv3",
+    "\x83t\x83\x85\x83\x8a\x83" "A\x83X\x83{...Lv2",
+    "\x83t\x83\x85\x83\x8a\x83" "A\x83X\x83{...Lv3",
+    "\x83\x89\x83" "b\x83L\x81[\x83o\x83" "E...Lv2",
+    "\x83\x89\x83" "b\x83L\x81[\x83o\x83" "E...Lv3",
+    "MG:\x83n\x83j\x81[\x83X\x83g\x81[\x83\x80",
+    "MG:\x83n\x83j\x81[\x83|\x83" "b\x83gLv2",
+    "MG:\x83n\x83j\x81[\x83|\x83" "b\x83gLv3",
+    "90:NG -ACTION-",
+    "91:NG -ACTION-",
+    "92:NG -ACTION-",
+    "93:NG -DUMMY-",
+    "94:NG -DUMMY-",
+    "\x83_\x81[\x83N\x83u\x83\x8c\x83" "C\x83N",
+    "\x83_\x81[\x83N\x83t\x83@\x83" "C\x83K",
+    "\x83_\x81[\x83N\x83I\x81[\x83\x89",
+    "\x82l\x82l\x83~\x83\x89\x83N\x83\x8b Lv2",
+    "\x82l\x82l\x83~\x83\x89\x83N\x83\x8b Lv3",
+    "\x83z\x81[\x83\x8a\x81[\x83o\x81[\x83X\x83g",
+    "\x83" "C\x83\x93\x83\x94\x81[\x83X\x83@\x83o\x81[\x83X\x83g",
+    "DS:\x83" "C\x83\x93\x83p\x83\x8b\x83X",
+    "DS:\x83\x81\x83" "C\x83\x8b\x83X\x83g\x83\x8d\x83\x80",
+    "DS:\x83o\x83\x89\x81[\x83W\x83\x85",
+    "DS:\x82" "c\x83" "C\x83\x93\x83p\x83\x8b\x83X",
+    "DS:\x82" "c\x83\x81\x83" "C\x83\x8b\x83X\x83g\x83\x8d\x83\x80",
+    "DS:\x82" "c\x83o\x83\x89\x81[\x83W\x83\x85",
+    "108:NG -DUMMY-",
+    "109:NG -ACTION-"
+};
+char* szPlayerCard[67] = {
+    "OFF",
+    "\x83L\x83\x93\x83O\x83_\x83\x80\x83`\x83" "F\x81[\x83\x93",
+    "\x83" "f\x83U\x83" "C\x83" "A\x81[\x83\x89\x83\x93\x83v",
+    "\x83g\x83\x8c\x83W\x83\x83\x81[\x83I\x83u\x83V\x81[",
+    "\x83p\x83\x93\x83v\x83L\x83\x93\x83w\x83" "b\x83h",
+    "\x83t\x83" "F\x83" "A\x83\x8a\x81[\x83n\x81[\x83v",
+    "\x83" "E\x83" "B\x83" "b\x83V\x83\x85\x83X\x83^\x81[",
+    "\x83G\x83O\x83U\x83~\x83l\x81[\x83V\x83\x87\x83\x93",
+    "\x83\x81\x83^\x83\x8b\x83`\x83\x87\x83R\x83{",
+    "\x83p\x83\x8f\x81[\x83I\x83u\x83q\x81[\x83\x8d\x81[",
+    "\x83\x89\x83" "C\x83I\x83\x93\x83n\x81[\x83g",
+    "\x83\x89\x83X\x83g\x83\x8a\x83]\x81[\x83g",
+    "\x83\x89\x83\x94\x83" "B\x83" "A\x83\x93\x83\x8d\x81[\x83Y",
+    "\x96\xf1\x91\xa9\x82\xcc\x82\xa8\x8e\xe7\x82\xe8",
+    "\x89\xdf\x82\xac\x8b\x8e\x82\xe8\x82\xb5\x8ev\x82\xa2\x8fo",
+    "\x83" "A\x83\x8b\x83" "e\x83}\x83" "E\x83" "F\x83|\x83\x93",
+    "\x83_\x83" "C\x83\x84\x83\x82\x83\x93\x83h\x83_\x83X\x83g",
+    "\x95\xd0\x97\x83\x82\xcc\x93V\x8eg",
+    "\x83\\\x83" "E\x83\x8b\x83" "C\x81[\x83^\x81[",
+    "\x83X\x83^\x81[\x83V\x81[\x83J\x81[",
+    "\x83\x82\x83m\x83N\x83\x8d\x81[\x83\x80",
+    "\x83t\x83H\x83\x8d\x81[\x83U\x83" "E\x83" "B\x83\x93\x83h",
+    "\x83q\x83h\x83" "D\x83\x93\x83h\x83\x89\x83S\x83\x93",
+    "\x83t\x83H\x83g\x83\x93\x83" "f\x83o\x83" "b\x83K\x81[",
+    "\x83{\x83\x93\x83h\x83I\x83u\x83t\x83\x8c\x83" "C\x83\x80",
+    "\x83n\x83`\x91\xde\x8e\xa1\x95\x90\x8a\xed",
+    "\x83t\x83@\x83" "C\x83" "A",
+    "\x83u\x83\x8a\x83U\x83h",
+    "\x83T\x83\x93\x83_\x81[",
+    "\x83P\x83" "A\x83\x8b",
+    "\x83O\x83\x89\x83r\x83" "f",
+    "\x83X\x83g\x83" "b\x83v",
+    "\x83G\x83" "A\x83\x8d",
+    "\x83n\x83`\x91\xde\x8e\xa1\x93\xcb\x95\x97",
+    "\x83n\x83`\x91\xde\x8e\xa1\x83n\x83`\x83~\x83" "c",
+    "\x83V\x83\x93\x83o",
+    "\x83W\x81[\x83j\x81[",
+    "\x83o\x83\x93\x83r",
+    "\x83_\x83\x93\x83{",
+    "\x83" "e\x83" "B\x83\x93\x83N",
+    "\x83\x80\x81[\x83V\x83\x85\x81[",
+    "\x83N\x83\x89\x83" "E\x83h",
+    "\x83|\x81[\x83V\x83\x87\x83\x93",
+    "\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93",
+    "\x83\x81\x83K\x83|\x81[\x83V\x83\x87\x83\x93",
+    "\x83G\x81[\x83" "e\x83\x8b",
+    "\x83\x81\x83K\x83G\x81[\x83" "e\x83\x8b",
+    "\x83G\x83\x8a\x83N\x83T\x81[",
+    "\x83\x89\x83X\x83g\x83G\x83\x8a\x83N\x83T\x81[",
+    "\x83h\x83i\x83\x8b\x83h",
+    "\x83O\x81[\x83t\x83" "B\x81[",
+    "\x83" "A\x83\x89\x83W\x83\x93",
+    "\x83" "A\x83\x8a\x83G\x83\x8b",
+    "\x83W\x83\x83\x83" "b\x83N",
+    "\x83s\x81[\x83^\x81[\x83p\x83\x93",
+    "\x83r\x81[\x83X\x83g",
+    "\x89\xa4\x97l",
+    "\x83v\x83\x8b\x81[\x83g",
+    "G:\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[",
+    "G:\x83g\x83\x8a\x83" "b\x83N\x83X\x83^\x81[",
+    "G:\x83W\x83\x83\x83t\x83@\x81[",
+    "G:\x83u\x83M\x81[",
+    "G:\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W",
+    "G:\x83" "A\x81[\x83X\x83\x89",
+    "G:\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g...",
+    "G:\x83_\x81[\x83N\x83T\x83" "C\x83h",
+    "G:ZexionTrapA"
+};
+/* placeholder: rodata of __12CPlayerDebugP5CTask */
+__asm__(".rdata\n");
+inline void _roPhB31() {
+    TRACE(" ");
+    TRACE(__FILE__ "(14052)");
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", __12CPlayerDebugP5CTask);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _$_12CPlayerDebug);
+/* placeholder: rodata of main__12CPlayerDebug */
+__asm__(".rdata\n");
+inline void _roPhB32() {
+    TRACE("\xf9WFlagPLY: % 08X");
+    TRACE("\xf9WFlagCON: % 08X");
+    TRACE("\xf9WFlagBTL: % 08X");
+    TRACE("\xf9WLEVEL: % 10d");
+    TRACE("\xf9WEXP: % 12d");
+    TRACE("\xf9WNEXT: % 5d/% 5d");
+    TRACE("\xf9WHP: % 3d/% 3d");
+    TRACE("\xf9WAP: % 6d");
+    TRACE("\xf9WDP: % 3d/% 3d");
+    TRACE("\xf9S");
+    TRACE("\xf9W\x95" "b\x91\xac:   % 7.4fm/s");
+    TRACE("\xf9W\x93`\x93\xb1\x97\xa6: % 7.2f\x81\x93");
+    TRACE("\xf9W%s");
+    TRACE("\xf9WSpdY:  % 8.4fm/s");
+    TRACE("\xf9W\x92\xb8\x93_:  % 8.4fm");
+    TRACE("\xf9W\x8d\x98x:    % 9.4f");
+    TRACE("\xf9W\x8d\x98y:    % 9.4f");
+    TRACE("\xf9W\x8d\x98z:    % 9.4f");
+    TRACE("\xf9W\x8d\xb6\x8e\xe8x:  % 9.4f");
+    TRACE("\xf9W\x8d\xb6\x8e\xe8y:  % 9.4f");
+    TRACE("\xf9W\x8d\xb6\x8e\xe8z:  % 9.4f");
+    TRACE("\xf9WStep:     % 3d/% 3d");
+    TRACE("\xf9W\x8d\x98yz:% 4.3f,% 4.3f");
+    TRACE("File: % 11s");
+    TRACE("TimeQ:% 5d/% 5d");
+}
+__asm__(".rdata\n.align 4\n.word .L00275AB0\n.word .L00275C3C\n.word .L00275C3C\n.word .L00275F80\n.word .L00275ED0\n.word .L00275CAC\n.word .L00275F80\n.word .L00275D2C\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275BA4\n.word .L00275E20\n.word .L00275F80\n.word .L00275F80\n.word .L00275ED0\n.word .L00275F80\n.word .L00275F80\n.word .L00275ED0\n.word .L00275F80\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275F24\n.word .L00275ED0\n.word .L00275F80\n.word .L00275F80\n.word .L00275AB0\n.word .L00275CAC\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.text\n");
+/* the vtables of CPlayerDebug / CPlayer (their key functions are still INCLUDE_ASM), then the CStateTemplate<CPlayer> assert string and vtable */
+__asm__(".rdata\n"
+    ".align 4\n"
+    ".globl _vt$12CPlayerDebug\n"
+    "_vt$12CPlayerDebug:\n"
+    ".word 0\n"
+    ".word 0\n"
+    ".word 0\n"
+    ".word _$_12CPlayerDebug\n"
+    ".word 0\n"
+    ".word main__12CPlayerDebug\n"
+    ".word 0\n"
+    ".word disp__5CTask\n"
+    ".word 0\n"
+    ".word after__5CTask\n"
+    ".word 0\n"
+    ".word onOut__5CTask\n"
+    ".word 0\n"
+    ".word getTypeID__C5CTask\n"
+    ".word 0\n"
+    ".word 0\n"
+    ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", main__12CPlayerDebug);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", __static_initialization_and_destruction_0_00276330);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _$_t14CStateTemplate1Z7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCurrentState__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", stateWait__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endStateWait__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCharaID__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getParam__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getPlayerCamera__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getLockonMarker__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getWeapon__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getRevolver__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getGauge__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getPlayerState__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getStateTQ__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", clearStateTQ__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setSubState__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getSubState__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setPlayerFlag__7CPlayerUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setActionFlag__7CPlayerUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setConditionFlag__7CPlayerUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setTrgFlag__7CPlayerUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setBattleFlag__7CPlayerUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isPlayerFlag__C7CPlayerUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isActionFlag__C7CPlayerUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isConditionFlag__C7CPlayerUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isTrgFlag__C7CPlayerUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isBattleFlag__C7CPlayerUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setHP__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setMaxHP__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setCP__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setMaxCP__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getHP__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getMaxHP__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCP__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getMaxCP__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAP__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getAP__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setLV__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getLV__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setEXP__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getEXP__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setMP__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getMP__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setDP__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setMaxDP__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getDP__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getMaxDP__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCount__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getNowAnimID__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getAnimID__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setStartPos__7CPlayerfff);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setStartDir__7CPlayerRCf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setDir__7CPlayerRCf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getStartPos__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getStartDir__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getDir__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCenterPos__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getMovePower__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getWalkSpeed__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getLockOnPos__7CPlayerR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getHeadPos__C7CPlayerR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getUseCardPos__7CPlayerR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getAppearPos__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setDrawRadius__7CPlayerff);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getPrizeDrawRadius__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getCardDrawRadius__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getLadderPos__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getLadderStep__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getLadderStepMax__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getJumpSpdY__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getJumpTop__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getJumpStartPos__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getJumpLandLimit__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getHangHandPos__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttackTimer__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setMaxCombo__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getAttackID__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setMutekiTimer__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isDead__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setBodyRviseCoefficient__7CPlayerf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getConfuse__C7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setMarkPos__7CPlayerfff);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getMarkPos__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowLockon__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getLockonPos__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowMark__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowTarget__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getOldLockon__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getOldCamMode__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setStateSE__7CPlayerii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", getStateSESeq__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttack_inFriend__7CPlayeriii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", startStockSkillAction__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initStockSkill__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStockSkill__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initMagic__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeMagic__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setMagic__7CPlayeriii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initFriend__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeFriend__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initSummon__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeSummon__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAttack_inFriend__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", endAttack_inFriend__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initTransform__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeTransform__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initGlide__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGlide__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initJump2nd__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeJump2nd__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeAvoid__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initPronounce__7CPlayeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exePronounce__7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", executeBeginState__t14CStateTemplate1Z7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", executeState__t14CStateTemplate1Z7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", executeEndState__t14CStateTemplate1Z7CPlayer);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", func_00277080);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _GLOBAL_$I$c__KHCOM_MainApp_Game_Player_Player.cppopbaaa);
+/* the static initializer (DWT table titles) is generated after the last INCLUDE_ASM: gcc assumes .rdata for its strings */
+__asm__(".rdata\n");
+// SOURCE DATA: .data .rodata .bss

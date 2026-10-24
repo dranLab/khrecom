@@ -132,7 +132,11 @@ class CPlayer : public CEntity, public CPlayerPad {
 public: // PARTIAL: members public for Game/Player/PlayerRiku
     void cmdState_setEncountWait(); // PARTIAL: added for Game/Enemy/MapEnemy
     void setCardSnatch(INT inFlag); // PARTIAL: added for Game/CardRevolver
+#ifdef GAME_PLAYER_PLAYER_CPP
+    CStateTemplate<CPlayer> m_State[4]; /* 0x21c */
+#else
     UBYTE _m_0x21c[0x80];        /* 0x21c CStateTemplate<CPlayer> m_State[4] */
+#endif
 public:
     INT m_iState;                /* 0x29c */
 public: // PARTIAL: members public for Game/Player/PlayerRiku
@@ -317,23 +321,91 @@ public:
     CPlayer(CTask* inParent, UINT inID, INT inEx); // PARTIAL: added for Game/Player/PlayerManager
     void notifyDead(INT inFlag);                   // PARTIAL: added for Game/Player/PlayerManager
     // PARTIAL: added for Game/Player/PlayerWeapon
+#ifdef GAME_PLAYER_PLAYER_CPP
+    FVECTOR& getCenterPos(); // the weak copies are emitted in the original order: defined after the class
+#else
     FVECTOR& getCenterPos() { return m_vCenterPos; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    FVECTOR& getAppearPos(); // the weak copies are emitted in the original order: defined after the class
+#else
     FVECTOR& getAppearPos() { return m_vAppearPos; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    FVECTOR& getJumpStartPos(); // the weak copies are emitted in the original order: defined after the class
+#else
     FVECTOR& getJumpStartPos() { return m_vJumpStartPos; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    FVECTOR& getMarkPos(); // the weak copies are emitted in the original order: defined after the class
+#else
     FVECTOR& getMarkPos() { return m_vMarkPos; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    PlayerCamera::CPlayerCamera* getPlayerCamera() const; // the weak copies are emitted in the original order: defined after the class
+#else
     PlayerCamera::CPlayerCamera* getPlayerCamera() { return m_pCam; } // PARTIAL: added for Game/Player/FriendJack
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT getPlayerState() const; // the weak copies are emitted in the original order: defined after the class
+#else
     INT getPlayerState() { return m_PlayerState; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT getHP(); // the weak copies are emitted in the original order: defined after the class
+#else
     INT getHP() { return m_iHP; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT getLV(); // the weak copies are emitted in the original order: defined after the class
+#else
     INT getLV() { return m_iLV; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT getEXP(); // the weak copies are emitted in the original order: defined after the class
+#else
     INT getEXP() { return m_iEXP; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setHP(INT inHP); // the weak copies are emitted in the original order: defined after the class
+#else
     void setHP(INT inHP) { m_iHP = inHP; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setMaxHP(INT inMaxHP); // the weak copies are emitted in the original order: defined after the class
+#else
     void setMaxHP(INT inHP) { m_iMaxHP = inHP; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setAP(INT inAP); // the weak copies are emitted in the original order: defined after the class
+#else
     void setAP(INT inAP) { m_iAP = inAP; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setLV(INT inLV); // the weak copies are emitted in the original order: defined after the class
+#else
     void setLV(INT inLV) { m_iLV = inLV; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setEXP(INT inEXP); // the weak copies are emitted in the original order: defined after the class
+#else
     void setEXP(INT inEXP) { m_iEXP = inEXP; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setMP(INT inMP); // the weak copies are emitted in the original order: defined after the class
+#else
     void setMP(INT inMP) { m_iMP = inMP; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setMaxDP(INT inDP); // the weak copies are emitted in the original order: defined after the class
+#else
     void setMaxDP(INT inDP) { m_iMaxDP = inDP; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT getMaxHP(); // the weak copies are emitted in the original order: defined after the class
+#else
     INT getMaxHP() { return m_iMaxHP; }
+#endif
     void addHP(INT inHP, INT inFlag, INT inEffect);
     void setPrizeHealing(TIMEQ inTime); // PARTIAL: added for Game/Player/SummonTink
     void exePrizeHealing();
@@ -341,7 +413,7 @@ public:
     INT getMotIndex(INT inChara, INT inIndex);
     void setReflectGuard(INT inFlag); void setQuickBarrier(INT inFlag);
     void setTransOff(INT inFlag);
-    INT chkAtelHide(INT inFlag); void initFSM_(); static void (CPlayer::*m_pBeginStateTbl[4])(); static void (CPlayer::*m_pStateTbl[4])(); static void (CPlayer::*m_pEndStateTbl[4])(); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
+    INT chkAtelHide(INT inFlag); void _init(); void initFSM_(); static void (CPlayer::*m_pBeginStateTbl[4])(); static void (CPlayer::*m_pStateTbl[4])(); static void (CPlayer::*m_pEndStateTbl[4])(); void chkAtelControl(); void calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr);
     void initRoomCreation(); void initWorldSelect();
     void cmdState_initWorldSelect(HANDLE inDoor);
     void exeEscape(); void exeGimmickRide(); INT chkGimmick(UINT inID); INT chkEscape(); void initTreasureBox(); void exeTreasureBox(); void setBanish(INT inFlag); void exeBanish(); INT exeWarp(INT inSet); void exeWind();
@@ -358,29 +430,83 @@ public:
     void exeWalk(); void setWalkAnim(); void exeStartWait(); INT isStartLadderJump(); void procDropMP(); INT chkBattleIdle(); FLOAT getAirHeight(FVECTOR* inPos, FLOAT inHeight, INT inLimit); FLOAT getFrontAirHeight(FVECTOR* inPos, FLOAT inLength, FLOAT inHeight, FLOAT inDir);
     void recoverCollMap();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setConditionFlag(UINT inSet, UINT inMask); // the weak copies are emitted in the original order: defined after the class
+#else
     void setConditionFlag(UINT inSet, UINT inMask) { m_uiConditionFlag = (m_uiConditionFlag | inSet) & ~inMask; }
+#endif
     // PARTIAL: added for Game/Player/FriendKing
+#ifdef GAME_PLAYER_PLAYER_CPP
+    CardBattle::CCardRevolver* getRevolver() const; // the weak copies are emitted in the original order: defined after the class
+#else
     CardBattle::CCardRevolver* getRevolver() { return m_pRevolver; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT isConditionFlag(UINT inFlag) const; // the weak copies are emitted in the original order: defined after the class
+#else
     INT isConditionFlag(UINT inFlag) { return m_uiConditionFlag & inFlag; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    UINT getAttackID(); // the weak copies are emitted in the original order: defined after the class
+#else
     UINT getAttackID() { return m_uiAttackID; }
+#endif
     void setCure(INT inID, INT inPow);
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT getCount() const; // the weak copies are emitted in the original order: defined after the class
+#else
     INT getCount() { return m_iCount; } // PARTIAL: added for Game/Player/Friend
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT isBattleFlag(UINT inFlag) const; // the weak copies are emitted in the original order: defined after the class
+#else
     INT isBattleFlag(UINT inFlag) { return m_uiBattleFlag & inFlag; } // PARTIAL: added for Game/Player/SummonMushu
+#endif
     // PARTIAL: added for Game/Player/FriendDonald
+#ifdef GAME_PLAYER_PLAYER_CPP
+    PlayerWeapon::CPlayerWeapon* getWeapon() const; // the weak copies are emitted in the original order: defined after the class
+#else
     PlayerWeapon::CPlayerWeapon* getWeapon() { return m_pWeapon; }
+#endif
     void getWeaponTopPos(FVECTOR& outPos); void getCaskPos(FVECTOR& inVec);
     // PARTIAL: added for Game/Player/SummonCloud
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setDir(const FLOAT& inDir); // the weak copies are emitted in the original order: defined after the class
+#else
     void setDir(FLOAT inDir) { m_fDir = inDir; }
+#endif
     // PARTIAL: added for Game/Player/Summon
+#ifdef GAME_PLAYER_PLAYER_CPP
+    FLOAT getDir(); // the weak copies are emitted in the original order: defined after the class
+#else
     FLOAT getDir() { return m_fDir; }
+#endif
+#ifndef GAME_PLAYER_PLAYER_CPP /* not in the original class: emitted as weak copies if defined in the key function's unit */
     Gauge::CLockonMarker* getMarker() { return m_pMarker; }
+#endif
     INT calcAppearPos(FLOAT inDist, FLOAT inRadius, FVECTOR* inCenter);
     void calcAppearPosFS(FLOAT inDist, FLOAT inRadius);
+#ifdef GAME_PLAYER_PLAYER_CPP
+    HANDLE isNowMark(); // the weak copies are emitted in the original order: defined after the class
+#else
     HANDLE isNowMark() { return m_hMark; } // PARTIAL: added for Game/Player/FriendGoofy (original name/type unknown)
+#endif
     // PARTIAL: added for Game/Player/PlayerCamera
+#ifdef GAME_PLAYER_PLAYER_CPP
+    HANDLE isNowLockon(); // the weak copies are emitted in the original order: defined after the class
+#else
     HANDLE isNowLockon() { return m_hLockon; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    FVECTOR& getLockonPos(); // the weak copies are emitted in the original order: defined after the class
+#else
     FVECTOR& getLockonPos() { return m_vLockonPos; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    FVECTOR& getStartPos(); // the weak copies are emitted in the original order: defined after the class
+#else
     FVECTOR& getStartPos() { return m_vStartPos; }
+#endif
     BOOL isNowIdleAnim();
     // PARTIAL: added for Game/Gimmick/GimmickJumpStand
     INT getJumpState() const;
@@ -388,13 +514,25 @@ public:
     static void notifyGetPrize(INT inKind, INT inNumber, INT inState);
     // PARTIAL: added for Game/Prize (getter names unknown)
     void notifyReturnCard(const CARD* inCard);
+#ifndef GAME_PLAYER_PLAYER_CPP /* not in the original class: emitted as weak copies if defined in the key function's unit */
     FLOAT getPrizeDraw() const { return m_fPrizeDraw; }
+#endif
+#ifndef GAME_PLAYER_PLAYER_CPP /* not in the original class: emitted as weak copies if defined in the key function's unit */
     FLOAT getCardDraw() const { return m_fCardDraw; }
+#endif
     static BOOL notifyBossDead(INT inStep);   // PARTIAL: added for Game/Enemy/BossDeadDemo
     static HANDLE getLevelUpEffect(); // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
     // PARTIAL: added for Game/Player/FriendBeast (also out of line: setPlayerFlag__7CPlayerUiUi)
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setPlayerFlag(UINT inSet, UINT inMask); // the weak copies are emitted in the original order: defined after the class
+#else
     void setPlayerFlag(UINT inSet, UINT inMask) { UINT& f = m_uiPlayerFlag; f = (f | inSet) & ~inMask; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setTrgFlag(UINT inSet, UINT inMask); // the weak copies are emitted in the original order: defined after the class
+#else
     void setTrgFlag(UINT inSet, UINT inMask) { UINT& f = m_uiTrgFlag; f = (f | inSet) & ~inMask; } // PARTIAL: added for Form/Menu/WorldSelect
+#endif
     // PARTIAL: added for Game/Player/FriendBeast (CPlayer's virtuals up to vtable[36])
     virtual void beginStateField();
     virtual void stateField();
@@ -452,13 +590,35 @@ public:
     virtual void updateAfter();
     virtual void lastUpdate();
     // PARTIAL: added for Game/Player/PlayerRiku
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setActionFlag(UINT inSet, UINT inMask); // the weak copies are emitted in the original order: defined after the class
+#else
     void setActionFlag(UINT inSet, UINT inMask) { UINT& f = m_uiActionFlag; f = (f | inSet) & ~inMask; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    void setBattleFlag(UINT inSet, UINT inMask); // the weak copies are emitted in the original order: defined after the class
+#else
     void setBattleFlag(UINT inSet, UINT inMask) { UINT& f = m_uiBattleFlag; f = (f | inSet) & ~inMask; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT isPlayerFlag(UINT inFlag) const; // the weak copies are emitted in the original order: defined after the class
+#else
     INT isPlayerFlag(UINT inFlag) { return m_uiPlayerFlag & inFlag; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT isActionFlag(UINT inFlag) const; // the weak copies are emitted in the original order: defined after the class
+#else
     INT isActionFlag(UINT inFlag) { return m_uiActionFlag & inFlag; }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT isTrgFlag(UINT inFlag) const; // the weak copies are emitted in the original order: defined after the class
+#else
     INT isTrgFlag(UINT inFlag) { return m_uiTrgFlag & inFlag; }
+#endif
     static CPlayer* m_pInstance;
+#ifndef GAME_PLAYER_PLAYER_CPP /* not in the original class: emitted as weak copies if defined in the key function's unit */
     static CPlayer*& _instance() { return m_pInstance; } // PARTIAL: reference accessor (as CStatus::_info): the original reloads m_pInstance after every store
+#endif
     static void enablePadControl(INT inFlag);
     static void enableDbgPadControl(INT inFlag);
     void changeState(INT inState);
@@ -547,11 +707,60 @@ public:
     void makeRevolver();
     void setAnimSpeed(FLOAT inSpeed);
     INT chkTrgAction(INT inFlag, UINT inMask);
+#ifndef GAME_PLAYER_PLAYER_CPP
     HANDLE getLockonHandle() {
         HANDLE handle = m_hLockon;
         if (handle == 0 || handle == -1) handle = m_hTarget;
         return handle;
     }
+#endif
+#ifdef GAME_PLAYER_PLAYER_CPP
+    INT getCurrentState();
+    UINT getCharaID();
+    PL_PARAM* getParam();
+    Gauge::CLockonMarker* getLockonMarker() const;
+    Gauge::CPlayerGauge* getGauge() const;
+    TIMEQ getStateTQ();
+    void clearStateTQ();
+    void setSubState(INT inSubState);
+    INT getSubState() const;
+    void setCP(INT inCP);
+    void setMaxCP(INT inMaxCP);
+    INT getCP();
+    INT getMaxCP();
+    INT getAP();
+    INT getMP();
+    void setDP(INT inDP);
+    INT getDP();
+    INT getMaxDP();
+    INT getNowAnimID();
+    INT getAnimID();
+    void setStartPos(FLOAT inX, FLOAT inY, FLOAT inZ);
+    void setStartDir(const FLOAT& inDir);
+    FLOAT getStartDir();
+    FLOAT getMovePower();
+    FLOAT getWalkSpeed();
+    void setDrawRadius(FLOAT inPrize, FLOAT inCard);
+    FLOAT getPrizeDrawRadius();
+    FLOAT getCardDrawRadius();
+    FVECTOR* getLadderPos();
+    INT getLadderStep();
+    INT getLadderStepMax();
+    FLOAT getJumpSpdY();
+    FLOAT getJumpTop();
+    FLOAT getJumpLandLimit() const;
+    FVECTOR& getHangHandPos();
+    void setAttackTimer(INT inTime);
+    void setMaxCombo(INT inMax);
+    void setMutekiTimer(INT inTime);
+    BOOL isDead() const;
+    void setBodyRviseCoefficient(FLOAT inCoef);
+    INT getConfuse() const;
+    void setMarkPos(FLOAT inX, FLOAT inY, FLOAT inZ);
+    HANDLE isNowTarget();
+    HANDLE getOldLockon();
+    INT getOldCamMode();
+#endif
 };
 
 extern CPlayer* g_pPlayer;
@@ -588,5 +797,122 @@ extern char* szAttackData[188];
 extern char* szPlayerSkill[110];
 extern char* szPlayerCard[67];
 extern char* szAtkAnimID[71];
+
+
+#ifdef GAME_PLAYER_PLAYER_CPP
+static inline CPlayer*& _instance() { return CPlayer::m_pInstance; }
+/* CPlayer's weak inline functions, defined here in the order the original emitted them (the key function beginStateField is in Player.cpp) */
+inline INT CPlayer::getCurrentState() { return m_iState; }
+inline void CPlayer::stateWait() {  }
+inline void CPlayer::endStateWait() {  }
+inline UINT CPlayer::getCharaID() { return m_uiCharaID; }
+inline PL_PARAM* CPlayer::getParam() { return m_pParam; }
+inline PlayerCamera::CPlayerCamera* CPlayer::getPlayerCamera() const { return m_pCam; }
+inline Gauge::CLockonMarker* CPlayer::getLockonMarker() const { return m_pMarker; }
+inline PlayerWeapon::CPlayerWeapon* CPlayer::getWeapon() const { return m_pWeapon; }
+inline CardBattle::CCardRevolver* CPlayer::getRevolver() const { return m_pRevolver; }
+inline Gauge::CPlayerGauge* CPlayer::getGauge() const { return m_pGauge; }
+inline INT CPlayer::getPlayerState() const { return m_PlayerState; }
+inline TIMEQ CPlayer::getStateTQ() { return m_tqStateTimer; }
+inline void CPlayer::clearStateTQ() { m_tqStateTimer = 0; }
+inline void CPlayer::setSubState(INT inSubState) { m_iSubState = inSubState; }
+inline INT CPlayer::getSubState() const { return m_iSubState; }
+inline void CPlayer::setPlayerFlag(UINT inSet, UINT inMask) { UINT& f = m_uiPlayerFlag; f = (f | inSet) & ~inMask; }
+inline void CPlayer::setActionFlag(UINT inSet, UINT inMask) { UINT& f = m_uiActionFlag; f = (f | inSet) & ~inMask; }
+inline void CPlayer::setConditionFlag(UINT inSet, UINT inMask) { UINT& f = m_uiConditionFlag; f = (f | inSet) & ~inMask; }
+inline void CPlayer::setTrgFlag(UINT inSet, UINT inMask) { UINT& f = m_uiTrgFlag; f = (f | inSet) & ~inMask; }
+inline void CPlayer::setBattleFlag(UINT inSet, UINT inMask) { UINT& f = m_uiBattleFlag; f = (f | inSet) & ~inMask; }
+inline INT CPlayer::isPlayerFlag(UINT inFlag) const { return m_uiPlayerFlag & inFlag; }
+inline INT CPlayer::isActionFlag(UINT inFlag) const { return m_uiActionFlag & inFlag; }
+inline INT CPlayer::isConditionFlag(UINT inFlag) const { return m_uiConditionFlag & inFlag; }
+inline INT CPlayer::isTrgFlag(UINT inFlag) const { return m_uiTrgFlag & inFlag; }
+inline INT CPlayer::isBattleFlag(UINT inFlag) const { return m_uiBattleFlag & inFlag; }
+inline void CPlayer::setHP(INT inHP) { m_iHP = inHP; }
+inline void CPlayer::setMaxHP(INT inMaxHP) { m_iMaxHP = inMaxHP; }
+inline void CPlayer::setCP(INT inCP) { m_iCP = inCP; }
+inline void CPlayer::setMaxCP(INT inMaxCP) { m_iMaxCP = inMaxCP; }
+inline INT CPlayer::getHP() { return m_iHP; }
+inline INT CPlayer::getMaxHP() { return m_iMaxHP; }
+inline INT CPlayer::getCP() { return m_iCP; }
+inline INT CPlayer::getMaxCP() { return m_iMaxCP; }
+inline void CPlayer::setAP(INT inAP) { m_iAP = inAP; }
+inline INT CPlayer::getAP() { return m_iAP; }
+inline void CPlayer::setLV(INT inLV) { m_iLV = inLV; }
+inline INT CPlayer::getLV() { return m_iLV; }
+inline void CPlayer::setEXP(INT inEXP) { m_iEXP = inEXP; }
+inline INT CPlayer::getEXP() { return m_iEXP; }
+inline void CPlayer::setMP(INT inMP) { m_iMP = inMP; }
+inline INT CPlayer::getMP() { return m_iMP; }
+inline void CPlayer::setDP(INT inDP) { m_iDP = inDP; }
+inline void CPlayer::setMaxDP(INT inDP) { m_iMaxDP = inDP; }
+inline INT CPlayer::getDP() { return m_iDP; }
+inline INT CPlayer::getMaxDP() { return m_iMaxDP; }
+inline INT CPlayer::getCount() const { return m_iCount; }
+inline INT CPlayer::getNowAnimID() { return m_iNowAnimID; }
+inline INT CPlayer::getAnimID() { return m_pAnim->getAnimID(); }
+inline void CPlayer::setStartPos(FLOAT inX, FLOAT inY, FLOAT inZ) { m_vStartPos.set(inX, inY, inZ); }
+inline void CPlayer::setStartDir(const FLOAT& inDir) { m_fStartDir = inDir; }
+inline void CPlayer::setDir(const FLOAT& inDir) { m_fDir = inDir; }
+inline FVECTOR& CPlayer::getStartPos() { return m_vStartPos; }
+inline FLOAT CPlayer::getStartDir() { return m_fStartDir; }
+inline FLOAT CPlayer::getDir() { return m_fDir; }
+inline FVECTOR& CPlayer::getCenterPos() { return m_vCenterPos; }
+inline FLOAT CPlayer::getMovePower() { return m_fMovePower; }
+inline FLOAT CPlayer::getWalkSpeed() { return m_fWalkSpeed; }
+inline void CPlayer::getLockOnPos(FVECTOR& outPos) { outPos = m_vCenterPos; }
+inline void CPlayer::getHeadPos(FVECTOR& outPos) const { outPos = m_vHeadPos; }
+inline void CPlayer::getUseCardPos(FVECTOR& outPos) { outPos = m_vCenterPos; }
+inline FVECTOR& CPlayer::getAppearPos() { return m_vAppearPos; }
+inline void CPlayer::setDrawRadius(FLOAT inPrize, FLOAT inCard) { m_fPrizeDraw = inPrize; m_fCardDraw = inCard; }
+inline FLOAT CPlayer::getPrizeDrawRadius() { return m_fPrizeDraw; }
+inline FLOAT CPlayer::getCardDrawRadius() { return m_fCardDraw; }
+inline FVECTOR* CPlayer::getLadderPos() { return m_pLadderPos; }
+inline INT CPlayer::getLadderStep() { return m_iLadderStep; }
+inline INT CPlayer::getLadderStepMax() { return m_iLadderStepMax; }
+inline FLOAT CPlayer::getJumpSpdY() { return m_fJumpSpdY; }
+inline FLOAT CPlayer::getJumpTop() { return m_fJumpTop; }
+inline FVECTOR& CPlayer::getJumpStartPos() { return m_vJumpStartPos; }
+inline FLOAT CPlayer::getJumpLandLimit() const { return m_fJumpLandLimit; }
+inline FVECTOR& CPlayer::getHangHandPos() { return m_vHangHandPos; }
+inline void CPlayer::setAttackTimer(INT inTime) { m_tqAttackTimer = inTime; }
+inline void CPlayer::setMaxCombo(INT inMax) { m_iMaxCombo = inMax; }
+inline UINT CPlayer::getAttackID() { return m_uiAttackID; }
+inline void CPlayer::setMutekiTimer(INT inTime) { m_tqMutekiTimer = inTime; }
+inline BOOL CPlayer::isDead() const { return m_bIsDead; }
+inline void CPlayer::setBodyRviseCoefficient(FLOAT inCoef) { m_fBodyRviseCoefficient = inCoef; }
+inline INT CPlayer::getConfuse() const { return m_tqConfuse; }
+inline void CPlayer::setMarkPos(FLOAT inX, FLOAT inY, FLOAT inZ) { m_vMarkPos.set(inX, inY, inZ); }
+inline FVECTOR& CPlayer::getMarkPos() { return m_vMarkPos; }
+inline HANDLE CPlayer::isNowLockon() { return m_hLockon; }
+inline FVECTOR& CPlayer::getLockonPos() { return m_vLockonPos; }
+inline HANDLE CPlayer::isNowMark() { return m_hMark; }
+inline HANDLE CPlayer::isNowTarget() { return m_hTarget; }
+inline HANDLE CPlayer::getOldLockon() { return m_hOldLockon; }
+inline INT CPlayer::getOldCamMode() { return m_iOldCamMode; }
+inline void CPlayer::setStateSE(INT inState, INT inKind) {  }
+inline INT CPlayer::getStateSESeq(INT inState) { return 0; }
+inline void CPlayer::setAttack_inFriend(INT inID, INT inStock, HANDLE inTarget) {  }
+inline INT CPlayer::startStockSkillAction() { return 0; }
+inline void CPlayer::initStockSkill(INT inNo) {  }
+inline void CPlayer::exeStockSkill() {  }
+inline void CPlayer::initMagic(INT inFlag) {  }
+inline void CPlayer::exeMagic() {  }
+inline void CPlayer::setMagic(INT inState, INT inCardID, INT inSkillID) {  }
+inline void CPlayer::initFriend(INT inNo) {  }
+inline void CPlayer::exeFriend() {  }
+inline void CPlayer::initSummon(INT inNo) {  }
+inline void CPlayer::exeSummon() {  }
+inline INT CPlayer::exeAttack_inFriend() { return -1; }
+inline INT CPlayer::endAttack_inFriend() { return -1; }
+inline void CPlayer::initTransform(INT inFlag) {  }
+inline void CPlayer::exeTransform() {  }
+inline void CPlayer::initGlide(INT inFlag) {  }
+inline void CPlayer::exeGlide() {  }
+inline void CPlayer::initJump2nd() {  }
+inline void CPlayer::exeJump2nd() {  }
+inline void CPlayer::exeAvoid() {  }
+inline void CPlayer::initPronounce(INT inFlag) {  }
+inline void CPlayer::exePronounce() {  }
+#endif
 
 #endif /* GAME_PLAYER_PLAYER_H */
