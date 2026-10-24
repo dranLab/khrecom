@@ -55,7 +55,7 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
-extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
+extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_0049B2D8[]; /* TRACE message of exeFooting */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
 extern "C" char D_00499988[]; extern "C" char D_004999B8[]; extern "C" char D_004999E8[]; /* "...Player.cpp(1156)", (1172), (1181) */
 extern "C" const CARD_DATA cardDataTbl_0049E190[224];
 extern "C" char D_0049AFA8[]; /* TRACE messages of setTrapDamage */
@@ -3251,7 +3251,127 @@ void CPlayer::initFooting(INT inFlag) {
         m_pMove->setFlag(0x40, TRUE);
     }
 }
+/* Parked: all but 4 instructions match (frame, branches, walk block registers). Left: in the analog walk arm the
+   original issues `lw m_pMove` between the `sq t._q` and the `swc1 t.y` and loads `lq t` only after the m_fDir
+   store; ours puts the lq right after the t.y store and the m_pMove load after it. tried: ~45 variants (store
+   order of the clear block = battle, cond, trg; dir/diff/result as one, two or three FP variables - a separate
+   `nd` for the Homing result and `d0 = m_fDir` before the call give the original's mov.s f12,f0 and f0 result;
+   m_fDir store before/inside/after the temp block, CMovement* / FVECTOR& temporaries for getRot(), line
+   layout) plus tools/permuter.py through a method alias wrapper (build/progress/Game/Player/permute_method.py):
+   safe 15 min (6082 candidates) and --unsafe 10 min (4320), score stays 1. */
+#if 0
+void CPlayer::exeFooting() {
+    FVECTOR target;
+    FVECTOR pos;
+    FVECTOR v;
+    FLOAT speed;
+    FLOAT d0;
+    FLOAT r;
+    CEntity* pEntity = m_hFooting > 0 ? (CEntity*)CTaskMan::getTask(m_hFooting) : NULL;
+    switch (m_iSubState) {
+    case 0:
+        setBattleFlag(0, 8);
+        if (pEntity) {
+            target = pEntity->getPos();
+            pos = getPos();
+            if (calcDistanceXZSq(target) < 0.010000001f) {
+                pos.x = target.x;
+                pos.z = target.z;
+            } else {
+                pos.x = Movement::Approach(pos.x, target.x, 0.1f, m_fFrameRate);
+                pos.z = Movement::Approach(pos.z, target.z, 0.1f, m_fFrameRate);
+            }
+            setPos(pos);
+        }
+        if (procFlowIdle(1)) {
+            m_iSubState = 1;
+            setConditionFlag(0x10000000, 0);
+        }
+        return;
+    case 2:
+        setBattleFlag(0, 8);
+        m_fWalkSpeed = 0.3f;
+        m_fWalkSpeed = m_fJumpSpdXZ = Movement::Approach(m_fJumpSpdXZ, m_fWalkSpeed, 0.2f, m_fFrameRate);
+        m_pMove->calcVelocityXZ(m_fWalkSpeed);
+        if (isMotionEnd()) {
+            setPlayerFlag(0, 1);
+            initFooting(0);
+        }
+        return;
+    case 3:
+        return;
+    case 1:
+    default:
+        break;
+    }
+    if (!m_hFooting) {
+        setBattleFlag(0, 8);
+        setConditionFlag(0, 0x10000000);
+        setTrgFlag(0, 0x400);
+        m_fJumpLandLimit = -100.0f;
+        m_pMove->setFlag(0x200, FALSE);
+        initIdle(-1, 0);
+        return;
+    }
+    if (isTrgFlag(0x100000)) {
+        TRACE(D_0049B2D8);
+        initTransform(0);
+        return;
+    }
+    if (isTrgFlag(0x10)) {
+        if (!chkChargeMove(0)) {
+            initCharge();
+            return;
+        }
+    }
+    if (isBattleFlag(4)) {
+        setMDFooting(0);
+        return;
+    }
+    if (isTrgFlag(8)) {
+        initItem(0);
+    } else if (isTrgFlag(0x40)) {
+        initGimmickCard(0);
+    } else if (isTrgFlag(0x20)) {
+        initMagic(0);
+    } else if (isTrgFlag(0x80)) {
+        initFriend(0);
+    } else if (isTrgFlag(0x100)) {
+        initSummon(0);
+    } else if (isTrgFlag(4)) {
+        initAttack(0);
+    } else if (isTrgFlag(2)) {
+        initAvoid();
+    } else if (isTrgFlag(1)) {
+        initJump(0);
+    } else {
+        speed = 0.0f;
+        if (m_fAnalogPower >= 0.3f) {
+            speed = 8.0f;
+            d0 = m_fDir;
+            r = m_fAnalogViewDir - d0;
+            if (r < -3.1415927f) r += 6.2831855f;
+            else if (r > 3.1415927f) r -= 6.2831855f;
+            d0 = m_fDir;
+            FLOAT nd = Movement::Homing(d0, m_fAnalogViewDir, 0.1f, m_fFrameRate);
+            {
+                FVECTOR t;
+                t._q = 0;
+                t.y = nd;
+                m_fDir = nd;
+                v = t;
+            }
+            m_pMove->getRot() = v;
+        }
+        setAnim(0x2A, -1, 0);
+        m_fWalkSpeed = speed / 60.0f;
+        m_fWalkSpeed = m_fJumpSpdXZ = Movement::Approach(m_fJumpSpdXZ, m_fWalkSpeed, 0.1f, m_fFrameRate);
+        m_pMove->calcVelocityXZ(m_fWalkSpeed);
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeFooting__7CPlayer);
+#endif
 void CPlayer::updateFooting() {
     if (isConditionFlag(0x10000000)) {
         CEntity* pEntity = m_hFooting > 0 ? (CEntity*)CTaskMan::getTask(m_hFooting) : NULL;
