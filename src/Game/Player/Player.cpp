@@ -1005,7 +1005,54 @@ INT CPlayer::chkLadderStepNow(BOOL inAir) {
 INT CPlayer::getLadderStepNow(FLOAT inHeight) {
     return (INT)((inHeight - m_vLadderPos.y + 0.0035f) / 0.375f);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initLadder__7CPlayeri);
+void CPlayer::initLadder(INT inStep) {
+    FVECTOR v;
+    FVECTOR ofs;
+    FMATRIX m;
+    FVECTOR pos;
+    m_vOldSafeField = getPos();
+    setPlayerState(LADDER);
+    offWeapon();
+    m_pLadderPos = (FVECTOR*)m_pMove->getLadderPos();
+    m_pLadderNormal = (FVECTOR*)m_pMove->getLadderNormal();
+    m_iLadderStep = inStep;
+    FLOAT d = atan2f(m_pLadderNormal->x, m_pLadderNormal->z) + 3.1415927f;
+    FLOAT r;
+    if (d < -3.1415927f) r = d + 6.2831855f;
+    else {
+        r = d;
+        if (r > 3.1415927f) r -= 6.2831855f;
+    }
+    m_fLadderDir = r;
+    m_fDir = r;
+    v = getRot();
+    v.y = m_fLadderDir;
+    setRot(v);
+    _unitMatrix(m);
+    _rotMatrixY(m, m_fLadderDir);
+    ApplyMatrixXYZ(ofs, m, PL::LADDER_LOCAL_OFS);
+    SubVectorXYZ(m_vLadderPos, *m_pLadderPos, ofs);
+    pos = m_vLadderPos;
+    if (!m_iLadderStep) {
+        m_iSubState = 0;
+        setAnimForce(9, 0, 0, 0, 0, 0);
+        clearSpeed();
+        m_fLadderSpdY = 0.375f / (FLOAT)(m_pAnim->getTotalTqCrd() / 25);
+        m_pCam->initCamera(1, 0, NULL);
+    } else {
+        m_iSubState = 0;
+        setAnimForce(10, 0, 0, 0, 0, 0);
+        clearSpeed();
+        m_fLadderSpdY = 0.0f;
+        pos.y += (FLOAT)(m_iLadderStep - 2) * 0.375f;
+    }
+    setPos(pos);
+    setOldPos(pos);
+    m_iLadderStepMax = getLadderStepNow(m_vLadderPos.y + m_pMove->getLadderHeight()) - 4;
+    m_JumpState = 6;
+    m_pMove->setFlag(0x40, FALSE);
+    m_pCam->setFlag(8, TRUE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeLadder__7CPlayer);
 /* Parked: everything but the ofs block matches (wrap: r wrapped in place, then dir = r); left: after getPos the
    original issues lq pos (v1) before lui LADDER_LOCAL_OFS (v0), ours schedules the lui first (sched1 priority:
