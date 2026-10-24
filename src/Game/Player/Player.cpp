@@ -3382,16 +3382,72 @@ INT CPlayer::exeUseStock(INT inFlag) {
         return FALSE;
     }
 }
-/* placeholder: rodata of startSingleAction__7CPlayer */
 __asm__(".rdata\n");
-inline void _roPh16() {
-    TRACE("CPlayer:: startSingleAction :holdTarget(0); \x81\xa6\x81\xa6\x81\xa6 No.2993\x91\xce\x89\x9e\x8e\xc0\x8ds \x81\xa6\x81\xa6\x81\xa6\n");
-    TRACE("CPlayer:: startSingleAction W-STOCK !!\n");
-    TRACE("CPlayer:: startSingleAction END.\n");
-    TRACE("CPlayer:: startSingleAction *** Chain? ***\n");
+INT CPlayer::startSingleAction() {
+    offAttack();
+    UBYTE* pc = (UBYTE*)this + m_iStepStockSkill * 4; /* m_recvCardInfo.m_cardData[step]: id byte, category in the top nibble (CARD is not in the tree yet) */
+    m_uiCardID = pc[0x6D8];
+    switch (*(UINT*)(pc + 0x6D8) >> 28) {
+    case 1:
+        initAttack(m_iAttackNo);
+        break;
+    case 4:
+        initItem(0);
+        break;
+    case 2:
+        initMagic(0);
+        break;
+    case 5:
+        initFriend(0);
+        break;
+    case 3:
+        initSummon(0);
+        break;
+    default:
+        setPushon(0);
+        m_pMarker->holdTarget(0);
+        TRACE("CPlayer:: startSingleAction :holdTarget(0); \x81\xa6\x81\xa6\x81\xa6 No.2993\x91\xce\x89\x9e\x8e\xc0\x8ds \x81\xa6\x81\xa6\x81\xa6\n");
+        if (isPlayerFlag(0x80000000)) setBGFade(1.0f, 20.0f, 0);
+        fadeEffAttack(0);
+        m_fWalkSpeed = m_fJumpSpdXZ = m_fMoveSpdXZ;
+        setUseRsrcBlock(0);
+        if (isBattleFlag(0x2000)) {
+            TRACE("CPlayer:: startSingleAction W-STOCK !!\n");
+            initIdle(isAir(), 0);
+            setBattleFlag(0, 0x00480F90);
+            setBattleFlag(0, 0x00041000);
+            setBattleFlag(0, 0x10200000);
+            setBattleFlag(0, 0x00130000);
+            setBattleFlag(0, 0x03000000);
+            setBattleFlag(0x41000, 0);
+            setBattleFlag(0, 0x2000);
+            m_iStepStockSkill = 0;
+            return TRUE;
+        }
+        if (m_pCB) m_pCB->destroyPlayCard(1, 0);
+        if (!m_iNextAttack) {
+            TRACE("CPlayer:: startSingleAction END.\n");
+            setBattleFlag(0, 0x00480F90);
+            setBattleFlag(0, 0x00041000);
+            setBattleFlag(0, 0x10200000);
+            setBattleFlag(0, 0x00130000);
+            setBattleFlag(0, 0x03000000);
+            m_iAttackNo = 0;
+            m_bIsAttackHit = FALSE;
+            m_bNextTrg = FALSE;
+            m_iNextAttack = 0;
+            m_bIsCanCombo = FALSE;
+            initIdle(isAir(), 0);
+            m_uiAttackKind = 0;
+            m_uiAttackID = 0;
+            return TRUE;
+        }
+        TRACE("CPlayer:: startSingleAction *** Chain? ***\n");
+        return FALSE;
+    }
+    m_iStepStockSkill++;
+    return TRUE;
 }
-__asm__(".rdata\n.align 4\n.word .L0026C6B0\n.word .L0026C6D8\n.word .L0026C700\n.word .L0026C6C4\n.word .L0026C6EC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", startSingleAction__7CPlayer);
 /* Parked: same spot as initAttackField: around the g_fGravity load the original keeps the %hi in v0 (later
    s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi
    moves. The flag block (battle 0x10/0x80000/8, then trg 4) and the ternary m_iComboBoost match.
