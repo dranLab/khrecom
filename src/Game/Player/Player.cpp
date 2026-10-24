@@ -3513,10 +3513,36 @@ BOOL CPlayer::chkExtraSkill() {
     }
     return FALSE;
 }
-/* placeholder: rodata of calcEnchant_AttackPoint__7CPlayerRiR8ATK_KIND8ATK_ATTRUi */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026DF8C\n.word .L0026DF8C\n.word .L0026DF8C\n.word .L0026DF94\n.word .L0026DF8C\n.word .L0026DF8C\n.word .L0026DF94\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcEnchant_AttackPoint__7CPlayerRiR8ATK_KIND8ATK_ATTRUi);
+void CPlayer::calcEnchant_AttackPoint(INT& inPoint, ATK_KIND& inAtkKind, ATK_ATTR inAttr, UINT inUpKind) {
+    if (m_pCB) {
+        CardBattle::ENCHANT_PARAM param;
+        param.init(getHandle(), 1);
+        param.uiState = 1;
+        param.AtkKind = inAtkKind;
+        param.UpKind = inUpKind;
+        param.AtkAttr = inAttr;
+        param.iAttackPoint = inPoint;
+        param.iHp = m_iHP;
+        param.iHpMax = m_iMaxHP;
+        switch (m_uiAttackKind) {
+        case 1:
+        case 2:
+        case 3:
+        case 5:
+        case 6:
+            param.iNormal = 1;
+            break;
+        case 4:
+        case 7:
+            param.iNormal = 1;
+            param.iFinish = 1;
+            break;
+        }
+        m_pCB->calcEnchantParam(param);
+        inPoint = param.iAttackPoint;
+        inAtkKind = param.AtkKind;
+    }
+}
 void CPlayer::calcEnchant_DamagePoint(INT& inPoint, ATK_ATTR inAttr) {
     if (m_pCB) {
         CardBattle::ENCHANT_PARAM param;
