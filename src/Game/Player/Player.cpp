@@ -3144,10 +3144,114 @@ void CPlayer::initCarry() {
     setAnimForce(0x17, 0, 0, 0, 0, 0);
     m_pCam->setFlag(0x800, TRUE); /* the partial CPlayerCamera keeps (flag, on/off): the original is setFlag(0x800, 0) */
 }
-/* placeholder: rodata of exeCarry__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026A4F4\n.word .L0026A5C4\n.word .L0026A608\n.word .L0026A714\n.word .L0026A7EC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeCarry__7CPlayer);
+void CPlayer::exeCarry() {
+    TIMEQ frameTQ;
+    CGimmickCarry* pGimmick;
+    FVECTOR pos;
+    FVECTOR rot;
+    INT PreWalkMode;
+    FLOAT aim_power;
+    INT frame;
+    frameTQ = getMotionCurrentTime();
+    frame = frameTQ / 50;
+    rot = getRot();
+    if (m_pMarker) m_pMarker->m_uiFlag |= 0x80;
+    if (m_hGimmick > 0) {
+        pGimmick = (CGimmickCarry*)CTaskMan::getTask(m_hGimmick);
+        if (!pGimmick || pGimmick->getTypeID() != 0x2003) {
+            m_hGimmick = 0;
+            m_iSubState = 4;
+            initStandUp(0);
+            return;
+        }
+    }
+    switch (m_iSubState) {
+    case 0:
+        m_pMove->homingY(m_vMarkPos, 0.1f);
+        if (calcDistanceXZ(m_vMarkPos) > 0.9f) {
+            m_fWalkSpeed = m_pParam->MAX_RUN_SPEED / 60.0f;
+            m_pMove->calcVelocityXZ(m_fWalkSpeed);
+        } else {
+            m_fWalkSpeed = 0.0f;
+            m_pMove->calcVelocityXZ(m_fWalkSpeed);
+        }
+        if (frameTQ >= 700) {
+            m_pMove->homingY(m_vMarkPos, 1.0f);
+            clearSpeed();
+            m_fWalkSpeed = 0.0f;
+            m_iSubState = 1;
+            pGimmick->lift();
+        }
+        break;
+    case 1:
+        if (isMotionEnd()) {
+            m_iSubState = 2;
+            setAnimForce(0x18, 0, 0, 0, 0, 0);
+            pGimmick->CarryStand();
+        }
+        break;
+    case 2:
+        if (isAir()) {
+            pGimmick->CancelCarry();
+            m_hGimmick = 0;
+            initFall();
+            break;
+        }
+        if (isTrgFlag(0x204)) {
+            m_iSubState = 3;
+            clearSpeed();
+            m_pMarker->holdTarget(8);
+            setAnimForce(0x1A, 0, 0, 0, 0, 0);
+            break;
+        }
+        PreWalkMode = m_WalkMode;
+        aim_power = m_fAnalogPower;
+        if (aim_power < 0.3f) {
+            m_fWalkSpeed = 0.0f;
+            m_WalkMode = 0;
+        } else {
+            m_fWalkSpeed = m_pParam->CARRY_MOVE_SPEED;
+            m_WalkMode = 1;
+        }
+        if (PreWalkMode != m_WalkMode) {
+            if (!m_WalkMode) {
+                if (m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
+                pGimmick->CarryStand();
+            } else {
+                pGimmick->CarryWalk();
+            }
+        }
+        exeWalk();
+        break;
+    case 3:
+        if (m_hGimmick > 0) {
+            procTargetMark();
+            if (m_hTarget > 0) m_pMove->homingY(m_vMarkPos, 1.0f);
+            m_fWalkSpeed = 0.0f;
+            m_pMove->calcVelocityXZ(m_fWalkSpeed);
+            if (m_hTarget > 0) {
+                pGimmick->ThrowGimmick(m_vMarkPos);
+            } else {
+                calcAppearPos(5.0f, 0.5f, NULL);
+                pGimmick->ThrowGimmick(m_vAppearPos);
+            }
+            m_hGimmick = 0;
+            m_pMarker->holdTarget(0);
+        } else {
+            m_pCam->setFlag(0x800, TRUE);
+            if (isMotionEnd()) {
+                m_hGimmick = 0;
+                m_iSubState = 4;
+                initStandUp(0);
+            }
+        }
+        break;
+    case 4:
+        m_hGimmick = 0;
+        initStandUp(0);
+        break;
+    }
+}
 /* placeholder: rodata of resetAction__7CPlayeri */
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L0026ADB4\n.word .L0026AAE4\n.word .L0026ADB4\n.word .L0026AAF8\n.word .L0026AAF8\n.word .L0026AAF8\n.word .L0026AAE0\n.word .L0026AC7C\n.word .L0026ACD0\n.word .L0026ACD0\n.text\n");
