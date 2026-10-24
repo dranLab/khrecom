@@ -154,7 +154,7 @@ public:
     static INT getPlutoCount();
     static void setGimmickOwner(HANDLE h);
     static HANDLE getGimmickOwner();
-    static BOOL isPlayingGimmickCard();
+    static BOOL isPlayingGimmickCard(); static BOOL isStandingCard(INT inSide); // PARTIAL: isStandingCard added for Game/Player/Player
     INT calcPointBreak(INT a, INT b);
     void destroyEnemyCard(INT inHandle);
     void destroyRevolver(INT inSide);

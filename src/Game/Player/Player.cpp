@@ -4377,16 +4377,153 @@ void CPlayer::setFlipForce(const FVECTOR* inPos) {
     CardBattle::CCardBattle::notifyCompleteGimmick();
     PLM::setVibration(3);
 }
-/* placeholder: rodata of exeDamage__7CPlayer */
-__asm__(".rdata\n");
-inline void _roPh21() {
-    TRACE("PL::exeDamage(); \x81\xa6\x83_\x83\x81\x81[\x83W\x92\x86\x82\xbe\x82\xaf\x82\xc7\x83M\x83~\x83" "b\x83N\x94\xad\x93\xae\x81I\n");
-    TRACE("CPlayer:: exeDamage -> initTransform(0)\n");
-    TRACE("PL::exeDamage(); \x81\xa6\x83_\x83\x81\x81[\x83W\x92\x86\x82\xc8\x82\xcc\x82\xc9\x83K\x81[\x83h\x82\xf0\x8eg\x97p\x92\x86\x82\xc5\x82\xb7\x81I\n");
-    TRACE("PL::exeDamage(); chkTrgAction=OK!\n");
+void CPlayer::exeDamage() {
+    BOOL bEndFlag;
+    BOOL bActionFlag;
+    setBattleFlag(0, 8);
+    setGroundIK(1);
+    if (m_iSubState != 7 || calcDistanceXZ(m_vEnemyPos) < 2.0f) {
+        m_fJumpSpdXZ = Movement::Approach(m_fJumpSpdXZ, 0.0f, 0.1f, m_fFrameRate);
+    }
+    m_pMove->calcVelocityXZ(m_fJumpSpdXZ);
+    if (isAir()) {
+        m_JumpState = 3;
+        FVECTOR vel = m_pMove->getVel();
+        m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        vel.y = m_fJumpSpdY;
+        m_pMove->setVel(vel);
+    }
+    bEndFlag = FALSE;
+    bActionFlag = FALSE;
+    switch (m_iSubState) {
+    case 1:
+        setGroundIK(1);
+        if (!isAir()) {
+            if (m_iNowAnimID == 6 || m_iNowAnimID == 0x26) {
+                setAnimForce(7, -1, 0, 0, 0, 0);
+                m_JumpState = 6;
+                m_fJumpSpdXZ = 0.0f;
+                m_fJumpSpdY = 0.0f;
+                m_fJumpGravity = 0.0f;
+                clearSpeed();
+            }
+            m_bDmgInAir = FALSE;
+            m_iPreAnimID = 0x24;
+        }
+        if (isMotionEnd()) {
+            setAnimForce(isAir() ? 6 : 0x2A, -1, 0, 0, 0, 0);
+        }
+        bEndFlag = !(m_tqStateTimer < m_tqCardBreakTime);
+        break;
+    case 2:
+        setGroundIK(1);
+        if (!isAir()) {
+            switch (m_iNowAnimID) {
+            case 0x26:
+                setAnimForce(0x25, -1, 0, 0, 0, getMotionCurrentTime() + m_tqFrameRate);
+                m_pAnim->setRootMove(1, 1);
+                m_JumpState = 6;
+                m_fJumpSpdXZ = 0.0f;
+                m_fJumpSpdY = 0.0f;
+                m_fJumpGravity = 0.0f;
+                clearSpeed();
+                break;
+            case 6:
+                setAnimForce(7, -1, 0, 0, 0, 0);
+                m_JumpState = 6;
+                m_fJumpSpdXZ = 0.0f;
+                m_fJumpSpdY = 0.0f;
+                m_fJumpGravity = 0.0f;
+                clearSpeed();
+                break;
+            }
+            m_bDmgInAir = FALSE;
+            m_iPreAnimID = 0x25;
+        }
+        if (isMotionEnd()) {
+            setAnimForce(isAir() ? 6 : 0x2A, -1, 0, 0, 0, 0);
+        }
+        bEndFlag = !(m_tqStateTimer < m_tqCardBreakTime);
+        break;
+    case 3:
+    case 5:
+    case 7:
+        if (isMotionEnd()) {
+            if (isAir()) setAnimForce(6, -1, 0, 0, 0, 0);
+            else setAnimForce(chkBattleIdle() ? 0x2A : 1, -1, 0, 0, 0, 0);
+        }
+        if (!(m_tqStateTimer < m_tqCardBreakTime)) {
+            bEndFlag = TRUE;
+            bActionFlag = !m_bIsDead;
+        }
+        break;
+    case 4:
+        if (!isAir()) {
+            if (m_iNowAnimID == 6 || m_iNowAnimID == 0x21) {
+                setAnimForce(7, -1, 0, 0, 0, 0);
+            }
+            m_bDmgInAir = FALSE;
+        }
+        if (isMotionEnd()) {
+            if (isAir()) setAnimForce(6, -1, 0, 0, 0, 0);
+            else setAnimForce(chkBattleIdle() ? 0x2A : 1, -1, 0, 0, 0, 0);
+        }
+        if (!(m_tqStateTimer < m_tqCardBreakTime)) {
+            bEndFlag = TRUE;
+            bActionFlag = !m_bIsDead;
+        }
+        break;
+    case 6:
+    default:
+        bEndFlag = isMotionEnd() != 0;
+        break;
+    }
+    if (isTrgFlag(0x40) && !isTrgFlag(0x100000) && !isConditionFlag(0x2000000)) {
+        TRACE("PL::exeDamage(); \x81\xa6\x83_\x83\x81\x81[\x83W\x92\x86\x82\xbe\x82\xaf\x82\xc7\x83M\x83~\x83" "b\x83N\x94\xad\x93\xae\x81I\n");
+        initGimmickCard(0);
+        return;
+    }
+    if (bEndFlag) {
+        if (m_bIsDead) {
+            initDead();
+            return;
+        }
+        if (isTrgFlag(0x100000) || isConditionFlag(0x2000000)) {
+            TRACE("CPlayer:: exeDamage -> initTransform(0)\n");
+            initTransform(0);
+            return;
+        }
+        if (m_pCB) {
+            if (CardBattle::CCardBattle::isStandingCard(1)) {
+                TRACE("PL::exeDamage(); \x81\xa6\x83_\x83\x81\x81[\x83W\x92\x86\x82\xc8\x82\xcc\x82\xc9\x83K\x81[\x83h\x82\xf0\x8eg\x97p\x92\x86\x82\xc5\x82\xb7\x81I\n");
+                m_pCB->destroyPlayCard(1, 0);
+                setBattleFlag(0, 0x10200000);
+            }
+        }
+        if (isConditionFlag(0x08810023)) {
+            initBadCondition();
+            return;
+        }
+        m_bDmgMuteki = FALSE;
+        initIdle(-1, 0);
+        setBattleFlag(0, 0x80000);
+        setBattleFlag(0, 0x10200000);
+        setBattleFlag(0, 0x4060);
+        setBattleFlag(0, 0x00130000);
+        setBattleFlag(0, 0x03000000);
+    } else {
+        if (isConditionFlag(0x4000)) bActionFlag = TRUE;
+        if (bActionFlag) {
+            if (isConditionFlag(0x08810023)) {
+                initBadCondition();
+                return;
+            }
+            if (chkTrgAction(1, 0)) {
+                TRACE("PL::exeDamage(); chkTrgAction=OK!\n");
+            }
+        }
+    }
 }
-__asm__(".rdata\n.align 4\n.word .L0026F518\n.word .L0026F588\n.word .L0026F6AC\n.word .L0026F6D4\n.word .L0026F6AC\n.word .L0026F7B4\n.word .L0026F6AC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeDamage__7CPlayer);
 INT CPlayer::chkTrgAction(INT inAction, UINT inFlag) {
     if (m_bIsBattleScene) {
         setBattleFlag(8, 0);
