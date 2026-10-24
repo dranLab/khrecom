@@ -177,9 +177,10 @@ public:
 };
 class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
 public:
-    static void setPrizeMp(INT inMP); static void setDropMp(INT inMP); static void setPrizeExp(INT inEXP);
+    static void setPrizeMp(INT inMP); static void setDropMp(INT inMP); static void setPrizeExp(INT inEXP); static void setPrizeCard(CARD& inCard, INT inKind, INT inFlag);
 };
 }
+class CJiminyMemoFlag { public: static void checkEvent(INT inEvent, INT inParam0, INT inParam1); }; /* PARTIAL: Form/Menu/JMemoFlag.h is not included here */
 class CSound { /* PARTIAL: System/Sound.h is not written yet */
 public:
     static HANDLE playSE(INT nID, INT nCh, INT nVol);
@@ -5461,12 +5462,213 @@ void CPlayer::notifyReturnCard(const CARD* inCard) {
         }
     }
 }
-/* placeholder: rodata of notifyGetPrize__7CPlayeriii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00273B0C\n.word .L00273B0C\n.word .L00273B0C\n.word .L00273B0C\n.word .L00273BE8\n.word .L00273BE8\n.word .L00273A9C\n.word .L00273C38\n.word .L00273B0C\n.word .L00273B0C\n.word .L00273B0C\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00273C94\n.word .L00273CA0\n.word .L00273FA0\n.word .L00273CAC\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273CB8\n.word .L00273CC4\n.word .L00273CD0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273DA0\n.word .L00273DA8\n.word .L00273DB0\n.word .L00273DB8\n.word .L00273DC0\n.word .L00273DC8\n.word .L00273FA0\n.word .L00273CDC\n.word .L00273FA0\n.word .L00273CE8\n.word .L00273FA0\n.word .L00273CF4\n.word .L00273D00\n.word .L00273D0C\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273D18\n.word .L00273D24\n.word .L00273D30\n.word .L00273D3C\n.word .L00273D44\n.word .L00273D4C\n.word .L00273D54\n.word .L00273FA0\n.word .L00273D5C\n.word .L00273D64\n.word .L00273D6C\n.word .L00273D74\n.word .L00273D7C\n.word .L00273D84\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273FA0\n.word .L00273DD0\n.word .L00273DD8\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00273E28\n.word .L00273E38\n.word .L00273E48\n.word .L00273E58\n.word .L00273E68\n.word .L00273E78\n.word .L00273E88\n.word .L00273E98\n.word .L00273ED8\n.word .L00273F2C\n.word .L00273F3C\n.word .L00273F4C\n.word .L00273F78\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", notifyGetPrize__7CPlayeriii);
+void CPlayer::notifyGetPrize(INT inKind, INT inNumber, INT inState) {
+    CBattleEnemyManager* pBEM;
+    INT bLvUpDisp;
+    CARD card;
+    INT work;
+    INT work2;
+    if (inKind <= 0xCA) {
+        _setCard(card, inKind, inNumber);
+        switch (card.m_nCategory20) {
+        case 7:
+            _setCard(card, inKind, 0xFF);
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 9:
+        case 10:
+        case 11:
+            if (inState == 3) {
+                if (_instance()) _instance()->m_pRevolver->addCard(&card, 1);
+            } else {
+                CCard::addCard(inKind, inNumber);
+                if (_instance()) {
+                    switch (inState) {
+                    case 1:
+                        Gauge::CPrizeGauge::setPrizeCard(card, _instance()->m_bIsBattleScene + 1, 0);
+                        break;
+                    case 2:
+                        Gauge::CPrizeGauge::setPrizeCard(card, 2, 0);
+                        break;
+                    }
+                } else if (inState > 0) {
+                    Gauge::CPrizeGauge::setPrizeCard(card, inState, 0);
+                }
+                INT mode = CGame::getDbgGameMode();
+                if (mode > 3) {
+                    if (mode < 7) CCard::addDeck(card, 0);
+                    else if (mode < 9) CCard::addDeck(card, 0);
+                }
+            }
+            break;
+        case 5:
+        case 6:
+            if (_instance()) {
+                if (_instance()->m_pRevolver) {
+                    if (inState == 3) {
+                        _instance()->m_pRevolver->addCard(&card, 1);
+                        break;
+                    }
+                    _instance()->m_pRevolver->addCard(&card, 0);
+                }
+                CJiminyMemoFlag::checkEvent(4, card.m_nKind, 0);
+            }
+            break;
+        case 8:
+            break;
+        }
+        CGameWork::setFlag(1, 0xF, TRUE);
+        work = CGameWork::getInt(0, 0x21);
+        work2 = CGameWork::getInt(0, 0x2D);
+        switch (card.m_nKind) {
+        case 0x7:
+            CGameWork::setInt(0, 0x21, work | 0x1);
+            break;
+        case 0x8:
+            CGameWork::setInt(0, 0x21, work | 0x2);
+            break;
+        case 0xA:
+            CGameWork::setInt(0, 0x21, work | 0x4);
+            break;
+        case 0xD:
+            CGameWork::setInt(0, 0x21, work | 0x8);
+            break;
+        case 0xE:
+            CGameWork::setInt(0, 0x21, work | 0x10);
+            break;
+        case 0xF:
+            CGameWork::setInt(0, 0x21, work | 0x20);
+            break;
+        case 0x1A:
+            CGameWork::setInt(0, 0x21, work | 0x100);
+            break;
+        case 0x1C:
+            CGameWork::setInt(0, 0x21, work | 0x200);
+            break;
+        case 0x1E:
+            CGameWork::setInt(0, 0x21, work | 0x400);
+            break;
+        case 0x1F:
+            CGameWork::setInt(0, 0x21, work | 0x800);
+            break;
+        case 0x20:
+            CGameWork::setInt(0, 0x21, work | 0x1000);
+            break;
+        case 0x23:
+            CGameWork::setInt(0, 0x21, work | 0x2000);
+            break;
+        case 0x24:
+            CGameWork::setInt(0, 0x21, work | 0x4000);
+            break;
+        case 0x25:
+            CGameWork::setInt(0, 0x21, work | 0x8000);
+            break;
+        case 0x26:
+            CGameWork::setInt(0, 0x21, work | 0x10000);
+            break;
+        case 0x27:
+            CGameWork::setInt(0, 0x21, work | 0x20000);
+            break;
+        case 0x28:
+            CGameWork::setInt(0, 0x21, work | 0x40000);
+            break;
+        case 0x29:
+            CGameWork::setInt(0, 0x21, work | 0x80000);
+            break;
+        case 0x2B:
+            CGameWork::setInt(0, 0x21, work | 0x100000);
+            break;
+        case 0x2C:
+            CGameWork::setInt(0, 0x21, work | 0x200000);
+            break;
+        case 0x2D:
+            CGameWork::setInt(0, 0x21, work | 0x400000);
+            break;
+        case 0x2E:
+            CGameWork::setInt(0, 0x21, work | 0x800000);
+            break;
+        case 0x2F:
+            CGameWork::setInt(0, 0x21, work | 0x1000000);
+            break;
+        case 0x30:
+            CGameWork::setInt(0, 0x21, work | 0x2000000);
+            break;
+        case 0x13:
+            CGameWork::setInt(0, 0x2D, work2 | 0x80);
+            break;
+        case 0x14:
+            CGameWork::setInt(0, 0x2D, work2 | 0x100);
+            break;
+        case 0x15:
+            CGameWork::setInt(0, 0x2D, work2 | 0x200);
+            break;
+        case 0x16:
+            CGameWork::setInt(0, 0x2D, work2 | 0x400);
+            break;
+        case 0x17:
+            CGameWork::setInt(0, 0x2D, work2 | 0x800);
+            break;
+        case 0x18:
+            CGameWork::setInt(0, 0x2D, work2 | 0x1000);
+            break;
+        case 0x7D:
+            CGameWork::setInt(0, 0x2D, work2 | 0x2000);
+            break;
+        case 0x7E:
+            CGameWork::setInt(0, 0x2D, work2 | 0x4000);
+            break;
+        }
+    } else {
+        bLvUpDisp = _instance() != NULL;
+        switch (inKind) {
+        case 0xCB:
+            addEXP(1, bLvUpDisp);
+            break;
+        case 0xCC:
+            addEXP(10, bLvUpDisp);
+            break;
+        case 0xCD:
+            addEXP(60, bLvUpDisp);
+            break;
+        case 0xCE:
+            addEXP(5, bLvUpDisp);
+            break;
+        case 0xCF:
+            addEXP(30, bLvUpDisp);
+            break;
+        case 0xD0:
+            addEXP(99, bLvUpDisp);
+            break;
+        case 0xD1:
+            addEXP(1400, bLvUpDisp);
+            break;
+        case 0xD2:
+            if (!_instance()->m_bIsBattleScene) _instance()->addHP(_instance()->m_iMaxHP * 3 / 100, 0x1770, 0);
+            else _instance()->addHP(3, 0x1770, 0);
+            break;
+        case 0xD3:
+            if (!_instance()->m_bIsBattleScene) _instance()->addHP(_instance()->m_iMaxHP / 20, 0x2328, 0);
+            else _instance()->addHP(10, 0x2328, 0);
+            break;
+        case 0xD4:
+            addMP(4);
+            break;
+        case 0xD5:
+            addMP(10);
+            break;
+        case 0xD6:
+            pBEM = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+            if (pBEM) pBEM->notifyPremiumPrizeGet();
+            break;
+        case 0xD7:
+            pBEM = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+            if (pBEM) pBEM->notifyRoulettePrizeGet();
+            break;
+        }
+    }
+}
 static inline BOOL _isLevelMax() {
     BOOL ret = FALSE;
     if (_instance()) {
