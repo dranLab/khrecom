@@ -4838,15 +4838,121 @@ void CPlayer::initBadCondition() {
     }
     setBattleFlag(0, 8);
 }
-/* placeholder: rodata of exeBadCondition__7CPlayer */
-__asm__(".rdata\n");
-inline void _roPh24() {
-    TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : [TRG_GIMMICK]\n");
-    TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : [TRG_CANCEL]\n");
-    TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : chkTrgAction=OK! ...enableDuelEntry\n");
+void CPlayer::exeBadCondition() {
+    setBattleFlag(0, 8);
+    if (isAir()) {
+        FVECTOR vel = m_pMove->getVel();
+        m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        vel.y = m_fJumpSpdY;
+        m_pMove->setVel(vel);
+    }
+    switch (m_iSubState) {
+    case 1:
+        if (isTrgAnyPad()) setTimer(getTimer() - 100);
+        if (getTimer() <= 0) {
+            m_iSubState = 12;
+            setAnimForce(0x28, -1, 0, 0, 0, 0);
+        }
+        break;
+    case 2:
+        if (isTrgAnyPad()) setTimer(getTimer() - 100);
+        if (getTimer() <= 0) {
+            m_iSubState = 12;
+            setAnimForce(0x28, -1, 0, 0, 0, 0);
+            fadeEffect(m_hEffBad, 1);
+        }
+        break;
+    case 6:
+        if (isTrgAnyPad()) setTimer(getTimer() - 100);
+        if (getTimer() <= 0) {
+            m_iSubState = 12;
+            setAnimForce(0x28, -1, 0, 0, 0, 0);
+            fadeEffect(m_hEffBad, 1);
+            m_hEffBad = setEffect(PL::g_szDpxVexen, 4, &getPos(), NULL, 0.0f);
+        }
+        break;
+    case 7:
+        PLM::setVibration(4);
+        if (getMotionCurrentTime() >= 400) setAnimForce(0x20, 0, 1, 99, 99, 200);
+        if (isTrgFlag(0x8000)) {
+            setConditionFlag(1, 0x10000);
+            m_pMove->setFlag(1, FALSE);
+            setOldPos(m_vCenterPos);
+            setFaceAnim(3, 0);
+            initBadCondition();
+        } else if (chkTrgAction(0, 0)) {
+            setConditionFlag(0, 0x10000);
+            m_pMove->setFlag(1, FALSE);
+            setOldPos(m_vCenterPos);
+        }
+        break;
+    case 8:
+        PLM::setVibration(4);
+        if (isMotionEnd()) {
+            setAnimForce(0x21, 800, 1, 99, 99, 100);
+            setAnimSpeed(0.5f);
+        }
+        if (isTrgFlag(0x8000)) {
+            setConditionFlag(1, 0x800000);
+            m_pMove->setFlag(1, FALSE);
+            setOldPos(m_vCenterPos);
+            m_iSubState = 12;
+            setAnimForce(0x28, -1, 0, 0, 0, 0);
+            m_JumpState = 3;
+            m_fJumpGravity = *(FLOAT*)&PL::g_fGravity * 5.0f;
+            m_fJumpSpdY = 0.0f;
+        } else if (chkTrgAction(0, 0)) {
+            setConditionFlag(0, 0x800000);
+            m_pMove->setFlag(1, FALSE);
+            setOldPos(m_vCenterPos);
+        }
+        break;
+    case 9:
+        PLM::setVibration(4);
+        if (m_pAnim->getAnimID() != 1) {
+            if (isMotionEnd()) setAnimRsrcEx(0xFCB, 1, -1, 1, 0, 0, 0);
+            break;
+        }
+        if (isTrgFlag(0x40)) {
+            TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : [TRG_GIMMICK]\n");
+            setConditionFlag(0, 0x8000000);
+            m_pMove->setFlag(1, FALSE);
+            setOldPos(m_vCenterPos);
+            setAnimRsrcEx(0xFCB, 2, -1, 1, 0, 0, 0);
+            initGimmickCard(0);
+        } else if (isTrgFlag(0x8000)) {
+            TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : [TRG_CANCEL]\n");
+            setConditionFlag(0, 0x8000000);
+            m_pMove->setFlag(1, FALSE);
+            setOldPos(m_vCenterPos);
+            m_iSubState = 12;
+            setAnimRsrcEx(0xFCB, 2, -1, 1, 0, 0, 0);
+        } else if (chkTrgAction(0, 0)) {
+            TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : chkTrgAction=OK! ...enableDuelEntry\n");
+            setConditionFlag(0, 0x8000000);
+            m_pMove->setFlag(1, FALSE);
+            setOldPos(m_vCenterPos);
+        } else {
+            break;
+        }
+        m_pCB->setFlag(0, 0x400000);
+        break;
+    case 11:
+        if (getTimer() <= 0) {
+            m_iSubState = 12;
+            setAnimForce(0x28, -1, 0, 0, 0, 0);
+        }
+        break;
+    case 12:
+        if (isMotionEnd()) initStandUp(0);
+        break;
+    case 3:
+    case 4:
+    case 5:
+    case 10:
+        break;
+    }
 }
-__asm__(".rdata\n.align 4\n.word .L00270804\n.word .L00270820\n.word .L00270D14\n.word .L00270D14\n.word .L00270D14\n.word .L00270884\n.word .L00270910\n.word .L002709D4\n.word .L00270B00\n.word .L00270D14\n.word .L00270CC0\n.word .L00270CFC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeBadCondition__7CPlayer);
 /* Parked: in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets
    the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but
    swaps v0/a2 (tq/pad). tried: all 6 statement orders x tq forms (ternary, param default, ==0), UINT& pad,
