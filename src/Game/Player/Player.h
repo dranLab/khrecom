@@ -351,11 +351,11 @@ public:
     BOOL cmdRevolver_isEmpty(); // PARTIAL: added for Game/Atel/AtelTutorial
     INT cmdRevolver_isActive();
     BOOL cmdRevolver_rollDeck(INT inNum);
-    INT chkLadderStepNow(BOOL inAir); INT getLadderStepNow(FLOAT inHeight);
+    INT chkLadderStepNow(BOOL inAir); INT getLadderStepNow(FLOAT inHeight); void initLadder(INT inStep);
     void exeQuickBarrier(); void exeAeroGuard(); void setAeroGuard(INT inFlag);
     INT isNowCardActionState();
     INT chkWalkMode();
-    void exeWalk(); void setWalkAnim(); void exeStartWait(); INT isStartLadderJump(); void procDropMP(); INT chkBattleIdle(); FLOAT getAirHeight(FVECTOR* inPos, FLOAT inHeight, INT inLimit);
+    void exeWalk(); void setWalkAnim(); void exeStartWait(); INT isStartLadderJump(); void procDropMP(); INT chkBattleIdle(); FLOAT getAirHeight(FVECTOR* inPos, FLOAT inHeight, INT inLimit); FLOAT getFrontAirHeight(FVECTOR* inPos, FLOAT inLength, FLOAT inHeight, FLOAT inDir);
     void recoverCollMap();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
     void setConditionFlag(UINT inSet, UINT inMask) { m_uiConditionFlag = (m_uiConditionFlag | inSet) & ~inMask; }
@@ -374,7 +374,7 @@ public:
     // PARTIAL: added for Game/Player/Summon
     FLOAT getDir() { return m_fDir; }
     Gauge::CLockonMarker* getMarker() { return m_pMarker; }
-    void calcAppearPos(FLOAT inX, FLOAT inZ, FVECTOR* inTarget);
+    INT calcAppearPos(FLOAT inDist, FLOAT inRadius, FVECTOR* inCenter);
     void calcAppearPosFS(FLOAT inDist, FLOAT inRadius);
     HANDLE isNowMark() { return m_hMark; } // PARTIAL: added for Game/Player/FriendGoofy (original name/type unknown)
     // PARTIAL: added for Game/Player/PlayerCamera
@@ -471,7 +471,7 @@ public:
     void setFaceAnim(INT inID, INT inFlag);
     void initStartWait();
     void initStandUp(INT inFlag);
-    void initFall(); void initWall(); INT chkWallBottom(); void initHang(); void initEscape(); void initAttackField(INT inNo); void initAttack(INT inNo); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void exeCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
+    void initFall(); void exeAttack(); void exeFooting(); void exeJumpLand(); void initDead(); void initWall(); INT chkWallBottom(); void initHang(); void initEscape(); void initAttackField(INT inNo); void initAttack(INT inNo); void initAvoid(); void initFooting(INT inFlag); void initCharge(); void exeCharge(); void initGimmickCard(INT inNo); void initItem(INT inNo); void initJump(INT inFlag); void initFlip(INT inFlag); void setFlipForce(const FVECTOR* inPos);
     INT initIdle(INT inAnim, INT inFlag);
     INT procFlowIdle(INT inFlag);
     void initEnd();
@@ -493,7 +493,7 @@ public:
     void resetAction(INT inFlag);
     void procAttackMove(INT inFlag, FLOAT inSpeed, FLOAT inRate, INT inP3, FLOAT inP4);
     INT procAttackCollision(TIMEQ inNowFrame);
-    void procTargetMark(); void exeAttackField(); void chkPlayCard(); void chkLockon();
+    void procTargetMark(); void exeAttackField(); void chkPlayCard(); INT chkPlayCardCombo(); void chkLockon();
     void procGravity(TIMEQ inNowFrame, TIMEQ inEndFrame, INT inFlag);
     void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inFlag);
     void setUseRsrcBlock(INT inBlock);
