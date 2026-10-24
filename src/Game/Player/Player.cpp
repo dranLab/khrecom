@@ -2445,7 +2445,65 @@ void CPlayer::setCastEffect(const CHAR* inName, INT inNo, CCoord* inCrd, FVECTOR
     CEffect* effect = CEffectMan::getEffect(m_hEffCast);
     if (effect) effect->m_iFlag |= 4;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", calcAppearPos__7CPlayerffP7FVECTOR);
+INT CPlayer::calcAppearPos(FLOAT inDist, FLOAT inRadius, FVECTOR* inCenter) {
+    FVECTOR pos = inCenter ? *inCenter : m_vCenterPos;
+    FMATRIX m;
+    FVECTOR mpos;
+    _unitMatrix(m);
+    _rotMatrixY(m, m_fDir);
+    m_pCollMap->setType(COLL_TYPE_SPHERE);
+    m_pCollMap->enableSliding(0);
+    pos.w = 1.0f;
+    if (inRadius > 0.5f) {
+        FLOAT _z = inRadius - 0.5f;
+        FVECTOR base = {{ 0.0f, 0.0f, inRadius - _z, 1.0f }};
+        ApplyMatrixXYZ(base, m, base);
+        AddVectorXYZ(base, pos, base);
+        m_pCollMap->setRadius(0.5f);
+        m_pCollMap->setShiftY(0.0f);
+        m_pCollMap->setStartPos(pos);
+        m_pCollMap->setEndPos(base);
+        if (m_pCollMap->collideRide(0) || m_pCollMap->collideMap()) base = pos;
+        FVECTOR start = {{ 0.0f, 0.0f, 0.5f - inRadius, 1.0f }};
+        ApplyMatrixXYZ(start, m, start);
+        AddVectorXYZ(start, pos, start);
+        m_pCollMap->setRadius(inRadius);
+        m_pCollMap->setShiftY(0.0f);
+        m_pCollMap->setStartPos(base);
+        m_pCollMap->setEndPos(start);
+        if (m_pCollMap->collideRide(0)) {
+            start = *m_pCollMap->getDetectPos();
+            if (m_pCollMap->collideMap()) {
+                mpos = *m_pCollMap->getDetectPos();
+                if (Math3D::NearVector(start, mpos, pos) > 0) start = mpos;
+            }
+        } else if (m_pCollMap->collideMap()) {
+            start = *m_pCollMap->getDetectPos();
+        }
+        pos = start;
+        pos.w = 1.0f;
+    }
+    m_vAppearPos.set(0.0f, 0.0f, inDist);
+    ApplyMatrixXYZ(m_vAppearPos, m, m_vAppearPos);
+    AddVectorXYZ(m_vAppearPos, m_vAppearPos, pos);
+    m_pCollMap->setRadius(inRadius);
+    m_pCollMap->setShiftY(0.0f);
+    m_pCollMap->setStartPos(pos);
+    m_pCollMap->setEndPos(m_vAppearPos);
+    if (m_pCollMap->collideRide(0)) {
+        m_vAppearPos = *m_pCollMap->getDetectPos();
+        if (m_pCollMap->collideMap()) {
+            mpos = *m_pCollMap->getDetectPos();
+            if (Math3D::NearVector(m_vAppearPos, mpos, pos) > 0) m_vAppearPos = mpos;
+        }
+        return TRUE;
+    }
+    if (m_pCollMap->collideMap()) {
+        m_vAppearPos = *m_pCollMap->getDetectPos();
+        return TRUE;
+    }
+    return FALSE;
+}
 void CPlayer::calcAppearPosFS(FLOAT inDist, FLOAT inRadius) {
     FVECTOR pos;
     BOOL hit;
