@@ -25,7 +25,7 @@ struct PATK_DATA {
 
 namespace PL {
 extern PATK_DATA g_AttackDataList[188];
-extern FLOAT g_fAntiGravity; // PARTIAL: added for Game/Player/SummonBambi
+extern FLOAT g_fAntiGravity; extern INT g_AttackList[]; extern INT g_RikuAttackList[]; extern INT g_DRikuAttackList[]; // PARTIAL: g_fAntiGravity added for Game/Player/SummonBambi, the attack lists for Game/Player/Player
 }
 
 #endif /* GAME_PLAYER_PLAYERATTACK_H */
