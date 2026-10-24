@@ -55,7 +55,7 @@ extern "C" char D_0049AFC0[]; /* "c:/KHCOM/MainApp/Game/Player/Player.cpp(12257)
 extern "C" char D_0049B238[]; /* TRACE message (Shift-JIS) of notifyExterminate */
 extern "C" char D_0049AEC0[]; /* TRACE message of initGimmickCard */
 extern "C" char D_0049A888[]; /* TRACE message of procSkillEnd */
-extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */
+extern "C" char D_00499F48[]; extern "C" char D_00499F70[]; extern "C" char D_00499F80[]; extern "C" char D_00499FA0[]; /* TRACE messages of chkPlayCard */ extern "C" char D_0049A030[]; extern "C" char D_0049A060[]; extern "C" char D_0049A068[]; /* TRACE messages of chkPlayCardCombo */
 extern "C" char D_00499988[]; extern "C" char D_004999B8[]; extern "C" char D_004999E8[]; /* "...Player.cpp(1156)", (1172), (1181) */
 extern "C" const CARD_DATA cardDataTbl_0049E190[224];
 extern "C" char D_0049AFA8[]; /* TRACE messages of setTrapDamage */
@@ -1636,7 +1636,65 @@ INT CPlayer::isNowCardActionState() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isNowCardActionState__7CPlayer);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkPlayCardCombo__7CPlayer);
+INT CPlayer::chkPlayCardCombo() {
+    if (!m_pRevolver) return FALSE;
+    if (m_bIsDead) return FALSE;
+    if (isBattleFlag(4)) return FALSE;
+    if (isConditionFlag(0x2000000)) return FALSE;
+    if (isTrgFlag(0x100000)) return FALSE;
+    BOOL bExeSkill = FALSE;
+    INT stock = m_pRevolver->getStock(1);
+    if (stock > 0) {
+        if (isTrgStock() && stock == 3) bExeSkill = TRUE;
+        else bExeSkill = isTrgStockSkill() != 0;
+    }
+    if (!bExeSkill && !isTrgAttack()) return FALSE;
+    if (!isActionFlag(0x40)) return FALSE;
+    if (isBattleFlag(0x4C1F90)) return FALSE;
+    CARD* card = m_pRevolver->getActiveCardData();
+    if (!card) return FALSE;
+    if (bExeSkill && m_bIsCanCombo && !m_iNextAttack && m_bIsAttackHit && m_iAttackNo < m_iMaxCombo) {
+        TRACE(D_0049A030);
+        INT result = m_pRevolver->setPlayStock(1, 1);
+        if (result) {
+            setBattleFlag(0, 8);
+            if (result == 1) {
+                setBattleFlag(0x80000, 0);
+                setBattleFlag(0x10200000, 0);
+                m_iNextAttack = 8;
+            } else {
+                TRACE(D_00499F70);
+                setBattleFlag(0, 0x80000);
+                setBattleFlag(0, 0x10200000);
+                m_iNextAttack = 0;
+            }
+            return TRUE;
+        }
+        TRACE(D_0049A060);
+    }
+    INT cat = card->m_nCategory1;
+    if (cat && (cat < 7 || cat == 14)) {
+        if (m_bIsCanCombo && !m_iNextAttack && m_bIsAttackHit && m_iAttackNo < m_iMaxCombo) {
+            TRACE(D_0049A068);
+            INT result = m_pRevolver->setPlayCard(1, 1);
+            if (result) {
+                setBattleFlag(0, 8);
+                if (result == 1) {
+                    setBattleFlag(0x80000, 0);
+                    setBattleFlag(0x10200000, 0x20);
+                } else {
+                    TRACE(D_00499F70);
+                    setBattleFlag(0, 0x80000);
+                    setBattleFlag(0, 0x10200000);
+                    setBattleFlag(0x20, 0);
+                }
+                return TRUE;
+            }
+            TRACE(D_0049A060);
+        }
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onMsg__7CPlayeriPv);
 INT CPlayer::exeUseStock(INT inFlag) {
     if (isBattleFlag(4) || m_bIsDead) return FALSE;
