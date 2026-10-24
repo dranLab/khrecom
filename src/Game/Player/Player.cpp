@@ -1466,13 +1466,103 @@ void CPlayer::initStandUp(INT inFlag) {
     setFaceAnim(0, 0);
     m_pMove->setFlag(0x40, TRUE); // partial CMovement: (flag, on)
 }
-/* placeholder: rodata of exeStandUp__7CPlayer */
 __asm__(".rdata\n");
-inline void _roPh5() {
-    TRACE("CPlayer:: exeStandUp -> initTransform(0)\n");
+void CPlayer::exeStandUp() {
+    INT PreWalkMode;
+    if (isTrgFlag(0x100000) || isConditionFlag(0x2000000)) {
+        TRACE("CPlayer:: exeStandUp -> initTransform(0)\n");
+        initTransform(0);
+        return;
+    }
+    if (isTrgFlag(0x10)) {
+        if (!chkChargeMove(0)) {
+            initCharge();
+            return;
+        }
+    }
+    if (m_bIsBattleScene) {
+        if (isBattleFlag(4)) {
+            initEnd();
+            return;
+        }
+        if (isTrgFlag(0x400)) {
+            initFooting(1);
+            return;
+        }
+        if (isTrgFlag(8)) {
+            initItem(0);
+            return;
+        }
+        if (isTrgFlag(0x40)) {
+            initGimmickCard(0);
+            return;
+        }
+        if (isTrgFlag(0x20)) initMagic(0);
+        else if (isTrgFlag(0x80)) initFriend(0);
+        else if (isTrgFlag(0x100)) initSummon(0);
+        else if (isTrgFlag(4)) initAttack(0);
+        else goto tail;
+        return;
+    } else {
+        if (isTrgFlag(0x200)) {
+            switch (chkGimmick(0)) {
+            case 0x11:
+                initTreasureBox();
+                return;
+            case 0x14:
+                initRoomCreation();
+                return;
+            case 0x15:
+                initWorldSelect();
+                return;
+            case 0x1E:
+                initCarry();
+                return;
+            case 0x1F:
+                initStandUp(0);
+                return;
+            }
+        }
+        if (isTrgFlag(4)) {
+            initAttackField(0);
+            return;
+        }
+    }
+tail:
+    if (isTrgFlag(2)) {
+        initAvoid();
+        return;
+    }
+    if (isTrgFlag(1)) {
+        initJump(0);
+        return;
+    }
+    PreWalkMode = m_WalkMode;
+    m_WalkMode = chkWalkMode();
+    switch (m_WalkMode) {
+    case 0:
+        if (PreWalkMode && m_pSE) ((CSEMotion*)m_pSE)->playFootStopSE();
+        setPlayerState(STAND);
+        break;
+    case 1:
+        setPlayerState(WALK);
+        break;
+    case 2:
+        setPlayerState(RUN);
+        break;
+    }
+    exeWalk();
+    if (isAir()) {
+        initFall();
+        setFallFloat();
+        return;
+    }
+    if (!chkLadderStepNow(0)) {
+        initLadder(0);
+        return;
+    }
+    if (chkWall(0)) initWall();
 }
-__asm__(".rdata\n.align 4\n.word .L00264580\n.word .L002645D4\n.word .L002645D4\n.word .L00264590\n.word .L002645A0\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645D4\n.word .L002645B0\n.word .L002645C0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeStandUp__7CPlayer);
 INT CPlayer::chkWalkMode() {
     FLOAT aim_power = m_fAnalogPower;
     if (aim_power < 0.3f) {
