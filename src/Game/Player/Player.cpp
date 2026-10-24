@@ -5040,6 +5040,92 @@ void CPlayer::initGimmickCard(INT inNo) {
     m_tqCardBreakTime = 0;
     m_fWalkSpeed = 0.0f;
 }
+/* Parked: 6 lines differ, all one register swap (size, branches, calls, strings, jump table match): the original
+   keeps the frame (getMotionCurrentTime() / 50) in $a1, which only case 4 reads, and a copy made before the switch
+   in $a2, which case 2 modifies (`frame = 50` after the timeout TRACE); ours has them the other way round.
+   Found: the BattleFlag/ConditionFlag arms of case 1 need `else if (!isConditionFlag) 0xFF2 else 0xFF3` (branch
+   layout); the vector update is the shared procFlowIdle pattern.
+   tried: one variable, a copy before/after setBattleFlag, the copy declared before/after frame, chained
+   assignments, the roles swapped (case 4 on the copy), the copy as a block-local in case 2, and tools/permuter.py
+   through the method wrapper (4 min, 1827 candidates, no better). */
+#if 0
+void CPlayer::exeGimmickCard() {
+    TIMEQ frame;
+    TIMEQ f;
+    frame = getMotionCurrentTime() / 50;
+    f = frame;
+    setBattleFlag(0, 8);
+    switch (m_iSubState) {
+    case 1:
+        if (isAir()) {
+            setAnim(6, 800, 0);
+            FVECTOR vel = m_pMove->getVel();
+            m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+            vel.y = m_fJumpSpdY;
+            m_pMove->setVel(vel);
+        } else if (isBattleFlag(0x400000)) {
+            m_iSubState = 4;
+            setAnim(0x2A, -1, 0);
+            m_tqStateTimer = 0;
+        } else {
+            m_iSubState = 2;
+            if (CGame::isSoraGame()) setAnimRsrcEx(0xFF0, 0, -1, 0, 0, 0, 1);
+            else if (!isConditionFlag(0x400000)) setAnimRsrcEx(0xFF2, 0, -1, 0, 0, 0, 1);
+            else setAnimRsrcEx(0xFF3, 0, -1, 0, 0, 0, 1);
+            m_tqStateTimer = 0;
+        }
+        break;
+    case 2: {
+        if (m_tqStateTimer > 5000) {
+            TRACE("CPlayer:: exeGimmickCard() %d, \x81\xa6\x83G\x83\x89\x81[\x8f\x88\x97\x9d\n");
+            f = 50;
+        }
+        if (f >= 50) {
+            TRACE("CPlayer:: exeGimmickCard() notifyMakeGimmick\n");
+            CardBattle::CCardBattle::notifyMakeGimmick(NULL, 0);
+            m_iSubState = 3;
+        }
+        break;
+    }
+    case 3:
+        if (isMotionEnd()) setAnim(0x2A, -1, 0);
+        if (CardBattle::CCardBattle::getGimmickOwner() > 0) {
+            if (CardBattle::CCardBattle::isPlayingGimmickCard()) break;
+        } else {
+            TRACE("CPlayer:: exeGimmickCard() notifyCompleteGimmick, \x81\xa6\x83G\x83\x89\x81[\x8f\x88\x97\x9d GimmickOwner=0\n");
+            CardBattle::CCardBattle::notifyCompleteGimmick();
+        }
+        if (!isMotionEnd() && m_iNowAnimID != 0x2A) break;
+        setPlayerFlag(0, 1);
+        m_pCB->destroyPlayCard(1, 0);
+        setBattleFlag(0, 0x10200000);
+        procSkillEnd(-1);
+        break;
+    case 4:
+        if (frame >= 30) {
+            m_iSubState = 5;
+            setEffect(PL::g_szDpxZexion, 0x1C, &getPos(), NULL, 0.0f);
+            setAnimForce(0x1F, 0, 1, 0, m_bIsDead, 0);
+            CardBattle::CCardBattle::notifyMakeGimmick(NULL, 0);
+            PLM::setVibration(3);
+        }
+        break;
+    case 5:
+        if (m_bIsDead) {
+            initDead();
+        } else if (!CardBattle::CCardBattle::isPlayingGimmickCard()) {
+            setPlayerFlag(0, 1);
+            m_pCB->destroyPlayCard(1, 0);
+            setBattleFlag(0, 0x10200000);
+            setBattleFlag(0, 0x400000);
+            setConditionFlag(1, 0);
+            setFaceAnim(3, 0);
+            initBadCondition();
+        }
+        break;
+    }
+}
+#else
 /* placeholder: rodata of exeGimmickCard__7CPlayer */
 __asm__(".rdata\n");
 inline void _roPh26() {
@@ -5049,6 +5135,7 @@ inline void _roPh26() {
 }
 __asm__(".rdata\n.align 4\n.word .L00272FE4\n.word .L002730E8\n.word .L00273138\n.word .L002731F8\n.word .L00273270\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickCard__7CPlayer);
+#endif
 __asm__(".rdata\n");
 void CPlayer::setTrapDamage(INT inPower, const CHAR* lpszInName, UINT nNo) {
     INT face;

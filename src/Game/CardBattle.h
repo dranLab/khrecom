@@ -163,7 +163,7 @@ public:
     static BOOL isBattleEnd();
     static void setSuspend(BOOL b);
     static BOOL isSuspend();
-    static BOOL isLevitate(); static void notifyCompleteGimmick(); // PARTIAL: notifyCompleteGimmick added for Game/Player/Player
+    static BOOL isLevitate(); static void notifyCompleteGimmick(); static void notifyMakeGimmick(CARD* inCard, INT inFlag); // PARTIAL: notifyCompleteGimmick, notifyMakeGimmick added for Game/Player/Player
     void calcEnchantParam(ENCHANT_PARAM& ioParam); // PARTIAL: added for Game/Player/Player
     static void setBlack(BOOL b);
     static BOOL isBlack();
