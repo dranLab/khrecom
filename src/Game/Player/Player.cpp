@@ -83,7 +83,7 @@ void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& outV, const FVECTOR& inV);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
-inline void* operator new(size_t, void* p) throw() { return p; }
+inline void* operator new(size_t, void* p) throw() { return p; } template <class T> static inline T& _ref(T& v) { return v; } static inline UINT _upKind(INT inType0, INT inType1) { UINT up = inType0 > 0 ? 1 << (inType0 - 1) : 0; if (inType1 > 0) up |= 1 << (inType1 - 1); return up; }
 static inline FLOAT _abs(FLOAT inValue) {
     FLOAT ret;
     __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
@@ -4254,10 +4254,155 @@ void CPlayer::initAttack(INT inNo) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
 #endif
+/* Parked: 25 lines differ (size, structure, every call, the jump table and the attack-kind logic match): (1) the
+   prologue: the original saves s1 before s0 (pTarget = NULL sits in the blez delay slot); (2) in the card-power
+   block the original keeps m_pAtkData in t1, &g_pBattleCardList in t0, id*16 in a3 and the 0x4000000 mask in a2
+   (ours t2, t1, t0, a3: one register more is live), and (3) in the tail it loads m_pAnim after the FLAG store.
+   Found: locals declared first and assigned after the lookup (pTarget/distY/dist/dir), `if/else` for pTarget,
+   distY and dir as separate statements, `!(AttackNo < MaxCombo - 1)`, the attack-list choice as three direct
+   stores, the debug-ID block without a local, `_ref()` stores for AtkKind/AtkAttr and `_upKind()` for the
+   enchant flags (Riku's form), m_bIsCanCombo stored before m_uiPreAttackKind (38 -> 28 lines).
+   tried: all 24 orders of the four tail statements, 6 forms of the pTarget/zero init, 3 forms of the card block
+   (pAtk/pCard locals), 4 forms of the debug ID, and tools/permuter.py through the method wrapper (6 min, 3289
+   candidates, no better). */
+#if 0
+void CPlayer::setAttack() {
+    CEntity* pTarget;
+    FLOAT distY;
+    FLOAT dist;
+    FLOAT dir;
+    FLOAT power;
+    CEffect* effect;
+    if (m_hTarget > 0) pTarget = (CEntity*)CTaskMan::getTask(m_hTarget);
+    else pTarget = NULL;
+    distY = 0.0f;
+    dist = 0.0f;
+    dir = 0.0f;
+    if (pTarget) {
+        pTarget->getLockOnPos(m_vMarkPos);
+        distY = m_vMarkPos.y - m_vCenterPos.y;
+        distY -= 1.0f;
+        dist = calcDistance(*pTarget);
+        dir = calcDirection(*pTarget) - m_fDir;
+        dir = _abs(dir);
+        m_hMark = m_hTarget;
+    } else {
+        m_iSubState = 3;
+        m_vMarkPos.set(0.0f, 0.0f, 0.0f);
+        m_hMark = 0;
+    }
+    m_fJumpSpdY = 0.0f;
+    if (m_iAttackNo >= m_iMaxCombo) m_iAttackNo = 0;
+    if (!(m_iAttackNo < m_iMaxCombo - 1)) {
+        m_uiAttackKind = isAir() ? 7 : 4;
+    } else {
+        switch (m_uiPreAttackKind) {
+        case 1:
+        case 2:
+        case 6:
+            if (distY > 0.0f) m_uiAttackKind = 5;
+            else if (isAir()) m_uiAttackKind = 5;
+            else m_uiAttackKind = 3;
+            break;
+        case 3:
+        case 5:
+            m_uiAttackKind = isAir() ? 6 : 1;
+            goto kindDone;
+        default:
+            if (isAir()) m_uiAttackKind = 6;
+            else if (!pTarget) m_uiAttackKind = 1;
+            else if (distY > 0.0f) m_uiAttackKind = 5;
+            else if (dist > 3.5f) m_uiAttackKind = 3;
+            else if (dir > 0.7853982f) {
+                if (dir < 2.3561945f) m_uiAttackKind = 2;
+                else m_uiAttackKind = 1;
+            } else m_uiAttackKind = 1;
+            break;
+        }
+    kindDone:
+        if (m_uiAttackKind == 1) {
+            if (getFrontAirHeight(NULL, 1.0f, 2.0f, 0.0f) > 0.0035f) m_uiAttackKind = 6;
+        }
+    }
+    if (CGame::isSoraGame()) m_uiAttackID = PL::g_AttackList[m_uiAttackKind];
+    else if (!isConditionFlag(0x400000)) m_uiAttackID = PL::g_RikuAttackList[m_uiAttackKind];
+    else m_uiAttackID = PL::g_DRikuAttackList[m_uiAttackKind];
+    if (m_iAttackNo == 0) {
+        if (CGame::isSoraGame()) {
+            if ((UINT)((USHORT)DebugWork::g_dw.player.iAttackID - 1) < 7) m_uiAttackID = DebugWork::g_dw.player.iAttackID;
+        } else {
+            if ((UINT)((USHORT)DebugWork::g_dw.player.iAttackID - 0x97) < 7) m_uiAttackID = DebugWork::g_dw.player.iAttackID;
+        }
+    }
+    m_pAtkData = &PL::g_AttackDataList[m_uiAttackID];
+    switch (m_uiAttackID) {
+    case 5:
+    case 0x9B:
+        power = 0.0f;
+        if (!isAir()) {
+            if (distY < 2.0f) power = (FLOAT)m_pAtkData->WORK1;
+            else power = distY * 10.0f + 24.0f;
+        } else {
+            if (power <= distY) power = distY * 10.0f + 4.0f;
+        }
+        if (power > 40.0f) power = 40.0f;
+        m_fJumpSpdY = PL::g_fAntiGravity * power;
+        procGravity(0, 1, 1);
+        break;
+    case 6:
+    case 7:
+    case 0x9C:
+    case 0x9D:
+        if (!isAir()) m_fJumpSpdY = PL::g_fAntiGravity * (FLOAT)m_pAtkData->WORK1;
+        procGravity(0, 1, 1);
+        break;
+    }
+    setAnimForce(m_pAtkData->ANIM_ID, 0, 1, 0, 0, 0);
+    if (isConditionFlag(0x4000000)) {
+        setAnimSpeed(1.5f);
+        if (!m_hEffAttack[0]) {
+            m_hEffAttack[0] = attachEffect(PL::g_szDpxSpeedBreak, 1, &Crd(m_iBoneChest), NULL, NULL, 0.0f);
+            effect = CEffectMan::getEffect(m_hEffAttack[0]);
+            if (effect) effect->m_iFlag |= 4;
+        }
+        if (!m_hEffAttack[1]) {
+            m_hEffAttack[1] = attachEffect(PL::g_szDpxEX1580, 0x2D, &Crd(m_iBoneChest), NULL, NULL, 0.0f);
+            effect = CEffectMan::getEffect(m_hEffAttack[1]);
+            if (effect) effect->m_iFlag |= 4;
+        }
+        if (!m_hEffAttack[2]) {
+            m_hEffAttack[2] = attachEffect(PL::g_szDpxSpeedBreak, 3, &Crd(m_iBoneChest), NULL, NULL, 0.0f);
+            effect = CEffectMan::getEffect(m_hEffAttack[2]);
+            if (effect) effect->m_iFlag |= 4;
+        }
+    }
+    if (isConditionFlag(0x100)) setAnimSpeed(2.0f);
+    m_bDmgMuteki = FALSE;
+    if (m_uiCardID == 0) {
+        m_iAttackPower = m_iAP;
+        m_AtkKind = (ATK_KIND)m_pAtkData->DAMAGE;
+        m_AtkAttr = (ATK_ATTR)0;
+    } else {
+        INT power2;
+        power2 = (*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER] + m_iComboBoost;
+        if (isConditionFlag(0x4000000)) power2 += power2 / 2;
+        m_iAttackPower = m_iAP * power2 / 100;
+        _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
+        _ref(m_AtkAttr) = (ATK_ATTR)(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].ATTR;
+        UINT up = _upKind((*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].UP_TYPE0, (*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].UP_TYPE1);
+        calcEnchant_AttackPoint(m_iAttackPower, m_AtkKind, m_AtkAttr, up);
+    }
+    m_bIsCanCombo = m_pAtkData->FLAG & 1;
+    m_uiPreAttackKind = m_uiAttackKind;
+    m_tqAttackTimer = m_pAnim->getTotalTqCrd() * 100 / (INT)(m_fAnimSpeed * 100.0f) + 1000;
+    m_iAttackNo++;
+}
+#else
 /* placeholder: rodata of setAttack__7CPlayer */
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L0026CBE4\n.word .L0026CBE4\n.word .L0026CC14\n.word .L0026CC30\n.word .L0026CC14\n.word .L0026CBE4\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttack__7CPlayer);
+#endif
 void CPlayer::exeAttack() {
     TIMEQ frameTQ = getMotionCurrentTime();
     TIMEQ frame = frameTQ / 50;
