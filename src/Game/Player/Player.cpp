@@ -6444,7 +6444,7 @@ void CPlayer::exeCharge() {
    after the flag 'and' and loads m_pRevolver after the flag store; ours zeroes pos in a0 first and loads
    m_pRevolver before the store. tried: all orders of setPlayerFlag/pos._q/pos.w (the 5-line ones zero w and
    are wrong), pos.init()/set()/copy, direct and cast flag stores, cast and volatile-reference m_pRevolver
-   loads, memory asm barriers (best 6); best clean draft 8 lines. tools/permuter.py can't run on C++ methods. */
+   loads, memory asm barriers (best 6); best clean draft 8 lines. tools/permuter.py can't run on C++ methods. Retried 2026-10-25 (sched dump): our sched1 has no dependency between the flag store and the m_pRevolver load and issues the pos zero (por) before the mask 'and', so pos gets a0 instead of reusing v1 after the mask dies; in the original that v1 reuse (sched2 anti-dependence) is what keeps por/sq and the m_pRevolver load late. tried: direct member stores (&= ~0x10 keeps the load late but gives lui/ori, 10 lines; (INT) casts, -17, a reference block: 8), _ref() and volatile m_pRevolver reads, the three valid flag/pos orders (8-10). */
 #if 0
 INT CPlayer::chkChargeMove(INT inFlag) {
     FVECTOR pos;
