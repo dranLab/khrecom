@@ -3276,7 +3276,12 @@ void CPlayer::initHang() {
    for the pad pointer in s0). tried: ~20 variants (dir as a local before/after the branch, a/b operand locals,
    operand order, _limitPI2 vs explicit if/else, rot.y/m_fDir store orders, d0 copy before getPos) and
    tools/permuter.py through the method alias wrapper (6 min; its best only commuted the vStart/vEnd sums, worse).
-   Same family as the parked exeWall / exeWalk wraps. */
+   Same family as the parked exeWall / exeWalk wraps. Retried 2026-10-25 ($LM tags): getDir() in the first
+   wrap and for dir, the model pointer read directly (m_pModels; the original inlines getModel, our Model.h only
+   defines it after Entity.h) -> 18 lines, but 8 bytes short: the two `mov.s` copies of the original are missing
+   (dir loaded into $f12 in the three branch delay slots and copied to $f22 after getPos, and the second wrap's
+   result r kept in $f12 apart from d = dir - PI in $f1 with the PI constant shared with the r > PI test); also the
+   0.5f (ofs.set / setRadius) is loaded into $f21 before getPos. tried: setDir(r), rot.y before setDir (23). */
 #if 0
 void CPlayer::exeHang() {
     FLOAT dir;
@@ -3306,7 +3311,7 @@ void CPlayer::exeHang() {
         if (m_iNowAnimID == 0xF) {
             if (m_tqStateTimer < 1500) break;
             if (isMotionEnd()) {
-                pos = Crd(getModel()->getBoneIndex(PL::g_szBoneLHand)).getWorldMatrix().v[3];
+                pos = Crd(m_pModels->getBoneIndex(PL::g_szBoneLHand)).getWorldMatrix().v[3];
                 SubVectorXYZ(m_vHangHandPos, pos, getPos());
                 _unitMatrix(m);
                 _rotMatrixY(m, m_fDir);
@@ -3316,11 +3321,11 @@ void CPlayer::exeHang() {
                 setAnimForce(0xE, 400, 0, 0, 0, 0);
             }
         }
-        r = _limitPI2(m_fAnalogViewDir - m_fDir + 3.1415927f);
+        r = _limitPI2(m_fAnalogViewDir - getDir() + 3.1415927f);
         if (getAnalogHoukou()) houkou = getHoukouFromAngle(r);
         else houkou = HOUKOU_NUTRAL;
         if (isTrgFlag(1) || getAnalogHoukou() == HOUKOU_DOWN || houkou == HOUKOU_DOWN) {
-            dir = m_fDir;
+            dir = getDir();
             pos = getPos();
             ofs.set(0.0f, 0.0f, -0.6f);
             _unitMatrix(m);
@@ -3347,7 +3352,7 @@ void CPlayer::exeHang() {
             setPos(pos);
             rot = getRot();
             r = _limitPI2(dir - 3.1415927f);
-            m_fDir = r;
+            setDir(r);
             rot.y = r;
             setRot(rot);
             setAnimForce(5, 0, 0, 0, 0, 0);
