@@ -4266,49 +4266,315 @@ INT CPlayer::chkPlayCardCombo() {
     }
     return FALSE;
 }
-/* placeholder: rodata of onMsg__7CPlayeriPv */
-__asm__(".rdata\n");
-inline void _roPh15() {
-    TRACE("CPlayer::onMsg *** warning!! *** %d, inExtraInfo=NULL\n");
-    TRACE("CPlayer::onMsg *** warning!! *** %d, BATTLE_FLAG_ENEMY_EXTERMINATE\n");
-    TRACE("CPlayer::onMsg = CB_MES_PRONOUNCE ---- DEATH\n");
-    TRACE("CPlayer::onMsg = CB_MES_PRONOUNCE ---- CLEAR\n");
-    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- TOOSLOW\n");
-    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- SUCCESS ---- %d\n");
-    TRACE("CPlayer::onMsg = CB_MES_START ---- PLAY CARD ---- card = id:%d, no:%d,");
-    TRACE("  break!!=%d, DP:%d/%d,");
-    TRACE("  speed break!!=%d, DP:%d/%d,");
-    TRACE("\n");
-    TRACE("CPlayer::onMsg = CB_MES_START ---- PLAY CARD ---- card = id:%d, no:%d,\n");
-    TRACE("  speed break!!\n");
-    TRACE("CPlayer::onMsg *** error!! *** card category = ???\n");
-    TRACE("CPlayer::onMsg = CB_MES_SET ---- PLAY CARD ---- card = id:%d, no:%d,");
-    TRACE("  break!!=%d,");
-    TRACE("CPlayer::onMsg = CB_MES_BREAK ---- PLAY CARD ----  break!!=%d,");
-    TRACE(" DP:%d/%d, in DMODE\n");
-    TRACE(" DP:%d/%d,\n");
-    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- PLAY CARD ----\n");
-    TRACE("CPlayer::onMsg = CB_MES_ZERO\n");
-    TRACE("CPlayer::onMsg = CB_MES_REFRECT\n");
-    TRACE("CPlayer::onMsg = CB_MES_????:%d\n");
-    TRACE("CPlayer::onMsg = CB_MES_START ---- STOCK SKILL ----");
-    TRACE("CPlayer::onMsg = CB_MES_START ---- STOCK SKILL ----\n");
-    TRACE("CPlayer::onMsg = CB_MES_SET ---- STOCK SKILL ----  break!!=%d, DP:%d/%d,\n");
-    TRACE("CPlayer::onMsg = CB_MES_SET ---- STOCK SKILL ----");
-    TRACE("card[0]= id:%d, no:%d, sk:%d, ex:%d, fi:%d,\n");
-    TRACE("card[1]= id:%d, no:%d,\n");
-    TRACE("card[2]= id:%d, no:%d,\n");
-    TRACE("CPlayer::onMsg = CB_MES_BREAK ---- STOCK SKILL ----  break!!=%d\n");
-    TRACE(" DP:%d/%d, \n");
-    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- STOCK SKILL ----\n");
+struct MES_CARD_INFO { // 0x24
+    CARD m_cardData[7];
+    SHORT m_nStock;
+    BYTE m_nExtra;
+    BYTE m_nFirst;
+    BYTE m_nBreak;
+    BYTE m_nBonus;
+    BYTE m_nWork0;
+    BYTE m_nWork1;
+};
+#define INFO (*(MES_CARD_INFO*)m_recvCardInfo)
+#define CARD0 (*pCard)
+void CPlayer::onMsg(INT inMsg, void* inExtraInfo) {
+    CARD* pCard;
+    m_recvMsg = inMsg;
+    if (!inMsg) return;
+    if (!inExtraInfo) {
+        TRACE("CPlayer::onMsg *** warning!! *** %d, inExtraInfo=NULL\n", inMsg);
+        return;
+    }
+    if (isBattleFlag(4) || m_bIsDead) {
+        TRACE("CPlayer::onMsg *** warning!! *** %d, BATTLE_FLAG_ENEMY_EXTERMINATE\n", inMsg);
+        setBattleFlag(0, 0x480F90);
+        m_iNextAttack = 0;
+        setBattleFlag(0, 8);
+        setBattleFlag(0, 0x10080000);
+        return;
+    }
+    pCard = INFO.m_cardData;
+    setBattleFlag(0, 0x10004060);
+    INFO = *(MES_CARD_INFO*)inExtraInfo;
+    m_iStockSkill = INFO.m_nStock;
+    m_iExtraSkill = INFO.m_nExtra;
+    m_iFirstSkill = INFO.m_nFirst;
+    if (getPlayerState() == 0x24) {
+        switch (m_recvMsg) {
+        case 1:
+            break;
+        case 3:
+        case 4:
+        case 7:
+        case 13:
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 14:
+            TRACE("CPlayer::onMsg = CB_MES_PRONOUNCE ---- DEATH\n");
+            setBattleFlag(0x1000000, 0x480F90);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 8);
+            setBattleFlag(0x20, 0);
+            break;
+        case 15:
+            TRACE("CPlayer::onMsg = CB_MES_PRONOUNCE ---- CLEAR\n");
+            setBattleFlag(0x2000000, 0x480F90);
+            break;
+        }
+    } else if (getPlayerState() == 0x22) {
+        switch (m_recvMsg) {
+        case 1:
+            setConditionFlag(0, 0x4000000);
+            break;
+        case 3:
+        case 4:
+        case 7:
+        case 8:
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 11:
+            TRACE("CPlayer::onMsg = CB_MES_DUEL ---- TOOSLOW\n");
+            setBattleFlag(0x10000, 0x480F90);
+            setBattleFlag(0, 8);
+            break;
+        case 12:
+            TRACE("CPlayer::onMsg = CB_MES_DUEL ---- SUCCESS ---- %d\n", m_iStockSkill);
+            setBattleFlag(0x20000, 0);
+            break;
+        }
+    } else if (!m_iStockSkill) {
+        m_iStepStockSkill = 0;
+        if (DebugWork::g_dw.player.iCardLock > 0) {
+            switch (CARD0.m_nCategory21) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+                _setCardNK(CARD0, DebugWork::g_dw.player.iCardLock, CARD0.m_nNumber);
+                break;
+            case 6:
+            case 14:
+                _setCardNK(CARD0, DebugWork::g_dw.player.iCardLock, 0);
+                break;
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            case 13:
+                break;
+            }
+        }
+        switch (m_recvMsg) {
+        case 1:
+            m_uiCardID = CARD0.m_nKind;
+            setConditionFlag(0, 0x4000000);
+            if (isActionFlag(0x4000000) && !isConditionFlag(0x400000)) {
+                TRACE("CPlayer::onMsg = CB_MES_START ---- PLAY CARD ---- card = id:%d, no:%d,", CARD0.m_nKind, CARD0.m_nNumber);
+                if (INFO.m_nBreak) {
+                    m_iDP += INFO.m_nBreak;
+                    m_iDP += INFO.m_nBonus;
+                    if (m_iDP > 30) m_iDP = 30;
+                    TRACE("  break!!=%d, DP:%d/%d,", INFO.m_nBreak, m_iDP, 30);
+                    m_pGauge->setDP(m_iDP, 30);
+                    if (INFO.m_nBonus) {
+                        setConditionFlag(0x4000000, 0);
+                        TRACE("  speed break!!=%d, DP:%d/%d,", INFO.m_nBonus, m_iDP, 30);
+                    }
+                }
+                TRACE("\n");
+                if (m_iDP >= 30) {
+                    INT cat = CARD0.m_nCategory21;
+                    if (cat < 6) {
+                        if (cat != 0) setPlayerFlag(0x40000, 0);
+                    }
+                    if (isPlayerFlag(0x40000)) return;
+                }
+            } else {
+                TRACE("CPlayer::onMsg = CB_MES_START ---- PLAY CARD ---- card = id:%d, no:%d,\n", CARD0.m_nKind, CARD0.m_nNumber);
+                if (INFO.m_nBonus) {
+                    setConditionFlag(0x4000000, 0);
+                    TRACE("  speed break!!\n");
+                }
+            }
+            setBattleFlag(0, 0x480F90);
+            switch (CARD0.m_nCategory21) {
+            case 1: setBattleFlag(0x10, 0); break;
+            case 2: setBattleFlag(0x100, 0); break;
+            case 3: setBattleFlag(0x800, 0); break;
+            case 4: setBattleFlag(0x80, 0); break;
+            case 5: setBattleFlag(0x400, 0); break;
+            case 14: setBattleFlag(0x400000, 0);
+            case 6: setBattleFlag(0x200, 0); break;
+            case 7:
+                if (CARD0.m_nNumber != -1) {
+                    m_pCB->destroyPlayCard(1, 0);
+                }
+                break;
+            case 8:
+                break;
+            default:
+                TRACE("CPlayer::onMsg *** error!! *** card category = ???\n");
+                break;
+            }
+            break;
+        case 2:
+            TRACE("CPlayer::onMsg = CB_MES_SET ---- PLAY CARD ---- card = id:%d, no:%d,", CARD0.m_nKind, CARD0.m_nNumber);
+            if (!isConditionFlag(0x400000)) {
+                if (INFO.m_nBreak) TRACE("  break!!=%d,", INFO.m_nBreak);
+            }
+            TRACE("\n");
+            break;
+        case 3:
+            setBattleFlag(0x40, 0);
+            if (isActionFlag(0x4000000)) {
+                TRACE("CPlayer::onMsg = CB_MES_BREAK ---- PLAY CARD ----  break!!=%d,", INFO.m_nBreak);
+                if (INFO.m_nBreak) {
+                    m_iDP -= INFO.m_nBreak;
+                    if (isConditionFlag(0x400000)) {
+                        if (m_iDP <= 0) {
+                            setTrgFlag(0x100000, 0);
+                            m_iDP = 0;
+                            m_pCB->setFlag(0x400000, 0);
+                        }
+                        TRACE(" DP:%d/%d, in DMODE\n", m_iDP, m_iMaxDP);
+                        m_pGauge->setDP(m_iDP, m_iMaxDP);
+                    } else {
+                        if (m_iDP <= 0) m_iDP = 0;
+                        TRACE(" DP:%d/%d,\n", m_iDP, 30);
+                        m_pGauge->setDP(m_iDP, 30);
+                    }
+                }
+                TRACE("\n");
+            }
+            setBattleFlag(0, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 8:
+            TRACE("CPlayer::onMsg = CB_MES_DUEL ---- PLAY CARD ----\n");
+            setBattleFlag(0x8000, 0);
+            break;
+        case 7:
+            TRACE("CPlayer::onMsg = CB_MES_ZERO\n");
+            setBattleFlag(0x4000, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 4:
+            TRACE("CPlayer::onMsg = CB_MES_REFRECT\n");
+            setBattleFlag(0x20, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        default:
+            TRACE("CPlayer::onMsg = CB_MES_????:%d\n", m_recvMsg);
+            return;
+        }
+    } else {
+        switch (m_recvMsg) {
+        case 1:
+            setConditionFlag(0, 0x4000000);
+            if (isActionFlag(0x4000000) && !isConditionFlag(0x400000)) {
+                TRACE("CPlayer::onMsg = CB_MES_START ---- STOCK SKILL ----");
+                if (INFO.m_nBreak) {
+                    m_iDP += INFO.m_nBreak;
+                    m_iDP += INFO.m_nBonus;
+                    if (m_iDP > 30) m_iDP = 30;
+                    TRACE("  break!!=%d, DP:%d/%d,", INFO.m_nBreak, m_iDP, 30);
+                    m_pGauge->setDP(m_iDP, 30);
+                    if (INFO.m_nBonus) {
+                        setConditionFlag(0x4000000, 0);
+                        TRACE("  speed break!!=%d, DP:%d/%d,", INFO.m_nBonus, m_iDP, 30);
+                    }
+                }
+                TRACE("\n");
+                if (m_iDP >= 30) {
+                    setPlayerFlag(0x40000, 0);
+                    break;
+                }
+            } else {
+                TRACE("CPlayer::onMsg = CB_MES_START ---- STOCK SKILL ----\n");
+                if (INFO.m_nBonus) {
+                    setConditionFlag(0x4000000, 0);
+                    TRACE("  speed break!!\n");
+                }
+            }
+            setBattleFlag(0x40000, 0);
+            m_iStepStockSkill = 99;
+            break;
+        case 2:
+            if (isActionFlag(0x4000000) && !isConditionFlag(0x400000)) {
+                if (isConditionFlag(0x200000)) {
+                    TRACE("CPlayer::onMsg = CB_MES_SET ---- STOCK SKILL ----  break!!=%d, DP:%d/%d,\n", INFO.m_nBreak, m_iDP, 30);
+                    return;
+                }
+            }
+            setBattleFlag(0x1000, 0);
+            if (m_pCB->getEnchantKind() == 0x2F) setBattleFlag(0x2000, 0);
+            TRACE("CPlayer::onMsg = CB_MES_SET ---- STOCK SKILL ----");
+            if (!isConditionFlag(0x400000)) {
+                if (INFO.m_nBreak) TRACE("  break!!=%d,", INFO.m_nBreak);
+            }
+            TRACE("\n");
+            TRACE("card[0]= id:%d, no:%d, sk:%d, ex:%d, fi:%d,\n", pCard[0].m_nKind, pCard[0].m_nNumber, INFO.m_nStock, INFO.m_nExtra, INFO.m_nFirst);
+            TRACE("card[1]= id:%d, no:%d,\n", pCard[1].m_nKind, pCard[1].m_nNumber);
+            TRACE("card[2]= id:%d, no:%d,\n", pCard[2].m_nKind, pCard[2].m_nNumber);
+            m_iStepStockSkill = 0;
+            break;
+        case 3:
+            setBattleFlag(0x40, 0);
+            if (isActionFlag(0x4000000) && isConditionFlag(0x400000)) {
+                TRACE("CPlayer::onMsg = CB_MES_BREAK ---- STOCK SKILL ----  break!!=%d\n", INFO.m_nBreak);
+                if (INFO.m_nBreak) {
+                    m_iDP -= INFO.m_nBreak;
+                    if (isConditionFlag(0x400000)) {
+                        if (m_iDP <= 0) {
+                            setTrgFlag(0x100000, 0);
+                            m_pCB->setFlag(0x400000, 0);
+                            m_iDP = 0;
+                        }
+                        TRACE(" DP:%d/%d, in DMODE\n", m_iDP, m_iMaxDP);
+                        m_pGauge->setDP(m_iDP, m_iMaxDP);
+                    } else {
+                        if (m_iDP <= 0) m_iDP = 0;
+                        TRACE(" DP:%d/%d, \n", m_iDP, 30);
+                        m_pGauge->setDP(m_iDP, 30);
+                    }
+                }
+                TRACE("\n");
+            }
+            setBattleFlag(0, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 8:
+            TRACE("CPlayer::onMsg = CB_MES_DUEL ---- STOCK SKILL ----\n");
+            setBattleFlag(0x8000, 0);
+            break;
+        case 7:
+            TRACE("CPlayer::onMsg = CB_MES_ZERO\n");
+            setBattleFlag(0x4000, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 4:
+            TRACE("CPlayer::onMsg = CB_MES_REFRECT\n");
+            setBattleFlag(0x20, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        default:
+            TRACE("CPlayer::onMsg = CB_MES_????:%d\n", m_recvMsg);
+            break;
+        }
+    }
 }
-__asm__(".rdata\n.align 4\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026C558\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BAE4\n.word .L0026BB20\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026BB78\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026BBA8\n.word .L0026BBDC\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC90\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BC90\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026BD34\n.word .L0026BF94\n.word .L0026BFE8\n.word .L0026C514\n.word .L0026C118\n.word .L0026C118\n.word .L0026C0F4\n.word .L0026C0E8\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026BEEC\n.word .L0026BEFC\n.word .L0026BF0C\n.word .L0026BF1C\n.word .L0026BF2C\n.word .L0026BF4C\n.word .L0026BF5C\n.word .L0026C558\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF3C\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026C158\n.word .L0026C2A0\n.word .L0026C3C0\n.word .L0026C514\n.word .L0026C548\n.word .L0026C548\n.word .L0026C4F0\n.word .L0026C4D0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onMsg__7CPlayeriPv);
+#undef CARD0
+#undef INFO
 INT CPlayer::exeUseStock(INT inFlag) {
     if (isBattleFlag(4) || m_bIsDead) return FALSE;
     switch (m_iStepStockSkill) {

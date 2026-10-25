@@ -128,7 +128,7 @@ public:
     void setMaxHP(INT n);
     void changeTimeHP(D2::C2DSeqCtrl* p, UINT nIdx, UINT nHP);
     void exeDPGauge();
-    void setDPGauge(INT n);
+    void setDPGauge(INT n); void setDP(INT inDP, INT inMax);
 };
 
 class CEnemyGauge : public CTask {
