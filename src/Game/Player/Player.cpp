@@ -4667,23 +4667,12 @@ void CPlayer::initAttack(INT inNo) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
 #endif
-/* Parked: 25 lines differ (size, structure, every call, the jump table and the attack-kind logic match): (1) the
-   prologue: the original saves s1 before s0 (pTarget = NULL sits in the blez delay slot); (2) in the card-power
-   block the original keeps m_pAtkData in t1, &g_pBattleCardList in t0, id*16 in a3 and the 0x4000000 mask in a2
-   (ours t2, t1, t0, a3: one register more is live), and (3) in the tail it loads m_pAnim after the FLAG store.
-   Found: locals declared first and assigned after the lookup (pTarget/distY/dist/dir), `if/else` for pTarget,
-   distY and dir as separate statements, `!(AttackNo < MaxCombo - 1)`, the attack-list choice as three direct
-   stores, the debug-ID block without a local, `_ref()` stores for AtkKind/AtkAttr and `_upKind()` for the
-   enchant flags (Riku's form), m_bIsCanCombo stored before m_uiPreAttackKind (38 -> 28 lines).
-   tried: all 24 orders of the four tail statements, 6 forms of the pTarget/zero init, 3 forms of the card block
-   (pAtk/pCard locals), 4 forms of the debug ID, and tools/permuter.py through the method wrapper (6 min, 3289
-   candidates, no better). */
-#if 0
 void CPlayer::setAttack() {
     CEntity* pTarget;
     FLOAT distY;
     FLOAT dist;
     FLOAT dir;
+    FLOAT rate;
     FLOAT power;
     CEffect* effect;
     if (m_hTarget > 0) pTarget = (CEntity*)CTaskMan::getTask(m_hTarget);
@@ -4797,7 +4786,8 @@ void CPlayer::setAttack() {
         m_AtkAttr = (ATK_ATTR)0;
     } else {
         INT power2;
-        power2 = (*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER] + m_iComboBoost;
+        power2 = (*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER];
+        power2 += m_iComboBoost;
         if (isConditionFlag(0x4000000)) power2 += power2 / 2;
         m_iAttackPower = m_iAP * power2 / 100;
         _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
@@ -4807,15 +4797,10 @@ void CPlayer::setAttack() {
     }
     m_bIsCanCombo = m_pAtkData->FLAG & 1;
     m_uiPreAttackKind = m_uiAttackKind;
-    m_tqAttackTimer = m_pAnim->getTotalTqCrd() * 100 / (INT)(m_fAnimSpeed * 100.0f) + 1000;
+    rate = m_fAnimSpeed * 100.0f;
+    m_tqAttackTimer = m_pAnim->getTotalTqCrd() * 100 / (INT)rate + 1000;
     m_iAttackNo++;
 }
-#else
-/* placeholder: rodata of setAttack__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026CBE4\n.word .L0026CBE4\n.word .L0026CC14\n.word .L0026CC30\n.word .L0026CC14\n.word .L0026CBE4\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttack__7CPlayer);
-#endif
 void CPlayer::exeAttack() {
     TIMEQ frameTQ = getMotionCurrentTime();
     TIMEQ frame = frameTQ / 50;
