@@ -7635,7 +7635,7 @@ void CPlayer::initFooting(INT inFlag) {
    `nd` for the Homing result and `d0 = m_fDir` before the call give the original's mov.s f12,f0 and f0 result;
    m_fDir store before/inside/after the temp block, CMovement* / FVECTOR& temporaries for getRot(), line
    layout) plus tools/permuter.py through a method alias wrapper (build/progress/Game/Player/permute_method.py):
-   safe 15 min (6082 candidates) and --unsafe 10 min (4320), score stays 1. */
+   safe 15 min (6082 candidates) and --unsafe 10 min (4320), score stays 1. Retried 2026-10-25: $LM tags show setDir() (Player.h:852) for the m_fDir store and CMovement::setRot (Movement.h:65), both now in the draft (same 4 lines). The same Homing -> {0, d, 0, 0} -> copy -> setRot block is left in parked chkDamage: our sched1 fills the lq stall with the m_pMove load (priority 4) instead of the m_fDir store (3); the original issues the store first (memory fvector-ctor-operator-temps). */
 #if 0
 void CPlayer::exeFooting() {
     FVECTOR target;
@@ -7731,14 +7731,14 @@ void CPlayer::exeFooting() {
             else if (r > 3.1415927f) r -= 6.2831855f;
             d0 = m_fDir;
             FLOAT nd = Movement::Homing(d0, m_fAnalogViewDir, 0.1f, m_fFrameRate);
+            setDir(nd);
             {
                 FVECTOR t;
                 t._q = 0;
                 t.y = nd;
-                m_fDir = nd;
                 v = t;
             }
-            m_pMove->getRot() = v;
+            m_pMove->setRot(v);
         }
         setAnim(0x2A, -1, 0);
         m_fWalkSpeed = speed / 60.0f;
