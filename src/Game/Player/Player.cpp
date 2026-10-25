@@ -5228,7 +5228,388 @@ inline void _roPh20() {
     TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n");
 }
 __asm__(".rdata\n.align 4\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026F018\n.word .L0026F018\n.word .L0026ED28\n.word .L0026EEE8\n.word .L0026EF64\n.word .L0026F018\n.word .L0026EEB4\n.word .L0026F018\n.word .L0026EF3C\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF94\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC40\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF80\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026ECBC\n.word .L0026EFA8\n.word .L0026EFBC\n.word .L0026EC84\n.word .L0026EC70\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC30\n.word .L0026EEAC\n.text\n");
+/* Parked: 20 lines differ, same size; structure, all branches, calls, the
+   40-entry jump table, frame and strings match. Left, four scheduling/register spots: (1) old_condition
+   (isConditionFlag(0x881803F)): the original loads the flag word into v1 and the mask into v0, ours the reverse;
+   (2) case 6 (knock-back): the {0, dir0, 0, 0} rotation temp gets v1 in the original (v0 ours, swapping the li 1 /
+   li 3 of m_bDmgInAir/m_JumpState) and its lq is issued after the m_JumpState/m_bDmgInAir stores; (3) case 33
+   (pronounce): the original stores m_fDir before loading the vptr for initPronounce, ours loads the vptr first
+   (equal sched2 priority, tie broken by RTL order; sched1 prefers our store because it frees $f0); (4) the
+   !bIsBackHit Homing block: the original issues lw m_pMove before the vel.y store and the m_fDir store before the
+   lq. (2)-(4) look like the original FVECTOR's own constructors/operator= (types.h lists FVECTOR(), FVECTOR(...),
+   operator=) building the temporaries, which System/Vector.h does not have. Found: statement order from the
+   $LM line tags (build/asmlines.py), dir declared before dpos (frame), def_attr holding the attack attribute
+   first, the playSE id as a ternary of two calls (cross-jumped), bIsBackHit = FALSE after procDropMP, the case-6
+   gravity as *(FLOAT*)&PL::g_fGravity and the store order from a 120-permutation search (23 -> 20). tried: brace
+   init (memset), _rotY() by-value helper, _assign() reference copy, setDir(const FLOAT&), *(FLOAT*)& and
+   *(volatile FLOAT*)& stores of m_fDir, an "+f" asm on the Homing result (21), a memory asm barrier after the
+   case-33 store (18 lines, kept out: still not a match), old_condition as a direct/commuted expression or moved
+   before bIsBackHit (33), and tools/permuter.py through the method wrapper (15 min, 7332 candidates, no better). */
+#if 0
+BOOL CPlayer::chkDamage() {
+    INT face;
+    FVECTOR dir;
+    FVECTOR dpos;
+    FLOAT dir0;
+    BOOL bIsBackHit;
+    UINT old_condition;
+    INT dmg0;
+    ATK_KIND kind;
+    INT def_attr;
+    INT anim;
+    if (m_bIsDead) {
+        setBattleFlag(0, 8);
+        return FALSE;
+    }
+    if (isBattleFlag(0x20)) {
+        if (isNowCardActionState()) {
+            resetAction(1);
+            initIdle(-1, 0);
+            setBattleFlag(0, 8);
+        }
+        setBattleFlag(0, 0x10200000);
+    }
+    if (isBattleFlag(0x8000)) {
+        resetAction(4);
+        initDuel(0);
+    } else if (isBattleFlag(0x4000)) {
+        if (isConditionFlag(0x8810000)) {
+            setBattleFlag(0, 0x4000);
+            setBattleFlag(0, 0x10200000);
+        } else {
+            resetAction(3);
+            initIdle(-1, 0);
+            setBattleFlag(0x20, 0x4000);
+            setBattleFlag(0, 0x10200000);
+        }
+        setBattleFlag(0, 8);
+    } else if (isBattleFlag(0x40)) {
+        initFlip(1);
+    }
+    if (!isActionFlag(0x200)) return FALSE;
+    if (isMuteki()) {
+        m_collBody.setDamage(0);
+        return FALSE;
+    }
+    if (m_collBody.isGuardTrg()) {
+        Gauge::CCommonGauge::setDispSeq(getHandle(), 2);
+        return FALSE;
+    }
+    if (!m_collBody.isHit()) return FALSE;
+    TRACE("CPlayer:: (initDamage)\n");
+    face = 1;
+    setBattleFlag(0, 8);
+    m_bDmgInAir = isAir();
+    dir = *m_collBody.getDetectPos();
+    m_vEnemyPos = m_collBody.getEnemyPos();
+    setConditionFlag(0, 0x20000);
+    if (m_collBody.getEnemyHandle() > 0) {
+        CEntity* pEntity = (CEntity*)CTaskMan::getTask(m_collBody.getEnemyHandle());
+        if (pEntity && PLM::isEntityTypeID(pEntity->getTypeID())) {
+            if (pEntity->isHeartless()) setConditionFlag(0x20000, 0);
+            pEntity->getLockOnPos(dir);
+        }
+    }
+    SubVectorXYZ(dpos, dir, getPos());
+    dir0 = atan2f(dpos.x, dpos.z);
+    bIsBackHit = _abs(_limitPI(dir0 - m_fDir)) < 1.5707964f ? FALSE : TRUE;
+    old_condition = isConditionFlag(0x881803F);
+    dmg0 = m_collBody.getDamage();
+    kind = m_collBody.getDamageKind();
+    def_attr = m_collBody.getDamageAttr();
+    calcEnchant_DamagePoint(dmg0, (ATK_ATTR)def_attr);
+    def_attr = (INT)getDefAttr((ATK_ATTR)def_attr);
+    if (def_attr >= 1000) {
+        def_attr = 100;
+        face = 3;
+        setConditionFlag(1, 0);
+    } else if (def_attr == 0) {
+        Gauge::CCommonGauge::setDispSeq(getHandle(), 5);
+        return FALSE;
+    }
+    m_collBody.setHitEffect();
+    if (old_condition & 1) setConditionFlag(0, 1);
+    dmg0 = dmg0 * def_attr / 100;
+    INT hp0 = getHP();
+    if (kind == 0x22) dmg0 = hp0;
+    if (kind != 8) {
+        hp0 -= dmg0;
+        if (m_pCB && m_pCB->getEnchantKind() == 0x3B) {
+            hp0 += dmg0;
+        } else {
+            hp0 += (DebugWork::g_dw.player.iDamage0 > 0) * dmg0;
+            setDamageNumber(m_vHeadPos, dmg0);
+        }
+    }
+    if (m_pCB) {
+        if (hp0 <= 0 && getHP() >= 2 && m_pCB->getEnchantKind() == 0x29) {
+            hp0 = 1;
+            CardBattle::CCardBattle::decEnchantTime(1, 0x28, 0x29);
+        }
+    }
+    if (hp0 < 0) hp0 = 0;
+    m_iHP = hp0;
+    TRACE("-------- Damege Info ------------------\n");
+    if (CGame::isSoraGame()) {
+        TRACE("Sora : HP = %d/%d\n", m_iHP, m_iMaxHP);
+    } else if (isActionFlag(0x4000000)) {
+        if (!isConditionFlag(0x400000)) {
+            m_iDP++;
+            if (m_iDP > 30) m_iDP = 30;
+            TRACE("Riku : HP = %d/%d, DP = %d/%d,\n", m_iHP, m_iMaxHP, m_iDP, 30);
+            m_pGauge->setDP(m_iDP, 30);
+        } else {
+            m_iDP -= 5;
+            if (m_iDP <= 0) {
+                setTrgFlag(0x100000, 0);
+                m_iDP = 0;
+                m_pCB->setFlag(0x400000, 0);
+                setBattleFlag(0, 8);
+            }
+            TRACE("Riku : HP = %d/%d, DP = %d/%d,\n", m_iHP, m_iMaxHP, m_iDP, m_iMaxDP);
+            m_pGauge->setDP(m_iDP, m_iMaxDP);
+        }
+    } else {
+        TRACE("Riku : HP = %d/%d\n", m_iHP, m_iMaxHP);
+    }
+    TRACE("Flag PL  : 0x%08x\n", m_uiPlayerFlag);
+    TRACE("Flag CON : 0x%08x\n", m_uiConditionFlag);
+    TRACE("Flag TRG : 0x%08x\n", m_uiTrgFlag);
+    TRACE("Flag BTL : 0x%08x\n", m_uiBattleFlag);
+    TRACE("---------------------------------------\n");
+    if (hp0 <= 0) {
+        TRACE("CPlayer::chkDamage(); ++++ DEAD ++++\n");
+        m_bIsDead = TRUE;
+        m_pPLM->notifyDeadSE(CGame::isSoraGame() ? CSound::playSE(0x4B, -1, 0x40) : CSound::playSE(0x4C, -1, 0x40));
+        CSceneInfo::cancelBattleRequest();
+        face = 2;
+        CGameWork::setFlag(1, 6, TRUE);
+        setPlayerFlag(0x1001, 0);
+    }
+    if (m_pGauge) m_pGauge->setDamage(m_iHP, kind);
+    if (m_pCB) {
+        if (m_pCB->getEnchantKind() == 0x2C) setConditionFlag(0x4000, 0);
+        else setConditionFlag(0, 0x4000);
+        CardBattle::CCardBattle::decEnchantTime(1, 0x27, 0);
+    }
+    if (isConditionFlag(0x1000)) setQuickBarrier(1);
+    if (kind == 0x1A && !m_bIsDead && getPlayerState() != 0xD) return FALSE;
+    if ((old_condition & 0x8010002) && !m_bIsDead && getPlayerState() != 0xD) return FALSE;
+    if (m_pCB) {
+        if (!m_bIsDead && !isBattleFlag(0x20)) {
+            if (isBattleFlag(0x10000000)) {
+                TRACE("CPlayer::chkDamage(); NG = Now Card Play TRG!!\n");
+                return FALSE;
+            }
+            if (CardBattle::CCardBattle::isStandingCard(1)) {
+                TRACE("CPlayer::chkDamage(); NG = Now Card Play!\n");
+                return FALSE;
+            }
+        }
+        if (isBattleFlag(0x20)) {
+            if (isBattleFlag(0x10000000)) TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play TRG)\n");
+            if (CardBattle::CCardBattle::isStandingCard(1)) TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play)\n");
+        }
+    }
+    if (!m_bIsDead && isBattleFlag(4)) {
+        initEnd();
+        return FALSE;
+    }
+    resetAction(6);
+    if (old_condition & 0x20) {
+        setConditionFlag(0, 0x20);
+        fadeEffect(m_hEffBad, 1);
+        m_hEffBad = setEffect(PL::g_szDpxVexen, 4, &getPos(), NULL, 0.0f);
+    }
+    if (old_condition & 0x800000) {
+        setConditionFlag(0, 0x800000);
+        m_pMove->setFlag(1, FALSE);
+        setOldPos(m_vCenterPos);
+    }
+    if (getPlayerState() == 0x1E) {
+        CTask* pTask = CTaskMan::getTask(m_hGimmick);
+        if (pTask && pTask->getTypeID() == 0x2003) {
+            ((CGimmickCarry*)pTask)->CancelCarry();
+            m_hGimmick = 0;
+        }
+    }
+    setFaceAnim(face, 1);
+    setPlayerState((PL::PlayerState)0xC);
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    m_bDmgMuteki = FALSE;
+    if (m_bIsDead) kind = (ATK_KIND)3;
+    switch (kind) {
+    case 39:
+        setConfuse(1, 0);
+    case 24:
+        setSubState(6);
+        m_fJumpSpdXZ = 0.0f;
+        m_bDmgInAir = FALSE;
+        anim = 0x29;
+        procDropMP();
+        bIsBackHit = FALSE;
+        PLM::setVibration(2);
+        break;
+    case 35:
+        if (m_pRevolver) m_pRevolver->setDiscard();
+    case 34:
+        fadeEffect(m_hEffBad, 1);
+        setSubState(5);
+        m_tqCardBreakTime = PL::g_CardBreakTime[5];
+        anim = 0x22;
+        m_fJumpSpdXZ = -0.13333334f;
+        PLM::setVibration(3);
+        break;
+    case 31:
+        setConditionFlag(1, 0);
+        setFaceAnim(3, 0);
+    case 3:
+    case 30:
+        setSubState(5);
+        m_tqCardBreakTime = PL::g_CardBreakTime[5];
+        anim = 0x22;
+        m_fJumpSpdXZ = -0.13333334f;
+        PLM::setVibration(2);
+        break;
+    case 2:
+    case 29:
+        setSubState(5);
+        m_tqCardBreakTime = PL::g_CardBreakTime[4];
+        anim = 0x22;
+        m_fJumpSpdXZ = -0.13333334f;
+        PLM::setVibration(2);
+        break;
+    case 6: {
+        SubVectorXYZ(dpos, getPos(), m_vEnemyPos);
+        dir0 = atan2f(dpos.x, dpos.z);
+        setSubState(7);
+        m_tqCardBreakTime = PL::g_CardBreakTime[5];
+        setAnimForce(0x22, 0, 0, 0, m_bIsDead, 0);
+        m_bDmgInAir = TRUE;
+        m_JumpState = 3;
+        m_fJumpSpdY = 0.0f;
+        m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+        m_fDir = dir0;
+        FVECTOR vec;
+        FVECTOR vel;
+        vel._q = 0;
+        vel.y = dir0;
+        vec = vel;
+        m_pMove->setRot(vec);
+        vec.x = dpos.x;
+        vec.y = 0.0f;
+        vec.z = dpos.z;
+        FLOAT power = InnerProduct(vec, vec);
+        m_fJumpSpdXZ = -0.26666668f;
+        m_pMove->calcVelocityXZ(m_fJumpSpdXZ);
+        power = dpos.y * 10.0f + 14.0f;
+        if (power > 40.0f) power = 40.0f;
+        else if (power < 0.0f) power = 0.0f;
+        m_fJumpSpdY = PL::g_fAntiGravity * power;
+        vel = getVel();
+        vel.y = m_fJumpSpdY;
+        m_pMove->setVel(vel);
+        PLM::setVibration(2);
+        if (m_bIsDead) initDead();
+        return TRUE;
+    }
+    case 40:
+        procDropMP();
+    case 10:
+        setConfuse(1, 0);
+    case 1:
+    case 28:
+        setSubState(3);
+        m_tqCardBreakTime = PL::g_CardBreakTime[3];
+        anim = 0x1F;
+        m_fJumpSpdXZ = -0.06666667f;
+        PLM::setVibration(1);
+        break;
+    case 7:
+        setConditionFlag(1, 0);
+        setFaceAnim(3, 0);
+        setSubState(3);
+        m_tqCardBreakTime = PL::g_CardBreakTime[3];
+        anim = 0x1F;
+        m_fJumpSpdXZ = -0.06666667f;
+        PLM::setVibration(1);
+        break;
+    case 12:
+        setConditionFlag(0x20, 0);
+        initBadCondition();
+        PLM::setVibration(2);
+        return TRUE;
+    case 8:
+        setConditionFlag(2, 0);
+        setTimer(dmg0);
+        initBadCondition();
+        PLM::setVibration(2);
+        return TRUE;
+    case 27:
+        setConditionFlag(0x10000, 0);
+        initBadCondition();
+        PLM::setVibration(2);
+        return TRUE;
+    case 17:
+        setConditionFlag(0x800000, 0);
+        initBadCondition();
+        PLM::setVibration(2);
+        return TRUE;
+    case 32:
+        setConditionFlag(0x8000000, 0);
+        initBadCondition();
+        PLM::setVibration(2);
+        return TRUE;
+    case 33:
+        PLM::setVibration(2);
+        if (m_bIsDead) {
+            initDead();
+            return TRUE;
+        }
+        m_fDir = Movement::Homing(m_fDir, dir0, 1.0f, m_fFrameRate);
+        initPronounce(1);
+        return TRUE;
+    default:
+        TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n", kind);
+        anim = 0x1F;
+        m_fJumpSpdXZ = -0.06666667f;
+        PLM::setVibration(1);
+        break;
+    }
+    if (m_bDmgInAir) {
+        setSubState(4);
+        m_tqCardBreakTime = PL::g_CardBreakTime[3];
+        anim = 0x21;
+        m_JumpState = 3;
+        bIsBackHit = FALSE;
+    }
+    m_fJumpGravity = PL::g_fGravity;
+    m_fJumpSpdY = 0.0f;
+    if (!bIsBackHit) {
+        m_fDir = Movement::Homing(m_fDir, dir0, 0.5f, m_fFrameRate);
+        FVECTOR vec;
+        FVECTOR vel;
+        vel._q = 0;
+        vel.y = m_fDir;
+        vec = vel;
+        m_pMove->setRot(vec);
+    } else {
+        anim++;
+        m_fJumpSpdXZ = -m_fJumpSpdXZ;
+    }
+    setAnimForce(anim, 0, 1, 0, m_bIsDead, 0);
+    m_pMove->calcVelocityXZ(m_fJumpSpdXZ);
+    if (m_bIsDead) initDead();
+    if (old_condition & 0x8000) {
+        setConditionFlag(0, 0x8000);
+        m_tqCardBreakTime = PL::g_CardBreakTime[7];
+    }
+    return TRUE;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkDamage__7CPlayer);
+#endif
 __asm__(".rdata\n");
 void CPlayer::initFlip(INT inBreak) {
     FLOAT speed;
