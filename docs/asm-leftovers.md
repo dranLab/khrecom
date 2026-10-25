@@ -25,7 +25,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 
 | unit | functions left | instr left | parked | data from asm |
 |---|---:|---:|---:|---|
-| `Game/Player/Player` | 303 | 23609 |  | .bss .data .rodata |
 | `Game/Atel/VSME` | 90 | 18301 |  | .bss .data .rodata |
 | `Form/Menu/JiminyMemo` | 160 | 17447 |  | .bss .data .rodata |
 | `Game/Player/PlayerSora` | 25 | 14383 |  | .data .rodata |
@@ -45,6 +44,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/PackMan` | 42 | 4290 |  | .bss .rodata |
 | `Game/Entity` | 117 | 3865 |  | .rodata |
 | `Game/Map` | 26 | 3779 |  | .data .rodata |
+| `Game/Player/Player` | 11 | 3573 | 11 |  |
 | `Game/Player/PlayerRiku` | 2 | 2940 | 2 |  |
 | `Game/Collision/CollUtil` | 13 | 2562 |  | .rodata |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
@@ -200,6 +200,17 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Atel/AtelCrossFade` | `drawCrossFadeImage__Q24ATEL14CAtelCrossFade` | 188 | (comment) Near-match: the second loop schedules the packet stores differently and hoists the GIF tag constant. |
 | `Game/Player/Friend` | `setMagic__Q26Friend7CFriendi` | 1274 |  |
 | `Game/Player/NaviMap` | `main__Q25Gauge8CNaviMap` | 425 | (comment) Not matching: in the debug-rotation block (g_dw.player.iTemp == 2) the original keeps PI in $f3 from before the branch and loads 180.0f/-PI in $f2/$f1 (100.0f and -PI share $f1); here 180.0f is hoisted too and the registers of 180.0f/-PI swap (9 lines). Everything else matches; the "deg" … |
+| `Game/Player/Player` | `exeWalk__7CPlayer` | 83 | 2 lines differ: the delay slot of jal calcVelocityXZ (the original issues the m_fWalkSpeed store first and puts mov.s $f12,$f1 in the slot; this draft the reverse). The angle-wrap register (r in $f1, not $f13) is fixed by keeping aim_dir live after the call with an empty asm (see the draft); … |
+| `Game/Player/Player` | `chkWall__7CPlayeri` | 705 | 11 lines differ (frame, structure, every branch and call match): (1) the first ofs constants - the original loads 0.07f into $f1 and 0.5f into $f0, ours the reverse (pseudo-number order of the two li.s); (2) the join block of the final fix-up: the original loads pos.x ($f0) before pos.z ($f1) in … |
+| `Game/Player/Player` | `exeWall__7CPlayer` | 517 | 4 lines differ (size, frame, every branch, call and register allocation match): at the start the original issues `lw m_iSubState` (getSubState) before the `sw zero` of vec.y, ours stores vec.y first (right after the lq of the getRot copy). Found 2026-10-25 from the $LM tags (25 -> 4): the first … |
+| `Game/Player/Player` | `isStartLadderJump__7CPlayer` | 120 | everything but the ofs block matches (wrap: r wrapped in place, then dir = r); left: after getPos the original issues lq pos (v1) before lui LADDER_LOCAL_OFS (v0), ours schedules the lui first (sched1 priority: hi->lwc1->swc1 chain) and allocates pos to a1. tried: all orders of pos/ofs statements … |
+| `Game/Player/Player` | `exeHang__7CPlayer` | 550 | 23 lines differ, all FP-register/load-order of the two angle wraps: the original loads m_fDir first ($f0) then m_fAnalogViewDir ($f1) for `view - dir + PI` (ours the reverse), and in the drop-off arm it loads dir into $f12 in the branch delay slots and copies it to $f22 after getPos (ours loads … |
+| `Game/Player/Player` | `initAttackField__7CPlayeri` | 81 | registers match; only the stores after the g_fGravity load are scheduled differently (the original stores m_JumpState right after the load and m_fJumpGravity before the g_CardBreakTime load; ours stores them later). tried: all 24 orders of the JumpState/CardBreakTime/JumpGravity/JumpSpdY block, … |
+| `Game/Player/Player` | `initAttack__7CPlayeri` | 104 | same spot as initAttackField: around the g_fGravity load the original keeps the %hi in v0 (later s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi moves. The flag block (battle 0x10/0x80000/8, then trg 4) and the ternary m_iComboBoost match. … |
+| `Game/Player/Player` | `chkDamage__7CPlayer` | 961 | 20 lines differ, same size; structure, all branches, calls, the 40-entry jump table, frame and strings match. Left, four scheduling/register spots: (1) old_condition (isConditionFlag(0x881803F)): the original loads the flag word into v1 and the mask into v0, ours the reverse; (2) case 6 … |
+| `Game/Player/Player` | `setConfuse__7CPlayerii` | 68 | in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but swaps v0/a2 (tq/pad). tried: all 6 statement orders x tq forms (ternary, param default, … |
+| `Game/Player/Player` | `chkChargeMove__7CPlayeri` | 91 | only the block before chargeReloadCard is scheduled differently: the original zeroes pos with v1 after the flag 'and' and loads m_pRevolver after the flag store; ours zeroes pos in a0 first and loads m_pRevolver before the store. tried: all orders of setPlayerFlag/pos._q/pos.w (the 5-line ones … |
+| `Game/Player/Player` | `exeFooting__7CPlayer` | 293 | all but 4 instructions match (frame, branches, walk block registers). Left: in the analog walk arm the original issues `lw m_pMove` between the `sq t._q` and the `swc1 t.y` and loads `lq t` only after the m_fDir store; ours puts the lq right after the t.y store and the m_pMove load after it. … |
 | `Game/Player/PlayerCamera` | `getPlayerCameraDir__Q212PlayerCamera13CPlayerCamera` | 39 | (comment) Only the scheduling of the first block differs: the original zeroes dir (por/sq) before loading m_pInstance (the zero gets $v1, then m_pInstance), ours loads m_pInstance first. |
 | `Game/Player/PlayerCamera` | `procFieldNormal__Q212PlayerCamera13CPlayerCamera` | 332 |  |
 | `Game/Player/PlayerDRiku` | `initJump2nd__Q22PL12CPlayerDRiku` | 153 | (comment) Best attempt: with a target, the m_vMarkPos/m_hMark copies get swapped registers and rot.y is stored before m_fDir/m_fJumpDir instead of in the branch delay slot (11 lines differ). |
@@ -243,7 +254,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). |
 | `Form/Menu/Roulette` | `setCardInfo__9CRoulettei` | 270 | (comment) Scheduling only: after the CButton constructor the copy to pButton (s1) is scheduled before the getLayPosition argument setup instead of after it (5 lines differ). |
 
-Totals: 2312 functions (229832 instructions) in 85 units, 120 of them parked; 29 units take a data section from assembly.
+Totals: 2020 functions (209796 instructions) in 85 units, 131 of them parked; 28 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
