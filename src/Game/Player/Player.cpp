@@ -155,7 +155,7 @@ extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the origin
 extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 }
 class CPlayerDebug : public CTask { /* main() is still INCLUDE_ASM; the members are those the constructor touches */
-    CDebugWindow* m_pWin; INT m_iWork44; INT m_iWork48; INT m_iWork4C; INT m_iWork50; INT m_iWork54; CHAR m_szBuf[6][0x20];
+    CDebugWindow* m_pWin; PCAM_DATA* m_pCamData; PATK_DATA* m_pAtkData; INT m_iPrevState; INT m_iPrevMuteki; INT m_iPrevHP; CHAR m_szBuf[6][0x20];
 public: CPlayerDebug(CTask* inParent); virtual ~CPlayerDebug();
     virtual void main();
 };
@@ -612,7 +612,190 @@ void CPlayer::initFSM_() {
     }
     m_iState = -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", _init__7CPlayer);
+static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
+    c.m_nId = 0;
+    c.m_nKind2 = kind;
+    c.m_nNumber2 = num;
+    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
+}
+static inline void _setCardNK(CARD& c, USHORT kind, BYTE num) {
+    c.m_nId = 0;
+    c.m_nNumber2 = num;
+    c.m_nKind2 = kind;
+    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
+}
+void CPlayer::_init() {
+    INT i;
+    m_fAnalogPower = 0.0f;
+    m_fAnalogDir = 0.0f;
+    m_fAnalogViewDir = 0.0f;
+    m_iMaxHP = 300;
+    m_iHP = 300;
+    m_iMaxCP = 275;
+    m_iCP = 0;
+    m_iAP = 10;
+    m_iEXP = 0;
+    m_iLV = 1;
+    m_iMP = 0;
+    m_iMaxDP = 8;
+    m_iDP = 0;
+    m_bIsBattleScene = FALSE;
+    m_iBoneWeapon = 0;
+    m_iBoneCenter = 0;
+    m_iBoneChest = 0;
+    m_iBoneHead = 0;
+    m_iBoneLFoot = 0;
+    m_iBoneRFoot = 0;
+    m_pPLM = NULL;
+    m_pAtkData = NULL;
+    m_pWeapon = NULL;
+    m_pCam = NULL;
+    m_pGauge = NULL;
+    m_pCB = NULL;
+    m_pRevolver = NULL;
+    m_pMarker = NULL;
+    m_pEscape = NULL;
+    m_PrePlayerState = INIT;
+    m_PlayerState = INIT;
+    m_tqStateTimer = 0;
+    m_iSubState = 0;
+    m_uiPlayerFlag = 0;
+    m_uiActionFlag = 0;
+    m_uiConditionFlag = 0;
+    m_uiTrgFlag = 0;
+    m_uiBattleFlag = 0;
+    m_uiStep = 0;
+    m_iCount = 0;
+    m_tqTime = 0;
+    m_tqFrameRate = getFrameRate();
+    m_fFrameRate = getFrameRateF();
+    m_fWeight = *(FLOAT*)&PL::g_fWeight;
+    m_fGravity = 0.0f;
+    m_iPreAnimID = 0;
+    m_iNowAnimID = 0;
+    m_iAerialAnimShift = 0;
+    m_fAnimSpeed = 1.0f;
+    m_iNowFaceID = 0;
+    m_nVoiceID = 0;
+    i = 3;
+    do {
+        m_hEffAttack[i] = 0;
+    } while (--i >= 0);
+    m_szEffectName = NULL;
+    m_vWeaponTopPos.init();
+    m_vCenterPos.init();
+    m_vStartPos.init();
+    m_fStartDir = 0.0f;
+    m_fDir = 0.0f;
+    m_fScale = 1.0f;
+    m_fWalkSpeed = 0.0f;
+    m_fMoveSpdXZ = 0.0f;
+    m_fMovePower = 0.0f;
+    m_vOldSafeField.init();
+    m_vAppearPos.init();
+    m_vHeadPos.init();
+    m_vEnemyPos.init();
+    m_pCollMap = NULL;
+    m_bAirCheck = FALSE;
+    m_bAir = FALSE;
+    m_bPreAir = FALSE;
+    m_fWallRadius = 0.5f;
+    m_fFootRadius = 0.25f;
+    m_fBodyRviseCoefficient = 0.5f;
+    m_fPrizeDraw = 0.0f;
+    m_fCardDraw = 0.0f;
+    m_hEffPrize = 0;
+    m_hEffLevelUp = 0;
+    m_tqPrize = 0;
+    m_WalkMode = 0;
+    m_tqEscape = 0;
+    m_vWallPos.init();
+    m_fWallDir = 0.0f;
+    m_pLadderPos = NULL;
+    m_pLadderNormal = NULL;
+    m_vLadderPos.init();
+    m_fLadderDir = 0.0f;
+    m_iLadderStep = 0;
+    m_iLadderStepMax = 0;
+    m_fLadderSpdY = 0.0f;
+    m_fJumpDir = 0.0f;
+    m_fJumpSpdXZ = 0.0f;
+    m_fJumpPow = 0.0f;
+    m_fJumpSpdY = 0.0f;
+    m_fJumpGravity = 0.0f;
+    m_tqJumpTimer = 0;
+    m_vJumpStartPos.init();
+    m_fJumpHeight = 0.0f;
+    m_fJumpTop = 0.0f;
+    m_fGimmickJumpPow = 0.0f;
+    m_hGimmickJump = 0;
+    m_fJumpLandLimit = -100.0f;
+    m_hFooting = 0;
+    m_hSnatch = 0;
+    m_vHangHandPos.init();
+    m_vHangPos.init();
+    m_uiAttackKind = 0;
+    m_uiPreAttackKind = 0;
+    m_uiAttackID = 0;
+    m_iAttackNo = 0;
+    m_iMaxCombo = 3;
+    m_bIsAttackHit = FALSE;
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    m_bIsCanCombo = FALSE;
+    m_tqAttackTimer = 0;
+    m_tqAttackResponse = 0;
+    m_tqCardBreakTime = 0;
+    m_iAttackPower = 0;
+    m_iComboBoost = 0;
+    m_AtkKind = (ATK_KIND)0;
+    m_AtkAttr = (ATK_ATTR)0;
+    m_fDistXZ = 0.0f;
+    m_fDistY = 0.0f;
+    m_hGimmick = 0;
+    m_bIsDead = FALSE;
+    m_bDmgMuteki = FALSE;
+    m_bDmgInAir = FALSE;
+    m_tqMutekiTimer = 0;
+    m_tqBanish = 0;
+    m_tqConfuse = 0;
+    m_tqBarrier = 0;
+    m_tqGuard = 0;
+    m_hEffBad = 0;
+    m_hEffGuard = 0;
+    m_uiCardID = 0;
+    m_iCardNum = -1;
+    _setCardNK(((CARD*)m_recvCardInfo)[0], 0, 0);
+    _setCardNK(((CARD*)m_recvCardInfo)[1], 0, 0);
+    _setCardNK(((CARD*)m_recvCardInfo)[2], 0, 0);
+    *(SHORT*)(m_recvCardInfo + 0x1c) = 0;
+    m_recvCardInfo[0x1e] = 0;
+    m_recvCardInfo[0x1f] = 0;
+    m_recvCardInfo[0x20] = 0;
+    m_recvCardInfo[0x21] = 0;
+    m_recvCardID = 0;
+    m_recvCardNum = -1;
+    m_iStockSkill = 0;
+    m_iExtraSkill = 0;
+    m_iFirstSkill = 0;
+    m_iStepStockSkill = 0;
+    m_tqRevolverRoll = 0;
+    m_tqRevolverSpeed = 0;
+    m_hEffCharge = 0;
+    m_tqEffCharge = 0;
+    m_hTarget = 0;
+    m_hLockon = 0;
+    m_hMark = 0;
+    m_vMarkPos.init();
+    m_vLockonPos.init();
+    m_hOldLockon = 0;
+    m_iOldCamMode = 0;
+    m_hEffCast = 0;
+    m_hFriend = 0;
+    m_hSummon = 0;
+}
 void CPlayer::updateBefore() {
     *(BOOL*)&m_bPreAir = m_bAir;
     m_fWeight = PL::g_fWeight;
@@ -701,14 +884,6 @@ void CPlayer::initStartPos() {
     m_collBody.setRadius(m_pParam->BODY_COLL_RADIUS);
     m_collBody.off();
 }
-/* Parked: 20 lines differ, all in the scheduling of the last getBoneIndex calls (size, frame, switch, strings match):
-   the original fills the delay slot with the string load for the Chest, LToes and RToes calls (`move a0; lui; move a2; jal;
-   lw a1`) but not for Head (`lui; move a0; lw a1; jal; move a2`); ours has Chest and Head the other way round.
-   Found: the strings must be read through `*(LPCSTR*)&PL::g_sz...` (a plain read of the never-written static is hoisted
-   above the previous store: 57 lines), each case sets m_iBoneCenter itself (a shared `name` temp: 70 lines).
-   tried: all 128 cast/plain combinations of the 7 reads, a temp for the Chest result, FALSE for the 0, and tools/
-   permuter.py through the method wrapper (4 min, no better). */
-#if 0
 void CPlayer::makeWeapon() {
     switch (m_uiCharaID) {
     case 5:
@@ -716,12 +891,14 @@ void CPlayer::makeWeapon() {
         setPlayerFlag(0, 0x40000000);
         m_iBoneWeapon = getBoneIndex(PL::g_szBoneWep0, 0);
         m_iBoneCenter = getBoneIndex(*(LPCSTR*)&PL::g_szBoneEx1580sk, 0);
+        m_iBoneChest = getBoneIndex(*(LPCSTR*)&PL::g_szBoneChest1, 0);
         break;
     case 3:
     case 4:
         setPlayerFlag(0, 0x40000000);
         m_iBoneWeapon = getBoneIndex(PL::g_szBoneWep0, 0);
         m_iBoneCenter = getBoneIndex(*(LPCSTR*)&PL::g_szBoneEx1010sk, 0);
+        m_iBoneChest = getBoneIndex(*(LPCSTR*)&PL::g_szBoneChest1, 0);
         break;
     case 1:
     case 2:
@@ -729,24 +906,15 @@ void CPlayer::makeWeapon() {
         setPlayerFlag(0x40000000, 0);
         m_iBoneWeapon = getBoneIndex(PL::g_szBoneWeaponR, 0);
         m_iBoneCenter = getBoneIndex(*(LPCSTR*)&PL::g_szBoneEx0010sk, 0);
+        m_iBoneChest = getBoneIndex(*(LPCSTR*)&PL::g_szBoneChest1, 0);
         break;
     }
-    m_iBoneChest = getBoneIndex(*(LPCSTR*)&PL::g_szBoneChest1, 0);
     m_iBoneHead = getBoneIndex(*(LPCSTR*)&PL::g_szBoneHead, 0);
     m_iBoneLFoot = getBoneIndex(*(LPCSTR*)&PL::g_szBoneLToes, 0);
     m_iBoneRFoot = getBoneIndex(*(LPCSTR*)&PL::g_szBoneRToes, 0);
     m_pWeapon = new (com_malloc_d(sizeof(PlayerWeapon::CPlayerWeapon), __FILE__ "(1094)", RET_ADDR())) PlayerWeapon::CPlayerWeapon(this, m_uiCharaID, m_iBoneWeapon);
     offWeapon();
 }
-#else
-/* placeholder: rodata of makeWeapon__7CPlayer */
-__asm__(".rdata\n");
-inline void _roPh1() {
-    TRACE(__FILE__ "(1094)");
-}
-__asm__(".rdata\n.align 4\n.word .L00260C8C\n.word .L00260C8C\n.word .L00260C4C\n.word .L00260C4C\n.word .L00260C0C\n.word .L00260C0C\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", makeWeapon__7CPlayer);
-#endif
 __asm__(".rdata\n");
 void CPlayer::makeCockpit() {
     m_pCam = new (com_malloc_d(sizeof(PlayerCamera::CPlayerCamera), __FILE__ "(1103)", RET_ADDR())) PlayerCamera::CPlayerCamera(this);
@@ -759,13 +927,6 @@ void CPlayer::makeCockpit() {
     m_pGauge->setHP(m_iHP, 1);
     m_pGauge->setDP(m_iDP, 30);
     m_pDebug = new (com_malloc_d(sizeof(CPlayerDebug), __FILE__ "(1124)", RET_ADDR())) CPlayerDebug(this);
-}
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nKind2 = kind;
-    c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
 __asm__(".rdata\n");
 void CPlayer::makeRevolver() {
@@ -1913,29 +2074,35 @@ INT CPlayer::chkWalkMode() {
     m_fWalkSpeed = aim_power * m_pParam->MAX_RUN_SPEED * dash;
     return 2;
 }
-/* Parked: only the angle-wrap register differs: the original keeps r (aim_dir - dirY, wrapped to +-PI) in $f1,
-   ours in $f13. Cause (greg dump): aim_dir dies at the subtraction (sched1 issues the v.y store first), so
-   global.c's expand_preferences hands r aim_dir's $f13 preference (from the Homing argument copy). tried:
-   _limitPI/_abs helper bodies (return forms, ret local, if/if, volatile/non-volatile asm, fabsf), r as an
-   explicit local first/last, the ref's locals at the top, folded calcVelocityXZ argument, the else-block and
-   in-place wrap forms, r computed before/between the v stores; best 6 lines. tools/permuter.py can't run on
-   C++ methods. */
+/* Parked: 2 lines differ: the delay slot of jal calcVelocityXZ (the original issues the m_fWalkSpeed store
+   first and puts mov.s $f12,$f1 in the slot; this draft the reverse). The angle-wrap register (r in $f1, not
+   $f13) is fixed by keeping aim_dir live after the call with an empty asm (see the draft); without it r inherits
+   aim_dir's $f13 preference from the Homing argument copy (global.c expand_preferences: aim_dir dies at the
+   subtraction because sched1 issues the v.y store first). $LM tags: dirY via getDir() (Player.h:856), both
+   rotation writes via CMovement::setRot (Movement.h:65). tried before: _limitPI/_abs helper bodies (return
+   forms, ret local, if/if, volatile/non-volatile asm, fabsf), r as an explicit local first/last, the ref's locals
+   at the top, folded calcVelocityXZ argument, the else-block and in-place wrap forms, r computed before/between
+   the v stores (best 6 lines without the asm). 2026-10-25: the keep-alive asm after the wrap (21, blocks
+   scheduling), at the end (6, epilogue order), after the call (2), after v.y = dirY (4), non-volatile (4),
+   between the speed store and the call (3, forces a reload of m_fWalkSpeed); a separate d = aim_dir - dirY
+   before the vector (6); folded call argument with the asm (2). */
 #if 0
 void CPlayer::exeWalk() {
     FLOAT aim_dir = m_fAnalogViewDir;
     FLOAT d0 = Movement::Homing(m_fDir, aim_dir, 0.2f, m_fFrameRate);
     if (m_WalkMode) m_fDir = d0;
     setWalkAnim();
-    FLOAT dirY = m_fDir;
+    FLOAT dirY = getDir();
     FVECTOR v;
     v._q = 0;
     v.y = aim_dir;
-    m_pMove->getRot() = v;
+    m_pMove->setRot(v);
     m_fMovePower = 1.0f - _abs(_limitPI(aim_dir - dirY)) / 3.1415927f;
     m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower;
     m_pMove->calcVelocityXZ(m_fWalkSpeed);
+    __asm__ __volatile__("" : : "f"(aim_dir)); /* keeps aim_dir live past the wrap: matching lever */
     v.y = dirY;
-    m_pMove->getRot() = v;
+    m_pMove->setRot(v);
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer);
@@ -2062,20 +2229,21 @@ INT CPlayer::initIdle(INT inAir, INT inStand) {
    tried: all orders of the 4 ofs stores, oz/oy temporaries, set()/brace init for ofs, z-then-x and local-variable
    orders for m_vWallPos, interleaved/reversed vStart/vEnd stores, per-block FLOAT r, _limitPI/_limitPI3 and tools/
    permuter.py through the method alias wrapper (8 min, score 40 -> 24 by commuting operands/declaration order, which
-   funcdiff shows as worse). */
+   funcdiff shows as worse). Retried 2026-10-25 ($LM tags):
+   the first ofs is one brace-init line (`FVECTOR ofs = {{0, 0.07f, 0.5f, 1}}` after the flag test, the other
+   aggregates declared after it) -> fixes (1); m_vWallPos.x before .z (lines 3686/3687) -> 9 lines. Left: the
+   join block loads pos.x into $f1 and pos.z into $f0 (original $f0/$f1) and sets v0 = 1 before the two stores
+   (original after). tried: v[] / *(FLOAT*)& reads and stores, `bHit = TRUE; return bHit;`, tools/permuter.py
+   through the method wrapper again (10 min, 4717 candidates, no better). */
 #if 0
 INT CPlayer::chkWall(INT inStep) {
-    FVECTOR ofs;
+    if (!isActionFlag(0x10000)) return FALSE;
+    FVECTOR ofs = {{0.0f, 0.07f, 0.5f, 1.0f}};
     FMATRIX m;
     FVECTOR old;
     FVECTOR pos;
     FLOAT dir;
     BOOL bHit;
-    if (!isActionFlag(0x10000)) return FALSE;
-    ofs.y = 0.07f;
-    ofs.z = 0.5f;
-    ofs.x = 0.0f;
-    ofs.w = 1.0f;
     dir = m_fDir;
     _unitMatrix(m);
     _rotMatrixY(m, dir);
@@ -2190,8 +2358,8 @@ INT CPlayer::chkWall(INT inStep) {
         vNormal = *m_pCollMap->getDetectNormal();
         if (vNormal.y < 0.64278764f) pos = *m_pCollMap->getDetectPos();
     }
-    m_vWallPos.z = pos.z;
     m_vWallPos.x = pos.x;
+    m_vWallPos.z = pos.z;
     return TRUE;
 }
 #else
@@ -2235,16 +2403,17 @@ void CPlayer::initWall() {
     m_pMove->setFlag(0x40, FALSE); // partial CMovement: (flag, on)
     m_fFootRadius = 0.5f;
 }
-/* Parked: 25 lines differ, all one register-allocation cascade: the original keeps cancel_speed in $f22 and the
-   0.5f constant (ofs.x / setRadius) in $f23, ours the reverse (global.c priority: the short-lived 0.5 constant
-   outranks the speed). Also left: the three vec stores come after `lw m_iSubState` and cancel_power is a load of
-   vec.y (original) vs a hoisted zero, the dir/view load order of the houkou wrap (dir first, then view, sub
-   view - dir in $f1), and the last ofs.w store goes through the shared &ofs register. tried: ~25 variants (declaration
-   order of cancel_*, a `half` local for 0.5f, statement order of the three arms, speed after/before the init calls,
-   vec store orders / set() / cancel_power = vec.y, _limitPI vs the copy form, houkou polarity and if/else layout,
-   cast read of g_fAntiGravity) and tools/permuter.py through the method alias wrapper (8 min, 5147 candidates,
-   its score does not see the register difference). The jump arms with initJump(0) before the speed/power stores
-   got the best diff (25). */
+/* Parked: 4 lines differ (size, frame, every branch, call and register allocation match): at the start the
+   original issues `lw m_iSubState` (getSubState) before the `sw zero` of vec.y, ours stores vec.y first (right after
+   the lq of the getRot copy). Found 2026-10-25 from the $LM tags (25 -> 4): the first ofs is one brace-init line
+   (`FVECTOR ofs = {{0, 0, 0.6f, 1}}`), the second ofs.set(0.5f, 0, 0) (Coord.h inline; the 0.5f then shares the
+   setRadius constant in $f23, which fixed the old cancel_speed/0.5f register cascade), getDir() for dir and in the
+   houkou wrap, setSubState() in the three cases, m_fJumpSpdXZ and m_fMoveSpdXZ as two statements, and a real bug:
+   the HOUKOU_RIGHT case compares getAnimID() with 1 (the animation it starts), not 3. tried for the rest: all 24
+   orders of the vec stores and the cancel_power read (permblk.py), chained x = w = 1 / y = z = 0 forms (10),
+   vec.set() (25), brace init of vec (12), vec.v[1] and _ref(vec).y reads, getSubState() in the test, and
+   tools/permuter.py through the method wrapper (10 min, 4918 candidates, no better). Earlier: ~25 variants of the
+   cancel_* declarations, arm statement orders, houkou forms, cast read of g_fAntiGravity. */
 #if 0
 void CPlayer::exeWall() {
     FVECTOR pos;
@@ -2264,7 +2433,7 @@ void CPlayer::exeWall() {
     vec.z = 0.0f;
     vec.w = 1.0f;
     cancel_power = vec.y;
-    if (!m_iSubState) {
+    if (!getSubState()) {
         FLOAT d0 = Movement::Homing(m_fDir, m_fWallDir, 0.15f, getFrameRateF());
         m_fDir = d0;
         rot.y = d0;
@@ -2299,7 +2468,7 @@ void CPlayer::exeWall() {
         warp(m_vWallPos);
         updateCoord();
         coordFix();
-        dir = _limitPI2(m_fAnalogViewDir - m_fDir + 3.1415927f);
+        dir = _limitPI2(m_fAnalogViewDir - getDir() + 3.1415927f);
         if (m_Houkou != HOUKOU_NUTRAL) {
             if (dir < 0.0f) houkou = HOUKOU_LEFT;
             else houkou = HOUKOU_RIGHT;
@@ -2308,7 +2477,7 @@ void CPlayer::exeWall() {
         }
         switch (houkou) {
         case HOUKOU_LEFT:
-            m_iSubState = 2;
+            setSubState(2);
             if (m_pAnim->getAnimID() != 2) {
                 if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 2, -1, 0, 0, 0, 1);
                 else setAnimRsrcEx(0xFD4, 2, -1, 0, 0, 0, 1);
@@ -2316,15 +2485,15 @@ void CPlayer::exeWall() {
             m_fWalkSpeed = 0.904f;
             break;
         case HOUKOU_RIGHT:
-            m_iSubState = 3;
-            if (m_pAnim->getAnimID() != 3) {
+            setSubState(3);
+            if (m_pAnim->getAnimID() != 1) {
                 if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 1, -1, 0, 0, 0, 1);
                 else setAnimRsrcEx(0xFD4, 1, -1, 0, 0, 0, 1);
             }
             m_fWalkSpeed = -0.904f;
             break;
         default:
-            m_iSubState = 1;
+            setSubState(1);
             if (m_pAnim->getAnimID() != 0) {
                 if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 0, -1, 0, 0, 0, 1);
                 else setAnimRsrcEx(0xFD4, 0, -1, 0, 0, 0, 1);
@@ -2341,21 +2510,14 @@ void CPlayer::exeWall() {
         return;
     }
     m_fFootRadius = 0.25f;
-    dir = m_fDir;
+    dir = getDir();
     pos = getPos();
-    FVECTOR ofs;
-    ofs.z = 0.6f;
-    ofs.x = 0.0f;
-    ofs.y = 0.0f;
-    ofs.w = 1.0f;
+    FVECTOR ofs = {{0.0f, 0.0f, 0.6f, 1.0f}};
     _unitMatrix(m);
     _rotMatrixY(m, dir);
     ApplyMatrixXYZ(ofs, m, ofs);
     AddVectorXYZ(pos, pos, ofs);
-    ofs.x = 0.5f;
-    ofs.y = 0.0f;
-    ofs.z = 0.0f;
-    ofs.w = 1.0f;
+    ofs.set(0.5f, 0.0f, 0.0f);
     ApplyMatrixXYZ(ofs, m, ofs);
     FVECTOR vStart = {{ pos.x + ofs.x, pos.y, pos.z + ofs.z, 1.0f }};
     FVECTOR vEnd = {{ pos.x - ofs.x, pos.y, pos.z - ofs.z, 1.0f }};
@@ -2375,7 +2537,8 @@ void CPlayer::exeWall() {
     setPos(pos);
     m_fWalkSpeed = cancel_speed / 60.0f;
     m_pMove->calcVelocityXZ(m_fWalkSpeed);
-    m_fJumpSpdXZ = m_fMoveSpdXZ = m_fWalkSpeed;
+    m_fJumpSpdXZ = m_fWalkSpeed;
+    m_fMoveSpdXZ = m_fWalkSpeed;
     FVECTOR vel = m_pMove->getVel();
     vel.y = *(FLOAT*)&PL::g_fAntiGravity * cancel_power;
     m_fJumpSpdY = vel.y;
@@ -2470,16 +2633,6 @@ void CPlayer::initLadder(INT inStep) {
     m_pMove->setFlag(0x40, FALSE);
     m_pCam->setFlag(8, TRUE);
 }
-/* Parked: 6 lines differ, the three constants of the case-4 ofs vector (1.8f, 1.3f, 1.0f; everything else, frame,
-   switch, jump table, vel slot sharing matches): the original loads them in that order into $f2, $f0, $f1 and
-   stores y, z, w before the call and x (sw zero) in its delay slot; ours uses $f0, $f1, $f2. With the source order
-   z, w, y the registers match but the scheduler then loads y last; `ofs._q = 0` first gives the registers but a
-   por/sq pair instead of the lone `sw zero`. Same family as exeHang's ofs block. Found: vel, A{pos,m} and
-   B{pos,ofs,m} must be sibling blocks (stack slots shared), case code order 0,1,2,4,3,5, the lost-step cases share
-   the setAnimForce(8) tail by crossjump.
-   tried: all 24 store orders of ofs.x/y/z/w, set(), brace init, v[] indexing, _ui[0]/_ul[0]/int zero stores, and
-   tools/permuter.py through the method wrapper (5 min, 2568 candidates, no better). */
-#if 0
 void CPlayer::exeLadder() {
     setPlayerFlag(0x400000, 0);
     m_iLadderStep = getLadderStepNow(getPos().y);
@@ -2532,14 +2685,10 @@ void CPlayer::exeLadder() {
         if (isMotionEnd()) {
             FLOAT dir;
             FVECTOR pos;
-            FVECTOR ofs;
-            FMATRIX m;
             dir = m_fDir;
             pos = getPos();
-            ofs.x = 0.0f;
-            ofs.y = 1.8f;
-            ofs.z = 1.3f;
-            ofs.w = 1.0f;
+            FVECTOR ofs = {{0.0f, 1.8f, 1.3f, 1.0f}};
+            FMATRIX m;
             _unitMatrix(m);
             _rotMatrixY(m, dir);
             ApplyMatrixXYZ(ofs, m, ofs);
@@ -2580,17 +2729,11 @@ void CPlayer::exeLadder() {
         m_pMove->setVel(vel);
     }
 }
-#else
-/* placeholder: rodata of exeLadder__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L002668F0\n.word .L00266908\n.word .L002669DC\n.word .L00266B84\n.word .L00266A54\n.word .L00266C44\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeLadder__7CPlayer);
-#endif
 /* Parked: everything but the ofs block matches (wrap: r wrapped in place, then dir = r); left: after getPos the
    original issues lq pos (v1) before lui LADDER_LOCAL_OFS (v0), ours schedules the lui first (sched1 priority:
    hi->lwc1->swc1 chain) and allocates pos to a1. tried: all orders of pos/ofs statements (perm.py), set(),
    brace init (adds a temp copy), x = y = 0 chains, FVECTOR pos = getPos(), extern const; best 10 lines.
-   tools/permuter.py can't run on C++ methods. */
+   Retried 2026-10-25: $LM tags put all four ofs stores on one line (4280) after pos = getPos() (4279), as in the draft; non-const LADDER_LOCAL_OFS (as the ref declares it) moves it to .data and fails the image, .v[2] / *(FLOAT*)& / _ref() / -> reads compile identically; tools/permuter.py through the method wrapper (10 min, 5151 candidates, no better). */
 #if 0
 INT CPlayer::isStartLadderJump() {
     FLOAT dir;
@@ -3134,7 +3277,12 @@ void CPlayer::initHang() {
    for the pad pointer in s0). tried: ~20 variants (dir as a local before/after the branch, a/b operand locals,
    operand order, _limitPI2 vs explicit if/else, rot.y/m_fDir store orders, d0 copy before getPos) and
    tools/permuter.py through the method alias wrapper (6 min; its best only commuted the vStart/vEnd sums, worse).
-   Same family as the parked exeWall / exeWalk wraps. */
+   Same family as the parked exeWall / exeWalk wraps. Retried 2026-10-25 ($LM tags): getDir() in the first
+   wrap and for dir, the model pointer read directly (m_pModels; the original inlines getModel, our Model.h only
+   defines it after Entity.h) -> 18 lines, but 8 bytes short: the two `mov.s` copies of the original are missing
+   (dir loaded into $f12 in the three branch delay slots and copied to $f22 after getPos, and the second wrap's
+   result r kept in $f12 apart from d = dir - PI in $f1 with the PI constant shared with the r > PI test); also the
+   0.5f (ofs.set / setRadius) is loaded into $f21 before getPos. tried: setDir(r), rot.y before setDir (23). */
 #if 0
 void CPlayer::exeHang() {
     FLOAT dir;
@@ -3164,7 +3312,7 @@ void CPlayer::exeHang() {
         if (m_iNowAnimID == 0xF) {
             if (m_tqStateTimer < 1500) break;
             if (isMotionEnd()) {
-                pos = Crd(getModel()->getBoneIndex(PL::g_szBoneLHand)).getWorldMatrix().v[3];
+                pos = Crd(m_pModels->getBoneIndex(PL::g_szBoneLHand)).getWorldMatrix().v[3];
                 SubVectorXYZ(m_vHangHandPos, pos, getPos());
                 _unitMatrix(m);
                 _rotMatrixY(m, m_fDir);
@@ -3174,11 +3322,11 @@ void CPlayer::exeHang() {
                 setAnimForce(0xE, 400, 0, 0, 0, 0);
             }
         }
-        r = _limitPI2(m_fAnalogViewDir - m_fDir + 3.1415927f);
+        r = _limitPI2(m_fAnalogViewDir - getDir() + 3.1415927f);
         if (getAnalogHoukou()) houkou = getHoukouFromAngle(r);
         else houkou = HOUKOU_NUTRAL;
         if (isTrgFlag(1) || getAnalogHoukou() == HOUKOU_DOWN || houkou == HOUKOU_DOWN) {
-            dir = m_fDir;
+            dir = getDir();
             pos = getPos();
             ofs.set(0.0f, 0.0f, -0.6f);
             _unitMatrix(m);
@@ -3205,7 +3353,7 @@ void CPlayer::exeHang() {
             setPos(pos);
             rot = getRot();
             r = _limitPI2(dir - 3.1415927f);
-            m_fDir = r;
+            setDir(r);
             rot.y = r;
             setRot(rot);
             setAnimForce(5, 0, 0, 0, 0, 0);
@@ -3835,7 +3983,7 @@ void CPlayer::resetAction(INT inMode) {
    them later). tried: all 24 orders of the JumpState/CardBreakTime/JumpGravity/JumpSpdY block, cast loads
    (*(FLOAT*)&g_fGravity, *(INT*)&g_CardBreakTime[7]) and cast stores, gravity via a local / *=, moving
    statements before isAir(), asm barriers; best 6 lines. The *(FLOAT*)& store on m_fMoveSpdXZ and the
-   chained m_fDistXZ = m_fDistY = 0.0f fixed the rest. tools/permuter.py can't run on C++ methods. */
+   chained m_fDistXZ = m_fDistY = 0.0f fixed the rest. tools/permuter.py can't run on C++ methods. Retried 2026-10-25: the $LM line order (gravity 6612, JumpState 6613, CardBreakTime 6614, SpdY 6615) breaks the registers (9 lines; v0 li 3 issued before the gravity load, CardBreakTime %hi in a0); all 24 orders with the casts (best 9), *(FLOAT*)&/*(INT*)& and _ref() reads of both globals: no better than this draft's 6. */
 #if 0
 void CPlayer::initAttackField(INT inNo) {
     setPlayerState(PL::ATTACK_FLD);
@@ -4090,49 +4238,315 @@ INT CPlayer::chkPlayCardCombo() {
     }
     return FALSE;
 }
-/* placeholder: rodata of onMsg__7CPlayeriPv */
-__asm__(".rdata\n");
-inline void _roPh15() {
-    TRACE("CPlayer::onMsg *** warning!! *** %d, inExtraInfo=NULL\n");
-    TRACE("CPlayer::onMsg *** warning!! *** %d, BATTLE_FLAG_ENEMY_EXTERMINATE\n");
-    TRACE("CPlayer::onMsg = CB_MES_PRONOUNCE ---- DEATH\n");
-    TRACE("CPlayer::onMsg = CB_MES_PRONOUNCE ---- CLEAR\n");
-    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- TOOSLOW\n");
-    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- SUCCESS ---- %d\n");
-    TRACE("CPlayer::onMsg = CB_MES_START ---- PLAY CARD ---- card = id:%d, no:%d,");
-    TRACE("  break!!=%d, DP:%d/%d,");
-    TRACE("  speed break!!=%d, DP:%d/%d,");
-    TRACE("\n");
-    TRACE("CPlayer::onMsg = CB_MES_START ---- PLAY CARD ---- card = id:%d, no:%d,\n");
-    TRACE("  speed break!!\n");
-    TRACE("CPlayer::onMsg *** error!! *** card category = ???\n");
-    TRACE("CPlayer::onMsg = CB_MES_SET ---- PLAY CARD ---- card = id:%d, no:%d,");
-    TRACE("  break!!=%d,");
-    TRACE("CPlayer::onMsg = CB_MES_BREAK ---- PLAY CARD ----  break!!=%d,");
-    TRACE(" DP:%d/%d, in DMODE\n");
-    TRACE(" DP:%d/%d,\n");
-    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- PLAY CARD ----\n");
-    TRACE("CPlayer::onMsg = CB_MES_ZERO\n");
-    TRACE("CPlayer::onMsg = CB_MES_REFRECT\n");
-    TRACE("CPlayer::onMsg = CB_MES_????:%d\n");
-    TRACE("CPlayer::onMsg = CB_MES_START ---- STOCK SKILL ----");
-    TRACE("CPlayer::onMsg = CB_MES_START ---- STOCK SKILL ----\n");
-    TRACE("CPlayer::onMsg = CB_MES_SET ---- STOCK SKILL ----  break!!=%d, DP:%d/%d,\n");
-    TRACE("CPlayer::onMsg = CB_MES_SET ---- STOCK SKILL ----");
-    TRACE("card[0]= id:%d, no:%d, sk:%d, ex:%d, fi:%d,\n");
-    TRACE("card[1]= id:%d, no:%d,\n");
-    TRACE("card[2]= id:%d, no:%d,\n");
-    TRACE("CPlayer::onMsg = CB_MES_BREAK ---- STOCK SKILL ----  break!!=%d\n");
-    TRACE(" DP:%d/%d, \n");
-    TRACE("CPlayer::onMsg = CB_MES_DUEL ---- STOCK SKILL ----\n");
+struct MES_CARD_INFO { // 0x24
+    CARD m_cardData[7];
+    SHORT m_nStock;
+    BYTE m_nExtra;
+    BYTE m_nFirst;
+    BYTE m_nBreak;
+    BYTE m_nBonus;
+    BYTE m_nWork0;
+    BYTE m_nWork1;
+};
+#define INFO (*(MES_CARD_INFO*)m_recvCardInfo)
+#define CARD0 (*pCard)
+void CPlayer::onMsg(INT inMsg, void* inExtraInfo) {
+    CARD* pCard;
+    m_recvMsg = inMsg;
+    if (!inMsg) return;
+    if (!inExtraInfo) {
+        TRACE("CPlayer::onMsg *** warning!! *** %d, inExtraInfo=NULL\n", inMsg);
+        return;
+    }
+    if (isBattleFlag(4) || m_bIsDead) {
+        TRACE("CPlayer::onMsg *** warning!! *** %d, BATTLE_FLAG_ENEMY_EXTERMINATE\n", inMsg);
+        setBattleFlag(0, 0x480F90);
+        m_iNextAttack = 0;
+        setBattleFlag(0, 8);
+        setBattleFlag(0, 0x10080000);
+        return;
+    }
+    pCard = INFO.m_cardData;
+    setBattleFlag(0, 0x10004060);
+    INFO = *(MES_CARD_INFO*)inExtraInfo;
+    m_iStockSkill = INFO.m_nStock;
+    m_iExtraSkill = INFO.m_nExtra;
+    m_iFirstSkill = INFO.m_nFirst;
+    if (getPlayerState() == 0x24) {
+        switch (m_recvMsg) {
+        case 1:
+            break;
+        case 3:
+        case 4:
+        case 7:
+        case 13:
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 14:
+            TRACE("CPlayer::onMsg = CB_MES_PRONOUNCE ---- DEATH\n");
+            setBattleFlag(0x1000000, 0x480F90);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 8);
+            setBattleFlag(0x20, 0);
+            break;
+        case 15:
+            TRACE("CPlayer::onMsg = CB_MES_PRONOUNCE ---- CLEAR\n");
+            setBattleFlag(0x2000000, 0x480F90);
+            break;
+        }
+    } else if (getPlayerState() == 0x22) {
+        switch (m_recvMsg) {
+        case 1:
+            setConditionFlag(0, 0x4000000);
+            break;
+        case 3:
+        case 4:
+        case 7:
+        case 8:
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 11:
+            TRACE("CPlayer::onMsg = CB_MES_DUEL ---- TOOSLOW\n");
+            setBattleFlag(0x10000, 0x480F90);
+            setBattleFlag(0, 8);
+            break;
+        case 12:
+            TRACE("CPlayer::onMsg = CB_MES_DUEL ---- SUCCESS ---- %d\n", m_iStockSkill);
+            setBattleFlag(0x20000, 0);
+            break;
+        }
+    } else if (!m_iStockSkill) {
+        m_iStepStockSkill = 0;
+        if (DebugWork::g_dw.player.iCardLock > 0) {
+            switch (CARD0.m_nCategory21) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+                _setCardNK(CARD0, DebugWork::g_dw.player.iCardLock, CARD0.m_nNumber);
+                break;
+            case 6:
+            case 14:
+                _setCardNK(CARD0, DebugWork::g_dw.player.iCardLock, 0);
+                break;
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            case 13:
+                break;
+            }
+        }
+        switch (m_recvMsg) {
+        case 1:
+            m_uiCardID = CARD0.m_nKind;
+            setConditionFlag(0, 0x4000000);
+            if (isActionFlag(0x4000000) && !isConditionFlag(0x400000)) {
+                TRACE("CPlayer::onMsg = CB_MES_START ---- PLAY CARD ---- card = id:%d, no:%d,", CARD0.m_nKind, CARD0.m_nNumber);
+                if (INFO.m_nBreak) {
+                    m_iDP += INFO.m_nBreak;
+                    m_iDP += INFO.m_nBonus;
+                    if (m_iDP > 30) m_iDP = 30;
+                    TRACE("  break!!=%d, DP:%d/%d,", INFO.m_nBreak, m_iDP, 30);
+                    m_pGauge->setDP(m_iDP, 30);
+                    if (INFO.m_nBonus) {
+                        setConditionFlag(0x4000000, 0);
+                        TRACE("  speed break!!=%d, DP:%d/%d,", INFO.m_nBonus, m_iDP, 30);
+                    }
+                }
+                TRACE("\n");
+                if (m_iDP >= 30) {
+                    INT cat = CARD0.m_nCategory21;
+                    if (cat < 6) {
+                        if (cat != 0) setPlayerFlag(0x40000, 0);
+                    }
+                    if (isPlayerFlag(0x40000)) return;
+                }
+            } else {
+                TRACE("CPlayer::onMsg = CB_MES_START ---- PLAY CARD ---- card = id:%d, no:%d,\n", CARD0.m_nKind, CARD0.m_nNumber);
+                if (INFO.m_nBonus) {
+                    setConditionFlag(0x4000000, 0);
+                    TRACE("  speed break!!\n");
+                }
+            }
+            setBattleFlag(0, 0x480F90);
+            switch (CARD0.m_nCategory21) {
+            case 1: setBattleFlag(0x10, 0); break;
+            case 2: setBattleFlag(0x100, 0); break;
+            case 3: setBattleFlag(0x800, 0); break;
+            case 4: setBattleFlag(0x80, 0); break;
+            case 5: setBattleFlag(0x400, 0); break;
+            case 14: setBattleFlag(0x400000, 0);
+            case 6: setBattleFlag(0x200, 0); break;
+            case 7:
+                if (CARD0.m_nNumber != -1) {
+                    m_pCB->destroyPlayCard(1, 0);
+                }
+                break;
+            case 8:
+                break;
+            default:
+                TRACE("CPlayer::onMsg *** error!! *** card category = ???\n");
+                break;
+            }
+            break;
+        case 2:
+            TRACE("CPlayer::onMsg = CB_MES_SET ---- PLAY CARD ---- card = id:%d, no:%d,", CARD0.m_nKind, CARD0.m_nNumber);
+            if (!isConditionFlag(0x400000)) {
+                if (INFO.m_nBreak) TRACE("  break!!=%d,", INFO.m_nBreak);
+            }
+            TRACE("\n");
+            break;
+        case 3:
+            setBattleFlag(0x40, 0);
+            if (isActionFlag(0x4000000)) {
+                TRACE("CPlayer::onMsg = CB_MES_BREAK ---- PLAY CARD ----  break!!=%d,", INFO.m_nBreak);
+                if (INFO.m_nBreak) {
+                    m_iDP -= INFO.m_nBreak;
+                    if (isConditionFlag(0x400000)) {
+                        if (m_iDP <= 0) {
+                            setTrgFlag(0x100000, 0);
+                            m_iDP = 0;
+                            m_pCB->setFlag(0x400000, 0);
+                        }
+                        TRACE(" DP:%d/%d, in DMODE\n", m_iDP, m_iMaxDP);
+                        m_pGauge->setDP(m_iDP, m_iMaxDP);
+                    } else {
+                        if (m_iDP <= 0) m_iDP = 0;
+                        TRACE(" DP:%d/%d,\n", m_iDP, 30);
+                        m_pGauge->setDP(m_iDP, 30);
+                    }
+                }
+                TRACE("\n");
+            }
+            setBattleFlag(0, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 8:
+            TRACE("CPlayer::onMsg = CB_MES_DUEL ---- PLAY CARD ----\n");
+            setBattleFlag(0x8000, 0);
+            break;
+        case 7:
+            TRACE("CPlayer::onMsg = CB_MES_ZERO\n");
+            setBattleFlag(0x4000, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 4:
+            TRACE("CPlayer::onMsg = CB_MES_REFRECT\n");
+            setBattleFlag(0x20, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        default:
+            TRACE("CPlayer::onMsg = CB_MES_????:%d\n", m_recvMsg);
+            return;
+        }
+    } else {
+        switch (m_recvMsg) {
+        case 1:
+            setConditionFlag(0, 0x4000000);
+            if (isActionFlag(0x4000000) && !isConditionFlag(0x400000)) {
+                TRACE("CPlayer::onMsg = CB_MES_START ---- STOCK SKILL ----");
+                if (INFO.m_nBreak) {
+                    m_iDP += INFO.m_nBreak;
+                    m_iDP += INFO.m_nBonus;
+                    if (m_iDP > 30) m_iDP = 30;
+                    TRACE("  break!!=%d, DP:%d/%d,", INFO.m_nBreak, m_iDP, 30);
+                    m_pGauge->setDP(m_iDP, 30);
+                    if (INFO.m_nBonus) {
+                        setConditionFlag(0x4000000, 0);
+                        TRACE("  speed break!!=%d, DP:%d/%d,", INFO.m_nBonus, m_iDP, 30);
+                    }
+                }
+                TRACE("\n");
+                if (m_iDP >= 30) {
+                    setPlayerFlag(0x40000, 0);
+                    break;
+                }
+            } else {
+                TRACE("CPlayer::onMsg = CB_MES_START ---- STOCK SKILL ----\n");
+                if (INFO.m_nBonus) {
+                    setConditionFlag(0x4000000, 0);
+                    TRACE("  speed break!!\n");
+                }
+            }
+            setBattleFlag(0x40000, 0);
+            m_iStepStockSkill = 99;
+            break;
+        case 2:
+            if (isActionFlag(0x4000000) && !isConditionFlag(0x400000)) {
+                if (isConditionFlag(0x200000)) {
+                    TRACE("CPlayer::onMsg = CB_MES_SET ---- STOCK SKILL ----  break!!=%d, DP:%d/%d,\n", INFO.m_nBreak, m_iDP, 30);
+                    return;
+                }
+            }
+            setBattleFlag(0x1000, 0);
+            if (m_pCB->getEnchantKind() == 0x2F) setBattleFlag(0x2000, 0);
+            TRACE("CPlayer::onMsg = CB_MES_SET ---- STOCK SKILL ----");
+            if (!isConditionFlag(0x400000)) {
+                if (INFO.m_nBreak) TRACE("  break!!=%d,", INFO.m_nBreak);
+            }
+            TRACE("\n");
+            TRACE("card[0]= id:%d, no:%d, sk:%d, ex:%d, fi:%d,\n", pCard[0].m_nKind, pCard[0].m_nNumber, INFO.m_nStock, INFO.m_nExtra, INFO.m_nFirst);
+            TRACE("card[1]= id:%d, no:%d,\n", pCard[1].m_nKind, pCard[1].m_nNumber);
+            TRACE("card[2]= id:%d, no:%d,\n", pCard[2].m_nKind, pCard[2].m_nNumber);
+            m_iStepStockSkill = 0;
+            break;
+        case 3:
+            setBattleFlag(0x40, 0);
+            if (isActionFlag(0x4000000) && isConditionFlag(0x400000)) {
+                TRACE("CPlayer::onMsg = CB_MES_BREAK ---- STOCK SKILL ----  break!!=%d\n", INFO.m_nBreak);
+                if (INFO.m_nBreak) {
+                    m_iDP -= INFO.m_nBreak;
+                    if (isConditionFlag(0x400000)) {
+                        if (m_iDP <= 0) {
+                            setTrgFlag(0x100000, 0);
+                            m_pCB->setFlag(0x400000, 0);
+                            m_iDP = 0;
+                        }
+                        TRACE(" DP:%d/%d, in DMODE\n", m_iDP, m_iMaxDP);
+                        m_pGauge->setDP(m_iDP, m_iMaxDP);
+                    } else {
+                        if (m_iDP <= 0) m_iDP = 0;
+                        TRACE(" DP:%d/%d, \n", m_iDP, 30);
+                        m_pGauge->setDP(m_iDP, 30);
+                    }
+                }
+                TRACE("\n");
+            }
+            setBattleFlag(0, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 8:
+            TRACE("CPlayer::onMsg = CB_MES_DUEL ---- STOCK SKILL ----\n");
+            setBattleFlag(0x8000, 0);
+            break;
+        case 7:
+            TRACE("CPlayer::onMsg = CB_MES_ZERO\n");
+            setBattleFlag(0x4000, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        case 4:
+            TRACE("CPlayer::onMsg = CB_MES_REFRECT\n");
+            setBattleFlag(0x20, 8);
+            m_iNextAttack = 0;
+            setBattleFlag(0, 0x480F90);
+            break;
+        default:
+            TRACE("CPlayer::onMsg = CB_MES_????:%d\n", m_recvMsg);
+            break;
+        }
+    }
 }
-__asm__(".rdata\n.align 4\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026C558\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BAE4\n.word .L0026BB20\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026BB78\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026BB90\n.word .L0026BB90\n.word .L0026C558\n.word .L0026C558\n.word .L0026BBA8\n.word .L0026BBDC\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC54\n.word .L0026BC90\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BD08\n.word .L0026BC90\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026BD34\n.word .L0026BF94\n.word .L0026BFE8\n.word .L0026C514\n.word .L0026C118\n.word .L0026C118\n.word .L0026C0F4\n.word .L0026C0E8\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026BEEC\n.word .L0026BEFC\n.word .L0026BF0C\n.word .L0026BF1C\n.word .L0026BF2C\n.word .L0026BF4C\n.word .L0026BF5C\n.word .L0026C558\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF80\n.word .L0026BF3C\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0026C158\n.word .L0026C2A0\n.word .L0026C3C0\n.word .L0026C514\n.word .L0026C548\n.word .L0026C548\n.word .L0026C4F0\n.word .L0026C4D0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", onMsg__7CPlayeriPv);
+#undef CARD0
+#undef INFO
 INT CPlayer::exeUseStock(INT inFlag) {
     if (isBattleFlag(4) || m_bIsDead) return FALSE;
     switch (m_iStepStockSkill) {
@@ -4220,7 +4634,7 @@ INT CPlayer::startSingleAction() {
    s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi
    moves. The flag block (battle 0x10/0x80000/8, then trg 4) and the ternary m_iComboBoost match.
    tried: block perms (perm.py, hillmove.py), cast loads/stores on g_fGravity/g_CardBreakTime/
-   m_JumpState/m_fJumpGravity, gravity via a local; best 13 lines. tools/permuter.py can't run on C++ methods. */
+   m_JumpState/m_fJumpGravity, gravity via a local; best 13 lines. tools/permuter.py can't run on C++ methods. Retried 2026-10-25: the $LM line order (gravity 7818 before JumpState 7819) also gives 13 lines: li 3 then issues before the gravity lwc1 (equal priority, later insn first) and the %hi(g_fGravity) moves from v0 to v1; same family as initAttackField. */
 #if 0
 void CPlayer::initAttack(INT inNo) {
     setPlayerState(PL::ATTACK);
@@ -4254,23 +4668,12 @@ void CPlayer::initAttack(INT inNo) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", initAttack__7CPlayeri);
 #endif
-/* Parked: 25 lines differ (size, structure, every call, the jump table and the attack-kind logic match): (1) the
-   prologue: the original saves s1 before s0 (pTarget = NULL sits in the blez delay slot); (2) in the card-power
-   block the original keeps m_pAtkData in t1, &g_pBattleCardList in t0, id*16 in a3 and the 0x4000000 mask in a2
-   (ours t2, t1, t0, a3: one register more is live), and (3) in the tail it loads m_pAnim after the FLAG store.
-   Found: locals declared first and assigned after the lookup (pTarget/distY/dist/dir), `if/else` for pTarget,
-   distY and dir as separate statements, `!(AttackNo < MaxCombo - 1)`, the attack-list choice as three direct
-   stores, the debug-ID block without a local, `_ref()` stores for AtkKind/AtkAttr and `_upKind()` for the
-   enchant flags (Riku's form), m_bIsCanCombo stored before m_uiPreAttackKind (38 -> 28 lines).
-   tried: all 24 orders of the four tail statements, 6 forms of the pTarget/zero init, 3 forms of the card block
-   (pAtk/pCard locals), 4 forms of the debug ID, and tools/permuter.py through the method wrapper (6 min, 3289
-   candidates, no better). */
-#if 0
 void CPlayer::setAttack() {
     CEntity* pTarget;
     FLOAT distY;
     FLOAT dist;
     FLOAT dir;
+    FLOAT rate;
     FLOAT power;
     CEffect* effect;
     if (m_hTarget > 0) pTarget = (CEntity*)CTaskMan::getTask(m_hTarget);
@@ -4384,7 +4787,8 @@ void CPlayer::setAttack() {
         m_AtkAttr = (ATK_ATTR)0;
     } else {
         INT power2;
-        power2 = (*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER] + m_iComboBoost;
+        power2 = (*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER];
+        power2 += m_iComboBoost;
         if (isConditionFlag(0x4000000)) power2 += power2 / 2;
         m_iAttackPower = m_iAP * power2 / 100;
         _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
@@ -4394,15 +4798,10 @@ void CPlayer::setAttack() {
     }
     m_bIsCanCombo = m_pAtkData->FLAG & 1;
     m_uiPreAttackKind = m_uiAttackKind;
-    m_tqAttackTimer = m_pAnim->getTotalTqCrd() * 100 / (INT)(m_fAnimSpeed * 100.0f) + 1000;
+    rate = m_fAnimSpeed * 100.0f;
+    m_tqAttackTimer = m_pAnim->getTotalTqCrd() * 100 / (INT)rate + 1000;
     m_iAttackNo++;
 }
-#else
-/* placeholder: rodata of setAttack__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0026CBE4\n.word .L0026CBE4\n.word .L0026CC14\n.word .L0026CC30\n.word .L0026CC14\n.word .L0026CBE4\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", setAttack__7CPlayer);
-#endif
 void CPlayer::exeAttack() {
     TIMEQ frameTQ = getMotionCurrentTime();
     TIMEQ frame = frameTQ / 50;
@@ -4786,7 +5185,388 @@ inline void _roPh20() {
     TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n");
 }
 __asm__(".rdata\n.align 4\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026F018\n.word .L0026F018\n.word .L0026ED28\n.word .L0026EEE8\n.word .L0026EF64\n.word .L0026F018\n.word .L0026EEB4\n.word .L0026F018\n.word .L0026EF3C\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF94\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC40\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF80\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026ECBC\n.word .L0026EFA8\n.word .L0026EFBC\n.word .L0026EC84\n.word .L0026EC70\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC30\n.word .L0026EEAC\n.text\n");
+/* Parked: 20 lines differ, same size; structure, all branches, calls, the
+   40-entry jump table, frame and strings match. Left, four scheduling/register spots: (1) old_condition
+   (isConditionFlag(0x881803F)): the original loads the flag word into v1 and the mask into v0, ours the reverse;
+   (2) case 6 (knock-back): the {0, dir0, 0, 0} rotation temp gets v1 in the original (v0 ours, swapping the li 1 /
+   li 3 of m_bDmgInAir/m_JumpState) and its lq is issued after the m_JumpState/m_bDmgInAir stores; (3) case 33
+   (pronounce): the original stores m_fDir before loading the vptr for initPronounce, ours loads the vptr first
+   (equal sched2 priority, tie broken by RTL order; sched1 prefers our store because it frees $f0); (4) the
+   !bIsBackHit Homing block: the original issues lw m_pMove before the vel.y store and the m_fDir store before the
+   lq. (2)-(4) look like the original FVECTOR's own constructors/operator= (types.h lists FVECTOR(), FVECTOR(...),
+   operator=) building the temporaries, which System/Vector.h does not have. Found: statement order from the
+   $LM line tags (build/asmlines.py), dir declared before dpos (frame), def_attr holding the attack attribute
+   first, the playSE id as a ternary of two calls (cross-jumped), bIsBackHit = FALSE after procDropMP, the case-6
+   gravity as *(FLOAT*)&PL::g_fGravity and the store order from a 120-permutation search (23 -> 20). tried: brace
+   init (memset), _rotY() by-value helper, _assign() reference copy, setDir(const FLOAT&), *(FLOAT*)& and
+   *(volatile FLOAT*)& stores of m_fDir, an "+f" asm on the Homing result (21), a memory asm barrier after the
+   case-33 store (18 lines, kept out: still not a match), old_condition as a direct/commuted expression or moved
+   before bIsBackHit (33), and tools/permuter.py through the method wrapper (15 min, 7332 candidates, no better). */
+#if 0
+BOOL CPlayer::chkDamage() {
+    INT face;
+    FVECTOR dir;
+    FVECTOR dpos;
+    FLOAT dir0;
+    BOOL bIsBackHit;
+    UINT old_condition;
+    INT dmg0;
+    ATK_KIND kind;
+    INT def_attr;
+    INT anim;
+    if (m_bIsDead) {
+        setBattleFlag(0, 8);
+        return FALSE;
+    }
+    if (isBattleFlag(0x20)) {
+        if (isNowCardActionState()) {
+            resetAction(1);
+            initIdle(-1, 0);
+            setBattleFlag(0, 8);
+        }
+        setBattleFlag(0, 0x10200000);
+    }
+    if (isBattleFlag(0x8000)) {
+        resetAction(4);
+        initDuel(0);
+    } else if (isBattleFlag(0x4000)) {
+        if (isConditionFlag(0x8810000)) {
+            setBattleFlag(0, 0x4000);
+            setBattleFlag(0, 0x10200000);
+        } else {
+            resetAction(3);
+            initIdle(-1, 0);
+            setBattleFlag(0x20, 0x4000);
+            setBattleFlag(0, 0x10200000);
+        }
+        setBattleFlag(0, 8);
+    } else if (isBattleFlag(0x40)) {
+        initFlip(1);
+    }
+    if (!isActionFlag(0x200)) return FALSE;
+    if (isMuteki()) {
+        m_collBody.setDamage(0);
+        return FALSE;
+    }
+    if (m_collBody.isGuardTrg()) {
+        Gauge::CCommonGauge::setDispSeq(getHandle(), 2);
+        return FALSE;
+    }
+    if (!m_collBody.isHit()) return FALSE;
+    TRACE("CPlayer:: (initDamage)\n");
+    face = 1;
+    setBattleFlag(0, 8);
+    m_bDmgInAir = isAir();
+    dir = *m_collBody.getDetectPos();
+    m_vEnemyPos = m_collBody.getEnemyPos();
+    setConditionFlag(0, 0x20000);
+    if (m_collBody.getEnemyHandle() > 0) {
+        CEntity* pEntity = (CEntity*)CTaskMan::getTask(m_collBody.getEnemyHandle());
+        if (pEntity && PLM::isEntityTypeID(pEntity->getTypeID())) {
+            if (pEntity->isHeartless()) setConditionFlag(0x20000, 0);
+            pEntity->getLockOnPos(dir);
+        }
+    }
+    SubVectorXYZ(dpos, dir, getPos());
+    dir0 = atan2f(dpos.x, dpos.z);
+    bIsBackHit = _abs(_limitPI(dir0 - m_fDir)) < 1.5707964f ? FALSE : TRUE;
+    old_condition = isConditionFlag(0x881803F);
+    dmg0 = m_collBody.getDamage();
+    kind = m_collBody.getDamageKind();
+    def_attr = m_collBody.getDamageAttr();
+    calcEnchant_DamagePoint(dmg0, (ATK_ATTR)def_attr);
+    def_attr = (INT)getDefAttr((ATK_ATTR)def_attr);
+    if (def_attr >= 1000) {
+        def_attr = 100;
+        face = 3;
+        setConditionFlag(1, 0);
+    } else if (def_attr == 0) {
+        Gauge::CCommonGauge::setDispSeq(getHandle(), 5);
+        return FALSE;
+    }
+    m_collBody.setHitEffect();
+    if (old_condition & 1) setConditionFlag(0, 1);
+    dmg0 = dmg0 * def_attr / 100;
+    INT hp0 = getHP();
+    if (kind == 0x22) dmg0 = hp0;
+    if (kind != 8) {
+        hp0 -= dmg0;
+        if (m_pCB && m_pCB->getEnchantKind() == 0x3B) {
+            hp0 += dmg0;
+        } else {
+            hp0 += (DebugWork::g_dw.player.iDamage0 > 0) * dmg0;
+            setDamageNumber(m_vHeadPos, dmg0);
+        }
+    }
+    if (m_pCB) {
+        if (hp0 <= 0 && getHP() >= 2 && m_pCB->getEnchantKind() == 0x29) {
+            hp0 = 1;
+            CardBattle::CCardBattle::decEnchantTime(1, 0x28, 0x29);
+        }
+    }
+    if (hp0 < 0) hp0 = 0;
+    m_iHP = hp0;
+    TRACE("-------- Damege Info ------------------\n");
+    if (CGame::isSoraGame()) {
+        TRACE("Sora : HP = %d/%d\n", m_iHP, m_iMaxHP);
+    } else if (isActionFlag(0x4000000)) {
+        if (!isConditionFlag(0x400000)) {
+            m_iDP++;
+            if (m_iDP > 30) m_iDP = 30;
+            TRACE("Riku : HP = %d/%d, DP = %d/%d,\n", m_iHP, m_iMaxHP, m_iDP, 30);
+            m_pGauge->setDP(m_iDP, 30);
+        } else {
+            m_iDP -= 5;
+            if (m_iDP <= 0) {
+                setTrgFlag(0x100000, 0);
+                m_iDP = 0;
+                m_pCB->setFlag(0x400000, 0);
+                setBattleFlag(0, 8);
+            }
+            TRACE("Riku : HP = %d/%d, DP = %d/%d,\n", m_iHP, m_iMaxHP, m_iDP, m_iMaxDP);
+            m_pGauge->setDP(m_iDP, m_iMaxDP);
+        }
+    } else {
+        TRACE("Riku : HP = %d/%d\n", m_iHP, m_iMaxHP);
+    }
+    TRACE("Flag PL  : 0x%08x\n", m_uiPlayerFlag);
+    TRACE("Flag CON : 0x%08x\n", m_uiConditionFlag);
+    TRACE("Flag TRG : 0x%08x\n", m_uiTrgFlag);
+    TRACE("Flag BTL : 0x%08x\n", m_uiBattleFlag);
+    TRACE("---------------------------------------\n");
+    if (hp0 <= 0) {
+        TRACE("CPlayer::chkDamage(); ++++ DEAD ++++\n");
+        m_bIsDead = TRUE;
+        m_pPLM->notifyDeadSE(CGame::isSoraGame() ? CSound::playSE(0x4B, -1, 0x40) : CSound::playSE(0x4C, -1, 0x40));
+        CSceneInfo::cancelBattleRequest();
+        face = 2;
+        CGameWork::setFlag(1, 6, TRUE);
+        setPlayerFlag(0x1001, 0);
+    }
+    if (m_pGauge) m_pGauge->setDamage(m_iHP, kind);
+    if (m_pCB) {
+        if (m_pCB->getEnchantKind() == 0x2C) setConditionFlag(0x4000, 0);
+        else setConditionFlag(0, 0x4000);
+        CardBattle::CCardBattle::decEnchantTime(1, 0x27, 0);
+    }
+    if (isConditionFlag(0x1000)) setQuickBarrier(1);
+    if (kind == 0x1A && !m_bIsDead && getPlayerState() != 0xD) return FALSE;
+    if ((old_condition & 0x8010002) && !m_bIsDead && getPlayerState() != 0xD) return FALSE;
+    if (m_pCB) {
+        if (!m_bIsDead && !isBattleFlag(0x20)) {
+            if (isBattleFlag(0x10000000)) {
+                TRACE("CPlayer::chkDamage(); NG = Now Card Play TRG!!\n");
+                return FALSE;
+            }
+            if (CardBattle::CCardBattle::isStandingCard(1)) {
+                TRACE("CPlayer::chkDamage(); NG = Now Card Play!\n");
+                return FALSE;
+            }
+        }
+        if (isBattleFlag(0x20)) {
+            if (isBattleFlag(0x10000000)) TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play TRG)\n");
+            if (CardBattle::CCardBattle::isStandingCard(1)) TRACE("CPlayer::chkDamage(); [REFRECT]  x(Now Card Play)\n");
+        }
+    }
+    if (!m_bIsDead && isBattleFlag(4)) {
+        initEnd();
+        return FALSE;
+    }
+    resetAction(6);
+    if (old_condition & 0x20) {
+        setConditionFlag(0, 0x20);
+        fadeEffect(m_hEffBad, 1);
+        m_hEffBad = setEffect(PL::g_szDpxVexen, 4, &getPos(), NULL, 0.0f);
+    }
+    if (old_condition & 0x800000) {
+        setConditionFlag(0, 0x800000);
+        m_pMove->setFlag(1, FALSE);
+        setOldPos(m_vCenterPos);
+    }
+    if (getPlayerState() == 0x1E) {
+        CTask* pTask = CTaskMan::getTask(m_hGimmick);
+        if (pTask && pTask->getTypeID() == 0x2003) {
+            ((CGimmickCarry*)pTask)->CancelCarry();
+            m_hGimmick = 0;
+        }
+    }
+    setFaceAnim(face, 1);
+    setPlayerState((PL::PlayerState)0xC);
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    m_bDmgMuteki = FALSE;
+    if (m_bIsDead) kind = (ATK_KIND)3;
+    switch (kind) {
+    case 39:
+        setConfuse(1, 0);
+    case 24:
+        setSubState(6);
+        m_fJumpSpdXZ = 0.0f;
+        m_bDmgInAir = FALSE;
+        anim = 0x29;
+        procDropMP();
+        bIsBackHit = FALSE;
+        PLM::setVibration(2);
+        break;
+    case 35:
+        if (m_pRevolver) m_pRevolver->setDiscard();
+    case 34:
+        fadeEffect(m_hEffBad, 1);
+        setSubState(5);
+        m_tqCardBreakTime = PL::g_CardBreakTime[5];
+        anim = 0x22;
+        m_fJumpSpdXZ = -0.13333334f;
+        PLM::setVibration(3);
+        break;
+    case 31:
+        setConditionFlag(1, 0);
+        setFaceAnim(3, 0);
+    case 3:
+    case 30:
+        setSubState(5);
+        m_tqCardBreakTime = PL::g_CardBreakTime[5];
+        anim = 0x22;
+        m_fJumpSpdXZ = -0.13333334f;
+        PLM::setVibration(2);
+        break;
+    case 2:
+    case 29:
+        setSubState(5);
+        m_tqCardBreakTime = PL::g_CardBreakTime[4];
+        anim = 0x22;
+        m_fJumpSpdXZ = -0.13333334f;
+        PLM::setVibration(2);
+        break;
+    case 6: {
+        SubVectorXYZ(dpos, getPos(), m_vEnemyPos);
+        dir0 = atan2f(dpos.x, dpos.z);
+        setSubState(7);
+        m_tqCardBreakTime = PL::g_CardBreakTime[5];
+        setAnimForce(0x22, 0, 0, 0, m_bIsDead, 0);
+        m_bDmgInAir = TRUE;
+        m_JumpState = 3;
+        m_fJumpSpdY = 0.0f;
+        m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+        m_fDir = dir0;
+        FVECTOR vec;
+        FVECTOR vel;
+        vel._q = 0;
+        vel.y = dir0;
+        vec = vel;
+        m_pMove->setRot(vec);
+        vec.x = dpos.x;
+        vec.y = 0.0f;
+        vec.z = dpos.z;
+        FLOAT power = InnerProduct(vec, vec);
+        m_fJumpSpdXZ = -0.26666668f;
+        m_pMove->calcVelocityXZ(m_fJumpSpdXZ);
+        power = dpos.y * 10.0f + 14.0f;
+        if (power > 40.0f) power = 40.0f;
+        else if (power < 0.0f) power = 0.0f;
+        m_fJumpSpdY = PL::g_fAntiGravity * power;
+        vel = getVel();
+        vel.y = m_fJumpSpdY;
+        m_pMove->setVel(vel);
+        PLM::setVibration(2);
+        if (m_bIsDead) initDead();
+        return TRUE;
+    }
+    case 40:
+        procDropMP();
+    case 10:
+        setConfuse(1, 0);
+    case 1:
+    case 28:
+        setSubState(3);
+        m_tqCardBreakTime = PL::g_CardBreakTime[3];
+        anim = 0x1F;
+        m_fJumpSpdXZ = -0.06666667f;
+        PLM::setVibration(1);
+        break;
+    case 7:
+        setConditionFlag(1, 0);
+        setFaceAnim(3, 0);
+        setSubState(3);
+        m_tqCardBreakTime = PL::g_CardBreakTime[3];
+        anim = 0x1F;
+        m_fJumpSpdXZ = -0.06666667f;
+        PLM::setVibration(1);
+        break;
+    case 12:
+        setConditionFlag(0x20, 0);
+        initBadCondition();
+        PLM::setVibration(2);
+        return TRUE;
+    case 8:
+        setConditionFlag(2, 0);
+        setTimer(dmg0);
+        initBadCondition();
+        PLM::setVibration(2);
+        return TRUE;
+    case 27:
+        setConditionFlag(0x10000, 0);
+        initBadCondition();
+        PLM::setVibration(2);
+        return TRUE;
+    case 17:
+        setConditionFlag(0x800000, 0);
+        initBadCondition();
+        PLM::setVibration(2);
+        return TRUE;
+    case 32:
+        setConditionFlag(0x8000000, 0);
+        initBadCondition();
+        PLM::setVibration(2);
+        return TRUE;
+    case 33:
+        PLM::setVibration(2);
+        if (m_bIsDead) {
+            initDead();
+            return TRUE;
+        }
+        m_fDir = Movement::Homing(m_fDir, dir0, 1.0f, m_fFrameRate);
+        initPronounce(1);
+        return TRUE;
+    default:
+        TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n", kind);
+        anim = 0x1F;
+        m_fJumpSpdXZ = -0.06666667f;
+        PLM::setVibration(1);
+        break;
+    }
+    if (m_bDmgInAir) {
+        setSubState(4);
+        m_tqCardBreakTime = PL::g_CardBreakTime[3];
+        anim = 0x21;
+        m_JumpState = 3;
+        bIsBackHit = FALSE;
+    }
+    m_fJumpGravity = PL::g_fGravity;
+    m_fJumpSpdY = 0.0f;
+    if (!bIsBackHit) {
+        m_fDir = Movement::Homing(m_fDir, dir0, 0.5f, m_fFrameRate);
+        FVECTOR vec;
+        FVECTOR vel;
+        vel._q = 0;
+        vel.y = m_fDir;
+        vec = vel;
+        m_pMove->setRot(vec);
+    } else {
+        anim++;
+        m_fJumpSpdXZ = -m_fJumpSpdXZ;
+    }
+    setAnimForce(anim, 0, 1, 0, m_bIsDead, 0);
+    m_pMove->calcVelocityXZ(m_fJumpSpdXZ);
+    if (m_bIsDead) initDead();
+    if (old_condition & 0x8000) {
+        setConditionFlag(0, 0x8000);
+        m_tqCardBreakTime = PL::g_CardBreakTime[7];
+    }
+    return TRUE;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkDamage__7CPlayer);
+#endif
 __asm__(".rdata\n");
 void CPlayer::initFlip(INT inBreak) {
     FLOAT speed;
@@ -5436,7 +6216,7 @@ void CPlayer::exeBadCondition() {
    the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but
    swaps v0/a2 (tq/pad). tried: all 6 statement orders x tq forms (ternary, param default, ==0), UINT& pad,
    (INT) casts, temporaries in both load orders, nested-if structure, asm barriers on tq; best 6 lines.
-   tools/permuter.py can't run on C++ methods. */
+   tools/permuter.py can't run on C++ methods. Retried 2026-10-25: $LM line tags put both flag updates before the m_tqConfuse store in both arms (cond/pad/tq: load order right, v0/a2 swapped and the tq/pad stores swapped); a Com.h-style reference flag helper for m_uiPadFlag, the 6 orders again with it (permblk.py, best 6), if/else, default-then-override and in-place inTime forms (13-29); still 6 lines. */
 #if 0
 void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
     if (!inFlag) {
@@ -5615,7 +6395,7 @@ void CPlayer::exeCharge() {
    after the flag 'and' and loads m_pRevolver after the flag store; ours zeroes pos in a0 first and loads
    m_pRevolver before the store. tried: all orders of setPlayerFlag/pos._q/pos.w (the 5-line ones zero w and
    are wrong), pos.init()/set()/copy, direct and cast flag stores, cast and volatile-reference m_pRevolver
-   loads, memory asm barriers (best 6); best clean draft 8 lines. tools/permuter.py can't run on C++ methods. */
+   loads, memory asm barriers (best 6); best clean draft 8 lines. tools/permuter.py can't run on C++ methods. Retried 2026-10-25 (sched dump): our sched1 has no dependency between the flag store and the m_pRevolver load and issues the pos zero (por) before the mask 'and', so pos gets a0 instead of reusing v1 after the mask dies; in the original that v1 reuse (sched2 anti-dependence) is what keeps por/sq and the m_pRevolver load late. tried: direct member stores (&= ~0x10 keeps the load late but gives lui/ori, 10 lines; (INT) casts, -17, a reference block: 8), _ref() and volatile m_pRevolver reads, the three valid flag/pos orders (8-10). */
 #if 0
 INT CPlayer::chkChargeMove(INT inFlag) {
     FVECTOR pos;
@@ -6106,15 +6886,6 @@ void CPlayer::initGimmickCard(INT inNo) {
     m_tqCardBreakTime = 0;
     m_fWalkSpeed = 0.0f;
 }
-/* Parked: 6 lines differ, all one register swap (size, branches, calls, strings, jump table match): the original
-   keeps the frame (getMotionCurrentTime() / 50) in $a1, which only case 4 reads, and a copy made before the switch
-   in $a2, which case 2 modifies (`frame = 50` after the timeout TRACE); ours has them the other way round.
-   Found: the BattleFlag/ConditionFlag arms of case 1 need `else if (!isConditionFlag) 0xFF2 else 0xFF3` (branch
-   layout); the vector update is the shared procFlowIdle pattern.
-   tried: one variable, a copy before/after setBattleFlag, the copy declared before/after frame, chained
-   assignments, the roles swapped (case 4 on the copy), the copy as a block-local in case 2, and tools/permuter.py
-   through the method wrapper (4 min, 1827 candidates, no better). */
-#if 0
 void CPlayer::exeGimmickCard() {
     TIMEQ frame;
     TIMEQ f;
@@ -6143,7 +6914,7 @@ void CPlayer::exeGimmickCard() {
         break;
     case 2: {
         if (m_tqStateTimer > 5000) {
-            TRACE("CPlayer:: exeGimmickCard() %d, \x81\xa6\x83G\x83\x89\x81[\x8f\x88\x97\x9d\n");
+            TRACE("CPlayer:: exeGimmickCard() %d, \x81\xa6\x83G\x83\x89\x81[\x8f\x88\x97\x9d\n", frame);
             f = 50;
         }
         if (f >= 50) {
@@ -6191,17 +6962,6 @@ void CPlayer::exeGimmickCard() {
         break;
     }
 }
-#else
-/* placeholder: rodata of exeGimmickCard__7CPlayer */
-__asm__(".rdata\n");
-inline void _roPh26() {
-    TRACE("CPlayer:: exeGimmickCard() %d, \x81\xa6\x83G\x83\x89\x81[\x8f\x88\x97\x9d\n");
-    TRACE("CPlayer:: exeGimmickCard() notifyMakeGimmick\n");
-    TRACE("CPlayer:: exeGimmickCard() notifyCompleteGimmick, \x81\xa6\x83G\x83\x89\x81[\x8f\x88\x97\x9d GimmickOwner=0\n");
-}
-__asm__(".rdata\n.align 4\n.word .L00272FE4\n.word .L002730E8\n.word .L00273138\n.word .L002731F8\n.word .L00273270\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeGimmickCard__7CPlayer);
-#endif
 __asm__(".rdata\n");
 void CPlayer::setTrapDamage(INT inPower, const CHAR* lpszInName, UINT nNo) {
     INT face;
@@ -6861,7 +7621,7 @@ void CPlayer::initFooting(INT inFlag) {
    `nd` for the Homing result and `d0 = m_fDir` before the call give the original's mov.s f12,f0 and f0 result;
    m_fDir store before/inside/after the temp block, CMovement* / FVECTOR& temporaries for getRot(), line
    layout) plus tools/permuter.py through a method alias wrapper (build/progress/Game/Player/permute_method.py):
-   safe 15 min (6082 candidates) and --unsafe 10 min (4320), score stays 1. */
+   safe 15 min (6082 candidates) and --unsafe 10 min (4320), score stays 1. Retried 2026-10-25: $LM tags show setDir() (Player.h:852) for the m_fDir store and CMovement::setRot (Movement.h:65), both now in the draft (same 4 lines). The same Homing -> {0, d, 0, 0} -> copy -> setRot block is left in parked chkDamage: our sched1 fills the lq stall with the m_pMove load (priority 4) instead of the m_fDir store (3); the original issues the store first (memory fvector-ctor-operator-temps). */
 #if 0
 void CPlayer::exeFooting() {
     FVECTOR target;
@@ -6957,14 +7717,14 @@ void CPlayer::exeFooting() {
             else if (r > 3.1415927f) r -= 6.2831855f;
             d0 = m_fDir;
             FLOAT nd = Movement::Homing(d0, m_fAnalogViewDir, 0.1f, m_fFrameRate);
+            setDir(nd);
             {
                 FVECTOR t;
                 t._q = 0;
                 t.y = nd;
-                m_fDir = nd;
                 v = t;
             }
-            m_pMove->getRot() = v;
+            m_pMove->setRot(v);
         }
         setAnim(0x2A, -1, 0);
         m_fWalkSpeed = speed / 60.0f;
@@ -7529,7 +8289,7 @@ char* szPlayerCard[67] = {
     "G:\x83_\x81[\x83N\x83T\x83" "C\x83h",
     "G:ZexionTrapA"
 };
-extern "C" int sprintf(char*, const char*, ...);
+extern "C" int sprintf(char*, const char*, ...); extern "C" unsigned int strlen(const char*); extern "C" char* strncpy(char*, const char*, unsigned int);
 CPlayerDebug::CPlayerDebug(CTask* pParent) : CTask(pParent, 0x4000) {
     INT i;
     UINT nRA;
@@ -7546,48 +8306,174 @@ CPlayerDebug::CPlayerDebug(CTask* pParent) : CTask(pParent, 0x4000) {
     DebugWork::g_dw.player.m_szState[3] = m_szBuf[3];
     DebugWork::g_dw.player.m_szAnim[0] = m_szBuf[4];
     DebugWork::g_dw.player.m_szAnim[1] = m_szBuf[5];
-    m_iWork4C = 0;
-    m_iWork50 = 0;
-    m_iWork54 = 0;
+    m_iPrevState = 0;
+    m_iPrevMuteki = 0;
+    m_iPrevHP = 0;
 #line 14052
     m_pWin = new (com_malloc_d(sizeof(CDebugWindow), __FILE__ "(" "14052" ")", RET_ADDR())) CDebugWindow(this, DWTPlayer::debugPlayerInfo);
     m_pWin->dispOff(0);
     for (i = 0; i < 71; i++) szAtkAnimID[i] = PL_ANIM::g_MotNameTbl[PLM::g_uiPlayerID][i].pFileName;
-    m_iWork44 = 0;
-    m_iWork48 = 0;
+    m_pCamData = 0;
+    m_pAtkData = 0;
 }
 CPlayerDebug::~CPlayerDebug() {}
-/* placeholder: rodata of main__12CPlayerDebug */
-__asm__(".rdata\n");
-inline void _roPhB32() {
-    TRACE("\xf9WFlagPLY: % 08X");
-    TRACE("\xf9WFlagCON: % 08X");
-    TRACE("\xf9WFlagBTL: % 08X");
-    TRACE("\xf9WLEVEL: % 10d");
-    TRACE("\xf9WEXP: % 12d");
-    TRACE("\xf9WNEXT: % 5d/% 5d");
-    TRACE("\xf9WHP: % 3d/% 3d");
-    TRACE("\xf9WAP: % 6d");
-    TRACE("\xf9WDP: % 3d/% 3d");
-    TRACE("\xf9S");
-    TRACE("\xf9W\x95" "b\x91\xac:   % 7.4fm/s");
-    TRACE("\xf9W\x93`\x93\xb1\x97\xa6: % 7.2f\x81\x93");
-    TRACE("\xf9W%s");
-    TRACE("\xf9WSpdY:  % 8.4fm/s");
-    TRACE("\xf9W\x92\xb8\x93_:  % 8.4fm");
-    TRACE("\xf9W\x8d\x98x:    % 9.4f");
-    TRACE("\xf9W\x8d\x98y:    % 9.4f");
-    TRACE("\xf9W\x8d\x98z:    % 9.4f");
-    TRACE("\xf9W\x8d\xb6\x8e\xe8x:  % 9.4f");
-    TRACE("\xf9W\x8d\xb6\x8e\xe8y:  % 9.4f");
-    TRACE("\xf9W\x8d\xb6\x8e\xe8z:  % 9.4f");
-    TRACE("\xf9WStep:     % 3d/% 3d");
-    TRACE("\xf9W\x8d\x98yz:% 4.3f,% 4.3f");
-    TRACE("File: % 11s");
-    TRACE("TimeQ:% 5d/% 5d");
+void CPlayerDebug::main() {
+    if (DebugWork::g_dw.player.iPlayerInfo) {
+        if (g_pPlayer) {
+            DebugWork::g_dw.player.vPos = g_pPlayer->getPos();
+            DebugWork::g_dw.player.vPos.w = g_pPlayer->m_fDir * 180.0f / 3.1415927f;
+            INT st = g_pPlayer->m_PlayerState;
+            DebugWork::g_dw.player.iPlayerState = st;
+            switch (g_pPlayer->m_PlayerState) {
+            case 2:
+            case 0x20:
+                if (g_pPlayer->getAnim()->getAnimID() == 0x2A) {
+                    sprintf(m_szBuf[0], "\xf9WFlagPLY: % 08X", g_pPlayer->m_uiPlayerFlag);
+                    sprintf(m_szBuf[1], "\xf9WFlagCON: % 08X", g_pPlayer->m_uiConditionFlag);
+                    sprintf(m_szBuf[2], "\xf9WFlagBTL: % 08X", g_pPlayer->m_uiBattleFlag);
+                } else if (CGame::isSoraGame()) {
+                    sprintf(m_szBuf[0], "\xf9WLEVEL: % 10d", g_pPlayer->m_iLV);
+                    sprintf(m_szBuf[1], "\xf9WEXP: % 12d", g_pPlayer->m_iEXP);
+                    { const char* f = "\xf9WNEXT: % 5d/% 5d"; INT n = CPlayer::getNowNextEXP(); INT e = g_pPlayer->m_iEXP; sprintf(m_szBuf[2], f, n, e + CPlayer::getNowNextEXP()); }
+                } else {
+                    sprintf(m_szBuf[0], "\xf9WHP: % 3d/% 3d", g_pPlayer->m_iHP, g_pPlayer->m_iMaxHP);
+                    sprintf(m_szBuf[1], "\xf9WAP: % 6d", g_pPlayer->m_iAP);
+                    sprintf(m_szBuf[2], "\xf9WDP: % 3d/% 3d", g_pPlayer->m_iDP, g_pPlayer->m_iMaxDP);
+                }
+                break;
+            case 0xF:
+                if (m_iPrevState != 2) {
+                    if (strlen(m_szBuf[0]) > 2) strncpy(m_szBuf[0], "\xf9S", 2);
+                    if (strlen(m_szBuf[1]) > 2) strncpy(m_szBuf[1], "\xf9S", 2);
+                    if (strlen(m_szBuf[2]) > 2) strncpy(m_szBuf[2], "\xf9S", 2);
+                }
+                break;
+            case 3:
+            case 4:
+                sprintf(m_szBuf[0], "\xf9W\x95" "b\x91\xac:   % 7.4fm/s", g_pPlayer->m_fWalkSpeed * 60.0f);
+                sprintf(m_szBuf[1], "\xf9W\x93`\x93\xb1\x97\xa6: % 7.2f\x81\x93", g_pPlayer->m_fMovePower * 100.0f);
+                sprintf(m_szBuf[2], " ");
+                break;
+            case 7:
+            case 0x21:
+                sprintf(m_szBuf[0], "\xf9W%s", szPlayerJumpState[g_pPlayer->getJumpState()]);
+                sprintf(m_szBuf[1], "\xf9WSpdY:  % 8.4fm/s", g_pPlayer->m_fJumpSpdY * 60.0f);
+                sprintf(m_szBuf[2], "\xf9W\x92\xb8\x93_:  % 8.4fm", g_pPlayer->m_fJumpTop);
+                break;
+            case 9:
+                if (g_pPlayer->m_iSubState == 2) {
+                    sprintf(m_szBuf[0], "\xf9W\x8d\x98x:    % 9.4f", g_pPlayer->m_vCenterPos.x);
+                    sprintf(m_szBuf[1], "\xf9W\x8d\x98y:    % 9.4f", g_pPlayer->m_vCenterPos.y);
+                    sprintf(m_szBuf[2], "\xf9W\x8d\x98z:    % 9.4f", g_pPlayer->m_vCenterPos.z);
+                } else {
+                    sprintf(m_szBuf[0], "\xf9W\x8d\xb6\x8e\xe8x:  % 9.4f", g_pPlayer->m_vHangHandPos.x);
+                    sprintf(m_szBuf[1], "\xf9W\x8d\xb6\x8e\xe8y:  % 9.4f", g_pPlayer->m_vHangHandPos.y);
+                    sprintf(m_szBuf[2], "\xf9W\x8d\xb6\x8e\xe8z:  % 9.4f", g_pPlayer->m_vHangHandPos.z);
+                }
+                break;
+            case 0x10:
+                sprintf(m_szBuf[0], "\xf9W%s", szPlayerLadderState[g_pPlayer->m_iSubState]);
+                sprintf(m_szBuf[1], "\xf9WStep:     % 3d/% 3d", g_pPlayer->m_iLadderStep, g_pPlayer->m_iLadderStepMax);
+                if (g_pPlayer->m_iSubState == 4) sprintf(m_szBuf[2], "\xf9W\x8d\x98yz:% 4.3f,% 4.3f", g_pPlayer->m_vHangHandPos.y, g_pPlayer->m_vHangHandPos.z);
+                else sprintf(m_szBuf[2], " ");
+                break;
+            case 6:
+            case 0xA:
+            case 0xB:
+            case 0xC:
+            case 0xD:
+            case 0xE:
+            case 0x13:
+            case 0x16:
+            case 0x18:
+            case 0x19:
+            case 0x1A:
+            case 0x1B:
+            case 0x1D:
+            case 0x22:
+            case 0x23:
+            case 0x24:
+                sprintf(m_szBuf[0], "\xf9WFlagPLY: % 08X", g_pPlayer->m_uiPlayerFlag);
+                sprintf(m_szBuf[1], "\xf9WFlagCON: % 08X", g_pPlayer->m_uiConditionFlag);
+                sprintf(m_szBuf[2], "\xf9WFlagBTL: % 08X", g_pPlayer->m_uiBattleFlag);
+                break;
+            case 0x1C:
+                sprintf(m_szBuf[0], "\xf9W%s", szPlayerEndState[g_pPlayer->m_iSubState]);
+                sprintf(m_szBuf[1], "\xf9WFlagPLY: % 08X", g_pPlayer->m_uiPlayerFlag);
+                sprintf(m_szBuf[2], "\xf9WFlagBTL: % 08X", g_pPlayer->m_uiBattleFlag);
+                break;
+            }
+            sprintf(m_szBuf[4], "File: % 11s", g_pPlayer->getMotionName(g_pPlayer->getAnim()->getAnimID()));
+            sprintf(m_szBuf[5], "TimeQ:% 5d/% 5d", g_pPlayer->getMotionCurrentTime(), g_pPlayer->getMotionTotalTime());
+            m_iPrevState = g_pPlayer->m_PlayerState;
+        }
+        m_pWin->dispOn(0);
+    } else {
+        m_pWin->dispOff(0);
+    }
+    if (g_pPlayer) {
+        if (DebugWork::g_dw.player.iMuteki) g_pPlayer->setPlayerFlag(1, 0);
+        else if (m_iPrevMuteki) g_pPlayer->setPlayerFlag(0, 1);
+        m_iPrevMuteki = DebugWork::g_dw.player.iMuteki;
+        if (DebugWork::g_dw.player.iDbgWindow) {
+            if (DebugWork::g_dw.player.iHP < 0) {
+                DebugWork::g_dw.player.iHP = 0;
+                m_iPrevHP = 1;
+            }
+            INT maxHp = g_pPlayer->m_iMaxHP;
+            if (maxHp < DebugWork::g_dw.player.iHP) {
+                DebugWork::g_dw.player.iHP = maxHp;
+                m_iPrevHP = (SHORT)maxHp + 1;
+            }
+            if (m_iPrevHP != DebugWork::g_dw.player.iHP) {
+                m_iPrevHP = DebugWork::g_dw.player.iHP;
+                (*(CPlayer* volatile*)&g_pPlayer)->m_iHP = m_iPrevHP;
+                (*(CPlayer* volatile*)&g_pPlayer)->m_pGauge->setHP(m_iPrevHP, 1);
+            }
+            if (m_iPrevHP != g_pPlayer->m_iHP) {
+                m_iPrevHP = g_pPlayer->m_iHP;
+                DebugWork::g_dw.player.iHP = m_iPrevHP;
+            }
+        }
+    }
+    m_pCamData = (PCAM_DATA*)DebugWork::g_dw.player.pCamData;
+    if (m_pCamData) {
+        if (m_pCamData->fViewAngle != DebugWork::g_dw.player.vCamEye.w) {
+            if (PlayerCamera::CPlayerCamera::getNowCamMode() == DebugWork::g_dw.player.iCamMode) ((CCamera*)g_pPlayer->m_pCam)->setGakaku(DebugWork::g_dw.player.vCamEye.w);
+        }
+        if (DebugWork::g_dw.player.iCamMode) {
+            if (DebugWork::g_dw.player.iCamMode == 2) {
+                if (m_pCamData->vEye.x != DebugWork::g_dw.player.vCamEye.x) DebugWork::g_dw.player.vCamEye.z = DebugWork::g_dw.player.vCamEye.x;
+                if (m_pCamData->vEye.z != DebugWork::g_dw.player.vCamEye.z) DebugWork::g_dw.player.vCamEye.x = DebugWork::g_dw.player.vCamEye.z;
+            }
+        }
+        m_pCamData->vEye = DebugWork::g_dw.player.vCamEye;
+        m_pCamData->fViewAngle = DebugWork::g_dw.player.vCamEye.w;
+        m_pCamData->vAim = DebugWork::g_dw.player.vCamAim;
+        m_pCamData->fAdjust = DebugWork::g_dw.player.vCamAim.w;
+        m_pCamData->fDistance = DebugWork::g_dw.player.fCamDist;
+        m_pCamData->fSize = DebugWork::g_dw.player.fCamSize;
+    }
+    m_pAtkData = (PATK_DATA*)DebugWork::g_dw.player.pAtkData;
+    if (m_pAtkData) {
+        m_pAtkData->ANIM_ID = DebugWork::g_dw.player.iAtkPrm[0];
+        m_pAtkData->ANIM_ESQ = DebugWork::g_dw.player.iAtkPrm[1];
+        m_pAtkData->EFFECT = DebugWork::g_dw.player.iAtkPrm[2];
+        m_pAtkData->TRG_FRAME = DebugWork::g_dw.player.iAtkPrm[3];
+        m_pAtkData->COLL_START_FRAME = DebugWork::g_dw.player.iAtkPrm[4];
+        m_pAtkData->COLL_END_FRAME = DebugWork::g_dw.player.iAtkPrm[5];
+        m_pAtkData->MOVE_START_FRAME = DebugWork::g_dw.player.iAtkPrm[6];
+        m_pAtkData->MOVE_END_FRAME = DebugWork::g_dw.player.iAtkPrm[7];
+        m_pAtkData->RADIUS = DebugWork::g_dw.player.iAtkPrm[8];
+        m_pAtkData->MAX_SPEED = DebugWork::g_dw.player.iAtkPrm[9];
+        m_pAtkData->POWER = DebugWork::g_dw.player.iAtkPrm[10];
+        m_pAtkData->DAMAGE = DebugWork::g_dw.player.iAtkPrm[11];
+        m_pAtkData->WORK0 = DebugWork::g_dw.player.iAtkPrm[12];
+        m_pAtkData->WORK1 = DebugWork::g_dw.player.iAtkPrm[13];
+        m_pAtkData->WORK2 = DebugWork::g_dw.player.iAtkPrm[14];
+        m_pAtkData->FLAG = DebugWork::g_dw.player.iAtkFlag[0] | DebugWork::g_dw.player.iAtkFlag[1] << 1 | DebugWork::g_dw.player.iAtkFlag[2] << 2 | DebugWork::g_dw.player.iAtkFlag[3] << 3 | DebugWork::g_dw.player.iAtkFlag[4] << 4 | DebugWork::g_dw.player.iAtkFlag[5] << 5 | DebugWork::g_dw.player.iAtkFlag[6] << 6 | DebugWork::g_dw.player.iAtkFlag[7] << 7;
+    }
 }
-__asm__(".rdata\n.align 4\n.word .L00275AB0\n.word .L00275C3C\n.word .L00275C3C\n.word .L00275F80\n.word .L00275ED0\n.word .L00275CAC\n.word .L00275F80\n.word .L00275D2C\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275BA4\n.word .L00275E20\n.word .L00275F80\n.word .L00275F80\n.word .L00275ED0\n.word .L00275F80\n.word .L00275F80\n.word .L00275ED0\n.word .L00275F80\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275F24\n.word .L00275ED0\n.word .L00275F80\n.word .L00275F80\n.word .L00275AB0\n.word .L00275CAC\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", main__12CPlayerDebug);
 /* the static initializer (DWT table titles) is generated after the last INCLUDE_ASM: gcc assumes .rdata for its strings */
 __asm__(".rdata\n");
 // SOURCE DATA: .data .rodata .bss
