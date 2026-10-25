@@ -6259,7 +6259,7 @@ void CPlayer::exeBadCondition() {
    the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but
    swaps v0/a2 (tq/pad). tried: all 6 statement orders x tq forms (ternary, param default, ==0), UINT& pad,
    (INT) casts, temporaries in both load orders, nested-if structure, asm barriers on tq; best 6 lines.
-   tools/permuter.py can't run on C++ methods. */
+   tools/permuter.py can't run on C++ methods. Retried 2026-10-25: $LM line tags put both flag updates before the m_tqConfuse store in both arms (cond/pad/tq: load order right, v0/a2 swapped and the tq/pad stores swapped); a Com.h-style reference flag helper for m_uiPadFlag, the 6 orders again with it (permblk.py, best 6), if/else, default-then-override and in-place inTime forms (13-29); still 6 lines. */
 #if 0
 void CPlayer::setConfuse(INT inFlag, TIMEQ inTime) {
     if (!inFlag) {
