@@ -2402,16 +2402,17 @@ void CPlayer::initWall() {
     m_pMove->setFlag(0x40, FALSE); // partial CMovement: (flag, on)
     m_fFootRadius = 0.5f;
 }
-/* Parked: 25 lines differ, all one register-allocation cascade: the original keeps cancel_speed in $f22 and the
-   0.5f constant (ofs.x / setRadius) in $f23, ours the reverse (global.c priority: the short-lived 0.5 constant
-   outranks the speed). Also left: the three vec stores come after `lw m_iSubState` and cancel_power is a load of
-   vec.y (original) vs a hoisted zero, the dir/view load order of the houkou wrap (dir first, then view, sub
-   view - dir in $f1), and the last ofs.w store goes through the shared &ofs register. tried: ~25 variants (declaration
-   order of cancel_*, a `half` local for 0.5f, statement order of the three arms, speed after/before the init calls,
-   vec store orders / set() / cancel_power = vec.y, _limitPI vs the copy form, houkou polarity and if/else layout,
-   cast read of g_fAntiGravity) and tools/permuter.py through the method alias wrapper (8 min, 5147 candidates,
-   its score does not see the register difference). The jump arms with initJump(0) before the speed/power stores
-   got the best diff (25). */
+/* Parked: 4 lines differ (size, frame, every branch, call and register allocation match): at the start the
+   original issues `lw m_iSubState` (getSubState) before the `sw zero` of vec.y, ours stores vec.y first (right after
+   the lq of the getRot copy). Found 2026-10-25 from the $LM tags (25 -> 4): the first ofs is one brace-init line
+   (`FVECTOR ofs = {{0, 0, 0.6f, 1}}`), the second ofs.set(0.5f, 0, 0) (Coord.h inline; the 0.5f then shares the
+   setRadius constant in $f23, which fixed the old cancel_speed/0.5f register cascade), getDir() for dir and in the
+   houkou wrap, setSubState() in the three cases, m_fJumpSpdXZ and m_fMoveSpdXZ as two statements, and a real bug:
+   the HOUKOU_RIGHT case compares getAnimID() with 1 (the animation it starts), not 3. tried for the rest: all 24
+   orders of the vec stores and the cancel_power read (permblk.py), chained x = w = 1 / y = z = 0 forms (10),
+   vec.set() (25), brace init of vec (12), vec.v[1] and _ref(vec).y reads, getSubState() in the test, and
+   tools/permuter.py through the method wrapper (10 min, 4918 candidates, no better). Earlier: ~25 variants of the
+   cancel_* declarations, arm statement orders, houkou forms, cast read of g_fAntiGravity. */
 #if 0
 void CPlayer::exeWall() {
     FVECTOR pos;
@@ -2431,7 +2432,7 @@ void CPlayer::exeWall() {
     vec.z = 0.0f;
     vec.w = 1.0f;
     cancel_power = vec.y;
-    if (!m_iSubState) {
+    if (!getSubState()) {
         FLOAT d0 = Movement::Homing(m_fDir, m_fWallDir, 0.15f, getFrameRateF());
         m_fDir = d0;
         rot.y = d0;
@@ -2466,7 +2467,7 @@ void CPlayer::exeWall() {
         warp(m_vWallPos);
         updateCoord();
         coordFix();
-        dir = _limitPI2(m_fAnalogViewDir - m_fDir + 3.1415927f);
+        dir = _limitPI2(m_fAnalogViewDir - getDir() + 3.1415927f);
         if (m_Houkou != HOUKOU_NUTRAL) {
             if (dir < 0.0f) houkou = HOUKOU_LEFT;
             else houkou = HOUKOU_RIGHT;
@@ -2475,7 +2476,7 @@ void CPlayer::exeWall() {
         }
         switch (houkou) {
         case HOUKOU_LEFT:
-            m_iSubState = 2;
+            setSubState(2);
             if (m_pAnim->getAnimID() != 2) {
                 if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 2, -1, 0, 0, 0, 1);
                 else setAnimRsrcEx(0xFD4, 2, -1, 0, 0, 0, 1);
@@ -2483,15 +2484,15 @@ void CPlayer::exeWall() {
             m_fWalkSpeed = 0.904f;
             break;
         case HOUKOU_RIGHT:
-            m_iSubState = 3;
-            if (m_pAnim->getAnimID() != 3) {
+            setSubState(3);
+            if (m_pAnim->getAnimID() != 1) {
                 if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 1, -1, 0, 0, 0, 1);
                 else setAnimRsrcEx(0xFD4, 1, -1, 0, 0, 0, 1);
             }
             m_fWalkSpeed = -0.904f;
             break;
         default:
-            m_iSubState = 1;
+            setSubState(1);
             if (m_pAnim->getAnimID() != 0) {
                 if (CGame::isSoraGame()) setAnimRsrcEx(0xFD2, 0, -1, 0, 0, 0, 1);
                 else setAnimRsrcEx(0xFD4, 0, -1, 0, 0, 0, 1);
@@ -2508,21 +2509,14 @@ void CPlayer::exeWall() {
         return;
     }
     m_fFootRadius = 0.25f;
-    dir = m_fDir;
+    dir = getDir();
     pos = getPos();
-    FVECTOR ofs;
-    ofs.z = 0.6f;
-    ofs.x = 0.0f;
-    ofs.y = 0.0f;
-    ofs.w = 1.0f;
+    FVECTOR ofs = {{0.0f, 0.0f, 0.6f, 1.0f}};
     _unitMatrix(m);
     _rotMatrixY(m, dir);
     ApplyMatrixXYZ(ofs, m, ofs);
     AddVectorXYZ(pos, pos, ofs);
-    ofs.x = 0.5f;
-    ofs.y = 0.0f;
-    ofs.z = 0.0f;
-    ofs.w = 1.0f;
+    ofs.set(0.5f, 0.0f, 0.0f);
     ApplyMatrixXYZ(ofs, m, ofs);
     FVECTOR vStart = {{ pos.x + ofs.x, pos.y, pos.z + ofs.z, 1.0f }};
     FVECTOR vEnd = {{ pos.x - ofs.x, pos.y, pos.z - ofs.z, 1.0f }};
@@ -2542,7 +2536,8 @@ void CPlayer::exeWall() {
     setPos(pos);
     m_fWalkSpeed = cancel_speed / 60.0f;
     m_pMove->calcVelocityXZ(m_fWalkSpeed);
-    m_fJumpSpdXZ = m_fMoveSpdXZ = m_fWalkSpeed;
+    m_fJumpSpdXZ = m_fWalkSpeed;
+    m_fMoveSpdXZ = m_fWalkSpeed;
     FVECTOR vel = m_pMove->getVel();
     vel.y = *(FLOAT*)&PL::g_fAntiGravity * cancel_power;
     m_fJumpSpdY = vel.y;
