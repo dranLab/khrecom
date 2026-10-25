@@ -4011,7 +4011,7 @@ void CPlayer::resetAction(INT inMode) {
    them later). tried: all 24 orders of the JumpState/CardBreakTime/JumpGravity/JumpSpdY block, cast loads
    (*(FLOAT*)&g_fGravity, *(INT*)&g_CardBreakTime[7]) and cast stores, gravity via a local / *=, moving
    statements before isAir(), asm barriers; best 6 lines. The *(FLOAT*)& store on m_fMoveSpdXZ and the
-   chained m_fDistXZ = m_fDistY = 0.0f fixed the rest. tools/permuter.py can't run on C++ methods. */
+   chained m_fDistXZ = m_fDistY = 0.0f fixed the rest. tools/permuter.py can't run on C++ methods. Retried 2026-10-25: the $LM line order (gravity 6612, JumpState 6613, CardBreakTime 6614, SpdY 6615) breaks the registers (9 lines; v0 li 3 issued before the gravity load, CardBreakTime %hi in a0); all 24 orders with the casts (best 9), *(FLOAT*)&/*(INT*)& and _ref() reads of both globals: no better than this draft's 6. */
 #if 0
 void CPlayer::initAttackField(INT inNo) {
     setPlayerState(PL::ATTACK_FLD);
