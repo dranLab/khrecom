@@ -2757,7 +2757,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeLadder__7CPlay
    original issues lq pos (v1) before lui LADDER_LOCAL_OFS (v0), ours schedules the lui first (sched1 priority:
    hi->lwc1->swc1 chain) and allocates pos to a1. tried: all orders of pos/ofs statements (perm.py), set(),
    brace init (adds a temp copy), x = y = 0 chains, FVECTOR pos = getPos(), extern const; best 10 lines.
-   tools/permuter.py can't run on C++ methods. */
+   Retried 2026-10-25: $LM tags put all four ofs stores on one line (4280) after pos = getPos() (4279), as in the draft; non-const LADDER_LOCAL_OFS (as the ref declares it) moves it to .data and fails the image, .v[2] / *(FLOAT*)& / _ref() / -> reads compile identically; tools/permuter.py through the method wrapper (10 min, 5151 candidates, no better). */
 #if 0
 INT CPlayer::isStartLadderJump() {
     FLOAT dir;
