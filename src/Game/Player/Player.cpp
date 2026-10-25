@@ -155,7 +155,7 @@ extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the origin
 extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original
 }
 class CPlayerDebug : public CTask { /* main() is still INCLUDE_ASM; the members are those the constructor touches */
-    CDebugWindow* m_pWin; INT m_iWork44; INT m_iWork48; INT m_iWork4C; INT m_iWork50; INT m_iWork54; CHAR m_szBuf[6][0x20];
+    CDebugWindow* m_pWin; PCAM_DATA* m_pCamData; PATK_DATA* m_pAtkData; INT m_iPrevState; INT m_iPrevMuteki; INT m_iPrevHP; CHAR m_szBuf[6][0x20];
 public: CPlayerDebug(CTask* inParent); virtual ~CPlayerDebug();
     virtual void main();
 };
@@ -7529,7 +7529,7 @@ char* szPlayerCard[67] = {
     "G:\x83_\x81[\x83N\x83T\x83" "C\x83h",
     "G:ZexionTrapA"
 };
-extern "C" int sprintf(char*, const char*, ...);
+extern "C" int sprintf(char*, const char*, ...); extern "C" unsigned int strlen(const char*); extern "C" char* strncpy(char*, const char*, unsigned int);
 CPlayerDebug::CPlayerDebug(CTask* pParent) : CTask(pParent, 0x4000) {
     INT i;
     UINT nRA;
@@ -7546,48 +7546,174 @@ CPlayerDebug::CPlayerDebug(CTask* pParent) : CTask(pParent, 0x4000) {
     DebugWork::g_dw.player.m_szState[3] = m_szBuf[3];
     DebugWork::g_dw.player.m_szAnim[0] = m_szBuf[4];
     DebugWork::g_dw.player.m_szAnim[1] = m_szBuf[5];
-    m_iWork4C = 0;
-    m_iWork50 = 0;
-    m_iWork54 = 0;
+    m_iPrevState = 0;
+    m_iPrevMuteki = 0;
+    m_iPrevHP = 0;
 #line 14052
     m_pWin = new (com_malloc_d(sizeof(CDebugWindow), __FILE__ "(" "14052" ")", RET_ADDR())) CDebugWindow(this, DWTPlayer::debugPlayerInfo);
     m_pWin->dispOff(0);
     for (i = 0; i < 71; i++) szAtkAnimID[i] = PL_ANIM::g_MotNameTbl[PLM::g_uiPlayerID][i].pFileName;
-    m_iWork44 = 0;
-    m_iWork48 = 0;
+    m_pCamData = 0;
+    m_pAtkData = 0;
 }
 CPlayerDebug::~CPlayerDebug() {}
-/* placeholder: rodata of main__12CPlayerDebug */
-__asm__(".rdata\n");
-inline void _roPhB32() {
-    TRACE("\xf9WFlagPLY: % 08X");
-    TRACE("\xf9WFlagCON: % 08X");
-    TRACE("\xf9WFlagBTL: % 08X");
-    TRACE("\xf9WLEVEL: % 10d");
-    TRACE("\xf9WEXP: % 12d");
-    TRACE("\xf9WNEXT: % 5d/% 5d");
-    TRACE("\xf9WHP: % 3d/% 3d");
-    TRACE("\xf9WAP: % 6d");
-    TRACE("\xf9WDP: % 3d/% 3d");
-    TRACE("\xf9S");
-    TRACE("\xf9W\x95" "b\x91\xac:   % 7.4fm/s");
-    TRACE("\xf9W\x93`\x93\xb1\x97\xa6: % 7.2f\x81\x93");
-    TRACE("\xf9W%s");
-    TRACE("\xf9WSpdY:  % 8.4fm/s");
-    TRACE("\xf9W\x92\xb8\x93_:  % 8.4fm");
-    TRACE("\xf9W\x8d\x98x:    % 9.4f");
-    TRACE("\xf9W\x8d\x98y:    % 9.4f");
-    TRACE("\xf9W\x8d\x98z:    % 9.4f");
-    TRACE("\xf9W\x8d\xb6\x8e\xe8x:  % 9.4f");
-    TRACE("\xf9W\x8d\xb6\x8e\xe8y:  % 9.4f");
-    TRACE("\xf9W\x8d\xb6\x8e\xe8z:  % 9.4f");
-    TRACE("\xf9WStep:     % 3d/% 3d");
-    TRACE("\xf9W\x8d\x98yz:% 4.3f,% 4.3f");
-    TRACE("File: % 11s");
-    TRACE("TimeQ:% 5d/% 5d");
+void CPlayerDebug::main() {
+    if (DebugWork::g_dw.player.iPlayerInfo) {
+        if (g_pPlayer) {
+            DebugWork::g_dw.player.vPos = g_pPlayer->getPos();
+            DebugWork::g_dw.player.vPos.w = g_pPlayer->m_fDir * 180.0f / 3.1415927f;
+            INT st = g_pPlayer->m_PlayerState;
+            DebugWork::g_dw.player.iPlayerState = st;
+            switch (g_pPlayer->m_PlayerState) {
+            case 2:
+            case 0x20:
+                if (g_pPlayer->getAnim()->getAnimID() == 0x2A) {
+                    sprintf(m_szBuf[0], "\xf9WFlagPLY: % 08X", g_pPlayer->m_uiPlayerFlag);
+                    sprintf(m_szBuf[1], "\xf9WFlagCON: % 08X", g_pPlayer->m_uiConditionFlag);
+                    sprintf(m_szBuf[2], "\xf9WFlagBTL: % 08X", g_pPlayer->m_uiBattleFlag);
+                } else if (CGame::isSoraGame()) {
+                    sprintf(m_szBuf[0], "\xf9WLEVEL: % 10d", g_pPlayer->m_iLV);
+                    sprintf(m_szBuf[1], "\xf9WEXP: % 12d", g_pPlayer->m_iEXP);
+                    { const char* f = "\xf9WNEXT: % 5d/% 5d"; INT n = CPlayer::getNowNextEXP(); INT e = g_pPlayer->m_iEXP; sprintf(m_szBuf[2], f, n, e + CPlayer::getNowNextEXP()); }
+                } else {
+                    sprintf(m_szBuf[0], "\xf9WHP: % 3d/% 3d", g_pPlayer->m_iHP, g_pPlayer->m_iMaxHP);
+                    sprintf(m_szBuf[1], "\xf9WAP: % 6d", g_pPlayer->m_iAP);
+                    sprintf(m_szBuf[2], "\xf9WDP: % 3d/% 3d", g_pPlayer->m_iDP, g_pPlayer->m_iMaxDP);
+                }
+                break;
+            case 0xF:
+                if (m_iPrevState != 2) {
+                    if (strlen(m_szBuf[0]) > 2) strncpy(m_szBuf[0], "\xf9S", 2);
+                    if (strlen(m_szBuf[1]) > 2) strncpy(m_szBuf[1], "\xf9S", 2);
+                    if (strlen(m_szBuf[2]) > 2) strncpy(m_szBuf[2], "\xf9S", 2);
+                }
+                break;
+            case 3:
+            case 4:
+                sprintf(m_szBuf[0], "\xf9W\x95" "b\x91\xac:   % 7.4fm/s", g_pPlayer->m_fWalkSpeed * 60.0f);
+                sprintf(m_szBuf[1], "\xf9W\x93`\x93\xb1\x97\xa6: % 7.2f\x81\x93", g_pPlayer->m_fMovePower * 100.0f);
+                sprintf(m_szBuf[2], " ");
+                break;
+            case 7:
+            case 0x21:
+                sprintf(m_szBuf[0], "\xf9W%s", szPlayerJumpState[g_pPlayer->getJumpState()]);
+                sprintf(m_szBuf[1], "\xf9WSpdY:  % 8.4fm/s", g_pPlayer->m_fJumpSpdY * 60.0f);
+                sprintf(m_szBuf[2], "\xf9W\x92\xb8\x93_:  % 8.4fm", g_pPlayer->m_fJumpTop);
+                break;
+            case 9:
+                if (g_pPlayer->m_iSubState == 2) {
+                    sprintf(m_szBuf[0], "\xf9W\x8d\x98x:    % 9.4f", g_pPlayer->m_vCenterPos.x);
+                    sprintf(m_szBuf[1], "\xf9W\x8d\x98y:    % 9.4f", g_pPlayer->m_vCenterPos.y);
+                    sprintf(m_szBuf[2], "\xf9W\x8d\x98z:    % 9.4f", g_pPlayer->m_vCenterPos.z);
+                } else {
+                    sprintf(m_szBuf[0], "\xf9W\x8d\xb6\x8e\xe8x:  % 9.4f", g_pPlayer->m_vHangHandPos.x);
+                    sprintf(m_szBuf[1], "\xf9W\x8d\xb6\x8e\xe8y:  % 9.4f", g_pPlayer->m_vHangHandPos.y);
+                    sprintf(m_szBuf[2], "\xf9W\x8d\xb6\x8e\xe8z:  % 9.4f", g_pPlayer->m_vHangHandPos.z);
+                }
+                break;
+            case 0x10:
+                sprintf(m_szBuf[0], "\xf9W%s", szPlayerLadderState[g_pPlayer->m_iSubState]);
+                sprintf(m_szBuf[1], "\xf9WStep:     % 3d/% 3d", g_pPlayer->m_iLadderStep, g_pPlayer->m_iLadderStepMax);
+                if (g_pPlayer->m_iSubState == 4) sprintf(m_szBuf[2], "\xf9W\x8d\x98yz:% 4.3f,% 4.3f", g_pPlayer->m_vHangHandPos.y, g_pPlayer->m_vHangHandPos.z);
+                else sprintf(m_szBuf[2], " ");
+                break;
+            case 6:
+            case 0xA:
+            case 0xB:
+            case 0xC:
+            case 0xD:
+            case 0xE:
+            case 0x13:
+            case 0x16:
+            case 0x18:
+            case 0x19:
+            case 0x1A:
+            case 0x1B:
+            case 0x1D:
+            case 0x22:
+            case 0x23:
+            case 0x24:
+                sprintf(m_szBuf[0], "\xf9WFlagPLY: % 08X", g_pPlayer->m_uiPlayerFlag);
+                sprintf(m_szBuf[1], "\xf9WFlagCON: % 08X", g_pPlayer->m_uiConditionFlag);
+                sprintf(m_szBuf[2], "\xf9WFlagBTL: % 08X", g_pPlayer->m_uiBattleFlag);
+                break;
+            case 0x1C:
+                sprintf(m_szBuf[0], "\xf9W%s", szPlayerEndState[g_pPlayer->m_iSubState]);
+                sprintf(m_szBuf[1], "\xf9WFlagPLY: % 08X", g_pPlayer->m_uiPlayerFlag);
+                sprintf(m_szBuf[2], "\xf9WFlagBTL: % 08X", g_pPlayer->m_uiBattleFlag);
+                break;
+            }
+            sprintf(m_szBuf[4], "File: % 11s", g_pPlayer->getMotionName(g_pPlayer->getAnim()->getAnimID()));
+            sprintf(m_szBuf[5], "TimeQ:% 5d/% 5d", g_pPlayer->getMotionCurrentTime(), g_pPlayer->getMotionTotalTime());
+            m_iPrevState = g_pPlayer->m_PlayerState;
+        }
+        m_pWin->dispOn(0);
+    } else {
+        m_pWin->dispOff(0);
+    }
+    if (g_pPlayer) {
+        if (DebugWork::g_dw.player.iMuteki) g_pPlayer->setPlayerFlag(1, 0);
+        else if (m_iPrevMuteki) g_pPlayer->setPlayerFlag(0, 1);
+        m_iPrevMuteki = DebugWork::g_dw.player.iMuteki;
+        if (DebugWork::g_dw.player.iDbgWindow) {
+            if (DebugWork::g_dw.player.iHP < 0) {
+                DebugWork::g_dw.player.iHP = 0;
+                m_iPrevHP = 1;
+            }
+            INT maxHp = g_pPlayer->m_iMaxHP;
+            if (maxHp < DebugWork::g_dw.player.iHP) {
+                DebugWork::g_dw.player.iHP = maxHp;
+                m_iPrevHP = (SHORT)maxHp + 1;
+            }
+            if (m_iPrevHP != DebugWork::g_dw.player.iHP) {
+                m_iPrevHP = DebugWork::g_dw.player.iHP;
+                (*(CPlayer* volatile*)&g_pPlayer)->m_iHP = m_iPrevHP;
+                (*(CPlayer* volatile*)&g_pPlayer)->m_pGauge->setHP(m_iPrevHP, 1);
+            }
+            if (m_iPrevHP != g_pPlayer->m_iHP) {
+                m_iPrevHP = g_pPlayer->m_iHP;
+                DebugWork::g_dw.player.iHP = m_iPrevHP;
+            }
+        }
+    }
+    m_pCamData = (PCAM_DATA*)DebugWork::g_dw.player.pCamData;
+    if (m_pCamData) {
+        if (m_pCamData->fViewAngle != DebugWork::g_dw.player.vCamEye.w) {
+            if (PlayerCamera::CPlayerCamera::getNowCamMode() == DebugWork::g_dw.player.iCamMode) ((CCamera*)g_pPlayer->m_pCam)->setGakaku(DebugWork::g_dw.player.vCamEye.w);
+        }
+        if (DebugWork::g_dw.player.iCamMode) {
+            if (DebugWork::g_dw.player.iCamMode == 2) {
+                if (m_pCamData->vEye.x != DebugWork::g_dw.player.vCamEye.x) DebugWork::g_dw.player.vCamEye.z = DebugWork::g_dw.player.vCamEye.x;
+                if (m_pCamData->vEye.z != DebugWork::g_dw.player.vCamEye.z) DebugWork::g_dw.player.vCamEye.x = DebugWork::g_dw.player.vCamEye.z;
+            }
+        }
+        m_pCamData->vEye = DebugWork::g_dw.player.vCamEye;
+        m_pCamData->fViewAngle = DebugWork::g_dw.player.vCamEye.w;
+        m_pCamData->vAim = DebugWork::g_dw.player.vCamAim;
+        m_pCamData->fAdjust = DebugWork::g_dw.player.vCamAim.w;
+        m_pCamData->fDistance = DebugWork::g_dw.player.fCamDist;
+        m_pCamData->fSize = DebugWork::g_dw.player.fCamSize;
+    }
+    m_pAtkData = (PATK_DATA*)DebugWork::g_dw.player.pAtkData;
+    if (m_pAtkData) {
+        m_pAtkData->ANIM_ID = DebugWork::g_dw.player.iAtkPrm[0];
+        m_pAtkData->ANIM_ESQ = DebugWork::g_dw.player.iAtkPrm[1];
+        m_pAtkData->EFFECT = DebugWork::g_dw.player.iAtkPrm[2];
+        m_pAtkData->TRG_FRAME = DebugWork::g_dw.player.iAtkPrm[3];
+        m_pAtkData->COLL_START_FRAME = DebugWork::g_dw.player.iAtkPrm[4];
+        m_pAtkData->COLL_END_FRAME = DebugWork::g_dw.player.iAtkPrm[5];
+        m_pAtkData->MOVE_START_FRAME = DebugWork::g_dw.player.iAtkPrm[6];
+        m_pAtkData->MOVE_END_FRAME = DebugWork::g_dw.player.iAtkPrm[7];
+        m_pAtkData->RADIUS = DebugWork::g_dw.player.iAtkPrm[8];
+        m_pAtkData->MAX_SPEED = DebugWork::g_dw.player.iAtkPrm[9];
+        m_pAtkData->POWER = DebugWork::g_dw.player.iAtkPrm[10];
+        m_pAtkData->DAMAGE = DebugWork::g_dw.player.iAtkPrm[11];
+        m_pAtkData->WORK0 = DebugWork::g_dw.player.iAtkPrm[12];
+        m_pAtkData->WORK1 = DebugWork::g_dw.player.iAtkPrm[13];
+        m_pAtkData->WORK2 = DebugWork::g_dw.player.iAtkPrm[14];
+        m_pAtkData->FLAG = DebugWork::g_dw.player.iAtkFlag[0] | DebugWork::g_dw.player.iAtkFlag[1] << 1 | DebugWork::g_dw.player.iAtkFlag[2] << 2 | DebugWork::g_dw.player.iAtkFlag[3] << 3 | DebugWork::g_dw.player.iAtkFlag[4] << 4 | DebugWork::g_dw.player.iAtkFlag[5] << 5 | DebugWork::g_dw.player.iAtkFlag[6] << 6 | DebugWork::g_dw.player.iAtkFlag[7] << 7;
+    }
 }
-__asm__(".rdata\n.align 4\n.word .L00275AB0\n.word .L00275C3C\n.word .L00275C3C\n.word .L00275F80\n.word .L00275ED0\n.word .L00275CAC\n.word .L00275F80\n.word .L00275D2C\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275BA4\n.word .L00275E20\n.word .L00275F80\n.word .L00275F80\n.word .L00275ED0\n.word .L00275F80\n.word .L00275F80\n.word .L00275ED0\n.word .L00275F80\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275F24\n.word .L00275ED0\n.word .L00275F80\n.word .L00275F80\n.word .L00275AB0\n.word .L00275CAC\n.word .L00275ED0\n.word .L00275ED0\n.word .L00275ED0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", main__12CPlayerDebug);
 /* the static initializer (DWT table titles) is generated after the last INCLUDE_ASM: gcc assumes .rdata for its strings */
 __asm__(".rdata\n");
 // SOURCE DATA: .data .rodata .bss
