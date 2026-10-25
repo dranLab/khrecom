@@ -4668,7 +4668,7 @@ INT CPlayer::startSingleAction() {
    s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi
    moves. The flag block (battle 0x10/0x80000/8, then trg 4) and the ternary m_iComboBoost match.
    tried: block perms (perm.py, hillmove.py), cast loads/stores on g_fGravity/g_CardBreakTime/
-   m_JumpState/m_fJumpGravity, gravity via a local; best 13 lines. tools/permuter.py can't run on C++ methods. */
+   m_JumpState/m_fJumpGravity, gravity via a local; best 13 lines. tools/permuter.py can't run on C++ methods. Retried 2026-10-25: the $LM line order (gravity 7818 before JumpState 7819) also gives 13 lines: li 3 then issues before the gravity lwc1 (equal priority, later insn first) and the %hi(g_fGravity) moves from v0 to v1; same family as initAttackField. */
 #if 0
 void CPlayer::initAttack(INT inNo) {
     setPlayerState(PL::ATTACK);
