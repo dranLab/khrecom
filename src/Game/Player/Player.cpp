@@ -2229,20 +2229,21 @@ INT CPlayer::initIdle(INT inAir, INT inStand) {
    tried: all orders of the 4 ofs stores, oz/oy temporaries, set()/brace init for ofs, z-then-x and local-variable
    orders for m_vWallPos, interleaved/reversed vStart/vEnd stores, per-block FLOAT r, _limitPI/_limitPI3 and tools/
    permuter.py through the method alias wrapper (8 min, score 40 -> 24 by commuting operands/declaration order, which
-   funcdiff shows as worse). */
+   funcdiff shows as worse). Retried 2026-10-25 ($LM tags):
+   the first ofs is one brace-init line (`FVECTOR ofs = {{0, 0.07f, 0.5f, 1}}` after the flag test, the other
+   aggregates declared after it) -> fixes (1); m_vWallPos.x before .z (lines 3686/3687) -> 9 lines. Left: the
+   join block loads pos.x into $f1 and pos.z into $f0 (original $f0/$f1) and sets v0 = 1 before the two stores
+   (original after). tried: v[] / *(FLOAT*)& reads and stores, `bHit = TRUE; return bHit;`, tools/permuter.py
+   through the method wrapper again (10 min, 4717 candidates, no better). */
 #if 0
 INT CPlayer::chkWall(INT inStep) {
-    FVECTOR ofs;
+    if (!isActionFlag(0x10000)) return FALSE;
+    FVECTOR ofs = {{0.0f, 0.07f, 0.5f, 1.0f}};
     FMATRIX m;
     FVECTOR old;
     FVECTOR pos;
     FLOAT dir;
     BOOL bHit;
-    if (!isActionFlag(0x10000)) return FALSE;
-    ofs.y = 0.07f;
-    ofs.z = 0.5f;
-    ofs.x = 0.0f;
-    ofs.w = 1.0f;
     dir = m_fDir;
     _unitMatrix(m);
     _rotMatrixY(m, dir);
@@ -2357,8 +2358,8 @@ INT CPlayer::chkWall(INT inStep) {
         vNormal = *m_pCollMap->getDetectNormal();
         if (vNormal.y < 0.64278764f) pos = *m_pCollMap->getDetectPos();
     }
-    m_vWallPos.z = pos.z;
     m_vWallPos.x = pos.x;
+    m_vWallPos.z = pos.z;
     return TRUE;
 }
 #else
