@@ -2637,16 +2637,6 @@ void CPlayer::initLadder(INT inStep) {
     m_pMove->setFlag(0x40, FALSE);
     m_pCam->setFlag(8, TRUE);
 }
-/* Parked: 6 lines differ, the three constants of the case-4 ofs vector (1.8f, 1.3f, 1.0f; everything else, frame,
-   switch, jump table, vel slot sharing matches): the original loads them in that order into $f2, $f0, $f1 and
-   stores y, z, w before the call and x (sw zero) in its delay slot; ours uses $f0, $f1, $f2. With the source order
-   z, w, y the registers match but the scheduler then loads y last; `ofs._q = 0` first gives the registers but a
-   por/sq pair instead of the lone `sw zero`. Same family as exeHang's ofs block. Found: vel, A{pos,m} and
-   B{pos,ofs,m} must be sibling blocks (stack slots shared), case code order 0,1,2,4,3,5, the lost-step cases share
-   the setAnimForce(8) tail by crossjump.
-   tried: all 24 store orders of ofs.x/y/z/w, set(), brace init, v[] indexing, _ui[0]/_ul[0]/int zero stores, and
-   tools/permuter.py through the method wrapper (5 min, 2568 candidates, no better). */
-#if 0
 void CPlayer::exeLadder() {
     setPlayerFlag(0x400000, 0);
     m_iLadderStep = getLadderStepNow(getPos().y);
@@ -2699,14 +2689,10 @@ void CPlayer::exeLadder() {
         if (isMotionEnd()) {
             FLOAT dir;
             FVECTOR pos;
-            FVECTOR ofs;
-            FMATRIX m;
             dir = m_fDir;
             pos = getPos();
-            ofs.x = 0.0f;
-            ofs.y = 1.8f;
-            ofs.z = 1.3f;
-            ofs.w = 1.0f;
+            FVECTOR ofs = {{0.0f, 1.8f, 1.3f, 1.0f}};
+            FMATRIX m;
             _unitMatrix(m);
             _rotMatrixY(m, dir);
             ApplyMatrixXYZ(ofs, m, ofs);
@@ -2747,12 +2733,6 @@ void CPlayer::exeLadder() {
         m_pMove->setVel(vel);
     }
 }
-#else
-/* placeholder: rodata of exeLadder__7CPlayer */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L002668F0\n.word .L00266908\n.word .L002669DC\n.word .L00266B84\n.word .L00266A54\n.word .L00266C44\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeLadder__7CPlayer);
-#endif
 /* Parked: everything but the ofs block matches (wrap: r wrapped in place, then dir = r); left: after getPos the
    original issues lq pos (v1) before lui LADDER_LOCAL_OFS (v0), ours schedules the lui first (sched1 priority:
    hi->lwc1->swc1 chain) and allocates pos to a1. tried: all orders of pos/ofs statements (perm.py), set(),
