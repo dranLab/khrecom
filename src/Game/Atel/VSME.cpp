@@ -1371,14 +1371,36 @@ inline void _roPh32() {
     TRACE("reqSS_TAG not found\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", reqSS__Q24ATEL4CVSMPCcT1i);
-/* placeholder: rodata of reqSSI__Q24ATEL4CVSMPCcii */
-__asm__(".rdata\n");
-inline void _roPh33() {
-    TRACE("reqSSI actor idx:%d %x %d\n");
-    TRACE("reqSSI no-tag\n");
-    TRACE("reqSSI_TAG not found\n");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+static inline INT _findTag(const ATP& atp, INT n) {
+    for (INT i = 0; i < atp.tag_count; i++) {
+        if (n == atp.tname[i]) return i;
+    }
+    return -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", reqSSI__Q24ATEL4CVSMPCcii);
+BOOL CVSM::reqSSI(const CHAR* pszTag, INT nActIdx, INT nLv) {
+    INT i;
+    INT n;
+    n = pszTag[3];
+    n = (n << 8) + pszTag[2];
+    n = (n << 8) + pszTag[1];
+    n = (n << 8) + pszTag[0];
+    _TRACE(m_bTrace, "reqSSI actor idx:%d %x %d\n", nActIdx, n, nLv);
+    ATP& atp = m_ActorTbl[nActIdx]._ATP;
+    if (atp.tag_count == 0) {
+        _TRACE(TRUE, "reqSSI no-tag\n");
+        return FALSE;
+    }
+    i = _findTag(atp, n);
+    if (i >= 0) {
+        RTP req;
+        _setRTP(req, nLv, nActIdx, i, 0xFF);
+        setReq(req);
+        return TRUE;
+    }
+    _TRACE(TRUE, "reqSSI_TAG not found\n");
+    return FALSE;
+}
 /* placeholder: rodata of reqSSW__Q24ATEL4CVSMPCcT1ii */
 __asm__(".rdata\n");
 inline void _roPh34() {

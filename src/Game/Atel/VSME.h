@@ -139,6 +139,7 @@ protected:
 private:
     BOOL reqN(Actor& act, INT nTag, INT nLv, BOOL bTop);
     BOOL reqNS(Actor& act, const CHAR* pszTag, INT nLv);
+    BOOL reqSSI(const CHAR* pszTag, INT nActIdx, INT nLv);
     BOOL reqSSD(INT nTagIdx, INT nActIdx, INT nLv);
     INT searchActor(const CHAR* pszActor) const;
     INT searchActorID(const CHAR* pszActor) const;
