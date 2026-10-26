@@ -3117,9 +3117,9 @@ extern CursorPosition CursorPosiOffset;
 extern FVECTOR NoteScrollBarPosi;
 }
 namespace StoryView {
-extern SHORT WorldPictureTbl[17];
+extern const SHORT WorldPictureTbl[17];
 namespace D {
-extern SHORT WorldPictureTbl[6];
+extern const SHORT WorldPictureTbl[6];
 }
 }
 }
@@ -5244,8 +5244,8 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setParamFromCar
 #endif
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 namespace JiminyMemo {
-extern INT CharaNumTbl[];
-extern INT RikuCharaNumTbl[];
+extern const INT CharaNumTbl[];
+extern const INT RikuCharaNumTbl[];
 }
 namespace JiminyMemo {
 namespace Chara {
@@ -5263,7 +5263,7 @@ void CJiminyMemo::contentChara() {
         INT posiNum;
         INT listNum;
         INT ctNo;
-        INT* charaNumTbl;
+        const INT* charaNumTbl;
         FVECTOR posi;
         D2::C2DSeqCtrl** pSeqCtrl;
         D2::C2DFnt** pString;
@@ -5504,15 +5504,9 @@ void CJiminyMemo::contentChara() {
         }
     }
 }
-/* Parked: 8 lines: in both arms of step 20 the original stores titleNo (stack spill) before loading
-   listNum, ours after (same family as contentCardSelect). Everything else matches.
-   tried: titleNo/listNum statement order, eventFlagOffset = 0 as its own statement (line 8669) before or after
-   kind; listNum local for the seq count / marks / loop (fixed 80 lines); tools/permuter.py 3 min starts at
-   score 1 in its copy (path-sensitive). */
-#if 0
 namespace JiminyMemo {
-extern INT CharaNumTbl[];
-extern INT RikuCharaNumTbl[];
+extern const INT CharaNumTbl[];
+extern const INT RikuCharaNumTbl[];
 namespace CharaSelect {
 extern INT NoteSeqData[5];
 extern CursorPosition CursorPosiOffset;
@@ -5741,22 +5735,6 @@ void CJiminyMemo::contentCharaSelect() {
         }
     }
 }
-#else
-/* placeholder: rodata of contentCharaSelect__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh33() {
-    TRACE(__FILE__ "(8702)");
-    TRACE(__FILE__ "(8709)");
-}
-__asm__(".rdata\n.align 4\n.word .L00332BD8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L0033313C\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n");
-__asm__(".word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003331D0\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003333C4\n.word .L003335C8\n");
-__asm__(".word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L00333488\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n");
-__asm__(".word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003334C0\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n");
-__asm__(".word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003334C0\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n");
-__asm__(".word .L003335C8\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCharaSelect__11CJiminyMemo);
-#endif
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 namespace JiminyMemo {
 extern CT_LOWER* CharacterManualTbl[15];
 extern CT_LOWER* RikuCharacterManualTbl[3];
