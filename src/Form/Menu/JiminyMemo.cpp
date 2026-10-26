@@ -162,6 +162,7 @@ public:
     void replaceSequenceId(INT inSeqId);
     void setInState(INT inSeqId);
     void setOutState(INT inSeqId);
+    void setSlideMoveParam(class CMemo2DCursor* inCursor);
 };
 
 class CMemo2DCursor : public D2::C2DSeqCtrl {
@@ -196,6 +197,8 @@ public:
     void setScale(FLOAT inScale);
     void getSubVector(CursorPosition& outSub, INT inId0, INT inId1);
     void setLimitPosi(CursorPosition& inPosi, INT inId);
+    FVECTOR& getShiftVector() { return m_vShiftPosi; }
+    FVECTOR& getAimVector() { return m_vAimPosi; }
     CursorPosition* getLimitPosi(INT inId);
     FLOAT getFrameRateF();
     void setReplaceSeq(INT inSeq);
@@ -590,7 +593,20 @@ void CMemo2DSequence::setLocalPosition() {
     setLocalPos(v);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__15CMemo2DSequencef);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setSlideMoveParam__15CMemo2DSequenceP13CMemo2DCursor);
+void CMemo2DSequence::setSlideMoveParam(CMemo2DCursor* inCursor) {
+    if (inCursor) {
+        m_bMoveSlideEnable = TRUE;
+        m_vAimPosition = inCursor->getAimVector();
+        m_vShiftPosition = inCursor->getShiftVector();
+        if (m_iStateFlag & 4) {
+            m_vPosition = m_vAimPosition;
+            setLocalPos(m_vPosition);
+            m_fMoveTimer = 30.0f;
+        } else {
+            m_fMoveTimer = 0.0f;
+        }
+    }
+}
 void CMemo2DSequence::setScale(FLOAT inScale) {
     m_fScale = inScale;
     if (inScale < 0.01f) m_fScale = 0.01f;
