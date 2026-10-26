@@ -334,10 +334,29 @@ __asm__(".globl DebugSetTutorialFlag__8DWTEventP12CDebugWindowii");
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L00241C3C\n.word .L00241C44\n.word .L00241C4C\n.word .L00241C54\n.word .L00241C5C\n.word .L00241C64\n.word .L00241C6C\n.word .L00241C74\n.word .L00241C7C\n.word .L00241C84\n.word .L00241C8C\n.word .L00241C94\n.word .L00241C9C\n.word .L00241CA4\n.word .L00241CAC\n.word .L00241CB4\n.word .L00241CBC\n.word .L00241CC4\n.word .L00241CCC\n.word .L00241CD4\n.word .L00241CDC\n.word .L00241CE4\n.word .L00241CEC\n.word .L00241CF4\n.word .L00241CFC\n.word .L00241D04\n.word func_0\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetCardPossibleFlag__8DWTEventP12CDebugWindowii);
-/* placeholder: rodata of DebugSetFriendPossibleFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00241D84\n.word .L00241D8C\n.word .L00241D94\n.word .L00241D9C\n.word .L00241DA4\n.word .L00241DAC\n.word .L00241DB4\n.word .L00241DBC\n.word .L00241DC4\n.word func_0\n.word func_0\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetFriendPossibleFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetFriendPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT fri = CGameWork::getInt(0, 0x22);
+        switch (inY) {
+        case 0: fri ^= 0x1; break;
+        case 1: fri ^= 0x2; break;
+        case 2: fri ^= 0x4; break;
+        case 3: fri ^= 0x8; break;
+        case 4: fri ^= 0x10; break;
+        case 5: fri ^= 0x20; break;
+        case 6: fri ^= 0x40; break;
+        case 7: fri ^= 0x80; break;
+        case 8: fri ^= 0x100; break;
+        }
+        DebugWork::g_dw.atelwork.iPossibleFriend = fri;
+        CGameWork::setInt(0, 0x22, fri);
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetFriendPossibleFlag__8DWTEventP12CDebugWindowii");
 /* placeholder: rodata of DebugSetPoohFlag__8DWTEventP12CDebugWindowii */
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L00241E48\n.word .L00241E50\n.word .L00241E58\n.word .L00241E60\n.word .L00241E68\n.word .L00241E70\n.word .L00241E78\n.word .L00241E80\n.text\n");
