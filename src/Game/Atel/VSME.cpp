@@ -1216,12 +1216,48 @@ BOOL CVSM::reqN(Actor& act, INT nTag, INT nLv, BOOL bTop) {
     if (!bTop) atp.Freg = 0;
     return TRUE;
 }
+static inline INT _tagID(const CHAR* pszTag) {
+    return (((((pszTag[3] << 8) + pszTag[2]) << 8) + pszTag[1]) << 8) + pszTag[0];
+}
+static inline INT _searchTag(Actor& act, const CHAR* pszTag) {
+    ATP& atp = act._ATP;
+    INT i;
+    INT n;
+    n = _tagID(pszTag);
+    for (i = 0; i < atp.tag_count; i++) {
+        if (n == atp.tname[i]) return i;
+    }
+    return -1;
+}
+/* Parked: same instructions, only registers: the original keeps the tag value n in t0 from its first lb on (one
+   pseudo for the whole computation, then act in t1 and atp in t2); ours builds n in v0 temporaries and only the
+   final value gets t2 (act t0, atp t1). $LM tags put the tag build in an inline at lines 4870-4873 and the search
+   loop in one at 4898-4905 (ref locals: atp, i, n there). tried: search inline taking ATP& / Actor& with its own
+   atp, n as a reqNS local or the inline's, the tag inline returning a value / filling INT& n / one expression,
+   compound n <<= 8; n += statements, declaration orders, tools/permuter.py 8 min (loose score 1, 15443 candidates,
+   no better). */
+#if 0
+BOOL CVSM::reqNS(Actor& act, const CHAR* pszTag, INT nLv) {
+    ATP& atp = act._ATP;
+    INT i = _searchTag(act, pszTag);
+    if (i >= 0) {
+        atp.rq_tag = i;
+        atp.rq_lv = nLv;
+        atp.status = 1;
+        atp.address = atp.loc[i];
+        return TRUE;
+    }
+    _TRACE(TRUE, "reqNS_TAG not found\n");
+    return FALSE;
+}
+#else
 /* placeholder: rodata of reqNS__Q24ATEL4CVSMRQ24ATEL5ActorPCci */
 __asm__(".rdata\n");
-inline void _roPh31() {
+inline void _roPhReqNS() {
     TRACE("reqNS_TAG not found\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", reqNS__Q24ATEL4CVSMRQ24ATEL5ActorPCci);
+#endif
 /* placeholder: rodata of reqSS__Q24ATEL4CVSMPCcT1i */
 __asm__(".rdata\n");
 inline void _roPh32() {
