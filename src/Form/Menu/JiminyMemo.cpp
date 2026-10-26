@@ -31,6 +31,7 @@ public:
     static void destroy(HANDLE hHandle);
     static HANDLE create(const CHAR* pBaseName, UINT inNo);
     static void setLayer(INT inLayer);
+    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inSeqNo, FVECTOR& outPos, INT inMode);
 };
 }
 
@@ -171,6 +172,7 @@ public:
     void setOutState(INT inSeqId);
     void setSlideMoveParam(class CMemo2DCursor* inCursor);
     void setState(INT inState) { m_iState = inState; }
+    void setBasePosition(const FVECTOR& inPosition) { m_vBasePosition = inPosition; }
     void setup(const CHAR* inSeqName, const INT* inSeqTbl, INT inLayer);
     void setup(const CHAR* inSeqName, INT inSeqNo, INT inLayer);
 };
@@ -285,6 +287,10 @@ private:
     void initialize(INT inPlayerMode);
     void setContentMode(INT inContentMode);
     void replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum);
+    CMemo2DSequence* createSequence(const INT* inSeqData, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
+                                    CMemo2DSequence* inParent);
+    CMemo2DSequence* createSequence(INT inSeqNo, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
+                                    CMemo2DSequence* inParent);
     INT createListSequence(CMemo2DSequence* inList, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
                            D2::C2DSeqCtrl** inFontSeq, D2::C2DFnt** inFont, UINT inFontCol, INT inFontSize,
                            INT inFontStyle, const CHAR* inStr);
@@ -950,12 +956,25 @@ inline void _roPh13() {
     TRACE(__FILE__ "(4012)");
     TRACE(__FILE__ "(4022)");
 }
-/* placeholder: rodata of createSequence__11CJiminyMemoPCiiiiP15CMemo2DSequence */
-__asm__(".rdata\n");
-inline void _roPh14() {
-    TRACE(__FILE__ "(4170)");
+CMemo2DSequence* CJiminyMemo::createSequence(const INT* inSeqData, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
+                                             CMemo2DSequence* inParent) {
+    FVECTOR posi;
+    CMemo2DSequence* pSeq = new (com_malloc_d(sizeof(CMemo2DSequence), __FILE__ "(4170)",
+                                              ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+        CMemo2DSequence;
+    if (pSeq) {
+        pSeq->setup(m_pLadName, inSeqData, inLayer);
+        D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqNo, posi, 0);
+        pSeq->setBasePosition(posi);
+        if (inParent) {
+            pSeq->setParent(inParent);
+            pSeq->setLocalPosition();
+        } else {
+            pSeq->setPosition();
+        }
+    }
+    return pSeq;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createSequence__11CJiminyMemoPCiiiiP15CMemo2DSequence);
 /* placeholder: rodata of createSequence__11CJiminyMemoiiiiP15CMemo2DSequence */
 __asm__(".rdata\n");
 inline void _roPh15() {
