@@ -318,6 +318,8 @@ private:
     void getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork);
     void setPlateState(INT inKind, INT inState);
     void setPlateNumSeq(INT inKind, INT inParam);
+    void ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR& inPos, FLOAT inBaseHeight,
+                       CMemo2DSequence* inParent);
     INT getPlateState(INT inKind);
     void setPlateText(INT inKind, INT inCTNo);
     CMemo2DSequence* createSequence(const INT* inSeqData, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
@@ -1629,7 +1631,34 @@ INT CJiminyMemo::getNextContentId(INT inEventFlagStartId, INT inEventFlagNum, IN
     }
     return rval;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", ScrollBarInit__11CJiminyMemoPPQ22D210C2DSeqCtrliR7FVECTORfP15CMemo2DSequence);
+namespace JiminyMemo {
+extern USHORT NoteScrollBarTbl[3];
+}
+void CJiminyMemo::ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR& inPos, FLOAT inBaseHeight,
+                                CMemo2DSequence* inParent) {
+    FVECTOR vec;
+    for (INT i = 0; i < 3; i++) {
+        createMarkSequence(JiminyMemo::NoteScrollBarTbl[i], 1, -1, 0, inLayer, inParent, &inSeqCtrl[i]);
+        D2::C2DSeqCtrl* p = inSeqCtrl[i];
+        if (p) {
+            switch (i) {
+            case 0:
+                p->setLocalPos(inPos);
+                vec.set(1.0f, inBaseHeight * 0.01f, 1.0f, 0.0f);
+                p->setScl(vec);
+                break;
+            case 1:
+                vec.set(inPos.x, inPos.y + 1.0f, inPos.z, inPos.w);
+                p->setLocalPos(vec);
+                break;
+            case 2:
+                vec.set(inPos.x, inPos.y + inBaseHeight - 2.0f, inPos.z, inPos.w);
+                p->setLocalPos(vec);
+                break;
+            }
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii);
 BOOL CJiminyMemo::nextPage(INT* ioTop, INT inMax, INT inDisp) {
     BOOL bRet;
