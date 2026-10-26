@@ -13,6 +13,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "System/TaskMan.h"
 #include "Form/DebugWindow.h"
 #include "Game/Debug/DebugWork.h"
+#include <string.h>
 #include "include_asm.h"
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -156,7 +157,12 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execStdCode__Q24ATEL4
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execExt1Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execExt2Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execExt3Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", getActorIndex__CQ24ATEL4CVSMPCc);
+INT CVSM::getActorIndex(const CHAR* pszName) const {
+    for (INT i = 0; i < m_ActorCount; i++) {
+        if (strcmp(pszName, m_ActorTbl[i]._ATP.name) == 0) return i;
+    }
+    return -1;
+}
 INT CVSM::getActorIndex(INT nID) const {
     for (INT i = 0; i < m_ActorCount; i++) {
         if (nID == m_ActorTbl[i]._ATP.id) return i;
