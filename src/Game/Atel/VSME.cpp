@@ -410,10 +410,33 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetSoraMovieFlag
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L00242380\n.word .L00242388\n.word .L00242390\n.word .L00242398\n.word .L002423A0\n.word .L002423A8\n.word .L002423B0\n.word .L002423B8\n.word .L002423C0\n.word .L002423C8\n.word .L002423D0\n.word .L002423D8\n.word .L002423E0\n.word .L002423E8\n.word .L002423F0\n.word .L002423F8\n.word .L00242400\n.word .L0024240C\n.word .L00242418\n.word .L00242424\n.word .L00242430\n.word .L0024243C\n.word .L00242448\n.word .L00242454\n.word .L00242460\n.word .L0024246C\n.word .L00242478\n.word .L00242484\n.word .L00242490\n.word .L0024249C\n.word .L002424A8\n.word .L002424B4\n.word .L002424C0\n.word .L002424C8\n.word .L002424D0\n.word .L002424D8\n.word .L002424E0\n.word .L002424E8\n.word .L002424F0\n.word .L002424F8\n.word .L00242500\n.word func_0\n.word func_0\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetRikuMovieFlag__8DWTEventP12CDebugWindowii);
-/* placeholder: rodata of DebugSetKH2CardGetFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L002425B4\n.word .L002425BC\n.word .L002425C4\n.word .L002425CC\n.word .L002425D4\n.word .L002425DC\n.word .L002425E4\n.word .L002425EC\n.word .L002425F4\n.word .L002425FC\n.word .L00242604\n.word .L0024260C\n.word .L00242614\n.word func_0\n.word func_0\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetKH2CardGetFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetKH2CardGetFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT card = CGameWork::getInt(0, 0x2D);
+        switch (inY) {
+        case 0: card ^= 0x1; break;
+        case 1: card ^= 0x2; break;
+        case 2: card ^= 0x4; break;
+        case 3: card ^= 0x8; break;
+        case 4: card ^= 0x10; break;
+        case 5: card ^= 0x20; break;
+        case 6: card ^= 0x40; break;
+        case 7: card ^= 0x80; break;
+        case 8: card ^= 0x100; break;
+        case 9: card ^= 0x200; break;
+        case 10: card ^= 0x400; break;
+        case 11: card ^= 0x800; break;
+        case 12: card ^= 0x1000; break;
+        }
+        DebugWork::g_dw.atelwork.iKH2CardGet = card;
+        CGameWork::setInt(0, 0x2D, card);
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetKH2CardGetFlag__8DWTEventP12CDebugWindowii");
 /* placeholder: rodata of DebugSetJiminyMemoFlag__8DWTEventP12CDebugWindowii */
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002428AC\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L002428AC\n.word .L0024274C\n.word .L00242764\n.word .L0024277C\n.word .L00242794\n.word .L002427AC\n.word .L002427C4\n.word .L002427DC\n.word .L002427F4\n.word .L0024280C\n.word .L00242824\n.word .L0024283C\n.word .L00242854\n.word .L0024286C\n.word .L00242890\n.word func_0\n.word func_0\n.text\n");
