@@ -1729,7 +1729,10 @@ void CVSM::execInit() {
    reorg puts it into the execCode jal slot instead of `move a0,s0`). Everything else matches: the PMF state call
    (m_ActorStateFnc as BOOL (CVSM::*[31])()), #line 844 assert, the switch tree needs a case ATEL_RET_REQ.
    tried: if/ternary/assign-in-test for m_Freg, status before/after it, m_SP before it, getPC() for the
-   argument, a split nRet declaration, tools/permuter.py 5 min (loose score 1). */
+   argument, a split nRet declaration, tools/permuter.py 5 min (loose score 1); retry: sched2 (forward list
+   scheduler) has 4 insns ready at t=1 after the join (m_Freg store, li 1, m_Pctr load, a0 copy) and gives the
+   memory unit to the m_Pctr argument load; the original picks the m_Freg store. tools/permuter.py 15 min (8163
+   candidates, score 1 unchanged). */
 #if 0
 void CVSM::execActor() {
     ATP& atp = m_pCurrentActor->_ATP;
