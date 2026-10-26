@@ -5602,12 +5602,8 @@ BOOL CVSM::acStatDLWait() {
 BOOL CVSM::acStatBGWait() {
     return FALSE;
 }
-/* Parked: 8 lines, one case (nCode 27, the two commands with f = 16.0f): the original issues the 16.0f load and
-   its store to f before loading m_pCurrentActor, ours after (sched2: the lw chain to the virtual call has the
-   higher priority; equal-priority ties go later-insn-first, so the original's RTL had the constant after the
-   load). Every other case, the jump table and the shared TRACE tail match. tried: volatile f, statement order per
-   the $LM tags (6202 f, 6203/6204 the calls), tools/permuter.py 5 min (loose score 1). */
-#if 0
+/* f goes through a reference: its stack store then is no fixed scalar for the scheduler (see execCode) */
+static inline void setFloat(FLOAT& r, FLOAT v) { r = v; }
 INT CVSM::player_ctrl(INT nCode) {
     FLOAT f;
     INT index;
@@ -5669,7 +5665,7 @@ INT CVSM::player_ctrl(INT nCode) {
         TRACE("AVTCMD_SET_LOOK_STOP :%s\n", m_pCurrentActor->_ATP.name);
         break;
     case 44:
-        f = 16.0f;
+        setFloat(f, 16.0f);
         m_pCurrentActor->_pAvatar->reqCommand(0x35, NULL, 0);
         m_pCurrentActor->_pAvatar->reqCommand(0x36, &f, 0);
         TRACE("AVTCMD_SET_LOOK_END :%s\n", m_pCurrentActor->_ATP.name);
@@ -5714,19 +5710,6 @@ INT CVSM::player_ctrl(INT nCode) {
     }
     return 0;
 }
-#else
-/* placeholder: rodata of player_ctrl__Q24ATEL4CVSMi */
-__asm__(".rdata\n");
-inline void _roPh42() {
-    TRACE("SHOW :%s\n");
-    TRACE("HIDE :%s\n");
-    TRACE("AVTCMD_START_AVATAR  :%s\n");
-    TRACE("bad param player_ctrl :%s\n");
-}
-__asm__(".rdata\n.align 4\n.word .L0024F080\n.word .L0024F0B8\n.word .L0024F604\n.word .L0024F604\n.word .L0024F0F0\n.word .L0024F128\n.word .L0024F160\n.word .L0024F198\n.word .L0024F1D0\n.word .L0024F208\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F240\n.word .L0024F2AC\n.word .L0024F2E4\n.word .L0024F31C\n.word .L0024F354\n.word .L0024F38C\n.word .L0024F3F8\n.word .L0024F430\n.word .L0024F468\n.word .L0024F4A0\n.word .L0024F4D8\n.word .L0024F550\n.word .L0024F588\n.word .L0024F5C0\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", player_ctrl__Q24ATEL4CVSMi);
-#endif
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 INT CVSM::player_ctrl(INT nCode, FLOAT fArg) {
     if (m_pCurrentActor->_pAvatar) _TRACE(m_bTrace, "bad param player_control\n");
     return -2;
