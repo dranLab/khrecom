@@ -11,6 +11,7 @@
 #include "Game/CardBattle.h"
 #include "Form/Menu/JiminyMemo.h"
 #include "System/Math3D.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "System/Sound/SoundMan.h"
@@ -185,6 +186,7 @@ public:
     void getSubVector(CursorPosition& outSub, INT inId0, INT inId1);
     void setLimitPosi(CursorPosition& inPosi, INT inId);
     CursorPosition* getLimitPosi(INT inId);
+    FLOAT getFrameRateF();
 };
 
 class CMemo2DCard : public D2::C2DSeqCtrl {
@@ -606,7 +608,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setReplaceSeq__
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setState__13CMemo2DCursori);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPosiId__13CMemo2DCursori);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__13CMemo2DCursor);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getFrameRateF__13CMemo2DCursor);
+FLOAT CMemo2DCursor::getFrameRateF() {
+    if (m_hParent) {
+        CTask* pTask = CTaskMan::getTask(m_hParent);
+        if (pTask && !pTask->isOut()) return pTask->getFrameRate() * 0.020000001f;
+    }
+    return 1.0000001f;
+}
 void CMemo2DCursor::setLimitPosi(CursorPosition& inPosi, INT inId) {}
 CursorPosition* CMemo2DCursor::getLimitPosi(INT inId) {
     return NULL;
