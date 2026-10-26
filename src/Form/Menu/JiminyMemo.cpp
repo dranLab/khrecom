@@ -664,7 +664,26 @@ void CMemo2DCursor::setReplaceSeq(INT inSeq) {
     replaceSeq(1, m_lpctLayoutName, m_iLadTbl[3]);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setState__13CMemo2DCursori);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPosiId__13CMemo2DCursori);
+INT CMemo2DCursor::setPosiId(INT inPosiId) {
+    INT rval;
+    if (inPosiId < 0) {
+        rval = -1;
+    } else if (inPosiId >= m_iPosiNum) {
+        rval = 1;
+    } else {
+        rval = 0;
+        m_vAimPosi.x = m_pPosiTbl[inPosiId].x * m_fScale;
+        m_vAimPosi.y = m_pPosiTbl[inPosiId].y * m_fScale;
+        m_bMoveSlideEnable = TRUE;
+        if (m_iState & 0x1000000) {
+            m_fMoveTimer = 0.0f;
+        } else {
+            m_fMoveTimer = 30.0f;
+        }
+        m_iPosiId = inPosiId;
+    }
+    return rval;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__13CMemo2DCursor);
 FLOAT CMemo2DCursor::getFrameRateF() {
     if (m_hParent) {
