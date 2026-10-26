@@ -1134,7 +1134,24 @@ void CJiminyMemo::replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER* in
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListMark__11CJiminyMemoPPQ22D210C2DSeqCtrlPUciiiii);
+void CJiminyMemo::replaceNoteListMark(D2::C2DSeqCtrl** inMark, BYTE* inFlagTbl, INT inListNum, INT inListAllNum,
+                                      INT inStartNo, INT inLayoutNo, INT inLayoutSeqNo) {
+    if (inMark) {
+        D2::C2DSeqCtrl** pMark = inMark;
+        INT listIndex = -inStartNo;
+        FVECTOR posi;
+        for (INT i = 0; i < inListAllNum; i++, pMark++, listIndex++) {
+            if (*pMark && (*pMark)->isEnableDisp()) {
+                if (listIndex >= 0 && listIndex < inListNum && inFlagTbl[i]) {
+                    D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqNo + listIndex, posi, 0);
+                } else {
+                    posi.set(0.0f, -1000.0f, 0.0f);
+                }
+                (*pMark)->setLocalPos(posi);
+            }
+        }
+    }
+}
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CJiminyMemo::replaceNoteListMark(D2::C2DSeqCtrl** inMark, INT inFlagId, INT inListNum, INT inListAllNum,
                                       INT inStartNo, INT inLayoutNo, INT inLayoutSeqNo) {
