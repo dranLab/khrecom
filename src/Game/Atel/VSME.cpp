@@ -11,6 +11,11 @@
 inline void* operator new(size_t, void* p) throw() { return p; }
 /* PARTIAL: the original System/HeapMan.h(134) has it inline */
 inline void* operator new(size_t size) throw() { return com_malloc(size); }
+/* PARTIAL: the original System/HeapMan.h(150-153) has the debug allocation inline */
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+inline void* operator new(size_t size, char* msg) throw() {
+    return com_malloc_d(size, msg, RET_ADDR());
+}
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
 #include "Game/Atel/Avatar.h"
@@ -63,6 +68,8 @@ inline void _vsmeMotionName() {
 #include "Game/Player/Player.h"
 #include "System/Sound/SoundMan.h"
 #include "System/Com.h"
+#include "Game/SceneEnv.h"
+#include "Form/Menu/JMemoFlag.h"
 #include <string.h>
 #include "include_asm.h"
 
@@ -304,7 +311,33 @@ static BOOL debugBtlReportCallBackParam(CDebugWindow* pObj, INT inY, INT inParam
     return 1;
 }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", debugBtlReportCallBack__8DWTEventP12CDebugWindowi);
+namespace DWTEvent {
+static INT debugBtlReportCallBack(CDebugWindow* pObj, INT inParam) {
+    INT i;
+    DebugWork::g_dw.atelwork.BtlMemo = CJiminyMemoFlag::getContentOpenPercentage(CGameWork::getByte(0, 0x60));
+    DebugWork::g_dw.atelwork.KillEnemyCount = CGameWork::getInt(0, 0xB3);
+    DebugWork::g_dw.atelwork.KeysTresur = 0;
+    for (i = 0; i < 16; i++) {
+        DebugWork::g_dw.atelwork.KeysTresur += CGameWork::progMCW()._KeyRoomsTresureBoxCounter[i];
+    }
+    DebugWork::g_dw.atelwork.CardBreakCount = CGameWork::getInt(0, 0x3C);
+    DebugWork::g_dw.atelwork.StockKind = CGameWork::getInt(0, 0x3D);
+    DebugWork::g_dw.atelwork.StockCount = CGameWork::getInt(0, 0x3E);
+    UINT nTime = CMainApp::getPlayTime();
+    DebugWork::g_dw.atelwork.Hour = nTime / 3600;
+    DebugWork::g_dw.atelwork.minit = nTime % 3600 / 60;
+    if (DebugWork::g_dw.atelwork.Hour >= 1000) {
+        DebugWork::g_dw.atelwork.Hour = 999;
+        DebugWork::g_dw.atelwork.minit = 59;
+    }
+    F_UL win;
+    win.ul = CGameWork::getInt(0, 0x40);
+    DebugWork::g_dw.atelwork.DuelWin = win.f * 100.0f;
+    DebugWork::g_dw.atelwork.DarkCount = CGameWork::getInt(0, 0x41);
+    DebugWork::g_dw.atelwork.SpeedCount = CGameWork::getInt(0, 0x3F);
+    return 1;
+}
+}
 namespace DWTEvent {
 static INT debugKeyTresurCallBack(CDebugWindow* pObj, INT inParam) {
     DebugWork::g_dw.atelwork.TreTr = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[1];
@@ -340,10 +373,46 @@ inline void _roPh3() {
     TRACE("\x83" "f\x83X\x83" "e\x83j\x81[         :%d");
     TRACE("\x96Y\x8bp\x82\xcc\x8f\xe9           :%d");
 }
-/* placeholder: rodata of DebugSetWorldTitleFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00241A40\n.word .L00241A48\n.word .L00241A50\n.word .L00241A58\n.word .L00241A60\n.word .L00241A68\n.word .L00241A70\n.word .L00241A78\n.word .L00241A80\n.word .L00241A88\n.word .L00241A90\n.word .L00241A98\n.word .L00241AA0\n.word .L00241B10\n.word .L00241AA8\n.word .L00241AB0\n.word .L00241AB8\n.word .L00241AC0\n.word .L00241AC8\n.word .L00241AD0\n.word .L00241AD8\n.word .L00241AE0\n.word .L00241AE8\n.word .L00241AF0\n.word .L00241AF8\n.word .L00241B00\n.word .L00241B08\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetWorldTitleFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetWorldTitleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT world = CGameWork::getInt(0, 0xC1);
+        switch (inY) {
+        case 1: world ^= 0x1; break;
+        case 2: world ^= 0x2; break;
+        case 3: world ^= 0x4; break;
+        case 4: world ^= 0x8; break;
+        case 5: world ^= 0x10; break;
+        case 6: world ^= 0x20; break;
+        case 7: world ^= 0x40; break;
+        case 8: world ^= 0x80; break;
+        case 9: world ^= 0x100; break;
+        case 10: world ^= 0x200; break;
+        case 11: world ^= 0x400; break;
+        case 12: world ^= 0x800; break;
+        case 13: world ^= 0x1000; break;
+        case 15: world ^= 0x10000; break;
+        case 16: world ^= 0x20000; break;
+        case 17: world ^= 0x40000; break;
+        case 18: world ^= 0x80000; break;
+        case 19: world ^= 0x100000; break;
+        case 20: world ^= 0x200000; break;
+        case 21: world ^= 0x400000; break;
+        case 22: world ^= 0x800000; break;
+        case 23: world ^= 0x1000000; break;
+        case 24: world ^= 0x2000000; break;
+        case 25: world ^= 0x4000000; break;
+        case 26: world ^= 0x8000000; break;
+        case 27: world ^= 0x10000000; break;
+        }
+        DebugWork::g_dw.atelwork.iWorldIntro = world;
+        CGameWork::setInt(0, 0xC1, world);
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetWorldTitleFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetTutorialFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
@@ -365,10 +434,46 @@ static BOOL DebugSetTutorialFlag(CDebugWindow* pObj, INT inY, INT inParam) {
 }
 /* the asm .data (debug window tables) refers to it by name until the data comes from source */
 __asm__(".globl DebugSetTutorialFlag__8DWTEventP12CDebugWindowii");
-/* placeholder: rodata of DebugSetCardPossibleFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00241C3C\n.word .L00241C44\n.word .L00241C4C\n.word .L00241C54\n.word .L00241C5C\n.word .L00241C64\n.word .L00241C6C\n.word .L00241C74\n.word .L00241C7C\n.word .L00241C84\n.word .L00241C8C\n.word .L00241C94\n.word .L00241C9C\n.word .L00241CA4\n.word .L00241CAC\n.word .L00241CB4\n.word .L00241CBC\n.word .L00241CC4\n.word .L00241CCC\n.word .L00241CD4\n.word .L00241CDC\n.word .L00241CE4\n.word .L00241CEC\n.word .L00241CF4\n.word .L00241CFC\n.word .L00241D04\n.word func_0\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetCardPossibleFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetCardPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT card = CGameWork::getInt(0, 0x21);
+        switch (inY) {
+        case 0: card ^= 0x1; break;
+        case 1: card ^= 0x2; break;
+        case 2: card ^= 0x4; break;
+        case 3: card ^= 0x8; break;
+        case 4: card ^= 0x10; break;
+        case 5: card ^= 0x20; break;
+        case 6: card ^= 0x40; break;
+        case 7: card ^= 0x80; break;
+        case 8: card ^= 0x100; break;
+        case 9: card ^= 0x200; break;
+        case 10: card ^= 0x400; break;
+        case 11: card ^= 0x800; break;
+        case 12: card ^= 0x1000; break;
+        case 13: card ^= 0x2000; break;
+        case 14: card ^= 0x4000; break;
+        case 15: card ^= 0x8000; break;
+        case 16: card ^= 0x10000; break;
+        case 17: card ^= 0x20000; break;
+        case 18: card ^= 0x40000; break;
+        case 19: card ^= 0x80000; break;
+        case 20: card ^= 0x100000; break;
+        case 21: card ^= 0x200000; break;
+        case 22: card ^= 0x400000; break;
+        case 23: card ^= 0x800000; break;
+        case 24: card ^= 0x1000000; break;
+        case 25: card ^= 0x2000000; break;
+        }
+        DebugWork::g_dw.atelwork.iPossibleCard = card;
+        CGameWork::setInt(0, 0x21, card);
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetCardPossibleFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetFriendPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
@@ -392,10 +497,37 @@ static BOOL DebugSetFriendPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam)
 }
 /* the asm .data (debug window tables) refers to it by name until the data comes from source */
 __asm__(".globl DebugSetFriendPossibleFlag__8DWTEventP12CDebugWindowii");
-/* placeholder: rodata of DebugSetPoohFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00241E48\n.word .L00241E50\n.word .L00241E58\n.word .L00241E60\n.word .L00241E68\n.word .L00241E70\n.word .L00241E78\n.word .L00241E80\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetPoohFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetPoohFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT intro = CGameWork::getInt(0, 0x23);
+        switch (inY) {
+        case 4: intro ^= 0x1; break;
+        case 5: intro ^= 0x2; break;
+        case 6: intro ^= 0x4; break;
+        case 7: intro ^= 0x8; break;
+        case 8: intro ^= 0x10; break;
+        case 9: intro ^= 0x20; break;
+        case 10: intro ^= 0x40; break;
+        case 11: intro ^= 0x80; break;
+        }
+        DebugWork::g_dw.atelwork.iPoohMiniGameIntro = intro;
+        CGameWork::setInt(0, 0x23, intro);
+        CGameWork::setInt(0, 0x2E, DebugWork::g_dw.atelwork.iPoohHiScoreOwl);
+        CGameWork::setInt(0, 0x2F, DebugWork::g_dw.atelwork.iPoohHiScoreRoo);
+        CGameWork::setInt(0, 0x30, DebugWork::g_dw.atelwork.iPoohHiScoreEeyore);
+        CGameWork::setInt(0, 0x31, DebugWork::g_dw.atelwork.iPoohHiScoreTigger);
+        CGameWork::setInt(0, 0x32, DebugWork::g_dw.atelwork.iPoohHiScoreRabbit);
+        CGameWork::setByte(0, 3, DebugWork::g_dw.atelwork.iPoohGamePiglet);
+        CGameWork::setByte(0, 4, DebugWork::g_dw.atelwork.iPoohGameOwl);
+        CGameWork::setByte(0, 5, DebugWork::g_dw.atelwork.iPoohGameRoo);
+        CGameWork::setByte(0, 6, DebugWork::g_dw.atelwork.iPoohGameEeyore);
+        CGameWork::setByte(0, 7, DebugWork::g_dw.atelwork.iPoohGameTigger);
+        CGameWork::setByte(0, 8, DebugWork::g_dw.atelwork.iPoohGameRabbit);
+    }
+    return 1;
+}
+}
 namespace DWTEvent {
 static BOOL DebugSetPcSkillFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
@@ -871,10 +1003,22 @@ inline void _roPh16() {
     TRACE("100\x83G\x81[\x83J\x81[        :%s");
     TRACE("\x96Y\x8bp\x82\xcc\x8f\xe9           :%s");
 }
-/* placeholder: rodata of DebugSetGameWorkParam__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00242C28\n.word .L00242C44\n.word .L00242CE4\n.word .L00242CE4\n.word .L00242C60\n.word .L00242C7C\n.word .L00242CE4\n.word .L00242CE4\n.word .L00242CE4\n.word .L00242C98\n.word .L00242CB4\n.word .L00242CD0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetGameWorkParam__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetGameWorkParam(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        switch (inY) {
+        case 17: CGameWork::setFlag(1, 0x0, DebugWork::g_dw.atelwork.iPlayerDispOff); break;
+        case 18: CGameWork::setFlag(1, 0x2, DebugWork::g_dw.atelwork.iBossKilled); break;
+        case 21: CGameWork::setFlag(1, 0x5, DebugWork::g_dw.atelwork.iNotPcControl); break;
+        case 22: CGameWork::setFlag(1, 0x6, DebugWork::g_dw.atelwork.iNotPause); break;
+        case 26: CGameWork::setFlag(1, 0x25, DebugWork::g_dw.atelwork.iNotHartBtl); break;
+        case 27: CGameWork::setFlag(1, 0x2C, DebugWork::g_dw.atelwork.iIsBtlTutorial); break;
+        case 28: CGameWork::setFlag(1, 0x37, DebugWork::g_dw.atelwork.iIsWorldIntro); break;
+        }
+    }
+    return 1;
+}
+}
 namespace DWTEvent {
 static INT debugWinNPCMainlCall(CDebugWindow* pObj, INT inParam) {
     if (inParam & 1) {
@@ -1030,23 +1174,71 @@ void CVSM::clearReq() {
     }
     m_nReqBufPtr = 0;
 }
-/* placeholder: rodata of setReq__Q24ATEL4CVSMRCQ24ATEL3RTP */
-__asm__(".rdata\n");
-inline void _roPh23() {
-    TRACE("\x8c\xbb\x8d\xdd\x82\xcc\x83\x8a\x83N\x83G\x83X\x83g\x82\xe6\x82\xe8\x8e\xe3\x82\xa2\x83\x8a\x83N\x83G\x83X\x83g\x94\xad\x8ds\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81" "B\n");
-    TRACE(">>> buf_pass a:%d l:%d\n");
-    TRACE("ReqBuf MAX\n");
+void CVSM::setReq(const RTP& rq) {
+    INT nPtr = -1;
+    RTP* p = m_ReqBuf;
+    for (INT i = 0; i < m_nReqBufPtr; i++, p++) {
+        if (rq.rq_actor == p->rq_actor) {
+            if (rq.rq_lv < p->rq_lv) {
+                TRACE("\x8c\xbb\x8d\xdd\x82\xcc\x83\x8a\x83N\x83G\x83X\x83g\x82\xe6\x82\xe8\x8e\xe3\x82\xa2\x83\x8a\x83N\x83G\x83X\x83g\x94\xad\x8ds\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81" "B\n");
+                _TRACE(m_bTrace, ">>> buf_pass a:%d l:%d\n", rq.rq_actor, rq.rq_lv);
+                return;
+            }
+            nPtr = i;
+            break;
+        }
+    }
+    if (m_nReqBufPtr >= 64) {
+        _TRACE(TRUE, "ReqBuf MAX\n");
+        return;
+    }
+    if (nPtr < 0) {
+        p = &m_ReqBuf[m_nReqBufPtr];
+        m_nReqBufPtr++;
+    }
+    p->rq_actor = rq.rq_actor;
+    p->rq_tag = rq.rq_tag;
+    p->rq_lv = rq.rq_lv;
+    p->rq_m_actor = rq.rq_m_actor;
+    p->wait_key = rq.wait_key;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", setReq__Q24ATEL4CVSMRCQ24ATEL3RTP);
-/* placeholder: rodata of tuneReq__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh24() {
-    TRACE("mode-exec\n");
-    TRACE("\x93\xaf\x82\xb6\x83\x8a\x83N\x83G\x83X\x83g\x82\xaa\x94\xad\x8ds\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81" "B\n");
-    TRACE("EW--!!tune");
-    TRACE("snatch wait PASS !!\n");
+void CVSM::tuneReq() {
+    if (m_nReqBufPtr > 0) {
+        RTP* p = m_ReqBuf;
+        for (INT i = 0; i < m_nReqBufPtr; i++, p++) {
+            UINT nActIdx = p->rq_actor;
+            ATP& atp = m_ActorTbl[nActIdx]._ATP;
+            INT nTag = p->rq_tag;
+            UINT nStat = atp.status;
+            if (nStat == 4 && nTag == 0xFF) {
+                atp.status = 1;
+                _TRACE(m_bTrace, "mode-exec\n");
+            } else if (nTag == atp.rq_tag) {
+                if (p->rq_m_actor != 0xFF) {
+                    TRACE("\x93\xaf\x82\xb6\x83\x8a\x83N\x83G\x83X\x83g\x82\xaa\x94\xad\x8ds\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81" "B\n");
+                    atp.status = 1;
+                    atp.rq_tag = nTag;
+                    atp.rq_lv = p->rq_lv;
+                    atp.address = atp.loc[nTag];
+                    atp.rq_m_actor = p->rq_m_actor;
+                    atp.wait_key = p->wait_key;
+                    _TRACE(m_bTrace, "EW--!!tune");
+                }
+            } else if (nStat == 11 && atp.tname[nTag] == 0x72665F40) {
+                atp.wait_timer = 0;
+                _TRACE(m_bTrace, "snatch wait PASS !!\n");
+            } else {
+                if (nStat == 3 || nStat == 20) atp.status = 1;
+                atp.rq_tag = nTag;
+                atp.rq_lv = p->rq_lv;
+                atp.address = atp.loc[nTag];
+                atp.rq_m_actor = p->rq_m_actor;
+                atp.wait_key = p->wait_key;
+            }
+        }
+        m_nReqBufPtr = 0;
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", tuneReq__Q24ATEL4CVSM);
 void CVSM::exec(TIMEQ nTQ) {
     m_nFrameRate = nTQ;
     if (m_WinCloseTimer > 0) {
@@ -1080,14 +1272,66 @@ inline void _roPh25() {
     TRACE("mada->ok pc:%d\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execActor__Q24ATEL4CVSM);
+/* Parked: 6 lines, one store: the original stores addr (a stack variable, its address goes to execStdCode)
+   right after its load, before the _cReg load, so reorg puts the m_Pctr store into the beqz slot; ours keeps addr
+   in a pseudo that is put on the stack later (RTL: the addr store comes after the m_Pctr++ store, -dg dump), so
+   reorg fills the slot with the addr store. $LM: 932 op, 933 addr, 935 if (m_pIseg[m_Pctr++]._cReg). tried: INSTR&/
+   INSTR* forms, m_pIseg + m_Pctr++, op/addr order, a reg temp, braces, an unused &addr, tools/permuter.py 6 min
+   (loose score 1, blind to it). */
+#if 0
+eATEL_REQ_RET CVSM::execCode(INT nAddr) {
+    INT addr;
+    INT op;
+    eATEL_REQ_RET reqR;
+    INT execR;
+    m_Pctr = nAddr;
+    while (TRUE) {
+        if (m_Pctr < 0 || m_Pctr >= m_MaxPC) {
+            _TRACE(TRUE, "Illegal instr. address : %d\n", m_Pctr);
+            return ATEL_RET_ERROR;
+        }
+        if ((UINT)m_SP >= 100) {
+            _TRACE(TRUE, "Illegal Stack pointer %d\n", m_SP);
+            return ATEL_RET_STACK_ERROR;
+        }
+        addr = m_pIseg[m_Pctr]._nAddr;
+        op = m_pIseg[m_Pctr]._cOp;
+        INT reg = m_pIseg[m_Pctr++]._cReg;
+        if (reg) {
+            addr += m_Freg;
+        }
+        m_InsCount++;
+        if (m_MaxSD < m_SP) m_MaxSD = m_SP;
+        if (op < 0) execR = 4;
+        else if (op < 0x3E) execR = execStdCode(op, addr, reqR);
+        else if (op < 100) execR = execExt1Code(op, reqR);
+        else if (op < 110) execR = 4;
+        else if (op < 0xA8) execR = execExt2Code(op, reqR);
+        else if (op < 0x113) execR = execExt3Code(op, reqR);
+        else execR = 4;
+        switch (execR) {
+        case 1:
+            continue;
+        case 2:
+            m_SP--;
+            continue;
+        case 3:
+            return reqR;
+        }
+        _TRACE(TRUE, "Illegal Op. code at loc. %d\n", m_Pctr);
+        return ATEL_RET_ERROR;
+    }
+}
+#else
 /* placeholder: rodata of execCode__Q24ATEL4CVSMi */
 __asm__(".rdata\n");
-inline void _roPh26() {
+inline void _roPhExecCode() {
     TRACE("Illegal instr. address : %d\n");
     TRACE("Illegal Stack pointer %d\n");
     TRACE("Illegal Op. code at loc. %d\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execCode__Q24ATEL4CVSMi);
+#endif
 /* placeholder: rodata of execStdCode__Q24ATEL4CVSMiRiRQ24ATEL13eATEL_REQ_RET */
 __asm__(".rdata\n");
 inline void _roPh27() {
@@ -1308,30 +1552,20 @@ BOOL CVSM::reqN(Actor& act, INT nTag, INT nLv, BOOL bTop) {
     if (!bTop) atp.Freg = 0;
     return TRUE;
 }
-static inline INT _tagID(const CHAR* pszTag) {
-    return (((((pszTag[3] << 8) + pszTag[2]) << 8) + pszTag[1]) << 8) + pszTag[0];
-}
-static inline INT _searchTag(Actor& act, const CHAR* pszTag) {
-    ATP& atp = act._ATP;
-    INT i;
-    INT n;
-    n = _tagID(pszTag);
-    for (i = 0; i < atp.tag_count; i++) {
+static inline INT _findTag(const ATP& atp, INT n) {
+    for (INT i = 0; i < atp.tag_count; i++) {
         if (n == atp.tname[i]) return i;
     }
     return -1;
 }
-/* Parked: same instructions, only registers: the original keeps the tag value n in t0 from its first lb on (one
-   pseudo for the whole computation, then act in t1 and atp in t2); ours builds n in v0 temporaries and only the
-   final value gets t2 (act t0, atp t1). $LM tags put the tag build in an inline at lines 4870-4873 and the search
-   loop in one at 4898-4905 (ref locals: atp, i, n there). tried: search inline taking ATP& / Actor& with its own
-   atp, n as a reqNS local or the inline's, the tag inline returning a value / filling INT& n / one expression,
-   compound n <<= 8; n += statements, declaration orders, tools/permuter.py 8 min (loose score 1, 15443 candidates,
-   no better). */
-#if 0
 BOOL CVSM::reqNS(Actor& act, const CHAR* pszTag, INT nLv) {
     ATP& atp = act._ATP;
-    INT i = _searchTag(act, pszTag);
+    INT n;
+    n = pszTag[3];
+    n = (n << 8) + pszTag[2];
+    n = (n << 8) + pszTag[1];
+    n = (n << 8) + pszTag[0];
+    INT i = _findTag(atp, n);
     if (i >= 0) {
         atp.rq_tag = i;
         atp.rq_lv = nLv;
@@ -1342,39 +1576,94 @@ BOOL CVSM::reqNS(Actor& act, const CHAR* pszTag, INT nLv) {
     _TRACE(TRUE, "reqNS_TAG not found\n");
     return FALSE;
 }
-#else
-/* placeholder: rodata of reqNS__Q24ATEL4CVSMRQ24ATEL5ActorPCci */
-__asm__(".rdata\n");
-inline void _roPhReqNS() {
-    TRACE("reqNS_TAG not found\n");
+BOOL CVSM::reqSS(const CHAR* pszTag, const CHAR* pszActor, INT nLv) {
+    INT nActIdx;
+    INT i;
+    INT n;
+    const CHAR* pszTagName = pszTag + 4;
+    n = pszTag[3];
+    n = (n << 8) + pszTag[2];
+    n = (n << 8) + pszTag[1];
+    n = (n << 8) + pszTag[0];
+    _TRACE(m_bTrace, "reqSS %s %x %d\n", pszActor, n, nLv);
+    nActIdx = getActorIndex(pszActor);
+    if (nActIdx < 0) {
+        _TRACE(TRUE, "reqSS no-actor %s:%s\n", pszActor, pszTagName);
+        return FALSE;
+    }
+    ATP& atp = m_ActorTbl[nActIdx]._ATP;
+    if (atp.tag_count == 0) {
+        _TRACE(TRUE, "reqSS no-tag\n");
+        return FALSE;
+    }
+    i = _findTag(atp, n);
+    if (i >= 0) {
+        RTP req;
+        _setRTP(req, nLv, nActIdx, i, 0xFF);
+        setReq(req);
+        return TRUE;
+    }
+    _TRACE(TRUE, "reqSS_TAG not found\n");
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", reqNS__Q24ATEL4CVSMRQ24ATEL5ActorPCci);
-#endif
-/* placeholder: rodata of reqSS__Q24ATEL4CVSMPCcT1i */
-__asm__(".rdata\n");
-inline void _roPh32() {
-    TRACE("reqSS %s %x %d\n");
-    TRACE("reqSS no-actor %s:%s\n");
-    TRACE("reqSS no-tag\n");
-    TRACE("reqSS_TAG not found\n");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+BOOL CVSM::reqSSI(const CHAR* pszTag, INT nActIdx, INT nLv) {
+    INT i;
+    INT n;
+    n = pszTag[3];
+    n = (n << 8) + pszTag[2];
+    n = (n << 8) + pszTag[1];
+    n = (n << 8) + pszTag[0];
+    _TRACE(m_bTrace, "reqSSI actor idx:%d %x %d\n", nActIdx, n, nLv);
+    ATP& atp = m_ActorTbl[nActIdx]._ATP;
+    if (atp.tag_count == 0) {
+        _TRACE(TRUE, "reqSSI no-tag\n");
+        return FALSE;
+    }
+    i = _findTag(atp, n);
+    if (i >= 0) {
+        RTP req;
+        _setRTP(req, nLv, nActIdx, i, 0xFF);
+        setReq(req);
+        return TRUE;
+    }
+    _TRACE(TRUE, "reqSSI_TAG not found\n");
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", reqSS__Q24ATEL4CVSMPCcT1i);
-/* placeholder: rodata of reqSSI__Q24ATEL4CVSMPCcii */
-__asm__(".rdata\n");
-inline void _roPh33() {
-    TRACE("reqSSI actor idx:%d %x %d\n");
-    TRACE("reqSSI no-tag\n");
-    TRACE("reqSSI_TAG not found\n");
+BOOL CVSM::reqSSW(const CHAR* pszTag, const CHAR* pszActor, INT nLv, int nAddr) {
+    INT nActIdx;
+    INT i;
+    INT n;
+    const CHAR* pszTagName = pszTag + 4;
+    n = pszTag[3];
+    n = (n << 8) + pszTag[2];
+    n = (n << 8) + pszTag[1];
+    n = (n << 8) + pszTag[0];
+    nActIdx = getActorIndex(pszActor);
+    if (nActIdx < 0) {
+        _TRACE(TRUE, "reqSSW no-actor %s:%s\n", pszActor, pszTagName);
+        return FALSE;
+    }
+    ATP& atp = m_ActorTbl[nActIdx]._ATP;
+    if (atp.tag_count == 0) {
+        _TRACE(TRUE, "reqSSW no-tag\n");
+        return FALSE;
+    }
+    i = _findTag(atp, n);
+    if (i >= 0) {
+        RTP req;
+        _setRTP(req, nLv, nActIdx, i, m_nCurrentActorIdx);
+        setReq(req);
+        _TRACE(m_bTrace, "reqSSW actor:%d tag:%d\n", nActIdx, i);
+        ATP& cur = m_pCurrentActor->_ATP;
+        cur.status = 4;
+        cur.next_address = nAddr;
+        cur.wait_timer = 1;
+        return TRUE;
+    }
+    _TRACE(TRUE, "reqSSI_TAG not found\n");
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", reqSSI__Q24ATEL4CVSMPCcii);
-/* placeholder: rodata of reqSSW__Q24ATEL4CVSMPCcT1ii */
-__asm__(".rdata\n");
-inline void _roPh34() {
-    TRACE("reqSSW no-actor %s:%s\n");
-    TRACE("reqSSW no-tag\n");
-    TRACE("reqSSW actor:%d tag:%d\n");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", reqSSW__Q24ATEL4CVSMPCcT1ii);
 BOOL CVSM::reqSSD(INT nTagIdx, INT nActIdx, INT nLv) {
     RTP rq;
     _setRTP(rq, nLv, nActIdx, nTagIdx, 0xFF);
@@ -1637,13 +1926,36 @@ BOOL CVSM::acStatPWait() {
     }
     return FALSE;
 }
-/* placeholder: rodata of acStatSWait__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh37() {
-    TRACE("pad_sel_wait_mode change = %d\n");
-    TRACE("SELECT STR %d\n");
+BOOL CVSM::acStatSWait() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    if (CPadHandler::isTrgSelect()) {
+        _TRACE(m_bTrace, "pad_sel_wait_mode change = %d\n", atp.id);
+        CSound::playSE(2, -1, 0x40);
+        m_Pctr = atp.next_address;
+        return TRUE;
+    }
+    INT nSelMax = (UBYTE)atp.wait_key;
+    INT nSelIdx = CGameWork::getByte(1, 0);
+    BOOL bUpdate = FALSE;
+    if (CPadHandler::isButtonTrg(0x101000) || CPadHandler::isButtonRpt(0x101000)) {
+        if (nSelIdx - 1 >= 0) {
+            nSelIdx--;
+            bUpdate = TRUE;
+        }
+    } else if (CPadHandler::isButtonTrg(0x204000) || CPadHandler::isButtonRpt(0x204000)) {
+        if (nSelIdx + 1 < nSelMax) {
+            nSelIdx++;
+            bUpdate = TRUE;
+        }
+    }
+    if (bUpdate) {
+        _TRACE(m_bTrace, "SELECT STR %d\n", nSelIdx);
+        CGameWork::setByte(1, 0, nSelIdx);
+        if (atp.wait_key < 0x100) nSelIdx++;
+        CChatMan::instance().reqCommand(0x3F9, &nSelIdx, atp.wait_timer);
+    }
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatSWait__Q24ATEL4CVSM);
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 BOOL CVSM::acStatMWait() {
     ATP& atp = m_pCurrentActor->_ATP;
@@ -1852,15 +2164,27 @@ inline void _roPh44() {
 }
 __asm__(".rdata\n.align 4\n.word .L0024FD70\n.word .L0024FD74\n.word .L0024FD7C\n.word .L0024FD8C\n.word .L0024FD98\n.word .L0024FD94\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", ctd_cal__Q24ATEL4CVSMPCQ24ATEL7CAvatariiPQ24ATEL21ChatWndCreateCTDParam);
-/* placeholder: rodata of AtelEventSkip__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh45() {
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CVSM::AtelEventSkip() {
     TRACE("Event Skip Start\n");
-    TRACE("@_sk");
-    TRACE("      GOTO_ EternityWait:%s\n");
-    TRACE("[ATEL]   GOTO_Skip:%s\n");
+    CGameWork::setFlag(1, 0x38, TRUE);
+    CSceneEnv::setStop((ObjType::eObjBit)0);
+    CSceneEnv::setStop((ObjType::eObjBit)0x581C);
+    clearReq();
+    CCameraMan::instance().reqCommand(0x45D, NULL, 0);
+    for (int i = 0; i < m_ActorCount; i++) {
+        if (m_ActorTbl[i]._pAvatar) m_ActorTbl[i]._pAvatar->reqCommand(0x2E, NULL, 0);
+        if (!reqSSI("@_sk", i, 7)) {
+            m_ActorTbl[i]._ATP.status = 25;
+            TRACE("      GOTO_ EternityWait:%s\n", m_ActorTbl[i]._ATP.name);
+        } else {
+            tuneReq();
+            m_ActorTbl[i]._ATP.status = 1;
+            m_Pctr = m_ActorTbl[i]._ATP.address;
+            TRACE("[ATEL]   GOTO_Skip:%s\n", m_ActorTbl[i]._ATP.name);
+        }
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", AtelEventSkip__Q24ATEL4CVSM);
 void close_dest_se(INT win_num) {
     INT nState;
     INT ans;
@@ -1875,12 +2199,19 @@ void close_dest_se(INT win_num) {
 void WinOpenSE(INT ctd) {}
 void WinCloseSE() {}
 static void dispActorTag(INT nMax, const Actor* pTbl) {}
-/* placeholder: rodata of __11CActorDebugP5CTask */
-__asm__(".rdata\n");
-inline void _roPh46() {
-    TRACE(__FILE__ "(6871)");
+namespace DWTEvent {
+extern DEBUG_WINDOW_LINE debugNpcInfoLine[];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", __11CActorDebugP5CTask);
+extern INT SCREEN_HEIGHT;
+CActorDebug::CActorDebug(CTask* pParent) : CTask(pParent, 0x8000), m_pWindow(NULL) {
+    CTask* pA = CTaskMan::getSysTask(0x1A);
+    DEBUG_WINDOW_TBL debugActorInfo = {
+        ((CAtel*)pA)->getVSM()->getAvatarName(DebugWork::g_dw.event.iNpcID),
+        0x90, -(SCREEN_HEIGHT >> 1) + 0x18, 7, 12, 14, 0, 6, DWTEvent::debugNpcInfoLine, NULL, NULL
+    };
+    m_pWindow = new (__FILE__ "(6871)") CDebugWindow(this, debugActorInfo);
+    m_pWindow->dispOn(0);
+}
 CActorDebug::~CActorDebug() {
     if (m_pWindow) m_pWindow->out();
 }

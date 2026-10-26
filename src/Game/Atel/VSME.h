@@ -54,6 +54,42 @@ struct Actor {
     FLOAT _fTalkableRadius; /* 0x1d8 */
 };
 
+enum eATEL_REQ_RET {
+    ATEL_RET_STACK_ERROR = -2,
+    ATEL_RET_ERROR = -1,
+    ATEL_RET_MAIN = 0,
+    ATEL_RET_REQ = 1,
+    ATEL_RET_REP = 2,
+    ATEL_RET_WAIT = 3,
+    ATEL_RET_RWAIT = 4,
+    ATEL_RET_HALT = 5,
+    ATEL_RET_CWAIT = 6,
+    ATEL_RET_PWAIT = 7,
+    ATEL_RET_SWAIT = 8,
+    ATEL_RET_MAINS = 9,
+    ATEL_RET_MWAIT = 10,
+    ATEL_RET_CPWAIT = 11,
+    ATEL_RET_MS_WAIT = 12,
+    ATEL_RET_SHOP = 13,
+    ATEL_RET_DROP = 14,
+    ATEL_RET_EWAIT = 15,
+    ATEL_RET_RCWAIT = 16,
+    ATEL_RET_EQWAIT = 17,
+    ATEL_RET_WKWAIT = 18,
+    ATEL_RET_XWAIT = 19,
+    ATEL_RET_BWAIT = 20,
+    ATEL_RET_BAWAIT = 21,
+    ATEL_RET_DLWAIT = 22,
+    ATEL_RET_BGWAIT = 23,
+    ATEL_RET_ACWAIT = 24,
+    ATEL_RET_ETERNITY_WAIT = 25,
+    ATEL_RET_RSRC_LOAD_WAIT = 26,
+    ATEL_RET_CARD_WND_WAIT = 27,
+    ATEL_RET_TECH_WND_WAIT = 28,
+    ATEL_RET_WORLD_CARD_WND_WAIT = 29,
+    ATEL_RET_CLOSS_FADE_WAIT = 30
+};
+
 struct INSTR {
     USHORT _cOp;
     USHORT _cReg;
@@ -128,17 +164,26 @@ protected:
     void deleteActorAll();
     void clearReq();
     void execInit();
+    eATEL_REQ_RET execCode(INT nAddr);
+    INT execStdCode(INT op, INT& addr, eATEL_REQ_RET& ret);
+    INT execExt1Code(INT op, eATEL_REQ_RET& ret);
+    INT execExt2Code(INT op, eATEL_REQ_RET& ret);
+    INT execExt3Code(INT op, eATEL_REQ_RET& ret);
     INT searchLockOnNpc();
     void initActor();
     void exec(TIMEQ nTQ);
     void execActor();
     void checkEvents();
     void tuneReq();
+    void AtelEventSkip();
     void setReq(const RTP& rq);
 
 private:
     BOOL reqN(Actor& act, INT nTag, INT nLv, BOOL bTop);
     BOOL reqNS(Actor& act, const CHAR* pszTag, INT nLv);
+    BOOL reqSS(const CHAR* pszTag, const CHAR* pszActor, INT nLv);
+    BOOL reqSSI(const CHAR* pszTag, INT nActIdx, INT nLv);
+    BOOL reqSSW(const CHAR* pszTag, const CHAR* pszActor, INT nLv, int nAddr);
     BOOL reqSSD(INT nTagIdx, INT nActIdx, INT nLv);
     INT searchActor(const CHAR* pszActor) const;
     INT searchActorID(const CHAR* pszActor) const;
