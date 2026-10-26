@@ -1874,13 +1874,36 @@ BOOL CVSM::acStatPWait() {
     }
     return FALSE;
 }
-/* placeholder: rodata of acStatSWait__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh37() {
-    TRACE("pad_sel_wait_mode change = %d\n");
-    TRACE("SELECT STR %d\n");
+BOOL CVSM::acStatSWait() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    if (CPadHandler::isTrgSelect()) {
+        _TRACE(m_bTrace, "pad_sel_wait_mode change = %d\n", atp.id);
+        CSound::playSE(2, -1, 0x40);
+        m_Pctr = atp.next_address;
+        return TRUE;
+    }
+    INT nSelMax = (UBYTE)atp.wait_key;
+    INT nSelIdx = CGameWork::getByte(1, 0);
+    BOOL bUpdate = FALSE;
+    if (CPadHandler::isButtonTrg(0x101000) || CPadHandler::isButtonRpt(0x101000)) {
+        if (nSelIdx - 1 >= 0) {
+            nSelIdx--;
+            bUpdate = TRUE;
+        }
+    } else if (CPadHandler::isButtonTrg(0x204000) || CPadHandler::isButtonRpt(0x204000)) {
+        if (nSelIdx + 1 < nSelMax) {
+            nSelIdx++;
+            bUpdate = TRUE;
+        }
+    }
+    if (bUpdate) {
+        _TRACE(m_bTrace, "SELECT STR %d\n", nSelIdx);
+        CGameWork::setByte(1, 0, nSelIdx);
+        if (atp.wait_key < 0x100) nSelIdx++;
+        CChatMan::instance().reqCommand(0x3F9, &nSelIdx, atp.wait_timer);
+    }
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatSWait__Q24ATEL4CVSM);
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 BOOL CVSM::acStatMWait() {
     ATP& atp = m_pCurrentActor->_ATP;
