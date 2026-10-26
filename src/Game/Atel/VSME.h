@@ -143,7 +143,7 @@ union OpStack {
 };
 
 void _TRACE(BOOL bDisp, const CHAR* fmt, ...);
-void _TRACE_(BOOL bDisp, const CHAR* fmt, ...); /* inline (weak) in the original; its copy is still asm */
+inline void _TRACE_(BOOL bDisp, const CHAR* fmt, ...) {}
 
 class CVSM {
 protected:
@@ -188,6 +188,9 @@ public:
     virtual ~CVSM();
     INT getActorIndex(INT nID) const;
     INT getActorIndex(const CHAR* pszName) const;
+    BOOL isInitComplete() const { return !isFlagOn(1); }
+    void startMain() { clearFlag(2); }
+    BOOL isMainStarted() const { return !isFlagOn(2); }
     CAvatar* getAvatar(INT nIdx) { return m_ActorTbl[nIdx]._pAvatar; }
     CEventTrap* getEventTrap(INT nIdx) { return m_ActorTbl[nIdx]._pEventTrap; }
     CHAR* getAvatarName(INT nIdx) { return m_ActorTbl[nIdx]._ATP.name; }
@@ -196,6 +199,7 @@ public:
     INT getPC() const { return m_Pctr; }
     void clearFlag(INT nFlag) { m_nFlag &= ~nFlag; }
     void setFlag(INT nFlag) { m_nFlag |= nFlag; }
+    BOOL isFlagOn(INT nFlag) const { return (m_nFlag & nFlag) == nFlag; }
 
 protected:
     void deleteActorAll();

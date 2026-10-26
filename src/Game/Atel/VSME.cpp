@@ -75,6 +75,19 @@ inline void _vsmeMotionName() {
 #include "System/Graphic/WorldEnv.h"
 #define SYSTEM_GRAPHIC_DEFOCUS_CPP /* the complete DeFocus classes (other includers get partial ones) */
 #include "System/Graphic/DeFocus.h"
+#include "System/PadIO.h"
+#include "Game/Enemy/MapEnemyManager.h"
+#include "Game/EntityFactory.h"
+#include "System/Graphic/ShadowModel.h"
+#include "System/PlaySpeedCtrl.h"
+#include "Game/Atel/AtelTutorial.h"
+#include "Game/Player/PlayerCamera.h"
+#include "Game/Gimmick/GimmickManager.h"
+#include "Game/Gimmick/BaseGimmick.h"
+#include "System/Graphic/Glare.h"
+#include "Game/Game.h"
+#include "Game/Player/PlayerManager.h"
+#include "Game/CardKind.h"
 #include <string.h>
 #include "include_asm.h"
 
@@ -1387,13 +1400,15 @@ CVSM::CVSM(CAtel& atel, BOOL bTrace)
     m_fEventTrapStartWait = 20.0f;
     m_fTalkWait = 0.0f;
 }
-/* placeholder: rodata of _$_Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh19() {
+CVSM::~CVSM() {
     TRACE("CVSM::~CVSM()\n");
+    if (m_pIseg) com_free(m_pIseg);
+    if (m_pDseg) com_free(m_pDseg);
+    CChatMan::instance().reqCommand(0x40F, NULL, 0);
+    for (int i = 0; i < m_ActorCount; i++) {
+        delete m_ActorTbl[i]._pEventTrap;
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _$_Q24ATEL4CVSM);
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CVSM::initActor() {
     Actor* p = m_ActorTbl;
     for (INT i = 0; i < 64; i++, p++) {
@@ -2623,150 +2638,2391 @@ INT CVSM::execExt1Code(INT op, eATEL_REQ_RET& ret) {
     } while (r == 0);
     return r;
 }
-/* placeholder: rodata of execExt2Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET */
-__asm__(".rdata\n");
-inline void _roPh29() {
-    TRACE("CCC %d %f %f %f\n");
-    TRACE("CCT %d %f %f %f\n");
-    TRACE("    %f %f %f %d %f\n");
-    TRACE("BGM_PLAY %s %d\n");
-    TRACE("MOE %d : %d : %f : %d\n");
-    TRACE("CAMCMD_CHANGE_GAKAKU %f\n");
-    TRACE("--- WNDCMD_FADE_CREATE ---\n");
-    TRACE("--- WNDCMD_FADE_DESTROY ---\n");
-    TRACE("BGM_FADE_IN %s %d %d\n");
-    TRACE("BGM_FADE_OUT %d \n");
-    TRACE("BGM_CROSS_FADE %s %d %d\n");
-    TRACE("\x82" "a\x82" "f\x82l\x8d\xc4\x90\xb6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97v\x8b\x81\x81" "F\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x83L\x83\x83\x83\x93\x83Z\x83\x8b\x81" "FBGM\x8d\xc4\x90\xb6\n");
-    TRACE("NG AWK param\n");
-    TRACE("CAMCMD_CREATE_PATHDATA %s\n");
-    TRACE("CAMCMD_ADD_QUAKE \n");
+namespace ATEL {
+struct ChatWndSetWordsParam;
+struct ChatWndCreateCTDParam {
+    CPointI pos;
+    CPointI cyobiPos;
+    UINT ctdID;
+    UINT waitFrame;
+    ChatWndSetWordsParam* pCwswp;
+    UINT nLine;
+    ChatWndCreateCTDParam() { nLine = 0; }
+};
 }
-__asm__(".rdata\n.align 4\n.word .L002468B0\n.word .L002468D4\n.word .L00246914\n.word .L00246954\n.word .L00246994\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002469D0\n.word .L00246A10\n.word .L00246C1C\n.word .L00246C60\n.word .L00246D3C\n.word .L002482EC\n.word .L00246E90\n.word .L00246EA4\n.word .L00246ED4\n.word .L002482F4\n.word .L00247178\n.word .L002471FC\n.word .L00247238\n.word .L002482F4\n.word .L002482F4\n.word .L00247294\n.word .L002472C8\n.word .L00247308\n.word .L002473B8\n.word .L002482EC\n.word .L002473EC\n.word .L00247420\n.word .L002482EC\n.word .L002474A8\n.word .L002474C8\n.word .L00247524\n.word .L00247594\n.word .L002475FC\n.word .L00247678\n.word .L002476C0\n.word .L0024773C\n.word .L0024773C\n.word .L0024773C\n.word .L00247784\n.word .L002477A0\n.word .L00247818\n.word .L0024785C\n.word .L002482F4\n.word .L002482F4\n.word .L002482F4\n.word .L002482F4\n.word .L002482F4\n.word .L00247908\n.word .L002482EC\n.word .L00247980\n.word .L002482F4\n.word .L0024799C\n.word .L002479F8\n.word .L00247AE0\n.word .L002482F4\n.word .L002482F4\n.word .L00246ED4\n.word .L00247B2C\n.word .L00247CA4\n.word .L00247F88\n.word .L00248168\n.word .L002481C8\n.word .L002482F4\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execExt2Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET);
-/* placeholder: rodata of execExt3Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET */
-__asm__(".rdata\n");
-inline void _roPh30() {
-    TRACE("%d\n");
-    TRACE("%f\n");
-    TRACE("\x83X\x83g\x83" "b\x83N\x8bZ\x8fK\x93\xbe:%d\n");
-    TRACE(__FILE__ "(2623)");
-    TRACE(__FILE__ "(2672)");
-    TRACE("Speed %f\n");
-    TRACE("CARD WINDW CLOSE WAIT START\n");
-    TRACE("reqEnterDorr:ATEL sys_ctrl\n");
-    TRACE(__FILE__ "(2713)");
-    TRACE(__FILE__ "(2716)");
-    TRACE(__FILE__ "(2719)");
-    TRACE("ATEL:cancelLoadRCF:%d,%d\n");
-    TRACE("ATEL:OPMEN DOOR: %d, %d\n");
-    TRACE("MIN:%d, MAX:%d,A:%d\n");
-    TRACE("\x83\x89\x83X\x83g\x83t\x83\x8d\x83" "A\x82\xd6\x82\xcc\x94\xe0\x95\\\x8e\xa6\n");
-    TRACE("ATEL:\x83\x8f\x81[\x83\x8b\x83h\x83Z\x83\x8c\x83N\x83g\x8c\xc4\x82\xd1\x8fo\x82\xb5\n");
-    TRACE("ATEL:UNAVAILABLE DOOR: %d, %d\n");
-    TRACE("ATEL:\x83S\x81[\x83\x8b\x95\x94\x89\xae\x8aJ\x82\xa2\x82\xbd\n");
-    TRACE("\x83\x8c\x83x\x83\x8b\x83" "A\x83" "b\x83v\x81H %d\n");
-    TRACE(__FILE__ "(3000)");
-    TRACE("TECH WINDW CLOSE WAIT START\n");
-    TRACE("ATEL:\x83\x8f\x81[\x83\x8b\x83h\x83N\x83\x8a\x83" "A\x81" "F%d\n");
-    TRACE("ATEL:\x83t\x83\x8d\x83" "A\x83N\x83\x8a\x83" "A\n");
-    TRACE("ATEL:\x83\x82\x83\x93\x83X\x83g\x83\x8d\x83U\x83R\x83o\x83g\x83\x8b\x83N\x83\x8a\x83" "A\n");
-    TRACE("\x83G\x83N\x83X\x83g\x83\x8a\x81[\x83\x80\x81" "F\x83X\x83g\x83" "b\x83N\x91S\x95\x94\x8ao\x82\xa6\x82\xe9\x81" "A\x83J\x81[\x83h\x91S\x95\x94\x89\xf0\x8b\xd6\x81" "A\x95W\x8f\x80\x83X\x83L\x83\x8b\x91S\x8eg\x97p\x89\xc2\n");
-    TRACE("ATEL:CGlare::fadein\n");
-    TRACE("ATEL:CGlare::fadeout\n");
-    TRACE("ATEL:\x82g\x82o\x89\xf1\x95\x9c\n");
-    TRACE("\x83v\x83\x8c\x83" "C\x83\x84\x81[\x82\xa2\x82\xc8\x82\xa2\n");
-    TRACE("ATEL:\x83o\x83" "b\x83N\x83" "A\x83" "b\x83v\n");
-    TRACE("ATEL:CLOSE DOOR: %d, %d\n");
-    TRACE("GPS NG01:%s\n");
-    TRACE("NAME TO SHOW :%s\n");
-    TRACE("NAME TO HIDE :%s\n");
-    TRACE("GRAVITY ON :%s\n");
-    TRACE("GRAVITY OFF :%s\n");
-    TRACE("MAP_COLL_ON :%s\n");
-    TRACE("MAP_COLL_OFF :%s\n");
-    TRACE("BODY_COLL_ON :%s\n");
-    TRACE("BODY_COLL_OFF :%s\n");
-    TRACE("REMOVE NPC :%s\n");
-    TRACE("MAKEUP_MOTION_INVALID :%s\n");
-    TRACE("MAKEUP_MOTION_VALID :%s\n");
-    TRACE("AVTCMD_SET_LOOK_START :%s\n");
-    TRACE("AVTCMD_SET_LOOK_STOP :%s\n");
-    TRACE("AVTCMD_SET_LOOK_END :%s\n");
-    TRACE("AVTCMD_CREATE_LEGIK :%s\n");
-    TRACE("AVTCMD_SET_IK  ON :%s\n");
-    TRACE("AVTCMD_SET_IK  OFF :%s\n");
-    TRACE("AVTCMD_SET_LOCK_ON  ON :%s\n");
-    TRACE("AVTCMD_SET_LOCK_ON  OFF :%s\n");
-    TRACE("AVTCMD_SET_NEAR_CLIP  OFF :%s\n");
-    TRACE("CHT\n");
-    TRACE("MTO NG01:%s\n");
-    TRACE("AED %d : %d : %f : %d : %d\n");
-    TRACE("FOG %d : R:%d : G:%d : B:%d : %d\n");
-    TRACE("FOG %d : %d : %d\n");
-    TRACE("SVR:%d,%d\n");
-    TRACE("CER:%d,%d,%d\n");
-    TRACE("EBT\n");
-    TRACE("scene_set_color:type:%d,frame:%d,color:%d\n");
-    TRACE("CWorldEnv::getActiveCamera()");
-    TRACE("EffectCtrl  %d, %d, %d\n");
-    TRACE("BLUR %d : :%d : %d\n");
-    TRACE("MEX:%d,%d,%d,%f,%d,%d,%d,%d\n");
-    TRACE("CRC %d %d\n");
-    TRACE("DRC %d %d\n");
-    TRACE("LOK:%s,%s,%f,%f,%f,%f,%f,%f,%f,%f\n");
-    TRACE("UDL:%s,%f,%f\n");
-    TRACE("LAG:%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n");
-    TRACE("UDA:%f,%f,%f,%f\n");
-    TRACE("CTX:%s,%s\n");
-    TRACE("ELK:AVTCMD_SET_LOOK_END\n");
-    TRACE("STA\x81" "F%d, %s\n");
-    TRACE("STX\x81" "F%d, %s\n");
-    TRACE("SUP:%d,%f,%f,%f\n");
-    TRACE("ATEL:\x83G\x83\x89\x81[\x81" "FsetUnknownPos\x81@\x91\xb6\x8d\xdd\x82\xb5\x82\xc8\x82\xa2\x83p\x83\x89\x83\x81\x81[\x83^\n");
-    TRACE("SUR:%d,%f,%f,%f\n");
-    TRACE("ATEL:\x83G\x83\x89\x81[\x81" "FsetUnknownRot\x81@\x91\xb6\x8d\xdd\x82\xb5\x82\xc8\x82\xa2\x83p\x83\x89\x83\x81\x81[\x83^\n");
-    TRACE("enableNotSemiModel: %d,%d");
-    TRACE("ATEL:playMovie %s, %d\n");
-    TRACE("ATEL:CrossFade %d, %d\n");
-    TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83" "C\x83\x81\x81[\x83W\x82r\x82s\x82n\x82q\x82" "d\n");
-    TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83" "C\x83\x81\x81[\x83W\x82" "c\x82q\x82`\x82v\n");
-    TRACE("CROSS_FADE : R:%d : G:%d : B:%d : A:%d\n");
-    TRACE("CROSS_FADE : R:%d : G:%d : B:%d : A:%d : Frame:%d\n");
-    TRACE("ChangeRoom:room:%d,door:%d,scene:%d\n");
-    TRACE("\x95\x94\x89\xae\x82\xcc\x83V\x81[\x83\x93\x82\xaa\x82\xc8\x82\xa2\x82\xa9\x82\xe7\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x93K\x93\x96\x82\xc9\x8ew\x92\xe8\x82\xb5\x82\xc4\x94\xf2\x82\xce\x82\xb7\n");
-    TRACE("EnterBattle:%d\n");
-    TRACE("deFocus_man %f %f\n");
-    TRACE("--- SCALING - player ---\n");
-    TRACE("--- WNDCMD_FADER ---\n");
-    TRACE("MTO NG01:%d\n");
-    TRACE("CAR %d %f %f %f\n");
-    TRACE("    %d %f\n");
-    TRACE("REL %d %f %f %f\n");
-    TRACE("CLK %d %f %f %f\n");
-    TRACE("wk_CMD %x : %x \n");
-    TRACE("--- START MOVE-ACTOR-PATH Type::%x ---\n");
-    TRACE("voice_play %s %d %d\n");
-    TRACE("voice_fadeout  %d %d\n");
-    TRACE("defoucus %d : %f : %f \n");
-    TRACE("VIB \n");
-    TRACE("voice_play_id:playVsb %d %d %d\n");
-    TRACE("BlurDistanceSet %f\n");
-    TRACE("%s,%s\n");
-    TRACE("--- ATTACH - %s(%d)\n");
-    TRACE("BlurSetEvent %f \n");
-    TRACE("face set NG01:%s\n");
+struct CameraManCreateParam {
+    FVECTOR cameraPos;
+    FVECTOR targetPos;
+    CHAR* pPathName;
+    FLOAT fChangeRate;
+    SHORT changeKind;
+    SHORT changeKind2;
+    SHORT changeFlag;
+    SHORT pathDateKind;
+    SHORT pathDateTargetID;
+    SHORT pathDateLocalID;
+    FLOAT fFullFrame;
+    FLOAT fMidFrame;
+    FLOAT fStartEndFrame;
+    FLOAT fOffsetX;
+    FLOAT fOffsetY;
+    FLOAT fOffsetZ;
+    CVSM* pCvsm;
+};
+struct AvatarMotionParamEx2 {
+    UINT _nRsrcID;
+    UINT _nInfo;
+    UINT _nMotionID;
+    FLOAT _fPlaySpeed;
+    UINT _nHokanFrame;
+    AvatarMotionParamEx2() { _nRsrcID = 0; _nInfo = 0; _nMotionID = 0; _fPlaySpeed = 1.0f; _nHokanFrame = 0; }
+};
+/* Math3D.h:137 and coord.h:730 in the original ($LM tags); the volatile abs.s keeps the original order (a scheduling barrier) */
+static inline FLOAT FABS(FLOAT f) { FLOAT r; __asm__ volatile("abs.s %0, %1" : "=f"(r) : "f"(f)); return r; }
+static inline void setFVector(FVECTOR& v, FLOAT _x, FLOAT _y, FLOAT _z) { v.x = _x; v.y = _y; v.z = _z; v.w = 1.0f; }
+INT CVSM::execExt2Code(INT op, eATEL_REQ_RET& ret) {
+    INT nID;
+    INT c;
+    INT t;
+    INT r;
+
+    do {
+        r = 1;
+        switch (op) {
+        case 0x5F:
+            c = CGameWork::getInt(1, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        case 0x60:
+            t = m_S[m_SP - 1].I;
+            c = m_S[m_SP].I;
+            CGameWork::setInt(1, t, c);
+            break;
+        case 0x61:
+            c = CGameWork::getByte(1, m_S[m_SP].I);
+            m_S[++m_SP].I = c & 0xFF;
+            break;
+        case 0x62:
+            t = m_S[m_SP - 1].I;
+            c = m_S[m_SP].I;
+            CGameWork::setByte(1, t, c);
+            break;
+        case 0x63:
+            c = CGameWork::getFlag(1, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        case 0x6E:
+            t = m_S[m_SP - 1].I;
+            c = m_S[m_SP].I;
+            CGameWork::setFlag(1, t, c);
+            break;
+        case 0x6F: {
+            float f6 = m_S[m_SP--].F;
+            int i5 = m_S[m_SP--].I;
+            float f4 = m_S[m_SP--].F;
+            float f3 = m_S[m_SP--].F;
+            float f2 = m_S[m_SP--].F;
+            int i1 = m_S[m_SP].I;
+            CameraManCreateParam CMCP;
+            TRACE("CCC %d %f %f %f\n", i1, f2, f3, f4);
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i1) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i1);
+            CMCP.pathDateTargetID = 0;
+            CMCP.fOffsetY = 1.5f;
+            setFVector(CMCP.cameraPos, f2, f3, f4);
+            CMCP.changeKind = i5 & 0xFF;
+            CMCP.changeKind2 = (i5 >> 8) & 0xFF;
+            CMCP.pCvsm = this;
+            if (op == 0xA0) f6 += 1000.0f;
+            CMCP.fChangeRate = f6;
+            CMCP.pathDateLocalID = 0;
+            CMCP.changeFlag = 0;
+            CCameraMan::instance().reqCommand(0x44C, &CMCP, i1);
+            break;
+        }
+        case 0x70:
+            nID = m_S[m_SP--].I;
+            if (cam_ctrl(m_S[m_SP].I, nID, c)) {
+                m_S[m_SP].I = c;
+            }
+            break;
+        case 0x71: {
+            INT c = m_S[m_SP - 1].I;
+            INT t = m_S[m_SP].I;
+            INT n = 0;
+            if (t & 0x1000) n = (t & 0x1000) >> 12;
+            CGameWork::setByte(1, 0, n);
+            t &= 0xFFF;
+            if (t < 0x100) n++;
+            CChatMan::instance().reqCommand(0x3F9, &n, c);
+            acWaitSelectPad(*m_pCurrentActor, c, t, m_Pctr);
+            ret = ATEL_RET_SWAIT; r = 3;
+            break;
+        }
+        case 0x72: {
+            INT i1 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            CHAR* pText = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            CameraManCreateParam CMCP;
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i2) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i2);
+            CMCP.pPathName = pText;
+            CMCP.changeKind = i1 & 0xFF;
+            CMCP.changeKind2 = (i1 >> 8) & 0xFF;
+            CMCP.pathDateTargetID = 0;
+            CMCP.pathDateLocalID = 0;
+            CMCP.changeFlag = 0;
+            CCameraMan::instance().reqCommand(0x44E, &CMCP, i2);
+            break;
+        }
+        case 0x74:
+            ret = ATEL_RET_MAINS; r = 3;
+            break;
+        case 0x75:
+            c = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            m_S[m_SP].I = c;
+            break;
+        case 0x76:
+        case 0xA1: {
+            float f9 = m_S[m_SP--].F;
+            int i1 = m_S[m_SP--].I;
+            float f7 = m_S[m_SP--].F;
+            float f6 = m_S[m_SP--].F;
+            float f5 = m_S[m_SP--].F;
+            float f4 = m_S[m_SP--].F;
+            float f3 = m_S[m_SP--].F;
+            float f2 = m_S[m_SP--].F;
+            int i0 = m_S[m_SP].I;
+            CameraManCreateParam CMCP;
+            TRACE("CCT %d %f %f %f\n", i0, f2, f3, f4);
+            TRACE("    %f %f %f %d %f\n", f5, f6, f7, i1, f9);
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i0) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i0);
+            CMCP.fOffsetY = 1.5f;
+            CMCP.pathDateTargetID = 0;
+            setFVector(CMCP.cameraPos, f2, f3, f4);
+            setFVector(CMCP.targetPos, f5, f6, f7);
+            CMCP.changeKind = i1 & 0xFF;
+            CMCP.changeKind2 = (i1 >> 8) & 0xFF;
+            if (op == 0xA1) f9 += 1000.0f;
+            CMCP.fChangeRate = f9;
+            CMCP.pathDateLocalID = 0;
+            CMCP.changeFlag = 0;
+            CMCP.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x44D, &CMCP, i0);
+            break;
+        }
+        case 0x78: {
+            INT nPan = m_S[m_SP--].I;
+            INT nVol = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP].I;
+            if (nPan == -1) nPan = 0x40;
+            m_S[m_SP].I = CSound::playSE(nSeq, nVol, nPan);
+            m_SeInf._nHanle = m_S[m_SP].I;
+            m_SeInf._nSeq = nSeq;
+            m_SeInf._nVol = nVol;
+            break;
+        }
+        case 0x79: {
+            INT nSeq = m_S[m_SP--].I;
+            INT nHandle = m_S[m_SP].I;
+            CSound::stopSE(nHandle, nSeq);
+            m_SeInf._nHanle = 0;
+            m_SeInf._nSeq = 0;
+            m_SeInf._nVol = 0;
+            break;
+        }
+        case 0x7A: {
+            INT nVol = m_S[m_SP--].I;
+            CHAR* pszFile = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            TRACE("BGM_PLAY %s %d\n", pszFile, nVol);
+            CSound::playBGM(pszFile, nVol, 0);
+            break;
+        }
+        case 0x7D:
+            acWaitMes(*m_pCurrentActor, m_S[m_SP].I, m_Pctr);
+            ret = ATEL_RET_MWAIT; r = 3;
+            break;
+        case 0x7E: {
+            FLOAT f = m_S[m_SP--].F;
+            c = m_S[m_SP].I;
+            m_S[m_SP].I = player_ctrl(c, f);
+            break;
+        }
+        case 0x7F: {
+            INT i4 = m_S[m_SP--].I;
+            FLOAT f3 = m_S[m_SP--].F;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("MOE %d : %d : %f : %d\n", i1, i2, f3, i4);
+            AvatarMotionParamEx2 param;
+            param._nRsrcID = i1;
+            param._nMotionID = i2;
+            param._fPlaySpeed = f3;
+            param._nInfo = (i4 >> 12) & 7;
+            m_pCurrentActor->_pAvatar->reqCommand(0x15, &param, 0);
+            break;
+        }
+        case 0x80:
+            acWaitCam(*m_pCurrentActor, m_S[m_SP].I, m_Pctr);
+            ret = ATEL_RET_CWAIT; r = 3;
+            break;
+        case 0x82:
+            acWaitSnatch(*m_pCurrentActor, m_S[m_SP].I, m_Pctr);
+            ret = ATEL_RET_SWAIT; r = 3;
+            break;
+        case 0x83: {
+            FLOAT f = m_S[m_SP].F;
+            CCameraMan::instance().reqCommand(0x456, &f, 0);
+            TRACE("CAMCMD_CHANGE_GAKAKU %f\n", f);
+            break;
+        }
+        case 0x85:
+            info_disp(m_S[m_SP].I);
+            break;
+        case 0x86: {
+            INT nVol = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP].I;
+            FVECTOR vPos;
+            m_pCurrentActor->_pAvatar->getNowPosition(vPos);
+            m_S[m_SP].I = CSound::playSE(nSeq, vPos, nVol);
+            break;
+        }
+        case 0x87: {
+            INT nTime = m_S[m_SP--].I;
+            INT nVol = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP--].I;
+            INT nHandle = m_S[m_SP].I;
+            CSound::setSEVolume(nHandle, nSeq, nVol, nTime);
+            m_SeInf._nHanle = nHandle;
+            m_SeInf._nSeq = nSeq;
+            m_SeInf._nVol = nVol;
+            break;
+        }
+        case 0x88: {
+            INT nTime = m_S[m_SP--].I;
+            INT nPan = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP--].I;
+            INT nHandle = m_S[m_SP].I;
+            if (nPan == -1) nPan = 0x40;
+            CSound::setSEPan(nHandle, nSeq, nPan, nTime);
+            break;
+        }
+        case 0x89: {
+            INT nTime = m_S[m_SP--].I;
+            INT nVol = m_S[m_SP--].I;
+            INT nPan = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP--].I;
+            INT nHandle = m_S[m_SP].I;
+            if (nVol == -1) nPan = 0x40;
+            CSound::setSEPanAndVol(nHandle, nSeq, nPan, nVol, nTime);
+            break;
+        }
+        case 0x8A: {
+            INT nTime = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP--].I;
+            INT nHandle = m_S[m_SP].I;
+            CSound::fadeoutSE(nHandle, nSeq, nTime);
+            break;
+        }
+        case 0x8B: {
+            INT nVol = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP--].I;
+            INT nName = m_S[m_SP].I;
+            FVECTOR vPos;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + nName));
+            m_ActorTbl[nIdx]._pAvatar->getNowPosition(vPos);
+            m_S[m_SP].I = CSound::playSE(nSeq, vPos, nVol);
+            break;
+        }
+        case 0x8C:
+        case 0x8D:
+        case 0x8E: {
+            FLOAT fRate = m_S[m_SP--].F;
+            INT nKind = m_S[m_SP].I;
+            m_Atel.setScreenFader(nKind, fRate, 2);
+            TRACE("--- WNDCMD_FADE_CREATE ---\n");
+            break;
+        }
+        case 0x8F:
+            CAtel::clearScreenFader(-1);
+            TRACE("--- WNDCMD_FADE_DESTROY ---\n");
+            break;
+        case 0x90: {
+            INT nVol = m_S[m_SP--].I;
+            INT nTime = m_S[m_SP--].I;
+            CHAR* pszFile = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            TRACE("BGM_FADE_IN %s %d %d\n", pszFile, nTime, nVol);
+            CSound::fadeinBGM(pszFile, nTime, nVol, 0);
+            break;
+        }
+        case 0x91: {
+            INT nTime = m_S[m_SP--].I;
+            TRACE("BGM_FADE_OUT %d \n", nTime);
+            CSound::fadeoutBGM(0, nTime);
+            CSound::getCurrentBGMHandle();
+            break;
+        }
+        case 0x92: {
+            INT nVol = m_S[m_SP--].I;
+            INT nTime = m_S[m_SP--].I;
+            CHAR* pszFile = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            TRACE("BGM_CROSS_FADE %s %d %d\n", pszFile, nTime, nVol);
+            if (CSound::getStateBGM(CSound::getCurrentBGMHandle())) {
+                CSound::crossFadeinBGM(pszFile, nTime, nVol, 0);
+            } else {
+                CSound::playBGM(pszFile, nTime, 0);
+                TRACE("\x82" "a\x82" "f\x82l\x8d\xc4\x90\xb6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97v\x8b\x81\x81" "F\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x83L\x83\x83\x83\x93\x83Z\x83\x8b\x81" "FBGM\x8d\xc4\x90\xb6\n");
+            }
+            break;
+        }
+        case 0x98: {
+            FLOAT fTime = m_S[m_SP--].F;
+            nID = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nID > 0 && m_pCurrentActor->_pAvatar) {
+                AvatarRotateParam param;
+                param._nType = 2;
+                param._fTime = fTime;
+                param._nTargetID = nID;
+                m_pCurrentActor->_pAvatar->reqCommand(0xE, &param, 0);
+            }
+            break;
+        }
+        case 0x9A:
+            m_pCurrentActor->_ATP.status = 13;
+            m_pCurrentActor->_ATP.next_address = m_Pctr;
+            ret = ATEL_RET_SHOP; r = 3;
+            break;
+        case 0x9C:
+            t = m_S[m_SP].I;
+            if (t == 0) c = m_pCurrentActor->_ATP.wait_key;
+            else if (t != 1) _TRACE(m_bTrace, "NG AWK param\n");
+            m_S[m_SP].I = c;
+            break;
+        case 0x9D: {
+            FLOAT z2 = m_S[m_SP--].F;
+            FLOAT y2 = m_S[m_SP--].F;
+            FLOAT x2 = m_S[m_SP--].F;
+            FLOAT z1 = m_S[m_SP--].F;
+            FLOAT y1 = m_S[m_SP--].F;
+            FLOAT x1 = m_S[m_SP].F;
+            BoxTrapSrc src;
+            src._fWidth = FABS(x2 - x1);
+            src._fHeight = FABS(y2 - y1);
+            src._fDepth = FABS(z2 - z1);
+            src._vPos.x = (x1 + x2) * 0.5f;
+            src._vPos.y = y1;
+            src._vPos.z = (z1 + z2) * 0.5f;
+            src._vPos.w = 1.0f;
+            src._fRotY = 0.0f;
+            m_Atel.createEventTrap(src, *m_pCurrentActor);
+            break;
+        }
+        case 0x9E:
+            c = m_S[m_SP--].I;
+            m_S[m_SP].I = actor_ref(m_S[m_SP].I, c);
+            break;
+        case 0xA2: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            ChatWndCreateCTDParam param;
+            param.pos.setPoint(-1, -1);
+            param.ctdID = i2;
+            param.waitFrame = i3 & 0x8000FFFF;
+            param.pCwswp = NULL;
+            ctd_cal(m_pCurrentActor->_pAvatar, i2, i3, &param);
+            close_dest_se(i1);
+            CChatMan::instance().reqCommand(0x405, &param, i1);
+            WinOpenSE(i2);
+            CChatMan::instance().reqCommand(0x3EA, &param, i1);
+            if (i3 & 0x20000000) {
+                INT n = 0;
+                CChatMan::instance().reqCommand(0x413, &n, i1);
+            }
+            m_pCurrentActor->_ATP.wait_key = i1;
+            m_pCurrentActor->_ATP.status = 12;
+            m_pCurrentActor->_ATP.next_address = m_Pctr;
+            ret = ATEL_RET_MS_WAIT; r = 3;
+            break;
+        }
+        case 0xA3: {
+            INT i5 = m_S[m_SP--].I;
+            INT i4 = m_S[m_SP--].I;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            INT nIdx = getActorIndex((CHAR*)(m_pDseg + m_S[m_SP].I));
+            ChatWndCreateCTDParam param;
+            if (i4 < 0) {
+                i5 = -1;
+                i4 = -1;
+            }
+            param.ctdID = i2;
+            param.waitFrame = i3 & 0x8000FFFF;
+            param.pos.setPoint(i4, i5);
+            param.pCwswp = NULL;
+            if (nIdx != -1) ctd_cal(getAvatar(nIdx), i2, i3, &param);
+            close_dest_se(i1);
+            CChatMan::instance().reqCommand(0x405, &param, i1);
+            WinOpenSE(i2);
+            CChatMan::instance().reqCommand(0x3EA, &param, i1);
+            if (i3 & 0x20000000) {
+                INT n = 0;
+                CChatMan::instance().reqCommand(0x413, &n, i1);
+            }
+            if (i3 & 0x40000000) {
+                INT n = 0;
+                CChatMan::instance().reqCommand(0x404, &n, i1);
+            } else {
+                INT n = 60;
+                CChatMan::instance().reqCommand(0x404, &n, i1);
+            }
+            m_pCurrentActor->_ATP.wait_key = i1;
+            m_pCurrentActor->_ATP.status = 12;
+            m_pCurrentActor->_ATP.next_address = m_Pctr;
+            ret = ATEL_RET_MS_WAIT; r = 3;
+            break;
+        }
+        case 0xA4: {
+            INT i4 = m_S[m_SP--].I;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            CHAR* pText = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            CameraManCreateParam CMCP;
+            if (i2 >= 0) i2 = searchActor((CHAR*)(m_pDseg + i2));
+            if (i3 >= 0) i3 = searchActor((CHAR*)(m_pDseg + i3));
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i1) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i1);
+            CMCP.fOffsetY = 1.5f;
+            CMCP.pPathName = pText;
+            CMCP.pathDateTargetID = i2;
+            CMCP.changeKind = (i4 >> 16) & 0xFF;
+            CMCP.changeKind2 = (UINT)i4 >> 24;
+            CMCP.pathDateKind = i4;
+            CMCP.pathDateLocalID = i3;
+            CMCP.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x459, &CMCP, i1);
+            TRACE("CAMCMD_CREATE_PATHDATA %s\n", pText);
+            break;
+        }
+        case 0xA5: {
+            t = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            m_pCurrentActor->_ATP.wait_key = t;
+            m_pCurrentActor->_ATP.status = 12;
+            m_pCurrentActor->_ATP.next_address = m_Pctr;
+            ret = ATEL_RET_MS_WAIT; r = 3;
+            break;
+        }
+        case 0xA6: {
+            FLOAT fCycle = m_S[m_SP--].F;
+            FLOAT fPower = m_S[m_SP--].F;
+            INT nTime = m_S[m_SP--].I;
+            INT nType = m_S[m_SP].I;
+            TRACE("CAMCMD_ADD_QUAKE \n");
+            CameraQuakeParam param;
+            param = (CameraQuakeParam){ nTime, fPower, fCycle };
+            if (nType == 0) {
+                CCameraMan::instance().reqCommand(0x45A, &param, 0);
+            } else {
+                CCameraMan::instance().reqCommand(0x45B, &param, 0);
+            }
+            break;
+        }
+        case 0x77:
+        case 0x7B:
+        case 0x7C:
+        case 0x93:
+        case 0x94:
+        case 0x95:
+        case 0x96:
+        case 0x97:
+        case 0x9B:
+        case 0x9F:
+        case 0xA0:
+        case 0xA7:
+            break;
+        default:
+            return 4;
+        }
+    } while (r == 0);
+    return r;
 }
-__asm__(".rdata\n.align 4\n.word .L0024D734\n.word .L002483E8\n.word .L0024D734\n.word .L00248740\n.word .L002487E4\n.word .L002497BC\n.word .L00249814\n.word .L0024D734\n.word .L0024C2B0\n.word .L0024D734\n.word .L0024C330\n.word .L0024D6E4\n.word .L0024D6E4\n.word .L0024D6E4\n.word .L0024D734\n.word .L0024D6E4\n.word .L0024D734\n.word .L0024C3D8\n.word .L0024C49C\n.word .L0024C514\n.word .L0024C5E4\n.word .L0024C844\n.word .L0024CA74\n.word .L0024D6E4\n.word .L0024CCBC\n.word .L0024CD10\n.word .L0024CD84\n.word .L0024D6E4\n.word .L0024D6E4\n.word .L0024CE70\n.word .L0024CEE4\n.word .L0024CF00\n.word .L0024CF28\n.word .L0024CF70\n.word .L0024CFC4\n.word .L0024D02C\n.word .L0024D07C\n.word .L0024D10C\n.word .L0024D198\n.word .L0024D1B8\n.word .L0024D23C\n.word .L0024D6E4\n.word .L0024D30C\n.word .L0024D344\n.word .L0024D394\n.word .L0024D6E4\n.word .L0024D54C\n.word .L0024D5F0\n.word .L0024D734\n.word .L0024D63C\n.word .L0024D6E4\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D6E4\n.word .L0024D734\n.word .L0024D6E4\n.word .L0024D734\n.word .L0024992C\n.word .L00249F64\n.word .L0024A090\n.word .L0024A11C\n.word .L0024A1E0\n.word .L0024A230\n.word .L0024A2C8\n.word .L0024A388\n.word .L0024BFF8\n.word .L0024C22C\n.word .L0024D400\n.word .L0024D454\n.word .L0024D4A8\n.word .L0024A3D0\n.word .L0024A42C\n.word .L0024A4C4\n.word .L0024A5A0\n.word .L0024A8AC\n.word .L0024A900\n.word .L0024A99C\n.word .L0024D734\n.word .L0024A9B8\n.word .L0024AAC4\n.word .L0024AB74\n.word .L0024AC6C\n.word .L0024ADAC\n.word .L0024AE5C\n.word .L0024AF88\n.word .L0024B018\n.word .L0024B1C0\n.word .L0024B254\n.word .L0024B2C0\n.word .L0024B4B8\n.word .L0024B560\n.word .L0024B788\n.word .L0024B870\n.word .L0024B8D8\n.word .L0024B950\n.word .L0024B9AC\n.word .L0024BA48\n.word .L0024BBC4\n.word .L0024BD94\n.word .L0024BDEC\n.word .L0024BE44\n.word .L0024D734\n.word .L0024D734\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00248848\n.word .L00248860\n.word .L00248870\n.word .L00248880\n.word .L00248890\n.word .L002488A0\n.word .L00248950\n.word .L0024897C\n.word .L00248A04\n.word .L00248A18\n.word .L00248A2C\n.word .L00248A48\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L00248AC0\n.word .L00248AD0\n.word .L00248B0C\n.word .L00248B1C\n.word .L00248B4C\n.word .L00248B70\n.word .L00248BB8\n.word .L00248BE8\n.word .L00248BF8\n.word .L00248C38\n.word .L00248C78\n.word .L00248CC8\n.word .L00248D00\n.word .L00248D18\n.word .L00248D3C\n.word .L00248D60\n.word .L00248D88\n.word .L00248D98\n.word .L00248DA8\n.word .L00248DB8\n.word .L00248DD0\n.word .L00248DF8\n.word .L00248E10\n.word .L00248E30\n.word .L00248E48\n.word .L00248E60\n.word .L00248E8C\n.word .L00248E9C\n.word .L00248EAC\n.word .L00248EC8\n.word .L00248EEC\n.word .L00248F20\n.word .L00248F60\n.word .L00248F94\n.word .L00248FD4\n.word .L00248FF0\n.word .L00249074\n.word .L002490C8\n.word .L002490F4\n.word .L00249110\n.word .L00249140\n.word .L00249278\n.word .L002492B4\n.word .L0024930C\n.word .L00249338\n.word .L0024938C\n.word .L002493B8\n.word .L002493DC\n.word .L0024944C\n.word .L00249468\n.word .L0024950C\n.word .L00249558\n.word .L00249570\n.word .L00249580\n.word .L0024959C\n.word .L002495C4\n.word .L002495D4\n.word .L0024961C\n.word .L00249670\n.word .L00249694\n.word .L002496D8\n.word .L00249734\n.word .L0024975C\n.word .L00249778\n.word .L00249790\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00249700\n.word .L00249708\n.word .L00249710\n.word .L00249718\n.word .L00249720\n.word .L00249728\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00249994\n.word .L002499D4\n.word .L0024D734\n.word .L0024D734\n.word .L00249A14\n.word .L00249A54\n.word .L00249A94\n.word .L00249AD4\n.word .L00249B14\n.word .L00249B54\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L00249B94\n.word .L00249BFC\n.word .L00249C3C\n.word .L00249C7C\n.word .L00249CBC\n.word .L00249CFC\n.word .L00249D7C\n.word .L00249DBC\n.word .L00249DFC\n.word .L00249E3C\n.word .L00249E7C\n.word .L00249F04\n.word .L00249F18\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024A600\n.word .L0024A63C\n.word .L0024A68C\n.word .L0024A6D4\n.word .L0024A714\n.word .L0024A75C\n.word .L0024A79C\n.word .L0024A7E4\n.word .L0024A824\n.word .L0024A86C\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024ACE8\n.word .L0024AD00\n.word .L0024AD28\n.word .L0024AD50\n.word .L0024AD6C\n.word .L0024AD88\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024AE10\n.word .L0024AE18\n.word .L0024AE20\n.word .L0024AE28\n.word .L0024AE30\n.word .L0024AE38\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024AED8\n.word .L0024AEEC\n.word .L0024AF0C\n.word .L0024AF20\n.word .L0024AF40\n.word .L0024AF54\n.word .L0024AF74\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024BEB8\n.word .L0024BECC\n.word .L0024BF0C\n.word .L0024BF4C\n.word .L0024BFA8\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execExt3Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET);
+namespace ATEL {
+struct ChatWndSetWordsParam {
+    union {
+        UINT ctdID[4];
+        char* pWord[4];
+    };
+};
+}
+/* Prize.h:30 in the original: PRIZE_PARAM's constructor */
+struct PRIZE_PARAM_C : PRIZE_PARAM {
+    PRIZE_PARAM_C() { uiFlag = 0; uiPrizeFlag = 0; }
+};
+struct FogColorStruct {
+    INT color;
+    INT AnimFrame;
+};
+struct FogNomalStruct {
+    FLOAT Param;
+    INT AnimFrame;
+};
+struct BlurStruct {
+    INT param;
+    INT AnimFrame;
+};
+struct BlurAnimStruct {
+    FVECTOR param;
+    INT AnimFrame;
+};
+struct CrossFadeColorStruct {
+    INT color;
+    INT AnimFrame;
+};
+struct AvatarMotionParamC {
+    FLOAT _fPlaySpeed;
+    INT _iChangeHokanRate;
+    SHORT _nMotionID;
+    SHORT _nFlag;
+    AvatarMotionParamC() { _fPlaySpeed = 1.0f; _nFlag = 0; }
+};
+struct AvatarMotionParamEx : AvatarMotionParamC {
+    UINT _nRsrcID;
+    UINT _nInfo;
+    UINT _nDakkoRsrcID;
+    UINT _nDakkoMotionID;
+    AvatarMotionParamEx() { _nInfo = 0; _nDakkoRsrcID = 0; }
+};
+struct AvatarMotionFrameParam {
+    INT _iFrame;
+    INT _nFrag;
+    AvatarMotionFrameParam() { _iFrame = 0; _nFrag = 0; }
+};
+struct AvatarFadeParam {
+    FLOAT _fTarget;
+    UINT _nTime;
+};
+struct AvatarMotionParamEfx {
+    UINT _nRsrcID;
+    UINT _nMotionID;
+    FLOAT _fPlaySpeed;
+    UINT _StartFrame;
+    UINT _nHokanFrame;
+    UINT _nEfxNo;
+    UINT _nFlag;
+    AvatarMotionParamEfx() {
+        _nRsrcID = 0;
+        _nMotionID = 0;
+        _fPlaySpeed = 1.0f;
+        _StartFrame = 0;
+        _nHokanFrame = 0;
+        _nEfxNo = 0;
+        _nFlag = 0;
+    }
+};
+struct AvatarScaleParam {
+    FVECTOR _vTarget;
+    UINT _nTime;
+};
+struct AvatarSetLook {
+    FVECTOR LookMin;
+    FVECTOR LookMax;
+    FLOAT Rate;
+    FLOAT OffsetY;
+    INT TargetID;
+    char* BoneName;
+};
+struct AvatarSetLookAngle {
+    FVECTOR LookMin;
+    FVECTOR LookMax;
+    FVECTOR LookAngle;
+    FLOAT Rate;
+    char* BoneName;
+};
+struct AvatarChangeTexture {
+    char* DstTexName;
+    char* SrcTexName;
+};
+struct AvatarEffectAttach {
+    char* EffectName;
+    INT EfxNo;
+    char* BoneName;
+    INT Type;
+    AvatarEffectAttach() { EffectName = NULL; EfxNo = 0; BoneName = NULL; Type = 0; }
+};
+struct AvatarModelDispParam {
+    INT _iNo;
+    INT _nState;
+    AvatarModelDispParam() { _iNo = 0; _nState = 0; }
+};
+struct FadeCreateParam {
+    INT kind;
+    FLOAT fRate;
+    INT layer;
+};
+namespace MoogleShop {
+/* A DLL class: its constructor is not linked into the main program (the original calls address 0). */
+class CMoogleShopCore : public CTask {
+    BYTE _pad[0x2F0 - sizeof(CTask)];
+public:
+    CMoogleShopCore(CTask* pParent);
+};
+}
+__asm__(".weak __Q210MoogleShop15CMoogleShopCoreP5CTask\n__Q210MoogleShop15CMoogleShopCoreP5CTask = 0\n");
+extern CARD_DATA cardDataTbl_00493C68[]; /* CardKind.h's static table: VSME's copy is still asm data */
+/* CardKind.h:554-558 in the original (a CARD constructor) */
+static inline void setCard(CARD& card, USHORT nKind, CHAR nNumber) {
+    card.m_nId = 0;
+    card.m_nNumber = nNumber;
+    card.m_nKind2 = nKind;
+    card.m_nCategory0 = cardDataTbl_00493C68[card.m_nKind].nCategory0;
+    card.m_nCategory1 = cardDataTbl_00493C68[card.m_nKind].nCategory1;
+}
+/* CollUtil.h:194/245 in the original */
+static inline CCollUtil* collUtilInstance() {
+    CCollUtil*& instance = CCollUtil::m_pInstance;
+    if (!instance) AssertApp(COLLUTIL_H_PATH, 194, "m_pInstance", 0);
+    return instance;
+}
+static inline void enableChipCollision(FVECTOR& vChipCenter, BOOL fg) { collUtilInstance()->_enableChipCollision(vChipCenter, fg); }
+/* effect.h:433 in the original */
+static inline void effectSetFlag4(CEffect* p) { p->m_iFlag |= 4; }
+/* Entity.h:176 in the original */
+static inline void setEntityFlagBit(CEntity* p, UINT nFlag, BOOL bSet) {
+    if (bSet) p->setEntityFlag(nFlag, 0); else p->setEntityFlag(0, nFlag);
+}
+/* SceneEnv.h:51 in the original */
+static inline void sceneSetColor(INT nType, INT nFrame, const FVECTOR& vCol) {
+    CSceneEnv::setColor((ObjType::eObjBit)(nType & 0xFFFF), (FLOAT)nFrame, vCol, NULL, (UINT)nType >> 16);
+}
+class CRsrcDB {
+public:
+    static void removeGroup(INT nGroup, INT nMember);
+};
+/* RsrcDef.h:171 in the original */
+static inline INT makeRsrcID(INT nGroup, INT nMember) { return nGroup * 10000 + nMember; }
+/* SceneInfo.h:223 in the original */
+static inline BOOL roomHasStorageInfo(const RoomInfo* p) { return (UINT)p->_pSrcInfo | (UINT)p->_pStorageInfo | (UINT)p->_pStorageInfo2; }
+INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
+    INT nID;
+    INT c;
+    INT t;
+    INT r;
+    INT i7;
+    INT i6;
+    INT i5;
+    INT i4;
+    INT i3;
+    INT i2;
+    INT i1;
+
+    do {
+        r = 1;
+        switch (op) {
+        case 0xAA: {
+            i7 = m_S[m_SP--].I;
+            i6 = m_S[m_SP--].I;
+            i5 = m_S[m_SP--].I;
+            i4 = m_S[m_SP--].I;
+            i3 = m_S[m_SP--].I;
+            i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            ATP& atp = m_pCurrentActor->_ATP;
+            ChatWndCreateCTDParam CWCP;
+            ChatWndSetWordsParam CWP;
+            CWCP.pos.setPoint(-1, -1);
+            CWCP.ctdID = i2;
+            CWCP.waitFrame = i3 & 0xFFFF;
+            CWP.ctdID[0] = i4;
+            CWP.ctdID[1] = i5;
+            CWP.ctdID[2] = i6;
+            CWP.ctdID[3] = i7;
+            CWCP.pCwswp = &CWP;
+            ctd_cal(m_pCurrentActor->_pAvatar, i2, i3, &CWCP);
+            if (i3 < 0) {
+                CChatMan::instance().reqCommand(0x409, &CWCP, i1);
+            } else {
+                close_dest_se(i1);
+                CChatMan::instance().reqCommand(0x405, &CWCP, i1);
+                WinOpenSE(i2);
+                CChatMan::instance().reqCommand(0x3EA, &CWCP, i1);
+                if (i3 & 0x20000000) {
+                    INT n = 0;
+                    CChatMan::instance().reqCommand(0x413, &n, i1);
+                }
+            }
+            if (i3 & 0x10000000) break;
+            if (i3 & 0x40000000) {
+                INT n = 0;
+                CChatMan::instance().reqCommand(0x404, &n, i1);
+            } else {
+                INT n = 60;
+                CChatMan::instance().reqCommand(0x404, &n, i1);
+            }
+            atp.wait_key = i1;
+            atp.status = 12;
+            atp.next_address = m_Pctr;
+            ret = ATEL_RET_MS_WAIT; r = 3;
+            break;
+        }
+        case 0xAC: {
+            BOOL bFlag = m_S[m_SP--].I;
+            FVECTOR vPos;
+            vPos.w = 0.0f;
+            vPos.z = m_S[m_SP--].F;
+            vPos.y = m_S[m_SP--].F;
+            vPos.x = m_S[m_SP].F;
+            enableChipCollision(vPos, bFlag);
+            break;
+        }
+        case 0xAD: {
+            OpStack param2;
+            OpStack param1;
+            param2.I = m_S[m_SP--].I;
+            param1.I = m_S[m_SP--].I;
+            switch (m_S[m_SP].I) {
+            case 0:
+                TRACE("%d\n", param1.I);
+                break;
+            case 1:
+                TRACE("%f\n", param1.F);
+                break;
+            case 2:
+                CPadIO::resetVibration();
+                break;
+            case 3:
+                CSceneEnv::setStop((ObjType::eObjBit)param1.I);
+                break;
+            case 4:
+                CSceneEnv::setStop((ObjType::eObjBit)0);
+                break;
+            case 5:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    CARD card;
+                    setCard(card, param1.I, param2.I);
+                    card = CCard::correctCardRank(card);
+                    if (card.m_nKind) CPlayer::notifyGetPrize(param1.I, param2.I, 2);
+                }
+                break;
+            case 6:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    CCard::deleteCard(param1.I, param2.I);
+                }
+                break;
+            case 7:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    if (CGameWork::getByte(0, 0x61) == 3) break;
+                    TRACE("\x83X\x83g\x83" "b\x83N\x8bZ\x8fK\x93\xbe:%d\n", param1.I);
+                    CTechnic::addTechnic(param1.I);
+                    if (param2.I) new (__FILE__ "(2623)") CLevelUp(CTaskMan::getSysTask(1), param1.I);
+                }
+                break;
+            case 8:
+                CSound::fadeoutAllSE(param1.I, 1);
+                break;
+            case 9:
+                CSound::fadeAllSE(param1.I, param2.I);
+                break;
+            case 10:
+                CMapEnemyManager::setEncountEventEnemy(param1.I, 0);
+                CSceneInfo::reqEnterBattle(0);
+                break;
+            case 11: {
+                PRIZE_PARAM_C param;
+                param.PrizeKind = 0x31;
+                setFVector(param.vPos, 0.0f, 0.8f, 3.0f);
+                param.iNumber = 0;
+                param.uiFlag = 0;
+                setFVector(param.vRot, 0.0f, 0.0f, 0.0f);
+                param.fSpeed = 0.0f;
+                CEntityFactory::getInstance()->createPrize(param, NULL);
+                break;
+            }
+            case 15:
+                CShadowModelMan::setADensity(param1.F);
+                break;
+            case 16:
+                new (__FILE__ "(2672)") CAtelTutorial(CTaskMan::getSysTask(0x1A));
+                break;
+            case 17:
+                m_S[m_SP].I = CSceneInfo::getCurrentFloorNumber();
+                break;
+            case 18:
+                CPlaySpeedCtrl::setPlaySpeed(param1.F);
+                TRACE("Speed %f\n", param1.F);
+                break;
+            case 19:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    CTechnic::clearAll();
+                }
+                break;
+            case 20:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    TRACE("CARD WINDW CLOSE WAIT START\n");
+                    acWaitCardWind(*m_pCurrentActor, m_Pctr);
+                    ret = ATEL_RET_CARD_WND_WAIT; r = 3;
+                }
+                break;
+            case 21:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    TRACE("reqEnterDorr:ATEL sys_ctrl\n");
+                    CSceneInfo::reqEnterDoor((DOOR_ID)param1.I);
+                }
+                break;
+            case 22:
+                CShadowModelMan::setCDensity(param1.F);
+                break;
+            case 23:
+                m_pAtelCard = new (__FILE__ "(2713)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 0, param1.I, param2.I);
+                break;
+            case 24:
+                m_pAtelCard = new (__FILE__ "(2716)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 1, param1.I, param2.I);
+                break;
+            case 25:
+                m_pAtelCard = new (__FILE__ "(2719)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 2, param1.I, param2.I);
+                break;
+            case 26:
+                m_pAtelCard->out();
+                break;
+            case 27:
+                g_pPlayer->cmdRevolver_rollDeck(param1.I);
+                break;
+            case 28:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    PLM::setReqLoadPlayer(0);
+                }
+                break;
+            case 29:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    PLM::setReqLoadBattlePlayer(0);
+                }
+                break;
+            case 30:
+                TRACE("ATEL:cancelLoadRCF:%d,%d\n", param1.I, param2.I);
+                CRcf::cancelLoadRCF(param1.I, param2.I);
+                break;
+            case 31:
+                m_S[m_SP].I = CSceneInfo::getPrevAreaNum();
+                break;
+            case 32:
+                m_S[m_SP].I = CSceneInfo::getPrevSceneNum();
+                break;
+            case 33:
+                m_S[m_SP].I = CSceneInfo::getPrevAreaScene();
+                break;
+            case 34:
+                CEntityFactory::getInstance()->createEntity(0xB, 0x86, NULL, NULL);
+                break;
+            case 35:
+                CEntityFactory::getInstance()->createEntity(0xB, 0x87, NULL, NULL);
+                break;
+            case 36:
+                ((CMapEnemyManager*)CTaskMan::getSysTask(0x18))->deleteEnemies();
+                break;
+            case 37:
+                CEntityFactory::getInstance()->createEntity(0xB, 0x72, NULL, NULL);
+            case 38:
+                g_pPlayer->getPlayerCamera()->initCamera(1, 1, NULL);
+                break;
+            case 39:
+                g_pPlayer->getPlayerCamera()->initCamera(3, 0, NULL);
+                break;
+            case 40:
+                TRACE("ATEL:OPMEN DOOR: %d, %d\n", param1.I, param2.I);
+                CSceneInfo::setDoorStat((DOOR_STAT)2, (DOOR_ID)param1.I, param2.I);
+                break;
+            case 41:
+                m_S[m_SP].I = CSceneInfo::getCurrentRoomID();
+                break;
+            case 42:
+                m_S[m_SP].I = CSceneInfo::getPrevRoomID();
+                break;
+            case 43:
+                m_S[m_SP].I = CSceneInfo::getEnteredDoorID();
+                break;
+            case 44: {
+                INT flag = CGameWork::getInt(0, param1.I);
+                CGameWork::setInt(0, param1.I, flag | param2.I);
+                break;
+            }
+            case 45: {
+                INT flag = CGameWork::getInt(0, param1.I);
+                flag &= param2.I;
+                if (flag) {
+                    m_S[m_SP].I = 1;
+                } else {
+                    m_S[m_SP].I = 0;
+                }
+                break;
+            }
+            case 46:
+                if (g_pPlayer) g_pPlayer->changeMotion(param1.I, 0, 0, 0, 0, 0);
+                break;
+            case 47:
+                if (g_pPlayer) g_pPlayer->changeMotionEx(param1.I, param2.I, 0, 0, -1, 0, 0);
+                break;
+            case 48: {
+                INT n = getRand() % (param2.I - param1.I) + param1.I;
+                TRACE("MIN:%d, MAX:%d,A:%d\n", param1.I, param2.I, n);
+                m_S[m_SP].I = n;
+                break;
+            }
+            case 49:
+                CSceneInfo::showAllHiddenDoorsOfCurrentFloor();
+                TRACE("\x83\x89\x83X\x83g\x83t\x83\x8d\x83" "A\x82\xd6\x82\xcc\x94\xe0\x95\\\x8e\xa6\n");
+                break;
+            case 50: {
+                CTask* pTask = CTaskMan::getSysTask(0x19);
+                if (!pTask) break;
+                SLContainerT<CTask>* pContainer = ((CBattleEnemyManager*)pTask)->getFirstBattleEnemy();
+                while (pContainer) {
+                    CTask* p = pContainer->getValue();
+                    if (p) {
+                        if (p->getTypeID() == 0x1004) {
+                            if ((UINT)((CEntity*)p)->getID() % 10000 == 122) {
+                                ((CEntity*)p)->changeMotion(param1.I, 0, 0, 0, 0, 0);
+                                break;
+                            }
+                        }
+                    }
+                    pContainer = pContainer->getNext();
+                }
+                break;
+            }
+            case 51: {
+                TRACE("ATEL:\x83\x8f\x81[\x83\x8b\x83h\x83Z\x83\x8c\x83N\x83g\x8c\xc4\x82\xd1\x8fo\x82\xb5\n");
+                RoomInfo* pRoom = CSceneInfo::getRoomInfo(-1);
+                if (!pRoom) break;
+                CGimmickManager* pGM = (CGimmickManager*)CTaskMan::getSysTask(0x11);
+                CEntity* pDoor = pGM->getDoor(pRoom->_doors[0]._id, NULL, NULL);
+                g_pPlayer->cmdState_initWorldSelect(pDoor->getHandle());
+                break;
+            }
+            case 52:
+                TRACE("ATEL:UNAVAILABLE DOOR: %d, %d\n", param1.I, param2.I);
+                CSceneInfo::setDoorStat((DOOR_STAT)4, (DOOR_ID)param1.I, param2.I);
+                break;
+            case 53:
+                TRACE("ATEL:\x83S\x81[\x83\x8b\x95\x94\x89\xae\x8aJ\x82\xa2\x82\xbd\n");
+                CSceneInfo::openGoalDoor();
+                break;
+            case 54: {
+                INT n = CStatus::isLevelUp();
+                TRACE("\x83\x8c\x83x\x83\x8b\x83" "A\x83" "b\x83v\x81H %d\n", n);
+                m_S[m_SP].I = n;
+                break;
+            }
+            case 55: {
+                CGimmickManager* pGM = (CGimmickManager*)CTaskMan::getSysTask(0x11);
+                SLContainerT<CTask>* pContainer = pGM->getChildren().getHead();
+                while (pContainer) {
+                    CTask* p = pContainer->getValue();
+                    if (p) {
+                        if (p->getTypeID() == 0x1005) {
+                            switch ((UINT)((CEntity*)p)->getID() % 10000) {
+                            case 0x43E:
+                            case 0x43F:
+                            case 0x440:
+                                if (param1.I == 1) {
+                                    setEntityFlagBit((CEntity*)p, 0x10000, FALSE);
+                                    g_pPlayer->cancelLockon();
+                                    ((CEntity*)p)->bodyCollOff(-1);
+                                } else {
+                                    INT st = pGM->getStorageGimmickState(((CBaseGimmick*)p)->getUniqueID());
+                                    if (st <= 0 || (UINT)((CEntity*)p)->getID() % 10000 == 0x43E) {
+                                        setEntityFlagBit((CEntity*)p, 0x10000, TRUE);
+                                        ((CEntity*)p)->bodyCollOn(-1);
+                                    }
+                                }
+                                break;
+                            case 0x43D:
+                                if (param1.I == 0) {
+                                    setEntityFlagBit((CEntity*)p, 0x10000, FALSE);
+                                    g_pPlayer->cancelLockon();
+                                    ((CEntity*)p)->bodyCollOff(-1);
+                                } else {
+                                    setEntityFlagBit((CEntity*)p, 0x10000, TRUE);
+                                    ((CEntity*)p)->bodyCollOn(-1);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    pContainer = pContainer->getNext();
+                }
+                break;
+            }
+            case 56:
+                new (__FILE__ "(3000)") MoogleShop::CMoogleShopCore(CTaskMan::getSysTask(1));
+                break;
+            case 57:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    if (CGameWork::getByte(0, 0x61) == 3) break;
+                    TRACE("TECH WINDW CLOSE WAIT START\n");
+                    acWaitTechWind(*m_pCurrentActor, m_Pctr);
+                    ret = ATEL_RET_TECH_WND_WAIT; r = 3;
+                }
+                break;
+            case 58:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    CCard::addCard(param1.I, param2.I);
+                }
+                break;
+            case 59: {
+                INT world;
+                if (CGame::isSoraGame())
+                    world = CSceneInfo::getWorldID(CGameWork::getInt(0, 0x33) - 1);
+                else
+                    world = CSceneInfo::getWorldID(CGameWork::getInt(0, 0x34) - 1);
+                TRACE("ATEL:\x83\x8f\x81[\x83\x8b\x83h\x83N\x83\x8a\x83" "A\x81" "F%d\n", world);
+                CJiminyMemoFlag::checkEvent(1, world, 0);
+                break;
+            }
+            case 60:
+                CJiminyMemoFlag::checkEvent(2, CSceneInfo::getCurrentFloorNumber() - 1, 0);
+                TRACE("ATEL:\x83t\x83\x8d\x83" "A\x83N\x83\x8a\x83" "A\n");
+                break;
+            case 61:
+                CJiminyMemoFlag::checkEvent(6, 0, 0);
+                TRACE("ATEL:\x83\x82\x83\x93\x83X\x83g\x83\x8d\x83U\x83R\x83o\x83g\x83\x8b\x83N\x83\x8a\x83" "A\n");
+                break;
+            case 62: {
+                SLContainerT<CTask>* pContainer = ((CGimmickManager*)CTaskMan::getSysTask(0x11))->getChildren().getHead();
+                while (pContainer) {
+                    CTask* p = pContainer->getValue();
+                    if (p) {
+                        if (p->getTypeID() == 0x1006) {
+                            setEntityFlagBit((CEntity*)p, 0x10000, FALSE);
+                            g_pPlayer->cancelLockon();
+                        }
+                    }
+                    pContainer = pContainer->getNext();
+                }
+                break;
+            }
+            case 63:
+                if (g_pPlayer) {
+                    m_S[m_SP].I = g_pPlayer->getPlayerState();
+                }
+                break;
+            case 64:
+                CTitleReportDllStarter::create(CTaskMan::getSysTask(1), 2, 0);
+                break;
+            case 65:
+                TRACE("\x83G\x83N\x83X\x83g\x83\x8a\x81[\x83\x80\x81" "F\x83X\x83g\x83" "b\x83N\x91S\x95\x94\x8ao\x82\xa6\x82\xe9\x81" "A\x83J\x81[\x83h\x91S\x95\x94\x89\xf0\x8b\xd6\x81" "A\x95W\x8f\x80\x83X\x83L\x83\x8b\x91S\x8eg\x97p\x89\xc2\n");
+                CTechnic::setAll();
+                CGameWork::setInt(0, 0x21, -1);
+                CGameWork::setInt(0, 0x2D, -1);
+                CGameWork::setInt(0, 0x24, -1);
+                break;
+            case 66:
+                g_pPlayer->getPlayerCamera()->initCamera(1, 0, NULL);
+                break;
+            case 67:
+                CGame::dispOffFadeMask();
+                break;
+            case 68:
+                WorldCard::CWorldCardSeq::create(CTaskMan::getSysTask(1), param1.I);
+                break;
+            case 69:
+                acWaitWorldCardWind(*m_pCurrentActor, m_Pctr);
+                ret = ATEL_RET_WORLD_CARD_WND_WAIT; r = 3;
+                break;
+            case 70:
+                CCard::setCardPossible(param1.I);
+                break;
+            case 71:
+                TRACE("ATEL:CGlare::fadein\n");
+                CGlare::off(0.0f);
+                CGlare::fadein(param1.F);
+                break;
+            case 72:
+                TRACE("ATEL:CGlare::fadeout\n");
+                CGlare::off(0.0f);
+                CGlare::fadeout(param1.F);
+                break;
+            case 73:
+                CGlare::on(0.0f);
+                break;
+            case 74:
+                TRACE("ATEL:\x82g\x82o\x89\xf1\x95\x9c\n");
+                if (g_pPlayer) {
+                    g_pPlayer->addHP(g_pPlayer->m_iMaxHP, 0, 0);
+                } else {
+                    TRACE("\x83v\x83\x8c\x83" "C\x83\x84\x81[\x82\xa2\x82\xc8\x82\xa2\n");
+                }
+                break;
+            case 75: {
+                INT n = 0;
+                switch (param1.I) {
+                case 0:
+                    n = 11;
+                    break;
+                case 1:
+                    n = 12;
+                    break;
+                case 2:
+                    n = 13;
+                    break;
+                case 3:
+                    n = 14;
+                    break;
+                case 4:
+                    n = 15;
+                    break;
+                case 5:
+                    n = 16;
+                    break;
+                }
+                CJiminyMemoFlag::checkEvent(10, n, 0);
+                break;
+            }
+            case 76:
+                acWaitCrossFade(*m_pCurrentActor, m_Pctr);
+                ret = ATEL_RET_CLOSS_FADE_WAIT; r = 3;
+                break;
+            case 77:
+                TRACE("ATEL:\x83o\x83" "b\x83N\x83" "A\x83" "b\x83v\n");
+                CGameWork::backup((CGameWork::BACKUP)0);
+                break;
+            case 78:
+                CJiminyMemoFlag::checkEvent(9, 0, 0);
+                break;
+            case 79:
+                TRACE("ATEL:CLOSE DOOR: %d, %d\n", param1.I, param2.I);
+                CSceneInfo::setDoorStat((DOOR_STAT)1, (DOOR_ID)param1.I, param2.I);
+                break;
+            }
+            break;
+        }
+        case 0xAE: {
+            F_UL fl;
+            fl.ul = m_S[m_SP--].I;
+            nID = m_S[m_SP--].I;
+            cam_ajt(m_S[m_SP].I, fl, nID);
+            break;
+        }
+        case 0xAF: {
+            i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            nID = searchActor((CHAR*)(m_pDseg + c));
+            FLOAT f = 8000.0f;
+            if (nID < 0) {
+                _TRACE(m_bTrace, "GPS NG01:%s\n", m_pDseg + c);
+            } else {
+                CAvatar* p = getAvatar(nID);
+                if (p) {
+                    FVECTOR vPos;
+                    p->getNowPosition(vPos);
+                    switch (i1) {
+                    case 0:
+                        f = vPos.x;
+                        break;
+                    case 1:
+                        f = vPos.y;
+                        break;
+                    case 2:
+                        f = vPos.z;
+                        break;
+                    case 3:
+                        f = RAD2DEG(p->getDirection());
+                        break;
+                    }
+                }
+            }
+            m_S[++m_SP].F = f;
+            break;
+        }
+        case 0xE5: {
+            INT i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + c));
+            switch (i1) {
+            case 2:
+                getAvatar(nIdx)->reqCommand(6, NULL, 0);
+                TRACE("NAME TO SHOW :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 3:
+                getAvatar(nIdx)->reqCommand(6, NULL, 1);
+                TRACE("NAME TO HIDE :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 6:
+                getAvatar(nIdx)->reqCommand(0x1D, NULL, 1);
+                TRACE("GRAVITY ON :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 7:
+                getAvatar(nIdx)->reqCommand(0x1D, NULL, 0);
+                TRACE("GRAVITY OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 8:
+                getAvatar(nIdx)->reqCommand(0x1E, NULL, 1);
+                TRACE("MAP_COLL_ON :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 9:
+                getAvatar(nIdx)->reqCommand(0x1E, NULL, 0);
+                TRACE("MAP_COLL_OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 10:
+                getAvatar(nIdx)->reqCommand(0x1F, NULL, 1);
+                TRACE("BODY_COLL_ON :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 11:
+                getAvatar(nIdx)->reqCommand(0x1F, NULL, 0);
+                TRACE("BODY_COLL_OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 39:
+                getAvatar(nIdx)->reqCommand(1, NULL, 0);
+                m_pCurrentActor->_ATP.status = 25;
+                m_pCurrentActor->_pAvatar = NULL;
+                m_ActorTbl[nIdx]._pAvatar = NULL;
+                TRACE("REMOVE NPC :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 40:
+                getAvatar(nIdx)->reqCommand(0x1A, NULL, 1);
+                TRACE("MAKEUP_MOTION_INVALID :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 41:
+                getAvatar(nIdx)->reqCommand(0x1A, NULL, 0);
+                TRACE("MAKEUP_MOTION_VALID :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 42:
+                getAvatar(nIdx)->reqCommand(0x34, NULL, 0);
+                TRACE("AVTCMD_SET_LOOK_START :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 43:
+                getAvatar(nIdx)->reqCommand(0x35, NULL, 0);
+                TRACE("AVTCMD_SET_LOOK_STOP :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 44: {
+                FLOAT f = 16.0f;
+                getAvatar(nIdx)->reqCommand(0x35, NULL, 0);
+                getAvatar(nIdx)->reqCommand(0x36, &f, 0);
+                TRACE("AVTCMD_SET_LOOK_END :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            }
+            case 45:
+                getAvatar(nIdx)->reqCommand(0x24, NULL, 0);
+                TRACE("AVTCMD_CREATE_LEGIK :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 46:
+                getAvatar(nIdx)->reqCommand(0x21, NULL, 1);
+                TRACE("AVTCMD_SET_IK  ON :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 47:
+                getAvatar(nIdx)->reqCommand(0x21, NULL, 0);
+                TRACE("AVTCMD_SET_IK  OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 48:
+                getAvatar(nIdx)->reqCommand(0x22, NULL, 1);
+                TRACE("AVTCMD_SET_LOCK_ON  ON :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 49: {
+                getAvatar(nIdx)->reqCommand(0x22, NULL, 0);
+                TRACE("AVTCMD_SET_LOCK_ON  OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                INT index = searchLockOnNpc();
+                if (index != -1) {
+                    if (m_ActorTbl[index]._pAvatar == getAvatar(nIdx)) {
+                        g_pPlayer->cancelLockon();
+                    }
+                }
+                break;
+            }
+            case 50:
+                getAvatar(nIdx)->reqCommand(0x23, NULL, 1);
+                TRACE("AVTCMD_SET_NEAR_CLIP  OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 51:
+                getAvatar(nIdx)->reqCommand(0x23, NULL, 0);
+                TRACE("AVTCMD_SET_NEAR_CLIP  OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            }
+            break;
+        }
+        case 0xE6: {
+            INT i6 = m_S[m_SP--].I;
+            INT i5 = m_S[m_SP--].I;
+            FLOAT f4 = m_S[m_SP--].F;
+            FLOAT f3 = m_S[m_SP--].F;
+            FLOAT f2 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            INT nID = searchActor((CHAR*)(m_pDseg + c));
+            CameraManCreateParam param;
+            TRACE("CHT\n");
+            param.pathDateTargetID = nID;
+            param.changeFlag = i1;
+            param.fOffsetX = f2;
+            param.fOffsetY = f3;
+            param.fOffsetZ = f4;
+            param.fFullFrame = (FLOAT)i5;
+            param.fStartEndFrame = (FLOAT)i6;
+            param.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x464, &param, 0);
+            break;
+        }
+        case 0xE7: {
+            INT HokanRate = m_S[m_SP--].I;
+            FLOAT PlaySpeed = m_S[m_SP--].F;
+            INT MotionID = m_S[m_SP].I;
+            AvatarMotionParamC param;
+            param._nMotionID = MotionID & 0xFFF;
+            param._fPlaySpeed = PlaySpeed;
+            param._nFlag = (MotionID >> 12) & 7;
+            param._iChangeHokanRate = HokanRate;
+            if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0x14, &param, 0);
+            break;
+        }
+        case 0xE8: {
+            INT HokanRate = m_S[m_SP--].I;
+            AvatarMotionParamC param;
+            param._fPlaySpeed = m_S[m_SP--].F;
+            i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            nID = searchActor((CHAR*)(m_pDseg + c));
+            if (nID < 0) {
+                _TRACE(m_bTrace, "MTO NG01:%s\n", m_pDseg + c);
+                break;
+            }
+            CAvatar* p = getAvatar(nID);
+            if (p) {
+                param._nMotionID = i1 & 0xFFF;
+                param._nFlag = (i1 >> 12) & 7;
+                param._iChangeHokanRate = HokanRate;
+                p->reqCommand(0x14, &param, 0);
+            }
+            break;
+        }
+        case 0xE9: {
+            AvatarMotionFrameParam param;
+            param._nFrag = m_S[m_SP--].I;
+            param._iFrame = m_S[m_SP].I;
+            m_pCurrentActor->_pAvatar->reqCommand(0x19, &param, 0);
+            break;
+        }
+        case 0xEA: {
+            AvatarMotionFrameParam param;
+            param._nFrag = m_S[m_SP--].I;
+            param._iFrame = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            nID = searchActor((CHAR*)(m_pDseg + c));
+            if (nID < 0) {
+                _TRACE(m_bTrace, "MTO NG01:%s\n", m_pDseg + c);
+                break;
+            }
+            CAvatar* p = getAvatar(nID);
+            if (p) p->reqCommand(0x19, &param, 0);
+            break;
+        }
+        case 0xEB: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            nID = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nID > 0 && m_pCurrentActor->_pAvatar) {
+                AvatarRotateParam pr;
+                if (i2 == 9) {
+                    pr._nType = i2;
+                } else if (i2 == 10) {
+                    pr._nType = i2;
+                } else {
+                    pr._nType = 2;
+                }
+                pr._fTime = (FLOAT)i1 * 0.016666668f;
+                pr._nTargetID = nID;
+                m_pCurrentActor->_pAvatar->reqCommand(0xE, &pr, 0);
+            }
+            break;
+        }
+        case 0xEC: {
+            INT i1 = m_S[m_SP--].I;
+            FLOAT f = m_S[m_SP].F;
+            AvatarFadeParam param;
+            param._fTarget = f;
+            param._nTime = i1;
+            m_pCurrentActor->_pAvatar->reqCommand(0x10, &param, -1);
+            break;
+        }
+        case 0xF2: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            FLOAT f = m_S[m_SP].F;
+            AvatarFadeParam param;
+            param._fTarget = f;
+            param._nTime = i1;
+            m_pCurrentActor->_pAvatar->reqCommand(0x10, &param, i2 - 1);
+            break;
+        }
+        case 0xF3: {
+            FLOAT f = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP].I;
+            if (i1) {
+                CDeFocus::setManual(CDeFocus::getNear(), f);
+            } else {
+                CDeFocus::setManual(f, CDeFocus::getFar());
+            }
+            break;
+        }
+        case 0xF4: {
+            INT Flag = m_S[m_SP--].I;
+            INT HokanFrame = m_S[m_SP--].I;
+            FLOAT Speed = m_S[m_SP--].F;
+            INT MotionID = m_S[m_SP--].I;
+            INT ResrcID = m_S[m_SP].I;
+            TRACE("AED %d : %d : %f : %d : %d\n", ResrcID, MotionID, Speed, HokanFrame, Flag);
+            AvatarMotionParamEx2 mot;
+            mot._nRsrcID = ResrcID;
+            mot._nMotionID = MotionID;
+            mot._fPlaySpeed = Speed;
+            mot._nHokanFrame = HokanFrame;
+            mot._nInfo = Flag;
+            m_pCurrentActor->_pAvatar->reqCommand(0x16, &mot, 0);
+            break;
+        }
+        case 0xF5: {
+            INT Frame = m_S[m_SP--].I;
+            OpStack Param = m_S[m_SP--];
+            INT type = m_S[m_SP].I;
+            FogColorStruct Color;
+            FogNomalStruct Nomal;
+            switch (type) {
+            case 0:
+                Color.color = Param.I;
+                TRACE("FOG %d : R:%d : G:%d : B:%d : %d\n", type, (Param.I >> 16) & 0xFF, (Param.I >> 8) & 0xFF, Param.I & 0xFF, Frame);
+                CAtelFog::m_pInstance->reqCommand(0x5DC, &Color, 0);
+                break;
+            case 1:
+                Color.color = Param.I;
+                TRACE("FOG %d : R:%d : G:%d : B:%d : %d\n", type, (Param.I >> 16) & 0xFF, (Param.I >> 8) & 0xFF, Param.I & 0xFF, Frame);
+                Color.AnimFrame = Frame;
+                CAtelFog::m_pInstance->reqCommand(0x5DD, &Color, 0);
+                break;
+            case 2:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                CAtelFog::m_pInstance->reqCommand(0x5DE, &Nomal, 0);
+                break;
+            case 3:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                Nomal.AnimFrame = Frame;
+                CAtelFog::m_pInstance->reqCommand(0x5DF, &Nomal, 0);
+                break;
+            case 4:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                CAtelFog::m_pInstance->reqCommand(0x5E0, &Nomal, 0);
+                break;
+            case 5:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                Nomal.AnimFrame = Frame;
+                CAtelFog::m_pInstance->reqCommand(0x5E1, &Nomal, 0);
+                break;
+            case 6:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                CAtelFog::m_pInstance->reqCommand(0x5E2, &Nomal, 0);
+                break;
+            case 7:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                Nomal.AnimFrame = Frame;
+                CAtelFog::m_pInstance->reqCommand(0x5E3, &Nomal, 0);
+                break;
+            case 8:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                CAtelFog::m_pInstance->reqCommand(0x5E4, &Nomal, 0);
+                break;
+            case 9:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                Nomal.AnimFrame = Frame;
+                CAtelFog::m_pInstance->reqCommand(0x5E5, &Nomal, 0);
+                break;
+            }
+            break;
+        }
+        case 0xF6: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("SVR:%d,%d\n", i1, i2);
+            CSceneInfo::setEventRoomSceneNum(i1, i2);
+            break;
+        }
+        case 0xF7: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            if (CGameWork::getFlag(1, 0x33)) {
+                CGameWork::setFlag(1, 0x34, TRUE);
+                m_pCurrentActor->_ATP.status = 25;
+                break;
+            }
+            TRACE("CER:%d,%d,%d\n", i1, i2, i3);
+            if (i2 == -1) i2 = CSceneInfo::getEnteredDoorID();
+            CSceneInfo::reqChangeEventRoom(i1, (DOOR_ID)i2, i3);
+            break;
+        }
+        case 0xF8:
+            TRACE("EBT\n");
+            CSceneInfo::reqExitBattle();
+            break;
+        case 0xFA: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("scene_set_color:type:%d,frame:%d,color:%d\n", i1, i2, i3);
+            FVECTOR vCol;
+            vCol.w = (FLOAT)(i3 & 0xFF) / 255.0f;
+            vCol.z = (FLOAT)((i3 >> 8) & 0xFF) / 255.0f;
+            vCol.y = (FLOAT)((i3 >> 16) & 0xFF) / 255.0f;
+            vCol.x = (FLOAT)((i3 >> 24) & 0xFF) / 255.0f;
+            sceneSetColor(i1, i2, vCol);
+            break;
+        }
+        case 0xFB: {
+            INT i4 = m_S[m_SP--].I;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            AvatarEffectAttach param;
+            param.BoneName = (char*)(m_pDseg + i3);
+            param.EffectName = (char*)(m_pDseg + i1);
+            param.EfxNo = i2;
+            param.Type = i4;
+            m_hEffect = m_pCurrentActor->_pAvatar->reqCommand(0x3A, &param, 0);
+            break;
+        }
+        case 0xFC: {
+            FLOAT f = m_S[m_SP--].F;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+#line 3698
+            if (!(CWorldEnv::getActiveCamera())) AssertApp(__FILE__, __LINE__, "CWorldEnv::getActiveCamera()", 0);
+            FVECTOR vPos;
+            FVECTOR vRot;
+            setFVector(vPos, 0.0f, 0.0f, f);
+            setFVector(vRot, 0.0f, 3.1415927f, 0.0f);
+            m_hEffect = CEffectMan::attachEffect((CHAR*)(m_pDseg + i1), i2, (ObjType::eObjType)0xD, &CWorldEnv::getActiveCamera()->Crd(0), &vPos, &vRot, 0.0f);
+            CEffect* pEffect = CEffectMan::getEffect(m_hEffect);
+            if (pEffect) pEffect->setDrawLast(0);
+            break;
+        }
+        case 0xFD: {
+            OpStack param2 = m_S[m_SP--];
+            OpStack param1 = m_S[m_SP--];
+            INT type = m_S[m_SP].I;
+            CEffect* effect;
+            TRACE("EffectCtrl  %d, %d, %d\n", type, param1.I, param2.I);
+            switch (type) {
+            case 0:
+                m_S[m_SP].I = m_hEffect;
+                break;
+            case 1: {
+                effect = CEffectMan::getEffect(param1.I);
+                if (effect) effect->fadeout(param2.F);
+                break;
+            }
+            case 2: {
+                effect = CEffectMan::getEffect(param1.I);
+                if (effect) effect->fadeout(0.0f);
+                break;
+            }
+            case 3:
+                effect = CEffectMan::getEffect(param1.I);
+                effectSetFlag4(effect);
+                break;
+            case 4:
+                CEffectMan::getEffect(param1.I)->setSkipFrame(param2.F);
+                break;
+            case 5: {
+                effect = CEffectMan::getEffect(param1.I);
+                if (effect) effect->setLightCalc(1);
+                break;
+            }
+            }
+            break;
+        }
+        case 0xFE: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            INT r;
+            switch (i2) {
+            case 0:
+                r = i1 | i3;
+                break;
+            case 1:
+                r = i1 & i3;
+                break;
+            case 2:
+                r = i1 ^ i3;
+                break;
+            case 3:
+                r = i1 >> i3;
+                break;
+            case 4:
+                r = i1 << i3;
+                break;
+            case 5:
+                r = i1 & ~i3;
+                break;
+            }
+            m_S[m_SP].I = r;
+            break;
+        }
+        case 0xFF: {
+            INT frame = m_S[m_SP--].I;
+            INT param = m_S[m_SP--].I;
+            INT type = m_S[m_SP].I;
+            BlurStruct blur;
+            TRACE("BLUR %d : :%d : %d\n", type, param, frame);
+            switch (type) {
+            case 0:
+                CAtelBlur::m_pInstance->reqCommand(0x640, &param, 0);
+                break;
+            case 1:
+                blur.param = param;
+                blur.AnimFrame = frame;
+                CAtelBlur::m_pInstance->reqCommand(0x641, &param, 0);
+                break;
+            case 2:
+                CAtelBlur::m_pInstance->reqCommand(0x642, &param, 0);
+                break;
+            case 3:
+                blur.param = param;
+                blur.AnimFrame = frame;
+                CAtelBlur::m_pInstance->reqCommand(0x643, &param, 0);
+                break;
+            case 4:
+                CAtelBlur::m_pInstance->reqCommand(0x644, &param, 0);
+                break;
+            case 5:
+                blur.param = param;
+                blur.AnimFrame = frame;
+                CAtelBlur::m_pInstance->reqCommand(0x645, &param, 0);
+                break;
+            case 6:
+                CAtelBlur::m_pInstance->reqCommand(0x647, NULL, 0);
+                break;
+            }
+            break;
+        }
+        case 0x100: {
+            BlurAnimStruct blur;
+            blur.AnimFrame = m_S[m_SP--].I;
+            blur.param.w = 0.0f;
+            blur.param.z = (FLOAT)m_S[m_SP--].I;
+            blur.param.y = (FLOAT)m_S[m_SP--].I;
+            blur.param.x = (FLOAT)m_S[m_SP].I;
+            CAtelBlur*& pBlur = CAtelBlur::m_pInstance;
+            pBlur->reqCommand(0x646, &blur, 0);
+            break;
+        }
+        case 0x101: {
+            AvatarMotionParamEfx param;
+            param._nFlag = m_S[m_SP--].I;
+            param._nEfxNo = m_S[m_SP--].I;
+            param._nHokanFrame = m_S[m_SP--].I;
+            param._StartFrame = m_S[m_SP--].I;
+            param._fPlaySpeed = m_S[m_SP--].F;
+            param._nMotionID = m_S[m_SP--].I;
+            param._nRsrcID = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("MEX:%d,%d,%d,%f,%d,%d,%d,%d\n", i1, param._nRsrcID, param._nMotionID, param._fPlaySpeed, param._StartFrame, param._nHokanFrame, param._nEfxNo, param._nFlag);
+            if (i1) {
+                INT nIdx = searchActor((CHAR*)(m_pDseg + i1));
+                if (nIdx < 0) {
+                    _TRACE(m_bTrace, "MTO NG01:%s\n", m_pDseg + c);
+                    break;
+                }
+                CAvatar* p = getAvatar(nIdx);
+                if (p) p->reqCommand(0x17, &param, 0);
+            } else {
+                if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0x17, &param, 0);
+            }
+            break;
+        }
+        case 0x102: {
+            i1 = m_S[m_SP - 1].I;
+            c = m_S[m_SP].I;
+            _TRACE(m_bTrace, "CRC %d %d\n", i1, c);
+            m_pCurrentActor->_GroupID = i1;
+            m_pCurrentActor->_nMembarID = c;
+            m_pCurrentActor->_nRsrcID = makeRsrcID(i1, c);
+            acWaitLoadRsrc(*m_pCurrentActor, m_Pctr);
+            ret = ATEL_RET_RSRC_LOAD_WAIT; r = 3;
+            break;
+        }
+        case 0x103: {
+            i1 = m_S[m_SP - 1].I;
+            c = m_S[m_SP].I;
+            _TRACE(m_bTrace, "DRC %d %d\n", i1, c);
+            m_pCurrentActor->_nRsrcID = makeRsrcID(i1, c);
+            CRsrcDB::removeGroup(i1, c);
+            break;
+        }
+        case 0x104: {
+            FLOAT f27 = m_S[m_SP--].F;
+            FLOAT f26 = m_S[m_SP--].F;
+            FLOAT f25 = m_S[m_SP--].F;
+            FLOAT f24 = m_S[m_SP--].F;
+            FLOAT f23 = m_S[m_SP--].F;
+            FLOAT f22 = m_S[m_SP--].F;
+            FLOAT f21 = m_S[m_SP--].F;
+            FLOAT f20 = m_S[m_SP--].F;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("LOK:%s,%s,%f,%f,%f,%f,%f,%f,%f,%f\n", m_pDseg + i1, m_pDseg + i2, f20, f21, f22, f23, f24, f25, f26, f27);
+            AvatarSetLook look;
+            look.TargetID = searchActor((CHAR*)(m_pDseg + i2));
+            look.BoneName = (char*)(m_pDseg + i1);
+            setFVector(look.LookMin, DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
+            setFVector(look.LookMax, DEG2RAD(f23), DEG2RAD(f24), DEG2RAD(f25));
+            look.OffsetY = f26;
+            look.Rate = f27;
+            m_pCurrentActor->_pAvatar->reqCommand(0x30, &look, 0);
+            break;
+        }
+        case 0x105: {
+            FLOAT f21 = m_S[m_SP--].F;
+            FLOAT f20 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP].I;
+            TRACE("UDL:%s,%f,%f\n", m_pDseg + i1, f20, f21);
+            AvatarSetLook look;
+            look.TargetID = searchActor((CHAR*)(m_pDseg + i1));
+            look.OffsetY = f20;
+            look.Rate = f21;
+            m_pCurrentActor->_pAvatar->reqCommand(0x31, &look, 0);
+            break;
+        }
+        case 0x106: {
+            FLOAT f29 = m_S[m_SP--].F;
+            FLOAT f28 = m_S[m_SP--].F;
+            FLOAT f27 = m_S[m_SP--].F;
+            FLOAT f26 = m_S[m_SP--].F;
+            FLOAT f25 = m_S[m_SP--].F;
+            FLOAT f24 = m_S[m_SP--].F;
+            FLOAT f23 = m_S[m_SP--].F;
+            FLOAT f22 = m_S[m_SP--].F;
+            FLOAT f21 = m_S[m_SP--].F;
+            FLOAT f20 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP].I;
+            TRACE("LAG:%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", m_pDseg + i1, f20, f21, f22, f23, f24, f25, f26, f27, f28, f29);
+            AvatarSetLookAngle look;
+            look.BoneName = (char*)(m_pDseg + i1);
+            setFVector(look.LookAngle, DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
+            setFVector(look.LookMin, DEG2RAD(f23), DEG2RAD(f24), DEG2RAD(f25));
+            setFVector(look.LookMax, DEG2RAD(f26), DEG2RAD(f27), DEG2RAD(f28));
+            look.Rate = f29;
+            m_pCurrentActor->_pAvatar->reqCommand(0x32, &look, 0);
+            break;
+        }
+        case 0x107: {
+            FLOAT f23 = m_S[m_SP--].F;
+            FLOAT f22 = m_S[m_SP--].F;
+            FLOAT f21 = m_S[m_SP--].F;
+            FLOAT f20 = m_S[m_SP].F;
+            TRACE("UDA:%f,%f,%f,%f\n", f20, f21, f22, f23);
+            AvatarSetLookAngle look;
+            look.Rate = f23;
+            setFVector(look.LookAngle, DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
+            m_pCurrentActor->_pAvatar->reqCommand(0x33, &look, 0);
+            break;
+        }
+        case 0x108: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            AvatarChangeTexture param;
+            param.DstTexName = (char*)(m_pDseg + i1);
+            param.SrcTexName = (char*)(m_pDseg + i2);
+            TRACE("CTX:%s,%s\n", param.DstTexName, param.SrcTexName);
+            m_pCurrentActor->_pAvatar->reqCommand(0x37, &param, 0);
+            break;
+        }
+        case 0x109: {
+            FLOAT f1 = m_S[m_SP].F;
+            /* a scalar read of _pAvatar: keeps the store of f1 before it (struct-field reads may pass a fixed scalar store) */
+            (*(CAvatar**)&m_pCurrentActor->_pAvatar)->reqCommand(0x35, NULL, 0);
+            m_pCurrentActor->_pAvatar->reqCommand(0x36, &f1, 0);
+            TRACE("ELK:AVTCMD_SET_LOOK_END\n");
+            break;
+        }
+        case 0x10A: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            CHAR* pName = (CHAR*)(m_pDseg + i2);
+            TRACE("STA\x81" "F%d, %s\n", i1, pName);
+            m_pCurrentActor->_pAvatar->reqCommand(0x38, pName, i1);
+            break;
+        }
+        case 0x10B: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            CHAR* pName = (CHAR*)(m_pDseg + i2);
+            INT nIdx = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            CAvatar* p = getAvatar(nIdx);
+            TRACE("STX\x81" "F%d, %s\n", i1, pName);
+            p->reqCommand(0x38, pName, i1);
+            break;
+        }
+        case 0x10C: {
+            FVECTOR vPos;
+            vPos.z = m_S[m_SP--].F;
+            vPos.y = m_S[m_SP--].F;
+            vPos.x = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP].I;
+            TRACE("SUP:%d,%f,%f,%f\n", i1, vPos.x, vPos.y, vPos.z);
+            switch (i1) {
+            case 0:
+                g_pPlayer->warp(vPos);
+                break;
+            case 1:
+                break;
+            case 2: {
+                CTask* pTask = CTaskMan::getSysTask(0x19);
+                if (!pTask) break;
+                SLContainerT<CTask>* pContainer = ((CBattleEnemyManager*)pTask)->getFirstBattleEnemy();
+                while (pContainer) {
+                    CTask* p = pContainer->getValue();
+                    if (p) {
+                        if (p->getTypeID() == 0x1004) {
+                            if ((UINT)((CEntity*)p)->getID() % 10000 == 122) {
+                                ((CEntity*)p)->warp(vPos);
+                                break;
+                            }
+                        }
+                    }
+                    pContainer = pContainer->getNext();
+                }
+                break;
+            }
+            default:
+                TRACE("ATEL:\x83G\x83\x89\x81[\x81" "FsetUnknownPos\x81@\x91\xb6\x8d\xdd\x82\xb5\x82\xc8\x82\xa2\x83p\x83\x89\x83\x81\x81[\x83^\n");
+                break;
+            }
+            break;
+        }
+        case 0x10D: {
+            FVECTOR vRot;
+            vRot.z = m_S[m_SP--].F;
+            vRot.y = m_S[m_SP--].F;
+            vRot.x = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP].I;
+            TRACE("SUR:%d,%f,%f,%f\n", i1, vRot.x, vRot.y, vRot.z);
+            switch (i1) {
+            case 0:
+                vRot.z = DEG2RAD(vRot.z);
+                vRot.y = DEG2RAD(vRot.y);
+                vRot.x = DEG2RAD(vRot.x);
+                g_pPlayer->setRot(vRot);
+                break;
+            case 1:
+                g_pPlayer->getPlayerCamera()->initCamera(1, 1, &vRot);
+                break;
+            case 2: {
+                CTask* pTask = CTaskMan::getSysTask(0x19);
+                if (!pTask) break;
+                SLContainerT<CTask>* pContainer = ((CBattleEnemyManager*)pTask)->getFirstBattleEnemy();
+                while (pContainer) {
+                    CTask* p = pContainer->getValue();
+                    if (p) {
+                        if (p->getTypeID() == 0x1004) {
+                            if ((UINT)((CEntity*)p)->getID() % 10000 == 122) {
+                                ((CEntity*)p)->setRot(vRot);
+                                break;
+                            }
+                        }
+                    }
+                    pContainer = pContainer->getNext();
+                }
+                break;
+            }
+            default:
+                TRACE("ATEL:\x83G\x83\x89\x81[\x81" "FsetUnknownRot\x81@\x91\xb6\x8d\xdd\x82\xb5\x82\xc8\x82\xa2\x83p\x83\x89\x83\x81\x81[\x83^\n");
+                break;
+            }
+            break;
+        }
+        case 0x10E: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("enableNotSemiModel: %d,%d", i1, i2);
+            m_pCurrentActor->_pAvatar->reqCommand(0x39, &i1, i2);
+            break;
+        }
+        case 0x10F: {
+            INT i2 = m_S[m_SP--].I;
+            CHAR* pName = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            CGame::reqPlayMovie(pName, 1);
+            TRACE("ATEL:playMovie %s, %d\n", pName, i2);
+            break;
+        }
+        case 0x110: {
+            INT frame = m_S[m_SP--].I;
+            INT param = m_S[m_SP--].I;
+            INT flag = m_S[m_SP].I;
+            CrossFadeColorStruct Color;
+            TRACE("ATEL:CrossFade %d, %d\n", flag, param);
+            switch (flag) {
+            case 0:
+                CAtelCrossFade::m_pInstance->reqCommand(0x640, NULL, 0);
+                break;
+            case 1:
+                CAtelCrossFade::m_pInstance->reqCommand(0x641, NULL, 0);
+                TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83" "C\x83\x81\x81[\x83W\x82r\x82s\x82n\x82q\x82" "d\n");
+                break;
+            case 2:
+                CAtelCrossFade::m_pInstance->reqCommand(0x642, NULL, 0);
+                TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83" "C\x83\x81\x81[\x83W\x82" "c\x82q\x82`\x82v\n");
+                break;
+            case 3:
+                Color.color = param;
+                TRACE("CROSS_FADE : R:%d : G:%d : B:%d : A:%d\n", (UINT)param >> 24, (param >> 16) & 0xFF, (param >> 8) & 0xFF, param & 0xFF);
+                CAtelCrossFade::m_pInstance->reqCommand(0x643, &Color, 0);
+                break;
+            case 4:
+                Color.color = param;
+                TRACE("CROSS_FADE : R:%d : G:%d : B:%d : A:%d : Frame:%d\n", (UINT)param >> 24, (param >> 16) & 0xFF, (param >> 8) & 0xFF, param & 0xFF, frame);
+                Color.AnimFrame = frame;
+                CAtelCrossFade::m_pInstance->reqCommand(0x644, &Color, 0);
+                break;
+            }
+            break;
+        }
+        case 0xED: {
+            INT i3 = m_S[m_SP--].I;
+            INT door = m_S[m_SP--].I;
+            INT room = m_S[m_SP].I;
+            TRACE("ChangeRoom:room:%d,door:%d,scene:%d\n", room, door, i3);
+            if (CGameWork::getFlag(1, 0x33)) {
+                CGameWork::setFlag(1, 0x34, TRUE);
+                m_pCurrentActor->_ATP.status = 25;
+                break;
+            }
+            if (room < 0 || door < 0) {
+                if (room == -2) {
+                    INT mode = CGame::getDbgGameMode();
+                    if (mode < 9) {
+                        if (mode >= 7) {
+                            CGame::reqCompleteGame();
+                            break;
+                        }
+                    }
+                    CSceneInfo::reqChangeGoalRoom();
+                    break;
+                } else if (room == -3) {
+                    CGame::reqCompleteGame();
+                    break;
+                } else {
+                    RoomInfo* pRoom = CSceneInfo::getRoomInfo(-1);
+                    BOOL bFound = FALSE;
+                    if (room == -1) {
+                        if (!pRoom || !roomHasStorageInfo(pRoom)) {
+                            CSceneInfo::reqChangeScene(CSceneInfo::getCurrentAreaNum(), CSceneInfo::getCurrentSceneNum(), -1, 0, 1);
+                            break;
+                        }
+                        INT i;
+                        for (i = 0; i < 4; i++) {
+                            if (pRoom->_doors[i].getDoorState() == 1) {
+                                door = pRoom->_doors[i]._id;
+                                bFound = TRUE;
+                                break;
+                            }
+                        }
+                    }
+                    if (bFound) {
+                        CSceneInfo::reqEnterDoor((DOOR_ID)door);
+                        break;
+                    }
+                    if (room == -1) room = CSceneInfo::getPrevRoomID();
+                    if (door == -1) door = CSceneInfo::getEnteredDoorID();
+                    switch (CSceneInfo::getEnteredDoorID()) {
+                    default:
+                        door = 2;
+                        break;
+                    case 1:
+                        door = 3;
+                        break;
+                    case 2:
+                        door = 0;
+                        break;
+                    case 3:
+                        door = 1;
+                        break;
+                    }
+                }
+            }
+            if (!CSceneInfo::reqChangeRoom(room, (DOOR_ID)door, -1)) {
+                TRACE("\x95\x94\x89\xae\x82\xcc\x83V\x81[\x83\x93\x82\xaa\x82\xc8\x82\xa2\x82\xa9\x82\xe7\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x93K\x93\x96\x82\xc9\x8ew\x92\xe8\x82\xb5\x82\xc4\x94\xf2\x82\xce\x82\xb7\n");
+                CSceneInfo::reqChangeRoom(room, (DOOR_ID)door, 3);
+            }
+            break;
+        }
+        case 0xEE: {
+            INT i1 = m_S[m_SP].I;
+            TRACE("EnterBattle:%d\n", i1);
+            if (CGameWork::getFlag(1, 0x33)) {
+                CGameWork::setFlag(1, 0x34, TRUE);
+                m_pCurrentActor->_ATP.status = 25;
+                break;
+            }
+            if (CSceneInfo::getCurrentSceneNum() < 2000) CGameWork::setFlag(1, 5, TRUE);
+            CSceneInfo::reqEnterBattle(i1);
+            break;
+        }
+        case 0xB1: {
+            FLOAT fFar = m_S[m_SP--].F;
+            FLOAT fNear = m_S[m_SP].F;
+            CDeFocus::setManual(fNear, fFar);
+            _TRACE(m_bTrace, "deFocus_man %f %f\n", fNear, fFar);
+            break;
+        }
+        case 0xB3: {
+            AvatarScaleParam param;
+            param._nTime = m_S[m_SP--].I;
+            param._vTarget.w = 0.0f;
+            param._vTarget.z = m_S[m_SP--].F;
+            param._vTarget.y = m_S[m_SP--].F;
+            param._vTarget.x = m_S[m_SP].F;
+            if (m_pCurrentActor->_pAvatar) {
+                m_pCurrentActor->_pAvatar->reqCommand(0xF, &param, 0);
+                _TRACE(m_bTrace, "--- SCALING - player ---\n");
+            }
+            break;
+        }
+        case 0xBA: {
+            AvatarMotionParamEx param;
+            param._fPlaySpeed = m_S[m_SP--].F;
+            param._nDakkoRsrcID = m_S[m_SP--].I;
+            param._nDakkoMotionID = m_S[m_SP--].I;
+            param._nRsrcID = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            param._nMotionID = i1 & 0xFFF;
+            param._nFlag = (i1 >> 12) & 3;
+            if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0x15, &param, 0);
+            break;
+        }
+        case 0xBB: {
+            FadeCreateParam param;
+            param.layer = m_S[m_SP--].I;
+            param.fRate = m_S[m_SP--].F;
+            param.kind = m_S[m_SP].I;
+            CAtel* pAtel = (CAtel*)CTaskMan::getSysTask(0x1A);
+            pAtel->setScreenFader(param.kind, param.fRate, param.layer);
+            TRACE("--- WNDCMD_FADER ---\n");
+            break;
+        }
+        case 0xBC: {
+            AvatarMotionParamC param;
+            param._fPlaySpeed = m_S[m_SP--].F;
+            i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            nID = searchActor((CHAR*)(m_pDseg + c));
+            if (nID < 0) {
+                _TRACE(m_bTrace, "MTO NG01:%s\n", m_pDseg + c);
+                break;
+            }
+            CAvatar* p = getAvatar(nID);
+            if (p) {
+                param._nMotionID = i1 & 0xFFF;
+                param._nFlag = (i1 >> 12) & 3;
+                p->reqCommand(0x13, &param, 0);
+            }
+            break;
+        }
+        case 0xBD: {
+            FLOAT fRate = m_S[m_SP--].F;
+            INT i5 = m_S[m_SP--].I;
+            FLOAT f3 = m_S[m_SP--].F;
+            FLOAT f2 = m_S[m_SP--].F;
+            FLOAT f1 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP--].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nIdx < 0) {
+                TRACE("MTO NG01:%d\n", nIdx);
+                break;
+            }
+            TRACE("CAR %d %f %f %f\n", i1, f1, f2, f3);
+            TRACE("    %d %f\n", i5, fRate);
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i1) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i1);
+            CameraManCreateParam param;
+            param.fOffsetY = 1.5f;
+            param.pathDateTargetID = nIdx;
+            if (i5 >= 0) param.changeFlag = 0; else param.changeFlag = 1;
+            param.pathDateLocalID = 0;
+            setFVector(param.cameraPos, f1, f2, f3);
+            param.changeKind = i5 & 0xFF;
+            param.changeKind2 = (i5 >> 8) & 0xFF;
+            param.fChangeRate = fRate + 1000.0f;
+            param.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x44C, &param, i1);
+            break;
+        }
+        case 0xBE: {
+            FLOAT fRate = m_S[m_SP--].F;
+            INT i5 = m_S[m_SP--].I;
+            FLOAT f3 = m_S[m_SP--].F;
+            FLOAT f2 = m_S[m_SP--].F;
+            FLOAT f1 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP--].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nIdx < 0) {
+                TRACE("MTO NG01:%d\n", nIdx);
+                break;
+            }
+            TRACE("REL %d %f %f %f\n", i1, f1, f2, f3);
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i1) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i1);
+            CameraManCreateParam param;
+            param.fOffsetY = 1.5f;
+            param.pathDateTargetID = nIdx;
+            setFVector(param.cameraPos, f1, f2, f3);
+            param.changeKind = i5 & 0xFF;
+            param.changeKind2 = (i5 >> 8) & 0xFF;
+            param.fChangeRate = fRate + 1000.0f;
+            param.pathDateLocalID = 0;
+            param.changeFlag = 0;
+            param.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x45F, &param, i1);
+            break;
+        }
+        case 0xBF: {
+            FLOAT fRate = m_S[m_SP--].F;
+            INT i5 = m_S[m_SP--].I;
+            FLOAT f3 = m_S[m_SP--].F;
+            FLOAT f2 = m_S[m_SP--].F;
+            FLOAT f1 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP--].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nIdx < 0) {
+                TRACE("MTO NG01:%d\n", nIdx);
+                break;
+            }
+            TRACE("CLK %d %f %f %f\n", i1, f1, f2, f3);
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i1) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i1);
+            CameraManCreateParam param;
+            param.fOffsetY = 1.5f;
+            param.pathDateTargetID = nIdx;
+            setFVector(param.cameraPos, f1, f2, f3);
+            param.changeKind = i5 & 0xFF;
+            param.changeKind2 = (i5 >> 8) & 0xFF;
+            param.fChangeRate = fRate + 1000.0f;
+            param.pathDateLocalID = 0;
+            param.changeFlag = 0;
+            param.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x463, &param, i1);
+            break;
+        }
+        case 0xC1: {
+            c = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            m_S[++m_SP].I = player_rsrc(i1, c);
+            break;
+        }
+        case 0xC2: {
+            c = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            _TRACE(m_bTrace, "wk_CMD %x : %x \n", i1, c);
+            acWaitChangeWork(*m_pCurrentActor, i1, c, m_Pctr);
+            ret = ATEL_RET_WKWAIT; r = 3;
+            break;
+        }
+        case 0xC3: {
+            AvatarMoveParam param;
+            param._fTime = m_S[m_SP--].F;
+            param._nType = m_S[m_SP--].I;
+            param._nMotion = m_S[m_SP--].I;
+            param._pszPathFile = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            if (m_pCurrentActor->_pAvatar) {
+                if (param._fTime != -1.0f) {
+                    m_pCurrentActor->_pAvatar->reqCommand(0xD, &param, 0);
+                } else {
+                    m_pCurrentActor->_pAvatar->reqCommand(0xB, param._pszPathFile, 0);
+                }
+                _TRACE(m_bTrace, "--- START MOVE-ACTOR-PATH Type::%x ---\n", param._nType);
+            }
+            break;
+        }
+        case 0xC6: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            CHAR* pName = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            TRACE("voice_play %s %d %d\n", pName, i2, i3);
+            m_S[++m_SP].I = CSound::playVoice(pName, i2, i3);
+            break;
+        }
+        case 0xC7:
+            CSound::stopVoice(m_S[m_SP].I);
+            break;
+        case 0xC8: {
+            INT n = m_S[m_SP].I; /* unused: its address base is reused (rematerialized) for the push, as in the original */
+            m_S[++m_SP].I = CSound::isVoicePlaying();
+            break;
+        }
+        case 0xC9: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            CSound::setVoiceVolume(i1, i2, i3);
+            break;
+        }
+        case 0xCA: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            if (i2 == -1) i2 = 0x40;
+            CSound::setVoicePan(i1, i2, i3);
+            break;
+        }
+        case 0xCB: {
+            INT i4 = m_S[m_SP--].I;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            if (i3 == -1) i3 = 0x40;
+            CSound::setVoicePanAndVol(i1, i2, i3, i4);
+            break;
+        }
+        case 0xCC: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("voice_fadeout  %d %d\n", i1, i2);
+            CSound::fadeoutVoice(i1, i2);
+            break;
+        }
+        case 0xCD: {
+            FLOAT f2 = m_S[m_SP--].F;
+            FLOAT f1 = m_S[m_SP--].F;
+            c = m_S[m_SP].I;
+            _TRACE(m_bTrace, "defoucus %d : %f : %f \n", c, f1, f2);
+            CDeFocus::BlurSet(c, f1, f2, 0);
+            break;
+        }
+        case 0xCE: {
+            i1 = m_S[m_SP--].I;
+            c = m_S[m_SP--].I;
+            INT nL = m_S[m_SP--].I;
+            INT nS = m_S[m_SP].I;
+            _TRACE(m_bTrace, "VIB \n");
+            CPadIO::startVibration(nS, nL, c * 50, i1);
+            break;
+        }
+        case 0xCF:
+            c = m_S[m_SP].I;
+            m_SP -= 2;
+            break;
+        case 0xD0: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("voice_play_id:playVsb %d %d %d\n", i1, i2, i3);
+            INT n = CSound::playVsb(i1 | 0x10000000, i2, i3);
+            m_S[++m_SP].I = n;
+            break;
+        }
+        case 0xD1: {
+            INT i1 = m_S[m_SP - 1].I;
+            INT i2 = m_S[m_SP].I;
+            INT n = 0;
+            CGameWork::setByte(1, 0, n);
+            if (i2 < 0x100) n++;
+            CChatMan::instance().reqCommand(0x3F9, &n, i1);
+            acWaitSelectPadEx(*m_pCurrentActor, i1, i2, m_Pctr);
+            ret = ATEL_RET_XWAIT; r = 3;
+            break;
+        }
+        case 0xD3:
+            acWaitBusy(*m_pCurrentActor, m_S[m_SP].I, m_Pctr);
+            ret = ATEL_RET_BWAIT; r = 3;
+            break;
+        case 0xD4:
+            _TRACE(m_bTrace, "BlurDistanceSet %f\n", m_S[m_SP].F);
+            CDeFocus::BlurDistanceSet(m_S[m_SP].F, 0);
+            break;
+        case 0xD5: {
+            i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + c));
+            acWaitBusyActor(*m_pCurrentActor, i1, nIdx, m_Pctr);
+            ret = ATEL_RET_BAWAIT; r = 3;
+            break;
+        }
+        case 0xEF: {
+            c = m_S[m_SP].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + c));
+            acWaitActor(*m_pCurrentActor, 7, nIdx, m_Pctr);
+            ret = ATEL_RET_ACWAIT; r = 3;
+            break;
+        }
+        case 0xF0: {
+            AvatarModelDispParam param;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            param._iNo = i2 - 1;
+            param._nState = i1;
+            m_pCurrentActor->_pAvatar->reqCommand(7, &param, 0);
+            break;
+        }
+        case 0xF1: {
+            FLOAT f3 = m_S[m_SP--].F;
+            FLOAT f2 = m_S[m_SP--].F;
+            FLOAT f1 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP--].I;
+            FVECTOR vPos;
+            setFVector(vPos, f1, f2, f3);
+            m_hEffect = CEffectMan::setEffect((CHAR*)(m_pDseg + m_S[m_SP].I), i1, (ObjType::eObjType)4, &vPos, NULL, 0.0f);
+            break;
+        }
+        case 0xD7: {
+            CHAR* pszAP = (CHAR*)(m_pDseg + m_S[m_SP--].I);
+            INT name = m_S[m_SP].I;
+            TRACE("%s,%s\n", pszAP, m_pDseg + name);
+            nID = searchActor((CHAR*)(m_pDseg + name));
+            if (m_pCurrentActor->_pAvatar) {
+                m_pCurrentActor->_pAvatar->reqCommand(5, pszAP, nID);
+                _TRACE(m_bTrace, "--- ATTACH - %s(%d)\n", pszAP, nID);
+            }
+            break;
+        }
+        case 0xD8: {
+            i1 = m_S[m_SP].I;
+            _TRACE(m_bTrace, "BlurSetEvent %f \n", i1);
+            if (i1 >= 0) CDeFocus::BlurSetEvent(i1); else CDeFocus::BlurReturnEvent();
+            break;
+        }
+        case 0xDA: {
+            i1 = m_S[m_SP--].I;
+            nID = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nID < 0) {
+                _TRACE(m_bTrace, "face set NG01:%s\n", m_pDseg + m_S[m_SP].I);
+                break;
+            }
+            getAvatar(nID)->reqCommand(0x38, NULL, i1);
+            break;
+        }
+        case 0xA9:
+        case 0xAB:
+        case 0xB0:
+        case 0xB2:
+        case 0xB7:
+        case 0xB9:
+        case 0xD9:
+        case 0xDC:
+        case 0xDD:
+        case 0xDE:
+        case 0xDF:
+        case 0xE0:
+        case 0xE2:
+        case 0xE4:
+        case 0xF9:
+        case 0x111:
+        case 0x112:
+            break;
+        default:
+            return 4;
+        }
+    } while (r == 0);
+    return r;
+}
 INT CVSM::getActorIndex(const CHAR* pszName) const {
     for (INT i = 0; i < m_ActorCount; i++) {
         if (strcmp(pszName, m_ActorTbl[i]._ATP.name) == 0) return i;
@@ -3528,17 +5784,6 @@ BOOL CVSM::player_rsrc(INT nCmnd, INT nArg) {
     _TRACE(m_bTrace, "bad case RSC_CMD %d\n", nArg);
     return FALSE;
 }
-namespace ATEL {
-struct ChatWndSetWordsParam;
-struct ChatWndCreateCTDParam {
-    CPointI pos;
-    CPointI cyobiPos;
-    UINT ctdID;
-    UINT waitFrame;
-    ChatWndSetWordsParam* pCwswp;
-    UINT nLine;
-};
-}
 FLOAT RotTransPers(FVECTOR& outV, const FMATRIX& inM, const FVECTOR& inV); /* System/Graphic/Gprim.h in the original */
 extern INT SCREEN_HEIGHT;
 void CVSM::ctd_cal(const CAvatar* in_pAvatar, int i2, int i3, ChatWndCreateCTDParam* CWCP) {
@@ -3693,812 +5938,164 @@ void CEventLineDisp::disp() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", __static_initialization_and_destruction_0_002505D8);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _TRACE___4ATELiPCce);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", isInitComplete__CQ24ATEL4CVSM);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", startMain__Q24ATEL4CVSM);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", isMainStarted__CQ24ATEL4CVSM);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", getAvatar__Q24ATEL4CVSMi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", getEventTrap__Q24ATEL4CVSMi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", getAvatarName__Q24ATEL4CVSMi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", getActorNum__Q24ATEL4CVSM);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", setPC__Q24ATEL4CVSMi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", getPC__CQ24ATEL4CVSM);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", clearFlag__Q24ATEL4CVSMi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", setFlag__Q24ATEL4CVSMi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", isFlagOn__CQ24ATEL4CVSMi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _GLOBAL_$I$c__KHCOM_MainApp_Game_Atel_VSME.cppEPaaaa);
-/* Placeholder for the end of .rodata, which gcc emits after the vtables (a deferred static const): CVSM's vtable
-   (its key function ~CVSM is still asm), the static initializer's constants and strings (the initializer is asm)
-   and execExt3Code's cardDataTbl (asm). Bytes from the original, pointers as relocations. */
-extern "C" char _rt0[] __asm__("D_0048DF10");
-extern "C" char _rt1[] __asm__("D_0048E1A0");
-extern "C" char _rt2[] __asm__("D_00491D80");
-extern "C" char _rt3[] __asm__("D_00491DC8");
-extern "C" char _rt4[] __asm__("D_00491E10");
-extern "C" char _rt5[] __asm__("D_00491E58");
-extern "C" char _rt6[] __asm__("D_00491EA0");
-extern "C" char _rt7[] __asm__("D_00491F08");
-extern "C" char _rt8[] __asm__("D_00491F50");
-extern "C" char _rt9[] __asm__("D_00491F98");
-extern "C" char _rt10[] __asm__("D_00492028");
-extern "C" char _rt11[] __asm__("D_00492070");
-extern "C" char _rt12[] __asm__("D_004920B8");
-extern "C" char _rt13[] __asm__("D_00492100");
-extern "C" char _rt14[] __asm__("D_00492148");
-extern "C" char _rt15[] __asm__("D_00492190");
-extern "C" char _rt16[] __asm__("D_00492248");
-extern "C" char _rt17[] __asm__("D_00492290");
-extern "C" char _rt18[] __asm__("D_004922D8");
-extern "C" char _rt19[] __asm__("D_00492320");
-extern "C" char _rt20[] __asm__("D_004923A8");
-extern "C" char _rt21[] __asm__("D_00492430");
-extern "C" char _rt22[] __asm__("D_004924C8");
-extern "C" char _rt23[] __asm__("D_00492530");
-extern "C" char _rt24[] __asm__("D_00492580");
-extern "C" char _rt25[] __asm__("D_004925B8");
-extern "C" char _rt26[] __asm__("D_004925F0");
-extern "C" char _rt27[] __asm__("D_00492628");
-extern "C" char _rt28[] __asm__("D_00492660");
-extern "C" char _rt29[] __asm__("D_00492698");
-extern "C" char _rt30[] __asm__("D_004926D0");
-extern "C" char _rt31[] __asm__("D_00492708");
-extern "C" char _rt32[] __asm__("D_00492740");
-extern "C" char _rt33[] __asm__("D_00492790");
-extern "C" char _rt34[] __asm__("D_004927F0");
-extern "C" char _rt35[] __asm__("D_00492800");
-extern "C" char _rt36[] __asm__("D_00492810");
-extern "C" char _rt37[] __asm__("D_00492820");
-extern "C" char _rt38[] __asm__("D_00492830");
-extern "C" char _rt39[] __asm__("D_00492840");
-extern "C" char _rt40[] __asm__("D_00492898");
-extern "C" char _rt41[] __asm__("D_004929F8");
-extern "C" char _rt42[] __asm__("D_00492A48");
-extern "C" char _rt43[] __asm__("D_00492A88");
-extern "C" char _rt44[] __asm__("D_00492AC8");
-extern "C" char _rt45[] __asm__("D_00492B00");
-extern "C" char _rt46[] __asm__("D_00492B38");
-extern "C" char _rt47[] __asm__("D_00492B78");
-extern "C" char _rt48[] __asm__("D_00492BB0");
-extern "C" char _rt49[] __asm__("D_00492BE8");
-extern "C" char _rt50[] __asm__("D_00492C20");
-extern "C" char _rt51[] __asm__("D_00492C60");
-extern "C" char _rt52[] __asm__("D_00492C98");
-extern "C" char _rt53[] __asm__("D_00492CD0");
-extern "C" char _rt54[] __asm__("D_00492D00");
-extern "C" char _rt55[] __asm__("D_00492D40");
-extern "C" char _rt56[] __asm__("D_00492DD0");
-extern "C" char _rt57[] __asm__("D_00492E18");
-extern "C" char _rt58[] __asm__("D_00492E60");
-extern "C" char _rt59[] __asm__("D_00492EA8");
-extern "C" char _rt60[] __asm__("D_00492EF0");
-extern "C" char _rt61[] __asm__("D_00492F38");
-extern "C" char _rt62[] __asm__("D_00492F80");
-extern "C" char _rt63[] __asm__("D_00492FC8");
-extern "C" char _rt64[] __asm__("D_00493010");
-extern "C" char _rt65[] __asm__("D_00493058");
-extern "C" char _rt66[] __asm__("D_004930A0");
-extern "C" char _rt67[] __asm__("D_004930E8");
-extern "C" char _rt68[] __asm__("D_006884E0");
-extern "C" char _rt69[] __asm__("D_00688508");
-extern "C" char _rt70[] __asm__("D_00688530");
-extern "C" char _rt71[] __asm__("D_00688558");
-extern "C" char _rt72[] __asm__("D_00688760");
-extern "C" char _rt73[] __asm__("D_00688788");
-extern "C" char _rt74[] __asm__("D_006887B0");
-extern "C" char _rt75[] __asm__("D_006887D8");
-extern "C" char _rt76[] __asm__("D_00688800");
-extern "C" char _rt77[] __asm__("D_00688E68");
-extern "C" char _rt78[] __asm__("D_00688E90");
-extern "C" char _rt79[] __asm__("D_00688EB8");
-extern "C" char _rt80[] __asm__("D_00688EE0");
-extern "C" char _rt81[] __asm__("DebugSetGameWorkParam__8DWTEventP12CDebugWindowii");
-extern "C" char _rt82[] __asm__("DebugSetPoohFlag__8DWTEventP12CDebugWindowii");
-extern "C" char _rt83[] __asm__("_$_Q24ATEL4CVSM");
-extern "C" char _rt84[] __asm__("_12CDebugWindow$none");
-extern "C" char _rt85[] __asm__("_3DWT$szOffOn");
-extern "C" char _rt86[] __asm__("_3DWT$szOnOff");
-extern "C" char _rt87[] __asm__("_9DebugWork$g_dw");
-extern "C" char _rt88[] __asm__("debugBtlReportCallBackParam__8DWTEventP12CDebugWindowii");
-extern "C" char _rt89[] __asm__("debugGameInfomationParam__8DWTEventP12CDebugWindowii");
+/* Initialized at run time (SCREEN_HEIGHT, value-name lookups by the current g_dw values): these make up the
+   static initializer. */
+namespace DWTEvent {
+extern DEBUG_WINDOW_LINE debugKeyTresurLine[];
+extern DEBUG_WINDOW_LINE debugWinCardPossibleLine[];
+extern DEBUG_WINDOW_LINE debugWinEventSelectPlayerLine[];
+extern DEBUG_WINDOW_LINE debugWinFriendPossibleLine[];
+extern DEBUG_WINDOW_LINE debugWinJiminyLine[];
+extern DEBUG_WINDOW_LINE debugWinKH2CardGetLine[];
+extern DEBUG_WINDOW_LINE debugWinMovieLine[];
+extern DEBUG_WINDOW_LINE debugWinMovieLineRiku[];
+extern DEBUG_WINDOW_LINE debugWinPcSkillLine[];
+extern DEBUG_WINDOW_LINE debugWinTuEndLine[];
+extern DEBUG_WINDOW_LINE debugWinWorldIntroLine[];
+extern LPCSTR szDifficultMode[];
+extern LPCSTR szMenuKind[];
+extern LPCSTR szMiniGameKind[];
+extern LPCSTR szMiniGamePlayState[];
+extern LPCSTR szMiniGameState[];
+extern LPCSTR szPlayMode[];
+extern LPCSTR szSoundMode[];
+extern LPCSTR szStockKindName[];
+static DEBUG_WINDOW_LINE debugBtlReportLine[22] = {
+    { "\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b       \x81@:%s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, NULL, NULL },
+    { "\x83W\x83~\x83j\x81[\x92" "B\x90\xac\x97\xa6     \x81@:%d", &DebugWork::g_dw.atelwork.BtlMemo, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N \x81@:--", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@\x81@ \x81@:%d", &DebugWork::g_dw.atelwork.KillEnemyCount, 4, { 0 }, 0, 0.0f, 999999.0f, 1000.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xcc\x90\x94     \x81@:%d/24", &DebugWork::g_dw.atelwork.KeysTresur, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83J\x81[\x83h\x83u\x83\x8c\x83" "C\x83N\x89\xf1\x90\x94 \x81@:%d", &DebugWork::g_dw.atelwork.CardBreakCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x8d\xc5\x82\xe0\x8eg\x82\xc1\x82\xbd\x83X\x83g\x83" "b\x83N\x8bZ :%s", &DebugWork::g_dw.atelwork.StockKind, 4, { 0 }, 0, 0.0f, 78.0f, 1.0f, &szStockKindName[DebugWork::g_dw.atelwork.StockKind], 0, debugBtlReportCallBackParam, NULL },
+    { "        \x81@\x81@\x81@\x81@\x89\xf1\x90\x94 :%d", &DebugWork::g_dw.atelwork.StockCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x83N\x83\x8a\x83" "A\x8e\x9e\x8a\xd4\x81@\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.Hour, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x81@\x81@  \x81@\x95\xaa\x81@\x81@\x81@\x81@   :%d", &DebugWork::g_dw.atelwork.minit, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b\x81@\x81@\x81@\x81@ :%s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, NULL, NULL },
+    { "\x82" "c\x83\x8c\x83|\x81[\x83g\x92" "B\x90\xac\x97\xa6     :%d", &DebugWork::g_dw.atelwork.BtlMemo, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N   :--", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83X\x83s\x81[\x83h\x83u\x83\x8c\x83" "C\x83N     :%d", &DebugWork::g_dw.atelwork.SpeedCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.KillEnemyCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x83" "f\x83\x85\x83G\x83\x8b\x82\xcc\x8f\x9f\x97\xa6       :%5.2f", &DebugWork::g_dw.atelwork.DuelWin, 4, { 0 }, 1, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x82" "c\x83\x82\x81[\x83h\x94\xad\x93\xae\x89\xf1\x90\x94     :%d", &DebugWork::g_dw.atelwork.DarkCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x83N\x83\x8a\x83" "A\x8e\x9e\x8a\xd4\x81@\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.Hour, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x81@\x81@  \x81@\x95\xaa\x81@\x81@\x81@\x81@   :%d", &DebugWork::g_dw.atelwork.minit, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+static DEBUG_WINDOW_TBL debugBtlReport = { "\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 29, 12, 0, 0, debugBtlReportLine, NULL, debugBtlReportCallBack };
+static DEBUG_WINDOW_TBL debugKeyTresur = { "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xa0\x82\xaf\x82\xbd\x90\x94", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugKeyTresurLine, NULL, debugKeyTresurCallBack };
+static DEBUG_WINDOW_TBL debugWinJiminy = { "\x83W\x83~\x83j\x81[\x83\x81\x83\x82", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 25, 12, 0, 0, debugWinJiminyLine, NULL, NULL };
+static DEBUG_WINDOW_TBL debugWinKH2CardGet = { "\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 13, 12, 0, 0, debugWinKH2CardGetLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_LINE debugGameInfomationLine[12] = {
+    { "\x83v\x83\x8c\x83" "C\x83\x82\x81[\x83h         : %s", &DebugWork::g_dw.atelwork.iPlayMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szPlayMode[DebugWork::g_dw.atelwork.iPlayMode], 0, NULL, NULL },
+    { "\x83R\x83x\x83" "c\x83Q\x81[\x83\x80\x83N\x83\x8a\x83" "A   : %s", &DebugWork::g_dw.atelwork.iDistinctionClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
+    { "\x82j\x82g\x82Q\x83N\x83\x8a\x83" "A         : %s", &DebugWork::g_dw.atelwork.iGameKH2clear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
+    { "\x83\\\x83\x89\x83N\x83\x8a\x83" "A           : %s", &DebugWork::g_dw.atelwork.iSoraClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
+    { "\x83\x8a\x83N\x83N\x83\x8a\x83" "A           : %s", &DebugWork::g_dw.atelwork.iRikuClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
+    { "\x83\\\x83\x89" "EN\x83t\x83\x89\x83O         : %d", &DebugWork::g_dw.atelwork.iEnSoraEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x8a\x83NEN\x83t\x83\x89\x83O         : %d", &DebugWork::g_dw.atelwork.iEnRikuEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83KILL     : %s", &DebugWork::g_dw.atelwork.iMahluciaKilled, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
+    { "\x83v\x83\x8c\x83" "C\x82\xc8\x82\xf1\x82\xa2\x82\xc7       : %s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, debugGameInfomationParam, NULL },
+    { "\x83T\x83" "E\x83\x93\x83h\x83\x82\x81[\x83h       : %s", &DebugWork::g_dw.atelwork.iSoundMode, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szSoundMode[DebugWork::g_dw.atelwork.iSoundMode], 0, NULL, NULL },
+    { "\x83o\x83" "C\x83u\x83\x8c\x81[\x83V\x83\x87\x83\x93     : %s", &DebugWork::g_dw.atelwork.iVibrat, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, (LPCSTR*)DWT::szOnOff, 0, NULL, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+static DEBUG_WINDOW_TBL debugGameInfomation = { "\x83Q\x81[\x83\x80\x8f\xee\x95\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 13, 12, 0, 0, debugGameInfomationLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinTuEnd = { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x8fI\x97\xb9", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 7, 12, 0, 0, debugWinTuEndLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinMovieRiku = { "\x83\x80\x81[\x83r\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 20, 12, 0, 0, debugWinMovieLineRiku, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinMovie = { "\x83\x80\x81[\x83r\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 20, 12, 0, 0, debugWinMovieLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinPcSkill = { "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x83X\x83L\x83\x8b", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 6, 12, 0, 0, debugWinPcSkillLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_LINE debugWinPoohLine[40] = {
+    { "\xf9S----------\xf9V\x83Q\x81[\x83\x80\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2  :%s", &DebugWork::g_dw.atelwork.iPoohMinigameState, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMiniGamePlayState[DebugWork::g_dw.atelwork.iPoohMinigameState], 0, NULL, NULL },
+    { "\x82\xb5\x82\xe3\x82\xe9\x82\xa2    :%s", &DebugWork::g_dw.atelwork.iPoohMinigameKind, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMiniGameKind[DebugWork::g_dw.atelwork.iPoohMinigameKind], 0, NULL, NULL },
+    { "\xf9S----------\xf9V\x82\xc7\x82\xa4\x82\xc9\x82\xe3\x82\xa4\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetPoohFlag, NULL },
+    { "\x83I\x83" "E\x83\x8b      :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetPoohFlag, NULL },
+    { "\x83\x8b\x81[        :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetPoohFlag, NULL },
+    { "\x83" "C\x81[\x83\x88\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetPoohFlag, NULL },
+    { "\x83" "e\x83" "B\x83K\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 16, DebugSetPoohFlag, NULL },
+    { "\x83\x89\x83r\x83" "b\x83g    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 32, DebugSetPoohFlag, NULL },
+    { "\x83S\x81[\x83\x8b\x82P    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 64, DebugSetPoohFlag, NULL },
+    { "\x83S\x81[\x83\x8b\x82Q    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 128, DebugSetPoohFlag, NULL },
+    { "\xf9S----------\xf9V\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%s", &DebugWork::g_dw.atelwork.iPoohGamePiglet, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGamePiglet], 0, DebugSetPoohFlag, NULL },
+    { "\x83I\x83" "E\x83\x8b      :%s", &DebugWork::g_dw.atelwork.iPoohGameOwl, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameOwl], 0, DebugSetPoohFlag, NULL },
+    { "\x83\x8b\x81[        :%s", &DebugWork::g_dw.atelwork.iPoohGameRoo, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameRoo], 0, DebugSetPoohFlag, NULL },
+    { "\x83" "C\x81[\x83\x88\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohGameEeyore, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameEeyore], 0, DebugSetPoohFlag, NULL },
+    { "\x83" "e\x83" "B\x83K\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohGameTigger, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameTigger], 0, DebugSetPoohFlag, NULL },
+    { "\x83\x89\x83r\x83" "b\x83g    :%s", &DebugWork::g_dw.atelwork.iPoohGameRabbit, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameRabbit], 0, DebugSetPoohFlag, NULL },
+    { "\xf9S----------\xf9V\x83N\x83\x8a\x83" "A\x97p\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroPiglet, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroOwl, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroRoo, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroEeyore, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroTigger, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroRabbit, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\xf9S----------\xf9V\x8eg\x82\xa2\x8e\xcc\x82\xc4\x83N\x83\x8a\x83" "A\x97p\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetPiglet, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetOwl, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetRoo, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetEeyore, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetTigger, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetRabbit, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\xf9S----------\xf9V\x83n\x83" "C\x83X\x83R\x83" "A\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreOwl, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
+    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreRoo, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
+    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreEeyore, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
+    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreTigger, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
+    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreRabbit, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+static DEBUG_WINDOW_TBL debugWinPooh = { "\x83v\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 25, 12, 0, 0, debugWinPoohLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinFriendPossible = { "\x83t\x83\x8c\x83\x93\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugWinFriendPossibleLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinCardPossible = { "\x83J\x81[\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 27, 12, 0, 0, debugWinCardPossibleLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinWorldIntro = { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugWinWorldIntroLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_LINE debugWinAtelWorkDefLine[30] = {
+    { "\xf9S----------\xf9VWLV_STORAGE\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinWorldIntro },
+    { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinTuEnd },
+    { "\x83J\x81[\x83h\x89\xf0\x8b\xd6...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinCardPossible },
+    { "\x83t\x83\x8c\x83\x93\x83h\x89\xf0\x8b\xd6...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinFriendPossible },
+    { "\x82P\x82O\x82O\x83G\x81[\x83J\x81[...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPooh },
+    { "\x95W\x8f\x80\x83X\x83L\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPcSkill },
+    { "\x83\x80\x81[\x83r\x81[\x83\\\x83\x89...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinMovie },
+    { "\x83\x80\x81[\x83r\x81[\x83\x8a\x83N...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinMovieRiku },
+    { "\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinKH2CardGet },
+    { "\x83W\x83~\x83j\x81[\x83\x81\x83\x82...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinJiminy },
+    { "\x83Q\x81[\x83\x80\x8f\xee\x95\xf1...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugGameInfomation },
+    { "\x95\xf3\x94\xa0...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugKeyTresur },
+    { "\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugBtlReport },
+    { "\xf9S----------\xf9VWLV_GLOBAL\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "BOSS\x83" "C\x83x\x83\x93\x83g\x83X\x83" "e\x83" "b\x83v : %d", &DebugWork::g_dw.atelwork.iBossEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x81\x83j\x83\x85\x81[\x82\xcc\x8e\xed\x97\xde       : %s", &DebugWork::g_dw.atelwork.iKindMenu, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMenuKind[DebugWork::g_dw.atelwork.iKindMenu], 0, NULL, NULL },
+    { "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x94\xf1\x95\\\x8e\xa6     : %s", &DebugWork::g_dw.atelwork.iPlayerDispOff, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "\x82" "a\x82n\x82r\x82r\x8e\x80\x96S         : %s", &DebugWork::g_dw.atelwork.iBossKilled, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "\x83" "C\x83x\x83\x93\x83g\x83X\x83L\x83" "b\x83v\x95s\x89\xc2 : %s", &DebugWork::g_dw.atelwork.iNotEventSkip, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
+    { "ATEL\x83" "C\x83x\x83\x93\x83g\x92\x86       : %s", &DebugWork::g_dw.atelwork.iIsAtelEvent, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
+    { "PC\x91\x80\x8d\xec\x95s\x89\xc2           : %s", &DebugWork::g_dw.atelwork.iNotPcControl, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "PAUSE\x8b\xd6\x8e~            : %s", &DebugWork::g_dw.atelwork.iNotPause, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86     : %s", &DebugWork::g_dw.atelwork.iIsTutorial, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
+    { "\x83\x8b\x81[\x83\x80\x88\xda\x93\xae\x8b\xd6\x8e~       : %s", &DebugWork::g_dw.atelwork.iNotRoomJump, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
+    { "\x83\x8b\x81[\x83\x80" "Creation\x8b\xd6\x8e~   : %s", &DebugWork::g_dw.atelwork.iNotRoomCreation, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
+    { "\x83n\x81[\x83g\x8fo\x82\xb3\x82\xc8\x82\xa2       : %s", &DebugWork::g_dw.atelwork.iNotHartBtl, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "BTL\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86  : %s", &DebugWork::g_dw.atelwork.iIsBtlTutorial, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b\x92\x86   : %s", &DebugWork::g_dw.atelwork.iIsWorldIntro, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+static DEBUG_WINDOW_TBL debugWinAtelWorkDef = { "ATEL WORK", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 30, 12, 0, 0, debugWinAtelWorkDefLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinEventPlayer = { "ATEL\x81@CONFIG", -206, -(SCREEN_HEIGHT >> 1) + 50, 12, 16, 14, 0, 0, debugWinEventSelectPlayerLine, NULL, debugWinNPCMainlCall };
+}
+/* Placeholder for the end of .rodata, which gcc emits after the static initializer's constants (a deferred
+   static const): execExt3Code's cardDataTbl and its strings. Bytes from the original, pointers as relocations. */
 static const struct {
-    char b0[12];
-    const void* p1;
-    char b2[8];
-    const void* p3;
-    const void* p4;
-    char b5[96];
-    const void* p6;
-    const void* p7;
-    char b8[64];
-    const void* p9;
-    const void* p10;
-    char b11[64];
-    const void* p12;
-    const void* p13;
-    char b14[24];
-    const void* p15;
-    char b16[36];
-    const void* p17;
-    const void* p18;
-    char b19[64];
-    const void* p20;
-    const void* p21;
-    char b22[24];
-    const void* p23;
-    char b24[68];
-    const void* p25;
-    const void* p26;
-    char b27[24];
-    const void* p28;
-    char b29[36];
-    const void* p30;
-    const void* p31;
-    char b32[64];
-    const void* p33;
-    const void* p34;
-    char b35[32];
-    const void* p36;
-    const void* p37;
-    char b38[96];
-    const void* p39;
-    const void* p40;
-    char b41[64];
-    const void* p42;
-    const void* p43;
-    char b44[64];
-    const void* p45;
-    const void* p46;
-    char b47[24];
-    const void* p48;
-    char b49[36];
-    const void* p50;
-    const void* p51;
-    char b52[24];
-    const void* p53;
-    char b54[36];
-    const void* p55;
-    const void* p56;
-    char b57[64];
-    const void* p58;
-    const void* p59;
-    char b60[24];
-    const void* p61;
-    char b62[148];
-    const void* p63;
-    const void* p64;
-    unsigned char b65[16];
-    const void* p66;
-    char b67[4];
-    const void* p68;
-    char b69[36];
-    const void* p70;
-    const void* p71;
-    unsigned char b72[16];
-    const void* p73;
-    char b74[4];
-    const void* p75;
-    char b76[36];
-    const void* p77;
-    const void* p78;
-    unsigned char b79[16];
-    const void* p80;
-    char b81[4];
-    const void* p82;
-    char b83[36];
-    const void* p84;
-    const void* p85;
-    unsigned char b86[16];
-    const void* p87;
-    char b88[4];
-    const void* p89;
-    char b90[100];
-    const void* p91;
-    const void* p92;
-    unsigned char b93[16];
-    const void* p94;
-    char b95[4];
-    const void* p96;
-    char b97[100];
-    const void* p98;
-    const void* p99;
-    unsigned char b100[16];
-    const void* p101;
-    char b102[124];
-    const void* p103;
-    const void* p104;
-    char b105[104];
-    const void* p106;
-    const void* p107;
-    char b108[48];
-    const void* p109;
-    const void* p110;
-    char b111[16];
-    const void* p112;
-    char b113[4];
-    const void* p114;
-    char b115[20];
-    const void* p116;
-    const void* p117;
-    char b118[16];
-    const void* p119;
-    char b120[4];
-    const void* p121;
-    char b122[20];
-    const void* p123;
-    const void* p124;
-    char b125[16];
-    const void* p126;
-    char b127[4];
-    const void* p128;
-    char b129[20];
-    const void* p130;
-    const void* p131;
-    char b132[16];
-    const void* p133;
-    char b134[4];
-    const void* p135;
-    char b136[20];
-    const void* p137;
-    const void* p138;
-    char b139[16];
-    const void* p140;
-    char b141[4];
-    const void* p142;
-    char b143[20];
-    const void* p144;
-    const void* p145;
-    char b146[16];
-    const void* p147;
-    char b148[4];
-    const void* p149;
-    char b150[20];
-    const void* p151;
-    const void* p152;
-    char b153[16];
-    const void* p154;
-    char b155[4];
-    const void* p156;
-    char b157[20];
-    const void* p158;
-    const void* p159;
-    char b160[16];
-    const void* p161;
-    char b162[4];
-    const void* p163;
-    char b164[44];
-    const void* p165;
-    const void* p166;
-    char b167[72];
-    const void* p168;
-    const void* p169;
-    char b170[176];
-    const void* p171;
-    const void* p172;
-    char b173[72];
-    const void* p174;
-    const void* p175;
-    char b176[32];
-    const void* p177;
-    const void* p178;
-    char b179[24];
-    const void* p180;
-    char b181[4];
-    const void* p182;
-    const void* p183;
-    char b184[24];
-    const void* p185;
-    char b186[4];
-    const void* p187;
-    const void* p188;
-    char b189[24];
-    const void* p190;
-    char b191[4];
-    const void* p192;
-    const void* p193;
-    char b194[24];
-    const void* p195;
-    char b196[4];
-    const void* p197;
-    const void* p198;
-    char b199[24];
-    const void* p200;
-    char b201[116];
-    const void* p202;
-    const void* p203;
-    char b204[56];
-    const void* p205;
-    const void* p206;
-    char b207[28];
-    const void* p208;
-    char b209[24];
-    const void* p210;
-    const void* p211;
-    char b212[28];
-    const void* p213;
-    char b214[16];
-    const void* p215;
-    const void* p216;
-    char b217[28];
-    const void* p218;
-    char b219[16];
-    const void* p220;
-    const void* p221;
-    char b222[28];
-    const void* p223;
-    char b224[24];
-    const void* p225;
-    const void* p226;
-    char b227[28];
-    const void* p228;
-    char b229[16];
-    const void* p230;
-    const void* p231;
-    char b232[28];
-    const void* p233;
-    char b234[16];
-    const void* p235;
-    const void* p236;
-    char b237[28];
-    const void* p238;
-    char b239[16];
-    const void* p240;
-    const void* p241;
-    char b242[28];
-    const void* p243;
-    char b244[24];
-    const void* p245;
-    const void* p246;
-    char b247[28];
-    const void* p248;
-    char b249[16];
-    const void* p250;
-    const void* p251;
-    char b252[28];
-    const void* p253;
-    char b254[16];
-    const void* p255;
-    const void* p256;
-    char b257[28];
-    const void* p258;
-    char b259[8];
-    const void* p260;
-    const void* p261;
-    char b262[28];
-    const void* p263;
-    char b264[24];
-    const void* p265;
-    const void* p266;
-    char b267[28];
-    const void* p268;
-    char b269[40];
-    const void* p270;
-    const void* p271;
-    char b272[128];
-    const void* p273;
-    const void* p274;
-    unsigned char b275[16];
-    const void* p276;
-    char b277[4];
-    const void* p278;
-    char b279[36];
-    const void* p280;
-    const void* p281;
-    unsigned char b282[16];
-    const void* p283;
-    char b284[4];
-    const void* p285;
-    char b286[36];
-    const void* p287;
-    const void* p288;
-    char b289[16];
-    const void* p290;
-    char b291[44];
-    const void* p292;
-    const void* p293;
-    char b294[16];
-    const void* p295;
-    char b296[44];
-    const void* p297;
-    const void* p298;
-    unsigned char b299[16];
-    const void* p300;
-    char b301[4];
-    const void* p302;
-    char b303[36];
-    const void* p304;
-    const void* p305;
-    unsigned char b306[16];
-    const void* p307;
-    char b308[4];
-    const void* p309;
-    char b310[36];
-    const void* p311;
-    const void* p312;
-    char b313[16];
-    const void* p314;
-    char b315[44];
-    const void* p316;
-    const void* p317;
-    char b318[16];
-    const void* p319;
-    char b320[44];
-    const void* p321;
-    const void* p322;
-    char b323[16];
-    const void* p324;
-    char b325[44];
-    const void* p326;
-    const void* p327;
-    unsigned char b328[16];
-    const void* p329;
-    char b330[4];
-    const void* p331;
-    char b332[36];
-    const void* p333;
-    const void* p334;
-    unsigned char b335[16];
-    const void* p336;
-    char b337[4];
-    const void* p338;
-    char b339[36];
-    const void* p340;
-    const void* p341;
-    unsigned char b342[16];
-    const void* p343;
-    char b344[4];
-    const void* p345;
-    char b346[4676];
-} _roTail __asm__("_vt$Q24ATEL4CVSM") = {
-    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt83,
-    "\x00\x00\x00\x00\x00\x00\x00",
-    _rt0,
-    _rt84,
-    "\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b       \x81@:%s\x00\x00\x00\x00\x00\x00\x00\x00\x83W\x83~\x83j\x81[\x92" "B\x90\xac\x97\xa6     \x81@:%d\x00\x00\x00\x00\x00\x00\x00",
-    _rt2,
-    _rt87 + 0x3a0,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N \x81@:--\x00\x00\x00\x00\x00\x00\x00",
-    _rt3,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@\x81@ \x81@:%d\x00\x00\x00\x00\x00\x00\x00",
-    _rt4,
-    _rt87 + 0x3a4,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\xf0#tI\x00\x00zD\x00\x00\x00\x00\x00\x00\x00",
-    _rt88,
-    "\x00\x00\x00\x00\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xcc\x90\x94     \x81@:%d/24\x00\x00\x00\x00",
-    _rt5,
-    _rt87 + 0x3ac,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83J\x81[\x83h\x83u\x83\x8c\x83" "C\x83N\x89\xf1\x90\x94 \x81@:%d\x00\x00\x00\x00\x00\x00\x00",
-    _rt6,
-    _rt87 + 0x3a8,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x80O\xc3G\x00\x00\xc8" "B\x00\x00\x00\x00\x00\x00\x00",
-    _rt88,
-    "\x00\x00\x00\x00\x8d\xc5\x82\xe0\x8eg\x82\xc1\x82\xbd\x83X\x83g\x83" "b\x83N\x8bZ :%s\x00\x00\x00\x00\x00\x00\x00\x00        \x81@\x81@\x81@\x81@\x89\xf1\x90\x94 :%d\x00\x00\x00\x00\x00\x00\x00",
-    _rt7,
-    _rt87 + 0x3b4,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x80O\xc3G\x00\x00\xc8" "B\x00\x00\x00\x00\x00\x00\x00",
-    _rt88,
-    "\x00\x00\x00\x00\x83N\x83\x8a\x83" "A\x8e\x9e\x8a\xd4\x81@\x81@\x81@     :%d\x00\x00\x00\x00\x00\x00\x00",
-    _rt8,
-    _rt87 + 0x3b8,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x81@\x81@  \x81@\x95\xaa\x81@\x81@\x81@\x81@   :%d\x00\x00\x00\x00\x00\x00\x00",
-    _rt9,
-    _rt87 + 0x3bc,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt1,
-    _rt84,
-    "\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b\x81@\x81@\x81@\x81@ :%s\x00\x00\x00\x00\x00\x00\x00\x00\x82" "c\x83\x8c\x83|\x81[\x83g\x92" "B\x90\xac\x97\xa6     :%d\x00\x00\x00\x00\x00\x00\x00",
-    _rt10,
-    _rt87 + 0x3a0,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N   :--\x00\x00\x00\x00\x00\x00\x00",
-    _rt11,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83X\x83s\x81[\x83h\x83u\x83\x8c\x83" "C\x83N     :%d\x00\x00\x00\x00\x00\x00\x00",
-    _rt12,
-    _rt87 + 0x3c0,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x80O\xc3G\x00\x00\xc8" "B\x00\x00\x00\x00\x00\x00\x00",
-    _rt88,
-    "\x00\x00\x00\x00\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@     :%d\x00\x00\x00\x00\x00\x00\x00",
-    _rt13,
-    _rt87 + 0x3a4,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x80O\xc3G\x00\x00\xc8" "B\x00\x00\x00\x00\x00\x00\x00",
-    _rt88,
-    "\x00\x00\x00\x00\x83" "f\x83\x85\x83G\x83\x8b\x82\xcc\x8f\x9f\x97\xa6       :%5.2f\x00\x00\x00\x00",
-    _rt14,
-    _rt87 + 0x3c4,
-    "\x04\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x82" "c\x83\x82\x81[\x83h\x94\xad\x93\xae\x89\xf1\x90\x94     :%d\x00\x00\x00\x00\x00\x00\x00",
-    _rt15,
-    _rt87 + 0x3c8,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x80O\xc3G\x00\x00\xc8" "B\x00\x00\x00\x00\x00\x00\x00",
-    _rt88,
-    "\x00\x00\x00\x00\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g\x00\x00\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xa0\x82\xaf\x82\xbd\x90\x94\x00\x00\x00\x00\x00\x00\x83W\x83~\x83j\x81[\x83\x81\x83\x82\x00\x00\x00\x00\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8\x00\x00\x00\x00\x00\x00\x00\x00\x83v\x83\x8c\x83" "C\x83\x82\x81[\x83h         : %s\x00\x00\x00\x00\x00\x00\x00\x83R\x83x\x83" "c\x83Q\x81[\x83\x80\x83N\x83\x8a\x83" "A   : %s\x00\x00\x00\x00\x00\x00",
-    _rt16,
-    _rt87 + 0x37e,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt89,
-    "\x00\x00\x00\x00\x82j\x82g\x82Q\x83N\x83\x8a\x83" "A         : %s\x00\x00\x00\x00\x00\x00",
-    _rt17,
-    _rt87 + 0x37a,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt89,
-    "\x00\x00\x00\x00\x83\\\x83\x89\x83N\x83\x8a\x83" "A           : %s\x00\x00\x00\x00\x00\x00",
-    _rt18,
-    _rt87 + 0x37d,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt89,
-    "\x00\x00\x00\x00\x83\x8a\x83N\x83N\x83\x8a\x83" "A           : %s\x00\x00\x00\x00\x00\x00",
-    _rt19,
-    _rt87 + 0x37c,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt89,
-    "\x00\x00\x00\x00\x83\\\x83\x89" "EN\x83t\x83\x89\x83O         : %d\x00\x00\x00\x00\x00\x00\x00\x83\x8a\x83NEN\x83t\x83\x89\x83O         : %d\x00\x00\x00\x00\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83KILL     : %s\x00\x00\x00\x00\x00\x00",
-    _rt20,
-    _rt87 + 0x37b,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt89,
-    "\x00\x00\x00\x00\x83v\x83\x8c\x83" "C\x82\xc8\x82\xf1\x82\xa2\x82\xc7       : %s\x00\x00\x00\x00\x00\x00\x00\x83T\x83" "E\x83\x93\x83h\x83\x82\x81[\x83h       : %s\x00\x00\x00\x00\x00\x00\x00\x83o\x83" "C\x83u\x83\x8c\x81[\x83V\x83\x87\x83\x93     : %s\x00\x00\x00\x00\x00\x00",
-    _rt21,
-    _rt87 + 0x380,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x40, 0x00, 0x00, 0x80, 0x3f },
-    _rt86,
-    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83Q\x81[\x83\x80\x8f\xee\x95\xf1\x00\x00\x00\x00\x00\x00\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x8fI\x97\xb9\x00\x00\x00\x00\x00\x00\x83\x80\x81[\x83r\x81[\x00\x00\x00\x00\x00\x00\x00\x00\x83v\x83\x8c\x83" "C\x83\x84\x81[\x83X\x83L\x83\x8b\x00\x00\x00\x00\x00\x00\x00\x00\xf9S----------\xf9V\x83Q\x81[\x83\x80\xf9S---------",
-    _rt22,
-    _rt84,
-    "\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2  :%s\x00\x82\xb5\x82\xe3\x82\xe9\x82\xa2    :%s\x00\xf9S----------\xf9V\x82\xc7\x82\xa4\x82\xc9\x82\xe3\x82\xa4\xf9S---------\x00\x00\x00\x00",
-    _rt23,
-    _rt84,
-    "\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83s\x83O\x83\x8c\x83" "b\x83g  :%s",
-    _rt24,
-    _rt87 + 0x334,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "\x01\x00\x00",
-    _rt82,
-    "\x00\x00\x00\x00\x83I\x83" "E\x83\x8b      :%s",
-    _rt25,
-    _rt87 + 0x334,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "\x02\x00\x00",
-    _rt82,
-    "\x00\x00\x00\x00\x83\x8b\x81[        :%s",
-    _rt26,
-    _rt87 + 0x334,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "\x04\x00\x00",
-    _rt82,
-    "\x00\x00\x00\x00\x83" "C\x81[\x83\x88\x81[    :%s",
-    _rt27,
-    _rt87 + 0x334,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "\x08\x00\x00",
-    _rt82,
-    "\x00\x00\x00\x00\x83" "e\x83" "B\x83K\x81[    :%s",
-    _rt28,
-    _rt87 + 0x334,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "\x10\x00\x00",
-    _rt82,
-    "\x00\x00\x00\x00\x83\x89\x83r\x83" "b\x83g    :%s",
-    _rt29,
-    _rt87 + 0x334,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    " \x00\x00",
-    _rt82,
-    "\x00\x00\x00\x00\x83S\x81[\x83\x8b\x82P    :%s",
-    _rt30,
-    _rt87 + 0x334,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "@\x00\x00",
-    _rt82,
-    "\x00\x00\x00\x00\x83S\x81[\x83\x8b\x82Q    :%s",
-    _rt31,
-    _rt87 + 0x334,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "\x80\x00\x00",
-    _rt82,
-    "\x00\x00\x00\x00\xf9S----------\xf9V\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2\xf9S---------\x00\x00\x00\x00",
-    _rt32,
-    _rt84,
-    "\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf9S----------\xf9V\x83N\x83\x8a\x83" "A\x97p\xf9S---------\x00\x00\x00\x00\x00\x00",
-    _rt33,
-    _rt84,
-    "\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83s\x83O\x83\x8c\x83" "b\x83g  :%d\x00\x83I\x83" "E\x83\x8b      :%d\x00\x83\x8b\x81[        :%d\x00\x83" "C\x81[\x83\x88\x81[    :%d\x00\x83" "e\x83" "B\x83K\x81[    :%d\x00\x83\x89\x83r\x83" "b\x83g    :%d\x00\xf9S----------\xf9V\x8eg\x82\xa2\x8e\xcc\x82\xc4\x83N\x83\x8a\x83" "A\x97p\xf9S---------\x00\x00\x00\x00\x00\x00",
-    _rt39,
-    _rt84,
-    "\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf9S----------\xf9V\x83n\x83" "C\x83X\x83R\x83" "A\xf9S---------\x00\x00\x00\x00",
-    _rt40,
-    _rt84,
-    "\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt34,
-    _rt87 + 0x364,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00@\x1c" "F\x00\x00\xc8" "B\x00\x00\x00\x00\x00\x00\x00",
-    _rt82,
-    "\x00\x00\x00",
-    _rt35,
-    _rt87 + 0x368,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00@\x1c" "F\x00\x00\xc8" "B\x00\x00\x00\x00\x00\x00\x00",
-    _rt82,
-    "\x00\x00\x00",
-    _rt36,
-    _rt87 + 0x36c,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00@\x1c" "F\x00\x00\xc8" "B\x00\x00\x00\x00\x00\x00\x00",
-    _rt82,
-    "\x00\x00\x00",
-    _rt37,
-    _rt87 + 0x370,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00@\x1c" "F\x00\x00\xc8" "B\x00\x00\x00\x00\x00\x00\x00",
-    _rt82,
-    "\x00\x00\x00",
-    _rt38,
-    _rt87 + 0x374,
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x00@\x1c" "F\x00\x00\xc8" "B\x00\x00\x00\x00\x00\x00\x00",
-    _rt82,
-    "\x00\x00\x00\x00\x83v\x81[\x00\x00\x00\x00\x83t\x83\x8c\x83\x93\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1\x00\x00\x00\x00\x00\x00\x00\x00\x83J\x81[\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1\x00\x00\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b\x00\x00\x00\x00\x00\x00\x00\x00\xf9S----------\xf9VWLV_STORAGE\xf9S---------\x00\x00\x00",
-    _rt41,
-    _rt84,
-    "\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b...\x00\x00\x00\x00",
-    _rt42,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt80,
-    "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b...\x00\x00\x00\x00\x00\x00",
-    _rt43,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt73,
-    "\x83J\x81[\x83h\x89\xf0\x8b\xd6...\x00\x00",
-    _rt44,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt79,
-    "\x83t\x83\x8c\x83\x93\x83h\x89\xf0\x8b\xd6...",
-    _rt45,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt78,
-    "\x82P\x82O\x82O\x83G\x81[\x83J\x81[...\x00\x00\x00\x00\x00\x00",
-    _rt46,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt77,
-    "\x95W\x8f\x80\x83X\x83L\x83\x8b...\x00\x00",
-    _rt47,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt76,
-    "\x83\x80\x81[\x83r\x81[\x83\\\x83\x89...",
-    _rt48,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt75,
-    "\x83\x80\x81[\x83r\x81[\x83\x8a\x83N...",
-    _rt49,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt74,
-    "\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8...\x00\x00\x00\x00",
-    _rt50,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt71,
-    "\x83W\x83~\x83j\x81[\x83\x81\x83\x82...",
-    _rt51,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt70,
-    "\x83Q\x81[\x83\x80\x8f\xee\x95\xf1...\x00\x00",
-    _rt52,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt72,
-    "\x95\xf3\x94\xa0...",
-    _rt53,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt69,
-    "\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g...\x00\x00\x00\x00\x00\x00",
-    _rt54,
-    _rt84,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt68,
-    "\xf9S----------\xf9VWLV_GLOBAL\xf9S---------\x00\x00\x00\x00",
-    _rt55,
-    _rt84,
-    "\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" "BOSS\x83" "C\x83x\x83\x93\x83g\x83X\x83" "e\x83" "b\x83v : %d\x00\x00\x00\x00\x00\x00\x00\x83\x81\x83j\x83\x85\x81[\x82\xcc\x8e\xed\x97\xde       : %s\x00\x00\x00\x00\x00\x00\x00\x83v\x83\x8c\x83" "C\x83\x84\x81[\x94\xf1\x95\\\x8e\xa6     : %s\x00\x00\x00\x00\x00\x00",
-    _rt56,
-    _rt87 + 0x3d7,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt81,
-    "\x00\x00\x00\x00\x82" "a\x82n\x82r\x82r\x8e\x80\x96S         : %s\x00\x00\x00\x00\x00\x00",
-    _rt57,
-    _rt87 + 0x3d8,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt81,
-    "\x00\x00\x00\x00\x83" "C\x83x\x83\x93\x83g\x83X\x83L\x83" "b\x83v\x95s\x89\xc2 : %s\x00\x00\x00\x00\x00\x00",
-    _rt58,
-    _rt87 + 0x3d9,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" "ATEL\x83" "C\x83x\x83\x93\x83g\x92\x86       : %s\x00\x00\x00\x00\x00\x00",
-    _rt59,
-    _rt87 + 0x3da,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00PC\x91\x80\x8d\xec\x95s\x89\xc2           : %s\x00\x00\x00\x00\x00\x00",
-    _rt60,
-    _rt87 + 0x3db,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt81,
-    "\x00\x00\x00\x00PAUSE\x8b\xd6\x8e~            : %s\x00\x00\x00\x00\x00\x00",
-    _rt61,
-    _rt87 + 0x3dc,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt81,
-    "\x00\x00\x00\x00\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86     : %s\x00\x00\x00\x00\x00\x00",
-    _rt62,
-    _rt87 + 0x3dd,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83\x8b\x81[\x83\x80\x88\xda\x93\xae\x8b\xd6\x8e~       : %s\x00\x00\x00\x00\x00\x00",
-    _rt63,
-    _rt87 + 0x3de,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83\x8b\x81[\x83\x80" "Creation\x8b\xd6\x8e~   : %s\x00\x00\x00\x00\x00\x00",
-    _rt64,
-    _rt87 + 0x3df,
-    "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-    _rt85,
-    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x83n\x81[\x83g\x8fo\x82\xb3\x82\xc8\x82\xa2       : %s\x00\x00\x00\x00\x00\x00",
-    _rt65,
-    _rt87 + 0x3e0,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt81,
-    "\x00\x00\x00\x00" "BTL\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86  : %s\x00\x00\x00\x00\x00\x00",
-    _rt66,
-    _rt87 + 0x3e1,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt81,
-    "\x00\x00\x00\x00\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b\x92\x86   : %s\x00\x00\x00\x00\x00\x00",
-    _rt67,
-    _rt87 + 0x3e2,
-    { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x80, 0x3f },
-    _rt85,
-    "\x00\x00\x00",
-    _rt81,
-    "\x00\x00\x00\x00" "ATEL WORK\x00\x00\x00\x00\x00\x00\x00" "ATEL\x81@CONFIG\x00\x00\x00\x00Kingdom Key\x00\x00\x00\x00\x00Three Wishes\x00\x00\x00\x00" "Crabclaw\x00\x00\x00\x00\x00\x00\x00\x00Pumpkinhead\x00\x00\x00\x00\x00" "Fairy Harp\x00\x00\x00\x00\x00\x00Wishing Star\x00\x00\x00\x00Spellbinder\x00\x00\x00\x00\x00Metal Chocobo\x00\x00\x00Olympia\x00Lionheart\x00\x00\x00\x00\x00\x00\x00Lady Luck\x00\x00\x00\x00\x00\x00\x00" "Divine Rose\x00\x00\x00\x00\x00Oathkeeper\x00\x00\x00\x00\x00\x00Oblivion\x00\x00\x00\x00\x00\x00\x00\x00Ultima Weapon\x00\x00\x00" "Diamond Dust\x00\x00\x00\x00One-Winged Angel\x00\x00\x00\x00\x00\x00\x00\x00Soul Eater\x00\x00\x00\x00\x00\x00Star Seeker\x00\x00\x00\x00\x00Monochrome\x00\x00\x00\x00\x00\x00" "Follow the Wind\x00Hidden Dragon\x00\x00\x00Photon Debugger\x00" "Bond of Flame\x00\x00\x00-\x00\x00\x00\x00\x00\x00\x00" "Fire\x00\x00\x00\x00" "Blizzard\x00\x00\x00\x00\x00\x00\x00\x00Thunder\x00" "Cure\x00\x00\x00\x00Gravity\x00Stop\x00\x00\x00\x00" "Aero\x00\x00\x00\x00Simba\x00\x00\x00Genie\x00\x00\x00" "Bambi\x00\x00\x00" "Dumbo\x00\x00\x00Tinker Bell\x00\x00\x00\x00\x00Mushu\x00\x00\x00" "Cloud\x00\x00\x00Potion\x00\x00Hi-Potion\x00\x00\x00\x00\x00\x00\x00Mega-Potion\x00\x00\x00\x00\x00" "Ether\x00\x00\x00Mega-Ether\x00\x00\x00\x00\x00\x00" "Elixir\x00\x00Megalixir\x00\x00\x00\x00\x00\x00\x00" "Donald Duck\x00\x00\x00\x00\x00Goofy\x00\x00\x00" "Aladdin\x00" "Ariel\x00\x00\x00Jack\x00\x00\x00\x00Peter Pan\x00\x00\x00\x00\x00\x00\x00The Beast\x00\x00\x00\x00\x00\x00\x00The King\x00\x00\x00\x00\x00\x00\x00\x00Pluto\x00\x00\x00Guard Armor\x00\x00\x00\x00\x00Trickmaster\x00\x00\x00\x00\x00Jafar\x00\x00\x00Oogie Boogie\x00\x00\x00\x00Parasite Cage\x00\x00\x00Ursula\x00\x00" "Dragon Maleficent\x00\x00\x00\x00\x00\x00\x00" "Darkside\x00\x00\x00\x00\x00\x00\x00\x00Shadow\x00\x00Soldier\x00Large Body\x00\x00\x00\x00\x00\x00Red Nocturne\x00\x00\x00\x00" "Blue Rhapsody\x00\x00\x00Yellow Opera\x00\x00\x00\x00Green Requiem\x00\x00\x00Powerwild\x00\x00\x00\x00\x00\x00\x00" "Bouncywild\x00\x00\x00\x00\x00\x00" "Air Soldier\x00\x00\x00\x00\x00" "Bandit\x00\x00" "Fat Bandit\x00\x00\x00\x00\x00\x00" "Barrel Spider\x00\x00\x00Search Ghost\x00\x00\x00\x00Sea Neon\x00\x00\x00\x00\x00\x00\x00\x00Screwdiver\x00\x00\x00\x00\x00\x00" "Aquatank\x00\x00\x00\x00\x00\x00\x00\x00Wight Knight\x00\x00\x00\x00Gargoyle\x00\x00\x00\x00\x00\x00\x00\x00Pirate\x00\x00" "Air Pirate\x00\x00\x00\x00\x00\x00" "Darkball\x00\x00\x00\x00\x00\x00\x00\x00" "Defender\x00\x00\x00\x00\x00\x00\x00\x00Wyvern\x00\x00Wizard\x00\x00Neoshadow\x00\x00\x00\x00\x00\x00\x00White Mushroom\x00\x00" "Black Fungus\x00\x00\x00\x00" "Creeper Plant\x00\x00\x00Tornado Step\x00\x00\x00\x00" "Crescendo\x00\x00\x00\x00\x00\x00\x00" "Card Soldier\x00\x00\x00\x00Hades\x00\x00\x00Hook\x00\x00\x00\x00Riku\x00\x00\x00\x00" "Axel\x00\x00\x00\x00Larxene\x00Vexen\x00\x00\x00Marluxia\x00\x00\x00\x00\x00\x00\x00\x00Lexaeus\x00" "Ansem\x00\x00\x00Zexion\x00\x00Xemnas\x00\x00Xigbar\x00\x00Xaldin\x00\x00Sa\x83\xc7x\x00\x00\x00" "Demyx\x00\x00\x00Luxord\x00\x00Roxas\x00\x00\x00Gold Card\x00\x00\x00\x00\x00\x00\x00Platinum Card\x00\x00\x00" "Card Soldier Spade\x00\x00\x00\x00\x00\x00" "Card Soldier Heart\x00\x00\x00\x00\x00\x00\x83N\x83\x89\x83" "E\x83hA\x00\x00\x00\x00\x00\x00\x00\x83N\x83\x89\x83" "E\x83hB\x00\x00\x00\x00\x00\x00\x00\x83n\x83" "f\x83XA\x00\x83n\x83" "f\x83XB\x00\x83t\x83" "b\x83NA\x00\x83t\x83" "b\x83NB\x00\x83t\x83" "b\x83NC\x00\x83t\x83" "b\x83ND\x00\x83" "A\x83N\x83Z\x83\x8b" "A\x00\x00\x00\x00\x00\x00\x00\x83" "A\x83N\x83Z\x83\x8b" "B\x00\x00\x00\x00\x00\x00\x00\x83\x89\x83N\x83V\x81[\x83kA\x00\x00\x00\x00\x00\x83\x89\x83N\x83V\x81[\x83kB\x00\x00\x00\x00\x00\x83\x89\x83N\x83V\x81[\x83kC\x00\x00\x00\x00\x00\x83\x8a\x83NA\x00\x00\x00\x83\x8a\x83NB\x00\x00\x00\x83\x8a\x83NC\x00\x00\x00\x83\x8a\x83ND\x00\x00\x00\x83\x94\x83" "B\x83N\x83Z\x83\x93" "A\x00\x00\x00\x00\x00\x83\x94\x83" "B\x83N\x83Z\x83\x93" "B\x00\x00\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "A\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "B\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "C\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "2\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "3\x00\x00\x00\x83\x8c\x83N\x83Z\x83" "E\x83XA\x00\x00\x00\x00\x00\x83\x8c\x83N\x83Z\x83" "E\x83XB\x00\x00\x00\x00\x00\x83\x8c\x83N\x83Z\x83" "E\x83XC\x00\x00\x00\x00\x00\x83" "A\x83\x93\x83Z\x83\x80" "A\x00\x00\x00\x00\x00\x00\x00\x83" "A\x83\x93\x83Z\x83\x80" "B\x00\x00\x00\x00\x00\x00\x00\x83[\x83N\x83V\x83I\x83\x93" "A\x00\x00\x00\x00\x00\x83\x8a\x83\x8d\x81[\x83h\x00\x00\x00\x00\x00\x00\x00\x00Tranquil Darkness\x00\x00\x00\x00\x00\x00\x00Teeming Darkness\x00\x00\x00\x00\x00\x00\x00\x00" "Feeble Darkness\x00" "Almighty Darkness\x00\x00\x00\x00\x00\x00\x00Sleeping Darkness\x00\x00\x00\x00\x00\x00\x00Looming Darkness\x00\x00\x00\x00\x00\x00\x00\x00Premium Room\x00\x00\x00\x00White Room\x00\x00\x00\x00\x00\x00" "Black Room\x00\x00\x00\x00\x00\x00" "Bottomless Darkness\x00\x00\x00\x00\x00Roulette Room\x00\x00\x00Martial Waking\x00\x00Sorcerous Waking\x00\x00\x00\x00\x00\x00\x00\x00" "Alchemic Waking\x00Meeting Ground\x00\x00Stagnant Space\x00\x00Strong Initiative\x00\x00\x00\x00\x00\x00\x00Lasting Daze\x00\x00\x00\x00" "Calm Bounty\x00\x00\x00\x00\x00Guarded Trove\x00\x00\x00" "False Bounty\x00\x00\x00\x00Moment's Reprieve\x00\x00\x00\x00\x00\x00\x00Mingling Worlds\x00Moogle Room\x00\x00\x00\x00\x00Random Joker\x00\x00\x00\x00Key of Beginnings\x00\x00\x00\x00\x00\x00\x00Key of Guidance\x00Key to Truth\x00\x00\x00\x00Key to Rewards\x00\x00Traverse Town\x00\x00\x00" "Agrabah\x00Olympus Coliseum\x00\x00\x00\x00\x00\x00\x00\x00Wonderland\x00\x00\x00\x00\x00\x00Monstro\x00Halloween Town\x00\x00" "Atlantica\x00\x00\x00\x00\x00\x00\x00Neverland\x00\x00\x00\x00\x00\x00\x00Hollow Bastion\x00\x00" "100 Acre Woods\x00\x00Twilight Town\x00\x00\x00" "Destiny Islands\x00" "Castle Oblivion\x00" "EXP\x90\xc2\x8f\xac\x00" "EXP\x90\xc2\x92\x86\x00" "EXP\x90\xc2\x91\xe5\x00" "EXP\x90\xd4\x8f\xac\x00" "EXP\x90\xd4\x92\x86\x00" "EXP\x90\xd4\x91\xe5\x00" "EXP\x8b\xe2\x00\x00\x00HP\x8f\xac\x00\x00\x00\x00HP\x91\xe5\x00\x00\x00\x00MP\x8f\xac\x00\x00\x00\x00MP\x91\xe5\x00\x00\x00\x00P\x00\x00\x00\x00\x00\x00\x00R\x00\x00\x00\x00\x00\x00\x00Unknown Room\x00\x00\x00\x00" "Conqueror's Respite\x00\x00\x00\x00\x00Room of Rewards\x00\x00\x00\x00\x00" "0\xc6H\x00\x11\x02\x00\x03P1I\x00\x11\x02\x01\x03`1I\x00\x11\x02\x02\x03p1I\x00\x11\x02\x03\x03\x80" "1I\x00\x11\x02\x04\x03\x90" "1I\x00\x11\x02\x05\x03\xa0" "1I\x00\x11\x02\x06\x03\xb0" "1I\x00\x11\x02\x07\x03\xc0" "1I\x00\x11\x03\x00\x03\xd0" "1I\x00\x11\x03\x01\x03\xd8" "1I\x00\x11\x03\x02\x03\xe8" "1I\x00\x11\x03\x03\x03\xf8" "1I\x00\x11\x03\x04\x03\x08" "2I\x00\x11\x03\x05\x03\x18" "2I\x00\x11\x03\x06\x03(2I\x00\x11\x03\x07\x03" "82I\x00\x11\x04\x00\x03H2I\x00\x11\x04\x01\x04`2I\x00\x11\x04\x02\x03p2I\x00\x11\x04\x03\x03\x80" "2I\x00\x11\x04\x04\x03\x90" "2I\x00\x11\x04\x05\x03\xa0" "2I\x00\x11\x04\x06\x03\xb0" "2I\x00\x11\x04\x07\x03\xc0" "2I\x00\x11\x1a\x00\x00\xd0" "2I\x00\"\x05\x00\x03\xd8" "2I\x00\"\x05\x01\x03\xe0" "2I\x00\"\x05\x02\x03\xf0" "2I\x00\"\x05\x03\x03\xf8" "2I\x00\"\x05\x04\x03\x00" "3I\x00\"\x05\x05\x03\x08" "3I\x00\"\x05\x06\x03\x10" "3I\x00\"\x1a\x02\x00\xd0" "2I\x00\"\x1a\x01\x00\xd0" "2I\x00" "3\x05\x07\x03\x18" "3I\x00" "3\x06\x00\x03 3I\x00" "3\x06\x01\x03(3I\x00" "3\x06\x02\x03" "03I\x00" "3\x06\x03\x03" "83I\x00" "3\x06\x04\x03H3I\x00" "3\x06\x05\x03P3I\x00" "D\x06\x06\x06X3I\x00" "D\x06\x07\x06`3I\x00" "D\x07\x00\x02p3I\x00" "D\x07\x01\x02\x80" "3I\x00" "D\x07\x02\x02\x88" "3I\x00" "D\x07\x03\x02\x98" "3I\x00" "D\x07\x04\x02\xa0" "3I\x00U\x07\x05\x02\xb0" "3I\x00U\x07\x06\x02\xc0" "3I\x00U\x07\x07\x02\xc8" "3I\x00U\x08\x00\x02\xd0" "3I\x00U\x08\x01\x02\xd8" "3I\x00U\x08\x02\x02\xe0" "3I\x00U\x08\x03\x02\xf0" "3I\x00U\x08\x04\x04\x00" "4I\x00U\x08\x05\x02\x10" "4I\x00" "f\x08\x06\x06\x18" "4I\x00" "f\x08\x06\x06(4I\x00" "f\x08\x06\x06" "84I\x00" "f\x08\x06\x06@4I\x00" "f\x08\x06\x06P4I\x00" "f\x08\x06\x06`4I\x00" "f\x08\x06\x06h4I\x00" "f\x08\x06\x06\x80" "4I\x00\xe6\x08\x07\x04\xd0" "2I\x00\xe6\t\x00\x00\xd0" "2I\x00w\t\x01\x06\x90" "4I\x00w\t\x02\x02\x98" "4I\x00w\t\x03\x06\xa0" "4I\x00w\t\x04\x02\xb0" "4I\x00w\t\x05\x02\xc0" "4I\x00w\t\x06\x02\xd0" "4I\x00w\t\x07\x02\xe0" "4I\x00w\n\x00\x06\xf0" "4I\x00w\n\x01\x02\x00" "5I\x00w\n\x02\x02\x10" "5I\x00w\n\x03\x02 5I\x00w\n\x04\x06(5I\x00w\n\x05\x02" "85I\x00w\n\x06\x06H5I\x00w\n\x07\x06X5I\x00w\x0b\x00\x02h5I\x00w\x0b\x01\x02x5I\x00w\x0b\x02\x06\x88" "5I\x00w\x0b\x03\x02\x98" "5I\x00w\x0b\x04\x06\xa8" "5I\x00w\x0b\x05\x02\xb0" "5I\x00w\x0b\x06\x04\xc0" "5I\x00w\x0b\x07\x06\xd0" "5I\x00w\x0c\x00\x02\xe0" "5I\x00w\x0c\x01\x02\xe8" "5I\x00w\x0c\x02\x02\xf0" "5I\x00w\x0c\x03\x02\x00" "6I\x00w\x0c\x04\x02\x10" "6I\x00w\x0c\x05\x02 6I\x00w\x0c\x06\x02" "06I\x00w\x0c\x07\x02@6I\x00w\x0d\x00\x06\x18" "4I\x00w\x0d\x01\x06P4I\x00w\x0d\x02\x06(4I\x00w\x0d\x03\x06\x80" "4I\x00w\x0d\x04\x02P6I\x00w\x0d\x05\x06`6I\x00w\x0d\x06\x06" "84I\x00w\x0d\x07\x06@4I\x00w\x0e\x00\x06`4I\x00w\x0e\x01\x06h6I\x00w\x0e\x02\x06h4I\x00w\x0e\x03\x02p6I\x00w\x0e\x04\x02x6I\x00w\x0e\x05\x02\x80" "6I\x00w\x0e\x06\x02\x88" "6I\x00w\x0e\x07\x02\x90" "6I\x00w\x0f\x00\x06\xa0" "6I\x00w\x0f\x01\x02\xa8" "6I\x00w\x0f\x03\x06\xb0" "6I\x00w\x0f\x04\x02\xb8" "6I\x00w\x0f\x05\x02\xc0" "6I\x00w\x0f\x06\x02\xc8" "6I\x00w\x0f\x07\x02\xd0" "6I\x00w\x10\x00\x02\xd8" "6I\x00w\x10\x01\x02\xe0" "6I\x00w\x10\x02\x02\xe8" "6I\x00w\x15\x06\x02\xf0" "6I\x00w\x15\x07\x02\x00" "7I\x00w\x0f\x02\x00\x10" "7I\x00w\x0d\x04\x00(7I\x00\x17\x16\x00\x00@7I\x00\x17\x16\x01\x00P7I\x00\x17\x16\x02\x00`7I\x00'\x16\x03\x00h7I\x00\x17\x16\x04\x00p7I\x00\x17\x16\x05\x00x7I\x00\x17\x16\x06\x00\x80" "7I\x00'\x16\x07\x00\x88" "7I\x00\x17\x17\x00\x00\x90" "7I\x00\x17\x17\x01\x00\xa0" "7I\x00\x17\x17\x02\x00\xb0" "7I\x00\x17\x17\x03\x00\xc0" "7I\x00'\x17\x04\x00\xd0" "7I\x00\x17\x17\x05\x00\xe0" "7I\x00\x17\x17\x06\x00\xe8" "7I\x00\x17\x17\x07\x00\xf0" "7I\x00\x17\x18\x00\x00\xf8" "7I\x00\x17\x18\x01\x00\x00" "8I\x00'\x18\x02\x00\x10" "8I\x00\x17\x18\x03\x00 8I\x00\x17\x18\x04\x00" "08I\x00'\x18\x05\x00@8I\x00w\x18\x06\x00P8I\x00w\x18\x07\x00`8I\x00\x17\x19\x00\x00p8I\x00\x17\x19\x01\x00\x80" "8I\x00'\x19\x02\x00\x90" "8I\x00\x17\x19\x03\x00\xa0" "8I\x00'\x19\x04\x00\xb0" "8I\x00'\x19\x05\x00\xc0" "8I\x00w\x1a\x03\x00\xd0" "2I\x00\x88\x00\x00\x06\xd0" "8I\x00\x99\x10\x03\x06\xe0" "8I\x00\x99\x10\x04\x06\xf8" "8I\x00\x99\x10\x05\x06\x10" "9I\x00\x99\x10\x06\x06 9I\x00\x99\x10\x07\x06" "89I\x00\x99\x11\x00\x06P9I\x00\x99\x11\x01\x02h9I\x00\x99\x11\x02\x02x9I\x00\x99\x11\x03\x06\x88" "9I\x00\x99\x11\x04\x06\x98" "9I\x00\x99\x11\x05\x06\xb0" "9I\x00\xa9\x11\x06\x06\xc0" "9I\x00\xa9\x11\x07\x02\xd0" "9I\x00\xa9\x12\x00\x02\xe8" "9I\x00\xa9\x12\x01\x06\xf8" "9I\x00\xa9\x12\x02\x06\x08:I\x00\xa9\x12\x03\x06\x18:I\x00\xa9\x12\x04\x06" "0:I\x00\xb9\x12\x05\x02@:I\x00\xb9\x12\x06\x02P:I\x00\xb9\x12\x07\x02`:I\x00\xb9\x13\x00\x06p:I\x00\xb9\x13\x01\x06\x88:I\x00\xb9\x13\x02\x02\x98:I\x00\xb9\x13\x03\x06\xa8:I\x00\xca\x13\x04\x06\xb8:I\x00\xca\x13\x05\x06\xd0:I\x00\xca\x13\x06\x06\xe0:I\x00\xca\x13\x07\x02\xf0:I\x00\xdb\x14\x00\x06\x00;I\x00\xdb\x14\x03\x06\x10;I\x00\xdb\x14\x02\x06\x18;I\x00\xdb\x14\x01\x06" "0;I\x00\xdb\x14\x05\x06@;I\x00\xdb\x14\x04\x06H;I\x00\xdb\x14\x06\x06X;I\x00\xdb\x14\x07\x06h;I\x00\xdb\x15\x00\x06x;I\x00\xdb\x15\x01\x02\x88;I\x00\xdb\x15\x02\x06\x98;I\x00\xdb\x15\x03\x06\xa8;I\x00\xdb\x15\x04\x04\xb8;I\x00\x0d\x00\x00\x00\xc8;I\x00\x0d\x00\x01\x00\xd0;I\x00\x0d\x00\x02\x00\xd8;I\x00\x0d\x00\x03\x00\xe0;I\x00\x0d\x00\x04\x00\xe8;I\x00\x0d\x00\x05\x00\xf0;I\x00\x0d\x00\x06\x00\xf8;I\x00\x0d\x01\x00\x00\x00<I\x00\x0d\x01\x01\x00\x08<I\x00\x0d\x02\x00\x00\x10<I\x00\x0d\x02\x01\x00\x18<I\x00\x0d\x03\x00\x00 <I\x00\x0d\x04\x00\x00(<I\x00\x0c\x00\x00\x00" "0<I\x00\x0c\x00\x00\x00@<I\x00\x0c\x00\x00\x00X<I\x00\x0c\x00\x00\x00" "0\xc6H\x00\x0c\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00\x00\x00\x00"
+    char b0[4640];
+} _roTail = {
+    "Kingdom Key\x00\x00\x00\x00\x00Three Wishes\x00\x00\x00\x00" "Crabclaw\x00\x00\x00\x00\x00\x00\x00\x00Pumpkinhead\x00\x00\x00\x00\x00" "Fairy Harp\x00\x00\x00\x00\x00\x00Wishing Star\x00\x00\x00\x00Spellbinder\x00\x00\x00\x00\x00Metal Chocobo\x00\x00\x00Olympia\x00Lionheart\x00\x00\x00\x00\x00\x00\x00Lady Luck\x00\x00\x00\x00\x00\x00\x00" "Divine Rose\x00\x00\x00\x00\x00Oathkeeper\x00\x00\x00\x00\x00\x00Oblivion\x00\x00\x00\x00\x00\x00\x00\x00Ultima Weapon\x00\x00\x00" "Diamond Dust\x00\x00\x00\x00One-Winged Angel\x00\x00\x00\x00\x00\x00\x00\x00Soul Eater\x00\x00\x00\x00\x00\x00Star Seeker\x00\x00\x00\x00\x00Monochrome\x00\x00\x00\x00\x00\x00" "Follow the Wind\x00Hidden Dragon\x00\x00\x00Photon Debugger\x00" "Bond of Flame\x00\x00\x00-\x00\x00\x00\x00\x00\x00\x00" "Fire\x00\x00\x00\x00" "Blizzard\x00\x00\x00\x00\x00\x00\x00\x00Thunder\x00" "Cure\x00\x00\x00\x00Gravity\x00Stop\x00\x00\x00\x00" "Aero\x00\x00\x00\x00Simba\x00\x00\x00Genie\x00\x00\x00" "Bambi\x00\x00\x00" "Dumbo\x00\x00\x00Tinker Bell\x00\x00\x00\x00\x00Mushu\x00\x00\x00" "Cloud\x00\x00\x00Potion\x00\x00Hi-Potion\x00\x00\x00\x00\x00\x00\x00Mega-Potion\x00\x00\x00\x00\x00" "Ether\x00\x00\x00Mega-Ether\x00\x00\x00\x00\x00\x00" "Elixir\x00\x00Megalixir\x00\x00\x00\x00\x00\x00\x00" "Donald Duck\x00\x00\x00\x00\x00Goofy\x00\x00\x00" "Aladdin\x00" "Ariel\x00\x00\x00Jack\x00\x00\x00\x00Peter Pan\x00\x00\x00\x00\x00\x00\x00The Beast\x00\x00\x00\x00\x00\x00\x00The King\x00\x00\x00\x00\x00\x00\x00\x00Pluto\x00\x00\x00Guard Armor\x00\x00\x00\x00\x00Trickmaster\x00\x00\x00\x00\x00Jafar\x00\x00\x00Oogie Boogie\x00\x00\x00\x00Parasite Cage\x00\x00\x00Ursula\x00\x00" "Dragon Maleficent\x00\x00\x00\x00\x00\x00\x00" "Darkside\x00\x00\x00\x00\x00\x00\x00\x00Shadow\x00\x00Soldier\x00Large Body\x00\x00\x00\x00\x00\x00Red Nocturne\x00\x00\x00\x00" "Blue Rhapsody\x00\x00\x00Yellow Opera\x00\x00\x00\x00Green Requiem\x00\x00\x00Powerwild\x00\x00\x00\x00\x00\x00\x00" "Bouncywild\x00\x00\x00\x00\x00\x00" "Air Soldier\x00\x00\x00\x00\x00" "Bandit\x00\x00" "Fat Bandit\x00\x00\x00\x00\x00\x00" "Barrel Spider\x00\x00\x00Search Ghost\x00\x00\x00\x00Sea Neon\x00\x00\x00\x00\x00\x00\x00\x00Screwdiver\x00\x00\x00\x00\x00\x00" "Aquatank\x00\x00\x00\x00\x00\x00\x00\x00Wight Knight\x00\x00\x00\x00Gargoyle\x00\x00\x00\x00\x00\x00\x00\x00Pirate\x00\x00" "Air Pirate\x00\x00\x00\x00\x00\x00" "Darkball\x00\x00\x00\x00\x00\x00\x00\x00" "Defender\x00\x00\x00\x00\x00\x00\x00\x00Wyvern\x00\x00Wizard\x00\x00Neoshadow\x00\x00\x00\x00\x00\x00\x00White Mushroom\x00\x00" "Black Fungus\x00\x00\x00\x00" "Creeper Plant\x00\x00\x00Tornado Step\x00\x00\x00\x00" "Crescendo\x00\x00\x00\x00\x00\x00\x00" "Card Soldier\x00\x00\x00\x00Hades\x00\x00\x00Hook\x00\x00\x00\x00Riku\x00\x00\x00\x00" "Axel\x00\x00\x00\x00Larxene\x00Vexen\x00\x00\x00Marluxia\x00\x00\x00\x00\x00\x00\x00\x00Lexaeus\x00" "Ansem\x00\x00\x00Zexion\x00\x00Xemnas\x00\x00Xigbar\x00\x00Xaldin\x00\x00Sa\x83\xc7x\x00\x00\x00" "Demyx\x00\x00\x00Luxord\x00\x00Roxas\x00\x00\x00Gold Card\x00\x00\x00\x00\x00\x00\x00Platinum Card\x00\x00\x00" "Card Soldier Spade\x00\x00\x00\x00\x00\x00" "Card Soldier Heart\x00\x00\x00\x00\x00\x00\x83N\x83\x89\x83" "E\x83hA\x00\x00\x00\x00\x00\x00\x00\x83N\x83\x89\x83" "E\x83hB\x00\x00\x00\x00\x00\x00\x00\x83n\x83" "f\x83XA\x00\x83n\x83" "f\x83XB\x00\x83t\x83" "b\x83NA\x00\x83t\x83" "b\x83NB\x00\x83t\x83" "b\x83NC\x00\x83t\x83" "b\x83ND\x00\x83" "A\x83N\x83Z\x83\x8b" "A\x00\x00\x00\x00\x00\x00\x00\x83" "A\x83N\x83Z\x83\x8b" "B\x00\x00\x00\x00\x00\x00\x00\x83\x89\x83N\x83V\x81[\x83kA\x00\x00\x00\x00\x00\x83\x89\x83N\x83V\x81[\x83kB\x00\x00\x00\x00\x00\x83\x89\x83N\x83V\x81[\x83kC\x00\x00\x00\x00\x00\x83\x8a\x83NA\x00\x00\x00\x83\x8a\x83NB\x00\x00\x00\x83\x8a\x83NC\x00\x00\x00\x83\x8a\x83ND\x00\x00\x00\x83\x94\x83" "B\x83N\x83Z\x83\x93" "A\x00\x00\x00\x00\x00\x83\x94\x83" "B\x83N\x83Z\x83\x93" "B\x00\x00\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "A\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "B\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "C\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "2\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "3\x00\x00\x00\x83\x8c\x83N\x83Z\x83" "E\x83XA\x00\x00\x00\x00\x00\x83\x8c\x83N\x83Z\x83" "E\x83XB\x00\x00\x00\x00\x00\x83\x8c\x83N\x83Z\x83" "E\x83XC\x00\x00\x00\x00\x00\x83" "A\x83\x93\x83Z\x83\x80" "A\x00\x00\x00\x00\x00\x00\x00\x83" "A\x83\x93\x83Z\x83\x80" "B\x00\x00\x00\x00\x00\x00\x00\x83[\x83N\x83V\x83I\x83\x93" "A\x00\x00\x00\x00\x00\x83\x8a\x83\x8d\x81[\x83h\x00\x00\x00\x00\x00\x00\x00\x00Tranquil Darkness\x00\x00\x00\x00\x00\x00\x00Teeming Darkness\x00\x00\x00\x00\x00\x00\x00\x00" "Feeble Darkness\x00" "Almighty Darkness\x00\x00\x00\x00\x00\x00\x00Sleeping Darkness\x00\x00\x00\x00\x00\x00\x00Looming Darkness\x00\x00\x00\x00\x00\x00\x00\x00Premium Room\x00\x00\x00\x00White Room\x00\x00\x00\x00\x00\x00" "Black Room\x00\x00\x00\x00\x00\x00" "Bottomless Darkness\x00\x00\x00\x00\x00Roulette Room\x00\x00\x00Martial Waking\x00\x00Sorcerous Waking\x00\x00\x00\x00\x00\x00\x00\x00" "Alchemic Waking\x00Meeting Ground\x00\x00Stagnant Space\x00\x00Strong Initiative\x00\x00\x00\x00\x00\x00\x00Lasting Daze\x00\x00\x00\x00" "Calm Bounty\x00\x00\x00\x00\x00Guarded Trove\x00\x00\x00" "False Bounty\x00\x00\x00\x00Moment's Reprieve\x00\x00\x00\x00\x00\x00\x00Mingling Worlds\x00Moogle Room\x00\x00\x00\x00\x00Random Joker\x00\x00\x00\x00Key of Beginnings\x00\x00\x00\x00\x00\x00\x00Key of Guidance\x00Key to Truth\x00\x00\x00\x00Key to Rewards\x00\x00Traverse Town\x00\x00\x00" "Agrabah\x00Olympus Coliseum\x00\x00\x00\x00\x00\x00\x00\x00Wonderland\x00\x00\x00\x00\x00\x00Monstro\x00Halloween Town\x00\x00" "Atlantica\x00\x00\x00\x00\x00\x00\x00Neverland\x00\x00\x00\x00\x00\x00\x00Hollow Bastion\x00\x00" "100 Acre Woods\x00\x00Twilight Town\x00\x00\x00" "Destiny Islands\x00" "Castle Oblivion\x00" "EXP\x90\xc2\x8f\xac\x00" "EXP\x90\xc2\x92\x86\x00" "EXP\x90\xc2\x91\xe5\x00" "EXP\x90\xd4\x8f\xac\x00" "EXP\x90\xd4\x92\x86\x00" "EXP\x90\xd4\x91\xe5\x00" "EXP\x8b\xe2\x00\x00\x00HP\x8f\xac\x00\x00\x00\x00HP\x91\xe5\x00\x00\x00\x00MP\x8f\xac\x00\x00\x00\x00MP\x91\xe5\x00\x00\x00\x00P\x00\x00\x00\x00\x00\x00\x00R\x00\x00\x00\x00\x00\x00\x00Unknown Room\x00\x00\x00\x00" "Conqueror's Respite\x00\x00\x00\x00\x00Room of Rewards\x00\x00\x00\x00\x00" "0\xc6H\x00\x11\x02\x00\x03P1I\x00\x11\x02\x01\x03`1I\x00\x11\x02\x02\x03p1I\x00\x11\x02\x03\x03\x80" "1I\x00\x11\x02\x04\x03\x90" "1I\x00\x11\x02\x05\x03\xa0" "1I\x00\x11\x02\x06\x03\xb0" "1I\x00\x11\x02\x07\x03\xc0" "1I\x00\x11\x03\x00\x03\xd0" "1I\x00\x11\x03\x01\x03\xd8" "1I\x00\x11\x03\x02\x03\xe8" "1I\x00\x11\x03\x03\x03\xf8" "1I\x00\x11\x03\x04\x03\x08" "2I\x00\x11\x03\x05\x03\x18" "2I\x00\x11\x03\x06\x03(2I\x00\x11\x03\x07\x03" "82I\x00\x11\x04\x00\x03H2I\x00\x11\x04\x01\x04`2I\x00\x11\x04\x02\x03p2I\x00\x11\x04\x03\x03\x80" "2I\x00\x11\x04\x04\x03\x90" "2I\x00\x11\x04\x05\x03\xa0" "2I\x00\x11\x04\x06\x03\xb0" "2I\x00\x11\x04\x07\x03\xc0" "2I\x00\x11\x1a\x00\x00\xd0" "2I\x00\"\x05\x00\x03\xd8" "2I\x00\"\x05\x01\x03\xe0" "2I\x00\"\x05\x02\x03\xf0" "2I\x00\"\x05\x03\x03\xf8" "2I\x00\"\x05\x04\x03\x00" "3I\x00\"\x05\x05\x03\x08" "3I\x00\"\x05\x06\x03\x10" "3I\x00\"\x1a\x02\x00\xd0" "2I\x00\"\x1a\x01\x00\xd0" "2I\x00" "3\x05\x07\x03\x18" "3I\x00" "3\x06\x00\x03 3I\x00" "3\x06\x01\x03(3I\x00" "3\x06\x02\x03" "03I\x00" "3\x06\x03\x03" "83I\x00" "3\x06\x04\x03H3I\x00" "3\x06\x05\x03P3I\x00" "D\x06\x06\x06X3I\x00" "D\x06\x07\x06`3I\x00" "D\x07\x00\x02p3I\x00" "D\x07\x01\x02\x80" "3I\x00" "D\x07\x02\x02\x88" "3I\x00" "D\x07\x03\x02\x98" "3I\x00" "D\x07\x04\x02\xa0" "3I\x00U\x07\x05\x02\xb0" "3I\x00U\x07\x06\x02\xc0" "3I\x00U\x07\x07\x02\xc8" "3I\x00U\x08\x00\x02\xd0" "3I\x00U\x08\x01\x02\xd8" "3I\x00U\x08\x02\x02\xe0" "3I\x00U\x08\x03\x02\xf0" "3I\x00U\x08\x04\x04\x00" "4I\x00U\x08\x05\x02\x10" "4I\x00" "f\x08\x06\x06\x18" "4I\x00" "f\x08\x06\x06(4I\x00" "f\x08\x06\x06" "84I\x00" "f\x08\x06\x06@4I\x00" "f\x08\x06\x06P4I\x00" "f\x08\x06\x06`4I\x00" "f\x08\x06\x06h4I\x00" "f\x08\x06\x06\x80" "4I\x00\xe6\x08\x07\x04\xd0" "2I\x00\xe6\t\x00\x00\xd0" "2I\x00w\t\x01\x06\x90" "4I\x00w\t\x02\x02\x98" "4I\x00w\t\x03\x06\xa0" "4I\x00w\t\x04\x02\xb0" "4I\x00w\t\x05\x02\xc0" "4I\x00w\t\x06\x02\xd0" "4I\x00w\t\x07\x02\xe0" "4I\x00w\n\x00\x06\xf0" "4I\x00w\n\x01\x02\x00" "5I\x00w\n\x02\x02\x10" "5I\x00w\n\x03\x02 5I\x00w\n\x04\x06(5I\x00w\n\x05\x02" "85I\x00w\n\x06\x06H5I\x00w\n\x07\x06X5I\x00w\x0b\x00\x02h5I\x00w\x0b\x01\x02x5I\x00w\x0b\x02\x06\x88" "5I\x00w\x0b\x03\x02\x98" "5I\x00w\x0b\x04\x06\xa8" "5I\x00w\x0b\x05\x02\xb0" "5I\x00w\x0b\x06\x04\xc0" "5I\x00w\x0b\x07\x06\xd0" "5I\x00w\x0c\x00\x02\xe0" "5I\x00w\x0c\x01\x02\xe8" "5I\x00w\x0c\x02\x02\xf0" "5I\x00w\x0c\x03\x02\x00" "6I\x00w\x0c\x04\x02\x10" "6I\x00w\x0c\x05\x02 6I\x00w\x0c\x06\x02" "06I\x00w\x0c\x07\x02@6I\x00w\x0d\x00\x06\x18" "4I\x00w\x0d\x01\x06P4I\x00w\x0d\x02\x06(4I\x00w\x0d\x03\x06\x80" "4I\x00w\x0d\x04\x02P6I\x00w\x0d\x05\x06`6I\x00w\x0d\x06\x06" "84I\x00w\x0d\x07\x06@4I\x00w\x0e\x00\x06`4I\x00w\x0e\x01\x06h6I\x00w\x0e\x02\x06h4I\x00w\x0e\x03\x02p6I\x00w\x0e\x04\x02x6I\x00w\x0e\x05\x02\x80" "6I\x00w\x0e\x06\x02\x88" "6I\x00w\x0e\x07\x02\x90" "6I\x00w\x0f\x00\x06\xa0" "6I\x00w\x0f\x01\x02\xa8" "6I\x00w\x0f\x03\x06\xb0" "6I\x00w\x0f\x04\x02\xb8" "6I\x00w\x0f\x05\x02\xc0" "6I\x00w\x0f\x06\x02\xc8" "6I\x00w\x0f\x07\x02\xd0" "6I\x00w\x10\x00\x02\xd8" "6I\x00w\x10\x01\x02\xe0" "6I\x00w\x10\x02\x02\xe8" "6I\x00w\x15\x06\x02\xf0" "6I\x00w\x15\x07\x02\x00" "7I\x00w\x0f\x02\x00\x10" "7I\x00w\x0d\x04\x00(7I\x00\x17\x16\x00\x00@7I\x00\x17\x16\x01\x00P7I\x00\x17\x16\x02\x00`7I\x00'\x16\x03\x00h7I\x00\x17\x16\x04\x00p7I\x00\x17\x16\x05\x00x7I\x00\x17\x16\x06\x00\x80" "7I\x00'\x16\x07\x00\x88" "7I\x00\x17\x17\x00\x00\x90" "7I\x00\x17\x17\x01\x00\xa0" "7I\x00\x17\x17\x02\x00\xb0" "7I\x00\x17\x17\x03\x00\xc0" "7I\x00'\x17\x04\x00\xd0" "7I\x00\x17\x17\x05\x00\xe0" "7I\x00\x17\x17\x06\x00\xe8" "7I\x00\x17\x17\x07\x00\xf0" "7I\x00\x17\x18\x00\x00\xf8" "7I\x00\x17\x18\x01\x00\x00" "8I\x00'\x18\x02\x00\x10" "8I\x00\x17\x18\x03\x00 8I\x00\x17\x18\x04\x00" "08I\x00'\x18\x05\x00@8I\x00w\x18\x06\x00P8I\x00w\x18\x07\x00`8I\x00\x17\x19\x00\x00p8I\x00\x17\x19\x01\x00\x80" "8I\x00'\x19\x02\x00\x90" "8I\x00\x17\x19\x03\x00\xa0" "8I\x00'\x19\x04\x00\xb0" "8I\x00'\x19\x05\x00\xc0" "8I\x00w\x1a\x03\x00\xd0" "2I\x00\x88\x00\x00\x06\xd0" "8I\x00\x99\x10\x03\x06\xe0" "8I\x00\x99\x10\x04\x06\xf8" "8I\x00\x99\x10\x05\x06\x10" "9I\x00\x99\x10\x06\x06 9I\x00\x99\x10\x07\x06" "89I\x00\x99\x11\x00\x06P9I\x00\x99\x11\x01\x02h9I\x00\x99\x11\x02\x02x9I\x00\x99\x11\x03\x06\x88" "9I\x00\x99\x11\x04\x06\x98" "9I\x00\x99\x11\x05\x06\xb0" "9I\x00\xa9\x11\x06\x06\xc0" "9I\x00\xa9\x11\x07\x02\xd0" "9I\x00\xa9\x12\x00\x02\xe8" "9I\x00\xa9\x12\x01\x06\xf8" "9I\x00\xa9\x12\x02\x06\x08:I\x00\xa9\x12\x03\x06\x18:I\x00\xa9\x12\x04\x06" "0:I\x00\xb9\x12\x05\x02@:I\x00\xb9\x12\x06\x02P:I\x00\xb9\x12\x07\x02`:I\x00\xb9\x13\x00\x06p:I\x00\xb9\x13\x01\x06\x88:I\x00\xb9\x13\x02\x02\x98:I\x00\xb9\x13\x03\x06\xa8:I\x00\xca\x13\x04\x06\xb8:I\x00\xca\x13\x05\x06\xd0:I\x00\xca\x13\x06\x06\xe0:I\x00\xca\x13\x07\x02\xf0:I\x00\xdb\x14\x00\x06\x00;I\x00\xdb\x14\x03\x06\x10;I\x00\xdb\x14\x02\x06\x18;I\x00\xdb\x14\x01\x06" "0;I\x00\xdb\x14\x05\x06@;I\x00\xdb\x14\x04\x06H;I\x00\xdb\x14\x06\x06X;I\x00\xdb\x14\x07\x06h;I\x00\xdb\x15\x00\x06x;I\x00\xdb\x15\x01\x02\x88;I\x00\xdb\x15\x02\x06\x98;I\x00\xdb\x15\x03\x06\xa8;I\x00\xdb\x15\x04\x04\xb8;I\x00\x0d\x00\x00\x00\xc8;I\x00\x0d\x00\x01\x00\xd0;I\x00\x0d\x00\x02\x00\xd8;I\x00\x0d\x00\x03\x00\xe0;I\x00\x0d\x00\x04\x00\xe8;I\x00\x0d\x00\x05\x00\xf0;I\x00\x0d\x00\x06\x00\xf8;I\x00\x0d\x01\x00\x00\x00<I\x00\x0d\x01\x01\x00\x08<I\x00\x0d\x02\x00\x00\x10<I\x00\x0d\x02\x01\x00\x18<I\x00\x0d\x03\x00\x00 <I\x00\x0d\x04\x00\x00(<I\x00\x0c\x00\x00\x00" "0<I\x00\x0c\x00\x00\x00@<I\x00\x0c\x00\x00\x00X<I\x00\x0c\x00\x00\x00" "0\xc6H\x00\x0c\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00\x00\x00\x00"
 };
 const void* _roTailKeep = &_roTail; /* keeps the deferred table (this .data is not from source) */
-__asm__(".globl _vt$Q24ATEL4CVSM"); /* other objects' data refer to CVSM's vtable */
+void (*_traceKeep)(BOOL, const CHAR*, ...) = ATEL::_TRACE_; /* only asm calls _TRACE_ (loadFromMem): emits its weak copy */
 
-// SOURCE DATA: .rodata
+// SOURCE DATA: .rodata .bss
