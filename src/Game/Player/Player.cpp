@@ -5193,8 +5193,8 @@ __asm__(".rdata\n.align 4\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\
    (pronounce): the original stores m_fDir before loading the vptr for initPronounce, ours loads the vptr first
    (equal sched2 priority, tie broken by RTL order; sched1 prefers our store because it frees $f0); (4) the
    !bIsBackHit Homing block: the original issues lw m_pMove before the vel.y store and the m_fDir store before the
-   lq. (2)-(4) look like the original FVECTOR's own constructors/operator= (types.h lists FVECTOR(), FVECTOR(...),
-   operator=) building the temporaries, which System/Vector.h does not have. Found: statement order from the
+   lq. Not missing FVECTOR constructors/operator=: types.h lists only the implicit ones, and the original
+   FMATRIX union holds FVECTOR v[4], which forbids user ones (ee-gcc error). Found: statement order from the
    $LM line tags (build/asmlines.py), dir declared before dpos (frame), def_attr holding the attack attribute
    first, the playSE id as a ternary of two calls (cross-jumped), bIsBackHit = FALSE after procDropMP, the case-6
    gravity as *(FLOAT*)&PL::g_fGravity and the store order from a 120-permutation search (23 -> 20). tried: brace
