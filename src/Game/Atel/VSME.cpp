@@ -1781,13 +1781,10 @@ inline void _roPhExecActor() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execActor__Q24ATEL4CVSM);
 #endif
-/* Parked: 6 lines, one store: the original stores addr (a stack variable, its address goes to execStdCode)
-   right after its load, before the _cReg load, so reorg puts the m_Pctr store into the beqz slot; ours keeps addr
-   in a pseudo that is put on the stack later (RTL: the addr store comes after the m_Pctr++ store, -dg dump), so
-   reorg fills the slot with the addr store. $LM: 932 op, 933 addr, 935 if (m_pIseg[m_Pctr++]._cReg). tried: INSTR&/
-   INSTR* forms, m_pIseg + m_Pctr++, op/addr order, a reg temp, braces, an unused &addr, tools/permuter.py 6 min
-   (loose score 1, blind to it). */
-#if 0
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+/* addr goes through a reference: its stack store then is no fixed scalar for the scheduler, which keeps it
+   before the _cReg load as in the original */
+static inline void setAddr(INT& a, INT v) { a = v; }
 eATEL_REQ_RET CVSM::execCode(INT nAddr) {
     INT addr;
     INT op;
@@ -1803,10 +1800,9 @@ eATEL_REQ_RET CVSM::execCode(INT nAddr) {
             _TRACE(TRUE, "Illegal Stack pointer %d\n", m_SP);
             return ATEL_RET_STACK_ERROR;
         }
-        addr = m_pIseg[m_Pctr]._nAddr;
         op = m_pIseg[m_Pctr]._cOp;
-        INT reg = m_pIseg[m_Pctr++]._cReg;
-        if (reg) {
+        setAddr(addr, m_pIseg[m_Pctr]._nAddr);
+        if (m_pIseg[m_Pctr++]._cReg) {
             addr += m_Freg;
         }
         m_InsCount++;
@@ -1831,17 +1827,6 @@ eATEL_REQ_RET CVSM::execCode(INT nAddr) {
         return ATEL_RET_ERROR;
     }
 }
-#else
-/* placeholder: rodata of execCode__Q24ATEL4CVSMi */
-__asm__(".rdata\n");
-inline void _roPhExecCode() {
-    TRACE("Illegal instr. address : %d\n");
-    TRACE("Illegal Stack pointer %d\n");
-    TRACE("Illegal Op. code at loc. %d\n");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execCode__Q24ATEL4CVSMi);
-#endif
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 INT CVSM::execStdCode(INT op, INT& addr, eATEL_REQ_RET& ret) {
     INT* ip;
     FLOAT* fp;
