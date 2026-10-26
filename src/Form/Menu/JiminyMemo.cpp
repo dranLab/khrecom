@@ -1,7 +1,15 @@
 #define FORM_MENU_JIMINYMEMO_CPP
 #include "khtypes.h"
-#include "Form/Menu/JiminyMemo.h"
 #include "Form/Menu/Menu.h"
+#include "System/Graphic/Gprim.h"
+#include "System/Graphic/Model.h"
+#include "System/Graphic/Anim.h"
+#include "System/Graphic/2d/2DMan.h"
+#define CTDMAN_H_PATH "System/Ctd/CtdMan.h"
+#include "System/Ctd/CtdMan.h"
+#include "System/Graphic/Effect/effect.h"
+#include "Game/CardBattle.h"
+#include "Form/Menu/JiminyMemo.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "System/Sound/SoundMan.h"
@@ -21,6 +29,7 @@ public:
     static void setLayer(INT inLayer);
 };
 }
+
 
 namespace JiminyMemo {
 INT getHostGroupId();
