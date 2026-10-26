@@ -18,6 +18,8 @@ using namespace ATEL;
 
 extern "C" char D_00491328[];
 extern "C" char D_00491338[];
+extern "C" char D_00491348[];
+extern "C" char D_00491358[];
 extern "C" char D_00491398[];
 extern "C" char D_004913C0[];
 extern "C" char D_004913E8[];
@@ -175,7 +177,15 @@ INT CVSM::searchActor(const CHAR* pszActor) const {
     }
     return i;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", searchActorID__CQ24ATEL4CVSMPCc);
+INT CVSM::searchActorID(const CHAR* pszActor) const {
+    TRACE(D_00491348);
+    INT i = getActorIndex(pszActor);
+    if (i < 0) {
+        _TRACE(TRUE, D_00491358);
+        return -1;
+    }
+    return m_ActorTbl[i]._ATP.id;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acWaitReq__Q24ATEL4CVSMRQ24ATEL5Actorii);
 void CVSM::acWaitLoadRsrc(Actor& act, INT nAddr) {
     ATP& atp = act._ATP;
