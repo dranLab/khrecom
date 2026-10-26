@@ -997,7 +997,16 @@ inline void _roPh20() {
     TRACE(__FILE__ "(4520)");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createMarkSequence__11CJiminyMemoiiiiiPQ22D210C2DSeqCtrlPPQ22D210C2DSeqCtrl);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", changeStateSequence__11CJiminyMemoPPQ22D210C2DSeqCtrliii);
+INT CJiminyMemo::changeStateSequence(D2::C2DSeqCtrl** inSeq, INT inNum, INT inMode, INT inSeqId) {
+    if (!inSeq) return 0;
+    for (INT i = 0; i < inNum; i++) {
+        D2::C2DSeqCtrl* pSeq = inSeq[i];
+        if (pSeq) {
+            if (!inMode || pSeq->isEnableDisp()) pSeq->replaceSeq(0, m_pLadName, inSeqId);
+        }
+    }
+    return 1;
+}
 INT CJiminyMemo::changeStateLoopSequence(D2::C2DSeqCtrl** inSeq, INT inNum) {
     return changeStateSequence(inSeq, inNum, 0, 0x25);
 }
