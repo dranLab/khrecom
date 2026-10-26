@@ -5,7 +5,7 @@
 #include "System/Task.h"
 
 class CAtel;
-class CAvatar;
+namespace ATEL { class CAvatar; }
 class CEventTrap;
 class CAtelCardSeq;
 
@@ -116,6 +116,7 @@ public:
     virtual ~CVSM();
     INT getActorIndex(INT nID) const;
     INT getActorIndex(const CHAR* pszName) const;
+    INT getActorNum() { return m_ActorCount; }
 
 protected:
     void deleteActorAll();
@@ -159,6 +160,16 @@ private:
     BOOL acStatBGWait();
     BOOL acStatEternityWait();
     BOOL acStatCardWndWait();
+    BOOL acStatActorWait();
+    BOOL acStatBSWait();
+    BOOL isAvatarBusy(INT nType, CAvatar* pAvatar);
+    BOOL acStatIWait();
+    BOOL acStatCWait();
+    BOOL acStatRsrcLoadWait();
+    BOOL acStatRWait();
+    BOOL acStatCrossFadeWait();
+    BOOL acStatTechWndWait();
+    BOOL acStatWorldCardWndWait();
     INT player_ctrl(INT nCode, FLOAT fArg);
     void info_disp(INT nCmnd);
     BOOL actor_ref(INT nCmnd, INT nArg);
@@ -168,6 +179,16 @@ private:
 typedef char _check_vsm_size[sizeof(CVSM) == 0x7d0c ? 1 : -1];
 
 } // namespace ATEL
+
+class CDebugWindow;
+class CActorDebug : public CTask {
+    CDebugWindow* m_pWindow; /* 0x40 */
+
+public:
+    CActorDebug(CTask* pParent);
+    virtual ~CActorDebug();
+    virtual void main();
+};
 
 class CEventLineDisp : public CTask {
 public:
