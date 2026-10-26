@@ -16,6 +16,7 @@
 #include "System/Graphic/Camera.h"
 #include "System/Graphic/WorldEnv.h"
 #include "System/Rcf.h"
+#include "System/Graphic/2d/2DSeqObj.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "System/Sound/SoundMan.h"
@@ -246,7 +247,7 @@ public:
     void setLocalPosition();
     void create(CARD inCard, INT inMode);
     void createPicture(UINT inTexNo, UINT inTexPos);
-    void changePicture(D2::C2DSeqObj* inSeqObj);
+    void changePicture(D2::C2DSeqObj* p2DSeqObj);
     void setState(INT inState);
     void main(FLOAT inFrameRate);
 };
@@ -963,16 +964,32 @@ void CMemo2DCard::createPicture(UINT inTexNo, UINT inTexPos) {
     if (!m_nSeq) addSeq(m_pEmptySeqName, JiminyMemo::CursorSeqTbl[0]);
     changePicture(addSeq("card:02", 0));
 }
-/* placeholder: rodata of changePicture__11CMemo2DCardPQ22D29C2DSeqObj */
-__asm__(".rdata\n");
-inline void _roPh10() {
-    TRACE("card:%02d");
-    TRACE("card_b:%02d");
-    TRACE("card_p:%02d");
-    TRACE("card_n:%02d");
-    TRACE("jminy_chara");
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+void CMemo2DCard::changePicture(D2::C2DSeqObj* p2DSeqObj) {
+    G_UV uvStart;
+    G_UV uvEnd;
+    char buf[16];
+    if (!p2DSeqObj) return;
+    UINT texNo = m_iTexNo;
+    INT texPos = m_iTexPos;
+    if (texNo == 21 && texPos == 1) {
+        if (JiminyMemo::is100AcreGoodEnding()) texPos = 5;
+    }
+    uvStart.set(((texPos & 3) << 6) | 2, ((texPos & 0xC) << 4) | 1);
+    uvEnd.set(uvStart.u | 0x3C, uvStart.v | 0x3E);
+    if (texNo < 22) {
+        sprintf(buf, "card:%02d", texNo);
+    } else if (texNo < 26) {
+        sprintf(buf, "card_b:%02d", texNo - 22);
+    } else if (texNo < 27) {
+        sprintf(buf, "card_p:%02d", texNo - 26);
+    } else if (texNo < 100) {
+        sprintf(buf, "card_n:%02d", texNo - 27);
+    } else {
+        sprintf(buf, "jminy_chara");
+    }
+    p2DSeqObj->changeTexture(0, buf, &uvStart, &uvEnd);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", changePicture__11CMemo2DCardPQ22D29C2DSeqObj);
 void CMemo2DCard::setPosition() {
     FVECTOR v;
     AddVectorXYZ(v, m_vBasePosition, m_vShiftPosition);
