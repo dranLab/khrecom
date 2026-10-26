@@ -34,6 +34,7 @@ extern "C" char D_00491610[];
 extern "C" char D_00491638[];
 extern "C" char D_00491668[];
 extern "C" char D_004916A0[];
+extern "C" char D_004916E8[];
 extern "C" char D_004917F0[];
 extern "C" char D_00491810[];
 extern "C" char D_00491830[];
@@ -317,7 +318,13 @@ BOOL CVSM::acStatExec() {
     return TRUE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatWait__Q24ATEL4CVSM);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatRWait__Q24ATEL4CVSM);
+BOOL CVSM::acStatRWait() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    if (atp.wait_timer) return FALSE;
+    _TRACE(m_bTrace, D_004916E8, atp.id);
+    m_Pctr = atp.next_address;
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatCWait__Q24ATEL4CVSM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatIWait__Q24ATEL4CVSM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatPWait__Q24ATEL4CVSM);
