@@ -1178,13 +1178,36 @@ CMemo2DSequence* CJiminyMemo::createSequence(INT inSeqNo, INT inLayer, INT inLay
     }
     return pSeq;
 }
-/* placeholder: rodata of createListSequence__11CJiminyMemoP15CMemo2DSequenceiiiPPQ22D210C2DSeqCtrlPPQ22D26C2DFntUiiiPCc */
-__asm__(".rdata\n");
-inline void _roPh16() {
-    TRACE(__FILE__ "(4228)");
-    TRACE(__FILE__ "(4240)");
+INT CJiminyMemo::createListSequence(CMemo2DSequence* inList, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
+                                    D2::C2DSeqCtrl** inFontSeq, D2::C2DFnt** inFont, UINT inFontCol, INT inFontSize,
+                                    INT inFontStyle, const CHAR* inStr) {
+    FVECTOR posi;
+    D2::C2DFnt* pFnt;
+    D2::C2DSeqCtrl* pListFont;
+    G_RGBA fontRGB;
+    if (!inList || !inFontSeq || !inFont) return FALSE;
+    fontRGB.col = inFontCol;
+    pListFont = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(4228)",
+                                  ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+        D2::C2DSeqCtrl;
+    if (pListFont) {
+        *inFontSeq = pListFont;
+        pListFont->setLayer(inLayer);
+        pListFont->enableColorCtrl(TRUE);
+        pListFont->setParent(inList);
+        pListFont->addSeq(m_pLadName, 0x24);
+        D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqNo, posi, 0);
+        pListFont->setLocalPos(posi);
+        pFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(4240)",
+                                 ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+            D2::C2DFnt(0, 0, &fontRGB, inFontSize, inStr, inFontStyle);
+        if (pFnt) {
+            *inFont = pFnt;
+            pListFont->addFnt(m_pLadName, pFnt);
+        }
+    }
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createListSequence__11CJiminyMemoP15CMemo2DSequenceiiiPPQ22D210C2DSeqCtrlPPQ22D26C2DFntUiiiPCc);
 INT CJiminyMemo::createListSequenceTypewriterFont(CMemo2DSequence* inList, INT inLayer, INT inLayoutNo,
                                                   INT inLayoutSeqNo, D2::C2DSeqCtrl** inFontSeq, D2::C2DFnt** inFont,
                                                   UINT inFontCol, INT inFontSize, INT inFontStyle, const CHAR* inStr,
