@@ -858,6 +858,7 @@ private:
     void initialize(INT inPlayerMode);
     void finalize();
     virtual void main();
+    void mainInit();
     void mainLoadWait();
     void mainIn();
     void mainInWait();
@@ -6425,9 +6426,123 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setContentParam
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getContentParam__11CJiminyMemoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setContentScroll__11CJiminyMemoiRC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getContentScroll__11CJiminyMemoiR7FVECTOR);
+namespace JiminyMemo {
+namespace Base {
+extern const INT LayoutData[];
+extern const LayoutDataParam SeqData[];
+extern FVECTOR TelopMessagePosition;
+extern CursorPosition L1R1DigitSlashOffset;
+}
+}
+/* Parked (final group): the inlined mainInit tail (posi._q = 0; posi.w = 1.0f; setContentStep(20); setContentScroll(0/1))
+   schedules the step/w/scroll stores in another order: in ours setContentStep's store and the posi.w stack store are
+   dependent (sched2 dump), in the original they are not (step lands before w in mainInit, after scroll[1] in mainIn).
+   mainInit 7 lines standalone, mainLoadWait 2, mainIn 2; the rest (layout setup, digit seqs, telop font) matches.
+   tried: all orders of the tail statements (scored on both callers), block-scoped tail FVECTOR (30), step first
+   (contentCollection recipe); tools/permuter.py 2 runs on mainInit (12/10, no gain). The weak functions can only
+   come from C together (key functions + deferred inline output), so they stay INCLUDE_ASM as a group. */
+#if 0
+inline void CJiminyMemo::mainInit() {
+    CMemo2DLayout* pLay;
+    D2::C2DSeqCtrl* pMess;
+    FVECTOR posi;
+    pLay = new (__FILE__ "(3948)") CMemo2DLayout(this);
+    if (pLay) {
+        D2::C2DSeqCtrl* pSeq;
+        m_hLayout = pLay->getHandle();
+        pLay->setup(m_pLadName, m_pLadFileName, JiminyMemo::Base::LayoutData, 0xC, JiminyMemo::Base::SeqData, 0xF);
+        pLay->init();
+        pSeq = pLay->getSeqCtrl(8);
+        if (pSeq) {
+            FLOAT offsetX;
+            FLOAT offsetY;
+            offsetX = JiminyMemo::Base::L1R1DigitNumOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitNumOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 0.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 16.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 32.0f, offsetY);
+            offsetX = JiminyMemo::Base::L1R1DigitSlashOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitSlashOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0xA1, offsetX + 0.0f, offsetY);
+            offsetX = JiminyMemo::Base::L1R1DigitDenomiOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitDenomiOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 0.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 16.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 32.0f, offsetY);
+        }
+        pSeq = pLay->getSeqCtrl(9);
+        if (pSeq) {
+            FLOAT offsetX;
+            FLOAT offsetY;
+            offsetX = JiminyMemo::Base::L1R1DigitNumOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitNumOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 0.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 16.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 32.0f, offsetY);
+            offsetX = JiminyMemo::Base::L1R1DigitSlashOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitSlashOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0xA1, offsetX + 0.0f, offsetY);
+            offsetX = JiminyMemo::Base::L1R1DigitDenomiOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitDenomiOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 0.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 16.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 32.0f, offsetY);
+        }
+        pSeq = pLay->getSeqCtrl(2);
+        if (pSeq) {
+            D2::C2DMan::getLayPosition(m_pLadFileName, 0x2C, 1, posi, 0);
+            pSeq->setLocalPos(posi);
+        }
+        pSeq = pLay->getSeqCtrl(5);
+        if (pSeq) {
+            D2::C2DMan::getLayPosition(m_pLadFileName, 0x2C, 2, posi, 0);
+            pSeq->setLocalPos(posi);
+        }
+    }
+    pMess = new (__FILE__ "(4012)") D2::C2DSeqCtrl;
+    if (pMess) {
+        D2::C2DFnt* pFnt;
+        m_pMessSeq = pMess;
+        pMess->setLayer(0x11);
+        pMess->enableDisp(TRUE);
+        pMess->addSeq(m_pLadName, 1);
+        pMess->setPos(JiminyMemo::Base::TelopMessagePosition);
+        pFnt = new (__FILE__ "(4022)") D2::C2DFnt(0, 0, NULL, 0x10, JiminyMemo::Base::DefaultMessage, 0x40);
+        if (pFnt) {
+            m_pMessString = pFnt;
+            pMess->addFnt(m_pLadName, pFnt);
+        }
+        pMess->enableDisp(TRUE);
+    }
+    JiminyMemo::playSE(3);
+    setLayoutState(m_hLayout, 1);
+    setContentStep(20);
+    posi._q = 0;
+    posi.w = 1.0f;
+    setContentScroll(0, posi);
+    setContentScroll(1, posi);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainInit__11CJiminyMemo);
+#endif
+#if 0
+void CJiminyMemo::mainLoadWait() {
+    if (CRcf::isCompleteLoadRCF(2, JiminyMemo::RsrcId[getLoadResourceIndex()])) {
+        mainInit();
+        m_iStep = 30;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainLoadWait__11CJiminyMemo);
+#endif
+#if 0
+void CJiminyMemo::mainIn() {
+    mainInit();
+    m_iStep = 30;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainIn__11CJiminyMemo);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainInWait__11CJiminyMemo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainLoop__11CJiminyMemo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainOut__11CJiminyMemo);
