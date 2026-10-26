@@ -699,10 +699,21 @@ inline void _roPh14() {
     TRACE("\x83t\x83H\x83g\x83\x93\x83" "f\x83o\x83" "b\x83K\x81[ :%s");
     TRACE("\x83{\x83\x93\x83h\x83I\x83u\x83t\x83\x8c\x83" "C\x83\x80 :%s");
 }
-/* placeholder: rodata of debugGameInfomationParam__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00242B40\n.word .L00242B5C\n.word .L00242B78\n.word .L00242B94\n.word .L00242BE0\n.word .L00242BE0\n.word .L00242BB0\n.word .L00242BCC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", debugGameInfomationParam__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL debugGameInfomationParam(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        switch (inY) {
+        case 1: CGameWork::setFlag(0, 0x83, DebugWork::g_dw.atelwork.iDistinctionClear); break;
+        case 2: CGameWork::setFlag(0, 0x11, DebugWork::g_dw.atelwork.iGameKH2clear); break;
+        case 3: CGameWork::setFlag(0, 0x9, DebugWork::g_dw.atelwork.iSoraClear); break;
+        case 4: CGameWork::setFlag(0, 0x12, DebugWork::g_dw.atelwork.iRikuClear); break;
+        case 7: CGameWork::setFlag(0, 0x82, DebugWork::g_dw.atelwork.iMahluciaKilled); break;
+        case 8: CGameWork::setByte(0, 0x61, DebugWork::g_dw.atelwork.iPlayDifficultMode); break;
+        }
+    }
+    return 1;
+}
+}
 /* placeholder: rodata of the tables before DebugSetGameWorkParam__8DWTEventP12CDebugWindowii */
 __asm__(".rdata\n");
 inline void _roPh16() {
