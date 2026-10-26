@@ -1620,12 +1620,20 @@ inline void _roPh37() {
     TRACE("SELECT STR %d\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatSWait__Q24ATEL4CVSM);
-/* placeholder: rodata of acStatMWait__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh38() {
-    TRACE("win_wait_mode change = %d\n");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+BOOL CVSM::acStatMWait() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    INT nWin = atp.wait_key;
+    INT nFlag;
+    if (CChatMan::instance().reqCommand(0x3ED, &nFlag, nWin) == -1)
+        nFlag = 9;
+    if (nFlag == 5 || nFlag == 0 || nFlag == 9) {
+        _TRACE(m_bTrace, "win_wait_mode change = %d\n", atp.id);
+        m_Pctr = atp.next_address;
+        return TRUE;
+    }
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatMWait__Q24ATEL4CVSM);
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 BOOL CVSM::acStatCPWait() {
     ATP& atp = m_pCurrentActor->_ATP;
