@@ -2848,9 +2848,9 @@ extern CursorPosition CursorPosiOffset;
 extern FVECTOR NoteScrollBarPosi;
 }
 namespace StoryView {
-extern USHORT WorldPictureTbl[];
+extern SHORT WorldPictureTbl[17];
 namespace D {
-extern USHORT WorldPictureTbl[];
+extern SHORT WorldPictureTbl[6];
 }
 }
 }
@@ -3057,6 +3057,249 @@ void CJiminyMemo::contentStory() {
         }
     }
 }
+/* Parked: 4 lines: in both arms of step 21 the original schedules the WorldPictureTbl load (lh) after the
+   storyNum constant, ours before. Everything else matches.
+   tried: statement order of storyNum/pictureNo, SHORT pictureNo, declaration order; setContentStep before
+   setNextContentMode fixed the prev/next branches; tools/permuter.py 5 min starts at score 1 in its copy
+   (compiled from another path), 4 here: path-sensitive like ScrollBarChange/contentMinigame. */
+#if 0
+namespace JiminyMemo {
+extern CHAR* StoryLadName[13];
+namespace StoryView {
+extern INT NoteSeqData[5];
+}
+}
+void CJiminyMemo::contentStoryView() {
+    INT eventFlagId = isModeDReport() ? 0x11 : 0;
+    switch (getContentStep()) {
+    case 20: {
+        USHORT groupId;
+        USHORT rsrcId;
+        m_ContentStoryView.iWorldNo = getContentParam(0);
+        if (isModeJiminyMemo()) {
+            INT flag = 0;
+            if (m_ContentStoryView.iWorldNo == 13) flag = JiminyMemo::is100AcreGoodEnding() ? 0 : 5;
+            rsrcId = JiminyMemo::StoryView::WorldPictureTbl[m_ContentStoryView.iWorldNo] + flag + 180;
+        } else {
+            rsrcId = JiminyMemo::StoryView::D::WorldPictureTbl[m_ContentStoryView.iWorldNo] + 180;
+        }
+        groupId = 2;
+        if (!CRsrcDB::hasRsrcGroup(groupId, rsrcId)) CRcf::reqLoadRCFFront(groupId, rsrcId, 0, NULL, 0);
+        m_ContentStoryView.iGroupId = groupId;
+        m_ContentStoryView.iRsrcId = rsrcId;
+        setContentStep(21);
+        break;
+    }
+    case 21: {
+        INT ctNo0;
+        INT ctNo1;
+        INT storyNum;
+        INT pictureNo;
+        FVECTOR posi;
+        D2::C2DSeqCtrl** pSeqCtrl;
+        D2::C2DFnt** pString;
+        CMemo2DSequence* pList;
+        if (!CRcf::isCompleteLoadRCF(m_ContentStoryView.iGroupId, m_ContentStoryView.iRsrcId)) break;
+        if (isModeJiminyMemo()) {
+            ctNo0 = 0x700401;
+            ctNo1 = 0x700501;
+            storyNum = 0x11;
+            pictureNo = JiminyMemo::StoryView::WorldPictureTbl[m_ContentStoryView.iWorldNo];
+        } else {
+            ctNo0 = 0x700412;
+            ctNo1 = 0x700512;
+            storyNum = 6;
+            pictureNo = JiminyMemo::StoryView::D::WorldPictureTbl[m_ContentStoryView.iWorldNo];
+        }
+        m_ContentStoryView.iAllStoryNum = storyNum;
+        m_ContentStoryView.iPictureNo = pictureNo;
+        m_ContentStoryView.iStringNum = 8;
+        pString = new (__FILE__ "(5890)") D2::C2DFnt*[m_ContentStoryView.iStringNum];
+        if (pString) {
+            for (INT i = 0; i < m_ContentStoryView.iStringNum; i++) pString[i] = NULL;
+            m_ContentStoryView.pString = pString;
+        }
+        m_ContentStoryView.iSeqCtrlNum = 11;
+        pSeqCtrl = new (__FILE__ "(5897)") D2::C2DSeqCtrl*[m_ContentStoryView.iSeqCtrlNum];
+        if (pSeqCtrl) {
+            for (INT i = 0; i < m_ContentStoryView.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
+            m_ContentStoryView.pSeqCtrl = pSeqCtrl;
+        }
+        splitMessage(&m_ContentStoryView.iTextLineNum, &m_ContentStoryView.pTextLineBuf,
+                     CCtdMan::getText(ctNo1 + m_ContentStoryView.iWorldNo), 14);
+        pList = createSequence(JiminyMemo::StoryView::NoteSeqData, 0x10, 0xB, 0, NULL);
+        if (pList) {
+            m_ContentStoryView.pList = pList;
+            pList->setInState(0);
+            for (INT i = 0; i < 8; i++) {
+                createListSequence(pList, 0x11, 0x19, i + 1, pSeqCtrl++, pString++, 0x8049481F, 16, 0x21000,
+                                   m_ContentStoryView.pTextLineBuf[i]);
+            }
+        }
+        if (pList) {
+            createMarkSequence(0xD0, 1, 0x19, 0xB, 0x11, pList, pSeqCtrl);
+            m_ContentStoryView.pTopArrowSeq = *pSeqCtrl++;
+            createMarkSequence(0xC3, 1, 0x19, 9, 0x11, pList, pSeqCtrl);
+            m_ContentStoryView.pBottomArrowSeq = *pSeqCtrl++;
+            if (isModeJiminyMemo() && m_ContentStoryView.iWorldNo == 13) {
+                INT flag = JiminyMemo::is100AcreGoodEnding() ? 1 : 2;
+                sprintf(m_ContentStoryView.pPictFileName, "%s%02d.lad", JiminyMemo::StoryLadName[pictureNo], flag);
+                sprintf(m_ContentStoryView.pPictSeqName, "%s%02d:00", JiminyMemo::StoryLadName[pictureNo], flag);
+            } else {
+                sprintf(m_ContentStoryView.pPictFileName, "%s.lad", JiminyMemo::StoryLadName[pictureNo]);
+                sprintf(m_ContentStoryView.pPictSeqName, "%s:00", JiminyMemo::StoryLadName[pictureNo]);
+            }
+            D2::C2DSeqCtrl* pPictSeq = new (__FILE__ "(5949)") D2::C2DSeqCtrl;
+            if (pPictSeq) {
+                *pSeqCtrl = pPictSeq;
+                m_ContentStoryView.pPictSeq = pPictSeq;
+                pPictSeq->setLayer(0x11);
+                pPictSeq->enableDisp(TRUE);
+                pPictSeq->addSeq(m_ContentStoryView.pPictSeqName, 0);
+                D2::C2DMan::getLayPosition(m_ContentStoryView.pPictFileName, 0, 0, posi, 0);
+                posi.x += 12.0f;
+                posi.y += 16.0f;
+                pPictSeq->setPos(posi);
+                pPictSeq->setScl(0.875f);
+            }
+        }
+        if (getPlateState(1) == -1) setPlateState(1, 0);
+        setPlateText(1, ctNo0 + m_ContentStoryView.iWorldNo);
+        if (getPlateState(3) == -1) setPlateState(3, 0);
+        setPlateNumSeq(7, m_ContentStoryView.iWorldNo + 1);
+        setPlateNumSeq(8, storyNum);
+        setContentStep(30);
+        setContentTimer(16.0f);
+        break;
+    }
+    case 30:
+        if (m_ContentStoryView.pPictSeq->isEnd(0)) {
+            m_ContentStoryView.pPictSeq->replaceSeq(0, m_ContentStoryView.pPictSeqName, 1);
+            setContentStep(31);
+        }
+    case 31:
+        if (getContentTimer() <= 0.0f) {
+            if (m_ContentStoryView.pSeqCtrl) {
+                changeStateLoopSequence(m_ContentStoryView.pSeqCtrl, m_ContentStoryView.iSeqCtrlNum);
+            }
+            CJiminyMemoFlag::setContentTouchFlag(eventFlagId + m_ContentStoryView.iWorldNo);
+            m_ContentStoryView.pPictSeq->replaceSeq(0, m_ContentStoryView.pPictSeqName, 1);
+            m_ContentStoryView.iPrevNo = getPrevStoryId(eventFlagId);
+            m_ContentStoryView.iNextNo = getNextStoryId(eventFlagId);
+            setContentStep(40);
+        }
+        break;
+    case 40: {
+        BOOL bTouch = FALSE;
+        if (_isButtonTrg(0x800, 0)) {
+            setContentStep(50);
+            JiminyMemo::playSE(4);
+            setNextContentMode(-1);
+        } else if (_isTrgCANCEL(0)) {
+            setContentStep(50);
+            setNextContentMode(1);
+            JiminyMemo::playSE(4);
+        } else if (m_ContentStoryView.iPrevNo >= 0 && _isButtonTrg(1, 0)) {
+            setContentStep(50);
+            setNextContentMode(6);
+            setContentParam(0, m_ContentStoryView.iPrevNo);
+            JiminyMemo::playSE(2);
+        } else if (m_ContentStoryView.iNextNo >= 0 && _isButtonTrg(2, 0)) {
+            setContentStep(50);
+            setNextContentMode(6);
+            setContentParam(0, m_ContentStoryView.iNextNo);
+            JiminyMemo::playSE(2);
+        } else if (_isButtonRpt(0x204000, 0)) {
+            if (m_ContentStoryView.iCurrentTextLine < m_ContentStoryView.iTextLineNum - 8) {
+                m_ContentStoryView.iCurrentTextLine++;
+                bTouch = TRUE;
+            }
+        } else if (_isButtonRpt(0x101000, 0)) {
+            if (m_ContentStoryView.iCurrentTextLine > 0) {
+                m_ContentStoryView.iCurrentTextLine--;
+                bTouch = TRUE;
+            }
+        } else if (_isButtonTrg(8, 0)) {
+            bTouch = nextPage(&m_ContentStoryView.iCurrentTextLine, m_ContentStoryView.iTextLineNum, 8);
+        } else if (_isButtonTrg(4, 0)) {
+            bTouch = prevPage(&m_ContentStoryView.iCurrentTextLine, 0, 8);
+        }
+        if (bTouch == TRUE) {
+            JiminyMemo::playSE(1);
+            replaceNoteList(m_ContentStoryView.pString,
+                            (const CHAR**)m_ContentStoryView.pTextLineBuf + m_ContentStoryView.iCurrentTextLine, 8);
+        }
+        break;
+    }
+    case 50: {
+        INT nextContent;
+        if (m_ContentStoryView.pList) m_ContentStoryView.pList->setOutState(2);
+        if (m_ContentStoryView.pSeqCtrl) {
+            changeStateOutSequence(m_ContentStoryView.pSeqCtrl, m_ContentStoryView.iSeqCtrlNum);
+        }
+        m_ContentStoryView.pPictSeq->replaceSeq(0, m_ContentStoryView.pPictSeqName, 2);
+        nextContent = getNextContentMode();
+        if (nextContent == 1) {
+            setPlateState(1, 2);
+            setPlateState(3, 2);
+        } else if (nextContent == -1) {
+            setPlateState(0, 2);
+            setPlateState(1, 2);
+            setPlateState(3, 2);
+        }
+        setContentStep(60);
+        setContentTimer(16.0f);
+        break;
+    }
+    case 60:
+        if (getContentTimer() <= 0.0f) setContentStep(80);
+        break;
+    case 80:
+    case 90:
+        if (m_ContentStoryView.pList) delete m_ContentStoryView.pList;
+        m_ContentStoryView.pList = NULL;
+        if (m_ContentStoryView.pString) {
+            delete[] m_ContentStoryView.pString;
+            m_ContentStoryView.pString = NULL;
+        }
+        if (m_ContentStoryView.pSeqCtrl) {
+            for (INT i = 0; i < m_ContentStoryView.iSeqCtrlNum; i++) {
+                if (m_ContentStoryView.pSeqCtrl[i]) delete m_ContentStoryView.pSeqCtrl[i];
+                m_ContentStoryView.pSeqCtrl[i] = NULL;
+            }
+            if (m_ContentStoryView.pSeqCtrl) delete[] m_ContentStoryView.pSeqCtrl;
+            m_ContentStoryView.pSeqCtrl = NULL;
+            m_ContentStoryView.pBottomArrowSeq = NULL;
+            m_ContentStoryView.pTopArrowSeq = NULL;
+            m_ContentStoryView.pPictSeq = NULL;
+        }
+        if (m_ContentStoryView.pTextLineBuf) {
+            for (INT i = 0; i < m_ContentStoryView.iTextLineNum; i++) {
+                if (m_ContentStoryView.pTextLineBuf[i]) com_free(m_ContentStoryView.pTextLineBuf[i]);
+                m_ContentStoryView.pTextLineBuf[i] = NULL;
+            }
+            if (m_ContentStoryView.pTextLineBuf) com_free(m_ContentStoryView.pTextLineBuf);
+            m_ContentStoryView.pTextLineBuf = NULL;
+        }
+        if (getNextContentMode() != 6 ||
+            JiminyMemo::StoryView::WorldPictureTbl[getContentParam(0)] != m_ContentStoryView.iPictureNo) {
+            CRsrcDB::removeGroup(m_ContentStoryView.iGroupId, m_ContentStoryView.iRsrcId);
+        }
+        setContentStep(100);
+        break;
+    case 100:
+        break;
+    }
+    if (m_ContentStoryView.pList) m_ContentStoryView.pList->main(getFrameRateF());
+    if (m_ContentStoryView.pBottomArrowSeq) {
+        m_ContentStoryView.pBottomArrowSeq->enableDisp(m_ContentStoryView.iCurrentTextLine <
+                                                       m_ContentStoryView.iTextLineNum - 8);
+    }
+    if (m_ContentStoryView.pTopArrowSeq) {
+        m_ContentStoryView.pTopArrowSeq->enableDisp(m_ContentStoryView.iCurrentTextLine > 0);
+    }
+}
+#else
 /* placeholder: rodata of contentStoryView__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh27() {
@@ -3075,6 +3318,7 @@ __asm__(".word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\
 __asm__(".word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D07C\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n");
 __asm__(".word .L0032D1F4\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentStoryView__11CJiminyMemo);
+#endif
 INT CJiminyMemo::getPrevStoryId(INT inId) {
     return getPrevContentId(inId, work(0x178), work(0x170));
 }
