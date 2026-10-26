@@ -1458,17 +1458,55 @@ inline void _roPh21() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", loadFromMem__Q24ATEL4CVSMPCUc);
 #endif
 void CVSM::deleteActorAll() {}
-/* placeholder: rodata of checkEvents__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh22() {
-    TRACE("@_to");
-    TRACE("@_tf");
-    TRACE("@_as");
-    TRACE("@_tc");
-    TRACE("@_tk");
-    TRACE("\x89\xef\x98" "b\x8aJ\x8en\x81" "F%s\n");
+void CVSM::checkEvents() {
+    ETMoveData data;
+    if (CMainApp::isPauseNow()) return;
+    if (CGameWork::getByte(1, 0x140)) return;
+    if (m_fEventTrapStartWait <= 0.0f) {
+        if (!CGameWork::getFlag(1, 0x26) && g_pPlayer) {
+            data._fRadius = 0.5f;
+            data._vNowPos = g_pPlayer->getPos();
+            data._vOldPos = g_pPlayer->getOldPos();
+            for (int i = 0; i < m_ActorCount; i++) {
+                CEventTrap* p = m_ActorTbl[i]._pEventTrap;
+                if (!p) continue;
+                INT ret = p->checkTrap(data);
+                if (!ret) continue;
+                switch (ret) {
+                case 3: reqSSI("@_to", i, 3); break;
+                case 5: reqSSI("@_tf", i, 2); break;
+                case 9: reqSSI("@_as", i, 5); break;
+                case 1: reqSSI("@_tc", i, 4); break;
+                default:
+                    if (ret & 8) reqSSI("@_as", i, 5);
+                    if (ret & 2) reqSSI("@_to", i, 3);
+                    if (ret & 4) reqSSI("@_tf", i, 2);
+                    break;
+                }
+            }
+        }
+    } else {
+        m_fEventTrapStartWait -= CTaskMan::getSysTask(0x1A)->getFrameRate() * 0.020000001f;
+    }
+    if (m_fTalkWait <= 0.0f) {
+        if (!g_pPlayer) return;
+        if (g_pPlayer->getPlayerState() == 1 || g_pPlayer->getPlayerState() == 2 ||
+            g_pPlayer->getPlayerState() == 3 || g_pPlayer->getPlayerState() == 4) {
+            if (CPadHandler::isTrgTalk() && (m_nFlag & 8)) {
+                INT Index = searchLockOnNpc();
+                if (Index != -1 && reqSSI("@_tk", Index, 5)) {
+                    TRACE("\x89\xef\x98" "b\x8aJ\x8en\x81" "F%s\n", m_ActorTbl[Index]._ATP.name);
+                    CGameWork::setFlag(1, 4, TRUE);
+                    CGameWork::setFlag(1, 3, TRUE);
+                    CGameWork::setFlag(1, 5, TRUE);
+                    m_fTalkWait = 10.0f;
+                }
+            }
+        }
+    } else {
+        m_fTalkWait -= CTaskMan::getSysTask(0x1A)->getFrameRate() * 0.020000001f;
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", checkEvents__Q24ATEL4CVSM);
 /* Parked: 8 bytes short; only the first return differs: the original keeps `if (!g_pPlayer) return -1;` as
    bnez over "b end; li -1", ours lets jump2 cross-jump it into the loop's final `li -1` (beqz v1 to it; -dJ dump:
    all four -1 returns share one label). $LM tags: 642 the test, 643 the return, 645-647 isNowLockon (Player.h)
