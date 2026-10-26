@@ -245,6 +245,7 @@ public:
 private:
     void initialize(INT inPlayerMode);
     void setContentMode(INT inContentMode);
+    void replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum);
     template <class T> T getTaskPointer(HANDLE inHandle);
     BOOL isTaskOut(HANDLE inHandle);
     UINT checkLayoutState(HANDLE inHandle, INT inFlags);
@@ -730,7 +731,15 @@ inline void _roPh16() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createListSequence__11CJiminyMemoP15CMemo2DSequenceiiiPPQ22D210C2DSeqCtrlPPQ22D26C2DFntUiiiPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createListSequenceTypewriterFont__11CJiminyMemoP15CMemo2DSequenceiiiPPQ22D210C2DSeqCtrlPPQ22D26C2DFntUiiiPCcf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteList__11CJiminyMemoPPQ22D26C2DFntPPCci);
+void CJiminyMemo::replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum) {
+    if (inFnt) {
+        for (INT i = 0; i < inNum; i++) {
+            D2::C2DFnt* pFnt = inFnt[i];
+            const CHAR* pString = inString[i];
+            if (pFnt) pFnt->setText(pString);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListWithOpenCheck__11CJiminyMemoPPQ22D26C2DFntUsiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListWithOpenCheck__11CJiminyMemoPPQ22D26C2DFntUsPUciii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListWithOpenCheck__11CJiminyMemoPPQ22D26C2DFntPUsiiii);
