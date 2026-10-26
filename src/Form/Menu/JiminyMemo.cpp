@@ -3602,8 +3602,8 @@ static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
     c.m_nCategory21 = cardDataTbl_004EA4F8[c.m_nKind].nCategory1;
 }
 namespace JiminyMemo {
-extern INT SoraCardNumTbl[];
-extern INT RikuCardNumTbl[];
+extern const INT SoraCardNumTbl[];
+extern const INT RikuCardNumTbl[];
 namespace Collect {
 extern INT BaseSeqData[5];
 extern INT NoteSeqData[5];
@@ -3642,7 +3642,7 @@ void CJiminyMemo::contentCollection() {
         INT cursorLimitY;
         FLOAT defaultScale;
         INT allCardNum;
-        INT* pCardNumTbl;
+        const INT* pCardNumTbl;
         INT kindNum;
         UINT* pCardFlagTbl;
         SHORT** pCardEncyclTbl;
@@ -4331,8 +4331,8 @@ void CJiminyMemo::CardScreenOutClip() {
 }
 
 namespace JiminyMemo {
-extern INT SoraCardNumTbl[];
-extern INT RikuCardNumTbl[];
+extern const INT SoraCardNumTbl[];
+extern const INT RikuCardNumTbl[];
 namespace Collect {
 extern UINT CursorMoveFlag[];
 extern UINT CursorMoveFlagWithSpecial[];
@@ -4350,7 +4350,7 @@ INT CJiminyMemo::setParamFromCollectToCardView() {
     INT kindId;
     UINT* pCursorMoveFlag;
     INT cardKindNum;
-    INT* pCardKindTbl;
+    const INT* pCardKindTbl;
     if (!work(0x1D4)) return FALSE;
     current = -1;
     cursorLimitX = work(0x1FC);
@@ -4406,7 +4406,7 @@ void CJiminyMemo::contentCard() {
         INT listNum;
         INT posiNum;
         INT CTNo;
-        INT* cardNumTbl;
+        const INT* cardNumTbl;
         FVECTOR posi;
         D2::C2DSeqCtrl** pSeqCtrl;
         D2::C2DFnt** pString;
@@ -4651,12 +4651,6 @@ void CJiminyMemo::contentCard() {
         }
     }
 }
-/* Parked: 2 lines: in the Sora arm of step 20 the original loads SoraCardNumTbl[kind] after forming the
-   CardNameTbl[kind] address, ours before (the Riku arm matches). Everything else matches.
-   tried: statement orders in the arm (plateCTNo first, pCTCodeTbl first: 20 lines), kind read per arm,
-   eventFlagOffset init placement, ternary forms for the telop CT number (fixed case 30: sums in each arm),
-   isModeDReport() for the event base; tools/permuter.py 6 min starts at score 1 in its copy (path-sensitive). */
-#if 0
 namespace JiminyMemo {
 namespace CardSelect {
 extern INT NoteSeqData[5];
@@ -4882,22 +4876,6 @@ void CJiminyMemo::contentCardSelect() {
         }
     }
 }
-#else
-/* placeholder: rodata of contentCardSelect__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh30() {
-    TRACE(__FILE__ "(7546)");
-    TRACE(__FILE__ "(7553)");
-}
-__asm__(".rdata\n.align 4\n.word .L003301A0\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L003306F8\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n");
-__asm__(".word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L0033079C\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330990\n.word .L00330B58\n");
-__asm__(".word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330A54\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n");
-__asm__(".word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330A78\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n");
-__asm__(".word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330A78\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n");
-__asm__(".word .L00330B58\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCardSelect__11CJiminyMemo);
-#endif
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 namespace JiminyMemo {
 namespace CardView {
 extern INT NoteSeqData[5];
@@ -5237,7 +5215,7 @@ INT CJiminyMemo::setParamFromCardViewToCollect() {
     INT kindNo = work(0x2CC);
     INT cursorLimitY;
     UINT* pCursorMoveFlag;
-    INT* pCardNumTbl;
+    const INT* pCardNumTbl;
     if (m_iPlayerMode == 0) {
         cursorLimitY = 7;
         pCursorMoveFlag = haveSpecialCard() ? JiminyMemo::Collect::CursorMoveFlagWithSpecial
