@@ -520,7 +520,23 @@ void CMemo3DObj::setPosition(const FVECTOR& inPosition) {
         m_bTouch = TRUE;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __13CMemo2DLayoutP5CTask);
+CMemo2DLayout::CMemo2DLayout(CTask* p) : CTask(p, 0x4000) {
+    setState(0);
+    m_uiStateFlags = 0;
+    m_hLayer = 0;
+    m_iSeqCtrlNum = 0;
+    for (INT i = 0; i < 32; i++) {
+        m_pSeqCtrlArray[i] = NULL;
+        m_pSeqFntArray[i] = NULL;
+    }
+    m_iLayerLevel = 11;
+    m_iSeqNum = 0;
+    m_pLayoutNoTbl = NULL;
+    m_pSeqNoTbl = NULL;
+    m_pSeqCodeTbl = NULL;
+    m_pLayoutName = NULL;
+    m_pLayoutFileName = NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DLayout);
 /* placeholder: rodata of main__13CMemo2DLayout */
 __asm__(".rdata\n");
