@@ -8,6 +8,7 @@
 inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/Atel/AtelCrossFade.h"
 #include "System/Rcf.h"
+#include "Game/GameWork.h"
 #include "System/Debug.h"
 #include "System/TaskMan.h"
 #include "Form/DebugWindow.h"
@@ -50,6 +51,7 @@ extern "C" char D_004917F0[];
 extern "C" char D_00491810[];
 extern "C" char D_00491830[];
 extern "C" char D_00491850[];
+extern "C" char D_00491868[];
 extern "C" char D_004918D0[];
 extern "C" char D_004918F0[];
 extern "C" char D_00491918[];
@@ -437,7 +439,15 @@ BOOL CVSM::acStatWKWait() {
     m_Pctr = m_pCurrentActor->_ATP.next_address;
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatXWait__Q24ATEL4CVSM);
+BOOL CVSM::acStatXWait() {
+    if (CPadHandler::isTrgCANCEL()) {
+        CGameWork::setByte(1, 0, 0xFF);
+        _TRACE(m_bTrace, D_00491868, m_pCurrentActor->_ATP.id);
+        m_Pctr = m_pCurrentActor->_ATP.next_address;
+        return TRUE;
+    }
+    return acStatSWait();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", isAvatarBusy__Q24ATEL4CVSMiPQ24ATEL7CAvatar);
 BOOL CVSM::acStatBSWait() {
     ATP& atp = m_pCurrentActor->_ATP;
