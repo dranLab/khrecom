@@ -722,8 +722,8 @@ struct ContentCharaViewWork {
         iListNum = 0;
         iPrevNo = -1;
         iGroupId = 0;
-        iRsrcId = 0;
         iNextNo = -1;
+        iRsrcId = 0;
         for (INT i = 0; i < 16; i++) DefeatEnemyStr[i] = 0;
     }
 };
@@ -792,6 +792,8 @@ private:
     BOOL isModeDReport() { return m_iPlayerMode != 0; }
     INT getLoadResourceIndex() { return m_iPlayerMode != 0; }
     void setContentStep(INT inStep) { m_ContentCommon.iStep = inStep; }
+    INT getContentStep() { return m_ContentCommon.iStep; }
+    INT getNextContentMode() { return m_ContentCommon.iNextContent; }
     void setContentParam(INT inIdx, INT inParam) { m_ContentCommon.param[inIdx] = inParam; }
     void setContentTimer(FLOAT inTimer) { m_ContentCommon.fTimer = inTimer; }
     FLOAT getContentTimer() { return m_ContentCommon.fTimer; }
@@ -804,6 +806,13 @@ public:
 private:
     void initialize(INT inPlayerMode);
     void finalize();
+    virtual void main();
+    void mainLoadWait();
+    void mainIn();
+    void mainInWait();
+    void mainLoop();
+    void mainOut();
+    void mainOutWait();
     void setContentMode(INT inContentMode);
     void replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum);
     void replaceNoteListMark(D2::C2DSeqCtrl** inMark, BYTE* inFlagTbl, INT inListNum, INT inListAllNum, INT inStartNo,
@@ -1861,15 +1870,93 @@ void CJiminyMemo::finalize() {
         }
     }
 }
-/* placeholder: rodata of main__11CJiminyMemo */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00328740\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328750\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n");
-__asm__(".word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328760\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328770\n.word .L00328798\n");
-__asm__(".word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328780\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n");
-__asm__(".word .L00328798\n.word .L00328798\n.word .L00328790\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n");
-__asm__(".word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.byte 0x00,0x00,0x00,0x00\n");
-__asm__(".rdata\n.align 4\n.word .L00328C90\n.word .L003288B4\n.word .L003288EC\n.word .L003289D8\n.word .L00328A54\n.word .L00328B30\n.word .L00328C58\n.word .L00328930\n.word .L00328AA4\n.word .L00328AD4\n.word .L00328B7C\n.word .L00328BD0\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__11CJiminyMemo);
+void CJiminyMemo::main() {
+    switch (m_iStep) {
+    case 10:
+        mainLoadWait();
+        break;
+    case 20:
+        mainIn();
+        break;
+    case 30:
+        mainInWait();
+        break;
+    case 40:
+        mainLoop();
+        break;
+    case 50:
+        mainOut();
+        break;
+    case 60:
+        mainOutWait();
+        break;
+    case 80:
+        break;
+    }
+    FLOAT time = getContentTimer() - getFrameRateF();
+    if (time < 0.0f) time = 0.0f;
+    setContentTimer(time);
+    (this->*pContentFunc)();
+    if (getContentStep() == 100) {
+        if (m_iStep == 80) {
+            out();
+        } else if (m_iStep == 40) {
+            switch (getNextContentMode()) {
+            case 0:
+                setContentMode(getNextContentMode());
+                m_ContentMenu.init();
+                break;
+            case 1:
+                setContentMode(getNextContentMode());
+                m_ContentStory.init();
+                break;
+            case 6:
+                setContentMode(getNextContentMode());
+                m_ContentStoryView.init();
+                break;
+            case 2:
+                setContentMode(getNextContentMode());
+                m_ContentCollect.init();
+                break;
+            case 3:
+                setContentMode(getNextContentMode());
+                m_ContentCard.init();
+                break;
+            case 7:
+                setContentMode(getNextContentMode());
+                m_ContentCardSelect.init();
+                break;
+            case 8:
+                setContentMode(getNextContentMode());
+                m_ContentCardView.init();
+                break;
+            case 4:
+                setContentMode(getNextContentMode());
+                m_ContentChara.init();
+                break;
+            case 9:
+                setContentMode(getNextContentMode());
+                m_ContentCharaSelect.init();
+                break;
+            case 10:
+                setContentMode(getNextContentMode());
+                m_ContentCharaView.init();
+                break;
+            case 5:
+                setContentMode(getNextContentMode());
+                m_ContentMinigame.init();
+                break;
+            case -1:
+                m_iStep = 50;
+                break;
+            default:
+#line 3934
+                AssertApp(__FILE__, __LINE__, "0", 0);
+                break;
+            }
+        }
+    }
+}
 UINT CJiminyMemo::checkLayoutState(HANDLE inHandle, INT inFlags) {
     CMemo2DLayout* p = getTaskPointer<CMemo2DLayout*>(inHandle);
     if (p) return p->isStateFlag(inFlags);
