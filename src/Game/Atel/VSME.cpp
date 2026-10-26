@@ -68,6 +68,7 @@ inline void _vsmeMotionName() {
 #include "Game/Player/Player.h"
 #include "System/Sound/SoundMan.h"
 #include "System/Com.h"
+#include "Form/Menu/JMemoFlag.h"
 #include <string.h>
 #include "include_asm.h"
 
@@ -309,7 +310,33 @@ static BOOL debugBtlReportCallBackParam(CDebugWindow* pObj, INT inY, INT inParam
     return 1;
 }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", debugBtlReportCallBack__8DWTEventP12CDebugWindowi);
+namespace DWTEvent {
+static INT debugBtlReportCallBack(CDebugWindow* pObj, INT inParam) {
+    INT i;
+    DebugWork::g_dw.atelwork.BtlMemo = CJiminyMemoFlag::getContentOpenPercentage(CGameWork::getByte(0, 0x60));
+    DebugWork::g_dw.atelwork.KillEnemyCount = CGameWork::getInt(0, 0xB3);
+    DebugWork::g_dw.atelwork.KeysTresur = 0;
+    for (i = 0; i < 16; i++) {
+        DebugWork::g_dw.atelwork.KeysTresur += CGameWork::progMCW()._KeyRoomsTresureBoxCounter[i];
+    }
+    DebugWork::g_dw.atelwork.CardBreakCount = CGameWork::getInt(0, 0x3C);
+    DebugWork::g_dw.atelwork.StockKind = CGameWork::getInt(0, 0x3D);
+    DebugWork::g_dw.atelwork.StockCount = CGameWork::getInt(0, 0x3E);
+    UINT nTime = CMainApp::getPlayTime();
+    DebugWork::g_dw.atelwork.Hour = nTime / 3600;
+    DebugWork::g_dw.atelwork.minit = nTime % 3600 / 60;
+    if (DebugWork::g_dw.atelwork.Hour >= 1000) {
+        DebugWork::g_dw.atelwork.Hour = 999;
+        DebugWork::g_dw.atelwork.minit = 59;
+    }
+    F_UL win;
+    win.ul = CGameWork::getInt(0, 0x40);
+    DebugWork::g_dw.atelwork.DuelWin = win.f * 100.0f;
+    DebugWork::g_dw.atelwork.DarkCount = CGameWork::getInt(0, 0x41);
+    DebugWork::g_dw.atelwork.SpeedCount = CGameWork::getInt(0, 0x3F);
+    return 1;
+}
+}
 namespace DWTEvent {
 static INT debugKeyTresurCallBack(CDebugWindow* pObj, INT inParam) {
     DebugWork::g_dw.atelwork.TreTr = CGameWork::progMCW()._KeyRoomsTresureBoxCounter[1];
