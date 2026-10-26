@@ -5745,13 +5745,6 @@ extern INT NoteSeqData[5];
 extern INT EnemyNoteSeqData[5];
 }
 }
-/* Parked: 12 lines: in both arms of step 20 the original schedules `li a2,14/2; sw a2,56(sp)` (EnemyNoteKind,
-   a spilled pseudo) after the table address setup and loads listNum after the ctTbl address add; ours issues the
-   li/sw right after the first lui. Everything else matches.
-   tried: EnemyNoteKind statement first/after listNum/last/after EnemyDownNumId, its and listNum's declaration
-   at every position, a ternary after the arms (111 lines); tools/permuter.py (other drafts hidden) 2 runs,
-   30 -> 12 via declaration order + the line-marker fixes (timer before step, 80 falls through to 81). */
-#if 0
 void CJiminyMemo::contentCharaView() {
     INT eventFlagId = isModeDReport() ? 0x7F : 0x17;
     switch (getContentStep()) {
@@ -6048,23 +6041,6 @@ void CJiminyMemo::contentCharaView() {
         m_ContentCharaView.pTopArrowSeq->enableDisp(m_ContentCharaView.iCurrentTextLine > 2);
     }
 }
-#else
-/* placeholder: rodata of contentCharaView__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh34() {
-    TRACE(__FILE__ "(8999)");
-    TRACE(__FILE__ "(9006)");
-    TRACE("%4d");
-    TRACE(__FILE__ "(9108)");
-}
-__asm__(".rdata\n.align 4\n.word .L00333744\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L00333E28\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n");
-__asm__(".word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L00333F5C\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003341B4\n.word .L003344E8\n");
-__asm__(".word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L0033428C\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n");
-__asm__(".word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003342C0\n.word .L0033441C\n.word .L00334494\n.word .L003344B8\n");
-__asm__(".word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003342B0\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n");
-__asm__(".word .L003344E8\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCharaView__11CJiminyMemo);
-#endif
 INT CJiminyMemo::getPrevCharaId(INT inId) {
     return getPrevContentId(inId, work(0x3A0), work(0x39C));
 }
