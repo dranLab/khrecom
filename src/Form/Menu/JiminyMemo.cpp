@@ -877,7 +877,19 @@ void CJiminyMemo::replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListWithOpenCheck__11CJiminyMemoPPQ22D26C2DFntUsiiii);
+void CJiminyMemo::replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER inStartCtNo, INT inFlagId, INT inListNum,
+                                               INT inListAllNum, INT inStartNo) {
+    if (inList) {
+        D2::C2DFnt** pList = inList;
+        INT flagIndex = inFlagId + inStartNo;
+        CT_LOWER CtNo = inStartCtNo + inStartNo;
+        for (INT i = 0; i < inListNum; i++, pList++, flagIndex++) {
+            replaceNoteListString(*pList, JiminyMemo::getOpenCloseStringData(JiminyMemo::getCT0014Code(CtNo),
+                                                                             CJiminyMemoFlag::isContentOpen(flagIndex)));
+            CtNo++;
+        }
+    }
+}
 void CJiminyMemo::replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER inStartCtNo, BYTE* inFlagTbl,
                                                INT inListNum, INT inListAllNum, INT inStartNo) {
     if (inList) {
