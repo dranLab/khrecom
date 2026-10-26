@@ -271,6 +271,7 @@ private:
     void initialize(INT inPlayerMode);
     void setContentMode(INT inContentMode);
     void replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum);
+    BOOL isButtonRptLimitStop(UINT inBit, UINT inPad, BOOL inStopCompare);
     template <class T> T getTaskPointer(HANDLE inHandle);
     BOOL isTaskOut(HANDLE inHandle);
     UINT checkLayoutState(HANDLE inHandle, INT inFlags);
@@ -908,7 +909,17 @@ BOOL CJiminyMemo::prevPage(INT* ioTop, INT inMin, INT inDisp) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", nextPage__11CJiminyMemoP13CMemo2DCursorPiiif);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", prevPage__11CJiminyMemoP13CMemo2DCursorPiiif);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", isButtonRptLimitStop__11CJiminyMemoUiUii);
+BOOL CJiminyMemo::isButtonRptLimitStop(UINT inBit, UINT inPad, BOOL inStopCompare) {
+    BOOL rval = FALSE;
+    if (_isButtonRpt(inBit, inPad)) {
+        if (inStopCompare) {
+            rval = _isButtonTrg(inBit, inPad);
+        } else {
+            rval = TRUE;
+        }
+    }
+    return rval;
+}
 BOOL CJiminyMemo::haveSpecialCard() {
     BOOL bRet = FALSE;
     if (!m_iPlayerMode) {
