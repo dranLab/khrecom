@@ -278,6 +278,7 @@ private:
     BOOL acStatCrossFadeWait();
     BOOL acStatTechWndWait();
     BOOL acStatWorldCardWndWait();
+    INT player_ctrl(INT nCode);
     INT player_ctrl(INT nCode, FLOAT fArg);
     void info_disp(INT nCmnd);
     BOOL actor_ref(INT nCmnd, INT nArg);

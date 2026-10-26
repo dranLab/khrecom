@@ -2608,6 +2608,119 @@ BOOL CVSM::acStatDLWait() {
 BOOL CVSM::acStatBGWait() {
     return FALSE;
 }
+/* Parked: 8 lines, one case (nCode 27, the two commands with f = 16.0f): the original issues the 16.0f load and
+   its store to f before loading m_pCurrentActor, ours after (sched2: the lw chain to the virtual call has the
+   higher priority; equal-priority ties go later-insn-first, so the original's RTL had the constant after the
+   load). Every other case, the jump table and the shared TRACE tail match. tried: volatile f, statement order per
+   the $LM tags (6202 f, 6203/6204 the calls), tools/permuter.py 5 min (loose score 1). */
+#if 0
+INT CVSM::player_ctrl(INT nCode) {
+    FLOAT f;
+    INT index;
+    switch (nCode) {
+    case 2:
+        m_pCurrentActor->_pAvatar->reqCommand(0x6, NULL, 0);
+        TRACE("SHOW :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 3:
+        m_pCurrentActor->_pAvatar->reqCommand(0x6, NULL, 1);
+        TRACE("HIDE :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 6:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1D, NULL, 1);
+        TRACE("GRAVITY ON :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 7:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1D, NULL, 0);
+        TRACE("GRAVITY OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 8:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1E, NULL, 1);
+        TRACE("MAP_COLL_ON :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 9:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1E, NULL, 0);
+        TRACE("MAP_COLL_OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 10:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1F, NULL, 1);
+        TRACE("BODY_COLL_ON :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 11:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1F, NULL, 0);
+        TRACE("BODY_COLL_OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 39:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1, NULL, 0);
+        m_pCurrentActor->_ATP.status = 25;
+        index = searchActor(m_pCurrentActor->_ATP.name);
+        m_ActorTbl[index]._pAvatar = NULL;
+        m_pCurrentActor->_pAvatar = NULL;
+        TRACE("REMOVE NPC :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 40:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1A, NULL, 1);
+        TRACE("MAKEUP_MOTION_INVALID :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 41:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1A, NULL, 0);
+        TRACE("MAKEUP_MOTION_VALID :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 42:
+        m_pCurrentActor->_pAvatar->reqCommand(0x34, NULL, 0);
+        TRACE("AVTCMD_SET_LOOK_START :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 43:
+        m_pCurrentActor->_pAvatar->reqCommand(0x35, NULL, 0);
+        TRACE("AVTCMD_SET_LOOK_STOP :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 44:
+        f = 16.0f;
+        m_pCurrentActor->_pAvatar->reqCommand(0x35, NULL, 0);
+        m_pCurrentActor->_pAvatar->reqCommand(0x36, &f, 0);
+        TRACE("AVTCMD_SET_LOOK_END :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 45:
+        m_pCurrentActor->_pAvatar->reqCommand(0x24, NULL, 0);
+        TRACE("AVTCMD_CREATE_LEGIK :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 46:
+        m_pCurrentActor->_pAvatar->reqCommand(0x21, NULL, 1);
+        TRACE("AVTCMD_SET_IK  ON :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 47:
+        m_pCurrentActor->_pAvatar->reqCommand(0x21, NULL, 0);
+        TRACE("AVTCMD_SET_IK  OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 48:
+        m_pCurrentActor->_pAvatar->reqCommand(0x22, NULL, 1);
+        TRACE("AVTCMD_SET_LOCK_ON  ON :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 49:
+        m_pCurrentActor->_pAvatar->reqCommand(0x22, NULL, 0);
+        index = searchLockOnNpc();
+        if (index != -1 && m_ActorTbl[index]._pAvatar == m_pCurrentActor->_pAvatar) g_pPlayer->cancelLockon();
+        TRACE("AVTCMD_SET_LOCK_ON  OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 50:
+        m_pCurrentActor->_pAvatar->reqCommand(0x23, NULL, 1);
+        TRACE("AVTCMD_SET_NEAR_CLIP  OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 51:
+        m_pCurrentActor->_pAvatar->reqCommand(0x23, NULL, 0);
+        TRACE("AVTCMD_SET_NEAR_CLIP  OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 52:
+        m_pCurrentActor->_pAvatar->reqCommand(0x2F, NULL, 0);
+        TRACE("AVTCMD_START_AVATAR  :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    default:
+        _TRACE(m_bTrace, "bad param player_ctrl :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    }
+    return 0;
+}
+#else
 /* placeholder: rodata of player_ctrl__Q24ATEL4CVSMi */
 __asm__(".rdata\n");
 inline void _roPh42() {
@@ -2618,6 +2731,7 @@ inline void _roPh42() {
 }
 __asm__(".rdata\n.align 4\n.word .L0024F080\n.word .L0024F0B8\n.word .L0024F604\n.word .L0024F604\n.word .L0024F0F0\n.word .L0024F128\n.word .L0024F160\n.word .L0024F198\n.word .L0024F1D0\n.word .L0024F208\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F240\n.word .L0024F2AC\n.word .L0024F2E4\n.word .L0024F31C\n.word .L0024F354\n.word .L0024F38C\n.word .L0024F3F8\n.word .L0024F430\n.word .L0024F468\n.word .L0024F4A0\n.word .L0024F4D8\n.word .L0024F550\n.word .L0024F588\n.word .L0024F5C0\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", player_ctrl__Q24ATEL4CVSMi);
+#endif
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 INT CVSM::player_ctrl(INT nCode, FLOAT fArg) {
     if (m_pCurrentActor->_pAvatar) _TRACE(m_bTrace, "bad param player_control\n");
