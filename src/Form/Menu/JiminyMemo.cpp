@@ -256,6 +256,12 @@ public:
     void main(FLOAT inFrameRate);
     void setState(INT inState) { m_iState = inState; }
     void setBasePosition(const FVECTOR& inPosition) { m_vBasePosition = inPosition; }
+    void setLocalPosition(FVECTOR& inPosi) {
+        m_vPosition = inPosi;
+        setLocalPos(m_vPosition);
+    }
+    void setStateFlag(USHORT inOrFlag, USHORT inAndFlag) { m_iStateFlag = (m_iStateFlag & ~inAndFlag) | inOrFlag; }
+    void addMoveTimer(FLOAT inTimeQ) { m_fMoveTimer += inTimeQ; }
     INT getSideInId(INT inId) { return inId == 1 ? 0 : 3; }
     INT getSideOutId(INT inId) { return inId == 1 ? 2 : 4; }
     void setup(const CHAR* inSeqName, const INT* inSeqTbl, INT inLayer);
@@ -300,6 +306,8 @@ public:
     FVECTOR& getShiftVector() { return m_vShiftPosi; }
     void setShiftVector(const FVECTOR& inVector) { m_vShiftPosi = inVector; }
     FVECTOR& getAimVector() { return m_vAimPosi; }
+    FVECTOR& getPosition() { return m_vPosi; }
+    void setSeqNo(INT inSeqNo) { m_iLadTbl[3] = inSeqNo; }
     CursorPosition* getLimitPosi(INT inId);
     FLOAT getFrameRateF();
     void setReplaceSeq(INT inSeq);
@@ -332,6 +340,11 @@ public:
     void main(FLOAT inFrameRate);
     void setBasePosition(const FVECTOR& inPosition) { m_vBasePosition = inPosition; }
     FVECTOR& getBasePosition() { return m_vBasePosition; }
+    void setShiftPosition(const FVECTOR& inShift) { m_vShiftPosition = inShift; }
+    void setScale(FLOAT inScale) {
+        m_fScale = inScale;
+        setScl(inScale);
+    }
 };
 
 struct ContentCommonWork {
@@ -3581,6 +3594,647 @@ INT CJiminyMemo::getPrevStoryId(INT inId) {
 INT CJiminyMemo::getNextStoryId(INT inId) {
     return getNextContentId(inId, work(0x178), work(0x170));
 }
+static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
+    c.m_nId = 0;
+    c.m_nNumber2 = num;
+    c.m_nKind2 = kind;
+    c.m_nCategory20 = cardDataTbl_004EA4F8[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl_004EA4F8[c.m_nKind].nCategory1;
+}
+namespace JiminyMemo {
+extern INT SoraCardNumTbl[];
+extern INT RikuCardNumTbl[];
+namespace Collect {
+extern INT BaseSeqData[5];
+extern INT NoteSeqData[5];
+extern const INT LightSeqTbl[5];
+extern const INT FrameSeqTbl[5];
+extern const INT FlickerSeqTbl[5];
+extern UINT CursorMoveFlag[];
+extern UINT CursorMoveFlagWithSpecial[];
+extern CursorPosition CursorMapStart;
+extern CursorPosition CursorMapOffset;
+extern CursorPosition CardMapOffset;
+namespace D {
+extern UINT CursorMoveFlag[];
+extern CursorPosition CursorMapStart;
+extern CursorPosition CardMapOffset;
+}
+}
+}
+/* Parked: 2 lines: in case 40's card-view branch the original stores the step (50, v1) before the next mode
+   (8, v0); ours stores the mode first. The sched2 dump shows both stores tied (prio 5, both after the shift.x/y
+   loads), broken by RTL order; writing setContentStep(50) first fixes the store order but swaps v0/v1 (4 lines).
+   Everything else matches (const eventFlagId, const Light/Frame/Flicker tables, x < cursorLimitX via cprop,
+   shift._q = 0 + w, setters before the shift init per the line markers).
+   tried: all 360 orders of the six statements of that block, declaration placement; tools/permuter.py (other
+   drafts hidden) 10 min, no improvement. */
+#if 0
+void CJiminyMemo::contentCollection() {
+    const INT eventFlagId = isModeJiminyMemo() ? 0xB7 : 0x14F;
+    BOOL bCursorShift = FALSE;
+    BOOL bCardShift = FALSE;
+    FLOAT frameRate = getFrameRateF();
+    switch (getContentStep()) {
+    case 20: {
+        INT currentStartNo;
+        INT cursorLimitX;
+        INT cursorLimitY;
+        FLOAT defaultScale;
+        INT allCardNum;
+        INT* pCardNumTbl;
+        INT kindNum;
+        UINT* pCardFlagTbl;
+        SHORT** pCardEncyclTbl;
+        CursorPosition* pCardMapOffset;
+        FVECTOR posi;
+        D2::C2DSeqCtrl** pSeqCtrl;
+        D2::C2DFnt** pString;
+        CMemo2DSequence* pBase;
+        CMemo2DCard** pCard;
+        CMemo2DSequence* pList;
+        currentStartNo = getContentParam(0);
+        if (isModeJiminyMemo()) {
+            if (currentStartNo < 0) currentStartNo = 1;
+            cursorLimitX = 0x16;
+            cursorLimitY = 7;
+            defaultScale = 0.25f;
+            allCardNum = 0x98;
+            pCardNumTbl = JiminyMemo::SoraCardNumTbl;
+            pCardFlagTbl = haveSpecialCard() ? JiminyMemo::Collect::CursorMoveFlagWithSpecial
+                                             : JiminyMemo::Collect::CursorMoveFlag;
+            pCardEncyclTbl = JiminyMemo::CardEncyclTbl;
+            kindNum = 10;
+            pCardMapOffset = &JiminyMemo::Collect::CardMapOffset;
+        } else {
+            if (currentStartNo < 0) currentStartNo = 0;
+            cursorLimitX = 0x16;
+            cursorLimitY = 3;
+            defaultScale = 0.25f;
+            allCardNum = 0x3B;
+            kindNum = 4;
+            pCardNumTbl = JiminyMemo::RikuCardNumTbl;
+            pCardFlagTbl = JiminyMemo::Collect::D::CursorMoveFlag;
+            pCardEncyclTbl = JiminyMemo::RikuCardEncyclTbl;
+            pCardMapOffset = &JiminyMemo::Collect::D::CardMapOffset;
+        }
+        m_ContentCollect.iCursorLimitX = cursorLimitX;
+        m_ContentCollect.iCursorLimitY = cursorLimitY;
+        m_ContentCollect.fDefaultScale = defaultScale;
+        m_ContentCollect.sCursorPosiX = currentStartNo % cursorLimitX;
+        m_ContentCollect.sCursorPosiY = currentStartNo / cursorLimitX;
+        m_ContentCollect.fScale = defaultScale;
+        m_ContentCollect.iStringNum = 6;
+        pString = new (__FILE__ "(6227)") D2::C2DFnt*[m_ContentCollect.iStringNum];
+        if (pString) {
+            for (INT i = 0; i < m_ContentCollect.iStringNum; i++) pString[i] = NULL;
+            m_ContentCollect.pString = pString;
+        }
+        m_ContentCollect.iSeqCtrlNum = m_ContentCollect.iStringNum + 1;
+        pSeqCtrl = new (__FILE__ "(6234)") D2::C2DSeqCtrl*[m_ContentCollect.iSeqCtrlNum];
+        if (pSeqCtrl) {
+            for (INT i = 0; i < m_ContentCollect.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
+            m_ContentCollect.pSeqCtrl = pSeqCtrl;
+        }
+        pBase = createSequence(JiminyMemo::Collect::BaseSeqData, 0xF, 0x28, 0, NULL);
+        if (pBase) {
+            m_ContentCollect.pBase = pBase;
+            pBase->setInState(0);
+            createMarkSequence(0xD7, 2, 0x2A, 1, 0x12, pBase, pSeqCtrl);
+            pSeqCtrl += 2;
+            createListSequence(pBase, 0x12, 0x2A, 3, pSeqCtrl++, pString++, 0x807F7F7F, 0x10, 0x42,
+                               CCtdMan::getText(0x78000F));
+            createListSequence(pBase, 0x12, 0x2A, 5, pSeqCtrl++, pString++, 0x807F7F7F, 0x10, 0x40,
+                               CCtdMan::getText(0x700601));
+        }
+        m_ContentCollect.iCardNum = allCardNum;
+        pCard = new (__FILE__ "(6280)") CMemo2DCard*[m_ContentCollect.iCardNum];
+        if (pCard) {
+            for (INT i = 0; i < m_ContentCollect.iCardNum; i++) pCard[i] = NULL;
+            m_ContentCollect.pCard = pCard;
+        }
+        if (pBase && pCard) {
+            INT no = 0;
+            FVECTOR offset;
+            for (INT kind = 0; kind < kindNum; kind++) {
+                for (INT i = 0; i < pCardNumTbl[kind]; i++) {
+                    if (CJiminyMemoFlag::isContentOpen(eventFlagId + no)) {
+                        pCard[no] = new (__FILE__ "(6294)") CMemo2DCard(m_pLadName);
+                        if (pCard[no]) {
+                            CARD card;
+                            pCard[no]->setLayer(0xF);
+                            pCard[no]->enableColorCtrl(TRUE);
+                            pCard[no]->setParent(pBase);
+                            _setCard(card, pCardEncyclTbl[kind][i], 0xFF);
+                            pCard[no]->create(card, 1);
+                        }
+                    }
+                    no++;
+                }
+            }
+            no = 0;
+            offset.set(cursorLimitX * 64.0f * -0.5f + pCardMapOffset->x,
+                       cursorLimitY * 96.0f * -0.5f + pCardMapOffset->y, 0.0f);
+            for (INT y = 0; y < cursorLimitY; y++) {
+                for (INT x = 0; x < cursorLimitX; x++) {
+                    if (pCardFlagTbl[y] & (1 << x)) {
+                        if (pCard[no]) {
+                            posi.set(x * 64.0f + offset.x, y * 96.0f + offset.y, 0.0f);
+                            pCard[no]->setScale(defaultScale);
+                            pCard[no]->setBasePosition(posi);
+                            pCard[no]->setLocalPosition();
+                            pCard[no]->setState(1);
+                        }
+                        no++;
+                    }
+                }
+            }
+            bCardShift = TRUE;
+        }
+        if (pBase) {
+            INT mode = getLoadResourceIndex();
+            FLOAT percentage = CJiminyMemoFlag::getCardCollectionPercentage(mode, FALSE);
+            createListSequence(pBase, 0x12, 0x2A, 4, pSeqCtrl++, pString++, 0x807F7F7F, 0xC, 0x42,
+                               CJiminyMemoFlag::getCollecterRankName(mode, percentage));
+            sprintf(m_ContentCollect.Percentage, "%3d%s", (INT)(percentage * 100.0f), CCtdMan::getText(0x700602));
+            createListSequence(pBase, 0x12, 0x2A, 6, pSeqCtrl++, pString, 0x807F7F7F, 0x11, 0x41,
+                               m_ContentCollect.Percentage);
+        }
+        if (pSeqCtrl) {
+            createMarkSequence(0x8B, 1, 0x2B, 0, 0x10, NULL, pSeqCtrl);
+            if (*pSeqCtrl) {
+                m_ContentCollect.pMaskFG = *pSeqCtrl;
+                (*pSeqCtrl)->enableColorCtrl(FALSE);
+                (*pSeqCtrl)->enableDisp(FALSE);
+            }
+        }
+        pList = createSequence(JiminyMemo::Collect::NoteSeqData, 0x11, 0x28, 0, NULL);
+        if (pList) {
+            m_ContentCollect.pList = pList;
+            pList->setInState(1);
+            pList->enableDisp(FALSE);
+        }
+        if (getPlateState(0) == -1) setPlateState(0, 0);
+        setPlateText(0, 0x700202);
+        if (getPlateState(2) == -1) setPlateState(2, 0);
+        setPlateText(2, 0x700001);
+        bCursorShift = TRUE;
+        setContentTimer(16.0f);
+        setContentStep(30);
+        break;
+    }
+    case 30:
+        if (getContentTimer() <= 0.0f) {
+            CMemo2DSequence* pBase;
+            if (m_ContentCollect.pSeqCtrl) {
+                changeStateLoopSequence(m_ContentCollect.pSeqCtrl, m_ContentCollect.iSeqCtrlNum);
+            }
+            if (m_ContentCollect.pMaskFG) m_ContentCollect.pMaskFG->enableDisp(TRUE);
+            if (m_ContentCollect.pList) m_ContentCollect.pList->enableDisp(TRUE);
+            pBase = m_ContentCollect.pBase;
+            if (pBase) {
+                CursorPosition* pCardMapOffset;
+                CursorPosition* pMapStart;
+                INT cursorLimitX = m_ContentCollect.iCursorLimitX;
+                INT cursorLimitY = m_ContentCollect.iCursorLimitY;
+                CursorPosition StartPosi;
+                INT current;
+                if (isModeJiminyMemo()) {
+                    pCardMapOffset = &JiminyMemo::Collect::CardMapOffset;
+                    pMapStart = &JiminyMemo::Collect::CursorMapStart;
+                } else {
+                    pCardMapOffset = &JiminyMemo::Collect::D::CardMapOffset;
+                    pMapStart = &JiminyMemo::Collect::D::CursorMapStart;
+                }
+                current = m_ContentCollect.sCursorPosiX + m_ContentCollect.sCursorPosiY * (SHORT)cursorLimitX;
+                StartPosi.x = pCardMapOffset->x + pMapStart->x;
+                StartPosi.y = pCardMapOffset->y + pMapStart->y;
+                m_ContentCollect.pCursor = createCollectionCursorSequence(
+                    (const INT*)JiminyMemo::CursorSeqTbl, StartPosi, JiminyMemo::Collect::CursorMapOffset,
+                    cursorLimitX * cursorLimitY, cursorLimitX * cursorLimitY, 0, current, cursorLimitX, 0x13,
+                    0x20002, current, m_ContentCollect.fScale, pBase);
+                m_ContentCollect.pFrame = createSequence(JiminyMemo::Collect::FrameSeqTbl[3], 0x12, 0, 0, pBase);
+                if (m_ContentCollect.pFrame) {
+                    m_ContentCollect.pFrame->setStateFlag(4, 0);
+                    m_ContentCollect.pFrame->setLocalPosition(m_ContentCollect.pCursor->getPosition());
+                }
+                m_ContentCollect.pLight = createSequence(JiminyMemo::Collect::LightSeqTbl[3], 0x12, 0, 0, pBase);
+                if (m_ContentCollect.pLight) {
+                    m_ContentCollect.pLight->setLocalPosition(m_ContentCollect.pCursor->getPosition());
+                }
+                m_ContentCollect.pFlicker =
+                    createSequence(JiminyMemo::Collect::FlickerSeqTbl[3], 0x12, 0, 0, pBase);
+                if (m_ContentCollect.pFlicker) {
+                    m_ContentCollect.pFlicker->setStateFlag(2, 0);
+                    m_ContentCollect.pFlicker->setStateFlag(4, 0);
+                    m_ContentCollect.pFlicker->setLocalPosition(m_ContentCollect.pCursor->getPosition());
+                }
+                bCursorShift = TRUE;
+            }
+            setTelopMessage(CCtdMan::getText(isModeJiminyMemo() ? 0x700107 : 0x70011B));
+            setPlateState(6, 0);
+            setContentStep(40);
+        }
+        break;
+    case 40:
+        if (_isButtonTrg(0x800, 0)) {
+            setContentStep(50);
+            JiminyMemo::playSE(4);
+            setNextContentMode(-1);
+        } else if (m_ContentCollect.pCursor) {
+            if (_isTrgCANCEL(0)) {
+                setNextContentMode(0);
+                setContentStep(50);
+                JiminyMemo::playSE(4);
+            } else if (_isButtonTrg(0x80, 0)) {
+                if (setParamFromCollectToCardView()) {
+                    FVECTOR shift;
+                    setNextContentMode(8);
+                    setContentStep(50);
+                    shift._q = 0;
+                    shift.w = 1.0f;
+                    setContentScroll(0, shift);
+                    setContentScroll(1, shift);
+                    JiminyMemo::playSE(2);
+                } else {
+                    JiminyMemo::playSE(5);
+                }
+            } else if (_isButtonRpt(0x204000, 0)) {
+                SHORT cx = m_ContentCollect.sCursorPosiX;
+                SHORT cy = m_ContentCollect.sCursorPosiY;
+                while (TRUE) {
+                    m_ContentCollect.sCursorPosiY++;
+                    if (m_ContentCollect.sCursorPosiY >= m_ContentCollect.iCursorLimitY) {
+                        if (_isButtonTrg(0x204000, 0)) {
+                            m_ContentCollect.sCursorPosiX++;
+                            if (m_ContentCollect.sCursorPosiX >= m_ContentCollect.iCursorLimitX) {
+                                m_ContentCollect.sCursorPosiX = cx;
+                                m_ContentCollect.sCursorPosiY = cy;
+                                break;
+                            }
+                            m_ContentCollect.sCursorPosiY = 0;
+                        } else {
+                            m_ContentCollect.sCursorPosiX = cx;
+                            m_ContentCollect.sCursorPosiY = cy;
+                            break;
+                        }
+                    }
+                    if (setParamFromCollectToCardView()) {
+                        bCursorShift = TRUE;
+                        break;
+                    }
+                }
+            } else if (_isButtonRpt(0x101000, 0)) {
+                SHORT cx = m_ContentCollect.sCursorPosiX;
+                SHORT cy = m_ContentCollect.sCursorPosiY;
+                while (TRUE) {
+                    m_ContentCollect.sCursorPosiY--;
+                    if (m_ContentCollect.sCursorPosiY < 0) {
+                        if (_isButtonTrg(0x101000, 0)) {
+                            m_ContentCollect.sCursorPosiX--;
+                            if (m_ContentCollect.sCursorPosiX < 0) {
+                                m_ContentCollect.sCursorPosiX = cx;
+                                m_ContentCollect.sCursorPosiY = cy;
+                                break;
+                            }
+                            m_ContentCollect.sCursorPosiY = m_ContentCollect.iCursorLimitY - 1;
+                        } else {
+                            m_ContentCollect.sCursorPosiX = cx;
+                            m_ContentCollect.sCursorPosiY = cy;
+                            break;
+                        }
+                    }
+                    if (setParamFromCollectToCardView()) {
+                        bCursorShift = TRUE;
+                        break;
+                    }
+                }
+            } else if (_isButtonRpt(0x802000, 0)) {
+                SHORT cx = m_ContentCollect.sCursorPosiX;
+                SHORT cy = m_ContentCollect.sCursorPosiY;
+                while (TRUE) {
+                    m_ContentCollect.sCursorPosiX++;
+                    if (m_ContentCollect.sCursorPosiX >= m_ContentCollect.iCursorLimitX) {
+                        if (_isButtonTrg(0x802000, 0)) {
+                            m_ContentCollect.sCursorPosiY++;
+                            if (m_ContentCollect.sCursorPosiY >= m_ContentCollect.iCursorLimitY) {
+                                m_ContentCollect.sCursorPosiX = cx;
+                                m_ContentCollect.sCursorPosiY = cy;
+                                break;
+                            }
+                            m_ContentCollect.sCursorPosiX = 0;
+                        } else {
+                            m_ContentCollect.sCursorPosiX = cx;
+                            m_ContentCollect.sCursorPosiY = cy;
+                            break;
+                        }
+                    }
+                    if (setParamFromCollectToCardView()) {
+                        bCursorShift = TRUE;
+                        break;
+                    }
+                }
+            } else if (_isButtonRpt(0x408000, 0)) {
+                SHORT cx = m_ContentCollect.sCursorPosiX;
+                SHORT cy = m_ContentCollect.sCursorPosiY;
+                while (TRUE) {
+                    m_ContentCollect.sCursorPosiX--;
+                    if (m_ContentCollect.sCursorPosiX < 0) {
+                        if (_isButtonTrg(0x408000, 0)) {
+                            m_ContentCollect.sCursorPosiY--;
+                            if (m_ContentCollect.sCursorPosiY < 0) {
+                                m_ContentCollect.sCursorPosiX = cx;
+                                m_ContentCollect.sCursorPosiY = cy;
+                                break;
+                            }
+                            m_ContentCollect.sCursorPosiX = m_ContentCollect.iCursorLimitX - 1;
+                        } else {
+                            m_ContentCollect.sCursorPosiX = cx;
+                            m_ContentCollect.sCursorPosiY = cy;
+                            break;
+                        }
+                    }
+                    if (setParamFromCollectToCardView()) {
+                        bCursorShift = TRUE;
+                        break;
+                    }
+                }
+            } else if (_isButtonTrg(0x40, 0)) {
+                if (m_ContentCollect.fScale < 1.0f) {
+                    setContentStep(41);
+                    JiminyMemo::playSE(0xF);
+                }
+                if (m_ContentCollect.fScale > m_ContentCollect.fDefaultScale) {
+                    setContentStep(43);
+                    JiminyMemo::playSE(0xF);
+                }
+            }
+            if (bCursorShift) {
+                m_ContentCollect.pCursor->setPosiId(m_ContentCollect.sCursorPosiX +
+                                                    m_ContentCollect.sCursorPosiY * m_ContentCollect.iCursorLimitX);
+                JiminyMemo::playSE(0xE);
+            }
+        }
+        break;
+    case 41: {
+        FVECTOR shift;
+        m_ContentCollect.fZoomTimer = 0.0f;
+        if (m_ContentCollect.pCursor) m_ContentCollect.pCursor->enableDisp(FALSE);
+        if (m_ContentCollect.pLight) {
+            m_ContentCollect.pLight->enableDisp(FALSE);
+            m_ContentCollect.pLight->setStateFlag(4, 0);
+        }
+        if (m_ContentCollect.pFrame) m_ContentCollect.pFrame->enableDisp(FALSE);
+        if (m_ContentCollect.pFlicker) m_ContentCollect.pFlicker->enableDisp(FALSE);
+        shift = m_ContentCollect.pCursor->getShiftVector();
+        m_ContentCollect.vShiftPosi.x = shift.x;
+        m_ContentCollect.vShiftPosi.y = shift.y;
+        m_ContentCollect.pCursor->setScale(1.0f);
+        m_ContentCollect.pCursor->main();
+        shift = m_ContentCollect.pCursor->getShiftVector();
+        m_ContentCollect.vShiftVec.x = shift.x;
+        m_ContentCollect.vShiftVec.y = shift.y;
+        m_ContentCollect.pCursor->setScale(m_ContentCollect.fScale);
+        setContentStep(42);
+    }
+    case 42: {
+        FLOAT rate;
+        m_ContentCollect.fZoomTimer += getFrameRateF();
+        if (m_ContentCollect.fZoomTimer >= 40.0f) {
+            m_ContentCollect.fZoomTimer = 40.0f;
+            if (m_ContentCollect.pCursor) {
+                m_ContentCollect.pCursor->enableDisp(TRUE);
+                m_ContentCollect.pCursor->setSeqNo(0xED);
+                m_ContentCollect.pCursor->setState(1);
+            }
+            if (m_ContentCollect.pLight) {
+                m_ContentCollect.pLight->enableDisp(TRUE);
+                m_ContentCollect.pLight->replaceSequence(JiminyMemo::Collect::LightSeqTbl[1]);
+                m_ContentCollect.pLight->setStateFlag(0, 4);
+            }
+            if (m_ContentCollect.pFrame) {
+                m_ContentCollect.pFrame->enableDisp(TRUE);
+                m_ContentCollect.pFrame->replaceSequence(JiminyMemo::Collect::FrameSeqTbl[1]);
+            }
+            if (m_ContentCollect.pFlicker) m_ContentCollect.pFlicker->enableDisp(TRUE);
+            setContentStep(40);
+        }
+        rate = 1.0f - powf(1.0f - m_ContentCollect.fZoomTimer / 40.0f, 2.5f);
+        m_ContentCollect.fScale = (1.0f - m_ContentCollect.fDefaultScale) * rate + m_ContentCollect.fDefaultScale;
+        if (m_ContentCollect.fZoomTimer < 40.0f) {
+            CursorPosition shiftPosi = m_ContentCollect.vShiftPosi;
+            CursorPosition shiftAdd = m_ContentCollect.vShiftVec;
+            FVECTOR posi;
+            shiftAdd.x = (shiftAdd.x - shiftPosi.x) * rate;
+            shiftAdd.y = (shiftAdd.y - shiftPosi.y) * rate;
+            shiftPosi.x += shiftAdd.x;
+            shiftPosi.y += shiftAdd.y;
+            posi.set(shiftPosi.x, shiftPosi.y, 0.0f);
+            m_ContentCollect.pCursor->setShiftVector(posi);
+        } else {
+            FVECTOR centerPosi;
+            centerPosi.set(m_ContentCollect.vShiftVec.x, m_ContentCollect.vShiftVec.y, 0.0f);
+            m_ContentCollect.pCursor->setShiftVector(centerPosi);
+        }
+        bCardShift = TRUE;
+        if (m_ContentCollect.pLight) m_ContentCollect.pLight->addMoveTimer(frameRate);
+        break;
+    }
+    case 43: {
+        FVECTOR shift;
+        m_ContentCollect.fZoomTimer = 0.0f;
+        if (m_ContentCollect.pCursor) m_ContentCollect.pCursor->enableDisp(FALSE);
+        if (m_ContentCollect.pLight) {
+            m_ContentCollect.pLight->enableDisp(FALSE);
+            m_ContentCollect.pLight->setStateFlag(4, 0);
+        }
+        if (m_ContentCollect.pFrame) m_ContentCollect.pFrame->enableDisp(FALSE);
+        if (m_ContentCollect.pFlicker) m_ContentCollect.pFlicker->enableDisp(FALSE);
+        shift = m_ContentCollect.pCursor->getShiftVector();
+        m_ContentCollect.vShiftPosi.x = shift.x;
+        m_ContentCollect.vShiftPosi.y = shift.y;
+        m_ContentCollect.vShiftVec.x = 0.0f;
+        m_ContentCollect.vShiftVec.y = 0.0f;
+        CardScreenSideClip(TRUE);
+        setContentStep(44);
+    }
+    case 44: {
+        FLOAT rate;
+        m_ContentCollect.fZoomTimer += getFrameRateF();
+        if (m_ContentCollect.fZoomTimer >= 40.0f) {
+            m_ContentCollect.fZoomTimer = 40.0f;
+            if (m_ContentCollect.pCursor) {
+                m_ContentCollect.pCursor->enableDisp(TRUE);
+                m_ContentCollect.pCursor->setSeqNo(0x80);
+                m_ContentCollect.pCursor->setState(1);
+            }
+            if (m_ContentCollect.pLight) {
+                m_ContentCollect.pLight->enableDisp(TRUE);
+                m_ContentCollect.pLight->replaceSequence(JiminyMemo::Collect::LightSeqTbl[3]);
+                m_ContentCollect.pLight->setStateFlag(0, 4);
+            }
+            if (m_ContentCollect.pFrame) {
+                m_ContentCollect.pFrame->enableDisp(TRUE);
+                m_ContentCollect.pFrame->replaceSequence(JiminyMemo::Collect::FrameSeqTbl[3]);
+            }
+            if (m_ContentCollect.pFlicker) m_ContentCollect.pFlicker->enableDisp(TRUE);
+            setContentStep(40);
+        }
+        rate = powf(1.0f - m_ContentCollect.fZoomTimer / 40.0f, 2.5f);
+        m_ContentCollect.fScale = (1.0f - m_ContentCollect.fDefaultScale) * rate + m_ContentCollect.fDefaultScale;
+        if (m_ContentCollect.fZoomTimer < 40.0f) {
+            CursorPosition shiftPosi = m_ContentCollect.vShiftPosi;
+            CursorPosition shiftAdd = m_ContentCollect.vShiftVec;
+            FVECTOR posi;
+            shiftAdd.x = (shiftAdd.x - shiftPosi.x) * (1.0f - rate);
+            shiftAdd.y = (shiftAdd.y - shiftPosi.y) * (1.0f - rate);
+            shiftPosi.x += shiftAdd.x;
+            shiftPosi.y += shiftAdd.y;
+            posi.set(shiftPosi.x, shiftPosi.y, 0.0f);
+            m_ContentCollect.pCursor->setShiftVector(posi);
+        } else {
+            FVECTOR centerPosi;
+            centerPosi.set(m_ContentCollect.vShiftVec.x, m_ContentCollect.vShiftVec.y, 0.0f);
+            m_ContentCollect.pCursor->setShiftVector(centerPosi);
+        }
+        bCardShift = TRUE;
+        if (m_ContentCollect.pLight) m_ContentCollect.pLight->addMoveTimer(frameRate);
+        break;
+    }
+    case 50:
+        if (m_ContentCollect.pList) m_ContentCollect.pList->setOutState(2);
+        if (m_ContentCollect.pBase) m_ContentCollect.pBase->setOutState(2);
+        if (m_ContentCollect.pCursor) m_ContentCollect.pCursor->setState(4);
+        if (m_ContentCollect.pLight) {
+            m_ContentCollect.pLight->setOutState(2);
+            m_ContentCollect.pLight->enableDisp(FALSE);
+        }
+        if (m_ContentCollect.pFrame) m_ContentCollect.pFrame->setOutState(2);
+        if (m_ContentCollect.pFlicker) {
+            m_ContentCollect.pFlicker->setOutState(2);
+            m_ContentCollect.pFlicker->enableDisp(FALSE);
+        }
+        if (m_ContentCollect.pCard) {
+            for (INT i = 0; i < m_ContentCollect.iCardNum; i++) {
+                if (m_ContentCollect.pCard[i]) m_ContentCollect.pCard[i]->setState(3);
+            }
+        }
+        if (m_ContentCollect.pSeqCtrl) {
+            changeStateOutSequence(m_ContentCollect.pSeqCtrl, m_ContentCollect.iSeqCtrlNum);
+        }
+        if (m_ContentCollect.pMaskFG) m_ContentCollect.pMaskFG->enableDisp(FALSE);
+        if (m_ContentCollect.pList) m_ContentCollect.pList->enableDisp(FALSE);
+        if (getNextContentMode() != 8) {
+            setPlateState(0, 2);
+            setPlateState(2, 2);
+        }
+        if (m_ContentCollect.pMaskFG) m_ContentCollect.pMaskFG->enableDisp(FALSE);
+        if (m_ContentCollect.pList) m_ContentCollect.pList->enableDisp(FALSE);
+        setTelopMessage("");
+        setPlateState(6, -1);
+        CardScreenOutClip();
+        setContentTimer(16.0f);
+        setContentStep(60);
+        break;
+    case 60:
+        if (getContentTimer() <= 0.0f) setContentStep(80);
+        break;
+    case 80:
+    case 90:
+        if (m_ContentCollect.pList) delete m_ContentCollect.pList;
+        m_ContentCollect.pList = NULL;
+        if (m_ContentCollect.pBase) delete m_ContentCollect.pBase;
+        m_ContentCollect.pBase = NULL;
+        if (m_ContentCollect.pCursor) delete m_ContentCollect.pCursor;
+        m_ContentCollect.pCursor = NULL;
+        if (m_ContentCollect.pLight) delete m_ContentCollect.pLight;
+        m_ContentCollect.pLight = NULL;
+        if (m_ContentCollect.pFrame) delete m_ContentCollect.pFrame;
+        m_ContentCollect.pFrame = NULL;
+        if (m_ContentCollect.pFlicker) delete m_ContentCollect.pFlicker;
+        m_ContentCollect.pFlicker = NULL;
+        if (m_ContentCollect.pString) {
+            delete[] m_ContentCollect.pString;
+            m_ContentCollect.pString = NULL;
+        }
+        if (m_ContentCollect.pSeqCtrl) {
+            for (INT i = 0; i < m_ContentCollect.iSeqCtrlNum; i++) {
+                if (m_ContentCollect.pSeqCtrl[i]) delete m_ContentCollect.pSeqCtrl[i];
+                m_ContentCollect.pSeqCtrl[i] = NULL;
+            }
+            if (m_ContentCollect.pSeqCtrl) delete[] m_ContentCollect.pSeqCtrl;
+            m_ContentCollect.pSeqCtrl = NULL;
+        }
+        if (m_ContentCollect.pCard) {
+            for (INT i = 0; i < m_ContentCollect.iCardNum; i++) {
+                if (m_ContentCollect.pCard[i]) delete m_ContentCollect.pCard[i];
+                m_ContentCollect.pCard[i] = NULL;
+            }
+            if (m_ContentCollect.pCard) delete[] m_ContentCollect.pCard;
+            m_ContentCollect.pCard = NULL;
+        }
+        setContentStep(100);
+        break;
+    case 100:
+        break;
+    }
+    if (m_ContentCollect.pList) m_ContentCollect.pList->main(frameRate);
+    if (m_ContentCollect.pBase) m_ContentCollect.pBase->main(frameRate);
+    if (bCardShift == TRUE || bCursorShift == TRUE) {
+        CMemo2DCursor* pCursor = m_ContentCollect.pCursor;
+        if (pCursor) {
+            FLOAT scale = m_ContentCollect.fScale;
+            pCursor->setScale(scale);
+            pCursor->main();
+            if (m_ContentCollect.pLight) {
+                m_ContentCollect.pLight->setScale(scale);
+                m_ContentCollect.pLight->setSlideMoveParam(pCursor);
+                m_ContentCollect.pLight->main(frameRate);
+            }
+            if (m_ContentCollect.pFrame) {
+                m_ContentCollect.pFrame->setScale(scale);
+                m_ContentCollect.pFrame->setSlideMoveParam(pCursor);
+                m_ContentCollect.pFrame->main(frameRate);
+            }
+            if (m_ContentCollect.pFlicker) {
+                m_ContentCollect.pFlicker->setScale(scale);
+                m_ContentCollect.pFlicker->setSlideMoveParam(pCursor);
+                m_ContentCollect.pFlicker->main(frameRate);
+            }
+            if (scale == 1.0f) CardScreenSideClip(FALSE);
+        }
+    } else if (m_ContentCollect.pCursor) {
+        m_ContentCollect.pCursor->main();
+        if (m_ContentCollect.pLight) m_ContentCollect.pLight->main(frameRate);
+        if (m_ContentCollect.pFrame) m_ContentCollect.pFrame->main(frameRate);
+        if (m_ContentCollect.pFlicker) m_ContentCollect.pFlicker->main(frameRate);
+    }
+    if (bCardShift == TRUE || bCursorShift == TRUE) {
+        if (m_ContentCollect.pCard && m_ContentCollect.pCursor) {
+            FLOAT scale;
+            FVECTOR shift;
+            FVECTOR shiftVec;
+            if (m_ContentCollect.fScale < 1e-05f) m_ContentCollect.fScale = m_ContentCollect.fDefaultScale;
+            shift = m_ContentCollect.pCursor->getShiftVector();
+            scale = m_ContentCollect.fScale;
+            shiftVec.x = -shift.x / scale;
+            shiftVec.y = -shift.y / scale;
+            for (INT i = 0; i < m_ContentCollect.iCardNum; i++) {
+                if (m_ContentCollect.pCard[i]) {
+                    m_ContentCollect.pCard[i]->setScale(scale);
+                    m_ContentCollect.pCard[i]->setShiftPosition(shiftVec);
+                    m_ContentCollect.pCard[i]->setLocalPosition();
+                    m_ContentCollect.pCard[i]->main(frameRate);
+                }
+            }
+        }
+    } else if (m_ContentCollect.pCard) {
+        for (INT i = 0; i < m_ContentCollect.iCardNum; i++) {
+            if (m_ContentCollect.pCard[i]) m_ContentCollect.pCard[i]->main(frameRate);
+        }
+    }
+}
+#else
 /* placeholder: rodata of contentCollection__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh28() {
@@ -3597,6 +4251,7 @@ __asm__(".word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\
 __asm__(".word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032E94C\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n");
 __asm__(".word .L0032EB40\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCollection__11CJiminyMemo);
+#endif
 void CJiminyMemo::CardScreenSideClip(BOOL inAllDisp) {
     CMemo2DCard* pCard;
     if (*(FLOAT*)&work(0x1F0) < 1.0f || inAllDisp == TRUE) {
@@ -4247,13 +4902,6 @@ namespace JiminyMemo {
 namespace CardView {
 extern INT NoteSeqData[5];
 }
-}
-static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
-    c.m_nId = 0;
-    c.m_nNumber2 = num;
-    c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl_004EA4F8[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl_004EA4F8[c.m_nKind].nCategory1;
 }
 void CJiminyMemo::contentCardView() {
     const INT eventFlagId = isModeJiminyMemo() ? 0xB7 : 0x14F;
