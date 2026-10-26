@@ -715,11 +715,119 @@ static BOOL DebugSetKH2CardGetFlag(CDebugWindow* pObj, INT inY, INT inParam) {
 }
 /* the asm .data (debug window tables) refers to it by name until the data comes from source */
 __asm__(".globl DebugSetKH2CardGetFlag__8DWTEventP12CDebugWindowii");
-/* placeholder: rodata of DebugSetJiminyMemoFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002428AC\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L002428AC\n.word .L0024274C\n.word .L00242764\n.word .L0024277C\n.word .L00242794\n.word .L002427AC\n.word .L002427C4\n.word .L002427DC\n.word .L002427F4\n.word .L0024280C\n.word .L00242824\n.word .L0024283C\n.word .L00242854\n.word .L0024286C\n.word .L00242890\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024296C\n.word .L0024296C\n.word .L0024296C\n.word .L002429E8\n.word .L00242984\n.word .L00242984\n.word .L00242984\n.word .L002429E8\n.word .L002429A8\n.word .L002429A8\n.word .L002429E8\n.word .L002429CC\n.word .L002429CC\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetJiminyMemoFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+extern BYTE SoraEnemyMemoIdTbl[];
+extern BYTE RikuEnemyMemoIdTbl[];
+extern USHORT SoraCardKindTbl[];
+extern USHORT RikuCardKindTbl[];
+static BOOL DebugSetJiminyMemoFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT SoraWorld = DebugWork::g_dw.jiminy.Sora_World;
+        INT SoraFloor = DebugWork::g_dw.jiminy.Sora_Floor;
+        INT RikuFloor = DebugWork::g_dw.jiminy.Riku_Floor;
+        INT RikuWorld = DebugWork::g_dw.jiminy.Riku_World;
+        INT SoraEtc = DebugWork::g_dw.jiminy.Sora_Etc;
+        INT shiftY;
+        switch (inY) {
+        case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13:
+            shiftY = 1 << (inY - 1);
+            SoraWorld ^= shiftY;
+            CJiminyMemoFlag::debugEvent(SoraWorld & shiftY, 0, 1, inY, 0);
+            break;
+        case 14: case 15: case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23: case 24: case 25: case 26:
+            shiftY = 1 << (inY - 14);
+            SoraFloor ^= shiftY;
+            CJiminyMemoFlag::debugEvent(SoraFloor & shiftY, 0, 2, inY - 13, 0);
+            break;
+        case 28: case 29: case 30: case 31: case 32: case 33: case 34: case 35: case 36: case 37: case 38: case 39:
+            shiftY = 1 << (inY - 28);
+            RikuWorld ^= shiftY;
+            CJiminyMemoFlag::debugEvent(RikuWorld & shiftY, 1, 1, inY - 27, 0);
+            break;
+        case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50: case 51:
+            shiftY = 1 << (inY - 40);
+            RikuFloor ^= shiftY;
+            CJiminyMemoFlag::debugEvent(RikuFloor & shiftY, 1, 2, inY - 52, 0);
+            break;
+        case 53: SoraEtc ^= 0x1; CJiminyMemoFlag::debugEvent(SoraEtc & 0x1, 0, 8, 0, 0); break;
+        case 54: SoraEtc ^= 0x2; CJiminyMemoFlag::debugEvent(SoraEtc & 0x2, 0, 8, 1, 0); break;
+        case 55: SoraEtc ^= 0x4; CJiminyMemoFlag::debugEvent(SoraEtc & 0x4, 0, 8, 2, 0); break;
+        case 56: SoraEtc ^= 0x8; CJiminyMemoFlag::debugEvent(SoraEtc & 0x8, 0, 8, 3, 0); break;
+        case 57: SoraEtc ^= 0x10; CJiminyMemoFlag::debugEvent(SoraEtc & 0x10, 0, 8, 4, 0); break;
+        case 58: SoraEtc ^= 0x20; CJiminyMemoFlag::debugEvent(SoraEtc & 0x20, 0, 6, 0, 0); break;
+        case 59: SoraEtc ^= 0x40; CJiminyMemoFlag::debugEvent(SoraEtc & 0x40, 0, 5, 0, 0); break;
+        case 60: SoraEtc ^= 0x80; CJiminyMemoFlag::debugEvent(SoraEtc & 0x80, 0, 10, 11, 0); break;
+        case 61: SoraEtc ^= 0x100; CJiminyMemoFlag::debugEvent(SoraEtc & 0x100, 0, 10, 12, 0); break;
+        case 62: SoraEtc ^= 0x200; CJiminyMemoFlag::debugEvent(SoraEtc & 0x200, 0, 10, 13, 0); break;
+        case 63: SoraEtc ^= 0x400; CJiminyMemoFlag::debugEvent(SoraEtc & 0x400, 0, 10, 14, 0); break;
+        case 64: SoraEtc ^= 0x800; CJiminyMemoFlag::debugEvent(SoraEtc & 0x800, 0, 10, 15, 0); break;
+        case 65: SoraEtc ^= 0x1000; CJiminyMemoFlag::debugEvent(SoraEtc & 0x1000, 0, 10, 16, 0); break;
+        case 66: SoraEtc ^= 0x2000; CJiminyMemoFlag::debugEvent(SoraEtc & 0x2000, 0, 9, 0, 0); break;
+        }
+        DebugWork::g_dw.jiminy.Sora_World = SoraWorld;
+        DebugWork::g_dw.jiminy.Sora_Floor = SoraFloor;
+        DebugWork::g_dw.jiminy.Riku_World = RikuWorld;
+        DebugWork::g_dw.jiminy.Riku_Floor = RikuFloor;
+        DebugWork::g_dw.jiminy.Sora_Etc = SoraEtc;
+    } else if (inParam & 0x20) {
+        INT SoraFlag = DebugWork::g_dw.jiminy.Sora_Flag;
+        INT SoraEKind = SoraEnemyMemoIdTbl[DebugWork::g_dw.jiminy.Sora_Enemy];
+        INT SoraENum = DebugWork::g_dw.jiminy.Sora_ENum;
+        INT SoraCard = DebugWork::g_dw.jiminy.Sora_Card;
+        USHORT SoraCKind = SoraCardKindTbl[SoraCard];
+        INT RikuFlag = DebugWork::g_dw.jiminy.Riku_Flag;
+        INT RikuEKind = RikuEnemyMemoIdTbl[DebugWork::g_dw.jiminy.Riku_Enemy];
+        INT RikuENum = DebugWork::g_dw.jiminy.Riku_ENum;
+        INT RikuCard = DebugWork::g_dw.jiminy.Riku_Card;
+        USHORT RikuCKind = RikuCardKindTbl[RikuCard];
+        switch (inY) {
+        case 68: case 69: case 70:
+            SoraFlag |= 0x701;
+            CJiminyMemoFlag::debugEvent(TRUE, 0, 3, SoraEKind, SoraENum);
+            break;
+        case 72: case 73: case 74:
+            RikuFlag |= 0x701;
+            CJiminyMemoFlag::debugEvent(TRUE, 1, 3, RikuEKind, RikuENum);
+            break;
+        case 76: case 77:
+            SoraFlag |= 0x7002;
+            CJiminyMemoFlag::debugEvent(TRUE, 0, 4, SoraCKind, 0);
+            break;
+        case 79: case 80:
+            RikuFlag |= 0x7002;
+            CJiminyMemoFlag::debugEvent(TRUE, 1, 4, RikuCKind, 0);
+            break;
+        }
+        DebugWork::g_dw.jiminy.Sora_Flag = SoraFlag;
+        DebugWork::g_dw.jiminy.Riku_Flag = RikuFlag;
+    } else {
+        INT SoraFlag = DebugWork::g_dw.jiminy.Sora_Flag;
+        INT RikuFlag = DebugWork::g_dw.jiminy.Riku_Flag;
+        INT n;
+        for (INT i = 0; i < 2; i++) {
+            if ((SoraFlag >> i) & 1) {
+                n = (SoraFlag >> (i * 4 + 8)) & 0xF;
+                n--;
+                if (n == 0) SoraFlag &= ~(1 << i);
+                SoraFlag = (SoraFlag & ~(0xF << (i * 4 + 8))) | (n << (i * 4 + 8));
+            }
+        }
+        for (INT i = 0; i < 2; i++) {
+            if ((RikuFlag >> i) & 1) {
+                n = (RikuFlag >> (i * 4 + 8)) & 0xF;
+                n--;
+                if (n == 0) RikuFlag &= ~(1 << i);
+                RikuFlag = (RikuFlag & ~(0xF << (i * 4 + 8))) | (n << (i * 4 + 8));
+            }
+        }
+        DebugWork::g_dw.jiminy.Sora_Flag = SoraFlag;
+        DebugWork::g_dw.jiminy.Riku_Flag = RikuFlag;
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetJiminyMemoFlag__8DWTEventP12CDebugWindowii");
 /* placeholder: rodata of the tables before debugGameInfomationParam__8DWTEventP12CDebugWindowii */
 __asm__(".rdata\n");
 inline void _roPh14() {
