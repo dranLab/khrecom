@@ -4255,15 +4255,8 @@ static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
     c.m_nCategory20 = cardDataTbl_004EA4F8[c.m_nKind].nCategory0;
     c.m_nCategory21 = cardDataTbl_004EA4F8[c.m_nKind].nCategory1;
 }
-/* Parked: 4 lines, prologue only: the spilled eventFlagId gets its constant 0xB7 via v1 in the original (stored
-   after the getContentStep load), via v0 in ours (stored before it). sched1 issues li 0xB7 before the step load
-   (-dS dump), so reload may use v0; the original must have had the step load live there. Same family as
-   contentChara. Everything else matches (cancel branch as `if (iKindNo != 8) 7 else 3`, 80/90 shared).
-   tried: ternary in both polarities, if/else and if-only forms, `!isModeJiminyMemo()`, declaration/statement
-   order with bTouch; tools/permuter.py (other drafts hidden) 10 min, no improvement. */
-#if 0
 void CJiminyMemo::contentCardView() {
-    INT eventFlagId = isModeDReport() ? 0x14F : 0xB7;
+    const INT eventFlagId = isModeJiminyMemo() ? 0xB7 : 0x14F;
     BOOL bTouch = FALSE;
     switch (getContentStep()) {
     case 20: {
@@ -4578,23 +4571,6 @@ void CJiminyMemo::contentCardView() {
         }
     }
 }
-#else
-/* placeholder: rodata of contentCardView__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh31() {
-    TRACE(__FILE__ "(7836)");
-    TRACE(__FILE__ "(7844)");
-    TRACE(__FILE__ "(7851)");
-    TRACE(__FILE__ "(7987)");
-}
-__asm__(".rdata\n.align 4\n.word .L00330CE4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331624\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n");
-__asm__(".word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L003316D8\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L003318E4\n.word .L00331BB4\n");
-__asm__(".word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331A20\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n");
-__asm__(".word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331A44\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n");
-__asm__(".word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331A44\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n");
-__asm__(".word .L00331BB4\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCardView__11CJiminyMemo);
-#endif
 INT CJiminyMemo::getPrevCardId(INT inId) {
     return getPrevContentId(inId, work(0x2D4), work(0x2D0));
 }
