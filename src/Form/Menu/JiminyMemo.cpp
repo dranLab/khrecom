@@ -38,6 +38,7 @@ INT getHostRsrcId();
 INT getCT0014Code(USHORT inLow);
 void playSE(INT inSENo);
 BOOL is100AcreGoodEnding();
+CHAR* getOpenCloseStringData(INT inCTNo, BOOL inIsFlag);
 }
 
 class CTexAnm;
@@ -246,6 +247,7 @@ struct ContentCommonWork {
     }
 };
 
+typedef USHORT CT_LOWER;
 class CJiminyMemo : public CMenu {
 private:
     UBYTE _m_0x80[0x10];  /* 0x080 */
@@ -272,6 +274,15 @@ private:
     void initialize(INT inPlayerMode);
     void setContentMode(INT inContentMode);
     void replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum);
+    void replaceNoteListString(D2::C2DFnt* inList, const CHAR* inString) {
+        if (inList) inList->setText(inString);
+    }
+    void replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER inStartCtNo, INT inFlagId, INT inListNum,
+                                      INT inListAllNum, INT inStartNo);
+    void replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER inStartCtNo, BYTE* inFlagTbl, INT inListNum,
+                                      INT inListAllNum, INT inStartNo);
+    void replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER* inCtTbl, INT inFlagId, INT inListNum,
+                                      INT inListAllNum, INT inStartNo);
     BOOL isButtonRptLimitStop(UINT inBit, UINT inPad, BOOL inStopCompare);
     template <class T> T getTaskPointer(HANDLE inHandle);
     BOOL isTaskOut(HANDLE inHandle);
@@ -308,7 +319,6 @@ private:
 };
 typedef char _check_jm_size[sizeof(CJiminyMemo) == 0x570 ? 1 : -1];
 
-typedef USHORT CT_LOWER;
 struct ILLUST_TEX_DATA {
     BYTE No;
     BYTE Posi;
@@ -868,7 +878,18 @@ void CJiminyMemo::replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListWithOpenCheck__11CJiminyMemoPPQ22D26C2DFntUsiiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListWithOpenCheck__11CJiminyMemoPPQ22D26C2DFntUsPUciii);
+void CJiminyMemo::replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER inStartCtNo, BYTE* inFlagTbl,
+                                               INT inListNum, INT inListAllNum, INT inStartNo) {
+    if (inList) {
+        D2::C2DFnt** pList = inList;
+        CT_LOWER CtNo = inStartCtNo + inStartNo;
+        for (INT i = 0; i < inListNum; i++, pList++) {
+            replaceNoteListString(*pList, JiminyMemo::getOpenCloseStringData(JiminyMemo::getCT0014Code(CtNo),
+                                                                             inFlagTbl[inStartNo + i]));
+            CtNo++;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListWithOpenCheck__11CJiminyMemoPPQ22D26C2DFntPUsiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListMark__11CJiminyMemoPPQ22D210C2DSeqCtrlPUciiiii);
 /* placeholder: rodata of replaceNoteListMark__11CJiminyMemoPPQ22D210C2DSeqCtrliiiiii */
