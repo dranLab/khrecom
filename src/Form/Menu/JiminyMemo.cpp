@@ -38,6 +38,11 @@ public:
     static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inSeqNo, FVECTOR& outPos, INT inMode);
 };
 }
+class CRsrcDB { /* PARTIAL: System/RsrcDB.h would add RsrcData.h's string, which this unit's .rodata lacks */
+public:
+    static void removeGroup(INT nGroupID, INT nMemberID);
+    static BOOL hasRsrcGroup(INT nGroupID, INT nMemberID);
+};
 
 
 namespace JiminyMemo {
@@ -47,6 +52,7 @@ INT getCT0014Code(USHORT inLow);
 void playSE(INT inSENo);
 BOOL is100AcreGoodEnding();
 CHAR* getOpenCloseStringData(INT inCTNo, BOOL inIsFlag);
+extern INT RsrcId[2];
 }
 
 class CTexAnm;
@@ -287,6 +293,10 @@ private:
     UBYTE m_Content[0x570 - 0xe4]; /* 0x0e4 m_ContentMenu .. m_ContentMinigame */
 
     INT& work(INT inOfs) { return *(INT*)((UBYTE*)&m_ContentCommon + (inOfs - 0xbc)); }
+    BOOL isModeJiminyMemo() { return m_iPlayerMode == 0; }
+    BOOL isModeDReport() { return m_iPlayerMode != 0; }
+    INT getLoadResourceIndex() { return m_iPlayerMode != 0; }
+    void setContentStep(INT inStep) { m_ContentCommon.iStep = inStep; }
 
 public:
     CJiminyMemo(CTask* inParent, INT inMode);
@@ -294,6 +304,7 @@ public:
 
 private:
     void initialize(INT inPlayerMode);
+    void finalize();
     void setContentMode(INT inContentMode);
     void replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum);
     void replaceNoteListMark(D2::C2DSeqCtrl** inMark, BYTE* inFlagTbl, INT inListNum, INT inListAllNum, INT inStartNo,
@@ -1105,7 +1116,36 @@ inline void _roPh11() {
     TRACE("Drepo.lad");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", initialize__11CJiminyMemoi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", finalize__11CJiminyMemo);
+void CJiminyMemo::finalize() {
+    CMemo2DLayout* pLay;
+    INT groupId;
+    INT rsrcId;
+    setContentStep(90);
+    (this->*pContentFunc)();
+    if (m_pMessSeq) delete m_pMessSeq;
+    m_pMessSeq = NULL;
+    pLay = getTaskPointer<CMemo2DLayout*>(m_hLayout);
+    if (pLay) delete pLay;
+    if (isModeJiminyMemo()) {
+        groupId = JiminyMemo::getHostGroupId();
+        rsrcId = JiminyMemo::getHostRsrcId();
+        if (CRsrcDB::hasRsrcGroup(groupId, rsrcId)) {
+            if (!CRcf::isCompleteLoadRCF(groupId, rsrcId)) {
+                CRcf::cancelLoadRCF(groupId, rsrcId);
+            } else {
+                CRsrcDB::removeGroup(groupId, rsrcId);
+            }
+        }
+    }
+    rsrcId = JiminyMemo::RsrcId[getLoadResourceIndex()];
+    if (CRsrcDB::hasRsrcGroup(2, rsrcId)) {
+        if (!CRcf::isCompleteLoadRCF(2, rsrcId)) {
+            CRcf::cancelLoadRCF(2, rsrcId);
+        } else {
+            CRsrcDB::removeGroup(2, rsrcId);
+        }
+    }
+}
 /* placeholder: rodata of main__11CJiminyMemo */
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L00328740\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328750\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n");
