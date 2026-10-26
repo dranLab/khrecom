@@ -340,10 +340,46 @@ inline void _roPh3() {
     TRACE("\x83" "f\x83X\x83" "e\x83j\x81[         :%d");
     TRACE("\x96Y\x8bp\x82\xcc\x8f\xe9           :%d");
 }
-/* placeholder: rodata of DebugSetWorldTitleFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00241A40\n.word .L00241A48\n.word .L00241A50\n.word .L00241A58\n.word .L00241A60\n.word .L00241A68\n.word .L00241A70\n.word .L00241A78\n.word .L00241A80\n.word .L00241A88\n.word .L00241A90\n.word .L00241A98\n.word .L00241AA0\n.word .L00241B10\n.word .L00241AA8\n.word .L00241AB0\n.word .L00241AB8\n.word .L00241AC0\n.word .L00241AC8\n.word .L00241AD0\n.word .L00241AD8\n.word .L00241AE0\n.word .L00241AE8\n.word .L00241AF0\n.word .L00241AF8\n.word .L00241B00\n.word .L00241B08\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetWorldTitleFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetWorldTitleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT world = CGameWork::getInt(0, 0xC1);
+        switch (inY) {
+        case 1: world ^= 0x1; break;
+        case 2: world ^= 0x2; break;
+        case 3: world ^= 0x4; break;
+        case 4: world ^= 0x8; break;
+        case 5: world ^= 0x10; break;
+        case 6: world ^= 0x20; break;
+        case 7: world ^= 0x40; break;
+        case 8: world ^= 0x80; break;
+        case 9: world ^= 0x100; break;
+        case 10: world ^= 0x200; break;
+        case 11: world ^= 0x400; break;
+        case 12: world ^= 0x800; break;
+        case 13: world ^= 0x1000; break;
+        case 15: world ^= 0x10000; break;
+        case 16: world ^= 0x20000; break;
+        case 17: world ^= 0x40000; break;
+        case 18: world ^= 0x80000; break;
+        case 19: world ^= 0x100000; break;
+        case 20: world ^= 0x200000; break;
+        case 21: world ^= 0x400000; break;
+        case 22: world ^= 0x800000; break;
+        case 23: world ^= 0x1000000; break;
+        case 24: world ^= 0x2000000; break;
+        case 25: world ^= 0x4000000; break;
+        case 26: world ^= 0x8000000; break;
+        case 27: world ^= 0x10000000; break;
+        }
+        DebugWork::g_dw.atelwork.iWorldIntro = world;
+        CGameWork::setInt(0, 0xC1, world);
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetWorldTitleFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetTutorialFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
