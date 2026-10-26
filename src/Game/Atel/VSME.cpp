@@ -385,7 +385,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", main__11CActorDebug);
 CEventLineDisp::CEventLineDisp(CTask* pParent) : CTask(pParent, 0x8000) {
     CTaskMan::getSysTask(0x1A);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _$_14CEventLineDisp);
+CEventLineDisp::~CEventLineDisp() {}
 void CEventLineDisp::main() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", disp__14CEventLineDisp);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", __static_initialization_and_destruction_0_002505D8);
