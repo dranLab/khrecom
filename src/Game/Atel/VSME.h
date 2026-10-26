@@ -116,8 +116,9 @@ public:
     virtual ~CVSM();
     INT getActorIndex(INT nID) const;
     INT getActorIndex(const CHAR* pszName) const;
-    INT getActorNum() { return m_ActorCount; }
+    CAvatar* getAvatar(INT nIdx) { return m_ActorTbl[nIdx]._pAvatar; }
     CHAR* getAvatarName(INT nIdx) { return m_ActorTbl[nIdx]._ATP.name; }
+    INT getActorNum() { return m_ActorCount; }
 
 protected:
     void deleteActorAll();
@@ -161,6 +162,7 @@ private:
     BOOL acStatBGWait();
     BOOL acStatEternityWait();
     BOOL acStatCardWndWait();
+    BOOL acStatBAWait();
     BOOL acStatActorWait();
     BOOL acStatBSWait();
     BOOL isAvatarBusy(INT nType, CAvatar* pAvatar);
