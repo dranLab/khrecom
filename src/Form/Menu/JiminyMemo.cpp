@@ -3249,6 +3249,239 @@ __asm__(".word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\
 __asm__(".word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FF04\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n.word .L0032FFF8\n");
 __asm__(".word .L0032FFF8\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCard__11CJiminyMemo);
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+/* Parked: 2 lines: in the Sora arm of step 20 the original loads SoraCardNumTbl[kind] after forming the
+   CardNameTbl[kind] address, ours before (the Riku arm matches). Everything else matches.
+   tried: statement orders in the arm (plateCTNo first, pCTCodeTbl first: 20 lines), kind read per arm,
+   eventFlagOffset init placement, ternary forms for the telop CT number (fixed case 30: sums in each arm),
+   isModeDReport() for the event base; tools/permuter.py 6 min starts at score 1 in its copy (path-sensitive). */
+#if 0
+namespace JiminyMemo {
+namespace CardSelect {
+extern INT NoteSeqData[5];
+extern CursorPosition CursorPosiOffset;
+extern FVECTOR NoteScrollBarPosi;
+}
+}
+void CJiminyMemo::contentCardSelect() {
+    INT eventFlagId = isModeDReport() ? 0x14F : 0xB7;
+    BOOL bCursorShift = FALSE;
+    switch (getContentStep()) {
+    case 20: {
+        INT kind;
+        INT plateCTNo;
+        INT posiNum;
+        INT eventFlagOffset = 0;
+        FVECTOR posi;
+        D2::C2DSeqCtrl** pSeqCtrl;
+        D2::C2DFnt** pString;
+        CMemo2DSequence* pList;
+        kind = getContentParam(0);
+        if (isModeJiminyMemo()) {
+            m_ContentCardSelect.iListNum = JiminyMemo::SoraCardNumTbl[kind];
+            m_ContentCardSelect.pCTCodeTbl = JiminyMemo::CardNameTbl[kind];
+            plateCTNo = 0x700701;
+            for (INT i = 0; i < kind; i++) eventFlagOffset += JiminyMemo::SoraCardNumTbl[i];
+        } else {
+            m_ContentCardSelect.iListNum = JiminyMemo::RikuCardNumTbl[kind];
+            m_ContentCardSelect.pCTCodeTbl = JiminyMemo::RikuCardNameTbl[kind];
+            plateCTNo = 0x70070B;
+            for (INT i = 0; i < kind; i++) eventFlagOffset += JiminyMemo::RikuCardNumTbl[i];
+        }
+        m_ContentCardSelect.iKindNo = kind;
+        m_ContentCardSelect.iEventFlagId = eventFlagId + eventFlagOffset;
+        posiNum = m_ContentCardSelect.iListNum < 9 ? m_ContentCardSelect.iListNum : 8;
+        m_ContentCardSelect.iCursorPosiNum = posiNum;
+        m_ContentCardSelect.fScrollBarLength = (FLOAT)m_ContentCardSelect.iCursorPosiNum / (FLOAT)m_ContentCardSelect.iListNum;
+        if (m_ContentCardSelect.fScrollBarLength > 1.0f) m_ContentCardSelect.fScrollBarLength = 1.0f;
+        if (m_ContentCardSelect.iListNum - m_ContentCardSelect.iCursorPosiNum > 0) {
+            m_ContentCardSelect.fScrollBarParListNum =
+                (1.0f - m_ContentCardSelect.fScrollBarLength) /
+                ((FLOAT)m_ContentCardSelect.iListNum - (FLOAT)m_ContentCardSelect.iCursorPosiNum);
+        } else {
+            m_ContentCardSelect.fScrollBarParListNum = 0.0f;
+        }
+        m_ContentCardSelect.iStringNum = m_ContentCardSelect.iCursorPosiNum;
+        pString = new (__FILE__ "(7546)") D2::C2DFnt*[m_ContentCardSelect.iStringNum];
+        if (pString) {
+            for (INT i = 0; i < m_ContentCardSelect.iStringNum; i++) pString[i] = NULL;
+            m_ContentCardSelect.pString = pString;
+        }
+        m_ContentCardSelect.iSeqCtrlNum = m_ContentCardSelect.iStringNum + m_ContentCardSelect.iListNum + 3;
+        pSeqCtrl = new (__FILE__ "(7553)") D2::C2DSeqCtrl*[m_ContentCardSelect.iSeqCtrlNum];
+        if (pSeqCtrl) {
+            for (INT i = 0; i < m_ContentCardSelect.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
+            m_ContentCardSelect.pSeqCtrl = pSeqCtrl;
+        }
+        pList = createSequence(JiminyMemo::CardSelect::NoteSeqData, 0x10, 0xB, 0, NULL);
+        if (pList) {
+            m_ContentCardSelect.pList = pList;
+            pList->setInState(pList->getSideInId(getPrevContentMode() == 3));
+            for (INT i = 0; i < m_ContentCardSelect.iCursorPosiNum; i++) {
+                createListSequence(pList, 0x11, 0x10, i + 1, pSeqCtrl++, pString++, 0x8049481F, 16, 0x21000,
+                                   CCtdMan::getText(JiminyMemo::getCT0014Code(m_ContentCardSelect.pCTCodeTbl[i])));
+            }
+        }
+        m_ContentCardSelect.iCursorCurrent = getPrevContentMode() == 8 ? getContentParam(1) : 0;
+        m_ContentCardSelect.pCursor = createCursorSequence(
+            (const INT*)JiminyMemo::CursorSeqTbl, 0x10, 0x11, JiminyMemo::CardSelect::CursorPosiOffset,
+            m_ContentCardSelect.iCursorPosiNum, m_ContentCardSelect.iListNum, 0, 0, 1, 0x11, 0x20002,
+            m_ContentCardSelect.iCursorCurrent, pList);
+        if (m_ContentCardSelect.pCursor && getPrevContentMode() == 8) {
+            getContentScroll(1, posi);
+            m_ContentCardSelect.pCursor->setShiftVector(posi);
+            m_ContentCardSelect.pCursor->setPosiId(m_ContentCardSelect.iCursorCurrent);
+        }
+        createMarkSequence(0x93, m_ContentCardSelect.iListNum, -1, 0, 0x11, pList, pSeqCtrl);
+        for (INT i = 0; i < m_ContentCardSelect.iListNum; i++) {
+            if (pSeqCtrl[i]) {
+                if (!CJiminyMemoFlag::isContentFlag(m_ContentCardSelect.iEventFlagId + i, 4) &&
+                    CJiminyMemoFlag::isContentFlag(m_ContentCardSelect.iEventFlagId + i, 2)) {
+                    pSeqCtrl[i]->replaceSeq(1, m_pLadName, 0x94);
+                }
+                pSeqCtrl[i]->enableDisp(CJiminyMemoFlag::isContentNew(m_ContentCardSelect.iEventFlagId + i) != 0);
+            }
+        }
+        m_ContentCardSelect.pNewMarkSeq = pSeqCtrl;
+        pSeqCtrl += m_ContentCardSelect.iListNum;
+        ScrollBarInit(pSeqCtrl, 0x10, JiminyMemo::CardSelect::NoteScrollBarPosi, 150.0f, pList);
+        m_ContentCardSelect.pScrollBar = pSeqCtrl;
+        if (m_ContentCardSelect.pCursor) {
+            CursorPosition cp;
+            m_ContentCardSelect.pCursor->getSubVector(cp, 1, 0);
+            m_ContentCardSelect.fCursorIntervalY = cp.y;
+        }
+        if (getPlateState(1) == -1) {
+            setPlateState(1, 0);
+            setPlateText(1, plateCTNo + kind);
+        }
+        bCursorShift = TRUE;
+        setContentStep(30);
+        setContentTimer(16.0f);
+        break;
+    }
+    case 30:
+        if (getContentTimer() <= 0.0f) {
+            if (m_ContentCardSelect.pSeqCtrl) {
+                changeStateLoopSequence(m_ContentCardSelect.pSeqCtrl, m_ContentCardSelect.iSeqCtrlNum);
+            }
+            setTelopMessage(
+                CCtdMan::getText((isModeJiminyMemo() ? m_ContentCardSelect.iKindNo + 0x700109 : m_ContentCardSelect.iKindNo + 0x70011D)));
+            setContentStep(40);
+        }
+        break;
+    case 40:
+        if (_isButtonTrg(0x800, 0)) {
+            setContentStep(50);
+            JiminyMemo::playSE(4);
+            setNextContentMode(-1);
+        } else if (m_ContentCardSelect.pCursor) {
+            if (_isTrgOK(0)) {
+                if (CJiminyMemoFlag::isContentOpen(m_ContentCardSelect.iEventFlagId +
+                                                   m_ContentCardSelect.iCursorCurrent)) {
+                    setContentStep(50);
+                    setNextContentMode(8);
+                    setContentParam(1, m_ContentCardSelect.iCursorCurrent);
+                    setContentScroll(1, m_ContentCardSelect.pCursor->getShiftVector());
+                    JiminyMemo::playSE(2);
+                } else {
+                    JiminyMemo::playSE(5);
+                }
+            } else if (_isTrgCANCEL(0)) {
+                setContentStep(50);
+                setNextContentMode(3);
+                JiminyMemo::playSE(4);
+            } else if (isButtonRptLimitStop(0x204000, 0,
+                                            m_ContentCardSelect.iCursorCurrent == m_ContentCardSelect.iListNum - 1)) {
+                m_ContentCardSelect.iCursorCurrent++;
+                if (m_ContentCardSelect.iCursorCurrent >= m_ContentCardSelect.iListNum) {
+                    m_ContentCardSelect.iCursorCurrent = 0;
+                }
+                bCursorShift = TRUE;
+            } else if (isButtonRptLimitStop(0x101000, 0, m_ContentCardSelect.iCursorCurrent == 0)) {
+                m_ContentCardSelect.iCursorCurrent--;
+                if (m_ContentCardSelect.iCursorCurrent < 0) {
+                    m_ContentCardSelect.iCursorCurrent = m_ContentCardSelect.iListNum - 1;
+                }
+                bCursorShift = TRUE;
+            } else if (_isButtonTrg(8, 0)) {
+                bCursorShift = nextPage(m_ContentCardSelect.pCursor, &m_ContentCardSelect.iCursorCurrent,
+                                        m_ContentCardSelect.iListNum, m_ContentCardSelect.iCursorPosiNum,
+                                        m_ContentCardSelect.fCursorIntervalY);
+            } else if (_isButtonTrg(4, 0)) {
+                bCursorShift = prevPage(m_ContentCardSelect.pCursor, &m_ContentCardSelect.iCursorCurrent,
+                                        m_ContentCardSelect.iListNum, m_ContentCardSelect.iCursorPosiNum,
+                                        m_ContentCardSelect.fCursorIntervalY);
+            }
+            if (bCursorShift) {
+                m_ContentCardSelect.pCursor->setPosiId(m_ContentCardSelect.iCursorCurrent);
+                JiminyMemo::playSE(1);
+            }
+        }
+        break;
+    case 50: {
+        INT nextContent;
+        if (m_ContentCardSelect.pList) {
+            m_ContentCardSelect.pList->setOutState(m_ContentCardSelect.pList->getSideOutId(getNextContentMode() == 3));
+        }
+        if (m_ContentCardSelect.pCursor) m_ContentCardSelect.pCursor->setState(4);
+        if (m_ContentCardSelect.pSeqCtrl) {
+            changeStateOutSequence(m_ContentCardSelect.pSeqCtrl, m_ContentCardSelect.iSeqCtrlNum);
+        }
+        nextContent = getNextContentMode();
+        if (nextContent == 3) {
+            setPlateState(1, 2);
+        } else if (nextContent == -1) {
+            setPlateState(0, 2);
+            setPlateState(1, 2);
+        }
+        setTelopMessage("");
+        setContentStep(60);
+        setContentTimer(16.0f);
+        break;
+    }
+    case 60:
+        if (getContentTimer() <= 0.0f) setContentStep(80);
+        break;
+    case 80:
+    case 90:
+        if (m_ContentCardSelect.pList) delete m_ContentCardSelect.pList;
+        m_ContentCardSelect.pList = NULL;
+        if (m_ContentCardSelect.pCursor) delete m_ContentCardSelect.pCursor;
+        m_ContentCardSelect.pCursor = NULL;
+        if (m_ContentCardSelect.pString) {
+            delete[] m_ContentCardSelect.pString;
+            m_ContentCardSelect.pString = NULL;
+        }
+        if (m_ContentCardSelect.pSeqCtrl) {
+            for (INT i = 0; i < m_ContentCardSelect.iSeqCtrlNum; i++) {
+                if (m_ContentCardSelect.pSeqCtrl[i]) delete m_ContentCardSelect.pSeqCtrl[i];
+                m_ContentCardSelect.pSeqCtrl[i] = NULL;
+            }
+            if (m_ContentCardSelect.pSeqCtrl) delete[] m_ContentCardSelect.pSeqCtrl;
+            m_ContentCardSelect.pSeqCtrl = NULL;
+        }
+        setContentStep(100);
+        break;
+    case 100:
+        break;
+    }
+    if (m_ContentCardSelect.pList) m_ContentCardSelect.pList->main(getFrameRateF());
+    if (m_ContentCardSelect.pCursor) m_ContentCardSelect.pCursor->main();
+    if (bCursorShift) {
+        if (m_ContentCardSelect.pCursor) {
+            INT top = (INT)m_ContentCardSelect.pCursor->getShiftVector().y / (INT)m_ContentCardSelect.fCursorIntervalY;
+            replaceNoteListWithOpenCheck(m_ContentCardSelect.pString, m_ContentCardSelect.pCTCodeTbl,
+                                         m_ContentCardSelect.iEventFlagId, m_ContentCardSelect.iCursorPosiNum,
+                                         m_ContentCardSelect.iListNum, top);
+            replaceNoteListMark(m_ContentCardSelect.pNewMarkSeq, m_ContentCardSelect.iEventFlagId,
+                                m_ContentCardSelect.iCursorPosiNum, m_ContentCardSelect.iListNum, top, 0x10, 9);
+            ScrollBarChange(m_ContentCardSelect.pScrollBar, JiminyMemo::CardSelect::NoteScrollBarPosi.y, 150.0f,
+                            m_ContentCardSelect.iCursorPosiNum, m_ContentCardSelect.iListNum, top);
+        }
+    }
+}
+#else
 /* placeholder: rodata of contentCardSelect__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh30() {
@@ -3262,6 +3495,7 @@ __asm__(".word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\
 __asm__(".word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330A78\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n");
 __asm__(".word .L00330B58\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCardSelect__11CJiminyMemo);
+#endif
 /* placeholder: rodata of contentCardView__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh31() {
