@@ -199,6 +199,7 @@ private:
     UINT m_uiSize;            /* 0x1f8 */
 
 public:
+    CMemo2DCursor(HANDLE inHandle);
     virtual ~CMemo2DCursor();
 
 private:
@@ -760,7 +761,27 @@ void CMemo2DSequence::setOutState(INT inSeqId) {
     replaceSequenceId(inSeqId);
     m_iState = 3;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __13CMemo2DCursori);
+CMemo2DCursor::CMemo2DCursor(HANDLE inHandle) {
+    m_iPosiNum = 0;
+    m_pPosiTbl = NULL;
+    m_iStartNo = 0;
+    for (INT i = 3; i >= 0; i--) m_iLadTbl[i] = 0;
+    for (INT i = 0; i < 4; i++) m_fSpacing[i] = 0.0f;
+    m_iLadSeq = 0;
+    m_lpctLayoutName = NULL;
+    m_vPosi.init();
+    m_vAimPosi.init();
+    m_vShiftPosi.init();
+    m_bMoveSlideEnable = FALSE;
+    m_fMoveTimer = 0.0f;
+    m_hParent = inHandle;
+    m_iState = 0;
+    m_ScreenLimit[0].x = 0.0f;
+    m_ScreenLimit[0].y = 0.0f;
+    m_ScreenLimit[1].x = 512.0f;
+    m_ScreenLimit[1].y = *(INT*)&SCREEN_HEIGHT;
+    m_fScale = 1.0f;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DCursor);
 /* placeholder: rodata of setup__13CMemo2DCursorR15CursorDataParam */
 __asm__(".rdata\n");
