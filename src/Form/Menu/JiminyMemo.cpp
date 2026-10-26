@@ -1551,7 +1551,56 @@ INT CJiminyMemo::getPrevCardId(INT inId) {
 INT CJiminyMemo::getNextCardId(INT inId) {
     return getNextContentId(inId, work(0x2D4), work(0x2D0));
 }
+namespace JiminyMemo {
+extern INT SoraCardNumTbl[];
+extern INT RikuCardNumTbl[];
+namespace Collect {
+extern UINT CursorMoveFlag[];
+extern UINT CursorMoveFlagWithSpecial[];
+namespace D {
+extern UINT CursorMoveFlag[];
+}
+}
+}
+/* Parked: 4 lines: the constant 1 for (1 << j) is hoisted to before the outer loop in ours, the original sets it
+   at the start of each outer iteration (li t0,1 after lw a0 / move v1,zero). Everything else matches: cardNo read
+   before kindNo, the cardNum sum loop, goto end instead of return in the inner loop (fixes the epilogue order).
+   tried: return vs goto, the row flag in a local, do-while and if-wrapped do-while inner loops, an INT bit = 1 local,
+   pointer-incremented rows (19 lines), tools/permuter.py 10 min (12608 candidates, score 1). */
+#if 0
+INT CJiminyMemo::setParamFromCardViewToCollect() {
+    INT rval = 0;
+    INT cardNo = work(0x2D0);
+    INT kindNo = work(0x2CC);
+    INT cursorLimitY;
+    UINT* pCursorMoveFlag;
+    INT* pCardNumTbl;
+    if (m_iPlayerMode == 0) {
+        cursorLimitY = 7;
+        pCursorMoveFlag = haveSpecialCard() ? JiminyMemo::Collect::CursorMoveFlagWithSpecial
+                                            : JiminyMemo::Collect::CursorMoveFlag;
+        pCardNumTbl = JiminyMemo::SoraCardNumTbl;
+    } else {
+        pCursorMoveFlag = JiminyMemo::Collect::D::CursorMoveFlag;
+        cursorLimitY = 3;
+        pCardNumTbl = JiminyMemo::RikuCardNumTbl;
+    }
+    INT currentCardNo = cardNo;
+    for (INT i = 0; i < kindNo; i++) currentCardNo += pCardNumTbl[i];
+    for (INT i = 0; i < cursorLimitY; i++) {
+        for (INT j = 0; j < 22; j++) {
+            if (pCursorMoveFlag[i] & (1 << j)) {
+                if (--currentCardNo < 0) goto end;
+            }
+            rval++;
+        }
+    }
+end:
+    return rval;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setParamFromCardViewToCollect__11CJiminyMemo);
+#endif
 /* placeholder: rodata of contentChara__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh32() {
