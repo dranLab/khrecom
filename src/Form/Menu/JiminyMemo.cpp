@@ -156,6 +156,21 @@ public:
 struct CursorPosition {
     FLOAT x;
     FLOAT y;
+
+    void copy(const CursorPosition& cp) {
+        x = cp.x;
+        y = cp.y;
+    }
+};
+struct CursorDataParam {
+    INT posiNum;
+    CursorPosition* posiTbl;
+    int spacing[4];
+    INT startNo;
+    int ladTbl[4];
+    CursorPosition* limitTbl;
+    LPCTSTR LayoutName;
+    FLOAT scale;
 };
 
 void AddVectorXYZ(FVECTOR& out, const FVECTOR& a, const FVECTOR& b);
@@ -223,6 +238,7 @@ private:
     void finalise();
 
 public:
+    void setup(CursorDataParam& inParam);
     INT setPosiId(INT inPosiId);
     void setScale(FLOAT inScale);
     void getSubVector(CursorPosition& outSub, INT inId0, INT inId1);
@@ -965,12 +981,37 @@ CMemo2DCursor::CMemo2DCursor(HANDLE inHandle) {
     m_fScale = 1.0f;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DCursor);
-/* placeholder: rodata of setup__13CMemo2DCursorR15CursorDataParam */
-__asm__(".rdata\n");
-inline void _roPh7() {
-    TRACE(__FILE__ "(3348)");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CMemo2DCursor::setup(CursorDataParam& inParam) {
+    if (inParam.posiNum > 0) {
+        if (inParam.posiTbl) {
+            m_iPosiNum = inParam.posiNum;
+            m_pPosiTbl = (CursorPosition*)com_malloc_d(
+                sizeof(CursorPosition) * m_iPosiNum, __FILE__ "(3348)",
+                ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }));
+            for (INT i = 0; i < m_iPosiNum; i++) m_pPosiTbl[i].copy(inParam.posiTbl[i]);
+        } else {
+            m_iPosiNum = 0;
+        }
+    }
+    m_iStartNo = inParam.startNo;
+    for (INT i = 0; i < 4; i++) m_iLadTbl[i] = inParam.ladTbl[i];
+    m_lpctLayoutName = inParam.LayoutName;
+    for (INT i = 0; i < 4; i++) m_fSpacing[i] = inParam.spacing[i];
+    m_fScale = inParam.scale;
+    m_vPosi.x = m_pPosiTbl[m_iStartNo].x * m_fScale;
+    m_vPosi.y = m_pPosiTbl[m_iStartNo].y * m_fScale;
+    m_vPosi.z = 0.0f;
+    if (inParam.limitTbl) {
+        for (INT i = 0; i < 2; i++) m_ScreenLimit[i].copy(inParam.limitTbl[i]);
+    }
+    m_iLadSeq = 0;
+    enableColorCtrl(TRUE);
+    addSeq(m_lpctLayoutName, m_iLadTbl[0]);
+    addSeq(m_lpctLayoutName, m_iLadTbl[3]);
+    enableDisp(FALSE);
+    setPosiId(m_iStartNo);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setup__13CMemo2DCursorR15CursorDataParam);
 void CMemo2DCursor::finalise() {
     if (m_pPosiTbl) com_free(m_pPosiTbl);
     m_pPosiTbl = NULL;
