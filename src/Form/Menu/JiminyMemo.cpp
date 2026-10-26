@@ -212,6 +212,7 @@ public:
     CursorPosition* getLimitPosi(INT inId);
     FLOAT getFrameRateF();
     void setReplaceSeq(INT inSeq);
+    void setState(INT inState);
 };
 
 namespace JiminyMemo {
@@ -755,7 +756,16 @@ void CMemo2DCursor::setReplaceSeq(INT inSeq) {
     replaceSeq(0, m_lpctLayoutName, m_iLadTbl[inSeq]);
     replaceSeq(1, m_lpctLayoutName, m_iLadTbl[3]);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setState__13CMemo2DCursori);
+void CMemo2DCursor::setState(INT inState) {
+    if (inState & 0x1) setReplaceSeq(1);
+    if (inState & 0x2) setReplaceSeq(0);
+    if (inState & 0x4) setReplaceSeq(2);
+    if (inState & 0x10000) enableDisp(FALSE);
+    if (inState & 0x20000) enableDisp(TRUE);
+    if (inState & 0x1000000) m_iState |= 0x1000000;
+    if (inState & 0x2000000) m_iState |= 0x2000000;
+    if (inState & 0x4000000) m_iState |= 0x4000000;
+}
 INT CMemo2DCursor::setPosiId(INT inPosiId) {
     INT rval;
     if (inPosiId < 0) {
