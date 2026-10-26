@@ -1272,14 +1272,66 @@ inline void _roPh25() {
     TRACE("mada->ok pc:%d\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execActor__Q24ATEL4CVSM);
+/* Parked: 6 lines, one store: the original stores addr (a stack variable, its address goes to execStdCode)
+   right after its load, before the _cReg load, so reorg puts the m_Pctr store into the beqz slot; ours keeps addr
+   in a pseudo that is put on the stack later (RTL: the addr store comes after the m_Pctr++ store, -dg dump), so
+   reorg fills the slot with the addr store. $LM: 932 op, 933 addr, 935 if (m_pIseg[m_Pctr++]._cReg). tried: INSTR&/
+   INSTR* forms, m_pIseg + m_Pctr++, op/addr order, a reg temp, braces, an unused &addr, tools/permuter.py 6 min
+   (loose score 1, blind to it). */
+#if 0
+eATEL_REQ_RET CVSM::execCode(INT nAddr) {
+    INT addr;
+    INT op;
+    eATEL_REQ_RET reqR;
+    INT execR;
+    m_Pctr = nAddr;
+    while (TRUE) {
+        if (m_Pctr < 0 || m_Pctr >= m_MaxPC) {
+            _TRACE(TRUE, "Illegal instr. address : %d\n", m_Pctr);
+            return ATEL_RET_ERROR;
+        }
+        if ((UINT)m_SP >= 100) {
+            _TRACE(TRUE, "Illegal Stack pointer %d\n", m_SP);
+            return ATEL_RET_STACK_ERROR;
+        }
+        addr = m_pIseg[m_Pctr]._nAddr;
+        op = m_pIseg[m_Pctr]._cOp;
+        INT reg = m_pIseg[m_Pctr++]._cReg;
+        if (reg) {
+            addr += m_Freg;
+        }
+        m_InsCount++;
+        if (m_MaxSD < m_SP) m_MaxSD = m_SP;
+        if (op < 0) execR = 4;
+        else if (op < 0x3E) execR = execStdCode(op, addr, reqR);
+        else if (op < 100) execR = execExt1Code(op, reqR);
+        else if (op < 110) execR = 4;
+        else if (op < 0xA8) execR = execExt2Code(op, reqR);
+        else if (op < 0x113) execR = execExt3Code(op, reqR);
+        else execR = 4;
+        switch (execR) {
+        case 1:
+            continue;
+        case 2:
+            m_SP--;
+            continue;
+        case 3:
+            return reqR;
+        }
+        _TRACE(TRUE, "Illegal Op. code at loc. %d\n", m_Pctr);
+        return ATEL_RET_ERROR;
+    }
+}
+#else
 /* placeholder: rodata of execCode__Q24ATEL4CVSMi */
 __asm__(".rdata\n");
-inline void _roPh26() {
+inline void _roPhExecCode() {
     TRACE("Illegal instr. address : %d\n");
     TRACE("Illegal Stack pointer %d\n");
     TRACE("Illegal Op. code at loc. %d\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execCode__Q24ATEL4CVSMi);
+#endif
 /* placeholder: rodata of execStdCode__Q24ATEL4CVSMiRiRQ24ATEL13eATEL_REQ_RET */
 __asm__(".rdata\n");
 inline void _roPh27() {
