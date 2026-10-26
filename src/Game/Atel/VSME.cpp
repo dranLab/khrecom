@@ -325,10 +325,26 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetFriendPossibl
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L00241E48\n.word .L00241E50\n.word .L00241E58\n.word .L00241E60\n.word .L00241E68\n.word .L00241E70\n.word .L00241E78\n.word .L00241E80\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetPoohFlag__8DWTEventP12CDebugWindowii);
-/* placeholder: rodata of DebugSetPcSkillFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00241FB4\n.word .L00241FBC\n.word .L00241FC4\n.word .L00241FCC\n.word .L00241FD4\n.word .L00241FDC\n.word func_0\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetPcSkillFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetPcSkillFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT skill = CGameWork::getInt(0, 0x24);
+        switch (inY) {
+        case 0: skill ^= 0x1; break;
+        case 1: skill ^= 0x2; break;
+        case 2: skill ^= 0x4; break;
+        case 3: skill ^= 0x8; break;
+        case 4: skill ^= 0x10; break;
+        case 5: skill ^= 0x20; break;
+        }
+        DebugWork::g_dw.atelwork.iPcStanderdSkill = skill;
+        CGameWork::setInt(0, 0x24, skill);
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetPcSkillFlag__8DWTEventP12CDebugWindowii");
 /* placeholder: rodata of DebugSetSoraMovieFlag__8DWTEventP12CDebugWindowii */
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L00242088\n.word .L00242090\n.word .L00242098\n.word .L002420A0\n.word .L002420A8\n.word .L002420B0\n.word .L002420B8\n.word .L002420C0\n.word .L002420C8\n.word .L002420D0\n.word .L002420D8\n.word .L002420E0\n.word .L002420E8\n.word .L002420F0\n.word .L002420F8\n.word .L00242100\n.word .L00242108\n.word .L00242114\n.word .L00242120\n.word .L0024212C\n.word .L00242138\n.word .L00242144\n.word .L00242150\n.word .L0024215C\n.word .L00242168\n.word .L00242174\n.word .L00242180\n.word .L0024218C\n.word .L00242198\n.word .L002421A4\n.word .L002421B0\n.word .L002421BC\n.word .L002421C8\n.word .L002421D0\n.word .L002421D8\n.word .L002421E0\n.word .L002421E8\n.word .L002421F0\n.word .L002421F8\n.word .L00242200\n.word .L00242208\n.word .L00242210\n.word .L00242218\n.word .L00242220\n.word .L00242228\n.word .L00242230\n.word .L00242238\n.word .L00242240\n.word .L00242248\n.word .L00242250\n.word .L00242258\n.word .L00242260\n.word .L00242268\n.word .L00242270\n.word .L00242278\n.word .L00242280\n.word .L00242288\n.word .L00242290\n.word .L00242298\n.word func_0\n.text\n");
