@@ -124,6 +124,7 @@ public:
 protected:
     void deleteActorAll();
     void clearReq();
+    void execInit();
     void setReq(const RTP& rq);
 
 private:

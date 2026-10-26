@@ -24,6 +24,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 using namespace ATEL;
 
 extern "C" char D_0048CD50[];
+extern "C" char D_0048F698[];
 extern "C" char D_00491328[];
 extern "C" char D_00491338[];
 extern "C" char D_00491348[];
@@ -204,7 +205,17 @@ void CVSM::clearReq() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", setReq__Q24ATEL4CVSMRCQ24ATEL3RTP);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", tuneReq__Q24ATEL4CVSM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", exec__Q24ATEL4CVSMi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execInit__Q24ATEL4CVSM);
+void CVSM::execInit() {
+    _TRACE(m_bTrace, D_0048F698, m_ActorCount);
+    m_ReadyActorCount = 0;
+    m_WinCloseTimer = 0;
+    m_nFlag |= 8;
+    clearReq();
+    m_pCurrentActor = m_ActorTbl;
+    for (INT i = 0; i < m_ActorCount; i++, m_pCurrentActor++) {
+        reqN(*m_pCurrentActor, 0, 3, i == 0);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execActor__Q24ATEL4CVSM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execCode__Q24ATEL4CVSMi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execStdCode__Q24ATEL4CVSMiRiRQ24ATEL13eATEL_REQ_RET);
