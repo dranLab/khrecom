@@ -61,6 +61,7 @@ inline void _vsmeMotionName() {
 #include "Form/DebugWindow.h"
 #include "Game/Debug/DebugWork.h"
 #include "Game/Player/Player.h"
+#include "System/Sound/SoundMan.h"
 #include <string.h>
 #include "include_asm.h"
 
@@ -1587,12 +1588,31 @@ BOOL CVSM::acStatIWait() {
     }
     return FALSE;
 }
-/* placeholder: rodata of acStatPWait__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh36() {
-    TRACE("pad_wait parm error\n");
+BOOL CVSM::acStatPWait() {
+    if (CMainApp::isPauseNow()) return FALSE;
+    if (m_PadWaitTime == 1) {
+        m_PadWaitTime = 0;
+        return FALSE;
+    }
+    ATP& atp = m_pCurrentActor->_ATP;
+    INT n = atp.wait_key;
+    switch (n) {
+    case 0:
+    case 1:
+    case 16:
+        if (CPadHandler::isTrgTalkMesNext()) {
+            m_Pctr = atp.next_address;
+            setFlag(4);
+            CSound::playSE(10, -1, 0x40);
+            return TRUE;
+        }
+        break;
+    default:
+        _TRACE(m_bTrace, "pad_wait parm error\n");
+        break;
+    }
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatPWait__Q24ATEL4CVSM);
 /* placeholder: rodata of acStatSWait__Q24ATEL4CVSM */
 __asm__(".rdata\n");
 inline void _roPh37() {

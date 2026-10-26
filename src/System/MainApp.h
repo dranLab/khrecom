@@ -51,7 +51,7 @@ public:
     static BOOL isWarningPauseDisable();
     static BOOL isDbgUsrPauseNow();
     static void enableDbgUsrPause(BOOL bFlag, BOOL bPause);
-    static BOOL isDbgUsrPauseDisable();
+    static BOOL isDbgUsrPauseDisable(); static BOOL isPauseNow() { return isWarningPauseNow() || isSysPauseNow() || isDbgUsrPauseNow(); } // PARTIAL: added for Game/Atel/VSME
     static BOOL reqBlackIn(USHORT nTime);
     static BOOL reqBlackOut(USHORT nTime);
     static BOOL reqWhiteIn(USHORT nTime);

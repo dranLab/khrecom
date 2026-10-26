@@ -122,6 +122,7 @@ public:
     INT getActorNum() { return m_ActorCount; }
     void setPC(INT nPC) { m_Pctr = nPC; }
     void clearFlag(INT nFlag) { m_nFlag &= ~nFlag; }
+    void setFlag(INT nFlag) { m_nFlag |= nFlag; }
 
 protected:
     void deleteActorAll();
@@ -174,6 +175,7 @@ private:
     BOOL acStatBGWait();
     BOOL acStatEternityWait();
     BOOL acStatCardWndWait();
+    BOOL acStatPWait();
     BOOL acStatMSWait();
     BOOL acStatCPWait();
     BOOL acStatWait();
