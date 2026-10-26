@@ -8,6 +8,8 @@
 #define CTDMAN_H_PATH "System/Ctd/CtdMan.h"
 #include "System/Ctd/CtdMan.h"
 #include "System/Graphic/Effect/effect.h"
+#include "System/Graphic/Effect/EffectMan.h"
+#include "System/Graphic/TexAnm.h"
 #include "Game/CardBattle.h"
 #include "Form/Menu/JiminyMemo.h"
 #include "System/Math3D.h"
@@ -42,6 +44,9 @@ public:
 }
 class CRsrcDB { /* PARTIAL: System/RsrcDB.h would add RsrcData.h's string, which this unit's .rodata lacks */
 public:
+    static INT getModelCount(INT nRsrcID);
+    static MODELDATA** getRsrcMDL(INT nRsrcID);
+    static TEXANM_DATA* getRsrcTXA(INT nRsrcID);
     static void removeGroup(INT nGroupID, INT nMemberID);
     static BOOL hasRsrcGroup(INT nGroupID, INT nMemberID);
 };
@@ -57,8 +62,17 @@ CHAR* getOpenCloseStringData(INT inCTNo, BOOL inIsFlag);
 extern INT RsrcId[2];
 }
 
-class CTexAnm;
 class CLightUnit;
+class CSemiModel : public CDrawable { /* PARTIAL: declared in System/Graphic/DispList.cpp */
+public:
+    void setSemiTrans(ALPHA nAlpha);
+};
+inline void CModel::setSemiTrans(ALPHA nAlpha) {
+    if (m_pSemiModel) m_pSemiModel->setSemiTrans(nAlpha);
+}
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 class CMemo3DObj : public CTask {
 public:
     CMemo3DObj(CTask* p, INT inGroupId, INT inRsrcId, UINT inDispLayer, BOOL inLoadEnable);
@@ -69,6 +83,7 @@ public:
     BOOL isLoadEnable() { return m_bLoadEnable; }
     void setPosition(const FVECTOR& inPosition);
     void calcLocalMatrix();
+    BOOL isLightOff() { return m_bLightOff; }
     void setErase() { m_bEraseModel = TRUE; }
     FLOAT getRotateY() { return m_fRotY; }
     void setScale(FLOAT s) { m_fScale = s; }
@@ -1119,20 +1134,127 @@ CMemo3DObj::CMemo3DObj(CTask* p, INT inGroupId, INT inRsrcId, UINT inDispLayer, 
     m_fFadeCountMax = 6.0f;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_10CMemo3DObj);
-/* placeholder: rodata of main__10CMemo3DObj */
-__asm__(".rdata\n");
-inline void _roPh1() {
-    TRACE(__FILE__ "(2485)");
-    TRACE(__FILE__);
-    TRACE("m_pModels");
-    TRACE(__FILE__ "(2501)");
-    TRACE(__FILE__ "(2525)");
-    TRACE("m_pAnime");
-    TRACE("head");
-    TRACE("n2030");
-    TRACE("EYE_BLINK");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CMemo3DObj::main() {
+    INT nID;
+    MODELDATA** pModelTbl;
+    TEXANM_DATA* pTexAnimData;
+    switch (m_iStep) {
+    case 0:
+        if (!CRcf::isCompleteLoadRCF(m_iGroupId, m_iResourceId)) break;
+    case 1:
+        nID = m_iGroupId * 10000 + m_iResourceId;
+        m_iModelCount = CRsrcDB::getModelCount(nID);
+        if (m_iModelCount > 0) {
+            pModelTbl = CRsrcDB::getRsrcMDL(nID);
+            if (pModelTbl) {
+#line 2485
+                m_pModels = new (__FILE__ "(2485)") CModel[m_iModelCount];
+#line 2487
+                if (!m_pModels) AssertApp(__FILE__, __LINE__, "m_pModels", 0);
+                pTexAnimData = CRsrcDB::getRsrcTXA(nID);
+                if (pTexAnimData) {
+                    m_iTexAnimNum = pTexAnimData->getDataNum();
+                    if (m_iTexAnimNum > 0) {
+                        m_pTexAnim = new (__FILE__ "(2501)") CTexAnm[m_iTexAnimNum];
+                        for (INT i = 0; i < m_iTexAnimNum; i++) m_pTexAnim[i].setup(*pTexAnimData, i);
+                    }
+                }
+                for (INT i = 0; i < m_iModelCount; i++) {
+                    m_pModels[i].link(this, pModelTbl[i]);
+                    if (m_bFade2PathFlag) m_pModels[i].m_nFlag |= 0x20;
+                    if (m_bNotSemiFlag) m_pModels[i].m_nFlag |= 0x800;
+                    if (isLightOff()) m_pModels[i].setColorScale(0.0f, 0.0f, 0.0f, 0.0f);
+                    if (m_pTexAnim) m_pModels[i].linkTexAnm(m_pTexAnim, m_iTexAnimNum);
+                }
+                m_pAnime = new (__FILE__ "(2525)") CAnim;
+#line 2527
+                if (!m_pAnime) AssertApp(__FILE__, __LINE__, "m_pAnime", 0);
+                m_pAnime->link(this, nID);
+                m_pAnime->init(1, 0);
+                for (INT i = 0; i < m_iModelCount; i++) m_pModels[i].changeLayerExt(1, m_uiDispLayer);
+                for (INT i = 0; i < m_iModelCount; i++) {
+                    m_pModels[i].setSemiTrans(ALPHA_BLEND);
+                    m_pModels[i].setAlphaScale(m_fFadeCount / m_fFadeCountMax);
+                }
+                if (m_iGroupId == 10 && m_iResourceId == 2030) {
+                    CEffectMan::setLastDraw(TRUE);
+                    for (INT i = 0; i < m_iModelCount; i++) {
+                        INT headId = pModelTbl[i]->getBoneIndex("head");
+                        if (headId >= 0) {
+                            FVECTOR pos;
+                            FVECTOR rot;
+                            pos.set(0.25f, 0.0f, 0.0f);
+                            rot.set(0.0f, DEG2RAD(270.0f), 0.0f);
+                            Math3D::LimitPIVector(rot);
+                            m_hEffect = CEffectMan::attachEffect("n2030", 0, ObjType::OBJ_TYPE_2D, &Crd(headId), &pos,
+                                                                 &rot, 0.0f);
+                            break;
+                        }
+                    }
+                }
+                if (m_pTexAnim && m_iTexAnimNum > 0) m_pTexAnim->setSeq("EYE_BLINK");
+                m_iStep = 2;
+                break;
+            }
+        }
+        m_iStep = 0xFFFF;
+        break;
+    case 2:
+        m_vBasePosition.x = 0.0f;
+        m_vBasePosition.y = -1.0f;
+        m_vBasePosition.z = 4.0f;
+        m_fBaseScale = 1.0f;
+        calcLocalMatrix();
+        m_iStep = 3;
+    case 3:
+        m_fFadeCount += getFrameRateF();
+        if (m_fFadeCount >= m_fFadeCountMax) {
+            m_fFadeCount = m_fFadeCountMax;
+            for (INT i = 0; i < m_iModelCount; i++) {
+                m_pModels[i].setAlphaScale(1.0f);
+                m_pModels[i].setSemiTrans(ALPHA_OFF);
+            }
+            m_iStep = 4;
+        } else {
+            for (INT i = 0; i < m_iModelCount; i++) m_pModels[i].setAlphaScale(m_fFadeCount / m_fFadeCountMax);
+        }
+        break;
+    case 4:
+        if (m_bEraseModel) {
+            m_iStep = 5;
+            for (INT i = 0; i < m_iModelCount; i++) m_pModels[i].setSemiTrans(ALPHA_BLEND);
+            if (m_hEffect) CEffectMan::getEffect(m_hEffect)->fadeout(8.0f);
+            m_fFadeCount = m_fFadeCountMax;
+        } else {
+            if (m_bTouch) {
+                m_bTouch = FALSE;
+                calcLocalMatrix();
+            }
+            break;
+        }
+    case 5:
+        m_fFadeCount -= getFrameRateF();
+        if (m_fFadeCount <= 0.0f) {
+            m_fFadeCount = 0.0f;
+            m_iStep = 0xFFFF;
+        } else {
+            for (INT i = 0; i < m_iModelCount; i++) m_pModels[i].setAlphaScale(m_fFadeCount / m_fFadeCountMax);
+        }
+        break;
+    case 0xFFFF:
+    default:
+        out();
+        CEffectMan::setLastDraw(FALSE);
+        break;
+    }
+    if (m_iStep < 0xFFFF) {
+        if (m_pAnime) m_pAnime->play(getFrameRate(), 0);
+        if (m_pTexAnim) {
+            for (INT i = 0; i < m_iTexAnimNum; i++) m_pTexAnim[i].update(getFrameRateF());
+        }
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__10CMemo3DObj);
 void CMemo3DObj::disp() {
     if (!m_pModels) return;
     if (m_iStep >= 0xFFFF) return;
