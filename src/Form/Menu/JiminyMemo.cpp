@@ -1118,7 +1118,34 @@ BOOL CJiminyMemo::prevPage(INT* ioTop, INT inMin, INT inDisp) {
     }
     return bRet;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", nextPage__11CJiminyMemoP13CMemo2DCursorPiiif);
+BOOL CJiminyMemo::nextPage(CMemo2DCursor* pCursor, INT* pCursorCurrent, INT iNoteListNum, INT iCursorPosiNum,
+                           FLOAT fCursorIntervalY) {
+    if (!pCursor || !pCursorCurrent) return FALSE;
+    INT iCursorIntervalY = (INT)fCursorIntervalY;
+    INT iScrollMax = iNoteListNum - iCursorPosiNum;
+    if (*pCursorCurrent == iNoteListNum - 1) {
+        *pCursorCurrent = 0;
+    } else {
+        FVECTOR posi = pCursor->getShiftVector();
+        INT offset = (INT)posi.y / iCursorIntervalY;
+        if (offset < iScrollMax) {
+            INT next = offset + iCursorPosiNum;
+            if (iScrollMax < next) {
+                *pCursorCurrent = iScrollMax + (*pCursorCurrent - offset);
+                offset = iScrollMax;
+            } else {
+                *pCursorCurrent += iCursorPosiNum;
+                if (*pCursorCurrent >= iNoteListNum) *pCursorCurrent = iNoteListNum - 1;
+                offset = next;
+            }
+            posi.y = offset * iCursorIntervalY;
+            pCursor->setShiftVector(posi);
+        } else {
+            *pCursorCurrent = iNoteListNum - 1;
+        }
+    }
+    return TRUE;
+}
 BOOL CJiminyMemo::prevPage(CMemo2DCursor* pCursor, INT* pCursorCurrent, INT iNoteListNum, INT iCursorPosiNum,
                            FLOAT fCursorIntervalY) {
     if (!pCursor || !pCursorCurrent) return FALSE;
