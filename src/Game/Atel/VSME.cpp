@@ -232,7 +232,21 @@ void CVSM::clearReq() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", setReq__Q24ATEL4CVSMRCQ24ATEL3RTP);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", tuneReq__Q24ATEL4CVSM);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", exec__Q24ATEL4CVSMi);
+void CVSM::exec(TIMEQ nTQ) {
+    m_nFrameRate = nTQ;
+    if (m_WinCloseTimer > 0) {
+        if ((m_WinCloseTimer -= nTQ) < 0) {
+            m_WinCloseTimer = 0;
+        }
+    }
+    clearFlag(4);
+    for (m_pCurrentActor = m_ActorTbl, m_nCurrentActorIdx = 0; m_nCurrentActorIdx < m_ActorCount; m_nCurrentActorIdx++, m_pCurrentActor++) {
+        execActor();
+    }
+    if (!(m_nFlag & 4)) checkEvents();
+    tuneReq();
+    clearReq();
+}
 void CVSM::execInit() {
     _TRACE(m_bTrace, D_0048F698, m_ActorCount);
     m_ReadyActorCount = 0;

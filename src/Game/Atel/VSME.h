@@ -120,11 +120,16 @@ public:
     CHAR* getAvatarName(INT nIdx) { return m_ActorTbl[nIdx]._ATP.name; }
     INT getActorNum() { return m_ActorCount; }
     void setPC(INT nPC) { m_Pctr = nPC; }
+    void clearFlag(INT nFlag) { m_nFlag &= ~nFlag; }
 
 protected:
     void deleteActorAll();
     void clearReq();
     void execInit();
+    void exec(TIMEQ nTQ);
+    void execActor();
+    void checkEvents();
+    void tuneReq();
     void setReq(const RTP& rq);
 
 private:
