@@ -500,7 +500,13 @@ inline void _roPh1() {
     TRACE("EYE_BLINK");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__10CMemo3DObj);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", disp__10CMemo3DObj);
+void CMemo3DObj::disp() {
+    if (!m_pModels) return;
+    if (m_iStep >= 0xFFFF) return;
+    for (INT i = 0; i < m_iModelCount; i++) {
+        m_pModels[i].disp();
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", calcLocalMatrix__10CMemo3DObj);
 void CMemo3DObj::setRotateY(FLOAT inRotY) {
     if (__builtin_fabsf(Math3D::LimitPI(m_fRotY - inRotY)) != 0.0f) {
