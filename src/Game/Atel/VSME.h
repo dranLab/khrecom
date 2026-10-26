@@ -134,6 +134,7 @@ protected:
     void execActor();
     void checkEvents();
     void tuneReq();
+    void AtelEventSkip();
     void setReq(const RTP& rq);
 
 private:

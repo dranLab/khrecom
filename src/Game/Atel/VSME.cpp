@@ -68,6 +68,7 @@ inline void _vsmeMotionName() {
 #include "Game/Player/Player.h"
 #include "System/Sound/SoundMan.h"
 #include "System/Com.h"
+#include "Game/SceneEnv.h"
 #include "Form/Menu/JMemoFlag.h"
 #include <string.h>
 #include "include_asm.h"
@@ -2060,15 +2061,27 @@ inline void _roPh44() {
 }
 __asm__(".rdata\n.align 4\n.word .L0024FD70\n.word .L0024FD74\n.word .L0024FD7C\n.word .L0024FD8C\n.word .L0024FD98\n.word .L0024FD94\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", ctd_cal__Q24ATEL4CVSMPCQ24ATEL7CAvatariiPQ24ATEL21ChatWndCreateCTDParam);
-/* placeholder: rodata of AtelEventSkip__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh45() {
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CVSM::AtelEventSkip() {
     TRACE("Event Skip Start\n");
-    TRACE("@_sk");
-    TRACE("      GOTO_ EternityWait:%s\n");
-    TRACE("[ATEL]   GOTO_Skip:%s\n");
+    CGameWork::setFlag(1, 0x38, TRUE);
+    CSceneEnv::setStop((ObjType::eObjBit)0);
+    CSceneEnv::setStop((ObjType::eObjBit)0x581C);
+    clearReq();
+    CCameraMan::instance().reqCommand(0x45D, NULL, 0);
+    for (int i = 0; i < m_ActorCount; i++) {
+        if (m_ActorTbl[i]._pAvatar) m_ActorTbl[i]._pAvatar->reqCommand(0x2E, NULL, 0);
+        if (!reqSSI("@_sk", i, 7)) {
+            m_ActorTbl[i]._ATP.status = 25;
+            TRACE("      GOTO_ EternityWait:%s\n", m_ActorTbl[i]._ATP.name);
+        } else {
+            tuneReq();
+            m_ActorTbl[i]._ATP.status = 1;
+            m_Pctr = m_ActorTbl[i]._ATP.address;
+            TRACE("[ATEL]   GOTO_Skip:%s\n", m_ActorTbl[i]._ATP.name);
+        }
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", AtelEventSkip__Q24ATEL4CVSM);
 void close_dest_se(INT win_num) {
     INT nState;
     INT ans;
