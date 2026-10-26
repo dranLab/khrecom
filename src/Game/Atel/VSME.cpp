@@ -259,7 +259,27 @@ static BOOL DebugCreateNpcWindow(CDebugWindow* pObj, INT inY, INT inParam) {
 }
 /* the asm .data (debug window tables) refers to it by name until the data comes from source */
 __asm__(".globl DebugCreateNpcWindow__8DWTEventP12CDebugWindowii");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugCreateEventLineDisp__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugCreateEventLineDisp(CDebugWindow* pObj, INT inY, INT inParam) {
+    CTask* pA = CTaskMan::getSysTask(0x1A);
+    if (pA && ((CAtel*)pA)->getVSM()) {
+        if (inParam & 0x180) {
+            if (DebugWork::g_dw.event.iEventline == 1) {
+                CEventLineDisp* p = new CEventLineDisp(CTaskMan::getSysTask(1));
+                DebugWork::g_dw.event.pEventlineClass = (INT*)p;
+            } else {
+                if (DebugWork::g_dw.event.pEventlineClass) {
+                    ((CTask*)DebugWork::g_dw.event.pEventlineClass)->out();
+                }
+                DebugWork::g_dw.event.pEventlineClass = NULL;
+            }
+        }
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugCreateEventLineDisp__8DWTEventP12CDebugWindowii");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugAtelWorkDef__8DWTEventP12CDebugWindowi);
 /* placeholder: rodata of the tables before debugBtlReportCallBackParam__8DWTEventP12CDebugWindowii */
 __asm__(".rdata\n");
