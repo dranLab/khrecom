@@ -25,6 +25,7 @@ extern "C" char D_00491328[];
 extern "C" char D_00491338[];
 extern "C" char D_00491348[];
 extern "C" char D_00491358[];
+extern "C" char D_00491370[];
 extern "C" char D_00491398[];
 extern "C" char D_004913C0[];
 extern "C" char D_004913E8[];
@@ -207,7 +208,24 @@ INT CVSM::searchActorID(const CHAR* pszActor) const {
     }
     return m_ActorTbl[i]._ATP.id;
 }
+/* Parked: same instructions and order except the wait_timer product: the original multiplies into LO ("mult $zero,s1,v1"
+   + mflo before the sh), ours with the 3-operand mult into v1 (gcc's mulsi3_mult3 "l" vs "d" alternative, chosen by
+   regclass: LO only when the product feeds a plain register copy, as for a call argument in PathData::delPath); ours
+   is 4 bytes shorter. Line tags: status (5114) before next_address (5115), the whole product on the isNTSC line. tried:
+   ternary inside/outside the product and with commuted arms, if/else, INT/USHORT/TIMEQ product locals, an INT
+   multiplier local, (UINT)/(SHORT)/float operands, an inline USHORT setter, statement orders, tools/permuter.py
+   10 min (50056 candidates, no better than 4). */
+#if 0
+void CVSM::acWaitReq(Actor& act, INT nTime, INT nAddr) {
+    ATP& atp = act._ATP;
+    atp.status = 3;
+    atp.next_address = nAddr;
+    atp.wait_timer = nTime * (CMainApp::isNTSC() ? 25 : 25);
+    _TRACE(m_bTrace, D_00491370, atp.id, nTime, nAddr);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acWaitReq__Q24ATEL4CVSMRQ24ATEL5Actorii);
+#endif
 void CVSM::acWaitLoadRsrc(Actor& act, INT nAddr) {
     ATP& atp = act._ATP;
     atp.next_address = nAddr;
