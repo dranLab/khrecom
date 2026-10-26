@@ -169,6 +169,9 @@ public:
     void setInState(INT inSeqId);
     void setOutState(INT inSeqId);
     void setSlideMoveParam(class CMemo2DCursor* inCursor);
+    void setState(INT inState) { m_iState = inState; }
+    void setup(const CHAR* inSeqName, const INT* inSeqTbl, INT inLayer);
+    void setup(const CHAR* inSeqName, INT inSeqNo, INT inLayer);
 };
 
 class CMemo2DCursor : public D2::C2DSeqCtrl {
@@ -671,7 +674,16 @@ inline void _roPh6() {
     TRACE("strlen(inSeqName) < 32");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setup__15CMemo2DSequencePCcPCii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setup__15CMemo2DSequencePCcii);
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CMemo2DSequence::setup(const CHAR* inSeqName, INT inSeqNo, INT inLayer) {
+#line 3158
+    if (!(strlen(inSeqName) < 32)) AssertApp(__FILE__, __LINE__, "strlen(inSeqName) < 32", 0);
+    strcpy(m_LayoutName, inSeqName);
+    setLayer(inLayer);
+    setState(1);
+    addSeq(m_LayoutName, inSeqNo);
+    enableDisp(TRUE);
+}
 void CMemo2DSequence::setPosition() {
     FVECTOR v;
     AddVectorXYZ(v, m_vBasePosition, m_vShiftPosition);
