@@ -297,6 +297,7 @@ private:
     BOOL isModeDReport() { return m_iPlayerMode != 0; }
     INT getLoadResourceIndex() { return m_iPlayerMode != 0; }
     void setContentStep(INT inStep) { m_ContentCommon.iStep = inStep; }
+    void setContentParam(INT inIdx, INT inParam) { m_ContentCommon.param[inIdx] = inParam; }
 
 public:
     CJiminyMemo(CTask* inParent, INT inMode);
@@ -356,6 +357,7 @@ private:
     BOOL prevPage(CMemo2DCursor* pCursor, INT* pCursorCurrent, INT iNoteListNum, INT iCursorPosiNum,
                   FLOAT fCursorIntervalY);
     BOOL haveSpecialCard();
+    INT setParamFromCollectToCardView();
     INT setParamFromCardViewToCollect();
     INT getNextCardId(INT inId);
     INT getPrevCardId(INT inId);
@@ -1726,7 +1728,66 @@ __asm__(".word .L0032EB40\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCollection__11CJiminyMemo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", CardScreenSideClip__11CJiminyMemoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", CardScreenOutClip__11CJiminyMemo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setParamFromCollectToCardView__11CJiminyMemo);
+namespace JiminyMemo {
+extern INT SoraCardNumTbl[];
+extern INT RikuCardNumTbl[];
+namespace Collect {
+extern UINT CursorMoveFlag[];
+extern UINT CursorMoveFlagWithSpecial[];
+namespace D {
+extern UINT CursorMoveFlag[];
+}
+}
+}
+INT CJiminyMemo::setParamFromCollectToCardView() {
+    INT cursorLimitX;
+    INT cursorLimitY;
+    INT current;
+    INT currentCard;
+    INT cardId;
+    INT kindId;
+    UINT* pCursorMoveFlag;
+    INT cardKindNum;
+    INT* pCardKindTbl;
+    if (!work(0x1D4)) return FALSE;
+    current = -1;
+    cursorLimitX = work(0x1FC);
+    cursorLimitY = work(0x200);
+    currentCard = *(SHORT*)&work(0x1DC) + *(SHORT*)&work(0x1DE) * cursorLimitX;
+    if (isModeJiminyMemo()) {
+        pCursorMoveFlag = haveSpecialCard() ? JiminyMemo::Collect::CursorMoveFlagWithSpecial
+                                            : JiminyMemo::Collect::CursorMoveFlag;
+        cardKindNum = 10;
+        pCardKindTbl = JiminyMemo::SoraCardNumTbl;
+    } else {
+        pCursorMoveFlag = JiminyMemo::Collect::D::CursorMoveFlag;
+        pCardKindTbl = JiminyMemo::RikuCardNumTbl;
+        cardKindNum = 4;
+    }
+    for (INT i = 0; i < cursorLimitY; i++) {
+        for (INT j = 0; j < cursorLimitX; j++) {
+            if (pCursorMoveFlag[i] & (1 << j)) {
+                current++;
+                if (--currentCard < 0) goto found;
+            } else {
+                if (--currentCard < 0) return FALSE;
+            }
+        }
+    }
+    return FALSE;
+found:
+    if (!((CMemo2DCard**)work(0x1D4))[current]) return FALSE;
+    for (kindId = 0; kindId < cardKindNum; kindId++) {
+        for (cardId = 0; cardId < pCardKindTbl[kindId]; cardId++) {
+            if (--current < 0) goto set;
+        }
+    }
+    return FALSE;
+set:
+    setContentParam(0, kindId);
+    setContentParam(1, cardId);
+    return TRUE;
+}
 /* placeholder: rodata of contentCard__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh29() {
@@ -1774,17 +1835,6 @@ INT CJiminyMemo::getPrevCardId(INT inId) {
 }
 INT CJiminyMemo::getNextCardId(INT inId) {
     return getNextContentId(inId, work(0x2D4), work(0x2D0));
-}
-namespace JiminyMemo {
-extern INT SoraCardNumTbl[];
-extern INT RikuCardNumTbl[];
-namespace Collect {
-extern UINT CursorMoveFlag[];
-extern UINT CursorMoveFlagWithSpecial[];
-namespace D {
-extern UINT CursorMoveFlag[];
-}
-}
 }
 /* Parked: 4 lines: the constant 1 for (1 << j) is hoisted to before the outer loop in ours, the original sets it
    at the start of each outer iteration (li t0,1 after lw a0 / move v1,zero). Everything else matches: cardNo read
