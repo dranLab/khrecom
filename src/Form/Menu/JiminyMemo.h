@@ -9,7 +9,9 @@
 /* Placeholder for the original header's inline function asserting inId (CursorDataParam): its strings
  * ("System/../Form/Menu/JiminyMemo.h", "inId < PARAM_NUM") are in .rodata of every includer. The line number
  * is not known. */
+#ifndef FORM_MENU_JIMINYMEMO_CPP /* its own unit includes it as "JiminyMemo.h" (the full path) */
 #line 1 "System/../Form/Menu/JiminyMemo.h"
+#endif
 inline void _jiminyMemoCheckId(INT inId) {
     if (!(inId < 8)) AssertApp(__FILE__, __LINE__, "inId < PARAM_NUM", 0);
 }
