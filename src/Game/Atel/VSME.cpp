@@ -6,6 +6,8 @@
 #include "Form/Menu/WorldCard.h"
 #include "Form/Menu/LevelUp.h"
 inline void* operator new(size_t, void* p) throw() { return p; }
+/* PARTIAL: the original System/HeapMan.h(134) has it inline */
+inline void* operator new(size_t size) throw() { return com_malloc(size); }
 #include "Game/Atel/AtelCrossFade.h"
 #include "System/Rcf.h"
 #include "Game/GameWork.h"
@@ -102,7 +104,22 @@ static INT debugWinNPCListDispCall(LPSTR pStr, INT iLineY, const void* pValue) {
 }
 /* the asm .data (debugWinNPCList table) refers to it by name until the data comes from source */
 __asm__(".globl debugWinNPCListDispCall__8DWTEventPciPCv");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugCreateNpcWindow__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugCreateNpcWindow(CDebugWindow* pObj, INT inY, INT inParam) {
+    CTask* pA = CTaskMan::getSysTask(0x1A);
+    if (pA && ((CAtel*)pA)->getVSM()) {
+        if (inParam & 0x180) {
+            if (DebugWork::g_dw.event.iNpcCoordDisp == 1) {
+                CActorDebug* p = new CActorDebug(CTaskMan::getSysTask(1));
+                DebugWork::g_dw.event.pClass = (INT*)p;
+            }
+        }
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugCreateNpcWindow__8DWTEventP12CDebugWindowii");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugCreateEventLineDisp__8DWTEventP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugAtelWorkDef__8DWTEventP12CDebugWindowi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", debugBtlReportCallBackParam__8DWTEventP12CDebugWindowii);
