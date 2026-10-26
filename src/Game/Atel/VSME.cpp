@@ -2,6 +2,8 @@
 #include "Game/Atel/VSME.h"
 #include "System/Debug.h"
 #include "System/TaskMan.h"
+#include "Form/DebugWindow.h"
+#include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
 
 using namespace ATEL;
@@ -68,7 +70,15 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetKH2CardGetFla
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetJiminyMemoFlag__8DWTEventP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", debugGameInfomationParam__8DWTEventP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetGameWorkParam__8DWTEventP12CDebugWindowii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", debugWinNPCMainlCall__8DWTEventP12CDebugWindowi);
+namespace DWTEvent {
+static INT debugWinNPCMainlCall(CDebugWindow* pObj, INT inParam) {
+    if (inParam & 1) {
+        DebugWork::g_dw.event.pClass = NULL;
+        DebugWork::g_dw.event.pEventlineClass = NULL;
+    }
+    return 1;
+}
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _TRACE__4ATELiPCce);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", __Q24ATEL4CVSMR5CAteli);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _$_Q24ATEL4CVSM);
