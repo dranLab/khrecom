@@ -79,6 +79,16 @@ private:
     BOOL m_bFade2PathFlag;   /* 0xbc */
 };
 
+struct LayoutDataParam {
+    INT In;
+    INT Loop;
+    INT Out;
+    FLOAT XPosi;
+    FLOAT YPosi;
+    INT Layer;
+    UINT CTCode;
+};
+
 class CMemo2DLayout : public CTask {
 private:
     LPCTSTR m_pLayoutName;          /* 0x40 */
@@ -117,6 +127,7 @@ public:
     D2::C2DSeqCtrl* getSeqCtrl(INT inSeqNo);
     D2::C2DFnt* getFnt(INT inSeqNo);
     D2::C2DFnt* setSeqText(UINT inSeqNo, const CHAR* inText);
+    INT getSeqState(UINT inSeqNo);
 };
 
 struct CursorPosition {
@@ -541,7 +552,18 @@ D2::C2DFnt* CMemo2DLayout::getFnt(INT inSeqNo) {
     return m_pSeqFntArray[inSeqNo];
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setSeqState__13CMemo2DLayoutUii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getSeqState__13CMemo2DLayoutUi);
+INT CMemo2DLayout::getSeqState(UINT inSeqNo) {
+    INT rval = -1;
+    if (inSeqNo >= m_iSeqNum) return -1;
+    if (m_pSeqCodeTbl[inSeqNo] == m_pSeqNoTbl[inSeqNo].In) {
+        rval = 0;
+    } else if (m_pSeqCodeTbl[inSeqNo] == m_pSeqNoTbl[inSeqNo].Loop) {
+        rval = 1;
+    } else if (m_pSeqCodeTbl[inSeqNo] == m_pSeqNoTbl[inSeqNo].Out) {
+        rval = 2;
+    }
+    return rval;
+}
 D2::C2DFnt* CMemo2DLayout::setSeqText(UINT inSeqNo, const CHAR* inText) {
     if (inSeqNo >= m_iSeqNum) return NULL;
     D2::C2DFnt* pFnt = m_pSeqFntArray[inSeqNo];
