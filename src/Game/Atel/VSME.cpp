@@ -88,6 +88,8 @@ int vsprintf(char* buf, const char* fmt, va_list ap);
 
 using namespace ATEL;
 
+static void dispActorTag(INT nMax, const Actor* pTbl);
+
 static inline void _setRTP(RTP& r, USHORT lv, USHORT actor, SHORT tag, SHORT mactor) {
     r.rq_lv = lv;
     r.rq_actor = actor;
@@ -1349,6 +1351,81 @@ __asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatTechWndWait__Q24ATEL4C
 __asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatWorldCardWndWait__Q24ATEL4CVSM\n.text\n");
 __asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatCrossFadeWait__Q24ATEL4CVSM\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", initActor__Q24ATEL4CVSM);
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+/* Parked: 4 lines: after the magic test the original advances the cursor (s0) in the beq delay slot, ours
+   on the fall-through path (pAddr += 4 after the if). Everything else matches: pAddr as the byte cursor with
+   pIntPtr as int view, destination pointers p for the copies, a block-scoped counter for the actor-ID loop.
+   tried: *pIntPtr++ in the test (+copy into s2), pAddr += 4 before the test (copy), pIntPtr as the only cursor
+   (33 lines), an INT*& alias of pAddr (param in memory, 117), increments as separate statements. */
+#if 0
+void CVSM::loadFromMem(const BYTE* pAddr) {
+    INT* pIntPtr;
+    BYTE* p;
+    INT i;
+    _TRACE_(TRUE, "Load I-Seg\n");
+    pIntPtr = (INT*)pAddr;
+    if (*pIntPtr != 0x6362612F) {
+        _TRACE(TRUE, "ATEL \x83R\x83\x93\x83p\x83" "C\x83\x89\x82\xcc\x83o\x81[\x83W\x83\x87\x83\x93\x82\xaa\x88\xe1\x82\xa2\x82\xdc\x82\xb7\n");
+        return;
+    }
+    pAddr += 4;
+    pIntPtr = (INT*)pAddr;
+    m_MaxActorCount = *pIntPtr++;
+    if (m_MaxActorCount > 64) {
+        _TRACE(TRUE, "Actor-ID \x93o\x98^\x90\x94\x83I\x81[\x83o\x81[\x83t\x83\x8d\x81[\n");
+#line 343
+        AssertApp(__FILE__, __LINE__, "0", 0);
+    }
+    for (INT n = 0; n < m_MaxActorCount; n++) {
+        m_ActorTbl[n]._nID = *pIntPtr++;
+    }
+    pAddr += 4 + 64 * 4;
+    pIntPtr = (INT*)pAddr;
+    m_MaxPC = *pIntPtr;
+    pAddr += 4;
+    _TRACE_(m_bTrace, "MaxPC:%x\n", m_MaxPC);
+    if (m_pIseg) com_free(m_pIseg);
+    m_pIseg = (INSTR*)com_malloc_d(m_MaxPC * sizeof(INSTR), __FILE__ "(357)", (UINT)-1);
+#line 358
+    if (!(m_pIseg)) AssertApp(__FILE__, __LINE__, "m_pIseg", 0);
+    p = (BYTE*)m_pIseg;
+    for (INT j = 0; j < m_MaxPC * sizeof(INSTR); j++) {
+        *p++ = *pAddr++;
+    }
+    pIntPtr = (INT*)pAddr;
+    m_GAptr = *pIntPtr;
+    _TRACE_(m_bTrace, "GAptr:%x\n", m_GAptr);
+    pAddr += 4;
+    if (m_GAptr > 0x1000) {
+        _TRACE(TRUE, "\x83" "f\x81[\x83^\x83Z\x83O\x83\x81\x83\x93\x83g \x83I\x81[\x83o\x81[\x83t\x83\x8d\x81[\n");
+#line 372
+        AssertApp(__FILE__, __LINE__, "0", 0);
+    }
+    if (m_pDseg) com_free(m_pDseg);
+    m_pDseg = (BYTE*)com_malloc_d(0x4000, __FILE__ "(376)", (UINT)-1);
+#line 377
+    if (!(m_pDseg)) AssertApp(__FILE__, __LINE__, "m_pDseg", 0);
+    p = m_pDseg;
+    for (INT j = 0; j < m_GAptr; j++) {
+        *p++ = *pAddr++;
+    }
+    m_ActorCount = *pAddr;
+    pAddr += 4;
+    if (m_ActorCount > 64) {
+        _TRACE(TRUE, "Actor \x93o\x98^\x90\x94\x83I\x81[\x83o\x81[\x83t\x83\x8d\x81[\n");
+#line 390
+        AssertApp(__FILE__, __LINE__, "0", 0);
+    }
+    for (INT n = 0; n < m_ActorCount; n++) {
+        p = (BYTE*)&m_ActorTbl[n]._ATP;
+        for (UINT k = 0; k < sizeof(ATP); k++) {
+            *p++ = *pAddr++;
+        }
+    }
+    setFlag(3);
+    if (m_bTrace) dispActorTag(m_ActorCount, m_ActorTbl);
+}
+#else
 /* placeholder: rodata of loadFromMem__Q24ATEL4CVSMPCUc */
 __asm__(".rdata\n");
 inline void _roPh21() {
@@ -1366,6 +1443,7 @@ inline void _roPh21() {
     TRACE("Actor \x93o\x98^\x90\x94\x83I\x81[\x83o\x81[\x83t\x83\x8d\x81[\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", loadFromMem__Q24ATEL4CVSMPCUc);
+#endif
 void CVSM::deleteActorAll() {}
 /* placeholder: rodata of checkEvents__Q24ATEL4CVSM */
 __asm__(".rdata\n");

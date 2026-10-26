@@ -143,6 +143,7 @@ union OpStack {
 };
 
 void _TRACE(BOOL bDisp, const CHAR* fmt, ...);
+void _TRACE_(BOOL bDisp, const CHAR* fmt, ...); /* inline (weak) in the original; its copy is still asm */
 
 class CVSM {
 protected:
@@ -206,6 +207,7 @@ protected:
     INT execExt2Code(INT op, eATEL_REQ_RET& ret);
     INT execExt3Code(INT op, eATEL_REQ_RET& ret);
     INT searchLockOnNpc();
+    void loadFromMem(const BYTE* pAddr);
     void initActor();
     void exec(TIMEQ nTQ);
     void execActor();
