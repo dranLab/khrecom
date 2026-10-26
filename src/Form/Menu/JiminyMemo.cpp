@@ -287,6 +287,9 @@ private:
     void initialize(INT inPlayerMode);
     void setContentMode(INT inContentMode);
     void replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum);
+    void setPlateState(INT inKind, INT inState);
+    INT getPlateState(INT inKind);
+    void setPlateText(INT inKind, INT inCTNo);
     CMemo2DSequence* createSequence(const INT* inSeqData, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
                                     CMemo2DSequence* inParent);
     CMemo2DSequence* createSequence(INT inSeqNo, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
@@ -1132,10 +1135,27 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", splitMessage__1
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L0032A1C8\n.word .L0032A200\n.word .L0032A238\n.word .L0032A260\n.word .L0032A278\n.word .L0032A290\n.word .L0032A2A8\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPlateState__11CJiminyMemoii);
-/* placeholder: rodata of getPlateState__11CJiminyMemoi */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0032A328\n.word .L0032A33C\n.word .L0032A350\n.word .L0032A364\n.word .L0032A378\n.word .L0032A38C\n.word .L0032A3A0\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getPlateState__11CJiminyMemoi);
+INT CJiminyMemo::getPlateState(INT inKind) {
+    CMemo2DLayout* seq = getTaskPointer<CMemo2DLayout*>(m_hLayout);
+    if (!seq || seq->isOut()) return -2;
+    switch (inKind) {
+    case 0:
+        return seq->getSeqState(0);
+    case 1:
+        return seq->getSeqState(3);
+    case 2:
+        return seq->getSeqState(6);
+    case 3:
+        return seq->getSeqState(8);
+    case 4:
+        return seq->getSeqState(9);
+    case 5:
+        return seq->getSeqState(10);
+    case 6:
+        return seq->getSeqState(11);
+    }
+    return -2;
+}
 /* placeholder: rodata of setPlateText__11CJiminyMemoii */
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L0032A474\n.word .L0032A480\n.word .L0032A498\n.word .L0032A4A8\n.word .L0032A4A8\n.byte 0x00,0x00,0x00,0x00\n");
