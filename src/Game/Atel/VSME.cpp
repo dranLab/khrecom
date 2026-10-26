@@ -1601,12 +1601,18 @@ BOOL CVSM::acStatCPWait() {
 BOOL CVSM::acStatSNWait() {
     return FALSE;
 }
-/* placeholder: rodata of acStatMSWait__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh40() {
-    TRACE("mes_disp_wait = %d\n");
+BOOL CVSM::acStatMSWait() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    INT nID = atp.wait_key;
+    INT nFlag;
+    if (CChatMan::instance().reqCommand(0x3ED, &nFlag, nID) == -1) nFlag = 5;
+    if (nFlag == 5) {
+        _TRACE(m_bTrace, "mes_disp_wait = %d\n", atp.id);
+        setPC(atp.next_address);
+        return TRUE;
+    }
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatMSWait__Q24ATEL4CVSM);
 BOOL CVSM::acStatShopWait() {
     return FALSE;
 }

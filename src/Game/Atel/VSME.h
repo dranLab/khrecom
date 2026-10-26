@@ -174,6 +174,7 @@ private:
     BOOL acStatBGWait();
     BOOL acStatEternityWait();
     BOOL acStatCardWndWait();
+    BOOL acStatMSWait();
     BOOL acStatCPWait();
     BOOL acStatWait();
     BOOL acStatXWait();
