@@ -309,10 +309,27 @@ inline void _roPh3() {
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L00241A40\n.word .L00241A48\n.word .L00241A50\n.word .L00241A58\n.word .L00241A60\n.word .L00241A68\n.word .L00241A70\n.word .L00241A78\n.word .L00241A80\n.word .L00241A88\n.word .L00241A90\n.word .L00241A98\n.word .L00241AA0\n.word .L00241B10\n.word .L00241AA8\n.word .L00241AB0\n.word .L00241AB8\n.word .L00241AC0\n.word .L00241AC8\n.word .L00241AD0\n.word .L00241AD8\n.word .L00241AE0\n.word .L00241AE8\n.word .L00241AF0\n.word .L00241AF8\n.word .L00241B00\n.word .L00241B08\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetWorldTitleFlag__8DWTEventP12CDebugWindowii);
-/* placeholder: rodata of DebugSetTutorialFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00241B8C\n.word .L00241B94\n.word .L00241B9C\n.word .L00241BA4\n.word .L00241BAC\n.word .L00241BB4\n.word .L00241BBC\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetTutorialFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetTutorialFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT tuto = CGameWork::getInt(0, 0xC2);
+        switch (inY) {
+        case 0: tuto ^= 0x1; break;
+        case 1: tuto ^= 0x2; break;
+        case 2: tuto ^= 0x4; break;
+        case 3: tuto ^= 0x8; break;
+        case 4: tuto ^= 0x10; break;
+        case 5: tuto ^= 0x20; break;
+        case 6: tuto ^= 0x40; break;
+        }
+        DebugWork::g_dw.atelwork.iTutorialEnd = tuto;
+        CGameWork::setInt(0, 0xC2, tuto);
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetTutorialFlag__8DWTEventP12CDebugWindowii");
 /* placeholder: rodata of DebugSetCardPossibleFlag__8DWTEventP12CDebugWindowii */
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L00241C3C\n.word .L00241C44\n.word .L00241C4C\n.word .L00241C54\n.word .L00241C5C\n.word .L00241C64\n.word .L00241C6C\n.word .L00241C74\n.word .L00241C7C\n.word .L00241C84\n.word .L00241C8C\n.word .L00241C94\n.word .L00241C9C\n.word .L00241CA4\n.word .L00241CAC\n.word .L00241CB4\n.word .L00241CBC\n.word .L00241CC4\n.word .L00241CCC\n.word .L00241CD4\n.word .L00241CDC\n.word .L00241CE4\n.word .L00241CEC\n.word .L00241CF4\n.word .L00241CFC\n.word .L00241D04\n.word func_0\n.word func_0\n.text\n");
