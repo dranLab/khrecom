@@ -138,6 +138,7 @@ public:
     D2::C2DSeqCtrl* getSeqCtrl(INT inSeqNo);
     D2::C2DFnt* getFnt(INT inSeqNo);
     D2::C2DFnt* setSeqText(UINT inSeqNo, const CHAR* inText);
+    D2::C2DSeqCtrl* setSeqState(UINT inSeqNo, INT inState);
     INT getSeqState(UINT inSeqNo);
     D2::C2DSeqCtrl* createSequence(INT inSeqNo, INT inLayer);
 };
@@ -705,7 +706,36 @@ D2::C2DFnt* CMemo2DLayout::getFnt(INT inSeqNo) {
     if (inSeqNo < 0 || inSeqNo >= m_iSeqNum) return NULL;
     return m_pSeqFntArray[inSeqNo];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setSeqState__13CMemo2DLayoutUii);
+D2::C2DSeqCtrl* CMemo2DLayout::setSeqState(UINT inSeqNo, INT inState) {
+    if (inSeqNo >= m_iSeqNum) return NULL;
+    D2::C2DSeqCtrl* pSeq = getSeqCtrl(inSeqNo);
+    if (pSeq) {
+        INT state;
+        switch (inState) {
+        case 0:
+            state = m_pSeqNoTbl[inSeqNo].In;
+            break;
+        case 1:
+            state = m_pSeqNoTbl[inSeqNo].Loop;
+            break;
+        case 2:
+            state = m_pSeqNoTbl[inSeqNo].Out;
+            break;
+        default:
+            state = -1;
+            break;
+        }
+        if (state >= 0) {
+            m_pSeqCodeTbl[inSeqNo] = state;
+            pSeq->replaceSeq(0, m_pLayoutName, m_pSeqCodeTbl[inSeqNo]);
+            pSeq->enableDisp(TRUE);
+        } else {
+            m_pSeqCodeTbl[inSeqNo] = -1;
+            pSeq->enableDisp(FALSE);
+        }
+    }
+    return pSeq;
+}
 INT CMemo2DLayout::getSeqState(UINT inSeqNo) {
     INT rval = -1;
     if (inSeqNo >= m_iSeqNum) return -1;
