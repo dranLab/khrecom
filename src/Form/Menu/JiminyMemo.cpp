@@ -285,6 +285,12 @@ private:
     void initialize(INT inPlayerMode);
     void setContentMode(INT inContentMode);
     void replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum);
+    INT createListSequence(CMemo2DSequence* inList, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
+                           D2::C2DSeqCtrl** inFontSeq, D2::C2DFnt** inFont, UINT inFontCol, INT inFontSize,
+                           INT inFontStyle, const CHAR* inStr);
+    INT createListSequenceTypewriterFont(CMemo2DSequence* inList, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
+                                         D2::C2DSeqCtrl** inFontSeq, D2::C2DFnt** inFont, UINT inFontCol,
+                                         INT inFontSize, INT inFontStyle, const CHAR* inStr, FLOAT inWidth);
     void replaceNoteListString(D2::C2DFnt* inList, const CHAR* inString) {
         if (inList) inList->setText(inString);
     }
@@ -963,7 +969,16 @@ inline void _roPh16() {
     TRACE(__FILE__ "(4240)");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createListSequence__11CJiminyMemoP15CMemo2DSequenceiiiPPQ22D210C2DSeqCtrlPPQ22D26C2DFntUiiiPCc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createListSequenceTypewriterFont__11CJiminyMemoP15CMemo2DSequenceiiiPPQ22D210C2DSeqCtrlPPQ22D26C2DFntUiiiPCcf);
+INT CJiminyMemo::createListSequenceTypewriterFont(CMemo2DSequence* inList, INT inLayer, INT inLayoutNo,
+                                                  INT inLayoutSeqNo, D2::C2DSeqCtrl** inFontSeq, D2::C2DFnt** inFont,
+                                                  UINT inFontCol, INT inFontSize, INT inFontStyle, const CHAR* inStr,
+                                                  FLOAT inWidth) {
+    if (!inList) return 0;
+    if (!inFontSeq || !inFont || !inStr || !strlen(inStr)) return 0;
+    createListSequence(inList, inLayer, inLayoutNo, inLayoutSeqNo, inFontSeq, inFont, inFontCol, inFontSize,
+                       inFontStyle, inStr);
+    return 1;
+}
 void CJiminyMemo::replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum) {
     if (inFnt) {
         for (INT i = 0; i < inNum; i++) {
