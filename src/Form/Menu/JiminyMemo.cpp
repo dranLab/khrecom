@@ -2710,9 +2710,8 @@ void CJiminyMemo::ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR
 /* Parked: 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves
    from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches.
    tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the top, NULL compare, 0 vs
-   0.0f w, fRatioPosY reused for the product; tools/permuter.py 8 min reached score 1 in its copy (vec before vPos,
-   braces, 3 > i), but the same source gives 69 lines in the real build: codegen depends on the source path
-   (identifier hash order), so permuter results do not transfer here. */
+   0.0f w, fRatioPosY reused for the product; tools/permuter.py (fixed wrapper, target draft on, other drafts hidden)
+   10 min, 6432 candidates: no improvement (earlier "score 1" runs were a wrapper bug). */
 #if 0
 void CJiminyMemo::ScrollBarChange(D2::C2DSeqCtrl** inSeqCtrl, FLOAT inBasePosY, FLOAT inBaseHeight,
                                   INT inCursorPosiNum, INT inNoteListNum, INT inStartNum) {
@@ -6024,7 +6023,8 @@ extern FVECTOR ModelPosi;
    original f4/f1/f3, ours f1/f3/f4). Everything else matches.
    tried: line-marker layout (both table arms written out, flags 0x8000 then 0x4000, setter order, ry split over
    3 statements), literal vs DEG2RAD constant, * 1/4096 vs / 4096, operand orders, ry as one or two statements;
-   tools/permuter.py 6 min starts at score 1 in its copy (another path) but 6 lines here: path/hash-sensitive. */
+   rotation as one/two/three statements, const ry;
+   tools/permuter.py (fixed wrapper, target draft on, other drafts hidden) 8 min: no improvement. */
 #if 0
 INT CJiminyMemo::contentCharaView_ModelView() {
     INT rval = TRUE;
