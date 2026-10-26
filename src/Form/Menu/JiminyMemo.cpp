@@ -3503,6 +3503,202 @@ __asm__(".word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\
 __asm__(".word .L003349F8\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCharaView_ModelView__11CJiminyMemo);
 #endif
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+namespace JiminyMemo {
+namespace Minigame {
+extern INT NoteSeqData[5];
+}
+}
+/* Parked: 34 lines, all stack offsets: the six hoisted string addresses (strBGlider..strBPanic, &scoreStr) are
+   spilled in another slot order (GCSE/PRE creates their pseudos in hash-table order: ours BPanic first, the
+   original BGlider first). Everything else matches (time math via the Com.h(59) seconds inline, string table).
+   tried: aggregate initializer for scoreStr, if vs ternary for the scores, unused posi removed (worse); RTL dump
+   shows pseudos 567.. made by gcse; tools/permuter.py 10 min starts at score 1 in its copy (another path) but 34
+   lines here: pointer-hash dependent (see memory gcse-pre-hash-order). */
+#if 0
+/* PARTIAL: the original's System/Com.h(59) inline: seconds to time quanta */
+static inline INT _sec2tq(INT inSec) { return inSec * 3000; }
+void CJiminyMemo::contentMinigame() {
+    switch (getContentStep()) {
+    case 20: {
+        FVECTOR posi;
+        D2::C2DSeqCtrl** pSeqCtrl;
+        D2::C2DFnt** pString;
+        CMemo2DSequence* pList;
+        m_ContentMinigame.iStringNum = 13;
+        pString = new (__FILE__ "(9647)") D2::C2DFnt*[m_ContentMinigame.iStringNum];
+        if (pString) {
+            for (INT i = 0; i < m_ContentMinigame.iStringNum; i++) pString[i] = NULL;
+            m_ContentMinigame.pString = pString;
+        }
+        m_ContentMinigame.iSeqCtrlNum = m_ContentMinigame.iStringNum + 6;
+        pSeqCtrl = new (__FILE__ "(9654)") D2::C2DSeqCtrl*[m_ContentMinigame.iSeqCtrlNum];
+        if (pSeqCtrl) {
+            for (INT i = 0; i < m_ContentMinigame.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
+            m_ContentMinigame.pSeqCtrl = pSeqCtrl;
+        }
+        pList = createSequence(JiminyMemo::Minigame::NoteSeqData, 0x10, 0x12, 0, NULL);
+        if (pList) {
+            int bFlag[6];
+            CHAR* pPoint;
+            CHAR* pMin;
+            CHAR* pSec;
+            CHAR* pTime;
+            CHAR* pMask;
+            INT bg;
+            INT wd;
+            INT eb;
+            INT eb_min;
+            INT eb_sec;
+            INT tj;
+            INT bp;
+            m_ContentMinigame.pList = pList;
+            pList->setInState(0);
+            for (INT i = 0; i < 6; i++) {
+                createListSequence(pList, 0x11, 0x11, i + 1, pSeqCtrl++, pString++, 0x8049481F, 16, 0x21000,
+                                   JiminyMemo::getOpenCloseStringData(0x700301 + i,
+                                                                      CJiminyMemoFlag::isContentOpen(0x18A + i)));
+            }
+            for (INT i = 0; i < 2; i++) {
+                createListSequence(pList, 0x11, 0x11, i + 0x12, pSeqCtrl, pString, 0x807F7F7F, 16, 0x21000,
+                                   CCtdMan::getText(0x700307 + i));
+                pSeqCtrl++;
+                pString++;
+            }
+            bFlag[0] = CGameWork::getByte(0, 4) >= 2;
+            bFlag[1] = CGameWork::getByte(0, 5) >= 2;
+            bFlag[2] = CGameWork::getByte(0, 6) >= 3;
+            bFlag[3] = CGameWork::getByte(0, 7) != 0;
+            bFlag[4] = CGameWork::getByte(0, 8) != 0;
+            bFlag[5] = CJiminyMemoFlag::isContentOpen(0x18F);
+            pPoint = CCtdMan::getText(0x700309);
+            pMin = CCtdMan::getText(0x70030A);
+            pSec = CCtdMan::getText(0x70030B);
+            pTime = CCtdMan::getText(0x70030C);
+            pMask = CCtdMan::getText(0x70030D);
+            bg = bFlag[0] == 1 ? CGameWork::getInt(0, 0x2E) : 0;
+            wd = bFlag[1] == 1 ? CGameWork::getInt(0, 0x2F) : 0;
+            eb = CGameWork::getInt(0, 0x30);
+            tj = bFlag[3] == 1 ? CGameWork::getInt(0, 0x31) : 0;
+            bp = bFlag[4] == 1 ? CGameWork::getInt(0, 0x32) : 0;
+            if (CJiminyMemoFlag::isContentOpen(0x18A)) {
+                sprintf(m_ContentMinigame.strBGlider, "%d%s", bg, pPoint);
+            } else {
+                sprintf(m_ContentMinigame.strBGlider, "%s", pMask);
+            }
+            if (CJiminyMemoFlag::isContentOpen(0x18B)) {
+                sprintf(m_ContentMinigame.strWDive, "%d%s", wd, pPoint);
+            } else {
+                sprintf(m_ContentMinigame.strWDive, "%s", pMask);
+            }
+            if (CJiminyMemoFlag::isContentOpen(0x18C) && bFlag[2] == 1 && eb > 0) {
+                eb_min = eb / _sec2tq(60);
+                eb_sec = (eb - eb_min * _sec2tq(60)) / _sec2tq(1);
+                sprintf(m_ContentMinigame.strEBee, "%s%d%s%02d%s%02d", pTime, eb_min, pMin, eb_sec, pSec,
+                        (eb - eb_min * _sec2tq(60) - eb_sec * _sec2tq(1)) * 1000 / _sec2tq(1) / 10);
+            } else {
+                sprintf(m_ContentMinigame.strEBee, "%s--%s--%s--", pTime, pMin, pSec);
+            }
+            if (CJiminyMemoFlag::isContentOpen(0x18D)) {
+                sprintf(m_ContentMinigame.strTJump, "%d%s", tj, pPoint);
+            } else {
+                sprintf(m_ContentMinigame.strTJump, "%s", pMask);
+            }
+            if (CJiminyMemoFlag::isContentOpen(0x18E)) {
+                sprintf(m_ContentMinigame.strBPanic, "%d%s", bp, pPoint);
+            } else {
+                sprintf(m_ContentMinigame.strBPanic, "%s", pMask);
+            }
+            CHAR* scoreStr[5] = {
+                m_ContentMinigame.strBGlider,
+                m_ContentMinigame.strWDive,
+                m_ContentMinigame.strEBee,
+                m_ContentMinigame.strTJump,
+                m_ContentMinigame.strBPanic,
+            };
+            for (INT i = 0; i < 5; i++) {
+                createListSequence(pList, 0x11, 0x11, i + 0xD, pSeqCtrl, pString, 0x8049481F, 16, 0x21001,
+                                   scoreStr[i]);
+                pSeqCtrl++;
+                pString++;
+            }
+            bFlag[0] = CGameWork::getByte(0, 4) >= 2;
+            bFlag[1] = CGameWork::getByte(0, 5) >= 2;
+            bFlag[2] = CGameWork::getByte(0, 6) >= 2;
+            bFlag[3] = CGameWork::getByte(0, 7) >= 2;
+            bFlag[4] = CGameWork::getByte(0, 8) >= 2;
+            bFlag[5] = CJiminyMemoFlag::isContentOpen(0x18F);
+            createMarkSequence(0x92, 6, 0x11, 7, 0x11, pList, pSeqCtrl);
+            for (INT i = 0; i < 6; i++) {
+                if (pSeqCtrl[i]) pSeqCtrl[i]->enableDisp(bFlag[i] != 0);
+            }
+        }
+        setPlateState(0, 0);
+        setPlateText(0, 0x700300);
+        setContentStep(30);
+        setContentTimer(16.0f);
+        break;
+    }
+    case 30:
+        if (getContentTimer() <= 0.0f) {
+            for (INT i = 0; i < 6; i++) {
+                if (CJiminyMemoFlag::isContentNew(0x18A + i)) CJiminyMemoFlag::setContentTouchFlag(0x18A + i);
+            }
+            if (m_ContentMinigame.pSeqCtrl) {
+                changeStateLoopSequence(m_ContentMinigame.pSeqCtrl, m_ContentMinigame.iSeqCtrlNum);
+            }
+            setTelopMessage(CCtdMan::getText(0x700115));
+            setContentStep(40);
+        }
+        break;
+    case 40:
+        if (_isButtonTrg(0x800, 0)) {
+            setContentStep(50);
+            JiminyMemo::playSE(4);
+            setNextContentMode(-1);
+        } else if (_isTrgCANCEL(0)) {
+            setNextContentMode(0);
+            setContentStep(50);
+            JiminyMemo::playSE(4);
+        }
+        break;
+    case 50:
+        if (m_ContentMinigame.pList) m_ContentMinigame.pList->setOutState(2);
+        if (m_ContentMinigame.pSeqCtrl) {
+            changeStateOutSequence(m_ContentMinigame.pSeqCtrl, m_ContentMinigame.iSeqCtrlNum);
+        }
+        setTelopMessage("");
+        setPlateState(0, 2);
+        setContentStep(60);
+        setContentTimer(16.0f);
+        break;
+    case 60:
+        if (getContentTimer() <= 0.0f) setContentStep(80);
+        break;
+    case 80:
+    case 90:
+        if (m_ContentMinigame.pList) delete m_ContentMinigame.pList;
+        m_ContentMinigame.pList = NULL;
+        if (m_ContentMinigame.pString) {
+            delete[] m_ContentMinigame.pString;
+            m_ContentMinigame.pString = NULL;
+        }
+        if (m_ContentMinigame.pSeqCtrl) {
+            for (INT i = 0; i < m_ContentMinigame.iSeqCtrlNum; i++) {
+                if (m_ContentMinigame.pSeqCtrl[i]) delete m_ContentMinigame.pSeqCtrl[i];
+                m_ContentMinigame.pSeqCtrl[i] = NULL;
+            }
+            if (m_ContentMinigame.pSeqCtrl) delete[] m_ContentMinigame.pSeqCtrl;
+            m_ContentMinigame.pSeqCtrl = NULL;
+        }
+        setContentStep(100);
+        break;
+    case 100:
+        break;
+    }
+    if (m_ContentMinigame.pList) m_ContentMinigame.pList->main(getFrameRateF());
+}
+#else
 /* placeholder: rodata of contentMinigame__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh36() {
@@ -3520,6 +3716,7 @@ __asm__(".word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\
 __asm__(".word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L00335410\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n");
 __asm__(".word .L003354D0\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentMinigame__11CJiminyMemo);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getTaskPointer__H1ZP13CMemo2DLayout_11CJiminyMemoi_X01);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getTaskPointer__H1ZP5CTask_11CJiminyMemoi_X01);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getTaskPointer__H1ZP10CMemo3DObj_11CJiminyMemoi_X01);
