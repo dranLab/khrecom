@@ -38,6 +38,7 @@ INT getHostRsrcId();
 INT getCT0014Code(USHORT inLow);
 void playSE(INT inSENo);
 BOOL is100AcreGoodEnding();
+CHAR* getOpenCloseStringData(INT inCTNo, BOOL inIsFlag);
 }
 
 class CTexAnm;
@@ -49,6 +50,7 @@ public:
     virtual void main();
     virtual void disp();
     void setRotateY(FLOAT inRotY);
+    void setPosition(const FVECTOR& inPosition);
 
 private:
     FLOAT m_fRotY;           /* 0x40 */
@@ -154,6 +156,7 @@ private:
     BOOL m_bMoveSlideEnable;  /* 0x1e0 */
 
 public:
+    CMemo2DSequence();
     virtual ~CMemo2DSequence();
     void setPosition();
     void setLocalPosition();
@@ -219,6 +222,7 @@ private:
     CHAR* m_pEmptySeqName;    /* 0x194 */
 
 public:
+    CMemo2DCard(const CHAR* inEmptySeqName);
     virtual ~CMemo2DCard();
     void setPosition();
     void setLocalPosition();
@@ -244,6 +248,7 @@ struct ContentCommonWork {
     }
 };
 
+typedef USHORT CT_LOWER;
 class CJiminyMemo : public CMenu {
 private:
     UBYTE _m_0x80[0x10];  /* 0x080 */
@@ -270,6 +275,16 @@ private:
     void initialize(INT inPlayerMode);
     void setContentMode(INT inContentMode);
     void replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum);
+    void replaceNoteListString(D2::C2DFnt* inList, const CHAR* inString) {
+        if (inList) inList->setText(inString);
+    }
+    void replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER inStartCtNo, INT inFlagId, INT inListNum,
+                                      INT inListAllNum, INT inStartNo);
+    void replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER inStartCtNo, BYTE* inFlagTbl, INT inListNum,
+                                      INT inListAllNum, INT inStartNo);
+    void replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER* inCtTbl, INT inFlagId, INT inListNum,
+                                      INT inListAllNum, INT inStartNo);
+    BOOL isButtonRptLimitStop(UINT inBit, UINT inPad, BOOL inStopCompare);
     template <class T> T getTaskPointer(HANDLE inHandle);
     BOOL isTaskOut(HANDLE inHandle);
     UINT checkLayoutState(HANDLE inHandle, INT inFlags);
@@ -305,7 +320,6 @@ private:
 };
 typedef char _check_jm_size[sizeof(CJiminyMemo) == 0x570 ? 1 : -1];
 
-typedef USHORT CT_LOWER;
 struct ILLUST_TEX_DATA {
     BYTE No;
     BYTE Posi;
@@ -497,7 +511,13 @@ inline void _roPh1() {
     TRACE("EYE_BLINK");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__10CMemo3DObj);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", disp__10CMemo3DObj);
+void CMemo3DObj::disp() {
+    if (!m_pModels) return;
+    if (m_iStep >= 0xFFFF) return;
+    for (INT i = 0; i < m_iModelCount; i++) {
+        m_pModels[i].disp();
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", calcLocalMatrix__10CMemo3DObj);
 void CMemo3DObj::setRotateY(FLOAT inRotY) {
     if (__builtin_fabsf(Math3D::LimitPI(m_fRotY - inRotY)) != 0.0f) {
@@ -505,8 +525,29 @@ void CMemo3DObj::setRotateY(FLOAT inRotY) {
         m_bTouch = TRUE;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPosition__10CMemo3DObjRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __13CMemo2DLayoutP5CTask);
+void CMemo3DObj::setPosition(const FVECTOR& inPosition) {
+    if (!Math3D::EqualVector(m_vPosition, inPosition, 1e-05f)) {
+        m_vPosition.set(inPosition.x, inPosition.y, inPosition.z);
+        m_bTouch = TRUE;
+    }
+}
+CMemo2DLayout::CMemo2DLayout(CTask* p) : CTask(p, 0x4000) {
+    setState(0);
+    m_uiStateFlags = 0;
+    m_hLayer = 0;
+    m_iSeqCtrlNum = 0;
+    for (INT i = 0; i < 32; i++) {
+        m_pSeqCtrlArray[i] = NULL;
+        m_pSeqFntArray[i] = NULL;
+    }
+    m_iLayerLevel = 11;
+    m_iSeqNum = 0;
+    m_pLayoutNoTbl = NULL;
+    m_pSeqNoTbl = NULL;
+    m_pSeqCodeTbl = NULL;
+    m_pLayoutName = NULL;
+    m_pLayoutFileName = NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DLayout);
 /* placeholder: rodata of main__13CMemo2DLayout */
 __asm__(".rdata\n");
@@ -580,7 +621,21 @@ D2::C2DFnt* CMemo2DLayout::setSeqText(UINT inSeqNo, const CHAR* inText) {
     if (pFnt) pFnt->setText(inText);
     return pFnt;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __15CMemo2DSequence);
+CMemo2DSequence::CMemo2DSequence() {
+    m_vBasePosition.init();
+    m_vShiftPosition.init();
+    m_vAimPosition.init();
+    m_vPosition.init();
+    m_fScale = 1.0f;
+    m_fMoveTimer = 0.0f;
+    m_bMoveSlideEnable = FALSE;
+    m_iState = 0;
+    m_iStateFlag = 0;
+    m_LayoutName[0] = '\0';
+    for (INT i = 4; i >= 0; i--) {
+        m_SeqTbl[i] = 0;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_15CMemo2DSequence);
 /* placeholder: rodata of setup__15CMemo2DSequencePCcPCii */
 __asm__(".rdata\n");
@@ -656,7 +711,26 @@ void CMemo2DCursor::setReplaceSeq(INT inSeq) {
     replaceSeq(1, m_lpctLayoutName, m_iLadTbl[3]);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setState__13CMemo2DCursori);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPosiId__13CMemo2DCursori);
+INT CMemo2DCursor::setPosiId(INT inPosiId) {
+    INT rval;
+    if (inPosiId < 0) {
+        rval = -1;
+    } else if (inPosiId >= m_iPosiNum) {
+        rval = 1;
+    } else {
+        rval = 0;
+        m_vAimPosi.x = m_pPosiTbl[inPosiId].x * m_fScale;
+        m_vAimPosi.y = m_pPosiTbl[inPosiId].y * m_fScale;
+        m_bMoveSlideEnable = TRUE;
+        if (m_iState & 0x1000000) {
+            m_fMoveTimer = 0.0f;
+        } else {
+            m_fMoveTimer = 30.0f;
+        }
+        m_iPosiId = inPosiId;
+    }
+    return rval;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__13CMemo2DCursor);
 FLOAT CMemo2DCursor::getFrameRateF() {
     if (m_hParent) {
@@ -678,7 +752,17 @@ void CMemo2DCursor::getSubVector(CursorPosition& outSub, INT inId0, INT inId1) {
     outSub.x = m_pPosiTbl[inId0].x - m_pPosiTbl[inId1].x;
     outSub.y = m_pPosiTbl[inId0].y - m_pPosiTbl[inId1].y;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __11CMemo2DCardPCc);
+CMemo2DCard::CMemo2DCard(const CHAR* inEmptySeqName) {
+    m_vBasePosition.init();
+    m_vShiftPosition.init();
+    m_iState = 0;
+    m_fScale = 1.0f;
+    m_iTexNo = 0;
+    m_iTexPos = 0;
+    m_iFrameSeqNo = -1;
+    m_pEmptySeqName = (CHAR*)inEmptySeqName;
+    setScl(m_fScale);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_11CMemo2DCard);
 /* placeholder: rodata of create__11CMemo2DCardG4CARDi */
 __asm__(".rdata\n");
@@ -808,9 +892,43 @@ void CJiminyMemo::replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListWithOpenCheck__11CJiminyMemoPPQ22D26C2DFntUsiiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListWithOpenCheck__11CJiminyMemoPPQ22D26C2DFntUsPUciii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListWithOpenCheck__11CJiminyMemoPPQ22D26C2DFntPUsiiii);
+void CJiminyMemo::replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER inStartCtNo, INT inFlagId, INT inListNum,
+                                               INT inListAllNum, INT inStartNo) {
+    if (inList) {
+        D2::C2DFnt** pList = inList;
+        INT flagIndex = inFlagId + inStartNo;
+        CT_LOWER CtNo = inStartCtNo + inStartNo;
+        for (INT i = 0; i < inListNum; i++, pList++, flagIndex++) {
+            replaceNoteListString(*pList, JiminyMemo::getOpenCloseStringData(JiminyMemo::getCT0014Code(CtNo),
+                                                                             CJiminyMemoFlag::isContentOpen(flagIndex)));
+            CtNo++;
+        }
+    }
+}
+void CJiminyMemo::replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER inStartCtNo, BYTE* inFlagTbl,
+                                               INT inListNum, INT inListAllNum, INT inStartNo) {
+    if (inList) {
+        D2::C2DFnt** pList = inList;
+        CT_LOWER CtNo = inStartCtNo + inStartNo;
+        for (INT i = 0; i < inListNum; i++, pList++) {
+            replaceNoteListString(*pList, JiminyMemo::getOpenCloseStringData(JiminyMemo::getCT0014Code(CtNo),
+                                                                             inFlagTbl[inStartNo + i]));
+            CtNo++;
+        }
+    }
+}
+void CJiminyMemo::replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER* inCtTbl, INT inFlagId, INT inListNum,
+                                               INT inListAllNum, INT inStartNo) {
+    if (inList) {
+        D2::C2DFnt** pList = inList;
+        INT flagIndex = inFlagId + inStartNo;
+        CT_LOWER* pCtTbl = &inCtTbl[inStartNo];
+        for (INT i = 0; i < inListNum; i++, pList++, flagIndex++, pCtTbl++) {
+            replaceNoteListString(*pList, JiminyMemo::getOpenCloseStringData(JiminyMemo::getCT0014Code(*pCtTbl),
+                                                                             CJiminyMemoFlag::isContentOpen(flagIndex)));
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListMark__11CJiminyMemoPPQ22D210C2DSeqCtrlPUciiiii);
 /* placeholder: rodata of replaceNoteListMark__11CJiminyMemoPPQ22D210C2DSeqCtrliiiiii */
 __asm__(".rdata\n");
@@ -902,7 +1020,17 @@ BOOL CJiminyMemo::prevPage(INT* ioTop, INT inMin, INT inDisp) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", nextPage__11CJiminyMemoP13CMemo2DCursorPiiif);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", prevPage__11CJiminyMemoP13CMemo2DCursorPiiif);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", isButtonRptLimitStop__11CJiminyMemoUiUii);
+BOOL CJiminyMemo::isButtonRptLimitStop(UINT inBit, UINT inPad, BOOL inStopCompare) {
+    BOOL rval = FALSE;
+    if (_isButtonRpt(inBit, inPad)) {
+        if (inStopCompare) {
+            rval = _isButtonTrg(inBit, inPad);
+        } else {
+            rval = TRUE;
+        }
+    }
+    return rval;
+}
 BOOL CJiminyMemo::haveSpecialCard() {
     BOOL bRet = FALSE;
     if (!m_iPlayerMode) {
