@@ -4242,6 +4242,343 @@ __asm__(".word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\
 __asm__(".word .L00330B58\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCardSelect__11CJiminyMemo);
 #endif
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+namespace JiminyMemo {
+namespace CardView {
+extern INT NoteSeqData[5];
+}
+}
+static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
+    c.m_nId = 0;
+    c.m_nNumber2 = num;
+    c.m_nKind2 = kind;
+    c.m_nCategory20 = cardDataTbl_004EA4F8[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl_004EA4F8[c.m_nKind].nCategory1;
+}
+/* Parked: 4 lines, prologue only: the spilled eventFlagId gets its constant 0xB7 via v1 in the original (stored
+   after the getContentStep load), via v0 in ours (stored before it). sched1 issues li 0xB7 before the step load
+   (-dS dump), so reload may use v0; the original must have had the step load live there. Same family as
+   contentChara. Everything else matches (cancel branch as `if (iKindNo != 8) 7 else 3`, 80/90 shared).
+   tried: ternary in both polarities, if/else and if-only forms, `!isModeJiminyMemo()`, declaration/statement
+   order with bTouch; tools/permuter.py (other drafts hidden) 10 min, no improvement. */
+#if 0
+void CJiminyMemo::contentCardView() {
+    INT eventFlagId = isModeDReport() ? 0x14F : 0xB7;
+    BOOL bTouch = FALSE;
+    switch (getContentStep()) {
+    case 20: {
+        INT cardNo;
+        INT kindNo;
+        INT cardManualNo;
+        INT cardEncyclNo;
+        BOOL bTextPositionChange;
+        FVECTOR posi;
+        D2::C2DSeqCtrl** pSeqCtrl;
+        D2::C2DFnt** pString;
+        INT* pListIndex;
+        CMemo2DSequence* pList;
+        INT eventFlagOffset;
+        cardNo = getContentParam(1);
+        kindNo = getContentParam(0);
+        m_ContentCardView.iKindNo = kindNo;
+        m_ContentCardView.iCardNo = cardNo;
+        bTextPositionChange = FALSE;
+        if (isModeJiminyMemo()) {
+            m_ContentCardView.iKindCardMax = JiminyMemo::SoraCardNumTbl[kindNo];
+            cardManualNo = JiminyMemo::getCT0014Code(JiminyMemo::CardManualTbl[kindNo][cardNo]);
+            cardEncyclNo = JiminyMemo::CardEncyclTbl[kindNo][cardNo];
+            if (kindNo == 5 || kindNo == 9) {
+                bTextPositionChange = TRUE;
+            }
+        } else {
+            m_ContentCardView.iKindCardMax = JiminyMemo::RikuCardNumTbl[kindNo];
+            cardManualNo = JiminyMemo::getCT0014Code(JiminyMemo::RikuCardManualTbl[kindNo][cardNo]);
+            cardEncyclNo = JiminyMemo::RikuCardEncyclTbl[kindNo][cardNo];
+            bTextPositionChange = kindNo == 1;
+        }
+        m_ContentCardView.iCurrentTextLine = 0;
+        splitMessage(&m_ContentCardView.iTextLineNum, &m_ContentCardView.pTextLineBuf, CCtdMan::getText(cardManualNo),
+                     0xF);
+        m_ContentCardView.iStringNum = m_ContentCardView.iTextLineNum + 0x42;
+        pString = new (__FILE__ "(7836)") D2::C2DFnt*[m_ContentCardView.iStringNum];
+        if (pString) {
+            for (INT i = 0; i < m_ContentCardView.iStringNum; i++) pString[i] = NULL;
+            m_ContentCardView.pString = pString;
+        }
+        m_ContentCardView.iSeqCtrlNum = m_ContentCardView.iTextLineNum + 9;
+        pSeqCtrl = new (__FILE__ "(7844)") D2::C2DSeqCtrl*[m_ContentCardView.iSeqCtrlNum];
+        if (pSeqCtrl) {
+            for (INT i = 0; i < m_ContentCardView.iSeqCtrlNum; i++) pSeqCtrl[i] = NULL;
+            m_ContentCardView.pSeqCtrl = pSeqCtrl;
+        }
+        pListIndex = (INT*)com_malloc_d(m_ContentCardView.iSeqCtrlNum * sizeof(INT), __FILE__ "(7851)", -1);
+        if (pListIndex) {
+            for (INT i = 0; i < m_ContentCardView.iSeqCtrlNum; i++) pListIndex[i] = -1;
+            m_ContentCardView.pListIndex = pListIndex;
+        }
+        pList = createSequence(JiminyMemo::CardView::NoteSeqData, 0x10, 0xB, 0, NULL);
+        if (pList) {
+            INT lineNum;
+            m_ContentCardView.pList = pList;
+            pList->setInState(0);
+            lineNum = 0;
+            if (!bTextPositionChange) {
+                for (INT i = 0; i < 6; i++) {
+                    if (createListSequenceTypewriterFont(pList, 0x11, 0x15, 6, pSeqCtrl, pString, 0x8049481F, 0x10,
+                                                         0x21000, m_ContentCardView.pTextLineBuf[i + 1], 14.0f)) {
+                        while (*pSeqCtrl) {
+                            (*pSeqCtrl++)->enableDisp(FALSE);
+                            *pListIndex++ = lineNum;
+                        }
+                        lineNum++;
+                    }
+                    while (*pString) pString++;
+                }
+                for (INT i = 0; i < m_ContentCardView.iTextLineNum - 7; i++) {
+                    createListSequence(pList, 0x11, 0x15, 1, pSeqCtrl, pString, 0x8049481F, 0x10, 0x21000,
+                                       m_ContentCardView.pTextLineBuf[i + 7]);
+                    (*pSeqCtrl)->enableDisp(FALSE);
+                    pSeqCtrl++;
+                    pString++;
+                    *pListIndex++ = lineNum;
+                    lineNum++;
+                }
+            } else {
+                for (INT i = 0; i < m_ContentCardView.iTextLineNum - 7; i++) {
+                    createListSequence(pList, 0x11, 0x15, 1, pSeqCtrl, pString, 0x8049481F, 0x10, 0x21000,
+                                       m_ContentCardView.pTextLineBuf[i + 7]);
+                    (*pSeqCtrl)->enableDisp(FALSE);
+                    pSeqCtrl++;
+                    pString++;
+                    *pListIndex++ = lineNum;
+                    lineNum++;
+                }
+                for (INT i = 0; i < 6; i++) {
+                    if (createListSequenceTypewriterFont(pList, 0x11, 0x15, 6, pSeqCtrl, pString, 0x8049481F, 0x10,
+                                                         0x21000, m_ContentCardView.pTextLineBuf[i + 1], 14.0f)) {
+                        while (*pSeqCtrl) {
+                            (*pSeqCtrl++)->enableDisp(FALSE);
+                            *pListIndex++ = lineNum;
+                        }
+                        lineNum++;
+                    }
+                    while (*pString) pString++;
+                }
+            }
+            m_ContentCardView.iListNum = lineNum;
+            bTouch = TRUE;
+            createListSequence(pList, 0x11, 0x15, 4, pSeqCtrl++, pString, 0x807F7F7F, 0x11, 0x42,
+                               m_ContentCardView.pTextLineBuf[0]);
+        }
+        if (pList) {
+            CMemo2DCard* pCard;
+            createMarkSequence(0xD0, 1, 0x15, 0xC, 0x11, pList, pSeqCtrl);
+            m_ContentCardView.pTopArrowSeq = *pSeqCtrl++;
+            createMarkSequence(0xC3, 1, 0x15, 0xD, 0x11, pList, pSeqCtrl);
+            m_ContentCardView.pBottomArrowSeq = *pSeqCtrl;
+            pCard = new (__FILE__ "(7987)") CMemo2DCard(m_pLadName);
+            if (pCard) {
+                CARD card;
+                m_ContentCardView.pCard = pCard;
+                pCard->setLayer(0x11);
+                pCard->enableColorCtrl(TRUE);
+                pCard->setParent(pList);
+                D2::C2DMan::getLayPosition(m_pLadFileName, 0x15, 5, posi, 0);
+                pCard->setBasePosition(posi);
+                pCard->setLocalPosition();
+                pCard->enableDisp(TRUE);
+                pCard->setState(1);
+                _setCard(card, cardEncyclNo, 0xFF);
+                pCard->create(card, 1);
+                pCard->enableDisp(3, FALSE);
+            }
+        }
+        if (getPlateState(2) == -1) setPlateState(2, 0);
+        setPlateText(2, 0x700002);
+        eventFlagOffset = 0;
+        if (isModeJiminyMemo()) {
+            for (INT i = 0; i < kindNo; i++) eventFlagOffset += JiminyMemo::SoraCardNumTbl[i];
+        } else {
+            for (INT i = 0; i < kindNo; i++) eventFlagOffset += JiminyMemo::RikuCardNumTbl[i];
+        }
+        m_ContentCardView.iPrevNo = getPrevCardId(eventFlagId + eventFlagOffset);
+        m_ContentCardView.iNextNo = getNextCardId(eventFlagId + eventFlagOffset);
+        if (m_ContentCardView.iKindNo != 8) {
+            if (getPlateState(4) == -1) setPlateState(4, 0);
+            setPlateNumSeq(9, cardNo + 1);
+            setPlateNumSeq(10, m_ContentCardView.iKindCardMax);
+        }
+        if (getPlateState(0) == -1) setPlateState(0, 0);
+        setPlateText(0, 0x700203);
+        if (getPlateState(1) == -1) setPlateState(1, 0);
+        setPlateText(1, isModeJiminyMemo() ? kindNo + 0x700701 : kindNo + 0x70070B);
+        setContentTimer(16.0f);
+        setContentStep(30);
+        break;
+    }
+    case 30:
+        if (getContentTimer() <= 0.0f) {
+            INT eventFlagOffset = 0;
+            INT kindNo = m_ContentCardView.iKindNo;
+            if (isModeJiminyMemo()) {
+                for (INT i = 0; i < kindNo; i++) eventFlagOffset += JiminyMemo::SoraCardNumTbl[i];
+            } else {
+                for (INT i = 0; i < kindNo; i++) eventFlagOffset += JiminyMemo::RikuCardNumTbl[i];
+            }
+            CJiminyMemoFlag::setContentTouchFlag(eventFlagId + eventFlagOffset + m_ContentCardView.iCardNo);
+            if (m_ContentCardView.pSeqCtrl) {
+                changeStateLoopSequence(m_ContentCardView.pSeqCtrl, m_ContentCardView.iSeqCtrlNum);
+            }
+            setContentStep(40);
+        }
+        break;
+    case 40:
+        if (_isButtonTrg(0x800, 0)) {
+            setContentStep(50);
+            JiminyMemo::playSE(4);
+            setNextContentMode(-1);
+        } else if (_isTrgCANCEL(0)) {
+            setContentStep(50);
+            if (m_ContentCardView.iKindNo != 8) {
+                setNextContentMode(7);
+            } else {
+                setNextContentMode(3);
+            }
+            JiminyMemo::playSE(4);
+        } else if (_isButtonTrg(0x80, 0)) {
+            setContentStep(50);
+            setNextContentMode(2);
+            setContentParam(0, setParamFromCardViewToCollect());
+            JiminyMemo::playSE(2);
+        } else if (m_ContentCardView.iPrevNo >= 0 && _isButtonTrg(1, 0)) {
+            setContentStep(50);
+            setNextContentMode(8);
+            setContentParam(1, m_ContentCardView.iPrevNo);
+            JiminyMemo::playSE(2);
+        } else if (m_ContentCardView.iNextNo >= 0 && _isButtonTrg(2, 0)) {
+            setContentStep(50);
+            setNextContentMode(8);
+            setContentParam(1, m_ContentCardView.iNextNo);
+            JiminyMemo::playSE(2);
+        } else if (_isButtonRpt(0x204000, 0)) {
+            INT limit = m_ContentCardView.iListNum - 6;
+            if (limit > 0) {
+                m_ContentCardView.iCurrentTextLine++;
+                if (limit < m_ContentCardView.iCurrentTextLine) {
+                    m_ContentCardView.iCurrentTextLine = limit;
+                } else {
+                    bTouch = TRUE;
+                }
+            }
+        } else if (_isButtonRpt(0x101000, 0)) {
+            m_ContentCardView.iCurrentTextLine--;
+            if (m_ContentCardView.iCurrentTextLine < 0) {
+                m_ContentCardView.iCurrentTextLine = 0;
+            } else {
+                bTouch = TRUE;
+            }
+        } else if (_isButtonTrg(8, 0)) {
+            bTouch = nextPage(&m_ContentCardView.iCurrentTextLine, m_ContentCardView.iListNum, 6);
+        } else if (_isButtonTrg(4, 0)) {
+            bTouch = prevPage(&m_ContentCardView.iCurrentTextLine, 0, 6);
+        }
+        if (bTouch == TRUE) JiminyMemo::playSE(1);
+        break;
+    case 50: {
+        INT nextContent;
+        if (m_ContentCardView.pList) m_ContentCardView.pList->setOutState(2);
+        if (m_ContentCardView.pCard) m_ContentCardView.pCard->setState(3);
+        if (m_ContentCardView.pSeqCtrl) {
+            changeStateOutSequence(m_ContentCardView.pSeqCtrl, m_ContentCardView.iSeqCtrlNum);
+        }
+        nextContent = getNextContentMode();
+        if (nextContent == 7) {
+            setPlateState(2, 2);
+            setPlateState(4, 2);
+        } else if (nextContent == 3) {
+            setPlateState(2, 2);
+            setPlateState(1, 2);
+        } else if (nextContent == 2) {
+            setPlateState(1, 2);
+            if (getPlateState(4) != -1) setPlateState(4, 2);
+        } else if (nextContent == -1) {
+            setPlateState(0, 2);
+            setPlateState(1, 2);
+            setPlateState(2, 2);
+            if (getPlateState(4) != -1) setPlateState(4, 2);
+        }
+        setContentTimer(16.0f);
+        setContentStep(60);
+        break;
+    }
+    case 60:
+        if (getContentTimer() <= 0.0f) setContentStep(80);
+        break;
+    case 80:
+    case 90:
+        if (m_ContentCardView.pList) delete m_ContentCardView.pList;
+        m_ContentCardView.pList = NULL;
+        if (m_ContentCardView.pCard) delete m_ContentCardView.pCard;
+        m_ContentCardView.pCard = NULL;
+        if (m_ContentCardView.pListIndex) com_free(m_ContentCardView.pListIndex);
+        m_ContentCardView.pListIndex = NULL;
+        if (m_ContentCardView.pString) {
+            delete[] m_ContentCardView.pString;
+            m_ContentCardView.pString = NULL;
+        }
+        if (m_ContentCardView.pSeqCtrl) {
+            for (INT i = 0; i < m_ContentCardView.iSeqCtrlNum; i++) {
+                if (m_ContentCardView.pSeqCtrl[i]) delete m_ContentCardView.pSeqCtrl[i];
+                m_ContentCardView.pSeqCtrl[i] = NULL;
+            }
+            if (m_ContentCardView.pSeqCtrl) delete[] m_ContentCardView.pSeqCtrl;
+            m_ContentCardView.pSeqCtrl = NULL;
+            m_ContentCardView.pBottomArrowSeq = NULL;
+            m_ContentCardView.pTopArrowSeq = NULL;
+        }
+        if (m_ContentCardView.pTextLineBuf) {
+            for (INT i = 0; i < m_ContentCardView.iTextLineNum; i++) {
+                if (m_ContentCardView.pTextLineBuf[i]) com_free(m_ContentCardView.pTextLineBuf[i]);
+                m_ContentCardView.pTextLineBuf[i] = NULL;
+            }
+            if (m_ContentCardView.pTextLineBuf) com_free(m_ContentCardView.pTextLineBuf);
+            m_ContentCardView.pTextLineBuf = NULL;
+        }
+        setContentStep(100);
+        break;
+    case 100:
+        break;
+    }
+    if (m_ContentCardView.pList) m_ContentCardView.pList->main(getFrameRateF());
+    if (m_ContentCardView.pCard) m_ContentCardView.pCard->main(getFrameRateF());
+    if (m_ContentCardView.pBottomArrowSeq) {
+        m_ContentCardView.pBottomArrowSeq->enableDisp(m_ContentCardView.iCurrentTextLine < m_ContentCardView.iListNum - 6);
+    }
+    if (m_ContentCardView.pTopArrowSeq) {
+        m_ContentCardView.pTopArrowSeq->enableDisp(m_ContentCardView.iCurrentTextLine > 0);
+    }
+    if (bTouch == TRUE) {
+        FVECTOR posi;
+        D2::C2DSeqCtrl** pSeqCtrl = m_ContentCardView.pSeqCtrl;
+        INT* pListIndex = m_ContentCardView.pListIndex;
+        INT seqNum = m_ContentCardView.iSeqCtrlNum;
+        for (INT i = 0; i < seqNum; i++) {
+            if (pSeqCtrl[i] && pListIndex[i] >= 0) pSeqCtrl[i]->enableDisp(FALSE);
+        }
+        for (INT i = 0; i < 6; i++) {
+            D2::C2DMan::getLayPosition(m_pLadFileName, 0x15, i + 6, posi, 0);
+            for (INT j = 0; j < seqNum; j++) {
+                if (pListIndex[j] == m_ContentCardView.iCurrentTextLine + i) {
+                    if (pSeqCtrl[j]) {
+                        pSeqCtrl[j]->setLocalPos(posi);
+                        pSeqCtrl[j]->enableDisp(TRUE);
+                    }
+                }
+            }
+        }
+    }
+}
+#else
 /* placeholder: rodata of contentCardView__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh31() {
@@ -4257,6 +4594,7 @@ __asm__(".word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\
 __asm__(".word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331A44\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n.word .L00331BB4\n");
 __asm__(".word .L00331BB4\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCardView__11CJiminyMemo);
+#endif
 INT CJiminyMemo::getPrevCardId(INT inId) {
     return getPrevContentId(inId, work(0x2D4), work(0x2D0));
 }
