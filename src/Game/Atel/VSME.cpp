@@ -1823,19 +1823,270 @@ inline void _roPhExecCode() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execCode__Q24ATEL4CVSMi);
 #endif
-/* placeholder: rodata of execStdCode__Q24ATEL4CVSMiRiRQ24ATEL13eATEL_REQ_RET */
-__asm__(".rdata\n");
-inline void _roPh27() {
-    TRACE("zero divide\n");
-    TRACE("Run-time stack  overflow Freg:%x addr:%x pc:%d\n");
-    TRACE("Run-time stack underflow\n");
-    TRACE("REQ:%s,%s\n");
-    TRACE(__FILE__ "(1121)");
-    TRACE("(m_S[m_SP].I)");
-    TRACE("%s");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+INT CVSM::execStdCode(INT op, INT& addr, eATEL_REQ_RET& ret) {
+    INT* ip;
+    FLOAT* fp;
+    char mes[128];
+    INT r;
+    INT i1;
+    INT i2;
+    INT i3;
+    INT c;
+    BYTE* to;
+    BYTE* from;
+    INT d;
+
+    do {
+        r = 1;
+        switch (op) {
+        case 1:
+            addr = m_S[m_SP - 1].I;
+            m_S[m_SP - 1].I = m_S[m_SP].I;
+            m_pDseg[addr] = m_S[m_SP].I;
+            goto pop;
+        case 2:
+            ip = (INT*)(m_pDseg + m_S[m_SP - 1].I);
+            m_S[m_SP - 1].I = m_S[m_SP].I;
+            *ip = m_S[m_SP].I;
+            goto pop;
+        case 3:
+            fp = (FLOAT*)(m_pDseg + m_S[m_SP - 1].I);
+            m_S[m_SP - 1].F = m_S[m_SP].F;
+            *fp = m_S[m_SP].F;
+            goto pop;
+        case 4:
+            m_S[m_SP - 1].I += m_S[m_SP].I;
+            goto pop;
+        case 5:
+            m_S[m_SP - 1].F += m_S[m_SP].F;
+            goto pop;
+        case 6:
+            m_S[m_SP].I += addr;
+            break;
+        case 7:
+            m_S[m_SP - 1].I -= m_S[m_SP].I;
+            goto pop;
+        case 8:
+            m_S[m_SP - 1].F -= m_S[m_SP].F;
+            goto pop;
+        case 9:
+            m_S[m_SP].I -= addr;
+            break;
+        case 10:
+            m_S[m_SP - 1].I *= m_S[m_SP].I;
+            goto pop;
+        case 11:
+            m_S[m_SP - 1].F *= m_S[m_SP].F;
+            goto pop;
+        case 12:
+            m_S[m_SP].I *= addr;
+            break;
+        case 13:
+            if (m_S[m_SP].I == 0) {
+                _TRACE(TRUE, "zero divide\n");
+                return -1;
+            }
+            m_S[m_SP - 1].I /= m_S[m_SP].I;
+            goto pop;
+        case 14:
+            if (m_S[m_SP].F == 0.0f) {
+                _TRACE(TRUE, "zero divide\n");
+                return -1;
+            }
+            m_S[m_SP - 1].F /= m_S[m_SP].F;
+            goto pop;
+        case 15:
+            m_S[m_SP].I /= addr;
+            break;
+        case 16:
+            if (m_S[m_SP].I == 0) {
+                _TRACE(TRUE, "zero divide\n");
+                return -1;
+            }
+            m_S[m_SP - 1].I %= m_S[m_SP].I;
+            goto pop;
+        case 18:
+            m_S[m_SP].I %= addr;
+            break;
+        case 19:
+            m_S[m_SP].I = -m_S[m_SP].I;
+            break;
+        case 20:
+            m_S[m_SP].F = -m_S[m_SP].F;
+            break;
+        case 21:
+            m_S[m_SP - 1].I = m_S[m_SP - 1].I < m_S[m_SP].I ? -1 : m_S[m_SP - 1].I > m_S[m_SP].I;
+            goto pop;
+        case 22:
+            m_S[m_SP - 1].I = m_S[m_SP - 1].F < m_S[m_SP].F ? -1 : m_S[m_SP - 1].F > m_S[m_SP].F ? 1 : 0;
+            goto pop;
+        case 23:
+            m_S[m_SP].I = m_S[m_SP].I < addr ? -1 : m_S[m_SP].I > addr;
+            break;
+        case 24:
+            m_SP++;
+            m_S[m_SP].I = m_S[m_SP - 1].I;
+            break;
+        case 25:
+            m_S[++m_SP].I = m_pDseg[addr];
+            break;
+        case 26:
+            m_S[++m_SP].I = *(INT*)(m_pDseg + addr);
+            break;
+        case 27:
+            m_S[++m_SP].F = *(FLOAT*)(m_pDseg + addr);
+            break;
+        case 28:
+            m_S[++m_SP].I = addr;
+            break;
+        case 29:
+            m_S[m_SP].I = m_pDseg[m_S[m_SP].I];
+            break;
+        case 30:
+            m_S[m_SP].I = *(INT*)(m_pDseg + m_S[m_SP].I);
+            break;
+        case 31:
+            m_S[m_SP].F = *(FLOAT*)(m_pDseg + m_S[m_SP].I);
+            break;
+        case 33:
+            m_pDseg[addr] = m_S[m_SP].I;
+            goto pop;
+        case 34:
+            *(INT*)(m_pDseg + addr) = m_S[m_SP].I;
+            goto pop;
+        case 35:
+            *(FLOAT*)(m_pDseg + addr) = m_S[m_SP].F;
+            goto pop;
+        case 36:
+            m_Freg = addr;
+            break;
+        case 37:
+            m_Freg += addr;
+            if (m_Freg > 0x4000) {
+                r = 3;
+                _TRACE(TRUE, "Run-time stack  overflow Freg:%x addr:%x pc:%d\n", m_Freg, addr, m_Pctr);
+                ret = ATEL_RET_ERROR;
+            }
+            break;
+        case 38:
+            m_Freg -= addr;
+            if (m_Freg < m_MinFP) {
+                if (m_Freg <= m_GAptr) {
+                    r = 3;
+                    _TRACE(TRUE, "Run-time stack underflow\n");
+                    ret = ATEL_RET_STACK_ERROR;
+                } else {
+                    m_MinFP = m_Freg;
+                }
+            }
+            break;
+        case 39:
+            m_S[m_SP].F = (FLOAT)m_S[m_SP].I;
+            break;
+        case 40:
+            m_S[m_SP].I = (INT)m_S[m_SP].F;
+            break;
+        case 42:
+            if (m_S[m_SP--].I < 0) m_Pctr = addr;
+            break;
+        case 43:
+            if (m_S[m_SP--].I <= 0) m_Pctr = addr;
+            break;
+        case 44:
+            if (m_S[m_SP--].I == 0) m_Pctr = addr;
+            break;
+        case 45:
+            if (m_S[m_SP--].I != 0) m_Pctr = addr;
+            break;
+        case 46:
+            if (m_S[m_SP--].I >= 0) m_Pctr = addr;
+            break;
+        case 47:
+            if (m_S[m_SP--].I > 0) m_Pctr = addr;
+            break;
+        case 41:
+            m_Pctr = addr;
+            break;
+        case 48:
+            m_S[++m_SP].I = m_Pctr;
+            m_Pctr = addr;
+            m_CallC++;
+            break;
+        case 49:
+            m_Pctr = m_S[m_SP--].I;
+            break;
+        case 50:
+            r = 3;
+            ret = ATEL_RET_HALT;
+            break;
+        case 57:
+            ret = ATEL_RET_MAIN;
+            r = 3;
+            break;
+        case 116:
+            r = 3;
+            ret = ATEL_RET_MAINS;
+            break;
+        case 58:
+            r = 3;
+            reqNS(*m_pCurrentActor, (CHAR*)(m_pDseg + m_S[m_SP--].I), 5);
+            ret = ATEL_RET_REQ;
+            break;
+        case 59:
+            acWaitReq(*m_pCurrentActor, m_S[m_SP--].I, m_Pctr);
+            ret = ATEL_RET_WAIT;
+            r = 3;
+            break;
+        case 60:
+            i1 = m_S[m_SP--].I;
+            i2 = m_S[m_SP--].I;
+            i3 = m_S[m_SP--].I;
+            TRACE("REQ:%s,%s\n", m_pDseg + i1, m_pDseg + i2);
+            reqSS((CHAR*)(m_pDseg + i1), (CHAR*)(m_pDseg + i2), i3);
+            break;
+        case 61:
+            reqSSW((CHAR*)(m_pDseg + m_S[m_SP--].I), (CHAR*)(m_pDseg + m_S[m_SP--].I), m_S[m_SP--].I, m_Pctr);
+            ret = ATEL_RET_RWAIT;
+            r = 3;
+            break;
+        case 51:
+            c = m_S[m_SP--].I;
+            to = (BYTE*)m_S[m_SP--].I;
+            from = (BYTE*)m_S[m_SP--].I;
+            for (; c > 0; c--) *to++ = *from++;
+            break;
+        case 52:
+            m_S[m_SP].I = (BYTE*)com_malloc_d(m_S[m_SP].I, __FILE__ "(1121)", (UINT)-1) - m_pDseg;
+#line 1122
+            if (!(m_S[m_SP].I)) AssertApp(__FILE__, __LINE__, "(m_S[m_SP].I)", 0);
+            break;
+        case 53:
+            com_free(m_pDseg + m_S[m_SP--].I);
+            break;
+        case 55:
+            d = m_S[m_SP--].I;
+            sprintf(mes, (CHAR*)(m_pDseg + m_S[m_SP--].I), d);
+            _TRACE(TRUE, "%s", mes);
+            break;
+        case 56:
+            sprintf(mes, (CHAR*)(m_pDseg + m_S[m_SP--].I));
+            _TRACE(TRUE, "%s", mes);
+            break;
+        default:
+            return 4;
+        case 32:
+            goto pop;
+        case 0:
+            break;
+        }
+        continue;
+    pop:
+        r = 2;
+        break;
+    } while (r == 0);
+    return r;
 }
-__asm__(".rdata\n.align 4\n.word .L00244ED0\n.word .L00244334\n.word .L00244394\n.word .L002443DC\n.word .L00244424\n.word .L00244454\n.word .L00244484\n.word .L002444A8\n.word .L002444D8\n.word .L00244508\n.word .L0024452C\n.word .L0024455C\n.word .L0024458C\n.word .L002445B0\n.word .L002445F0\n.word .L00244634\n.word .L00244664\n.word .L00244EC0\n.word .L002446BC\n.word .L002446EC\n.word .L0024470C\n.word .L0024472C\n.word .L00244768\n.word .L002447B8\n.word .L002447E8\n.word .L00244814\n.word .L00244840\n.word .L0024486C\n.word .L00244898\n.word .L002448B8\n.word .L002448E0\n.word .L00244908\n.word .L00244EC8\n.word .L00244930\n.word .L00244954\n.word .L00244978\n.word .L0024499C\n.word .L002449A8\n.word .L002449E8\n.word .L00244A34\n.word .L00244A54\n.word .L00244B48\n.word .L00244A78\n.word .L00244A9C\n.word .L00244AC0\n.word .L00244AE4\n.word .L00244B08\n.word .L00244B2C\n.word .L00244B54\n.word .L00244B88\n.word .L00244BA8\n.word .L00244D28\n.word .L00244D90\n.word .L00244E08\n.word .L00244EC0\n.word .L00244E34\n.word .L00244E7C\n.word .L00244BB0\n.word .L00244BCC\n.word .L00244C0C\n.word .L00244C44\n.word .L00244CC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244BBC\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execStdCode__Q24ATEL4CVSMiRiRQ24ATEL13eATEL_REQ_RET);
 /* placeholder: rodata of execExt1Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET */
 __asm__(".rdata\n");
 inline void _roPh28() {
