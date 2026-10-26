@@ -15,6 +15,7 @@
 #include "Game/CardKind.h"
 #include "System/Graphic/Camera.h"
 #include "System/Graphic/WorldEnv.h"
+#include "System/Rcf.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "System/Sound/SoundMan.h"
@@ -51,11 +52,12 @@ class CTexAnm;
 class CLightUnit;
 class CMemo3DObj : public CTask {
 public:
-    CMemo3DObj(CTask* inParent, INT inGroupId, INT inResourceId, UINT inDispLayer, INT inA, INT inB);
+    CMemo3DObj(CTask* p, INT inGroupId, INT inRsrcId, UINT inDispLayer, BOOL inLoadEnable);
     virtual ~CMemo3DObj();
     virtual void main();
     virtual void disp();
     void setRotateY(FLOAT inRotY);
+    BOOL isLoadEnable() { return m_bLoadEnable; }
     void setPosition(const FVECTOR& inPosition);
     void calcLocalMatrix();
 
@@ -536,7 +538,19 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getOpenCloseStr
 BOOL JiminyMemo::is100AcreGoodEnding() {
     return CGameWork::getInt(0, 0x23) & 0x40;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __10CMemo3DObjP5CTaskiiUii);
+CMemo3DObj::CMemo3DObj(CTask* p, INT inGroupId, INT inRsrcId, UINT inDispLayer, BOOL inLoadEnable)
+    : CTask(p, 0x4000), m_pModels(NULL), m_iModelCount(0), m_pAnime(NULL), m_pTexAnim(NULL), m_iTexAnimNum(0),
+      m_iTexAnimNo(0), m_iTexAnimSeqNo(0), m_pLight(NULL), m_iStep(1), m_iGroupId(inGroupId), m_iResourceId(inRsrcId),
+      m_fFadeCount(0.0f), m_fFadeCountMax(0.0f), m_bEraseModel(FALSE), m_bTouch(FALSE), m_fBaseScale(1.0f),
+      m_fScale(1.0f), m_uiDispLayer(inDispLayer), m_bLoadEnable(inLoadEnable), m_hEffect(0), m_bLightOff(FALSE),
+      m_bNotSemiFlag(FALSE), m_bFade2PathFlag(FALSE) {
+    m_fRotY = 3.1415927f;
+    m_vPosition.init();
+    m_vBasePosition.init();
+    if (isLoadEnable()) CRcf::reqLoadRCFFront(m_iGroupId, m_iResourceId, 0, NULL, 0);
+    m_iStep = 0;
+    m_fFadeCountMax = 6.0f;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_10CMemo3DObj);
 /* placeholder: rodata of main__10CMemo3DObj */
 __asm__(".rdata\n");
