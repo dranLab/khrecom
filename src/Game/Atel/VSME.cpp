@@ -5187,7 +5187,9 @@ INT CVSM::searchActorID(const CHAR* pszActor) const {
    is 4 bytes shorter. Line tags: status (5114) before next_address (5115), the whole product on the isNTSC line. tried:
    ternary inside/outside the product and with commuted arms, if/else, INT/USHORT/TIMEQ product locals, an INT
    multiplier local, (UINT)/(SHORT)/float operands, an inline USHORT setter, statement orders, tools/permuter.py
-   10 min (50056 candidates, no better than 4). */
+   10 min (50056 candidates, no better than 4); retry: an inline INT-returning product helper, an inline INT-parameter
+   setter, a widening (long) product (gives mult + mflo, but also mfhi and the 64-bit merge), a register asm v1
+   temporary (combine folds it into the mult3). Every original "mult $zero" + mflo in the game feeds a call argument. */
 #if 0
 void CVSM::acWaitReq(Actor& act, INT nTime, INT nAddr) {
     ATP& atp = act._ATP;
