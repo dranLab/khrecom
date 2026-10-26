@@ -186,6 +186,8 @@ public:
     virtual ~CJiminyMemo();
 
 private:
+    void initialize(INT inPlayerMode);
+    void setContentMode(INT inContentMode);
     template <class T> T getTaskPointer(HANDLE inHandle);
     BOOL isTaskOut(HANDLE inHandle);
     UINT checkLayoutState(HANDLE inHandle, INT inFlags);
@@ -594,7 +596,9 @@ void CMemo2DCard::setLocalPosition() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setState__11CMemo2DCardi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__11CMemo2DCardf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __11CJiminyMemoP5CTaski);
+CJiminyMemo::CJiminyMemo(CTask* inParent, INT inPlayerMode) : CMenu(inParent, -1) {
+    initialize(inPlayerMode);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_11CJiminyMemo);
 /* placeholder: rodata of initialize__11CJiminyMemoi */
 __asm__(".rdata\n");
