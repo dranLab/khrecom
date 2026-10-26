@@ -337,7 +337,7 @@ private:
     void setPlateState(INT inKind, INT inState);
     void setPlateNumSeq(INT inKind, INT inParam);
     void CardScreenOutClip();
-    void CardScreenSideClip(BOOL inFlag);
+    void CardScreenSideClip(BOOL inAllDisp);
     void ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR& inPos, FLOAT inBaseHeight,
                        CMemo2DSequence* inParent);
     void ScrollBarChange(D2::C2DSeqCtrl** inSeqCtrl, FLOAT inBasePosY, FLOAT inBaseHeight, INT inCursorPosiNum,
@@ -1990,7 +1990,46 @@ __asm__(".word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\
 __asm__(".word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032E94C\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n");
 __asm__(".word .L0032EB40\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCollection__11CJiminyMemo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", CardScreenSideClip__11CJiminyMemoi);
+void CJiminyMemo::CardScreenSideClip(BOOL inAllDisp) {
+    CMemo2DCard* pCard;
+    if (*(FLOAT*)&work(0x1F0) < 1.0f || inAllDisp == TRUE) {
+        for (INT i = 0; i < work(0x1D8); i++) {
+            pCard = ((CMemo2DCard**)work(0x1D4))[i];
+            if (pCard && pCard->isEnableDisp(2) != TRUE) pCard->enableDisp(2, TRUE);
+        }
+        return;
+    }
+    FVECTOR shift;
+    FVECTOR shiftVec;
+    FLOAT limitL1;
+    FLOAT limitR1;
+    FLOAT limitL2;
+    FLOAT limitR2;
+    FLOAT limitU;
+    FLOAT limitD;
+    FVECTOR base;
+    shift = ((CMemo2DCursor*)work(0x1B4))->getShiftVector();
+    limitL1 = shift.x - 192.0f;
+    limitR1 = shift.x + 192.0f;
+    limitL2 = shift.x - 256.0f;
+    limitR2 = shift.x + 256.0f;
+    limitU = shift.y - 96.0f;
+    limitD = shift.y + 96.0f;
+    shiftVec.x = -shift.x / *(FLOAT*)&work(0x1F0);
+    shiftVec.y = -shift.y / *(FLOAT*)&work(0x1F0);
+    for (INT i = 0; i < work(0x1D8); i++) {
+        pCard = ((CMemo2DCard**)work(0x1D4))[i];
+        if (!pCard) continue;
+        base = pCard->getBasePosition();
+        if (limitU < base.y || base.y < limitD) {
+            if ((base.x < limitL1 && limitL2 < base.x) || (limitR1 < base.x && base.x < limitR2)) {
+                if (pCard->isEnableDisp(2)) pCard->enableDisp(2, FALSE);
+            } else if (limitL1 < base.x && base.x < limitR1) {
+                if (pCard->isEnableDisp(2) != TRUE) pCard->enableDisp(2, TRUE);
+            }
+        }
+    }
+}
 void CJiminyMemo::CardScreenOutClip() {
     FVECTOR shift;
     FVECTOR shiftVec;
