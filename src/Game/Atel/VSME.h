@@ -207,6 +207,7 @@ protected:
     INT execExt2Code(INT op, eATEL_REQ_RET& ret);
     INT execExt3Code(INT op, eATEL_REQ_RET& ret);
     INT searchLockOnNpc();
+    BOOL cam_ctrl(INT nCmnd, INT nID, INT& nRet);
     void ctd_cal(const CAvatar* in_pAvatar, int i2, int i3, ChatWndCreateCTDParam* CWCP);
     void loadFromMem(const BYTE* pAddr);
     void initActor();

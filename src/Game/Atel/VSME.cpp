@@ -72,6 +72,8 @@ inline void _vsmeMotionName() {
 #include "Form/Menu/JMemoFlag.h"
 #include "System/Component.h"
 #include "System/Graphic/WorldEnv.h"
+#define SYSTEM_GRAPHIC_DEFOCUS_CPP /* the complete DeFocus classes (other includers get partial ones) */
+#include "System/Graphic/DeFocus.h"
 #include <string.h>
 #include "include_asm.h"
 
@@ -2621,10 +2623,35 @@ INT CVSM::player_ctrl(INT nCode, FLOAT fArg) {
     if (m_pCurrentActor->_pAvatar) _TRACE(m_bTrace, "bad param player_control\n");
     return -2;
 }
-/* placeholder: rodata of cam_ctrl__Q24ATEL4CVSMiiRi */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0024F6AC\n.word .L0024F6E8\n.word .L0024F724\n.word .L0024F760\n.word .L0024F7C8\n.word .L0024F824\n.word .L0024F864\n.word .L0024F8A4\n.word .L0024F8C4\n.word .L0024F8E4\n.word .L0024F904\n.word .L0024F924\n.word .L0024F944\n.word .L0024F96C\n.word .L0024F9A0\n.word .L0024F9C8\n.word .L0024FA04\n.word .L0024FA40\n.word .L0024FADC\n.word .L0024FA80\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", cam_ctrl__Q24ATEL4CVSMiiRi);
+BOOL CVSM::cam_ctrl(INT nCmnd, INT nID, INT& nRet) {
+    switch (nCmnd) {
+    case 0: CCameraMan::instance().reqCommand(0x44F, NULL, nID); break;
+    case 1: CCameraMan::instance().reqCommand(0x450, NULL, nID); break;
+    case 2: CCameraMan::instance().reqCommand(0x451, NULL, nID); break;
+    case 3:
+        if (CCameraMan::instance().reqCommand(0x453, &nRet, nID) != 1) nRet = 0;
+        break;
+    case 4: nRet = CCameraMan::instance().reqCommand(0x452, &nRet, nID); break;
+    case 5: CCameraMan::instance().reqCommand(0x455, NULL, 0); break;
+    case 6: CCameraMan::instance().reqCommand(0x457, NULL, 0); break;
+    case 7: CDeFocus::off(); break;
+    case 8: CDeFocus::on(); break;
+    case 9: CDeFocus::offNear(); break;
+    case 10: CDeFocus::onNear(); break;
+    case 11: CDeFocus::offFar(); break;
+    case 12: CDeFocus::setAutomatic(); break;
+    case 13: CDeFocus::push(); break;
+    case 14: CDeFocus::pop();
+    case 15: CCameraMan::instance().reqCommand(0x45D, NULL, nID); break;
+    case 16: CCameraMan::instance().reqCommand(0x45E, NULL, nID); break;
+    case 17: CCameraMan::instance().reqCommand(0x460, NULL, 0); break;
+    case 19: CCameraMan::instance().reqCommand(0x465, NULL, nID); break;
+    default:
+        _TRACE(m_bTrace, "MESS_CMD bad param \n");
+        break;
+    }
+    return FALSE;
+}
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CVSM::info_disp(INT nCmnd) {
     _TRACE(m_bTrace, "NG INF-param\n");
