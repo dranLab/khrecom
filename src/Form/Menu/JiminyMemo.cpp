@@ -173,6 +173,32 @@ struct CursorDataParam {
     CursorPosition* limitTbl;
     LPCTSTR LayoutName;
     FLOAT scale;
+
+    void init() {
+        posiNum = 0;
+        posiTbl = NULL;
+        for (INT i = 0; i < 4; i++) spacing[i] = 0;
+        startNo = 0;
+        for (INT i = 0; i < 4; i++) ladTbl[i] = -1;
+        limitTbl = NULL;
+        LayoutName = NULL;
+        scale = 1.0f;
+    }
+    void set(LPCTSTR _layoutName, INT _posiNum, INT _startNo, const INT* _ladTbl, CursorPosition* _limitTbl,
+             FLOAT _scale) {
+        posiNum = _posiNum;
+        startNo = _startNo;
+        for (INT i = 0; i < 4; i++) ladTbl[i] = _ladTbl[i];
+        limitTbl = _limitTbl;
+        LayoutName = _layoutName;
+        scale = _scale;
+    }
+    void setSpacing(INT _left, INT _top, INT _right, INT _bottom) {
+        spacing[0] = _left;
+        spacing[1] = _top;
+        spacing[2] = _right;
+        spacing[3] = _bottom;
+    }
 };
 
 void AddVectorXYZ(FVECTOR& out, const FVECTOR& a, const FVECTOR& b);
@@ -338,6 +364,10 @@ private:
     void getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork);
     void setPlateState(INT inKind, INT inState);
     void setPlateNumSeq(INT inKind, INT inParam);
+    CMemo2DCursor* createCollectionCursorSequence(const INT* inSeqTbl, const CursorPosition& inStartPosi,
+                                                  const CursorPosition& inStepPosi, INT inStepNum, INT inListNum,
+                                                  INT inOffset, INT inStart, INT inPosiWidth, INT inLayer,
+                                                  INT inState, INT inPosiId, FLOAT inScale, CMemo2DSequence* inParent);
     INT splitMessage(INT* outNum, CHAR*** outBuf, const CHAR* inStr, INT inWidth);
     void CardScreenOutClip();
     void CardScreenSideClip(BOOL inAllDisp);
@@ -1540,13 +1570,50 @@ void CJiminyMemo::replaceNoteListMark(D2::C2DSeqCtrl** inMark, INT inFlagId, INT
         if (pFlagTbl) com_free(pFlagTbl);
     }
 }
-/* placeholder: rodata of createCollectionCursorSequence__11CJiminyMemoPCiRC14CursorPositionT2iiiiiiiifP15CMemo2DSequence */
-__asm__(".rdata\n");
-inline void _roPh18() {
-    TRACE(__FILE__ "(4411)");
-    TRACE(__FILE__ "(4413)");
+namespace JiminyMemo {
+namespace Collect {
+extern INT CardMapSpacingTbl[4];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createCollectionCursorSequence__11CJiminyMemoPCiRC14CursorPositionT2iiiiiiiifP15CMemo2DSequence);
+}
+CMemo2DCursor* CJiminyMemo::createCollectionCursorSequence(const INT* inSeqTbl, const CursorPosition& inStartPosi,
+                                                           const CursorPosition& inStepPosi, INT inStepNum,
+                                                           INT inListNum, INT inOffset, INT inStart,
+                                                           INT inPosiWidth, INT inLayer, INT inState, INT inPosiId,
+                                                           FLOAT inScale, CMemo2DSequence* inParent) {
+    CMemo2DCursor* pCur;
+    CursorDataParam param;
+    pCur = new (com_malloc_d(sizeof(CMemo2DCursor), __FILE__ "(4411)",
+                             ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+        CMemo2DCursor(getHandle());
+    if (pCur) {
+        CursorPosition* cpTbl = (CursorPosition*)com_malloc_d(sizeof(CursorPosition) * (inListNum + 2),
+                                                              __FILE__ "(4413)", -1);
+        if (cpTbl) {
+            CursorPosition* limitTbl = cpTbl + inListNum;
+            createCursorPosiTbl(cpTbl, inStartPosi, inStepPosi, inListNum, inPosiWidth);
+            limitTbl[0].x = -200.0f;
+            limitTbl[0].y = -100.0f;
+            limitTbl[1].x = 200.0f;
+            limitTbl[1].y = 100.0f;
+            param.init();
+            param.posiNum = inListNum;
+            param.posiTbl = cpTbl;
+            param.set(m_pLadName, inListNum, inStart, inSeqTbl, limitTbl, inScale);
+            param.setSpacing(JiminyMemo::Collect::CardMapSpacingTbl[0], JiminyMemo::Collect::CardMapSpacingTbl[1],
+                             JiminyMemo::Collect::CardMapSpacingTbl[2], JiminyMemo::Collect::CardMapSpacingTbl[3]);
+            pCur->setup(param);
+            pCur->setLayer(inLayer);
+            pCur->setState(inState);
+            pCur->setPosiId(inPosiId);
+            if (inParent) pCur->setParent(inParent);
+            if (cpTbl) com_free(cpTbl);
+        } else {
+            delete pCur;
+            pCur = NULL;
+        }
+    }
+    return pCur;
+}
 void CJiminyMemo::createCursorPosiTbl(CursorPosition* inPosiTbl, const CursorPosition& inStartPosi,
                                       const CursorPosition& inStepPosi, INT inListNum, INT inWidth) {
     CursorPosition offset;
