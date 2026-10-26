@@ -116,6 +116,7 @@ public:
     virtual ~CVSM();
     INT getActorIndex(INT nID) const;
     INT getActorIndex(const CHAR* pszName) const;
+    INT getActorNum() { return m_ActorCount; }
 
 protected:
     void deleteActorAll();

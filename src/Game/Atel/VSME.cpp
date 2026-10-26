@@ -1,5 +1,6 @@
 #include "khtypes.h"
 #include "Game/Atel/VSME.h"
+#include "Game/Atel/Atel.h"
 #include "System/Debug.h"
 #include "System/TaskMan.h"
 #include "Form/DebugWindow.h"
@@ -50,7 +51,21 @@ public:
 }
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetNpcIDWindow__8DWTEventP12CDebugWindowii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", debugWinNPCListAllCall__8DWTEventP12CDebugWindowi);
+namespace DWTEvent {
+static INT debugWinNPCListAllCall(CDebugWindow* pObj, INT inParam) {
+    CTask* pA;
+    INT ret;
+    if (inParam & 1) {
+        pA = CTaskMan::getSysTask(0x1A);
+        ret = 0;
+        if (pA && ((CAtel*)pA)->getVSM()) ret = ((CAtel*)pA)->getVSM()->getActorNum();
+        return ret;
+    }
+    return 1;
+}
+}
+/* the asm .data (debugWinNPCList table) refers to it by name until the data comes from source */
+__asm__(".globl debugWinNPCListAllCall__8DWTEventP12CDebugWindowi");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", debugWinNPCListDispCall__8DWTEventPciPCv);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugCreateNpcWindow__8DWTEventP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugCreateEventLineDisp__8DWTEventP12CDebugWindowii);
