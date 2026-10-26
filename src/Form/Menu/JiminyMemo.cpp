@@ -204,6 +204,7 @@ public:
     void getSubVector(CursorPosition& outSub, INT inId0, INT inId1);
     void setLimitPosi(CursorPosition& inPosi, INT inId);
     FVECTOR& getShiftVector() { return m_vShiftPosi; }
+    void setShiftVector(const FVECTOR& inVector) { m_vShiftPosi = inVector; }
     FVECTOR& getAimVector() { return m_vAimPosi; }
     CursorPosition* getLimitPosi(INT inId);
     FLOAT getFrameRateF();
@@ -302,6 +303,10 @@ private:
     INT getNextContentId(INT inId, INT inNum, INT inMax);
     BOOL nextPage(INT* ioTop, INT inMax, INT inDisp);
     BOOL prevPage(INT* ioTop, INT inMin, INT inDisp);
+    BOOL nextPage(CMemo2DCursor* pCursor, INT* pCursorCurrent, INT iNoteListNum, INT iCursorPosiNum,
+                  FLOAT fCursorIntervalY);
+    BOOL prevPage(CMemo2DCursor* pCursor, INT* pCursorCurrent, INT iNoteListNum, INT iCursorPosiNum,
+                  FLOAT fCursorIntervalY);
     BOOL haveSpecialCard();
     INT getNextCardId(INT inId);
     INT getPrevCardId(INT inId);
@@ -1114,7 +1119,33 @@ BOOL CJiminyMemo::prevPage(INT* ioTop, INT inMin, INT inDisp) {
     return bRet;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", nextPage__11CJiminyMemoP13CMemo2DCursorPiiif);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", prevPage__11CJiminyMemoP13CMemo2DCursorPiiif);
+BOOL CJiminyMemo::prevPage(CMemo2DCursor* pCursor, INT* pCursorCurrent, INT iNoteListNum, INT iCursorPosiNum,
+                           FLOAT fCursorIntervalY) {
+    if (!pCursor || !pCursorCurrent) return FALSE;
+    INT iCursorIntervalY = (INT)fCursorIntervalY;
+    if (*pCursorCurrent == 0) {
+        *pCursorCurrent = iNoteListNum - 1;
+    } else {
+        FVECTOR posi = pCursor->getShiftVector();
+        INT offset = (INT)posi.y / iCursorIntervalY;
+        if (offset > 0) {
+            INT next = offset - iCursorPosiNum;
+            if (next < 0) {
+                *pCursorCurrent -= offset;
+                offset = 0;
+            } else {
+                *pCursorCurrent -= iCursorPosiNum;
+                if (*pCursorCurrent < 0) *pCursorCurrent = 0;
+                offset = next;
+            }
+            posi.y = offset * iCursorIntervalY;
+            pCursor->setShiftVector(posi);
+        } else {
+            *pCursorCurrent = 0;
+        }
+    }
+    return TRUE;
+}
 BOOL CJiminyMemo::isButtonRptLimitStop(UINT inBit, UINT inPad, BOOL inStopCompare) {
     BOOL rval = FALSE;
     if (_isButtonRpt(inBit, inPad)) {
