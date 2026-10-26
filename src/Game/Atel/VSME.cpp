@@ -39,6 +39,7 @@ extern "C" char D_00491668[];
 extern "C" char D_004916A0[];
 extern "C" char D_004916E8[];
 extern "C" char D_00491700[];
+extern "C" char D_00491718[];
 extern "C" char D_004917D8[];
 extern "C" char D_004917F0[];
 extern "C" char D_00491810[];
@@ -339,7 +340,15 @@ BOOL CVSM::acStatCWait() {
     }
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatIWait__Q24ATEL4CVSM);
+BOOL CVSM::acStatIWait() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    if (!(m_nFlag & 2)) {
+        _TRACE(m_bTrace, D_00491718, atp.id, atp.address);
+        m_Pctr = atp.address;
+        return TRUE;
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatPWait__Q24ATEL4CVSM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatSWait__Q24ATEL4CVSM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatMWait__Q24ATEL4CVSM);
