@@ -1042,14 +1042,34 @@ void CVSM::clearReq() {
     }
     m_nReqBufPtr = 0;
 }
-/* placeholder: rodata of setReq__Q24ATEL4CVSMRCQ24ATEL3RTP */
-__asm__(".rdata\n");
-inline void _roPh23() {
-    TRACE("\x8c\xbb\x8d\xdd\x82\xcc\x83\x8a\x83N\x83G\x83X\x83g\x82\xe6\x82\xe8\x8e\xe3\x82\xa2\x83\x8a\x83N\x83G\x83X\x83g\x94\xad\x8ds\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81" "B\n");
-    TRACE(">>> buf_pass a:%d l:%d\n");
-    TRACE("ReqBuf MAX\n");
+void CVSM::setReq(const RTP& rq) {
+    INT nPtr = -1;
+    RTP* p = m_ReqBuf;
+    for (INT i = 0; i < m_nReqBufPtr; i++, p++) {
+        if (rq.rq_actor == p->rq_actor) {
+            if (rq.rq_lv < p->rq_lv) {
+                TRACE("\x8c\xbb\x8d\xdd\x82\xcc\x83\x8a\x83N\x83G\x83X\x83g\x82\xe6\x82\xe8\x8e\xe3\x82\xa2\x83\x8a\x83N\x83G\x83X\x83g\x94\xad\x8ds\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81" "B\n");
+                _TRACE(m_bTrace, ">>> buf_pass a:%d l:%d\n", rq.rq_actor, rq.rq_lv);
+                return;
+            }
+            nPtr = i;
+            break;
+        }
+    }
+    if (m_nReqBufPtr >= 64) {
+        _TRACE(TRUE, "ReqBuf MAX\n");
+        return;
+    }
+    if (nPtr < 0) {
+        p = &m_ReqBuf[m_nReqBufPtr];
+        m_nReqBufPtr++;
+    }
+    p->rq_actor = rq.rq_actor;
+    p->rq_tag = rq.rq_tag;
+    p->rq_lv = rq.rq_lv;
+    p->rq_m_actor = rq.rq_m_actor;
+    p->wait_key = rq.wait_key;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", setReq__Q24ATEL4CVSMRCQ24ATEL3RTP);
 /* placeholder: rodata of tuneReq__Q24ATEL4CVSM */
 __asm__(".rdata\n");
 inline void _roPh24() {
