@@ -1563,12 +1563,21 @@ inline void _roPh38() {
     TRACE("win_wait_mode change = %d\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatMWait__Q24ATEL4CVSM);
-/* placeholder: rodata of acStatCPWait__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh39() {
-    TRACE("cam_wait_mode change = %d\n");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+BOOL CVSM::acStatCPWait() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    INT nID = atp.wait_key;
+    INT nFlag;
+    INT nRet = CCameraMan::instance().reqCommand(0x453, &nFlag, nID);
+    if (nRet == 1) {
+        if (nFlag == 1) {
+            _TRACE(m_bTrace, "cam_wait_mode change = %d\n", atp.id);
+            m_Pctr = atp.next_address;
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatCPWait__Q24ATEL4CVSM);
 BOOL CVSM::acStatSNWait() {
     return FALSE;
 }
