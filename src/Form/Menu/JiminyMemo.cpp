@@ -277,6 +277,7 @@ public:
     void changePicture(D2::C2DSeqObj* p2DSeqObj);
     void setState(INT inState);
     void main(FLOAT inFrameRate);
+    FVECTOR& getBasePosition() { return m_vBasePosition; }
 };
 
 struct ContentCommonWork {
@@ -335,6 +336,8 @@ private:
     void getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork);
     void setPlateState(INT inKind, INT inState);
     void setPlateNumSeq(INT inKind, INT inParam);
+    void CardScreenOutClip();
+    void CardScreenSideClip(BOOL inFlag);
     void ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR& inPos, FLOAT inBaseHeight,
                        CMemo2DSequence* inParent);
     void ScrollBarChange(D2::C2DSeqCtrl** inSeqCtrl, FLOAT inBasePosY, FLOAT inBaseHeight, INT inCursorPosiNum,
@@ -1988,7 +1991,44 @@ __asm__(".word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\
 __asm__(".word .L0032EB40\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCollection__11CJiminyMemo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", CardScreenSideClip__11CJiminyMemoi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", CardScreenOutClip__11CJiminyMemo);
+void CJiminyMemo::CardScreenOutClip() {
+    FVECTOR shift;
+    FVECTOR shiftVec;
+    FLOAT limitL1;
+    FLOAT limitR1;
+    FLOAT limitU1;
+    FLOAT limitD1;
+    FLOAT limitL2;
+    FLOAT limitR2;
+    FLOAT limitU2;
+    FLOAT limitD2;
+    FVECTOR base;
+    CMemo2DCard* pCard;
+    if (*(FLOAT*)&work(0x1F0) < 1.0f) return;
+    shift = ((CMemo2DCursor*)work(0x1B4))->getShiftVector();
+    limitL1 = shift.x - 192.0f;
+    limitR1 = shift.x + 192.0f;
+    limitU1 = shift.y - 96.0f;
+    limitD1 = shift.y + 96.0f;
+    limitL2 = shift.x - 320.0f;
+    limitR2 = shift.x + 320.0f;
+    limitU2 = shift.y - 288.0f;
+    limitD2 = shift.y + 288.0f;
+    shiftVec.x = -shift.x / *(FLOAT*)&work(0x1F0);
+    shiftVec.y = -shift.y / *(FLOAT*)&work(0x1F0);
+    for (INT i = 0; i < work(0x1D8); i++) {
+        pCard = ((CMemo2DCard**)work(0x1D4))[i];
+        if (!pCard) continue;
+        base = pCard->getBasePosition();
+        if (base.x < limitL2 || limitR2 < base.x || base.y < limitU2 || limitD2 < base.y) continue;
+        if ((base.x < limitL1 && limitL2 < base.x) || (limitR1 < base.x && base.x < limitR2) ||
+            (base.y < limitU1 && limitU2 < base.y) || (limitD1 < base.y && base.y < limitD2)) {
+            if (pCard->isEnableDisp(1)) pCard->enableDisp(1, FALSE);
+            if (pCard->isEnableDisp(2)) pCard->enableDisp(2, FALSE);
+        }
+    }
+}
+
 namespace JiminyMemo {
 extern INT SoraCardNumTbl[];
 extern INT RikuCardNumTbl[];
