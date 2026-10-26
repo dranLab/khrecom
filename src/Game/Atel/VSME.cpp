@@ -496,10 +496,37 @@ static BOOL DebugSetFriendPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam)
 }
 /* the asm .data (debug window tables) refers to it by name until the data comes from source */
 __asm__(".globl DebugSetFriendPossibleFlag__8DWTEventP12CDebugWindowii");
-/* placeholder: rodata of DebugSetPoohFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00241E48\n.word .L00241E50\n.word .L00241E58\n.word .L00241E60\n.word .L00241E68\n.word .L00241E70\n.word .L00241E78\n.word .L00241E80\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetPoohFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetPoohFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT intro = CGameWork::getInt(0, 0x23);
+        switch (inY) {
+        case 4: intro ^= 0x1; break;
+        case 5: intro ^= 0x2; break;
+        case 6: intro ^= 0x4; break;
+        case 7: intro ^= 0x8; break;
+        case 8: intro ^= 0x10; break;
+        case 9: intro ^= 0x20; break;
+        case 10: intro ^= 0x40; break;
+        case 11: intro ^= 0x80; break;
+        }
+        DebugWork::g_dw.atelwork.iPoohMiniGameIntro = intro;
+        CGameWork::setInt(0, 0x23, intro);
+        CGameWork::setInt(0, 0x2E, DebugWork::g_dw.atelwork.iPoohHiScoreOwl);
+        CGameWork::setInt(0, 0x2F, DebugWork::g_dw.atelwork.iPoohHiScoreRoo);
+        CGameWork::setInt(0, 0x30, DebugWork::g_dw.atelwork.iPoohHiScoreEeyore);
+        CGameWork::setInt(0, 0x31, DebugWork::g_dw.atelwork.iPoohHiScoreTigger);
+        CGameWork::setInt(0, 0x32, DebugWork::g_dw.atelwork.iPoohHiScoreRabbit);
+        CGameWork::setByte(0, 3, DebugWork::g_dw.atelwork.iPoohGamePiglet);
+        CGameWork::setByte(0, 4, DebugWork::g_dw.atelwork.iPoohGameOwl);
+        CGameWork::setByte(0, 5, DebugWork::g_dw.atelwork.iPoohGameRoo);
+        CGameWork::setByte(0, 6, DebugWork::g_dw.atelwork.iPoohGameEeyore);
+        CGameWork::setByte(0, 7, DebugWork::g_dw.atelwork.iPoohGameTigger);
+        CGameWork::setByte(0, 8, DebugWork::g_dw.atelwork.iPoohGameRabbit);
+    }
+    return 1;
+}
+}
 namespace DWTEvent {
 static BOOL DebugSetPcSkillFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
