@@ -48,6 +48,7 @@ extern "C" char D_00491810[];
 extern "C" char D_00491830[];
 extern "C" char D_00491850[];
 extern "C" char D_004918D0[];
+extern "C" char D_00491918[];
 extern "C" char D_00491A70[];
 extern "C" char D_00491AE0[];
 extern "C" char D_00491AF0[];
@@ -434,7 +435,14 @@ BOOL CVSM::acStatBSWait() {
     return TRUE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatBAWait__Q24ATEL4CVSM);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatActorWait__Q24ATEL4CVSM);
+BOOL CVSM::acStatActorWait() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    /* the original passes wait_timer (lhu 0x1b2) as the avatar argument */
+    if (isAvatarBusy(atp.wait_key, (CAvatar*)atp.wait_timer) != TRUE) return FALSE;
+    _TRACE(m_bTrace, D_00491918, atp.id, atp.wait_key);
+    m_Pctr = atp.next_address;
+    return TRUE;
+}
 BOOL CVSM::acStatEternityWait() {
     return FALSE;
 }
