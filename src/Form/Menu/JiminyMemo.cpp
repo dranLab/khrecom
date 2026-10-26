@@ -12,6 +12,7 @@
 #include "Form/Menu/JiminyMemo.h"
 #include "System/Math3D.h"
 #include "System/TaskMan.h"
+#include "Game/CardKind.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "System/Sound/SoundMan.h"
@@ -234,6 +235,7 @@ public:
     virtual ~CMemo2DCard();
     void setPosition();
     void setLocalPosition();
+    void create(CARD inCard, INT inMode);
     void createPicture(UINT inTexNo, UINT inTexPos);
     void changePicture(D2::C2DSeqObj* inSeqObj);
     void setState(INT inState);
@@ -819,14 +821,23 @@ CMemo2DCard::CMemo2DCard(const CHAR* inEmptySeqName) {
     setScl(m_fScale);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_11CMemo2DCard);
-/* placeholder: rodata of create__11CMemo2DCardG4CARDi */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 2\n.byte 0x00,0x07,0x05,0x05,0x06,0x06,0x06,0x04,0x2f,0x02,0x01,0x00,0x03,0x09,0x07,0x00\n");
-inline void _roPh8() {
-    TRACE("card:01");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", create__11CMemo2DCardG4CARDi);
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+extern "C" CARD_DATA cardDataTbl_004EA4F8[]; /* CardKind.h's static table: still in the asm tail of .rodata */
+/* CardKind.h's inline lookup (line 561 in the original header) */
+static inline CARD_DATA* getCardData(CARD inCard) {
+    CARD_DATA* p = cardDataTbl_004EA4F8;
+    return &p[inCard.m_nKind];
+}
+void CMemo2DCard::create(CARD inCard, INT inMode) {
+    if (inCard.m_nCategory0 == 0xC) return;
+    CARD_DATA* pData = getCardData(inCard);
+    createPicture(pData->nTexNo, pData->nTexPos);
+    if (inMode > 0) {
+        BYTE frameSeqTbl[15] = { 0, 7, 5, 5, 6, 6, 6, 4, 0x2f, 2, 1, 0, 3, 9, 7 };
+        m_iFrameSeqNo = (inCard.m_nKind == 0xB9) ? 0x14 : frameSeqTbl[inCard.m_nCategory1];
+        addSeq("card:01", m_iFrameSeqNo);
+    }
+}
 void CMemo2DCard::createPicture(UINT inTexNo, UINT inTexPos) {
     m_iTexNo = inTexNo;
     m_iTexPos = inTexPos;
