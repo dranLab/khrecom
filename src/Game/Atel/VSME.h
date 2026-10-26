@@ -160,6 +160,8 @@ private:
     BOOL acStatBGWait();
     BOOL acStatEternityWait();
     BOOL acStatCardWndWait();
+    BOOL acStatBSWait();
+    BOOL isAvatarBusy(INT nType, CAvatar* pAvatar);
     BOOL acStatIWait();
     BOOL acStatCWait();
     BOOL acStatRsrcLoadWait();

@@ -45,6 +45,7 @@ extern "C" char D_004917F0[];
 extern "C" char D_00491810[];
 extern "C" char D_00491830[];
 extern "C" char D_00491850[];
+extern "C" char D_004918D0[];
 extern "C" char D_00491A70[];
 extern "C" char D_00491AE0[];
 extern "C" char D_00491AF0[];
@@ -415,7 +416,13 @@ BOOL CVSM::acStatWKWait() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatXWait__Q24ATEL4CVSM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", isAvatarBusy__Q24ATEL4CVSMiPQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatBSWait__Q24ATEL4CVSM);
+BOOL CVSM::acStatBSWait() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    if (isAvatarBusy(atp.wait_key, m_pCurrentActor->_pAvatar)) return FALSE;
+    _TRACE(m_bTrace, D_004918D0, atp.id, atp.wait_key);
+    m_Pctr = atp.next_address;
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatBAWait__Q24ATEL4CVSM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatActorWait__Q24ATEL4CVSM);
 BOOL CVSM::acStatEternityWait() {
