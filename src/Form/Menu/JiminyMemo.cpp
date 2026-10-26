@@ -575,7 +575,19 @@ inline void _roPh4() {
     TRACE(__FILE__ "(2945)");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", initialize__13CMemo2DLayout);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", finalize__13CMemo2DLayout);
+void CMemo2DLayout::finalize() {
+    for (INT i = 0; i < 32; i++) {
+        delete m_pSeqCtrlArray[i];
+        m_pSeqCtrlArray[i] = NULL;
+    }
+    if (m_pSeqNoTbl) com_free(m_pSeqNoTbl);
+    m_pSeqNoTbl = NULL;
+    if (m_pSeqCodeTbl) com_free(m_pSeqCodeTbl);
+    m_pSeqCodeTbl = NULL;
+    if (m_pLayoutNoTbl) com_free(m_pLayoutNoTbl);
+    m_pLayoutNoTbl = NULL;
+    destroyLayer();
+}
 void CMemo2DLayout::setState(INT inState) {
     m_iState = inState;
 }
