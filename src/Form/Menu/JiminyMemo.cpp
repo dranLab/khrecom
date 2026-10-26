@@ -287,6 +287,10 @@ private:
     void initialize(INT inPlayerMode);
     void setContentMode(INT inContentMode);
     void replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum);
+    void replaceNoteListMark(D2::C2DSeqCtrl** inMark, BYTE* inFlagTbl, INT inListNum, INT inListAllNum, INT inStartNo,
+                             INT inLayoutNo, INT inLayoutSeqNo);
+    void replaceNoteListMark(D2::C2DSeqCtrl** inMark, INT inFlagId, INT inListNum, INT inListAllNum, INT inStartNo,
+                             INT inLayoutNo, INT inLayoutSeqNo);
     void setPlateState(INT inKind, INT inState);
     INT getPlateState(INT inKind);
     void setPlateText(INT inKind, INT inCTNo);
@@ -1061,12 +1065,19 @@ void CJiminyMemo::replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER* in
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListMark__11CJiminyMemoPPQ22D210C2DSeqCtrlPUciiiii);
-/* placeholder: rodata of replaceNoteListMark__11CJiminyMemoPPQ22D210C2DSeqCtrliiiiii */
-__asm__(".rdata\n");
-inline void _roPh17() {
-    TRACE(__FILE__ "(4394)");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CJiminyMemo::replaceNoteListMark(D2::C2DSeqCtrl** inMark, INT inFlagId, INT inListNum, INT inListAllNum,
+                                      INT inStartNo, INT inLayoutNo, INT inLayoutSeqNo) {
+    INT flagIndex = inFlagId;
+    BYTE* pFlagTbl = (BYTE*)com_malloc_d(inListAllNum, __FILE__ "(4394)", (UINT)-1);
+    if (pFlagTbl) {
+        for (INT i = 0; i < inListAllNum; i++, flagIndex++) {
+            pFlagTbl[i] = CJiminyMemoFlag::isContentOpen(flagIndex) ? 1 : 0;
+        }
+        replaceNoteListMark(inMark, pFlagTbl, inListNum, inListAllNum, inStartNo, inLayoutNo, inLayoutSeqNo);
+        if (pFlagTbl) com_free(pFlagTbl);
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListMark__11CJiminyMemoPPQ22D210C2DSeqCtrliiiiii);
 /* placeholder: rodata of createCollectionCursorSequence__11CJiminyMemoPCiRC14CursorPositionT2iiiiiiiifP15CMemo2DSequence */
 __asm__(".rdata\n");
 inline void _roPh18() {
