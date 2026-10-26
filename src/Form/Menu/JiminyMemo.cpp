@@ -3326,12 +3326,6 @@ void CJiminyMemo::contentStory() {
         }
     }
 }
-/* Parked: 4 lines: in both arms of step 21 the original schedules the WorldPictureTbl load (lh) after the
-   storyNum constant, ours before. Everything else matches.
-   tried: statement order of storyNum/pictureNo, SHORT pictureNo, declaration order; setContentStep before
-   setNextContentMode fixed the prev/next branches; tools/permuter.py 5 min starts at score 1 in its copy
-   (compiled from another path), 4 here: path-sensitive like ScrollBarChange/contentMinigame. */
-#if 0
 namespace JiminyMemo {
 extern CHAR* StoryLadName[13];
 namespace StoryView {
@@ -3568,26 +3562,6 @@ void CJiminyMemo::contentStoryView() {
         m_ContentStoryView.pTopArrowSeq->enableDisp(m_ContentStoryView.iCurrentTextLine > 0);
     }
 }
-#else
-/* placeholder: rodata of contentStoryView__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh27() {
-    TRACE(__FILE__ "(5890)");
-    TRACE(__FILE__ "(5897)");
-    TRACE("%s%02d.lad");
-    TRACE("%s%02d:00");
-    TRACE("%s.lad");
-    TRACE("%s:00");
-    TRACE(__FILE__ "(5949)");
-}
-__asm__(".rdata\n.align 4\n.word .L0032C78C\n.word .L0032C844\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032CCEC\n.word .L0032CD28\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n");
-__asm__(".word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032CDB8\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032CF84\n.word .L0032D1F4\n");
-__asm__(".word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D058\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n");
-__asm__(".word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D07C\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n");
-__asm__(".word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D07C\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n");
-__asm__(".word .L0032D1F4\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentStoryView__11CJiminyMemo);
-#endif
 INT CJiminyMemo::getPrevStoryId(INT inId) {
     return getPrevContentId(inId, work(0x178), work(0x170));
 }
