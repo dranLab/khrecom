@@ -60,6 +60,7 @@ inline void _vsmeMotionName() {
 #include "System/TaskMan.h"
 #include "Form/DebugWindow.h"
 #include "Game/Debug/DebugWork.h"
+#include "Game/Player/Player.h"
 #include <string.h>
 #include "include_asm.h"
 
@@ -925,7 +926,30 @@ inline void _roPh22() {
     TRACE("\x89\xef\x98" "b\x8aJ\x8en\x81" "F%s\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", checkEvents__Q24ATEL4CVSM);
+/* Parked: 8 bytes short; only the first return differs: the original keeps `if (!g_pPlayer) return -1;` as
+   bnez over "b end; li -1", ours lets jump2 cross-jump it into the loop's final `li -1` (beqz v1 to it; -dJ dump:
+   all four -1 returns share one label). $LM tags: 642 the test, 643 the return, 645-647 isNowLockon (Player.h)
+   and the 0/-1 test, 650 getTask, 651/653 the early returns, 655 the cast, 658-662 the loop, 665 return -1.
+   tried: wrapping the body in if (g_pPlayer) {}, getLockonHandle() vs isNowLockon() + m_hTarget, a break loop
+   with a separate found test (longer), separate-line returns. */
+#if 0
+INT CVSM::searchLockOnNpc() {
+    if (!g_pPlayer)
+        return -1;
+    HANDLE handle = g_pPlayer->isNowLockon();
+    if (handle == 0 || handle == -1) handle = g_pPlayer->m_hTarget;
+    CTask* lockTarget = CTaskMan::getTask(handle);
+    if (!lockTarget) return -1;
+    if (lockTarget->getTypeID() != 0x4000) return -1;
+    CAvatar* avater = static_cast<CAvatar*>(lockTarget);
+    for (int i = 0; i < m_ActorCount; i++) {
+        if (m_ActorTbl[i]._pAvatar == avater) return i;
+    }
+    return -1;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", searchLockOnNpc__Q24ATEL4CVSM);
+#endif
 void CVSM::clearReq() {
     RTP* p = m_ReqBuf;
     for (INT i = 0; i < 64; i++, p++) {

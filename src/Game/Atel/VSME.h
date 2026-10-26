@@ -127,6 +127,7 @@ protected:
     void deleteActorAll();
     void clearReq();
     void execInit();
+    INT searchLockOnNpc();
     void initActor();
     void exec(TIMEQ nTQ);
     void execActor();
