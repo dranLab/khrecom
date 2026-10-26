@@ -113,6 +113,9 @@ public:
     INT assign(CTask* p, const CHAR* pName, INT n);
     void changeTextureSub(INT nIdx, const struct TexInfo* pTex);
     void setupUVScroll(INT n);
+#ifdef FORM_MENU_JIMINYMEMO_CPP
+    inline void setSemiTrans(ALPHA nAlpha); // PARTIAL: added for Form/Menu/JiminyMemo (defined there)
+#endif
 };
 
 #ifdef GAME_ENTITY_H
