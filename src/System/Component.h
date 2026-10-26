@@ -25,7 +25,7 @@ template <class T> struct CPointT : POINT_T<T> {
 
 template <class T> struct CSizeT : SIZE_T<T> {
     CSizeT() {}
-    CSizeT(T w, T h) { m_w = w; m_h = h; }
+    CSizeT(T w, T h) { m_w = w; m_h = h; } void setSize(T w, T h) { m_w = w; m_h = h; } // PARTIAL: setSize added for Game/Atel/VSME
     BOOL operator==(const SIZE_T<T>& sz) const { return m_w == sz.m_w && m_h == sz.m_h; } // PARTIAL: added for System/Wnd
 };
 

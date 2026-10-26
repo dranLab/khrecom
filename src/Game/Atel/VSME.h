@@ -307,7 +307,7 @@ public:
     virtual void disp();
 };
 
-void WinOpenSE(INT ctd);
+void WinOpenSE(INT ctd); void close_dest_se(INT win_num);
 void WinCloseSE();
 
 #endif /* GAME_ATEL_VSME_H */

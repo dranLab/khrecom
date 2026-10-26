@@ -62,6 +62,7 @@ inline void _vsmeMotionName() {
 #include "Form/Menu/LevelUp.h"
 #include "System/Rcf.h"
 #include "Game/GameWork.h"
+#include "Game/SceneInfo.h"
 #include "System/TaskMan.h"
 #include "Form/DebugWindow.h"
 #include "Game/Debug/DebugWork.h"
@@ -2087,47 +2088,541 @@ INT CVSM::execStdCode(INT op, INT& addr, eATEL_REQ_RET& ret) {
     } while (r == 0);
     return r;
 }
-/* placeholder: rodata of execExt1Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET */
-__asm__(".rdata\n");
-inline void _roPh28() {
-    TRACE("--- ACTCMD_SET_FACE --- %d\n");
-    TRACE("ACC c:%d t:%d id:%d\n");
-    TRACE("Avatar init ACI %.1f %.1f %.1f \n");
-    TRACE("ACP %.1f %.1f %.1f \n");
-    TRACE("ATEL:\x83\x8a\x83\\\x81[\x83X\x83\x8d\x81[\x83h: %d, %d\n");
-    TRACE("--- START MOVE-ACTOR Type::%x ---\n");
-    TRACE("--- ACTOR-SET-TALKRAD ---\n");
-    TRACE("--- START ROATE-ACTOR-Target ---TYPE[%d]\n");
-    TRACE("chibi-pos %d : %d\n");
-    TRACE("MESS_CMD OPEN \n");
-    TRACE("MESS_CMD CLOSE \n");
-    TRACE("MESS_CMD DESTROY \n");
-    TRACE("MESS_CMD CLR TEXT \n");
-    TRACE("MESS_CMD TEXT DELEY \n");
-    TRACE("MESS_CMD WND STYLE \n");
-    TRACE("MESS_CMD CHG WND STYLE\n");
-    TRACE("MESS_CMD SET TEXT MARGIN\n");
-    TRACE("MESS_CMD SET FONT SIZE\n");
-    TRACE("MESS_CMD SET FONT SPACE\n");
-    TRACE("MESS_CMD SET TEXT STYLE\n");
-    TRACE("MESS_CMD SET TEXT COLOR\n");
-    TRACE("MESS_CMD SET TEXT EXCOLOR\n");
-    TRACE("MESS_CMD SETSELECTOFS\n");
-    TRACE("MESS_CMD CHGCURSORCOLOR\n");
-    TRACE("MESS_CMD SETDISPINTERVAL\n");
-    TRACE("MESS_CMD CHANGETEXT_NEXT\n");
-    TRACE("MESS_CMD CHAT_ENABLEDISP\n");
-    TRACE("MESS_CMD IMAGE_PHASEINI\n");
-    TRACE("MESS_CMD IMAGE_PHASEINI2\n");
-    TRACE("MES_DEST_ALL\n");
-    TRACE("MES_LAYER_CHANGE\n");
-    TRACE("MES_SET_C_FADEINDELAY\n");
-    TRACE("MES_SET_T_FADEOUTTIME\n");
-    TRACE("MESS_CMD bad param \n");
+struct AvatarInitParam {
+    FVECTOR _vPos;
+    FVECTOR _vAngle;
+    BOOL _bOnGround;
+};
+struct AvatarMoveParam {
+    union {
+        FVECTOR _vTarget;
+        struct {
+            FLOAT _fCx;
+            FLOAT _fCz;
+            FLOAT _fTargetRotY;
+        };
+        struct {
+            CHAR* _pszPathFile;
+            USHORT _nMotion;
+        };
+    };
+    UINT _nType;
+    union {
+        FLOAT _fTime;
+        FLOAT _fSpeed;
+    };
+};
+struct AvatarRotateParam {
+    union {
+        FVECTOR _vTarget;
+        UINT _nTargetID;
+    };
+    UINT _nType;
+    FLOAT _fTime;
+};
+struct AvatarMotionParam {
+    FLOAT _fPlaySpeed;
+    INT _iChangeHokanRate;
+    SHORT _nMotionID;
+    SHORT _nFlag;
+};
+struct ChatWndCreateParam {
+    CPointI pos;
+    CSizeI size;
+    UINT wndColor;
+    LPCTSTR pText;
+    UINT textColor;
+    UINT fontSize;
+    UINT wndArrangement;
+    CPointI cyobiPos;
+    UINT waitFrame;
+    UINT fontStyle;
+    ChatWndCreateParam() { cyobiPos.m_y = 0; cyobiPos.m_x = 0; }
+};
+struct ImageWndCreateParam {
+    CPointI pos0;
+    CSizeI size0;
+    CPointI pos1;
+    CSizeI size1;
+    LPCTSTR pTexName;
+    INT kind;
+    FLOAT fRate;
+    UINT color0;
+    UINT color1;
+    ImageWndCreateParam() { kind = 0; }
+};
+FLOAT RotTransPers(FVECTOR& outV, const FMATRIX& inM, const FVECTOR& inV);
+INT CVSM::execExt1Code(INT op, eATEL_REQ_RET& ret) {
+    INT nID;
+    INT c;
+    INT t;
+    INT r;
+
+    do {
+        r = 1;
+        switch (op) {
+        case 0x3E:
+            nID = m_S[m_SP].I;
+            if (m_pCurrentActor->_pAvatar) {
+                m_pCurrentActor->_pAvatar->reqCommand(0x38, NULL, nID);
+                _TRACE(m_bTrace, "--- ACTCMD_SET_FACE --- %d\n", nID);
+            }
+            break;
+        case 0x3F:
+            acWaitPad(*m_pCurrentActor, m_S[m_SP].I, m_Pctr);
+            ret = ATEL_RET_PWAIT; r = 3;
+            break;
+        case 0x40:
+            nID = m_S[m_SP].I;
+            ret = ATEL_RET_EWAIT; r = 3;
+            break;
+        case 0x41:
+            break;
+        case 0x43: {
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            _TRACE(m_bTrace, "ACC c:%d t:%d id:%d\n", c, t, nID);
+            ATP& atp = m_pCurrentActor->_ATP;
+            m_Atel.createAvatar(c, *m_pCurrentActor, t);
+            atp.status = 5;
+            atp.next_address = m_Pctr;
+            ret = ATEL_RET_CWAIT; r = 3;
+            break;
+        }
+        case 0x45: {
+            AvatarInitParam param;
+            param._bOnGround = m_S[m_SP--].I;
+            param._vAngle.w = 1.0f;
+            param._vAngle.z = DEG2RAD(m_S[m_SP--].F);
+            param._vAngle.y = DEG2RAD(m_S[m_SP--].F);
+            param._vAngle.x = DEG2RAD(m_S[m_SP--].F);
+            param._vPos.w = 1.0f;
+            param._vPos.z = m_S[m_SP--].F;
+            param._vPos.y = m_S[m_SP--].F;
+            param._vPos.x = m_S[m_SP].F;
+            if (m_pCurrentActor->_pAvatar) {
+                _TRACE(m_bTrace, "Avatar init ACI %.1f %.1f %.1f \n", param._vPos.x, param._vPos.y, param._vPos.z);
+                m_pCurrentActor->_pAvatar->reqCommand(2, &param, 0);
+            }
+            break;
+        }
+        case 0x46: {
+            FVECTOR vPos;
+            vPos.w = 1.0f;
+            vPos.z = m_S[m_SP--].F;
+            vPos.y = m_S[m_SP--].F;
+            vPos.x = m_S[m_SP].F;
+            if (m_pCurrentActor->_pAvatar) {
+                _TRACE(m_bTrace, "ACP %.1f %.1f %.1f \n", vPos.x, vPos.y, vPos.z);
+                m_pCurrentActor->_pAvatar->reqCommand(10, &vPos, 0);
+            }
+            break;
+        }
+        case 0x47:
+        case 0x48:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            TRACE("ATEL:\x83\x8a\x83\\\x81[\x83X\x83\x8d\x81[\x83h: %d, %d\n", c, t);
+            m_pCurrentActor->_nRsrcID = c * 10000 + t;
+            CRcf::reqLoadRCF(c, t, 0, NULL, 0);
+            break;
+        case 0x49: {
+            FVECTOR v;
+            AvatarMoveParam param;
+            v.w = m_S[m_SP--].F;
+            v.z = m_S[m_SP--].F;
+            v.y = m_S[m_SP--].F;
+            v.x = m_S[m_SP--].F;
+            c = m_S[m_SP].I;
+            if (m_pCurrentActor->_pAvatar) {
+                param._nType = c;
+                param._fTime = v.w;
+                switch (c & 0xF) {
+                case 3:
+                case 4:
+                    param._fCx = v.x;
+                    param._fCz = v.z;
+                    param._fTargetRotY = v.y * 0.017453292f;
+                    break;
+                default:
+                    param._vTarget = v;
+                    param._vTarget.w = 0.0f;
+                    break;
+                }
+                if (m_pCurrentActor->_pAvatar) {
+                    _TRACE(m_bTrace, "--- START MOVE-ACTOR Type::%x ---\n", c);
+                    m_pCurrentActor->_pAvatar->reqCommand(0xD, &param, 0);
+                }
+            }
+            break;
+        }
+        case 0x4A:
+            m_S[m_SP].I = m_pCurrentActor->_pAvatar ? isAvatarBusy(m_S[m_SP].I, m_pCurrentActor->_pAvatar) : 0;
+            break;
+        case 0x4B: {
+            c = m_S[m_SP - 1].I;
+            AvatarMotionParam param;
+            param._nMotionID = c & 0xFFF;
+            param._fPlaySpeed = m_S[m_SP].F;
+            param._nFlag = (c >> 12) & 3;
+            if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0x13, &param, 0);
+            break;
+        }
+        case 0x4C: {
+            LineTrapSrc src;
+            src._vP[1].w = 1.0f;
+            src._vP[1].z = m_S[m_SP--].F;
+            src._vP[1].y = m_S[m_SP--].F;
+            src._vP[1].x = m_S[m_SP--].F;
+            src._vP[0].w = 1.0f;
+            src._vP[0].z = m_S[m_SP--].F;
+            src._vP[0].y = m_S[m_SP--].F;
+            src._vP[0].x = m_S[m_SP].F;
+            m_Atel.createEventTrap(src, *m_pCurrentActor);
+            break;
+        }
+        case 0x4D: {
+            BoxTrapSrc src;
+            src._fRotY = DEG2RAD(m_S[m_SP--].F);
+            src._fHeight = m_S[m_SP--].F;
+            src._fDepth = m_S[m_SP--].F;
+            src._fWidth = m_S[m_SP--].F;
+            src._vPos.w = 1.0f;
+            src._vPos.z = m_S[m_SP--].F;
+            src._vPos.y = m_S[m_SP--].F;
+            src._vPos.x = m_S[m_SP].F;
+            m_Atel.createEventTrap(src, *m_pCurrentActor);
+            break;
+        }
+        case 0x4E:
+            CSceneInfo::reqChangeScene(m_S[m_SP - 1].I, m_S[m_SP].I, -1, 1, 1);
+            break;
+        case 0x4F: {
+            AvatarRotateParam param;
+            param._vTarget.w = 0.0f;
+            param._vTarget.z = m_S[m_SP--].F;
+            param._vTarget.y = m_S[m_SP--].F;
+            param._vTarget.x = m_S[m_SP--].F;
+            param._fTime = m_S[m_SP--].F;
+            param._nType = m_S[m_SP].I;
+            if (param._nType & 0x100) {
+                param._nType ^= 0x100;
+                param._fTime = param._fTime * 0.016666668f;
+            }
+            if (param._nType < 3 || param._nType == 5 || param._nType == 7 || param._nType == 9 || param._nType == 6 || param._nType == 8 || param._nType == 10) {
+                param._vTarget.z = DEG2RAD(param._vTarget.z);
+                param._vTarget.y = DEG2RAD(param._vTarget.y);
+                param._vTarget.x = DEG2RAD(param._vTarget.x);
+            }
+            if (param._nType == 2) param._nTargetID = 1;
+            if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0xE, &param, 0);
+            break;
+        }
+        case 0x50:
+            m_pCurrentActor->_fTalkableRadius = m_S[m_SP].F;
+            _TRACE(m_bTrace, "--- ACTOR-SET-TALKRAD ---\n");
+            break;
+        case 0x51: {
+            AvatarRotateParam param;
+            c = m_S[m_SP].I;
+            param._fTime = m_S[m_SP - 1].F;
+            param._nTargetID = c & 0xFFFFFF;
+            param._nType = (c & 0x80000000) ? 4 : 2;
+            if (m_pCurrentActor->_pAvatar) {
+                m_pCurrentActor->_pAvatar->reqCommand(0xE, &param, 0);
+                _TRACE(m_bTrace, "--- START ROATE-ACTOR-Target ---TYPE[%d]\n", param._nType);
+            }
+            break;
+        }
+        case 0x52: {
+            FVECTOR vDir;
+            vDir.w = 0.0f;
+            vDir.z = DEG2RAD(m_S[m_SP--].F);
+            vDir.y = DEG2RAD(m_S[m_SP--].F);
+            vDir.x = DEG2RAD(m_S[m_SP].F);
+            if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0xC, &vDir, 0);
+            break;
+        }
+        case 0x53:
+            c = CGameWork::getInt(0, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        case 0x54:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            CGameWork::setInt(0, c, t);
+            break;
+        case 0x55:
+            c = CGameWork::getByte(0, m_S[m_SP].I);
+            m_S[++m_SP].I = (BYTE)c;
+            break;
+        case 0x56:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            CGameWork::setByte(0, c, t);
+            break;
+        case 0x57:
+            c = CGameWork::getFlag(0, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        case 0x58:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            CGameWork::setFlag(0, c, t);
+            break;
+        case 0x59: {
+            FVECTOR vPos;
+            c = m_S[m_SP--].I;
+            DEG2RAD(m_S[m_SP--].F);
+            DEG2RAD(m_S[m_SP--].F);
+            vPos.w = 1.0f;
+            vPos.z = m_S[m_SP--].F;
+            vPos.y = m_S[m_SP--].F;
+            vPos.x = m_S[m_SP].F;
+            break;
+        }
+        case 0x5A:
+            m_S[m_SP].I = player_ctrl(m_S[m_SP].I);
+            break;
+        case 0x5B: {
+            INT t;
+            INT i11 = m_S[m_SP--].I;
+            INT i10 = m_S[m_SP--].I;
+            INT i9 = m_S[m_SP--].I;
+            INT i8 = m_S[m_SP--].I;
+            INT i7 = m_S[m_SP--].I;
+            INT i6 = m_S[m_SP--].I;
+            INT i5 = m_S[m_SP--].I;
+            INT i4 = m_S[m_SP--].I;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            LPCSTR pText = (LPCSTR)(m_pDseg + m_S[m_SP].I);
+            FVECTOR vPos;
+            ATP& atp = m_pCurrentActor->_ATP;
+            ChatWndCreateParam cpar;
+            cpar.pos.setPoint(i2, i3);
+            cpar.size.setSize(i4, i5);
+            cpar.wndColor = i6;
+            cpar.pText = "";
+            cpar.textColor = i7;
+            cpar.fontSize = i8 & 0xFF;
+            cpar.wndArrangement = i9 & 3;
+            cpar.waitFrame = i10;
+            cpar.fontStyle = i11;
+            if (i9 >= 0x80 && m_pCurrentActor) {
+                FVECTOR vWorld;
+                FVECTOR vPos;
+                getAvatar(m_pCurrentActor->_nID)->getNowPosition(vPos);
+                RotTransPers(vPos, CWorldEnv::getWorldScreenMatrix(), vWorld);
+                UINT inX = (UINT)(vPos.x - 1792.0f);
+                UINT inY = (UINT)(vPos.y - 1880.0f);
+                TRACE("chibi-pos %d : %d\n", inX, inY);
+                cpar.cyobiPos.setPoint(inX, inY);
+            } else {
+                cpar.cyobiPos.setPoint(0, 0);
+            }
+            close_dest_se(i1);
+            if (i9 < 0x10) {
+                CChatMan::instance().reqCommand(0x3E8, &cpar, i1);
+            } else {
+                CChatMan::instance().reqCommand(0x3E9, &cpar, i1);
+            }
+            c = (i9 >> 4) & 3;
+            if (i9 >= 0x10) {
+                INT nIdx;
+                switch (c) {
+                case 1:
+                case 3:
+                    nIdx = 1;
+                    break;
+                case 2:
+                case 4:
+                    nIdx = 2;
+                    break;
+                default:
+                    nIdx = 0;
+                    break;
+                }
+                CChatMan::instance().reqCommand(0x3F1, &nIdx, i1);
+            }
+            if (i8 > 0x10000) {
+                CPointI pos((UINT)i8 >> 24, (i8 >> 16) & 0xFF);
+                CChatMan::instance().reqCommand(0x3F3, &pos, i1);
+            }
+            CChatMan::instance().reqCommand(0x3EF, (void*)pText, i1);
+            WinOpenSE(0);
+            CChatMan::instance().reqCommand(0x3EA, NULL, i1);
+            atp.wait_key = i1;
+            atp.status = 12;
+            atp.next_address = m_Pctr;
+            ret = ATEL_RET_MS_WAIT; r = 3;
+            break;
+        }
+        case 0x5C:
+        case 0x5D: {
+            ImageWndCreateParam m_IWCP;
+            FLOAT f3 = m_S[m_SP].F;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            switch (i1) {
+            case 0:
+                TRACE("MESS_CMD OPEN \n");
+                WinOpenSE(0);
+                CChatMan::instance().reqCommand(0x3EA, NULL, i2);
+                break;
+            case 1:
+                TRACE("MESS_CMD CLOSE \n");
+                WinCloseSE();
+                CChatMan::instance().reqCommand(0x3EB, NULL, i2);
+                break;
+            case 2:
+                TRACE("MESS_CMD DESTROY \n");
+                close_dest_se(i2);
+                break;
+            case 3:
+                TRACE("MESS_CMD CLR TEXT \n");
+                CChatMan::instance().reqCommand(0x3EE, NULL, i2);
+                break;
+            case 4:
+                TRACE("MESS_CMD TEXT DELEY \n");
+                CChatMan::instance().reqCommand(0x3F0, &i3, i2);
+                break;
+            case 5:
+                TRACE("MESS_CMD WND STYLE \n");
+                CChatMan::instance().reqCommand(0x3F1, &i3, i2);
+                break;
+            case 6:
+                TRACE("MESS_CMD CHG WND STYLE\n");
+                CChatMan::instance().reqCommand(0x3F2, &i3, i2);
+                break;
+            case 7: {
+                TRACE("MESS_CMD SET TEXT MARGIN\n");
+                CPointI pos;
+                pos.setPoint((i3 >> 8) & 0xFF, i3 & 0xFF);
+                CChatMan::instance().reqCommand(0x3F3, &pos, i2);
+                break;
+            }
+            case 8:
+                TRACE("MESS_CMD SET FONT SIZE\n");
+                CChatMan::instance().reqCommand(0x3F4, &i3, i2);
+                break;
+            case 9: {
+                TRACE("MESS_CMD SET FONT SPACE\n");
+                CSizeI size;
+                size.setSize((i3 >> 8) & 0xFF, i3 & 0xFF);
+                CChatMan::instance().reqCommand(0x3F5, &size, i2);
+                break;
+            }
+            case 10:
+                TRACE("MESS_CMD SET TEXT STYLE\n");
+                CChatMan::instance().reqCommand(0x3F6, &i3, i2);
+                break;
+            case 11:
+                TRACE("MESS_CMD SET TEXT COLOR\n");
+                CChatMan::instance().reqCommand(0x3F7, &i3, i2);
+                break;
+            case 12:
+                TRACE("MESS_CMD SET TEXT EXCOLOR\n");
+                CChatMan::instance().reqCommand(0x3F8, &i3, i2);
+                break;
+            case 13:
+                TRACE("MESS_CMD SETSELECTOFS\n");
+                CChatMan::instance().reqCommand(0x402, &i3, i2);
+                break;
+            case 14:
+                TRACE("MESS_CMD CHGCURSORCOLOR\n");
+                CChatMan::instance().reqCommand(0x403, &i3, i2);
+                break;
+            case 15:
+                TRACE("MESS_CMD SETDISPINTERVAL\n");
+                CChatMan::instance().reqCommand(0x404, &i3, i2);
+                break;
+            case 16:
+                TRACE("MESS_CMD CHANGETEXT_NEXT\n");
+                CChatMan::instance().reqCommand(0x406, NULL, i2);
+                break;
+            case 17:
+                TRACE("MESS_CMD CHAT_ENABLEDISP\n");
+                CChatMan::instance().reqCommand(0x407, &i3, i2);
+                break;
+            case 18:
+                TRACE("MESS_CMD IMAGE_PHASEINI\n");
+                m_IWCP.pos0.m_x = 0x80000000;
+                m_IWCP.pos1.m_x = 0x80000000;
+                m_IWCP.size0.m_w = -1;
+                m_IWCP.size1.m_w = -1;
+                m_IWCP.color0 = 0x80FFFFFF;
+                m_IWCP.color1 = 0xFFFFFF;
+                m_IWCP.kind = 1;
+                m_IWCP.fRate = f3;
+                CChatMan::instance().reqCommand(0x401, &m_IWCP, i2);
+                break;
+            case 20:
+                TRACE("MESS_CMD IMAGE_PHASEINI2\n");
+                m_IWCP.pos0.m_x = 0x80000000;
+                m_IWCP.pos1.m_x = 0x80000000;
+                m_IWCP.size0.m_w = -1;
+                m_IWCP.size1.m_w = -1;
+                m_IWCP.color0 = 0x80808080;
+                m_IWCP.color1 = 0x808080;
+                m_IWCP.kind = 1;
+                m_IWCP.fRate = f3;
+                CChatMan::instance().reqCommand(0x401, &m_IWCP, i2);
+                break;
+            case 21:
+                TRACE("MES_DEST_ALL\n");
+                CChatMan::instance().reqCommand(0x40F, NULL, 0);
+                break;
+            case 22:
+                TRACE("MES_LAYER_CHANGE\n");
+                CChatMan::instance().reqCommand(0x410, NULL, i3);
+                break;
+            case 23:
+                TRACE("MES_SET_C_FADEINDELAY\n");
+                CChatMan::instance().reqCommand(0x411, &f3, i2);
+                break;
+            case 24:
+                TRACE("MES_SET_T_FADEOUTTIME\n");
+                CChatMan::instance().reqCommand(0x412, &f3, i2);
+                break;
+            default:
+                TRACE("MESS_CMD bad param \n");
+                break;
+            }
+            break;
+        }
+        case 0x5E:
+            break;
+        case 0x5F:
+            c = CGameWork::getInt(1, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        case 0x60:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            CGameWork::setInt(1, c, t);
+            break;
+        case 0x61:
+            c = CGameWork::getByte(1, m_S[m_SP].I);
+            m_S[++m_SP].I = (BYTE)c;
+            break;
+        case 0x62:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            CGameWork::setByte(1, c, t);
+            break;
+        case 0x63:
+            c = CGameWork::getFlag(1, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        default:
+            return 4;
+        }
+    } while (r == 0);
+    return r;
 }
-__asm__(".rdata\n.align 4\n.word .L00244F74\n.word .L00244FD0\n.word .L00245004\n.word .L002467E8\n.word .L002467E0\n.word .L0024502C\n.word .L002467E0\n.word .L002450A4\n.word .L002451D8\n.word .L00245290\n.word .L00245290\n.word .L002452FC\n.word .L00245404\n.word .L0024543C\n.word .L00245498\n.word .L00245550\n.word .L0024562C\n.word .L00245668\n.word .L002457B0\n.word .L002457E0\n.word .L00245878\n.word .L002458FC\n.word .L00245920\n.word .L00245930\n.word .L00245958\n.word .L00245968\n.word .L00245978\n.word .L002459AC\n.word .L00245A10\n.word .L00245A40\n.word .L00245ECC\n.word .L00245ECC\n.word .L002467E8\n.word .L002466F8\n.word .L0024671C\n.word .L00246750\n.word .L00246778\n.word .L002467AC\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00245F3C\n.word .L00245F90\n.word .L00245FE4\n.word .L00246000\n.word .L0024604C\n.word .L00246098\n.word .L002460E4\n.word .L00246130\n.word .L00246188\n.word .L002461D4\n.word .L0024622C\n.word .L00246278\n.word .L002462C4\n.word .L00246310\n.word .L0024635C\n.word .L002463A8\n.word .L002463F4\n.word .L00246440\n.word .L0024648C\n.word .L002466E4\n.word .L00246514\n.word .L0024659C\n.word .L002465E8\n.word .L00246634\n.word .L0024667C\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execExt1Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET);
 /* placeholder: rodata of execExt2Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET */
 __asm__(".rdata\n");
 inline void _roPh29() {
