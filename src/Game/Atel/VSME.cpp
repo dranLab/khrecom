@@ -1,6 +1,7 @@
 #include "khtypes.h"
 #include "Game/Atel/VSME.h"
 #include "Game/Atel/Atel.h"
+#include "Form/Menu/WorldCard.h"
 #include "System/Debug.h"
 #include "System/TaskMan.h"
 #include "Form/DebugWindow.h"
@@ -31,6 +32,7 @@ extern "C" char D_00491638[];
 extern "C" char D_00491668[];
 extern "C" char D_004916A0[];
 extern "C" char D_004917F0[];
+extern "C" char D_00491830[];
 extern "C" char D_00491A70[];
 extern "C" char D_00491AE0[];
 extern "C" char D_00491AF0[];
@@ -335,7 +337,12 @@ BOOL CVSM::acStatCardWndWait() {
     return TRUE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatTechWndWait__Q24ATEL4CVSM);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatWorldCardWndWait__Q24ATEL4CVSM);
+BOOL CVSM::acStatWorldCardWndWait() {
+    if (WorldCard::CWorldCardSeq::isNowDispCard()) return FALSE;
+    TRACE(D_00491830);
+    m_Pctr = m_pCurrentActor->_ATP.next_address;
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatCrossFadeWait__Q24ATEL4CVSM);
 BOOL CVSM::acStatEnemyLoadWait() {
     return FALSE;

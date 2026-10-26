@@ -160,6 +160,7 @@ private:
     BOOL acStatBGWait();
     BOOL acStatEternityWait();
     BOOL acStatCardWndWait();
+    BOOL acStatWorldCardWndWait();
     INT player_ctrl(INT nCode, FLOAT fArg);
     void info_disp(INT nCmnd);
     BOOL actor_ref(INT nCmnd, INT nArg);
