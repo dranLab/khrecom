@@ -49,6 +49,7 @@ public:
     virtual void main();
     virtual void disp();
     void setRotateY(FLOAT inRotY);
+    void setPosition(const FVECTOR& inPosition);
 
 private:
     FLOAT m_fRotY;           /* 0x40 */
@@ -505,7 +506,12 @@ void CMemo3DObj::setRotateY(FLOAT inRotY) {
         m_bTouch = TRUE;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPosition__10CMemo3DObjRC7FVECTOR);
+void CMemo3DObj::setPosition(const FVECTOR& inPosition) {
+    if (!Math3D::EqualVector(m_vPosition, inPosition, 1e-05f)) {
+        m_vPosition.set(inPosition.x, inPosition.y, inPosition.z);
+        m_bTouch = TRUE;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __13CMemo2DLayoutP5CTask);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DLayout);
 /* placeholder: rodata of main__13CMemo2DLayout */
