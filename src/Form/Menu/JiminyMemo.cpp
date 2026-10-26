@@ -178,6 +178,7 @@ public:
     void setInState(INT inSeqId);
     void setOutState(INT inSeqId);
     void setSlideMoveParam(class CMemo2DCursor* inCursor);
+    void main(FLOAT inFrameRate);
     void setState(INT inState) { m_iState = inState; }
     void setBasePosition(const FVECTOR& inPosition) { m_vBasePosition = inPosition; }
     void setup(const CHAR* inSeqName, const INT* inSeqTbl, INT inLayer);
@@ -828,7 +829,40 @@ void CMemo2DSequence::setLocalPosition() {
     AddVectorXYZ(v, m_vBasePosition, m_vShiftPosition);
     setLocalPos(v);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__15CMemo2DSequencef);
+void SubVectorXYZ(FVECTOR& out, const FVECTOR& a, const FVECTOR& b);
+extern "C" void sceVu0InterVectorXYZ(FVECTOR& out, FVECTOR& v0, FVECTOR& v1, float r);
+extern "C" float powf(float x, float y);
+void CMemo2DSequence::main(FLOAT inFrameRate) {
+    if (m_iStateFlag & 1) {
+        switch (m_iState) {
+        case 1:
+            if (isEnd(0)) {
+                setState(2);
+                replaceSequenceId(1);
+            }
+            break;
+        case 3:
+            if (isEnd(0)) {
+                setState(4);
+                enableDisp(FALSE);
+            }
+            break;
+        }
+    }
+    if (m_bMoveSlideEnable == 1) {
+        m_fMoveTimer += inFrameRate;
+        if (m_fMoveTimer >= 30.0f) {
+            m_fMoveTimer = 30.0f;
+            m_bMoveSlideEnable = FALSE;
+        }
+        FVECTOR posi = m_vPosition;
+        FVECTOR aim = m_vAimPosition;
+        FVECTOR shift = m_vShiftPosition;
+        SubVectorXYZ(aim, aim, shift);
+        sceVu0InterVectorXYZ(m_vPosition, aim, posi, 1.0f - powf(1.0f - m_fMoveTimer / 30.0f, 2.5f));
+        setLocalPos(m_vPosition);
+    }
+}
 void CMemo2DSequence::setSlideMoveParam(CMemo2DCursor* inCursor) {
     if (inCursor) {
         m_bMoveSlideEnable = TRUE;
