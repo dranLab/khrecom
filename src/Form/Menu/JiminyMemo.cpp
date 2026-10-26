@@ -802,7 +802,22 @@ void CMemo2DCard::setLocalPosition() {
     ScaleVectorXYZ(v, v, m_fScale);
     setLocalPos(v);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setState__11CMemo2DCardi);
+void CMemo2DCard::setState(INT inState) {
+    m_iState = inState;
+    switch (inState) {
+    case 1:
+        break;
+    case 2:
+        replaceSeq(0, m_pEmptySeqName, JiminyMemo::CursorSeqTbl[1]);
+        break;
+    case 3:
+        replaceSeq(0, m_pEmptySeqName, JiminyMemo::CursorSeqTbl[2]);
+        break;
+    case 4:
+        enableDisp(FALSE);
+        break;
+    }
+}
 void CMemo2DCard::main(FLOAT inFrameRate) {
     switch (m_iState) {
     case 1:
