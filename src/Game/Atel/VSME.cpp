@@ -1318,39 +1318,50 @@ inline void _roPh19() {
     TRACE("CVSM::~CVSM()\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _$_Q24ATEL4CVSM);
-/* placeholder: rodata of initActor__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatNop__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatExec__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatRWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatCWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatIWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatPWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatSWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatMWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatCPWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatSNWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatMSWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatShopWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatDropWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatEnemyLoadWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatRCWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatEQWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatWKWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatXWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatBSWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatBAWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatDLWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatBGWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatActorWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatEternityWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatRsrcLoadWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatCardWndWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatTechWndWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatWorldCardWndWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatCrossFadeWait__Q24ATEL4CVSM\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", initActor__Q24ATEL4CVSM);
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CVSM::initActor() {
+    Actor* p = m_ActorTbl;
+    for (INT i = 0; i < 64; i++, p++) {
+        p->_nID = -1;
+        p->_nRsrcID = -1;
+        p->_pAvatar = NULL;
+        p->_pEventTrap = NULL;
+        p->_fTalkableRadius = 0.0f;
+    }
+    m_ActorStateFnc[0] = &CVSM::acStatNop;
+    m_ActorStateFnc[1] = &CVSM::acStatExec;
+    m_ActorStateFnc[2] = &CVSM::acStatNop;
+    m_ActorStateFnc[3] = &CVSM::acStatWait;
+    m_ActorStateFnc[4] = &CVSM::acStatRWait;
+    m_ActorStateFnc[5] = &CVSM::acStatCWait;
+    m_ActorStateFnc[6] = &CVSM::acStatIWait;
+    m_ActorStateFnc[7] = &CVSM::acStatPWait;
+    m_ActorStateFnc[8] = &CVSM::acStatSWait;
+    m_ActorStateFnc[9] = &CVSM::acStatMWait;
+    m_ActorStateFnc[10] = &CVSM::acStatCPWait;
+    m_ActorStateFnc[11] = &CVSM::acStatSNWait;
+    m_ActorStateFnc[12] = &CVSM::acStatMSWait;
+    m_ActorStateFnc[13] = &CVSM::acStatShopWait;
+    m_ActorStateFnc[14] = &CVSM::acStatDropWait;
+    m_ActorStateFnc[15] = &CVSM::acStatEnemyLoadWait;
+    m_ActorStateFnc[16] = &CVSM::acStatRCWait;
+    m_ActorStateFnc[17] = &CVSM::acStatEQWait;
+    m_ActorStateFnc[18] = &CVSM::acStatWKWait;
+    m_ActorStateFnc[19] = &CVSM::acStatXWait;
+    m_ActorStateFnc[20] = &CVSM::acStatBSWait;
+    m_ActorStateFnc[21] = &CVSM::acStatBAWait;
+    m_ActorStateFnc[22] = &CVSM::acStatDLWait;
+    m_ActorStateFnc[23] = &CVSM::acStatBGWait;
+    m_ActorStateFnc[24] = &CVSM::acStatActorWait;
+    m_ActorStateFnc[25] = &CVSM::acStatEternityWait;
+    m_ActorStateFnc[26] = &CVSM::acStatRsrcLoadWait;
+    m_ActorStateFnc[27] = &CVSM::acStatCardWndWait;
+    m_ActorStateFnc[28] = &CVSM::acStatTechWndWait;
+    m_ActorStateFnc[29] = &CVSM::acStatWorldCardWndWait;
+    m_ActorStateFnc[30] = &CVSM::acStatCrossFadeWait;
+    CGameWork::setFlag(1, 0x26, FALSE);
+    CGameWork::setFlag(1, 0x38, FALSE);
+}
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 /* Parked: 4 lines: after the magic test the original advances the cursor (s0) in the beq delay slot, ours
    on the fall-through path (pAddr += 4 after the if). Everything else matches: pAddr as the byte cursor with
