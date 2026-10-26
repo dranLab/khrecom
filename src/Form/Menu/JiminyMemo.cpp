@@ -332,6 +332,433 @@ struct ContentCommonWork {
 };
 
 typedef USHORT CT_LOWER;
+struct ContentMenuWork {
+    HANDLE hJiminyObj; /* 0x00 */
+    CMemo2DSequence* pList; /* 0x04 */
+    CMemo2DSequence* pTalk; /* 0x08 */
+    CMemo2DCursor* pCursor; /* 0x0c */
+    CMemo2DSequence* pCursorLight; /* 0x10 */
+    INT iStringNum; /* 0x14 */
+    D2::C2DFnt** pString; /* 0x18 */
+    INT iSeqCtrlNum; /* 0x1c */
+    D2::C2DSeqCtrl** pSeqCtrl; /* 0x20 */
+    INT iCursorCurrent; /* 0x24 */
+    INT iCursorPosiNum; /* 0x28 */
+    INT iTelopNo; /* 0x2c */
+
+    void init() {
+        hJiminyObj = 0;
+        pList = NULL;
+        pTalk = NULL;
+        pCursor = NULL;
+        pCursorLight = NULL;
+        pString = NULL;
+        pSeqCtrl = NULL;
+        iCursorCurrent = 0;
+        iCursorPosiNum = 0;
+        iTelopNo = 0;
+    }
+};
+struct ContentStoryWork {
+    CMemo2DSequence* pList; /* 0x00 */
+    CMemo2DCursor* pCursor; /* 0x04 */
+    D2::C2DFnt** pString; /* 0x08 */
+    INT iStringNum; /* 0x0c */
+    D2::C2DSeqCtrl** pSeqCtrl; /* 0x10 */
+    INT iSeqCtrlNum; /* 0x14 */
+    D2::C2DSeqCtrl** pNewMarkSeq; /* 0x18 */
+    D2::C2DSeqCtrl** pScrollBar; /* 0x1c */
+    INT iCursorCurrent; /* 0x20 */
+    FLOAT fCursorIntervalY; /* 0x24 */
+    SHORT iNoteListNum; /* 0x28 */
+    SHORT iCursorPosiNum; /* 0x2a */
+    INT iCTCodeOffset; /* 0x2c */
+
+    void init() {
+        pList = NULL;
+        pCursor = NULL;
+        pString = NULL;
+        pSeqCtrl = NULL;
+        pNewMarkSeq = NULL;
+        pScrollBar = NULL;
+        iCursorCurrent = 0;
+        fCursorIntervalY = 0.0f;
+        iStringNum = 0;
+        iSeqCtrlNum = 0;
+        iNoteListNum = 0;
+        iCursorPosiNum = 0;
+        iCTCodeOffset = 0;
+    }
+};
+struct ContentStoryViewWork {
+    CMemo2DSequence* pList; /* 0x00 */
+    CHAR** pTextLineBuf; /* 0x04 */
+    INT iStringNum; /* 0x08 */
+    D2::C2DFnt** pString; /* 0x0c */
+    INT iSeqCtrlNum; /* 0x10 */
+    D2::C2DSeqCtrl** pSeqCtrl; /* 0x14 */
+    D2::C2DSeqCtrl* pTopArrowSeq; /* 0x18 */
+    D2::C2DSeqCtrl* pBottomArrowSeq; /* 0x1c */
+    D2::C2DSeqCtrl* pPictSeq; /* 0x20 */
+    INT iCurrentTextLine; /* 0x24 */
+    INT iTextLineNum; /* 0x28 */
+    INT iWorldNo; /* 0x2c */
+    INT iCTCodeOffset; /* 0x30 */
+    INT iAllStoryNum; /* 0x34 */
+    INT iPictureNo; /* 0x38 */
+    INT iPrevNo; /* 0x3c */
+    INT iNextNo; /* 0x40 */
+    USHORT iGroupId; /* 0x44 */
+    USHORT iRsrcId; /* 0x46 */
+    char pPictFileName[16]; /* 0x48 */
+    char pPictSeqName[16]; /* 0x58 */
+
+    void init() {
+        pList = NULL;
+        pTextLineBuf = NULL;
+        pString = NULL;
+        pSeqCtrl = NULL;
+        pTopArrowSeq = NULL;
+        pBottomArrowSeq = NULL;
+        pPictSeq = NULL;
+        iCurrentTextLine = 0;
+        iTextLineNum = 0;
+        iStringNum = 0;
+        iSeqCtrlNum = 0;
+        iWorldNo = 0;
+        iCTCodeOffset = 0;
+        iAllStoryNum = 0;
+        iPictureNo = 0;
+        iPrevNo = -1;
+        iNextNo = -1;
+        iGroupId = 0;
+        iRsrcId = 0;
+        for (INT i = 0; i < 16; i++) pPictFileName[i] = 0;
+        for (INT i = 0; i < 16; i++) pPictSeqName[i] = 0;
+    }
+};
+struct ContentCollectWork {
+    CMemo2DSequence* pList; /* 0x00 */
+    CMemo2DSequence* pBase; /* 0x04 */
+    CMemo2DCursor* pCursor; /* 0x08 */
+    CMemo2DSequence* pLight; /* 0x0c */
+    CMemo2DSequence* pFrame; /* 0x10 */
+    CMemo2DSequence* pFlicker; /* 0x14 */
+    D2::C2DFnt** pString; /* 0x18 */
+    INT iStringNum; /* 0x1c */
+    D2::C2DSeqCtrl** pSeqCtrl; /* 0x20 */
+    INT iSeqCtrlNum; /* 0x24 */
+    CMemo2DCard** pCard; /* 0x28 */
+    INT iCardNum; /* 0x2c */
+    SHORT sCursorPosiX; /* 0x30 */
+    SHORT sCursorPosiY; /* 0x32 */
+    char Percentage[16]; /* 0x34 */
+    FLOAT fScale; /* 0x44 */
+    FLOAT fZoomTimer; /* 0x48 */
+    FLOAT fDefaultScale; /* 0x4c */
+    INT iCursorLimitX; /* 0x50 */
+    INT iCursorLimitY; /* 0x54 */
+    CursorPosition vShiftVec; /* 0x58 */
+    CursorPosition vShiftPosi; /* 0x60 */
+    D2::C2DSeqCtrl* pMaskFG; /* 0x68 */
+
+    void init() {
+        pList = NULL;
+        vShiftPosi.y = 0.0f;
+        pBase = NULL;
+        pCursor = NULL;
+        pLight = NULL;
+        pFrame = NULL;
+        pFlicker = NULL;
+        pString = NULL;
+        pSeqCtrl = NULL;
+        pCard = NULL;
+        pMaskFG = NULL;
+        iStringNum = 0;
+        iSeqCtrlNum = 0;
+        sCursorPosiX = 0;
+        sCursorPosiY = 0;
+        iCardNum = 0;
+        iCursorLimitX = 0;
+        iCursorLimitY = 0;
+        Percentage[0] = 0;
+        fScale = 0.0f;
+        fZoomTimer = 0.0f;
+        vShiftVec.x = 0.0f;
+        vShiftVec.y = 0.0f;
+        vShiftPosi.x = 0.0f;
+        fDefaultScale = 1.0f;
+    }
+};
+struct ContentCardWork {
+    CMemo2DSequence* pList; /* 0x00 */
+    CMemo2DCursor* pCursor; /* 0x04 */
+    D2::C2DFnt** pString; /* 0x08 */
+    INT iStringNum; /* 0x0c */
+    D2::C2DSeqCtrl** pSeqCtrl; /* 0x10 */
+    INT iSeqCtrlNum; /* 0x14 */
+    D2::C2DSeqCtrl** pNewMarkSeq; /* 0x18 */
+    D2::C2DSeqCtrl** pKingMarkSeq; /* 0x1c */
+    D2::C2DSeqCtrl** pScrollBar; /* 0x20 */
+    INT iCursorCurrent; /* 0x24 */
+    INT iListNum; /* 0x28 */
+    INT iCursorPosiNum; /* 0x2c */
+    FLOAT fCursorIntervalY; /* 0x30 */
+    CT_LOWER starCTNo; /* 0x34 */
+    BYTE* pCardKindFlagTbl; /* 0x38 */
+    BYTE* pCompFlagTbl; /* 0x3c */
+
+    void init() {
+        pList = NULL;
+        pCursor = NULL;
+        pString = NULL;
+        pSeqCtrl = NULL;
+        pCardKindFlagTbl = NULL;
+        pNewMarkSeq = NULL;
+        pKingMarkSeq = NULL;
+        pCompFlagTbl = NULL;
+        pScrollBar = NULL;
+        iStringNum = 0;
+        iSeqCtrlNum = 0;
+        iCursorCurrent = 0;
+        iListNum = 0;
+        iCursorPosiNum = 0;
+        fCursorIntervalY = 0.0f;
+        starCTNo = 0;
+    }
+};
+struct ContentCardSelectWork {
+    CMemo2DSequence* pList; /* 0x00 */
+    CMemo2DCursor* pCursor; /* 0x04 */
+    D2::C2DFnt** pString; /* 0x08 */
+    INT iStringNum; /* 0x0c */
+    D2::C2DSeqCtrl** pSeqCtrl; /* 0x10 */
+    INT iSeqCtrlNum; /* 0x14 */
+    D2::C2DSeqCtrl** pNewMarkSeq; /* 0x18 */
+    CT_LOWER* pCTCodeTbl; /* 0x1c */
+    D2::C2DSeqCtrl** pScrollBar; /* 0x20 */
+    INT iCursorCurrent; /* 0x24 */
+    FLOAT fCursorIntervalY; /* 0x28 */
+    INT iKindNo; /* 0x2c */
+    INT iListNum; /* 0x30 */
+    INT iCursorPosiNum; /* 0x34 */
+    INT iEventFlagId; /* 0x38 */
+    FLOAT fScrollBarLength; /* 0x3c */
+    FLOAT fScrollBarParListNum; /* 0x40 */
+
+    void init() {
+        pList = NULL;
+        pCursor = NULL;
+        pString = NULL;
+        pSeqCtrl = NULL;
+        pNewMarkSeq = NULL;
+        pCTCodeTbl = NULL;
+        pScrollBar = NULL;
+        iCursorCurrent = 0;
+        fCursorIntervalY = 0.0f;
+        iStringNum = 0;
+        iSeqCtrlNum = 0;
+        iKindNo = 0;
+        iListNum = 0;
+        iCursorPosiNum = 0;
+        iEventFlagId = 0;
+        fScrollBarLength = 0.0f;
+        fScrollBarParListNum = 0.0f;
+    }
+};
+struct ContentCardViewWork {
+    CMemo2DSequence* pList; /* 0x00 */
+    CMemo2DCard* pCard; /* 0x04 */
+    CHAR** pTextLineBuf; /* 0x08 */
+    INT iStringNum; /* 0x0c */
+    D2::C2DFnt** pString; /* 0x10 */
+    INT iSeqCtrlNum; /* 0x14 */
+    D2::C2DSeqCtrl** pSeqCtrl; /* 0x18 */
+    INT* pListIndex; /* 0x1c */
+    D2::C2DSeqCtrl* pTopArrowSeq; /* 0x20 */
+    D2::C2DSeqCtrl* pBottomArrowSeq; /* 0x24 */
+    INT iCurrentTextLine; /* 0x28 */
+    INT iTextLineNum; /* 0x2c */
+    INT iKindNo; /* 0x30 */
+    INT iCardNo; /* 0x34 */
+    INT iKindCardMax; /* 0x38 */
+    INT iListNum; /* 0x3c */
+    INT iPrevNo; /* 0x40 */
+    INT iNextNo; /* 0x44 */
+
+    void init() {
+        pList = NULL;
+        pCard = NULL;
+        pTextLineBuf = NULL;
+        pString = NULL;
+        pSeqCtrl = NULL;
+        pListIndex = NULL;
+        pTopArrowSeq = NULL;
+        pBottomArrowSeq = NULL;
+        iCurrentTextLine = 0;
+        iTextLineNum = 0;
+        iStringNum = 0;
+        iSeqCtrlNum = 0;
+        iKindNo = 0;
+        iCardNo = 0;
+        iKindCardMax = 0;
+        iListNum = 0;
+        iPrevNo = -1;
+        iNextNo = -1;
+    }
+};
+struct ContentCharaWork {
+    CMemo2DSequence* pList; /* 0x00 */
+    CMemo2DCursor* pCursor; /* 0x04 */
+    D2::C2DFnt** pString; /* 0x08 */
+    INT iStringNum; /* 0x0c */
+    D2::C2DSeqCtrl** pSeqCtrl; /* 0x10 */
+    INT iSeqCtrlNum; /* 0x14 */
+    D2::C2DSeqCtrl** pScrollBar; /* 0x18 */
+    D2::C2DSeqCtrl** pNewMarkSeq; /* 0x1c */
+    D2::C2DSeqCtrl** pKingMarkSeq; /* 0x20 */
+    INT iCursorCurrent; /* 0x24 */
+    FLOAT fCursorIntervalY; /* 0x28 */
+    INT iNoteListNum; /* 0x2c */
+    INT iCursorPosiNum; /* 0x30 */
+    INT iCTCodeOffset; /* 0x34 */
+    BYTE* pCardKindFlagTbl; /* 0x38 */
+    BYTE* pCompFlagTbl; /* 0x3c */
+
+    void init() {
+        pList = NULL;
+        pCursor = NULL;
+        pString = NULL;
+        pSeqCtrl = NULL;
+        pCardKindFlagTbl = NULL;
+        pNewMarkSeq = NULL;
+        pKingMarkSeq = NULL;
+        pScrollBar = NULL;
+        iCursorCurrent = 0;
+        fCursorIntervalY = 0.0f;
+        iStringNum = 0;
+        iSeqCtrlNum = 0;
+        iNoteListNum = 0;
+        iCursorPosiNum = 0;
+        iCTCodeOffset = 0;
+    }
+};
+struct ContentCharaSelectWork {
+    CMemo2DSequence* pList; /* 0x00 */
+    CMemo2DCursor* pCursor; /* 0x04 */
+    D2::C2DFnt** pString; /* 0x08 */
+    INT iStringNum; /* 0x0c */
+    D2::C2DSeqCtrl** pSeqCtrl; /* 0x10 */
+    INT iSeqCtrlNum; /* 0x14 */
+    D2::C2DSeqCtrl** pScrollBar; /* 0x18 */
+    D2::C2DSeqCtrl** pNewMarkSeq; /* 0x1c */
+    CT_LOWER* pCTCodeTbl; /* 0x20 */
+    INT iCursorCurrent; /* 0x24 */
+    FLOAT fCursorIntervalY; /* 0x28 */
+    INT iKindNo; /* 0x2c */
+    INT iListNum; /* 0x30 */
+    INT iCursorPosiNum; /* 0x34 */
+    INT iEventFlagId; /* 0x38 */
+    FLOAT fScrollBarLength; /* 0x3c */
+    FLOAT fScrollBarParListNum; /* 0x40 */
+
+    void init() {
+        pList = NULL;
+        pCursor = NULL;
+        pString = NULL;
+        pSeqCtrl = NULL;
+        pNewMarkSeq = NULL;
+        pCTCodeTbl = NULL;
+        pScrollBar = NULL;
+        iCursorCurrent = 0;
+        fCursorIntervalY = 0.0f;
+        iStringNum = 0;
+        iSeqCtrlNum = 0;
+        iKindNo = 0;
+        iListNum = 0;
+        iCursorPosiNum = 0;
+        iEventFlagId = 0;
+        fScrollBarLength = 0.0f;
+        fScrollBarParListNum = 0.0f;
+    }
+};
+struct ContentCharaViewWork {
+    CMemo2DSequence* pList; /* 0x00 */
+    CMemo2DCard* pChara; /* 0x04 */
+    CHAR** pTextLineBuf; /* 0x08 */
+    INT iStringNum; /* 0x0c */
+    D2::C2DFnt** pString; /* 0x10 */
+    INT iSeqCtrlNum; /* 0x14 */
+    D2::C2DSeqCtrl** pSeqCtrl; /* 0x18 */
+    D2::C2DSeqCtrl* pTopArrowSeq; /* 0x1c */
+    D2::C2DSeqCtrl* pBottomArrowSeq; /* 0x20 */
+    CT_LOWER* pCTCodeTbl; /* 0x24 */
+    INT iCurrentTextLine; /* 0x28 */
+    INT iTextLineNum; /* 0x2c */
+    INT iKindNo; /* 0x30 */
+    INT iCharaNo; /* 0x34 */
+    INT iListNum; /* 0x38 */
+    INT iPrevNo; /* 0x3c */
+    INT iNextNo; /* 0x40 */
+    USHORT iGroupId; /* 0x44 */
+    USHORT iRsrcId; /* 0x46 */
+    char DefeatEnemyStr[16]; /* 0x48 */
+
+    void init() {
+        pList = NULL;
+        pChara = NULL;
+        pTextLineBuf = NULL;
+        pString = NULL;
+        pSeqCtrl = NULL;
+        pTopArrowSeq = NULL;
+        pBottomArrowSeq = NULL;
+        pCTCodeTbl = NULL;
+        iCurrentTextLine = 0;
+        iTextLineNum = 0;
+        iStringNum = 0;
+        iSeqCtrlNum = 0;
+        iKindNo = 0;
+        iCharaNo = 0;
+        iListNum = 0;
+        iPrevNo = -1;
+        iGroupId = 0;
+        iRsrcId = 0;
+        iNextNo = -1;
+        for (INT i = 0; i < 16; i++) DefeatEnemyStr[i] = 0;
+    }
+};
+struct ContentCharaModelViewWork {
+    HANDLE hObj; /* 0x00 */
+    CMemo2DSequence* pDustyList; /* 0x04 */
+    INT iStep; /* 0x08 */
+    INT iState; /* 0x0c */
+    char ScaleStr[64]; /* 0x10 */
+};
+struct ContentMinigameWork {
+    CMemo2DSequence* pList; /* 0x00 */
+    D2::C2DFnt** pString; /* 0x04 */
+    INT iStringNum; /* 0x08 */
+    D2::C2DSeqCtrl** pSeqCtrl; /* 0x0c */
+    INT iSeqCtrlNum; /* 0x10 */
+    char strBGlider[64]; /* 0x14 */
+    char strWDive[64]; /* 0x54 */
+    char strEBee[64]; /* 0x94 */
+    char strTJump[64]; /* 0xd4 */
+    char strBPanic[64]; /* 0x114 */
+
+    void init() {
+        pList = NULL;
+        pString = NULL;
+        pSeqCtrl = NULL;
+        iStringNum = 0;
+        iSeqCtrlNum = 0;
+        strBGlider[0] = 0;
+        strWDive[0] = 0;
+        strEBee[0] = 0;
+        strTJump[0] = 0;
+        strBPanic[0] = 0;
+    }
+};
 class CJiminyMemo : public CMenu {
 private:
     UBYTE _m_0x80[0x10];  /* 0x080 */
@@ -346,7 +773,19 @@ private:
     CHAR* m_pLadName;     /* 0x0b4 */
     CHAR* m_pLadFileName; /* 0x0b8 */
     ContentCommonWork m_ContentCommon;              /* 0x0bc */
-    UBYTE m_Content[0x570 - 0xe4]; /* 0x0e4 m_ContentMenu .. m_ContentMinigame */
+    ContentMenuWork m_ContentMenu;                 /* 0x0e4 */
+    ContentStoryWork m_ContentStory;               /* 0x114 */
+    ContentStoryViewWork m_ContentStoryView;       /* 0x144 */
+    ContentCollectWork m_ContentCollect;           /* 0x1ac */
+    ContentCardWork m_ContentCard;                 /* 0x218 */
+    ContentCardSelectWork m_ContentCardSelect;     /* 0x258 */
+    ContentCardViewWork m_ContentCardView;         /* 0x29c */
+    ContentCharaWork m_ContentChara;               /* 0x2e4 */
+    ContentCharaSelectWork m_ContentCharaSelect;   /* 0x324 */
+    ContentCharaViewWork m_ContentCharaView;       /* 0x368 */
+    ContentCharaModelViewWork m_ContentCharaModelView; /* 0x3c0 */
+    ContentMinigameWork m_ContentMinigame;         /* 0x410 */
+    UBYTE _m_0x564[0xc];                           /* 0x564 */
 
     INT& work(INT inOfs) { return *(INT*)((UBYTE*)&m_ContentCommon + (inOfs - 0xbc)); }
     BOOL isModeJiminyMemo() { return m_iPlayerMode == 0; }
@@ -1352,17 +1791,46 @@ CJiminyMemo::CJiminyMemo(CTask* inParent, INT inPlayerMode) : CMenu(inParent, -1
     initialize(inPlayerMode);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_11CJiminyMemo);
-/* placeholder: rodata of initialize__11CJiminyMemoi */
-__asm__(".rdata\n");
-inline void _roPh11() {
-    TRACE("%s\n");
-    TRACE("########## Jiminy memo is MainApp boot. ##########");
-    TRACE("jiminy_top:00");
-    TRACE("jiminy_top.lad");
-    TRACE("Drepo:00");
-    TRACE("Drepo.lad");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CJiminyMemo::initialize(INT inPlayerMode) {
+    INT resourceId;
+    TRACE_USER((USER)10, "%s\n", "########## Jiminy memo is MainApp boot. ##########");
+    m_iPlayerMode = inPlayerMode;
+    setContentMode(0);
+    m_uiStateFlags = 0;
+    m_hLayout = 0;
+    m_pMessSeq = NULL;
+    m_pMessString = NULL;
+    m_ContentCommon.init();
+    m_ContentMenu.init();
+    m_ContentStory.init();
+    m_ContentStoryView.init();
+    m_ContentCollect.init();
+    m_ContentCard.init();
+    m_ContentCardSelect.init();
+    m_ContentCardView.init();
+    m_ContentChara.init();
+    m_ContentCharaSelect.init();
+    m_ContentCharaView.init();
+    m_ContentMinigame.init();
+    if (isModeJiminyMemo()) {
+        m_pLadName = "jiminy_top:00";
+        m_pLadFileName = "jiminy_top.lad";
+    } else {
+        m_pLadName = "Drepo:00";
+        m_pLadFileName = "Drepo.lad";
+    }
+    resourceId = JiminyMemo::RsrcId[getLoadResourceIndex()];
+    if (!CRsrcDB::hasRsrcGroup(2, resourceId)) {
+        CRcf::reqLoadRCFFront(2, resourceId, 0, NULL, 0);
+        if (isModeJiminyMemo()) {
+            CRcf::reqLoadRCF(JiminyMemo::getHostGroupId(), JiminyMemo::getHostRsrcId(), 0, NULL, 0);
+        }
+        m_iStep = 10;
+    } else {
+        m_iStep = 20;
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", initialize__11CJiminyMemoi);
 void CJiminyMemo::finalize() {
     CMemo2DLayout* pLay;
     INT groupId;
