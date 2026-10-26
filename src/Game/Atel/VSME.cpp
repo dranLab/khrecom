@@ -365,10 +365,46 @@ static BOOL DebugSetTutorialFlag(CDebugWindow* pObj, INT inY, INT inParam) {
 }
 /* the asm .data (debug window tables) refers to it by name until the data comes from source */
 __asm__(".globl DebugSetTutorialFlag__8DWTEventP12CDebugWindowii");
-/* placeholder: rodata of DebugSetCardPossibleFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00241C3C\n.word .L00241C44\n.word .L00241C4C\n.word .L00241C54\n.word .L00241C5C\n.word .L00241C64\n.word .L00241C6C\n.word .L00241C74\n.word .L00241C7C\n.word .L00241C84\n.word .L00241C8C\n.word .L00241C94\n.word .L00241C9C\n.word .L00241CA4\n.word .L00241CAC\n.word .L00241CB4\n.word .L00241CBC\n.word .L00241CC4\n.word .L00241CCC\n.word .L00241CD4\n.word .L00241CDC\n.word .L00241CE4\n.word .L00241CEC\n.word .L00241CF4\n.word .L00241CFC\n.word .L00241D04\n.word func_0\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetCardPossibleFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetCardPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT card = CGameWork::getInt(0, 0x21);
+        switch (inY) {
+        case 0: card ^= 0x1; break;
+        case 1: card ^= 0x2; break;
+        case 2: card ^= 0x4; break;
+        case 3: card ^= 0x8; break;
+        case 4: card ^= 0x10; break;
+        case 5: card ^= 0x20; break;
+        case 6: card ^= 0x40; break;
+        case 7: card ^= 0x80; break;
+        case 8: card ^= 0x100; break;
+        case 9: card ^= 0x200; break;
+        case 10: card ^= 0x400; break;
+        case 11: card ^= 0x800; break;
+        case 12: card ^= 0x1000; break;
+        case 13: card ^= 0x2000; break;
+        case 14: card ^= 0x4000; break;
+        case 15: card ^= 0x8000; break;
+        case 16: card ^= 0x10000; break;
+        case 17: card ^= 0x20000; break;
+        case 18: card ^= 0x40000; break;
+        case 19: card ^= 0x80000; break;
+        case 20: card ^= 0x100000; break;
+        case 21: card ^= 0x200000; break;
+        case 22: card ^= 0x400000; break;
+        case 23: card ^= 0x800000; break;
+        case 24: card ^= 0x1000000; break;
+        case 25: card ^= 0x2000000; break;
+        }
+        DebugWork::g_dw.atelwork.iPossibleCard = card;
+        CGameWork::setInt(0, 0x21, card);
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetCardPossibleFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetFriendPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
