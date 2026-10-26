@@ -11,6 +11,7 @@
 #include "Game/CardBattle.h"
 #include "Form/Menu/JiminyMemo.h"
 #include "System/Math3D.h"
+#include "System/Com.h"
 #include "System/TaskMan.h"
 #include "Game/CardKind.h"
 #include "System/Graphic/Camera.h"
@@ -68,6 +69,12 @@ public:
     BOOL isLoadEnable() { return m_bLoadEnable; }
     void setPosition(const FVECTOR& inPosition);
     void calcLocalMatrix();
+    void setErase() { m_bEraseModel = TRUE; }
+    FLOAT getRotateY() { return m_fRotY; }
+    void setScale(FLOAT s) { m_fScale = s; }
+    void setFadeCountMax(FLOAT inMax) { m_fFadeCountMax = inMax; }
+    void setNotSemiFlag(BOOL inFlag) { m_bNotSemiFlag = inFlag; }
+    void setFade2PathFlag(BOOL inFlag) { m_bFade2PathFlag = inFlag; }
 
 private:
     FLOAT m_fRotY;           /* 0x40 */
@@ -347,6 +354,9 @@ private:
     INT getLoadResourceIndex() { return m_iPlayerMode != 0; }
     void setContentStep(INT inStep) { m_ContentCommon.iStep = inStep; }
     void setContentParam(INT inIdx, INT inParam) { m_ContentCommon.param[inIdx] = inParam; }
+    void setContentTimer(FLOAT inTimer) { m_ContentCommon.fTimer = inTimer; }
+    FLOAT getContentTimer() { return m_ContentCommon.fTimer; }
+    INT getContentParam(INT inIdx) { return m_ContentCommon.param[inIdx]; }
 
 public:
     CJiminyMemo(CTask* inParent, INT inMode);
@@ -440,7 +450,7 @@ private:
     void contentChara();
     void contentCharaSelect();
     void contentCharaView();
-    void contentCharaView_ModelView();
+    INT contentCharaView_ModelView();
     void contentMinigame();
     static void (CJiminyMemo::*m_pContentTbl[11])();
 };
@@ -2464,6 +2474,126 @@ INT CJiminyMemo::getPrevCharaId(INT inId) {
 INT CJiminyMemo::getNextCharaId(INT inId) {
     return getNextContentId(inId, work(0x3A0), work(0x39C));
 }
+namespace JiminyMemo {
+namespace CharaView {
+extern INT DuskyNoteSeqData[5];
+extern FVECTOR ModelPosi;
+}
+}
+/* Parked: 6 lines: three FP registers of case 40 (DEG2RAD(2.0f) constant, 1/4096 constant, the rotation load:
+   original f4/f1/f3, ours f1/f3/f4). Everything else matches.
+   tried: line-marker layout (both table arms written out, flags 0x8000 then 0x4000, setter order, ry split over
+   3 statements), literal vs DEG2RAD constant, * 1/4096 vs / 4096, operand orders, ry as one or two statements;
+   tools/permuter.py 6 min starts at score 1 in its copy (another path) but 6 lines here: path/hash-sensitive. */
+#if 0
+INT CJiminyMemo::contentCharaView_ModelView() {
+    INT rval = TRUE;
+    INT charaNo;
+    INT kindNo;
+    USHORT groupId;
+    USHORT rsrcId;
+    FLOAT scale;
+    FLOAT posiY;
+    FLOAT rotY;
+    USHORT resrcFlag;
+    USHORT notSemiFlag;
+    USHORT fade2PathFlag;
+    CMemo2DSequence* pList;
+    CMemo3DObj* pObj;
+    switch (work(0x3C8)) {
+    case 20:
+        charaNo = getContentParam(1);
+        kindNo = getContentParam(0);
+        groupId = *(USHORT*)&work(0x3AC);
+        rsrcId = *(USHORT*)&work(0x3AE);
+        if (isModeJiminyMemo()) {
+            scale = JiminyMemo::CharaModelResourceTbl[kindNo][charaNo].ScaleFix8 * 0.00390625f;
+            posiY = JiminyMemo::CharaModelResourceTbl[kindNo][charaNo].PosiYFix8 * 0.00390625f;
+            rotY = JiminyMemo::CharaModelResourceTbl[kindNo][charaNo].RotYDeg;
+            resrcFlag = JiminyMemo::CharaModelResourceTbl[kindNo][charaNo].ResourceNo;
+        } else {
+            scale = JiminyMemo::RikuCharaModelResourceTbl[kindNo][charaNo].ScaleFix8 * 0.00390625f;
+            posiY = JiminyMemo::RikuCharaModelResourceTbl[kindNo][charaNo].PosiYFix8 * 0.00390625f;
+            rotY = JiminyMemo::RikuCharaModelResourceTbl[kindNo][charaNo].RotYDeg;
+            resrcFlag = JiminyMemo::RikuCharaModelResourceTbl[kindNo][charaNo].ResourceNo;
+        }
+        notSemiFlag = resrcFlag & 0x8000;
+        fade2PathFlag = resrcFlag & 0x4000;
+        if ((isModeJiminyMemo() && groupId == JiminyMemo::getHostGroupId() && rsrcId == JiminyMemo::getHostRsrcId()) ||
+            CRcf::isCompleteLoadRCF(groupId, rsrcId)) {
+            CMemo2DSequence* pDusty = createSequence(JiminyMemo::CharaView::DuskyNoteSeqData, 0x11, 0x21, 0, NULL);
+            if (pDusty) {
+                work(0x3C4) = (INT)pDusty;
+                pDusty->setInState(0);
+            }
+            pObj = new (com_malloc_d(sizeof(CMemo3DObj), __FILE__ "(9474)",
+                                     ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+                CMemo3DObj(this, groupId, rsrcId, 0x12, FALSE);
+            if (pObj) {
+                FVECTOR posi;
+                work(0x3C0) = pObj->getHandle();
+                posi.set(JiminyMemo::CharaView::ModelPosi.x, posiY, JiminyMemo::CharaView::ModelPosi.z);
+                pObj->setPosition(posi);
+                pObj->setRotateY(DEG2RAD(rotY));
+                pObj->setScale(scale);
+                pObj->setFadeCountMax(12.0f);
+                pObj->setNotSemiFlag(notSemiFlag);
+                pObj->setFade2PathFlag(fade2PathFlag);
+            }
+            setContentTimer(16.0f);
+            work(0x3C8) = 30;
+        }
+        break;
+    case 30:
+        if (getContentTimer() <= 0.0f) work(0x3C8) = 40;
+        break;
+    case 40:
+        pObj = getTaskPointer<CMemo3DObj*>(work(0x3C0));
+        if (_isButtonTrg(0x800, 0)) {
+            work(0x3CC) = -1;
+            work(0x3C8) = 50;
+            JiminyMemo::playSE(4);
+        } else if (_isButtonTrg(0x20, 0)) {
+            work(0x3CC) = 0;
+            work(0x3C8) = 50;
+            JiminyMemo::playSE(4);
+        } else if (pObj) {
+            FLOAT ry = (FLOAT)_getAnalogLX(0) * DEG2RAD(2.0f) / 4096.0f * getFrameRateF();
+            ry = Math3D::LimitPI(pObj->getRotateY() + ry);
+            pObj->setRotateY(ry);
+        }
+        break;
+    case 50: {
+        CMemo3DObj* pObj = getTaskPointer<CMemo3DObj*>(work(0x3C0));
+        if (pObj) pObj->setErase();
+        if (work(0x3C4)) ((CMemo2DSequence*)work(0x3C4))->setOutState(2);
+        setContentTimer(16.0f);
+        work(0x3C8) = 60;
+        break;
+    }
+    case 60:
+        if (getContentTimer() <= 0.0f) work(0x3C8) = 80;
+        break;
+    case 80:
+    case 90: {
+        CMemo3DObj* pObj = getTaskPointer<CMemo3DObj*>(work(0x3C0));
+        if (pObj) pObj->out();
+        if (work(0x3C4)) delete (CMemo2DSequence*)work(0x3C4);
+        work(0x3C4) = 0;
+        work(0x3C8) = 100;
+        break;
+    }
+    case 100:
+        rval = work(0x3CC);
+        break;
+    default:
+        rval = FALSE;
+        break;
+    }
+    if (work(0x3C4)) ((CMemo2DSequence*)work(0x3C4))->main(getFrameRateF());
+    return rval;
+}
+#else
 /* placeholder: rodata of contentCharaView_ModelView__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh35() {
@@ -2476,6 +2606,7 @@ __asm__(".word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\
 __asm__(".word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334984\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n");
 __asm__(".word .L003349F8\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCharaView_ModelView__11CJiminyMemo);
+#endif
 /* placeholder: rodata of contentMinigame__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh36() {
