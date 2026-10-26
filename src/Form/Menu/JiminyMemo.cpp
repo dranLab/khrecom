@@ -668,13 +668,18 @@ CMemo2DSequence::CMemo2DSequence() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_15CMemo2DSequence);
-/* placeholder: rodata of setup__15CMemo2DSequencePCcPCii */
-__asm__(".rdata\n");
-inline void _roPh6() {
-    TRACE("strlen(inSeqName) < 32");
+void CMemo2DSequence::setup(const CHAR* inSeqName, const INT* inSeqTbl, INT inLayer) {
+#line 3138
+    if (!(strlen(inSeqName) < 32)) AssertApp(__FILE__, __LINE__, "strlen(inSeqName) < 32", 0);
+    strcpy(m_LayoutName, inSeqName);
+    m_iStateFlag |= 1;
+    for (INT i = 0; i < 5; i++) {
+        m_SeqTbl[i] = inSeqTbl[i];
+    }
+    setLayer(inLayer);
+    setState(1);
+    enableDisp(FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setup__15CMemo2DSequencePCcPCii);
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CMemo2DSequence::setup(const CHAR* inSeqName, INT inSeqNo, INT inLayer) {
 #line 3158
     if (!(strlen(inSeqName) < 32)) AssertApp(__FILE__, __LINE__, "strlen(inSeqName) < 32", 0);
