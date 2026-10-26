@@ -19,11 +19,24 @@ inline void* operator new(size_t size) throw() { return com_malloc(size); }
 #include <string.h>
 #include "include_asm.h"
 
-extern "C" int sprintf(char* buf, const char* fmt, ...);
+typedef char* va_list;
+#define va_start(ap, last)                                    \
+    (ap = ((va_list)__builtin_next_arg(last)                  \
+           - (__builtin_args_info(2) >= 8 ? 0                 \
+              : (8 - __builtin_args_info(2)) * 8)))
+#define va_end(ap) ((void)0)
+extern "C" {
+int sprintf(char* buf, const char* fmt, ...);
+int printf(const char* fmt, ...);
+int vprintf(const char* fmt, va_list ap);
+int vsprintf(char* buf, const char* fmt, va_list ap);
+}
 
 using namespace ATEL;
 
 extern "C" char D_0048CD50[];
+extern "C" char D_0048F320[];
+extern "C" char D_0048F330[];
 extern "C" char D_0048F698[];
 extern "C" char D_00491328[];
 extern "C" char D_00491338[];
@@ -182,7 +195,22 @@ static INT debugWinNPCMainlCall(CDebugWindow* pObj, INT inParam) {
     return 1;
 }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _TRACE__4ATELiPCce);
+void ATEL::_TRACE(BOOL bDisp, const CHAR* fmt, ...) {
+    va_list args;
+
+    if (bDisp) {
+        printf(D_0048F320, 31);
+        va_start(args, fmt);
+        if (g_bTraceOnScreen) {
+            vsprintf(_szTraceBuf, fmt, args);
+            addTraceString(_szTraceBuf);
+        } else {
+            vprintf(fmt, args);
+        }
+        printf(D_0048F330);
+        va_end(args);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", __Q24ATEL4CVSMR5CAteli);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _$_Q24ATEL4CVSM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", initActor__Q24ATEL4CVSM);
