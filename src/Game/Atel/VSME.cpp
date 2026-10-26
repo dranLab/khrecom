@@ -871,10 +871,22 @@ inline void _roPh16() {
     TRACE("100\x83G\x81[\x83J\x81[        :%s");
     TRACE("\x96Y\x8bp\x82\xcc\x8f\xe9           :%s");
 }
-/* placeholder: rodata of DebugSetGameWorkParam__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00242C28\n.word .L00242C44\n.word .L00242CE4\n.word .L00242CE4\n.word .L00242C60\n.word .L00242C7C\n.word .L00242CE4\n.word .L00242CE4\n.word .L00242CE4\n.word .L00242C98\n.word .L00242CB4\n.word .L00242CD0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetGameWorkParam__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetGameWorkParam(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        switch (inY) {
+        case 17: CGameWork::setFlag(1, 0x0, DebugWork::g_dw.atelwork.iPlayerDispOff); break;
+        case 18: CGameWork::setFlag(1, 0x2, DebugWork::g_dw.atelwork.iBossKilled); break;
+        case 21: CGameWork::setFlag(1, 0x5, DebugWork::g_dw.atelwork.iNotPcControl); break;
+        case 22: CGameWork::setFlag(1, 0x6, DebugWork::g_dw.atelwork.iNotPause); break;
+        case 26: CGameWork::setFlag(1, 0x25, DebugWork::g_dw.atelwork.iNotHartBtl); break;
+        case 27: CGameWork::setFlag(1, 0x2C, DebugWork::g_dw.atelwork.iIsBtlTutorial); break;
+        case 28: CGameWork::setFlag(1, 0x37, DebugWork::g_dw.atelwork.iIsWorldIntro); break;
+        }
+    }
+    return 1;
+}
+}
 namespace DWTEvent {
 static INT debugWinNPCMainlCall(CDebugWindow* pObj, INT inParam) {
     if (inParam & 1) {
