@@ -62,6 +62,7 @@ inline void _vsmeMotionName() {
 #include "Game/Debug/DebugWork.h"
 #include "Game/Player/Player.h"
 #include "System/Sound/SoundMan.h"
+#include "System/Com.h"
 #include <string.h>
 #include "include_asm.h"
 
@@ -1883,7 +1884,24 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", __11CActorDebugP5CTas
 CActorDebug::~CActorDebug() {
     if (m_pWindow) m_pWindow->out();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", main__11CActorDebug);
+void CActorDebug::main() {
+    CAtel* pA = (CAtel*)CTaskMan::getSysTask(0x1A);
+    if (DebugWork::g_dw.event.iNpcCoordDisp) {
+        if (!pA) return;
+        CAvatar* p = pA->getVSM()->getAvatar(DebugWork::g_dw.event.iNpcID);
+        if (!p) return;
+        if (p->getMovement()) {
+            DebugWork::g_dw.event.vPos = p->getPos();
+            DebugWork::g_dw.event.vRot = p->getRot();
+            DebugWork::g_dw.event.vRot.x = RAD2DEG(DebugWork::g_dw.event.vRot.x);
+            DebugWork::g_dw.event.vRot.y = RAD2DEG(DebugWork::g_dw.event.vRot.y);
+            DebugWork::g_dw.event.vRot.z = RAD2DEG(DebugWork::g_dw.event.vRot.z);
+        }
+    } else {
+        DebugWork::g_dw.event.pClass = NULL;
+        delete this;
+    }
+}
 CEventLineDisp::CEventLineDisp(CTask* pParent) : CTask(pParent, 0x8000) {
     CTaskMan::getSysTask(0x1A);
 }
