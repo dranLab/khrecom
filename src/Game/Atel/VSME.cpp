@@ -1643,13 +1643,25 @@ BOOL CVSM::acStatXWait() {
     }
     return acStatSWait();
 }
-/* placeholder: rodata of isAvatarBusy__Q24ATEL4CVSMiPQ24ATEL7CAvatar */
-__asm__(".rdata\n");
-inline void _roPh41() {
-    TRACE("NG Buzy param\n");
+BOOL CVSM::isAvatarBusy(INT nType, CAvatar* pAvatar) {
+    BOOL bRes = FALSE;
+    switch (nType) {
+    case 0: bRes = pAvatar->getAvatarState() & 0x2; break;
+    case 1: bRes = pAvatar->getAvatarState() & 0x10; break;
+    case 2: bRes = pAvatar->getAvatarState() & 0x40; break;
+    case 3: bRes = pAvatar->getAvatarState() & 0x100; break;
+    case 7:
+        /* here the "avatar" argument is an actor index (see acStatActorWait) */
+        return m_ActorTbl[(INT)pAvatar]._ATP.rq_tag == 1;
+    case 8: bRes = pAvatar->getAvatarState() & 0x400; break;
+    case 9: bRes = pAvatar->getAvatarState() & 0x1000; break;
+    case 10: bRes = pAvatar->getAvatarState() & 0x4000; break;
+    default:
+        _TRACE(m_bTrace, "NG Buzy param\n");
+        break;
+    }
+    return bRes;
 }
-__asm__(".rdata\n.align 4\n.word .L0024EE38\n.word .L0024EE44\n.word .L0024EE50\n.word .L0024EE5C\n.word .L0024EEA8\n.word .L0024EEA8\n.word .L0024EEA8\n.word .L0024EE68\n.word .L0024EE84\n.word .L0024EE90\n.word .L0024EE9C\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", isAvatarBusy__Q24ATEL4CVSMiPQ24ATEL7CAvatar);
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 BOOL CVSM::acStatBSWait() {
     ATP& atp = m_pCurrentActor->_ATP;
