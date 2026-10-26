@@ -62,6 +62,7 @@ inline void _vsmeMotionName() {
 #include "Form/Menu/LevelUp.h"
 #include "System/Rcf.h"
 #include "Game/GameWork.h"
+#include "Game/SceneInfo.h"
 #include "System/TaskMan.h"
 #include "Form/DebugWindow.h"
 #include "Game/Debug/DebugWork.h"
@@ -70,6 +71,10 @@ inline void _vsmeMotionName() {
 #include "System/Com.h"
 #include "Game/SceneEnv.h"
 #include "Form/Menu/JMemoFlag.h"
+#include "System/Component.h"
+#include "System/Graphic/WorldEnv.h"
+#define SYSTEM_GRAPHIC_DEFOCUS_CPP /* the complete DeFocus classes (other includers get partial ones) */
+#include "System/Graphic/DeFocus.h"
 #include <string.h>
 #include "include_asm.h"
 
@@ -87,6 +92,8 @@ int vsprintf(char* buf, const char* fmt, va_list ap);
 }
 
 using namespace ATEL;
+
+static void dispActorTag(INT nMax, const Actor* pTbl);
 
 static inline void _setRTP(RTP& r, USHORT lv, USHORT actor, SHORT tag, SHORT mactor) {
     r.rq_lv = lv;
@@ -289,7 +296,77 @@ static BOOL DebugCreateEventLineDisp(CDebugWindow* pObj, INT inY, INT inParam) {
 }
 /* the asm .data (debug window tables) refers to it by name until the data comes from source */
 __asm__(".globl DebugCreateEventLineDisp__8DWTEventP12CDebugWindowii");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugAtelWorkDef__8DWTEventP12CDebugWindowi);
+namespace DWTEvent {
+static INT DebugAtelWorkDef(CDebugWindow* pObj, INT inParam) {
+    DebugWork::g_dw.atelwork.iWorldIntro = CGameWork::getInt(0, 0xC1);
+    DebugWork::g_dw.atelwork.iTutorialEnd = CGameWork::getInt(0, 0xC2);
+    DebugWork::g_dw.atelwork.iPossibleCard = CGameWork::getInt(0, 0x21);
+    DebugWork::g_dw.atelwork.iPossibleFriend = CGameWork::getInt(0, 0x22);
+    DebugWork::g_dw.atelwork.iPoohMiniGameIntro = CGameWork::getInt(0, 0x23);
+    DebugWork::g_dw.atelwork.iPcStanderdSkill = CGameWork::getInt(0, 0x24);
+    DebugWork::g_dw.atelwork.iEnSoraEventStep = CGameWork::getInt(0, 0x25);
+    DebugWork::g_dw.atelwork.iEnRikuEventStep = CGameWork::getInt(0, 0x26);
+    DebugWork::g_dw.atelwork.iSoraJiminyStep = CGameWork::getInt(0, 0x33);
+    DebugWork::g_dw.atelwork.iRikuJiminyStep = CGameWork::getInt(0, 0x34);
+    DebugWork::g_dw.atelwork.iKH2CardGet = CGameWork::getInt(0, 0x2D);
+    DebugWork::g_dw.atelwork.iPoohHiScoreOwl = CGameWork::getInt(0, 0x2E);
+    DebugWork::g_dw.atelwork.iPoohHiScoreRoo = CGameWork::getInt(0, 0x2F);
+    DebugWork::g_dw.atelwork.iPoohHiScoreEeyore = CGameWork::getInt(0, 0x30);
+    DebugWork::g_dw.atelwork.iPoohHiScoreTigger = CGameWork::getInt(0, 0x31);
+    DebugWork::g_dw.atelwork.iPoohHiScoreRabbit = CGameWork::getInt(0, 0x32);
+    DebugWork::g_dw.atelwork.iDistinctionClear = CGameWork::getFlag(0, 0x83);
+    DebugWork::g_dw.atelwork.iPlayMode = CGameWork::getByte(0, 0x60);
+    DebugWork::g_dw.atelwork.iPlayDifficultMode = CGameWork::getByte(0, 0x61);
+    DebugWork::g_dw.atelwork.iSoundMode = CGameWork::getByte(0, 0x62);
+    DebugWork::g_dw.atelwork.iVibrat = CGameWork::getByte(0, 0x63);
+    DebugWork::g_dw.atelwork.iPoohGamePiglet = CGameWork::getByte(0, 0x3);
+    DebugWork::g_dw.atelwork.iPoohGameOwl = CGameWork::getByte(0, 0x4);
+    DebugWork::g_dw.atelwork.iPoohGameRoo = CGameWork::getByte(0, 0x5);
+    DebugWork::g_dw.atelwork.iPoohGameEeyore = CGameWork::getByte(0, 0x6);
+    DebugWork::g_dw.atelwork.iPoohGameTigger = CGameWork::getByte(0, 0x7);
+    DebugWork::g_dw.atelwork.iPoohGameRabbit = CGameWork::getByte(0, 0x8);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroPiglet = CGameWork::getFlag(0, 0xA);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroOwl = CGameWork::getFlag(0, 0xB);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroRoo = CGameWork::getFlag(0, 0xC);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroEeyore = CGameWork::getFlag(0, 0xD);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroTigger = CGameWork::getFlag(0, 0xE);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroRabbit = CGameWork::getFlag(0, 0xF);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroResetPiglet = CGameWork::getFlag(0, 0x13);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroResetOwl = CGameWork::getFlag(0, 0x14);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroResetRoo = CGameWork::getFlag(0, 0x15);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroResetEeyore = CGameWork::getFlag(0, 0x16);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroResetTigger = CGameWork::getFlag(0, 0x17);
+    DebugWork::g_dw.atelwork.iPoohClearIntoroRabbit = CGameWork::getFlag(0, 0x18);
+    DebugWork::g_dw.atelwork.iGameKH2clear = CGameWork::getFlag(0, 0x11);
+    DebugWork::g_dw.atelwork.iMahluciaKilled = CGameWork::getFlag(0, 0x82);
+    DebugWork::g_dw.atelwork.iRikuClear = CGameWork::getFlag(0, 0x12);
+    DebugWork::g_dw.atelwork.iSoraClear = CGameWork::getFlag(0, 0x9);
+    DebugWork::g_dw.atelwork.iSoraMovie0 = CGameWork::getInt(0, 0x27);
+    DebugWork::g_dw.atelwork.iSoraMovie1 = CGameWork::getInt(0, 0x28);
+    DebugWork::g_dw.atelwork.iSoraMovie2 = CGameWork::getInt(0, 0x29);
+    DebugWork::g_dw.atelwork.iRikuMovie0 = CGameWork::getInt(0, 0x2A);
+    DebugWork::g_dw.atelwork.iRikuMovie1 = CGameWork::getInt(0, 0x2B);
+    DebugWork::g_dw.atelwork.iRikuMovie2 = CGameWork::getInt(0, 0x2C);
+    DebugWork::g_dw.atelwork.iBossEventStep = CGameWork::getInt(1, 0xE1);
+    DebugWork::g_dw.atelwork.iCockpitDisp = CGameWork::getInt(1, 0xE2);
+    DebugWork::g_dw.atelwork.iKindMenu = CGameWork::getByte(1, 0x140);
+    DebugWork::g_dw.atelwork.iPoohMinigameState = CGameWork::getByte(1, 0x141);
+    DebugWork::g_dw.atelwork.iPoohMinigameKind = CGameWork::getByte(1, 0x142);
+    DebugWork::g_dw.atelwork.iPlayerDispOff = CGameWork::getFlag(1, 0x0);
+    DebugWork::g_dw.atelwork.iBossKilled = CGameWork::getFlag(1, 0x2);
+    DebugWork::g_dw.atelwork.iNotEventSkip = CGameWork::getFlag(1, 0x3);
+    DebugWork::g_dw.atelwork.iIsAtelEvent = CGameWork::getFlag(1, 0x4);
+    DebugWork::g_dw.atelwork.iNotPcControl = CGameWork::getFlag(1, 0x5);
+    DebugWork::g_dw.atelwork.iNotPause = CGameWork::getFlag(1, 0x6);
+    DebugWork::g_dw.atelwork.iIsTutorial = CGameWork::getFlag(1, 0x7);
+    DebugWork::g_dw.atelwork.iNotRoomJump = CGameWork::getFlag(1, 0x20);
+    DebugWork::g_dw.atelwork.iNotRoomCreation = CGameWork::getFlag(1, 0x24);
+    DebugWork::g_dw.atelwork.iNotHartBtl = CGameWork::getFlag(1, 0x25);
+    DebugWork::g_dw.atelwork.iIsBtlTutorial = CGameWork::getFlag(1, 0x2C);
+    DebugWork::g_dw.atelwork.iIsWorldIntro = CGameWork::getFlag(1, 0x37);
+    return 1;
+}
+}
 /* placeholder: rodata of the tables before debugBtlReportCallBackParam__8DWTEventP12CDebugWindowii */
 __asm__(".rdata\n");
 inline void _roPh1() {
@@ -548,14 +625,146 @@ static BOOL DebugSetPcSkillFlag(CDebugWindow* pObj, INT inY, INT inParam) {
 }
 /* the asm .data (debug window tables) refers to it by name until the data comes from source */
 __asm__(".globl DebugSetPcSkillFlag__8DWTEventP12CDebugWindowii");
-/* placeholder: rodata of DebugSetSoraMovieFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00242088\n.word .L00242090\n.word .L00242098\n.word .L002420A0\n.word .L002420A8\n.word .L002420B0\n.word .L002420B8\n.word .L002420C0\n.word .L002420C8\n.word .L002420D0\n.word .L002420D8\n.word .L002420E0\n.word .L002420E8\n.word .L002420F0\n.word .L002420F8\n.word .L00242100\n.word .L00242108\n.word .L00242114\n.word .L00242120\n.word .L0024212C\n.word .L00242138\n.word .L00242144\n.word .L00242150\n.word .L0024215C\n.word .L00242168\n.word .L00242174\n.word .L00242180\n.word .L0024218C\n.word .L00242198\n.word .L002421A4\n.word .L002421B0\n.word .L002421BC\n.word .L002421C8\n.word .L002421D0\n.word .L002421D8\n.word .L002421E0\n.word .L002421E8\n.word .L002421F0\n.word .L002421F8\n.word .L00242200\n.word .L00242208\n.word .L00242210\n.word .L00242218\n.word .L00242220\n.word .L00242228\n.word .L00242230\n.word .L00242238\n.word .L00242240\n.word .L00242248\n.word .L00242250\n.word .L00242258\n.word .L00242260\n.word .L00242268\n.word .L00242270\n.word .L00242278\n.word .L00242280\n.word .L00242288\n.word .L00242290\n.word .L00242298\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetSoraMovieFlag__8DWTEventP12CDebugWindowii);
-/* placeholder: rodata of DebugSetRikuMovieFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00242380\n.word .L00242388\n.word .L00242390\n.word .L00242398\n.word .L002423A0\n.word .L002423A8\n.word .L002423B0\n.word .L002423B8\n.word .L002423C0\n.word .L002423C8\n.word .L002423D0\n.word .L002423D8\n.word .L002423E0\n.word .L002423E8\n.word .L002423F0\n.word .L002423F8\n.word .L00242400\n.word .L0024240C\n.word .L00242418\n.word .L00242424\n.word .L00242430\n.word .L0024243C\n.word .L00242448\n.word .L00242454\n.word .L00242460\n.word .L0024246C\n.word .L00242478\n.word .L00242484\n.word .L00242490\n.word .L0024249C\n.word .L002424A8\n.word .L002424B4\n.word .L002424C0\n.word .L002424C8\n.word .L002424D0\n.word .L002424D8\n.word .L002424E0\n.word .L002424E8\n.word .L002424F0\n.word .L002424F8\n.word .L00242500\n.word func_0\n.word func_0\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetRikuMovieFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetSoraMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT movie0 = CGameWork::getInt(0, 0x27);
+        INT movie1 = CGameWork::getInt(0, 0x28);
+        INT movie2 = CGameWork::getInt(0, 0x29);
+        switch (inY) {
+        case 0: movie0 ^= 0x1; break;
+        case 1: movie0 ^= 0x2; break;
+        case 2: movie0 ^= 0x4; break;
+        case 3: movie0 ^= 0x8; break;
+        case 4: movie0 ^= 0x10; break;
+        case 5: movie0 ^= 0x20; break;
+        case 6: movie0 ^= 0x40; break;
+        case 7: movie0 ^= 0x80; break;
+        case 8: movie0 ^= 0x100; break;
+        case 9: movie0 ^= 0x200; break;
+        case 10: movie0 ^= 0x400; break;
+        case 11: movie0 ^= 0x800; break;
+        case 12: movie0 ^= 0x1000; break;
+        case 13: movie0 ^= 0x2000; break;
+        case 14: movie0 ^= 0x4000; break;
+        case 15: movie0 ^= 0x8000; break;
+        case 16: movie0 ^= 0x10000; break;
+        case 17: movie0 ^= 0x20000; break;
+        case 18: movie0 ^= 0x40000; break;
+        case 19: movie0 ^= 0x80000; break;
+        case 20: movie0 ^= 0x100000; break;
+        case 21: movie0 ^= 0x200000; break;
+        case 22: movie0 ^= 0x400000; break;
+        case 23: movie0 ^= 0x800000; break;
+        case 24: movie0 ^= 0x1000000; break;
+        case 25: movie0 ^= 0x2000000; break;
+        case 26: movie0 ^= 0x4000000; break;
+        case 27: movie0 ^= 0x8000000; break;
+        case 28: movie0 ^= 0x10000000; break;
+        case 29: movie0 ^= 0x20000000; break;
+        case 30: movie0 ^= 0x40000000; break;
+        case 31: movie0 ^= 0x80000000; break;
+        case 32: movie1 ^= 0x1; break;
+        case 33: movie1 ^= 0x2; break;
+        case 34: movie1 ^= 0x4; break;
+        case 35: movie1 ^= 0x8; break;
+        case 36: movie1 ^= 0x10; break;
+        case 37: movie1 ^= 0x20; break;
+        case 38: movie1 ^= 0x40; break;
+        case 39: movie1 ^= 0x80; break;
+        case 40: movie1 ^= 0x100; break;
+        case 41: movie1 ^= 0x200; break;
+        case 42: movie1 ^= 0x400; break;
+        case 43: movie1 ^= 0x800; break;
+        case 44: movie1 ^= 0x1000; break;
+        case 45: movie1 ^= 0x2000; break;
+        case 46: movie1 ^= 0x4000; break;
+        case 47: movie1 ^= 0x8000; break;
+        case 48: movie1 ^= 0x10000; break;
+        case 49: movie1 ^= 0x20000; break;
+        case 50: movie1 ^= 0x40000; break;
+        case 51: movie1 ^= 0x80000; break;
+        case 52: movie1 ^= 0x100000; break;
+        case 53: movie1 ^= 0x200000; break;
+        case 54: movie1 ^= 0x400000; break;
+        case 55: movie1 ^= 0x800000; break;
+        case 56: movie1 ^= 0x1000000; break;
+        case 57: movie1 ^= 0x2000000; break;
+        case 58: movie1 ^= 0x4000000; break;
+        }
+        DebugWork::g_dw.atelwork.iSoraMovie0 = movie0;
+        CGameWork::setInt(0, 0x27, movie0);
+        DebugWork::g_dw.atelwork.iSoraMovie1 = movie1;
+        CGameWork::setInt(0, 0x28, movie1);
+        DebugWork::g_dw.atelwork.iSoraMovie2 = movie2;
+        CGameWork::setInt(0, 0x29, movie2);
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetSoraMovieFlag__8DWTEventP12CDebugWindowii");
+namespace DWTEvent {
+static BOOL DebugSetRikuMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT movie0 = CGameWork::getInt(0, 0x2A);
+        INT movie1 = CGameWork::getInt(0, 0x2B);
+        INT movie2 = CGameWork::getInt(0, 0x2C);
+        switch (inY) {
+        case 0: movie0 ^= 0x1; break;
+        case 1: movie0 ^= 0x2; break;
+        case 2: movie0 ^= 0x4; break;
+        case 3: movie0 ^= 0x8; break;
+        case 4: movie0 ^= 0x10; break;
+        case 5: movie0 ^= 0x20; break;
+        case 6: movie0 ^= 0x40; break;
+        case 7: movie0 ^= 0x80; break;
+        case 8: movie0 ^= 0x100; break;
+        case 9: movie0 ^= 0x200; break;
+        case 10: movie0 ^= 0x400; break;
+        case 11: movie0 ^= 0x800; break;
+        case 12: movie0 ^= 0x1000; break;
+        case 13: movie0 ^= 0x2000; break;
+        case 14: movie0 ^= 0x4000; break;
+        case 15: movie0 ^= 0x8000; break;
+        case 16: movie0 ^= 0x10000; break;
+        case 17: movie0 ^= 0x20000; break;
+        case 18: movie0 ^= 0x40000; break;
+        case 19: movie0 ^= 0x80000; break;
+        case 20: movie0 ^= 0x100000; break;
+        case 21: movie0 ^= 0x200000; break;
+        case 22: movie0 ^= 0x400000; break;
+        case 23: movie0 ^= 0x800000; break;
+        case 24: movie0 ^= 0x1000000; break;
+        case 25: movie0 ^= 0x2000000; break;
+        case 26: movie0 ^= 0x4000000; break;
+        case 27: movie0 ^= 0x8000000; break;
+        case 28: movie0 ^= 0x10000000; break;
+        case 29: movie0 ^= 0x20000000; break;
+        case 30: movie0 ^= 0x40000000; break;
+        case 31: movie0 ^= 0x80000000; break;
+        case 32: movie1 ^= 0x1; break;
+        case 33: movie1 ^= 0x2; break;
+        case 34: movie1 ^= 0x4; break;
+        case 35: movie1 ^= 0x8; break;
+        case 36: movie1 ^= 0x10; break;
+        case 37: movie1 ^= 0x20; break;
+        case 38: movie1 ^= 0x40; break;
+        case 39: movie1 ^= 0x80; break;
+        case 40: movie1 ^= 0x100; break;
+        }
+        DebugWork::g_dw.atelwork.iRikuMovie0 = movie0;
+        CGameWork::setInt(0, 0x2A, movie0);
+        DebugWork::g_dw.atelwork.iRikuMovie1 = movie1;
+        CGameWork::setInt(0, 0x2B, movie1);
+        DebugWork::g_dw.atelwork.iRikuMovie2 = movie2;
+        CGameWork::setInt(0, 0x2C, movie2);
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetRikuMovieFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetKH2CardGetFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
@@ -583,11 +792,119 @@ static BOOL DebugSetKH2CardGetFlag(CDebugWindow* pObj, INT inY, INT inParam) {
 }
 /* the asm .data (debug window tables) refers to it by name until the data comes from source */
 __asm__(".globl DebugSetKH2CardGetFlag__8DWTEventP12CDebugWindowii");
-/* placeholder: rodata of DebugSetJiminyMemoFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426C0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002426E0\n.word .L002428AC\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242704\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L00242728\n.word .L002428AC\n.word .L0024274C\n.word .L00242764\n.word .L0024277C\n.word .L00242794\n.word .L002427AC\n.word .L002427C4\n.word .L002427DC\n.word .L002427F4\n.word .L0024280C\n.word .L00242824\n.word .L0024283C\n.word .L00242854\n.word .L0024286C\n.word .L00242890\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024296C\n.word .L0024296C\n.word .L0024296C\n.word .L002429E8\n.word .L00242984\n.word .L00242984\n.word .L00242984\n.word .L002429E8\n.word .L002429A8\n.word .L002429A8\n.word .L002429E8\n.word .L002429CC\n.word .L002429CC\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetJiminyMemoFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+extern BYTE SoraEnemyMemoIdTbl[];
+extern BYTE RikuEnemyMemoIdTbl[];
+extern USHORT SoraCardKindTbl[];
+extern USHORT RikuCardKindTbl[];
+static BOOL DebugSetJiminyMemoFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT SoraWorld = DebugWork::g_dw.jiminy.Sora_World;
+        INT SoraFloor = DebugWork::g_dw.jiminy.Sora_Floor;
+        INT RikuFloor = DebugWork::g_dw.jiminy.Riku_Floor;
+        INT RikuWorld = DebugWork::g_dw.jiminy.Riku_World;
+        INT SoraEtc = DebugWork::g_dw.jiminy.Sora_Etc;
+        INT shiftY;
+        switch (inY) {
+        case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13:
+            shiftY = 1 << (inY - 1);
+            SoraWorld ^= shiftY;
+            CJiminyMemoFlag::debugEvent(SoraWorld & shiftY, 0, 1, inY, 0);
+            break;
+        case 14: case 15: case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23: case 24: case 25: case 26:
+            shiftY = 1 << (inY - 14);
+            SoraFloor ^= shiftY;
+            CJiminyMemoFlag::debugEvent(SoraFloor & shiftY, 0, 2, inY - 13, 0);
+            break;
+        case 28: case 29: case 30: case 31: case 32: case 33: case 34: case 35: case 36: case 37: case 38: case 39:
+            shiftY = 1 << (inY - 28);
+            RikuWorld ^= shiftY;
+            CJiminyMemoFlag::debugEvent(RikuWorld & shiftY, 1, 1, inY - 27, 0);
+            break;
+        case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50: case 51:
+            shiftY = 1 << (inY - 40);
+            RikuFloor ^= shiftY;
+            CJiminyMemoFlag::debugEvent(RikuFloor & shiftY, 1, 2, inY - 52, 0);
+            break;
+        case 53: SoraEtc ^= 0x1; CJiminyMemoFlag::debugEvent(SoraEtc & 0x1, 0, 8, 0, 0); break;
+        case 54: SoraEtc ^= 0x2; CJiminyMemoFlag::debugEvent(SoraEtc & 0x2, 0, 8, 1, 0); break;
+        case 55: SoraEtc ^= 0x4; CJiminyMemoFlag::debugEvent(SoraEtc & 0x4, 0, 8, 2, 0); break;
+        case 56: SoraEtc ^= 0x8; CJiminyMemoFlag::debugEvent(SoraEtc & 0x8, 0, 8, 3, 0); break;
+        case 57: SoraEtc ^= 0x10; CJiminyMemoFlag::debugEvent(SoraEtc & 0x10, 0, 8, 4, 0); break;
+        case 58: SoraEtc ^= 0x20; CJiminyMemoFlag::debugEvent(SoraEtc & 0x20, 0, 6, 0, 0); break;
+        case 59: SoraEtc ^= 0x40; CJiminyMemoFlag::debugEvent(SoraEtc & 0x40, 0, 5, 0, 0); break;
+        case 60: SoraEtc ^= 0x80; CJiminyMemoFlag::debugEvent(SoraEtc & 0x80, 0, 10, 11, 0); break;
+        case 61: SoraEtc ^= 0x100; CJiminyMemoFlag::debugEvent(SoraEtc & 0x100, 0, 10, 12, 0); break;
+        case 62: SoraEtc ^= 0x200; CJiminyMemoFlag::debugEvent(SoraEtc & 0x200, 0, 10, 13, 0); break;
+        case 63: SoraEtc ^= 0x400; CJiminyMemoFlag::debugEvent(SoraEtc & 0x400, 0, 10, 14, 0); break;
+        case 64: SoraEtc ^= 0x800; CJiminyMemoFlag::debugEvent(SoraEtc & 0x800, 0, 10, 15, 0); break;
+        case 65: SoraEtc ^= 0x1000; CJiminyMemoFlag::debugEvent(SoraEtc & 0x1000, 0, 10, 16, 0); break;
+        case 66: SoraEtc ^= 0x2000; CJiminyMemoFlag::debugEvent(SoraEtc & 0x2000, 0, 9, 0, 0); break;
+        }
+        DebugWork::g_dw.jiminy.Sora_World = SoraWorld;
+        DebugWork::g_dw.jiminy.Sora_Floor = SoraFloor;
+        DebugWork::g_dw.jiminy.Riku_World = RikuWorld;
+        DebugWork::g_dw.jiminy.Riku_Floor = RikuFloor;
+        DebugWork::g_dw.jiminy.Sora_Etc = SoraEtc;
+    } else if (inParam & 0x20) {
+        INT SoraFlag = DebugWork::g_dw.jiminy.Sora_Flag;
+        INT SoraEKind = SoraEnemyMemoIdTbl[DebugWork::g_dw.jiminy.Sora_Enemy];
+        INT SoraENum = DebugWork::g_dw.jiminy.Sora_ENum;
+        INT SoraCard = DebugWork::g_dw.jiminy.Sora_Card;
+        USHORT SoraCKind = SoraCardKindTbl[SoraCard];
+        INT RikuFlag = DebugWork::g_dw.jiminy.Riku_Flag;
+        INT RikuEKind = RikuEnemyMemoIdTbl[DebugWork::g_dw.jiminy.Riku_Enemy];
+        INT RikuENum = DebugWork::g_dw.jiminy.Riku_ENum;
+        INT RikuCard = DebugWork::g_dw.jiminy.Riku_Card;
+        USHORT RikuCKind = RikuCardKindTbl[RikuCard];
+        switch (inY) {
+        case 68: case 69: case 70:
+            SoraFlag |= 0x701;
+            CJiminyMemoFlag::debugEvent(TRUE, 0, 3, SoraEKind, SoraENum);
+            break;
+        case 72: case 73: case 74:
+            RikuFlag |= 0x701;
+            CJiminyMemoFlag::debugEvent(TRUE, 1, 3, RikuEKind, RikuENum);
+            break;
+        case 76: case 77:
+            SoraFlag |= 0x7002;
+            CJiminyMemoFlag::debugEvent(TRUE, 0, 4, SoraCKind, 0);
+            break;
+        case 79: case 80:
+            RikuFlag |= 0x7002;
+            CJiminyMemoFlag::debugEvent(TRUE, 1, 4, RikuCKind, 0);
+            break;
+        }
+        DebugWork::g_dw.jiminy.Sora_Flag = SoraFlag;
+        DebugWork::g_dw.jiminy.Riku_Flag = RikuFlag;
+    } else {
+        INT SoraFlag = DebugWork::g_dw.jiminy.Sora_Flag;
+        INT RikuFlag = DebugWork::g_dw.jiminy.Riku_Flag;
+        INT n;
+        for (INT i = 0; i < 2; i++) {
+            if ((SoraFlag >> i) & 1) {
+                n = (SoraFlag >> (i * 4 + 8)) & 0xF;
+                n--;
+                if (n == 0) SoraFlag &= ~(1 << i);
+                SoraFlag = (SoraFlag & ~(0xF << (i * 4 + 8))) | (n << (i * 4 + 8));
+            }
+        }
+        for (INT i = 0; i < 2; i++) {
+            if ((RikuFlag >> i) & 1) {
+                n = (RikuFlag >> (i * 4 + 8)) & 0xF;
+                n--;
+                if (n == 0) RikuFlag &= ~(1 << i);
+                RikuFlag = (RikuFlag & ~(0xF << (i * 4 + 8))) | (n << (i * 4 + 8));
+            }
+        }
+        DebugWork::g_dw.jiminy.Sora_Flag = SoraFlag;
+        DebugWork::g_dw.jiminy.Riku_Flag = RikuFlag;
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetJiminyMemoFlag__8DWTEventP12CDebugWindowii");
 /* placeholder: rodata of the tables before debugGameInfomationParam__8DWTEventP12CDebugWindowii */
 __asm__(".rdata\n");
 inline void _roPh14() {
@@ -1076,39 +1393,125 @@ inline void _roPh19() {
     TRACE("CVSM::~CVSM()\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _$_Q24ATEL4CVSM);
-/* placeholder: rodata of initActor__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatNop__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatExec__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatRWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatCWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatIWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatPWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatSWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatMWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatCPWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatSNWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatMSWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatShopWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatDropWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatEnemyLoadWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatRCWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatEQWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatWKWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatXWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatBSWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatBAWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatDLWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatBGWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatActorWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatEternityWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatRsrcLoadWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatCardWndWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatTechWndWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatWorldCardWndWait__Q24ATEL4CVSM\n.text\n");
-__asm__(".rdata\n.align 3\n.half 0\n.half -1\n.word acStatCrossFadeWait__Q24ATEL4CVSM\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", initActor__Q24ATEL4CVSM);
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CVSM::initActor() {
+    Actor* p = m_ActorTbl;
+    for (INT i = 0; i < 64; i++, p++) {
+        p->_nID = -1;
+        p->_nRsrcID = -1;
+        p->_pAvatar = NULL;
+        p->_pEventTrap = NULL;
+        p->_fTalkableRadius = 0.0f;
+    }
+    m_ActorStateFnc[0] = &CVSM::acStatNop;
+    m_ActorStateFnc[1] = &CVSM::acStatExec;
+    m_ActorStateFnc[2] = &CVSM::acStatNop;
+    m_ActorStateFnc[3] = &CVSM::acStatWait;
+    m_ActorStateFnc[4] = &CVSM::acStatRWait;
+    m_ActorStateFnc[5] = &CVSM::acStatCWait;
+    m_ActorStateFnc[6] = &CVSM::acStatIWait;
+    m_ActorStateFnc[7] = &CVSM::acStatPWait;
+    m_ActorStateFnc[8] = &CVSM::acStatSWait;
+    m_ActorStateFnc[9] = &CVSM::acStatMWait;
+    m_ActorStateFnc[10] = &CVSM::acStatCPWait;
+    m_ActorStateFnc[11] = &CVSM::acStatSNWait;
+    m_ActorStateFnc[12] = &CVSM::acStatMSWait;
+    m_ActorStateFnc[13] = &CVSM::acStatShopWait;
+    m_ActorStateFnc[14] = &CVSM::acStatDropWait;
+    m_ActorStateFnc[15] = &CVSM::acStatEnemyLoadWait;
+    m_ActorStateFnc[16] = &CVSM::acStatRCWait;
+    m_ActorStateFnc[17] = &CVSM::acStatEQWait;
+    m_ActorStateFnc[18] = &CVSM::acStatWKWait;
+    m_ActorStateFnc[19] = &CVSM::acStatXWait;
+    m_ActorStateFnc[20] = &CVSM::acStatBSWait;
+    m_ActorStateFnc[21] = &CVSM::acStatBAWait;
+    m_ActorStateFnc[22] = &CVSM::acStatDLWait;
+    m_ActorStateFnc[23] = &CVSM::acStatBGWait;
+    m_ActorStateFnc[24] = &CVSM::acStatActorWait;
+    m_ActorStateFnc[25] = &CVSM::acStatEternityWait;
+    m_ActorStateFnc[26] = &CVSM::acStatRsrcLoadWait;
+    m_ActorStateFnc[27] = &CVSM::acStatCardWndWait;
+    m_ActorStateFnc[28] = &CVSM::acStatTechWndWait;
+    m_ActorStateFnc[29] = &CVSM::acStatWorldCardWndWait;
+    m_ActorStateFnc[30] = &CVSM::acStatCrossFadeWait;
+    CGameWork::setFlag(1, 0x26, FALSE);
+    CGameWork::setFlag(1, 0x38, FALSE);
+}
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+/* Parked: 4 lines: after the magic test the original advances the cursor (s0) in the beq delay slot, ours
+   on the fall-through path (pAddr += 4 after the if). Everything else matches: pAddr as the byte cursor with
+   pIntPtr as int view, destination pointers p for the copies, a block-scoped counter for the actor-ID loop.
+   tried: *pIntPtr++ in the test (+copy into s2), pAddr += 4 before the test (copy), pIntPtr as the only cursor
+   (33 lines), an INT*& alias of pAddr (param in memory, 117), increments as separate statements. */
+#if 0
+void CVSM::loadFromMem(const BYTE* pAddr) {
+    INT* pIntPtr;
+    BYTE* p;
+    INT i;
+    _TRACE_(TRUE, "Load I-Seg\n");
+    pIntPtr = (INT*)pAddr;
+    if (*pIntPtr != 0x6362612F) {
+        _TRACE(TRUE, "ATEL \x83R\x83\x93\x83p\x83" "C\x83\x89\x82\xcc\x83o\x81[\x83W\x83\x87\x83\x93\x82\xaa\x88\xe1\x82\xa2\x82\xdc\x82\xb7\n");
+        return;
+    }
+    pAddr += 4;
+    pIntPtr = (INT*)pAddr;
+    m_MaxActorCount = *pIntPtr++;
+    if (m_MaxActorCount > 64) {
+        _TRACE(TRUE, "Actor-ID \x93o\x98^\x90\x94\x83I\x81[\x83o\x81[\x83t\x83\x8d\x81[\n");
+#line 343
+        AssertApp(__FILE__, __LINE__, "0", 0);
+    }
+    for (INT n = 0; n < m_MaxActorCount; n++) {
+        m_ActorTbl[n]._nID = *pIntPtr++;
+    }
+    pAddr += 4 + 64 * 4;
+    pIntPtr = (INT*)pAddr;
+    m_MaxPC = *pIntPtr;
+    pAddr += 4;
+    _TRACE_(m_bTrace, "MaxPC:%x\n", m_MaxPC);
+    if (m_pIseg) com_free(m_pIseg);
+    m_pIseg = (INSTR*)com_malloc_d(m_MaxPC * sizeof(INSTR), __FILE__ "(357)", (UINT)-1);
+#line 358
+    if (!(m_pIseg)) AssertApp(__FILE__, __LINE__, "m_pIseg", 0);
+    p = (BYTE*)m_pIseg;
+    for (INT j = 0; j < m_MaxPC * sizeof(INSTR); j++) {
+        *p++ = *pAddr++;
+    }
+    pIntPtr = (INT*)pAddr;
+    m_GAptr = *pIntPtr;
+    _TRACE_(m_bTrace, "GAptr:%x\n", m_GAptr);
+    pAddr += 4;
+    if (m_GAptr > 0x1000) {
+        _TRACE(TRUE, "\x83" "f\x81[\x83^\x83Z\x83O\x83\x81\x83\x93\x83g \x83I\x81[\x83o\x81[\x83t\x83\x8d\x81[\n");
+#line 372
+        AssertApp(__FILE__, __LINE__, "0", 0);
+    }
+    if (m_pDseg) com_free(m_pDseg);
+    m_pDseg = (BYTE*)com_malloc_d(0x4000, __FILE__ "(376)", (UINT)-1);
+#line 377
+    if (!(m_pDseg)) AssertApp(__FILE__, __LINE__, "m_pDseg", 0);
+    p = m_pDseg;
+    for (INT j = 0; j < m_GAptr; j++) {
+        *p++ = *pAddr++;
+    }
+    m_ActorCount = *pAddr;
+    pAddr += 4;
+    if (m_ActorCount > 64) {
+        _TRACE(TRUE, "Actor \x93o\x98^\x90\x94\x83I\x81[\x83o\x81[\x83t\x83\x8d\x81[\n");
+#line 390
+        AssertApp(__FILE__, __LINE__, "0", 0);
+    }
+    for (INT n = 0; n < m_ActorCount; n++) {
+        p = (BYTE*)&m_ActorTbl[n]._ATP;
+        for (UINT k = 0; k < sizeof(ATP); k++) {
+            *p++ = *pAddr++;
+        }
+    }
+    setFlag(3);
+    if (m_bTrace) dispActorTag(m_ActorCount, m_ActorTbl);
+}
+#else
 /* placeholder: rodata of loadFromMem__Q24ATEL4CVSMPCUc */
 __asm__(".rdata\n");
 inline void _roPh21() {
@@ -1126,18 +1529,57 @@ inline void _roPh21() {
     TRACE("Actor \x93o\x98^\x90\x94\x83I\x81[\x83o\x81[\x83t\x83\x8d\x81[\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", loadFromMem__Q24ATEL4CVSMPCUc);
+#endif
 void CVSM::deleteActorAll() {}
-/* placeholder: rodata of checkEvents__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh22() {
-    TRACE("@_to");
-    TRACE("@_tf");
-    TRACE("@_as");
-    TRACE("@_tc");
-    TRACE("@_tk");
-    TRACE("\x89\xef\x98" "b\x8aJ\x8en\x81" "F%s\n");
+void CVSM::checkEvents() {
+    ETMoveData data;
+    if (CMainApp::isPauseNow()) return;
+    if (CGameWork::getByte(1, 0x140)) return;
+    if (m_fEventTrapStartWait <= 0.0f) {
+        if (!CGameWork::getFlag(1, 0x26) && g_pPlayer) {
+            data._fRadius = 0.5f;
+            data._vNowPos = g_pPlayer->getPos();
+            data._vOldPos = g_pPlayer->getOldPos();
+            for (int i = 0; i < m_ActorCount; i++) {
+                CEventTrap* p = m_ActorTbl[i]._pEventTrap;
+                if (!p) continue;
+                INT ret = p->checkTrap(data);
+                if (!ret) continue;
+                switch (ret) {
+                case 3: reqSSI("@_to", i, 3); break;
+                case 5: reqSSI("@_tf", i, 2); break;
+                case 9: reqSSI("@_as", i, 5); break;
+                case 1: reqSSI("@_tc", i, 4); break;
+                default:
+                    if (ret & 8) reqSSI("@_as", i, 5);
+                    if (ret & 2) reqSSI("@_to", i, 3);
+                    if (ret & 4) reqSSI("@_tf", i, 2);
+                    break;
+                }
+            }
+        }
+    } else {
+        m_fEventTrapStartWait -= CTaskMan::getSysTask(0x1A)->getFrameRate() * 0.020000001f;
+    }
+    if (m_fTalkWait <= 0.0f) {
+        if (!g_pPlayer) return;
+        if (g_pPlayer->getPlayerState() == 1 || g_pPlayer->getPlayerState() == 2 ||
+            g_pPlayer->getPlayerState() == 3 || g_pPlayer->getPlayerState() == 4) {
+            if (CPadHandler::isTrgTalk() && (m_nFlag & 8)) {
+                INT Index = searchLockOnNpc();
+                if (Index != -1 && reqSSI("@_tk", Index, 5)) {
+                    TRACE("\x89\xef\x98" "b\x8aJ\x8en\x81" "F%s\n", m_ActorTbl[Index]._ATP.name);
+                    CGameWork::setFlag(1, 4, TRUE);
+                    CGameWork::setFlag(1, 3, TRUE);
+                    CGameWork::setFlag(1, 5, TRUE);
+                    m_fTalkWait = 10.0f;
+                }
+            }
+        }
+    } else {
+        m_fTalkWait -= CTaskMan::getSysTask(0x1A)->getFrameRate() * 0.020000001f;
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", checkEvents__Q24ATEL4CVSM);
 /* Parked: 8 bytes short; only the first return differs: the original keeps `if (!g_pPlayer) return -1;` as
    bnez over "b end; li -1", ours lets jump2 cross-jump it into the loop's final `li -1` (beqz v1 to it; -dJ dump:
    all four -1 returns share one label). $LM tags: 642 the test, 643 the return, 645-647 isNowLockon (Player.h)
@@ -1265,13 +1707,63 @@ void CVSM::execInit() {
         reqN(*m_pCurrentActor, 0, 3, i == 0);
     }
 }
+/* Parked: 3 lines, one store: the original issues the m_Freg store first after the Freg/prev-actor join, ours
+   last (sched2 -fsched-verbose: our store gets priority 7 against 8 for the m_SP store and the m_Pctr load, so
+   reorg puts it into the execCode jal slot instead of `move a0,s0`). Everything else matches: the PMF state call
+   (m_ActorStateFnc as BOOL (CVSM::*[31])()), #line 844 assert, the switch tree needs a case ATEL_RET_REQ.
+   tried: if/ternary/assign-in-test for m_Freg, status before/after it, m_SP before it, getPC() for the
+   argument, a split nRet declaration, tools/permuter.py 5 min (loose score 1). */
+#if 0
+void CVSM::execActor() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    INT nState = atp.status;
+#line 844
+    if (!((ATEL_REQ <= nState) && (_ATEL_REQ_MAX > nState))) AssertApp(__FILE__, __LINE__, "(ATEL_REQ <= nState) && (_ATEL_REQ_MAX > nState)", 0);
+    if ((this->*m_ActorStateFnc[nState])()) {
+        atp.status = 1;
+        INT f;
+        if ((f = atp.Freg) == 0) f = m_pCurrentActor[-1]._ATP.Freg;
+        m_Freg = f;
+        m_SP = 1;
+        eATEL_REQ_RET nRet;
+        nRet = execCode(getPC());
+        atp.Freg = m_Freg;
+        switch (nRet) {
+        case ATEL_RET_MAIN: {
+            if (atp.rq_tag == 0) {
+                atp.status = 6;
+                reqSSD(1, m_nCurrentActorIdx, 5);
+                if (++m_ReadyActorCount == m_ActorCount) {
+                    clearFlag(1);
+                    _TRACE(m_bTrace, "mada->ok pc:%d\n", atp.next_address);
+                }
+            } else if (atp.rq_tag != 1) {
+                reqSSD(1, m_nCurrentActorIdx, 1);
+            }
+            INT nActw = atp.rq_m_actor;
+            if (nActw != 0xFF) {
+                atp.rq_m_actor = 0xFF;
+                m_ActorTbl[nActw]._ATP.wait_timer = 0;
+            }
+            break;
+        }
+        case ATEL_RET_REQ:
+            break;
+        case ATEL_RET_ERROR:
+            atp.status = 2;
+            break;
+        }
+    }
+}
+#else
 /* placeholder: rodata of execActor__Q24ATEL4CVSM */
 __asm__(".rdata\n");
-inline void _roPh25() {
+inline void _roPhExecActor() {
     TRACE("(ATEL_REQ <= nState) && (_ATEL_REQ_MAX > nState)");
     TRACE("mada->ok pc:%d\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execActor__Q24ATEL4CVSM);
+#endif
 /* Parked: 6 lines, one store: the original stores addr (a stack variable, its address goes to execStdCode)
    right after its load, before the _cReg load, so reorg puts the m_Pctr store into the beqz slot; ours keeps addr
    in a pseudo that is put on the stack later (RTL: the addr store comes after the m_Pctr++ store, -dg dump), so
@@ -1332,60 +1824,805 @@ inline void _roPhExecCode() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execCode__Q24ATEL4CVSMi);
 #endif
-/* placeholder: rodata of execStdCode__Q24ATEL4CVSMiRiRQ24ATEL13eATEL_REQ_RET */
-__asm__(".rdata\n");
-inline void _roPh27() {
-    TRACE("zero divide\n");
-    TRACE("Run-time stack  overflow Freg:%x addr:%x pc:%d\n");
-    TRACE("Run-time stack underflow\n");
-    TRACE("REQ:%s,%s\n");
-    TRACE(__FILE__ "(1121)");
-    TRACE("(m_S[m_SP].I)");
-    TRACE("%s");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+INT CVSM::execStdCode(INT op, INT& addr, eATEL_REQ_RET& ret) {
+    INT* ip;
+    FLOAT* fp;
+    char mes[128];
+    INT r;
+    INT i1;
+    INT i2;
+    INT i3;
+    INT c;
+    BYTE* to;
+    BYTE* from;
+    INT d;
+
+    do {
+        r = 1;
+        switch (op) {
+        case 1:
+            addr = m_S[m_SP - 1].I;
+            m_S[m_SP - 1].I = m_S[m_SP].I;
+            m_pDseg[addr] = m_S[m_SP].I;
+            goto pop;
+        case 2:
+            ip = (INT*)(m_pDseg + m_S[m_SP - 1].I);
+            m_S[m_SP - 1].I = m_S[m_SP].I;
+            *ip = m_S[m_SP].I;
+            goto pop;
+        case 3:
+            fp = (FLOAT*)(m_pDseg + m_S[m_SP - 1].I);
+            m_S[m_SP - 1].F = m_S[m_SP].F;
+            *fp = m_S[m_SP].F;
+            goto pop;
+        case 4:
+            m_S[m_SP - 1].I += m_S[m_SP].I;
+            goto pop;
+        case 5:
+            m_S[m_SP - 1].F += m_S[m_SP].F;
+            goto pop;
+        case 6:
+            m_S[m_SP].I += addr;
+            break;
+        case 7:
+            m_S[m_SP - 1].I -= m_S[m_SP].I;
+            goto pop;
+        case 8:
+            m_S[m_SP - 1].F -= m_S[m_SP].F;
+            goto pop;
+        case 9:
+            m_S[m_SP].I -= addr;
+            break;
+        case 10:
+            m_S[m_SP - 1].I *= m_S[m_SP].I;
+            goto pop;
+        case 11:
+            m_S[m_SP - 1].F *= m_S[m_SP].F;
+            goto pop;
+        case 12:
+            m_S[m_SP].I *= addr;
+            break;
+        case 13:
+            if (m_S[m_SP].I == 0) {
+                _TRACE(TRUE, "zero divide\n");
+                return -1;
+            }
+            m_S[m_SP - 1].I /= m_S[m_SP].I;
+            goto pop;
+        case 14:
+            if (m_S[m_SP].F == 0.0f) {
+                _TRACE(TRUE, "zero divide\n");
+                return -1;
+            }
+            m_S[m_SP - 1].F /= m_S[m_SP].F;
+            goto pop;
+        case 15:
+            m_S[m_SP].I /= addr;
+            break;
+        case 16:
+            if (m_S[m_SP].I == 0) {
+                _TRACE(TRUE, "zero divide\n");
+                return -1;
+            }
+            m_S[m_SP - 1].I %= m_S[m_SP].I;
+            goto pop;
+        case 18:
+            m_S[m_SP].I %= addr;
+            break;
+        case 19:
+            m_S[m_SP].I = -m_S[m_SP].I;
+            break;
+        case 20:
+            m_S[m_SP].F = -m_S[m_SP].F;
+            break;
+        case 21:
+            m_S[m_SP - 1].I = m_S[m_SP - 1].I < m_S[m_SP].I ? -1 : m_S[m_SP - 1].I > m_S[m_SP].I;
+            goto pop;
+        case 22:
+            m_S[m_SP - 1].I = m_S[m_SP - 1].F < m_S[m_SP].F ? -1 : m_S[m_SP - 1].F > m_S[m_SP].F ? 1 : 0;
+            goto pop;
+        case 23:
+            m_S[m_SP].I = m_S[m_SP].I < addr ? -1 : m_S[m_SP].I > addr;
+            break;
+        case 24:
+            m_SP++;
+            m_S[m_SP].I = m_S[m_SP - 1].I;
+            break;
+        case 25:
+            m_S[++m_SP].I = m_pDseg[addr];
+            break;
+        case 26:
+            m_S[++m_SP].I = *(INT*)(m_pDseg + addr);
+            break;
+        case 27:
+            m_S[++m_SP].F = *(FLOAT*)(m_pDseg + addr);
+            break;
+        case 28:
+            m_S[++m_SP].I = addr;
+            break;
+        case 29:
+            m_S[m_SP].I = m_pDseg[m_S[m_SP].I];
+            break;
+        case 30:
+            m_S[m_SP].I = *(INT*)(m_pDseg + m_S[m_SP].I);
+            break;
+        case 31:
+            m_S[m_SP].F = *(FLOAT*)(m_pDseg + m_S[m_SP].I);
+            break;
+        case 33:
+            m_pDseg[addr] = m_S[m_SP].I;
+            goto pop;
+        case 34:
+            *(INT*)(m_pDseg + addr) = m_S[m_SP].I;
+            goto pop;
+        case 35:
+            *(FLOAT*)(m_pDseg + addr) = m_S[m_SP].F;
+            goto pop;
+        case 36:
+            m_Freg = addr;
+            break;
+        case 37:
+            m_Freg += addr;
+            if (m_Freg > 0x4000) {
+                r = 3;
+                _TRACE(TRUE, "Run-time stack  overflow Freg:%x addr:%x pc:%d\n", m_Freg, addr, m_Pctr);
+                ret = ATEL_RET_ERROR;
+            }
+            break;
+        case 38:
+            m_Freg -= addr;
+            if (m_Freg < m_MinFP) {
+                if (m_Freg <= m_GAptr) {
+                    r = 3;
+                    _TRACE(TRUE, "Run-time stack underflow\n");
+                    ret = ATEL_RET_STACK_ERROR;
+                } else {
+                    m_MinFP = m_Freg;
+                }
+            }
+            break;
+        case 39:
+            m_S[m_SP].F = (FLOAT)m_S[m_SP].I;
+            break;
+        case 40:
+            m_S[m_SP].I = (INT)m_S[m_SP].F;
+            break;
+        case 42:
+            if (m_S[m_SP--].I < 0) m_Pctr = addr;
+            break;
+        case 43:
+            if (m_S[m_SP--].I <= 0) m_Pctr = addr;
+            break;
+        case 44:
+            if (m_S[m_SP--].I == 0) m_Pctr = addr;
+            break;
+        case 45:
+            if (m_S[m_SP--].I != 0) m_Pctr = addr;
+            break;
+        case 46:
+            if (m_S[m_SP--].I >= 0) m_Pctr = addr;
+            break;
+        case 47:
+            if (m_S[m_SP--].I > 0) m_Pctr = addr;
+            break;
+        case 41:
+            m_Pctr = addr;
+            break;
+        case 48:
+            m_S[++m_SP].I = m_Pctr;
+            m_Pctr = addr;
+            m_CallC++;
+            break;
+        case 49:
+            m_Pctr = m_S[m_SP--].I;
+            break;
+        case 50:
+            r = 3;
+            ret = ATEL_RET_HALT;
+            break;
+        case 57:
+            ret = ATEL_RET_MAIN;
+            r = 3;
+            break;
+        case 116:
+            r = 3;
+            ret = ATEL_RET_MAINS;
+            break;
+        case 58:
+            r = 3;
+            reqNS(*m_pCurrentActor, (CHAR*)(m_pDseg + m_S[m_SP--].I), 5);
+            ret = ATEL_RET_REQ;
+            break;
+        case 59:
+            acWaitReq(*m_pCurrentActor, m_S[m_SP--].I, m_Pctr);
+            ret = ATEL_RET_WAIT;
+            r = 3;
+            break;
+        case 60:
+            i1 = m_S[m_SP--].I;
+            i2 = m_S[m_SP--].I;
+            i3 = m_S[m_SP--].I;
+            TRACE("REQ:%s,%s\n", m_pDseg + i1, m_pDseg + i2);
+            reqSS((CHAR*)(m_pDseg + i1), (CHAR*)(m_pDseg + i2), i3);
+            break;
+        case 61:
+            reqSSW((CHAR*)(m_pDseg + m_S[m_SP--].I), (CHAR*)(m_pDseg + m_S[m_SP--].I), m_S[m_SP--].I, m_Pctr);
+            ret = ATEL_RET_RWAIT;
+            r = 3;
+            break;
+        case 51:
+            c = m_S[m_SP--].I;
+            to = (BYTE*)m_S[m_SP--].I;
+            from = (BYTE*)m_S[m_SP--].I;
+            for (; c > 0; c--) *to++ = *from++;
+            break;
+        case 52:
+            m_S[m_SP].I = (BYTE*)com_malloc_d(m_S[m_SP].I, __FILE__ "(1121)", (UINT)-1) - m_pDseg;
+#line 1122
+            if (!(m_S[m_SP].I)) AssertApp(__FILE__, __LINE__, "(m_S[m_SP].I)", 0);
+            break;
+        case 53:
+            com_free(m_pDseg + m_S[m_SP--].I);
+            break;
+        case 55:
+            d = m_S[m_SP--].I;
+            sprintf(mes, (CHAR*)(m_pDseg + m_S[m_SP--].I), d);
+            _TRACE(TRUE, "%s", mes);
+            break;
+        case 56:
+            sprintf(mes, (CHAR*)(m_pDseg + m_S[m_SP--].I));
+            _TRACE(TRUE, "%s", mes);
+            break;
+        default:
+            return 4;
+        case 32:
+            goto pop;
+        case 0:
+            break;
+        }
+        continue;
+    pop:
+        r = 2;
+        break;
+    } while (r == 0);
+    return r;
 }
-__asm__(".rdata\n.align 4\n.word .L00244ED0\n.word .L00244334\n.word .L00244394\n.word .L002443DC\n.word .L00244424\n.word .L00244454\n.word .L00244484\n.word .L002444A8\n.word .L002444D8\n.word .L00244508\n.word .L0024452C\n.word .L0024455C\n.word .L0024458C\n.word .L002445B0\n.word .L002445F0\n.word .L00244634\n.word .L00244664\n.word .L00244EC0\n.word .L002446BC\n.word .L002446EC\n.word .L0024470C\n.word .L0024472C\n.word .L00244768\n.word .L002447B8\n.word .L002447E8\n.word .L00244814\n.word .L00244840\n.word .L0024486C\n.word .L00244898\n.word .L002448B8\n.word .L002448E0\n.word .L00244908\n.word .L00244EC8\n.word .L00244930\n.word .L00244954\n.word .L00244978\n.word .L0024499C\n.word .L002449A8\n.word .L002449E8\n.word .L00244A34\n.word .L00244A54\n.word .L00244B48\n.word .L00244A78\n.word .L00244A9C\n.word .L00244AC0\n.word .L00244AE4\n.word .L00244B08\n.word .L00244B2C\n.word .L00244B54\n.word .L00244B88\n.word .L00244BA8\n.word .L00244D28\n.word .L00244D90\n.word .L00244E08\n.word .L00244EC0\n.word .L00244E34\n.word .L00244E7C\n.word .L00244BB0\n.word .L00244BCC\n.word .L00244C0C\n.word .L00244C44\n.word .L00244CC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244EC0\n.word .L00244BBC\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execStdCode__Q24ATEL4CVSMiRiRQ24ATEL13eATEL_REQ_RET);
-/* placeholder: rodata of execExt1Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET */
-__asm__(".rdata\n");
-inline void _roPh28() {
-    TRACE("--- ACTCMD_SET_FACE --- %d\n");
-    TRACE("ACC c:%d t:%d id:%d\n");
-    TRACE("Avatar init ACI %.1f %.1f %.1f \n");
-    TRACE("ACP %.1f %.1f %.1f \n");
-    TRACE("ATEL:\x83\x8a\x83\\\x81[\x83X\x83\x8d\x81[\x83h: %d, %d\n");
-    TRACE("--- START MOVE-ACTOR Type::%x ---\n");
-    TRACE("--- ACTOR-SET-TALKRAD ---\n");
-    TRACE("--- START ROATE-ACTOR-Target ---TYPE[%d]\n");
-    TRACE("chibi-pos %d : %d\n");
-    TRACE("MESS_CMD OPEN \n");
-    TRACE("MESS_CMD CLOSE \n");
-    TRACE("MESS_CMD DESTROY \n");
-    TRACE("MESS_CMD CLR TEXT \n");
-    TRACE("MESS_CMD TEXT DELEY \n");
-    TRACE("MESS_CMD WND STYLE \n");
-    TRACE("MESS_CMD CHG WND STYLE\n");
-    TRACE("MESS_CMD SET TEXT MARGIN\n");
-    TRACE("MESS_CMD SET FONT SIZE\n");
-    TRACE("MESS_CMD SET FONT SPACE\n");
-    TRACE("MESS_CMD SET TEXT STYLE\n");
-    TRACE("MESS_CMD SET TEXT COLOR\n");
-    TRACE("MESS_CMD SET TEXT EXCOLOR\n");
-    TRACE("MESS_CMD SETSELECTOFS\n");
-    TRACE("MESS_CMD CHGCURSORCOLOR\n");
-    TRACE("MESS_CMD SETDISPINTERVAL\n");
-    TRACE("MESS_CMD CHANGETEXT_NEXT\n");
-    TRACE("MESS_CMD CHAT_ENABLEDISP\n");
-    TRACE("MESS_CMD IMAGE_PHASEINI\n");
-    TRACE("MESS_CMD IMAGE_PHASEINI2\n");
-    TRACE("MES_DEST_ALL\n");
-    TRACE("MES_LAYER_CHANGE\n");
-    TRACE("MES_SET_C_FADEINDELAY\n");
-    TRACE("MES_SET_T_FADEOUTTIME\n");
-    TRACE("MESS_CMD bad param \n");
+struct AvatarInitParam {
+    FVECTOR _vPos;
+    FVECTOR _vAngle;
+    BOOL _bOnGround;
+};
+struct AvatarMoveParam {
+    union {
+        FVECTOR _vTarget;
+        struct {
+            FLOAT _fCx;
+            FLOAT _fCz;
+            FLOAT _fTargetRotY;
+        };
+        struct {
+            CHAR* _pszPathFile;
+            USHORT _nMotion;
+        };
+    };
+    UINT _nType;
+    union {
+        FLOAT _fTime;
+        FLOAT _fSpeed;
+    };
+};
+struct AvatarRotateParam {
+    union {
+        FVECTOR _vTarget;
+        UINT _nTargetID;
+    };
+    UINT _nType;
+    FLOAT _fTime;
+};
+struct AvatarMotionParam {
+    FLOAT _fPlaySpeed;
+    INT _iChangeHokanRate;
+    SHORT _nMotionID;
+    SHORT _nFlag;
+};
+struct ChatWndCreateParam {
+    CPointI pos;
+    CSizeI size;
+    UINT wndColor;
+    LPCTSTR pText;
+    UINT textColor;
+    UINT fontSize;
+    UINT wndArrangement;
+    CPointI cyobiPos;
+    UINT waitFrame;
+    UINT fontStyle;
+    ChatWndCreateParam() { cyobiPos.m_y = 0; cyobiPos.m_x = 0; }
+};
+struct ImageWndCreateParam {
+    CPointI pos0;
+    CSizeI size0;
+    CPointI pos1;
+    CSizeI size1;
+    LPCTSTR pTexName;
+    INT kind;
+    FLOAT fRate;
+    UINT color0;
+    UINT color1;
+    ImageWndCreateParam() { kind = 0; }
+};
+FLOAT RotTransPers(FVECTOR& outV, const FMATRIX& inM, const FVECTOR& inV);
+INT CVSM::execExt1Code(INT op, eATEL_REQ_RET& ret) {
+    INT nID;
+    INT c;
+    INT t;
+    INT r;
+
+    do {
+        r = 1;
+        switch (op) {
+        case 0x3E:
+            nID = m_S[m_SP].I;
+            if (m_pCurrentActor->_pAvatar) {
+                m_pCurrentActor->_pAvatar->reqCommand(0x38, NULL, nID);
+                _TRACE(m_bTrace, "--- ACTCMD_SET_FACE --- %d\n", nID);
+            }
+            break;
+        case 0x3F:
+            acWaitPad(*m_pCurrentActor, m_S[m_SP].I, m_Pctr);
+            ret = ATEL_RET_PWAIT; r = 3;
+            break;
+        case 0x40:
+            nID = m_S[m_SP].I;
+            ret = ATEL_RET_EWAIT; r = 3;
+            break;
+        case 0x41:
+            break;
+        case 0x43: {
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            _TRACE(m_bTrace, "ACC c:%d t:%d id:%d\n", c, t, nID);
+            ATP& atp = m_pCurrentActor->_ATP;
+            m_Atel.createAvatar(c, *m_pCurrentActor, t);
+            atp.status = 5;
+            atp.next_address = m_Pctr;
+            ret = ATEL_RET_CWAIT; r = 3;
+            break;
+        }
+        case 0x45: {
+            AvatarInitParam param;
+            param._bOnGround = m_S[m_SP--].I;
+            param._vAngle.w = 1.0f;
+            param._vAngle.z = DEG2RAD(m_S[m_SP--].F);
+            param._vAngle.y = DEG2RAD(m_S[m_SP--].F);
+            param._vAngle.x = DEG2RAD(m_S[m_SP--].F);
+            param._vPos.w = 1.0f;
+            param._vPos.z = m_S[m_SP--].F;
+            param._vPos.y = m_S[m_SP--].F;
+            param._vPos.x = m_S[m_SP].F;
+            if (m_pCurrentActor->_pAvatar) {
+                _TRACE(m_bTrace, "Avatar init ACI %.1f %.1f %.1f \n", param._vPos.x, param._vPos.y, param._vPos.z);
+                m_pCurrentActor->_pAvatar->reqCommand(2, &param, 0);
+            }
+            break;
+        }
+        case 0x46: {
+            FVECTOR vPos;
+            vPos.w = 1.0f;
+            vPos.z = m_S[m_SP--].F;
+            vPos.y = m_S[m_SP--].F;
+            vPos.x = m_S[m_SP].F;
+            if (m_pCurrentActor->_pAvatar) {
+                _TRACE(m_bTrace, "ACP %.1f %.1f %.1f \n", vPos.x, vPos.y, vPos.z);
+                m_pCurrentActor->_pAvatar->reqCommand(10, &vPos, 0);
+            }
+            break;
+        }
+        case 0x47:
+        case 0x48:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            TRACE("ATEL:\x83\x8a\x83\\\x81[\x83X\x83\x8d\x81[\x83h: %d, %d\n", c, t);
+            m_pCurrentActor->_nRsrcID = c * 10000 + t;
+            CRcf::reqLoadRCF(c, t, 0, NULL, 0);
+            break;
+        case 0x49: {
+            FVECTOR v;
+            AvatarMoveParam param;
+            v.w = m_S[m_SP--].F;
+            v.z = m_S[m_SP--].F;
+            v.y = m_S[m_SP--].F;
+            v.x = m_S[m_SP--].F;
+            c = m_S[m_SP].I;
+            if (m_pCurrentActor->_pAvatar) {
+                param._nType = c;
+                param._fTime = v.w;
+                switch (c & 0xF) {
+                case 3:
+                case 4:
+                    param._fCx = v.x;
+                    param._fCz = v.z;
+                    param._fTargetRotY = v.y * 0.017453292f;
+                    break;
+                default:
+                    param._vTarget = v;
+                    param._vTarget.w = 0.0f;
+                    break;
+                }
+                if (m_pCurrentActor->_pAvatar) {
+                    _TRACE(m_bTrace, "--- START MOVE-ACTOR Type::%x ---\n", c);
+                    m_pCurrentActor->_pAvatar->reqCommand(0xD, &param, 0);
+                }
+            }
+            break;
+        }
+        case 0x4A:
+            m_S[m_SP].I = m_pCurrentActor->_pAvatar ? isAvatarBusy(m_S[m_SP].I, m_pCurrentActor->_pAvatar) : 0;
+            break;
+        case 0x4B: {
+            c = m_S[m_SP - 1].I;
+            AvatarMotionParam param;
+            param._nMotionID = c & 0xFFF;
+            param._fPlaySpeed = m_S[m_SP].F;
+            param._nFlag = (c >> 12) & 3;
+            if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0x13, &param, 0);
+            break;
+        }
+        case 0x4C: {
+            LineTrapSrc src;
+            src._vP[1].w = 1.0f;
+            src._vP[1].z = m_S[m_SP--].F;
+            src._vP[1].y = m_S[m_SP--].F;
+            src._vP[1].x = m_S[m_SP--].F;
+            src._vP[0].w = 1.0f;
+            src._vP[0].z = m_S[m_SP--].F;
+            src._vP[0].y = m_S[m_SP--].F;
+            src._vP[0].x = m_S[m_SP].F;
+            m_Atel.createEventTrap(src, *m_pCurrentActor);
+            break;
+        }
+        case 0x4D: {
+            BoxTrapSrc src;
+            src._fRotY = DEG2RAD(m_S[m_SP--].F);
+            src._fHeight = m_S[m_SP--].F;
+            src._fDepth = m_S[m_SP--].F;
+            src._fWidth = m_S[m_SP--].F;
+            src._vPos.w = 1.0f;
+            src._vPos.z = m_S[m_SP--].F;
+            src._vPos.y = m_S[m_SP--].F;
+            src._vPos.x = m_S[m_SP].F;
+            m_Atel.createEventTrap(src, *m_pCurrentActor);
+            break;
+        }
+        case 0x4E:
+            CSceneInfo::reqChangeScene(m_S[m_SP - 1].I, m_S[m_SP].I, -1, 1, 1);
+            break;
+        case 0x4F: {
+            AvatarRotateParam param;
+            param._vTarget.w = 0.0f;
+            param._vTarget.z = m_S[m_SP--].F;
+            param._vTarget.y = m_S[m_SP--].F;
+            param._vTarget.x = m_S[m_SP--].F;
+            param._fTime = m_S[m_SP--].F;
+            param._nType = m_S[m_SP].I;
+            if (param._nType & 0x100) {
+                param._nType ^= 0x100;
+                param._fTime = param._fTime * 0.016666668f;
+            }
+            if (param._nType < 3 || param._nType == 5 || param._nType == 7 || param._nType == 9 || param._nType == 6 || param._nType == 8 || param._nType == 10) {
+                param._vTarget.z = DEG2RAD(param._vTarget.z);
+                param._vTarget.y = DEG2RAD(param._vTarget.y);
+                param._vTarget.x = DEG2RAD(param._vTarget.x);
+            }
+            if (param._nType == 2) param._nTargetID = 1;
+            if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0xE, &param, 0);
+            break;
+        }
+        case 0x50:
+            m_pCurrentActor->_fTalkableRadius = m_S[m_SP].F;
+            _TRACE(m_bTrace, "--- ACTOR-SET-TALKRAD ---\n");
+            break;
+        case 0x51: {
+            AvatarRotateParam param;
+            c = m_S[m_SP].I;
+            param._fTime = m_S[m_SP - 1].F;
+            param._nTargetID = c & 0xFFFFFF;
+            param._nType = (c & 0x80000000) ? 4 : 2;
+            if (m_pCurrentActor->_pAvatar) {
+                m_pCurrentActor->_pAvatar->reqCommand(0xE, &param, 0);
+                _TRACE(m_bTrace, "--- START ROATE-ACTOR-Target ---TYPE[%d]\n", param._nType);
+            }
+            break;
+        }
+        case 0x52: {
+            FVECTOR vDir;
+            vDir.w = 0.0f;
+            vDir.z = DEG2RAD(m_S[m_SP--].F);
+            vDir.y = DEG2RAD(m_S[m_SP--].F);
+            vDir.x = DEG2RAD(m_S[m_SP].F);
+            if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0xC, &vDir, 0);
+            break;
+        }
+        case 0x53:
+            c = CGameWork::getInt(0, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        case 0x54:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            CGameWork::setInt(0, c, t);
+            break;
+        case 0x55:
+            c = CGameWork::getByte(0, m_S[m_SP].I);
+            m_S[++m_SP].I = (BYTE)c;
+            break;
+        case 0x56:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            CGameWork::setByte(0, c, t);
+            break;
+        case 0x57:
+            c = CGameWork::getFlag(0, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        case 0x58:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            CGameWork::setFlag(0, c, t);
+            break;
+        case 0x59: {
+            FVECTOR vPos;
+            c = m_S[m_SP--].I;
+            DEG2RAD(m_S[m_SP--].F);
+            DEG2RAD(m_S[m_SP--].F);
+            vPos.w = 1.0f;
+            vPos.z = m_S[m_SP--].F;
+            vPos.y = m_S[m_SP--].F;
+            vPos.x = m_S[m_SP].F;
+            break;
+        }
+        case 0x5A:
+            m_S[m_SP].I = player_ctrl(m_S[m_SP].I);
+            break;
+        case 0x5B: {
+            INT t;
+            INT i11 = m_S[m_SP--].I;
+            INT i10 = m_S[m_SP--].I;
+            INT i9 = m_S[m_SP--].I;
+            INT i8 = m_S[m_SP--].I;
+            INT i7 = m_S[m_SP--].I;
+            INT i6 = m_S[m_SP--].I;
+            INT i5 = m_S[m_SP--].I;
+            INT i4 = m_S[m_SP--].I;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            LPCSTR pText = (LPCSTR)(m_pDseg + m_S[m_SP].I);
+            FVECTOR vPos;
+            ATP& atp = m_pCurrentActor->_ATP;
+            ChatWndCreateParam cpar;
+            cpar.pos.setPoint(i2, i3);
+            cpar.size.setSize(i4, i5);
+            cpar.wndColor = i6;
+            cpar.pText = "";
+            cpar.textColor = i7;
+            cpar.fontSize = i8 & 0xFF;
+            cpar.wndArrangement = i9 & 3;
+            cpar.waitFrame = i10;
+            cpar.fontStyle = i11;
+            if (i9 >= 0x80 && m_pCurrentActor) {
+                FVECTOR vWorld;
+                FVECTOR vPos;
+                getAvatar(m_pCurrentActor->_nID)->getNowPosition(vPos);
+                RotTransPers(vPos, CWorldEnv::getWorldScreenMatrix(), vWorld);
+                UINT inX = (UINT)(vPos.x - 1792.0f);
+                UINT inY = (UINT)(vPos.y - 1880.0f);
+                TRACE("chibi-pos %d : %d\n", inX, inY);
+                cpar.cyobiPos.setPoint(inX, inY);
+            } else {
+                cpar.cyobiPos.setPoint(0, 0);
+            }
+            close_dest_se(i1);
+            if (i9 < 0x10) {
+                CChatMan::instance().reqCommand(0x3E8, &cpar, i1);
+            } else {
+                CChatMan::instance().reqCommand(0x3E9, &cpar, i1);
+            }
+            c = (i9 >> 4) & 3;
+            if (i9 >= 0x10) {
+                INT nIdx;
+                switch (c) {
+                case 1:
+                case 3:
+                    nIdx = 1;
+                    break;
+                case 2:
+                case 4:
+                    nIdx = 2;
+                    break;
+                default:
+                    nIdx = 0;
+                    break;
+                }
+                CChatMan::instance().reqCommand(0x3F1, &nIdx, i1);
+            }
+            if (i8 > 0x10000) {
+                CPointI pos((UINT)i8 >> 24, (i8 >> 16) & 0xFF);
+                CChatMan::instance().reqCommand(0x3F3, &pos, i1);
+            }
+            CChatMan::instance().reqCommand(0x3EF, (void*)pText, i1);
+            WinOpenSE(0);
+            CChatMan::instance().reqCommand(0x3EA, NULL, i1);
+            atp.wait_key = i1;
+            atp.status = 12;
+            atp.next_address = m_Pctr;
+            ret = ATEL_RET_MS_WAIT; r = 3;
+            break;
+        }
+        case 0x5C:
+        case 0x5D: {
+            ImageWndCreateParam m_IWCP;
+            FLOAT f3 = m_S[m_SP].F;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            switch (i1) {
+            case 0:
+                TRACE("MESS_CMD OPEN \n");
+                WinOpenSE(0);
+                CChatMan::instance().reqCommand(0x3EA, NULL, i2);
+                break;
+            case 1:
+                TRACE("MESS_CMD CLOSE \n");
+                WinCloseSE();
+                CChatMan::instance().reqCommand(0x3EB, NULL, i2);
+                break;
+            case 2:
+                TRACE("MESS_CMD DESTROY \n");
+                close_dest_se(i2);
+                break;
+            case 3:
+                TRACE("MESS_CMD CLR TEXT \n");
+                CChatMan::instance().reqCommand(0x3EE, NULL, i2);
+                break;
+            case 4:
+                TRACE("MESS_CMD TEXT DELEY \n");
+                CChatMan::instance().reqCommand(0x3F0, &i3, i2);
+                break;
+            case 5:
+                TRACE("MESS_CMD WND STYLE \n");
+                CChatMan::instance().reqCommand(0x3F1, &i3, i2);
+                break;
+            case 6:
+                TRACE("MESS_CMD CHG WND STYLE\n");
+                CChatMan::instance().reqCommand(0x3F2, &i3, i2);
+                break;
+            case 7: {
+                TRACE("MESS_CMD SET TEXT MARGIN\n");
+                CPointI pos;
+                pos.setPoint((i3 >> 8) & 0xFF, i3 & 0xFF);
+                CChatMan::instance().reqCommand(0x3F3, &pos, i2);
+                break;
+            }
+            case 8:
+                TRACE("MESS_CMD SET FONT SIZE\n");
+                CChatMan::instance().reqCommand(0x3F4, &i3, i2);
+                break;
+            case 9: {
+                TRACE("MESS_CMD SET FONT SPACE\n");
+                CSizeI size;
+                size.setSize((i3 >> 8) & 0xFF, i3 & 0xFF);
+                CChatMan::instance().reqCommand(0x3F5, &size, i2);
+                break;
+            }
+            case 10:
+                TRACE("MESS_CMD SET TEXT STYLE\n");
+                CChatMan::instance().reqCommand(0x3F6, &i3, i2);
+                break;
+            case 11:
+                TRACE("MESS_CMD SET TEXT COLOR\n");
+                CChatMan::instance().reqCommand(0x3F7, &i3, i2);
+                break;
+            case 12:
+                TRACE("MESS_CMD SET TEXT EXCOLOR\n");
+                CChatMan::instance().reqCommand(0x3F8, &i3, i2);
+                break;
+            case 13:
+                TRACE("MESS_CMD SETSELECTOFS\n");
+                CChatMan::instance().reqCommand(0x402, &i3, i2);
+                break;
+            case 14:
+                TRACE("MESS_CMD CHGCURSORCOLOR\n");
+                CChatMan::instance().reqCommand(0x403, &i3, i2);
+                break;
+            case 15:
+                TRACE("MESS_CMD SETDISPINTERVAL\n");
+                CChatMan::instance().reqCommand(0x404, &i3, i2);
+                break;
+            case 16:
+                TRACE("MESS_CMD CHANGETEXT_NEXT\n");
+                CChatMan::instance().reqCommand(0x406, NULL, i2);
+                break;
+            case 17:
+                TRACE("MESS_CMD CHAT_ENABLEDISP\n");
+                CChatMan::instance().reqCommand(0x407, &i3, i2);
+                break;
+            case 18:
+                TRACE("MESS_CMD IMAGE_PHASEINI\n");
+                m_IWCP.pos0.m_x = 0x80000000;
+                m_IWCP.pos1.m_x = 0x80000000;
+                m_IWCP.size0.m_w = -1;
+                m_IWCP.size1.m_w = -1;
+                m_IWCP.color0 = 0x80FFFFFF;
+                m_IWCP.color1 = 0xFFFFFF;
+                m_IWCP.kind = 1;
+                m_IWCP.fRate = f3;
+                CChatMan::instance().reqCommand(0x401, &m_IWCP, i2);
+                break;
+            case 20:
+                TRACE("MESS_CMD IMAGE_PHASEINI2\n");
+                m_IWCP.pos0.m_x = 0x80000000;
+                m_IWCP.pos1.m_x = 0x80000000;
+                m_IWCP.size0.m_w = -1;
+                m_IWCP.size1.m_w = -1;
+                m_IWCP.color0 = 0x80808080;
+                m_IWCP.color1 = 0x808080;
+                m_IWCP.kind = 1;
+                m_IWCP.fRate = f3;
+                CChatMan::instance().reqCommand(0x401, &m_IWCP, i2);
+                break;
+            case 21:
+                TRACE("MES_DEST_ALL\n");
+                CChatMan::instance().reqCommand(0x40F, NULL, 0);
+                break;
+            case 22:
+                TRACE("MES_LAYER_CHANGE\n");
+                CChatMan::instance().reqCommand(0x410, NULL, i3);
+                break;
+            case 23:
+                TRACE("MES_SET_C_FADEINDELAY\n");
+                CChatMan::instance().reqCommand(0x411, &f3, i2);
+                break;
+            case 24:
+                TRACE("MES_SET_T_FADEOUTTIME\n");
+                CChatMan::instance().reqCommand(0x412, &f3, i2);
+                break;
+            default:
+                TRACE("MESS_CMD bad param \n");
+                break;
+            }
+            break;
+        }
+        case 0x5E:
+            break;
+        case 0x5F:
+            c = CGameWork::getInt(1, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        case 0x60:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            CGameWork::setInt(1, c, t);
+            break;
+        case 0x61:
+            c = CGameWork::getByte(1, m_S[m_SP].I);
+            m_S[++m_SP].I = (BYTE)c;
+            break;
+        case 0x62:
+            c = m_S[m_SP - 1].I;
+            t = m_S[m_SP].I;
+            CGameWork::setByte(1, c, t);
+            break;
+        case 0x63:
+            c = CGameWork::getFlag(1, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        default:
+            return 4;
+        }
+    } while (r == 0);
+    return r;
 }
-__asm__(".rdata\n.align 4\n.word .L00244F74\n.word .L00244FD0\n.word .L00245004\n.word .L002467E8\n.word .L002467E0\n.word .L0024502C\n.word .L002467E0\n.word .L002450A4\n.word .L002451D8\n.word .L00245290\n.word .L00245290\n.word .L002452FC\n.word .L00245404\n.word .L0024543C\n.word .L00245498\n.word .L00245550\n.word .L0024562C\n.word .L00245668\n.word .L002457B0\n.word .L002457E0\n.word .L00245878\n.word .L002458FC\n.word .L00245920\n.word .L00245930\n.word .L00245958\n.word .L00245968\n.word .L00245978\n.word .L002459AC\n.word .L00245A10\n.word .L00245A40\n.word .L00245ECC\n.word .L00245ECC\n.word .L002467E8\n.word .L002466F8\n.word .L0024671C\n.word .L00246750\n.word .L00246778\n.word .L002467AC\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00245F3C\n.word .L00245F90\n.word .L00245FE4\n.word .L00246000\n.word .L0024604C\n.word .L00246098\n.word .L002460E4\n.word .L00246130\n.word .L00246188\n.word .L002461D4\n.word .L0024622C\n.word .L00246278\n.word .L002462C4\n.word .L00246310\n.word .L0024635C\n.word .L002463A8\n.word .L002463F4\n.word .L00246440\n.word .L0024648C\n.word .L002466E4\n.word .L00246514\n.word .L0024659C\n.word .L002465E8\n.word .L00246634\n.word .L0024667C\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execExt1Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET);
 /* placeholder: rodata of execExt2Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET */
 __asm__(".rdata\n");
 inline void _roPh29() {
@@ -2117,6 +3354,119 @@ BOOL CVSM::acStatDLWait() {
 BOOL CVSM::acStatBGWait() {
     return FALSE;
 }
+/* Parked: 8 lines, one case (nCode 27, the two commands with f = 16.0f): the original issues the 16.0f load and
+   its store to f before loading m_pCurrentActor, ours after (sched2: the lw chain to the virtual call has the
+   higher priority; equal-priority ties go later-insn-first, so the original's RTL had the constant after the
+   load). Every other case, the jump table and the shared TRACE tail match. tried: volatile f, statement order per
+   the $LM tags (6202 f, 6203/6204 the calls), tools/permuter.py 5 min (loose score 1). */
+#if 0
+INT CVSM::player_ctrl(INT nCode) {
+    FLOAT f;
+    INT index;
+    switch (nCode) {
+    case 2:
+        m_pCurrentActor->_pAvatar->reqCommand(0x6, NULL, 0);
+        TRACE("SHOW :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 3:
+        m_pCurrentActor->_pAvatar->reqCommand(0x6, NULL, 1);
+        TRACE("HIDE :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 6:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1D, NULL, 1);
+        TRACE("GRAVITY ON :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 7:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1D, NULL, 0);
+        TRACE("GRAVITY OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 8:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1E, NULL, 1);
+        TRACE("MAP_COLL_ON :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 9:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1E, NULL, 0);
+        TRACE("MAP_COLL_OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 10:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1F, NULL, 1);
+        TRACE("BODY_COLL_ON :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 11:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1F, NULL, 0);
+        TRACE("BODY_COLL_OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 39:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1, NULL, 0);
+        m_pCurrentActor->_ATP.status = 25;
+        index = searchActor(m_pCurrentActor->_ATP.name);
+        m_ActorTbl[index]._pAvatar = NULL;
+        m_pCurrentActor->_pAvatar = NULL;
+        TRACE("REMOVE NPC :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 40:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1A, NULL, 1);
+        TRACE("MAKEUP_MOTION_INVALID :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 41:
+        m_pCurrentActor->_pAvatar->reqCommand(0x1A, NULL, 0);
+        TRACE("MAKEUP_MOTION_VALID :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 42:
+        m_pCurrentActor->_pAvatar->reqCommand(0x34, NULL, 0);
+        TRACE("AVTCMD_SET_LOOK_START :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 43:
+        m_pCurrentActor->_pAvatar->reqCommand(0x35, NULL, 0);
+        TRACE("AVTCMD_SET_LOOK_STOP :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 44:
+        f = 16.0f;
+        m_pCurrentActor->_pAvatar->reqCommand(0x35, NULL, 0);
+        m_pCurrentActor->_pAvatar->reqCommand(0x36, &f, 0);
+        TRACE("AVTCMD_SET_LOOK_END :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 45:
+        m_pCurrentActor->_pAvatar->reqCommand(0x24, NULL, 0);
+        TRACE("AVTCMD_CREATE_LEGIK :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 46:
+        m_pCurrentActor->_pAvatar->reqCommand(0x21, NULL, 1);
+        TRACE("AVTCMD_SET_IK  ON :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 47:
+        m_pCurrentActor->_pAvatar->reqCommand(0x21, NULL, 0);
+        TRACE("AVTCMD_SET_IK  OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 48:
+        m_pCurrentActor->_pAvatar->reqCommand(0x22, NULL, 1);
+        TRACE("AVTCMD_SET_LOCK_ON  ON :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 49:
+        m_pCurrentActor->_pAvatar->reqCommand(0x22, NULL, 0);
+        index = searchLockOnNpc();
+        if (index != -1 && m_ActorTbl[index]._pAvatar == m_pCurrentActor->_pAvatar) g_pPlayer->cancelLockon();
+        TRACE("AVTCMD_SET_LOCK_ON  OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 50:
+        m_pCurrentActor->_pAvatar->reqCommand(0x23, NULL, 1);
+        TRACE("AVTCMD_SET_NEAR_CLIP  OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 51:
+        m_pCurrentActor->_pAvatar->reqCommand(0x23, NULL, 0);
+        TRACE("AVTCMD_SET_NEAR_CLIP  OFF :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    case 52:
+        m_pCurrentActor->_pAvatar->reqCommand(0x2F, NULL, 0);
+        TRACE("AVTCMD_START_AVATAR  :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    default:
+        _TRACE(m_bTrace, "bad param player_ctrl :%s\n", m_pCurrentActor->_ATP.name);
+        break;
+    }
+    return 0;
+}
+#else
 /* placeholder: rodata of player_ctrl__Q24ATEL4CVSMi */
 __asm__(".rdata\n");
 inline void _roPh42() {
@@ -2127,15 +3477,41 @@ inline void _roPh42() {
 }
 __asm__(".rdata\n.align 4\n.word .L0024F080\n.word .L0024F0B8\n.word .L0024F604\n.word .L0024F604\n.word .L0024F0F0\n.word .L0024F128\n.word .L0024F160\n.word .L0024F198\n.word .L0024F1D0\n.word .L0024F208\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F604\n.word .L0024F240\n.word .L0024F2AC\n.word .L0024F2E4\n.word .L0024F31C\n.word .L0024F354\n.word .L0024F38C\n.word .L0024F3F8\n.word .L0024F430\n.word .L0024F468\n.word .L0024F4A0\n.word .L0024F4D8\n.word .L0024F550\n.word .L0024F588\n.word .L0024F5C0\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", player_ctrl__Q24ATEL4CVSMi);
+#endif
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 INT CVSM::player_ctrl(INT nCode, FLOAT fArg) {
     if (m_pCurrentActor->_pAvatar) _TRACE(m_bTrace, "bad param player_control\n");
     return -2;
 }
-/* placeholder: rodata of cam_ctrl__Q24ATEL4CVSMiiRi */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0024F6AC\n.word .L0024F6E8\n.word .L0024F724\n.word .L0024F760\n.word .L0024F7C8\n.word .L0024F824\n.word .L0024F864\n.word .L0024F8A4\n.word .L0024F8C4\n.word .L0024F8E4\n.word .L0024F904\n.word .L0024F924\n.word .L0024F944\n.word .L0024F96C\n.word .L0024F9A0\n.word .L0024F9C8\n.word .L0024FA04\n.word .L0024FA40\n.word .L0024FADC\n.word .L0024FA80\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", cam_ctrl__Q24ATEL4CVSMiiRi);
+BOOL CVSM::cam_ctrl(INT nCmnd, INT nID, INT& nRet) {
+    switch (nCmnd) {
+    case 0: CCameraMan::instance().reqCommand(0x44F, NULL, nID); break;
+    case 1: CCameraMan::instance().reqCommand(0x450, NULL, nID); break;
+    case 2: CCameraMan::instance().reqCommand(0x451, NULL, nID); break;
+    case 3:
+        if (CCameraMan::instance().reqCommand(0x453, &nRet, nID) != 1) nRet = 0;
+        break;
+    case 4: nRet = CCameraMan::instance().reqCommand(0x452, &nRet, nID); break;
+    case 5: CCameraMan::instance().reqCommand(0x455, NULL, 0); break;
+    case 6: CCameraMan::instance().reqCommand(0x457, NULL, 0); break;
+    case 7: CDeFocus::off(); break;
+    case 8: CDeFocus::on(); break;
+    case 9: CDeFocus::offNear(); break;
+    case 10: CDeFocus::onNear(); break;
+    case 11: CDeFocus::offFar(); break;
+    case 12: CDeFocus::setAutomatic(); break;
+    case 13: CDeFocus::push(); break;
+    case 14: CDeFocus::pop();
+    case 15: CCameraMan::instance().reqCommand(0x45D, NULL, nID); break;
+    case 16: CCameraMan::instance().reqCommand(0x45E, NULL, nID); break;
+    case 17: CCameraMan::instance().reqCommand(0x460, NULL, 0); break;
+    case 19: CCameraMan::instance().reqCommand(0x465, NULL, nID); break;
+    default:
+        _TRACE(m_bTrace, "MESS_CMD bad param \n");
+        break;
+    }
+    return FALSE;
+}
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CVSM::info_disp(INT nCmnd) {
     _TRACE(m_bTrace, "NG INF-param\n");
@@ -2152,18 +3528,88 @@ BOOL CVSM::player_rsrc(INT nCmnd, INT nArg) {
     _TRACE(m_bTrace, "bad case RSC_CMD %d\n", nArg);
     return FALSE;
 }
-/* placeholder: rodata of ctd_cal__Q24ATEL4CVSMPCQ24ATEL7CAvatariiPQ24ATEL21ChatWndCreateCTDParam */
-__asm__(".rdata\n");
-inline void _roPh44() {
-    TRACE("chobi-man %d\n");
-    TRACE(">>>>>chibi(CMA) pos %d : %d\n");
-    TRACE("neck");
-    TRACE("neck1");
-    TRACE("head");
-    TRACE("ATEL:CVSM::ctd_cal\x81" "F\x83\x81\x83" "b\x83Z\x81[\x83W\x83" "E\x83" "C\x83\x93\x83h\x83" "E\x81" "F\x83`\x83\x87\x83r\x82\xf0\x8c\xfc\x82\xaf\x82\xe9\x83{\x81[\x83\x93\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1\x81" "E\x81" "E\x81" "E\n");
+namespace ATEL {
+struct ChatWndSetWordsParam;
+struct ChatWndCreateCTDParam {
+    CPointI pos;
+    CPointI cyobiPos;
+    UINT ctdID;
+    UINT waitFrame;
+    ChatWndSetWordsParam* pCwswp;
+    UINT nLine;
+};
 }
-__asm__(".rdata\n.align 4\n.word .L0024FD70\n.word .L0024FD74\n.word .L0024FD7C\n.word .L0024FD8C\n.word .L0024FD98\n.word .L0024FD94\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", ctd_cal__Q24ATEL4CVSMPCQ24ATEL7CAvatariiPQ24ATEL21ChatWndCreateCTDParam);
+FLOAT RotTransPers(FVECTOR& outV, const FMATRIX& inM, const FVECTOR& inV); /* System/Graphic/Gprim.h in the original */
+extern INT SCREEN_HEIGHT;
+void CVSM::ctd_cal(const CAvatar* in_pAvatar, int i2, int i3, ChatWndCreateCTDParam* CWCP) {
+    i3 &= 0x7FFFFFFF;
+    if (i3 > 0xFFFFF) {
+        int i4;
+        int ix;
+        int iy;
+        int x;
+        int y;
+        int hx;
+        int hy;
+        i4 = i3 >> 20;
+        TRACE("chobi-man %d\n", i4);
+        CtdBlock* pBlock = CCtdMan::getCtdBlock(i2, NULL);
+        INT style = (UBYTE)pBlock->wndStyle;
+        CSizeI size(pBlock->sizeX, pBlock->sizeY);
+        CPointI targetPos;
+        targetPos.setPoint(pBlock->posX, pBlock->posY);
+        switch (style) {
+        case 0: break;
+        case 1: targetPos.m_x = 0x20; break;
+        case 2: targetPos.m_x = 0x100 - (size.m_w >> 1); break;
+        case 3: targetPos.m_x = 0x1D0 - size.m_w; break;
+        }
+        x = size.m_w >> 1;
+        y = size.m_h >> 1;
+        ix = targetPos.m_x + x;
+        iy = targetPos.m_y + y;
+        hx = (UINT)(x * 1.6);
+        hy = size.m_h + 0x20;
+        switch (i4) {
+        case 1: ix -= hx; iy -= hy; break;
+        case 2: iy -= hy; break;
+        case 3: ix += hx; iy -= hy; break;
+        case 4: ix -= hx; iy += hy; break;
+        case 5: iy += hy; break;
+        case 6: ix += hx; iy += hy; break;
+        }
+        if (ix < 0) ix = 0;
+        if (iy < 0) iy = 0;
+        TRACE(">>>>>chibi(CMA) pos %d : %d\n", ix, iy);
+        CWCP->cyobiPos.setPoint(ix, iy);
+    } else if (i3 & 0x10000) {
+        if (in_pAvatar) {
+            INT BoneIndex = in_pAvatar->getBoneIndex("neck", 0);
+            if (BoneIndex == -1) BoneIndex = in_pAvatar->getBoneIndex("neck1", 0);
+            if (BoneIndex == -1) BoneIndex = in_pAvatar->getBoneIndex("head", 0);
+            FVECTOR vWorld;
+            FVECTOR vPos;
+            if (BoneIndex == -1) {
+                TRACE("ATEL:CVSM::ctd_cal\x81" "F\x83\x81\x83" "b\x83Z\x81[\x83W\x83" "E\x83" "C\x83\x93\x83h\x83" "E\x81" "F\x83`\x83\x87\x83r\x82\xf0\x8c\xfc\x82\xaf\x82\xe9\x83{\x81[\x83\x93\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1\x81" "E\x81" "E\x81" "E\n");
+                in_pAvatar->getNowPosition(vWorld);
+                RotTransPers(vPos, CWorldEnv::getWorldScreenMatrix(), vWorld);
+                UINT x = (UINT)(vPos.x - 1792.0f);
+                UINT y = (UINT)(vPos.y - 1880.0f);
+                CWCP->cyobiPos.setPoint(x, y);
+                return;
+            }
+            RotTransPers(vPos, CWorldEnv::getWorldScreenMatrix(), in_pAvatar->Crd(BoneIndex).m_World.v[3]);
+            UINT x = (UINT)(vPos.x - 1792.0f);
+            UINT y = (UINT)(vPos.y - (FLOAT)(2048 - SCREEN_HEIGHT / 2));
+            CWCP->cyobiPos.setPoint(x, y);
+            if (x == 0 && y == 0) CWCP->cyobiPos.setPoint(1, 1);
+        } else {
+            CWCP->cyobiPos.setPoint(1, 1);
+        }
+    } else {
+        CWCP->cyobiPos.setPoint(0, 0);
+    }
+}
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CVSM::AtelEventSkip() {
     TRACE("Event Skip Start\n");

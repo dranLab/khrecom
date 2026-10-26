@@ -19,13 +19,13 @@ template <class T> struct SIZE_T {
 
 template <class T> struct CPointT : POINT_T<T> {
     CPointT() {}
-    CPointT(T x, T y) { m_x = x; m_y = y; }
+    CPointT(T x, T y) { m_x = x; m_y = y; } void setPoint(T x, T y) { m_x = x; m_y = y; } // PARTIAL: setPoint added for Game/Atel/VSME
     CPointT<T> operator+(const POINT_T<T>& pt) const { return CPointT<T>(m_x + pt.m_x, m_y + pt.m_y); }
 };
 
 template <class T> struct CSizeT : SIZE_T<T> {
     CSizeT() {}
-    CSizeT(T w, T h) { m_w = w; m_h = h; }
+    CSizeT(T w, T h) { m_w = w; m_h = h; } void setSize(T w, T h) { m_w = w; m_h = h; } // PARTIAL: setSize added for Game/Atel/VSME
     BOOL operator==(const SIZE_T<T>& sz) const { return m_w == sz.m_w && m_h == sz.m_h; } // PARTIAL: added for System/Wnd
 };
 
