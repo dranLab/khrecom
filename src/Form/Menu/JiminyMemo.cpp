@@ -204,6 +204,9 @@ public:
     void setReplaceSeq(INT inSeq);
 };
 
+namespace JiminyMemo {
+extern UINT CursorSeqTbl[];
+}
 class CMemo2DCard : public D2::C2DSeqCtrl {
 private:
     FVECTOR m_vBasePosition;  /* 0x160 */
@@ -219,6 +222,10 @@ public:
     virtual ~CMemo2DCard();
     void setPosition();
     void setLocalPosition();
+    void createPicture(UINT inTexNo, UINT inTexPos);
+    void changePicture(D2::C2DSeqObj* inSeqObj);
+    void setState(INT inState);
+    void main(FLOAT inFrameRate);
 };
 
 struct ContentCommonWork {
@@ -680,12 +687,13 @@ inline void _roPh8() {
     TRACE("card:01");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", create__11CMemo2DCardG4CARDi);
-/* placeholder: rodata of createPicture__11CMemo2DCardUiUi */
-__asm__(".rdata\n");
-inline void _roPh9() {
-    TRACE("card:02");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CMemo2DCard::createPicture(UINT inTexNo, UINT inTexPos) {
+    m_iTexNo = inTexNo;
+    m_iTexPos = inTexPos;
+    if (!m_nSeq) addSeq(m_pEmptySeqName, JiminyMemo::CursorSeqTbl[0]);
+    changePicture(addSeq("card:02", 0));
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createPicture__11CMemo2DCardUiUi);
 /* placeholder: rodata of changePicture__11CMemo2DCardPQ22D29C2DSeqObj */
 __asm__(".rdata\n");
 inline void _roPh10() {
