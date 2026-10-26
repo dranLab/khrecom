@@ -239,6 +239,7 @@ private:
 
 public:
     void setup(CursorDataParam& inParam);
+    void main();
     INT setPosiId(INT inPosiId);
     void setScale(FLOAT inScale);
     void getSubVector(CursorPosition& outSub, INT inId0, INT inId1);
@@ -1077,7 +1078,60 @@ INT CMemo2DCursor::setPosiId(INT inPosiId) {
     }
     return rval;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__13CMemo2DCursor);
+void CMemo2DCursor::main() {
+    FVECTOR posi;
+    FVECTOR aim;
+    FVECTOR shift;
+    FLOAT limx0;
+    FLOAT limy0;
+    if (!(m_iState & 0x2000000)) {
+        switch (m_iLadSeq) {
+        case 0:
+            if (isEnd(0)) setReplaceSeq(1);
+            break;
+        case 2:
+            if (isEnd(0)) {
+                m_iLadSeq = 5;
+                enableDisp(FALSE);
+                return;
+            }
+            break;
+        }
+    }
+    if (m_bMoveSlideEnable) {
+        m_fMoveTimer += getFrameRateF();
+        if (m_fMoveTimer >= 30.0f) {
+            m_fMoveTimer = 30.0f;
+            m_bMoveSlideEnable = FALSE;
+        }
+        posi = m_vPosi;
+        aim = m_vAimPosi;
+        shift = m_vShiftPosi;
+        SubVectorXYZ(aim, aim, shift);
+        sceVu0InterVectorXYZ(posi, aim, posi, 1.0f - powf(1.0f - m_fMoveTimer / 30.0f, 2.5f));
+        limx0 = m_ScreenLimit[0].x + m_fSpacing[0] * m_fScale;
+        FLOAT limx1 = m_ScreenLimit[1].x + m_fSpacing[2] * m_fScale;
+        if (posi.x > limx1) {
+            shift.x += posi.x - limx1;
+            posi.x = limx1;
+        } else if (posi.x < limx0) {
+            shift.x -= limx0 - posi.x;
+            posi.x = limx0;
+        }
+        limy0 = m_ScreenLimit[0].y + m_fSpacing[1] * m_fScale;
+        FLOAT limy1 = m_ScreenLimit[1].y + m_fSpacing[3] * m_fScale;
+        if (posi.y > limy1) {
+            shift.y += posi.y - limy1;
+            posi.y = limy1;
+        } else if (posi.y < limy0) {
+            shift.y -= limy0 - posi.y;
+            posi.y = limy0;
+        }
+        m_vPosi = posi;
+        m_vShiftPosi = shift;
+        setLocalPos(m_vPosi);
+    }
+}
 FLOAT CMemo2DCursor::getFrameRateF() {
     if (m_hParent) {
         CTask* pTask = CTaskMan::getTask(m_hParent);
