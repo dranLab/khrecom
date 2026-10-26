@@ -336,6 +336,8 @@ private:
     void setPlateNumSeq(INT inKind, INT inParam);
     void ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR& inPos, FLOAT inBaseHeight,
                        CMemo2DSequence* inParent);
+    void ScrollBarChange(D2::C2DSeqCtrl** inSeqCtrl, FLOAT inBasePosY, FLOAT inBaseHeight, INT inCursorPosiNum,
+                         INT inNoteListNum, INT inStartNum);
     INT getPlateState(INT inKind);
     void setPlateText(INT inKind, INT inCTNo);
     CMemo2DSequence* createSequence(const INT* inSeqData, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
@@ -1700,7 +1702,48 @@ void CJiminyMemo::ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR
         }
     }
 }
+/* Parked: 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves
+   from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches.
+   tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the top, NULL compare, 0 vs
+   0.0f w, fRatioPosY reused for the product; tools/permuter.py 8 min reached score 1 in its copy (vec before vPos,
+   braces, 3 > i), but the same source gives 69 lines in the real build: codegen depends on the source path
+   (identifier hash order), so permuter results do not transfer here. */
+#if 0
+void CJiminyMemo::ScrollBarChange(D2::C2DSeqCtrl** inSeqCtrl, FLOAT inBasePosY, FLOAT inBaseHeight,
+                                  INT inCursorPosiNum, INT inNoteListNum, INT inStartNum) {
+    FLOAT fRatioHeight;
+    FLOAT fRatioPosY;
+    FVECTOR vPos;
+    FVECTOR vec;
+    if (!inSeqCtrl) return;
+    fRatioHeight = (FLOAT)inCursorPosiNum / (FLOAT)inNoteListNum;
+    fRatioPosY = (1.0f - fRatioHeight) / ((FLOAT)inNoteListNum - (FLOAT)inCursorPosiNum) * (FLOAT)inStartNum;
+    vPos = inSeqCtrl[0]->m_seqControl.vPos;
+    vPos.y = inBasePosY + inBaseHeight * fRatioPosY;
+    for (INT i = 0; i < 3; i++) {
+        D2::C2DSeqCtrl* p = inSeqCtrl[i];
+        if (p) {
+            switch (i) {
+            case 0:
+                p->setLocalPos(vPos);
+                vec.set(1.0f, inBaseHeight * 0.01f * fRatioHeight, 1.0f, 0.0f);
+                p->setScl(vec);
+                break;
+            case 1:
+                vec.set(vPos.x, vPos.y + 1.0f, vPos.z, vPos.w);
+                p->setLocalPos(vec);
+                break;
+            case 2:
+                vec.set(vPos.x, vPos.y + inBaseHeight * fRatioHeight - 2.0f, vPos.z, vPos.w);
+                p->setLocalPos(vec);
+                break;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii);
+#endif
 BOOL CJiminyMemo::nextPage(INT* ioTop, INT inMax, INT inDisp) {
     BOOL bRet;
     INT nLimit = inMax - inDisp;
