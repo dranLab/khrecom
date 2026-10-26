@@ -285,6 +285,8 @@ private:
     void replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER* inCtTbl, INT inFlagId, INT inListNum,
                                       INT inListAllNum, INT inStartNo);
     BOOL isButtonRptLimitStop(UINT inBit, UINT inPad, BOOL inStopCompare);
+    void createCursorPosiTbl(CursorPosition* inPosiTbl, const CursorPosition& inStartPosi, const CursorPosition& inStepPosi,
+                             INT inListNum, INT inWidth);
     template <class T> T getTaskPointer(HANDLE inHandle);
     BOOL isTaskOut(HANDLE inHandle);
     UINT checkLayoutState(HANDLE inHandle, INT inFlags);
@@ -943,7 +945,21 @@ inline void _roPh18() {
     TRACE(__FILE__ "(4413)");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createCollectionCursorSequence__11CJiminyMemoPCiRC14CursorPositionT2iiiiiiiifP15CMemo2DSequence);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createCursorPosiTbl__11CJiminyMemoP14CursorPositionRC14CursorPositionT2ii);
+void CJiminyMemo::createCursorPosiTbl(CursorPosition* inPosiTbl, const CursorPosition& inStartPosi,
+                                      const CursorPosition& inStepPosi, INT inListNum, INT inWidth) {
+    CursorPosition offset;
+    INT height = inListNum / inWidth + (inListNum % inWidth > 0);
+    offset.y = inStartPosi.y;
+    for (INT i = 0; i < height; i++) {
+        offset.x = inStartPosi.x;
+        for (INT j = 0; j < inWidth; j++) {
+            inPosiTbl[i * inWidth + j].x = offset.x;
+            inPosiTbl[i * inWidth + j].y = offset.y;
+            offset.x += inStepPosi.x;
+        }
+        offset.y += inStepPosi.y;
+    }
+}
 /* placeholder: rodata of createCursorSequence__11CJiminyMemoPCiiiRC14CursorPositioniiiiiiiiP15CMemo2DSequence */
 __asm__(".rdata\n");
 inline void _roPh19() {
