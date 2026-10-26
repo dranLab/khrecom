@@ -1202,15 +1202,43 @@ void CVSM::setReq(const RTP& rq) {
     p->rq_m_actor = rq.rq_m_actor;
     p->wait_key = rq.wait_key;
 }
-/* placeholder: rodata of tuneReq__Q24ATEL4CVSM */
-__asm__(".rdata\n");
-inline void _roPh24() {
-    TRACE("mode-exec\n");
-    TRACE("\x93\xaf\x82\xb6\x83\x8a\x83N\x83G\x83X\x83g\x82\xaa\x94\xad\x8ds\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81" "B\n");
-    TRACE("EW--!!tune");
-    TRACE("snatch wait PASS !!\n");
+void CVSM::tuneReq() {
+    if (m_nReqBufPtr > 0) {
+        RTP* p = m_ReqBuf;
+        for (INT i = 0; i < m_nReqBufPtr; i++, p++) {
+            UINT nActIdx = p->rq_actor;
+            ATP& atp = m_ActorTbl[nActIdx]._ATP;
+            INT nTag = p->rq_tag;
+            UINT nStat = atp.status;
+            if (nStat == 4 && nTag == 0xFF) {
+                atp.status = 1;
+                _TRACE(m_bTrace, "mode-exec\n");
+            } else if (nTag == atp.rq_tag) {
+                if (p->rq_m_actor != 0xFF) {
+                    TRACE("\x93\xaf\x82\xb6\x83\x8a\x83N\x83G\x83X\x83g\x82\xaa\x94\xad\x8ds\x82\xb3\x82\xea\x82\xdc\x82\xb5\x82\xbd\x81" "B\x96\xb3\x8e\x8b\x82\xb5\x82\xdc\x82\xb7\x81" "B\n");
+                    atp.status = 1;
+                    atp.rq_tag = nTag;
+                    atp.rq_lv = p->rq_lv;
+                    atp.address = atp.loc[nTag];
+                    atp.rq_m_actor = p->rq_m_actor;
+                    atp.wait_key = p->wait_key;
+                    _TRACE(m_bTrace, "EW--!!tune");
+                }
+            } else if (nStat == 11 && atp.tname[nTag] == 0x72665F40) {
+                atp.wait_timer = 0;
+                _TRACE(m_bTrace, "snatch wait PASS !!\n");
+            } else {
+                if (nStat == 3 || nStat == 20) atp.status = 1;
+                atp.rq_tag = nTag;
+                atp.rq_lv = p->rq_lv;
+                atp.address = atp.loc[nTag];
+                atp.rq_m_actor = p->rq_m_actor;
+                atp.wait_key = p->wait_key;
+            }
+        }
+        m_nReqBufPtr = 0;
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", tuneReq__Q24ATEL4CVSM);
 void CVSM::exec(TIMEQ nTQ) {
     m_nFrameRate = nTQ;
     if (m_WinCloseTimer > 0) {
