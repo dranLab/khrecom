@@ -1031,7 +1031,24 @@ __asm__(".rdata\n.align 4\n.word .L0032A474\n.word .L0032A480\n.word .L0032A498\
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPlateText__11CJiminyMemoii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPlateNumSeq__11CJiminyMemoii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getMenuContentFlag__11CJiminyMemoiiPiT3);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getPrevContentId__11CJiminyMemoiii);
+INT CJiminyMemo::getPrevContentId(INT inEventFlagStartId, INT inEventFlagNum, INT inCurrentNo) {
+    INT rval = -1;
+    for (INT i = inCurrentNo - 1; i >= 0; i--) {
+        if (CJiminyMemoFlag::isContentOpen(inEventFlagStartId + i)) {
+            rval = i;
+            break;
+        }
+    }
+    if (rval == -1) {
+        for (INT i = inEventFlagNum - 1; i > inCurrentNo; i--) {
+            if (CJiminyMemoFlag::isContentOpen(inEventFlagStartId + i)) {
+                rval = i;
+                break;
+            }
+        }
+    }
+    return rval;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getNextContentId__11CJiminyMemoiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", ScrollBarInit__11CJiminyMemoPPQ22D210C2DSeqCtrliR7FVECTORfP15CMemo2DSequence);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii);
