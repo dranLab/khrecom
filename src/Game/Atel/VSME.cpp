@@ -1,6 +1,8 @@
 #include "khtypes.h"
 #include "Game/Atel/VSME.h"
 #include "Game/Atel/Atel.h"
+#define GAME_ATEL_AVATAR_CPP /* the full CAvatar class (the other includers get a stub) */
+#include "Game/Atel/Avatar.h"
 #include "Form/Menu/WorldCard.h"
 #include "Form/Menu/LevelUp.h"
 inline void* operator new(size_t, void* p) throw() { return p; }
@@ -36,6 +38,7 @@ extern "C" char D_00491638[];
 extern "C" char D_00491668[];
 extern "C" char D_004916A0[];
 extern "C" char D_004916E8[];
+extern "C" char D_00491700[];
 extern "C" char D_004917D8[];
 extern "C" char D_004917F0[];
 extern "C" char D_00491810[];
@@ -327,7 +330,15 @@ BOOL CVSM::acStatRWait() {
     m_Pctr = atp.next_address;
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatCWait__Q24ATEL4CVSM);
+BOOL CVSM::acStatCWait() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    if (!m_pCurrentActor->_pAvatar->isAvatarBusy()) {
+        _TRACE(m_bTrace, D_00491700, atp.id);
+        m_Pctr = atp.next_address;
+        return TRUE;
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatIWait__Q24ATEL4CVSM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatPWait__Q24ATEL4CVSM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatSWait__Q24ATEL4CVSM);

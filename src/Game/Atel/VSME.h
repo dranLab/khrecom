@@ -5,7 +5,7 @@
 #include "System/Task.h"
 
 class CAtel;
-class CAvatar;
+namespace ATEL { class CAvatar; }
 class CEventTrap;
 class CAtelCardSeq;
 
@@ -160,6 +160,7 @@ private:
     BOOL acStatBGWait();
     BOOL acStatEternityWait();
     BOOL acStatCardWndWait();
+    BOOL acStatCWait();
     BOOL acStatRsrcLoadWait();
     BOOL acStatRWait();
     BOOL acStatCrossFadeWait();
