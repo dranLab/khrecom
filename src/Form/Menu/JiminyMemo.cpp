@@ -187,6 +187,7 @@ public:
     void setLimitPosi(CursorPosition& inPosi, INT inId);
     CursorPosition* getLimitPosi(INT inId);
     FLOAT getFrameRateF();
+    void setReplaceSeq(INT inSeq);
 };
 
 class CMemo2DCard : public D2::C2DSeqCtrl {
@@ -604,7 +605,11 @@ void CMemo2DCursor::finalise() {
     if (m_pPosiTbl) com_free(m_pPosiTbl);
     m_pPosiTbl = NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setReplaceSeq__13CMemo2DCursori);
+void CMemo2DCursor::setReplaceSeq(INT inSeq) {
+    m_iLadSeq = inSeq;
+    replaceSeq(0, m_lpctLayoutName, m_iLadTbl[inSeq]);
+    replaceSeq(1, m_lpctLayoutName, m_iLadTbl[3]);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setState__13CMemo2DCursori);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPosiId__13CMemo2DCursori);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__13CMemo2DCursor);
