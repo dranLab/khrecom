@@ -1837,7 +1837,17 @@ inline void _roPh45() {
     TRACE("[ATEL]   GOTO_Skip:%s\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", AtelEventSkip__Q24ATEL4CVSM);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", close_dest_se__Fi);
+void close_dest_se(INT win_num) {
+    INT nState;
+    INT ans;
+    INT mode;
+    ans = CChatMan::instance().reqCommand(0x3ED, &nState, win_num);
+    if (ans == 1) {
+        WinCloseSE();
+        mode = ans;
+        CChatMan::instance().reqCommand(0x3EC, &mode, win_num);
+    }
+}
 void WinOpenSE(INT ctd) {}
 void WinCloseSE() {}
 static void dispActorTag(INT nMax, const Actor* pTbl) {}
