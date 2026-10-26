@@ -40,6 +40,7 @@ struct RTP {
     SHORT rq_m_actor;  /* 0x6 */
     SHORT status;      /* 0x8 */
     SHORT wait_key;    /* 0xa */
+    RTP() {}
 };
 
 struct Actor {
@@ -121,11 +122,14 @@ public:
     INT getActorNum() { return m_ActorCount; }
     void setPC(INT nPC) { m_Pctr = nPC; }
     void clearFlag(INT nFlag) { m_nFlag &= ~nFlag; }
+    void setFlag(INT nFlag) { m_nFlag |= nFlag; }
 
 protected:
     void deleteActorAll();
     void clearReq();
     void execInit();
+    INT searchLockOnNpc();
+    void initActor();
     void exec(TIMEQ nTQ);
     void execActor();
     void checkEvents();
@@ -134,6 +138,7 @@ protected:
 
 private:
     BOOL reqN(Actor& act, INT nTag, INT nLv, BOOL bTop);
+    BOOL reqNS(Actor& act, const CHAR* pszTag, INT nLv);
     BOOL reqSSD(INT nTagIdx, INT nActIdx, INT nLv);
     INT searchActor(const CHAR* pszActor) const;
     INT searchActorID(const CHAR* pszActor) const;
@@ -170,6 +175,10 @@ private:
     BOOL acStatBGWait();
     BOOL acStatEternityWait();
     BOOL acStatCardWndWait();
+    BOOL acStatMWait();
+    BOOL acStatPWait();
+    BOOL acStatMSWait();
+    BOOL acStatCPWait();
     BOOL acStatWait();
     BOOL acStatXWait();
     BOOL acStatSWait();
