@@ -717,7 +717,16 @@ void CMemo2DCard::setLocalPosition() {
     setLocalPos(v);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setState__11CMemo2DCardi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__11CMemo2DCardf);
+void CMemo2DCard::main(FLOAT inFrameRate) {
+    switch (m_iState) {
+    case 1:
+        if (isEnd(0)) setState(2);
+        break;
+    case 3:
+        if (isEnd(0)) setState(4);
+        break;
+    }
+}
 CJiminyMemo::CJiminyMemo(CTask* inParent, INT inPlayerMode) : CMenu(inParent, -1) {
     initialize(inPlayerMode);
 }
