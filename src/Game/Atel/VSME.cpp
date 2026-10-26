@@ -11,6 +11,11 @@
 inline void* operator new(size_t, void* p) throw() { return p; }
 /* PARTIAL: the original System/HeapMan.h(134) has it inline */
 inline void* operator new(size_t size) throw() { return com_malloc(size); }
+/* PARTIAL: the original System/HeapMan.h(150-153) has the debug allocation inline */
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+inline void* operator new(size_t size, char* msg) throw() {
+    return com_malloc_d(size, msg, RET_ADDR());
+}
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
 #include "Game/Atel/Avatar.h"
@@ -1977,12 +1982,19 @@ void close_dest_se(INT win_num) {
 void WinOpenSE(INT ctd) {}
 void WinCloseSE() {}
 static void dispActorTag(INT nMax, const Actor* pTbl) {}
-/* placeholder: rodata of __11CActorDebugP5CTask */
-__asm__(".rdata\n");
-inline void _roPh46() {
-    TRACE(__FILE__ "(6871)");
+namespace DWTEvent {
+extern DEBUG_WINDOW_LINE debugNpcInfoLine[];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", __11CActorDebugP5CTask);
+extern INT SCREEN_HEIGHT;
+CActorDebug::CActorDebug(CTask* pParent) : CTask(pParent, 0x8000), m_pWindow(NULL) {
+    CTask* pA = CTaskMan::getSysTask(0x1A);
+    DEBUG_WINDOW_TBL debugActorInfo = {
+        ((CAtel*)pA)->getVSM()->getAvatarName(DebugWork::g_dw.event.iNpcID),
+        0x90, -(SCREEN_HEIGHT >> 1) + 0x18, 7, 12, 14, 0, 6, DWTEvent::debugNpcInfoLine, NULL, NULL
+    };
+    m_pWindow = new (__FILE__ "(6871)") CDebugWindow(this, debugActorInfo);
+    m_pWindow->dispOn(0);
+}
 CActorDebug::~CActorDebug() {
     if (m_pWindow) m_pWindow->out();
 }
