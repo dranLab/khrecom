@@ -6157,8 +6157,9 @@ extern INT NoteSeqData[5];
    spilled in another slot order (GCSE/PRE creates their pseudos in hash-table order: ours BPanic first, the
    original BGlider first). Everything else matches (time math via the Com.h(59) seconds inline, string table).
    tried: aggregate initializer for scoreStr, if vs ternary for the scores, unused posi removed (worse); RTL dump
-   shows pseudos 567.. made by gcse; tools/permuter.py 10 min starts at score 1 in its copy (another path) but 34
-   lines here: pointer-hash dependent (see memory gcse-pre-hash-order). */
+   shows pseudos 567.. made by gcse; scoreStr declared
+   with the other locals + element stores (34/99); tools/permuter.py (fixed wrapper, target on, others hidden)
+   9 min: no gain (earlier "score 1" was a wrapper bug); gcse hash order (see memory gcse-pre-hash-order). */
 #if 0
 /* PARTIAL: the original's System/Com.h(59) inline: seconds to time quanta */
 static inline INT _sec2tq(INT inSec) { return inSec * 3000; }
