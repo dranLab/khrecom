@@ -13,6 +13,8 @@
 #include "System/Math3D.h"
 #include "System/TaskMan.h"
 #include "Game/CardKind.h"
+#include "System/Graphic/Camera.h"
+#include "System/Graphic/WorldEnv.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "System/Sound/SoundMan.h"
@@ -55,6 +57,7 @@ public:
     virtual void disp();
     void setRotateY(FLOAT inRotY);
     void setPosition(const FVECTOR& inPosition);
+    void calcLocalMatrix();
 
 private:
     FLOAT m_fRotY;           /* 0x40 */
@@ -335,6 +338,7 @@ private:
     BOOL prevPage(CMemo2DCursor* pCursor, INT* pCursorCurrent, INT iNoteListNum, INT iCursorPosiNum,
                   FLOAT fCursorIntervalY);
     BOOL haveSpecialCard();
+    INT setParamFromCardViewToCollect();
     INT getNextCardId(INT inId);
     INT getPrevCardId(INT inId);
     INT getNextCharaId(INT inId);
@@ -555,7 +559,37 @@ void CMemo3DObj::disp() {
         m_pModels[i].disp();
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", calcLocalMatrix__10CMemo3DObj);
+void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
+void scaleMatrixSelf(FMATRIX& m, FLOAT fScale);
+extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
+void CMemo3DObj::calcLocalMatrix() {
+    CCoord& crd = Crd(0);
+    FVECTOR posi = m_vBasePosition;
+    FLOAT rate = m_vBasePosition.z / 3.0f;
+    posi.x += m_vPosition.x * -rate;
+    posi.y += m_vPosition.y * rate;
+    _unitMatrixVu0(crd.getLocalMatrix());
+    sceVu0RotMatrixY(crd.getLocalMatrix(), crd.getLocalMatrix(), m_fRotY);
+    crd.getLocalMatrix().setTrans(posi);
+    CCamera* pCamera = CWorldEnv::getActiveCamera();
+    if (pCamera && pCamera->getCoordNum() > 0) {
+        MulMatrix(crd.getLocalMatrix(), pCamera->Crd(0).getLocalMatrix(), crd.getLocalMatrix());
+    }
+    scaleMatrixSelf(crd.getLocalMatrix(), m_fBaseScale * m_fScale);
+    crd.touch();
+}
 void CMemo3DObj::setRotateY(FLOAT inRotY) {
     if (__builtin_fabsf(Math3D::LimitPI(m_fRotY - inRotY)) != 0.0f) {
         m_fRotY = inRotY;
