@@ -156,6 +156,7 @@ private:
     BOOL m_bMoveSlideEnable;  /* 0x1e0 */
 
 public:
+    CMemo2DSequence();
     virtual ~CMemo2DSequence();
     void setPosition();
     void setLocalPosition();
@@ -620,7 +621,21 @@ D2::C2DFnt* CMemo2DLayout::setSeqText(UINT inSeqNo, const CHAR* inText) {
     if (pFnt) pFnt->setText(inText);
     return pFnt;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __15CMemo2DSequence);
+CMemo2DSequence::CMemo2DSequence() {
+    m_vBasePosition.init();
+    m_vShiftPosition.init();
+    m_vAimPosition.init();
+    m_vPosition.init();
+    m_fScale = 1.0f;
+    m_fMoveTimer = 0.0f;
+    m_bMoveSlideEnable = FALSE;
+    m_iState = 0;
+    m_iStateFlag = 0;
+    m_LayoutName[0] = '\0';
+    for (INT i = 4; i >= 0; i--) {
+        m_SeqTbl[i] = 0;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_15CMemo2DSequence);
 /* placeholder: rodata of setup__15CMemo2DSequencePCcPCii */
 __asm__(".rdata\n");
