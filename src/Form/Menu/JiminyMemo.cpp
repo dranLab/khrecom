@@ -1070,7 +1070,24 @@ INT CJiminyMemo::getPrevContentId(INT inEventFlagStartId, INT inEventFlagNum, IN
     }
     return rval;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getNextContentId__11CJiminyMemoiii);
+INT CJiminyMemo::getNextContentId(INT inEventFlagStartId, INT inEventFlagNum, INT inCurrentNo) {
+    INT rval = -1;
+    for (INT i = inCurrentNo + 1; i < inEventFlagNum; i++) {
+        if (CJiminyMemoFlag::isContentOpen(inEventFlagStartId + i)) {
+            rval = i;
+            break;
+        }
+    }
+    if (rval == -1) {
+        for (INT i = 0; i < inCurrentNo; i++) {
+            if (CJiminyMemoFlag::isContentOpen(inEventFlagStartId + i)) {
+                rval = i;
+                break;
+            }
+        }
+    }
+    return rval;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", ScrollBarInit__11CJiminyMemoPPQ22D210C2DSeqCtrliR7FVECTORfP15CMemo2DSequence);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii);
 BOOL CJiminyMemo::nextPage(INT* ioTop, INT inMax, INT inDisp) {
