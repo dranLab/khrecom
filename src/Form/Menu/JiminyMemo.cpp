@@ -314,6 +314,7 @@ private:
                              INT inLayoutNo, INT inLayoutSeqNo);
     void getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork);
     void setPlateState(INT inKind, INT inState);
+    void setPlateNumSeq(INT inKind, INT inParam);
     INT getPlateState(INT inKind);
     void setPlateText(INT inKind, INT inCTNo);
     CMemo2DSequence* createSequence(const INT* inSeqData, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
@@ -1502,7 +1503,52 @@ void CJiminyMemo::setPlateText(INT inKind, INT inCTNo) {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPlateNumSeq__11CJiminyMemoii);
+namespace JiminyMemo {
+namespace Base {
+extern CursorPosition L1R1DigitNumOffset;
+extern CursorPosition L1R1DigitDenomiOffset;
+}
+}
+void CJiminyMemo::setPlateNumSeq(INT inKind, INT inParam) {
+    D2::C2DSeqCtrl* pDig = NULL;
+    INT n;
+    INT offsetSeq;
+    FLOAT offsetX;
+    FLOAT offsetY;
+    CMemo2DLayout* seq = getTaskPointer<CMemo2DLayout*>(m_hLayout);
+    if (!seq) return;
+    switch (inKind) {
+    case 7:
+    case 8:
+        pDig = seq->getSeqCtrl(8);
+        break;
+    case 9:
+    case 10:
+        pDig = seq->getSeqCtrl(9);
+        break;
+    }
+    switch (inKind) {
+    case 7:
+    case 9:
+        offsetSeq = 1;
+        offsetX = JiminyMemo::Base::L1R1DigitNumOffset.x;
+        offsetY = JiminyMemo::Base::L1R1DigitNumOffset.y;
+        break;
+    case 8:
+    case 10:
+        offsetSeq = 5;
+        offsetX = JiminyMemo::Base::L1R1DigitDenomiOffset.x;
+        offsetY = JiminyMemo::Base::L1R1DigitDenomiOffset.y;
+        break;
+    }
+    if (pDig) {
+        n = inParam;
+        for (INT i = 0; i < 3; i++) {
+            pDig->replaceSeqShift(offsetSeq + i, m_pLadName, n % 10 + 0x95, offsetX + (2 - i) * 16.0f, offsetY);
+            n /= 10;
+        }
+    }
+}
 void CJiminyMemo::getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork) {
     *inFlagWork = 0;
     for (INT i = 0; i < inNum; i++) {
