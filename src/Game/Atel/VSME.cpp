@@ -5,6 +5,7 @@
 #include "Form/Menu/LevelUp.h"
 inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/Atel/AtelCrossFade.h"
+#include "System/Rcf.h"
 #include "System/Debug.h"
 #include "System/TaskMan.h"
 #include "Form/DebugWindow.h"
@@ -35,6 +36,7 @@ extern "C" char D_00491638[];
 extern "C" char D_00491668[];
 extern "C" char D_004916A0[];
 extern "C" char D_004916E8[];
+extern "C" char D_004917D8[];
 extern "C" char D_004917F0[];
 extern "C" char D_00491810[];
 extern "C" char D_00491830[];
@@ -341,7 +343,14 @@ BOOL CVSM::acStatShopWait() {
 BOOL CVSM::acStatDropWait() {
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acStatRsrcLoadWait__Q24ATEL4CVSM);
+BOOL CVSM::acStatRsrcLoadWait() {
+    if (CRcf::isCompleteLoadRCF(m_pCurrentActor->_GroupID, m_pCurrentActor->_nMembarID)) {
+        _TRACE(m_bTrace, D_004917D8);
+        m_Pctr = m_pCurrentActor->_ATP.next_address;
+        return TRUE;
+    }
+    return FALSE;
+}
 BOOL CVSM::acStatCardWndWait() {
     if (Gauge::CPrizeGauge::isNowDispCard()) return FALSE;
     TRACE(D_004917F0);
