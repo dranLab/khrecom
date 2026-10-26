@@ -21,6 +21,8 @@
 #include "System/Debug.h"
 #include "include_asm.h"
 
+inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 namespace D2 {
 class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the class only for its own unit */
@@ -130,6 +132,7 @@ public:
     D2::C2DFnt* getFnt(INT inSeqNo);
     D2::C2DFnt* setSeqText(UINT inSeqNo, const CHAR* inText);
     INT getSeqState(UINT inSeqNo);
+    D2::C2DSeqCtrl* createSequence(INT inSeqNo, INT inLayer);
 };
 
 struct CursorPosition {
@@ -589,13 +592,19 @@ void CMemo2DLayout::destroyLayer() {
     D2::C2DMan::destroy(m_hLayer);
     m_hLayer = 0;
 }
-/* placeholder: rodata of createSequence__13CMemo2DLayoutii */
-__asm__(".rdata\n");
-inline void _roPh5() {
-    TRACE("inSeqNo < SEQCTRL_MAX");
-    TRACE(__FILE__ "(3017)");
+D2::C2DSeqCtrl* CMemo2DLayout::createSequence(INT inSeqNo, INT inLayer) {
+#line 3011
+    if (!(inSeqNo < 32)) AssertApp(__FILE__, __LINE__, "inSeqNo < SEQCTRL_MAX", 0);
+    D2::C2DSeqCtrl* pSeq = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(3017)",
+                                             ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+        D2::C2DSeqCtrl;
+    if (pSeq) {
+        pSeq->setLayer(inLayer);
+        m_pSeqCtrlArray[inSeqNo] = pSeq;
+        m_iSeqCtrlNum++;
+    }
+    return pSeq;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createSequence__13CMemo2DLayoutii);
 D2::C2DSeqCtrl* CMemo2DLayout::getSeqCtrl(INT inSeqNo) {
     if (inSeqNo < 0 || inSeqNo >= m_iSeqNum) return NULL;
     return m_pSeqCtrlArray[inSeqNo];
