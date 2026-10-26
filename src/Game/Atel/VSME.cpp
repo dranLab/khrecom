@@ -1265,13 +1265,63 @@ void CVSM::execInit() {
         reqN(*m_pCurrentActor, 0, 3, i == 0);
     }
 }
+/* Parked: 3 lines, one store: the original issues the m_Freg store first after the Freg/prev-actor join, ours
+   last (sched2 -fsched-verbose: our store gets priority 7 against 8 for the m_SP store and the m_Pctr load, so
+   reorg puts it into the execCode jal slot instead of `move a0,s0`). Everything else matches: the PMF state call
+   (m_ActorStateFnc as BOOL (CVSM::*[31])()), #line 844 assert, the switch tree needs a case ATEL_RET_REQ.
+   tried: if/ternary/assign-in-test for m_Freg, status before/after it, m_SP before it, getPC() for the
+   argument, a split nRet declaration, tools/permuter.py 5 min (loose score 1). */
+#if 0
+void CVSM::execActor() {
+    ATP& atp = m_pCurrentActor->_ATP;
+    INT nState = atp.status;
+#line 844
+    if (!((ATEL_REQ <= nState) && (_ATEL_REQ_MAX > nState))) AssertApp(__FILE__, __LINE__, "(ATEL_REQ <= nState) && (_ATEL_REQ_MAX > nState)", 0);
+    if ((this->*m_ActorStateFnc[nState])()) {
+        atp.status = 1;
+        INT f;
+        if ((f = atp.Freg) == 0) f = m_pCurrentActor[-1]._ATP.Freg;
+        m_Freg = f;
+        m_SP = 1;
+        eATEL_REQ_RET nRet;
+        nRet = execCode(getPC());
+        atp.Freg = m_Freg;
+        switch (nRet) {
+        case ATEL_RET_MAIN: {
+            if (atp.rq_tag == 0) {
+                atp.status = 6;
+                reqSSD(1, m_nCurrentActorIdx, 5);
+                if (++m_ReadyActorCount == m_ActorCount) {
+                    clearFlag(1);
+                    _TRACE(m_bTrace, "mada->ok pc:%d\n", atp.next_address);
+                }
+            } else if (atp.rq_tag != 1) {
+                reqSSD(1, m_nCurrentActorIdx, 1);
+            }
+            INT nActw = atp.rq_m_actor;
+            if (nActw != 0xFF) {
+                atp.rq_m_actor = 0xFF;
+                m_ActorTbl[nActw]._ATP.wait_timer = 0;
+            }
+            break;
+        }
+        case ATEL_RET_REQ:
+            break;
+        case ATEL_RET_ERROR:
+            atp.status = 2;
+            break;
+        }
+    }
+}
+#else
 /* placeholder: rodata of execActor__Q24ATEL4CVSM */
 __asm__(".rdata\n");
-inline void _roPh25() {
+inline void _roPhExecActor() {
     TRACE("(ATEL_REQ <= nState) && (_ATEL_REQ_MAX > nState)");
     TRACE("mada->ok pc:%d\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execActor__Q24ATEL4CVSM);
+#endif
 /* Parked: 6 lines, one store: the original stores addr (a stack variable, its address goes to execStdCode)
    right after its load, before the _cReg load, so reorg puts the m_Pctr store into the beqz slot; ours keeps addr
    in a pseudo that is put on the stack later (RTL: the addr store comes after the m_Pctr++ store, -dg dump), so

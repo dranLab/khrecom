@@ -90,6 +90,41 @@ enum eATEL_REQ_RET {
     ATEL_RET_CLOSS_FADE_WAIT = 30
 };
 
+enum eATEL_REQ {
+    ATEL_REQ = 0,
+    ATEL_REQ_EXEC = 1,
+    ATEL_REQ_HALT = 2,
+    ATEL_REQ_WAIT = 3,
+    ATEL_REQ_RWAIT = 4,
+    ATEL_REQ_CWAIT = 5,
+    ATEL_REQ_IWAIT = 6,
+    ATEL_REQ_PWAIT = 7,
+    ATEL_REQ_SWAIT = 8,
+    ATEL_REQ_MWAIT = 9,
+    ATEL_REQ_CPWAIT = 10,
+    ATEL_REQ_SNWAIT = 11,
+    ATEL_REQ_MS_WAIT = 12,
+    ATEL_SHOP_WAIT = 13,
+    ATEL_DROP_WAIT = 14,
+    ATEL_REQ_LD_EMY_WAIT = 15,
+    ATEL_REQ_RCWAIT = 16,
+    ATEL_REQ_EQWAIT = 17,
+    ATEL_REQ_WKWAIT = 18,
+    ATEL_REQ_XWAIT = 19,
+    ATEL_REQ_BSWAIT = 20,
+    ATEL_REQ_BAWAIT = 21,
+    ATEL_REQ_DLWAIT = 22,
+    ATEL_REQ_BGWAIT = 23,
+    ATEL_REQ_ACWAIT = 24,
+    ATEL_REQ_ETERNITY_WAIT = 25,
+    ATEL_REQ_RSRC_LOAD_WAIT = 26,
+    ATEL_REQ_CARD_WND_WAIT = 27,
+    ATEL_REQ_TECH_WND_WAIT = 28,
+    ATEL_REQ_WORLD_CARD_WND_WAIT = 29,
+    ATEL_REQ_CLOSS_FADE_WAIT = 30,
+    _ATEL_REQ_MAX = 31
+};
+
 struct INSTR {
     USHORT _cOp;
     USHORT _cReg;
@@ -141,7 +176,7 @@ private:
     INT m_nCurrentActorIdx;      /* 0x0068 */
     Actor* m_pCurrentActor;      /* 0x006c */
     Actor m_ActorTbl[64];        /* 0x0070 */
-    BYTE m_ActorStateFnc[31 * 8]; /* 0x7770 */
+    BOOL (CVSM::*m_ActorStateFnc[31])(); /* 0x7770 */
     RTP m_ReqBuf[64];            /* 0x7868 */
     INT m_nReqBufPtr;            /* 0x7b68 */
     OpStack m_S[100];            /* 0x7b6c */
@@ -157,6 +192,7 @@ public:
     CHAR* getAvatarName(INT nIdx) { return m_ActorTbl[nIdx]._ATP.name; }
     INT getActorNum() { return m_ActorCount; }
     void setPC(INT nPC) { m_Pctr = nPC; }
+    INT getPC() const { return m_Pctr; }
     void clearFlag(INT nFlag) { m_nFlag &= ~nFlag; }
     void setFlag(INT nFlag) { m_nFlag |= nFlag; }
 
