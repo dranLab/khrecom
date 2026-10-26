@@ -205,9 +205,167 @@ private:
     INT getPrevCharaId(INT inId);
     INT getNextStoryId(INT inId);
     INT getPrevStoryId(INT inId);
+    void contentMenu();
+    void contentStory();
+    void contentStoryView();
+    void contentCollection();
+    void contentCard();
+    void contentCardSelect();
+    void contentCardView();
+    void contentChara();
+    void contentCharaSelect();
+    void contentCharaView();
+    void contentCharaView_ModelView();
+    void contentMinigame();
+    static void (CJiminyMemo::*m_pContentTbl[11])();
 };
 typedef char _check_jm_size[sizeof(CJiminyMemo) == 0x570 ? 1 : -1];
 
+typedef USHORT CT_LOWER;
+struct ILLUST_TEX_DATA {
+    BYTE No;
+    BYTE Posi;
+};
+struct MODEL_VIEW_DATA {
+    USHORT ResourceNo;
+    USHORT ScaleFix8;
+    SHORT PosiYFix8;
+    SHORT RotYDeg;
+};
+/* .data (in this order): DefaultMessage and the tables of pointers to the .rodata tables at the end */
+namespace JiminyMemo {
+namespace Base {
+static CHAR* DefaultMessage = "";
+}
+extern SHORT CardAttackTbl[];
+extern SHORT CardMagicTbl[];
+extern SHORT CardSummonsTbl[];
+extern SHORT CardItemTbl[];
+extern SHORT CardFriendTbl[];
+extern SHORT CardEnemyTbl[];
+extern SHORT CardMapTbl[];
+extern SHORT CardWorldTbl[];
+extern SHORT CardGimmickTbl[];
+extern SHORT CardSpecialTbl[];
+extern SHORT RikuCardBattleTbl[];
+extern SHORT RikuCardEnemyTbl[];
+extern SHORT RikuCardMapTbl[];
+extern SHORT RikuCardWorldTbl[];
+extern CT_LOWER CardNameAttackTbl[];
+extern CT_LOWER CardNameMagicTbl[];
+extern CT_LOWER CardNameSummonsTbl[];
+extern CT_LOWER CardNameItemTbl[];
+extern CT_LOWER CardNameFriendTbl[];
+extern CT_LOWER CardNameEnemyTbl[];
+extern CT_LOWER CardNameMapTbl[];
+extern CT_LOWER CardNameWorldTbl[];
+extern CT_LOWER CardNameGimmickTbl[];
+extern CT_LOWER CardNameSpecialTbl[];
+extern CT_LOWER RikuCardNameBattleTbl[];
+extern CT_LOWER RikuCardNameEnemyTbl[];
+extern CT_LOWER RikuCardNameMapTbl[];
+extern CT_LOWER RikuCardNameWorldTbl[];
+extern CT_LOWER CardManualAttackTbl[];
+extern CT_LOWER CardManualMagicTbl[];
+extern CT_LOWER CardManualSummonsTbl[];
+extern CT_LOWER CardManualItemTbl[];
+extern CT_LOWER CardManualFriendTbl[];
+extern CT_LOWER CardManualEnemyTbl[];
+extern CT_LOWER CardManualMapTbl[];
+extern CT_LOWER CardManualWorldTbl[];
+extern CT_LOWER CardManualGimmickTbl[];
+extern CT_LOWER CardManualSpecialTbl[];
+extern CT_LOWER RikuCardManualBattleTbl[];
+extern CT_LOWER RikuCardManualEnemyTbl[];
+extern CT_LOWER RikuCardManualMapTbl[];
+extern CT_LOWER RikuCardManualWorldTbl[];
+extern ILLUST_TEX_DATA CharaIllustMain1Tbl[];
+extern ILLUST_TEX_DATA CharaIllustMain2Tbl[];
+extern ILLUST_TEX_DATA CharaIllustEtcTbl[];
+extern ILLUST_TEX_DATA CharaIllustTRTbl[];
+extern ILLUST_TEX_DATA CharaIllustWOTbl[];
+extern ILLUST_TEX_DATA CharaIllustOLTbl[];
+extern ILLUST_TEX_DATA CharaIllustAGTbl[];
+extern ILLUST_TEX_DATA CharaIllustHATbl[];
+extern ILLUST_TEX_DATA CharaIllustMOTbl[];
+extern ILLUST_TEX_DATA CharaIllustATTbl[];
+extern ILLUST_TEX_DATA CharaIllustNETbl[];
+extern ILLUST_TEX_DATA CharaIllustHOTbl[];
+extern ILLUST_TEX_DATA CharaIllustPOTbl[];
+extern ILLUST_TEX_DATA CharaIllustDETbl[];
+extern ILLUST_TEX_DATA CharaIllustHeartLessTbl[];
+extern ILLUST_TEX_DATA CharaIllustRiku1Tbl[];
+extern ILLUST_TEX_DATA CharaIllustRiku2Tbl[];
+extern ILLUST_TEX_DATA CharaIllustRikuHeartLessTbl[];
+extern CT_LOWER CharaNameMain1Tbl[];
+extern CT_LOWER CharaNameMain2Tbl[];
+extern CT_LOWER CharaNameEtcTbl[];
+extern CT_LOWER CharaNameTRTbl[];
+extern CT_LOWER CharaNameWOTbl[];
+extern CT_LOWER CharaNameOLTbl[];
+extern CT_LOWER CharaNameAGTbl[];
+extern CT_LOWER CharaNameHATbl[];
+extern CT_LOWER CharaNameMOTbl[];
+extern CT_LOWER CharaNameATTbl[];
+extern CT_LOWER CharaNameNETbl[];
+extern CT_LOWER CharaNameHOTbl[];
+extern CT_LOWER CharaNamePOTbl[];
+extern CT_LOWER CharaNameDETbl[];
+extern CT_LOWER CharaNameHeartLessTbl[];
+extern CT_LOWER CharaNameRiku1Tbl[];
+extern CT_LOWER CharaNameRiku2Tbl[];
+extern CT_LOWER CharaNameRikuHeartLessTbl[];
+extern CT_LOWER CharaManualMain1Tbl[];
+extern CT_LOWER CharaManualMain2Tbl[];
+extern CT_LOWER CharaManualEtcTbl[];
+extern CT_LOWER CharaManualTRTbl[];
+extern CT_LOWER CharaManualWOTbl[];
+extern CT_LOWER CharaManualOLTbl[];
+extern CT_LOWER CharaManualAGTbl[];
+extern CT_LOWER CharaManualHATbl[];
+extern CT_LOWER CharaManualMOTbl[];
+extern CT_LOWER CharaManualATTbl[];
+extern CT_LOWER CharaManualNETbl[];
+extern CT_LOWER CharaManualHOTbl[];
+extern CT_LOWER CharaManualPOTbl[];
+extern CT_LOWER CharaManualDETbl[];
+extern CT_LOWER CharaManualHeartLessTbl[];
+extern CT_LOWER CharaManualRiku1Tbl[];
+extern CT_LOWER CharaManualRiku2Tbl[];
+extern CT_LOWER CharaManualRikuHeartLessTbl[];
+extern MODEL_VIEW_DATA CharaModelMain1Tbl[];
+extern MODEL_VIEW_DATA CharaModelMain2Tbl[];
+extern MODEL_VIEW_DATA CharaModelEtcTbl[];
+extern MODEL_VIEW_DATA CharaModelTRTbl[];
+extern MODEL_VIEW_DATA CharaModelWOTbl[];
+extern MODEL_VIEW_DATA CharaModelOLTbl[];
+extern MODEL_VIEW_DATA CharaModelAGTbl[];
+extern MODEL_VIEW_DATA CharaModelHATbl[];
+extern MODEL_VIEW_DATA CharaModelMOTbl[];
+extern MODEL_VIEW_DATA CharaModelATTbl[];
+extern MODEL_VIEW_DATA CharaModelNETbl[];
+extern MODEL_VIEW_DATA CharaModelHOTbl[];
+extern MODEL_VIEW_DATA CharaModelPOTbl[];
+extern MODEL_VIEW_DATA CharaModelDETbl[];
+extern MODEL_VIEW_DATA CharaModelHeartLessTbl[];
+extern MODEL_VIEW_DATA CharaModelRiku1Tbl[];
+extern MODEL_VIEW_DATA CharaModelRiku2Tbl[];
+extern MODEL_VIEW_DATA CharaModelRikuHeartLessTbl[];
+SHORT* CardEncyclTbl[10] = { CardAttackTbl, CardMagicTbl, CardSummonsTbl, CardItemTbl, CardFriendTbl, CardEnemyTbl, CardMapTbl, CardWorldTbl, CardGimmickTbl, CardSpecialTbl };
+SHORT* RikuCardEncyclTbl[4] = { RikuCardBattleTbl, RikuCardEnemyTbl, RikuCardMapTbl, RikuCardWorldTbl };
+CT_LOWER* CardNameTbl[10] = { CardNameAttackTbl, CardNameMagicTbl, CardNameSummonsTbl, CardNameItemTbl, CardNameFriendTbl, CardNameEnemyTbl, CardNameMapTbl, CardNameWorldTbl, CardNameGimmickTbl, CardNameSpecialTbl };
+CT_LOWER* RikuCardNameTbl[4] = { RikuCardNameBattleTbl, RikuCardNameEnemyTbl, RikuCardNameMapTbl, RikuCardNameWorldTbl };
+CT_LOWER* CardManualTbl[10] = { CardManualAttackTbl, CardManualMagicTbl, CardManualSummonsTbl, CardManualItemTbl, CardManualFriendTbl, CardManualEnemyTbl, CardManualMapTbl, CardManualWorldTbl, CardManualGimmickTbl, CardManualSpecialTbl };
+CT_LOWER* RikuCardManualTbl[4] = { RikuCardManualBattleTbl, RikuCardManualEnemyTbl, RikuCardManualMapTbl, RikuCardManualWorldTbl };
+ILLUST_TEX_DATA* CharaIllustTextureTbl[15] = { CharaIllustMain1Tbl, CharaIllustMain2Tbl, CharaIllustEtcTbl, CharaIllustTRTbl, CharaIllustWOTbl, CharaIllustOLTbl, CharaIllustAGTbl, CharaIllustHATbl, CharaIllustMOTbl, CharaIllustATTbl, CharaIllustNETbl, CharaIllustHOTbl, CharaIllustPOTbl, CharaIllustDETbl, CharaIllustHeartLessTbl };
+ILLUST_TEX_DATA* RikuCharaIllustTextureTbl[3] = { CharaIllustRiku1Tbl, CharaIllustRiku2Tbl, CharaIllustRikuHeartLessTbl };
+CT_LOWER* CharacterNameTbl[15] = { CharaNameMain1Tbl, CharaNameMain2Tbl, CharaNameEtcTbl, CharaNameTRTbl, CharaNameWOTbl, CharaNameOLTbl, CharaNameAGTbl, CharaNameHATbl, CharaNameMOTbl, CharaNameATTbl, CharaNameNETbl, CharaNameHOTbl, CharaNamePOTbl, CharaNameDETbl, CharaNameHeartLessTbl };
+CT_LOWER* RikuCharacterNameTbl[3] = { CharaNameRiku1Tbl, CharaNameRiku2Tbl, CharaNameRikuHeartLessTbl };
+CT_LOWER* CharacterManualTbl[15] = { CharaManualMain1Tbl, CharaManualMain2Tbl, CharaManualEtcTbl, CharaManualTRTbl, CharaManualWOTbl, CharaManualOLTbl, CharaManualAGTbl, CharaManualHATbl, CharaManualMOTbl, CharaManualATTbl, CharaManualNETbl, CharaManualHOTbl, CharaManualPOTbl, CharaManualDETbl, CharaManualHeartLessTbl };
+CT_LOWER* RikuCharacterManualTbl[3] = { CharaManualRiku1Tbl, CharaManualRiku2Tbl, CharaManualRikuHeartLessTbl };
+MODEL_VIEW_DATA* CharaModelResourceTbl[15] = { CharaModelMain1Tbl, CharaModelMain2Tbl, CharaModelEtcTbl, CharaModelTRTbl, CharaModelWOTbl, CharaModelOLTbl, CharaModelAGTbl, CharaModelHATbl, CharaModelMOTbl, CharaModelATTbl, CharaModelNETbl, CharaModelHOTbl, CharaModelPOTbl, CharaModelDETbl, CharaModelHeartLessTbl };
+MODEL_VIEW_DATA* RikuCharaModelResourceTbl[3] = { CharaModelRiku1Tbl, CharaModelRiku2Tbl, CharaModelRikuHeartLessTbl };
+}
 INT JiminyMemo::getHostGroupId() {
     return 10;
 }
@@ -220,18 +378,27 @@ INT JiminyMemo::getCT0014Code(USHORT inLow) {
 void JiminyMemo::playSE(INT inSENo) {
     CSound::playSE(inSENo, -1, 64);
 }
+/* placeholder: getOpenCloseStringData's local static (its string comes right after DefaultMessage's) */
+CHAR* _phDefaultStr __asm__("pDefaultStr.3528") = "\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96";
+void (CJiminyMemo::*CJiminyMemo::m_pContentTbl[11])() = {
+    &CJiminyMemo::contentMenu,
+    &CJiminyMemo::contentStory,
+    &CJiminyMemo::contentCollection,
+    &CJiminyMemo::contentCard,
+    &CJiminyMemo::contentChara,
+    &CJiminyMemo::contentMinigame,
+    &CJiminyMemo::contentStoryView,
+    &CJiminyMemo::contentCardSelect,
+    &CJiminyMemo::contentCardView,
+    &CJiminyMemo::contentCharaSelect,
+    &CJiminyMemo::contentCharaView
+};
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getOpenCloseStringData__10JiminyMemoii);
 BOOL JiminyMemo::is100AcreGoodEnding() {
     return CGameWork::getInt(0, 0x23) & 0x40;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __10CMemo3DObjP5CTaskiiUii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_10CMemo3DObj);
-/* placeholder: rodata of the items before main__10CMemo3DObj */
-__asm__(".rdata\n");
-inline void _roPh0() {
-    TRACE("");
-    TRACE("\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96");
-}
 /* placeholder: rodata of main__10CMemo3DObj */
 __asm__(".rdata\n");
 inline void _roPh1() {
@@ -2139,4 +2306,4 @@ __asm__(
     "_Q210JiminyMemo4Base$L1R1DigitDenomiOffset:\n"
     ".byte 0x00,0x00,0xa8,0x42,0x00,0x00,0x80,0xc1,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
 );
-// SOURCE DATA: .rodata
+// SOURCE DATA: .data .rodata
