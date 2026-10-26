@@ -185,7 +185,7 @@ struct CursorDataParam {
         scale = 1.0f;
     }
     void set(LPCTSTR _layoutName, INT _posiNum, INT _startNo, const INT* _ladTbl, CursorPosition* _limitTbl,
-             FLOAT _scale) {
+             FLOAT _scale = 1.0f) {
         posiNum = _posiNum;
         startNo = _startNo;
         for (INT i = 0; i < 4; i++) ladTbl[i] = _ladTbl[i];
@@ -368,6 +368,10 @@ private:
                                                   const CursorPosition& inStepPosi, INT inStepNum, INT inListNum,
                                                   INT inOffset, INT inStart, INT inPosiWidth, INT inLayer,
                                                   INT inState, INT inPosiId, FLOAT inScale, CMemo2DSequence* inParent);
+    CMemo2DCursor* createCursorSequence(const INT* inSeqTbl, INT inLayoutNo, INT inStartSeq,
+                                        const CursorPosition& inPosiOffset, INT inStepNum, INT inListNum, INT inOffset,
+                                        INT inStart, INT inWidth, INT inLayer, INT inState, INT inPosiId,
+                                        CMemo2DSequence* inParent);
     INT splitMessage(INT* outNum, CHAR*** outBuf, const CHAR* inStr, INT inWidth);
     void CardScreenOutClip();
     void CardScreenSideClip(BOOL inAllDisp);
@@ -1629,14 +1633,50 @@ void CJiminyMemo::createCursorPosiTbl(CursorPosition* inPosiTbl, const CursorPos
         offset.y += inStepPosi.y;
     }
 }
-/* placeholder: rodata of createCursorSequence__11CJiminyMemoPCiiiRC14CursorPositioniiiiiiiiP15CMemo2DSequence */
-__asm__(".rdata\n");
-inline void _roPh19() {
-    TRACE(__FILE__ "(4472)");
-    TRACE(__FILE__ "(4474)");
+CMemo2DCursor* CJiminyMemo::createCursorSequence(const INT* inSeqTbl, INT inLayoutNo, INT inStartSeq,
+                                                 const CursorPosition& inPosiOffset, INT inStepNum, INT inListNum,
+                                                 INT inOffset, INT inStart, INT inWidth, INT inLayer, INT inState,
+                                                 INT inPosiId, CMemo2DSequence* inParent) {
+    CMemo2DCursor* pCur;
+    CursorDataParam param;
+    FVECTOR posi0;
+    FVECTOR posi1;
+    FVECTOR interval;
+    pCur = new (com_malloc_d(sizeof(CMemo2DCursor), __FILE__ "(4472)",
+                             ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+        CMemo2DCursor(getHandle());
+    if (pCur) {
+        CursorPosition* cpTbl = (CursorPosition*)com_malloc_d(sizeof(CursorPosition) * (inListNum + 2),
+                                                              __FILE__ "(4474)", -1);
+        if (cpTbl) {
+            CursorPosition* limitTbl = cpTbl + inListNum;
+            D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inStartSeq, posi0, 0);
+            D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inStartSeq + 1, posi1, 0);
+            interval.x = posi1.x - posi0.x;
+            interval.y = posi1.y - posi0.y;
+            for (INT i = 0; i < inListNum; i++) {
+                cpTbl[i].x = posi0.x + inPosiOffset.x + interval.x * i;
+                cpTbl[i].y = posi0.y + inPosiOffset.y + interval.y * i;
+            }
+            limitTbl[0].copy(cpTbl[0]);
+            limitTbl[1].copy(cpTbl[inStepNum - 1]);
+            param.init();
+            param.posiNum = inListNum;
+            param.posiTbl = cpTbl;
+            param.set(m_pLadName, inListNum, inStart, inSeqTbl, limitTbl);
+            pCur->setup(param);
+            pCur->setLayer(inLayer);
+            pCur->setState(inState);
+            pCur->setPosiId(inPosiId);
+            if (inParent) pCur->setParent(inParent);
+            if (cpTbl) com_free(cpTbl);
+        } else {
+            delete pCur;
+            pCur = NULL;
+        }
+    }
+    return pCur;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createCursorSequence__11CJiminyMemoPCiiiRC14CursorPositioniiiiiiiiP15CMemo2DSequence);
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CJiminyMemo::createMarkSequence(INT inMarkSeq, INT inNum, INT inLayoutNo, INT inLayoutSeqOffset, INT inLayer,
                                      D2::C2DSeqCtrl* inParent, D2::C2DSeqCtrl** inArray) {
     D2::C2DSeqCtrl* pMark;
