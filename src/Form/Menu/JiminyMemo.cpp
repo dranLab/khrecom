@@ -220,6 +220,7 @@ private:
     CHAR* m_pEmptySeqName;    /* 0x194 */
 
 public:
+    CMemo2DCard(const CHAR* inEmptySeqName);
     virtual ~CMemo2DCard();
     void setPosition();
     void setLocalPosition();
@@ -685,7 +686,17 @@ void CMemo2DCursor::getSubVector(CursorPosition& outSub, INT inId0, INT inId1) {
     outSub.x = m_pPosiTbl[inId0].x - m_pPosiTbl[inId1].x;
     outSub.y = m_pPosiTbl[inId0].y - m_pPosiTbl[inId1].y;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __11CMemo2DCardPCc);
+CMemo2DCard::CMemo2DCard(const CHAR* inEmptySeqName) {
+    m_vBasePosition.init();
+    m_vShiftPosition.init();
+    m_iState = 0;
+    m_fScale = 1.0f;
+    m_iTexNo = 0;
+    m_iTexPos = 0;
+    m_iFrameSeqNo = -1;
+    m_pEmptySeqName = (CHAR*)inEmptySeqName;
+    setScl(m_fScale);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_11CMemo2DCard);
 /* placeholder: rodata of create__11CMemo2DCardG4CARDi */
 __asm__(".rdata\n");
