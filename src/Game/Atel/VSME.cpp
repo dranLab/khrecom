@@ -79,7 +79,24 @@ public:
 };
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetNpcIDWindow__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetNpcIDWindow(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x20) {
+        DebugWork::g_dw.event.iNpcID = inY;
+        CActorDebug* p;
+        if (DebugWork::g_dw.event.pClass) {
+            p = (CActorDebug*)DebugWork::g_dw.event.pClass;
+            delete p;
+        }
+        p = new CActorDebug(CTaskMan::getSysTask(1));
+        DebugWork::g_dw.event.pClass = (INT*)p;
+        DebugWork::g_dw.event.iNpcCoordDisp = 1;
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetNpcIDWindow__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static INT debugWinNPCListAllCall(CDebugWindow* pObj, INT inParam) {
     CTask* pA;
