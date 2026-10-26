@@ -1156,10 +1156,28 @@ INT CJiminyMemo::getPlateState(INT inKind) {
     }
     return -2;
 }
-/* placeholder: rodata of setPlateText__11CJiminyMemoii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0032A474\n.word .L0032A480\n.word .L0032A498\n.word .L0032A4A8\n.word .L0032A4A8\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPlateText__11CJiminyMemoii);
+void CJiminyMemo::setPlateText(INT inKind, INT inCTNo) {
+    CHAR* pText;
+    if (inCTNo < 0 || !(pText = CCtdMan::getText(inCTNo))) pText = "";
+    CMemo2DLayout* seq = getTaskPointer<CMemo2DLayout*>(m_hLayout);
+    if (seq) {
+        switch (inKind) {
+        case 0:
+            seq->setSeqText(1, pText);
+            break;
+        case 1:
+            seq->setSeqText(4, pText);
+            break;
+        case 2:
+            seq->setSeqText(7, pText);
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPlateNumSeq__11CJiminyMemoii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getMenuContentFlag__11CJiminyMemoiiPiT3);
 INT CJiminyMemo::getPrevContentId(INT inEventFlagStartId, INT inEventFlagNum, INT inCurrentNo) {
