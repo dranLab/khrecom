@@ -1600,7 +1600,9 @@ void CVSM::checkEvents() {
    all four -1 returns share one label). $LM tags: 642 the test, 643 the return, 645-647 isNowLockon (Player.h)
    and the 0/-1 test, 650 getTask, 651/653 the early returns, 655 the cast, 658-662 the loop, 665 return -1.
    tried: wrapping the body in if (g_pPlayer) {}, getLockonHandle() vs isNowLockon() + m_hTarget, a break loop
-   with a separate found test (longer), separate-line returns. */
+   with a separate found test (longer), separate-line returns; retry: a CPlayer* local (also assigned in the test),
+   if/else return, the loop in an inline helper (then only the inner -1 stays apart), tools/permuter.py 15 min (8318
+   candidates, score 8 unchanged). */
 #if 0
 INT CVSM::searchLockOnNpc() {
     if (!g_pPlayer)
