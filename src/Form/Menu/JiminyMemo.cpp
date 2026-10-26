@@ -336,6 +336,7 @@ private:
     void getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork);
     void setPlateState(INT inKind, INT inState);
     void setPlateNumSeq(INT inKind, INT inParam);
+    INT splitMessage(INT* outNum, CHAR*** outBuf, const CHAR* inStr, INT inWidth);
     void CardScreenOutClip();
     void CardScreenSideClip(BOOL inAllDisp);
     void ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR& inPos, FLOAT inBaseHeight,
@@ -1567,16 +1568,60 @@ INT CJiminyMemo::changeStateOutSequence(D2::C2DSeqCtrl** inSeq, INT inNum) {
 void CJiminyMemo::setTelopMessage(const CHAR* inMess) {
     if (m_pMessString) m_pMessString->setText(inMess);
 }
-/* placeholder: rodata of splitMessage__11CJiminyMemoPiPPPcPCci */
-__asm__(".rdata\n");
-inline void _roPh21() {
-    TRACE("len < (inWidth - 1)");
-    TRACE(__FILE__ "(4617)");
-    TRACE("  (%d)\n");
-    TRACE("String line num = %d\n");
-    TRACE(__FILE__ "(4660)");
+INT CJiminyMemo::splitMessage(INT* outNum, CHAR*** outBuf, const CHAR* inStr, INT inWidth) {
+    INT lineNum;
+    const CHAR* pChar0;
+    const CHAR* pChar1;
+    INT len;
+    if (!inStr) {
+        *outNum = 0;
+        return 0;
+    }
+    inWidth *= 2;
+    inWidth += 10;
+    for (INT i = 0; i < 2; i++) {
+        pChar0 = inStr;
+        lineNum = 0;
+        len = 0;
+        while (*pChar0 != '\0') {
+            pChar1 = pChar0 + len;
+#line 4612
+            if (!(len < (inWidth - 1))) AssertApp(__FILE__, __LINE__, "len < (inWidth - 1)", 0);
+            if (*pChar1 == '\n' || *pChar1 == '\0') {
+                if (i == 1) {
+                    (*outBuf)[lineNum] = (CHAR*)com_malloc_d(inWidth + 1, __FILE__ "(4617)", -1);
+                    memcpy((*outBuf)[lineNum], pChar0, len + 1);
+                    if (*pChar1 == '\n') {
+                        (*outBuf)[lineNum][len] = '\0';
+                    } else if (*pChar1 != '\0') {
+                        (*outBuf)[lineNum][len + 1] = '\0';
+                    }
+                    TRACE_USER((USER)2, (*outBuf)[lineNum]);
+                    TRACE_USER((USER)2, "  (%d)\n", strlen((*outBuf)[lineNum]));
+                }
+                lineNum++;
+                len = 0;
+                if (*pChar1 == '\n') {
+                    pChar0 = pChar1 + 1;
+                } else if (*pChar1 == '\0') {
+                    break;
+                } else {
+                    pChar0 = pChar1 + 1;
+                }
+            } else {
+                len++;
+            }
+            if (*pChar1 == '\0') break;
+        }
+        if (i == 0) {
+            TRACE_USER((USER)2, "String line num = %d\n", lineNum);
+            *outBuf = (CHAR**)com_malloc_d(sizeof(CHAR*) * (lineNum + 1), __FILE__ "(4660)", -1);
+            for (INT j = 0; j < lineNum + 1; j++) (*outBuf)[j] = NULL;
+            *outNum = lineNum;
+        }
+    }
+    return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", splitMessage__11CJiminyMemoPiPPPcPCci);
 void CJiminyMemo::setPlateState(INT inKind, INT inState) {
     CMemo2DLayout* seq = getTaskPointer<CMemo2DLayout*>(m_hLayout);
     if (seq) {
