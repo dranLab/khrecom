@@ -137,8 +137,6 @@ static BOOL DebugSetNpcIDWindow(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugSetNpcIDWindow__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static INT debugWinNPCListAllCall(CDebugWindow* pObj, INT inParam) {
     CTask* pA;
@@ -152,116 +150,41 @@ static INT debugWinNPCListAllCall(CDebugWindow* pObj, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debugWinNPCList table) refers to it by name until the data comes from source */
-__asm__(".globl debugWinNPCListAllCall__8DWTEventP12CDebugWindowi");
-/* placeholder: rodata of the tables before debugWinNPCListDispCall__8DWTEventPciPCv */
+/* placeholder: "" comes right before szPlayMode's strings in the original (0x48C630; the tables and cardDataTbl
+   share it), though the first table using it (debugWinNPCListLine) follows szStockKindName: its source is unknown */
 __asm__(".rdata\n");
-inline void _roPh0() {
+inline void _roPh0a() {
     TRACE("");
-    TRACE("\x83\\\x83\x89");
-    TRACE("\x83\x8a\x83N");
-    TRACE("\x83r\x83M\x83i\x81[");
-    TRACE("\x83X\x83^\x83\x93\x83_\x81[\x83h");
-    TRACE("\x83v\x83\x89\x83" "E\x83h");
-    TRACE("\x83G\x83N\x83X\x83g\x83\x8a\x81[\x83\x80");
-    TRACE("\x83X\x83" "e\x83\x8c\x83I");
-    TRACE("\x83v\x83\x8d\x83\x8d\x83W\x83" "b\x83N\x87U");
-    TRACE("\x83\x82\x83m\x83\x89\x83\x8b");
-    TRACE("NotOpen");
-    TRACE("Camp");
-    TRACE("RoomCreation_1");
-    TRACE("RoomCreation_2");
-    TRACE("RoomCreation_EV");
-    TRACE("WorldSelect");
-    TRACE("MogShop");
-    TRACE("SaveMenu");
-    TRACE("\x82\xb5\x82\xe5\x82\xab\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2");
-    TRACE("\x82P\x89\xf1\x96\xda\x82\xbf\x82\xe5\x82\xa4\x82\xb9\x82\xf1");
-    TRACE("\x82P\x89\xf1\x96\xda\x83N\x83\x8a\x83" "A\x82\xb5\x82\xbd");
-    TRACE("\x82Q\x89\xf1\x96\xda\x82\xbf\x82\xe5\x82\xa4\x82\xb9\x82\xf1");
-    TRACE("\x82Q\x89\xf1\x96\xda\x83N\x83\x8a\x83" "A\x82\xb5\x82\xbd");
-    TRACE("\x8d" "D\x82\xab\x82\xc9\x97V\x82\xd7");
-    TRACE("\x83Q\x81[\x83\x80\x8aJ\x8en");
-    TRACE("\x83Q\x81[\x83\x80\x92\x86");
-    TRACE("\x83Q\x81[\x83\x80\x8fI\x97\xb9");
-    TRACE("\x96\xec\x8d\xd8\x83p\x83j\x83" "b\x83N");
-    TRACE("\x83o\x83\x8b\x81[\x83\x93\x83O\x83\x89\x83" "C\x83_\x81[");
-    TRACE("\x83" "e\x83" "B\x83K\x81[\x83W\x83\x83\x83\x93\x83v");
-    TRACE("\x83\x8f\x83" "C\x83\x8b\x83h\x83_\x83" "C\x83u");
-    TRACE("\x82\xcd\x82\xbf\x91\xde\x8e\xa1");
-    TRACE("-----\x82O");
-    TRACE("-----\x82P");
-    TRACE("-----\x82Q");
-    TRACE("-----\x82R");
-    TRACE("\x83X\x83\x89\x83" "C\x83h\x83_\x83" "b\x83V\x83\x85");
-    TRACE("\x83t\x83@\x83" "C\x83i\x83\x8b\x83u\x83\x8c\x83" "C\x83N");
-    TRACE("\x83X\x83^\x83\x93\x83" "C\x83\x93\x83p\x83N\x83g");
-    TRACE("\x83U\x83\x93\x83" "e\x83" "c\x83P\x83\x93");
-    TRACE("\x83X\x83g\x83\x89\x83" "C\x83N\x83\x8c\x83" "C\x83h");
-    TRACE("\x83\\\x83j\x83" "b\x83N\x83\x8c\x83" "C\x83\x94");
-    TRACE("\x83\x89\x83X\x83g\x83" "A\x83\x8b\x83J\x83i\x83\x80");
-    TRACE("\x83\x89\x83O\x83i\x83\x8d\x83N");
-    TRACE("\x83\x8a\x83j\x83" "e\x83" "B\x83\x8a\x83~\x83" "b\x83g");
-    TRACE("\x83t\x83@\x83" "C\x83\x89");
-    TRACE("\x83u\x83\x8a\x83U\x83\x89");
-    TRACE("\x83T\x83\x93\x83_\x83\x89");
-    TRACE("\x83P\x83" "A\x83\x8b\x83\x89");
-    TRACE("\x83O\x83\x89\x83r\x83\x89");
-    TRACE("\x83X\x83g\x83v\x83\x89");
-    TRACE("\x83G\x83" "A\x83\x8d\x83\x89");
-    TRACE("\x83t\x83@\x83" "C\x83K");
-    TRACE("\x83u\x83\x8a\x83U\x83K");
-    TRACE("\x83T\x83\x93\x83_\x83K");
-    TRACE("\x83P\x83" "A\x83\x8b\x83K");
-    TRACE("\x83O\x83\x89\x83r\x83K");
-    TRACE("\x83X\x83g\x83v\x83K");
-    TRACE("\x83G\x83" "A\x83\x8d\x83K");
-    TRACE("\x83t\x83@\x83" "C\x83" "A\x83\x8c\x83" "C\x83h");
-    TRACE("\x83u\x83\x8a\x83U\x83h\x83\x8c\x83" "C\x83h");
-    TRACE("\x83T\x83\x93\x83_\x81[\x83\x8c\x83" "C\x83h");
-    TRACE("\x83\x8a\x83t\x83\x8c\x83N\x83g\x83\x8c\x83" "C\x83h");
-    TRACE("\x83W\x83\x83\x83" "b\x83W\x83\x81\x83\x93\x83g");
-    TRACE("\x83t\x83@\x83" "C\x83K\x83o\x81[\x83X\x83g");
-    TRACE("\x83\x8c\x83" "C\x83W\x83\x93\x83O\x83X\x83g\x81[\x83\x80");
-    TRACE("\x83\x81\x83K\x83t\x83\x8c\x83" "A");
-    TRACE("\x83t\x83\x8a\x81[\x83Y");
-    TRACE("\x83z\x81[\x83~\x83\x93\x83O\x83u\x83\x8a\x83U\x83\x89\t");
-    TRACE("\x83" "A\x83N\x83" "A\x83X\x83v\x83\x89\x83" "b\x83V\x83\x85");
-    TRACE("\x83}\x83O\x83l\x83X\x83p\x83" "C\x83\x89\x83\x8b");
-    TRACE("\x83\x8a\x81[\x83T\x83\x8b\x83t\x83\x8c\x81[\x83\x80");
-    TRACE("\x83V\x83\x87\x83" "b\x83N\x83" "C\x83\x93\x83p\x83N\x83g");
-    TRACE("\x83g\x83\x8b\x83l\x83h");
-    TRACE("\x83N\x83G\x83" "C\x83N");
-    TRACE("\x83" "f\x83W\x83\x87\x83l\x81[\x83^\x81[");
-    TRACE("\x83" "f\x83W\x83\x87\x83\x93");
-    TRACE("\x83o\x83" "C\x83\x93\x83h");
-    TRACE("\x83R\x83\x93\x83t\x83\x85");
-    TRACE("\x83" "e\x83\x89\x81[");
-    TRACE("\x83V\x83\x93\x83N\x83\x8d");
-    TRACE("\x83~\x83\x89\x83N\x83\x8b\x83M\x83t\x83g");
-    TRACE("\x83" "e\x83\x8c\x83|");
-    TRACE("\x83z\x81[\x83\x8a\x81[");
-    TRACE("\x83v\x83\x89\x83" "E\x83h\x83\x8d\x83" "A");
-    TRACE("\x83X\x83v\x83\x89\x83" "b\x83V\x83\x85");
-    TRACE("\x83p\x83\x89\x83_\x83" "C\x83X");
-    TRACE("\x83p\x83\x89\x83_\x83" "C\x83X\x83X\x83^\x83\x93\x83v");
-    TRACE("\x83t\x83\x8c\x83" "A\x83u\x83\x8c\x83X");
-    TRACE("\x83V\x83\x87\x81[\x83^\x83" "C\x83\x80");
-    TRACE("\x83" "c\x83" "C\x83\x93\x83N\x83\x8b");
-    TRACE("\x8b\xa5\x8e" "a\x82\xe8");
-    TRACE("\x92\xb4\x8b\x86\x95\x90\x90_\x94" "e\x8e" "a");
-    TRACE("\x8b\xa5\x8e" "a\x82\xe8\x81" "E\x89\xfc");
-    TRACE("\x83}\x83W\x83" "b\x83N");
-    TRACE("\x83X\x83^\x81[\x83_\x83X\x83g\x83u\x83\x8a\x83" "b\x83" "c");
-    TRACE("\x83O\x81[\x83t\x83" "B\x81[\x83g\x83\x8b\x83l\x83h");
-    TRACE("\x83O\x81[\x83t\x83" "B\x81[\x83X\x83}\x83" "b\x83V\x83\x85");
-    TRACE("\x83\x8f\x83" "C\x83\x8b\x83h\x83N\x83\x89\x83" "b\x83V\x83\x83\x81[");
-    TRACE("\x83X\x83g\x81[\x83\x80\x83\x8a\x81[\x83p\x81[");
-    TRACE("\x83T\x83v\x83\x89\x83" "C\x83Y");
-    TRACE("\x83X\x83p\x83" "C\x83\x89\x83\x8b\x83" "E\x83" "F\x83" "C\x83u");
-    TRACE("\x83X\x83\x89\x83X\x83g\x83\x89\x83" "b\x83V\x83\x85");
-    TRACE("\x83t\x83\x85\x83\x8a\x83" "A\x83X\x83{\x83\x8c\x81[");
-    TRACE("\x83\x89\x83" "b\x83L\x81[\x83o\x83" "E\x83\x93\x83" "e\x83" "B");
+}
+namespace DWTEvent {
+LPCSTR szPlayMode[2] = { "\x83\\\x83\x89", "\x83\x8a\x83N" };
+}
+namespace DWTEvent {
+LPCSTR szDifficultMode[4] = { "\x83r\x83M\x83i\x81[", "\x83X\x83^\x83\x93\x83_\x81[\x83h", "\x83v\x83\x89\x83" "E\x83h", "\x83G\x83N\x83X\x83g\x83\x8a\x81[\x83\x80" };
+}
+namespace DWTEvent {
+LPCSTR szSoundMode[3] = { "\x83X\x83" "e\x83\x8c\x83I", "\x83v\x83\x8d\x83\x8d\x83W\x83" "b\x83N\x87U", "\x83\x82\x83m\x83\x89\x83\x8b" };
+}
+namespace DWTEvent {
+LPCSTR szMenuKind[8] = { "NotOpen", "Camp", "RoomCreation_1", "RoomCreation_2", "RoomCreation_EV", "WorldSelect", "MogShop", "SaveMenu" };
+}
+namespace DWTEvent {
+LPCSTR szMiniGameState[6] = { "\x82\xb5\x82\xe5\x82\xab\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2", "\x82P\x89\xf1\x96\xda\x82\xbf\x82\xe5\x82\xa4\x82\xb9\x82\xf1", "\x82P\x89\xf1\x96\xda\x83N\x83\x8a\x83" "A\x82\xb5\x82\xbd", "\x82Q\x89\xf1\x96\xda\x82\xbf\x82\xe5\x82\xa4\x82\xb9\x82\xf1", "\x82Q\x89\xf1\x96\xda\x83N\x83\x8a\x83" "A\x82\xb5\x82\xbd", "\x8d" "D\x82\xab\x82\xc9\x97V\x82\xd7" };
+}
+namespace DWTEvent {
+LPCSTR szMiniGamePlayState[4] = { "\x82\xb5\x82\xe5\x82\xab\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2", "\x83Q\x81[\x83\x80\x8aJ\x8en", "\x83Q\x81[\x83\x80\x92\x86", "\x83Q\x81[\x83\x80\x8fI\x97\xb9" };
+}
+namespace DWTEvent {
+LPCSTR szMiniGameKind[5] = { "\x96\xec\x8d\xd8\x83p\x83j\x83" "b\x83N", "\x83o\x83\x8b\x81[\x83\x93\x83O\x83\x89\x83" "C\x83_\x81[", "\x83" "e\x83" "B\x83K\x81[\x83W\x83\x83\x83\x93\x83v", "\x83\x8f\x83" "C\x83\x8b\x83h\x83_\x83" "C\x83u", "\x82\xcd\x82\xbf\x91\xde\x8e\xa1" };
+}
+namespace DWTEvent {
+LPCSTR szStockKindName[77] = { "-----\x82O", "-----\x82P", "-----\x82Q", "-----\x82R", "\x83X\x83\x89\x83" "C\x83h\x83_\x83" "b\x83V\x83\x85", "\x83t\x83@\x83" "C\x83i\x83\x8b\x83u\x83\x8c\x83" "C\x83N", "\x83X\x83^\x83\x93\x83" "C\x83\x93\x83p\x83N\x83g", "\x83U\x83\x93\x83" "e\x83" "c\x83P\x83\x93", "\x83X\x83g\x83\x89\x83" "C\x83N\x83\x8c\x83" "C\x83h", "\x83\\\x83j\x83" "b\x83N\x83\x8c\x83" "C\x83\x94", "\x83\x89\x83X\x83g\x83" "A\x83\x8b\x83J\x83i\x83\x80", "\x83\x89\x83O\x83i\x83\x8d\x83N", "\x83\x8a\x83j\x83" "e\x83" "B\x83\x8a\x83~\x83" "b\x83g", "\x83t\x83@\x83" "C\x83\x89", "\x83u\x83\x8a\x83U\x83\x89", "\x83T\x83\x93\x83_\x83\x89", "\x83P\x83" "A\x83\x8b\x83\x89", "\x83O\x83\x89\x83r\x83\x89", "\x83X\x83g\x83v\x83\x89", "\x83G\x83" "A\x83\x8d\x83\x89", "\x83t\x83@\x83" "C\x83K", "\x83u\x83\x8a\x83U\x83K", "\x83T\x83\x93\x83_\x83K", "\x83P\x83" "A\x83\x8b\x83K", "\x83O\x83\x89\x83r\x83K", "\x83X\x83g\x83v\x83K", "\x83G\x83" "A\x83\x8d\x83K", "\x83t\x83@\x83" "C\x83" "A\x83\x8c\x83" "C\x83h", "\x83u\x83\x8a\x83U\x83h\x83\x8c\x83" "C\x83h", "\x83T\x83\x93\x83_\x81[\x83\x8c\x83" "C\x83h", "\x83\x8a\x83t\x83\x8c\x83N\x83g\x83\x8c\x83" "C\x83h", "\x83W\x83\x83\x83" "b\x83W\x83\x81\x83\x93\x83g", "\x83t\x83@\x83" "C\x83K\x83o\x81[\x83X\x83g", "\x83\x8c\x83" "C\x83W\x83\x93\x83O\x83X\x83g\x81[\x83\x80", "\x83\x81\x83K\x83t\x83\x8c\x83" "A", "\x83t\x83\x8a\x81[\x83Y", "\x83z\x81[\x83~\x83\x93\x83O\x83u\x83\x8a\x83U\x83\x89\t", "\x83" "A\x83N\x83" "A\x83X\x83v\x83\x89\x83" "b\x83V\x83\x85", "\x83}\x83O\x83l\x83X\x83p\x83" "C\x83\x89\x83\x8b", "\x83\x8a\x81[\x83T\x83\x8b\x83t\x83\x8c\x81[\x83\x80", "\x83V\x83\x87\x83" "b\x83N\x83" "C\x83\x93\x83p\x83N\x83g", "\x83g\x83\x8b\x83l\x83h", "\x83N\x83G\x83" "C\x83N", "\x83" "f\x83W\x83\x87\x83l\x81[\x83^\x81[", "\x83" "f\x83W\x83\x87\x83\x93", "\x83o\x83" "C\x83\x93\x83h", "\x83R\x83\x93\x83t\x83\x85", "\x83" "e\x83\x89\x81[", "\x83V\x83\x93\x83N\x83\x8d", "\x83~\x83\x89\x83N\x83\x8b\x83M\x83t\x83g", "\x83" "e\x83\x8c\x83|", "\x83z\x81[\x83\x8a\x81[", "\x83v\x83\x89\x83" "E\x83h\x83\x8d\x83" "A", "\x83X\x83v\x83\x89\x83" "b\x83V\x83\x85", "\x83p\x83\x89\x83_\x83" "C\x83X", "\x83p\x83\x89\x83_\x83" "C\x83X\x83X\x83^\x83\x93\x83v", "\x83t\x83\x8c\x83" "A\x83u\x83\x8c\x83X", "\x83V\x83\x87\x81[\x83^\x83" "C\x83\x80", "\x83V\x83\x87\x81[\x83^\x83" "C\x83\x80", "\x83" "c\x83" "C\x83\x93\x83N\x83\x8b", "\x8b\xa5\x8e" "a\x82\xe8", "\x92\xb4\x8b\x86\x95\x90\x90_\x94" "e\x8e" "a", "\x8b\xa5\x8e" "a\x82\xe8\x81" "E\x89\xfc", "\x83}\x83W\x83" "b\x83N", "\x83X\x83^\x81[\x83_\x83X\x83g\x83u\x83\x8a\x83" "b\x83" "c", "\x83O\x81[\x83t\x83" "B\x81[\x83g\x83\x8b\x83l\x83h", "\x83O\x81[\x83t\x83" "B\x81[\x83X\x83}\x83" "b\x83V\x83\x85", "\x83\x8f\x83" "C\x83\x8b\x83h\x83N\x83\x89\x83" "b\x83V\x83\x83\x81[", "\x83X\x83g\x81[\x83\x80\x83\x8a\x81[\x83p\x81[", "\x83T\x83v\x83\x89\x83" "C\x83Y", "\x83X\x83p\x83" "C\x83\x89\x83\x8b\x83" "E\x83" "F\x83" "C\x83u", "\x83X\x83p\x83" "C\x83\x89\x83\x8b\x83" "E\x83" "F\x83" "C\x83u", "\x83X\x83\x89\x83X\x83g\x83\x89\x83" "b\x83V\x83\x85", "\x83t\x83\x85\x83\x8a\x83" "A\x83X\x83{\x83\x8c\x81[", "\x83t\x83\x85\x83\x8a\x83" "A\x83X\x83{\x83\x8c\x81[", "\x83\x89\x83" "b\x83L\x81[\x83o\x83" "E\x83\x93\x83" "e\x83" "B", "\x83\x89\x83" "b\x83L\x81[\x83o\x83" "E\x83\x93\x83" "e\x83" "B" };
+}
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugWinNPCListLine[2] = {
+    { "", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, DebugSetNpcIDWindow, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
 }
 namespace DWTEvent {
 static INT debugWinNPCListDispCall(LPSTR pStr, INT iLineY, const void* pValue) {
@@ -270,8 +193,6 @@ static INT debugWinNPCListDispCall(LPSTR pStr, INT iLineY, const void* pValue) {
     return 1;
 }
 }
-/* the asm .data (debugWinNPCList table) refers to it by name until the data comes from source */
-__asm__(".globl debugWinNPCListDispCall__8DWTEventPciPCv");
 namespace DWTEvent {
 static BOOL DebugCreateNpcWindow(CDebugWindow* pObj, INT inY, INT inParam) {
     CTask* pA = CTaskMan::getSysTask(0x1A);
@@ -286,8 +207,6 @@ static BOOL DebugCreateNpcWindow(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugCreateNpcWindow__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugCreateEventLineDisp(CDebugWindow* pObj, INT inY, INT inParam) {
     CTask* pA = CTaskMan::getSysTask(0x1A);
@@ -307,8 +226,6 @@ static BOOL DebugCreateEventLineDisp(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugCreateEventLineDisp__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static INT DebugAtelWorkDef(CDebugWindow* pObj, INT inParam) {
     DebugWork::g_dw.atelwork.iWorldIntro = CGameWork::getInt(0, 0xC1);
@@ -380,10 +297,8 @@ static INT DebugAtelWorkDef(CDebugWindow* pObj, INT inParam) {
     return 1;
 }
 }
-/* placeholder: rodata of the tables before debugBtlReportCallBackParam__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-inline void _roPh1() {
-    TRACE("ACTOR\x83\x8a\x83X\x83g");
+namespace DWTEvent {
+DEBUG_WINDOW_TBL debugWinNpcList = { "ACTOR\x83\x8a\x83X\x83g", -208, -136, 10, 20, 14, 0, 8, debugWinNPCListLine, debugWinNPCListDispCall, debugWinNPCListAllCall };
 }
 namespace DWTEvent {
 static BOOL debugBtlReportCallBackParam(CDebugWindow* pObj, INT inY, INT inParam) {
@@ -446,22 +361,35 @@ static INT debugKeyTresurCallBack(CDebugWindow* pObj, INT inParam) {
     return 1;
 }
 }
-/* placeholder: rodata of the tables before DebugSetWorldTitleFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-inline void _roPh3() {
-    TRACE("\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%d");
-    TRACE("\x83" "A\x83O\x83\x89\x83o           :%d");
-    TRACE("\x83I\x83\x8a\x83\x93\x83|\x83X         :%d");
-    TRACE("\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%d");
-    TRACE("\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%d");
-    TRACE("\x83n\x83\x8d\x83" "E\x83" "B\x83\x93         :%d");
-    TRACE("\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%d");
-    TRACE("\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%d");
-    TRACE("\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%d");
-    TRACE("100\x83G\x81[\x83J\x81[        :%d");
-    TRACE("\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%d");
-    TRACE("\x83" "f\x83X\x83" "e\x83j\x81[         :%d");
-    TRACE("\x96Y\x8bp\x82\xcc\x8f\xe9           :%d");
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugKeyTresurLine[14] = {
+    { "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%d", &DebugWork::g_dw.atelwork.TreTr, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83" "A\x83O\x83\x89\x83o           :%d", &DebugWork::g_dw.atelwork.TreAg, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83I\x83\x8a\x83\x93\x83|\x83X         :%d", &DebugWork::g_dw.atelwork.TreOl, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%d", &DebugWork::g_dw.atelwork.TreWo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%d", &DebugWork::g_dw.atelwork.TreMo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93         :%d", &DebugWork::g_dw.atelwork.TreHa, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%d", &DebugWork::g_dw.atelwork.TreAt, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%d", &DebugWork::g_dw.atelwork.TreNe, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%d", &DebugWork::g_dw.atelwork.TreHo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "100\x83G\x81[\x83J\x81[        :%d", &DebugWork::g_dw.atelwork.TrePo, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%d", &DebugWork::g_dw.atelwork.TreTw, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83" "f\x83X\x83" "e\x83j\x81[         :%d", &DebugWork::g_dw.atelwork.TreDe, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x96Y\x8bp\x82\xcc\x8f\xe9           :%d", &DebugWork::g_dw.atelwork.TreCa, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+}
+namespace DWTEvent {
+UBYTE SoraEnemyMemoIdTbl[35] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 100, 108, 103, 113 };
+}
+namespace DWTEvent {
+UBYTE RikuEnemyMemoIdTbl[34] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 100, 108, 103, 113 };
+}
+namespace DWTEvent {
+USHORT SoraCardKindTbl[159] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 32, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 57, 68, 69, 75, 76, 70, 79, 82, 78, 87, 71, 72, 73, 74, 92, 77, 80, 85, 88, 86, 81, 84, 83, 91, 90, 94, 95, 96, 97, 98, 93, 99, 104, 101, 105, 107, 106, 100, 108, 109, 102, 110, 103, 116, 118, 119, 120, 113, 115, 117, 121, 111, 122, 123, 114, 112, 124, 125, 126, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 189, 186, 187, 188, 185, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 58, 59, 60, 61, 62, 63, 64, 65 };
+}
+namespace DWTEvent {
+USHORT RikuCardKindTbl[66] = { 18, 42, 43, 56, 68, 75, 70, 79, 82, 87, 85, 81, 90, 89, 99, 104, 101, 105, 107, 106, 100, 108, 109, 102, 115, 117, 161, 162, 163, 164, 165, 166, 169, 170, 171, 172, 175, 176, 177, 178, 182, 183, 186, 187, 188, 185, 190, 191, 192, 193, 194, 195, 196, 197, 198, 200, 201, 202, 58, 59, 60, 61, 62, 63, 64, 65 };
 }
 namespace DWTEvent {
 static BOOL DebugSetWorldTitleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
@@ -501,8 +429,6 @@ static BOOL DebugSetWorldTitleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugSetWorldTitleFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetTutorialFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
@@ -522,8 +448,6 @@ static BOOL DebugSetTutorialFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugSetTutorialFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetCardPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
@@ -562,8 +486,6 @@ static BOOL DebugSetCardPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugSetCardPossibleFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetFriendPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
@@ -585,8 +507,6 @@ static BOOL DebugSetFriendPossibleFlag(CDebugWindow* pObj, INT inY, INT inParam)
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugSetFriendPossibleFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetPoohFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
@@ -636,8 +556,6 @@ static BOOL DebugSetPcSkillFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugSetPcSkillFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetSoraMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
@@ -715,8 +633,6 @@ static BOOL DebugSetSoraMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugSetSoraMovieFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetRikuMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
@@ -776,8 +692,6 @@ static BOOL DebugSetRikuMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugSetRikuMovieFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetKH2CardGetFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
@@ -803,8 +717,6 @@ static BOOL DebugSetKH2CardGetFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugSetKH2CardGetFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 extern BYTE SoraEnemyMemoIdTbl[];
 extern BYTE RikuEnemyMemoIdTbl[];
@@ -916,251 +828,124 @@ static BOOL DebugSetJiminyMemoFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* the asm .data (debug window tables) refers to it by name until the data comes from source */
-__asm__(".globl DebugSetJiminyMemoFlag__8DWTEventP12CDebugWindowii");
-/* placeholder: rodata of the tables before debugGameInfomationParam__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-inline void _roPh14() {
-    TRACE("\x83V\x83\x83\x83h\x83" "E");
-    TRACE("\x83\\\x83\x8b\x83W\x83\x83\x81[");
-    TRACE("\x83\x8c\x83" "b\x83h\x83m\x83N\x83^\x81[\x83\x93");
-    TRACE("\x83u\x83\x8b\x81[\x83\x89\x83v\x83\\\x83" "f\x83" "B");
-    TRACE("\x83" "C\x83G\x83\x8d\x81[\x83I\x83y\x83\x89");
-    TRACE("\x83O\x83\x8a\x81[\x83\x93\x83\x8c\x83N\x83" "C\x83G\x83\x80");
-    TRACE("\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h");
-    TRACE("\x83o\x83" "E\x83\x93\x83V\x81[\x83\x8f\x83" "C\x83\x8b\x83h");
-    TRACE("\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B");
-    TRACE("\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g");
-    TRACE("\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g");
-    TRACE("\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g");
-    TRACE("\x83K\x81[\x83S\x83" "C\x83\x8b");
-    TRACE("\x83T\x81[\x83`\x83S\x81[\x83X\x83g");
-    TRACE("\x83G\x83" "A\x83\\\x83\x8b\x83W\x83\x83\x81[");
-    TRACE("\x83z\x83\x8f\x83" "C\x83g\x83}\x83" "b\x83V\x83\x85\x83\x8b\x81[\x83\x80");
-    TRACE("\x83u\x83\x89\x83" "b\x83N\x83t\x83@\x83\x93\x83K\x83X");
-    TRACE("\x83V\x81[\x83l\x83I\x83\x93");
-    TRACE("\x83X\x83N\x83\x8a\x83\x85\x81[\x83_\x83" "C\x83o\x81[");
-    TRACE("\x83" "A\x83N\x83" "A\x83^\x83\x93\x83N");
-    TRACE("\x83p\x83" "C\x83\x8c\x81[\x83" "c");
-    TRACE("\x83G\x83" "A\x83p\x83" "C\x83\x8c\x81[\x83" "c");
-    TRACE("\x83_\x81[\x83N\x83{\x81[\x83\x8b");
-    TRACE("\x83\x8f\x83" "C\x83o\x81[\x83\x93");
-    TRACE("\x83" "E\x83" "B\x83U\x81[\x83h");
-    TRACE("\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[");
-    TRACE("\x83l\x83I\x83V\x83\x83\x83h\x83" "E");
-    TRACE("\x83o\x83\x8c\x83\x8b\x83X\x83p\x83" "C\x83_\x81[");
-    TRACE("\x83g\x83\x8b\x83l\x81[\x83h\x83X\x83" "e\x83" "b\x83v");
-    TRACE("\x83\x89\x83" "E\x83h\x83l\x83X");
-    TRACE("\x83N\x83\x8a\x81[\x83v\x83v\x83\x89\x83\x93\x83g");
-    TRACE("\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[");
-    TRACE("\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W");
-    TRACE("\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[");
-    TRACE("\x83_\x81[\x83N\x83T\x83" "C\x83h");
-    TRACE("\x83L\x83\x93\x83O\x83_\x83\x80\x83`\x83" "F\x81[\x83\x93");
-    TRACE("\x83" "f\x83U\x83" "C\x83" "A\x81[\x83\x89\x83\x93\x83v");
-    TRACE("\x83g\x83\x8c\x83W\x83\x83\x81[\x83I\x83u\x83V\x81[");
-    TRACE("\x83p\x83\x93\x83v\x83L\x83\x93\x83w\x83" "b\x83h");
-    TRACE("\x83t\x83" "F\x83" "A\x83\x8a\x81[\x83n\x81[\x83v");
-    TRACE("\x83" "E\x83" "B\x83" "b\x83V\x83\x85\x83X\x83^\x81[");
-    TRACE("\x83G\x83O\x83U\x83~\x83l\x81[\x83V\x83\x87\x83\x93");
-    TRACE("\x83\x81\x83^\x83\x8b\x83`\x83\x87\x83R\x83{");
-    TRACE("\x83p\x83\x8f\x81[\x83I\x83u\x83q\x81[\x83\x8d\x81[");
-    TRACE("\x83\x89\x83" "C\x83I\x83\x93\x83n\x81[\x83g");
-    TRACE("\x83\x89\x83X\x83g\x83\x8a\x83]\x81[\x83g");
-    TRACE("\x83\x89\x83\x94\x83" "B\x83" "A\x83\x93\x83\x8d\x81[\x83Y");
-    TRACE("\x96\xf1\x91\xa9\x82\xcc\x82\xa8\x8e\xe7\x82\xe8");
-    TRACE("\x89\xdf\x82\xac\x8b\x8e\x82\xe8\x82\xb5\x8ev\x82\xa2\x8fo");
-    TRACE("\x83" "A\x83\x8b\x83" "e\x83}\x83" "E\x83" "F\x83|\x83\x93");
-    TRACE("\x83_\x83" "C\x83\x84\x83\x82\x83\x93\x83h\x83_\x83X\x83g");
-    TRACE("\x95\xd0\x97\x83\x82\xcc\x93V\x8eg");
-    TRACE("\x83X\x83^\x81[\x83V\x81[\x83J\x81[");
-    TRACE("\x83\x82\x83m\x83N\x83\x8d\x81[\x83\x80");
-    TRACE("\x83t\x83H\x83\x8d\x81[\x83U\x83" "E\x83" "B\x83\x93\x83h");
-    TRACE("\x83q\x83h\x83" "D\x83\x93\x83h\x83\x89\x83S\x83\x93");
-    TRACE("\x83t\x83H\x83g\x83\x93\x83" "f\x83o\x83" "b\x83K\x81[");
-    TRACE("\x83{\x83\x93\x83h\x83I\x83u\x83t\x83\x8c\x83" "C\x83\x80");
-    TRACE("\x83t\x83@\x83" "C\x83" "A");
-    TRACE("\x83u\x83\x8a\x83U\x83h");
-    TRACE("\x83T\x83\x93\x83_\x81[");
-    TRACE("\x83P\x83" "A\x83\x8b");
-    TRACE("\x83O\x83\x89\x83r\x83" "f");
-    TRACE("\x83X\x83g\x83" "b\x83v");
-    TRACE("\x83G\x83" "A\x83\x8d");
-    TRACE("\x83V\x83\x93\x83o");
-    TRACE("\x83W\x81[\x83j\x81[");
-    TRACE("\x83o\x83\x93\x83r");
-    TRACE("\x83_\x83\x93\x83{");
-    TRACE("\x83" "e\x83" "B\x83\x93\x83N");
-    TRACE("\x83\x80\x81[\x83V\x83\x85\x81[");
-    TRACE("\x83N\x83\x89\x83" "E\x83h");
-    TRACE("\x83|\x81[\x83V\x83\x87\x83\x93");
-    TRACE("\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93");
-    TRACE("\x83\x81\x83K\x83|\x81[\x83V\x83\x87\x83\x93");
-    TRACE("\x83G\x81[\x83" "e\x83\x8b");
-    TRACE("\x83\x81\x83K\x83G\x81[\x83" "e\x83\x8b");
-    TRACE("\x83G\x83\x8a\x83N\x83T\x81[");
-    TRACE("\x83\x89\x83X\x83g\x83G\x83\x8a\x83N\x83T\x81[");
-    TRACE("\x83h\x83i\x83\x8b\x83h");
-    TRACE("\x83O\x81[\x83t\x83" "B\x81[");
-    TRACE("\x83" "A\x83\x89\x83W\x83\x93");
-    TRACE("\x83" "A\x83\x8a\x83G\x83\x8b");
-    TRACE("\x83W\x83\x83\x83" "b\x83N");
-    TRACE("\x83s\x81[\x83^\x81[\x83p\x83\x93");
-    TRACE("\x83r\x81[\x83X\x83g");
-    TRACE("\x83v\x83\x8b\x81[\x83g");
-    TRACE("\x83n\x83" "f\x83X");
-    TRACE("\x83W\x83\x83\x83t\x83@\x81[");
-    TRACE("\x83" "A\x81[\x83X\x83\x89");
-    TRACE("\x83u\x83M\x81[");
-    TRACE("\x83t\x83" "b\x83N");
-    TRACE("\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93");
-    TRACE("\x83g\x83\x89\x83\x93\x83v\x95\xba");
-    TRACE("\x83" "A\x83\x93\x83Z\x83\x80");
-    TRACE("\x83[\x83\x80\x83i\x83X");
-    TRACE("\x83V\x83O\x83o\x81[\x83\x8b");
-    TRACE("\x83U\x83\x8b\x83" "f\x83" "B\x83\x93");
-    TRACE("\x83\x94\x83" "B\x83N\x83Z\x83\x93");
-    TRACE("\x83\x8c\x83N\x83Z\x83" "E\x83X");
-    TRACE("\x83[\x83N\x83V\x83I\x83\x93");
-    TRACE("\x83T\x83" "C\x83N\x83X");
-    TRACE("\x83" "A\x83N\x83Z\x83\x8b");
-    TRACE("\x83" "f\x83~\x83" "b\x83N\x83X");
-    TRACE("\x83\x8b\x83N\x83\\\x81[\x83h");
-    TRACE("\x83}\x81[\x83\x8b\x81[\x83V\x83\x83");
-    TRACE("\x83\x89\x83N\x83V\x81[\x83k");
-    TRACE("\x83\x8d\x83N\x83T\x83X");
-    TRACE("\x83S\x81[\x83\x8b\x83h");
-    TRACE("\x83v\x83\x89\x83`\x83i");
-    TRACE("\x90\xc3\x82\xb6\x82\xe1\x82\xad\x82\xc8\x82\xe9\x88\xc5");
-    TRACE("\x82\xd0\x82\xb5\x82\xdf\x82\xad\x88\xc5");
-    TRACE("\x82\xbf\x82\xa9\x82\xe7\x82\xc8\x82\xab\x88\xc5");
-    TRACE("\x82\xa8\x82\xa8\x82\xa2\x82\xc8\x82\xe9\x88\xc5");
-    TRACE("\x96\xb0\x82\xe8\x82\xcc\x88\xc5");
-    TRACE("\x82\xb9\x82\xdc\x82\xe8\x82\xad\x82\xe9\x88\xc5");
-    TRACE("\x83v\x83\x8c\x83~\x83" "A\x83\x8b\x81[\x83\x80");
-    TRACE("\x83z\x83\x8f\x83" "C\x83g\x83\x8b\x81[\x83\x80");
-    TRACE("\x83u\x83\x89\x83" "b\x83N\x83\x8b\x81[\x83\x80");
-    TRACE("\x92\xea\x92m\x82\xea\x82\xca\x88\xc5");
-    TRACE("\x83\x8b\x81[\x83\x8c\x83" "b\x83g\x83\x8b\x81[\x83\x80");
-    TRACE("\x95\x90\x97\xcd\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf");
-    TRACE("\x96\x82\x97\xcd\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf");
-    TRACE("\x98" "B\x8b\xe0\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf");
-    TRACE("\x82\xdf\x82\xae\x82\xe8\x82\xa0\x82\xa2\x82\xcc\x92n");
-    TRACE("\x82\xc4\x82\xa2\x82\xbd\x82\xa2\x82\xcc\x8a\xd4");
-    TRACE("\x83_\x83\x81\x81[\x83W\x83" "A\x83" "b\x83v\x83\x8b\x81[\x83\x80");
-    TRACE("\x83X\x83^\x83\x93\x83v\x83\x89\x83X\x83\x8b\x81[\x83\x80");
-    TRACE("\x82\xe2\x82\xb7\x82\xe7\x82\xac\x82\xcc\x95\xf3");
-    TRACE("\x8e\xe7\x82\xe7\x82\xea\x82\xb5\x95\xf3");
-    TRACE("\x82\xa2\x82\xc2\x82\xed\x82\xe8\x82\xcc\x95\xf3");
-    TRACE("\x88\xea\x8e\x9e\x82\xcc\x8bx\x91\xa7");
-    TRACE("\x8c\xf0\x82\xb6\x82\xe8\x8d\x87\x82\xa4\x90\xa2\x8a" "E");
-    TRACE("\x83\x82\x81[\x83O\x83\x8a\x83\x8b\x81[\x83\x80");
-    TRACE("\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xcc\x83L\x81[\x83J\x81[\x83h");
-    TRACE("\x82\xcd\x82\xb6\x82\xdc\x82\xe8\x82\xcc\x83L\x81[\x83J\x81[\x83h");
-    TRACE("\x82\xdd\x82\xbf\x82\xd1\x82\xab\x82\xcc\x83L\x81[\x83J\x81[\x83h");
-    TRACE("\x90^\x8e\xc0\x82\xd6\x82\xcc\x83L\x81[\x83J\x81[\x83h");
-    TRACE("\x83W\x83\x87\x81[\x83J\x81[");
-    TRACE("\x83g\x83\x89\x83o\x81[\x83X\x83^\x83" "E\x83\x93");
-    TRACE("\x83" "A\x83O\x83\x89\x83o\x81[");
-    TRACE("\x83I\x83\x8a\x83\x93\x83|\x83X\x81" "E\x83R\x83\x8d\x83V\x83" "A\x83\x80");
-    TRACE("\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h");
-    TRACE("\x83\x82\x83\x93\x83X\x83g\x83\x8d");
-    TRACE("\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93");
-    TRACE("\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J");
-    TRACE("\x83l\x83o\x81[\x83\x89\x83\x93\x83h");
-    TRACE("\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93");
-    TRACE("100\x83G\x81[\x83J\x81[\x82\xcc\x90X");
-    TRACE("\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g\x83^\x83" "E\x83\x93");
-    TRACE("\x83" "f\x83X\x83" "e\x83" "B\x83j\x81[\x83" "A\x83" "C\x83\x89\x83\x93\x83h");
-    TRACE("\x83M\x83~\x83" "b\x83N-\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[");
-    TRACE("\x83M\x83~\x83" "b\x83N-\x83g\x83\x8a\x83" "b\x83N\x83X\x83^\x81[");
-    TRACE("\x83M\x83~\x83" "b\x83N-\x83W\x83\x83\x83t\x83@\x81[");
-    TRACE("\x83M\x83~\x83" "b\x83N-\x83u\x83M\x81[");
-    TRACE("\x83M\x83~\x83" "b\x83N-\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W");
-    TRACE("\x83M\x83~\x83" "b\x83N-\x83" "A\x81[\x83X\x83\x89");
-    TRACE("\x83M\x83~\x83" "b\x83N-\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93");
-    TRACE("\x83M\x83~\x83" "b\x83N-\x83_\x81[\x83N\x83T\x83" "C\x83h");
-    TRACE("\x83\\\x83" "E\x83\x8b\x83" "C\x81[\x83^\x81[");
-    TRACE("\x89\xa4\x97l");
-    TRACE("\x96Y\x8bp\x82\xcc\x8f\xe9");
-    TRACE("\x8dX\x90V");
-    TRACE("\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------");
-    TRACE("\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s");
-    TRACE("\x83" "A\x83O\x83\x89\x83o\x81[         :%s");
-    TRACE("\x83I\x83\x8a\x83\x93\x83|\x83X         :%s");
-    TRACE("\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s");
-    TRACE("\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s");
-    TRACE("\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93   :%s");
-    TRACE("\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s");
-    TRACE("\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s");
-    TRACE("\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s");
-    TRACE("\x82P\x82O\x82O\x83G\x81[\x83J\x81[     :%s");
-    TRACE("\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s");
-    TRACE("\x83" "f\x83X\x83" "e\x83j\x81[         :%s");
-    TRACE("\x82\xda\x82\xa4\x82\xab\x82\xe1\x82\xad\x82\xcc\x82\xb5\x82\xeb   :%s");
-    TRACE("\x81@\x82P\x82" "e             :%s");
-    TRACE("\x81@\x82Q\x82" "e             :%s");
-    TRACE("\x81@\x82R\x82" "e             :%s");
-    TRACE("\x81@\x82S\x82" "e             :%s");
-    TRACE("\x81@\x82T\x82" "e             :%s");
-    TRACE("\x81@\x82U\x82" "e             :%s");
-    TRACE("\x81@\x82V\x82" "e             :%s");
-    TRACE("\x81@\x82W\x82" "e             :%s");
-    TRACE("\x81@\x82X\x82" "e             :%s");
-    TRACE("\x82P\x82O\x82" "e             :%s");
-    TRACE("\x82P\x82P\x82" "e             :%s");
-    TRACE("\x82P\x82Q\x82" "e             :%s");
-    TRACE("\x82P\x82R\x82" "e             :%s");
-    TRACE("\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------");
-    TRACE("\x82" "a\x82P\x82Q\x82" "e           :%s");
-    TRACE("\x82" "a\x82P\x82P\x82" "e           :%s");
-    TRACE("\x82" "a\x82P\x82O\x82" "e           :%s");
-    TRACE("\x82" "a\x81@\x82X\x82" "e           :%s");
-    TRACE("\x82" "a\x81@\x82W\x82" "e           :%s");
-    TRACE("\x82" "a\x81@\x82V\x82" "e           :%s");
-    TRACE("\x82" "a\x81@\x82U\x82" "e           :%s");
-    TRACE("\x82" "a\x81@\x82T\x82" "e           :%s");
-    TRACE("\x82" "a\x81@\x82S\x82" "e           :%s");
-    TRACE("\x82" "a\x81@\x82R\x82" "e           :%s");
-    TRACE("\x82" "a\x81@\x82Q\x82" "e           :%s");
-    TRACE("\x82" "a\x81@\x82P\x82" "e           :%s");
-    TRACE("\xf9S------\xf9V\x83\\\x83\x89 \x82\xbb\x82\xcc\x91\xbc\xf9S------");
-    TRACE("\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x96\xec\x8d\xd8   :%s");
-    TRACE("\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83o\x83\x8b   :%s");
-    TRACE("\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83W\x83\x83   :%s");
-    TRACE("\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83\x8f\x83" "C   :%s");
-    TRACE("\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83n\x83`   :%s");
-    TRACE("\x83\x82\x83\x93\x83X\x83g\x83\x8d\x82\xc5\x91\xe5\x96\\\x82\xea :%s");
-    TRACE("\x83\x82\x81[\x83O\x83\x8a\x83V\x83\x87\x83" "b\x83v   :%s");
-    TRACE("\x83s\x83O\x83\x8c\x83" "b\x83g\x82\xc6\x98" "b\x82\xb5\x82\xbd :%s");
-    TRACE("\x83I\x83" "E\x83\x8b\x82\xc6\x98" "b\x82\xb5\x82\xbd     :%s");
-    TRACE("\x83\x8b\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd       :%s");
-    TRACE("\x83" "C\x81[\x83\x88\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s");
-    TRACE("\x83" "e\x83" "B\x83K\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s");
-    TRACE("\x83\x89\x83r\x83" "b\x83g\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s");
-    TRACE("100\x83G\x81[\x83J\x81[\x82\xcc\x90X\x8fo\x82\xbd:%s");
-    TRACE("\xf9S------\xf9V\x83\\\x83\x89 \x93G\x82\xcc\x90\x94\xf9S------");
-    TRACE("\x93G\x82\xcc\x8e\xed\x97\xde           :%s");
-    TRACE("\x93G\x82\xcc\x90\x94             :%5d");
-    TRACE("\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x90\xdd\x92\xe8     :%s");
-    TRACE("\xf9S------\xf9V\x83\x8a\x83N \x93G\x82\xcc\x90\x94\xf9S------");
-    TRACE("\xf9S------\xf9V\x83\\\x83\x89 \x83J\x81[\x83h\xf9S------");
-    TRACE("\x83J\x81[\x83h\x82\xcc\x8e\xed\x97\xde       :%s");
-    TRACE("\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x8e\xe6\x93\xbe     :%s");
-    TRACE("\xf9S------\xf9V\x83\x8a\x83N \x83J\x81[\x83h\xf9S------");
-    TRACE("\x83[\x83\x80\x83i\x83X           :%s");
-    TRACE("\x83V\x83\x8b\x83o\x81[\x83\x8b         :%s");
-    TRACE("\x83U\x83\x8b\x83" "f\x83" "B\x83\x93         :%s");
-    TRACE("\x83T\x83" "C\x83N\x83X           :%s");
-    TRACE("\x83" "f\x83~\x83" "b\x83N\x83X         :%s");
-    TRACE("\x83\x8b\x83N\x83\\\x81[\x83h         :%s");
-    TRACE("\x83\x8d\x83N\x83T\x83X           :%s");
-    TRACE("\x83X\x83^\x81[\x83V\x81[\x83J\x81[     :%s");
-    TRACE("\x83\x82\x83m\x83N\x83\x8d\x81[\x83\x80\t    :%s");
-    TRACE("\x83t\x83H\x83\x8d\x81[\x83U\x83" "E\x83" "B\x83\x93\x83h :%s");
-    TRACE("\x83q\x83h\x83" "D\x83\x93\x83h\x83\x89\x83S\x83\x93   :%s");
-    TRACE("\x83t\x83H\x83g\x83\x93\x83" "f\x83o\x83" "b\x83K\x81[ :%s");
-    TRACE("\x83{\x83\x93\x83h\x83I\x83u\x83t\x83\x8c\x83" "C\x83\x80 :%s");
+namespace DWTEvent {
+LPCSTR szJMSoraEnemyKind[35] = { "\x83V\x83\x83\x83h\x83" "E", "\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83\x8c\x83" "b\x83h\x83m\x83N\x83^\x81[\x83\x93", "\x83u\x83\x8b\x81[\x83\x89\x83v\x83\\\x83" "f\x83" "B", "\x83" "C\x83G\x83\x8d\x81[\x83I\x83y\x83\x89", "\x83O\x83\x8a\x81[\x83\x93\x83\x8c\x83N\x83" "C\x83G\x83\x80", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83o\x83" "E\x83\x93\x83V\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83K\x81[\x83S\x83" "C\x83\x8b", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83G\x83" "A\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83z\x83\x8f\x83" "C\x83g\x83}\x83" "b\x83V\x83\x85\x83\x8b\x81[\x83\x80", "\x83u\x83\x89\x83" "b\x83N\x83t\x83@\x83\x93\x83K\x83X", "\x83V\x81[\x83l\x83I\x83\x93", "\x83X\x83N\x83\x8a\x83\x85\x81[\x83_\x83" "C\x83o\x81[", "\x83" "A\x83N\x83" "A\x83^\x83\x93\x83N", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83G\x83" "A\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83_\x81[\x83N\x83{\x81[\x83\x8b", "\x83\x8f\x83" "C\x83o\x81[\x83\x93", "\x83" "E\x83" "B\x83U\x81[\x83h", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83l\x83I\x83V\x83\x83\x83h\x83" "E", "\x83o\x83\x8c\x83\x8b\x83X\x83p\x83" "C\x83_\x81[", "\x83g\x83\x8b\x83l\x81[\x83h\x83X\x83" "e\x83" "b\x83v", "\x83\x89\x83" "E\x83h\x83l\x83X", "\x83N\x83\x8a\x81[\x83v\x83v\x83\x89\x83\x93\x83g", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83_\x81[\x83N\x83T\x83" "C\x83h" };
+}
+namespace DWTEvent {
+LPCSTR szJMRikuEnemyKind[34] = { "\x83V\x83\x83\x83h\x83" "E", "\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83\x8c\x83" "b\x83h\x83m\x83N\x83^\x81[\x83\x93", "\x83u\x83\x8b\x81[\x83\x89\x83v\x83\\\x83" "f\x83" "B", "\x83" "C\x83G\x83\x8d\x81[\x83I\x83y\x83\x89", "\x83O\x83\x8a\x81[\x83\x93\x83\x8c\x83N\x83" "C\x83G\x83\x80", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83o\x83" "E\x83\x93\x83V\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83K\x81[\x83S\x83" "C\x83\x8b", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83G\x83" "A\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83u\x83\x89\x83" "b\x83N\x83t\x83@\x83\x93\x83K\x83X", "\x83V\x81[\x83l\x83I\x83\x93", "\x83X\x83N\x83\x8a\x83\x85\x81[\x83_\x83" "C\x83o\x81[", "\x83" "A\x83N\x83" "A\x83^\x83\x93\x83N", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83G\x83" "A\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83_\x81[\x83N\x83{\x81[\x83\x8b", "\x83\x8f\x83" "C\x83o\x81[\x83\x93", "\x83" "E\x83" "B\x83U\x81[\x83h", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83l\x83I\x83V\x83\x83\x83h\x83" "E", "\x83o\x83\x8c\x83\x8b\x83X\x83p\x83" "C\x83_\x81[", "\x83g\x83\x8b\x83l\x81[\x83h\x83X\x83" "e\x83" "b\x83v", "\x83\x89\x83" "E\x83h\x83l\x83X", "\x83N\x83\x8a\x81[\x83v\x83v\x83\x89\x83\x93\x83g", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83_\x81[\x83N\x83T\x83" "C\x83h" };
+}
+namespace DWTEvent {
+LPCSTR szJMSoraCardKindTbl[159] = { "\x83L\x83\x93\x83O\x83_\x83\x80\x83`\x83" "F\x81[\x83\x93", "\x83" "f\x83U\x83" "C\x83" "A\x81[\x83\x89\x83\x93\x83v", "\x83g\x83\x8c\x83W\x83\x83\x81[\x83I\x83u\x83V\x81[", "\x83p\x83\x93\x83v\x83L\x83\x93\x83w\x83" "b\x83h", "\x83t\x83" "F\x83" "A\x83\x8a\x81[\x83n\x81[\x83v", "\x83" "E\x83" "B\x83" "b\x83V\x83\x85\x83X\x83^\x81[", "\x83G\x83O\x83U\x83~\x83l\x81[\x83V\x83\x87\x83\x93", "\x83\x81\x83^\x83\x8b\x83`\x83\x87\x83R\x83{", "\x83p\x83\x8f\x81[\x83I\x83u\x83q\x81[\x83\x8d\x81[", "\x83\x89\x83" "C\x83I\x83\x93\x83n\x81[\x83g", "\x83\x89\x83X\x83g\x83\x8a\x83]\x81[\x83g", "\x83\x89\x83\x94\x83" "B\x83" "A\x83\x93\x83\x8d\x81[\x83Y", "\x96\xf1\x91\xa9\x82\xcc\x82\xa8\x8e\xe7\x82\xe8", "\x89\xdf\x82\xac\x8b\x8e\x82\xe8\x82\xb5\x8ev\x82\xa2\x8fo", "\x83" "A\x83\x8b\x83" "e\x83}\x83" "E\x83" "F\x83|\x83\x93", "\x83_\x83" "C\x83\x84\x83\x82\x83\x93\x83h\x83_\x83X\x83g", "\x95\xd0\x97\x83\x82\xcc\x93V\x8eg", "\x83X\x83^\x81[\x83V\x81[\x83J\x81[", "\x83\x82\x83m\x83N\x83\x8d\x81[\x83\x80", "\x83t\x83H\x83\x8d\x81[\x83U\x83" "E\x83" "B\x83\x93\x83h", "\x83q\x83h\x83" "D\x83\x93\x83h\x83\x89\x83S\x83\x93", "\x83t\x83H\x83g\x83\x93\x83" "f\x83o\x83" "b\x83K\x81[", "\x83{\x83\x93\x83h\x83I\x83u\x83t\x83\x8c\x83" "C\x83\x80", "\x83t\x83@\x83" "C\x83" "A", "\x83u\x83\x8a\x83U\x83h", "\x83T\x83\x93\x83_\x81[", "\x83P\x83" "A\x83\x8b", "\x83O\x83\x89\x83r\x83" "f", "\x83X\x83g\x83" "b\x83v", "\x83G\x83" "A\x83\x8d", "\x83V\x83\x93\x83o", "\x83W\x81[\x83j\x81[", "\x83o\x83\x93\x83r", "\x83_\x83\x93\x83{", "\x83" "e\x83" "B\x83\x93\x83N", "\x83\x80\x81[\x83V\x83\x85\x81[", "\x83N\x83\x89\x83" "E\x83h", "\x83|\x81[\x83V\x83\x87\x83\x93", "\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93", "\x83\x81\x83K\x83|\x81[\x83V\x83\x87\x83\x93", "\x83G\x81[\x83" "e\x83\x8b", "\x83\x81\x83K\x83G\x81[\x83" "e\x83\x8b", "\x83G\x83\x8a\x83N\x83T\x81[", "\x83\x89\x83X\x83g\x83G\x83\x8a\x83N\x83T\x81[", "\x83h\x83i\x83\x8b\x83h", "\x83O\x81[\x83t\x83" "B\x81[", "\x83" "A\x83\x89\x83W\x83\x93", "\x83" "A\x83\x8a\x83G\x83\x8b", "\x83W\x83\x83\x83" "b\x83N", "\x83s\x81[\x83^\x81[\x83p\x83\x93", "\x83r\x81[\x83X\x83g", "\x83v\x83\x8b\x81[\x83g", "\x83V\x83\x83\x83h\x83" "E", "\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83o\x83" "E\x83\x93\x83V\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83V\x81[\x83l\x83I\x83\x93", "\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83\x8c\x83" "b\x83h\x83m\x83N\x83^\x81[\x83\x93", "\x83u\x83\x8b\x81[\x83\x89\x83v\x83\\\x83" "f\x83" "B", "\x83" "C\x83G\x83\x8d\x81[\x83I\x83y\x83\x89", "\x83O\x83\x8a\x81[\x83\x93\x83\x8c\x83N\x83" "C\x83G\x83\x80", "\x83" "E\x83" "B\x83U\x81[\x83h", "\x83G\x83" "A\x83\\\x83\x8b\x83W\x83\x83\x81[", "\x83o\x83\x8c\x83\x8b\x83X\x83p\x83" "C\x83_\x81[", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83G\x83" "A\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83K\x81[\x83S\x83" "C\x83\x8b", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83" "A\x83N\x83" "A\x83^\x83\x93\x83N", "\x83X\x83N\x83\x8a\x83\x85\x81[\x83_\x83" "C\x83o\x81[", "\x83\x8f\x83" "C\x83o\x81[\x83\x93", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83z\x83\x8f\x83" "C\x83g\x83}\x83" "b\x83V\x83\x85\x83\x8b\x81[\x83\x80", "\x83u\x83\x89\x83" "b\x83N\x83t\x83@\x83\x93\x83K\x83X", "\x83N\x83\x8a\x81[\x83v\x83v\x83\x89\x83\x93\x83g", "\x83g\x83\x8b\x83l\x81[\x83h\x83X\x83" "e\x83" "b\x83v", "\x83\x89\x83" "E\x83h\x83l\x83X", "\x83l\x83I\x83V\x83\x83\x83h\x83" "E", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83n\x83" "f\x83X", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83W\x83\x83\x83t\x83@\x81[", "\x83" "A\x81[\x83X\x83\x89", "\x83u\x83M\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83t\x83" "b\x83N", "\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83_\x81[\x83N\x83T\x83" "C\x83h", "\x83\x8a\x83N", "\x83g\x83\x89\x83\x93\x83v\x95\xba", "\x83" "A\x83\x93\x83Z\x83\x80", "\x83[\x83\x80\x83i\x83X", "\x83V\x83O\x83o\x81[\x83\x8b", "\x83U\x83\x8b\x83" "f\x83" "B\x83\x93", "\x83\x94\x83" "B\x83N\x83Z\x83\x93", "\x83\x8c\x83N\x83Z\x83" "E\x83X", "\x83[\x83N\x83V\x83I\x83\x93", "\x83T\x83" "C\x83N\x83X", "\x83" "A\x83N\x83Z\x83\x8b", "\x83" "f\x83~\x83" "b\x83N\x83X", "\x83\x8b\x83N\x83\\\x81[\x83h", "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83", "\x83\x89\x83N\x83V\x81[\x83k", "\x83\x8d\x83N\x83T\x83X", "\x83S\x81[\x83\x8b\x83h", "\x83v\x83\x89\x83`\x83i", "\x90\xc3\x82\xb6\x82\xe1\x82\xad\x82\xc8\x82\xe9\x88\xc5", "\x82\xd0\x82\xb5\x82\xdf\x82\xad\x88\xc5", "\x82\xbf\x82\xa9\x82\xe7\x82\xc8\x82\xab\x88\xc5", "\x82\xa8\x82\xa8\x82\xa2\x82\xc8\x82\xe9\x88\xc5", "\x96\xb0\x82\xe8\x82\xcc\x88\xc5", "\x82\xb9\x82\xdc\x82\xe8\x82\xad\x82\xe9\x88\xc5", "\x83v\x83\x8c\x83~\x83" "A\x83\x8b\x81[\x83\x80", "\x83z\x83\x8f\x83" "C\x83g\x83\x8b\x81[\x83\x80", "\x83u\x83\x89\x83" "b\x83N\x83\x8b\x81[\x83\x80", "\x92\xea\x92m\x82\xea\x82\xca\x88\xc5", "\x83\x8b\x81[\x83\x8c\x83" "b\x83g\x83\x8b\x81[\x83\x80", "\x95\x90\x97\xcd\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x96\x82\x97\xcd\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x98" "B\x8b\xe0\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x82\xdf\x82\xae\x82\xe8\x82\xa0\x82\xa2\x82\xcc\x92n", "\x82\xc4\x82\xa2\x82\xbd\x82\xa2\x82\xcc\x8a\xd4", "\x83_\x83\x81\x81[\x83W\x83" "A\x83" "b\x83v\x83\x8b\x81[\x83\x80", "\x83X\x83^\x83\x93\x83v\x83\x89\x83X\x83\x8b\x81[\x83\x80", "\x82\xe2\x82\xb7\x82\xe7\x82\xac\x82\xcc\x95\xf3", "\x8e\xe7\x82\xe7\x82\xea\x82\xb5\x95\xf3", "\x82\xa2\x82\xc2\x82\xed\x82\xe8\x82\xcc\x95\xf3", "\x88\xea\x8e\x9e\x82\xcc\x8bx\x91\xa7", "\x8c\xf0\x82\xb6\x82\xe8\x8d\x87\x82\xa4\x90\xa2\x8a" "E", "\x83\x82\x81[\x83O\x83\x8a\x83\x8b\x81[\x83\x80", "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x82\xcd\x82\xb6\x82\xdc\x82\xe8\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x82\xdd\x82\xbf\x82\xd1\x82\xab\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x90^\x8e\xc0\x82\xd6\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x83W\x83\x87\x81[\x83J\x81[", "\x83g\x83\x89\x83o\x81[\x83X\x83^\x83" "E\x83\x93", "\x83" "A\x83O\x83\x89\x83o\x81[", "\x83I\x83\x8a\x83\x93\x83|\x83X\x81" "E\x83R\x83\x8d\x83V\x83" "A\x83\x80", "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h", "\x83\x82\x83\x93\x83X\x83g\x83\x8d", "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93", "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J", "\x83l\x83o\x81[\x83\x89\x83\x93\x83h", "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93", "100\x83G\x81[\x83J\x81[\x82\xcc\x90X", "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g\x83^\x83" "E\x83\x93", "\x83" "f\x83X\x83" "e\x83" "B\x83j\x81[\x83" "A\x83" "C\x83\x89\x83\x93\x83h", "\x83M\x83~\x83" "b\x83N-\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83M\x83~\x83" "b\x83N-\x83g\x83\x8a\x83" "b\x83N\x83X\x83^\x81[", "\x83M\x83~\x83" "b\x83N-\x83W\x83\x83\x83t\x83@\x81[", "\x83M\x83~\x83" "b\x83N-\x83u\x83M\x81[", "\x83M\x83~\x83" "b\x83N-\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83M\x83~\x83" "b\x83N-\x83" "A\x81[\x83X\x83\x89", "\x83M\x83~\x83" "b\x83N-\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83M\x83~\x83" "b\x83N-\x83_\x81[\x83N\x83T\x83" "C\x83h" };
+}
+namespace DWTEvent {
+LPCSTR szJMRikuCardKindTbl[66] = { "\x83\\\x83" "E\x83\x8b\x83" "C\x81[\x83^\x81[", "\x83|\x81[\x83V\x83\x87\x83\x93", "\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93", "\x89\xa4\x97l", "\x83V\x83\x83\x83h\x83" "E", "\x83p\x83\x8f\x81[\x83\x8f\x83" "C\x83\x8b\x83h", "\x83\x89\x81[\x83W\x83{\x83" "f\x83" "B", "\x83t\x83@\x83" "b\x83g\x83o\x83\x93\x83" "f\x83" "B\x83" "b\x83g", "\x83V\x81[\x83l\x83I\x83\x93", "\x83p\x83" "C\x83\x8c\x81[\x83" "c", "\x83\x8f\x83" "C\x83g\x83i\x83" "C\x83g", "\x83T\x81[\x83`\x83S\x81[\x83X\x83g", "\x83" "f\x83" "B\x83t\x83" "F\x83\x93\x83_\x81[", "\x83_\x81[\x83N\x83{\x81[\x83\x8b", "\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83n\x83" "f\x83X", "\x83g\x83\x8a\x83" "b\x83N\x83}\x83X\x83^\x81[", "\x83W\x83\x83\x83t\x83@\x81[", "\x83" "A\x81[\x83X\x83\x89", "\x83u\x83M\x81[", "\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83t\x83" "b\x83N", "\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83_\x81[\x83N\x83T\x83" "C\x83h", "\x83\x8c\x83N\x83Z\x83" "E\x83X", "\x83[\x83N\x83V\x83I\x83\x93", "\x90\xc3\x82\xb6\x82\xe1\x82\xad\x82\xc8\x82\xe9\x88\xc5", "\x82\xd0\x82\xb5\x82\xdf\x82\xad\x88\xc5", "\x82\xbf\x82\xa9\x82\xe7\x82\xc8\x82\xab\x88\xc5", "\x82\xa8\x82\xa8\x82\xa2\x82\xc8\x82\xe9\x88\xc5", "\x96\xb0\x82\xe8\x82\xcc\x88\xc5", "\x82\xb9\x82\xdc\x82\xe8\x82\xad\x82\xe9\x88\xc5", "\x83u\x83\x89\x83" "b\x83N\x83\x8b\x81[\x83\x80", "\x92\xea\x92m\x82\xea\x82\xca\x88\xc5", "\x83\x8b\x81[\x83\x8c\x83" "b\x83g\x83\x8b\x81[\x83\x80", "\x95\x90\x97\xcd\x82\xd6\x82\xcc\x82\xdf\x82\xb4\x82\xdf", "\x82\xdf\x82\xae\x82\xe8\x82\xa0\x82\xa2\x82\xcc\x92n", "\x82\xc4\x82\xa2\x82\xbd\x82\xa2\x82\xcc\x8a\xd4", "\x83_\x83\x81\x81[\x83W\x83" "A\x83" "b\x83v\x83\x8b\x81[\x83\x80", "\x83X\x83^\x83\x93\x83v\x83\x89\x83X\x83\x8b\x81[\x83\x80", "\x88\xea\x8e\x9e\x82\xcc\x8bx\x91\xa7", "\x8c\xf0\x82\xb6\x82\xe8\x8d\x87\x82\xa4\x90\xa2\x8a" "E", "\x82\xcd\x82\xb6\x82\xdc\x82\xe8\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x82\xdd\x82\xbf\x82\xd1\x82\xab\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x90^\x8e\xc0\x82\xd6\x82\xcc\x83L\x81[\x83J\x81[\x83h", "\x83W\x83\x87\x81[\x83J\x81[", "\x83g\x83\x89\x83o\x81[\x83X\x83^\x83" "E\x83\x93", "\x83" "A\x83O\x83\x89\x83o\x81[", "\x83I\x83\x8a\x83\x93\x83|\x83X\x81" "E\x83R\x83\x8d\x83V\x83" "A\x83\x80", "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h", "\x83\x82\x83\x93\x83X\x83g\x83\x8d", "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93", "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J", "\x83l\x83o\x81[\x83\x89\x83\x93\x83h", "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93", "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g\x83^\x83" "E\x83\x93", "\x83" "f\x83X\x83" "e\x83" "B\x83j\x81[\x83" "A\x83" "C\x83\x89\x83\x93\x83h", "\x96Y\x8bp\x82\xcc\x8f\xe9", "\x83M\x83~\x83" "b\x83N-\x83K\x81[\x83h\x83" "A\x81[\x83}\x81[", "\x83M\x83~\x83" "b\x83N-\x83g\x83\x8a\x83" "b\x83N\x83X\x83^\x81[", "\x83M\x83~\x83" "b\x83N-\x83W\x83\x83\x83t\x83@\x81[", "\x83M\x83~\x83" "b\x83N-\x83u\x83M\x81[", "\x83M\x83~\x83" "b\x83N-\x83p\x83\x89\x83T\x83" "C\x83g\x83P\x83" "C\x83W", "\x83M\x83~\x83" "b\x83N-\x83" "A\x81[\x83X\x83\x89", "\x83M\x83~\x83" "b\x83N-\x83}\x83\x8c\x83t\x83" "B\x83Z\x83\x93\x83g\x83h\x83\x89\x83S\x83\x93", "\x83M\x83~\x83" "b\x83N-\x83_\x81[\x83N\x83T\x83" "C\x83h" };
+}
+namespace DWTEvent {
+LPCSTR szJMSwitchTbl[2] = { "", "\x8dX\x90V" };
+}
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugWinJiminyLine[82] = {
+    { "\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },
+    { "\x83" "A\x83O\x83\x89\x83o\x81[         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },
+    { "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },
+    { "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },
+    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },
+    { "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93   :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },
+    { "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },
+    { "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },
+    { "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },
+    { "\x82P\x82O\x82O\x83G\x81[\x83J\x81[     :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },
+    { "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },
+    { "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },
+    { "\x82\xda\x82\xa4\x82\xab\x82\xe1\x82\xad\x82\xcc\x82\xb5\x82\xeb   :%s", &DebugWork::g_dw.jiminy.Sora_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetJiminyMemoFlag, NULL },
+    { "\x81@\x82P\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },
+    { "\x81@\x82Q\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },
+    { "\x81@\x82R\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },
+    { "\x81@\x82S\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },
+    { "\x81@\x82T\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },
+    { "\x81@\x82U\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },
+    { "\x81@\x82V\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },
+    { "\x81@\x82W\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },
+    { "\x81@\x82X\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },
+    { "\x82P\x82O\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },
+    { "\x82P\x82P\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },
+    { "\x82P\x82Q\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },
+    { "\x82P\x82R\x82" "e             :%s", &DebugWork::g_dw.jiminy.Sora_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetJiminyMemoFlag, NULL },
+    { "\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },
+    { "\x83" "A\x83O\x83\x89\x83o\x81[         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },
+    { "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },
+    { "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },
+    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },
+    { "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93\x83^\x83" "E\x83\x93   :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },
+    { "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },
+    { "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },
+    { "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },
+    { "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },
+    { "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },
+    { "\x82\xda\x82\xa4\x82\xab\x82\xe1\x82\xad\x82\xcc\x82\xb5\x82\xeb   :%s", &DebugWork::g_dw.jiminy.Riku_World, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x82P\x82Q\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x82P\x82P\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x82P\x82O\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x81@\x82X\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x81@\x82W\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x81@\x82V\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x81@\x82U\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x81@\x82T\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x81@\x82S\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x81@\x82R\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x81@\x82Q\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },
+    { "\x82" "a\x81@\x82P\x82" "e           :%s", &DebugWork::g_dw.jiminy.Riku_Floor, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },
+    { "\xf9S------\xf9V\x83\\\x83\x89 \x82\xbb\x82\xcc\x91\xbc\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x96\xec\x8d\xd8   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetJiminyMemoFlag, NULL },
+    { "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83o\x83\x8b   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetJiminyMemoFlag, NULL },
+    { "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83W\x83\x83   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetJiminyMemoFlag, NULL },
+    { "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83\x8f\x83" "C   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetJiminyMemoFlag, NULL },
+    { "\x83~\x83j\x83Q\x81[\x83\x80\x81" "E\x83n\x83`   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetJiminyMemoFlag, NULL },
+    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d\x82\xc5\x91\xe5\x96\\\x82\xea :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetJiminyMemoFlag, NULL },
+    { "\x83\x82\x81[\x83O\x83\x8a\x83V\x83\x87\x83" "b\x83v   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetJiminyMemoFlag, NULL },
+    { "\x83s\x83O\x83\x8c\x83" "b\x83g\x82\xc6\x98" "b\x82\xb5\x82\xbd :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetJiminyMemoFlag, NULL },
+    { "\x83I\x83" "E\x83\x8b\x82\xc6\x98" "b\x82\xb5\x82\xbd     :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetJiminyMemoFlag, NULL },
+    { "\x83\x8b\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd       :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetJiminyMemoFlag, NULL },
+    { "\x83" "C\x81[\x83\x88\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetJiminyMemoFlag, NULL },
+    { "\x83" "e\x83" "B\x83K\x81[\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetJiminyMemoFlag, NULL },
+    { "\x83\x89\x83r\x83" "b\x83g\x82\xc6\x98" "b\x82\xb5\x82\xbd   :%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetJiminyMemoFlag, NULL },
+    { "100\x83G\x81[\x83J\x81[\x82\xcc\x90X\x8fo\x82\xbd:%s", &DebugWork::g_dw.jiminy.Sora_Etc, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetJiminyMemoFlag, NULL },
+    { "\xf9S------\xf9V\x83\\\x83\x89 \x93G\x82\xcc\x90\x94\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x93G\x82\xcc\x8e\xed\x97\xde           :%s", &DebugWork::g_dw.jiminy.Sora_Enemy, 4, { 0 }, 0, 0.0f, 34.0f, 1.0f, szJMSoraEnemyKind, 0, DebugSetJiminyMemoFlag, NULL },
+    { "\x93G\x82\xcc\x90\x94             :%5d", &DebugWork::g_dw.jiminy.Sora_ENum, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetJiminyMemoFlag, NULL },
+    { "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x90\xdd\x92\xe8     :%s", &DebugWork::g_dw.jiminy.Sora_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 1, DebugSetJiminyMemoFlag, NULL },
+    { "\xf9S------\xf9V\x83\x8a\x83N \x93G\x82\xcc\x90\x94\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x93G\x82\xcc\x8e\xed\x97\xde           :%s", &DebugWork::g_dw.jiminy.Riku_Enemy, 4, { 0 }, 0, 0.0f, 33.0f, 1.0f, szJMRikuEnemyKind, 0, DebugSetJiminyMemoFlag, NULL },
+    { "\x93G\x82\xcc\x90\x94             :%5d", &DebugWork::g_dw.jiminy.Riku_ENum, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetJiminyMemoFlag, NULL },
+    { "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x90\xdd\x92\xe8     :%s", &DebugWork::g_dw.jiminy.Riku_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 1, DebugSetJiminyMemoFlag, NULL },
+    { "\xf9S------\xf9V\x83\\\x83\x89 \x83J\x81[\x83h\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83J\x81[\x83h\x82\xcc\x8e\xed\x97\xde       :%s", &DebugWork::g_dw.jiminy.Sora_Card, 4, { 0 }, 0, 0.0f, 158.0f, 1.0f, szJMSoraCardKindTbl, 0, DebugSetJiminyMemoFlag, NULL },
+    { "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x8e\xe6\x93\xbe     :%s", &DebugWork::g_dw.jiminy.Sora_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 2, DebugSetJiminyMemoFlag, NULL },
+    { "\xf9S------\xf9V\x83\x8a\x83N \x83J\x81[\x83h\xf9S------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83J\x81[\x83h\x82\xcc\x8e\xed\x97\xde       :%s", &DebugWork::g_dw.jiminy.Riku_Card, 4, { 0 }, 0, 0.0f, 65.0f, 1.0f, szJMRikuCardKindTbl, 0, DebugSetJiminyMemoFlag, NULL },
+    { "\x81\x9b\x83{\x83^\x83\x93\x82\xc5\x8e\xe6\x93\xbe     :%s", &DebugWork::g_dw.jiminy.Riku_Flag, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, szJMSwitchTbl, 2, DebugSetJiminyMemoFlag, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+}
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugWinKH2CardGetLine[14] = {
+    { "\x83[\x83\x80\x83i\x83X           :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetKH2CardGetFlag, NULL },
+    { "\x83V\x83\x8b\x83o\x81[\x83\x8b         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetKH2CardGetFlag, NULL },
+    { "\x83U\x83\x8b\x83" "f\x83" "B\x83\x93         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetKH2CardGetFlag, NULL },
+    { "\x83T\x83" "C\x83N\x83X           :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetKH2CardGetFlag, NULL },
+    { "\x83" "f\x83~\x83" "b\x83N\x83X         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetKH2CardGetFlag, NULL },
+    { "\x83\x8b\x83N\x83\\\x81[\x83h         :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetKH2CardGetFlag, NULL },
+    { "\x83\x8d\x83N\x83T\x83X           :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetKH2CardGetFlag, NULL },
+    { "\x83X\x83^\x81[\x83V\x81[\x83J\x81[     :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetKH2CardGetFlag, NULL },
+    { "\x83\x82\x83m\x83N\x83\x8d\x81[\x83\x80\t    :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetKH2CardGetFlag, NULL },
+    { "\x83t\x83H\x83\x8d\x81[\x83U\x83" "E\x83" "B\x83\x93\x83h :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetKH2CardGetFlag, NULL },
+    { "\x83q\x83h\x83" "D\x83\x93\x83h\x83\x89\x83S\x83\x93   :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetKH2CardGetFlag, NULL },
+    { "\x83t\x83H\x83g\x83\x93\x83" "f\x83o\x83" "b\x83K\x81[ :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetKH2CardGetFlag, NULL },
+    { "\x83{\x83\x93\x83h\x83I\x83u\x83t\x83\x8c\x83" "C\x83\x80 :%s", &DebugWork::g_dw.atelwork.iKH2CardGet, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetKH2CardGetFlag, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
 }
 namespace DWTEvent {
 static BOOL debugGameInfomationParam(CDebugWindow* pObj, INT inY, INT inParam) {
@@ -1177,161 +962,216 @@ static BOOL debugGameInfomationParam(CDebugWindow* pObj, INT inY, INT inParam) {
     return 1;
 }
 }
-/* placeholder: rodata of the tables before DebugSetGameWorkParam__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-inline void _roPh16() {
-    TRACE("\x83L\x81[\x83\x8b\x81[\x83\x80        :%s");
-    TRACE("\x83\x82\x81[\x83O\x83\x8a\x83V\x83\x87\x83" "b\x83v  :%s");
-    TRACE("\x83t\x83\x8d\x83" "A\x88\xda\x93\xae        :%s");
-    TRACE("\x83\x8f\x81[\x83v\x83|\x83" "C\x83\x93\x83g    :%s");
-    TRACE("\x83Z\x81[\x83u\x83|\x83" "C\x83\x93\x83g    :%s");
-    TRACE("\x83t\x83" "B\x81[\x83\x8b\x83h        :%s");
-    TRACE("\x83\x8f\x81[\x83\x8b\x83h\x83Z\x83\x8c\x83N\x83g  :%s");
-    TRACE("501   :%s");
-    TRACE("502   :%s");
-    TRACE("503   :%s");
-    TRACE("504   :%s");
-    TRACE("511   :%s");
-    TRACE("512   :%s");
-    TRACE("521   :%s");
-    TRACE("522   :%s");
-    TRACE("531   :%s");
-    TRACE("541   :%s");
-    TRACE("542   :%s");
-    TRACE("543   :%s");
-    TRACE("551   :%s");
-    TRACE("552   :%s");
-    TRACE("561   :%s");
-    TRACE("571   :%s");
-    TRACE("581   :%s");
-    TRACE("582   :%s");
-    TRACE("583   :%s");
-    TRACE("584   :%s");
-    TRACE("585   :%s");
-    TRACE("586   :%s");
-    TRACE("591   :%s");
-    TRACE("592   :%s");
-    TRACE("593   :%s");
-    TRACE("594   :%s");
-    TRACE("595   :%s");
-    TRACE("596   :%s");
-    TRACE("601   :%s");
-    TRACE("602   :%s");
-    TRACE("603   :%s");
-    TRACE("604   :%s");
-    TRACE("605   :%s");
-    TRACE("606   :%s");
-    TRACE("611   :%s");
-    TRACE("612   :%s");
-    TRACE("613   :%s");
-    TRACE("614   :%s");
-    TRACE("615   :%s");
-    TRACE("621   :%s");
-    TRACE("631   :%s");
-    TRACE("001   :%s");
-    TRACE("011   :%s");
-    TRACE("012   :%s");
-    TRACE("013   :%s");
-    TRACE("021   :%s");
-    TRACE("022   :%s");
-    TRACE("023   :%s");
-    TRACE("031   :%s");
-    TRACE("032   :%s");
-    TRACE("033   :%s");
-    TRACE("041   :%s");
-    TRACE("042   :%s");
-    TRACE("043   :%s");
-    TRACE("051   :%s");
-    TRACE("052   :%s");
-    TRACE("053   :%s");
-    TRACE("061   :%s");
-    TRACE("062   :%s");
-    TRACE("063   :%s");
-    TRACE("064   :%s");
-    TRACE("071   :%s");
-    TRACE("072   :%s");
-    TRACE("073   :%s");
-    TRACE("081   :%s");
-    TRACE("082   :%s");
-    TRACE("083   :%s");
-    TRACE("084   :%s");
-    TRACE("091   :%s");
-    TRACE("092   :%s");
-    TRACE("093   :%s");
-    TRACE("101   :%s");
-    TRACE("102   :%s");
-    TRACE("103   :%s");
-    TRACE("104   :%s");
-    TRACE("111   :%s");
-    TRACE("112   :%s");
-    TRACE("113   :%s");
-    TRACE("114   :%s");
-    TRACE("115   :%s");
-    TRACE("116   :%s");
-    TRACE("117   :%s");
-    TRACE("118   :%s");
-    TRACE("121   :%s");
-    TRACE("122   :%s");
-    TRACE("123   :%s");
-    TRACE("124   :%s");
-    TRACE("125   :%s");
-    TRACE("126   :%s");
-    TRACE("131   :%s");
-    TRACE("132   :%s");
-    TRACE("133   :%s");
-    TRACE("134   :%s");
-    TRACE("135   :%s");
-    TRACE("136   :%s");
-    TRACE("137   :%s");
-    TRACE("138   :%s");
-    TRACE("139   :%s");
-    TRACE("140   :%s");
-    TRACE("151   :%s");
-    TRACE("\x83n\x83" "C\x83W\x83\x83\x83\x93\x83v     :%s");
-    TRACE("\x83O\x83\x89\x83" "C\x83h         :%s");
-    TRACE("\x83X\x81[\x83p\x81[\x83O\x83\x89\x83" "C\x83h :%s");
-    TRACE("\x83_\x81[\x83N\x83\x8a\x83N\x89\xbb     :%s");
-    TRACE("\x83X\x83s\x81[\x83h\x83u\x83\x8c\x83" "C\x83N :%s");
-    TRACE("\x83" "f\x83\x85\x83G\x83\x8b         :%s");
-    TRACE("\x83h\x83i\x83\x8b\x83h     :%s");
-    TRACE("\x83O\x81[\x83t\x83" "B\x81[   :%s");
-    TRACE("\x83" "A\x83\x89\x83W\x83\x93     :%s");
-    TRACE("\x83" "A\x83\x8a\x83G\x83\x8b     :%s");
-    TRACE("\x83W\x83\x83\x83" "b\x83N     :%s");
-    TRACE("\x83s\x81[\x83^\x81[\x83p\x83\x93 :%s");
-    TRACE("\x83r\x81[\x83X\x83g     :%s");
-    TRACE("\x89\xa4\x97l         :%s");
-    TRACE("\x83v\x83\x8b\x81[\x83g     :%s");
-    TRACE("\x83G\x83O\x83U\x83~\x83l\x81[\x83V\x83\x87\x83\x93 :%s");
-    TRACE("\x83\x81\x83^\x83\x8b\x83`\x83\x87\x83R\x83{     :%s");
-    TRACE("\x83\x89\x83" "C\x83I\x83\x93\x83n\x81[\x83g     :%s");
-    TRACE("\x96\xf1\x91\xa9\x82\xcc\x82\xa8\x8e\xe7\x82\xe8       :%s");
-    TRACE("\x89\xdf\x82\xac\x8b\x8e\x82\xe8\x82\xb5\x8ev\x82\xa2\x8fo   :%s");
-    TRACE("\x83" "A\x83\x8b\x83" "e\x83}\x83" "E\x83G\x83|\x83\x93   :%s");
-    TRACE("\x83_\x83" "C\x83" "A\x83\x82\x83\x93\x83h\x83_\x83X\x83g :%s");
-    TRACE("\x95\xfb\x97\x83\x82\xcc\x93V\x8eg         :%s");
-    TRACE("\x83t\x83@\x83" "C\x83" "A           :%s");
-    TRACE("\x83T\x83\x93\x83_\x81[           :%s");
-    TRACE("\x83O\x83\x89\x83r\x83" "f           :%s");
-    TRACE("\x83X\x83g\x83" "b\x83v           :%s");
-    TRACE("\x83G\x83" "A\x83\x8d             :%s");
-    TRACE("\x83V\x83\x93\x83o             :%s");
-    TRACE("\x83W\x81[\x83j\x81[           :%s");
-    TRACE("\x83o\x83\x93\x83r             :%s");
-    TRACE("\x83_\x83\x93\x83{             :%s");
-    TRACE("\x83" "e\x83" "B\x83\x93\x83N           :%s");
-    TRACE("\x83\x80\x81[\x83V\x83\x85\x81[         :%s");
-    TRACE("\x83N\x83\x89\x83" "E\x83h           :%s");
-    TRACE("\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93     :%s");
-    TRACE("\x83\x81\x83K\x83|\x81[\x83V\x83\x87\x83\x93     :%s");
-    TRACE("\x83G\x81[\x83" "e\x83\x8b           :%s");
-    TRACE("\x83\x81\x83K\x83G\x81[\x83" "e\x83\x8b       :%s");
-    TRACE("\x83G\x83\x8a\x83N\x83T\x81[         :%s");
-    TRACE("\x83\x89\x83X\x83g\x83G\x83\x8a\x83N\x83T\x81[   :%s");
-    TRACE("\x83" "A\x83O\x83\x89\x83o           :%s");
-    TRACE("\x83n\x83\x8d\x83" "E\x83" "B\x83\x93         :%s");
-    TRACE("100\x83G\x81[\x83J\x81[        :%s");
-    TRACE("\x96Y\x8bp\x82\xcc\x8f\xe9           :%s");
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugWinTuEndLine[8] = {
+    { "\x83L\x81[\x83\x8b\x81[\x83\x80        :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetTutorialFlag, NULL },
+    { "\x83\x82\x81[\x83O\x83\x8a\x83V\x83\x87\x83" "b\x83v  :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetTutorialFlag, NULL },
+    { "\x83t\x83\x8d\x83" "A\x88\xda\x93\xae        :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetTutorialFlag, NULL },
+    { "\x83\x8f\x81[\x83v\x83|\x83" "C\x83\x93\x83g    :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetTutorialFlag, NULL },
+    { "\x83Z\x81[\x83u\x83|\x83" "C\x83\x93\x83g    :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetTutorialFlag, NULL },
+    { "\x83t\x83" "B\x81[\x83\x8b\x83h        :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetTutorialFlag, NULL },
+    { "\x83\x8f\x81[\x83\x8b\x83h\x83Z\x83\x8c\x83N\x83g  :%s", &DebugWork::g_dw.atelwork.iTutorialEnd, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetTutorialFlag, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+}
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugWinMovieLineRiku[42] = {
+    { "501   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetRikuMovieFlag, NULL },
+    { "502   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetRikuMovieFlag, NULL },
+    { "503   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetRikuMovieFlag, NULL },
+    { "504   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetRikuMovieFlag, NULL },
+    { "511   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetRikuMovieFlag, NULL },
+    { "512   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetRikuMovieFlag, NULL },
+    { "521   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetRikuMovieFlag, NULL },
+    { "522   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetRikuMovieFlag, NULL },
+    { "531   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetRikuMovieFlag, NULL },
+    { "541   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetRikuMovieFlag, NULL },
+    { "542   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetRikuMovieFlag, NULL },
+    { "543   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetRikuMovieFlag, NULL },
+    { "551   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetRikuMovieFlag, NULL },
+    { "552   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetRikuMovieFlag, NULL },
+    { "561   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetRikuMovieFlag, NULL },
+    { "571   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetRikuMovieFlag, NULL },
+    { "581   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetRikuMovieFlag, NULL },
+    { "582   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetRikuMovieFlag, NULL },
+    { "583   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetRikuMovieFlag, NULL },
+    { "584   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetRikuMovieFlag, NULL },
+    { "585   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetRikuMovieFlag, NULL },
+    { "586   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetRikuMovieFlag, NULL },
+    { "591   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetRikuMovieFlag, NULL },
+    { "592   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetRikuMovieFlag, NULL },
+    { "593   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetRikuMovieFlag, NULL },
+    { "594   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetRikuMovieFlag, NULL },
+    { "595   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetRikuMovieFlag, NULL },
+    { "596   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000000, DebugSetRikuMovieFlag, NULL },
+    { "601   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000000, DebugSetRikuMovieFlag, NULL },
+    { "602   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000000, DebugSetRikuMovieFlag, NULL },
+    { "603   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000000, DebugSetRikuMovieFlag, NULL },
+    { "604   :%s", &DebugWork::g_dw.atelwork.iRikuMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000000, DebugSetRikuMovieFlag, NULL },
+    { "605   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetRikuMovieFlag, NULL },
+    { "606   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetRikuMovieFlag, NULL },
+    { "611   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetRikuMovieFlag, NULL },
+    { "612   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetRikuMovieFlag, NULL },
+    { "613   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetRikuMovieFlag, NULL },
+    { "614   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetRikuMovieFlag, NULL },
+    { "615   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetRikuMovieFlag, NULL },
+    { "621   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetRikuMovieFlag, NULL },
+    { "631   :%s", &DebugWork::g_dw.atelwork.iRikuMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetRikuMovieFlag, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+}
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugWinMovieLine[60] = {
+    { "001   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetSoraMovieFlag, NULL },
+    { "011   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetSoraMovieFlag, NULL },
+    { "012   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetSoraMovieFlag, NULL },
+    { "013   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetSoraMovieFlag, NULL },
+    { "021   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetSoraMovieFlag, NULL },
+    { "022   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetSoraMovieFlag, NULL },
+    { "023   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetSoraMovieFlag, NULL },
+    { "031   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetSoraMovieFlag, NULL },
+    { "032   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetSoraMovieFlag, NULL },
+    { "033   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetSoraMovieFlag, NULL },
+    { "041   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetSoraMovieFlag, NULL },
+    { "042   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetSoraMovieFlag, NULL },
+    { "043   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetSoraMovieFlag, NULL },
+    { "051   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetSoraMovieFlag, NULL },
+    { "052   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetSoraMovieFlag, NULL },
+    { "053   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetSoraMovieFlag, NULL },
+    { "061   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetSoraMovieFlag, NULL },
+    { "062   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetSoraMovieFlag, NULL },
+    { "063   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetSoraMovieFlag, NULL },
+    { "064   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetSoraMovieFlag, NULL },
+    { "071   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetSoraMovieFlag, NULL },
+    { "072   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetSoraMovieFlag, NULL },
+    { "073   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetSoraMovieFlag, NULL },
+    { "081   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetSoraMovieFlag, NULL },
+    { "082   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetSoraMovieFlag, NULL },
+    { "083   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetSoraMovieFlag, NULL },
+    { "084   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetSoraMovieFlag, NULL },
+    { "091   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000000, DebugSetSoraMovieFlag, NULL },
+    { "092   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000000, DebugSetSoraMovieFlag, NULL },
+    { "093   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000000, DebugSetSoraMovieFlag, NULL },
+    { "101   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000000, DebugSetSoraMovieFlag, NULL },
+    { "102   :%s", &DebugWork::g_dw.atelwork.iSoraMovie0, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000000, DebugSetSoraMovieFlag, NULL },
+    { "103   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetSoraMovieFlag, NULL },
+    { "104   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetSoraMovieFlag, NULL },
+    { "111   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetSoraMovieFlag, NULL },
+    { "112   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetSoraMovieFlag, NULL },
+    { "113   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetSoraMovieFlag, NULL },
+    { "114   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetSoraMovieFlag, NULL },
+    { "115   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetSoraMovieFlag, NULL },
+    { "116   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetSoraMovieFlag, NULL },
+    { "117   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetSoraMovieFlag, NULL },
+    { "118   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetSoraMovieFlag, NULL },
+    { "121   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetSoraMovieFlag, NULL },
+    { "122   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetSoraMovieFlag, NULL },
+    { "123   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetSoraMovieFlag, NULL },
+    { "124   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetSoraMovieFlag, NULL },
+    { "125   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetSoraMovieFlag, NULL },
+    { "126   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetSoraMovieFlag, NULL },
+    { "131   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetSoraMovieFlag, NULL },
+    { "132   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetSoraMovieFlag, NULL },
+    { "133   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetSoraMovieFlag, NULL },
+    { "134   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetSoraMovieFlag, NULL },
+    { "135   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetSoraMovieFlag, NULL },
+    { "136   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetSoraMovieFlag, NULL },
+    { "137   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetSoraMovieFlag, NULL },
+    { "138   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetSoraMovieFlag, NULL },
+    { "139   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetSoraMovieFlag, NULL },
+    { "140   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetSoraMovieFlag, NULL },
+    { "151   :%s", &DebugWork::g_dw.atelwork.iSoraMovie1, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetSoraMovieFlag, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+}
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugWinPcSkillLine[7] = {
+    { "\x83n\x83" "C\x83W\x83\x83\x83\x93\x83v     :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetPcSkillFlag, NULL },
+    { "\x83O\x83\x89\x83" "C\x83h         :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetPcSkillFlag, NULL },
+    { "\x83X\x81[\x83p\x81[\x83O\x83\x89\x83" "C\x83h :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetPcSkillFlag, NULL },
+    { "\x83_\x81[\x83N\x83\x8a\x83N\x89\xbb     :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetPcSkillFlag, NULL },
+    { "\x83X\x83s\x81[\x83h\x83u\x83\x8c\x83" "C\x83N :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetPcSkillFlag, NULL },
+    { "\x83" "f\x83\x85\x83G\x83\x8b         :%s", &DebugWork::g_dw.atelwork.iPcStanderdSkill, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetPcSkillFlag, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+}
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugWinFriendPossibleLine[10] = {
+    { "\x83h\x83i\x83\x8b\x83h     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetFriendPossibleFlag, NULL },
+    { "\x83O\x81[\x83t\x83" "B\x81[   :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetFriendPossibleFlag, NULL },
+    { "\x83" "A\x83\x89\x83W\x83\x93     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetFriendPossibleFlag, NULL },
+    { "\x83" "A\x83\x8a\x83G\x83\x8b     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetFriendPossibleFlag, NULL },
+    { "\x83W\x83\x83\x83" "b\x83N     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetFriendPossibleFlag, NULL },
+    { "\x83s\x81[\x83^\x81[\x83p\x83\x93 :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetFriendPossibleFlag, NULL },
+    { "\x83r\x81[\x83X\x83g     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetFriendPossibleFlag, NULL },
+    { "\x89\xa4\x97l         :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetFriendPossibleFlag, NULL },
+    { "\x83v\x83\x8b\x81[\x83g     :%s", &DebugWork::g_dw.atelwork.iPossibleFriend, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetFriendPossibleFlag, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+}
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugWinCardPossibleLine[27] = {
+    { "\x83G\x83O\x83U\x83~\x83l\x81[\x83V\x83\x87\x83\x93 :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetCardPossibleFlag, NULL },
+    { "\x83\x81\x83^\x83\x8b\x83`\x83\x87\x83R\x83{     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetCardPossibleFlag, NULL },
+    { "\x83\x89\x83" "C\x83I\x83\x93\x83n\x81[\x83g     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetCardPossibleFlag, NULL },
+    { "\x96\xf1\x91\xa9\x82\xcc\x82\xa8\x8e\xe7\x82\xe8       :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetCardPossibleFlag, NULL },
+    { "\x89\xdf\x82\xac\x8b\x8e\x82\xe8\x82\xb5\x8ev\x82\xa2\x8fo   :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetCardPossibleFlag, NULL },
+    { "\x83" "A\x83\x8b\x83" "e\x83}\x83" "E\x83G\x83|\x83\x93   :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetCardPossibleFlag, NULL },
+    { "\x83_\x83" "C\x83" "A\x83\x82\x83\x93\x83h\x83_\x83X\x83g :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetCardPossibleFlag, NULL },
+    { "\x95\xfb\x97\x83\x82\xcc\x93V\x8eg         :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetCardPossibleFlag, NULL },
+    { "\x83t\x83@\x83" "C\x83" "A           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetCardPossibleFlag, NULL },
+    { "\x83T\x83\x93\x83_\x81[           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetCardPossibleFlag, NULL },
+    { "\x83O\x83\x89\x83r\x83" "f           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetCardPossibleFlag, NULL },
+    { "\x83X\x83g\x83" "b\x83v           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetCardPossibleFlag, NULL },
+    { "\x83G\x83" "A\x83\x8d             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetCardPossibleFlag, NULL },
+    { "\x83V\x83\x93\x83o             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000, DebugSetCardPossibleFlag, NULL },
+    { "\x83W\x81[\x83j\x81[           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000, DebugSetCardPossibleFlag, NULL },
+    { "\x83o\x83\x93\x83r             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000, DebugSetCardPossibleFlag, NULL },
+    { "\x83_\x83\x93\x83{             :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetCardPossibleFlag, NULL },
+    { "\x83" "e\x83" "B\x83\x93\x83N           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetCardPossibleFlag, NULL },
+    { "\x83\x80\x81[\x83V\x83\x85\x81[         :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetCardPossibleFlag, NULL },
+    { "\x83N\x83\x89\x83" "E\x83h           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetCardPossibleFlag, NULL },
+    { "\x83n\x83" "C\x83|\x81[\x83V\x83\x87\x83\x93     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetCardPossibleFlag, NULL },
+    { "\x83\x81\x83K\x83|\x81[\x83V\x83\x87\x83\x93     :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetCardPossibleFlag, NULL },
+    { "\x83G\x81[\x83" "e\x83\x8b           :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetCardPossibleFlag, NULL },
+    { "\x83\x81\x83K\x83G\x81[\x83" "e\x83\x8b       :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetCardPossibleFlag, NULL },
+    { "\x83G\x83\x8a\x83N\x83T\x81[         :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetCardPossibleFlag, NULL },
+    { "\x83\x89\x83X\x83g\x83G\x83\x8a\x83N\x83T\x81[   :%s", &DebugWork::g_dw.atelwork.iPossibleCard, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetCardPossibleFlag, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+}
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugWinWorldIntroLine[29] = {
+    { "\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetWorldTitleFlag, NULL },
+    { "\x83" "A\x83O\x83\x89\x83o           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetWorldTitleFlag, NULL },
+    { "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetWorldTitleFlag, NULL },
+    { "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetWorldTitleFlag, NULL },
+    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10, DebugSetWorldTitleFlag, NULL },
+    { "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20, DebugSetWorldTitleFlag, NULL },
+    { "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40, DebugSetWorldTitleFlag, NULL },
+    { "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80, DebugSetWorldTitleFlag, NULL },
+    { "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100, DebugSetWorldTitleFlag, NULL },
+    { "100\x83G\x81[\x83J\x81[        :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200, DebugSetWorldTitleFlag, NULL },
+    { "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400, DebugSetWorldTitleFlag, NULL },
+    { "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800, DebugSetWorldTitleFlag, NULL },
+    { "\x96Y\x8bp\x82\xcc\x8f\xe9           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000, DebugSetWorldTitleFlag, NULL },
+    { "\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83g\x83\x89\x83\x94\x83@\x81[\x83X       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000, DebugSetWorldTitleFlag, NULL },
+    { "\x83" "A\x83O\x83\x89\x83o           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x20000, DebugSetWorldTitleFlag, NULL },
+    { "\x83I\x83\x8a\x83\x93\x83|\x83X         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x40000, DebugSetWorldTitleFlag, NULL },
+    { "\x83\x8f\x83\x93\x83_\x81[\x83\x89\x83\x93\x83h     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x80000, DebugSetWorldTitleFlag, NULL },
+    { "\x83\x82\x83\x93\x83X\x83g\x83\x8d         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x100000, DebugSetWorldTitleFlag, NULL },
+    { "\x83n\x83\x8d\x83" "E\x83" "B\x83\x93         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x200000, DebugSetWorldTitleFlag, NULL },
+    { "\x83" "A\x83g\x83\x89\x83\x93\x83" "e\x83" "B\x83J     :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x400000, DebugSetWorldTitleFlag, NULL },
+    { "\x83l\x83o\x81[\x83\x89\x83\x93\x83h       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x800000, DebugSetWorldTitleFlag, NULL },
+    { "\x83z\x83\x8d\x83" "E\x83o\x83X\x83" "e\x83" "B\x83I\x83\x93 :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x1000000, DebugSetWorldTitleFlag, NULL },
+    { "100\x83G\x81[\x83J\x81[        :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x2000000, DebugSetWorldTitleFlag, NULL },
+    { "\x83g\x83\x8f\x83" "C\x83\x89\x83" "C\x83g       :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x4000000, DebugSetWorldTitleFlag, NULL },
+    { "\x83" "f\x83X\x83" "e\x83j\x81[         :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x8000000, DebugSetWorldTitleFlag, NULL },
+    { "\x96Y\x8bp\x82\xcc\x8f\xe9           :%s", &DebugWork::g_dw.atelwork.iWorldIntro, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0x10000000, DebugSetWorldTitleFlag, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
 }
 namespace DWTEvent {
 static BOOL DebugSetGameWorkParam(CDebugWindow* pObj, INT inY, INT inParam) {
@@ -1358,20 +1198,179 @@ static INT debugWinNPCMainlCall(CDebugWindow* pObj, INT inParam) {
     return 1;
 }
 }
-/* placeholder: rodata of the tables before _TRACE__4ATELiPCce */
-__asm__(".rdata\n");
-inline void _roPh18() {
-    TRACE("coord axis\x81" "F%s");
-    TRACE("actor pos \x81" "F%s");
-    TRACE("actor list...");
-    TRACE("\x83" "C\x83x\x83\x93\x83g\x83\x89\x83" "C\x83\x93\x81" "F%s");
-    TRACE("\x83t\x83\x89\x83O\x83`\x83" "F\x83" "b\x83N...");
-    TRACE("PosX:  %.2f");
-    TRACE("PosY:  %.2f");
-    TRACE("PosZ:  %.2f");
-    TRACE("RotX:  %.2f");
-    TRACE("RotY:  %.2f");
-    TRACE("RotZ:  %.2f");
+extern INT SCREEN_HEIGHT;
+/* Initialized at run time (SCREEN_HEIGHT, value-name lookups by the current g_dw values): these make up the
+   static initializer. */
+namespace DWTEvent {
+extern DEBUG_WINDOW_LINE debugKeyTresurLine[];
+extern DEBUG_WINDOW_LINE debugWinCardPossibleLine[];
+extern DEBUG_WINDOW_LINE debugWinEventSelectPlayerLine[];
+extern DEBUG_WINDOW_LINE debugWinFriendPossibleLine[];
+extern DEBUG_WINDOW_LINE debugWinJiminyLine[];
+extern DEBUG_WINDOW_LINE debugWinKH2CardGetLine[];
+extern DEBUG_WINDOW_LINE debugWinMovieLine[];
+extern DEBUG_WINDOW_LINE debugWinMovieLineRiku[];
+extern DEBUG_WINDOW_LINE debugWinPcSkillLine[];
+extern DEBUG_WINDOW_LINE debugWinTuEndLine[];
+extern DEBUG_WINDOW_LINE debugWinWorldIntroLine[];
+extern LPCSTR szDifficultMode[];
+extern LPCSTR szMenuKind[];
+extern LPCSTR szMiniGameKind[];
+extern LPCSTR szMiniGamePlayState[];
+extern LPCSTR szMiniGameState[];
+extern LPCSTR szPlayMode[];
+extern LPCSTR szSoundMode[];
+extern LPCSTR szStockKindName[];
+static DEBUG_WINDOW_LINE debugBtlReportLine[22] = {
+    { "\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b       \x81@:%s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, NULL, NULL },
+    { "\x83W\x83~\x83j\x81[\x92" "B\x90\xac\x97\xa6     \x81@:%d", &DebugWork::g_dw.atelwork.BtlMemo, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N \x81@:--", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@\x81@ \x81@:%d", &DebugWork::g_dw.atelwork.KillEnemyCount, 4, { 0 }, 0, 0.0f, 999999.0f, 1000.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xcc\x90\x94     \x81@:%d/24", &DebugWork::g_dw.atelwork.KeysTresur, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83J\x81[\x83h\x83u\x83\x8c\x83" "C\x83N\x89\xf1\x90\x94 \x81@:%d", &DebugWork::g_dw.atelwork.CardBreakCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x8d\xc5\x82\xe0\x8eg\x82\xc1\x82\xbd\x83X\x83g\x83" "b\x83N\x8bZ :%s", &DebugWork::g_dw.atelwork.StockKind, 4, { 0 }, 0, 0.0f, 78.0f, 1.0f, &szStockKindName[DebugWork::g_dw.atelwork.StockKind], 0, debugBtlReportCallBackParam, NULL },
+    { "        \x81@\x81@\x81@\x81@\x89\xf1\x90\x94 :%d", &DebugWork::g_dw.atelwork.StockCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x83N\x83\x8a\x83" "A\x8e\x9e\x8a\xd4\x81@\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.Hour, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x81@\x81@  \x81@\x95\xaa\x81@\x81@\x81@\x81@   :%d", &DebugWork::g_dw.atelwork.minit, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b\x81@\x81@\x81@\x81@ :%s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, NULL, NULL },
+    { "\x82" "c\x83\x8c\x83|\x81[\x83g\x92" "B\x90\xac\x97\xa6     :%d", &DebugWork::g_dw.atelwork.BtlMemo, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N   :--", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83X\x83s\x81[\x83h\x83u\x83\x8c\x83" "C\x83N     :%d", &DebugWork::g_dw.atelwork.SpeedCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.KillEnemyCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x83" "f\x83\x85\x83G\x83\x8b\x82\xcc\x8f\x9f\x97\xa6       :%5.2f", &DebugWork::g_dw.atelwork.DuelWin, 4, { 0 }, 1, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x82" "c\x83\x82\x81[\x83h\x94\xad\x93\xae\x89\xf1\x90\x94     :%d", &DebugWork::g_dw.atelwork.DarkCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
+    { "\x83N\x83\x8a\x83" "A\x8e\x9e\x8a\xd4\x81@\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.Hour, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x81@\x81@  \x81@\x95\xaa\x81@\x81@\x81@\x81@   :%d", &DebugWork::g_dw.atelwork.minit, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+static DEBUG_WINDOW_TBL debugBtlReport = { "\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 29, 12, 0, 0, debugBtlReportLine, NULL, debugBtlReportCallBack };
+static DEBUG_WINDOW_TBL debugKeyTresur = { "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xa0\x82\xaf\x82\xbd\x90\x94", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugKeyTresurLine, NULL, debugKeyTresurCallBack };
+static DEBUG_WINDOW_TBL debugWinJiminy = { "\x83W\x83~\x83j\x81[\x83\x81\x83\x82", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 25, 12, 0, 0, debugWinJiminyLine, NULL, NULL };
+static DEBUG_WINDOW_TBL debugWinKH2CardGet = { "\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 13, 12, 0, 0, debugWinKH2CardGetLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_LINE debugGameInfomationLine[12] = {
+    { "\x83v\x83\x8c\x83" "C\x83\x82\x81[\x83h         : %s", &DebugWork::g_dw.atelwork.iPlayMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szPlayMode[DebugWork::g_dw.atelwork.iPlayMode], 0, NULL, NULL },
+    { "\x83R\x83x\x83" "c\x83Q\x81[\x83\x80\x83N\x83\x8a\x83" "A   : %s", &DebugWork::g_dw.atelwork.iDistinctionClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
+    { "\x82j\x82g\x82Q\x83N\x83\x8a\x83" "A         : %s", &DebugWork::g_dw.atelwork.iGameKH2clear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
+    { "\x83\\\x83\x89\x83N\x83\x8a\x83" "A           : %s", &DebugWork::g_dw.atelwork.iSoraClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
+    { "\x83\x8a\x83N\x83N\x83\x8a\x83" "A           : %s", &DebugWork::g_dw.atelwork.iRikuClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
+    { "\x83\\\x83\x89" "EN\x83t\x83\x89\x83O         : %d", &DebugWork::g_dw.atelwork.iEnSoraEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x8a\x83NEN\x83t\x83\x89\x83O         : %d", &DebugWork::g_dw.atelwork.iEnRikuEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83KILL     : %s", &DebugWork::g_dw.atelwork.iMahluciaKilled, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
+    { "\x83v\x83\x8c\x83" "C\x82\xc8\x82\xf1\x82\xa2\x82\xc7       : %s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, debugGameInfomationParam, NULL },
+    { "\x83T\x83" "E\x83\x93\x83h\x83\x82\x81[\x83h       : %s", &DebugWork::g_dw.atelwork.iSoundMode, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szSoundMode[DebugWork::g_dw.atelwork.iSoundMode], 0, NULL, NULL },
+    { "\x83o\x83" "C\x83u\x83\x8c\x81[\x83V\x83\x87\x83\x93     : %s", &DebugWork::g_dw.atelwork.iVibrat, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, (LPCSTR*)DWT::szOnOff, 0, NULL, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+static DEBUG_WINDOW_TBL debugGameInfomation = { "\x83Q\x81[\x83\x80\x8f\xee\x95\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 13, 12, 0, 0, debugGameInfomationLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinTuEnd = { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x8fI\x97\xb9", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 7, 12, 0, 0, debugWinTuEndLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinMovieRiku = { "\x83\x80\x81[\x83r\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 20, 12, 0, 0, debugWinMovieLineRiku, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinMovie = { "\x83\x80\x81[\x83r\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 20, 12, 0, 0, debugWinMovieLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinPcSkill = { "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x83X\x83L\x83\x8b", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 6, 12, 0, 0, debugWinPcSkillLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_LINE debugWinPoohLine[40] = {
+    { "\xf9S----------\xf9V\x83Q\x81[\x83\x80\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2  :%s", &DebugWork::g_dw.atelwork.iPoohMinigameState, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMiniGamePlayState[DebugWork::g_dw.atelwork.iPoohMinigameState], 0, NULL, NULL },
+    { "\x82\xb5\x82\xe3\x82\xe9\x82\xa2    :%s", &DebugWork::g_dw.atelwork.iPoohMinigameKind, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMiniGameKind[DebugWork::g_dw.atelwork.iPoohMinigameKind], 0, NULL, NULL },
+    { "\xf9S----------\xf9V\x82\xc7\x82\xa4\x82\xc9\x82\xe3\x82\xa4\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetPoohFlag, NULL },
+    { "\x83I\x83" "E\x83\x8b      :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetPoohFlag, NULL },
+    { "\x83\x8b\x81[        :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetPoohFlag, NULL },
+    { "\x83" "C\x81[\x83\x88\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetPoohFlag, NULL },
+    { "\x83" "e\x83" "B\x83K\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 16, DebugSetPoohFlag, NULL },
+    { "\x83\x89\x83r\x83" "b\x83g    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 32, DebugSetPoohFlag, NULL },
+    { "\x83S\x81[\x83\x8b\x82P    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 64, DebugSetPoohFlag, NULL },
+    { "\x83S\x81[\x83\x8b\x82Q    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 128, DebugSetPoohFlag, NULL },
+    { "\xf9S----------\xf9V\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%s", &DebugWork::g_dw.atelwork.iPoohGamePiglet, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGamePiglet], 0, DebugSetPoohFlag, NULL },
+    { "\x83I\x83" "E\x83\x8b      :%s", &DebugWork::g_dw.atelwork.iPoohGameOwl, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameOwl], 0, DebugSetPoohFlag, NULL },
+    { "\x83\x8b\x81[        :%s", &DebugWork::g_dw.atelwork.iPoohGameRoo, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameRoo], 0, DebugSetPoohFlag, NULL },
+    { "\x83" "C\x81[\x83\x88\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohGameEeyore, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameEeyore], 0, DebugSetPoohFlag, NULL },
+    { "\x83" "e\x83" "B\x83K\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohGameTigger, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameTigger], 0, DebugSetPoohFlag, NULL },
+    { "\x83\x89\x83r\x83" "b\x83g    :%s", &DebugWork::g_dw.atelwork.iPoohGameRabbit, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameRabbit], 0, DebugSetPoohFlag, NULL },
+    { "\xf9S----------\xf9V\x83N\x83\x8a\x83" "A\x97p\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroPiglet, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroOwl, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroRoo, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroEeyore, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroTigger, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroRabbit, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\xf9S----------\xf9V\x8eg\x82\xa2\x8e\xcc\x82\xc4\x83N\x83\x8a\x83" "A\x97p\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetPiglet, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetOwl, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetRoo, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetEeyore, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetTigger, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetRabbit, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\xf9S----------\xf9V\x83n\x83" "C\x83X\x83R\x83" "A\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreOwl, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
+    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreRoo, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
+    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreEeyore, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
+    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreTigger, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
+    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreRabbit, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+static DEBUG_WINDOW_TBL debugWinPooh = { "\x83v\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 25, 12, 0, 0, debugWinPoohLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinFriendPossible = { "\x83t\x83\x8c\x83\x93\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugWinFriendPossibleLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinCardPossible = { "\x83J\x81[\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 27, 12, 0, 0, debugWinCardPossibleLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_TBL debugWinWorldIntro = { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugWinWorldIntroLine, NULL, DebugAtelWorkDef };
+static DEBUG_WINDOW_LINE debugWinAtelWorkDefLine[30] = {
+    { "\xf9S----------\xf9VWLV_STORAGE\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinWorldIntro },
+    { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinTuEnd },
+    { "\x83J\x81[\x83h\x89\xf0\x8b\xd6...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinCardPossible },
+    { "\x83t\x83\x8c\x83\x93\x83h\x89\xf0\x8b\xd6...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinFriendPossible },
+    { "\x82P\x82O\x82O\x83G\x81[\x83J\x81[...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPooh },
+    { "\x95W\x8f\x80\x83X\x83L\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPcSkill },
+    { "\x83\x80\x81[\x83r\x81[\x83\\\x83\x89...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinMovie },
+    { "\x83\x80\x81[\x83r\x81[\x83\x8a\x83N...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinMovieRiku },
+    { "\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinKH2CardGet },
+    { "\x83W\x83~\x83j\x81[\x83\x81\x83\x82...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinJiminy },
+    { "\x83Q\x81[\x83\x80\x8f\xee\x95\xf1...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugGameInfomation },
+    { "\x95\xf3\x94\xa0...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugKeyTresur },
+    { "\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugBtlReport },
+    { "\xf9S----------\xf9VWLV_GLOBAL\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "BOSS\x83" "C\x83x\x83\x93\x83g\x83X\x83" "e\x83" "b\x83v : %d", &DebugWork::g_dw.atelwork.iBossEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "\x83\x81\x83j\x83\x85\x81[\x82\xcc\x8e\xed\x97\xde       : %s", &DebugWork::g_dw.atelwork.iKindMenu, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMenuKind[DebugWork::g_dw.atelwork.iKindMenu], 0, NULL, NULL },
+    { "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x94\xf1\x95\\\x8e\xa6     : %s", &DebugWork::g_dw.atelwork.iPlayerDispOff, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "\x82" "a\x82n\x82r\x82r\x8e\x80\x96S         : %s", &DebugWork::g_dw.atelwork.iBossKilled, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "\x83" "C\x83x\x83\x93\x83g\x83X\x83L\x83" "b\x83v\x95s\x89\xc2 : %s", &DebugWork::g_dw.atelwork.iNotEventSkip, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
+    { "ATEL\x83" "C\x83x\x83\x93\x83g\x92\x86       : %s", &DebugWork::g_dw.atelwork.iIsAtelEvent, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
+    { "PC\x91\x80\x8d\xec\x95s\x89\xc2           : %s", &DebugWork::g_dw.atelwork.iNotPcControl, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "PAUSE\x8b\xd6\x8e~            : %s", &DebugWork::g_dw.atelwork.iNotPause, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86     : %s", &DebugWork::g_dw.atelwork.iIsTutorial, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
+    { "\x83\x8b\x81[\x83\x80\x88\xda\x93\xae\x8b\xd6\x8e~       : %s", &DebugWork::g_dw.atelwork.iNotRoomJump, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
+    { "\x83\x8b\x81[\x83\x80" "Creation\x8b\xd6\x8e~   : %s", &DebugWork::g_dw.atelwork.iNotRoomCreation, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
+    { "\x83n\x81[\x83g\x8fo\x82\xb3\x82\xc8\x82\xa2       : %s", &DebugWork::g_dw.atelwork.iNotHartBtl, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "BTL\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86  : %s", &DebugWork::g_dw.atelwork.iIsBtlTutorial, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b\x92\x86   : %s", &DebugWork::g_dw.atelwork.iIsWorldIntro, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+static DEBUG_WINDOW_TBL debugWinAtelWorkDef = { "ATEL WORK", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 30, 12, 0, 0, debugWinAtelWorkDefLine, NULL, DebugAtelWorkDef };
+}
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugWinEventSelectPlayerLine[6] = {
+    { "coord axis\x81" "F%s", &DebugWork::g_dw.event.iAtelCoord, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
+    { "actor pos \x81" "F%s", &DebugWork::g_dw.event.iNpcCoordDisp, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugCreateNpcWindow, NULL },
+    { "actor list...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, DebugCreateNpcWindow, &debugWinNpcList },
+    { "\x83" "C\x83x\x83\x93\x83g\x83\x89\x83" "C\x83\x93\x81" "F%s", &DebugWork::g_dw.event.iEventline, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugCreateEventLineDisp, NULL },
+    { "\x83t\x83\x89\x83O\x83`\x83" "F\x83" "b\x83N...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, &debugWinAtelWorkDef },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
+}
+namespace DWTEvent {
+static DEBUG_WINDOW_TBL debugWinEventPlayer = { "ATEL\x81@CONFIG", -206, -(SCREEN_HEIGHT >> 1) + 50, 12, 16, 14, 0, 0, debugWinEventSelectPlayerLine, NULL, debugWinNPCMainlCall };
+}
+namespace DWTEvent {
+DEBUG_WINDOW_LINE debugNpcInfoLine[7] = {
+    { "PosX:  %.2f", &DebugWork::g_dw.event.vPos, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "PosY:  %.2f", &DebugWork::g_dw.event.vPos.y, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "PosZ:  %.2f", &DebugWork::g_dw.event.vPos.z, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "RotX:  %.2f", &DebugWork::g_dw.event.vRot, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "RotY:  %.2f", &DebugWork::g_dw.event.vRot.y, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { "RotZ:  %.2f", &DebugWork::g_dw.event.vRot.z, 4, { 0 }, 3, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
+};
 }
 #include "Form/Menu/TitleReportDllStarter.h"
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
@@ -6116,155 +6115,5 @@ void CEventLineDisp::disp() {
         }
     }
 }
-/* Initialized at run time (SCREEN_HEIGHT, value-name lookups by the current g_dw values): these make up the
-   static initializer. */
-namespace DWTEvent {
-extern DEBUG_WINDOW_LINE debugKeyTresurLine[];
-extern DEBUG_WINDOW_LINE debugWinCardPossibleLine[];
-extern DEBUG_WINDOW_LINE debugWinEventSelectPlayerLine[];
-extern DEBUG_WINDOW_LINE debugWinFriendPossibleLine[];
-extern DEBUG_WINDOW_LINE debugWinJiminyLine[];
-extern DEBUG_WINDOW_LINE debugWinKH2CardGetLine[];
-extern DEBUG_WINDOW_LINE debugWinMovieLine[];
-extern DEBUG_WINDOW_LINE debugWinMovieLineRiku[];
-extern DEBUG_WINDOW_LINE debugWinPcSkillLine[];
-extern DEBUG_WINDOW_LINE debugWinTuEndLine[];
-extern DEBUG_WINDOW_LINE debugWinWorldIntroLine[];
-extern LPCSTR szDifficultMode[];
-extern LPCSTR szMenuKind[];
-extern LPCSTR szMiniGameKind[];
-extern LPCSTR szMiniGamePlayState[];
-extern LPCSTR szMiniGameState[];
-extern LPCSTR szPlayMode[];
-extern LPCSTR szSoundMode[];
-extern LPCSTR szStockKindName[];
-static DEBUG_WINDOW_LINE debugBtlReportLine[22] = {
-    { "\xf9S----------\xf9V\x83\\\x83\x89\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b       \x81@:%s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, NULL, NULL },
-    { "\x83W\x83~\x83j\x81[\x92" "B\x90\xac\x97\xa6     \x81@:%d", &DebugWork::g_dw.atelwork.BtlMemo, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N \x81@:--", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@\x81@ \x81@:%d", &DebugWork::g_dw.atelwork.KillEnemyCount, 4, { 0 }, 0, 0.0f, 999999.0f, 1000.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xcc\x90\x94     \x81@:%d/24", &DebugWork::g_dw.atelwork.KeysTresur, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83J\x81[\x83h\x83u\x83\x8c\x83" "C\x83N\x89\xf1\x90\x94 \x81@:%d", &DebugWork::g_dw.atelwork.CardBreakCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x8d\xc5\x82\xe0\x8eg\x82\xc1\x82\xbd\x83X\x83g\x83" "b\x83N\x8bZ :%s", &DebugWork::g_dw.atelwork.StockKind, 4, { 0 }, 0, 0.0f, 78.0f, 1.0f, &szStockKindName[DebugWork::g_dw.atelwork.StockKind], 0, debugBtlReportCallBackParam, NULL },
-    { "        \x81@\x81@\x81@\x81@\x89\xf1\x90\x94 :%d", &DebugWork::g_dw.atelwork.StockCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x83N\x83\x8a\x83" "A\x8e\x9e\x8a\xd4\x81@\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.Hour, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x81@\x81@  \x81@\x95\xaa\x81@\x81@\x81@\x81@   :%d", &DebugWork::g_dw.atelwork.minit, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\xf9S----------\xf9V\x83\x8a\x83N\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83Q\x81[\x83\x80\x83\x8c\x83x\x83\x8b\x81@\x81@\x81@\x81@ :%s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, NULL, NULL },
-    { "\x82" "c\x83\x8c\x83|\x81[\x83g\x92" "B\x90\xac\x97\xa6     :%d", &DebugWork::g_dw.atelwork.BtlMemo, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83R\x83\x8c\x83N\x83^\x81[\x83Y\x83\x89\x83\x93\x83N   :--", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83X\x83s\x81[\x83h\x83u\x83\x8c\x83" "C\x83N     :%d", &DebugWork::g_dw.atelwork.SpeedCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x93|\x82\xb5\x82\xbd\x93G\x82\xcc\x90\x94\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.KillEnemyCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x83" "f\x83\x85\x83G\x83\x8b\x82\xcc\x8f\x9f\x97\xa6       :%5.2f", &DebugWork::g_dw.atelwork.DuelWin, 4, { 0 }, 1, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x82" "c\x83\x82\x81[\x83h\x94\xad\x93\xae\x89\xf1\x90\x94     :%d", &DebugWork::g_dw.atelwork.DarkCount, 4, { 0 }, 0, 0.0f, 99999.0f, 100.0f, NULL, 0, debugBtlReportCallBackParam, NULL },
-    { "\x83N\x83\x8a\x83" "A\x8e\x9e\x8a\xd4\x81@\x81@\x81@     :%d", &DebugWork::g_dw.atelwork.Hour, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x81@\x81@  \x81@\x95\xaa\x81@\x81@\x81@\x81@   :%d", &DebugWork::g_dw.atelwork.minit, 4, { 0 }, 0, 0.0f, 1.0f, 0.0f, NULL, 0, NULL, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-static DEBUG_WINDOW_TBL debugBtlReport = { "\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 29, 12, 0, 0, debugBtlReportLine, NULL, debugBtlReportCallBack };
-static DEBUG_WINDOW_TBL debugKeyTresur = { "\x96\xa2\x92m\x82\xc8\x82\xe9\x95\xf3\x82\xa0\x82\xaf\x82\xbd\x90\x94", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugKeyTresurLine, NULL, debugKeyTresurCallBack };
-static DEBUG_WINDOW_TBL debugWinJiminy = { "\x83W\x83~\x83j\x81[\x83\x81\x83\x82", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 25, 12, 0, 0, debugWinJiminyLine, NULL, NULL };
-static DEBUG_WINDOW_TBL debugWinKH2CardGet = { "\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 13, 12, 0, 0, debugWinKH2CardGetLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_LINE debugGameInfomationLine[12] = {
-    { "\x83v\x83\x8c\x83" "C\x83\x82\x81[\x83h         : %s", &DebugWork::g_dw.atelwork.iPlayMode, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szPlayMode[DebugWork::g_dw.atelwork.iPlayMode], 0, NULL, NULL },
-    { "\x83R\x83x\x83" "c\x83Q\x81[\x83\x80\x83N\x83\x8a\x83" "A   : %s", &DebugWork::g_dw.atelwork.iDistinctionClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
-    { "\x82j\x82g\x82Q\x83N\x83\x8a\x83" "A         : %s", &DebugWork::g_dw.atelwork.iGameKH2clear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
-    { "\x83\\\x83\x89\x83N\x83\x8a\x83" "A           : %s", &DebugWork::g_dw.atelwork.iSoraClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
-    { "\x83\x8a\x83N\x83N\x83\x8a\x83" "A           : %s", &DebugWork::g_dw.atelwork.iRikuClear, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
-    { "\x83\\\x83\x89" "EN\x83t\x83\x89\x83O         : %d", &DebugWork::g_dw.atelwork.iEnSoraEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x8a\x83NEN\x83t\x83\x89\x83O         : %d", &DebugWork::g_dw.atelwork.iEnRikuEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83KILL     : %s", &DebugWork::g_dw.atelwork.iMahluciaKilled, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, debugGameInfomationParam, NULL },
-    { "\x83v\x83\x8c\x83" "C\x82\xc8\x82\xf1\x82\xa2\x82\xc7       : %s", &DebugWork::g_dw.atelwork.iPlayDifficultMode, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szDifficultMode[DebugWork::g_dw.atelwork.iPlayDifficultMode], 0, debugGameInfomationParam, NULL },
-    { "\x83T\x83" "E\x83\x93\x83h\x83\x82\x81[\x83h       : %s", &DebugWork::g_dw.atelwork.iSoundMode, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szSoundMode[DebugWork::g_dw.atelwork.iSoundMode], 0, NULL, NULL },
-    { "\x83o\x83" "C\x83u\x83\x8c\x81[\x83V\x83\x87\x83\x93     : %s", &DebugWork::g_dw.atelwork.iVibrat, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, (LPCSTR*)DWT::szOnOff, 0, NULL, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-static DEBUG_WINDOW_TBL debugGameInfomation = { "\x83Q\x81[\x83\x80\x8f\xee\x95\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 13, 12, 0, 0, debugGameInfomationLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinTuEnd = { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x8fI\x97\xb9", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 7, 12, 0, 0, debugWinTuEndLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinMovieRiku = { "\x83\x80\x81[\x83r\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 20, 12, 0, 0, debugWinMovieLineRiku, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinMovie = { "\x83\x80\x81[\x83r\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 20, 12, 0, 0, debugWinMovieLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinPcSkill = { "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x83X\x83L\x83\x8b", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 6, 12, 0, 0, debugWinPcSkillLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_LINE debugWinPoohLine[40] = {
-    { "\xf9S----------\xf9V\x83Q\x81[\x83\x80\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2  :%s", &DebugWork::g_dw.atelwork.iPoohMinigameState, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMiniGamePlayState[DebugWork::g_dw.atelwork.iPoohMinigameState], 0, NULL, NULL },
-    { "\x82\xb5\x82\xe3\x82\xe9\x82\xa2    :%s", &DebugWork::g_dw.atelwork.iPoohMinigameKind, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMiniGameKind[DebugWork::g_dw.atelwork.iPoohMinigameKind], 0, NULL, NULL },
-    { "\xf9S----------\xf9V\x82\xc7\x82\xa4\x82\xc9\x82\xe3\x82\xa4\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 1, DebugSetPoohFlag, NULL },
-    { "\x83I\x83" "E\x83\x8b      :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 2, DebugSetPoohFlag, NULL },
-    { "\x83\x8b\x81[        :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 4, DebugSetPoohFlag, NULL },
-    { "\x83" "C\x81[\x83\x88\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 8, DebugSetPoohFlag, NULL },
-    { "\x83" "e\x83" "B\x83K\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 16, DebugSetPoohFlag, NULL },
-    { "\x83\x89\x83r\x83" "b\x83g    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 32, DebugSetPoohFlag, NULL },
-    { "\x83S\x81[\x83\x8b\x82P    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 64, DebugSetPoohFlag, NULL },
-    { "\x83S\x81[\x83\x8b\x82Q    :%s", &DebugWork::g_dw.atelwork.iPoohMiniGameIntro, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 128, DebugSetPoohFlag, NULL },
-    { "\xf9S----------\xf9V\x82\xb6\x82\xe5\x82\xa4\x82\xbd\x82\xa2\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%s", &DebugWork::g_dw.atelwork.iPoohGamePiglet, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGamePiglet], 0, DebugSetPoohFlag, NULL },
-    { "\x83I\x83" "E\x83\x8b      :%s", &DebugWork::g_dw.atelwork.iPoohGameOwl, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameOwl], 0, DebugSetPoohFlag, NULL },
-    { "\x83\x8b\x81[        :%s", &DebugWork::g_dw.atelwork.iPoohGameRoo, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameRoo], 0, DebugSetPoohFlag, NULL },
-    { "\x83" "C\x81[\x83\x88\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohGameEeyore, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameEeyore], 0, DebugSetPoohFlag, NULL },
-    { "\x83" "e\x83" "B\x83K\x81[    :%s", &DebugWork::g_dw.atelwork.iPoohGameTigger, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameTigger], 0, DebugSetPoohFlag, NULL },
-    { "\x83\x89\x83r\x83" "b\x83g    :%s", &DebugWork::g_dw.atelwork.iPoohGameRabbit, 1, { 0 }, 0, 0.0f, 3.0f, 1.0f, &szMiniGameState[DebugWork::g_dw.atelwork.iPoohGameRabbit], 0, DebugSetPoohFlag, NULL },
-    { "\xf9S----------\xf9V\x83N\x83\x8a\x83" "A\x97p\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroPiglet, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroOwl, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroRoo, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroEeyore, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroTigger, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroRabbit, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\xf9S----------\xf9V\x8eg\x82\xa2\x8e\xcc\x82\xc4\x83N\x83\x8a\x83" "A\x97p\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83s\x83O\x83\x8c\x83" "b\x83g  :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetPiglet, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetOwl, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetRoo, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetEeyore, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetTigger, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohClearIntoroResetRabbit, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\xf9S----------\xf9V\x83n\x83" "C\x83X\x83R\x83" "A\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83I\x83" "E\x83\x8b      :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreOwl, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
-    { "\x83\x8b\x81[        :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreRoo, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
-    { "\x83" "C\x81[\x83\x88\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreEeyore, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
-    { "\x83" "e\x83" "B\x83K\x81[    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreTigger, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
-    { "\x83\x89\x83r\x83" "b\x83g    :%d", &DebugWork::g_dw.atelwork.iPoohHiScoreRabbit, 4, { 0 }, 0, 0.0f, 10000.0f, 100.0f, NULL, 0, DebugSetPoohFlag, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-static DEBUG_WINDOW_TBL debugWinPooh = { "\x83v\x81[", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 25, 12, 0, 0, debugWinPoohLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinFriendPossible = { "\x83t\x83\x8c\x83\x93\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugWinFriendPossibleLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinCardPossible = { "\x83J\x81[\x83h\x82\xa9\x82\xa2\x82\xab\x82\xf1", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 27, 12, 0, 0, debugWinCardPossibleLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinWorldIntro = { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b", -106, -(SCREEN_HEIGHT >> 1) + 150, 15, 29, 12, 0, 0, debugWinWorldIntroLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_LINE debugWinAtelWorkDefLine[30] = {
-    { "\xf9S----------\xf9VWLV_STORAGE\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinWorldIntro },
-    { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinTuEnd },
-    { "\x83J\x81[\x83h\x89\xf0\x8b\xd6...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinCardPossible },
-    { "\x83t\x83\x8c\x83\x93\x83h\x89\xf0\x8b\xd6...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinFriendPossible },
-    { "\x82P\x82O\x82O\x83G\x81[\x83J\x81[...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPooh },
-    { "\x95W\x8f\x80\x83X\x83L\x83\x8b...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPcSkill },
-    { "\x83\x80\x81[\x83r\x81[\x83\\\x83\x89...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinMovie },
-    { "\x83\x80\x81[\x83r\x81[\x83\x8a\x83N...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinMovieRiku },
-    { "\x82j\x82g\x82Q\x83J\x81[\x83h\x93\xfc\x8e\xe8...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinKH2CardGet },
-    { "\x83W\x83~\x83j\x81[\x83\x81\x83\x82...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinJiminy },
-    { "\x83Q\x81[\x83\x80\x8f\xee\x95\xf1...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugGameInfomation },
-    { "\x95\xf3\x94\xa0...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugKeyTresur },
-    { "\x83o\x83g\x83\x8b\x83\x8c\x83|\x81[\x83g...", &CDebugWindow::none, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugBtlReport },
-    { "\xf9S----------\xf9VWLV_GLOBAL\xf9S---------", &CDebugWindow::none, 1, { 0 }, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "BOSS\x83" "C\x83x\x83\x93\x83g\x83X\x83" "e\x83" "b\x83v : %d", &DebugWork::g_dw.atelwork.iBossEventStep, 4, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-    { "\x83\x81\x83j\x83\x85\x81[\x82\xcc\x8e\xed\x97\xde       : %s", &DebugWork::g_dw.atelwork.iKindMenu, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, &szMenuKind[DebugWork::g_dw.atelwork.iKindMenu], 0, NULL, NULL },
-    { "\x83v\x83\x8c\x83" "C\x83\x84\x81[\x94\xf1\x95\\\x8e\xa6     : %s", &DebugWork::g_dw.atelwork.iPlayerDispOff, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "\x82" "a\x82n\x82r\x82r\x8e\x80\x96S         : %s", &DebugWork::g_dw.atelwork.iBossKilled, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "\x83" "C\x83x\x83\x93\x83g\x83X\x83L\x83" "b\x83v\x95s\x89\xc2 : %s", &DebugWork::g_dw.atelwork.iNotEventSkip, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
-    { "ATEL\x83" "C\x83x\x83\x93\x83g\x92\x86       : %s", &DebugWork::g_dw.atelwork.iIsAtelEvent, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
-    { "PC\x91\x80\x8d\xec\x95s\x89\xc2           : %s", &DebugWork::g_dw.atelwork.iNotPcControl, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "PAUSE\x8b\xd6\x8e~            : %s", &DebugWork::g_dw.atelwork.iNotPause, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86     : %s", &DebugWork::g_dw.atelwork.iIsTutorial, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
-    { "\x83\x8b\x81[\x83\x80\x88\xda\x93\xae\x8b\xd6\x8e~       : %s", &DebugWork::g_dw.atelwork.iNotRoomJump, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
-    { "\x83\x8b\x81[\x83\x80" "Creation\x8b\xd6\x8e~   : %s", &DebugWork::g_dw.atelwork.iNotRoomCreation, 1, { 0 }, 0, 0.0f, 0.0f, 0.0f, (LPCSTR*)DWT::szOffOn, 0, NULL, NULL },
-    { "\x83n\x81[\x83g\x8fo\x82\xb3\x82\xc8\x82\xa2       : %s", &DebugWork::g_dw.atelwork.iNotHartBtl, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "BTL\x83`\x83\x85\x81[\x83g\x83\x8a\x83" "A\x83\x8b\x92\x86  : %s", &DebugWork::g_dw.atelwork.iIsBtlTutorial, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { "\x83\x8f\x81[\x83\x8b\x83h\x83^\x83" "C\x83g\x83\x8b\x92\x86   : %s", &DebugWork::g_dw.atelwork.iIsWorldIntro, 1, { 0 }, 0, 0.0f, 1.0f, 1.0f, (LPCSTR*)DWT::szOffOn, 0, DebugSetGameWorkParam, NULL },
-    { NULL, NULL, 0, { 0 }, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL },
-};
-static DEBUG_WINDOW_TBL debugWinAtelWorkDef = { "ATEL WORK", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 30, 12, 0, 0, debugWinAtelWorkDefLine, NULL, DebugAtelWorkDef };
-static DEBUG_WINDOW_TBL debugWinEventPlayer = { "ATEL\x81@CONFIG", -206, -(SCREEN_HEIGHT >> 1) + 50, 12, 16, 14, 0, 0, debugWinEventSelectPlayerLine, NULL, debugWinNPCMainlCall };
-}
 
-// SOURCE DATA: .rodata .bss
+// SOURCE DATA: .data .rodata .bss
