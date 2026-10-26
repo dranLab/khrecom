@@ -139,8 +139,11 @@ private:
 
 public:
     void init();
+    INT setup(const CHAR* inSeqName, const CHAR* inFileName, const INT* inLayNoTbl, INT inSeqNum,
+              const LayoutDataParam* inSeqNoTbl, INT inLayerLevel);
     void setState(INT inState);
     INT getState();
+    void setStateFlag(INT inOn, INT inOff) { m_uiStateFlags = (m_uiStateFlags & ~inOff) | inOn; }
     UINT isStateFlag(UINT inFlags) { return m_uiStateFlags & inFlags; }
     D2::C2DSeqCtrl* getSeqCtrl(INT inSeqNo);
     D2::C2DFnt* getFnt(INT inSeqNo);
@@ -683,14 +686,35 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DLay
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L003262A8\n.word .L00326188\n.word .L003261B0\n.word .L003262A8\n.word .L003261E8\n.word .L00326210\n.word .L003262A8\n.word .L00326248\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__13CMemo2DLayout);
-/* placeholder: rodata of setup__13CMemo2DLayoutPCcT1PCiiPC15LayoutDataParami */
-__asm__(".rdata\n");
-inline void _roPh3() {
-    TRACE(__FILE__ "(2877)");
-    TRACE(__FILE__ "(2881)");
-    TRACE(__FILE__ "(2894)");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+INT CMemo2DLayout::setup(const CHAR* inSeqName, const CHAR* inFileName, const INT* inLayNoTbl, INT inSeqNum,
+                         const LayoutDataParam* inSeqNoTbl, INT inLayerLevel) {
+    INT rval = FALSE;
+    m_pLayoutFileName = (LPCTSTR)inFileName;
+    m_pLayoutName = (LPCTSTR)inSeqName;
+    m_pLayoutNoTbl = (INT*)com_malloc_d(sizeof(INT) * 3, __FILE__ "(2877)", -1);
+    for (INT i = 0; i < 3; i++) m_pLayoutNoTbl[i] = inLayNoTbl[i];
+    m_iSeqNum = inSeqNum;
+    size_t size = sizeof(LayoutDataParam) * inSeqNum;
+    m_pSeqNoTbl = (LayoutDataParam*)com_malloc_d(size, __FILE__ "(2881)",
+                                                 ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }));
+    if (m_pSeqNoTbl) {
+        for (INT i = 0; i < m_iSeqNum; i++) {
+            m_pSeqNoTbl[i].In = inSeqNoTbl[i].In;
+            m_pSeqNoTbl[i].Loop = inSeqNoTbl[i].Loop;
+            m_pSeqNoTbl[i].Out = inSeqNoTbl[i].Out;
+            m_pSeqNoTbl[i].XPosi = inSeqNoTbl[i].XPosi;
+            m_pSeqNoTbl[i].YPosi = inSeqNoTbl[i].YPosi;
+            m_pSeqNoTbl[i].Layer = inSeqNoTbl[i].Layer;
+            m_pSeqNoTbl[i].CTCode = inSeqNoTbl[i].CTCode;
+        }
+        rval = TRUE;
+    }
+    m_pSeqCodeTbl = (INT*)com_malloc_d(sizeof(INT) * m_iSeqNum, __FILE__ "(2894)", -1);
+    setStateFlag(0x20, 0);
+    m_iLayerLevel = inLayerLevel;
+    return rval;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setup__13CMemo2DLayoutPCcT1PCiiPC15LayoutDataParami);
 void CMemo2DLayout::init() {
     if (m_uiStateFlags & 0x20) initialize();
 }
