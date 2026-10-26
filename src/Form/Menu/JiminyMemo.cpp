@@ -292,6 +292,7 @@ private:
                              INT inLayoutNo, INT inLayoutSeqNo);
     void replaceNoteListMark(D2::C2DSeqCtrl** inMark, INT inFlagId, INT inListNum, INT inListAllNum, INT inStartNo,
                              INT inLayoutNo, INT inLayoutSeqNo);
+    void getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork);
     void setPlateState(INT inKind, INT inState);
     INT getPlateState(INT inKind);
     void setPlateText(INT inKind, INT inCTNo);
@@ -1211,7 +1212,26 @@ void CJiminyMemo::setPlateText(INT inKind, INT inCTNo) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPlateNumSeq__11CJiminyMemoii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getMenuContentFlag__11CJiminyMemoiiPiT3);
+void CJiminyMemo::getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork) {
+    *inFlagWork = 0;
+    for (INT i = 0; i < inNum; i++) {
+        if (CJiminyMemoFlag::isContentFlag(inFlagId + i, 4)) {
+            *inFlagWork |= 4;
+        } else if (CJiminyMemoFlag::isContentFlag(inFlagId + i, 2)) {
+            *inFlagWork |= 2;
+        } else if (CJiminyMemoFlag::isContentFlag(inFlagId + i, 1)) {
+            *inFlagWork = 1;
+            break;
+        }
+    }
+    *inCompWork = TRUE;
+    for (INT i = 0; i < inNum; i++) {
+        if (!CJiminyMemoFlag::isContentOpen(inFlagId + i)) {
+            *inCompWork = FALSE;
+            break;
+        }
+    }
+}
 INT CJiminyMemo::getPrevContentId(INT inEventFlagStartId, INT inEventFlagNum, INT inCurrentNo) {
     INT rval = -1;
     for (INT i = inCurrentNo - 1; i >= 0; i--) {
