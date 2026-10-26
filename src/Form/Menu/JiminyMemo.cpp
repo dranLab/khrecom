@@ -4621,11 +4621,6 @@ namespace JiminyMemo {
 extern INT CharaNumTbl[];
 extern INT RikuCharaNumTbl[];
 }
-/* Parked: 4 lines: the prologue issues li 0x17 (eventFlagId) before li 0x7F, the original after; everything
-   else matches (the contentCard recipe with charaNumTbl, getText(ctNo + i), next 9 + C1/C2 resource load).
-   tried: ternary polarity (isModeJiminyMemo ? 0x17 : 0x7F gives movz), if-statement form, declaration order;
-   tools/permuter.py 4 min starts at score 1 in its copy (TU-context sensitive, see contentCardSelect). */
-#if 0
 namespace JiminyMemo {
 namespace Chara {
 extern INT NoteSeqData[5];
@@ -4635,7 +4630,7 @@ extern FVECTOR NoteScrollBarPosi;
 }
 }
 void CJiminyMemo::contentChara() {
-    INT eventFlagId = isModeDReport() ? 0x7F : 0x17;
+    const INT eventFlagId = isModeJiminyMemo() ? 0x17 : 0x7F;
     BOOL bCursorShift = FALSE;
     switch (getContentStep()) {
     case 20: {
@@ -4883,22 +4878,6 @@ void CJiminyMemo::contentChara() {
         }
     }
 }
-#else
-/* placeholder: rodata of contentChara__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh32() {
-    TRACE(__FILE__ "(8341)");
-    TRACE(__FILE__ "(8348)");
-    TRACE(__FILE__ "(8357)");
-}
-__asm__(".rdata\n.align 4\n.word .L00331F18\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L003325A0\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n");
-__asm__(".word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332634\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332820\n.word .L00332A30\n");
-__asm__(".word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332918\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n");
-__asm__(".word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L0033293C\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n");
-__asm__(".word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L0033293C\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n.word .L00332A30\n");
-__asm__(".word .L00332A30\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentChara__11CJiminyMemo);
-#endif
 /* Parked: 8 lines: in both arms of step 20 the original stores titleNo (stack spill) before loading
    listNum, ours after (same family as contentCardSelect). Everything else matches.
    tried: titleNo/listNum statement order, eventFlagOffset = 0 as its own statement (line 8669) before or after
