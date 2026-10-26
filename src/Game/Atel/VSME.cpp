@@ -368,7 +368,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", AtelEventSkip__Q24ATE
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", close_dest_se__Fi);
 void WinOpenSE(INT ctd) {}
 void WinCloseSE() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", dispActorTag__FiPCQ24ATEL5Actor);
+static void dispActorTag(INT nMax, const Actor* pTbl) {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", __11CActorDebugP5CTask);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _$_11CActorDebug);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", main__11CActorDebug);
