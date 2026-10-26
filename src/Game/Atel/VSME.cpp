@@ -548,10 +548,85 @@ static BOOL DebugSetPcSkillFlag(CDebugWindow* pObj, INT inY, INT inParam) {
 }
 /* the asm .data (debug window tables) refers to it by name until the data comes from source */
 __asm__(".globl DebugSetPcSkillFlag__8DWTEventP12CDebugWindowii");
-/* placeholder: rodata of DebugSetSoraMovieFlag__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L00242088\n.word .L00242090\n.word .L00242098\n.word .L002420A0\n.word .L002420A8\n.word .L002420B0\n.word .L002420B8\n.word .L002420C0\n.word .L002420C8\n.word .L002420D0\n.word .L002420D8\n.word .L002420E0\n.word .L002420E8\n.word .L002420F0\n.word .L002420F8\n.word .L00242100\n.word .L00242108\n.word .L00242114\n.word .L00242120\n.word .L0024212C\n.word .L00242138\n.word .L00242144\n.word .L00242150\n.word .L0024215C\n.word .L00242168\n.word .L00242174\n.word .L00242180\n.word .L0024218C\n.word .L00242198\n.word .L002421A4\n.word .L002421B0\n.word .L002421BC\n.word .L002421C8\n.word .L002421D0\n.word .L002421D8\n.word .L002421E0\n.word .L002421E8\n.word .L002421F0\n.word .L002421F8\n.word .L00242200\n.word .L00242208\n.word .L00242210\n.word .L00242218\n.word .L00242220\n.word .L00242228\n.word .L00242230\n.word .L00242238\n.word .L00242240\n.word .L00242248\n.word .L00242250\n.word .L00242258\n.word .L00242260\n.word .L00242268\n.word .L00242270\n.word .L00242278\n.word .L00242280\n.word .L00242288\n.word .L00242290\n.word .L00242298\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugSetSoraMovieFlag__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL DebugSetSoraMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        INT movie0 = CGameWork::getInt(0, 0x27);
+        INT movie1 = CGameWork::getInt(0, 0x28);
+        INT movie2 = CGameWork::getInt(0, 0x29);
+        switch (inY) {
+        case 0: movie0 ^= 0x1; break;
+        case 1: movie0 ^= 0x2; break;
+        case 2: movie0 ^= 0x4; break;
+        case 3: movie0 ^= 0x8; break;
+        case 4: movie0 ^= 0x10; break;
+        case 5: movie0 ^= 0x20; break;
+        case 6: movie0 ^= 0x40; break;
+        case 7: movie0 ^= 0x80; break;
+        case 8: movie0 ^= 0x100; break;
+        case 9: movie0 ^= 0x200; break;
+        case 10: movie0 ^= 0x400; break;
+        case 11: movie0 ^= 0x800; break;
+        case 12: movie0 ^= 0x1000; break;
+        case 13: movie0 ^= 0x2000; break;
+        case 14: movie0 ^= 0x4000; break;
+        case 15: movie0 ^= 0x8000; break;
+        case 16: movie0 ^= 0x10000; break;
+        case 17: movie0 ^= 0x20000; break;
+        case 18: movie0 ^= 0x40000; break;
+        case 19: movie0 ^= 0x80000; break;
+        case 20: movie0 ^= 0x100000; break;
+        case 21: movie0 ^= 0x200000; break;
+        case 22: movie0 ^= 0x400000; break;
+        case 23: movie0 ^= 0x800000; break;
+        case 24: movie0 ^= 0x1000000; break;
+        case 25: movie0 ^= 0x2000000; break;
+        case 26: movie0 ^= 0x4000000; break;
+        case 27: movie0 ^= 0x8000000; break;
+        case 28: movie0 ^= 0x10000000; break;
+        case 29: movie0 ^= 0x20000000; break;
+        case 30: movie0 ^= 0x40000000; break;
+        case 31: movie0 ^= 0x80000000; break;
+        case 32: movie1 ^= 0x1; break;
+        case 33: movie1 ^= 0x2; break;
+        case 34: movie1 ^= 0x4; break;
+        case 35: movie1 ^= 0x8; break;
+        case 36: movie1 ^= 0x10; break;
+        case 37: movie1 ^= 0x20; break;
+        case 38: movie1 ^= 0x40; break;
+        case 39: movie1 ^= 0x80; break;
+        case 40: movie1 ^= 0x100; break;
+        case 41: movie1 ^= 0x200; break;
+        case 42: movie1 ^= 0x400; break;
+        case 43: movie1 ^= 0x800; break;
+        case 44: movie1 ^= 0x1000; break;
+        case 45: movie1 ^= 0x2000; break;
+        case 46: movie1 ^= 0x4000; break;
+        case 47: movie1 ^= 0x8000; break;
+        case 48: movie1 ^= 0x10000; break;
+        case 49: movie1 ^= 0x20000; break;
+        case 50: movie1 ^= 0x40000; break;
+        case 51: movie1 ^= 0x80000; break;
+        case 52: movie1 ^= 0x100000; break;
+        case 53: movie1 ^= 0x200000; break;
+        case 54: movie1 ^= 0x400000; break;
+        case 55: movie1 ^= 0x800000; break;
+        case 56: movie1 ^= 0x1000000; break;
+        case 57: movie1 ^= 0x2000000; break;
+        case 58: movie1 ^= 0x4000000; break;
+        }
+        DebugWork::g_dw.atelwork.iSoraMovie0 = movie0;
+        CGameWork::setInt(0, 0x27, movie0);
+        DebugWork::g_dw.atelwork.iSoraMovie1 = movie1;
+        CGameWork::setInt(0, 0x28, movie1);
+        DebugWork::g_dw.atelwork.iSoraMovie2 = movie2;
+        CGameWork::setInt(0, 0x29, movie2);
+    }
+    return 1;
+}
+}
+/* the asm .data (debug window tables) refers to it by name until the data comes from source */
+__asm__(".globl DebugSetSoraMovieFlag__8DWTEventP12CDebugWindowii");
 namespace DWTEvent {
 static BOOL DebugSetRikuMovieFlag(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x180) {
