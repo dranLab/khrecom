@@ -521,8 +521,35 @@ INT JiminyMemo::getCT0014Code(USHORT inLow) {
 void JiminyMemo::playSE(INT inSENo) {
     CSound::playSE(inSENo, -1, 64);
 }
-/* placeholder: getOpenCloseStringData's local static (its string comes right after DefaultMessage's) */
-CHAR* _phDefaultStr __asm__("pDefaultStr.3528") = "\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96";
+CHAR* JiminyMemo::getOpenCloseStringData(INT inCTNo, BOOL inIsFlag) {
+    CHAR* rval;
+    if (inIsFlag) {
+        rval = CCtdMan::getText(inCTNo);
+    } else {
+        static CHAR* pDefaultStr = "\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96";
+        CHAR* pCloseStr = CCtdMan::getText(0x700003);
+        if (!pCloseStr) pCloseStr = pDefaultStr;
+        INT closeLen = strlen(pCloseStr);
+        if (!closeLen) {
+            pCloseStr = pDefaultStr;
+            closeLen = strlen(pCloseStr);
+        }
+        CHAR* pMessStr = CCtdMan::getText(inCTNo);
+        if (!pMessStr) {
+            rval = pCloseStr + (closeLen - 2);
+        } else {
+            INT messLen = strlen(pMessStr);
+            if (!messLen) {
+                rval = pCloseStr + (closeLen - 4);
+            } else if (closeLen < messLen) {
+                rval = pCloseStr;
+            } else {
+                rval = pCloseStr + (closeLen - messLen);
+            }
+        }
+    }
+    return rval;
+}
 void (CJiminyMemo::*CJiminyMemo::m_pContentTbl[11])() = {
     &CJiminyMemo::contentMenu,
     &CJiminyMemo::contentStory,
@@ -536,7 +563,6 @@ void (CJiminyMemo::*CJiminyMemo::m_pContentTbl[11])() = {
     &CJiminyMemo::contentCharaSelect,
     &CJiminyMemo::contentCharaView
 };
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getOpenCloseStringData__10JiminyMemoii);
 BOOL JiminyMemo::is100AcreGoodEnding() {
     return CGameWork::getInt(0, 0x23) & 0x40;
 }
