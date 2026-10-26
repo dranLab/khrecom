@@ -38,6 +38,11 @@ public:
     static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inSeqNo, FVECTOR& outPos, INT inMode);
 };
 }
+class CRsrcDB { /* PARTIAL: System/RsrcDB.h would add RsrcData.h's string, which this unit's .rodata lacks */
+public:
+    static void removeGroup(INT nGroupID, INT nMemberID);
+    static BOOL hasRsrcGroup(INT nGroupID, INT nMemberID);
+};
 
 
 namespace JiminyMemo {
@@ -47,6 +52,7 @@ INT getCT0014Code(USHORT inLow);
 void playSE(INT inSENo);
 BOOL is100AcreGoodEnding();
 CHAR* getOpenCloseStringData(INT inCTNo, BOOL inIsFlag);
+extern INT RsrcId[2];
 }
 
 class CTexAnm;
@@ -133,8 +139,11 @@ private:
 
 public:
     void init();
+    INT setup(const CHAR* inSeqName, const CHAR* inFileName, const INT* inLayNoTbl, INT inSeqNum,
+              const LayoutDataParam* inSeqNoTbl, INT inLayerLevel);
     void setState(INT inState);
     INT getState();
+    void setStateFlag(INT inOn, INT inOff) { m_uiStateFlags = (m_uiStateFlags & ~inOff) | inOn; }
     UINT isStateFlag(UINT inFlags) { return m_uiStateFlags & inFlags; }
     D2::C2DSeqCtrl* getSeqCtrl(INT inSeqNo);
     D2::C2DFnt* getFnt(INT inSeqNo);
@@ -147,6 +156,21 @@ public:
 struct CursorPosition {
     FLOAT x;
     FLOAT y;
+
+    void copy(const CursorPosition& cp) {
+        x = cp.x;
+        y = cp.y;
+    }
+};
+struct CursorDataParam {
+    INT posiNum;
+    CursorPosition* posiTbl;
+    int spacing[4];
+    INT startNo;
+    int ladTbl[4];
+    CursorPosition* limitTbl;
+    LPCTSTR LayoutName;
+    FLOAT scale;
 };
 
 void AddVectorXYZ(FVECTOR& out, const FVECTOR& a, const FVECTOR& b);
@@ -214,6 +238,8 @@ private:
     void finalise();
 
 public:
+    void setup(CursorDataParam& inParam);
+    void main();
     INT setPosiId(INT inPosiId);
     void setScale(FLOAT inScale);
     void getSubVector(CursorPosition& outSub, INT inId0, INT inId1);
@@ -251,6 +277,7 @@ public:
     void changePicture(D2::C2DSeqObj* p2DSeqObj);
     void setState(INT inState);
     void main(FLOAT inFrameRate);
+    FVECTOR& getBasePosition() { return m_vBasePosition; }
 };
 
 struct ContentCommonWork {
@@ -287,6 +314,11 @@ private:
     UBYTE m_Content[0x570 - 0xe4]; /* 0x0e4 m_ContentMenu .. m_ContentMinigame */
 
     INT& work(INT inOfs) { return *(INT*)((UBYTE*)&m_ContentCommon + (inOfs - 0xbc)); }
+    BOOL isModeJiminyMemo() { return m_iPlayerMode == 0; }
+    BOOL isModeDReport() { return m_iPlayerMode != 0; }
+    INT getLoadResourceIndex() { return m_iPlayerMode != 0; }
+    void setContentStep(INT inStep) { m_ContentCommon.iStep = inStep; }
+    void setContentParam(INT inIdx, INT inParam) { m_ContentCommon.param[inIdx] = inParam; }
 
 public:
     CJiminyMemo(CTask* inParent, INT inMode);
@@ -294,6 +326,7 @@ public:
 
 private:
     void initialize(INT inPlayerMode);
+    void finalize();
     void setContentMode(INT inContentMode);
     void replaceNoteList(D2::C2DFnt** inFnt, const CHAR** inString, INT inNum);
     void replaceNoteListMark(D2::C2DSeqCtrl** inMark, BYTE* inFlagTbl, INT inListNum, INT inListAllNum, INT inStartNo,
@@ -302,6 +335,13 @@ private:
                              INT inLayoutNo, INT inLayoutSeqNo);
     void getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork);
     void setPlateState(INT inKind, INT inState);
+    void setPlateNumSeq(INT inKind, INT inParam);
+    void CardScreenOutClip();
+    void CardScreenSideClip(BOOL inAllDisp);
+    void ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR& inPos, FLOAT inBaseHeight,
+                       CMemo2DSequence* inParent);
+    void ScrollBarChange(D2::C2DSeqCtrl** inSeqCtrl, FLOAT inBasePosY, FLOAT inBaseHeight, INT inCursorPosiNum,
+                         INT inNoteListNum, INT inStartNum);
     INT getPlateState(INT inKind);
     void setPlateText(INT inKind, INT inCTNo);
     CMemo2DSequence* createSequence(const INT* inSeqData, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
@@ -345,6 +385,7 @@ private:
     BOOL prevPage(CMemo2DCursor* pCursor, INT* pCursorCurrent, INT iNoteListNum, INT iCursorPosiNum,
                   FLOAT fCursorIntervalY);
     BOOL haveSpecialCard();
+    INT setParamFromCollectToCardView();
     INT setParamFromCardViewToCollect();
     INT getNextCardId(INT inId);
     INT getPrevCardId(INT inId);
@@ -669,23 +710,68 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DLay
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L003262A8\n.word .L00326188\n.word .L003261B0\n.word .L003262A8\n.word .L003261E8\n.word .L00326210\n.word .L003262A8\n.word .L00326248\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__13CMemo2DLayout);
-/* placeholder: rodata of setup__13CMemo2DLayoutPCcT1PCiiPC15LayoutDataParami */
-__asm__(".rdata\n");
-inline void _roPh3() {
-    TRACE(__FILE__ "(2877)");
-    TRACE(__FILE__ "(2881)");
-    TRACE(__FILE__ "(2894)");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+INT CMemo2DLayout::setup(const CHAR* inSeqName, const CHAR* inFileName, const INT* inLayNoTbl, INT inSeqNum,
+                         const LayoutDataParam* inSeqNoTbl, INT inLayerLevel) {
+    INT rval = FALSE;
+    m_pLayoutFileName = (LPCTSTR)inFileName;
+    m_pLayoutName = (LPCTSTR)inSeqName;
+    m_pLayoutNoTbl = (INT*)com_malloc_d(sizeof(INT) * 3, __FILE__ "(2877)", -1);
+    for (INT i = 0; i < 3; i++) m_pLayoutNoTbl[i] = inLayNoTbl[i];
+    m_iSeqNum = inSeqNum;
+    size_t size = sizeof(LayoutDataParam) * inSeqNum;
+    m_pSeqNoTbl = (LayoutDataParam*)com_malloc_d(size, __FILE__ "(2881)",
+                                                 ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }));
+    if (m_pSeqNoTbl) {
+        for (INT i = 0; i < m_iSeqNum; i++) {
+            m_pSeqNoTbl[i].In = inSeqNoTbl[i].In;
+            m_pSeqNoTbl[i].Loop = inSeqNoTbl[i].Loop;
+            m_pSeqNoTbl[i].Out = inSeqNoTbl[i].Out;
+            m_pSeqNoTbl[i].XPosi = inSeqNoTbl[i].XPosi;
+            m_pSeqNoTbl[i].YPosi = inSeqNoTbl[i].YPosi;
+            m_pSeqNoTbl[i].Layer = inSeqNoTbl[i].Layer;
+            m_pSeqNoTbl[i].CTCode = inSeqNoTbl[i].CTCode;
+        }
+        rval = TRUE;
+    }
+    m_pSeqCodeTbl = (INT*)com_malloc_d(sizeof(INT) * m_iSeqNum, __FILE__ "(2894)", -1);
+    setStateFlag(0x20, 0);
+    m_iLayerLevel = inLayerLevel;
+    return rval;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setup__13CMemo2DLayoutPCcT1PCiiPC15LayoutDataParami);
 void CMemo2DLayout::init() {
     if (m_uiStateFlags & 0x20) initialize();
 }
-/* placeholder: rodata of initialize__13CMemo2DLayout */
-__asm__(".rdata\n");
-inline void _roPh4() {
-    TRACE(__FILE__ "(2945)");
+void CMemo2DLayout::initialize() {
+    FVECTOR pos;
+    D2::C2DSeqCtrl* pSeq;
+    D2::C2DSeqCtrl* pSeqParent;
+    if (isStateFlag(1)) return;
+    setStateFlag(1, 0);
+    pos.init();
+    pSeqParent = NULL;
+    for (INT i = 0; i < m_iSeqNum; i++) {
+        if (m_pSeqNoTbl[i].CTCode == 0) {
+            pSeq = createSequence(i, m_pSeqNoTbl[i].Layer);
+            pSeq->addSeq(m_pLayoutName, m_pSeqNoTbl[i].In);
+            pos.x = m_pSeqNoTbl[i].XPosi;
+            pos.y = m_pSeqNoTbl[i].YPosi;
+            pSeq->setPos(pos);
+            pSeq->enableDisp(FALSE);
+            pSeq->enableColorCtrl(TRUE);
+            pSeqParent = pSeq;
+        } else if (pSeqParent) {
+            D2::C2DFnt* pFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2945)",
+                                                 ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+                D2::C2DFnt(0, 0, NULL, 15, CCtdMan::getText(m_pSeqNoTbl[i].CTCode), 0x40);
+            if (pFnt) {
+                m_pSeqFntArray[i] = pFnt;
+                pSeqParent->addFntShift(m_pLayoutName, pFnt, m_pSeqNoTbl[i].XPosi, m_pSeqNoTbl[i].YPosi);
+            }
+        }
+        if (m_pSeqCodeTbl) m_pSeqCodeTbl[i] = -1;
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", initialize__13CMemo2DLayout);
 void CMemo2DLayout::finalize() {
     for (INT i = 0; i < 32; i++) {
         delete m_pSeqCtrlArray[i];
@@ -925,12 +1011,37 @@ CMemo2DCursor::CMemo2DCursor(HANDLE inHandle) {
     m_fScale = 1.0f;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DCursor);
-/* placeholder: rodata of setup__13CMemo2DCursorR15CursorDataParam */
-__asm__(".rdata\n");
-inline void _roPh7() {
-    TRACE(__FILE__ "(3348)");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CMemo2DCursor::setup(CursorDataParam& inParam) {
+    if (inParam.posiNum > 0) {
+        if (inParam.posiTbl) {
+            m_iPosiNum = inParam.posiNum;
+            m_pPosiTbl = (CursorPosition*)com_malloc_d(
+                sizeof(CursorPosition) * m_iPosiNum, __FILE__ "(3348)",
+                ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }));
+            for (INT i = 0; i < m_iPosiNum; i++) m_pPosiTbl[i].copy(inParam.posiTbl[i]);
+        } else {
+            m_iPosiNum = 0;
+        }
+    }
+    m_iStartNo = inParam.startNo;
+    for (INT i = 0; i < 4; i++) m_iLadTbl[i] = inParam.ladTbl[i];
+    m_lpctLayoutName = inParam.LayoutName;
+    for (INT i = 0; i < 4; i++) m_fSpacing[i] = inParam.spacing[i];
+    m_fScale = inParam.scale;
+    m_vPosi.x = m_pPosiTbl[m_iStartNo].x * m_fScale;
+    m_vPosi.y = m_pPosiTbl[m_iStartNo].y * m_fScale;
+    m_vPosi.z = 0.0f;
+    if (inParam.limitTbl) {
+        for (INT i = 0; i < 2; i++) m_ScreenLimit[i].copy(inParam.limitTbl[i]);
+    }
+    m_iLadSeq = 0;
+    enableColorCtrl(TRUE);
+    addSeq(m_lpctLayoutName, m_iLadTbl[0]);
+    addSeq(m_lpctLayoutName, m_iLadTbl[3]);
+    enableDisp(FALSE);
+    setPosiId(m_iStartNo);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setup__13CMemo2DCursorR15CursorDataParam);
 void CMemo2DCursor::finalise() {
     if (m_pPosiTbl) com_free(m_pPosiTbl);
     m_pPosiTbl = NULL;
@@ -970,7 +1081,60 @@ INT CMemo2DCursor::setPosiId(INT inPosiId) {
     }
     return rval;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__13CMemo2DCursor);
+void CMemo2DCursor::main() {
+    FVECTOR posi;
+    FVECTOR aim;
+    FVECTOR shift;
+    FLOAT limx0;
+    FLOAT limy0;
+    if (!(m_iState & 0x2000000)) {
+        switch (m_iLadSeq) {
+        case 0:
+            if (isEnd(0)) setReplaceSeq(1);
+            break;
+        case 2:
+            if (isEnd(0)) {
+                m_iLadSeq = 5;
+                enableDisp(FALSE);
+                return;
+            }
+            break;
+        }
+    }
+    if (m_bMoveSlideEnable) {
+        m_fMoveTimer += getFrameRateF();
+        if (m_fMoveTimer >= 30.0f) {
+            m_fMoveTimer = 30.0f;
+            m_bMoveSlideEnable = FALSE;
+        }
+        posi = m_vPosi;
+        aim = m_vAimPosi;
+        shift = m_vShiftPosi;
+        SubVectorXYZ(aim, aim, shift);
+        sceVu0InterVectorXYZ(posi, aim, posi, 1.0f - powf(1.0f - m_fMoveTimer / 30.0f, 2.5f));
+        limx0 = m_ScreenLimit[0].x + m_fSpacing[0] * m_fScale;
+        FLOAT limx1 = m_ScreenLimit[1].x + m_fSpacing[2] * m_fScale;
+        if (posi.x > limx1) {
+            shift.x += posi.x - limx1;
+            posi.x = limx1;
+        } else if (posi.x < limx0) {
+            shift.x -= limx0 - posi.x;
+            posi.x = limx0;
+        }
+        limy0 = m_ScreenLimit[0].y + m_fSpacing[1] * m_fScale;
+        FLOAT limy1 = m_ScreenLimit[1].y + m_fSpacing[3] * m_fScale;
+        if (posi.y > limy1) {
+            shift.y += posi.y - limy1;
+            posi.y = limy1;
+        } else if (posi.y < limy0) {
+            shift.y -= limy0 - posi.y;
+            posi.y = limy0;
+        }
+        m_vPosi = posi;
+        m_vShiftPosi = shift;
+        setLocalPos(m_vPosi);
+    }
+}
 FLOAT CMemo2DCursor::getFrameRateF() {
     if (m_hParent) {
         CTask* pTask = CTaskMan::getTask(m_hParent);
@@ -1105,7 +1269,36 @@ inline void _roPh11() {
     TRACE("Drepo.lad");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", initialize__11CJiminyMemoi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", finalize__11CJiminyMemo);
+void CJiminyMemo::finalize() {
+    CMemo2DLayout* pLay;
+    INT groupId;
+    INT rsrcId;
+    setContentStep(90);
+    (this->*pContentFunc)();
+    if (m_pMessSeq) delete m_pMessSeq;
+    m_pMessSeq = NULL;
+    pLay = getTaskPointer<CMemo2DLayout*>(m_hLayout);
+    if (pLay) delete pLay;
+    if (isModeJiminyMemo()) {
+        groupId = JiminyMemo::getHostGroupId();
+        rsrcId = JiminyMemo::getHostRsrcId();
+        if (CRsrcDB::hasRsrcGroup(groupId, rsrcId)) {
+            if (!CRcf::isCompleteLoadRCF(groupId, rsrcId)) {
+                CRcf::cancelLoadRCF(groupId, rsrcId);
+            } else {
+                CRsrcDB::removeGroup(groupId, rsrcId);
+            }
+        }
+    }
+    rsrcId = JiminyMemo::RsrcId[getLoadResourceIndex()];
+    if (CRsrcDB::hasRsrcGroup(2, rsrcId)) {
+        if (!CRcf::isCompleteLoadRCF(2, rsrcId)) {
+            CRcf::cancelLoadRCF(2, rsrcId);
+        } else {
+            CRsrcDB::removeGroup(2, rsrcId);
+        }
+    }
+}
 /* placeholder: rodata of main__11CJiminyMemo */
 __asm__(".rdata\n");
 __asm__(".rdata\n.align 4\n.word .L00328740\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328750\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n.word .L00328798\n");
@@ -1460,7 +1653,52 @@ void CJiminyMemo::setPlateText(INT inKind, INT inCTNo) {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPlateNumSeq__11CJiminyMemoii);
+namespace JiminyMemo {
+namespace Base {
+extern CursorPosition L1R1DigitNumOffset;
+extern CursorPosition L1R1DigitDenomiOffset;
+}
+}
+void CJiminyMemo::setPlateNumSeq(INT inKind, INT inParam) {
+    D2::C2DSeqCtrl* pDig = NULL;
+    INT n;
+    INT offsetSeq;
+    FLOAT offsetX;
+    FLOAT offsetY;
+    CMemo2DLayout* seq = getTaskPointer<CMemo2DLayout*>(m_hLayout);
+    if (!seq) return;
+    switch (inKind) {
+    case 7:
+    case 8:
+        pDig = seq->getSeqCtrl(8);
+        break;
+    case 9:
+    case 10:
+        pDig = seq->getSeqCtrl(9);
+        break;
+    }
+    switch (inKind) {
+    case 7:
+    case 9:
+        offsetSeq = 1;
+        offsetX = JiminyMemo::Base::L1R1DigitNumOffset.x;
+        offsetY = JiminyMemo::Base::L1R1DigitNumOffset.y;
+        break;
+    case 8:
+    case 10:
+        offsetSeq = 5;
+        offsetX = JiminyMemo::Base::L1R1DigitDenomiOffset.x;
+        offsetY = JiminyMemo::Base::L1R1DigitDenomiOffset.y;
+        break;
+    }
+    if (pDig) {
+        n = inParam;
+        for (INT i = 0; i < 3; i++) {
+            pDig->replaceSeqShift(offsetSeq + i, m_pLadName, n % 10 + 0x95, offsetX + (2 - i) * 16.0f, offsetY);
+            n /= 10;
+        }
+    }
+}
 void CJiminyMemo::getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork) {
     *inFlagWork = 0;
     for (INT i = 0; i < inNum; i++) {
@@ -1517,8 +1755,76 @@ INT CJiminyMemo::getNextContentId(INT inEventFlagStartId, INT inEventFlagNum, IN
     }
     return rval;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", ScrollBarInit__11CJiminyMemoPPQ22D210C2DSeqCtrliR7FVECTORfP15CMemo2DSequence);
+namespace JiminyMemo {
+extern USHORT NoteScrollBarTbl[3];
+}
+void CJiminyMemo::ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR& inPos, FLOAT inBaseHeight,
+                                CMemo2DSequence* inParent) {
+    FVECTOR vec;
+    for (INT i = 0; i < 3; i++) {
+        createMarkSequence(JiminyMemo::NoteScrollBarTbl[i], 1, -1, 0, inLayer, inParent, &inSeqCtrl[i]);
+        D2::C2DSeqCtrl* p = inSeqCtrl[i];
+        if (p) {
+            switch (i) {
+            case 0:
+                p->setLocalPos(inPos);
+                vec.set(1.0f, inBaseHeight * 0.01f, 1.0f, 0.0f);
+                p->setScl(vec);
+                break;
+            case 1:
+                vec.set(inPos.x, inPos.y + 1.0f, inPos.z, inPos.w);
+                p->setLocalPos(vec);
+                break;
+            case 2:
+                vec.set(inPos.x, inPos.y + inBaseHeight - 2.0f, inPos.z, inPos.w);
+                p->setLocalPos(vec);
+                break;
+            }
+        }
+    }
+}
+/* Parked: 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves
+   from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches.
+   tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the top, NULL compare, 0 vs
+   0.0f w, fRatioPosY reused for the product; tools/permuter.py 8 min reached score 1 in its copy (vec before vPos,
+   braces, 3 > i), but the same source gives 69 lines in the real build: codegen depends on the source path
+   (identifier hash order), so permuter results do not transfer here. */
+#if 0
+void CJiminyMemo::ScrollBarChange(D2::C2DSeqCtrl** inSeqCtrl, FLOAT inBasePosY, FLOAT inBaseHeight,
+                                  INT inCursorPosiNum, INT inNoteListNum, INT inStartNum) {
+    FLOAT fRatioHeight;
+    FLOAT fRatioPosY;
+    FVECTOR vPos;
+    FVECTOR vec;
+    if (!inSeqCtrl) return;
+    fRatioHeight = (FLOAT)inCursorPosiNum / (FLOAT)inNoteListNum;
+    fRatioPosY = (1.0f - fRatioHeight) / ((FLOAT)inNoteListNum - (FLOAT)inCursorPosiNum) * (FLOAT)inStartNum;
+    vPos = inSeqCtrl[0]->m_seqControl.vPos;
+    vPos.y = inBasePosY + inBaseHeight * fRatioPosY;
+    for (INT i = 0; i < 3; i++) {
+        D2::C2DSeqCtrl* p = inSeqCtrl[i];
+        if (p) {
+            switch (i) {
+            case 0:
+                p->setLocalPos(vPos);
+                vec.set(1.0f, inBaseHeight * 0.01f * fRatioHeight, 1.0f, 0.0f);
+                p->setScl(vec);
+                break;
+            case 1:
+                vec.set(vPos.x, vPos.y + 1.0f, vPos.z, vPos.w);
+                p->setLocalPos(vec);
+                break;
+            case 2:
+                vec.set(vPos.x, vPos.y + inBaseHeight * fRatioHeight - 2.0f, vPos.z, vPos.w);
+                p->setLocalPos(vec);
+                break;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii);
+#endif
 BOOL CJiminyMemo::nextPage(INT* ioTop, INT inMax, INT inDisp) {
     BOOL bRet;
     INT nLimit = inMax - inDisp;
@@ -1684,9 +1990,144 @@ __asm__(".word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\
 __asm__(".word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032E94C\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n");
 __asm__(".word .L0032EB40\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCollection__11CJiminyMemo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", CardScreenSideClip__11CJiminyMemoi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", CardScreenOutClip__11CJiminyMemo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setParamFromCollectToCardView__11CJiminyMemo);
+void CJiminyMemo::CardScreenSideClip(BOOL inAllDisp) {
+    CMemo2DCard* pCard;
+    if (*(FLOAT*)&work(0x1F0) < 1.0f || inAllDisp == TRUE) {
+        for (INT i = 0; i < work(0x1D8); i++) {
+            pCard = ((CMemo2DCard**)work(0x1D4))[i];
+            if (pCard && pCard->isEnableDisp(2) != TRUE) pCard->enableDisp(2, TRUE);
+        }
+        return;
+    }
+    FVECTOR shift;
+    FVECTOR shiftVec;
+    FLOAT limitL1;
+    FLOAT limitR1;
+    FLOAT limitL2;
+    FLOAT limitR2;
+    FLOAT limitU;
+    FLOAT limitD;
+    FVECTOR base;
+    shift = ((CMemo2DCursor*)work(0x1B4))->getShiftVector();
+    limitL1 = shift.x - 192.0f;
+    limitR1 = shift.x + 192.0f;
+    limitL2 = shift.x - 256.0f;
+    limitR2 = shift.x + 256.0f;
+    limitU = shift.y - 96.0f;
+    limitD = shift.y + 96.0f;
+    shiftVec.x = -shift.x / *(FLOAT*)&work(0x1F0);
+    shiftVec.y = -shift.y / *(FLOAT*)&work(0x1F0);
+    for (INT i = 0; i < work(0x1D8); i++) {
+        pCard = ((CMemo2DCard**)work(0x1D4))[i];
+        if (!pCard) continue;
+        base = pCard->getBasePosition();
+        if (limitU < base.y || base.y < limitD) {
+            if ((base.x < limitL1 && limitL2 < base.x) || (limitR1 < base.x && base.x < limitR2)) {
+                if (pCard->isEnableDisp(2)) pCard->enableDisp(2, FALSE);
+            } else if (limitL1 < base.x && base.x < limitR1) {
+                if (pCard->isEnableDisp(2) != TRUE) pCard->enableDisp(2, TRUE);
+            }
+        }
+    }
+}
+void CJiminyMemo::CardScreenOutClip() {
+    FVECTOR shift;
+    FVECTOR shiftVec;
+    FLOAT limitL1;
+    FLOAT limitR1;
+    FLOAT limitU1;
+    FLOAT limitD1;
+    FLOAT limitL2;
+    FLOAT limitR2;
+    FLOAT limitU2;
+    FLOAT limitD2;
+    FVECTOR base;
+    CMemo2DCard* pCard;
+    if (*(FLOAT*)&work(0x1F0) < 1.0f) return;
+    shift = ((CMemo2DCursor*)work(0x1B4))->getShiftVector();
+    limitL1 = shift.x - 192.0f;
+    limitR1 = shift.x + 192.0f;
+    limitU1 = shift.y - 96.0f;
+    limitD1 = shift.y + 96.0f;
+    limitL2 = shift.x - 320.0f;
+    limitR2 = shift.x + 320.0f;
+    limitU2 = shift.y - 288.0f;
+    limitD2 = shift.y + 288.0f;
+    shiftVec.x = -shift.x / *(FLOAT*)&work(0x1F0);
+    shiftVec.y = -shift.y / *(FLOAT*)&work(0x1F0);
+    for (INT i = 0; i < work(0x1D8); i++) {
+        pCard = ((CMemo2DCard**)work(0x1D4))[i];
+        if (!pCard) continue;
+        base = pCard->getBasePosition();
+        if (base.x < limitL2 || limitR2 < base.x || base.y < limitU2 || limitD2 < base.y) continue;
+        if ((base.x < limitL1 && limitL2 < base.x) || (limitR1 < base.x && base.x < limitR2) ||
+            (base.y < limitU1 && limitU2 < base.y) || (limitD1 < base.y && base.y < limitD2)) {
+            if (pCard->isEnableDisp(1)) pCard->enableDisp(1, FALSE);
+            if (pCard->isEnableDisp(2)) pCard->enableDisp(2, FALSE);
+        }
+    }
+}
+
+namespace JiminyMemo {
+extern INT SoraCardNumTbl[];
+extern INT RikuCardNumTbl[];
+namespace Collect {
+extern UINT CursorMoveFlag[];
+extern UINT CursorMoveFlagWithSpecial[];
+namespace D {
+extern UINT CursorMoveFlag[];
+}
+}
+}
+INT CJiminyMemo::setParamFromCollectToCardView() {
+    INT cursorLimitX;
+    INT cursorLimitY;
+    INT current;
+    INT currentCard;
+    INT cardId;
+    INT kindId;
+    UINT* pCursorMoveFlag;
+    INT cardKindNum;
+    INT* pCardKindTbl;
+    if (!work(0x1D4)) return FALSE;
+    current = -1;
+    cursorLimitX = work(0x1FC);
+    cursorLimitY = work(0x200);
+    currentCard = *(SHORT*)&work(0x1DC) + *(SHORT*)&work(0x1DE) * cursorLimitX;
+    if (isModeJiminyMemo()) {
+        pCursorMoveFlag = haveSpecialCard() ? JiminyMemo::Collect::CursorMoveFlagWithSpecial
+                                            : JiminyMemo::Collect::CursorMoveFlag;
+        cardKindNum = 10;
+        pCardKindTbl = JiminyMemo::SoraCardNumTbl;
+    } else {
+        pCursorMoveFlag = JiminyMemo::Collect::D::CursorMoveFlag;
+        pCardKindTbl = JiminyMemo::RikuCardNumTbl;
+        cardKindNum = 4;
+    }
+    for (INT i = 0; i < cursorLimitY; i++) {
+        for (INT j = 0; j < cursorLimitX; j++) {
+            if (pCursorMoveFlag[i] & (1 << j)) {
+                current++;
+                if (--currentCard < 0) goto found;
+            } else {
+                if (--currentCard < 0) return FALSE;
+            }
+        }
+    }
+    return FALSE;
+found:
+    if (!((CMemo2DCard**)work(0x1D4))[current]) return FALSE;
+    for (kindId = 0; kindId < cardKindNum; kindId++) {
+        for (cardId = 0; cardId < pCardKindTbl[kindId]; cardId++) {
+            if (--current < 0) goto set;
+        }
+    }
+    return FALSE;
+set:
+    setContentParam(0, kindId);
+    setContentParam(1, cardId);
+    return TRUE;
+}
 /* placeholder: rodata of contentCard__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh29() {
@@ -1734,17 +2175,6 @@ INT CJiminyMemo::getPrevCardId(INT inId) {
 }
 INT CJiminyMemo::getNextCardId(INT inId) {
     return getNextContentId(inId, work(0x2D4), work(0x2D0));
-}
-namespace JiminyMemo {
-extern INT SoraCardNumTbl[];
-extern INT RikuCardNumTbl[];
-namespace Collect {
-extern UINT CursorMoveFlag[];
-extern UINT CursorMoveFlagWithSpecial[];
-namespace D {
-extern UINT CursorMoveFlag[];
-}
-}
 }
 /* Parked: 4 lines: the constant 1 for (1 << j) is hoisted to before the outer loop in ours, the original sets it
    at the start of each outer iteration (li t0,1 after lw a0 / move v1,zero). Everything else matches: cardNo read
