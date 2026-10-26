@@ -160,6 +160,7 @@ private:
     BOOL acStatBGWait();
     BOOL acStatEternityWait();
     BOOL acStatCardWndWait();
+    BOOL acStatCrossFadeWait();
     BOOL acStatTechWndWait();
     BOOL acStatWorldCardWndWait();
     INT player_ctrl(INT nCode, FLOAT fArg);
