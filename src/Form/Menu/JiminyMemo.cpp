@@ -10,6 +10,7 @@
 #include "System/Graphic/Effect/effect.h"
 #include "Game/CardBattle.h"
 #include "Form/Menu/JiminyMemo.h"
+#include "System/Math3D.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "System/Sound/SoundMan.h"
@@ -37,6 +38,45 @@ INT getCT0014Code(USHORT inLow);
 void playSE(INT inSENo);
 BOOL is100AcreGoodEnding();
 }
+
+class CTexAnm;
+class CLightUnit;
+class CMemo3DObj : public CTask {
+public:
+    CMemo3DObj(CTask* inParent, INT inGroupId, INT inResourceId, UINT inDispLayer, INT inA, INT inB);
+    virtual ~CMemo3DObj();
+    virtual void main();
+    virtual void disp();
+    void setRotateY(FLOAT inRotY);
+
+private:
+    FLOAT m_fRotY;           /* 0x40 */
+    CModel* m_pModels;       /* 0x44 */
+    INT m_iModelCount;       /* 0x48 */
+    CAnim* m_pAnime;         /* 0x4c */
+    CTexAnm* m_pTexAnim;     /* 0x50 */
+    INT m_iTexAnimNum;       /* 0x54 */
+    INT m_iTexAnimNo;        /* 0x58 */
+    INT m_iTexAnimSeqNo;     /* 0x5c */
+    CLightUnit* m_pLight;    /* 0x60 */
+    INT m_iStep;             /* 0x64 */
+    INT m_iGroupId;          /* 0x68 */
+    INT m_iResourceId;       /* 0x6c */
+    FLOAT m_fFadeCount;      /* 0x70 */
+    FLOAT m_fFadeCountMax;   /* 0x74 */
+    BOOL m_bEraseModel;      /* 0x78 */
+    BOOL m_bTouch;           /* 0x7c */
+    FVECTOR m_vPosition;     /* 0x80 */
+    FVECTOR m_vBasePosition; /* 0x90 */
+    FLOAT m_fBaseScale;      /* 0xa0 */
+    FLOAT m_fScale;          /* 0xa4 */
+    UINT m_uiDispLayer;      /* 0xa8 */
+    BOOL m_bLoadEnable;      /* 0xac */
+    HANDLE m_hEffect;        /* 0xb0 */
+    BOOL m_bLightOff;        /* 0xb4 */
+    BOOL m_bNotSemiFlag;     /* 0xb8 */
+    BOOL m_bFade2PathFlag;   /* 0xbc */
+};
 
 class CMemo2DLayout : public CTask {
 private:
@@ -434,7 +474,12 @@ inline void _roPh1() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__10CMemo3DObj);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", disp__10CMemo3DObj);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", calcLocalMatrix__10CMemo3DObj);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setRotateY__10CMemo3DObjf);
+void CMemo3DObj::setRotateY(FLOAT inRotY) {
+    if (__builtin_fabsf(Math3D::LimitPI(m_fRotY - inRotY)) != 0.0f) {
+        m_fRotY = inRotY;
+        m_bTouch = TRUE;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPosition__10CMemo3DObjRC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __13CMemo2DLayoutP5CTask);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DLayout);
