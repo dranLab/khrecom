@@ -14,8 +14,11 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
 
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+
 using namespace ATEL;
 
+extern "C" char D_0048CD50[];
 extern "C" char D_00491328[];
 extern "C" char D_00491338[];
 extern "C" char D_00491348[];
@@ -84,7 +87,15 @@ static INT debugWinNPCListAllCall(CDebugWindow* pObj, INT inParam) {
 }
 /* the asm .data (debugWinNPCList table) refers to it by name until the data comes from source */
 __asm__(".globl debugWinNPCListAllCall__8DWTEventP12CDebugWindowi");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", debugWinNPCListDispCall__8DWTEventPciPCv);
+namespace DWTEvent {
+static INT debugWinNPCListDispCall(LPSTR pStr, INT iLineY, const void* pValue) {
+    CTask* pA = CTaskMan::getSysTask(0x1A);
+    if (pA && ((CAtel*)pA)->getVSM()) sprintf(pStr, D_0048CD50, ((CAtel*)pA)->getVSM()->getAvatarName(iLineY));
+    return 1;
+}
+}
+/* the asm .data (debugWinNPCList table) refers to it by name until the data comes from source */
+__asm__(".globl debugWinNPCListDispCall__8DWTEventPciPCv");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugCreateNpcWindow__8DWTEventP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugCreateEventLineDisp__8DWTEventP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", DebugAtelWorkDef__8DWTEventP12CDebugWindowi);

@@ -117,6 +117,7 @@ public:
     INT getActorIndex(INT nID) const;
     INT getActorIndex(const CHAR* pszName) const;
     INT getActorNum() { return m_ActorCount; }
+    CHAR* getAvatarName(INT nIdx) { return m_ActorTbl[nIdx]._ATP.name; }
 
 protected:
     void deleteActorAll();
