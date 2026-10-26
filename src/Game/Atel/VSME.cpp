@@ -75,6 +75,19 @@ inline void _vsmeMotionName() {
 #include "System/Graphic/WorldEnv.h"
 #define SYSTEM_GRAPHIC_DEFOCUS_CPP /* the complete DeFocus classes (other includers get partial ones) */
 #include "System/Graphic/DeFocus.h"
+#include "System/PadIO.h"
+#include "Game/Enemy/MapEnemyManager.h"
+#include "Game/EntityFactory.h"
+#include "System/Graphic/ShadowModel.h"
+#include "System/PlaySpeedCtrl.h"
+#include "Game/Atel/AtelTutorial.h"
+#include "Game/Player/PlayerCamera.h"
+#include "Game/Gimmick/GimmickManager.h"
+#include "Game/Gimmick/BaseGimmick.h"
+#include "System/Graphic/Glare.h"
+#include "Game/Game.h"
+#include "Game/Player/PlayerManager.h"
+#include "Game/CardKind.h"
 #include <string.h>
 #include "include_asm.h"
 
@@ -2660,7 +2673,7 @@ struct AvatarMotionParamEx2 {
     UINT _nMotionID;
     FLOAT _fPlaySpeed;
     UINT _nHokanFrame;
-    AvatarMotionParamEx2() { _nHokanFrame = 0; }
+    AvatarMotionParamEx2() { _nRsrcID = 0; _nInfo = 0; _nMotionID = 0; _fPlaySpeed = 1.0f; _nHokanFrame = 0; }
 };
 /* Math3D.h:137 and coord.h:730 in the original ($LM tags); the volatile abs.s keeps the original order (a scheduling barrier) */
 static inline FLOAT FABS(FLOAT f) { FLOAT r; __asm__ volatile("abs.s %0, %1" : "=f"(r) : "f"(f)); return r; }
@@ -3131,129 +3144,1883 @@ INT CVSM::execExt2Code(INT op, eATEL_REQ_RET& ret) {
     } while (r == 0);
     return r;
 }
-/* placeholder: rodata of execExt3Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET */
-__asm__(".rdata\n");
-inline void _roPh30() {
-    TRACE("%d\n");
-    TRACE("%f\n");
-    TRACE("\x83X\x83g\x83" "b\x83N\x8bZ\x8fK\x93\xbe:%d\n");
-    TRACE(__FILE__ "(2623)");
-    TRACE(__FILE__ "(2672)");
-    TRACE("Speed %f\n");
-    TRACE("CARD WINDW CLOSE WAIT START\n");
-    TRACE("reqEnterDorr:ATEL sys_ctrl\n");
-    TRACE(__FILE__ "(2713)");
-    TRACE(__FILE__ "(2716)");
-    TRACE(__FILE__ "(2719)");
-    TRACE("ATEL:cancelLoadRCF:%d,%d\n");
-    TRACE("ATEL:OPMEN DOOR: %d, %d\n");
-    TRACE("MIN:%d, MAX:%d,A:%d\n");
-    TRACE("\x83\x89\x83X\x83g\x83t\x83\x8d\x83" "A\x82\xd6\x82\xcc\x94\xe0\x95\\\x8e\xa6\n");
-    TRACE("ATEL:\x83\x8f\x81[\x83\x8b\x83h\x83Z\x83\x8c\x83N\x83g\x8c\xc4\x82\xd1\x8fo\x82\xb5\n");
-    TRACE("ATEL:UNAVAILABLE DOOR: %d, %d\n");
-    TRACE("ATEL:\x83S\x81[\x83\x8b\x95\x94\x89\xae\x8aJ\x82\xa2\x82\xbd\n");
-    TRACE("\x83\x8c\x83x\x83\x8b\x83" "A\x83" "b\x83v\x81H %d\n");
-    TRACE(__FILE__ "(3000)");
-    TRACE("TECH WINDW CLOSE WAIT START\n");
-    TRACE("ATEL:\x83\x8f\x81[\x83\x8b\x83h\x83N\x83\x8a\x83" "A\x81" "F%d\n");
-    TRACE("ATEL:\x83t\x83\x8d\x83" "A\x83N\x83\x8a\x83" "A\n");
-    TRACE("ATEL:\x83\x82\x83\x93\x83X\x83g\x83\x8d\x83U\x83R\x83o\x83g\x83\x8b\x83N\x83\x8a\x83" "A\n");
-    TRACE("\x83G\x83N\x83X\x83g\x83\x8a\x81[\x83\x80\x81" "F\x83X\x83g\x83" "b\x83N\x91S\x95\x94\x8ao\x82\xa6\x82\xe9\x81" "A\x83J\x81[\x83h\x91S\x95\x94\x89\xf0\x8b\xd6\x81" "A\x95W\x8f\x80\x83X\x83L\x83\x8b\x91S\x8eg\x97p\x89\xc2\n");
-    TRACE("ATEL:CGlare::fadein\n");
-    TRACE("ATEL:CGlare::fadeout\n");
-    TRACE("ATEL:\x82g\x82o\x89\xf1\x95\x9c\n");
-    TRACE("\x83v\x83\x8c\x83" "C\x83\x84\x81[\x82\xa2\x82\xc8\x82\xa2\n");
-    TRACE("ATEL:\x83o\x83" "b\x83N\x83" "A\x83" "b\x83v\n");
-    TRACE("ATEL:CLOSE DOOR: %d, %d\n");
-    TRACE("GPS NG01:%s\n");
-    TRACE("NAME TO SHOW :%s\n");
-    TRACE("NAME TO HIDE :%s\n");
-    TRACE("GRAVITY ON :%s\n");
-    TRACE("GRAVITY OFF :%s\n");
-    TRACE("MAP_COLL_ON :%s\n");
-    TRACE("MAP_COLL_OFF :%s\n");
-    TRACE("BODY_COLL_ON :%s\n");
-    TRACE("BODY_COLL_OFF :%s\n");
-    TRACE("REMOVE NPC :%s\n");
-    TRACE("MAKEUP_MOTION_INVALID :%s\n");
-    TRACE("MAKEUP_MOTION_VALID :%s\n");
-    TRACE("AVTCMD_SET_LOOK_START :%s\n");
-    TRACE("AVTCMD_SET_LOOK_STOP :%s\n");
-    TRACE("AVTCMD_SET_LOOK_END :%s\n");
-    TRACE("AVTCMD_CREATE_LEGIK :%s\n");
-    TRACE("AVTCMD_SET_IK  ON :%s\n");
-    TRACE("AVTCMD_SET_IK  OFF :%s\n");
-    TRACE("AVTCMD_SET_LOCK_ON  ON :%s\n");
-    TRACE("AVTCMD_SET_LOCK_ON  OFF :%s\n");
-    TRACE("AVTCMD_SET_NEAR_CLIP  OFF :%s\n");
-    TRACE("CHT\n");
-    TRACE("MTO NG01:%s\n");
-    TRACE("AED %d : %d : %f : %d : %d\n");
-    TRACE("FOG %d : R:%d : G:%d : B:%d : %d\n");
-    TRACE("FOG %d : %d : %d\n");
-    TRACE("SVR:%d,%d\n");
-    TRACE("CER:%d,%d,%d\n");
-    TRACE("EBT\n");
-    TRACE("scene_set_color:type:%d,frame:%d,color:%d\n");
-    TRACE("CWorldEnv::getActiveCamera()");
-    TRACE("EffectCtrl  %d, %d, %d\n");
-    TRACE("BLUR %d : :%d : %d\n");
-    TRACE("MEX:%d,%d,%d,%f,%d,%d,%d,%d\n");
-    TRACE("CRC %d %d\n");
-    TRACE("DRC %d %d\n");
-    TRACE("LOK:%s,%s,%f,%f,%f,%f,%f,%f,%f,%f\n");
-    TRACE("UDL:%s,%f,%f\n");
-    TRACE("LAG:%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n");
-    TRACE("UDA:%f,%f,%f,%f\n");
-    TRACE("CTX:%s,%s\n");
-    TRACE("ELK:AVTCMD_SET_LOOK_END\n");
-    TRACE("STA\x81" "F%d, %s\n");
-    TRACE("STX\x81" "F%d, %s\n");
-    TRACE("SUP:%d,%f,%f,%f\n");
-    TRACE("ATEL:\x83G\x83\x89\x81[\x81" "FsetUnknownPos\x81@\x91\xb6\x8d\xdd\x82\xb5\x82\xc8\x82\xa2\x83p\x83\x89\x83\x81\x81[\x83^\n");
-    TRACE("SUR:%d,%f,%f,%f\n");
-    TRACE("ATEL:\x83G\x83\x89\x81[\x81" "FsetUnknownRot\x81@\x91\xb6\x8d\xdd\x82\xb5\x82\xc8\x82\xa2\x83p\x83\x89\x83\x81\x81[\x83^\n");
-    TRACE("enableNotSemiModel: %d,%d");
-    TRACE("ATEL:playMovie %s, %d\n");
-    TRACE("ATEL:CrossFade %d, %d\n");
-    TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83" "C\x83\x81\x81[\x83W\x82r\x82s\x82n\x82q\x82" "d\n");
-    TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83" "C\x83\x81\x81[\x83W\x82" "c\x82q\x82`\x82v\n");
-    TRACE("CROSS_FADE : R:%d : G:%d : B:%d : A:%d\n");
-    TRACE("CROSS_FADE : R:%d : G:%d : B:%d : A:%d : Frame:%d\n");
-    TRACE("ChangeRoom:room:%d,door:%d,scene:%d\n");
-    TRACE("\x95\x94\x89\xae\x82\xcc\x83V\x81[\x83\x93\x82\xaa\x82\xc8\x82\xa2\x82\xa9\x82\xe7\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x93K\x93\x96\x82\xc9\x8ew\x92\xe8\x82\xb5\x82\xc4\x94\xf2\x82\xce\x82\xb7\n");
-    TRACE("EnterBattle:%d\n");
-    TRACE("deFocus_man %f %f\n");
-    TRACE("--- SCALING - player ---\n");
-    TRACE("--- WNDCMD_FADER ---\n");
-    TRACE("MTO NG01:%d\n");
-    TRACE("CAR %d %f %f %f\n");
-    TRACE("    %d %f\n");
-    TRACE("REL %d %f %f %f\n");
-    TRACE("CLK %d %f %f %f\n");
-    TRACE("wk_CMD %x : %x \n");
-    TRACE("--- START MOVE-ACTOR-PATH Type::%x ---\n");
-    TRACE("voice_play %s %d %d\n");
-    TRACE("voice_fadeout  %d %d\n");
-    TRACE("defoucus %d : %f : %f \n");
-    TRACE("VIB \n");
-    TRACE("voice_play_id:playVsb %d %d %d\n");
-    TRACE("BlurDistanceSet %f\n");
-    TRACE("%s,%s\n");
-    TRACE("--- ATTACH - %s(%d)\n");
-    TRACE("BlurSetEvent %f \n");
-    TRACE("face set NG01:%s\n");
+namespace ATEL {
+struct ChatWndSetWordsParam {
+    union {
+        UINT ctdID[4];
+        char* pWord[4];
+    };
+};
 }
-__asm__(".rdata\n.align 4\n.word .L0024D734\n.word .L002483E8\n.word .L0024D734\n.word .L00248740\n.word .L002487E4\n.word .L002497BC\n.word .L00249814\n.word .L0024D734\n.word .L0024C2B0\n.word .L0024D734\n.word .L0024C330\n.word .L0024D6E4\n.word .L0024D6E4\n.word .L0024D6E4\n.word .L0024D734\n.word .L0024D6E4\n.word .L0024D734\n.word .L0024C3D8\n.word .L0024C49C\n.word .L0024C514\n.word .L0024C5E4\n.word .L0024C844\n.word .L0024CA74\n.word .L0024D6E4\n.word .L0024CCBC\n.word .L0024CD10\n.word .L0024CD84\n.word .L0024D6E4\n.word .L0024D6E4\n.word .L0024CE70\n.word .L0024CEE4\n.word .L0024CF00\n.word .L0024CF28\n.word .L0024CF70\n.word .L0024CFC4\n.word .L0024D02C\n.word .L0024D07C\n.word .L0024D10C\n.word .L0024D198\n.word .L0024D1B8\n.word .L0024D23C\n.word .L0024D6E4\n.word .L0024D30C\n.word .L0024D344\n.word .L0024D394\n.word .L0024D6E4\n.word .L0024D54C\n.word .L0024D5F0\n.word .L0024D734\n.word .L0024D63C\n.word .L0024D6E4\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D6E4\n.word .L0024D734\n.word .L0024D6E4\n.word .L0024D734\n.word .L0024992C\n.word .L00249F64\n.word .L0024A090\n.word .L0024A11C\n.word .L0024A1E0\n.word .L0024A230\n.word .L0024A2C8\n.word .L0024A388\n.word .L0024BFF8\n.word .L0024C22C\n.word .L0024D400\n.word .L0024D454\n.word .L0024D4A8\n.word .L0024A3D0\n.word .L0024A42C\n.word .L0024A4C4\n.word .L0024A5A0\n.word .L0024A8AC\n.word .L0024A900\n.word .L0024A99C\n.word .L0024D734\n.word .L0024A9B8\n.word .L0024AAC4\n.word .L0024AB74\n.word .L0024AC6C\n.word .L0024ADAC\n.word .L0024AE5C\n.word .L0024AF88\n.word .L0024B018\n.word .L0024B1C0\n.word .L0024B254\n.word .L0024B2C0\n.word .L0024B4B8\n.word .L0024B560\n.word .L0024B788\n.word .L0024B870\n.word .L0024B8D8\n.word .L0024B950\n.word .L0024B9AC\n.word .L0024BA48\n.word .L0024BBC4\n.word .L0024BD94\n.word .L0024BDEC\n.word .L0024BE44\n.word .L0024D734\n.word .L0024D734\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00248848\n.word .L00248860\n.word .L00248870\n.word .L00248880\n.word .L00248890\n.word .L002488A0\n.word .L00248950\n.word .L0024897C\n.word .L00248A04\n.word .L00248A18\n.word .L00248A2C\n.word .L00248A48\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L00248AC0\n.word .L00248AD0\n.word .L00248B0C\n.word .L00248B1C\n.word .L00248B4C\n.word .L00248B70\n.word .L00248BB8\n.word .L00248BE8\n.word .L00248BF8\n.word .L00248C38\n.word .L00248C78\n.word .L00248CC8\n.word .L00248D00\n.word .L00248D18\n.word .L00248D3C\n.word .L00248D60\n.word .L00248D88\n.word .L00248D98\n.word .L00248DA8\n.word .L00248DB8\n.word .L00248DD0\n.word .L00248DF8\n.word .L00248E10\n.word .L00248E30\n.word .L00248E48\n.word .L00248E60\n.word .L00248E8C\n.word .L00248E9C\n.word .L00248EAC\n.word .L00248EC8\n.word .L00248EEC\n.word .L00248F20\n.word .L00248F60\n.word .L00248F94\n.word .L00248FD4\n.word .L00248FF0\n.word .L00249074\n.word .L002490C8\n.word .L002490F4\n.word .L00249110\n.word .L00249140\n.word .L00249278\n.word .L002492B4\n.word .L0024930C\n.word .L00249338\n.word .L0024938C\n.word .L002493B8\n.word .L002493DC\n.word .L0024944C\n.word .L00249468\n.word .L0024950C\n.word .L00249558\n.word .L00249570\n.word .L00249580\n.word .L0024959C\n.word .L002495C4\n.word .L002495D4\n.word .L0024961C\n.word .L00249670\n.word .L00249694\n.word .L002496D8\n.word .L00249734\n.word .L0024975C\n.word .L00249778\n.word .L00249790\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00249700\n.word .L00249708\n.word .L00249710\n.word .L00249718\n.word .L00249720\n.word .L00249728\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L00249994\n.word .L002499D4\n.word .L0024D734\n.word .L0024D734\n.word .L00249A14\n.word .L00249A54\n.word .L00249A94\n.word .L00249AD4\n.word .L00249B14\n.word .L00249B54\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L0024D734\n.word .L00249B94\n.word .L00249BFC\n.word .L00249C3C\n.word .L00249C7C\n.word .L00249CBC\n.word .L00249CFC\n.word .L00249D7C\n.word .L00249DBC\n.word .L00249DFC\n.word .L00249E3C\n.word .L00249E7C\n.word .L00249F04\n.word .L00249F18\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024A600\n.word .L0024A63C\n.word .L0024A68C\n.word .L0024A6D4\n.word .L0024A714\n.word .L0024A75C\n.word .L0024A79C\n.word .L0024A7E4\n.word .L0024A824\n.word .L0024A86C\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024ACE8\n.word .L0024AD00\n.word .L0024AD28\n.word .L0024AD50\n.word .L0024AD6C\n.word .L0024AD88\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024AE10\n.word .L0024AE18\n.word .L0024AE20\n.word .L0024AE28\n.word .L0024AE30\n.word .L0024AE38\n.word func_0\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024AED8\n.word .L0024AEEC\n.word .L0024AF0C\n.word .L0024AF20\n.word .L0024AF40\n.word .L0024AF54\n.word .L0024AF74\n.word func_0\n.text\n");
-__asm__(".rdata\n.align 4\n.word .L0024BEB8\n.word .L0024BECC\n.word .L0024BF0C\n.word .L0024BF4C\n.word .L0024BFA8\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execExt3Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET);
+/* Prize.h:30 in the original: PRIZE_PARAM's constructor */
+struct PRIZE_PARAM_C : PRIZE_PARAM {
+    PRIZE_PARAM_C() { uiFlag = 0; uiPrizeFlag = 0; }
+};
+struct FogColorStruct {
+    INT color;
+    INT AnimFrame;
+};
+struct FogNomalStruct {
+    FLOAT Param;
+    INT AnimFrame;
+};
+struct BlurStruct {
+    INT param;
+    INT AnimFrame;
+};
+struct BlurAnimStruct {
+    FVECTOR param;
+    INT AnimFrame;
+};
+struct CrossFadeColorStruct {
+    INT color;
+    INT AnimFrame;
+};
+struct AvatarMotionParamC {
+    FLOAT _fPlaySpeed;
+    INT _iChangeHokanRate;
+    SHORT _nMotionID;
+    SHORT _nFlag;
+    AvatarMotionParamC() { _fPlaySpeed = 1.0f; _nFlag = 0; }
+};
+struct AvatarMotionParamEx : AvatarMotionParamC {
+    UINT _nRsrcID;
+    UINT _nInfo;
+    UINT _nDakkoRsrcID;
+    UINT _nDakkoMotionID;
+    AvatarMotionParamEx() { _nInfo = 0; _nDakkoRsrcID = 0; }
+};
+struct AvatarMotionFrameParam {
+    INT _iFrame;
+    INT _nFrag;
+    AvatarMotionFrameParam() { _iFrame = 0; _nFrag = 0; }
+};
+struct AvatarFadeParam {
+    FLOAT _fTarget;
+    UINT _nTime;
+};
+struct AvatarMotionParamEfx {
+    UINT _nRsrcID;
+    UINT _nMotionID;
+    FLOAT _fPlaySpeed;
+    UINT _StartFrame;
+    UINT _nHokanFrame;
+    UINT _nEfxNo;
+    UINT _nFlag;
+    AvatarMotionParamEfx() {
+        _nRsrcID = 0;
+        _nMotionID = 0;
+        _fPlaySpeed = 1.0f;
+        _StartFrame = 0;
+        _nHokanFrame = 0;
+        _nEfxNo = 0;
+        _nFlag = 0;
+    }
+};
+struct AvatarScaleParam {
+    FVECTOR _vTarget;
+    UINT _nTime;
+};
+struct AvatarSetLook {
+    FVECTOR LookMin;
+    FVECTOR LookMax;
+    FLOAT Rate;
+    FLOAT OffsetY;
+    INT TargetID;
+    char* BoneName;
+};
+struct AvatarSetLookAngle {
+    FVECTOR LookMin;
+    FVECTOR LookMax;
+    FVECTOR LookAngle;
+    FLOAT Rate;
+    char* BoneName;
+};
+struct AvatarChangeTexture {
+    char* DstTexName;
+    char* SrcTexName;
+};
+struct AvatarEffectAttach {
+    char* EffectName;
+    INT EfxNo;
+    char* BoneName;
+    INT Type;
+    AvatarEffectAttach() { EffectName = NULL; EfxNo = 0; BoneName = NULL; Type = 0; }
+};
+struct AvatarModelDispParam {
+    INT _iNo;
+    INT _nState;
+    AvatarModelDispParam() { _iNo = 0; _nState = 0; }
+};
+struct FadeCreateParam {
+    INT kind;
+    FLOAT fRate;
+    INT layer;
+};
+namespace MoogleShop {
+/* A DLL class: its constructor is not linked into the main program (the original calls address 0). */
+class CMoogleShopCore : public CTask {
+    BYTE _pad[0x2F0 - sizeof(CTask)];
+public:
+    CMoogleShopCore(CTask* pParent);
+};
+}
+__asm__(".weak __Q210MoogleShop15CMoogleShopCoreP5CTask\n__Q210MoogleShop15CMoogleShopCoreP5CTask = 0\n");
+extern CARD_DATA cardDataTbl_00493C68[]; /* CardKind.h's static table: VSME's copy is still asm data */
+/* CardKind.h:554-558 in the original (a CARD constructor) */
+static inline void setCard(CARD& card, USHORT nKind, CHAR nNumber) {
+    card.m_nId = 0;
+    card.m_nNumber = nNumber;
+    card.m_nKind2 = nKind;
+    card.m_nCategory0 = cardDataTbl_00493C68[card.m_nKind].nCategory0;
+    card.m_nCategory1 = cardDataTbl_00493C68[card.m_nKind].nCategory1;
+}
+/* CollUtil.h:194/245 in the original */
+static inline CCollUtil* collUtilInstance() {
+    CCollUtil*& instance = CCollUtil::m_pInstance;
+    if (!instance) AssertApp(COLLUTIL_H_PATH, 194, "m_pInstance", 0);
+    return instance;
+}
+static inline void enableChipCollision(FVECTOR& vChipCenter, BOOL fg) { collUtilInstance()->_enableChipCollision(vChipCenter, fg); }
+/* effect.h:433 in the original */
+static inline void effectSetFlag4(CEffect* p) { p->m_iFlag |= 4; }
+/* Entity.h:176 in the original */
+static inline void setEntityFlagBit(CEntity* p, UINT nFlag, BOOL bSet) {
+    if (bSet) p->setEntityFlag(nFlag, 0); else p->setEntityFlag(0, nFlag);
+}
+/* SceneEnv.h:51 in the original */
+static inline void sceneSetColor(INT nType, INT nFrame, const FVECTOR& vCol) {
+    CSceneEnv::setColor((ObjType::eObjBit)(nType & 0xFFFF), (FLOAT)nFrame, vCol, NULL, (UINT)nType >> 16);
+}
+class CRsrcDB {
+public:
+    static void removeGroup(INT nGroup, INT nMember);
+};
+/* RsrcDef.h:171 in the original */
+static inline INT makeRsrcID(INT nGroup, INT nMember) { return nGroup * 10000 + nMember; }
+/* SceneInfo.h:223 in the original */
+static inline BOOL roomHasStorageInfo(const RoomInfo* p) { return (UINT)p->_pSrcInfo | (UINT)p->_pStorageInfo | (UINT)p->_pStorageInfo2; }
+INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
+    INT nID;
+    INT c;
+    INT t;
+    INT r;
+    INT i7;
+    INT i6;
+    INT i5;
+    INT i4;
+    INT i3;
+    INT i2;
+    INT i1;
+
+    do {
+        r = 1;
+        switch (op) {
+        case 0xAA: {
+            i7 = m_S[m_SP--].I;
+            i6 = m_S[m_SP--].I;
+            i5 = m_S[m_SP--].I;
+            i4 = m_S[m_SP--].I;
+            i3 = m_S[m_SP--].I;
+            i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            ATP& atp = m_pCurrentActor->_ATP;
+            ChatWndCreateCTDParam CWCP;
+            ChatWndSetWordsParam CWP;
+            CWCP.pos.setPoint(-1, -1);
+            CWCP.ctdID = i2;
+            CWCP.waitFrame = i3 & 0xFFFF;
+            CWP.ctdID[0] = i4;
+            CWP.ctdID[1] = i5;
+            CWP.ctdID[2] = i6;
+            CWP.ctdID[3] = i7;
+            CWCP.pCwswp = &CWP;
+            ctd_cal(m_pCurrentActor->_pAvatar, i2, i3, &CWCP);
+            if (i3 < 0) {
+                CChatMan::instance().reqCommand(0x409, &CWCP, i1);
+            } else {
+                close_dest_se(i1);
+                CChatMan::instance().reqCommand(0x405, &CWCP, i1);
+                WinOpenSE(i2);
+                CChatMan::instance().reqCommand(0x3EA, &CWCP, i1);
+                if (i3 & 0x20000000) {
+                    INT n = 0;
+                    CChatMan::instance().reqCommand(0x413, &n, i1);
+                }
+            }
+            if (i3 & 0x10000000) break;
+            if (i3 & 0x40000000) {
+                INT n = 0;
+                CChatMan::instance().reqCommand(0x404, &n, i1);
+            } else {
+                INT n = 60;
+                CChatMan::instance().reqCommand(0x404, &n, i1);
+            }
+            atp.wait_key = i1;
+            atp.status = 12;
+            atp.next_address = m_Pctr;
+            ret = ATEL_RET_MS_WAIT; r = 3;
+            break;
+        }
+        case 0xAC: {
+            BOOL bFlag = m_S[m_SP--].I;
+            FVECTOR vPos;
+            vPos.w = 0.0f;
+            vPos.z = m_S[m_SP--].F;
+            vPos.y = m_S[m_SP--].F;
+            vPos.x = m_S[m_SP].F;
+            enableChipCollision(vPos, bFlag);
+            break;
+        }
+        case 0xAD: {
+            OpStack param2;
+            OpStack param1;
+            param2.I = m_S[m_SP--].I;
+            param1.I = m_S[m_SP--].I;
+            switch (m_S[m_SP].I) {
+            case 0:
+                TRACE("%d\n", param1.I);
+                break;
+            case 1:
+                TRACE("%f\n", param1.F);
+                break;
+            case 2:
+                CPadIO::resetVibration();
+                break;
+            case 3:
+                CSceneEnv::setStop((ObjType::eObjBit)param1.I);
+                break;
+            case 4:
+                CSceneEnv::setStop((ObjType::eObjBit)0);
+                break;
+            case 5:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    CARD card;
+                    setCard(card, param1.I, param2.I);
+                    card = CCard::correctCardRank(card);
+                    if (card.m_nKind) CPlayer::notifyGetPrize(param1.I, param2.I, 2);
+                }
+                break;
+            case 6:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    CCard::deleteCard(param1.I, param2.I);
+                }
+                break;
+            case 7:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    if (CGameWork::getByte(0, 0x61) == 3) break;
+                    TRACE("\x83X\x83g\x83" "b\x83N\x8bZ\x8fK\x93\xbe:%d\n", param1.I);
+                    CTechnic::addTechnic(param1.I);
+                    if (param2.I) new (__FILE__ "(2623)") CLevelUp(CTaskMan::getSysTask(1), param1.I);
+                }
+                break;
+            case 8:
+                CSound::fadeoutAllSE(param1.I, 1);
+                break;
+            case 9:
+                CSound::fadeAllSE(param1.I, param2.I);
+                break;
+            case 10:
+                CMapEnemyManager::setEncountEventEnemy(param1.I, 0);
+                CSceneInfo::reqEnterBattle(0);
+                break;
+            case 11: {
+                PRIZE_PARAM_C param;
+                param.PrizeKind = 0x31;
+                setFVector(param.vPos, 0.0f, 0.8f, 3.0f);
+                param.iNumber = 0;
+                param.uiFlag = 0;
+                setFVector(param.vRot, 0.0f, 0.0f, 0.0f);
+                param.fSpeed = 0.0f;
+                CEntityFactory::getInstance()->createPrize(param, NULL);
+                break;
+            }
+            case 15:
+                CShadowModelMan::setADensity(param1.F);
+                break;
+            case 16:
+                new (__FILE__ "(2672)") CAtelTutorial(CTaskMan::getSysTask(0x1A));
+                break;
+            case 17:
+                m_S[m_SP].I = CSceneInfo::getCurrentFloorNumber();
+                break;
+            case 18:
+                CPlaySpeedCtrl::setPlaySpeed(param1.F);
+                TRACE("Speed %f\n", param1.F);
+                break;
+            case 19:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    CTechnic::clearAll();
+                }
+                break;
+            case 20:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    TRACE("CARD WINDW CLOSE WAIT START\n");
+                    acWaitCardWind(*m_pCurrentActor, m_Pctr);
+                    ret = ATEL_RET_CARD_WND_WAIT; r = 3;
+                }
+                break;
+            case 21:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    TRACE("reqEnterDorr:ATEL sys_ctrl\n");
+                    CSceneInfo::reqEnterDoor((DOOR_ID)param1.I);
+                }
+                break;
+            case 22:
+                CShadowModelMan::setCDensity(param1.F);
+                break;
+            case 23:
+                m_pAtelCard = new (__FILE__ "(2713)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 0, param1.I, param2.I);
+                break;
+            case 24:
+                m_pAtelCard = new (__FILE__ "(2716)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 1, param1.I, param2.I);
+                break;
+            case 25:
+                m_pAtelCard = new (__FILE__ "(2719)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 2, param1.I, param2.I);
+                break;
+            case 26:
+                m_pAtelCard->out();
+                break;
+            case 27:
+                g_pPlayer->cmdRevolver_rollDeck(param1.I);
+                break;
+            case 28:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    PLM::setReqLoadPlayer(0);
+                }
+                break;
+            case 29:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    PLM::setReqLoadBattlePlayer(0);
+                }
+                break;
+            case 30:
+                TRACE("ATEL:cancelLoadRCF:%d,%d\n", param1.I, param2.I);
+                CRcf::cancelLoadRCF(param1.I, param2.I);
+                break;
+            case 31:
+                m_S[m_SP].I = CSceneInfo::getPrevAreaNum();
+                break;
+            case 32:
+                m_S[m_SP].I = CSceneInfo::getPrevSceneNum();
+                break;
+            case 33:
+                m_S[m_SP].I = CSceneInfo::getPrevAreaScene();
+                break;
+            case 34:
+                CEntityFactory::getInstance()->createEntity(0xB, 0x86, NULL, NULL);
+                break;
+            case 35:
+                CEntityFactory::getInstance()->createEntity(0xB, 0x87, NULL, NULL);
+                break;
+            case 36:
+                ((CMapEnemyManager*)CTaskMan::getSysTask(0x18))->deleteEnemies();
+                break;
+            case 37:
+                CEntityFactory::getInstance()->createEntity(0xB, 0x72, NULL, NULL);
+            case 38:
+                g_pPlayer->getPlayerCamera()->initCamera(1, 1, NULL);
+                break;
+            case 39:
+                g_pPlayer->getPlayerCamera()->initCamera(3, 0, NULL);
+                break;
+            case 40:
+                TRACE("ATEL:OPMEN DOOR: %d, %d\n", param1.I, param2.I);
+                CSceneInfo::setDoorStat((DOOR_STAT)2, (DOOR_ID)param1.I, param2.I);
+                break;
+            case 41:
+                m_S[m_SP].I = CSceneInfo::getCurrentRoomID();
+                break;
+            case 42:
+                m_S[m_SP].I = CSceneInfo::getPrevRoomID();
+                break;
+            case 43:
+                m_S[m_SP].I = CSceneInfo::getEnteredDoorID();
+                break;
+            case 44: {
+                INT flag = CGameWork::getInt(0, param1.I);
+                CGameWork::setInt(0, param1.I, flag | param2.I);
+                break;
+            }
+            case 45: {
+                INT flag = CGameWork::getInt(0, param1.I);
+                flag &= param2.I;
+                if (flag) {
+                    m_S[m_SP].I = 1;
+                } else {
+                    m_S[m_SP].I = 0;
+                }
+                break;
+            }
+            case 46:
+                if (g_pPlayer) g_pPlayer->changeMotion(param1.I, 0, 0, 0, 0, 0);
+                break;
+            case 47:
+                if (g_pPlayer) g_pPlayer->changeMotionEx(param1.I, param2.I, 0, 0, -1, 0, 0);
+                break;
+            case 48: {
+                INT n = getRand() % (param2.I - param1.I) + param1.I;
+                TRACE("MIN:%d, MAX:%d,A:%d\n", param1.I, param2.I, n);
+                m_S[m_SP].I = n;
+                break;
+            }
+            case 49:
+                CSceneInfo::showAllHiddenDoorsOfCurrentFloor();
+                TRACE("\x83\x89\x83X\x83g\x83t\x83\x8d\x83" "A\x82\xd6\x82\xcc\x94\xe0\x95\\\x8e\xa6\n");
+                break;
+            case 50: {
+                CTask* pTask = CTaskMan::getSysTask(0x19);
+                if (!pTask) break;
+                SLContainerT<CTask>* pContainer = ((CBattleEnemyManager*)pTask)->getFirstBattleEnemy();
+                while (pContainer) {
+                    CTask* p = pContainer->getValue();
+                    if (p) {
+                        if (p->getTypeID() == 0x1004) {
+                            if ((UINT)((CEntity*)p)->getID() % 10000 == 122) {
+                                ((CEntity*)p)->changeMotion(param1.I, 0, 0, 0, 0, 0);
+                                break;
+                            }
+                        }
+                    }
+                    pContainer = pContainer->getNext();
+                }
+                break;
+            }
+            case 51: {
+                TRACE("ATEL:\x83\x8f\x81[\x83\x8b\x83h\x83Z\x83\x8c\x83N\x83g\x8c\xc4\x82\xd1\x8fo\x82\xb5\n");
+                RoomInfo* pRoom = CSceneInfo::getRoomInfo(-1);
+                if (!pRoom) break;
+                CGimmickManager* pGM = (CGimmickManager*)CTaskMan::getSysTask(0x11);
+                CEntity* pDoor = pGM->getDoor(pRoom->_doors[0]._id, NULL, NULL);
+                g_pPlayer->cmdState_initWorldSelect(pDoor->getHandle());
+                break;
+            }
+            case 52:
+                TRACE("ATEL:UNAVAILABLE DOOR: %d, %d\n", param1.I, param2.I);
+                CSceneInfo::setDoorStat((DOOR_STAT)4, (DOOR_ID)param1.I, param2.I);
+                break;
+            case 53:
+                TRACE("ATEL:\x83S\x81[\x83\x8b\x95\x94\x89\xae\x8aJ\x82\xa2\x82\xbd\n");
+                CSceneInfo::openGoalDoor();
+                break;
+            case 54: {
+                INT n = CStatus::isLevelUp();
+                TRACE("\x83\x8c\x83x\x83\x8b\x83" "A\x83" "b\x83v\x81H %d\n", n);
+                m_S[m_SP].I = n;
+                break;
+            }
+            case 55: {
+                CGimmickManager* pGM = (CGimmickManager*)CTaskMan::getSysTask(0x11);
+                SLContainerT<CTask>* pContainer = pGM->getChildren().getHead();
+                while (pContainer) {
+                    CTask* p = pContainer->getValue();
+                    if (p) {
+                        if (p->getTypeID() == 0x1005) {
+                            switch ((UINT)((CEntity*)p)->getID() % 10000) {
+                            case 0x43E:
+                            case 0x43F:
+                            case 0x440:
+                                if (param1.I == 1) {
+                                    setEntityFlagBit((CEntity*)p, 0x10000, FALSE);
+                                    g_pPlayer->cancelLockon();
+                                    ((CEntity*)p)->bodyCollOff(-1);
+                                } else {
+                                    INT st = pGM->getStorageGimmickState(((CBaseGimmick*)p)->getUniqueID());
+                                    if (st <= 0 || (UINT)((CEntity*)p)->getID() % 10000 == 0x43E) {
+                                        setEntityFlagBit((CEntity*)p, 0x10000, TRUE);
+                                        ((CEntity*)p)->bodyCollOn(-1);
+                                    }
+                                }
+                                break;
+                            case 0x43D:
+                                if (param1.I == 0) {
+                                    setEntityFlagBit((CEntity*)p, 0x10000, FALSE);
+                                    g_pPlayer->cancelLockon();
+                                    ((CEntity*)p)->bodyCollOff(-1);
+                                } else {
+                                    setEntityFlagBit((CEntity*)p, 0x10000, TRUE);
+                                    ((CEntity*)p)->bodyCollOn(-1);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    pContainer = pContainer->getNext();
+                }
+                break;
+            }
+            case 56:
+                new (__FILE__ "(3000)") MoogleShop::CMoogleShopCore(CTaskMan::getSysTask(1));
+                break;
+            case 57:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    if (CGameWork::getByte(0, 0x61) == 3) break;
+                    TRACE("TECH WINDW CLOSE WAIT START\n");
+                    acWaitTechWind(*m_pCurrentActor, m_Pctr);
+                    ret = ATEL_RET_TECH_WND_WAIT; r = 3;
+                }
+                break;
+            case 58:
+                if (!CGameWork::getFlag(1, 0x33)) {
+                    CCard::addCard(param1.I, param2.I);
+                }
+                break;
+            case 59: {
+                INT world;
+                if (CGame::isSoraGame())
+                    world = CSceneInfo::getWorldID(CGameWork::getInt(0, 0x33) - 1);
+                else
+                    world = CSceneInfo::getWorldID(CGameWork::getInt(0, 0x34) - 1);
+                TRACE("ATEL:\x83\x8f\x81[\x83\x8b\x83h\x83N\x83\x8a\x83" "A\x81" "F%d\n", world);
+                CJiminyMemoFlag::checkEvent(1, world, 0);
+                break;
+            }
+            case 60:
+                CJiminyMemoFlag::checkEvent(2, CSceneInfo::getCurrentFloorNumber() - 1, 0);
+                TRACE("ATEL:\x83t\x83\x8d\x83" "A\x83N\x83\x8a\x83" "A\n");
+                break;
+            case 61:
+                CJiminyMemoFlag::checkEvent(6, 0, 0);
+                TRACE("ATEL:\x83\x82\x83\x93\x83X\x83g\x83\x8d\x83U\x83R\x83o\x83g\x83\x8b\x83N\x83\x8a\x83" "A\n");
+                break;
+            case 62: {
+                SLContainerT<CTask>* pContainer = ((CGimmickManager*)CTaskMan::getSysTask(0x11))->getChildren().getHead();
+                while (pContainer) {
+                    CTask* p = pContainer->getValue();
+                    if (p) {
+                        if (p->getTypeID() == 0x1006) {
+                            setEntityFlagBit((CEntity*)p, 0x10000, FALSE);
+                            g_pPlayer->cancelLockon();
+                        }
+                    }
+                    pContainer = pContainer->getNext();
+                }
+                break;
+            }
+            case 63:
+                if (g_pPlayer) {
+                    m_S[m_SP].I = g_pPlayer->getPlayerState();
+                }
+                break;
+            case 64:
+                CTitleReportDllStarter::create(CTaskMan::getSysTask(1), 2, 0);
+                break;
+            case 65:
+                TRACE("\x83G\x83N\x83X\x83g\x83\x8a\x81[\x83\x80\x81" "F\x83X\x83g\x83" "b\x83N\x91S\x95\x94\x8ao\x82\xa6\x82\xe9\x81" "A\x83J\x81[\x83h\x91S\x95\x94\x89\xf0\x8b\xd6\x81" "A\x95W\x8f\x80\x83X\x83L\x83\x8b\x91S\x8eg\x97p\x89\xc2\n");
+                CTechnic::setAll();
+                CGameWork::setInt(0, 0x21, -1);
+                CGameWork::setInt(0, 0x2D, -1);
+                CGameWork::setInt(0, 0x24, -1);
+                break;
+            case 66:
+                g_pPlayer->getPlayerCamera()->initCamera(1, 0, NULL);
+                break;
+            case 67:
+                CGame::dispOffFadeMask();
+                break;
+            case 68:
+                WorldCard::CWorldCardSeq::create(CTaskMan::getSysTask(1), param1.I);
+                break;
+            case 69:
+                acWaitWorldCardWind(*m_pCurrentActor, m_Pctr);
+                ret = ATEL_RET_WORLD_CARD_WND_WAIT; r = 3;
+                break;
+            case 70:
+                CCard::setCardPossible(param1.I);
+                break;
+            case 71:
+                TRACE("ATEL:CGlare::fadein\n");
+                CGlare::off(0.0f);
+                CGlare::fadein(param1.F);
+                break;
+            case 72:
+                TRACE("ATEL:CGlare::fadeout\n");
+                CGlare::off(0.0f);
+                CGlare::fadeout(param1.F);
+                break;
+            case 73:
+                CGlare::on(0.0f);
+                break;
+            case 74:
+                TRACE("ATEL:\x82g\x82o\x89\xf1\x95\x9c\n");
+                if (g_pPlayer) {
+                    g_pPlayer->addHP(g_pPlayer->m_iMaxHP, 0, 0);
+                } else {
+                    TRACE("\x83v\x83\x8c\x83" "C\x83\x84\x81[\x82\xa2\x82\xc8\x82\xa2\n");
+                }
+                break;
+            case 75: {
+                INT n = 0;
+                switch (param1.I) {
+                case 0:
+                    n = 11;
+                    break;
+                case 1:
+                    n = 12;
+                    break;
+                case 2:
+                    n = 13;
+                    break;
+                case 3:
+                    n = 14;
+                    break;
+                case 4:
+                    n = 15;
+                    break;
+                case 5:
+                    n = 16;
+                    break;
+                }
+                CJiminyMemoFlag::checkEvent(10, n, 0);
+                break;
+            }
+            case 76:
+                acWaitCrossFade(*m_pCurrentActor, m_Pctr);
+                ret = ATEL_RET_CLOSS_FADE_WAIT; r = 3;
+                break;
+            case 77:
+                TRACE("ATEL:\x83o\x83" "b\x83N\x83" "A\x83" "b\x83v\n");
+                CGameWork::backup((CGameWork::BACKUP)0);
+                break;
+            case 78:
+                CJiminyMemoFlag::checkEvent(9, 0, 0);
+                break;
+            case 79:
+                TRACE("ATEL:CLOSE DOOR: %d, %d\n", param1.I, param2.I);
+                CSceneInfo::setDoorStat((DOOR_STAT)1, (DOOR_ID)param1.I, param2.I);
+                break;
+            }
+            break;
+        }
+        case 0xAE: {
+            F_UL fl;
+            fl.ul = m_S[m_SP--].I;
+            nID = m_S[m_SP--].I;
+            cam_ajt(m_S[m_SP].I, fl, nID);
+            break;
+        }
+        case 0xAF: {
+            i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            nID = searchActor((CHAR*)(m_pDseg + c));
+            FLOAT f = 8000.0f;
+            if (nID < 0) {
+                _TRACE(m_bTrace, "GPS NG01:%s\n", m_pDseg + c);
+            } else {
+                CAvatar* p = getAvatar(nID);
+                if (p) {
+                    FVECTOR vPos;
+                    p->getNowPosition(vPos);
+                    switch (i1) {
+                    case 0:
+                        f = vPos.x;
+                        break;
+                    case 1:
+                        f = vPos.y;
+                        break;
+                    case 2:
+                        f = vPos.z;
+                        break;
+                    case 3:
+                        f = RAD2DEG(p->getDirection());
+                        break;
+                    }
+                }
+            }
+            m_S[++m_SP].F = f;
+            break;
+        }
+        case 0xE5: {
+            INT i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + c));
+            switch (i1) {
+            case 2:
+                getAvatar(nIdx)->reqCommand(6, NULL, 0);
+                TRACE("NAME TO SHOW :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 3:
+                getAvatar(nIdx)->reqCommand(6, NULL, 1);
+                TRACE("NAME TO HIDE :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 6:
+                getAvatar(nIdx)->reqCommand(0x1D, NULL, 1);
+                TRACE("GRAVITY ON :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 7:
+                getAvatar(nIdx)->reqCommand(0x1D, NULL, 0);
+                TRACE("GRAVITY OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 8:
+                getAvatar(nIdx)->reqCommand(0x1E, NULL, 1);
+                TRACE("MAP_COLL_ON :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 9:
+                getAvatar(nIdx)->reqCommand(0x1E, NULL, 0);
+                TRACE("MAP_COLL_OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 10:
+                getAvatar(nIdx)->reqCommand(0x1F, NULL, 1);
+                TRACE("BODY_COLL_ON :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 11:
+                getAvatar(nIdx)->reqCommand(0x1F, NULL, 0);
+                TRACE("BODY_COLL_OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 39:
+                getAvatar(nIdx)->reqCommand(1, NULL, 0);
+                m_pCurrentActor->_ATP.status = 25;
+                m_pCurrentActor->_pAvatar = NULL;
+                m_ActorTbl[nIdx]._pAvatar = NULL;
+                TRACE("REMOVE NPC :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 40:
+                getAvatar(nIdx)->reqCommand(0x1A, NULL, 1);
+                TRACE("MAKEUP_MOTION_INVALID :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 41:
+                getAvatar(nIdx)->reqCommand(0x1A, NULL, 0);
+                TRACE("MAKEUP_MOTION_VALID :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 42:
+                getAvatar(nIdx)->reqCommand(0x34, NULL, 0);
+                TRACE("AVTCMD_SET_LOOK_START :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 43:
+                getAvatar(nIdx)->reqCommand(0x35, NULL, 0);
+                TRACE("AVTCMD_SET_LOOK_STOP :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 44: {
+                FLOAT f = 16.0f;
+                getAvatar(nIdx)->reqCommand(0x35, NULL, 0);
+                getAvatar(nIdx)->reqCommand(0x36, &f, 0);
+                TRACE("AVTCMD_SET_LOOK_END :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            }
+            case 45:
+                getAvatar(nIdx)->reqCommand(0x24, NULL, 0);
+                TRACE("AVTCMD_CREATE_LEGIK :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 46:
+                getAvatar(nIdx)->reqCommand(0x21, NULL, 1);
+                TRACE("AVTCMD_SET_IK  ON :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 47:
+                getAvatar(nIdx)->reqCommand(0x21, NULL, 0);
+                TRACE("AVTCMD_SET_IK  OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 48:
+                getAvatar(nIdx)->reqCommand(0x22, NULL, 1);
+                TRACE("AVTCMD_SET_LOCK_ON  ON :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 49: {
+                getAvatar(nIdx)->reqCommand(0x22, NULL, 0);
+                TRACE("AVTCMD_SET_LOCK_ON  OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                INT index = searchLockOnNpc();
+                if (index != -1) {
+                    if (m_ActorTbl[index]._pAvatar == getAvatar(nIdx)) {
+                        g_pPlayer->cancelLockon();
+                    }
+                }
+                break;
+            }
+            case 50:
+                getAvatar(nIdx)->reqCommand(0x23, NULL, 1);
+                TRACE("AVTCMD_SET_NEAR_CLIP  OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            case 51:
+                getAvatar(nIdx)->reqCommand(0x23, NULL, 0);
+                TRACE("AVTCMD_SET_NEAR_CLIP  OFF :%s\n", m_ActorTbl[nIdx]._ATP.name);
+                break;
+            }
+            break;
+        }
+        case 0xE6: {
+            INT i6 = m_S[m_SP--].I;
+            INT i5 = m_S[m_SP--].I;
+            FLOAT f4 = m_S[m_SP--].F;
+            FLOAT f3 = m_S[m_SP--].F;
+            FLOAT f2 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            INT nID = searchActor((CHAR*)(m_pDseg + c));
+            CameraManCreateParam param;
+            TRACE("CHT\n");
+            param.pathDateTargetID = nID;
+            param.changeFlag = i1;
+            param.fOffsetX = f2;
+            param.fOffsetY = f3;
+            param.fOffsetZ = f4;
+            param.fFullFrame = (FLOAT)i5;
+            param.fStartEndFrame = (FLOAT)i6;
+            param.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x464, &param, 0);
+            break;
+        }
+        case 0xE7: {
+            INT HokanRate = m_S[m_SP--].I;
+            FLOAT PlaySpeed = m_S[m_SP--].F;
+            INT MotionID = m_S[m_SP].I;
+            AvatarMotionParamC param;
+            param._nMotionID = MotionID & 0xFFF;
+            param._fPlaySpeed = PlaySpeed;
+            param._nFlag = (MotionID >> 12) & 7;
+            param._iChangeHokanRate = HokanRate;
+            if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0x14, &param, 0);
+            break;
+        }
+        case 0xE8: {
+            INT HokanRate = m_S[m_SP--].I;
+            AvatarMotionParamC param;
+            param._fPlaySpeed = m_S[m_SP--].F;
+            i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            nID = searchActor((CHAR*)(m_pDseg + c));
+            if (nID < 0) {
+                _TRACE(m_bTrace, "MTO NG01:%s\n", m_pDseg + c);
+                break;
+            }
+            CAvatar* p = getAvatar(nID);
+            if (p) {
+                param._nMotionID = i1 & 0xFFF;
+                param._nFlag = (i1 >> 12) & 7;
+                param._iChangeHokanRate = HokanRate;
+                p->reqCommand(0x14, &param, 0);
+            }
+            break;
+        }
+        case 0xE9: {
+            AvatarMotionFrameParam param;
+            param._nFrag = m_S[m_SP--].I;
+            param._iFrame = m_S[m_SP].I;
+            m_pCurrentActor->_pAvatar->reqCommand(0x19, &param, 0);
+            break;
+        }
+        case 0xEA: {
+            AvatarMotionFrameParam param;
+            param._nFrag = m_S[m_SP--].I;
+            param._iFrame = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            nID = searchActor((CHAR*)(m_pDseg + c));
+            if (nID < 0) {
+                _TRACE(m_bTrace, "MTO NG01:%s\n", m_pDseg + c);
+                break;
+            }
+            CAvatar* p = getAvatar(nID);
+            if (p) p->reqCommand(0x19, &param, 0);
+            break;
+        }
+        case 0xEB: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            nID = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nID > 0 && m_pCurrentActor->_pAvatar) {
+                AvatarRotateParam pr;
+                if (i2 == 9) {
+                    pr._nType = i2;
+                } else if (i2 == 10) {
+                    pr._nType = i2;
+                } else {
+                    pr._nType = 2;
+                }
+                pr._fTime = (FLOAT)i1 * 0.016666668f;
+                pr._nTargetID = nID;
+                m_pCurrentActor->_pAvatar->reqCommand(0xE, &pr, 0);
+            }
+            break;
+        }
+        case 0xEC: {
+            INT i1 = m_S[m_SP--].I;
+            FLOAT f = m_S[m_SP].F;
+            AvatarFadeParam param;
+            param._fTarget = f;
+            param._nTime = i1;
+            m_pCurrentActor->_pAvatar->reqCommand(0x10, &param, -1);
+            break;
+        }
+        case 0xF2: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            FLOAT f = m_S[m_SP].F;
+            AvatarFadeParam param;
+            param._fTarget = f;
+            param._nTime = i1;
+            m_pCurrentActor->_pAvatar->reqCommand(0x10, &param, i2 - 1);
+            break;
+        }
+        case 0xF3: {
+            FLOAT f = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP].I;
+            if (i1) {
+                CDeFocus::setManual(CDeFocus::getNear(), f);
+            } else {
+                CDeFocus::setManual(f, CDeFocus::getFar());
+            }
+            break;
+        }
+        case 0xF4: {
+            INT Flag = m_S[m_SP--].I;
+            INT HokanFrame = m_S[m_SP--].I;
+            FLOAT Speed = m_S[m_SP--].F;
+            INT MotionID = m_S[m_SP--].I;
+            INT ResrcID = m_S[m_SP].I;
+            TRACE("AED %d : %d : %f : %d : %d\n", ResrcID, MotionID, Speed, HokanFrame, Flag);
+            AvatarMotionParamEx2 mot;
+            mot._nRsrcID = ResrcID;
+            mot._nMotionID = MotionID;
+            mot._fPlaySpeed = Speed;
+            mot._nHokanFrame = HokanFrame;
+            mot._nInfo = Flag;
+            m_pCurrentActor->_pAvatar->reqCommand(0x16, &mot, 0);
+            break;
+        }
+        case 0xF5: {
+            INT Frame = m_S[m_SP--].I;
+            OpStack Param = m_S[m_SP--];
+            INT type = m_S[m_SP].I;
+            FogColorStruct Color;
+            FogNomalStruct Nomal;
+            switch (type) {
+            case 0:
+                Color.color = Param.I;
+                TRACE("FOG %d : R:%d : G:%d : B:%d : %d\n", type, (Param.I >> 16) & 0xFF, (Param.I >> 8) & 0xFF, Param.I & 0xFF, Frame);
+                CAtelFog::m_pInstance->reqCommand(0x5DC, &Color, 0);
+                break;
+            case 1:
+                Color.color = Param.I;
+                TRACE("FOG %d : R:%d : G:%d : B:%d : %d\n", type, (Param.I >> 16) & 0xFF, (Param.I >> 8) & 0xFF, Param.I & 0xFF, Frame);
+                Color.AnimFrame = Frame;
+                CAtelFog::m_pInstance->reqCommand(0x5DD, &Color, 0);
+                break;
+            case 2:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                CAtelFog::m_pInstance->reqCommand(0x5DE, &Nomal, 0);
+                break;
+            case 3:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                Nomal.AnimFrame = Frame;
+                CAtelFog::m_pInstance->reqCommand(0x5DF, &Nomal, 0);
+                break;
+            case 4:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                CAtelFog::m_pInstance->reqCommand(0x5E0, &Nomal, 0);
+                break;
+            case 5:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                Nomal.AnimFrame = Frame;
+                CAtelFog::m_pInstance->reqCommand(0x5E1, &Nomal, 0);
+                break;
+            case 6:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                CAtelFog::m_pInstance->reqCommand(0x5E2, &Nomal, 0);
+                break;
+            case 7:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                Nomal.AnimFrame = Frame;
+                CAtelFog::m_pInstance->reqCommand(0x5E3, &Nomal, 0);
+                break;
+            case 8:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                CAtelFog::m_pInstance->reqCommand(0x5E4, &Nomal, 0);
+                break;
+            case 9:
+                TRACE("FOG %d : %d : %d\n", type, Param.F, Frame);
+                Nomal.Param = Param.F;
+                Nomal.AnimFrame = Frame;
+                CAtelFog::m_pInstance->reqCommand(0x5E5, &Nomal, 0);
+                break;
+            }
+            break;
+        }
+        case 0xF6: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("SVR:%d,%d\n", i1, i2);
+            CSceneInfo::setEventRoomSceneNum(i1, i2);
+            break;
+        }
+        case 0xF7: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            if (CGameWork::getFlag(1, 0x33)) {
+                CGameWork::setFlag(1, 0x34, TRUE);
+                m_pCurrentActor->_ATP.status = 25;
+                break;
+            }
+            TRACE("CER:%d,%d,%d\n", i1, i2, i3);
+            if (i2 == -1) i2 = CSceneInfo::getEnteredDoorID();
+            CSceneInfo::reqChangeEventRoom(i1, (DOOR_ID)i2, i3);
+            break;
+        }
+        case 0xF8:
+            TRACE("EBT\n");
+            CSceneInfo::reqExitBattle();
+            break;
+        case 0xFA: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("scene_set_color:type:%d,frame:%d,color:%d\n", i1, i2, i3);
+            FVECTOR vCol;
+            vCol.w = (FLOAT)(i3 & 0xFF) / 255.0f;
+            vCol.z = (FLOAT)((i3 >> 8) & 0xFF) / 255.0f;
+            vCol.y = (FLOAT)((i3 >> 16) & 0xFF) / 255.0f;
+            vCol.x = (FLOAT)((i3 >> 24) & 0xFF) / 255.0f;
+            sceneSetColor(i1, i2, vCol);
+            break;
+        }
+        case 0xFB: {
+            INT i4 = m_S[m_SP--].I;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            AvatarEffectAttach param;
+            param.BoneName = (char*)(m_pDseg + i3);
+            param.EffectName = (char*)(m_pDseg + i1);
+            param.EfxNo = i2;
+            param.Type = i4;
+            m_hEffect = m_pCurrentActor->_pAvatar->reqCommand(0x3A, &param, 0);
+            break;
+        }
+        case 0xFC: {
+            FLOAT f = m_S[m_SP--].F;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+#line 3698
+            if (!(CWorldEnv::getActiveCamera())) AssertApp(__FILE__, __LINE__, "CWorldEnv::getActiveCamera()", 0);
+            FVECTOR vPos;
+            FVECTOR vRot;
+            setFVector(vPos, 0.0f, 0.0f, f);
+            setFVector(vRot, 0.0f, 3.1415927f, 0.0f);
+            m_hEffect = CEffectMan::attachEffect((CHAR*)(m_pDseg + i1), i2, (ObjType::eObjType)0xD, &CWorldEnv::getActiveCamera()->Crd(0), &vPos, &vRot, 0.0f);
+            CEffect* pEffect = CEffectMan::getEffect(m_hEffect);
+            if (pEffect) pEffect->setDrawLast(0);
+            break;
+        }
+        case 0xFD: {
+            OpStack param2 = m_S[m_SP--];
+            OpStack param1 = m_S[m_SP--];
+            INT type = m_S[m_SP].I;
+            CEffect* effect;
+            TRACE("EffectCtrl  %d, %d, %d\n", type, param1.I, param2.I);
+            switch (type) {
+            case 0:
+                m_S[m_SP].I = m_hEffect;
+                break;
+            case 1: {
+                effect = CEffectMan::getEffect(param1.I);
+                if (effect) effect->fadeout(param2.F);
+                break;
+            }
+            case 2: {
+                effect = CEffectMan::getEffect(param1.I);
+                if (effect) effect->fadeout(0.0f);
+                break;
+            }
+            case 3:
+                effect = CEffectMan::getEffect(param1.I);
+                effectSetFlag4(effect);
+                break;
+            case 4:
+                CEffectMan::getEffect(param1.I)->setSkipFrame(param2.F);
+                break;
+            case 5: {
+                effect = CEffectMan::getEffect(param1.I);
+                if (effect) effect->setLightCalc(1);
+                break;
+            }
+            }
+            break;
+        }
+        case 0xFE: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            INT r;
+            switch (i2) {
+            case 0:
+                r = i1 | i3;
+                break;
+            case 1:
+                r = i1 & i3;
+                break;
+            case 2:
+                r = i1 ^ i3;
+                break;
+            case 3:
+                r = i1 >> i3;
+                break;
+            case 4:
+                r = i1 << i3;
+                break;
+            case 5:
+                r = i1 & ~i3;
+                break;
+            }
+            m_S[m_SP].I = r;
+            break;
+        }
+        case 0xFF: {
+            INT frame = m_S[m_SP--].I;
+            INT param = m_S[m_SP--].I;
+            INT type = m_S[m_SP].I;
+            BlurStruct blur;
+            TRACE("BLUR %d : :%d : %d\n", type, param, frame);
+            switch (type) {
+            case 0:
+                CAtelBlur::m_pInstance->reqCommand(0x640, &param, 0);
+                break;
+            case 1:
+                blur.param = param;
+                blur.AnimFrame = frame;
+                CAtelBlur::m_pInstance->reqCommand(0x641, &param, 0);
+                break;
+            case 2:
+                CAtelBlur::m_pInstance->reqCommand(0x642, &param, 0);
+                break;
+            case 3:
+                blur.param = param;
+                blur.AnimFrame = frame;
+                CAtelBlur::m_pInstance->reqCommand(0x643, &param, 0);
+                break;
+            case 4:
+                CAtelBlur::m_pInstance->reqCommand(0x644, &param, 0);
+                break;
+            case 5:
+                blur.param = param;
+                blur.AnimFrame = frame;
+                CAtelBlur::m_pInstance->reqCommand(0x645, &param, 0);
+                break;
+            case 6:
+                CAtelBlur::m_pInstance->reqCommand(0x647, NULL, 0);
+                break;
+            }
+            break;
+        }
+        case 0x100: {
+            BlurAnimStruct blur;
+            blur.AnimFrame = m_S[m_SP--].I;
+            blur.param.w = 0.0f;
+            blur.param.z = (FLOAT)m_S[m_SP--].I;
+            blur.param.y = (FLOAT)m_S[m_SP--].I;
+            blur.param.x = (FLOAT)m_S[m_SP].I;
+            CAtelBlur*& pBlur = CAtelBlur::m_pInstance;
+            pBlur->reqCommand(0x646, &blur, 0);
+            break;
+        }
+        case 0x101: {
+            AvatarMotionParamEfx param;
+            param._nFlag = m_S[m_SP--].I;
+            param._nEfxNo = m_S[m_SP--].I;
+            param._nHokanFrame = m_S[m_SP--].I;
+            param._StartFrame = m_S[m_SP--].I;
+            param._fPlaySpeed = m_S[m_SP--].F;
+            param._nMotionID = m_S[m_SP--].I;
+            param._nRsrcID = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("MEX:%d,%d,%d,%f,%d,%d,%d,%d\n", i1, param._nRsrcID, param._nMotionID, param._fPlaySpeed, param._StartFrame, param._nHokanFrame, param._nEfxNo, param._nFlag);
+            if (i1) {
+                INT nIdx = searchActor((CHAR*)(m_pDseg + i1));
+                if (nIdx < 0) {
+                    _TRACE(m_bTrace, "MTO NG01:%s\n", m_pDseg + c);
+                    break;
+                }
+                CAvatar* p = getAvatar(nIdx);
+                if (p) p->reqCommand(0x17, &param, 0);
+            } else {
+                if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0x17, &param, 0);
+            }
+            break;
+        }
+        case 0x102: {
+            i1 = m_S[m_SP - 1].I;
+            c = m_S[m_SP].I;
+            _TRACE(m_bTrace, "CRC %d %d\n", i1, c);
+            m_pCurrentActor->_GroupID = i1;
+            m_pCurrentActor->_nMembarID = c;
+            m_pCurrentActor->_nRsrcID = makeRsrcID(i1, c);
+            acWaitLoadRsrc(*m_pCurrentActor, m_Pctr);
+            ret = ATEL_RET_RSRC_LOAD_WAIT; r = 3;
+            break;
+        }
+        case 0x103: {
+            i1 = m_S[m_SP - 1].I;
+            c = m_S[m_SP].I;
+            _TRACE(m_bTrace, "DRC %d %d\n", i1, c);
+            m_pCurrentActor->_nRsrcID = makeRsrcID(i1, c);
+            CRsrcDB::removeGroup(i1, c);
+            break;
+        }
+        case 0x104: {
+            FLOAT f27 = m_S[m_SP--].F;
+            FLOAT f26 = m_S[m_SP--].F;
+            FLOAT f25 = m_S[m_SP--].F;
+            FLOAT f24 = m_S[m_SP--].F;
+            FLOAT f23 = m_S[m_SP--].F;
+            FLOAT f22 = m_S[m_SP--].F;
+            FLOAT f21 = m_S[m_SP--].F;
+            FLOAT f20 = m_S[m_SP--].F;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("LOK:%s,%s,%f,%f,%f,%f,%f,%f,%f,%f\n", m_pDseg + i1, m_pDseg + i2, f20, f21, f22, f23, f24, f25, f26, f27);
+            AvatarSetLook look;
+            look.TargetID = searchActor((CHAR*)(m_pDseg + i2));
+            look.BoneName = (char*)(m_pDseg + i1);
+            setFVector(look.LookMin, DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
+            setFVector(look.LookMax, DEG2RAD(f23), DEG2RAD(f24), DEG2RAD(f25));
+            look.OffsetY = f26;
+            look.Rate = f27;
+            m_pCurrentActor->_pAvatar->reqCommand(0x30, &look, 0);
+            break;
+        }
+        case 0x105: {
+            FLOAT f21 = m_S[m_SP--].F;
+            FLOAT f20 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP].I;
+            TRACE("UDL:%s,%f,%f\n", m_pDseg + i1, f20, f21);
+            AvatarSetLook look;
+            look.TargetID = searchActor((CHAR*)(m_pDseg + i1));
+            look.OffsetY = f20;
+            look.Rate = f21;
+            m_pCurrentActor->_pAvatar->reqCommand(0x31, &look, 0);
+            break;
+        }
+        case 0x106: {
+            FLOAT f29 = m_S[m_SP--].F;
+            FLOAT f28 = m_S[m_SP--].F;
+            FLOAT f27 = m_S[m_SP--].F;
+            FLOAT f26 = m_S[m_SP--].F;
+            FLOAT f25 = m_S[m_SP--].F;
+            FLOAT f24 = m_S[m_SP--].F;
+            FLOAT f23 = m_S[m_SP--].F;
+            FLOAT f22 = m_S[m_SP--].F;
+            FLOAT f21 = m_S[m_SP--].F;
+            FLOAT f20 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP].I;
+            TRACE("LAG:%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", m_pDseg + i1, f20, f21, f22, f23, f24, f25, f26, f27, f28, f29);
+            AvatarSetLookAngle look;
+            look.BoneName = (char*)(m_pDseg + i1);
+            setFVector(look.LookAngle, DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
+            setFVector(look.LookMin, DEG2RAD(f23), DEG2RAD(f24), DEG2RAD(f25));
+            setFVector(look.LookMax, DEG2RAD(f26), DEG2RAD(f27), DEG2RAD(f28));
+            look.Rate = f29;
+            m_pCurrentActor->_pAvatar->reqCommand(0x32, &look, 0);
+            break;
+        }
+        case 0x107: {
+            FLOAT f23 = m_S[m_SP--].F;
+            FLOAT f22 = m_S[m_SP--].F;
+            FLOAT f21 = m_S[m_SP--].F;
+            FLOAT f20 = m_S[m_SP].F;
+            TRACE("UDA:%f,%f,%f,%f\n", f20, f21, f22, f23);
+            AvatarSetLookAngle look;
+            look.Rate = f23;
+            setFVector(look.LookAngle, DEG2RAD(f20), DEG2RAD(f21), DEG2RAD(f22));
+            m_pCurrentActor->_pAvatar->reqCommand(0x33, &look, 0);
+            break;
+        }
+        case 0x108: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            AvatarChangeTexture param;
+            param.DstTexName = (char*)(m_pDseg + i1);
+            param.SrcTexName = (char*)(m_pDseg + i2);
+            TRACE("CTX:%s,%s\n", param.DstTexName, param.SrcTexName);
+            m_pCurrentActor->_pAvatar->reqCommand(0x37, &param, 0);
+            break;
+        }
+        case 0x109: {
+            FLOAT f1 = m_S[m_SP].F;
+            /* a scalar read of _pAvatar: keeps the store of f1 before it (struct-field reads may pass a fixed scalar store) */
+            (*(CAvatar**)&m_pCurrentActor->_pAvatar)->reqCommand(0x35, NULL, 0);
+            m_pCurrentActor->_pAvatar->reqCommand(0x36, &f1, 0);
+            TRACE("ELK:AVTCMD_SET_LOOK_END\n");
+            break;
+        }
+        case 0x10A: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            CHAR* pName = (CHAR*)(m_pDseg + i2);
+            TRACE("STA\x81" "F%d, %s\n", i1, pName);
+            m_pCurrentActor->_pAvatar->reqCommand(0x38, pName, i1);
+            break;
+        }
+        case 0x10B: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            CHAR* pName = (CHAR*)(m_pDseg + i2);
+            INT nIdx = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            CAvatar* p = getAvatar(nIdx);
+            TRACE("STX\x81" "F%d, %s\n", i1, pName);
+            p->reqCommand(0x38, pName, i1);
+            break;
+        }
+        case 0x10C: {
+            FVECTOR vPos;
+            vPos.z = m_S[m_SP--].F;
+            vPos.y = m_S[m_SP--].F;
+            vPos.x = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP].I;
+            TRACE("SUP:%d,%f,%f,%f\n", i1, vPos.x, vPos.y, vPos.z);
+            switch (i1) {
+            case 0:
+                g_pPlayer->warp(vPos);
+                break;
+            case 1:
+                break;
+            case 2: {
+                CTask* pTask = CTaskMan::getSysTask(0x19);
+                if (!pTask) break;
+                SLContainerT<CTask>* pContainer = ((CBattleEnemyManager*)pTask)->getFirstBattleEnemy();
+                while (pContainer) {
+                    CTask* p = pContainer->getValue();
+                    if (p) {
+                        if (p->getTypeID() == 0x1004) {
+                            if ((UINT)((CEntity*)p)->getID() % 10000 == 122) {
+                                ((CEntity*)p)->warp(vPos);
+                                break;
+                            }
+                        }
+                    }
+                    pContainer = pContainer->getNext();
+                }
+                break;
+            }
+            default:
+                TRACE("ATEL:\x83G\x83\x89\x81[\x81" "FsetUnknownPos\x81@\x91\xb6\x8d\xdd\x82\xb5\x82\xc8\x82\xa2\x83p\x83\x89\x83\x81\x81[\x83^\n");
+                break;
+            }
+            break;
+        }
+        case 0x10D: {
+            FVECTOR vRot;
+            vRot.z = m_S[m_SP--].F;
+            vRot.y = m_S[m_SP--].F;
+            vRot.x = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP].I;
+            TRACE("SUR:%d,%f,%f,%f\n", i1, vRot.x, vRot.y, vRot.z);
+            switch (i1) {
+            case 0:
+                vRot.z = DEG2RAD(vRot.z);
+                vRot.y = DEG2RAD(vRot.y);
+                vRot.x = DEG2RAD(vRot.x);
+                g_pPlayer->setRot(vRot);
+                break;
+            case 1:
+                g_pPlayer->getPlayerCamera()->initCamera(1, 1, &vRot);
+                break;
+            case 2: {
+                CTask* pTask = CTaskMan::getSysTask(0x19);
+                if (!pTask) break;
+                SLContainerT<CTask>* pContainer = ((CBattleEnemyManager*)pTask)->getFirstBattleEnemy();
+                while (pContainer) {
+                    CTask* p = pContainer->getValue();
+                    if (p) {
+                        if (p->getTypeID() == 0x1004) {
+                            if ((UINT)((CEntity*)p)->getID() % 10000 == 122) {
+                                ((CEntity*)p)->setRot(vRot);
+                                break;
+                            }
+                        }
+                    }
+                    pContainer = pContainer->getNext();
+                }
+                break;
+            }
+            default:
+                TRACE("ATEL:\x83G\x83\x89\x81[\x81" "FsetUnknownRot\x81@\x91\xb6\x8d\xdd\x82\xb5\x82\xc8\x82\xa2\x83p\x83\x89\x83\x81\x81[\x83^\n");
+                break;
+            }
+            break;
+        }
+        case 0x10E: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("enableNotSemiModel: %d,%d", i1, i2);
+            m_pCurrentActor->_pAvatar->reqCommand(0x39, &i1, i2);
+            break;
+        }
+        case 0x10F: {
+            INT i2 = m_S[m_SP--].I;
+            CHAR* pName = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            CGame::reqPlayMovie(pName, 1);
+            TRACE("ATEL:playMovie %s, %d\n", pName, i2);
+            break;
+        }
+        case 0x110: {
+            INT frame = m_S[m_SP--].I;
+            INT param = m_S[m_SP--].I;
+            INT flag = m_S[m_SP].I;
+            CrossFadeColorStruct Color;
+            TRACE("ATEL:CrossFade %d, %d\n", flag, param);
+            switch (flag) {
+            case 0:
+                CAtelCrossFade::m_pInstance->reqCommand(0x640, NULL, 0);
+                break;
+            case 1:
+                CAtelCrossFade::m_pInstance->reqCommand(0x641, NULL, 0);
+                TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83" "C\x83\x81\x81[\x83W\x82r\x82s\x82n\x82q\x82" "d\n");
+                break;
+            case 2:
+                CAtelCrossFade::m_pInstance->reqCommand(0x642, NULL, 0);
+                TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83" "C\x83\x81\x81[\x83W\x82" "c\x82q\x82`\x82v\n");
+                break;
+            case 3:
+                Color.color = param;
+                TRACE("CROSS_FADE : R:%d : G:%d : B:%d : A:%d\n", (UINT)param >> 24, (param >> 16) & 0xFF, (param >> 8) & 0xFF, param & 0xFF);
+                CAtelCrossFade::m_pInstance->reqCommand(0x643, &Color, 0);
+                break;
+            case 4:
+                Color.color = param;
+                TRACE("CROSS_FADE : R:%d : G:%d : B:%d : A:%d : Frame:%d\n", (UINT)param >> 24, (param >> 16) & 0xFF, (param >> 8) & 0xFF, param & 0xFF, frame);
+                Color.AnimFrame = frame;
+                CAtelCrossFade::m_pInstance->reqCommand(0x644, &Color, 0);
+                break;
+            }
+            break;
+        }
+        case 0xED: {
+            INT i3 = m_S[m_SP--].I;
+            INT door = m_S[m_SP--].I;
+            INT room = m_S[m_SP].I;
+            TRACE("ChangeRoom:room:%d,door:%d,scene:%d\n", room, door, i3);
+            if (CGameWork::getFlag(1, 0x33)) {
+                CGameWork::setFlag(1, 0x34, TRUE);
+                m_pCurrentActor->_ATP.status = 25;
+                break;
+            }
+            if (room < 0 || door < 0) {
+                if (room == -2) {
+                    INT mode = CGame::getDbgGameMode();
+                    if (mode < 9) {
+                        if (mode >= 7) {
+                            CGame::reqCompleteGame();
+                            break;
+                        }
+                    }
+                    CSceneInfo::reqChangeGoalRoom();
+                    break;
+                } else if (room == -3) {
+                    CGame::reqCompleteGame();
+                    break;
+                } else {
+                    RoomInfo* pRoom = CSceneInfo::getRoomInfo(-1);
+                    BOOL bFound = FALSE;
+                    if (room == -1) {
+                        if (!pRoom || !roomHasStorageInfo(pRoom)) {
+                            CSceneInfo::reqChangeScene(CSceneInfo::getCurrentAreaNum(), CSceneInfo::getCurrentSceneNum(), -1, 0, 1);
+                            break;
+                        }
+                        INT i;
+                        for (i = 0; i < 4; i++) {
+                            if (pRoom->_doors[i].getDoorState() == 1) {
+                                door = pRoom->_doors[i]._id;
+                                bFound = TRUE;
+                                break;
+                            }
+                        }
+                    }
+                    if (bFound) {
+                        CSceneInfo::reqEnterDoor((DOOR_ID)door);
+                        break;
+                    }
+                    if (room == -1) room = CSceneInfo::getPrevRoomID();
+                    if (door == -1) door = CSceneInfo::getEnteredDoorID();
+                    switch (CSceneInfo::getEnteredDoorID()) {
+                    default:
+                        door = 2;
+                        break;
+                    case 1:
+                        door = 3;
+                        break;
+                    case 2:
+                        door = 0;
+                        break;
+                    case 3:
+                        door = 1;
+                        break;
+                    }
+                }
+            }
+            if (!CSceneInfo::reqChangeRoom(room, (DOOR_ID)door, -1)) {
+                TRACE("\x95\x94\x89\xae\x82\xcc\x83V\x81[\x83\x93\x82\xaa\x82\xc8\x82\xa2\x82\xa9\x82\xe7\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x93K\x93\x96\x82\xc9\x8ew\x92\xe8\x82\xb5\x82\xc4\x94\xf2\x82\xce\x82\xb7\n");
+                CSceneInfo::reqChangeRoom(room, (DOOR_ID)door, 3);
+            }
+            break;
+        }
+        case 0xEE: {
+            INT i1 = m_S[m_SP].I;
+            TRACE("EnterBattle:%d\n", i1);
+            if (CGameWork::getFlag(1, 0x33)) {
+                CGameWork::setFlag(1, 0x34, TRUE);
+                m_pCurrentActor->_ATP.status = 25;
+                break;
+            }
+            if (CSceneInfo::getCurrentSceneNum() < 2000) CGameWork::setFlag(1, 5, TRUE);
+            CSceneInfo::reqEnterBattle(i1);
+            break;
+        }
+        case 0xB1: {
+            FLOAT fFar = m_S[m_SP--].F;
+            FLOAT fNear = m_S[m_SP].F;
+            CDeFocus::setManual(fNear, fFar);
+            _TRACE(m_bTrace, "deFocus_man %f %f\n", fNear, fFar);
+            break;
+        }
+        case 0xB3: {
+            AvatarScaleParam param;
+            param._nTime = m_S[m_SP--].I;
+            param._vTarget.w = 0.0f;
+            param._vTarget.z = m_S[m_SP--].F;
+            param._vTarget.y = m_S[m_SP--].F;
+            param._vTarget.x = m_S[m_SP].F;
+            if (m_pCurrentActor->_pAvatar) {
+                m_pCurrentActor->_pAvatar->reqCommand(0xF, &param, 0);
+                _TRACE(m_bTrace, "--- SCALING - player ---\n");
+            }
+            break;
+        }
+        case 0xBA: {
+            AvatarMotionParamEx param;
+            param._fPlaySpeed = m_S[m_SP--].F;
+            param._nDakkoRsrcID = m_S[m_SP--].I;
+            param._nDakkoMotionID = m_S[m_SP--].I;
+            param._nRsrcID = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            param._nMotionID = i1 & 0xFFF;
+            param._nFlag = (i1 >> 12) & 3;
+            if (m_pCurrentActor->_pAvatar) m_pCurrentActor->_pAvatar->reqCommand(0x15, &param, 0);
+            break;
+        }
+        case 0xBB: {
+            FadeCreateParam param;
+            param.layer = m_S[m_SP--].I;
+            param.fRate = m_S[m_SP--].F;
+            param.kind = m_S[m_SP].I;
+            CAtel* pAtel = (CAtel*)CTaskMan::getSysTask(0x1A);
+            pAtel->setScreenFader(param.kind, param.fRate, param.layer);
+            TRACE("--- WNDCMD_FADER ---\n");
+            break;
+        }
+        case 0xBC: {
+            AvatarMotionParamC param;
+            param._fPlaySpeed = m_S[m_SP--].F;
+            i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            nID = searchActor((CHAR*)(m_pDseg + c));
+            if (nID < 0) {
+                _TRACE(m_bTrace, "MTO NG01:%s\n", m_pDseg + c);
+                break;
+            }
+            CAvatar* p = getAvatar(nID);
+            if (p) {
+                param._nMotionID = i1 & 0xFFF;
+                param._nFlag = (i1 >> 12) & 3;
+                p->reqCommand(0x13, &param, 0);
+            }
+            break;
+        }
+        case 0xBD: {
+            FLOAT fRate = m_S[m_SP--].F;
+            INT i5 = m_S[m_SP--].I;
+            FLOAT f3 = m_S[m_SP--].F;
+            FLOAT f2 = m_S[m_SP--].F;
+            FLOAT f1 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP--].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nIdx < 0) {
+                TRACE("MTO NG01:%d\n", nIdx);
+                break;
+            }
+            TRACE("CAR %d %f %f %f\n", i1, f1, f2, f3);
+            TRACE("    %d %f\n", i5, fRate);
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i1) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i1);
+            CameraManCreateParam param;
+            param.fOffsetY = 1.5f;
+            param.pathDateTargetID = nIdx;
+            if (i5 >= 0) param.changeFlag = 0; else param.changeFlag = 1;
+            param.pathDateLocalID = 0;
+            setFVector(param.cameraPos, f1, f2, f3);
+            param.changeKind = i5 & 0xFF;
+            param.changeKind2 = (i5 >> 8) & 0xFF;
+            param.fChangeRate = fRate + 1000.0f;
+            param.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x44C, &param, i1);
+            break;
+        }
+        case 0xBE: {
+            FLOAT fRate = m_S[m_SP--].F;
+            INT i5 = m_S[m_SP--].I;
+            FLOAT f3 = m_S[m_SP--].F;
+            FLOAT f2 = m_S[m_SP--].F;
+            FLOAT f1 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP--].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nIdx < 0) {
+                TRACE("MTO NG01:%d\n", nIdx);
+                break;
+            }
+            TRACE("REL %d %f %f %f\n", i1, f1, f2, f3);
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i1) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i1);
+            CameraManCreateParam param;
+            param.fOffsetY = 1.5f;
+            param.pathDateTargetID = nIdx;
+            setFVector(param.cameraPos, f1, f2, f3);
+            param.changeKind = i5 & 0xFF;
+            param.changeKind2 = (i5 >> 8) & 0xFF;
+            param.fChangeRate = fRate + 1000.0f;
+            param.pathDateLocalID = 0;
+            param.changeFlag = 0;
+            param.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x45F, &param, i1);
+            break;
+        }
+        case 0xBF: {
+            FLOAT fRate = m_S[m_SP--].F;
+            INT i5 = m_S[m_SP--].I;
+            FLOAT f3 = m_S[m_SP--].F;
+            FLOAT f2 = m_S[m_SP--].F;
+            FLOAT f1 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP--].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nIdx < 0) {
+                TRACE("MTO NG01:%d\n", nIdx);
+                break;
+            }
+            TRACE("CLK %d %f %f %f\n", i1, f1, f2, f3);
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i1) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i1);
+            CameraManCreateParam param;
+            param.fOffsetY = 1.5f;
+            param.pathDateTargetID = nIdx;
+            setFVector(param.cameraPos, f1, f2, f3);
+            param.changeKind = i5 & 0xFF;
+            param.changeKind2 = (i5 >> 8) & 0xFF;
+            param.fChangeRate = fRate + 1000.0f;
+            param.pathDateLocalID = 0;
+            param.changeFlag = 0;
+            param.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x463, &param, i1);
+            break;
+        }
+        case 0xC1: {
+            c = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            m_S[++m_SP].I = player_rsrc(i1, c);
+            break;
+        }
+        case 0xC2: {
+            c = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            _TRACE(m_bTrace, "wk_CMD %x : %x \n", i1, c);
+            acWaitChangeWork(*m_pCurrentActor, i1, c, m_Pctr);
+            ret = ATEL_RET_WKWAIT; r = 3;
+            break;
+        }
+        case 0xC3: {
+            AvatarMoveParam param;
+            param._fTime = m_S[m_SP--].F;
+            param._nType = m_S[m_SP--].I;
+            param._nMotion = m_S[m_SP--].I;
+            param._pszPathFile = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            if (m_pCurrentActor->_pAvatar) {
+                if (param._fTime != -1.0f) {
+                    m_pCurrentActor->_pAvatar->reqCommand(0xD, &param, 0);
+                } else {
+                    m_pCurrentActor->_pAvatar->reqCommand(0xB, param._pszPathFile, 0);
+                }
+                _TRACE(m_bTrace, "--- START MOVE-ACTOR-PATH Type::%x ---\n", param._nType);
+            }
+            break;
+        }
+        case 0xC6: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            CHAR* pName = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            TRACE("voice_play %s %d %d\n", pName, i2, i3);
+            m_S[++m_SP].I = CSound::playVoice(pName, i2, i3);
+            break;
+        }
+        case 0xC7:
+            CSound::stopVoice(m_S[m_SP].I);
+            break;
+        case 0xC8: {
+            INT n = m_S[m_SP].I; /* unused: its address base is reused (rematerialized) for the push, as in the original */
+            m_S[++m_SP].I = CSound::isVoicePlaying();
+            break;
+        }
+        case 0xC9: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            CSound::setVoiceVolume(i1, i2, i3);
+            break;
+        }
+        case 0xCA: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            if (i2 == -1) i2 = 0x40;
+            CSound::setVoicePan(i1, i2, i3);
+            break;
+        }
+        case 0xCB: {
+            INT i4 = m_S[m_SP--].I;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            i1 = m_S[m_SP].I;
+            if (i3 == -1) i3 = 0x40;
+            CSound::setVoicePanAndVol(i1, i2, i3, i4);
+            break;
+        }
+        case 0xCC: {
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("voice_fadeout  %d %d\n", i1, i2);
+            CSound::fadeoutVoice(i1, i2);
+            break;
+        }
+        case 0xCD: {
+            FLOAT f2 = m_S[m_SP--].F;
+            FLOAT f1 = m_S[m_SP--].F;
+            c = m_S[m_SP].I;
+            _TRACE(m_bTrace, "defoucus %d : %f : %f \n", c, f1, f2);
+            CDeFocus::BlurSet(c, f1, f2, 0);
+            break;
+        }
+        case 0xCE: {
+            i1 = m_S[m_SP--].I;
+            c = m_S[m_SP--].I;
+            INT nL = m_S[m_SP--].I;
+            INT nS = m_S[m_SP].I;
+            _TRACE(m_bTrace, "VIB \n");
+            CPadIO::startVibration(nS, nL, c * 50, i1);
+            break;
+        }
+        case 0xCF:
+            c = m_S[m_SP].I;
+            m_SP -= 2;
+            break;
+        case 0xD0: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("voice_play_id:playVsb %d %d %d\n", i1, i2, i3);
+            INT n = CSound::playVsb(i1 | 0x10000000, i2, i3);
+            m_S[++m_SP].I = n;
+            break;
+        }
+        case 0xD1: {
+            INT i1 = m_S[m_SP - 1].I;
+            INT i2 = m_S[m_SP].I;
+            INT n = 0;
+            CGameWork::setByte(1, 0, n);
+            if (i2 < 0x100) n++;
+            CChatMan::instance().reqCommand(0x3F9, &n, i1);
+            acWaitSelectPadEx(*m_pCurrentActor, i1, i2, m_Pctr);
+            ret = ATEL_RET_XWAIT; r = 3;
+            break;
+        }
+        case 0xD3:
+            acWaitBusy(*m_pCurrentActor, m_S[m_SP].I, m_Pctr);
+            ret = ATEL_RET_BWAIT; r = 3;
+            break;
+        case 0xD4:
+            _TRACE(m_bTrace, "BlurDistanceSet %f\n", m_S[m_SP].F);
+            CDeFocus::BlurDistanceSet(m_S[m_SP].F, 0);
+            break;
+        case 0xD5: {
+            i1 = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + c));
+            acWaitBusyActor(*m_pCurrentActor, i1, nIdx, m_Pctr);
+            ret = ATEL_RET_BAWAIT; r = 3;
+            break;
+        }
+        case 0xEF: {
+            c = m_S[m_SP].I;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + c));
+            acWaitActor(*m_pCurrentActor, 7, nIdx, m_Pctr);
+            ret = ATEL_RET_ACWAIT; r = 3;
+            break;
+        }
+        case 0xF0: {
+            AvatarModelDispParam param;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            param._iNo = i2 - 1;
+            param._nState = i1;
+            m_pCurrentActor->_pAvatar->reqCommand(7, &param, 0);
+            break;
+        }
+        case 0xF1: {
+            FLOAT f3 = m_S[m_SP--].F;
+            FLOAT f2 = m_S[m_SP--].F;
+            FLOAT f1 = m_S[m_SP--].F;
+            INT i1 = m_S[m_SP--].I;
+            FVECTOR vPos;
+            setFVector(vPos, f1, f2, f3);
+            m_hEffect = CEffectMan::setEffect((CHAR*)(m_pDseg + m_S[m_SP].I), i1, (ObjType::eObjType)4, &vPos, NULL, 0.0f);
+            break;
+        }
+        case 0xD7: {
+            CHAR* pszAP = (CHAR*)(m_pDseg + m_S[m_SP--].I);
+            INT name = m_S[m_SP].I;
+            TRACE("%s,%s\n", pszAP, m_pDseg + name);
+            nID = searchActor((CHAR*)(m_pDseg + name));
+            if (m_pCurrentActor->_pAvatar) {
+                m_pCurrentActor->_pAvatar->reqCommand(5, pszAP, nID);
+                _TRACE(m_bTrace, "--- ATTACH - %s(%d)\n", pszAP, nID);
+            }
+            break;
+        }
+        case 0xD8: {
+            i1 = m_S[m_SP].I;
+            _TRACE(m_bTrace, "BlurSetEvent %f \n", i1);
+            if (i1 >= 0) CDeFocus::BlurSetEvent(i1); else CDeFocus::BlurReturnEvent();
+            break;
+        }
+        case 0xDA: {
+            i1 = m_S[m_SP--].I;
+            nID = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nID < 0) {
+                _TRACE(m_bTrace, "face set NG01:%s\n", m_pDseg + m_S[m_SP].I);
+                break;
+            }
+            getAvatar(nID)->reqCommand(0x38, NULL, i1);
+            break;
+        }
+        case 0xA9:
+        case 0xAB:
+        case 0xB0:
+        case 0xB2:
+        case 0xB7:
+        case 0xB9:
+        case 0xD9:
+        case 0xDC:
+        case 0xDD:
+        case 0xDE:
+        case 0xDF:
+        case 0xE0:
+        case 0xE2:
+        case 0xE4:
+        case 0xF9:
+        case 0x111:
+        case 0x112:
+            break;
+        default:
+            return 4;
+        }
+    } while (r == 0);
+    return r;
+}
 INT CVSM::getActorIndex(const CHAR* pszName) const {
     for (INT i = 0; i < m_ActorCount; i++) {
         if (strcmp(pszName, m_ActorTbl[i]._ATP.name) == 0) return i;

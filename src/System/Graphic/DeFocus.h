@@ -150,7 +150,7 @@ public:
         if (m_pInstance) m_pInstance->m_DeFocusPrim.setAutomatic();
     }
     static void setManual(FLOAT fNear, FLOAT fFar) {
-        if (m_pInstance) m_pInstance->m_DeFocusPrim.setManual(fNear, fFar);
+        CDeFocus*& p = m_pInstance; if (p) p->m_DeFocusPrim.setManual(fNear, fFar); // PARTIAL: reference read (Game/Atel/VSME: the load stays after stores)
     }
     static FLOAT getNear() {
         if (m_pInstance) return m_pInstance->m_DeFocusPrim.getNear();

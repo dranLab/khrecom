@@ -349,10 +349,10 @@ public:
     static void setEventDoorUnavailable(INT nFloorIndex, INT nRoomID);
     static void setupCompleteFloorWorld(WORLD_ID w);
     static DOOR_ID setTmpCurrentRoomID(SHORT nRoomID);
-    static void openGoalDoor();
+    static void openGoalDoor(); static void showAllHiddenDoorsOfCurrentFloor(); static void setEventRoomSceneNum(UINT nRoom, SHORT nScene); // PARTIAL: added for Game/Atel/VSME
     static RoomInfo* getEventRoomInfo(UINT nIndex);
     static void reqChangeGoalRoom();
-    static void reqChangeRoom(INT nRoomID, DOOR_ID nDoorID, SHORT nScene);
+    static BOOL reqChangeRoom(INT nRoomID, DOOR_ID nDoorID, SHORT nScene); // PARTIAL: BOOL result (Game/Atel/VSME)
     static void ignoreFloorInfo();
     static void reqChangeScene(SHORT nArea, SHORT nScene, SHORT nEntrance, INT nMode, INT nAtel);
     // PARTIAL: added for Game/SceneInfo
