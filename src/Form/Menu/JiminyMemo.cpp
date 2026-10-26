@@ -975,12 +975,25 @@ CMemo2DSequence* CJiminyMemo::createSequence(const INT* inSeqData, INT inLayer, 
     }
     return pSeq;
 }
-/* placeholder: rodata of createSequence__11CJiminyMemoiiiiP15CMemo2DSequence */
-__asm__(".rdata\n");
-inline void _roPh15() {
-    TRACE(__FILE__ "(4194)");
+CMemo2DSequence* CJiminyMemo::createSequence(INT inSeqNo, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
+                                             CMemo2DSequence* inParent) {
+    FVECTOR posi;
+    CMemo2DSequence* pSeq = new (com_malloc_d(sizeof(CMemo2DSequence), __FILE__ "(4194)",
+                                              ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+        CMemo2DSequence;
+    if (pSeq) {
+        pSeq->setup(m_pLadName, inSeqNo, inLayer);
+        D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqNo, posi, 0);
+        pSeq->setBasePosition(posi);
+        if (inParent) {
+            pSeq->setParent(inParent);
+            pSeq->setLocalPosition();
+        } else {
+            pSeq->setPosition();
+        }
+    }
+    return pSeq;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createSequence__11CJiminyMemoiiiiP15CMemo2DSequence);
 /* placeholder: rodata of createListSequence__11CJiminyMemoP15CMemo2DSequenceiiiPPQ22D210C2DSeqCtrlPPQ22D26C2DFntUiiiPCc */
 __asm__(".rdata\n");
 inline void _roPh16() {
