@@ -70,6 +70,8 @@ inline void _vsmeMotionName() {
 #include "System/Com.h"
 #include "Game/SceneEnv.h"
 #include "Form/Menu/JMemoFlag.h"
+#include "System/Component.h"
+#include "System/Graphic/WorldEnv.h"
 #include <string.h>
 #include "include_asm.h"
 
@@ -2531,18 +2533,88 @@ BOOL CVSM::player_rsrc(INT nCmnd, INT nArg) {
     _TRACE(m_bTrace, "bad case RSC_CMD %d\n", nArg);
     return FALSE;
 }
-/* placeholder: rodata of ctd_cal__Q24ATEL4CVSMPCQ24ATEL7CAvatariiPQ24ATEL21ChatWndCreateCTDParam */
-__asm__(".rdata\n");
-inline void _roPh44() {
-    TRACE("chobi-man %d\n");
-    TRACE(">>>>>chibi(CMA) pos %d : %d\n");
-    TRACE("neck");
-    TRACE("neck1");
-    TRACE("head");
-    TRACE("ATEL:CVSM::ctd_cal\x81" "F\x83\x81\x83" "b\x83Z\x81[\x83W\x83" "E\x83" "C\x83\x93\x83h\x83" "E\x81" "F\x83`\x83\x87\x83r\x82\xf0\x8c\xfc\x82\xaf\x82\xe9\x83{\x81[\x83\x93\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1\x81" "E\x81" "E\x81" "E\n");
+namespace ATEL {
+struct ChatWndSetWordsParam;
+struct ChatWndCreateCTDParam {
+    CPointI pos;
+    CPointI cyobiPos;
+    UINT ctdID;
+    UINT waitFrame;
+    ChatWndSetWordsParam* pCwswp;
+    UINT nLine;
+};
 }
-__asm__(".rdata\n.align 4\n.word .L0024FD70\n.word .L0024FD74\n.word .L0024FD7C\n.word .L0024FD8C\n.word .L0024FD98\n.word .L0024FD94\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", ctd_cal__Q24ATEL4CVSMPCQ24ATEL7CAvatariiPQ24ATEL21ChatWndCreateCTDParam);
+FLOAT RotTransPers(FVECTOR& outV, const FMATRIX& inM, const FVECTOR& inV); /* System/Graphic/Gprim.h in the original */
+extern INT SCREEN_HEIGHT;
+void CVSM::ctd_cal(const CAvatar* in_pAvatar, int i2, int i3, ChatWndCreateCTDParam* CWCP) {
+    i3 &= 0x7FFFFFFF;
+    if (i3 > 0xFFFFF) {
+        int i4;
+        int ix;
+        int iy;
+        int x;
+        int y;
+        int hx;
+        int hy;
+        i4 = i3 >> 20;
+        TRACE("chobi-man %d\n", i4);
+        CtdBlock* pBlock = CCtdMan::getCtdBlock(i2, NULL);
+        INT style = (UBYTE)pBlock->wndStyle;
+        CSizeI size(pBlock->sizeX, pBlock->sizeY);
+        CPointI targetPos;
+        targetPos.setPoint(pBlock->posX, pBlock->posY);
+        switch (style) {
+        case 0: break;
+        case 1: targetPos.m_x = 0x20; break;
+        case 2: targetPos.m_x = 0x100 - (size.m_w >> 1); break;
+        case 3: targetPos.m_x = 0x1D0 - size.m_w; break;
+        }
+        x = size.m_w >> 1;
+        y = size.m_h >> 1;
+        ix = targetPos.m_x + x;
+        iy = targetPos.m_y + y;
+        hx = (UINT)(x * 1.6);
+        hy = size.m_h + 0x20;
+        switch (i4) {
+        case 1: ix -= hx; iy -= hy; break;
+        case 2: iy -= hy; break;
+        case 3: ix += hx; iy -= hy; break;
+        case 4: ix -= hx; iy += hy; break;
+        case 5: iy += hy; break;
+        case 6: ix += hx; iy += hy; break;
+        }
+        if (ix < 0) ix = 0;
+        if (iy < 0) iy = 0;
+        TRACE(">>>>>chibi(CMA) pos %d : %d\n", ix, iy);
+        CWCP->cyobiPos.setPoint(ix, iy);
+    } else if (i3 & 0x10000) {
+        if (in_pAvatar) {
+            INT BoneIndex = in_pAvatar->getBoneIndex("neck", 0);
+            if (BoneIndex == -1) BoneIndex = in_pAvatar->getBoneIndex("neck1", 0);
+            if (BoneIndex == -1) BoneIndex = in_pAvatar->getBoneIndex("head", 0);
+            FVECTOR vWorld;
+            FVECTOR vPos;
+            if (BoneIndex == -1) {
+                TRACE("ATEL:CVSM::ctd_cal\x81" "F\x83\x81\x83" "b\x83Z\x81[\x83W\x83" "E\x83" "C\x83\x93\x83h\x83" "E\x81" "F\x83`\x83\x87\x83r\x82\xf0\x8c\xfc\x82\xaf\x82\xe9\x83{\x81[\x83\x93\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1\x81" "E\x81" "E\x81" "E\n");
+                in_pAvatar->getNowPosition(vWorld);
+                RotTransPers(vPos, CWorldEnv::getWorldScreenMatrix(), vWorld);
+                UINT x = (UINT)(vPos.x - 1792.0f);
+                UINT y = (UINT)(vPos.y - 1880.0f);
+                CWCP->cyobiPos.setPoint(x, y);
+                return;
+            }
+            RotTransPers(vPos, CWorldEnv::getWorldScreenMatrix(), in_pAvatar->Crd(BoneIndex).m_World.v[3]);
+            UINT x = (UINT)(vPos.x - 1792.0f);
+            UINT y = (UINT)(vPos.y - (FLOAT)(2048 - SCREEN_HEIGHT / 2));
+            CWCP->cyobiPos.setPoint(x, y);
+            if (x == 0 && y == 0) CWCP->cyobiPos.setPoint(1, 1);
+        } else {
+            CWCP->cyobiPos.setPoint(1, 1);
+        }
+    } else {
+        CWCP->cyobiPos.setPoint(0, 0);
+    }
+}
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CVSM::AtelEventSkip() {
     TRACE("Event Skip Start\n");

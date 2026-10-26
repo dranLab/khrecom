@@ -19,7 +19,7 @@ template <class T> struct SIZE_T {
 
 template <class T> struct CPointT : POINT_T<T> {
     CPointT() {}
-    CPointT(T x, T y) { m_x = x; m_y = y; }
+    CPointT(T x, T y) { m_x = x; m_y = y; } void setPoint(T x, T y) { m_x = x; m_y = y; } // PARTIAL: setPoint added for Game/Atel/VSME
     CPointT<T> operator+(const POINT_T<T>& pt) const { return CPointT<T>(m_x + pt.m_x, m_y + pt.m_y); }
 };
 
