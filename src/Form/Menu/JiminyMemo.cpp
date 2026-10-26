@@ -13,6 +13,10 @@
 #include "System/Math3D.h"
 #include "System/TaskMan.h"
 #include "Game/CardKind.h"
+#include "System/Graphic/Camera.h"
+#include "System/Graphic/WorldEnv.h"
+#include "System/Rcf.h"
+#include "System/Graphic/2d/2DSeqObj.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "System/Sound/SoundMan.h"
@@ -49,12 +53,14 @@ class CTexAnm;
 class CLightUnit;
 class CMemo3DObj : public CTask {
 public:
-    CMemo3DObj(CTask* inParent, INT inGroupId, INT inResourceId, UINT inDispLayer, INT inA, INT inB);
+    CMemo3DObj(CTask* p, INT inGroupId, INT inRsrcId, UINT inDispLayer, BOOL inLoadEnable);
     virtual ~CMemo3DObj();
     virtual void main();
     virtual void disp();
     void setRotateY(FLOAT inRotY);
+    BOOL isLoadEnable() { return m_bLoadEnable; }
     void setPosition(const FVECTOR& inPosition);
+    void calcLocalMatrix();
 
 private:
     FLOAT m_fRotY;           /* 0x40 */
@@ -133,6 +139,7 @@ public:
     D2::C2DSeqCtrl* getSeqCtrl(INT inSeqNo);
     D2::C2DFnt* getFnt(INT inSeqNo);
     D2::C2DFnt* setSeqText(UINT inSeqNo, const CHAR* inText);
+    D2::C2DSeqCtrl* setSeqState(UINT inSeqNo, INT inState);
     INT getSeqState(UINT inSeqNo);
     D2::C2DSeqCtrl* createSequence(INT inSeqNo, INT inLayer);
 };
@@ -171,6 +178,7 @@ public:
     void setInState(INT inSeqId);
     void setOutState(INT inSeqId);
     void setSlideMoveParam(class CMemo2DCursor* inCursor);
+    void main(FLOAT inFrameRate);
     void setState(INT inState) { m_iState = inState; }
     void setBasePosition(const FVECTOR& inPosition) { m_vBasePosition = inPosition; }
     void setup(const CHAR* inSeqName, const INT* inSeqTbl, INT inLayer);
@@ -240,7 +248,7 @@ public:
     void setLocalPosition();
     void create(CARD inCard, INT inMode);
     void createPicture(UINT inTexNo, UINT inTexPos);
-    void changePicture(D2::C2DSeqObj* inSeqObj);
+    void changePicture(D2::C2DSeqObj* p2DSeqObj);
     void setState(INT inState);
     void main(FLOAT inFrameRate);
 };
@@ -292,6 +300,7 @@ private:
                              INT inLayoutNo, INT inLayoutSeqNo);
     void replaceNoteListMark(D2::C2DSeqCtrl** inMark, INT inFlagId, INT inListNum, INT inListAllNum, INT inStartNo,
                              INT inLayoutNo, INT inLayoutSeqNo);
+    void getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork);
     void setPlateState(INT inKind, INT inState);
     INT getPlateState(INT inKind);
     void setPlateText(INT inKind, INT inCTNo);
@@ -299,6 +308,8 @@ private:
                                     CMemo2DSequence* inParent);
     CMemo2DSequence* createSequence(INT inSeqNo, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
                                     CMemo2DSequence* inParent);
+    void createMarkSequence(INT inMarkSeq, INT inNum, INT inLayoutNo, INT inLayoutSeqOffset, INT inLayer,
+                            D2::C2DSeqCtrl* inParent, D2::C2DSeqCtrl** inArray);
     INT createListSequence(CMemo2DSequence* inList, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
                            D2::C2DSeqCtrl** inFontSeq, D2::C2DFnt** inFont, UINT inFontCol, INT inFontSize,
                            INT inFontStyle, const CHAR* inStr);
@@ -334,6 +345,7 @@ private:
     BOOL prevPage(CMemo2DCursor* pCursor, INT* pCursorCurrent, INT iNoteListNum, INT iCursorPosiNum,
                   FLOAT fCursorIntervalY);
     BOOL haveSpecialCard();
+    INT setParamFromCardViewToCollect();
     INT getNextCardId(INT inId);
     INT getPrevCardId(INT inId);
     INT getNextCharaId(INT inId);
@@ -512,8 +524,35 @@ INT JiminyMemo::getCT0014Code(USHORT inLow) {
 void JiminyMemo::playSE(INT inSENo) {
     CSound::playSE(inSENo, -1, 64);
 }
-/* placeholder: getOpenCloseStringData's local static (its string comes right after DefaultMessage's) */
-CHAR* _phDefaultStr __asm__("pDefaultStr.3528") = "\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96";
+CHAR* JiminyMemo::getOpenCloseStringData(INT inCTNo, BOOL inIsFlag) {
+    CHAR* rval;
+    if (inIsFlag) {
+        rval = CCtdMan::getText(inCTNo);
+    } else {
+        static CHAR* pDefaultStr = "\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96\x81\x96";
+        CHAR* pCloseStr = CCtdMan::getText(0x700003);
+        if (!pCloseStr) pCloseStr = pDefaultStr;
+        INT closeLen = strlen(pCloseStr);
+        if (!closeLen) {
+            pCloseStr = pDefaultStr;
+            closeLen = strlen(pCloseStr);
+        }
+        CHAR* pMessStr = CCtdMan::getText(inCTNo);
+        if (!pMessStr) {
+            rval = pCloseStr + (closeLen - 2);
+        } else {
+            INT messLen = strlen(pMessStr);
+            if (!messLen) {
+                rval = pCloseStr + (closeLen - 4);
+            } else if (closeLen < messLen) {
+                rval = pCloseStr;
+            } else {
+                rval = pCloseStr + (closeLen - messLen);
+            }
+        }
+    }
+    return rval;
+}
 void (CJiminyMemo::*CJiminyMemo::m_pContentTbl[11])() = {
     &CJiminyMemo::contentMenu,
     &CJiminyMemo::contentStory,
@@ -527,11 +566,22 @@ void (CJiminyMemo::*CJiminyMemo::m_pContentTbl[11])() = {
     &CJiminyMemo::contentCharaSelect,
     &CJiminyMemo::contentCharaView
 };
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getOpenCloseStringData__10JiminyMemoii);
 BOOL JiminyMemo::is100AcreGoodEnding() {
     return CGameWork::getInt(0, 0x23) & 0x40;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", __10CMemo3DObjP5CTaskiiUii);
+CMemo3DObj::CMemo3DObj(CTask* p, INT inGroupId, INT inRsrcId, UINT inDispLayer, BOOL inLoadEnable)
+    : CTask(p, 0x4000), m_pModels(NULL), m_iModelCount(0), m_pAnime(NULL), m_pTexAnim(NULL), m_iTexAnimNum(0),
+      m_iTexAnimNo(0), m_iTexAnimSeqNo(0), m_pLight(NULL), m_iStep(1), m_iGroupId(inGroupId), m_iResourceId(inRsrcId),
+      m_fFadeCount(0.0f), m_fFadeCountMax(0.0f), m_bEraseModel(FALSE), m_bTouch(FALSE), m_fBaseScale(1.0f),
+      m_fScale(1.0f), m_uiDispLayer(inDispLayer), m_bLoadEnable(inLoadEnable), m_hEffect(0), m_bLightOff(FALSE),
+      m_bNotSemiFlag(FALSE), m_bFade2PathFlag(FALSE) {
+    m_fRotY = 3.1415927f;
+    m_vPosition.init();
+    m_vBasePosition.init();
+    if (isLoadEnable()) CRcf::reqLoadRCFFront(m_iGroupId, m_iResourceId, 0, NULL, 0);
+    m_iStep = 0;
+    m_fFadeCountMax = 6.0f;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_10CMemo3DObj);
 /* placeholder: rodata of main__10CMemo3DObj */
 __asm__(".rdata\n");
@@ -554,7 +604,37 @@ void CMemo3DObj::disp() {
         m_pModels[i].disp();
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", calcLocalMatrix__10CMemo3DObj);
+void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
+void scaleMatrixSelf(FMATRIX& m, FLOAT fScale);
+extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
+void CMemo3DObj::calcLocalMatrix() {
+    CCoord& crd = Crd(0);
+    FVECTOR posi = m_vBasePosition;
+    FLOAT rate = m_vBasePosition.z / 3.0f;
+    posi.x += m_vPosition.x * -rate;
+    posi.y += m_vPosition.y * rate;
+    _unitMatrixVu0(crd.getLocalMatrix());
+    sceVu0RotMatrixY(crd.getLocalMatrix(), crd.getLocalMatrix(), m_fRotY);
+    crd.getLocalMatrix().setTrans(posi);
+    CCamera* pCamera = CWorldEnv::getActiveCamera();
+    if (pCamera && pCamera->getCoordNum() > 0) {
+        MulMatrix(crd.getLocalMatrix(), pCamera->Crd(0).getLocalMatrix(), crd.getLocalMatrix());
+    }
+    scaleMatrixSelf(crd.getLocalMatrix(), m_fBaseScale * m_fScale);
+    crd.touch();
+}
 void CMemo3DObj::setRotateY(FLOAT inRotY) {
     if (__builtin_fabsf(Math3D::LimitPI(m_fRotY - inRotY)) != 0.0f) {
         m_fRotY = inRotY;
@@ -656,7 +736,36 @@ D2::C2DFnt* CMemo2DLayout::getFnt(INT inSeqNo) {
     if (inSeqNo < 0 || inSeqNo >= m_iSeqNum) return NULL;
     return m_pSeqFntArray[inSeqNo];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setSeqState__13CMemo2DLayoutUii);
+D2::C2DSeqCtrl* CMemo2DLayout::setSeqState(UINT inSeqNo, INT inState) {
+    if (inSeqNo >= m_iSeqNum) return NULL;
+    D2::C2DSeqCtrl* pSeq = getSeqCtrl(inSeqNo);
+    if (pSeq) {
+        INT state;
+        switch (inState) {
+        case 0:
+            state = m_pSeqNoTbl[inSeqNo].In;
+            break;
+        case 1:
+            state = m_pSeqNoTbl[inSeqNo].Loop;
+            break;
+        case 2:
+            state = m_pSeqNoTbl[inSeqNo].Out;
+            break;
+        default:
+            state = -1;
+            break;
+        }
+        if (state >= 0) {
+            m_pSeqCodeTbl[inSeqNo] = state;
+            pSeq->replaceSeq(0, m_pLayoutName, m_pSeqCodeTbl[inSeqNo]);
+            pSeq->enableDisp(TRUE);
+        } else {
+            m_pSeqCodeTbl[inSeqNo] = -1;
+            pSeq->enableDisp(FALSE);
+        }
+    }
+    return pSeq;
+}
 INT CMemo2DLayout::getSeqState(UINT inSeqNo) {
     INT rval = -1;
     if (inSeqNo >= m_iSeqNum) return -1;
@@ -722,7 +831,40 @@ void CMemo2DSequence::setLocalPosition() {
     AddVectorXYZ(v, m_vBasePosition, m_vShiftPosition);
     setLocalPos(v);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__15CMemo2DSequencef);
+void SubVectorXYZ(FVECTOR& out, const FVECTOR& a, const FVECTOR& b);
+extern "C" void sceVu0InterVectorXYZ(FVECTOR& out, FVECTOR& v0, FVECTOR& v1, float r);
+extern "C" float powf(float x, float y);
+void CMemo2DSequence::main(FLOAT inFrameRate) {
+    if (m_iStateFlag & 1) {
+        switch (m_iState) {
+        case 1:
+            if (isEnd(0)) {
+                setState(2);
+                replaceSequenceId(1);
+            }
+            break;
+        case 3:
+            if (isEnd(0)) {
+                setState(4);
+                enableDisp(FALSE);
+            }
+            break;
+        }
+    }
+    if (m_bMoveSlideEnable == 1) {
+        m_fMoveTimer += inFrameRate;
+        if (m_fMoveTimer >= 30.0f) {
+            m_fMoveTimer = 30.0f;
+            m_bMoveSlideEnable = FALSE;
+        }
+        FVECTOR posi = m_vPosition;
+        FVECTOR aim = m_vAimPosition;
+        FVECTOR shift = m_vShiftPosition;
+        SubVectorXYZ(aim, aim, shift);
+        sceVu0InterVectorXYZ(m_vPosition, aim, posi, 1.0f - powf(1.0f - m_fMoveTimer / 30.0f, 2.5f));
+        setLocalPos(m_vPosition);
+    }
+}
 void CMemo2DSequence::setSlideMoveParam(CMemo2DCursor* inCursor) {
     if (inCursor) {
         m_bMoveSlideEnable = TRUE;
@@ -884,16 +1026,32 @@ void CMemo2DCard::createPicture(UINT inTexNo, UINT inTexPos) {
     if (!m_nSeq) addSeq(m_pEmptySeqName, JiminyMemo::CursorSeqTbl[0]);
     changePicture(addSeq("card:02", 0));
 }
-/* placeholder: rodata of changePicture__11CMemo2DCardPQ22D29C2DSeqObj */
-__asm__(".rdata\n");
-inline void _roPh10() {
-    TRACE("card:%02d");
-    TRACE("card_b:%02d");
-    TRACE("card_p:%02d");
-    TRACE("card_n:%02d");
-    TRACE("jminy_chara");
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+void CMemo2DCard::changePicture(D2::C2DSeqObj* p2DSeqObj) {
+    G_UV uvStart;
+    G_UV uvEnd;
+    char buf[16];
+    if (!p2DSeqObj) return;
+    UINT texNo = m_iTexNo;
+    INT texPos = m_iTexPos;
+    if (texNo == 21 && texPos == 1) {
+        if (JiminyMemo::is100AcreGoodEnding()) texPos = 5;
+    }
+    uvStart.set(((texPos & 3) << 6) | 2, ((texPos & 0xC) << 4) | 1);
+    uvEnd.set(uvStart.u | 0x3C, uvStart.v | 0x3E);
+    if (texNo < 22) {
+        sprintf(buf, "card:%02d", texNo);
+    } else if (texNo < 26) {
+        sprintf(buf, "card_b:%02d", texNo - 22);
+    } else if (texNo < 27) {
+        sprintf(buf, "card_p:%02d", texNo - 26);
+    } else if (texNo < 100) {
+        sprintf(buf, "card_n:%02d", texNo - 27);
+    } else {
+        sprintf(buf, "jminy_chara");
+    }
+    p2DSeqObj->changeTexture(0, buf, &uvStart, &uvEnd);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", changePicture__11CMemo2DCardPQ22D29C2DSeqObj);
 void CMemo2DCard::setPosition() {
     FVECTOR v;
     AddVectorXYZ(v, m_vBasePosition, m_vShiftPosition);
@@ -1022,13 +1180,36 @@ CMemo2DSequence* CJiminyMemo::createSequence(INT inSeqNo, INT inLayer, INT inLay
     }
     return pSeq;
 }
-/* placeholder: rodata of createListSequence__11CJiminyMemoP15CMemo2DSequenceiiiPPQ22D210C2DSeqCtrlPPQ22D26C2DFntUiiiPCc */
-__asm__(".rdata\n");
-inline void _roPh16() {
-    TRACE(__FILE__ "(4228)");
-    TRACE(__FILE__ "(4240)");
+INT CJiminyMemo::createListSequence(CMemo2DSequence* inList, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
+                                    D2::C2DSeqCtrl** inFontSeq, D2::C2DFnt** inFont, UINT inFontCol, INT inFontSize,
+                                    INT inFontStyle, const CHAR* inStr) {
+    FVECTOR posi;
+    D2::C2DFnt* pFnt;
+    D2::C2DSeqCtrl* pListFont;
+    G_RGBA fontRGB;
+    if (!inList || !inFontSeq || !inFont) return FALSE;
+    fontRGB.col = inFontCol;
+    pListFont = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(4228)",
+                                  ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+        D2::C2DSeqCtrl;
+    if (pListFont) {
+        *inFontSeq = pListFont;
+        pListFont->setLayer(inLayer);
+        pListFont->enableColorCtrl(TRUE);
+        pListFont->setParent(inList);
+        pListFont->addSeq(m_pLadName, 0x24);
+        D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqNo, posi, 0);
+        pListFont->setLocalPos(posi);
+        pFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(4240)",
+                                 ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+            D2::C2DFnt(0, 0, &fontRGB, inFontSize, inStr, inFontStyle);
+        if (pFnt) {
+            *inFont = pFnt;
+            pListFont->addFnt(m_pLadName, pFnt);
+        }
+    }
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createListSequence__11CJiminyMemoP15CMemo2DSequenceiiiPPQ22D210C2DSeqCtrlPPQ22D26C2DFntUiiiPCc);
 INT CJiminyMemo::createListSequenceTypewriterFont(CMemo2DSequence* inList, INT inLayer, INT inLayoutNo,
                                                   INT inLayoutSeqNo, D2::C2DSeqCtrl** inFontSeq, D2::C2DFnt** inFont,
                                                   UINT inFontCol, INT inFontSize, INT inFontStyle, const CHAR* inStr,
@@ -1085,7 +1266,24 @@ void CJiminyMemo::replaceNoteListWithOpenCheck(D2::C2DFnt** inList, CT_LOWER* in
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListMark__11CJiminyMemoPPQ22D210C2DSeqCtrlPUciiiii);
+void CJiminyMemo::replaceNoteListMark(D2::C2DSeqCtrl** inMark, BYTE* inFlagTbl, INT inListNum, INT inListAllNum,
+                                      INT inStartNo, INT inLayoutNo, INT inLayoutSeqNo) {
+    if (inMark) {
+        D2::C2DSeqCtrl** pMark = inMark;
+        INT listIndex = -inStartNo;
+        FVECTOR posi;
+        for (INT i = 0; i < inListAllNum; i++, pMark++, listIndex++) {
+            if (*pMark && (*pMark)->isEnableDisp()) {
+                if (listIndex >= 0 && listIndex < inListNum && inFlagTbl[i]) {
+                    D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqNo + listIndex, posi, 0);
+                } else {
+                    posi.set(0.0f, -1000.0f, 0.0f);
+                }
+                (*pMark)->setLocalPos(posi);
+            }
+        }
+    }
+}
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CJiminyMemo::replaceNoteListMark(D2::C2DSeqCtrl** inMark, INT inFlagId, INT inListNum, INT inListAllNum,
                                       INT inStartNo, INT inLayoutNo, INT inLayoutSeqNo) {
@@ -1128,12 +1326,35 @@ inline void _roPh19() {
     TRACE(__FILE__ "(4474)");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createCursorSequence__11CJiminyMemoPCiiiRC14CursorPositioniiiiiiiiP15CMemo2DSequence);
-/* placeholder: rodata of createMarkSequence__11CJiminyMemoiiiiiPQ22D210C2DSeqCtrlPPQ22D210C2DSeqCtrl */
-__asm__(".rdata\n");
-inline void _roPh20() {
-    TRACE(__FILE__ "(4520)");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CJiminyMemo::createMarkSequence(INT inMarkSeq, INT inNum, INT inLayoutNo, INT inLayoutSeqOffset, INT inLayer,
+                                     D2::C2DSeqCtrl* inParent, D2::C2DSeqCtrl** inArray) {
+    D2::C2DSeqCtrl* pMark;
+    FVECTOR posi;
+    INT i;
+    if (!inArray) return;
+    for (i = 0; i < inNum; i++) {
+        pMark = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(4520)",
+                                  ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+            D2::C2DSeqCtrl;
+        if (pMark) {
+            if (inArray) inArray[i] = pMark;
+            if (inParent) pMark->setParent(inParent);
+            pMark->setLayer(inLayer);
+            pMark->enableColorCtrl(TRUE);
+            pMark->addSeq(m_pLadName, 0x24);
+            pMark->addSeq(m_pLadName, inMarkSeq);
+            if (inLayoutNo >= 0) {
+                D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqOffset + i, posi, 0);
+                if (inParent) {
+                    pMark->setLocalPos(posi);
+                } else {
+                    pMark->setPos(posi);
+                }
+            }
+        }
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createMarkSequence__11CJiminyMemoiiiiiPQ22D210C2DSeqCtrlPPQ22D210C2DSeqCtrl);
 INT CJiminyMemo::changeStateSequence(D2::C2DSeqCtrl** inSeq, INT inNum, INT inMode, INT inSeqId) {
     if (!inSeq) return 0;
     for (INT i = 0; i < inNum; i++) {
@@ -1163,10 +1384,39 @@ inline void _roPh21() {
     TRACE(__FILE__ "(4660)");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", splitMessage__11CJiminyMemoPiPPPcPCci);
-/* placeholder: rodata of setPlateState__11CJiminyMemoii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0032A1C8\n.word .L0032A200\n.word .L0032A238\n.word .L0032A260\n.word .L0032A278\n.word .L0032A290\n.word .L0032A2A8\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPlateState__11CJiminyMemoii);
+void CJiminyMemo::setPlateState(INT inKind, INT inState) {
+    CMemo2DLayout* seq = getTaskPointer<CMemo2DLayout*>(m_hLayout);
+    if (seq) {
+        switch (inKind) {
+        case 0:
+            seq->setSeqState(0, inState);
+            seq->setSeqState(1, inState);
+            seq->setSeqState(2, inState);
+            break;
+        case 1:
+            seq->setSeqState(3, inState);
+            seq->setSeqState(4, inState);
+            seq->setSeqState(5, inState);
+            break;
+        case 2:
+            seq->setSeqState(6, inState);
+            seq->setSeqState(7, inState);
+            break;
+        case 3:
+            seq->setSeqState(8, inState);
+            break;
+        case 4:
+            seq->setSeqState(9, inState);
+            break;
+        case 5:
+            seq->setSeqState(10, inState);
+            break;
+        case 6:
+            seq->setSeqState(11, inState);
+            break;
+        }
+    }
+}
 INT CJiminyMemo::getPlateState(INT inKind) {
     CMemo2DLayout* seq = getTaskPointer<CMemo2DLayout*>(m_hLayout);
     if (!seq || seq->isOut()) return -2;
@@ -1211,7 +1461,26 @@ void CJiminyMemo::setPlateText(INT inKind, INT inCTNo) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPlateNumSeq__11CJiminyMemoii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getMenuContentFlag__11CJiminyMemoiiPiT3);
+void CJiminyMemo::getMenuContentFlag(INT inFlagId, INT inNum, INT* inFlagWork, BOOL* inCompWork) {
+    *inFlagWork = 0;
+    for (INT i = 0; i < inNum; i++) {
+        if (CJiminyMemoFlag::isContentFlag(inFlagId + i, 4)) {
+            *inFlagWork |= 4;
+        } else if (CJiminyMemoFlag::isContentFlag(inFlagId + i, 2)) {
+            *inFlagWork |= 2;
+        } else if (CJiminyMemoFlag::isContentFlag(inFlagId + i, 1)) {
+            *inFlagWork = 1;
+            break;
+        }
+    }
+    *inCompWork = TRUE;
+    for (INT i = 0; i < inNum; i++) {
+        if (!CJiminyMemoFlag::isContentOpen(inFlagId + i)) {
+            *inCompWork = FALSE;
+            break;
+        }
+    }
+}
 INT CJiminyMemo::getPrevContentId(INT inEventFlagStartId, INT inEventFlagNum, INT inCurrentNo) {
     INT rval = -1;
     for (INT i = inCurrentNo - 1; i >= 0; i--) {
@@ -1466,7 +1735,56 @@ INT CJiminyMemo::getPrevCardId(INT inId) {
 INT CJiminyMemo::getNextCardId(INT inId) {
     return getNextContentId(inId, work(0x2D4), work(0x2D0));
 }
+namespace JiminyMemo {
+extern INT SoraCardNumTbl[];
+extern INT RikuCardNumTbl[];
+namespace Collect {
+extern UINT CursorMoveFlag[];
+extern UINT CursorMoveFlagWithSpecial[];
+namespace D {
+extern UINT CursorMoveFlag[];
+}
+}
+}
+/* Parked: 4 lines: the constant 1 for (1 << j) is hoisted to before the outer loop in ours, the original sets it
+   at the start of each outer iteration (li t0,1 after lw a0 / move v1,zero). Everything else matches: cardNo read
+   before kindNo, the cardNum sum loop, goto end instead of return in the inner loop (fixes the epilogue order).
+   tried: return vs goto, the row flag in a local, do-while and if-wrapped do-while inner loops, an INT bit = 1 local,
+   pointer-incremented rows (19 lines), tools/permuter.py 10 min (12608 candidates, score 1). */
+#if 0
+INT CJiminyMemo::setParamFromCardViewToCollect() {
+    INT rval = 0;
+    INT cardNo = work(0x2D0);
+    INT kindNo = work(0x2CC);
+    INT cursorLimitY;
+    UINT* pCursorMoveFlag;
+    INT* pCardNumTbl;
+    if (m_iPlayerMode == 0) {
+        cursorLimitY = 7;
+        pCursorMoveFlag = haveSpecialCard() ? JiminyMemo::Collect::CursorMoveFlagWithSpecial
+                                            : JiminyMemo::Collect::CursorMoveFlag;
+        pCardNumTbl = JiminyMemo::SoraCardNumTbl;
+    } else {
+        pCursorMoveFlag = JiminyMemo::Collect::D::CursorMoveFlag;
+        cursorLimitY = 3;
+        pCardNumTbl = JiminyMemo::RikuCardNumTbl;
+    }
+    INT currentCardNo = cardNo;
+    for (INT i = 0; i < kindNo; i++) currentCardNo += pCardNumTbl[i];
+    for (INT i = 0; i < cursorLimitY; i++) {
+        for (INT j = 0; j < 22; j++) {
+            if (pCursorMoveFlag[i] & (1 << j)) {
+                if (--currentCardNo < 0) goto end;
+            }
+            rval++;
+        }
+    }
+end:
+    return rval;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setParamFromCardViewToCollect__11CJiminyMemo);
+#endif
 /* placeholder: rodata of contentChara__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh32() {
