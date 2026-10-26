@@ -3234,14 +3234,241 @@ public:
 };
 }
 __asm__(".weak __Q210MoogleShop15CMoogleShopCoreP5CTask\n__Q210MoogleShop15CMoogleShopCoreP5CTask = 0\n");
-extern CARD_DATA cardDataTbl_00493C68[]; /* CardKind.h's static table: VSME's copy is still asm data */
+/* Game/CardKind's card table (a static in the original's header; the same as in Game/Card.cpp): emitted with
+ * its strings at the end of .rodata. */
+static const CARD_DATA cardDataTbl[224] = {
+    { { 0x00 }, 0, 0, 0, "" }, // 0
+    { { 0x11 }, 2, 0, 3, "Kingdom Key" }, // 1
+    { { 0x11 }, 2, 1, 3, "Three Wishes" }, // 2
+    { { 0x11 }, 2, 2, 3, "Crabclaw" }, // 3
+    { { 0x11 }, 2, 3, 3, "Pumpkinhead" }, // 4
+    { { 0x11 }, 2, 4, 3, "Fairy Harp" }, // 5
+    { { 0x11 }, 2, 5, 3, "Wishing Star" }, // 6
+    { { 0x11 }, 2, 6, 3, "Spellbinder" }, // 7
+    { { 0x11 }, 2, 7, 3, "Metal Chocobo" }, // 8
+    { { 0x11 }, 3, 0, 3, "Olympia" }, // 9
+    { { 0x11 }, 3, 1, 3, "Lionheart" }, // 10
+    { { 0x11 }, 3, 2, 3, "Lady Luck" }, // 11
+    { { 0x11 }, 3, 3, 3, "Divine Rose" }, // 12
+    { { 0x11 }, 3, 4, 3, "Oathkeeper" }, // 13
+    { { 0x11 }, 3, 5, 3, "Oblivion" }, // 14
+    { { 0x11 }, 3, 6, 3, "Ultima Weapon" }, // 15
+    { { 0x11 }, 3, 7, 3, "Diamond Dust" }, // 16
+    { { 0x11 }, 4, 0, 3, "One-Winged Angel" }, // 17
+    { { 0x11 }, 4, 1, 4, "Soul Eater" }, // 18
+    { { 0x11 }, 4, 2, 3, "Star Seeker" }, // 19
+    { { 0x11 }, 4, 3, 3, "Monochrome" }, // 20
+    { { 0x11 }, 4, 4, 3, "Follow the Wind" }, // 21
+    { { 0x11 }, 4, 5, 3, "Hidden Dragon" }, // 22
+    { { 0x11 }, 4, 6, 3, "Photon Debugger" }, // 23
+    { { 0x11 }, 4, 7, 3, "Bond of Flame" }, // 24
+    { { 0x11 }, 26, 0, 0, "-" }, // 25
+    { { 0x22 }, 5, 0, 3, "Fire" }, // 26
+    { { 0x22 }, 5, 1, 3, "Blizzard" }, // 27
+    { { 0x22 }, 5, 2, 3, "Thunder" }, // 28
+    { { 0x22 }, 5, 3, 3, "Cure" }, // 29
+    { { 0x22 }, 5, 4, 3, "Gravity" }, // 30
+    { { 0x22 }, 5, 5, 3, "Stop" }, // 31
+    { { 0x22 }, 5, 6, 3, "Aero" }, // 32
+    { { 0x22 }, 26, 2, 0, "-" }, // 33
+    { { 0x22 }, 26, 1, 0, "-" }, // 34
+    { { 0x33 }, 5, 7, 3, "Simba" }, // 35
+    { { 0x33 }, 6, 0, 3, "Genie" }, // 36
+    { { 0x33 }, 6, 1, 3, "Bambi" }, // 37
+    { { 0x33 }, 6, 2, 3, "Dumbo" }, // 38
+    { { 0x33 }, 6, 3, 3, "Tinker Bell" }, // 39
+    { { 0x33 }, 6, 4, 3, "Mushu" }, // 40
+    { { 0x33 }, 6, 5, 3, "Cloud" }, // 41
+    { { 0x44 }, 6, 6, 6, "Potion" }, // 42
+    { { 0x44 }, 6, 7, 6, "Hi-Potion" }, // 43
+    { { 0x44 }, 7, 0, 2, "Mega-Potion" }, // 44
+    { { 0x44 }, 7, 1, 2, "Ether" }, // 45
+    { { 0x44 }, 7, 2, 2, "Mega-Ether" }, // 46
+    { { 0x44 }, 7, 3, 2, "Elixir" }, // 47
+    { { 0x44 }, 7, 4, 2, "Megalixir" }, // 48
+    { { 0x55 }, 7, 5, 2, "Donald Duck" }, // 49
+    { { 0x55 }, 7, 6, 2, "Goofy" }, // 50
+    { { 0x55 }, 7, 7, 2, "Aladdin" }, // 51
+    { { 0x55 }, 8, 0, 2, "Ariel" }, // 52
+    { { 0x55 }, 8, 1, 2, "Jack" }, // 53
+    { { 0x55 }, 8, 2, 2, "Peter Pan" }, // 54
+    { { 0x55 }, 8, 3, 2, "The Beast" }, // 55
+    { { 0x55 }, 8, 4, 4, "The King" }, // 56
+    { { 0x55 }, 8, 5, 2, "Pluto" }, // 57
+    { { 0x66 }, 8, 6, 6, "Guard Armor" }, // 58
+    { { 0x66 }, 8, 6, 6, "Trickmaster" }, // 59
+    { { 0x66 }, 8, 6, 6, "Jafar" }, // 60
+    { { 0x66 }, 8, 6, 6, "Oogie Boogie" }, // 61
+    { { 0x66 }, 8, 6, 6, "Parasite Cage" }, // 62
+    { { 0x66 }, 8, 6, 6, "Ursula" }, // 63
+    { { 0x66 }, 8, 6, 6, "Dragon Maleficent" }, // 64
+    { { 0x66 }, 8, 6, 6, "Darkside" }, // 65
+    { { 0xe6 }, 8, 7, 4, "-" }, // 66
+    { { 0xe6 }, 9, 0, 0, "-" }, // 67
+    { { 0x77 }, 9, 1, 6, "Shadow" }, // 68
+    { { 0x77 }, 9, 2, 2, "Soldier" }, // 69
+    { { 0x77 }, 9, 3, 6, "Large Body" }, // 70
+    { { 0x77 }, 9, 4, 2, "Red Nocturne" }, // 71
+    { { 0x77 }, 9, 5, 2, "Blue Rhapsody" }, // 72
+    { { 0x77 }, 9, 6, 2, "Yellow Opera" }, // 73
+    { { 0x77 }, 9, 7, 2, "Green Requiem" }, // 74
+    { { 0x77 }, 10, 0, 6, "Powerwild" }, // 75
+    { { 0x77 }, 10, 1, 2, "Bouncywild" }, // 76
+    { { 0x77 }, 10, 2, 2, "Air Soldier" }, // 77
+    { { 0x77 }, 10, 3, 2, "Bandit" }, // 78
+    { { 0x77 }, 10, 4, 6, "Fat Bandit" }, // 79
+    { { 0x77 }, 10, 5, 2, "Barrel Spider" }, // 80
+    { { 0x77 }, 10, 6, 6, "Search Ghost" }, // 81
+    { { 0x77 }, 10, 7, 6, "Sea Neon" }, // 82
+    { { 0x77 }, 11, 0, 2, "Screwdiver" }, // 83
+    { { 0x77 }, 11, 1, 2, "Aquatank" }, // 84
+    { { 0x77 }, 11, 2, 6, "Wight Knight" }, // 85
+    { { 0x77 }, 11, 3, 2, "Gargoyle" }, // 86
+    { { 0x77 }, 11, 4, 6, "Pirate" }, // 87
+    { { 0x77 }, 11, 5, 2, "Air Pirate" }, // 88
+    { { 0x77 }, 11, 6, 4, "Darkball" }, // 89
+    { { 0x77 }, 11, 7, 6, "Defender" }, // 90
+    { { 0x77 }, 12, 0, 2, "Wyvern" }, // 91
+    { { 0x77 }, 12, 1, 2, "Wizard" }, // 92
+    { { 0x77 }, 12, 2, 2, "Neoshadow" }, // 93
+    { { 0x77 }, 12, 3, 2, "White Mushroom" }, // 94
+    { { 0x77 }, 12, 4, 2, "Black Fungus" }, // 95
+    { { 0x77 }, 12, 5, 2, "Creeper Plant" }, // 96
+    { { 0x77 }, 12, 6, 2, "Tornado Step" }, // 97
+    { { 0x77 }, 12, 7, 2, "Crescendo" }, // 98
+    { { 0x77 }, 13, 0, 6, "Guard Armor" }, // 99
+    { { 0x77 }, 13, 1, 6, "Parasite Cage" }, // 100
+    { { 0x77 }, 13, 2, 6, "Trickmaster" }, // 101
+    { { 0x77 }, 13, 3, 6, "Darkside" }, // 102
+    { { 0x77 }, 13, 4, 2, "Card Soldier" }, // 103
+    { { 0x77 }, 13, 5, 6, "Hades" }, // 104
+    { { 0x77 }, 13, 6, 6, "Jafar" }, // 105
+    { { 0x77 }, 13, 7, 6, "Oogie Boogie" }, // 106
+    { { 0x77 }, 14, 0, 6, "Ursula" }, // 107
+    { { 0x77 }, 14, 1, 6, "Hook" }, // 108
+    { { 0x77 }, 14, 2, 6, "Dragon Maleficent" }, // 109
+    { { 0x77 }, 14, 3, 2, "Riku" }, // 110
+    { { 0x77 }, 14, 4, 2, "Axel" }, // 111
+    { { 0x77 }, 14, 5, 2, "Larxene" }, // 112
+    { { 0x77 }, 14, 6, 2, "Vexen" }, // 113
+    { { 0x77 }, 14, 7, 2, "Marluxia" }, // 114
+    { { 0x77 }, 15, 0, 6, "Lexaeus" }, // 115
+    { { 0x77 }, 15, 1, 2, "Ansem" }, // 116
+    { { 0x77 }, 15, 3, 6, "Zexion" }, // 117
+    { { 0x77 }, 15, 4, 2, "Xemnas" }, // 118
+    { { 0x77 }, 15, 5, 2, "Xigbar" }, // 119
+    { { 0x77 }, 15, 6, 2, "Xaldin" }, // 120
+    { { 0x77 }, 15, 7, 2, "Sa\203\307x" }, // 121
+    { { 0x77 }, 16, 0, 2, "Demyx" }, // 122
+    { { 0x77 }, 16, 1, 2, "Luxord" }, // 123
+    { { 0x77 }, 16, 2, 2, "Roxas" }, // 124
+    { { 0x77 }, 21, 6, 2, "Gold Card" }, // 125
+    { { 0x77 }, 21, 7, 2, "Platinum Card" }, // 126
+    { { 0x77 }, 15, 2, 0, "Card Soldier Spade" }, // 127
+    { { 0x77 }, 13, 4, 0, "Card Soldier Heart" }, // 128
+    { { 0x17 }, 22, 0, 0, "\203N\203\211\203E\203hA" }, // 129
+    { { 0x17 }, 22, 1, 0, "\203N\203\211\203E\203hB" }, // 130
+    { { 0x17 }, 22, 2, 0, "\203n\203f\203XA" }, // 131
+    { { 0x27 }, 22, 3, 0, "\203n\203f\203XB" }, // 132
+    { { 0x17 }, 22, 4, 0, "\203t\203b\203NA" }, // 133
+    { { 0x17 }, 22, 5, 0, "\203t\203b\203NB" }, // 134
+    { { 0x17 }, 22, 6, 0, "\203t\203b\203NC" }, // 135
+    { { 0x27 }, 22, 7, 0, "\203t\203b\203ND" }, // 136
+    { { 0x17 }, 23, 0, 0, "\203A\203N\203Z\203\213A" }, // 137
+    { { 0x17 }, 23, 1, 0, "\203A\203N\203Z\203\213B" }, // 138
+    { { 0x17 }, 23, 2, 0, "\203\211\203N\203V\201[\203kA" }, // 139
+    { { 0x17 }, 23, 3, 0, "\203\211\203N\203V\201[\203kB" }, // 140
+    { { 0x27 }, 23, 4, 0, "\203\211\203N\203V\201[\203kC" }, // 141
+    { { 0x17 }, 23, 5, 0, "\203\212\203NA" }, // 142
+    { { 0x17 }, 23, 6, 0, "\203\212\203NB" }, // 143
+    { { 0x17 }, 23, 7, 0, "\203\212\203NC" }, // 144
+    { { 0x17 }, 24, 0, 0, "\203\212\203ND" }, // 145
+    { { 0x17 }, 24, 1, 0, "\203\224\203B\203N\203Z\203\223A" }, // 146
+    { { 0x27 }, 24, 2, 0, "\203\224\203B\203N\203Z\203\223B" }, // 147
+    { { 0x17 }, 24, 3, 0, "\203}\201[\203\213\201[\203V\203\203A" }, // 148
+    { { 0x17 }, 24, 4, 0, "\203}\201[\203\213\201[\203V\203\203B" }, // 149
+    { { 0x27 }, 24, 5, 0, "\203}\201[\203\213\201[\203V\203\203C" }, // 150
+    { { 0x77 }, 24, 6, 0, "\203}\201[\203\213\201[\203V\203\2032" }, // 151
+    { { 0x77 }, 24, 7, 0, "\203}\201[\203\213\201[\203V\203\2033" }, // 152
+    { { 0x17 }, 25, 0, 0, "\203\214\203N\203Z\203E\203XA" }, // 153
+    { { 0x17 }, 25, 1, 0, "\203\214\203N\203Z\203E\203XB" }, // 154
+    { { 0x27 }, 25, 2, 0, "\203\214\203N\203Z\203E\203XC" }, // 155
+    { { 0x17 }, 25, 3, 0, "\203A\203\223\203Z\203\200A" }, // 156
+    { { 0x27 }, 25, 4, 0, "\203A\203\223\203Z\203\200B" }, // 157
+    { { 0x27 }, 25, 5, 0, "\203[\203N\203V\203I\203\223A" }, // 158
+    { { 0x77 }, 26, 3, 0, "-" }, // 159
+    { { 0x88 }, 0, 0, 6, "\203\212\203\215\201[\203h" }, // 160
+    { { 0x99 }, 16, 3, 6, "Tranquil Darkness" }, // 161
+    { { 0x99 }, 16, 4, 6, "Teeming Darkness" }, // 162
+    { { 0x99 }, 16, 5, 6, "Feeble Darkness" }, // 163
+    { { 0x99 }, 16, 6, 6, "Almighty Darkness" }, // 164
+    { { 0x99 }, 16, 7, 6, "Sleeping Darkness" }, // 165
+    { { 0x99 }, 17, 0, 6, "Looming Darkness" }, // 166
+    { { 0x99 }, 17, 1, 2, "Premium Room" }, // 167
+    { { 0x99 }, 17, 2, 2, "White Room" }, // 168
+    { { 0x99 }, 17, 3, 6, "Black Room" }, // 169
+    { { 0x99 }, 17, 4, 6, "Bottomless Darkness" }, // 170
+    { { 0x99 }, 17, 5, 6, "Roulette Room" }, // 171
+    { { 0xa9 }, 17, 6, 6, "Martial Waking" }, // 172
+    { { 0xa9 }, 17, 7, 2, "Sorcerous Waking" }, // 173
+    { { 0xa9 }, 18, 0, 2, "Alchemic Waking" }, // 174
+    { { 0xa9 }, 18, 1, 6, "Meeting Ground" }, // 175
+    { { 0xa9 }, 18, 2, 6, "Stagnant Space" }, // 176
+    { { 0xa9 }, 18, 3, 6, "Strong Initiative" }, // 177
+    { { 0xa9 }, 18, 4, 6, "Lasting Daze" }, // 178
+    { { 0xb9 }, 18, 5, 2, "Calm Bounty" }, // 179
+    { { 0xb9 }, 18, 6, 2, "Guarded Trove" }, // 180
+    { { 0xb9 }, 18, 7, 2, "False Bounty" }, // 181
+    { { 0xb9 }, 19, 0, 6, "Moment's Reprieve" }, // 182
+    { { 0xb9 }, 19, 1, 6, "Mingling Worlds" }, // 183
+    { { 0xb9 }, 19, 2, 2, "Moogle Room" }, // 184
+    { { 0xb9 }, 19, 3, 6, "Random Joker" }, // 185
+    { { 0xca }, 19, 4, 6, "Key of Beginnings" }, // 186
+    { { 0xca }, 19, 5, 6, "Key of Guidance" }, // 187
+    { { 0xca }, 19, 6, 6, "Key to Truth" }, // 188
+    { { 0xca }, 19, 7, 2, "Key to Rewards" }, // 189
+    { { 0xdb }, 20, 0, 6, "Traverse Town" }, // 190
+    { { 0xdb }, 20, 3, 6, "Agrabah" }, // 191
+    { { 0xdb }, 20, 2, 6, "Olympus Coliseum" }, // 192
+    { { 0xdb }, 20, 1, 6, "Wonderland" }, // 193
+    { { 0xdb }, 20, 5, 6, "Monstro" }, // 194
+    { { 0xdb }, 20, 4, 6, "Halloween Town" }, // 195
+    { { 0xdb }, 20, 6, 6, "Atlantica" }, // 196
+    { { 0xdb }, 20, 7, 6, "Neverland" }, // 197
+    { { 0xdb }, 21, 0, 6, "Hollow Bastion" }, // 198
+    { { 0xdb }, 21, 1, 2, "100 Acre Woods" }, // 199
+    { { 0xdb }, 21, 2, 6, "Twilight Town" }, // 200
+    { { 0xdb }, 21, 3, 6, "Destiny Islands" }, // 201
+    { { 0xdb }, 21, 4, 4, "Castle Oblivion" }, // 202
+    { { 0x0d }, 0, 0, 0, "EXP\220\302\217\254" }, // 203
+    { { 0x0d }, 0, 1, 0, "EXP\220\302\222\206" }, // 204
+    { { 0x0d }, 0, 2, 0, "EXP\220\302\221\345" }, // 205
+    { { 0x0d }, 0, 3, 0, "EXP\220\324\217\254" }, // 206
+    { { 0x0d }, 0, 4, 0, "EXP\220\324\222\206" }, // 207
+    { { 0x0d }, 0, 5, 0, "EXP\220\324\221\345" }, // 208
+    { { 0x0d }, 0, 6, 0, "EXP\213\342" }, // 209
+    { { 0x0d }, 1, 0, 0, "HP\217\254" }, // 210
+    { { 0x0d }, 1, 1, 0, "HP\221\345" }, // 211
+    { { 0x0d }, 2, 0, 0, "MP\217\254" }, // 212
+    { { 0x0d }, 2, 1, 0, "MP\221\345" }, // 213
+    { { 0x0d }, 3, 0, 0, "P" }, // 214
+    { { 0x0d }, 4, 0, 0, "R" }, // 215
+    { { 0x0c }, 0, 0, 0, "Unknown Room" }, // 216
+    { { 0x0c }, 0, 0, 0, "Conqueror's Respite" }, // 217
+    { { 0x0c }, 0, 0, 0, "Room of Rewards" }, // 218
+    { { 0x0c }, 0, 0, 0, "" }, // 219
+    { { 0x0c }, 0, 0, 0, "" }, // 220
+    { { 0x00 }, 0, 0, 0, "" }, // 221
+    { { 0x00 }, 0, 0, 0, "" }, // 222
+    { { 0x00 }, 0, 0, 0, "" }, // 223
+};
 /* CardKind.h:554-558 in the original (a CARD constructor) */
 static inline void setCard(CARD& card, USHORT nKind, CHAR nNumber) {
     card.m_nId = 0;
     card.m_nNumber = nNumber;
     card.m_nKind2 = nKind;
-    card.m_nCategory0 = cardDataTbl_00493C68[card.m_nKind].nCategory0;
-    card.m_nCategory1 = cardDataTbl_00493C68[card.m_nKind].nCategory1;
+    card.m_nCategory0 = cardDataTbl[card.m_nKind].nCategory0;
+    card.m_nCategory1 = cardDataTbl[card.m_nKind].nCategory1;
 }
 /* CollUtil.h:194/245 in the original */
 static inline CCollUtil* collUtilInstance() {
@@ -6039,13 +6266,5 @@ static DEBUG_WINDOW_LINE debugWinAtelWorkDefLine[30] = {
 static DEBUG_WINDOW_TBL debugWinAtelWorkDef = { "ATEL WORK", -106, -(SCREEN_HEIGHT >> 1) + 150, 20, 30, 12, 0, 0, debugWinAtelWorkDefLine, NULL, DebugAtelWorkDef };
 static DEBUG_WINDOW_TBL debugWinEventPlayer = { "ATEL\x81@CONFIG", -206, -(SCREEN_HEIGHT >> 1) + 50, 12, 16, 14, 0, 0, debugWinEventSelectPlayerLine, NULL, debugWinNPCMainlCall };
 }
-/* Placeholder for the end of .rodata, which gcc emits after the static initializer's constants (a deferred
-   static const): execExt3Code's cardDataTbl and its strings. Bytes from the original, pointers as relocations. */
-static const struct {
-    char b0[4640];
-} _roTail = {
-    "Kingdom Key\x00\x00\x00\x00\x00Three Wishes\x00\x00\x00\x00" "Crabclaw\x00\x00\x00\x00\x00\x00\x00\x00Pumpkinhead\x00\x00\x00\x00\x00" "Fairy Harp\x00\x00\x00\x00\x00\x00Wishing Star\x00\x00\x00\x00Spellbinder\x00\x00\x00\x00\x00Metal Chocobo\x00\x00\x00Olympia\x00Lionheart\x00\x00\x00\x00\x00\x00\x00Lady Luck\x00\x00\x00\x00\x00\x00\x00" "Divine Rose\x00\x00\x00\x00\x00Oathkeeper\x00\x00\x00\x00\x00\x00Oblivion\x00\x00\x00\x00\x00\x00\x00\x00Ultima Weapon\x00\x00\x00" "Diamond Dust\x00\x00\x00\x00One-Winged Angel\x00\x00\x00\x00\x00\x00\x00\x00Soul Eater\x00\x00\x00\x00\x00\x00Star Seeker\x00\x00\x00\x00\x00Monochrome\x00\x00\x00\x00\x00\x00" "Follow the Wind\x00Hidden Dragon\x00\x00\x00Photon Debugger\x00" "Bond of Flame\x00\x00\x00-\x00\x00\x00\x00\x00\x00\x00" "Fire\x00\x00\x00\x00" "Blizzard\x00\x00\x00\x00\x00\x00\x00\x00Thunder\x00" "Cure\x00\x00\x00\x00Gravity\x00Stop\x00\x00\x00\x00" "Aero\x00\x00\x00\x00Simba\x00\x00\x00Genie\x00\x00\x00" "Bambi\x00\x00\x00" "Dumbo\x00\x00\x00Tinker Bell\x00\x00\x00\x00\x00Mushu\x00\x00\x00" "Cloud\x00\x00\x00Potion\x00\x00Hi-Potion\x00\x00\x00\x00\x00\x00\x00Mega-Potion\x00\x00\x00\x00\x00" "Ether\x00\x00\x00Mega-Ether\x00\x00\x00\x00\x00\x00" "Elixir\x00\x00Megalixir\x00\x00\x00\x00\x00\x00\x00" "Donald Duck\x00\x00\x00\x00\x00Goofy\x00\x00\x00" "Aladdin\x00" "Ariel\x00\x00\x00Jack\x00\x00\x00\x00Peter Pan\x00\x00\x00\x00\x00\x00\x00The Beast\x00\x00\x00\x00\x00\x00\x00The King\x00\x00\x00\x00\x00\x00\x00\x00Pluto\x00\x00\x00Guard Armor\x00\x00\x00\x00\x00Trickmaster\x00\x00\x00\x00\x00Jafar\x00\x00\x00Oogie Boogie\x00\x00\x00\x00Parasite Cage\x00\x00\x00Ursula\x00\x00" "Dragon Maleficent\x00\x00\x00\x00\x00\x00\x00" "Darkside\x00\x00\x00\x00\x00\x00\x00\x00Shadow\x00\x00Soldier\x00Large Body\x00\x00\x00\x00\x00\x00Red Nocturne\x00\x00\x00\x00" "Blue Rhapsody\x00\x00\x00Yellow Opera\x00\x00\x00\x00Green Requiem\x00\x00\x00Powerwild\x00\x00\x00\x00\x00\x00\x00" "Bouncywild\x00\x00\x00\x00\x00\x00" "Air Soldier\x00\x00\x00\x00\x00" "Bandit\x00\x00" "Fat Bandit\x00\x00\x00\x00\x00\x00" "Barrel Spider\x00\x00\x00Search Ghost\x00\x00\x00\x00Sea Neon\x00\x00\x00\x00\x00\x00\x00\x00Screwdiver\x00\x00\x00\x00\x00\x00" "Aquatank\x00\x00\x00\x00\x00\x00\x00\x00Wight Knight\x00\x00\x00\x00Gargoyle\x00\x00\x00\x00\x00\x00\x00\x00Pirate\x00\x00" "Air Pirate\x00\x00\x00\x00\x00\x00" "Darkball\x00\x00\x00\x00\x00\x00\x00\x00" "Defender\x00\x00\x00\x00\x00\x00\x00\x00Wyvern\x00\x00Wizard\x00\x00Neoshadow\x00\x00\x00\x00\x00\x00\x00White Mushroom\x00\x00" "Black Fungus\x00\x00\x00\x00" "Creeper Plant\x00\x00\x00Tornado Step\x00\x00\x00\x00" "Crescendo\x00\x00\x00\x00\x00\x00\x00" "Card Soldier\x00\x00\x00\x00Hades\x00\x00\x00Hook\x00\x00\x00\x00Riku\x00\x00\x00\x00" "Axel\x00\x00\x00\x00Larxene\x00Vexen\x00\x00\x00Marluxia\x00\x00\x00\x00\x00\x00\x00\x00Lexaeus\x00" "Ansem\x00\x00\x00Zexion\x00\x00Xemnas\x00\x00Xigbar\x00\x00Xaldin\x00\x00Sa\x83\xc7x\x00\x00\x00" "Demyx\x00\x00\x00Luxord\x00\x00Roxas\x00\x00\x00Gold Card\x00\x00\x00\x00\x00\x00\x00Platinum Card\x00\x00\x00" "Card Soldier Spade\x00\x00\x00\x00\x00\x00" "Card Soldier Heart\x00\x00\x00\x00\x00\x00\x83N\x83\x89\x83" "E\x83hA\x00\x00\x00\x00\x00\x00\x00\x83N\x83\x89\x83" "E\x83hB\x00\x00\x00\x00\x00\x00\x00\x83n\x83" "f\x83XA\x00\x83n\x83" "f\x83XB\x00\x83t\x83" "b\x83NA\x00\x83t\x83" "b\x83NB\x00\x83t\x83" "b\x83NC\x00\x83t\x83" "b\x83ND\x00\x83" "A\x83N\x83Z\x83\x8b" "A\x00\x00\x00\x00\x00\x00\x00\x83" "A\x83N\x83Z\x83\x8b" "B\x00\x00\x00\x00\x00\x00\x00\x83\x89\x83N\x83V\x81[\x83kA\x00\x00\x00\x00\x00\x83\x89\x83N\x83V\x81[\x83kB\x00\x00\x00\x00\x00\x83\x89\x83N\x83V\x81[\x83kC\x00\x00\x00\x00\x00\x83\x8a\x83NA\x00\x00\x00\x83\x8a\x83NB\x00\x00\x00\x83\x8a\x83NC\x00\x00\x00\x83\x8a\x83ND\x00\x00\x00\x83\x94\x83" "B\x83N\x83Z\x83\x93" "A\x00\x00\x00\x00\x00\x83\x94\x83" "B\x83N\x83Z\x83\x93" "B\x00\x00\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "A\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "B\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "C\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "2\x00\x00\x00\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "3\x00\x00\x00\x83\x8c\x83N\x83Z\x83" "E\x83XA\x00\x00\x00\x00\x00\x83\x8c\x83N\x83Z\x83" "E\x83XB\x00\x00\x00\x00\x00\x83\x8c\x83N\x83Z\x83" "E\x83XC\x00\x00\x00\x00\x00\x83" "A\x83\x93\x83Z\x83\x80" "A\x00\x00\x00\x00\x00\x00\x00\x83" "A\x83\x93\x83Z\x83\x80" "B\x00\x00\x00\x00\x00\x00\x00\x83[\x83N\x83V\x83I\x83\x93" "A\x00\x00\x00\x00\x00\x83\x8a\x83\x8d\x81[\x83h\x00\x00\x00\x00\x00\x00\x00\x00Tranquil Darkness\x00\x00\x00\x00\x00\x00\x00Teeming Darkness\x00\x00\x00\x00\x00\x00\x00\x00" "Feeble Darkness\x00" "Almighty Darkness\x00\x00\x00\x00\x00\x00\x00Sleeping Darkness\x00\x00\x00\x00\x00\x00\x00Looming Darkness\x00\x00\x00\x00\x00\x00\x00\x00Premium Room\x00\x00\x00\x00White Room\x00\x00\x00\x00\x00\x00" "Black Room\x00\x00\x00\x00\x00\x00" "Bottomless Darkness\x00\x00\x00\x00\x00Roulette Room\x00\x00\x00Martial Waking\x00\x00Sorcerous Waking\x00\x00\x00\x00\x00\x00\x00\x00" "Alchemic Waking\x00Meeting Ground\x00\x00Stagnant Space\x00\x00Strong Initiative\x00\x00\x00\x00\x00\x00\x00Lasting Daze\x00\x00\x00\x00" "Calm Bounty\x00\x00\x00\x00\x00Guarded Trove\x00\x00\x00" "False Bounty\x00\x00\x00\x00Moment's Reprieve\x00\x00\x00\x00\x00\x00\x00Mingling Worlds\x00Moogle Room\x00\x00\x00\x00\x00Random Joker\x00\x00\x00\x00Key of Beginnings\x00\x00\x00\x00\x00\x00\x00Key of Guidance\x00Key to Truth\x00\x00\x00\x00Key to Rewards\x00\x00Traverse Town\x00\x00\x00" "Agrabah\x00Olympus Coliseum\x00\x00\x00\x00\x00\x00\x00\x00Wonderland\x00\x00\x00\x00\x00\x00Monstro\x00Halloween Town\x00\x00" "Atlantica\x00\x00\x00\x00\x00\x00\x00Neverland\x00\x00\x00\x00\x00\x00\x00Hollow Bastion\x00\x00" "100 Acre Woods\x00\x00Twilight Town\x00\x00\x00" "Destiny Islands\x00" "Castle Oblivion\x00" "EXP\x90\xc2\x8f\xac\x00" "EXP\x90\xc2\x92\x86\x00" "EXP\x90\xc2\x91\xe5\x00" "EXP\x90\xd4\x8f\xac\x00" "EXP\x90\xd4\x92\x86\x00" "EXP\x90\xd4\x91\xe5\x00" "EXP\x8b\xe2\x00\x00\x00HP\x8f\xac\x00\x00\x00\x00HP\x91\xe5\x00\x00\x00\x00MP\x8f\xac\x00\x00\x00\x00MP\x91\xe5\x00\x00\x00\x00P\x00\x00\x00\x00\x00\x00\x00R\x00\x00\x00\x00\x00\x00\x00Unknown Room\x00\x00\x00\x00" "Conqueror's Respite\x00\x00\x00\x00\x00Room of Rewards\x00\x00\x00\x00\x00" "0\xc6H\x00\x11\x02\x00\x03P1I\x00\x11\x02\x01\x03`1I\x00\x11\x02\x02\x03p1I\x00\x11\x02\x03\x03\x80" "1I\x00\x11\x02\x04\x03\x90" "1I\x00\x11\x02\x05\x03\xa0" "1I\x00\x11\x02\x06\x03\xb0" "1I\x00\x11\x02\x07\x03\xc0" "1I\x00\x11\x03\x00\x03\xd0" "1I\x00\x11\x03\x01\x03\xd8" "1I\x00\x11\x03\x02\x03\xe8" "1I\x00\x11\x03\x03\x03\xf8" "1I\x00\x11\x03\x04\x03\x08" "2I\x00\x11\x03\x05\x03\x18" "2I\x00\x11\x03\x06\x03(2I\x00\x11\x03\x07\x03" "82I\x00\x11\x04\x00\x03H2I\x00\x11\x04\x01\x04`2I\x00\x11\x04\x02\x03p2I\x00\x11\x04\x03\x03\x80" "2I\x00\x11\x04\x04\x03\x90" "2I\x00\x11\x04\x05\x03\xa0" "2I\x00\x11\x04\x06\x03\xb0" "2I\x00\x11\x04\x07\x03\xc0" "2I\x00\x11\x1a\x00\x00\xd0" "2I\x00\"\x05\x00\x03\xd8" "2I\x00\"\x05\x01\x03\xe0" "2I\x00\"\x05\x02\x03\xf0" "2I\x00\"\x05\x03\x03\xf8" "2I\x00\"\x05\x04\x03\x00" "3I\x00\"\x05\x05\x03\x08" "3I\x00\"\x05\x06\x03\x10" "3I\x00\"\x1a\x02\x00\xd0" "2I\x00\"\x1a\x01\x00\xd0" "2I\x00" "3\x05\x07\x03\x18" "3I\x00" "3\x06\x00\x03 3I\x00" "3\x06\x01\x03(3I\x00" "3\x06\x02\x03" "03I\x00" "3\x06\x03\x03" "83I\x00" "3\x06\x04\x03H3I\x00" "3\x06\x05\x03P3I\x00" "D\x06\x06\x06X3I\x00" "D\x06\x07\x06`3I\x00" "D\x07\x00\x02p3I\x00" "D\x07\x01\x02\x80" "3I\x00" "D\x07\x02\x02\x88" "3I\x00" "D\x07\x03\x02\x98" "3I\x00" "D\x07\x04\x02\xa0" "3I\x00U\x07\x05\x02\xb0" "3I\x00U\x07\x06\x02\xc0" "3I\x00U\x07\x07\x02\xc8" "3I\x00U\x08\x00\x02\xd0" "3I\x00U\x08\x01\x02\xd8" "3I\x00U\x08\x02\x02\xe0" "3I\x00U\x08\x03\x02\xf0" "3I\x00U\x08\x04\x04\x00" "4I\x00U\x08\x05\x02\x10" "4I\x00" "f\x08\x06\x06\x18" "4I\x00" "f\x08\x06\x06(4I\x00" "f\x08\x06\x06" "84I\x00" "f\x08\x06\x06@4I\x00" "f\x08\x06\x06P4I\x00" "f\x08\x06\x06`4I\x00" "f\x08\x06\x06h4I\x00" "f\x08\x06\x06\x80" "4I\x00\xe6\x08\x07\x04\xd0" "2I\x00\xe6\t\x00\x00\xd0" "2I\x00w\t\x01\x06\x90" "4I\x00w\t\x02\x02\x98" "4I\x00w\t\x03\x06\xa0" "4I\x00w\t\x04\x02\xb0" "4I\x00w\t\x05\x02\xc0" "4I\x00w\t\x06\x02\xd0" "4I\x00w\t\x07\x02\xe0" "4I\x00w\n\x00\x06\xf0" "4I\x00w\n\x01\x02\x00" "5I\x00w\n\x02\x02\x10" "5I\x00w\n\x03\x02 5I\x00w\n\x04\x06(5I\x00w\n\x05\x02" "85I\x00w\n\x06\x06H5I\x00w\n\x07\x06X5I\x00w\x0b\x00\x02h5I\x00w\x0b\x01\x02x5I\x00w\x0b\x02\x06\x88" "5I\x00w\x0b\x03\x02\x98" "5I\x00w\x0b\x04\x06\xa8" "5I\x00w\x0b\x05\x02\xb0" "5I\x00w\x0b\x06\x04\xc0" "5I\x00w\x0b\x07\x06\xd0" "5I\x00w\x0c\x00\x02\xe0" "5I\x00w\x0c\x01\x02\xe8" "5I\x00w\x0c\x02\x02\xf0" "5I\x00w\x0c\x03\x02\x00" "6I\x00w\x0c\x04\x02\x10" "6I\x00w\x0c\x05\x02 6I\x00w\x0c\x06\x02" "06I\x00w\x0c\x07\x02@6I\x00w\x0d\x00\x06\x18" "4I\x00w\x0d\x01\x06P4I\x00w\x0d\x02\x06(4I\x00w\x0d\x03\x06\x80" "4I\x00w\x0d\x04\x02P6I\x00w\x0d\x05\x06`6I\x00w\x0d\x06\x06" "84I\x00w\x0d\x07\x06@4I\x00w\x0e\x00\x06`4I\x00w\x0e\x01\x06h6I\x00w\x0e\x02\x06h4I\x00w\x0e\x03\x02p6I\x00w\x0e\x04\x02x6I\x00w\x0e\x05\x02\x80" "6I\x00w\x0e\x06\x02\x88" "6I\x00w\x0e\x07\x02\x90" "6I\x00w\x0f\x00\x06\xa0" "6I\x00w\x0f\x01\x02\xa8" "6I\x00w\x0f\x03\x06\xb0" "6I\x00w\x0f\x04\x02\xb8" "6I\x00w\x0f\x05\x02\xc0" "6I\x00w\x0f\x06\x02\xc8" "6I\x00w\x0f\x07\x02\xd0" "6I\x00w\x10\x00\x02\xd8" "6I\x00w\x10\x01\x02\xe0" "6I\x00w\x10\x02\x02\xe8" "6I\x00w\x15\x06\x02\xf0" "6I\x00w\x15\x07\x02\x00" "7I\x00w\x0f\x02\x00\x10" "7I\x00w\x0d\x04\x00(7I\x00\x17\x16\x00\x00@7I\x00\x17\x16\x01\x00P7I\x00\x17\x16\x02\x00`7I\x00'\x16\x03\x00h7I\x00\x17\x16\x04\x00p7I\x00\x17\x16\x05\x00x7I\x00\x17\x16\x06\x00\x80" "7I\x00'\x16\x07\x00\x88" "7I\x00\x17\x17\x00\x00\x90" "7I\x00\x17\x17\x01\x00\xa0" "7I\x00\x17\x17\x02\x00\xb0" "7I\x00\x17\x17\x03\x00\xc0" "7I\x00'\x17\x04\x00\xd0" "7I\x00\x17\x17\x05\x00\xe0" "7I\x00\x17\x17\x06\x00\xe8" "7I\x00\x17\x17\x07\x00\xf0" "7I\x00\x17\x18\x00\x00\xf8" "7I\x00\x17\x18\x01\x00\x00" "8I\x00'\x18\x02\x00\x10" "8I\x00\x17\x18\x03\x00 8I\x00\x17\x18\x04\x00" "08I\x00'\x18\x05\x00@8I\x00w\x18\x06\x00P8I\x00w\x18\x07\x00`8I\x00\x17\x19\x00\x00p8I\x00\x17\x19\x01\x00\x80" "8I\x00'\x19\x02\x00\x90" "8I\x00\x17\x19\x03\x00\xa0" "8I\x00'\x19\x04\x00\xb0" "8I\x00'\x19\x05\x00\xc0" "8I\x00w\x1a\x03\x00\xd0" "2I\x00\x88\x00\x00\x06\xd0" "8I\x00\x99\x10\x03\x06\xe0" "8I\x00\x99\x10\x04\x06\xf8" "8I\x00\x99\x10\x05\x06\x10" "9I\x00\x99\x10\x06\x06 9I\x00\x99\x10\x07\x06" "89I\x00\x99\x11\x00\x06P9I\x00\x99\x11\x01\x02h9I\x00\x99\x11\x02\x02x9I\x00\x99\x11\x03\x06\x88" "9I\x00\x99\x11\x04\x06\x98" "9I\x00\x99\x11\x05\x06\xb0" "9I\x00\xa9\x11\x06\x06\xc0" "9I\x00\xa9\x11\x07\x02\xd0" "9I\x00\xa9\x12\x00\x02\xe8" "9I\x00\xa9\x12\x01\x06\xf8" "9I\x00\xa9\x12\x02\x06\x08:I\x00\xa9\x12\x03\x06\x18:I\x00\xa9\x12\x04\x06" "0:I\x00\xb9\x12\x05\x02@:I\x00\xb9\x12\x06\x02P:I\x00\xb9\x12\x07\x02`:I\x00\xb9\x13\x00\x06p:I\x00\xb9\x13\x01\x06\x88:I\x00\xb9\x13\x02\x02\x98:I\x00\xb9\x13\x03\x06\xa8:I\x00\xca\x13\x04\x06\xb8:I\x00\xca\x13\x05\x06\xd0:I\x00\xca\x13\x06\x06\xe0:I\x00\xca\x13\x07\x02\xf0:I\x00\xdb\x14\x00\x06\x00;I\x00\xdb\x14\x03\x06\x10;I\x00\xdb\x14\x02\x06\x18;I\x00\xdb\x14\x01\x06" "0;I\x00\xdb\x14\x05\x06@;I\x00\xdb\x14\x04\x06H;I\x00\xdb\x14\x06\x06X;I\x00\xdb\x14\x07\x06h;I\x00\xdb\x15\x00\x06x;I\x00\xdb\x15\x01\x02\x88;I\x00\xdb\x15\x02\x06\x98;I\x00\xdb\x15\x03\x06\xa8;I\x00\xdb\x15\x04\x04\xb8;I\x00\x0d\x00\x00\x00\xc8;I\x00\x0d\x00\x01\x00\xd0;I\x00\x0d\x00\x02\x00\xd8;I\x00\x0d\x00\x03\x00\xe0;I\x00\x0d\x00\x04\x00\xe8;I\x00\x0d\x00\x05\x00\xf0;I\x00\x0d\x00\x06\x00\xf8;I\x00\x0d\x01\x00\x00\x00<I\x00\x0d\x01\x01\x00\x08<I\x00\x0d\x02\x00\x00\x10<I\x00\x0d\x02\x01\x00\x18<I\x00\x0d\x03\x00\x00 <I\x00\x0d\x04\x00\x00(<I\x00\x0c\x00\x00\x00" "0<I\x00\x0c\x00\x00\x00@<I\x00\x0c\x00\x00\x00X<I\x00\x0c\x00\x00\x00" "0\xc6H\x00\x0c\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00" "0\xc6H\x00\x00\x00\x00\x00\x00\x00\x00"
-};
-const void* _roTailKeep = &_roTail; /* keeps the deferred table (this .data is not from source) */
 
 // SOURCE DATA: .rodata .bss
