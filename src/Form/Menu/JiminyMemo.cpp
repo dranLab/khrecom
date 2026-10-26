@@ -2824,6 +2824,253 @@ BOOL CJiminyMemo::haveSpecialCard() {
     }
     return bRet;
 }
+namespace JiminyMemo {
+namespace Menu {
+extern INT NoteSeqData[5];
+extern INT TalkSeqData[5];
+extern INT CursorLightSeqTbl[5];
+extern FVECTOR JiminyPosi;
+extern CursorPosition CursorPosiOffset;
+extern CursorPosition NewMarkPosiOffset;
+extern FLOAT JiminyRotY __asm__("D_0068C400"); /* PARTIAL: .bss still from the original's assembly */
+}
+}
+/* Parked: 129 lines: the stack slots of iFlag[5]/bComp[5] (and the pMarkSeq/pNewSeq spills) differ, which
+   shifts every s-register from the prologue on (s7 vs s8 saves); the code itself matches in structure.
+   tried: declaration orders of posi/telopNo/iFlag/bComp/pMarkSeq/pNewSeq (posi after bComp fixes the slots but
+   breaks the registers, 270 lines), listNum statement order per arm, member vs local listNum, braces per
+   statement; tools/permuter.py (fixed wrapper, other drafts hidden) 3 runs, 277 -> 141 -> 129 applied. */
+#if 0
+void CJiminyMemo::contentMenu() {
+    BOOL bCursorShift = FALSE;
+    switch (getContentStep()) {
+    case 20: {
+        FVECTOR posi;
+        INT listNum;
+        int iFlag[5];
+        int bComp[5];
+        INT telopNo;
+        D2::C2DSeqCtrl** pNewSeq;
+        D2::C2DSeqCtrl** pMarkSeq;
+        CMemo2DSequence* pList;
+        if (isModeJiminyMemo()) {
+            getMenuContentFlag(0, 0x11, &iFlag[0], &bComp[0]);
+            getMenuContentFlag(0xB7, 0x98, &iFlag[1], &bComp[1]);
+            listNum = 5;
+            iFlag[2] = iFlag[1];
+            bComp[2] = bComp[1];
+            telopNo = 0x700101;
+            getMenuContentFlag(0x17, 0x68, &iFlag[3], &bComp[3]);
+            getMenuContentFlag(0x18A, 6, &iFlag[4], &bComp[4]);
+            if (bComp[4] == TRUE && CGameWork::getByte(0, 4) >= 2 && CGameWork::getByte(0, 5) >= 2 &&
+                CGameWork::getByte(0, 6) >= 2 && CGameWork::getByte(0, 7) >= 2 && CGameWork::getByte(0, 8) >= 2 &&
+                CJiminyMemoFlag::isContentOpen(0x18F)) {
+                bComp[4] = TRUE;
+            } else {
+                bComp[4] = FALSE;
+            }
+            if (!iFlag[4]) listNum = 4;
+        } else {
+            telopNo = 0x700116;
+            listNum = 4;
+            getMenuContentFlag(0x11, 6, &iFlag[0], &bComp[0]);
+            getMenuContentFlag(0x14F, 0x3B, &iFlag[1], &bComp[1]);
+            iFlag[2] = iFlag[1];
+            bComp[2] = bComp[1];
+            getMenuContentFlag(0x7F, 0x38, &iFlag[3], &bComp[3]);
+        }
+        m_ContentMenu.iCursorPosiNum = listNum;
+        m_ContentMenu.iTelopNo = telopNo;
+        m_ContentMenu.iStringNum = listNum + 1;
+        m_ContentMenu.pString = new (__FILE__ "(5252)") D2::C2DFnt*[m_ContentMenu.iStringNum];
+        if (m_ContentMenu.pString) {
+            for (INT i = 0; i < m_ContentMenu.iStringNum; i++) m_ContentMenu.pString[i] = NULL;
+        }
+        m_ContentMenu.iSeqCtrlNum = m_ContentMenu.iStringNum + 10;
+        m_ContentMenu.pSeqCtrl = new (__FILE__ "(5258)") D2::C2DSeqCtrl*[m_ContentMenu.iSeqCtrlNum];
+        if (m_ContentMenu.pSeqCtrl) {
+            for (INT i = 0; i < m_ContentMenu.iSeqCtrlNum; i++) m_ContentMenu.pSeqCtrl[i] = NULL;
+        }
+        pMarkSeq = m_ContentMenu.pSeqCtrl + m_ContentMenu.iStringNum;
+        pNewSeq = m_ContentMenu.pSeqCtrl + m_ContentMenu.iStringNum + 5;
+        pList = createSequence(JiminyMemo::Menu::NoteSeqData, 0x10, 1, 0, NULL);
+        if (pList) {
+            m_ContentMenu.pList = pList;
+            pList->setInState(pList->getSideInId(getPrevContentMode() < 0));
+            for (INT i = 0; i < listNum; i++) {
+                createListSequence(pList, 0x11, 0, 0xE + i, &m_ContentMenu.pSeqCtrl[i], &m_ContentMenu.pString[i],
+                                   0x807F7F7F, 16, 0x40, CCtdMan::getText(i + 0x700201));
+            }
+        }
+        m_ContentMenu.iCursorCurrent = getPrevContentMode() < 1 ? 0 : getPrevContentMode() - 1;
+        m_ContentMenu.pCursor = createCursorSequence((const INT*)JiminyMemo::CursorSeqTbl, 0, 2,
+                                                     JiminyMemo::Menu::CursorPosiOffset, listNum, listNum, 0, 0, 1,
+                                                     0x11, 0x20002, m_ContentMenu.iCursorCurrent, pList);
+        m_ContentMenu.pCursorLight = createSequence(JiminyMemo::Menu::CursorLightSeqTbl, 0x11, 0, 2, pList);
+        if (m_ContentMenu.pCursorLight) m_ContentMenu.pCursorLight->setInState(0);
+        createMarkSequence(0x92, listNum, 0, 8, 0x11, pList, pMarkSeq);
+        bCursorShift = TRUE;
+        for (INT i = 0; listNum > i; i++) {
+            if (pMarkSeq[i]) pMarkSeq[i]->enableDisp(bComp[i]);
+        }
+        createMarkSequence(0x93, listNum, 0, 8, 0x11, pList, pNewSeq);
+        for (INT i = 0; listNum > i; i++) {
+            if (pNewSeq[i]) {
+                if (1 & iFlag[i]) {
+                    pNewSeq[i]->enableDisp(TRUE);
+                } else if (iFlag[i] & 2) {
+                    pNewSeq[i]->enableDisp(TRUE);
+                    pNewSeq[i]->replaceSeq(1, m_pLadName, 0x94);
+                } else {
+                    pNewSeq[i]->enableDisp(FALSE);
+                }
+                pNewSeq[i]->shiftSeqPos(1, JiminyMemo::Menu::NewMarkPosiOffset.x, JiminyMemo::Menu::NewMarkPosiOffset.y);
+            }
+        }
+        setContentTimer(getPrevContentMode() < 0 ? 45.0f : 16.0f);
+        setContentStep(isModeDReport() ? 31 : 30);
+        break;
+    }
+    case 30:
+        if (getContentTimer() <= 15.0f) {
+            CMemo3DObj* pObj;
+            setContentStep(31);
+            pObj = new (__FILE__ "(5350)")
+                CMemo3DObj(this, JiminyMemo::getHostGroupId(), JiminyMemo::getHostRsrcId(), 0x12, FALSE);
+            if (pObj) {
+                CMemo2DSequence* pTalk;
+                m_ContentMenu.hJiminyObj = pObj->getHandle();
+                pObj->setPosition(JiminyMemo::Menu::JiminyPosi);
+                pObj->setRotateY(JiminyMemo::Menu::JiminyRotY);
+                pObj->setScale(8.0f);
+                pTalk = new (__FILE__ "(5359)") CMemo2DSequence;
+                if (pTalk) {
+                    FVECTOR posi1;
+                    FVECTOR posi0;
+                    FVECTOR posi2;
+                    D2::C2DFnt* pFnt;
+                    INT no;
+                    G_RGBA fontRGB;
+                    m_ContentMenu.pTalk = pTalk;
+                    pTalk->setup(m_pLadName, JiminyMemo::Menu::TalkSeqData, 0x11);
+                    pTalk->setInState(pTalk->getSideInId(getPrevContentMode() < 0));
+                    D2::C2DMan::getLayPosition(m_pLadFileName, 1, 1, posi0, 0);
+                    pTalk->setBasePosition(posi0);
+                    pTalk->setPosition();
+                    no = m_ContentMenu.iCursorPosiNum;
+                    fontRGB.col = 0x80000000;
+                    pFnt = new (__FILE__ "(5377)") D2::C2DFnt(0, 0, &fontRGB, 18, CCtdMan::getText(0x700206), 0x21002);
+                    if (pFnt) {
+                        if (m_ContentMenu.pString) m_ContentMenu.pString[no] = pFnt;
+                        D2::C2DMan::getLayPosition(m_pLadFileName, 1, 0, posi1, 0);
+                        D2::C2DMan::getLayPosition(m_pLadFileName, 0, 0x13, posi2, 0);
+                        __typeof__((posi0.x - posi1.x)) pt395 = (posi0.x - posi1.x); posi1.x = posi2.x - pt395;
+                        posi1.y = posi2.y - (posi0.y - posi1.y);
+                        pTalk->addFntShift(m_pLadName, pFnt, posi1.x, posi1.y);
+                        pTalk->enableDisp(1, FALSE);
+                    }
+                }
+            }
+        }
+        break;
+    case 31:
+        if (getContentTimer() <= 0.0f) {
+            if (m_ContentMenu.pSeqCtrl) changeStateLoopSequence(m_ContentMenu.pSeqCtrl, m_ContentMenu.iSeqCtrlNum);
+            if (m_ContentMenu.pTalk) m_ContentMenu.pTalk->enableDisp(1, TRUE);
+            setTelopMessage(CCtdMan::getText(m_ContentMenu.iTelopNo + m_ContentMenu.iCursorCurrent));
+            setContentStep(40);
+        }
+        break;
+    case 40:
+        if (!m_ContentMenu.pCursor) break;
+        if (_isTrgOK(0)) {
+            setContentStep(50);
+            JiminyMemo::playSE(2);
+            setNextContentMode(1 + m_ContentMenu.iCursorCurrent);
+            if (m_ContentMenu.iCursorCurrent == 1) setContentParam(0, -1);
+        } else if (_isTrgCANCEL(0) || _isButtonTrg(0x800, 0)) {
+            JiminyMemo::playSE(4);
+            setContentStep(50);
+            setNextContentMode(-1);
+        } else if (isButtonRptLimitStop(0x204000, 0,
+                                        m_ContentMenu.iCursorCurrent == m_ContentMenu.iCursorPosiNum - 1)) {
+            m_ContentMenu.iCursorCurrent++;
+            if (m_ContentMenu.iCursorPosiNum <= m_ContentMenu.iCursorCurrent) m_ContentMenu.iCursorCurrent = 0;
+            bCursorShift = TRUE;
+        } else if (isButtonRptLimitStop(0x101000, 0, m_ContentMenu.iCursorCurrent == 0)) {
+            m_ContentMenu.iCursorCurrent--;
+            if (m_ContentMenu.iCursorCurrent < 0) m_ContentMenu.iCursorCurrent = m_ContentMenu.iCursorPosiNum - 1;
+            bCursorShift = TRUE;
+        }
+        if (bCursorShift) {
+            JiminyMemo::playSE(1);
+            m_ContentMenu.pCursor->setPosiId(m_ContentMenu.iCursorCurrent);
+            setTelopMessage(CCtdMan::getText(m_ContentMenu.iTelopNo + m_ContentMenu.iCursorCurrent));
+        }
+        break;
+    case 50: {
+        CMemo3DObj* pObj;
+        if (m_ContentMenu.pList) {
+            m_ContentMenu.pList->setOutState(m_ContentMenu.pList->getSideOutId(getNextContentMode() < 0));
+        }
+        if (m_ContentMenu.pTalk) {
+            m_ContentMenu.pTalk->setOutState(m_ContentMenu.pTalk->getSideOutId(getNextContentMode() < 0));
+        }
+        if (m_ContentMenu.pCursor) m_ContentMenu.pCursor->setState(4);
+        if (m_ContentMenu.pCursorLight) m_ContentMenu.pCursorLight->setOutState(2);
+        if (m_ContentMenu.pSeqCtrl) changeStateOutSequence(m_ContentMenu.pSeqCtrl, m_ContentMenu.iSeqCtrlNum);
+        pObj = getTaskPointer<CMemo3DObj*>(m_ContentMenu.hJiminyObj);
+        if (pObj) pObj->setErase();
+        setTelopMessage("");
+        setContentStep(60);
+        setContentTimer(16.0f);
+        break;
+    }
+    case 60:
+        if (getContentTimer() <= 0.0f) setContentStep(80);
+        break;
+    case 80:
+    case 90: {
+        CMemo3DObj* pObj = getTaskPointer<CMemo3DObj*>(m_ContentMenu.hJiminyObj);
+        if (pObj) pObj->out();
+        if (m_ContentMenu.pList) delete m_ContentMenu.pList;
+        m_ContentMenu.pList = NULL;
+        if (m_ContentMenu.pTalk) delete m_ContentMenu.pTalk;
+        m_ContentMenu.pTalk = NULL;
+        if (m_ContentMenu.pCursor) delete m_ContentMenu.pCursor;
+        m_ContentMenu.pCursor = NULL;
+        if (m_ContentMenu.pCursorLight) delete m_ContentMenu.pCursorLight;
+        m_ContentMenu.pCursorLight = NULL;
+        if (m_ContentMenu.pString) {
+            delete[] m_ContentMenu.pString;
+            m_ContentMenu.pString = NULL;
+        }
+        if (m_ContentMenu.pSeqCtrl) {
+            for (INT i = 0; m_ContentMenu.iSeqCtrlNum > i; i++) {
+                __typeof__(m_ContentMenu.pSeqCtrl[i]) pt87 = m_ContentMenu.pSeqCtrl[i]; if (m_ContentMenu.pSeqCtrl[i]) delete pt87;
+                m_ContentMenu.pSeqCtrl[i] = NULL;
+            }
+            if (m_ContentMenu.pSeqCtrl) delete[] m_ContentMenu.pSeqCtrl;
+            m_ContentMenu.pSeqCtrl = NULL;
+        }
+        setContentStep(100);
+        break;
+    }
+    case 100:
+        break;
+    }
+    FLOAT rate = getFrameRateF();
+    if (m_ContentMenu.pList) m_ContentMenu.pList->main(rate);
+    if (m_ContentMenu.pTalk) m_ContentMenu.pTalk->main(rate);
+    if (m_ContentMenu.pCursor) {
+        m_ContentMenu.pCursor->main();
+        if (m_ContentMenu.pCursorLight) {
+            if (bCursorShift == TRUE) m_ContentMenu.pCursorLight->setSlideMoveParam(m_ContentMenu.pCursor);
+            m_ContentMenu.pCursorLight->main(rate);
+        }
+    }
+}
+#else
 /* placeholder: rodata of contentMenu__11CJiminyMemo */
 __asm__(".rdata\n");
 inline void _roPh25() {
@@ -2840,6 +3087,7 @@ __asm__(".word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\
 __asm__(".word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BA9C\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n");
 __asm__(".word .L0032BC08\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentMenu__11CJiminyMemo);
+#endif
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 namespace JiminyMemo {
 namespace Story {
