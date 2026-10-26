@@ -5,8 +5,7 @@
 #include "System/Task.h"
 
 class CAtel;
-namespace ATEL { class CAvatar; }
-class CEventTrap;
+namespace ATEL { class CAvatar; class CEventTrap; }
 class CAtelCardSeq;
 
 union F_UL {
@@ -117,6 +116,7 @@ public:
     INT getActorIndex(INT nID) const;
     INT getActorIndex(const CHAR* pszName) const;
     CAvatar* getAvatar(INT nIdx) { return m_ActorTbl[nIdx]._pAvatar; }
+    CEventTrap* getEventTrap(INT nIdx) { return m_ActorTbl[nIdx]._pEventTrap; }
     CHAR* getAvatarName(INT nIdx) { return m_ActorTbl[nIdx]._ATP.name; }
     INT getActorNum() { return m_ActorCount; }
     void setPC(INT nPC) { m_Pctr = nPC; }

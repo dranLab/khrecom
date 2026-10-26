@@ -3,6 +3,7 @@
 #include "Game/Atel/Atel.h"
 #define GAME_ATEL_AVATAR_CPP /* the full CAvatar class (the other includers get a stub) */
 #include "Game/Atel/Avatar.h"
+#include "Game/Atel/EventTrap.h"
 #include "Form/Menu/WorldCard.h"
 #include "Form/Menu/LevelUp.h"
 inline void* operator new(size_t, void* p) throw() { return p; }
@@ -610,7 +611,15 @@ CEventLineDisp::CEventLineDisp(CTask* pParent) : CTask(pParent, 0x8000) {
 }
 CEventLineDisp::~CEventLineDisp() {}
 void CEventLineDisp::main() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", disp__14CEventLineDisp);
+void CEventLineDisp::disp() {
+    CAtel* at = (CAtel*)CTaskMan::getSysTask(0x1A);
+    if (at && at->getVSM()) {
+        for (int i = 0; i < at->getVSM()->getActorNum(); i++) {
+            CEventTrap* p = at->getVSM()->getEventTrap(i);
+            if (p) p->dispShape();
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", __static_initialization_and_destruction_0_002505D8);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _TRACE___4ATELiPCce);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", isInitComplete__CQ24ATEL4CVSM);
