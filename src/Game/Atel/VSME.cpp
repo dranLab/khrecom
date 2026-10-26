@@ -2623,27 +2623,514 @@ INT CVSM::execExt1Code(INT op, eATEL_REQ_RET& ret) {
     } while (r == 0);
     return r;
 }
-/* placeholder: rodata of execExt2Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET */
-__asm__(".rdata\n");
-inline void _roPh29() {
-    TRACE("CCC %d %f %f %f\n");
-    TRACE("CCT %d %f %f %f\n");
-    TRACE("    %f %f %f %d %f\n");
-    TRACE("BGM_PLAY %s %d\n");
-    TRACE("MOE %d : %d : %f : %d\n");
-    TRACE("CAMCMD_CHANGE_GAKAKU %f\n");
-    TRACE("--- WNDCMD_FADE_CREATE ---\n");
-    TRACE("--- WNDCMD_FADE_DESTROY ---\n");
-    TRACE("BGM_FADE_IN %s %d %d\n");
-    TRACE("BGM_FADE_OUT %d \n");
-    TRACE("BGM_CROSS_FADE %s %d %d\n");
-    TRACE("\x82" "a\x82" "f\x82l\x8d\xc4\x90\xb6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97v\x8b\x81\x81" "F\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x83L\x83\x83\x83\x93\x83Z\x83\x8b\x81" "FBGM\x8d\xc4\x90\xb6\n");
-    TRACE("NG AWK param\n");
-    TRACE("CAMCMD_CREATE_PATHDATA %s\n");
-    TRACE("CAMCMD_ADD_QUAKE \n");
+namespace ATEL {
+struct ChatWndSetWordsParam;
+struct ChatWndCreateCTDParam {
+    CPointI pos;
+    CPointI cyobiPos;
+    UINT ctdID;
+    UINT waitFrame;
+    ChatWndSetWordsParam* pCwswp;
+    UINT nLine;
+    ChatWndCreateCTDParam() { nLine = 0; }
+};
 }
-__asm__(".rdata\n.align 4\n.word .L002468B0\n.word .L002468D4\n.word .L00246914\n.word .L00246954\n.word .L00246994\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002482EC\n.word .L002469D0\n.word .L00246A10\n.word .L00246C1C\n.word .L00246C60\n.word .L00246D3C\n.word .L002482EC\n.word .L00246E90\n.word .L00246EA4\n.word .L00246ED4\n.word .L002482F4\n.word .L00247178\n.word .L002471FC\n.word .L00247238\n.word .L002482F4\n.word .L002482F4\n.word .L00247294\n.word .L002472C8\n.word .L00247308\n.word .L002473B8\n.word .L002482EC\n.word .L002473EC\n.word .L00247420\n.word .L002482EC\n.word .L002474A8\n.word .L002474C8\n.word .L00247524\n.word .L00247594\n.word .L002475FC\n.word .L00247678\n.word .L002476C0\n.word .L0024773C\n.word .L0024773C\n.word .L0024773C\n.word .L00247784\n.word .L002477A0\n.word .L00247818\n.word .L0024785C\n.word .L002482F4\n.word .L002482F4\n.word .L002482F4\n.word .L002482F4\n.word .L002482F4\n.word .L00247908\n.word .L002482EC\n.word .L00247980\n.word .L002482F4\n.word .L0024799C\n.word .L002479F8\n.word .L00247AE0\n.word .L002482F4\n.word .L002482F4\n.word .L00246ED4\n.word .L00247B2C\n.word .L00247CA4\n.word .L00247F88\n.word .L00248168\n.word .L002481C8\n.word .L002482F4\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", execExt2Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET);
+struct CameraManCreateParam {
+    FVECTOR cameraPos;
+    FVECTOR targetPos;
+    CHAR* pPathName;
+    FLOAT fChangeRate;
+    SHORT changeKind;
+    SHORT changeKind2;
+    SHORT changeFlag;
+    SHORT pathDateKind;
+    SHORT pathDateTargetID;
+    SHORT pathDateLocalID;
+    FLOAT fFullFrame;
+    FLOAT fMidFrame;
+    FLOAT fStartEndFrame;
+    FLOAT fOffsetX;
+    FLOAT fOffsetY;
+    FLOAT fOffsetZ;
+    CVSM* pCvsm;
+};
+struct AvatarMotionParamEx2 {
+    UINT _nRsrcID;
+    UINT _nInfo;
+    UINT _nMotionID;
+    FLOAT _fPlaySpeed;
+    UINT _nHokanFrame;
+    AvatarMotionParamEx2() { _nHokanFrame = 0; }
+};
+/* Math3D.h:137 and coord.h:730 in the original ($LM tags); the volatile abs.s keeps the original order (a scheduling barrier) */
+static inline FLOAT FABS(FLOAT f) { FLOAT r; __asm__ volatile("abs.s %0, %1" : "=f"(r) : "f"(f)); return r; }
+static inline void setFVector(FVECTOR& v, FLOAT _x, FLOAT _y, FLOAT _z) { v.x = _x; v.y = _y; v.z = _z; v.w = 1.0f; }
+INT CVSM::execExt2Code(INT op, eATEL_REQ_RET& ret) {
+    INT nID;
+    INT c;
+    INT t;
+    INT r;
+
+    do {
+        r = 1;
+        switch (op) {
+        case 0x5F:
+            c = CGameWork::getInt(1, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        case 0x60:
+            t = m_S[m_SP - 1].I;
+            c = m_S[m_SP].I;
+            CGameWork::setInt(1, t, c);
+            break;
+        case 0x61:
+            c = CGameWork::getByte(1, m_S[m_SP].I);
+            m_S[++m_SP].I = c & 0xFF;
+            break;
+        case 0x62:
+            t = m_S[m_SP - 1].I;
+            c = m_S[m_SP].I;
+            CGameWork::setByte(1, t, c);
+            break;
+        case 0x63:
+            c = CGameWork::getFlag(1, m_S[m_SP].I);
+            m_S[++m_SP].I = c;
+            break;
+        case 0x6E:
+            t = m_S[m_SP - 1].I;
+            c = m_S[m_SP].I;
+            CGameWork::setFlag(1, t, c);
+            break;
+        case 0x6F: {
+            float f6 = m_S[m_SP--].F;
+            int i5 = m_S[m_SP--].I;
+            float f4 = m_S[m_SP--].F;
+            float f3 = m_S[m_SP--].F;
+            float f2 = m_S[m_SP--].F;
+            int i1 = m_S[m_SP].I;
+            CameraManCreateParam CMCP;
+            TRACE("CCC %d %f %f %f\n", i1, f2, f3, f4);
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i1) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i1);
+            CMCP.pathDateTargetID = 0;
+            CMCP.fOffsetY = 1.5f;
+            setFVector(CMCP.cameraPos, f2, f3, f4);
+            CMCP.changeKind = i5 & 0xFF;
+            CMCP.changeKind2 = (i5 >> 8) & 0xFF;
+            CMCP.pCvsm = this;
+            if (op == 0xA0) f6 += 1000.0f;
+            CMCP.fChangeRate = f6;
+            CMCP.pathDateLocalID = 0;
+            CMCP.changeFlag = 0;
+            CCameraMan::instance().reqCommand(0x44C, &CMCP, i1);
+            break;
+        }
+        case 0x70:
+            nID = m_S[m_SP--].I;
+            if (cam_ctrl(m_S[m_SP].I, nID, c)) {
+                m_S[m_SP].I = c;
+            }
+            break;
+        case 0x71: {
+            INT c = m_S[m_SP - 1].I;
+            INT t = m_S[m_SP].I;
+            INT n = 0;
+            if (t & 0x1000) n = (t & 0x1000) >> 12;
+            CGameWork::setByte(1, 0, n);
+            t &= 0xFFF;
+            if (t < 0x100) n++;
+            CChatMan::instance().reqCommand(0x3F9, &n, c);
+            acWaitSelectPad(*m_pCurrentActor, c, t, m_Pctr);
+            ret = ATEL_RET_SWAIT; r = 3;
+            break;
+        }
+        case 0x72: {
+            INT i1 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            CHAR* pText = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            CameraManCreateParam CMCP;
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i2) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i2);
+            CMCP.pPathName = pText;
+            CMCP.changeKind = i1 & 0xFF;
+            CMCP.changeKind2 = (i1 >> 8) & 0xFF;
+            CMCP.pathDateTargetID = 0;
+            CMCP.pathDateLocalID = 0;
+            CMCP.changeFlag = 0;
+            CCameraMan::instance().reqCommand(0x44E, &CMCP, i2);
+            break;
+        }
+        case 0x74:
+            ret = ATEL_RET_MAINS; r = 3;
+            break;
+        case 0x75:
+            c = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            m_S[m_SP].I = c;
+            break;
+        case 0x76:
+        case 0xA1: {
+            float f9 = m_S[m_SP--].F;
+            int i1 = m_S[m_SP--].I;
+            float f7 = m_S[m_SP--].F;
+            float f6 = m_S[m_SP--].F;
+            float f5 = m_S[m_SP--].F;
+            float f4 = m_S[m_SP--].F;
+            float f3 = m_S[m_SP--].F;
+            float f2 = m_S[m_SP--].F;
+            int i0 = m_S[m_SP].I;
+            CameraManCreateParam CMCP;
+            TRACE("CCT %d %f %f %f\n", i0, f2, f3, f4);
+            TRACE("    %f %f %f %d %f\n", f5, f6, f7, i1, f9);
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i0) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i0);
+            CMCP.fOffsetY = 1.5f;
+            CMCP.pathDateTargetID = 0;
+            setFVector(CMCP.cameraPos, f2, f3, f4);
+            setFVector(CMCP.targetPos, f5, f6, f7);
+            CMCP.changeKind = i1 & 0xFF;
+            CMCP.changeKind2 = (i1 >> 8) & 0xFF;
+            if (op == 0xA1) f9 += 1000.0f;
+            CMCP.fChangeRate = f9;
+            CMCP.pathDateLocalID = 0;
+            CMCP.changeFlag = 0;
+            CMCP.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x44D, &CMCP, i0);
+            break;
+        }
+        case 0x78: {
+            INT nPan = m_S[m_SP--].I;
+            INT nVol = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP].I;
+            if (nPan == -1) nPan = 0x40;
+            m_S[m_SP].I = CSound::playSE(nSeq, nVol, nPan);
+            m_SeInf._nHanle = m_S[m_SP].I;
+            m_SeInf._nSeq = nSeq;
+            m_SeInf._nVol = nVol;
+            break;
+        }
+        case 0x79: {
+            INT nSeq = m_S[m_SP--].I;
+            INT nHandle = m_S[m_SP].I;
+            CSound::stopSE(nHandle, nSeq);
+            m_SeInf._nHanle = 0;
+            m_SeInf._nSeq = 0;
+            m_SeInf._nVol = 0;
+            break;
+        }
+        case 0x7A: {
+            INT nVol = m_S[m_SP--].I;
+            CHAR* pszFile = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            TRACE("BGM_PLAY %s %d\n", pszFile, nVol);
+            CSound::playBGM(pszFile, nVol, 0);
+            break;
+        }
+        case 0x7D:
+            acWaitMes(*m_pCurrentActor, m_S[m_SP].I, m_Pctr);
+            ret = ATEL_RET_MWAIT; r = 3;
+            break;
+        case 0x7E: {
+            FLOAT f = m_S[m_SP--].F;
+            c = m_S[m_SP].I;
+            m_S[m_SP].I = player_ctrl(c, f);
+            break;
+        }
+        case 0x7F: {
+            INT i4 = m_S[m_SP--].I;
+            FLOAT f3 = m_S[m_SP--].F;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            TRACE("MOE %d : %d : %f : %d\n", i1, i2, f3, i4);
+            AvatarMotionParamEx2 param;
+            param._nRsrcID = i1;
+            param._nMotionID = i2;
+            param._fPlaySpeed = f3;
+            param._nInfo = (i4 >> 12) & 7;
+            m_pCurrentActor->_pAvatar->reqCommand(0x15, &param, 0);
+            break;
+        }
+        case 0x80:
+            acWaitCam(*m_pCurrentActor, m_S[m_SP].I, m_Pctr);
+            ret = ATEL_RET_CWAIT; r = 3;
+            break;
+        case 0x82:
+            acWaitSnatch(*m_pCurrentActor, m_S[m_SP].I, m_Pctr);
+            ret = ATEL_RET_SWAIT; r = 3;
+            break;
+        case 0x83: {
+            FLOAT f = m_S[m_SP].F;
+            CCameraMan::instance().reqCommand(0x456, &f, 0);
+            TRACE("CAMCMD_CHANGE_GAKAKU %f\n", f);
+            break;
+        }
+        case 0x85:
+            info_disp(m_S[m_SP].I);
+            break;
+        case 0x86: {
+            INT nVol = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP].I;
+            FVECTOR vPos;
+            m_pCurrentActor->_pAvatar->getNowPosition(vPos);
+            m_S[m_SP].I = CSound::playSE(nSeq, vPos, nVol);
+            break;
+        }
+        case 0x87: {
+            INT nTime = m_S[m_SP--].I;
+            INT nVol = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP--].I;
+            INT nHandle = m_S[m_SP].I;
+            CSound::setSEVolume(nHandle, nSeq, nVol, nTime);
+            m_SeInf._nHanle = nHandle;
+            m_SeInf._nSeq = nSeq;
+            m_SeInf._nVol = nVol;
+            break;
+        }
+        case 0x88: {
+            INT nTime = m_S[m_SP--].I;
+            INT nPan = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP--].I;
+            INT nHandle = m_S[m_SP].I;
+            if (nPan == -1) nPan = 0x40;
+            CSound::setSEPan(nHandle, nSeq, nPan, nTime);
+            break;
+        }
+        case 0x89: {
+            INT nTime = m_S[m_SP--].I;
+            INT nVol = m_S[m_SP--].I;
+            INT nPan = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP--].I;
+            INT nHandle = m_S[m_SP].I;
+            if (nVol == -1) nPan = 0x40;
+            CSound::setSEPanAndVol(nHandle, nSeq, nPan, nVol, nTime);
+            break;
+        }
+        case 0x8A: {
+            INT nTime = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP--].I;
+            INT nHandle = m_S[m_SP].I;
+            CSound::fadeoutSE(nHandle, nSeq, nTime);
+            break;
+        }
+        case 0x8B: {
+            INT nVol = m_S[m_SP--].I;
+            INT nSeq = m_S[m_SP--].I;
+            INT nName = m_S[m_SP].I;
+            FVECTOR vPos;
+            INT nIdx = searchActor((CHAR*)(m_pDseg + nName));
+            m_ActorTbl[nIdx]._pAvatar->getNowPosition(vPos);
+            m_S[m_SP].I = CSound::playSE(nSeq, vPos, nVol);
+            break;
+        }
+        case 0x8C:
+        case 0x8D:
+        case 0x8E: {
+            FLOAT fRate = m_S[m_SP--].F;
+            INT nKind = m_S[m_SP].I;
+            m_Atel.setScreenFader(nKind, fRate, 2);
+            TRACE("--- WNDCMD_FADE_CREATE ---\n");
+            break;
+        }
+        case 0x8F:
+            CAtel::clearScreenFader(-1);
+            TRACE("--- WNDCMD_FADE_DESTROY ---\n");
+            break;
+        case 0x90: {
+            INT nVol = m_S[m_SP--].I;
+            INT nTime = m_S[m_SP--].I;
+            CHAR* pszFile = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            TRACE("BGM_FADE_IN %s %d %d\n", pszFile, nTime, nVol);
+            CSound::fadeinBGM(pszFile, nTime, nVol, 0);
+            break;
+        }
+        case 0x91: {
+            INT nTime = m_S[m_SP--].I;
+            TRACE("BGM_FADE_OUT %d \n", nTime);
+            CSound::fadeoutBGM(0, nTime);
+            CSound::getCurrentBGMHandle();
+            break;
+        }
+        case 0x92: {
+            INT nVol = m_S[m_SP--].I;
+            INT nTime = m_S[m_SP--].I;
+            CHAR* pszFile = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            TRACE("BGM_CROSS_FADE %s %d %d\n", pszFile, nTime, nVol);
+            if (CSound::getStateBGM(CSound::getCurrentBGMHandle())) {
+                CSound::crossFadeinBGM(pszFile, nTime, nVol, 0);
+            } else {
+                CSound::playBGM(pszFile, nTime, 0);
+                TRACE("\x82" "a\x82" "f\x82l\x8d\xc4\x90\xb6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97v\x8b\x81\x81" "F\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x83L\x83\x83\x83\x93\x83Z\x83\x8b\x81" "FBGM\x8d\xc4\x90\xb6\n");
+            }
+            break;
+        }
+        case 0x98: {
+            FLOAT fTime = m_S[m_SP--].F;
+            nID = searchActor((CHAR*)(m_pDseg + m_S[m_SP].I));
+            if (nID > 0 && m_pCurrentActor->_pAvatar) {
+                AvatarRotateParam param;
+                param._nType = 2;
+                param._fTime = fTime;
+                param._nTargetID = nID;
+                m_pCurrentActor->_pAvatar->reqCommand(0xE, &param, 0);
+            }
+            break;
+        }
+        case 0x9A:
+            m_pCurrentActor->_ATP.status = 13;
+            m_pCurrentActor->_ATP.next_address = m_Pctr;
+            ret = ATEL_RET_SHOP; r = 3;
+            break;
+        case 0x9C:
+            t = m_S[m_SP].I;
+            if (t == 0) c = m_pCurrentActor->_ATP.wait_key;
+            else if (t != 1) _TRACE(m_bTrace, "NG AWK param\n");
+            m_S[m_SP].I = c;
+            break;
+        case 0x9D: {
+            FLOAT z2 = m_S[m_SP--].F;
+            FLOAT y2 = m_S[m_SP--].F;
+            FLOAT x2 = m_S[m_SP--].F;
+            FLOAT z1 = m_S[m_SP--].F;
+            FLOAT y1 = m_S[m_SP--].F;
+            FLOAT x1 = m_S[m_SP].F;
+            BoxTrapSrc src;
+            src._fWidth = FABS(x2 - x1);
+            src._fHeight = FABS(y2 - y1);
+            src._fDepth = FABS(z2 - z1);
+            src._vPos.x = (x1 + x2) * 0.5f;
+            src._vPos.y = y1;
+            src._vPos.z = (z1 + z2) * 0.5f;
+            src._vPos.w = 1.0f;
+            src._fRotY = 0.0f;
+            m_Atel.createEventTrap(src, *m_pCurrentActor);
+            break;
+        }
+        case 0x9E:
+            c = m_S[m_SP--].I;
+            m_S[m_SP].I = actor_ref(m_S[m_SP].I, c);
+            break;
+        case 0xA2: {
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP].I;
+            ChatWndCreateCTDParam param;
+            param.pos.setPoint(-1, -1);
+            param.ctdID = i2;
+            param.waitFrame = i3 & 0x8000FFFF;
+            param.pCwswp = NULL;
+            ctd_cal(m_pCurrentActor->_pAvatar, i2, i3, &param);
+            close_dest_se(i1);
+            CChatMan::instance().reqCommand(0x405, &param, i1);
+            WinOpenSE(i2);
+            CChatMan::instance().reqCommand(0x3EA, &param, i1);
+            if (i3 & 0x20000000) {
+                INT n = 0;
+                CChatMan::instance().reqCommand(0x413, &n, i1);
+            }
+            m_pCurrentActor->_ATP.wait_key = i1;
+            m_pCurrentActor->_ATP.status = 12;
+            m_pCurrentActor->_ATP.next_address = m_Pctr;
+            ret = ATEL_RET_MS_WAIT; r = 3;
+            break;
+        }
+        case 0xA3: {
+            INT i5 = m_S[m_SP--].I;
+            INT i4 = m_S[m_SP--].I;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            INT nIdx = getActorIndex((CHAR*)(m_pDseg + m_S[m_SP].I));
+            ChatWndCreateCTDParam param;
+            if (i4 < 0) {
+                i5 = -1;
+                i4 = -1;
+            }
+            param.ctdID = i2;
+            param.waitFrame = i3 & 0x8000FFFF;
+            param.pos.setPoint(i4, i5);
+            param.pCwswp = NULL;
+            if (nIdx != -1) ctd_cal(getAvatar(nIdx), i2, i3, &param);
+            close_dest_se(i1);
+            CChatMan::instance().reqCommand(0x405, &param, i1);
+            WinOpenSE(i2);
+            CChatMan::instance().reqCommand(0x3EA, &param, i1);
+            if (i3 & 0x20000000) {
+                INT n = 0;
+                CChatMan::instance().reqCommand(0x413, &n, i1);
+            }
+            if (i3 & 0x40000000) {
+                INT n = 0;
+                CChatMan::instance().reqCommand(0x404, &n, i1);
+            } else {
+                INT n = 60;
+                CChatMan::instance().reqCommand(0x404, &n, i1);
+            }
+            m_pCurrentActor->_ATP.wait_key = i1;
+            m_pCurrentActor->_ATP.status = 12;
+            m_pCurrentActor->_ATP.next_address = m_Pctr;
+            ret = ATEL_RET_MS_WAIT; r = 3;
+            break;
+        }
+        case 0xA4: {
+            INT i4 = m_S[m_SP--].I;
+            INT i3 = m_S[m_SP--].I;
+            INT i2 = m_S[m_SP--].I;
+            INT i1 = m_S[m_SP--].I;
+            CHAR* pText = (CHAR*)(m_pDseg + m_S[m_SP].I);
+            CameraManCreateParam CMCP;
+            if (i2 >= 0) i2 = searchActor((CHAR*)(m_pDseg + i2));
+            if (i3 >= 0) i3 = searchActor((CHAR*)(m_pDseg + i3));
+            if (CCameraMan::instance().reqCommand(0x452, NULL, i1) == 1) CCameraMan::instance().reqCommand(0x44F, NULL, i1);
+            CMCP.fOffsetY = 1.5f;
+            CMCP.pPathName = pText;
+            CMCP.pathDateTargetID = i2;
+            CMCP.changeKind = (i4 >> 16) & 0xFF;
+            CMCP.changeKind2 = (UINT)i4 >> 24;
+            CMCP.pathDateKind = i4;
+            CMCP.pathDateLocalID = i3;
+            CMCP.pCvsm = this;
+            CCameraMan::instance().reqCommand(0x459, &CMCP, i1);
+            TRACE("CAMCMD_CREATE_PATHDATA %s\n", pText);
+            break;
+        }
+        case 0xA5: {
+            t = m_S[m_SP--].I;
+            c = m_S[m_SP].I;
+            m_pCurrentActor->_ATP.wait_key = t;
+            m_pCurrentActor->_ATP.status = 12;
+            m_pCurrentActor->_ATP.next_address = m_Pctr;
+            ret = ATEL_RET_MS_WAIT; r = 3;
+            break;
+        }
+        case 0xA6: {
+            FLOAT fCycle = m_S[m_SP--].F;
+            FLOAT fPower = m_S[m_SP--].F;
+            INT nTime = m_S[m_SP--].I;
+            INT nType = m_S[m_SP].I;
+            TRACE("CAMCMD_ADD_QUAKE \n");
+            CameraQuakeParam param;
+            param = (CameraQuakeParam){ nTime, fPower, fCycle };
+            if (nType == 0) {
+                CCameraMan::instance().reqCommand(0x45A, &param, 0);
+            } else {
+                CCameraMan::instance().reqCommand(0x45B, &param, 0);
+            }
+            break;
+        }
+        case 0x77:
+        case 0x7B:
+        case 0x7C:
+        case 0x93:
+        case 0x94:
+        case 0x95:
+        case 0x96:
+        case 0x97:
+        case 0x9B:
+        case 0x9F:
+        case 0xA0:
+        case 0xA7:
+            break;
+        default:
+            return 4;
+        }
+    } while (r == 0);
+    return r;
+}
 /* placeholder: rodata of execExt3Code__Q24ATEL4CVSMiRQ24ATEL13eATEL_REQ_RET */
 __asm__(".rdata\n");
 inline void _roPh30() {
@@ -3527,17 +4014,6 @@ BOOL CVSM::player_rsrc(INT nCmnd, INT nArg) {
     _TRACE(m_bTrace, "--- player_rsrc %d : %d \n ---\n", nCmnd, nArg);
     _TRACE(m_bTrace, "bad case RSC_CMD %d\n", nArg);
     return FALSE;
-}
-namespace ATEL {
-struct ChatWndSetWordsParam;
-struct ChatWndCreateCTDParam {
-    CPointI pos;
-    CPointI cyobiPos;
-    UINT ctdID;
-    UINT waitFrame;
-    ChatWndSetWordsParam* pCwswp;
-    UINT nLine;
-};
 }
 FLOAT RotTransPers(FVECTOR& outV, const FMATRIX& inM, const FVECTOR& inV); /* System/Graphic/Gprim.h in the original */
 extern INT SCREEN_HEIGHT;
