@@ -287,10 +287,22 @@ __asm__(".rdata\n");
 inline void _roPh1() {
     TRACE("ACTOR\x83\x8a\x83X\x83g");
 }
-/* placeholder: rodata of debugBtlReportCallBackParam__8DWTEventP12CDebugWindowii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L002417D8\n.word .L00241808\n.word .L00241768\n.word .L00241784\n.word .L002417A0\n.word .L00241808\n.word .L00241808\n.word .L00241808\n.word .L00241808\n.word .L00241808\n.word .L00241808\n.word .L002417BC\n.word .L002417D8\n.word .L00241808\n.word .L002417F4\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", debugBtlReportCallBackParam__8DWTEventP12CDebugWindowii);
+namespace DWTEvent {
+static BOOL debugBtlReportCallBackParam(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x180) {
+        switch (inY) {
+        case 6: CGameWork::setInt(0, 0x3C, DebugWork::g_dw.atelwork.CardBreakCount); break;
+        case 7: CGameWork::setInt(0, 0x3D, DebugWork::g_dw.atelwork.StockKind); break;
+        case 8: CGameWork::setInt(0, 0x3E, DebugWork::g_dw.atelwork.StockCount); break;
+        case 15: CGameWork::setInt(0, 0x3F, DebugWork::g_dw.atelwork.SpeedCount); break;
+        case 4:
+        case 16: CGameWork::setInt(0, 0xB3, DebugWork::g_dw.atelwork.KillEnemyCount); break;
+        case 18: CGameWork::setInt(0, 0x41, DebugWork::g_dw.atelwork.DarkCount); break;
+        }
+    }
+    return 1;
+}
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", debugBtlReportCallBack__8DWTEventP12CDebugWindowi);
 namespace DWTEvent {
 static INT debugKeyTresurCallBack(CDebugWindow* pObj, INT inParam) {
