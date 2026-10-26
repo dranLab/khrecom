@@ -141,6 +141,7 @@ private:
     BOOL reqNS(Actor& act, const CHAR* pszTag, INT nLv);
     BOOL reqSS(const CHAR* pszTag, const CHAR* pszActor, INT nLv);
     BOOL reqSSI(const CHAR* pszTag, INT nActIdx, INT nLv);
+    BOOL reqSSW(const CHAR* pszTag, const CHAR* pszActor, INT nLv, int nAddr);
     BOOL reqSSD(INT nTagIdx, INT nActIdx, INT nLv);
     INT searchActor(const CHAR* pszActor) const;
     INT searchActorID(const CHAR* pszActor) const;
