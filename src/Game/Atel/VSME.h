@@ -40,6 +40,7 @@ struct RTP {
     SHORT rq_m_actor;  /* 0x6 */
     SHORT status;      /* 0x8 */
     SHORT wait_key;    /* 0xa */
+    RTP() {}
 };
 
 struct Actor {
@@ -126,6 +127,7 @@ protected:
     void deleteActorAll();
     void clearReq();
     void execInit();
+    void initActor();
     void exec(TIMEQ nTQ);
     void execActor();
     void checkEvents();

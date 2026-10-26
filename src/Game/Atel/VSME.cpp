@@ -848,7 +848,15 @@ void ATEL::_TRACE(BOOL bDisp, const CHAR* fmt, ...) {
         va_end(args);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", __Q24ATEL4CVSMR5CAteli);
+CVSM::CVSM(CAtel& atel, BOOL bTrace)
+    : m_Atel(atel), m_GAptr(0), m_FAptr(0), m_Pctr(0), m_SP(0), m_Freg(0), m_InsCount(0), m_MaxSD(0), m_MinFP(0x4000),
+      m_MaxPC(0), m_CallC(0), m_MaxActorCount(0), m_ActorCount(0), m_pIseg(NULL), m_pDseg(NULL), m_pCurrentActor(NULL) {
+    m_nFlag = 0;
+    m_bTrace = bTrace;
+    initActor();
+    m_fEventTrapStartWait = 20.0f;
+    m_fTalkWait = 0.0f;
+}
 /* placeholder: rodata of _$_Q24ATEL4CVSM */
 __asm__(".rdata\n");
 inline void _roPh19() {
