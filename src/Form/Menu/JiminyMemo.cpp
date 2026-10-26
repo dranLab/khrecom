@@ -738,12 +738,36 @@ INT CMemo2DLayout::setup(const CHAR* inSeqName, const CHAR* inFileName, const IN
 void CMemo2DLayout::init() {
     if (m_uiStateFlags & 0x20) initialize();
 }
-/* placeholder: rodata of initialize__13CMemo2DLayout */
-__asm__(".rdata\n");
-inline void _roPh4() {
-    TRACE(__FILE__ "(2945)");
+void CMemo2DLayout::initialize() {
+    FVECTOR pos;
+    D2::C2DSeqCtrl* pSeq;
+    D2::C2DSeqCtrl* pSeqParent;
+    if (isStateFlag(1)) return;
+    setStateFlag(1, 0);
+    pos.init();
+    pSeqParent = NULL;
+    for (INT i = 0; i < m_iSeqNum; i++) {
+        if (m_pSeqNoTbl[i].CTCode == 0) {
+            pSeq = createSequence(i, m_pSeqNoTbl[i].Layer);
+            pSeq->addSeq(m_pLayoutName, m_pSeqNoTbl[i].In);
+            pos.x = m_pSeqNoTbl[i].XPosi;
+            pos.y = m_pSeqNoTbl[i].YPosi;
+            pSeq->setPos(pos);
+            pSeq->enableDisp(FALSE);
+            pSeq->enableColorCtrl(TRUE);
+            pSeqParent = pSeq;
+        } else if (pSeqParent) {
+            D2::C2DFnt* pFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2945)",
+                                                 ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+                D2::C2DFnt(0, 0, NULL, 15, CCtdMan::getText(m_pSeqNoTbl[i].CTCode), 0x40);
+            if (pFnt) {
+                m_pSeqFntArray[i] = pFnt;
+                pSeqParent->addFntShift(m_pLayoutName, pFnt, m_pSeqNoTbl[i].XPosi, m_pSeqNoTbl[i].YPosi);
+            }
+        }
+        if (m_pSeqCodeTbl) m_pSeqCodeTbl[i] = -1;
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", initialize__13CMemo2DLayout);
 void CMemo2DLayout::finalize() {
     for (INT i = 0; i < 32; i++) {
         delete m_pSeqCtrlArray[i];
