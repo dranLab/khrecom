@@ -463,7 +463,9 @@ void WinOpenSE(INT ctd) {}
 void WinCloseSE() {}
 static void dispActorTag(INT nMax, const Actor* pTbl) {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", __11CActorDebugP5CTask);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", _$_11CActorDebug);
+CActorDebug::~CActorDebug() {
+    if (m_pWindow) m_pWindow->out();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", main__11CActorDebug);
 CEventLineDisp::CEventLineDisp(CTask* pParent) : CTask(pParent, 0x8000) {
     CTaskMan::getSysTask(0x1A);

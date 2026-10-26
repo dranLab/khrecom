@@ -179,6 +179,16 @@ typedef char _check_vsm_size[sizeof(CVSM) == 0x7d0c ? 1 : -1];
 
 } // namespace ATEL
 
+class CDebugWindow;
+class CActorDebug : public CTask {
+    CDebugWindow* m_pWindow; /* 0x40 */
+
+public:
+    CActorDebug(CTask* pParent);
+    virtual ~CActorDebug();
+    virtual void main();
+};
+
 class CEventLineDisp : public CTask {
 public:
     CEventLineDisp(CTask* pParent);
