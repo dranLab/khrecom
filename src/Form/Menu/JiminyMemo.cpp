@@ -36,6 +36,7 @@ public:
     static HANDLE create(const CHAR* pBaseName, UINT inNo);
     static void setLayer(INT inLayer);
     static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inSeqNo, FVECTOR& outPos, INT inMode);
+    static BOOL isEnd(HANDLE handle);
 };
 }
 class CRsrcDB { /* PARTIAL: System/RsrcDB.h would add RsrcData.h's string, which this unit's .rodata lacks */
@@ -143,6 +144,7 @@ public:
               const LayoutDataParam* inSeqNoTbl, INT inLayerLevel);
     void setState(INT inState);
     INT getState();
+    BOOL isEndLayer() { return D2::C2DMan::isEnd(m_hLayer); }
     void setStateFlag(INT inOn, INT inOff) { m_uiStateFlags = (m_uiStateFlags & ~inOff) | inOn; }
     UINT isStateFlag(UINT inFlags) { return m_uiStateFlags & inFlags; }
     D2::C2DSeqCtrl* getSeqCtrl(INT inSeqNo);
@@ -707,11 +709,58 @@ CMemo2DLayout::CMemo2DLayout(CTask* p) : CTask(p, 0x4000) {
     m_pLayoutFileName = NULL;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DLayout);
-/* placeholder: rodata of main__13CMemo2DLayout */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L003262A8\n.word .L00326188\n.word .L003261B0\n.word .L003262A8\n.word .L003261E8\n.word .L00326210\n.word .L003262A8\n.word .L00326248\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", main__13CMemo2DLayout);
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CMemo2DLayout::main() {
+    D2::C2DSeqCtrl* pSeq;
+    switch (getState()) {
+    case 0:
+        break;
+    case 1:
+        createLayer(0);
+        initialize();
+        setState(2);
+        break;
+    case 2:
+        if (isEndLayer()) {
+            destroyLayer();
+            createLayer(1);
+            setStateFlag(4, 0);
+            setState(3);
+        }
+        break;
+    case 3:
+        break;
+    case 4:
+        destroyLayer();
+        createLayer(2);
+        setState(5);
+        break;
+    case 5:
+        if (isEndLayer()) {
+            destroyLayer();
+            setStateFlag(0x10, 0);
+            setState(6);
+        }
+        break;
+    case 6:
+        break;
+    case 7:
+        out();
+        break;
+    default:
+        out();
+        break;
+    }
+    for (INT i = 0; i < m_iSeqNum; i++) {
+        pSeq = getSeqCtrl(i);
+        if (pSeq && pSeq->isEnableDisp() && m_pSeqCodeTbl) {
+            if (m_pSeqCodeTbl[i] == m_pSeqNoTbl[i].In && pSeq->isEnd(0)) {
+                setSeqState(i, 1);
+            } else if (m_pSeqCodeTbl[i] == m_pSeqNoTbl[i].Out && pSeq->isEnd(0)) {
+                setSeqState(i, -1);
+            }
+        }
+    }
+}
 INT CMemo2DLayout::setup(const CHAR* inSeqName, const CHAR* inFileName, const INT* inLayNoTbl, INT inSeqNum,
                          const LayoutDataParam* inSeqNoTbl, INT inLayerLevel) {
     INT rval = FALSE;
