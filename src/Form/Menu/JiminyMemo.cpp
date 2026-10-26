@@ -308,6 +308,8 @@ private:
                                     CMemo2DSequence* inParent);
     CMemo2DSequence* createSequence(INT inSeqNo, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
                                     CMemo2DSequence* inParent);
+    void createMarkSequence(INT inMarkSeq, INT inNum, INT inLayoutNo, INT inLayoutSeqOffset, INT inLayer,
+                            D2::C2DSeqCtrl* inParent, D2::C2DSeqCtrl** inArray);
     INT createListSequence(CMemo2DSequence* inList, INT inLayer, INT inLayoutNo, INT inLayoutSeqNo,
                            D2::C2DSeqCtrl** inFontSeq, D2::C2DFnt** inFont, UINT inFontCol, INT inFontSize,
                            INT inFontStyle, const CHAR* inStr);
@@ -1324,12 +1326,35 @@ inline void _roPh19() {
     TRACE(__FILE__ "(4474)");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createCursorSequence__11CJiminyMemoPCiiiRC14CursorPositioniiiiiiiiP15CMemo2DSequence);
-/* placeholder: rodata of createMarkSequence__11CJiminyMemoiiiiiPQ22D210C2DSeqCtrlPPQ22D210C2DSeqCtrl */
-__asm__(".rdata\n");
-inline void _roPh20() {
-    TRACE(__FILE__ "(4520)");
+__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
+void CJiminyMemo::createMarkSequence(INT inMarkSeq, INT inNum, INT inLayoutNo, INT inLayoutSeqOffset, INT inLayer,
+                                     D2::C2DSeqCtrl* inParent, D2::C2DSeqCtrl** inArray) {
+    D2::C2DSeqCtrl* pMark;
+    FVECTOR posi;
+    INT i;
+    if (!inArray) return;
+    for (i = 0; i < inNum; i++) {
+        pMark = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(4520)",
+                                  ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })))
+            D2::C2DSeqCtrl;
+        if (pMark) {
+            if (inArray) inArray[i] = pMark;
+            if (inParent) pMark->setParent(inParent);
+            pMark->setLayer(inLayer);
+            pMark->enableColorCtrl(TRUE);
+            pMark->addSeq(m_pLadName, 0x24);
+            pMark->addSeq(m_pLadName, inMarkSeq);
+            if (inLayoutNo >= 0) {
+                D2::C2DMan::getLayPosition(m_pLadFileName, inLayoutNo, inLayoutSeqOffset + i, posi, 0);
+                if (inParent) {
+                    pMark->setLocalPos(posi);
+                } else {
+                    pMark->setPos(posi);
+                }
+            }
+        }
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", createMarkSequence__11CJiminyMemoiiiiiPQ22D210C2DSeqCtrlPPQ22D210C2DSeqCtrl);
 INT CJiminyMemo::changeStateSequence(D2::C2DSeqCtrl** inSeq, INT inNum, INT inMode, INT inSeqId) {
     if (!inSeq) return 0;
     for (INT i = 0; i < inNum; i++) {
