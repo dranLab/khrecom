@@ -1495,15 +1495,36 @@ BOOL CVSM::reqNS(Actor& act, const CHAR* pszTag, INT nLv) {
     _TRACE(TRUE, "reqNS_TAG not found\n");
     return FALSE;
 }
-/* placeholder: rodata of reqSS__Q24ATEL4CVSMPCcT1i */
-__asm__(".rdata\n");
-inline void _roPh32() {
-    TRACE("reqSS %s %x %d\n");
-    TRACE("reqSS no-actor %s:%s\n");
-    TRACE("reqSS no-tag\n");
-    TRACE("reqSS_TAG not found\n");
+BOOL CVSM::reqSS(const CHAR* pszTag, const CHAR* pszActor, INT nLv) {
+    INT nActIdx;
+    INT i;
+    INT n;
+    const CHAR* pszTagName = pszTag + 4;
+    n = pszTag[3];
+    n = (n << 8) + pszTag[2];
+    n = (n << 8) + pszTag[1];
+    n = (n << 8) + pszTag[0];
+    _TRACE(m_bTrace, "reqSS %s %x %d\n", pszActor, n, nLv);
+    nActIdx = getActorIndex(pszActor);
+    if (nActIdx < 0) {
+        _TRACE(TRUE, "reqSS no-actor %s:%s\n", pszActor, pszTagName);
+        return FALSE;
+    }
+    ATP& atp = m_ActorTbl[nActIdx]._ATP;
+    if (atp.tag_count == 0) {
+        _TRACE(TRUE, "reqSS no-tag\n");
+        return FALSE;
+    }
+    i = _findTag(atp, n);
+    if (i >= 0) {
+        RTP req;
+        _setRTP(req, nLv, nActIdx, i, 0xFF);
+        setReq(req);
+        return TRUE;
+    }
+    _TRACE(TRUE, "reqSS_TAG not found\n");
+    return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", reqSS__Q24ATEL4CVSMPCcT1i);
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 BOOL CVSM::reqSSI(const CHAR* pszTag, INT nActIdx, INT nLv) {
     INT i;
