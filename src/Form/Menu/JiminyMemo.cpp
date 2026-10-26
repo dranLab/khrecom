@@ -164,6 +164,22 @@ public:
     void setLocalPosition();
 };
 
+struct ContentCommonWork {
+    INT iStep;
+    FLOAT fTimer;
+    INT iNextContent;
+    INT iPrevContent;
+    int param[2];
+    CursorPosition scroll[2];
+
+    void init() {
+        iStep = 0;
+        fTimer = 0.0f;
+        iNextContent = 0;
+        iPrevContent = -1;
+    }
+};
+
 class CJiminyMemo : public CMenu {
 private:
     UBYTE _m_0x80[0x10];  /* 0x080 */
@@ -172,14 +188,15 @@ private:
     INT m_iContentMode;   /* 0x098 */
     HANDLE m_hLayout;     /* 0x09c */
     UINT m_uiStateFlags;  /* 0x0a0 */
-    UBYTE pContentFunc[8]; /* 0x0a4 */
+    void (CJiminyMemo::*pContentFunc)(); /* 0x0a4 */
     D2::C2DSeqCtrl* m_pMessSeq; /* 0x0ac */
     D2::C2DFnt* m_pMessString;  /* 0x0b0 */
     CHAR* m_pLadName;     /* 0x0b4 */
     CHAR* m_pLadFileName; /* 0x0b8 */
-    UBYTE m_Content[0x570 - 0xbc]; /* 0x0bc m_ContentCommon .. m_ContentMinigame */
+    ContentCommonWork m_ContentCommon;              /* 0x0bc */
+    UBYTE m_Content[0x570 - 0xe4]; /* 0x0e4 m_ContentMenu .. m_ContentMinigame */
 
-    INT& work(INT inOfs) { return *(INT*)&m_Content[inOfs - 0xbc]; }
+    INT& work(INT inOfs) { return *(INT*)((UBYTE*)&m_ContentCommon + (inOfs - 0xbc)); }
 
 public:
     CJiminyMemo(CTask* inParent, INT inMode);
@@ -633,7 +650,14 @@ void CJiminyMemo::setLayoutState(HANDLE inHandle, INT inState) {
 BOOL CJiminyMemo::isTaskOut(HANDLE inHandle) {
     return getTaskPointer<CTask*>(inHandle) == NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setContentMode__11CJiminyMemoi);
+void CJiminyMemo::setContentMode(INT inContentMode) {
+    INT prev = m_iContentMode;
+    m_iContentMode = inContentMode;
+    pContentFunc = m_pContentTbl[inContentMode];
+    m_ContentCommon.init();
+    m_ContentCommon.iStep = 20;
+    m_ContentCommon.iPrevContent = prev;
+}
 /* placeholder: rodata of the items before createSequence__11CJiminyMemoPCiiiiP15CMemo2DSequence */
 __asm__(".rdata\n");
 inline void _roPh13() {
