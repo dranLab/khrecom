@@ -1259,10 +1259,39 @@ inline void _roPh21() {
     TRACE(__FILE__ "(4660)");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", splitMessage__11CJiminyMemoPiPPPcPCci);
-/* placeholder: rodata of setPlateState__11CJiminyMemoii */
-__asm__(".rdata\n");
-__asm__(".rdata\n.align 4\n.word .L0032A1C8\n.word .L0032A200\n.word .L0032A238\n.word .L0032A260\n.word .L0032A278\n.word .L0032A290\n.word .L0032A2A8\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setPlateState__11CJiminyMemoii);
+void CJiminyMemo::setPlateState(INT inKind, INT inState) {
+    CMemo2DLayout* seq = getTaskPointer<CMemo2DLayout*>(m_hLayout);
+    if (seq) {
+        switch (inKind) {
+        case 0:
+            seq->setSeqState(0, inState);
+            seq->setSeqState(1, inState);
+            seq->setSeqState(2, inState);
+            break;
+        case 1:
+            seq->setSeqState(3, inState);
+            seq->setSeqState(4, inState);
+            seq->setSeqState(5, inState);
+            break;
+        case 2:
+            seq->setSeqState(6, inState);
+            seq->setSeqState(7, inState);
+            break;
+        case 3:
+            seq->setSeqState(8, inState);
+            break;
+        case 4:
+            seq->setSeqState(9, inState);
+            break;
+        case 5:
+            seq->setSeqState(10, inState);
+            break;
+        case 6:
+            seq->setSeqState(11, inState);
+            break;
+        }
+    }
+}
 INT CJiminyMemo::getPlateState(INT inKind) {
     CMemo2DLayout* seq = getTaskPointer<CMemo2DLayout*>(m_hLayout);
     if (!seq || seq->isOut()) return -2;
