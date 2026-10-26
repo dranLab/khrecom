@@ -5,8 +5,7 @@
 #include "System/Task.h"
 
 class CAtel;
-namespace ATEL { class CAvatar; }
-class CEventTrap;
+namespace ATEL { class CAvatar; class CEventTrap; }
 class CAtelCardSeq;
 
 union F_UL {
@@ -116,11 +115,21 @@ public:
     virtual ~CVSM();
     INT getActorIndex(INT nID) const;
     INT getActorIndex(const CHAR* pszName) const;
+    CAvatar* getAvatar(INT nIdx) { return m_ActorTbl[nIdx]._pAvatar; }
+    CEventTrap* getEventTrap(INT nIdx) { return m_ActorTbl[nIdx]._pEventTrap; }
+    CHAR* getAvatarName(INT nIdx) { return m_ActorTbl[nIdx]._ATP.name; }
     INT getActorNum() { return m_ActorCount; }
+    void setPC(INT nPC) { m_Pctr = nPC; }
+    void clearFlag(INT nFlag) { m_nFlag &= ~nFlag; }
 
 protected:
     void deleteActorAll();
     void clearReq();
+    void execInit();
+    void exec(TIMEQ nTQ);
+    void execActor();
+    void checkEvents();
+    void tuneReq();
     void setReq(const RTP& rq);
 
 private:
@@ -142,6 +151,7 @@ private:
     void acWaitSelectPad(Actor& act, INT nKey, INT nWin, INT nAddr);
     void acWaitSelectPadEx(Actor& act, INT nKey, INT nWin, INT nAddr);
     void acWaitChangeWork(Actor& act, INT nKey, INT nVal, INT nAddr);
+    void acWaitReq(Actor& act, INT nTime, INT nAddr);
     void acWaitLoadRsrc(Actor& act, INT nAddr);
     void acWaitCardWind(Actor& act, INT nAddr);
     void acWaitTechWind(Actor& act, INT nAddr);
@@ -160,6 +170,10 @@ private:
     BOOL acStatBGWait();
     BOOL acStatEternityWait();
     BOOL acStatCardWndWait();
+    BOOL acStatWait();
+    BOOL acStatXWait();
+    BOOL acStatSWait();
+    BOOL acStatBAWait();
     BOOL acStatActorWait();
     BOOL acStatBSWait();
     BOOL isAvatarBusy(INT nType, CAvatar* pAvatar);
