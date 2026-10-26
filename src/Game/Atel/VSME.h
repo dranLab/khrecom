@@ -119,6 +119,7 @@ public:
     CAvatar* getAvatar(INT nIdx) { return m_ActorTbl[nIdx]._pAvatar; }
     CHAR* getAvatarName(INT nIdx) { return m_ActorTbl[nIdx]._ATP.name; }
     INT getActorNum() { return m_ActorCount; }
+    void setPC(INT nPC) { m_Pctr = nPC; }
 
 protected:
     void deleteActorAll();
@@ -144,6 +145,7 @@ private:
     void acWaitSelectPad(Actor& act, INT nKey, INT nWin, INT nAddr);
     void acWaitSelectPadEx(Actor& act, INT nKey, INT nWin, INT nAddr);
     void acWaitChangeWork(Actor& act, INT nKey, INT nVal, INT nAddr);
+    void acWaitReq(Actor& act, INT nTime, INT nAddr);
     void acWaitLoadRsrc(Actor& act, INT nAddr);
     void acWaitCardWind(Actor& act, INT nAddr);
     void acWaitTechWind(Actor& act, INT nAddr);
@@ -162,6 +164,7 @@ private:
     BOOL acStatBGWait();
     BOOL acStatEternityWait();
     BOOL acStatCardWndWait();
+    BOOL acStatWait();
     BOOL acStatXWait();
     BOOL acStatSWait();
     BOOL acStatBAWait();
