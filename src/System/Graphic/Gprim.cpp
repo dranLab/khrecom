@@ -1817,7 +1817,97 @@ ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL Bac
     }
     return p64;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1P6CCoordi);
+ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back) {
+    IVECTOR p[3];
+    INT iBone;
+    iBone = -1;
+    if (!Back) {
+        while (it < end) {
+            _prefetch(it, 0x20);
+            if (iBone != it[0].Bone) {
+                iBone = it[0].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            RotTransPersClipW(p[0], it[0].P);
+            if (p[0].w) {
+                goto next0;
+            }
+            _prefetch(it, 0x40);
+            if (iBone != it[1].Bone) {
+                iBone = it[1].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            RotTransPersClipW(p[1], it[1].P);
+            if (p[1].w) {
+                goto next0;
+            }
+            _prefetch(it, 0x60);
+            if (iBone != it[2].Bone) {
+                iBone = it[2].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            RotTransPersClipW(p[2], it[2].P);
+            if (p[2].w) {
+            next0:
+                it += 3;
+            } else {
+                p64[0] = it[0].C.col;
+                p64[1] = _vecToXYZ(p[0]);
+                p64[2] = it[1].C.col;
+                p64[3] = _vecToXYZ(p[1]);
+                p64[4] = it[2].C.col;
+                p64[5] = _vecToXYZ(p[2]);
+                it += 3;
+                p64 += 6;
+            }
+        }
+    } else {
+        FVECTOR vDir[3];
+        while (it < end) {
+            _prefetch(it, 0x20);
+            if (iBone != it[0].Bone) {
+                iBone = it[0].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            RotTransPersClipW(p[0], vDir[0], it[0].P);
+            if (p[0].w) {
+                goto next1;
+            }
+            _prefetch(it, 0x40);
+            if (iBone != it[1].Bone) {
+                iBone = it[1].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            RotTransPersClipW(p[1], vDir[1], it[1].P);
+            if (p[1].w) {
+                goto next1;
+            }
+            _prefetch(it, 0x60);
+            if (iBone != it[2].Bone) {
+                iBone = it[2].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            RotTransPersClipW(p[2], vDir[2], it[2].P);
+            if (p[2].w) {
+                goto next1;
+            }
+            if (BackClip(vDir, 0)) {
+            next1:
+                it += 3;
+            } else {
+                p64[0] = it[0].C.col;
+                p64[1] = _vecToXYZ(p[0]);
+                p64[2] = it[1].C.col;
+                p64[3] = _vecToXYZ(p[1]);
+                p64[4] = it[2].C.col;
+                p64[5] = _vecToXYZ(p[2]);
+                it += 3;
+                p64 += 6;
+            }
+        }
+    }
+    return p64;
+}
 QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
     IVECTOR p;
     UINT fg;
