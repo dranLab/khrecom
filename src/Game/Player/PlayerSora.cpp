@@ -28,6 +28,7 @@ inline void _roulettePrizeMessage() {
 #include "Game/Enemy/BattleEnemy.h"
 #include "Game/Player/PlayerSora.h"
 #include "Game/Player/PlayerManager.h"
+#include "Game/Player/Friend.h"
 #include "Game/Player/PlayerCamera.h"
 #include "include_asm.h"
 
@@ -239,7 +240,27 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeFriend__Q2
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", watchTarget__Q22PL11CPlayerSorai);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", setAttack_inFriend__Q22PL11CPlayerSoraiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeAttack_inFriend__Q22PL11CPlayerSora);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", endAttack_inFriend__Q22PL11CPlayerSora);
+INT CPlayerSora::endAttack_inFriend() {
+    if (!isPlayerFlag(0x20000)) {
+        return -1;
+    }
+    setPlayerFlag(0, 0x20000);
+    offAttack();
+    m_fWalkSpeed = m_fJumpSpdXZ = m_fMoveSpdXZ;
+    if (isAir()) {
+        setAnim(6, 0x320, 0);
+    } else {
+        setAnimForce(0x2A, -1, 0, 0, 0, 0);
+    }
+    m_uiAttackID = 0;
+    if (m_bIsAttackHit) {
+        m_bIsAttackHit = FALSE;
+        return 1;
+    }
+    m_bIsAttackHit = FALSE;
+    m_pPLM->getFriend()->setFailed();
+    return -1;
+}
 /* placeholder: .rodata of initSummon__Q22PL11CPlayerSorai (strings, jump tables) */
 __asm__(".rdata\n.align 4\n.word .L002A17DC\n.word .L002A1800\n.word .L002A1824\n.word .L002A1838\n.word .L002A1860\n.word .L002A1880\n.word .L002A18A8\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initSummon__Q22PL11CPlayerSorai);
