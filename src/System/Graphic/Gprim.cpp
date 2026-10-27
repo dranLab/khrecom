@@ -710,7 +710,16 @@ void C3DTPrim::_init() {
     m_iMax = 0;
     m_iZ = -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _create__8C3DTPrimUliP6CCoordP7CCoordsi);
+void C3DTPrim::_create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, CCoords* pOParent, INT iRep) {
+    remove();
+    m_PRIM = iPrim;
+    m_pCrd = pCParent;
+    m_pObj = pOParent;
+    m_iRep = iRep;
+    m_iMax = iVertexNum;
+    m_V = (G_STRIP*)com_malloc_d(m_iMax * sizeof(G_STRIP), D_00463AB8, (UINT)-1);
+    if (!m_V) AssertApp(D_00463A88, 4317, D_004639F8, 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DTPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DTPrim);
 QWdata* C3DTPrim::makePkt_None(QWdata* pQw) {
