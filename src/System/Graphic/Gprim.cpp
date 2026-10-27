@@ -1463,7 +1463,98 @@ FIX4 C3DPointLight2::calcZ() {
     }
     return nRet;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__14C3DPointLight2);
+#define PI 3.1415927f
+extern "C" {
+float atan2f(float, float);
+float cosf(float);
+float sinf(float);
+}
+namespace Math3D {
+FLOAT LimitPI(FLOAT pai);
+}
+void C3DPointLight2::makePkt() {
+    BOOL bRet;
+    FVECTOR c[2];
+    FVECTOR r[2];
+    FVECTOR r1[2];
+    INT z0;
+    INT z1;
+    QWdata giftag;
+    FLOAT ftheta;
+    IVECTOR ip;
+    INT j;
+
+    bRet = _makePktSub(0);
+    if (m_nType != 1) return;
+    if (!_makePktSub(1) || !bRet) return;
+
+    for (j = 0; j < 2; j++) {
+        c[j].x = (m_Cl[j].p0.x + m_Cl[j].p1.x) / 2;
+        r[j].x = (m_Cl[j].p1.x - m_Cl[j].p0.x) / 2;
+        c[j].y = (m_Cl[j].p0.y + m_Cl[j].p1.y) / 2;
+        r[j].y = (m_Cl[j].p1.y - m_Cl[j].p0.y) / 2;
+
+        r1[j].x = (p01[j].x - p00[j].x) / 2;
+        r1[j].y = (p01[j].y - p00[j].y) / 2;
+
+        m_Cl[j].m_C0.a = m_Cl[j].m_C1.a = 0x80;
+    }
+    z0 = m_Cl[0].p0.z >> 4;
+    z1 = m_Cl[1].p0.z >> 4;
+
+    giftag.ul64[0] = 0x1400000000008000UL;
+    giftag.ul64[1] = 0;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkCloseGifTag();
+
+    giftag.ul64[0] = 0x2400000000008000UL;
+    giftag.ul64[1] = 0x41;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+
+    CPackMan::pkAddGsData(m_Cl[0].m_C0.col);
+    CPackMan::pkAddGsData((u_long)(INT)c[0].x | ((u_long)(INT)c[0].y << 16) | ((u_long)z0 << 32));
+    CPackMan::pkAddGsData(m_Cl[1].m_C1.col);
+    CPackMan::pkAddGsData((u_long)(INT)c[1].x | ((u_long)(INT)c[1].y << 16) | ((u_long)z1 << 32));
+
+    ftheta = atan2f(c[1].y - c[0].y, c[1].x - c[0].x);
+
+    ip.x = c[0].x + r[0].x * cosf(Math3D::LimitPI(ftheta + PI / 2));
+    ip.y = c[0].y + r[0].y * sinf(Math3D::LimitPI(ftheta + PI / 2));
+    CPackMan::pkAddGsData(m_Cl[0].m_C0.col);
+    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));
+    ip.x = c[1].x + r[1].x * cosf(Math3D::LimitPI(ftheta + PI / 2));
+    ip.y = c[1].y + r[1].y * sinf(Math3D::LimitPI(ftheta + PI / 2));
+    CPackMan::pkAddGsData(m_Cl[1].m_C1.col);
+    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));
+    ip.x = c[0].x + r[0].x * cosf(Math3D::LimitPI(ftheta - PI / 2));
+    ip.y = c[0].y + r[0].y * sinf(Math3D::LimitPI(ftheta - PI / 2));
+    CPackMan::pkAddGsData(m_Cl[0].m_C0.col);
+    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));
+    ip.x = c[1].x + r[1].x * cosf(Math3D::LimitPI(ftheta - PI / 2));
+    ip.y = c[1].y + r[1].y * sinf(Math3D::LimitPI(ftheta - PI / 2));
+    CPackMan::pkAddGsData(m_Cl[1].m_C1.col);
+    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));
+
+    ip.x = c[0].x + r1[0].x * cosf(Math3D::LimitPI(ftheta + PI / 2));
+    ip.y = c[0].y + r1[0].y * sinf(Math3D::LimitPI(ftheta + PI / 2));
+    CPackMan::pkAddGsData(m_Cl[0].m_C0.col);
+    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));
+    ip.x = c[1].x + r1[1].x * cosf(Math3D::LimitPI(ftheta + PI / 2));
+    ip.y = c[1].y + r1[1].y * sinf(Math3D::LimitPI(ftheta + PI / 2));
+    CPackMan::pkAddGsData(m_Cl[1].m_C1.col);
+    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));
+    ip.x = c[0].x + r1[0].x * cosf(Math3D::LimitPI(ftheta - PI / 2));
+    ip.y = c[0].y + r1[0].y * sinf(Math3D::LimitPI(ftheta - PI / 2));
+    CPackMan::pkAddGsData(m_Cl[0].m_C0.col);
+    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z0 << 32));
+    ip.x = c[1].x + r1[1].x * cosf(Math3D::LimitPI(ftheta - PI / 2));
+    ip.y = c[1].y + r1[1].y * sinf(Math3D::LimitPI(ftheta - PI / 2));
+    CPackMan::pkAddGsData(m_Cl[1].m_C1.col);
+    CPackMan::pkAddGsData((u_long)ip.x | ((u_long)ip.y << 16) | ((u_long)z1 << 32));
+
+    CPackMan::pkCloseGifTag();
+}
 BOOL C3DPointLight2::_makePktSub(INT nIdx) {
     C3DCircle& cl = m_Cl[nIdx];
     INT cx;
