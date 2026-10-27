@@ -2899,7 +2899,11 @@ asm(".section .rodata\n"
     ".byte 0xAC,0x14,0x31,0x00,0x20,0x15,0x31,0x00,0x8C,0x15,0x31,0x00,0x58,0x18,0x31,0x00\n"
     ".byte 0x9C,0x18,0x31,0x00,0x84,0x18,0x31,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
     ".section .text");
-#if 0 /* ret = 1 is scheduled after the first call of the cancel block instead of into its delay slot */
+/* Parked: 2 of 457 lines differ: reorg fills setStatusWin(4)'s delay slot (cancel block, after the `cancel:`
+   label) with `li a1,4` in ours, with `ret = 1` (s3) in the original. tried: ret before/after the call and before the
+   label, ret/bChange declaration order (ref: ret, fgCursorMove, nStatusTechSelectOld); permuter 6 min (3613
+   candidates, no gain). */
+#if 0
 INT CCamp::statusWinMenu() {
     BOOL bChange = FALSE;
     INT ret = 0;
