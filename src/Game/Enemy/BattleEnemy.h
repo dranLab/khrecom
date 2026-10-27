@@ -109,6 +109,7 @@ public:
     BOOL isActiveTarget() const { return !isBtlEnemyFlag(0x80000) && !isBtlEnemyFlag(0x100000); }
     // PARTIAL: added for Game/Enemy/EnemyDarkball (original name unknown)
     void setBtlEnemyFlag(ULONGLONG inFlag) { m_ullBtlEnemyFlag |= inFlag; }
+    void setBattleEnemyFlag(ULONGLONG inOn, ULONGLONG inOff) { m_ullBtlEnemyFlag = (m_ullBtlEnemyFlag | inOn) & ~inOff; }
     void clearBtlEnemyFlag(ULONGLONG inFlag) { m_ullBtlEnemyFlag &= ~inFlag; } // PARTIAL: added for Game/Enemy/EnemyTornadostep
     void getPlayerPosition(FVECTOR& outPos);
     FLOAT getExtraParam(const CHAR* inParamName);
@@ -121,6 +122,16 @@ public:
     FLOAT getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpFlag, ATK_KIND* outAtkKind, INT inFinish);
     ATK_ATTR getAttackAttr(INT inIndex) const;
     HANDLE getPlayerHandle(); // PARTIAL: added for Game/Enemy/EnemyFatbandit
+    void makePrize();
+    void makeExpPrize(const FVECTOR* inPos);
+    void homingMoveXZToPlayer(FLOAT inRate, FLOAT inSpeed);
+    void createFriendCard_(INT inRate);
+    void attackStateCardDestroy(BOOL inColl);
+    void changeDamageMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr);
+    void updateHitBackTimer_();
+    BOOL changeMotionIndex(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
+    BOOL changeSmallDamageState_(ATK_KIND inDmgKind);
+    void playDamageSE(ATK_KIND inDmgKind);
     // PARTIAL: added for Game/Enemy/EnemyHeartsoldier
     void changeDefaultState();
     void playSmallDamageSE();
