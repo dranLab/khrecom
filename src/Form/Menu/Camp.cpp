@@ -4519,7 +4519,11 @@ asm(".section .rodata\n"
     ".byte 0x20,0x01,0x1D,0x01,0x23,0x01\n"
     ".byte 0x00,0x00\n"
     ".section .text");
-#if 0 /* register allocation in the sleight-list loop differs (the original spills the category table pointer and the category count) */
+/* Parked: 53 of 621 lines differ: in the sleight-list loop the original spills pTechCateTbl and nTechCateCnt and
+   recomputes &pTechCateTbl[nTechSelectTop] from the spilled pointer every iteration; ours strength-reduces it into
+   an s-register (the same giv difference as setMainCmd's font loop). tried: the ref's unused nLine as the loop
+   counter, non-const table pointer, compare operand order (kept: load order); permuter 6 min (68 -> 65). */
+#if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
     FVECTOR vec2;
@@ -4596,7 +4600,7 @@ INT CCamp::setTechWin(INT nSetCmd) {
         m_pTechWinCtrl->enableDisp(TRUE);
         break;
     case 9:
-        if (m_nTechSelect < m_nTechSelectTop) {
+        if (m_nTechSelectTop > m_nTechSelect) {
             m_nTechSelectTop = m_nTechSelect;
         } else if (m_nTechSelectTop + 8 < m_nTechSelect) {
             m_nTechSelectTop = m_nTechSelect - 8;
@@ -4612,7 +4616,7 @@ INT CCamp::setTechWin(INT nSetCmd) {
         for (INT i = 0; i < 9; i++) {
             SHORT nTechKind = pTechCateTbl[nTechSelectTop][0];
             SHORT nTechSeqIdx = pTechCateTbl[nTechSelectTop][1];
-            if (nTechSelectTop == m_nTechSelect) {
+            if (m_nTechSelect == nTechSelectTop) {
                 m_nTechKind = nTechKind;
                 if (m_fgNewTbl[nTechKind] > 0) {
                     m_fgNewTbl[nTechKind] = -1;
