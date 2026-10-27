@@ -1,6 +1,7 @@
 #define SYSTEM_GRAPHIC_GPRIM_CPP
 #include "khtypes.h"
 #include "System/Graphic/Gprim.h"
+#include "System/Coord.h"
 #include "include_asm.h"
 
 extern INT SCREEN_HEIGHT;
@@ -12,12 +13,25 @@ public:
 BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect);
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
 ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
+ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd);
+ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd);
+ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL Back);
+ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL Back);
+QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end);
+QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end);
+ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
+QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd);
+QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back);
+QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
+QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back);
+QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
+ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
+QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd);
+QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back);
+QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
+QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back);
+QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
 template <class T> static inline T& _ref(T& v) { return v; }
-class CCoord { /* PARTIAL: System/Graphic/Camera.h */
-public:
-    void getRotTransPersMatrix(FMATRIX& outMat);
-    void getRotTransPersMatrix_VF04_07();
-};
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
     static FMATRIX& getWorldScreenMatrix();
@@ -388,9 +402,20 @@ QWdata* C3DTPrim::makePkt_Line0(QWdata* pQw) {
     }
     return (QWdata*)_makePkt_TexLine((ULONGLONG*)pQw, m_V, m_V + m_iMax);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Line1__8C3DTPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle0__8C3DTPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle1__8C3DTPrimP6QWdata);
+QWdata* C3DTPrim::makePkt_Line1(QWdata* pQw) {
+    return (QWdata*)_makePkt_TexLine((ULONGLONG*)pQw, m_V, m_V + m_iMax, &m_pObj->Crd(0));
+}
+QWdata* C3DTPrim::makePkt_Triangle0(QWdata* pQw) {
+    if (m_pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        m_pCrd->getRotTransPersMatrix_VF04_07();
+    }
+    return (QWdata*)_makePkt_TexTriangle((ULONGLONG*)pQw, m_V, m_V + m_iMax, isBackClip());
+}
+QWdata* C3DTPrim::makePkt_Triangle1(QWdata* pQw) {
+    return (QWdata*)_makePkt_TexTriangle((ULONGLONG*)pQw, m_V, m_V + m_iMax, &m_pObj->Crd(0), isBackClip());
+}
 QWdata* C3DCPrim::makePkt_None(QWdata* pQw) {
     return pQw;
 }
@@ -402,21 +427,110 @@ QWdata* C3DCPrim::makePkt_Line0(QWdata* pQw) {
     }
     return (QWdata*)_makePkt_Line((ULONGLONG*)pQw, m_V, m_V + m_iMax);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Line1__8C3DCPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle0__8C3DCPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle1__8C3DCPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_LineStrip0__8C3DTPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_LineStrip1__8C3DTPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleStrip0__8C3DTPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleStrip1__8C3DTPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleFan0__8C3DTPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleFan1__8C3DTPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_LineStrip0__8C3DCPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_LineStrip1__8C3DCPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleStrip0__8C3DCPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleStrip1__8C3DCPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleFan0__8C3DCPrimP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleFan1__8C3DCPrimP6QWdata);
+QWdata* C3DCPrim::makePkt_Line1(QWdata* pQw) {
+    return (QWdata*)_makePkt_Line((ULONGLONG*)pQw, m_V, m_V + m_iMax, &m_pObj->Crd(0));
+}
+QWdata* C3DCPrim::makePkt_Triangle0(QWdata* pQw) {
+    if (m_pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        m_pCrd->getRotTransPersMatrix_VF04_07();
+    }
+    return (QWdata*)_makePkt_Triangle((ULONGLONG*)pQw, m_V, m_V + m_iMax, isBackClip());
+}
+QWdata* C3DCPrim::makePkt_Triangle1(QWdata* pQw) {
+    return (QWdata*)_makePkt_Triangle((ULONGLONG*)pQw, m_V, m_V + m_iMax, &m_pObj->Crd(0), isBackClip());
+}
+QWdata* C3DTPrim::makePkt_LineStrip0(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    if (m_pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        m_pCrd->getRotTransPersMatrix_VF04_07();
+    }
+    return _makePkt_TexLineStrip(pQw, it, end);
+}
+QWdata* C3DTPrim::makePkt_LineStrip1(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    return _makePkt_TexLineStrip(pQw, it, end, &m_pObj->Crd(0));
+}
+QWdata* C3DTPrim::makePkt_TriangleStrip0(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    if (m_pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        m_pCrd->getRotTransPersMatrix_VF04_07();
+    }
+    return _makePkt_TexTriangleStrip(pQw, it, end, isBackClip());
+}
+QWdata* C3DTPrim::makePkt_TriangleStrip1(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    return _makePkt_TexTriangleStrip(pQw, it, end, &m_pObj->Crd(0), isBackClip());
+}
+QWdata* C3DTPrim::makePkt_TriangleFan0(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    if (m_pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        m_pCrd->getRotTransPersMatrix_VF04_07();
+    }
+    return _makePkt_TexTriangleFan(pQw, it, end, isBackClip());
+}
+QWdata* C3DTPrim::makePkt_TriangleFan1(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    return _makePkt_TexTriangleFan(pQw, it, end, &m_pObj->Crd(0), isBackClip());
+}
+QWdata* C3DCPrim::makePkt_LineStrip0(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    if (m_pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        m_pCrd->getRotTransPersMatrix_VF04_07();
+    }
+    return _makePkt_LineStrip(pQw, it, end);
+}
+QWdata* C3DCPrim::makePkt_LineStrip1(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    return _makePkt_LineStrip(pQw, it, end, &m_pObj->Crd(0));
+}
+QWdata* C3DCPrim::makePkt_TriangleStrip0(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    if (m_pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        m_pCrd->getRotTransPersMatrix_VF04_07();
+    }
+    return _makePkt_TriangleStrip(pQw, it, end, isBackClip());
+}
+QWdata* C3DCPrim::makePkt_TriangleStrip1(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    return _makePkt_TriangleStrip(pQw, it, end, &m_pObj->Crd(0), isBackClip());
+}
+QWdata* C3DCPrim::makePkt_TriangleFan0(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    if (m_pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        m_pCrd->getRotTransPersMatrix_VF04_07();
+    }
+    return _makePkt_TriangleFan(pQw, it, end, isBackClip());
+}
+QWdata* C3DCPrim::makePkt_TriangleFan1(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    return _makePkt_TriangleFan(pQw, it, end, &m_pObj->Crd(0), isBackClip());
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", initAttribute__6CGPrimUiUiUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", __6CGPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _$_6CGPrim);
