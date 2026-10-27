@@ -265,16 +265,72 @@ INT CPlayerSora::endAttack_inFriend() {
 __asm__(".rdata\n.align 4\n.word .L002A17DC\n.word .L002A1800\n.word .L002A1824\n.word .L002A1838\n.word .L002A1860\n.word .L002A1880\n.word .L002A18A8\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initSummon__Q22PL11CPlayerSorai);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeSummon__Q22PL11CPlayerSora);
-/* placeholder: .rodata of setStateSE__Q22PL11CPlayerSoraii (strings, jump tables) */
-__asm__(".rdata\n.align 4\n.word .L002A2168\n.word .L002A2158\n.word .L002A2150\n.word .L002A2160\n.word .L002A2148\n.word .L002A2128\n.word .L002A2130\n.word .L002A2138\n.word .L002A2140\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n");
-__asm__(".word .L002A2140\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A2148\n.word .L002A2168\n.word .L002A2158\n.word .L002A2160\n.word .L002A2170\n.word .L002A2148\n.word .L002A21A0\n.word .L002A2150\n.word .L002A2158\n.word .L002A2160\n.word .L002A2168\n.word .L002A2170\n.word .L002A21A0\n");
-__asm__(".word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n");
-__asm__(".word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n");
-__asm__(".word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A2178\n");
-__asm__(".word .L002A218C\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n");
-__asm__(".word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A2194\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n");
-__asm__(".word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A2194\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", setStateSE__Q22PL11CPlayerSoraii);
+void CPlayerSora::setStateSE(INT inState, INT inKind) {
+    INT SEID = -1;
+    switch (inState) {
+    case 1:
+        switch (m_uiAttackID) {
+        case 6:
+            SEID = 0xcd;
+            break;
+        case 7:
+            SEID = 0xd0;
+            break;
+        case 8:
+            SEID = 0xd4;
+            break;
+        case 9:
+        case 15:
+            SEID = 0xd1;
+            break;
+        case 5:
+        case 18:
+        case 23:
+            SEID = 0xce;
+            break;
+        case 3:
+        case 25:
+            SEID = 0xca;
+            break;
+        case 2:
+        case 20:
+        case 26:
+            SEID = 0xc9;
+            break;
+        case 4:
+        case 21:
+        case 27:
+            SEID = 0xcb;
+            break;
+        case 1:
+        case 19:
+        case 28:
+            SEID = 0xc8;
+            break;
+        case 22:
+        case 29:
+            SEID = 0xcc;
+            break;
+        case 78:
+            SEID = 0xd0 - (m_nHitCount & 1);
+            break;
+        case 79:
+            SEID = 0xd6;
+            break;
+        case 103:
+        case 115:
+            SEID = 0xd3;
+            break;
+        }
+        break;
+    case 2:
+        SEID = 0xd2;
+        break;
+    }
+    if (SEID != -1) {
+        playSEPanAndVol(1, SEID, 0, NULL, 0);
+    }
+}
 INT CPlayerSora::getStateSESeq(INT inState) {
     INT seq = 0;
     switch (inState) {
