@@ -249,8 +249,7 @@ static inline void setRotTransPersMatrix(FMATRIX& m) {
         "lqc2 $vf6, 0x20(%0)\n"
         "lqc2 $vf7, 0x30(%0)\n"
         :
-        : "r"(&m)
-        : "memory");
+        : "r"(&m));
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DPolyFT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyFT4);
@@ -291,7 +290,17 @@ FIX4 C3DLine::calcZ() {
     return p0.z;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DLine);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__13C3DLineCoord2);
+FIX4 C3DLineCoord2::calcZ() {
+    FMATRIX mat0;
+    FMATRIX mat1;
+    m_pCrd0->getRotTransPersMatrix(mat0);
+    m_pCrd1->getRotTransPersMatrix(mat1);
+    setRotTransPersMatrix(mat0);
+    RotTransPersClipW(p0, m_P0);
+    setRotTransPersMatrix(mat1);
+    RotTransPersClipW(p1, m_P1);
+    return p0.z;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__13C3DLineCoord2);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DLines);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DLines);
