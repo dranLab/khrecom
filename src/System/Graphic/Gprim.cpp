@@ -720,7 +720,12 @@ QWdata* C3DLineStripCoord::makePktSub(QWdata* pQw) {
     G_STRIP* end = m_vVERT.end();
     return _makePkt_LineStrip(pQw, it, end, &m_pObj->Crd(0));
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__12C3DPolyStripP6QWdata);
+QWdata* C3DPolyStrip::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    _setRotTransPersMatrix_VF04_07(m_pCrd);
+    return _makePkt_TriangleStrip(pQw, it, end, isBackClip());
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__17C3DPolyStripCoordP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__10C3DPolyFanP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__15C3DPolyFanCoordP6QWdata);
