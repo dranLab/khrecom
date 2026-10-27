@@ -1330,7 +1330,67 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back
     }
     return pQw;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleStrip__FP6QWdataP7G_STRIPT1P6CCoordi);
+QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back) {
+    IVECTOR p;
+    UINT fg;
+    INT iBone;
+    fg = 2;
+    iBone = -1;
+
+    if (!Back) {
+        for (; it < end; it++, pQw += 2) {
+            if (iBone != it->Bone) {
+                iBone = it->Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            _prefetch(it, 0x20);
+            RotTransPersClipW(p, it->P);
+            if (p.w) {
+                fg |= 4;
+            } else if (fg) {
+                p.w = 0x8000;
+            }
+            if (it->Term) {
+                fg = 2;
+            } else {
+                fg >>= 1;
+            }
+            pQw[0].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = p._q;
+        }
+        return pQw;
+    } else {
+        FVECTOR vDir[3];
+        INT iDirL = 0;
+        for (; it < end; it++, pQw += 2) {
+            if (iBone != it->Bone) {
+                iBone = it->Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            _prefetch(it, 0x20);
+            RotTransPersClipW(p, vDir[2], it->P);
+            if (p.w) {
+                fg |= 4;
+            } else if (fg) {
+                p.w = 0x8000;
+            } else {
+                p.w |= BackClip(vDir, iDirL);
+            }
+            if (it->Term) {
+                fg = 2;
+                iDirL = 0;
+            } else {
+                fg >>= 1;
+                vDir[0] = vDir[1];
+                vDir[1] = vDir[2];
+                iDirL ^= 1;
+            }
+            pQw[0].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = p._q;
+        }
+    }
+    return pQw;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPrimGetaZ__FiRC7FVECTORPC7FMATRIXf);
