@@ -33,6 +33,7 @@ inline void _roulettePrizeMessage() {
 #include "Game/Player/PlayerWeapon.h"
 #include "Game/Player/Summon.h"
 #include "System/Com.h"
+#include "System/TaskMan.h"
 #include "Game/Player/PlayerCamera.h"
 #include "Game/Movement.h"
 #include "include_asm.h"
@@ -418,7 +419,80 @@ void CPlayerSora::watchTarget(INT inMode) {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", setAttack_inFriend__Q22PL11CPlayerSoraiii);
+static inline UINT _upKind(INT inType0, INT inType1) {
+    UINT up = inType0 > 0 ? 1 << (inType0 - 1) : 0;
+    if (inType1 > 0) up |= 1 << (inType1 - 1);
+    return up;
+}
+
+void CPlayerSora::setAttack_inFriend(INT inID, INT inStock, HANDLE inTarget) {
+    CEntity* pTarget;
+    FLOAT distY;
+    FLOAT dir;
+    if (isPlayerFlag(0x20000)) {
+        return;
+    }
+    setPlayerFlag(0x20000, 0);
+    _ref(m_bIsAttackHit) = FALSE;
+    m_fJumpGravity = g_fGravity * 0.16f;
+    m_JumpState = 3;
+    m_fJumpSpdY = 0.0f;
+    if (inTarget > 0) {
+        m_hTarget = inTarget;
+    }
+    if (m_hTarget > 0) pTarget = (CEntity*)CTaskMan::getTask(m_hTarget);
+    else pTarget = NULL;
+    distY = 0.0f;
+    if (pTarget) {
+        pTarget->getLockOnPos(m_vMarkPos);
+        distY = m_vMarkPos.y - m_vCenterPos.y;
+        distY -= 1.0f;
+        calcDistance(*pTarget);
+        dir = _abs(calcDirection(*pTarget) - getDir());
+        m_hMark = m_hTarget;
+        setPlayerFlag(0x100000, 0);
+    } else {
+        setPlayerFlag(0, 0x100000);
+    }
+    m_uiAttackID = inID;
+    m_pAtkData = &g_AttackDataList[inID];
+    if (inID == 5 || inID == 0x67) {
+        if (!isAir()) {
+            if (distY < 2.0f) m_fJumpSpdY = g_fAntiGravity * (FLOAT)m_pAtkData->WORK1;
+            else m_fJumpSpdY = g_fAntiGravity * (distY * 10.0f + 24.0f);
+        } else {
+            if (0.0f <= distY) m_fJumpSpdY = g_fAntiGravity * (distY * 10.0f + 4.0f);
+        }
+        procGravity(0, m_pAtkData->MOVE_END_FRAME, 1);
+    }
+    setAnimForce(m_pAtkData->ANIM_ID, 0, 1, 0, 0, 0);
+    if (isConditionFlag(0x100)) {
+        setAnimSpeed(2.0f);
+    }
+    if (!inStock) {
+        m_iAttackPower = m_iAP * CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
+        _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
+        _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pBattleCardList[m_uiCardID].ATTR;
+        UINT up = _upKind(CardBattle::g_pBattleCardList[m_uiCardID].UP_TYPE0,
+                          CardBattle::g_pBattleCardList[m_uiCardID].UP_TYPE1);
+        calcEnchant_AttackPoint(m_iAttackPower, m_AtkKind, m_AtkAttr, up);
+    } else {
+        m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+        _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
+        _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
+        UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
+                          CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE1);
+        calcEnchant_AttackPoint(m_iAttackPower, m_AtkKind, m_AtkAttr, up);
+    }
+    m_fDistXZ = m_fDistY = 0.0f;
+    if (m_pAtkData->FLAG & 8) {
+        setPlayerFlag(0x2800000, 0);
+    } else {
+        setPlayerFlag(0, 0x2800000);
+        m_fJumpGravity = g_fGravity;
+    }
+    onWeapon(1);
+}
 INT CPlayerSora::exeAttack_inFriend() {
     TIMEQ frame = getMotionCurrentTime() / 50;
     procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
@@ -700,7 +774,91 @@ void CPlayerSora::initGlide(INT inFlag) {
     setFaceAnim(0, 0);
     m_pMove->setFlag(0x40, TRUE);
 }
+/* Parked: only the analog-steering block after Homing differs: the original loads m_pMove (lw v1,0xa0) before
+   the y store into the {0, dir, 0, 0} temporary at sp+0x20 and copies it (lq/sq to sp+0x10) after the m_fDir
+   store; ours stores y and loads the temp first (its stack-temp accesses conflict with this-> accesses, the
+   original's do not) - 4 lines. tried: decl scopes/stack-slot order (vel/vNormal/v), brace init (memset: FVECTOR
+   union is BLKmode here), explicit temp block, _ref/pointer/array-element/scalar-pointer stores, d0 as Homing
+   result vs wrapped angle, setDir before/after/inside the temp block, getRot() = v, early m_pMove local,
+   -dS sched dump (dependence 496 -> 469/484 in ours); permuter 6 + 12 min, best 4 lines (start 8) */
+#if 0
+void CPlayerSora::exeGlide() {
+    FLOAT speed;
+    setBattleFlag(0, 8);
+    if (m_JumpState == 6) {
+        setGroundIK(1);
+        exeJumpLand();
+        return;
+    }
+    if (isPlayerFlag(0x200000)) {
+        initFall();
+        return;
+    }
+    if (m_pMove->getCollisionFlag() & 0xA) {
+        FVECTOR vNormal = m_pMove->getWallNormal();
+        m_fWallDir = _limitPI2(atan2f(vNormal.x, vNormal.z));
+        if (_abs(_limitPI2(m_fWallDir - m_fDir)) > 1.5707964f) {
+            initFall();
+            return;
+        }
+    }
+    if (!isDownJump()) {
+        initFall();
+        return;
+    }
+    speed = isActionFlag(0x800000) ? g_fGlideSpeedHigh : g_fGlideSpeedLow;
+    FVECTOR vel = m_pMove->getVel();
+    m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+    vel.y = m_fJumpSpdY;
+    m_pMove->setVel(vel);
+    if (m_fAnalogPower >= 0.3f) {
+        FLOAT d0 = _limitPI2(m_fAnalogViewDir - getDir());
+        setDir(Movement::Homing(getDir(), m_fAnalogViewDir, g_fGlideTurnRate, m_fFrameRate));
+        FVECTOR v;
+        {
+            /* the original's brace-initialized temporary ({0, dir, 0, 0}, cleared as one quadword) */
+            FVECTOR t;
+            t._q = 0;
+            t.y = getDir();
+            v = t;
+        }
+        m_pMove->setRot(v);
+        if (getHoukouFromAngle(d0) != 4) {
+            if (d0 < 0.0f) {
+                setAnim(0x1D, -1, 0);
+            } else {
+                setAnim(0x1E, -1, 0);
+            }
+        } else if (isActionFlag(0x800000)) {
+            setAnim(0x1C, -1, 0);
+        } else {
+            setAnim(0x1B, -1, 0);
+        }
+    } else if (isActionFlag(0x800000)) {
+        setAnim(0x1C, -1, 0);
+    } else {
+        setAnim(0x1B, -1, 0);
+    }
+    m_fWalkSpeed = speed / 60.0f;
+    m_fJumpSpdXZ = Movement::Approach(m_fJumpSpdXZ, m_fWalkSpeed, 0.1f, m_fFrameRate);
+    m_fWalkSpeed = m_fJumpSpdXZ;
+    m_pMove->calcVelocityXZ(m_fWalkSpeed);
+    if (!isAir()) {
+        m_JumpState = 6;
+        setAnimForce(7, -1, 0, 0, 0, 0);
+        m_fJumpSpdXZ = 0.0f;
+        clearSpeed();
+        m_fJumpSpdY = 0.0f;
+        m_fJumpGravity = 0.0f;
+        return;
+    }
+    m_fJumpHeight = getPos().y - m_vJumpStartPos.y;
+    if (m_fJumpTop < m_fJumpHeight) m_fJumpTop = m_fJumpHeight;
+    m_tqJumpTimer += m_tqFrameRate;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeGlide__Q22PL11CPlayerSora);
+#endif
 void CPlayerSora::exeAvoid() {
     exeDogeRoll();
 }
