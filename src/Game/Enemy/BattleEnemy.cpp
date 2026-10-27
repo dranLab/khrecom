@@ -268,7 +268,16 @@ void CBattleEnemy::endStateShock() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateTornado__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateTornado__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateTornado__12CBattleEnemy);
+void CBattleEnemy::endStateTornado() {
+    bodyCollOn(-1);
+    bodyCollOnBody(-1);
+    m_pAnim->setSpeed(1.0f);
+    if (isBtlEnemyFlag(0x100)) {
+        m_pMove->enableGravity(FALSE);
+    } else {
+        m_pMove->enableGravity(TRUE);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDegenerator__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDegenerator__12CBattleEnemy);
 void CBattleEnemy::endStateDegenerator() {}
