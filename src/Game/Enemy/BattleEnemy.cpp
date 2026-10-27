@@ -12,6 +12,9 @@
 #include "Game/Debug/DebugWork.h"
 #include "Game/Movement.h"
 #include "Game/CardBattle.h"
+#include "Game/Player/Player.h"
+#include "Game/BodyCollision.h"
+#include "System/Graphic/Anim.h"
 #include "include_asm.h"
 
 extern "C" char D_004AD680[];
@@ -123,7 +126,10 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getPlayerHand
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeExpPrize__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makePrize__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", bossDeadDemoDispOff__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getPlayerState__12CBattleEnemy);
+INT CBattleEnemy::getPlayerState() {
+    if (g_pPlayer) return g_pPlayer->getPlayerState();
+    return 2;
+}
 void CBattleEnemy::setBossKilledFlag() {
     CGameWork::setFlag(1, 2, 1);
 }

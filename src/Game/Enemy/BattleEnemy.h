@@ -121,6 +121,9 @@ public:
     FLOAT getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpFlag, ATK_KIND* outAtkKind, INT inFinish);
     ATK_ATTR getAttackAttr(INT inIndex) const;
     HANDLE getPlayerHandle(); // PARTIAL: added for Game/Enemy/EnemyFatbandit
+    void makePrize();
+    BOOL changeSmallDamageState_(ATK_KIND inDmgKind);
+    void playDamageSE(ATK_KIND inDmgKind);
     // PARTIAL: added for Game/Enemy/EnemyHeartsoldier
     void changeDefaultState();
     void playSmallDamageSE();
