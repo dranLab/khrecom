@@ -344,6 +344,8 @@ extern CHAR D_004E33E0[]; /* "%d", setDeckInfo */
 extern CHAR D_004E4048[]; /* "Zoom In{    \xF9DShow Criteria", setWorldmap */
 #define STR_ZOOM_IN D_004E4048
 #define STR_PCT_D D_004E33E0
+extern CHAR D_004E33E8[]; /* "\x81~%02d", setDeckInfo */
+#define STR_TILDE_02D D_004E33E8
 
 template <class T> static inline T& _ref(T& v) { return v; }
 
@@ -3235,7 +3237,258 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
 }
 #endif
 
+/* Parked: same size, 33 of 1409 lines differ: the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl,
+   &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt,
+   0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by member offset) - stable across
+   rebuilds, likely gcse hash-table order; plus one s0 move around a C2DFnt new. tried: ref declaration order,
+   chain-store order, p2DSeqCtrl/p2DFnt/p2DCard locals; permuter 15 min (59 -> 58). */
+#if 0
+INT CCamp::setMapCardWin(INT nSetCmd) {
+    static char* pStrNum[4] = { "%02d/99", "%02d", STR_TILDE_02D, "" };
+    static USHORT mcTabSeqTbl[5] = { 330, 329, 327, 326, 328 };
+    static unsigned char colSeqTbl[3] = { 116, 95, 75 };
+    FVECTOR vec;
+    FVECTOR vec2;
+    C2DSeqCtrl* p2DSeqCtrl;
+    C2DFnt* p2DFnt;
+    C2DCard* p2DCard;
+    G_RGBA rgba;
+    FLOAT fRatioHeight;
+    FLOAT fRatioPosY;
+    char chrTmp[64];
+    CARD card;
+    USHORT nKind;
+    INT idx;
+    INT ret;
+    USHORT nColSeq;
+    CARD cardOld;
+    CampRoomInfo* pCampRoomInfo;
+    static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
+
+    ret = 0;
+    switch (nSetCmd) {
+    case 0:
+        m_nMCSelCateSelect = m_nMCSelSelect = m_nMCSelSelectTop = m_nMCSelNumSelect = 0;
+        initCardData(1);
+        initCardMapKind(m_nMCSelCateSelect);
+        if (!m_pMCInfoWinCtrl) {
+            rgba.col = 0x807C7C7C;
+            m_pMCInfoWinCtrl = NEW(5731, C2DSeqCtrl);
+            m_pMCInfoWinCtrl->setLayer(0x10);
+            m_pMCInfoWinCtrl->enableColorCtrl(TRUE);
+            C2DMan::getLayPosition(m_pLadName, 0x16, 2, vec, 0);
+            m_pMCInfoWinCtrl->setPos(vec);
+            m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x143);
+            m_pMCInfoFnt[0] = NEW(5737, C2DFnt)(0, 0, &rgba, 0xE, NULL, 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[0], -134.0f, -49.0f);
+            m_pMCInfoFnt[1] = NEW(5740, C2DFnt)(0, 0, &rgba, 0xD, CCtdMan::getText(0x500300), 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[1], -72.0f, 6.0f);
+            m_pMCInfoFnt[2] = NEW(5743, C2DFnt)(0, 0, &rgba, 0xD, CCtdMan::getText(0x500301), 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[2], -72.0f, 43.0f);
+            m_pMCInfoFnt[3] = NEW(5747, C2DFnt)(0, 0, &rgba, 0xE, NULL, 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[3], -137.0f, 102.0f);
+            m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x13D);
+            m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x13D);
+            m_pMCInfoCard = NEW(5753, C2DCard);
+            m_pMCInfoCard->setParent(m_pMCInfoWinCtrl);
+            m_pMCInfoCard->setLayer(0x11);
+            m_pMCInfoCard->enableColorCtrl(TRUE);
+            m_pMCInfoCard->addSeqShift(m_pSeqName, 0x158, -110.0f, 26.0f);
+            vec.set(33.0f, -23.0f, 0.0f);
+            for (INT i = 0; i < 2; i++) {
+                for (INT j = 0; j < 5; j++) {
+                    idx = i * 5 + j;
+                    p2DSeqCtrl = m_pMCInfoNumCtrl[idx] = NEW(5764, C2DSeqCtrl);
+                    p2DSeqCtrl->setParent(m_pMCInfoWinCtrl);
+                    p2DSeqCtrl->setLayer(0x11);
+                    p2DSeqCtrl->enableColorCtrl(TRUE);
+                    p2DSeqCtrl->setLocalPos(vec);
+                    p2DSeqCtrl->addSeq(m_pSeqName, idx * 2 + 0x60);
+                    p2DFnt = m_pMCInfoNumFnt[idx] = NEW(5772, C2DFnt)(0, 0, &rgba, 0xD, NULL, 0x40);
+                    p2DFnt->allocText(chrTmp);
+                    p2DSeqCtrl->addFntShift(m_pSeqName, p2DFnt, 14.0f, 7.0f);
+                    vec.y += 20.0f;
+                }
+                vec.x += 62.0f;
+                vec.y -= 100.0f;
+            }
+            p2DSeqCtrl = m_pMCSelWinCtrl[0] = NEW(5784, C2DSeqCtrl);
+            p2DSeqCtrl->setLayer(0x11);
+            p2DSeqCtrl->enableColorCtrl(TRUE);
+            C2DMan::getLayPosition(m_pLadName, 0x16, 1, vec, 0);
+            p2DSeqCtrl->setPos(vec);
+            p2DSeqCtrl->addSeq(m_pSeqName, 0x13A);
+            p2DSeqCtrl = m_pMCSelWinCtrl[1] = NEW(5792, C2DSeqCtrl);
+            p2DSeqCtrl->setLayer(0x10);
+            p2DSeqCtrl->enableColorCtrl(TRUE);
+            p2DSeqCtrl->setParent(m_pMCSelWinCtrl[0]);
+            C2DMan::getLayPosition(m_pLadName, 0x15, 0, vec, 0);
+            p2DSeqCtrl->addSeqShift(m_pSeqName, 0x14B, vec.x, vec.y);
+            m_pMCFnt[0] = NEW(5799, C2DFnt)(0, 0, &rgba, 0xC, NULL, 0x40);
+            p2DSeqCtrl->addFntShift(m_pSeqName, m_pMCFnt[0], 22.0f, 1.0f);
+            rgba.col = 0x80007878;
+            for (INT i = 0; i < 4; i++) {
+                m_pMCFnt[i + 1] = NEW(5804, C2DFnt)(0, 0, &rgba, 0xC, NULL, 0x40);
+                p2DSeqCtrl->addFntShift(m_pSeqName, m_pMCFnt[i + 1], i * 38.0f + -58.0f, 18.0f);
+            }
+            p2DSeqCtrl = m_pMCSelWinCtrl[2] = NEW(5810, C2DSeqCtrl);
+            p2DSeqCtrl->setLayer(0xF);
+            p2DSeqCtrl->enableColorCtrl(TRUE);
+            p2DSeqCtrl->setParent(m_pMCSelWinCtrl[0]);
+            p2DSeqCtrl->addSeq(m_pSeqName, 0x14A);
+            for (INT i = 0; i < 3; i++) {
+                for (INT j = 0; j < 3; j++) {
+                    p2DCard = m_pMCCard[i * 3 + j] = NEW(5820, C2DCard);
+                    p2DCard->setParent(m_pMCSelWinCtrl[0]);
+                    p2DCard->setLayer(0x11);
+                    p2DCard->enableColorCtrl(TRUE);
+                    C2DMan::getLayPosition(m_pLadName, 7, i * 3 + j + 3, vec, 0);
+                    p2DCard->setLocalPos(vec);
+                    p2DCard->addSeq(m_pSeqName, 0xB6);
+                }
+            }
+            m_pMCSelScrollBar = NEW(5832, CScrollBar);
+            vec.set(68.0f, -56.0f, 0.0f);
+            m_pMCSelScrollBar->init(m_pSeqName, 0x14, scrollBarSeqTbl, vec, 117.0f, m_pMCSelWinCtrl[0]);
+        } else {
+            m_pMCInfoWinCtrl->replaceSeq(0, m_pSeqName, 0x143);
+        }
+        break;
+    case 1:
+        if (m_pMCInfoWinCtrl->isEnd(0)) {
+            m_pMCInfoWinCtrl->replaceSeq(0, m_pSeqName, 0x144);
+            m_pMCSelWinCtrl[0]->replaceSeq(0, m_pSeqName, 0x13B);
+            m_pHelpFnt->setText(CCtdMan::getText(0x500402));
+            ret = 1;
+        }
+        break;
+    case 4:
+        m_pMCInfoWinCtrl->replaceSeq(0, m_pSeqName, 0x145);
+        m_pMCSelWinCtrl[0]->replaceSeq(0, m_pSeqName, 0x13C);
+        m_pHelpFnt->setText(m_pMainCmdName[1][1][6]);
+        break;
+    case 5:
+        ret = m_pMCInfoWinCtrl->isEnd(0) != 0;
+        break;
+    case 6:
+        SAFE_DELETE(m_pMCInfoWinCtrl);
+        for (INT i = 0; i < 3; i++) {
+            SAFE_DELETE(m_pMCSelWinCtrl[i]);
+        }
+        for (INT i = 0; i < 9; i++) {
+            SAFE_DELETE(m_pMCCard[i]);
+        }
+        SAFE_DELETE(m_pMCSelScrollBar);
+        for (INT i = 0; i < 10; i++) {
+            SAFE_DELETE(m_pMCInfoNumCtrl[i]);
+        }
+        SAFE_DELETE(m_pMCInfoCard);
+        break;
+    case 10:
+        m_nMCSelSelectTop = 0;
+        m_pMCSelWinCtrl[2]->replaceSeq(0, m_pSeqName, mcTabSeqTbl[m_nMCSelCateSelect]);
+        initCardMapKind(m_nMCSelCateSelect);
+    case 9: {
+        nColSeq = 0;
+        nKind = 0;
+        for (INT i = 3; i > 0; i--) {
+            m_pMCInfoCard->destroy(i);
+        }
+        cardOld = m_pMCInfoCard->m_card;
+        if (!m_bCategorySelectMode) {
+            if (m_nMapKind[m_nMCSelCateSelect]) {
+                nKind = m_nMapKindTbl[m_nMCSelSelect];
+                _setCardNK(card, nKind, -1);
+                m_pMCInfoCard->create(card);
+                if (nKind != cardOld.m_nKind) {
+                    m_pMCInfoCard->restart(0, 0.0f);
+                }
+                m_pMCInfoFnt[0]->setText(card.getName());
+                nColSeq = colSeqTbl[card.m_nCategory21 - 9];
+            }
+        } else {
+            m_pMCInfoFnt[0]->setText(pStrNum[3]);
+        }
+        pCampRoomInfo = getRoomInfo(nKind);
+        if (pCampRoomInfo) {
+            m_pMCInfoFnt[3]->setText(CCtdMan::getText(pCampRoomInfo->nRoomExplane));
+            m_pMCInfoWinCtrl->replaceSeqShift(5, m_pSeqName, pCampRoomInfo->nEnemyVolume + 0x13D, -18.0f, 17.0f);
+            m_pMCInfoWinCtrl->replaceSeqShift(6, m_pSeqName, pCampRoomInfo->nRoomVolume + 0x13D, -18.0f, 55.0f);
+            m_pMCInfoWinCtrl->enableDisp(5, TRUE);
+            m_pMCInfoWinCtrl->enableDisp(6, TRUE);
+        } else {
+            m_pMCInfoFnt[3]->setText(pStrNum[3]);
+            m_pMCInfoWinCtrl->enableDisp(5, FALSE);
+            m_pMCInfoWinCtrl->enableDisp(6, FALSE);
+        }
+        sprintf(chrTmp, pStrNum[0], m_nMapKindTotal[0]);
+        m_pMCFnt[0]->allocText(chrTmp);
+        sprintf(chrTmp, pStrNum[1], m_nMapKindTotal[1]);
+        m_pMCFnt[1]->allocText(chrTmp);
+        sprintf(chrTmp, pStrNum[1], m_nMapKindTotal[2]);
+        m_pMCFnt[2]->allocText(chrTmp);
+        sprintf(chrTmp, pStrNum[1], m_nMapKindTotal[3]);
+        m_pMCFnt[3]->allocText(chrTmp);
+        sprintf(chrTmp, pStrNum[1], m_nMapKindTotal[4]);
+        m_pMCFnt[4]->allocText(chrTmp);
+        for (INT i = 0; i < 9; i++) {
+            idx = m_nMCSelSelectTop + i;
+            p2DCard = m_pMCCard[i];
+            p2DCard->destroy(3);
+            p2DCard->destroy(2);
+            p2DCard->destroy(1);
+            if (idx < m_nMapKind[m_nMCSelCateSelect]) {
+                _setCardNK(card, m_nMapKindTbl[idx], -1);
+                p2DCard->create(card);
+                if (card.m_nCategory20 == 10) {
+                    p2DCard->restart(p2DCard->getNumSeq() - 1, m_iFrame60);
+                }
+            }
+        }
+        if (nKind) {
+            for (idx = 0; idx < m_nCardKindMax; idx++) {
+                if (m_nCardKind[idx] == nKind) break;
+            }
+            ASSERT_AT(5964, idx < m_nCardKindMax);
+            if (nKind == 0xB9) nColSeq = 0x73;
+        }
+        for (INT i = 0; i < 10; i++) {
+            p2DSeqCtrl = m_pMCInfoNumCtrl[i];
+            if ((USHORT)(nKind - 0xA1) < 25) {
+                if (!m_bCategorySelectMode && m_nMapKind[m_nMCSelCateSelect]) {
+                    if (nColSeq != 0x73 || i == 0) {
+                        INT n = m_nCardKind10[idx][i];
+                        p2DSeqCtrl->enableDisp(TRUE);
+                        p2DSeqCtrl->replaceSeq(0, m_pSeqName, nColSeq + i * 2 + (n == 0));
+                        sprintf(chrTmp, pStrNum[2], n);
+                        m_pMCInfoNumFnt[i]->allocText(chrTmp);
+                        continue;
+                    }
+                }
+                p2DSeqCtrl->enableDisp(FALSE);
+            } else {
+                p2DSeqCtrl->enableDisp(FALSE);
+            }
+        }
+        INT n = (m_nMapKind[m_nMCSelCateSelect] + 2) / 3;
+        if (!n) n = 1;
+        fRatioHeight = 3.0f / n;
+        if (fRatioHeight > 1.0f) {
+            fRatioHeight = 1.0f;
+        }
+        fRatioPosY = (FLOAT)(m_nMCSelSelectTop / 3) / n;
+        if (fRatioPosY > 1.0f) {
+            fRatioPosY = 1.0f;
+        }
+        m_pMCSelScrollBar->change(fRatioPosY, fRatioHeight);
+        break;
+    }
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setMapCardWin__5CCampi);
+#endif
 // setMapCardWin__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
 asm(".section .rodata\n"
     ".align 3\n"
@@ -5348,5 +5601,7 @@ const unsigned char CCamp::m_techRikuCateTbl[14][2] = {
 asm(".globl D_004E5374\nD_004E5374 = 0x004E5374");
 
 asm(".globl D_004E3C80\nD_004E3C80 = 0x004E3C80"); /* "%d/%d" (setStatusWin's statusStr), used by asm setMapCardWin */
+
+asm(".globl D_004E33E8\nD_004E33E8 = 0x004E33E8"); /* "\x81~%02d" in asm setDeckInfo's .rodata */
 
 // SOURCE DATA: .data .rodata
