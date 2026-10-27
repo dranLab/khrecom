@@ -71,7 +71,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackPoin
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackAttr__C12CBattleEnemyi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackRate__C12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getUseCardPos__12CBattleEnemyR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", isPlayingCardBattle__12CBattleEnemy);
+BOOL CBattleEnemy::isPlayingCardBattle() {
+    if (CTaskMan::getSysTask(0x16) && CardBattle::CCardBattle::getPlayingHandle(2) == getHandle() &&
+        CardBattle::CCardBattle::isPlayingEnemyCard()) {
+        return TRUE;
+    }
+    return FALSE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", isCurrentState__12CBattleEnemyi);
 BOOL CBattleEnemy::isValidSynchro() {
     return (INT)getExtraParam(BattleEnemy::SynchroParamName) != 0;
