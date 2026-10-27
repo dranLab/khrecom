@@ -13,6 +13,7 @@ struct ENEMY_ACT;   // PARTIAL: added for Game/Enemy/Heartless
 namespace BattleEnemy {
 INT GameModeHp(INT inHp); // PARTIAL: added for Game/Enemy/BattleEnemy
 extern CHAR* SynchroParamName;
+extern CHAR* CamTrgOfsParamName;
 extern INT GameModeParamHp[];
 }
 
@@ -125,6 +126,8 @@ public:
     ATK_ATTR getAttackAttr(INT inIndex) const;
     HANDLE getPlayerHandle(); // PARTIAL: added for Game/Enemy/EnemyFatbandit
     void makePrize();
+    void makeRoulettePrize(const FVECTOR* inPos);
+    BOOL checkResist_(ATK_KIND inDmgKind);
     CBattleEnemyManager* getBattleEnemyManager() const;
     void makeExpPrize(const FVECTOR* inPos);
     void homingMoveXZToPlayer(FLOAT inRate, FLOAT inSpeed);

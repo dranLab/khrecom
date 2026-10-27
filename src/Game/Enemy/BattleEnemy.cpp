@@ -17,6 +17,7 @@
 #include "System/Graphic/Anim.h"
 #include "System/Coord.h"
 #include "Game/CardKind.h"
+#include "Game/Enemy/BattleEnemyManager.h"
 #include "include_asm.h"
 
 extern "C" char D_004AD680[];
@@ -24,6 +25,12 @@ extern "C" char D_004AD3E0[];
 extern "C" char D_004ACBC0[];
 extern "C" char D_004AD3C0[];
 extern "C" char D_004AD3C8[];
+extern "C" char D_004AD3B8[];
+extern "C" char D_004AD388[];
+/* PARTIAL: until SOURCE DATA, the unit's copy of the header static BattleEnemy::BadStatusEffectName (its .data
+ * comes from the original assembly) */
+template <class T> static inline T& _ref(T& x) { return x; }
+extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
 FVECTOR getPlayerPos(INT inIndex);
 namespace BattleEnemy {
 FLOAT GameModeAp(FLOAT inAp);
@@ -31,6 +38,10 @@ INT GameModeHp(INT inHp);
 extern FLOAT GameModeParamAp[];
 }
 namespace Gauge {
+class CCommonGauge { /* PARTIAL: Game/Player/PlayerGauge.h */
+public:
+    static void setDispSeq(HANDLE inOwner, INT inSeq);
+};
 class CEnemyGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
 public:
     static void notifyHP(HANDLE inHandle, INT inHp, INT inHpMax);
@@ -81,7 +92,11 @@ BOOL CBattleEnemy::isPlayingCardBattle() {
     }
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", isCurrentState__12CBattleEnemyi);
+BOOL CBattleEnemy::isCurrentState(INT inState) {
+    if (!((UINT)inState < 31)) AssertApp(D_004ACBC0, 0x4AF, D_004AD388, 0);
+    CState& State = *(CState*)((inState * 0x20 + (INT)this) + 0x450);
+    return isState(State);
+}
 BOOL CBattleEnemy::isValidSynchro() {
     return (INT)getExtraParam(BattleEnemy::SynchroParamName) != 0;
 }
