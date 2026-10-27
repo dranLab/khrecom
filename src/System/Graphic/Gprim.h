@@ -528,7 +528,44 @@ private:
 typedef SHORT TDEG;
 class CCoord;
 class CCoords;
-struct TexInfo;
+
+struct VTransInfo { /* PARTIAL: as in System/Graphic/modeldata.h */
+    UINT _nDistPos;
+    USHORT _nFormat;
+    USHORT _nDistBufW;
+    ULONGLONG* _pImage;
+    UINT _qwImage;
+    USHORT _nDistX;
+    USHORT _nDistY;
+    USHORT _nDistW;
+    USHORT _nDistH;
+    USHORT _nTw;
+    USHORT _nTh;
+    UINT _nTransSize;
+};
+
+struct TexInfo {
+    ULONGLONG _nTPage;
+    VTransInfo _TexInfo;
+    VTransInfo _ClutInfo;
+    TexInfo* _pExtendInfo0;
+    TexInfo* _pExtendInfo1;
+    TexInfo* _pExtendInfo2;
+    UBYTE _nInfoType;
+    UBYTE _nType;
+    UBYTE _nParam;
+    UBYTE _nFlag;
+    float _fOfs[2];
+    CHAR* _pName;
+    void* _pTexAnm;
+    INT _nTexSize;
+    INT _nClutSize;
+
+    BOOL isFixTex() const { return !_TexInfo._pImage || (_nFlag & 1); }
+    BOOL isFixClut() const { return !_ClutInfo._pImage || (_nFlag & 2); }
+    BOOL isFix() const { return isFixTex() && isFixClut(); }
+    ULONGLONG getTPage() const { return _nTPage; }
+};
 
 struct G_ST {
     FLOAT s;

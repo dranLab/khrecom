@@ -33,7 +33,12 @@ void CGTexPrim2D::setTPage(const CHAR* pTexName) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setTexture__9CGTexPrimPC7TexInfoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setTexture__11CGTexPrim2DPC7TexInfoi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPacketSize__C9CGTexPrim);
+UINT CGTexPrim::getPacketSize() const {
+    if (m_pTexInfo && !m_pTexInfo->isFix()) {
+        return 26;
+    }
+    return 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPacketSize__C11CGTexPrim2D);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__11CScissoring);
 void CScissoring::setRect(G_XY& p0, G_XY& p1) {
