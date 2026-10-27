@@ -743,7 +743,27 @@ void C3DLineCoord2::makePkt() {
     CPackMan::pkCloseGifTag();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DLines);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DLines);
+void C3DLines::makePkt() {
+    QWdata giftag;
+    G_LINE* it;
+    if (m_vLINE.size() == 0) {
+        return;
+    }
+    giftag.ul64[0] = 0x5400000000008000UL;
+    giftag.ul64[1] = 0x41410;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    for (it = m_vLINE.begin(); it != m_vLINE.end(); it++) {
+        if (it->p0.w) {
+            continue;
+        }
+        CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
+        CPackMan::pkAddGsData(it->C0.col);
+        CPackMan::pkAddGsData(_vecToXYZ(it->p0));
+        CPackMan::pkAddGsData(it->C1.col);
+        CPackMan::pkAddGsData(_vecToXYZ(it->p1));
+    }
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1i);
