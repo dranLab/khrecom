@@ -419,7 +419,15 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playSmallDama
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playBigDamageSE__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playDamageSE__12CBattleEnemy8ATK_KIND);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setupDuelCard__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", destroyCard__12CBattleEnemy);
+BOOL CBattleEnemy::destroyCard() {
+    CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (!cb) AssertApp(D_004ACBC0, 0x12F9, D_004AD3C0, 0);
+    if (CardBattle::CCardBattle::getPlayingHandle(2) == getHandle()) {
+        cb->destroyEnemyCard(getHandle());
+        return TRUE;
+    }
+    return FALSE;
+}
 void CBattleEnemy::changeDamageMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr) {
     INT identifyNo = 0;
     if (m_pBodyColl->getHitCollBody()) {
