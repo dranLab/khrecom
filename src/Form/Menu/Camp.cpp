@@ -6572,7 +6572,11 @@ asm(".section .rodata\n"
     ".byte 0xF8,0xD9,0x31,0x00,0xC4,0xDA,0x31,0x00,0xF4,0xDA,0x31,0x00,0x1C,0xDB,0x31,0x00\n"
     ".byte 0x44,0xDB,0x31,0x00,0x94,0xDB,0x31,0x00,0xC4,0xDA,0x31,0x00,0xAC,0xDB,0x31,0x00\n"
     ".section .text");
-#if 0 /* one addiu (&m_nKindSelectTop) is scheduled before sd ra instead of after */
+/* Parked: 2 of 198 lines differ: the two member addresses of the top-index select (&m_nMCSelSelectTop,
+   &m_nKindSelectTop) issue in the other order in the prologue (equal-priority tie). tried: ternary both polarities,
+   if/else and default+if forms, the ref's `INT& nKindSelectTop` reference local, idx local; permuter 6 min (3573
+   candidates, no gain). */
+#if 0
 void CCamp::setCursor2(INT nSelect, INT nMode, BOOL bMapCard) {
     FVECTOR vec;
     INT* pTop = bMapCard ? &m_nMCSelSelectTop : &m_nKindSelectTop;
