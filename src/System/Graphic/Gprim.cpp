@@ -236,7 +236,30 @@ ULONGLONG CGTexPrim::setTexture(const TexInfo* pInInfo, BOOL bOnly2D) {
     }
     return pInInfo->getTPage(nTexPos, nClutPos);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setTexture__11CGTexPrim2DPC7TexInfoi);
+ULONGLONG CGTexPrim2D::setTexture(const TexInfo* pInInfo, BOOL bOnly2D) {
+    UINT nTexPos;
+    UINT nClutPos;
+    INT nID;
+    if (!pInInfo) return 0;
+    if (pInInfo->isFix()) return pInInfo->getTPage();
+
+    _getTmpTexArea(0, nTexPos, nClutPos);
+
+    nID = updateTexCache(pInInfo);
+    if (nID < 0) {
+        CPackMan::pkCloseDirectCode();
+        nTexPos += m_nCacheIdxOld * 64;
+        nClutPos += m_nCacheIdxOld * 4;
+        CPackMan::pkRefLoadImage(nTexPos, pInInfo->_TexInfo);
+        CPackMan::pkRefLoadImage(nClutPos, pInInfo->_ClutInfo);
+        CModelMan::incTexSendCount(1);
+        CPackMan::pkOpenDirectCode(0);
+    } else {
+        nTexPos += nID * 64;
+        nClutPos += nID * 4;
+    }
+    return pInInfo->getTPage(nTexPos, nClutPos);
+}
 UINT CGTexPrim::getPacketSize() const {
     if (m_pTexInfo && !m_pTexInfo->isFix()) {
         return 26;

@@ -694,7 +694,25 @@ public:
             m_pTexCache[i] = NULL;
         }
     }
-    static INT updateTexCache(const TexInfo* pInInfo);
+    static INT updateTexCache(const TexInfo* pInInfo) {
+        INT size;
+        for (INT i = 0; i < 28; i++) {
+            if (pInInfo == m_pTexCache[i]) return i;
+        }
+        size = pInInfo->_TexInfo._nTransSize >> 6;
+        if (size == 0) size = 1;
+        m_nCacheIdxOld = m_nCacheIdx;
+        m_nCacheIdx += size;
+        if (m_nCacheIdx > 28) {
+            m_nCacheIdx = size;
+            m_nCacheIdxOld = 0;
+        }
+        m_pTexCache[m_nCacheIdxOld] = (TexInfo*)pInInfo;
+        for (INT i = m_nCacheIdxOld + 1; i < m_nCacheIdx; i++) {
+            m_pTexCache[i] = (TexInfo*)-1;
+        }
+        return -1;
+    }
 };
 
 class CScissoring : public CGPrim {
