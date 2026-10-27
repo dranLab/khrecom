@@ -34,6 +34,12 @@ inline void _emptyStringPlaceholder() {
 #include "Form/Menu/TechHelp.h"
 #include "System/Sound/SoundMan.h"
 #include "Form/Menu/MenuModel.h"
+#include "System/Wnd.h"
+#include "System/Rcf.h"
+#include "System/TaskMan.h"
+#include "Form/Menu/WorldWarp.h"
+#include "Form/Menu/DecknameEdit.h"
+#include "Form/Menu/JMemoFlag.h"
 #include "include_asm.h"
 
 
@@ -282,12 +288,6 @@ private:
     virtual void makePkt();
 };
 
-class CTextWnd {
-    UBYTE _m_0x00[0x10];
-
-public:
-    virtual ~CTextWnd();
-};
 
 namespace D2 {
 class C2DMan {
@@ -305,10 +305,35 @@ public:
 };
 }
 
+
+enum NAME_CASE {
+    NAME_CASE_SENSITIVE = 0,
+    NAME_CASE_UPPER = 1,
+    NAME_CASE_LOWER = 2
+};
+
+class CRsrcData;
+struct TexInfo;
 class CRsrcDB {
 public:
     static void removeGroup(INT nGroup, INT nID);
+    static CRsrcData* getRsrc(INT nRsrcType, const CHAR* pszName, NAME_CASE nc);
+    static void* getRsrcData(const CRsrcData& data);
+    static TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
+    /* RsrcDB.h's inline */
+    static void* getRsrcData(INT nRsrcType, const CHAR* pszName) {
+        CRsrcData* pData = getRsrc(nRsrcType, pszName, NAME_CASE_SENSITIVE);
+        return pData ? getRsrcData(*pData) : NULL;
+    }
 };
+
+class CPlayer {
+public:
+    static INT exportStatus();
+};
+
+/* SceneInfo.h's inline */
+static inline RoomInfo* _getCurrentRoomInfo() { return CSceneInfo::getRoomInfo(-1); }
 
 class CPackMan {
 public:
@@ -1013,64 +1038,967 @@ void CCamp::adjustSelect(BOOL bMapCard) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", main__5CCamp);
-// main__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    " D_004E2AB8:\n"
-    ".byte 0x77,0x6F,0x72,0x6C,0x64,0x5F,0x74,0x69,0x74,0x6C,0x65,0x3A,0x30,0x30,0x00,0x00\n"
-    ".byte 0x24,0x29,0x2D,0x31,0x35,0x39,0x24,0x2D,0x2D,0x2D,0x2D,0x2D,0x00,0x00,0x00,0x00\n"
-    ".byte 0x42,0x61,0x74,0x74,0x6C,0x65,0x43,0x61,0x72,0x64,0x4C,0x69,0x73,0x74,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x39,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x38,0x31,0x30,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x39,0x32,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x39,0x33,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x1C,0x15,0x40,0x19,0x43,0x46,0x49,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x31,0x32,0x30,0x39,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x31,0x32,0x38,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x60,0xCD,0x30,0x00,0xCC,0xCD,0x30,0x00,0xA4,0xCE,0x30,0x00,0x8C,0xCF,0x30,0x00\n"
-    ".byte 0x94,0xD1,0x30,0x00,0xF0,0xD0,0x30,0x00,0x94,0xD1,0x30,0x00,0xA4,0xD1,0x30,0x00\n"
-    ".byte 0x8C,0xD2,0x30,0x00,0x58,0xD3,0x30,0x00,0x84,0xD3,0x30,0x00,0xA0,0xD3,0x30,0x00\n"
-    ".byte 0xD0,0xD3,0x30,0x00,0xEC,0xD3,0x30,0x00,0x50,0xD4,0x30,0x00,0x7C,0xD6,0x30,0x00\n"
-    ".byte 0x7C,0xD6,0x30,0x00,0x84,0xD7,0x30,0x00,0xAC,0xD7,0x30,0x00,0xC8,0xD7,0x30,0x00\n"
-    ".byte 0x04,0xD8,0x30,0x00,0x1C,0xD8,0x30,0x00,0x34,0xD8,0x30,0x00,0x50,0xD8,0x30,0x00\n"
-    ".byte 0xC8,0xD8,0x30,0x00,0xF0,0xD8,0x30,0x00,0x2C,0xD9,0x30,0x00,0xD0,0xD9,0x30,0x00\n"
-    ".byte 0x8C,0xDA,0x30,0x00,0x3C,0xDB,0x30,0x00,0xFC,0xDB,0x30,0x00,0xFC,0xDB,0x30,0x00\n"
-    ".byte 0x94,0xDC,0x30,0x00,0xD4,0xDC,0x30,0x00,0x34,0xE0,0x30,0x00,0xB4,0xE0,0x30,0x00\n"
-    ".byte 0xD0,0xE0,0x30,0x00,0x3C,0xE1,0x30,0x00,0xA0,0xE1,0x30,0x00,0xC0,0xE1,0x30,0x00\n"
-    ".byte 0x44,0xE2,0x30,0x00,0xC0,0xE2,0x30,0x00,0xEC,0xE2,0x30,0x00,0x20,0xE3,0x30,0x00\n"
-    ".byte 0x74,0xE3,0x30,0x00,0xA4,0xE3,0x30,0x00,0x04,0xE4,0x30,0x00,0x48,0xE4,0x30,0x00\n"
-    ".byte 0xE4,0xE4,0x30,0x00,0x20,0xE5,0x30,0x00,0x4C,0xE5,0x30,0x00,0x80,0xE5,0x30,0x00\n"
-    ".byte 0xD4,0xE5,0x30,0x00,0x04,0xE6,0x30,0x00,0x3C,0xE6,0x30,0x00,0xBC,0xE6,0x30,0x00\n"
-    ".byte 0xAC,0xE7,0x30,0x00,0xE0,0xE7,0x30,0x00,0x5C,0xE8,0x30,0x00,0xC4,0xE8,0x30,0x00\n"
-    ".byte 0xF0,0xE8,0x30,0x00,0x30,0xE9,0x30,0x00,0x94,0xE9,0x30,0x00,0x4C,0xEA,0x30,0x00\n"
-    ".byte 0x74,0xEA,0x30,0x00,0x94,0xEA,0x30,0x00,0xE8,0xEB,0x30,0x00,0xC0,0xEA,0x30,0x00\n"
-    ".byte 0xE0,0xEA,0x30,0x00,0xE8,0xEB,0x30,0x00,0x0C,0xEB,0x30,0x00,0x50,0xEB,0x30,0x00\n"
-    ".byte 0x68,0xEB,0x30,0x00,0x9C,0xEB,0x30,0x00,0xBC,0xEB,0x30,0x00,0xE8,0xEB,0x30,0x00\n"
-    ".byte 0x3C,0xEC,0x30,0x00,0xC0,0xEC,0x30,0x00,0xDC,0xEC,0x30,0x00,0x10,0xEE,0x30,0x00\n"
-    ".byte 0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00\n"
-    ".byte 0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00\n"
-    ".byte 0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0xBC,0xD5,0x30,0x00,0x30,0xD6,0x30,0x00,0x20,0xD6,0x30,0x00,0xC4,0xD5,0x30,0x00\n"
-    ".byte 0x20,0xD6,0x30,0x00,0x20,0xD6,0x30,0x00,0x20,0xD6,0x30,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .data\n"
-    ".align 3\n"
-    " pWTSeqName.4377:\n"
-    ".byte 0xB8,0x2A,0x4E,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00\n"
-    ".section .text");
+void CCamp::main() {
+    static LPCTSTR pWTSeqName = "world_title:00";
+    FVECTOR vec;
+    FVECTOR vec2;
+    G_RGBA rgba;
+    INT iWorldRsrc;
+    unsigned char deckCheckStepTbl[2][6] = { { 0x24, 0x29, 0x2D, 0x31, 0x35, 0x39 }, { 0x24, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D } };
+    INT nError;
+
+    m_iFrame60 = CMainApp::getTickCount() % 7000;
+    switch (m_nStep) {
+    case 0:
+        D2::C2DMan::changeLevel(D2::C2DMan::D2MAN_LEVEL1);
+        CPackMan::changeDrawMode(1);
+        initCardKind(m_nDeckNoSelect, 0, FALSE);
+        initDeck(m_nDeckNoSelect, 0);
+        m_pBCParam = (BC_PARAM*)CRsrcDB::getRsrcData(1, "BattleCardList");
+        m_nStep = 1;
+        break;
+    case 1:
+        m_nStep = 2;
+        iWorldRsrc = CSceneInfo::getCurrentWorldID(TRUE);
+        if (iWorldRsrc >= 14) {
+            iWorldRsrc = 0;
+        }
+        if (m_iWorldRsrc && m_iWorldRsrc != iWorldRsrc) {
+            CRsrcDB::removeGroup(2, m_iWorldRsrc);
+        }
+        /* through a reference: the original loads m_pSeqName only after this store */
+        _ref(m_iWorldRsrc) = iWorldRsrc;
+        if (CRsrcDB::getRsrcTex(m_pSeqName, NAME_CASE_SENSITIVE)) {
+            goto loaded;
+        }
+        if (m_addrRsrcBuf) {
+            CRcf::reqLoadRCFFront(2, 100, 0x140, m_addrRsrcBuf, 0);
+        } else {
+            CRcf::reqLoadRCFFront(2, 100, 0x140, NULL, 0);
+        }
+        if (m_iWorldRsrc) {
+            if (m_addrRsrcBuf) {
+                CRcf::reqLoadRCFFront(2, m_iWorldRsrc + 0x95, 0x140, m_addrRsrcBuf + 0x90000, 0);
+            } else {
+                CRcf::reqLoadRCFFront(2, m_iWorldRsrc + 0x95, 0x140, NULL, 0);
+            }
+        }
+        break;
+    case 2:
+        if (!CRcf::isCompleteLoadRCF(2, 100)) {
+            break;
+        }
+        if (m_iWorldRsrc && !CRcf::isCompleteLoadRCF(2, m_iWorldRsrc)) {
+            break;
+        }
+    loaded:
+        rgba.col = 0x80806228;
+        m_pHelpFnt = NEW(791, CStrPrim)(-0x65, -(SCREEN_HEIGHT / 2) + 0x144, &rgba, 0xE, NULL, 0x40, 0xFFFF28);
+        m_pHelpFnt->setLayerFG(15);
+        m_pHelpFnt->setSpace(-10, 48);
+        CPlayer::exportStatus();
+        CSound::playSE(3, -1, 0x40);
+        m_nStep = 3;
+        break;
+    case 3:
+        D2::C2DMan::setLayer(0xC);
+        m_hLay = D2::C2DMan::create(m_pLadName, 8);
+        m_pBaseCtrl = NEW(810, C2DSeqCtrl);
+        m_pBaseCtrl->setLayer(0xB);
+        m_pBaseCtrl->addSeq(m_pLadName, 0, 0);
+        vec.init();
+        m_pBaseCtrl->setPos(vec);
+        setCurrentRoomName(0);
+        setPoint(0);
+        setTime(0);
+        if (!m_bWorldmap) {
+            m_pBaseCtrl->addSeq(m_pLadName, 0, 0x1A);
+            m_pBaseCtrl->addSeq(m_pLadName, 0, 0x16);
+            setMainParty(0);
+            setMainCmd(0, 0);
+            setMainCmdHist(1, 0);
+            setStatusWin0(0);
+            setStatusWin1(0);
+            m_nStep = 6;
+        } else {
+            m_nStep = 4;
+        }
+        break;
+    case 5:
+        if (!D2::C2DMan::isEnd(m_hLay)) {
+            break;
+        }
+        CSound::setBGMMasterVolume(0x40, -1);
+        D2::C2DMan::destroy(m_hLay);
+        D2::C2DMan::setLayer(0xE);
+        m_hLay = D2::C2DMan::create(m_pLadName, 9);
+        m_pBaseCtrl->replaceSeq(0, m_pSeqName, 1);
+        setCurrentRoomName(3);
+        m_nMainCmdSel = 1;
+        setMainCmdHist(1, 0);
+        setPoint(3);
+        setTime(3);
+        m_nStep = 0x11;
+        break;
+    case 4:
+    case 6:
+        m_nStep++;
+        break;
+    case 7:
+        if (D2::C2DMan::isEnd(m_hLay)) {
+            CSound::setBGMMasterVolume(0x40, -1);
+            D2::C2DMan::destroy(m_hLay);
+            D2::C2DMan::setLayer(0xE);
+            m_hLay = D2::C2DMan::create(m_pLadName, 9);
+            m_pBaseCtrl->replaceSeq(0, m_pSeqName, 1);
+            setMainParty(3);
+            setCurrentRoomName(3);
+            setPoint(3);
+            setTime(3);
+            m_nStep = 8;
+        }
+        if (m_pMainCmdCtrl[0]->isEnd(0)) {
+            setMainCmd(1, 0);
+        }
+        if (!m_pWindow0Ctrl->isEnd(0)) {
+            break;
+        }
+        setStatusWin0(1);
+        setStatusWin1(1);
+        break;
+    case 8:
+        if (!m_pCursorCtrl) {
+            m_pCursorCtrl = NEW(928, C2DSeqCtrl);
+            m_pCursorCtrl->setLayer(0xD);
+            m_pCursorCtrl->addSeq(m_pSeqName, 0x12);
+            m_pLightCtrl = NEW(931, C2DSeqCtrl);
+            m_pLightCtrl->setLayer(0xD);
+            m_pLightCtrl->addSeq(m_pSeqName, 0x14);
+        }
+        selectMainCmd(0, TRUE);
+        moveLight();
+        m_nStep = 9;
+        break;
+    case 9:
+        if (CCard::shouldDispBattleCardFullMessage()) {
+            CCard::finishBattleCardFullMessage();
+            m_nError = 6;
+            m_nStep = 10;
+            m_nErrorWinStep = 0;
+        } else {
+            m_nStep = 0xB;
+        }
+        break;
+    case 10:
+        if (deckCheckErrorWinMenu(FALSE)) {
+            m_nStep = 0xB;
+        }
+        moveYNLight();
+        break;
+    case 11:
+        if (CCard::shouldDispMapCardFullMessage()) {
+            CCard::finishMapCardFullMessage();
+            m_nError = 7;
+            m_nStep = 0xC;
+            m_nErrorWinStep = 0;
+        } else {
+            m_nStep = 0xE;
+        }
+        break;
+    case 12:
+        if (deckCheckErrorWinMenu(FALSE)) {
+            m_nStep = 0xE;
+        }
+        moveYNLight();
+        break;
+    case 13:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setMainCmd(1, 0);
+        setStatusWin0(1);
+        setStatusWin1(1);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        moveLight();
+        setMainParty(3);
+        m_nStep = 0xE;
+        break;
+    case 14:
+        if (CPadHandler::isButtonTrg(0x800, 0) || CPadHandler::isTrgCANCEL(0)) {
+            if (CGameWork::getFlag(1, 0x1E)) {
+                break;
+            }
+            selectMainCmd(m_nMainCmdSel, FALSE);
+            m_nStep = 0x4E;
+        } else if (CPadHandler::isButtonTrg(0x40, 0)) {
+            if (m_nMainCmdSel < 7) {
+                RoomInfo* pRoomInfo = _getCurrentRoomInfo();
+                if ((m_nMainCmdSel == 1 && !pRoomInfo->_pSrcInfo) || (m_nMainCmdSel == 3 && !CSceneInfo::getWorldID(0))) {
+                    CSound::playSE(5, -1, 0x40);
+                    break;
+                }
+                CSound::playSE(2, -1, 0x40);
+                selectMainCmd(m_nMainCmdSel, FALSE);
+                setMainCmd(2, 0);
+                if (m_nMainCmdSel != 3 && m_nMainCmdSel != 5) {
+                    setMainCmdHist(1, 0);
+                    setMainCmdHist(7, 0);
+                }
+                setStatusWin0(2);
+                setStatusWin1(2);
+                switch (m_nMainCmdSel) {
+                case 0:
+                    m_nStep = 0xF;
+                    break;
+                case 3:
+                    D2::C2DMan::destroy(m_hLay);
+                    D2::C2DMan::setLayer(0xE);
+                    m_hLay = D2::C2DMan::create(m_pLadName, 10);
+                    m_pBaseCtrl->enableDisp(2, FALSE);
+                    setCurrentRoomName(4);
+                    setPoint(4);
+                    setTime(4);
+                    m_nStep = 0x10;
+                    break;
+                case 2:
+                case 4:
+                case 5:
+                case 6:
+                    m_pBaseCtrl->enableDisp(2, FALSE);
+                case 1:
+                    m_nStep = 0x10;
+                    break;
+                }
+                if (m_nStep != 0xE) {
+                    m_nMainCmdSelSave = m_nMainCmdSel;
+                    setMainParty(4);
+                }
+            }
+        } else if (CPadHandler::isButtonRpt(0x101000, 0)) {
+            if (m_nMainCmdSel - 1 < 0 && !CPadHandler::isButtonTrg(0x101000, 0)) {
+                break;
+            }
+            selectMainCmd(m_nMainCmdSel - 1, TRUE);
+            CSound::playSE(1, -1, 0x40);
+        } else if (CPadHandler::isButtonRpt(0x204000, 0)) {
+            if (m_nMainCmdSel + 1 >= m_nCurrentCmdMax && !CPadHandler::isButtonTrg(0x204000, 0)) {
+                break;
+            }
+            selectMainCmd(m_nMainCmdSel + 1, TRUE);
+            CSound::playSE(1, -1, 0x40);
+        }
+        moveLight();
+        break;
+    case 15:
+    case 16:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        if (m_nStep == 0xF) {
+            setMainCmd(0, m_nMainCmdSel + 1);
+            setDeckCard(1);
+            setDeckCard(0x12);
+            setDeckDeck(1);
+            setDeckDeck(0x12);
+            setDeckDeck(0x13);
+            setDeckCard(7);
+            setDeckDeck(7);
+        } else {
+            setCursor(-1, 0);
+            setLight(-1, 0);
+        }
+        {
+            unsigned char mainCmdJmpTbl[7] = { 0x1C, 0x15, 0x40, 0x19, 0x43, 0x46, 0x49 };
+            m_nStep = mainCmdJmpTbl[m_nMainCmdSel];
+        }
+        setStatusWin0(3);
+        setStatusWin1(3);
+        break;
+    case 17:
+        setMainCmdHist(1, 0);
+        setWorldmap(0);
+        m_nStep = 0x12;
+        break;
+    case 18:
+        if (setWorldmap(1)) {
+            m_nStep = 0x13;
+        }
+        break;
+    case 19:
+        if (setWorldmap(10)) {
+            if (CPadHandler::isButtonTrg(0x100, 0) || CPadHandler::isTrgCANCEL(0)) {
+                m_nStep = 0x14;
+            }
+        }
+        setWorldmap(3);
+        break;
+    case 20:
+        setWorldmap(4);
+        m_nStep = 0x4C;
+        break;
+    case 21:
+        setWorldmap(0);
+        m_nStep = 0x16;
+        break;
+    case 22:
+        if (setWorldmap(1)) {
+            m_nStep = 0x17;
+        }
+        break;
+    case 23:
+        if (setWorldmap(10)) {
+            if (CPadHandler::isTrgCANCEL(0)) {
+                setWorldmap(4);
+                setMainCmdHist(4, 0);
+                setMainCmd(0, 0);
+                CSound::playSE(4, -1, 0x40);
+                m_nStep = 0x18;
+            }
+        }
+        setWorldmap(3);
+        break;
+    case 24:
+        if (!setWorldmap(5)) {
+            break;
+        }
+        setWorldmap(8);
+        setStatusWin0(0);
+        setStatusWin1(0);
+        setMainParty(1);
+        m_pBaseCtrl->enableDisp(2, TRUE);
+        m_nStep = 0xD;
+        break;
+    case 25:
+        m_hEtcMenu = (NEW(1209, CWorldWarp)(this, TRUE))->getHandle();
+        m_nStep = 0x1A;
+        break;
+    case 26:
+        if (CTaskMan::getTask(m_hEtcMenu)) {
+            break;
+        }
+        setMainCmd(0, 0);
+        setStatusWin0(0);
+        setStatusWin1(0);
+        D2::C2DMan::destroy(m_hLay);
+        D2::C2DMan::setLayer(0xE);
+        m_hLay = D2::C2DMan::create(m_pLadName, 8);
+        setMainParty(1);
+        m_pBaseCtrl->enableDisp(2, TRUE);
+        setCurrentRoomName(0);
+        setPoint(0);
+        setTime(0);
+        m_nStep = 0x1B;
+        break;
+    case 27:
+        if (m_pMainCmdCtrl[0]->isEnd(0)) {
+            setMainCmd(1, 0);
+            setStatusWin0(1);
+            setStatusWin1(1);
+            selectMainCmd(m_nMainCmdSel, TRUE);
+            moveLight();
+        }
+        if (!D2::C2DMan::isEnd(m_hLay)) {
+            break;
+        }
+        D2::C2DMan::destroy(m_hLay);
+        D2::C2DMan::setLayer(0xE);
+        m_hLay = D2::C2DMan::create(m_pLadName, 9);
+        setMainParty(3);
+        setCurrentRoomName(3);
+        setPoint(3);
+        setTime(3);
+        m_nStep = 0xE;
+        break;
+    case 28:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        SAFE_DELETE(m_pMenuModel);
+        m_nKindSelect = m_nDeckSelect = 0;
+        m_nKindSelectTop = m_nDeckSelectTop = 0;
+        m_nKindCategorySelect = 0;
+        initCardData(0);
+        initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+        setMainCmd(1, 0);
+        selectMainCmd(0, TRUE);
+        setDeckCard(3);
+        setDeckDeck(3);
+        m_nStep = 0x1D;
+        break;
+    case 29:
+        if (!m_bPlayerKind || CGameWork::getFlag(0, 0x84)) {
+            m_nStep = 0x21;
+            break;
+        }
+        CGameWork::setFlag(0, 0x84, TRUE);
+        m_pTextWnd = NEW(1282, CTextWnd)(*this, FALSE);
+        m_pTextWnd->setObjType((ObjType::eObjType)0x10);
+        CBaseWnd::setLayerFG(0x17);
+        /* m_pTextWnd through a reference: its loads stay after the setLayerFG stores */
+        _ref(m_pTextWnd)->createWindowCTD(0x500600, NULL, NULL, 0, NULL, 0);
+        CBaseWnd::setLayerFG(9);
+        _ref(m_pTextWnd)->open();
+        CSound::playSE(3, -1, 0x40);
+        m_nStep = 0x1E;
+        break;
+    case 30:
+    case 31:
+        if (m_pTextWnd->getStatus() != 5) {
+            break;
+        }
+        if (!CPadHandler::isButtonTrg(0x60, 0)) {
+            break;
+        }
+        if (m_nStep == 0x1E) {
+            CBaseWnd::setLayerFG(0x17);
+            _ref(m_pTextWnd)->setTextCTD(0x500601, NULL);
+            CBaseWnd::setLayerFG(9);
+            CSound::playSE(10, -1, 0x40);
+            m_nStep = 0x1F;
+        } else {
+            m_pTextWnd->close();
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x20;
+        }
+        break;
+    case 32:
+        if (m_pTextWnd->getStatus() != 9) {
+            break;
+        }
+        SAFE_DELETE(m_pTextWnd);
+        m_nStep = 0x21;
+        break;
+    case 33:
+        if (CPadHandler::isTrgCANCEL(0)) {
+            if (!m_bPlayerKind) {
+                nError = CCard::checkCurrentDeck();
+                if (nError) {
+                    m_nError = nError;
+                    m_nStep = 0x23;
+                    m_nErrorWinStep = 0;
+                    break;
+                }
+            }
+            selectMainCmd(m_nMainCmdSel, FALSE);
+            setMainCmd(2, 0);
+            setMainCmdHist(4, 0);
+            setDeckCard(4);
+            setDeckDeck(4);
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x22;
+        } else if (CPadHandler::isButtonTrg(0x40, 0)) {
+            if (!m_nMainCmdSel) {
+                CSound::playSE(2, -1, 0x40);
+                if (m_nKind[m_nKindCategorySelect]) {
+                    m_nCardInOut = 0;
+                } else {
+                    if (!m_nDeck[m_nDeckCategorySelect]) {
+                        break;
+                    }
+                    m_nCardInOut = 1;
+                }
+                setMainCmdHist(1, 1);
+                setMainCmdHist(7, 1);
+                setDeckCard(10);
+                setDeckDeck(3);
+                setMainCmd(2, 0);
+                setCursor(-1, 0);
+                setLight(-1, 0);
+                m_nStep = 0x24;
+            } else {
+                CSound::playSE(2, -1, 0x40);
+                setMainCmdHist(1, 1);
+                setMainCmdHist(7, 1);
+                setMainCmd(2, 0);
+                setCursor(-1, 0);
+                setLight(-1, 0);
+                setDeckCard(4);
+                if (m_nMainCmdSel == 4) {
+                    setDeckDeck(4);
+                }
+            }
+            if (m_nMainCmdSel < 5) {
+                setButtonHelp(1, 0, m_nMainCmdSel);
+                setButtonHelp(7, 0, 0);
+                if (!m_nMainCmdSel) {
+                    setButtonHelp(10, 0, m_nCardInOut);
+                }
+            }
+            m_pHelpFnt->setText(m_pMainCmdName[1][1][6]);
+            m_nStep = deckCheckStepTbl[m_bPlayerKind][m_nMainCmdSel];
+        } else if (CPadHandler::isButtonRpt(0x101000, 0)) {
+            if (m_nMainCmdSel - 1 < 0 && !CPadHandler::isButtonTrg(0x101000, 0)) {
+                break;
+            }
+            selectMainCmd(m_nMainCmdSel - 1, TRUE);
+            CSound::playSE(1, -1, 0x40);
+        } else if (CPadHandler::isButtonRpt(0x204000, 0)) {
+            if (m_nMainCmdSel + 1 >= m_nCurrentCmdMax && !CPadHandler::isButtonTrg(0x204000, 0)) {
+                break;
+            }
+            selectMainCmd(m_nMainCmdSel + 1, TRUE);
+            CSound::playSE(1, -1, 0x40);
+        }
+        moveLight();
+        break;
+    case 34:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(6);
+        setDeckDeck(6);
+        m_nMainCmdSel = m_nMainCmdSelSave;
+        setCursor(m_nMainCmdSel, 0);
+        setMainCmd(0, 0);
+        setStatusWin0(0);
+        setStatusWin1(0);
+        setMainParty(1);
+        m_nStep = 0xD;
+        break;
+    case 35:
+        if (deckCheckErrorWinMenu(FALSE)) {
+            m_nStep = 0x21;
+        }
+        moveYNLight();
+        break;
+    case 36:
+        if (!m_bPlayerKind && !m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(0xB);
+        if (m_bPlayerKind) {
+            m_nCardInOut = 1;
+        }
+        setDeckInfo(1);
+        setDeckInfo(7);
+        setDeckInfo(0xC);
+        m_nStep = 0x25;
+        break;
+    case 37:
+        if (!m_pDeckInfoCtrl->isEnd(0)) {
+            break;
+        }
+        setDeckInfo(3);
+        if (!m_nCardInOut) {
+            setDeckInfo(0xA);
+        } else {
+            setDeckInfo(0xB);
+        }
+        m_nMainMode = 2;
+        m_nTechWinStep = -1;
+        m_nStep = 0x26;
+        m_nSubStep = 0;
+        break;
+    case 38:
+        if (deckCommonButton()) {
+            break;
+        }
+        deckEditMenu();
+        techWinMenu();
+        break;
+    case 39:
+        if (!m_pDeckInfoCtrl->isEnd(0)) {
+            break;
+        }
+        setMainCmd(0, 1);
+        setButtonHelp(4, 0, 0);
+        setDeckInfo(6);
+        m_nKindSelect = m_nDeckSelect = 0;
+        m_nKindSelectTop = m_nDeckSelectTop = 0;
+        m_nKindCategorySelect = 0;
+        setDeckCard(0x14);
+        setDeckCard(0xC);
+        setDeckDeck(0x12);
+        m_nStep = 0x28;
+        break;
+    case 40:
+        if (!(!m_bPlayerKind ? m_pDeckCardCtrl[0]->isEnd(0) : m_pDeckDeckCtrl[0]->isEnd(0))) {
+            break;
+        }
+        setMainCmd(1, 0);
+        selectMainCmd(0, TRUE);
+        setDeckInfo(6);
+        setDeckCard(3);
+        m_nStep = 0x21;
+        break;
+    case 41:
+        m_nMainMode = 2;
+        setDeckCard(4);
+        m_nSubStep = 0;
+        deckSetWinMenu();
+        m_nStep = 0x2A;
+        break;
+    case 42:
+        deckSetWinMenu();
+        if (!m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(6);
+        m_nStep = 0x2B;
+        break;
+    case 43:
+        if (deckSetWinMenu() >= 0) {
+            break;
+        }
+        setDeckCard(7);
+        setDeckCard(1);
+        setMainCmdHist(4, 1);
+        setMainCmd(0, 1);
+        m_nStep = 0x2C;
+        break;
+    case 44:
+        deckSetWinMenu();
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(3);
+        setMainCmd(1, 0);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        m_nStep = 0x21;
+        break;
+    case 45:
+        m_bShortCutMode = TRUE;
+        m_nMainMode = 2;
+        m_nCardInOut = 1;
+        setDeckCard(4);
+        setDeckInfo(1);
+        setDeckInfo(7);
+        setDeckInfo(0xC);
+        setDeckInfo(0xF);
+        m_nSubStep = 0;
+        m_nStep = 0x2E;
+        break;
+    case 46:
+        if (!m_pDeckInfoCtrl->isEnd(0)) {
+            break;
+        }
+        setDeckDeck(3);
+        setDeckCard(6);
+        setDeckInfo(3);
+        m_nStep = 0x2F;
+        break;
+    case 47:
+        if (deckCommonButton2()) {
+            break;
+        }
+        if (deckEditMenu()) {
+            setButtonHelp(4, 0, 0);
+            setDeckCard(7);
+            setDeckCard(1);
+            setDeckInfo(4);
+            m_nCardInOut = 0;
+            setDeckDeck(3);
+            setMainCmdHist(4, 1);
+            setMainCmd(0, 1);
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x30;
+        }
+        techWinMenu();
+        break;
+    case 48:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        m_bShortCutMode = FALSE;
+        m_nDeckSelect = 0;
+        m_nDeckSelectTop = 0;
+        setDeckDeck(0x12);
+        setDeckCard(3);
+        setMainCmd(1, 0);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        m_nStep = 0x21;
+        break;
+    case 49:
+        m_nMainMode = 2;
+        setDeckCard(4);
+        m_nSubStep = 0;
+        deckClearWinMenu();
+        m_nStep = 0x32;
+        break;
+    case 50:
+        deckClearWinMenu();
+        if (!m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(6);
+        m_nStep = 0x33;
+        break;
+    case 51:
+        if (deckClearWinMenu() >= 0) {
+            break;
+        }
+        setDeckCard(7);
+        setDeckCard(1);
+        setMainCmdHist(4, 1);
+        setMainCmd(0, 1);
+        m_nStep = 0x34;
+        break;
+    case 52:
+        deckClearWinMenu();
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(3);
+        setMainCmd(1, 0);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        m_nStep = 0x21;
+        break;
+    case 53:
+        m_nMainMode = 2;
+        setDeckCard(4);
+        setDeckDeck(4);
+        CDecknameEditWnd::startEdit(this, m_nDeckNoSelect);
+        m_nStep = 0x36;
+        break;
+    case 54:
+        if (!m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(6);
+        setDeckDeck(6);
+        m_pHelpFnt->setText(CCtdMan::getText(0x50040D));
+        m_nStep = 0x37;
+        break;
+    case 55:
+        if (!CDecknameEditWnd::isFinish()) {
+            break;
+        }
+        m_nDeckNoSelect = CDecknameEditWnd::getLastEditDeckNo();
+        initCardData(0);
+        initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+        initDeck(m_nDeckNoSelect, 0);
+        setDeckCard(7);
+        setDeckCard(1);
+        setDeckCard(0x12);
+        setDeckDeck(7);
+        setDeckDeck(1);
+        setDeckDeck(0x13);
+        setDeckDeck(0x12);
+        setMainCmdHist(4, 1);
+        setMainCmd(0, 1);
+        setButtonHelp(4, 0, 0);
+        m_pHelpFnt->setText(m_pMainCmdName[1][1][6]);
+        m_nStep = 0x38;
+        break;
+    case 56:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(3);
+        setDeckDeck(3);
+        setMainCmd(1, 0);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        m_nStep = 0x21;
+        break;
+    case 57:
+        m_bShortCutMode = TRUE;
+        m_nKindCategorySelect = 0;
+        m_nDeckCategorySelect = 0;
+        m_nDeckNoSelectSave = m_nDeckNoSelect;
+        m_nDeckNoSelect = 0;
+        initCardData(0);
+        initCardKind(0, 0, TRUE);
+        m_nMainMode = 2;
+        m_nCardInOut = 0;
+        setDeckDeck(4);
+        setDeckCard(0x12);
+        setDeckCard(0xA);
+        m_nSubStep = 0;
+        m_nStep = 0x3A;
+        break;
+    case 58:
+        if (!m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckDeck(6);
+        setDeckCard(0xB);
+        setDeckInfo(1);
+        setDeckInfo(7);
+        setDeckInfo(0xC);
+        setDeckInfo(0xF);
+        m_nStep = 0x3B;
+        break;
+    case 59:
+        if (!m_pDeckInfoCtrl->isEnd(0)) {
+            break;
+        }
+        setDeckInfo(3);
+        m_nStep = 0x3C;
+        break;
+    case 60:
+        if (deckEditMenu()) {
+            setDeckInfo(4);
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x3D;
+        }
+        techWinMenu();
+        break;
+    case 61:
+        if (!m_pDeckInfoCtrl->isEnd(0)) {
+            break;
+        }
+        setDeckCard(0xC);
+        setDeckDeck(1);
+        setDeckDeck(7);
+        setMainCmdHist(4, 1);
+        setMainCmd(0, 1);
+        m_nStep = 0x3E;
+        break;
+    case 62:
+        if (!m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        m_bShortCutMode = FALSE;
+        m_nDeckNoSelect = m_nDeckNoSelectSave;
+        initCardData(0);
+        initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+        m_nKindSelect = m_nDeckSelect = 0;
+        m_nKindSelectTop = m_nDeckSelectTop = 0;
+        m_nKindCategorySelect = 0;
+        setDeckCard(0x14);
+        setDeckDeck(0x12);
+        setDeckCard(3);
+        setDeckDeck(3);
+        setDeckInfo(0xC);
+        setMainCmd(1, 0);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        m_nStep = 0x21;
+        break;
+    case 63:
+        if (deckCheckErrorWinMenu(FALSE)) {
+            m_nStep = 0x3C;
+        }
+        moveYNLight();
+        break;
+    case 64:
+        m_nMainMode = 2;
+        m_nSubStep = 0;
+        mapCardWinMenu();
+        m_nStep = 0x41;
+        break;
+    case 65:
+        if (mapCardWinMenu() >= 0) {
+            break;
+        }
+        setMainCmdHist(4, 0);
+        m_nStep = 0x42;
+        break;
+    case 67:
+        m_nMainMode = 2;
+        m_nSubStep = 0;
+        statusWinMenu();
+        m_nStep = 0x44;
+        break;
+    case 68:
+        if (statusWinMenu() >= 0) {
+            break;
+        }
+        setMainCmdHist(4, 0);
+        m_nStep = 0x45;
+        break;
+    case 70:
+        CJiminyMemoFlag::initTask();
+        CJiminyMemoFlag::createTask(this, m_bPlayerKind);
+        SAFE_DELETE(m_pMenuModel);
+        m_nStep = 0x47;
+        break;
+    case 71:
+        if (CJiminyMemoFlag::checkTaskOut()) {
+            m_nStep = 0x48;
+        }
+        break;
+    case 72:
+        setMainCmd(0, 0);
+        setStatusWin0(0);
+        setStatusWin1(0);
+        setMainParty(0);
+        m_pBaseCtrl->enableDisp(2, TRUE);
+        m_nStep = 0xD;
+        break;
+    case 73:
+        m_nMainMode = 2;
+        m_nSubStep = 0;
+        configWinMenu();
+        m_nStep = 0x4A;
+        break;
+    case 74:
+        if (configWinMenu() >= 0) {
+            break;
+        }
+        setMainCmdHist(4, 0);
+        m_nStep = 0x4B;
+        break;
+    case 66:
+    case 69:
+    case 75:
+        setMainCmd(0, 0);
+        setStatusWin0(0);
+        setStatusWin1(0);
+        setMainParty(1);
+        m_pBaseCtrl->enableDisp(2, TRUE);
+        m_nStep = 0xD;
+        break;
+    case 76:
+        CSound::setBGMMasterVolume(-1, -1);
+        D2::C2DMan::destroy(m_hLay);
+        D2::C2DMan::setLayer(0xE);
+        m_hLay = D2::C2DMan::create(m_pLadName, 10);
+        m_pBaseCtrl->replaceSeq(0, m_pSeqName, 2);
+        setCurrentRoomName(4);
+        setMainCmdHist(4, 0);
+        setPoint(4);
+        setTime(4);
+        CSound::playSE(4, -1, 0x40);
+        m_nStep++;
+        break;
+    case 77:
+        setWorldmap(5);
+        if (!D2::C2DMan::isEnd(m_hLay)) {
+            break;
+        }
+        D2::C2DMan::destroy(m_hLay);
+        dispose();
+        m_nStep = 0x59;
+        break;
+    case 78:
+        CSound::setBGMMasterVolume(-1, -1);
+        D2::C2DMan::destroy(m_hLay);
+        m_hLay = D2::C2DMan::create(m_pLadName, 10);
+        m_pBaseCtrl->replaceSeq(0, m_pSeqName, 2);
+        setMainParty(4);
+        m_pBaseCtrl->enableDisp(2, FALSE);
+        setCurrentRoomName(4);
+        SAFE_DELETE(m_pCursorCtrl);
+        SAFE_DELETE(m_pLightCtrl);
+        setMainCmd(2, 0);
+        setStatusWin0(2);
+        setStatusWin1(2);
+        SAFE_DELETE(m_pPointCtrl);
+        setTime(8);
+        CSound::playSE(4, -1, 0x40);
+        m_nStep++;
+        break;
+    case 79:
+        if (!m_pWindow0Ctrl->isEnd(0)) {
+            break;
+        }
+        D2::C2DMan::destroy(m_hLay);
+        dispose();
+        m_nStep = 0x59;
+        break;
+    case 0x59:
+    default:
+        out();
+        break;
+    }
+    if (m_nStep < 0x59) {
+        setMainCmdHist(m_nMainCmdHistRun[0], 0);
+        setMainCmdHist(m_nMainCmdHistRun[1], 1);
+        setButtonHelp(m_nButtonHelpRun[0], 0, 0);
+        setButtonHelp(m_nButtonHelpRun[1], 1, 0);
+        setTime(9);
+    }
+}
 INT CCamp::deckCheckErrorWinMenu(BOOL bCardDelete) {
     static USHORT errorWinSeqTbl[3] = { 72, 73, 74 };
     static USHORT buttonYesNoSeqTbl[4] = { 188, 189, 190, 187 };
@@ -6641,6 +7569,8 @@ asm(".globl D_004E33E8\nD_004E33E8 = 0x004E33E8"); /* "\x81~%02d" in asm setDeck
 
 asm(".globl D_004E4028\nD_004E4028 = 0x004E4028"); /* "worldmap:00" (setWorldmap's pSeqName), STR_WORLDMAP */
 
-asm(".globl D_004E4048\nD_004E4048 = 0x004E4048"); /* "Zoom In..." (setWorldmap's pStrButton), STR_ZOOM_IN */
+asm(".globl D_004E4048\nD_004E4048 = 0x004E4048");
+
+asm(".globl D_004E2AB8\nD_004E2AB8 = 0x004E2AB8"); /* "world_title:00" (main's pWTSeqName), STR_WORLD_TITLE */ /* "Zoom In..." (setWorldmap's pStrButton), STR_ZOOM_IN */
 
 // SOURCE DATA: .data .rodata
