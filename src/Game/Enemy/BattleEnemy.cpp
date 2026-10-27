@@ -253,7 +253,12 @@ void CBattleEnemy::beginStateGravity() {
     m_pMove->setMass(5.0f);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateGravity__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateGravity__12CBattleEnemy);
+void CBattleEnemy::endStateGravity() {
+    bodyCollOn(-1);
+    bodyCollOnBody(-1);
+    if (isBtlEnemyFlag(0x100)) m_pMove->enableGravity(FALSE);
+    m_pMove->setMass(1.0f);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateToss__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateToss__12CBattleEnemy);
 void CBattleEnemy::endStateToss() {
