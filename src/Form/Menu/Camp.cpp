@@ -339,13 +339,11 @@ using namespace D2;
 extern CHAR D_004E2AB8[]; /* "world_title:00", main */
 extern CHAR D_004E4028[]; /* "worldmap:00", setWorldmap */
 extern CHAR D_004E33E0[]; /* "%d", setDeckInfo */
-extern CHAR D_004E3C80[]; /* "%d/%d", setMapCardWin */
 #define STR_WORLD_TITLE D_004E2AB8
 #define STR_WORLDMAP D_004E4028
 extern CHAR D_004E4048[]; /* "Zoom In{    \xF9DShow Criteria", setWorldmap */
 #define STR_ZOOM_IN D_004E4048
 #define STR_PCT_D D_004E33E0
-#define STR_PCT_D_D D_004E3C80
 
 template <class T> static inline T& _ref(T& v) { return v; }
 
@@ -3305,64 +3303,254 @@ asm(".section .rodata\n"
     ".byte 0x20,0x01,0x1D,0x01,0x23,0x01\n"
     ".byte 0x00,0x00\n"
     ".section .text");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setStatusWin__5CCampi);
-// setStatusWin__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    " D_004E3C80:\n"
-    ".byte 0x25,0x64,0x2F,0x25,0x64,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43\n"
-    ".byte 0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43\n"
-    ".byte 0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43\n"
-    ".byte 0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x30,0x38,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x30,0x38,0x39,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x30,0x39,0x36,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x31,0x30,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x31,0x31,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x31,0x36,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x31,0x37,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x33,0x30,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x68,0x82,0x31,0x00,0x74,0x89,0x31,0x00,0x88,0x90,0x31,0x00,0x2C,0x8A,0x31,0x00\n"
-    ".byte 0x5C,0x8A,0x31,0x00,0xC4,0x8A,0x31,0x00,0xDC,0x8A,0x31,0x00,0x88,0x90,0x31,0x00\n"
-    ".byte 0x88,0x90,0x31,0x00,0x28,0x8E,0x31,0x00,0x0C,0x8C,0x31,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0xBC,0x85,0x31,0x00,0xDC,0x85,0x31,0x00,0xFC,0x85,0x31,0x00,0x4C,0x86,0x31,0x00\n"
-    ".byte 0x80,0x86,0x31,0x00,0xC8,0x86,0x31,0x00\n"
-    ".section .data\n"
-    ".align 3\n"
-    " statusSeqTbl.4459:\n"
-    ".byte 0x2C,0x01,0x2C,0x01,0x2C,0x01,0x2B,0x01,0x2B,0x01,0x29,0x01,0x2A,0x01,0x2A,0x01\n"
-    ".byte 0x2A,0x01,0x2C,0x01,0x2C,0x01,0x2C,0x01,0x2B,0x01,0x29,0x01,0x28,0x01,0x2A,0x01\n"
-    " techSeqTbl.4460:\n"
-    ".byte 0x2E,0x01,0x33,0x01,0x31,0x01,0x32,0x01,0x2F,0x01,0x60,0x01,0x30,0x01\n"
-    ".byte 0x00,0x00\n"
-    " techTabSeqTbl.4461:\n"
-    ".byte 0x4F,0x01,0x50,0x01,0x51,0x01,0x52,0x01,0x53,0x01,0x54,0x01,0x55,0x01,0x56,0x01\n"
-    ".byte 0x57,0x01\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00\n"
-    " statusStr.4462:\n"
-    ".byte 0xE0,0x33,0x4E,0x00,0x80,0x3C,0x4E,0x00\n"
-    " scrollBarSeqTbl.4463:\n"
-    ".byte 0x20,0x01,0x1D,0x01,0x23,0x01\n"
-    ".byte 0x00,0x00\n"
-    ".section .text");
+INT CCamp::setStatusWin(INT nSetCmd) {
+    FVECTOR vec;
+    FVECTOR vec2;
+    C2DSeqCtrl* p2DSeqCtrl;
+    C2DSeqObj* p2DSeqObj;
+    G_RGBA rgba;
+    FLOAT fRatioHeight;
+    FLOAT fRatioPosY;
+    static USHORT statusSeqTbl[16] = { 300, 300, 300, 299, 299, 297, 298, 298, 298, 300, 300, 300, 299, 297, 296, 298 };
+    static USHORT techSeqTbl[7] = { 302, 307, 305, 306, 303, 352, 304 };
+    static USHORT techTabSeqTbl[9] = { 335, 336, 337, 338, 339, 340, 341, 342, 343 };
+    static char* statusStr[2] = { STR_PCT_D, "%d/%d" };
+    float fLightXTbl[8] = { 284.0f, 284.0f, 284.0f, 284.0f, 284.0f, 284.0f, 284.0f, 284.0f };
+    float fLightYTbl[8] = { 168.0f, 168.0f, 168.0f, 168.0f, 168.0f, 168.0f, 168.0f, 168.0f };
+    char buf[64];
+    LPCTSTR pBuf;
+    INT ret = 0;
+    const unsigned char (*pTechCateTbl)[2];
+    BYTE* pTechCate;
+    INT nLine;
+    INT idxStart;
+    INT idxStart2;
+    INT nFriendCnt;
+    PLM::CPlayerManager* pPlayerManager;
+    static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
+
+    switch (nSetCmd) {
+    case 0:
+        m_nStatusTechCateSelect = m_nStatusTechSelect = m_nStatusTechSelectTop = 0;
+        m_nStatusMax = !m_bPlayerKind ? 9 : 7;
+        m_nTechSelectMax = !m_bPlayerKind ? 0x56 : 0xE;
+        if (!m_pStatusWinCtrl) {
+            m_pStatusWinCtrl = NEW(6082, C2DSeqCtrl);
+            m_pStatusWinCtrl->setLayer(0x10);
+            m_pStatusWinCtrl->enableColorCtrl(TRUE);
+            C2DMan::getLayPosition(m_pLadName, 0x11, 3, vec, 0);
+            m_pStatusWinCtrl->setPos(vec);
+            m_pStatusWinCtrl->addSeq(m_pSeqName, 0x125);
+            p2DSeqCtrl = m_pStatusTechWinCtrl[0] = NEW(6089, C2DSeqCtrl);
+            p2DSeqCtrl->setLayer(0x11);
+            p2DSeqCtrl->enableColorCtrl(TRUE);
+            C2DMan::getLayPosition(m_pLadName, 0x11, 2, vec, 0);
+            p2DSeqCtrl->setPos(vec);
+            p2DSeqCtrl->addSeq(m_pSeqName, 0x14C);
+            p2DSeqCtrl = m_pStatusTechWinCtrl[1] = NEW(6096, C2DSeqCtrl);
+            p2DSeqCtrl->setLayer(0x10);
+            p2DSeqCtrl->enableColorCtrl(TRUE);
+            p2DSeqCtrl->addSeq(m_pSeqName, !m_bPlayerKind ? 0x14F : 0x154);
+            p2DSeqCtrl->setParent(m_pStatusTechWinCtrl[0]);
+            m_pStatusBC = NEW(6103, CButtonCursor)(0x12, m_pStatusTechWinCtrl[0], 0x12D);
+            idxStart = m_bPlayerKind * 7;
+            idxStart2 = m_bPlayerKind * 9;
+            nFriendCnt = 0;
+            pPlayerManager = PLM::CPlayerManager::getPLM();
+            for (INT i = 0; i < m_nStatusMax; i++) {
+                C2DMan::getLayPosition(m_pLadName, !m_bPlayerKind ? 0x11 : 0x13, i + 4, vec, 1);
+                vec.y += 8.0f;
+                CButton* pButton = m_pStatusButton[i] = NEW(6115, CButton);
+                pButton->init(m_pSeqName, 0x10, statusSeqTbl, vec, m_pStatusWinCtrl,
+                                         i < 7 ? CCtdMan::getText(i + idxStart + 0x500200) : NULL, 0xE, 0.0f, 1.0f, 0x40,
+                                         NULL, idxStart2 + i);
+                pBuf = buf;
+                switch (i) {
+                case 0:
+                    sprintf(buf, statusStr[0], CStatus::getLV());
+                    break;
+                case 1:
+                    sprintf(buf, statusStr[0], CStatus::getEXP());
+                    break;
+                case 2: {
+                    INT nextExp = CStatus::getLvExp(CStatus::getLV()) - CStatus::getEXP();
+                    if (nextExp < 0) nextExp = 0;
+                    sprintf(buf, statusStr[0], nextExp);
+                    break;
+                }
+                case 3:
+                    sprintf(buf, statusStr[1], CStatus::getStaus().HP, CStatus::getStaus().HPMax);
+                    break;
+                case 4:
+                    sprintf(buf, statusStr[0], !m_bPlayerKind ? CStatus::getCPMax() : CStatus::getAP());
+                    break;
+                case 5:
+                    if (!m_bPlayerKind) {
+                        pBuf = CCard::m_pCardInfo->_deckName[CCard::m_pCardInfo->_nCurrentDeck];
+                    } else {
+                        sprintf(buf, statusStr[0], CStatus::getDPMax());
+                    }
+                    break;
+                default: {
+                    INT kind = 0;
+                    while (nFriendCnt < 3) {
+                        kind = pPlayerManager->getAppearFriendCard(nFriendCnt, 1);
+                        nFriendCnt++;
+                        if (kind) break;
+                    }
+                    if (kind) {
+                        CARD card;
+                        _setCardNK(card, kind, -1);
+                        pBuf = card.getName();
+                    } else {
+                        pBuf = NULL;
+                    }
+                    break;
+                }
+                }
+                rgba.col = i < 5 ? 0x80046060 : (i == 5 && m_bPlayerKind ? 0x80046060 : 0x807C7C7C);
+                C2DFnt* p2DFnt = m_pStatusFnt[i] = NEW(6167, C2DFnt)(0, 0, &rgba, 0xE, NULL, 0x41);
+                p2DFnt->allocText(pBuf);
+                pButton->get2DSeqCtrl()->addFntShift(m_pSeqName, p2DFnt, 220.0f, 1.0f);
+            }
+            m_pStatusTechScrollBar = NEW(6173, CScrollBar);
+            vec.set(133.0f, -56.0f, 0.0f);
+            m_pStatusTechScrollBar->init(m_pSeqName, 0x14, scrollBarSeqTbl, vec, 157.0f, m_pStatusTechWinCtrl[0]);
+        } else {
+            m_pStatusWinCtrl->replaceSeq(0, m_pSeqName, 0x125);
+        }
+        break;
+    case 1:
+        if (m_pStatusWinCtrl->isEnd(0)) {
+            m_pStatusWinCtrl->replaceSeq(0, m_pSeqName, 0x126);
+            m_pStatusTechWinCtrl[0]->replaceSeq(0, m_pSeqName, 0x14D);
+            m_pStatusBC->setDisp(TRUE, FALSE);
+            m_pHelpFnt->setText(CCtdMan::getText(0x500417));
+            ret = 1;
+        }
+    case 3:
+        if (m_pStatusBC) {
+            m_pStatusBC->moveLight(getFrameRateF());
+        }
+        break;
+    case 4:
+        m_pStatusWinCtrl->replaceSeq(0, m_pSeqName, 0x127);
+        m_pStatusTechWinCtrl[0]->replaceSeq(0, m_pSeqName, 0x14E);
+        m_pStatusBC->setOut();
+        m_pHelpFnt->setText(m_pMainCmdName[1][1][6]);
+        break;
+    case 5:
+        ret = m_pStatusWinCtrl->isEnd(0) != 0;
+        break;
+    case 6:
+        SAFE_DELETE(m_pStatusWinCtrl);
+        SAFE_DELETE(m_pStatusTechWinCtrl[0]);
+        SAFE_DELETE(m_pStatusTechWinCtrl[1]);
+        for (INT i = 0; i < 9; i++) {
+            SAFE_DELETE(m_pStatusButton[i]);
+        }
+        for (INT i = 0; i < 8; i++) {
+            SAFE_DELETE(m_pStatusTechButton[i]);
+        }
+        SAFE_DELETE(m_pStatusBC);
+        SAFE_DELETE(m_pStatusTechScrollBar);
+        break;
+    case 10: {
+        m_nStatusTechSelect = m_nStatusTechSelectTop = 0;
+        m_pStatusTechWinCtrl[1]->replaceSeq(0, m_pSeqName, techTabSeqTbl[m_nStatusTechCateSelect + m_bPlayerKind * 5]);
+        for (INT i = 0; i < 5; i++) {
+            m_nStatusTech[i] = 0;
+        }
+        m_nStatusTechSelectMax = 0;
+        pTechCateTbl = !m_bPlayerKind ? m_techSoraCateTbl : m_techRikuCateTbl;
+        for (INT i = 0; i < m_nTechSelectMax; i++) {
+            pTechCate = (BYTE*)pTechCateTbl[i];
+            if (CTechnic::canUse(pTechCate[0])) {
+                BYTE nCate;
+                if (!m_bPlayerKind) {
+                    if (pTechCate[1] < 2) {
+                        nCate = 0;
+                    } else if (pTechCate[1] < 4) {
+                        nCate = 1;
+                    } else if (pTechCate[1] <= 7) {
+                        nCate = 2;
+                    } else {
+                        nCate = 3;
+                    }
+                } else {
+                    if (pTechCate[1] < 10) {
+                        nCate = 0;
+                    } else if (pTechCate[1] <= 11) {
+                        nCate = 1;
+                    } else {
+                        nCate = 2;
+                    }
+                }
+                m_nStatusTech[0]++;
+                m_nStatusTech[nCate + 1]++;
+                if (!m_nStatusTechCateSelect || nCate == m_nStatusTechCateSelect - 1) {
+                    m_techCateTbl[m_nStatusTechSelectMax][0] = pTechCateTbl[i][0];
+                    m_techCateTbl[m_nStatusTechSelectMax][1] = nCate + m_bPlayerKind * 4;
+                    m_nStatusTechSelectMax++;
+                }
+            }
+        }
+        if (m_bCategorySelectMode) {
+            vec.set(m_nStatusTechCateSelect ? m_nStatusTechCateSelect * 24.0f + -42.0f : -68.0f, -100.0f, 0.0f);
+            m_pStatusBC->setLocalPos(vec);
+        }
+    }
+    case 9: {
+        if (m_nStatusTechSelectTop > m_nStatusTechSelect) {
+            m_nStatusTechSelectTop = m_nStatusTechSelect;
+        } else if (m_nStatusTechSelectTop + 7 < m_nStatusTechSelect) {
+            m_nStatusTechSelectTop = m_nStatusTechSelect - 7;
+        }
+        rgba.col = 0x807C7C7C;
+        for (INT i = 0; i < 8; i++) {
+            SAFE_DELETE(m_pStatusTechButton[i]);
+            INT idx = m_nStatusTechSelectTop + i;
+            if (idx < m_nStatusTechSelectMax) {
+                pTechCate = m_techCateTbl[idx];
+                USHORT nTechKind = pTechCate[0];
+                LPCTSTR pStr = CTechnic::getName(nTechKind);
+                if (!m_bCategorySelectMode && idx == m_nStatusTechSelect) {
+                    if (m_fgNewTbl[nTechKind] > 0) {
+                        m_fgNewTbl[nTechKind] = -1;
+                    }
+                }
+                C2DMan::getLayPosition(m_pLadName, 0x12, i + 2, vec, 0);
+                CButton* pButton = m_pStatusTechButton[i] = NEW(6303, CButton);
+                pButton->init(m_pSeqName, 0x11, techSeqTbl, vec, m_pStatusTechWinCtrl[0], pStr, 0xF, 1.0f, 2.0f,
+                                             0x40, &rgba, pTechCate[1]);
+                if (m_fgNewTbl[nTechKind]) {
+                    p2DSeqObj = pButton->get2DSeqCtrl()->addSeqShift(
+                        m_pSeqName, m_fgNewTbl[nTechKind] > 0 ? 0x1E : 0x1D, 170.0f, -13.0f);
+                    p2DSeqObj->restart(m_iFrame60);
+                }
+            }
+        }
+        if (!m_bCategorySelectMode) {
+            m_pStatusBC->select(m_nStatusTechSelect - m_nStatusTechSelectTop, m_pStatusTechButton, fLightXTbl, fLightYTbl);
+        }
+        INT nMax = m_nStatusTechSelectMax;
+        if (!nMax) {
+            nMax = 1;
+        }
+        fRatioHeight = 8.0f / nMax;
+        if (fRatioHeight > 1.0f) {
+            fRatioHeight = 1.0f;
+        }
+        fRatioPosY = (FLOAT)m_nStatusTechSelectTop / nMax;
+        if (fRatioPosY > 1.0f) {
+            fRatioPosY = 1.0f;
+        }
+        m_pStatusTechScrollBar->change(fRatioPosY, fRatioHeight);
+        break;
+    }
+    }
+    return ret;
+}
 INT CCamp::setConfigWin(INT nSetCmd) {
     FVECTOR vec;
     FVECTOR vec2;
@@ -3948,7 +4136,7 @@ INT CCamp::setMainCmdHist(INT nSetCmd, INT nMode) {
 }
 
 INT CCamp::setStatusWin0(INT nSetCmd) {
-    static char* pStrEtc[6] = { "Sora", "Riku", "LV", STR_PCT_D, "HP", STR_PCT_D_D };
+    static char* pStrEtc[6] = { "Sora", "Riku", "LV", STR_PCT_D, "HP", "%d/%d" };
     FVECTOR vec;
     FVECTOR vec2;
     C2DFnt* p2DFnt;
@@ -5158,5 +5346,7 @@ const unsigned char CCamp::m_techRikuCateTbl[14][2] = {
  * disassembled as references to D_004E5374, inside this object's card name strings. Until
  * config/SLUS_217.99/symbol_addrs.txt defines "D_004E5374 = 0x004E5374;", define it here. */
 asm(".globl D_004E5374\nD_004E5374 = 0x004E5374");
+
+asm(".globl D_004E3C80\nD_004E3C80 = 0x004E3C80"); /* "%d/%d" (setStatusWin's statusStr), used by asm setMapCardWin */
 
 // SOURCE DATA: .data .rodata
