@@ -10,7 +10,6 @@ class CRsrcDB { /* PARTIAL: System/RsrcDB.h does not compile on its own here */
 public:
     static struct TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
 };
-BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect);
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
 ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd);
@@ -109,7 +108,36 @@ CScreenColoredMask::CScreenColoredMask() {
     m_P1.set(0x1000, _ref(SCREEN_HEIGHT) * 8);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CRotSprt);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", __isRect__FRC7FVECTORPC7FVECTOR);
+static BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect) {
+    FVECTOR __CCTPrim_vDefRect;
+    INT iRet;
+    if (vRect == NULL) {
+        __CCTPrim_vDefRect.x = -256.0f;
+        __CCTPrim_vDefRect.y = -SCREEN_HEIGHT / 2;
+        __CCTPrim_vDefRect.z = 512.0f;
+        __CCTPrim_vDefRect.w = SCREEN_HEIGHT;
+        vRect = &__CCTPrim_vDefRect;
+    }
+    __asm__ volatile(
+        "lqc2 $vf4, 0x0(%1)\n"
+        "lqc2 $vf5, 0x0(%2)\n"
+        "vaddz.x $vf6, $vf5, $vf5z\n"
+        "vaddw.y $vf6, $vf5, $vf5w\n"
+        "vnop\n"
+        "vnop\n"
+        "ctc2.ni $0, $vi16\n"
+        "vsub.xy $vf0, $vf4, $vf5\n"
+        "vsub.xy $vf0, $vf6, $vf4\n"
+        "vnop\n"
+        "vnop\n"
+        "vnop\n"
+        "vnop\n"
+        "vnop\n"
+        "cfc2.ni %0, $vi16\n"
+        : "=r"(iRet)
+        : "r"(&v), "r"(vRect));
+    return (iRet & 0xC0) == 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CCPrim);
 BOOL CCPrim::isRect(INT i, const FVECTOR* vRect) {
     return __isRect(*(FVECTOR*)&m_V[i], vRect);
