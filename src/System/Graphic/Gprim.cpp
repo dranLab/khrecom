@@ -71,7 +71,7 @@ static inline u_long128 _screenClamp(const FVECTOR& inFVec) {
                      "vminiz.xy $vf4, $vf4, $vf5z\n"
                      "vftoi4.xyz $vf4, $vf4\n"
                      "qmfc2.ni %0, $vf4\n"
-                     : "=&r"(outVec128), "=&r"(tmp)
+                     : "=r"(outVec128), "=&r"(tmp)
                      : "r"(&inFVec));
     return outVec128;
 }
@@ -618,7 +618,76 @@ void CCPrim::makePkt() {
 BOOL CCPrim::isRect(INT i, const FVECTOR* vRect) {
     return __isRect(*(FVECTOR*)&m_V[i], vRect);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CTPrim);
+void CTPrim::makePkt() {
+    ULONGLONG* p64;
+    QWdata* pQw;
+    UINT iEnvChange;
+    FTVERTEX* pV;
+    ULONGLONG tex;
+    if (m_iMax <= 0) {
+        return;
+    }
+    tex = setTexture();
+
+    iEnvChange = 0;
+    if ((INT)m_TEST >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 1;
+    }
+    if ((long)m_CLAMP >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 2;
+    }
+    if ((long)m_SCISSOR >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 4;
+    }
+    if ((INT)m_ALPHA >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 8;
+    }
+    if (iEnvChange) {
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_gifTag((u_long)(iEnvChange >> 12) | 0x1000000000000000UL, 0xE));
+        if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, m_TEST);
+        if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, m_CLAMP);
+        if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, m_SCISSOR);
+        if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, ((u_long)m_ALPHA << 16) | m_ALPHA);
+        CPackMan::pkCloseGifTagManual((UINT*)pQw);
+    }
+
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_gifTag(0x2400000000000000UL, 7));
+    p64[0] = tex;
+    {
+        ULONGLONG abe = (u_long)isSemiTrans() << 6;
+        ULONGLONG prim = m_PRIM & 0xCF;
+        prim |= 0x210;
+        p64[1] = abe | prim;
+    }
+    CPackMan::pkCloseGifTag(&p64[2]);
+
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_gifTag(0x3400000000008000UL, 0x412));
+    INT i;
+    for (i = m_iMax, pV = m_V; i > 0; i--, pV++) {
+        _prefetch(pV, 0x20);
+        if (pV->fP[2] >= 0.0f) {
+            p64[0] = *(ULONGLONG*)pV->fT;
+            p64[1] = (u_long)pV->C.col | ((u_long)*(UINT*)&pV->fT[2] << 32);
+            p64[2] = _vecToXYZ(_screenClamp(*(FVECTOR*)pV->fP));
+            p64 += 3;
+        }
+    }
+    CPackMan::pkCloseGifTag(p64);
+
+    if (iEnvChange) {
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(
+            _gifTag((u_long)((iEnvChange >> 12) | 0x8000) | 0x1000000000000000UL, 0xE));
+        if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, CPackMan::getDefault_TEST_2());
+        if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, CPackMan::getDefault_CLAMP_2());
+        if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, CPackMan::getDefault_SCISSOR_2());
+        if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, CPackMan::getDefault_ALPHA_2());
+        CPackMan::pkCloseGifTagManual((UINT*)pQw);
+    }
+}
 BOOL CTPrim::isRect(INT i, const FVECTOR* vRect) {
     return __isRect(*(FVECTOR*)m_V[i].fP, vRect);
 }
