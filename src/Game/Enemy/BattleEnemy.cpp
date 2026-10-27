@@ -84,7 +84,11 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getExtraParam
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackPoint__12CBattleEnemyi8ATK_KINDUsP8ATK_KINDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackAttr__C12CBattleEnemyi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackRate__C12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getUseCardPos__12CBattleEnemyR7FVECTOR);
+void CBattleEnemy::getUseCardPos(FVECTOR& outPos) {
+    FLOAT offset = getExtraParam(BattleEnemy::CamTrgOfsParamName);
+    outPos = Crd(0).m_World.getTrans();
+    outPos.y += offset;
+}
 BOOL CBattleEnemy::isPlayingCardBattle() {
     if (CTaskMan::getSysTask(0x16) && CardBattle::CCardBattle::getPlayingHandle(2) == getHandle() &&
         CardBattle::CCardBattle::isPlayingEnemyCard()) {
