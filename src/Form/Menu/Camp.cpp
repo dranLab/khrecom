@@ -361,13 +361,7 @@ using namespace D2;
 /* STOPGAP: string literals that functions still INCLUDE_ASM'd use first: their bytes are in those functions' asm
  * blocks, which gcc doesn't see, so a literal here would be a second copy. Replace them by the literals once those
  * functions are C. */
-extern CHAR D_004E2AB8[]; /* "world_title:00", main */
-extern CHAR D_004E4028[]; /* "worldmap:00", setWorldmap */
 extern CHAR D_004E33E0[]; /* "%d", setDeckInfo */
-#define STR_WORLD_TITLE D_004E2AB8
-#define STR_WORLDMAP D_004E4028
-extern CHAR D_004E4048[]; /* "Zoom In{    \xF9DShow Criteria", setWorldmap */
-#define STR_ZOOM_IN D_004E4048
 #define STR_PCT_D D_004E33E0
 extern CHAR D_004E33E8[]; /* "\x81~%02d", setDeckInfo */
 #define STR_TILDE_02D D_004E33E8
@@ -5951,8 +5945,8 @@ void CCamp::setWorldmapCursor() {
     DoorInfo* pDoorInfo;
     INT idx;
     INT idx2;
-    static LPCTSTR pSeqName = STR_WORLDMAP;
-    static char* pStrButton[2] = { STR_ZOOM_IN, "Zoom Out     \xF9" "DShow Criteria" };
+    static LPCTSTR pSeqName = "worldmap:00";
+    static char* pStrButton[2] = { "Zoom In{     \xF9" "DShow Criteria", "Zoom Out     \xF9" "DShow Criteria" };
     FVECTOR vec;
     FVECTOR vec2;
     C2DSeqCtrl* p2DSeqCtrl;
@@ -7262,7 +7256,7 @@ void CCamp::setTime(INT nSetCmd) {
 }
 
 void CCamp::setWMRoomName(BYTE cardID, INT nRoomSelect, const RoomInfo* pRoomInfo, BOOL bIn) {
-    static LPCTSTR pSeqName = STR_WORLDMAP;
+    static LPCTSTR pSeqName = "worldmap:00";
     static CHAR roomColorSeqTbl[4] = { 0x31, 0x2E, 0x2B, 0x34 };
     FLOOR::FloorLayout* pFloor;
 
@@ -7342,7 +7336,7 @@ LPCTSTR CCamp::getRoomHelp(USHORT kind, USHORT idxPooRoom) {
 }
 
 void CCamp::setCurrentRoomName(INT nSetCmd) {
-    static LPCTSTR pWTSeqName = STR_WORLD_TITLE;
+    static LPCTSTR pWTSeqName = "world_title:00";
     FVECTOR vec;
     CARD card;
     G_RGBA rgba;
@@ -7561,11 +7555,5 @@ asm(".globl D_004E5374\nD_004E5374 = 0x004E5374");
 asm(".globl D_004E3C80\nD_004E3C80 = 0x004E3C80"); /* "%d/%d" (setStatusWin's statusStr), used by asm setMapCardWin */
 
 asm(".globl D_004E33E8\nD_004E33E8 = 0x004E33E8"); /* "\x81~%02d" in asm setDeckInfo's .rodata */
-
-asm(".globl D_004E4028\nD_004E4028 = 0x004E4028"); /* "worldmap:00" (setWorldmap's pSeqName), STR_WORLDMAP */
-
-asm(".globl D_004E4048\nD_004E4048 = 0x004E4048");
-
-asm(".globl D_004E2AB8\nD_004E2AB8 = 0x004E2AB8"); /* "world_title:00" (main's pWTSeqName), STR_WORLD_TITLE */ /* "Zoom In..." (setWorldmap's pStrButton), STR_ZOOM_IN */
 
 // SOURCE DATA: .data .rodata
