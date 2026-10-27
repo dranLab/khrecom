@@ -40,6 +40,7 @@ inline void _roulettePrizeMessage() {
 
 namespace PL {
 extern TIMEQ g_CardBreakTime[];
+extern const FVECTOR g_vPronounceCountOfs; /* defined after the vtables (tail asm block) */
 static LPCSTR g_szDpxFriend = "friend";
 static LPCSTR g_szDpxSummon = "summon";
 static LPCSTR g_szDpxLimit1 = "limit1";
@@ -956,10 +957,121 @@ void CPlayerSora::initPronounce(INT inFlag) {
     m_iCount = 7;
     m_pCB->setPronounceStart(0);
 }
-/* placeholder: .rodata of exePronounce__Q22PL11CPlayerSora (strings, jump tables) */
-__asm__(".rdata\n.align 3\n.byte 0x43,0x50,0x6c,0x61,0x79,0x65,0x72,0x53,0x6f,0x72,0x61,0x3a,0x3a,0x20,0x65,0x78\n.byte 0x65,0x50,0x72,0x6f,0x6e,0x6f,0x75,0x6e,0x63,0x65,0x28,0x29,0x20,0x25,0x64,0x2c\n.byte 0x25,0x64,0x2c,0x25,0x64,0x20,0x81,0xa6,0x83,0x4d,0x83,0x8a,0x83,0x4d,0x83,0x8a\n.byte 0x8d,0xc5,0x8c,0xe3,0x82,0xcc,0x93,0xfc,0x97,0xcd,0x96,0xb3,0x8c,0xf8,0x0a,0x00\n.align 3\n.byte 0x43,0x50,0x6c,0x61,0x79,0x65,0x72,0x53,0x6f,0x72,0x61,0x3a,0x3a,0x20,0x65,0x78\n.byte 0x65,0x50,0x72,0x6f,0x6e,0x6f,0x75,0x6e,0x63,0x65,0x28,0x29,0x20,0x54,0x52,0x47\n.byte 0x21,0x0a,0x00,0x00,0x00,0x00,0x00,0x00\n.align 3\n.byte 0x43,0x50,0x6c,0x61,0x79,0x65,0x72,0x53,0x6f,0x72,0x61,0x3a,0x3a,0x20,0x65,0x78\n.byte 0x65,0x50,0x72,0x6f,0x6e,0x6f,0x75,0x6e,0x63,0x65,0x28,0x29,0x20,0x54,0x52,0x47\n.byte 0x2e,0x2e,0x2e,0x52,0x45,0x46,0x52,0x45,0x43,0x54,0x0a,0x00,0x00,0x00,0x00,0x00\n.byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n.align 4\n");
-__asm__(".word .L002A2D54\n.word .L002A2E14\n.word .L002A3100\n.word .L002A2EA4\n.word .L002A2EA4\n.word .L002A2EA4\n.word .L002A2EA4\n.word .L002A2EA4\n.word .L002A2EA4\n.word .L002A3074\n.word .L002A3100\n.word .L002A3100\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exePronounce__Q22PL11CPlayerSora);
+void CPlayerSora::exePronounce() {
+    TIMEQ time;
+    setBattleFlag(0, 8);
+    if (isMotionEnd()) {
+        setAnim(0x2A, -1, 0);
+    }
+    if (isTrgAnyPad()) {
+        if (m_pAnim->getAnimID()) {
+            setAnimRsrcEx(0xFFA, 0, -1, 0, 0, 0, 1);
+        }
+    }
+    switch (m_iSubState) {
+    case 1: {
+        setPos(m_vEnemyPos);
+        m_fDir = Movement::Homing(m_fDir, m_fStartDir, 0.5f, getFrameRateF());
+        FVECTOR rot = getRot();
+        rot.y = m_fDir;
+        setRot(rot);
+        if (!m_hEffBad) {
+            m_hEffBad = setEffect(g_szDpxMarluxia3, 0x14, &getPos(), NULL, 0.0f);
+        }
+        if (getTimer() > 0) break;
+        if (m_pCB->setPronounceStart(1)) {
+            m_iSubState = 2;
+        }
+        break;
+    }
+    case 2:
+        if (!m_pCB->isNowPronounce()) break;
+        m_iSubState = 4;
+        m_iCount--;
+        setCastEffect(g_szDpxMarluxia3, m_iCount + 0x15, &Crd(0), (FVECTOR*)&g_vPronounceCountOfs);
+        time = m_pCB->getSubTimer();
+        if (!time) {
+            m_pCB->setSubTimer(15000);
+            time = 15000;
+        }
+        setTimer(time - 1500);
+        setPlayerFlag(0, 1);
+        break;
+    case 3:
+        break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+        if (m_uiStep) {
+            if (getTimer() <= 0) {
+                m_iSubState++;
+                m_iCount--;
+                setCastEffect(g_szDpxMarluxia3, m_iCount + 0x15, &Crd(0), (FVECTOR*)&g_vPronounceCountOfs);
+                setTimer(m_pCB->getSubTimer() - 1500);
+                m_uiStep = 0;
+                break;
+            }
+        } else if (getTimer() <= 0) {
+            m_uiStep = 1;
+            setTimer(1500);
+            fadeEffect(m_hEffCast, 1);
+        }
+        if (isBattleFlag(0x2000000)) {
+            initStandUp(0);
+            fadeEffect(m_hEffBad, 1);
+            playSEPanAndVol(0x10F, 0x2D, 0, NULL, 0);
+            fadeEffect(m_hEffCast, 0);
+            PlayerCamera::CPlayerCamera::setBattleCamData(0, NULL);
+            m_pCam->changeNowPlayer(0, 0);
+            m_pCam->changeCamMode(-1, 0);
+            setPlayerFlag(0, 0x10000);
+            break;
+        }
+        if (m_iCount < 2 && m_uiStep) {
+            if (getTimer() < 600) {
+                TRACE("CPlayerSora:: exePronounce() %d,%d,%d \x81\xa6\x83\x4d\x83\x8a\x83\x4d\x83\x8a\x8d\xc5\x8c\xe3\x82\xcc\x93\xfc\x97\xcd\x96\xb3\x8c\xf8\n", m_iCount, m_uiStep, getTimer());
+                break;
+            }
+        }
+        if (isTrgFlag(0x10)) {
+            if (chkChargeMove(1)) break;
+        }
+        if (isBattleFlag(0x20)) {
+            setBattleFlag(0, 0x20);
+            break;
+        }
+        if (!isTrgAttack()) break;
+        if (m_pRevolver->setPlayerPronounceCard(1) == 1) {
+            TRACE("CPlayerSora:: exePronounce() TRG!\n");
+            setBattleFlag(0, 0x20);
+        } else {
+            TRACE("CPlayerSora:: exePronounce() TRG...REFRECT\n");
+            setBattleFlag(0, 0x10200000);
+            setBattleFlag(0x20, 0);
+        }
+        break;
+    case 10:
+        if (!m_uiStep) {
+            m_uiStep = 1;
+            m_pCB->setPronounceEnd(m_iCount);
+        }
+        if (getTimer() > 0) break;
+        m_iSubState = 11;
+        fadeEffect(m_hEffCast, 1);
+        m_iCount = -1;
+        PlayerCamera::CPlayerCamera::setBattleCamData(0, NULL);
+        m_pCam->changeNowPlayer(0, 0);
+        m_pCam->changeCamMode(-1, 0);
+        setPlayerFlag(0, 0x10000);
+        break;
+    case 11:
+    case 12:
+        break;
+    }
+}
 void CPlayerSora::calcAppearPosFS_toAttackID() {
     switch (m_uiAttackID) {
     case 104:

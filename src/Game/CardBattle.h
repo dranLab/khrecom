@@ -117,6 +117,10 @@ public:
     // PARTIAL: added for Game/Enemy/HumanBoss (the enemy side's enchant)
     INT getEnchantKind(INT inSide) { return m_cardEnchant[inSide][0] < 0x44 ? 0 : m_cardEnchant[inSide][0] - 0x43; }
     HANDLE getDuelEnemy() { return m_hDuelEnemy; }
+    // PARTIAL: added for Game/Player/PlayerSora (out of line in Game/CardBattle, inlined elsewhere)
+    INT isNowPronounce() const { return m_uiDuelState == 0xB; }
+    void setSubTimer(TIMEQ inTime) { *(TIMEQ*)&_m_0x0[0x90] = inTime; }
+    TIMEQ getSubTimer() const { return *(const TIMEQ*)&_m_0x0[0x90]; }
     void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
     void destroyPlayCard(INT inFlag, INT inP1);
     void transferPlayerEnchant(CPlayer* inPlayer);
@@ -141,6 +145,7 @@ public:
     INT setDuelPlayStock(class CBattleCard** inCards, INT inSkill);
     INT setEnemyPronounceCard(HANDLE inOwner, class CBattleCard* inCard);
     INT setPronounceStart(INT inFlag); // PARTIAL: added for Game/Player/PlayerSora
+    void setPronounceEnd(INT inCount); // PARTIAL: added for Game/Player/PlayerSora
     static void decEnchantTime(INT inSide, INT inKind, INT inFlag);
     friend class CCardRevolver;
     INT setPlayStock(HANDLE inOwner, INT inSide, class CBattleCard** inCards, INT inSkill, INT inExtra, INT inFirst, INT inTest);
@@ -218,6 +223,7 @@ public:
     INT calcPlutoMark();
     void dropPlutoMarkCard(const FVECTOR* inPos);
     void setSnatch(HANDLE inHandle); // PARTIAL: added for Game/Player/Player
+    INT setPlayerPronounceCard(INT inTest); // PARTIAL: added for Game/Player/PlayerSora
     void addCard(CARD* pData, INT inReturn); void resetCardOwner(INT inOld, INT inNew); // PARTIAL: added for Game/Player/Player
 };
 #endif
