@@ -1235,6 +1235,7 @@ private:
 };
 
 class C3DCircle : public CGPrim {
+    friend class C3DPointLight2;
 protected:
     IVECTOR p0;
     IVECTOR p1;
