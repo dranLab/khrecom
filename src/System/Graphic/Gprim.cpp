@@ -548,7 +548,28 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTri
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleStrip__FP6QWdataP7G_STRIPT1P6CCoordi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_LineStrip__FP6QWdataP7G_STRIPT1);
+QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
+    IVECTOR p;
+    UINT fg;
+    fg = 1;
+    for (; it < end; it++, pQw += 2) {
+        _prefetch(it, 0x20);
+        RotTransPersClipW(p, it->P);
+        if (p.w) {
+            fg |= 2;
+        } else if (fg) {
+            p.w = 0x8000;
+        }
+        if (it->Term) {
+            fg = 1;
+        } else {
+            fg >>= 1;
+        }
+        pQw[0].ul128 = _colToVec(it->C);
+        pQw[1].ul128 = p._q;
+    }
+    return pQw;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_LineStrip__FP6QWdataP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleStrip__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleStrip__FP6QWdataP7G_STRIPT1P6CCoordi);
