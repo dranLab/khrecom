@@ -996,7 +996,104 @@ void C3DCircle::makePkt() {
     }
     CPackMan::pkCloseGifTag();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__13C3DPointLight);
+void C3DPointLight::makePkt() {
+    INT cx;
+    INT cy;
+    INT z;
+    FLOAT rx;
+    FLOAT ry;
+    INT dx;
+    INT dy;
+    FVECTOR c;
+    FLOAT rx0;
+    FLOAT ry0;
+    if (p0.z <= 0 || p0.z > 0xFFFF28 || p0.x < 0 || p0.x > 0xFFFF || p0.y < 0 || p0.y > 0xFFFF ||
+        p1.z > 0xFFFF28 || p1.z <= 0 || p1.x < 0 || p1.x > 0xFFFF || p1.y < 0 || p1.y > 0xFFFF) {
+        return;
+    }
+
+    z = p0.z >> 4;
+
+    m_C0.a = m_C1.a = 0x80;
+
+    cx = (p0.x + p1.x) / 2;
+    rx = (p1.x - p0.x) / 2;
+
+    cy = (p0.y + p1.y) / 2;
+    ry = (p1.y - p0.y) / 2;
+
+    FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
+    c = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);
+    c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);
+    IVECTOR p00;
+    IVECTOR p01;
+
+    c.x -= m_R00;
+    c.y -= m_R00;
+
+    RotTransPers(p00, vs, c);
+
+    c.x += m_R00 * 2.0f;
+    c.y += m_R00 * 2.0f;
+    RotTransPers(p01, vs, c);
+    rx0 = (p01.x - p00.x) / 2;
+    ry0 = (p01.y - p00.y) / 2;
+
+    QWdata giftag;
+    giftag.ul64[0] = 0x4400000000008000UL;
+    giftag.ul64[1] = 0x1410;
+
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x20A | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));
+    CPackMan::pkAddGsData(m_C1.col);
+    CPackMan::pkCloseGifTag();
+
+    giftag.ul64[0] = 0x1400000000008000UL;
+    giftag.ul64[1] = 4;
+
+    CPackMan::pkOpenGifTag(giftag.ul128);
+
+    int deg;
+    for (deg = 0; deg <= 3600; deg += 200) {
+        dy = -(INT)(ry * tcos(deg));
+        dx = rx * tsin(deg);
+        CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));
+    }
+    for (deg = 0; deg <= 3600; deg += 200) {
+        dy = -(INT)(ry0 * tcos(deg));
+        dx = rx0 * tsin(deg);
+        CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));
+    }
+    CPackMan::pkCloseGifTag();
+
+    if (m_Active) {
+        int deg;
+        m_C0.a = m_C1.a = 0x40;
+
+        giftag.ul64[0] = 0x4400000000008000UL;
+        giftag.ul64[1] = 0x1410;
+
+        CPackMan::pkOpenGifTag(giftag.ul128);
+        CPackMan::pkAddGsData((u_long)0x20D | ((u_long)isSemiTrans() << 6));
+        CPackMan::pkAddGsData(m_C0.col);
+        CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));
+        CPackMan::pkAddGsData(m_C1.col);
+        CPackMan::pkCloseGifTag();
+
+        giftag.ul64[0] = 0x1400000000008000UL;
+        giftag.ul64[1] = 4;
+
+        CPackMan::pkOpenGifTag(giftag.ul128);
+        for (deg = 0; deg <= 3600; deg += 200) {
+            dy = -(INT)(ry0 * tcos(deg));
+            dx = rx0 * tsin(deg);
+            CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));
+        }
+        CPackMan::pkCloseGifTag();
+    }
+}
 FIX4 C3DPointLight2::calcZ() {
     FIX4 nRet = ((CGPrim&)m_Cl[0]).calcZ();
     if (m_nType == 1) {
