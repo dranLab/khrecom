@@ -6210,12 +6210,18 @@ asm(".section .rodata\n"
     ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
     ".byte 0x63,0x70,0x70,0x28,0x37,0x34,0x34,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
     ".section .text");
-#if 0 /* register allocation and giv choice in the font-replacing loop differ (this in s1, m_pMainCmdFnt[i] strength-reduced) */
+/* Parked: 53 of 282 lines differ (was 81): with the ref's function-level `INT i` plus a block `INT i` in the else
+   branch `this` is in s0 as in the original; left: in the font-replacing loop the original recomputes
+   &m_pMainCmdFnt[i] from i each iteration (only m_pMainCmdCtrl[i] strength-reduced), ours folds both into one giv;
+   the create loop's first test uses a1 (nSetCmd == 0) in the original. tried: SAFE_DELETE / template inline /
+   reference local for the delete. */
+#if 0
 INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
     FVECTOR vec;
     FVECTOR vec2;
     C2DSeqCtrl* p2DSeqCtrl;
     G_RGBA rgba;
+    INT i;
 
     if (nSetCmd == 0) {
         rgba.col = 0x80404040;
@@ -6224,7 +6230,7 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
             vec.y = 88.0f;
             vec.w = 1.0f;
             vec.z = 0.0f;
-            for (INT i = 0; i < m_nCurrentCmdMax; i++) {
+            for (i = 0; i < m_nCurrentCmdMax; i++) {
                 p2DSeqCtrl = m_pMainCmdCtrl[i] = NEW(7430, C2DSeqCtrl);
                 p2DSeqCtrl->setLayer(0xC);
                 p2DSeqCtrl->enableColorCtrl(TRUE);
@@ -6235,9 +6241,10 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
                 vec.y += 26.0f;
             }
         } else {
+            INT i;
             if (nMode != m_nMainMode) {
                 m_nCurrentCmdMax = nMode ? (!m_bPlayerKind ? 6 : 2) : 7;
-                for (INT i = 0; i < m_nCurrentCmdMax; i++) {
+                for (i = 0; i < m_nCurrentCmdMax; i++) {
                     p2DSeqCtrl = m_pMainCmdCtrl[i];
                     delete m_pMainCmdFnt[i];
                     m_pMainCmdFnt[i] = NULL;
@@ -6246,16 +6253,16 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
                 }
                 m_nMainMode = nMode;
             }
-            for (INT i = 0; i < m_nCurrentCmdMax; i++) {
+            for (i = 0; i < m_nCurrentCmdMax; i++) {
                 m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 4);
             }
         }
     } else if (nSetCmd == 1) {
-        for (INT i = 0; i < m_nCurrentCmdMax; i++) {
+        for (i = 0; i < m_nCurrentCmdMax; i++) {
             m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 5);
         }
     } else if (nSetCmd == 2) {
-        for (INT i = 0; i < m_nCurrentCmdMax; i++) {
+        for (i = 0; i < m_nCurrentCmdMax; i++) {
             m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 6);
         }
     }
