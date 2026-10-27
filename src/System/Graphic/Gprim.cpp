@@ -196,6 +196,18 @@ void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+static inline FVECTOR& operator+=(FVECTOR& a, const FVECTOR& b) { /* PARTIAL: System/Coord.h */
+    a.x += b.x;
+    a.y += b.y;
+    a.z += b.z;
+    a.w += b.w;
+    return a;
+}
+static inline FVECTOR operator+(const FVECTOR& a, const FVECTOR& b) { /* PARTIAL: System/Coord.h */
+    FVECTOR vec = a;
+    vec += b;
+    return vec;
+}
 static inline FVECTOR ApplyMatrix(const FMATRIX& m0, const FVECTOR& v1) { /* PARTIAL: System/Coord.h */
     FVECTOR b;
     ApplyMatrix(b, m0, v1);
@@ -1110,7 +1122,34 @@ void C3DSprt::makePkt() {
     CPackMan::pkAddGsData((u_long)p1.x | ((u_long)p1.y << 16) | ((u_long)p1.z << 32));
     CPackMan::pkCloseGifTag();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DRotSprt);
+FIX4 C3DRotSprt::calcZ() {
+    FVECTOR c0;
+    FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
+    c0 = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);
+    c0 = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c0);
+
+    c0.w = 1.0f;
+
+    FVECTOR c;
+    FVECTOR p0x = (FVECTOR){{m_P0.x * tcos(m_Rot), m_P0.x * tsin(m_Rot), 0.0f, 0.0f}};
+    FVECTOR p0y = (FVECTOR){{-m_P0.y * tsin(m_Rot), m_P0.y * tcos(m_Rot), 0.0f, 0.0f}};
+    FVECTOR p1x = (FVECTOR){{m_P1.x * tcos(m_Rot), m_P1.x * tsin(m_Rot), 0.0f, 0.0f}};
+    FVECTOR p1y = (FVECTOR){{-m_P1.y * tsin(m_Rot), m_P1.y * tcos(m_Rot), 0.0f, 0.0f}};
+
+    c = c0 + p0x + p0y;
+    RotTransPers(p0, vs, c);
+
+    c = c0 + p1x + p1y;
+    RotTransPers(p1, vs, c);
+
+    c = c0 + p0x + p1y;
+    RotTransPers(p01, vs, c);
+
+    c = c0 + p1x + p0y;
+    RotTransPers(p10, vs, c);
+
+    return p0.z << 4;
+}
 void C3DRotSprt::makePkt() {
     QWdata giftag;
     ULONGLONG tex;
