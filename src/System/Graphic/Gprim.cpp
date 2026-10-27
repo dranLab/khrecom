@@ -763,130 +763,148 @@ BOOL CTPrim::isRect(INT i, const FVECTOR* vRect) {
     return __isRect(*(FVECTOR*)m_V[i].fP, vRect);
 }
 FLOAT RotTransPers(FVECTOR& out_v, const FMATRIX& in_m, const FVECTOR& in_v) {
-    __asm__ volatile(
-        "lqc2 $vf8, 0x0($6)\n"
-        "lqc2 $vf4, 0x0($5)\n"
-        "lqc2 $vf5, 0x10($5)\n"
-        "lqc2 $vf6, 0x20($5)\n"
-        "lqc2 $vf7, 0x30($5)\n"
-        "vmulax.xyzw $ACC, $vf4, $vf8x\n"
-        "vmadday.xyzw $ACC, $vf5, $vf8y\n"
-        "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
-        "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
-        "vdiv $Q, $vf0w, $vf8w\n"
-        "vwaitq\n"
-        "vmulq.xyz $vf8, $vf8, $Q\n"
-        "cfc2.ni $2, $vi22\n"
-        "mtc1 $2, $f0\n"
-        "sqc2 $vf8, 0x0($4)\n"
-    );
+    INT iQ;
+    FLOAT fQ;
+    __asm__ volatile("lqc2 $vf8, 0x0(%0)" : : "r"(&in_v));
+    __asm__ volatile("lqc2 $vf4, 0x0(%0)" : : "r"(&in_m));
+    __asm__ volatile("lqc2 $vf5, 0x10(%0)" : : "r"(&in_m));
+    __asm__ volatile("lqc2 $vf6, 0x20(%0)" : : "r"(&in_m));
+    __asm__ volatile("lqc2 $vf7, 0x30(%0)" : : "r"(&in_m));
+    __asm__ volatile("vmulax.xyzw $ACC, $vf4, $vf8x");
+    __asm__ volatile("vmadday.xyzw $ACC, $vf5, $vf8y");
+    __asm__ volatile("vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                     "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
+                     "vdiv $Q, $vf0w, $vf8w");
+    __asm__ volatile("vwaitq");
+    __asm__ volatile("vmulq.xyz $vf8, $vf8, $Q");
+    __asm__ volatile("cfc2.ni %0, $vi22" : "=r"(iQ));
+    __asm__ volatile("mtc1 %1, %0" : "=f"(fQ) : "r"(iQ));
+    __asm__ volatile("sqc2 $vf8, 0x0(%0)" : : "r"(&out_v));
+    return fQ;
 }
 FLOAT RotTransPers(IVECTOR& out_v, const FMATRIX& in_m, const FVECTOR& in_v) {
-    __asm__ volatile(
-        "lqc2 $vf8, 0x0($6)\n"
-        "lqc2 $vf4, 0x0($5)\n"
-        "lqc2 $vf5, 0x10($5)\n"
-        "lqc2 $vf6, 0x20($5)\n"
-        "lqc2 $vf7, 0x30($5)\n"
-        "vmulax.xyzw $ACC, $vf4, $vf8x\n"
-        "vmadday.xyzw $ACC, $vf5, $vf8y\n"
-        "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
-        "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
-        "vdiv $Q, $vf0w, $vf8w\n"
-        "vwaitq\n"
-        "vmulq.xyz $vf8, $vf8, $Q\n"
-        "cfc2.ni $2, $vi22\n"
-        "mtc1 $2, $f0\n"
-        "vftoi4.xyzw $vf8, $vf8\n"
-        "sqc2 $vf8, 0x0($4)\n"
-    );
+    INT iQ;
+    FLOAT fQ;
+    __asm__ volatile("lqc2 $vf8, 0x0(%0)" : : "r"(&in_v));
+    __asm__ volatile("lqc2 $vf4, 0x0(%0)" : : "r"(&in_m));
+    __asm__ volatile("lqc2 $vf5, 0x10(%0)" : : "r"(&in_m));
+    __asm__ volatile("lqc2 $vf6, 0x20(%0)" : : "r"(&in_m));
+    __asm__ volatile("lqc2 $vf7, 0x30(%0)" : : "r"(&in_m));
+    __asm__ volatile("vmulax.xyzw $ACC, $vf4, $vf8x");
+    __asm__ volatile("vmadday.xyzw $ACC, $vf5, $vf8y");
+    __asm__ volatile("vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                     "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
+                     "vdiv $Q, $vf0w, $vf8w");
+    __asm__ volatile("vwaitq");
+    __asm__ volatile("vmulq.xyz $vf8, $vf8, $Q");
+    __asm__ volatile("cfc2.ni %0, $vi22" : "=r"(iQ));
+    __asm__ volatile("mtc1 %1, %0" : "=f"(fQ) : "r"(iQ));
+    __asm__ volatile("vftoi4.xyzw $vf8, $vf8");
+    __asm__ volatile("sqc2 $vf8, 0x0(%0)" : : "r"(&out_v));
+    return fQ;
 }
 u_long128 RotTransPersW(const FMATRIX& in_m, const FVECTOR& in_v) {
-    __asm__ volatile(
-        "lqc2 $vf8, 0x0($5)\n"
-        "lqc2 $vf4, 0x0($4)\n"
-        "lqc2 $vf5, 0x10($4)\n"
-        "lqc2 $vf6, 0x20($4)\n"
-        "lqc2 $vf7, 0x30($4)\n"
-        "vmulax.xyzw $ACC, $vf4, $vf8x\n"
-        "vmadday.xyzw $ACC, $vf5, $vf8y\n"
-        "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
-        "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
-        "vdiv $Q, $vf0w, $vf8w\n"
-        "vmax.w $vf8, $vf0, $vf0\n"
-        "vwaitq\n"
-        "vmulq.xyzw $vf8, $vf8, $Q\n"
-        "vftoi4.xyz $vf8, $vf8\n"
-        "qmfc2.ni $2, $vf8\n"
-    );
+    u_long128 out;
+    __asm__ volatile("lqc2 $vf8, 0x0(%0)" : : "r"(&in_v));
+    __asm__ volatile("lqc2 $vf4, 0x0(%0)" : : "r"(&in_m));
+    __asm__ volatile("lqc2 $vf5, 0x10(%0)" : : "r"(&in_m));
+    __asm__ volatile("lqc2 $vf6, 0x20(%0)" : : "r"(&in_m));
+    __asm__ volatile("lqc2 $vf7, 0x30(%0)" : : "r"(&in_m));
+    __asm__ volatile("vmulax.xyzw $ACC, $vf4, $vf8x");
+    __asm__ volatile("vmadday.xyzw $ACC, $vf5, $vf8y");
+    __asm__ volatile("vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                     "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
+                     "vdiv $Q, $vf0w, $vf8w");
+    __asm__ volatile("vmax.w $vf8, $vf0, $vf0");
+    __asm__ volatile("vwaitq");
+    __asm__ volatile("vmulq.xyzw $vf8, $vf8, $Q");
+    __asm__ volatile("vftoi4.xyz $vf8, $vf8");
+    __asm__ volatile("qmfc2.ni %0, $vf8" : "=r"(out));
+    return out;
 }
 FLOAT RotTransPersClipW(IVECTOR& out_v, const FVECTOR& in_v) {
-    __asm__ volatile(
-        "lqc2 $vf8, 0x0($5)\n"
-        "vmulax.xyzw $ACC, $vf4, $vf8x\n"
-        "vmadday.xyzw $ACC, $vf5, $vf8y\n"
-        "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
-        "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
-        "vdiv $Q, $vf0w, $vf8w\n"
-        "vmulaw.xyz $ACC, $vf3, $vf8w\n"
-        "vmaddw.xyz $vf8, $vf8, $vf0w\n"
-        "vsub.xyzw $vf10, $vf0, $vf0\n"
-        "lui $2, (0x45800000 >> 16)\n"
-        "vwaitq\n"
-        "vmulq.xyz $vf8, $vf8, $Q\n"
-        "pextlw $2, $2, $2\n"
-        "qmtc2.ni $2, $vf11\n"
-        "ctc2.ni $0, $vi16\n"
-        "vsub.xyzw $vf0, $vf8, $vf10\n"
-        "vsub.xy $vf0, $vf11, $vf8\n"
-        "vftoi4.xyzw $vf9, $vf8\n"
-        "vnop\n"
-        "cfc2.ni $2, $vi22\n"
-        "mtc1 $2, $f0\n"
-        "sqc2 $vf9, 0x0($4)\n"
-        "cfc2.ni $2, $vi16\n"
-        "andi $2, $2, 0xC0\n"
-        ".set noreorder\n"
-        "bnel $2, $0, 0f\n"
-        "ori $2, $0, 0x8000\n"
-        ".set reorder\n"
-        "0:\n"
-        "sw $2, 0xC($4)\n"
-    );
+    INT iQ;
+    FLOAT fQ;
+    INT iClip;
+    u_long128 v4096;
+    UINT k4096;
+    __asm__ volatile("lqc2 $vf8, 0x0(%0)" : : "r"(&in_v));
+    __asm__ volatile("vmulax.xyzw $ACC, $vf4, $vf8x");
+    __asm__ volatile("vmadday.xyzw $ACC, $vf5, $vf8y");
+    __asm__ volatile("vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                     "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
+                     "vdiv $Q, $vf0w, $vf8w");
+    __asm__ volatile("vmulaw.xyz $ACC, $vf3, $vf8w");
+    __asm__ volatile("vmaddw.xyz $vf8, $vf8, $vf0w");
+    __asm__ volatile("vsub.xyzw $vf10, $vf0, $vf0");
+    k4096 = 0x45800000;
+    __asm__ volatile("vwaitq");
+    __asm__ volatile("vmulq.xyz $vf8, $vf8, $Q");
+    __asm__ volatile("pextlw %0, %1, %1" : "=r"(v4096) : "r"(k4096));
+    __asm__ volatile("qmtc2.ni %0, $vf11" : : "r"(v4096));
+    __asm__ volatile("ctc2.ni $0, $vi16");
+    __asm__ volatile("vsub.xyzw $vf0, $vf8, $vf10");
+    __asm__ volatile("vsub.xy $vf0, $vf11, $vf8");
+    __asm__ volatile("vftoi4.xyzw $vf9, $vf8");
+    __asm__ volatile("vnop");
+    __asm__ volatile("cfc2.ni %0, $vi22" : "=r"(iQ));
+    __asm__ volatile("mtc1 %1, %0" : "=f"(fQ) : "r"(iQ));
+    __asm__ volatile("sqc2 $vf9, 0x0(%0)" : : "r"(&out_v));
+    /* clip flags -> out_v.w (0x8000 if clipped); stays asm: C gets a movn here (if-conversion) or, with that
+     * blocked, an unfilled branch instead of the original's branch-likely */
+    __asm__ volatile("cfc2.ni %0, $vi16\n"
+                     "andi %0, %0, 0xC0\n"
+                     ".set noreorder\n"
+                     "bnel %0, $0, 0f\n"
+                     "ori %0, $0, 0x8000\n"
+                     ".set reorder\n"
+                     "0:\n"
+                     "sw %0, 0xC(%1)"
+                     : "=&r"(iClip)
+                     : "r"(&out_v));
+    return fQ;
 }
 FLOAT RotTransPersClipW(IVECTOR& out_v, FVECTOR& out_fv, const FVECTOR& in_v) {
-    __asm__ volatile(
-        "lqc2 $vf8, 0x0($6)\n"
-        "vmulax.xyzw $ACC, $vf4, $vf8x\n"
-        "vmadday.xyzw $ACC, $vf5, $vf8y\n"
-        "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
-        "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
-        "vdiv $Q, $vf0w, $vf8w\n"
-        "vmulaw.xyz $ACC, $vf3, $vf8w\n"
-        "vmaddw.xyz $vf8, $vf8, $vf0w\n"
-        "vsub.xyzw $vf10, $vf0, $vf0\n"
-        "lui $2, (0x45800000 >> 16)\n"
-        "vwaitq\n"
-        "vmulq.xyz $vf8, $vf8, $Q\n"
-        "pextlw $2, $2, $2\n"
-        "qmtc2.ni $2, $vf11\n"
-        "ctc2.ni $0, $vi16\n"
-        "vsub.xyzw $vf0, $vf8, $vf10\n"
-        "vsub.xy $vf0, $vf11, $vf8\n"
-        "vftoi4.xyzw $vf9, $vf8\n"
-        "sqc2 $vf8, 0x0($5)\n"
-        "cfc2.ni $2, $vi22\n"
-        "mtc1 $2, $f0\n"
-        "sqc2 $vf9, 0x0($4)\n"
-        "cfc2.ni $2, $vi16\n"
-        "andi $2, $2, 0xC0\n"
-        ".set noreorder\n"
-        "bnel $2, $0, 0f\n"
-        "ori $2, $0, 0x8000\n"
-        ".set reorder\n"
-        "0:\n"
-        "sw $2, 0xC($4)\n"
-    );
+    INT iQ;
+    FLOAT fQ;
+    INT iClip;
+    u_long128 v4096;
+    UINT k4096;
+    __asm__ volatile("lqc2 $vf8, 0x0(%0)" : : "r"(&in_v));
+    __asm__ volatile("vmulax.xyzw $ACC, $vf4, $vf8x");
+    __asm__ volatile("vmadday.xyzw $ACC, $vf5, $vf8y");
+    __asm__ volatile("vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                     "vmaddw.xyzw $vf8, $vf7, $vf8w\n"
+                     "vdiv $Q, $vf0w, $vf8w");
+    __asm__ volatile("vmulaw.xyz $ACC, $vf3, $vf8w");
+    __asm__ volatile("vmaddw.xyz $vf8, $vf8, $vf0w");
+    __asm__ volatile("vsub.xyzw $vf10, $vf0, $vf0");
+    k4096 = 0x45800000;
+    __asm__ volatile("vwaitq");
+    __asm__ volatile("vmulq.xyz $vf8, $vf8, $Q");
+    __asm__ volatile("pextlw %0, %1, %1" : "=r"(v4096) : "r"(k4096));
+    __asm__ volatile("qmtc2.ni %0, $vf11" : : "r"(v4096));
+    __asm__ volatile("ctc2.ni $0, $vi16");
+    __asm__ volatile("vsub.xyzw $vf0, $vf8, $vf10");
+    __asm__ volatile("vsub.xy $vf0, $vf11, $vf8");
+    __asm__ volatile("vftoi4.xyzw $vf9, $vf8");
+    __asm__ volatile("sqc2 $vf8, 0x0(%0)" : : "r"(&out_fv));
+    __asm__ volatile("cfc2.ni %0, $vi22" : "=r"(iQ));
+    __asm__ volatile("mtc1 %1, %0" : "=f"(fQ) : "r"(iQ));
+    __asm__ volatile("sqc2 $vf9, 0x0(%0)" : : "r"(&out_v));
+    /* clip flags -> out_v.w (0x8000 if clipped); stays asm: C gets a movn here (if-conversion) or, with that
+     * blocked, an unfilled branch instead of the original's branch-likely */
+    __asm__ volatile("cfc2.ni %0, $vi16\n"
+                     "andi %0, %0, 0xC0\n"
+                     ".set noreorder\n"
+                     "bnel %0, $0, 0f\n"
+                     "ori %0, $0, 0x8000\n"
+                     ".set reorder\n"
+                     "0:\n"
+                     "sw %0, 0xC(%1)"
+                     : "=&r"(iClip)
+                     : "r"(&out_v));
+    return fQ;
 }
 INT BackClip(const FVECTOR* in_fV, INT iDirL) {
     INT iRet;
