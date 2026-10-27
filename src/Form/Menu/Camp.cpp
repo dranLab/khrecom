@@ -2576,7 +2576,7 @@ asm(".section .rodata\n"
    number-grid moves with `n = 9; if (m < 5) n = 4;`, per-arm clamps in the down move, fgCursorMove in both arms
    of the right move, error stores Error/WinStep/SubStep) only the cancel block is left: the original fills
    setCursor2(0, 2, TRUE)'s delay slot with `ret = 1`, ours with `li a3,1` (ret = 1 issues after the call) - the
-   same as statusWinMenu. tried: ret before/after the call, TRUE vs 1; permuter 7 min (4249 candidates, no gain). */
+   same as statusWinMenu. tried: ret before/after the call, TRUE vs 1; permuter 7 min (4249) and 15 min (9076 candidates), no gain. */
 #if 0
 INT CCamp::mapCardWinMenu() {
     BOOL ret = FALSE;
@@ -2895,7 +2895,7 @@ asm(".section .rodata\n"
 /* Parked: 2 of 457 lines differ: reorg fills setStatusWin(4)'s delay slot (cancel block, after the `cancel:`
    label) with `li a1,4` in ours, with `ret = 1` (s3) in the original. tried: ret before/after the call and before the
    label, ret/bChange declaration order (ref: ret, fgCursorMove, nStatusTechSelectOld); permuter 6 min (3613
-   candidates, no gain). */
+   candidates) and 15 min (8843 candidates), no gain. */
 #if 0
 INT CCamp::statusWinMenu() {
     BOOL bChange = FALSE;
@@ -4112,7 +4112,7 @@ asm(".section .rodata\n"
     ".section .text");
 /* Parked: 4 of 1048 lines differ in the last loop: the addu operand order of this + m_nKindCategorySelect * 2 and
    v0/v1 swapped for the nColSeq != 0x73 compare. tried: without _ref (24 lines), _ref(*(p + i)), _ref(m_nKind)[i],
-   != 0, !i, swapped operand/condition orders, !(a && b); permuter 7 min (4293 candidates, no gain). */
+   != 0, !i, swapped operand/condition orders, !(a && b); permuter 7 min (4293) and 15 min (9220 candidates), no gain. */
 #if 0
 INT CCamp::setDeckInfo(INT nSetCmd) {
     static char* pStrNum[4] = { "%d", "\x81~%02d", "", "--" };
@@ -6562,7 +6562,7 @@ asm(".section .rodata\n"
 /* Parked: 2 of 198 lines differ: the two member addresses of the top-index select (&m_nMCSelSelectTop,
    &m_nKindSelectTop) issue in the other order in the prologue (equal-priority tie). tried: ternary both polarities,
    if/else and default+if forms, the ref's `INT& nKindSelectTop` reference local, idx local; permuter 6 min (3573
-   candidates, no gain). */
+   candidates) and 15 min (9060 candidates), no gain. */
 #if 0
 void CCamp::setCursor2(INT nSelect, INT nMode, BOOL bMapCard) {
     FVECTOR vec;
@@ -7400,7 +7400,7 @@ void CCamp::setTotalCP() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", getCardIndex__5CCampi);
 /* Parked: 4 of 44 lines differ: the original computes nIndex + 1 from a1 and moves idx = nIndex into the beqz delay
    slot; ours copies nIndex through idx first. tried: idx assigned in an else / after the test, separate n = nIndex + 1,
-   i <= nIndex, return nIndex directly, comma init in the for; permuter 5 min (no gain). */
+   i <= nIndex, return nIndex directly, comma init in the for; permuter 5 + 15 min: it stalls on this function (7 candidates per run). */
 #if 0
 INT CCamp::getCardIndex(INT nIndex) {
     INT idx = nIndex;
