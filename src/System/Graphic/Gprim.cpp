@@ -94,6 +94,17 @@ static inline u_long128 _calcSTQ(ULONGLONG inSTQ, UINT iW) {
                      : "r"(iW), "r"(inSTQ));
     return iRet;
 }
+static inline u_long128 _calcSTQW(ULONGLONG inSTQ, FLOAT fW) {
+    u_long128 iRet;
+    __asm__ volatile("mfc1 %0, %2\n"
+                     "pcpyld %0, %0, %1\n"
+                     "qmtc2.ni %0, $vf8\n"
+                     "vmulz.xy $vf8, $vf8, $vf8z\n"
+                     "qmfc2.ni %0, $vf8\n"
+                     : "=&r"(iRet)
+                     : "r"(inSTQ), "f"(fW));
+    return iRet;
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -509,7 +520,27 @@ FIX4 C3DPolyFT3::calcZ() {
     }
     return max;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyFT3);
+void C3DPolyFT3::makePkt() {
+    ULONGLONG* p64;
+    ULONGLONG tex = setTexture();
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xB400000000008001UL, 0x42142142170UL));
+    p64[0] = (u_long)0x213 | ((u_long)isSemiTrans() << 6);
+    p64[1] = tex;
+
+    p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
+    p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
+    p64[4] = _vecToXYZ(p0);
+
+    p64[5] = (u_long)m_C0.col | ((u_long)p1.w << 32);
+    p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
+    p64[7] = _vecToXYZ(p1);
+
+    p64[8] = (u_long)m_C0.col | ((u_long)p2.w << 32);
+    p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
+    p64[10] = _vecToXYZ(p2);
+
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[11]);
+}
 FIX4 C3DPolyGT3::calcZ() {
     FMATRIX rts;
     FVECTOR* fv;
