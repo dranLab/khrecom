@@ -34,6 +34,12 @@ inline void _emptyStringPlaceholder() {
 #include "Form/Menu/TechHelp.h"
 #include "System/Sound/SoundMan.h"
 #include "Form/Menu/MenuModel.h"
+#include "System/Wnd.h"
+#include "System/Rcf.h"
+#include "System/TaskMan.h"
+#include "Form/Menu/WorldWarp.h"
+#include "Form/Menu/DecknameEdit.h"
+#include "Form/Menu/JMemoFlag.h"
 #include "include_asm.h"
 
 
@@ -282,12 +288,6 @@ private:
     virtual void makePkt();
 };
 
-class CTextWnd {
-    UBYTE _m_0x00[0x10];
-
-public:
-    virtual ~CTextWnd();
-};
 
 namespace D2 {
 class C2DMan {
@@ -305,10 +305,35 @@ public:
 };
 }
 
+
+enum NAME_CASE {
+    NAME_CASE_SENSITIVE = 0,
+    NAME_CASE_UPPER = 1,
+    NAME_CASE_LOWER = 2
+};
+
+class CRsrcData;
+struct TexInfo;
 class CRsrcDB {
 public:
     static void removeGroup(INT nGroup, INT nID);
+    static CRsrcData* getRsrc(INT nRsrcType, const CHAR* pszName, NAME_CASE nc);
+    static void* getRsrcData(const CRsrcData& data);
+    static TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
+    /* RsrcDB.h's inline */
+    static void* getRsrcData(INT nRsrcType, const CHAR* pszName) {
+        CRsrcData* pData = getRsrc(nRsrcType, pszName, NAME_CASE_SENSITIVE);
+        return pData ? getRsrcData(*pData) : NULL;
+    }
 };
+
+class CPlayer {
+public:
+    static INT exportStatus();
+};
+
+/* SceneInfo.h's inline */
+static inline RoomInfo* _getCurrentRoomInfo() { return CSceneInfo::getRoomInfo(-1); }
 
 class CPackMan {
 public:
@@ -324,6 +349,7 @@ char* strcat(char*, const char*);
 void sceVu0InterVectorXYZ(FVECTOR& v0, FVECTOR& v1, FVECTOR& v2, float t);
 void sceVu0InterVector(FVECTOR& v0, FVECTOR& v1, FVECTOR& v2, float t);
 }
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 class CFntLF : public CFntM2 {
 public:
@@ -335,14 +361,10 @@ using namespace D2;
 /* STOPGAP: string literals that functions still INCLUDE_ASM'd use first: their bytes are in those functions' asm
  * blocks, which gcc doesn't see, so a literal here would be a second copy. Replace them by the literals once those
  * functions are C. */
-extern CHAR D_004E2AB8[]; /* "world_title:00", main */
-extern CHAR D_004E4028[]; /* "worldmap:00", setWorldmap */
 extern CHAR D_004E33E0[]; /* "%d", setDeckInfo */
-extern CHAR D_004E3C80[]; /* "%d/%d", setMapCardWin */
-#define STR_WORLD_TITLE D_004E2AB8
-#define STR_WORLDMAP D_004E4028
 #define STR_PCT_D D_004E33E0
-#define STR_PCT_D_D D_004E3C80
+extern CHAR D_004E33E8[]; /* "\x81~%02d", setDeckInfo */
+#define STR_TILDE_02D D_004E33E8
 
 template <class T> static inline T& _ref(T& v) { return v; }
 
@@ -357,6 +379,12 @@ static inline void _setCardNK(CARD& c, USHORT kind, BYTE num) {
     c.m_nKind2 = kind;
     c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
     c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
+}
+
+static inline CARD _makeCardNK(USHORT kind, BYTE num) {
+    CARD c;
+    _setCardNK(c, kind, num);
+    return c;
 }
 
 static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
@@ -711,8 +739,11 @@ void CCamp::removeRsrc() {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", initCardKind__5CCampiii);
-#if 0 /* loop.c hoists the m_pCardInfo load of the 3-deck copy out of the outer loop (the original keeps it inside) */
+/* Parked: 26 of 342 lines differ: loop.c hoists the CCard::m_pCardInfo load of the 3-deck copy out of the outer
+   loop (the original reloads it each iteration: the stack-array stores must alias it there). tried: destination
+   pointer, direct m_pCardInfo->_deck[i] without _ref, pointer post-increment, _ref on the store; permuter 6 min (3640
+   candidates, no gain). */
+#if 0
 void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
     CARD* pDeck;
 
@@ -750,9 +781,10 @@ void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
             deckTmp[i].m_nId = 0;
         }
         for (INT i = 0; i < 3; i++) {
+            CARD* pDst = cardTmp[i];
             pCardTmp = _getDeck(i);
             for (INT j = 0; j < 99; j++) {
-                cardTmp[i][j] = pCardTmp[j];
+                pDst[j] = pCardTmp[j];
             }
         }
         nDeckTmpMax = 0;
@@ -829,6 +861,8 @@ void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
         }
     }
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", initCardKind__5CCampiii);
 #endif
 
 void CCamp::initDeck(INT nInDeck, INT nInCategory) {
@@ -1004,64 +1038,967 @@ void CCamp::adjustSelect(BOOL bMapCard) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", main__5CCamp);
-// main__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    " D_004E2AB8:\n"
-    ".byte 0x77,0x6F,0x72,0x6C,0x64,0x5F,0x74,0x69,0x74,0x6C,0x65,0x3A,0x30,0x30,0x00,0x00\n"
-    ".byte 0x24,0x29,0x2D,0x31,0x35,0x39,0x24,0x2D,0x2D,0x2D,0x2D,0x2D,0x00,0x00,0x00,0x00\n"
-    ".byte 0x42,0x61,0x74,0x74,0x6C,0x65,0x43,0x61,0x72,0x64,0x4C,0x69,0x73,0x74,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x39,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x38,0x31,0x30,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x39,0x32,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x39,0x33,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x1C,0x15,0x40,0x19,0x43,0x46,0x49,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x31,0x32,0x30,0x39,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x31,0x32,0x38,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x60,0xCD,0x30,0x00,0xCC,0xCD,0x30,0x00,0xA4,0xCE,0x30,0x00,0x8C,0xCF,0x30,0x00\n"
-    ".byte 0x94,0xD1,0x30,0x00,0xF0,0xD0,0x30,0x00,0x94,0xD1,0x30,0x00,0xA4,0xD1,0x30,0x00\n"
-    ".byte 0x8C,0xD2,0x30,0x00,0x58,0xD3,0x30,0x00,0x84,0xD3,0x30,0x00,0xA0,0xD3,0x30,0x00\n"
-    ".byte 0xD0,0xD3,0x30,0x00,0xEC,0xD3,0x30,0x00,0x50,0xD4,0x30,0x00,0x7C,0xD6,0x30,0x00\n"
-    ".byte 0x7C,0xD6,0x30,0x00,0x84,0xD7,0x30,0x00,0xAC,0xD7,0x30,0x00,0xC8,0xD7,0x30,0x00\n"
-    ".byte 0x04,0xD8,0x30,0x00,0x1C,0xD8,0x30,0x00,0x34,0xD8,0x30,0x00,0x50,0xD8,0x30,0x00\n"
-    ".byte 0xC8,0xD8,0x30,0x00,0xF0,0xD8,0x30,0x00,0x2C,0xD9,0x30,0x00,0xD0,0xD9,0x30,0x00\n"
-    ".byte 0x8C,0xDA,0x30,0x00,0x3C,0xDB,0x30,0x00,0xFC,0xDB,0x30,0x00,0xFC,0xDB,0x30,0x00\n"
-    ".byte 0x94,0xDC,0x30,0x00,0xD4,0xDC,0x30,0x00,0x34,0xE0,0x30,0x00,0xB4,0xE0,0x30,0x00\n"
-    ".byte 0xD0,0xE0,0x30,0x00,0x3C,0xE1,0x30,0x00,0xA0,0xE1,0x30,0x00,0xC0,0xE1,0x30,0x00\n"
-    ".byte 0x44,0xE2,0x30,0x00,0xC0,0xE2,0x30,0x00,0xEC,0xE2,0x30,0x00,0x20,0xE3,0x30,0x00\n"
-    ".byte 0x74,0xE3,0x30,0x00,0xA4,0xE3,0x30,0x00,0x04,0xE4,0x30,0x00,0x48,0xE4,0x30,0x00\n"
-    ".byte 0xE4,0xE4,0x30,0x00,0x20,0xE5,0x30,0x00,0x4C,0xE5,0x30,0x00,0x80,0xE5,0x30,0x00\n"
-    ".byte 0xD4,0xE5,0x30,0x00,0x04,0xE6,0x30,0x00,0x3C,0xE6,0x30,0x00,0xBC,0xE6,0x30,0x00\n"
-    ".byte 0xAC,0xE7,0x30,0x00,0xE0,0xE7,0x30,0x00,0x5C,0xE8,0x30,0x00,0xC4,0xE8,0x30,0x00\n"
-    ".byte 0xF0,0xE8,0x30,0x00,0x30,0xE9,0x30,0x00,0x94,0xE9,0x30,0x00,0x4C,0xEA,0x30,0x00\n"
-    ".byte 0x74,0xEA,0x30,0x00,0x94,0xEA,0x30,0x00,0xE8,0xEB,0x30,0x00,0xC0,0xEA,0x30,0x00\n"
-    ".byte 0xE0,0xEA,0x30,0x00,0xE8,0xEB,0x30,0x00,0x0C,0xEB,0x30,0x00,0x50,0xEB,0x30,0x00\n"
-    ".byte 0x68,0xEB,0x30,0x00,0x9C,0xEB,0x30,0x00,0xBC,0xEB,0x30,0x00,0xE8,0xEB,0x30,0x00\n"
-    ".byte 0x3C,0xEC,0x30,0x00,0xC0,0xEC,0x30,0x00,0xDC,0xEC,0x30,0x00,0x10,0xEE,0x30,0x00\n"
-    ".byte 0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00\n"
-    ".byte 0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00\n"
-    ".byte 0x40,0xEE,0x30,0x00,0x40,0xEE,0x30,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0xBC,0xD5,0x30,0x00,0x30,0xD6,0x30,0x00,0x20,0xD6,0x30,0x00,0xC4,0xD5,0x30,0x00\n"
-    ".byte 0x20,0xD6,0x30,0x00,0x20,0xD6,0x30,0x00,0x20,0xD6,0x30,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .data\n"
-    ".align 3\n"
-    " pWTSeqName.4377:\n"
-    ".byte 0xB8,0x2A,0x4E,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00\n"
-    ".section .text");
+void CCamp::main() {
+    static LPCTSTR pWTSeqName = "world_title:00";
+    FVECTOR vec;
+    FVECTOR vec2;
+    G_RGBA rgba;
+    INT iWorldRsrc;
+    unsigned char deckCheckStepTbl[2][6] = { { 0x24, 0x29, 0x2D, 0x31, 0x35, 0x39 }, { 0x24, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D } };
+    INT nError;
+
+    m_iFrame60 = CMainApp::getTickCount() % 7000;
+    switch (m_nStep) {
+    case 0:
+        D2::C2DMan::changeLevel(D2::C2DMan::D2MAN_LEVEL1);
+        CPackMan::changeDrawMode(1);
+        initCardKind(m_nDeckNoSelect, 0, FALSE);
+        initDeck(m_nDeckNoSelect, 0);
+        m_pBCParam = (BC_PARAM*)CRsrcDB::getRsrcData(1, "BattleCardList");
+        m_nStep = 1;
+        break;
+    case 1:
+        m_nStep = 2;
+        iWorldRsrc = CSceneInfo::getCurrentWorldID(TRUE);
+        if (iWorldRsrc >= 14) {
+            iWorldRsrc = 0;
+        }
+        if (m_iWorldRsrc && m_iWorldRsrc != iWorldRsrc) {
+            CRsrcDB::removeGroup(2, m_iWorldRsrc);
+        }
+        /* through a reference: the original loads m_pSeqName only after this store */
+        _ref(m_iWorldRsrc) = iWorldRsrc;
+        if (CRsrcDB::getRsrcTex(m_pSeqName, NAME_CASE_SENSITIVE)) {
+            goto loaded;
+        }
+        if (m_addrRsrcBuf) {
+            CRcf::reqLoadRCFFront(2, 100, 0x140, m_addrRsrcBuf, 0);
+        } else {
+            CRcf::reqLoadRCFFront(2, 100, 0x140, NULL, 0);
+        }
+        if (m_iWorldRsrc) {
+            if (m_addrRsrcBuf) {
+                CRcf::reqLoadRCFFront(2, m_iWorldRsrc + 0x95, 0x140, m_addrRsrcBuf + 0x90000, 0);
+            } else {
+                CRcf::reqLoadRCFFront(2, m_iWorldRsrc + 0x95, 0x140, NULL, 0);
+            }
+        }
+        break;
+    case 2:
+        if (!CRcf::isCompleteLoadRCF(2, 100)) {
+            break;
+        }
+        if (m_iWorldRsrc && !CRcf::isCompleteLoadRCF(2, m_iWorldRsrc)) {
+            break;
+        }
+    loaded:
+        rgba.col = 0x80806228;
+        m_pHelpFnt = NEW(791, CStrPrim)(-0x65, -(SCREEN_HEIGHT / 2) + 0x144, &rgba, 0xE, NULL, 0x40, 0xFFFF28);
+        m_pHelpFnt->setLayerFG(15);
+        m_pHelpFnt->setSpace(-10, 48);
+        CPlayer::exportStatus();
+        CSound::playSE(3, -1, 0x40);
+        m_nStep = 3;
+        break;
+    case 3:
+        D2::C2DMan::setLayer(0xC);
+        m_hLay = D2::C2DMan::create(m_pLadName, 8);
+        m_pBaseCtrl = NEW(810, C2DSeqCtrl);
+        m_pBaseCtrl->setLayer(0xB);
+        m_pBaseCtrl->addSeq(m_pLadName, 0, 0);
+        vec.init();
+        m_pBaseCtrl->setPos(vec);
+        setCurrentRoomName(0);
+        setPoint(0);
+        setTime(0);
+        if (!m_bWorldmap) {
+            m_pBaseCtrl->addSeq(m_pLadName, 0, 0x1A);
+            m_pBaseCtrl->addSeq(m_pLadName, 0, 0x16);
+            setMainParty(0);
+            setMainCmd(0, 0);
+            setMainCmdHist(1, 0);
+            setStatusWin0(0);
+            setStatusWin1(0);
+            m_nStep = 6;
+        } else {
+            m_nStep = 4;
+        }
+        break;
+    case 5:
+        if (!D2::C2DMan::isEnd(m_hLay)) {
+            break;
+        }
+        CSound::setBGMMasterVolume(0x40, -1);
+        D2::C2DMan::destroy(m_hLay);
+        D2::C2DMan::setLayer(0xE);
+        m_hLay = D2::C2DMan::create(m_pLadName, 9);
+        m_pBaseCtrl->replaceSeq(0, m_pSeqName, 1);
+        setCurrentRoomName(3);
+        m_nMainCmdSel = 1;
+        setMainCmdHist(1, 0);
+        setPoint(3);
+        setTime(3);
+        m_nStep = 0x11;
+        break;
+    case 4:
+    case 6:
+        m_nStep++;
+        break;
+    case 7:
+        if (D2::C2DMan::isEnd(m_hLay)) {
+            CSound::setBGMMasterVolume(0x40, -1);
+            D2::C2DMan::destroy(m_hLay);
+            D2::C2DMan::setLayer(0xE);
+            m_hLay = D2::C2DMan::create(m_pLadName, 9);
+            m_pBaseCtrl->replaceSeq(0, m_pSeqName, 1);
+            setMainParty(3);
+            setCurrentRoomName(3);
+            setPoint(3);
+            setTime(3);
+            m_nStep = 8;
+        }
+        if (m_pMainCmdCtrl[0]->isEnd(0)) {
+            setMainCmd(1, 0);
+        }
+        if (!m_pWindow0Ctrl->isEnd(0)) {
+            break;
+        }
+        setStatusWin0(1);
+        setStatusWin1(1);
+        break;
+    case 8:
+        if (!m_pCursorCtrl) {
+            m_pCursorCtrl = NEW(928, C2DSeqCtrl);
+            m_pCursorCtrl->setLayer(0xD);
+            m_pCursorCtrl->addSeq(m_pSeqName, 0x12);
+            m_pLightCtrl = NEW(931, C2DSeqCtrl);
+            m_pLightCtrl->setLayer(0xD);
+            m_pLightCtrl->addSeq(m_pSeqName, 0x14);
+        }
+        selectMainCmd(0, TRUE);
+        moveLight();
+        m_nStep = 9;
+        break;
+    case 9:
+        if (CCard::shouldDispBattleCardFullMessage()) {
+            CCard::finishBattleCardFullMessage();
+            m_nError = 6;
+            m_nStep = 10;
+            m_nErrorWinStep = 0;
+        } else {
+            m_nStep = 0xB;
+        }
+        break;
+    case 10:
+        if (deckCheckErrorWinMenu(FALSE)) {
+            m_nStep = 0xB;
+        }
+        moveYNLight();
+        break;
+    case 11:
+        if (CCard::shouldDispMapCardFullMessage()) {
+            CCard::finishMapCardFullMessage();
+            m_nError = 7;
+            m_nStep = 0xC;
+            m_nErrorWinStep = 0;
+        } else {
+            m_nStep = 0xE;
+        }
+        break;
+    case 12:
+        if (deckCheckErrorWinMenu(FALSE)) {
+            m_nStep = 0xE;
+        }
+        moveYNLight();
+        break;
+    case 13:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setMainCmd(1, 0);
+        setStatusWin0(1);
+        setStatusWin1(1);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        moveLight();
+        setMainParty(3);
+        m_nStep = 0xE;
+        break;
+    case 14:
+        if (CPadHandler::isButtonTrg(0x800, 0) || CPadHandler::isTrgCANCEL(0)) {
+            if (CGameWork::getFlag(1, 0x1E)) {
+                break;
+            }
+            selectMainCmd(m_nMainCmdSel, FALSE);
+            m_nStep = 0x4E;
+        } else if (CPadHandler::isButtonTrg(0x40, 0)) {
+            if (m_nMainCmdSel < 7) {
+                RoomInfo* pRoomInfo = _getCurrentRoomInfo();
+                if ((m_nMainCmdSel == 1 && !pRoomInfo->_pSrcInfo) || (m_nMainCmdSel == 3 && !CSceneInfo::getWorldID(0))) {
+                    CSound::playSE(5, -1, 0x40);
+                    break;
+                }
+                CSound::playSE(2, -1, 0x40);
+                selectMainCmd(m_nMainCmdSel, FALSE);
+                setMainCmd(2, 0);
+                if (m_nMainCmdSel != 3 && m_nMainCmdSel != 5) {
+                    setMainCmdHist(1, 0);
+                    setMainCmdHist(7, 0);
+                }
+                setStatusWin0(2);
+                setStatusWin1(2);
+                switch (m_nMainCmdSel) {
+                case 0:
+                    m_nStep = 0xF;
+                    break;
+                case 3:
+                    D2::C2DMan::destroy(m_hLay);
+                    D2::C2DMan::setLayer(0xE);
+                    m_hLay = D2::C2DMan::create(m_pLadName, 10);
+                    m_pBaseCtrl->enableDisp(2, FALSE);
+                    setCurrentRoomName(4);
+                    setPoint(4);
+                    setTime(4);
+                    m_nStep = 0x10;
+                    break;
+                case 2:
+                case 4:
+                case 5:
+                case 6:
+                    m_pBaseCtrl->enableDisp(2, FALSE);
+                case 1:
+                    m_nStep = 0x10;
+                    break;
+                }
+                if (m_nStep != 0xE) {
+                    m_nMainCmdSelSave = m_nMainCmdSel;
+                    setMainParty(4);
+                }
+            }
+        } else if (CPadHandler::isButtonRpt(0x101000, 0)) {
+            if (m_nMainCmdSel - 1 < 0 && !CPadHandler::isButtonTrg(0x101000, 0)) {
+                break;
+            }
+            selectMainCmd(m_nMainCmdSel - 1, TRUE);
+            CSound::playSE(1, -1, 0x40);
+        } else if (CPadHandler::isButtonRpt(0x204000, 0)) {
+            if (m_nMainCmdSel + 1 >= m_nCurrentCmdMax && !CPadHandler::isButtonTrg(0x204000, 0)) {
+                break;
+            }
+            selectMainCmd(m_nMainCmdSel + 1, TRUE);
+            CSound::playSE(1, -1, 0x40);
+        }
+        moveLight();
+        break;
+    case 15:
+    case 16:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        if (m_nStep == 0xF) {
+            setMainCmd(0, m_nMainCmdSel + 1);
+            setDeckCard(1);
+            setDeckCard(0x12);
+            setDeckDeck(1);
+            setDeckDeck(0x12);
+            setDeckDeck(0x13);
+            setDeckCard(7);
+            setDeckDeck(7);
+        } else {
+            setCursor(-1, 0);
+            setLight(-1, 0);
+        }
+        {
+            unsigned char mainCmdJmpTbl[7] = { 0x1C, 0x15, 0x40, 0x19, 0x43, 0x46, 0x49 };
+            m_nStep = mainCmdJmpTbl[m_nMainCmdSel];
+        }
+        setStatusWin0(3);
+        setStatusWin1(3);
+        break;
+    case 17:
+        setMainCmdHist(1, 0);
+        setWorldmap(0);
+        m_nStep = 0x12;
+        break;
+    case 18:
+        if (setWorldmap(1)) {
+            m_nStep = 0x13;
+        }
+        break;
+    case 19:
+        if (setWorldmap(10)) {
+            if (CPadHandler::isButtonTrg(0x100, 0) || CPadHandler::isTrgCANCEL(0)) {
+                m_nStep = 0x14;
+            }
+        }
+        setWorldmap(3);
+        break;
+    case 20:
+        setWorldmap(4);
+        m_nStep = 0x4C;
+        break;
+    case 21:
+        setWorldmap(0);
+        m_nStep = 0x16;
+        break;
+    case 22:
+        if (setWorldmap(1)) {
+            m_nStep = 0x17;
+        }
+        break;
+    case 23:
+        if (setWorldmap(10)) {
+            if (CPadHandler::isTrgCANCEL(0)) {
+                setWorldmap(4);
+                setMainCmdHist(4, 0);
+                setMainCmd(0, 0);
+                CSound::playSE(4, -1, 0x40);
+                m_nStep = 0x18;
+            }
+        }
+        setWorldmap(3);
+        break;
+    case 24:
+        if (!setWorldmap(5)) {
+            break;
+        }
+        setWorldmap(8);
+        setStatusWin0(0);
+        setStatusWin1(0);
+        setMainParty(1);
+        m_pBaseCtrl->enableDisp(2, TRUE);
+        m_nStep = 0xD;
+        break;
+    case 25:
+        m_hEtcMenu = (NEW(1209, CWorldWarp)(this, TRUE))->getHandle();
+        m_nStep = 0x1A;
+        break;
+    case 26:
+        if (CTaskMan::getTask(m_hEtcMenu)) {
+            break;
+        }
+        setMainCmd(0, 0);
+        setStatusWin0(0);
+        setStatusWin1(0);
+        D2::C2DMan::destroy(m_hLay);
+        D2::C2DMan::setLayer(0xE);
+        m_hLay = D2::C2DMan::create(m_pLadName, 8);
+        setMainParty(1);
+        m_pBaseCtrl->enableDisp(2, TRUE);
+        setCurrentRoomName(0);
+        setPoint(0);
+        setTime(0);
+        m_nStep = 0x1B;
+        break;
+    case 27:
+        if (m_pMainCmdCtrl[0]->isEnd(0)) {
+            setMainCmd(1, 0);
+            setStatusWin0(1);
+            setStatusWin1(1);
+            selectMainCmd(m_nMainCmdSel, TRUE);
+            moveLight();
+        }
+        if (!D2::C2DMan::isEnd(m_hLay)) {
+            break;
+        }
+        D2::C2DMan::destroy(m_hLay);
+        D2::C2DMan::setLayer(0xE);
+        m_hLay = D2::C2DMan::create(m_pLadName, 9);
+        setMainParty(3);
+        setCurrentRoomName(3);
+        setPoint(3);
+        setTime(3);
+        m_nStep = 0xE;
+        break;
+    case 28:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        SAFE_DELETE(m_pMenuModel);
+        m_nKindSelect = m_nDeckSelect = 0;
+        m_nKindSelectTop = m_nDeckSelectTop = 0;
+        m_nKindCategorySelect = 0;
+        initCardData(0);
+        initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+        setMainCmd(1, 0);
+        selectMainCmd(0, TRUE);
+        setDeckCard(3);
+        setDeckDeck(3);
+        m_nStep = 0x1D;
+        break;
+    case 29:
+        if (!m_bPlayerKind || CGameWork::getFlag(0, 0x84)) {
+            m_nStep = 0x21;
+            break;
+        }
+        CGameWork::setFlag(0, 0x84, TRUE);
+        m_pTextWnd = NEW(1282, CTextWnd)(*this, FALSE);
+        m_pTextWnd->setObjType((ObjType::eObjType)0x10);
+        CBaseWnd::setLayerFG(0x17);
+        /* m_pTextWnd through a reference: its loads stay after the setLayerFG stores */
+        _ref(m_pTextWnd)->createWindowCTD(0x500600, NULL, NULL, 0, NULL, 0);
+        CBaseWnd::setLayerFG(9);
+        _ref(m_pTextWnd)->open();
+        CSound::playSE(3, -1, 0x40);
+        m_nStep = 0x1E;
+        break;
+    case 30:
+    case 31:
+        if (m_pTextWnd->getStatus() != 5) {
+            break;
+        }
+        if (!CPadHandler::isButtonTrg(0x60, 0)) {
+            break;
+        }
+        if (m_nStep == 0x1E) {
+            CBaseWnd::setLayerFG(0x17);
+            _ref(m_pTextWnd)->setTextCTD(0x500601, NULL);
+            CBaseWnd::setLayerFG(9);
+            CSound::playSE(10, -1, 0x40);
+            m_nStep = 0x1F;
+        } else {
+            m_pTextWnd->close();
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x20;
+        }
+        break;
+    case 32:
+        if (m_pTextWnd->getStatus() != 9) {
+            break;
+        }
+        SAFE_DELETE(m_pTextWnd);
+        m_nStep = 0x21;
+        break;
+    case 33:
+        if (CPadHandler::isTrgCANCEL(0)) {
+            if (!m_bPlayerKind) {
+                nError = CCard::checkCurrentDeck();
+                if (nError) {
+                    m_nError = nError;
+                    m_nStep = 0x23;
+                    m_nErrorWinStep = 0;
+                    break;
+                }
+            }
+            selectMainCmd(m_nMainCmdSel, FALSE);
+            setMainCmd(2, 0);
+            setMainCmdHist(4, 0);
+            setDeckCard(4);
+            setDeckDeck(4);
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x22;
+        } else if (CPadHandler::isButtonTrg(0x40, 0)) {
+            if (!m_nMainCmdSel) {
+                CSound::playSE(2, -1, 0x40);
+                if (m_nKind[m_nKindCategorySelect]) {
+                    m_nCardInOut = 0;
+                } else {
+                    if (!m_nDeck[m_nDeckCategorySelect]) {
+                        break;
+                    }
+                    m_nCardInOut = 1;
+                }
+                setMainCmdHist(1, 1);
+                setMainCmdHist(7, 1);
+                setDeckCard(10);
+                setDeckDeck(3);
+                setMainCmd(2, 0);
+                setCursor(-1, 0);
+                setLight(-1, 0);
+                m_nStep = 0x24;
+            } else {
+                CSound::playSE(2, -1, 0x40);
+                setMainCmdHist(1, 1);
+                setMainCmdHist(7, 1);
+                setMainCmd(2, 0);
+                setCursor(-1, 0);
+                setLight(-1, 0);
+                setDeckCard(4);
+                if (m_nMainCmdSel == 4) {
+                    setDeckDeck(4);
+                }
+            }
+            if (m_nMainCmdSel < 5) {
+                setButtonHelp(1, 0, m_nMainCmdSel);
+                setButtonHelp(7, 0, 0);
+                if (!m_nMainCmdSel) {
+                    setButtonHelp(10, 0, m_nCardInOut);
+                }
+            }
+            m_pHelpFnt->setText(m_pMainCmdName[1][1][6]);
+            m_nStep = deckCheckStepTbl[m_bPlayerKind][m_nMainCmdSel];
+        } else if (CPadHandler::isButtonRpt(0x101000, 0)) {
+            if (m_nMainCmdSel - 1 < 0 && !CPadHandler::isButtonTrg(0x101000, 0)) {
+                break;
+            }
+            selectMainCmd(m_nMainCmdSel - 1, TRUE);
+            CSound::playSE(1, -1, 0x40);
+        } else if (CPadHandler::isButtonRpt(0x204000, 0)) {
+            if (m_nMainCmdSel + 1 >= m_nCurrentCmdMax && !CPadHandler::isButtonTrg(0x204000, 0)) {
+                break;
+            }
+            selectMainCmd(m_nMainCmdSel + 1, TRUE);
+            CSound::playSE(1, -1, 0x40);
+        }
+        moveLight();
+        break;
+    case 34:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(6);
+        setDeckDeck(6);
+        m_nMainCmdSel = m_nMainCmdSelSave;
+        setCursor(m_nMainCmdSel, 0);
+        setMainCmd(0, 0);
+        setStatusWin0(0);
+        setStatusWin1(0);
+        setMainParty(1);
+        m_nStep = 0xD;
+        break;
+    case 35:
+        if (deckCheckErrorWinMenu(FALSE)) {
+            m_nStep = 0x21;
+        }
+        moveYNLight();
+        break;
+    case 36:
+        if (!m_bPlayerKind && !m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(0xB);
+        if (m_bPlayerKind) {
+            m_nCardInOut = 1;
+        }
+        setDeckInfo(1);
+        setDeckInfo(7);
+        setDeckInfo(0xC);
+        m_nStep = 0x25;
+        break;
+    case 37:
+        if (!m_pDeckInfoCtrl->isEnd(0)) {
+            break;
+        }
+        setDeckInfo(3);
+        if (!m_nCardInOut) {
+            setDeckInfo(0xA);
+        } else {
+            setDeckInfo(0xB);
+        }
+        m_nMainMode = 2;
+        m_nTechWinStep = -1;
+        m_nStep = 0x26;
+        m_nSubStep = 0;
+        break;
+    case 38:
+        if (deckCommonButton()) {
+            break;
+        }
+        deckEditMenu();
+        techWinMenu();
+        break;
+    case 39:
+        if (!m_pDeckInfoCtrl->isEnd(0)) {
+            break;
+        }
+        setMainCmd(0, 1);
+        setButtonHelp(4, 0, 0);
+        setDeckInfo(6);
+        m_nKindSelect = m_nDeckSelect = 0;
+        m_nKindSelectTop = m_nDeckSelectTop = 0;
+        m_nKindCategorySelect = 0;
+        setDeckCard(0x14);
+        setDeckCard(0xC);
+        setDeckDeck(0x12);
+        m_nStep = 0x28;
+        break;
+    case 40:
+        if (!(!m_bPlayerKind ? m_pDeckCardCtrl[0]->isEnd(0) : m_pDeckDeckCtrl[0]->isEnd(0))) {
+            break;
+        }
+        setMainCmd(1, 0);
+        selectMainCmd(0, TRUE);
+        setDeckInfo(6);
+        setDeckCard(3);
+        m_nStep = 0x21;
+        break;
+    case 41:
+        m_nMainMode = 2;
+        setDeckCard(4);
+        m_nSubStep = 0;
+        deckSetWinMenu();
+        m_nStep = 0x2A;
+        break;
+    case 42:
+        deckSetWinMenu();
+        if (!m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(6);
+        m_nStep = 0x2B;
+        break;
+    case 43:
+        if (deckSetWinMenu() >= 0) {
+            break;
+        }
+        setDeckCard(7);
+        setDeckCard(1);
+        setMainCmdHist(4, 1);
+        setMainCmd(0, 1);
+        m_nStep = 0x2C;
+        break;
+    case 44:
+        deckSetWinMenu();
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(3);
+        setMainCmd(1, 0);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        m_nStep = 0x21;
+        break;
+    case 45:
+        m_bShortCutMode = TRUE;
+        m_nMainMode = 2;
+        m_nCardInOut = 1;
+        setDeckCard(4);
+        setDeckInfo(1);
+        setDeckInfo(7);
+        setDeckInfo(0xC);
+        setDeckInfo(0xF);
+        m_nSubStep = 0;
+        m_nStep = 0x2E;
+        break;
+    case 46:
+        if (!m_pDeckInfoCtrl->isEnd(0)) {
+            break;
+        }
+        setDeckDeck(3);
+        setDeckCard(6);
+        setDeckInfo(3);
+        m_nStep = 0x2F;
+        break;
+    case 47:
+        if (deckCommonButton2()) {
+            break;
+        }
+        if (deckEditMenu()) {
+            setButtonHelp(4, 0, 0);
+            setDeckCard(7);
+            setDeckCard(1);
+            setDeckInfo(4);
+            m_nCardInOut = 0;
+            setDeckDeck(3);
+            setMainCmdHist(4, 1);
+            setMainCmd(0, 1);
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x30;
+        }
+        techWinMenu();
+        break;
+    case 48:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        m_bShortCutMode = FALSE;
+        m_nDeckSelect = 0;
+        m_nDeckSelectTop = 0;
+        setDeckDeck(0x12);
+        setDeckCard(3);
+        setMainCmd(1, 0);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        m_nStep = 0x21;
+        break;
+    case 49:
+        m_nMainMode = 2;
+        setDeckCard(4);
+        m_nSubStep = 0;
+        deckClearWinMenu();
+        m_nStep = 0x32;
+        break;
+    case 50:
+        deckClearWinMenu();
+        if (!m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(6);
+        m_nStep = 0x33;
+        break;
+    case 51:
+        if (deckClearWinMenu() >= 0) {
+            break;
+        }
+        setDeckCard(7);
+        setDeckCard(1);
+        setMainCmdHist(4, 1);
+        setMainCmd(0, 1);
+        m_nStep = 0x34;
+        break;
+    case 52:
+        deckClearWinMenu();
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(3);
+        setMainCmd(1, 0);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        m_nStep = 0x21;
+        break;
+    case 53:
+        m_nMainMode = 2;
+        setDeckCard(4);
+        setDeckDeck(4);
+        CDecknameEditWnd::startEdit(this, m_nDeckNoSelect);
+        m_nStep = 0x36;
+        break;
+    case 54:
+        if (!m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(6);
+        setDeckDeck(6);
+        m_pHelpFnt->setText(CCtdMan::getText(0x50040D));
+        m_nStep = 0x37;
+        break;
+    case 55:
+        if (!CDecknameEditWnd::isFinish()) {
+            break;
+        }
+        m_nDeckNoSelect = CDecknameEditWnd::getLastEditDeckNo();
+        initCardData(0);
+        initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+        initDeck(m_nDeckNoSelect, 0);
+        setDeckCard(7);
+        setDeckCard(1);
+        setDeckCard(0x12);
+        setDeckDeck(7);
+        setDeckDeck(1);
+        setDeckDeck(0x13);
+        setDeckDeck(0x12);
+        setMainCmdHist(4, 1);
+        setMainCmd(0, 1);
+        setButtonHelp(4, 0, 0);
+        m_pHelpFnt->setText(m_pMainCmdName[1][1][6]);
+        m_nStep = 0x38;
+        break;
+    case 56:
+        if (!m_pMainCmdCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckCard(3);
+        setDeckDeck(3);
+        setMainCmd(1, 0);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        m_nStep = 0x21;
+        break;
+    case 57:
+        m_bShortCutMode = TRUE;
+        m_nKindCategorySelect = 0;
+        m_nDeckCategorySelect = 0;
+        m_nDeckNoSelectSave = m_nDeckNoSelect;
+        m_nDeckNoSelect = 0;
+        initCardData(0);
+        initCardKind(0, 0, TRUE);
+        m_nMainMode = 2;
+        m_nCardInOut = 0;
+        setDeckDeck(4);
+        setDeckCard(0x12);
+        setDeckCard(0xA);
+        m_nSubStep = 0;
+        m_nStep = 0x3A;
+        break;
+    case 58:
+        if (!m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        setDeckDeck(6);
+        setDeckCard(0xB);
+        setDeckInfo(1);
+        setDeckInfo(7);
+        setDeckInfo(0xC);
+        setDeckInfo(0xF);
+        m_nStep = 0x3B;
+        break;
+    case 59:
+        if (!m_pDeckInfoCtrl->isEnd(0)) {
+            break;
+        }
+        setDeckInfo(3);
+        m_nStep = 0x3C;
+        break;
+    case 60:
+        if (deckEditMenu()) {
+            setDeckInfo(4);
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x3D;
+        }
+        techWinMenu();
+        break;
+    case 61:
+        if (!m_pDeckInfoCtrl->isEnd(0)) {
+            break;
+        }
+        setDeckCard(0xC);
+        setDeckDeck(1);
+        setDeckDeck(7);
+        setMainCmdHist(4, 1);
+        setMainCmd(0, 1);
+        m_nStep = 0x3E;
+        break;
+    case 62:
+        if (!m_pDeckCardCtrl[0]->isEnd(0)) {
+            break;
+        }
+        m_bShortCutMode = FALSE;
+        m_nDeckNoSelect = m_nDeckNoSelectSave;
+        initCardData(0);
+        initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+        m_nKindSelect = m_nDeckSelect = 0;
+        m_nKindSelectTop = m_nDeckSelectTop = 0;
+        m_nKindCategorySelect = 0;
+        setDeckCard(0x14);
+        setDeckDeck(0x12);
+        setDeckCard(3);
+        setDeckDeck(3);
+        setDeckInfo(0xC);
+        setMainCmd(1, 0);
+        selectMainCmd(m_nMainCmdSel, TRUE);
+        m_nStep = 0x21;
+        break;
+    case 63:
+        if (deckCheckErrorWinMenu(FALSE)) {
+            m_nStep = 0x3C;
+        }
+        moveYNLight();
+        break;
+    case 64:
+        m_nMainMode = 2;
+        m_nSubStep = 0;
+        mapCardWinMenu();
+        m_nStep = 0x41;
+        break;
+    case 65:
+        if (mapCardWinMenu() >= 0) {
+            break;
+        }
+        setMainCmdHist(4, 0);
+        m_nStep = 0x42;
+        break;
+    case 67:
+        m_nMainMode = 2;
+        m_nSubStep = 0;
+        statusWinMenu();
+        m_nStep = 0x44;
+        break;
+    case 68:
+        if (statusWinMenu() >= 0) {
+            break;
+        }
+        setMainCmdHist(4, 0);
+        m_nStep = 0x45;
+        break;
+    case 70:
+        CJiminyMemoFlag::initTask();
+        CJiminyMemoFlag::createTask(this, m_bPlayerKind);
+        SAFE_DELETE(m_pMenuModel);
+        m_nStep = 0x47;
+        break;
+    case 71:
+        if (CJiminyMemoFlag::checkTaskOut()) {
+            m_nStep = 0x48;
+        }
+        break;
+    case 72:
+        setMainCmd(0, 0);
+        setStatusWin0(0);
+        setStatusWin1(0);
+        setMainParty(0);
+        m_pBaseCtrl->enableDisp(2, TRUE);
+        m_nStep = 0xD;
+        break;
+    case 73:
+        m_nMainMode = 2;
+        m_nSubStep = 0;
+        configWinMenu();
+        m_nStep = 0x4A;
+        break;
+    case 74:
+        if (configWinMenu() >= 0) {
+            break;
+        }
+        setMainCmdHist(4, 0);
+        m_nStep = 0x4B;
+        break;
+    case 66:
+    case 69:
+    case 75:
+        setMainCmd(0, 0);
+        setStatusWin0(0);
+        setStatusWin1(0);
+        setMainParty(1);
+        m_pBaseCtrl->enableDisp(2, TRUE);
+        m_nStep = 0xD;
+        break;
+    case 76:
+        CSound::setBGMMasterVolume(-1, -1);
+        D2::C2DMan::destroy(m_hLay);
+        D2::C2DMan::setLayer(0xE);
+        m_hLay = D2::C2DMan::create(m_pLadName, 10);
+        m_pBaseCtrl->replaceSeq(0, m_pSeqName, 2);
+        setCurrentRoomName(4);
+        setMainCmdHist(4, 0);
+        setPoint(4);
+        setTime(4);
+        CSound::playSE(4, -1, 0x40);
+        m_nStep++;
+        break;
+    case 77:
+        setWorldmap(5);
+        if (!D2::C2DMan::isEnd(m_hLay)) {
+            break;
+        }
+        D2::C2DMan::destroy(m_hLay);
+        dispose();
+        m_nStep = 0x59;
+        break;
+    case 78:
+        CSound::setBGMMasterVolume(-1, -1);
+        D2::C2DMan::destroy(m_hLay);
+        m_hLay = D2::C2DMan::create(m_pLadName, 10);
+        m_pBaseCtrl->replaceSeq(0, m_pSeqName, 2);
+        setMainParty(4);
+        m_pBaseCtrl->enableDisp(2, FALSE);
+        setCurrentRoomName(4);
+        SAFE_DELETE(m_pCursorCtrl);
+        SAFE_DELETE(m_pLightCtrl);
+        setMainCmd(2, 0);
+        setStatusWin0(2);
+        setStatusWin1(2);
+        SAFE_DELETE(m_pPointCtrl);
+        setTime(8);
+        CSound::playSE(4, -1, 0x40);
+        m_nStep++;
+        break;
+    case 79:
+        if (!m_pWindow0Ctrl->isEnd(0)) {
+            break;
+        }
+        D2::C2DMan::destroy(m_hLay);
+        dispose();
+        m_nStep = 0x59;
+        break;
+    case 0x59:
+    default:
+        out();
+        break;
+    }
+    if (m_nStep < 0x59) {
+        setMainCmdHist(m_nMainCmdHistRun[0], 0);
+        setMainCmdHist(m_nMainCmdHistRun[1], 1);
+        setButtonHelp(m_nButtonHelpRun[0], 0, 0);
+        setButtonHelp(m_nButtonHelpRun[1], 1, 0);
+        setTime(9);
+    }
+}
 INT CCamp::deckCheckErrorWinMenu(BOOL bCardDelete) {
     static USHORT errorWinSeqTbl[3] = { 72, 73, 74 };
     static USHORT buttonYesNoSeqTbl[4] = { 188, 189, 190, 187 };
@@ -1210,23 +2147,21 @@ void CCamp::moveYNLight() {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", deckCommonButton__5CCamp);
-// deckCommonButton__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    ".byte 0x30,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .text");
-#if 0 /* the original is laid out as a rotated loop (constants hoisted into s-registers, the L1/R1 test placed last); the control flow source form is unknown */
 INT CCamp::deckCommonButton() {
-    INT ret = 0;
+    BOOL fgButton = FALSE;
 
     if (m_nStep != 0x26) {
         ASSERT_AT(2226, 0);
         return 0;
     }
-    if (_isButtonTrg(3, 0) && !m_bPlayerKind) {
-        if (m_nSubStep > 0) {
-            if (m_nSubStep == 1 || m_nSubStep == 4 || m_nSubStep == 5) {
+    while (TRUE) {
+        if (_isButtonTrg(3, 0) && !m_bPlayerKind) {
+            if (m_nSubStep <= 0) {
+                break;
+            }
+            if (m_nSubStep != 1 && m_nSubStep != 4 && m_nSubStep != 5) {
+                CSound::playSE(5, -1, 0x40);
+            } else {
                 if (_isButtonTrg(1, 0)) {
                     if (--m_nDeckNoSelect < 0) {
                         m_nDeckNoSelect = 2;
@@ -1237,7 +2172,7 @@ INT CCamp::deckCommonButton() {
                     }
                 }
                 setDeckDeck(0x13);
-                ret = 1;
+                fgButton = TRUE;
                 initCardData(0);
                 initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
                 initDeck(m_nDeckNoSelect, 0);
@@ -1248,7 +2183,7 @@ INT CCamp::deckCommonButton() {
                         m_nKindSelect = 0;
                     } else if (m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
                         m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
-                        m_nKindSelectTop = m_nKind[m_nKindCategorySelect] - 7;
+                        m_nKindSelectTop = m_nKindSelect - 6;
                         if (m_nKindSelectTop < 0) {
                             m_nKindSelectTop = 0;
                         }
@@ -1265,7 +2200,7 @@ INT CCamp::deckCommonButton() {
                     } else {
                         if (m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
                             m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
-                            m_nKindSelectTop = m_nKind[m_nKindCategorySelect] - 7;
+                            m_nKindSelectTop = m_nKindSelect - 6;
                             if (m_nKindSelectTop < 0) {
                                 m_nKindSelectTop = 0;
                             }
@@ -1280,82 +2215,75 @@ INT CCamp::deckCommonButton() {
                 }
                 setDeckDeck(0x12);
                 CSound::playSE(1, -1, 0x40);
-            } else {
-                CSound::playSE(5, -1, 0x40);
             }
+        } else if (_isButtonTrg(0x100, 0) && !m_bPlayerKind) {
+            if (m_bCardPermuteMode) {
+                CSound::playSE(5, -1, 0x40);
+            } else {
+                CCard::packDeck(m_nDeckNoSelect);
+                initCardData(0);
+                initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+                initDeck(m_nDeckNoSelect, 0);
+                if (m_nSubStep >= 3) {
+                    setDeckInfo(0x11);
+                }
+                setDeckDeck(0x12);
+                fgButton = TRUE;
+                CSound::playSE(2, -1, 0x40);
+            }
+        } else if (_isButtonTrg(0x10, 0) && !m_bPlayerKind && !m_bCardPermuteMode) {
+            if (m_nSubStep != 4 || !m_nDeck[0] || !m_pDeck[m_nDeckSelect].m_nId) {
+                CSound::playSE(5, -1, 0x40);
+            } else {
+                m_nDeckSelectHist = m_nDeckSelect;
+                m_bCardPermuteMode = 1;
+                m_nDeckCategorySelect = 0;
+                m_nSubStep = 6;
+                setDeckDeck(0x14);
+                fgButton = TRUE;
+                setDeckInfo(0xE);
+                CSound::playSE(0xF, -1, 0x40);
+            }
+        } else if (_isButtonTrg(0x80, 0)) {
+            m_fgPadDisable = 1;
+            fgButton = TRUE;
+            m_nTechWinStep = 0;
         }
-    } else if (_isButtonTrg(0x100, 0) && !m_bPlayerKind) {
-        if (m_bCardPermuteMode) {
-            CSound::playSE(5, -1, 0x40);
-        } else {
-            CCard::packDeck(m_nDeckNoSelect);
+        break;
+    }
+    return fgButton;
+}
+
+INT CCamp::deckCommonButton2() {
+    BOOL fgButton = FALSE;
+
+    do {
+        if (_isButtonTrg(3, 0) && !m_bPlayerKind) {
+            if (_isButtonTrg(1, 0)) {
+                if (--m_nDeckNoSelect < 0) {
+                    m_nDeckNoSelect = 2;
+                }
+            } else {
+                if (++m_nDeckNoSelect >= 3) {
+                    m_nDeckNoSelect = 0;
+                }
+            }
             initCardData(0);
+            fgButton = TRUE;
             initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
             initDeck(m_nDeckNoSelect, 0);
-            if (m_nSubStep >= 3) {
-                setDeckInfo(0x11);
-            }
+            setDeckDeck(0x13);
             setDeckDeck(0x12);
-            ret = 1;
-            CSound::playSE(2, -1, 0x40);
+            setDeckInfo(0xC);
+            CSound::playSE(1, -1, 0x40);
+        } else if (_isButtonTrg(0x80, 0)) {
+            m_nTechWinStep = 0;
+            m_fgPadDisable = 1;
+            fgButton = TRUE;
         }
-    } else if (_isButtonTrg(0x10, 0) && !m_bPlayerKind && !m_bCardPermuteMode) {
-        if (m_nSubStep != 4) {
-            CSound::playSE(5, -1, 0x40);
-        } else if (!m_nDeck[0]) {
-            CSound::playSE(5, -1, 0x40);
-        } else if (!m_pDeck[m_nDeckSelect].m_nId) {
-            CSound::playSE(5, -1, 0x40);
-        } else {
-            m_nDeckSelectHist = m_nDeckSelect;
-            m_bCardPermuteMode = 1;
-            m_nDeckCategorySelect = 0;
-            m_nSubStep = 6;
-            setDeckDeck(0x14);
-            ret = 1;
-            setDeckInfo(0xE);
-            CSound::playSE(0xF, -1, 0x40);
-        }
-    } else if (_isButtonTrg(0x80, 0)) {
-        m_fgPadDisable = 1;
-        ret = 1;
-        m_nTechWinStep = 0;
-    }
-    return ret;
+    } while (0);
+    return fgButton;
 }
-#endif
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", deckCommonButton2__5CCamp);
-#if 0 /* only the order of the first argument loads and ret = 0 in the prologue differs */
-INT CCamp::deckCommonButton2() {
-    INT ret = 0;
-
-    if (_isButtonTrg(3, 0) && !m_bPlayerKind) {
-        if (_isButtonTrg(1, 0)) {
-            if (--m_nDeckNoSelect < 0) {
-                m_nDeckNoSelect = 2;
-            }
-        } else {
-            if (++m_nDeckNoSelect >= 3) {
-                m_nDeckNoSelect = 0;
-            }
-        }
-        initCardData(0);
-        ret = 1;
-        initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
-        initDeck(m_nDeckNoSelect, 0);
-        setDeckDeck(0x13);
-        setDeckDeck(0x12);
-        setDeckInfo(0xC);
-        CSound::playSE(1, -1, 0x40);
-    } else if (_isButtonTrg(0x80, 0)) {
-        m_nTechWinStep = 0;
-        m_fgPadDisable = 1;
-        ret = 1;
-    }
-    return ret;
-}
-#endif
 
 INT CCamp::techWinMenu() {
     BOOL bChange = FALSE;
@@ -1638,18 +2566,16 @@ INT CCamp::deckClearWinMenu() {
     return ret;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", mapCardWinMenu__5CCamp);
-// mapCardWinMenu__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    ".byte 0x5C,0x09,0x31,0x00,0x90,0x09,0x31,0x00,0x00,0x0A,0x31,0x00,0xB8,0x0D,0x31,0x00\n"
-    ".byte 0x0C,0x11,0x31,0x00,0xE8,0x0D,0x31,0x00,0x28,0x13,0x31,0x00,0x50,0x13,0x31,0x00\n"
-    ".section .text");
-#if 0 /* register allocation: the original shares s2 between bChange and the 4/5 constants of the number-grid moves (one s-register less) */
+/* Parked: 2 of 819 lines differ (was 86): with deckEditMenu's forms (member arithmetic instead of nSelect, the
+   number-grid moves with `n = 9; if (m < 5) n = 4;`, per-arm clamps in the down move, fgCursorMove in both arms
+   of the right move, error stores Error/WinStep/SubStep) only the cancel block is left: the original fills
+   setCursor2(0, 2, TRUE)'s delay slot with `ret = 1`, ours with `li a3,1` (ret = 1 issues after the call) - the
+   same as statusWinMenu. tried: ret before/after the call, TRUE vs 1; permuter 7 min (4249) and 15 min (9076 candidates), no gain. */
+#if 0
 INT CCamp::mapCardWinMenu() {
-    BOOL bChange = FALSE;
-    INT ret = 0;
-    INT nSelect;
+    BOOL ret = FALSE;
+    BOOL fgCursorMove = FALSE;
+    INT nNumSelect;
 
     switch (m_nSubStep) {
     case 0:
@@ -1697,9 +2623,9 @@ INT CCamp::mapCardWinMenu() {
             CSound::playSE(5, -1, 0x40);
             break;
         } else if (_isButtonRpt(0x101000, 0)) {
-            nSelect = m_nMCSelSelect;
-            if ((m_nMCSelSelect = nSelect - 3) < 0) {
-                m_nMCSelSelect = nSelect;
+            m_nMCSelSelect -= 3;
+            if (m_nMCSelSelect < 0) {
+                m_nMCSelSelect += 3;
                 if (!m_buttonTrg) {
                     break;
                 }
@@ -1711,52 +2637,49 @@ INT CCamp::mapCardWinMenu() {
                 m_nSubStep = 4;
                 break;
             }
-            bChange = TRUE;
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x204000, 0)) {
-            nSelect = m_nMCSelSelect;
-            if (nSelect / 3 < (m_nMapKind[m_nMCSelCateSelect] - 1) / 3) {
-                if ((m_nMCSelSelect = nSelect + 3) >= m_nMapKind[m_nMCSelCateSelect]) {
+            if (m_nMCSelSelect / 3 < (m_nMapKind[m_nMCSelCateSelect] - 1) / 3) {
+                if ((m_nMCSelSelect += 3) >= m_nMapKind[m_nMCSelCateSelect]) {
                     m_nMCSelSelect = m_nMapKind[m_nMCSelCateSelect] - 1;
                 }
-                bChange = TRUE;
             } else {
                 if (!m_buttonTrg || m_nMapKind[m_nMCSelCateSelect] < 4) {
                     break;
                 }
-                if ((m_nMCSelSelect = nSelect % 3) >= m_nMapKind[m_nMCSelCateSelect]) {
+                if ((m_nMCSelSelect %= 3) >= m_nMapKind[m_nMCSelCateSelect]) {
                     m_nMCSelSelect = m_nMapKind[m_nMCSelCateSelect] - 1;
                 }
                 m_nMCSelSelectTop = 0;
-                bChange = TRUE;
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x408000, 0)) {
-            nSelect = m_nMCSelSelect;
-            if ((m_nMCSelSelect = nSelect - 1) >= 0 && m_nMCSelSelect % 3 != 2) {
-                bChange = TRUE;
-            } else {
-                m_nMCSelSelect = nSelect;
-                if (!m_buttonTrg || nSelect == m_nMapKind[m_nMCSelCateSelect] - 1) {
+            m_nMCSelSelect--;
+            if (m_nMCSelSelect < 0 || m_nMCSelSelect % 3 == 2) {
+                m_nMCSelSelect++;
+                if (!m_buttonTrg || m_nMCSelSelect == m_nMapKind[m_nMCSelCateSelect] - 1) {
                     break;
                 }
-                if ((m_nMCSelSelect = nSelect + 2) >= m_nMapKind[m_nMCSelCateSelect]) {
+                m_nMCSelSelect += 2;
+                if (m_nMCSelSelect >= m_nMapKind[m_nMCSelCateSelect]) {
                     m_nMCSelSelect = m_nMapKind[m_nMCSelCateSelect] - 1;
                 }
-                bChange = TRUE;
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x802000, 0)) {
-            nSelect = m_nMCSelSelect;
-            if ((m_nMCSelSelect = nSelect + 1) % 3 != 0 && m_nMCSelSelect < m_nMapKind[m_nMCSelCateSelect]) {
-                bChange = TRUE;
-            } else {
-                m_nMCSelSelect = nSelect;
-                if (!m_buttonTrg || nSelect % 3 == 0) {
+            m_nMCSelSelect++;
+            if (m_nMCSelSelect % 3 == 0 || m_nMCSelSelect >= m_nMapKind[m_nMCSelCateSelect]) {
+                m_nMCSelSelect--;
+                if (!m_buttonTrg || m_nMCSelSelect % 3 == 0) {
                     break;
                 }
-                m_nMCSelSelect = nSelect - nSelect % 3;
-                bChange = TRUE;
+                m_nMCSelSelect -= m_nMCSelSelect % 3;
+                fgCursorMove = TRUE;
+            } else {
+                fgCursorMove = TRUE;
             }
         }
-        if (bChange) {
+        if (fgCursorMove) {
             CSound::playSE(0xE, -1, 0x40);
             setCursor2(m_nMCSelSelect, 1, TRUE);
             setMapCardWin(9);
@@ -1771,7 +2694,6 @@ INT CCamp::mapCardWinMenu() {
         }
         break;
     case 5: {
-        INT nNum;
         if (_isTrgCANCEL(0)) {
             setCursor3(0, 2, TRUE);
             setCursor2(0, 4, TRUE);
@@ -1780,92 +2702,90 @@ INT CCamp::mapCardWinMenu() {
             m_nSubStep = 2;
         } else if (_isButtonTrg(0x40, 0)) {
             if (CCard::m_pCardInfo->_nMapTotal < 0x15) {
-                m_nSubStep = 6;
                 m_nError = 3;
                 m_nErrorWinStep = 0;
+                m_nSubStep = 6;
                 break;
             }
             m_nError = 4;
             m_nSubStep = 7;
             m_nErrorWinStep = 0;
         } else if (_isButtonRpt(0x101000, 0)) {
-            nNum = m_nMCSelNumSelect - 1;
-            if (nNum < 0 || nNum % 5 == 4) {
+            nNumSelect = m_nMCSelNumSelect - 1;
+            if (nNumSelect < 0 || nNumSelect % 5 == 4) {
                 if (!m_buttonTrg) {
                     break;
                 }
-                nNum = searchNumExist(2, m_nMCSelNumSelect + 4, TRUE);
-                bChange = TRUE;
+                nNumSelect = searchNumExist(2, m_nMCSelNumSelect + 4, TRUE);
             } else {
-                nNum = searchNumExist(2, nNum, TRUE);
-                if (nNum >= 0) {
-                    bChange = TRUE;
-                } else {
+                nNumSelect = searchNumExist(2, nNumSelect, TRUE);
+                if (nNumSelect < 0) {
                     if (!m_buttonTrg) {
                         break;
                     }
-                    nNum = searchNumExist(2, m_nMCSelNumSelect > 4 ? 9 : 4, TRUE);
-                    bChange = TRUE;
+                    nNumSelect = 9;
+                    if (m_nMCSelNumSelect < 5) nNumSelect = 4;
+                    nNumSelect = searchNumExist(2, nNumSelect, TRUE);
                 }
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x204000, 0)) {
-            nNum = m_nMCSelNumSelect + 1;
-            if (nNum % 5 == 0) {
+            nNumSelect = m_nMCSelNumSelect + 1;
+            if (nNumSelect % 5 == 0) {
                 if (!m_buttonTrg) {
                     break;
                 }
-                nNum = searchNumExist(1, m_nMCSelNumSelect - 4, TRUE);
-                bChange = TRUE;
+                nNumSelect = searchNumExist(1, m_nMCSelNumSelect - 4, TRUE);
             } else {
-                nNum = searchNumExist(1, nNum, TRUE);
-                if (nNum >= 0) {
-                    bChange = TRUE;
-                } else {
+                nNumSelect = searchNumExist(1, nNumSelect, TRUE);
+                if (nNumSelect < 0) {
                     if (!m_buttonTrg) {
                         break;
                     }
-                    nNum = searchNumExist(1, m_nMCSelNumSelect < 5 ? 0 : 5, TRUE);
-                    bChange = TRUE;
+                    nNumSelect = searchNumExist(1, m_nMCSelNumSelect < 5 ? 0 : 5, TRUE);
                 }
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x408000, 0)) {
-            nNum = m_nMCSelNumSelect - 5;
-            if (nNum < 0) {
+            nNumSelect = m_nMCSelNumSelect - 5;
+            if (nNumSelect < 0) {
                 if (!m_buttonTrg) {
                     break;
                 }
-                nNum = searchNumExist(3, m_nMCSelNumSelect + 5, TRUE);
-                bChange = TRUE;
+                nNumSelect = searchNumExist(3, m_nMCSelNumSelect + 5, TRUE);
             } else {
-                nNum = searchNumExist(3, nNum, TRUE);
-                bChange = TRUE;
-                if (nNum < 0 && !m_buttonTrg) {
-                    break;
+                nNumSelect = searchNumExist(3, nNumSelect, TRUE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
                 }
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x802000, 0)) {
-            nNum = m_nMCSelNumSelect + 5;
-            if (nNum >= 10) {
+            nNumSelect = m_nMCSelNumSelect + 5;
+            if (nNumSelect >= 10) {
                 if (!m_buttonTrg) {
                     break;
                 }
-                nNum = searchNumExist(4, m_nMCSelNumSelect - 5, TRUE);
-                bChange = TRUE;
+                nNumSelect = searchNumExist(4, m_nMCSelNumSelect - 5, TRUE);
             } else {
-                nNum = searchNumExist(4, nNum, TRUE);
-                bChange = TRUE;
-                if (nNum < 0 && !m_buttonTrg) {
-                    break;
+                nNumSelect = searchNumExist(4, nNumSelect, TRUE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
                 }
             }
+            fgCursorMove = TRUE;
         }
-        if (bChange) {
-            if (nNum < 0 || nNum == m_nMCSelNumSelect) {
+        if (fgCursorMove) {
+            if (nNumSelect < 0 || nNumSelect == m_nMCSelNumSelect) {
                 break;
             }
             CSound::playSE(0xE, -1, 0x40);
-            m_nMCSelNumSelect = nNum;
-            setCursor3(nNum, 1, TRUE);
+            m_nMCSelNumSelect = nNumSelect;
+            setCursor3(nNumSelect, 1, TRUE);
         }
         moveCursor2();
         moveCursor3();
@@ -1907,14 +2827,14 @@ INT CCamp::mapCardWinMenu() {
             if (--m_nMCSelCateSelect < 0) {
                 m_nMCSelCateSelect = 4;
             }
-            bChange = TRUE;
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x802000, 0)) {
             if (++m_nMCSelCateSelect >= 5) {
                 m_nMCSelCateSelect = 0;
             }
-            bChange = TRUE;
+            fgCursorMove = TRUE;
         }
-        if (bChange) {
+        if (fgCursorMove) {
             CSound::playSE(1, -1, 0x40);
             setMapCardWin(0xA);
             setCursor2(m_nMCSelCateSelect, 6, TRUE);
@@ -1954,19 +2874,21 @@ INT CCamp::mapCardWinMenu() {
     }
     return ret;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", mapCardWinMenu__5CCamp);
 #endif
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", statusWinMenu__5CCamp);
-// statusWinMenu__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
+// mapCardWinMenu__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
 asm(".section .rodata\n"
     ".align 4\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x33,0x32,0x33,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0xAC,0x14,0x31,0x00,0x20,0x15,0x31,0x00,0x8C,0x15,0x31,0x00,0x58,0x18,0x31,0x00\n"
-    ".byte 0x9C,0x18,0x31,0x00,0x84,0x18,0x31,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x5C,0x09,0x31,0x00,0x90,0x09,0x31,0x00,0x00,0x0A,0x31,0x00,0xB8,0x0D,0x31,0x00\n"
+    ".byte 0x0C,0x11,0x31,0x00,0xE8,0x0D,0x31,0x00,0x28,0x13,0x31,0x00,0x50,0x13,0x31,0x00\n"
     ".section .text");
-#if 0 /* ret = 1 is scheduled after the first call of the cancel block instead of into its delay slot */
+
+/* Parked: 2 of 457 lines differ: reorg fills setStatusWin(4)'s delay slot (cancel block, after the `cancel:`
+   label) with `li a1,4` in ours, with `ret = 1` (s3) in the original. tried: ret before/after the call and before the
+   label, ret/bChange declaration order (ref: ret, fgCursorMove, nStatusTechSelectOld); permuter 6 min (3613
+   candidates) and 15 min (8843 candidates), no gain. */
+#if 0
 INT CCamp::statusWinMenu() {
     BOOL bChange = FALSE;
     INT ret = 0;
@@ -2136,7 +3058,18 @@ INT CCamp::statusWinMenu() {
     }
     return ret;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", statusWinMenu__5CCamp);
 #endif
+// statusWinMenu__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
+asm(".section .rodata\n"
+    ".align 4\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x33,0x32,0x33,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0xAC,0x14,0x31,0x00,0x20,0x15,0x31,0x00,0x8C,0x15,0x31,0x00,0x58,0x18,0x31,0x00\n"
+    ".byte 0x9C,0x18,0x31,0x00,0x84,0x18,0x31,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".section .text");
 
 INT CCamp::configWinMenu() {
     BOOL bChange = FALSE;
@@ -2203,14 +3136,627 @@ INT CCamp::configWinMenu() {
     return ret;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", deckEditMenu__5CCamp);
-// deckEditMenu__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    ".byte 0x94,0x1D,0x31,0x00,0x58,0x1E,0x31,0x00,0x38,0x22,0x31,0x00,0xE4,0x25,0x31,0x00\n"
-    ".byte 0x80,0x29,0x31,0x00,0x48,0x30,0x31,0x00,0x14,0x2D,0x31,0x00,0x40,0x2D,0x31,0x00\n"
-    ".byte 0x34,0x32,0x31,0x00,0x30,0x33,0x31,0x00\n"
-    ".section .text");
+INT CCamp::deckEditMenu() {
+    BOOL ret = FALSE;
+    BOOL fgCursorMove = FALSE;
+    INT fgForceChangeInOut = 0;
+    INT nNumSelect;
+    CARD card;
+    BOOL fgInOutChange;
+
+    switch (m_nSubStep) {
+    case 0:
+        if (m_bPlayerKind) {
+            m_nCardInOut = 1;
+        }
+        if (!m_nCardInOut) {
+            if (!m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect = m_nKindSelectTop = 0;
+                m_bCategorySelectMode = TRUE;
+                setCursor2(0, 0, FALSE);
+                setCursor2(m_nKindCategorySelect, 5, FALSE);
+                moveCursor2();
+                m_nSubStep = 5;
+            } else {
+                setCursor2(m_nKindSelect, 0, FALSE);
+                moveCursor2();
+                m_nSubStep = 1;
+            }
+        } else {
+            setCursor4(m_nDeckSelect, 0);
+            moveCursor4();
+            m_nSubStep = 4;
+        }
+        break;
+    case 1:
+        if (_isTrgCANCEL(0)) {
+        cancel:
+            setCursor2(0, 2, FALSE);
+            ret = TRUE;
+            if (m_bShortCutMode) {
+                break;
+            }
+            setDeckInfo(4);
+            setMainCmdHist(4, 1);
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x27;
+        } else if (_isButtonTrg(0x40, 0)) {
+            if (!m_nKind[m_nKindCategorySelect] || !m_kindTbl[m_nKindSelect]) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            CSound::playSE(2, -1, 0x40);
+            m_nNumSelect = searchNumExist(0, 0, FALSE);
+            setCursor2(0, 3, FALSE);
+            setCursor3(m_nNumSelect, 0, FALSE);
+            moveCursor3();
+            setDeckInfo(0xD);
+            m_nSubStep = 2;
+        } else if (_isButtonRpt(0x101000, 0)) {
+            m_nKindSelect -= 3;
+            if (m_nKindSelect < 0) {
+                m_nKindSelect += 3;
+                if (!m_buttonTrg) {
+                    break;
+                }
+                m_nKindSelect = m_nKindSelectTop = 0;
+                m_bCategorySelectMode = TRUE;
+                setDeckInfo(0xC);
+                setCursor2(m_nKindCategorySelect, 5, FALSE);
+                CSound::playSE(1, -1, 0x40);
+                m_nSubStep = 5;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x204000, 0)) {
+            if (m_nKindSelect / 3 < (m_nKind[m_nKindCategorySelect] - 1) / 3) {
+                m_nKindSelect += 3;
+            } else {
+                if (!m_buttonTrg || m_nKind[m_nKindCategorySelect] < 4) {
+                    break;
+                }
+                m_nKindSelect %= 3;
+                m_nKindSelectTop = 0;
+            }
+            if (m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x408000, 0)) {
+            m_nKindSelect--;
+            if (m_nKindSelect < 0 || m_nKindSelect % 3 == 2) {
+                m_nKindSelect++;
+                if (!m_buttonTrg || m_nKindSelect == m_nKind[m_nKindCategorySelect] - 1) {
+                    break;
+                }
+                m_nKindSelect += 2;
+                if (m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
+                    m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
+                }
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x802000, 0)) {
+            m_nKindSelect++;
+            if (m_nKindSelect % 3 == 0 || m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect--;
+                if (!m_buttonTrg || m_nKindSelect % 3 == 0) {
+                    break;
+                }
+                m_nKindSelect -= m_nKindSelect % 3;
+            }
+            fgCursorMove = TRUE;
+        }
+        if (fgCursorMove) {
+            if (m_nKindSelect < 0) {
+                m_nKindSelect = 0;
+                break;
+            }
+            CSound::playSE(0xE, -1, 0x40);
+            setCursor2(m_nKindSelect, 1, FALSE);
+            setDeckCard(0x12);
+            setDeckInfo(0xC);
+        }
+        moveCursor2();
+        break;
+    case 2:
+        if (_isTrgCANCEL(0)) {
+            setCursor3(0, 2, FALSE);
+            setCursor2(0, 4, FALSE);
+            setCursor2(m_nKindSelect, 0, FALSE);
+            m_nNumSelect = 1;
+            setDeckInfo(0x10);
+            CSound::playSE(4, -1, 0x40);
+            m_nSubStep = 1;
+        } else if (_isButtonTrg(0x40, 0)) {
+            if (m_bShortCutMode) {
+                if ((BYTE)m_kindTbl[m_nKindSelect] < 0x19 && CCard::getAttackCardMax(0) < 2) {
+                    m_nError = 3;
+                    m_nStep = 0x3F;
+                    m_nErrorWinStep = 0;
+                    break;
+                }
+                m_nError = 4;
+                m_nSubStep = 8;
+                m_nErrorWinStep = 0;
+            } else {
+                setCursor3(0, 3, FALSE);
+                setCursor4(m_nDeckSelect, 0);
+                moveCursor4();
+                CSound::playSE(2, -1, 0x40);
+                m_nSubStep = 3;
+            }
+        } else if (_isButtonRpt(0x101000, 0)) {
+            nNumSelect = m_nNumSelect - 1;
+            if (nNumSelect < 0 || nNumSelect % 5 == 4) {
+                if (!m_buttonTrg) {
+                    break;
+                }
+                nNumSelect = searchNumExist(2, m_nNumSelect + 4, FALSE);
+            } else {
+                nNumSelect = searchNumExist(2, nNumSelect, FALSE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
+                    nNumSelect = 9;
+                    if (m_nNumSelect < 5) nNumSelect = 4;
+                    nNumSelect = searchNumExist(2, nNumSelect, FALSE);
+                }
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x204000, 0)) {
+            nNumSelect = m_nNumSelect + 1;
+            if (nNumSelect % 5 == 0) {
+                if (!m_buttonTrg) {
+                    break;
+                }
+                nNumSelect = searchNumExist(1, m_nNumSelect - 4, FALSE);
+            } else {
+                nNumSelect = searchNumExist(1, nNumSelect, FALSE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
+                    nNumSelect = searchNumExist(1, m_nNumSelect < 5 ? 0 : 5, FALSE);
+                }
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x408000, 0)) {
+            nNumSelect = m_nNumSelect - 5;
+            if (nNumSelect < 0) {
+                if (!m_buttonTrg) {
+                    break;
+                }
+                nNumSelect = searchNumExist(3, m_nNumSelect + 5, FALSE);
+            } else {
+                nNumSelect = searchNumExist(3, nNumSelect, FALSE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
+                }
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x802000, 0)) {
+            nNumSelect = m_nNumSelect + 5;
+            if (nNumSelect >= 10) {
+                if (!m_buttonTrg) {
+                    break;
+                }
+                nNumSelect = searchNumExist(4, m_nNumSelect - 5, FALSE);
+            } else {
+                nNumSelect = searchNumExist(4, nNumSelect, FALSE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
+                }
+            }
+            fgCursorMove = TRUE;
+        }
+        if (fgCursorMove) {
+            if (nNumSelect < 0 || nNumSelect == m_nNumSelect) {
+                break;
+            }
+            CSound::playSE(0xE, -1, 0x40);
+            m_nNumSelect = nNumSelect;
+            setCursor3(nNumSelect, 1, FALSE);
+            setDeckInfo(0xD);
+        }
+        moveCursor2();
+        moveCursor3();
+        break;
+    case 3:
+        if (_isTrgCANCEL(0)) {
+            setCursor4(0, 2);
+            setCursor3(0, 4, FALSE);
+            setCursor3(m_nNumSelect, 0, FALSE);
+            CSound::playSE(4, -1, 0x40);
+            m_nSubStep = 2;
+        } else if (_isButtonTrg(0x40, 0)) {
+            if (m_nDeck[0] >= 99) {
+                m_nError = 5;
+                m_fgPadDisable = 2;
+                m_nSubStep = 9;
+                m_nErrorWinStep = 0;
+                break;
+            }
+            CCard::insertDeck(_makeCardNK(m_kindTbl[m_nKindSelect], m_nNumSelect), m_nDeckNoSelect, m_nDeckSelect, FALSE);
+            initCardData(0);
+            initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+            initDeck(m_nDeckNoSelect, 0);
+            adjustSelect(FALSE);
+            setDeckCard(0x12);
+            setDeckInfo(0xC);
+            setDeckDeck(0x12);
+            setCursor4(0, 2);
+            setCursor3(0, 2, FALSE);
+            setCursor2(0, 4, FALSE);
+            setCursor2(m_nKindSelect, 0, FALSE);
+            CSound::playSE(2, -1, 0x40);
+            if (!m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect = m_nKindSelectTop = 0;
+                m_bCategorySelectMode = TRUE;
+                setCursor2(m_nKindCategorySelect, 5, FALSE);
+                m_nSubStep = 5;
+            } else {
+                m_nSubStep = 1;
+            }
+        } else if (_isButtonRpt(0x101000, 0)) {
+            m_nDeckSelect -= 3;
+            if (m_nDeckSelect < 0) {
+                m_nDeckSelect += 3;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x204000, 0)) {
+            if (m_nDeckSelect / 3 < 32) {
+                m_nDeckSelect += 3;
+                if (m_nDeckSelect >= 99) {
+                    m_nDeckSelect = 98;
+                }
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x408000, 0)) {
+            m_nDeckSelect--;
+            if (m_nDeckSelect < 0 || m_nDeckSelect % 3 == 2) {
+                m_nDeckSelect++;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x802000, 0)) {
+            m_nDeckSelect++;
+            if (m_nDeckSelect % 3 == 0 || m_nDeckSelect >= 99) {
+                m_nDeckSelect--;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        }
+        if (fgCursorMove) {
+            CSound::playSE(0xE, -1, 0x40);
+            setCursor4(m_nDeckSelect, 1);
+            setDeckDeck(0x12);
+        }
+        moveCursor4();
+        break;
+    case 4:
+        if (_isTrgCANCEL(0)) {
+            ret = TRUE;
+            setCursor4(0, 2);
+            if (m_bShortCutMode) {
+                break;
+            }
+            setDeckInfo(4);
+            m_nCardInOut = 0;
+            setDeckDeck(3);
+            setMainCmdHist(4, 1);
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x27;
+        } else if (_isButtonTrg(0x40, 0)) {
+            if (m_bShortCutMode) {
+                if (!setShortCut(m_nDeckSelect)) {
+                    CSound::playSE(5, -1, 0x40);
+                    break;
+                }
+                initCardData(0);
+                initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+                initDeck(m_nDeckNoSelect, m_nDeckCategorySelect);
+            } else {
+                if (m_bPlayerKind) {
+                    break;
+                }
+                if (!m_nDeck[m_nDeckCategorySelect]) {
+                    CSound::playSE(5, -1, 0x40);
+                    break;
+                }
+                if (!removeDeck(m_nDeckSelect)) {
+                    CSound::playSE(5, -1, 0x40);
+                    break;
+                }
+                initCardData(0);
+                initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+                initDeck(m_nDeckNoSelect, m_nDeckCategorySelect);
+                adjustSelect(FALSE);
+                setCursor4(m_nDeckSelect, 0);
+                setDeckCard(0x12);
+                setDeckInfo(0xC);
+            }
+            setDeckDeck(0x12);
+            CSound::playSE(2, -1, 0x40);
+        } else if (_isButtonRpt(0x101000, 0)) {
+            m_nDeckSelect -= 3;
+            if (m_nDeckSelect < 0) {
+                m_nDeckSelect += 3;
+                if (!m_buttonTrg) {
+                    break;
+                }
+                m_nDeckSelect = m_nDeckSelect % 3 + 96;
+                m_nDeckSelectTop = 90;
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x204000, 0)) {
+            if (m_nDeckSelect / 3 < 32) {
+                m_nDeckSelect += 3;
+                if (m_nDeckSelect >= 99) {
+                    m_nDeckSelect = 98;
+                }
+            } else {
+                if (!m_buttonTrg) {
+                    break;
+                }
+                m_nDeckSelect %= 3;
+                m_nDeckSelectTop = 0;
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x408000, 0)) {
+            m_nDeckSelect--;
+            if (m_nDeckSelect < 0 || m_nDeckSelect % 3 == 2) {
+                m_nDeckSelect++;
+                if (!m_buttonTrg) {
+                    break;
+                }
+                m_nDeckSelect += 2 - m_nDeckSelect % 3;
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x802000, 0)) {
+            m_nDeckSelect++;
+            if (m_nDeckSelect % 3 == 0 || m_nDeckSelect >= 99) {
+                m_nDeckSelect--;
+                if (!m_buttonTrg) {
+                    break;
+                }
+                m_nDeckSelect -= m_nDeckSelect % 3;
+            }
+            fgCursorMove = TRUE;
+        }
+        if (fgCursorMove) {
+            CSound::playSE(0xE, -1, 0x40);
+            setCursor4(m_nDeckSelect, 1);
+            setDeckDeck(0x12);
+            setDeckInfo(0xC);
+        }
+        moveCursor4();
+        break;
+    case 6:
+        setCursor4Hist(m_nDeckSelectHist, 0);
+        setCursor4Hist(m_nDeckSelectHist, 1);
+        m_nSubStep = 7;
+        break;
+    case 7:
+        if (_isTrgCANCEL(0)) {
+            m_bCardPermuteMode = FALSE;
+            setDeckInfo(!m_nCardInOut ? 0xA : 0xB);
+            setCursor4Hist(0, 2);
+            CSound::playSE(4, -1, 0x40);
+            m_nSubStep = !m_nCardInOut ? 3 : 4;
+        } else if (_isButtonTrg(0x50, 0)) {
+            if (m_nDeckSelect == m_nDeckSelectHist) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            m_bCardPermuteMode = FALSE;
+            card = m_pDeck[m_nDeckSelectHist];
+            removeDeck(m_nDeckSelectHist);
+            CCard::insertDeck(card, m_nDeckNoSelect, m_nDeckSelect, m_nDeckSelectHist == m_nSCIndex[m_nDeckCategorySelect]);
+            initCardData(0);
+            initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+            initDeck(m_nDeckNoSelect, m_nDeckCategorySelect);
+            adjustSelect(FALSE);
+            setCursor4(m_nDeckSelect, 0);
+            setDeckCard(0x12);
+            setDeckInfo(0xC);
+            setDeckDeck(0x12);
+            CSound::playSE(0xF, -1, 0x40);
+            setDeckInfo(!m_nCardInOut ? 0xA : 0xB);
+            setCursor4Hist(0, 2);
+            m_nSubStep = !m_nCardInOut ? 1 : 4;
+        } else if (_isButtonRpt(0x101000, 0)) {
+            m_nDeckSelect -= 3;
+            if (m_nDeckSelect < 0) {
+                m_nDeckSelect += 3;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x204000, 0)) {
+            if (m_nDeckSelect / 3 < 32) {
+                m_nDeckSelect += 3;
+                if (m_nDeckSelect >= 99) {
+                    m_nDeckSelect = 98;
+                }
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x408000, 0)) {
+            m_nDeckSelect--;
+            if (m_nDeckSelect < 0 || m_nDeckSelect % 3 == 2) {
+                m_nDeckSelect++;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x802000, 0)) {
+            m_nDeckSelect++;
+            if (m_nDeckSelect % 3 == 0 || m_nDeckSelect >= 99) {
+                m_nDeckSelect--;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        }
+        if (fgCursorMove) {
+            CSound::playSE(0xE, -1, 0x40);
+            setCursor4(m_nDeckSelect, 1);
+            setDeckDeck(0x12);
+            setDeckInfo(0xC);
+            setCursor4Hist(m_nDeckSelectHist, 1);
+        }
+        moveCursor4();
+        break;
+    case 5:
+        if (_isTrgCANCEL(0)) {
+            m_bCategorySelectMode = FALSE;
+            goto cancel;
+        }
+        if (_isButtonTrg(0x101000, 0)) {
+            if (!m_nKind[m_nKindCategorySelect]) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
+            m_nKindSelectTop = m_nKindSelect - 6;
+            if ((m_nKindSelectTop -= m_nKindSelectTop % 3) < 0) {
+                m_nKindSelectTop = 0;
+            }
+            setDeckCard(0x12);
+            goto enter;
+        } else if (_isButtonTrg(0x204040, 0)) {
+            if (!m_nKind[m_nKindCategorySelect]) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            m_nKindSelect = m_nKindSelectTop = 0;
+        enter:
+            m_bCategorySelectMode = FALSE;
+            setDeckInfo(0xC);
+            setCursor2(m_nKindSelect, 7, FALSE);
+            setCursor2(m_nKindSelect, 0, FALSE);
+            CSound::playSE(0xE, -1, 0x40);
+            m_nSubStep = 1;
+        } else if (_isButtonRpt(0x408000, 0)) {
+            if (--m_nKindCategorySelect < 0) {
+                m_nKindCategorySelect = 4;
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x802000, 0)) {
+            if (++m_nKindCategorySelect >= 5) {
+                m_nKindCategorySelect = 0;
+            }
+            fgCursorMove = TRUE;
+        }
+        if (fgCursorMove) {
+            CSound::playSE(1, -1, 0x40);
+            setDeckCard(0x14);
+            setDeckInfo(0xC);
+            setCursor2(m_nKindCategorySelect, 6, FALSE);
+        }
+        moveCursor2();
+        break;
+    case 8:
+        if (deckCheckErrorWinMenu(TRUE)) {
+            if (!m_nSelYesNo) {
+                CCard::deleteCard(m_kindTbl[m_nKindSelect], m_nNumSelect);
+                initCardData(0);
+                initCardKind(0, m_nKindCategorySelect, TRUE);
+                adjustSelect(FALSE);
+                setDeckCard(0x12);
+                setDeckInfo(0xC);
+                setCursor2(0, 4, FALSE);
+                setCursor3(0, 2, FALSE);
+                setCursor2(m_nKindSelect, 0, FALSE);
+                if (!m_nKind[m_nKindCategorySelect]) {
+                    m_bCategorySelectMode = TRUE;
+                    setCursor2(m_nKindCategorySelect, 5, FALSE);
+                    m_nSubStep = 5;
+                } else {
+                    m_nSubStep = 1;
+                }
+            } else {
+                m_nSubStep = 2;
+            }
+        }
+        moveYNLight();
+        break;
+    case 9:
+        m_fgPadDisable = 2;
+        if (deckCheckErrorWinMenu(FALSE)) {
+            m_nSubStep = 3;
+        }
+        moveYNLight();
+        break;
+    }
+    if (m_bShortCutMode || m_bPlayerKind || m_nStep != 0x26) {
+        return ret;
+    }
+    while (!fgCursorMove) {
+        fgInOutChange = FALSE;
+        if (_isButtonTrg(4, 0) || fgForceChangeInOut == 2) {
+            if (!m_nCardInOut) {
+                break;
+            }
+            if (!m_nKind[0]) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            m_nCardInOut = 0;
+            initCardData(0);
+            initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+            initDeck(m_nDeckNoSelect, 0);
+            setDeckCard(0x14);
+            setDeckInfo(3);
+            setDeckInfo(0xA);
+            setDeckDeck(0x14);
+            setCursor4(0, 2);
+            setCursor4Hist(0, 2);
+            setButtonHelp(0xA, 0, 0);
+            if (!m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect = m_nKindSelectTop = 0;
+            } else if (m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
+                m_nKindSelectTop = m_nKindSelect - 6;
+                if ((m_nKindSelectTop -= m_nKindSelectTop % 3) < 0) {
+                    m_nKindSelectTop = 0;
+                }
+            }
+            fgInOutChange = TRUE;
+            CSound::playSE(3, -1, 0x40);
+        } else if (_isButtonTrg(8, 0) || fgForceChangeInOut == 1) {
+            if (m_nCardInOut) {
+                break;
+            }
+            if (!m_nDeck[0]) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            m_nCardInOut = 1;
+            setDeckInfo(3);
+            setDeckInfo(0xB);
+            setCursor2(0, 2, FALSE);
+            if (m_pCursor3Ctrl) {
+                setCursor3(0, 2, FALSE);
+            }
+            setButtonHelp(0xA, 0, 1);
+            fgInOutChange = TRUE;
+            CSound::playSE(3, -1, 0x40);
+        }
+        if (fgInOutChange) {
+            m_bCategorySelectMode = FALSE;
+            m_bCardPermuteMode = FALSE;
+            setDeckCard(0xB);
+            setDeckInfo(0xC);
+            setDeckDeck(3);
+            m_nSubStep = 0;
+        }
+        break;
+    }
+    return ret;
+}
 void CCamp::setDeckCard(INT nSetCmd) {
     static char* pStrNum[2] = { "%03d/%03d", "%03d" };
     FVECTOR vec;
@@ -2528,46 +4074,10 @@ INT CCamp::setDeckDeck(INT nSetCmd) {
     return 1;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setDeckInfo__5CCampi);
-// setDeckInfo__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    " D_004E33E0:\n"
-    ".byte 0x25,0x64,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x81,0x7E,0x25,0x30,0x32,0x64,0x00,0x00\n"
-    ".byte 0x2D,0x2D,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x34,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x37,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x38,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x39,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x39,0x30,0x36,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x34,0x39,0x31,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x24,0x4B,0x31,0x00,0x40,0x59,0x31,0x00,0x90,0x50,0x31,0x00,0x14,0x51,0x31,0x00\n"
-    ".byte 0x40,0x59,0x31,0x00,0xE8,0x51,0x31,0x00,0x40,0x52,0x31,0x00,0x40,0x59,0x31,0x00\n"
-    ".byte 0x40,0x59,0x31,0x00,0xA8,0x52,0x31,0x00,0xDC,0x52,0x31,0x00,0xFC,0x53,0x31,0x00\n"
-    ".byte 0x78,0x58,0x31,0x00,0x80,0x53,0x31,0x00,0xD0,0x53,0x31,0x00,0x30,0x59,0x31,0x00\n"
-    ".byte 0xFC,0x53,0x31,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .data\n"
-    ".align 3\n"
-    " pStrNum.4431:\n"
-    ".byte 0xE0,0x33,0x4E,0x00,0xE8,0x33,0x4E,0x00,0x48,0x29,0x4E,0x00,0xF0,0x33,0x4E,0x00\n"
-    " colSeqTbl.4432:\n"
-    ".byte 0x00,0x74,0x4B,0x4B,0x5F,0x5F,0x5F,0x73\n"
-    ".section .text");
-#if 0 /* 4 lines differ in the last loop: addu operand order of this+m_nKindCategorySelect*2 and v0/v1 swapped for the nColSeq != 0x73 compare */
+/* Parked: 4 of 1048 lines differ in the last loop: the addu operand order of this + m_nKindCategorySelect * 2 and
+   v0/v1 swapped for the nColSeq != 0x73 compare. tried: without _ref (24 lines), _ref(*(p + i)), _ref(m_nKind)[i],
+   != 0, !i, swapped operand/condition orders, !(a && b); permuter 7 min (4293) and 15 min (9220 candidates), no gain. */
+#if 0
 INT CCamp::setDeckInfo(INT nSetCmd) {
     static char* pStrNum[4] = { "%d", "\x81~%02d", "", "--" };
     FVECTOR vec;
@@ -2832,7 +4342,47 @@ INT CCamp::setDeckInfo(INT nSetCmd) {
     }
     return 1;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setDeckInfo__5CCampi);
 #endif
+// setDeckInfo__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
+asm(".section .rodata\n"
+    ".align 4\n"
+    " D_004E33E0:\n"
+    ".byte 0x25,0x64,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x81,0x7E,0x25,0x30,0x32,0x64,0x00,0x00\n"
+    ".byte 0x2D,0x2D,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x34,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x37,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x38,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x34,0x38,0x39,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x34,0x39,0x30,0x36,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x34,0x39,0x31,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x24,0x4B,0x31,0x00,0x40,0x59,0x31,0x00,0x90,0x50,0x31,0x00,0x14,0x51,0x31,0x00\n"
+    ".byte 0x40,0x59,0x31,0x00,0xE8,0x51,0x31,0x00,0x40,0x52,0x31,0x00,0x40,0x59,0x31,0x00\n"
+    ".byte 0x40,0x59,0x31,0x00,0xA8,0x52,0x31,0x00,0xDC,0x52,0x31,0x00,0xFC,0x53,0x31,0x00\n"
+    ".byte 0x78,0x58,0x31,0x00,0x80,0x53,0x31,0x00,0xD0,0x53,0x31,0x00,0x30,0x59,0x31,0x00\n"
+    ".byte 0xFC,0x53,0x31,0x00,0x00,0x00,0x00,0x00\n"
+    ".section .data\n"
+    ".align 3\n"
+    " pStrNum.4431:\n"
+    ".byte 0xE0,0x33,0x4E,0x00,0xE8,0x33,0x4E,0x00,0x48,0x29,0x4E,0x00,0xF0,0x33,0x4E,0x00\n"
+    " colSeqTbl.4432:\n"
+    ".byte 0x00,0x74,0x4B,0x4B,0x5F,0x5F,0x5F,0x73\n"
+    ".section .text");
 
 INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
     FVECTOR vec;
@@ -2914,62 +4464,11 @@ INT CCamp::setButtonHelp(INT nSetCmd, INT nMode, INT nKind) {
     return 1;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setTechWin__5CCampi);
-// setTechWin__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    ".byte 0x80,0x40,0x40,0x80,0x31,0x63,0x7A,0x80,0x80,0x50,0x79,0x80,0x18,0x7B,0x13,0x80\n"
-    ".byte 0x80,0x40,0x40,0x80,0x50,0x50,0x50,0x80,0x63,0x31,0x7A,0x80,0x00,0x00,0x00,0x00\n"
-    ".byte 0x41,0x74,0x74,0x61,0x63,0x6B,0x73,0x00\n"
-    ".byte 0x4D,0x61,0x67,0x69,0x63,0x00,0x00,0x00\n"
-    ".byte 0x53,0x75,0x6D,0x6D,0x6F,0x6E,0x73,0x00\n"
-    ".byte 0x46,0x72,0x69,0x65,0x6E,0x64,0x73,0x00\n"
-    ".byte 0x44,0x75,0x65,0x6C,0x20,0x41,0x74,0x74,0x61,0x63,0x6B,0x73,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44\n"
-    ".byte 0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44\n"
-    ".byte 0x00,0x00,0x0B,0x44,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43\n"
-    ".byte 0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43\n"
-    ".byte 0x00,0x00,0x20,0x43,0x00,0x00,0x00,0x00\n"
-    ".byte 0x53,0x6C,0x65,0x69,0x67,0x68,0x74,0x73,0x20,0x4C,0x69,0x73,0x74,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x35,0x33,0x38,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x35,0x33,0x39,0x30,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x35,0x33,0x39,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x35,0x34,0x31,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x35,0x34,0x38,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x35,0x35,0x31,0x36,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0xC8,0x5F,0x31,0x00,0xC8,0x61,0x31,0x00,0xEC,0x66,0x31,0x00,0x14,0x62,0x31,0x00\n"
-    ".byte 0x44,0x62,0x31,0x00,0x84,0x62,0x31,0x00,0x9C,0x62,0x31,0x00,0x48,0x63,0x31,0x00\n"
-    ".byte 0xEC,0x66,0x31,0x00,0x5C,0x63,0x31,0x00\n"
-    ".section .data\n"
-    ".align 3\n"
-    " techSeqTbl.4440:\n"
-    ".byte 0xE0,0x00,0xD9,0x00,0xE2,0x00,0xDB,0x00,0xE6,0x00,0xDF,0x00,0xE1,0x00,0xDA,0x00\n"
-    ".byte 0xE3,0x00,0xDC,0x00,0xE5,0x00,0xDE,0x00,0xE4,0x00,0xDD,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00\n"
-    " pTechCateNameTbl.4441:\n"
-    ".byte 0x48,0x36,0x4E,0x00,0x50,0x36,0x4E,0x00,0x58,0x36,0x4E,0x00,0x60,0x36,0x4E,0x00\n"
-    ".byte 0x48,0x36,0x4E,0x00,0x60,0x36,0x4E,0x00,0x68,0x36,0x4E,0x00\n"
-    " pStrListTitle.4442:\n"
-    ".byte 0xC8,0x36,0x4E,0x00\n"
-    " scrollBarSeqTbl.4443:\n"
-    ".byte 0x20,0x01,0x1D,0x01,0x23,0x01\n"
-    ".byte 0x00,0x00\n"
-    ".section .text");
-#if 0 /* register allocation in the sleight-list loop differs (the original spills the category table pointer and the category count) */
+/* Parked: 53 of 621 lines differ: in the sleight-list loop the original spills pTechCateTbl and nTechCateCnt and
+   recomputes &pTechCateTbl[nTechSelectTop] from the spilled pointer every iteration; ours strength-reduces it into
+   an s-register (the same giv difference as setMainCmd's font loop). tried: the ref's unused nLine as the loop
+   counter, non-const table pointer, compare operand order (kept: load order); permuter 6 min (68 -> 65). */
+#if 0
 INT CCamp::setTechWin(INT nSetCmd) {
     FVECTOR vec;
     FVECTOR vec2;
@@ -3046,7 +4545,7 @@ INT CCamp::setTechWin(INT nSetCmd) {
         m_pTechWinCtrl->enableDisp(TRUE);
         break;
     case 9:
-        if (m_nTechSelect < m_nTechSelectTop) {
+        if (m_nTechSelectTop > m_nTechSelect) {
             m_nTechSelectTop = m_nTechSelect;
         } else if (m_nTechSelectTop + 8 < m_nTechSelect) {
             m_nTechSelectTop = m_nTechSelect - 8;
@@ -3062,7 +4561,7 @@ INT CCamp::setTechWin(INT nSetCmd) {
         for (INT i = 0; i < 9; i++) {
             SHORT nTechKind = pTechCateTbl[nTechSelectTop][0];
             SHORT nTechSeqIdx = pTechCateTbl[nTechSelectTop][1];
-            if (nTechSelectTop == m_nTechSelect) {
+            if (m_nTechSelect == nTechSelectTop) {
                 m_nTechKind = nTechKind;
                 if (m_fgNewTbl[nTechKind] > 0) {
                     m_fgNewTbl[nTechKind] = -1;
@@ -3108,41 +4607,64 @@ INT CCamp::setTechWin(INT nSetCmd) {
     }
     return ret;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setTechWin__5CCampi);
 #endif
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setDeckSetWin__5CCampi);
-// setDeckSetWin__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
+// setTechWin__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
 asm(".section .rodata\n"
     ".align 3\n"
-    ".byte 0x00,0x00,0x00,0x43,0x00,0x00,0x00,0x43,0x00,0x00,0x00,0x43,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x80,0xC0,0x00,0x00,0x80,0xC0,0x00,0x00,0x80,0xC0,0x00,0x00,0x00,0x00\n"
+    ".byte 0x80,0x40,0x40,0x80,0x31,0x63,0x7A,0x80,0x80,0x50,0x79,0x80,0x18,0x7B,0x13,0x80\n"
+    ".byte 0x80,0x40,0x40,0x80,0x50,0x50,0x50,0x80,0x63,0x31,0x7A,0x80,0x00,0x00,0x00,0x00\n"
+    ".byte 0x41,0x74,0x74,0x61,0x63,0x6B,0x73,0x00\n"
+    ".byte 0x4D,0x61,0x67,0x69,0x63,0x00,0x00,0x00\n"
+    ".byte 0x53,0x75,0x6D,0x6D,0x6F,0x6E,0x73,0x00\n"
+    ".byte 0x46,0x72,0x69,0x65,0x6E,0x64,0x73,0x00\n"
+    ".byte 0x44,0x75,0x65,0x6C,0x20,0x41,0x74,0x74,0x61,0x63,0x6B,0x73,0x00,0x00,0x00,0x00\n"
+    ".byte 0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44\n"
+    ".byte 0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44,0x00,0x00,0x0B,0x44\n"
+    ".byte 0x00,0x00,0x0B,0x44,0x00,0x00,0x00,0x00\n"
+    ".byte 0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43\n"
+    ".byte 0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43,0x00,0x00,0x20,0x43\n"
+    ".byte 0x00,0x00,0x20,0x43,0x00,0x00,0x00,0x00\n"
+    ".byte 0x53,0x6C,0x65,0x69,0x67,0x68,0x74,0x73,0x20,0x4C,0x69,0x73,0x74,0x00,0x00,0x00\n"
     ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
     ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x35,0x35,0x39,0x34,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x70,0x70,0x28,0x35,0x33,0x38,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
     ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
     ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x35,0x36,0x30,0x30,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x70,0x70,0x28,0x35,0x33,0x39,0x30,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
     ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
     ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x35,0x36,0x35,0x36,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x70,0x70,0x28,0x35,0x33,0x39,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
     ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
     ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x35,0x36,0x36,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x70,0x70,0x28,0x35,0x34,0x31,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
     ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
     ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x35,0x36,0x37,0x34,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x70,0x70,0x28,0x35,0x34,0x38,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x35,0x35,0x31,0x36,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
     ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0xD8,0x67,0x31,0x00,0xE8,0x68,0x31,0x00,0x14,0x6E,0x31,0x00,0x9C,0x69,0x31,0x00\n"
-    ".byte 0xCC,0x69,0x31,0x00,0x24,0x6A,0x31,0x00,0x3C,0x6A,0x31,0x00,0x14,0x6E,0x31,0x00\n"
-    ".byte 0x14,0x6E,0x31,0x00,0xC0,0x6A,0x31,0x00\n"
+    ".byte 0xC8,0x5F,0x31,0x00,0xC8,0x61,0x31,0x00,0xEC,0x66,0x31,0x00,0x14,0x62,0x31,0x00\n"
+    ".byte 0x44,0x62,0x31,0x00,0x84,0x62,0x31,0x00,0x9C,0x62,0x31,0x00,0x48,0x63,0x31,0x00\n"
+    ".byte 0xEC,0x66,0x31,0x00,0x5C,0x63,0x31,0x00\n"
     ".section .data\n"
     ".align 3\n"
-    " decksetSeqTbl.4447:\n"
-    ".byte 0xC9,0x00,0xCC,0x00,0xCA,0x00,0xCD,0x00,0xC9,0x00,0xCC,0x00,0xC4,0x00,0xC5,0x00\n"
-    " decksetWinSeqTbl.4448:\n"
-    ".byte 0xC6,0x00,0xC7,0x00,0xC8,0x00,0x00,0x00,0xC1,0x00,0xC2,0x00,0xC3,0x00,0x00,0x00\n"
+    " techSeqTbl.4440:\n"
+    ".byte 0xE0,0x00,0xD9,0x00,0xE2,0x00,0xDB,0x00,0xE6,0x00,0xDF,0x00,0xE1,0x00,0xDA,0x00\n"
+    ".byte 0xE3,0x00,0xDC,0x00,0xE5,0x00,0xDE,0x00,0xE4,0x00,0xDD,0x00\n"
+    ".byte 0x00,0x00,0x00,0x00\n"
+    " pTechCateNameTbl.4441:\n"
+    ".byte 0x48,0x36,0x4E,0x00,0x50,0x36,0x4E,0x00,0x58,0x36,0x4E,0x00,0x60,0x36,0x4E,0x00\n"
+    ".byte 0x48,0x36,0x4E,0x00,0x60,0x36,0x4E,0x00,0x68,0x36,0x4E,0x00\n"
+    " pStrListTitle.4442:\n"
+    ".byte 0xC8,0x36,0x4E,0x00\n"
+    " scrollBarSeqTbl.4443:\n"
+    ".byte 0x20,0x01,0x1D,0x01,0x23,0x01\n"
+    ".byte 0x00,0x00\n"
     ".section .text");
-#if 0 /* ret = 1 is stored after the CtdMan instance check in the original; the second button's register use differs */
+
 INT CCamp::setDeckSetWin(INT nSetCmd) {
     FVECTOR vec;
     FVECTOR vec2;
@@ -3173,9 +4695,9 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
         if (m_pDeckSetWinCtrl->isEnd(0)) {
             m_pDeckSetWinCtrl->replaceSeq(0, m_pSeqName, decksetWinSeqTbl[fgSetOrClear + 1]);
             UINT ctdID = fgSetOrClear ? 0x50040B : 0x500409;
-            ret = 1;
             m_pHelpFnt->setText(CCtdMan::getText(ctdID));
             m_pDeckSetBC->setDisp(TRUE, FALSE);
+            ret = 1;
         }
     case 3:
         if (m_pDeckSetBC) {
@@ -3221,9 +4743,8 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
                 rgba2.col = !fgSetOrClear ? 0x80406331 : 0x80404040;
             }
             pButton = m_pDeckSetButton[i + 3] = NEW(5674, CButton);
-            nSetSeqIdx++;
             pButton->init(m_pSeqName, 0x10, decksetSeqTbl, vec2, m_pDeckSetWinCtrl, CCtdMan::getText(i + 0x500000), 0xE, 14.0f, 1.0f,
-                          0x40, &rgba2, nSetSeqIdx + fgSetOrClear);
+                          0x40, &rgba2, ++nSetSeqIdx + fgSetOrClear);
             vec.y += 26.0f;
             vec2.y += 26.0f;
         }
@@ -3232,9 +4753,260 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
     }
     return ret;
 }
-#endif
 
+/* Parked: same size, 33 of 1409 lines differ: the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl,
+   &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt,
+   0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by member offset) - stable across
+   rebuilds, likely gcse hash-table order; plus one s0 move around a C2DFnt new. tried: ref declaration order,
+   chain-store order, p2DSeqCtrl/p2DFnt/p2DCard locals; permuter 15 min (59 -> 58); shared function-level i/j (as the
+   ref lists one i and one j: 256 lines) or j only (38), the block `n` locals as idx/nKind. */
+#if 0
+INT CCamp::setMapCardWin(INT nSetCmd) {
+    static char* pStrNum[4] = { "%02d/99", "%02d", STR_TILDE_02D, "" };
+    static USHORT mcTabSeqTbl[5] = { 330, 329, 327, 326, 328 };
+    static unsigned char colSeqTbl[3] = { 116, 95, 75 };
+    FVECTOR vec;
+    FVECTOR vec2;
+    C2DSeqCtrl* p2DSeqCtrl;
+    C2DFnt* p2DFnt;
+    C2DCard* p2DCard;
+    G_RGBA rgba;
+    FLOAT fRatioHeight;
+    FLOAT fRatioPosY;
+    char chrTmp[64];
+    CARD card;
+    USHORT nKind;
+    INT idx;
+    INT ret;
+    USHORT nColSeq;
+    CARD cardOld;
+    CampRoomInfo* pCampRoomInfo;
+    static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
+
+    ret = 0;
+    switch (nSetCmd) {
+    case 0:
+        m_nMCSelCateSelect = m_nMCSelSelect = m_nMCSelSelectTop = m_nMCSelNumSelect = 0;
+        initCardData(1);
+        initCardMapKind(m_nMCSelCateSelect);
+        if (!m_pMCInfoWinCtrl) {
+            rgba.col = 0x807C7C7C;
+            m_pMCInfoWinCtrl = NEW(5731, C2DSeqCtrl);
+            m_pMCInfoWinCtrl->setLayer(0x10);
+            m_pMCInfoWinCtrl->enableColorCtrl(TRUE);
+            C2DMan::getLayPosition(m_pLadName, 0x16, 2, vec, 0);
+            m_pMCInfoWinCtrl->setPos(vec);
+            m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x143);
+            m_pMCInfoFnt[0] = NEW(5737, C2DFnt)(0, 0, &rgba, 0xE, NULL, 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[0], -134.0f, -49.0f);
+            m_pMCInfoFnt[1] = NEW(5740, C2DFnt)(0, 0, &rgba, 0xD, CCtdMan::getText(0x500300), 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[1], -72.0f, 6.0f);
+            m_pMCInfoFnt[2] = NEW(5743, C2DFnt)(0, 0, &rgba, 0xD, CCtdMan::getText(0x500301), 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[2], -72.0f, 43.0f);
+            m_pMCInfoFnt[3] = NEW(5747, C2DFnt)(0, 0, &rgba, 0xE, NULL, 0x40);
+            m_pMCInfoWinCtrl->addFntShift(m_pSeqName, m_pMCInfoFnt[3], -137.0f, 102.0f);
+            m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x13D);
+            m_pMCInfoWinCtrl->addSeq(m_pSeqName, 0x13D);
+            m_pMCInfoCard = NEW(5753, C2DCard);
+            m_pMCInfoCard->setParent(m_pMCInfoWinCtrl);
+            m_pMCInfoCard->setLayer(0x11);
+            m_pMCInfoCard->enableColorCtrl(TRUE);
+            m_pMCInfoCard->addSeqShift(m_pSeqName, 0x158, -110.0f, 26.0f);
+            vec.set(33.0f, -23.0f, 0.0f);
+            for (INT i = 0; i < 2; i++) {
+                for (INT j = 0; j < 5; j++) {
+                    idx = i * 5 + j;
+                    p2DSeqCtrl = m_pMCInfoNumCtrl[idx] = NEW(5764, C2DSeqCtrl);
+                    p2DSeqCtrl->setParent(m_pMCInfoWinCtrl);
+                    p2DSeqCtrl->setLayer(0x11);
+                    p2DSeqCtrl->enableColorCtrl(TRUE);
+                    p2DSeqCtrl->setLocalPos(vec);
+                    p2DSeqCtrl->addSeq(m_pSeqName, idx * 2 + 0x60);
+                    p2DFnt = m_pMCInfoNumFnt[idx] = NEW(5772, C2DFnt)(0, 0, &rgba, 0xD, NULL, 0x40);
+                    p2DFnt->allocText(chrTmp);
+                    p2DSeqCtrl->addFntShift(m_pSeqName, p2DFnt, 14.0f, 7.0f);
+                    vec.y += 20.0f;
+                }
+                vec.x += 62.0f;
+                vec.y -= 100.0f;
+            }
+            p2DSeqCtrl = m_pMCSelWinCtrl[0] = NEW(5784, C2DSeqCtrl);
+            p2DSeqCtrl->setLayer(0x11);
+            p2DSeqCtrl->enableColorCtrl(TRUE);
+            C2DMan::getLayPosition(m_pLadName, 0x16, 1, vec, 0);
+            p2DSeqCtrl->setPos(vec);
+            p2DSeqCtrl->addSeq(m_pSeqName, 0x13A);
+            p2DSeqCtrl = m_pMCSelWinCtrl[1] = NEW(5792, C2DSeqCtrl);
+            p2DSeqCtrl->setLayer(0x10);
+            p2DSeqCtrl->enableColorCtrl(TRUE);
+            p2DSeqCtrl->setParent(m_pMCSelWinCtrl[0]);
+            C2DMan::getLayPosition(m_pLadName, 0x15, 0, vec, 0);
+            p2DSeqCtrl->addSeqShift(m_pSeqName, 0x14B, vec.x, vec.y);
+            m_pMCFnt[0] = NEW(5799, C2DFnt)(0, 0, &rgba, 0xC, NULL, 0x40);
+            p2DSeqCtrl->addFntShift(m_pSeqName, m_pMCFnt[0], 22.0f, 1.0f);
+            rgba.col = 0x80007878;
+            for (INT i = 0; i < 4; i++) {
+                m_pMCFnt[i + 1] = NEW(5804, C2DFnt)(0, 0, &rgba, 0xC, NULL, 0x40);
+                p2DSeqCtrl->addFntShift(m_pSeqName, m_pMCFnt[i + 1], i * 38.0f + -58.0f, 18.0f);
+            }
+            p2DSeqCtrl = m_pMCSelWinCtrl[2] = NEW(5810, C2DSeqCtrl);
+            p2DSeqCtrl->setLayer(0xF);
+            p2DSeqCtrl->enableColorCtrl(TRUE);
+            p2DSeqCtrl->setParent(m_pMCSelWinCtrl[0]);
+            p2DSeqCtrl->addSeq(m_pSeqName, 0x14A);
+            for (INT i = 0; i < 3; i++) {
+                for (INT j = 0; j < 3; j++) {
+                    p2DCard = m_pMCCard[i * 3 + j] = NEW(5820, C2DCard);
+                    p2DCard->setParent(m_pMCSelWinCtrl[0]);
+                    p2DCard->setLayer(0x11);
+                    p2DCard->enableColorCtrl(TRUE);
+                    C2DMan::getLayPosition(m_pLadName, 7, i * 3 + j + 3, vec, 0);
+                    p2DCard->setLocalPos(vec);
+                    p2DCard->addSeq(m_pSeqName, 0xB6);
+                }
+            }
+            m_pMCSelScrollBar = NEW(5832, CScrollBar);
+            vec.set(68.0f, -56.0f, 0.0f);
+            m_pMCSelScrollBar->init(m_pSeqName, 0x14, scrollBarSeqTbl, vec, 117.0f, m_pMCSelWinCtrl[0]);
+        } else {
+            m_pMCInfoWinCtrl->replaceSeq(0, m_pSeqName, 0x143);
+        }
+        break;
+    case 1:
+        if (m_pMCInfoWinCtrl->isEnd(0)) {
+            m_pMCInfoWinCtrl->replaceSeq(0, m_pSeqName, 0x144);
+            m_pMCSelWinCtrl[0]->replaceSeq(0, m_pSeqName, 0x13B);
+            m_pHelpFnt->setText(CCtdMan::getText(0x500402));
+            ret = 1;
+        }
+        break;
+    case 4:
+        m_pMCInfoWinCtrl->replaceSeq(0, m_pSeqName, 0x145);
+        m_pMCSelWinCtrl[0]->replaceSeq(0, m_pSeqName, 0x13C);
+        m_pHelpFnt->setText(m_pMainCmdName[1][1][6]);
+        break;
+    case 5:
+        ret = m_pMCInfoWinCtrl->isEnd(0) != 0;
+        break;
+    case 6:
+        SAFE_DELETE(m_pMCInfoWinCtrl);
+        for (INT i = 0; i < 3; i++) {
+            SAFE_DELETE(m_pMCSelWinCtrl[i]);
+        }
+        for (INT i = 0; i < 9; i++) {
+            SAFE_DELETE(m_pMCCard[i]);
+        }
+        SAFE_DELETE(m_pMCSelScrollBar);
+        for (INT i = 0; i < 10; i++) {
+            SAFE_DELETE(m_pMCInfoNumCtrl[i]);
+        }
+        SAFE_DELETE(m_pMCInfoCard);
+        break;
+    case 10:
+        m_nMCSelSelectTop = 0;
+        m_pMCSelWinCtrl[2]->replaceSeq(0, m_pSeqName, mcTabSeqTbl[m_nMCSelCateSelect]);
+        initCardMapKind(m_nMCSelCateSelect);
+    case 9: {
+        nColSeq = 0;
+        nKind = 0;
+        for (INT i = 3; i > 0; i--) {
+            m_pMCInfoCard->destroy(i);
+        }
+        cardOld = m_pMCInfoCard->m_card;
+        if (!m_bCategorySelectMode) {
+            if (m_nMapKind[m_nMCSelCateSelect]) {
+                nKind = m_nMapKindTbl[m_nMCSelSelect];
+                _setCardNK(card, nKind, -1);
+                m_pMCInfoCard->create(card);
+                if (nKind != cardOld.m_nKind) {
+                    m_pMCInfoCard->restart(0, 0.0f);
+                }
+                m_pMCInfoFnt[0]->setText(card.getName());
+                nColSeq = colSeqTbl[card.m_nCategory21 - 9];
+            }
+        } else {
+            m_pMCInfoFnt[0]->setText(pStrNum[3]);
+        }
+        pCampRoomInfo = getRoomInfo(nKind);
+        if (pCampRoomInfo) {
+            m_pMCInfoFnt[3]->setText(CCtdMan::getText(pCampRoomInfo->nRoomExplane));
+            m_pMCInfoWinCtrl->replaceSeqShift(5, m_pSeqName, pCampRoomInfo->nEnemyVolume + 0x13D, -18.0f, 17.0f);
+            m_pMCInfoWinCtrl->replaceSeqShift(6, m_pSeqName, pCampRoomInfo->nRoomVolume + 0x13D, -18.0f, 55.0f);
+            m_pMCInfoWinCtrl->enableDisp(5, TRUE);
+            m_pMCInfoWinCtrl->enableDisp(6, TRUE);
+        } else {
+            m_pMCInfoFnt[3]->setText(pStrNum[3]);
+            m_pMCInfoWinCtrl->enableDisp(5, FALSE);
+            m_pMCInfoWinCtrl->enableDisp(6, FALSE);
+        }
+        sprintf(chrTmp, pStrNum[0], m_nMapKindTotal[0]);
+        m_pMCFnt[0]->allocText(chrTmp);
+        sprintf(chrTmp, pStrNum[1], m_nMapKindTotal[1]);
+        m_pMCFnt[1]->allocText(chrTmp);
+        sprintf(chrTmp, pStrNum[1], m_nMapKindTotal[2]);
+        m_pMCFnt[2]->allocText(chrTmp);
+        sprintf(chrTmp, pStrNum[1], m_nMapKindTotal[3]);
+        m_pMCFnt[3]->allocText(chrTmp);
+        sprintf(chrTmp, pStrNum[1], m_nMapKindTotal[4]);
+        m_pMCFnt[4]->allocText(chrTmp);
+        for (INT i = 0; i < 9; i++) {
+            idx = m_nMCSelSelectTop + i;
+            p2DCard = m_pMCCard[i];
+            p2DCard->destroy(3);
+            p2DCard->destroy(2);
+            p2DCard->destroy(1);
+            if (idx < m_nMapKind[m_nMCSelCateSelect]) {
+                _setCardNK(card, m_nMapKindTbl[idx], -1);
+                p2DCard->create(card);
+                if (card.m_nCategory20 == 10) {
+                    p2DCard->restart(p2DCard->getNumSeq() - 1, m_iFrame60);
+                }
+            }
+        }
+        if (nKind) {
+            for (idx = 0; idx < m_nCardKindMax; idx++) {
+                if (m_nCardKind[idx] == nKind) break;
+            }
+            ASSERT_AT(5964, idx < m_nCardKindMax);
+            if (nKind == 0xB9) nColSeq = 0x73;
+        }
+        for (INT i = 0; i < 10; i++) {
+            p2DSeqCtrl = m_pMCInfoNumCtrl[i];
+            if ((USHORT)(nKind - 0xA1) < 25) {
+                if (!m_bCategorySelectMode && m_nMapKind[m_nMCSelCateSelect]) {
+                    if (nColSeq != 0x73 || i == 0) {
+                        INT n = m_nCardKind10[idx][i];
+                        p2DSeqCtrl->enableDisp(TRUE);
+                        p2DSeqCtrl->replaceSeq(0, m_pSeqName, nColSeq + i * 2 + (n == 0));
+                        sprintf(chrTmp, pStrNum[2], n);
+                        m_pMCInfoNumFnt[i]->allocText(chrTmp);
+                        continue;
+                    }
+                }
+                p2DSeqCtrl->enableDisp(FALSE);
+            } else {
+                p2DSeqCtrl->enableDisp(FALSE);
+            }
+        }
+        INT n = (m_nMapKind[m_nMCSelCateSelect] + 2) / 3;
+        if (!n) n = 1;
+        fRatioHeight = 3.0f / n;
+        if (fRatioHeight > 1.0f) {
+            fRatioHeight = 1.0f;
+        }
+        fRatioPosY = (FLOAT)(m_nMCSelSelectTop / 3) / n;
+        if (fRatioPosY > 1.0f) {
+            fRatioPosY = 1.0f;
+        }
+        m_pMCSelScrollBar->change(fRatioPosY, fRatioHeight);
+        break;
+    }
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setMapCardWin__5CCampi);
+#endif
 // setMapCardWin__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
 asm(".section .rodata\n"
     ".align 3\n"
@@ -3302,64 +5074,254 @@ asm(".section .rodata\n"
     ".byte 0x20,0x01,0x1D,0x01,0x23,0x01\n"
     ".byte 0x00,0x00\n"
     ".section .text");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setStatusWin__5CCampi);
-// setStatusWin__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    " D_004E3C80:\n"
-    ".byte 0x25,0x64,0x2F,0x25,0x64,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43\n"
-    ".byte 0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43,0x00,0x00,0x8E,0x43\n"
-    ".byte 0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43\n"
-    ".byte 0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43,0x00,0x00,0x28,0x43\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x30,0x38,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x30,0x38,0x39,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x30,0x39,0x36,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x31,0x30,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x31,0x31,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x31,0x36,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x31,0x37,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x33,0x30,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x68,0x82,0x31,0x00,0x74,0x89,0x31,0x00,0x88,0x90,0x31,0x00,0x2C,0x8A,0x31,0x00\n"
-    ".byte 0x5C,0x8A,0x31,0x00,0xC4,0x8A,0x31,0x00,0xDC,0x8A,0x31,0x00,0x88,0x90,0x31,0x00\n"
-    ".byte 0x88,0x90,0x31,0x00,0x28,0x8E,0x31,0x00,0x0C,0x8C,0x31,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0xBC,0x85,0x31,0x00,0xDC,0x85,0x31,0x00,0xFC,0x85,0x31,0x00,0x4C,0x86,0x31,0x00\n"
-    ".byte 0x80,0x86,0x31,0x00,0xC8,0x86,0x31,0x00\n"
-    ".section .data\n"
-    ".align 3\n"
-    " statusSeqTbl.4459:\n"
-    ".byte 0x2C,0x01,0x2C,0x01,0x2C,0x01,0x2B,0x01,0x2B,0x01,0x29,0x01,0x2A,0x01,0x2A,0x01\n"
-    ".byte 0x2A,0x01,0x2C,0x01,0x2C,0x01,0x2C,0x01,0x2B,0x01,0x29,0x01,0x28,0x01,0x2A,0x01\n"
-    " techSeqTbl.4460:\n"
-    ".byte 0x2E,0x01,0x33,0x01,0x31,0x01,0x32,0x01,0x2F,0x01,0x60,0x01,0x30,0x01\n"
-    ".byte 0x00,0x00\n"
-    " techTabSeqTbl.4461:\n"
-    ".byte 0x4F,0x01,0x50,0x01,0x51,0x01,0x52,0x01,0x53,0x01,0x54,0x01,0x55,0x01,0x56,0x01\n"
-    ".byte 0x57,0x01\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00\n"
-    " statusStr.4462:\n"
-    ".byte 0xE0,0x33,0x4E,0x00,0x80,0x3C,0x4E,0x00\n"
-    " scrollBarSeqTbl.4463:\n"
-    ".byte 0x20,0x01,0x1D,0x01,0x23,0x01\n"
-    ".byte 0x00,0x00\n"
-    ".section .text");
+INT CCamp::setStatusWin(INT nSetCmd) {
+    FVECTOR vec;
+    FVECTOR vec2;
+    C2DSeqCtrl* p2DSeqCtrl;
+    C2DSeqObj* p2DSeqObj;
+    G_RGBA rgba;
+    FLOAT fRatioHeight;
+    FLOAT fRatioPosY;
+    static USHORT statusSeqTbl[16] = { 300, 300, 300, 299, 299, 297, 298, 298, 298, 300, 300, 300, 299, 297, 296, 298 };
+    static USHORT techSeqTbl[7] = { 302, 307, 305, 306, 303, 352, 304 };
+    static USHORT techTabSeqTbl[9] = { 335, 336, 337, 338, 339, 340, 341, 342, 343 };
+    static char* statusStr[2] = { STR_PCT_D, "%d/%d" };
+    float fLightXTbl[8] = { 284.0f, 284.0f, 284.0f, 284.0f, 284.0f, 284.0f, 284.0f, 284.0f };
+    float fLightYTbl[8] = { 168.0f, 168.0f, 168.0f, 168.0f, 168.0f, 168.0f, 168.0f, 168.0f };
+    char buf[64];
+    LPCTSTR pBuf;
+    INT ret = 0;
+    const unsigned char (*pTechCateTbl)[2];
+    BYTE* pTechCate;
+    INT nLine;
+    INT idxStart;
+    INT idxStart2;
+    INT nFriendCnt;
+    PLM::CPlayerManager* pPlayerManager;
+    static USHORT scrollBarSeqTbl[3] = { 288, 285, 291 };
+
+    switch (nSetCmd) {
+    case 0:
+        m_nStatusTechCateSelect = m_nStatusTechSelect = m_nStatusTechSelectTop = 0;
+        m_nStatusMax = !m_bPlayerKind ? 9 : 7;
+        m_nTechSelectMax = !m_bPlayerKind ? 0x56 : 0xE;
+        if (!m_pStatusWinCtrl) {
+            m_pStatusWinCtrl = NEW(6082, C2DSeqCtrl);
+            m_pStatusWinCtrl->setLayer(0x10);
+            m_pStatusWinCtrl->enableColorCtrl(TRUE);
+            C2DMan::getLayPosition(m_pLadName, 0x11, 3, vec, 0);
+            m_pStatusWinCtrl->setPos(vec);
+            m_pStatusWinCtrl->addSeq(m_pSeqName, 0x125);
+            p2DSeqCtrl = m_pStatusTechWinCtrl[0] = NEW(6089, C2DSeqCtrl);
+            p2DSeqCtrl->setLayer(0x11);
+            p2DSeqCtrl->enableColorCtrl(TRUE);
+            C2DMan::getLayPosition(m_pLadName, 0x11, 2, vec, 0);
+            p2DSeqCtrl->setPos(vec);
+            p2DSeqCtrl->addSeq(m_pSeqName, 0x14C);
+            p2DSeqCtrl = m_pStatusTechWinCtrl[1] = NEW(6096, C2DSeqCtrl);
+            p2DSeqCtrl->setLayer(0x10);
+            p2DSeqCtrl->enableColorCtrl(TRUE);
+            p2DSeqCtrl->addSeq(m_pSeqName, !m_bPlayerKind ? 0x14F : 0x154);
+            p2DSeqCtrl->setParent(m_pStatusTechWinCtrl[0]);
+            m_pStatusBC = NEW(6103, CButtonCursor)(0x12, m_pStatusTechWinCtrl[0], 0x12D);
+            idxStart = m_bPlayerKind * 7;
+            idxStart2 = m_bPlayerKind * 9;
+            nFriendCnt = 0;
+            pPlayerManager = PLM::CPlayerManager::getPLM();
+            for (INT i = 0; i < m_nStatusMax; i++) {
+                C2DMan::getLayPosition(m_pLadName, !m_bPlayerKind ? 0x11 : 0x13, i + 4, vec, 1);
+                vec.y += 8.0f;
+                CButton* pButton = m_pStatusButton[i] = NEW(6115, CButton);
+                pButton->init(m_pSeqName, 0x10, statusSeqTbl, vec, m_pStatusWinCtrl,
+                                         i < 7 ? CCtdMan::getText(i + idxStart + 0x500200) : NULL, 0xE, 0.0f, 1.0f, 0x40,
+                                         NULL, idxStart2 + i);
+                pBuf = buf;
+                switch (i) {
+                case 0:
+                    sprintf(buf, statusStr[0], CStatus::getLV());
+                    break;
+                case 1:
+                    sprintf(buf, statusStr[0], CStatus::getEXP());
+                    break;
+                case 2: {
+                    INT nextExp = CStatus::getLvExp(CStatus::getLV()) - CStatus::getEXP();
+                    if (nextExp < 0) nextExp = 0;
+                    sprintf(buf, statusStr[0], nextExp);
+                    break;
+                }
+                case 3:
+                    sprintf(buf, statusStr[1], CStatus::getStaus().HP, CStatus::getStaus().HPMax);
+                    break;
+                case 4:
+                    sprintf(buf, statusStr[0], !m_bPlayerKind ? CStatus::getCPMax() : CStatus::getAP());
+                    break;
+                case 5:
+                    if (!m_bPlayerKind) {
+                        pBuf = CCard::m_pCardInfo->_deckName[CCard::m_pCardInfo->_nCurrentDeck];
+                    } else {
+                        sprintf(buf, statusStr[0], CStatus::getDPMax());
+                    }
+                    break;
+                default: {
+                    INT kind = 0;
+                    while (nFriendCnt < 3) {
+                        kind = pPlayerManager->getAppearFriendCard(nFriendCnt, 1);
+                        nFriendCnt++;
+                        if (kind) break;
+                    }
+                    if (kind) {
+                        CARD card;
+                        _setCardNK(card, kind, -1);
+                        pBuf = card.getName();
+                    } else {
+                        pBuf = NULL;
+                    }
+                    break;
+                }
+                }
+                rgba.col = i < 5 ? 0x80046060 : (i == 5 && m_bPlayerKind ? 0x80046060 : 0x807C7C7C);
+                C2DFnt* p2DFnt = m_pStatusFnt[i] = NEW(6167, C2DFnt)(0, 0, &rgba, 0xE, NULL, 0x41);
+                p2DFnt->allocText(pBuf);
+                pButton->get2DSeqCtrl()->addFntShift(m_pSeqName, p2DFnt, 220.0f, 1.0f);
+            }
+            m_pStatusTechScrollBar = NEW(6173, CScrollBar);
+            vec.set(133.0f, -56.0f, 0.0f);
+            m_pStatusTechScrollBar->init(m_pSeqName, 0x14, scrollBarSeqTbl, vec, 157.0f, m_pStatusTechWinCtrl[0]);
+        } else {
+            m_pStatusWinCtrl->replaceSeq(0, m_pSeqName, 0x125);
+        }
+        break;
+    case 1:
+        if (m_pStatusWinCtrl->isEnd(0)) {
+            m_pStatusWinCtrl->replaceSeq(0, m_pSeqName, 0x126);
+            m_pStatusTechWinCtrl[0]->replaceSeq(0, m_pSeqName, 0x14D);
+            m_pStatusBC->setDisp(TRUE, FALSE);
+            m_pHelpFnt->setText(CCtdMan::getText(0x500417));
+            ret = 1;
+        }
+    case 3:
+        if (m_pStatusBC) {
+            m_pStatusBC->moveLight(getFrameRateF());
+        }
+        break;
+    case 4:
+        m_pStatusWinCtrl->replaceSeq(0, m_pSeqName, 0x127);
+        m_pStatusTechWinCtrl[0]->replaceSeq(0, m_pSeqName, 0x14E);
+        m_pStatusBC->setOut();
+        m_pHelpFnt->setText(m_pMainCmdName[1][1][6]);
+        break;
+    case 5:
+        ret = m_pStatusWinCtrl->isEnd(0) != 0;
+        break;
+    case 6:
+        SAFE_DELETE(m_pStatusWinCtrl);
+        SAFE_DELETE(m_pStatusTechWinCtrl[0]);
+        SAFE_DELETE(m_pStatusTechWinCtrl[1]);
+        for (INT i = 0; i < 9; i++) {
+            SAFE_DELETE(m_pStatusButton[i]);
+        }
+        for (INT i = 0; i < 8; i++) {
+            SAFE_DELETE(m_pStatusTechButton[i]);
+        }
+        SAFE_DELETE(m_pStatusBC);
+        SAFE_DELETE(m_pStatusTechScrollBar);
+        break;
+    case 10: {
+        m_nStatusTechSelect = m_nStatusTechSelectTop = 0;
+        m_pStatusTechWinCtrl[1]->replaceSeq(0, m_pSeqName, techTabSeqTbl[m_nStatusTechCateSelect + m_bPlayerKind * 5]);
+        for (INT i = 0; i < 5; i++) {
+            m_nStatusTech[i] = 0;
+        }
+        m_nStatusTechSelectMax = 0;
+        pTechCateTbl = !m_bPlayerKind ? m_techSoraCateTbl : m_techRikuCateTbl;
+        for (INT i = 0; i < m_nTechSelectMax; i++) {
+            pTechCate = (BYTE*)pTechCateTbl[i];
+            if (CTechnic::canUse(pTechCate[0])) {
+                BYTE nCate;
+                if (!m_bPlayerKind) {
+                    if (pTechCate[1] < 2) {
+                        nCate = 0;
+                    } else if (pTechCate[1] < 4) {
+                        nCate = 1;
+                    } else if (pTechCate[1] <= 7) {
+                        nCate = 2;
+                    } else {
+                        nCate = 3;
+                    }
+                } else {
+                    if (pTechCate[1] < 10) {
+                        nCate = 0;
+                    } else if (pTechCate[1] <= 11) {
+                        nCate = 1;
+                    } else {
+                        nCate = 2;
+                    }
+                }
+                m_nStatusTech[0]++;
+                m_nStatusTech[nCate + 1]++;
+                if (!m_nStatusTechCateSelect || nCate == m_nStatusTechCateSelect - 1) {
+                    m_techCateTbl[m_nStatusTechSelectMax][0] = pTechCateTbl[i][0];
+                    m_techCateTbl[m_nStatusTechSelectMax][1] = nCate + m_bPlayerKind * 4;
+                    m_nStatusTechSelectMax++;
+                }
+            }
+        }
+        if (m_bCategorySelectMode) {
+            vec.set(m_nStatusTechCateSelect ? m_nStatusTechCateSelect * 24.0f + -42.0f : -68.0f, -100.0f, 0.0f);
+            m_pStatusBC->setLocalPos(vec);
+        }
+    }
+    case 9: {
+        if (m_nStatusTechSelectTop > m_nStatusTechSelect) {
+            m_nStatusTechSelectTop = m_nStatusTechSelect;
+        } else if (m_nStatusTechSelectTop + 7 < m_nStatusTechSelect) {
+            m_nStatusTechSelectTop = m_nStatusTechSelect - 7;
+        }
+        rgba.col = 0x807C7C7C;
+        for (INT i = 0; i < 8; i++) {
+            SAFE_DELETE(m_pStatusTechButton[i]);
+            INT idx = m_nStatusTechSelectTop + i;
+            if (idx < m_nStatusTechSelectMax) {
+                pTechCate = m_techCateTbl[idx];
+                USHORT nTechKind = pTechCate[0];
+                LPCTSTR pStr = CTechnic::getName(nTechKind);
+                if (!m_bCategorySelectMode && idx == m_nStatusTechSelect) {
+                    if (m_fgNewTbl[nTechKind] > 0) {
+                        m_fgNewTbl[nTechKind] = -1;
+                    }
+                }
+                C2DMan::getLayPosition(m_pLadName, 0x12, i + 2, vec, 0);
+                CButton* pButton = m_pStatusTechButton[i] = NEW(6303, CButton);
+                pButton->init(m_pSeqName, 0x11, techSeqTbl, vec, m_pStatusTechWinCtrl[0], pStr, 0xF, 1.0f, 2.0f,
+                                             0x40, &rgba, pTechCate[1]);
+                if (m_fgNewTbl[nTechKind]) {
+                    p2DSeqObj = pButton->get2DSeqCtrl()->addSeqShift(
+                        m_pSeqName, m_fgNewTbl[nTechKind] > 0 ? 0x1E : 0x1D, 170.0f, -13.0f);
+                    p2DSeqObj->restart(m_iFrame60);
+                }
+            }
+        }
+        if (!m_bCategorySelectMode) {
+            m_pStatusBC->select(m_nStatusTechSelect - m_nStatusTechSelectTop, m_pStatusTechButton, fLightXTbl, fLightYTbl);
+        }
+        INT nMax = m_nStatusTechSelectMax;
+        if (!nMax) {
+            nMax = 1;
+        }
+        fRatioHeight = 8.0f / nMax;
+        if (fRatioHeight > 1.0f) {
+            fRatioHeight = 1.0f;
+        }
+        fRatioPosY = (FLOAT)m_nStatusTechSelectTop / nMax;
+        if (fRatioPosY > 1.0f) {
+            fRatioPosY = 1.0f;
+        }
+        m_pStatusTechScrollBar->change(fRatioPosY, fRatioHeight);
+        break;
+    }
+    }
+    return ret;
+}
 INT CCamp::setConfigWin(INT nSetCmd) {
     FVECTOR vec;
     FVECTOR vec2;
@@ -3481,86 +5443,722 @@ INT CCamp::setConfigWin(INT nSetCmd) {
     return ret;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setWorldmap__5CCampi);
-// setWorldmap__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    " D_004E4028:\n"
-    ".byte 0x77,0x6F,0x72,0x6C,0x64,0x6D,0x61,0x70,0x3A,0x30,0x30,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x77,0x6F,0x72,0x6C,0x64,0x5F,0x69,0x63,0x6F,0x6E,0x3A,0x30,0x30,0x00,0x00,0x00\n"
-    ".byte 0x5A,0x6F,0x6F,0x6D,0x20,0x49,0x6E,0x7B,0x20,0x20,0x20,0x20,0x20,0xF9,0x44,0x53\n"
-    ".byte 0x68,0x6F,0x77,0x20,0x43,0x72,0x69,0x74,0x65,0x72,0x69,0x61,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x35,0x37,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x35,0x38,0x30,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x36,0x30,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x36,0x30,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x36,0x31,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x36,0x31,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x37,0x35,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x38,0x37,0x34,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x38,0x39,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x30,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x31,0x34,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x33,0x34,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x34,0x30,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x34,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x35,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x35,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x36,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x60,0x99,0x31,0x00,0x80,0xAD,0x31,0x00,0xE4,0xB5,0x31,0x00,0x28,0xAF,0x31,0x00\n"
-    ".byte 0x4C,0xB0,0x31,0x00,0x6C,0xB2,0x31,0x00,0xE4,0xB5,0x31,0x00,0xE4,0xB5,0x31,0x00\n"
-    ".byte 0x28,0xB3,0x31,0x00,0xE4,0xB5,0x31,0x00,0x10,0xB3,0x31,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x50,0xA3,0x31,0x00,0x48,0xA8,0x31,0x00,0x8C,0xA3,0x31,0x00,0xA4,0xA3,0x31,0x00\n"
-    ".byte 0xBC,0xA3,0x31,0x00,0x50,0xA3,0x31,0x00,0xD4,0xA3,0x31,0x00,0x50,0xA3,0x31,0x00\n"
-    ".byte 0x50,0xA3,0x31,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .data\n"
-    ".align 2\n"
-    " pSeqName.4476:\n"
-    ".byte 0x28,0x40,0x4E,0x00\n"
-    " pSeqName2.4477:\n"
-    ".byte 0x38,0x40,0x4E,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00\n"
-    " roomSeqTbl.4478:\n"
-    ".byte 0x0C,0x11,0x10,0x15,0x0F,0x14,0x13,0x19,0x12,0x18,0x17,0x1C,0x16,0x1B,0x1A,0x1D\n"
-    " pStrButton.4479:\n"
-    ".byte 0x48,0x40,0x4E,0x00\n"
-    ".section .text");
+INT CCamp::setWorldmap(INT nSetCmd) {
+    static LPCTSTR pSeqName = "worldmap:00";
+    static LPCTSTR pSeqName2 = "world_icon:00";
+    static char roomSeqTbl[16] = { 12, 17, 16, 21, 15, 20, 19, 25, 18, 24, 23, 28, 22, 27, 26, 29 };
+    FVECTOR vec;
+    FVECTOR vec2;
+    C2DSeqCtrl* p2DSeqCtrl;
+    C2DSeqObj* p2DSeqObj;
+    G_RGBA rgba;
+    CARD card;
+    FLOAT fCol;
+    INT idx;
+    INT ret = FALSE;
+    USHORT roomId;
+    BYTE cardID;
+    FLOOR::FloorLayout* pFloorLayout;
+    FLOOR::RoomSrcInfo* pRoomSrcInfo;
+    RoomInfo* pRoomInfo;
+    DOOR_STAT doorStat;
+    RCNORMA::NormaSrc normaSrc;
+    static LPCTSTR pStrButton = "Zoom In{     \xF9" "DShow Criteria";
+    INT fgExpectStart;
+    INT nCard;
+    INT j;
+
+    if (!m_bPooWorld) {
+        pFloorLayout = CSceneInfo::getCurrentFloorDataSrc();
+    } else {
+        pFloorLayout = CSceneInfo::getFloorDataSrc(CSceneInfo::getFloorIndex(100, TRUE), TRUE);
+    }
+    if (!pFloorLayout) {
+        return TRUE;
+    }
+    rgba.col = 0x807C7C7C;
+    switch (nSetCmd) {
+    case 0:
+        m_nSubStep = 0;
+        if (!m_pWMNormaCtrl) {
+            /* stored through a reference: in the original the next pSeqName load waits for this store */
+            _ref(m_pWMMoveCtrl) = NEW(6575, C2DSeqCtrl);
+            m_pWMMoveCtrl->addSeq(pSeqName, 0x4B);
+            m_pWMMoveCtrl->enableColorCtrl(TRUE);
+            m_nRoomCurrent = CSceneInfo::getCurrentRoomID() - 1;
+            m_pWMNormaCtrl = NEW(6580, C2DSeqCtrl);
+            vec._q = 0;
+            m_pWMNormaCtrl->setCol(vec);
+            m_pWMNormaCtrl->setLayer(0xD);
+            m_pWMNormaCtrl->setParent(m_pWMMoveCtrl);
+            m_pWMNormaCtrl->addSeq(pSeqName, 0x4B);
+            m_pWMNormaCtrl->enableDisp(FALSE);
+            m_pWMNormaCtrl->setLocalPos(vec);
+            vec.init();
+            if (!m_bPooWorld) {
+                m_pWMExplaneCtrl = NEW(6602, C2DSeqCtrl);
+                m_pWMExplaneCtrl->setLayer(0xF);
+                m_pWMExplaneCtrl->addSeq(m_pSeqName, 0xB8);
+                m_pWMExplaneCtrl->setPos(vec);
+                m_pWMExplaneCtrl->enableColorCtrl(TRUE);
+                m_pWMExplaneFnt = NEW(6607, C2DFnt)(0, 0, &rgba, 0xE, pStrButton, 0x40);
+                m_pWMExplaneCtrl->addFntShift(m_pSeqName, m_pWMExplaneFnt, 0.0f, 1.0f);
+            }
+            m_pWMCardCtrl = NEW(6612, C2DSeqCtrl);
+            m_pWMCardCtrl->setLayer(0xE);
+            m_pWMCardCtrl->addSeq(pSeqName, 0x27);
+            m_pWMCardCtrl->addSeq(pSeqName2, (m_bPooWorld && (CGameWork::getInt(0, 0x23) & 0x40)) ? 1 : 0);
+            m_pWMCardCtrl->setPos(vec);
+            m_pWMFloorCtrl = NEW(6618, C2DSeqCtrl);
+            m_pWMFloorCtrl->setLayer(0xE);
+            m_pWMFloorCtrl->addSeq(pSeqName, 0x24);
+            m_pWMFloorCtrl->setPos(vec);
+            idx = CSceneInfo::getCurrentFloorNumber();
+            m_pWMFloorCtrl->addSeq(pSeqName, idx > 0 ? idx + 0x3D : -idx + 0x5C);
+
+            pRoomSrcInfo = pFloorLayout->_rooms;
+            fgExpectStart = -1;
+            vec.set(999.0f, 999.0f, -999.0f, -999.0f);
+            for (INT i = 0; i < pFloorLayout->_nRoomCount; i++, pRoomSrcInfo++) {
+                if (pRoomSrcInfo->_nPosX < 0 || pRoomSrcInfo->_nPosY < 0) {
+                    continue;
+                }
+                if (pRoomSrcInfo->_nRoomType == 1) {
+                    continue;
+                }
+                if (!pRoomSrcInfo->_nPosY) {
+                    fgExpectStart = 0;
+                }
+                vec2.x = (pRoomSrcInfo->_nPosX + pRoomSrcInfo->_nPosY) * 50.0f;
+                vec2.y = pRoomSrcInfo->_nPosX * 40.0f + pRoomSrcInfo->_nPosY * -40.0f;
+                if (vec2.x < vec.x) {
+                    vec.x = vec2.x;
+                }
+                if (vec2.x > vec.z) {
+                    vec.z = vec2.x;
+                }
+                if (vec2.y < vec.y) {
+                    vec.y = vec2.y;
+                }
+                if (vec2.y > vec.w) {
+                    vec.w = vec2.y;
+                }
+            }
+            m_vWMPosMinMax.x = (vec.z - vec.x) * -0.5f;
+            m_vWMPosMinMax.z = -m_vWMPosMinMax.x;
+            m_vWMPosMinMax.y = (vec.w - vec.y) * -0.5f;
+            m_vWMPosMinMax.w = -m_vWMPosMinMax.y;
+            vec.x = (vec.z + vec.x) * -0.5f + 24.0f;
+            vec.y = (vec.w + vec.y) * -0.5f + 8.0f - 8.0f;
+            vec2.x = vec2.y = 0.0f;
+            vec.z = vec2.z = 0.0f;
+            vec.w = vec2.w = 1.0f;
+            m_vWMPosTarget.init();
+            m_vWMPosCurrent.init();
+            m_vWMPosCurrent0.init();
+            m_fgWMMove = FALSE;
+
+            pRoomSrcInfo = pFloorLayout->_rooms;
+            for (INT i = 0; i < 32; i++) {
+                m_roomDiscover[i] = -1;
+                m_roomDoor[i] = 0;
+                m_roomInfo[i] = 0;
+            }
+            for (INT i = 0; i < 48; i++) {
+                m_roomMap[i] = 0;
+            }
+            for (INT i = 0; i < pFloorLayout->_nRoomCount; i++, pRoomSrcInfo++) {
+                pRoomInfo = CSceneInfo::getRoomInfo(pRoomSrcInfo->_nID);
+                if (!pRoomInfo) {
+                    continue;
+                }
+                while (hasOpenedDoor(pRoomInfo, pRoomSrcInfo) && pRoomSrcInfo->_nRoomType != 1 && pRoomInfo->hasEntered()) {
+                    idx = 0;
+                    for (j = 0; j < 4; j++) {
+                        DoorInfo* pDoor = &pRoomInfo->_doors[j];
+                        if (pDoor->_type == 12) {
+                            continue;
+                        }
+                        doorStat = pDoor->getDoorState();
+                        if (doorStat == DOOR_STAT_CLOSED || doorStat == DOOR_STAT_OPENED) {
+                            idx |= 1 << pDoor->_id;
+                            if (pDoor->_nDstRoom && pDoor->_nDstRoom < 99) {
+                                if (m_roomDiscover[pDoor->_nDstRoom - 1] < 0) {
+                                    m_roomDiscover[pDoor->_nDstRoom - 1] = 16;
+                                }
+                            }
+                        }
+                        INT nState = 0;
+                        if (!m_bPooWorld) {
+                            if (doorStat == DOOR_STAT_CLOSED) {
+                                nState = 1;
+                            } else if (doorStat == DOOR_STAT_OPENED) {
+                                if (pDoor->_type == 8) {
+                                    nState = 3;
+                                } else {
+                                    nState = 2;
+                                }
+                            }
+                        } else {
+                            if (doorStat == DOOR_STAT_OPENED) {
+                                if (pDoor->_type == 8) {
+                                    nState = 3;
+                                } else {
+                                    nState = !CSceneInfo::getRoomInfo(pDoor->_nDstRoom)->hasEntered() ? 1 : 2;
+                                }
+                            }
+                        }
+                        m_roomDoor[i] |= nState << (pDoor->_id * 2);
+                    }
+                    m_roomDiscover[i] = idx;
+                    break;
+                }
+                for (j = 0; j < 4; j++) {
+                    DoorInfo* pDoor = &pRoomInfo->_doors[j];
+                    if (pDoor->_type == 12) {
+                        continue;
+                    }
+                    doorStat = pDoor->getDoorState();
+                    if (pDoor->_nDstRoom && pDoor->_nDstRoom < 99) {
+                        if (doorStat == DOOR_STAT_CLOSED || doorStat == DOOR_STAT_OPENED) {
+                            m_roomInfo[pDoor->_nDstRoom - 1] |= pRoomSrcInfo->_nID << ((pDoor->_id & 3) * 8);
+                        }
+                    }
+                }
+                if (pRoomSrcInfo->_nRoomType != 1) {
+                    idx = pRoomSrcInfo->_nPosX + pRoomSrcInfo->_nPosY * 6;
+                    m_roomMap[idx] = pRoomSrcInfo->_nID;
+                    if (m_nRoomCurrent == pRoomSrcInfo->_nID - 1) {
+                        m_nRoomSelect = idx;
+                    }
+                }
+            }
+
+            nCard = 0;
+            pRoomSrcInfo = pFloorLayout->_rooms;
+            for (INT i = 0; i < pFloorLayout->_nRoomCount; i++, pRoomSrcInfo++) {
+                INT nSearch;
+                pRoomInfo = CSceneInfo::getRoomInfo(pRoomSrcInfo->_nID);
+                p2DSeqCtrl = m_pRoomCtrl[i] = NEW(6755, C2DSeqCtrl);
+                p2DSeqCtrl->setParent(m_pWMMoveCtrl);
+                p2DSeqCtrl->setLayer(0xC);
+                p2DSeqCtrl->enableColorCtrl(TRUE);
+                if (pRoomSrcInfo->_nPosX < 0 || pRoomSrcInfo->_nPosY < 0) {
+                    continue;
+                }
+                vec2.x = vec.x + (pRoomSrcInfo->_nPosX + pRoomSrcInfo->_nPosY) * 50.0f;
+                vec2.y = vec.y + pRoomSrcInfo->_nPosX * 40.0f + pRoomSrcInfo->_nPosY * -40.0f;
+                p2DSeqCtrl->setLocalPos(vec2);
+                nSearch = -1;
+                switch (pRoomSrcInfo->_nRoomType) {
+                case 0:
+                case 5:
+                case 7:
+                case 8:
+                    if (m_roomDiscover[i] < 0) {
+                        idx = 0xE;
+                    } else if (m_roomDiscover[i] < 16) {
+                        idx = roomSeqTbl[m_roomDiscover[i]];
+                    } else {
+                        idx = 0xD;
+                    }
+                    break;
+                case 2:
+                    idx = 0x22;
+                    nSearch = CCard::searchCard(0xBA, 0);
+                    goto chk;
+                case 3:
+                    idx = 0x20;
+                    nSearch = CCard::searchCard(0xBB, 0);
+                    goto chk;
+                case 4:
+                    idx = 0x21;
+                    nSearch = CCard::searchCard(0xBC, 0);
+                    goto chk;
+                case 6:
+                    idx = 0x1E;
+                    nSearch = 0x1000;
+                    if (!CGameWork::progMCW()._KeyRoomsTresureBox[CSceneInfo::getCurrentWorldID(FALSE)]) {
+                        if (!pRoomInfo->hasEntered()) {
+                            nSearch = CCard::searchCard(0xBD, 0) | 0x1000;
+                        }
+                    }
+                chk:
+                    if (m_roomDiscover[i] < 0 && !pRoomInfo->hasEntered()) {
+                        idx = 0x23;
+                    } else if (m_roomDiscover[i] < 16) {
+                        if (pRoomSrcInfo->_nRoomType != 6) {
+                            idx = 0x1F;
+                            nSearch = 0;
+                        } else if (m_roomDiscover[i] >= 0) {
+                            idx = roomSeqTbl[m_roomDiscover[i]];
+                        } else {
+                            idx = 0x23;
+                        }
+                    }
+                    break;
+                default:
+                    continue;
+                }
+                p2DSeqCtrl->addSeq(pSeqName, pRoomSrcInfo->_nPosY + 0x57 + fgExpectStart);
+                p2DSeqCtrl->addSeq(pSeqName, idx);
+                if (nSearch >= 0) {
+                    INT nSeq1;
+                    INT nSeq2 = 0;
+                    if (nSearch < 0x1000) {
+                        if (nSearch <= 0 || !m_roomInfo[i]) {
+                            nSeq1 = 0x4E;
+                        } else {
+                            nSeq1 = 0x4D;
+                            nSeq2 = 0x4C;
+                        }
+                    } else if (nSearch == 0x1000) {
+                        nSeq1 = 0x4E;
+                    } else {
+                        nSeq1 = 0x50;
+                        nSeq2 = 0x4F;
+                    }
+                    p2DSeqObj = p2DSeqCtrl->addSeq(pSeqName, nSeq1);
+                    p2DSeqObj->changeLayer(0xD);
+                    p2DSeqCtrl->enableDisp(2, FALSE);
+                    if (nSeq2) {
+                        p2DSeqObj = p2DSeqCtrl->addSeq(pSeqName, nSeq2);
+                        p2DSeqObj->changeLayer(0xB);
+                        p2DSeqCtrl->enableDisp(3, FALSE);
+                    }
+                }
+                p2DSeqCtrl = m_pWayCtrl[i] = NEW(6874, C2DSeqCtrl)(1);
+                p2DSeqCtrl->setParent(m_pWMMoveCtrl);
+                p2DSeqCtrl->setLayer(0xB);
+                p2DSeqCtrl->enableColorCtrl(TRUE);
+                p2DSeqCtrl->setLocalPos(vec2);
+                p2DSeqCtrl->enableDisp(FALSE);
+                INT nDoorBits = m_roomDoor[i];
+                for (j = 0; j < 4; j++) {
+                    INT nDoor = (nDoorBits >> (j * 2)) & 3;
+                    idx = -1;
+                    if (nDoor == 1) {
+                        idx = 4;
+                    } else if (nDoor == 2) {
+                        idx = 8;
+                    } else if (nDoor == 3) {
+                        idx = 0;
+                    }
+                    if (idx >= 0) {
+                        p2DSeqCtrl->addSeq(pSeqName, idx + ((j + 1) & 3));
+                    }
+                }
+                cardID = pRoomInfo->getRoomNameCardID();
+                if (cardID == 0xB8 || cardID == 0xB6) {
+                    C2DCard* p2DCard;
+                    p2DSeqCtrl = m_pShopAndSaveCtrl[nCard] = NEW(6898, C2DSeqCtrl);
+                    p2DSeqCtrl->setParent(m_pWMMoveCtrl);
+                    p2DSeqCtrl->setLocalPos(vec2);
+                    p2DSeqCtrl->addSeq(pSeqName, cardID == 0xB8 ? 0x53 : 0x55);
+                    p2DSeqCtrl->enableDisp(FALSE);
+                    _setCardNK(card, cardID, -1);
+                    p2DCard = m_pShopAndSave[nCard++] = NEW(6905, C2DCard);
+                    p2DCard->setParent(p2DSeqCtrl);
+                    p2DCard->setLayer(0xC);
+                    p2DCard->create(card);
+                    p2DCard->enableDisp(FALSE);
+                }
+            }
+            m_fRoomCurrentTimer = 0.0f;
+            m_pMapCursorCtrl = NEW(6914, C2DSeqCtrl);
+            m_pMapCursorCtrl->setLayer(0xD);
+            m_pMapCursorCtrl->setParent(m_pWMMoveCtrl);
+            vec = m_pRoomCtrl[m_nRoomCurrent]->m_seqControl.vPos;
+            m_pMapCursorCtrl->setLocalPos(vec);
+            if (vec.x < -105.0f) {
+                m_vWMPosTarget.x = ((INT)(-105.0f - vec.x) / 50 + 1) * 50;
+            } else if (vec.x > 105.0f) {
+                m_vWMPosTarget.x = -(FLOAT)(((INT)(vec.x - 105.0f) / 50 + 1) * 50);
+            }
+            if (vec.y < -75.0f) {
+                m_vWMPosTarget.y = ((INT)(-75.0f - vec.y) / 40 + 1) * 40;
+            } else if (vec.y > 85.0f) {
+                m_vWMPosTarget.y = -(FLOAT)(((INT)(vec.y - 85.0f) / 40 + 1) * 40);
+            }
+            m_pWMMoveCtrl->setLocalPos(m_vWMPosTarget);
+            m_vWMPosOld = m_vWMPosCurrent = m_vWMPosCurrent0 = m_vWMPosTarget;
+            m_pMapCursorCtrl->addSeqShift(m_pSeqName, 0x12, -12.0f, -13.0f);
+            m_pMapCursorCtrl->enableDisp(FALSE);
+            m_pMapGuideCtrl = NEW(6934, C2DSeqCtrl);
+            m_pMapGuideCtrl->setLayer(0xD);
+            m_pMapGuideCtrl->setParent(m_pWMMoveCtrl);
+            m_pMapGuideCtrl->addSeqShift(m_pSeqName, 0xB7, 4.0f, -20.0f);
+            m_pMapGuideCtrl->setLocalPos(vec);
+            m_pMapGuideCtrl->enableDisp(FALSE);
+            m_pCurrentRoomPosCtrl = NEW(6940, C2DSeqCtrl)(1);
+            m_pCurrentRoomPosCtrl->setLayer(0xD);
+            m_pCurrentRoomPosCtrl->setParent(m_pWMMoveCtrl);
+            m_pCurrentRoomPosCtrl->setLocalPos(vec);
+            vec.init();
+            pRoomInfo = CSceneInfo::getRoomInfo(m_roomMap[m_nRoomSelect]);
+            cardID = pRoomInfo->getRoomNameCardID();
+            m_pWMRoomNameCtrl = NEW(6948, C2DSeqCtrl);
+            m_pWMRoomNameCtrl->setLayer(0xE);
+            m_pWMRoomNameCtrl->addSeq(pSeqName, 0x34);
+            m_pWMRoomNameCtrl->setPos(vec);
+            m_pWMRoomNameFnt = NEW(6953, C2DFnt)(0, 0, &rgba, 0xF, NULL, 0x40);
+            m_pWMRoomNameCtrl->addFntShift(pSeqName, m_pWMRoomNameFnt, 0.0f, 7.0f);
+            setWMRoomName(cardID, m_nRoomSelect, pRoomInfo, TRUE);
+            m_pWMNormaArrowCtrl = NEW(6958, C2DSeqCtrl);
+            m_pWMNormaArrowCtrl->setParent(m_pWMNormaCtrl);
+            m_pWMNormaArrowCtrl->setLayer(0x10);
+            for (INT i = 0; i < 4; i++) {
+                p2DSeqCtrl = m_pRoomNormaCtrl[i] = NEW(6962, C2DSeqCtrl);
+                p2DSeqCtrl->setParent(m_pWMNormaCtrl);
+                p2DSeqCtrl->setLayer(0xD);
+                p2DSeqCtrl->addSeq(pSeqName, 0x3A);
+                p2DSeqCtrl->enableDisp(FALSE);
+                m_pWMNormaArrowCtrl->addSeq(pSeqName, ((i + 3) & 3) + 0x36);
+                m_pWMNormaArrowCtrl->enableDisp(i, FALSE);
+            }
+            m_bRoomNorma = FALSE;
+            m_nRoomNorma = 0;
+        }
+        m_fWMTimer = 0.0f;
+        break;
+    case 1:
+        if (!m_pWMCardCtrl->isEnd(0)) {
+            break;
+        }
+        if (m_pWMExplaneCtrl) {
+            m_pWMExplaneCtrl->replaceSeq(0, m_pSeqName, 0xB9);
+        }
+        m_pWMCardCtrl->replaceSeq(0, pSeqName, 0x28);
+        m_pWMFloorCtrl->replaceSeq(0, pSeqName, 0x25);
+        m_pWMRoomNameCtrl->replaceSeq(0, pSeqName, ++m_nWMRoomNameSeq);
+        m_pCurrentRoomPosCtrl->addSeq(pSeqName, !m_bPlayerKind ? 0x51 : 0x6A);
+        m_pMapCursorCtrl->enableDisp(TRUE);
+        m_pMapGuideCtrl->enableDisp(checkNorma(-1, roomId, -1) != 0);
+        for (INT i = 0; i < 32; i++) {
+            if (m_pWayCtrl[i]) {
+                m_pWayCtrl[i]->enableDisp(TRUE);
+            }
+            if (m_pRoomCtrl[i]) {
+                m_pRoomCtrl[i]->enableDisp(2, TRUE);
+                m_pRoomCtrl[i]->enableDisp(3, TRUE);
+            }
+            if (m_pShopAndSaveCtrl[i]) {
+                m_pShopAndSaveCtrl[i]->enableDisp(TRUE);
+                m_pShopAndSave[i]->enableDisp(TRUE);
+            }
+        }
+        ret = TRUE;
+        break;
+    case 3:
+        m_fRoomCurrentTimer += getFrameRateF();
+        if (m_fRoomCurrentTimer >= 165.0f) {
+            m_fRoomCurrentTimer = 0.0f;
+        }
+        fCol = m_fRoomCurrentTimer < 82.5f ? m_fRoomCurrentTimer : 165.0f - m_fRoomCurrentTimer;
+        fCol /= 82.5f;
+        vec.z = fCol * 0.85f + 0.9f;
+        vec.y = fCol * 0.47f + 0.7f;
+        vec.x = 0.5f - fCol * 0.2f;
+        vec.w = 1.0f;
+        m_pRoomCtrl[m_nRoomCurrent]->setCol(vec);
+        for (INT i = 0; i < 32; i++) {
+            if (m_pShopAndSave[i]) {
+                m_pShopAndSave[i]->checkBack();
+            }
+        }
+        break;
+    case 4:
+        if (m_pWMExplaneCtrl) {
+            m_pWMExplaneCtrl->replaceSeq(0, m_pSeqName, 0xBA);
+        }
+        m_pWMCardCtrl->replaceSeq(0, pSeqName, 0x29);
+        m_pWMFloorCtrl->replaceSeq(0, pSeqName, 0x26);
+        m_pWMRoomNameCtrl->replaceSeq(0, pSeqName, ++m_nWMRoomNameSeq);
+        m_pCurrentRoomPosCtrl->replaceSeq(0, pSeqName, !m_bPlayerKind ? 0x52 : 0x6B);
+        for (INT i = 0; i < 32; i++) {
+            if (m_pShopAndSaveCtrl[i]) {
+                m_pShopAndSaveCtrl[i]->replaceSeq(0, pSeqName, 0x54);
+            }
+        }
+        SAFE_DELETE(m_pMapCursorCtrl);
+        SAFE_DELETE(m_pMapGuideCtrl);
+        for (INT i = 0; i < 4; i++) {
+            SAFE_DELETE(m_pRoomNormaCtrl[i]);
+        }
+        for (INT i = 0; i < 4; i++) {
+            SAFE_DELETE(m_pRoomNorma[i]);
+        }
+        SAFE_DELETE(m_pWMNormaArrowCtrl);
+        setRoomHelp(0, 0);
+        m_fWMTimer = 5.0f;
+        break;
+    case 5:
+        if (m_pWMMoveCtrl) {
+            vec2.set(1.0f, 1.0f, 1.0f, 1.0f);
+            m_fWMTimer -= getFrameRateF();
+            if (m_fWMTimer < 0.0f) {
+                m_fWMTimer = 0.0f;
+            }
+            vec2.w = m_fWMTimer / 5.0f;
+            m_pWMMoveCtrl->setCol(vec2);
+            ret = m_pWMCardCtrl->isEnd(0) != FALSE;
+        } else {
+            ret = TRUE;
+        }
+        break;
+    case 10:
+        setWorldmapCursor();
+        ret = TRUE;
+        break;
+    case 8:
+        SAFE_DELETE(m_pWMNormaCtrl);
+        for (INT i = 0; i < 32; i++) {
+            SAFE_DELETE(m_pRoomCtrl[i]);
+            SAFE_DELETE(m_pWayCtrl[i]);
+            SAFE_DELETE(m_pShopAndSaveCtrl[i]);
+            SAFE_DELETE(m_pShopAndSave[i]);
+        }
+        SAFE_DELETE(m_pMapCursorCtrl);
+        SAFE_DELETE(m_pMapGuideCtrl);
+        for (INT i = 0; i < 4; i++) {
+            SAFE_DELETE(m_pRoomNormaCtrl[i]);
+        }
+        for (INT i = 0; i < 4; i++) {
+            SAFE_DELETE(m_pRoomNorma[i]);
+        }
+        SAFE_DELETE(m_pWMCardCtrl);
+        SAFE_DELETE(m_pWMFloorCtrl);
+        SAFE_DELETE(m_pWMRoomNameCtrl);
+        SAFE_DELETE(m_pWMMoveCtrl);
+        SAFE_DELETE(m_pWMNormaArrowCtrl);
+        SAFE_DELETE(m_pWMExplaneCtrl);
+        SAFE_DELETE(m_pCurrentRoomPosCtrl);
+        setRoomHelp(0, 0);
+        break;
+    }
+    return ret;
+}
+/* Parked: 62 of 941 lines differ. The RCNORMA::NormaSrc argument of createNorma is built from four lhu of its
+   stack copy in the original (extract_bit_field pieces), one ld in ours - the open issue of
+   RoomCreation::menuMain and C2DCard::replaceNorma; the s3/s4 and spill-slot (0x64/0x68) swaps around it follow
+   from that. tried: while/do/for shapes of the 0x40 block (`while (isButtonTrg(0x40)) { if (m_bPooWorld) break;
+   ... break; }` gives the original's block order), nested `if (< 4) if (>= 0)` against the sltiu fold, ref locals
+   (id, block-scoped i), set(1,1,1,1) instead of setAll, setLayer before the vec.set. */
+#if 0
+void CCamp::setWorldmapCursor() {
+    RoomInfo* pRoomInfo;
+    DoorInfo* pDoorInfo;
+    INT idx;
+    INT idx2;
+    static LPCTSTR pSeqName = "worldmap:00";
+    static char* pStrButton[2] = { "Zoom In{     \xF9" "DShow Criteria", "Zoom Out     \xF9" "DShow Criteria" };
+    FVECTOR vec;
+    FVECTOR vec2;
+    C2DSeqCtrl* p2DSeqCtrl;
+    RCNORMA::NormaSrc normaSrc;
+    CARD card;
+    USHORT roomId;
+    vec.init();
+    idx = -1;
+    if (m_nSubStep < 4) if (m_nSubStep >= 0) {
+        INT iMoveDirect;
+        if (CPadHandler::isButtonRpt(0x101000, 0)) {
+            iMoveDirect = 0;
+            idx = searchRoom(0, m_nSubStep & 1);
+        } else if (CPadHandler::isButtonRpt(0x204000, 0)) {
+            iMoveDirect = 1;
+            idx = searchRoom(1, m_nSubStep & 1);
+        } else if (CPadHandler::isButtonRpt(0x408000, 0)) {
+            iMoveDirect = 2;
+            idx = searchRoom(2, m_nSubStep & 1);
+        } else if (CPadHandler::isButtonRpt(0x802000, 0)) {
+            iMoveDirect = 3;
+            idx = searchRoom(3, m_nSubStep & 1);
+        }
+        if (idx >= 0) {
+            m_nRoomSelect = idx;
+            idx2 = m_roomMap[idx] - 1;
+            vec = m_pRoomCtrl[idx2]->m_seqControl.vPos;
+            m_pMapCursorCtrl->setLocalPos(vec);
+            m_pMapGuideCtrl->setLocalPos(vec);
+            if (checkNorma(-1, roomId, -1) && !(m_nSubStep & 1)) {
+                m_pMapGuideCtrl->enableDisp(1);
+            } else {
+                m_pMapGuideCtrl->enableDisp(0);
+                setRoomHelp(0, 0);
+            }
+            pRoomInfo = CSceneInfo::getRoomInfo(idx2 + 1);
+            setWMRoomName(pRoomInfo->getRoomNameCardID(), m_nRoomSelect, pRoomInfo, 0);
+            if (m_pRoomCtrl[idx2]->getNumSeq() >= 4) {
+                m_pRoomCtrl[idx2]->restart(1, 0.0f);
+                m_pRoomCtrl[idx2]->restart(2, 0.0f);
+            }
+            m_vWMPosOld = m_vWMPosTarget;
+            AddVectorXYZ(vec2, vec, m_vWMPosTarget);
+            if (vec2.y < -85.0f) {
+                m_vWMPosTarget.y += (INT)((-85.0f - vec2.y + 40.0f) / 40.0f) * 40.0f;
+            } else if (vec2.y > 85.0f) {
+                m_vWMPosTarget.y += (INT)((vec2.y - 85.0f + 40.0f) / 40.0f) * -40.0f;
+            } else if (vec2.y < -5.0f && !(iMoveDirect & 1) && vec.y - m_vWMPosMinMax.y > 45.0f) {
+                m_vWMPosTarget.y += 40.0f;
+            } else if (vec2.y > 5.0f && (iMoveDirect & 1) && m_vWMPosMinMax.w - vec.y > 45.0f) {
+                m_vWMPosTarget.y += -40.0f;
+            }
+            if (vec2.x < -105.0f) {
+                m_vWMPosTarget.x += (INT)((-105.0f - vec2.x + 50.0f) / 50.0f) * 50.0f;
+            } else if (vec2.x > 105.0f) {
+                m_vWMPosTarget.x += (INT)((vec2.x - 105.0f + 50.0f) / 50.0f) * -50.0f;
+            }
+            if (m_nSubStep < 2) {
+                m_fgWMMove = TRUE; m_fWMTimer = 0.0f;
+            } else {
+                m_vWMPosOld = m_vWMPosTarget;
+            }
+            CSound::playSE(1, -1, 0x40);
+        }
+    }
+    while (CPadHandler::isButtonTrg(0x40, 0)) {
+        if (m_bPooWorld) break;
+        if (!(m_nSubStep & 1)) {
+            if (!checkNorma(-1, roomId, -1)) break;
+                m_pMapGuideCtrl->enableDisp(0);
+                idx = 0;
+                m_bRoomNorma = TRUE;
+                CSound::playSE(2, -1, 0x40);
+                m_nSubStep |= 1;
+            break;
+        }
+        m_pWMNormaCtrl->enableDisp(0);
+        for (INT i = 0; i < 4; i++) {
+            m_pRoomNormaCtrl[i]->enableDisp(0);
+            m_pWMNormaArrowCtrl->enableDisp(i, 0);
+        }
+        for (INT i = 0; i < 4; i++) {
+            SAFE_DELETE(m_pRoomNorma[i]);
+        }
+        vec.set(1.0f, 1.0f, 1.0f, 1.0f);
+        for (INT i = 0; i < 32; i++) {
+            if (m_pRoomCtrl[i]) {
+                m_pRoomCtrl[i]->setCol(vec);
+            }
+            if (m_pWayCtrl[i]) {
+                m_pWayCtrl[i]->setCol(vec);
+            }
+        }
+        m_pMapGuideCtrl->enableDisp(checkNorma(-1, roomId, -1) != 0);
+        m_nRoomNorma = 0;
+        m_bRoomNorma = FALSE;
+        CSound::playSE(4, -1, 0x40);
+        m_nSubStep &= ~1;
+        break;
+    }
+    if (!m_bPooWorld) {
+        if ((m_nSubStep & 1) && idx >= 0) {
+            m_pWMNormaCtrl->enableDisp(0);
+            for (INT i = 0; i < 4; i++) {
+                m_pRoomNormaCtrl[i]->enableDisp(0);
+                m_pWMNormaArrowCtrl->enableDisp(i, 0);
+            }
+            for (INT i = 0; i < 4; i++) {
+                SAFE_DELETE(m_pRoomNorma[i]);
+            }
+            vec.set(1.0f, 1.0f, 1.0f, 1.0f);
+            for (INT i = 0; i < 32; i++) {
+                if (m_pRoomCtrl[i]) {
+                    m_pRoomCtrl[i]->setCol(vec);
+                }
+                if (m_pWayCtrl[i]) {
+                    m_pWayCtrl[i]->setCol(vec);
+                }
+            }
+            INT id = m_roomMap[m_nRoomSelect] - 1;
+            if (checkNorma(-1, roomId, -1)) {
+                m_nRoomNorma = 0;
+                m_pWMNormaCtrl->setLocalPos(m_pRoomCtrl[id]->m_seqControl.vPos);
+                m_pWMNormaCtrl->enableDisp(1);
+                for (INT i = 0; i < 4; i++) {
+                    if (!checkNorma(i, roomId, -1)) continue;
+                    pRoomInfo = CSceneInfo::getRoomInfo(roomId);
+                    if (!pRoomInfo) continue;
+                    INT k;
+                    for (k = 0; k < 4; k++) {
+                        pDoorInfo = &pRoomInfo->_doors[k];
+                        if (pDoorInfo->_id == i) break;
+                    }
+                    INT nNormaIndex = pDoorInfo->getNextNormaIndex();
+                    INT nNorma = pDoorInfo->getNormaCount() - nNormaIndex - 1;
+                    if (nNorma < 0) continue;
+                    p2DSeqCtrl = m_pRoomNormaCtrl[i];
+                    p2DSeqCtrl->enableDisp(1);
+                    p2DSeqCtrl->setLayer(0x10);
+                    p2DSeqCtrl->replaceSeq(0, pSeqName, nNorma + 0x3A);
+                    if (nNorma == 0) {
+                        vec.set(i < 2 ? -71.0f : 71.0f, ((i + 1) & 3) < 2 ? 83.0f : -67.0f, 0.0f);
+                    } else {
+                        vec.set(nNorma * -26.0f, ((i + 1) & 3) < 2 ? 95.0f : -81.0f, 0.0f);
+                    }
+                    p2DSeqCtrl->setLocalPos(vec);
+                    m_pWMNormaArrowCtrl->enableDisp(i, 1);
+                    INT fgKeyCard = pDoorInfo->getNormaKeyCardID();
+                    INT nNI;
+                    for (nNI = nNorma; nNI >= 0; nNI--) {
+                        ASSERT_AT(7351, m_nRoomNorma < 4);
+                        C2DCard* p2DCard = m_pRoomNorma[m_nRoomNorma++] = NEW(7352, C2DCard)(1);
+                        p2DCard->setParent(p2DSeqCtrl);
+                        p2DCard->setLayer(0x10);
+                        vec.set(nNI * 82.0f, 0.0f, 0.0f);
+                        p2DCard->setLocalPos(vec);
+                        if (nNI == nNorma && fgKeyCard) {
+                            _setCardNK(card, fgKeyCard, 0);
+                            p2DCard->create(card);
+                        } else {
+                            USHORT n = nNI + nNormaIndex;
+                            normaSrc._nColor = pDoorInfo->getNormaColor(n);
+                            normaSrc._nNumber = pDoorInfo->getNormaNumber(n);
+                            normaSrc._nOp = pDoorInfo->getNormaOperation(n);
+                            p2DCard->createNorma(normaSrc, 0);
+                        }
+                    }
+                }
+                vec.set(0.5f, 0.5f, 0.5f, 1.0f);
+                for (INT i = 0; i < 32; i++) {
+                    if (i != id) {
+                        if (m_pRoomCtrl[i]) {
+                            m_pRoomCtrl[i]->setCol(vec);
+                        }
+                    }
+                    if (m_pWayCtrl[i]) {
+                        m_pWayCtrl[i]->setCol(vec);
+                    }
+                }
+            }
+        }
+        if (CPadHandler::isButtonTrg(0x10, 0)) {
+            if (!(m_nSubStep & 2)) {
+                m_pWMExplaneFnt->setText(pStrButton[0]);
+                m_pWMMoveCtrl->setLocalPos(vec);
+                m_vWMPosOld = m_vWMPosTarget;
+                m_vWMPosTarget.set(0.0f, -3.0f, 0.0f, 0.585f);
+                CSound::playSE(2, -1, 0x40);
+                m_nSubStep |= 2;
+            } else {
+                m_pWMExplaneFnt->setText(pStrButton[1]);
+                m_pWMMoveCtrl->setLocalPos(m_vWMPosCurrent);
+                m_vWMPosTarget = m_vWMPosOld;
+                m_vWMPosTarget.w = 1.0f;
+                m_vWMPosOld.set(0.0f, 0.0f, 0.0f, 0.585f);
+                CSound::playSE(4, -1, 0x40);
+                m_nSubStep &= ~2;
+            }
+            m_fgWMMove = TRUE;
+            m_fWMTimer = 0.0f;
+        }
+    }
+    moveWM();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setWorldmapCursor__5CCamp);
+#endif
 // setWorldmapCursor__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
 asm(".section .rodata\n"
     ".align 3\n"
@@ -3578,7 +6176,67 @@ asm(".section .rodata\n"
     " pStrButton.4484:\n"
     ".byte 0x48,0x40,0x4E,0x00,0xF8,0x43,0x4E,0x00\n"
     ".section .text");
+/* Parked: 53 of 282 lines differ (was 81): with the ref's function-level `INT i` plus a block `INT i` in the else
+   branch `this` is in s0 as in the original; left: in the font-replacing loop the original recomputes
+   &m_pMainCmdFnt[i] from i each iteration (only m_pMainCmdCtrl[i] strength-reduced), ours folds both into one giv;
+   the create loop's first test uses a1 (nSetCmd == 0) in the original. tried: SAFE_DELETE / template inline /
+   reference local for the delete. */
+#if 0
+INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
+    FVECTOR vec;
+    FVECTOR vec2;
+    C2DSeqCtrl* p2DSeqCtrl;
+    G_RGBA rgba;
+    INT i;
+
+    if (nSetCmd == 0) {
+        rgba.col = 0x80404040;
+        if (!m_pMainCmdCtrl[0]) {
+            vec.x = 86.0f;
+            vec.y = 88.0f;
+            vec.w = 1.0f;
+            vec.z = 0.0f;
+            for (i = 0; i < m_nCurrentCmdMax; i++) {
+                p2DSeqCtrl = m_pMainCmdCtrl[i] = NEW(7430, C2DSeqCtrl);
+                p2DSeqCtrl->setLayer(0xC);
+                p2DSeqCtrl->enableColorCtrl(TRUE);
+                p2DSeqCtrl->addSeq(m_pSeqName, 4);
+                p2DSeqCtrl->setPos(vec);
+                m_pMainCmdFnt[i] = NEW(7435, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][0][i], 0x40);
+                p2DSeqCtrl->addFntShift(m_pSeqName, m_pMainCmdFnt[i], 0.0f, 6.0f);
+                vec.y += 26.0f;
+            }
+        } else {
+            INT i;
+            if (nMode != m_nMainMode) {
+                m_nCurrentCmdMax = nMode ? (!m_bPlayerKind ? 6 : 2) : 7;
+                for (i = 0; i < m_nCurrentCmdMax; i++) {
+                    p2DSeqCtrl = m_pMainCmdCtrl[i];
+                    delete m_pMainCmdFnt[i];
+                    m_pMainCmdFnt[i] = NULL;
+                    m_pMainCmdFnt[i] = NEW(7448, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][i], 0x40);
+                    p2DSeqCtrl->replaceFnt(1, m_pSeqName, m_pMainCmdFnt[i]);
+                }
+                m_nMainMode = nMode;
+            }
+            for (i = 0; i < m_nCurrentCmdMax; i++) {
+                m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 4);
+            }
+        }
+    } else if (nSetCmd == 1) {
+        for (i = 0; i < m_nCurrentCmdMax; i++) {
+            m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 5);
+        }
+    } else if (nSetCmd == 2) {
+        for (i = 0; i < m_nCurrentCmdMax; i++) {
+            m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 6);
+        }
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setMainCmd__5CCampii);
+#endif
 // setMainCmd__5CCampii: its .rodata/.data, for its INCLUDE_ASM; remove with it.
 asm(".section .rodata\n"
     ".align 4\n"
@@ -3592,58 +6250,6 @@ asm(".section .rodata\n"
     ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
     ".byte 0x63,0x70,0x70,0x28,0x37,0x34,0x34,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
     ".section .text");
-#if 0 /* register allocation and giv choice in the font-replacing loop differ (this in s1, m_pMainCmdFnt[i] strength-reduced) */
-INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
-    FVECTOR vec;
-    FVECTOR vec2;
-    C2DSeqCtrl* p2DSeqCtrl;
-    G_RGBA rgba;
-
-    if (nSetCmd == 0) {
-        rgba.col = 0x80404040;
-        if (!m_pMainCmdCtrl[0]) {
-            vec.x = 86.0f;
-            vec.y = 88.0f;
-            vec.w = 1.0f;
-            vec.z = 0.0f;
-            for (INT i = 0; i < m_nCurrentCmdMax; i++) {
-                p2DSeqCtrl = m_pMainCmdCtrl[i] = NEW(7430, C2DSeqCtrl);
-                p2DSeqCtrl->setLayer(0xC);
-                p2DSeqCtrl->enableColorCtrl(TRUE);
-                p2DSeqCtrl->addSeq(m_pSeqName, 4);
-                p2DSeqCtrl->setPos(vec);
-                m_pMainCmdFnt[i] = NEW(7435, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][0][i], 0x40);
-                p2DSeqCtrl->addFntShift(m_pSeqName, m_pMainCmdFnt[i], 0.0f, 6.0f);
-                vec.y += 26.0f;
-            }
-        } else {
-            if (nMode != m_nMainMode) {
-                m_nCurrentCmdMax = nMode ? (!m_bPlayerKind ? 6 : 2) : 7;
-                for (INT i = 0; i < m_nCurrentCmdMax; i++) {
-                    p2DSeqCtrl = m_pMainCmdCtrl[i];
-                    delete m_pMainCmdFnt[i];
-                    m_pMainCmdFnt[i] = NULL;
-                    m_pMainCmdFnt[i] = NEW(7448, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][i], 0x40);
-                    p2DSeqCtrl->replaceFnt(1, m_pSeqName, m_pMainCmdFnt[i]);
-                }
-                m_nMainMode = nMode;
-            }
-            for (INT i = 0; i < m_nCurrentCmdMax; i++) {
-                m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 4);
-            }
-        }
-    } else if (nSetCmd == 1) {
-        for (INT i = 0; i < m_nCurrentCmdMax; i++) {
-            m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 5);
-        }
-    } else if (nSetCmd == 2) {
-        for (INT i = 0; i < m_nCurrentCmdMax; i++) {
-            m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 6);
-        }
-    }
-    return 1;
-}
-#endif
 
 INT CCamp::setMainCmdHist(INT nSetCmd, INT nMode) {
     FVECTOR vec;
@@ -3725,7 +6331,7 @@ INT CCamp::setMainCmdHist(INT nSetCmd, INT nMode) {
 }
 
 INT CCamp::setStatusWin0(INT nSetCmd) {
-    static char* pStrEtc[6] = { "Sora", "Riku", "LV", STR_PCT_D, "HP", STR_PCT_D_D };
+    static char* pStrEtc[6] = { "Sora", "Riku", "LV", STR_PCT_D, "HP", "%d/%d" };
     FVECTOR vec;
     FVECTOR vec2;
     C2DFnt* p2DFnt;
@@ -3776,42 +6382,11 @@ INT CCamp::setStatusWin0(INT nSetCmd) {
     return 1;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setStatusWin1__5CCampi);
-// setStatusWin1__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    ".byte 0x46,0x52,0x49,0x45,0x4E,0x44,0x53,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x36,0x39,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x30,0x36,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x32,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x33,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x34,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .data\n"
-    ".align 3\n"
-    " pStrFriend.4498:\n"
-    ".byte 0x10,0x47,0x4E,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00\n"
-    " baseSeqTbl.4499:\n"
-    ".byte 0x0D,0x00,0x0E,0x00,0x0F,0x00,0x5D,0x01,0x5E,0x01,0x5F,0x01\n"
-    ".byte 0x00,0x00,0x00,0x00\n"
-    " nameSeqTbl.4500:\n"
-    ".byte 0x37,0x01,0x38,0x01,0x39,0x01\n"
-    ".byte 0x00,0x00\n"
-    " deckNameSeqTbl.4501:\n"
-    ".byte 0x34,0x01,0x35,0x01,0x36,0x01\n"
-    ".byte 0x00,0x00\n"
-    ".section .text");
-#if 0 /* the friend-card position vector is written through a pointer and its z kept in f20 in the original; scheduling around it differs */
+/* Parked: 13 of 487 lines differ (was 23): vec.set() (the ref's inlined `FVECTOR *this`) and a precomputed
+   `m_bPlayerKind + 0xF` (permuter) fixed the rest; left: the original keeps &vec in v0 (y/w/z stores and the later
+   fShift = vec.z load through it), so pPlayerManager is reloaded from its spill slot for the test; ours keeps it in
+   v0 and uses v1/sp. tried: getPLM() before vec.set, _ref(m_pInstance), set() without w; permuter 6 min (32 -> 26). */
+#if 0
 INT CCamp::setStatusWin1(INT nSetCmd) {
     static LPCTSTR pStrFriend = "FRIENDS";
     static USHORT baseSeqTbl[2][3] = { { 13, 14, 15 }, { 349, 350, 351 } };
@@ -3835,7 +6410,7 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
             rgba.col = 0x807C7C7C;
             m_pWindow1Fnt = NEW(7706, C2DFnt)(0, 0, &rgba, 0xF, pStrFriend, 0x40);
             m_pWindow1Ctrl->addFntShift(m_pSeqName, m_pWindow1Fnt, !m_bPlayerKind ? -83.0f : -32.0f, -44.0f);
-            vec.x = !m_bPlayerKind ? -72.0f : 2.0f; vec.y = 26.0f; vec.w = 1.0f; vec.z = 0.0f;
+            vec.set(!m_bPlayerKind ? -72.0f : 2.0f, 26.0f, 0.0f, 1.0f);
             pPlayerManager = PLM::CPlayerManager::getPLM();
             INT idx = 0;
             if (pPlayerManager) {
@@ -3853,7 +6428,8 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
                         m_pWindow1Card[idx]->create(card);
                         m_pWin1EtcButton[idx] = NEW(7731, CButton);
                         pButton = m_pWin1EtcButton[idx];
-                        C2DMan::getLayPosition(m_pLadName, 0, idx + (m_bPlayerKind + 0xF), vec2, 1);
+                        INT nLay = m_bPlayerKind + 0xF;
+                        C2DMan::getLayPosition(m_pLadName, 0, idx + nLay, vec2, 1);
                         idx++;
                         pButton->init(m_pSeqName, 0x14, nameSeqTbl, vec2, NULL, card.getName(), 0xC, fShift, fShift, 0x42, NULL, -1);
                     }
@@ -3905,7 +6481,43 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
     }
     return 1;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setStatusWin1__5CCampi);
 #endif
+// setStatusWin1__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
+asm(".section .rodata\n"
+    ".align 4\n"
+    ".byte 0x46,0x52,0x49,0x45,0x4E,0x44,0x53,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x37,0x36,0x39,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x30,0x36,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x32,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x33,0x31,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x37,0x37,0x34,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".section .data\n"
+    ".align 3\n"
+    " pStrFriend.4498:\n"
+    ".byte 0x10,0x47,0x4E,0x00\n"
+    ".byte 0x00,0x00,0x00,0x00\n"
+    " baseSeqTbl.4499:\n"
+    ".byte 0x0D,0x00,0x0E,0x00,0x0F,0x00,0x5D,0x01,0x5E,0x01,0x5F,0x01\n"
+    ".byte 0x00,0x00,0x00,0x00\n"
+    " nameSeqTbl.4500:\n"
+    ".byte 0x37,0x01,0x38,0x01,0x39,0x01\n"
+    ".byte 0x00,0x00\n"
+    " deckNameSeqTbl.4501:\n"
+    ".byte 0x34,0x01,0x35,0x01,0x36,0x01\n"
+    ".byte 0x00,0x00\n"
+    ".section .text");
 
 void CCamp::setCursor(INT nSelect, INT nMode) {
     FVECTOR vec;
@@ -3943,18 +6555,11 @@ void CCamp::setLight(INT nSelect, INT nMode) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setCursor2__5CCampiii);
-// setCursor2__5CCampiii: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x38,0x36,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0xF8,0xD9,0x31,0x00,0xC4,0xDA,0x31,0x00,0xF4,0xDA,0x31,0x00,0x1C,0xDB,0x31,0x00\n"
-    ".byte 0x44,0xDB,0x31,0x00,0x94,0xDB,0x31,0x00,0xC4,0xDA,0x31,0x00,0xAC,0xDB,0x31,0x00\n"
-    ".section .text");
-#if 0 /* one addiu (&m_nKindSelectTop) is scheduled before sd ra instead of after */
+/* Parked: 2 of 198 lines differ: the two member addresses of the top-index select (&m_nMCSelSelectTop,
+   &m_nKindSelectTop) issue in the other order in the prologue (equal-priority tie). tried: ternary both polarities,
+   if/else and default+if forms, the ref's `INT& nKindSelectTop` reference local, idx local; permuter 6 min (3573
+   candidates) and 15 min (9060 candidates), no gain. */
+#if 0
 void CCamp::setCursor2(INT nSelect, INT nMode, BOOL bMapCard) {
     FVECTOR vec;
     INT* pTop = bMapCard ? &m_nMCSelSelectTop : &m_nKindSelectTop;
@@ -4022,7 +6627,19 @@ void CCamp::setCursor2(INT nSelect, INT nMode, BOOL bMapCard) {
         break;
     }
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setCursor2__5CCampiii);
 #endif
+// setCursor2__5CCampiii: its .rodata/.data, for its INCLUDE_ASM; remove with it.
+asm(".section .rodata\n"
+    ".align 3\n"
+    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
+    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
+    ".byte 0x63,0x70,0x70,0x28,0x37,0x38,0x36,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
+    ".byte 0xF8,0xD9,0x31,0x00,0xC4,0xDA,0x31,0x00,0xF4,0xDA,0x31,0x00,0x1C,0xDB,0x31,0x00\n"
+    ".byte 0x44,0xDB,0x31,0x00,0x94,0xDB,0x31,0x00,0xC4,0xDA,0x31,0x00,0xAC,0xDB,0x31,0x00\n"
+    ".section .text");
 
 void CCamp::setCursor3(INT nSelect, INT nMode, BOOL bMapCard) {
     FVECTOR vec;
@@ -4453,8 +7070,11 @@ BOOL CCamp::checkNorma(SHORT idx, USHORT& roomID, INT nRoomSelect) {
     return i < 4;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", searchRoom__5CCampii);
-#if 0 /* the up/down search loop's checkNorma block is laid out after the loop test instead of before the increment */
+/* Parked: 15 of 169 lines differ: in the left/right loop the original's rotated prefix (loop test .. `if
+   (!bDiscover) break`) stops before the checkNorma test, which stays at the loop top; ours rotates the whole body.
+   tried: nested ifs, `continue` forms, `!bDiscover || checkNorma`, bDiscover if/else, while + i++, (UINT) range test,
+   i % 2, ternary step, -= i * 6, the up/down loop's (matching) form; permuter 8 min (4622 candidates, no gain). */
+#if 0
 INT CCamp::searchRoom(INT iDir, BOOL bDiscover) {
     USHORT roomID;
     INT nRoom;
@@ -4522,6 +7142,8 @@ INT CCamp::searchRoom(INT iDir, BOOL bDiscover) {
     }
     return -1;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", searchRoom__5CCampii);
 #endif
 
 void CCamp::setCardHelp(SHORT kind) {
@@ -4643,7 +7265,7 @@ void CCamp::setTime(INT nSetCmd) {
 }
 
 void CCamp::setWMRoomName(BYTE cardID, INT nRoomSelect, const RoomInfo* pRoomInfo, BOOL bIn) {
-    static LPCTSTR pSeqName = STR_WORLDMAP;
+    static LPCTSTR pSeqName = "worldmap:00";
     static CHAR roomColorSeqTbl[4] = { 0x31, 0x2E, 0x2B, 0x34 };
     FLOOR::FloorLayout* pFloor;
 
@@ -4723,7 +7345,7 @@ LPCTSTR CCamp::getRoomHelp(USHORT kind, USHORT idxPooRoom) {
 }
 
 void CCamp::setCurrentRoomName(INT nSetCmd) {
-    static LPCTSTR pWTSeqName = STR_WORLD_TITLE;
+    static LPCTSTR pWTSeqName = "world_title:00";
     FVECTOR vec;
     CARD card;
     G_RGBA rgba;
@@ -4784,8 +7406,10 @@ void CCamp::setTotalCP() {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", getCardIndex__5CCampi);
-#if 0 /* nIndex + 1 comes from a copy of nIndex (one register move differs) */
+/* Parked: 4 of 44 lines differ: the original computes nIndex + 1 from a1 and moves idx = nIndex into the beqz delay
+   slot; ours copies nIndex through idx first. tried: idx assigned in an else / after the test, separate n = nIndex + 1,
+   i <= nIndex, return nIndex directly, comma init in the for; permuter 5 + 15 min: it stalls on this function (7 candidates per run). */
+#if 0
 INT CCamp::getCardIndex(INT nIndex) {
     INT idx = nIndex;
 
@@ -4804,6 +7428,8 @@ INT CCamp::getCardIndex(INT nIndex) {
     }
     return idx;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", getCardIndex__5CCampi);
 #endif
 
 BOOL CCamp::removeDeck(INT nIndex) {
@@ -4935,5 +7561,9 @@ const unsigned char CCamp::m_techRikuCateTbl[14][2] = {
  * disassembled as references to D_004E5374, inside this object's card name strings. Until
  * config/SLUS_217.99/symbol_addrs.txt defines "D_004E5374 = 0x004E5374;", define it here. */
 asm(".globl D_004E5374\nD_004E5374 = 0x004E5374");
+
+asm(".globl D_004E3C80\nD_004E3C80 = 0x004E3C80"); /* "%d/%d" (setStatusWin's statusStr), used by asm setMapCardWin */
+
+asm(".globl D_004E33E8\nD_004E33E8 = 0x004E33E8"); /* "\x81~%02d" in asm setDeckInfo's .rodata */
 
 // SOURCE DATA: .data .rodata
