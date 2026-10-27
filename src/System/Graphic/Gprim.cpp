@@ -1099,7 +1099,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLin
 #endif
 /* Parked: registers only - as in the CCoord-less version the original keeps iW in a0 and the copy of the mfc1 in v1
  * (ld of it->S after it), ours swaps them; tried: STQ inline taking G_ST&+UINT, G_ST&+FLOAT, operand order in the
- * pcpyld asm, iW assigned inside the call */
+ * pcpyld asm, iW assigned inside the call, permuter 15 min (12213 candidates, no gain) */
 #if 0
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd) {
     IVECTOR p[3];
