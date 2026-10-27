@@ -667,16 +667,16 @@ void CPlayerSora::initStockSkill(INT inNo) {
         setPlayerFlag(0x2000000, 0);
     }
 }
-/* Parked: 18 of 7932 lines differ, in four case groups (all 105 jump-table groups otherwise match).
-   711/741/1042: the original loads m_pMove (lw 0xa0) between the two stores into the {0, d0, 0, 0} temp and
-   stores m_fDir before copying the temp; ours (sched1) loads m_pMove after both temp stores and sched2 keeps it
-   (post-reload sp vs s3 alias), same open issue as exeGlide. 178-182: the m_bIsAttackHit and m_uiAttackID stores
-   are swapped. tried: all statement orders (60) of the 178 block, _ref/pointer/reference temp stores, compound
-   literal and brace init (memset), m_pMove/setDir moved before the temp, register-asm and empty-asm barriers,
-   two 30-min permuter runs (59->58, 36->35). Levers that matched the rest: separate early `case 1211:`/`case 1473:`
-   copies of the procSkillEnd tail, const g_EffTbl_* (.rodata), function-scope effect/pHB/scale/pos/rot,
-   _subAngle(getDir(), viewDir) + Homing(getDir(), ...) for the turning blocks. The draft needs
-   `void operator+=(const FVECTOR&)` in FVECTOR (Vector.h; clashes with LightUnit.cpp's free operator+=). */
+/* Parked: 14 of 7930 lines differ, in three case groups (711/741/1042; all other jump-table groups match):
+   the original loads m_pMove (lw 0xa0) between the two stores into the {0, d0, 0, 0} temp and stores m_fDir
+   before copying the temp; ours (sched1) loads m_pMove after both temp stores and sched2 keeps it (post-reload
+   sp vs s3 alias) - same open issue as exeGlide. tried: _ref/pointer/reference temp stores, compound literal and
+   brace init (memset), m_pMove/setDir moved before the temp, register-asm and empty-asm barriers, two 30-min
+   permuter runs (59->58, 36->35). Levers that matched the rest: separate early `case 1211:`/`case 1473:` copies
+   of the procSkillEnd tail, const g_EffTbl_* (.rodata), function-scope effect/pHB/scale/pos/rot,
+   _subAngle(getDir(), viewDir) + Homing(getDir(), ...) for the turning blocks, _ref(g_pStockSkillList)[..].POWER.
+   The draft needs `void operator+=(const FVECTOR&)` in FVECTOR (Vector.h; clashes with LightUnit.cpp's free
+   operator+=). */
 #if 0
 void CPlayerSora::exeStockSkill() {
     INT SESeq;
@@ -919,7 +919,7 @@ void CPlayerSora::exeStockSkill() {
             if (m_iSubState == 0x5C) {
                 m_uiAttackID = 10;
                 m_pAtkData = &g_AttackDataList[m_uiAttackID];
-                m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+                m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
                 _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
                 _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
                 UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
@@ -1044,7 +1044,7 @@ void CPlayerSora::exeStockSkill() {
                     m_iSubState = 0x209;
                     m_uiAttackID = 0x35;
                     m_pAtkData = &g_AttackDataList[m_uiAttackID];
-                    m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+                    m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
                     _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
                     _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
                     UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
@@ -1126,7 +1126,7 @@ void CPlayerSora::exeStockSkill() {
             m_bIsAttackHit = FALSE;
             m_uiAttackID = 0xF;
             m_pAtkData = &g_AttackDataList[m_uiAttackID];
-            m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+            m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
             _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
             _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
             UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
@@ -1180,7 +1180,7 @@ void CPlayerSora::exeStockSkill() {
                     m_bIsAttackHit = FALSE;
                     m_uiAttackID = m_iSubState == 0x93 ? 0x10 : 0xF;
                     m_pAtkData = &g_AttackDataList[m_uiAttackID];
-                    m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+                    m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
                     _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
                     _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
                     UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
@@ -1229,7 +1229,7 @@ void CPlayerSora::exeStockSkill() {
             m_bIsAttackHit = FALSE;
             m_uiAttackID = 0x12;
             m_pAtkData = &g_AttackDataList[m_uiAttackID];
-            m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+            m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
             _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
             _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
             UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
@@ -1266,7 +1266,7 @@ void CPlayerSora::exeStockSkill() {
             m_uiAttackID = m_iSubState - 0x98;
             m_iSubState++;
             m_pAtkData = &g_AttackDataList[m_uiAttackID];
-            m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+            m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
             _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
             _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
             UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
@@ -1315,7 +1315,7 @@ void CPlayerSora::exeStockSkill() {
             m_uiAttackID = m_iSubState - 0x98;
             m_iSubState++;
             m_pAtkData = &g_AttackDataList[m_uiAttackID];
-            m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+            m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
             _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
             _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
             UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
@@ -1402,7 +1402,7 @@ void CPlayerSora::exeStockSkill() {
             }
             m_uiAttackID = 0x20;
             m_pAtkData = &g_AttackDataList[m_uiAttackID];
-            m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+            m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
             _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
             _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
             UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
@@ -1964,7 +1964,7 @@ void CPlayerSora::exeStockSkill() {
         m_pCam->changeCamMode(4, 0);
         m_uiAttackID = 0x46;
         m_pAtkData = &g_AttackDataList[m_uiAttackID];
-        m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+        m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
         _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
         _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
         {
@@ -2272,7 +2272,7 @@ void CPlayerSora::exeStockSkill() {
         m_bIsAttackHit = FALSE;
         m_uiAttackID = 0x4C;
         m_pAtkData = &g_AttackDataList[m_uiAttackID];
-        m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+        m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
         _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
         _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
         {
@@ -2329,7 +2329,7 @@ void CPlayerSora::exeStockSkill() {
             m_bIsAttackHit = FALSE;
             m_uiAttackID = 0x4E;
             m_pAtkData = &g_AttackDataList[m_uiAttackID];
-            m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+            m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
             _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
             _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
             UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
@@ -2363,7 +2363,7 @@ void CPlayerSora::exeStockSkill() {
                 if (m_nHitCount == 4) {
                     m_uiAttackID = 0x4F;
                     m_pAtkData = &g_AttackDataList[m_uiAttackID];
-                    m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+                    m_iAttackPower = m_iAP * _ref(CardBattle::g_pStockSkillList)[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
                     _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
                     _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
                     UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
