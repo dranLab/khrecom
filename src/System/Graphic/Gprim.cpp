@@ -299,7 +299,38 @@ void CScissoring::setDefault() {
     p1.y = SCREEN_HEIGHT - 1;
     setRect(p0, p1);
 }
+/* Parked: the loop's i++ and giv scheduling and two constant loads in the A+D header part (the original issues
+ * addiu i early and loads the zero/0x206 constants in the other order); tried: _gifTag vs _AD (asm input order),
+ * _ref(SCREEN_HEIGHT/m_nZ/VRAM::_ZBUF_START) for the reloads (42 -> 14 lines), memory clobber, permuter 15 min x2
+ * (10585 candidates, no gain) */
+#if 0
+void CZFill::makePkt() {
+    QWdata* qp;
+    INT i;
+
+    qp = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(0x1000000000008000UL, 0xE));
+
+    qp[0].ul128 = _AD(0x48, 0x32001);
+    qp[1].ul128 = _AD(0x4F, (_ref(VRAM::_ZBUF_START) / 32) | 0x31000000);
+    qp[2].ul128 = _AD(0, 0x206);
+    qp[3].ul128 = _AD(1, 0);
+    qp += 4;
+
+    for (i = 0; i < 8; i++) {
+        qp[0].ul128 = _AD(0x41, (u_long)(i * 64) | ((u_long)(i * 64 + 63) << 16) | ((u_long)(_ref(SCREEN_HEIGHT) - 1) << 48));
+        qp[1].ul128 = _AD(5, _gsXYZ(-0x1000, -((_ref(SCREEN_HEIGHT) / 2) << 4), _ref(m_nZ)));
+        qp[2].ul128 = _AD(5, _gsXYZ(0x1000, (_ref(SCREEN_HEIGHT) / 2) << 4, _ref(m_nZ)));
+        qp += 3;
+    }
+    qp[0].ul128 = _AD(0x48, CPackMan::getDefault_TEST_2());
+    qp[1].ul128 = _AD(0x4F, CPackMan::getDefault_ZBUF_2());
+    qp[2].ul128 = _AD(0x41, CPackMan::getDefault_SCISSOR_2());
+
+    CPackMan::pkCloseGifTag(&qp[3]);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CZFill);
+#endif
 void CTile::makePkt() {
     QWdata giftag;
     giftag.ul64[0] = 0x4400000000008000UL;
