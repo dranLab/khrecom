@@ -35,11 +35,13 @@ inline void _roulettePrizeMessage() {
 #include "System/Com.h"
 #include "System/TaskMan.h"
 #include "Game/Player/PlayerCamera.h"
+#include "Game/Player/PlayerGauge.h"
 #include "Game/Movement.h"
 #include "include_asm.h"
 
 namespace PL {
 extern TIMEQ g_CardBreakTime[];
+extern FVECTOR g_vBGFadeColor[7];
 extern const FVECTOR g_vPronounceCountOfs; /* defined after the vtables (tail asm block) */
 static LPCSTR g_szDpxFriend = "friend";
 static LPCSTR g_szDpxSummon = "summon";
@@ -320,7 +322,99 @@ void CPlayerSora::initFriend(INT inNo) {
     m_uiPreAttackKind = m_uiAttackKind;
     m_fDistXZ = m_fDistY = 0.0f;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeFriend__Q22PL11CPlayerSora);
+void CPlayerSora::exeFriend() {
+    TIMEQ frame = getMotionCurrentTime() / 50;
+    setBattleFlag(0, 8);
+    procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
+    switch (m_iSubState) {
+    case 1:
+        if (isAir()) {
+            setAnim(6, 800, 0);
+            break;
+        }
+        setBGFade(g_vBGFadeColor[0], 20.0f, 0);
+        setAnimForce(0x2e, -1, 1, 0, getStateSESeq(6), 0);
+        setCastEffect(g_szDpxFriend, 0, &Crd(0), NULL);
+        calcAppearPosFS_toAttackID();
+        _ref(m_hOldLockon) = m_hLockon;
+        _ref(m_iOldCamMode) = PlayerCamera::CPlayerCamera::getNowCamMode();
+        if ((m_pAtkData->FLAG & 0x20) && m_pPLM->isCompleteLoadCard(m_uiCardID) != 1) {
+            setObjStop(1);
+            m_pCam->changeCamMode(5, 0);
+        }
+        m_iSubState = 4;
+        break;
+    case 4:
+        if (m_pPLM->isCompleteLoadCard(m_uiCardID) != 1) break;
+        if (!m_pPLM->isFriendReady()) {
+            m_pPLM->createFriend(m_pPLM->getFriendID_toCard(m_uiCardID), NULL);
+            break;
+        }
+        if (!isMotionLoop()) break;
+        setObjStop(0);
+        m_pCam->changeCamMode(-1, 0);
+        calcAppearPosFS_toAttackID();
+        m_pPLM->getFriend()->setAppear();
+        fadeEffect(m_hEffCast, 1);
+        setEffect(g_szDpxFriend, 3, &getPos(), NULL, 0.0f);
+        m_iSubState = m_uiAttackID * 5;
+        setAnimForce(0x2a, -1, 0, 0, 0, 0);
+        setPlayerFlag(0x100000, 0);
+        m_tqStateTimer = 0;
+        m_pMarker->holdTarget(8);
+        procTargetMark();
+        break;
+    case 0x1a9:
+    case 0x1ae:
+    case 0x1b3:
+    case 0x1bd:
+    case 0x1d1:
+        if (!m_pPLM->isFriendReady()) {
+            m_iSubState = 3;
+            break;
+        }
+        if (!m_bIsCanCombo) {
+            m_bIsCanCombo = m_pPLM->getFriend()->setSkill(m_uiAttackID);
+        }
+        exeStandUp_inFriend();
+        break;
+    case 0x1b8:
+    case 0x1c2:
+    case 0x1cc:
+        if (!m_pPLM->isFriendReady()) {
+            m_iSubState = 3;
+            break;
+        }
+        if (!m_bIsCanCombo) {
+            m_bIsCanCombo = m_pPLM->getFriend()->setSkill(m_uiAttackID);
+        }
+        watchTarget(0);
+        break;
+    case 0x1c7:
+        if (!m_pPLM->isFriendReady()) {
+            m_iSubState = 3;
+            break;
+        }
+        if (!m_bIsCanCombo) {
+            m_bIsCanCombo = m_pPLM->getFriend()->setSkill(m_uiAttackID);
+        }
+        if (isPlayerFlag(0x20000)) {
+            if (exeAttack_inFriend()) {
+                setPlayerFlag(0, 0x20000);
+            }
+            break;
+        }
+        watchTarget(0);
+        break;
+    case 3:
+        if (isBattleFlag(0x1000) && exeUseStock(1)) {
+            if (isPlayerFlag(0x80000000)) setBGFade(1.0f, 20.0f, 0);
+            break;
+        }
+        procSkillEnd(-1);
+        break;
+    }
+}
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& outV, const FVECTOR& inV);
 extern "C" float atan2f(float y, float x);
