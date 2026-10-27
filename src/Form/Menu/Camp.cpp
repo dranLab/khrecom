@@ -746,7 +746,11 @@ void CCamp::removeRsrc() {
 }
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", initCardKind__5CCampiii);
-#if 0 /* loop.c hoists the m_pCardInfo load of the 3-deck copy out of the outer loop (the original keeps it inside) */
+/* Parked: 26 of 342 lines differ: loop.c hoists the CCard::m_pCardInfo load of the 3-deck copy out of the outer
+   loop (the original reloads it each iteration: the stack-array stores must alias it there). tried: destination
+   pointer, direct m_pCardInfo->_deck[i] without _ref, pointer post-increment, _ref on the store; permuter 6 min (3640
+   candidates, no gain). */
+#if 0
 void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
     CARD* pDeck;
 
@@ -784,9 +788,10 @@ void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
             deckTmp[i].m_nId = 0;
         }
         for (INT i = 0; i < 3; i++) {
+            CARD* pDst = cardTmp[i];
             pCardTmp = _getDeck(i);
             for (INT j = 0; j < 99; j++) {
-                cardTmp[i][j] = pCardTmp[j];
+                pDst[j] = pCardTmp[j];
             }
         }
         nDeckTmpMax = 0;
