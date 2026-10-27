@@ -66,6 +66,16 @@ extern char D_004639F8[]; /* "m_V" */
 extern char D_00463A58[]; /* "c:/KHCOM/MainApp/System/Graphic/Gprim.cpp(4121)" */
 extern char D_00463AB8[]; /* "c:/KHCOM/MainApp/System/Graphic/Gprim.cpp(4316)" */
 extern char D_00463A88[]; /* "c:/KHCOM/MainApp/System/Graphic/Gprim.cpp" */
+static inline void _setSTQ(FVECTOR& outSTQ, ULONGLONG inSTQ, FLOAT fW) {
+    __asm__ volatile("mfc1 $8, %1\n"
+                     "pcpyld $8, $8, %2\n"
+                     "qmtc2.ni $8, $vf8\n"
+                     "vmulz.xy $vf8, $vf8, $vf8z\n"
+                     "sqc2 $vf8, 0x0(%0)\n"
+                     :
+                     : "r"(&outSTQ), "f"(fW), "r"(inSTQ)
+                     : "$8", "memory");
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -618,7 +628,30 @@ ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Line__FPUlP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1P6CCoordi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLineStrip__FP6QWdataP7G_STRIPT1);
+QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
+    IVECTOR p;
+    UINT fg;
+    FLOAT fW;
+    fg = 1;
+    for (; it < end; it++, pQw += 3) {
+        _prefetch(it, 0x20);
+        fW = RotTransPersClipW(p, it->P);
+        if (p.w) {
+            fg |= 2;
+        } else if (fg) {
+            p.w = 0x8000;
+        }
+        if (it->Term) {
+            fg = 1;
+        } else {
+            fg >>= 1;
+        }
+        _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
+        pQw[1].ul128 = _colToVec(it->C);
+        pQw[2].ul128 = p._q;
+    }
+    return pQw;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLineStrip__FP6QWdataP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleStrip__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleStrip__FP6QWdataP7G_STRIPT1P6CCoordi);
