@@ -2082,7 +2082,56 @@ void C3DTPrim::_create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, CCoord
     m_V = (G_STRIP*)com_malloc_d(m_iMax * sizeof(G_STRIP), __FILE__ "(4316)", (UINT)-1);
     if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
 }
+/* Parked: registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the
+ * TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it
+ * stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter wrapper, const attribute,
+ * declaration-only callee, permuter 15 min on C3DCPrim::calcZ (10285 candidates) and on getPrimGetaZ (same cause),
+ * no gain */
+#if 0
+FIX4 C3DTPrim::calcZ() {
+    G_STRIP* it;
+    FMATRIX mMat;
+    u_long128 v;
+    INT iz;
+    if (m_iMax == 0) {
+        return 0;
+    }
+    it = &m_V[m_iRep];
+
+    if (m_pObj) {
+        m_pObj->Crd(it->Bone).getRotTransPersMatrix(mMat);
+    } else if (m_pCrd) {
+        m_pCrd->getRotTransPersMatrix(mMat);
+    } else {
+        mMat = CWorldEnv::getWorldScreenMatrix();
+    }
+
+    v = RotTransPersW(mMat, it->P);
+
+    if (_getW(v) < 0.0f) {
+        iz = 0xFFFF280;
+    } else {
+        iz = _getZ(v);
+        if (iz < 0) iz = 0;
+    }
+
+    if (m_fGeta == 0.0f) {
+        m_fGetaZ = 0.0f;
+    } else {
+        FMATRIX* pWMat;
+        if (m_pObj) {
+            pWMat = &m_pObj->Crd(it->Bone).m_World;
+        } else {
+            pWMat = m_pCrd ? &m_pCrd->m_World : NULL;
+        }
+        m_fGetaZ = getPrimGetaZ(iz, it->P, pWMat, m_fGeta);
+    }
+
+    return m_iZ < 0 ? iz : m_iZ << 4;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DTPrim);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DTPrim);
 QWdata* C3DTPrim::makePkt_None(QWdata* pQw) {
     return pQw;
