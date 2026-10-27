@@ -39,7 +39,12 @@ UINT CGTexPrim::getPacketSize() const {
     }
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPacketSize__C11CGTexPrim2D);
+UINT CGTexPrim2D::getPacketSize() const {
+    if (m_pTexInfo && !m_pTexInfo->isFix()) {
+        return 26;
+    }
+    return 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__11CScissoring);
 void CScissoring::setRect(G_XY& p0, G_XY& p1) {
     m_P0 = p0;
