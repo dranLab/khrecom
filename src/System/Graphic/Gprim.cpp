@@ -5,6 +5,7 @@
 #include "System/Graphic/Gprim.h"
 #include "System/Coord.h"
 #include "System/Tsin.h"
+#include "System/VramMan.h"
 #include "include_asm.h"
 
 extern INT SCREEN_HEIGHT;
@@ -172,6 +173,9 @@ public:
     static void* pkGetCurrentPointer();
     static void pkSetCurrentPointer(void* p);
     static void pkCloseGifTag(void* p);
+    static u_long getDefault_TEST_2();
+    static u_long getDefault_ZBUF_2();
+    static u_long getDefault_SCISSOR_2();
 };
 class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
 public:
@@ -760,7 +764,26 @@ FIX4 C3DSprt::calcZ() {
 
     return p0.z << 4;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DSprt);
+void C3DSprt::makePkt() {
+    QWdata giftag;
+    ULONGLONG tex;
+    if (p0.z <= 0 || p0.z > 0xFFFF28 || p0.x < 0 || p0.x > 0xFFFF || p0.y < 0 || p0.y > 0xFFFF ||
+        p1.z > 0xFFFF28 || p1.z <= 0 || p1.x < 0 || p1.x > 0xFFFF || p1.y < 0 || p1.y > 0xFFFF) {
+        return;
+    }
+    tex = setTexture();
+    giftag.ul64[0] = 0x7400000000008000UL;
+    giftag.ul64[1] = 0x4343170;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x316 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(tex);
+    CPackMan::pkAddGsData((u_long)m_C0.r | ((u_long)m_C0.g << 8) | ((u_long)m_C0.b << 16) | ((u_long)m_C0.a << 24));
+    CPackMan::pkAddGsData(_gsUV(m_T0));
+    CPackMan::pkAddGsData((u_long)p0.x | ((u_long)p0.y << 16) | ((u_long)p0.z << 32));
+    CPackMan::pkAddGsData(_gsUV(m_T1));
+    CPackMan::pkAddGsData((u_long)p1.x | ((u_long)p1.y << 16) | ((u_long)p1.z << 32));
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DRotSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DRotSprt);
 FIX4 C3DCircle::calcZ() {
