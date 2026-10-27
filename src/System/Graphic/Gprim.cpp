@@ -1,6 +1,7 @@
 #define SYSTEM_GRAPHIC_GPRIM_CPP
 #include "khtypes.h"
 #include "System/Graphic/Gprim.h"
+#include "System/Coord.h"
 #include "include_asm.h"
 
 extern INT SCREEN_HEIGHT;
@@ -12,12 +13,13 @@ public:
 BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect);
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
 ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
+ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd);
+ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd);
+ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL Back);
+ULONGLONG* _makePkt_Triangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL Back);
+QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end);
+QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end);
 template <class T> static inline T& _ref(T& v) { return v; }
-class CCoord { /* PARTIAL: System/Graphic/Camera.h */
-public:
-    void getRotTransPersMatrix(FMATRIX& outMat);
-    void getRotTransPersMatrix_VF04_07();
-};
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
     static FMATRIX& getWorldScreenMatrix();
@@ -402,7 +404,9 @@ QWdata* C3DCPrim::makePkt_Line0(QWdata* pQw) {
     }
     return (QWdata*)_makePkt_Line((ULONGLONG*)pQw, m_V, m_V + m_iMax);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Line1__8C3DCPrimP6QWdata);
+QWdata* C3DCPrim::makePkt_Line1(QWdata* pQw) {
+    return (QWdata*)_makePkt_Line((ULONGLONG*)pQw, m_V, m_V + m_iMax, &m_pObj->Crd(0));
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle0__8C3DCPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle1__8C3DCPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_LineStrip0__8C3DTPrimP6QWdata);

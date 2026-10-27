@@ -634,9 +634,9 @@ public:
         else m_nAttribute &= ~8;
     }
     INT isSemiTrans() { return m_nAttribute & 1; }
-    INT isShading() { return (m_nAttribute >> 1) & 1; }
-    INT isBackClip() { return (m_nAttribute >> 2) & 1; }
-    INT isTexNearest() { return (m_nAttribute >> 3) & 1; }
+    INT isShading() { return ((INT)m_nAttribute >> 1) & 1; }
+    INT isBackClip() { return ((INT)m_nAttribute >> 2) & 1; }
+    INT isTexNearest() { return ((INT)m_nAttribute >> 3) & 1; }
     virtual void disp();
     virtual FIX4 calcZ() { return 0; }
 };
