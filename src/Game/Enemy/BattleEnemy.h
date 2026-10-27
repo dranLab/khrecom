@@ -13,6 +13,7 @@ struct ENEMY_ACT;   // PARTIAL: added for Game/Enemy/Heartless
 namespace BattleEnemy {
 INT GameModeHp(INT inHp); // PARTIAL: added for Game/Enemy/BattleEnemy
 extern CHAR* SynchroParamName;
+extern CHAR* CamTrgOfsParamName;
 extern INT GameModeParamHp[];
 }
 
@@ -37,6 +38,8 @@ inline void _battleEnemyCheckIndex(INT inIndex, INT inState) {
     if (!(0 <= inIndex && inIndex < 2)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < 2", 0);
     if (!(inState < 8)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);
 }
+
+class CBattleEnemyManager;
 
 class CBattleEnemy : public CEntity {
 private:
@@ -123,6 +126,9 @@ public:
     ATK_ATTR getAttackAttr(INT inIndex) const;
     HANDLE getPlayerHandle(); // PARTIAL: added for Game/Enemy/EnemyFatbandit
     void makePrize();
+    void makeRoulettePrize(const FVECTOR* inPos);
+    BOOL checkResist_(ATK_KIND inDmgKind);
+    CBattleEnemyManager* getBattleEnemyManager() const;
     void makeExpPrize(const FVECTOR* inPos);
     void homingMoveXZToPlayer(FLOAT inRate, FLOAT inSpeed);
     void createFriendCard_(INT inRate);

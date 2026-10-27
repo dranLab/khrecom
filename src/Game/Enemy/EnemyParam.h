@@ -74,6 +74,7 @@ struct ENEMY_PARAM {
         }
         return FALSE;
     }
+    int getSpecialEffect(INT inIndex) const { return iSpecialEffect[inIndex]; } // PARTIAL: added for Game/Enemy/BattleEnemy (name unknown)
 };
 
 /* Placeholders for the original header's inline functions: their strings ("@ENP", the parameter file's
