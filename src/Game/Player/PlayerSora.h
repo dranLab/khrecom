@@ -47,6 +47,8 @@ private:
 public:
     virtual void setStateSE(INT inState, INT inKind);
     virtual INT getStateSESeq(INT inState);
+    virtual void setAttack_inFriend(INT inID, INT inStock, HANDLE inTarget);
+    virtual void calcAppearPosFS_toAttackID();
 };
 
 extern PL_PARAM g_SoraParam;
