@@ -745,7 +745,12 @@ void CBattleEnemy::notifyHP() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initFSM___12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initRoom___12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", changeBattleEnemyState__12CBattleEnemyi);
+void CBattleEnemy::changeBattleEnemyState(INT inState) {
+    if (!((UINT)inState < 31)) AssertApp(D_004ACBC0, 0x162B, D_004AD388, 0);
+    CState& NewState = *(CState*)((inState * 0x20 + (INT)this) + 0x450);
+    clearBtlEnemyFlag(0x10);
+    m_pNewState = &NewState;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", hitTest___12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", computeDamage___12CBattleEnemyff8ATK_KIND);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", computeDamage___12CBattleEnemyff);
