@@ -4759,7 +4759,8 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
    &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt,
    0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by member offset) - stable across
    rebuilds, likely gcse hash-table order; plus one s0 move around a C2DFnt new. tried: ref declaration order,
-   chain-store order, p2DSeqCtrl/p2DFnt/p2DCard locals; permuter 15 min (59 -> 58). */
+   chain-store order, p2DSeqCtrl/p2DFnt/p2DCard locals; permuter 15 min (59 -> 58); shared function-level i/j (as the
+   ref lists one i and one j: 256 lines) or j only (38), the block `n` locals as idx/nKind. */
 #if 0
 INT CCamp::setMapCardWin(INT nSetCmd) {
     static char* pStrNum[4] = { "%02d/99", "%02d", STR_TILDE_02D, "" };
