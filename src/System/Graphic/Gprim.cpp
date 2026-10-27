@@ -953,7 +953,49 @@ FIX4 C3DCircle::calcZ() {
 
     return p0.z;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DCircle);
+void C3DCircle::makePkt() {
+    INT cx;
+    INT cy;
+    INT z;
+    FLOAT rx;
+    FLOAT ry;
+    INT dx;
+    INT dy;
+    QWdata giftag;
+    if (p0.z <= 0 || p0.z > 0xFFFF28 || p0.x < 0 || p0.x > 0xFFFF || p0.y < 0 || p0.y > 0xFFFF ||
+        p1.z > 0xFFFF28 || p1.z <= 0 || p1.x < 0 || p1.x > 0xFFFF || p1.y < 0 || p1.y > 0xFFFF) {
+        return;
+    }
+
+    cx = (p0.x + p1.x) / 2;
+    rx = (p1.x - p0.x) / 2;
+
+    cy = (p0.y + p1.y) / 2;
+    ry = (p1.y - p0.y) / 2;
+
+    z = p0.z >> 4;
+
+    giftag.ul64[0] = 0x4400000000008000UL;
+    giftag.ul64[1] = 0x1410;
+
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x20D | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData((u_long)cx | ((u_long)cy << 16) | ((u_long)z << 32));
+    CPackMan::pkAddGsData(m_C1.col);
+    CPackMan::pkCloseGifTag();
+
+    giftag.ul64[0] = 0x1400000000008000UL;
+    giftag.ul64[1] = 4;
+
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    for (int deg = 0; deg <= 3600; deg += 200) {
+        dx = rx * tcos(deg);
+        dy = ry * tsin(deg);
+        CPackMan::pkAddGsData((u_long)(cx + dx) | ((u_long)(cy + dy) << 16) | ((u_long)z << 32));
+    }
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__13C3DPointLight);
 FIX4 C3DPointLight2::calcZ() {
     FIX4 nRet = ((CGPrim&)m_Cl[0]).calcZ();
