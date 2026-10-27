@@ -348,11 +348,17 @@ void CScissoring::setDefault() {
     p1.y = SCREEN_HEIGHT - 1;
     setRect(p0, p1);
 }
-/* Parked: the loop's i++ and giv scheduling and two constant loads in the A+D header part (the original issues
- * addiu i early and loads the zero/0x206 constants in the other order); tried: _gifTag vs _AD (asm input order),
- * _ref(SCREEN_HEIGHT/m_nZ/VRAM::_ZBUF_START) for the reloads (42 -> 14 lines), memory clobber, permuter 15 min x2
- * (10585 candidates, no gain) */
+/* Parked: 8 lines - two scheduling ties: the original loads 0x206 before the shared zero for the PRIM/PRMODE A+D
+ * pair, and strength-reduces i * 64 + 63 with its increment at the loop end while i++ sits inside the SCISSOR
+ * expression (ours increments both there); this draft fixed the hoisted-constant order (XYZ helper with y first
+ * and z by reference, as the original's PackMan.h inline) and i++ (line 277); tried before: _gifTag vs _AD, _ref
+ * reloads, memory clobber, permuter 15 min x2; now also: _AD operand listing (breaks its other users), typed
+ * zeros, swapped statements, ++i/(i+1) forms, separate x biv, for-increment variants, permuter 15 min (17083
+ * candidates, no gain). CZFill's key function: the weak tail needs it */
 #if 0
+static inline u_long _gsXYZz(INT x, INT y, const FIX4& z) {
+    return ((u_long)(y + 0x8000) << 16) | (u_long)(x + 0x8000) | ((u_long)(z >> 4) << 32);
+}
 void CZFill::makePkt() {
     QWdata* qp;
     INT i;
@@ -365,11 +371,10 @@ void CZFill::makePkt() {
     qp[3].ul128 = _AD(1, 0);
     qp += 4;
 
-    for (i = 0; i < 8; i++) {
-        qp[0].ul128 = _AD(0x41, (u_long)(i * 64) | ((u_long)(i * 64 + 63) << 16) | ((u_long)(_ref(SCREEN_HEIGHT) - 1) << 48));
-        qp[1].ul128 = _AD(5, _gsXYZ(-0x1000, -((_ref(SCREEN_HEIGHT) / 2) << 4), _ref(m_nZ)));
-        qp[2].ul128 = _AD(5, _gsXYZ(0x1000, (_ref(SCREEN_HEIGHT) / 2) << 4, _ref(m_nZ)));
-        qp += 3;
+    for (i = 0; i < 8; qp += 3) {
+        qp[0].ul128 = _AD(0x41, (u_long)(i * 64) | ((u_long)(i++ * 64 + 63) << 16) | ((u_long)(_ref(SCREEN_HEIGHT) - 1) << 48));
+        qp[1].ul128 = _AD(5, _gsXYZz(-0x1000, -((_ref(SCREEN_HEIGHT) / 2) << 4), m_nZ));
+        qp[2].ul128 = _AD(5, _gsXYZz(0x1000, (_ref(SCREEN_HEIGHT) / 2) << 4, m_nZ));
     }
     qp[0].ul128 = _AD(0x48, CPackMan::getDefault_TEST_2());
     qp[1].ul128 = _AD(0x4F, CPackMan::getDefault_ZBUF_2());
@@ -541,11 +546,12 @@ CScreenColoredMask::CScreenColoredMask() {
     m_P0.set(-0x1000, -(_ref(SCREEN_HEIGHT) * 8));
     m_P1.set(0x1000, _ref(SCREEN_HEIGHT) * 8);
 }
-/* Parked: the corner setup before the two calcVert calls (load/store order of b, c and ab; the original keeps
- * &m_P1 in s0 and reads m_P1.y through it) and the register numbering that follows; packet part matches with
- * centre offsets computed once; tried: direct member stores, reference locals for m_P0/m_P1, cd.set before the
- * first calcVert, mid-function declarations (tb/tc/giftag reuse the inline's slot), permuter 15 min (8515
- * candidates, 49 -> 48) */
+/* Parked: the corner setup before the two calcVert calls (load/store order of b, c and ab: the original keeps a
+ * separate copy of m_P0.y for ab.set's _y parameter) and the register numbering that follows; a reference to m_P1
+ * (not in the ref's locals) reproduces the original's s0 = &m_P1 read of m_P1.y in the second set (41 -> 39
+ * lines); the ref also has no tex local although setTexture()'s result lives in s3 until its pkAddGsData; tried:
+ * direct member stores, reference locals for m_P0/m_P1, cd.set before the first calcVert, mid-function
+ * declarations, permuter 15 min (49 -> 48). CRotSprt's key function: the weak tail needs it */
 #if 0
 void CRotSprt::makePkt() {
     G_XYZ b;
@@ -558,12 +564,13 @@ void CRotSprt::makePkt() {
     }
     tex = setTexture();
 
+    const G_XYZ& p1 = m_P1;
     b.set(m_P1.x, m_P0.y);
     c.set(m_P0.x, m_P1.y);
 
     ab.set(m_P0.x, m_P0.y, b.x, b.y);
     calcVert(ab);
-    cd.set(c.x, c.y, m_P1.x, m_P1.y);
+    cd.set(c.x, c.y, m_P1.x, p1.y);
     calcVert(cd);
 
     G_UV tb;
