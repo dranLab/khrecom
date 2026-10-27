@@ -38,6 +38,8 @@ inline void _battleEnemyCheckIndex(INT inIndex, INT inState) {
     if (!(inState < 8)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);
 }
 
+class CBattleEnemyManager;
+
 class CBattleEnemy : public CEntity {
 private:
     // PARTIAL: split into the original members for Game/Enemy/BattleEnemy (same layout)
@@ -123,6 +125,7 @@ public:
     ATK_ATTR getAttackAttr(INT inIndex) const;
     HANDLE getPlayerHandle(); // PARTIAL: added for Game/Enemy/EnemyFatbandit
     void makePrize();
+    CBattleEnemyManager* getBattleEnemyManager() const;
     void makeExpPrize(const FVECTOR* inPos);
     void homingMoveXZToPlayer(FLOAT inRate, FLOAT inSpeed);
     void createFriendCard_(INT inRate);

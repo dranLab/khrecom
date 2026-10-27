@@ -21,6 +21,9 @@
 
 extern "C" char D_004AD680[];
 extern "C" char D_004AD3E0[];
+extern "C" char D_004ACBC0[];
+extern "C" char D_004AD3C0[];
+extern "C" char D_004AD3C8[];
 FVECTOR getPlayerPos(INT inIndex);
 namespace BattleEnemy {
 FLOAT GameModeAp(FLOAT inAp);
@@ -142,7 +145,11 @@ void CBattleEnemy::getPlayerPosition(FVECTOR& outPos) {
     if (m_ullBtlEnemyFlag & 0x40000) outPos = m_vConfusePlayerPos;
     else outPos = getPlayerPos(0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getPlayerHandle__12CBattleEnemy);
+HANDLE CBattleEnemy::getPlayerHandle() {
+    if (isBtlEnemyFlag(0x40000)) return 0;
+    if (!g_pPlayer) AssertApp(D_004ACBC0, 0x611, D_004AD3C8, 0);
+    return g_pPlayer->getHandle();
+}
 void CBattleEnemy::makeExpPrize() {
     if (m_pBodyColl->getHitCollBody()) {
         makeExpPrize(m_pBodyColl->getHitCollBody()->getDetectPos());
