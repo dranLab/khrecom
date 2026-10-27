@@ -657,7 +657,18 @@ void CBattleEnemy::updateConfuseTimer_() {
         if (m_tqConfuseTimer <= 0) enableConfuse_(FALSE);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateHitBackTimer___12CBattleEnemy);
+void CBattleEnemy::updateHitBackTimer_() {
+    if (m_tqHitBackTimer > 0) {
+        m_tqHitBackTimer -= getFrameRate();
+        if (m_tqHitBackTimer <= 0) {
+            FVECTOR v;
+            v.init();
+            m_pMove->setHitBackVel(v);
+        } else {
+            m_pMove->setHitBackVel(m_vHitBackVel);
+        }
+    }
+}
 void CBattleEnemy::updateDamageTimer_() {
     if (m_tqDamageTimer > 0) {
         m_tqDamageTimer -= getFrameRate();
