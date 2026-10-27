@@ -838,7 +838,15 @@ BOOL CBattleEnemy::changeSmallDamageState_(ATK_KIND inDmgKind) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateSpotLight___12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", canCreateEnemyCard___12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", continuousDamageProc___12CBattleEnemy);
+void CBattleEnemy::continuousDamageProc_() {
+    if ((UINT)getID() % 10000 - 100 < 100) {
+        if (++m_iHitCount >= 6) {
+            m_fDamageRate -= 0.25f;
+            if (m_fDamageRate < 0.05f) m_fDamageRate = 0.05f;
+        }
+        m_tqDamageTimer = 1500;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", canBlackroomCard___12CBattleEnemy);
 BOOL CBattleEnemy::checkResist_(ATK_KIND inDmgKind) {
     BOOL resist = FALSE;
