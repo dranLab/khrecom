@@ -539,7 +539,38 @@ FIX4 C3DSprt::calcZ() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DRotSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DRotSprt);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DCircle);
+FIX4 C3DCircle::calcZ() {
+    FVECTOR c;
+    FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
+    c = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);
+    c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);
+
+    c.x -= m_R0;
+    c.y -= m_R0;
+
+    RotTransPers(p0, vs, c);
+
+    c.x += m_R0 * 2.0f;
+    c.y += m_R0 * 2.0f;
+    RotTransPers(p1, vs, c);
+
+    if (m_Zoffset != 0.0f) {
+        IVECTOR p;
+
+        c.x -= m_R0;
+        c.y -= m_R0;
+
+        c.z += m_Zoffset;
+
+        RotTransPers(p, vs, c);
+
+        p0.z = p.z;
+    }
+
+    p1.z = p0.z;
+
+    return p0.z;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DCircle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__13C3DPointLight);
 FIX4 C3DPointLight2::calcZ() {
