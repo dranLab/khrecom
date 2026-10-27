@@ -1974,7 +1974,97 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
     }
     return pQw;
 }
+/* Parked: registers (fg in s4 vs end in s3 swapped) and the scheduling of the loop condition bLoop (the original
+ * materializes it in s1 after pQw += 2; Back loop moves it in the delay slot); tried: while/do-while/goto shapes,
+ * an explicit BOOL bLoop tested first by the skip loop (86 -> 32 lines), declaration orders, permuter 15 min (8745
+ * candidates, no gain) */
+#if 0
+QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) {
+    IVECTOR p;
+    UINT fg = 2;
+    INT bTop = 1;
+    BOOL bLoop;
+
+    if (!Back) {
+        bLoop = it < end;
+        while (bLoop) {
+            _prefetch(it, 0x20);
+            RotTransPersClipW(p, it->P);
+            if (bTop) {
+                if (p.w) {
+                    if (!bLoop) return pQw;
+                    while (!(it++)->Term) {
+                        if (!(it < end)) return pQw;
+                    }
+                    bLoop = it < end;
+                    continue;
+                }
+                p.w = 0x8000;
+                bTop = 0;
+            } else if (p.w) {
+                fg |= 2;
+            } else if (fg) {
+                p.w = 0x8000;
+            }
+            if (it->Term) {
+                fg = 2;
+                bTop = 2;
+            } else {
+                fg >>= 1;
+            }
+            pQw[0].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = p._q;
+            it++;
+            pQw += 2;
+            bLoop = it < end;
+        }
+        return pQw;
+    } else {
+        FVECTOR vDir[3];
+        INT iDir = 0;
+        bLoop = it < end;
+        while (bLoop) {
+            _prefetch(it, 0x20);
+            RotTransPersClipW(p, vDir[iDir], it->P);
+            if (bTop) {
+                if (p.w) {
+                    if (!bLoop) return pQw;
+                    while (!(it++)->Term) {
+                        if (!(it < end)) return pQw;
+                    }
+                    bLoop = it < end;
+                    continue;
+                }
+                p.w = 0x8000;
+                bTop = 0;
+            } else if (p.w) {
+                fg |= 2;
+            } else if (fg) {
+                p.w = 0x8000;
+            } else {
+                p.w |= BackClip(vDir, 0);
+            }
+            if (it->Term) {
+                fg = 2;
+                bTop = 2;
+                iDir = 0;
+            } else {
+                fg >>= 1;
+                vDir[1] = vDir[2];
+                iDir = 2;
+            }
+            pQw[0].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = p._q;
+            it++;
+            pQw += 2;
+            bLoop = it < end;
+        }
+    }
+    return pQw;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1i);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
 /* Parked: argument order of the RotTransPersW call (the original sets a1 before a0; sched1 issues a1 first only
  * when its source REG_DEADs, ours keeps vW's address live) and with it the TImode result register (a1 vs a0);
