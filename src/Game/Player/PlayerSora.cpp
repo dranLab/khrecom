@@ -216,7 +216,135 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeStockSkill
 /* placeholder: .rodata of initMagic__Q22PL11CPlayerSorai (strings, jump tables) */
 __asm__(".rdata\n.align 4\n.word .L0029CB98\n.word .L0029CBB0\n.word .L0029CC0C\n.word .L0029CD68\n.word .L0029CDDC\n.word .L0029CF40\n.word .L0029D008\n.word .L0029D0B4\n.word .L0029D128\n.word func_0\n.word func_0\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initMagic__Q22PL11CPlayerSorai);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeMagic__Q22PL11CPlayerSora);
+/* Game/MinigameManager.h */
+namespace MG_SKILL {
+HANDLE createMGSkill(INT inType, INT inLevel);
+BOOL isMGSkillAlive();
+}
+
+void CPlayerSora::exeMagic() {
+    FVECTOR pos; /* unused locals of the original (stack frame) */
+    FVECTOR rot;
+    TIMEQ frameTQ = getMotionCurrentTime();
+    TIMEQ frame = frameTQ / 50;
+    setBattleFlag(0, 8);
+    m_fDistXZ = m_fDistY = 0.0f;
+    procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
+    switch (m_iSubState) {
+    case 0x22:
+        m_fJumpSpdY = 0.0f;
+        procTargetMark();
+        procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+        if (isMotionEnd()) {
+            m_iSubState = 0x209;
+            setAnimForce(m_iNowAnimID + 1, 0, 1, m_pAtkData->ANIM_ESQ, 0, 0);
+            setMagic(0x22, m_uiCardID, 0);
+            setTimer(4000);
+        }
+        break;
+    case 0x23:
+        m_fJumpSpdY = 0.0f;
+        procTargetMark();
+        procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+        if (frame < m_pAtkData->TRG_FRAME) break;
+        m_iSubState = 0x209;
+        setMagic(0x23, m_uiCardID, 0);
+        setTimer(4000);
+        break;
+    case 0x24:
+        m_fJumpSpdY = 0.0f;
+        procTargetMark();
+        procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+        if (frame < m_pAtkData->TRG_FRAME) break;
+        m_iSubState = 0x209;
+        setMagic(0x24, m_uiCardID, 0);
+        setTimer(4000);
+        break;
+    case 0x25:
+        m_fJumpSpdY = 0.0f;
+        if (frame < m_pAtkData->TRG_FRAME) break;
+        m_iSubState = 0x209;
+        setMagic(0x25, m_uiCardID, 0);
+        setTimer(4000);
+        break;
+    case 0x26:
+        m_fJumpSpdY = 0.0f;
+        procTargetMark();
+        procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+        if (frame < m_pAtkData->TRG_FRAME) break;
+        m_iSubState = 0x209;
+        setMagic(0x26, m_uiCardID, 0);
+        setTimer(4000);
+        break;
+    case 0x27:
+        m_fJumpSpdY = 0.0f;
+        procTargetMark();
+        procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+        if (frame < m_pAtkData->TRG_FRAME) break;
+        m_iSubState = 0x209;
+        setMagic(0x27, m_uiCardID, 0);
+        setTimer(4000);
+        break;
+    case 0x28:
+        m_fJumpSpdY = 0.0f;
+        procTargetMark();
+        procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+        if (frame < m_pAtkData->TRG_FRAME) break;
+        m_iSubState = 0x209;
+        setMagic(0x28, m_uiCardID, 0);
+        setTimer(4000);
+        break;
+    case 0x94:
+        m_fJumpSpdY = 0.0f;
+        procTargetMark();
+        procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+        if (frame < m_pAtkData->TRG_FRAME) break;
+        m_iSubState = 0x96;
+        m_hMagicCore = MG_SKILL::createMGSkill(0, 0);
+        break;
+    case 0x95:
+        m_fJumpSpdY = 0.0f;
+        if (frame < m_pAtkData->TRG_FRAME) break;
+        m_iSubState = 0x96;
+        m_hMagicCore = MG_SKILL::createMGSkill(1, 0);
+        break;
+    case 0x96:
+        if (!m_bNextTrg) {
+            if (isMotionEnd()) {
+                m_bNextTrg = TRUE;
+            }
+        } else {
+            exeStandUp_inFriend();
+        }
+        if (MG_SKILL::isMGSkillAlive() && m_hMagicCore > 0) break;
+        m_iSubState = 0x209;
+        clearSpeed();
+        setTimer(1000);
+        break;
+    case 0x209:
+        if (isBattleFlag(0x1000) && exeUseStock(1)) {
+            if (isPlayerFlag(0x80000000)) setBGFade(1.0f, 20.0f, 0);
+            break;
+        }
+        setGroundIK(1);
+        if (isPlayerFlag(0x800000)) {
+            setPlayerFlag(0, 0x2000000);
+            if (!isAir()) {
+                if (m_iNowAnimID != 0x2A) {
+                    if (m_iNowAnimID != 7) {
+                        setAnim(7, -1, 0);
+                    } else if (isMotionEnd()) {
+                        setAnim(0x2A, -1, 0);
+                    }
+                }
+            }
+        }
+        if (isMotionEnd() || getTimer() <= 0) {
+            procSkillEnd(-1);
+        }
+        break;
+    }
+}
 /* placeholder: .rodata of setMagic__Q22PL11CPlayerSoraiii (strings, jump tables) */
 __asm__(".rdata\n.align 4\n.word .L0029ECD8\n.word .L0029ECBC\n.word .L002A0328\n.word .L0029ECBC\n.word .L0029ECBC\n.word .L002A0328\n.word .L0029ECB0\n.word .L0029ECD8\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", setMagic__Q22PL11CPlayerSoraiii);
