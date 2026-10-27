@@ -83,7 +83,15 @@ template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
     static FMATRIX& getWorldScreenMatrix();
+    static FMATRIX& getWorldViewMatrix();
+    static FMATRIX& getViewScreenMatrix();
 };
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+static inline FVECTOR ApplyMatrix(const FMATRIX& m0, const FVECTOR& v1) { /* PARTIAL: System/Coord.h */
+    FVECTOR b;
+    ApplyMatrix(b, m0, v1);
+    return b;
+}
 class CPackMan { /* PARTIAL: System/Graphic/PackMan.cpp */
 public:
     static u_long128* pkOpenGifTag(u_long128 tag);
@@ -480,7 +488,25 @@ FIX4 C3DPolyGT3::calcZ() {
     return max;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyGT3);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__7C3DTile);
+FIX4 C3DTile::calcZ() {
+    FVECTOR c;
+    FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
+    c = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);
+    c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);
+
+    c.x += m_P0.x;
+    c.y += m_P0.y;
+
+    RotTransPers(p0, vs, c);
+
+    c.x += m_P1.x - m_P0.x;
+    c.y += m_P1.y - m_P0.y;
+    RotTransPers(p1, vs, c);
+
+    p1.z = p0.z;
+
+    return p0.z << 4;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DTile);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__7C3DSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DSprt);
