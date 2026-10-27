@@ -79,6 +79,16 @@ static inline void _setGeta(FLOAT fGetaZ) {
     __asm__ volatile("pcpyld %0, %2, %1" : "=r"(inGeta) : "r"((u_long)0), "r"((u_long)*(UINT*)&fGetaZ));
     __asm__ volatile("qmtc2.ni %0, $vf3" : : "r"(inGeta));
 }
+static inline u_long128 _calcSTQ(ULONGLONG inSTQ, UINT iW) {
+    u_long128 iRet;
+    __asm__ volatile("pcpyld %0, %1, %2\n"
+                     "qmtc2.ni %0, $vf8\n"
+                     "vmulz.xy $vf8, $vf8, $vf8z\n"
+                     "qmfc2.ni %0, $vf8\n"
+                     : "=r"(iRet)
+                     : "r"(iW), "r"(inSTQ));
+    return iRet;
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -694,7 +704,39 @@ ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
     }
     return p64;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Line__FPUlP7G_STRIPT1P6CCoord);
+ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd) {
+    IVECTOR p[3];
+    INT iBone = -1;
+    while (it < end) {
+        _prefetch(it, 0x20);
+        if (iBone != it[0].Bone) {
+            iBone = it[0].Bone;
+            pCrd[iBone].getRotTransPersMatrix_VF04_07();
+        }
+        RotTransPersClipW(p[0], it[0].P);
+        if (p[0].w) {
+            it += 2;
+            continue;
+        }
+        _prefetch(it, 0x40);
+        if (iBone != it[1].Bone) {
+            iBone = it[1].Bone;
+            pCrd[iBone].getRotTransPersMatrix_VF04_07();
+        }
+        RotTransPersClipW(p[1], it[1].P);
+        if (p[1].w) {
+            it += 2;
+            continue;
+        }
+        p64[0] = it[0].C.col;
+        p64[1] = _vecToXYZ(p[0]);
+        p64[2] = it[1].C.col;
+        p64[3] = _vecToXYZ(p[1]);
+        it += 2;
+        p64 += 4;
+    }
+    return p64;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1P6CCoordi);
 QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
