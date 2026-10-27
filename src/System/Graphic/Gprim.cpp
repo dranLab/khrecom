@@ -10,6 +10,10 @@ public:
     static struct TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
 };
 BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect);
+class CCoord { /* PARTIAL: System/Graphic/Camera.h */
+public:
+    void getRotTransPersMatrix(FMATRIX& outMat);
+};
 class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
 public:
     static void add2DispList(CDrawable& inPrim, FIX4 inZ);
@@ -191,6 +195,17 @@ FLOAT RotTransPersClipW(IVECTOR& out_v, FVECTOR& out_fv, const FVECTOR& in_v) {
     );
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", BackClip__FPC7FVECTORi);
+static inline void setRotTransPersMatrix(FMATRIX& m) {
+    __asm__ volatile(
+        "vsub.xyzw $vf3, $vf0, $vf0\n"
+        "lqc2 $vf4, 0x0(%0)\n"
+        "lqc2 $vf5, 0x10(%0)\n"
+        "lqc2 $vf6, 0x20(%0)\n"
+        "lqc2 $vf7, 0x30(%0)\n"
+        :
+        : "r"(&m)
+        : "memory");
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DPolyFT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyFT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DPolyGT4);
@@ -215,7 +230,14 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DPoly
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DPolyG4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DPolyG3);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DPolyG3);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__7C3DLine);
+FIX4 C3DLine::calcZ() {
+    FMATRIX mat0;
+    m_pCrd->getRotTransPersMatrix(mat0);
+    setRotTransPersMatrix(mat0);
+    RotTransPersClipW(p0, m_P0);
+    RotTransPersClipW(p1, m_P1);
+    return p0.z;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DLine);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__13C3DLineCoord2);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__13C3DLineCoord2);
