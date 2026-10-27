@@ -57,6 +57,10 @@ static inline u_long128 _gifTag(u_long tag, u_long regs) {
     __asm__ volatile("pcpyld %0, %2, %1" : "=r"(giftag) : "r"(tag), "0"(regs));
     return giftag;
 }
+static inline u_long _gsXYZ(FIX4 x, FIX4 y, FIX4 z) {
+    return (u_long)(x + 0x8000) | ((u_long)(y + 0x8000) << 16) | ((u_long)(z >> 4) << 32);
+}
+static inline u_long _gsXYZ(const G_XYZ& p) { return _gsXYZ(p.x, p.y, p.z); }
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -125,7 +129,17 @@ void CScissoring::setDefault() {
     setRect(p0, p1);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CZFill);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__5CTile);
+void CTile::makePkt() {
+    QWdata giftag;
+    giftag.ul64[0] = 0x4400000000008000UL;
+    giftag.ul64[1] = 0x4410;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x206 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_gsXYZ(m_P0));
+    CPackMan::pkAddGsData(_gsXYZ(m_P1.x, m_P1.y, m_P0.z));
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__5CSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CPolyGT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10CPolyGT4ST);
