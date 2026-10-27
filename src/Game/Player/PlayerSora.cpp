@@ -3111,13 +3111,6 @@ __asm__(".word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3D8\n.word .L0029C3B0\
 __asm__(".word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word func_0\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeStockSkill__Q22PL11CPlayerSora);
 #endif
-/* Parked: structure, constants and calls match (size 0x8c4 vs 0x8c8, 264 lines differ); every case block is
-   scheduled differently: the original issues the AttackID store, `li 100` and the divide-by-zero trap before the
-   m_uiCardID/g_pBattleCardList/POWER loads and keeps &g_AttackDataList[] in v1 (ours: loads first, v0/v1 swapped),
-   and one case is 4 bytes longer. tried: AtkData by constant vs m_uiAttackID index (the latter needed), flag/store
-   orders and _ref on the leading stores (top part now matches), INT local for the signed /10, operand order of
-   m_iAP * POWER, _ref on m_iAP/m_uiCardID/m_pAtkData; permuter 12 min (2102 candidates), best 268 = start */
-#if 0
 void CPlayerSora::initMagic(INT inNo) {
     FVECTOR pos;
     FVECTOR rot;
@@ -3153,17 +3146,17 @@ void CPlayerSora::initMagic(INT inNo) {
     case 0x1A:
         m_uiAttackID = 0x22;
         m_pAtkData = &g_AttackDataList[m_uiAttackID];
-        m_iAttackPower = m_iAP * CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
+        m_iAttackPower = m_iAP * _ref(CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
         break;
     case 0x1B:
         m_uiAttackID = 0x23;
         m_pAtkData = &g_AttackDataList[m_uiAttackID];
-        m_iAttackPower = m_iAP * CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
+        m_iAttackPower = m_iAP * _ref(CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
         break;
     case 0x1C: {
         m_uiAttackID = 0x24;
         m_pAtkData = &g_AttackDataList[m_uiAttackID];
-        m_iAttackPower = m_iAP * CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
+        m_iAttackPower = m_iAP * _ref(CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
         calcAppearPos((FLOAT)m_pAtkData->WORK0, (FLOAT)m_pAtkData->COLL_START_FRAME * 0.1f, NULL);
         m_vAppearPos.y = getPos().y;
         if (isAir()) m_vAppearPos.y = m_vJumpStartPos.y;
@@ -3178,7 +3171,7 @@ void CPlayerSora::initMagic(INT inNo) {
         m_uiAttackID = 0x25;
         m_pAtkData = &g_AttackDataList[m_uiAttackID];
         {
-            INT power = CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER];
+            INT power = _ref(CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER];
             m_iAttackPower = power / 10;
         }
         attachEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, 0, &m_pWeapon->Crd(2),
@@ -3187,7 +3180,7 @@ void CPlayerSora::initMagic(INT inNo) {
     case 0x1E:
         m_uiAttackID = 0x26;
         m_pAtkData = &g_AttackDataList[m_uiAttackID];
-        m_iAttackPower = CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER];
+        m_iAttackPower = _ref(CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER];
         attachEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][2].pEffectName, 0, &m_pWeapon->Crd(2),
                      &PlayerWeapon::g_fWeaponTopOffset, NULL, 0.0f);
         calcAppearPos((FLOAT)m_pAtkData->WORK0, (FLOAT)m_pAtkData->COLL_START_FRAME * 0.01f, NULL);
@@ -3204,7 +3197,7 @@ void CPlayerSora::initMagic(INT inNo) {
     case 0x1F: {
         m_uiAttackID = 0x27;
         m_pAtkData = &g_AttackDataList[m_uiAttackID];
-        m_iAttackPower = CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER];
+        m_iAttackPower = _ref(CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER];
         pos.set(0.0f, 0.85f, 0.0f);
         CEffect* effect = CEffectMan::getEffect(attachEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, 0,
                                                              &Crd(0), &pos, NULL, 0.0f));
@@ -3214,14 +3207,14 @@ void CPlayerSora::initMagic(INT inNo) {
     case 0x20:
         m_uiAttackID = 0x28;
         m_pAtkData = &g_AttackDataList[m_uiAttackID];
-        m_iAttackPower = m_iAP * CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
+        m_iAttackPower = m_iAP * _ref(CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
         attachEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, 0, &m_pWeapon->Crd(2),
                      &PlayerWeapon::g_fWeaponTopOffset, NULL, 0.0f);
         break;
     case 0x21:
         m_uiAttackID = 0x94;
         m_pAtkData = &g_AttackDataList[m_uiAttackID];
-        m_iAttackPower = m_iAP * CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
+        m_iAttackPower = m_iAP * _ref(CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
         setPlayerFlag(0, 0x2800000);
         m_iAerialAnimShift = 0;
         break;
@@ -3229,7 +3222,7 @@ void CPlayerSora::initMagic(INT inNo) {
         m_uiAttackID = 0x95;
         m_pAtkData = &g_AttackDataList[m_uiAttackID];
         {
-            INT power = CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER];
+            INT power = _ref(CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER];
             m_iAttackPower = power / 10;
         }
         setPlayerFlag(0, 0x2800000);
@@ -3254,15 +3247,11 @@ void CPlayerSora::initMagic(INT inNo) {
     m_uiPreAttackKind = m_uiAttackKind;
     m_fDistXZ = m_fDistY = 0.0f;
     m_iSubState = m_uiAttackID;
-    setAnimForce(m_pAtkData->ANIM_ID + m_iAerialAnimShift, -1, 1, m_pAtkData->ANIM_ESQ, getStateSESeq(4), 0);
+    INT SESeq = getStateSESeq(4);
+    setAnimForce(m_pAtkData->ANIM_ID + m_iAerialAnimShift, -1, 1, m_pAtkData->ANIM_ESQ, SESeq, 0);
     setPlayerFlag(0x100000, 0);
     m_tqStateTimer = 0;
 }
-#else
-/* placeholder: .rodata of initMagic__Q22PL11CPlayerSorai (strings, jump tables) */
-__asm__(".rdata\n.align 4\n.word .L0029CB98\n.word .L0029CBB0\n.word .L0029CC0C\n.word .L0029CD68\n.word .L0029CDDC\n.word .L0029CF40\n.word .L0029D008\n.word .L0029D0B4\n.word .L0029D128\n.word func_0\n.word func_0\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initMagic__Q22PL11CPlayerSorai);
-#endif
 /* Game/MinigameManager.h */
 void CPlayerSora::exeMagic() {
     FVECTOR pos; /* unused locals of the original (stack frame) */
