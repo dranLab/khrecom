@@ -890,23 +890,22 @@ FLOAT RotTransPersClipW(IVECTOR& out_v, FVECTOR& out_fv, const FVECTOR& in_v) {
 }
 INT BackClip(const FVECTOR* in_fV, INT iDirL) {
     INT iRet;
-    __asm__ volatile(
-        "lqc2 $vf8, 0x0(%2)\n"
-        "lqc2 $vf9, 0x10(%2)\n"
-        "lqc2 $vf10, 0x20(%2)\n"
-        "vsub.xyzw $vf9, $vf9, $vf8\n"
-        "vsub.xyzw $vf10, $vf10, $vf8\n"
-        "dsll %1, %1, 31\n"
-        "vopmula.xyz $ACC, $vf9, $vf10\n"
-        "vopmsub.xyz $vf10, $vf10, $vf9\n"
-        "qmfc2.ni $3, $vf10\n"
-        "pcpyud $3, $3, $0\n"
-        "xor %0, $3, %1\n"
-        "dsrl %0, %0, 16\n"
-        : "=r"(iRet), "=r"(iDirL)
-        : "r"(in_fV), "1"(iDirL)
-        : "$3");
-    return iRet & 0x8000;
+    register u_long128 vN asm("$3");
+    register ULONGLONG lZ asm("$3");
+    ULONGLONG lDir;
+    __asm__ volatile("lqc2 $vf8, 0x0(%0)" : : "r"(in_fV));
+    __asm__ volatile("lqc2 $vf9, 0x10(%0)" : : "r"(in_fV));
+    __asm__ volatile("lqc2 $vf10, 0x20(%0)" : : "r"(in_fV));
+    __asm__ volatile("vsub.xyzw $vf9, $vf9, $vf8");
+    __asm__ volatile("vsub.xyzw $vf10, $vf10, $vf8");
+    lDir = (ULONGLONG)iDirL << 31;
+    __asm__ volatile("vopmula.xyz $ACC, $vf9, $vf10");
+    __asm__ volatile("vopmsub.xyz $vf10, $vf10, $vf9");
+    __asm__ volatile("qmfc2.ni %0, $vf10" : "=r"(vN));
+    __asm__ volatile("pcpyud %0, %1, $0" : "=r"(lZ) : "r"(vN));
+    __asm__ volatile("dsrl %0, %1, 16" : "=r"(iRet) : "r"(lZ ^ lDir));
+    iRet &= 0x8000;
+    return iRet;
 }
 static inline void loadMatrix_VF04_07(FMATRIX& m) {
     __asm__ volatile(
