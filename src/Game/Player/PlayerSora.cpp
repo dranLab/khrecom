@@ -30,6 +30,7 @@ inline void _roulettePrizeMessage() {
 #include "Game/Player/PlayerManager.h"
 #include "Game/Player/Friend.h"
 #include "Game/Player/PlayerCamera.h"
+#include "Game/Movement.h"
 #include "include_asm.h"
 
 namespace PL {
@@ -378,7 +379,37 @@ INT CPlayerSora::getStateSESeq(INT inState) {
     }
     return seq;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initGlide__Q22PL11CPlayerSorai);
+// reads a global after the member stores before it (the original reloads it there)
+template <class T> static inline T& _ref(T& v) { return v; }
+
+void CPlayerSora::initGlide(INT inFlag) {
+    if (isBattleFlag(0x200000)) {
+        return;
+    }
+    setPlayerState(PL::GLIDE);
+    setBattleFlag(0, 0x8);
+    setPlayerFlag(0, 0x1000000);
+    if (isActionFlag(0x800000)) {
+        setAnimForce(0x1C, -1, 0, 0, 0, 0);
+    } else {
+        setAnimForce(0x1B, -1, 0, 0, 0, 0);
+    }
+    m_JumpState = 4;
+    m_fJumpSpdY = 0.0f;
+    m_fJumpGravity = _ref(g_fGlideWeight) * -0.008166667f;
+    m_fJumpSpdXZ = m_fWalkSpeed;
+    m_fJumpPow = 0.0f;
+    m_fJumpDir = getDir();
+    offAttack();
+    setBattleFlag(0, 0x00443F90);
+    setBattleFlag(0, 0x80000);
+    setBattleFlag(0, 0x10200000);
+    setPlayerFlag(0, 0x020C2000);
+    setBattleFlag(0, 0x4060);
+    setBattleFlag(0, 0x3000000);
+    setFaceAnim(0, 0);
+    m_pMove->setFlag(0x40, TRUE);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeGlide__Q22PL11CPlayerSora);
 void CPlayerSora::exeAvoid() {
     exeDogeRoll();
