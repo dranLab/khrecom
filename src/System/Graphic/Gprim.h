@@ -565,6 +565,9 @@ struct TexInfo {
     BOOL isFixClut() const { return !_ClutInfo._pImage || (_nFlag & 2); }
     BOOL isFix() const { return isFixTex() && isFixClut(); }
     ULONGLONG getTPage() const { return _nTPage; }
+    ULONGLONG getTPage(UINT nTexPos, UINT nClutPos) const {
+        return _nTPage | nTexPos | ((ULONGLONG)nClutPos << 37);
+    }
 };
 
 struct G_ST {

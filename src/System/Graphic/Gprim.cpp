@@ -145,6 +145,16 @@ static inline u_long128 _calcSTQ(const G_ST& st, UINT iW) {
     return iRet;
 }
 INT BackClip(const FVECTOR* in_fV, INT iDirL);
+FLOAT getPrimGetaZ(INT iz, const FVECTOR& Vert, const FMATRIX* pWMat, FLOAT fGeta);
+static inline void _getTmpTexArea(INT nID, UINT& nTexPos, UINT& nClutPos) { /* PARTIAL: VramDef.h */
+    if (nID == 0) {
+        nTexPos = VRAM::_TEX_TMP1_START;
+        nClutPos = VRAM::_CLUT_TMP1_START;
+    } else {
+        nTexPos = VRAM::_TEX_TMP2_START;
+        nClutPos = VRAM::_CLUT_TMP2_START;
+    }
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -173,6 +183,9 @@ public:
     static void* pkGetCurrentPointer();
     static void pkSetCurrentPointer(void* p);
     static void pkCloseGifTag(void* p);
+    static void pkCloseDirectCode();
+    static void pkOpenDirectCode(int);
+    static void pkRefLoadImage(USHORT nPos, const VTransInfo& info);
     static u_long getDefault_TEST_2();
     static u_long getDefault_ZBUF_2();
     static u_long getDefault_SCISSOR_2();
@@ -180,6 +193,7 @@ public:
 class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
 public:
     static void add2DispList(CDrawable& inPrim, FIX4 inZ);
+    static void incTexSendCount(INT n);
 };
 
 void CGPrim::disp() {
@@ -194,7 +208,34 @@ void CGTexPrim::setTPage(const CHAR* pTexName) {
 void CGTexPrim2D::setTPage(const CHAR* pTexName) {
     m_pTexInfo = CRsrcDB::getRsrcTex(pTexName, NAME_CASE_SENSITIVE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setTexture__9CGTexPrimPC7TexInfoi);
+ULONGLONG CGTexPrim::setTexture(const TexInfo* pInInfo, BOOL bOnly2D) {
+    UINT nTexPos;
+    UINT nClutPos;
+    if (!pInInfo) return 0;
+    if (pInInfo->isFix()) return pInInfo->getTPage();
+
+    _getTmpTexArea(m_nTmpTexArea, nTexPos, nClutPos);
+
+    if (updateTexCache(pInInfo)) {
+        CPackMan::pkCloseDirectCode();
+        if (pInInfo->isFixTex()) {
+            nTexPos = pInInfo->_TexInfo._nDistPos;
+        } else {
+            CPackMan::pkRefLoadImage(nTexPos, pInInfo->_TexInfo);
+            CModelMan::incTexSendCount(1);
+        }
+        if (pInInfo->isFixClut()) {
+            nClutPos = pInInfo->_ClutInfo._nDistPos;
+        } else {
+            CPackMan::pkRefLoadImage(nClutPos, pInInfo->_ClutInfo);
+        }
+        CPackMan::pkOpenDirectCode(0);
+    } else {
+        if (pInInfo->isFixTex()) nTexPos = pInInfo->_TexInfo._nDistPos;
+        if (pInInfo->isFixClut()) nClutPos = pInInfo->_ClutInfo._nDistPos;
+    }
+    return pInInfo->getTPage(nTexPos, nClutPos);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setTexture__11CGTexPrim2DPC7TexInfoi);
 UINT CGTexPrim::getPacketSize() const {
     if (m_pTexInfo && !m_pTexInfo->isFix()) {
