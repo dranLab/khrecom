@@ -530,7 +530,60 @@ CScreenColoredMask::CScreenColoredMask() {
     m_P0.set(-0x1000, -(_ref(SCREEN_HEIGHT) * 8));
     m_P1.set(0x1000, _ref(SCREEN_HEIGHT) * 8);
 }
+/* Parked: the corner setup before the two calcVert calls (load/store order of b, c and ab; the original keeps
+ * &m_P1 in s0 and reads m_P1.y through it) and the register numbering that follows; packet part matches with
+ * centre offsets computed once; tried: direct member stores, reference locals for m_P0/m_P1, cd.set before the
+ * first calcVert, mid-function declarations (tb/tc/giftag reuse the inline's slot), permuter 15 min (8515
+ * candidates, 49 -> 48) */
+#if 0
+void CRotSprt::makePkt() {
+    G_XYZ b;
+    G_XYZ c;
+    IVECTOR ab;
+    IVECTOR cd;
+    ULONGLONG tex;
+    if (getTPage() == NULL) {
+        return;
+    }
+    tex = setTexture();
+
+    b.set(m_P1.x, m_P0.y);
+    c.set(m_P0.x, m_P1.y);
+
+    ab.set(m_P0.x, m_P0.y, b.x, b.y);
+    calcVert(ab);
+    cd.set(c.x, c.y, m_P1.x, m_P1.y);
+    calcVert(cd);
+
+    G_UV tb;
+    G_UV tc;
+    tb.set(m_T1.u, m_T0.v);
+    tc.set(m_T0.u, m_T1.v);
+
+    QWdata giftag;
+    giftag.ul64[0] = 0xB400000000008000UL;
+    giftag.ul64[1] = 0x43434343170UL;
+
+    FIX4 _x = m_Center.x + 0x8000;
+    FIX4 _y = m_Center.y + 0x8000;
+    FIX4 _z = m_Center.z >> 4;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x31C | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(tex);
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_gsUV(m_T0));
+    CPackMan::pkAddGsData((u_long)(ab.x + _x) | ((u_long)(ab.y + _y) << 16) | ((u_long)_z << 32));
+    CPackMan::pkAddGsData(_gsUV(tb));
+    CPackMan::pkAddGsData((u_long)(ab.z + _x) | ((u_long)(ab.w + _y) << 16) | ((u_long)_z << 32));
+    CPackMan::pkAddGsData(_gsUV(tc));
+    CPackMan::pkAddGsData((u_long)(cd.x + _x) | ((u_long)(cd.y + _y) << 16) | ((u_long)_z << 32));
+    CPackMan::pkAddGsData(_gsUV(m_T1));
+    CPackMan::pkAddGsData((u_long)(cd.z + _x) | ((u_long)(cd.w + _y) << 16) | ((u_long)_z << 32));
+    CPackMan::pkCloseGifTag();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CRotSprt);
+#endif
 static BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect) {
     FVECTOR __CCTPrim_vDefRect;
     INT iRet;
