@@ -29,6 +29,8 @@ inline void _roulettePrizeMessage() {
 #include "Game/Player/PlayerSora.h"
 #include "Game/Player/PlayerManager.h"
 #include "Game/Player/Friend.h"
+#include "Game/Player/PlayerAttack.h"
+#include "Game/Player/PlayerWeapon.h"
 #include "Game/Player/PlayerCamera.h"
 #include "Game/Movement.h"
 #include "include_asm.h"
@@ -240,7 +242,50 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initFriend__Q
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeFriend__Q22PL11CPlayerSora);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", watchTarget__Q22PL11CPlayerSorai);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", setAttack_inFriend__Q22PL11CPlayerSoraiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeAttack_inFriend__Q22PL11CPlayerSora);
+INT CPlayerSora::exeAttack_inFriend() {
+    TIMEQ frame = getMotionCurrentTime() / 50;
+    procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
+    if (frame <= m_pAtkData->MOVE_START_FRAME) {
+        if (isPlayerFlag(0x100000)) {
+            procTargetMark();
+        }
+        procAttackMove(frame, 1.0f, 4.0f, 2, 1.0f);
+    } else {
+        FLOAT rate = 0.0f;
+        if (frame < 6 && (m_pAtkData->FLAG & 8)) {
+            procTargetMark();
+            rate = 1.0f;
+        }
+        procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, !m_bIsAttackHit, rate);
+    }
+    if (!m_bIsAttackHit) {
+        if (frame >= m_pAtkData->COLL_START_FRAME) {
+            if (frame < m_pAtkData->COLL_END_FRAME) {
+                if (!m_pWeapon->isOnAttack()) {
+                    onAttack();
+                }
+                if (m_pWeapon->isHit()) {
+                    m_bIsAttackHit = TRUE;
+                    setPlayerFlag(0, 0x100000);
+                    m_pPLM->getFriend()->setSuccess();
+                    offAttack();
+                }
+            } else {
+                offAttack();
+                setPlayerFlag(0, 0x100000);
+            }
+        }
+    } else {
+        setPlayerFlag(0, 0x2000000);
+    }
+    if (isPlayerFlag(0x800000) && !isAir() && frame > m_pAtkData->COLL_END_FRAME) {
+        return endAttack_inFriend();
+    }
+    if (isMotionEnd()) {
+        return endAttack_inFriend();
+    }
+    return 0;
+}
 INT CPlayerSora::endAttack_inFriend() {
     if (!isPlayerFlag(0x20000)) {
         return -1;
