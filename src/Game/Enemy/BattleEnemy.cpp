@@ -105,7 +105,12 @@ BOOL CBattleEnemy::isCurrentState(INT inState) {
 BOOL CBattleEnemy::isValidSynchro() {
     return (INT)getExtraParam(BattleEnemy::SynchroParamName) != 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", canCardBattle__12CBattleEnemy);
+BOOL CBattleEnemy::canCardBattle() {
+    if (CardBattle::CCardBattle::isPlayingEnemyCard()) return FALSE;
+    CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+    if (!bem) AssertApp(D_004ACBC0, 0x4C8, D_004AD3B8, 0);
+    return bem->canCardBattle(getHandle()) != FALSE;
+}
 BOOL CBattleEnemy::canKill() {
     if (CardBattle::CCardBattle::getPlayingHandle(2) == getHandle() && CardBattle::CCardBattle::isPlayingEnemyCard()) return FALSE;
     return !isCurrentState(15);
