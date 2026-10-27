@@ -341,7 +341,21 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__12C
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__17C3DPolyStripCoordP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__10C3DPolyFanP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__15C3DPolyFanCoordP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _init__8C3DCPrim);
+void C3DCPrim::_init() {
+    m_PRIM = 0;
+    m_TEST = (UINT)-1;
+    m_ALPHA = (UINT)-1;
+    m_ZBUF = (UINT)-1;
+    m_CLAMP = (ULONGLONG)-1;
+    m_SCISSOR = (ULONGLONG)-1;
+    m_pCrd = NULL;
+    m_pObj = NULL;
+    m_V = NULL;
+    m_fGeta = 0.0f;
+    m_iRep = 0;
+    m_iMax = 0;
+    m_iZ = -1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _create__8C3DCPrimUliP6CCoordP7CCoordsi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DCPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DCPrim);
