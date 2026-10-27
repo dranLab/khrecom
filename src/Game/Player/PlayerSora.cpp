@@ -459,7 +459,55 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeGlide__Q22
 void CPlayerSora::exeAvoid() {
     exeDogeRoll();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeDogeRoll__Q22PL11CPlayerSora);
+void CPlayerSora::exeDogeRoll() {
+    setBattleFlag(0, 0x8);
+    FVECTOR vel = m_pMove->getVel();
+    if (isAir()) {
+        m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        vel.y = m_fJumpSpdY;
+        m_pMove->setVel(vel);
+    } else {
+        if (m_fJumpSpdY < 0.0f) m_fJumpSpdY = 0.0f;
+        vel.y = m_fJumpSpdY;
+        m_pMove->setVel(vel);
+    }
+    if (getMotionCurrentTime() >= m_pParam->AVOID_TQ_MUTEKI) {
+        setPlayerFlag(0, 1);
+    }
+    if (!isAir() && getMotionCurrentTime() >= m_pParam->AVOID_TQ_CANCEL && m_fAnalogPower >= 0.3f) {
+        m_WalkMode = chkWalkMode();
+        setWalkAnim();
+        switch (m_WalkMode) {
+        case 0:
+            setPlayerState(PL::STAND);
+            break;
+        case 1:
+            setPlayerState(PL::WALK);
+            break;
+        case 2:
+            setPlayerState(PL::RUN);
+            break;
+        }
+        m_fMovePower = 1.0f;
+        m_fWalkSpeed = m_fWalkSpeed / 60.0f;
+        setPlayerFlag(0, 1);
+        offAttack();
+        setBattleFlag(0, 0x00443F90);
+        setBattleFlag(0, 0x80000);
+        setBattleFlag(0, 0x10200000);
+        setPlayerFlag(0, 0x024C2000);
+        setConditionFlag(0, 0x08810023);
+        setBattleFlag(0, 0x4060);
+        setBattleFlag(0, 0x3000000);
+        m_JumpState = 0;
+        m_fJumpSpdY = 0.0f;
+        setFaceAnim(0, 0);
+        return;
+    }
+    if (isMotionEnd()) {
+        initIdle(-1, 1);
+    }
+}
 /* Game/Collision/CollBody.h (not decompiled yet): CPlayer's m_collBody */
 struct _CollBodyView {
     UBYTE _m_0x00[0x8];
