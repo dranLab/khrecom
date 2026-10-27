@@ -858,6 +858,7 @@ private:
     void initialize(INT inPlayerMode);
     void finalize();
     virtual void main();
+    void mainInit();
     void mainLoadWait();
     void mainIn();
     void mainInWait();
@@ -1169,7 +1170,28 @@ CMemo3DObj::CMemo3DObj(CTask* p, INT inGroupId, INT inRsrcId, UINT inDispLayer, 
     m_iStep = 0;
     m_fFadeCountMax = 6.0f;
 }
+/* Parked: final group, see the note above getTaskPointer<T> at the end of the file (matches when the group is C) */
+#if 0
+CMemo3DObj::~CMemo3DObj() {
+    if (m_pModels) delete[] m_pModels;
+    m_pModels = NULL;
+    if (m_pAnime) delete m_pAnime;
+    m_pAnime = NULL;
+    if (m_pLight) delete m_pLight;
+    m_pLight = NULL;
+    if (m_pTexAnim) delete[] m_pTexAnim;
+    m_pTexAnim = NULL;
+    if (isLoadEnable()) {
+        if (m_iStep == 0 && !CRcf::isCompleteLoadRCF(m_iGroupId, m_iResourceId)) {
+            CRcf::cancelLoadRCF(m_iGroupId, m_iResourceId);
+        } else {
+            CRsrcDB::removeGroup(m_iGroupId, m_iResourceId);
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_10CMemo3DObj);
+#endif
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CMemo3DObj::main() {
     INT nID;
@@ -1358,7 +1380,14 @@ CMemo2DLayout::CMemo2DLayout(CTask* p) : CTask(p, 0x4000) {
     m_pLayoutName = NULL;
     m_pLayoutFileName = NULL;
 }
+/* Parked: final group, see the note above getTaskPointer<T> at the end of the file (matches when the group is C) */
+#if 0
+CMemo2DLayout::~CMemo2DLayout() {
+    finalize();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DLayout);
+#endif
 void CMemo2DLayout::main() {
     D2::C2DSeqCtrl* pSeq;
     switch (getState()) {
@@ -1585,7 +1614,12 @@ CMemo2DSequence::CMemo2DSequence() {
         m_SeqTbl[i] = 0;
     }
 }
+/* Parked: final group, see the note above getTaskPointer<T> at the end of the file (matches when the group is C) */
+#if 0
+CMemo2DSequence::~CMemo2DSequence() {}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_15CMemo2DSequence);
+#endif
 void CMemo2DSequence::setup(const CHAR* inSeqName, const INT* inSeqTbl, INT inLayer) {
 #line 3138
     if (!(strlen(inSeqName) < 32)) AssertApp(__FILE__, __LINE__, "strlen(inSeqName) < 32", 0);
@@ -1710,7 +1744,14 @@ CMemo2DCursor::CMemo2DCursor(HANDLE inHandle) {
     m_ScreenLimit[1].y = *(INT*)&SCREEN_HEIGHT;
     m_fScale = 1.0f;
 }
+/* Parked: final group, see the note above getTaskPointer<T> at the end of the file (matches when the group is C) */
+#if 0
+CMemo2DCursor::~CMemo2DCursor() {
+    finalise();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_13CMemo2DCursor);
+#endif
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CMemo2DCursor::setup(CursorDataParam& inParam) {
     if (inParam.posiNum > 0) {
@@ -1866,7 +1907,12 @@ CMemo2DCard::CMemo2DCard(const CHAR* inEmptySeqName) {
     m_pEmptySeqName = (CHAR*)inEmptySeqName;
     setScl(m_fScale);
 }
+/* Parked: final group, see the note above getTaskPointer<T> at the end of the file (matches when the group is C) */
+#if 0
+CMemo2DCard::~CMemo2DCard() {}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_11CMemo2DCard);
+#endif
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 extern "C" CARD_DATA cardDataTbl_004EA4F8[]; /* CardKind.h's static table: still in the asm tail of .rodata */
 /* CardKind.h's inline lookup (line 561 in the original header) */
@@ -1957,7 +2003,14 @@ void CMemo2DCard::main(FLOAT inFrameRate) {
 CJiminyMemo::CJiminyMemo(CTask* inParent, INT inPlayerMode) : CMenu(inParent, -1) {
     initialize(inPlayerMode);
 }
+/* Parked: final group, see the note above getTaskPointer<T> at the end of the file (matches when the group is C) */
+#if 0
+CJiminyMemo::~CJiminyMemo() {
+    finalize();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _$_11CJiminyMemo);
+#endif
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CJiminyMemo::initialize(INT inPlayerMode) {
     INT resourceId;
@@ -2710,9 +2763,8 @@ void CJiminyMemo::ScrollBarInit(D2::C2DSeqCtrl** inSeqCtrl, INT inLayer, FVECTOR
 /* Parked: 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves
    from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches.
    tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the top, NULL compare, 0 vs
-   0.0f w, fRatioPosY reused for the product; tools/permuter.py 8 min reached score 1 in its copy (vec before vPos,
-   braces, 3 > i), but the same source gives 69 lines in the real build: codegen depends on the source path
-   (identifier hash order), so permuter results do not transfer here. */
+   0.0f w, fRatioPosY reused for the product; tools/permuter.py (fixed wrapper, target draft on, other drafts hidden)
+   10 min, 6432 candidates: no improvement (earlier "score 1" runs were a wrapper bug). */
 #if 0
 void CJiminyMemo::ScrollBarChange(D2::C2DSeqCtrl** inSeqCtrl, FLOAT inBasePosY, FLOAT inBaseHeight,
                                   INT inCursorPosiNum, INT inNoteListNum, INT inStartNum) {
@@ -3117,9 +3169,9 @@ extern CursorPosition CursorPosiOffset;
 extern FVECTOR NoteScrollBarPosi;
 }
 namespace StoryView {
-extern SHORT WorldPictureTbl[17];
+extern const SHORT WorldPictureTbl[17];
 namespace D {
-extern SHORT WorldPictureTbl[6];
+extern const SHORT WorldPictureTbl[6];
 }
 }
 }
@@ -3326,12 +3378,6 @@ void CJiminyMemo::contentStory() {
         }
     }
 }
-/* Parked: 4 lines: in both arms of step 21 the original schedules the WorldPictureTbl load (lh) after the
-   storyNum constant, ours before. Everything else matches.
-   tried: statement order of storyNum/pictureNo, SHORT pictureNo, declaration order; setContentStep before
-   setNextContentMode fixed the prev/next branches; tools/permuter.py 5 min starts at score 1 in its copy
-   (compiled from another path), 4 here: path-sensitive like ScrollBarChange/contentMinigame. */
-#if 0
 namespace JiminyMemo {
 extern CHAR* StoryLadName[13];
 namespace StoryView {
@@ -3568,26 +3614,6 @@ void CJiminyMemo::contentStoryView() {
         m_ContentStoryView.pTopArrowSeq->enableDisp(m_ContentStoryView.iCurrentTextLine > 0);
     }
 }
-#else
-/* placeholder: rodata of contentStoryView__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh27() {
-    TRACE(__FILE__ "(5890)");
-    TRACE(__FILE__ "(5897)");
-    TRACE("%s%02d.lad");
-    TRACE("%s%02d:00");
-    TRACE("%s.lad");
-    TRACE("%s:00");
-    TRACE(__FILE__ "(5949)");
-}
-__asm__(".rdata\n.align 4\n.word .L0032C78C\n.word .L0032C844\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032CCEC\n.word .L0032CD28\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n");
-__asm__(".word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032CDB8\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032CF84\n.word .L0032D1F4\n");
-__asm__(".word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D058\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n");
-__asm__(".word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D07C\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n");
-__asm__(".word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D07C\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n.word .L0032D1F4\n");
-__asm__(".word .L0032D1F4\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentStoryView__11CJiminyMemo);
-#endif
 INT CJiminyMemo::getPrevStoryId(INT inId) {
     return getPrevContentId(inId, work(0x178), work(0x170));
 }
@@ -3602,8 +3628,8 @@ static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
     c.m_nCategory21 = cardDataTbl_004EA4F8[c.m_nKind].nCategory1;
 }
 namespace JiminyMemo {
-extern INT SoraCardNumTbl[];
-extern INT RikuCardNumTbl[];
+extern const INT SoraCardNumTbl[];
+extern const INT RikuCardNumTbl[];
 namespace Collect {
 extern INT BaseSeqData[5];
 extern INT NoteSeqData[5];
@@ -3642,7 +3668,7 @@ void CJiminyMemo::contentCollection() {
         INT cursorLimitY;
         FLOAT defaultScale;
         INT allCardNum;
-        INT* pCardNumTbl;
+        const INT* pCardNumTbl;
         INT kindNum;
         UINT* pCardFlagTbl;
         SHORT** pCardEncyclTbl;
@@ -4331,8 +4357,8 @@ void CJiminyMemo::CardScreenOutClip() {
 }
 
 namespace JiminyMemo {
-extern INT SoraCardNumTbl[];
-extern INT RikuCardNumTbl[];
+extern const INT SoraCardNumTbl[];
+extern const INT RikuCardNumTbl[];
 namespace Collect {
 extern UINT CursorMoveFlag[];
 extern UINT CursorMoveFlagWithSpecial[];
@@ -4350,7 +4376,7 @@ INT CJiminyMemo::setParamFromCollectToCardView() {
     INT kindId;
     UINT* pCursorMoveFlag;
     INT cardKindNum;
-    INT* pCardKindTbl;
+    const INT* pCardKindTbl;
     if (!work(0x1D4)) return FALSE;
     current = -1;
     cursorLimitX = work(0x1FC);
@@ -4406,7 +4432,7 @@ void CJiminyMemo::contentCard() {
         INT listNum;
         INT posiNum;
         INT CTNo;
-        INT* cardNumTbl;
+        const INT* cardNumTbl;
         FVECTOR posi;
         D2::C2DSeqCtrl** pSeqCtrl;
         D2::C2DFnt** pString;
@@ -4651,12 +4677,6 @@ void CJiminyMemo::contentCard() {
         }
     }
 }
-/* Parked: 2 lines: in the Sora arm of step 20 the original loads SoraCardNumTbl[kind] after forming the
-   CardNameTbl[kind] address, ours before (the Riku arm matches). Everything else matches.
-   tried: statement orders in the arm (plateCTNo first, pCTCodeTbl first: 20 lines), kind read per arm,
-   eventFlagOffset init placement, ternary forms for the telop CT number (fixed case 30: sums in each arm),
-   isModeDReport() for the event base; tools/permuter.py 6 min starts at score 1 in its copy (path-sensitive). */
-#if 0
 namespace JiminyMemo {
 namespace CardSelect {
 extern INT NoteSeqData[5];
@@ -4882,22 +4902,6 @@ void CJiminyMemo::contentCardSelect() {
         }
     }
 }
-#else
-/* placeholder: rodata of contentCardSelect__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh30() {
-    TRACE(__FILE__ "(7546)");
-    TRACE(__FILE__ "(7553)");
-}
-__asm__(".rdata\n.align 4\n.word .L003301A0\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L003306F8\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n");
-__asm__(".word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L0033079C\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330990\n.word .L00330B58\n");
-__asm__(".word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330A54\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n");
-__asm__(".word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330A78\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n");
-__asm__(".word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330A78\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n.word .L00330B58\n");
-__asm__(".word .L00330B58\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCardSelect__11CJiminyMemo);
-#endif
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 namespace JiminyMemo {
 namespace CardView {
 extern INT NoteSeqData[5];
@@ -5225,33 +5229,30 @@ INT CJiminyMemo::getPrevCardId(INT inId) {
 INT CJiminyMemo::getNextCardId(INT inId) {
     return getNextContentId(inId, work(0x2D4), work(0x2D0));
 }
-/* Parked: 4 lines: the constant 1 for (1 << j) is hoisted to before the outer loop in ours, the original sets it
-   at the start of each outer iteration (li t0,1 after lw a0 / move v1,zero). Everything else matches: cardNo read
-   before kindNo, the cardNum sum loop, goto end instead of return in the inner loop (fixes the epilogue order).
-   tried: return vs goto, the row flag in a local, do-while and if-wrapped do-while inner loops, an INT bit = 1 local,
-   pointer-incremented rows (19 lines), tools/permuter.py 10 min (12608 candidates, score 1). */
-#if 0
 INT CJiminyMemo::setParamFromCardViewToCollect() {
     INT rval = 0;
     INT cardNo = work(0x2D0);
     INT kindNo = work(0x2CC);
+    INT cursorLimitX;
     INT cursorLimitY;
     UINT* pCursorMoveFlag;
-    INT* pCardNumTbl;
+    const INT* pCardNumTbl;
     if (m_iPlayerMode == 0) {
+        cursorLimitX = 22;
         cursorLimitY = 7;
         pCursorMoveFlag = haveSpecialCard() ? JiminyMemo::Collect::CursorMoveFlagWithSpecial
                                             : JiminyMemo::Collect::CursorMoveFlag;
         pCardNumTbl = JiminyMemo::SoraCardNumTbl;
     } else {
         pCursorMoveFlag = JiminyMemo::Collect::D::CursorMoveFlag;
+        cursorLimitX = 22;
         cursorLimitY = 3;
         pCardNumTbl = JiminyMemo::RikuCardNumTbl;
     }
     INT currentCardNo = cardNo;
     for (INT i = 0; i < kindNo; i++) currentCardNo += pCardNumTbl[i];
     for (INT i = 0; i < cursorLimitY; i++) {
-        for (INT j = 0; j < 22; j++) {
+        for (INT j = 0; j < cursorLimitX; j++) {
             if (pCursorMoveFlag[i] & (1 << j)) {
                 if (--currentCardNo < 0) goto end;
             }
@@ -5261,13 +5262,9 @@ INT CJiminyMemo::setParamFromCardViewToCollect() {
 end:
     return rval;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setParamFromCardViewToCollect__11CJiminyMemo);
-#endif
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 namespace JiminyMemo {
-extern INT CharaNumTbl[];
-extern INT RikuCharaNumTbl[];
+extern const INT CharaNumTbl[];
+extern const INT RikuCharaNumTbl[];
 }
 namespace JiminyMemo {
 namespace Chara {
@@ -5285,7 +5282,7 @@ void CJiminyMemo::contentChara() {
         INT posiNum;
         INT listNum;
         INT ctNo;
-        INT* charaNumTbl;
+        const INT* charaNumTbl;
         FVECTOR posi;
         D2::C2DSeqCtrl** pSeqCtrl;
         D2::C2DFnt** pString;
@@ -5526,15 +5523,9 @@ void CJiminyMemo::contentChara() {
         }
     }
 }
-/* Parked: 8 lines: in both arms of step 20 the original stores titleNo (stack spill) before loading
-   listNum, ours after (same family as contentCardSelect). Everything else matches.
-   tried: titleNo/listNum statement order, eventFlagOffset = 0 as its own statement (line 8669) before or after
-   kind; listNum local for the seq count / marks / loop (fixed 80 lines); tools/permuter.py 3 min starts at
-   score 1 in its copy (path-sensitive). */
-#if 0
 namespace JiminyMemo {
-extern INT CharaNumTbl[];
-extern INT RikuCharaNumTbl[];
+extern const INT CharaNumTbl[];
+extern const INT RikuCharaNumTbl[];
 namespace CharaSelect {
 extern INT NoteSeqData[5];
 extern CursorPosition CursorPosiOffset;
@@ -5763,22 +5754,6 @@ void CJiminyMemo::contentCharaSelect() {
         }
     }
 }
-#else
-/* placeholder: rodata of contentCharaSelect__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh33() {
-    TRACE(__FILE__ "(8702)");
-    TRACE(__FILE__ "(8709)");
-}
-__asm__(".rdata\n.align 4\n.word .L00332BD8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L0033313C\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n");
-__asm__(".word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003331D0\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003333C4\n.word .L003335C8\n");
-__asm__(".word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L00333488\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n");
-__asm__(".word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003334C0\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n");
-__asm__(".word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003334C0\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n.word .L003335C8\n");
-__asm__(".word .L003335C8\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCharaSelect__11CJiminyMemo);
-#endif
-__asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 namespace JiminyMemo {
 extern CT_LOWER* CharacterManualTbl[15];
 extern CT_LOWER* RikuCharacterManualTbl[3];
@@ -5789,13 +5764,6 @@ extern INT NoteSeqData[5];
 extern INT EnemyNoteSeqData[5];
 }
 }
-/* Parked: 12 lines: in both arms of step 20 the original schedules `li a2,14/2; sw a2,56(sp)` (EnemyNoteKind,
-   a spilled pseudo) after the table address setup and loads listNum after the ctTbl address add; ours issues the
-   li/sw right after the first lui. Everything else matches.
-   tried: EnemyNoteKind statement first/after listNum/last/after EnemyDownNumId, its and listNum's declaration
-   at every position, a ternary after the arms (111 lines); tools/permuter.py (other drafts hidden) 2 runs,
-   30 -> 12 via declaration order + the line-marker fixes (timer before step, 80 falls through to 81). */
-#if 0
 void CJiminyMemo::contentCharaView() {
     INT eventFlagId = isModeDReport() ? 0x7F : 0x17;
     switch (getContentStep()) {
@@ -6092,23 +6060,6 @@ void CJiminyMemo::contentCharaView() {
         m_ContentCharaView.pTopArrowSeq->enableDisp(m_ContentCharaView.iCurrentTextLine > 2);
     }
 }
-#else
-/* placeholder: rodata of contentCharaView__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh34() {
-    TRACE(__FILE__ "(8999)");
-    TRACE(__FILE__ "(9006)");
-    TRACE("%4d");
-    TRACE(__FILE__ "(9108)");
-}
-__asm__(".rdata\n.align 4\n.word .L00333744\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L00333E28\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n");
-__asm__(".word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L00333F5C\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003341B4\n.word .L003344E8\n");
-__asm__(".word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L0033428C\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n");
-__asm__(".word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003342C0\n.word .L0033441C\n.word .L00334494\n.word .L003344B8\n");
-__asm__(".word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003342B0\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n.word .L003344E8\n");
-__asm__(".word .L003344E8\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCharaView__11CJiminyMemo);
-#endif
 INT CJiminyMemo::getPrevCharaId(INT inId) {
     return getPrevContentId(inId, work(0x3A0), work(0x39C));
 }
@@ -6125,7 +6076,8 @@ extern FVECTOR ModelPosi;
    original f4/f1/f3, ours f1/f3/f4). Everything else matches.
    tried: line-marker layout (both table arms written out, flags 0x8000 then 0x4000, setter order, ry split over
    3 statements), literal vs DEG2RAD constant, * 1/4096 vs / 4096, operand orders, ry as one or two statements;
-   tools/permuter.py 6 min starts at score 1 in its copy (another path) but 6 lines here: path/hash-sensitive. */
+   rotation as one/two/three statements, const ry;
+   tools/permuter.py (fixed wrapper, target draft on, other drafts hidden) 8 min: no improvement. */
 #if 0
 INT CJiminyMemo::contentCharaView_ModelView() {
     INT rval = TRUE;
@@ -6258,8 +6210,9 @@ extern INT NoteSeqData[5];
    spilled in another slot order (GCSE/PRE creates their pseudos in hash-table order: ours BPanic first, the
    original BGlider first). Everything else matches (time math via the Com.h(59) seconds inline, string table).
    tried: aggregate initializer for scoreStr, if vs ternary for the scores, unused posi removed (worse); RTL dump
-   shows pseudos 567.. made by gcse; tools/permuter.py 10 min starts at score 1 in its copy (another path) but 34
-   lines here: pointer-hash dependent (see memory gcse-pre-hash-order). */
+   shows pseudos 567.. made by gcse; scoreStr declared
+   with the other locals + element stores (34/99); tools/permuter.py (fixed wrapper, target on, others hidden)
+   9 min: no gain (earlier "score 1" was a wrapper bug); gcse hash order (see memory gcse-pre-hash-order). */
 #if 0
 /* PARTIAL: the original's System/Com.h(59) inline: seconds to time quanta */
 static inline INT _sec2tq(INT inSec) { return inSec * 3000; }
@@ -6462,6 +6415,104 @@ __asm__(".word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\
 __asm__(".word .L003354D0\n.byte 0x00,0x00,0x00,0x00\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentMinigame__11CJiminyMemo);
 #endif
+/* Parked: final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the
+   .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once.
+   Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every function matches except
+   mainInit/mainLoadWait/mainIn (tail store order/FP regs, 7/2/2 lines), and the ~175 namespace-scope const tables
+   (static, emitted after the vtables only when C references them) need contentMenu, contentCollection,
+   contentCharaView_ModelView and contentMinigame in C, which are parked. tried: see those functions' notes. */
+#if 0
+template <class T> T CJiminyMemo::getTaskPointer(HANDLE inHandle) {
+    T p = NULL;
+    if (inHandle) {
+        p = (T)CTaskMan::getTask(inHandle);
+        if (p && p->isOut()) p = NULL;
+    }
+    return p;
+}
+BOOL CMemo3DObj::isErase() { return m_bEraseModel; }
+BOOL CMemo3DObj::isLoadEnable() { return m_bLoadEnable; }
+BOOL CMemo3DObj::isLightOff() { return m_bLightOff; }
+void CMemo3DObj::setErase() { m_bEraseModel = TRUE; }
+FLOAT CMemo3DObj::getRotateY() { return m_fRotY; }
+FVECTOR& CMemo3DObj::getPosition() { return m_vPosition; }
+void CMemo3DObj::setScale(FLOAT inScale) { m_fScale = inScale; }
+FLOAT CMemo3DObj::getScale() { return m_fScale; }
+void CMemo3DObj::setLightOff(BOOL inFlag) { m_bLightOff = inFlag; }
+void CMemo3DObj::setFadeCountMax(FLOAT inMax) { m_fFadeCountMax = inMax; }
+void CMemo3DObj::setNotSemiFlag(BOOL inFlag) { m_bNotSemiFlag = inFlag; }
+void CMemo3DObj::setFade2PathFlag(BOOL inFlag) { m_bFade2PathFlag = inFlag; }
+BOOL CMemo2DLayout::isEndLayer() { return D2::C2DMan::isEnd(m_hLayer); }
+void CMemo2DLayout::setStateFlag(INT inOn, INT inOff) { m_uiStateFlags = (m_uiStateFlags & ~inOff) | inOn; }
+INT CMemo2DLayout::isStateFlag(INT inFlags) { return m_uiStateFlags & inFlags; }
+BOOL CMemo2DLayout::isFontSeqTbl(INT inSeqNo) { return m_pSeqNoTbl[inSeqNo].CTCode != 0; }
+INT CMemo2DLayout::getSeqCtrlNum() { return m_iSeqCtrlNum; }
+INT CMemo2DLayout::getSeqNum() { return m_iSeqNum; }
+void CMemo2DSequence::setBasePosition(const FVECTOR& inPosi) { m_vBasePosition = inPosi; }
+FVECTOR& CMemo2DSequence::getBasePosition() { return m_vBasePosition; }
+void CMemo2DSequence::setShiftPosition(const FVECTOR& inShift) { m_vShiftPosition = inShift; }
+void CMemo2DSequence::setAimPosition(const FVECTOR& inAim) { m_vAimPosition = inAim; }
+void CMemo2DSequence::setPosition(const FVECTOR& inPosi) {
+    m_vPosition = inPosi;
+    setPos(m_vPosition);
+}
+void CMemo2DSequence::setLocalPosition(const FVECTOR& inPosi) {
+    m_vPosition = inPosi;
+    setLocalPos(m_vPosition);
+}
+void CMemo2DSequence::setState(INT inState) { m_iState = inState; }
+void CMemo2DSequence::setStateFlag(USHORT inOrFlag, USHORT inAndFlag) { m_iStateFlag = (m_iStateFlag & ~inAndFlag) | inOrFlag; }
+USHORT CMemo2DSequence::isStateFlag(USHORT inFlag) { return m_iStateFlag & inFlag; }
+void CMemo2DSequence::setMoveTimer(FLOAT inTimeQ) { m_fMoveTimer = inTimeQ; }
+FLOAT CMemo2DSequence::getMoveTimer() { return m_fMoveTimer; }
+void CMemo2DSequence::addMoveTimer(FLOAT inTimeQ) { m_fMoveTimer += inTimeQ; }
+INT CMemo2DSequence::getSideInId(INT inId) { return inId == 1 ? 0 : 3; }
+INT CMemo2DSequence::getSideOutId(INT inId) { return inId == 1 ? 2 : 4; }
+void CMemo2DCursor::setShiftVector(const FVECTOR& inShiftPosi) { m_vShiftPosi = inShiftPosi; }
+FVECTOR& CMemo2DCursor::getShiftVector() { return m_vShiftPosi; }
+FVECTOR& CMemo2DCursor::getAimVector() { return m_vAimPosi; }
+FVECTOR& CMemo2DCursor::getPosition() { return m_vPosi; }
+void CMemo2DCursor::setSeqNo(INT inSeqNo) { m_iLadTbl[3] = inSeqNo; }
+void CMemo2DCard::setBasePosition(const FVECTOR& inPosition) { m_vBasePosition = inPosition; }
+FVECTOR& CMemo2DCard::getBasePosition() { return m_vBasePosition; }
+void CMemo2DCard::setShiftPosition(const FVECTOR& inShift) { m_vShiftPosition = inShift; }
+FVECTOR& CMemo2DCard::getShiftPosition() { return m_vShiftPosition; }
+void CMemo2DCard::setScale(FLOAT inScale) {
+    m_fScale = inScale;
+    setScl(inScale);
+}
+void CJiminyMemo::setStateFlag(INT inOn, INT inOff) { m_uiStateFlags = (m_uiStateFlags & ~inOff) | inOn; }
+INT CJiminyMemo::isStateFlag(INT inFlags) { return m_uiStateFlags & inFlags; }
+BOOL CJiminyMemo::isModeJiminyMemo() { return m_iPlayerMode == 0; }
+BOOL CJiminyMemo::isModeDReport() { return m_iPlayerMode != 0; }
+INT CJiminyMemo::getLoadResourceIndex() { return m_iPlayerMode != 0; }
+void CJiminyMemo::setContentStep(INT inStep) { m_ContentCommon.iStep = inStep; }
+INT CJiminyMemo::getContentStep() { return m_ContentCommon.iStep; }
+void CJiminyMemo::setContentTimer(FLOAT inTimer) { m_ContentCommon.fTimer = inTimer; }
+FLOAT CJiminyMemo::getContentTimer() { return m_ContentCommon.fTimer; }
+void CJiminyMemo::setNextContentMode(INT inMode) { m_ContentCommon.iNextContent = inMode; }
+INT CJiminyMemo::getNextContentMode() { return m_ContentCommon.iNextContent; }
+void CJiminyMemo::setPrevContentMode(INT inMode) { m_ContentCommon.iPrevContent = inMode; }
+INT CJiminyMemo::getPrevContentMode() { return m_ContentCommon.iPrevContent; }
+void CJiminyMemo::setContentParam(INT inId, INT inParam) {
+    _jiminyMemoAssertParamId(inId, 1185);
+    m_ContentCommon.param[inId] = inParam;
+}
+INT CJiminyMemo::getContentParam(INT inId) {
+    _jiminyMemoAssertParamId(inId, 1193);
+    return m_ContentCommon.param[inId];
+}
+void CJiminyMemo::setContentScroll(INT inIdx, const FVECTOR& inPosi) {
+    m_ContentCommon.scroll[inIdx].x = inPosi.x;
+    m_ContentCommon.scroll[inIdx].y = inPosi.y;
+}
+void CJiminyMemo::getContentScroll(INT inIdx, FVECTOR& outPosi) {
+    outPosi.x = m_ContentCommon.scroll[inIdx].x;
+    outPosi.y = m_ContentCommon.scroll[inIdx].y;
+    outPosi.z = 0.0f;
+    outPosi.w = 1.0f;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getTaskPointer__H1ZP13CMemo2DLayout_11CJiminyMemoi_X01);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getTaskPointer__H1ZP5CTask_11CJiminyMemoi_X01);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getTaskPointer__H1ZP10CMemo3DObj_11CJiminyMemoi_X01);
@@ -6525,15 +6576,156 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setContentParam
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getContentParam__11CJiminyMemoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", setContentScroll__11CJiminyMemoiRC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", getContentScroll__11CJiminyMemoiR7FVECTOR);
+#endif
+namespace JiminyMemo {
+namespace Base {
+extern const INT LayoutData[];
+extern const LayoutDataParam SeqData[];
+extern FVECTOR TelopMessagePosition;
+extern CursorPosition L1R1DigitSlashOffset;
+}
+}
+/* Parked (final group): the inlined mainInit tail (posi._q = 0; posi.w = 1.0f; setContentStep(20); setContentScroll(0/1))
+   schedules the step/w/scroll stores in another order: in ours setContentStep's store and the posi.w stack store are
+   dependent (sched2 dump), in the original they are not (step lands before w in mainInit, after scroll[1] in mainIn).
+   mainInit 7 lines standalone, mainLoadWait 2, mainIn 2; the rest (layout setup, digit seqs, telop font) matches.
+   tried: all orders of the tail statements (scored on both callers), block-scoped tail FVECTOR (30), step first
+   (contentCollection recipe); tools/permuter.py 2 runs on mainInit (12/10, no gain). The weak functions can only
+   come from C together (key functions + deferred inline output), so they stay INCLUDE_ASM as a group. */
+#if 0
+inline void CJiminyMemo::mainInit() {
+    CMemo2DLayout* pLay;
+    D2::C2DSeqCtrl* pMess;
+    FVECTOR posi;
+    pLay = new (__FILE__ "(3948)") CMemo2DLayout(this);
+    if (pLay) {
+        D2::C2DSeqCtrl* pSeq;
+        m_hLayout = pLay->getHandle();
+        pLay->setup(m_pLadName, m_pLadFileName, JiminyMemo::Base::LayoutData, 0xC, JiminyMemo::Base::SeqData, 0xF);
+        pLay->init();
+        pSeq = pLay->getSeqCtrl(8);
+        if (pSeq) {
+            FLOAT offsetX;
+            FLOAT offsetY;
+            offsetX = JiminyMemo::Base::L1R1DigitNumOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitNumOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 0.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 16.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 32.0f, offsetY);
+            offsetX = JiminyMemo::Base::L1R1DigitSlashOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitSlashOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0xA1, offsetX + 0.0f, offsetY);
+            offsetX = JiminyMemo::Base::L1R1DigitDenomiOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitDenomiOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 0.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 16.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 32.0f, offsetY);
+        }
+        pSeq = pLay->getSeqCtrl(9);
+        if (pSeq) {
+            FLOAT offsetX;
+            FLOAT offsetY;
+            offsetX = JiminyMemo::Base::L1R1DigitNumOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitNumOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 0.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 16.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 32.0f, offsetY);
+            offsetX = JiminyMemo::Base::L1R1DigitSlashOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitSlashOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0xA1, offsetX + 0.0f, offsetY);
+            offsetX = JiminyMemo::Base::L1R1DigitDenomiOffset.x;
+            offsetY = JiminyMemo::Base::L1R1DigitDenomiOffset.y;
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 0.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 16.0f, offsetY);
+            pSeq->addSeqShift(m_pLadName, 0x95, offsetX + 32.0f, offsetY);
+        }
+        pSeq = pLay->getSeqCtrl(2);
+        if (pSeq) {
+            D2::C2DMan::getLayPosition(m_pLadFileName, 0x2C, 1, posi, 0);
+            pSeq->setLocalPos(posi);
+        }
+        pSeq = pLay->getSeqCtrl(5);
+        if (pSeq) {
+            D2::C2DMan::getLayPosition(m_pLadFileName, 0x2C, 2, posi, 0);
+            pSeq->setLocalPos(posi);
+        }
+    }
+    pMess = new (__FILE__ "(4012)") D2::C2DSeqCtrl;
+    if (pMess) {
+        D2::C2DFnt* pFnt;
+        m_pMessSeq = pMess;
+        pMess->setLayer(0x11);
+        pMess->enableDisp(TRUE);
+        pMess->addSeq(m_pLadName, 1);
+        pMess->setPos(JiminyMemo::Base::TelopMessagePosition);
+        pFnt = new (__FILE__ "(4022)") D2::C2DFnt(0, 0, NULL, 0x10, JiminyMemo::Base::DefaultMessage, 0x40);
+        if (pFnt) {
+            m_pMessString = pFnt;
+            pMess->addFnt(m_pLadName, pFnt);
+        }
+        pMess->enableDisp(TRUE);
+    }
+    JiminyMemo::playSE(3);
+    setLayoutState(m_hLayout, 1);
+    setContentStep(20);
+    posi._q = 0;
+    posi.w = 1.0f;
+    setContentScroll(0, posi);
+    setContentScroll(1, posi);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainInit__11CJiminyMemo);
+#endif
+#if 0
+void CJiminyMemo::mainLoadWait() {
+    if (CRcf::isCompleteLoadRCF(2, JiminyMemo::RsrcId[getLoadResourceIndex()])) {
+        mainInit();
+        m_iStep = 30;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainLoadWait__11CJiminyMemo);
+#endif
+#if 0
+void CJiminyMemo::mainIn() {
+    mainInit();
+    m_iStep = 30;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainIn__11CJiminyMemo);
+#endif
+/* Parked: final group, see the note above getTaskPointer<T> */
+#if 0
+inline void CJiminyMemo::mainInWait() {
+    if (checkLayoutState(m_hLayout, 4)) {
+        setLayoutState(m_hLayout, 3);
+        m_iStep = 40;
+    }
+}
+inline void CJiminyMemo::mainLoop() {}
+inline void CJiminyMemo::mainOut() {
+    setLayoutState(m_hLayout, 4);
+    m_iStep = 60;
+}
+inline void CJiminyMemo::mainOutWait() {
+    if (checkLayoutState(m_hLayout, 0x10)) {
+        setLayoutState(m_hLayout, 7);
+        CJiminyMemoFlag::checkMiniGameHiScore();
+        CJiminyMemoFlag::cleanTouchFlag();
+        m_iStep = 80;
+    }
+}
+/* replaceNoteListString: inline before its first user (replaceNoteListWithOpenCheck); static init: the
+   namespace statics `static FLOAT JiminyRotY = DEG2RAD(-120.0f)` (Menu) and `ModelRotY = DEG2RAD(180.0f)`
+   (CharaView) with .bss from source */
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainInWait__11CJiminyMemo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainLoop__11CJiminyMemo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainOut__11CJiminyMemo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainOutWait__11CJiminyMemo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", replaceNoteListString__11CJiminyMemoPQ22D26C2DFntPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", _GLOBAL_$I$c__KHCOM_MainApp_Form_Menu_JiminyMemo.cppbgbaaa);
+#endif
 /* Placeholder for the end of .rodata: the vtables (their key functions are still asm) and the static const
    tables gcc emits after them (cardDataTbl with its strings, the JiminyMemo:: tables). Bytes from the original,
    relocated words as symbols. */
