@@ -508,7 +508,24 @@ FIX4 C3DTile::calcZ() {
     return p0.z << 4;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DTile);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__7C3DSprt);
+FIX4 C3DSprt::calcZ() {
+    FVECTOR c;
+    FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
+    c = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);
+    c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);
+
+    c.w = 1.0f;
+    c.x += m_P0.x;
+    c.y += m_P0.y;
+
+    RotTransPers(p0, vs, c);
+
+    c.x += m_P1.x - m_P0.x;
+    c.y += m_P1.y - m_P0.y;
+    RotTransPers(p1, vs, c);
+
+    return p0.z << 4;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DRotSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DRotSprt);
