@@ -2672,43 +2672,112 @@ FIX4 C3DTPrim::calcZ() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DTPrim);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DTPrim);
-/* PARTIAL: the draw_Tbl of the still asm C3DTPrim::makePkt, for its INCLUDE_ASM; remove with it */
-__asm__(".data\n"
-        "draw_Tbl.2152:\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_None__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_Line0__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_LineStrip0__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_Triangle0__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_TriangleStrip0__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_TriangleFan0__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_None__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_None__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_None__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_Line1__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_LineStrip1__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_Triangle1__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_TriangleStrip1__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_TriangleFan1__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_None__8C3DTPrimP6QWdata\n"
-        ".word 0xFFFF0000\n"
-        ".word makePkt_None__8C3DTPrimP6QWdata\n"
-        ".text\n");
+void C3DTPrim::makePkt() {
+    ULONGLONG lTex0;
+    QWdata* pQw;
+    QWdata* pQwTop;
+    QWdata* pQwPkt;
+    ULONGLONG* p64;
+    UINT iEnvChange;
+    ULONGLONG lPrim;
+    INT iIdx;
+    static QWdata* (C3DTPrim::*draw_Tbl[2][8])(QWdata*) = {
+        {&C3DTPrim::makePkt_None, &C3DTPrim::makePkt_Line0, &C3DTPrim::makePkt_LineStrip0,
+         &C3DTPrim::makePkt_Triangle0, &C3DTPrim::makePkt_TriangleStrip0, &C3DTPrim::makePkt_TriangleFan0,
+         &C3DTPrim::makePkt_None, &C3DTPrim::makePkt_None},
+        {&C3DTPrim::makePkt_None, &C3DTPrim::makePkt_Line1, &C3DTPrim::makePkt_LineStrip1,
+         &C3DTPrim::makePkt_Triangle1, &C3DTPrim::makePkt_TriangleStrip1, &C3DTPrim::makePkt_TriangleFan1,
+         &C3DTPrim::makePkt_None, &C3DTPrim::makePkt_None},
+    };
+    if (m_iMax == 0) {
+        return;
+    }
+    lTex0 = setTexture();
+    pQwTop = (QWdata*)CPackMan::pkGetCurrentPointer();
+
+    iEnvChange = 0;
+    if ((INT)m_TEST >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 1;
+    }
+    if ((long)m_CLAMP >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 2;
+    }
+    if ((long)m_SCISSOR >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 4;
+    }
+    if ((INT)m_ALPHA >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 8;
+    }
+    if ((INT)m_ZBUF >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 0x10;
+    }
+    if (iEnvChange) {
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_gifTag((u_long)(iEnvChange >> 12) | 0x1000000000000000UL, 0xE));
+        if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, m_TEST);
+        if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, m_CLAMP);
+        if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, m_SCISSOR);
+        if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, ((u_long)m_ALPHA << 16) | m_ALPHA);
+        if (iEnvChange & 0x10) {
+            ULONGLONG ZMSK = (ULONGLONG)(m_ZBUF & 0xF0000000) << 2;
+            ULONGLONG ZBUF = m_ZBUF & 0x0FFFFFFF;
+            ULONGLONG x;
+            if (!ZBUF) {
+                ZBUF = CPackMan::getDefault_ZBUF_2() & 0xFFFFFFFF;
+                x = ZBUF | ZMSK;
+            } else {
+                x = ZBUF | ZMSK;
+            }
+            (pQw++)->ul128 = _AD(0x4F, x);
+        }
+        CPackMan::pkCloseGifTagManual((UINT*)pQw);
+    }
+
+    {
+        ULONGLONG x = m_PRIM & 0xCF;
+        x |= 0x210;
+        lPrim = ((u_long)isSemiTrans() << 6) | x;
+    }
+    if (m_PackReglist[m_PRIM & 7]) {
+        p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x2400000000000001UL, 0x7));
+        p64[0] = lTex0;
+        p64[1] = lPrim;
+        CPackMan::pkCloseGifTagManual((UINT*)&p64[2]);
+        pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(0x3400000000008000UL, 0x412));
+    } else {
+        p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x1400000000000001UL, 0x7));
+        p64[0] = lTex0;
+        CPackMan::pkCloseGifTagManual((UINT*)&p64[1]);
+        pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag((lPrim << 47) | 0x3000400000008000UL, 0x412));
+    }
+
+    _setGeta(m_fGetaZ);
+
+    iIdx = m_pObj != NULL;
+
+    pQwPkt = pQw;
+    pQw = (this->*draw_Tbl[iIdx][m_PRIM & 7])(pQwPkt);
+
+    if (pQwPkt != pQw) {
+        CPackMan::pkCloseGifTag(pQw);
+        if (iEnvChange) {
+            pQw = (QWdata*)CPackMan::pkOpenGifTagManual(
+                _gifTag((u_long)((iEnvChange >> 12) | 0x8000) | 0x1000000000000000UL, 0xE));
+            if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, CPackMan::getDefault_TEST_2());
+            if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, CPackMan::getDefault_CLAMP_2());
+            if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, CPackMan::getDefault_SCISSOR_2());
+            if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, CPackMan::getDefault_ALPHA_2());
+            if (iEnvChange & 0x10) (pQw++)->ul128 = _AD(0x4F, CPackMan::getDefault_ZBUF_2());
+            CPackMan::pkCloseGifTagManual((UINT*)pQw);
+        }
+    } else {
+        CPackMan::pkSetCurrentPointer(pQwTop);
+    }
+}
 QWdata* C3DTPrim::makePkt_None(QWdata* pQw) {
     return pQw;
 }
