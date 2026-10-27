@@ -479,7 +479,11 @@ QWdata* C3DTPrim::makePkt_TriangleFan0(QWdata* pQw) {
     }
     return _makePkt_TexTriangleFan(pQw, it, end, isBackClip());
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleFan1__8C3DTPrimP6QWdata);
+QWdata* C3DTPrim::makePkt_TriangleFan1(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    return _makePkt_TexTriangleFan(pQw, it, end, &m_pObj->Crd(0), isBackClip());
+}
 QWdata* C3DCPrim::makePkt_LineStrip0(QWdata* pQw) {
     G_STRIP* it = m_V;
     G_STRIP* end = m_V + m_iMax;
