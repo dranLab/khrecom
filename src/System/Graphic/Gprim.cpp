@@ -143,7 +143,17 @@ void CTile::makePkt() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__5CSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CPolyGT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10CPolyGT4ST);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CLineF2);
+void CLineF2::makePkt() {
+    QWdata giftag;
+    giftag.ul64[0] = 0x4400000000008000UL;
+    giftag.ul64[1] = 0x4410;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x281 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_gsXYZ(m_P0));
+    CPackMan::pkAddGsData(_gsXYZ(m_P1.x, m_P1.y, m_P1.z));
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CPolyG4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CCircle);
 CScreenColoredMask::CScreenColoredMask() {
