@@ -10,10 +10,23 @@ public:
     static struct TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
 };
 BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect);
+ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
+ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
 template <class T> static inline T& _ref(T& v) { return v; }
 class CCoord { /* PARTIAL: System/Graphic/Camera.h */
 public:
     void getRotTransPersMatrix(FMATRIX& outMat);
+    void getRotTransPersMatrix_VF04_07();
+};
+class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
+public:
+    static FMATRIX& getWorldScreenMatrix();
+};
+class CPackMan { /* PARTIAL: System/Graphic/PackMan.cpp */
+public:
+    static u_long128* pkOpenGifTag(u_long128 tag);
+    static void pkAddGsAD(UINT addr, u_long data);
+    static void pkCloseGifTag();
 };
 class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
 public:
@@ -46,7 +59,15 @@ UINT CGTexPrim2D::getPacketSize() const {
     }
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__11CScissoring);
+void CScissoring::makePkt() {
+    QWdata giftag;
+    giftag.ul64[0] = 0x1000800000008000UL;
+    giftag.ul64[1] = 0xE;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsAD(0x41, (u_long)m_P0.x | ((u_long)m_P1.x << 16) | ((u_long)m_P0.y << 32) |
+                                  ((u_long)m_P1.y << 48));
+    CPackMan::pkCloseGifTag();
+}
 void CScissoring::setRect(G_XY& p0, G_XY& p1) {
     m_P0 = p0;
     m_P1 = p1;
@@ -210,6 +231,16 @@ FLOAT RotTransPersClipW(IVECTOR& out_v, FVECTOR& out_fv, const FVECTOR& in_v) {
     );
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", BackClip__FPC7FVECTORi);
+static inline void loadMatrix_VF04_07(FMATRIX& m) {
+    __asm__ volatile(
+        "lqc2 $vf4, 0x0(%0)\n"
+        "lqc2 $vf5, 0x10(%0)\n"
+        "lqc2 $vf6, 0x20(%0)\n"
+        "lqc2 $vf7, 0x30(%0)\n"
+        :
+        : "r"(&m)
+        : "memory");
+}
 static inline void setRotTransPersMatrix(FMATRIX& m) {
     __asm__ volatile(
         "vsub.xyzw $vf3, $vf0, $vf0\n"
