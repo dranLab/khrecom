@@ -7403,7 +7403,10 @@ void CCamp::setTotalCP() {
 }
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", getCardIndex__5CCampi);
-#if 0 /* nIndex + 1 comes from a copy of nIndex (one register move differs) */
+/* Parked: 4 of 44 lines differ: the original computes nIndex + 1 from a1 and moves idx = nIndex into the beqz delay
+   slot; ours copies nIndex through idx first. tried: idx assigned in an else / after the test, separate n = nIndex + 1,
+   i <= nIndex, return nIndex directly, comma init in the for; permuter 5 min (no gain). */
+#if 0
 INT CCamp::getCardIndex(INT nIndex) {
     INT idx = nIndex;
 
