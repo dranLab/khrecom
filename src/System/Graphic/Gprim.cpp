@@ -1,4 +1,6 @@
 #define SYSTEM_GRAPHIC_GPRIM_CPP
+#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
+#define TASK_H_NO_SLC_OVERFLOW_MSG
 #include "khtypes.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Coord.h"
@@ -57,6 +59,21 @@ static inline u_long128 _gifTag(u_long tag, u_long regs) {
     __asm__ volatile("pcpyld %0, %2, %1" : "=r"(giftag) : "r"(tag), "0"(regs));
     return giftag;
 }
+static inline u_long _gsXYZ(FIX4 x, FIX4 y, FIX4 z) {
+    return (u_long)(x + 0x8000) | ((u_long)(y + 0x8000) << 16) | ((u_long)(z >> 4) << 32);
+}
+static inline u_long _gsXYZ(const G_XYZ& p) { return _gsXYZ(p.x, p.y, p.z); }
+static inline void _setSTQ(FVECTOR& outSTQ, ULONGLONG inSTQ, FLOAT fW) {
+    __asm__ volatile("mfc1 $8, %1\n"
+                     "pcpyld $8, $8, %2\n"
+                     "qmtc2.ni $8, $vf8\n"
+                     "vmulz.xy $vf8, $vf8, $vf8z\n"
+                     "sqc2 $vf8, 0x0(%0)\n"
+                     :
+                     : "r"(&outSTQ), "f"(fW), "r"(inSTQ)
+                     : "$8", "memory");
+}
+QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd);
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -125,11 +142,31 @@ void CScissoring::setDefault() {
     setRect(p0, p1);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CZFill);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__5CTile);
+void CTile::makePkt() {
+    QWdata giftag;
+    giftag.ul64[0] = 0x4400000000008000UL;
+    giftag.ul64[1] = 0x4410;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x206 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_gsXYZ(m_P0));
+    CPackMan::pkAddGsData(_gsXYZ(m_P1.x, m_P1.y, m_P0.z));
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__5CSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CPolyGT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10CPolyGT4ST);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CLineF2);
+void CLineF2::makePkt() {
+    QWdata giftag;
+    giftag.ul64[0] = 0x4400000000008000UL;
+    giftag.ul64[1] = 0x4410;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x281 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_gsXYZ(m_P0));
+    CPackMan::pkAddGsData(_gsXYZ(m_P1.x, m_P1.y, m_P1.z));
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CPolyG4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CCircle);
 CScreenColoredMask::CScreenColoredMask() {
@@ -312,6 +349,13 @@ static inline void loadMatrix_VF04_07(FMATRIX& m) {
         :
         : "r"(&m)
         : "memory");
+}
+static inline void _setRotTransPersMatrix_VF04_07(CCoord* pCrd) {
+    if (pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        pCrd->getRotTransPersMatrix_VF04_07();
+    }
 }
 static inline void setRotTransPersMatrix(FMATRIX& m) {
     __asm__ volatile(
@@ -589,7 +633,30 @@ ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Line__FPUlP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1P6CCoordi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLineStrip__FP6QWdataP7G_STRIPT1);
+QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
+    IVECTOR p;
+    UINT fg;
+    FLOAT fW;
+    fg = 1;
+    for (; it < end; it++, pQw += 3) {
+        _prefetch(it, 0x20);
+        fW = RotTransPersClipW(p, it->P);
+        if (p.w) {
+            fg |= 2;
+        } else if (fg) {
+            p.w = 0x8000;
+        }
+        if (it->Term) {
+            fg = 1;
+        } else {
+            fg >>= 1;
+        }
+        _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
+        pQw[1].ul128 = _colToVec(it->C);
+        pQw[2].ul128 = p._q;
+    }
+    return pQw;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLineStrip__FP6QWdataP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleStrip__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleStrip__FP6QWdataP7G_STRIPT1P6CCoordi);
@@ -627,18 +694,72 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__12C3DStr
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__12C3DStripBase);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__15C3DTexStripBase);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__15C3DTexStripBase);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__13C3DLineTStripP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__18C3DLineTStripCoordP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__13C3DPolyTStripP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__18C3DPolyTStripCoordP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__11C3DPolyTFanP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__16C3DPolyTFanCoordP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__12C3DLineStripP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__17C3DLineStripCoordP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__12C3DPolyStripP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__17C3DPolyStripCoordP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__10C3DPolyFanP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__15C3DPolyFanCoordP6QWdata);
+QWdata* C3DLineTStrip::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    _setRotTransPersMatrix_VF04_07(m_pCrd);
+    return _makePkt_TexLineStrip(pQw, it, end);
+}
+QWdata* C3DLineTStripCoord::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    return _makePkt_TexLineStrip(pQw, it, end, &m_pObj->Crd(0));
+}
+QWdata* C3DPolyTStrip::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    _setRotTransPersMatrix_VF04_07(m_pCrd);
+    return _makePkt_TexTriangleStrip(pQw, it, end, isBackClip());
+}
+QWdata* C3DPolyTStripCoord::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    return _makePkt_TexTriangleStrip(pQw, it, end, &m_pObj->Crd(0), isBackClip());
+}
+QWdata* C3DPolyTFan::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    _setRotTransPersMatrix_VF04_07(m_pCrd);
+    return _makePkt_TexTriangleFan(pQw, it, end, isBackClip());
+}
+QWdata* C3DPolyTFanCoord::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    return _makePkt_TexTriangleFan(pQw, it, end, &m_pObj->Crd(0), isBackClip());
+}
+QWdata* C3DLineStrip::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    _setRotTransPersMatrix_VF04_07(m_pCrd);
+    return _makePkt_LineStrip(pQw, it, end);
+}
+QWdata* C3DLineStripCoord::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    return _makePkt_LineStrip(pQw, it, end, &m_pObj->Crd(0));
+}
+QWdata* C3DPolyStrip::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    _setRotTransPersMatrix_VF04_07(m_pCrd);
+    return _makePkt_TriangleStrip(pQw, it, end, isBackClip());
+}
+QWdata* C3DPolyStripCoord::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    return _makePkt_TriangleStrip(pQw, it, end, &m_pObj->Crd(0), isBackClip());
+}
+QWdata* C3DPolyFan::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    _setRotTransPersMatrix_VF04_07(m_pCrd);
+    return _makePkt_TriangleFan(pQw, it, end, isBackClip());
+}
+QWdata* C3DPolyFanCoord::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    return _makePkt_TriangleFan(pQw, it, end, &m_pObj->Crd(0), isBackClip());
+}
 void C3DCPrim::_init() {
     m_PRIM = 0;
     m_TEST = (UINT)-1;
@@ -654,7 +775,17 @@ void C3DCPrim::_init() {
     m_iMax = 0;
     m_iZ = -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _create__8C3DCPrimUliP6CCoordP7CCoordsi);
+void C3DCPrim::_create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, CCoords* pOParent, INT iRep) {
+    remove();
+    m_PRIM = iPrim;
+    m_pCrd = pCParent;
+    m_pObj = pOParent;
+    m_iRep = iRep;
+    m_iMax = iVertexNum;
+#line 4121
+    m_V = (G_STRIP*)com_malloc_d(m_iMax * sizeof(G_STRIP), __FILE__ "(4121)", (UINT)-1);
+    if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DCPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DCPrim);
 void C3DTPrim::_init() {
@@ -672,7 +803,17 @@ void C3DTPrim::_init() {
     m_iMax = 0;
     m_iZ = -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _create__8C3DTPrimUliP6CCoordP7CCoordsi);
+void C3DTPrim::_create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, CCoords* pOParent, INT iRep) {
+    remove();
+    m_PRIM = iPrim;
+    m_pCrd = pCParent;
+    m_pObj = pOParent;
+    m_iRep = iRep;
+    m_iMax = iVertexNum;
+#line 4316
+    m_V = (G_STRIP*)com_malloc_d(m_iMax * sizeof(G_STRIP), __FILE__ "(4316)", (UINT)-1);
+    if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DTPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DTPrim);
 QWdata* C3DTPrim::makePkt_None(QWdata* pQw) {
@@ -1021,3 +1162,754 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setCalcZ__8C3DT
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPacketSize__C8C3DTPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", func_0015A310);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _$_t7CVector1Z6G_LINE);
+/* PARTIAL: the vtables, as ROM words until the weak inlines (and with them the vtables) come from C */
+__asm__(".rdata\n"
+        ".align 3\n"
+        ".globl _vt$8C3DTPrim\n_vt$8C3DTPrim:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x0015A298\n"
+        ".word 0x00000000\n"
+        ".word 0x00156760\n"
+        ".word 0x00000000\n"
+        ".word 0x0015A118\n"
+        ".word 0x00000000\n"
+        ".word 0x00156588\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$8C3DCPrim\n_vt$8C3DCPrim:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x0015A060\n"
+        ".word 0x00000000\n"
+        ".word 0x00156040\n"
+        ".word 0x00000000\n"
+        ".word 0x00159EE0\n"
+        ".word 0x00000000\n"
+        ".word 0x00155E68\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$16C3DPolyTFanCoord\n_vt$16C3DPolyTFanCoord:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158FB8\n"
+        ".word 0x00000000\n"
+        ".word 0x00155110\n"
+        ".word 0x00000000\n"
+        ".word 0x00159D48\n"
+        ".word 0x00000000\n"
+        ".word 0x00154F28\n"
+        ".word 0x00000000\n"
+        ".word 0x001556C8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$11C3DPolyTFan\n_vt$11C3DPolyTFan:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158FB8\n"
+        ".word 0x00000000\n"
+        ".word 0x00155110\n"
+        ".word 0x00000000\n"
+        ".word 0x00159C10\n"
+        ".word 0x00000000\n"
+        ".word 0x00154F28\n"
+        ".word 0x00000000\n"
+        ".word 0x001555E0\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$15C3DPolyFanCoord\n_vt$15C3DPolyFanCoord:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158E88\n"
+        ".word 0x00000000\n"
+        ".word 0x00154E38\n"
+        ".word 0x00000000\n"
+        ".word 0x00159AD8\n"
+        ".word 0x00000000\n"
+        ".word 0x00154C50\n"
+        ".word 0x00000000\n"
+        ".word 0x00155C50\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$10C3DPolyFan\n_vt$10C3DPolyFan:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158E88\n"
+        ".word 0x00000000\n"
+        ".word 0x00154E38\n"
+        ".word 0x00000000\n"
+        ".word 0x001599A0\n"
+        ".word 0x00000000\n"
+        ".word 0x00154C50\n"
+        ".word 0x00000000\n"
+        ".word 0x00155B68\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$18C3DPolyTStripCoord\n_vt$18C3DPolyTStripCoord:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158FB8\n"
+        ".word 0x00000000\n"
+        ".word 0x00155110\n"
+        ".word 0x00000000\n"
+        ".word 0x00159868\n"
+        ".word 0x00000000\n"
+        ".word 0x00154F28\n"
+        ".word 0x00000000\n"
+        ".word 0x001554E8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$13C3DPolyTStrip\n_vt$13C3DPolyTStrip:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158FB8\n"
+        ".word 0x00000000\n"
+        ".word 0x00155110\n"
+        ".word 0x00000000\n"
+        ".word 0x00159730\n"
+        ".word 0x00000000\n"
+        ".word 0x00154F28\n"
+        ".word 0x00000000\n"
+        ".word 0x00155400\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$17C3DPolyStripCoord\n_vt$17C3DPolyStripCoord:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158E88\n"
+        ".word 0x00000000\n"
+        ".word 0x00154E38\n"
+        ".word 0x00000000\n"
+        ".word 0x001595F8\n"
+        ".word 0x00000000\n"
+        ".word 0x00154C50\n"
+        ".word 0x00000000\n"
+        ".word 0x00155A70\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$12C3DPolyStrip\n_vt$12C3DPolyStrip:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158E88\n"
+        ".word 0x00000000\n"
+        ".word 0x00154E38\n"
+        ".word 0x00000000\n"
+        ".word 0x001594C0\n"
+        ".word 0x00000000\n"
+        ".word 0x00154C50\n"
+        ".word 0x00000000\n"
+        ".word 0x00155988\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$18C3DLineTStripCoord\n_vt$18C3DLineTStripCoord:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158FB8\n"
+        ".word 0x00000000\n"
+        ".word 0x00155110\n"
+        ".word 0x00000000\n"
+        ".word 0x00159388\n"
+        ".word 0x00000000\n"
+        ".word 0x00154F28\n"
+        ".word 0x00000000\n"
+        ".word 0x00155318\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$13C3DLineTStrip\n_vt$13C3DLineTStrip:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158FB8\n"
+        ".word 0x00000000\n"
+        ".word 0x00155110\n"
+        ".word 0x00000000\n"
+        ".word 0x00159250\n"
+        ".word 0x00000000\n"
+        ".word 0x00154F28\n"
+        ".word 0x00000000\n"
+        ".word 0x00155238\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$17C3DLineStripCoord\n_vt$17C3DLineStripCoord:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158E88\n"
+        ".word 0x00000000\n"
+        ".word 0x00154E38\n"
+        ".word 0x00000000\n"
+        ".word 0x00159120\n"
+        ".word 0x00000000\n"
+        ".word 0x00154C50\n"
+        ".word 0x00000000\n"
+        ".word 0x001558A0\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$12C3DLineStrip\n_vt$12C3DLineStrip:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158E88\n"
+        ".word 0x00000000\n"
+        ".word 0x00154E38\n"
+        ".word 0x00000000\n"
+        ".word 0x00158FF0\n"
+        ".word 0x00000000\n"
+        ".word 0x00154C50\n"
+        ".word 0x00000000\n"
+        ".word 0x001557C0\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$15C3DTexStripBase\n_vt$15C3DTexStripBase:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158FB8\n"
+        ".word 0x00000000\n"
+        ".word 0x00155110\n"
+        ".word 0x00000000\n"
+        ".word 0x00158EA0\n"
+        ".word 0x00000000\n"
+        ".word 0x00154F28\n"
+        ".word 0x00000000\n"
+        ".word 0x0035CDC8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$12C3DStripBase\n_vt$12C3DStripBase:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158E88\n"
+        ".word 0x00000000\n"
+        ".word 0x00154E38\n"
+        ".word 0x00000000\n"
+        ".word 0x00158D78\n"
+        ".word 0x00000000\n"
+        ".word 0x00154C50\n"
+        ".word 0x00000000\n"
+        ".word 0x0035CDC8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$14C3DPointLight2\n_vt$14C3DPointLight2:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158D60\n"
+        ".word 0x00000000\n"
+        ".word 0x001510C0\n"
+        ".word 0x00000000\n"
+        ".word 0x00158CC8\n"
+        ".word 0x00000000\n"
+        ".word 0x00151050\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$13C3DPointLight\n_vt$13C3DPointLight:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158CB0\n"
+        ".word 0x00000000\n"
+        ".word 0x00150B88\n"
+        ".word 0x00000000\n"
+        ".word 0x00158C80\n"
+        ".word 0x00000000\n"
+        ".word 0x00150828\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$9C3DCircle\n_vt$9C3DCircle:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158C78\n"
+        ".word 0x00000000\n"
+        ".word 0x00150958\n"
+        ".word 0x00000000\n"
+        ".word 0x00158C08\n"
+        ".word 0x00000000\n"
+        ".word 0x00150828\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$9C3DPolyG3\n_vt$9C3DPolyG3:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158C00\n"
+        ".word 0x00000000\n"
+        ".word 0x00151E58\n"
+        ".word 0x00000000\n"
+        ".word 0x00158BD0\n"
+        ".word 0x00000000\n"
+        ".word 0x00151DA8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$9C3DPolyG4\n_vt$9C3DPolyG4:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158BC8\n"
+        ".word 0x00000000\n"
+        ".word 0x00151CC0\n"
+        ".word 0x00000000\n"
+        ".word 0x00158B98\n"
+        ".word 0x00000000\n"
+        ".word 0x00151C10\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$8C3DLines\n_vt$8C3DLines:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158B80\n"
+        ".word 0x00000000\n"
+        ".word 0x001522E0\n"
+        ".word 0x00000000\n"
+        ".word 0x00158AD8\n"
+        ".word 0x00000000\n"
+        ".word 0x00152188\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$13C3DLineCoord2\n_vt$13C3DLineCoord2:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158AD0\n"
+        ".word 0x00000000\n"
+        ".word 0x001520C0\n"
+        ".word 0x00000000\n"
+        ".word 0x00158AA0\n"
+        ".word 0x00000000\n"
+        ".word 0x00152040\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$7C3DLine\n_vt$7C3DLine:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158A98\n"
+        ".word 0x00000000\n"
+        ".word 0x00151F78\n"
+        ".word 0x00000000\n"
+        ".word 0x00158A68\n"
+        ".word 0x00000000\n"
+        ".word 0x00151F18\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$10C3DPolyGT3\n_vt$10C3DPolyGT3:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158A48\n"
+        ".word 0x00000000\n"
+        ".word 0x0014FAD8\n"
+        ".word 0x00000000\n"
+        ".word 0x001589A0\n"
+        ".word 0x00000000\n"
+        ".word 0x0014FA20\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$10C3DPolyFT3\n_vt$10C3DPolyFT3:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158980\n"
+        ".word 0x00000000\n"
+        ".word 0x0014F8A8\n"
+        ".word 0x00000000\n"
+        ".word 0x001588E0\n"
+        ".word 0x00000000\n"
+        ".word 0x0014F7F0\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$10C3DPolyGT4\n_vt$10C3DPolyGT4:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x001588C0\n"
+        ".word 0x00000000\n"
+        ".word 0x0014F620\n"
+        ".word 0x00000000\n"
+        ".word 0x00158810\n"
+        ".word 0x00000000\n"
+        ".word 0x0014F568\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$10C3DPolyFT4\n_vt$10C3DPolyFT4:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x001587F0\n"
+        ".word 0x00000000\n"
+        ".word 0x0014F398\n"
+        ".word 0x00000000\n"
+        ".word 0x00158748\n"
+        ".word 0x00000000\n"
+        ".word 0x0014F2E0\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$10C3DRotSprt\n_vt$10C3DRotSprt:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158728\n"
+        ".word 0x00000000\n"
+        ".word 0x00150548\n"
+        ".word 0x00000000\n"
+        ".word 0x00158668\n"
+        ".word 0x00000000\n"
+        ".word 0x00150140\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$7C3DSprt\n_vt$7C3DSprt:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158648\n"
+        ".word 0x00000000\n"
+        ".word 0x0014FF70\n"
+        ".word 0x00000000\n"
+        ".word 0x00158570\n"
+        ".word 0x00000000\n"
+        ".word 0x0014FE78\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$7C3DTile\n_vt$7C3DTile:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158568\n"
+        ".word 0x00000000\n"
+        ".word 0x0014FD40\n"
+        ".word 0x00000000\n"
+        ".word 0x001584B8\n"
+        ".word 0x00000000\n"
+        ".word 0x0014FC50\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$6CTPrim\n_vt$6CTPrim:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158400\n"
+        ".word 0x00000000\n"
+        ".word 0x0014ED90\n"
+        ".word 0x00000000\n"
+        ".word 0x001582A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00158478\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$6CCPrim\n_vt$6CCPrim:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x001581C0\n"
+        ".word 0x00000000\n"
+        ".word 0x0014EA78\n"
+        ".word 0x00000000\n"
+        ".word 0x00158068\n"
+        ".word 0x00000000\n"
+        ".word 0x00158208\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$8CRotSprt\n_vt$8CRotSprt:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157FE8\n"
+        ".word 0x00000000\n"
+        ".word 0x0014E710\n"
+        ".word 0x00000000\n"
+        ".word 0x00157FB0\n"
+        ".word 0x00000000\n"
+        ".word 0x00157FE0\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$18CScreenColoredMask\n_vt$18CScreenColoredMask:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157C50\n"
+        ".word 0x00000000\n"
+        ".word 0x0014DC98\n"
+        ".word 0x00000000\n"
+        ".word 0x00157F80\n"
+        ".word 0x00000000\n"
+        ".word 0x00157C58\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$7CCircle\n_vt$7CCircle:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157F70\n"
+        ".word 0x00000000\n"
+        ".word 0x0014E520\n"
+        ".word 0x00000000\n"
+        ".word 0x00157F40\n"
+        ".word 0x00000000\n"
+        ".word 0x00157F78\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$7CPolyG4\n_vt$7CPolyG4:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157F10\n"
+        ".word 0x00000000\n"
+        ".word 0x0014E3C8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157EE0\n"
+        ".word 0x00000000\n"
+        ".word 0x00157F18\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$7CLineF2\n_vt$7CLineF2:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157EC0\n"
+        ".word 0x00000000\n"
+        ".word 0x0014E2F8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157E90\n"
+        ".word 0x00000000\n"
+        ".word 0x00157EC8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$10CPolyGT4ST\n_vt$10CPolyGT4ST:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157E70\n"
+        ".word 0x00000000\n"
+        ".word 0x0014E0D0\n"
+        ".word 0x00000000\n"
+        ".word 0x00157E40\n"
+        ".word 0x00000000\n"
+        ".word 0x001578E8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$8CPolyGT4\n_vt$8CPolyGT4:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157DF8\n"
+        ".word 0x00000000\n"
+        ".word 0x0014DEB0\n"
+        ".word 0x00000000\n"
+        ".word 0x00157D60\n"
+        ".word 0x00000000\n"
+        ".word 0x00157E18\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$5CSprt\n_vt$5CSprt:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157D38\n"
+        ".word 0x00000000\n"
+        ".word 0x0014DD68\n"
+        ".word 0x00000000\n"
+        ".word 0x00157C60\n"
+        ".word 0x00000000\n"
+        ".word 0x00157D58\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$5CTile\n_vt$5CTile:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157C50\n"
+        ".word 0x00000000\n"
+        ".word 0x0014DC98\n"
+        ".word 0x00000000\n"
+        ".word 0x00157C20\n"
+        ".word 0x00000000\n"
+        ".word 0x00157C58\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$6CZFill\n_vt$6CZFill:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157C18\n"
+        ".word 0x00000000\n"
+        ".word 0x0014DAE0\n"
+        ".word 0x00000000\n"
+        ".word 0x00157BA8\n"
+        ".word 0x00000000\n"
+        ".word 0x001578E8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$11CScissoring\n_vt$11CScissoring:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x00157BA0\n"
+        ".word 0x00000000\n"
+        ".word 0x0014DA00\n"
+        ".word 0x00000000\n"
+        ".word 0x00157B70\n"
+        ".word 0x00000000\n"
+        ".word 0x001578E8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$11CGTexPrim2D\n_vt$11CGTexPrim2D:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D990\n"
+        ".word 0x00000000\n"
+        ".word 0x0035CDC8\n"
+        ".word 0x00000000\n"
+        ".word 0x001579D0\n"
+        ".word 0x00000000\n"
+        ".word 0x001578E8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$9CGTexPrim\n_vt$9CGTexPrim:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D920\n"
+        ".word 0x00000000\n"
+        ".word 0x0035CDC8\n"
+        ".word 0x00000000\n"
+        ".word 0x001578F0\n"
+        ".word 0x00000000\n"
+        ".word 0x001578E8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$6CGPrim\n_vt$6CGPrim:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0014D4A8\n"
+        ".word 0x00000000\n"
+        ".word 0x0035CDC8\n"
+        ".word 0x00000000\n"
+        ".word 0x0035CDC8\n"
+        ".word 0x00000000\n"
+        ".word 0x001577B0\n"
+        ".word 0x00000000\n"
+        ".word 0x001578E8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0012BDD8\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".globl _vt$t7CVector1Z6G_LINE\n_vt$t7CVector1Z6G_LINE:\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".word 0x0015A3A0\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".text\n");
+// SOURCE DATA: .rodata
