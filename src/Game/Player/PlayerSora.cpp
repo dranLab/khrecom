@@ -31,6 +31,8 @@ inline void _roulettePrizeMessage() {
 #include "Game/Player/Friend.h"
 #include "Game/Player/PlayerAttack.h"
 #include "Game/Player/PlayerWeapon.h"
+#include "Game/Player/Summon.h"
+#include "System/Com.h"
 #include "Game/Player/PlayerCamera.h"
 #include "Game/Movement.h"
 #include "include_asm.h"
@@ -317,7 +319,105 @@ void CPlayerSora::initFriend(INT inNo) {
     m_fDistXZ = m_fDistY = 0.0f;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeFriend__Q22PL11CPlayerSora);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", watchTarget__Q22PL11CPlayerSorai);
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void Normalize(FVECTOR& outV, const FVECTOR& inV);
+extern "C" float atan2f(float y, float x);
+
+/* abs.s of the original (Math3D.h) */
+static inline FLOAT _abs(FLOAT inValue) {
+    FLOAT ret;
+    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
+    return ret;
+}
+/* the angle wrap of Com.h, with a separate result variable (the original's mov.s copy) */
+static inline FLOAT _limitPI2(FLOAT d) {
+    FLOAT r;
+    if (d < -3.1415927f) r = d + 6.2831855f;
+    else {
+        r = d;
+        if (r > 3.1415927f) r -= 6.2831855f;
+    }
+    return r;
+}
+
+void CPlayerSora::watchTarget(INT inMode) {
+    CEntity* pTarget;
+    FLOAT tmp_dir;
+    FLOAT fTurn;
+    if (inMode == 1) {
+        if (isAir()) {
+            setAnim(6, 800, 0);
+            FVECTOR vel = m_pMove->getVel();
+            m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+            vel.y = m_fJumpSpdY;
+            m_pMove->setVel(vel);
+        } else {
+            setAnim(0x2A, -1, 0);
+            clearSpeed();
+        }
+    }
+    FVECTOR vec;
+    switch (inMode) {
+    case 0:
+        pTarget = m_pPLM->getFriend()->getTarget();
+        if (!pTarget) {
+            pTarget = m_pPLM->getFriend();
+        } else {
+            m_hTarget = pTarget->getHandle();
+        }
+        break;
+    case 1:
+        pTarget = m_pPLM->getSummon()->getTarget();
+        if (!pTarget) {
+            pTarget = m_pPLM->getSummon();
+        } else {
+            m_hTarget = pTarget->getHandle();
+        }
+        break;
+    case 2:
+        pTarget = m_pPLM->getSummon();
+        clearSpeed();
+        break;
+    default:
+        return;
+    }
+    pTarget->getLockOnPos(vec);
+    SubVectorXYZ(vec, vec, m_vCenterPos);
+    Normalize(vec, vec);
+    tmp_dir = atan2f(vec.x, vec.z);
+    fTurn = RAD2DEG(_abs(_limitPI2(tmp_dir - getDir())));
+    m_fDir = Movement::Homing(getDir(), tmp_dir, 0.15f, m_fFrameRate);
+    vec.set(0.0f, m_fDir, 0.0f);
+    m_pMove->setRot(vec);
+    switch (inMode) {
+    case 2: {
+        FLOAT x = CPadHandler::getAnalogLX() * (1.0f / 4096.0f);
+        FLOAT y = CPadHandler::getAnalogLY() * (1.0f / 4096.0f);
+        if (_abs(x) > 0.25f) {
+            setAnim(0x2B, -1, 0);
+        } else {
+            setAnim(0x2A, -1, 0);
+        }
+        break;
+    }
+    case 0:
+        if (isAir()) {
+            setAnim(6, 800, 0);
+            FVECTOR vel = m_pMove->getVel();
+            m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+            vel.y = m_fJumpSpdY;
+            m_pMove->setVel(vel);
+        } else {
+            if (fTurn > 10.0f) {
+                setAnim(0x2B, -1, 0);
+            } else {
+                setAnim(0x2A, -1, 0);
+            }
+            clearSpeed();
+        }
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", setAttack_inFriend__Q22PL11CPlayerSoraiii);
 INT CPlayerSora::exeAttack_inFriend() {
     TIMEQ frame = getMotionCurrentTime() / 50;
