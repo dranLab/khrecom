@@ -314,16 +314,27 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initPronounce
 __asm__(".rdata\n.align 2\n.byte 0x43,0x50,0x6c,0x61,0x79,0x65,0x72,0x53,0x6f,0x72,0x61,0x3a,0x3a,0x20,0x65,0x78\n.byte 0x65,0x50,0x72,0x6f,0x6e,0x6f,0x75,0x6e,0x63,0x65,0x28,0x29,0x20,0x25,0x64,0x2c\n.byte 0x25,0x64,0x2c,0x25,0x64,0x20,0x81,0xa6,0x83,0x4d,0x83,0x8a,0x83,0x4d,0x83,0x8a\n.byte 0x8d,0xc5,0x8c,0xe3,0x82,0xcc,0x93,0xfc,0x97,0xcd,0x96,0xb3,0x8c,0xf8,0x0a,0x00\n.align 3\n.byte 0x43,0x50,0x6c,0x61,0x79,0x65,0x72,0x53,0x6f,0x72,0x61,0x3a,0x3a,0x20,0x65,0x78\n.byte 0x65,0x50,0x72,0x6f,0x6e,0x6f,0x75,0x6e,0x63,0x65,0x28,0x29,0x20,0x54,0x52,0x47\n.byte 0x21,0x0a,0x00,0x00,0x00,0x00,0x00,0x00\n.align 3\n.byte 0x43,0x50,0x6c,0x61,0x79,0x65,0x72,0x53,0x6f,0x72,0x61,0x3a,0x3a,0x20,0x65,0x78\n.byte 0x65,0x50,0x72,0x6f,0x6e,0x6f,0x75,0x6e,0x63,0x65,0x28,0x29,0x20,0x54,0x52,0x47\n.byte 0x2e,0x2e,0x2e,0x52,0x45,0x46,0x52,0x45,0x43,0x54,0x0a,0x00,0x00,0x00,0x00,0x00\n.byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n.align 4\n");
 __asm__(".word .L002A2D54\n.word .L002A2E14\n.word .L002A3100\n.word .L002A2EA4\n.word .L002A2EA4\n.word .L002A2EA4\n.word .L002A2EA4\n.word .L002A2EA4\n.word .L002A2EA4\n.word .L002A3074\n.word .L002A3100\n.word .L002A3100\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exePronounce__Q22PL11CPlayerSora);
-/* placeholder: .rodata of calcAppearPosFS_toAttackID__Q22PL11CPlayerSora (strings, jump tables) */
-__asm__(".rdata\n.align 4\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A31AC\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A31AC\n.word .L002A31AC\n");
-__asm__(".word .L002A31AC\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A31AC\n.word .L002A3154\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n.word .L002A316C\n");
-__asm__(".word .L002A31AC\n.word .L002A31AC\n.word .L002A31AC\n.word .L002A31AC\n.word .L002A31AC\n.word .L002A316C\n.word .L002A316C\n.word .L002A31AC\n.word .L002A31AC\n.word .L002A3190\n.word .L002A31AC\n.word .L002A31AC\n.word .L002A31AC\n.word .L002A31AC\n.word .L002A31AC\n.word .L002A31AC\n");
-__asm__(".word .L002A31AC\n.word .L002A31AC\n.word .L002A3190\n.word .L002A3190\n.word .L002A3190\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", calcAppearPosFS_toAttackID__Q22PL11CPlayerSora);
+void CPlayerSora::calcAppearPosFS_toAttackID() {
+    switch (m_uiAttackID) {
+    case 104:
+        calcAppearPosFS(0.0f, m_fWallRadius);
+        break;
+    case 85: case 86: case 87: case 88: case 89: case 90: case 91: case 93: case 94: case 95: case 96:
+    case 100: case 101: case 102: case 105: case 106: case 107: case 108: case 109: case 110: case 111:
+    case 112: case 113: case 114: case 120: case 121:
+        calcAppearPosFS(2.0f, 0.55f);
+        break;
+    case 124: case 133: case 134: case 135:
+        calcAppearPosFS(1.0f, 0.55f);
+    default:
+        calcAppearPosFS(0.0f, m_fWallRadius);
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initDuel__Q22PL11CPlayerSorai);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeDuel__Q22PL11CPlayerSora);
 /* end of .rodata: the vtables (key function ~CPlayerSora still asm) and the deferred const g_vPronounceCountOfs */
-__asm__(".rdata\n.globl _vt$Q22PL11CPlayerSora$4CFSM\n_vt$Q22PL11CPlayerSora$4CFSM:\n.word 0x0000FFC0\n.word func_0\n.word 0x0000FFC0\n.word _$_Q22PL11CPlayerSora\n.word func_0\n.word update__4CFSM\n.word func_0\n.word beginStateInitial__4CFSM\n.word 0x0000FFC0\n.word stateInitial__7CPlayer\n.word func_0\n.word endStateInitial__4CFSM\n.word 0x0000FFC0\n");
+__asm__(".rdata\n.align 3\n.globl _vt$Q22PL11CPlayerSora$4CFSM\n_vt$Q22PL11CPlayerSora$4CFSM:\n.word 0x0000FFC0\n.word func_0\n.word 0x0000FFC0\n.word _$_Q22PL11CPlayerSora\n.word func_0\n.word update__4CFSM\n.word func_0\n.word beginStateInitial__4CFSM\n.word 0x0000FFC0\n.word stateInitial__7CPlayer\n.word func_0\n.word endStateInitial__4CFSM\n.word 0x0000FFC0\n");
 __asm__(".word endStateProc__7CEntity\n.word func_0\n.word func_0\n.globl _vt$Q22PL11CPlayerSora\n_vt$Q22PL11CPlayerSora:\n.word func_0\n.word func_0\n.word func_0\n.word _$_Q22PL11CPlayerSora\n.word func_0\n.word main__7CEntity\n.word func_0\n.word disp__7CEntity\n.word func_0\n.word after__5CTask\n.word func_0\n");
 __asm__(".word onOut__5CTask\n.word func_0\n.word getTypeID__C7CEntity\n.word func_0\n.word initalize__7CEntityii\n.word func_0\n.word initalize__7CEntityiiUi\n.word func_0\n.word AfterInit__7CEntity\n.word func_0\n.word onMsg__7CPlayeriPv\n.word func_0\n.word getLockOnPos__7CPlayerR7FVECTOR\n.word func_0\n.word getHeadPos__C7CPlayerR7FVECTOR\n.word func_0\n");
 __asm__(".word getUseCardPos__7CPlayerR7FVECTOR\n.word func_0\n.word getCameraTargetPos__7CPlayerR7FVECTOR\n.word func_0\n.word changeMotion__7CEntityiiiiii\n.word func_0\n.word updateBefore__7CPlayer\n.word func_0\n.word updateAfter__7CPlayer\n.word func_0\n.word updatePositionAfter__7CEntity\n.word func_0\n.word lastUpdate__7CPlayer\n.word func_0\n.word beginStateField__7CPlayer\n.word func_0\n");
