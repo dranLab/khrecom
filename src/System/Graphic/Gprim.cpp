@@ -155,6 +155,11 @@ static inline void _getTmpTexArea(INT nID, UINT& nTexPos, UINT& nClutPos) { /* P
         nClutPos = VRAM::_CLUT_TMP2_START;
     }
 }
+static inline u_long128 _AD(u_long addr, u_long data) {
+    u_long128 out128;
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(out128) : "r"(data), "r"(addr));
+    return out128;
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -351,7 +356,48 @@ void CPolyGT4::makePkt() {
     CPackMan::pkAddGsData(_gsXYZ(m_P3));
     CPackMan::pkCloseGifTag();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10CPolyGT4ST);
+void CPolyGT4ST::makePkt() {
+    ULONGLONG* p64;
+    QWdata* qp;
+    ULONGLONG tex;
+    if (m_pTexInfo == NULL) {
+        return;
+    }
+    tex = setTexture();
+    if (isTexNearest()) {
+        qp = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(0x1000000000008000UL, 0xE));
+        qp[0].ul128 = _AD(0x15, 1);
+        CPackMan::pkCloseGifTag(&qp[1]);
+    }
+
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xE400000000008001UL, 0x41241241241270UL));
+    p64[0] = (u_long)0x21C | ((u_long)isSemiTrans() << 6);
+    p64[1] = tex;
+
+    p64[2] = (u_long)*(UINT*)&m_T0.s | ((u_long)*(UINT*)&m_T0.t << 32);
+    p64[3] = (u_long)m_C0.col | 0x3F80000000000000UL;
+    p64[4] = (u_long)(m_P0.x + 0x8000) | ((u_long)(m_P0.y + 0x8000) << 16);
+
+    p64[5] = (u_long)*(UINT*)&m_T1.s | ((u_long)*(UINT*)&m_T1.t << 32);
+    p64[6] = (u_long)m_C1.col | 0x3F80000000000000UL;
+    p64[7] = (u_long)(m_P1.x + 0x8000) | ((u_long)(m_P1.y + 0x8000) << 16);
+
+    p64[8] = (u_long)*(UINT*)&m_T2.s | ((u_long)*(UINT*)&m_T2.t << 32);
+    p64[9] = (u_long)m_C2.col | 0x3F80000000000000UL;
+    p64[10] = (u_long)(m_P2.x + 0x8000) | ((u_long)(m_P2.y + 0x8000) << 16);
+
+    p64[11] = (u_long)*(UINT*)&m_T3.s | ((u_long)*(UINT*)&m_T3.t << 32);
+    p64[12] = (u_long)m_C3.col | 0x3F80000000000000UL;
+    p64[13] = (u_long)(m_P3.x + 0x8000) | ((u_long)(m_P3.y + 0x8000) << 16);
+
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[14]);
+
+    if (isTexNearest()) {
+        qp = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(0x1000000000008000UL, 0xE));
+        qp[0].ul128 = _AD(0x15, 0x61);
+        CPackMan::pkCloseGifTag(&qp[1]);
+    }
+}
 void CLineF2::makePkt() {
     QWdata giftag;
     giftag.ul64[0] = 0x4400000000008000UL;
