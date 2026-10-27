@@ -793,7 +793,19 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateSpotLig
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", canCreateEnemyCard___12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", continuousDamageProc___12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", canBlackroomCard___12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", checkResist___12CBattleEnemy8ATK_KIND);
+BOOL CBattleEnemy::checkResist_(ATK_KIND inDmgKind) {
+    BOOL resist = FALSE;
+    switch (inDmgKind) {
+    case 7:
+        resist = !m_pEnemyParam->getSpecialEffect(0);
+        break;
+    case 10:
+        resist = !m_pEnemyParam->getSpecialEffect(4);
+        break;
+    }
+    if (resist) Gauge::CCommonGauge::setDispSeq(getHandle(), 6);
+    return resist;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", _$_t14CStateTemplate1Z12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initalize__12CBattleEnemyii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setBattleEnemyFlag__12CBattleEnemyUlUl);
