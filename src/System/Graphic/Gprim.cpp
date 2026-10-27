@@ -30,6 +30,28 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back
 QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back);
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
+#define _prefetch(p, ofs) __asm__ volatile("pref 0, %1(%0)" : : "r"(p), "i"(ofs))
+static inline u_long128 _colToVec(const G_RGBA& col) {
+    UINT iCol = col.col;
+    u_long128 ivCol;
+    __asm__ volatile("pextlb %0, $0, %1\n"
+            "pextlh %0, $0, %0\n"
+            : "=r"(ivCol)
+            : "r"(iCol));
+    return ivCol;
+}
+static inline ULONGLONG _vecToXYZ(const IVECTOR& v) {
+    u_long128 inIVec = v._q;
+    ULONGLONG outVec64;
+    __asm__ volatile("pexcw %0, %1\n"
+                     "pexch $8, %1\n"
+                     "dsra32 %0, %0, 4\n"
+                     "pextlw %0, %0, $8\n"
+                     : "=&r"(outVec64)
+                     : "r"(inIVec)
+                     : "$8");
+    return outVec64;
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -493,7 +515,30 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLin
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1P6CCoordi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Line__FPUlP7G_STRIPT1);
+ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
+    IVECTOR p[3];
+    while (it < end) {
+        _prefetch(it, 0x20);
+        RotTransPersClipW(p[0], it[0].P);
+        if (p[0].w) {
+            it += 2;
+            continue;
+        }
+        _prefetch(it, 0x40);
+        RotTransPersClipW(p[1], it[1].P);
+        if (p[1].w) {
+            it += 2;
+            continue;
+        }
+        p64[0] = it[0].C.col;
+        p64[1] = _vecToXYZ(p[0]);
+        p64[2] = it[1].C.col;
+        p64[3] = _vecToXYZ(p[1]);
+        it += 2;
+        p64 += 4;
+    }
+    return p64;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Line__FPUlP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1P6CCoordi);
