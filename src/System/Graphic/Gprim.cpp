@@ -514,7 +514,20 @@ FIX4 C3DPolyG4::calcZ() {
     }
     return max;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DPolyG4);
+void C3DPolyG4::makePkt() {
+    ULONGLONG* p64;
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x9400000000008001UL, 0x414141410UL));
+    p64[0] = (u_long)0x20C | ((u_long)isSemiTrans() << 6);
+    p64[1] = m_C0.col;
+    p64[2] = _vecToXYZ(p0);
+    p64[3] = m_C1.col;
+    p64[4] = _vecToXYZ(p1);
+    p64[5] = m_C2.col;
+    p64[6] = _vecToXYZ(p2);
+    p64[7] = m_C3.col;
+    p64[8] = _vecToXYZ(p3);
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[9]);
+}
 FIX4 C3DPolyG3::calcZ() {
     FVECTOR c;
     FMATRIX rts;
