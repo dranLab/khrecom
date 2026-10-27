@@ -10,7 +10,6 @@ class CRsrcDB { /* PARTIAL: System/RsrcDB.h does not compile on its own here */
 public:
     static struct TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
 };
-BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect);
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
 ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd);
@@ -31,6 +30,33 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back
 QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back);
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back);
+#define _prefetch(p, ofs) __asm__ volatile("pref 0, %1(%0)" : : "r"(p), "i"(ofs))
+static inline u_long128 _colToVec(const G_RGBA& col) {
+    UINT iCol = col.col;
+    u_long128 ivCol;
+    __asm__ volatile("pextlb %0, $0, %1\n"
+            "pextlh %0, $0, %0\n"
+            : "=r"(ivCol)
+            : "r"(iCol));
+    return ivCol;
+}
+static inline ULONGLONG _vecToXYZ(const IVECTOR& v) {
+    u_long128 inIVec = v._q;
+    ULONGLONG outVec64;
+    __asm__ volatile("pexcw %0, %1\n"
+                     "pexch $8, %1\n"
+                     "dsra32 %0, %0, 4\n"
+                     "pextlw %0, %0, $8\n"
+                     : "=&r"(outVec64)
+                     : "r"(inIVec)
+                     : "$8");
+    return outVec64;
+}
+static inline u_long128 _gifTag(u_long tag, u_long regs) {
+    u_long128 giftag;
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(giftag) : "r"(tag), "0"(regs));
+    return giftag;
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -41,6 +67,9 @@ public:
     static u_long128* pkOpenGifTag(u_long128 tag);
     static void pkAddGsAD(UINT addr, u_long data);
     static void pkCloseGifTag();
+    static u_long128* pkOpenGifTagManual(u_long128 tag);
+    static void pkCloseGifTagManual(UINT* p);
+    static void pkAddGsData(u_long data);
 };
 class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
 public:
@@ -109,7 +138,36 @@ CScreenColoredMask::CScreenColoredMask() {
     m_P1.set(0x1000, _ref(SCREEN_HEIGHT) * 8);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CRotSprt);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", __isRect__FRC7FVECTORPC7FVECTOR);
+static BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect) {
+    FVECTOR __CCTPrim_vDefRect;
+    INT iRet;
+    if (vRect == NULL) {
+        __CCTPrim_vDefRect.x = -256.0f;
+        __CCTPrim_vDefRect.y = -SCREEN_HEIGHT / 2;
+        __CCTPrim_vDefRect.z = 512.0f;
+        __CCTPrim_vDefRect.w = SCREEN_HEIGHT;
+        vRect = &__CCTPrim_vDefRect;
+    }
+    __asm__ volatile(
+        "lqc2 $vf4, 0x0(%1)\n"
+        "lqc2 $vf5, 0x0(%2)\n"
+        "vaddz.x $vf6, $vf5, $vf5z\n"
+        "vaddw.y $vf6, $vf5, $vf5w\n"
+        "vnop\n"
+        "vnop\n"
+        "ctc2.ni $0, $vi16\n"
+        "vsub.xy $vf0, $vf4, $vf5\n"
+        "vsub.xy $vf0, $vf6, $vf4\n"
+        "vnop\n"
+        "vnop\n"
+        "vnop\n"
+        "vnop\n"
+        "vnop\n"
+        "cfc2.ni %0, $vi16\n"
+        : "=r"(iRet)
+        : "r"(&v), "r"(vRect));
+    return (iRet & 0xC0) == 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CCPrim);
 BOOL CCPrim::isRect(INT i, const FVECTOR* vRect) {
     return __isRect(*(FVECTOR*)&m_V[i], vRect);
@@ -265,13 +323,110 @@ static inline void setRotTransPersMatrix(FMATRIX& m) {
         :
         : "r"(&m));
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DPolyFT4);
+FIX4 C3DPolyFT4::calcZ() {
+    FVECTOR c;
+    FMATRIX rts;
+    FVECTOR* fv;
+    IVECTOR* iv;
+    FLOAT fW;
+    INT max;
+    INT i;
+
+    m_pCrd->getRotTransPersMatrix(rts);
+    fv = &m_P0;
+    iv = &p0;
+    max = 0;
+    setRotTransPersMatrix(rts);
+    for (i = 0; i < 4; i++) {
+        fW = RotTransPersClipW(iv[i], fv[i]);
+        if (iv[i].w) {
+            return (FIX4)0xF0000000;
+        }
+        *(FLOAT*)&iv[i].w = fW;
+        if (max < iv[i].z) {
+            max = iv[i].z;
+        }
+    }
+    return max;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyFT4);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DPolyGT4);
+FIX4 C3DPolyGT4::calcZ() {
+    FMATRIX rts;
+    FVECTOR* fv;
+    IVECTOR* iv;
+    FLOAT fW;
+    INT max;
+    INT i;
+
+    m_pCrd->getRotTransPersMatrix(rts);
+    fv = &m_P0;
+    iv = &p0;
+    max = 0;
+    setRotTransPersMatrix(rts);
+    for (i = 0; i < 4; i++) {
+        fW = RotTransPersClipW(iv[i], fv[i]);
+        if (iv[i].w) {
+            return (FIX4)0xF0000000;
+        }
+        *(FLOAT*)&iv[i].w = fW;
+        if (max < iv[i].z) {
+            max = iv[i].z;
+        }
+    }
+    return max;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyGT4);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DPolyFT3);
+FIX4 C3DPolyFT3::calcZ() {
+    FMATRIX rts;
+    FVECTOR* fv;
+    IVECTOR* iv;
+    FLOAT fW;
+    INT max;
+    INT i;
+
+    m_pCrd->getRotTransPersMatrix(rts);
+    fv = &m_P0;
+    iv = &p0;
+    max = 0;
+    setRotTransPersMatrix(rts);
+    for (i = 0; i < 3; i++) {
+        fW = RotTransPersClipW(iv[i], fv[i]);
+        if (iv[i].w) {
+            return (FIX4)0xF0000000;
+        }
+        *(FLOAT*)&iv[i].w = fW;
+        if (max < iv[i].z) {
+            max = iv[i].z;
+        }
+    }
+    return max;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyFT3);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DPolyGT3);
+FIX4 C3DPolyGT3::calcZ() {
+    FMATRIX rts;
+    FVECTOR* fv;
+    IVECTOR* iv;
+    FLOAT fW;
+    INT max;
+    INT i;
+
+    m_pCrd->getRotTransPersMatrix(rts);
+    fv = &m_P0;
+    iv = &p0;
+    max = 0;
+    setRotTransPersMatrix(rts);
+    for (i = 0; i < 3; i++) {
+        fW = RotTransPersClipW(iv[i], fv[i]);
+        if (iv[i].w) {
+            return (FIX4)0xF0000000;
+        }
+        *(FLOAT*)&iv[i].w = fW;
+        if (max < iv[i].z) {
+            max = iv[i].z;
+        }
+    }
+    return max;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyGT3);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__7C3DTile);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DTile);
@@ -291,10 +446,67 @@ FIX4 C3DPointLight2::calcZ() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__14C3DPointLight2);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePktSub__14C3DPointLight2i);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DPolyG4);
+FIX4 C3DPolyG4::calcZ() {
+    FVECTOR c;
+    FMATRIX rts;
+    FVECTOR* fv;
+    IVECTOR* iv;
+    INT max;
+    INT i;
+
+    m_pCrd->getRotTransPersMatrix(rts);
+    fv = &m_P0;
+    iv = &p0;
+    max = 0;
+    setRotTransPersMatrix(rts);
+    for (i = 0; i < 4; i++) {
+        RotTransPersClipW(iv[i], fv[i]);
+        if (iv[i].w) {
+            return (FIX4)0xF0000000;
+        }
+        if (max < iv[i].z) {
+            max = iv[i].z;
+        }
+    }
+    return max;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DPolyG4);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DPolyG3);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DPolyG3);
+FIX4 C3DPolyG3::calcZ() {
+    FVECTOR c;
+    FMATRIX rts;
+    FVECTOR* fv;
+    IVECTOR* iv;
+    INT max;
+    INT i;
+
+    m_pCrd->getRotTransPersMatrix(rts);
+    fv = &m_P0;
+    iv = &p0;
+    max = 0;
+    setRotTransPersMatrix(rts);
+    for (i = 0; i < 3; i++) {
+        RotTransPersClipW(iv[i], fv[i]);
+        if (iv[i].w) {
+            return (FIX4)0xF0000000;
+        }
+        if (max < iv[i].z) {
+            max = iv[i].z;
+        }
+    }
+    return max;
+}
+void C3DPolyG3::makePkt() {
+    ULONGLONG* p64;
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x7400000000008001UL, 0x4141410));
+    p64[0] = (u_long)0x20C | ((u_long)isSemiTrans() << 6);
+    p64[1] = m_C0.col;
+    p64[2] = _vecToXYZ(p0);
+    p64[3] = m_C1.col;
+    p64[4] = _vecToXYZ(p1);
+    p64[5] = m_C2.col;
+    p64[6] = _vecToXYZ(p2);
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[7]);
+}
 FIX4 C3DLine::calcZ() {
     FMATRIX mat0;
     m_pCrd->getRotTransPersMatrix(mat0);
@@ -303,7 +515,21 @@ FIX4 C3DLine::calcZ() {
     RotTransPersClipW(p1, m_P1);
     return p0.z;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DLine);
+void C3DLine::makePkt() {
+    QWdata giftag;
+    if (p0.w || p1.w) {
+        return;
+    }
+    giftag.ul64[0] = 0x5400000000008000UL;
+    giftag.ul64[1] = 0x41410;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_vecToXYZ(p0));
+    CPackMan::pkAddGsData(m_C1.col);
+    CPackMan::pkAddGsData(_vecToXYZ(p1));
+    CPackMan::pkCloseGifTag();
+}
 FIX4 C3DLineCoord2::calcZ() {
     FMATRIX mat0;
     FMATRIX mat1;
@@ -315,14 +541,51 @@ FIX4 C3DLineCoord2::calcZ() {
     RotTransPersClipW(p1, m_P1);
     return p0.z;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__13C3DLineCoord2);
+void C3DLineCoord2::makePkt() {
+    QWdata giftag;
+    if (p0.w || p1.w) {
+        return;
+    }
+    giftag.ul64[0] = 0x5400000000008000UL;
+    giftag.ul64[1] = 0x41410;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_vecToXYZ(p0));
+    CPackMan::pkAddGsData(m_C1.col);
+    CPackMan::pkAddGsData(_vecToXYZ(p1));
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DLines);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DLines);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1P6CCoordi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Line__FPUlP7G_STRIPT1);
+ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
+    IVECTOR p[3];
+    while (it < end) {
+        _prefetch(it, 0x20);
+        RotTransPersClipW(p[0], it[0].P);
+        if (p[0].w) {
+            it += 2;
+            continue;
+        }
+        _prefetch(it, 0x40);
+        RotTransPersClipW(p[1], it[1].P);
+        if (p[1].w) {
+            it += 2;
+            continue;
+        }
+        p64[0] = it[0].C.col;
+        p64[1] = _vecToXYZ(p[0]);
+        p64[2] = it[1].C.col;
+        p64[3] = _vecToXYZ(p[1]);
+        it += 2;
+        p64 += 4;
+    }
+    return p64;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Line__FPUlP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1P6CCoordi);
@@ -332,7 +595,28 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTri
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleStrip__FP6QWdataP7G_STRIPT1P6CCoordi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_LineStrip__FP6QWdataP7G_STRIPT1);
+QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
+    IVECTOR p;
+    UINT fg;
+    fg = 1;
+    for (; it < end; it++, pQw += 2) {
+        _prefetch(it, 0x20);
+        RotTransPersClipW(p, it->P);
+        if (p.w) {
+            fg |= 2;
+        } else if (fg) {
+            p.w = 0x8000;
+        }
+        if (it->Term) {
+            fg = 1;
+        } else {
+            fg >>= 1;
+        }
+        pQw[0].ul128 = _colToVec(it->C);
+        pQw[1].ul128 = p._q;
+    }
+    return pQw;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_LineStrip__FP6QWdataP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleStrip__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleStrip__FP6QWdataP7G_STRIPT1P6CCoordi);
