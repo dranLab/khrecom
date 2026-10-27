@@ -68,14 +68,32 @@ CPlayerSora::CPlayerSora(CTask* inParent) : CPlayer(inParent, PLM::g_uiPlayerID,
     m_nHitCount = 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", _$_Q22PL11CPlayerSora);
-/* placeholder: .rodata of startStockSkillAction__Q22PL11CPlayerSora (strings, jump tables) */
-__asm__(".rdata\n.align 4\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n");
-__asm__(".word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n");
-__asm__(".word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L00295084\n");
-__asm__(".word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n");
-__asm__(".word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n.word .L00295084\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n");
-__asm__(".word .L0029508C\n.word .L00295084\n.word .L0029508C\n.word .L00295084\n.word .L0029508C\n.word .L0029509C\n.word .L0029509C\n.word .L0029509C\n.word func_0\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", startStockSkillAction__Q22PL11CPlayerSora);
+INT CPlayerSora::startStockSkillAction() {
+    switch (m_iStockSkill) {
+    case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
+    case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23: case 24: case 25: case 26:
+    case 27: case 28: case 29: case 30: case 31: case 32: case 33: case 34: case 35: case 36: case 37:
+    case 38: case 39: case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47: case 48:
+    case 49: case 50: case 51: case 52: case 54: case 56: case 58: case 59: case 61: case 63: case 65:
+    case 66: case 67: case 68: case 70: case 71: case 73: case 74: case 75: case 77: case 79: case 81:
+    case 83: case 85:
+        PLM::addStockBR(m_iStockSkill);
+        initStockSkill(0);
+        m_iStepStockSkill = 10;
+        return TRUE;
+    case 53: case 55: case 57: case 60: case 62: case 64: case 69: case 72: case 76: case 78: case 80:
+    case 82: case 84: case 86:
+        PLM::addStockBR(m_iStockSkill - 1);
+        initStockSkill(0);
+        m_iStepStockSkill = 10;
+        return TRUE;
+    case 87: case 88: case 89:
+        initStockSkill(0);
+        m_iStepStockSkill = 10;
+        return TRUE;
+    }
+    return FALSE;
+}
 /* placeholder: .rodata of initStockSkill__Q22PL11CPlayerSorai (strings, jump tables) */
 __asm__(".rdata\n.align 4\n.word .L002951E8\n.word .L002951F0\n.word .L00295204\n.word .L0029520C\n.word .L00295214\n.word .L0029521C\n.word .L00295230\n.word .L00295244\n.word .L00295258\n.word .L0029526C\n.word .L002952C4\n.word .L00295348\n.word .L002953C8\n.word .L00295420\n");
 __asm__(".word .L00295478\n.word .L002954D0\n.word .L00295298\n.word .L002952F0\n.word .L00295374\n.word .L002953F4\n.word .L0029544C\n.word .L002954A4\n.word .L002954FC\n.word .L002953A0\n.word .L002953A8\n.word .L002953B0\n.word .L002953B8\n.word .L002953C0\n.word .L00295698\n.word .L002956AC\n");
