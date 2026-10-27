@@ -15,6 +15,8 @@
 #include "Game/Player/Player.h"
 #include "Game/BodyCollision.h"
 #include "System/Graphic/Anim.h"
+#include "System/Coord.h"
+#include "Game/CardKind.h"
 #include "include_asm.h"
 
 extern "C" char D_004AD680[];
@@ -125,7 +127,11 @@ void CBattleEnemy::homingMoveToPlayer(FLOAT inRate, FLOAT inSpeed) {
     getPlayerPosition(vPos);
     m_pMove->homingMove(vPos, inRate, inSpeed);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", homingMoveXZToPlayer__12CBattleEnemyff);
+void CBattleEnemy::homingMoveXZToPlayer(FLOAT inRate, FLOAT inSpeed) {
+    FVECTOR pos;
+    getPlayerPosition(pos);
+    m_pMove->homingMoveXZ(pos, inRate, inSpeed);
+}
 void CBattleEnemy::getPlayerPosition(FVECTOR& outPos) {
     if (m_ullBtlEnemyFlag & 0x40000) outPos = m_vConfusePlayerPos;
     else outPos = getPlayerPos(0);

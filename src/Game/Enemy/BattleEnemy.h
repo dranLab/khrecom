@@ -123,6 +123,9 @@ public:
     ATK_ATTR getAttackAttr(INT inIndex) const;
     HANDLE getPlayerHandle(); // PARTIAL: added for Game/Enemy/EnemyFatbandit
     void makePrize();
+    void makeExpPrize(const FVECTOR* inPos);
+    void homingMoveXZToPlayer(FLOAT inRate, FLOAT inSpeed);
+    void createFriendCard_(INT inRate);
     void attackStateCardDestroy(BOOL inColl);
     void changeDamageMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr);
     void updateHitBackTimer_();
