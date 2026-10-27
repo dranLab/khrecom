@@ -4544,85 +4544,501 @@ INT CCamp::setConfigWin(INT nSetCmd) {
     return ret;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setWorldmap__5CCampi);
-// setWorldmap__5CCampi: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    " D_004E4028:\n"
-    ".byte 0x77,0x6F,0x72,0x6C,0x64,0x6D,0x61,0x70,0x3A,0x30,0x30,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x77,0x6F,0x72,0x6C,0x64,0x5F,0x69,0x63,0x6F,0x6E,0x3A,0x30,0x30,0x00,0x00,0x00\n"
-    ".byte 0x5A,0x6F,0x6F,0x6D,0x20,0x49,0x6E,0x7B,0x20,0x20,0x20,0x20,0x20,0xF9,0x44,0x53\n"
-    ".byte 0x68,0x6F,0x77,0x20,0x43,0x72,0x69,0x74,0x65,0x72,0x69,0x61,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x35,0x37,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x35,0x38,0x30,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x36,0x30,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x36,0x30,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x36,0x31,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x36,0x31,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x37,0x35,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x38,0x37,0x34,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x38,0x39,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x30,0x35,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x31,0x34,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x33,0x34,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x34,0x30,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x34,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x35,0x33,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x35,0x38,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x36,0x39,0x36,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x60,0x99,0x31,0x00,0x80,0xAD,0x31,0x00,0xE4,0xB5,0x31,0x00,0x28,0xAF,0x31,0x00\n"
-    ".byte 0x4C,0xB0,0x31,0x00,0x6C,0xB2,0x31,0x00,0xE4,0xB5,0x31,0x00,0xE4,0xB5,0x31,0x00\n"
-    ".byte 0x28,0xB3,0x31,0x00,0xE4,0xB5,0x31,0x00,0x10,0xB3,0x31,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x50,0xA3,0x31,0x00,0x48,0xA8,0x31,0x00,0x8C,0xA3,0x31,0x00,0xA4,0xA3,0x31,0x00\n"
-    ".byte 0xBC,0xA3,0x31,0x00,0x50,0xA3,0x31,0x00,0xD4,0xA3,0x31,0x00,0x50,0xA3,0x31,0x00\n"
-    ".byte 0x50,0xA3,0x31,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .data\n"
-    ".align 2\n"
-    " pSeqName.4476:\n"
-    ".byte 0x28,0x40,0x4E,0x00\n"
-    " pSeqName2.4477:\n"
-    ".byte 0x38,0x40,0x4E,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00\n"
-    " roomSeqTbl.4478:\n"
-    ".byte 0x0C,0x11,0x10,0x15,0x0F,0x14,0x13,0x19,0x12,0x18,0x17,0x1C,0x16,0x1B,0x1A,0x1D\n"
-    " pStrButton.4479:\n"
-    ".byte 0x48,0x40,0x4E,0x00\n"
-    ".section .text");
+INT CCamp::setWorldmap(INT nSetCmd) {
+    static LPCTSTR pSeqName = "worldmap:00";
+    static LPCTSTR pSeqName2 = "world_icon:00";
+    static char roomSeqTbl[16] = { 12, 17, 16, 21, 15, 20, 19, 25, 18, 24, 23, 28, 22, 27, 26, 29 };
+    FVECTOR vec;
+    FVECTOR vec2;
+    C2DSeqCtrl* p2DSeqCtrl;
+    C2DSeqObj* p2DSeqObj;
+    G_RGBA rgba;
+    CARD card;
+    FLOAT fCol;
+    INT idx;
+    INT ret = FALSE;
+    USHORT roomId;
+    BYTE cardID;
+    FLOOR::FloorLayout* pFloorLayout;
+    FLOOR::RoomSrcInfo* pRoomSrcInfo;
+    RoomInfo* pRoomInfo;
+    DOOR_STAT doorStat;
+    RCNORMA::NormaSrc normaSrc;
+    static LPCTSTR pStrButton = "Zoom In{     \xF9" "DShow Criteria";
+    INT fgExpectStart;
+    INT nCard;
+    INT j;
+
+    if (!m_bPooWorld) {
+        pFloorLayout = CSceneInfo::getCurrentFloorDataSrc();
+    } else {
+        pFloorLayout = CSceneInfo::getFloorDataSrc(CSceneInfo::getFloorIndex(100, TRUE), TRUE);
+    }
+    if (!pFloorLayout) {
+        return TRUE;
+    }
+    rgba.col = 0x807C7C7C;
+    switch (nSetCmd) {
+    case 0:
+        m_nSubStep = 0;
+        if (!m_pWMNormaCtrl) {
+            /* stored through a reference: in the original the next pSeqName load waits for this store */
+            _ref(m_pWMMoveCtrl) = NEW(6575, C2DSeqCtrl);
+            m_pWMMoveCtrl->addSeq(pSeqName, 0x4B);
+            m_pWMMoveCtrl->enableColorCtrl(TRUE);
+            m_nRoomCurrent = CSceneInfo::getCurrentRoomID() - 1;
+            m_pWMNormaCtrl = NEW(6580, C2DSeqCtrl);
+            vec._q = 0;
+            m_pWMNormaCtrl->setCol(vec);
+            m_pWMNormaCtrl->setLayer(0xD);
+            m_pWMNormaCtrl->setParent(m_pWMMoveCtrl);
+            m_pWMNormaCtrl->addSeq(pSeqName, 0x4B);
+            m_pWMNormaCtrl->enableDisp(FALSE);
+            m_pWMNormaCtrl->setLocalPos(vec);
+            vec.init();
+            if (!m_bPooWorld) {
+                m_pWMExplaneCtrl = NEW(6602, C2DSeqCtrl);
+                m_pWMExplaneCtrl->setLayer(0xF);
+                m_pWMExplaneCtrl->addSeq(m_pSeqName, 0xB8);
+                m_pWMExplaneCtrl->setPos(vec);
+                m_pWMExplaneCtrl->enableColorCtrl(TRUE);
+                m_pWMExplaneFnt = NEW(6607, C2DFnt)(0, 0, &rgba, 0xE, pStrButton, 0x40);
+                m_pWMExplaneCtrl->addFntShift(m_pSeqName, m_pWMExplaneFnt, 0.0f, 1.0f);
+            }
+            m_pWMCardCtrl = NEW(6612, C2DSeqCtrl);
+            m_pWMCardCtrl->setLayer(0xE);
+            m_pWMCardCtrl->addSeq(pSeqName, 0x27);
+            m_pWMCardCtrl->addSeq(pSeqName2, (m_bPooWorld && (CGameWork::getInt(0, 0x23) & 0x40)) ? 1 : 0);
+            m_pWMCardCtrl->setPos(vec);
+            m_pWMFloorCtrl = NEW(6618, C2DSeqCtrl);
+            m_pWMFloorCtrl->setLayer(0xE);
+            m_pWMFloorCtrl->addSeq(pSeqName, 0x24);
+            m_pWMFloorCtrl->setPos(vec);
+            idx = CSceneInfo::getCurrentFloorNumber();
+            m_pWMFloorCtrl->addSeq(pSeqName, idx > 0 ? idx + 0x3D : -idx + 0x5C);
+
+            pRoomSrcInfo = pFloorLayout->_rooms;
+            fgExpectStart = -1;
+            vec.set(999.0f, 999.0f, -999.0f, -999.0f);
+            for (INT i = 0; i < pFloorLayout->_nRoomCount; i++, pRoomSrcInfo++) {
+                if (pRoomSrcInfo->_nPosX < 0 || pRoomSrcInfo->_nPosY < 0) {
+                    continue;
+                }
+                if (pRoomSrcInfo->_nRoomType == 1) {
+                    continue;
+                }
+                if (!pRoomSrcInfo->_nPosY) {
+                    fgExpectStart = 0;
+                }
+                vec2.x = (pRoomSrcInfo->_nPosX + pRoomSrcInfo->_nPosY) * 50.0f;
+                vec2.y = pRoomSrcInfo->_nPosX * 40.0f + pRoomSrcInfo->_nPosY * -40.0f;
+                if (vec2.x < vec.x) {
+                    vec.x = vec2.x;
+                }
+                if (vec2.x > vec.z) {
+                    vec.z = vec2.x;
+                }
+                if (vec2.y < vec.y) {
+                    vec.y = vec2.y;
+                }
+                if (vec2.y > vec.w) {
+                    vec.w = vec2.y;
+                }
+            }
+            m_vWMPosMinMax.x = (vec.z - vec.x) * -0.5f;
+            m_vWMPosMinMax.z = -m_vWMPosMinMax.x;
+            m_vWMPosMinMax.y = (vec.w - vec.y) * -0.5f;
+            m_vWMPosMinMax.w = -m_vWMPosMinMax.y;
+            vec.x = (vec.z + vec.x) * -0.5f + 24.0f;
+            vec.y = (vec.w + vec.y) * -0.5f + 8.0f - 8.0f;
+            vec2.x = vec2.y = 0.0f;
+            vec.z = vec2.z = 0.0f;
+            vec.w = vec2.w = 1.0f;
+            m_vWMPosTarget.init();
+            m_vWMPosCurrent.init();
+            m_vWMPosCurrent0.init();
+            m_fgWMMove = FALSE;
+
+            pRoomSrcInfo = pFloorLayout->_rooms;
+            for (INT i = 0; i < 32; i++) {
+                m_roomDiscover[i] = -1;
+                m_roomDoor[i] = 0;
+                m_roomInfo[i] = 0;
+            }
+            for (INT i = 0; i < 48; i++) {
+                m_roomMap[i] = 0;
+            }
+            for (INT i = 0; i < pFloorLayout->_nRoomCount; i++, pRoomSrcInfo++) {
+                pRoomInfo = CSceneInfo::getRoomInfo(pRoomSrcInfo->_nID);
+                if (!pRoomInfo) {
+                    continue;
+                }
+                while (hasOpenedDoor(pRoomInfo, pRoomSrcInfo) && pRoomSrcInfo->_nRoomType != 1 && pRoomInfo->hasEntered()) {
+                    idx = 0;
+                    for (j = 0; j < 4; j++) {
+                        DoorInfo* pDoor = &pRoomInfo->_doors[j];
+                        if (pDoor->_type == 12) {
+                            continue;
+                        }
+                        doorStat = pDoor->getDoorState();
+                        if (doorStat == DOOR_STAT_CLOSED || doorStat == DOOR_STAT_OPENED) {
+                            idx |= 1 << pDoor->_id;
+                            if (pDoor->_nDstRoom && pDoor->_nDstRoom < 99) {
+                                if (m_roomDiscover[pDoor->_nDstRoom - 1] < 0) {
+                                    m_roomDiscover[pDoor->_nDstRoom - 1] = 16;
+                                }
+                            }
+                        }
+                        INT nState = 0;
+                        if (!m_bPooWorld) {
+                            if (doorStat == DOOR_STAT_CLOSED) {
+                                nState = 1;
+                            } else if (doorStat == DOOR_STAT_OPENED) {
+                                if (pDoor->_type == 8) {
+                                    nState = 3;
+                                } else {
+                                    nState = 2;
+                                }
+                            }
+                        } else {
+                            if (doorStat == DOOR_STAT_OPENED) {
+                                if (pDoor->_type == 8) {
+                                    nState = 3;
+                                } else {
+                                    nState = !CSceneInfo::getRoomInfo(pDoor->_nDstRoom)->hasEntered() ? 1 : 2;
+                                }
+                            }
+                        }
+                        m_roomDoor[i] |= nState << (pDoor->_id * 2);
+                    }
+                    m_roomDiscover[i] = idx;
+                    break;
+                }
+                for (j = 0; j < 4; j++) {
+                    DoorInfo* pDoor = &pRoomInfo->_doors[j];
+                    if (pDoor->_type == 12) {
+                        continue;
+                    }
+                    doorStat = pDoor->getDoorState();
+                    if (pDoor->_nDstRoom && pDoor->_nDstRoom < 99) {
+                        if (doorStat == DOOR_STAT_CLOSED || doorStat == DOOR_STAT_OPENED) {
+                            m_roomInfo[pDoor->_nDstRoom - 1] |= pRoomSrcInfo->_nID << ((pDoor->_id & 3) * 8);
+                        }
+                    }
+                }
+                if (pRoomSrcInfo->_nRoomType != 1) {
+                    idx = pRoomSrcInfo->_nPosX + pRoomSrcInfo->_nPosY * 6;
+                    m_roomMap[idx] = pRoomSrcInfo->_nID;
+                    if (m_nRoomCurrent == pRoomSrcInfo->_nID - 1) {
+                        m_nRoomSelect = idx;
+                    }
+                }
+            }
+
+            nCard = 0;
+            pRoomSrcInfo = pFloorLayout->_rooms;
+            for (INT i = 0; i < pFloorLayout->_nRoomCount; i++, pRoomSrcInfo++) {
+                INT nSearch;
+                pRoomInfo = CSceneInfo::getRoomInfo(pRoomSrcInfo->_nID);
+                p2DSeqCtrl = m_pRoomCtrl[i] = NEW(6755, C2DSeqCtrl);
+                p2DSeqCtrl->setParent(m_pWMMoveCtrl);
+                p2DSeqCtrl->setLayer(0xC);
+                p2DSeqCtrl->enableColorCtrl(TRUE);
+                if (pRoomSrcInfo->_nPosX < 0 || pRoomSrcInfo->_nPosY < 0) {
+                    continue;
+                }
+                vec2.x = vec.x + (pRoomSrcInfo->_nPosX + pRoomSrcInfo->_nPosY) * 50.0f;
+                vec2.y = vec.y + pRoomSrcInfo->_nPosX * 40.0f + pRoomSrcInfo->_nPosY * -40.0f;
+                p2DSeqCtrl->setLocalPos(vec2);
+                nSearch = -1;
+                switch (pRoomSrcInfo->_nRoomType) {
+                case 0:
+                case 5:
+                case 7:
+                case 8:
+                    if (m_roomDiscover[i] < 0) {
+                        idx = 0xE;
+                    } else if (m_roomDiscover[i] < 16) {
+                        idx = roomSeqTbl[m_roomDiscover[i]];
+                    } else {
+                        idx = 0xD;
+                    }
+                    break;
+                case 2:
+                    idx = 0x22;
+                    nSearch = CCard::searchCard(0xBA, 0);
+                    goto chk;
+                case 3:
+                    idx = 0x20;
+                    nSearch = CCard::searchCard(0xBB, 0);
+                    goto chk;
+                case 4:
+                    idx = 0x21;
+                    nSearch = CCard::searchCard(0xBC, 0);
+                    goto chk;
+                case 6:
+                    idx = 0x1E;
+                    nSearch = 0x1000;
+                    if (!CGameWork::progMCW()._KeyRoomsTresureBox[CSceneInfo::getCurrentWorldID(FALSE)]) {
+                        if (!pRoomInfo->hasEntered()) {
+                            nSearch = CCard::searchCard(0xBD, 0) | 0x1000;
+                        }
+                    }
+                chk:
+                    if (m_roomDiscover[i] < 0 && !pRoomInfo->hasEntered()) {
+                        idx = 0x23;
+                    } else if (m_roomDiscover[i] < 16) {
+                        if (pRoomSrcInfo->_nRoomType != 6) {
+                            idx = 0x1F;
+                            nSearch = 0;
+                        } else if (m_roomDiscover[i] >= 0) {
+                            idx = roomSeqTbl[m_roomDiscover[i]];
+                        } else {
+                            idx = 0x23;
+                        }
+                    }
+                    break;
+                default:
+                    continue;
+                }
+                p2DSeqCtrl->addSeq(pSeqName, pRoomSrcInfo->_nPosY + 0x57 + fgExpectStart);
+                p2DSeqCtrl->addSeq(pSeqName, idx);
+                if (nSearch >= 0) {
+                    INT nSeq1;
+                    INT nSeq2 = 0;
+                    if (nSearch < 0x1000) {
+                        if (nSearch <= 0 || !m_roomInfo[i]) {
+                            nSeq1 = 0x4E;
+                        } else {
+                            nSeq1 = 0x4D;
+                            nSeq2 = 0x4C;
+                        }
+                    } else if (nSearch == 0x1000) {
+                        nSeq1 = 0x4E;
+                    } else {
+                        nSeq1 = 0x50;
+                        nSeq2 = 0x4F;
+                    }
+                    p2DSeqObj = p2DSeqCtrl->addSeq(pSeqName, nSeq1);
+                    p2DSeqObj->changeLayer(0xD);
+                    p2DSeqCtrl->enableDisp(2, FALSE);
+                    if (nSeq2) {
+                        p2DSeqObj = p2DSeqCtrl->addSeq(pSeqName, nSeq2);
+                        p2DSeqObj->changeLayer(0xB);
+                        p2DSeqCtrl->enableDisp(3, FALSE);
+                    }
+                }
+                p2DSeqCtrl = m_pWayCtrl[i] = NEW(6874, C2DSeqCtrl)(1);
+                p2DSeqCtrl->setParent(m_pWMMoveCtrl);
+                p2DSeqCtrl->setLayer(0xB);
+                p2DSeqCtrl->enableColorCtrl(TRUE);
+                p2DSeqCtrl->setLocalPos(vec2);
+                p2DSeqCtrl->enableDisp(FALSE);
+                INT nDoorBits = m_roomDoor[i];
+                for (j = 0; j < 4; j++) {
+                    INT nDoor = (nDoorBits >> (j * 2)) & 3;
+                    idx = -1;
+                    if (nDoor == 1) {
+                        idx = 4;
+                    } else if (nDoor == 2) {
+                        idx = 8;
+                    } else if (nDoor == 3) {
+                        idx = 0;
+                    }
+                    if (idx >= 0) {
+                        p2DSeqCtrl->addSeq(pSeqName, idx + ((j + 1) & 3));
+                    }
+                }
+                cardID = pRoomInfo->getRoomNameCardID();
+                if (cardID == 0xB8 || cardID == 0xB6) {
+                    C2DCard* p2DCard;
+                    p2DSeqCtrl = m_pShopAndSaveCtrl[nCard] = NEW(6898, C2DSeqCtrl);
+                    p2DSeqCtrl->setParent(m_pWMMoveCtrl);
+                    p2DSeqCtrl->setLocalPos(vec2);
+                    p2DSeqCtrl->addSeq(pSeqName, cardID == 0xB8 ? 0x53 : 0x55);
+                    p2DSeqCtrl->enableDisp(FALSE);
+                    _setCardNK(card, cardID, -1);
+                    p2DCard = m_pShopAndSave[nCard++] = NEW(6905, C2DCard);
+                    p2DCard->setParent(p2DSeqCtrl);
+                    p2DCard->setLayer(0xC);
+                    p2DCard->create(card);
+                    p2DCard->enableDisp(FALSE);
+                }
+            }
+            m_fRoomCurrentTimer = 0.0f;
+            m_pMapCursorCtrl = NEW(6914, C2DSeqCtrl);
+            m_pMapCursorCtrl->setLayer(0xD);
+            m_pMapCursorCtrl->setParent(m_pWMMoveCtrl);
+            vec = m_pRoomCtrl[m_nRoomCurrent]->m_seqControl.vPos;
+            m_pMapCursorCtrl->setLocalPos(vec);
+            if (vec.x < -105.0f) {
+                m_vWMPosTarget.x = ((INT)(-105.0f - vec.x) / 50 + 1) * 50;
+            } else if (vec.x > 105.0f) {
+                m_vWMPosTarget.x = -(FLOAT)(((INT)(vec.x - 105.0f) / 50 + 1) * 50);
+            }
+            if (vec.y < -75.0f) {
+                m_vWMPosTarget.y = ((INT)(-75.0f - vec.y) / 40 + 1) * 40;
+            } else if (vec.y > 85.0f) {
+                m_vWMPosTarget.y = -(FLOAT)(((INT)(vec.y - 85.0f) / 40 + 1) * 40);
+            }
+            m_pWMMoveCtrl->setLocalPos(m_vWMPosTarget);
+            m_vWMPosOld = m_vWMPosCurrent = m_vWMPosCurrent0 = m_vWMPosTarget;
+            m_pMapCursorCtrl->addSeqShift(m_pSeqName, 0x12, -12.0f, -13.0f);
+            m_pMapCursorCtrl->enableDisp(FALSE);
+            m_pMapGuideCtrl = NEW(6934, C2DSeqCtrl);
+            m_pMapGuideCtrl->setLayer(0xD);
+            m_pMapGuideCtrl->setParent(m_pWMMoveCtrl);
+            m_pMapGuideCtrl->addSeqShift(m_pSeqName, 0xB7, 4.0f, -20.0f);
+            m_pMapGuideCtrl->setLocalPos(vec);
+            m_pMapGuideCtrl->enableDisp(FALSE);
+            m_pCurrentRoomPosCtrl = NEW(6940, C2DSeqCtrl)(1);
+            m_pCurrentRoomPosCtrl->setLayer(0xD);
+            m_pCurrentRoomPosCtrl->setParent(m_pWMMoveCtrl);
+            m_pCurrentRoomPosCtrl->setLocalPos(vec);
+            vec.init();
+            pRoomInfo = CSceneInfo::getRoomInfo(m_roomMap[m_nRoomSelect]);
+            cardID = pRoomInfo->getRoomNameCardID();
+            m_pWMRoomNameCtrl = NEW(6948, C2DSeqCtrl);
+            m_pWMRoomNameCtrl->setLayer(0xE);
+            m_pWMRoomNameCtrl->addSeq(pSeqName, 0x34);
+            m_pWMRoomNameCtrl->setPos(vec);
+            m_pWMRoomNameFnt = NEW(6953, C2DFnt)(0, 0, &rgba, 0xF, NULL, 0x40);
+            m_pWMRoomNameCtrl->addFntShift(pSeqName, m_pWMRoomNameFnt, 0.0f, 7.0f);
+            setWMRoomName(cardID, m_nRoomSelect, pRoomInfo, TRUE);
+            m_pWMNormaArrowCtrl = NEW(6958, C2DSeqCtrl);
+            m_pWMNormaArrowCtrl->setParent(m_pWMNormaCtrl);
+            m_pWMNormaArrowCtrl->setLayer(0x10);
+            for (INT i = 0; i < 4; i++) {
+                p2DSeqCtrl = m_pRoomNormaCtrl[i] = NEW(6962, C2DSeqCtrl);
+                p2DSeqCtrl->setParent(m_pWMNormaCtrl);
+                p2DSeqCtrl->setLayer(0xD);
+                p2DSeqCtrl->addSeq(pSeqName, 0x3A);
+                p2DSeqCtrl->enableDisp(FALSE);
+                m_pWMNormaArrowCtrl->addSeq(pSeqName, ((i + 3) & 3) + 0x36);
+                m_pWMNormaArrowCtrl->enableDisp(i, FALSE);
+            }
+            m_bRoomNorma = FALSE;
+            m_nRoomNorma = 0;
+        }
+        m_fWMTimer = 0.0f;
+        break;
+    case 1:
+        if (!m_pWMCardCtrl->isEnd(0)) {
+            break;
+        }
+        if (m_pWMExplaneCtrl) {
+            m_pWMExplaneCtrl->replaceSeq(0, m_pSeqName, 0xB9);
+        }
+        m_pWMCardCtrl->replaceSeq(0, pSeqName, 0x28);
+        m_pWMFloorCtrl->replaceSeq(0, pSeqName, 0x25);
+        m_pWMRoomNameCtrl->replaceSeq(0, pSeqName, ++m_nWMRoomNameSeq);
+        m_pCurrentRoomPosCtrl->addSeq(pSeqName, !m_bPlayerKind ? 0x51 : 0x6A);
+        m_pMapCursorCtrl->enableDisp(TRUE);
+        m_pMapGuideCtrl->enableDisp(checkNorma(-1, roomId, -1) != 0);
+        for (INT i = 0; i < 32; i++) {
+            if (m_pWayCtrl[i]) {
+                m_pWayCtrl[i]->enableDisp(TRUE);
+            }
+            if (m_pRoomCtrl[i]) {
+                m_pRoomCtrl[i]->enableDisp(2, TRUE);
+                m_pRoomCtrl[i]->enableDisp(3, TRUE);
+            }
+            if (m_pShopAndSaveCtrl[i]) {
+                m_pShopAndSaveCtrl[i]->enableDisp(TRUE);
+                m_pShopAndSave[i]->enableDisp(TRUE);
+            }
+        }
+        ret = TRUE;
+        break;
+    case 3:
+        m_fRoomCurrentTimer += getFrameRateF();
+        if (m_fRoomCurrentTimer >= 165.0f) {
+            m_fRoomCurrentTimer = 0.0f;
+        }
+        fCol = m_fRoomCurrentTimer < 82.5f ? m_fRoomCurrentTimer : 165.0f - m_fRoomCurrentTimer;
+        fCol /= 82.5f;
+        vec.z = fCol * 0.85f + 0.9f;
+        vec.y = fCol * 0.47f + 0.7f;
+        vec.x = 0.5f - fCol * 0.2f;
+        vec.w = 1.0f;
+        m_pRoomCtrl[m_nRoomCurrent]->setCol(vec);
+        for (INT i = 0; i < 32; i++) {
+            if (m_pShopAndSave[i]) {
+                m_pShopAndSave[i]->checkBack();
+            }
+        }
+        break;
+    case 4:
+        if (m_pWMExplaneCtrl) {
+            m_pWMExplaneCtrl->replaceSeq(0, m_pSeqName, 0xBA);
+        }
+        m_pWMCardCtrl->replaceSeq(0, pSeqName, 0x29);
+        m_pWMFloorCtrl->replaceSeq(0, pSeqName, 0x26);
+        m_pWMRoomNameCtrl->replaceSeq(0, pSeqName, ++m_nWMRoomNameSeq);
+        m_pCurrentRoomPosCtrl->replaceSeq(0, pSeqName, !m_bPlayerKind ? 0x52 : 0x6B);
+        for (INT i = 0; i < 32; i++) {
+            if (m_pShopAndSaveCtrl[i]) {
+                m_pShopAndSaveCtrl[i]->replaceSeq(0, pSeqName, 0x54);
+            }
+        }
+        SAFE_DELETE(m_pMapCursorCtrl);
+        SAFE_DELETE(m_pMapGuideCtrl);
+        for (INT i = 0; i < 4; i++) {
+            SAFE_DELETE(m_pRoomNormaCtrl[i]);
+        }
+        for (INT i = 0; i < 4; i++) {
+            SAFE_DELETE(m_pRoomNorma[i]);
+        }
+        SAFE_DELETE(m_pWMNormaArrowCtrl);
+        setRoomHelp(0, 0);
+        m_fWMTimer = 5.0f;
+        break;
+    case 5:
+        if (m_pWMMoveCtrl) {
+            vec2.set(1.0f, 1.0f, 1.0f, 1.0f);
+            m_fWMTimer -= getFrameRateF();
+            if (m_fWMTimer < 0.0f) {
+                m_fWMTimer = 0.0f;
+            }
+            vec2.w = m_fWMTimer / 5.0f;
+            m_pWMMoveCtrl->setCol(vec2);
+            ret = m_pWMCardCtrl->isEnd(0) != FALSE;
+        } else {
+            ret = TRUE;
+        }
+        break;
+    case 10:
+        setWorldmapCursor();
+        ret = TRUE;
+        break;
+    case 8:
+        SAFE_DELETE(m_pWMNormaCtrl);
+        for (INT i = 0; i < 32; i++) {
+            SAFE_DELETE(m_pRoomCtrl[i]);
+            SAFE_DELETE(m_pWayCtrl[i]);
+            SAFE_DELETE(m_pShopAndSaveCtrl[i]);
+            SAFE_DELETE(m_pShopAndSave[i]);
+        }
+        SAFE_DELETE(m_pMapCursorCtrl);
+        SAFE_DELETE(m_pMapGuideCtrl);
+        for (INT i = 0; i < 4; i++) {
+            SAFE_DELETE(m_pRoomNormaCtrl[i]);
+        }
+        for (INT i = 0; i < 4; i++) {
+            SAFE_DELETE(m_pRoomNorma[i]);
+        }
+        SAFE_DELETE(m_pWMCardCtrl);
+        SAFE_DELETE(m_pWMFloorCtrl);
+        SAFE_DELETE(m_pWMRoomNameCtrl);
+        SAFE_DELETE(m_pWMMoveCtrl);
+        SAFE_DELETE(m_pWMNormaArrowCtrl);
+        SAFE_DELETE(m_pWMExplaneCtrl);
+        SAFE_DELETE(m_pCurrentRoomPosCtrl);
+        setRoomHelp(0, 0);
+        break;
+    }
+    return ret;
+}
 /* Parked: 62 of 941 lines differ. The RCNORMA::NormaSrc argument of createNorma is built from four lhu of its
    stack copy in the original (extract_bit_field pieces), one ld in ours - the open issue of
    RoomCreation::menuMain and C2DCard::replaceNorma; the s3/s4 and spill-slot (0x64/0x68) swaps around it follow
@@ -6222,5 +6638,9 @@ asm(".globl D_004E5374\nD_004E5374 = 0x004E5374");
 asm(".globl D_004E3C80\nD_004E3C80 = 0x004E3C80"); /* "%d/%d" (setStatusWin's statusStr), used by asm setMapCardWin */
 
 asm(".globl D_004E33E8\nD_004E33E8 = 0x004E33E8"); /* "\x81~%02d" in asm setDeckInfo's .rodata */
+
+asm(".globl D_004E4028\nD_004E4028 = 0x004E4028"); /* "worldmap:00" (setWorldmap's pSeqName), STR_WORLDMAP */
+
+asm(".globl D_004E4048\nD_004E4048 = 0x004E4048"); /* "Zoom In..." (setWorldmap's pStrButton), STR_ZOOM_IN */
 
 // SOURCE DATA: .data .rodata
