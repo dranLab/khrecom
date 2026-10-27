@@ -237,9 +237,85 @@ void CPlayerSora::setMagicBullet(HANDLE inBullet) {
         }
     }
 }
-/* placeholder: .rodata of initFriend__Q22PL11CPlayerSorai (strings, jump tables) */
-__asm__(".rdata\n.align 4\n.word .L002A05A4\n.word .L002A05B8\n.word .L002A05CC\n.word .L002A05E0\n.word .L002A05F4\n.word .L002A0608\n.word .L002A061C\n.word .L002A0630\n.word .L002A0644\n.word func_0\n.word func_0\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initFriend__Q22PL11CPlayerSorai);
+// reads/writes members and globals as through a reference (the original reloads/stores them in this order)
+template <class T> static inline T& _ref(T& v) { return v; }
+
+void CPlayerSora::initFriend(INT inNo) {
+    if (m_pCB->getEnchantKind() == 0x1b) {
+        addHP(m_iMaxHP / 4, 6000, 1);
+    }
+    setPlayerState(FRIEND);
+    m_iSubState = 1;
+    clearSpeed();
+    offAttack();
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x400);
+    setBattleFlag(0, 0x80000);
+    setTrgFlag(0, 0x80);
+    setPlayerFlag(0, 0x20000);
+    setPlayerFlag(0, 0x2800000);
+    _ref(m_iAttackNo) = inNo;
+    _ref(m_uiPreAttackKind) = 0;
+    _ref(m_uiAttackKind) = 0;
+    _ref(m_bIsAttackHit) = FALSE;
+    _ref(m_bNextTrg) = FALSE;
+    _ref(m_iNextAttack) = 0;
+    _ref(m_bDmgMuteki) = FALSE;
+    _ref(m_bIsCanCombo) = FALSE;
+    _ref(m_fJumpGravity) = g_fGravity;
+    _ref(m_JumpState) = 3;
+    _ref(m_fMoveSpdXZ) = 0.0f;
+    m_tqCardBreakTime = g_CardBreakTime[CardBattle::g_pBattleCardList[m_uiCardID].BREAK];
+    m_fWalkSpeed = 0.0f;
+    m_szEffectName = NULL;
+    switch (m_uiCardID) {
+    case 0x31:
+        m_uiAttackID = 0x55;
+        m_pPLM->setReqLoad(0x44, 0);
+        break;
+    case 0x32:
+        m_uiAttackID = 0x56;
+        m_pPLM->setReqLoad(0x47, 0);
+        break;
+    case 0x33:
+        m_uiAttackID = 0x57;
+        m_pPLM->setReqLoad(0x4b, 0);
+        break;
+    case 0x34:
+        m_uiAttackID = 0x58;
+        m_pPLM->setReqLoad(0x4f, 0);
+        break;
+    case 0x35:
+        m_uiAttackID = 0x59;
+        m_pPLM->setReqLoad(0x4d, 0);
+        break;
+    case 0x36:
+        m_uiAttackID = 0x5a;
+        m_pPLM->setReqLoad(0x51, 0);
+        break;
+    case 0x37:
+        m_uiAttackID = 0x5b;
+        m_pPLM->setReqLoad(0x53, 0);
+        break;
+    case 0x38:
+        m_uiAttackID = 0x5c;
+        m_pPLM->setReqLoad(0x62, 0);
+        break;
+    case 0x39:
+        m_uiAttackID = 0x5d;
+        m_pPLM->setReqLoad(0x55, 0);
+        break;
+    default:
+        m_iSubState = 3;
+        m_pAtkData = &g_AttackDataList[0];
+        m_uiAttackID = 0;
+        m_uiAttackKind = 0;
+        return;
+    }
+    m_pAtkData = &g_AttackDataList[m_uiAttackID];
+    m_uiPreAttackKind = m_uiAttackKind;
+    m_fDistXZ = m_fDistY = 0.0f;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeFriend__Q22PL11CPlayerSora);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", watchTarget__Q22PL11CPlayerSorai);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", setAttack_inFriend__Q22PL11CPlayerSoraiii);
@@ -308,9 +384,6 @@ INT CPlayerSora::endAttack_inFriend() {
     m_pPLM->getFriend()->setFailed();
     return -1;
 }
-// reads/writes members and globals as through a reference (the original reloads/stores them in this order)
-template <class T> static inline T& _ref(T& v) { return v; }
-
 void CPlayerSora::initSummon(INT inNo) {
     setPlayerState(SUMMON);
     m_iSubState = 1;
