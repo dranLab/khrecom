@@ -84,7 +84,12 @@ void CBattleEnemy::changeMainState(INT inState) {
     if (m_pMainState) m_pNewState = &((CStateTemplate<CBattleEnemy>*)m_pMainState)[inState];
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", changeMotion__12CBattleEnemyiiiiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", changeMotionIndex__12CBattleEnemyiiiiii);
+BOOL CBattleEnemy::changeMotionIndex(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
+    if (!m_pAnim) return FALSE;
+    if (m_pAnim->getAnimID() == inIndex) return FALSE;
+    changeMotion(inIndex, inTq, inRootMove, inGr, inEffectNo, inSENo);
+    return TRUE;
+}
 BOOL CBattleEnemy::startCardBattle() {
     m_ullBtlEnemyFlag &= ~0x802;
     return FALSE;
