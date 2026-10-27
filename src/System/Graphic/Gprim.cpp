@@ -540,7 +540,21 @@ FIX4 C3DTile::calcZ() {
 
     return p0.z << 4;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DTile);
+void C3DTile::makePkt() {
+    QWdata giftag;
+    if (p0.z <= 0 || p0.z > 0xFFFF28 || p0.x < 0 || p0.x > 0xFFFF || p0.y < 0 || p0.y > 0xFFFF ||
+        p1.z > 0xFFFF28 || p1.z <= 0 || p1.x < 0 || p1.x > 0xFFFF || p1.y < 0 || p1.y > 0xFFFF) {
+        return;
+    }
+    giftag.ul64[0] = 0x4400000000008000UL;
+    giftag.ul64[1] = 0x4410;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x206 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData((u_long)p0.x | ((u_long)p0.y << 16) | ((u_long)p0.z << 32));
+    CPackMan::pkAddGsData((u_long)p1.x | ((u_long)p1.y << 16) | ((u_long)p1.z << 32));
+    CPackMan::pkCloseGifTag();
+}
 FIX4 C3DSprt::calcZ() {
     FVECTOR c;
     FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
