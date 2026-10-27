@@ -742,7 +742,28 @@ void C3DLineCoord2::makePkt() {
     CPackMan::pkAddGsData(_vecToXYZ(p1));
     CPackMan::pkCloseGifTag();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DLines);
+FIX4 C3DLines::calcZ() {
+    FMATRIX mat0;
+    G_LINE* it;
+    if (m_vLINE.size() == 0) {
+        return 0;
+    }
+
+    if (m_pCrd) {
+        m_pCrd->getRotTransPersMatrix(mat0);
+    } else {
+        mat0 = CWorldEnv::getWorldScreenMatrix();
+    }
+    setRotTransPersMatrix(mat0);
+
+    for (it = m_vLINE.begin(); it != m_vLINE.end();) {
+        RotTransPersClipW(it->p0, it->P0);
+        RotTransPersClipW(it->p1, it->P1);
+        it++;
+    }
+
+    return m_vLINE.begin()->p0.z;
+}
 void C3DLines::makePkt() {
     QWdata giftag;
     G_LINE* it;
