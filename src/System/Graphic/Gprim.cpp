@@ -746,7 +746,11 @@ QWdata* C3DPolyFan::makePktSub(QWdata* pQw) {
     _setRotTransPersMatrix_VF04_07(m_pCrd);
     return _makePkt_TriangleFan(pQw, it, end, isBackClip());
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__15C3DPolyFanCoordP6QWdata);
+QWdata* C3DPolyFanCoord::makePktSub(QWdata* pQw) {
+    G_STRIP* it = m_vVERT.begin();
+    G_STRIP* end = m_vVERT.end();
+    return _makePkt_TriangleFan(pQw, it, end, &m_pObj->Crd(0), isBackClip());
+}
 void C3DCPrim::_init() {
     m_PRIM = 0;
     m_TEST = (UINT)-1;
