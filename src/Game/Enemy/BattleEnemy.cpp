@@ -239,7 +239,12 @@ void CBattleEnemy::beginStateMagnet() {
     setTimer(m_tqTime);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateMagnet__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateMagnet__12CBattleEnemy);
+void CBattleEnemy::endStateMagnet() {
+    FVECTOR v;
+    v.init();
+    m_pMove->setAcc(v);
+    if (!isBtlEnemyFlag(0x100)) m_pMove->enableGravity(TRUE);
+}
 void CBattleEnemy::beginStateSuspend() {
     m_pAnim->setSpeed(0.0f);
     m_ullBackupFlag = m_ullBtlEnemyFlag;
