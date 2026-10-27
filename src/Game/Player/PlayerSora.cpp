@@ -254,16 +254,53 @@ __asm__(".word .L002A218C\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\
 __asm__(".word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A2194\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n");
 __asm__(".word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A21A0\n.word .L002A2194\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", setStateSE__Q22PL11CPlayerSoraii);
-/* placeholder: .rodata of getStateSESeq__Q22PL11CPlayerSorai (strings, jump tables) */
-__asm__(".rdata\n.align 4\n.word .L002A2274\n.word .L002A2228\n.word .L002A2228\n.word .L002A2268\n.word .L002A2268\n.word .L002A2240\n.word .L002A2260\n.word .L002A2274\n.word .L002A2274\n.word .L002A2228\n.word .L002A2228\n.word .L002A2228\n.word .L002A2228\n.word .L002A2228\n");
-__asm__(".word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2268\n.word .L002A2268\n.word .L002A2268\n.word .L002A2268\n.word .L002A2240\n.word .L002A2240\n.word .L002A2260\n.word .L002A2260\n.word .L002A2248\n.word .L002A2248\n");
-__asm__(".word .L002A2248\n.word .L002A2248\n.word .L002A2248\n.word .L002A2248\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n");
-__asm__(".word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2230\n.word .L002A2274\n.word .L002A2268\n.word .L002A2238\n.word .L002A2240\n.word .L002A2260\n.word .L002A2258\n.word .L002A2250\n.word .L002A2248\n.word .L002A2274\n.word .L002A2270\n.word .L002A2268\n.word .L002A2268\n");
-__asm__(".word .L002A2268\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2238\n.word .L002A2238\n.word .L002A2238\n.word .L002A2274\n.word .L002A2270\n.word .L002A2240\n.word .L002A2240\n.word .L002A2258\n.word .L002A2258\n.word .L002A2260\n.word .L002A2260\n.word .L002A2250\n");
-__asm__(".word .L002A2250\n.word .L002A2248\n.word .L002A2248\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n");
-__asm__(".word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2274\n.word .L002A2274\n.word .L002A2274\n.word .L002A2270\n");
-__asm__(".word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2270\n.word .L002A2260\n.word .L002A2268\n.word .L002A2270\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", getStateSESeq__Q22PL11CPlayerSorai);
+INT CPlayerSora::getStateSESeq(INT inState) {
+    INT seq = 0;
+    switch (inState) {
+    case 3:
+    case 4:
+    case 6:
+    case 7:
+        switch (m_uiAttackID) {
+        case 34:
+            break;
+        case 35: case 36: case 43: case 44: case 45: case 46: case 47:
+            seq = 0;
+            break;
+        case 83:
+            seq = 9;
+            break;
+        case 86: case 100: case 101: case 102:
+            seq = 2;
+            break;
+        case 39: case 58: case 59: case 87: case 105: case 106:
+            seq = 3;
+            break;
+        case 62: case 63: case 64: case 65: case 66: case 67: case 91: case 113: case 114:
+            seq = 5;
+            break;
+        case 90: case 111: case 112:
+            seq = 6;
+            break;
+        case 89: case 107: case 108:
+            seq = 7;
+            break;
+        case 40: case 60: case 61: case 88: case 109: case 110: case 148:
+            seq = 4;
+            break;
+        case 37: case 38: case 54: case 55: case 56: case 57: case 85: case 94: case 95: case 96: case 149:
+            seq = 1;
+            break;
+        case 93: case 104: case 120: case 121: case 122: case 123: case 124: case 125: case 126: case 127:
+        case 128: case 129: case 130: case 131: case 132: case 133: case 134: case 135: case 136: case 137:
+        case 138: case 139: case 143: case 144: case 145: case 146: case 147: case 150:
+            seq = 8;
+            break;
+        }
+        break;
+    }
+    return seq;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initGlide__Q22PL11CPlayerSorai);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeGlide__Q22PL11CPlayerSora);
 void CPlayerSora::exeAvoid() {
