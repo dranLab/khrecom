@@ -25,7 +25,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 
 | unit | functions left | instr left | parked | data from asm |
 |---|---:|---:|---:|---|
-| `Form/Menu/Camp` | 19 | 13530 | 13 |  |
 | `System/Graphic/Gprim` | 321 | 12993 |  | .data .rodata |
 | `Game/Enemy/BattleEnemy` | 249 | 9962 |  | .data .rodata |
 | `Form/Menu/SaveLoad` | 86 | 9524 |  | .bss .data .rodata |
@@ -34,6 +33,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Debug/DebugPathData` | 77 | 6931 |  | .data .rodata |
 | `Game/CardRevolver` | 45 | 6930 |  | .data .rodata |
 | `Game/Player/PlayerGauge` | 61 | 6867 |  | .bss .data .rodata |
+| `Form/Menu/Camp` | 12 | 6098 | 12 |  |
 | `System/Graphic/Model` | 170 | 5996 |  | .bss .data .rodata |
 | `Game/Player/PlayerDRiku` | 5 | 5620 | 1 |  |
 | `Game/BattleCard` | 73 | 5375 |  | .bss .data .rodata |
@@ -242,19 +242,18 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Gimmick/GimmickTreasureBox` | `EnemyPop__19CGimmickTreasureBox` | 191 | (comment) Matches, but uses string literals and a jump table: needs the unit's .rodata from source, which CardMaxWarningMain blocks. |
 | `Form/DebugWindow` | `disp__12CDebugWindow` | 549 | (comment) Close: the reload registers of the spilled WW/sign (t0 instead of a3) and the loop's line-font position stores (G_XYZ pointer formed before the x store) differ. |
 | `Form/DebugWindow` | `main__10CNakCamera` | 118 | (comment) Only the scheduling differs: the m_fProjectionDist store after ViewAngleToProjection is placed after the CDeFocus instance load (the original stores it first, with %hi in v0). |
-| `Form/Menu/Camp` | `initCardKind__5CCampiii` | 331 |  |
-| `Form/Menu/Camp` | `deckCommonButton__5CCamp` | 270 |  |
-| `Form/Menu/Camp` | `deckCommonButton2__5CCamp` | 73 |  |
-| `Form/Menu/Camp` | `mapCardWinMenu__5CCamp` | 723 |  |
-| `Form/Menu/Camp` | `statusWinMenu__5CCamp` | 392 |  |
-| `Form/Menu/Camp` | `setDeckInfo__5CCampi` | 951 |  |
-| `Form/Menu/Camp` | `setTechWin__5CCampi` | 551 |  |
-| `Form/Menu/Camp` | `setDeckSetWin__5CCampi` | 457 |  |
-| `Form/Menu/Camp` | `setMainCmd__5CCampii` | 257 |  |
-| `Form/Menu/Camp` | `setStatusWin1__5CCampi` | 429 |  |
-| `Form/Menu/Camp` | `setCursor2__5CCampiii` | 184 |  |
-| `Form/Menu/Camp` | `searchRoom__5CCampii` | 158 |  |
-| `Form/Menu/Camp` | `getCardIndex__5CCampi` | 42 |  |
+| `Form/Menu/Camp` | `initCardKind__5CCampiii` | 331 | 26 of 342 lines differ: loop.c hoists the CCard::m_pCardInfo load of the 3-deck copy out of the outer loop (the original reloads it each iteration: the stack-array stores must alias it there). tried: destination pointer, direct m_pCardInfo->_deck[i] without _ref, pointer post-increment, _ref on … |
+| `Form/Menu/Camp` | `mapCardWinMenu__5CCamp` | 723 | 2 of 819 lines differ (was 86): with deckEditMenu's forms (member arithmetic instead of nSelect, the number-grid moves with `n = 9; if (m < 5) n = 4;`, per-arm clamps in the down move, fgCursorMove in both arms of the right move, error stores Error/WinStep/SubStep) only the cancel block is left: … |
+| `Form/Menu/Camp` | `statusWinMenu__5CCamp` | 392 | 2 of 457 lines differ: reorg fills setStatusWin(4)'s delay slot (cancel block, after the `cancel:` label) with `li a1,4` in ours, with `ret = 1` (s3) in the original. tried: ret before/after the call and before the label, ret/bChange declaration order (ref: ret, fgCursorMove, … |
+| `Form/Menu/Camp` | `setDeckInfo__5CCampi` | 951 | 4 of 1048 lines differ in the last loop: the addu operand order of this + m_nKindCategorySelect 2 and v0/v1 swapped for the nColSeq != 0x73 compare. tried: without _ref (24 lines), _ref(*(p + i)), _ref(m_nKind)[i], != 0, !i, swapped operand/condition orders, !(a && b); permuter 7 min (4293) and 15 … |
+| `Form/Menu/Camp` | `setTechWin__5CCampi` | 551 | 53 of 621 lines differ: in the sleight-list loop the original spills pTechCateTbl and nTechCateCnt and recomputes &pTechCateTbl[nTechSelectTop] from the spilled pointer every iteration; ours strength-reduces it into an s-register (the same giv difference as setMainCmd's font loop). tried: the … |
+| `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | same size, 33 of 1409 lines differ: the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl, &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt, 0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by … |
+| `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 62 of 941 lines differ. The RCNORMA::NormaSrc argument of createNorma is built from four lhu of its stack copy in the original (extract_bit_field pieces), one ld in ours - the open issue of RoomCreation::menuMain and C2DCard::replaceNorma; the s3/s4 and spill-slot (0x64/0x68) swaps around it … |
+| `Form/Menu/Camp` | `setMainCmd__5CCampii` | 257 | 53 of 282 lines differ (was 81): with the ref's function-level `INT i` plus a block `INT i` in the else branch `this` is in s0 as in the original; left: in the font-replacing loop the original recomputes &m_pMainCmdFnt[i] from i each iteration (only m_pMainCmdCtrl[i] strength-reduced), ours folds … |
+| `Form/Menu/Camp` | `setStatusWin1__5CCampi` | 429 | 13 of 487 lines differ (was 23): vec.set() (the ref's inlined `FVECTOR *this`) and a precomputed `m_bPlayerKind + 0xF` (permuter) fixed the rest; left: the original keeps &vec in v0 (y/w/z stores and the later fShift = vec.z load through it), so pPlayerManager is reloaded from its spill slot for … |
+| `Form/Menu/Camp` | `setCursor2__5CCampiii` | 184 | 2 of 198 lines differ: the two member addresses of the top-index select (&m_nMCSelSelectTop, &m_nKindSelectTop) issue in the other order in the prologue (equal-priority tie). tried: ternary both polarities, if/else and default+if forms, the ref's `INT& nKindSelectTop` reference local, idx local; … |
+| `Form/Menu/Camp` | `searchRoom__5CCampii` | 158 | 15 of 169 lines differ: in the left/right loop the original's rotated prefix (loop test .. `if (!bDiscover) break`) stops before the checkNorma test, which stays at the loop top; ours rotates the whole body. tried: nested ifs, `continue` forms, `!bDiscover \|\| checkNorma`, bDiscover if/else, while … |
+| `Form/Menu/Camp` | `getCardIndex__5CCampi` | 42 | 4 of 44 lines differ: the original computes nIndex + 1 from a1 and moves idx = nIndex into the beqz delay slot; ours copies nIndex through idx first. tried: idx assigned in an else / after the test, separate n = nIndex + 1, i <= nIndex, return nIndex directly, comma init in the for; permuter 5 + … |
 | `Form/Menu/DecknameEdit` | `chgType__16CDnEditWordPlateii` | 67 | (comment) Scheduling only: same instructions, but the original fills the bSeOn branch's delay slot with the playSE "li a0,3" (ours: "li a1,-1") and allocates the tab label pointer to v1 (ours: a1). |
 | `Form/Menu/JiminyMemo` | `ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii` | 122 | 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches. tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the … |
 | `Form/Menu/JiminyMemo` | `contentMenu__11CJiminyMemo` | 859 | 129 lines: the stack slots of iFlag[5]/bComp[5] (and the pMarkSeq/pNewSeq spills) differ, which shifts every s-register from the prologue on (s7 vs s8 saves); the code itself matches in structure. tried: declaration orders of posi/telopNo/iFlag/bComp/pMarkSeq/pNewSeq (posi after bComp fixes the … |
@@ -278,7 +277,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). |
 | `Form/Menu/Roulette` | `setCardInfo__9CRoulettei` | 270 | (comment) Scheduling only: after the CButton constructor the copy to pButton (s1) is scheduled before the getLayPosition argument setup instead of after it (5 lines differ). |
 
-Totals: 1833 functions (172428 instructions) in 85 units, 155 of them parked; 26 units take a data section from assembly.
+Totals: 1826 functions (164996 instructions) in 85 units, 154 of them parked; 26 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
