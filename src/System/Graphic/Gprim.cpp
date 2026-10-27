@@ -1998,7 +1998,123 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL 
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1i);
 #endif
+/* Parked: registers (as the CCoord-less version: it->S into v1 and the mfc1 copy in a0 for iW, ours swapped) and
+ * one loop-alignment nop before the second loop; the draft is the CCoord-less one plus the per-vertex bone checks
+ * of the matched _makePkt_Triangle (CCoord); tried: the CCoord-less version's levers (see there) */
+#if 0
+ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back) {
+    IVECTOR p[3];
+    INT iBone;
+    UINT iW;
+    iBone = -1;
+    if (!Back) {
+        FLOAT fW0;
+        FLOAT fW1;
+        FLOAT fW2;
+        while (it < end) {
+            _prefetch(it, 0x20);
+            if (iBone != it[0].Bone) {
+                iBone = it[0].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            fW0 = RotTransPersClipW(p[0], it[0].P);
+            if (p[0].w) {
+                goto next0;
+            }
+            _prefetch(it, 0x40);
+            if (iBone != it[1].Bone) {
+                iBone = it[1].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            fW1 = RotTransPersClipW(p[1], it[1].P);
+            if (p[1].w) {
+                goto next0;
+            }
+            _prefetch(it, 0x60);
+            if (iBone != it[2].Bone) {
+                iBone = it[2].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            fW2 = RotTransPersClipW(p[2], it[2].P);
+            if (p[2].w) {
+            next0:
+                it += 3;
+            } else {
+                iW = _floatBits(fW0);
+                p64[0] = _toU64(_calcSTQ(*(ULONGLONG*)&it[0].S, iW));
+                p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
+                p64[2] = _vecToXYZ(p[0]);
+                iW = _floatBits(fW1);
+                p64[3] = _toU64(_calcSTQ(*(ULONGLONG*)&it[1].S, iW));
+                p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
+                p64[5] = _vecToXYZ(p[1]);
+                iW = _floatBits(fW2);
+                p64[6] = _toU64(_calcSTQ(*(ULONGLONG*)&it[2].S, iW));
+                p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
+                p64[8] = _vecToXYZ(p[2]);
+                it += 3;
+                p64 += 9;
+            }
+        }
+    } else {
+        FVECTOR vDir[3];
+        FLOAT fW0;
+        FLOAT fW1;
+        FLOAT fW2;
+        while (it < end) {
+            _prefetch(it, 0x20);
+            if (iBone != it[0].Bone) {
+                iBone = it[0].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            fW0 = RotTransPersClipW(p[0], vDir[0], it[0].P);
+            if (p[0].w) {
+                goto next1;
+            }
+            _prefetch(it, 0x40);
+            if (iBone != it[1].Bone) {
+                iBone = it[1].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            fW1 = RotTransPersClipW(p[1], vDir[1], it[1].P);
+            if (p[1].w) {
+                goto next1;
+            }
+            _prefetch(it, 0x60);
+            if (iBone != it[2].Bone) {
+                iBone = it[2].Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            fW2 = RotTransPersClipW(p[2], vDir[2], it[2].P);
+            if (p[2].w) {
+                goto next1;
+            }
+            if (BackClip(vDir, 0)) {
+            next1:
+                it += 3;
+            } else {
+                iW = _floatBits(fW0);
+                p64[0] = _toU64(_calcSTQ(*(ULONGLONG*)&it[0].S, iW));
+                p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
+                p64[2] = _vecToXYZ(p[0]);
+                iW = _floatBits(fW1);
+                p64[3] = _toU64(_calcSTQ(*(ULONGLONG*)&it[1].S, iW));
+                p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
+                p64[5] = _vecToXYZ(p[1]);
+                iW = _floatBits(fW2);
+                p64[6] = _toU64(_calcSTQ(*(ULONGLONG*)&it[2].S, iW));
+                p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
+                p64[8] = _vecToXYZ(p[2]);
+                it += 3;
+                p64 += 9;
+            }
+        }
+    }
+    return p64;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1P6CCoordi);
+#endif
 ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
     IVECTOR p[3];
     while (it < end) {
@@ -2474,7 +2590,103 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Bac
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1i);
 #endif
+/* Parked: the strip-skip loop entry only, as in the CCoord-less version (the original enters the rolled skip loop
+ * at its Term test, ours copies the test to the entry or keeps a redundant it < end test); bone check at the loop
+ * top, iDir = 0 last in this one; tried: the CCoord-less version's levers (see there) */
+#if 0
+QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back) {
+    IVECTOR p;
+    UINT fg = 2;
+    INT bTop = 1;
+    INT iBone = -1;
+    FLOAT fW;
+
+    if (!Back) {
+        while (it < end) {
+            if (iBone != it->Bone) {
+                iBone = it->Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            _prefetch(it, 0x20);
+            fW = RotTransPersClipW(p, it->P);
+            if (bTop) {
+                if (p.w) {
+                    if (!(it < end)) return pQw;
+                    do {
+                        if (!(it < end)) return pQw;
+                    } while (!(it++)->Term);
+                    goto next0;
+                }
+                p.w = 0x8000;
+                bTop = 0;
+            } else if (p.w) {
+                fg |= 2;
+            } else if (fg) {
+                p.w = 0x8000;
+            }
+            if (it->Term) {
+                fg = 2;
+                bTop = 2;
+            } else {
+                fg >>= 1;
+            }
+            _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
+            pQw[1].ul128 = _colToVec(it->C);
+            pQw[2].ul128 = p._q;
+            it++;
+            pQw += 3;
+        next0:;
+        }
+        return pQw;
+    } else {
+        FVECTOR vDir[3];
+        INT iDir = 0;
+        while (it < end) {
+            if (iBone != it->Bone) {
+                iBone = it->Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            _prefetch(it, 0x20);
+            fW = RotTransPersClipW(p, vDir[iDir], it->P);
+            if (bTop) {
+                if (p.w) {
+                    if (!(it < end)) return pQw;
+                    do {
+                        if (!(it < end)) return pQw;
+                    } while (!(it++)->Term);
+                    goto next1;
+                }
+                p.w = 0x8000;
+                bTop = 0;
+            } else if (p.w) {
+                fg |= 2;
+            } else if (fg) {
+                p.w = 0x8000;
+            } else {
+                p.w |= BackClip(vDir, 0);
+            }
+            if (it->Term) {
+                fg = 2;
+                bTop = 2;
+                iDir = 0;
+            } else {
+                fg >>= 1;
+                vDir[1] = vDir[2];
+                iDir = 2;
+            }
+            _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
+            pQw[1].ul128 = _colToVec(it->C);
+            pQw[2].ul128 = p._q;
+            it++;
+            pQw += 3;
+        next1:;
+        }
+    }
+    return pQw;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
+#endif
 QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
     IVECTOR p;
     UINT fg;
@@ -2725,7 +2937,99 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1i);
 #endif
+/* Parked: the strip-skip loop entry only, as in _makePkt_TexTriangleFan; bone check at the loop top, iDir = 0
+ * last; tried: the levers of the CCoord-less fans (see there) */
+#if 0
+QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back) {
+    IVECTOR p;
+    UINT fg = 2;
+    INT bTop = 1;
+    INT iBone = -1;
+
+    if (!Back) {
+        while (it < end) {
+            if (iBone != it->Bone) {
+                iBone = it->Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            _prefetch(it, 0x20);
+            RotTransPersClipW(p, it->P);
+            if (bTop) {
+                if (p.w) {
+                    if (!(it < end)) return pQw;
+                    do {
+                        if (!(it < end)) return pQw;
+                    } while (!(it++)->Term);
+                    goto next0;
+                }
+                p.w = 0x8000;
+                bTop = 0;
+            } else if (p.w) {
+                fg |= 2;
+            } else if (fg) {
+                p.w = 0x8000;
+            }
+            if (it->Term) {
+                fg = 2;
+                bTop = 2;
+            } else {
+                fg >>= 1;
+            }
+            pQw[0].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = p._q;
+            it++;
+            pQw += 2;
+        next0:;
+        }
+        return pQw;
+    } else {
+        FVECTOR vDir[3];
+        INT iDir = 0;
+        while (it < end) {
+            if (iBone != it->Bone) {
+                iBone = it->Bone;
+                pCrd[iBone].getRotTransPersMatrix_VF04_07();
+            }
+            _prefetch(it, 0x20);
+            RotTransPersClipW(p, vDir[iDir], it->P);
+            if (bTop) {
+                if (p.w) {
+                    if (!(it < end)) return pQw;
+                    do {
+                        if (!(it < end)) return pQw;
+                    } while (!(it++)->Term);
+                    goto next1;
+                }
+                p.w = 0x8000;
+                bTop = 0;
+            } else if (p.w) {
+                fg |= 2;
+            } else if (fg) {
+                p.w = 0x8000;
+            } else {
+                p.w |= BackClip(vDir, 0);
+            }
+            if (it->Term) {
+                fg = 2;
+                bTop = 2;
+                iDir = 0;
+            } else {
+                fg >>= 1;
+                vDir[1] = vDir[2];
+                iDir = 2;
+            }
+            pQw[0].ul128 = _colToVec(it->C);
+            pQw[1].ul128 = p._q;
+            it++;
+            pQw += 2;
+        next1:;
+        }
+    }
+    return pQw;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
+#endif
 /* Parked: argument order of the RotTransPersW call (the original sets a1 before a0; sched1 issues a1 first only
  * when its source REG_DEADs, ours keeps vW's address live) and with it the TImode result register (a1 vs a0);
  * tried: matrix ref local, temp for the result, 0.0f > w, wrapper with swapped parameters, const attribute,
