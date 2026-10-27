@@ -1905,7 +1905,99 @@ ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* p
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1P6CCoord);
 #endif
+/* Parked: registers only - per vertex the original loads it->S into v1 (the first one in the beql slot) and copies
+ * the mfc1 result into a0 for iW, ours puts iW in v1 and loads it->S into v0; loop shape, per-loop fW and mfc1
+ * order (volatile _floatBits) match; tried: S read into a local first/last, STQ inline with swapped operands, iW
+ * assigned inside the call, register asm a0 for iW, a C bit-cast inline, permuter 2x15 min (9270 candidates, no
+ * gain) */
+#if 0
+ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL Back) {
+    IVECTOR p[3];
+    UINT iW;
+    if (!Back) {
+        FLOAT fW0;
+        FLOAT fW1;
+        FLOAT fW2;
+        while (it < end) {
+            _prefetch(it, 0x20);
+            fW0 = RotTransPersClipW(p[0], it[0].P);
+            if (p[0].w) {
+                goto next0;
+            }
+            _prefetch(it, 0x40);
+            fW1 = RotTransPersClipW(p[1], it[1].P);
+            if (p[1].w) {
+                goto next0;
+            }
+            _prefetch(it, 0x60);
+            fW2 = RotTransPersClipW(p[2], it[2].P);
+            if (p[2].w) {
+            next0:
+                it += 3;
+            } else {
+                iW = _floatBits(fW0);
+                p64[0] = _toU64(_calcSTQ(*(ULONGLONG*)&it[0].S, iW));
+                p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
+                p64[2] = _vecToXYZ(p[0]);
+                iW = _floatBits(fW1);
+                p64[3] = _toU64(_calcSTQ(*(ULONGLONG*)&it[1].S, iW));
+                p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
+                p64[5] = _vecToXYZ(p[1]);
+                iW = _floatBits(fW2);
+                p64[6] = _toU64(_calcSTQ(*(ULONGLONG*)&it[2].S, iW));
+                p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
+                p64[8] = _vecToXYZ(p[2]);
+                it += 3;
+                p64 += 9;
+            }
+        }
+    } else {
+        FVECTOR vDir[3];
+        FLOAT fW0;
+        FLOAT fW1;
+        FLOAT fW2;
+        while (it < end) {
+            _prefetch(it, 0x20);
+            fW0 = RotTransPersClipW(p[0], vDir[0], it[0].P);
+            if (p[0].w) {
+                goto next1;
+            }
+            _prefetch(it, 0x40);
+            fW1 = RotTransPersClipW(p[1], vDir[1], it[1].P);
+            if (p[1].w) {
+                goto next1;
+            }
+            _prefetch(it, 0x60);
+            fW2 = RotTransPersClipW(p[2], vDir[2], it[2].P);
+            if (p[2].w) {
+                goto next1;
+            }
+            if (BackClip(vDir, 0)) {
+            next1:
+                it += 3;
+            } else {
+                iW = _floatBits(fW0);
+                p64[0] = _toU64(_calcSTQ(*(ULONGLONG*)&it[0].S, iW));
+                p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
+                p64[2] = _vecToXYZ(p[0]);
+                iW = _floatBits(fW1);
+                p64[3] = _toU64(_calcSTQ(*(ULONGLONG*)&it[1].S, iW));
+                p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
+                p64[5] = _vecToXYZ(p[1]);
+                iW = _floatBits(fW2);
+                p64[6] = _toU64(_calcSTQ(*(ULONGLONG*)&it[2].S, iW));
+                p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
+                p64[8] = _vecToXYZ(p[2]);
+                it += 3;
+                p64 += 9;
+            }
+        }
+    }
+    return p64;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1i);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1P6CCoordi);
 ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
     IVECTOR p[3];
@@ -2292,7 +2384,96 @@ QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord
     }
     return pQw;
 }
+/* Parked: the strip-skip loop entry only - the original jumps into the rolled loop at its Term test (b X with the
+ * lhu in the slot), ours copies the test to the loop entry (jump.c duplicate_loop_exit_test) or keeps a redundant
+ * it < end test; fg/end and iDir/0x8000 registers fixed by the plain while (it < end) form and iDir = 0 first;
+ * tried: while/do-while/for(;;) skip loops, goto into the loop, bLoop variable with a bottom label, an inline Term
+ * test, continue in the body, permuter 2x15 min (30 -> 23, no gain after) */
+#if 0
+QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) {
+    IVECTOR p;
+    UINT fg = 2;
+    INT bTop = 1;
+    FLOAT fW;
+
+    if (!Back) {
+        while (it < end) {
+            _prefetch(it, 0x20);
+            fW = RotTransPersClipW(p, it->P);
+            if (bTop) {
+                if (p.w) {
+                    if (!(it < end)) return pQw;
+                    do {
+                        if (!(it < end)) return pQw;
+                    } while (!(it++)->Term);
+                    goto next0;
+                }
+                p.w = 0x8000;
+                bTop = 0;
+            } else if (p.w) {
+                fg |= 2;
+            } else if (fg) {
+                p.w = 0x8000;
+            }
+            if (it->Term) {
+                fg = 2;
+                bTop = 2;
+            } else {
+                fg >>= 1;
+            }
+            _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
+            pQw[1].ul128 = _colToVec(it->C);
+            pQw[2].ul128 = p._q;
+            it++;
+            pQw += 3;
+        next0:;
+        }
+        return pQw;
+    } else {
+        FVECTOR vDir[3];
+        INT iDir = 0;
+        while (it < end) {
+            _prefetch(it, 0x20);
+            fW = RotTransPersClipW(p, vDir[iDir], it->P);
+            if (bTop) {
+                if (p.w) {
+                    if (!(it < end)) return pQw;
+                    do {
+                        if (!(it < end)) return pQw;
+                    } while (!(it++)->Term);
+                    goto next1;
+                }
+                p.w = 0x8000;
+                bTop = 0;
+            } else if (p.w) {
+                fg |= 2;
+            } else if (fg) {
+                p.w = 0x8000;
+            } else {
+                p.w |= BackClip(vDir, 0);
+            }
+            if (it->Term) {
+                iDir = 0;
+                fg = 2;
+                bTop = 2;
+            } else {
+                fg >>= 1;
+                vDir[1] = vDir[2];
+                iDir = 2;
+            }
+            _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
+            pQw[1].ul128 = _colToVec(it->C);
+            pQw[2].ul128 = p._q;
+            it++;
+            pQw += 3;
+        next1:;
+        }
+    }
+    return pQw;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1i);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
 QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
     IVECTOR p;
@@ -2456,30 +2637,29 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
     }
     return pQw;
 }
-/* Parked: registers (fg in s4 vs end in s3 swapped) and the scheduling of the loop condition bLoop (the original
- * materializes it in s1 after pQw += 2; Back loop moves it in the delay slot); tried: while/do-while/goto shapes,
- * an explicit BOOL bLoop tested first by the skip loop (86 -> 32 lines), declaration orders, permuter 15 min (8745
- * candidates, no gain) */
+/* Parked: the strip-skip loop entry only (as _makePkt_TexTriangleFan) - the original jumps into the rolled skip
+ * loop at its Term test, ours copies that test to the loop entry or keeps a redundant it < end test; this draft
+ * (11 lines) fixes the fg/end registers and the bLoop scheduling of the earlier one (32) with a plain while (it <
+ * end) loop, a goto to the loop end instead of continue and iDir = 0 first; tried before: while/do-while/goto
+ * shapes, an explicit BOOL bLoop, declaration orders, permuter 15 min; now also: for(;;)/goto-into-loop skip
+ * loops, an inline Term test, continue in the body, permuter 2x15 min on the textured twin */
 #if 0
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) {
     IVECTOR p;
     UINT fg = 2;
     INT bTop = 1;
-    BOOL bLoop;
 
     if (!Back) {
-        bLoop = it < end;
-        while (bLoop) {
+        while (it < end) {
             _prefetch(it, 0x20);
             RotTransPersClipW(p, it->P);
             if (bTop) {
                 if (p.w) {
-                    if (!bLoop) return pQw;
-                    while (!(it++)->Term) {
+                    if (!(it < end)) return pQw;
+                    do {
                         if (!(it < end)) return pQw;
-                    }
-                    bLoop = it < end;
-                    continue;
+                    } while (!(it++)->Term);
+                    goto next0;
                 }
                 p.w = 0x8000;
                 bTop = 0;
@@ -2498,24 +2678,22 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
             pQw[1].ul128 = p._q;
             it++;
             pQw += 2;
-            bLoop = it < end;
+        next0:;
         }
         return pQw;
     } else {
         FVECTOR vDir[3];
         INT iDir = 0;
-        bLoop = it < end;
-        while (bLoop) {
+        while (it < end) {
             _prefetch(it, 0x20);
             RotTransPersClipW(p, vDir[iDir], it->P);
             if (bTop) {
                 if (p.w) {
-                    if (!bLoop) return pQw;
-                    while (!(it++)->Term) {
+                    if (!(it < end)) return pQw;
+                    do {
                         if (!(it < end)) return pQw;
-                    }
-                    bLoop = it < end;
-                    continue;
+                    } while (!(it++)->Term);
+                    goto next1;
                 }
                 p.w = 0x8000;
                 bTop = 0;
@@ -2527,9 +2705,9 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
                 p.w |= BackClip(vDir, 0);
             }
             if (it->Term) {
+                iDir = 0;
                 fg = 2;
                 bTop = 2;
-                iDir = 0;
             } else {
                 fg >>= 1;
                 vDir[1] = vDir[2];
@@ -2539,7 +2717,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
             pQw[1].ul128 = p._q;
             it++;
             pQw += 2;
-            bLoop = it < end;
+        next1:;
         }
     }
     return pQw;
