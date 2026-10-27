@@ -336,7 +336,11 @@ CBattleEnemyManager* CBattleEnemy::getBattleEnemyManager() const {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makePrize__12CBattleEnemyPC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeExpPrize__12CBattleEnemyPC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makePremiumPrize__12CBattleEnemyPC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeRoulettePrize__12CBattleEnemyPC7FVECTOR);
+void CBattleEnemy::makeRoulettePrize(const FVECTOR* inPos) {
+    CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+    if (!bem) AssertApp(D_004ACBC0, 0xFA4, D_004AD3B8, 0);
+    bem->createRoulettePrize(*inPos);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeCard__12CBattleEnemyPC7FVECTOR);
 void CBattleEnemy::setBossDeadEffect() {
     m_hDeath = setDeathEffect();
