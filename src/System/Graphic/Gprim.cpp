@@ -52,6 +52,11 @@ static inline ULONGLONG _vecToXYZ(const IVECTOR& v) {
                      : "$8");
     return outVec64;
 }
+static inline u_long128 _gifTag(u_long tag, u_long regs) {
+    u_long128 giftag;
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(giftag) : "r"(tag), "0"(regs));
+    return giftag;
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -62,6 +67,9 @@ public:
     static u_long128* pkOpenGifTag(u_long128 tag);
     static void pkAddGsAD(UINT addr, u_long data);
     static void pkCloseGifTag();
+    static u_long128* pkOpenGifTagManual(u_long128 tag);
+    static void pkCloseGifTagManual(UINT* p);
+    static void pkAddGsData(u_long data);
 };
 class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
 public:
@@ -487,7 +495,18 @@ FIX4 C3DPolyG3::calcZ() {
     }
     return max;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DPolyG3);
+void C3DPolyG3::makePkt() {
+    ULONGLONG* p64;
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x7400000000008001UL, 0x4141410));
+    p64[0] = (u_long)0x20C | ((u_long)isSemiTrans() << 6);
+    p64[1] = m_C0.col;
+    p64[2] = _vecToXYZ(p0);
+    p64[3] = m_C1.col;
+    p64[4] = _vecToXYZ(p1);
+    p64[5] = m_C2.col;
+    p64[6] = _vecToXYZ(p2);
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[7]);
+}
 FIX4 C3DLine::calcZ() {
     FMATRIX mat0;
     m_pCrd->getRotTransPersMatrix(mat0);
