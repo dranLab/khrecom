@@ -515,7 +515,21 @@ FIX4 C3DLine::calcZ() {
     RotTransPersClipW(p1, m_P1);
     return p0.z;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DLine);
+void C3DLine::makePkt() {
+    QWdata giftag;
+    if (p0.w || p1.w) {
+        return;
+    }
+    giftag.ul64[0] = 0x5400000000008000UL;
+    giftag.ul64[1] = 0x41410;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_vecToXYZ(p0));
+    CPackMan::pkAddGsData(m_C1.col);
+    CPackMan::pkAddGsData(_vecToXYZ(p1));
+    CPackMan::pkCloseGifTag();
+}
 FIX4 C3DLineCoord2::calcZ() {
     FMATRIX mat0;
     FMATRIX mat1;
