@@ -25,7 +25,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 
 | unit | functions left | instr left | parked | data from asm |
 |---|---:|---:|---:|---|
-| `Form/Menu/JiminyMemo` | 160 | 17447 |  | .bss .data .rodata |
 | `Game/Player/PlayerSora` | 25 | 14383 |  | .data .rodata |
 | `Form/Menu/Camp` | 19 | 13530 | 13 |  |
 | `System/Graphic/Gprim` | 321 | 12993 |  | .data .rodata |
@@ -38,6 +37,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Model` | 170 | 5996 |  | .bss .data .rodata |
 | `Game/Player/PlayerDRiku` | 5 | 5620 | 1 |  |
 | `Game/BattleCard` | 73 | 5375 |  | .bss .data .rodata |
+| `Form/Menu/JiminyMemo` | 83 | 5244 | 19 | .bss |
 | `Game/Atel/Avatar` | 113 | 4856 |  | .rodata |
 | `Game/SceneInfo` | 57 | 4635 |  | .bss .data .rodata |
 | `System/Graphic/PackMan` | 42 | 4290 |  | .bss .rodata |
@@ -254,10 +254,29 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `searchRoom__5CCampii` | 158 |  |
 | `Form/Menu/Camp` | `getCardIndex__5CCampi` | 42 |  |
 | `Form/Menu/DecknameEdit` | `chgType__16CDnEditWordPlateii` | 67 | (comment) Scheduling only: same instructions, but the original fills the bSeOn branch's delay slot with the playSE "li a0,3" (ours: "li a1,-1") and allocates the tab label pointer to v1 (ours: a1). |
+| `Form/Menu/JiminyMemo` | `ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii` | 122 | 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches. tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the … |
+| `Form/Menu/JiminyMemo` | `contentMenu__11CJiminyMemo` | 859 | 129 lines: the stack slots of iFlag[5]/bComp[5] (and the pMarkSeq/pNewSeq spills) differ, which shifts every s-register from the prologue on (s7 vs s8 saves); the code itself matches in structure. tried: declaration orders of posi/telopNo/iFlag/bComp/pMarkSeq/pNewSeq (posi after bComp fixes the … |
+| `Form/Menu/JiminyMemo` | `contentCollection__11CJiminyMemo` | 1759 | 2 lines: in case 40's card-view branch the original stores the step (50, v1) before the next mode (8, v0); ours stores the mode first. The sched2 dump shows both stores tied (prio 5, both after the shift.x/y loads), broken by RTL order; writing setContentStep(50) first fixes the store order but … |
+| `Form/Menu/JiminyMemo` | `contentCharaView_ModelView__11CJiminyMemo` | 287 | 6 lines: three FP registers of case 40 (DEG2RAD(2.0f) constant, 1/4096 constant, the rotation load: original f4/f1/f3, ours f1/f3/f4). Everything else matches. tried: line-marker layout (both table arms written out, flags 0x8000 then 0x4000, setter order, ry split over 3 statements), literal vs … |
+| `Form/Menu/JiminyMemo` | `contentMinigame__11CJiminyMemo` | 688 | 34 lines, all stack offsets: the six hoisted string addresses (strBGlider..strBPanic, &scoreStr) are spilled in another slot order (GCSE/PRE creates their pseudos in hash-table order: ours BPanic first, the original BGlider first). Everything else matches (time math via the Com.h(59) seconds … |
+| `Form/Menu/JiminyMemo` | `setPosition__15CMemo2DSequenceRC7FVECTOR` | 10 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
+| `Form/Menu/JiminyMemo` | `setLocalPosition__15CMemo2DSequenceRC7FVECTOR` | 10 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
+| `Form/Menu/JiminyMemo` | `setScale__11CMemo2DCardf` | 9 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
+| `Form/Menu/JiminyMemo` | `setContentParam__11CJiminyMemoii` | 26 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
+| `Form/Menu/JiminyMemo` | `getContentParam__11CJiminyMemoi` | 23 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
+| `Form/Menu/JiminyMemo` | `setContentScroll__11CJiminyMemoiRC7FVECTOR` | 8 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
+| `Form/Menu/JiminyMemo` | `getContentScroll__11CJiminyMemoiR7FVECTOR` | 12 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
+| `Form/Menu/JiminyMemo` | `mainInit__11CJiminyMemo` | 320 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
+| `Form/Menu/JiminyMemo` | `mainLoadWait__11CJiminyMemo` | 332 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
+| `Form/Menu/JiminyMemo` | `mainIn__11CJiminyMemo` | 322 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
+| `Form/Menu/JiminyMemo` | `mainInWait__11CJiminyMemo` | 18 | final group, see the note above getTaskPointer<T> |
+| `Form/Menu/JiminyMemo` | `mainLoop__11CJiminyMemo` | 2 | final group, see the note above getTaskPointer<T> |
+| `Form/Menu/JiminyMemo` | `mainOut__11CJiminyMemo` | 13 | final group, see the note above getTaskPointer<T> |
+| `Form/Menu/JiminyMemo` | `mainOutWait__11CJiminyMemo` | 22 | final group, see the note above getTaskPointer<T> |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). |
 | `Form/Menu/Roulette` | `setCardInfo__9CRoulettei` | 270 | (comment) Scheduling only: after the CButton constructor the copy to pButton (s1) is scheduled before the getLayPosition argument setup instead of after it (5 lines differ). |
 
-Totals: 1933 functions (191692 instructions) in 85 units, 134 of them parked; 27 units take a data section from assembly.
+Totals: 1856 functions (179489 instructions) in 85 units, 153 of them parked; 27 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
