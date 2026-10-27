@@ -62,6 +62,11 @@ static inline u_long128 _gifTag(u_long tag, u_long regs) {
 static inline u_long _gsXYZ(FIX4 x, FIX4 y, FIX4 z) {
     return (u_long)(x + 0x8000) | ((u_long)(y + 0x8000) << 16) | ((u_long)(z >> 4) << 32);
 }
+static inline u_long _gsUV(const G_UV& t) {
+    INT u = t.u << 4;
+    INT v = t.v << 4;
+    return (u_long)(u | 8) | ((u_long)(v | 8) << 16);
+}
 static inline u_long _gsXYZ(const G_XYZ& p) { return _gsXYZ(p.x, p.y, p.z); }
 static inline void _setSTQ(FVECTOR& outSTQ, ULONGLONG inSTQ, FLOAT fW) {
     __asm__ volatile("mfc1 $8, %1\n"
@@ -179,7 +184,25 @@ void CTile::makePkt() {
     CPackMan::pkAddGsData(_gsXYZ(m_P1.x, m_P1.y, m_P0.z));
     CPackMan::pkCloseGifTag();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__5CSprt);
+void CSprt::makePkt() {
+    QWdata giftag;
+    ULONGLONG tex;
+    if (m_pTexInfo == NULL) {
+        return;
+    }
+    tex = setTexture();
+    giftag.ul64[0] = 0x7400000000008000UL;
+    giftag.ul64[1] = 0x4343170;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x316 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(tex);
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_gsUV(m_T0));
+    CPackMan::pkAddGsData(_gsXYZ(m_P0));
+    CPackMan::pkAddGsData(_gsUV(m_T1));
+    CPackMan::pkAddGsData(_gsXYZ(m_P1.x, m_P1.y, m_P0.z));
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CPolyGT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10CPolyGT4ST);
 void CLineF2::makePkt() {
