@@ -748,7 +748,34 @@ QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
     }
     return pQw;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_LineStrip__FP6QWdataP7G_STRIPT1P6CCoord);
+QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd) {
+    IVECTOR p;
+    UINT fg;
+    INT iBone;
+    fg = 1;
+    iBone = -1;
+    for (; it < end; it++, pQw += 2) {
+        if (iBone != it->Bone) {
+            iBone = it->Bone;
+            pCrd[iBone].getRotTransPersMatrix_VF04_07();
+        }
+        _prefetch(it, 0x20);
+        RotTransPersClipW(p, it->P);
+        if (p.w) {
+            fg |= 2;
+        } else if (fg) {
+            p.w = 0x8000;
+        }
+        if (it->Term) {
+            fg = 1;
+        } else {
+            fg >>= 1;
+        }
+        pQw[0].ul128 = _colToVec(it->C);
+        pQw[1].ul128 = p._q;
+    }
+    return pQw;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleStrip__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleStrip__FP6QWdataP7G_STRIPT1P6CCoordi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1i);
