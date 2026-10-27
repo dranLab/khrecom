@@ -319,7 +319,30 @@ FIX4 C3DPointLight2::calcZ() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__14C3DPointLight2);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePktSub__14C3DPointLight2i);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DPolyG4);
+FIX4 C3DPolyG4::calcZ() {
+    FVECTOR c;
+    FMATRIX rts;
+    FVECTOR* fv;
+    IVECTOR* iv;
+    INT max;
+    INT i;
+
+    m_pCrd->getRotTransPersMatrix(rts);
+    fv = &m_P0;
+    iv = &p0;
+    max = 0;
+    setRotTransPersMatrix(rts);
+    for (i = 0; i < 4; i++) {
+        RotTransPersClipW(iv[i], fv[i]);
+        if (iv[i].w) {
+            return (FIX4)0xF0000000;
+        }
+        if (max < iv[i].z) {
+            max = iv[i].z;
+        }
+    }
+    return max;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DPolyG4);
 FIX4 C3DPolyG3::calcZ() {
     FVECTOR c;
