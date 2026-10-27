@@ -56,7 +56,7 @@ static inline ULONGLONG _vecToXYZ(const IVECTOR& v) {
 }
 static inline u_long128 _gifTag(u_long tag, u_long regs) {
     u_long128 giftag;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(giftag) : "r"(tag), "0"(regs));
+    __asm__ volatile("pcpyld %0, %1, %2" : "=r"(giftag) : "r"(regs), "r"(tag));
     return giftag;
 }
 static inline u_long _gsXYZ(FIX4 x, FIX4 y, FIX4 z) {
@@ -74,6 +74,11 @@ static inline void _setSTQ(FVECTOR& outSTQ, ULONGLONG inSTQ, FLOAT fW) {
                      : "$8", "memory");
 }
 QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd);
+static inline void _setGeta(FLOAT fGetaZ) {
+    u_long128 inGeta;
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(inGeta) : "r"((u_long)0), "r"((u_long)*(UINT*)&fGetaZ));
+    __asm__ volatile("qmtc2.ni %0, $vf3" : : "r"(inGeta));
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -87,6 +92,9 @@ public:
     static u_long128* pkOpenGifTagManual(u_long128 tag);
     static void pkCloseGifTagManual(UINT* p);
     static void pkAddGsData(u_long data);
+    static void* pkGetCurrentPointer();
+    static void pkSetCurrentPointer(void* p);
+    static void pkCloseGifTag(void* p);
 };
 class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
 public:
@@ -704,7 +712,27 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triang
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPrimGetaZ__FiRC7FVECTORPC7FMATRIXf);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__12C3DStripBase);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__12C3DStripBase);
+void C3DStripBase::makePkt() {
+    QWdata* pQw;
+    QWdata* pQwTop;
+    QWdata* pQwPkt;
+    if (m_vVERT.size() == 0) {
+        return;
+    }
+    pQwTop = (QWdata*)CPackMan::pkGetCurrentPointer();
+    pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(
+        (((u_long)m_nType | ((u_long)isShading() << 3) | ((u_long)isSemiTrans() << 6) | (u_long)0x200) << 47) |
+            0x2000400000008000UL,
+        0x41));
+    _setGeta(m_fGetaZ);
+    pQwPkt = pQw;
+    pQw = makePktSub(pQwPkt);
+    if (pQwPkt != pQw) {
+        CPackMan::pkCloseGifTag(pQw);
+    } else {
+        CPackMan::pkSetCurrentPointer(pQwTop);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__15C3DTexStripBase);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__15C3DTexStripBase);
 QWdata* C3DLineTStrip::makePktSub(QWdata* pQw) {
