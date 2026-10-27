@@ -10,6 +10,7 @@ public:
     static struct TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
 };
 BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect);
+template <class T> static inline T& _ref(T& v) { return v; }
 class CCoord { /* PARTIAL: System/Graphic/Camera.h */
 public:
     void getRotTransPersMatrix(FMATRIX& outMat);
@@ -67,7 +68,11 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10CPol
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CLineF2);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CPolyG4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CCircle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", __18CScreenColoredMask);
+CScreenColoredMask::CScreenColoredMask() {
+    setLayerFG(1);
+    m_P0.set(-0x1000, -(_ref(SCREEN_HEIGHT) * 8));
+    m_P1.set(0x1000, _ref(SCREEN_HEIGHT) * 8);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CRotSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", __isRect__FRC7FVECTORPC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CCPrim);
