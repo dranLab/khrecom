@@ -44,8 +44,7 @@ static inline u_long128 _colToVec(const G_RGBA& col) {
             : "r"(iCol));
     return ivCol;
 }
-static inline ULONGLONG _vecToXYZ(const IVECTOR& v) {
-    u_long128 inIVec = v._q;
+static inline ULONGLONG _vecToXYZ(u_long128 inIVec) {
     ULONGLONG outVec64;
     __asm__ volatile("pexcw %0, %1\n"
                      "pexch $8, %1\n"
@@ -55,6 +54,26 @@ static inline ULONGLONG _vecToXYZ(const IVECTOR& v) {
                      : "r"(inIVec)
                      : "$8");
     return outVec64;
+}
+static inline ULONGLONG _vecToXYZ(const IVECTOR& v) { return _vecToXYZ(v._q); }
+static inline u_long128 _screenClamp(const FVECTOR& inFVec) {
+    u_long128 outVec128;
+    u_long128 tmp;
+    __asm__ volatile("lqc2 $vf4, 0x0(%2)\n"
+                     "lui %0, 0x4500\n"
+                     "lui %1, 0x457f\n"
+                     "ori %1, %1, 0xf000\n"
+                     "pextlw %0, %1, %0\n"
+                     "pextlw %0, %0, %0\n"
+                     "qmtc2.ni %0, $vf5\n"
+                     "vadd.xy $vf4, $vf4, $vf5\n"
+                     "vmaxz.xy $vf4, $vf4, $vf0z\n"
+                     "vminiz.xy $vf4, $vf4, $vf5z\n"
+                     "vftoi4.xyz $vf4, $vf4\n"
+                     "qmfc2.ni %0, $vf4\n"
+                     : "=&r"(outVec128), "=&r"(tmp)
+                     : "r"(&inFVec));
+    return outVec128;
 }
 static inline u_long128 _gifTag(u_long tag, u_long regs) {
     u_long128 giftag;
@@ -199,6 +218,8 @@ public:
     static u_long getDefault_TEST_2();
     static u_long getDefault_ZBUF_2();
     static u_long getDefault_SCISSOR_2();
+    static u_long getDefault_CLAMP_2();
+    static u_long getDefault_ALPHA_2();
 };
 class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
 public:
@@ -528,7 +549,72 @@ static BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect) {
         : "r"(&v), "r"(vRect));
     return (iRet & 0xC0) == 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CCPrim);
+void CCPrim::makePkt() {
+    ULONGLONG* p64;
+    QWdata* pQw;
+    UINT iEnvChange;
+    FVERTEX* pV;
+    if (m_iMax <= 0) {
+        return;
+    }
+
+    iEnvChange = 0;
+    if ((INT)m_TEST >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 1;
+    }
+    if ((long)m_CLAMP >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 2;
+    }
+    if ((long)m_SCISSOR >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 4;
+    }
+    if ((INT)m_ALPHA >= 0) {
+        iEnvChange += 0x1000;
+        iEnvChange |= 8;
+    }
+    if (iEnvChange) {
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(_gifTag((u_long)(iEnvChange >> 12) | 0x1000000000000000UL, 0xE));
+        if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, m_TEST);
+        if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, m_CLAMP);
+        if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, m_SCISSOR);
+        if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, ((u_long)m_ALPHA << 16) | m_ALPHA);
+        CPackMan::pkCloseGifTagManual((UINT*)pQw);
+    }
+
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_gifTag(0x1400000000000000UL, 0));
+    {
+        ULONGLONG abe = (u_long)isSemiTrans() << 6;
+        ULONGLONG prim = m_PRIM & 0xCF;
+        prim |= 0x200;
+        p64[0] = abe | prim;
+    }
+    CPackMan::pkCloseGifTag(&p64[1]);
+
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTag(_gifTag(0x2400000000008000UL, 0x41));
+    INT i;
+    for (i = m_iMax, pV = m_V; i > 0; i--, pV++) {
+        _prefetch(pV, 0x10);
+        if (pV->f[2] >= 0.0f) {
+            p64[0] = pV->C.col;
+            p64[1] = _vecToXYZ(_screenClamp(*(FVECTOR*)pV));
+            p64 += 2;
+        }
+    }
+    CPackMan::pkCloseGifTag(p64);
+
+    if (iEnvChange) {
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(
+            _gifTag((u_long)((iEnvChange >> 12) | 0x8000) | 0x1000000000000000UL, 0xE));
+        if (iEnvChange & 1) (pQw++)->ul128 = _AD(0x48, CPackMan::getDefault_TEST_2());
+        if (iEnvChange & 2) (pQw++)->ul128 = _AD(0x9, CPackMan::getDefault_CLAMP_2());
+        if (iEnvChange & 4) (pQw++)->ul128 = _AD(0x41, CPackMan::getDefault_SCISSOR_2());
+        if (iEnvChange & 8) (pQw++)->ul128 = _AD(0x43, CPackMan::getDefault_ALPHA_2());
+        CPackMan::pkCloseGifTagManual((UINT*)pQw);
+    }
+}
 BOOL CCPrim::isRect(INT i, const FVECTOR* vRect) {
     return __isRect(*(FVECTOR*)&m_V[i], vRect);
 }
