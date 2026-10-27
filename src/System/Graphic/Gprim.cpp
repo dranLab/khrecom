@@ -526,7 +526,11 @@ QWdata* C3DCPrim::makePkt_TriangleFan0(QWdata* pQw) {
     }
     return _makePkt_TriangleFan(pQw, it, end, isBackClip());
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleFan1__8C3DCPrimP6QWdata);
+QWdata* C3DCPrim::makePkt_TriangleFan1(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    return _makePkt_TriangleFan(pQw, it, end, &m_pObj->Crd(0), isBackClip());
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", initAttribute__6CGPrimUiUiUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", __6CGPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _$_6CGPrim);
