@@ -1330,7 +1330,11 @@ public:
     void create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, INT iRep);
     void create(ULONGLONG iPrim, INT iVertexNum, CCoords* pOParent, INT iRep);
     void create(ULONGLONG iPrim, INT iVertexNum);
-    void remove();
+    void remove() {
+        if (m_V) com_free(m_V);
+        m_V = NULL;
+        _init();
+    }
     void setTEST(ULONGLONG TEST);
     void setALPHA(ULONGLONG ALPHA);
     void setCLAMP(ULONGLONG CLAMP);
@@ -1382,7 +1386,11 @@ public:
     void create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, INT iRep);
     void create(ULONGLONG iPrim, INT iVertexNum, CCoords* pOParent, INT iRep);
     void create(ULONGLONG iPrim, INT iVertexNum);
-    void remove();
+    void remove() {
+        if (m_V) com_free(m_V);
+        m_V = NULL;
+        _init();
+    }
     void setTEST(ULONGLONG TEST);
     void setALPHA(ULONGLONG ALPHA);
     void setCLAMP(ULONGLONG CLAMP);

@@ -61,6 +61,11 @@ static inline u_long _gsXYZ(FIX4 x, FIX4 y, FIX4 z) {
     return (u_long)(x + 0x8000) | ((u_long)(y + 0x8000) << 16) | ((u_long)(z >> 4) << 32);
 }
 static inline u_long _gsXYZ(const G_XYZ& p) { return _gsXYZ(p.x, p.y, p.z); }
+/* PARTIAL: string literals of the unit's still asm .rodata */
+extern char D_004639F8[]; /* "m_V" */
+extern char D_00463A58[]; /* "c:/KHCOM/MainApp/System/Graphic/Gprim.cpp(4121)" */
+extern char D_00463AB8[]; /* "c:/KHCOM/MainApp/System/Graphic/Gprim.cpp(4316)" */
+extern char D_00463A88[]; /* "c:/KHCOM/MainApp/System/Graphic/Gprim.cpp" */
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -678,7 +683,16 @@ void C3DCPrim::_init() {
     m_iMax = 0;
     m_iZ = -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _create__8C3DCPrimUliP6CCoordP7CCoordsi);
+void C3DCPrim::_create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, CCoords* pOParent, INT iRep) {
+    remove();
+    m_PRIM = iPrim;
+    m_pCrd = pCParent;
+    m_pObj = pOParent;
+    m_iRep = iRep;
+    m_iMax = iVertexNum;
+    m_V = (G_STRIP*)com_malloc_d(m_iMax * sizeof(G_STRIP), D_00463A58, (UINT)-1);
+    if (!m_V) AssertApp(D_00463A88, 4122, D_004639F8, 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DCPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DCPrim);
 void C3DTPrim::_init() {
