@@ -25,7 +25,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 
 | unit | functions left | instr left | parked | data from asm |
 |---|---:|---:|---:|---|
-| `System/Graphic/Gprim` | 321 | 12993 |  | .data .rodata |
 | `Game/Enemy/BattleEnemy` | 249 | 9962 |  | .data .rodata |
 | `Form/Menu/SaveLoad` | 86 | 9524 |  | .bss .data .rodata |
 | `Game/CardBattle` | 85 | 7583 |  | .data .rodata |
@@ -46,6 +45,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Player/Player` | 11 | 3573 | 11 |  |
 | `Game/Player/PlayerRiku` | 2 | 2940 | 2 |  |
 | `Game/Collision/CollUtil` | 13 | 2562 |  | .rodata |
+| `System/Graphic/Gprim` | 15 | 2159 | 15 |  |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
 | `Form/Menu/RoomCreation` | 1 | 1995 | 1 |  |
 | `Game/Card` | 12 | 1794 | 12 |  |
@@ -142,6 +142,21 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/WorldEnv` | `initialize__9CWorldEnv` | 128 |  |
 | `System/Graphic/WorldEnv` | `mainProc__9CWorldEnv` | 111 | (comment) mainProc: near-match. The original stores _vecMikePos.z through a new %hi(_vecMikePos + 8) after the sqc2 of the unit vector (Coord.h's inline, lines 87-91); here the address register of the asm is reused. |
 | `System/Graphic/WorldEnv` | `getBillboardMatrix__9CWorldEnvR7FMATRIXRC7FVECTORi` | 29 | (comment) getBillboardMatrix: near-match. The original compares nFlag with -1 in a register (slt) and copies the constant 1 it also compares with; a constant -1 is folded to slti here, a variable keeps slt but not the shared 1. |
+| `System/Graphic/Gprim` | `makePkt__6CZFill` | 109 | 8 lines - two scheduling ties: the original loads 0x206 before the shared zero for the PRIM/PRMODE A+D pair, and strength-reduces i 64 + 63 with its increment at the loop end while i++ sits inside the SCISSOR expression (ours increments both there); this draft fixed the hoisted-constant order (XYZ … |
+| `System/Graphic/Gprim` | `makePkt__8CRotSprt` | 173 | the corner setup before the two calcVert calls (load/store order of b, c and ab: the original keeps a separate copy of m_P0.y for ab.set's _y parameter) and the register numbering that follows; a reference to m_P1 (not in the ref's locals) reproduces the original's s0 = &m_P1 read of m_P1.y in the … |
+| `System/Graphic/Gprim` | `_makePkt_TexLine__FPUlP7G_STRIPT1` | 75 | registers only - the original loads it->S into v1 before the mfc1 of fW0 (filling the beql slot) and keeps iW in a0, ours puts iW in v1 and loads it->S after; tried: STQ inline taking G_ST&/ULONGLONG/FLOAT, iW before/after the call, an inSTQ block local, permuter 15 min (15280 candidates, no gain) |
+| `System/Graphic/Gprim` | `_makePkt_TexLine__FPUlP7G_STRIPT1P6CCoord` | 102 | registers only - as in the CCoord-less version the original keeps iW in a0 and the copy of the mfc1 in v1 (ld of it->S after it), ours swaps them; tried: STQ inline taking G_ST&+UINT, G_ST&+FLOAT, operand order in the pcpyld asm, iW assigned inside the call, permuter 15 min (12213 candidates, no … |
+| `System/Graphic/Gprim` | `_makePkt_TexTriangle__FPUlP7G_STRIPT1i` | 209 | registers only - per vertex the original loads it->S into v1 (the first one in the beql slot) and copies the mfc1 result into a0 for iW, ours puts iW in v1 and loads it->S into v0; loop shape, per-loop fW and mfc1 order (volatile _floatBits) match; tried: S read into a local first/last, STQ inline … |
+| `System/Graphic/Gprim` | `_makePkt_TexTriangle__FPUlP7G_STRIPT1P6CCoordi` | 263 | registers (as the CCoord-less version: it->S into v1 and the mfc1 copy in a0 for iW, ours swapped) and one loop-alignment nop before the second loop; the draft is the CCoord-less one plus the per-vertex bone checks of the matched _makePkt_Triangle (CCoord); tried: the CCoord-less version's levers … |
+| `System/Graphic/Gprim` | `_makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1i` | 162 | the strip-skip loop entry only - the original jumps into the rolled loop at its Term test (b X with the lhu in the slot), ours copies the test to the loop entry (jump.c duplicate_loop_exit_test) or keeps a redundant it < end test; fg/end and iDir/0x8000 registers fixed by the plain while (it < … |
+| `System/Graphic/Gprim` | `_makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi` | 179 | the strip-skip loop entry only, as in the CCoord-less version (the original enters the rolled skip loop at its Term test, ours copies the test to the entry or keeps a redundant it < end test); bone check at the loop top, iDir = 0 last in this one; tried: the CCoord-less version's levers (see there) |
+| `System/Graphic/Gprim` | `_makePkt_TriangleFan__FP6QWdataP7G_STRIPT1i` | 144 | the strip-skip loop entry only (as _makePkt_TexTriangleFan) - the original jumps into the rolled skip loop at its Term test, ours copies that test to the loop entry or keeps a redundant it < end test; this draft (11 lines) fixes the fg/end registers and the bLoop scheduling of the earlier one (32) … |
+| `System/Graphic/Gprim` | `_makePkt_TriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi` | 163 | the strip-skip loop entry only, as in _makePkt_TexTriangleFan; bone check at the loop top, iDir = 0 last; tried: the levers of the CCoord-less fans (see there) |
+| `System/Graphic/Gprim` | `getPrimGetaZ__FiRC7FVECTORPC7FMATRIXf` | 100 | argument order of the RotTransPersW call (the original sets a1 before a0; sched1 issues a1 first only when its source REG_DEADs, ours keeps vW's address live) and with it the TImode result register (a1 vs a0); tried: matrix ref local, temp for the result, 0.0f > w, wrapper with swapped parameters, … |
+| `System/Graphic/Gprim` | `calcZ__12C3DStripBase` | 122 | registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter … |
+| `System/Graphic/Gprim` | `calcZ__15C3DTexStripBase` | 122 | registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter … |
+| `System/Graphic/Gprim` | `calcZ__8C3DCPrim` | 118 | registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter … |
+| `System/Graphic/Gprim` | `calcZ__8C3DTPrim` | 118 | registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter … |
 | `System/Graphic/2d/2DCard` | `replaceNorma__7C2DCardGQ27RCNORMA8NormaSrci` | 30 | (comment) Not matching: the original passes inNorma to createNorma as four lhu from the parameter's stack slot combined with dsll/or into a1 (extract_bit_field in 16-bit pieces); ours copies the struct to an 8-aligned temporary and loads it with one ld. No struct shape tried (bitfields, arrays, … |
 | `System/Graphic/Effect/effect` | `_updateSE__7CEffect` | 83 | (comment) Near match: "li v0,-1" and "lw s0,36(s1)" swap in the first block. |
 | `System/Graphic/Effect/effect` | `strcpyEffName__FPcPCci` | 23 | (comment) Near match: the original keeps the destination in a second register (t1/a3). |
@@ -277,7 +292,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). |
 | `Form/Menu/Roulette` | `setCardInfo__9CRoulettei` | 270 | (comment) Scheduling only: after the CButton constructor the copy to pButton (s1) is scheduled before the getLayPosition argument setup instead of after it (5 lines differ). |
 
-Totals: 1826 functions (164996 instructions) in 85 units, 154 of them parked; 26 units take a data section from assembly.
+Totals: 1520 functions (154162 instructions) in 85 units, 169 of them parked; 25 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
