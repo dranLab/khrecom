@@ -7072,7 +7072,11 @@ BOOL CCamp::checkNorma(SHORT idx, USHORT& roomID, INT nRoomSelect) {
 }
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", searchRoom__5CCampii);
-#if 0 /* the up/down search loop's checkNorma block is laid out after the loop test instead of before the increment */
+/* Parked: 15 of 169 lines differ: in the left/right loop the original's rotated prefix (loop test .. `if
+   (!bDiscover) break`) stops before the checkNorma test, which stays at the loop top; ours rotates the whole body.
+   tried: nested ifs, `continue` forms, `!bDiscover || checkNorma`, bDiscover if/else, while + i++, (UINT) range test,
+   i % 2, ternary step, -= i * 6, the up/down loop's (matching) form; permuter 8 min (4622 candidates, no gain). */
+#if 0
 INT CCamp::searchRoom(INT iDir, BOOL bDiscover) {
     USHORT roomID;
     INT nRoom;
