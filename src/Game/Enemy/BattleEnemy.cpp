@@ -377,7 +377,13 @@ void CBattleEnemy::attackStateCardDestroy(BOOL inColl) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", attackStateCardDestroy__12CBattleEnemyi);
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", onBio__12CBattleEnemyi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", onGift__12CBattleEnemyi);
+void CBattleEnemy::onGift(INT inAddHp) {
+    if (m_iHp > 0) {
+        FVECTOR pos;
+        getLockOnPos(pos);
+        recover(inAddHp, D_004AD578, 0, pos, NULL);
+    }
+}
 void CBattleEnemy::setBadStatusEffect(INT inNo, FLOAT inWait) {
     CEffectMan::killEffect(m_hBadStatus, 0.0f);
     m_hBadStatus = 0;
