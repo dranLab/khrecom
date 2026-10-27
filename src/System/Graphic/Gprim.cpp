@@ -106,13 +106,43 @@ static inline u_long128 _calcSTQW(ULONGLONG inSTQ, FLOAT fW) {
                      : "r"(inSTQ), "f"(fW));
     return iRet;
 }
+static inline u_long128 _getHi64(u_long128 x) {
+    u_long128 out;
+    __asm__ volatile("pcpyud %0, %1, $0" : "=r"(out) : "r"(x));
+    return out;
+}
+static inline ULONGLONG _toU64(u_long128 x) {
+    ULONGLONG out64;
+    __asm__ volatile("por %0, $0, %1" : "=r"(out64) : "r"(x));
+    return out64;
+}
+static inline FLOAT _hiToFloat(ULONGLONG x) {
+    FLOAT outf;
+    ULONGLONG tmp;
+    __asm__ volatile("dsra32 %1, %2, 0\n"
+                     "mtc1 %1, %0\n"
+                     : "=f"(outf), "=&r"(tmp)
+                     : "r"(x));
+    return outf;
+}
+static inline INT _toInt(u_long128 x) {
+    INT tmp;
+    __asm__ volatile("sll %0, %1, 0" : "=r"(tmp) : "r"(x));
+    return tmp;
+}
+static inline FLOAT _getW(u_long128 x) { return _hiToFloat(_toU64(_getHi64(x))); }
+static inline INT _getZ(u_long128 x) { return _toInt(_getHi64(x)); }
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
     static FMATRIX& getWorldScreenMatrix();
     static FMATRIX& getWorldViewMatrix();
     static FMATRIX& getViewScreenMatrix();
+    static CCamera* getActiveCamera();
 };
+void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 static inline FVECTOR ApplyMatrix(const FMATRIX& m0, const FVECTOR& v1) { /* PARTIAL: System/Coord.h */
     FVECTOR b;
@@ -930,7 +960,44 @@ void C3DLines::makePkt() {
     }
     CPackMan::pkCloseGifTag();
 }
+/* Parked: registers only - the original loads it->S into v1 before the mfc1 of fW0 (filling the beql slot) and keeps
+ * iW in a0, ours puts iW in v1 and loads it->S after; tried: STQ inline taking G_ST&/ULONGLONG/FLOAT, iW before/after
+ * the call, an inSTQ block local, permuter 15 min (15280 candidates, no gain) */
+#if 0
+ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
+    IVECTOR p[3];
+    FLOAT fW0;
+    FLOAT fW1;
+    UINT iW;
+    while (it < end) {
+        _prefetch(it, 0x20);
+        fW0 = RotTransPersClipW(p[0], it[0].P);
+        if (p[0].w) {
+            it += 2;
+            continue;
+        }
+        _prefetch(it, 0x40);
+        fW1 = RotTransPersClipW(p[1], it[1].P);
+        if (p[1].w) {
+            it += 2;
+            continue;
+        }
+        iW = *(UINT*)&fW0;
+        p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
+        p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
+        p64[2] = _vecToXYZ(p[0]);
+        iW = *(UINT*)&fW1;
+        p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
+        p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
+        p64[5] = _vecToXYZ(p[1]);
+        it += 2;
+        p64 += 6;
+    }
+    return p64;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1P6CCoordi);
