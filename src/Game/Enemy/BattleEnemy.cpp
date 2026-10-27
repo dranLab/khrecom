@@ -230,7 +230,11 @@ void CBattleEnemy::beginStateMagnet() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateMagnet__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateMagnet__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateSuspend__12CBattleEnemy);
+void CBattleEnemy::beginStateSuspend() {
+    m_pAnim->setSpeed(0.0f);
+    m_ullBackupFlag = m_ullBtlEnemyFlag;
+    setBtlEnemyFlag(0x84000);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateSuspend__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateSuspend__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateVolley__12CBattleEnemy);
