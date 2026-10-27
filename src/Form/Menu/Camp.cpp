@@ -2578,11 +2578,16 @@ asm(".section .rodata\n"
     ".byte 0x5C,0x09,0x31,0x00,0x90,0x09,0x31,0x00,0x00,0x0A,0x31,0x00,0xB8,0x0D,0x31,0x00\n"
     ".byte 0x0C,0x11,0x31,0x00,0xE8,0x0D,0x31,0x00,0x28,0x13,0x31,0x00,0x50,0x13,0x31,0x00\n"
     ".section .text");
-#if 0 /* register allocation: the original shares s2 between bChange and the 4/5 constants of the number-grid moves (one s-register less) */
+/* Parked: 2 of 819 lines differ (was 86): with deckEditMenu's forms (member arithmetic instead of nSelect, the
+   number-grid moves with `n = 9; if (m < 5) n = 4;`, per-arm clamps in the down move, fgCursorMove in both arms
+   of the right move, error stores Error/WinStep/SubStep) only the cancel block is left: the original fills
+   setCursor2(0, 2, TRUE)'s delay slot with `ret = 1`, ours with `li a3,1` (ret = 1 issues after the call) - the
+   same as statusWinMenu. tried: ret before/after the call, TRUE vs 1; permuter 7 min (4249 candidates, no gain). */
+#if 0
 INT CCamp::mapCardWinMenu() {
-    BOOL bChange = FALSE;
-    INT ret = 0;
-    INT nSelect;
+    BOOL ret = FALSE;
+    BOOL fgCursorMove = FALSE;
+    INT nNumSelect;
 
     switch (m_nSubStep) {
     case 0:
@@ -2630,9 +2635,9 @@ INT CCamp::mapCardWinMenu() {
             CSound::playSE(5, -1, 0x40);
             break;
         } else if (_isButtonRpt(0x101000, 0)) {
-            nSelect = m_nMCSelSelect;
-            if ((m_nMCSelSelect = nSelect - 3) < 0) {
-                m_nMCSelSelect = nSelect;
+            m_nMCSelSelect -= 3;
+            if (m_nMCSelSelect < 0) {
+                m_nMCSelSelect += 3;
                 if (!m_buttonTrg) {
                     break;
                 }
@@ -2644,52 +2649,49 @@ INT CCamp::mapCardWinMenu() {
                 m_nSubStep = 4;
                 break;
             }
-            bChange = TRUE;
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x204000, 0)) {
-            nSelect = m_nMCSelSelect;
-            if (nSelect / 3 < (m_nMapKind[m_nMCSelCateSelect] - 1) / 3) {
-                if ((m_nMCSelSelect = nSelect + 3) >= m_nMapKind[m_nMCSelCateSelect]) {
+            if (m_nMCSelSelect / 3 < (m_nMapKind[m_nMCSelCateSelect] - 1) / 3) {
+                if ((m_nMCSelSelect += 3) >= m_nMapKind[m_nMCSelCateSelect]) {
                     m_nMCSelSelect = m_nMapKind[m_nMCSelCateSelect] - 1;
                 }
-                bChange = TRUE;
             } else {
                 if (!m_buttonTrg || m_nMapKind[m_nMCSelCateSelect] < 4) {
                     break;
                 }
-                if ((m_nMCSelSelect = nSelect % 3) >= m_nMapKind[m_nMCSelCateSelect]) {
+                if ((m_nMCSelSelect %= 3) >= m_nMapKind[m_nMCSelCateSelect]) {
                     m_nMCSelSelect = m_nMapKind[m_nMCSelCateSelect] - 1;
                 }
                 m_nMCSelSelectTop = 0;
-                bChange = TRUE;
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x408000, 0)) {
-            nSelect = m_nMCSelSelect;
-            if ((m_nMCSelSelect = nSelect - 1) >= 0 && m_nMCSelSelect % 3 != 2) {
-                bChange = TRUE;
-            } else {
-                m_nMCSelSelect = nSelect;
-                if (!m_buttonTrg || nSelect == m_nMapKind[m_nMCSelCateSelect] - 1) {
+            m_nMCSelSelect--;
+            if (m_nMCSelSelect < 0 || m_nMCSelSelect % 3 == 2) {
+                m_nMCSelSelect++;
+                if (!m_buttonTrg || m_nMCSelSelect == m_nMapKind[m_nMCSelCateSelect] - 1) {
                     break;
                 }
-                if ((m_nMCSelSelect = nSelect + 2) >= m_nMapKind[m_nMCSelCateSelect]) {
+                m_nMCSelSelect += 2;
+                if (m_nMCSelSelect >= m_nMapKind[m_nMCSelCateSelect]) {
                     m_nMCSelSelect = m_nMapKind[m_nMCSelCateSelect] - 1;
                 }
-                bChange = TRUE;
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x802000, 0)) {
-            nSelect = m_nMCSelSelect;
-            if ((m_nMCSelSelect = nSelect + 1) % 3 != 0 && m_nMCSelSelect < m_nMapKind[m_nMCSelCateSelect]) {
-                bChange = TRUE;
-            } else {
-                m_nMCSelSelect = nSelect;
-                if (!m_buttonTrg || nSelect % 3 == 0) {
+            m_nMCSelSelect++;
+            if (m_nMCSelSelect % 3 == 0 || m_nMCSelSelect >= m_nMapKind[m_nMCSelCateSelect]) {
+                m_nMCSelSelect--;
+                if (!m_buttonTrg || m_nMCSelSelect % 3 == 0) {
                     break;
                 }
-                m_nMCSelSelect = nSelect - nSelect % 3;
-                bChange = TRUE;
+                m_nMCSelSelect -= m_nMCSelSelect % 3;
+                fgCursorMove = TRUE;
+            } else {
+                fgCursorMove = TRUE;
             }
         }
-        if (bChange) {
+        if (fgCursorMove) {
             CSound::playSE(0xE, -1, 0x40);
             setCursor2(m_nMCSelSelect, 1, TRUE);
             setMapCardWin(9);
@@ -2704,7 +2706,6 @@ INT CCamp::mapCardWinMenu() {
         }
         break;
     case 5: {
-        INT nNum;
         if (_isTrgCANCEL(0)) {
             setCursor3(0, 2, TRUE);
             setCursor2(0, 4, TRUE);
@@ -2713,92 +2714,90 @@ INT CCamp::mapCardWinMenu() {
             m_nSubStep = 2;
         } else if (_isButtonTrg(0x40, 0)) {
             if (CCard::m_pCardInfo->_nMapTotal < 0x15) {
-                m_nSubStep = 6;
                 m_nError = 3;
                 m_nErrorWinStep = 0;
+                m_nSubStep = 6;
                 break;
             }
             m_nError = 4;
             m_nSubStep = 7;
             m_nErrorWinStep = 0;
         } else if (_isButtonRpt(0x101000, 0)) {
-            nNum = m_nMCSelNumSelect - 1;
-            if (nNum < 0 || nNum % 5 == 4) {
+            nNumSelect = m_nMCSelNumSelect - 1;
+            if (nNumSelect < 0 || nNumSelect % 5 == 4) {
                 if (!m_buttonTrg) {
                     break;
                 }
-                nNum = searchNumExist(2, m_nMCSelNumSelect + 4, TRUE);
-                bChange = TRUE;
+                nNumSelect = searchNumExist(2, m_nMCSelNumSelect + 4, TRUE);
             } else {
-                nNum = searchNumExist(2, nNum, TRUE);
-                if (nNum >= 0) {
-                    bChange = TRUE;
-                } else {
+                nNumSelect = searchNumExist(2, nNumSelect, TRUE);
+                if (nNumSelect < 0) {
                     if (!m_buttonTrg) {
                         break;
                     }
-                    nNum = searchNumExist(2, m_nMCSelNumSelect > 4 ? 9 : 4, TRUE);
-                    bChange = TRUE;
+                    nNumSelect = 9;
+                    if (m_nMCSelNumSelect < 5) nNumSelect = 4;
+                    nNumSelect = searchNumExist(2, nNumSelect, TRUE);
                 }
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x204000, 0)) {
-            nNum = m_nMCSelNumSelect + 1;
-            if (nNum % 5 == 0) {
+            nNumSelect = m_nMCSelNumSelect + 1;
+            if (nNumSelect % 5 == 0) {
                 if (!m_buttonTrg) {
                     break;
                 }
-                nNum = searchNumExist(1, m_nMCSelNumSelect - 4, TRUE);
-                bChange = TRUE;
+                nNumSelect = searchNumExist(1, m_nMCSelNumSelect - 4, TRUE);
             } else {
-                nNum = searchNumExist(1, nNum, TRUE);
-                if (nNum >= 0) {
-                    bChange = TRUE;
-                } else {
+                nNumSelect = searchNumExist(1, nNumSelect, TRUE);
+                if (nNumSelect < 0) {
                     if (!m_buttonTrg) {
                         break;
                     }
-                    nNum = searchNumExist(1, m_nMCSelNumSelect < 5 ? 0 : 5, TRUE);
-                    bChange = TRUE;
+                    nNumSelect = searchNumExist(1, m_nMCSelNumSelect < 5 ? 0 : 5, TRUE);
                 }
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x408000, 0)) {
-            nNum = m_nMCSelNumSelect - 5;
-            if (nNum < 0) {
+            nNumSelect = m_nMCSelNumSelect - 5;
+            if (nNumSelect < 0) {
                 if (!m_buttonTrg) {
                     break;
                 }
-                nNum = searchNumExist(3, m_nMCSelNumSelect + 5, TRUE);
-                bChange = TRUE;
+                nNumSelect = searchNumExist(3, m_nMCSelNumSelect + 5, TRUE);
             } else {
-                nNum = searchNumExist(3, nNum, TRUE);
-                bChange = TRUE;
-                if (nNum < 0 && !m_buttonTrg) {
-                    break;
+                nNumSelect = searchNumExist(3, nNumSelect, TRUE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
                 }
             }
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x802000, 0)) {
-            nNum = m_nMCSelNumSelect + 5;
-            if (nNum >= 10) {
+            nNumSelect = m_nMCSelNumSelect + 5;
+            if (nNumSelect >= 10) {
                 if (!m_buttonTrg) {
                     break;
                 }
-                nNum = searchNumExist(4, m_nMCSelNumSelect - 5, TRUE);
-                bChange = TRUE;
+                nNumSelect = searchNumExist(4, m_nMCSelNumSelect - 5, TRUE);
             } else {
-                nNum = searchNumExist(4, nNum, TRUE);
-                bChange = TRUE;
-                if (nNum < 0 && !m_buttonTrg) {
-                    break;
+                nNumSelect = searchNumExist(4, nNumSelect, TRUE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
                 }
             }
+            fgCursorMove = TRUE;
         }
-        if (bChange) {
-            if (nNum < 0 || nNum == m_nMCSelNumSelect) {
+        if (fgCursorMove) {
+            if (nNumSelect < 0 || nNumSelect == m_nMCSelNumSelect) {
                 break;
             }
             CSound::playSE(0xE, -1, 0x40);
-            m_nMCSelNumSelect = nNum;
-            setCursor3(nNum, 1, TRUE);
+            m_nMCSelNumSelect = nNumSelect;
+            setCursor3(nNumSelect, 1, TRUE);
         }
         moveCursor2();
         moveCursor3();
@@ -2840,14 +2839,14 @@ INT CCamp::mapCardWinMenu() {
             if (--m_nMCSelCateSelect < 0) {
                 m_nMCSelCateSelect = 4;
             }
-            bChange = TRUE;
+            fgCursorMove = TRUE;
         } else if (_isButtonRpt(0x802000, 0)) {
             if (++m_nMCSelCateSelect >= 5) {
                 m_nMCSelCateSelect = 0;
             }
-            bChange = TRUE;
+            fgCursorMove = TRUE;
         }
-        if (bChange) {
+        if (fgCursorMove) {
             CSound::playSE(1, -1, 0x40);
             setMapCardWin(0xA);
             setCursor2(m_nMCSelCateSelect, 6, TRUE);
