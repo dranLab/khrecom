@@ -565,6 +565,9 @@ struct TexInfo {
     BOOL isFixClut() const { return !_ClutInfo._pImage || (_nFlag & 2); }
     BOOL isFix() const { return isFixTex() && isFixClut(); }
     ULONGLONG getTPage() const { return _nTPage; }
+    ULONGLONG getTPage(UINT nTexPos, UINT nClutPos) const {
+        return _nTPage | nTexPos | ((ULONGLONG)nClutPos << 37);
+    }
 };
 
 struct G_ST {
@@ -691,7 +694,25 @@ public:
             m_pTexCache[i] = NULL;
         }
     }
-    static INT updateTexCache(const TexInfo* pInInfo);
+    static INT updateTexCache(const TexInfo* pInInfo) {
+        INT size;
+        for (INT i = 0; i < 28; i++) {
+            if (pInInfo == m_pTexCache[i]) return i;
+        }
+        size = pInInfo->_TexInfo._nTransSize >> 6;
+        if (size == 0) size = 1;
+        m_nCacheIdxOld = m_nCacheIdx;
+        m_nCacheIdx += size;
+        if (m_nCacheIdx > 28) {
+            m_nCacheIdx = size;
+            m_nCacheIdxOld = 0;
+        }
+        m_pTexCache[m_nCacheIdxOld] = (TexInfo*)pInInfo;
+        for (INT i = m_nCacheIdxOld + 1; i < m_nCacheIdx; i++) {
+            m_pTexCache[i] = (TexInfo*)-1;
+        }
+        return -1;
+    }
 };
 
 class CScissoring : public CGPrim {
@@ -857,11 +878,23 @@ public:
     virtual ~CScreenColoredMask();
 };
 
+extern "C" void sceVu0ITOF4Vector(FVECTOR& v0, IVECTOR& v1);
+extern "C" void sceVu0FTOI4Vector(IVECTOR& v0, FVECTOR& v1);
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+
 class C2DRot {
 protected:
     FMATRIX m_Matrix;
     FLOAT m_fRot;
     G_XYZ m_Center;
+
+public:
+    void calcVert(IVECTOR& iv) {
+        FVECTOR v;
+        sceVu0ITOF4Vector(v, iv);
+        ApplyMatrix(v, m_Matrix, v);
+        sceVu0FTOI4Vector(iv, v);
+    }
 };
 
 class CRotSprt : public CSprt, public C2DRot {
