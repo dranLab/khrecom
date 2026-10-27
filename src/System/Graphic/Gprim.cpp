@@ -566,7 +566,27 @@ FIX4 C3DPolyGT3::calcZ() {
     }
     return max;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyGT3);
+void C3DPolyGT3::makePkt() {
+    ULONGLONG* p64;
+    ULONGLONG tex = setTexture();
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xB400000000008001UL, 0x42142142170UL));
+    p64[0] = (u_long)0x21B | ((u_long)isSemiTrans() << 6);
+    p64[1] = tex;
+
+    p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
+    p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
+    p64[4] = _vecToXYZ(p0);
+
+    p64[5] = (u_long)m_C1.col | ((u_long)p1.w << 32);
+    p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
+    p64[7] = _vecToXYZ(p1);
+
+    p64[8] = (u_long)m_C2.col | ((u_long)p2.w << 32);
+    p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
+    p64[10] = _vecToXYZ(p2);
+
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[11]);
+}
 FIX4 C3DTile::calcZ() {
     FVECTOR c;
     FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
