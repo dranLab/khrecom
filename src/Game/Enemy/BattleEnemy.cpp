@@ -306,7 +306,14 @@ void CBattleEnemy::endStateVolley() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDead__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDead__12CBattleEnemy);
 void CBattleEnemy::endStateDead() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getBattleEnemyManager__C12CBattleEnemy);
+CBattleEnemyManager* CBattleEnemy::getBattleEnemyManager() const {
+    CTask* parent = (CTask*)getParent();
+    while (parent) {
+        if (parent->getTypeID() == 0x1003) return (CBattleEnemyManager*)parent;
+        parent = parent->getParent();
+    }
+    return NULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makePrize__12CBattleEnemyPC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeExpPrize__12CBattleEnemyPC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makePremiumPrize__12CBattleEnemyPC7FVECTOR);
