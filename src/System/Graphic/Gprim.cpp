@@ -233,7 +233,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DR
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DCircle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DCircle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__13C3DPointLight);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__14C3DPointLight2);
+FIX4 C3DPointLight2::calcZ() {
+    FIX4 nRet = ((CGPrim&)m_Cl[0]).calcZ();
+    if (m_nType == 1) {
+        ((CGPrim&)m_Cl[1]).calcZ();
+    }
+    return nRet;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__14C3DPointLight2);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePktSub__14C3DPointLight2i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DPolyG4);
