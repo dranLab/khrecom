@@ -43,6 +43,7 @@ inline void _roulettePrizeMessage() {
 namespace PL {
 extern TIMEQ g_CardBreakTime[];
 extern FVECTOR g_vBGFadeColor[7];
+extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; /* Game/Player/PlayerAttack.h */
 extern const FVECTOR g_vPronounceCountOfs; /* defined after the vtables (tail asm block) */
 static LPCSTR g_szDpxFriend = "friend";
 static LPCSTR g_szDpxSummon = "summon";
@@ -72,6 +73,16 @@ PlayerCamera::BCAM_PARAM g_PronounceCamParam = {
 } // namespace PL
 
 using namespace PL;
+
+// reads/writes members and globals as through a reference (the original reloads/stores them in this order)
+template <class T> static inline T& _ref(T& v) { return v; }
+
+static inline UINT _upKind(INT inType0, INT inType1) {
+    UINT up = inType0 > 0 ? 1 << (inType0 - 1) : 0;
+    if (inType1 > 0) up |= 1 << (inType1 - 1);
+    return up;
+}
+
 
 CPlayerSora::CPlayerSora(CTask* inParent) : CPlayer(inParent, PLM::g_uiPlayerID, 0) {
     g_Param = g_SoraParam;
@@ -106,14 +117,474 @@ INT CPlayerSora::startStockSkillAction() {
     }
     return FALSE;
 }
-/* placeholder: .rodata of initStockSkill__Q22PL11CPlayerSorai (strings, jump tables) */
-__asm__(".rdata\n.align 4\n.word .L002951E8\n.word .L002951F0\n.word .L00295204\n.word .L0029520C\n.word .L00295214\n.word .L0029521C\n.word .L00295230\n.word .L00295244\n.word .L00295258\n.word .L0029526C\n.word .L002952C4\n.word .L00295348\n.word .L002953C8\n.word .L00295420\n");
-__asm__(".word .L00295478\n.word .L002954D0\n.word .L00295298\n.word .L002952F0\n.word .L00295374\n.word .L002953F4\n.word .L0029544C\n.word .L002954A4\n.word .L002954FC\n.word .L002953A0\n.word .L002953A8\n.word .L002953B0\n.word .L002953B8\n.word .L002953C0\n.word .L00295698\n.word .L002956AC\n");
-__asm__(".word .L002956C0\n.word .L002956D4\n.word .L0029531C\n.word .L002956E8\n.word .L002956FC\n.word .L00295710\n.word .L00295724\n.word .L00295748\n.word .L0029575C\n.word .L00295528\n.word .L00295554\n.word .L00295588\n.word .L002955C0\n.word .L002955F8\n.word .L00295630\n.word .L00295770\n");
-__asm__(".word .L00295654\n.word .L00295794\n.word .L002958D4\n.word .L002958D4\n.word .L002958FC\n.word .L002958FC\n.word .L00295928\n.word .L00295928\n.word .L00295928\n.word .L00295940\n.word .L00295940\n.word .L00295960\n.word .L00295960\n.word .L00295988\n.word .L00295988\n.word .L002959AC\n");
-__asm__(".word .L002959AC\n.word .L002959AC\n.word .L002957B8\n.word .L002957B8\n.word .L002957B8\n.word .L002957D0\n.word .L002957D0\n.word .L002957D0\n.word .L002957E8\n.word .L00295844\n.word .L00295844\n.word .L0029585C\n.word .L0029585C\n.word .L00295874\n.word .L00295874\n.word .L0029588C\n");
-__asm__(".word .L0029588C\n.word .L002958A4\n.word .L002958A4\n.word .L002958BC\n.word .L002958BC\n.word .L002959EC\n.word .L002959FC\n.word .L002959FC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initStockSkill__Q22PL11CPlayerSorai);
+void CPlayerSora::initStockSkill(INT inNo) {
+    INT type;
+    setPlayerState(SKILL);
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x80000);
+    setPlayerFlag(0, 0x20000);
+    setPlayerFlag(0, 0x8000000);
+    m_iAttackNo = inNo;
+    if (!inNo) m_uiPreAttackKind = 0;
+    m_bIsAttackHit = FALSE;
+    m_bNextTrg = FALSE;
+    m_iNextAttack = 0;
+    m_bIsCanCombo = FALSE;
+    m_bDmgMuteki = FALSE;
+    m_tqCardBreakTime = g_CardBreakTime[7];
+    m_uiStep = 0;
+    m_szEffectName = NULL;
+    clearSpeed();
+    _ref(m_uiAttackKind) = 8;
+    m_fJumpGravity = g_fGravity;
+    m_JumpState = 3;
+    m_fMoveSpdXZ = 0.0f;
+    m_fWalkSpeed = 0.0f;
+    m_iAerialAnimShift = 0;
+    setPlayerFlag(0, 0x2800000);
+    procTargetMark();
+    type = 0;
+    switch (m_iStockSkill) {
+    case 4:
+        m_uiAttackID = 0x8;
+        type = 1;
+        break;
+    case 5:
+        m_uiAttackID = 0x9;
+        m_pPLM->setReqLoad(0x5, 0);
+        type = 1;
+        break;
+    case 6:
+        m_uiAttackID = 0xb;
+        type = 1;
+        break;
+    case 7:
+        m_uiAttackID = 0xc;
+        type = 1;
+        break;
+    case 8:
+        m_uiAttackID = 0xd;
+        type = 1;
+        break;
+    case 9:
+        m_uiAttackID = 0xe;
+        m_pPLM->setReqLoad(0x9, 0);
+        type = 1;
+        break;
+    case 10:
+        m_uiAttackID = 0x11;
+        m_pPLM->setReqLoad(0xa, 0);
+        type = 1;
+        break;
+    case 11:
+        m_uiAttackID = 0x1f;
+        m_pPLM->setReqLoad(0xb, 0);
+        type = 1;
+        break;
+    case 12:
+        m_uiAttackID = 0x21;
+        m_pPLM->setReqLoad(0xc, 0);
+        type = 1;
+        break;
+    case 13:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x29;
+        type = 1;
+        break;
+    case 20:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x2a;
+        type = 1;
+        break;
+    case 14:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x2b;
+        type = 1;
+        break;
+    case 21:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x2c;
+        type = 1;
+        break;
+    case 36:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x2d;
+        type = 1;
+        break;
+    case 15:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x2e;
+        type = 1;
+        break;
+    case 22:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x2f;
+        type = 1;
+        break;
+    case 27:
+        m_uiAttackID = 0x30;
+        type = 1;
+        break;
+    case 28:
+        m_uiAttackID = 0x31;
+        type = 1;
+        break;
+    case 29:
+        m_uiAttackID = 0x32;
+        type = 1;
+        break;
+    case 30:
+        m_uiAttackID = 0x34;
+        type = 1;
+        break;
+    case 31:
+        m_uiAttackID = 0x33;
+        type = 1;
+        break;
+    case 16:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x36;
+        type = 2;
+        break;
+    case 23:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x37;
+        type = 2;
+        break;
+    case 17:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x38;
+        type = 3;
+        break;
+    case 24:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x39;
+        type = 3;
+        break;
+    case 18:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x3a;
+        type = 3;
+        break;
+    case 25:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x3b;
+        type = 3;
+        break;
+    case 19:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x3c;
+        type = 1;
+        break;
+    case 26:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x3d;
+        type = 1;
+        break;
+    case 43:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x3e;
+        type = 0;
+        break;
+    case 44:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x3f;
+        type = 0;
+        break;
+    case 45:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x40;
+        m_pPLM->setReqLoad(0x2d, 0);
+        type = 1;
+        break;
+    case 46:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x41;
+        m_pPLM->setReqLoad(0x2e, 0);
+        type = 1;
+        break;
+    case 47:
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = 4;
+        }
+        m_uiAttackID = 0x42;
+        m_pPLM->setReqLoad(0x2f, 0);
+        type = 1;
+        break;
+    case 48:
+        m_uiAttackID = 0x43;
+        m_pPLM->setReqLoad(0x30, 0);
+        type = 0;
+        break;
+    case 50:
+        m_fWallRadius = 0.6f;
+        if (isAir()) {
+            setPlayerFlag(0x800000, 0);
+            m_iAerialAnimShift = -36;
+        }
+        m_uiAttackID = 0x44;
+        type = 3;
+        break;
+    case 32:
+        m_uiAttackID = 0x45;
+        m_pPLM->setReqLoad(0x20, 0);
+        type = 1;
+        break;
+    case 33:
+        m_uiAttackID = 0x47;
+        m_pPLM->setReqLoad(0x21, 0);
+        type = 1;
+        break;
+    case 34:
+        m_uiAttackID = 0x48;
+        m_pPLM->setReqLoad(0x22, 0);
+        type = 1;
+        break;
+    case 35:
+        m_uiAttackID = 0x49;
+        m_pPLM->setReqLoad(0x23, 0);
+        type = 1;
+        break;
+    case 37:
+        m_uiAttackID = 0x4a;
+        m_pPLM->setReqLoad(0x25, 0);
+        type = 1;
+        break;
+    case 38:
+        m_uiAttackID = 0x4b;
+        m_pPLM->setReqLoad(0x26, 0);
+        type = 1;
+        break;
+    case 39:
+        m_uiAttackID = 0x4d;
+        m_pPLM->setReqLoad(0x27, 0);
+        type = 3;
+        break;
+    case 40:
+        m_uiAttackID = 0x50;
+        m_pPLM->setReqLoad(0x28, 0);
+        type = 3;
+        break;
+    case 41:
+        m_uiAttackID = 0x51;
+        m_pPLM->setReqLoad(0x29, 0);
+        type = 1;
+        break;
+    case 42:
+        m_uiAttackID = 0x52;
+        m_pPLM->setReqLoad(0x2a, 0);
+        type = 1;
+        break;
+    case 49:
+        m_uiAttackID = 0x53;
+        m_pPLM->setReqLoad(0x31, 0);
+        type = 2;
+        break;
+    case 51:
+        m_uiAttackID = 0x54;
+        m_pPLM->setReqLoad(0x33, 0);
+        type = 1;
+        break;
+    case 68:
+    case 69:
+    case 70:
+        m_uiAttackID = m_iStockSkill + 0x1a;
+        m_pPLM->setReqLoad(0x44, 0);
+        break;
+    case 71:
+    case 72:
+    case 73:
+        m_uiAttackID = m_iStockSkill + 0x1d;
+        m_pPLM->setReqLoad(0x47, 0);
+        break;
+    case 74:
+        setMDFooting(0);
+        m_fWallRadius = 1.0f;
+        m_uiAttackID = m_iStockSkill + 0x1e;
+        m_pPLM->setReqLoad(0x44, 0);
+        m_pPLM->setReqLoad(0x47, 0);
+        m_pPLM->setReqLoad(0x4a, 0);
+        break;
+    case 75:
+    case 76:
+        m_uiAttackID = m_iStockSkill + 0x1e;
+        m_pPLM->setReqLoad(0x4b, 0);
+        break;
+    case 77:
+    case 78:
+        m_uiAttackID = m_iStockSkill + 0x1e;
+        m_pPLM->setReqLoad(0x4d, 0);
+        break;
+    case 79:
+    case 80:
+        m_uiAttackID = m_iStockSkill + 0x1e;
+        m_pPLM->setReqLoad(0x4f, 0);
+        break;
+    case 81:
+    case 82:
+        m_uiAttackID = m_iStockSkill + 0x1e;
+        m_pPLM->setReqLoad(0x51, 0);
+        break;
+    case 83:
+    case 84:
+        m_uiAttackID = m_iStockSkill + 0x1e;
+        m_pPLM->setReqLoad(0x53, 0);
+        break;
+    case 85:
+    case 86:
+        m_uiAttackID = m_iStockSkill + 0x23;
+        m_pPLM->setReqLoad(0x55, 0);
+        break;
+    case 52:
+    case 53:
+        setMDFooting(0);
+        m_fWallRadius = 1.0f;
+        m_uiAttackID = m_iStockSkill + 0x4d;
+        m_pPLM->setReqLoad(0x34, 0);
+        break;
+    case 54:
+    case 55:
+        setMDFooting(0);
+        m_fWallRadius = 0.8f;
+        m_uiAttackID = m_iStockSkill + 0x4d;
+        m_pPLM->setReqLoad(0x36, 0);
+        break;
+    case 56:
+    case 57:
+    case 58:
+        m_uiAttackID = m_iStockSkill + 0x4d;
+        m_pPLM->setReqLoad(0x38, 0);
+        break;
+    case 59:
+    case 60:
+        m_vAppearPos = m_vHeadPos;
+        m_uiAttackID = m_iStockSkill + 0x4d;
+        m_pPLM->setReqLoad(0x3b, 0);
+        break;
+    case 61:
+    case 62:
+        setMDFooting(0);
+        m_fWallRadius = 2.0f;
+        m_uiAttackID = m_iStockSkill + 0x4d;
+        m_pPLM->setReqLoad(0x3d, 0);
+        break;
+    case 63:
+    case 64:
+        m_uiAttackID = m_iStockSkill + 0x50;
+        m_pPLM->setReqLoad(0x3f, 0);
+        break;
+    case 65:
+    case 66:
+    case 67:
+        setMDFooting(0);
+        m_fWallRadius = 0.8f;
+        m_uiAttackID = m_iStockSkill + 0x50;
+        m_pPLM->setReqLoad(0x41, 0);
+        break;
+    case 87:
+        m_uiAttackID = 0x96;
+        type = 1;
+        break;
+    case 88:
+    case 89:
+        m_uiAttackID = 0x95;
+        type = 2;
+        break;
+    default:
+        m_iSubState = 3;
+        m_pAtkData = &g_AttackDataList[0];
+        m_uiAttackID = 0;
+        m_uiAttackKind = 0;
+        return;
+    }
+    m_pAtkData = &g_AttackDataList[m_uiAttackID];
+    switch (type) {
+    case 1:
+        m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER] / 100;
+        break;
+    case 2: {
+        INT power = CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER];
+        m_iAttackPower = power / 10;
+        break;
+    }
+    case 3:
+        m_iAttackPower = CardBattle::g_pStockSkillList[m_iStockSkill].POWER[m_pAtkData->POWER];
+        break;
+    default:
+        m_iAttackPower = 0;
+        break;
+    }
+    _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
+    _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
+    UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
+                      CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE1);
+    calcEnchant_AttackPoint(m_iAttackPower, m_AtkKind, m_AtkAttr, up);
+    m_iSubState = 1;
+    m_uiPreAttackKind = m_uiAttackKind;
+    m_fDistXZ = m_fDistY = 0.0f;
+    setTrgFlag(0, 0x40000);
+    if (isPlayerFlag(0x800000)) {
+        setPlayerFlag(0x2000000, 0);
+    }
+}
 /* placeholder: .rodata of exeStockSkill__Q22PL11CPlayerSora (strings, jump tables) */
 __asm__(".rdata\n.align 3\n.byte 0x65,0x78,0x65,0x53,0x74,0x6f,0x63,0x6b,0x53,0x6b,0x69,0x6c,0x6c,0x3a,0x20,0x20\n.byte 0x46,0x49,0x4e,0x41,0x4c,0x42,0x52,0x45,0x41,0x4b,0x20,0x20,0x45,0x6e,0x74,0x72\n.byte 0x79,0x20,0x4e,0x47,0x2e,0x2e,0x2e,0x0a,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n.align 3\n.byte 0x72,0x65,0x63,0x6f,0x6d,0x00,0x00,0x00\n.align 3\n.byte 0x43,0x50,0x6c,0x61,0x79,0x65,0x72,0x53,0x6f,0x72,0x61,0x3a,0x3a,0x20,0x53,0x53\n.byte 0x5f,0x52,0x45,0x46,0x52,0x45,0x43,0x54,0x52,0x41,0x49,0x44,0x20,0x3a,0x20,0x42\n.byte 0x75,0x6c,0x6c,0x65,0x74,0x3d,0x25,0x64,0x2f,0x25,0x64,0x2c,0x0a,0x00,0x00,0x00\n.align 3\n.byte 0x65,0x78,0x65,0x53,0x74,0x6f,0x63,0x6b,0x53,0x6b,0x69,0x6c,0x6c,0x3a,0x20,0x20\n.byte 0x53,0x4f,0x4e,0x49,0x43,0x52,0x41,0x56,0x45,0x20,0x20,0x45,0x6e,0x74,0x72,0x79\n.byte 0x20,0x4e,0x47,0x2e,0x2e,0x2e,0x0a,0x00\n.align 3\n");
 __asm__(".byte 0x65,0x78,0x65,0x53,0x74,0x6f,0x63,0x6b,0x53,0x6b,0x69,0x6c,0x6c,0x3a,0x20,0x20\n.byte 0x4c,0x41,0x53,0x54,0x41,0x52,0x43,0x41,0x4e,0x55,0x4d,0x20,0x20,0x45,0x6e,0x74\n.byte 0x72,0x79,0x20,0x4e,0x47,0x2e,0x2e,0x2e,0x0a,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n.align 3\n.byte 0x65,0x78,0x65,0x53,0x74,0x6f,0x63,0x6b,0x53,0x6b,0x69,0x6c,0x6c,0x3a,0x20,0x20\n.byte 0x4c,0x41,0x53,0x54,0x41,0x52,0x43,0x41,0x4e,0x55,0x4d,0x20,0x20,0x46,0x69,0x6e\n.byte 0x69,0x73,0x68,0x20,0x4e,0x47,0x2e,0x2e,0x2e,0x0a,0x00,0x00,0x00,0x00,0x00,0x00\n.align 3\n.byte 0x6c,0x69,0x6d,0x69,0x74,0x34,0x00,0x00\n.align 3\n.byte 0x6d,0x61,0x67,0x6e,0x65,0x73,0x70,0x69,0x72,0x61,0x6c,0x00,0x00,0x00,0x00,0x00\n.align 3\n.byte 0x69,0x74,0x65,0x6d,0x70,0x6c,0x75,0x73,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n.align 4\n.word .L00295CAC\n.word .L0029C9CC\n");
@@ -214,9 +685,153 @@ __asm__(".word .L0029C92C\n.word .L0029C964\n.word .L0029C9CC\n.word .L0029C9CC\
 __asm__(".word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3D8\n");
 __asm__(".word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word func_0\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeStockSkill__Q22PL11CPlayerSora);
+/* Parked: provisional (being worked on): scheduling/register differences in the case blocks, size 0x8c4 vs 0x8c8 */
+#if 0
+void CPlayerSora::initMagic(INT inNo) {
+    FVECTOR pos;
+    FVECTOR rot;
+    setPlayerState(MAGIC);
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x100);
+    setBattleFlag(0, 0x80000);
+    setTrgFlag(0, 0x20);
+    _ref(m_iAttackNo) = inNo;
+    _ref(m_uiPreAttackKind) = 0;
+    _ref(m_bIsAttackHit) = FALSE;
+    _ref(m_bNextTrg) = FALSE;
+    _ref(m_iNextAttack) = 0;
+    _ref(m_bIsCanCombo) = FALSE;
+    _ref(m_bDmgMuteki) = FALSE;
+    clearSpeed();
+    _ref(m_uiAttackKind) = 0;
+    m_fJumpGravity = g_fGravity;
+    m_JumpState = 3;
+    m_fMoveSpdXZ = 0.0f;
+    m_fJumpSpdY = 0.0f;
+    m_fWalkSpeed = 0.0f;
+    m_iAerialAnimShift = 0;
+    setPlayerFlag(0, 0x2800000);
+    m_pMarker->holdTarget(8);
+    procTargetMark();
+    m_tqCardBreakTime = g_CardBreakTime[CardBattle::g_pBattleCardList[m_uiCardID].BREAK];
+    if (isAir()) {
+        setPlayerFlag(0x2800000, 0);
+        m_iAerialAnimShift = 4;
+    }
+    switch (m_uiCardID) {
+    case 0x1A:
+        m_uiAttackID = 0x22;
+        m_pAtkData = &g_AttackDataList[m_uiAttackID];
+        m_iAttackPower = m_iAP * CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
+        break;
+    case 0x1B:
+        m_uiAttackID = 0x23;
+        m_pAtkData = &g_AttackDataList[m_uiAttackID];
+        m_iAttackPower = m_iAP * CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
+        break;
+    case 0x1C: {
+        m_uiAttackID = 0x24;
+        m_pAtkData = &g_AttackDataList[m_uiAttackID];
+        m_iAttackPower = m_iAP * CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
+        calcAppearPos((FLOAT)m_pAtkData->WORK0, (FLOAT)m_pAtkData->COLL_START_FRAME * 0.1f, NULL);
+        m_vAppearPos.y = getPos().y;
+        if (isAir()) m_vAppearPos.y = m_vJumpStartPos.y;
+        m_vAppearPos.y += 6.0f;
+        CEffect* effect = CEffectMan::getEffect(attachEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, 0,
+                                                             &m_pWeapon->Crd(2), &PlayerWeapon::g_fWeaponTopOffset, NULL, 0.0f));
+        if (effect) effect->m_iFlag |= 4;
+        setBGFade(g_vBGFadeColor[0], 20.0f, 0);
+        break;
+    }
+    case 0x1D:
+        m_uiAttackID = 0x25;
+        m_pAtkData = &g_AttackDataList[m_uiAttackID];
+        {
+            INT power = CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER];
+            m_iAttackPower = power / 10;
+        }
+        attachEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, 0, &m_pWeapon->Crd(2),
+                     &PlayerWeapon::g_fWeaponTopOffset, NULL, 0.0f);
+        break;
+    case 0x1E:
+        m_uiAttackID = 0x26;
+        m_pAtkData = &g_AttackDataList[m_uiAttackID];
+        m_iAttackPower = CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER];
+        attachEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][2].pEffectName, 0, &m_pWeapon->Crd(2),
+                     &PlayerWeapon::g_fWeaponTopOffset, NULL, 0.0f);
+        calcAppearPos((FLOAT)m_pAtkData->WORK0, (FLOAT)m_pAtkData->COLL_START_FRAME * 0.01f, NULL);
+        m_vAppearPos.y = getPos().y;
+        if (m_hTarget > 0) {
+            m_vAppearPos.x = m_vMarkPos.x;
+            m_vAppearPos.z = m_vMarkPos.z;
+        }
+        if (isAir()) m_vAppearPos.y = m_vJumpStartPos.y;
+        m_vAppearPos.y += 3.0f;
+        rot = getRot();
+        setEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][2].pEffectName, 2, &m_vAppearPos, &rot, 0.0f);
+        break;
+    case 0x1F: {
+        m_uiAttackID = 0x27;
+        m_pAtkData = &g_AttackDataList[m_uiAttackID];
+        m_iAttackPower = CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER];
+        pos.set(0.0f, 0.85f, 0.0f);
+        CEffect* effect = CEffectMan::getEffect(attachEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, 0,
+                                                             &Crd(0), &pos, NULL, 0.0f));
+        if (effect) effect->m_iFlag |= 4;
+        break;
+    }
+    case 0x20:
+        m_uiAttackID = 0x28;
+        m_pAtkData = &g_AttackDataList[m_uiAttackID];
+        m_iAttackPower = m_iAP * CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
+        attachEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, 0, &m_pWeapon->Crd(2),
+                     &PlayerWeapon::g_fWeaponTopOffset, NULL, 0.0f);
+        break;
+    case 0x21:
+        m_uiAttackID = 0x94;
+        m_pAtkData = &g_AttackDataList[m_uiAttackID];
+        m_iAttackPower = m_iAP * CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER] / 100;
+        setPlayerFlag(0, 0x2800000);
+        m_iAerialAnimShift = 0;
+        break;
+    case 0x22:
+        m_uiAttackID = 0x95;
+        m_pAtkData = &g_AttackDataList[m_uiAttackID];
+        {
+            INT power = CardBattle::g_pBattleCardList[m_uiCardID].POWER[m_pAtkData->POWER];
+            m_iAttackPower = power / 10;
+        }
+        setPlayerFlag(0, 0x2800000);
+        m_iAerialAnimShift = 0;
+        break;
+    default:
+        m_iSubState = 0x209;
+        m_pAtkData = &g_AttackDataList[0];
+        m_uiAttackID = 0;
+        m_uiAttackKind = 0;
+        return;
+    }
+    _ref(m_AtkKind) = (ATK_KIND)m_pAtkData->DAMAGE;
+    _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pBattleCardList[m_uiCardID].ATTR;
+    UINT up = _upKind(CardBattle::g_pBattleCardList[m_uiCardID].UP_TYPE0,
+                      CardBattle::g_pBattleCardList[m_uiCardID].UP_TYPE1);
+    calcEnchant_AttackPoint(m_iAttackPower, m_AtkKind, m_AtkAttr, up);
+    if (isPlayerFlag(0x800000)) {
+        setPlayerFlag(0x2000000, 0);
+        m_fJumpGravity = g_fGravity * 0.16f;
+    }
+    m_uiPreAttackKind = m_uiAttackKind;
+    m_fDistXZ = m_fDistY = 0.0f;
+    m_iSubState = m_uiAttackID;
+    setAnimForce(m_pAtkData->ANIM_ID + m_iAerialAnimShift, -1, 1, m_pAtkData->ANIM_ESQ, getStateSESeq(4), 0);
+    setPlayerFlag(0x100000, 0);
+    m_tqStateTimer = 0;
+}
+#else
 /* placeholder: .rodata of initMagic__Q22PL11CPlayerSorai (strings, jump tables) */
 __asm__(".rdata\n.align 4\n.word .L0029CB98\n.word .L0029CBB0\n.word .L0029CC0C\n.word .L0029CD68\n.word .L0029CDDC\n.word .L0029CF40\n.word .L0029D008\n.word .L0029D0B4\n.word .L0029D128\n.word func_0\n.word func_0\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initMagic__Q22PL11CPlayerSorai);
+#endif
 /* Game/MinigameManager.h */
 namespace MG_SKILL {
 HANDLE createMGSkill(INT inType, INT inLevel);
@@ -372,9 +987,6 @@ void CPlayerSora::setMagicBullet(HANDLE inBullet) {
         }
     }
 }
-// reads/writes members and globals as through a reference (the original reloads/stores them in this order)
-template <class T> static inline T& _ref(T& v) { return v; }
-
 void CPlayerSora::initFriend(INT inNo) {
     if (m_pCB->getEnchantKind() == 0x1b) {
         addHP(m_iMaxHP / 4, 6000, 1);
@@ -643,12 +1255,6 @@ void CPlayerSora::watchTarget(INT inMode) {
         break;
     }
 }
-static inline UINT _upKind(INT inType0, INT inType1) {
-    UINT up = inType0 > 0 ? 1 << (inType0 - 1) : 0;
-    if (inType1 > 0) up |= 1 << (inType1 - 1);
-    return up;
-}
-
 void CPlayerSora::setAttack_inFriend(INT inID, INT inStock, HANDLE inTarget) {
     CEntity* pTarget;
     FLOAT distY;
