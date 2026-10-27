@@ -685,7 +685,12 @@ __asm__(".word .L0029C92C\n.word .L0029C964\n.word .L0029C9CC\n.word .L0029C9CC\
 __asm__(".word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3D8\n");
 __asm__(".word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word func_0\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeStockSkill__Q22PL11CPlayerSora);
-/* Parked: provisional (being worked on): scheduling/register differences in the case blocks, size 0x8c4 vs 0x8c8 */
+/* Parked: structure, constants and calls match (size 0x8c4 vs 0x8c8, 264 lines differ); every case block is
+   scheduled differently: the original issues the AttackID store, `li 100` and the divide-by-zero trap before the
+   m_uiCardID/g_pBattleCardList/POWER loads and keeps &g_AttackDataList[] in v1 (ours: loads first, v0/v1 swapped),
+   and one case is 4 bytes longer. tried: AtkData by constant vs m_uiAttackID index (the latter needed), flag/store
+   orders and _ref on the leading stores (top part now matches), INT local for the signed /10, operand order of
+   m_iAP * POWER, _ref on m_iAP/m_uiCardID/m_pAtkData; permuter 12 min (2102 candidates), best 268 = start */
 #if 0
 void CPlayerSora::initMagic(INT inNo) {
     FVECTOR pos;
