@@ -44,7 +44,7 @@ namespace PL {
 extern TIMEQ g_CardBreakTime[];
 extern FVECTOR g_vBGFadeColor[7];
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; /* Game/Player/PlayerAttack.h */
-extern const FVECTOR g_vPronounceCountOfs; /* defined after the vtables (tail asm block) */
+static const FVECTOR g_vPronounceCountOfs = {{0.0f, 1.5f, 0.0f, 1.0f}};
 static LPCSTR g_szDpxFriend = "friend";
 static LPCSTR g_szDpxSummon = "summon";
 static LPCSTR g_szDpxLimit1 = "limit1";
@@ -90,7 +90,7 @@ CPlayerSora::CPlayerSora(CTask* inParent) : CPlayer(inParent, PLM::g_uiPlayerID,
     initMagicBullet();
     m_nHitCount = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", _$_Q22PL11CPlayerSora);
+CPlayerSora::~CPlayerSora() {}
 INT CPlayerSora::startStockSkillAction() {
     switch (m_iStockSkill) {
     case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
@@ -2063,17 +2063,4 @@ void CPlayerSora::calcAppearPosFS_toAttackID() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initDuel__Q22PL11CPlayerSorai);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeDuel__Q22PL11CPlayerSora);
-/* end of .rodata: the vtables (key function ~CPlayerSora still asm) and the deferred const g_vPronounceCountOfs */
-__asm__(".rdata\n.align 3\n.globl _vt$Q22PL11CPlayerSora$4CFSM\n_vt$Q22PL11CPlayerSora$4CFSM:\n.word 0x0000FFC0\n.word func_0\n.word 0x0000FFC0\n.word _$_Q22PL11CPlayerSora\n.word func_0\n.word update__4CFSM\n.word func_0\n.word beginStateInitial__4CFSM\n.word 0x0000FFC0\n.word stateInitial__7CPlayer\n.word func_0\n.word endStateInitial__4CFSM\n.word 0x0000FFC0\n");
-__asm__(".word endStateProc__7CEntity\n.word func_0\n.word func_0\n.globl _vt$Q22PL11CPlayerSora\n_vt$Q22PL11CPlayerSora:\n.word func_0\n.word func_0\n.word func_0\n.word _$_Q22PL11CPlayerSora\n.word func_0\n.word main__7CEntity\n.word func_0\n.word disp__7CEntity\n.word func_0\n.word after__5CTask\n.word func_0\n");
-__asm__(".word onOut__5CTask\n.word func_0\n.word getTypeID__C7CEntity\n.word func_0\n.word initalize__7CEntityii\n.word func_0\n.word initalize__7CEntityiiUi\n.word func_0\n.word AfterInit__7CEntity\n.word func_0\n.word onMsg__7CPlayeriPv\n.word func_0\n.word getLockOnPos__7CPlayerR7FVECTOR\n.word func_0\n.word getHeadPos__C7CPlayerR7FVECTOR\n.word func_0\n");
-__asm__(".word getUseCardPos__7CPlayerR7FVECTOR\n.word func_0\n.word getCameraTargetPos__7CPlayerR7FVECTOR\n.word func_0\n.word changeMotion__7CEntityiiiiii\n.word func_0\n.word updateBefore__7CPlayer\n.word func_0\n.word updateAfter__7CPlayer\n.word func_0\n.word updatePositionAfter__7CEntity\n.word func_0\n.word lastUpdate__7CPlayer\n.word func_0\n.word beginStateField__7CPlayer\n.word func_0\n");
-__asm__(".word stateField__7CPlayer\n.word func_0\n.word endStateField__7CPlayer\n.word func_0\n.word beginStateBattle__7CPlayer\n.word func_0\n.word stateBattle__7CPlayer\n.word func_0\n.word endStateBattle__7CPlayer\n.word func_0\n.word beginStateWait__7CPlayer\n.word func_0\n.word stateWait__7CPlayer\n.word func_0\n.word endStateWait__7CPlayer\n.word func_0\n");
-__asm__(".word beginStateHide__7CPlayer\n.word func_0\n.word stateHide__7CPlayer\n.word func_0\n.word endStateHide__7CPlayer\n.word func_0\n.word onWeapon__7CPlayeri\n.word func_0\n.word offWeapon__7CPlayer\n.word func_0\n.word setStateSE__Q22PL11CPlayerSoraii\n.word func_0\n.word getStateSESeq__Q22PL11CPlayerSorai\n.word func_0\n.word setAttack_inFriend__Q22PL11CPlayerSoraiii\n.word func_0\n");
-__asm__(".word calcAppearPosFS_toAttackID__Q22PL11CPlayerSora\n.word func_0\n.word setAttack__7CPlayer\n.word func_0\n.word startStockSkillAction__Q22PL11CPlayerSora\n.word func_0\n.word initStockSkill__Q22PL11CPlayerSorai\n.word func_0\n.word exeStockSkill__Q22PL11CPlayerSora\n.word func_0\n.word initMagic__Q22PL11CPlayerSorai\n.word func_0\n.word exeMagic__Q22PL11CPlayerSora\n.word func_0\n.word setMagic__Q22PL11CPlayerSoraiii\n.word func_0\n");
-__asm__(".word initFriend__Q22PL11CPlayerSorai\n.word func_0\n.word exeFriend__Q22PL11CPlayerSora\n.word func_0\n.word initSummon__Q22PL11CPlayerSorai\n.word func_0\n.word exeSummon__Q22PL11CPlayerSora\n.word func_0\n.word exeStandUp_inFriend__7CPlayer\n.word func_0\n.word exeAttack_inFriend__Q22PL11CPlayerSora\n.word func_0\n.word endAttack_inFriend__Q22PL11CPlayerSora\n.word func_0\n.word initTransform__7CPlayeri\n.word func_0\n");
-__asm__(".word exeTransform__7CPlayer\n.word func_0\n.word initGlide__Q22PL11CPlayerSorai\n.word func_0\n.word exeGlide__Q22PL11CPlayerSora\n.word func_0\n.word initJump2nd__7CPlayer\n.word func_0\n.word exeJump2nd__7CPlayer\n.word func_0\n.word exeAvoid__Q22PL11CPlayerSora\n.word func_0\n.word initDuel__Q22PL11CPlayerSorai\n.word func_0\n.word exeDuel__Q22PL11CPlayerSora\n.word func_0\n");
-__asm__(".word initPronounce__Q22PL11CPlayerSorai\n.word func_0\n.word exePronounce__Q22PL11CPlayerSora\n.word func_0\n.word func_0\n.globl _2PL$g_vPronounceCountOfs\n_2PL$g_vPronounceCountOfs:\n.byte 0x00,0x00,0x00,0x00,0x00,0x00,0xc0,0x3f,0x00,0x00,0x00,0x00,0x00,0x00,0x80,0x3f\n.text\n");
 // SOURCE DATA: .data .rodata
