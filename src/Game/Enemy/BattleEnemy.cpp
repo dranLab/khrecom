@@ -124,7 +124,9 @@ void CBattleEnemy::getPlayerPosition(FVECTOR& outPos) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getPlayerHandle__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeExpPrize__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makePrize__12CBattleEnemy);
+void CBattleEnemy::makePrize() {
+    if (m_pBodyColl->getHitCollBody()) makePrize(m_pBodyColl->getHitCollBody()->getDetectPos());
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", bossDeadDemoDispOff__12CBattleEnemy);
 INT CBattleEnemy::getPlayerState() {
     if (g_pPlayer) return g_pPlayer->getPlayerState();
