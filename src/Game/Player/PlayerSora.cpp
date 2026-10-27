@@ -37,6 +37,7 @@ inline void _roulettePrizeMessage() {
 #include "Game/Player/PlayerCamera.h"
 #include "Game/Player/PlayerGauge.h"
 #include "Game/Movement.h"
+#include "System/Graphic/Effect/EffectMan.h"
 #include "include_asm.h"
 
 namespace PL {
@@ -855,7 +856,147 @@ void CPlayerSora::initSummon(INT inNo) {
     m_uiPreAttackKind = m_uiAttackKind;
     m_fDistXZ = m_fDistY = 0.0f;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeSummon__Q22PL11CPlayerSora);
+void CPlayerSora::exeSummon() {
+    TIMEQ frame = getMotionCurrentTime() / 50;
+    setBattleFlag(0, 8);
+    if (!isConditionFlag(0x1000000)) {
+        procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
+    }
+    switch (m_iSubState) {
+    case 1:
+        if (isAir()) {
+            setAnim(6, 800, 0);
+            break;
+        }
+        setBGFade(g_vBGFadeColor[0], 20.0f, 0);
+        setAnimForce(0x2e, -1, 1, 0, getStateSESeq(7), 0);
+        setCastEffect(g_szDpxSummon, 1, &Crd(0), NULL);
+        calcAppearPosFS_toAttackID();
+        _ref(m_hOldLockon) = m_hLockon;
+        _ref(m_iOldCamMode) = PlayerCamera::CPlayerCamera::getNowCamMode();
+        if ((m_pAtkData->FLAG & 0x20) && m_pPLM->isCompleteLoadCard(m_uiCardID) != 1) {
+            setObjStop(1);
+            m_pCam->changeCamMode(5, 0);
+        }
+        m_iSubState = 6;
+        break;
+    case 6:
+        if (m_pPLM->isCompleteLoadCard(m_uiCardID) != 1) break;
+        if (!m_pPLM->isSummonReady()) {
+            calcAppearPosFS_toAttackID();
+            m_pPLM->createSummon(m_pPLM->getSummonID_toCard(m_uiCardID), NULL);
+            break;
+        }
+        if (!isMotionLoop()) break;
+        setObjStop(0);
+        m_pCam->changeCamMode(-1, 0);
+        m_pPLM->getSummon()->setAppear();
+        fadeEffect(m_hEffCast, 1);
+        {
+            CEffect* effect = CEffectMan::getEffect(m_hEffCast);
+            if (effect) {
+                effect->setZSortEntity(m_pPLM->getSummon(), 1, 1);
+            }
+        }
+        switch (m_uiAttackID) {
+        case 0x7A:
+        case 0x7B:
+        case 0x7D:
+        case 0x80:
+            break;
+        default:
+            setEffect(g_szDpxSummon, 2, &getPos(), NULL, 0.0f);
+            break;
+        }
+        m_iSubState = m_uiAttackID;
+        setAnimForce(0x2a, -1, 0, 0, 0, 0);
+        setPlayerFlag(0x100000, 0);
+        m_tqStateTimer = 0;
+        m_pMarker->holdTarget(8);
+        procTargetMark();
+        break;
+    case 0x7C:
+    case 0x7E:
+        if (!m_pPLM->isSummonReady()) {
+            m_iSubState = 5;
+            break;
+        }
+        if (!m_bIsCanCombo) {
+            m_bIsCanCombo = m_pPLM->getSummon()->setSkill(m_uiAttackID);
+        }
+        exeStandUp_inFriend();
+        break;
+    case 0x7F:
+        if (!m_pPLM->isSummonReady() || isPlayerFlag(0x8000000)) {
+            m_iSubState = 3;
+            setAnim(0x2A, -1, 0);
+            break;
+        }
+        if (!m_bIsCanCombo) {
+            m_bIsCanCombo = m_pPLM->getSummon()->setSkill(m_uiAttackID);
+        } else {
+            watchTarget(2);
+        }
+        break;
+    case 3:
+        if (m_pPLM->isSummonReady()) break;
+        m_iSubState = 5;
+        setPlayerFlag(0, 0x8000000);
+        m_fWallRadius = 0.5f;
+        break;
+    case 0x7A:
+    case 0x7B:
+    case 0x7D:
+    case 0x80:
+        if (!m_pPLM->isSummonReady() || isPlayerFlag(0x8000000)) {
+            setPlayerFlag(0x400000, 0x1000);
+            m_iSubState = 4;
+            if (isAir()) {
+                setLand(8.0f, 0.5f, 1);
+                updateCoord();
+                coordFix();
+            }
+            exeWarp(0);
+            setCastEffect(g_szDpxSummon, 2, &Crd(0), NULL);
+            setPlayerFlag(0, 0x8000000);
+            if (m_uiAttackID == 0x80) {
+                setEffect(g_szDpxCloud, 0, &getPos(), NULL, 0.0f);
+            }
+            break;
+        }
+        setPlayerFlag(0x400000, 0);
+        if (!exeWarp(1)) break;
+        if (!m_bIsCanCombo) {
+            m_bIsCanCombo = m_pPLM->getSummon()->setSkill(m_uiAttackID);
+            m_pCam->changeNowPlayer(m_pPLM->getSummon()->getHandle(), m_hTarget);
+            m_pCam->changeCamMode(-1, 0);
+            setPlayerFlag(0x1001, 0);
+            setEntityFlag(1, 0);
+            offWeapon();
+        }
+        warp(m_pPLM->getSummon()->getPos());
+        setRot(m_pPLM->getSummon()->getRot());
+        clearSpeed();
+        break;
+    case 4:
+        setPlayerFlag(0x400000, 0);
+        onWeapon(0);
+        if (!exeWarp(0)) break;
+        if (m_pPLM->isSummonReady()) break;
+        setPlayerFlag(0, 0x1001);
+        m_iSubState = 5;
+        setPlayerFlag(0, 0x8000000);
+        m_fWallRadius = 0.5f;
+        break;
+    case 5:
+        if (isBattleFlag(0x1000) && exeUseStock(1)) {
+            if (isPlayerFlag(0x80000000)) setBGFade(1.0f, 20.0f, 0);
+            break;
+        }
+        procSkillEnd(-1);
+        break;
+    }
+}
 void CPlayerSora::setStateSE(INT inState, INT inKind) {
     INT SEID = -1;
     switch (inState) {
