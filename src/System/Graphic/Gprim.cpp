@@ -132,6 +132,17 @@ static inline INT _toInt(u_long128 x) {
 }
 static inline FLOAT _getW(u_long128 x) { return _hiToFloat(_toU64(_getHi64(x))); }
 static inline INT _getZ(u_long128 x) { return _toInt(_getHi64(x)); }
+static inline u_long128 _calcSTQ(const G_ST& st, UINT iW) {
+    ULONGLONG inSTQ = *(ULONGLONG*)&st;
+    u_long128 iRet;
+    __asm__ volatile("pcpyld %0, %2, %1\n"
+                     "qmtc2.ni %0, $vf8\n"
+                     "vmulz.xy $vf8, $vf8, $vf8z\n"
+                     "qmfc2.ni %0, $vf8\n"
+                     : "=r"(iRet)
+                     : "r"(inSTQ), "r"(iW));
+    return iRet;
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
@@ -998,7 +1009,53 @@ ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1);
 #endif
+/* Parked: registers only - as in the CCoord-less version the original keeps iW in a0 and the copy of the mfc1 in v1
+ * (ld of it->S after it), ours swaps them; tried: STQ inline taking G_ST&+UINT, G_ST&+FLOAT, operand order in the
+ * pcpyld asm, iW assigned inside the call */
+#if 0
+ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd) {
+    IVECTOR p[3];
+    FLOAT fW0;
+    FLOAT fW1;
+    UINT iW;
+    INT iBone = -1;
+    while (it < end) {
+        _prefetch(it, 0x20);
+        if (iBone != it[0].Bone) {
+            iBone = it[0].Bone;
+            pCrd[iBone].getRotTransPersMatrix_VF04_07();
+        }
+        fW0 = RotTransPersClipW(p[0], it[0].P);
+        if (p[0].w) {
+            it += 2;
+            continue;
+        }
+        _prefetch(it, 0x40);
+        if (iBone != it[1].Bone) {
+            iBone = it[1].Bone;
+            pCrd[iBone].getRotTransPersMatrix_VF04_07();
+        }
+        fW1 = RotTransPersClipW(p[1], it[1].P);
+        if (p[1].w) {
+            it += 2;
+            continue;
+        }
+        iW = *(UINT*)&fW0;
+        p64[0] = (ULONGLONG)_calcSTQ(it[0].S, iW);
+        p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
+        p64[2] = _vecToXYZ(p[0]);
+        iW = *(UINT*)&fW1;
+        p64[3] = (ULONGLONG)_calcSTQ(it[1].S, iW);
+        p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
+        p64[5] = _vecToXYZ(p[1]);
+        it += 2;
+        p64 += 6;
+    }
+    return p64;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1P6CCoord);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1P6CCoordi);
 ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
