@@ -413,7 +413,9 @@ QWdata* C3DTPrim::makePkt_Triangle0(QWdata* pQw) {
     }
     return (QWdata*)_makePkt_TexTriangle((ULONGLONG*)pQw, m_V, m_V + m_iMax, isBackClip());
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle1__8C3DTPrimP6QWdata);
+QWdata* C3DTPrim::makePkt_Triangle1(QWdata* pQw) {
+    return (QWdata*)_makePkt_TexTriangle((ULONGLONG*)pQw, m_V, m_V + m_iMax, &m_pObj->Crd(0), isBackClip());
+}
 QWdata* C3DCPrim::makePkt_None(QWdata* pQw) {
     return pQw;
 }
