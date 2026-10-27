@@ -10,8 +10,35 @@ public:
     static struct TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
 };
 BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect);
+ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
+ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
+template <class T> static inline T& _ref(T& v) { return v; }
+class CCoord { /* PARTIAL: System/Graphic/Camera.h */
+public:
+    void getRotTransPersMatrix(FMATRIX& outMat);
+    void getRotTransPersMatrix_VF04_07();
+};
+class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
+public:
+    static FMATRIX& getWorldScreenMatrix();
+};
+class CPackMan { /* PARTIAL: System/Graphic/PackMan.cpp */
+public:
+    static u_long128* pkOpenGifTag(u_long128 tag);
+    static void pkAddGsAD(UINT addr, u_long data);
+    static void pkCloseGifTag();
+};
+class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
+public:
+    static void add2DispList(CDrawable& inPrim, FIX4 inZ);
+};
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", disp__6CGPrim);
+void CGPrim::disp() {
+    FIX4 z = calcZ();
+    if (z != (FIX4)0xF0000000) {
+        CModelMan::add2DispList(*this, z);
+    }
+}
 void CGTexPrim::setTPage(const CHAR* pTexName) {
     m_pTexInfo = CRsrcDB::getRsrcTex(pTexName, NAME_CASE_SENSITIVE);
 }
@@ -20,9 +47,27 @@ void CGTexPrim2D::setTPage(const CHAR* pTexName) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setTexture__9CGTexPrimPC7TexInfoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", setTexture__11CGTexPrim2DPC7TexInfoi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPacketSize__C9CGTexPrim);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPacketSize__C11CGTexPrim2D);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__11CScissoring);
+UINT CGTexPrim::getPacketSize() const {
+    if (m_pTexInfo && !m_pTexInfo->isFix()) {
+        return 26;
+    }
+    return 0;
+}
+UINT CGTexPrim2D::getPacketSize() const {
+    if (m_pTexInfo && !m_pTexInfo->isFix()) {
+        return 26;
+    }
+    return 0;
+}
+void CScissoring::makePkt() {
+    QWdata giftag;
+    giftag.ul64[0] = 0x1000800000008000UL;
+    giftag.ul64[1] = 0xE;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsAD(0x41, (u_long)m_P0.x | ((u_long)m_P1.x << 16) | ((u_long)m_P0.y << 32) |
+                                  ((u_long)m_P1.y << 48));
+    CPackMan::pkCloseGifTag();
+}
 void CScissoring::setRect(G_XY& p0, G_XY& p1) {
     m_P0 = p0;
     m_P1 = p1;
@@ -44,7 +89,11 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10CPol
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CLineF2);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CPolyG4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CCircle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", __18CScreenColoredMask);
+CScreenColoredMask::CScreenColoredMask() {
+    setLayerFG(1);
+    m_P0.set(-0x1000, -(_ref(SCREEN_HEIGHT) * 8));
+    m_P1.set(0x1000, _ref(SCREEN_HEIGHT) * 8);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CRotSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", __isRect__FRC7FVECTORPC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__6CCPrim);
@@ -182,6 +231,26 @@ FLOAT RotTransPersClipW(IVECTOR& out_v, FVECTOR& out_fv, const FVECTOR& in_v) {
     );
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", BackClip__FPC7FVECTORi);
+static inline void loadMatrix_VF04_07(FMATRIX& m) {
+    __asm__ volatile(
+        "lqc2 $vf4, 0x0(%0)\n"
+        "lqc2 $vf5, 0x10(%0)\n"
+        "lqc2 $vf6, 0x20(%0)\n"
+        "lqc2 $vf7, 0x30(%0)\n"
+        :
+        : "r"(&m)
+        : "memory");
+}
+static inline void setRotTransPersMatrix(FMATRIX& m) {
+    __asm__ volatile(
+        "vsub.xyzw $vf3, $vf0, $vf0\n"
+        "lqc2 $vf4, 0x0(%0)\n"
+        "lqc2 $vf5, 0x10(%0)\n"
+        "lqc2 $vf6, 0x20(%0)\n"
+        "lqc2 $vf7, 0x30(%0)\n"
+        :
+        : "r"(&m));
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DPolyFT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyFT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DPolyGT4);
@@ -199,16 +268,39 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DR
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DCircle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DCircle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__13C3DPointLight);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__14C3DPointLight2);
+FIX4 C3DPointLight2::calcZ() {
+    FIX4 nRet = ((CGPrim&)m_Cl[0]).calcZ();
+    if (m_nType == 1) {
+        ((CGPrim&)m_Cl[1]).calcZ();
+    }
+    return nRet;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__14C3DPointLight2);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePktSub__14C3DPointLight2i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DPolyG4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DPolyG4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DPolyG3);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DPolyG3);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__7C3DLine);
+FIX4 C3DLine::calcZ() {
+    FMATRIX mat0;
+    m_pCrd->getRotTransPersMatrix(mat0);
+    setRotTransPersMatrix(mat0);
+    RotTransPersClipW(p0, m_P0);
+    RotTransPersClipW(p1, m_P1);
+    return p0.z;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DLine);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__13C3DLineCoord2);
+FIX4 C3DLineCoord2::calcZ() {
+    FMATRIX mat0;
+    FMATRIX mat1;
+    m_pCrd0->getRotTransPersMatrix(mat0);
+    m_pCrd1->getRotTransPersMatrix(mat1);
+    setRotTransPersMatrix(mat0);
+    RotTransPersClipW(p0, m_P0);
+    setRotTransPersMatrix(mat1);
+    RotTransPersClipW(p1, m_P1);
+    return p0.z;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__13C3DLineCoord2);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DLines);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DLines);
@@ -249,25 +341,67 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__12C
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__17C3DPolyStripCoordP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__10C3DPolyFanP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePktSub__15C3DPolyFanCoordP6QWdata);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _init__8C3DCPrim);
+void C3DCPrim::_init() {
+    m_PRIM = 0;
+    m_TEST = (UINT)-1;
+    m_ALPHA = (UINT)-1;
+    m_ZBUF = (UINT)-1;
+    m_CLAMP = (ULONGLONG)-1;
+    m_SCISSOR = (ULONGLONG)-1;
+    m_pCrd = NULL;
+    m_pObj = NULL;
+    m_V = NULL;
+    m_fGeta = 0.0f;
+    m_iRep = 0;
+    m_iMax = 0;
+    m_iZ = -1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _create__8C3DCPrimUliP6CCoordP7CCoordsi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DCPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DCPrim);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _init__8C3DTPrim);
+void C3DTPrim::_init() {
+    m_PRIM = 0;
+    m_TEST = (UINT)-1;
+    m_ALPHA = (UINT)-1;
+    m_ZBUF = (UINT)-1;
+    m_CLAMP = (ULONGLONG)-1;
+    m_SCISSOR = (ULONGLONG)-1;
+    m_pCrd = NULL;
+    m_pObj = NULL;
+    m_V = NULL;
+    m_fGeta = 0.0f;
+    m_iRep = 0;
+    m_iMax = 0;
+    m_iZ = -1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _create__8C3DTPrimUliP6CCoordP7CCoordsi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DTPrim);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DTPrim);
 QWdata* C3DTPrim::makePkt_None(QWdata* pQw) {
     return pQw;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Line0__8C3DTPrimP6QWdata);
+QWdata* C3DTPrim::makePkt_Line0(QWdata* pQw) {
+    if (m_pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        m_pCrd->getRotTransPersMatrix_VF04_07();
+    }
+    return (QWdata*)_makePkt_TexLine((ULONGLONG*)pQw, m_V, m_V + m_iMax);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Line1__8C3DTPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle0__8C3DTPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle1__8C3DTPrimP6QWdata);
 QWdata* C3DCPrim::makePkt_None(QWdata* pQw) {
     return pQw;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Line0__8C3DCPrimP6QWdata);
+QWdata* C3DCPrim::makePkt_Line0(QWdata* pQw) {
+    if (m_pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        m_pCrd->getRotTransPersMatrix_VF04_07();
+    }
+    return (QWdata*)_makePkt_Line((ULONGLONG*)pQw, m_V, m_V + m_iMax);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Line1__8C3DCPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle0__8C3DCPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_Triangle1__8C3DCPrimP6QWdata);
