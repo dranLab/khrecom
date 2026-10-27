@@ -56,11 +56,16 @@ static inline ULONGLONG _vecToXYZ(const IVECTOR& v) {
 }
 static inline u_long128 _gifTag(u_long tag, u_long regs) {
     u_long128 giftag;
-    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(giftag) : "r"(tag), "0"(regs));
+    __asm__ volatile("pcpyld %0, %1, %2" : "=r"(giftag) : "r"(regs), "r"(tag));
     return giftag;
 }
 static inline u_long _gsXYZ(FIX4 x, FIX4 y, FIX4 z) {
     return (u_long)(x + 0x8000) | ((u_long)(y + 0x8000) << 16) | ((u_long)(z >> 4) << 32);
+}
+static inline u_long _gsUV(const G_UV& t) {
+    INT u = t.u << 4;
+    INT v = t.v << 4;
+    return (u_long)(u | 8) | ((u_long)(v | 8) << 16);
 }
 static inline u_long _gsXYZ(const G_XYZ& p) { return _gsXYZ(p.x, p.y, p.z); }
 static inline void _setSTQ(FVECTOR& outSTQ, ULONGLONG inSTQ, FLOAT fW) {
@@ -74,11 +79,45 @@ static inline void _setSTQ(FVECTOR& outSTQ, ULONGLONG inSTQ, FLOAT fW) {
                      : "$8", "memory");
 }
 QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd);
+static inline void _setGeta(FLOAT fGetaZ) {
+    u_long128 inGeta;
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(inGeta) : "r"((u_long)0), "r"((u_long)*(UINT*)&fGetaZ));
+    __asm__ volatile("qmtc2.ni %0, $vf3" : : "r"(inGeta));
+}
+static inline u_long128 _calcSTQ(ULONGLONG inSTQ, UINT iW) {
+    u_long128 iRet;
+    __asm__ volatile("pcpyld %0, %1, %2\n"
+                     "qmtc2.ni %0, $vf8\n"
+                     "vmulz.xy $vf8, $vf8, $vf8z\n"
+                     "qmfc2.ni %0, $vf8\n"
+                     : "=r"(iRet)
+                     : "r"(iW), "r"(inSTQ));
+    return iRet;
+}
+static inline u_long128 _calcSTQW(ULONGLONG inSTQ, FLOAT fW) {
+    u_long128 iRet;
+    __asm__ volatile("mfc1 %0, %2\n"
+                     "pcpyld %0, %0, %1\n"
+                     "qmtc2.ni %0, $vf8\n"
+                     "vmulz.xy $vf8, $vf8, $vf8z\n"
+                     "qmfc2.ni %0, $vf8\n"
+                     : "=&r"(iRet)
+                     : "r"(inSTQ), "f"(fW));
+    return iRet;
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
 public:
     static FMATRIX& getWorldScreenMatrix();
+    static FMATRIX& getWorldViewMatrix();
+    static FMATRIX& getViewScreenMatrix();
 };
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+static inline FVECTOR ApplyMatrix(const FMATRIX& m0, const FVECTOR& v1) { /* PARTIAL: System/Coord.h */
+    FVECTOR b;
+    ApplyMatrix(b, m0, v1);
+    return b;
+}
 class CPackMan { /* PARTIAL: System/Graphic/PackMan.cpp */
 public:
     static u_long128* pkOpenGifTag(u_long128 tag);
@@ -87,6 +126,9 @@ public:
     static u_long128* pkOpenGifTagManual(u_long128 tag);
     static void pkCloseGifTagManual(UINT* p);
     static void pkAddGsData(u_long data);
+    static void* pkGetCurrentPointer();
+    static void pkSetCurrentPointer(void* p);
+    static void pkCloseGifTag(void* p);
 };
 class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
 public:
@@ -153,7 +195,25 @@ void CTile::makePkt() {
     CPackMan::pkAddGsData(_gsXYZ(m_P1.x, m_P1.y, m_P0.z));
     CPackMan::pkCloseGifTag();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__5CSprt);
+void CSprt::makePkt() {
+    QWdata giftag;
+    ULONGLONG tex;
+    if (m_pTexInfo == NULL) {
+        return;
+    }
+    tex = setTexture();
+    giftag.ul64[0] = 0x7400000000008000UL;
+    giftag.ul64[1] = 0x4343170;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x316 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(tex);
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_gsUV(m_T0));
+    CPackMan::pkAddGsData(_gsXYZ(m_P0));
+    CPackMan::pkAddGsData(_gsUV(m_T1));
+    CPackMan::pkAddGsData(_gsXYZ(m_P1.x, m_P1.y, m_P0.z));
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CPolyGT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10CPolyGT4ST);
 void CLineF2::makePkt() {
@@ -167,7 +227,22 @@ void CLineF2::makePkt() {
     CPackMan::pkAddGsData(_gsXYZ(m_P1.x, m_P1.y, m_P1.z));
     CPackMan::pkCloseGifTag();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CPolyG4);
+void CPolyG4::makePkt() {
+    QWdata giftag;
+    giftag.ul64[0] = 0x9400000000008000UL;
+    giftag.ul64[1] = 0x414141410UL;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x30C | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_gsXYZ(m_P0));
+    CPackMan::pkAddGsData(m_C1.col);
+    CPackMan::pkAddGsData(_gsXYZ(m_P1));
+    CPackMan::pkAddGsData(m_C2.col);
+    CPackMan::pkAddGsData(_gsXYZ(m_P2));
+    CPackMan::pkAddGsData(m_C3.col);
+    CPackMan::pkAddGsData(_gsXYZ(m_P3));
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CCircle);
 CScreenColoredMask::CScreenColoredMask() {
     setLayerFG(1);
@@ -393,7 +468,31 @@ FIX4 C3DPolyFT4::calcZ() {
     }
     return max;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyFT4);
+void C3DPolyFT4::makePkt() {
+    ULONGLONG* p64;
+    ULONGLONG tex = setTexture();
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xE400000000008001UL, 0x42142142142170UL));
+    p64[0] = (u_long)0x214 | ((u_long)isSemiTrans() << 6);
+    p64[1] = tex;
+
+    p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
+    p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
+    p64[4] = _vecToXYZ(p0);
+
+    p64[5] = (u_long)m_C0.col | ((u_long)p1.w << 32);
+    p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
+    p64[7] = _vecToXYZ(p1);
+
+    p64[8] = (u_long)m_C0.col | ((u_long)p2.w << 32);
+    p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
+    p64[10] = _vecToXYZ(p2);
+
+    p64[11] = (u_long)m_C0.col | ((u_long)p3.w << 32);
+    p64[12] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S3, *(FLOAT*)&p3.w);
+    p64[13] = _vecToXYZ(p3);
+
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[14]);
+}
 FIX4 C3DPolyGT4::calcZ() {
     FMATRIX rts;
     FVECTOR* fv;
@@ -419,7 +518,31 @@ FIX4 C3DPolyGT4::calcZ() {
     }
     return max;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyGT4);
+void C3DPolyGT4::makePkt() {
+    ULONGLONG* p64;
+    ULONGLONG tex = setTexture();
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xE400000000008001UL, 0x42142142142170UL));
+    p64[0] = (u_long)0x21C | ((u_long)isSemiTrans() << 6);
+    p64[1] = tex;
+
+    p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
+    p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
+    p64[4] = _vecToXYZ(p0);
+
+    p64[5] = (u_long)m_C1.col | ((u_long)p1.w << 32);
+    p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
+    p64[7] = _vecToXYZ(p1);
+
+    p64[8] = (u_long)m_C2.col | ((u_long)p2.w << 32);
+    p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
+    p64[10] = _vecToXYZ(p2);
+
+    p64[11] = (u_long)m_C3.col | ((u_long)p3.w << 32);
+    p64[12] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S3, *(FLOAT*)&p3.w);
+    p64[13] = _vecToXYZ(p3);
+
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[14]);
+}
 FIX4 C3DPolyFT3::calcZ() {
     FMATRIX rts;
     FVECTOR* fv;
@@ -445,7 +568,27 @@ FIX4 C3DPolyFT3::calcZ() {
     }
     return max;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyFT3);
+void C3DPolyFT3::makePkt() {
+    ULONGLONG* p64;
+    ULONGLONG tex = setTexture();
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xB400000000008001UL, 0x42142142170UL));
+    p64[0] = (u_long)0x213 | ((u_long)isSemiTrans() << 6);
+    p64[1] = tex;
+
+    p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
+    p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
+    p64[4] = _vecToXYZ(p0);
+
+    p64[5] = (u_long)m_C0.col | ((u_long)p1.w << 32);
+    p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
+    p64[7] = _vecToXYZ(p1);
+
+    p64[8] = (u_long)m_C0.col | ((u_long)p2.w << 32);
+    p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
+    p64[10] = _vecToXYZ(p2);
+
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[11]);
+}
 FIX4 C3DPolyGT3::calcZ() {
     FMATRIX rts;
     FVECTOR* fv;
@@ -471,14 +614,114 @@ FIX4 C3DPolyGT3::calcZ() {
     }
     return max;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyGT3);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__7C3DTile);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DTile);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__7C3DSprt);
+void C3DPolyGT3::makePkt() {
+    ULONGLONG* p64;
+    ULONGLONG tex = setTexture();
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0xB400000000008001UL, 0x42142142170UL));
+    p64[0] = (u_long)0x21B | ((u_long)isSemiTrans() << 6);
+    p64[1] = tex;
+
+    p64[2] = (u_long)m_C0.col | ((u_long)p0.w << 32);
+    p64[3] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S0, *(FLOAT*)&p0.w);
+    p64[4] = _vecToXYZ(p0);
+
+    p64[5] = (u_long)m_C1.col | ((u_long)p1.w << 32);
+    p64[6] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S1, *(FLOAT*)&p1.w);
+    p64[7] = _vecToXYZ(p1);
+
+    p64[8] = (u_long)m_C2.col | ((u_long)p2.w << 32);
+    p64[9] = (ULONGLONG)_calcSTQW(*(ULONGLONG*)&m_S2, *(FLOAT*)&p2.w);
+    p64[10] = _vecToXYZ(p2);
+
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[11]);
+}
+FIX4 C3DTile::calcZ() {
+    FVECTOR c;
+    FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
+    c = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);
+    c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);
+
+    c.x += m_P0.x;
+    c.y += m_P0.y;
+
+    RotTransPers(p0, vs, c);
+
+    c.x += m_P1.x - m_P0.x;
+    c.y += m_P1.y - m_P0.y;
+    RotTransPers(p1, vs, c);
+
+    p1.z = p0.z;
+
+    return p0.z << 4;
+}
+void C3DTile::makePkt() {
+    QWdata giftag;
+    if (p0.z <= 0 || p0.z > 0xFFFF28 || p0.x < 0 || p0.x > 0xFFFF || p0.y < 0 || p0.y > 0xFFFF ||
+        p1.z > 0xFFFF28 || p1.z <= 0 || p1.x < 0 || p1.x > 0xFFFF || p1.y < 0 || p1.y > 0xFFFF) {
+        return;
+    }
+    giftag.ul64[0] = 0x4400000000008000UL;
+    giftag.ul64[1] = 0x4410;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x206 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData((u_long)p0.x | ((u_long)p0.y << 16) | ((u_long)p0.z << 32));
+    CPackMan::pkAddGsData((u_long)p1.x | ((u_long)p1.y << 16) | ((u_long)p1.z << 32));
+    CPackMan::pkCloseGifTag();
+}
+FIX4 C3DSprt::calcZ() {
+    FVECTOR c;
+    FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
+    c = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);
+    c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);
+
+    c.w = 1.0f;
+    c.x += m_P0.x;
+    c.y += m_P0.y;
+
+    RotTransPers(p0, vs, c);
+
+    c.x += m_P1.x - m_P0.x;
+    c.y += m_P1.y - m_P0.y;
+    RotTransPers(p1, vs, c);
+
+    return p0.z << 4;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7C3DSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DRotSprt);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DRotSprt);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__9C3DCircle);
+FIX4 C3DCircle::calcZ() {
+    FVECTOR c;
+    FMATRIX& vs = CWorldEnv::getViewScreenMatrix();
+    c = ApplyMatrix(m_pCrd->getWorldMatrix(), m_Center);
+    c = ApplyMatrix(CWorldEnv::getWorldViewMatrix(), c);
+
+    c.x -= m_R0;
+    c.y -= m_R0;
+
+    RotTransPers(p0, vs, c);
+
+    c.x += m_R0 * 2.0f;
+    c.y += m_R0 * 2.0f;
+    RotTransPers(p1, vs, c);
+
+    if (m_Zoffset != 0.0f) {
+        IVECTOR p;
+
+        c.x -= m_R0;
+        c.y -= m_R0;
+
+        c.z += m_Zoffset;
+
+        RotTransPers(p, vs, c);
+
+        p0.z = p.z;
+    }
+
+    p1.z = p0.z;
+
+    return p0.z;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DCircle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__13C3DPointLight);
 FIX4 C3DPointLight2::calcZ() {
@@ -514,7 +757,20 @@ FIX4 C3DPolyG4::calcZ() {
     }
     return max;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__9C3DPolyG4);
+void C3DPolyG4::makePkt() {
+    ULONGLONG* p64;
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x9400000000008001UL, 0x414141410UL));
+    p64[0] = (u_long)0x20C | ((u_long)isSemiTrans() << 6);
+    p64[1] = m_C0.col;
+    p64[2] = _vecToXYZ(p0);
+    p64[3] = m_C1.col;
+    p64[4] = _vecToXYZ(p1);
+    p64[5] = m_C2.col;
+    p64[6] = _vecToXYZ(p2);
+    p64[7] = m_C3.col;
+    p64[8] = _vecToXYZ(p3);
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[9]);
+}
 FIX4 C3DPolyG3::calcZ() {
     FVECTOR c;
     FMATRIX rts;
@@ -600,8 +856,49 @@ void C3DLineCoord2::makePkt() {
     CPackMan::pkAddGsData(_vecToXYZ(p1));
     CPackMan::pkCloseGifTag();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DLines);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8C3DLines);
+FIX4 C3DLines::calcZ() {
+    FMATRIX mat0;
+    G_LINE* it;
+    if (m_vLINE.size() == 0) {
+        return 0;
+    }
+
+    if (m_pCrd) {
+        m_pCrd->getRotTransPersMatrix(mat0);
+    } else {
+        mat0 = CWorldEnv::getWorldScreenMatrix();
+    }
+    setRotTransPersMatrix(mat0);
+
+    for (it = m_vLINE.begin(); it != m_vLINE.end();) {
+        RotTransPersClipW(it->p0, it->P0);
+        RotTransPersClipW(it->p1, it->P1);
+        it++;
+    }
+
+    return m_vLINE.begin()->p0.z;
+}
+void C3DLines::makePkt() {
+    QWdata giftag;
+    G_LINE* it;
+    if (m_vLINE.size() == 0) {
+        return;
+    }
+    giftag.ul64[0] = 0x5400000000008000UL;
+    giftag.ul64[1] = 0x41410;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    for (it = m_vLINE.begin(); it != m_vLINE.end(); it++) {
+        if (it->p0.w) {
+            continue;
+        }
+        CPackMan::pkAddGsData((u_long)0x209 | ((u_long)isSemiTrans() << 6));
+        CPackMan::pkAddGsData(it->C0.col);
+        CPackMan::pkAddGsData(_vecToXYZ(it->p0));
+        CPackMan::pkAddGsData(it->C1.col);
+        CPackMan::pkAddGsData(_vecToXYZ(it->p1));
+    }
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1P6CCoord);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1i);
@@ -630,7 +927,39 @@ ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
     }
     return p64;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Line__FPUlP7G_STRIPT1P6CCoord);
+ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd) {
+    IVECTOR p[3];
+    INT iBone = -1;
+    while (it < end) {
+        _prefetch(it, 0x20);
+        if (iBone != it[0].Bone) {
+            iBone = it[0].Bone;
+            pCrd[iBone].getRotTransPersMatrix_VF04_07();
+        }
+        RotTransPersClipW(p[0], it[0].P);
+        if (p[0].w) {
+            it += 2;
+            continue;
+        }
+        _prefetch(it, 0x40);
+        if (iBone != it[1].Bone) {
+            iBone = it[1].Bone;
+            pCrd[iBone].getRotTransPersMatrix_VF04_07();
+        }
+        RotTransPersClipW(p[1], it[1].P);
+        if (p[1].w) {
+            it += 2;
+            continue;
+        }
+        p64[0] = it[0].C.col;
+        p64[1] = _vecToXYZ(p[0]);
+        p64[2] = it[1].C.col;
+        p64[3] = _vecToXYZ(p[1]);
+        it += 2;
+        p64 += 4;
+    }
+    return p64;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_Triangle__FPUlP7G_STRIPT1P6CCoordi);
 QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
@@ -657,7 +986,36 @@ QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
     }
     return pQw;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLineStrip__FP6QWdataP7G_STRIPT1P6CCoord);
+QWdata* _makePkt_TexLineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd) {
+    IVECTOR p;
+    UINT fg;
+    FLOAT fW;
+    INT iBone;
+    fg = 1;
+    iBone = -1;
+    for (; it < end; it++, pQw += 3) {
+        if (iBone != it->Bone) {
+            iBone = it->Bone;
+            pCrd[iBone].getRotTransPersMatrix_VF04_07();
+        }
+        _prefetch(it, 0x20);
+        fW = RotTransPersClipW(p, it->P);
+        if (p.w) {
+            fg |= 2;
+        } else if (fg) {
+            p.w = 0x8000;
+        }
+        if (it->Term) {
+            fg = 1;
+        } else {
+            fg >>= 1;
+        }
+        _setSTQ(*(FVECTOR*)&pQw[0], *(ULONGLONG*)&it->S, fW);
+        pQw[1].ul128 = _colToVec(it->C);
+        pQw[2].ul128 = p._q;
+    }
+    return pQw;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleStrip__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleStrip__FP6QWdataP7G_STRIPT1P6CCoordi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1i);
@@ -684,16 +1042,91 @@ QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
     }
     return pQw;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_LineStrip__FP6QWdataP7G_STRIPT1P6CCoord);
+QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd) {
+    IVECTOR p;
+    UINT fg;
+    INT iBone;
+    fg = 1;
+    iBone = -1;
+    for (; it < end; it++, pQw += 2) {
+        if (iBone != it->Bone) {
+            iBone = it->Bone;
+            pCrd[iBone].getRotTransPersMatrix_VF04_07();
+        }
+        _prefetch(it, 0x20);
+        RotTransPersClipW(p, it->P);
+        if (p.w) {
+            fg |= 2;
+        } else if (fg) {
+            p.w = 0x8000;
+        }
+        if (it->Term) {
+            fg = 1;
+        } else {
+            fg >>= 1;
+        }
+        pQw[0].ul128 = _colToVec(it->C);
+        pQw[1].ul128 = p._q;
+    }
+    return pQw;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleStrip__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleStrip__FP6QWdataP7G_STRIPT1P6CCoordi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPrimGetaZ__FiRC7FVECTORPC7FMATRIXf);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__12C3DStripBase);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__12C3DStripBase);
+void C3DStripBase::makePkt() {
+    QWdata* pQw;
+    QWdata* pQwTop;
+    QWdata* pQwPkt;
+    if (m_vVERT.size() == 0) {
+        return;
+    }
+    pQwTop = (QWdata*)CPackMan::pkGetCurrentPointer();
+    pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(
+        (((u_long)m_nType | ((u_long)isShading() << 3) | ((u_long)isSemiTrans() << 6) | (u_long)0x200) << 47) |
+            0x2000400000008000UL,
+        0x41));
+    _setGeta(m_fGetaZ);
+    pQwPkt = pQw;
+    pQw = makePktSub(pQwPkt);
+    if (pQwPkt != pQw) {
+        CPackMan::pkCloseGifTag(pQw);
+    } else {
+        CPackMan::pkSetCurrentPointer(pQwTop);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__15C3DTexStripBase);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__15C3DTexStripBase);
+void C3DTexStripBase::makePkt() {
+    QWdata* pQw;
+    QWdata* pQwTop;
+    QWdata* pQwPkt;
+    ULONGLONG* p64;
+    ULONGLONG tex;
+    if (m_vVERT.size() == 0) {
+        return;
+    }
+    tex = setTexture();
+    pQwTop = (QWdata*)CPackMan::pkGetCurrentPointer();
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x1400000000000001UL, 0x7));
+    p64[0] = tex;
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[1]);
+    pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(
+        (((u_long)m_nType | ((u_long)isShading() << 3) | ((u_long)1 << 4) | ((u_long)isSemiTrans() << 6) |
+          (u_long)0x200)
+         << 47) |
+            0x3000400000008000UL,
+        0x412));
+    _setGeta(m_fGetaZ);
+    pQwPkt = pQw;
+    pQw = makePktSub(pQwPkt);
+    if (pQwPkt != pQw) {
+        CPackMan::pkCloseGifTag(pQw);
+    } else {
+        CPackMan::pkSetCurrentPointer(pQwTop);
+    }
+}
 QWdata* C3DLineTStrip::makePktSub(QWdata* pQw) {
     G_STRIP* it = m_vVERT.begin();
     G_STRIP* end = m_vVERT.end();
