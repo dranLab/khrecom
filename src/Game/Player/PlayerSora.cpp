@@ -36,6 +36,7 @@ inline void _roulettePrizeMessage() {
 #include "include_asm.h"
 
 namespace PL {
+extern TIMEQ g_CardBreakTime[];
 static LPCSTR g_szDpxFriend = "friend";
 static LPCSTR g_szDpxSummon = "summon";
 static LPCSTR g_szDpxLimit1 = "limit1";
@@ -307,9 +308,83 @@ INT CPlayerSora::endAttack_inFriend() {
     m_pPLM->getFriend()->setFailed();
     return -1;
 }
-/* placeholder: .rodata of initSummon__Q22PL11CPlayerSorai (strings, jump tables) */
-__asm__(".rdata\n.align 4\n.word .L002A17DC\n.word .L002A1800\n.word .L002A1824\n.word .L002A1838\n.word .L002A1860\n.word .L002A1880\n.word .L002A18A8\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", initSummon__Q22PL11CPlayerSorai);
+// reads/writes members and globals as through a reference (the original reloads/stores them in this order)
+template <class T> static inline T& _ref(T& v) { return v; }
+
+void CPlayerSora::initSummon(INT inNo) {
+    setPlayerState(SUMMON);
+    m_iSubState = 1;
+    clearSpeed();
+    offAttack();
+    setBattleFlag(0, 8);
+    setBattleFlag(0, 0x800);
+    setBattleFlag(0, 0x80000);
+    setTrgFlag(0, 0x100);
+    setPlayerFlag(0, 0x2800000);
+    setPlayerFlag(0, 0x8000000);
+    _ref(m_iAttackNo) = inNo;
+    _ref(m_uiPreAttackKind) = 0;
+    _ref(m_uiAttackKind) = 0;
+    _ref(m_bIsAttackHit) = FALSE;
+    _ref(m_bNextTrg) = FALSE;
+    _ref(m_iNextAttack) = 0;
+    _ref(m_bDmgMuteki) = FALSE;
+    _ref(m_bIsCanCombo) = FALSE;
+    _ref(m_fJumpGravity) = g_fGravity;
+    _ref(m_JumpState) = 3;
+    _ref(m_fMoveSpdXZ) = 0.0f;
+    m_tqCardBreakTime = g_CardBreakTime[CardBattle::g_pBattleCardList[m_uiCardID].BREAK];
+    m_fWalkSpeed = 0.0f;
+    m_szEffectName = NULL;
+    switch (m_uiCardID) {
+    case 0x23:
+        setMDFooting(0);
+        m_fWallRadius = 1.0f;
+        m_uiAttackID = 0x7a;
+        m_pPLM->setReqLoad(0x34, 0);
+        break;
+    case 0x24:
+        setMDFooting(0);
+        m_fWallRadius = 2.0f;
+        m_uiAttackID = 0x7b;
+        m_pPLM->setReqLoad(0x3d, 0);
+        break;
+    case 0x25:
+        m_uiAttackID = 0x7c;
+        m_pPLM->setReqLoad(0x38, 0);
+        break;
+    case 0x26:
+        setMDFooting(0);
+        m_fWallRadius = 0.8f;
+        m_uiAttackID = 0x7d;
+        m_pPLM->setReqLoad(0x36, 0);
+        break;
+    case 0x27:
+        m_uiAttackID = 0x7e;
+        m_pPLM->setReqLoad(0x3f, 0);
+        break;
+    case 0x28:
+        m_vAppearPos = m_vHeadPos;
+        m_uiAttackID = 0x7f;
+        m_pPLM->setReqLoad(0x3b, 0);
+        break;
+    case 0x29:
+        setMDFooting(0);
+        m_fWallRadius = 0.8f;
+        m_uiAttackID = 0x80;
+        m_pPLM->setReqLoad(0x41, 0);
+        break;
+    default:
+        m_iSubState = 5;
+        m_pAtkData = &g_AttackDataList[0];
+        m_uiAttackID = 0;
+        m_uiAttackKind = 0;
+        return;
+    }
+    m_pAtkData = &g_AttackDataList[m_uiAttackID];
+    m_uiPreAttackKind = m_uiAttackKind;
+    m_fDistXZ = m_fDistY = 0.0f;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeSummon__Q22PL11CPlayerSora);
 void CPlayerSora::setStateSE(INT inState, INT inKind) {
     INT SEID = -1;
@@ -424,9 +499,6 @@ INT CPlayerSora::getStateSESeq(INT inState) {
     }
     return seq;
 }
-// reads a global after the member stores before it (the original reloads it there)
-template <class T> static inline T& _ref(T& v) { return v; }
-
 void CPlayerSora::initGlide(INT inFlag) {
     if (isBattleFlag(0x200000)) {
         return;
