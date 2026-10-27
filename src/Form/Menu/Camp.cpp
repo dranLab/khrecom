@@ -4116,7 +4116,10 @@ asm(".section .rodata\n"
     " colSeqTbl.4432:\n"
     ".byte 0x00,0x74,0x4B,0x4B,0x5F,0x5F,0x5F,0x73\n"
     ".section .text");
-#if 0 /* 4 lines differ in the last loop: addu operand order of this+m_nKindCategorySelect*2 and v0/v1 swapped for the nColSeq != 0x73 compare */
+/* Parked: 4 of 1048 lines differ in the last loop: the addu operand order of this + m_nKindCategorySelect * 2 and
+   v0/v1 swapped for the nColSeq != 0x73 compare. tried: without _ref (24 lines), _ref(*(p + i)), _ref(m_nKind)[i],
+   != 0, !i, swapped operand/condition orders, !(a && b); permuter 7 min (4293 candidates, no gain). */
+#if 0
 INT CCamp::setDeckInfo(INT nSetCmd) {
     static char* pStrNum[4] = { "%d", "\x81~%02d", "", "--" };
     FVECTOR vec;
