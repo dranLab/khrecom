@@ -143,7 +143,13 @@ void CBattleEnemy::getPlayerPosition(FVECTOR& outPos) {
     else outPos = getPlayerPos(0);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getPlayerHandle__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeExpPrize__12CBattleEnemy);
+void CBattleEnemy::makeExpPrize() {
+    if (m_pBodyColl->getHitCollBody()) {
+        makeExpPrize(m_pBodyColl->getHitCollBody()->getDetectPos());
+    } else {
+        makeExpPrize(&Crd(1).m_World.getTrans());
+    }
+}
 void CBattleEnemy::makePrize() {
     if (m_pBodyColl->getHitCollBody()) makePrize(m_pBodyColl->getHitCollBody()->getDetectPos());
 }
