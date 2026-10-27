@@ -6445,7 +6445,11 @@ asm(".section .rodata\n"
     ".byte 0x34,0x01,0x35,0x01,0x36,0x01\n"
     ".byte 0x00,0x00\n"
     ".section .text");
-#if 0 /* the friend-card position vector is written through a pointer and its z kept in f20 in the original; scheduling around it differs */
+/* Parked: 13 of 487 lines differ (was 23): vec.set() (the ref's inlined `FVECTOR *this`) and a precomputed
+   `m_bPlayerKind + 0xF` (permuter) fixed the rest; left: the original keeps &vec in v0 (y/w/z stores and the later
+   fShift = vec.z load through it), so pPlayerManager is reloaded from its spill slot for the test; ours keeps it in
+   v0 and uses v1/sp. tried: getPLM() before vec.set, _ref(m_pInstance), set() without w; permuter 6 min (32 -> 26). */
+#if 0
 INT CCamp::setStatusWin1(INT nSetCmd) {
     static LPCTSTR pStrFriend = "FRIENDS";
     static USHORT baseSeqTbl[2][3] = { { 13, 14, 15 }, { 349, 350, 351 } };
@@ -6469,7 +6473,7 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
             rgba.col = 0x807C7C7C;
             m_pWindow1Fnt = NEW(7706, C2DFnt)(0, 0, &rgba, 0xF, pStrFriend, 0x40);
             m_pWindow1Ctrl->addFntShift(m_pSeqName, m_pWindow1Fnt, !m_bPlayerKind ? -83.0f : -32.0f, -44.0f);
-            vec.x = !m_bPlayerKind ? -72.0f : 2.0f; vec.y = 26.0f; vec.w = 1.0f; vec.z = 0.0f;
+            vec.set(!m_bPlayerKind ? -72.0f : 2.0f, 26.0f, 0.0f, 1.0f);
             pPlayerManager = PLM::CPlayerManager::getPLM();
             INT idx = 0;
             if (pPlayerManager) {
@@ -6487,7 +6491,8 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
                         m_pWindow1Card[idx]->create(card);
                         m_pWin1EtcButton[idx] = NEW(7731, CButton);
                         pButton = m_pWin1EtcButton[idx];
-                        C2DMan::getLayPosition(m_pLadName, 0, idx + (m_bPlayerKind + 0xF), vec2, 1);
+                        INT nLay = m_bPlayerKind + 0xF;
+                        C2DMan::getLayPosition(m_pLadName, 0, idx + nLay, vec2, 1);
                         idx++;
                         pButton->init(m_pSeqName, 0x14, nameSeqTbl, vec2, NULL, card.getName(), 0xC, fShift, fShift, 0x42, NULL, -1);
                     }
