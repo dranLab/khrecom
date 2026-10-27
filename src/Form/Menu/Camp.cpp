@@ -324,6 +324,7 @@ char* strcat(char*, const char*);
 void sceVu0InterVectorXYZ(FVECTOR& v0, FVECTOR& v1, FVECTOR& v2, float t);
 void sceVu0InterVector(FVECTOR& v0, FVECTOR& v1, FVECTOR& v2, float t);
 }
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 class CFntLF : public CFntM2 {
 public:
@@ -341,6 +342,8 @@ extern CHAR D_004E33E0[]; /* "%d", setDeckInfo */
 extern CHAR D_004E3C80[]; /* "%d/%d", setMapCardWin */
 #define STR_WORLD_TITLE D_004E2AB8
 #define STR_WORLDMAP D_004E4028
+extern CHAR D_004E4048[]; /* "Zoom In{    \xF9DShow Criteria", setWorldmap */
+#define STR_ZOOM_IN D_004E4048
 #define STR_PCT_D D_004E33E0
 #define STR_PCT_D_D D_004E3C80
 
@@ -3560,7 +3563,227 @@ asm(".section .rodata\n"
     " pStrButton.4479:\n"
     ".byte 0x48,0x40,0x4E,0x00\n"
     ".section .text");
+/* Parked: 62 of 941 lines differ. The RCNORMA::NormaSrc argument of createNorma is built from four lhu of its
+   stack copy in the original (extract_bit_field pieces), one ld in ours - the open issue of
+   RoomCreation::menuMain and C2DCard::replaceNorma; the s3/s4 and spill-slot (0x64/0x68) swaps around it follow
+   from that. tried: while/do/for shapes of the 0x40 block (`while (isButtonTrg(0x40)) { if (m_bPooWorld) break;
+   ... break; }` gives the original's block order), nested `if (< 4) if (>= 0)` against the sltiu fold, ref locals
+   (id, block-scoped i), set(1,1,1,1) instead of setAll, setLayer before the vec.set. */
+#if 0
+void CCamp::setWorldmapCursor() {
+    RoomInfo* pRoomInfo;
+    DoorInfo* pDoorInfo;
+    INT idx;
+    INT idx2;
+    static LPCTSTR pSeqName = STR_WORLDMAP;
+    static char* pStrButton[2] = { STR_ZOOM_IN, "Zoom Out     \xF9" "DShow Criteria" };
+    FVECTOR vec;
+    FVECTOR vec2;
+    C2DSeqCtrl* p2DSeqCtrl;
+    RCNORMA::NormaSrc normaSrc;
+    CARD card;
+    USHORT roomId;
+    vec.init();
+    idx = -1;
+    if (m_nSubStep < 4) if (m_nSubStep >= 0) {
+        INT iMoveDirect;
+        if (CPadHandler::isButtonRpt(0x101000, 0)) {
+            iMoveDirect = 0;
+            idx = searchRoom(0, m_nSubStep & 1);
+        } else if (CPadHandler::isButtonRpt(0x204000, 0)) {
+            iMoveDirect = 1;
+            idx = searchRoom(1, m_nSubStep & 1);
+        } else if (CPadHandler::isButtonRpt(0x408000, 0)) {
+            iMoveDirect = 2;
+            idx = searchRoom(2, m_nSubStep & 1);
+        } else if (CPadHandler::isButtonRpt(0x802000, 0)) {
+            iMoveDirect = 3;
+            idx = searchRoom(3, m_nSubStep & 1);
+        }
+        if (idx >= 0) {
+            m_nRoomSelect = idx;
+            idx2 = m_roomMap[idx] - 1;
+            vec = m_pRoomCtrl[idx2]->m_seqControl.vPos;
+            m_pMapCursorCtrl->setLocalPos(vec);
+            m_pMapGuideCtrl->setLocalPos(vec);
+            if (checkNorma(-1, roomId, -1) && !(m_nSubStep & 1)) {
+                m_pMapGuideCtrl->enableDisp(1);
+            } else {
+                m_pMapGuideCtrl->enableDisp(0);
+                setRoomHelp(0, 0);
+            }
+            pRoomInfo = CSceneInfo::getRoomInfo(idx2 + 1);
+            setWMRoomName(pRoomInfo->getRoomNameCardID(), m_nRoomSelect, pRoomInfo, 0);
+            if (m_pRoomCtrl[idx2]->getNumSeq() >= 4) {
+                m_pRoomCtrl[idx2]->restart(1, 0.0f);
+                m_pRoomCtrl[idx2]->restart(2, 0.0f);
+            }
+            m_vWMPosOld = m_vWMPosTarget;
+            AddVectorXYZ(vec2, vec, m_vWMPosTarget);
+            if (vec2.y < -85.0f) {
+                m_vWMPosTarget.y += (INT)((-85.0f - vec2.y + 40.0f) / 40.0f) * 40.0f;
+            } else if (vec2.y > 85.0f) {
+                m_vWMPosTarget.y += (INT)((vec2.y - 85.0f + 40.0f) / 40.0f) * -40.0f;
+            } else if (vec2.y < -5.0f && !(iMoveDirect & 1) && vec.y - m_vWMPosMinMax.y > 45.0f) {
+                m_vWMPosTarget.y += 40.0f;
+            } else if (vec2.y > 5.0f && (iMoveDirect & 1) && m_vWMPosMinMax.w - vec.y > 45.0f) {
+                m_vWMPosTarget.y += -40.0f;
+            }
+            if (vec2.x < -105.0f) {
+                m_vWMPosTarget.x += (INT)((-105.0f - vec2.x + 50.0f) / 50.0f) * 50.0f;
+            } else if (vec2.x > 105.0f) {
+                m_vWMPosTarget.x += (INT)((vec2.x - 105.0f + 50.0f) / 50.0f) * -50.0f;
+            }
+            if (m_nSubStep < 2) {
+                m_fgWMMove = TRUE; m_fWMTimer = 0.0f;
+            } else {
+                m_vWMPosOld = m_vWMPosTarget;
+            }
+            CSound::playSE(1, -1, 0x40);
+        }
+    }
+    while (CPadHandler::isButtonTrg(0x40, 0)) {
+        if (m_bPooWorld) break;
+        if (!(m_nSubStep & 1)) {
+            if (!checkNorma(-1, roomId, -1)) break;
+                m_pMapGuideCtrl->enableDisp(0);
+                idx = 0;
+                m_bRoomNorma = TRUE;
+                CSound::playSE(2, -1, 0x40);
+                m_nSubStep |= 1;
+            break;
+        }
+        m_pWMNormaCtrl->enableDisp(0);
+        for (INT i = 0; i < 4; i++) {
+            m_pRoomNormaCtrl[i]->enableDisp(0);
+            m_pWMNormaArrowCtrl->enableDisp(i, 0);
+        }
+        for (INT i = 0; i < 4; i++) {
+            SAFE_DELETE(m_pRoomNorma[i]);
+        }
+        vec.set(1.0f, 1.0f, 1.0f, 1.0f);
+        for (INT i = 0; i < 32; i++) {
+            if (m_pRoomCtrl[i]) {
+                m_pRoomCtrl[i]->setCol(vec);
+            }
+            if (m_pWayCtrl[i]) {
+                m_pWayCtrl[i]->setCol(vec);
+            }
+        }
+        m_pMapGuideCtrl->enableDisp(checkNorma(-1, roomId, -1) != 0);
+        m_nRoomNorma = 0;
+        m_bRoomNorma = FALSE;
+        CSound::playSE(4, -1, 0x40);
+        m_nSubStep &= ~1;
+        break;
+    }
+    if (!m_bPooWorld) {
+        if ((m_nSubStep & 1) && idx >= 0) {
+            m_pWMNormaCtrl->enableDisp(0);
+            for (INT i = 0; i < 4; i++) {
+                m_pRoomNormaCtrl[i]->enableDisp(0);
+                m_pWMNormaArrowCtrl->enableDisp(i, 0);
+            }
+            for (INT i = 0; i < 4; i++) {
+                SAFE_DELETE(m_pRoomNorma[i]);
+            }
+            vec.set(1.0f, 1.0f, 1.0f, 1.0f);
+            for (INT i = 0; i < 32; i++) {
+                if (m_pRoomCtrl[i]) {
+                    m_pRoomCtrl[i]->setCol(vec);
+                }
+                if (m_pWayCtrl[i]) {
+                    m_pWayCtrl[i]->setCol(vec);
+                }
+            }
+            INT id = m_roomMap[m_nRoomSelect] - 1;
+            if (checkNorma(-1, roomId, -1)) {
+                m_nRoomNorma = 0;
+                m_pWMNormaCtrl->setLocalPos(m_pRoomCtrl[id]->m_seqControl.vPos);
+                m_pWMNormaCtrl->enableDisp(1);
+                for (INT i = 0; i < 4; i++) {
+                    if (!checkNorma(i, roomId, -1)) continue;
+                    pRoomInfo = CSceneInfo::getRoomInfo(roomId);
+                    if (!pRoomInfo) continue;
+                    INT k;
+                    for (k = 0; k < 4; k++) {
+                        pDoorInfo = &pRoomInfo->_doors[k];
+                        if (pDoorInfo->_id == i) break;
+                    }
+                    INT nNormaIndex = pDoorInfo->getNextNormaIndex();
+                    INT nNorma = pDoorInfo->getNormaCount() - nNormaIndex - 1;
+                    if (nNorma < 0) continue;
+                    p2DSeqCtrl = m_pRoomNormaCtrl[i];
+                    p2DSeqCtrl->enableDisp(1);
+                    p2DSeqCtrl->setLayer(0x10);
+                    p2DSeqCtrl->replaceSeq(0, pSeqName, nNorma + 0x3A);
+                    if (nNorma == 0) {
+                        vec.set(i < 2 ? -71.0f : 71.0f, ((i + 1) & 3) < 2 ? 83.0f : -67.0f, 0.0f);
+                    } else {
+                        vec.set(nNorma * -26.0f, ((i + 1) & 3) < 2 ? 95.0f : -81.0f, 0.0f);
+                    }
+                    p2DSeqCtrl->setLocalPos(vec);
+                    m_pWMNormaArrowCtrl->enableDisp(i, 1);
+                    INT fgKeyCard = pDoorInfo->getNormaKeyCardID();
+                    INT nNI;
+                    for (nNI = nNorma; nNI >= 0; nNI--) {
+                        ASSERT_AT(7351, m_nRoomNorma < 4);
+                        C2DCard* p2DCard = m_pRoomNorma[m_nRoomNorma++] = NEW(7352, C2DCard)(1);
+                        p2DCard->setParent(p2DSeqCtrl);
+                        p2DCard->setLayer(0x10);
+                        vec.set(nNI * 82.0f, 0.0f, 0.0f);
+                        p2DCard->setLocalPos(vec);
+                        if (nNI == nNorma && fgKeyCard) {
+                            _setCardNK(card, fgKeyCard, 0);
+                            p2DCard->create(card);
+                        } else {
+                            USHORT n = nNI + nNormaIndex;
+                            normaSrc._nColor = pDoorInfo->getNormaColor(n);
+                            normaSrc._nNumber = pDoorInfo->getNormaNumber(n);
+                            normaSrc._nOp = pDoorInfo->getNormaOperation(n);
+                            p2DCard->createNorma(normaSrc, 0);
+                        }
+                    }
+                }
+                vec.set(0.5f, 0.5f, 0.5f, 1.0f);
+                for (INT i = 0; i < 32; i++) {
+                    if (i != id) {
+                        if (m_pRoomCtrl[i]) {
+                            m_pRoomCtrl[i]->setCol(vec);
+                        }
+                    }
+                    if (m_pWayCtrl[i]) {
+                        m_pWayCtrl[i]->setCol(vec);
+                    }
+                }
+            }
+        }
+        if (CPadHandler::isButtonTrg(0x10, 0)) {
+            if (!(m_nSubStep & 2)) {
+                m_pWMExplaneFnt->setText(pStrButton[0]);
+                m_pWMMoveCtrl->setLocalPos(vec);
+                m_vWMPosOld = m_vWMPosTarget;
+                m_vWMPosTarget.set(0.0f, -3.0f, 0.0f, 0.585f);
+                CSound::playSE(2, -1, 0x40);
+                m_nSubStep |= 2;
+            } else {
+                m_pWMExplaneFnt->setText(pStrButton[1]);
+                m_pWMMoveCtrl->setLocalPos(m_vWMPosCurrent);
+                m_vWMPosTarget = m_vWMPosOld;
+                m_vWMPosTarget.w = 1.0f;
+                m_vWMPosOld.set(0.0f, 0.0f, 0.0f, 0.585f);
+                CSound::playSE(4, -1, 0x40);
+                m_nSubStep &= ~2;
+            }
+            m_fgWMMove = TRUE;
+            m_fWMTimer = 0.0f;
+        }
+    }
+    moveWM();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setWorldmapCursor__5CCamp);
+#endif
 // setWorldmapCursor__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
 asm(".section .rodata\n"
     ".align 3\n"
