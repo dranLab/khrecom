@@ -293,7 +293,32 @@ static inline void setRotTransPersMatrix(FMATRIX& m) {
         :
         : "r"(&m));
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DPolyFT4);
+FIX4 C3DPolyFT4::calcZ() {
+    FVECTOR c;
+    FMATRIX rts;
+    FVECTOR* fv;
+    IVECTOR* iv;
+    FLOAT fW;
+    INT max;
+    INT i;
+
+    m_pCrd->getRotTransPersMatrix(rts);
+    fv = &m_P0;
+    iv = &p0;
+    max = 0;
+    setRotTransPersMatrix(rts);
+    for (i = 0; i < 4; i++) {
+        fW = RotTransPersClipW(iv[i], fv[i]);
+        if (iv[i].w) {
+            return (FIX4)0xF0000000;
+        }
+        *(FLOAT*)&iv[i].w = fW;
+        if (max < iv[i].z) {
+            max = iv[i].z;
+        }
+    }
+    return max;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyFT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DPolyGT4);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DPolyGT4);
