@@ -186,6 +186,7 @@ private:
     virtual void makePkt();
 };
 
+#ifndef SYSTEM_GRAPHIC_GPRIM_CPP /* the partial classes, as the other units see them */
 class CGPrim : public CDrawable {
 protected:
     UINT m_nAttribute;
@@ -518,9 +519,759 @@ private:
     virtual QWdata* makePktSub();
 };
 
-#ifdef SYSTEM_GRAPHIC_GPRIM_CPP /* PARTIAL: full classes for System/Graphic/Gprim only */
+#else /* SYSTEM_GRAPHIC_GPRIM_CPP: the full classes, for System/Graphic/Gprim itself */
+
+/* PARTIAL: while the unit's weak inlines are still INCLUDE_ASM, every virtual destructor is declared out of line
+ * (and first): it is then the classes' key function, never defined here, so defining makePkt/calcZ/... emits
+ * no vtables and no weak copies after the INCLUDE_ASM'd ones. The original's destructors are inline. */
+
+typedef SHORT TDEG;
+class CCoord;
+class CCoords;
+struct TexInfo;
+
+struct G_ST {
+    FLOAT s;
+    FLOAT t;
+    void set(FLOAT _s, FLOAT _t) {
+        s = _s;
+        t = _t;
+    }
+};
+
+struct G_LINE {
+    FVECTOR P0;
+    FVECTOR P1;
+    G_RGBA C0;
+    G_RGBA C1;
+    IVECTOR p0;
+    IVECTOR p1;
+};
+
+struct G_STRIP {
+    FVECTOR P;
+    G_ST S;
+    G_RGBA C;
+    USHORT Term;
+    USHORT Bone;
+};
+
+typedef CVector<G_LINE> G_LINE_VECTOR;
+typedef CVector<G_STRIP> G_STRIP_VECTOR;
+
+class CGPrim : public CDrawable {
+protected:
+    UINT m_nAttribute;
+
+    void initAttribute(UINT nABE, UINT nIIP, UINT nBackClip) {
+        m_nAttribute = nABE | (nIIP << 1) | (nBackClip << 2);
+    }
+public:
+    CGPrim() {
+        m_iFlag = 0;
+        m_nZ = 0;
+        initAttribute(0, 1, 0);
+        CDrawable::setSemiTrans(ALPHA_OFF);
+        setTestFlag(0x5000D);
+        setLayer(0, 0);
+    }
+    virtual ~CGPrim();
+    void setSemiTrans(ALPHA nInAlpha) {
+        CDrawable::setSemiTrans(nInAlpha);
+        if (nInAlpha != ALPHA_OFF) {
+            m_nAttribute |= 1;
+        } else {
+            m_nAttribute &= ~1;
+        }
+    }
+    void setShading(UBYTE nIIP) {
+        if (nIIP) m_nAttribute |= 2;
+        else m_nAttribute &= ~2;
+    }
+    void setBackClip(UBYTE nBackClip) {
+        if (nBackClip) m_nAttribute |= 4;
+        else m_nAttribute &= ~4;
+    }
+    void setTexNearest(UBYTE nNearest) {
+        if (nNearest) m_nAttribute |= 8;
+        else m_nAttribute &= ~8;
+    }
+    INT isSemiTrans() { return m_nAttribute & 1; }
+    INT isShading() { return (m_nAttribute >> 1) & 1; }
+    INT isBackClip() { return (m_nAttribute >> 2) & 1; }
+    INT isTexNearest() { return (m_nAttribute >> 3) & 1; }
+    virtual void disp();
+    virtual FIX4 calcZ() { return 0; }
+};
+
+class CGTexPrim : public CGPrim {
+protected:
+    TexInfo* m_pTexInfo;
+    static TexInfo* m_pTexCache;
+    static INT m_nTmpTexArea;
+
+public:
+    virtual ~CGTexPrim();
+    CGTexPrim() { m_pTexInfo = NULL; }
+    void setTPage(TexInfo* pInInfo) { m_pTexInfo = pInInfo; }
+    void setTPage(const CHAR* pTexName);
+    TexInfo* getTPage() const { return m_pTexInfo; }
+    virtual UINT getPacketSize() const;
+protected:
+    ULONGLONG setTexture() { return setTexture(m_pTexInfo, FALSE); }
+    ULONGLONG setTexture(const TexInfo* pInInfo, BOOL bOnly2D);
+public:
+    static void clearTexCache() { m_pTexCache = NULL; }
+    static BOOL updateTexCache(const TexInfo* pInInfo) {
+        if (pInInfo == m_pTexCache) return FALSE;
+        m_pTexCache = (TexInfo*)pInInfo;
+        return TRUE;
+    }
+    static void setTmpTexAreaForAllPrims(INT nArea) { m_nTmpTexArea = nArea; }
+};
+
+class CGTexPrim2D : public CGPrim {
+protected:
+    TexInfo* m_pTexInfo;
+    static TexInfo* m_pTexCache[28];
+    static USHORT m_nCacheIdx;
+    static USHORT m_nCacheIdxOld;
+
+public:
+    virtual ~CGTexPrim2D();
+    CGTexPrim2D() { m_pTexInfo = NULL; }
+    void setTPage(TexInfo* pInInfo) { m_pTexInfo = pInInfo; }
+    void setTPage(const CHAR* pTexName);
+    TexInfo* getTPage() const { return m_pTexInfo; }
+    virtual UINT getPacketSize() const;
+protected:
+    ULONGLONG setTexture() { return setTexture(m_pTexInfo, FALSE); }
+    ULONGLONG setTexture(const TexInfo* pInInfo, BOOL bOnly2D);
+public:
+    static void clearTexCache() {
+        m_nCacheIdx = 0;
+        for (INT i = 27; i >= 0; i--) {
+            m_pTexCache[i] = NULL;
+        }
+    }
+    static INT updateTexCache(const TexInfo* pInInfo);
+};
+
+class CScissoring : public CGPrim {
+public:
+    G_XY m_P0;
+    G_XY m_P1;
+
+    CScissoring() {}
+    virtual ~CScissoring();
+    void setRect(G_XY& scissoringStart, G_XY& scissoringEnd);
+    void setDefault();
+    virtual UINT getPacketSize() const { return 3; }
+private:
+    virtual void makePkt();
+};
+
+class CZFill : public CGPrim {
+public:
+    INT m_nZ;
+
+    virtual ~CZFill();
+    CZFill();
+    virtual UINT getPacketSize() const;
+private:
+    virtual void makePkt();
+};
+
+class CTile : public CGPrim {
+public:
+    G_XYZ m_P0;
+    G_XYZ m_P1;
+    G_RGBA m_C0;
+
+    CTile() {}
+    virtual ~CTile();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class CSprt : public CGTexPrim {
+public:
+    G_XYZ m_P0;
+    G_XYZ m_P1;
+    G_RGBA m_C0;
+    G_UV m_T0;
+    G_UV m_T1;
+
+    virtual ~CSprt();
+    CSprt() { m_C0.set(0x80, 0x80, 0x80, 0x80); }
+    void setUVWH(USHORT u, USHORT v, USHORT w, USHORT h) {
+        FIX4 _x = w << 4;
+        FIX4 _y = h << 4;
+        m_P1.x = m_P0.x + _x;
+        m_P1.y = m_P0.y + _y;
+        m_T0.set(u, v);
+        m_T1.set(u + w, v + h);
+    }
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class CPolyGT4 : public CGTexPrim {
+public:
+    G_XYZ m_P0;
+    G_XYZ m_P1;
+    G_XYZ m_P2;
+    G_XYZ m_P3;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    G_RGBA m_C2;
+    G_RGBA m_C3;
+    G_UV m_T0;
+    G_UV m_T1;
+    G_UV m_T2;
+    G_UV m_T3;
+
+    virtual ~CPolyGT4();
+    CPolyGT4();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class CPolyGT4ST : public CGTexPrim2D {
+public:
+    G_XY m_P0;
+    G_XY m_P1;
+    G_XY m_P2;
+    G_XY m_P3;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    G_RGBA m_C2;
+    G_RGBA m_C3;
+    G_ST m_T0;
+    G_ST m_T1;
+    G_ST m_T2;
+    G_ST m_T3;
+
+    CPolyGT4ST() {}
+    virtual ~CPolyGT4ST();
+    virtual UINT getPacketSize() const;
+private:
+    virtual void makePkt();
+};
+
+class CLineF2 : public CGPrim {
+public:
+    G_XYZ m_P0;
+    G_XYZ m_P1;
+    G_RGBA m_C0;
+
+    CLineF2() {}
+    virtual ~CLineF2();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class CPolyG4 : public CGPrim {
+public:
+    G_XYZ m_P0;
+    G_XYZ m_P1;
+    G_XYZ m_P2;
+    G_XYZ m_P3;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    G_RGBA m_C2;
+    G_RGBA m_C3;
+
+    CPolyG4() {}
+    virtual ~CPolyG4();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class CCircle : public CGPrim {
+public:
+    G_XYZ m_P0;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    FIX4 m_RX;
+    FIX4 m_RY;
+
+    CCircle() {}
+    virtual ~CCircle();
+    virtual UINT getPacketSize() const;
+protected:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class CScreenColoredMask : public CTile {
+public:
+    CScreenColoredMask();
+    virtual ~CScreenColoredMask();
+};
+
+class C2DRot {
+protected:
+    FMATRIX m_Matrix;
+    FLOAT m_fRot;
+    G_XYZ m_Center;
+};
+
+class CRotSprt : public CSprt, public C2DRot {
+public:
+    CRotSprt() {}
+    virtual ~CRotSprt();
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+public:
+    virtual UINT getPacketSize() const;
+};
+
+class CCPrim : public CGPrim {
+private:
+    UINT m_PRIM;
+    UINT m_TEST;
+    ULONGLONG m_CLAMP;
+    ULONGLONG m_SCISSOR;
+    UINT m_ALPHA;
+public:
+    INT m_iMax;
+    FVERTEX* m_V;
+
+    CCPrim();
+    virtual ~CCPrim();
+    void create(ULONGLONG iPrim, INT iVertexNum);
+    void remove();
+    void setTEST(ULONGLONG TEST);
+    void setALPHA(ULONGLONG ALPHA);
+    void setCLAMP(ULONGLONG CLAMP);
+    void setSCISSOR(ULONGLONG SCISSOR);
+    BOOL isRect(INT i, const FVECTOR* vRect);
+    virtual UINT getPacketSize() const;
+private:
+    void init();
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class CTPrim : public CGTexPrim {
+private:
+    UINT m_PRIM;
+    UINT m_TEST;
+    ULONGLONG m_CLAMP;
+    ULONGLONG m_SCISSOR;
+    UINT m_ALPHA;
+public:
+    INT m_iMax;
+    FTVERTEX* m_V;
+
+    CTPrim();
+    virtual ~CTPrim();
+    void create(ULONGLONG iPrim, INT iVertexNum);
+    void remove();
+    void setTEST(ULONGLONG TEST);
+    void setALPHA(ULONGLONG ALPHA);
+    void setCLAMP(ULONGLONG CLAMP);
+    void setSCISSOR(ULONGLONG SCISSOR);
+    BOOL isRect(INT i, const FVECTOR* vRect);
+    virtual UINT getPacketSize() const;
+private:
+    void init();
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DTile : public CGPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+public:
+    FVECTOR m_Center;
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    G_RGBA m_C0;
+    CCoord* m_pCrd;
+
+    virtual ~C3DTile();
+    C3DTile();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DSprt : public CGTexPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+public:
+    FVECTOR m_Center;
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    G_RGBA m_C0;
+    G_UV m_T0;
+    G_UV m_T1;
+    CCoord* m_pCrd;
+
+    virtual ~C3DSprt();
+    C3DSprt();
+    void setUVWH(USHORT u, USHORT v, USHORT w, USHORT h);
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DRotSprt : public C3DSprt {
+protected:
+    IVECTOR p10;
+    IVECTOR p01;
+public:
+    TDEG m_Rot;
+
+    virtual ~C3DRotSprt();
+    C3DRotSprt();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DPolyFT4 : public CGTexPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+    IVECTOR p2;
+    IVECTOR p3;
+public:
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    FVECTOR m_P2;
+    FVECTOR m_P3;
+    G_ST m_S0;
+    G_ST m_S1;
+    G_ST m_S2;
+    G_ST m_S3;
+    G_RGBA m_C0;
+    CCoord* m_pCrd;
+
+    virtual ~C3DPolyFT4();
+    C3DPolyFT4();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DPolyGT4 : public CGTexPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+    IVECTOR p2;
+    IVECTOR p3;
+public:
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    FVECTOR m_P2;
+    FVECTOR m_P3;
+    G_ST m_S0;
+    G_ST m_S1;
+    G_ST m_S2;
+    G_ST m_S3;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    G_RGBA m_C2;
+    G_RGBA m_C3;
+    CCoord* m_pCrd;
+
+    virtual ~C3DPolyGT4();
+    C3DPolyGT4();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DPolyFT3 : public CGTexPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+    IVECTOR p2;
+public:
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    FVECTOR m_P2;
+    G_ST m_S0;
+    G_ST m_S1;
+    G_ST m_S2;
+    G_RGBA m_C0;
+    CCoord* m_pCrd;
+
+    virtual ~C3DPolyFT3();
+    C3DPolyFT3();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DPolyGT3 : public CGTexPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+    IVECTOR p2;
+public:
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    FVECTOR m_P2;
+    G_ST m_S0;
+    G_ST m_S1;
+    G_ST m_S2;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    G_RGBA m_C2;
+    CCoord* m_pCrd;
+
+    virtual ~C3DPolyGT3();
+    C3DPolyGT3();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DLine : public CGPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+public:
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    CCoord* m_pCrd;
+
+    C3DLine() {}
+    virtual ~C3DLine();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DLineCoord2 : public CGPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+public:
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    CCoord* m_pCrd0;
+    CCoord* m_pCrd1;
+
+    C3DLineCoord2() {}
+    virtual ~C3DLineCoord2();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DLines : public CGPrim {
+public:
+    CCoord* m_pCrd;
+    G_LINE_VECTOR m_vLINE;
+
+    C3DLines() {}
+    virtual ~C3DLines();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DPolyG4 : public CGPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+    IVECTOR p2;
+    IVECTOR p3;
+public:
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    FVECTOR m_P2;
+    FVECTOR m_P3;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    G_RGBA m_C2;
+    G_RGBA m_C3;
+    CCoord* m_pCrd;
+
+    C3DPolyG4() {}
+    virtual ~C3DPolyG4();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DPolyG3 : public CGPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+    IVECTOR p2;
+public:
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    FVECTOR m_P2;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+    G_RGBA m_C2;
+    CCoord* m_pCrd;
+
+    C3DPolyG3() {}
+    virtual ~C3DPolyG3();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DCircle : public CGPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+public:
+    FVECTOR m_Center;
+    CCoord* m_pCrd;
+    FLOAT m_R0;
+    FLOAT m_Zoffset;
+    G_RGBA m_C0;
+    G_RGBA m_C1;
+
+    virtual ~C3DCircle();
+    C3DCircle();
+    virtual UINT getPacketSize() const;
+protected:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class C3DPointLight : public C3DCircle {
+public:
+    FLOAT m_R00;
+    INT m_Active;
+
+    C3DPointLight() {}
+    virtual ~C3DPointLight();
+    virtual UINT getPacketSize() const;
+private:
+    virtual void makePkt();
+};
+
+class C3DPointLight2 : public CGPrim {
+protected:
+    IVECTOR p00[2];
+    IVECTOR p01[2];
+public:
+    C3DCircle m_Cl[2];
+    FLOAT m_R00;
+    INT m_Active;
+    INT m_nType;
+
+    C3DPointLight2() {}
+    virtual ~C3DPointLight2();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+    BOOL _makePktSub(INT nIdx);
+};
+
+class C3DStripBase : public CGPrim {
+public:
+    G_STRIP_VECTOR m_vVERT;
+    FLOAT m_fGeta;
+protected:
+    FLOAT m_fGetaZ;
+    CCoord* m_pCrd;
+    CCoords* m_pObj;
+    INT m_nType;
+
+public:
+    virtual ~C3DStripBase();
+    C3DStripBase() {
+        m_pCrd = NULL;
+        m_pObj = NULL;
+        m_fGeta = 0.0f;
+    }
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+    virtual QWdata* makePktSub(QWdata* pQw) = 0;
+};
+
+class C3DTexStripBase : public CGTexPrim {
+public:
+    G_STRIP_VECTOR m_vVERT;
+    FLOAT m_fGeta;
+protected:
+    FLOAT m_fGetaZ;
+    CCoord* m_pCrd;
+    CCoords* m_pObj;
+    INT m_nType;
+
+public:
+    virtual ~C3DTexStripBase();
+    C3DTexStripBase();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+    virtual QWdata* makePktSub(QWdata* pQw) = 0;
+};
+
+#define GPRIM_STRIP_CLASS(NAME, BASE, TYPE, SET, GET, PTR)                                                         \
+    class NAME : public BASE {                                                                                     \
+    public:                                                                                                        \
+        virtual ~NAME();                                                                                           \
+        NAME() { m_nType = TYPE; }                                                                                 \
+        void SET(PTR* p);                                                                                          \
+        PTR* GET();                                                                                                \
+    private:                                                                                                       \
+        virtual QWdata* makePktSub(QWdata* pQw);                                                                   \
+    }
+GPRIM_STRIP_CLASS(C3DLineStrip, C3DStripBase, 2, setCoord, getCoord, CCoord);
+GPRIM_STRIP_CLASS(C3DLineStripCoord, C3DStripBase, 2, setObject, getObject, CCoords);
+GPRIM_STRIP_CLASS(C3DLineTStrip, C3DTexStripBase, 2, setCoord, getCoord, CCoord);
+GPRIM_STRIP_CLASS(C3DLineTStripCoord, C3DTexStripBase, 2, setObject, getObject, CCoords);
+GPRIM_STRIP_CLASS(C3DPolyStrip, C3DStripBase, 4, setCoord, getCoord, CCoord);
+GPRIM_STRIP_CLASS(C3DPolyStripCoord, C3DStripBase, 4, setObject, getObject, CCoords);
+GPRIM_STRIP_CLASS(C3DPolyTStrip, C3DTexStripBase, 4, setCoord, getCoord, CCoord);
+GPRIM_STRIP_CLASS(C3DPolyTStripCoord, C3DTexStripBase, 4, setObject, getObject, CCoords);
+GPRIM_STRIP_CLASS(C3DPolyFan, C3DStripBase, 5, setCoord, getCoord, CCoord);
+GPRIM_STRIP_CLASS(C3DPolyFanCoord, C3DStripBase, 5, setObject, getObject, CCoords);
+GPRIM_STRIP_CLASS(C3DPolyTFan, C3DTexStripBase, 5, setCoord, getCoord, CCoord);
+GPRIM_STRIP_CLASS(C3DPolyTFanCoord, C3DTexStripBase, 5, setObject, getObject, CCoords);
+#undef GPRIM_STRIP_CLASS
+
 class C3DCPrim : public CGPrim {
 private:
+    static unsigned char m_PackReglist[8];
     UINT m_PRIM;
     UINT m_TEST;
     ULONGLONG m_CLAMP;
@@ -537,11 +1288,42 @@ public:
     USHORT m_iMax;
     G_STRIP* m_V;
 
+    C3DCPrim();
+    virtual ~C3DCPrim();
+    void create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, INT iRep);
+    void create(ULONGLONG iPrim, INT iVertexNum, CCoords* pOParent, INT iRep);
+    void create(ULONGLONG iPrim, INT iVertexNum);
+    void remove();
+    void setTEST(ULONGLONG TEST);
+    void setALPHA(ULONGLONG ALPHA);
+    void setCLAMP(ULONGLONG CLAMP);
+    void setSCISSOR(ULONGLONG SCISSOR);
+    void setZBUF(ULONGLONG ZBUF);
+    CCoord* getCoordPtr() const;
+    CCoords* getObjPtr() const;
+    void setCalcZ(INT iZ);
+    virtual UINT getPacketSize() const;
 private:
+    void _init();
+    void _create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, CCoords* pOParent, INT iRep);
+    virtual FIX4 calcZ();
+    virtual void makePkt();
     QWdata* makePkt_None(QWdata* pQw);
+    QWdata* makePkt_Line0(QWdata* pQw);
+    QWdata* makePkt_LineStrip0(QWdata* pQw);
+    QWdata* makePkt_Triangle0(QWdata* pQw);
+    QWdata* makePkt_TriangleStrip0(QWdata* pQw);
+    QWdata* makePkt_TriangleFan0(QWdata* pQw);
+    QWdata* makePkt_Line1(QWdata* pQw);
+    QWdata* makePkt_LineStrip1(QWdata* pQw);
+    QWdata* makePkt_Triangle1(QWdata* pQw);
+    QWdata* makePkt_TriangleStrip1(QWdata* pQw);
+    QWdata* makePkt_TriangleFan1(QWdata* pQw);
 };
+
 class C3DTPrim : public CGTexPrim {
 private:
+    static unsigned char m_PackReglist[8];
     UINT m_PRIM;
     UINT m_TEST;
     ULONGLONG m_CLAMP;
@@ -558,9 +1340,38 @@ public:
     USHORT m_iMax;
     G_STRIP* m_V;
 
+    C3DTPrim();
+    virtual ~C3DTPrim();
+    void create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, INT iRep);
+    void create(ULONGLONG iPrim, INT iVertexNum, CCoords* pOParent, INT iRep);
+    void create(ULONGLONG iPrim, INT iVertexNum);
+    void remove();
+    void setTEST(ULONGLONG TEST);
+    void setALPHA(ULONGLONG ALPHA);
+    void setCLAMP(ULONGLONG CLAMP);
+    void setSCISSOR(ULONGLONG SCISSOR);
+    void setZBUF(ULONGLONG ZBUF);
+    CCoord* getCoordPtr() const;
+    CCoords* getObjPtr() const;
+    void setCalcZ(INT iZ);
+    virtual UINT getPacketSize() const;
 private:
+    void _init();
+    void _create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, CCoords* pOParent, INT iRep);
+    virtual FIX4 calcZ();
+    virtual void makePkt();
     QWdata* makePkt_None(QWdata* pQw);
+    QWdata* makePkt_Line0(QWdata* pQw);
+    QWdata* makePkt_LineStrip0(QWdata* pQw);
+    QWdata* makePkt_Triangle0(QWdata* pQw);
+    QWdata* makePkt_TriangleStrip0(QWdata* pQw);
+    QWdata* makePkt_TriangleFan0(QWdata* pQw);
+    QWdata* makePkt_Line1(QWdata* pQw);
+    QWdata* makePkt_LineStrip1(QWdata* pQw);
+    QWdata* makePkt_Triangle1(QWdata* pQw);
+    QWdata* makePkt_TriangleStrip1(QWdata* pQw);
+    QWdata* makePkt_TriangleFan1(QWdata* pQw);
 };
-#endif
+#endif /* SYSTEM_GRAPHIC_GPRIM_CPP */
 
 #endif /* SYSTEM_GRAPHIC_GPRIM_H */
