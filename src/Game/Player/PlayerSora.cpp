@@ -38,12 +38,17 @@ inline void _roulettePrizeMessage() {
 #include "Game/Player/PlayerGauge.h"
 #include "Game/Movement.h"
 #include "System/Graphic/Effect/EffectMan.h"
+#include "Game/EntityFactory.h"
+#include "Game/LockOnManager.h"
+#include "Game/Enemy/BattleEnemyManager.h"
 #include "include_asm.h"
 
 namespace PL {
 extern TIMEQ g_CardBreakTime[];
 extern FVECTOR g_vBGFadeColor[7];
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; /* Game/Player/PlayerAttack.h */
+extern BULLET_EFFECT_INFO g_EffTbl_HitMark[27]; /* Game/Player/PlayerAttack.h */
+extern FVECTOR g_RotTbl_Magic[8]; /* Game/Player/PlayerAttack.h */
 static const FVECTOR g_vPronounceCountOfs = {{0.0f, 1.5f, 0.0f, 1.0f}};
 static LPCSTR g_szDpxFriend = "friend";
 static LPCSTR g_szDpxSummon = "summon";
@@ -81,6 +86,35 @@ static inline UINT _upKind(INT inType0, INT inType1) {
     UINT up = inType0 > 0 ? 1 << (inType0 - 1) : 0;
     if (inType1 > 0) up |= 1 << (inType1 - 1);
     return up;
+}
+
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void Normalize(FVECTOR& outV, const FVECTOR& inV);
+extern "C" float atan2f(float y, float x);
+namespace Math3D { FLOAT VectorLength(const FVECTOR& inVector); }
+extern "C" void* memset(void* s, int c, unsigned int n);
+
+/* the angle wrap of Com.h, with a separate result variable (the original's mov.s copy) */
+static inline FLOAT _limitPI2(FLOAT d) {
+    FLOAT r;
+    if (d < -3.1415927f) r = d + 6.2831855f;
+    else {
+        r = d;
+        if (r > 3.1415927f) r -= 6.2831855f;
+    }
+    return r;
+}
+/* the angle wrap of Com.h */
+static inline FLOAT _limitPI(FLOAT r) {
+    if (r < -3.1415927f) r += 6.2831855f;
+    else if (r > 3.1415927f) r -= 6.2831855f;
+    return r;
+}
+/* sqrt.s (Math3D.h) */
+static inline FLOAT _sqrtf(FLOAT x) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
+    return ret;
 }
 
 
@@ -966,9 +1000,668 @@ void CPlayerSora::exeMagic() {
         break;
     }
 }
-/* placeholder: .rodata of setMagic__Q22PL11CPlayerSoraiii (strings, jump tables) */
-__asm__(".rdata\n.align 4\n.word .L0029ECD8\n.word .L0029ECBC\n.word .L002A0328\n.word .L0029ECBC\n.word .L0029ECBC\n.word .L002A0328\n.word .L0029ECB0\n.word .L0029ECD8\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", setMagic__Q22PL11CPlayerSoraiii);
+void CPlayerSora::setMagic(INT inState, INT inCardID, INT inSkillID) {
+    FVECTOR pos;
+    FVECTOR rot;
+    BULLET_PARAM param;
+    CBullet* pBullet;
+    INT i;
+    if (!inCardID && !inSkillID) return;
+    switch (inState) {
+    case 0x22:
+        getWeaponTopPos(pos);
+        param.init(2, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 0x9100;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = 12000;
+        param.hHomingTarget = m_hTarget;
+        param.fHomingRadius = m_pAtkData->RADIUS;
+        param.fHomingRate = m_pAtkData->WORK1;
+        param.vPos = pos;
+        param.vPos.w = 0.5f;
+        param.vRot = getRot();
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.01f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            pBullet->setBodyRadius(0.1f, 0.0f, 0, (COLL_KIND)-1);
+        }
+        break;
+    case 0x23:
+        getWeaponTopPos(pos);
+        rot = getRot();
+        param.init(2, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        if (inSkillID == 0x24) {
+            param.uiFlag = 0x8000;
+            param.tqHomingTime = 12000;
+            param.hHomingTarget = m_hTarget;
+            param.fHomingRadius = m_pAtkData->RADIUS;
+            param.fHomingRate = m_pAtkData->WORK1;
+        }
+        param.uiFlag |= 0x4000000;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.vPos = pos;
+        param.vRot = rot;
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.01f;
+        param.tqExplodeTime = m_pAtkData->WORK2 * 100;
+        param.vPos.w = m_pAtkData->COLL_END_FRAME * 0.01f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            param.uiAttackID = pBullet->getAttackID();
+        }
+        switch (inSkillID) {
+        case 0:
+            param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT + 1];
+            param.vRot.y = _limitPI2(rot.y - 0.17467256f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            param.vRot.y = _limitPI2(rot.y + 0.17467256f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            break;
+        case 0xE:
+            param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT + 1];
+            param.vRot.y = _limitPI2(rot.y - 0.21802653f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            param.vRot.y = _limitPI2(rot.y + 0.21802653f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            param.vRot.x = _limitPI2(rot.x - 0.1781283f);
+            param.vRot.y = _limitPI2(rot.y - 0.10461504f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            param.vRot.y = _limitPI2(rot.y + 0.10461504f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            break;
+        case 0x15:
+            param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT + 1];
+            param.vRot.y = _limitPI2(rot.y - 0.17467256f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            param.vRot.y = _limitPI2(rot.y + 0.17467256f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            param.vRot.y = _limitPI2(rot.y - 0.29656637f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            param.vRot.y = _limitPI2(rot.y + 0.29656637f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            param.vRot.x = _limitPI2(rot.x - 0.1781283f);
+            param.vRot.y = _limitPI2(rot.y - 0.122207955f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            param.vRot.y = _limitPI2(rot.y + 0.122207955f);
+            CEntityFactory::getInstance()->createBullet(param, this);
+            break;
+        }
+        break;
+    case 0x24:
+        getWeaponTopPos(pos);
+        rot = getRot();
+        setEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, 1, &pos, &rot, 0.0f);
+        pos = m_vAppearPos;
+        if (m_hTarget > 0) {
+            pos.x = m_vMarkPos.x;
+            pos.z = m_vMarkPos.z;
+        } else {
+            pos.x = m_vCenterPos.x;
+            pos.z = m_vCenterPos.z;
+        }
+        pos.y -= 6.0f;
+        setEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, m_pAtkData->EFFECT - 10, &pos, &rot, 0.0f);
+        pos.y += 6.0f;
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 0x47;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = 800;
+        param.vPos = pos;
+        rot.x = _limitPI2(1.5707964f);
+        param.vRot = rot;
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.1f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            pBullet->setBodyRadius(0.1f, 0.0f, 0, (COLL_KIND)-1);
+        }
+        break;
+    case 0x25: {
+        pos.set(0.0f, 0.85f, 0.0f);
+        CEffect* effect = CEffectMan::getEffect(attachEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName,
+                                                             m_pAtkData->EFFECT - 0xE, &Crd(0), &pos, NULL, 0.0f));
+        if (effect) effect->m_iFlag |= 4;
+        addHP(m_iAttackPower, 0, 1);
+        break;
+    }
+    case 0x26:
+        getWeaponTopPos(pos);
+        rot = getRot();
+        setEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][2].pEffectName, 1, &pos, &rot, 0.0f);
+        pos = m_vAppearPos;
+        if (m_hTarget > 0) {
+            pos.x = m_vMarkPos.x;
+            pos.z = m_vMarkPos.z;
+        }
+        param.init(2, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 0x41E1;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = m_pAtkData->WORK2 * 100;
+        param.vPos = pos;
+        rot.x = _limitPI2(1.5707964f);
+        param.vRot = rot;
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.pRotTbl = g_RotTbl_Magic;
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.01f;
+        param.vPos.w = m_pAtkData->COLL_END_FRAME * 0.01f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            pBullet->setBodyRadius(m_pAtkData->WORK1 * 0.01f, 0.0f, 0, (COLL_KIND)-1);
+        }
+        break;
+    case 0x27:
+        rot = getRot();
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 5;
+        if (m_hTarget > 0) {
+            pos = m_vMarkPos;
+            param.uiFlag = 0x25;
+            param.fSpeed = 0.0f;
+        } else {
+            pos = m_vCenterPos;
+            param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        }
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = m_pAtkData->WORK2 * 100;
+        param.vPos = pos;
+        param.vRot = rot;
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.1f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            pBullet->setBodyRadius(0.1f, 0.0f, 0, (COLL_KIND)-1);
+        }
+        break;
+    case 0x28:
+        getWeaponTopPos(pos);
+        rot = getRot();
+        setEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, 1, &pos, &rot, 0.0f);
+        pos = getPos();
+        if (!isAir()) {
+            setEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, m_pAtkData->EFFECT - 0x16, &pos, &rot, 0.0f);
+        }
+        setEffect(g_EffTbl_Skill[m_pAtkData->EFFECT][1].pEffectName, m_pAtkData->EFFECT - 0x11, &pos, &rot, 0.0f);
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 7;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = m_pAtkData->WORK2 * 100;
+        param.vPos = pos;
+        rot.x = _limitPI2(-1.5707964f);
+        param.vRot = rot;
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.1f;
+        CEntityFactory::getInstance()->createBullet(param, this);
+        break;
+    case 0x3E:
+    case 0x3F:
+    case 0x41:
+    case 0x42:
+    case 0x44:
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 4;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.tqHomingTime = 0;
+        param.fSpeed = 0.0f;
+        param.vPos = m_hTarget > 0 ? m_vMarkPos : m_vCenterPos;
+        param.vRot = getRot();
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.01f;
+        switch (inSkillID) {
+        case 0x31:
+            param.iAttackPoint = -m_iAttackPower;
+        case 0x2C:
+        case 0x2E:
+        case 0x2F:
+            param.fCollRadius = 50.0f;
+            CEntityFactory::getInstance()->createBullet(param, this);
+            break;
+        case 0x2B:
+        case 0x32:
+            CEntityFactory::getInstance()->createBullet(param, this);
+            break;
+        case 0x2D:
+        case 0x30:
+            break;
+        }
+        break;
+    case 0x40:
+        rot = getRot();
+        pos = getPos();
+        if (isAir()) pos.y = m_vJumpStartPos.y;
+        setEffect("bind", 0, &pos, &rot, 0.0f);
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 4;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.tqHomingTime = 0;
+        param.fSpeed = 0.0f;
+        param.vPos = m_hTarget > 0 ? m_vMarkPos : m_vCenterPos;
+        param.vRot = rot;
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = 50.0f;
+        CEntityFactory::getInstance()->createBullet(param, this);
+        break;
+    case 0x43:
+        getWeaponTopPos(pos);
+        param.init(2, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 0x8000;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.tqHomingTime = 12000;
+        param.hHomingTarget = m_hTarget;
+        param.fHomingRadius = m_pAtkData->RADIUS;
+        param.fHomingRate = m_pAtkData->WORK1;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.vPos = pos;
+        param.vRot = getRot();
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.01f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            m_hMagicCore = pBullet->getHandle();
+        }
+        break;
+    case 0x2B2:
+        if (inSkillID == -1) {
+            param.init(2, 3);
+            param.CollKind = COLL_KIND_PSHOT;
+            param.uiFlag = 0x1C8007;
+            param.AtkKind = m_AtkKind;
+            param.AtkAttr = m_AtkAttr;
+            param.iAttackPoint = m_iAttackPower;
+            param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+            param.tqHomingTime = m_pAtkData->WORK2 * 100;
+            param.fHomingRadius = m_pAtkData->RADIUS * 0.1f;
+            param.fHomingRate = m_pAtkData->WORK1;
+            getWeaponTopPos(pos);
+            param.vPos = pos;
+            rot = getRot();
+            rot.x = DEG2RAD(-45.0f);
+            param.vRot = rot;
+            param.vHomingPos = m_vAppearPos;
+            if (m_hTarget > 0) {
+                param.vHomingPos.x = m_vMarkPos.x;
+                param.vHomingPos.z = m_vMarkPos.z;
+            }
+            SubVectorXYZ(pos, param.vHomingPos, param.vPos);
+            param.fMaxDist = Math3D::VectorLength(pos);
+            param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+            param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.01f;
+            pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+            if (pBullet) {
+                m_hMagicCore = pBullet->getHandle();
+            }
+        } else {
+            if (m_hMagicCore <= 0) break;
+            pBullet = (CBullet*)CTaskMan::getTask(m_hMagicCore);
+            if (!pBullet) {
+                m_hMagicCore = 0;
+                break;
+            }
+            pos = pBullet->getPos();
+            rot.x = _limitPI2(DEG2RAD(getRandF() * 90.0f - 10.0f));
+            rot.y = _limitPI2(DEG2RAD((m_iCount % 8) * 45.0f + getRandF() * 45.0f));
+            rot.z = 0.0f;
+            param.init(1, 3);
+            param.CollKind = COLL_KIND_PSHOT;
+            param.uiFlag = 8;
+            param.AtkKind = m_AtkKind;
+            param.AtkAttr = m_AtkAttr;
+            param.iAttackPoint = m_iAttackPower;
+            param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+            param.fMaxDist = m_pAtkData->WORK0;
+            param.tqHomingTime = 9000;
+            param.vPos = pos;
+            param.vRot = rot;
+            param.tqFadeTime = 800;
+            param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+            param.pRotTbl = g_RotTbl_Magic;
+            param.fCollRadius = m_pAtkData->RADIUS * 0.01f;
+            pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+            if (!pBullet) break;
+            pBullet->setBodyRadius(0.15f, 0.0f, 0, (COLL_KIND)-1);
+            if (!(m_iCount % 10)) {
+                m_pWeapon->setCollAttackID(pBullet->getAttackID());
+            } else {
+                pBullet->setAttackID(m_pWeapon->getCollAttackID());
+            }
+        }
+        break;
+    case 0x2C6:
+        pos = getPos();
+        rot = getRot();
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 7;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = m_pAtkData->TRG_FRAME * 50;
+        param.vPos = pos;
+        rot.x = _limitPI2(-1.5707964f);
+        param.vRot = rot;
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.1f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (!pBullet) break;
+        pBullet->setBodyRadius(0.1f, 0.0f, 0, (COLL_KIND)-1);
+        if (!m_iCount) {
+            m_pWeapon->setCollAttackID(pBullet->getAttackID());
+        } else {
+            pBullet->setAttackID(m_pWeapon->getCollAttackID());
+        }
+        break;
+    case 0x2D0:
+        param.init(2, 3);
+        param.uiFlag = 0x800401;
+        param.CollKind = COLL_KIND_PSHOT;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fSpeed = 0.01f;
+        param.fMaxDist = 0.0f;
+        param.tqHomingTime = 100;
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.pExplodeEffectTbl = &g_EffTbl_HitMark[14];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.01f;
+        param.tqExplodeTime = m_pAtkData->WORK2 * 100;
+        getWeaponTopPos(pos);
+        calcAppearPos(m_pAtkData->WORK0 * 0.1f, param.fCollRadius, &pos);
+        param.vPos = m_vAppearPos;
+        param.vRot = getRot();
+        param.vPos.w = m_pAtkData->COLL_END_FRAME * 0.01f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            m_hMagicCore = pBullet->getHandle();
+        }
+        break;
+    case 0x2E4:
+        getWeaponTopPos(pos);
+        rot = getRot();
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 7;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = m_pAtkData->TRG_FRAME * 50;
+        param.vPos = pos;
+        param.vRot = rot;
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.1f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (!pBullet) break;
+        pBullet->setBodyRadius(0.1f, 0.0f, 0, (COLL_KIND)-1);
+        if (!m_iCount) {
+            m_pWeapon->setCollAttackID(pBullet->getAttackID());
+        } else {
+            pBullet->setAttackID(m_pWeapon->getCollAttackID());
+        }
+        break;
+    case 0x2EE:
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 6;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_pAtkData->WORK0 * 50;
+        param.tqHomingTime = m_pAtkData->WORK0 * 50;
+        param.fSpeed = 0.0f;
+        param.fMaxDist = 0.0f;
+        param.vPos = m_vCenterPos;
+        param.vRot = getRot();
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->RADIUS * 0.1f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            pBullet->setBodyRadius(m_pAtkData->WORK1 * 0.1f, 0.0f, 0, (COLL_KIND)-1);
+        }
+        break;
+    case 0x320:
+        getWeaponTopPos(pos);
+        rot = getRot();
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 0x25;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = m_pAtkData->WORK1 * 100;
+        param.vPos = pos;
+        param.vRot = rot;
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.1f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            pBullet->setBodyRadius(0.1f, 0.0f, 0, (COLL_KIND)-1);
+        }
+        break;
+    case 0x32A:
+        param.init(2, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 7;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.1f / 60.0f;
+        param.fMaxDist = 30.0f;
+        param.tqHomingTime = m_pAtkData->MOVE_END_FRAME * 100;
+        param.vPos = getPos();
+        param.vRot = getRot();
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->RADIUS * 0.1f;
+        param.fShiftY = m_pAtkData->RADIUS * 0.1f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        m_hMagicCore = pBullet->getHandle();
+        pBullet->setBodyRadius(m_pAtkData->RADIUS * 0.01f, m_pAtkData->RADIUS * 0.01f, 1, (COLL_KIND)0);
+        break;
+    case 0x334:
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 6;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.tqHomingTime = m_pAtkData->WORK0 * 50;
+        param.fSpeed = 0.0f;
+        param.fMaxDist = 0.0f;
+        param.vPos = getPos();
+        param.vRot = getRot();
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->RADIUS;
+        CEntityFactory::getInstance()->createBullet(param, this);
+        break;
+    case 0x33E: {
+        CBattleEnemyManager* man = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+        if (!man) break;
+        SLContainerT<CTask>* container = man->getFirstBattleEnemy();
+        if (!container) break;
+        do {
+            CBattleEnemy* enemy = (CBattleEnemy*)container->getValue();
+            if (enemy && enemy->getTypeID() == 0x1004) {
+                enemy->onGift(m_iAttackPower);
+            }
+            container = container->getNext();
+        } while (container);
+        break;
+    }
+    case 0x348:
+        pos = m_vAppearPos;
+        pos.y += 6.0f;
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 0x65;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.tqHomingTime = 800;
+        param.vPos = pos;
+        rot.x = _limitPI2(1.5707964f);
+        param.vRot = rot;
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->RADIUS * 0.1f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            pBullet->setBodyRadius(0.1f, 0.0f, 0, (COLL_KIND)-1);
+        }
+        break;
+    case 0x2DA:
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.uiFlag = 6;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.tqHomingTime = m_pAtkData->WORK0 * 100;
+        param.fSpeed = 0.0f;
+        param.fMaxDist = 0.0f;
+        param.vPos = getPos();
+        param.vRot = getRot();
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->RADIUS * 0.1f;
+        param.vPos.y += param.fCollRadius * 0.25f;
+        CEntityFactory::getInstance()->createBullet(param, this);
+        break;
+    case 0x208:
+        if (inSkillID == -1) {
+            for (i = 0; i < 16; i++) {
+                if (m_hMagicBullet[i] <= 0) continue;
+                pBullet = (CBullet*)CTaskMan::getTask(m_hMagicBullet[i]);
+                if (!pBullet) {
+                    m_hMagicBullet[i] = 0;
+                    continue;
+                }
+                if (pBullet->getHitEnemyHandle() <= 0) continue;
+                m_hTarget = pBullet->getHitEnemyHandle();
+                if (!CTaskMan::getTask(m_hTarget)) m_hTarget = m_hMagicBullet[i];
+                setMagic(0x208, 0, m_iStockSkill);
+                pBullet->out();
+                m_hMagicBullet[i] = 0;
+            }
+        } else {
+            if (m_nMagicBullet >= m_nMagicBulletMax) break;
+            CEntity* pEntity = (CEntity*)CTaskMan::getTask(m_hTarget);
+            if (!pEntity) pEntity = this;
+            INT target[2];
+            memset(target, 0, sizeof(target));
+            target[0] = LockOnManager::CLockOnManager::getLockOnObject(*pEntity);
+            param.init(1, 3);
+            param.CollKind = COLL_KIND_PSHOT;
+            param.uiFlag = 0x200020;
+            param.AtkKind = m_AtkKind;
+            param.AtkAttr = m_AtkAttr;
+            param.iAttackPoint = m_iAttackPower;
+            param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+            param.fMaxDist = m_pAtkData->WORK0;
+            param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+            param.fCollRadius = m_pAtkData->RADIUS * 0.01f;
+            param.tqCollAtkTime = m_pAtkData->COLL_START_FRAME * 100;
+            if (pEntity != this) {
+                pEntity->getLockOnPos(pos);
+            } else {
+                m_pWeapon->getEnemyPos(pos);
+            }
+            param.vPos = pos;
+            INT nCollAttackID = m_pWeapon->getCollAttackID();
+            for (i = 0; i < 2; i++) {
+                if (target[i] > 0 && (pEntity = (CEntity*)CTaskMan::getTask(target[i])) != NULL) {
+                    pEntity->getLockOnPos(pos);
+                    SubVectorXYZ(rot, pos, param.vPos);
+                    Normalize(rot, rot);
+                    param.vRot.x = -atan2f(rot.y, _sqrtf(rot.z * rot.z + rot.x * rot.x));
+                    param.vRot.y = atan2f(rot.x, rot.z);
+                } else {
+                    param.vRot.x = _limitPI2(rndArea(0.0f, 0.25f) * -3.1415927f);
+                    if (i == 0) {
+                        param.vRot.y = _limitPI2(rndArea(0.0f, 2.0f) * 3.1415927f);
+                    } else {
+                        param.vRot.y = _limitPI2(param.vRot.y + rndArea(0.4f, 0.6f) * 3.1415927f);
+                    }
+                }
+                param.vRot.z = 0.0f;
+                pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+                if (!pBullet) continue;
+                pBullet->setBodyRadius(0.1f, 0.0f, 0, (COLL_KIND)-1);
+                if (!m_iCount || i > 0) {
+                    pBullet->setAttackID(nCollAttackID);
+                } else {
+                    nCollAttackID = pBullet->getAttackID();
+                }
+                setMagicBullet(pBullet->getHandle());
+                if (param.pEffectTbl == g_EffTbl_Skill[m_pAtkData->EFFECT]) {
+                    param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT + 1];
+                }
+            }
+        }
+        break;
+    case 0x302:
+        if (inSkillID != -1) {
+            m_hEffAttack[0] = setEffect(g_EffTbl_HitMark[17].pEffectName, 3, &m_vMarkPos, NULL, 0.0f);
+            param.init(1, 3);
+            param.CollKind = COLL_KIND_PSHOT;
+            param.uiFlag = 4;
+            param.AtkKind = m_AtkKind;
+            param.AtkAttr = m_AtkAttr;
+            param.iAttackPoint = m_iAttackPower;
+            param.tqHomingTime = 0;
+            param.fSpeed = 0.0f;
+            param.vPos = m_vMarkPos;
+            param.vRot = getRot();
+            param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.01f;
+            CEntityFactory::getInstance()->createBullet(param, this);
+            setEnemyStop(m_hMark, 1);
+        } else {
+            setEnemyStop(0, 0);
+        }
+        break;
+    }
+}
 void CPlayerSora::initMagicBullet() {
     m_nMagicBullet = 0;
     m_nMagicBulletMax = 0;
@@ -1161,25 +1854,12 @@ void CPlayerSora::exeFriend() {
         break;
     }
 }
-void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void Normalize(FVECTOR& outV, const FVECTOR& inV);
-extern "C" float atan2f(float y, float x);
 
 /* abs.s of the original (Math3D.h) */
 static inline FLOAT _abs(FLOAT inValue) {
     FLOAT ret;
     __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
     return ret;
-}
-/* the angle wrap of Com.h, with a separate result variable (the original's mov.s copy) */
-static inline FLOAT _limitPI2(FLOAT d) {
-    FLOAT r;
-    if (d < -3.1415927f) r = d + 6.2831855f;
-    else {
-        r = d;
-        if (r > 3.1415927f) r -= 6.2831855f;
-    }
-    return r;
 }
 
 void CPlayerSora::watchTarget(INT inMode) {
