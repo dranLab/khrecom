@@ -2147,23 +2147,21 @@ void CCamp::moveYNLight() {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", deckCommonButton__5CCamp);
-// deckCommonButton__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    ".byte 0x30,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .text");
-#if 0 /* the original is laid out as a rotated loop (constants hoisted into s-registers, the L1/R1 test placed last); the control flow source form is unknown */
 INT CCamp::deckCommonButton() {
-    INT ret = 0;
+    BOOL fgButton = FALSE;
 
     if (m_nStep != 0x26) {
         ASSERT_AT(2226, 0);
         return 0;
     }
-    if (_isButtonTrg(3, 0) && !m_bPlayerKind) {
-        if (m_nSubStep > 0) {
-            if (m_nSubStep == 1 || m_nSubStep == 4 || m_nSubStep == 5) {
+    while (TRUE) {
+        if (_isButtonTrg(3, 0) && !m_bPlayerKind) {
+            if (m_nSubStep <= 0) {
+                break;
+            }
+            if (m_nSubStep != 1 && m_nSubStep != 4 && m_nSubStep != 5) {
+                CSound::playSE(5, -1, 0x40);
+            } else {
                 if (_isButtonTrg(1, 0)) {
                     if (--m_nDeckNoSelect < 0) {
                         m_nDeckNoSelect = 2;
@@ -2174,7 +2172,7 @@ INT CCamp::deckCommonButton() {
                     }
                 }
                 setDeckDeck(0x13);
-                ret = 1;
+                fgButton = TRUE;
                 initCardData(0);
                 initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
                 initDeck(m_nDeckNoSelect, 0);
@@ -2185,7 +2183,7 @@ INT CCamp::deckCommonButton() {
                         m_nKindSelect = 0;
                     } else if (m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
                         m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
-                        m_nKindSelectTop = m_nKind[m_nKindCategorySelect] - 7;
+                        m_nKindSelectTop = m_nKindSelect - 6;
                         if (m_nKindSelectTop < 0) {
                             m_nKindSelectTop = 0;
                         }
@@ -2202,7 +2200,7 @@ INT CCamp::deckCommonButton() {
                     } else {
                         if (m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
                             m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
-                            m_nKindSelectTop = m_nKind[m_nKindCategorySelect] - 7;
+                            m_nKindSelectTop = m_nKindSelect - 6;
                             if (m_nKindSelectTop < 0) {
                                 m_nKindSelectTop = 0;
                             }
@@ -2217,50 +2215,44 @@ INT CCamp::deckCommonButton() {
                 }
                 setDeckDeck(0x12);
                 CSound::playSE(1, -1, 0x40);
-            } else {
+            }
+        } else if (_isButtonTrg(0x100, 0) && !m_bPlayerKind) {
+            if (m_bCardPermuteMode) {
                 CSound::playSE(5, -1, 0x40);
+            } else {
+                CCard::packDeck(m_nDeckNoSelect);
+                initCardData(0);
+                initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+                initDeck(m_nDeckNoSelect, 0);
+                if (m_nSubStep >= 3) {
+                    setDeckInfo(0x11);
+                }
+                setDeckDeck(0x12);
+                fgButton = TRUE;
+                CSound::playSE(2, -1, 0x40);
             }
-        }
-    } else if (_isButtonTrg(0x100, 0) && !m_bPlayerKind) {
-        if (m_bCardPermuteMode) {
-            CSound::playSE(5, -1, 0x40);
-        } else {
-            CCard::packDeck(m_nDeckNoSelect);
-            initCardData(0);
-            initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
-            initDeck(m_nDeckNoSelect, 0);
-            if (m_nSubStep >= 3) {
-                setDeckInfo(0x11);
+        } else if (_isButtonTrg(0x10, 0) && !m_bPlayerKind && !m_bCardPermuteMode) {
+            if (m_nSubStep != 4 || !m_nDeck[0] || !m_pDeck[m_nDeckSelect].m_nId) {
+                CSound::playSE(5, -1, 0x40);
+            } else {
+                m_nDeckSelectHist = m_nDeckSelect;
+                m_bCardPermuteMode = 1;
+                m_nDeckCategorySelect = 0;
+                m_nSubStep = 6;
+                setDeckDeck(0x14);
+                fgButton = TRUE;
+                setDeckInfo(0xE);
+                CSound::playSE(0xF, -1, 0x40);
             }
-            setDeckDeck(0x12);
-            ret = 1;
-            CSound::playSE(2, -1, 0x40);
+        } else if (_isButtonTrg(0x80, 0)) {
+            m_fgPadDisable = 1;
+            fgButton = TRUE;
+            m_nTechWinStep = 0;
         }
-    } else if (_isButtonTrg(0x10, 0) && !m_bPlayerKind && !m_bCardPermuteMode) {
-        if (m_nSubStep != 4) {
-            CSound::playSE(5, -1, 0x40);
-        } else if (!m_nDeck[0]) {
-            CSound::playSE(5, -1, 0x40);
-        } else if (!m_pDeck[m_nDeckSelect].m_nId) {
-            CSound::playSE(5, -1, 0x40);
-        } else {
-            m_nDeckSelectHist = m_nDeckSelect;
-            m_bCardPermuteMode = 1;
-            m_nDeckCategorySelect = 0;
-            m_nSubStep = 6;
-            setDeckDeck(0x14);
-            ret = 1;
-            setDeckInfo(0xE);
-            CSound::playSE(0xF, -1, 0x40);
-        }
-    } else if (_isButtonTrg(0x80, 0)) {
-        m_fgPadDisable = 1;
-        ret = 1;
-        m_nTechWinStep = 0;
+        break;
     }
-    return ret;
+    return fgButton;
 }
-#endif
 
 INT CCamp::deckCommonButton2() {
     BOOL fgButton = FALSE;
