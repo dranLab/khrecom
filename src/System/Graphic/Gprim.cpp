@@ -4,6 +4,7 @@
 #include "khtypes.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Coord.h"
+#include "System/Tsin.h"
 #include "include_asm.h"
 
 extern INT SCREEN_HEIGHT;
@@ -243,7 +244,37 @@ void CPolyG4::makePkt() {
     CPackMan::pkAddGsData(_gsXYZ(m_P3));
     CPackMan::pkCloseGifTag();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__7CCircle);
+void CCircle::makePkt() {
+    QWdata giftag;
+    FLOAT fRx;
+    FLOAT fRy;
+    G_XYZ edge;
+    INT deg;
+
+    giftag.ul64[0] = 0x4400000000008000UL;
+    giftag.ul64[1] = 0x1410;
+
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x20D | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_gsXYZ(m_P0));
+    CPackMan::pkAddGsData(m_C1.col);
+    CPackMan::pkCloseGifTag();
+
+    fRx = m_RX;
+    fRy = m_RY;
+
+    edge.z = m_P0.z;
+    giftag.ul64[0] = 0x1400000000008000UL;
+    giftag.ul64[1] = 4;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    for (deg = 0; deg <= 3600; deg += 200) {
+        edge.x = fRx * tcos(deg);
+        edge.y = fRy * tsin(deg);
+        CPackMan::pkAddGsData(_gsXYZ(edge));
+    }
+    CPackMan::pkCloseGifTag();
+}
 CScreenColoredMask::CScreenColoredMask() {
     setLayerFG(1);
     m_P0.set(-0x1000, -(_ref(SCREEN_HEIGHT) * 8));
