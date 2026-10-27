@@ -287,7 +287,11 @@ void CBattleEnemy::beginStateSuspend() {
     m_ullBackupFlag = m_ullBtlEnemyFlag;
     setBtlEnemyFlag(0x84000);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateSuspend__12CBattleEnemy);
+void CBattleEnemy::stateSuspend() {
+    CTask* cb = CTaskMan::getSysTask(0x16);
+    if (!cb) AssertApp(D_004ACBC0, 0xE6B, D_004AD3C0, 0);
+    if (!CardBattle::CCardBattle::isSuspend()) changeDefaultState();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateSuspend__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateVolley__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateVolley__12CBattleEnemy);
