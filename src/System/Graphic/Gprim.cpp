@@ -64,6 +64,11 @@ static inline u_long128 _gifTag(u_long tag, u_long regs) {
 static inline u_long _gsXYZ(FIX4 x, FIX4 y, FIX4 z) {
     return (u_long)(x + 0x8000) | ((u_long)(y + 0x8000) << 16) | ((u_long)(z >> 4) << 32);
 }
+static inline u_long _gsUV(USHORT tu, USHORT tv) {
+    INT u = tu << 4;
+    INT v = tv << 4;
+    return (u_long)(u | 8) | ((u_long)(v | 8) << 16);
+}
 static inline u_long _gsUV(const G_UV& t) {
     INT u = t.u << 4;
     INT v = t.v << 4;
@@ -951,7 +956,39 @@ void C3DSprt::makePkt() {
     CPackMan::pkCloseGifTag();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__10C3DRotSprt);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10C3DRotSprt);
+void C3DRotSprt::makePkt() {
+    QWdata giftag;
+    ULONGLONG tex;
+    if (p0.z <= 0 || p0.z > 0xFFFF28 || p0.x < 0 || p0.x > 0xFFFF || p0.y < 0 || p0.y > 0xFFFF ||
+        p1.z > 0xFFFF28 || p1.z <= 0 || p1.x < 0 || p1.x > 0xFFFF || p1.y < 0 || p1.y > 0xFFFF ||
+        p01.z > 0xFFFF28 || p10.z <= 0 || p01.x < 0 || p01.x > 0xFFFF || p01.y < 0 || p01.y > 0xFFFF ||
+        p10.z > 0xFFFF28 || p01.z <= 0 || p10.x < 0 || p10.x > 0xFFFF || p10.y < 0 || p10.y > 0xFFFF) {
+        return;
+    }
+    tex = setTexture();
+
+    giftag.ul64[0] = 0xB400000000008000UL;
+    giftag.ul64[1] = 0x43434343170UL;
+
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x314 | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(tex);
+    CPackMan::pkAddGsData((u_long)m_C0.r | ((u_long)m_C0.g << 8) | ((u_long)m_C0.b << 16) | ((u_long)m_C0.a << 24));
+
+    CPackMan::pkAddGsData(_gsUV(m_T0));
+    CPackMan::pkAddGsData((u_long)p0.x | ((u_long)p0.y << 16) | ((u_long)p0.z << 32));
+
+    CPackMan::pkAddGsData(_gsUV(m_T0.u, m_T1.v));
+    CPackMan::pkAddGsData((u_long)p01.x | ((u_long)p01.y << 16) | ((u_long)p01.z << 32));
+
+    CPackMan::pkAddGsData(_gsUV(m_T1.u, m_T0.v));
+    CPackMan::pkAddGsData((u_long)p10.x | ((u_long)p10.y << 16) | ((u_long)p10.z << 32));
+
+    CPackMan::pkAddGsData(_gsUV(m_T1));
+    CPackMan::pkAddGsData((u_long)p1.x | ((u_long)p1.y << 16) | ((u_long)p1.z << 32));
+
+    CPackMan::pkCloseGifTag();
+}
 FIX4 C3DCircle::calcZ() {
     FVECTOR c;
     FMATRIX& vs = CWorldEnv::getViewScreenMatrix();

@@ -878,11 +878,23 @@ public:
     virtual ~CScreenColoredMask();
 };
 
+extern "C" void sceVu0ITOF4Vector(FVECTOR& v0, IVECTOR& v1);
+extern "C" void sceVu0FTOI4Vector(IVECTOR& v0, FVECTOR& v1);
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+
 class C2DRot {
 protected:
     FMATRIX m_Matrix;
     FLOAT m_fRot;
     G_XYZ m_Center;
+
+public:
+    void calcVert(IVECTOR& iv) {
+        FVECTOR v;
+        sceVu0ITOF4Vector(v, iv);
+        ApplyMatrix(v, m_Matrix, v);
+        sceVu0FTOI4Vector(iv, v);
+    }
 };
 
 class CRotSprt : public CSprt, public C2DRot {
