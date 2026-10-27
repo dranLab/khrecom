@@ -454,7 +454,16 @@ QWdata* C3DTPrim::makePkt_LineStrip1(QWdata* pQw) {
     G_STRIP* end = m_V + m_iMax;
     return _makePkt_TexLineStrip(pQw, it, end, &m_pObj->Crd(0));
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleStrip0__8C3DTPrimP6QWdata);
+QWdata* C3DTPrim::makePkt_TriangleStrip0(QWdata* pQw) {
+    G_STRIP* it = m_V;
+    G_STRIP* end = m_V + m_iMax;
+    if (m_pCrd == NULL) {
+        loadMatrix_VF04_07(CWorldEnv::getWorldScreenMatrix());
+    } else {
+        m_pCrd->getRotTransPersMatrix_VF04_07();
+    }
+    return _makePkt_TexTriangleStrip(pQw, it, end, isBackClip());
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleStrip1__8C3DTPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleFan0__8C3DTPrimP6QWdata);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt_TriangleFan1__8C3DTPrimP6QWdata);
