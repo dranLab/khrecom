@@ -734,7 +734,35 @@ void C3DStripBase::makePkt() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__15C3DTexStripBase);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__15C3DTexStripBase);
+void C3DTexStripBase::makePkt() {
+    QWdata* pQw;
+    QWdata* pQwTop;
+    QWdata* pQwPkt;
+    ULONGLONG* p64;
+    ULONGLONG tex;
+    if (m_vVERT.size() == 0) {
+        return;
+    }
+    tex = setTexture();
+    pQwTop = (QWdata*)CPackMan::pkGetCurrentPointer();
+    p64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(_gifTag(0x1400000000000001UL, 0x7));
+    p64[0] = tex;
+    CPackMan::pkCloseGifTagManual((UINT*)&p64[1]);
+    pQw = (QWdata*)CPackMan::pkOpenGifTag(_gifTag(
+        (((u_long)m_nType | ((u_long)isShading() << 3) | ((u_long)1 << 4) | ((u_long)isSemiTrans() << 6) |
+          (u_long)0x200)
+         << 47) |
+            0x3000400000008000UL,
+        0x412));
+    _setGeta(m_fGetaZ);
+    pQwPkt = pQw;
+    pQw = makePktSub(pQwPkt);
+    if (pQwPkt != pQw) {
+        CPackMan::pkCloseGifTag(pQw);
+    } else {
+        CPackMan::pkSetCurrentPointer(pQwTop);
+    }
+}
 QWdata* C3DLineTStrip::makePktSub(QWdata* pQw) {
     G_STRIP* it = m_vVERT.begin();
     G_STRIP* end = m_vVERT.end();
