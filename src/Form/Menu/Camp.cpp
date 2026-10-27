@@ -2262,37 +2262,36 @@ INT CCamp::deckCommonButton() {
 }
 #endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", deckCommonButton2__5CCamp);
-#if 0 /* only the order of the first argument loads and ret = 0 in the prologue differs */
 INT CCamp::deckCommonButton2() {
-    INT ret = 0;
+    BOOL fgButton = FALSE;
 
-    if (_isButtonTrg(3, 0) && !m_bPlayerKind) {
-        if (_isButtonTrg(1, 0)) {
-            if (--m_nDeckNoSelect < 0) {
-                m_nDeckNoSelect = 2;
+    do {
+        if (_isButtonTrg(3, 0) && !m_bPlayerKind) {
+            if (_isButtonTrg(1, 0)) {
+                if (--m_nDeckNoSelect < 0) {
+                    m_nDeckNoSelect = 2;
+                }
+            } else {
+                if (++m_nDeckNoSelect >= 3) {
+                    m_nDeckNoSelect = 0;
+                }
             }
-        } else {
-            if (++m_nDeckNoSelect >= 3) {
-                m_nDeckNoSelect = 0;
-            }
+            initCardData(0);
+            fgButton = TRUE;
+            initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+            initDeck(m_nDeckNoSelect, 0);
+            setDeckDeck(0x13);
+            setDeckDeck(0x12);
+            setDeckInfo(0xC);
+            CSound::playSE(1, -1, 0x40);
+        } else if (_isButtonTrg(0x80, 0)) {
+            m_nTechWinStep = 0;
+            m_fgPadDisable = 1;
+            fgButton = TRUE;
         }
-        initCardData(0);
-        ret = 1;
-        initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
-        initDeck(m_nDeckNoSelect, 0);
-        setDeckDeck(0x13);
-        setDeckDeck(0x12);
-        setDeckInfo(0xC);
-        CSound::playSE(1, -1, 0x40);
-    } else if (_isButtonTrg(0x80, 0)) {
-        m_nTechWinStep = 0;
-        m_fgPadDisable = 1;
-        ret = 1;
-    }
-    return ret;
+    } while (0);
+    return fgButton;
 }
-#endif
 
 INT CCamp::techWinMenu() {
     BOOL bChange = FALSE;
