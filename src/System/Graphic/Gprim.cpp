@@ -1784,7 +1784,46 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1i);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
+/* Parked: argument order of the RotTransPersW call (the original sets a1 before a0; sched1 issues a1 first only
+ * when its source REG_DEADs, ours keeps vW's address live) and with it the TImode result register (a1 vs a0);
+ * tried: matrix ref local, temp for the result, 0.0f > w, wrapper with swapped parameters, const attribute,
+ * element helpers as asm (pcpyud/por/dsra32+mtc1/sll: 53 -> 10 lines), permuter 15 min (9926 candidates, no gain) */
+#if 0
+FLOAT getPrimGetaZ(INT iz, const FVECTOR& Vert, const FMATRIX* pWMat, FLOAT fGeta) {
+    CCamera* pCam = CWorldEnv::getActiveCamera();
+    if (pCam) {
+        FVECTOR vW;
+        FVECTOR vN;
+        u_long128 vGeta;
+        INT iGetaZ;
+        vN.set(0.0f, 0.0f, -1.0f, 1.0f);
+        if (pWMat) ApplyMatrix(vW, *pWMat, Vert); else vW = Vert;
+        ApplyMatrix33(vN, ((const CCamera*)pCam)->Crd(0).m_World, vN);
+        ScaleVectorXYZ(vN, vN, fGeta);
+        AddVectorXYZ(vW, vW, vN);
+        vGeta = RotTransPersW(CWorldEnv::getWorldScreenMatrix(), vW);
+
+        if (_getW(vGeta) < 0.0f) {
+            iGetaZ = 0xFFFF280;
+        } else {
+            iGetaZ = _getZ(vGeta);
+            if (iGetaZ < 0) iGetaZ = 0;
+        }
+
+        iGetaZ = (iGetaZ - iz) >> 4;
+        if (fGeta > 0.0f) {
+            if (iGetaZ <= 0) iGetaZ = 1;
+        } else {
+            if (iGetaZ >= 0) iGetaZ = -1;
+        }
+
+        return iGetaZ;
+    }
+    return 0.0f;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPrimGetaZ__FiRC7FVECTORPC7FMATRIXf);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__12C3DStripBase);
 void C3DStripBase::makePkt() {
     QWdata* pQw;
