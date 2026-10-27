@@ -888,7 +888,26 @@ FLOAT RotTransPersClipW(IVECTOR& out_v, FVECTOR& out_fv, const FVECTOR& in_v) {
         "sw $2, 0xC($4)\n"
     );
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", BackClip__FPC7FVECTORi);
+INT BackClip(const FVECTOR* in_fV, INT iDirL) {
+    INT iRet;
+    __asm__ volatile(
+        "lqc2 $vf8, 0x0(%2)\n"
+        "lqc2 $vf9, 0x10(%2)\n"
+        "lqc2 $vf10, 0x20(%2)\n"
+        "vsub.xyzw $vf9, $vf9, $vf8\n"
+        "vsub.xyzw $vf10, $vf10, $vf8\n"
+        "dsll %1, %1, 31\n"
+        "vopmula.xyz $ACC, $vf9, $vf10\n"
+        "vopmsub.xyz $vf10, $vf10, $vf9\n"
+        "qmfc2.ni $3, $vf10\n"
+        "pcpyud $3, $3, $0\n"
+        "xor %0, $3, %1\n"
+        "dsrl %0, %0, 16\n"
+        : "=r"(iRet), "=r"(iDirL)
+        : "r"(in_fV), "1"(iDirL)
+        : "$3");
+    return iRet & 0x8000;
+}
 static inline void loadMatrix_VF04_07(FMATRIX& m) {
     __asm__ volatile(
         "lqc2 $vf4, 0x0(%0)\n"
