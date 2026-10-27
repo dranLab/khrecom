@@ -10,8 +10,17 @@ public:
     static struct TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
 };
 BOOL __isRect(const FVECTOR& v, const FVECTOR* vRect);
+class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
+public:
+    static void add2DispList(CDrawable& inPrim, FIX4 inZ);
+};
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", disp__6CGPrim);
+void CGPrim::disp() {
+    FIX4 z = calcZ();
+    if (z != (FIX4)0xF0000000) {
+        CModelMan::add2DispList(*this, z);
+    }
+}
 void CGTexPrim::setTPage(const CHAR* pTexName) {
     m_pTexInfo = CRsrcDB::getRsrcTex(pTexName, NAME_CASE_SENSITIVE);
 }
