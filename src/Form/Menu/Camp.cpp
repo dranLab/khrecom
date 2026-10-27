@@ -362,6 +362,12 @@ static inline void _setCardNK(CARD& c, USHORT kind, BYTE num) {
     c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
 
+static inline CARD _makeCardNK(USHORT kind, BYTE num) {
+    CARD c;
+    _setCardNK(c, kind, num);
+    return c;
+}
+
 static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
     c.m_nId = 0;
     c.m_nKind2 = kind;
@@ -2206,14 +2212,627 @@ INT CCamp::configWinMenu() {
     return ret;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", deckEditMenu__5CCamp);
-// deckEditMenu__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    ".byte 0x94,0x1D,0x31,0x00,0x58,0x1E,0x31,0x00,0x38,0x22,0x31,0x00,0xE4,0x25,0x31,0x00\n"
-    ".byte 0x80,0x29,0x31,0x00,0x48,0x30,0x31,0x00,0x14,0x2D,0x31,0x00,0x40,0x2D,0x31,0x00\n"
-    ".byte 0x34,0x32,0x31,0x00,0x30,0x33,0x31,0x00\n"
-    ".section .text");
+INT CCamp::deckEditMenu() {
+    BOOL ret = FALSE;
+    BOOL fgCursorMove = FALSE;
+    INT fgForceChangeInOut = 0;
+    INT nNumSelect;
+    CARD card;
+    BOOL fgInOutChange;
+
+    switch (m_nSubStep) {
+    case 0:
+        if (m_bPlayerKind) {
+            m_nCardInOut = 1;
+        }
+        if (!m_nCardInOut) {
+            if (!m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect = m_nKindSelectTop = 0;
+                m_bCategorySelectMode = TRUE;
+                setCursor2(0, 0, FALSE);
+                setCursor2(m_nKindCategorySelect, 5, FALSE);
+                moveCursor2();
+                m_nSubStep = 5;
+            } else {
+                setCursor2(m_nKindSelect, 0, FALSE);
+                moveCursor2();
+                m_nSubStep = 1;
+            }
+        } else {
+            setCursor4(m_nDeckSelect, 0);
+            moveCursor4();
+            m_nSubStep = 4;
+        }
+        break;
+    case 1:
+        if (_isTrgCANCEL(0)) {
+        cancel:
+            setCursor2(0, 2, FALSE);
+            ret = TRUE;
+            if (m_bShortCutMode) {
+                break;
+            }
+            setDeckInfo(4);
+            setMainCmdHist(4, 1);
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x27;
+        } else if (_isButtonTrg(0x40, 0)) {
+            if (!m_nKind[m_nKindCategorySelect] || !m_kindTbl[m_nKindSelect]) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            CSound::playSE(2, -1, 0x40);
+            m_nNumSelect = searchNumExist(0, 0, FALSE);
+            setCursor2(0, 3, FALSE);
+            setCursor3(m_nNumSelect, 0, FALSE);
+            moveCursor3();
+            setDeckInfo(0xD);
+            m_nSubStep = 2;
+        } else if (_isButtonRpt(0x101000, 0)) {
+            m_nKindSelect -= 3;
+            if (m_nKindSelect < 0) {
+                m_nKindSelect += 3;
+                if (!m_buttonTrg) {
+                    break;
+                }
+                m_nKindSelect = m_nKindSelectTop = 0;
+                m_bCategorySelectMode = TRUE;
+                setDeckInfo(0xC);
+                setCursor2(m_nKindCategorySelect, 5, FALSE);
+                CSound::playSE(1, -1, 0x40);
+                m_nSubStep = 5;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x204000, 0)) {
+            if (m_nKindSelect / 3 < (m_nKind[m_nKindCategorySelect] - 1) / 3) {
+                m_nKindSelect += 3;
+            } else {
+                if (!m_buttonTrg || m_nKind[m_nKindCategorySelect] < 4) {
+                    break;
+                }
+                m_nKindSelect %= 3;
+                m_nKindSelectTop = 0;
+            }
+            if (m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x408000, 0)) {
+            m_nKindSelect--;
+            if (m_nKindSelect < 0 || m_nKindSelect % 3 == 2) {
+                m_nKindSelect++;
+                if (!m_buttonTrg || m_nKindSelect == m_nKind[m_nKindCategorySelect] - 1) {
+                    break;
+                }
+                m_nKindSelect += 2;
+                if (m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
+                    m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
+                }
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x802000, 0)) {
+            m_nKindSelect++;
+            if (m_nKindSelect % 3 == 0 || m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect--;
+                if (!m_buttonTrg || m_nKindSelect % 3 == 0) {
+                    break;
+                }
+                m_nKindSelect -= m_nKindSelect % 3;
+            }
+            fgCursorMove = TRUE;
+        }
+        if (fgCursorMove) {
+            if (m_nKindSelect < 0) {
+                m_nKindSelect = 0;
+                break;
+            }
+            CSound::playSE(0xE, -1, 0x40);
+            setCursor2(m_nKindSelect, 1, FALSE);
+            setDeckCard(0x12);
+            setDeckInfo(0xC);
+        }
+        moveCursor2();
+        break;
+    case 2:
+        if (_isTrgCANCEL(0)) {
+            setCursor3(0, 2, FALSE);
+            setCursor2(0, 4, FALSE);
+            setCursor2(m_nKindSelect, 0, FALSE);
+            m_nNumSelect = 1;
+            setDeckInfo(0x10);
+            CSound::playSE(4, -1, 0x40);
+            m_nSubStep = 1;
+        } else if (_isButtonTrg(0x40, 0)) {
+            if (m_bShortCutMode) {
+                if ((BYTE)m_kindTbl[m_nKindSelect] < 0x19 && CCard::getAttackCardMax(0) < 2) {
+                    m_nError = 3;
+                    m_nStep = 0x3F;
+                    m_nErrorWinStep = 0;
+                    break;
+                }
+                m_nError = 4;
+                m_nSubStep = 8;
+                m_nErrorWinStep = 0;
+            } else {
+                setCursor3(0, 3, FALSE);
+                setCursor4(m_nDeckSelect, 0);
+                moveCursor4();
+                CSound::playSE(2, -1, 0x40);
+                m_nSubStep = 3;
+            }
+        } else if (_isButtonRpt(0x101000, 0)) {
+            nNumSelect = m_nNumSelect - 1;
+            if (nNumSelect < 0 || nNumSelect % 5 == 4) {
+                if (!m_buttonTrg) {
+                    break;
+                }
+                nNumSelect = searchNumExist(2, m_nNumSelect + 4, FALSE);
+            } else {
+                nNumSelect = searchNumExist(2, nNumSelect, FALSE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
+                    nNumSelect = 9;
+                    if (m_nNumSelect < 5) nNumSelect = 4;
+                    nNumSelect = searchNumExist(2, nNumSelect, FALSE);
+                }
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x204000, 0)) {
+            nNumSelect = m_nNumSelect + 1;
+            if (nNumSelect % 5 == 0) {
+                if (!m_buttonTrg) {
+                    break;
+                }
+                nNumSelect = searchNumExist(1, m_nNumSelect - 4, FALSE);
+            } else {
+                nNumSelect = searchNumExist(1, nNumSelect, FALSE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
+                    nNumSelect = searchNumExist(1, m_nNumSelect < 5 ? 0 : 5, FALSE);
+                }
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x408000, 0)) {
+            nNumSelect = m_nNumSelect - 5;
+            if (nNumSelect < 0) {
+                if (!m_buttonTrg) {
+                    break;
+                }
+                nNumSelect = searchNumExist(3, m_nNumSelect + 5, FALSE);
+            } else {
+                nNumSelect = searchNumExist(3, nNumSelect, FALSE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
+                }
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x802000, 0)) {
+            nNumSelect = m_nNumSelect + 5;
+            if (nNumSelect >= 10) {
+                if (!m_buttonTrg) {
+                    break;
+                }
+                nNumSelect = searchNumExist(4, m_nNumSelect - 5, FALSE);
+            } else {
+                nNumSelect = searchNumExist(4, nNumSelect, FALSE);
+                if (nNumSelect < 0) {
+                    if (!m_buttonTrg) {
+                        break;
+                    }
+                }
+            }
+            fgCursorMove = TRUE;
+        }
+        if (fgCursorMove) {
+            if (nNumSelect < 0 || nNumSelect == m_nNumSelect) {
+                break;
+            }
+            CSound::playSE(0xE, -1, 0x40);
+            m_nNumSelect = nNumSelect;
+            setCursor3(nNumSelect, 1, FALSE);
+            setDeckInfo(0xD);
+        }
+        moveCursor2();
+        moveCursor3();
+        break;
+    case 3:
+        if (_isTrgCANCEL(0)) {
+            setCursor4(0, 2);
+            setCursor3(0, 4, FALSE);
+            setCursor3(m_nNumSelect, 0, FALSE);
+            CSound::playSE(4, -1, 0x40);
+            m_nSubStep = 2;
+        } else if (_isButtonTrg(0x40, 0)) {
+            if (m_nDeck[0] >= 99) {
+                m_nError = 5;
+                m_fgPadDisable = 2;
+                m_nSubStep = 9;
+                m_nErrorWinStep = 0;
+                break;
+            }
+            CCard::insertDeck(_makeCardNK(m_kindTbl[m_nKindSelect], m_nNumSelect), m_nDeckNoSelect, m_nDeckSelect, FALSE);
+            initCardData(0);
+            initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+            initDeck(m_nDeckNoSelect, 0);
+            adjustSelect(FALSE);
+            setDeckCard(0x12);
+            setDeckInfo(0xC);
+            setDeckDeck(0x12);
+            setCursor4(0, 2);
+            setCursor3(0, 2, FALSE);
+            setCursor2(0, 4, FALSE);
+            setCursor2(m_nKindSelect, 0, FALSE);
+            CSound::playSE(2, -1, 0x40);
+            if (!m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect = m_nKindSelectTop = 0;
+                m_bCategorySelectMode = TRUE;
+                setCursor2(m_nKindCategorySelect, 5, FALSE);
+                m_nSubStep = 5;
+            } else {
+                m_nSubStep = 1;
+            }
+        } else if (_isButtonRpt(0x101000, 0)) {
+            m_nDeckSelect -= 3;
+            if (m_nDeckSelect < 0) {
+                m_nDeckSelect += 3;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x204000, 0)) {
+            if (m_nDeckSelect / 3 < 32) {
+                m_nDeckSelect += 3;
+                if (m_nDeckSelect >= 99) {
+                    m_nDeckSelect = 98;
+                }
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x408000, 0)) {
+            m_nDeckSelect--;
+            if (m_nDeckSelect < 0 || m_nDeckSelect % 3 == 2) {
+                m_nDeckSelect++;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x802000, 0)) {
+            m_nDeckSelect++;
+            if (m_nDeckSelect % 3 == 0 || m_nDeckSelect >= 99) {
+                m_nDeckSelect--;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        }
+        if (fgCursorMove) {
+            CSound::playSE(0xE, -1, 0x40);
+            setCursor4(m_nDeckSelect, 1);
+            setDeckDeck(0x12);
+        }
+        moveCursor4();
+        break;
+    case 4:
+        if (_isTrgCANCEL(0)) {
+            ret = TRUE;
+            setCursor4(0, 2);
+            if (m_bShortCutMode) {
+                break;
+            }
+            setDeckInfo(4);
+            m_nCardInOut = 0;
+            setDeckDeck(3);
+            setMainCmdHist(4, 1);
+            CSound::playSE(4, -1, 0x40);
+            m_nStep = 0x27;
+        } else if (_isButtonTrg(0x40, 0)) {
+            if (m_bShortCutMode) {
+                if (!setShortCut(m_nDeckSelect)) {
+                    CSound::playSE(5, -1, 0x40);
+                    break;
+                }
+                initCardData(0);
+                initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+                initDeck(m_nDeckNoSelect, m_nDeckCategorySelect);
+            } else {
+                if (m_bPlayerKind) {
+                    break;
+                }
+                if (!m_nDeck[m_nDeckCategorySelect]) {
+                    CSound::playSE(5, -1, 0x40);
+                    break;
+                }
+                if (!removeDeck(m_nDeckSelect)) {
+                    CSound::playSE(5, -1, 0x40);
+                    break;
+                }
+                initCardData(0);
+                initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+                initDeck(m_nDeckNoSelect, m_nDeckCategorySelect);
+                adjustSelect(FALSE);
+                setCursor4(m_nDeckSelect, 0);
+                setDeckCard(0x12);
+                setDeckInfo(0xC);
+            }
+            setDeckDeck(0x12);
+            CSound::playSE(2, -1, 0x40);
+        } else if (_isButtonRpt(0x101000, 0)) {
+            m_nDeckSelect -= 3;
+            if (m_nDeckSelect < 0) {
+                m_nDeckSelect += 3;
+                if (!m_buttonTrg) {
+                    break;
+                }
+                m_nDeckSelect = m_nDeckSelect % 3 + 96;
+                m_nDeckSelectTop = 90;
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x204000, 0)) {
+            if (m_nDeckSelect / 3 < 32) {
+                m_nDeckSelect += 3;
+                if (m_nDeckSelect >= 99) {
+                    m_nDeckSelect = 98;
+                }
+            } else {
+                if (!m_buttonTrg) {
+                    break;
+                }
+                m_nDeckSelect %= 3;
+                m_nDeckSelectTop = 0;
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x408000, 0)) {
+            m_nDeckSelect--;
+            if (m_nDeckSelect < 0 || m_nDeckSelect % 3 == 2) {
+                m_nDeckSelect++;
+                if (!m_buttonTrg) {
+                    break;
+                }
+                m_nDeckSelect += 2 - m_nDeckSelect % 3;
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x802000, 0)) {
+            m_nDeckSelect++;
+            if (m_nDeckSelect % 3 == 0 || m_nDeckSelect >= 99) {
+                m_nDeckSelect--;
+                if (!m_buttonTrg) {
+                    break;
+                }
+                m_nDeckSelect -= m_nDeckSelect % 3;
+            }
+            fgCursorMove = TRUE;
+        }
+        if (fgCursorMove) {
+            CSound::playSE(0xE, -1, 0x40);
+            setCursor4(m_nDeckSelect, 1);
+            setDeckDeck(0x12);
+            setDeckInfo(0xC);
+        }
+        moveCursor4();
+        break;
+    case 6:
+        setCursor4Hist(m_nDeckSelectHist, 0);
+        setCursor4Hist(m_nDeckSelectHist, 1);
+        m_nSubStep = 7;
+        break;
+    case 7:
+        if (_isTrgCANCEL(0)) {
+            m_bCardPermuteMode = FALSE;
+            setDeckInfo(!m_nCardInOut ? 0xA : 0xB);
+            setCursor4Hist(0, 2);
+            CSound::playSE(4, -1, 0x40);
+            m_nSubStep = !m_nCardInOut ? 3 : 4;
+        } else if (_isButtonTrg(0x50, 0)) {
+            if (m_nDeckSelect == m_nDeckSelectHist) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            m_bCardPermuteMode = FALSE;
+            card = m_pDeck[m_nDeckSelectHist];
+            removeDeck(m_nDeckSelectHist);
+            CCard::insertDeck(card, m_nDeckNoSelect, m_nDeckSelect, m_nDeckSelectHist == m_nSCIndex[m_nDeckCategorySelect]);
+            initCardData(0);
+            initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+            initDeck(m_nDeckNoSelect, m_nDeckCategorySelect);
+            adjustSelect(FALSE);
+            setCursor4(m_nDeckSelect, 0);
+            setDeckCard(0x12);
+            setDeckInfo(0xC);
+            setDeckDeck(0x12);
+            CSound::playSE(0xF, -1, 0x40);
+            setDeckInfo(!m_nCardInOut ? 0xA : 0xB);
+            setCursor4Hist(0, 2);
+            m_nSubStep = !m_nCardInOut ? 1 : 4;
+        } else if (_isButtonRpt(0x101000, 0)) {
+            m_nDeckSelect -= 3;
+            if (m_nDeckSelect < 0) {
+                m_nDeckSelect += 3;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x204000, 0)) {
+            if (m_nDeckSelect / 3 < 32) {
+                m_nDeckSelect += 3;
+                if (m_nDeckSelect >= 99) {
+                    m_nDeckSelect = 98;
+                }
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x408000, 0)) {
+            m_nDeckSelect--;
+            if (m_nDeckSelect < 0 || m_nDeckSelect % 3 == 2) {
+                m_nDeckSelect++;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        } else if (_isButtonRpt(0x802000, 0)) {
+            m_nDeckSelect++;
+            if (m_nDeckSelect % 3 == 0 || m_nDeckSelect >= 99) {
+                m_nDeckSelect--;
+            } else {
+                fgCursorMove = TRUE;
+            }
+        }
+        if (fgCursorMove) {
+            CSound::playSE(0xE, -1, 0x40);
+            setCursor4(m_nDeckSelect, 1);
+            setDeckDeck(0x12);
+            setDeckInfo(0xC);
+            setCursor4Hist(m_nDeckSelectHist, 1);
+        }
+        moveCursor4();
+        break;
+    case 5:
+        if (_isTrgCANCEL(0)) {
+            m_bCategorySelectMode = FALSE;
+            goto cancel;
+        }
+        if (_isButtonTrg(0x101000, 0)) {
+            if (!m_nKind[m_nKindCategorySelect]) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
+            m_nKindSelectTop = m_nKindSelect - 6;
+            if ((m_nKindSelectTop -= m_nKindSelectTop % 3) < 0) {
+                m_nKindSelectTop = 0;
+            }
+            setDeckCard(0x12);
+            goto enter;
+        } else if (_isButtonTrg(0x204040, 0)) {
+            if (!m_nKind[m_nKindCategorySelect]) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            m_nKindSelect = m_nKindSelectTop = 0;
+        enter:
+            m_bCategorySelectMode = FALSE;
+            setDeckInfo(0xC);
+            setCursor2(m_nKindSelect, 7, FALSE);
+            setCursor2(m_nKindSelect, 0, FALSE);
+            CSound::playSE(0xE, -1, 0x40);
+            m_nSubStep = 1;
+        } else if (_isButtonRpt(0x408000, 0)) {
+            if (--m_nKindCategorySelect < 0) {
+                m_nKindCategorySelect = 4;
+            }
+            fgCursorMove = TRUE;
+        } else if (_isButtonRpt(0x802000, 0)) {
+            if (++m_nKindCategorySelect >= 5) {
+                m_nKindCategorySelect = 0;
+            }
+            fgCursorMove = TRUE;
+        }
+        if (fgCursorMove) {
+            CSound::playSE(1, -1, 0x40);
+            setDeckCard(0x14);
+            setDeckInfo(0xC);
+            setCursor2(m_nKindCategorySelect, 6, FALSE);
+        }
+        moveCursor2();
+        break;
+    case 8:
+        if (deckCheckErrorWinMenu(TRUE)) {
+            if (!m_nSelYesNo) {
+                CCard::deleteCard(m_kindTbl[m_nKindSelect], m_nNumSelect);
+                initCardData(0);
+                initCardKind(0, m_nKindCategorySelect, TRUE);
+                adjustSelect(FALSE);
+                setDeckCard(0x12);
+                setDeckInfo(0xC);
+                setCursor2(0, 4, FALSE);
+                setCursor3(0, 2, FALSE);
+                setCursor2(m_nKindSelect, 0, FALSE);
+                if (!m_nKind[m_nKindCategorySelect]) {
+                    m_bCategorySelectMode = TRUE;
+                    setCursor2(m_nKindCategorySelect, 5, FALSE);
+                    m_nSubStep = 5;
+                } else {
+                    m_nSubStep = 1;
+                }
+            } else {
+                m_nSubStep = 2;
+            }
+        }
+        moveYNLight();
+        break;
+    case 9:
+        m_fgPadDisable = 2;
+        if (deckCheckErrorWinMenu(FALSE)) {
+            m_nSubStep = 3;
+        }
+        moveYNLight();
+        break;
+    }
+    if (m_bShortCutMode || m_bPlayerKind || m_nStep != 0x26) {
+        return ret;
+    }
+    while (!fgCursorMove) {
+        fgInOutChange = FALSE;
+        if (_isButtonTrg(4, 0) || fgForceChangeInOut == 2) {
+            if (!m_nCardInOut) {
+                break;
+            }
+            if (!m_nKind[0]) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            m_nCardInOut = 0;
+            initCardData(0);
+            initCardKind(m_nDeckNoSelect, m_nKindCategorySelect, FALSE);
+            initDeck(m_nDeckNoSelect, 0);
+            setDeckCard(0x14);
+            setDeckInfo(3);
+            setDeckInfo(0xA);
+            setDeckDeck(0x14);
+            setCursor4(0, 2);
+            setCursor4Hist(0, 2);
+            setButtonHelp(0xA, 0, 0);
+            if (!m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect = m_nKindSelectTop = 0;
+            } else if (m_nKindSelect >= m_nKind[m_nKindCategorySelect]) {
+                m_nKindSelect = m_nKind[m_nKindCategorySelect] - 1;
+                m_nKindSelectTop = m_nKindSelect - 6;
+                if ((m_nKindSelectTop -= m_nKindSelectTop % 3) < 0) {
+                    m_nKindSelectTop = 0;
+                }
+            }
+            fgInOutChange = TRUE;
+            CSound::playSE(3, -1, 0x40);
+        } else if (_isButtonTrg(8, 0) || fgForceChangeInOut == 1) {
+            if (m_nCardInOut) {
+                break;
+            }
+            if (!m_nDeck[0]) {
+                CSound::playSE(5, -1, 0x40);
+                break;
+            }
+            m_nCardInOut = 1;
+            setDeckInfo(3);
+            setDeckInfo(0xB);
+            setCursor2(0, 2, FALSE);
+            if (m_pCursor3Ctrl) {
+                setCursor3(0, 2, FALSE);
+            }
+            setButtonHelp(0xA, 0, 1);
+            fgInOutChange = TRUE;
+            CSound::playSE(3, -1, 0x40);
+        }
+        if (fgInOutChange) {
+            m_bCategorySelectMode = FALSE;
+            m_bCardPermuteMode = FALSE;
+            setDeckCard(0xB);
+            setDeckInfo(0xC);
+            setDeckDeck(3);
+            m_nSubStep = 0;
+        }
+        break;
+    }
+    return ret;
+}
 void CCamp::setDeckCard(INT nSetCmd) {
     static char* pStrNum[2] = { "%03d/%03d", "%03d" };
     FVECTOR vec;
