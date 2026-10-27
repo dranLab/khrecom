@@ -888,7 +888,14 @@ public:
 
     CCPrim();
     virtual ~CCPrim();
-    void create(ULONGLONG iPrim, INT iVertexNum);
+    void create(ULONGLONG iPrim, INT iVertexNum) {
+        remove();
+        m_iMax = iVertexNum;
+        m_PRIM = iPrim;
+#line 613 GPRIM_H_PATH
+        m_V = (FVERTEX*)com_malloc_d(iVertexNum * sizeof(FVERTEX), __FILE__ "(613)", (UINT)-1);
+        if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+    }
     void remove();
     void setTEST(ULONGLONG TEST);
     void setALPHA(ULONGLONG ALPHA);
@@ -915,7 +922,14 @@ public:
 
     CTPrim();
     virtual ~CTPrim();
-    void create(ULONGLONG iPrim, INT iVertexNum);
+    void create(ULONGLONG iPrim, INT iVertexNum) {
+        remove();
+        m_iMax = iVertexNum;
+        m_PRIM = iPrim;
+#line 684 GPRIM_H_PATH
+        m_V = (FTVERTEX*)com_malloc_d(iVertexNum * sizeof(FTVERTEX), __FILE__ "(684)", (UINT)-1);
+        if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
+    }
     void remove();
     void setTEST(ULONGLONG TEST);
     void setALPHA(ULONGLONG ALPHA);
