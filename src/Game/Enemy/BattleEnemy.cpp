@@ -299,7 +299,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playBigDamage
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playDamageSE__12CBattleEnemy8ATK_KIND);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setupDuelCard__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", destroyCard__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", changeDamageMotion__12CBattleEnemyiiii);
+void CBattleEnemy::changeDamageMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr) {
+    INT identifyNo = 0;
+    if (m_pBodyColl->getHitCollBody()) {
+        identifyNo = m_sAttrDmgSeIdentifyNo[m_pBodyColl->getHitCollBody()->getDamageAttr()];
+    }
+    changeMotion(inIndex, inTq, inRootMove, inGr, 0, identifyNo);
+}
 void CBattleEnemy::beginStateAppear_() {
     beginStateAppear();
 }
