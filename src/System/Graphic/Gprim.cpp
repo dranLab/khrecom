@@ -325,7 +325,32 @@ void CSprt::makePkt() {
     CPackMan::pkAddGsData(_gsXYZ(m_P1.x, m_P1.y, m_P0.z));
     CPackMan::pkCloseGifTag();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__8CPolyGT4);
+void CPolyGT4::makePkt() {
+    QWdata giftag;
+    ULONGLONG tex;
+    if (m_pTexInfo == NULL) {
+        return;
+    }
+    tex = setTexture();
+    giftag.ul64[0] = 0xE400000000008000UL;
+    giftag.ul64[1] = 0x43143143143170UL;
+    CPackMan::pkOpenGifTag(giftag.ul128);
+    CPackMan::pkAddGsData((u_long)0x31C | ((u_long)isSemiTrans() << 6));
+    CPackMan::pkAddGsData(tex);
+    CPackMan::pkAddGsData(m_C0.col);
+    CPackMan::pkAddGsData(_gsUV(m_T0));
+    CPackMan::pkAddGsData(_gsXYZ(m_P0));
+    CPackMan::pkAddGsData(m_C1.col);
+    CPackMan::pkAddGsData(_gsUV(m_T1));
+    CPackMan::pkAddGsData(_gsXYZ(m_P1));
+    CPackMan::pkAddGsData(m_C2.col);
+    CPackMan::pkAddGsData(_gsUV(m_T2));
+    CPackMan::pkAddGsData(_gsXYZ(m_P2));
+    CPackMan::pkAddGsData(m_C3.col);
+    CPackMan::pkAddGsData(_gsUV(m_T3));
+    CPackMan::pkAddGsData(_gsXYZ(m_P3));
+    CPackMan::pkCloseGifTag();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", makePkt__10CPolyGT4ST);
 void CLineF2::makePkt() {
     QWdata giftag;
