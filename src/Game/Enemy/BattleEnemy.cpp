@@ -83,7 +83,10 @@ void CBattleEnemy::changeMainState(INT inState) {
     if (m_ullBtlEnemyFlag & 4) return;
     if (m_pMainState) m_pNewState = &((CStateTemplate<CBattleEnemy>*)m_pMainState)[inState];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", changeMotion__12CBattleEnemyiiiiii);
+void CBattleEnemy::changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
+    CEntity::changeMotion(inIndex, inTq, inRootMove, inGr, inEffectNo, inSENo);
+    if (m_pAttack && m_pAttack->set(inIndex)) m_pAttack->setAttackParamForBattleEnemy();
+}
 BOOL CBattleEnemy::changeMotionIndex(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
     if (!m_pAnim) return FALSE;
     if (m_pAnim->getAnimID() == inIndex) return FALSE;
