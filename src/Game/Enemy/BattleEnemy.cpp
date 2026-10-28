@@ -254,7 +254,16 @@ void CBattleEnemy::stateDuelSuccess() {
     if (getTimer() <= 0) changeDefaultState();
 }
 void CBattleEnemy::endStateDuelSuccess() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateFaint__12CBattleEnemy);
+void CBattleEnemy::beginStateFaint() {
+    if (m_pEnemyParam) {
+        changeMotion(m_pEnemyParam->iFaintMotionIndex[0], 0, 0, -1, 0, 0);
+    } else {
+        setTimer(15000);
+    }
+    m_iSysStep = 0;
+    setBadStatusEffect(1, 0.0f);
+    m_ullBtlEnemyFlag |= 0x80000000000ULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateFaint__12CBattleEnemy);
 void CBattleEnemy::endStateFaint() {
     m_ullBtlEnemyFlag &= ~0x80000000000ULL;
