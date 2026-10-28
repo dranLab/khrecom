@@ -1503,8 +1503,160 @@ void CPrizeGauge::_initialize() {
     m_nTexID = 0;
     if (PLM::CPlayerManager::getPLM() && PLM::CPlayerManager::getPLM()->is100AcreWood()) m_nTexID = 4;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge11CPrizeGauge);
-__asm__(".rdata\n.align 4\n.word 0x002890EC\n.word 0x00288E64\n.word 0x00288EE8\n.word 0x00288F58\n.word 0x00288FA8\n.word 0x00289028\n.word 0x00289098\n.word 0x00000000\n.align 4\n.word 0x0028953C\n.word 0x0028911C\n.word 0x002891A0\n.word 0x00289210\n.word 0x00289260\n.word 0x002892E0\n.word 0x00289350\n.word 0x002893A8\n.word 0x00289428\n.word 0x00289498\n.word 0x00000000\n.word 0x00000000\n.text\n");
+void CPrizeGauge::main() {
+    INT i;
+
+    if (CSceneEnv::isStopGauge()) return;
+    if (exePrizeCard()) return;
+    if (CGameWork::getInt(1, 0xE2)) {
+        if (m_uiState) {
+            m_uiState = 0;
+            m_pSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x51);
+            for (i = 0; i < 6; i++) m_pSeqCtrls[i].enableDisp(0, FALSE);
+            m_iExp = 0;
+            m_iOldExp = 0;
+        }
+        if (m_uiMogState) {
+            m_uiMogState = 0;
+            m_pMogSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x66);
+            m_pMogSeqCtrls->enableDisp(0, FALSE);
+            for (i = 1; i < 6; i++) {
+                m_pMogSeqCtrls[i].replaceSeq(0, g_szSeqCockpit, 0x57);
+                m_pMogSeqCtrls[i].enableDisp(0, FALSE);
+            }
+            m_iMp = 0;
+            m_iOldMp = 0;
+            m_iDropMp = 0;
+        }
+        return;
+    }
+    switch (m_uiState) {
+    case 0:
+        break;
+    case 1:
+        if (m_pSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiState = 2; // MATCH: not struct-field stores (register of the state constants), all states below
+            m_pSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x52);
+            for (i = 1; i <= m_iFigure; i++) m_pSeqCtrls[i].enableDisp(0, TRUE);
+        }
+        break;
+    case 2:
+        if (m_pSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiState = 3;
+            m_pSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x53);
+            for (i = 1; i < 6; i++) m_pSeqCtrls[i].enableDisp(0, FALSE);
+        }
+        break;
+    case 3:
+        if (m_pSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiState = 4;
+            m_pSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x54);
+            setPrizeExp(0);
+            m_iOldExp = 0;
+        }
+        break;
+    case 4:
+        if (m_pSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiState = 5;
+            m_pSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x55);
+            for (i = 1; i <= m_iFigure; i++) m_pSeqCtrls[i].enableDisp(0, TRUE);
+        }
+        break;
+    case 5:
+        if (m_pSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiState = 6;
+            m_pSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x56);
+            for (i = 1; i < 6; i++) m_pSeqCtrls[i].enableDisp(0, FALSE);
+        }
+        break;
+    case 6:
+        if (m_pSeqCtrls->isEnd(0)) {
+            m_uiState = 0;
+            m_pSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x51);
+            m_pSeqCtrls->enableDisp(0, FALSE);
+            m_iExp = 0;
+            m_iOldExp = 0;
+        }
+        break;
+    }
+    m_iOldExp = m_iExp;
+    switch (m_uiMogState) {
+    case 0:
+        break;
+    case 1:
+        if (m_pMogSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiMogState = 2;
+            m_pMogSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x67);
+            for (i = 1; i <= m_iMpFigure; i++) m_pMogSeqCtrls[i].enableDisp(0, TRUE);
+        }
+        break;
+    case 2:
+        if (m_pMogSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiMogState = 3;
+            m_pMogSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x68);
+            for (i = 1; i < 6; i++) m_pMogSeqCtrls[i].enableDisp(0, FALSE);
+        }
+        break;
+    case 3:
+        if (m_pMogSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiMogState = 4;
+            m_pMogSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x69);
+            setPrizeMp(0);
+            m_iOldMp = 0;
+        }
+        break;
+    case 4:
+        if (m_pMogSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiMogState = 5;
+            m_pMogSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x6A);
+            for (i = 1; i <= m_iMpFigure; i++) m_pMogSeqCtrls[i].enableDisp(0, TRUE);
+        }
+        break;
+    case 5:
+        if (m_pMogSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiMogState = 6;
+            m_pMogSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x6B);
+            for (i = 1; i < 6; i++) m_pMogSeqCtrls[i].enableDisp(0, FALSE);
+        }
+        break;
+    case 6:
+        if (m_pMogSeqCtrls->isEnd(0)) {
+            m_uiMogState = 0;
+            m_pMogSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x66);
+            m_pMogSeqCtrls->enableDisp(0, FALSE);
+            m_iMp = 0;
+            m_iOldMp = 0;
+        }
+        break;
+    case 7:
+        if (m_pMogSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiMogState = 8;
+            m_pMogSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x8D);
+            for (i = 1; i <= m_iMpFigure; i++) m_pMogSeqCtrls[i].enableDisp(0, TRUE);
+        }
+        break;
+    case 8:
+        if (m_pMogSeqCtrls->isEnd(0)) {
+            *(UINT*)&m_uiMogState = 9;
+            m_pMogSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x8E);
+            for (i = 1; i < 6; i++) m_pMogSeqCtrls[i].enableDisp(0, FALSE);
+        }
+        break;
+    case 9:
+        if (m_pMogSeqCtrls->isEnd(0)) {
+            m_uiMogState = 0;
+            m_pMogSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x66);
+            m_pMogSeqCtrls->enableDisp(0, FALSE);
+            for (i = 1; i < 6; i++) {
+                m_pMogSeqCtrls[i].replaceSeq(0, g_szSeqCockpit, 0x57);
+                m_pMogSeqCtrls[i].enableDisp(0, FALSE);
+            }
+            m_iDropMp = 0;
+        }
+        break;
+    }
+    m_iOldMp = m_iMp;
+}
 void CPrizeGauge::setDispSeq() {
     INT i;
     INT pow;
