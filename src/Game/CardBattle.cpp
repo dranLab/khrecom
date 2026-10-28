@@ -51,8 +51,12 @@ public:
     void setPronounceCard(INT inKind, INT inNumber);
     INT setPlayPronounce();
 };
-class CEnchantGauge {
+class CEnchantGauge : public ::CTask {
+    BYTE _m_0x40[0x20];
+
 public:
+    CEnchantGauge(::CTask* pParent, INT inUser, CARD& inCard);
+    virtual ~CEnchantGauge();
     void changeCount(INT inCount);
     void destroy();
 };
@@ -747,8 +751,86 @@ INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard,
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayStock__Q210CardBattle11CCardBattleiiPPQ210CardBattle11CBattleCardiiii);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnchantCard__Q210CardBattle11CCardBattleiiPQ210CardBattle11CBattleCard);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61432F65\n.word 0x61426472\n.word 0x656C7474\n.word 0x7070632E\n.word 0x35383128\n.word 0x00002938\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word .L001DCF5C\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCDE4\n.word .L001DCFC8\n.word .L001DCF5C\n.word .L001DCFC8\n.word .L001DCF78\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCF98\n.word .L001DCDF4\n.word .L001DCFC8\n.word .L001DCE08\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFB4\n.word .L001DCFC8\n.word .L001DCEB4\n.word .L001DCFC8\n.word .L001DCED8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCF38\n.text\n");
+INT CCardBattle::setEnchantCard(HANDLE inHandle, INT inUser, CBattleCard* inCard) {
+    if (!(inUser)) AssertApp(D_00476980, 1823, "inUser", 0);
+    UINT _PLAYER = inUser - 1;
+    if (m_uiState[_PLAYER]) return 0;
+    if (m_pEnchant[_PLAYER]) resetEnchantCard(inUser);
+    m_pEnchant[_PLAYER] = inCard;
+    m_cardEnchant[_PLAYER] = *inCard->getCardData();
+    inCard->setEnchant();
+    CSound::playSE(0x20, -1, 0x40);
+    if (m_pEnchantGauge[_PLAYER]) delete m_pEnchantGauge[_PLAYER];
+    m_pEnchantGauge[_PLAYER] = NULL;
+    m_pEnchantGauge[_PLAYER] = new (com_malloc_d(sizeof(CEnchantGauge), __FILE__ "(1858)", RET_ADDR()))
+        CEnchantGauge(asTask(), inUser, m_cardEnchant[_PLAYER]);
+    m_nEnchantTime[_PLAYER] = _ref(g_pBattleCardList)[m_cardEnchant[_PLAYER].m_nKind].EFF_TIMES;
+    if (_PLAYER == 0) setPlayerEnchant(m_cardEnchant[0].m_nKind);
+    UINT _ENEMY = _PLAYER ^ 1;
+    switch (m_cardEnchant[_PLAYER].m_nKind) {
+    case 0x55:
+        m_uiFlag |= 0x4000;
+        break;
+    case 0x5D: {
+        UINT flag = 0x1000 << _ENEMY;
+        m_uiFlag |= flag;
+        m_tqEnchantTimer[_ENEMY] = 0;
+        break;
+    }
+    case 0x5F: {
+        INT kind = m_cardEnchant[_PLAYER].m_nKind;
+        while (kind == 0x5F || kind == 0x66 || (kind == 0x59 && !(m_uiFlag & 0x20000))) {
+            if (CGameWork::getInt(0, 0x2D)) {
+                kind = RND::genrand_int31() % 0x39 + 0x44;
+            } else {
+                kind = RND::genrand_int31() % 0x32 + 0x44;
+            }
+        }
+        m_cardEnchant[_PLAYER].m_nKind = kind;
+        inCard->changeData(m_cardEnchant[_PLAYER]);
+        setEnchantCard(inHandle, inUser, inCard);
+        return 1;
+    }
+    case 0x64:
+        if (m_cardEnchant[_ENEMY].m_nKind) resetEnchantCard(_ENEMY + 1);
+        resetEnchantCard(inUser);
+        return 1;
+    case 0x66:
+        if (m_cardEnchant[_ENEMY].m_nKind) {
+            m_cardEnchant[_PLAYER].m_nKind = m_cardEnchant[_ENEMY].m_nKind;
+            inCard->changeData(m_cardEnchant[_PLAYER]);
+            setEnchantCard(inHandle, inUser, inCard);
+        } else {
+            resetEnchantCard(inUser);
+        }
+        break;
+    case 0x6A: {
+        UINT flag = 0x400 << _PLAYER;
+        m_uiFlag |= flag;
+        m_tqEnchantTimer[_PLAYER] = 0;
+        break;
+    }
+    case 0x4B:
+    case 0x57:
+        inCard->getRevolver()->rollDeck(0, 1, 300);
+        return 1;
+    case 0x59:
+        if (CGame::isRikuGame()) m_uiFlag |= 0x80000;
+        break;
+    case 0x5C:
+        if (inCard->getRevolver()) {
+            inCard->getRevolver()->setPlayNG(1, 3);
+            return 1;
+        }
+        break;
+    case 0x62:
+        if (inCard->getRevolver()) {
+            inCard->getRevolver()->setPlayNG(1, 2);
+        }
+        break;
+    }
+    return 1;
+}
 /* Parked: address forms - the original computes &m_cardEnchant[_PLAYER] as (idx*4+0x17c)+base and loads the kind with
  * offset 0 (kept in two registers), and &m_nEnchantTime[_PLAYER] as (base+0x184)+idx*4; ours folds the offsets the
  * other way round; the reload of m_pInstance after the decrement matches via the INT* pTime pointer; tried: CARD view
