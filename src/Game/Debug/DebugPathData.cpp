@@ -1,6 +1,7 @@
 #include "khtypes.h"
 #define GAME_DEBUG_DEBUGPATHDATA_CPP
 #define FORM_DEBUGWINDOW_FULL /* MATCH: CNakCamera; the original has Gprim.h's strings (PathData.h includes it first) */
+#define COLLOBJ_H_COLLISION_CLASSES /* MATCH: CPointCollision (debugWinPathEditPosCamGround) */
 #define TASK_H_NO_SLC_OVERFLOW_MSG /* MATCH: the message comes after DebugPathData.h's strings (placeholder below) */
 #include "System/Graphic/PathData.h"
 #include "System/Graphic/HermitePath.h"
@@ -13,6 +14,7 @@ inline void _taskSLCOverflowDebugPathData() {
 }
 #define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h" /* MATCH: the original includes it under this name */
 #include "System/Graphic/PathDataCamera.h"
+#include "Game/Collision/CollUtilA.h"
 #include "Game/Collision/CollUtil.h"
 #include "System/Graphic/Anim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -129,9 +131,7 @@ CHermitePathMoveS::CHermitePathMoveS(CTask* p, const CPathVector* pVec) : CTask(
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __17CHermitePathMoveSP5CTaskPC11CPathVector);
 #endif
-/* Matched (CHermitePathMoveS::~CHermitePathMoveS() {}), asm until the weak tail: as the key function it emits
-   the vtable after the .rodata tail block below. */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", _$_17CHermitePathMoveS);
+CHermitePathMoveS::~CHermitePathMoveS() {}
 void CHermitePathMoveS::main() {
     PATH_PARAM sParam;
     FVECTOR vPos;
@@ -268,9 +268,47 @@ DEBUG_WINDOW_LINE debugWinPathEditEtcParamLine[28] = {
 };
 
 DEBUG_WINDOW_TBL debugWinPathEditEtcParam = {"\x82\xbb\x82\xcc\x91\xbc\x83p\x83\x89\x83\x81\x81[\x83^\x90\xdd\x92\xe8", -136, -176, 18, 26, 12, 0, 2, debugWinPathEditEtcParamLine, NULL, &debugWinPathEditEtcParamAllCall};
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4116: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPosCamGround__FP12CDebugWindowii);
+extern "C" char D_00486A80[];
+BOOL debugWinPathEditPosCamGround(CDebugWindow* pObj, INT inY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if (inParam & 0x20) {
+            pObj->sendMessage(1, &DWT::debugWinYesNo);
+            iStep++;
+        }
+        break;
+    case 1:
+        if (inParam & 0x800) {
+            if (pObj->isChildAnswer() && pObj->getChildAnswer() == 1) {
+                FVECTOR vPos = CDebugPathData::m_vActivePathPos;
+                FVECTOR v1;
+                FVECTOR v2;
+                FVECTOR vo;
+                CPointCollision cColl;
+                vPos.w = 1.0f;
+                v1 = vPos;
+                v2 = vPos;
+                v1.y += 0.5f;
+                v2.y -= 10.0f;
+                cColl.setStartPos(v1);
+                cColl.setEndPos(v2);
+                if (CCollUtil::detectMCD(cColl)) {
+                    vo = cColl.m_outDetect;
+                    vPos.y = vo.y;
+                    CDebugPathData::setActivePathVecPositionXYZ(vPos);
+                    CDebugPathData::getCam()->SetCameraLook(CDebugPathData::m_vActivePathPos);
+                } else {
+                    pObj->sendMessage(1, D_00486A80);
+                }
+            }
+            iStep = 0;
+        }
+        break;
+    }
+    return TRUE;
+}
 __asm__(".rdata\n.align 3\n.word 0xCA966E92\n.word 0xA98CAA82\n.word 0xA982C282\n.word 0xDC82E882\n.word 0xF182B982\n.word 0x00000021\n.text\n");
 /* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
 __asm__(".data\n.align 2\n" "iStep.4123: .word 0\n" ".text\n");
@@ -503,7 +541,6 @@ extern "C" char D_00487040[];
 extern "C" char D_00487078[];
 /* Data step first: the inline CCPrim::create brings Gprim.h's "(613)"/"m_V" literals, and the unit's .rodata is
    still asm (objcopy: symbol .rodata required). Draft not compared yet. */
-#if 0
 CDebugPathData::CDebugPathData(CTask* p, BOOL bEnd) : CTask(p, 0x4000) {
     CTask* pWnd;
     m_pPath = NULL;
@@ -522,15 +559,17 @@ CDebugPathData::CDebugPathData(CTask* p, BOOL bEnd) : CTask(p, 0x4000) {
     CDebugWindow::enableTopDebugWindow(FALSE);
     CPlayer::enableDbgPadControl(FALSE);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __14CDebugPathDataP5CTaski);
-#endif
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x39312870\n.word 0x00293832\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x39312870\n.word 0x00293932\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x39312870\n.word 0x00293833\n.word 0x00000000\n.text\n");
-/* Not attempted yet: the key function; defining it emits every in-class inline (the weak tail, still asm).
-   Draft (needs Game/CardKind.h + Game/Player/Player.h after PathDataCamera.h, ~CPDFrameTime() {} inline):
-   delete m_pPath; m_pPath = NULL; delete m_pFrame; m_pFrame = NULL; m_pInstance = NULL;
-   CDebugWindow::enableTopDebugWindow(TRUE); CPlayer::enableDbgPadControl(TRUE); */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", _$_14CDebugPathData);
+CDebugPathData::~CDebugPathData() {
+    delete m_pPath;
+    m_pPath = NULL;
+    CPDFrameTime*& pFrame = m_pFrame; /* MATCH: a reference keeps its load after the m_pPath store */
+    delete pFrame;
+    pFrame = NULL;
+    m_pInstance = NULL;
+    CDebugWindow::enableTopDebugWindow(TRUE);
+    CPlayer::enableDbgPadControl(TRUE);
+}
 BOOL CDebugPathData::create(CTask* p, BOOL bEnd) {
     if (!m_pInstance) {
         m_pInstance = new (com_malloc_d(sizeof(CDebugPathData), "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(1963)", RET_ADDR())) CDebugPathData(p, bEnd);
@@ -611,7 +650,6 @@ extern "C" char D_00487268[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(
 /* Weak tail first: this draft matches (V1), but `new CPathData` makes gcc emit the weak CVector<G_STRIP>
    destructor (the original's unnamed func_0021F178, which follows savePath) at the end of the unit. Needs
    CPathData(const PATH_DATA* pPathData, BOOL bAlloc) { init(pPathData, bAlloc); } in PathData.h. */
-#if 0
 BOOL CDebugPathData::loadPath(const CHAR* pName) {
     CDebugPathData* p = getInstance();
     INT iSize;
@@ -636,9 +674,6 @@ BOOL CDebugPathData::loadPath(const CHAR* pName) {
     CFileIO::closeFile(iFD);
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", loadPath__14CDebugPathDataPCc);
-#endif
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x31322870\n.word 0x00293233\n.word 0x00000000\n.word 0x66754270\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x31322870\n.word 0x00293134\n.word 0x00000000\n.text\n");
 extern "C" void* memset(void*, int, unsigned int);
 extern "C" char* strncpy(char*, const char*, unsigned int);
@@ -816,44 +851,4 @@ BOOL CDebugPathData::savePath(const CHAR* pName) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", savePath__14CDebugPathDataPCc);
 #endif
 __asm__(".rdata\n.align 3\n.word 0x40837483\n.word 0x8B834383\n.word 0x62837783\n.word 0xCC825F83\n.word 0xAB82918F\n.word 0xDD829E8D\n.word 0x6E8E4A8A\n.word 0x0000000A\n.word 0x833A6425\n.word 0x83408374\n.word 0x828B8343\n.word 0x82918FCC\n.word 0x829E8DAB\n.word 0x8EC982DD\n.word 0x217394B8\n.word 0x21212121\n.word 0x21212121\n.word 0x21212121\n.word 0x00000A21\n.word 0x00000000\n.word 0x40837483\n.word 0x8B834383\n.word 0x62837783\n.word 0xCC825F83\n.word 0xAB82918F\n.word 0xDD829E8D\n.word 0xED82498F\n.word 0x000AE882\n.word 0xAB82918F\n.word 0xDE829E8D\n.word 0x58837083\n.word 0x9490CC82\n.word 0x000A6425\n.word 0x00000000\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x8F3A6425\n.word 0x8DAB8291\n.word 0x82DD829E\n.word 0x82B782DC\n.word 0x2D2D2DE6\n.word 0x2D2D2D2D\n.word 0x00000A2D\n.word 0x00000000\n.word 0x833A6425\n.word 0x83588370\n.word 0x83628377\n.word 0x8FCC825F\n.word 0x8DAB8291\n.word 0x8ADD829E\n.word 0x0A6E8E4A\n.word 0x00000000\n.word 0x833A6425\n.word 0x83588370\n.word 0x83628377\n.word 0x8FCC825F\n.word 0x8DAB8291\n.word 0x8FDD829E\n.word 0x82ED8249\n.word 0x00000AE8\n.word 0xAB82918F\n.word 0xDE829E8D\n.word 0x5F93B892\n.word 0x9490CC82\n.word 0x000A6425\n.word 0x00000000\n.word 0x923A6425\n.word 0x825F93B8\n.word 0x82918FCC\n.word 0x829E8DAB\n.word 0x8E4A8ADD\n.word 0x00000A6E\n.word 0x923A6425\n.word 0x825F93B8\n.word 0x82918FCC\n.word 0x829E8DAB\n.word 0x82498FDD\n.word 0x0AE882ED\n.word 0x00000000\n.word 0x00000000\n.word 0x833A6425\n.word 0x83898370\n.word 0x835B8181\n.word 0x8FCC825E\n.word 0x8DAB8291\n.word 0x8ADD829E\n.word 0x0A6E8E4A\n.word 0x00000000\n.word 0x833A6425\n.word 0x83898370\n.word 0x835B8181\n.word 0x8FCC825E\n.word 0x8DAB8291\n.word 0x8FDD829E\n.word 0x82ED8249\n.word 0x00000AE8\n.word 0xAB82918F\n.word 0xF1829E8D\n.word 0x7083BE82\n.word 0x81838983\n.word 0x5E835B81\n.word 0x9490CC82\n.word 0x000A6425\n.word 0x00000000\n.word 0xAB82918F\n.word 0xDE829E8D\n.word 0x66837083\n.word 0x93834283\n.word 0xCC824F83\n.word 0x64259490\n.word 0x0000000A\n.word 0x00000000\n.word 0x833A6425\n.word 0x83668370\n.word 0x83938342\n.word 0x8FCC824F\n.word 0x8DAB8291\n.word 0x8ADD829E\n.word 0x0A6E8E4A\n.word 0x00000000\n.word 0x833A6425\n.word 0x83668370\n.word 0x83938342\n.word 0x8FCC824F\n.word 0x8DAB8291\n.word 0x8FDD829E\n.word 0x82ED8249\n.word 0x00000AE8\n.word 0x833A6425\n.word 0x83408374\n.word 0x828B8343\n.word 0x834E83CC\n.word 0x835B818D\n.word 0x8EC98259\n.word 0x217394B8\n.word 0x21212121\n.word 0x21212121\n.word 0x21212121\n.word 0x00000A21\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_0021F178);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_0021F208);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_0021F230);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", isDebugPathData__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getPathNum__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getPathVectorNum__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getPathVector__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getPathVectorData__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getPathPointer__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", setActivePathNum__14CDebugPathDataii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getActivePathNum__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", addPath__14CDebugPathDataPC7FVECTORi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", delPath__14CDebugPathDatai);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", limitClampActivePathNum__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", limitRepeatActivePathNum__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", incActivePathNum__14CDebugPathDatai);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", decActivePathNum__14CDebugPathDatai);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", setActivePathVecNum__14CDebugPathDatai);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", setActivePathVecPosition__14CDebugPathDataRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", setActivePathVecPositionXYZ__14CDebugPathDataRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getActivePathVecNum__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getActivePathVecPosition__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", addPathVector__14CDebugPathDatai);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", delPathVector__14CDebugPathDatai);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", limitClampActivePathVecNum__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", limitRepeatActivePathVecNum__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", incActivePathVecNum__14CDebugPathDatai);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", decActivePathVecNum__14CDebugPathDatai);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getActiveParam__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", setActiveParam__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", removePath__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getInstance__14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220AD0);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220B00);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220B30);
-/* Matched as the in-class inlines (emitted by the key function), asm with it: */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", isEnd__17CHermitePathMoveS);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getHermitePath__17CHermitePathMoveS);
-/* The vtables: their key functions (and the weak copies) are still assembly. */
-__asm__(".rdata\n.align 3\n.globl _vt$17CHermitePathMoveS\n_vt$17CHermitePathMoveS:\n.word 0\n.word 0\n.word 0\n.word _$_17CHermitePathMoveS\n.word 0\n.word main__17CHermitePathMoveS\n.word 0\n.word disp__17CHermitePathMoveS\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.word 0\n.word 0\n.word 0\n.word _$_15CPointCollision\n.word 0\n.word collideMap__15CPointCollision\n.word 0\n.word 0\n.word 0\n.word 0\n.word 0\n.word _$_10CCollision\n.word 0\n.word 0\n.globl _vt$14CDebugPathData\n_vt$14CDebugPathData:\n.word 0\n.word 0\n.word 0\n.word _$_14CDebugPathData\n.word 0\n.word main__14CDebugPathData\n.word 0\n.word disp__14CDebugPathData\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.word 0\n.word 0\n.word 0\n.word disp__6CGPrim\n.word 0\n.word getPacketSize__C8CStrPrim\n.word 0\n.word makePkt__8CStrPrim\n.word 0\n.word _$_4CFnt\n.word 0\n.word calcZ__6CFntM2\n.word 0\n.word getSize__C8CStrPrimR4G_XYP4G_XYPi\n.word 0\n.word drawFont__6CFntM2i\n.word 0\n.word 0\n.word 0\n.word 0\n.word 0\n.word _$_t7CVector1Z7G_STRIP\n.word 0\n.word 0\n.word 0\n.word 0\n.text\n");
 // SOURCE DATA: .data .rodata

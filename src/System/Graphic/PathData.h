@@ -117,6 +117,8 @@ public:
     float getPathStepToVectorIdx4(int* pv, float fstep);
     float getPathStepToVector4(const FVECTOR** pv, float fstep);
     void setPathParam(PATH_PARAM& sParam);
+    void setPathPosition(INT iNum, const FVECTOR& vPos) { m_pVec[iNum] = vPos; }
+    void setActive(INT iNum) { *(INT*)&m_iActive = iNum; } // MATCH: not a struct-field store, so callers reload statics after it (gcc 2.95 alias heuristic; CDebugPathData::setActivePathVecNum)
     BOOL addPath(INT iNum);
     BOOL delPath(INT iNum);
     void dispDebugLine(INT iFlg);
@@ -142,6 +144,7 @@ private:
 public:
     CPathData(const CHAR* pszName) { init(pszName, 0); }
     CPathData(const PATH_DATA* pPathData) { init(pPathData, 0); }
+    CPathData(const PATH_DATA* pPathData, BOOL bAlloc) { init(pPathData, bAlloc); }
     ~CPathData();
     void init(const PATH_DATA* pPathData, INT iMode);
     void init(const CHAR* pszName, INT iMode);
@@ -151,14 +154,23 @@ public:
         return &m_pPath[iPathNum];
     }
     INT getPathVectorNum(INT iPathNum) { return m_pPath[iPathNum].getPathVectorNum(); }
+    FVECTOR* getPathVector(INT iPathNum) { return m_pPath[iPathNum].getPathVector(); }
     FVECTOR& getPathPosition(INT iPathNum, INT iIdx) { return m_pPath[iPathNum].getPathPosition(iIdx); }
     void getPathParam(INT iPathNum, PATH_PARAM& sParam) { m_pPath[iPathNum].getPathParam(sParam); }
     INT getLinkChild(INT iPathNum, INT iStart);
     void makeVertexSpeedAll() {
         for (INT i = 0; i < getPathNum(); i++) getPathVectorData(i)->makeVertexSpeedAll();
     }
+    void setPathParam(INT iPathNum, PATH_PARAM& sParam) { m_pPath[iPathNum].setPathParam(sParam); }
+    void setPathPosition(INT iPathNum, INT iNum, const FVECTOR& vPos) { m_pPath[iPathNum].setPathPosition(iNum, vPos); }
+    void setActive(INT iPathNum, INT iNum) {
+        *(INT*)&m_iActive = iPathNum; // MATCH: as CPathVector::setActive
+        m_pPath[iPathNum].setActive(iNum);
+    }
     BOOL addPath(const FVECTOR* pVec, INT iNum);
     BOOL delPath(INT iNum);
+    BOOL addPathVector(INT iPathNum, INT iNum) { return m_pPath[iPathNum].addPath(iNum); }
+    BOOL delPathVector(INT iPathNum, INT iNum) { return m_pPath[iPathNum].delPath(iNum); }
     void dispDebugLine();
 private:
     void _init(const PATH_DATA* pPathData, BOOL bAlloc);

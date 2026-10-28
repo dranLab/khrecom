@@ -292,8 +292,11 @@ public:
     }
     void remove();
     BOOL isRect(INT i, const FVECTOR* vRect); // PARTIAL: added for System/Graphic/Gprim
+    virtual UINT getPacketSize() const; // PARTIAL: added for Game/Debug/DebugPathData (the key function)
 private:
     void init(); // PARTIAL: added for Game/Debug/DebugPathData
+    virtual FIX4 calcZ();
+    virtual void makePkt();
 };
 
 class CTPrim : public CGTexPrim {

@@ -371,3 +371,15 @@ _$_6CState_00277080 = 0x00277080; // type:func size:0x30
 _vt$6CState_0049E8D0 = 0x0049E8D0; // size:0x30
 _vt$t7CVector1Z7G_STRIP_004645A0 = 0x004645A0; // size:0x18
 _vt$6CState_004ADF80 = 0x004ADF80; // size:0x30 (Game/Enemy/BattleEnemy)
+
+// Game/Debug/DebugPathData: unnamed copies of other classes' inline functions and vtables (its weak tail)
+_$_t7CVector1Z7G_STRIP_0021F178 = 0x0021F178; // type:func size:0x8C
+_$_4CFnt_0021F208 = 0x0021F208; // type:func size:0x28
+setStyle__4CFntUi_0021F230 = 0x0021F230; // type:func size:0xC
+_$_10CCollision_00220AD0 = 0x00220AD0; // type:func size:0x30
+_$_15CPointCollision_00220B00 = 0x00220B00; // type:func size:0x30
+collideMap__15CPointCollision_00220B30 = 0x00220B30; // type:func size:0x5C
+_vt$15CPointCollision_00487640 = 0x00487640; // size:0x20
+_vt$10CCollision_00487660 = 0x00487660; // size:0x18
+_vt$4CFnt_004876B8 = 0x004876B8; // size:0x48
+_vt$t7CVector1Z7G_STRIP_00487700 = 0x00487700; // size:0x18
