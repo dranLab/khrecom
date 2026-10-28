@@ -64,6 +64,10 @@ extern "C" char D_004A2E38[];
 extern "C" char D_004A2E70[];
 extern "C" char D_004A2EA8[];
 extern "C" char D_004A3270[];
+extern "C" char D_004A2F90[];
+extern "C" char D_004A2FC8[];
+extern "C" char D_004A3000[];
+extern "C" char D_004A3038[];
 extern "C" char D_004A2BD8[];
 extern "C" char D_004A2C10[];
 extern "C" char D_004A2C48[];
@@ -76,6 +80,14 @@ static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
     c.m_nId = 0;
     c.m_nKind2 = kind;
     c.m_nNumber2 = num;
+    c.m_nCategory20 = cardDataTbl_004A4070[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl_004A4070[c.m_nKind].nCategory1;
+}
+/* MATCH: this CARD init stores the number before the kind (as CardRevolver's debug cards) */
+static inline void _setCardNum(CARD& c, USHORT kind, BYTE num) {
+    c.m_nId = 0;
+    c.m_nNumber2 = num;
+    c.m_nKind2 = kind;
     c.m_nCategory20 = cardDataTbl_004A4070[c.m_nKind].nCategory0;
     c.m_nCategory21 = cardDataTbl_004A4070[c.m_nKind].nCategory1;
 }
@@ -848,7 +860,62 @@ CPrizeGauge::CPrizeGauge(CTask* p) : CTask(p ? p : getSysTask(1), 0x4000) {
     _initialize();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge11CPrizeGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge11CPrizeGauge);
+void CPrizeGauge::_initialize() {
+    INT i;
+    FVECTOR pos;
+    INT size;
+    m_iFigure = 1;
+    m_uiState = 0;
+    m_iExp = 0;
+    m_iOldExp = 0;
+    m_pSeqCtrls = NULL;
+    m_pSeqCtrls = new (D_004A2F90) D2::C2DSeqCtrl[6];
+    size = 16;
+    m_pSeqCtrls->setLayer(8);
+    m_pSeqCtrls->addSeq(g_szSeqCockpit, 0x51);
+    D2::C2DMan::getLayPosition(g_szLadCockpit, 0xA, 0, pos, FALSE);
+    m_pSeqCtrls->setPos(pos);
+    m_pSeqCtrls->enableDisp(0, FALSE);
+    pos.x += 114.0f;
+    pos.y += 20.0f;
+    for (i = 1; i < 6; i++) {
+        m_pSeqCtrls[i].setLayer(8);
+        m_pSeqCtrls[i].addSeq(g_szSeqCockpit, 0x57);
+        pos.x -= size;
+        m_pSeqCtrls[i].setPos(pos);
+        m_pSeqCtrls[i].enableDisp(0, FALSE);
+    }
+    m_iMpFigure = 1;
+    m_uiMogState = 0;
+    m_iMp = 0;
+    m_iOldMp = 0;
+    m_iDropMp = 0;
+    m_pMogSeqCtrls = NULL;
+    m_pMogSeqCtrls = new (D_004A2FC8) D2::C2DSeqCtrl[6];
+    m_pMogSeqCtrls->setLayer(8);
+    m_pMogSeqCtrls->addSeq(g_szSeqCockpit, 0x66);
+    D2::C2DMan::getLayPosition(g_szLadCockpit, 0x10, 0, pos, FALSE);
+    m_pMogSeqCtrls->setPos(pos);
+    m_pMogSeqCtrls->enableDisp(0, FALSE);
+    pos.x += size * 4 + 50;
+    pos.y += 20.0f;
+    for (i = 1; i < 6; i++) {
+        m_pMogSeqCtrls[i].setLayer(8);
+        m_pMogSeqCtrls[i].addSeq(g_szSeqCockpit, 0x57);
+        pos.x -= size;
+        m_pMogSeqCtrls[i].setPos(pos);
+        m_pMogSeqCtrls[i].enableDisp(0, FALSE);
+    }
+    m_uiCardState = 0;
+    _setCardNum(m_cardData, 0, 0);
+    m_pCardSeqCtrls = NULL;
+    m_pCardSeqCtrls = new (D_004A3000) D2::C2DSeqCtrl[2];
+    m_pCard = new (D_004A3038) C2DCard;
+    for (i = 0; i < 4; i++) _setCard(m_cardStack[i], 0, 0);
+    m_nStack = 0;
+    m_nTexID = 0;
+    if (PLM::CPlayerManager::getPLM() && PLM::CPlayerManager::getPLM()->is100AcreWood()) m_nTexID = 4;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge11CPrizeGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispSeq__Q25Gauge11CPrizeGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispMogSeq__Q25Gauge11CPrizeGauge);

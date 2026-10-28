@@ -203,7 +203,7 @@ public:
     D2::C2DSeqCtrl* m_pMogSeqCtrls; /* 0x78 */
     INT m_iDropMp;               /* 0x7c */
     UINT m_uiCardState;          /* 0x80 */
-    UINT m_cardData;             /* 0x84 CARD */
+    CARD m_cardData;             /* 0x84 */
     D2::C2DSeqCtrl* m_pCardSeqCtrls; /* 0x88 */
     ::C2DCard* m_pCard;      /* 0x8c */
     TIMEQ m_tqTimer;             /* 0x90 */
