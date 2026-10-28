@@ -28,11 +28,8 @@ inline void* operator new(size_t size, char* msg) throw() {
     return com_malloc_d(size, msg, RET_ADDR());
 }
 
-class CSceneEnv {
-public:
-    static ObjType::eObjBit getStopTypeBit();
-    static FVECTOR* getTypeColor(ObjType::eObjType eType);
-};
+#include "Game/SceneEnv.h"
+#line 36
 
 class CRsrcDB {
 public:
