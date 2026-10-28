@@ -5,6 +5,7 @@
 #include "System/Sound/SoundMan.h"
 #include "Game/GameWork.h"
 #include "Game/Player/Player.h"
+#include "Game/Player/PlayerManager.h"
 #include "System/Debug.h"
 #include "System/HeapMan.h"
 #include "Game/Debug/DebugWork.h"
@@ -379,7 +380,69 @@ void CCardRevolver::initHide() {
         m_hChargeSE = 0;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setDeck__Q210CardBattle13CCardRevolverP4CARDi);
+extern "C" char D_0047AD28[]; /* "ENCR:: (ZEXION MODE) snatchCard = %d\n" */
+extern "C" char D_0047AD50[]; /* "...CardRevolver.cpp(1359)" */
+extern "C" char D_0047AD80[]; /* "...CardRevolver.cpp(1363)" */
+extern "C" char D_0047ADB0[]; /* "...CardRevolver.cpp(1417)" */
+inline void operator delete[](void* mem) { com_free(mem); }
+void CCardRevolver::setDeck(CARD* pDeck, INT inShortCut) {
+    INT i;
+    CARD card;
+    INT snatch;
+    m_nRemain[0] = m_nRemain[1] = m_nActive[0] = m_nActive[1] = 0;
+    delete[] m_pCards;
+    m_pCards = NULL;
+    delete[] m_pCardsE;
+    m_pCardsE = NULL;
+    for (i = 0; i < 99 && (card = pDeck[i], card.m_nKind && card.m_nKind <= 0xCA); i++) {
+        if (card.m_nCategory1 == 7 && card.m_nNumber == -1) m_nRemain[1]++;
+        else m_nRemain[0]++;
+    }
+    m_nTotal[0] = m_nRemain[0] + 1;
+    m_nTotal[1] = m_nRemain[1];
+    if (m_uiUser == 1) {
+        m_nLimit = m_nTotal[0] + 9;
+    } else {
+        snatch = 0;
+        PLM::CPlayerManager* pPLM = (PLM::CPlayerManager*)CTaskMan::getSysTask(0x1F);
+        if (pPLM && pPLM->isZexionBattle()) {
+            m_uiFlag |= 0x2000;
+            snatch = 0x18;
+            TRACE(D_0047AD28, 0x18);
+        }
+        m_nLimit = m_nTotal[0] + snatch;
+    }
+    if (m_nTotal[0] > 0) m_pCards = new (D_0047AD50) CBattleCard[m_nLimit](this, 0, -1, m_uiUser, 2);
+    if (m_nTotal[1] > 0) m_pCardsE = new (D_0047AD80) CBattleCard[m_nTotal[1]](this, 0, -1, m_uiUser, 2);
+    m_nRemain[1] = 0;
+    m_nRemain[0] = 0;
+    for (i = 0; i < 99 && (card = pDeck[i], card.m_nKind && card.m_nKind <= 0xCA); i++) {
+        if (card.m_nCategory1 == 7 && card.m_nNumber == -1) {
+            m_pCardsE[m_nRemain[1]].setHand(card, m_nRemain[1], m_nTotal[1], 0);
+            m_pCardsE[m_nRemain[1]].hideHand();
+            m_nRemain[1]++;
+        } else {
+            m_pCards[m_nRemain[0]].setHand(card, m_nRemain[0], m_nTotal[0], 0);
+            if (inShortCut == i) m_nShortCutID = m_nRemain[0];
+            m_nRemain[0]++;
+        }
+    }
+    if (m_uiFlag & 0x80) m_iChargeCount = -1;
+    else m_iChargeCount = 1;
+    _setCard(card, 0xA0, m_iChargeCount);
+    m_pCards[m_nRemain[0]].setHand(card, m_nRemain[0], m_nTotal[0], 0);
+    m_iCharge = 0;
+    m_tqCharge = 0;
+    m_nReloadID = m_nRemain[0];
+    m_nReloadCard = 1;
+    m_uiFlag |= 1;
+    rollDeck(0, 1, 300);
+    if (m_nTotal[1] == 0) {
+        m_pCardsE = new (D_0047ADB0) CBattleCard[1](this, 0, -1, m_uiUser, 2);
+        m_pCardsE->setHand(card, 0, 1, 0);
+        m_pCardsE->hideHand();
+    }
+}
 /* Parked: 5 lines off, the direction `a`: the original computes it as li t3,1 / slt v0,v1,a1 / movz t3,v1,v0
    with v1 = -1 set in both predecessors of the join, then negates num with bltzl; ours branches (bgez). Worked:
    one `i` for all three loops (s0), !m_iMode-first rc/pCards select, hand++ after setHand, if/else direction.
