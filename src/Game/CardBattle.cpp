@@ -444,7 +444,32 @@ void CCardBattle::transferPlayerEnchant(CPlayer* inPL) {
         inPL->setAeroGuard(FALSE);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeRegeneration__Q210CardBattle11CCardBattle);
+void CCardBattle::exeRegeneration() {
+    UINT flag = 0x400;
+    if (m_uiFlag & flag) {
+        m_tqEnchantTimer[0] += getFrameRate();
+        if (m_tqEnchantTimer[0] >= 6000) {
+            if (g_pPlayer) {
+                INT iHP = g_pPlayer->getHP();
+                INT iMax = g_pPlayer->getMaxHP();
+                if (!g_pPlayer->isConditionFlag(2) && iHP < iMax) {
+                    INT iHeal = (iMax - iHP) / 8;
+                    g_pPlayer->addHP(iHeal, 3000, 1);
+                    decEnchantTime(1, 40, 39);
+                    m_tqEnchantTimer[0] = 0;
+                }
+            }
+        }
+    }
+    flag = 0x800;
+    if (m_uiFlag & flag) {
+        m_tqEnchantTimer[1] += getFrameRate();
+        if (m_tqEnchantTimer[1] >= 6000) {
+            decEnchantTime(2, 40, 39);
+            m_tqEnchantTimer[1] = 0;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeBio__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropFriendCard__10CardBattleR4CARDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropPlutoCard__10CardBattleR4CARD);

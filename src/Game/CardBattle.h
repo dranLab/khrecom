@@ -137,6 +137,7 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     INT isNowPronounce() const { return m_uiDuelState == 0xB; }
     void setSubTimer(TIMEQ inTime) { *(TIMEQ*)&_m_0x0[0x90] = inTime; }
     TIMEQ getSubTimer() const { return *(const TIMEQ*)&_m_0x0[0x90]; }
+    TIMEQ getFrameRate() const { return *(const TIMEQ*)&_m_0x0[0x8]; } // PARTIAL: CTask::getFrameRate (base still opaque)
     void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
     void destroyPlayCard(INT inFlag, INT inP1);
     void transferPlayerEnchant(CPlayer* inPlayer);
