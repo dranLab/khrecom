@@ -936,7 +936,48 @@ void CSaveLoadUI::closeMessageDlg() {
         m_pMainLightMark->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
     }
 }
+/* Parked: the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of
+ * case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and
+ * one nop in the select loop; tried: switch vs if/else chain, combined early return, store after the call,
+ * SLMSG_RESULT_OK / m_nDlgType as the value, permuter 4 min (6886 candidates, no gain) */
+#if 0
+BOOL CSaveLoadUI::exeMessageDlg() {
+    if (!m_pMessageDlgAgent || m_pMessageDlgAgent->getState() != C2DSeqAgent::STATE_LOOP || m_nDlgResult) return FALSE;
+    switch (m_nDlgType) {
+    case 1:
+        lockPadControl(FALSE);
+        if (isTrgOK()) {
+            m_nDlgResult = 1;
+            CSound::playSE(2, -1, 64);
+        } else if (isTrgCANCEL()) {
+            m_nDlgResult = 3;
+            CSound::playSE(4, -1, 64);
+        }
+        break;
+    case 2:
+    case 3:
+        lockPadControl(FALSE);
+        if (checkSelectorH(m_nDlgSel, 2, TRUE, TRUE)) {
+            for (INT i = 0; i < 2; i++) {
+                m_pMessageDlgBtnAgent[i]->select(i == m_nDlgSel);
+            }
+        } else if (isTrgOK()) {
+            m_nDlgResult = m_nDlgSel + 1;
+            CSound::playSE(2, -1, 64);
+        } else if (m_nDlgType == 3 && isTrgCANCEL()) {
+            m_nDlgResult = 3;
+            CSound::playSE(4, -1, 64);
+        }
+        break;
+    default:
+        return FALSE;
+    }
+    lockPadControl(TRUE);
+    return FALSE;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeMessageDlg__11CSaveLoadUI);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", outAllAgent__11CSaveLoadUI);
 void CSaveLoadUI::outDataList(INT nNextState) {
     if (m_pResultPlateAgent[1]->getState() < C2DSeqAgent::STATE_OUT) {
