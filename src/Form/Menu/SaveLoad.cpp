@@ -647,8 +647,21 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createTimeLabel__
 __asm__(".rdata\n.align 3\n.word 0x002E002D\n.word 0x0000002F\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31303132\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x30313132\n.word 0x00000029\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createTimeCtrl__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32323132\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMPLabel__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
-__asm__(".rdata\n.align 3\n.word 0x00280027\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32343132\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x30353132\n.word 0x00000029\n.text\n");
+C2DSeqAgent* CSaveLoadUI::createMPLabel(D2::C2DSeqCtrl*& pOutCtrl) {
+    C2DSeqAgent::SeqTbl tbl = {{39, 40, 41}};
+    FVECTOR v;
+    C2DSeqAgent* pAgent;
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2142)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, tbl._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    v.init();
+    pOutCtrl->setPos(v);
+    pOutCtrl->enableColorCtrl(TRUE);
+    pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2150)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
+    pAgent->setupState(tbl);
+    return pAgent;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMPCtrl__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32363132\n.word 0x00000029\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMainHelp__11CSaveLoadUIRPQ22D210C2DSeqCtrlRPQ22D26C2DFnt);
