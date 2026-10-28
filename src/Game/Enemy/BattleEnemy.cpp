@@ -577,7 +577,25 @@ void CBattleEnemy::endStateSuspend() {
     if (!(m_ullBackupFlag & 0x4000)) clearBtlEnemyFlag(0x4000);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateVolley__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateVolley__12CBattleEnemy);
+void CBattleEnemy::stateVolley() {
+    switch (m_iSysStep) {
+    case 0:
+        if (m_pMove->getCollisionFlag() & 0xA) {
+            if (m_pAnim->getAnimID() == m_pEnemyParam->iDamageMotionIndex[6]) {
+                changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[7], 0, 1, -1);
+            } else {
+                changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[9], 0, 1, -1);
+            }
+            clearSpeed();
+            bodyCollOnBody(-1);
+            m_iSysStep++;
+        }
+        break;
+    case 1:
+        if (isMotionEnd()) changeDefaultState();
+        break;
+    }
+}
 void CBattleEnemy::endStateVolley() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
     bodyCollOnBody(-1);
@@ -737,6 +755,8 @@ void CBattleEnemy::playBigDamageSE() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playBigDamageSE__12CBattleEnemy);
 #endif
+/* Not attempted: its switch emits a jump table in .rodata, which needs the unit's data from source (draft:
+ * build/progress/Game/Enemy/pdse_draft.c) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playDamageSE__12CBattleEnemy8ATK_KIND);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setupDuelCard__12CBattleEnemy);
 BOOL CBattleEnemy::destroyCard() {
