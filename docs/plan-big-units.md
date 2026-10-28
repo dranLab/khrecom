@@ -13,7 +13,10 @@ fine; that is a tool, not a second worker.)
 
 Out of scope: `lib/` units (see `docs/sdk-leftovers.md`), hand-written `.s` units (`crt0`, `System/expand`),
 changes to `tools/`, `configure.py`, `config/` and the build flags. If a unit seems to need one of those, stop
-and ask the user (see "When to stop and ask").
+and ask the user (see "When to stop and ask"). The one approved `tools/` change is `tools/partials.py`.
+
+Interleaved with this plan: the PARTIAL cleanup of `docs/plan-partials.md` (start hook A1 and finish hook A2 per
+unit, one queue batch A3 between units, the header-change protocol A0). Its report is `docs/partials.md`.
 
 State at the start of this plan (main, 2026-10-21): 9955 functions matched in 662 files. 2312 game functions
 (about 230,000 instructions) are still `INCLUDE_ASM` in 85 units; 120 of them have a parked C draft.
@@ -52,6 +55,8 @@ The table is sorted by instructions left. The order at the start, with the match
 
 After these come the smaller units; `docs/plan-asm-leftovers.md` covers them (smallest first).
 
+Between two units: one cleanup batch from `tools/partials.py --queue` (plan-partials A3).
+
 A unit is finished when it is complete, or when every function still left in it is parked (see "Parking").
 Move to the next unit only then. Never leave a unit with a function that was neither tried nor parked.
 
@@ -67,6 +72,9 @@ Move to the next unit only then. Never leave a unit with a function that was nei
 
        .venv/bin/python tools/leftovers.py game --unit <unit>   # every function left: state, size, note
        .venv/bin/python tools/asm.py <unit>                       # every function, size, weak/global
+
+5. First session of a unit: the start hook (plan-partials A1, `tools/partials.py --unit <unit>`) before the
+   first function.
 
 ## Order of functions inside a unit
 
@@ -139,6 +147,8 @@ anything else.
   was recompiled, and V3 is what checks them. Header string literals and `__LINE__`s move other units'
   `.rodata`, which is why the header's line layout must not change (add members in place, keep line counts,
   `#line` if needed).
+- After a header change, follow plan-partials A0 (baseline, imagediff classification, `partials.py --header`
+  hidden-conflict recheck).
 
 **V4: honest C.** Review `git diff` before each commit:
 - The function is real C/C++ for what the original does. Not allowed: `.word`/`.byte` emitting instructions,
@@ -149,7 +159,10 @@ anything else.
   memories show which), and empty `asm volatile("" ...)` barriers as a matching lever
   (asm-barrier-death-note-levers). Mark such a barrier with a short comment.
 - No changes outside the unit's `src/U.cpp`/`.h` and the headers its classes need. A header of another unit
-  that you create or extend is marked `// PARTIAL: added for <unit>` at the top if it is new.
+  that you create or extend is marked `// PARTIAL: added for <unit>` at the top if it is new. Exception: the
+  plan-partials hook edits (A1, A2) may touch other files.
+- A matching mechanism that stays (gate, opt-out, include-guard pre-define, placeholder, path override,
+  pragma) carries a `MATCH: <reason>` comment.
 - `config/SLUS_217.99/symbol_addrs.txt` may get lines that name unnamed weak or vtable copies
   (symbol-addrs-followups); nothing else in `config/`.
 
@@ -217,16 +230,20 @@ Once every function is matched or parked:
    - Validate with V6.
    - A unit whose `.rodata` can't start where the split puts it (misaligned-unit-rodata) keeps its data from
      assembly. Note that in `docs/asm-leftovers.md` (the hand-written table at the top).
+   - Then the unit's own headers to the full ref class (plan-partials A2 part 1).
 3. **The "NOT matching" noise** of the unit should go away once its data comes from source. If it doesn't,
    find out whether it is an objdiff artifact (the checksum passes) or real, and record what you find.
 4. **Gate, merge, docs:** V5, merge (below), then regenerate the docs on `main`:
 
        .venv/bin/python tools/leftovers.py game --update docs/asm-leftovers.md
        .venv/bin/python tools/progress.py --update README.md
+       .venv/bin/python tools/partials.py --update docs/partials.md
 
    Commit them as `docs: regenerate leftovers and progress`.
 5. **Memory:** write or update the unit's `*-unit-lessons` memory with the levers that worked and what stayed
    unsolved, and its line in `MEMORY.md`.
+6. **Cleanup branch for the other files** (plan-partials A2 part 2): `cleanup/<Unit-with-dashes>` from main,
+   the stand-ins and duplicates of the unit's classes elsewhere.
 
 ## Commits and merges
 
@@ -243,6 +260,11 @@ Once every function is matched or parked:
   Continue on the same branch afterwards (`git checkout decomp/...`, it already contains main).
 - There is no git remote. Never push, rebase `main`, or force anything.
 - Never commit game data (`iso/`, `ref/`, `asm/`, `build/`).
+- PARTIAL cleanup (plan-partials "Branches and commits"): batches on `cleanup/<Header-with-dashes>` or
+  `cleanup/<topic>`, finish hook part 2 on `cleanup/<Unit-with-dashes>`; hook edits A1/A2 part 1 on the unit's
+  `decomp/...` branch. A cleanup branch never contains function matches. Merge message:
+  `Merge cleanup/<x>: <what> (stand-ins -N, PARTIAL -M, mechanisms -K)`, the `partials.py --summary` deltas;
+  then `docs: regenerate partials` on main.
 
 ## Record keeping
 
@@ -288,7 +310,7 @@ A unit like Player takes many sessions. Keep output small (the rules in `.claude
 
 - A function or the unit's data needs a change to `tools/`, `configure.py`, `config/` (other than
   symbol_addrs names) or the compiler flags.
-- A header change would restructure a class that many units include (beyond adding members in place).
+- The cases of plan-partials A5 (they replace the former "a header change beyond adding members in place").
 - V3 or V5 fails on `main` and the cause isn't in your change.
 - A whole unit ends with all remaining functions parked: report it and the next unit you would take.
 - Anything destructive (resetting branches, deleting drafts that someone else wrote).
