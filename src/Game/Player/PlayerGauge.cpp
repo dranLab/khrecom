@@ -27,6 +27,8 @@ extern LPCSTR g_szSeqCockpit;
 extern LPCSTR g_szSeqGauge;
 extern LPCSTR g_szLadCockpit;
 extern LPCSTR g_szLadGauge;
+extern LPCSTR g_szSeqFace;
+extern LPCSTR g_szSeqDFace;
 extern G_UV g_uvNumberTex[2][10];
 }
 FVECTOR getPlayerPos(BOOL flag);
@@ -140,7 +142,46 @@ void CPlayerGauge::setDP(INT inDP, INT inMax) {
     gauge = m_nDP / 10 % 10;
     m_pSeqCtrlDP[2].changeTexture(1, 0, NULL, &g_uvNumberTex[0][gauge], &g_uvNumberTex[1][gauge]);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDMode__Q25Gauge12CPlayerGaugeiii);
+void CPlayerGauge::setDMode(INT inMode, INT inDP, INT inMax) {
+    D2::C2DSeqCtrl* pSeqDP = m_pSeqCtrlDP;
+    if (!pSeqDP) return;
+    if (!(m_uiFlag & 4)) return;
+    if (inMode) {
+        *(UINT*)&m_uiFlag |= 8; // MATCH: not a struct-field store (stored before the face/HP loads)
+        m_szSeqFace = g_szSeqDFace;
+        INT max = m_nMaxHP; // MATCH: signed /4 (as setHP)
+        if (m_nHP <= max / 4) {
+            m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xA);
+            m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 0);
+            m_iState = 4;
+        } else {
+            m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xF);
+            m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 3);
+            m_iState = 2;
+        }
+        if (!(CGameWork::getInt(1, 0xE2) & 1)) m_pSeqCtrl->addSeq(g_szSeqGauge, 0x2E);
+        setDPGauge(8);
+        setDP(inDP, inMax);
+        if (!(CGameWork::getInt(1, 0xE2) & 1)) pSeqDP->addSeq(g_szSeqGauge, 0x2C);
+    } else {
+        *(INT*)&m_uiFlag = (INT)m_uiFlag & ~8;
+        m_szSeqFace = g_szSeqFace;
+        INT max = m_nMaxHP;
+        if (m_nHP <= max / 4) {
+            m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xA);
+            m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 0);
+            m_iState = 4;
+        } else {
+            m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xF);
+            m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 3);
+            m_iState = 2;
+        }
+        if (!(CGameWork::getInt(1, 0xE2) & 1)) m_pSeqCtrl->replaceSeq(5, g_szSeqGauge, 0x2E);
+        setDPGauge(9);
+        setDP(inDP, inMax);
+        if (!(CGameWork::getInt(1, 0xE2) & 1)) pSeqDP->addSeq(g_szSeqGauge, 0x2D);
+    }
+}
 void CPlayerGauge::exeDPGauge() {
     if (!m_pSeqCtrlDP) return;
     if (!(m_uiFlag & 4)) {

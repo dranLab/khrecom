@@ -135,6 +135,7 @@ public:
     void setHP(INT inHP, INT inFlag);
     void exeDPGauge();
     void setDPGauge(INT n); void setDP(INT inDP, INT inMax);
+    void setDMode(INT inMode, INT inDP, INT inMax);
 };
 
 class CEnemyGauge : public CTask {
