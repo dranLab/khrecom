@@ -592,7 +592,43 @@ BOOL CCardBattle::checkNowPlaying(INT inSide, CBattleCard* pCard) {
     }
     return FALSE;
 }
+/* Parked: final return only - the original computes 4 into v0 and movn's 1 from v1 when iDuelOK (the != path sets v0 = 1 in the bne delay slot, one exit); ours keeps 1 in v1/v0 and movz's or branches; tried: ~35 return forms (?: nests, ret locals, if chains, && forms), iDuelOK as INT/UINT/BOOL/SHORT and its if/ternary forms, inPlayer vs _PLAYER uses, permuter 4 min (7128 candidates, no gain) */
+#if 0
+INT CCardBattle::testPlayingCard(UINT inPlayer) {
+    UINT _PLAYER = inPlayer;
+    UINT _ENEMY = _PLAYER ^ 1;
+    switch (m_uiState[_ENEMY]) {
+    case 1:
+    case 2:
+    case 9:
+    case 10:
+    case 14:
+    case 15:
+        break;
+    default:
+        return 1;
+    }
+    INT iPoint = 0;
+    INT iPointE = m_iPoint[_ENEMY];
+    for (INT i = 0; i < 7; i++) {
+        if (m_cardData[_PLAYER][i].m_nKind) iPoint += m_cardData[_PLAYER][i].m_nNumber;
+    }
+    if (m_uiState[_PLAYER] == 9 || m_uiState[_PLAYER] == 14) {
+        if (!iPoint || iPoint >= iPointE) return 1;
+        return 4;
+    }
+    if (m_cardEnchant[_PLAYER].m_nKind == 0x7B) return 1;
+    if (m_cardData[_PLAYER][0].m_nCategory20 == 6) return 1;
+    INT iDuelOK = FALSE;
+    if (inPlayer == 0 && m_uiDuelState == 1 && !(m_uiFlag & 0x600000)) iDuelOK = TRUE;
+    if (iDuelOK && (m_uiFlag & 0x80000)) return 1;
+    if (m_uiFlag & (0x100 << _ENEMY)) return 4;
+    if (iPoint > 0 && iPoint < iPointE) return 4;
+    return (iPoint != iPointE) ? 1 : (!iDuelOK ? 4 : 1);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testPlayingCard__Q210CardBattle11CCardBattleUi);
+#endif
 __asm__(".rdata\n.align 3\n.word .L001DC4E0\n.word .L001DC4E0\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC4E0\n.word .L001DC4E0\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC4E0\n.word .L001DC4E0\n.word 0\n.text\n");
 INT CCardBattle::testBreakingCard(UINT inPlayer) {
     UINT _PLAYER = inPlayer - 1;
