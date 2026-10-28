@@ -1526,8 +1526,101 @@ void CPrizeGauge::setDropMp(INT inMp) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDropMp__Q25Gauge11CPrizeGaugei);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setPrizeCard__Q25Gauge11CPrizeGaugeR4CARDii);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6C502F65\n.word 0x72657961\n.word 0x616C502F\n.word 0x47726579\n.word 0x65677561\n.word 0x7070632E\n.word 0x34363228\n.word 0x00002935\n.word 0x00000000\n.align 4\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6C502F65\n.word 0x72657961\n.word 0x616C502F\n.word 0x47726579\n.word 0x65677561\n.word 0x7070632E\n.word 0x30373228\n.word 0x00002935\n.word 0x00000000\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6C502F65\n.word 0x72657961\n.word 0x616C502F\n.word 0x47726579\n.word 0x65677561\n.word 0x7070632E\n.word 0x34373228\n.word 0x00002936\n.word 0x00000000\n.text\n");
+void CPrizeGauge::setPrizeCard(CARD& inData, INT inMode, INT inStack) {
+    INT i;
+
+    if (!m_pInstance) {
+#line 2645
+        new (com_malloc_d(sizeof(CPrizeGauge), __FILE__ "(2645)", RET_ADDR())) CPrizeGauge(NULL);
+        setPrizeCard(inData, inMode, 0);
+        return;
+    }
+    if (m_pInstance->m_uiCardState != 0 && inStack == 0) {
+        if (CGameWork::getInt(1, 0xE2) && inMode == 1) return;
+        if (_ref(m_pInstance)->m_nStack == 4) {
+            _ref(m_pInstance)->m_pCard->destroy();
+            _ref(m_pInstance)->m_pCardSeqCtrls[0].destroy();
+            _ref(m_pInstance)->m_pCardSeqCtrls[1].destroy();
+            setPrizeCard(_ref(m_pInstance)->m_cardStack[0], inMode, _ref(m_pInstance)->m_nStack);
+        }
+        _ref(m_pInstance)->m_cardStack[_ref(m_pInstance)->m_nStack] = inData;
+        _ref(m_pInstance)->m_nStack++;
+        return;
+    }
+    _ref(m_pInstance)->m_uiCardState = inMode;
+    switch (_ref(m_pInstance)->m_uiCardState) {
+    case 1:
+        _ref(m_pInstance)->m_cardData = inData;
+        if (!CGameWork::getInt(1, 0xE2)) {
+            FVECTOR pos;
+            D2::C2DSeqCtrl* pSeq0;
+            G_RGBA rgba;
+            D2::C2DFnt* p2DFnt;
+            D2::C2DSeqCtrl* pSeq1;
+
+            pSeq0 = &_ref(m_pInstance)->m_pCardSeqCtrls[0];
+            pSeq0->setLayer(8);
+            pSeq0->addSeq(g_szSeqGetCard, 5);
+            D2::C2DMan::getLayPosition(g_szLadGetCard, 2, 0, pos, FALSE);
+            pSeq0->setPos(pos);
+            rgba.col = 0x80808080;
+#line 2705
+            p2DFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2705)", RET_ADDR())) D2::C2DFnt(0, 0, &rgba, 0xE, inData.getName(), 0);
+            pSeq0->addFnt(g_szSeqGetCard, p2DFnt);
+            pSeq0->enableColorCtrl(TRUE);
+            pSeq1 = &_ref(m_pInstance)->m_pCardSeqCtrls[1];
+            pSeq1->setLayer(8);
+            pSeq1->addSeq(g_szSeqGetCard, 4);
+            D2::C2DMan::getLayPosition(g_szLadGetCard, 2, 0, pos, FALSE);
+            pSeq1->setPos(pos);
+            _ref(m_pInstance)->m_pCard->setLayer(8);
+            _ref(m_pInstance)->m_pCard->create(inData);
+            _ref(m_pInstance)->m_pCard->setParent(pSeq1);
+            _ref(m_pInstance)->m_pCard->enableColorCtrl(TRUE);
+            CSound::playSE(0x39, -1, 64);
+        }
+        break;
+    case 2: {
+        INT nShiftKH2;
+        FVECTOR pos;
+        D2::C2DSeqCtrl* pSeq0;
+        G_RGBA rgba;
+        D2::C2DFnt* p2DFnt;
+        D2::C2DSeqCtrl* pSeq1;
+
+        _ref(m_pInstance)->m_tqTimer = 3000;
+        nShiftKH2 = 0;
+        if ((UINT)(inData.m_nKind - 0x13) < 6 || inData.m_nKind == 0xF || (UINT)(inData.m_nKind - 0x73) < 12) nShiftKH2 = 5;
+        _ref(m_pInstance)->m_cardData = inData;
+        pSeq0 = &_ref(m_pInstance)->m_pCardSeqCtrls[0];
+        pSeq0->setLayer(8);
+        pSeq0->addSeq(g_szSeqGetCard, nShiftKH2 + 2);
+        D2::C2DMan::getLayPosition(g_szLadGetCard, 0, 0, pos, FALSE);
+        pSeq0->setPos(pos);
+        rgba.col = 0x80808080;
+#line 2746
+        p2DFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2746)", RET_ADDR())) D2::C2DFnt(0, 0, &rgba, 0x12, inData.getName(), 2);
+        pSeq0->addFnt(g_szSeqGetCard, p2DFnt);
+        pSeq0->enableColorCtrl(TRUE);
+        pSeq1 = &_ref(m_pInstance)->m_pCardSeqCtrls[1];
+        pSeq1->setLayer(8);
+        pSeq1->addSeq(g_szSeqGetCard, 0);
+        D2::C2DMan::getLayPosition(g_szLadGetCard, 0, 0, pos, FALSE);
+        pSeq1->setPos(pos);
+        _ref(m_pInstance)->m_pCard->setLayer(8);
+        _ref(m_pInstance)->m_pCard->create(inData);
+        _ref(m_pInstance)->m_pCard->setParent(pSeq1);
+        _ref(m_pInstance)->m_pCard->enableColorCtrl(TRUE);
+        CSound::playSE(0x3A, -1, 64);
+        break;
+    }
+    }
+    if (inStack > 0) {
+        for (i = 0; i < 2; i++) _ref(m_pInstance)->m_cardStack[i] = _ref(m_pInstance)->m_cardStack[i + 1];
+        _setCard(_ref(m_pInstance)->m_cardStack[3], 0, 0);
+        _ref(m_pInstance)->m_nStack--;
+    }
+}
 INT CPrizeGauge::exePrizeCard() {
     BOOL flag;
 
