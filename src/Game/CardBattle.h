@@ -109,7 +109,7 @@ class CCardBattle {
     INT m_tqEnchantTimer[2];  /* 0x18c */
     HANDLE m_hGimmickOwner;   /* 0x194 */
     BYTE m_cardRoom[4];       /* 0x198 CARD */
-public:
+public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); // PARTIAL: setEnemyDuelCard added for Game/Enemy/BattleEnemy (parameter names guessed)
     UINT m_uiFlag;            /* 0x19c */
     UINT m_uiDuelState;       /* 0x1a0 */
     HANDLE m_hDuelEnemy;      /* 0x1a4 */

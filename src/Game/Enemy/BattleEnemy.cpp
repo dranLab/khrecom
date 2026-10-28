@@ -26,6 +26,7 @@
 #include "System/Sound/SoundMan.h"
 #include "System/Math3D.h"
 #include "Game/MessageManager.h"
+#include "Game/Collision/CollMap.h"
 #include "System/Com.h"
 #include "System/Rnd.h"
 #include "Game/EntityFactory.h"
@@ -60,11 +61,30 @@ extern CHAR* VexenGuardEffectEffectName;
 extern CHAR* BindEffectName;
 extern CHAR* MemoIDParamName;
 extern CHAR* SpeedParamName;
+extern CHAR* MagnetParamName;
+extern CHAR* MagnetEffectName;
+extern CHAR* QuakeEffectName;
+extern CHAR* DuelEffectName;
+extern const FLOAT g_vSpotSizeTbl[9];
+extern const unsigned char g_byHeartlessSpotSizeIndexTbl[39];
+extern const unsigned char g_byBossSpotSizeIndexTbl[38];
 }
 extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
 extern "C" char D_004AD568[];
 extern "C" char D_004AD3D8[];
+extern "C" char D_004AD430[];
+extern "C" char D_004AD920[];
+extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
+struct STOP_DAMAGE {
+    FVECTOR vDetectPos;
+    char szHitEffectName[16];
+    SHORT sHitEffectNo;
+    SHORT sHitIndex;
+    eObjType hitEffectObjType;
+    ATK_KIND dmgKind;
+    INT iDamage;
+};
 class CJiminyMemoFlag {
 public:
     static void checkEvent(INT inEvent, INT inParam0, INT inParam1);
@@ -78,6 +98,26 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
+extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
+static inline FLOAT _sqrtf(FLOAT x) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
+    return ret;
+}
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
 extern "C" float sinf(float);
 extern "C" float cosf(float);
 extern "C" float atan2f(float, float);
@@ -467,7 +507,52 @@ void CBattleEnemy::beginStateSmallDamage() {
         m_iSysStep = 0;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateSmallDamage__12CBattleEnemy);
+void CBattleEnemy::stateSmallDamage() {
+    if (m_pEnemyParam) {
+        switch (m_iSysStep) {
+        case 0:
+            if (getMotionCurrentTime() >= getMotionTotalTime() / 4) {
+                if (!isBtlEnemyFlag(8) && !isBtlEnemyFlag(0x10000000)) setBattleEnemyFlag(0x1010, 1);
+                m_iSysStep = 1;
+            }
+        case 1:
+            if (isBtlEnemyFlag(0x10000000) && (m_pMove->getCollisionFlag() & 5) && m_iLandMotionIndex != -1) {
+                changeMotion(m_iLandMotionIndex, 0, 0, -1, 0, 0);
+                m_iSysStep = 3;
+            } else if (isMotionEnd()) {
+                if (isBtlEnemyFlag(8)) {
+                    changeBattleEnemyState(17);
+                } else if (isBtlEnemyFlag(0x100) || (m_pMove->getCollisionFlag() & 5)) {
+                    changeDefaultState();
+                } else {
+                    if (m_iFallMotionIndex != -1) changeMotion(m_iFallMotionIndex, 0, 0, -1, 0, 0);
+                    m_iSysStep = 2;
+                }
+            }
+            break;
+        case 2:
+            if (m_pMove->getCollisionFlag() & 5) {
+                if (m_iLandMotionIndex == -1) {
+                    changeDefaultState();
+                } else {
+                    changeMotion(m_iLandMotionIndex, 0, 0, -1, 0, 0);
+                    clearSpeed();
+                    m_iSysStep = 3;
+                }
+            }
+            break;
+        case 3:
+            if (isMotionEnd()) changeDefaultState();
+            break;
+        }
+    } else if (getTimer() <= 0) {
+        if (isBtlEnemyFlag(8)) {
+            changeBattleEnemyState(17);
+        } else {
+            changeDefaultState();
+        }
+    }
+}
 void CBattleEnemy::endStateSmallDamage() {
     m_ullBtlEnemyFlag &= ~0x10000000;
 }
@@ -487,7 +572,44 @@ void CBattleEnemy::beginStateBigDamage() {
     }
     playBigDamageSE();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateBigDamage__12CBattleEnemy);
+void CBattleEnemy::stateBigDamage() {
+    if (m_pEnemyParam) {
+        switch (m_iSysStep) {
+        case 0:
+            if (m_pMove->getVel().y < 0.0f && (m_pMove->getCollisionFlag() & 5)) {
+                if (m_pAnim->getAnimID() == m_pEnemyParam->iDamageMotionIndex[6]) {
+                    changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[7], 0, 1, -1);
+                } else {
+                    changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[9], 0, 1, -1);
+                }
+                clearSpeed();
+                m_iSysStep++;
+            }
+            break;
+        case 1:
+            if (isMotionEnd()) {
+                if (isBtlEnemyFlag(8)) {
+                    changeBattleEnemyState(17);
+                } else {
+                    CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+                    if (!hitBody) AssertApp(D_004ACBC0, 0x860, D_004AD3D8, 0);
+                    if (hitBody->getDamageKind() == ATK_KIND_SHOCK && m_pEnemyParam->getSpecialEffect(1)) {
+                        changeBattleEnemyState(18);
+                    } else {
+                        changeDefaultState();
+                    }
+                }
+            }
+            break;
+        }
+    } else if (m_pMove->getVel().y < 0.0f && (m_pMove->getCollisionFlag() & 5)) {
+        if (isBtlEnemyFlag(8)) {
+            changeBattleEnemyState(17);
+        } else {
+            changeDefaultState();
+        }
+    }
+}
 void CBattleEnemy::endStateBigDamage() {
     if (!(m_ullBackupFlag & 4)) m_pMove->enableGravity(FALSE);
 }
@@ -507,7 +629,41 @@ void CBattleEnemy::beginStateCardBreak() {
     onCardBreak();
     m_iSysStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateCardBreak__12CBattleEnemy);
+void CBattleEnemy::stateCardBreak() {
+    if (m_pEnemyParam) {
+        switch (m_iSysStep) {
+        case 0:
+            if (isBtlEnemyFlag(0x10000000) && (m_pMove->getCollisionFlag() & 5) && m_iLandMotionIndex != -1) {
+                changeMotion(m_iLandMotionIndex, 0, 0, -1, 0, 0);
+                m_iSysStep = 2;
+            } else if (isMotionEnd()) {
+                if (isBtlEnemyFlag(0x100) || (m_pMove->getCollisionFlag() & 5)) {
+                    changeDefaultState();
+                } else {
+                    if (m_iFallMotionIndex != -1) changeMotion(m_iFallMotionIndex, 0, 0, -1, 0, 0);
+                    m_iSysStep = 1;
+                }
+            }
+            break;
+        case 1:
+            if (m_pMove->getCollisionFlag() & 5) {
+                if (m_iLandMotionIndex == -1) {
+                    changeDefaultState();
+                } else {
+                    changeMotion(m_iLandMotionIndex, 0, 0, -1, 0, 0);
+                    clearSpeed();
+                    m_iSysStep = 2;
+                }
+            }
+            break;
+        case 2:
+            if (isMotionEnd()) changeDefaultState();
+            break;
+        }
+    } else if (getTimer() <= 0) {
+        changeDefaultState();
+    }
+}
 void CBattleEnemy::endStateCardBreak() {
     m_ullBtlEnemyFlag &= ~0x10000000;
 }
@@ -534,7 +690,45 @@ void CBattleEnemy::beginStateDuel() {
     setTimer(0);
     bodyCollOffBody(-1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDuel__12CBattleEnemy);
+void CBattleEnemy::stateDuel() {
+    if (!isBtlEnemyFlag(0x4000000000ULL)) m_pMove->turnToTargetY(g_pPlayer, 0.17453292f);
+    switch (m_iSysStep) {
+    case 0:
+        if (isBtlEnemyFlag(0x100000000ULL)) {
+            INT id = (UINT)getID() % 10000;
+            INT idx = id % 100;
+            FLOAT scale;
+            if (id < 100) {
+                scale = BattleEnemy::g_vSpotSizeTbl[BattleEnemy::g_byHeartlessSpotSizeIndexTbl[idx]];
+            } else {
+                scale = BattleEnemy::g_vSpotSizeTbl[BattleEnemy::g_byBossSpotSizeIndexTbl[idx]];
+            }
+            if (scale > 0.0f) {
+                FVECTOR pos;
+                pos.init();
+                m_hSpotLight[0] = attachEffect(BattleEnemy::DuelEffectName, 2, &Crd(0), &pos, NULL, 0.0f);
+                if (!isBtlEnemyFlag(0x100)) m_hSpotLight[1] = setEffect(BattleEnemy::DuelEffectName, 3, &getPos(), NULL, 0.0f);
+                for (INT i = 0; i < 2; i++) {
+                    CEffect* effect = CEffectMan::getEffect(m_hSpotLight[i]);
+                    if (effect) effect->setScale(scale, scale, scale);
+                }
+            }
+            m_iSysStep++;
+        }
+        break;
+    case 1:
+        if (getTimer() <= 0) {
+            CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+            if (!cb) AssertApp(D_004ACBC0, 0x96B, D_004AD3C0, 0);
+            if (m_iDuelCardNum > 0 && m_iDuelCardPtr < m_iDuelCardNum) {
+                if (cb->setEnemyDuelCard(getHandle(), m_DuelCardKind, m_iDuelCardArray[m_iDuelCardPtr])) m_iDuelCardPtr++;
+            }
+            setTimer(200);
+        }
+        break;
+    }
+    updateSpotLight_();
+}
 void CBattleEnemy::endStateDuel() {
     for (INT i = 0; i < 2; i++) {
         CEffect* effect = CEffectMan::getEffect(m_hSpotLight[i]);
@@ -762,7 +956,51 @@ void CBattleEnemy::beginStateDegenerator() {
     m_pMove->enableGravity(FALSE);
     m_iSysStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDegenerator__12CBattleEnemy);
+void CBattleEnemy::stateDegenerator() {
+    CEffect* effect = CEffectMan::getEffect(m_hDision);
+    switch (m_iSysStep) {
+    case 0: {
+        if (!effect) break;
+        FLOAT t = effect->getNowFrame() / (effect->getTotalFrame() * 0.5f);
+        if (t >= 1.0f) {
+            t = 1.0f;
+            setEntityFlag(1, 0);
+            m_iSysStep++;
+        }
+        FVECTOR s2;
+        FVECTOR s0;
+        FVECTOR s1;
+        s0.set(1.0f, 1.0f, 1.0f, 1.0f);
+        s1.set(0.0f, 2.0f, 0.0f, 1.0f);
+        Math3D::VectorLerp(s2, s0, s1, t);
+        setScale(s2);
+        break;
+    }
+    case 1:
+        if (effect) break;
+        notifyDead();
+        switch (m_pBodyColl->getHitCollBody()->getDamageKind()) {
+        case ATK_KIND_DEGENERATOR:
+        case ATK_KIND_DEGENERATE_BREAK: {
+            FVECTOR pos;
+            getLockOnPos(pos);
+            makePrize(&pos);
+            break;
+        }
+        case ATK_KIND_DEGENERATE:
+            if (!isBtlEnemyFlag(0x400000)) {
+                FVECTOR pos;
+                getLockOnPos(pos);
+                makePremiumPrize(&pos);
+                makeRoulettePrize(&pos);
+                makeCard(&pos);
+            }
+            break;
+        }
+        out();
+        break;
+    }
+}
 void CBattleEnemy::endStateDegenerator() {}
 void CBattleEnemy::beginStateGravity() {
     m_iSysStep = 0;
@@ -872,7 +1110,31 @@ void CBattleEnemy::beginStateMagnet() {
     m_iSysStep = 0;
     setTimer(m_tqTime);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateMagnet__12CBattleEnemy);
+void CBattleEnemy::stateMagnet() {
+    FVECTOR dir = getPlayerPos(0);
+    SubVectorXYZ(dir, dir, getPos());
+    Normalize(dir, dir);
+    if ((INT)getExtraParam(BattleEnemy::MagnetParamName) == 1) {
+        ScaleVectorXYZ(dir, dir, 0.1f);
+    } else {
+        ScaleVectorXYZ(dir, dir, 0.033333335f);
+    }
+    m_pMove->setVel(dir);
+    if (isMotionEnd() && !m_pAnim->isLoop(-1)) {
+        if (getMotionName(1)) changeMotion(1, 0, 0, -1, 0, 0);
+    }
+    if (arriveTarget(getPlayerPos(0), 1.25f)) {
+        FVECTOR v;
+        v.init();
+        m_pMove->setAcc(v);
+        m_pMove->setVel(v);
+        if (m_iSysStep == 0) {
+            setEffect(BattleEnemy::MagnetEffectName, 5, &Crd(1).m_World.getTrans(), NULL, 0.0f);
+            m_iSysStep++;
+        }
+    }
+    if (getTimer() <= 0) changeDefaultState();
+}
 void CBattleEnemy::endStateMagnet() {
     FVECTOR v;
     v.init();
@@ -937,7 +1199,66 @@ void CBattleEnemy::endStateVolley() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
     bodyCollOnBody(-1);
 }
+/* Parked: registers only (3 lines) - the second hit->getDetectPos() (for makePrize) loads m_pCollision into v0 in
+ * the original, v1 in ours; tried: dmgType declared/initialized before or after the calls, a pos local, _ref(hit),
+ * a second inline (getDitectPos), comma expression, permuter 4 min (5076 candidates, no gain) */
+#if 0
+void CBattleEnemy::beginStateDead() {
+    m_ullBtlEnemyFlag &= ~0x200;
+    setEntityFlag(0, 0x10000);
+    setEntityFlag(0, 0x7C);
+    bodyCollOff(-1);
+    m_pMove->enableGravity(TRUE);
+    enableBind_(FALSE);
+    notifyDead();
+    setTimer(1500);
+    CCollBody* hit = m_pBodyColl->getHitCollBody();
+    if (hit) {
+        setDeathEffect(hit->getDetectPos());
+        makePrize(hit->getDetectPos());
+        INT dmgType = 0;
+        if (!isBtlEnemyFlag(0x100000)) {
+            switch (hit->getDamageKind()) {
+            case ATK_KIND_DMG_BIG:
+                dmgType = getSize() < 1;
+                break;
+            case ATK_KIND_DMG_BLOWN:
+                dmgType = 1;
+                break;
+            }
+        }
+        if (dmgType) {
+            setupFlick();
+            playBigDamageSE();
+            if (!isBtlEnemyFlag(0x100)) {
+                m_iSysStep = 0;
+            } else {
+                FVECTOR vel = m_pMove->getVel();
+                vel.y = 0.0f;
+                m_pMove->setVel(vel);
+                m_pMove->enableGravity(FALSE);
+                m_iSysStep = 1;
+            }
+        } else {
+            changeMotion(selectDamageMotion_(), 0, 0, -1, 0, 0);
+            playSmallDamageSE();
+            m_iSysStep = 1;
+        }
+    } else {
+        FVECTOR pos;
+        getLockOnPos(pos);
+        setDeathEffect(&pos);
+        makePrize(&pos);
+        changeMotion(m_pEnemyParam->iDamageMotionIndex[2], 0, 0, -1, 0, 0);
+        playSmallDamageSE();
+        m_iSysStep = 1;
+    }
+    setEntityFlag(0x40000000, 0);
+    setupFade(1.0f, 0.0f, 1500, -1);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDead__12CBattleEnemy);
+#endif
 void CBattleEnemy::stateDead() {
     if (m_pEnemyParam && m_iSysStep == 0 && m_pMove->getVel().y < 0.0f && (m_pMove->getCollisionFlag() & 5)) {
         clearSpeed();
@@ -982,7 +1303,54 @@ void CBattleEnemy::killBossDeadEffect() {
     if (pEffect) pEffect->kill();
     m_hDeath = 0;
 }
+/* Parked: 3 lines - the original keeps the hp <= 0 `return 0` as a stub right after the bgtz (the count >= 8 and
+ * inParent paths jump to it) and a separate return-0 copy after ApplyMatrix; ours (this goto form) merges the stub
+ * into the ApplyMatrix copy; tried: early returns, nested if/else with final return 0, if (hp > 0) {...} return 0,
+ * ApplyMatrix path falling to a final return, goto fail (closest), permuter 5 min (5739 candidates, no gain) */
+#if 0
+HANDLE CBattleEnemy::recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent) {
+    if (m_iHp <= 0) {
+    fail:
+        return 0;
+    }
+    CEffectMan::killEffect(m_hRecover, 0.0f);
+    m_hRecover = 0;
+    if (isCurrentState(18) && m_iSysStep == 0) {
+        if (m_sStopDamageCount >= 8) goto fail;
+        STOP_DAMAGE* stopDmg = &((STOP_DAMAGE*)m_StopDamage)[m_sStopDamageCount++];
+        stopDmg->iDamage = -inPoint;
+        stopDmg->dmgKind = ATK_KIND_DMG_SMALL;
+        stopDmg->sHitEffectNo = inEffectNo;
+        stopDmg->sHitIndex = 0;
+        stopDmg->hitEffectObjType = getEntityType();
+        FMATRIX m;
+        if (inParent) {
+            sceVu0InversMatrix(m, inParent->m_World);
+            stopDmg->vDetectPos = m.getTrans();
+            goto fail;
+        }
+        stopDmg->vDetectPos = inPos;
+        stopDmg->vDetectPos.w = 1.0f;
+        sceVu0InversMatrix(m, Crd(0).m_World);
+        ApplyMatrix(stopDmg->vDetectPos, m, stopDmg->vDetectPos);
+        return 0;
+    }
+    m_iHp += inPoint;
+    if (getHpMax() < m_iHp) m_iHp = getHpMax();
+    if (inEffectName) {
+        if (inParent) {
+            m_hRecover = attachEffect(inEffectName, inEffectNo, inParent, &inPos, NULL, 0.0f);
+        } else {
+            m_hRecover = setEffect(inEffectName, inEffectNo, &inPos, NULL, 0.0f);
+        }
+    }
+    notifyHP();
+    Gauge::CCommonGauge::setDispSeq(getHandle(), 1);
+    return m_hRecover;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", recover__12CBattleEnemyiPCciRC7FVECTORPC6CCoord);
+#endif
 void CBattleEnemy::kill() {
     if (isState(*(CState*)&m_EnemyState[30 * 0x20])) return;
     m_iHp = 0;
@@ -1538,7 +1906,106 @@ BOOL CBattleEnemy::canAttack_(const ENEMY_ACT* inAct) {
     }
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", selectDamageMotion___12CBattleEnemy);
+INT CBattleEnemy::selectDamageMotion_() {
+    INT res = checkHitPos();
+    if (isBtlEnemyFlag(0x100)) {
+        if (res & 1) {
+            if (res & 4) {
+                INT index = m_pEnemyParam->iDamageMotionIndex[0];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[1];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[2];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            } else {
+                INT index = m_pEnemyParam->iDamageMotionIndex[1];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[0];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[3];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            }
+        } else {
+            if (res & 4) {
+                INT index = m_pEnemyParam->iDamageMotionIndex[2];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[3];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[0];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            } else {
+                INT index = m_pEnemyParam->iDamageMotionIndex[3];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[2];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[1];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            }
+        }
+    } else if (res & 1) {
+        if (m_pMove->getCollisionFlag() & 5) {
+            if (res & 4) {
+                INT index = m_pEnemyParam->iDamageMotionIndex[0];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[1];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[2];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            } else {
+                INT index = m_pEnemyParam->iDamageMotionIndex[1];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[0];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[3];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            }
+        } else {
+            INT index = m_pEnemyParam->iDamageMotionIndex[4];
+            if (m_pAnim->getAnimID() == index) return m_pEnemyParam->iDamageMotionIndex[5];
+            m_iDamageCounter = 0;
+            return index;
+        }
+    } else {
+        if (m_pMove->getCollisionFlag() & 5) {
+            if (res & 4) {
+                INT index = m_pEnemyParam->iDamageMotionIndex[2];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[3];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[0];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            } else {
+                INT index = m_pEnemyParam->iDamageMotionIndex[3];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[2];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[1];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            }
+        } else {
+            INT index = m_pEnemyParam->iDamageMotionIndex[5];
+            if (m_pAnim->getAnimID() == index) return m_pEnemyParam->iDamageMotionIndex[4];
+            m_iDamageCounter = 0;
+            return index;
+        }
+    }
+}
 void CBattleEnemy::enableBind_(BOOL inSw) {
     if (inSw) {
         CCollBody* hitBody = m_pBodyColl->getHitCollBody();
@@ -1557,7 +2024,34 @@ void CBattleEnemy::enableBind_(BOOL inSw) {
         m_tqBindTimer = 0;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", enableConfuse___12CBattleEnemyi);
+void CBattleEnemy::enableConfuse_(BOOL inSw) {
+    FMATRIX m;
+    FVECTOR start;
+    if (inSw) {
+        CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+        if (hitBody) {
+            setBadStatusEffect(2, hitBody->getBadStatusParam());
+        } else {
+            setBadStatusEffect(2, 0.0f);
+        }
+        m_ullBtlEnemyFlag |= 0x40000;
+        m_tqConfuseTimer = 21000;
+        _unitMatrixVu0(m);
+        sceVu0RotMatrixY(m, m, Math3D::LimitPI(DEG2RAD(RND::genrand_real1() * 360.0f)));
+        m_vConfusePlayerPos.set(0.0f, 0.0f, RND::genrand_real1() * 3.0f + 2.0f);
+        ApplyMatrix(m_vConfusePlayerPos, m, m_vConfusePlayerPos);
+        AddVectorXYZ(m_vConfusePlayerPos, m_vConfusePlayerPos, getPos());
+        start = getPos();
+        CCollMap* coll = m_pMove->getMapCollision();
+        coll->setStartPos(start);
+        coll->setEndPos(m_vConfusePlayerPos);
+        if (coll->collideMap()) m_vConfusePlayerPos = *coll->getOutPos();
+    } else {
+        m_ullBtlEnemyFlag &= ~0x40000;
+        killBadStatusEffect();
+        m_tqConfuseTimer = 0;
+    }
+}
 void CBattleEnemy::setGuardEffect_(const FVECTOR* inPos) {
     switch ((UINT)getID() % 10000) {
     case 9:
@@ -1622,7 +2116,43 @@ void CBattleEnemy::createFriendCard_(INT inRate) {
     CardBattle::getDropFriendCard(card, inRate);
     if (card.m_nKind) createFriendCard((CARD_KIND)card.m_nKind, card.m_nNumber);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setHitEffect___12CBattleEnemy);
+void CBattleEnemy::setHitEffect_() {
+    if (isBtlEnemyFlag(0x4000000)) return;
+    CCollBody* hit = m_pBodyColl->getHitCollBody();
+    if (!hit) AssertApp(D_004ACBC0, 0x1C50, D_004AD430, 0);
+    switch (hit->getDamageKind()) {
+    case ATK_KIND_QUAKE: {
+        CCollMap* coll = m_pMove->getMapCollision();
+        if (!coll) AssertApp(D_004ACBC0, 0x1C57, D_004AD920, 0);
+        FVECTOR pos = getPos();
+        coll->setStartPos(pos);
+        pos.y -= 1.0f;
+        coll->setEndPos(pos);
+        if (coll->collideMap()) {
+            pos = *coll->getOutPos();
+        } else {
+            pos.y += 1.0f;
+        }
+        CEffectMan::setEffect(BattleEnemy::QuakeEffectName, 1, (ObjType::eObjType)hit->getHitEffectObjType(), &pos, NULL, 0.0f);
+        break;
+    }
+    case ATK_KIND_CONFUSE:
+    case ATK_KIND_TERROR: {
+        FVECTOR pos;
+        pos.init();
+        CEffectMan::killEffect(m_hHitEffect, 0.0f);
+        m_hHitEffect = CEffectMan::attachEffect(hit->getHitEffectName(), hit->getHitEffectNo(),
+                                                (ObjType::eObjType)hit->getHitEffectObjType(), &Crd(1), &pos, NULL,
+                                                hit->getBadStatusParam());
+        CEffect* effect = CEffectMan::getEffect(m_hHitEffect);
+        if (effect) effect->m_iFlag |= 4;
+        break;
+    }
+    default:
+        hit->setHitEffect();
+        break;
+    }
+}
 void CBattleEnemy::cardBattleProc_() {
     if (!isBtlEnemyFlag(0x800000000ULL) && isBtlEnemyFlag(0x10) && m_iHp > 0 && m_tqCancelTimer <= 0 &&
         !(DebugWork::g_dw.enemy.uiFlag & 0x400)) {
@@ -1727,7 +2257,20 @@ BOOL CBattleEnemy::changeSmallDamageState_(ATK_KIND inDmgKind) {
     playDamageSE(inDmgKind);
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateSpotLight___12CBattleEnemy);
+void CBattleEnemy::updateSpotLight_() {
+    CEffect* effect = CEffectMan::getEffect(m_hSpotLight[1]);
+    if (!effect) return;
+    FVECTOR n = m_pMove->getDetectNormal();
+    FMATRIX m;
+    _unitMatrixVu0(m);
+    sceVu0RotMatrixX(m, m, atan2f(_sqrtf(n.z * n.z + n.x * n.x), n.y));
+    sceVu0RotMatrixY(m, m, atan2f(n.x, n.z));
+    FVECTOR pos = getPos();
+    pos.w = 1.0f;
+    m.getTrans() = pos;
+    effect->getCoords()->Crd(0).m_Local = m;
+    effect->getCoords()->Crd(0).m_Flag = 1;
+}
 BOOL CBattleEnemy::canCreateEnemyCard_() {
     if (CGame::isRikuGame()) return FALSE;
     if (CGameWork::getFlag(1, 7)) return FALSE;

@@ -27,6 +27,9 @@ public:
     HANDLE getEnemyHandle() { return m_hEnemyTask; } // PARTIAL: added for Game/Enemy/BattleEnemy
     const FVECTOR& getEnemyPos() const { return *(const FVECTOR*)&_m_0x10[0x10]; } // PARTIAL: added for Game/Enemy/BattleEnemy (m_vEnemyPos)
     FVECTOR* getStartPos() { return (FVECTOR*)m_pCollision; } // PARTIAL: added for Game/Enemy/BattleEnemy
+    const CHAR* getHitEffectName() const { return (const CHAR*)&_m_0x8c[0xe8 - 0x8c]; } // PARTIAL: added for Game/Enemy/BattleEnemy
+    INT getHitEffectNo() const { return *(const INT*)&_m_0x8c[0xf8 - 0x8c]; }           // PARTIAL: added for Game/Enemy/BattleEnemy
+    INT getHitEffectObjType() const { return *(const INT*)&_m_0x8c[0xfc - 0x8c]; }      // PARTIAL: added for Game/Enemy/BattleEnemy (ObjType::eObjType)
     INT getDamageAttr() { return m_DamageAttr; } // PARTIAL: added for Game/Enemy/EnemyWhitemushroom (name unknown)
     /* CCollObj::getDetectPos (m_pCollision->m_vDetectPos at 0x40) */
     FVECTOR* getDetectPos() { return m_pCollision ? (FVECTOR*)(m_pCollision + 0x40) : NULL; }
