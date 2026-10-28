@@ -13,6 +13,7 @@
 #include "Game/Player/Player.h"
 #include "System/Graphic/WorldEnv.h"
 #include "Game/SceneInfo.h"
+#include "Game/Enemy/BattleEnemy.h"
 #include "Game/Player/PlayerManager.h"
 #include "System/Graphic/2d/2DCard.h"
 #include "include_asm.h"
@@ -189,7 +190,65 @@ void CLockonMarker::_initialize() {
         m_pGauge = new (D_004A2EA8) CEnemyGauge(this);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge13CLockonMarker);
+void CLockonMarker::main() {
+    CEntity* pEntity;
+    if (CSceneEnv::isStopGauge()) return;
+    if (!m_pSeqCtrl) return;
+    pEntity = NULL;
+    if (m_bFlag) {
+        m_bDisp = FALSE;
+        if (m_hTarget > 0) {
+            pEntity = (CEntity*)CTaskMan::getTask(m_hTarget);
+            if (pEntity) {
+                pEntity->getLockOnPos(m_vPos);
+                m_bDisp = TRUE;
+            } else {
+                m_hTarget = 0;
+                m_uiFlag = (INT)m_uiFlag & ~0x10;
+                m_bTarget = FALSE;
+                m_bLockon = FALSE;
+            }
+        }
+        if (!m_bDisp) {
+            if (m_pGauge) CEnemyGauge::resetHP();
+        } else {
+            if (m_bLockon) m_nSeqNo = 0x62;
+            else if (m_bTarget) m_nSeqNo = (m_uiFlag & 0x10) ? 0x92 : 0x63;
+            else goto hide;
+            if (m_uiFlag & 1) {
+                m_uiFlag = (INT)m_uiFlag & ~1;
+                m_pSeqCtrl->enableDisp(0, TRUE);
+                m_pSeqCtrl->restart(0, 0.0f);
+            }
+            if (m_nSeqNo != m_nPreSeqNo) m_pSeqCtrl->replaceSeq(0, g_szSeqCockpit, m_nSeqNo);
+            m_pSeqCtrl->set3DPos(m_vPos);
+            calcMarkerScale();
+            if (m_pGauge && pEntity->getTypeID() == 0x1004) {
+                CBattleEnemy* pEnemy = (CBattleEnemy*)CTaskMan::getTask(m_hTarget);
+                CEnemyGauge::setHP(m_hTarget, pEnemy->getHp(), pEnemy->getHpMax());
+            }
+            m_nPreSeqNo = m_nSeqNo;
+            if (m_uiKind != 6) goto push;
+        }
+    }
+hide:
+    if ((m_uiFlag & 1) == 0) {
+        m_uiFlag |= 1;
+        m_pSeqCtrl->enableDisp(0, FALSE);
+    }
+push:
+    if (m_uiFlag & 2) m_pSeqCtrlPush->set3DPos(m_vPos);
+    if (m_uiFlag & 0x20) {
+        if (m_uiFlag & 0x100) {
+            m_uiFlag = (INT)m_uiFlag & ~0x100;
+            m_pSeqCtrlPush->addSeq(_ref(g_szSeqCockpit), 0x91);
+        }
+        if (m_pSeqCtrlPush->isEnd(0)) {
+            m_uiFlag = (INT)m_uiFlag & ~0x20;
+            m_pSeqCtrlPush->destroy();
+        }
+    }
+}
 void CLockonMarker::calcMarkerScale() {
     FVECTOR pos = getPlayerPos(FALSE);
     FLOAT dist;

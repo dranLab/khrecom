@@ -44,6 +44,7 @@ private:
 public:
     CLockonMarker(CTask* inParent, BOOL inFlag);
     virtual ~CLockonMarker(); // PARTIAL: declared for Game/Player/PlayerGauge
+    virtual void main();
     void _initialize();
     void calcMarkerScale();
     void setTarget(HANDLE inTarget);
@@ -154,6 +155,7 @@ public:
     virtual ~CEnemyGauge();
     void _initialize();
     static void resetHP();
+    static void setHP(HANDLE inHandle, INT inHP, INT inMax);
     static HANDLE getNowTarget();
 };
 
