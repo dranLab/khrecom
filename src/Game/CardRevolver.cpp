@@ -1,5 +1,16 @@
 #define GAME_CARDREVOLVER_CPP
 #include "khtypes.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: the original includes it under this name */
+#define TECHNIC_H_PATH "c:/KHCOM/MainApp/Game/Technic.h" /* MATCH: the original includes it under this name */
+#define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h" /* MATCH: the original includes it under this name */
+#include "System/Task.h"
+#include "System/Graphic/Gprim.h"
+#include "Game/Technic.h"
+#include "System/Graphic/2d/2DMan.h"
+#include "Game/CardBattle.h"
+#include "System/Graphic/Anim.h"
+#include "System/Graphic/Str.h"
+#include "Game/Collision/CollUtil.h"
 #include "Game/CardRevolver.h"
 #include "System/TaskMan.h"
 #include "System/Sound/SoundMan.h"
