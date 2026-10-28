@@ -90,6 +90,8 @@ extern "C" char D_004769E8[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_00477090[]; /* "inData" */
 extern "C" char D_00477098[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_004772C0[]; /* "...CardBattle.cpp(NNNN)" */
+extern "C" char D_00476A18[]; /* "...CardBattle.cpp(NNNN)" */
+extern "C" char D_00476A48[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_004772F0[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_00477320[]; /* break effect name */
 extern "C" char D_00477328[]; /* speed break effect name */
@@ -103,8 +105,8 @@ extern const CARD_DATA cardDataTbl[224] __asm__("cardDataTbl_00478270");
 /* CARD's inline constructor (Game/Card.cpp's _setCard) */
 static inline void _setCard(CARD& c, USHORT nKind, BYTE nNumber) {
     c.m_nId = 0;
-    c.m_nKind2 = nKind;
     c.m_nNumber2 = nNumber;
+    c.m_nKind2 = nKind;
     c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
     c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
@@ -139,7 +141,72 @@ CCardBattle* CCardBattle::getInstance() {
     }
     return m_pInstance;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", init__Q210CardBattle11CCardBattle);
+void CCardBattle::init() {
+    INT i;
+    INT j;
+    for (i = 0; i < 2; i++) {
+        m_hOwner[i] = 0;
+        m_uiState[i] = 0;
+        m_uiResult[i] = 0;
+        m_tqPlayTimer[i] = 0;
+        m_mesCardInfo[i].m_nStock = 0;
+        m_mesCardInfo[i].m_nExtra = 0;
+        m_mesCardInfo[i].m_nFirst = 0;
+        m_mesCardInfo[i].m_nBreak = 0;
+        m_mesCardInfo[i].m_nBonus = 0;
+        m_mesCardInfo[i].m_nWork0 = 0;
+        m_mesCardInfo[i].m_nWork1 = 0;
+        for (j = 0; j < 7; j++) {
+            _setCard(m_cardData[i][j], 0, 0);
+            m_pCard[i][j] = NULL;
+            _setCard(m_mesCardInfo[i].m_cardData[j], 0, 0);
+        }
+        m_iCount[i] = 0;
+        m_iPoint[i] = 0;
+        m_iStock[i] = 0;
+        m_iExtra[i] = 0;
+        m_iFirst[i] = 0;
+        _setCard(m_cardEnchant[i], 0, 0);
+        m_pEnchantGauge[i] = NULL;
+        m_nEnchantTime[i] = 0;
+        m_pEnchant[i] = NULL;
+        m_pRevolver[i] = NULL;
+        m_pStockFolder[i] = NULL;
+    }
+    m_hGimmickOwner = 0;
+    m_iCountGimmick = 0;
+    m_iCountFriend = 0;
+    m_iCountPluto = 0;
+    _setCard(m_cardGimmick, 0, 0);
+    m_tqMainTimer = 0;
+    m_tqSubTimer = 0;
+    m_uiFlag = 0;
+    m_iPointBreak = 0;
+    m_iPointBonus = 0;
+    if (CGame::isRikuGame()) m_uiFlag |= 0x20000;
+    INT cardID = 0;
+    INT cardNum = 0;
+    RoomInfo* pRoom = CSceneInfo::getRoomInfo(-1);
+    if (pRoom) {
+        cardID = pRoom->getCardID();
+        cardNum = pRoom->getCardNumber();
+    }
+    _setCard(m_cardRoom, cardID, cardNum);
+    if (!m_pSeqCtrlEnemy) {
+        m_pSeqCtrlEnemy = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_00476A18, RET_ADDR())) D2::C2DSeqCtrl(2);
+    }
+    initCardBreak(0, 0);
+    m_uiDuelState = 0;
+    m_hDuelEnemy = 0;
+    setDuelBreakCount(0, 0);
+    m_pDuelGauge = NULL;
+    m_iDuelSkill = 0;
+    UINT flag = 0x20000;
+    if (m_uiFlag & flag) {
+        if (CGameWork::getInt(0, 0x24) & 0x20) m_uiDuelState = 1;
+        m_pDuelGauge = new (com_malloc_d(sizeof(CDuelGauge), D_00476A48, RET_ADDR())) CDuelGauge(asTask());
+    }
+}
 void CCardBattle::main() {
     TIMEQ tqFrameRate = getFrameRate();
     UINT flag = 0x20000;
