@@ -521,8 +521,24 @@ __asm__(".rdata\n.align 3\n.word 0x218D923C\n.word 0x8DBB8C3E\n.word 0x914991DD\
 __asm__(".data\n.align 2\n" "iStep.4169: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPathDel__FP12CDebugWindowii);
 __asm__(".rdata\n.align 3\n.word 0x58837083\n.word 0xC58DCD82\n.word 0xEA88E192\n.word 0x4B95C282\n.word 0xC5827697\n.word 0x4281B782\n.word 0x9C8FED8D\n.word 0xAB82C582\n.word 0xB982DC82\n.word 0x0021F182\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditDispCall__FPciPCv);
-__asm__(".rdata\n.align 3\n.word 0x8256F92D\n.word 0x83CC82B1\n.word 0x20588370\n.word 0x6425203A\n.word 0x2064252F\n.word 0x253A6590\n.word 0x41F96432\n.word 0x294A8328\n.word 0x0000002D\n.word 0x00000000\n.word 0x8256F92D\n.word 0x83CC82B1\n.word 0x20588370\n.word 0x6425203A\n.word 0x2064252F\n.word 0x963A6590\n.word 0x2D41F9B3\n.word 0x2D2D2D2D\n.word 0x00000000\n.word 0x00000000\n.word 0x8256F92D\n.word 0x92CC82B1\n.word 0x205F93B8\n.word 0x6432253A\n.word 0x6432252F\n.word 0x324C2820\n.word 0x2932522D\n.word 0x2D2D41F9\n.word 0x00000000\n.word 0x00000000\n.word 0x527C2020\n.word 0x3A6C6C6F\n.word 0x2E372025\n.word 0x25286632\n.word 0x332E3620\n.word 0x007C2966\n.word 0x887C2020\n.word 0x91AE93DA\n.word 0x3A7893AC\n.word 0x322E3725\n.word 0x2F6D4B66\n.word 0x00007C68\n.text\n");
+INT debugWinPathEditDispCall(char* pStr, INT iLineY, const void* pValue) {
+    if (iLineY == 0) {
+        if (CDebugPathData::m_sParam.iFlags & 0x10) {
+            sprintf(pStr, "-\xf9V\x82\xb1\x82\xcc\x83p\x83X : %d/%d \x90" "e:%2d\xf9" "A(\x83J)-", CDebugPathData::getActivePathNum(), CDebugPathData::getPathNum(),
+                    CDebugPathData::m_sParam.iParentLink);
+        } else {
+            sprintf(pStr, "-\xf9V\x82\xb1\x82\xcc\x83p\x83X : %d/%d \x90" "e:\x96\xb3\xf9" "A-----", CDebugPathData::getActivePathNum(), CDebugPathData::getPathNum());
+        }
+    } else if (iLineY == 5) {
+        sprintf(pStr, "-\xf9V\x82\xb1\x82\xcc\x92\xb8\x93_ :%2d/%2d (L2-R2)\xf9" "A--", CDebugPathData::getActivePathVecNum(), CDebugPathData::getPathVectorNum());
+    } else if (iLineY == 12) {
+        sprintf(pStr, "  |Roll:% 7.2f(% 6.3f)|", _getPathVectorConvWRoll(CDebugPathData::m_vActivePathPos.w) * 57.295776f,
+                _getPathVectorConvWRoll(CDebugPathData::m_vActivePathPos.w));
+    } else if (iLineY == 13) {
+        sprintf(pStr, "  |\x88\xda\x93\xae\x91\xac\x93x:%7.2fKm/h|", _getPathVectorConvWSpeed(CDebugPathData::m_vActivePathPos.w));
+    }
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditAllCall__FP12CDebugWindowi);
 __asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text */
 DEBUG_WINDOW_LINE debugWinPathEditPathAddLine[5] = {
@@ -657,10 +673,45 @@ BOOL debugWinPathLineNewCall(CDebugWindow* pObj, INT inY, INT inParam) {
     }
     return TRUE;
 }
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4193: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineNameLoadCall__FP12CDebugWindowii);
-__asm__(".rdata\n.align 3\n.word 0x5B818D83\n.word 0xB5826883\n.word 0xB582DC82\n.word 0x0021BD82\n.word 0x5B818D83\n.word 0xC9826883\n.word 0x7394B88E\n.word 0xDC82B582\n.word 0xBD82B582\n.word 0x00000021\n.text\n");
+BOOL debugWinPathLineNameLoadCall(CDebugWindow* pObj, INT inY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if (inParam & 0x20) {
+            pObj->sendMessage(1, &DWT::debugWinName);
+            iStep++;
+        }
+        break;
+    case 1:
+        if (inParam & 0x800) {
+            if (pObj->isChildAnswer()) {
+                strcpy(CDebugPathData::m_szPathName, (char*)pObj->getChildAnswer());
+                if (CDebugPathData::loadPath(CDebugPathData::m_szPathName)) {
+                    pObj->sendMessage(1, "\x83\x8d\x81[\x83h\x82\xb5\x82\xdc\x82\xb5\x82\xbd!");
+                    iStep++;
+                } else {
+                    pObj->sendMessage(1, "\x83\x8d\x81[\x83h\x82\xc9\x8e\xb8\x94s\x82\xb5\x82\xdc\x82\xb5\x82\xbd!");
+                    iStep--;
+                }
+            } else {
+                iStep--;
+            }
+        }
+        break;
+    case 2:
+        pObj->dispOff(0);
+        pObj->sendMessage(1, &debugWinPathEdit);
+        iStep++;
+        break;
+    case 3:
+        CDebugPathData::removePath();
+        pObj->dispOn(0);
+        iStep = 0;
+        break;
+    }
+    return TRUE;
+}
 __asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text */
 DEBUG_WINDOW_LINE debugWinPathLine[5] = {
     {"\x8d\xa1\x82\xcc\x83V\x81[\x83\x93\x82\xcc\x93\xc7\x8d\x9e\x8d\xcf\x83\x8a\x83\\\x81[\x83X\x88\xea\x97\x97\x82\xa9\x82\xe7\x83\x8d\x81[\x83h\xf9T(\x83J\x83" "e\x83S\x83\x8a\x83G\x83" "f\x83" "B\x83^\x82\xc5\x82\xcc\x8dX\x90V\x82\xaa\x95K\x97v)\xf9" "A", &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPathList},
