@@ -330,7 +330,20 @@ void CBattleEnemy::stateZero() {
     changeDefaultState();
 }
 void CBattleEnemy::endStateZero() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDuel__12CBattleEnemy);
+void CBattleEnemy::beginStateDuel() {
+    setupDuelCard();
+    INT no = (INT)getExtraParam(BattleEnemy::DuelMotionParamName);
+    if (no <= 0) {
+        changeMotion(1, 0, 0, -1, 0, 0);
+    } else {
+        changeMotion(no, 0, 0, -1, 0, 0);
+    }
+    CBulletManager* p = (CBulletManager*)CTaskMan::getSysTask(0x1B);
+    if (p) p->kill(getHandle());
+    m_iSysStep = 0;
+    setTimer(0);
+    bodyCollOffBody(-1);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDuel__12CBattleEnemy);
 void CBattleEnemy::endStateDuel() {
     for (INT i = 0; i < 2; i++) {
