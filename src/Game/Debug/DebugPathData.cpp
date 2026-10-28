@@ -69,7 +69,28 @@ CHermitePathMoveS::CHermitePathMoveS(CTask* p, const CPathVector* pVec) : CTask(
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __17CHermitePathMoveSP5CTaskPC11CPathVector);
 #endif
 CHermitePathMoveS::~CHermitePathMoveS() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", main__17CHermitePathMoveS);
+void CHermitePathMoveS::main() {
+    PATH_PARAM sParam;
+    FVECTOR vPos;
+    FLOAT fRate = getFrameRateF();
+    m_pPath->getPathParam(sParam);
+    if (sParam.iFlags & 0x4000000) {
+        INT iBlock1 = m_HPath.getPathBlock();
+        INT iBlock2 = iBlock1 + 1;
+        FLOAT fVSpeed0 = m_pPath->getPathSpeed(iBlock1);
+        FLOAT fVSpeed1 = m_pPath->getPathSpeed(iBlock2);
+        FLOAT fSpeed = (fVSpeed1 - fVSpeed0) * m_HPath.getHermiteCoefficient(iBlock1, m_HPath.getProgress()) + fVSpeed0;
+        m_HPath.setSpeed(fSpeed * 0.0046296297f);
+    }
+    m_HPath.update(fRate);
+    m_HPath.getNowPos(vPos);
+    m_HPath.getNowRot(m_vRot, 1.0f);
+    m_vRot.z = m_HPath.getNowRoll();
+    m_vRot.w = 5.0f;
+    m_DDPathCamArrow.setCoord(NULL, &m_vRot);
+    Crd(0).m_Local.v[3] = vPos;
+    Crd(0).m_Flag = 1;
+}
 void CHermitePathMoveS::disp() { m_DDPathCamArrow.disp(); }
 INT debugWinPathEndOneCall(CDebugWindow* pWin, INT iMes, INT iParam) {
     if (iParam & 0x20) pWin->sendMessage(2, 0);
