@@ -25,6 +25,7 @@
 #include "Game/EffectMotion.h"
 #include "System/Sound/SoundMan.h"
 #include "System/Math3D.h"
+#include "Game/MessageManager.h"
 #include "System/Com.h"
 #include "System/Rnd.h"
 #include "Game/EntityFactory.h"
@@ -74,6 +75,9 @@ void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
+void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
+FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 extern "C" float sinf(float);
 extern "C" float cosf(float);
 extern "C" float atan2f(float, float);
@@ -754,7 +758,26 @@ void CBattleEnemy::endStateGravity() {
     if (isBtlEnemyFlag(0x100)) m_pMove->enableGravity(FALSE);
     m_pMove->setMass(1.0f);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateToss__12CBattleEnemy);
+void CBattleEnemy::beginStateToss() {
+    const FVECTOR& enemyPos = m_pBodyColl->getHitCollBody()->getEnemyPos();
+    FLOAT dist = calcDistanceXZ(enemyPos);
+    getRot().y = calcDirection(enemyPos);
+    m_pMove->calcOrbitVelocityFromSpeedY((1.0f - m_pMove->getForce()) * 0.175f + 0.25f, dist);
+    m_pMove->enableGravity(TRUE);
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xD87, D_004AD2A0, 0);
+    if (checkHitPos() & 1) {
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
+        getRot().y = calcDirection(enemyPos);
+    } else {
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[8], 0, 0, -1);
+        FVECTOR dir;
+        SubVectorXYZ(dir, enemyPos, getPos());
+        getRot().y = atan2f(dir.x, dir.z);
+    }
+    playBigDamageSE();
+    m_iSysStep = 0;
+    bodyCollOffBody(-1);
+}
 void CBattleEnemy::stateToss() {
     switch (m_iSysStep) {
     case 0:
