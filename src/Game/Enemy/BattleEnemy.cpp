@@ -367,7 +367,36 @@ void CBattleEnemy::changeDefaultState() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateAppear__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateAppear__12CBattleEnemy);
+void CBattleEnemy::stateAppear() {
+    if (isBtlEnemyFlag(8) || isBtlEnemyFlag(0x20000000000ULL)) {
+        if (m_pEnemyParam) {
+            switch (m_iSysStep) {
+            case 0:
+                if (getTimer() <= 0) {
+                    changeMotion(m_pEnemyParam->iFaintMotionIndex[2], 0, 0, -1, 0, 0);
+                    killBadStatusEffect();
+                    m_iSysStep++;
+                }
+                break;
+            case 1:
+                if (isMotionEnd()) changeDefaultState();
+                break;
+            }
+        } else if (getTimer() <= 0) {
+            changeDefaultState();
+        }
+    } else {
+        m_pMove->homingY(g_pPlayer, 0.1f);
+        switch (m_iSysStep) {
+        case 0:
+            if (isMotionEnd()) changeDefaultState();
+            break;
+        case 1:
+            if (getTimer() <= 0) changeDefaultState();
+            break;
+        }
+    }
+}
 void CBattleEnemy::endStateAppear() {}
 void CBattleEnemy::beginStateSmallDamage() {
     if (m_pEnemyParam) {
