@@ -247,7 +247,32 @@ void CBattleEnemy::endCardBattle(CState* inState, TIMEQ inNextAttackWait) {
         changeDefaultState();
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", checkHitPos__12CBattleEnemy);
+INT CBattleEnemy::checkHitPos() {
+    CCollBody* hit = m_pBodyColl->getHitCollBody();
+    if (!hit) return -1;
+    FVECTOR* detect = hit->getDetectPos();
+    INT result = 2;
+    FVECTOR n;
+    n.x = 0.0f;
+    n.y = 0.0f;
+    n.z = 1.0f;
+    n.w = 1.0f;
+    ApplyMatrix33(n, Crd(0).m_World, n);
+    Normalize(n, n);
+    n.w = InnerProduct(n, *hit->getStartPos());
+    if (InnerProduct(n, *detect) - n.w > 0.0f) result = 1;
+    FVECTOR center = Crd(1).m_World.getTrans();
+    if (center.x == 0.0f && center.y == 0.0f && center.z == 0.0f) center.y = 1.0f;
+    Normalize(n, center);
+    ScaleVector(center, center, 0.5f);
+    n.w = InnerProduct(n, center);
+    if (InnerProduct(n, *detect) - n.w > 0.0f) {
+        result |= 4;
+    } else {
+        result |= 8;
+    }
+    return result;
+}
 void CBattleEnemy::playerHomingY(FLOAT inRate) {
     FVECTOR target;
     FVECTOR vel;
