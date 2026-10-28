@@ -1451,8 +1451,32 @@ void CDuelGauge::_initialize() {
     m_hTimerSE = 0;
     m_pSeqCtrls = new (__FILE__ "(4378)") D2::C2DSeqCtrl[12];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", main__Q210CardBattle10CDuelGauge);
-__asm__(".rdata\n.align 3\n.word .L001E0638\n.word .L001E05F0\n.word .L001E0638\n.word .L001E060C\n.word .L001E0634\n.word 0\n.text\n");
+void CDuelGauge::main() {
+    switch (m_uiState) {
+    case 0:
+        break;
+    case 1:
+        if (m_pSeqCtrls->isEnd(0)) {
+            m_uiState = 2;
+            m_pSeqCtrls->destroy();
+        }
+        break;
+    case 2:
+        break;
+    case 3:
+        if (m_pSeqCtrls->isEnd(0)) {
+            m_uiState = 4;
+            m_pSeqCtrls->destroy();
+        }
+        break;
+    case 4:
+        m_uiState = 0;
+        break;
+    }
+    exeTimer();
+    exeCount();
+    exeDuelNG();
+}
 /* Parked: one store slot - the original schedules the m_tqTimer store (0x5c) after the zero stores of m_uiCount and
  * m_uiResult, ours before them (and the setLayer sb one slot earlier); the statement order is the $LM line order;
  * tried: all 720 orders of the six stores (200 tested), chained/temp assignments for timer/limit, pSeq load forms
