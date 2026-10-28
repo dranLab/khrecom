@@ -187,6 +187,11 @@ public:
     void setLayerFG(USHORT nDepth) { setLayer(3, nDepth); }
     void setSemiTrans(ALPHA nInAlpha) { m_nAlphaMode = nInAlpha; }
     USHORT getLayerDepth() const { return m_LayerInfo._nDepth; } // PARTIAL: added for System/Graphic/2d/2DSprObj
+    void setZ(FIX4 nZ) { m_nZ = nZ; } // PARTIAL: added for System/Graphic/Model
+    USHORT getLayerID() const { return m_LayerInfo._nID; }
+    ULONGLONG getTestFlag() const { return m_nTestFlag; }
+    ALPHA getSemiTrans() const { return m_nAlphaMode; }
+    FIX4 getZ() const { return m_nZ; }
     virtual void disp();
     virtual UINT getPacketSize() const GPRIM_DRAWABLE_PURE;
 private:

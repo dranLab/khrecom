@@ -14,12 +14,21 @@ class CTask;
 class CCoord;
 class CCoords; // PARTIAL: added for System/Graphic/DispList
 class CTexAnm;
+class CSemiModel;
+union _TEX_UV_OFFSET { // PARTIAL: added for System/Graphic/Model
+    struct {
+        FLOAT fu;
+        FLOAT fv;
+    };
+    ULONGLONG luv;
+};
 class CLightUnit; // PARTIAL: added for Game/ModelObj
 struct MODELDATA;
 
 // PARTIAL: CModel derives from CDrawable (System/Graphic/Gprim.h, which every includer includes first) and
 // its virtual functions added for Form/Menu/MenuModel
 class CModel : public CDrawable {
+    friend class CSemiZModel; // PARTIAL: guessed (CSemiZModel::makePkt sets m_ShaderOption, no accessor exists)
 public:
     // PARTIAL: added for System/Graphic/ModelMan
     static void resetSendCtrl(INT nMode);
@@ -40,7 +49,13 @@ private:
     class CSemiModel* m_pSemiModel; /* 0x034 */
     class CFadeModel* m_pFadeModel; /* 0x038 */
     CLightUnit* m_pLightUnit; /* 0x03c PARTIAL: split out for Game/ModelObj */
-    UBYTE _m_0x40[0x14]; /* 0x040 .. 0x054 */
+    u_long128* m_pBeforeDirect;  /* 0x040 */
+    u_long128* m_pAfterDirect;   /* 0x044 */
+    USHORT m_iBeforeDirectQNum;  /* 0x048 */
+    USHORT m_iAfterDirectQNum;   /* 0x04a */
+    FIX4 m_iOTZ;                 /* 0x04c */
+    SHORT m_BoneIdx;             /* 0x050 */
+    SHORT m_BoneStart;           /* 0x052 */
     CCoords* m_pCrds;    /* 0x054 PARTIAL: split out for System/Graphic/DispList */
     const MODELDATA* m_pData; /* 0x058 */
     USHORT m_Mode;       /* 0x05c */ // PARTIAL: split out for System/Graphic/Model
@@ -50,11 +65,11 @@ private:
     SBYTE m_BoneSkip;      /* 0x065 */
     unsigned char m_Pad[2];
     struct { BYTE* m_pTex; INT m_n; } m_TexInfo[16]; /* 0x068 TexInfoStub */
-    void* m_TexUV;         /* 0x0e8 _TEX_UV_OFFSET* */
-    void* m_pTexAnm;       /* 0x0ec CModelTexAnm* */
+    union _TEX_UV_OFFSET* m_TexUV; /* 0x0e8 */
+    class CModelTexAnm* m_pTexAnm; /* 0x0ec */
     CTask* m_pTask;      /* 0x0f0 */
     FMATRIX* m_pWSMat;   /* 0x0f4 */
-    void* m_pShadowMapModel; /* 0x0f8 */
+    class CShadowMapModel* m_pShadowMapModel; /* 0x0f8 */
     BBOX m_BBox;         /* 0x0fc */
     struct SHADERDESC* m_pShader; /* 0x114 */
     UBYTE _m_0x118[0x8];
@@ -82,10 +97,24 @@ public:
     void setColorScale(const FVECTOR& vColor);        // PARTIAL: added for Form/Menu/MenuModel
     void setWorldScreenMatrix(FMATRIX* pWSMat) { m_pWSMat = pWSMat; } // PARTIAL: added for Form/Menu/MenuModel
     virtual void dispImpl();                          // PARTIAL: added for Form/Menu/MenuModel
-    virtual void dispUpdate();
+    virtual void dispUpdate(FLOAT fR);
     virtual BOOL dispCheck();
+    virtual void makePkt(); // PARTIAL: added for System/Graphic/Model
+    BOOL isDataEmpty() const { return m_pData->isDataEmpty(); }
+    CSemiModel* getSemiModel() { return m_pSemiModel; }
+protected:
+    BOOL isManagedSemiModel() const { return m_nFlag & 1; }
+    BOOL isAvailableSemiModel() const { return m_nFlag & 2; }
+public:
+    void attachSemiModel(CSemiModel& inModel, BOOL bInManage);
+    FIX4 getSemiZ();
+    INT checkBBox();
+    void getWorldBBoxScr(IVECTOR& vScr, const FMATRIX* pWS);
+    void disp0(INT nFlag, u_long nTest, INT nPass);
     virtual void changeLayerExt(INT a, INT b);        // PARTIAL: parameters guessed, for Form/Menu/MenuModel
     FLOAT getAlphaScale() { return m_fAlphaScale; }
+    INT getBeforeDirectNum() const { return m_iBeforeDirectQNum; } // PARTIAL: added for System/Graphic/Model
+    INT getAfterDirectNum() const { return m_iAfterDirectQNum; }
     // PARTIAL: added for Game/ModelObj (m_ColorScale is the FVECTOR at 0x020)
     FVECTOR& getColorScale() { return *(FVECTOR*)&_m_0x18[8]; }
     void setLightUnit(CLightUnit* p) { m_pLightUnit = p; } // PARTIAL: added for Game/ModelObj
@@ -113,6 +142,8 @@ public:
     INT assign(CTask* p, const CHAR* pName, INT n);
     void changeTextureSub(INT nIdx, const struct TexInfo* pTex);
     void setupUVScroll(INT n);
+    void setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV); // PARTIAL: added for System/Graphic/Model
+    void updateUVScroll(FLOAT fR);
 #ifdef FORM_MENU_JIMINYMEMO_CPP
     inline void setSemiTrans(ALPHA nAlpha); // PARTIAL: added for Form/Menu/JiminyMemo (defined there)
 #endif
@@ -121,6 +152,100 @@ public:
 #ifdef GAME_ENTITY_H
 inline CModel* CEntity::getModel() { return m_pModels; }
 inline CModel* CEntity::getModel(INT inIndex) { return &m_pModels[inIndex]; }
+#endif
+
+#ifdef SYSTEM_GRAPHIC_MODEL_CPP
+class CShader;
+struct SHADERDESC {
+    USHORT m_Mode;                 /* 0x00 */
+    USHORT m_Mask;                 /* 0x02 */
+    u_long128* m_pMpg;             /* 0x04 */
+    INT m_BoneSize;                /* 0x08 */
+    INT m_WorkSize;                /* 0x0c */
+    CShader* (*createInstance)();  /* 0x10 */
+    ALPHA m_BaseAlpha;             /* 0x14 */
+    ALPHA m_SemiAlpha;             /* 0x16 */
+    ULONGLONG m_BaseTest;          /* 0x18 */
+    ULONGLONG m_SemiTest;          /* 0x20 */
+};
+
+/* PARTIAL: CSemiModel, CSemiZModel, CFadeModel and CBBox for System/Graphic/Model only (System/Graphic/DispList
+   and Form/Menu/JiminyMemo still declare CSemiModel stand-ins) */
+class CSemiZModel;
+class CSemiModel : public CDrawable {
+protected:
+    CModel* m_pModel;        /* 0x18 */
+    CSemiZModel* m_pSemiZ;   /* 0x1c */
+    FIX4 m_nOldZ;            /* 0x20 */
+    USHORT m_nPacketSize;    /* 0x24 */
+    BYTE m_SemiDraw;         /* 0x26 */
+    BYTE __pad;              /* 0x27 */
+
+public:
+    CSemiModel();
+    virtual ~CSemiModel();
+    void reset();
+    virtual void disp();
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+    void link(CModel* m);
+    void relink(CModel* m);
+    void setSemiTrans(ALPHA a);
+    void setSemiSort(BOOL bVal);
+    virtual UINT getPacketSize() const;
+    void dispDirect();
+    CModel* getParentModel() { return m_pModel; }
+    void initSemiZModel();
+    void releaseSemiZModel();
+    virtual void changeLayerExt(BOOL bOn, INT nDepth);
+    void setOldZ(FIX4 nZ) { m_nOldZ = nZ; }
+    FIX4 getOldZ() { return m_nOldZ; }
+protected:
+    void setDefaultSemiTrans();
+    void replaceParentModel(CModel* pInModel);
+    void setPacketSize(USHORT nSize);
+};
+
+class CSemiZModel : public CSemiModel {
+public:
+    CSemiZModel();
+    virtual ~CSemiZModel();
+    virtual void changeLayerExt(BOOL bOn, INT nDepth);
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class CFadeModel : public CSemiModel {
+public:
+    CFadeModel();
+    virtual ~CFadeModel();
+    virtual void makePkt();
+    virtual UINT getPacketSize() const;
+};
+
+class CModelBG : public CModel {
+public:
+    CModelBG(USHORT nInDepth);
+    virtual ~CModelBG();
+    virtual void disp();
+private:
+    virtual void makePkt();
+    void setLayerFG(BYTE nInDepth);
+};
+
+class CBBox : public CGPrim {
+    CCoord* m_pCrd;  /* 0x1c */
+    G_RGBA m_C0;     /* 0x20 */
+    BBOX m_bbox;     /* 0x24 */
+
+public:
+    CBBox();
+    virtual ~CBBox();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
 #endif
 
 /* Placeholders for the original header's inline functions: their strings ("System/Graphic/Model.h",
