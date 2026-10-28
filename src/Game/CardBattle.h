@@ -11,6 +11,7 @@
 class CPlayer; // PARTIAL: added for Game/Player/PlayerRiku
 class CTask; // PARTIAL: added for Game/CardBattle
 namespace D2 { class C2DSeqCtrl; } // PARTIAL: added for Game/CardBattle
+namespace Message { class CMessageManager; } // PARTIAL: added for Game/CardBattle
 union FVECTOR; // PARTIAL: added for Game/Player/FriendPluto
 
 /* Placeholder for the original header's inline function asserting inUser: its strings
@@ -86,7 +87,12 @@ struct ENCHANT_PARAM {
 class CCardBattle {
     // PARTIAL: members added for Game/Player/PlayerRiku
     // PARTIAL: split out for Game/CardBattle
-    UBYTE _m_0x0[0x94];       /* 0x000 CTask .. 0x090 m_tqSubTimer */
+    UBYTE _m_0x0[0x40];       /* 0x000 CTask */
+    // PARTIAL: split for Game/CardBattle
+    Message::CMessageManager* m_pMesage; /* 0x040 */
+    UBYTE m_mesCardInfo[2][0x24];  /* 0x044 MES_CARD_INFO[2] */
+    TIMEQ m_tqMainTimer;           /* 0x08c */
+    TIMEQ m_tqSubTimer;            /* 0x090 */
     HANDLE m_hOwner[2];       /* 0x094 */
     UINT m_uiState[2];        /* 0x09c */
     UINT m_uiResult[2];       /* 0x0a4 */
@@ -135,9 +141,12 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     HANDLE getDuelEnemy() { return m_hDuelEnemy; }
     // PARTIAL: added for Game/Player/PlayerSora (out of line in Game/CardBattle, inlined elsewhere)
     INT isNowPronounce() const { return m_uiDuelState == 0xB; }
-    void setSubTimer(TIMEQ inTime) { *(TIMEQ*)&_m_0x0[0x90] = inTime; }
-    TIMEQ getSubTimer() const { return *(const TIMEQ*)&_m_0x0[0x90]; }
+    void setSubTimer(TIMEQ inTime) { m_tqSubTimer = inTime; }
+    TIMEQ getSubTimer() const { return m_tqSubTimer; }
+    TIMEQ getFrameRate() const { return *(const TIMEQ*)&_m_0x0[0x8]; } // PARTIAL: CTask::getFrameRate (base still opaque)
+    HANDLE getHandle() const { return *(const HANDLE*)&_m_0x0[0x14]; } // PARTIAL: CTask::getHandle (base still opaque)
     void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
+    void disablePlayCard(UINT inSet) { setFlag(inSet, inSet ^ 0xC0000000); } // PARTIAL: added for Game/CardBattle
     void destroyPlayCard(INT inFlag, INT inP1);
     void transferPlayerEnchant(CPlayer* inPlayer);
     void setDuelEntry(INT inFlag);
@@ -225,7 +234,8 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
 class CCardRevolver {
     UBYTE _m_0x00[0x4c]; // PARTIAL: added for Game/Enemy/HumanBoss
     SHORT m_sMode;       /* 0x4c */ // PARTIAL: name unknown
-    UBYTE _m_0x4e[0x26]; // PARTIAL: added for Game/Player/Player
+    UBYTE _m_0x4e[0x22]; // PARTIAL: added for Game/Player/Player
+    TIMEQ m_tqChargeRate; /* 0x70 */ // PARTIAL: added for Game/CardBattle
     BOOL m_bActive;      /* 0x74 */ // PARTIAL: added for Game/Player/Player
     UBYTE _m_0x78[0x168]; /* 0x078 .. sizeof 0x1e0 */ // PARTIAL: added for Game/Player/Player (makeRevolver)
 public:
@@ -233,6 +243,8 @@ public:
     INT isActive() const { return m_bActive; } // PARTIAL: added for Game/Player/Player
     // PARTIAL: added for Game/Enemy/HumanBoss
     INT getMode() const { return m_sMode; } // PARTIAL: name unknown
+    void setChargeRate(INT inRate) { m_tqChargeRate = inRate; } // PARTIAL: added for Game/CardBattle
+    void setPlayNG(INT inFlag, INT inCategory);
     INT getRemain(INT inKind, INT inCardKind, INT inFlag);
     BOOL isEnableCharge();
     CARD* getActiveCardData();
