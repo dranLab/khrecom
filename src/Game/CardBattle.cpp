@@ -21,6 +21,9 @@ public:
     void destroy();
     INT calcEnemyStockSkill();
     void setStockInfo();
+    INT getStock(INT inFlag);
+    void setPronounceCard(INT inKind, INT inNumber);
+    INT setPlayPronounce();
 };
 void calcFreezeDamage(INT& ioDamage);
 
@@ -672,7 +675,18 @@ void CDuelGauge::exeDuelNG() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPronounceStart__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPronouncePlay__Q210CardBattle11CCardBattlei);
+INT CCardBattle::setPronouncePlay(INT inFlag) {
+    CStockFolder* pSF = m_pStockFolder[1];
+    if (!pSF) return 0;
+    if (inFlag) {
+        while (pSF->getStock(0) < 6) {
+            pSF->setPronounceCard(0x98, RND::genrand_int31() % 8 + 1);
+        }
+    }
+    m_uiDuelState = 11;
+    setDuelBreakCount(0, 6);
+    return pSF->setPlayPronounce();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnemyPronounceCard__Q210CardBattle11CCardBattleiPQ210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPronounceEnd__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", disablePlayCard__Q210CardBattle11CCardBattleUi);
