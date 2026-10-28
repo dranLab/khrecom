@@ -521,8 +521,78 @@ void CSaveLoadUI::preCheckSlot() {
     m_nStep = 0;
     m_nTargetIndex = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckSlot__11CSaveLoadUI);
-__asm__(".rdata\n.align 4\n.word .L00349C88\n.word .L00349CAC\n.word .L00349CD0\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349CF0\n.word .L00349E5C\n.word .L00349E80\n.word 0\n.text\n");
+void CSaveLoadUI::exeCheckSlot() {
+    INT nRes;
+    UINT nIdx;
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqGetEntries(*m_pGameDataEntries, m_mode == SLMODE_SAVE)) m_nStep++;
+        return;
+    case 1:
+        if (!m_pMemoca->isCompleteReq(NULL)) return;
+        m_nStep++;
+        break;
+    case 2:
+        if (isPadEnable()) changeState(9);
+        return;
+    case 10: {
+        char szMsg[256];
+        char szSlot[32];
+        _getSlotName(m_nSlot + 1, szSlot);
+        const CHAR* pszFmt = _ctdText(0x600302);
+        sprintf(szMsg, pszFmt, _ctdText(0x600000), szSlot);
+        openMessageDlg(szMsg, 0, 1);
+        m_nStep++;
+        return;
+    }
+    case 11:
+        if (!m_nDlgResult) return;
+        closeMessageDlg();
+        m_nStep++;
+        return;
+    case 12:
+        if (isPadEnable()) backtoSelSlot();
+        return;
+    }
+    nRes = m_pMemoca->getLastResult();
+    if (nRes < 0) {
+        BOOL bExit = TRUE;
+        switch (nRes) {
+        case -2:
+            changeState(15);
+            break;
+        case -4:
+            if (m_mode == SLMODE_SAVE) {
+                changeState(14);
+                m_nFlag &= ~0x80;
+            } else {
+                bExit = FALSE;
+            }
+            break;
+        case -3:
+            bExit = FALSE;
+            break;
+        default:
+            m_nStep = 10;
+            return;
+        }
+        if (bExit) {
+            m_nStep = -1;
+            return;
+        }
+    }
+    nIdx = m_pMemoca->getLatestDataIndex();
+    m_nDataListSel = nIdx;
+    if (nIdx >= 96) {
+        m_nDataListTop = 95;
+    } else {
+        m_nDataListTop = nIdx < 4 ? 0 : nIdx - 3;
+    }
+    for (INT i = 0; i < 4; i++) {
+        setupDataPlate(m_nDataListTop + i);
+    }
+    if (m_nFlag & 4) closeMessageDlg();
+}
 void CSaveLoadUI::endCheckSlot() {}
 void CSaveLoadUI::preOpenDataList() {
     if (m_pMemocaInfoAgent) m_pMemocaInfoAgent->startOrRestart();
