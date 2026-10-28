@@ -505,9 +505,28 @@ BOOL debugWinPathLineSaveCall(CDebugWindow* pObj, INT inY, INT inParam) {
     return TRUE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditNum__FP12CDebugWindowii);
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4154: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditAdd__FP12CDebugWindowii);
+BOOL debugWinPathEditAdd(CDebugWindow* pObj, INT inY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if (inParam & 0x20) {
+            pObj->sendMessage(1, &DWT::debugWinYesNo);
+            iStep++;
+        }
+        break;
+    case 1:
+        if (inParam & 0x800) {
+            if (pObj->isChildAnswer() && pObj->getChildAnswer() == 1) {
+                CDebugPathData::addPathVector(CDebugPathData::m_iActivePathNum);
+                CDebugPathData::incActivePathVecNum(FALSE);
+            }
+            iStep = 0;
+        }
+        break;
+    }
+    return TRUE;
+}
 /* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
 __asm__(".data\n.align 2\n" "iStep.4158: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditDel__FP12CDebugWindowii);
