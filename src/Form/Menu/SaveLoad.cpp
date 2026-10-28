@@ -435,7 +435,43 @@ void CSaveLoadUI::preCheckOverwrite() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckOverwrite__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckNoMemory__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x250A7325\n.word 0x00000073\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckNoMemory__11CSaveLoadUI);
+void CSaveLoadUI::exeCheckNoMemory() {
+    INT r = -9999;
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqIdleCheckCard()) m_nStep++;
+        break;
+    case 1:
+        if (m_pMemoca->isCompleteReq(NULL)) {
+            r = m_pMemoca->getLastResult();
+            m_nStep = 0;
+        }
+        break;
+    }
+    if (r == -2) {
+        changeState(15);
+        return;
+    }
+    switch (m_nStep) {
+    case 0:
+    case 1:
+        if (m_nDlgResult) {
+            closeMessageDlg();
+            m_nStep = 2;
+        }
+        break;
+    case 2:
+        if (isPadEnable()) {
+            if (m_nFlag & 0x80) {
+                changeState(10);
+            } else {
+                backtoSelSlot();
+            }
+            m_nStep = 99;
+        }
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckNoCard__11CSaveLoadUI);
 void CSaveLoadUI::exeCheckNoCard() {
     INT nResult = -9999;
