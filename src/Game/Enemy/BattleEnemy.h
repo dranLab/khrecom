@@ -152,6 +152,7 @@ public:
     INT computeDamage_(FLOAT inDamage, FLOAT inAttr, ATK_KIND inAtkKind);
     BOOL initEnemyParam(INT inGroupID, INT inRsrcID, INT inIndex);
     void initFSM_();
+    void initRoom_();
     void setupHitBack();
     void makeRoulettePrize(const FVECTOR* inPos);
     BOOL checkResist_(ATK_KIND inDmgKind);
