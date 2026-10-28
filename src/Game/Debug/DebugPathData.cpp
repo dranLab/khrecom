@@ -805,10 +805,57 @@ BOOL debugWinPathEditPathNum(CDebugWindow* pObj, INT inY, INT inParam) {
     else if (inParam & 0x80) CDebugPathData::decActivePathNum(TRUE);
     return TRUE;
 }
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4165: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPathAddLineCall__FP12CDebugWindowii);
-__asm__(".rdata\n.align 3\n.word 0x218D923C\n.word 0x8DBB8C3E\n.word 0x914991DD\n.word 0x828692F0\n.word 0x837083CC\n.word 0x81CD8258\n.word 0x82F98A41\n.word 0x826590C9\n.word 0x8DB691AA\n.word 0x82B782DD\n.word 0x82BD82E9\n.word 0x8DC08EDF\n.word 0x82B78273\n.word 0x90C682E9\n.word 0x95AA8265\n.word 0x82588DCF\n.word 0x82EA82B3\n.word 0x21B782DC\n.word 0x00000000\n.word 0x00000000\n.text\n");
+BOOL debugWinPathEditPathAddLineCall(CDebugWindow* pObj, INT inY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if (inParam & 0x20) {
+            if (inY == 2 && (CDebugPathData::m_sParam.iFlags & 0x10)) pObj->sendMessage(1, "<\x92\x8d!>\x8c\xbb\x8d\xdd\x91I\x91\xf0\x92\x86\x82\xcc\x83p\x83X\x82\xcd\x81" "A\x8a\xf9\x82\xc9\x90" "e\x82\xaa\x91\xb6\x8d\xdd\x82\xb7\x82\xe9\x82\xbd\x82\xdf\x8e\xc0\x8ds\x82\xb7\x82\xe9\x82\xc6\x90" "e\x82\xaa\x95\xcf\x8dX\x82\xb3\x82\xea\x82\xdc\x82\xb7!");
+            iStep++;
+        }
+        break;
+    case 1:
+        pObj->sendMessage(1, &DWT::debugWinYesNo);
+        iStep++;
+        break;
+    case 2:
+        if (inParam & 0x800) {
+            if (pObj->isChildAnswer() && pObj->getChildAnswer() == 1) {
+                if (inY == 0) {
+                    CDebugPathData::addPath(CDebugPathData::getPathVector(), CDebugPathData::getPathVectorNum());
+                    CDebugPathData::setActivePathNum(CDebugPathData::getPathNum() - 1, -1);
+                } else if (inY == 1) {
+                    CDebugPathData::addPath(CDebugPathData::getPathVector(), CDebugPathData::getPathVectorNum());
+                    INT iParentNum = CDebugPathData::getActivePathNum();
+                    CDebugPathData::setActivePathNum(CDebugPathData::getPathNum() - 1, -1);
+                    CDebugPathData::getActiveParam();
+                    CDebugPathData::m_sParam.iFlags |= 0x10;
+                    CDebugPathData::m_sParam.iParentLink = iParentNum;
+                    CDebugPathData::setActiveParam();
+                } else if (inY == 2) {
+                    CDebugPathData::addPath(CDebugPathData::getPathVector(), CDebugPathData::getPathVectorNum());
+                    INT iNum = CDebugPathData::getPathNum() - 1;
+                    CDebugPathData::getActiveParam();
+                    CDebugPathData::m_sParam.iFlags |= 0x10;
+                    CDebugPathData::m_sParam.iParentLink = iNum;
+                    CDebugPathData::setActiveParam();
+                    CDebugPathData::setActivePathNum(CDebugPathData::getPathNum() - 1, -1);
+                    CDebugPathData::getActiveParam();
+                } else {
+                    CDebugPathData::addPath(NULL, 0);
+                    CDebugPathData::setActivePathNum(CDebugPathData::getPathNum() - 1, -1);
+                }
+                pObj->sendMessage(2, 0);
+                iStep++;
+            } else {
+                iStep = 0;
+            }
+        }
+        break;
+    }
+    return TRUE;
+}
 BOOL debugWinPathEditPathDel(CDebugWindow* pObj, INT inY, INT inParam) {
     static INT iStep = 0;
     if (inParam & 5) iStep = 0;
