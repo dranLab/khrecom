@@ -463,8 +463,74 @@ void CPlayerGauge::setDamage(INT inHP, INT inKind) {
     m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 1);
 }
 void CPlayerGauge::setBattleEnd() { CNaviMap::m_bBattleEnd = TRUE; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDPGauge__Q25Gauge12CPlayerGaugei);
-__asm__(".rdata\n.align 4\n.word 0x00285874\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285874\n.word 0x00285874\n.word 0x00000000\n.text\n");
+void CPlayerGauge::setDPGauge(INT inState) {
+    INT i;
+    INT dark;
+    D2::C2DSeqCtrl* pSeq;
+    INT gauge;
+    if (!m_pSeqCtrlDP) return;
+    if (!(m_uiFlag & 4)) return;
+    if (inState == m_nStateDP) return;
+    dark = FALSE;
+    if (m_uiFlag & 8) dark = TRUE;
+    switch (inState) {
+    case 0:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+        break;
+    default:
+        for (i = 0; i < 3; i++) m_pSeqCtrlDP[i].destroy();
+        break;
+    }
+    m_uiFlag = (INT)m_uiFlag & ~0x10;
+    if (m_nMaxDP) gauge = m_nDP * 100 / m_nMaxDP;
+    else gauge = 0;
+    if (gauge > 100) gauge = 100;
+    switch (inState) {
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        break;
+    case 1:
+    case 8:
+    case 9:
+        pSeq = m_pSeqCtrlDP;
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqGauge, g_RikuSeqIDData[dark][0]);
+        pSeq->addSeq(g_szSeqGauge, g_RikuSeqIDData[dark][1]);
+        if (gauge == 100 && !dark && inState != 9) {
+            pSeq->addSeq(g_szSeqGauge, 0x1D);
+            m_uiFlag |= 0x10;
+        }
+        pSeq->setParent(m_pSeqCtrl);
+        pSeq->enableColorCtrl(TRUE);
+        pSeq->changeTime(1, gauge);
+        pSeq = &m_pSeqCtrlDP[1];
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqGauge, 0x2A);
+        pSeq->addSeq(g_szSeqGauge, g_RikuSeqIDData[dark][2]);
+        pSeq->setParent(m_pSeqCtrlDP);
+        pSeq->enableColorCtrl(TRUE);
+        i = m_nDP % 10; // MATCH: i reused for the digit (as gauge in setDP)
+        pSeq->changeTexture(1, 0, NULL, &g_uvNumberTex[0][i], &g_uvNumberTex[1][i]);
+        pSeq = &m_pSeqCtrlDP[2];
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqGauge, 0x2B);
+        pSeq->addSeq(g_szSeqGauge, g_RikuSeqIDData[dark][2]);
+        pSeq->setParent(m_pSeqCtrlDP);
+        pSeq->enableColorCtrl(TRUE);
+        i = m_nDP / 10 % 10;
+        pSeq->changeTexture(1, 0, NULL, &g_uvNumberTex[0][i], &g_uvNumberTex[1][i]);
+        break;
+    }
+    m_nStateDP = inState;
+}
 void CPlayerGauge::setDP(INT inDP, INT inMax) {
     INT gauge;
     D2::C2DSeqCtrl* pSeq;
