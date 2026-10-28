@@ -38,19 +38,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | decomp/Game-Player-PlayerGauge (complete 78/80, 2 parked; A2 part 1: gauge classes in ref form, CPadHandler base) | 1098 | 438 | 23 | 942 (928) | 49 |
 | 2026-10-28 | cleanup/Game-Player-PlayerGauge (A2 part 2: gauge classes ungated, stand-ins in 11 files) | 1090 | 422 | 23 | 939 (924) | 49 |
 | 2026-10-28 | cleanup/System-Graphic-WorldEnv (CWorldEnv stand-ins in 6 files) | 1089 | 416 | 23 | 939 (924) | 51 |
+| 2026-10-28 | decomp/System-Graphic-Model (partial 66/206, 6 parked; A1 reasons; semi classes gated in Model.h) | 1101 | 417 | 23 | 941 (926) | 53 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1089 (1022 in 110 headers, 67 in 31 .cpp); MATCH: 51
-  by category: method 467, data member 71, type 95, fwd decl 53, #include 29, changed in place 129, padding 33, path override 24, gate 36, guessed 41, header-level 75, stand-in 28, other 8
-stand-ins: 416 foreign in 131 files (121 names), 191 unattributed, 173 own
+PARTIAL: 1101 (1030 in 110 headers, 71 in 31 .cpp); MATCH: 53
+  by category: method 472, data member 71, type 96, fwd decl 54, #include 29, changed in place 129, padding 33, path override 24, gate 36, guessed 42, header-level 75, stand-in 32, other 8
+stand-ins: 417 foreign in 131 files (121 names), 192 unattributed, 176 own
 duplicate class names across headers: 23
-padding: 35 arrays, 26 accessors
-mechanisms: 939 sites (924 untagged); #line: 1181
+padding: 34 arrays, 26 accessors
+mechanisms: 941 sites (926 untagged); #line: 1181
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 155, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 538, superset 124, partial 98, gated 101, missing 17, unattributed 309
+classes: complete 538, superset 125, partial 98, gated 107, missing 15, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -87,7 +88,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | class | readiness | home | stand-in files | also defined in | gaps vs ref |
 |---|---|---|---:|---|---|
 | `CRsrcDB` | partial | System/RsrcDB.h | 65 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene |
-| `CPackMan` | missing | System/Graphic/PackMan.h | 31 |  |  |
+| `CPackMan` | missing | System/Graphic/PackMan.h | 32 |  |  |
 | `NAME_CASE` | gated | System/RsrcData.h | 30 |  |  |
 | `C2DMan` | gated | System/Graphic/2d/2DMan.h | 28 | Form/Menu/SaveLoadCtrl.h |  |
 | `CRcf` | complete | System/Rcf.h | 26 |  |  |
@@ -126,7 +127,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPause` | complete | Form/Menu/Pause.h | 2 |  |  |
 | `CPlayerDRiku` | superset | Game/Player/PlayerDRiku.h | 2 |  | virtual order differs |
 | `CPrize` | superset | Game/Prize.h | 2 |  | virtual order differs |
-| `CSemiModel` | missing | System/Graphic/Model.h | 2 |  |  |
+| `CSemiModel` | gated | System/Graphic/Model.h | 2 |  | virtual order differs |
 | `CTexAnm` | complete | System/Graphic/TexAnm.h | 2 |  |  |
 | `CTextWnd` | complete | System/Wnd.h | 2 |  |  |
 | `CVramMan` | complete | System/VramMan.h | 2 |  |  |
@@ -162,7 +163,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CMemocaAgent` | complete | Form/Menu/SaveLoadUtil.h | 1 |  |  |
 | `CMemocaDataEntries` | superset | Form/Menu/SaveLoadUtil.h | 1 |  | extra methods: setNoSpace |
 | `CMinigameManager` | complete | Game/MinigameManager.h | 1 |  |  |
-| `CModelBG` | missing | System/Graphic/Model.h | 1 |  |  |
+| `CModelBG` | gated | System/Graphic/Model.h | 1 |  | virtual order differs |
 | `CMovie` | complete | System/Movie/Movie.h | 1 |  |  |
 | `CMovieFiles` | complete | System/Movie/MovieFiles.h | 1 |  |  |
 | `CMovieScript` | complete | System/Movie/MovieScript.h | 1 |  |  |
@@ -333,7 +334,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Buf.h` | 4 | 0/1/0/0 | 18 |
 | `System/Com.h` | 1 | 0/0/0/0 | 7 |
 | `System/Component.h` | 3 | 1/1/0/0 | 5 |
-| `System/Coord.h` | 3 | 0/1/0/0 | 15 |
+| `System/Coord.h` | 3 | 0/1/0/0 | 16 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 270 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 10 |
 | `System/Fsm.h` | 4 | 1/0/0/1 | 107 |
@@ -349,7 +350,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 8 |
 | `System/Graphic/3DCPrim.h` | 1 | 0/0/1/0 | 1 |
 | `System/Graphic/Anim.h` | 29 | 0/0/0/2 | 148 |
-| `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 86 |
+| `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 87 |
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
 | `System/Graphic/DeFocus.h` | 5 | 0/0/0/5 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
@@ -371,12 +372,12 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 37 |
 | `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 2 |
-| `System/Graphic/Gprim.h` | 45 | 3/3/5/21 | 229 |
+| `System/Graphic/Gprim.h` | 46 | 3/3/5/21 | 229 |
 | `System/Graphic/GprimFull.h` | 0 | 1/17/2/0 | 1 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/LightUnit.h` | 3 | 4/0/3/0 | 8 |
 | `System/Graphic/MapUnit.h` | 2 | 0/0/0/0 | 3 |
-| `System/Graphic/Model.h` | 35 | 0/0/1/0 | 69 |
+| `System/Graphic/Model.h` | 41 | 0/1/1/6 | 69 |
 | `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 5 |
 | `System/Graphic/MotData.h` | 1 | 4/0/3/0 | 3 |
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
@@ -387,10 +388,10 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 137 |
 | `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 35 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
-| `System/Graphic/modeldata.h` | 11 | 1/0/1/1 | 81 |
+| `System/Graphic/modeldata.h` | 12 | 1/0/1/1 | 81 |
 | `System/LinkedBuf.h` | 6 | 1/2/1/0 | 6 |
 | `System/MainApp.h` | 5 | 0/0/0/2 | 268 |
-| `System/Math3D.h` | 1 | 2/0/1/0 | 56 |
+| `System/Math3D.h` | 1 | 2/0/1/0 | 57 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 4 |
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 94 |
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
@@ -419,8 +420,8 @@ or `untagged`.
 | feature site | `COLLOBJ_H_INFO_UNION` | 1 | 0 | untagged, e.g. Game/Collision/CollObj.h:205 |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 0 | untagged, e.g. Game/Entity.h:159 |
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 0 | untagged, e.g. System/LinkedBuf.h:10 |
-| feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:57 |
-| feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:94 |
+| feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:64 |
+| feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:101 |
 | full-class | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.cpp:2 |
 | full-class | `FORM_DEBUGMENU_FULL` | 1 | 0 | untagged, e.g. Form/DebugMenu.cpp:3 |
 | full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 1 | CNakCamera; the original has Gprim.h's strings (PathData.h includes it first) |
@@ -528,10 +529,10 @@ or `untagged`.
 | placeholder | `_mapEnemyAirEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyAir.cpp:11 |
 | placeholder | `_mapEnemyGroundEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyGround.cpp:11 |
 | placeholder | `_mapEnemyMushroomEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyMushroom.cpp:11 |
-| placeholder | `_mcShaderCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:143 |
-| placeholder | `_mcShaderDelete*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:146 |
-| placeholder | `_modelAssertZero*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:140 |
-| placeholder | `_modelCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:137 |
+| placeholder | `_mcShaderCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:268 |
+| placeholder | `_mcShaderDelete*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:271 |
+| placeholder | `_modelAssertZero*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:265 |
+| placeholder | `_modelCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:262 |
 | placeholder | `_monstroEventBattleEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MonstroEventBattle.cpp:27 |
 | placeholder | `_pathDataCameraSLCOverflow*` | 1 | 0 | untagged, e.g. System/Graphic/PathDataCamera.cpp:7 |
 | placeholder | `_premiumPrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:10 |
@@ -572,6 +573,7 @@ or `untagged`.
 | unit gate | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.cpp:2 |
 | unit gate | `SYSTEM_GRAPHIC_DEFOCUS_CPP` | 2 | 0 | untagged, e.g. Game/Atel/VSME.cpp:76 |
 | unit gate | `SYSTEM_GRAPHIC_GPRIM_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:1 |
+| unit gate | `SYSTEM_GRAPHIC_MODEL_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Model.cpp:2 |
 | unit gate | `SYSTEM_TASKMAN_CPP` | 1 | 0 | untagged, e.g. System/TaskMan.cpp:1 |
 | unit gate site | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.h:17 |
 | unit gate site | `EFFECT_CPP` | 3 | 0 | untagged, e.g. System/Graphic/Effect/effect.h:13 |
@@ -592,6 +594,7 @@ or `untagged`.
 | unit gate site | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.h:30 |
 | unit gate site | `SYSTEM_GRAPHIC_DEFOCUS_CPP` | 1 | 0 | untagged, e.g. System/Graphic/DeFocus.h:9 |
 | unit gate site | `SYSTEM_GRAPHIC_GPRIM_CPP` | 2 | 0 | untagged, e.g. System/Graphic/Gprim.h:155 |
+| unit gate site | `SYSTEM_GRAPHIC_MODEL_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:157 |
 | unit gate site | `SYSTEM_TASKMAN_CPP` | 2 | 0 | untagged, e.g. System/Task.h:183 |
 
 ## String evidence

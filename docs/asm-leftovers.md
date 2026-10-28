@@ -27,10 +27,10 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 |---|---:|---:|---:|---|
 | `Game/Player/PlayerSora` | 2 | 7322 | 2 |  |
 | `Form/Menu/Camp` | 12 | 6098 | 12 |  |
-| `System/Graphic/Model` | 170 | 5996 |  | .bss .data .rodata |
 | `Game/Player/PlayerDRiku` | 5 | 5620 | 1 |  |
 | `Game/BattleCard` | 73 | 5375 |  | .bss .data .rodata |
 | `Form/Menu/JiminyMemo` | 83 | 5244 | 19 | .bss |
+| `System/Graphic/Model` | 145 | 5228 | 5 | .bss .data .rodata |
 | `Game/Atel/Avatar` | 113 | 4856 |  | .rodata |
 | `Game/SceneInfo` | 57 | 4635 |  | .bss .data .rodata |
 | `System/Graphic/PackMan` | 42 | 4290 |  | .bss .rodata |
@@ -135,6 +135,11 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/Anim` | `_hokanRot__Ffff` | 33 | (comment) Near-match: the angle difference is copied into another FP register before it is limited |
 | `System/Graphic/FrecFont` | `setupFontTex__9CFrecFontRC8RsrcInfoRC4CBuf` | 252 | (comment) Matches except for the order of two loop-invariant CSA values that loop.c hoists ((nCSA + 6) << 56 is computed before (nCSA + 2) << 56 in the original). |
 | `System/Graphic/Glare` | `makePkt__10CGlarePrim` | 446 | (comment) not matching: register allocation differs (the original keeps the -1 of its divisions by 32 in a saved register from the start); with it the function-local statics ofsX/ofsY, so .data comes from the original assembly |
+| `System/Graphic/Model` | `searchShaderDesc__FUs` | 23 | 12 lines off, registers only: the original keeps the masked mode in a1, the table pointer in a2, 0xffff in a3 and the TRACE string's %hi in a0; ours mode a0, pointer a1, 0xffff a2, string a3. Tried: for/while/break loop shapes, a UINT copy of mode; permuter 12 min (24539 candidates, stays 12). |
+| `System/Graphic/Model` | `checkBSphere__FR6CCoordPC4BBOX` | 47 | 10 lines off, FP registers only: the original keeps the shared 0.5f in f5 (x sum f6, y[1] f7), ours 0.5f in f7. Worked: x[0] > x[1] compare, a copy tmp (declared first) of ctr as the call argument, sqrt after the copy. Tried: statement orders, w first/last, 0.5f local; permuter 12 min (37389 … |
+| `System/Graphic/Model` | `checkBBox__FRC7FMATRIXPC4BBOX` | 36 | 12 lines off, registers only: the original keeps the scratchpad pointer in v1 and the clip result in a0 (or a0,v0,a0; move v0,a0), ours v0/v1. Worked: the 0xC0000000 return last (if (!(x[1] < x[0])) {...}), v assigned inside the if, asm "nop" opening the if (ret) block (the original's extra nop … |
+| `System/Graphic/Model` | `resultCheckBBox__FR6CCoordPC4BBOX` | 18 | 5 lines off: the original leaves the bc1t delay slot empty (lui 0xc000 in the final jr slot), has an extra nop after the beqz slot and builds the result in v1 (move v0,v1); ours fills bc1t with the lui. Tried: compare forms (>, <=, !<), result locals (clip \|= ret, res), if/else return; permuter 15 … |
+| `System/Graphic/Model` | `_disp0_GetData__6CModelRUii` | 15 | 2 lines off: the original loads *pData before the lui 0x6000 of the tag compare, ours lui first. Tried: d/mode locals, store forms, int (*)[4]/u_long/u_long128 pData, test forms (!=, ^, ternary, tag local); permuter 12 min (22337 candidates, stays 2). |
 | `System/Graphic/ModelMan` | `reset__9CModelMan` | 43 | (comment) reset: near-match. The original reloads the 0.0f arguments (and stack addresses) after each call to FVECTOR::set (called out of line here); this build keeps them in callee-saved registers across the call. |
 | `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | (comment) setupDrawEnv: near-match. The original reloads the 0.0f arguments (and stack addresses) after each call to FVECTOR::set (called out of line here); this build keeps them in callee-saved registers across the call. |
 | `System/Graphic/ModelMan` | `setupDrawMode__9CModelMani` | 64 | (comment) setupDrawMode: near-match. The two halves of the first GIF tag get swapped registers ($v0/$v1). |
@@ -318,7 +323,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 943 functions (110482 instructions) in 85 units, 195 of them parked; 19 units take a data section from assembly.
+Totals: 918 functions (109714 instructions) in 85 units, 200 of them parked; 19 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
