@@ -103,7 +103,19 @@ FLOAT CBattleEnemy::getExtraParam(const CHAR* inParamName) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackPoint__12CBattleEnemyi8ATK_KINDUsP8ATK_KINDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackAttr__C12CBattleEnemyi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackRate__C12CBattleEnemy);
+INT CBattleEnemy::getAttackRate() const {
+    if (!m_pEnemyParam) return 10000;
+    INT power = 1;
+    if (m_tqConfuseTimer > 0) power = 10;
+    if ((UINT)getID() % 10000 < 100) {
+        CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+        if (bem) {
+            power *= bem->getEnemyCount();
+            if (power <= 0) power = 1;
+        }
+    }
+    return m_pEnemyParam->iAttackRate[m_iActiveAttackRate] * power;
+}
 void CBattleEnemy::getUseCardPos(FVECTOR& outPos) {
     FLOAT offset = getExtraParam(BattleEnemy::CamTrgOfsParamName);
     outPos = Crd(0).m_World.getTrans();
