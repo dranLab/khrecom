@@ -394,8 +394,26 @@ __asm__(".rdata\n.align 4\n.word .L00349C88\n.word .L00349CAC\n.word .L00349CD0\
 void CSaveLoadUI::endCheckSlot() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preOpenDataList__11CSaveLoadUI);
 void CSaveLoadUI::exeOpenDataList() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preSelDataList__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x00707063\n.word 0x3D3C2030\n.word 0x6E5F6D20\n.word 0x61746144\n.word 0x7473694C\n.word 0x00706F54\n.word 0x00000000\n.word 0x656C6553\n.word 0x66207463\n.word 0x20656C69\n.word 0x6C206F74\n.word 0x0064616F\n.word 0x00000000\n.word 0x656C6553\n.word 0x66207463\n.word 0x20656C69\n.word 0x73206F74\n.word 0x00657661\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
+void CSaveLoadUI::preSelDataList() {
+    SHORT n = m_nDataListSel - m_nDataListTop;
+    CHAR* pszMes;
+    if (n < 0) {
+        m_nDataListTop = m_nDataListSel;
+        if (!(0 <= m_nDataListTop)) AssertApp(__FILE__, 1185, "0 <= m_nDataListTop", 0);
+    } else if (n >= 4) {
+        m_nDataListTop = m_nDataListSel - 3;
+        if (!(0 <= m_nDataListTop)) AssertApp(__FILE__, 1190, "0 <= m_nDataListTop", 0);
+    }
+    m_pMainLightMark->setSleep(FALSE);
+    m_pDataItemPlate[(SHORT)(m_nDataListSel - m_nDataListTop)]->select(TRUE);
+    if (getRsrcType()) {
+        pszMes = "Select file to load";
+    } else {
+        pszMes = "Select file to save";
+    }
+    setHelpMessage(pszMes);
+    m_nStep = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeSelDataList__11CSaveLoadUI);
 void CSaveLoadUI::endSelDataList() {
     outHelpMessage();

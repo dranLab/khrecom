@@ -153,6 +153,14 @@ public:
             m_nFlag &= ~1;
         }
     }
+    // PARTIAL: added for Form/Menu/SaveLoad
+    void setSleep(BOOL bSleep) {
+        if (bSleep) {
+            m_nFlag |= 2;
+        } else {
+            m_nFlag &= ~2;
+        }
+    }
 
 protected:
     void updatePos();
