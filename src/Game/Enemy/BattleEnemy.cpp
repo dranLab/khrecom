@@ -336,7 +336,22 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateBigDamag
 void CBattleEnemy::endStateBigDamage() {
     if (!(m_ullBackupFlag & 4)) m_pMove->enableGravity(FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateCardBreak__12CBattleEnemy);
+void CBattleEnemy::beginStateCardBreak() {
+    if (m_pEnemyParam) {
+        if (isBtlEnemyFlag(0x100) || (m_pMove->getCollisionFlag() & 5)) {
+            changeMotion(m_pEnemyParam->iDamageMotionIndex[0], 0, 0, -1, 0, m_iCardBreakSeIdentifyNo);
+        } else {
+            changeMotion(m_pEnemyParam->iDamageMotionIndex[4], 0, 0, -1, 0, m_iCardBreakSeIdentifyNo);
+            m_ullBtlEnemyFlag |= 0x10000000;
+        }
+    } else {
+        setTimer(3000);
+    }
+    CBulletManager* p = (CBulletManager*)CTaskMan::getSysTask(0x1B);
+    if (p) p->kill(getHandle());
+    onCardBreak();
+    m_iSysStep = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateCardBreak__12CBattleEnemy);
 void CBattleEnemy::endStateCardBreak() {
     m_ullBtlEnemyFlag &= ~0x10000000;
