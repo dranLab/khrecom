@@ -25,6 +25,7 @@ public:
     FLOAT getBadStatusParam() { return m_fBadStatusParam; } // PARTIAL: added for Game/Enemy/EnemyCreapplant (name unknown)
     ATK_KIND getDamageKind() { return m_DamageKind; }
     HANDLE getEnemyHandle() { return m_hEnemyTask; } // PARTIAL: added for Game/Enemy/BattleEnemy
+    INT getDamage(); // PARTIAL: added for Game/Enemy/BattleEnemy
     const FVECTOR& getEnemyPos() const { return *(const FVECTOR*)&_m_0x10[0x10]; } // PARTIAL: added for Game/Enemy/BattleEnemy (m_vEnemyPos)
     FVECTOR* getStartPos() { return (FVECTOR*)m_pCollision; } // PARTIAL: added for Game/Enemy/BattleEnemy
     const CHAR* getHitEffectName() const { return (const CHAR*)&_m_0x8c[0xe8 - 0x8c]; } // PARTIAL: added for Game/Enemy/BattleEnemy

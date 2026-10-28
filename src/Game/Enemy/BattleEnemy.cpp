@@ -1360,8 +1360,56 @@ void CBattleEnemy::beginStateBeat() {
     playBigDamageSE();
     m_iSysStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateBeat__12CBattleEnemy);
-__asm__(".rdata\n.align 3\n.word .L002B157C\n.word .L002B1584\n.word .L002B158C\n.word .L002B1594\n.word .L002B159C\n.word func_0\n.text\n");
+/* ENEMY_PARAM's inline attribute rate (name unknown) */
+static inline FLOAT _getAttrRate(ENEMY_PARAM* inParam, INT inAttr) {
+    FLOAT value = 100.0f;
+    switch (inAttr) {
+    case 0:
+        value = inParam->fAttr[0];
+        break;
+    case 1:
+        value = inParam->fAttr[1];
+        break;
+    case 2:
+        value = inParam->fAttr[2];
+        break;
+    case 3:
+        value = inParam->fAttr[3];
+        break;
+    case 4:
+        value = inParam->fAttr[4];
+        break;
+    }
+    return value;
+}
+void CBattleEnemy::stateBeat() {
+    switch (m_iSysStep) {
+    case 0:
+        if (m_pMove->getCollisionFlag() & 5) {
+            if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xDEA, "m_pEnemyParam", 0);
+            CCollBody* hit = m_pBodyColl->getHitCollBody();
+            if (!hit) AssertApp(D_004ACBC0, 0xDEC, D_004AD430, 0);
+            FLOAT damage = hit->getDamage();
+            FLOAT value = _getAttrRate(m_pEnemyParam, hit->getDamageAttr());
+            computeDamage_(damage, value, hit->getDamageKind());
+            if (m_iHp <= 0) {
+                if (!isReraise_()) changeBattleEnemyState(30);
+            } else {
+                setEffect(BattleEnemy::GuffyEffectName, 4, &getPos(), NULL, 0.0f);
+                if (m_pAnim->getAnimID() == m_pEnemyParam->iDamageMotionIndex[6]) {
+                    changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[7], 0, 0, -1);
+                } else {
+                    changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[9], 0, 0, -1);
+                }
+                m_iSysStep++;
+            }
+        }
+        break;
+    case 1:
+        if (isMotionEnd()) changeDefaultState();
+        break;
+    }
+}
 void CBattleEnemy::endStateBeat() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
 }

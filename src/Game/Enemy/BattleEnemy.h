@@ -149,6 +149,7 @@ public:
     void setHitEffect_();
     void updateSpotLight_();
     INT computeDamage_(FLOAT inDamage, FLOAT inAttr);
+    INT computeDamage_(FLOAT inDamage, FLOAT inAttr, ATK_KIND inAtkKind);
     BOOL initEnemyParam(INT inGroupID, INT inRsrcID, INT inIndex);
     void initFSM_();
     void setupHitBack();
