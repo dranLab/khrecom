@@ -427,7 +427,22 @@ void CBattleEnemy::beginStateStop() {
     setEntityFlag(0x8000, 0);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateStop__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateStop__12CBattleEnemy);
+void CBattleEnemy::endStateStop() {
+    setEntityFlag(0, 0x8000);
+    m_pAnim->setSpeed(1.0f);
+    killBadStatusEffect();
+    if (!(m_ullBackupFlag & 0x80000)) m_ullBtlEnemyFlag &= ~0x80000;
+    if (!(m_ullBackupFlag & 0x4000)) {
+        m_ullBtlEnemyFlag &= ~0x4000;
+    } else if (!(m_ullBtlEnemyFlag & 0x4000)) {
+        m_ullBtlEnemyFlag |= 0x4000;
+    }
+    if (!(m_ullBackupFlag & 0x4000000)) {
+        m_ullBtlEnemyFlag &= ~0x4000000;
+    } else if (!(m_ullBtlEnemyFlag & 0x4000000)) {
+        m_ullBtlEnemyFlag |= 0x4000000;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateTerror__12CBattleEnemy);
 void CBattleEnemy::stateTerror() {
     if (getTimer() <= 0) changeDefaultState();
