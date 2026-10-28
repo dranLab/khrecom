@@ -143,7 +143,16 @@ BOOL CBattleEnemy::startCardBattle() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endCardBattle__12CBattleEnemyP6CStatei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", checkHitPos__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playerHomingY__12CBattleEnemyf);
+void CBattleEnemy::playerHomingY(FLOAT inRate) {
+    FVECTOR target;
+    FVECTOR vel;
+    if (!g_pPlayer) return;
+    getPlayerPosition(target);
+    ScaleVectorXYZ(vel, g_pPlayer->getVel(), 12.5f);
+    vel.y = 0.0f;
+    AddVectorXYZ(target, target, vel);
+    m_pMove->homingY(target, inRate);
+}
 void CBattleEnemy::homingToPlayer(FLOAT inRate) {
     FVECTOR vPos;
     getPlayerPosition(vPos);
