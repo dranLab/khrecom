@@ -546,7 +546,41 @@ void CBattleEnemy::beginStateCardBreak() {
     onCardBreak();
     m_iSysStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateCardBreak__12CBattleEnemy);
+void CBattleEnemy::stateCardBreak() {
+    if (m_pEnemyParam) {
+        switch (m_iSysStep) {
+        case 0:
+            if (isBtlEnemyFlag(0x10000000) && (m_pMove->getCollisionFlag() & 5) && m_iLandMotionIndex != -1) {
+                changeMotion(m_iLandMotionIndex, 0, 0, -1, 0, 0);
+                m_iSysStep = 2;
+            } else if (isMotionEnd()) {
+                if (isBtlEnemyFlag(0x100) || (m_pMove->getCollisionFlag() & 5)) {
+                    changeDefaultState();
+                } else {
+                    if (m_iFallMotionIndex != -1) changeMotion(m_iFallMotionIndex, 0, 0, -1, 0, 0);
+                    m_iSysStep = 1;
+                }
+            }
+            break;
+        case 1:
+            if (m_pMove->getCollisionFlag() & 5) {
+                if (m_iLandMotionIndex == -1) {
+                    changeDefaultState();
+                } else {
+                    changeMotion(m_iLandMotionIndex, 0, 0, -1, 0, 0);
+                    clearSpeed();
+                    m_iSysStep = 2;
+                }
+            }
+            break;
+        case 2:
+            if (isMotionEnd()) changeDefaultState();
+            break;
+        }
+    } else if (getTimer() <= 0) {
+        changeDefaultState();
+    }
+}
 void CBattleEnemy::endStateCardBreak() {
     m_ullBtlEnemyFlag &= ~0x10000000;
 }
