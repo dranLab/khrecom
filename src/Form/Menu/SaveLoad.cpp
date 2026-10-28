@@ -267,21 +267,21 @@ public:
 
 HANDLE CSaveLoadUI::m_hThis = 0;
 
-/* Placeholders for the inline helpers whose strings follow the headers' in the original's .rodata (exeCheckSlot
- * and main use them: the CTD text fallback, the memory card slot name and the update() loop guard). */
+/* The file's inline helpers, whose strings follow the headers' in .rodata: the CTD text with its "" fallback, the
+ * memory card slot name (createCheckingMsg, exeCheckSlot) and a placeholder for main's update() loop guard. */
 static inline const CHAR* _ctdText(UINT nID) {
     const CHAR* p = CCtdMan::getText(nID);
     return p ? p : "";
 }
-static inline void _slotName(CHAR* pOut, CHAR* pNum, INT nSlot) {
+static inline void _getSlotName(INT nSlot, CHAR* pszOutStr) {
+    char szNum[16];
     if (nSlot == 12) {
-        strcpy(pNum, "s 1 and 2");
-    } else if (nSlot == 2) {
-        strcpy(pNum, " 2");
+        strcpy(szNum, "s 1 and 2");
     } else {
-        strcpy(pNum, " 1");
+        strcpy(szNum, nSlot == 2 ? " 2" : " 1");
     }
-    sprintf(pOut, "%s%s", _ctdText(0x600001), pNum);
+    const CHAR* pszText = _ctdText(0x600001);
+    sprintf(pszOutStr, "%s%s", pszText, szNum);
 }
 static inline void _updateOverrun() { TRACE("CSaveLoadUI \x82\xcc update() \x82\xaa\x89\xf1\x82\xe8\x82\xb7\x82\xac\x81" "c\n"); }
 
@@ -885,7 +885,13 @@ void CSaveLoadUI::callbackMessageDlg(C2DSeqAgent& agent) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", checkSelector__11CSaveLoadUIRssiisii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createBootInfoMsg__11CSaveLoadUIiPc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createCheckingMsg__11CSaveLoadUIiPc);
+void CSaveLoadUI::createCheckingMsg(INT nSlot, CHAR* pszOutMsg) {
+    char szSlot[32];
+    pszOutMsg[0] = '\0';
+    _getSlotName(nSlot, szSlot);
+    const CHAR* pszText = _ctdText(0x600000);
+    sprintf(pszOutMsg, _ctdText(0x600105), pszText, szSlot, pszText);
+}
 HANDLE CSaveLoad::m_hThis = 0;
 
 CSaveLoad::CSaveLoad(CTask* pParent, SAVELOAD mode, GAMECLEAR clear) : CTask(pParent, 0x8000) {
