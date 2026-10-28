@@ -33,17 +33,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | decomp/Game-CardRevolver (partial 93/106, 9 parked; .data/.rodata from source, weak tail) | 1102 | 449 | 24 | 940 (927) | 25 |
 | 2026-10-28 | decomp/Game-CardRevolver (96/106, 10 parked, no other asm; A2 part 1: own classes complete, mechanisms re-checked) | 1103 | 449 | 24 | 940 (927) | 30 |
 | 2026-10-28 | cleanup/Game-CardRevolver (A2 part 2: CardBattle.cpp includes CardRevolver.h) | 1103 | 447 | 24 | 938 (925) | 30 |
+| 2026-10-28 | cleanup/Game-SceneEnv (CSceneEnv stand-ins in 6 files) | 1101 | 437 | 24 | 938 (925) | 30 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1103 (1028 in 110 headers, 75 in 30 .cpp); MATCH: 30
-  by category: method 468, data member 71, type 96, fwd decl 53, #include 29, changed in place 132, padding 33, path override 24, gate 40, guessed 43, header-level 75, stand-in 31, other 8
-stand-ins: 447 foreign in 136 files (130 names), 191 unattributed, 173 own
+PARTIAL: 1101 (1028 in 110 headers, 73 in 30 .cpp); MATCH: 30
+  by category: method 468, data member 71, type 96, fwd decl 53, #include 29, changed in place 131, padding 33, path override 24, gate 40, guessed 43, header-level 75, stand-in 30, other 8
+stand-ins: 437 foreign in 135 files (127 names), 191 unattributed, 173 own
 duplicate class names across headers: 24
 padding: 36 arrays, 26 accessors
-mechanisms: 938 sites (925 untagged); #line: 1167
+mechanisms: 938 sites (925 untagged); #line: 1173
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 155, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 532, superset 123, partial 99, gated 107, missing 17, unattributed 309
 ```
@@ -56,9 +57,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 12.0 | `Game/SceneEnv.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | CSceneEnv (1 partial) |  |
 | R0 | 12.0 | `System/Graphic/WorldEnv.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | CWorldEnv (1 complete) |  |
-| R0 | 10.5 | `System/Graphic/Effect/EffectMan.h` | ready | 4 stand-in files, 0 dup headers, 0 gate users, 5 PARTIAL | CEffectMan, eObjBit (1 superset, 1 complete) |  |
 | R0 | 10.0 | `System/Graphic/ModelMan.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users | CDispListSemiSingleSort, CModelMan (1 missing, 1 complete) |  |
 | R0 | 6.0 | `System/FileIO.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CFileIO (1 complete) |  |
 | R0 | 6.0 | `System/Graphic/Effect/libppp/keProg/KeTh.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | KeData16, _sceDmaTag (1 partial, 1 complete) |  |
@@ -76,6 +75,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R0 | 2.0 | `System/PlaySpeedCtrl.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlaySpeedCtrl (1 complete) |  |
 | R0 | 2.0 | `System/RcfCD.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRcfCD (1 complete) |  |
 | R1 | 29.0 | `Game/Player/Player.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 34 PARTIAL | CPlayer (1 partial) | inline bodies or virtuals |
+| R1 | 22.0 | `Game/Enemy/BattleEnemyManager.h` | ready | 11 stand-in files, 0 dup headers, 0 gate users | CBattleEnemyManager (1 complete) | inline bodies or virtuals |
+| R1 | 14.0 | `Game/Atel/Atel.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | CAtel (1 complete) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -95,7 +96,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CJiminyMemoFlag` | superset | Form/Menu/JMemoFlag.h | 6 |  | 1 PARTIAL |
 | `CPlayer` | partial | Game/Player/Player.h | 6 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; padding: _m_0x21c; extra methods: __attribute__, _instance, getCardDraw, getLockonHandle, getMarker, getPrizeDraw, ... (+1); virtual order differs; 3 |
 | `CPrizeGauge` | gated | Game/Player/PlayerGauge.h | 6 |  | missing fields: m_cardStack, m_nStack, m_nTexID; missing methods: exePrizeCard, main, setDispMogSeq, setDispSeq, setDropMp, setPrizeCard, ... (+2); padding: _m_0x40 |
-| `CSceneEnv` | partial | Game/SceneEnv.h | 6 |  | missing methods: clearStop, ~CSceneEnv |
 | `CWorldEnv` | complete | System/Graphic/WorldEnv.h | 6 |  |  |
 | `CBuf` | superset | System/Buf.h | 5 |  | 3 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
@@ -119,7 +119,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `TIM2_PICTUREHEADER` | missing | System/Graphic/TexUtil.h | 3 |  |  |
 | `CCamp` | complete | Form/Menu/Camp.h | 2 |  |  |
 | `CCommonGauge` | gated | Game/Player/PlayerGauge.h | 2 |  | missing fields: m_uiFlag, m_pSeqCtrls, m_vPos, m_hOwner, m_pInstance; missing methods: CCommonGauge, _initialize, dispSeqCtrl, main, ~CCommonGauge |
-| `CEffectMan` | superset | System/Graphic/Effect/EffectMan.h | 2 |  | 5 PARTIAL |
 | `CEnemyGauge` | gated | Game/Player/PlayerGauge.h | 2 |  | missing methods: main, notifyHP, setHP |
 | `CGameWork` | superset | Game/GameWork.h | 2 |  | 3 PARTIAL |
 | `CGlare` | complete | System/Graphic/Glare.h | 2 |  |  |
@@ -135,7 +134,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CVramMan` | complete | System/VramMan.h | 2 |  |  |
 | `KeData16` | partial | System/Graphic/Effect/libppp/keProg/KeTh.h | 2 |  | missing fields: S8, S16, S32, S64, S128, U8, ... (+4) |
 | `QWdata` | complete | System/Graphic/Gprim.h | 2 |  |  |
-| `eObjBit` | complete | System/Graphic/Effect/EffectMan.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `ALF_DATA` | superset | Game/Map.h | 1 |  | 1 PARTIAL |
@@ -330,7 +328,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 50 |
 | `Game/Prize.h` | 0 | 0/1/0/0 | 2 |
 | `Game/SEMotion.h` | 0 | 5/0/1/0 | 4 |
-| `Game/SceneEnv.h` | 1 | 0/0/1/0 | 29 |
+| `Game/SceneEnv.h` | 1 | 0/0/1/0 | 35 |
 | `Game/SceneInfo.h` | 76 | 18/0/5/0 | 80 |
 | `Game/Status.h` | 11 | 1/0/1/0 | 14 |
 | `Game/StorageWork.h` | 1 | 3/1/1/0 | 58 |
@@ -358,8 +356,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
 | `System/Graphic/DeFocus.h` | 5 | 0/0/0/5 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
-| `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 162 |
-| `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 166 |
+| `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 167 |
+| `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 169 |
 | `System/Graphic/Effect/effect.h` | 7 | 1/1/4/0 | 74 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 3 | 2/0/0/0 | 13 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
