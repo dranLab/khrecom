@@ -8,12 +8,9 @@ extern "C" {
 float atan2f(float y, float x);
 }
 
-// PARTIAL: from System/Coord.h and System/Graphic/WorldEnv.h
+// PARTIAL: from System/Coord.h
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
-class CWorldEnv {
-public:
-    static void getViewVector(FVECTOR& outVec);
-};
+#include "System/Graphic/WorldEnv.h"
 
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;

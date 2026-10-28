@@ -17,10 +17,8 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-class CWorldEnv {
-public:
-    static FMATRIX& getWorldScreenMatrix();
-};
+#include "System/Graphic/WorldEnv.h"
+#line 24
 
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);

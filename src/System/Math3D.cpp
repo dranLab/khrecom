@@ -27,11 +27,8 @@ extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-class CWorldEnv {
-public:
-    static FLOAT getDispFar();
-    static FMATRIX& getWorldViewMatrix();
-};
+#include "System/Graphic/WorldEnv.h"
+#line 35
 
 static inline FLOAT _fabsf(FLOAT inValue) {
     return __builtin_fabsf(inValue);

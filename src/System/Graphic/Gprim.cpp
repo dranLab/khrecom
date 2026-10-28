@@ -197,13 +197,8 @@ unsigned char C3DCPrim::m_PackReglist[8] = {1, 1, 0, 1, 0, 0, 1, 1};
 unsigned char C3DTPrim::m_PackReglist[8] = {1, 1, 0, 1, 0, 0, 1, 1};
 
 template <class T> static inline T& _ref(T& v) { return v; }
-class CWorldEnv { /* PARTIAL: System/Graphic/WorldEnv.h */
-public:
-    static FMATRIX& getWorldScreenMatrix();
-    static FMATRIX& getWorldViewMatrix();
-    static FMATRIX& getViewScreenMatrix();
-    static CCamera* getActiveCamera();
-};
+#include "System/Graphic/WorldEnv.h"
+#line 207
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
