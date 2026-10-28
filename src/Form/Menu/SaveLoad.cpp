@@ -586,7 +586,22 @@ void CSaveLoadUI::callbackMemocaInfo(C2DSeqAgent& agent) {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackMessageDlg__11CSaveLoadUIR11C2DSeqAgent);
+void CSaveLoadUI::callbackMessageDlg(C2DSeqAgent& agent) {
+    CSaveLoadUI* pThis = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
+    if (!pThis) return;
+    switch (agent.getState()) {
+    case C2DSeqAgent::STATE_IN:
+        if (pThis->m_nDlgType) {
+            C2DSeqSelectable* pBtn = pThis->m_pMessageDlgBtnAgent[pThis->m_nDlgSel];
+            if (pBtn) pBtn->select(TRUE);
+        }
+        break;
+    case C2DSeqAgent::STATE_OUT:
+        pThis->lockPadControl(FALSE);
+        if (pThis->m_pMainCursor) pThis->m_pMainCursor->setNormalSeq();
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", checkSelector__11CSaveLoadUIRssiisii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createBootInfoMsg__11CSaveLoadUIiPc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createCheckingMsg__11CSaveLoadUIiPc);

@@ -128,6 +128,9 @@ private:
 
 public:
     void setupSeq(const CHAR* pszLad, SHORT nUnit, SHORT nSeqNormal, SHORT nSeqHistory);
+    // PARTIAL: added for Form/Menu/SaveLoad
+    void setNormalSeq() { replaceSeq(0, m_pszLad, m_nSeqUnit, m_nSeqTbl[0]); }
+    void setHistorySeq() { replaceSeq(0, m_pszLad, m_nSeqUnit, m_nSeqTbl[1]); }
 };
 
 class C2DSeqLightMarkAgent : public C2DSeqAgent {
