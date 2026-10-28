@@ -45,6 +45,12 @@ struct MODELDATA {
         return 0;
     }
     USHORT getMode() const { return getRawMode(); }
+    USHORT getShaderOption() const {
+        const SHORT* tag = (const SHORT*)(!isDataEmpty() ? m_pData : m_pSemiData);
+        INT version = tag[0x16 / 2];
+        if (!version) return 0;
+        return ((const USHORT*)tag)[0x1e / 2];
+    }
     BOOL enablePointLight() const;
     BOOL enableLight() const;
     INT getBoneIndex(const CHAR* pName) const; // PARTIAL: added for System/Graphic/TriangleIK

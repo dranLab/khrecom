@@ -129,6 +129,7 @@ public:
     void setLocal(INT index);
     void getChangeClut(INT inIdx, INT nInType);
     virtual void changeLayerExt(INT a, INT b);        // PARTIAL: parameters guessed, for Form/Menu/MenuModel
+    virtual CSemiModel* createSemiModel(); // PARTIAL: added for System/Graphic/Model (vtable[9])
     FLOAT getAlphaScale() { return m_fAlphaScale; }
     INT getBeforeDirectNum() const { return m_iBeforeDirectQNum; } // PARTIAL: added for System/Graphic/Model
     INT getAfterDirectNum() const { return m_iAfterDirectQNum; }

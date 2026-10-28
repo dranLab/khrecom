@@ -39,6 +39,7 @@ public:
 };
 extern const FMATRIX ONE_MATRIX;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
+SHADERDESC* searchShaderDesc(USHORT mode);
 void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin); /* static in the original (parked, asm glabel) */
 extern "C" const FLOAT D_00460FB0; /* -FLT_MAX / 2 */
 extern "C" const FLOAT D_00460FB4; /* FLT_MAX / 2 */
@@ -52,6 +53,12 @@ extern INT _CLUT_TMP1_START;
 extern "C" char D_00460D98[]; /* "System/Graphic/modeldata.h" */
 extern "C" char D_00460DC8[];
 extern "C" char D_00461090[];
+extern "C" char D_00460FC8[];
+struct BONELABEL { /* PARTIAL: stand-in for BONELABEL (modeldata.h): owner not written */
+    char m_Name[16];     /* 0x00 */
+    SHORT m_ParentIndex; /* 0x10 */
+    SHORT m_BuddyIndex;  /* 0x12 */
+};
 extern "C" char D_00460FF8[];
 extern "C" char D_00460F30[];
 extern "C" char D_00460F60[];
@@ -83,6 +90,19 @@ public:
         m_hHnd = 0;
     }
     virtual ~CShadowMapModel();
+};
+class CShadowModel : public CFadeModel { /* PARTIAL: stand-in for CShadowModel: owner not written */
+    INT m_nSize; /* 0x28 */
+public:
+    CShadowModel() {
+        setTestFlag(0x70000);
+        m_LayerInfo._nID = 0x17;
+        CDrawable::setSemiTrans(ALPHA_OFF);
+        m_LayerInfo._nDepth = 0;
+        m_SemiDraw = FALSE;
+        m_nSize = 0;
+    }
+    virtual ~CShadowModel();
 };
 namespace Mad {
 struct MODEL_ATTACH_DATA {
@@ -265,7 +285,50 @@ INT CModel::link(CTask* p) {
     m_pTask = p;
     return link(*pCrds);
 }
+/* Parked: 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 pointers). Tried: UINT i, SHORT nIdx, nIdx declaration scope, m_pParent store. */
+#if 0
+INT CModel::link(CCoords& crds) {
+    BOOL add;
+    INT nBoneNum;
+    INT i;
+    if (!(m_pData)) AssertApp(D_00460EB8, 633, D_00460F30, 0);
+    m_pCrds = &crds;
+    INT nCrd = crds.getCoordNum();
+    m_BoneSkip = nCrd;
+    nBoneNum = m_pData->m_nBoneNum;
+    add = FALSE;
+    if (nCrd < nBoneNum) {
+        crds.addCoord(nBoneNum, NULL);
+        add = TRUE;
+    }
+    if (add) {
+        for (i = 0; i < nBoneNum; i++) {
+            INT nIdx;
+            crds.Crd(i).m_Local = ((const FMATRIX*)m_pData->m_pBones)[i];
+            nIdx = ((const BONELABEL*)m_pData->m_pBoneLabel)[i].m_ParentIndex;
+            if (nIdx >= 0) crds.Crd(i).setParent(&crds.Crd(nIdx));
+            crds.Crd(i).recalcWorldMatrix();
+            crds.Crd(i).m_Flag = 1;
+        }
+    }
+    if (m_pData->m_BoneIndex == 0) {
+        m_BoneStart = 0;
+        m_BoneIdx = -1;
+    } else {
+        m_BoneIdx = m_BoneStart = m_pData->m_BoneIndex - 1;
+    }
+    m_TransTexCount = m_pData->m_nTexNum;
+    if (!(!(m_TransTexCount > 16))) AssertApp(D_00460EB8, 707, D_00460F38, 0);
+    for (i = 0; i < m_TransTexCount; i++) {
+        *(u_long*)&m_TexInfo[i] = *(u_long*)((BYTE*)m_pData->m_pTexParam + i * 0x20 + 0x10);
+    }
+    setupUVScroll(0);
+    linksub();
+    return 1;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoords);
+#endif
 CCoord& CModel::getCrd(INT idx) {
     if (m_BoneIdx != -1) idx = 0;
     return m_pCrds->Crd(m_BoneStart + idx);
@@ -638,7 +701,43 @@ INT CModel::checkBBox() {
 void CModel::setColorScale(const FVECTOR& vColor) { getColorScale() = vColor; }
 void CModel::setColorScale(FLOAT r, FLOAT g, FLOAT b, FLOAT a) { getColorScale().set(r, g, b, a); }
 void CModel::setAlphaScale(FLOAT inScale) { m_fAlphaScale = inScale; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", linksub__6CModel);
+void CModel::linksub() {
+    UINT rawMode;
+    BOOL bHasSemiData;
+    m_Mode = m_pData->getMode();
+    m_pShader = searchShaderDesc(m_Mode);
+    if (!(m_pShader)) AssertApp(D_00460EB8, 1738, D_00460FB8, 0);
+    rawMode = m_pData->getRawMode();
+    if (rawMode & 0x20000000) m_nTestFlag = (INT)m_nTestFlag & -2;
+    else m_nTestFlag = ((INT)m_nTestFlag & -0x4000) | 0xFD;
+    m_ShaderOption = m_pData->getShaderOption();
+    bHasSemiData = FALSE;
+    if (m_pData->m_pSemiData) bHasSemiData = *(UINT*)m_pData->m_pSemiData != 0x60000000;
+    if (bHasSemiData) m_nFlag |= 2;
+    else m_nFlag &= ~2;
+    if (bHasSemiData) {
+        if (!m_pSemiModel) {
+            m_pSemiModel = createSemiModel();
+            if (m_pSemiModel) {
+                m_nFlag |= 1;
+                m_pSemiModel->link(this);
+            }
+        } else {
+            m_pSemiModel->link(this);
+        }
+    }
+    if (m_Mode == 0x10 && !m_pFadeModel) {
+        m_pFadeModel = new (com_malloc_d(sizeof(CShadowModel), D_00460FC8, RET_ADDR())) CShadowModel;
+        if (m_pFadeModel) {
+            m_pFadeModel->link(this);
+            m_pWSMat = &CShadowModelMan::getWorldScreenMatrix();
+            getColorScale().set(1.0f, 1.0f, 1.0f, 1.0f);
+        }
+    }
+    if (m_pData->isDataEmpty() && m_pData->isSemiDataEmpty()) m_nPacketSize = 0;
+    else m_nPacketSize = m_pData->m_nPacketSize;
+    setShadowMapModel();
+}
 void CModel::addTexture(const CHAR* texName, INT idx) {
     SHORT nTmpTex;
     SHORT nTmpClut;
