@@ -262,7 +262,20 @@ BOOL CCardBattle::isBlack() {
     return (m_pInstance->m_uiFlag & uiMask) != 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setStockFolder__Q210CardBattle11CCardBattleP5CTaski);
+/* Parked: same as destroyRevolver - the original adds this+0x134 and (inSide-1)*4 separately, ours folds the -4 into
+ * the offset; tried: the destroyRevolver variants */
+#if 0
+void CCardBattle::destroyStockFolder(INT inSide) {
+    if (!(inSide)) AssertApp(D_00476980, 2905, D_00476730, 0);
+    CStockFolder*& rpFolder = m_pStockFolder[inSide - 1];
+    if (rpFolder) {
+        rpFolder->destroy();
+        rpFolder = NULL;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", destroyStockFolder__Q210CardBattle11CCardBattlei);
+#endif
 CStockFolder* CCardBattle::getStockFolder(INT inSide) {
     if (!m_pInstance) return NULL;
     return m_pInstance->m_pStockFolder[inSide - 1];
