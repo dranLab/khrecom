@@ -8,12 +8,7 @@ extern "C" float atan2f(float, float);
 
 extern INT VSYNC_TIMEQ;
 
-class CWorldEnv {
-public:
-    static void pushCamera(CCamera& inCamera);
-    static void popCamera(CCamera& inCamera);
-    static FLOAT getScreenZ();
-};
+#include "System/Graphic/WorldEnv.h"
 
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);

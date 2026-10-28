@@ -248,12 +248,8 @@ public:
     static void finalize();
 };
 
-class CWorldEnv {
-public:
-    static void initialize();
-    static void finalize();
-    static void setFogColor(INT r, INT g, INT b);
-};
+#include "System/Graphic/WorldEnv.h"
+#line 257
 
 class CHeapMan {
 public:
