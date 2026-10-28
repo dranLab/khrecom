@@ -5,7 +5,7 @@
 #include "System/Debug.h"
 #include "System/Task.h"
 
-class CEntity;
+class CEntity; union FVECTOR;
 struct OSD_HEADER;
 struct OBJ_FORMATION;
 struct OBJ_GROUP;

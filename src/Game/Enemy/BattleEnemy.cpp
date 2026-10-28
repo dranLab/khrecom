@@ -1,25 +1,39 @@
 #define GAME_ENEMY_BATTLEENEMY_CPP
 #include "khtypes.h"
 #define BATTLEENEMY_H_STATE_TEMPLATE
+#define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+/* .rodata starts with the strings of the included headers' inline functions, in this order. */
+#include "Game/Enemy/BattleEnemyManager.h"
+#include "Game/Collision/CollUtil.h"
+#include "Game/BodyCollision.h"
+#include "System/Graphic/Gprim.h"
+#include "System/Graphic/2d/2DMan.h"
+#include "Game/CardBattle.h"
 #include "Game/Enemy/BattleEnemy.h"
+#include "System/Graphic/Anim.h"
+#include "System/Graphic/Str.h"
+/* Placeholder: an empty string follows Str.h's strings in .rodata; which header it comes from is not known. */
+inline void _emptyStringPlaceholder0() {
+    TRACE("");
+}
+#include "Game/Enemy/EnemyParam.h"
+#include "System/Graphic/modeldata.h"
+#include "System/Graphic/Model.h"
+#include "System/RsrcData.h"
+#include "System/Graphic/Effect/effect.h"
+#include "Game/Card.h"
 #include "System/Debug.h"
 #include "System/Fsm.h"
 #include "Game/GameWork.h"
-#include "Game/Enemy/EnemyParam.h"
 #include "System/TaskMan.h"
 #include "System/Graphic/Effect/EffectMan.h"
-#include "System/Graphic/Effect/effect.h"
 #include "Game/Bullet/BulletManager.h"
 #include "Game/Debug/DebugWork.h"
 #include "Game/Movement.h"
-#include "Game/CardBattle.h"
 #include "Game/Player/Player.h"
-#include "Game/BodyCollision.h"
-#include "System/Graphic/Anim.h"
 #include "System/Coord.h"
 #include "Game/CardKind.h"
-#include "Game/Enemy/BattleEnemyManager.h"
-#include "Game/Card.h"
 #include "Game/SceneInfo.h"
 #include "Game/Game.h"
 #include "Game/SceneEnv.h"
@@ -36,14 +50,7 @@
 #include "Game/EntityFactory.h"
 #include "include_asm.h"
 
-extern "C" char D_004AD680[];
-extern "C" char D_004AD3E0[];
 extern "C" char D_004ACBC0[];
-extern "C" char D_004AD3C0[];
-extern "C" char D_004AD3C8[];
-extern "C" char D_004AD3B8[];
-extern "C" char D_004AD388[];
-extern "C" char D_004AD578[];
 /* PARTIAL: until SOURCE DATA, the unit's copy of the header static BattleEnemy::BadStatusEffectName (its .data
  * comes from the original assembly) */
 template <class T> static inline T& _ref(T& x) { return x; }
@@ -54,50 +61,7 @@ struct CB_ENCHANT_VIEW {
 static inline INT _getEnchantKind(CardBattle::CCardBattle* p, INT inUser) {
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
-namespace BattleEnemy {
-extern CHAR* FreezeEffectName;
-extern CHAR* DuelMotionParamName;
-extern CHAR* DisionEffectName;
-extern CHAR* FileIDParamName;
-extern CHAR* AlwaysEffectName;
-extern CHAR* LargebodyGuardEffectEffectName;
-extern CHAR* VexenGuardEffectEffectName;
-extern CHAR* BindEffectName;
-extern CHAR* MemoIDParamName;
-extern CHAR* SpeedParamName;
-extern CHAR* RikuParamName;
-extern CHAR* MagnetParamName;
-extern CHAR* MagnetEffectName;
-extern CHAR* QuakeEffectName;
-extern CHAR* DuelEffectName;
-extern const FLOAT g_vSpotSizeTbl[9];
-extern const unsigned char g_byHeartlessSpotSizeIndexTbl[39];
-extern const unsigned char g_byBossSpotSizeIndexTbl[38];
-extern CHAR* FreezeParamName;
-extern const FVECTOR g_vIceSizeTbl[8];
-extern const unsigned char g_byHeartlessIceSizeIndexTbl[39];
-extern const unsigned char g_byBossIceSizeIndexTbl[38];
-}
-extern "C" char D_004AD928[];
-extern "C" char D_004AD2A0[];
-extern "C" char D_004AD568[];
-extern "C" char D_004AD3D8[];
 extern "C" char D_004AD430[];
-extern "C" char D_004AD920[];
-extern "C" char D_004AD2B0[];
-extern "C" char D_004AD2E0[];
-extern "C" char D_004AD2F8[];
-extern "C" char D_004AD310[];
-extern "C" char D_004AD328[];
-extern "C" char D_004AD340[];
-extern "C" char D_004AD358[];
-extern "C" char D_004AD570[];
-extern "C" char D_004AD638[];
-extern "C" char D_004AD810[];
-extern "C" char D_004AD840[];
-extern "C" char D_004AD858[];
-extern "C" char D_004AD870[];
-extern "C" char D_004AD888[];
 extern "C" char D_004AD588[];
 extern "C" char D_004AC8E8[];
 extern "C" char D_004AC8F0[];
@@ -135,12 +99,10 @@ static inline BASIC_ENEMY_PARAM* _getBasicParam(ENEMY_PARAM* inParam, INT inFloo
     if (!(0 <= inFloor && inFloor < 13)) AssertApp(D_004AC8F0, 0xE5, D_004AC920, 0);
     return &inParam->pBasic[inFloor];
 }
-extern int g_iDuelCardNum[3] asm("g_iDuelCardNum.6149");
 struct PRIZE_DATA {
     INT PrizeKind; /* CARD_KIND */
     INT iPoint;
 };
-extern PRIZE_DATA g_PrizeDataTbl[7] asm("g_PrizeDataTbl.6082"); // PARTIAL: makeExpPrize's static table, from the asm .data until SOURCE DATA // PARTIAL: setupDuelCard's static table, from the asm .data until SOURCE DATA
 struct DropPrize { // PARTIAL: Game/Gimmick/GimmickManager.h only forward-declares it outside its own unit
     INT StockKind;
     CARD_KIND Kind;
@@ -161,7 +123,6 @@ class CJiminyMemoFlag {
 public:
     static void checkEvent(INT inEvent, INT inParam0, INT inParam1);
 };
-extern ATK_ATTR g_AtkAttrTbl[] asm("g_AtkAttrTbl.5784"); // PARTIAL: getAttackAttr's static table, from the asm .data until SOURCE DATA
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -193,12 +154,10 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
 extern "C" float sinf(float);
 extern "C" float cosf(float);
 extern "C" float atan2f(float, float);
-extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
 FVECTOR getPlayerPos(INT inIndex);
 namespace BattleEnemy {
 FLOAT GameModeAp(FLOAT inAp);
 INT GameModeHp(INT inHp);
-extern FLOAT GameModeParamAp[];
 }
 namespace Gauge {
 class CCommonGauge { /* PARTIAL: Game/Player/PlayerGauge.h */
@@ -211,6 +170,159 @@ public:
 };
 }
 
+namespace BattleEnemy {
+CARD_KIND g_HeartlessCardKindTbl[39] = {
+    (CARD_KIND)0, (CARD_KIND)68, (CARD_KIND)69, (CARD_KIND)71, (CARD_KIND)72, (CARD_KIND)73, (CARD_KIND)74, (CARD_KIND)75,
+    (CARD_KIND)76, (CARD_KIND)70, (CARD_KIND)79, (CARD_KIND)78, (CARD_KIND)85, (CARD_KIND)86, (CARD_KIND)81, (CARD_KIND)77,
+    (CARD_KIND)94, (CARD_KIND)95, (CARD_KIND)82, (CARD_KIND)83, (CARD_KIND)84, (CARD_KIND)87, (CARD_KIND)88, (CARD_KIND)89,
+    (CARD_KIND)91, (CARD_KIND)92, (CARD_KIND)90, (CARD_KIND)93, (CARD_KIND)80, (CARD_KIND)97, (CARD_KIND)98, (CARD_KIND)96,
+    (CARD_KIND)68, (CARD_KIND)81, (CARD_KIND)94, (CARD_KIND)95, (CARD_KIND)96, (CARD_KIND)159, (CARD_KIND)159,
+};
+CARD_KIND g_BossCardKindTbl[38] = {
+    (CARD_KIND)0, (CARD_KIND)0, (CARD_KIND)99, (CARD_KIND)127, (CARD_KIND)128, (CARD_KIND)101, (CARD_KIND)41, (CARD_KIND)104,
+    (CARD_KIND)105, (CARD_KIND)106, (CARD_KIND)100, (CARD_KIND)107, (CARD_KIND)108, (CARD_KIND)109, (CARD_KIND)113, (CARD_KIND)102,
+    (CARD_KIND)110, (CARD_KIND)112, (CARD_KIND)111, (CARD_KIND)114, (CARD_KIND)151, (CARD_KIND)115, (CARD_KIND)116, (CARD_KIND)116,
+    (CARD_KIND)117, (CARD_KIND)105, (CARD_KIND)105, (CARD_KIND)111, (CARD_KIND)111, (CARD_KIND)111, (CARD_KIND)111, (CARD_KIND)112,
+    (CARD_KIND)152, (CARD_KIND)117, (CARD_KIND)151, (CARD_KIND)114, (CARD_KIND)151, (CARD_KIND)151,
+};
+CARD_KIND g_BossDuelCardKindTbl[38] = {
+    (CARD_KIND)0, (CARD_KIND)1, (CARD_KIND)99, (CARD_KIND)127, (CARD_KIND)128, (CARD_KIND)101, (CARD_KIND)129, (CARD_KIND)131,
+    (CARD_KIND)105, (CARD_KIND)106, (CARD_KIND)100, (CARD_KIND)107, (CARD_KIND)133, (CARD_KIND)109, (CARD_KIND)146, (CARD_KIND)102,
+    (CARD_KIND)142, (CARD_KIND)139, (CARD_KIND)137, (CARD_KIND)148, (CARD_KIND)151, (CARD_KIND)153, (CARD_KIND)156, (CARD_KIND)156,
+    (CARD_KIND)158, (CARD_KIND)105, (CARD_KIND)105, (CARD_KIND)137, (CARD_KIND)137, (CARD_KIND)137, (CARD_KIND)137, (CARD_KIND)139,
+    (CARD_KIND)152, (CARD_KIND)158, (CARD_KIND)151, (CARD_KIND)114, (CARD_KIND)151, (CARD_KIND)151,
+};
+static CHAR* CamTrgOfsParamName = "CamTrgOfs";
+static CHAR* DuelMotionParamName = "DuelMotion";
+static CHAR* SpeedParamName = "Speed";
+static CHAR* FreezeParamName = "Freeze";
+static CHAR* MagnetParamName = "Magnet";
+static CHAR* FileIDParamName = "FileID";
+static CHAR* SynchroParamName = "Synchro";
+static CHAR* MemoIDParamName = "MemoID";
+static CHAR* RikuParamName = "riku";
+static CHAR* DuelEffectName = "duel";
+static CHAR* FreezeEffectName = "ice";
+static CHAR* DisionEffectName = "dision";
+static CHAR* GuffyEffectName = "guffy";
+static CHAR* MagnetEffectName = "magnespiral";
+static CHAR* SynchroEffectName = "synchro";
+static CHAR* BindEffectName = "bind";
+static CHAR* AlwaysEffectName = "always";
+static CHAR* QuakeEffectName = "quake";
+static CHAR* LargebodyGuardEffectEffectName = "_ex_2050";
+static CHAR* VexenGuardEffectEffectName = "vexen";
+extern const FVECTOR g_vIceSizeTbl[8];
+extern const unsigned char g_byHeartlessIceSizeIndexTbl[39];
+extern const unsigned char g_byBossIceSizeIndexTbl[38];
+extern const FLOAT g_vSpotSizeTbl[9];
+extern const unsigned char g_byHeartlessSpotSizeIndexTbl[39];
+extern const unsigned char g_byBossSpotSizeIndexTbl[38];
+extern const INT GameModeParamHp[4];
+extern const FLOAT GameModeParamAp[4];
+}
+void (CBattleEnemy::*CBattleEnemy::m_pBeginStateTbl[])() = {
+    &CBattleEnemy::beginStateAppear_,
+    &CBattleEnemy::beginStateMain_,
+    &CBattleEnemy::beginStateAttack1_,
+    &CBattleEnemy::beginStateAttack2_,
+    &CBattleEnemy::beginStateAttack3_,
+    &CBattleEnemy::beginStateAttack4_,
+    &CBattleEnemy::beginStateAttack5_,
+    &CBattleEnemy::beginStateAttack6_,
+    &CBattleEnemy::beginStateAttack7_,
+    &CBattleEnemy::beginStateAttack8_,
+    &CBattleEnemy::beginStateItem_,
+    &CBattleEnemy::beginStateSmallDamage_,
+    &CBattleEnemy::beginStateBigDamage_,
+    &CBattleEnemy::beginStateCardBreak_,
+    &CBattleEnemy::beginStateZero_,
+    &CBattleEnemy::beginStateDuel_,
+    &CBattleEnemy::beginStateDuelSuccess_,
+    &CBattleEnemy::beginStateFaint_,
+    &CBattleEnemy::beginStateStop_,
+    &CBattleEnemy::beginStateTerror_,
+    &CBattleEnemy::beginStateFreeze_,
+    &CBattleEnemy::beginStateShock_,
+    &CBattleEnemy::beginStateTornado_,
+    &CBattleEnemy::beginStateDegenerator_,
+    &CBattleEnemy::beginStateGravity_,
+    &CBattleEnemy::beginStateToss_,
+    &CBattleEnemy::beginStateBeat_,
+    &CBattleEnemy::beginStateMagnet_,
+    &CBattleEnemy::beginStateSuspend_,
+    &CBattleEnemy::beginStateVolley_,
+    &CBattleEnemy::beginStateDead_,
+};
+void (CBattleEnemy::*CBattleEnemy::m_pStateTbl[])() = {
+    &CBattleEnemy::stateAppear_,
+    &CBattleEnemy::stateMain_,
+    &CBattleEnemy::stateAttack1_,
+    &CBattleEnemy::stateAttack2_,
+    &CBattleEnemy::stateAttack3_,
+    &CBattleEnemy::stateAttack4_,
+    &CBattleEnemy::stateAttack5_,
+    &CBattleEnemy::stateAttack6_,
+    &CBattleEnemy::stateAttack7_,
+    &CBattleEnemy::stateAttack8_,
+    &CBattleEnemy::stateItem_,
+    &CBattleEnemy::stateSmallDamage_,
+    &CBattleEnemy::stateBigDamage_,
+    &CBattleEnemy::stateCardBreak_,
+    &CBattleEnemy::stateZero_,
+    &CBattleEnemy::stateDuel_,
+    &CBattleEnemy::stateDuelSuccess_,
+    &CBattleEnemy::stateFaint_,
+    &CBattleEnemy::stateStop_,
+    &CBattleEnemy::stateTerror_,
+    &CBattleEnemy::stateFreeze_,
+    &CBattleEnemy::stateShock_,
+    &CBattleEnemy::stateTornado_,
+    &CBattleEnemy::stateDegenerator_,
+    &CBattleEnemy::stateGravity_,
+    &CBattleEnemy::stateToss_,
+    &CBattleEnemy::stateBeat_,
+    &CBattleEnemy::stateMagnet_,
+    &CBattleEnemy::stateSuspend_,
+    &CBattleEnemy::stateVolley_,
+    &CBattleEnemy::stateDead_,
+};
+void (CBattleEnemy::*CBattleEnemy::m_pEndStateTbl[])() = {
+    &CBattleEnemy::endStateAppear_,
+    &CBattleEnemy::endStateMain_,
+    &CBattleEnemy::endStateAttack1_,
+    &CBattleEnemy::endStateAttack2_,
+    &CBattleEnemy::endStateAttack3_,
+    &CBattleEnemy::endStateAttack4_,
+    &CBattleEnemy::endStateAttack5_,
+    &CBattleEnemy::endStateAttack6_,
+    &CBattleEnemy::endStateAttack7_,
+    &CBattleEnemy::endStateAttack8_,
+    &CBattleEnemy::endStateItem_,
+    &CBattleEnemy::endStateSmallDamage_,
+    &CBattleEnemy::endStateBigDamage_,
+    &CBattleEnemy::endStateCardBreak_,
+    &CBattleEnemy::endStateZero_,
+    &CBattleEnemy::endStateDuel_,
+    &CBattleEnemy::endStateDuelSuccess_,
+    &CBattleEnemy::endStateFaint_,
+    &CBattleEnemy::endStateStop_,
+    &CBattleEnemy::endStateTerror_,
+    &CBattleEnemy::endStateFreeze_,
+    &CBattleEnemy::endStateShock_,
+    &CBattleEnemy::endStateTornado_,
+    &CBattleEnemy::endStateDegenerator_,
+    &CBattleEnemy::endStateGravity_,
+    &CBattleEnemy::endStateToss_,
+    &CBattleEnemy::endStateBeat_,
+    &CBattleEnemy::endStateMagnet_,
+    &CBattleEnemy::endStateSuspend_,
+    &CBattleEnemy::endStateVolley_,
+    &CBattleEnemy::endStateDead_,
+};
+INT CBattleEnemy::m_iDuelCardNum = 0;
+INT CBattleEnemy::m_iDuelCardPtr = 0;
+
 INT BattleEnemy::GameModeHp(INT inHp) {
     return inHp * GameModeParamHp[CGameWork::getByte(0, 0x61)] / 100;
 }
@@ -218,6 +330,7 @@ FLOAT BattleEnemy::GameModeAp(FLOAT inAp) {
     return inAp * GameModeParamAp[CGameWork::getByte(0, 0x61)];
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", __12CBattleEnemyP5CTaskP6CStateT2);
+__asm__(".rdata\n.align 3\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x7A697320\n.word 0x203D2065\n.word 0x78257830\n.word 0x0000000A\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", _$_12CBattleEnemy);
 INT CBattleEnemy::getTypeID() const {
     return 0x1004;
@@ -230,7 +343,9 @@ void CBattleEnemy::update() {
     else CFSM::update();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initalize__12CBattleEnemyiiUi);
+__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6E452F65\n.word 0x2F796D65\n.word 0x74746142\n.word 0x6E45656C\n.word 0x2E796D65\n.word 0x00707063\n.word 0x00000000\n.word 0x3D3C2030\n.word 0x72616320\n.word 0x646E4964\n.word 0x26207865\n.word 0x61632026\n.word 0x6E496472\n.word 0x20786564\n.word 0x7328203C\n.word 0x6F657A69\n.word 0x61422866\n.word 0x656C7474\n.word 0x6D656E45\n.word 0x673A3A79\n.word 0x6165485F\n.word 0x656C7472\n.word 0x61437373\n.word 0x694B6472\n.word 0x6254646E\n.word 0x732F296C\n.word 0x6F657A69\n.word 0x42282866\n.word 0x6C747461\n.word 0x656E4565\n.word 0x3A3A796D\n.word 0x65485F67\n.word 0x6C747261\n.word 0x43737365\n.word 0x4B647261\n.word 0x54646E69\n.word 0x5B296C62\n.word 0x29295D30\n.word 0x00000000\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCC8\n.word .L002ACCB8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCB8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCB8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCB8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCC8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCB8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCC8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCB8\n.word .L002ACCC8\n.word func_0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", onMsg__12CBattleEnemyiPv);
+__asm__(".rdata\n.align 3\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4154535F\n.word 0x202C5452\n.word 0x6D656E45\n.word 0x20444979\n.word 0x6425203D\n.word 0x0000000A\n.word 0x00000000\n.word 0x5F4C5442\n.word 0x4D454E45\n.word 0x54535F59\n.word 0x5F455441\n.word 0x41545441\n.word 0x20314B43\n.word 0x6D203D3C\n.word 0x7441695F\n.word 0x6B636174\n.word 0x74617453\n.word 0x26262065\n.word 0x695F6D20\n.word 0x61747441\n.word 0x74536B63\n.word 0x20657461\n.word 0x42203D3C\n.word 0x455F4C54\n.word 0x594D454E\n.word 0x4154535F\n.word 0x495F4554\n.word 0x004D4554\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x5445535F\n.word 0x6E45202C\n.word 0x49796D65\n.word 0x203D2044\n.word 0x000A6425\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4552425F\n.word 0x202C4B41\n.word 0x6D656E45\n.word 0x20444979\n.word 0x6425203D\n.word 0x0000000A\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4645525F\n.word 0x54434552\n.word 0x6E45202C\n.word 0x49796D65\n.word 0x203D2044\n.word 0x000A6425\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x52455A5F\n.word 0x45202C4F\n.word 0x796D656E\n.word 0x3D204449\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4D49475F\n.word 0x4B43494D\n.word 0x6E45202C\n.word 0x49796D65\n.word 0x203D2044\n.word 0x000A6425\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4555445F\n.word 0x45202C4C\n.word 0x796D656E\n.word 0x3D204449\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4555445F\n.word 0x41435F4C\n.word 0x4C45434E\n.word 0x6E45202C\n.word 0x49796D65\n.word 0x203D2044\n.word 0x000A6425\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4555445F\n.word 0x54535F4C\n.word 0x2C545241\n.word 0x656E4520\n.word 0x4449796D\n.word 0x25203D20\n.word 0x00000A64\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4555445F\n.word 0x4F545F4C\n.word 0x4F4C534F\n.word 0x45202C57\n.word 0x796D656E\n.word 0x3D204449\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4555445F\n.word 0x55535F4C\n.word 0x53454343\n.word 0x45202C53\n.word 0x796D656E\n.word 0x3D204449\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.word .L002ACDA8\n.word .L002ACDC8\n.word .L002ACEB0\n.word .L002ACF28\n.word .L002AD1E0\n.word .L002ACFF0\n.word .L002ACF88\n.word .L002AD034\n.word .L002AD09C\n.word .L002AD0D4\n.word .L002AD10C\n.word .L002AD1B0\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE7C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.text\n");
 void CBattleEnemy::onOut() {
     if (!(m_ullBtlEnemyFlag & 0x40000000)) notifyDead();
 }
@@ -268,7 +383,7 @@ FLOAT CBattleEnemy::getExtraParam(const CHAR* inParamName) {
     return 0.0f;
 }
 FLOAT CBattleEnemy::getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpFlag, ATK_KIND* outAtkKind, INT inFinish) {
-    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0x414, D_004AD2A0, 0);
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0x414, "m_pEnemyParam", 0);
     ENEMY_ACT* act = NULL;
     for (INT i = 0; i < m_pEnemyParam->iActCount; i++) {
         if (m_pEnemyParam->pActs[i].iActNo == inIndex) {
@@ -305,20 +420,21 @@ FLOAT CBattleEnemy::getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpF
         if (cb) {
             cb->calcEnchantParam(param);
             if (outAtkKind) *outAtkKind = param.AtkKind;
-            TRACE_USER((USER)5, D_004AD2B0);
-            TRACE_USER((USER)5, D_004AD2E0, getID());
-            TRACE_USER((USER)5, D_004AD2F8, param.iAttackPoint);
-            TRACE_USER((USER)5, D_004AD310, param.AtkKind);
-            TRACE_USER((USER)5, D_004AD328, param.AtkAttr);
-            TRACE_USER((USER)5, D_004AD340, act->iActNo);
-            TRACE_USER((USER)5, D_004AD358);
+            TRACE_USER((USER)5, "======== Enemy attack infomation ========\n");
+            TRACE_USER((USER)5, "ID         = %d\n", getID());
+            TRACE_USER((USER)5, "\x8dU\x8c\x82\x97\xcd     = %d\n", param.iAttackPoint);
+            TRACE_USER((USER)5, "\x8dU\x8c\x82\x82\xcc\x8e\xed\x97\xde = %d\n", param.AtkKind);
+            TRACE_USER((USER)5, "\x91\xae\x90\xab       = %d\n", param.AtkAttr);
+            TRACE_USER((USER)5, "\x8bZ\x94\xd4\x8d\x86     = %d\n", act->iActNo);
+            TRACE_USER((USER)5, "=========================================\n");
             return param.iAttackPoint;
         }
     }
     return 0.0f;
 }
 ATK_ATTR CBattleEnemy::getAttackAttr(INT inIndex) const {
-    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0x465, D_004AD2A0, 0);
+    static ATK_ATTR g_AtkAttrTbl[6] = {(ATK_ATTR)0, (ATK_ATTR)1, (ATK_ATTR)2, (ATK_ATTR)3, (ATK_ATTR)4, (ATK_ATTR)5};
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0x465, "m_pEnemyParam", 0);
     ENEMY_ACT* act = NULL;
     for (INT i = 0; i < m_pEnemyParam->iActCount; i++) {
         if (m_pEnemyParam->pActs[i].iActNo == inIndex) {
@@ -355,7 +471,7 @@ BOOL CBattleEnemy::isPlayingCardBattle() {
     return FALSE;
 }
 BOOL CBattleEnemy::isCurrentState(INT inState) {
-    if (!((UINT)inState < 31)) AssertApp(D_004ACBC0, 0x4AF, D_004AD388, 0);
+    if (!((UINT)inState < 31)) AssertApp(D_004ACBC0, 0x4AF, "0 <= inState && inState < BTL_ENEMY_STATE_MAX", 0);
     CState& State = *(CState*)((inState * 0x20 + (INT)this) + 0x450);
     return isState(State);
 }
@@ -365,7 +481,7 @@ BOOL CBattleEnemy::isValidSynchro() {
 BOOL CBattleEnemy::canCardBattle() {
     if (CardBattle::CCardBattle::isPlayingEnemyCard()) return FALSE;
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-    if (!bem) AssertApp(D_004ACBC0, 0x4C8, D_004AD3B8, 0);
+    if (!bem) AssertApp(D_004ACBC0, 0x4C8, "bem", 0);
     return bem->canCardBattle(getHandle()) != FALSE;
 }
 BOOL CBattleEnemy::canKill() {
@@ -392,7 +508,7 @@ BOOL CBattleEnemy::startCardBattle() {
 }
 void CBattleEnemy::endCardBattle(CState* inState, TIMEQ inNextAttackWait) {
     CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-    if (!cb) AssertApp(D_004ACBC0, 0x56C, D_004AD3C0, 0);
+    if (!cb) AssertApp(D_004ACBC0, 0x56C, "cb", 0);
     if (_getEnchantKind(cb, 2) == 0x2F && isBtlEnemyFlag(0x20000000)) {
         changeBattleEnemyState(m_iAttackState);
         m_ullBtlEnemyFlag &= ~0x20000000;
@@ -480,7 +596,7 @@ void CBattleEnemy::getPlayerPosition(FVECTOR& outPos) {
 }
 HANDLE CBattleEnemy::getPlayerHandle() {
     if (isBtlEnemyFlag(0x40000)) return 0;
-    if (!g_pPlayer) AssertApp(D_004ACBC0, 0x611, D_004AD3C8, 0);
+    if (!g_pPlayer) AssertApp(D_004ACBC0, 0x611, "g_pPlayer", 0);
     return g_pPlayer->getHandle();
 }
 void CBattleEnemy::makeExpPrize() {
@@ -713,7 +829,7 @@ void CBattleEnemy::stateBigDamage() {
                     changeBattleEnemyState(17);
                 } else {
                     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-                    if (!hitBody) AssertApp(D_004ACBC0, 0x860, D_004AD3D8, 0);
+                    if (!hitBody) AssertApp(D_004ACBC0, 0x860, "hitBody", 0);
                     if (hitBody->getDamageKind() == ATK_KIND_SHOCK && m_pEnemyParam->getSpecialEffect(1)) {
                         changeBattleEnemyState(18);
                     } else {
@@ -793,7 +909,7 @@ void CBattleEnemy::beginStateZero() {
     if (p) p->kill(getHandle());
 }
 void CBattleEnemy::stateZero() {
-    if (isBtlEnemyFlag(1)) TRACE(D_004AD3E0);
+    if (isBtlEnemyFlag(1)) TRACE("waring : BATTLE_ENEMY_FLAG_CARD_BATTLE\x83t\x83\x89\x83O\x82\xaa\x82\xbd\x82\xc1\x82\xc4\x82\xa2\x82\xdc\x82\xb7\n");
     changeDefaultState();
 }
 void CBattleEnemy::endStateZero() {}
@@ -840,7 +956,7 @@ void CBattleEnemy::stateDuel() {
     case 1:
         if (getTimer() <= 0) {
             CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-            if (!cb) AssertApp(D_004ACBC0, 0x96B, D_004AD3C0, 0);
+            if (!cb) AssertApp(D_004ACBC0, 0x96B, "cb", 0);
             if (m_iDuelCardNum > 0 && m_iDuelCardPtr < m_iDuelCardNum) {
                 if (cb->setEnemyDuelCard(getHandle(), m_DuelCardKind, m_iDuelCardArray[m_iDuelCardPtr])) m_iDuelCardPtr++;
             }
@@ -945,6 +1061,7 @@ void CBattleEnemy::beginStateStop() {
     setEntityFlag(0x8000, 0);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateStop__12CBattleEnemy);
+__asm__(".rdata\n.align 3\n.word 0x42705F6D\n.word 0x4379646F\n.word 0x006C6C6F\n.word 0x00000000\n.word 0x00746968\n.word 0x00000000\n.word 0x355F7865\n.word 0x00303130\n.word 0x70616577\n.word 0x00006E6F\n.word 0x79646F62\n.word 0x00000000\n.word 0x2D746968\n.word 0x7465673E\n.word 0x6C6C6F43\n.word 0x6F697369\n.word 0x0029286E\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word .L002AF8B8\n.word .L002AFBF4\n.word .L002AFFA0\n.word .L002AFFBC\n.word .L002B0014\n.word .L002B0034\n.word .L002B00AC\n.word .L002B0108\n.word .L002AF9AC\n.word .L002AF9AC\n.word .L002AF9AC\n.word .L002AF9AC\n.word .L002AF9AC\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002AF9AC\n.word .L002AFBD4\n.word .L002AFBD4\n.word .L002B0170\n.word .L002AF9AC\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002AF9AC\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002AFBD4\n.word func_0\n.word .L002AFA18\n.word .L002AFA20\n.word .L002AFA28\n.word .L002AFA30\n.word .L002AFA38\n.word func_0\n.word func_0\n.word func_0\n.text\n");
 void CBattleEnemy::endStateStop() {
     setEntityFlag(0, 0x8000);
     m_pAnim->setSpeed(1.0f);
@@ -963,7 +1080,7 @@ void CBattleEnemy::endStateStop() {
 }
 void CBattleEnemy::beginStateTerror() {
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-    if (!hitBody) AssertApp(D_004ACBC0, 0xBA0, D_004AD3D8, 0);
+    if (!hitBody) AssertApp(D_004ACBC0, 0xBA0, "hitBody", 0);
     setTimer(18000);
     setBadStatusEffect(3, hitBody->getBadStatusParam());
     m_ullBtlEnemyFlag |= 0x40000000000ULL;
@@ -1068,7 +1185,7 @@ void CBattleEnemy::endStateShock() {
     if (!(m_ullBackupFlag & 4)) m_pMove->enableGravity(FALSE);
 }
 void CBattleEnemy::beginStateTornado() {
-    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xC5B, D_004AD2A0, 0);
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xC5B, "m_pEnemyParam", 0);
     changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
     m_pMove->enableGravity(FALSE);
     m_iSysStep = 0;
@@ -1076,6 +1193,7 @@ void CBattleEnemy::beginStateTornado() {
     bodyCollOffBody(-1);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateTornado__12CBattleEnemy);
+__asm__(".rdata\n.align 3\n.word .L002B0B20\n.word .L002B0B28\n.word .L002B0B30\n.word .L002B0B38\n.word .L002B0B40\n.word func_0\n.word func_0\n.word func_0\n.text\n");
 void CBattleEnemy::endStateTornado() {
     bodyCollOn(-1);
     bodyCollOnBody(-1);
@@ -1091,7 +1209,7 @@ void CBattleEnemy::beginStateDegenerator() {
     bodyCollOff(-1);
     bodyCollOffBody(-1);
     getLockOnPos(pos);
-    if (!m_pBodyColl->getHitCollBody()) AssertApp(D_004ACBC0, 0xCC3, D_004AD3D8, 0);
+    if (!m_pBodyColl->getHitCollBody()) AssertApp(D_004ACBC0, 0xCC3, "hitBody", 0);
     m_hDision = setEffect(BattleEnemy::DisionEffectName, 0, &pos, NULL, 0.0f);
     m_iHp = 0;
     m_pMove->enableGravity(FALSE);
@@ -1189,7 +1307,7 @@ void CBattleEnemy::beginStateToss() {
     getRot().y = calcDirection(enemyPos);
     m_pMove->calcOrbitVelocityFromSpeedY((1.0f - m_pMove->getForce()) * 0.175f + 0.25f, dist);
     m_pMove->enableGravity(TRUE);
-    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xD87, D_004AD2A0, 0);
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xD87, "m_pEnemyParam", 0);
     if (checkHitPos() & 1) {
         changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
         getRot().y = calcDirection(enemyPos);
@@ -1243,6 +1361,7 @@ void CBattleEnemy::beginStateBeat() {
     m_iSysStep = 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateBeat__12CBattleEnemy);
+__asm__(".rdata\n.align 3\n.word .L002B157C\n.word .L002B1584\n.word .L002B158C\n.word .L002B1594\n.word .L002B159C\n.word func_0\n.text\n");
 void CBattleEnemy::endStateBeat() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
 }
@@ -1289,7 +1408,7 @@ void CBattleEnemy::beginStateSuspend() {
 }
 void CBattleEnemy::stateSuspend() {
     CTask* cb = CTaskMan::getSysTask(0x16);
-    if (!cb) AssertApp(D_004ACBC0, 0xE6B, D_004AD3C0, 0);
+    if (!cb) AssertApp(D_004ACBC0, 0xE6B, "cb", 0);
     if (!CardBattle::CCardBattle::isSuspend()) changeDefaultState();
 }
 void CBattleEnemy::endStateSuspend() {
@@ -1299,9 +1418,9 @@ void CBattleEnemy::endStateSuspend() {
 }
 void CBattleEnemy::beginStateVolley() {
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-    if (!hitBody) AssertApp(D_004ACBC0, 0xE83, D_004AD3D8, 0);
+    if (!hitBody) AssertApp(D_004ACBC0, 0xE83, "hitBody", 0);
     const FVECTOR& enemyPos = hitBody->getEnemyPos();
-    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xE86, D_004AD2A0, 0);
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xE86, "m_pEnemyParam", 0);
     if (checkHitPos() & 1) {
         changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
         getRot().y = calcDirection(enemyPos);
@@ -1417,7 +1536,7 @@ CBattleEnemyManager* CBattleEnemy::getBattleEnemyManager() const {
     return NULL;
 }
 void CBattleEnemy::makePrize(const FVECTOR* inPos) {
-    if (!inPos) AssertApp(D_004ACBC0, 0xF4B, D_004AD568, 0);
+    if (!inPos) AssertApp(D_004ACBC0, 0xF4B, "inPos", 0);
     if (isBtlEnemyFlag(0x400000)) return;
     makeExpPrize(inPos);
     makePremiumPrize(inPos);
@@ -1425,6 +1544,7 @@ void CBattleEnemy::makePrize(const FVECTOR* inPos) {
     makeCard(inPos);
 }
 void CBattleEnemy::makeExpPrize(const FVECTOR* inPos) {
+    static PRIZE_DATA g_PrizeDataTbl[7] = {{209, 1400}, {208, 199}, {205, 60}, {207, 30}, {204, 10}, {206, 5}, {203, 1}};
     PRIZE_PARAM param;
     if (!m_pBasicParam) return;
     param.vPos = *inPos;
@@ -1448,19 +1568,19 @@ void CBattleEnemy::makeExpPrize(const FVECTOR* inPos) {
 }
 void CBattleEnemy::makePremiumPrize(const FVECTOR* inPos) {
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-    if (!bem) AssertApp(D_004ACBC0, 0xF9A, D_004AD3B8, 0);
+    if (!bem) AssertApp(D_004ACBC0, 0xF9A, "bem", 0);
     bem->createPremiumPrize(*inPos, (UINT)getID() % 10000);
 }
 void CBattleEnemy::makeRoulettePrize(const FVECTOR* inPos) {
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-    if (!bem) AssertApp(D_004ACBC0, 0xFA4, D_004AD3B8, 0);
+    if (!bem) AssertApp(D_004ACBC0, 0xFA4, "bem", 0);
     bem->createRoulettePrize(*inPos);
 }
 void CBattleEnemy::makeCard(const FVECTOR* inPos) {
     if (!m_pBasicParam) return;
     if (isBtlEnemyFlag(0x20)) return;
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-    if (!bem) AssertApp(D_004ACBC0, 0xFB4, D_004AD3B8, 0);
+    if (!bem) AssertApp(D_004ACBC0, 0xFB4, "bem", 0);
     if (!bem->canCreateEnemyCard()) return;
     if (bem->isRoulettePrizeGet()) return;
     if (bem->isAppearRoulettePrize()) return;
@@ -1498,7 +1618,7 @@ void CBattleEnemy::makeCard(const FVECTOR* inPos) {
                 param.iNumber = RND::genrand_int31() % 10;
             } else {
                 CGimmickManager* gm = (CGimmickManager*)CTaskMan::getSysTask(0x11);
-                if (!gm) AssertApp(D_004ACBC0, 0x103B, D_004AD570, 0);
+                if (!gm) AssertApp(D_004ACBC0, 0x103B, "gm", 0);
                 DropPrize drop = gm->DecideMapCardPrize(TRUE);
                 param.PrizeKind = drop.Kind;
                 param.iNumber = drop.No;
@@ -1599,29 +1719,29 @@ void CBattleEnemy::onGift(INT inAddHp) {
     if (m_iHp > 0) {
         FVECTOR pos;
         getLockOnPos(pos);
-        recover(inAddHp, D_004AD578, 0, pos, NULL);
+        recover(inAddHp, "cure_all", 0, pos, NULL);
     }
 }
 void CBattleEnemy::setBadStatusEffect(INT inNo, FLOAT inWait) {
     CEffectMan::killEffect(m_hBadStatus, 0.0f);
     m_hBadStatus = 0;
-    m_hBadStatus = CEntity::setBadStatusEffect(_ref(g_BadStatusEffectName), inNo, inWait);
+    m_hBadStatus = CEntity::setBadStatusEffect(_ref(BattleEnemy::BadStatusEffectName), inNo, inWait);
 }
 void CBattleEnemy::killBadStatusEffect() {
     CEffectMan::killEffect(m_hBadStatus, 0.0f);
     m_hBadStatus = 0;
     if (isBtlEnemyFlag(0x40000000000ULL)) {
-        m_hBadStatus = CEntity::setBadStatusEffect(g_BadStatusEffectName, 3, 0.0f);
+        m_hBadStatus = CEntity::setBadStatusEffect(BattleEnemy::BadStatusEffectName, 3, 0.0f);
     } else if (isBtlEnemyFlag(0x80000000000ULL)) {
-        m_hBadStatus = CEntity::setBadStatusEffect(g_BadStatusEffectName, 1, 0.0f);
+        m_hBadStatus = CEntity::setBadStatusEffect(BattleEnemy::BadStatusEffectName, 1, 0.0f);
     } else if (isBtlEnemyFlag(0x20000)) {
         if (isBtlEnemyFlag(0x40000) && m_tqConfuseTimer < m_tqBindTimer) {
-            m_hBadStatus = CEntity::setBadStatusEffect(g_BadStatusEffectName, 2, 0.0f);
+            m_hBadStatus = CEntity::setBadStatusEffect(BattleEnemy::BadStatusEffectName, 2, 0.0f);
         } else {
-            m_hBadStatus = CEntity::setBadStatusEffect(g_BadStatusEffectName, 0, 0.0f);
+            m_hBadStatus = CEntity::setBadStatusEffect(BattleEnemy::BadStatusEffectName, 0, 0.0f);
         }
     } else if (isBtlEnemyFlag(0x40000)) {
-        m_hBadStatus = CEntity::setBadStatusEffect(g_BadStatusEffectName, 2, 0.0f);
+        m_hBadStatus = CEntity::setBadStatusEffect(BattleEnemy::BadStatusEffectName, 2, 0.0f);
     }
 }
 /* Parked: the 30-degree constant (0.5235988f) is loaded once into $f20 and reused for sinf, cosf and
@@ -1656,7 +1776,7 @@ void CBattleEnemy::commonEndAttack() {
 void CBattleEnemy::notifyDead() {
     if (isBtlEnemyFlag(0x40000000)) return;
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
-    if (!bem) AssertApp(D_004ACBC0, 0x116A, D_004AD3B8, 0);
+    if (!bem) AssertApp(D_004ACBC0, 0x116A, "bem", 0);
     bem->notifyDead(getHandle());
     m_ullBtlEnemyFlag |= 0x40000000;
 }
@@ -1745,6 +1865,7 @@ BOOL CBattleEnemy::initEnemyParam(INT inGroupID, INT inRsrcID, INT inIndex) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initEnemyParam__12CBattleEnemyiii);
 #endif
+__asm__(".rdata\n.align 3\n.word 0x3D3C2030\n.word 0x6F6C6620\n.word 0x2620726F\n.word 0x6C662026\n.word 0x20726F6F\n.word 0x4E45203C\n.word 0x5F594D45\n.word 0x41524150\n.word 0x423A3A4D\n.word 0x43495341\n.word 0x58414D5F\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
 /* Parked: the load of hitBody->m_pCollision (getDetectPos) is scheduled before the vol = -1 store in ours, after
  * it in the original (8 lines: registers a2/v1, order): our vol store is a fixed scalar MEM that cannot alias the
  * varying struct load; `INT vol[1]` matches but the ref says INT vol (same open issue: MapEnemy::hitTest_); tried:
@@ -1796,7 +1917,9 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playBigDamage
 /* Not attempted: its switch emits a jump table in .rodata, which needs the unit's data from source (draft:
  * build/progress/Game/Enemy/pdse_draft.c) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playDamageSE__12CBattleEnemy8ATK_KIND);
+__asm__(".rdata\n.align 3\n.word .L002B33F0\n.word .L002B3410\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3410\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B33F0\n.word .L002B3410\n.word func_0\n.text\n");
 BOOL CBattleEnemy::setupDuelCard() {
+    static int g_iDuelCardNum[3] = {3, 5, 7};
     ENEMY_CARD* cards = NULL;
     BOOL result;
     INT cardNum;
@@ -1810,12 +1933,12 @@ BOOL CBattleEnemy::setupDuelCard() {
         cardNum = cards->bNumber[0];
         result = TRUE;
     } else {
-        TRACE(D_004AD638, (UINT)getID() % 10000);
+        TRACE("warning : \x83" "f\x83\x85\x83G\x83\x8b\x83J\x81[\x83h\x83p\x83\x89\x83\x81\x81[\x83^\x82\xaa\x90\xdd\x92\xe8\x82\xb3\x82\xea\x82\xc4\x82\xa8\x82\xe8\x82\xdc\x82\xb9\x82\xf1\x81" "BID = %d\n", (UINT)getID() % 10000);
         result = FALSE;
         cardNum = g_iDuelCardNum[(UINT)RND::genrand_int31() % 3];
     }
     for (INT i = 0; i < 10; i++) m_iDuelCardArray[i] = 0;
-    if (!g_pPlayer) AssertApp(D_004ACBC0, 0x128E, D_004AD3C8, 0);
+    if (!g_pPlayer) AssertApp(D_004ACBC0, 0x128E, "g_pPlayer", 0);
     CardBattle::CCardRevolver* revolver = g_pPlayer->getRevolver();
     if (!revolver) return FALSE;
     INT number = 9;
@@ -1833,13 +1956,13 @@ BOOL CBattleEnemy::setupDuelCard() {
     m_iDuelCardNum = cardNum;
     m_iDuelCardPtr = 0;
     CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-    if (!cb) AssertApp(D_004ACBC0, 0x12AC, D_004AD3C0, 0);
+    if (!cb) AssertApp(D_004ACBC0, 0x12AC, "cb", 0);
     cb->setDuelBreakCount(0, cardNum);
     return result;
 }
 BOOL CBattleEnemy::destroyCard() {
     CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-    if (!cb) AssertApp(D_004ACBC0, 0x12F9, D_004AD3C0, 0);
+    if (!cb) AssertApp(D_004ACBC0, 0x12F9, "cb", 0);
     if (CardBattle::CCardBattle::getPlayingHandle(2) == getHandle()) {
         cb->destroyEnemyCard(getHandle());
         return TRUE;
@@ -1884,7 +2007,7 @@ void CBattleEnemy::beginStateAttack1_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack1_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE(D_004AD680, getHandle(), getID());
+    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
     stateAttack1();
 }
 void CBattleEnemy::endStateAttack1_() {
@@ -1896,7 +2019,7 @@ void CBattleEnemy::beginStateAttack2_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack2_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE(D_004AD680, getHandle(), getID());
+    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
     stateAttack2();
 }
 void CBattleEnemy::endStateAttack2_() {
@@ -1908,7 +2031,7 @@ void CBattleEnemy::beginStateAttack3_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack3_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE(D_004AD680, getHandle(), getID());
+    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
     stateAttack3();
 }
 void CBattleEnemy::endStateAttack3_() {
@@ -1920,7 +2043,7 @@ void CBattleEnemy::beginStateAttack4_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack4_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE(D_004AD680, getHandle(), getID());
+    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
     stateAttack4();
 }
 void CBattleEnemy::endStateAttack4_() {
@@ -1932,7 +2055,7 @@ void CBattleEnemy::beginStateAttack5_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack5_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE(D_004AD680, getHandle(), getID());
+    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
     stateAttack5();
 }
 void CBattleEnemy::endStateAttack5_() {
@@ -1944,7 +2067,7 @@ void CBattleEnemy::beginStateAttack6_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack6_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE(D_004AD680, getHandle(), getID());
+    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
     stateAttack6();
 }
 void CBattleEnemy::endStateAttack6_() {
@@ -1956,7 +2079,7 @@ void CBattleEnemy::beginStateAttack7_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack7_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE(D_004AD680, getHandle(), getID());
+    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
     stateAttack7();
 }
 void CBattleEnemy::endStateAttack7_() {
@@ -1968,7 +2091,7 @@ void CBattleEnemy::beginStateAttack8_() {
     commonBeginAttack();
 }
 void CBattleEnemy::stateAttack8_() {
-    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE(D_004AD680, getHandle(), getID());
+    if (!(m_ullBtlEnemyFlag & 0x800000000ULL) && !isPlayingCardBattle()) TRACE("warning:\x83J\x81[\x83h\x92\xf1\x8e\xa6\x82\xb5\x82\xc4\x82\xa2\x82\xc8\x82\xa2\x82\xcc\x82\xc9\x8dU\x8c\x82\x82\xb5\x82\xc4\x82\xa2\x82\xdc\x82\xb7\x81I\x81I... handle = %x, ID = %d\n", getHandle(), getID());
     stateAttack8();
 }
 void CBattleEnemy::endStateAttack8_() {
@@ -2195,21 +2318,25 @@ void CBattleEnemy::notifyHP() {
 /* Not attempted: CStateTemplate::set()'s assert strings (System/Fsm.h) need the unit's .rodata from source (draft:
  * build/progress/Game/Enemy/initFSM_draft.c) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initFSM___12CBattleEnemy);
+__asm__(".rdata\n.align 3\n.word 0x74737953\n.word 0x462F6D65\n.word 0x682E6D73\n.word 0x00000000\n.word 0x736E4970\n.word 0x636E6174\n.word 0x00000065\n.word 0x00000000\n.word 0x426E6670\n.word 0x6E696765\n.word 0x74617453\n.word 0x00000065\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initRoom___12CBattleEnemy);
+__asm__(".rdata\n.align 3\n.word .L002B4FF0\n.word .L002B4FAC\n.word .L002B506C\n.word .L002B5060\n.word .L002B515C\n.word .L002B5118\n.word .L002B4FF0\n.word .L002B4FAC\n.word .L002B5250\n.word .L002B520C\n.text\n");
 void CBattleEnemy::changeBattleEnemyState(INT inState) {
-    if (!((UINT)inState < 31)) AssertApp(D_004ACBC0, 0x162B, D_004AD388, 0);
+    if (!((UINT)inState < 31)) AssertApp(D_004ACBC0, 0x162B, "0 <= inState && inState < BTL_ENEMY_STATE_MAX", 0);
     CState& NewState = *(CState*)((inState * 0x20 + (INT)this) + 0x450);
     clearBtlEnemyFlag(0x10);
     m_pNewState = &NewState;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", hitTest___12CBattleEnemy);
+__asm__(".rdata\n.align 3\n.word 0x42705F6D\n.word 0x4379646F\n.word 0x2D6C6C6F\n.word 0x7465673E\n.word 0x43746948\n.word 0x426C6C6F\n.word 0x2879646F\n.word 0x00000029\n.word 0x00000000\n.word 0x00000000\n.word .L002B543C\n.word .L002B5444\n.word .L002B544C\n.word .L002B5454\n.word .L002B545C\n.word func_0\n.word func_0\n.word func_0\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", computeDamage___12CBattleEnemyff8ATK_KIND);
+__asm__(".rdata\n.align 3\n.word .L002B57B4\n.word .L002B57CC\n.word .L002B5A70\n.word .L002B580C\n.word .L002B57E4\n.word .L002B5818\n.word .L002B5870\n.word .L002B589C\n.word .L002B5A60\n.word .L002B5998\n.word .L002B59AC\n.word .L002B58B4\n.word .L002B59C8\n.word .L002B59F0\n.word .L002B5A68\n.word .L002B5A60\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B589C\n.text\n");
 INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
     INT result = (INT)(inDamage * inAttr * getDamageRate_() / 100.0f);
     if (!isBtlEnemyFlag(0x400) && !isBtlEnemyFlag(0x4000)) {
         if (isBtlEnemyFlag(0x1000000)) {
             CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-            if (!hitBody) AssertApp(D_004ACBC0, 0x1846, D_004AD3D8, 0);
+            if (!hitBody) AssertApp(D_004ACBC0, 0x1846, "hitBody", 0);
             INT bodyHp = hitBody->getHp();
             if (!(DebugWork::g_dw.enemy.uiFlag & 1)) {
                 if (!isLastLeave_(bodyHp - result)) {
@@ -2220,14 +2347,14 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
             }
             if (result >= 2) {
                 CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-                if (!cb) AssertApp(D_004ACBC0, 0x1864, D_004AD3C0, 0);
+                if (!cb) AssertApp(D_004ACBC0, 0x1864, "cb", 0);
                 CardBattle::CCardBattle::decEnchantTime(2, 0x27, 0);
-                TRACE_USER((USER)5, D_004AD810);
-                TRACE_USER((USER)5, D_004AD840, getID());
-                TRACE_USER((USER)5, D_004AD858, result);
-                TRACE_USER((USER)5, D_004AD870, hitBody->getDamageKind());
-                TRACE_USER((USER)5, D_004AD888, hitBody->getDamageAttr());
-                TRACE_USER((USER)5, D_004AD358);
+                TRACE_USER((USER)5, "======== Enemy damage infomation ========\n");
+                TRACE_USER((USER)5, "ID             = %d\n", getID());
+                TRACE_USER((USER)5, "\x83_\x83\x81\x81[\x83W\x97\xca     = %d\n", result);
+                TRACE_USER((USER)5, "\x83_\x83\x81\x81[\x83W\x82\xcc\x8e\xed\x97\xde = %d\n", hitBody->getDamageKind());
+                TRACE_USER((USER)5, "\x83_\x83\x81\x81[\x83W\x91\xae\x90\xab   = %d\n", hitBody->getDamageAttr());
+                TRACE_USER((USER)5, "=========================================\n");
             }
             hitBody->setHp(bodyHp);
             if (hitBody->getMaxHp() < bodyHp) hitBody->setHp(hitBody->getMaxHp());
@@ -2246,27 +2373,28 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
             }
             if (result >= 2) {
                 CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
-                if (!cb) AssertApp(D_004ACBC0, 0x18A3, D_004AD3C0, 0);
+                if (!cb) AssertApp(D_004ACBC0, 0x18A3, "cb", 0);
                 CardBattle::CCardBattle::decEnchantTime(2, 0x27, 0);
                 CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-                if (!hitBody) AssertApp(D_004ACBC0, 0x18A8, D_004AD3D8, 0);
-                TRACE_USER((USER)5, D_004AD810);
-                TRACE_USER((USER)5, D_004AD840, getID());
-                TRACE_USER((USER)5, D_004AD858, result);
-                TRACE_USER((USER)5, D_004AD870, hitBody->getDamageKind());
-                TRACE_USER((USER)5, D_004AD888, hitBody->getDamageAttr());
-                TRACE_USER((USER)5, D_004AD358);
+                if (!hitBody) AssertApp(D_004ACBC0, 0x18A8, "hitBody", 0);
+                TRACE_USER((USER)5, "======== Enemy damage infomation ========\n");
+                TRACE_USER((USER)5, "ID             = %d\n", getID());
+                TRACE_USER((USER)5, "\x83_\x83\x81\x81[\x83W\x97\xca     = %d\n", result);
+                TRACE_USER((USER)5, "\x83_\x83\x81\x81[\x83W\x82\xcc\x8e\xed\x97\xde = %d\n", hitBody->getDamageKind());
+                TRACE_USER((USER)5, "\x83_\x83\x81\x81[\x83W\x91\xae\x90\xab   = %d\n", hitBody->getDamageAttr());
+                TRACE_USER((USER)5, "=========================================\n");
             }
             if (getHpMax() < m_iHp) m_iHp = getHpMax();
             notifyHP();
         }
     }
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-    if (!hitBody) AssertApp(D_004ACBC0, 0x18BD, D_004AD3D8, 0);
+    if (!hitBody) AssertApp(D_004ACBC0, 0x18BD, "hitBody", 0);
     setDamageNumber(*hitBody->getDetectPos(), result);
     return result;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", changeDamageState___12CBattleEnemy8ATK_KIND);
+__asm__(".rdata\n.align 3\n.word .L002B60A0\n.word .L002B5F60\n.word .L002B5FA0\n.word .L002B5FD8\n.word .L002B6010\n.word .L002B6048\n.word .L002B6090\n.word .L002B60B4\n.word .L002B60C8\n.word .L002B60DC\n.word .L002B615C\n.word .L002B6170\n.word .L002B6228\n.word .L002B6198\n.word .L002B6198\n.word .L002B61BC\n.word .L002B61D0\n.word .L002B5FA0\n.word .L002B60A0\n.word .L002B623C\n.word .L002B60A0\n.word .L002B6250\n.word .L002B60B4\n.word .L002B60A0\n.word .L002B60A0\n.word .L002B60A0\n.word .L002B60A0\n.word .L002B60A0\n.word .L002B5F60\n.word .L002B5FA0\n.word .L002B6184\n.word func_0\n.text\n");
 BOOL CBattleEnemy::canAttack_(const ENEMY_ACT* inAct) {
     if (!inAct) return FALSE;
     FLOAT viewAngle = inAct->fViewAngle;
@@ -2388,7 +2516,7 @@ INT CBattleEnemy::selectDamageMotion_() {
 void CBattleEnemy::enableBind_(BOOL inSw) {
     if (inSw) {
         CCollBody* hitBody = m_pBodyColl->getHitCollBody();
-        if (!hitBody) AssertApp(D_004ACBC0, 0x1B8A, D_004AD3D8, 0);
+        if (!hitBody) AssertApp(D_004ACBC0, 0x1B8A, "hitBody", 0);
         setEntityFlag(0x8000, 0);
         m_ullBtlEnemyFlag |= 0x20000;
         setBadStatusEffect(0, hitBody->getBadStatusParam());
@@ -2502,7 +2630,7 @@ void CBattleEnemy::setHitEffect_() {
     switch (hit->getDamageKind()) {
     case ATK_KIND_QUAKE: {
         CCollMap* coll = m_pMove->getMapCollision();
-        if (!coll) AssertApp(D_004ACBC0, 0x1C57, D_004AD920, 0);
+        if (!coll) AssertApp(D_004ACBC0, 0x1C57, "coll", 0);
         FVECTOR pos = getPos();
         coll->setStartPos(pos);
         pos.y -= 1.0f;
@@ -2601,7 +2729,7 @@ void CBattleEnemy::updateDamageTimer_() {
     }
 }
 BOOL CBattleEnemy::isNowPlayDamageMotion_() {
-    if (!m_pAnim) AssertApp(D_004ACBC0, 0x1D28, D_004AD928, 0);
+    if (!m_pAnim) AssertApp(D_004ACBC0, 0x1D28, "m_pAnim", 0);
     return m_pEnemyParam->isDamageMotion(m_pAnim->getAnimID());
 }
 BOOL CBattleEnemy::addEnemyKillCount_() {
@@ -2828,3 +2956,43 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", executeState_
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", executeEndState__t14CStateTemplate1Z12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", func_002B8070);
 typedef char _chk_be[sizeof(CBattleEnemy) == 0x830 ? 1 : -1];
+/* The vtables, the CStateTemplate assert string and its vtable: their key functions are still assembly. */
+__asm__(".rdata\n.align 3\n.globl _vt$12CBattleEnemy$4CFSM\n_vt$12CBattleEnemy$4CFSM:\n.word 0x0000FFC0\n.word 0\n.word 0x0000FFC0\n.word _$_12CBattleEnemy\n.word 0x0000FFC0\n.word update__12CBattleEnemy\n.word 0\n.word beginStateInitial__4CFSM\n.word 0\n.word stateInitial__4CFSM\n.word 0\n.word endStateInitial__4CFSM\n.word 0x0000FFC0\n.word endStateProc__7CEntity\n.word 0\n.word 0\n.globl _vt$12CBattleEnemy\n_vt$12CBattleEnemy:\n.word 0\n.word 0\n.word 0\n.word _$_12CBattleEnemy\n.word 0\n.word main__12CBattleEnemy\n.word 0\n.word disp__7CEntity\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__12CBattleEnemy\n.word 0\n.word getTypeID__C12CBattleEnemy\n.word 0\n.word initalize__12CBattleEnemyii\n.word 0\n.word initalize__12CBattleEnemyiiUi\n.word 0\n.word AfterInit__7CEntity\n.word 0\n.word onMsg__12CBattleEnemyiPv\n.word 0\n.word getLockOnPos__7CEntityR7FVECTOR\n.word 0\n.word getHeadPos__C7CEntityR7FVECTOR\n.word 0\n.word getUseCardPos__12CBattleEnemyR7FVECTOR\n.word 0\n.word getCameraTargetPos__7CEntityR7FVECTOR\n.word 0\n.word changeMotion__12CBattleEnemyiiiiii\n.word 0\n.word updateBefore__12CBattleEnemy\n.word 0\n.word updateAfter__12CBattleEnemy\n.word 0\n.word updatePositionAfter__12CBattleEnemy\n.word 0\n.word lastUpdate__12CBattleEnemy\n.word 0\n.word startCardBattle__12CBattleEnemy\n.word 0\n.word bossDeadDemoCallback__12CBattleEnemy\n.word 0\n.word setBossDeadEffect__12CBattleEnemy\n.word 0\n.word killBossDeadEffect__12CBattleEnemy\n.word 0\n.word bossCardRevolverDestroy__12CBattleEnemy\n.word 0\n.word bossDeadDemoDispOff__12CBattleEnemy\n.word 0\n.word bossDeadDemoSpecial__12CBattleEnemy\n.word 0\n.word bossDeadDemoEnd__12CBattleEnemy\n.word 0\n.word onBio__12CBattleEnemyi\n.word 0\n.word onGift__12CBattleEnemyi\n.word 0\n.word beginStateAppear__12CBattleEnemy\n.word 0\n.word stateAppear__12CBattleEnemy\n.word 0\n.word endStateAppear__12CBattleEnemy\n.word 0\n.word beginStateMain__12CBattleEnemy\n.word 0\n.word stateMain__12CBattleEnemy\n.word 0\n.word endStateMain__12CBattleEnemy\n.word 0\n.word beginStateAttack1__12CBattleEnemy\n.word 0\n.word stateAttack1__12CBattleEnemy\n.word 0\n.word endStateAttack1__12CBattleEnemy\n.word 0\n.word beginStateAttack2__12CBattleEnemy\n.word 0\n.word stateAttack2__12CBattleEnemy\n.word 0\n.word endStateAttack2__12CBattleEnemy\n.word 0\n.word beginStateAttack3__12CBattleEnemy\n.word 0\n.word stateAttack3__12CBattleEnemy\n.word 0\n.word endStateAttack3__12CBattleEnemy\n.word 0\n.word beginStateAttack4__12CBattleEnemy\n.word 0\n.word stateAttack4__12CBattleEnemy\n.word 0\n.word endStateAttack4__12CBattleEnemy\n.word 0\n.word beginStateAttack5__12CBattleEnemy\n.word 0\n.word stateAttack5__12CBattleEnemy\n.word 0\n.word endStateAttack5__12CBattleEnemy\n.word 0\n.word beginStateAttack6__12CBattleEnemy\n.word 0\n.word stateAttack6__12CBattleEnemy\n.word 0\n.word endStateAttack6__12CBattleEnemy\n.word 0\n.word beginStateAttack7__12CBattleEnemy\n.word 0\n.word stateAttack7__12CBattleEnemy\n.word 0\n.word endStateAttack7__12CBattleEnemy\n.word 0\n.word beginStateAttack8__12CBattleEnemy\n.word 0\n.word stateAttack8__12CBattleEnemy\n.word 0\n.word endStateAttack8__12CBattleEnemy\n.word 0\n.word beginStateItem__12CBattleEnemy\n.word 0\n.word stateItem__12CBattleEnemy\n.word 0\n.word endStateItem__12CBattleEnemy\n.word 0\n.word beginStateSmallDamage__12CBattleEnemy\n.word 0\n.word stateSmallDamage__12CBattleEnemy\n.word 0\n.word endStateSmallDamage__12CBattleEnemy\n.word 0\n.word beginStateBigDamage__12CBattleEnemy\n.word 0\n.word stateBigDamage__12CBattleEnemy\n.word 0\n.word endStateBigDamage__12CBattleEnemy\n.word 0\n.word beginStateCardBreak__12CBattleEnemy\n.word 0\n.word stateCardBreak__12CBattleEnemy\n.word 0\n.word endStateCardBreak__12CBattleEnemy\n.word 0\n.word beginStateZero__12CBattleEnemy\n.word 0\n.word stateZero__12CBattleEnemy\n.word 0\n.word endStateZero__12CBattleEnemy\n.word 0\n.word beginStateDuel__12CBattleEnemy\n.word 0\n.word stateDuel__12CBattleEnemy\n.word 0\n.word endStateDuel__12CBattleEnemy\n.word 0\n.word beginStateDuelSuccess__12CBattleEnemy\n.word 0\n.word stateDuelSuccess__12CBattleEnemy\n.word 0\n.word endStateDuelSuccess__12CBattleEnemy\n.word 0\n.word beginStateFaint__12CBattleEnemy\n.word 0\n.word stateFaint__12CBattleEnemy\n.word 0\n.word endStateFaint__12CBattleEnemy\n.word 0\n.word beginStateStop__12CBattleEnemy\n.word 0\n.word stateStop__12CBattleEnemy\n.word 0\n.word endStateStop__12CBattleEnemy\n.word 0\n.word beginStateTerror__12CBattleEnemy\n.word 0\n.word stateTerror__12CBattleEnemy\n.word 0\n.word endStateTerror__12CBattleEnemy\n.word 0\n.word beginStateFreeze__12CBattleEnemy\n.word 0\n.word stateFreeze__12CBattleEnemy\n.word 0\n.word endStateFreeze__12CBattleEnemy\n.word 0\n.word beginStateShock__12CBattleEnemy\n.word 0\n.word stateShock__12CBattleEnemy\n.word 0\n.word endStateShock__12CBattleEnemy\n.word 0\n.word beginStateTornado__12CBattleEnemy\n.word 0\n.word stateTornado__12CBattleEnemy\n.word 0\n.word endStateTornado__12CBattleEnemy\n.word 0\n.word beginStateDegenerator__12CBattleEnemy\n.word 0\n.word stateDegenerator__12CBattleEnemy\n.word 0\n.word endStateDegenerator__12CBattleEnemy\n.word 0\n.word beginStateGravity__12CBattleEnemy\n.word 0\n.word stateGravity__12CBattleEnemy\n.word 0\n.word endStateGravity__12CBattleEnemy\n.word 0\n.word beginStateToss__12CBattleEnemy\n.word 0\n.word stateToss__12CBattleEnemy\n.word 0\n.word endStateToss__12CBattleEnemy\n.word 0\n.word beginStateBeat__12CBattleEnemy\n.word 0\n.word stateBeat__12CBattleEnemy\n.word 0\n.word endStateBeat__12CBattleEnemy\n.word 0\n.word beginStateMagnet__12CBattleEnemy\n.word 0\n.word stateMagnet__12CBattleEnemy\n.word 0\n.word endStateMagnet__12CBattleEnemy\n.word 0\n.word beginStateSuspend__12CBattleEnemy\n.word 0\n.word stateSuspend__12CBattleEnemy\n.word 0\n.word endStateSuspend__12CBattleEnemy\n.word 0\n.word beginStateVolley__12CBattleEnemy\n.word 0\n.word stateVolley__12CBattleEnemy\n.word 0\n.word endStateVolley__12CBattleEnemy\n.word 0\n.word beginStateDead__12CBattleEnemy\n.word 0\n.word stateDead__12CBattleEnemy\n.word 0\n.word endStateDead__12CBattleEnemy\n.word 0\n.word aiCardBattle__12CBattleEnemy\n.word 0\n.word onGuard__12CBattleEnemy\n.word 0\n.word onDamage__12CBattleEnemy\n.word 0\n.word onAbsorb__12CBattleEnemy\n.word 0\n.word onInvalid__12CBattleEnemy\n.word 0\n.word onGimmickCard__12CBattleEnemy\n.word 0\n.word onCardBreak__12CBattleEnemy\n.word 0\n.word onReflect__12CBattleEnemy\n.word 0\n.word onAttackCancel__12CBattleEnemy\n.word 0\n.word onCardBattleFailed__12CBattleEnemy\n.word 0\n.word getDuelAttackState__12CBattleEnemy\n.word 0\n.word createFriendCard__12CBattleEnemy9CARD_KINDi\n.word 0\n.word notifyHP__12CBattleEnemy\n.word 0\n.word commonBeginAttack__12CBattleEnemy\n.word 0\n.word commonEndAttack__12CBattleEnemy\n.word 0\n.word 0\n.word 0x49705F6D\n.word 0x6174736E\n.word 0x0065636E\n.word 0x00000000\n.globl _vt$t14CStateTemplate1Z12CBattleEnemy\n_vt$t14CStateTemplate1Z12CBattleEnemy:\n.word 0\n.word 0\n.word 0\n.word _$_t14CStateTemplate1Z12CBattleEnemy\n.word 0\n.word executeBeginState__t14CStateTemplate1Z12CBattleEnemy\n.word 0\n.word executeState__t14CStateTemplate1Z12CBattleEnemy\n.word 0\n.word executeEndState__t14CStateTemplate1Z12CBattleEnemy\n.word 0\n.word 0\n.word 0\n.word 0\n.text\n");
+namespace BattleEnemy {
+const FVECTOR g_vIceSizeTbl[8] = {
+    {{2.1f, 3.5f, 2.1f, 1.0f}},
+    {{1.5f, 2.5f, 1.5f, 1.0f}},
+    {{1.2f, 2.0f, 1.2f, 1.0f}},
+    {{4.0f, 4.0f, 4.0f, 1.0f}},
+    {{2.5f, 2.5f, 2.5f, 1.0f}},
+    {{1.0f, 1.0f, 1.0f, 1.0f}},
+    {{4.0f, 3.0f, 4.0f, 1.0f}},
+    {{2.66f, 2.0f, 2.66f, 1.0f}},
+};
+const unsigned char g_byHeartlessIceSizeIndexTbl[39] = {
+    0, 1, 1, 2, 0, 2, 2, 1, 1, 6, 6, 1, 0,
+    4, 1, 1, 2, 2, 2, 4, 3, 1, 4, 4, 4, 0,
+    6, 1, 7, 7, 2, 1, 1, 1, 2, 2, 1, 1, 1,
+};
+const unsigned char g_byBossIceSizeIndexTbl[38] = {
+    0, 0, 0, 1, 1, 0, 4, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+const FLOAT g_vSpotSizeTbl[9] = {1.4f, 1.0f, 0.8f, 2.0f, 1.0f, 0.6f, 2.0f, 1.2f, 0.0f};
+const unsigned char g_byHeartlessSpotSizeIndexTbl[39] = {
+    0, 1, 1, 2, 0, 2, 2, 1, 1, 6, 6, 1, 0,
+    4, 1, 1, 2, 2, 2, 4, 8, 1, 4, 4, 4, 0,
+    6, 1, 7, 7, 2, 1, 1, 1, 2, 2, 1, 1, 1,
+};
+const unsigned char g_byBossSpotSizeIndexTbl[38] = {
+    8, 8, 8, 1, 1, 8, 4, 0, 8, 8, 8, 8, 0,
+    8, 0, 8, 1, 0, 0, 0, 8, 0, 0, 0, 0, 8,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+};
+const INT GameModeParamHp[4] = {75, 100, 100, 100};
+const FLOAT GameModeParamAp[4] = {0.8f, 1.0f, 1.2f, 1.0f};
+}
+/* CState's vtable (all its virtuals are inline or pure): this object's copy is the one the original kept. */
+__asm__(".rdata\n.align 3\n.word 0\n.word 0\n.word 0\n.word _$_6CState\n.word 0\n.word __pure_virtual\n.word 0\n.word __pure_virtual\n.word 0\n.word __pure_virtual\n.word 0\n.word 0\n.text\n");
+// SOURCE DATA: .data .rodata

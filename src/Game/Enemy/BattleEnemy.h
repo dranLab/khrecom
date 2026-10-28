@@ -15,9 +15,6 @@ struct ENEMY_PARAM; // PARTIAL: added for Game/Enemy/EnemyAirpirate
 struct ENEMY_ACT;   // PARTIAL: added for Game/Enemy/Heartless
 namespace BattleEnemy {
 INT GameModeHp(INT inHp); // PARTIAL: added for Game/Enemy/BattleEnemy
-extern CHAR* SynchroParamName;
-extern CHAR* CamTrgOfsParamName;
-extern INT GameModeParamHp[];
 }
 
 enum CARD_KIND {
