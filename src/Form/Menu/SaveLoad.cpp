@@ -555,14 +555,8 @@ public:
     static BOOL isRikuGame();
     static BOOL isSoraGame();
 };
-namespace ObjType { /* PARTIAL: System/Graphic/Effect/EffectMan.h is too heavy here (an 8-byte enum there too) */
-enum eObjBit { OBJ_BIT_CLEAR = 0, OBJ_BIT_STILL_SCR = 0x80000000L, OBJ_BIT_ALL = 0xFFFEFFFFL, OBJ_BIT_TRUE_ALL = -1 };
-}
-class CSceneEnv { /* PARTIAL: Game/SceneEnv.h needs EffectMan.h */
-public:
-    static void setStop(ObjType::eObjBit iBit);
-    static void setStopGauge(BOOL bStop);
-};
+#include "Game/SceneEnv.h"
+#line 566
 class CPackMan { /* PARTIAL: System/Graphic/PackMan.h is not written yet */
 public:
     static void changeDrawMode(INT nMode);
