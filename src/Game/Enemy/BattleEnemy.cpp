@@ -31,6 +31,10 @@ extern "C" char D_004AD578[];
 /* PARTIAL: until SOURCE DATA, the unit's copy of the header static BattleEnemy::BadStatusEffectName (its .data
  * comes from the original assembly) */
 template <class T> static inline T& _ref(T& x) { return x; }
+namespace BattleEnemy {
+extern CHAR* FreezeEffectName;
+}
+extern "C" char D_004AD928[];
 extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
 FVECTOR getPlayerPos(INT inIndex);
 namespace BattleEnemy {
@@ -233,7 +237,17 @@ void CBattleEnemy::stateZero() {
 void CBattleEnemy::endStateZero() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDuel__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDuel__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateDuel__12CBattleEnemy);
+void CBattleEnemy::endStateDuel() {
+    for (INT i = 0; i < 2; i++) {
+        CEffect* effect = CEffectMan::getEffect(m_hSpotLight[i]);
+        if (effect) {
+            effect->detachCoord();
+            effect->loopEnd();
+        }
+        m_hSpotLight[i] = 0;
+    }
+    bodyCollOnBody(-1);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDuelSuccess__12CBattleEnemy);
 void CBattleEnemy::stateDuelSuccess() {
     if (!isBtlEnemyFlag(0x4000000000ULL)) m_pMove->turnToTargetY(g_pPlayer, 0.17453292f);
