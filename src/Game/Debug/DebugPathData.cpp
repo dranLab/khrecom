@@ -1,5 +1,6 @@
 #include "khtypes.h"
 #define GAME_DEBUG_DEBUGPATHDATA_CPP
+#include "System/Graphic/PathData.h"
 #include "Game/Debug/DebugPathData.h"
 #include "Form/DebugWindow.h"
 #include "System/TaskMan.h"
@@ -8,14 +9,11 @@
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(unsigned int, void* p) throw() { return p; }
 extern "C" char* strcpy(char*, const char*);
-class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs the full RsrcData.h classes */
+class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: RsrcDB.h brings "System/RsrcData.h(156)", not in the original (queue: RsrcDB partition) */
 public:
     static CHAR* getRsrcPTDName(INT nPtdNo);
 };
-class CDbgArrow {
-public:
-    void disp();
-};
+#line 19
 class CHermitePathMoveS : public CTask {
     UBYTE _m_0x40[0x50];
     CDbgArrow m_cArrow; /* 0x90 */
