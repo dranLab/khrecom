@@ -1990,10 +1990,6 @@ void CBattleEnemy::endStateVolley() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
     bodyCollOnBody(-1);
 }
-/* Parked: registers only (3 lines) - the second hit->getDetectPos() (for makePrize) loads m_pCollision into v0 in
- * the original, v1 in ours; tried: dmgType declared/initialized before or after the calls, a pos local, _ref(hit),
- * a second inline (getDitectPos), comma expression, permuter 4 min (5076 candidates, no gain) */
-#if 0
 void CBattleEnemy::beginStateDead() {
     m_ullBtlEnemyFlag &= ~0x200;
     setEntityFlag(0, 0x10000);
@@ -2047,9 +2043,6 @@ void CBattleEnemy::beginStateDead() {
     setEntityFlag(0x40000000, 0);
     setupFade(1.0f, 0.0f, 1500, -1);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDead__12CBattleEnemy);
-#endif
 void CBattleEnemy::stateDead() {
     if (m_pEnemyParam && m_iSysStep == 0 && m_pMove->getVel().y < 0.0f && (m_pMove->getCollisionFlag() & 5)) {
         clearSpeed();
@@ -2222,20 +2215,11 @@ void CBattleEnemy::kill() {
     destroyCard();
     changeBattleEnemyState(30);
 }
-/* Parked: registers only - after destroyCard() the original loads m_ullBtlEnemyFlag into v1 and the ~1 mask into
- * v0 (ours: v0/v1; in our RTL the -2 constant is set before the load, so it gets the other register); the same ld
- * v1/li v0 pattern follows destroyCard() in endCardBattle and hitTest_; tried: setBattleEnemyFlag(0, 1), &= ~1 / -2 /
- * ~1ULL / (INT)~1, reversed operands, a flag local, a reference local, setBattleEnemyFlag(0, 1) (the weak (on,
- * off) inline), if (TRUE), permuter 6 min (20513 candidates, no gain) */
-#if 0
 void CBattleEnemy::attackStateCardDestroy(BOOL inColl) {
     destroyCard();
     setBattleEnemyFlag(0, 1);
     if (inColl) bodyCollOn(-1);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", attackStateCardDestroy__12CBattleEnemyi);
-#endif
 void CBattleEnemy::onBio(INT inSubHp) {
     if (m_iHp > 0) {
         if (CSceneEnv::getStopTypeBit() & (1 << getEntityType())) return;
