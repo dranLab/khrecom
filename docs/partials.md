@@ -28,6 +28,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | decomp/Game-Debug-DebugPathData (20/87; data from source, temporary data-block PARTIALs) | 1115 | 455 | 25 | 934 (931) | 3 |
 | 2026-10-28 | decomp/Game-Debug-DebugPathData (62/87; weak tail from C) | 1115 | 455 | 25 | 935 (931) | 7 |
 | 2026-10-28 | decomp/Game-Debug-DebugPathData (complete 86/87 + 1 parked; A2 part 1: gate dropped) | 1101 | 455 | 25 | 936 (927) | 16 |
+| 2026-10-28 | cleanup/System-Graphic-Effect-libppp-draw-md0_p3f (OMD_PRIM_H) | 1101 | 449 | 24 | 936 (927) | 16 |
 
 <!-- partials:start -->
 ## Summary
@@ -35,8 +36,8 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1101 (1027 in 110 headers, 74 in 30 .cpp); MATCH: 16
   by category: method 467, data member 71, type 96, fwd decl 53, #include 29, changed in place 132, padding 33, path override 24, gate 39, guessed 43, header-level 75, stand-in 31, other 8
-stand-ins: 455 foreign in 139 files (133 names), 191 unattributed, 173 own
-duplicate class names across headers: 25
+stand-ins: 449 foreign in 136 files (132 names), 191 unattributed, 173 own
+duplicate class names across headers: 24
 padding: 36 arrays, 26 accessors
 mechanisms: 936 sites (927 untagged); #line: 1167
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 155, MAPENEMY_H_NO_COLL_ANIM 2
@@ -51,7 +52,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 15.0 | `System/Graphic/Effect/libppp/draw/md0_p3f.h` | ready | 6 stand-in files, 1 dup headers, 0 gate users | OMD_PRIM_H (1 complete) |  |
 | R0 | 12.0 | `Game/SceneEnv.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | CSceneEnv (1 partial) |  |
 | R0 | 12.0 | `System/Graphic/WorldEnv.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | CWorldEnv (1 complete) |  |
 | R0 | 10.5 | `System/Graphic/Effect/EffectMan.h` | ready | 4 stand-in files, 0 dup headers, 0 gate users, 5 PARTIAL | CEffectMan, eObjBit (1 superset, 1 complete) |  |
@@ -71,6 +71,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R0 | 2.0 | `System/PadIO.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPadIO (1 complete) |  |
 | R0 | 2.0 | `System/PlaySpeedCtrl.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlaySpeedCtrl (1 complete) |  |
 | R0 | 2.0 | `System/RcfCD.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRcfCD (1 complete) |  |
+| R1 | 29.0 | `Game/Player/Player.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 34 PARTIAL | CPlayer (1 partial) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -92,7 +93,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPrizeGauge` | gated | Game/Player/PlayerGauge.h | 6 |  | missing fields: m_cardStack, m_nStack, m_nTexID; missing methods: exePrizeCard, main, setDispMogSeq, setDispSeq, setDropMp, setPrizeCard, ... (+2); padding: _m_0x40 |
 | `CSceneEnv` | partial | Game/SceneEnv.h | 6 |  | missing methods: clearStop, ~CSceneEnv |
 | `CWorldEnv` | complete | System/Graphic/WorldEnv.h | 6 |  |  |
-| `OMD_PRIM_H` | complete | System/Graphic/Effect/libppp/draw/md0_p3f.h | 6 | System/Graphic/Effect/libppp/partMng.h |  |
 | `CBuf` | superset | System/Buf.h | 5 |  | 3 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `COLL_INFO_UNION` | missing | Game/Movement.h | 5 |  |  |
