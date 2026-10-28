@@ -3,6 +3,7 @@
 #include "Game/CardBattle.h"
 #include "Game/BattleCard.h"
 #include "Game/Entity.h"
+#include "Game/Player/Player.h"
 #include "Game/GameWork.h"
 #include "System/TaskMan.h"
 #include "System/HeapMan.h"
@@ -73,6 +74,9 @@ extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039AF98");
 extern "C" char D_00477690[]; /* "...CardBattle.cpp(4378)" */
 extern "C" char D_00477338[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_00477298[]; /* notifyCompleteGimmick's TRACE format */
+namespace PL {
+extern FLOAT g_fDefAttr[18][6];
+}
 /* the unit's copy of Game/CardKind's header static table (data still from assembly) */
 extern const CARD_DATA cardDataTbl[224] __asm__("cardDataTbl_00478270");
 /* CARD's inline constructor (Game/Card.cpp's _setCard) */
@@ -407,7 +411,24 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcEnchantParam__Q2
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcEnchant_AttackPoint__Q210CardBattle11CCardBattleRiR8ATK_KIND8ATK_ATTRUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayerEnchant__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", resetPlayerEnchant__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", transferPlayerEnchant__Q210CardBattle11CCardBattleP7CPlayer);
+void CCardBattle::transferPlayerEnchant(CPlayer* inPL) {
+    if (inPL && m_cardEnchant[0][0] >= 0x44) {
+        setPlayerEnchant(m_cardEnchant[0][0]);
+        inPL->setDefAttr(PL::g_fDefAttr[0]);
+        inPL->m_iMaxCombo = 3;
+        inPL->m_fPrizeDraw = 5.0f;
+        inPL->m_fCardDraw = 5.0f;
+        inPL->setBanish(FALSE);
+        inPL->setConditionFlag(0, 0x100000);
+        inPL->setConditionFlag(0, 0x80);
+        inPL->setConditionFlag(0, 0x100);
+        inPL->setConditionFlag(0, 0x20000000);
+        inPL->setConditionFlag(0, 0x40000000);
+        inPL->setConditionFlag(0, 0x1000);
+        inPL->setReflectGuard(FALSE);
+        inPL->setAeroGuard(FALSE);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeRegeneration__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeBio__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropFriendCard__10CardBattleR4CARDi);
