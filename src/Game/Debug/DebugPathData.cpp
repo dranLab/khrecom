@@ -6,6 +6,8 @@
 #include "System/Graphic/Str.h"
 #include "System/DebugProcInfo.h"
 #include "Game/Debug/DebugPathData.h"
+#define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h" /* MATCH: the original includes it under this name */
+#include "System/Graphic/PathDataCamera.h"
 #include "Form/DebugWindow.h"
 #include "System/TaskMan.h"
 #include "include_asm.h"
@@ -52,7 +54,17 @@ INT debugWinPathLineAddSubCall(CDebugWindow* pWin, INT iMes, INT iParam) {
     else if (iParam & 0x100) pWin->addValue(1, NULL, NULL, &CDebugPathData::m_fValuePlus, NULL);
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __simuCamPause__FP15CPathDataCamera);
+void __simuCamPause(CPathDataCamera* pHPC) {
+    if (dbgButtonTrg(USR_SYSTEM, 0x80, 1)) {
+        if (pHPC->isStop()) {
+            pHPC->run();
+            CDebugPathData::m_pFrame->start();
+        } else {
+            pHPC->stop();
+            CDebugPathData::m_pFrame->stop();
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditSimulateLineCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditSimulateSpeedLineCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditSimulateSpeedCamLineCall__FP12CDebugWindowii);

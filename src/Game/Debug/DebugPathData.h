@@ -12,7 +12,23 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 /* PARTIAL: the full class, for Game/Debug/DebugPathData only (no SOURCE DATA yet: the inline's strings are labels) */
 class CPathData;
 class CNakCamera;
-class CPDFrameTime;
+class CPDFrameTime {
+    INT m_iFlags;      /* 0x00 */
+    FLOAT m_fTimer;    /* 0x04 */
+    char m_szStr[32];  /* 0x08 */
+    CFnt m_cFnt;
+    CTile m_cTile;
+
+public:
+    CPDFrameTime();
+    ~CPDFrameTime();
+    void reset();
+    void start() { m_iFlags |= 2; }
+    void stop() { m_iFlags &= ~2; }
+    void on();
+    void off();
+    void disp();
+};
 extern "C" char D_00485FA8[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.h" */
 extern "C" char D_00485FD8[]; /* "m_pInstance" */
 class CDebugPathData : public CTask {
