@@ -31,6 +31,7 @@ inline void _emptyStringPlaceholder0() {
 #include "System/HeapMan.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Sound/SoundMan.h"
+#include "Game/CardRevolver.h"
 #include "include_asm.h"
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
@@ -41,27 +42,6 @@ inline void operator delete[](void* mem) { com_free(mem); }
 using namespace CardBattle;
 
 namespace CardBattle {
-class CStockFolder {
-    BYTE _m_0x00[0xb0];
-
-public:
-    CStockFolder(::CTask* pParent, INT inUser);
-    void destroy();
-    INT calcEnemyStockSkill();
-    void setStockInfo();
-    INT getStock(INT inFlag);
-    void setPronounceCard(INT inKind, INT inNumber);
-    INT setPlayPronounce();
-};
-class CEnchantGauge : public ::CTask {
-    BYTE _m_0x40[0x20];
-
-public:
-    CEnchantGauge(::CTask* pParent, INT inUser, CARD& inCard);
-    virtual ~CEnchantGauge();
-    void changeCount(INT inCount);
-    void destroy();
-};
 void calcFreezeDamage(INT& ioDamage);
 INT getDropPlutoCard(CARD& outData);
 
