@@ -25,7 +25,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 
 | unit | functions left | instr left | parked | data from asm |
 |---|---:|---:|---:|---|
-| `Game/Enemy/BattleEnemy` | 249 | 9962 |  | .data .rodata |
 | `Form/Menu/SaveLoad` | 86 | 9524 |  | .bss .data .rodata |
 | `Game/CardBattle` | 85 | 7583 |  | .data .rodata |
 | `Game/Player/PlayerSora` | 2 | 7322 | 2 |  |
@@ -71,6 +70,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/EffectMotion` | 4 | 609 | 1 |  |
 | `System/Graphic/Effect/EffectMan` | 3 | 604 | 3 |  |
 | `Game/Enemy/MapEnemy` | 3 | 562 | 3 |  |
+| `Game/Enemy/BattleEnemy` | 5 | 558 | 5 |  |
 | `System/RcfCD` | 4 | 549 |  |  |
 | `Game/Atel/CameraMan` | 1 | 536 |  |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
@@ -237,6 +237,11 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Player/PlayerSora` | `exeStockSkill__Q22PL11CPlayerSora` | 7049 | 14 of 7930 lines differ, in three case groups (711/741/1042; all other jump-table groups match): the original loads m_pMove (lw 0xa0) between the two stores into the {0, d0, 0, 0} temp and stores m_fDir before copying the temp; ours (sched1) loads m_pMove after both temp stores and sched2 keeps it … |
 | `Game/Player/PlayerSora` | `exeGlide__Q22PL11CPlayerSora` | 273 | only the analog-steering block after Homing differs: the original loads m_pMove (lw v1,0xa0) before the y store into the {0, dir, 0, 0} temporary at sp+0x20 and copies it (lq/sq to sp+0x10) after the m_fDir store; ours stores y and loads the temp first (its stack-temp accesses conflict with this-> … |
 | `Game/Player/SummonTink` | `initRecover__Q26Summon11CSummonTink` | 37 | (comment) Best attempt: same size; combine folds the Crd() result straight into a3 ("move a3,v0" right after the call), so the effect name's address lands in v0 instead of v1 and the lui/lw are scheduled later. |
+| `Game/Enemy/BattleEnemy` | `recover__12CBattleEnemyiPCciRC7FVECTORPC6CCoord` | 121 | 3 lines - the original keeps the hp <= 0 `return 0` as a stub right after the bgtz (the count >= 8 and inParent paths jump to it) and a separate return-0 copy after ApplyMatrix; ours (this goto form) merges the stub into the ApplyMatrix copy; tried: early returns, nested if/else with final return … |
+| `Game/Enemy/BattleEnemy` | `setupFlick__12CBattleEnemy` | 82 | the 30-degree constant (0.5235988f) is loaded once into $f20 and reused for sinf, cosf and calcOrbitSpeedFromDistance in ours; the original reloads it (lui/ori/mtc1) before each call and keeps the sinf result in $f20 instead (vel.y stored after cosf); tried: field stores vs vel.set(), … |
+| `Game/Enemy/BattleEnemy` | `initEnemyParam__12CBattleEnemyiii` | 245 | 34 lines - the Riku-game scan loop: the original places the getRsrcData() ternary before the inline getExtraParam's found block and keeps the parameter in s0 (ours: s2, blocks swapped); the rest (seek loops, relocation, floor mapping, basic param) matches; tried: while/for/continue loop forms, … |
+| `Game/Enemy/BattleEnemy` | `playSmallDamageSE__12CBattleEnemy` | 55 | the load of hitBody->m_pCollision (getDetectPos) is scheduled before the vol = -1 store in ours, after it in the original (8 lines: registers a2/v1, order): our vol store is a fixed scalar MEM that cannot alias the varying struct load; `INT vol[1]` matches but the ref says INT vol (same open … |
+| `Game/Enemy/BattleEnemy` | `playBigDamageSE__12CBattleEnemy` | 55 | the load of hitBody->m_pCollision (getDetectPos) is scheduled before the vol = -1 store in ours, after it in the original (8 lines: registers a2/v1, order): our vol store is a fixed scalar MEM that cannot alias the varying struct load; `INT vol[1]` matches but the ref says INT vol (same open … |
 | `Game/Enemy/BattleEnemyManager` | `createBattleEnemies___19CBattleEnemyManager` | 149 | (comment) Near match: only `this` and `group` swap registers (s2/s3). |
 | `Game/Enemy/EnemyWhitemushroom` | `damage___19CEnemyWhitemushroom` | 184 | (comment) Near-match (3 lines): in case 4 the original loads the vtable pointer for getLockOnPos right after the two TIMEQ stores of setupFade; here the vtable entry loads depend on all six setupFade stores (unknown alias), so the vptr load ranks below them and comes last. Tried (~45 min): … |
 | `Game/Enemy/HumanBoss` | `initalize__10CHumanBossiiUi` | 58 |  |
@@ -292,7 +297,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). |
 | `Form/Menu/Roulette` | `setCardInfo__9CRoulettei` | 270 | (comment) Scheduling only: after the CButton constructor the copy to pButton (s1) is scheduled before the getLayPosition argument setup instead of after it (5 lines differ). |
 
-Totals: 1520 functions (154162 instructions) in 85 units, 169 of them parked; 25 units take a data section from assembly.
+Totals: 1276 functions (144758 instructions) in 85 units, 174 of them parked; 24 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
