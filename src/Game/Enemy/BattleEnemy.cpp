@@ -35,6 +35,7 @@ namespace BattleEnemy {
 extern CHAR* FreezeEffectName;
 }
 extern "C" char D_004AD928[];
+extern "C" char D_004AD2A0[];
 extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
 FVECTOR getPlayerPos(INT inIndex);
 namespace BattleEnemy {
@@ -308,7 +309,14 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateShock__1
 void CBattleEnemy::endStateShock() {
     if (!(m_ullBackupFlag & 4)) m_pMove->enableGravity(FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateTornado__12CBattleEnemy);
+void CBattleEnemy::beginStateTornado() {
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xC5B, D_004AD2A0, 0);
+    changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
+    m_pMove->enableGravity(FALSE);
+    m_iSysStep = 0;
+    bodyCollOff(-1);
+    bodyCollOffBody(-1);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateTornado__12CBattleEnemy);
 void CBattleEnemy::endStateTornado() {
     bodyCollOn(-1);
