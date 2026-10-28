@@ -1334,8 +1334,49 @@ void CPrizeGauge::setDispSeq() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispMogSeq__Q25Gauge11CPrizeGauge);
-__asm__(".rdata\n.align 4\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x00000000\n.word 0x00000000\n.text\n");
+void CPrizeGauge::setDispMogSeq() {
+    INT mp;
+    INT i;
+    INT pow;
+    FVECTOR pos;
+    mp = m_iDropMp;
+    if (mp <= 0) mp = m_iMp;
+    if (mp > 99999) mp = 99999;
+    m_iMpFigure = 0;
+    pow = 10000;
+    for (i = 5; i > 0; i--) {
+        INT n = mp / pow % 10;
+        if (n > 0 && m_iMpFigure == 0) m_iMpFigure = i;
+        m_pMogSeqCtrls[i].changeTexture(0, 0, NULL, &CardBattle::g_uvCRCounterNumTex[m_nTexID][n], &CardBattle::g_uvCRCounterNumTex[m_nTexID + 1][n]);
+        pow /= 10;
+    }
+    D2::C2DMan::getLayPosition(g_szLadCockpit, 0x10, 0, pos, FALSE);
+    pos.x += m_iMpFigure * 15 + 35;
+    pos.y += 20.0f;
+    for (i = 1; i <= m_iMpFigure; i++) {
+        pos.x -= 15.0f;
+        m_pMogSeqCtrls[i].setPos(pos);
+    }
+    switch (m_uiMogState) {
+    case 0:
+    case 1:
+    case 3:
+    case 4:
+    case 6:
+    case 7:
+    case 9:
+        break;
+    case 2:
+    case 5:
+    case 8:
+    default:
+        for (i = 1; i < 6; i++) {
+            if (i <= m_iMpFigure) m_pMogSeqCtrls[i].enableDisp(0, TRUE);
+            else m_pMogSeqCtrls[i].enableDisp(0, FALSE);
+        }
+        break;
+    }
+}
 void CPrizeGauge::setPrizeExp(INT inExp) {
     if (!m_pInstance) return;
     if (CGameWork::getInt(1, 0xE2)) return;
