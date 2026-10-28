@@ -3,6 +3,7 @@
 #include "System/Graphic/Effect/libppp/eiProg/pppColor.h"
 #include "System/Graphic/Effect/libppp/eiProg/pppScale.h"
 #include "System/Graphic/Effect/libppp/draw/md.h"
+#include "System/Graphic/Effect/libppp/draw/md0_p3f.h"
 #include "System/Debug.h"
 #include "include_asm.h"
 
@@ -12,17 +13,6 @@ enum {
     DRAWSHIPOLY_COLOR = 2,
     DRAWSHIPOLY_THIS = 3
 };
-
-typedef struct { /* 0x10 */
-    char flag;
-    char ptype;
-    short pc;
-    u_char tno;
-    u_char timposx;
-    u_char res[2];
-    u_word tex0l;
-    u_word tex0h;
-} OMD_PRIM_H;
 
 extern sceVu0FMATRIX ppvCameraMatrixInv;
 extern char D_00469F88[];
