@@ -1447,8 +1447,500 @@ INT CCardRevolver::returnStockCard(INT inFlag) {
     m_iFirstSkill = 0;
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", calcStockSkill__Q210CardBattle13CCardRevolver);
-__asm__(".rdata\n.align 4\n.word 0x001E511C\n.word 0x001E5124\n.word 0x001E5130\n.word 0x001E5130\n.word 0x001E5130\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001E5684\n.word 0x001E568C\n.word 0x001E5694\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E569C\n.word 0x001E56A4\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56B4\n.word 0x001E56D8\n.word 0x001E56BC\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56AC\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56C4\n.word 0x00000000\n.text\n");
+INT CCardRevolver::calcStockSkill() {
+    INT nSkill;
+    INT nSame;
+    INT sameCardID;
+    INT nAttack;
+    INT nMagic;
+    INT nSum;
+    INT index;
+    INT category;
+    INT i;
+    UINT uiCode;
+    UINT uiCode2;
+    UINT uiCode02;
+    USHORT nCodeCategory;
+    if (m_uiUser != 1) return calcEnemyStockSkill();
+    nSkill = 0;
+    m_iExtraSkill = 0;
+    nSame = 0;
+    m_iStockSkill = m_iStock;
+    m_iFirstSkill = 0;
+    sameCardID = 0;
+    nAttack = 0;
+    nMagic = 0;
+    uiCode = 0;
+    nCodeCategory = 0;
+    nSum = 0;
+    for (i = 0; i < m_iStock; i++) {
+        category = m_pDataS[i]->m_nCategory1;
+        index = m_pDataS[i]->m_nKind;
+        switch (category) {
+        case 1:
+            nAttack++;
+            break;
+        case 2:
+            nMagic++;
+            break;
+        case 3:
+        case 4:
+            break;
+        case 5:; // MATCH: 5 falls off the end, so it is not grouped with 3-4 (5 case nodes give the jump table)
+        }
+        if (index == m_pDataS[0]->m_nKind) {
+            nSame++;
+            sameCardID = index;
+        }
+        uiCode |= index << (i * 8);
+        nSum += m_pDataS[i]->m_nNumber;
+        nCodeCategory |= category << (i * 4);
+    }
+    uiCode2 = (uiCode >> 8) & 0xFFFF;
+    uiCode02 = uiCode & 0xFFFF; // MATCH: the tests below use uiCode & 0xFFFF (gcse copy), the pair switch uiCode02
+    if (nSame == 1) {
+        nSame = 0;
+        for (i = 1; i < m_iStock; i++) {
+            index = m_pDataS[i]->m_nKind;
+            if (index == m_pDataS[1]->m_nKind) {
+                sameCardID = index;
+                nSame++;
+            }
+        }
+    }
+    if (DebugWork::g_dw.player.iSkillLock >= 4) {
+        m_iStockSkill = DebugWork::g_dw.player.iSkillLock;
+        goto end;
+    }
+    if (m_uiFlag & 0x200) {
+        m_iStockSkill = CCardBattle::getDuelSkill();
+        goto end;
+    }
+    if (m_iStock == 3) {
+        if (nAttack == 3) {
+            if (sameCardID == 0x12) {
+                if (m_uiFlag & 0x100) {
+                    if (nSum == 27) nSkill = 0x61;
+                    else if (nSum >= 5 && nSum <= 15) nSkill = 0x5F;
+                    else if (nSum >= 16 && nSum <= 25) nSkill = 0x60;
+                }
+            } else if (nSum == 0 || nSum == 27) {
+                nSkill = 7;
+            } else if (nSum < 7) {
+                nSkill = 10;
+            } else if (nSum < 10) {
+                nSkill = 11;
+            } else if (nSum < 16) {
+                if (nSame == 3) nSkill = 4;
+                else if (nSame == 1) nSkill = 5;
+            } else if (nSum >= 24) {
+                nSkill = 8;
+            } else if (nSum >= 20) {
+                if (nSame == 3) nSkill = 6;
+                else if (nSame == 1) nSkill = 9;
+            }
+            if (nSkill && CTechnic::canUse(nSkill)) {
+                m_iStockSkill = nSkill;
+                goto end;
+            }
+        }
+        switch (uiCode) {
+        case 0x1A1A1A:
+            nSkill = 0x14;
+            break;
+        case 0x1B1B1B:
+            nSkill = 0x15;
+            break;
+        case 0x1C1C1C:
+            nSkill = 0x16;
+            break;
+        case 0x1D1D1D:
+            nSkill = 0x17;
+            break;
+        case 0x1E1E1E:
+            nSkill = 0x18;
+            break;
+        case 0x1F1F1F:
+            nSkill = 0x19;
+            break;
+        case 0x202020:
+            nSkill = 0x1A;
+            break;
+        case 0x201E1F:
+            nSkill = 0x2B;
+            break;
+        case 0x20201F:
+            nSkill = 0x2C;
+            break;
+        case 0x201E1D:
+            nSkill = 0x30;
+            break;
+        case 0x1E1A1A:
+            nSkill = 0x20;
+            break;
+        case 0x1A1A20:
+            nSkill = 0x21;
+            break;
+        case 0x1A1A28:
+            nSkill = 0x22;
+            break;
+        case 0x1F1B1B:
+            nSkill = 0x23;
+            break;
+        case 0x201A1B:
+            nSkill = 0x25;
+            break;
+        case 0x232323:
+            nSkill = 0x35;
+            break;
+        case 0x262626:
+            nSkill = 0x37;
+            break;
+        case 0x252525:
+            nSkill = 0x39;
+            break;
+        case 0x282828:
+            nSkill = 0x3C;
+            break;
+        case 0x242424:
+            nSkill = 0x3E;
+            break;
+        case 0x272727:
+            nSkill = 0x40;
+            break;
+        case 0x292929:
+            nSkill = 0x42;
+            break;
+        case 0x313131:
+            nSkill = 0x45;
+            break;
+        case 0x323232:
+            nSkill = 0x48;
+            break;
+        case 0x333333:
+            nSkill = 0x4C;
+            break;
+        case 0x353535:
+            nSkill = 0x4E;
+            break;
+        case 0x343434:
+            nSkill = 0x50;
+            break;
+        case 0x363636:
+            nSkill = 0x52;
+            break;
+        case 0x373737:
+            nSkill = 0x54;
+            break;
+        case 0x393939:
+            nSkill = 0x56;
+            break;
+        case 0x383838:
+            nSkill = 0x63;
+            break;
+        }
+        if (nSkill && CTechnic::canUse(nSkill)) {
+            m_iStockSkill = nSkill;
+            goto end;
+        }
+        if (nAttack == 2) {
+            switch (uiCode & 0xFF) {
+            case 0x1A:
+                nSkill = 0x1B;
+                break;
+            case 0x1B:
+                nSkill = 0x1C;
+                break;
+            case 0x1C:
+                nSkill = 0x1D;
+                break;
+            case 0x1F:
+                nSkill = 0x27;
+                break;
+            case 0x20:
+                nSkill = 0x1F;
+                break;
+            case 0x29:
+                nSkill = 0x1E;
+                break;
+            case 0x23:
+                nSkill = 0x28;
+                break;
+            case 0x25:
+                nSkill = 0x3A;
+                break;
+            case 0x38:
+                nSkill = 0x64;
+                if (m_uiFlag & 0x100) nSkill = 0x65;
+                break;
+            }
+            if (nSkill && CTechnic::canUse(nSkill)) {
+                m_iStockSkill = nSkill;
+                goto end;
+            }
+        }
+        switch (nCodeCategory) {
+        case 0x551:
+            if ((uiCode & 0xFFFF00) == 0x313200 || (uiCode & 0xFFFF00) == 0x323100) nSkill = 0xC;
+            break;
+        case 0x515:
+            if ((uiCode & 0xFF00FF) == 0x310032 || (uiCode & 0xFF00FF) == 0x320031) nSkill = 0xC;
+            break;
+        case 0x155:
+            if ((uiCode & 0xFFFF) != 0x3132) {
+                if ((uiCode & 0xFFFF) == 0x3231) nSkill = 0xC;
+            } else {
+                nSkill = 0x4A;
+            }
+            break;
+        case 0x222:
+            switch (uiCode & 0xFFFF) {
+            case 0x1B20:
+                nSkill = 0x24;
+                break;
+            case 0x1F1E:
+                nSkill = 0x2D;
+                break;
+            }
+            break;
+        case 0x322:
+            if ((uiCode & 0xFFFF) == 0x1E20) nSkill = 0x29;
+            break;
+        case 0x232:
+            if ((uiCode & 0xFFFF) == 0x231E) nSkill = 0x2A;
+            break;
+        case 0x333:
+            if ((uiCode & 0xFFFF) == 0x2724) nSkill = 0x2E;
+            break;
+        case 0x533:
+            if ((uiCode & 0xFF0000) == 0x350000) nSkill = 0x2F;
+            break;
+        case 0x433:
+            if ((uiCode & 0xFFFF) == 0x2823) nSkill = 0x2F;
+            break;
+        case 0x523:
+            if ((uiCode & 0xFF0000) == 0x350000) nSkill = 0x31;
+            break;
+        case 0x423:
+            if ((uiCode & 0xFFFF) == 0x1B25) nSkill = 0x31;
+            break;
+        case 0x123:
+            if ((uiCode & 0xFFFF) == 0x1F29) nSkill = 0x43;
+            break;
+        case 0x522:
+            if ((uiCode & 0xFF0000) == 0x360000) nSkill = 0x32;
+            break;
+        case 0x422:
+            if ((uiCode & 0xFFFF) == 0x201F) nSkill = 0x32;
+            break;
+        case 0x444:
+            if ((uiCode & 0xFFFF) == 0x302E) nSkill = 0x33;
+            break;
+        case 0x122:
+            if ((uiCode & 0xFFFF) == 0x1E1E) nSkill = 0x26;
+            break;
+        case 0x133: // MATCH: an empty case between 0x123 and 0x155 (the tree splits at 0x155)
+            break;
+        }
+        if (nSkill && CTechnic::canUse(nSkill)) {
+            m_iStockSkill = nSkill;
+            goto end;
+        }
+    }
+    if ((m_uiFlag & 0x800) && nMagic >= 2) {
+        if ((uiCode & 0xFFFF00) == 0x212200 || (uiCode & 0xFFFF00) == 0x222100) nSkill = 0x57;
+        if ((uiCode & 0xFF00FF) == 0x2122 || (uiCode & 0xFF00FF) == 0x2221) nSkill = 0x57;
+        if ((uiCode & 0xFFFF) == 0x2122 || (uiCode & 0xFFFF) == 0x2221) nSkill = 0x57;
+        if (nSkill) {
+            m_iStockSkill = nSkill;
+            goto end;
+        }
+        if (uiCode == 0x222222) {
+            m_iStockSkill = 0x59;
+            goto end;
+        }
+        if ((uiCode & 0xFFFF00) == 0x222200) {
+            if (m_iStock == 3) m_iFirstSkill = m_pDataS[0]->m_nKind;
+            nSkill = 0x58;
+        }
+        if ((uiCode & 0xFFFF) == 0x2222) {
+            if (m_iStock == 3) m_iExtraSkill = m_pDataS[2]->m_nKind;
+            nSkill = 0x58;
+        }
+        if (nSkill) {
+            m_iStockSkill = nSkill;
+            goto end;
+        }
+    }
+    switch (uiCode02) {
+    case 0x1A1A:
+        nSkill = 0xD;
+        break;
+    case 0x1B1B:
+        nSkill = 0xE;
+        break;
+    case 0x1C1C:
+        nSkill = 0xF;
+        break;
+    case 0x1D1D:
+        nSkill = 0x10;
+        break;
+    case 0x1E1E:
+        nSkill = 0x11;
+        break;
+    case 0x1F1F:
+        nSkill = 0x12;
+        break;
+    case 0x2020:
+        nSkill = 0x13;
+        break;
+    case 0x2323:
+        nSkill = 0x34;
+        break;
+    case 0x2626:
+        nSkill = 0x36;
+        break;
+    case 0x2525:
+        nSkill = 0x38;
+        break;
+    case 0x2828:
+        nSkill = 0x3B;
+        break;
+    case 0x2424:
+        nSkill = 0x3D;
+        break;
+    case 0x2727:
+        nSkill = 0x3F;
+        break;
+    case 0x2929:
+        nSkill = 0x41;
+        break;
+    case 0x3131:
+        nSkill = 0x44;
+        break;
+    case 0x3232:
+        nSkill = 0x47;
+        break;
+    case 0x3333:
+        nSkill = 0x4B;
+        break;
+    case 0x3535:
+        nSkill = 0x4D;
+        break;
+    case 0x3434:
+        nSkill = 0x4F;
+        break;
+    case 0x3636:
+        nSkill = 0x51;
+        break;
+    case 0x3737:
+        nSkill = 0x53;
+        break;
+    case 0x3939:
+        nSkill = 0x55;
+        break;
+    case 0x1A31:
+        nSkill = 0x46;
+        break;
+    case 0x3838:
+        nSkill = 0x62;
+        break;
+    default:
+        if ((nCodeCategory & 0xFF) == 0x15 && (uiCode02 & 0xFF) == 0x32) nSkill = 0x49;
+        break;
+    }
+    if (nSkill && CTechnic::canUse(nSkill)) {
+        m_iStockSkill = nSkill;
+        if (m_iStock == 3) m_iExtraSkill = m_pDataS[2]->m_nKind;
+        goto end;
+    }
+    switch (uiCode2) {
+    case 0x1A1A:
+        nSkill = 0xD;
+        break;
+    case 0x1B1B:
+        nSkill = 0xE;
+        break;
+    case 0x1C1C:
+        nSkill = 0xF;
+        break;
+    case 0x1D1D:
+        nSkill = 0x10;
+        break;
+    case 0x1E1E:
+        nSkill = 0x11;
+        break;
+    case 0x1F1F:
+        nSkill = 0x12;
+        break;
+    case 0x2020:
+        nSkill = 0x13;
+        break;
+    case 0x2323:
+        nSkill = 0x34;
+        break;
+    case 0x2626:
+        nSkill = 0x36;
+        break;
+    case 0x2525:
+        nSkill = 0x38;
+        break;
+    case 0x2828:
+        nSkill = 0x3B;
+        break;
+    case 0x2424:
+        nSkill = 0x3D;
+        break;
+    case 0x2727:
+        nSkill = 0x3F;
+        break;
+    case 0x2929:
+        nSkill = 0x41;
+        break;
+    case 0x3131:
+        nSkill = 0x44;
+        break;
+    case 0x3232:
+        nSkill = 0x47;
+        break;
+    case 0x3333:
+        nSkill = 0x4B;
+        break;
+    case 0x3535:
+        nSkill = 0x4D;
+        break;
+    case 0x3434:
+        nSkill = 0x4F;
+        break;
+    case 0x3636:
+        nSkill = 0x51;
+        break;
+    case 0x3737:
+        nSkill = 0x53;
+        break;
+    case 0x3939:
+        nSkill = 0x55;
+        break;
+    case 0x1A31:
+        nSkill = 0x46;
+        break;
+    case 0x3838:
+        nSkill = 0x62;
+        break;
+    default:
+        if (((nCodeCategory & 0xFF0) >> 4) == 0x15 && (uiCode2 & 0xFF) == 0x32) nSkill = 0x49;
+        break;
+    }
+    if (nSkill && CTechnic::canUse(nSkill)) {
+        m_iStockSkill = nSkill;
+        m_iFirstSkill = m_pDataS[0]->m_nKind;
+    }
+end:
+    m_iStockSum = nSum;
+    setStockInfo();
+    ((PLM::CPlayerManager*)CTaskMan::getSysTask(0x1F))->setReqLoad(m_iStockSkill, 0);
+    return m_iStockSkill;
+}
 INT CCardRevolver::calcEnemyStockSkill() {
     UINT uiKinds = 0;
     INT nSum = 0;
