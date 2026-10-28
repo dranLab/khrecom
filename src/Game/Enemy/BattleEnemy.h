@@ -137,6 +137,8 @@ public:
     BOOL isReraise_();
     BOOL setupDuelCard();
     void cardBattleProc_();
+    void setGuardEffect_(const FVECTOR* inPos);
+    void reviseObject_();
     void setupHitBack();
     void makeRoulettePrize(const FVECTOR* inPos);
     BOOL checkResist_(ATK_KIND inDmgKind);
