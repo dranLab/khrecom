@@ -1292,7 +1292,27 @@ void CBattleEnemy::cardBattleProc_() {
     }
     m_ullBtlEnemyFlag &= ~0x800;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", reviseObject___12CBattleEnemy);
+void CBattleEnemy::reviseObject_() {
+    FVECTOR result;
+    FVECTOR pos;
+    FVECTOR v;
+    FLOAT len;
+    if (!m_pBodyColl) return;
+    if (m_pBodyColl->collideBody(&result, NULL, NULL)) {
+        pos = getPos();
+        setOldPos(pos);
+        SubVectorXYZ(v, result, pos);
+        v.y = 0.0f;
+        len = Math3D::VectorLength(v);
+        Normalize(v, v);
+        ScaleVectorXYZ(v, v, len * m_fBodyRviseCoefficient);
+        AddVectorXYZ(pos, pos, v);
+        setPos(pos);
+        m_ullBtlEnemyFlag |= 0x800000;
+    } else {
+        m_ullBtlEnemyFlag &= ~0x800000;
+    }
+}
 void CBattleEnemy::updateBindTimer_() {
     if (m_tqBindTimer > 0) {
         m_tqBindTimer -= getFrameRate();
