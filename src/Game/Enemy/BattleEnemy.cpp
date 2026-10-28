@@ -976,7 +976,17 @@ BOOL CBattleEnemy::isLastLeave_(INT inResultHp) {
     }
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", isReraise___12CBattleEnemy);
+BOOL CBattleEnemy::isReraise_() {
+    CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (cb && _getEnchantKind(cb, 2) == 0x2E) {
+        m_iHp = getHpMax() / 4;
+        notifyHP();
+        Gauge::CCommonGauge::setDispSeq(getHandle(), 1);
+        CardBattle::CCardBattle::decEnchantTime(2, 0x28, 0x2E);
+        return TRUE;
+    }
+    return FALSE;
+}
 /* CCardBattle's m_cardEnchant as the original's CARD[2] (Game/CardBattle.h declares bytes), and its
  * getEnchantKind(INT inUser) inline (1-based user), as in Game/CardRevolver */
 BOOL CBattleEnemy::isQuickRecover_() {
