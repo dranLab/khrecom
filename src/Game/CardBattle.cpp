@@ -1,6 +1,14 @@
 #include "khtypes.h"
+#include "System/Task.h"
 #include "Game/CardBattle.h"
+#include "Game/BattleCard.h"
+#include "System/HeapMan.h"
+#include "System/Graphic/2d/2DSeqCtrl.h"
+#include "System/Sound/SoundMan.h"
 #include "include_asm.h"
+
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 
 using namespace CardBattle;
 
@@ -12,6 +20,58 @@ public:
     void setStockInfo();
 };
 void calcFreezeDamage(INT& ioDamage);
+
+class CDuelGauge : public ::CTask {
+private:
+    UINT m_uiState;        /* 0x40 */
+    UINT m_uiTimerState;   /* 0x44 */
+    UINT m_uiCountState;   /* 0x48 */
+    UINT m_uiCount;        /* 0x4c */
+    UINT m_uiCountMax;     /* 0x50 */
+    UINT m_uiResult;       /* 0x54 */
+    UINT m_uiFlag;         /* 0x58 */
+    TIMEQ m_tqTimer;       /* 0x5c */
+    TIMEQ m_tqLimit;       /* 0x60 */
+    HANDLE m_hTimerSE;     /* 0x64 */
+    D2::C2DSeqCtrl* m_pSeqCtrls; /* 0x68 */
+
+public:
+    CDuelGauge(::CTask* pParent);
+    virtual ~CDuelGauge();
+    virtual void main();
+
+private:
+    void _initialize();
+    void setTimer(UINT inState);
+    void exeTimer();
+    void changeTimer(INT inTime);
+    void setCount(UINT inState);
+    void exeCount();
+
+public:
+    UINT getState() const { return m_uiState; }
+    void setStart(TIMEQ inTime, UINT inCount);
+    void setResult(UINT inResult);
+    TIMEQ getTimer() const { return m_tqTimer; }
+    void changeCount(UINT inCount, UINT inMax);
+    void setDuelNG();
+    void exeDuelNG();
+};
+}
+/* the unit's own copy of the header static (data still from assembly) */
+extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039AF98");
+extern "C" char D_00477690[]; /* "...CardBattle.cpp(4378)" */
+namespace D2 {
+class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the classes only for its own unit */
+public:
+    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
+};
+}
+namespace CardBattle {
+extern INT g_DuelSeqIDX_TimerNumDmy[6][3];
+extern G_UV g_uvDuelNumTex[4][10];
+extern LPCSTR g_szLadDuel; /* the file's statics (data still from assembly) */
+extern LPCSTR g_szSeqDuel;
 }
 extern "C" char D_00476980[]; /* __FILE__ */
 extern "C" char D_00476730[];
@@ -243,20 +303,302 @@ BOOL CCardBattle::isDuelEntryingCard(INT inSide) {
     }
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", __Q210CardBattle10CDuelGaugeP5CTask);
+CDuelGauge::CDuelGauge(::CTask* pParent) : ::CTask(pParent, 0x4000) {
+    m_pSeqCtrls = NULL;
+    _initialize();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _$_Q210CardBattle10CDuelGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _initialize__Q210CardBattle10CDuelGauge);
+void CDuelGauge::_initialize() {
+    m_uiFlag = 0;
+    m_uiState = 0;
+    m_uiTimerState = 0;
+    m_uiCountState = 0;
+    m_uiCount = 0;
+    m_uiCountMax = 0;
+    m_uiResult = 0;
+    m_tqTimer = 0;
+    m_tqLimit = 0;
+    m_hTimerSE = 0;
+    m_pSeqCtrls = new (D_00477690) D2::C2DSeqCtrl[12];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", main__Q210CardBattle10CDuelGauge);
+/* Parked: one store slot - the original schedules the m_tqTimer store (0x5c) after the zero stores of m_uiCount and
+ * m_uiResult, ours before them (and the setLayer sb one slot earlier); the statement order is the $LM line order;
+ * tried: all 720 orders of the six stores (200 tested), chained/temp assignments for timer/limit, pSeq load forms
+ * (_ref, m_pSeqCtrls, &[0]), permuter 4 min (13841 candidates, no gain) */
+#if 0
+void CDuelGauge::setStart(TIMEQ inTime, UINT inCount) {
+    m_uiState = 1;
+    m_uiCount = 0;
+    m_uiCountMax = inCount;
+    m_uiResult = 0;
+    m_tqTimer = inTime;
+    m_tqLimit = inTime;
+    D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[0];
+    pSeq->setLayer(8);
+    pSeq->addSeq(g_szSeqDuel, 30);
+    FVECTOR pos;
+    D2::C2DMan::getLayPosition(g_szLadDuel, 1, 0, pos, FALSE);
+    pSeq->setPos(pos);
+    setTimer(1);
+    setCount(1);
+    CSound::playSE(0x14B, -1, 64);
+    m_hTimerSE = CSound::playSE(0x14C, -1, 64);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setStart__Q210CardBattle10CDuelGaugeiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setResult__Q210CardBattle10CDuelGaugeUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setTimer__Q210CardBattle10CDuelGaugeUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", changeTimer__Q210CardBattle10CDuelGaugei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeTimer__Q210CardBattle10CDuelGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setCount__Q210CardBattle10CDuelGaugeUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeCount__Q210CardBattle10CDuelGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", changeCount__Q210CardBattle10CDuelGaugeUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelNG__Q210CardBattle10CDuelGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeDuelNG__Q210CardBattle10CDuelGauge);
+#endif
+void CDuelGauge::setResult(UINT inResult) {
+    m_uiResult = inResult;
+    D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[0];
+    m_uiState = 3;
+    pSeq->setLayer(8);
+    if (m_uiResult) {
+        pSeq->addSeq(g_szSeqDuel, 31);
+        CSound::playSE(0x14E, -1, 64);
+    } else {
+        pSeq->addSeq(g_szSeqDuel, 32);
+        CSound::playSE(0x14F, -1, 64);
+    }
+    setTimer(3);
+    setCount(3);
+    if (m_hTimerSE > 0) {
+        CSound::stopSE(m_hTimerSE, 0x14C);
+        m_hTimerSE = 0;
+    }
+}
+void CDuelGauge::setTimer(UINT inState) {
+    D2::C2DSeqCtrl* pSeq;
+    INT i;
+    FVECTOR pos;
+    switch (inState) {
+    case 0:
+        m_uiTimerState = inState;
+        for (i = 1; i < 8; i++) {
+            m_pSeqCtrls[i].destroy();
+        }
+        break;
+    case 1:
+        m_uiTimerState = 1;
+        D2::C2DMan::getLayPosition(_ref(g_szLadDuel), 1, 0, pos, FALSE);
+        pSeq = &m_pSeqCtrls[1];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 0x21);
+        pSeq->setPos(pos);
+        pSeq->addSeq(g_szSeqDuel, 0x24);
+        pSeq->enableColorCtrl(TRUE);
+        for (i = 0; i < 6; i++) {
+            pSeq = &m_pSeqCtrls[i + 2];
+            pSeq->destroy();
+            pSeq->setLayer(2);
+            pSeq->addSeq(g_szSeqDuel, g_DuelSeqIDX_TimerNumDmy[i][0]);
+            pSeq->addSeq(g_szSeqDuel, 0x25);
+            pSeq->enableColorCtrl(TRUE);
+            pSeq->setPos(pos);
+        }
+        changeTimer(m_tqLimit);
+        break;
+    case 2:
+        m_uiTimerState = inState;
+        pSeq = &m_pSeqCtrls[1];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 0x22);
+        pSeq->addSeq(g_szSeqDuel, 0x24);
+        pSeq->enableColorCtrl(TRUE);
+        for (i = 0; i < 6; i++) {
+            pSeq = &m_pSeqCtrls[i + 2];
+            pSeq->destroy();
+            pSeq->setLayer(2);
+            pSeq->addSeq(g_szSeqDuel, g_DuelSeqIDX_TimerNumDmy[i][1]);
+            pSeq->addSeq(g_szSeqDuel, 0x25);
+            pSeq->enableColorCtrl(TRUE);
+        }
+        changeTimer(m_tqTimer);
+        break;
+    case 3:
+        m_uiTimerState = inState;
+        pSeq = &m_pSeqCtrls[1];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 0x23);
+        pSeq->addSeq(g_szSeqDuel, 0x24);
+        pSeq->enableColorCtrl(TRUE);
+        for (i = 0; i < 6; i++) {
+            pSeq = &m_pSeqCtrls[i + 2];
+            pSeq->destroy();
+            pSeq->setLayer(2);
+            pSeq->addSeq(g_szSeqDuel, g_DuelSeqIDX_TimerNumDmy[i][2]);
+            pSeq->addSeq(g_szSeqDuel, 0x25);
+            pSeq->enableColorCtrl(TRUE);
+        }
+        changeTimer(m_tqTimer);
+        break;
+    }
+}
+void CDuelGauge::changeTimer(TIMEQ inTime) {
+    INT n = inTime * 100 / m_tqLimit;
+    m_pSeqCtrls[1].changeTime(1, 100 - n);
+    n = inTime % 3000 / 30 % 10;
+    m_pSeqCtrls[2].changeTexture(1, 0, NULL, &g_uvDuelNumTex[0][n], &g_uvDuelNumTex[1][n]);
+    n = inTime % 3000 / 300 % 10;
+    m_pSeqCtrls[3].changeTexture(1, 0, NULL, &g_uvDuelNumTex[0][n], &g_uvDuelNumTex[1][n]);
+    n = inTime / 3000 % 10;
+    m_pSeqCtrls[4].changeTexture(1, 0, NULL, &g_uvDuelNumTex[0][n], &g_uvDuelNumTex[1][n]);
+    n = inTime / 30000 % 10;
+    m_pSeqCtrls[5].changeTexture(1, 0, NULL, &g_uvDuelNumTex[0][n], &g_uvDuelNumTex[1][n]);
+}
+void CDuelGauge::exeTimer() {
+    D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[1];
+    switch (m_uiTimerState) {
+    case 1:
+        if (pSeq->isEnd(0)) setTimer(2);
+        break;
+    case 0:
+        break;
+    case 2:
+        if (m_tqTimer > 0) {
+            m_tqTimer -= getFrameRate();
+            if (m_tqTimer < 0) m_tqTimer = 0;
+            changeTimer(m_tqTimer);
+        }
+        break;
+    case 3:
+        if (pSeq->isEnd(0)) setTimer(0);
+        break;
+    }
+}
+void CDuelGauge::setCount(UINT inState) {
+    D2::C2DSeqCtrl* pSeq;
+    FVECTOR pos;
+    switch (inState) {
+    case 0:
+        m_uiCountState = inState;
+        m_pSeqCtrls[8].destroy();
+        m_pSeqCtrls[9].destroy();
+        m_pSeqCtrls[10].destroy();
+        break;
+    case 1:
+        m_uiCountState = inState;
+        D2::C2DMan::getLayPosition(_ref(g_szLadDuel), 1, 0, pos, FALSE);
+        pSeq = &m_pSeqCtrls[8];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 0);
+        pSeq->setPos(pos);
+        pSeq = &m_pSeqCtrls[9];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 6);
+        pSeq->addSeq(g_szSeqDuel, m_uiCountMax + 20);
+        pSeq->setPos(pos);
+        pSeq->enableColorCtrl(TRUE);
+        pSeq = &m_pSeqCtrls[10];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 3);
+        pSeq->addSeq(g_szSeqDuel, m_uiCount + 9);
+        pSeq->setPos(pos);
+        pSeq->enableColorCtrl(TRUE);
+        break;
+    case 2:
+        m_uiCountState = inState;
+        pSeq = &m_pSeqCtrls[8];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 1);
+        pSeq = &m_pSeqCtrls[9];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 7);
+        pSeq->addSeq(g_szSeqDuel, m_uiCountMax + 20);
+        pSeq->enableColorCtrl(TRUE);
+        pSeq = &m_pSeqCtrls[10];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 4);
+        if (m_uiCount) {
+            pSeq->addSeq(g_szSeqDuel, m_uiCount + 9);
+        } else {
+            pSeq->addSeq(g_szSeqDuel, 9);
+        }
+        pSeq->enableColorCtrl(TRUE);
+        break;
+    case 3:
+        m_uiCountState = inState;
+        pSeq = &m_pSeqCtrls[8];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 2);
+        pSeq = &m_pSeqCtrls[9];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 8);
+        pSeq->addSeq(g_szSeqDuel, m_uiCountMax + 20);
+        pSeq->enableColorCtrl(TRUE);
+        pSeq = &m_pSeqCtrls[10];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 5);
+        if (m_uiResult) {
+            pSeq->addSeq(g_szSeqDuel, m_uiCount + 9);
+        } else {
+            pSeq->addSeq(g_szSeqDuel, 9);
+            m_pSeqCtrls[10].changeTexture(1, 0, NULL, &g_uvDuelNumTex[2][m_uiCount], &g_uvDuelNumTex[3][m_uiCount]);
+        }
+        pSeq->enableColorCtrl(TRUE);
+        break;
+    }
+}
+void CDuelGauge::exeCount() {
+    D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[8];
+    switch (m_uiCountState) {
+    case 1:
+        if (pSeq->isEnd(0)) setCount(2);
+        break;
+    case 0:
+    case 2:
+        break;
+    case 3:
+        if (pSeq->isEnd(0)) setCount(0);
+        break;
+    }
+}
+void CDuelGauge::changeCount(UINT inCount, UINT inMax) {
+    m_uiCount = inCount % 10;
+    if (m_uiCount) {
+        m_pSeqCtrls[10].replaceSeq(1, g_szSeqDuel, m_uiCount + 9);
+    } else {
+        m_pSeqCtrls[10].replaceSeq(1, g_szSeqDuel, 9);
+    }
+    if (inMax) {
+        m_uiCountMax = inMax % 10;
+        m_pSeqCtrls[9].changeTexture(1, 0, NULL, &g_uvDuelNumTex[2][m_uiCountMax], &g_uvDuelNumTex[3][m_uiCountMax]);
+    }
+}
+void CDuelGauge::setDuelNG() {
+    D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[11];
+    if (pSeq) {
+        m_uiFlag |= 1;
+        pSeq->destroy();
+        pSeq->setLayer(8);
+        pSeq->addSeq(g_szSeqCockpit, 0x97);
+        CB_LAYOUT* pLayout = &g_LayoutData[1];
+        FVECTOR pos = {{pLayout->x, pLayout->y, 0.0f, 1.0f}};
+        pSeq->setPos(pos);
+    }
+}
+void CDuelGauge::exeDuelNG() {
+    UINT flag = 1;
+    if (m_uiFlag & flag) {
+        D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[11];
+        if (pSeq && pSeq->isEnd(0)) {
+            pSeq->destroy();
+            m_uiFlag &= ~flag;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPronounceStart__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPronouncePlay__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnemyPronounceCard__Q210CardBattle11CCardBattleiPQ210CardBattle11CBattleCard);
