@@ -114,19 +114,21 @@ public:
     BOOL isNowPlaying() { return m_uiFlag & 0x40; }
     BOOL isNowReloadNG() { return m_uiFlag & 0x60; }
     INT isDModeNG() { return m_uiFlag & 0x8000; }
-    BOOL isPlutoON() { return m_uiFlag & 0x40000; }
+    // MATCH: masks in an `unsigned int flag` local (the callers' ref locals list it): the constant gets its own
+    // pseudo, which loop.c hoists (CardRevolver exeWait, dropPlutoMarkCard); resetPlutoON keeps the plain form
+    BOOL isPlutoON() { unsigned int flag = 0x40000; return m_uiFlag & flag; }
     void setPlutoON() { m_uiFlag |= 0x40000; }
     void resetPlutoON() { m_uiFlag &= ~0x40000; }
-    BOOL isPlayNG() { return m_uiFlag & 0x80000; }
+    BOOL isPlayNG() { unsigned int flag = 0x80000; return m_uiFlag & flag; }
     void setPlayNG() { m_uiFlag |= 0x80000; }
     void resetPlayNG() { m_uiFlag &= ~0x80000; }
-    BOOL isReloadSet() { return m_uiFlag & 0x80000000; }
-    void setReloadSet() { m_uiFlag |= 0x80000000; }
-    void resetReloadSet() { m_uiFlag &= ~0x80000000; }
+    BOOL isReloadSet() { unsigned int flag = 0x80000000; return m_uiFlag & flag; }
+    void setReloadSet() { unsigned int flag = 0x80000000; m_uiFlag |= flag; }
+    void resetReloadSet() { unsigned int flag = 0x80000000; m_uiFlag &= ~flag; }
     void setStartIn() { m_uiFlag |= 0x100000; }
-    BOOL isFolderON() { return m_uiFlag & 0x40000000; }
+    BOOL isFolderON() { unsigned int flag = 0x40000000; return m_uiFlag & flag; }
     void setFolderON() { m_uiFlag |= 0x40000000; }
-    BOOL isDuelStock() { return m_uiFlag & 0x200000; }
+    BOOL isDuelStock() { unsigned int flag = 0x200000; return m_uiFlag & flag; }
     CCardRevolver* getRevolver() const { return m_pRevolver; }
     INT getCardKind() const { return m_cardData.m_nKind; }
     INT getCardCategory() const { return m_cardData.m_nCategory1; }
@@ -141,7 +143,7 @@ public:
     void updateNumberEffect();
     void setDuel(INT inMode);
     void setFlagDuelPlay() { m_uiFlag |= 0x10000; }
-    INT isFlagDuelPlay() { return m_uiFlag & 0x10000; }
+    INT isFlagDuelPlay() { unsigned int flag = 0x10000; return m_uiFlag & flag; }
     void setDuelRefrect();
     void setDuelStock(UINT inPri);
     void setPlayDuelStock(INT inCount);
@@ -151,7 +153,7 @@ public:
     void resetSnatch();
     void setPronounce(UINT inPri);
     void setFlagPronouncePlay() { m_uiFlag |= 0x20000; }
-    INT isFlagPronouncePlay() { return m_uiFlag & 0x20000; }
+    INT isFlagPronouncePlay() { unsigned int flag = 0x20000; return m_uiFlag & flag; }
     void setPlayPronounce();
     void setDiscard(INT inFlag);
 };
