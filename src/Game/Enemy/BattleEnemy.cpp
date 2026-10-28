@@ -501,7 +501,16 @@ void CBattleEnemy::attackStateCardDestroy(BOOL inColl) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", attackStateCardDestroy__12CBattleEnemyi);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", onBio__12CBattleEnemyi);
+void CBattleEnemy::onBio(INT inSubHp) {
+    if (m_iHp > 0) {
+        if (CSceneEnv::getStopTypeBit() & (1 << getEntityType())) return;
+        if (getFlag() & 0x80000000) return;
+        if (isCurrentState(18)) return;
+        m_iHp -= inSubHp;
+        if (m_iHp <= 0) m_iHp = 1;
+        notifyHP();
+    }
+}
 void CBattleEnemy::onGift(INT inAddHp) {
     if (m_iHp > 0) {
         FVECTOR pos;
