@@ -4,6 +4,8 @@
 #include "Game/BattleCard.h"
 #include "System/HeapMan.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
+#include "System/Graphic/2d/2DMan.h"
+#include "System/Sound/SoundMan.h"
 #include "include_asm.h"
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
@@ -60,6 +62,10 @@ public:
 /* the unit's own copy of the header static (data still from assembly) */
 extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039AF98");
 extern "C" char D_00477690[]; /* "...CardBattle.cpp(4378)" */
+namespace CardBattle {
+extern LPCSTR g_szLadDuel; /* the file's statics (data still from assembly) */
+extern LPCSTR g_szSeqDuel;
+}
 extern "C" char D_00476980[]; /* __FILE__ */
 extern "C" char D_00476730[];
 extern "C" int abs(int);
@@ -313,7 +319,26 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setStart__Q210CardBa
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setResult__Q210CardBattle10CDuelGaugeUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setTimer__Q210CardBattle10CDuelGaugeUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", changeTimer__Q210CardBattle10CDuelGaugei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeTimer__Q210CardBattle10CDuelGauge);
+void CDuelGauge::exeTimer() {
+    D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[1];
+    switch (m_uiTimerState) {
+    case 1:
+        if (pSeq->isEnd(0)) setTimer(2);
+        break;
+    case 0:
+        break;
+    case 2:
+        if (m_tqTimer > 0) {
+            m_tqTimer -= getFrameRate();
+            if (m_tqTimer < 0) m_tqTimer = 0;
+            changeTimer(m_tqTimer);
+        }
+        break;
+    case 3:
+        if (pSeq->isEnd(0)) setTimer(0);
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setCount__Q210CardBattle10CDuelGaugeUi);
 void CDuelGauge::exeCount() {
     D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[8];
