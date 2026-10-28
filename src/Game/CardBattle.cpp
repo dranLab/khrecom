@@ -187,7 +187,46 @@ BOOL CCardBattle::checkNowPlaying(INT inSide, CBattleCard* pCard) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testPlayingCard__Q210CardBattle11CCardBattleUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testBreakingCard__Q210CardBattle11CCardBattleUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayCard__Q210CardBattle11CCardBattleiiPQ210CardBattle11CBattleCardP4CARDi);
+/* Parked: induction variable - the original's copy loop runs on &m_pCard[_PLAYER][i] (cardData at -0x38), ours on
+ * &m_cardData[_PLAYER][i] (m_pCard at +0x38); all else matches; tried: pointer/index forms of inCard (in-body and
+ * for-header increments), the m_pCard store per branch, an m_pCard row pointer, call/copy order, permuter 4 min
+ * (7957 candidates, no gain) */
+#if 0
+INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard, INT inSkill, INT inExtra, INT inFirst,
+                              INT inTest) {
+    if (!(inUser)) AssertApp(D_00476980, 1754, D_00476730, 0);
+    UINT _PLAYER = inUser - 1;
+    if (m_uiState[_PLAYER]) return 0;
+    m_hOwner[_PLAYER] = inHandle;
+    m_uiState[_PLAYER] = 1;
+    m_uiResult[_PLAYER] = 0;
+    m_tqPlayTimer[_PLAYER] = 0;
+    INT max = inSkill < 4 ? inSkill : 3;
+    INT count = 0;
+    INT i;
+    for (i = 0; i < max; i++) {
+        if (inCard[i]) count++;
+    }
+    for (i = 0; i < max; i++) {
+        CBattleCard* pCard = *inCard;
+        m_pCard[_PLAYER][i] = pCard;
+        if (pCard) {
+            *(CARD*)m_cardData[_PLAYER][i] = *pCard->getCardData();
+            pCard->setPlayStock(count);
+        } else {
+            _setCard(*(CARD*)m_cardData[_PLAYER][i], 0, 0);
+        }
+        inCard++;
+    }
+    m_iStock[_PLAYER] = inSkill;
+    m_iExtra[_PLAYER] = inExtra;
+    m_iFirst[_PLAYER] = inFirst;
+    if (!inTest) return 1;
+    return testPlayingCard(_PLAYER);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayStock__Q210CardBattle11CCardBattleiiPPQ210CardBattle11CBattleCardiiii);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnchantCard__Q210CardBattle11CCardBattleiiPQ210CardBattle11CBattleCard);
 /* Parked: address forms - the original computes &m_cardEnchant[_PLAYER] as (idx*4+0x17c)+base and loads the kind with
  * offset 0 (kept in two registers), and &m_nEnchantTime[_PLAYER] as (base+0x184)+idx*4; ours folds the offsets the
