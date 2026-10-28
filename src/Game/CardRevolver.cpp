@@ -324,7 +324,48 @@ INT CCardRevolver::isEnableCharge() {
     m_uiFlag |= 4;
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", chargeReloadCard__Q210CardBattle13CCardRevolveri);
+INT CCardRevolver::chargeReloadCard(INT inMode) {
+    if (CGameWork::getFlag(1, 8)) return -1;
+    if (m_uiFlag & 0x10000) return -1;
+    if (!isEnableCharge() && !inMode) return -1;
+    if (m_uiFlag & 0x80) {
+        if (!inMode) CSound::playSE(0x15, -1, 0x40);
+        initReload(inMode);
+        return 1;
+    }
+    m_tqCharge += getFrameRate() * m_tqChargeRate / 100;
+    CBattleCard* card = getActiveCard();
+    INT charge = m_tqCharge / 30;
+    if (charge - m_iCharge * 100 >= 100) {
+        if (m_iCharge > 0) {
+            m_iCharge--;
+            m_tqCharge = m_iCharge * 3000;
+            charge = m_iCharge * 100;
+            CSound::playSE(0x14, -1, 0x40);
+        } else {
+            CCardBattle* pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+            INT kind = _getEnchantKind(pCB, m_uiUser);
+            if (kind != 0x18) {
+                if (m_iChargeCount < 3) m_iChargeCount++;
+                if (kind == 0x1E) m_iChargeCount = 1;
+            }
+            m_iCharge = m_iChargeCount - 1;
+            m_tqCharge = m_iCharge * 3000;
+            card->updateReload(m_iCharge * 100);
+            CSound::playSE(0x15, -1, 0x40);
+            if (kind == 0xD) {
+                setAction(0x50, 0);
+                return 1;
+            }
+            initReload(0);
+            return 1;
+        }
+    }
+    card->updateReload(charge);
+    m_uiFlag |= 0x20;
+    if (!m_hChargeSE) m_hChargeSE = CSound::playSE(0x13, -1, 0x40);
+    return 0;
+}
 void CCardRevolver::initReload(INT inMode) {
     TRACE(D_0047AE78, inMode);
     m_iState = 2;
