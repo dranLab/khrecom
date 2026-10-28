@@ -189,6 +189,9 @@ public:
     // PARTIAL: added for Form/Menu/SaveLoad
     void attachCursor(C2DSeqCursorCtrl* pCursor) { m_pCursor = pCursor; }
     void attachLightMark(C2DSeqLightMarkAgent* pLight) { m_pLightMark = pLight; }
+    void enableDisp(BOOL bDisp) {
+        if (m_pCtrl) m_pCtrl->enableDisp(bDisp);
+    }
     void enableDispCaption(BOOL bDisp) {
         if (m_pCtrl) m_pCtrl->enableDisp(1, bDisp);
     }

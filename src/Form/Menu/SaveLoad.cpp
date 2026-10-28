@@ -1106,7 +1106,40 @@ void CSaveLoadUI::callbackResultPlate(C2DSeqAgent& agent) {
         pLight->changeState(C2DSeqAgent::STATE_IN, TRUE, -1);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackDataList__11CSaveLoadUIR11C2DSeqAgent);
+extern "C" char D_004F3D90[]; /* "%3d:%02d": first used by setupDataPlate (still assembly) */
+void CSaveLoadUI::callbackDataList(C2DSeqAgent& agent) {
+    CSaveLoadUI* pThis = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
+    if (!pThis) return;
+    switch (agent.getState()) {
+    case C2DSeqAgent::STATE_IN:
+        pThis->changeState(10);
+        for (INT i = 0; i < 4; i++) {
+            pThis->m_pDataItemPlate[i]->enableDispCaption(TRUE);
+            pThis->m_pDataItemNumCircle[i]->enableDisp(TRUE);
+            GameDataHeader* pInfo = pThis->m_pGameDataEntries->getEntry(pThis->m_nDataListTop + i);
+            BOOL bDispIcon;
+            if (pInfo && pInfo->hasData()) {
+                sprintf(pThis->m_szDataItemTime[i], D_004F3D90, pInfo->_nTime / 3600, pInfo->_nTime % 3600 / 60);
+                bDispIcon = (pInfo->_cWorld & 0xF) < 14;
+            } else {
+                *pThis->m_szDataItemTime[i] = '\0';
+                bDispIcon = FALSE;
+            }
+            pThis->m_pDataItemIcon[i]->enableDisp(bDispIcon);
+            pThis->m_pDataItemClearIcon[i]->enableDisp(pInfo && pInfo->isGameCleared());
+        }
+        break;
+    case C2DSeqAgent::STATE_OUT:
+        for (INT i = 0; i < 4; i++) {
+            pThis->m_pDataItemPlate[i]->enableDisp(FALSE);
+            pThis->m_pDataItemNumCircle[i]->enableDisp(FALSE);
+            pThis->m_pDataItemIcon[i]->enableDisp(FALSE);
+            pThis->m_pDataItemClearIcon[i]->enableDisp(FALSE);
+        }
+        pThis->changeNextState();
+        break;
+    }
+}
 void CSaveLoadUI::callbackMemocaInfo(C2DSeqAgent& agent) {
     CSaveLoadUI* p = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
     if (!p) return;
