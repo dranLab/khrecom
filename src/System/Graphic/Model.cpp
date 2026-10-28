@@ -285,7 +285,7 @@ INT CModel::link(CTask* p) {
     m_pTask = p;
     return link(*pCrds);
 }
-/* Parked: 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 pointers). Tried: UINT i, SHORT nIdx, nIdx declaration scope, m_pParent store. */
+/* Parked: 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 pointers). Tried: UINT i, SHORT nIdx, nIdx declaration scope, m_pParent store; permuter 10 min (29465 candidates, stays 25). */
 #if 0
 INT CModel::link(CCoords& crds) {
     BOOL add;
