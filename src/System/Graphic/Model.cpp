@@ -14,6 +14,11 @@ public:
     static TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
     static MODELDATA* getRsrcAMF(const CHAR* pszName, NAME_CASE nc);
 };
+class CPackMan { /* PARTIAL: stand-in for System/Graphic/PackMan CPackMan: owner not written */
+public:
+    static void pkCloseDirectCode();
+    static void pkOpenDirectCode(INT stall);
+};
 extern "C" char D_00460EB8[]; /* __FILE__ */
 extern "C" char D_00460EE8[];
 extern "C" char D_00460F18[];
@@ -177,7 +182,20 @@ void resultCheckBBox(FVECTOR& min, FVECTOR& max) {
     asm volatile("sqc2 $vf2, 0(%0)" : : "r"(&min) : "memory");
     asm volatile("sqc2 $vf3, 0(%0)" : : "r"(&max) : "memory");
 }
+/* Parked: 5 lines off: the original leaves the bc1t delay slot empty (lui 0xc000 in the final jr slot), has an extra nop after the beqz slot and builds the result in v1 (move v0,v1); ours fills bc1t with the lui. Tried: compare forms (>, <=, !<), result locals (clip |= ret, res), if/else return; permuter 15 min (24217 candidates, 16 -> 13). */
+#if 0
+INT resultCheckBBox(CCoord& crd, const BBOX* bbox) {
+    INT ret;
+    INT clip;
+    if (bbox->x[1] < bbox->x[0]) return 0xC0000000;
+    asm volatile("cfc2.i %0, $vi4" : "=r"(ret));
+    asm volatile("cfc2.ni %0, $vi5" : "=r"(clip));
+    if (ret) ret = (ret | 0x8000) << 16;
+    return ret | clip;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resultCheckBBox__FR6CCoordPC4BBOX);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__6CModel);
 void CModel::setColorScale(const FVECTOR& vColor) { getColorScale() = vColor; }
 void CModel::setColorScale(FLOAT r, FLOAT g, FLOAT b, FLOAT a) { getColorScale().set(r, g, b, a); }
@@ -195,7 +213,25 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__6CModelf)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispImpl__6CModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__6CModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp0__6CModeliUli);
+/* Parked: 2 lines off: the original loads *pData before the lui 0x6000 of the tag compare, ours lui first. Tried: d/mode locals, store forms, int (*)[4]/u_long/u_long128 pData, test forms (!=, ^, ternary, tag local); permuter 12 min (22337 candidates, stays 2). */
+#if 0
+u_long* CModel::_disp0_GetData(UINT& nMode, INT iFlags) {
+    UINT* pData;
+    UINT mode;
+    if (iFlags & 1) {
+        pData = (UINT*)m_pData->m_pSemiData;
+        mode = ((USHORT*)pData)[0x1c / 2];
+    } else {
+        mode = m_Mode;
+        pData = (UINT*)m_pData->m_pData;
+    }
+    nMode = mode;
+    if (*pData == 0x60000000) return NULL;
+    return (u_long*)pData;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_GetData__6CModelRUii);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp0_SetMicroCode__6CModelPUx);
 void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
     if (!(nFlag & 6)) sendTexture(pTag);
@@ -206,12 +242,20 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", initSemiZModel_
 void CSemiModel::releaseSemiZModel() {
     if (m_pSemiZ) delete m_pSemiZ;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__10CSemiModelii);
+void CSemiModel::changeLayerExt(BOOL bOn, INT nDepth) {
+    if (bOn) setLayer(0x1b, nDepth);
+    else setLayer(0x10, 0);
+    if (m_pSemiZ) m_pSemiZ->changeLayerExt(bOn, nDepth + 1);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__10CSemiModel);
 UINT CSemiModel::getPacketSize() const {
     return m_nPacketSize + m_pModel->getBeforeDirectNum() + m_pModel->getAfterDirectNum();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__10CSemiModel);
+void CSemiModel::makePkt() {
+    CPackMan::pkCloseDirectCode();
+    if (m_pModel->m_nFlag & 2) dispDirect();
+    CPackMan::pkOpenDirectCode(0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiTrans__10CSemiModelG5ALPHA);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispDirect__10CSemiModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__11CSemiZModel);
@@ -227,7 +271,16 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__5CBBox
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", linkTexAnm__6CModelP7CTexAnmi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setupUVScroll__6CModeli);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateUVScroll__6CModelf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setUVScrollOffset__6CModeliff);
+void CModel::setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV) {
+    /* MATCH: isUVScroll() as the weak copy shows it (lbu + dsrl: a 64-bit bit-field, result in a 64-bit local) */
+    struct _flag { u_long b0 : 7; u_long b7 : 1; };
+    u_long b = 0;
+    if (m_TexUV) b = ((_flag*)&m_nFlag)->b7;
+    if (b && nNum < m_TransTexCount) {
+        ((FLOAT*)m_TexUV)[nNum * 2] = fU;
+        ((FLOAT*)m_TexUV)[nNum * 2 + 1] = fV;
+    }
+}
 void* CModel::getExtendClut(INT nTex, INT nType) {
     if (nTex >= 0 && nTex < m_pData->m_nTexNum) {
         BYTE* p = m_TexInfo[nTex].m_pTex;
