@@ -503,7 +503,13 @@ void CBattleEnemy::endStateVolley() {
     bodyCollOnBody(-1);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDead__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDead__12CBattleEnemy);
+void CBattleEnemy::stateDead() {
+    if (m_pEnemyParam && m_iSysStep == 0 && m_pMove->getVel().y < 0.0f && (m_pMove->getCollisionFlag() & 5)) {
+        clearSpeed();
+        m_iSysStep++;
+    }
+    if (getTimer() <= 0) out();
+}
 void CBattleEnemy::endStateDead() {}
 CBattleEnemyManager* CBattleEnemy::getBattleEnemyManager() const {
     CTask* parent = (CTask*)getParent();
