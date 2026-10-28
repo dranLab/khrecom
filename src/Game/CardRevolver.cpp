@@ -378,7 +378,121 @@ void CCardRevolver::initHide() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setDeck__Q210CardBattle13CCardRevolverP4CARDi);
+/* Parked: 5 lines off, the direction `a`: the original computes it as li t3,1 / slt v0,v1,a1 / movz t3,v1,v0
+   with v1 = -1 set in both predecessors of the join, then negates num with bltzl; ours branches (bgez). Worked:
+   one `i` for all three loops (s0), !m_iMode-first rc/pCards select, hand++ after setHand, if/else direction.
+   Tried: 11 forms of a/abs (ternaries, -1 < num, a = -1 before the rc block); permuter 5 min (5534, no gain). */
+#if 0
+void CCardRevolver::rollDeck(INT inNum, INT inFlag, TIMEQ inTime) {
+    INT iRemain;
+    INT i;
+    INT nLimit;
+    INT iEnd;
+    INT iMax;
+    CBattleCard* pCards;
+    INT rc;
+    INT num;
+    INT target;
+    INT n;
+    INT a;
+    INT loop;
+    INT hand;
+    iRemain = m_nRemain[m_iMode];
+    if (!inFlag) {
+        if (CGameWork::getFlag(1, 9)) return;
+        if (m_iState != 1) return;
+        if (!m_bActive) return;
+        if (!inTime) return;
+        if (m_iMode == 0) {
+            if (m_nTotal[0] == m_nReloadCard) return;
+        } else {
+            if (m_nTotal[m_iMode] == 0) return;
+        }
+        if (m_uiUser == 1) {
+            if (m_iMode == 0) {
+                if (inTime == 100 && m_pCards[m_nActive[0]].getCardCategory() == 8) return;
+                if (inNum && iRemain > 0) {
+                    CSound::playSE(0xE, -1, 0x40);
+                    CGameWork::setFlag(1, 0x17, 1);
+                }
+            } else {
+                if (inNum && iRemain >= 2) {
+                    CSound::playSE(0xE, -1, 0x40);
+                    CGameWork::setFlag(1, 0x17, 1);
+                }
+            }
+        }
+    }
+    if (m_iMode == 0) {
+        nLimit = m_nLimit;
+        iMax = m_nRemain[0] + m_nReloadCard;
+        for (i = nLimit - 1; i >= 0; i--) {
+            CBattleCard* pCard = &m_pCards[i];
+            if (!pCard) continue;
+            if (pCard->getHand() == -1) continue;
+            m_nEnd = i;
+            break;
+        }
+        iEnd = m_nEnd + 1;
+        if (!m_nReloadCard && iMax == 1) m_nActive[m_iMode] = m_nEnd;
+    } else {
+        nLimit = m_nTotal[m_iMode];
+        iMax = m_nRemain[m_iMode];
+        iEnd = nLimit;
+    }
+    m_bActive = FALSE;
+    m_tqTimer = 0;
+    SHORT& iActive = m_nActive[m_iMode];
+    if (!iMax && m_nReloadCard > 0) return;
+    if (!m_iMode) {
+        rc = m_nReloadCard;
+        pCards = m_pCards;
+    } else {
+        pCards = m_pCardsE;
+        rc = 0;
+    }
+    num = inNum;
+    target = iActive;
+    if (!rc && !iMax) {
+        num = 0;
+        if (!m_iMode) target = m_nReloadID;
+    }
+    if (num < 0) {
+        a = -1;
+        num = -num;
+    } else {
+        a = 1;
+    }
+    loop = 0;
+    while (num > 0) {
+        for (i = 0; i < nLimit; i++) {
+            target += a;
+            if (target < 0) target = iEnd - 1;
+            else if (target >= iEnd) target = 0;
+            CBattleCard* pCard = &pCards[target];
+            if (!pCard) continue;
+            if (pCard->getHand() == -1) continue;
+            if (pCard->getCardOwner() == 1 || pCard->getCardOwner() == m_uiUser) {
+                num--;
+                break;
+            }
+        }
+        if (++loop > nLimit) return;
+    }
+    iActive = target;
+    hand = 0;
+    m_tqRollSpeed = inTime;
+    for (i = 0; i < nLimit; i++) {
+        CBattleCard* pCard = &pCards[(iActive + i) % nLimit];
+        if (!pCard) continue;
+        if (pCard->getHand() == -1) continue;
+        pCard->setHand(*pCard->getCardData(), hand, iMax, 1);
+        hand++;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", rollDeck__Q210CardBattle13CCardRevolveriii);
+#endif
 /* Parked: 12 lines off, all in `limit`: the original loads m_nTotal[m_iMode] (lhu + sll 16) above the m_iMode
    branch and sign-extends (sra 16) only in that arm (interblock-scheduled split extension); ours branches first
    and uses lh. Worked: `if (inMode == -1) ^= 1; else =`, `!old_mode ? m_pCards : m_pCardsE`, indexed
