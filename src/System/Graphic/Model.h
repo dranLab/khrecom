@@ -21,6 +21,7 @@ struct MODELDATA;
 // PARTIAL: CModel derives from CDrawable (System/Graphic/Gprim.h, which every includer includes first) and
 // its virtual functions added for Form/Menu/MenuModel
 class CModel : public CDrawable {
+    friend class CSemiZModel; // PARTIAL: guessed (CSemiZModel::makePkt sets m_ShaderOption, no accessor exists)
 public:
     // PARTIAL: added for System/Graphic/ModelMan
     static void resetSendCtrl(INT nMode);
@@ -100,6 +101,7 @@ protected:
 public:
     void attachSemiModel(CSemiModel& inModel, BOOL bInManage);
     FIX4 getSemiZ();
+    INT checkBBox();
     void getWorldBBoxScr(IVECTOR& vScr, const FMATRIX* pWS);
     void disp0(INT nFlag, u_long nTest, INT nPass);
     virtual void changeLayerExt(INT a, INT b);        // PARTIAL: parameters guessed, for Form/Menu/MenuModel
@@ -185,7 +187,7 @@ public:
     void setSemiSort(BOOL bVal);
     virtual UINT getPacketSize() const;
     void dispDirect();
-    CModel* getParentModel();
+    CModel* getParentModel() { return m_pModel; }
     void initSemiZModel();
     void releaseSemiZModel();
     virtual void changeLayerExt(BOOL bOn, INT nDepth);

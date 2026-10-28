@@ -23,7 +23,12 @@ public:
     static void pkOpenDirectCode(INT stall);
     static BOOL isOverFlow(UINT nSize);
     static u_long getDefault_TEST_1();
+    static void pkCall(u_long128* pAddr, UINT nFlag);
+    static void pkAddCode(UINT nCode);
 };
+extern u_long128* g_mpg0;
+extern u_long128* g_mpg2;
+extern "C" char D_00461058[];
 union FIVECTOR { /* PARTIAL: stand-in for FIVECTOR: owner not written */
     FVECTOR f;
     IVECTOR i;
@@ -208,8 +213,55 @@ FIX4 CModel::getSemiZ() {
     }
     return nRetZ;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getOldSemiZ__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getWorldBBoxScr__6CModelR7IVECTORPC7FMATRIX);
+FIX4 CModel::getOldSemiZ() {
+    FIX4 nZ;
+    FIX4 nRetZ;
+    FIVECTOR vScr;
+    nRetZ = getZ();
+    if (m_pFadeModel) {
+        nZ = m_pFadeModel->getOldZ();
+        if (nRetZ < nZ) nRetZ = nZ;
+    }
+    if (m_pSemiModel) {
+        if (nRetZ < nZ) nRetZ = nZ;
+    }
+    if (nRetZ == 0) {
+        getWorldBBoxScr(vScr.i, &CWorldEnv::getWorldScreenMatrix());
+        nRetZ = vScr.i.z;
+        if (nRetZ < 0) nRetZ = vScr.f.w <= 0.0f ? 0x0FFFF280 : 0x10;
+    }
+    return nRetZ;
+}
+void CModel::getWorldBBoxScr(IVECTOR& vScr, const FMATRIX* pMWS) {
+    FVECTOR vMax;
+    FVECTOR vMin;
+    if (pMWS) {
+        asm volatile("lqc2 $vf28, 0x0(%0)\n"
+                     "lqc2 $vf29, 0x10(%0)\n"
+                     "lqc2 $vf30, 0x20(%0)\n"
+                     "lqc2 $vf31, 0x30(%0)" : : "r"(pMWS));
+    }
+    if (!(m_nFlag & 0x2000)) {
+        getWorldBBox(vMax, vMin);
+        vMin.w = 0.5f;
+        asm volatile("lqc2 $vf8, 0(%0)\n\tlqc2 $vf9, 0(%1)" : : "r"(&vMax), "r"(&vMin));
+        asm volatile("vadd.xyz $vf8, $vf8, $vf9");
+        asm volatile("vmulw.xyz $vf8, $vf8, $vf9w");
+    } else {
+        FVECTOR& vWorld = getCrd(m_BoneStart).getWorldMatrix().v[3];
+        asm volatile("lqc2 $vf8, 0(%0)" : : "r"(&vWorld));
+    }
+    asm volatile("vmulax.xyzw $ACC, $vf28, $vf8x\n"
+                 "vmadday.xyzw $ACC, $vf29, $vf8y\n"
+                 "vmaddaz.xyzw $ACC, $vf30, $vf8z\n"
+                 "vmaddw.xyzw $vf8, $vf31, $vf0w\n"
+                 "vdiv $Q, $vf0w, $vf8w\n"
+                 "vmax.w $vf8, $vf0, $vf0\n"
+                 "vwaitq\n"
+                 "vmulq.xyzw $vf8, $vf8, $Q\n"
+                 "vftoi4.xyz $vf8, $vf8");
+    asm volatile("sqc2 $vf8, 0(%0)" : : "r"(&vScr) : "memory");
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcWorldBBox__6CModeli);
 void CModel::getWorldBBox(FVECTOR& vMax, FVECTOR& vMin) {
@@ -321,7 +373,16 @@ BOOL CModel::dispCheck() {
     return !CPackMan::isOverFlow(getPacketSize());
 }
 void CModel::disp() { disp(m_pTask ? m_pTask->getFrameRate() * 0.020000001f : 1.0f); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__6CModelf);
+void CModel::disp(FLOAT fR) {
+    BOOL bUpdate = TRUE;
+    m_BBoxFlag = 0;
+    m_nFlag &= ~0x200;
+    dispUpdate(fR);
+    if (checkBBox() < 0) bUpdate = FALSE;
+    else if (!dispCheck()) bUpdate = FALSE;
+    if (bUpdate) dispImpl();
+    else m_nFlag &= ~0x18;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispImpl__6CModel);
 void CModel::makePkt() {
     CPackMan::pkCloseDirectCode();
@@ -351,7 +412,15 @@ u_long* CModel::_disp0_GetData(UINT& nMode, INT iFlags) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_GetData__6CModelRUii);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp0_SetMicroCode__6CModelPUx);
+void CModel::disp0_SetMicroCode(u_long128* pMProg) {
+    if (!((m_pMpg == g_mpg0) || (m_pMpg == g_mpg2) || (m_pMpg == __null))) AssertApp(D_00460EB8, 2539, D_00461058, 0);
+    if (pMProg != m_pMpg || (m_iSendFlg & 0x100)) {
+        m_pMpg = pMProg;
+        CPackMan::pkCall(pMProg, 0);
+        CPackMan::pkAddCode(0x10000000);
+        CPackMan::pkAddCode(0);
+    }
+}
 void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
     if (!(nFlag & 6)) sendTexture(pTag);
 }
@@ -377,7 +446,17 @@ void CSemiModel::makePkt() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiTrans__10CSemiModelG5ALPHA);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispDirect__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__11CSemiZModel);
+void CSemiZModel::makePkt() {
+    CPackMan::pkCloseDirectCode();
+    CModel* m = getParentModel();
+    m->disp0(getSemiTrans(), getTestFlag(), m_SemiDraw ? 5 : 4);
+    if ((m->m_nFlag & 4) && MODELDATA::isCharacter(m->m_Mode)) {
+        m->m_ShaderOption |= 0x80;
+        m->disp0(getSemiTrans(), m->getTestFlag(), m_SemiDraw != 0);
+        m->m_ShaderOption &= ~0x80;
+    }
+    CPackMan::pkOpenDirectCode(0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__10CFadeModel);
 UINT CFadeModel::getPacketSize() const {
     UINT nPacketSize = m_nPacketSize;
