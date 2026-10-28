@@ -345,7 +345,84 @@ void CLockonMarker::setLockon(HANDLE inTarget, INT inDist) {
     m_bLockon = FALSE;
     if (inTarget > 0 && CTaskMan::getTask(inTarget)) m_bLockon = TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", chkLockon__Q25Gauge13CLockonMarkerRi);
+void CLockonMarker::chkLockon(INT& inTarget) {
+    CEntity* pTargetEntity;
+    FVECTOR v;
+    FLOAT dist;
+    pTargetEntity = NULL;
+    if (m_hHoldTarget > 0) {
+        pTargetEntity = (CEntity*)CTaskMan::getTask(m_hHoldTarget);
+        if (pTargetEntity && pTargetEntity->isPermissionLockOn()) {
+            inTarget = m_hHoldTarget;
+        } else {
+            m_hHoldTarget = 0;
+            pTargetEntity = NULL;
+        }
+    }
+    if (m_iMode == 0) {
+        if (!pTargetEntity) {
+            if (inTarget > 0) pTargetEntity = (CEntity*)CTaskMan::getTask(inTarget);
+            if (m_uiFlag & 8) m_hHoldTarget = inTarget;
+            if (!pTargetEntity) goto reset;
+        }
+        pTargetEntity->getLockOnPos(m_vPos);
+        SubVectorXYZ(v, getPlayerPos(FALSE), m_vPos);
+        m_fDist = _sqrtf(InnerProduct(v, v));
+        if (m_uiFlag & 4) dist = 14.0f;
+        else if (m_uiFlag & 0x80) dist = 14.0f;
+        else dist = 3.0f;
+        if (m_fDist > dist) goto reset;
+        if (!pTargetEntity->isPermissionLockOn()) goto reset;
+        setTarget(inTarget);
+    } else {
+        if (m_hLockon > 0) {
+            pTargetEntity = (CEntity*)CTaskMan::getTask(m_hLockon);
+            if (m_uiFlag & 8) m_hHoldTarget = m_hLockon;
+            if (!pTargetEntity || !pTargetEntity->isPermissionLockOn()) {
+                if (m_uiFlag & 2) {
+                    m_hLockon = 0;
+                } else {
+                    setTarget(0);
+                    inTarget = 0;
+                    m_hLockon = 0;
+                    m_iMode = 0;
+                    m_hHoldTarget = 0;
+                }
+            }
+        } else {
+            m_hLockon = inTarget;
+            if (!pTargetEntity) {
+                if (m_hLockon > 0) pTargetEntity = (CEntity*)CTaskMan::getTask(m_hLockon);
+                if (m_uiFlag & 8) m_hHoldTarget = m_hLockon;
+            }
+            setLockon(m_hLockon, 0);
+        }
+        if (pTargetEntity) {
+            pTargetEntity->getLockOnPos(m_vPos);
+            pTargetEntity->getUseCardPos(m_vUseCardPos);
+            pTargetEntity->getCameraTargetPos(m_vCameraTargetPos);
+            SubVectorXYZ(v, getPlayerPos(FALSE), m_vPos);
+            dist = _sqrtf(InnerProduct(v, v));
+            m_fDist = dist;
+            if (dist > ((m_uiFlag & 4) ? 30.0f : 3.0f) || (dist > 14.0f && m_bTrg)) {
+            reset:
+                setTarget(0);
+                inTarget = 0;
+                m_hLockon = 0;
+                m_iMode = 0;
+                m_hHoldTarget = 0;
+            } else if (m_fDist > 7.0f) {
+                m_iDist = 2;
+            } else if (m_fDist > 3.5f) {
+                m_iDist = 1;
+            } else {
+                m_iDist = 0;
+            }
+        }
+    }
+    m_bTrg = FALSE;
+    m_uiFlag = (INT)m_uiFlag & ~0x80;
+}
 void CLockonMarker::cancelLockon(INT& ioHandle, INT inFlag) {
     if (!inFlag) {
         m_hTarget = 0;
