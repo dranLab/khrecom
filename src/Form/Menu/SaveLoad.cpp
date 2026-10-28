@@ -432,7 +432,42 @@ void CSaveLoadUI::preCheckOverwrite() {
     openMessageDlg(_ctdText(0x600200), 1, 3);
     m_nStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckOverwrite__11CSaveLoadUI);
+void CSaveLoadUI::exeCheckOverwrite() {
+    INT r = -9999;
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqIdleCheckCard()) m_nStep++;
+        break;
+    case 1:
+        if (m_pMemoca->isCompleteReq(NULL)) {
+            r = m_pMemoca->getLastResult();
+            m_nStep = 0;
+        }
+        break;
+    }
+    if (r == -2) {
+        changeState(15);
+        return;
+    }
+    switch (m_nStep) {
+    case 0:
+    case 1:
+        if (m_nDlgResult) {
+            if (m_nDlgResult == 1) {
+                m_nFlag |= 0x100;
+                changeState(11);
+                continueProc();
+            } else {
+                closeMessageDlg();
+                m_nStep = 2;
+            }
+        }
+        break;
+    case 2:
+        if (isPadEnable()) changeState(10);
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckNoMemory__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x250A7325\n.word 0x00000073\n.text\n");
 void CSaveLoadUI::exeCheckNoMemory() {
