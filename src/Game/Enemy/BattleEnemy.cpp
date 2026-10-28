@@ -41,6 +41,13 @@ extern "C" char D_004AD578[];
 /* PARTIAL: until SOURCE DATA, the unit's copy of the header static BattleEnemy::BadStatusEffectName (its .data
  * comes from the original assembly) */
 template <class T> static inline T& _ref(T& x) { return x; }
+struct CB_ENCHANT_VIEW {
+    BYTE _pad[0x17C];
+    CARD m_cardEnchant[2];
+};
+static inline INT _getEnchantKind(CardBattle::CCardBattle* p, INT inUser) {
+    return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
+}
 namespace BattleEnemy {
 extern CHAR* FreezeEffectName;
 extern CHAR* DuelMotionParamName;
@@ -49,11 +56,17 @@ extern CHAR* FileIDParamName;
 extern CHAR* AlwaysEffectName;
 extern CHAR* LargebodyGuardEffectEffectName;
 extern CHAR* VexenGuardEffectEffectName;
+extern CHAR* BindEffectName;
+extern CHAR* MemoIDParamName;
 }
 extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
 extern "C" char D_004AD568[];
 extern "C" char D_004AD3D8[];
+class CJiminyMemoFlag {
+public:
+    static void checkEvent(INT inEvent, INT inParam0, INT inParam1);
+};
 extern ATK_ATTR g_AtkAttrTbl[] asm("g_AtkAttrTbl.5784"); // PARTIAL: getAttackAttr's static table, from the asm .data until SOURCE DATA
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -208,7 +221,24 @@ BOOL CBattleEnemy::startCardBattle() {
     m_ullBtlEnemyFlag &= ~0x802;
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endCardBattle__12CBattleEnemyP6CStatei);
+void CBattleEnemy::endCardBattle(CState* inState, TIMEQ inNextAttackWait) {
+    CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (!cb) AssertApp(D_004ACBC0, 0x56C, D_004AD3C0, 0);
+    if (_getEnchantKind(cb, 2) == 0x2F && isBtlEnemyFlag(0x20000000)) {
+        changeBattleEnemyState(m_iAttackState);
+        m_ullBtlEnemyFlag &= ~0x20000000;
+        return;
+    }
+    destroyCard();
+    m_tqCancelTimer = inNextAttackWait;
+    m_ullBtlEnemyFlag &= ~1;
+    if (inState) {
+        CState& NewState = *inState;
+        m_pNewState = &NewState;
+    } else {
+        changeDefaultState();
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", checkHitPos__12CBattleEnemy);
 void CBattleEnemy::playerHomingY(FLOAT inRate) {
     FVECTOR target;
@@ -1320,13 +1350,6 @@ void CBattleEnemy::setGuardEffect_(const FVECTOR* inPos) {
 }
 FLOAT CBattleEnemy::getDamageRate_() const {
     return m_fDamageRate;
-}
-struct CB_ENCHANT_VIEW {
-    BYTE _pad[0x17C];
-    CARD m_cardEnchant[2];
-};
-static inline INT _getEnchantKind(CardBattle::CCardBattle* p, INT inUser) {
-    return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
 BOOL CBattleEnemy::isLastLeave_(INT inResultHp) {
     CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
