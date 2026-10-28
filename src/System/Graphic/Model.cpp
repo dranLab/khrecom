@@ -4,6 +4,7 @@
 #include "System/Task.h"
 #include "System/Coord.h"
 #include "System/Math3D.h"
+#include "System/Graphic/WorldEnv.h"
 #include "include_asm.h"
 
 class CRsrcData;
@@ -21,6 +22,11 @@ public:
     static void pkCloseDirectCode();
     static void pkOpenDirectCode(INT stall);
     static BOOL isOverFlow(UINT nSize);
+    static u_long getDefault_TEST_1();
+};
+union FIVECTOR { /* PARTIAL: stand-in for FIVECTOR: owner not written */
+    FVECTOR f;
+    IVECTOR i;
 };
 extern "C" SHADERDESC D_00505118[]; /* the shader table */
 extern "C" char D_00460E80[];
@@ -183,7 +189,25 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTextureSu
 void CModel::setShadowSize(INT nSize) {
     if (m_Mode == 0x10 && m_pFadeModel) *(INT*)((BYTE*)m_pFadeModel + 0x28) = nSize;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getSemiZ__6CModel);
+FIX4 CModel::getSemiZ() {
+    FIX4 nZ;
+    FIX4 nRetZ;
+    FIVECTOR vScr;
+    nRetZ = getZ();
+    if (m_pFadeModel) {
+        nZ = m_pFadeModel->getZ();
+        if (nRetZ < nZ) nRetZ = nZ;
+    }
+    if (m_pSemiModel) {
+        if (nRetZ < nZ) nRetZ = nZ;
+    }
+    if (nRetZ == 0) {
+        getWorldBBoxScr(vScr.i, &CWorldEnv::getWorldScreenMatrix());
+        nRetZ = vScr.i.z;
+        if (nRetZ < 0) nRetZ = vScr.f.w <= 0.0f ? 0x0FFFF280 : 0x10;
+    }
+    return nRetZ;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getOldSemiZ__6CModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getWorldBBoxScr__6CModelR7IVECTORPC7FMATRIX);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3);
@@ -210,7 +234,41 @@ INT checkBSphere(CCoord& crd, const FVECTOR& ctr, FLOAT rad) {
     return Math3D::CheckVisibleBoundingSphere(sphere, frustum) ? 0 : 0x80000000;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBSphere__FR6CCoordPC4BBOX);
+/* Parked: 12 lines off, registers only: the original keeps the scratchpad pointer in v1 and the clip result in a0 (or a0,v0,a0; move v0,a0), ours v0/v1. Worked: the 0xC0000000 return last (if (!(x[1] < x[0])) {...}), v assigned inside the if, asm "nop" opening the if (ret) block (the original's extra nop after the beqz slot; same tail as the parked resultCheckBBox(CCoord&)). Tried: one/two-output cfc2 asm, 'm' operand lqc2 helpers, result local, decl order; permuter 15 min (45593 candidates, stays 16). */
+#if 0
+INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox) {
+    INT ret;
+    INT clip;
+    FVECTOR* v;
+    if (!(bbox->x[1] < bbox->x[0])) {
+        v = (FVECTOR*)0x70000000;
+    v[0].x = bbox->x[0];
+    v[0].y = bbox->y[0];
+    v[0].z = bbox->z[0];
+    v[1].x = bbox->x[1];
+    v[1].y = bbox->y[1];
+    v[1].z = bbox->z[1];
+    asm volatile("lqc2 $vf20, 0(%0)" : : "r"(v));
+    asm volatile("lqc2 $vf27, 0x10(%0)" : : "r"(v));
+    asm volatile("lqc2 $vf21, 0x0(%0)\n"
+                 "lqc2 $vf22, 0x10(%0)\n"
+                 "lqc2 $vf23, 0x20(%0)\n"
+                 "lqc2 $vf24, 0x30(%0)" : : "r"(&mWorldMatrix));
+    asm volatile("vcallms 0x20");
+    asm volatile("cfc2.i %0, $vi4" : "=r"(ret));
+    asm volatile("cfc2.ni %0, $vi5" : "=r"(clip));
+        if (ret) {
+            asm volatile("nop");
+            ret = (ret | 0x8000) << 16;
+        }
+        clip |= ret;
+        return clip;
+    }
+    return 0xC0000000;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__FRC7FMATRIXPC4BBOX);
+#endif
 void resultCheckBBox(FVECTOR& min, FVECTOR& max) {
     asm volatile("qmfc2.i $0, $vf0");
     asm volatile("sqc2 $vf2, 0(%0)" : : "r"(&min) : "memory");
@@ -237,7 +295,12 @@ void CModel::setAlphaScale(FLOAT inScale) { m_fAlphaScale = inScale; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", linksub__6CModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", addTexture__6CModelPCci);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShadowMapModel__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", attachSemiModel__6CModelR10CSemiModeli);
+void CModel::attachSemiModel(CSemiModel& inModel, BOOL bInManage) {
+    if (m_pSemiModel && isManagedSemiModel()) delete m_pSemiModel;
+    m_pSemiModel = &inModel;
+    if (bInManage) m_nFlag |= 1;
+    else m_nFlag &= ~1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", sendTexture__6CModelPUl);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTexParam__6CModelPUl);
 void CModel::dispUpdate(FLOAT fR) {
@@ -260,7 +323,14 @@ BOOL CModel::dispCheck() {
 void CModel::disp() { disp(m_pTask ? m_pTask->getFrameRate() * 0.020000001f : 1.0f); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__6CModelf);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispImpl__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__6CModel);
+void CModel::makePkt() {
+    CPackMan::pkCloseDirectCode();
+    if (!m_pData->isDataEmpty()) {
+        if (getLayerID() == 0x1b) disp0(-1, CPackMan::getDefault_TEST_1(), 0);
+        else disp0(-1, getTestFlag(), 0);
+    }
+    CPackMan::pkOpenDirectCode(0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp0__6CModeliUli);
 /* Parked: 2 lines off: the original loads *pData before the lui 0x6000 of the tag compare, ours lui first. Tried: d/mode locals, store forms, int (*)[4]/u_long/u_long128 pData, test forms (!=, ^, ternary, tag local); permuter 12 min (22337 candidates, stays 2). */
 #if 0
@@ -314,7 +384,12 @@ UINT CFadeModel::getPacketSize() const {
     if (m_pModel && (m_pModel->m_nFlag & 0x20)) nPacketSize *= 2;
     return nPacketSize + m_pModel->getBeforeDirectNum() + m_pModel->getAfterDirectNum();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__8CModelBG);
+void CModelBG::makePkt() {
+    CPackMan::pkCloseDirectCode();
+    if (!isDataEmpty()) disp0(-1, getTestFlag(), 0);
+    if (isAvailableSemiModel() && getSemiModel()) getSemiModel()->dispDirect();
+    CPackMan::pkOpenDirectCode(0);
+}
 FIX4 CBBox::calcZ() { return 0x640; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__5CBBox);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", linkTexAnm__6CModelP7CTexAnmi);

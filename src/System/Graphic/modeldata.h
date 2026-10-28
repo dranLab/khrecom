@@ -37,6 +37,7 @@ struct MODELDATA {
     void* m_pSemiData; /* MODELTAG* */
     BBOX* m_pBBox;
 
+    BOOL isDataEmpty() const { return !m_pData || *(UINT*)m_pData == 0x60000000; } // PARTIAL: added for System/Graphic/Model
     BOOL enablePointLight() const;
     BOOL enableLight() const;
     INT getBoneIndex(const CHAR* pName) const; // PARTIAL: added for System/Graphic/TriangleIK

@@ -14,6 +14,7 @@ class CTask;
 class CCoord;
 class CCoords; // PARTIAL: added for System/Graphic/DispList
 class CTexAnm;
+class CSemiModel;
 class CLightUnit; // PARTIAL: added for Game/ModelObj
 struct MODELDATA;
 
@@ -90,6 +91,17 @@ public:
     virtual void dispImpl();                          // PARTIAL: added for Form/Menu/MenuModel
     virtual void dispUpdate(FLOAT fR);
     virtual BOOL dispCheck();
+    virtual void makePkt(); // PARTIAL: added for System/Graphic/Model
+    BOOL isDataEmpty() const { return m_pData->isDataEmpty(); }
+    CSemiModel* getSemiModel() { return m_pSemiModel; }
+protected:
+    BOOL isManagedSemiModel() const { return m_nFlag & 1; }
+    BOOL isAvailableSemiModel() const { return m_nFlag & 2; }
+public:
+    void attachSemiModel(CSemiModel& inModel, BOOL bInManage);
+    FIX4 getSemiZ();
+    void getWorldBBoxScr(IVECTOR& vScr, const FMATRIX* pWS);
+    void disp0(INT nFlag, u_long nTest, INT nPass);
     virtual void changeLayerExt(INT a, INT b);        // PARTIAL: parameters guessed, for Form/Menu/MenuModel
     FLOAT getAlphaScale() { return m_fAlphaScale; }
     INT getBeforeDirectNum() const { return m_iBeforeDirectQNum; } // PARTIAL: added for System/Graphic/Model
@@ -200,6 +212,16 @@ public:
     virtual ~CFadeModel();
     virtual void makePkt();
     virtual UINT getPacketSize() const;
+};
+
+class CModelBG : public CModel {
+public:
+    CModelBG(USHORT nInDepth);
+    virtual ~CModelBG();
+    virtual void disp();
+private:
+    virtual void makePkt();
+    void setLayerFG(BYTE nInDepth);
 };
 
 class CBBox : public CGPrim {
