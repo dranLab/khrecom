@@ -64,6 +64,12 @@ extern "C" char D_004A2E38[];
 extern "C" char D_004A2E70[];
 extern "C" char D_004A2EA8[];
 extern "C" char D_004A3270[];
+extern "C" char D_004A2BD8[];
+extern "C" char D_004A2C10[];
+extern "C" char D_004A2C48[];
+extern "C" char D_004A2C80[];
+extern "C" char D_004A2CB8[];
+extern "C" char D_004A2CF0[];
 extern "C" char D_004A32A8[];
 extern "C" const CARD_DATA cardDataTbl_004A4070[];
 static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
@@ -82,7 +88,59 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", DebugPlayerA
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", DebugWinPlayer__9DWTPlayerP12CDebugWindowii_002848F0);
 CPlayerGauge::CPlayerGauge(CTask* p) : CTask(p, 0x4000), m_pNaviMap(NULL), m_pFriend(NULL) { _initialize(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge12CPlayerGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge12CPlayerGauge);
+void CPlayerGauge::_initialize() {
+    FVECTOR pos;
+    m_nMaxHP = 300;
+    m_nRedHP = 300;
+    m_nHP = 300;
+    m_iState = 1;
+    m_uiFlag = 0;
+    m_hAlertSE = 0;
+    m_tqTimer = 0;
+    m_tqRed = 0;
+    m_szSeqFace = _ref(g_szSeqFace); // MATCH: global load kept after the field stores
+    m_pSeqCtrl = NULL;
+    m_pSeqCtrl = new (D_004A2BD8) D2::C2DSeqCtrl;
+    m_pSeqCtrl->setLayer(2);
+    m_pSeqCtrl->addSeq(g_szSeqGauge, 0xE);
+    m_pSeqCtrl->addSeq(g_szSeqGauge, 7);
+    m_pSeqCtrl->addSeq(g_szSeqGauge, 8);
+    m_pSeqCtrl->addSeq(g_szSeqGauge, 9);
+    m_pSeqCtrl->addSeq(m_szSeqFace, 3);
+    changeTimeHP(m_pSeqCtrl, 1, m_nMaxHP);
+    changeTimeHP(m_pSeqCtrl, 2, m_nMaxHP);
+    changeTimeHP(m_pSeqCtrl, 3, m_nMaxHP);
+    D2::C2DMan::getLayPosition(g_szLadGauge, 1, 0, pos, FALSE);
+    m_pSeqCtrl->setPos(pos);
+    m_pCommon = new (D_004A2C10) CCommonGauge(this);
+    m_pPrize = new (D_004A2C48) CPrizeGauge(this);
+    if (!CSceneInfo::isBattleScene() && !CSceneInfo::isMinigameScene()) {
+        m_pNaviMap = new (D_004A2C80) CNaviMap(this);
+        INT mode = CGame::getDbgGameMode();
+        if (mode >= 7) m_pFriend = new (D_004A2CB8) CFriendGauge(this);
+        else if (mode < 4) m_pFriend = new (D_004A2CB8) CFriendGauge(this);
+    }
+    if (CGameWork::getInt(1, 0xE2) & 1) {
+        m_iState = 7;
+        m_pSeqCtrl->enableDisp(0, FALSE);
+        m_pSeqCtrl->enableDisp(1, FALSE);
+        m_pSeqCtrl->enableDisp(2, FALSE);
+        m_pSeqCtrl->enableDisp(3, FALSE);
+        m_pSeqCtrl->enableDisp(4, FALSE);
+    } else if (m_pFriend) {
+        m_pFriend->setGauge(1);
+    }
+    m_pSeqCtrlDP = NULL;
+    m_nMaxDP = 0;
+    m_nDP = 0;
+    m_nStateDP = 0;
+    if (CGame::isRikuGame() && CSceneInfo::isBattleScene()) {
+        m_pSeqCtrlDP = new (D_004A2CF0) D2::C2DSeqCtrl[3];
+        m_nMaxDP = 30;
+        if (CGameWork::getInt(0, 0x24) & 8) m_uiFlag |= 4;
+    }
+    setDPGauge(m_iState);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge12CPlayerGauge);
 void CPlayerGauge::changeTimeHP(D2::C2DSeqCtrl* p, UINT nIdx, UINT nHP) {
     p->changeTime(nIdx, (UINT)((FLOAT)nHP / 560.0f * 470.0f));

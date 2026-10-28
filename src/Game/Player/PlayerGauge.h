@@ -207,6 +207,9 @@ public:
     D2::C2DSeqCtrl* m_pCardSeqCtrls; /* 0x88 */
     ::C2DCard* m_pCard;      /* 0x8c */
     TIMEQ m_tqTimer;             /* 0x90 */
+    CARD m_cardStack[4];         /* 0x94 */
+    SHORT m_nStack;              /* 0xa4 */
+    SHORT m_nTexID;              /* 0xa6 */
     CPrizeGauge(CTask* p);
     void _initialize();
     virtual ~CPrizeGauge();
