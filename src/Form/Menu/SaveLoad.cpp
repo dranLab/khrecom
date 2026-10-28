@@ -520,8 +520,58 @@ void CSaveLoadUI::preSaveData() {
     openMessageDlg(szMsg, 0, 0);
     m_nStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeSaveData__11CSaveLoadUI);
-__asm__(".rdata\n.align 4\n.word .L0034A8D4\n.word .L0034A8EC\n.word .L0034A90C\n.word .L0034A938\n.word .L0034A97C\n.word .L0034A994\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034A9CC\n.word .L0034A9E4\n.text\n");
+void CSaveLoadUI::exeSaveData() {
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqLoadSysData()) m_nStep++;
+        break;
+    case 1:
+        if (!m_pMemoca->isCompleteReq(NULL)) break;
+        m_nStep++;
+    case 2:
+        if (m_pMemoca->reqSaveGameData(m_nDataListSel, *m_pGameDataEntries, (m_nFlag & 0x40) != 0)) m_nStep++;
+        break;
+    case 3:
+        if (!m_pMemoca->isCompleteReq(NULL)) break;
+        m_nLastResult = m_pMemoca->getLastResult();
+        if (m_nLastResult < 0) {
+            m_nExecError = 2;
+            m_nStep = 10;
+            break;
+        }
+        m_nStep++;
+    case 4:
+        if (m_pMemoca->reqSaveSysData()) m_nStep++;
+        break;
+    case 5:
+        if (!m_pMemoca->isCompleteReq(NULL)) break;
+        m_nLastResult = m_pMemoca->getLastResult();
+        if (m_nLastResult < 0) m_nExecError = 3;
+        m_nStep = 10;
+        break;
+    case 10:
+        closeMessageDlg();
+        m_nStep++;
+        break;
+    case 11:
+        if (!isPadEnable()) break;
+        if (m_nLastResult >= 0) {
+            _ref(s_bSaveLoadDone) = TRUE;
+            if (!(m_nFlag & 0x100)) m_pGameDataEntries->useOneSavableUnit(m_nDataListSel);
+            for (INT i = 0; i < 4; i++) {
+                setupDataPlate(m_nDataListTop + i);
+            }
+            updateMemocaInfoStr();
+            updateMemocaInfoBar();
+            m_pGameDataEntries->setLatestEntryIndex(m_nSlot, m_nDataListSel);
+            CSound::playSE(11, -1, 64);
+            changeState(10);
+        } else {
+            changeState(17);
+        }
+        break;
+    }
+}
 void CSaveLoadUI::preLoadData() {
     char szSlot[32];
     _getSlotName(m_nSlot + 1, szSlot);
