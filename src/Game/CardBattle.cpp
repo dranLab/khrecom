@@ -2,6 +2,9 @@
 #include "System/Task.h"
 #include "Game/CardBattle.h"
 #include "Game/BattleCard.h"
+#include "Game/Entity.h"
+#include "Game/GameWork.h"
+#include "System/TaskMan.h"
 #include "System/HeapMan.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Sound/SoundMan.h"
@@ -193,7 +196,15 @@ BOOL CCardBattle::isPlayingGimmickCard() {
     if (!m_pInstance) return FALSE;
     return m_pInstance->m_cardGimmick[0];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", initPlayingEnemy__Q210CardBattle11CCardBattlei);
+void CCardBattle::initPlayingEnemy(HANDLE inHandle) {
+    m_uiFlag |= 1;
+    m_pSeqCtrlEnemy->destroy();
+    m_pSeqCtrlEnemy->setLayer(2);
+    m_pSeqCtrlEnemy->addSeq(g_szSeqCockpit, 100);
+    CB_LAYOUT* pLayout = &g_LayoutData[16];
+    FVECTOR pos = {{pLayout->x, pLayout->y, 0.0f, 1.0f}};
+    m_pSeqCtrlEnemy->setPos(pos);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", dispPlayingEnemy__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", initCardBreak__Q210CardBattle11CCardBattleiUi);
 void CCardBattle::dispCardBreak() {
