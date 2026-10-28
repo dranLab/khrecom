@@ -92,7 +92,7 @@ struct CB_CARD_VIEW {
     CARD m_cardEnchant[2];
 };
 /* CARD's inline constructor (Game/Card.cpp's _setCard) */
-static inline void _setCard(CARD& c, USHORT nKind, CHAR nNumber) {
+static inline void _setCard(CARD& c, USHORT nKind, BYTE nNumber) {
     c.m_nId = 0;
     c.m_nKind2 = nKind;
     c.m_nNumber2 = nNumber;
@@ -536,7 +536,16 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeDuel__Q210CardBat
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelEntry__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelStart__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelBreakCount__Q210CardBattle11CCardBattleii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnemyDuelCard__Q210CardBattle11CCardBattleiii);
+BOOL CCardBattle::setEnemyDuelCard(HANDLE inHandle, INT inIndex, INT inNumber) {
+    if (m_uiDuelState != 5) return 0;
+    if (m_uiState[0]) return 0;
+    if (m_uiState[1]) return 0;
+    CARD card;
+    _setCard(card, inIndex, inNumber);
+    INT result = setPlayCard(inHandle, 2, NULL, &card, 0);
+    if (result > 0) initPlayingEnemy(inHandle);
+    return result;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelEnd__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelPlayStock__Q210CardBattle11CCardBattlePPQ210CardBattle11CBattleCardi);
 BOOL CCardBattle::isDuelEntryingCard(INT inSide) {
