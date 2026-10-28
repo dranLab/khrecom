@@ -1345,7 +1345,49 @@ BOOL CSaveLoadUI::checkSelector(SHORT& nOutIdx, SHORT nMax, INT nValDownKey, INT
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", checkSelector__11CSaveLoadUIRssiisii);
 #endif
+extern "C" char D_004F3DA0[]; /* "%s\n%s\n%s": first used by setupDataPlate (still assembly) */
+/* Parked: 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0`
+ * (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function
+ * scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter 4 min (5641 candidates) */
+#if 0
+void CSaveLoadUI::createBootInfoMsg(INT nRes, CHAR* pszOutMsg) {
+    INT nSlot = 0;
+    INT nCtd = 0x600100;
+    pszOutMsg[0] = '\0';
+    const CHAR* pszMemoca = _ctdText(0x600000);
+    switch (nRes) {
+    case -4:
+        nSlot = 12;
+        break;
+    case -5:
+        nSlot = 1;
+        break;
+    case -6:
+        nSlot = 2;
+        break;
+    default:
+        nCtd = 0x600102;
+        break;
+    }
+    char szLine1[128];
+    CHAR* pszForm = (CHAR*)_ctdText(nCtd);
+    if (nSlot) {
+        char szSlot[32];
+        _getSlotName(nSlot, szSlot);
+        sprintf(szLine1, pszForm, pszMemoca, szSlot);
+    } else {
+        sprintf(szLine1, pszForm, pszMemoca);
+    }
+    char szLine2[256];
+    const CHAR* pszNum = _ctdText(0x100000);
+    const CHAR* pszFmt = _ctdText(0x600103);
+    sprintf(szLine2, pszFmt, 100, pszNum);
+    const CHAR* pszInfo = _ctdText(0x600104);
+    sprintf(pszOutMsg, D_004F3DA0, szLine1, szLine2, pszInfo);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createBootInfoMsg__11CSaveLoadUIiPc);
+#endif
 void CSaveLoadUI::createCheckingMsg(INT nSlot, CHAR* pszOutMsg) {
     char szSlot[32];
     pszOutMsg[0] = '\0';
