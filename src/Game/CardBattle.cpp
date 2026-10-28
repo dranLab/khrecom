@@ -205,7 +205,21 @@ void CCardBattle::initPlayingEnemy(HANDLE inHandle) {
     FVECTOR pos = {{pLayout->x, pLayout->y, 0.0f, 1.0f}};
     m_pSeqCtrlEnemy->setPos(pos);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", dispPlayingEnemy__Q210CardBattle11CCardBattle);
+void CCardBattle::dispPlayingEnemy() {
+    UINT flag = 1;
+    if (m_uiFlag & flag) {
+        CEntity* pEntity;
+        if (m_pSeqCtrlEnemy->isEnd(0) || CGameWork::getInt(1, 0xE2) || !m_hOwner[1] ||
+            !(pEntity = (CEntity*)CTaskMan::getTask(m_hOwner[1]))) {
+            m_uiFlag = (INT)m_uiFlag & ~1;
+            m_pSeqCtrlEnemy->destroy();
+        } else {
+            FVECTOR pos;
+            pEntity->getUseCardPos(pos);
+            m_pSeqCtrlEnemy->set3DPos(pos);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", initCardBreak__Q210CardBattle11CCardBattleiUi);
 void CCardBattle::dispCardBreak() {
     if (m_hBreak > 0) {
