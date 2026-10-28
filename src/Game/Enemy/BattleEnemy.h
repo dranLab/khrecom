@@ -130,10 +130,14 @@ public:
     BOOL isQuickRecover_();
     void enemyCardDash_();
     void continuousDamageProc_();
+    BOOL isNowPlayDamageMotion_();
     void makeRoulettePrize(const FVECTOR* inPos);
     BOOL checkResist_(ATK_KIND inDmgKind);
     CBattleEnemyManager* getBattleEnemyManager() const;
     void makeExpPrize(const FVECTOR* inPos);
+    void makePremiumPrize(const FVECTOR* inPos);
+    void makeCard(const FVECTOR* inPos);
+    BOOL hitTest_();
     void homingMoveXZToPlayer(FLOAT inRate, FLOAT inSpeed);
     void createFriendCard_(INT inRate);
     void attackStateCardDestroy(BOOL inColl);

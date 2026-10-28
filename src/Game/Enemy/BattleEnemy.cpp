@@ -31,6 +31,14 @@ extern "C" char D_004AD578[];
 /* PARTIAL: until SOURCE DATA, the unit's copy of the header static BattleEnemy::BadStatusEffectName (its .data
  * comes from the original assembly) */
 template <class T> static inline T& _ref(T& x) { return x; }
+namespace BattleEnemy {
+extern CHAR* FreezeEffectName;
+}
+extern "C" char D_004AD928[];
+extern "C" char D_004AD2A0[];
+extern "C" char D_004AD568[];
+void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
 FVECTOR getPlayerPos(INT inIndex);
 namespace BattleEnemy {
@@ -135,7 +143,16 @@ BOOL CBattleEnemy::startCardBattle() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endCardBattle__12CBattleEnemyP6CStatei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", checkHitPos__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playerHomingY__12CBattleEnemyf);
+void CBattleEnemy::playerHomingY(FLOAT inRate) {
+    FVECTOR target;
+    FVECTOR vel;
+    if (!g_pPlayer) return;
+    getPlayerPosition(target);
+    ScaleVectorXYZ(vel, g_pPlayer->getVel(), 12.5f);
+    vel.y = 0.0f;
+    AddVectorXYZ(target, target, vel);
+    m_pMove->homingY(target, inRate);
+}
 void CBattleEnemy::homingToPlayer(FLOAT inRate) {
     FVECTOR vPos;
     getPlayerPosition(vPos);
@@ -193,7 +210,18 @@ INT CBattleEnemy::getPlayerState() {
 void CBattleEnemy::setBossKilledFlag() {
     CGameWork::setFlag(1, 2, 1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateBefore__12CBattleEnemy);
+void CBattleEnemy::updateBefore() {
+    enemyCardDash_();
+    if (m_pAttack) {
+        if (m_pAttack->test()) {
+            m_ullBtlEnemyFlag |= 0x40;
+        } else {
+            m_ullBtlEnemyFlag &= ~0x40;
+        }
+    }
+    hitTest_();
+    if (isBtlEnemyFlag(0x20000)) m_pMove->setOldPos2(getPos());
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateAfter__12CBattleEnemy);
 void CBattleEnemy::updatePositionAfter() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", lastUpdate__12CBattleEnemy);
@@ -233,14 +261,33 @@ void CBattleEnemy::stateZero() {
 void CBattleEnemy::endStateZero() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDuel__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDuel__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateDuel__12CBattleEnemy);
+void CBattleEnemy::endStateDuel() {
+    for (INT i = 0; i < 2; i++) {
+        CEffect* effect = CEffectMan::getEffect(m_hSpotLight[i]);
+        if (effect) {
+            effect->detachCoord();
+            effect->loopEnd();
+        }
+        m_hSpotLight[i] = 0;
+    }
+    bodyCollOnBody(-1);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDuelSuccess__12CBattleEnemy);
 void CBattleEnemy::stateDuelSuccess() {
     if (!isBtlEnemyFlag(0x4000000000ULL)) m_pMove->turnToTargetY(g_pPlayer, 0.17453292f);
     if (getTimer() <= 0) changeDefaultState();
 }
 void CBattleEnemy::endStateDuelSuccess() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateFaint__12CBattleEnemy);
+void CBattleEnemy::beginStateFaint() {
+    if (m_pEnemyParam) {
+        changeMotion(m_pEnemyParam->iFaintMotionIndex[0], 0, 0, -1, 0, 0);
+    } else {
+        setTimer(15000);
+    }
+    m_iSysStep = 0;
+    setBadStatusEffect(1, 0.0f);
+    m_ullBtlEnemyFlag |= 0x80000000000ULL;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateFaint__12CBattleEnemy);
 void CBattleEnemy::endStateFaint() {
     m_ullBtlEnemyFlag &= ~0x80000000000ULL;
@@ -259,7 +306,16 @@ void CBattleEnemy::endStateTerror() {
     killBadStatusEffect();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateFreeze__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateFreeze__12CBattleEnemy);
+void CBattleEnemy::stateFreeze() {
+    if (getTimer() > 0) return;
+    CEffect* effect = CEffectMan::getEffect(m_hFreeze);
+    if (effect) effect->loopEnd();
+    m_hFreeze = 0;
+    FVECTOR pos;
+    getLockOnPos(pos);
+    setEffect(BattleEnemy::FreezeEffectName, 4, &pos, NULL, 0.0f);
+    changeDefaultState();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateFreeze__12CBattleEnemy);
 void CBattleEnemy::beginStateShock() {
     if (!isBtlEnemyFlag(0x200000000ULL)) {
@@ -276,7 +332,14 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateShock__1
 void CBattleEnemy::endStateShock() {
     if (!(m_ullBackupFlag & 4)) m_pMove->enableGravity(FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateTornado__12CBattleEnemy);
+void CBattleEnemy::beginStateTornado() {
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xC5B, D_004AD2A0, 0);
+    changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
+    m_pMove->enableGravity(FALSE);
+    m_iSysStep = 0;
+    bodyCollOff(-1);
+    bodyCollOffBody(-1);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateTornado__12CBattleEnemy);
 void CBattleEnemy::endStateTornado() {
     bodyCollOn(-1);
@@ -361,9 +424,20 @@ CBattleEnemyManager* CBattleEnemy::getBattleEnemyManager() const {
     }
     return NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makePrize__12CBattleEnemyPC7FVECTOR);
+void CBattleEnemy::makePrize(const FVECTOR* inPos) {
+    if (!inPos) AssertApp(D_004ACBC0, 0xF4B, D_004AD568, 0);
+    if (isBtlEnemyFlag(0x400000)) return;
+    makeExpPrize(inPos);
+    makePremiumPrize(inPos);
+    makeRoulettePrize(inPos);
+    makeCard(inPos);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeExpPrize__12CBattleEnemyPC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makePremiumPrize__12CBattleEnemyPC7FVECTOR);
+void CBattleEnemy::makePremiumPrize(const FVECTOR* inPos) {
+    CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+    if (!bem) AssertApp(D_004ACBC0, 0xF9A, D_004AD3B8, 0);
+    bem->createPremiumPrize(*inPos, (UINT)getID() % 10000);
+}
 void CBattleEnemy::makeRoulettePrize(const FVECTOR* inPos) {
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
     if (!bem) AssertApp(D_004ACBC0, 0xFA4, D_004AD3B8, 0);
@@ -422,7 +496,13 @@ void CBattleEnemy::commonEndAttack() {
     m_ullBtlEnemyFlag &= ~5;
     bodyCollOn(-1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", notifyDead__12CBattleEnemy);
+void CBattleEnemy::notifyDead() {
+    if (isBtlEnemyFlag(0x40000000)) return;
+    CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+    if (!bem) AssertApp(D_004ACBC0, 0x116A, D_004AD3B8, 0);
+    bem->notifyDead(getHandle());
+    m_ullBtlEnemyFlag |= 0x40000000;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setupHitBack__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initEnemyParam__12CBattleEnemyiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playSmallDamageSE__12CBattleEnemy);
@@ -849,7 +929,10 @@ void CBattleEnemy::updateDamageTimer_() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", isNowPlayDamageMotion___12CBattleEnemy);
+BOOL CBattleEnemy::isNowPlayDamageMotion_() {
+    if (!m_pAnim) AssertApp(D_004ACBC0, 0x1D28, D_004AD928, 0);
+    return m_pEnemyParam->isDamageMotion(m_pAnim->getAnimID());
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", addEnemyKillCount___12CBattleEnemy);
 BOOL CBattleEnemy::changeSmallDamageState_(ATK_KIND inDmgKind) {
     if (!isBtlEnemyFlag(0x200000)) {
