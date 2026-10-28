@@ -273,7 +273,16 @@ void CBattleEnemy::endStateTerror() {
     killBadStatusEffect();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateFreeze__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateFreeze__12CBattleEnemy);
+void CBattleEnemy::stateFreeze() {
+    if (getTimer() > 0) return;
+    CEffect* effect = CEffectMan::getEffect(m_hFreeze);
+    if (effect) effect->loopEnd();
+    m_hFreeze = 0;
+    FVECTOR pos;
+    getLockOnPos(pos);
+    setEffect(BattleEnemy::FreezeEffectName, 4, &pos, NULL, 0.0f);
+    changeDefaultState();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateFreeze__12CBattleEnemy);
 void CBattleEnemy::beginStateShock() {
     if (!isBtlEnemyFlag(0x200000000ULL)) {
