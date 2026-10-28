@@ -713,7 +713,30 @@ void CBattleEnemy::playSmallDamageSE() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playSmallDamageSE__12CBattleEnemy);
 #endif
+/* Parked: the load of hitBody->m_pCollision (getDetectPos) is scheduled before the vol = -1 store in ours, after
+ * it in the original (8 lines: registers a2/v1, order): our vol store is a fixed scalar MEM that cannot alias the
+ * varying struct load; `INT vol[1]` matches but the ref says INT vol (same open issue: MapEnemy::hitTest_); tried:
+ * no hitBody local (getHitCollBody() twice), separate pos local, `INT vol; vol = -1`, _ref(vol) store/arg,
+ * playSE(.., getPanAndVol(..)) args, full Game/Collision/CollBody.h class, if/return getDetectPos, permuter 6 min
+ * (9052 candidates, no gain); sched dump: insn r135=[r129+0xc] has no dependence on [$1]=r132 */
+#if 0
+void CBattleEnemy::playBigDamageSE() {
+    if (isBtlEnemyFlag(0x400000000ULL)) return;
+    INT fileID = (INT)getExtraParam(BattleEnemy::FileIDParamName);
+    INT seID = m_iDamageCounter ? 3 : 4;
+    CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+    if (hitBody) {
+        INT vol = -1;
+        INT pan = CSound::getPanAndVol(*hitBody->getDetectPos(), vol);
+        CSound::playSE(fileID * 1000 | seID, vol, pan);
+    } else {
+        playSEPanAndVol(fileID, seID, 0, NULL, 0);
+    }
+    m_iDamageCounter ^= 1;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playBigDamageSE__12CBattleEnemy);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playDamageSE__12CBattleEnemy8ATK_KIND);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setupDuelCard__12CBattleEnemy);
 BOOL CBattleEnemy::destroyCard() {
