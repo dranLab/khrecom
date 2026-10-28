@@ -974,7 +974,28 @@ void CBattleEnemy::killBadStatusEffect() {
         m_hBadStatus = CEntity::setBadStatusEffect(g_BadStatusEffectName, 2, 0.0f);
     }
 }
+/* Parked: the 30-degree constant (0.5235988f) is loaded once into $f20 and reused for sinf, cosf and
+ * calcOrbitSpeedFromDistance in ours; the original reloads it (lui/ori/mtc1) before each call and keeps the sinf
+ * result in $f20 instead (vel.y stored after cosf); tried: field stores vs vel.set(), DEG2RAD(30.0f) inline,
+ * double literal, PI / 6, sin result in a local, speed local, permuter 6 min (11226 candidates, no gain) */
+#if 0
+void CBattleEnemy::setupFlick() {
+    FVECTOR vel;
+    if (!m_pEnemyParam) return;
+    if (checkHitPos() & 1) {
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
+        m_pMove->getRot().y = calcDirection(g_pPlayer);
+        vel.set(0.0f, sinf(0.5235988f), -cosf(0.5235988f));
+        m_pMove->calcVelocity(m_pMove->calcOrbitSpeedFromDistance(0.5235988f, 4.0f), vel);
+    } else {
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[8], 0, 0, -1);
+        m_pMove->getRot().y = g_pPlayer->calcDirection(*this);
+        m_pMove->calcOrbitVelocityFromDistance(0.5235988f, 4.0f);
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setupFlick__12CBattleEnemy);
+#endif
 void CBattleEnemy::commonBeginAttack() {
     bodyCollOff(-1);
 }
