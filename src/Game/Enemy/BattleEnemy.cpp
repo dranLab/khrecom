@@ -1205,7 +1205,20 @@ void CBattleEnemy::stateDead_() {
 void CBattleEnemy::endStateDead_() {
     endStateDead();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", createFriendCard__12CBattleEnemy9CARD_KINDi);
+CEntity* CBattleEnemy::createFriendCard(CARD_KIND inCardKind, INT inCardNumber) {
+    PRIZE_PARAM param;
+    if (isBtlEnemyFlag(0x2000000000ULL)) return NULL;
+    param.iNumber = inCardNumber;
+    param.PrizeKind = inCardKind;
+    param.fSpeed = 0.2f;
+    param.uiFlag = 1;
+    param.uiPrizeFlag = 0;
+    getHeadPos(param.vPos);
+    param.vPos.y += 2.0f;
+    param.vRot.set(DEG2RAD(-70.0f), DEG2RAD(RND::genrand_real1() * 360.0f), 0.0f);
+    Math3D::LimitPIVector(param.vRot);
+    return CEntityFactory::getInstance()->createPrize(param, NULL);
+}
 void CBattleEnemy::notifyHP() {
     INT nHp = m_iHp;
     HANDLE hThis = getHandle();
