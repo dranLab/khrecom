@@ -863,7 +863,10 @@ void CBattleEnemy::updateDamageTimer_() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", isNowPlayDamageMotion___12CBattleEnemy);
+BOOL CBattleEnemy::isNowPlayDamageMotion_() {
+    if (!m_pAnim) AssertApp(D_004ACBC0, 0x1D28, D_004AD928, 0);
+    return m_pEnemyParam->isDamageMotion(m_pAnim->getAnimID());
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", addEnemyKillCount___12CBattleEnemy);
 BOOL CBattleEnemy::changeSmallDamageState_(ATK_KIND inDmgKind) {
     if (!isBtlEnemyFlag(0x200000)) {
