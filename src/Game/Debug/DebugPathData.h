@@ -36,11 +36,11 @@ public:
         m_cTile.m_P1.set(244 << 4, -166 << 4, 0xFFFF280);
     }
     ~CPDFrameTime() {}
-    void reset();
-    void start() { m_iFlags |= 2; }
+    void reset() { *(FLOAT*)&m_fTimer = 0.0f; } // MATCH: not a struct-field store, so callers reload m_pFrame after it (gcc 2.95 alias heuristic; SimulateSpeedLineCall)
+    void start() { *(INT*)&m_iFlags |= 2; } // MATCH: as reset
     void stop() { m_iFlags &= ~2; }
-    void on();
-    void off();
+    void on() { *(INT*)&m_iFlags |= 1; } // MATCH: as reset
+    void off() { m_iFlags &= ~1; }
     void disp(FLOAT fRate) {
         if (m_iFlags & 1) {
             if (m_iFlags & 2) m_fTimer += fRate;
