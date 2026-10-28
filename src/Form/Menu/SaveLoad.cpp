@@ -19,11 +19,15 @@ inline void* operator new(unsigned int, void* p) throw() { return p; }
 #include "System/PadHandler.h"
 #include "System/Sound/SoundMan.h"
 #include "Game/GameWork.h"
+#include "Game/CardKind.h"
 #include <string.h>
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 #include "System/Graphic/ScreenMask.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "include_asm.h"
+inline void C2DSeqSelectable::setCaptionSize(INT nSize) {
+    if (m_pCaption) m_pCaption->setSize(nSize);
+}
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
@@ -1396,8 +1400,131 @@ void CSaveLoadUI::setActiveSlotPlate(INT nSlot) {
     setHelpMessage(szMes);
     m_pResultPlateFnt[1]->setText(s_pStrSlot[nSlot]);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", setupDataPlate__11CSaveLoadUIs);
-__asm__(".rdata\n.align 3\n.word 0x76615343\n.word 0x616F4C65\n.word 0x3A495564\n.word 0x7465733A\n.word 0x61447075\n.word 0x6C506174\n.word 0x28657461\n.word 0x20296425\n.word 0x202E2E2E\n.word 0xCD88CD94\n.word 0xC5824F8A\n.word 0x000AB782\n.word 0x004C004B\n.word 0x0050004F\n.word 0x64323025\n.word 0x00000000\n.word 0x20207325\n.word 0x45F9564C\n.word 0x00643225\n.word 0x00000000\n.word 0x20207325\n.word 0x45F9564C\n.word 0x20643225\n.word 0x20202020\n.word 0x64352520\n.word 0x00504D20\n.word 0x72746E45\n.word 0x65636E61\n.word 0x6C614820\n.word 0x0000006C\n.word 0x00466425\n.word 0x00000000\n.word 0x00000020\n.word 0x00000000\n.word 0x25207325\n.word 0x00000073\n.word 0x3A643325\n.word 0x64323025\n.word 0x00000000\n.word 0x00000000\n.word 0x250A7325\n.word 0x73250A73\n.word 0x00000000\n.word 0x00000000\n.text\n");
+/* tables still defined by the assembly block at the end of the file */
+extern "C" CARD_DATA cardDataTbl_004F4ED0[];
+extern "C" C2DSeqAgent::SeqTbl s_seqDataPlateTbl[3][2];
+extern "C" short s_seqDataActPlateTbl[3][2];
+void CSaveLoadUI::setupDataPlate(SHORT nDataIdx) {
+    if (nDataIdx < m_nDataListTop || nDataIdx >= m_nDataListTop + 4) {
+        TRACE("CSaveLoadUI::setupDataPlate(%d) ... \x94\xcd\x88\xcd\x8aO\x82\xc5\x82\xb7\n", nDataIdx);
+        return;
+    }
+    SHORT n = nDataIdx - m_nDataListTop;
+    short cirTbl[2][2] = {{0x4B, 0x4C}, {0x4F, 0x50}};
+    C2DSeqSelectable* pPlate = m_pDataItemPlate[n];
+    D2::C2DSeqCtrl* pCircle = m_pDataItemNumCircle[n];
+    D2::C2DSeqCtrl* pWorldIcon = m_pDataItemIcon[n];
+    D2::C2DSeqCtrl* pClearIcon = m_pDataItemClearIcon[n];
+    INT nCircle = 0;
+    INT nGameMode;
+    sprintf(m_szDataItemID[n], "%02d", nDataIdx + 1);
+    BOOL bUpdateIcon = FALSE;
+    BOOL bClearIcon = FALSE;
+    GameDataHeader* pHead = m_pGameDataEntries->getEntry(nDataIdx);
+    char szLine[3][64];
+    *m_szDataItemTime[n] = 0;
+    if (pHead && pHead->hasData()) {
+        pPlate->setCaptionShift(-50.0f, -8.0f);
+        pPlate->setCaptionSize(12);
+        if (pHead->_cFlag & 2) {
+            sprintf(szLine[0], "%s  LV\xf9" "E%2d", _ctdText(0x100002), pHead->_cLevel);
+        } else {
+            sprintf(szLine[0], "%s  LV\xf9" "E%2d      %5d MP", _ctdText(0x100001), pHead->_cLevel, pHead->_nMoogle);
+        }
+        szLine[1][0] = 0;
+        if (pHead->_cGameLevel) {
+            INT id = pHead->_cGameLevel < 4 ? pHead->_cGameLevel : 0;
+            UINT ctdID = 0x100200 + id;
+            strcpy(szLine[1], _ctdText(ctdID));
+        }
+        INT nFloor = pHead->_cFloor;
+        CHAR* pszFloor = szLine[2];
+        if (nFloor < 0) {
+            *pszFloor++ = 'B';
+            nFloor = -nFloor;
+        } else {
+            *pszFloor++ = ' ';
+        }
+        const CHAR* pszWorld;
+        BYTE w = pHead->_cWorld & 0xF;
+        if ((pHead->_cWorld & 0x10) || !w) {
+            pszWorld = "Entrance Hall";
+        } else {
+            pszWorld = cardDataTbl_004F4ED0[w + 0xBD].pName;
+        }
+        bUpdateIcon = w < 14;
+        char szFloor[8];
+        sprintf(szFloor, "%dF", nFloor);
+        if (nFloor < 10) strcat(szFloor, " ");
+        sprintf(pszFloor, "%s %s", szFloor, pszWorld);
+        if (pPlate->getState() == C2DSeqAgent::STATE_LOOP) {
+            INT nH = pHead->_nTime / 3600;
+            INT nM = pHead->_nTime % 3600 / 60;
+            sprintf(m_szDataItemTime[n], "%3d:%02d", nH, nM);
+        }
+        nCircle = (pHead->_cFlag & 2) ? 2 : 1;
+        nGameMode = 0;
+        bClearIcon = pHead->isGameCleared();
+    } else {
+        szLine[0][0] = 0;
+        pPlate->setCaptionShift(-110.0f, -8.0f);
+        pPlate->setCaptionSize(12);
+        UINT nCtd;
+        INT nArgc = 0;
+        if (m_mode == SLMODE_SAVE) {
+            if (pHead) {
+                if (pHead->isDirBroken()) {
+                    nCtd = 0x600404;
+                } else {
+                    nCtd = pHead->isDataBroken() ? 0x600403 : 0x600401;
+                }
+            } else {
+                nArgc = 1;
+                nCtd = 0x600400;
+            }
+        } else {
+            nCtd = 0x600402;
+            if (pHead && (pHead->isDataBroken() || pHead->isDirBroken())) nCtd = 0x600403;
+        }
+        if (nArgc) {
+            const CHAR* pszArg = _ctdText(0x600000);
+            sprintf(szLine[1], _ctdText(nCtd), pszArg);
+        } else {
+            strcpy(szLine[1], _ctdText(nCtd));
+        }
+        nGameMode = 1;
+        szLine[2][0] = 0;
+        FLOAT fY = strchr(szLine[1], '\n') ? -14.0f : -8.0f;
+        pPlate->setCaptionShift(-110.0f, fY);
+    }
+    sprintf(m_szDataItemContent[n], "%s\n%s\n%s", szLine[0], szLine[1], szLine[2]);
+    BOOL bSelected = pPlate->getCurerntSeq() == pPlate->m_nActiveLoopSeq;
+    pPlate->setupState(s_seqDataPlateTbl[nCircle][getRsrcType()]);
+    pPlate->setupActiveSeq(s_seqDataActPlateTbl[nCircle][getRsrcType()]);
+    BOOL bNew = pPlate->getState() == C2DSeqAgent::_STATE_NOT_START;
+    if (bNew) {
+        pPlate->changeSeq(s_seqDataPlateTbl[nCircle][getRsrcType()]._tbl[0]);
+        if (pPlate->m_pCtrl) pPlate->m_pCtrl->enableDisp(FALSE);
+    } else if (pPlate->getState() == C2DSeqAgent::STATE_LOOP) {
+        pPlate->changeSeq(bSelected ? s_seqDataActPlateTbl[nCircle][getRsrcType()]
+                                    : s_seqDataPlateTbl[nCircle][getRsrcType()]._tbl[1]);
+    }
+    if (bUpdateIcon) {
+        INT id = pHead->_cWorld & 0xF;
+        if (id) {
+            id--;
+        } else {
+            id = 13;
+        }
+        pWorldIcon->replaceSeq(0, m_pszLad, m_nIconSeqUnit, id);
+        BOOL bShow = pPlate->getState() != C2DSeqAgent::_STATE_NOT_START;
+        if (bShow) pWorldIcon->enableDisp(TRUE);
+    } else {
+        pWorldIcon->enableDisp(FALSE);
+    }
+    pCircle->replaceSeq(0, m_pszLad, m_nMainSeqUnit, cirTbl[getRsrcType()][nGameMode]);
+    pClearIcon->enableDisp(bClearIcon);
+}
 void CSaveLoadUI::updateMemocaInfoBar() {
     INT nY = 0;
     INT nH;
@@ -1702,7 +1829,6 @@ void CSaveLoadUI::callbackResultPlate(C2DSeqAgent& agent) {
         pLight->changeState(C2DSeqAgent::STATE_IN, TRUE, -1);
     }
 }
-extern "C" char D_004F3D90[]; /* "%3d:%02d": first used by setupDataPlate (still assembly) */
 void CSaveLoadUI::callbackDataList(C2DSeqAgent& agent) {
     CSaveLoadUI* pThis = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
     if (!pThis) return;
@@ -1715,7 +1841,7 @@ void CSaveLoadUI::callbackDataList(C2DSeqAgent& agent) {
             GameDataHeader* pInfo = pThis->m_pGameDataEntries->getEntry(pThis->m_nDataListTop + i);
             BOOL bDispIcon;
             if (pInfo && pInfo->hasData()) {
-                sprintf(pThis->m_szDataItemTime[i], D_004F3D90, pInfo->_nTime / 3600, pInfo->_nTime % 3600 / 60);
+                sprintf(pThis->m_szDataItemTime[i], "%3d:%02d", pInfo->_nTime / 3600, pInfo->_nTime % 3600 / 60);
                 bDispIcon = (pInfo->_cWorld & 0xF) < 14;
             } else {
                 *pThis->m_szDataItemTime[i] = '\0';
@@ -1807,7 +1933,6 @@ BOOL CSaveLoadUI::checkSelector(SHORT& nOutIdx, SHORT nMax, INT nValDownKey, INT
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", checkSelector__11CSaveLoadUIRssiisii);
 #endif
-extern "C" char D_004F3DA0[]; /* "%s\n%s\n%s": first used by setupDataPlate (still assembly) */
 /* Parked: 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0`
  * (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function
  * scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter 4 min (5641 candidates) */
@@ -1845,7 +1970,7 @@ void CSaveLoadUI::createBootInfoMsg(INT nRes, CHAR* pszOutMsg) {
     const CHAR* pszFmt = _ctdText(0x600103);
     sprintf(szLine2, pszFmt, 100, pszNum);
     const CHAR* pszInfo = _ctdText(0x600104);
-    sprintf(pszOutMsg, D_004F3DA0, szLine1, szLine2, pszInfo);
+    sprintf(pszOutMsg, "%s\n%s\n%s", szLine1, szLine2, pszInfo);
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createBootInfoMsg__11CSaveLoadUIiPc);

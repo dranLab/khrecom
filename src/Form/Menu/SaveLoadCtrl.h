@@ -195,6 +195,11 @@ public:
     void enableDispCaption(BOOL bDisp) {
         if (m_pCtrl) m_pCtrl->enableDisp(1, bDisp);
     }
+    void setupActiveSeq(SHORT nSeq) { m_nActiveLoopSeq = nSeq; }
+    void setCaptionShift(FLOAT fX, FLOAT fY) {
+        if (m_pCtrl) m_pCtrl->setFntPos(1, fX, fY);
+    }
+    inline void setCaptionSize(INT nSize); // defined where D2::C2DFnt is complete (Form/Menu/SaveLoad)
 };
 
 class C2DSeqScrollbarCtrl {
