@@ -621,7 +621,25 @@ void CCardBattle::exeBio() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropFriendCard__10CardBattleR4CARDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropPlutoCard__10CardBattleR4CARD);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeDuel__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelEntry__Q210CardBattle11CCardBattlei);
+void CCardBattle::setDuelEntry(INT inFlag) {
+    if (inFlag > 0) {
+        if (m_uiDuelState == 1) m_uiDuelState = 2;
+        return;
+    }
+    if (inFlag == -1) {
+        if (!isDuelEntryingCard(0)) return;
+    } else {
+        if (m_uiDuelState != 2) return;
+    }
+    m_uiDuelState = 1;
+    for (INT owner = 0; owner < 2; owner++) {
+        for (INT i = 0; i < m_iCount[owner]; i++) {
+            if (m_pCard[owner][i]) m_pCard[owner][i]->setDuelRefrect();
+        }
+        m_uiState[owner] = 5;
+    }
+    m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 9, m_mesCardInfo[1]);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelStart__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelBreakCount__Q210CardBattle11CCardBattleii);
 BOOL CCardBattle::setEnemyDuelCard(HANDLE inHandle, INT inIndex, INT inNumber) {
