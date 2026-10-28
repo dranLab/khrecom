@@ -30,6 +30,7 @@ public:
     static void fadeoutAllSE(INT nTime, BOOL bOutConstEnvSE);
     static void fadeAllSE(INT nTime, INT nVol);
     static void muteAllSE(INT nTime);
+    static void stopAllVoice(); /* parameters unknown: no caller or symbol in the image */
     static void fadeoutAllVoice(INT nTime);
     static void setSEPan(HANDLE nHandle, INT nSeq, INT nPan, INT nTime);
     static void setSEPanAndVol(HANDLE nHandle, INT nSeq, INT nPan, INT nVol, INT nTime);
@@ -42,6 +43,7 @@ public:
     static INT getStateBGM(HANDLE hBGM);
     static HANDLE playBGM(const CHAR* pszFile, INT nVol, INT nFlag);
     static void stopBGM(HANDLE hBGM);
+    static void stopAllBGM(); /* parameters unknown: no caller or symbol in the image */
     static HANDLE fadeinBGM(const CHAR* pszFile, UINT nTime, INT nVol, INT nFlag);
     static void fadeoutBGM(HANDLE hBGM, UINT nTime);
     static void fadeoutAllBGM(UINT nTime);
