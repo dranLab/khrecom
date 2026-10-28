@@ -570,9 +570,37 @@ DEBUG_WINDOW_LINE debugWinPathEditLine[23] = {
 };
 
 DEBUG_WINDOW_TBL debugWinPathEdit = {CDebugPathData::m_szPathName, -248, -176, 13, 22, 12, 0, 6, debugWinPathEditLine, &debugWinPathEditDispCall, &debugWinPathEditAllCall};
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4179: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathListLineCall__FP12CDebugWindowii);
+BOOL debugWinPathListLineCall(CDebugWindow* pObj, INT iLineY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if ((inParam & 0x800) && pObj->isChildAnswer() && pObj->getChildAnswer() == 1) {
+            strcpy(CDebugPathData::m_szPathName, CDebugPathData::m_szNames[iLineY]);
+            if (CDebugPathData::entryPath(CDebugPathData::m_szPathName)) {
+                for (INT i = 0; i < 32; i++) {
+                    if (CDebugPathData::m_szPathName[i] == '\0' || CDebugPathData::m_szPathName[i] == '.') {
+                        CDebugPathData::m_szPathName[i] = '\0';
+                        break;
+                    }
+                }
+                iStep++;
+            }
+        }
+        break;
+    case 1:
+        pObj->dispOff(1);
+        pObj->sendMessage(1, &debugWinPathEdit);
+        iStep++;
+        break;
+    case 2:
+        CDebugPathData::removePath();
+        pObj->dispOn(1);
+        iStep = 0;
+        break;
+    }
+    return TRUE;
+}
 INT debugWinPathListDispCall(char* pBuf, INT iIdx, const void* pParam) {
     sprintf(pBuf, " %s", CDebugPathData::m_szNames[iIdx]);
     return 1;
