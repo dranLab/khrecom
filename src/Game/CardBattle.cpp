@@ -594,8 +594,43 @@ BOOL CCardBattle::checkNowPlaying(INT inSide, CBattleCard* pCard) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testPlayingCard__Q210CardBattle11CCardBattleUi);
 __asm__(".rdata\n.align 3\n.word .L001DC4E0\n.word .L001DC4E0\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC4E0\n.word .L001DC4E0\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC4E0\n.word .L001DC4E0\n.word 0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testBreakingCard__Q210CardBattle11CCardBattleUi);
-__asm__(".rdata\n.align 3\n.word 0x72614343\n.word 0x74614264\n.word 0x3A656C74\n.word 0x7365743A\n.word 0x65724274\n.word 0x6E696B61\n.word 0x72614367\n.word 0xA6812064\n.word 0x2D424370\n.word 0x5073693E\n.word 0x6979616C\n.word 0x6143676E\n.word 0x74536472\n.word 0x4E646E61\n.word 0x3D3D776F\n.word 0x2021474E\n.word 0x6F4EA681\n.word 0x3737322E\n.word 0xCE912039\n.word 0x0A31888F\n.word 0x00000000\n.word 0x00000000\n.word 0x72614343\n.word 0x74614264\n.word 0x3A656C74\n.word 0x7365743A\n.word 0x65724274\n.word 0x6E696B61\n.word 0x72614367\n.word 0xA6812064\n.word 0x2D424370\n.word 0x5073693E\n.word 0x6979616C\n.word 0x6143676E\n.word 0x74536472\n.word 0x4E646E61\n.word 0x3D3D776F\n.word 0x20214B4F\n.word 0x6F4EA681\n.word 0x3737322E\n.word 0xCE912039\n.word 0x0A32888F\n.word 0x00000000\n.word 0x00000000\n.word 0x72614343\n.word 0x74614264\n.word 0x3A656C74\n.word 0x7365743A\n.word 0x65724274\n.word 0x6E696B61\n.word 0x72614367\n.word 0xA6812064\n.word 0x2D424370\n.word 0x5073693E\n.word 0x6979616C\n.word 0x6143676E\n.word 0x74536472\n.word 0x4E646E61\n.word 0x3D3D776F\n.word 0x20214B4F\n.word 0x6F4EA681\n.word 0x3737322E\n.word 0xCE912039\n.word 0x0A33888F\n.word 0x00000000\n.word 0x00000000\n.word 0x72614343\n.word 0x74614264\n.word 0x3A656C74\n.word 0x7365743A\n.word 0x65724274\n.word 0x6E696B61\n.word 0x72614367\n.word 0xA6812064\n.word 0x2D424370\n.word 0x5073693E\n.word 0x6979616C\n.word 0x6143676E\n.word 0x74536472\n.word 0x4E646E61\n.word 0x3D3D776F\n.word 0x20214B4F\n.word 0x6F4EA681\n.word 0x3737322E\n.word 0xCE912039\n.word 0x0A34888F\n.word 0x00000000\n.word 0x00000000\n.word .L001DC68C\n.word .L001DC68C\n.word .L001DC680\n.word .L001DC680\n.word .L001DC680\n.word .L001DC680\n.word .L001DC680\n.word .L001DC680\n.word .L001DC68C\n.word .L001DC68C\n.word .L001DC680\n.word .L001DC680\n.word .L001DC680\n.word .L001DC68C\n.word .L001DC68C\n.word 0\n.text\n");
+INT CCardBattle::testBreakingCard(UINT inPlayer) {
+    UINT _PLAYER = inPlayer - 1;
+    UINT _ENEMY = _PLAYER ^ 1;
+    if (!isPlayingCardStandNow(inPlayer)) {
+        TRACE("CCardBattle::testBreakingCard \x81\xa6pCB->isPlayingCardStandNow==NG! \x81\xa6No.2779 \x91\xce\x8f\x88" "1\n");
+        return 0;
+    }
+    switch (m_uiState[_ENEMY]) {
+    case 1:
+    case 2:
+    case 9:
+    case 10:
+    case 14:
+    case 15:
+        break;
+    default:
+        TRACE("CCardBattle::testBreakingCard \x81\xa6pCB->isPlayingCardStandNow==OK! \x81\xa6No.2779 \x91\xce\x8f\x88" "2\n");
+        return 2;
+    }
+    if (m_cardEnchant[_ENEMY].m_nKind == 0x7B) return 0;
+    if (m_cardData[_PLAYER][0].m_nCategory20 == 6) return 0;
+    INT iDuelOK = FALSE;
+    if (_PLAYER == 0 && m_uiDuelState == 1 && !(m_uiFlag & 0x600000)) iDuelOK = TRUE;
+    if (iDuelOK && (m_uiFlag & 0x80000)) return 0;
+    if (m_uiFlag & (0x100 << _PLAYER)) {
+        TRACE("CCardBattle::testBreakingCard \x81\xa6pCB->isPlayingCardStandNow==OK! \x81\xa6No.2779 \x91\xce\x8f\x88" "3\n");
+        return 2;
+    }
+    INT iPoint = m_iPoint[_PLAYER];
+    INT iPointE = m_iPoint[_ENEMY];
+    if (!iPointE) return 0;
+    if (iPointE < iPoint) {
+        TRACE("CCardBattle::testBreakingCard \x81\xa6pCB->isPlayingCardStandNow==OK! \x81\xa6No.2779 \x91\xce\x8f\x88" "4\n");
+        return 2;
+    }
+    return 0;
+}
 INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, CARD* inData, INT inTest) {
     if (!(inUser)) AssertApp(D_00476980, 1660, "inUser", 0);
     UINT _PLAYER = inUser - 1;
