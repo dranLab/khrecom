@@ -998,8 +998,43 @@ C2DSeqAgent* CSaveLoadUI::createResultPlate(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFn
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createSelSlotPlate__11CSaveLoadUIi);
 __asm__(".rdata\n.align 3\n.word 0x00020001\n.word 0x00010003\n.word 0x00030002\n.word 0x00000000\n.word 0x00060003\n.word 0x00060004\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x39373232\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMemocaInfo__11CSaveLoadUIRPQ22D210C2DSeqCtrlPPQ22D210C2DSeqCtrl);
-__asm__(".rdata\n.align 3\n.word 0x006C006B\n.word 0x0000006D\n.word 0x00080003\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31313332\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x39313332\n.word 0x00000029\n.word 0x00390037\n.word 0x00000038\n.word 0x00010006\n.word 0x00000000\n.word 0x80208000\n.word 0x80204080\n.word 0x80804020\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31333332\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x34343332\n.word 0x00000029\n.text\n");
+C2DSeqAgent* CSaveLoadUI::createMemocaInfo(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DSeqCtrl** ppOutInfoBar) {
+    if (m_mode == SLMODE_LOAD) {
+        pOutCtrl = NULL;
+        return NULL;
+    }
+    C2DSeqAgent::SeqTbl t = {{107, 108, 109}};
+    _LayoutInfo info = {3, 8};
+    FVECTOR vPos;
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2311)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, t._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
+    pOutCtrl->setPos(vPos);
+    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2319)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
+    pAgent->setupState(t, callbackMemocaInfo, callbackMemocaInfo);
+    unsigned short barTbl[3] = {55, 57, 56};
+    _LayoutInfo barInfo = {6, 1};
+    unsigned int fntCol[3] = {0x80208000, 0x80204080, 0x80804020};
+    for (INT i = 0; i < 3; i++) {
+        D2::C2DSeqCtrl* pCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2331)", RET_ADDR())) D2::C2DSeqCtrl;
+        *ppOutInfoBar++ = pCtrl;
+        pCtrl->addSeq(m_pszLad, m_nMainSeqUnit, barTbl[i]);
+        pCtrl->setParent(pOutCtrl);
+        pCtrl->changeLayer(12);
+        pCtrl->enableColorCtrl(TRUE);
+        D2::C2DMan::getLayPosition(m_pszLad, barInfo._nLayIdx, barInfo._nSeqIdx, vPos, FALSE);
+        pCtrl->setLocalPos(vPos);
+        G_RGBA col;
+        col.col = fntCol[i];
+        m_szMemocaInfoStr[i][0] = '\0';
+        D2::C2DFnt* pFont = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2344)", RET_ADDR()))
+            D2::C2DFnt(0, 0, &col, 12, m_szMemocaInfoStr[i], 0x40);
+        pOutCtrl->addFntShift(m_pszLad, m_nMainSeqUnit, pFont, -36.0f, i * 58.0f - 52.0f);
+    }
+    return pAgent;
+}
 C2DSeqAgent* CSaveLoadUI::createDataListContainer(D2::C2DSeqCtrl*& pOutCtrl, C2DSeqScrollbarCtrl*& pOutScrollbar) {
     C2DSeqAgent::SeqTbl tbl[2] = {{{96, 97, 98}}, {{93, 94, 95}}};
     _LayoutInfo ltbl[2] = {{3, 3}, {4, 3}};
