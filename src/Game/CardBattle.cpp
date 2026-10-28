@@ -4,6 +4,7 @@
 #include "Game/BattleCard.h"
 #include "Game/Entity.h"
 #include "Game/Player/Player.h"
+#include "Game/Player/PlayerManager.h"
 #include "Game/Enemy/BattleEnemy.h"
 #include "Game/Enemy/BattleEnemyManager.h"
 #include "Game/MessageManager.h"
@@ -652,7 +653,29 @@ BOOL CCardBattle::setEnemyDuelCard(HANDLE inHandle, INT inIndex, INT inNumber) {
     if (result > 0) initPlayingEnemy(inHandle);
     return result;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelEnd__Q210CardBattle11CCardBattle);
+void CCardBattle::setDuelEnd() {
+    if (!m_iDuelSkill) {
+        m_uiDuelState = 1;
+        CGameWork::setByte(1, 3, 2);
+        m_pMesage->sendMessage(0, getHandle(), g_pPlayer->getHandle(), 11, m_mesCardInfo[0]);
+        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 11, m_mesCardInfo[1]);
+        if (!CGameWork::getFlag(1, 7)) CGameWork::setFlag(1, 10, FALSE);
+        if (m_pRevolver[0]) m_pRevolver[0]->returnStockCard(1);
+        CGameWork::setFlag(1, 11, FALSE);
+        CGameWork::setInt(1, 0xE2, CGameWork::getInt(1, 0xE2) ^ 0x14);
+    } else {
+        m_uiDuelState = 8;
+        CGameWork::setByte(1, 3, 1);
+        *(SHORT*)&m_mesCardInfo[0][0x1C] = m_iDuelSkill;
+        m_pMesage->sendMessage(0, getHandle(), g_pPlayer->getHandle(), 12, m_mesCardInfo[0]);
+        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 12, m_mesCardInfo[1]);
+        if (!CGameWork::getFlag(1, 7)) CGameWork::setFlag(1, 10, FALSE);
+        CGameWork::setFlag(1, 11, FALSE);
+        CGameWork::setInt(1, 0xE2, CGameWork::getInt(1, 0xE2) ^ 0x14);
+        PLM::addIntBR(0x42);
+    }
+    PLM::calcDuelWin();
+}
 INT CCardBattle::setDuelPlayStock(CBattleCard** inCard, INT inSkill) {
     m_uiState[0] = 12;
     m_uiResult[0] = 0;
