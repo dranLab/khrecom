@@ -32,6 +32,10 @@ public:
     void setPronounceCard(INT inKind, INT inNumber);
     INT setPlayPronounce();
 };
+class CEnchantGauge {
+public:
+    void changeCount(INT inCount);
+};
 void calcFreezeDamage(INT& ioDamage);
 
 class CDuelGauge : public ::CTask {
@@ -81,6 +85,11 @@ extern FLOAT g_fDefAttr[18][6];
 }
 /* the unit's copy of Game/CardKind's header static table (data still from assembly) */
 extern const CARD_DATA cardDataTbl[224] __asm__("cardDataTbl_00478270");
+/* CCardBattle's CARD members as the original's CARD types (Game/CardBattle.h declares bytes) */
+struct CB_CARD_VIEW {
+    BYTE _pad[0x17C];
+    CARD m_cardEnchant[2];
+};
 /* CARD's inline constructor (Game/Card.cpp's _setCard) */
 static inline void _setCard(CARD& c, USHORT nKind, CHAR nNumber) {
     c.m_nId = 0;
@@ -146,7 +155,33 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testBreakingCard__Q2
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayCard__Q210CardBattle11CCardBattleiiPQ210CardBattle11CBattleCardP4CARDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayStock__Q210CardBattle11CCardBattleiiPPQ210CardBattle11CBattleCardiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnchantCard__Q210CardBattle11CCardBattleiiPQ210CardBattle11CBattleCard);
+/* Parked: address forms - the original computes &m_cardEnchant[_PLAYER] as (idx*4+0x17c)+base and loads the kind with
+ * offset 0 (kept in two registers), and &m_nEnchantTime[_PLAYER] as (base+0x184)+idx*4; ours folds the offsets the
+ * other way round; the reload of m_pInstance after the decrement matches via the INT* pTime pointer; tried: CARD view
+ * struct / reference / pointer locals for the enchant, BYTE/INT/UINT kind, _ref forms, compare operand order,
+ * permuter 4 min (8263 candidates, no gain) */
+#if 0
+void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
+    if (!(inUser)) AssertApp(D_00476980, 1977, D_00476730, 0);
+    UINT _PLAYER = inUser - 1;
+    INT kind = m_pInstance->m_cardEnchant[_PLAYER][0];
+    if (!kind) return;
+    if (inPart != g_pBattleCardList[kind].EFF_PART) return;
+    if (inKind && inKind != kind - 0x43) return;
+    CEnchantGauge* pGauge = m_pInstance->m_pEnchantGauge[_PLAYER];
+    if (!pGauge) return;
+    INT* pTime = &m_pInstance->m_nEnchantTime[_PLAYER];
+    (*pTime)--;
+    if (_ref(m_pInstance)->m_nEnchantTime[_PLAYER] <= 0) {
+        pGauge->changeCount(0);
+        m_pInstance->resetEnchantCard(inUser);
+    } else {
+        pGauge->changeCount(_ref(m_pInstance)->m_nEnchantTime[_PLAYER]);
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", decEnchantTime__Q210CardBattle11CCardBattleiii);
+#endif
 void CCardBattle::destroyPlayCard(INT inFlag, INT inP1) { resetNowPlaying(inFlag); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", resetNowPlaying__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", resetEnchantCard__Q210CardBattle11CCardBattlei);
