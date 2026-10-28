@@ -273,13 +273,8 @@ static const CARD_DATA cardDataTbl[224] = {
 };
 
 
-class CSound {
-public:
-    static HANDLE playSE(INT nID, INT nCh, INT nVol);
-    static void pauseAllSE();
-    static void startAllPausedSE();
-    static void setBGMMasterVolume(INT nVol, INT nFrame);
-};
+#include "System/Sound/SoundMan.h"
+#line 283
 
 extern "C" {
 int sprintf(char*, const char*, ...);

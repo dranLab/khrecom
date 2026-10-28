@@ -64,11 +64,8 @@ public:
     static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
 };
 
-class CSound {
-public:
-    static HANDLE playSE(INT nID, INT nCh, INT nVol);
-    static void fadeoutAllSE(INT nFrame, INT nFlag);
-};
+#include "System/Sound/SoundMan.h"
+#line 72
 
 class CAtel {
 public:

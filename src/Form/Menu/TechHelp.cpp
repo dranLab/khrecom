@@ -35,10 +35,8 @@ public:
     static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
 };
 
-class CSound {
-public:
-    static HANDLE playSE(INT nID, INT nCh, INT nVol);
-};
+#include "System/Sound/SoundMan.h"
+#line 42
 
 BOOL CTechHelp::m_bEnd = 0;
 

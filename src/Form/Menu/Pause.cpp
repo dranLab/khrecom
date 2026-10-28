@@ -43,12 +43,8 @@ public:
     static void changeDrawMode(INT nMode);
 };
 
-class CSound {
-public:
-    static HANDLE playSE(INT nID, INT nCh, INT nVol);
-    static void stopAllSE();
-    static void setBGMMasterVolume(INT nVol, INT nFrame);
-};
+#include "System/Sound/SoundMan.h"
+#line 52
 
 class CMinigameManager {
 public:

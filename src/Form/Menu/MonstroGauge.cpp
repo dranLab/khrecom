@@ -43,10 +43,8 @@ public:
 };
 }
 
-class CSound {
-public:
-    static HANDLE playSE(INT nID, INT nCh, INT nVol);
-};
+#include "System/Sound/SoundMan.h"
+#line 50
 
 using namespace D2;
 

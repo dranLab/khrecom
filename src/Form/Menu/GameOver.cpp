@@ -42,10 +42,8 @@ public:
     static void setStop(ObjType::eObjBit nBit);
 };
 
-class CSound {
-public:
-    static HANDLE playSE(INT nID, INT nCh, INT nVol);
-};
+#include "System/Sound/SoundMan.h"
+#line 49
 
 extern "C" void sceVu0InterVectorXYZ(float* v0, float* v1, float* v2, float t);
 extern "C" float powf(float, float);

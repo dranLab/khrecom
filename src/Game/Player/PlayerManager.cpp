@@ -108,15 +108,8 @@ union F_UL {
     ULONG ul;
 };
 
-class CSound {
-public:
-    static void invalidateSE(INT inFlag);
-    static void fadeoutAllSE(INT inTime, INT inFlag);
-    static void setSEVolume(HANDLE inHandle, INT inVol, INT inPan, INT inFlag);
-    static HANDLE getCurrentBGMHandle();
-    static void setBGMVolume(HANDLE inHandle, INT inVol, INT inTime);
-    static void fadeoutBGM(HANDLE inHandle, UINT inTime);
-};
+#include "System/Sound/SoundMan.h"
+#line 120
 
 class CPackMan {
 public:

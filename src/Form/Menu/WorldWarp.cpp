@@ -304,13 +304,8 @@ public:
     static void changeDrawMode(INT nMode);
 };
 
-class CSound {
-public:
-    static HANDLE playSE(INT nID, INT nCh, INT nVol);
-    static void pauseAllSE();
-    static void startAllPausedSE();
-    static void setBGMMasterVolume(INT nVol, INT nFrame);
-};
+#include "System/Sound/SoundMan.h"
+#line 314
 
 extern "C" {
 float powf(float, float);

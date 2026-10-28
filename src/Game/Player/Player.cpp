@@ -181,10 +181,8 @@ public:
 };
 }
 class CJiminyMemoFlag { public: static void checkEvent(INT inEvent, INT inParam0, INT inParam1); }; namespace Friend { class CFriend { public: void setExit(INT inFlag); }; } namespace Summon { class CSummon { public: void setExit(INT inFlag); }; } class CEffectMotion { public: void kill(FLOAT inFadeTime); }; namespace MG_SKILL { void killMGSkill(); } /* PARTIAL: the headers are not included here */
-class CSound { /* PARTIAL: System/Sound.h is not written yet */
-public:
-    static HANDLE playSE(INT nID, INT nCh, INT nVol);
-};
+#include "System/Sound/SoundMan.h"
+#line 188
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 CPlayer* g_pPlayer = NULL;

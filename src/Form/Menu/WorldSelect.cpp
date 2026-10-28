@@ -312,13 +312,8 @@ void sceVu0RotMatrix(FMATRIX& m0, FMATRIX& m1, FVECTOR& rot);
 }
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
-class CSound {
-public:
-    static HANDLE playSE(INT nID, INT nCh, INT nVol);
-    static void pauseAllSE();
-    static void startAllPausedSE();
-    static void setBGMMasterVolume(INT nVol, INT nFrame);
-};
+#include "System/Sound/SoundMan.h"
+#line 322
 
 class CGlare : public CTask {
 private:

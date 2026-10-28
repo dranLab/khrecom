@@ -67,10 +67,8 @@ struct ChatWndCreateCTDParam {
     UINT nLine;
 };
 
-class CSound {
-public:
-    static HANDLE playSE(INT nID, INT nCh, INT nVol);
-};
+#include "System/Sound/SoundMan.h"
+#line 74
 
 class CLevelUp {
 private:
