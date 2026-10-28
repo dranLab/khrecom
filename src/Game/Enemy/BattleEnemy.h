@@ -332,7 +332,8 @@ public: // PARTIAL: state wrappers added for Game/Enemy/BattleEnemy
     FLOAT getDamageRate_() const;
     void changeMainState(INT inState);
     BOOL isPlayingCardBattle();
-    void addEnemyKillCount_();
+    BOOL addEnemyKillCount_();
+    BOOL canCreateEnemyCard_();
     void beginStateAppear_();
     void stateAppear_();
     void endStateAppear_();
