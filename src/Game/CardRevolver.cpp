@@ -1273,7 +1273,58 @@ INT CCardRevolver::returnSnatchCard(INT inNum) {
     CEntityFactory::getInstance()->createPrize(param, 0);
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeReturnCard__Q210CardBattle13CCardRevolver);
+INT CCardRevolver::exeReturnCard() {
+    INT count;
+    INT i;
+    CBattleCard* card;
+    CARD* cardData;
+    if (!(m_uiFlag & 0x4000)) return 0;
+    if (!(m_uiFlag & 0x20000)) return 0;
+    count = m_nReturn + 8;
+    if (count < 9) {
+        m_uiFlag = (INT)m_uiFlag & ~0x4000;
+        return 0;
+    }
+    if (m_iMode > 0) changeMode(0, 1);
+    else m_pEmpty->enableDisp(0);
+    cardData = NULL;
+    for (i = 0; i < m_nLimit; i++) {
+        card = &m_pCards[i];
+        if (!card) continue;
+        if (card->getCardOwner() == 1) continue;
+        cardData = card->getCardData();
+        if (cardData->m_nKind == m_cardAdd[count].m_nKind && card->getBaseCardNumber() == m_cardAdd[count].m_nNumber) {
+            card->setBaseCardNumber();
+            break;
+        }
+        cardData = NULL;
+    }
+    if (cardData) {
+        if (card->getCardOwner() == 2) {
+            card->setCardOwner(1);
+            card->setHand(*cardData, m_nRemain[0], m_nTotal[0], 0);
+            card->updateNumberEffect();
+            card->testDisp();
+            if (cardData->m_nCategory1 == 8) {
+                m_nReloadCard = 1;
+                card->updateReload(m_tqCharge / 30);
+            } else {
+                m_nRemain[0]++;
+            }
+            m_nReturn--;
+            _setCard(m_cardAdd[count], 0, 0);
+            rollDeck(0, 1, 300);
+            return 1;
+        }
+        card->resetReloadNG();
+        card->setCardOwner(1);
+        card->updateNumberEffect();
+        card->testDisp();
+    }
+    m_nReturn--;
+    _setCard(m_cardAdd[count], 0, 0);
+    return 1;
+}
 INT CCardRevolver::canSnatch() {
     if (getHave(1, 1, 0, 0, 0) > 6) return TRUE;
     return FALSE;
