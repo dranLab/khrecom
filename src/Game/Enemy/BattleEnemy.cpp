@@ -45,6 +45,7 @@ extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
 extern "C" char D_004AD568[];
 extern "C" char D_004AD3D8[];
+extern ATK_ATTR g_AtkAttrTbl[] asm("g_AtkAttrTbl.5784"); // PARTIAL: getAttackAttr's static table, from the asm .data until SOURCE DATA
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
@@ -372,7 +373,30 @@ void CBattleEnemy::endStateFaint() {
     m_ullBtlEnemyFlag &= ~0x80000000000ULL;
     killBadStatusEffect();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateStop__12CBattleEnemy);
+void CBattleEnemy::beginStateStop() {
+    m_ullBackupFlag = m_ullBtlEnemyFlag;
+    CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+    if (hitBody) {
+        switch (hitBody->getDamageKind()) {
+        case ATK_KIND_STOP:
+        default:
+            setBadStatusEffect(4, hitBody->getBadStatusParam());
+            break;
+        case ATK_KIND_ABSOLUTE_STOP:
+            m_ullBtlEnemyFlag |= 0x4000000;
+            break;
+        }
+    } else {
+        setBadStatusEffect(4, 0.0f);
+    }
+    setTimer(m_tqTime);
+    m_pAnim->setSpeed(0.0f);
+    m_iSysStep = 0;
+    m_ullBtlEnemyFlag |= 0x84000;
+    m_sStopDamageCount = 0;
+    m_sStopDamagePtr = 0;
+    setEntityFlag(0x8000, 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateStop__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateStop__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateTerror__12CBattleEnemy);
