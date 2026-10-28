@@ -87,6 +87,14 @@ extern FLOAT g_fDefAttr[18][6];
 }
 /* the unit's copy of Game/CardKind's header static table (data still from assembly) */
 extern const CARD_DATA cardDataTbl[224] __asm__("cardDataTbl_00478270");
+struct MES_CARD_INFO { /* the message payload (Game/MessageManager.h does not declare it yet) */
+    CARD m_cardData[7];
+    SHORT m_nStock;
+    BYTE m_nExtra;
+    BYTE m_nFirst;
+    BYTE m_nBreak;
+    BYTE m_nBonus;
+};
 /* CCardBattle's CARD members as the original's CARD types (Game/CardBattle.h declares bytes) */
 struct CB_CARD_VIEW {
     BYTE _pad[0x17C];
@@ -301,7 +309,22 @@ HANDLE CCardBattle::getGimmickOwner() {
     if (!m_pInstance) return 0;
     return m_pInstance->m_hGimmickOwner;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", notifyMakeGimmick__Q210CardBattle11CCardBattleP4CARDi);
+void CCardBattle::notifyMakeGimmick(CARD* inData, INT inFlag) {
+    if (!m_pInstance) return;
+    if (inData) *(CARD*)m_pInstance->m_cardGimmick = *inData;
+    _ref(m_pInstance)->m_uiFlag |= 0x8000;
+    if (inFlag) return;
+    CCardBattle* p = _ref(m_pInstance);
+    if (!p->m_hGimmickOwner) return;
+    MES_CARD_INFO mesInfo;
+    mesInfo.m_nStock = 0;
+    mesInfo.m_nExtra = 0;
+    mesInfo.m_nFirst = 0;
+    mesInfo.m_cardData[0] = *(CARD*)p->m_cardGimmick;
+    _setCard(mesInfo.m_cardData[1], 0, 0);
+    _setCard(mesInfo.m_cardData[2], 0, 0);
+    p->m_pMesage->sendMessage(0, p->getHandle(), p->m_hGimmickOwner, 6, &mesInfo);
+}
 void CCardBattle::notifyCompleteGimmick() {
     if (m_pInstance) {
         TRACE(D_00477298, ((CARD*)m_pInstance->m_cardGimmick)->m_nKind);
