@@ -1500,8 +1500,27 @@ C2DSeqAgent* CSaveLoadUI::createMessageDlg(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt
     pAgent->setupState(t, callbackMessageDlg, callbackMessageDlg);
     return pAgent;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMessageDlgBtn__11CSaveLoadUIPQ22D210C2DSeqCtrli);
-__asm__(".rdata\n.align 3\n.word 0x00320031\n.word 0x00310033\n.word 0x00330032\n.word 0x00000000\n.word 0x00300030\n.word 0x00000000\n.word 0x00010000\n.word 0x00020000\n.word 0x00010000\n.word 0x00020000\n.word 0x00020002\n.word 0x00010002\n.word 0x00020002\n.word 0x00010002\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x37363532\n.word 0x00000029\n.text\n");
+C2DSeqSelectable* CSaveLoadUI::createMessageDlgBtn(D2::C2DSeqCtrl* pParent, INT nIdx) {
+    C2DSeqAgent::SeqTbl tbl[2] = {{{49, 50, 51}}, {{49, 50, 51}}};
+    short actTbl[2] = {48, 48};
+    _LayoutInfo ltbl[4][2] = {{{0, 1}, {0, 2}}, {{0, 1}, {0, 2}}, {{2, 2}, {2, 1}}, {{2, 2}, {2, 1}}};
+    C2DSeqAgent::SeqTbl& t = tbl[getRsrcType()];
+    C2DSeqSelectable* pBtn =
+        new (com_malloc_d(sizeof(C2DSeqSelectable), __FILE__ "(2567)", RET_ADDR())) C2DSeqSelectable(this);
+    pBtn->setupSeq(t, m_pszLad, m_nMainSeqUnit, actTbl[getRsrcType()], 14);
+    pBtn->getSeqCtrl()->setParent(pParent);
+    G_RGBA rgba;
+    rgba.col = 0x80707070;
+    pBtn->setCaptionParam(NULL, 15, &rgba, 0x42);
+    pBtn->setCaptionShift(48.0f, 16.0f);
+    FVECTOR vPos;
+    _LayoutInfo& info = ltbl[m_mode][nIdx];
+    D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
+    pBtn->setCtrlPos(vPos);
+    pBtn->setupState(t);
+    pBtn->setLightMarkOfs(100.0f, 2.0f);
+    return pBtn;
+}
 void CSaveLoadUI::setActiveSlotPlate(INT nSlot) {
     unsigned short seqTbl[2][2] = {{0, 2}, {0, 2}};
     char szMes[64];
