@@ -22,6 +22,7 @@ namespace Gauge {
 extern LPCSTR g_szSeqCockpit;
 extern LPCSTR g_szSeqGauge;
 extern LPCSTR g_szLadCockpit;
+extern LPCSTR g_szLadGauge;
 extern G_UV g_uvNumberTex[2][10];
 }
 FVECTOR getPlayerPos(BOOL flag);
@@ -50,6 +51,10 @@ static inline FLOAT _sqrtf(FLOAT x) {
     return ret;
 }
 extern "C" char D_004A3238[];
+extern "C" char D_004A2F38[];
+extern "C" char D_004A2F00[];
+inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 template <class T> static inline T& _ref(T& v) { return v; }
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_00284530);
@@ -250,7 +255,35 @@ CEnemyGauge::CEnemyGauge(CTask* p) : CTask(p, 0x4000) {
     _initialize();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge11CEnemyGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge11CEnemyGauge);
+void CEnemyGauge::_initialize() {
+    m_nMaxHP = 200;
+    m_nRedHP = 200;
+    m_nHP = 200;
+    m_nMaxHPS = 15;
+    m_nRedHPS = 15;
+    m_nHPS = 15;
+    m_uiFlag = 0;
+    m_hTarget = 0;
+    m_tqRed = 0;
+    m_pSeqCtrl = NULL;
+    m_pSeqCtrl = new (D_004A2F00) D2::C2DSeqCtrl(1);
+    m_pSeqCtrl->setLayer(2);
+    m_pSeqCtrl->addSeq(g_szLadGauge, 1, 2);
+    m_pSeqCtrl->addSeq(g_szLadGauge, 1, 0);
+    m_pSeqCtrl->addSeq(g_szLadGauge, 1, 1);
+    m_pSeqCtrl->addSeq(g_szLadGauge, 1, 3);
+    m_pSeqCtrl->addSeq(g_szLadGauge, 1, 4);
+    m_pSeqCtrl->addSeq(g_szLadGauge, 1, 5);
+    m_pSeqCtrl->addSeq(g_szLadGauge, 1, 6);
+    m_pSeqCtrl->changeTime(1, m_nMaxHP);
+    m_pSeqCtrl->changeTime(2, m_nMaxHP);
+    m_pSeqCtrl->changeTime(3, m_nMaxHP);
+    m_pSeqCtrl->changeTime(4, m_nMaxHPS);
+    m_pSeqCtrl->changeTime(5, m_nMaxHPS);
+    m_pSeqCtrl->changeTime(6, m_nMaxHPS);
+    m_pSeqCtrl->enableDispEach(0);
+    m_vPos.set(240.0f, -40.0f, 0.0f);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge11CEnemyGauge);
 void CEnemyGauge::resetHP() {
     if (!m_pInstance) return;
@@ -272,7 +305,24 @@ CCommonGauge::CCommonGauge(CTask* p) : CTask(p, 0x4000) {
     _initialize();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge12CCommonGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge12CCommonGauge);
+void CCommonGauge::_initialize() {
+    INT i;
+    m_uiFlag = 0;
+    m_pSeqCtrls = NULL;
+    m_pSeqCtrls = new (D_004A2F38) D2::C2DSeqCtrl[7];
+    m_pSeqCtrls[0].addSeq(_ref(g_szSeqCockpit), 0xD);
+    m_pSeqCtrls[1].addSeq(g_szSeqCockpit, 0xD);
+    m_pSeqCtrls[2].addSeq(g_szSeqCockpit, 0xC);
+    m_pSeqCtrls[3].addSeq(g_szSeqCockpit, 0xC);
+    m_pSeqCtrls[4].addSeq(g_szSeqCockpit, 0x3D);
+    m_pSeqCtrls[5].addSeq(g_szSeqCockpit, 0x8F);
+    m_pSeqCtrls[6].addSeq(g_szSeqCockpit, 0x8F);
+    for (i = 0; i < 7; i++) {
+        m_pSeqCtrls[i].changeLayer(2);
+        m_pSeqCtrls[i].enableDisp(0, FALSE);
+        m_vPos[i].init();
+    }
+}
 void CCommonGauge::main() {
     INT i;
     if (CSceneEnv::isStopGauge()) return;
