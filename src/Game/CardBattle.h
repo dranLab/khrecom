@@ -6,8 +6,11 @@
 #include "System/MainApp.h"
 #include "Game/CollParam.h"     // PARTIAL: added for Game/Player/SummonDumbo (ATK_KIND)
 #include "Game/AttackMotion.h" // PARTIAL: added for Game/Player/SummonDumbo (ATK_ATTR)
+#include "System/Vector.h"     // PARTIAL: added for Game/CardBattle (m_vBreakPos)
 
 class CPlayer; // PARTIAL: added for Game/Player/PlayerRiku
+class CTask; // PARTIAL: added for Game/CardBattle
+namespace D2 { class C2DSeqCtrl; } // PARTIAL: added for Game/CardBattle
 union FVECTOR; // PARTIAL: added for Game/Player/FriendPluto
 
 /* Placeholder for the original header's inline function asserting inUser: its strings
@@ -113,6 +116,18 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     UINT m_uiFlag;            /* 0x19c */
     UINT m_uiDuelState;       /* 0x1a0 */
     HANDLE m_hDuelEnemy;      /* 0x1a4 */
+    // PARTIAL: added for Game/CardBattle
+    USHORT m_nDuelBreakCount;    /* 0x1a8 */
+    USHORT m_nDuelBreakCountMax; /* 0x1aa */
+    INT m_iDuelSkill;            /* 0x1ac */
+    D2::C2DSeqCtrl* m_pSeqCtrlEnemy; /* 0x1b0 */
+    D2::C2DSeqCtrl* m_pSeqCtrlBreak; /* 0x1b4 */
+    D2::C2DSeqCtrl* m_pSeqCtrlSpeed; /* 0x1b8 */
+    HANDLE m_hBreak;             /* 0x1bc */
+    HANDLE m_hSpeed;             /* 0x1c0 */
+    FVECTOR m_vBreakPos;         /* 0x1d0 */
+    class CEnchantGauge* m_pEnchantGauge[2]; /* 0x1e0 */
+    class CDuelGauge* m_pDuelGauge; /* 0x1e8 */
     // PARTIAL: added for Game/Player/PlayerRiku
     INT getEnchantKind() { return m_cardEnchant[0][0] < 0x44 ? 0 : m_cardEnchant[0][0] - 0x43; }
     // PARTIAL: added for Game/Enemy/HumanBoss (the enemy side's enchant)
@@ -185,6 +200,24 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     static void setBattleEnd();
     void initCardBreak(INT n, UINT f);
     void resetEnchantCard(INT inSide);
+    // PARTIAL: added for Game/CardBattle
+    void init();
+    void calcPlayingCard();
+    void exePlaying(INT inUser);
+    void setPlayerEnchant(INT inKind);
+    void resetPlayerEnchant(INT inKind);
+    void exeRegeneration();
+    void exeBio();
+    void exeDuel();
+    void initPlayingEnemy(HANDLE inHandle);
+    void dispPlayingEnemy();
+    void dispCardBreak();
+    void setNumberBreak(UINT inPlayer, UINT inEnemy);
+    INT testPlayingCard(UINT inPlayer);
+    INT setEnchantCard(HANDLE inHandle, INT inUser, class CBattleCard* inCard);
+    static class CStockFolder* setStockFolder(::CTask* inParent, INT inUser);
+    void setDuelEnd();
+    INT setPronouncePlay(INT inFlag);
 };
 
 #ifndef GAME_CARDREVOLVER_CPP /* full class in Game/CardRevolver.h */

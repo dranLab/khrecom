@@ -196,7 +196,26 @@ BOOL CCardBattle::isPlayingGimmickCard() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", initPlayingEnemy__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", dispPlayingEnemy__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", initCardBreak__Q210CardBattle11CCardBattleiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", dispCardBreak__Q210CardBattle11CCardBattle);
+void CCardBattle::dispCardBreak() {
+    if (m_hBreak > 0) {
+        if (m_pSeqCtrlBreak->isEnd(0)) {
+            m_pSeqCtrlBreak->enableDisp(FALSE);
+            m_hBreak = 0;
+        } else {
+            m_pSeqCtrlBreak->enableDisp(TRUE);
+            m_pSeqCtrlBreak->set3DPos(m_vBreakPos);
+        }
+    }
+    if (m_hSpeed > 0) {
+        if (m_pSeqCtrlSpeed->isEnd(0)) {
+            m_pSeqCtrlSpeed->enableDisp(FALSE);
+            m_hBreak = 0;
+        } else {
+            m_pSeqCtrlSpeed->enableDisp(TRUE);
+            m_pSeqCtrlSpeed->set3DPos(m_vBreakPos);
+        }
+    }
+}
 INT CCardBattle::calcPointBreak(INT a, INT b) {
     INT d = abs(a - b);
     return d < 10 ? d : 9;
