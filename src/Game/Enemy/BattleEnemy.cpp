@@ -208,7 +208,16 @@ void CBattleEnemy::makeExpPrize() {
 void CBattleEnemy::makePrize() {
     if (m_pBodyColl->getHitCollBody()) makePrize(m_pBodyColl->getHitCollBody()->getDetectPos());
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", bossDeadDemoDispOff__12CBattleEnemy);
+void CBattleEnemy::bossDeadDemoDispOff() {
+    m_pEffect->kill(0.0f);
+    m_pSE->stop();
+    setEntityFlag(0, 0x80000000);
+    setModelAlphaScale(0.0f, -1);
+    bodyCollOffBody(-1);
+    loadModelColor_();
+    killLoopEffect(0);
+    killBadStatusEffect();
+}
 INT CBattleEnemy::getPlayerState() {
     if (g_pPlayer) return g_pPlayer->getPlayerState();
     return 2;
