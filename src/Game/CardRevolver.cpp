@@ -11,6 +11,8 @@
 #include "System/Graphic/Anim.h"
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
+/* MATCH: placeholder: an empty string follows CollUtil.h's strings in .rodata; which header it comes from is not known */
+inline void _emptyStringPlaceholderCardRevolver() { TRACE(""); }
 #include "Game/CardRevolver.h"
 #include "System/TaskMan.h"
 #include "System/Sound/SoundMan.h"
@@ -34,221 +36,9 @@ inline void* operator new(unsigned int, void* p) throw() { return p; }
 inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 
-extern "C" char D_00479EA0[];
-extern "C" char D_00479EA8[];
-extern "C" char D_00479EB8[];
-extern "C" char D_00479EC8[];
-extern "C" char D_00479ED8[];
-extern "C" char D_00479EE8[];
-extern "C" char D_00479EF8[];
-extern "C" char D_00479F08[];
-extern "C" char D_00479F10[];
-extern "C" char D_00479F18[];
-extern "C" char D_00479F20[];
-extern "C" char D_00479F28[];
-extern "C" char D_00479F30[];
-extern "C" char D_00479F38[];
-extern "C" char D_00479F48[];
-extern "C" char D_00479F50[];
-extern "C" char D_00479F60[];
-extern "C" char D_00479F70[];
-extern "C" char D_00479F80[];
-extern "C" char D_00479F90[];
-extern "C" char D_00479FA0[];
-extern "C" char D_00479FB0[];
-extern "C" char D_00479FC0[];
-extern "C" char D_00479FC8[];
-extern "C" char D_00479FD8[];
-extern "C" char D_00479FE8[];
-extern "C" char D_00479FF0[];
-extern "C" char D_00479FF8[];
-extern "C" char D_0047A000[];
-extern "C" char D_0047A008[];
-extern "C" char D_0047A010[];
-extern "C" char D_0047A020[];
-extern "C" char D_0047A030[];
-extern "C" char D_0047A038[];
-extern "C" char D_0047A040[];
-extern "C" char D_0047A048[];
-extern "C" char D_0047A050[];
-extern "C" char D_0047A060[];
-extern "C" char D_0047A070[];
-extern "C" char D_0047A080[];
-extern "C" char D_0047A090[];
-extern "C" char D_0047A0A0[];
-extern "C" char D_0047A0B0[];
-extern "C" char D_0047A0C0[];
-extern "C" char D_0047A0D0[];
-extern "C" char D_0047A0D8[];
-extern "C" char D_0047A0E8[];
-extern "C" char D_0047A0F8[];
-extern "C" char D_0047A108[];
-extern "C" char D_0047A118[];
-extern "C" char D_0047A128[];
-extern "C" char D_0047A130[];
-extern "C" char D_0047A138[];
-extern "C" char D_0047A148[];
-extern "C" char D_0047A150[];
-extern "C" char D_0047A158[];
-extern "C" char D_0047A160[];
-extern "C" char D_0047A168[];
-extern "C" char D_0047A170[];
-extern "C" char D_0047A180[];
-extern "C" char D_0047A190[];
-extern "C" char D_0047A198[];
-extern "C" char D_0047A1A8[];
-extern "C" char D_0047A1B8[];
-extern "C" char D_0047A1C8[];
-extern "C" char D_0047A1D8[];
-extern "C" char D_0047A1E8[];
-extern "C" char D_0047A1F8[];
-extern "C" char D_0047A208[];
-extern "C" char D_0047A220[];
-extern "C" char D_0047A238[];
-extern "C" char D_0047A248[];
-extern "C" char D_0047A258[];
-extern "C" char D_0047A268[];
-extern "C" char D_0047A278[];
-extern "C" char D_0047A288[];
-extern "C" char D_0047A298[];
-extern "C" char D_0047A2A8[];
-extern "C" char D_0047A2B8[];
-extern "C" char D_0047A2C8[];
-extern "C" char D_0047A2D8[];
-extern "C" char D_0047A2F0[];
-extern "C" char D_0047A308[];
-extern "C" char D_0047A318[];
-extern "C" char D_0047A328[];
-extern "C" char D_0047A338[];
-extern "C" char D_0047A348[];
-extern "C" char D_0047A358[];
-extern "C" char D_0047A368[];
-extern "C" char D_0047A378[];
-extern "C" char D_0047A388[];
-extern "C" char D_0047A398[];
-extern "C" char D_0047A3A8[];
-extern "C" char D_0047A3C0[];
-extern "C" char D_0047A3D8[];
-extern "C" char D_0047A3F0[];
-extern "C" char D_0047A408[];
-extern "C" char D_0047A418[];
-extern "C" char D_0047A428[];
-extern "C" char D_0047A438[];
-extern "C" char D_0047A440[];
-extern "C" char D_0047A450[];
-extern "C" char D_0047A460[];
-extern "C" char D_0047A470[];
-extern "C" char D_0047A480[];
-extern "C" char D_0047A490[];
-extern "C" char D_0047A4A0[];
-extern "C" char D_0047A4B0[];
-extern "C" char D_0047A4C0[];
-extern "C" char D_0047A4D0[];
-extern "C" char D_0047A4E0[];
-extern "C" char D_0047A4E8[];
-extern "C" char D_0047A4F8[];
-extern "C" char D_0047A500[];
-extern "C" char D_0047A510[];
-extern "C" char D_0047A520[];
-extern "C" char D_0047A530[];
-extern "C" char D_0047A540[];
-extern "C" char D_0047A548[];
-extern "C" char D_0047A550[];
-extern "C" char D_0047A560[];
-extern "C" char D_0047A570[];
-extern "C" char D_0047A580[];
-extern "C" char D_0047A590[];
-extern "C" char D_0047A5A0[];
-extern "C" char D_0047A5B0[];
-extern "C" char D_0047A5C0[];
-extern "C" char D_0047A5D0[];
-extern "C" char D_0047A5E0[];
-extern "C" char D_0047A5F0[];
-extern "C" char D_0047A600[];
-extern "C" char D_0047A610[];
-extern "C" char D_0047A620[];
-extern "C" char D_0047A630[];
-extern "C" char D_0047A640[];
-extern "C" char D_0047A650[];
-extern "C" char D_0047A660[];
-extern "C" char D_0047A670[];
-extern "C" char D_0047A678[];
-extern "C" char D_0047A690[];
-extern "C" char D_0047A6A8[];
-extern "C" char D_0047A6B8[];
-extern "C" char D_0047A6C8[];
-extern "C" char D_0047A6D8[];
-extern "C" char D_0047A6E8[];
-extern "C" char D_0047A6F8[];
-extern "C" char D_0047A708[];
-extern "C" char D_0047A718[];
-extern "C" char D_0047A728[];
-extern "C" char D_0047A738[];
-extern "C" char D_0047A748[];
-extern "C" char D_0047A758[];
-extern "C" char D_0047A768[];
-extern "C" char D_0047A778[];
-extern "C" char D_0047A788[];
-extern "C" char D_0047A798[];
-extern "C" char D_0047A7A0[];
-extern "C" char D_0047A7B0[];
-extern "C" char D_0047A7C0[];
-extern "C" char D_0047A7D0[];
-extern "C" char D_0047A7E0[];
-extern "C" char D_0047A7F0[];
-extern "C" char D_0047A7F8[];
-extern "C" char D_0047A808[];
-extern "C" char D_0047A818[];
-extern "C" char D_0047A828[];
-extern "C" char D_0047A838[];
-extern "C" char D_0047A840[];
-extern "C" char D_0047A850[];
-extern "C" char D_0047A860[];
-extern "C" char D_0047A870[];
-extern "C" char D_0047A878[];
-extern "C" char D_0047A880[];
-extern "C" char D_0047A890[];
-extern "C" char D_0047A8A0[];
-extern "C" char D_0047A8B0[];
-extern "C" char D_0047A8B8[];
-extern "C" char D_0047A8C8[];
-extern "C" char D_0047A8D8[];
-extern "C" char D_0047A8E0[];
-extern "C" char D_0047A8F0[];
-extern "C" char D_0047A900[];
-extern "C" char D_0047A910[];
-extern "C" char D_0047A920[];
-extern "C" char D_0047A930[];
-extern "C" char D_0047A940[];
-extern "C" char D_0047A948[];
-extern "C" char D_0047A958[];
-extern "C" char D_0047A960[];
-extern "C" char D_0047A970[];
-extern "C" char D_0047A978[];
-extern "C" char D_0047A988[];
-extern "C" char D_0047A990[];
-extern "C" char D_0047A998[];
-extern "C" char D_0047A9A8[];
-extern "C" char D_0047A9B8[];
-extern "C" char D_0047A9C8[];
-extern "C" char D_0047A9D8[];
-extern "C" char D_0047A9E0[];
-extern "C" char D_0047A9F0[];
-extern "C" char D_0047AA00[];
-extern "C" char D_0047AA10[];
-extern "C" char D_0047AA20[];
-extern "C" char D_0047AA30[];
-extern "C" char D_0047AA40[];
-extern "C" char D_0047AA50[];
-extern "C" char D_0047AA60[];
-extern "C" char D_0047AA70[];
-extern "C" char D_0047AA80[];
-extern "C" char D_0047AA90[];
-extern "C" char D_0047AAA0[];
-extern "C" char D_0047AAB0[];
 namespace CardBattle {
-static LPCSTR g_szLadCockpit = D_00479EA8;
-static LPCSTR g_szSeqCockpit = D_00479EB8;
+static LPCSTR g_szLadCockpit = "Cockpit.lad";
+static LPCSTR g_szSeqCockpit = "Cockpit:00";
 BTL_DECK g_deckSoraTutorial[17] = {
     {1, 4}, {1, 5}, {1, 6}, {1, 1}, {1, 3}, {1, 9}, {1, 0}, {1, 2},
     {1, 7}, {1, 7}, {1, 6}, {1, 5}, {1, 4}, {1, 5}, {1, 6}, {68, -1},
@@ -288,8 +78,8 @@ BTL_DECK g_deckSoraDebug99[100] = {
     {10, 6}, {10, 7}, {10, 8}, {255, 0},
 };
 char* g_szDbgDeckName[10] = {
-    D_00479EC8, D_00479ED8, D_00479EE8, D_00479EF8, D_00479F08, D_00479F10,
-    D_00479F18, D_00479F20, D_00479F28, D_00479F30,
+    "OFF (\x92\xca\x8f\xed)", "COM\x94\xc5\x83X\x83^\x81[\x83^", "\x83" "f\x83o\x83" "b\x83O\x97p", "99\x96\x87\x83" "e\x83X\x83g", "4:OFF", "5:OFF",
+    "6:OFF", "7:OFF", "8:OFF", "9:OFF",
 };
 BTL_DECK g_deckSoraPoo[19] = {
     {25, 9}, {25, 0}, {25, 2}, {25, 6}, {25, 9}, {25, 0}, {25, 6}, {25, 2},
@@ -297,49 +87,47 @@ BTL_DECK g_deckSoraPoo[19] = {
     {25, 6}, {25, 8}, {255, 0},
 };
 static char* g_szStockSkillName[150] = {
-    D_00479EA0, D_00479EA0, D_00479EA0, D_00479EA0, D_00479F38, D_00479F48,
-    D_00479F50, D_00479F60, D_00479F70, D_00479F80, D_00479F90, D_00479FA0,
-    D_00479FB0, D_00479FC0, D_00479FC8, D_00479FD8, D_00479FE8, D_00479FF0,
-    D_00479FF8, D_0047A000, D_0047A008, D_0047A010, D_0047A020, D_0047A030,
-    D_0047A038, D_0047A040, D_0047A048, D_0047A050, D_0047A060, D_0047A070,
-    D_0047A080, D_0047A090, D_0047A0A0, D_0047A0B0, D_0047A0C0, D_0047A0D0,
-    D_0047A0D8, D_0047A0E8, D_0047A0F8, D_0047A108, D_0047A118, D_0047A128,
-    D_0047A130, D_0047A138, D_0047A148, D_0047A150, D_0047A158, D_0047A160,
-    D_0047A168, D_0047A170, D_0047A180, D_0047A190, D_0047A198, D_0047A1A8,
-    D_0047A1B8, D_0047A1C8, D_0047A1D8, D_0047A1E8, D_0047A1F8, D_0047A208,
-    D_0047A220, D_0047A238, D_0047A248, D_0047A258, D_0047A268, D_0047A278,
-    D_0047A288, D_0047A298, D_0047A2A8, D_0047A2B8, D_0047A2C8, D_0047A2D8,
-    D_0047A2F0, D_0047A308, D_0047A318, D_0047A328, D_0047A338, D_0047A348,
-    D_0047A358, D_0047A368, D_0047A378, D_0047A388, D_0047A398, D_0047A3A8,
-    D_0047A3C0, D_0047A3D8, D_0047A3F0, D_0047A408, D_0047A418, D_0047A418,
-    D_0047A428, D_0047A438, D_0047A440, D_0047A450, D_0047A460, D_0047A470,
-    D_0047A480, D_0047A490, D_0047A4A0, D_0047A4B0, D_0047A4C0, D_0047A4D0,
-    D_0047A4E0, D_0047A4E8, D_0047A4F8, D_0047A500, D_0047A510, D_0047A520,
-    D_0047A530, D_0047A540, D_0047A548, D_0047A278, D_0047A288, D_0047A550,
-    D_0047A560, D_0047A570, D_0047A580, D_0047A590, D_0047A5A0, D_0047A5B0,
-    D_0047A5C0, D_0047A5D0, D_0047A5E0, D_0047A480, D_0047A490, D_0047A0D0,
-    D_0047A5F0, D_0047A600, D_0047A610, D_0047A620, D_0047A630, D_0047A640,
-    D_0047A650, D_0047A660, D_0047A670, D_0047A678, D_0047A690, D_0047A6A8,
-    D_0047A6B8, D_0047A6C8, D_0047A6D8, D_0047A6E8, D_0047A6F8, D_0047A708,
-    D_0047A718, D_0047A728, D_0047A738, D_0047A748, D_0047A758, D_0047A768,
+    "", "", "", "", "Sliding Dash", "Blitz",
+    "Stun Impact", "Zantetsuken", "Strike Raid", "Sonic Blade", "Ars Arcanum", "Ragnarok",
+    "Trinity Limit", "Fira", "Blizzara", "Thundara", "Cura", "Gravira",
+    "Stopra", "Aerora", "Firaga", "Blizzaga", "Thundaga", "Curaga",
+    "Graviga", "Stopga", "Aeroga", "Fire Raid", "Blizzard Raid", "Thunder Raid",
+    "Reflect Raid", "Judgment", "Firaga Burst", "Raging Storm", "Mega Flare", "Freeze",
+    "Homing Blizzara", "Aqua Splash", "Magnet Spiral", "Lethal Flame", "Shock Impact", "Tornado",
+    "Quake", "Warpinator", "Warp", "Bind", "Confuse", "Terror",
+    "Synchro", "Gifted Miracle", "Teleport", "Holy", "Proud Roar LV2", "Proud Roar LV3",
+    "Splash LV2", "Splash LV3", "Paradise LV2", "Paradise LV3", "Idyll Romp", "Flare Breath LV2",
+    "Flare Breath LV3", "Showtime LV2", "Showtime LV3", "Twinkle LV2", "Twinkle LV3", "Cross-slash",
+    "Omnislash", "Cross-slash+", "Magic LV2", "Magic LV3", "Stardust Blitz", "Goofy Tornado LV2",
+    "Goofy Tornado LV3", "Goofy Smash", "Wild Crush", "Sandstorm LV2", "Sandstorm LV3", "Surprise! LV2",
+    "Surprise! LV3", "Spiral Wave LV2", "Spiral Wave LV3", "Hummingbird LV2", "Hummingbird LV3", "Furious Volley LV2",
+    "Furious Volley LV3", "Lucky Bounty LV2", "Lucky Bounty LV3", "Honey Storm", "Honey Pot", "Honey Pot",
+    "High Jump", "Glide", "Super Glide", "DummyS00", "DummyS01", "Dark Break",
+    "Dark Firaga", "Dark Aura", "MM Miracle LV2", "MM Miracle LV3", "Holy Burst", "Inverse Burst",
+    "Impulse", "Maelstrom", "Barrage", "Dark Impulse", "Dark Maelstrom", "Dark Barrage",
+    "DummyR00", "D Mode", "Nothing", "Cross-slash", "Omnislash", "Temper Flare",
+    "Firagaball", "Combo & Present", "Barrel Blast", "Fire Wall", "Firetooth", "Teleport Rush",
+    "Mega Volt", "Blade Storm", "Helm Split", "Dark Firaga", "Dark Aura", "Freeze",
+    "Ice Needles", "Slide Break", "Diamond Dust", "Deathscythe", "Blossom Shower", "Drop Shot",
+    "Omni Laser", "Circle Reject", "Doom", "Whirldwind to the Void", "Gale of Severance", "Rockshatter",
+    "Impact Quake", "Ground Impact", "Shock Slash", "Dark Rush", "Dark Shadow", "Cyclone Snatch",
+    "Dark Punisher", "Catastrophe", "DummyE00", "DummyE01", "DummyE02", "DummyE03",
 };
 char* g_szEnemyCardEffName[60] = {
-    D_00479EA0, D_0047A778, D_0047A788, D_0047A798, D_0047A7A0, D_0047A7B0,
-    D_0047A7C0, D_0047A7D0, D_0047A7E0, D_0047A7F0, D_0047A7F8, D_0047A808,
-    D_0047A818, D_0047A828, D_0047A838, D_0047A840, D_0047A850, D_0047A860,
-    D_0047A870, D_0047A878, D_0047A880, D_0047A890, D_0047A8A0, D_0047A8B0,
-    D_0047A8B8, D_0047A8C8, D_0047A8D8, D_0047A8E0, D_0047A8F0, D_0047A900,
-    D_0047A910, D_0047A920, D_0047A930, D_0047A940, D_0047A948, D_0047A958,
-    D_0047A960, D_0047A970, D_0047A978, D_0047A988, D_0047A990, D_0047A998,
-    D_0047A9A8, D_0047A9B8, D_0047A9C8, D_0047A9D8, D_0047A9E0, D_0047A9F0,
-    D_0047AA00, D_0047AA10, D_0047AA20, D_0047AA30, D_0047AA40, D_0047AA50,
-    D_0047AA60, D_0047AA70, D_0047AA80, D_0047AA90, D_0047AAA0, D_0047AAB0,
+    "", "Incrementor", "Combo Plus", "Guard", "Fire Boost", "Blizzard Boost",
+    "Thunder Boost", "Cure Boost", "Retrograde", "Draw", "Reload Kinesis", "Combo Finish",
+    "Back Attack", "Quickload", "Drain", "Random Values", "Decrementor", "Auto-Reload",
+    "Float", "Vanish", "All Zeros", "Item Bracer", "Duel Trigger", "Protect",
+    "Reload Lock", "Magic Boost", "Bio", "Hyper Healing", "Random Flush", "Leaf Bracer",
+    "Reload Haste", "Summon Boost", "Wide Attack", "Dispel", "Value Break", "Mimic",
+    "Attack Haste", "Berserk", "Attack Bracer", "Regen", "Shell", "Second Chance",
+    "Overdrive", "Sleight Lock", "Quick Recovery", "Dash", "Auto-Life", "Double Sleight",
+    "Warp Break", "Sleightblind", "Confu-Strike", "Quick Barrier", "Shot Charge", "Aero Guard",
+    "Combo Boost", "Water Charge", "Omni Break", "Double Strike", "Premium Guard", "Damage Zero",
 };
 G_UV g_uvCRCounterNumOfs[4] = {{67, 30}, {52, 30}, {56, 20}, {37, 29}};
 }
 template <class T> static inline T& _ref(T& v) { return v; }
-extern "C" char D_00479D40[]; /* "Game/CardBattle.h" */
-extern "C" char D_00479D68[]; /* "inUser" */
 /* PARTIAL: stand-in for Game/CardBattle CCardBattle (m_cardEnchant, getEnchantKind): gated by GAME_CARDBATTLE_CPP */
 struct CB_ENCHANT_VIEW {
     BYTE _pad[0x17C];
@@ -347,7 +135,7 @@ struct CB_ENCHANT_VIEW {
 };
 /* CCardBattle::getEnchantKind(INT inUser), an inline in Game/CardBattle.h */
 inline INT CCardRevolver::_getEnchantKind(CCardBattle* p, INT inUser) {
-    if (!inUser) AssertApp(D_00479D40, 641, D_00479D68, 0);
+    if (!inUser) AssertApp("c:/KHCOM/MainApp/Game/CardBattle.h", 641, "inUser", 0);
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
 static inline BOOL _isEqual(UINT a, UINT b) { return a == b; }
@@ -358,31 +146,239 @@ public:
 };
 }
 extern INT SCREEN_HEIGHT;
-extern "C" char D_0047AAC0[];
-extern "C" char D_0047B3A8[];
-extern "C" char D_0047B3D8[];
-extern "C" char D_0047B408[];
-extern "C" char D_0047B5E8[];
-extern "C" char D_0047B618[];
-extern "C" char D_0047B648[];
-extern "C" char D_0047B438[];
-extern "C" char D_0047B678[];
-extern "C" char D_0047B710[];
-extern "C" char D_0047B740[];
-extern "C" char D_0047B348[];
-extern "C" char D_0047B378[];
-extern "C" char D_0047AE78[];
-extern "C" char D_0047B070[];
-extern "C" char D_0047B1E0[];
-extern "C" char D_0047B210[];
-extern "C" const CARD_DATA cardDataTbl_0047C338[224];
+static const CARD_DATA cardDataTbl[224] = {
+    { { 0x00 }, 0, 0, 0, "" }, // 0
+    { { 0x11 }, 2, 0, 3, "Kingdom Key" }, // 1
+    { { 0x11 }, 2, 1, 3, "Three Wishes" }, // 2
+    { { 0x11 }, 2, 2, 3, "Crabclaw" }, // 3
+    { { 0x11 }, 2, 3, 3, "Pumpkinhead" }, // 4
+    { { 0x11 }, 2, 4, 3, "Fairy Harp" }, // 5
+    { { 0x11 }, 2, 5, 3, "Wishing Star" }, // 6
+    { { 0x11 }, 2, 6, 3, "Spellbinder" }, // 7
+    { { 0x11 }, 2, 7, 3, "Metal Chocobo" }, // 8
+    { { 0x11 }, 3, 0, 3, "Olympia" }, // 9
+    { { 0x11 }, 3, 1, 3, "Lionheart" }, // 10
+    { { 0x11 }, 3, 2, 3, "Lady Luck" }, // 11
+    { { 0x11 }, 3, 3, 3, "Divine Rose" }, // 12
+    { { 0x11 }, 3, 4, 3, "Oathkeeper" }, // 13
+    { { 0x11 }, 3, 5, 3, "Oblivion" }, // 14
+    { { 0x11 }, 3, 6, 3, "Ultima Weapon" }, // 15
+    { { 0x11 }, 3, 7, 3, "Diamond Dust" }, // 16
+    { { 0x11 }, 4, 0, 3, "One-Winged Angel" }, // 17
+    { { 0x11 }, 4, 1, 4, "Soul Eater" }, // 18
+    { { 0x11 }, 4, 2, 3, "Star Seeker" }, // 19
+    { { 0x11 }, 4, 3, 3, "Monochrome" }, // 20
+    { { 0x11 }, 4, 4, 3, "Follow the Wind" }, // 21
+    { { 0x11 }, 4, 5, 3, "Hidden Dragon" }, // 22
+    { { 0x11 }, 4, 6, 3, "Photon Debugger" }, // 23
+    { { 0x11 }, 4, 7, 3, "Bond of Flame" }, // 24
+    { { 0x11 }, 26, 0, 0, "-" }, // 25
+    { { 0x22 }, 5, 0, 3, "Fire" }, // 26
+    { { 0x22 }, 5, 1, 3, "Blizzard" }, // 27
+    { { 0x22 }, 5, 2, 3, "Thunder" }, // 28
+    { { 0x22 }, 5, 3, 3, "Cure" }, // 29
+    { { 0x22 }, 5, 4, 3, "Gravity" }, // 30
+    { { 0x22 }, 5, 5, 3, "Stop" }, // 31
+    { { 0x22 }, 5, 6, 3, "Aero" }, // 32
+    { { 0x22 }, 26, 2, 0, "-" }, // 33
+    { { 0x22 }, 26, 1, 0, "-" }, // 34
+    { { 0x33 }, 5, 7, 3, "Simba" }, // 35
+    { { 0x33 }, 6, 0, 3, "Genie" }, // 36
+    { { 0x33 }, 6, 1, 3, "Bambi" }, // 37
+    { { 0x33 }, 6, 2, 3, "Dumbo" }, // 38
+    { { 0x33 }, 6, 3, 3, "Tinker Bell" }, // 39
+    { { 0x33 }, 6, 4, 3, "Mushu" }, // 40
+    { { 0x33 }, 6, 5, 3, "Cloud" }, // 41
+    { { 0x44 }, 6, 6, 6, "Potion" }, // 42
+    { { 0x44 }, 6, 7, 6, "Hi-Potion" }, // 43
+    { { 0x44 }, 7, 0, 2, "Mega-Potion" }, // 44
+    { { 0x44 }, 7, 1, 2, "Ether" }, // 45
+    { { 0x44 }, 7, 2, 2, "Mega-Ether" }, // 46
+    { { 0x44 }, 7, 3, 2, "Elixir" }, // 47
+    { { 0x44 }, 7, 4, 2, "Megalixir" }, // 48
+    { { 0x55 }, 7, 5, 2, "Donald Duck" }, // 49
+    { { 0x55 }, 7, 6, 2, "Goofy" }, // 50
+    { { 0x55 }, 7, 7, 2, "Aladdin" }, // 51
+    { { 0x55 }, 8, 0, 2, "Ariel" }, // 52
+    { { 0x55 }, 8, 1, 2, "Jack" }, // 53
+    { { 0x55 }, 8, 2, 2, "Peter Pan" }, // 54
+    { { 0x55 }, 8, 3, 2, "The Beast" }, // 55
+    { { 0x55 }, 8, 4, 4, "The King" }, // 56
+    { { 0x55 }, 8, 5, 2, "Pluto" }, // 57
+    { { 0x66 }, 8, 6, 6, "Guard Armor" }, // 58
+    { { 0x66 }, 8, 6, 6, "Trickmaster" }, // 59
+    { { 0x66 }, 8, 6, 6, "Jafar" }, // 60
+    { { 0x66 }, 8, 6, 6, "Oogie Boogie" }, // 61
+    { { 0x66 }, 8, 6, 6, "Parasite Cage" }, // 62
+    { { 0x66 }, 8, 6, 6, "Ursula" }, // 63
+    { { 0x66 }, 8, 6, 6, "Dragon Maleficent" }, // 64
+    { { 0x66 }, 8, 6, 6, "Darkside" }, // 65
+    { { 0xe6 }, 8, 7, 4, "-" }, // 66
+    { { 0xe6 }, 9, 0, 0, "-" }, // 67
+    { { 0x77 }, 9, 1, 6, "Shadow" }, // 68
+    { { 0x77 }, 9, 2, 2, "Soldier" }, // 69
+    { { 0x77 }, 9, 3, 6, "Large Body" }, // 70
+    { { 0x77 }, 9, 4, 2, "Red Nocturne" }, // 71
+    { { 0x77 }, 9, 5, 2, "Blue Rhapsody" }, // 72
+    { { 0x77 }, 9, 6, 2, "Yellow Opera" }, // 73
+    { { 0x77 }, 9, 7, 2, "Green Requiem" }, // 74
+    { { 0x77 }, 10, 0, 6, "Powerwild" }, // 75
+    { { 0x77 }, 10, 1, 2, "Bouncywild" }, // 76
+    { { 0x77 }, 10, 2, 2, "Air Soldier" }, // 77
+    { { 0x77 }, 10, 3, 2, "Bandit" }, // 78
+    { { 0x77 }, 10, 4, 6, "Fat Bandit" }, // 79
+    { { 0x77 }, 10, 5, 2, "Barrel Spider" }, // 80
+    { { 0x77 }, 10, 6, 6, "Search Ghost" }, // 81
+    { { 0x77 }, 10, 7, 6, "Sea Neon" }, // 82
+    { { 0x77 }, 11, 0, 2, "Screwdiver" }, // 83
+    { { 0x77 }, 11, 1, 2, "Aquatank" }, // 84
+    { { 0x77 }, 11, 2, 6, "Wight Knight" }, // 85
+    { { 0x77 }, 11, 3, 2, "Gargoyle" }, // 86
+    { { 0x77 }, 11, 4, 6, "Pirate" }, // 87
+    { { 0x77 }, 11, 5, 2, "Air Pirate" }, // 88
+    { { 0x77 }, 11, 6, 4, "Darkball" }, // 89
+    { { 0x77 }, 11, 7, 6, "Defender" }, // 90
+    { { 0x77 }, 12, 0, 2, "Wyvern" }, // 91
+    { { 0x77 }, 12, 1, 2, "Wizard" }, // 92
+    { { 0x77 }, 12, 2, 2, "Neoshadow" }, // 93
+    { { 0x77 }, 12, 3, 2, "White Mushroom" }, // 94
+    { { 0x77 }, 12, 4, 2, "Black Fungus" }, // 95
+    { { 0x77 }, 12, 5, 2, "Creeper Plant" }, // 96
+    { { 0x77 }, 12, 6, 2, "Tornado Step" }, // 97
+    { { 0x77 }, 12, 7, 2, "Crescendo" }, // 98
+    { { 0x77 }, 13, 0, 6, "Guard Armor" }, // 99
+    { { 0x77 }, 13, 1, 6, "Parasite Cage" }, // 100
+    { { 0x77 }, 13, 2, 6, "Trickmaster" }, // 101
+    { { 0x77 }, 13, 3, 6, "Darkside" }, // 102
+    { { 0x77 }, 13, 4, 2, "Card Soldier" }, // 103
+    { { 0x77 }, 13, 5, 6, "Hades" }, // 104
+    { { 0x77 }, 13, 6, 6, "Jafar" }, // 105
+    { { 0x77 }, 13, 7, 6, "Oogie Boogie" }, // 106
+    { { 0x77 }, 14, 0, 6, "Ursula" }, // 107
+    { { 0x77 }, 14, 1, 6, "Hook" }, // 108
+    { { 0x77 }, 14, 2, 6, "Dragon Maleficent" }, // 109
+    { { 0x77 }, 14, 3, 2, "Riku" }, // 110
+    { { 0x77 }, 14, 4, 2, "Axel" }, // 111
+    { { 0x77 }, 14, 5, 2, "Larxene" }, // 112
+    { { 0x77 }, 14, 6, 2, "Vexen" }, // 113
+    { { 0x77 }, 14, 7, 2, "Marluxia" }, // 114
+    { { 0x77 }, 15, 0, 6, "Lexaeus" }, // 115
+    { { 0x77 }, 15, 1, 2, "Ansem" }, // 116
+    { { 0x77 }, 15, 3, 6, "Zexion" }, // 117
+    { { 0x77 }, 15, 4, 2, "Xemnas" }, // 118
+    { { 0x77 }, 15, 5, 2, "Xigbar" }, // 119
+    { { 0x77 }, 15, 6, 2, "Xaldin" }, // 120
+    { { 0x77 }, 15, 7, 2, "Sa\203\307x" }, // 121
+    { { 0x77 }, 16, 0, 2, "Demyx" }, // 122
+    { { 0x77 }, 16, 1, 2, "Luxord" }, // 123
+    { { 0x77 }, 16, 2, 2, "Roxas" }, // 124
+    { { 0x77 }, 21, 6, 2, "Gold Card" }, // 125
+    { { 0x77 }, 21, 7, 2, "Platinum Card" }, // 126
+    { { 0x77 }, 15, 2, 0, "Card Soldier Spade" }, // 127
+    { { 0x77 }, 13, 4, 0, "Card Soldier Heart" }, // 128
+    { { 0x17 }, 22, 0, 0, "\203N\203\211\203E\203hA" }, // 129
+    { { 0x17 }, 22, 1, 0, "\203N\203\211\203E\203hB" }, // 130
+    { { 0x17 }, 22, 2, 0, "\203n\203f\203XA" }, // 131
+    { { 0x27 }, 22, 3, 0, "\203n\203f\203XB" }, // 132
+    { { 0x17 }, 22, 4, 0, "\203t\203b\203NA" }, // 133
+    { { 0x17 }, 22, 5, 0, "\203t\203b\203NB" }, // 134
+    { { 0x17 }, 22, 6, 0, "\203t\203b\203NC" }, // 135
+    { { 0x27 }, 22, 7, 0, "\203t\203b\203ND" }, // 136
+    { { 0x17 }, 23, 0, 0, "\203A\203N\203Z\203\213A" }, // 137
+    { { 0x17 }, 23, 1, 0, "\203A\203N\203Z\203\213B" }, // 138
+    { { 0x17 }, 23, 2, 0, "\203\211\203N\203V\201[\203kA" }, // 139
+    { { 0x17 }, 23, 3, 0, "\203\211\203N\203V\201[\203kB" }, // 140
+    { { 0x27 }, 23, 4, 0, "\203\211\203N\203V\201[\203kC" }, // 141
+    { { 0x17 }, 23, 5, 0, "\203\212\203NA" }, // 142
+    { { 0x17 }, 23, 6, 0, "\203\212\203NB" }, // 143
+    { { 0x17 }, 23, 7, 0, "\203\212\203NC" }, // 144
+    { { 0x17 }, 24, 0, 0, "\203\212\203ND" }, // 145
+    { { 0x17 }, 24, 1, 0, "\203\224\203B\203N\203Z\203\223A" }, // 146
+    { { 0x27 }, 24, 2, 0, "\203\224\203B\203N\203Z\203\223B" }, // 147
+    { { 0x17 }, 24, 3, 0, "\203}\201[\203\213\201[\203V\203\203A" }, // 148
+    { { 0x17 }, 24, 4, 0, "\203}\201[\203\213\201[\203V\203\203B" }, // 149
+    { { 0x27 }, 24, 5, 0, "\203}\201[\203\213\201[\203V\203\203C" }, // 150
+    { { 0x77 }, 24, 6, 0, "\203}\201[\203\213\201[\203V\203\2032" }, // 151
+    { { 0x77 }, 24, 7, 0, "\203}\201[\203\213\201[\203V\203\2033" }, // 152
+    { { 0x17 }, 25, 0, 0, "\203\214\203N\203Z\203E\203XA" }, // 153
+    { { 0x17 }, 25, 1, 0, "\203\214\203N\203Z\203E\203XB" }, // 154
+    { { 0x27 }, 25, 2, 0, "\203\214\203N\203Z\203E\203XC" }, // 155
+    { { 0x17 }, 25, 3, 0, "\203A\203\223\203Z\203\200A" }, // 156
+    { { 0x27 }, 25, 4, 0, "\203A\203\223\203Z\203\200B" }, // 157
+    { { 0x27 }, 25, 5, 0, "\203[\203N\203V\203I\203\223A" }, // 158
+    { { 0x77 }, 26, 3, 0, "-" }, // 159
+    { { 0x88 }, 0, 0, 6, "\203\212\203\215\201[\203h" }, // 160
+    { { 0x99 }, 16, 3, 6, "Tranquil Darkness" }, // 161
+    { { 0x99 }, 16, 4, 6, "Teeming Darkness" }, // 162
+    { { 0x99 }, 16, 5, 6, "Feeble Darkness" }, // 163
+    { { 0x99 }, 16, 6, 6, "Almighty Darkness" }, // 164
+    { { 0x99 }, 16, 7, 6, "Sleeping Darkness" }, // 165
+    { { 0x99 }, 17, 0, 6, "Looming Darkness" }, // 166
+    { { 0x99 }, 17, 1, 2, "Premium Room" }, // 167
+    { { 0x99 }, 17, 2, 2, "White Room" }, // 168
+    { { 0x99 }, 17, 3, 6, "Black Room" }, // 169
+    { { 0x99 }, 17, 4, 6, "Bottomless Darkness" }, // 170
+    { { 0x99 }, 17, 5, 6, "Roulette Room" }, // 171
+    { { 0xa9 }, 17, 6, 6, "Martial Waking" }, // 172
+    { { 0xa9 }, 17, 7, 2, "Sorcerous Waking" }, // 173
+    { { 0xa9 }, 18, 0, 2, "Alchemic Waking" }, // 174
+    { { 0xa9 }, 18, 1, 6, "Meeting Ground" }, // 175
+    { { 0xa9 }, 18, 2, 6, "Stagnant Space" }, // 176
+    { { 0xa9 }, 18, 3, 6, "Strong Initiative" }, // 177
+    { { 0xa9 }, 18, 4, 6, "Lasting Daze" }, // 178
+    { { 0xb9 }, 18, 5, 2, "Calm Bounty" }, // 179
+    { { 0xb9 }, 18, 6, 2, "Guarded Trove" }, // 180
+    { { 0xb9 }, 18, 7, 2, "False Bounty" }, // 181
+    { { 0xb9 }, 19, 0, 6, "Moment's Reprieve" }, // 182
+    { { 0xb9 }, 19, 1, 6, "Mingling Worlds" }, // 183
+    { { 0xb9 }, 19, 2, 2, "Moogle Room" }, // 184
+    { { 0xb9 }, 19, 3, 6, "Random Joker" }, // 185
+    { { 0xca }, 19, 4, 6, "Key of Beginnings" }, // 186
+    { { 0xca }, 19, 5, 6, "Key of Guidance" }, // 187
+    { { 0xca }, 19, 6, 6, "Key to Truth" }, // 188
+    { { 0xca }, 19, 7, 2, "Key to Rewards" }, // 189
+    { { 0xdb }, 20, 0, 6, "Traverse Town" }, // 190
+    { { 0xdb }, 20, 3, 6, "Agrabah" }, // 191
+    { { 0xdb }, 20, 2, 6, "Olympus Coliseum" }, // 192
+    { { 0xdb }, 20, 1, 6, "Wonderland" }, // 193
+    { { 0xdb }, 20, 5, 6, "Monstro" }, // 194
+    { { 0xdb }, 20, 4, 6, "Halloween Town" }, // 195
+    { { 0xdb }, 20, 6, 6, "Atlantica" }, // 196
+    { { 0xdb }, 20, 7, 6, "Neverland" }, // 197
+    { { 0xdb }, 21, 0, 6, "Hollow Bastion" }, // 198
+    { { 0xdb }, 21, 1, 2, "100 Acre Woods" }, // 199
+    { { 0xdb }, 21, 2, 6, "Twilight Town" }, // 200
+    { { 0xdb }, 21, 3, 6, "Destiny Islands" }, // 201
+    { { 0xdb }, 21, 4, 4, "Castle Oblivion" }, // 202
+    { { 0x0d }, 0, 0, 0, "EXP\220\302\217\254" }, // 203
+    { { 0x0d }, 0, 1, 0, "EXP\220\302\222\206" }, // 204
+    { { 0x0d }, 0, 2, 0, "EXP\220\302\221\345" }, // 205
+    { { 0x0d }, 0, 3, 0, "EXP\220\324\217\254" }, // 206
+    { { 0x0d }, 0, 4, 0, "EXP\220\324\222\206" }, // 207
+    { { 0x0d }, 0, 5, 0, "EXP\220\324\221\345" }, // 208
+    { { 0x0d }, 0, 6, 0, "EXP\213\342" }, // 209
+    { { 0x0d }, 1, 0, 0, "HP\217\254" }, // 210
+    { { 0x0d }, 1, 1, 0, "HP\221\345" }, // 211
+    { { 0x0d }, 2, 0, 0, "MP\217\254" }, // 212
+    { { 0x0d }, 2, 1, 0, "MP\221\345" }, // 213
+    { { 0x0d }, 3, 0, 0, "P" }, // 214
+    { { 0x0d }, 4, 0, 0, "R" }, // 215
+    { { 0x0c }, 0, 0, 0, "Unknown Room" }, // 216
+    { { 0x0c }, 0, 0, 0, "Conqueror's Respite" }, // 217
+    { { 0x0c }, 0, 0, 0, "Room of Rewards" }, // 218
+    { { 0x0c }, 0, 0, 0, "" }, // 219
+    { { 0x0c }, 0, 0, 0, "" }, // 220
+    { { 0x00 }, 0, 0, 0, "" }, // 221
+    { { 0x00 }, 0, 0, 0, "" }, // 222
+    { { 0x00 }, 0, 0, 0, "" }, // 223
+};
 
 static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
     c.m_nId = 0;
     c.m_nKind2 = kind;
     c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl_0047C338[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl_0047C338[c.m_nKind].nCategory1;
+    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
 
 void CardBattle::convBtlDeckToCard(BTL_DECK* inDeck) {
@@ -509,7 +505,7 @@ void CCardRevolver::_initialize(CARD* inDeck, INT inShortCut) {
 }
 void CCardRevolver::_initCounter() {
     initCounter();
-    m_pEmpty = new (com_malloc_d(sizeof(C2DCard), D_0047AAC0, RET_ADDR())) C2DCard;
+    m_pEmpty = new (com_malloc_d(sizeof(C2DCard), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(810)", RET_ADDR())) C2DCard;
     m_pEmpty->setLayer(2);
     m_pEmpty->createEmpty();
     FVECTOR vPos;
@@ -574,6 +570,7 @@ void CCardRevolver::exeWait() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle13CCardRevolver);
+__asm__(".rdata\n.align 3\n.word 0x52434C50\n.word 0x3D3D203A\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x000A3D3D\n.word 0x3A766552\n.word 0x646F4D20\n.word 0x203D2065\n.word 0x45444F4D\n.word 0x524F4E5F\n.word 0x0A4C414D\n.word 0x00000000\n.word 0x00000000\n.word 0x3A766552\n.word 0x6F546E20\n.word 0x206C6174\n.word 0x6425203D\n.word 0x526E202C\n.word 0x69616D65\n.word 0x203D206E\n.word 0x202C6425\n.word 0x7463416E\n.word 0x20657669\n.word 0x6425203D\n.word 0x00000A2C\n.word 0x3A766552\n.word 0x694C6E20\n.word 0x2074696D\n.word 0x6425203D\n.word 0x456E202C\n.word 0x61727478\n.word 0x25203D20\n.word 0x69202C64\n.word 0x2078614D\n.word 0x6425203D\n.word 0x0000000A\n.word 0x00000000\n.word 0x3A766552\n.word 0x63416220\n.word 0x65766974\n.word 0x25203D20\n.word 0x74202C64\n.word 0x6D695471\n.word 0x3D207265\n.word 0x2C642520\n.word 0x46697520\n.word 0x2067616C\n.word 0x3025203D\n.word 0x0A2C7838\n.word 0x00000000\n.word 0x00000000\n.word 0x52434C50\n.word 0x6143203A\n.word 0x2D736472\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x0A2D2D2D\n.word 0x00000000\n.word 0x3A643325\n.word 0x61435B20\n.word 0x30256472\n.word 0x253A6433\n.word 0x64252864\n.word 0x69205D29\n.word 0x636F7453\n.word 0x64253D6B\n.word 0x4869202C\n.word 0x3D646E61\n.word 0x252F6425\n.word 0x75202C64\n.word 0x616C4669\n.word 0x30253D67\n.word 0x202C7838\n.word 0x774F6975\n.word 0x3D72656E\n.word 0x0A2C6425\n.word 0x00000000\n.word 0x00000000\n.word 0x3A643325\n.word 0x4C554E20\n.word 0x000A2C4C\n.word 0x00000000\n.word 0x52434E45\n.word 0x3D3D203A\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x000A3D3D\n.word 0x52434E45\n.word 0x6143203A\n.word 0x2D736472\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x0A2D2D2D\n.word 0x00000000\n.word 0x3A643325\n.word 0x61435B20\n.word 0x30256472\n.word 0x253A6433\n.word 0x69205D64\n.word 0x636F7453\n.word 0x64253D6B\n.word 0x4869202C\n.word 0x3D646E61\n.word 0x252F6425\n.word 0x75202C64\n.word 0x616C4669\n.word 0x30253D67\n.word 0x202C7838\n.word 0x774F6975\n.word 0x3D72656E\n.word 0x0A2C6425\n.word 0x00000000\n.word 0x001E2810\n.word 0x001E2820\n.word 0x001E2888\n.word 0x001E2898\n.word 0x001E28A8\n.word 0x00000000\n.text\n");
 void CCardRevolver::exeMain() {
     if (DebugWork::g_dw.player.iDeckDbgDisp) {
         if (!(m_uiFlag & 0x10)) rollDeck(0, 0, 300);
@@ -681,10 +678,6 @@ void CCardRevolver::initHide() {
         m_hChargeSE = 0;
     }
 }
-extern "C" char D_0047AD28[]; /* "ENCR:: (ZEXION MODE) snatchCard = %d\n" */
-extern "C" char D_0047AD50[]; /* "...CardRevolver.cpp(1359)" */
-extern "C" char D_0047AD80[]; /* "...CardRevolver.cpp(1363)" */
-extern "C" char D_0047ADB0[]; /* "...CardRevolver.cpp(1417)" */
 inline void operator delete[](void* mem) { com_free(mem); }
 void CCardRevolver::setDeck(CARD* pDeck, INT inShortCut) {
     INT i;
@@ -709,12 +702,12 @@ void CCardRevolver::setDeck(CARD* pDeck, INT inShortCut) {
         if (pPLM && pPLM->isZexionBattle()) {
             m_uiFlag |= 0x2000;
             snatch = 0x18;
-            TRACE(D_0047AD28, 0x18);
+            TRACE("ENCR:: (ZEXION MODE) snatchCard = %d\n", 0x18);
         }
         m_nLimit = m_nTotal[0] + snatch;
     }
-    if (m_nTotal[0] > 0) m_pCards = new (D_0047AD50) CBattleCard[m_nLimit](this, 0, -1, m_uiUser, 2);
-    if (m_nTotal[1] > 0) m_pCardsE = new (D_0047AD80) CBattleCard[m_nTotal[1]](this, 0, -1, m_uiUser, 2);
+    if (m_nTotal[0] > 0) m_pCards = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(1359)") CBattleCard[m_nLimit](this, 0, -1, m_uiUser, 2);
+    if (m_nTotal[1] > 0) m_pCardsE = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(1363)") CBattleCard[m_nTotal[1]](this, 0, -1, m_uiUser, 2);
     m_nRemain[1] = 0;
     m_nRemain[0] = 0;
     for (i = 0; i < 99 && (card = pDeck[i], card.m_nKind && card.m_nKind <= 0xCA); i++) {
@@ -739,7 +732,7 @@ void CCardRevolver::setDeck(CARD* pDeck, INT inShortCut) {
     m_uiFlag |= 1;
     rollDeck(0, 1, 300);
     if (m_nTotal[1] == 0) {
-        m_pCardsE = new (D_0047ADB0) CBattleCard[1](this, 0, -1, m_uiUser, 2);
+        m_pCardsE = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(1417)") CBattleCard[1](this, 0, -1, m_uiUser, 2);
         m_pCardsE->setHand(card, 0, 1, 0);
         m_pCardsE->hideHand();
     }
@@ -943,6 +936,7 @@ CARD* CCardRevolver::getActiveCardData() {
     return NULL;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayCard__Q210CardBattle13CCardRevolverii);
+__asm__(".rdata\n.align 3\n.word 0x72614343\n.word 0x76655264\n.word 0x65766C6F\n.word 0x733A3A72\n.word 0x6C507465\n.word 0x61437961\n.word 0x81206472\n.word 0x424370A6\n.word 0x73693E2D\n.word 0x79616C50\n.word 0x43676E69\n.word 0x53647261\n.word 0x646E6174\n.word 0x3D776F4E\n.word 0x214B4F3D\n.word 0x42437020\n.word 0x65723E2D\n.word 0x4E746573\n.word 0x6C50776F\n.word 0x6E697961\n.word 0x00000A67\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001E3E10\n.word 0x001E3E64\n.word 0x001E3F44\n.word 0x001E3F44\n.word 0x001E3EC4\n.word 0x001E3E04\n.word 0x001E3D6C\n.word 0x001E3F44\n.word 0x001E3F44\n.word 0x001E3F44\n.word 0x001E3F44\n.word 0x001E3F44\n.word 0x001E3EC4\n.word 0x00000000\n.text\n");
 INT CCardRevolver::isEnableCharge() {
     if (m_uiFlag & 0x10000) return 0;
     if (m_uiFlag & 2) return m_uiFlag & 4;
@@ -997,7 +991,7 @@ INT CCardRevolver::chargeReloadCard(INT inMode) {
     return 0;
 }
 void CCardRevolver::initReload(INT inMode) {
-    TRACE(D_0047AE78, inMode);
+    TRACE("CCardRevolver::initReload(%d);\n", inMode);
     m_iState = 2;
     m_bActive = FALSE;
     m_tqTimer = 0;
@@ -1101,6 +1095,7 @@ check:
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeReload__Q210CardBattle13CCardRevolver);
 #endif
+__asm__(".rdata\n.align 3\n.word 0x72614343\n.word 0x76655264\n.word 0x65766C6F\n.word 0x653A3A72\n.word 0x65526578\n.word 0x64616F6C\n.word 0x203B2928\n.word 0x4F4C4552\n.word 0x65204441\n.word 0x0A2E646E\n.word 0x00000000\n.word 0x00000000\n.word 0x72614343\n.word 0x76655264\n.word 0x65766C6F\n.word 0x653A3A72\n.word 0x65526578\n.word 0x64616F6C\n.word 0x203B2928\n.word 0x4F4C4552\n.word 0x63204441\n.word 0x6C706D6F\n.word 0x21657465\n.word 0x0000000A\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INT CCardRevolver::getRemain(INT inMode, INT inKind, INT inCategory) {
     if (inMode < 0) return m_nRemain[m_iMode];
     if (inKind == 0 && inCategory == 0) return m_nRemain[inMode];
@@ -1128,20 +1123,17 @@ INT CCardRevolver::getRemain(INT inMode, INT inKind, INT inCategory) {
     return n;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockCard__Q210CardBattle13CCardRevolver);
-extern "C" char D_0047AF38[]; /* "CR::returnStockCard NowDuel NG!\n" */
-extern "C" char D_0047AF60[]; /* "CR::returnStockCard Now Reload Lost NG!\n" */
-extern "C" char D_0047AF90[]; /* "CR::returnStockCard DESTROY\n" */
-extern "C" char D_0047AFB0[]; /* "CR::returnStockCard RETURN\n" */
+__asm__(".rdata\n.align 4\n.word 0x001E4C70\n.word 0x001E4CC4\n.word 0x001E4D1C\n.word 0x001E4D1C\n.word 0x001E4DBC\n.word 0x001E4C5C\n.word 0x001E4DBC\n.word 0x001E4D1C\n.word 0x001E4D1C\n.word 0x001E4D1C\n.word 0x001E4D1C\n.word 0x001E4D1C\n.word 0x001E4DBC\n.word 0x00000000\n.text\n");
 INT CCardRevolver::returnStockCard(INT inFlag) {
     INT nStock;
     BOOL bDestroy;
     INT i;
     if (((CCardBattle*)CTaskMan::getSysTask(0x16))->isNowDuel()) {
-        TRACE(D_0047AF38);
+        TRACE("CR::returnStockCard NowDuel NG!\n");
         return 0;
     }
     if (!m_nReloadCard) {
-        TRACE(D_0047AF60);
+        TRACE("CR::returnStockCard Now Reload Lost NG!\n");
         return 0;
     }
     nStock = getStock(1);
@@ -1162,14 +1154,14 @@ INT CCardRevolver::returnStockCard(INT inFlag) {
     }
     m_uiFlag = (INT)m_uiFlag & ~0x200;
     if (bDestroy) {
-        TRACE(D_0047AF90);
+        TRACE("CR::returnStockCard DESTROY\n");
         for (i = 0; i < 7; i++) {
             if (m_pCardsS[i]) m_pCardsS[i]->destroy(0);
             m_pCardsS[i] = NULL;
             m_pDataS[i] = NULL;
         }
     } else {
-        TRACE(D_0047AFB0);
+        TRACE("CR::returnStockCard RETURN\n");
         for (i = 0; i < 7; i++) {
             if (m_pCardsS[i]) m_pCardsS[i]->resetHand(++m_nRemain[0], m_nTotal[0]);
             m_pCardsS[i] = NULL;
@@ -1189,6 +1181,7 @@ INT CCardRevolver::returnStockCard(INT inFlag) {
     return 1;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", calcStockSkill__Q210CardBattle13CCardRevolver);
+__asm__(".rdata\n.align 4\n.word 0x001E511C\n.word 0x001E5124\n.word 0x001E5130\n.word 0x001E5130\n.word 0x001E5130\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001E5684\n.word 0x001E568C\n.word 0x001E5694\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E569C\n.word 0x001E56A4\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56B4\n.word 0x001E56D8\n.word 0x001E56BC\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56AC\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56D8\n.word 0x001E56C4\n.word 0x00000000\n.text\n");
 INT CCardRevolver::calcEnemyStockSkill() {
     UINT uiKinds = 0;
     INT nSum = 0;
@@ -1275,7 +1268,7 @@ INT CCardRevolver::setPlayStock(INT inFlag, INT inTest) {
     if (pBattle->isPlayingGimmickCard()) return 0;
     if (inFlag) {
         if (!pBattle->testBreakingCard(m_uiUser)) return 0;
-        TRACE(D_0047B070);
+        TRACE("CCardRevolver::setPlayStock \x81\xa6pCB->isPlayingCardStandNow==OK! pCB->resetNowPlaying\n");
         pBattle->resetNowPlaying(m_uiUser);
     }
     if (!pBattle->setPlayStock(m_hOwner, m_uiUser, m_pCardsS, m_iStockSkill, m_iExtraSkill, m_iFirstSkill, inTest)) return 0;
@@ -1339,6 +1332,7 @@ void CCardRevolver::setAction(INT inID, INT inNum) {
     if (m_iAction > 0) initAction();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initAction__Q210CardBattle13CCardRevolver);
+__asm__(".rdata\n.align 3\n.word 0x72614343\n.word 0x76655264\n.word 0x65766C6F\n.word 0x693A3A72\n.word 0x4174696E\n.word 0x6F697463\n.word 0x2029286E\n.word 0x0A2C6425\n.word 0x00000000\n.word 0x00000000\n.word 0x2A2A2A2A\n.word 0x55414320\n.word 0x4E4F4954\n.word 0x2A202121\n.word 0x202A2A2A\n.word 0x74696E69\n.word 0x69746341\n.word 0x29286E6F\n.word 0x0000000A\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001E68A8\n.word 0x001E68B4\n.word 0x001E68C4\n.word 0x001E68D8\n.word 0x001E68E4\n.word 0x001E68F8\n.word 0x001E6910\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6950\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E692C\n.word 0x00000000\n.word 0x001E6AF0\n.word 0x001E6B08\n.word 0x001E6B08\n.word 0x001E6B74\n.word 0x001E6B84\n.word 0x001E6B84\n.word 0x001E6B84\n.word 0x001E6B60\n.text\n");
 void CCardRevolver::exeAction() {
     m_tqTimer -= getFrameRate();
     if (m_tqTimer > 0) return;
@@ -1346,13 +1340,13 @@ void CCardRevolver::exeAction() {
         rollDeck(0, 1, 300);
         m_tqTimer = 0;
         m_iState = 1;
-        TRACE(D_0047B1E0);
+        TRACE("CCardRevolver::exeAction(); RELOAD end.\n");
     } else {
         m_tqTimer = 200;
         m_uiFlag |= 8;
         rollDeck(0, 1, 300);
         m_tqTimer = 400;
-        TRACE(D_0047B210);
+        TRACE("CCardRevolver::exeAction(); RELOAD complete!\n");
     }
 }
 void CCardRevolver::addCard(CARD* pData, INT inReturn) {
@@ -1433,9 +1427,6 @@ INT CCardRevolver::exeAddCard() {
     rollDeck(0, 1, 300);
     return 1;
 }
-extern "C" char D_0047B240[];
-extern "C" char D_0047B270[];
-extern "C" char D_0047B2A0[];
 void CCardRevolver::initCounter() {
     FVECTOR pos;
     INT ofsID;
@@ -1453,7 +1444,7 @@ void CCardRevolver::initCounter() {
     if (m_uiUser == 1) {
         m_uiCounterState = 1;
         m_uiScutState = 1;
-        m_pSeqCtrlCounter = new (D_0047B240) D2::C2DSeqCtrl;
+        m_pSeqCtrlCounter = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4140)") D2::C2DSeqCtrl;
         m_pSeqCtrlCounter->setLayer(6);
         m_pSeqCtrlCounter->addSeq(g_szSeqCockpit, 0x42);
         m_pSeqCtrlCounter->addSeq(g_szSeqCockpit, 0x3E);
@@ -1470,14 +1461,14 @@ void CCardRevolver::initCounter() {
             m_uiNumTexID = 4;
         }
         FVECTOR start = pos;
-        m_pSeqCtrlCounter_Num01 = new (D_0047B270) D2::C2DSeqCtrl;
+        m_pSeqCtrlCounter_Num01 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4165)") D2::C2DSeqCtrl;
         m_pSeqCtrlCounter_Num01->setLayer(8);
         m_pSeqCtrlCounter_Num01->addSeq(g_szSeqCockpit, 0x46);
         pos.x = start.x + g_uvCRCounterNumOfs[ofsID].u;
         pos.y = start.y + g_uvCRCounterNumOfs[ofsID].v;
         m_pSeqCtrlCounter_Num01->setPos(pos);
         m_pSeqCtrlCounter_Num01->enableDisp(FALSE);
-        m_pSeqCtrlCounter_Num10 = new (D_0047B2A0) D2::C2DSeqCtrl;
+        m_pSeqCtrlCounter_Num10 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4173)") D2::C2DSeqCtrl;
         m_pSeqCtrlCounter_Num10->setLayer(8);
         m_pSeqCtrlCounter_Num10->addSeq(g_szSeqCockpit, 0x46);
         pos.x = start.x + g_uvCRCounterNumOfs[ofsID + 1].u;
@@ -1487,6 +1478,7 @@ void CCardRevolver::initCounter() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeCounter__Q210CardBattle13CCardRevolver);
+__asm__(".rdata\n.align 4\n.word 0x001E750C\n.word 0x001E7434\n.word 0x001E7434\n.word 0x001E750C\n.word 0x001E74B4\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001E75DC\n.word 0x001E7534\n.word 0x001E7534\n.word 0x001E75DC\n.word 0x001E75DC\n.word 0x001E7584\n.word 0x00000000\n.word 0x00000000\n.word 0x001E78F8\n.word 0x001E7604\n.word 0x001E7698\n.word 0x001E788C\n.word 0x001E78B8\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001E7A14\n.word 0x001E7920\n.word 0x001E7A14\n.word 0x001E7A14\n.word 0x001E7998\n.word 0x001E79D4\n.text\n");
 void CCardRevolver::destroyCounter() {
     if (!m_pSeqCtrlCounter) return;
     m_uiCounterState = 3;
@@ -1536,7 +1528,7 @@ void CCardRevolver::setNumberEffect(INT inKind) {
 }
 void CCardRevolver::_initNumEffect() {
     m_uiNumEffState = 0;
-    m_pSeqCtrlNumEff = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B348, RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrlNumEff = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4430)", RET_ADDR())) D2::C2DSeqCtrl;
 }
 void CCardRevolver::exeNumEffect() {
     switch (m_uiNumEffState) {
@@ -1564,7 +1556,7 @@ void CCardRevolver::exeNumEffect() {
 }
 void CCardRevolver::setTrapEffect() {
     if (!m_pSeqCtrlTrap) {
-        m_pSeqCtrlTrap = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B378, RET_ADDR())) D2::C2DSeqCtrl;
+        m_pSeqCtrlTrap = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4469)", RET_ADDR())) D2::C2DSeqCtrl;
     }
     m_pSeqCtrlTrap->setLayer(8);
     m_pSeqCtrlTrap->addSeq(g_szSeqCockpit, 0x96);
@@ -1589,9 +1581,9 @@ void CCardRevolver::initStock() {
     m_pSeqCtrlStock = NULL;
     m_pSeqCtrlStock_Num01 = NULL;
     m_pSeqCtrlStock_Num10 = NULL;
-    m_pSeqCtrlStock = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B3A8, RET_ADDR())) D2::C2DSeqCtrl;
-    m_pSeqCtrlStock_Num10 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B3D8, RET_ADDR())) D2::C2DSeqCtrl;
-    m_pSeqCtrlStock_Num01 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B408, RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrlStock = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4510)", RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrlStock_Num10 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4511)", RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrlStock_Num01 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4512)", RET_ADDR())) D2::C2DSeqCtrl;
     m_pSeqCtrlStock->setLayer(7);
     m_pSeqCtrlStock_Num01->setLayer(8);
     m_pSeqCtrlStock_Num10->setLayer(8);
@@ -1629,13 +1621,14 @@ void CCardRevolver::initStock() {
 void CCardRevolver::initStockSkillName(D2::C2DSeqCtrl* inSeq) {
     G_RGBA rgba;
     rgba.col = 0x80808080;
-    m_p2DFntStockName = new (com_malloc_d(sizeof(D2::C2DFnt), D_0047B438, RET_ADDR()))
+    m_p2DFntStockName = new (com_malloc_d(sizeof(D2::C2DFnt), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4567)", RET_ADDR()))
         D2::C2DFnt(0, 0, &rgba, 14, g_szStockSkillName[m_iStockSkill], 0x80);
     inSeq->addFntShift(g_szSeqCockpit, m_p2DFntStockName, -4.0f, 0.0f);
     inSeq->m_seqControl.fgColor = 1;
     inSeq->m_seqControl.fgFntScale = 1;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeStock__Q210CardBattle13CCardRevolver);
+__asm__(".rdata\n.align 4\n.word 0x001E8590\n.word 0x001E84B0\n.word 0x001E84E8\n.word 0x001E8524\n.word 0x001E8570\n.word 0x001E8590\n.word 0x00000000\n.word 0x00000000\n.text\n");
 void CCardRevolver::deleteStock() {
     delete m_pSeqCtrlStock;
     m_pSeqCtrlStock = NULL;
@@ -1645,6 +1638,7 @@ void CCardRevolver::deleteStock() {
     m_pSeqCtrlStock_Num10 = NULL;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockInfo__Q210CardBattle13CCardRevolver);
+__asm__(".rdata\n.align 4\n.word 0x001E8AF4\n.word 0x001E8B00\n.word 0x001E8B0C\n.word 0x001E8B24\n.word 0x001E8B0C\n.word 0x001E8B24\n.word 0x001E8B18\n.word 0x00000000\n.text\n");
 void CCardRevolver::changeDarkMode(HANDLE inHandle, INT inFlag) {
     changeOwner(inHandle);
     if (inFlag) m_uiFlag |= 0x100;
@@ -1862,6 +1856,7 @@ INT CCardRevolver::canSnatch() {
     return FALSE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayerPronounceCard__Q210CardBattle13CCardRevolveri);
+__asm__(".rdata\n.align 4\n.word 0x001E9814\n.word 0x001E9840\n.word 0x001E9864\n.word 0x001E9864\n.word 0x001E9A0C\n.word 0x001E9A0C\n.word 0x001E9A0C\n.word 0x001E9864\n.word 0x001E9864\n.word 0x001E9864\n.word 0x001E9864\n.word 0x001E9864\n.word 0x001E9A0C\n.word 0x00000000\n.text\n");
 void CCardRevolver::setDiscard() {
     if (isDiscard()) return;
     discard();
@@ -2050,11 +2045,6 @@ CEnchantGauge::CEnchantGauge(CTask* pParent, INT inUser, CARD& inCard) : CTask(p
     _initialize();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _$_Q210CardBattle13CEnchantGauge);
-extern "C" char D_0047B4E8[]; /* "c:/KHCOM/MainApp/Game/CardRevolver.cpp(5825)" */
-extern "C" char D_0047B518[]; /* "c:/KHCOM/MainApp/Game/CardRevolver.cpp" */
-extern "C" char D_0047B540[]; /* "m_pSeqCtrls" */
-extern "C" char D_0047B550[]; /* "CEnchantGauge:: m_pSeqCtrls=New..." */
-extern "C" char D_0047B578[]; /* "c:/KHCOM/MainApp/Game/CardRevolver.cpp(5840)" */
 void CEnchantGauge::_initialize() {
     FVECTOR pos;
     INT layout;
@@ -2062,15 +2052,15 @@ void CEnchantGauge::_initialize() {
     BC_PARAM* param;
     INT num;
     m_uiState = 1;
-    m_pSeqCtrls = new (D_0047B4E8) D2::C2DSeqCtrl[3];
-    if (!m_pSeqCtrls) AssertApp(D_0047B518, 5826, D_0047B540, D_0047B550);
+    m_pSeqCtrls = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(5825)") D2::C2DSeqCtrl[3];
+    if (!m_pSeqCtrls) AssertApp("c:/KHCOM/MainApp/Game/CardRevolver.cpp", 5826, "m_pSeqCtrls", "CEnchantGauge:: m_pSeqCtrls=New\x8e\xb8\x94s");
     m_pSeqCtrls[0].setLayer(6);
     m_pSeqCtrls[0].addSeq(g_szSeqCockpit, 0x36);
     layout = (m_uiUser == 1) ? 6 : 5;
     D2::C2DMan::getLayPosition(g_szLadCockpit, layout, 0, pos, FALSE);
     m_pSeqCtrls[0].setPos(pos);
     rgba.col = 0x80808080;
-    _ref(m_pFntName) = new (D_0047B578) D2::C2DFnt(0, 0, &rgba, 12, NULL, 2); // MATCH: store via reference keeps it before the m_pSeqCtrls reload
+    _ref(m_pFntName) = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(5840)") D2::C2DFnt(0, 0, &rgba, 12, NULL, 2); // MATCH: store via reference keeps it before the m_pSeqCtrls reload
     m_pSeqCtrls[0].addFntShift(g_szSeqCockpit, m_pFntName, 0.0f, 2.0f);
     m_pSeqCtrls[0].enableColorCtrl(TRUE);
     setText();
@@ -2100,7 +2090,9 @@ void CEnchantGauge::setText() {
     m_pFntName->setText(g_szEnemyCardEffName[m_cardData.m_nKind - 0x43]);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle13CEnchantGauge);
+__asm__(".rdata\n.align 4\n.word 0x001EAB74\n.word 0x001EA934\n.word 0x001EA9B4\n.word 0x001EA9D8\n.word 0x001EAAF4\n.word 0x001EAB4C\n.word 0x001EAB74\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", changeCount__Q210CardBattle13CEnchantGaugei);
+__asm__(".rdata\n.align 4\n.word 0x001EABD4\n.word 0x001EABDC\n.word 0x001EABD4\n.word 0x001EAC7C\n.word 0x001EABD4\n.word 0x001EABD4\n.text\n");
 void CEnchantGauge::destroy() {
     m_nNext = 0;
     CCardBattle* pBattle = _ref(CCardBattle::m_pInstance);
@@ -2163,9 +2155,9 @@ void CStockFolder::initGauge() {
     m_pSeqCtrl_Num01 = NULL;
     m_pSeqCtrl_Num10 = NULL;
     m_nNumTexID = 0;
-    m_pSeqCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B5E8, RET_ADDR())) D2::C2DSeqCtrl;
-    m_pSeqCtrl_Num10 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B618, RET_ADDR())) D2::C2DSeqCtrl;
-    m_pSeqCtrl_Num01 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_0047B648, RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6211)", RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrl_Num10 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6212)", RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrl_Num01 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6213)", RET_ADDR())) D2::C2DSeqCtrl;
     m_pSeqCtrl->setLayer(7);
     m_pSeqCtrl_Num01->setLayer(8);
     m_pSeqCtrl_Num10->setLayer(8);
@@ -2189,13 +2181,14 @@ void CStockFolder::initGauge() {
 void CStockFolder::initName(D2::C2DSeqCtrl* inSeq) {
     G_RGBA rgba;
     rgba.col = 0x80808080;
-    m_p2DFntStockName = new (com_malloc_d(sizeof(D2::C2DFnt), D_0047B678, RET_ADDR()))
+    m_p2DFntStockName = new (com_malloc_d(sizeof(D2::C2DFnt), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6245)", RET_ADDR()))
         D2::C2DFnt(0, 0, &rgba, 14, g_szStockSkillName[m_iStockSkill], 0x80);
     inSeq->addFntShift(g_szSeqCockpit, m_p2DFntStockName, -4.0f, 0.0f);
     inSeq->m_seqControl.fgColor = 1;
     inSeq->m_seqControl.fgFntScale = 1;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeGauge__Q210CardBattle12CStockFolder);
+__asm__(".rdata\n.align 4\n.word 0x001EB268\n.word 0x001EB2B4\n.word 0x001EB2B4\n.word 0x001EB2B4\n.word 0x001EB340\n.word 0x001EB320\n.word 0x001EB2B4\n.word 0x00000000\n.word 0x001EB524\n.word 0x001EB3AC\n.word 0x001EB3E4\n.word 0x001EB408\n.word 0x001EB474\n.word 0x001EB524\n.word 0x001EB4A0\n.word 0x00000000\n.text\n");
 void CStockFolder::deleteGauge() {
     delete m_pSeqCtrl;
     m_pSeqCtrl = NULL;
@@ -2205,6 +2198,7 @@ void CStockFolder::deleteGauge() {
     m_pSeqCtrl_Num10 = NULL;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockInfo__Q210CardBattle12CStockFolder);
+__asm__(".rdata\n.align 4\n.word 0x001EB87C\n.word 0x001EB888\n.word 0x001EB894\n.word 0x001EB8AC\n.word 0x001EB894\n.word 0x001EB8AC\n.word 0x001EB8A0\n.word 0x00000000\n.text\n");
 INT CStockFolder::setStockCard(INT inKind, INT inNumber) {
     if (CGameWork::getFlag(1, 10)) return 0;
     if (m_uiFlag & 2) return 0;
@@ -2212,7 +2206,7 @@ INT CStockFolder::setStockCard(INT inKind, INT inNumber) {
     if (!pBattle) return 0;
     if (pBattle->isPlayingCard(m_uiUser)) return 0;
     if (m_iStock == 3) return 0;
-    m_pCards[m_iStock] = new (com_malloc_d(sizeof(CBattleCard), D_0047B710, RET_ADDR())) CBattleCard(this, inKind, inNumber, m_uiUser, 0);
+    m_pCards[m_iStock] = new (com_malloc_d(sizeof(CBattleCard), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6495)", RET_ADDR())) CBattleCard(this, inKind, inNumber, m_uiUser, 0);
     CBattleCard* pCard = m_pCards[m_iStock];
     pCard->setFolderON();
     pCard->setRoomEffect(NULL);
@@ -2304,7 +2298,7 @@ INT CStockFolder::setPronounceCard(INT inKind, INT inNumber) {
     }
     return 0;
 ok:
-    m_pCards[m_iStock] = new (com_malloc_d(sizeof(CBattleCard), D_0047B740, RET_ADDR())) CBattleCard(this, inKind, inNumber, m_uiUser, 0);
+    m_pCards[m_iStock] = new (com_malloc_d(sizeof(CBattleCard), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6700)", RET_ADDR())) CBattleCard(this, inKind, inNumber, m_uiUser, 0);
     CBattleCard* pCard = m_pCards[m_iStock];
     pCard->setRoomEffect(NULL);
     m_pData[m_iStock] = pCard->getCardData();
@@ -2350,4 +2344,6 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", isDiscard__Q210Car
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", isEnableCount__Q210CardBattle13CEnchantGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getStockSkill__CQ210CardBattle12CStockFolder);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getStockSum__CQ210CardBattle12CStockFolder);
-// SOURCE DATA: .data
+/* The vtables: their key functions (the destructors) are still assembly. */
+__asm__(".rdata\n.align 3\n.globl _vt$Q210CardBattle12CStockFolder\n_vt$Q210CardBattle12CStockFolder:\n.word 0\n.word 0\n.word 0\n.word _$_Q210CardBattle12CStockFolder\n.word 0\n.word main__Q210CardBattle12CStockFolder\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.globl _vt$Q210CardBattle13CEnchantGauge\n_vt$Q210CardBattle13CEnchantGauge:\n.word 0\n.word 0\n.word 0\n.word _$_Q210CardBattle13CEnchantGauge\n.word 0\n.word main__Q210CardBattle13CEnchantGauge\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.globl _vt$Q210CardBattle13CCardRevolver\n_vt$Q210CardBattle13CCardRevolver:\n.word 0\n.word 0\n.word 0\n.word _$_Q210CardBattle13CCardRevolver\n.word 0\n.word main__Q210CardBattle13CCardRevolver\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.text\n");
+// SOURCE DATA: .data .rodata
