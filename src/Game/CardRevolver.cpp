@@ -1778,8 +1778,147 @@ void CCardRevolver::initCounter() {
         m_pSeqCtrlCounter_Num10->enableDisp(FALSE);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeCounter__Q210CardBattle13CCardRevolver);
-__asm__(".rdata\n.align 4\n.word 0x001E750C\n.word 0x001E7434\n.word 0x001E7434\n.word 0x001E750C\n.word 0x001E74B4\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001E75DC\n.word 0x001E7534\n.word 0x001E7534\n.word 0x001E75DC\n.word 0x001E75DC\n.word 0x001E7584\n.word 0x00000000\n.word 0x00000000\n.word 0x001E78F8\n.word 0x001E7604\n.word 0x001E7698\n.word 0x001E788C\n.word 0x001E78B8\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001E7A14\n.word 0x001E7920\n.word 0x001E7A14\n.word 0x001E7A14\n.word 0x001E7998\n.word 0x001E79D4\n.text\n");
+void CCardRevolver::exeCounter() {
+    INT iMax;
+    INT iRemain;
+    INT nRemain;
+    INT ofsID;
+    if (m_uiUser != 1) return;
+    switch (m_uiCounterState) {
+    case 0:
+    case 3:
+        break;
+    case 1:
+    case 2:
+        if (CGameWork::getInt(1, 0xE2) & 2) {
+            m_uiCounterState = 4;
+            m_pSeqCtrlCounter->replaceSeq(0, _ref(g_szSeqCockpit), 0x44);
+            m_uiCounterFlag |= 1;
+            m_pSeqCtrlCounter->enableDisp(2, FALSE);
+            m_pSeqCtrlCounter_Num01->enableDisp(FALSE);
+            m_pSeqCtrlCounter_Num10->enableDisp(FALSE);
+        }
+        break;
+    case 4:
+        if (!(CGameWork::getInt(1, 0xE2) & 2)) {
+            m_uiCounterState = 1;
+            m_pSeqCtrlCounter->replaceSeq(0, _ref(g_szSeqCockpit), 0x42);
+            m_uiCounterFlag = (INT)m_uiCounterFlag & ~1;
+        }
+        break;
+    }
+    switch (m_uiScutState) {
+    case 0:
+    case 3:
+    case 4:
+        break;
+    case 1:
+    case 2:
+        if (CGameWork::getInt(1, 0xE2) & 2) {
+            m_uiScutState = 5;
+            m_pSeqCtrlCounter->replaceSeq(1, _ref(g_szSeqCockpit), 0x40);
+            m_uiCounterFlag |= 2;
+        }
+        break;
+    case 5:
+        if (!(CGameWork::getInt(1, 0xE2) & 2)) {
+            m_uiScutState = 1;
+            m_pSeqCtrlCounter->replaceSeq(1, _ref(g_szSeqCockpit), 0x3E);
+            m_uiCounterFlag = (INT)m_uiCounterFlag & ~2;
+        }
+        break;
+    }
+    switch (m_uiCounterState) {
+    case 0:
+        break;
+    case 1:
+        if ((m_uiCounterFlag & 1) == 0) { // MATCH: == 0 keeps andi/bnez (! folds the bit-0 test into xori)
+            m_uiCounterFlag |= 1;
+            m_pSeqCtrlCounter->enableDisp(0, TRUE);
+        }
+        if (m_pSeqCtrlCounter->isEnd(0)) {
+            m_uiCounterState = 2;
+            m_pSeqCtrlCounter->replaceSeq(0, _ref(g_szSeqCockpit), 0x43);
+            m_pSeqCtrlCounter->enableDisp(2, TRUE);
+            m_pSeqCtrlCounter_Num01->enableDisp(TRUE);
+            m_pSeqCtrlCounter_Num10->enableDisp(TRUE);
+        }
+        break;
+    case 2:
+        if (m_iMode != m_nOldMode || m_nRemain[m_iMode] != m_nOldRemain) {
+            iMax = m_nTotal[m_iMode];
+            if (m_iMode == 0) iMax -= m_nReloadCard;
+            if (iMax != 0) iRemain = m_nRemain[m_iMode] * 100 / iMax;
+            else iRemain = 0;
+            if (iRemain > 100) iRemain = 100;
+            m_pSeqCtrlCounter->enableDisp(2, TRUE);
+            m_pSeqCtrlCounter->changeTime(2, iRemain);
+            nRemain = (m_nRemain[m_iMode] > 99) ? 99 : m_nRemain[m_iMode];
+            ofsID = CSceneInfo::isMinigameScene() ? m_uiNumTexID + 2 : 0;
+            m_pSeqCtrlCounter_Num01->changeTexture(0, 0, NULL, &g_uvCRCounterNumTex[ofsID][nRemain % 10], &g_uvCRCounterNumTex[ofsID + 1][nRemain % 10]);
+            nRemain /= 10;
+            if (nRemain > 0) {
+                if (m_uiCounterFlag & 4) {
+                    m_uiCounterFlag = (INT)m_uiCounterFlag & ~4;
+                    m_pSeqCtrlCounter_Num10->replaceSeq(0, _ref(g_szSeqCockpit), 0x46);
+                }
+                m_pSeqCtrlCounter_Num10->changeTexture(0, 0, NULL, &g_uvCRCounterNumTex[ofsID][nRemain], &g_uvCRCounterNumTex[ofsID + 1][nRemain]);
+            } else {
+                m_uiCounterFlag |= 4;
+                m_pSeqCtrlCounter_Num10->replaceSeq(0, _ref(g_szSeqCockpit), 0x50);
+            }
+        }
+        m_nOldMode = m_iMode;
+        m_nOldRemain = m_nRemain[m_iMode];
+        break;
+    case 3:
+        if (m_pSeqCtrlCounter->isEnd(0)) {
+            m_uiCounterState = 0;
+            m_pSeqCtrlCounter->enableDisp(0, FALSE);
+        }
+        break;
+    case 4:
+        if (m_uiCounterFlag & 1) {
+            if (m_pSeqCtrlCounter->isEnd(0)) {
+                m_uiCounterFlag = (INT)m_uiCounterFlag & ~1;
+                m_pSeqCtrlCounter->enableDisp(0, FALSE);
+            }
+        }
+        break;
+    }
+    switch (m_uiScutState) {
+    case 0:
+    case 2:
+    case 3:
+        break;
+    case 1:
+        if (!(m_uiCounterFlag & 2)) {
+            m_uiCounterFlag |= 2;
+            m_pSeqCtrlCounter->enableDisp(1, TRUE);
+        }
+        if (m_pSeqCtrlCounter->isEnd(1)) {
+            m_uiScutState = 2;
+            m_uiCounterFlag |= 2;
+            m_pSeqCtrlCounter->replaceSeq(1, _ref(g_szSeqCockpit), 0x3F);
+        }
+        break;
+    case 4:
+        if (m_pSeqCtrlCounter->isEnd(1)) {
+            m_uiScutState = 0;
+            m_uiCounterFlag = (INT)m_uiCounterFlag & ~2;
+            m_pSeqCtrlCounter->enableDisp(1, FALSE);
+        }
+        break;
+    case 5:
+        if (m_uiCounterFlag & 2) {
+            if (m_pSeqCtrlCounter->isEnd(1)) {
+                m_uiCounterFlag = (INT)m_uiCounterFlag & ~2;
+                m_pSeqCtrlCounter->enableDisp(1, FALSE);
+            }
+        }
+        break;
+    }
+}
 void CCardRevolver::destroyCounter() {
     if (!m_pSeqCtrlCounter) return;
     m_uiCounterState = 3;
