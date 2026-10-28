@@ -346,7 +346,25 @@ void CDuelGauge::setStart(TIMEQ inTime, UINT inCount) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setStart__Q210CardBattle10CDuelGaugeiUi);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setResult__Q210CardBattle10CDuelGaugeUi);
+void CDuelGauge::setResult(UINT inResult) {
+    m_uiResult = inResult;
+    D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[0];
+    m_uiState = 3;
+    pSeq->setLayer(8);
+    if (m_uiResult) {
+        pSeq->addSeq(g_szSeqDuel, 31);
+        CSound::playSE(0x14E, -1, 64);
+    } else {
+        pSeq->addSeq(g_szSeqDuel, 32);
+        CSound::playSE(0x14F, -1, 64);
+    }
+    setTimer(3);
+    setCount(3);
+    if (m_hTimerSE > 0) {
+        CSound::stopSE(m_hTimerSE, 0x14C);
+        m_hTimerSE = 0;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setTimer__Q210CardBattle10CDuelGaugeUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", changeTimer__Q210CardBattle10CDuelGaugei);
 void CDuelGauge::exeTimer() {
