@@ -89,6 +89,10 @@ extern "C" char D_00477338[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_004769E8[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_00477090[]; /* "inData" */
 extern "C" char D_00477098[]; /* "...CardBattle.cpp(NNNN)" */
+extern "C" char D_004772C0[]; /* "...CardBattle.cpp(NNNN)" */
+extern "C" char D_004772F0[]; /* "...CardBattle.cpp(NNNN)" */
+extern "C" char D_00477320[]; /* break effect name */
+extern "C" char D_00477328[]; /* speed break effect name */
 extern "C" char D_00476938[]; /* "m_pInstance" */
 extern "C" char D_00477298[]; /* notifyCompleteGimmick's TRACE format */
 namespace PL {
@@ -111,6 +115,7 @@ public:
 };
 }
 namespace CardBattle {
+extern G_UV g_uvCRCounterNumTex[8][10];
 extern INT g_DuelSeqIDX_TimerNumDmy[6][3];
 extern G_UV g_uvDuelNumTex[4][10];
 extern LPCSTR g_szLadDuel; /* the file's statics (data still from assembly) */
@@ -528,7 +533,72 @@ void CCardBattle::dispPlayingEnemy() {
         }
     }
 }
+/* Parked: registers/scheduling only (12 lines) - the m_pSeqCtrlBreak null test loads into v0 (ours a0, reused by the
+ * else call), and in the speed branch the original stores m_hSpeed before loading m_pSeqCtrlSpeed for enableDisp
+ * (jal delay slot); tried: _ref/== NULL test forms, m_hBreak store placement, permuter 4 min (379 candidates) */
+#if 0
+void CCardBattle::initCardBreak(HANDLE inHandle, UINT inUser) {
+    m_vBreakPos.init();
+    if (!inHandle) {
+        m_hBreak = 0;
+        if (!m_pSeqCtrlBreak) {
+            m_pSeqCtrlBreak = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_004772C0, RET_ADDR())) D2::C2DSeqCtrl(2);
+            m_pSeqCtrlBreak->setLayer(7);
+            m_pSeqCtrlBreak->addSeq(g_szSeqCockpit, 1);
+            UINT flag = 0x20000;
+            if (m_uiFlag & flag) {
+                m_pSeqCtrlBreak->addSeq(g_szSeqCockpit, 2);
+                m_pSeqCtrlBreak->enableColorCtrl(TRUE);
+            }
+            m_pSeqCtrlBreak->enableDisp(FALSE);
+        } else {
+            m_pSeqCtrlBreak->enableDisp(FALSE);
+        }
+        m_hSpeed = 0;
+        if (!m_pSeqCtrlSpeed) {
+            m_pSeqCtrlSpeed = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_004772F0, RET_ADDR())) D2::C2DSeqCtrl(2);
+            UINT flag = 0x20000;
+            if (m_uiFlag & flag) {
+                m_pSeqCtrlSpeed->setLayer(7);
+                m_pSeqCtrlSpeed->addSeq(g_szSeqCockpit, 0x95);
+                m_pSeqCtrlSpeed->addSeqShift(g_szSeqCockpit, 2, 60.0f, 0.0f);
+                m_pSeqCtrlSpeed->addSeqShift(g_szSeqCockpit, 2, 80.0f, 0.0f);
+                m_pSeqCtrlSpeed->enableColorCtrl(TRUE);
+                m_pSeqCtrlSpeed->enableDisp(FALSE);
+            }
+        } else {
+            m_pSeqCtrlSpeed->enableDisp(FALSE);
+        }
+        return;
+    }
+    CEntity* pEntity = (CEntity*)CTaskMan::getTask(inHandle);
+    if (!pEntity) return;
+    pEntity->getUseCardPos(m_vBreakPos);
+    if (!m_iPointBonus || inUser == 1) {
+        pEntity->setEffect(D_00477320, 0, &m_vBreakPos, NULL, 0.0f);
+        pEntity->getHeadPos(m_vBreakPos);
+        m_hBreak = inHandle;
+        m_pSeqCtrlBreak->enableDisp(TRUE);
+        m_pSeqCtrlBreak->changeTexture(1, 0, NULL, &g_uvCRCounterNumTex[0][m_iPointBreak],
+                                       &g_uvCRCounterNumTex[1][m_iPointBreak]);
+        m_pSeqCtrlBreak->restart(0, 0.0f);
+    } else {
+        pEntity->setEffect(D_00477328, 5, &m_vBreakPos, NULL, 0.0f);
+        pEntity->getHeadPos(m_vBreakPos);
+        m_hSpeed = inHandle;
+        m_pSeqCtrlSpeed->enableDisp(TRUE);
+        INT point = m_iPointBreak + m_iPointBonus;
+        m_pSeqCtrlSpeed->changeTexture(1, 0, NULL, &g_uvCRCounterNumTex[0][point / 10],
+                                       &g_uvCRCounterNumTex[1][point / 10]);
+        m_pSeqCtrlSpeed->changeTexture(2, 0, NULL, &g_uvCRCounterNumTex[0][point % 10],
+                                       &g_uvCRCounterNumTex[1][point % 10]);
+        m_pSeqCtrlSpeed->restart(0, 0.0f);
+        m_iPointBonus = 0;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", initCardBreak__Q210CardBattle11CCardBattleiUi);
+#endif
 void CCardBattle::dispCardBreak() {
     if (m_hBreak > 0) {
         if (m_pSeqCtrlBreak->isEnd(0)) {
