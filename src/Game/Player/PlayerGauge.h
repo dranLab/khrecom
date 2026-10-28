@@ -43,6 +43,7 @@ public:
     CLockonMarker(CTask* inParent, BOOL inFlag);
     virtual ~CLockonMarker(); // PARTIAL: declared for Game/Player/PlayerGauge
     void _initialize();
+    void calcMarkerScale();
     void setTarget(HANDLE inTarget);
     void setLockon(HANDLE inTarget, INT inDist);
     void onPush(INT inKind);
@@ -127,6 +128,7 @@ public:
     static void setBattleEnd();
     void setMaxHP(INT n);
     void changeTimeHP(D2::C2DSeqCtrl* p, UINT nIdx, UINT nHP);
+    void setHP(INT inHP, INT inFlag);
     void exeDPGauge();
     void setDPGauge(INT n); void setDP(INT inDP, INT inMax);
 };
@@ -161,6 +163,7 @@ public:
     virtual ~CEscapeGauge();
     virtual void main();
     void _initialize();
+    void setCharge(FLOAT inRate);
     void destroy();
 };
 
@@ -202,6 +205,8 @@ public:
     CPrizeGauge(CTask* p);
     void _initialize();
     virtual ~CPrizeGauge();
+    void setDispMogSeq();
+    static void setDropMp(INT inMp);
     static BOOL isNowDispCard();
 };
 #endif

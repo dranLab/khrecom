@@ -7,6 +7,7 @@
 #include "Game/SceneEnv.h"
 #include "Game/Game.h"
 #include "Game/Entity.h"
+#include "Game/Player/PlayerCamera.h"
 #include "include_asm.h"
 
 using namespace Gauge;
@@ -15,6 +16,22 @@ using namespace Gauge;
 inline void* operator new(unsigned int, void* p) throw() { return p; }
 namespace Gauge {
 extern LPCSTR g_szSeqCockpit;
+extern LPCSTR g_szSeqGauge;
+extern LPCSTR g_szLadCockpit;
+}
+FVECTOR getPlayerPos(BOOL flag);
+namespace D2 {
+class C2DMan { /* PARTIAL: stand-in for System/Graphic/2d/2DMan C2DMan: gated by SYSTEM_GRAPHIC_2D_2DMAN_CPP */
+public:
+    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
+};
+}
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
+static inline FLOAT _sqrtf(FLOAT x) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
+    return ret;
 }
 extern "C" char D_004A3238[];
 template <class T> static inline T& _ref(T& v) { return v; }
@@ -34,7 +51,25 @@ void CPlayerGauge::setMaxHP(INT n) {
     if (m_nMaxHP > 560) m_nMaxHP = 560;
     changeTimeHP(m_pSeqCtrl, 1, n);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setHP__Q25Gauge12CPlayerGaugeii);
+void CPlayerGauge::setHP(INT inHP, INT inFlag) {
+    if (m_nHP == inHP) return;
+    m_nHP = inHP > -1 ? inHP : 0;
+    if (m_nHP > 560) m_nHP = 560;
+    changeTimeHP(m_pSeqCtrl, 3, inHP);
+    m_tqRed = 1500;
+    if (inFlag || m_nRedHP < m_nHP) {
+        m_nRedHP = m_nHP;
+        changeTimeHP(m_pSeqCtrl, 2, m_nRedHP);
+        m_tqRed = 0;
+    }
+    if (inFlag) {
+        INT max = m_nMaxHP; // MATCH: signed division (USHORT / 4 is shortened to unsigned)
+        if (m_nHP <= max / 4) {
+            m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xA);
+            m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 0);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDamage__Q25Gauge12CPlayerGaugeii);
 void CPlayerGauge::setBattleEnd() { CNaviMap::m_bBattleEnd = TRUE; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDPGauge__Q25Gauge12CPlayerGaugei);
@@ -58,7 +93,25 @@ CLockonMarker::CLockonMarker(CTask* inParent, BOOL inFlag) : CTask(inParent, 0x4
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge13CLockonMarker);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge13CLockonMarker);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", calcMarkerScale__Q25Gauge13CLockonMarker);
+void CLockonMarker::calcMarkerScale() {
+    FVECTOR pos = getPlayerPos(FALSE);
+    FLOAT dist;
+    FLOAT old_sc;
+    FVECTOR v;
+    dist = m_fDist;
+    if (PlayerCamera::CPlayerCamera::getPlayerCameraPos(pos)) {
+        SubVectorXYZ(v, pos, m_vPos);
+        dist = _sqrtf(InnerProduct(v, v));
+    }
+    old_sc = m_fScale;
+    if (dist < 3.5f) m_fScale = 1.0f;
+    else if (dist < 14.0f) m_fScale = (14.0f - dist) / 10.5f * 0.5f + 0.5f;
+    else m_fScale = 0.5f;
+    if (m_fScale != old_sc) {
+        m_pSeqCtrl->setScl(m_fScale);
+        if (m_uiFlag & 2) m_pSeqCtrlPush->setScl(m_fScale);
+    }
+}
 void CLockonMarker::setTarget(HANDLE inTarget) {
     m_hTarget = inTarget;
     m_bLockon = FALSE;
@@ -193,7 +246,33 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispSeq__
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispMogSeq__Q25Gauge11CPrizeGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setPrizeExp__Q25Gauge11CPrizeGaugei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setPrizeMp__Q25Gauge11CPrizeGaugei);
+/* Parked: 18 lines off: the %hi(m_pInstance) base and its loop copy swap s2/s3, and the inMp <= 0 return
+   branch doesn't get the epilogue's lq s0 in its delay slot, so the loop top gets an alignment nop. Worked:
+   *(T*)& stores for m_uiMogState and m_iDropMp (m_pInstance reloaded after them, as resetHP). Tried: loop shapes
+   (index base 0/1, do-while, pointer local), early-return shapes; permuter 3 min (8172, no gain). */
+#if 0
+void CPrizeGauge::setDropMp(INT inMp) {
+    INT i;
+    if (!m_pInstance) return;
+    if (inMp <= 0) return;
+    if (CGameWork::getInt(1, 0xE2)) return;
+    if (m_pInstance->m_uiMogState < 7) {
+        *(UINT*)&m_pInstance->m_uiMogState = 7; // MATCH: as resetHP (m_pInstance reloaded after it)
+        m_pInstance->m_pMogSeqCtrls->replaceSeq(0, g_szSeqCockpit, 0x8C);
+        m_pInstance->m_pMogSeqCtrls->enableDisp(0, TRUE);
+        for (i = 1; i < 6; i++) {
+            m_pInstance->m_pMogSeqCtrls[i].replaceSeq(0, g_szSeqCockpit, 0x82);
+            m_pInstance->m_pMogSeqCtrls[i].enableDisp(0, FALSE);
+        }
+    }
+    *(INT*)&m_pInstance->m_iDropMp = inMp; // MATCH: as resetHP
+    m_pInstance->m_iOldMp = 0;
+    m_pInstance->m_iMp = 0;
+    m_pInstance->setDispMogSeq();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDropMp__Q25Gauge11CPrizeGaugei);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setPrizeCard__Q25Gauge11CPrizeGaugeR4CARDii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", exePrizeCard__Q25Gauge11CPrizeGauge);
 BOOL CPrizeGauge::isNowDispCard() {
@@ -228,7 +307,36 @@ void CEscapeGauge::main() {
         break;
     }
 }
+/* Parked: 3 lines off, the getLayPosition argument loads: the original sets a2 first and a1 (7) last (in the
+   jal delay slot), ours a1 first. Worked: case 2 with its own copy of case 1's body (separate tree nodes 1/0/2/3,
+   cross-jumped later), case 0 falling into it. Tried: _ref(g_szLadCockpit), FALSE vs 0, casts; permuter 3 min
+   (12013 candidates, no gain). */
+#if 0
+void CEscapeGauge::setCharge(FLOAT inRate) {
+    FVECTOR pos;
+    switch (m_uiState) {
+    case 0:
+        m_uiState = 1;
+        m_pSeqCtrl->addSeq(g_szSeqCockpit, 0x39);
+        m_pSeqCtrl->addSeq(g_szSeqCockpit, 0x3C);
+        D2::C2DMan::getLayPosition(g_szLadCockpit, 7, 0, pos, FALSE);
+        m_pSeqCtrl->setPos(pos);
+    case 1:
+        m_pSeqCtrl->changeTime(1, (UINT)inRate);
+        break;
+    case 2:
+        m_pSeqCtrl->changeTime(1, (UINT)inRate);
+        break;
+    case 3:
+        m_uiState = 2;
+        m_pSeqCtrl->replaceSeq(0, g_szSeqCockpit, 0x3A);
+        m_pSeqCtrl->changeTime(1, (UINT)inRate);
+        break;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setCharge__Q25Gauge12CEscapeGaugef);
+#endif
 void CEscapeGauge::destroy() {
     switch (m_uiState) {
     case 1:
