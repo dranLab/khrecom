@@ -23,19 +23,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | date | merge | PARTIAL | foreign stand-ins | duplicates | mechanisms (untagged) | MATCH |
 |---|---|---:|---:|---:|---:|---:|
 | 2026-10-28 | tools/partials (baseline) | 1092 | 470 | 25 | 929 (929) | 0 |
+| 2026-10-28 | cleanup/System-Sound-SoundMan (CSound pilot) | 1091 | 456 | 25 | 929 (929) | 0 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1092 (1024 in 111 headers, 68 in 30 .cpp); MATCH: 0
-  by category: method 461, data member 72, type 96, fwd decl 54, #include 29, changed in place 125, padding 33, path override 24, gate 39, guessed 43, header-level 76, stand-in 32, other 8
-stand-ins: 470 foreign in 139 files (135 names), 190 unattributed, 173 own
+PARTIAL: 1091 (1024 in 111 headers, 67 in 30 .cpp); MATCH: 0
+  by category: method 461, data member 72, type 96, fwd decl 54, #include 29, changed in place 125, padding 33, path override 24, gate 39, guessed 43, header-level 76, stand-in 31, other 8
+stand-ins: 456 foreign in 139 files (134 names), 190 unattributed, 173 own
 duplicate class names across headers: 25
 padding: 36 arrays, 26 accessors
-mechanisms: 929 sites (929 untagged); #line: 1152
+mechanisms: 929 sites (929 untagged); #line: 1166
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 154, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 528, superset 122, partial 101, gated 109, missing 17, unattributed 309
+classes: complete 529, superset 122, partial 100, gated 109, missing 17, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -46,7 +47,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 28.0 | `System/Sound/SoundMan.h` | ready | 14 stand-in files, 0 dup headers, 0 gate users | CSound (1 partial) |  |
 | R0 | 15.0 | `System/Graphic/Effect/libppp/draw/md0_p3f.h` | ready | 6 stand-in files, 1 dup headers, 0 gate users | OMD_PRIM_H (1 complete) |  |
 | R0 | 12.0 | `Game/SceneEnv.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | CSceneEnv (1 partial) |  |
 | R0 | 12.0 | `System/Graphic/WorldEnv.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | CWorldEnv (1 complete) |  |
@@ -66,6 +66,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R0 | 2.0 | `System/Movie/MovieFiles.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMovieFiles (1 complete) |  |
 | R0 | 2.0 | `System/PadIO.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPadIO (1 complete) |  |
 | R0 | 2.0 | `System/PlaySpeedCtrl.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlaySpeedCtrl (1 complete) |  |
+| R0 | 2.0 | `System/RcfCD.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRcfCD (1 complete) |  |
 
 ## Classes with foreign copies
 
@@ -76,7 +77,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `NAME_CASE` | gated | System/RsrcData.h | 30 |  |  |
 | `C2DMan` | gated | System/Graphic/2d/2DMan.h | 27 | Form/Menu/SaveLoadCtrl.h |  |
 | `CRcf` | complete | System/Rcf.h | 26 |  |  |
-| `CSound` | partial | System/Sound/SoundMan.h | 14 |  | missing methods: stopAllBGM, stopAllVoice |
 | `CBattleEnemyManager` | complete | Game/Enemy/BattleEnemyManager.h | 11 |  |  |
 | `CRsrcData` | gated | System/RsrcData.h | 11 |  |  |
 | `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
@@ -397,7 +397,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
 | `System/RsrcData.h` | 3 | 0/0/0/32 | 26 |
 | `System/SJoint.h` | 9 | 0/0/0/0 | 197 |
-| `System/Sound/SoundMan.h` | 0 | 0/0/1/0 | 25 |
 | `System/Task.h` | 27 | 1/2/0/1 | 233 |
 | `System/TaskMan.h` | 7 | 1/2/0/0 | 82 |
 | `System/Vector.h` | 20 | 0/0/3/0 | 263 |
