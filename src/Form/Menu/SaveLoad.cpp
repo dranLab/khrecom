@@ -548,15 +548,16 @@ class CSceneInfo { /* PARTIAL: Game/SceneInfo.h needs the game headers */
 public:
     static void initNewGame(BOOL bSora);
     static RoomInfo* getRoomInfo(INT nRoomID);
+    static INT getCurrentWorldID(BOOL bCheck);
 };
 class CGame { /* PARTIAL: Game/Game.h needs the game headers */
 public:
     static BOOL isRikuGame();
     static BOOL isSoraGame();
 };
-struct ObjType { /* PARTIAL: System/Graphic/Effect/EffectMan.h is too heavy here */
-    enum eObjBit { OBJBIT_NONE = 0 };
-};
+namespace ObjType { /* PARTIAL: System/Graphic/Effect/EffectMan.h is too heavy here (an 8-byte enum there too) */
+enum eObjBit { OBJ_BIT_CLEAR = 0, OBJ_BIT_STILL_SCR = 0x80000000L, OBJ_BIT_ALL = 0xFFFEFFFFL, OBJ_BIT_TRUE_ALL = -1 };
+}
 class CSceneEnv { /* PARTIAL: Game/SceneEnv.h needs EffectMan.h */
 public:
     static void setStop(ObjType::eObjBit iBit);
@@ -570,16 +571,84 @@ public:
 HANDLE CSaveLoadUI::m_hThis = 0;
 
 
-/* Placeholder (stripped) for the constructor, still assembly: it inlines CStateTemplate::set, whose assert strings
- * come first in its .rodata (the CStateTemplate functions compiled at the end share them), and constructs m_State[]. */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _saveLoadUiCtorStrings_placeholder(CStateTemplate<CSaveLoadUI>* pState,
-                                                                        CSaveLoadUI* pThis, void (CSaveLoadUI::*pfn)()) {
-    new (pState) CStateTemplate<CSaveLoadUI>;
-    pState->set(pThis, pfn, pfn, pfn);
+CSaveLoadUI::CSaveLoadUI(CSaveLoad& parent, SAVELOAD mode, GAMECLEAR clear)
+    : CTask(&parent, 0x4000), m_mode(mode), m_pMemoca(NULL), m_pGameDataEntries(NULL), m_hLay(0), m_nFlag(0),
+      m_pMainFrameAgent(NULL), m_pRoomNameAgent(NULL), m_pRoomNameCtrl(NULL), m_pWorldIconAgent(NULL),
+      m_pWorldIconCtrl(NULL), m_pMainFrameHelpAgent(NULL), m_pMainFrameHelpCtrl(NULL), m_pMainFrameHelpFnt(NULL),
+      m_pMainCursor(NULL), m_pMainLightMark(NULL), m_pTimeLabelAgent(NULL), m_pTimeLabelCtrl(NULL), m_pTimeCtrl(NULL),
+      m_pMPLabelAgent(NULL), m_pMPLabelCtrl(NULL), m_pMPCtrl(NULL), m_pMemocaInfoAgent(NULL), m_pMemocaInfoCtrl(NULL),
+      m_pDataListContainerAgent(NULL), m_pDataListContainerCtrl(NULL), m_pDataListScrollbar(NULL), m_nDataListTop(0),
+      m_nDataListSel(0), m_pMessageDlgAgent(NULL), m_pMessageDlgCtrl(NULL), m_pMessageDlgFntInf(NULL),
+      m_pMessageDlgCursor(NULL) {
+    ignorePause(TRUE);
+    m_hParent = parent.getHandle();
+    m_hThis = getHandle();
+    s_pFadeMask = NULL;
+    s_nMsgResult = SLMSG_RESULT_CANCEL;
+    m_nSlot = CMemocaDataEntries::getLatestSlot();
+    if (clear == GAMECLEAR_CLEAR) m_nFlag |= 0x40;
+    if (CMainApp::isWarningPauseDisable()) m_nFlag |= 0x8000;
+    CMainApp::enableWarningPause(FALSE);
+    for (INT i = 0; i < 2; i++) {
+        m_pResultPlateCtrl[i] = NULL;
+        m_pResultPlateAgent[i] = NULL;
+        m_pResultLightAgent[i] = NULL;
+    }
+    for (INT j = 0; j < 2; j++) {
+        m_pSelSlotPlate[j] = NULL;
+    }
+    for (INT k = 0; k < 4; k++) {
+        m_pDataItemPlate[k] = NULL;
+        m_pDataItemNumCircle[k] = NULL;
+        m_pDataItemNumFnt[k] = NULL;
+        m_pDataItemIcon[k] = NULL;
+        m_pDataItemClearIcon[k] = NULL;
+    }
+    for (INT l = 0; l < 3; l++) {
+        m_pMemocaInfoBar[l] = NULL;
+    }
+    for (INT m = 0; m < 2; m++) {
+        m_pMessageDlgBtnAgent[m] = NULL;
+    }
+    m_State[0].set(this, &CSaveLoadUI::preInit, &CSaveLoadUI::exeInit, &CSaveLoadUI::endInit);
+    m_State[1].set(this, &CSaveLoadUI::preCheckBoot, &CSaveLoadUI::exeCheckBoot, NULL);
+    m_State[2].set(this, &CSaveLoadUI::preLayIn, &CSaveLoadUI::exeLayIn, NULL);
+    m_State[3].set(this, &CSaveLoadUI::preLayOut, &CSaveLoadUI::exeLayOut, NULL);
+    m_State[4].set(this, &CSaveLoadUI::preExit, &CSaveLoadUI::exeExit, NULL);
+    m_State[5].set(this, &CSaveLoadUI::preNop, &CSaveLoadUI::exeNop, NULL);
+    m_State[6].set(this, &CSaveLoadUI::preOpenSlot, &CSaveLoadUI::exeOpenSlot, NULL);
+    m_State[7].set(this, &CSaveLoadUI::preSelSlot, &CSaveLoadUI::exeSelSlot, &CSaveLoadUI::endSelSlot);
+    m_State[8].set(this, &CSaveLoadUI::preCheckSlot, &CSaveLoadUI::exeCheckSlot, &CSaveLoadUI::endCheckSlot);
+    m_State[9].set(this, &CSaveLoadUI::preOpenDataList, &CSaveLoadUI::exeOpenDataList, NULL);
+    m_State[10].set(this, &CSaveLoadUI::preSelDataList, &CSaveLoadUI::exeSelDataList, &CSaveLoadUI::endSelDataList);
+    m_State[11].set(this, &CSaveLoadUI::preSaveData, &CSaveLoadUI::exeSaveData, NULL);
+    m_State[12].set(this, &CSaveLoadUI::preLoadData, &CSaveLoadUI::exeLoadData, NULL);
+    m_State[13].set(this, &CSaveLoadUI::preCheckOverwrite, &CSaveLoadUI::exeCheckOverwrite, NULL);
+    m_State[14].set(this, &CSaveLoadUI::preCheckNoMemory, &CSaveLoadUI::exeCheckNoMemory, NULL);
+    m_State[15].set(this, &CSaveLoadUI::preCheckNoCard, &CSaveLoadUI::exeCheckNoCard, NULL);
+    m_State[16].set(this, &CSaveLoadUI::preCheckUnformat, &CSaveLoadUI::exeCheckUnformat, NULL);
+    m_State[17].set(this, &CSaveLoadUI::preConfirmExecErr, &CSaveLoadUI::exeConfirmExecErr, NULL);
+    m_State[18].set(this, &CSaveLoadUI::preMessageOnly, &CSaveLoadUI::exeMessageOnly, NULL);
+    if (m_mode == SLMODE_SAVE) {
+        m_pszLad = "save.lad";
+        m_nMainSeqUnit = 0;
+        m_nIconSeqUnit = 1;
+        s_nWorldIconRsrc = CSceneInfo::getCurrentWorldID(1);
+        if (!s_nWorldIconRsrc) s_nWorldIconRsrc = 13;
+        s_nWorldIconRsrc += 0x95;
+    } else {
+        m_pszLad = "load.lad";
+        m_nMainSeqUnit = 0;
+        m_nIconSeqUnit = 1;
+        s_nWorldIconRsrc = 0;
+    }
+    if (mode != SLMODE_BOOT && mode != SLMODE_MESSAGE) {
+        CSceneEnv::setStop(ObjType::OBJ_BIT_ALL);
+        CSceneEnv::setStopGauge(TRUE);
+        CSound::pauseAllSE();
+    }
+    changeState(0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", __11CSaveLoadUIR9CSaveLoad8SAVELOAD9GAMECLEAR);
-__asm__(".rdata\n.align 3\n.word 0xFFFF0000\n.word 0x00348F38\n.word 0xFFFF0000\n.word 0x00349018\n.word 0xFFFF0000\n.word 0x00349148\n.word 0xFFFF0000\n.word 0x00349150\n.word 0xFFFF0000\n.word 0x00349248\n.word 0xFFFF0000\n.word 0x003493F8\n.word 0xFFFF0000\n.word 0x00349788\n.word 0xFFFF0000\n.word 0x00349790\n.word 0xFFFF0000\n.word 0x00349860\n.word 0xFFFF0000\n.word 0x003498D8\n.word 0xFFFF0000\n.word 0x00349938\n.word 0xFFFF0000\n.word 0x00349940\n.word 0xFFFF0000\n.word 0x00349948\n.word 0xFFFF0000\n.word 0x00349950\n.word 0xFFFF0000\n.word 0x003499D0\n.word 0xFFFF0000\n.word 0x003499D8\n.word 0xFFFF0000\n.word 0x00349A18\n.word 0xFFFF0000\n.word 0x00349B18\n.word 0xFFFF0000\n.word 0x00349B98\n.word 0xFFFF0000\n.word 0x00349C48\n.word 0xFFFF0000\n.word 0x00349FE8\n.word 0xFFFF0000\n.word 0x00349FF0\n.word 0xFFFF0000\n.word 0x0034A1D0\n.word 0xFFFF0000\n.word 0x0034A1D8\n.word 0xFFFF0000\n.word 0x0034A2D8\n.word 0xFFFF0000\n.word 0x0034A6A8\n.word 0xFFFF0000\n.word 0x0034A6E8\n.word 0xFFFF0000\n.word 0x0034A890\n.word 0xFFFF0000\n.word 0x0034AAC0\n.word 0xFFFF0000\n.word 0x0034ACA8\n.word 0xFFFF0000\n.word 0x0034ADE0\n.word 0xFFFF0000\n.word 0x0034AE68\n.word 0xFFFF0000\n.word 0x0034AF80\n.word 0xFFFF0000\n.word 0x0034B228\n.word 0xFFFF0000\n.word 0x0034B338\n.word 0xFFFF0000\n.word 0x0034B4E0\n.word 0xFFFF0000\n.word 0x0034B5A8\n.word 0xFFFF0000\n.word 0x0034B7B8\n.word 0xFFFF0000\n.word 0x0034BB00\n.word 0xFFFF0000\n.word 0x0034BCF0\n.word 0xFFFF0000\n.word 0x0034BDC0\n.word 0xFFFF0000\n.word 0x0034BEA0\n.word 0x65766173\n.word 0x64616C2E\n.word 0x00000000\n.word 0x00000000\n.word 0x64616F6C\n.word 0x64616C2E\n.word 0x00000000\n.word 0x00000000\n.text\n");
 CSaveLoadUI::~CSaveLoadUI() {
     CTask* pParent = CTaskMan::getTask(m_hParent);
     if (pParent) pParent->out();
@@ -611,7 +680,7 @@ CSaveLoadUI::~CSaveLoadUI() {
     delete m_pMessageDlgCursor;
     _ref(m_hThis) = 0;
     if (m_mode != SLMODE_BOOT && m_mode != SLMODE_MESSAGE) {
-        CSceneEnv::setStop((ObjType::eObjBit)0);
+        CSceneEnv::setStop(ObjType::OBJ_BIT_CLEAR);
         CSceneEnv::setStopGauge(FALSE);
         CPackMan::changeDrawMode(0);
         CSound::startAllPausedSE();
