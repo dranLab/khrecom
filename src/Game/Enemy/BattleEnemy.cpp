@@ -959,10 +959,6 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setGuardEffec
 FLOAT CBattleEnemy::getDamageRate_() const {
     return m_fDamageRate;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", isLastLeave___12CBattleEnemyi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", isReraise___12CBattleEnemy);
-/* CCardBattle's m_cardEnchant as the original's CARD[2] (Game/CardBattle.h declares bytes), and its
- * getEnchantKind(INT inUser) inline (1-based user), as in Game/CardRevolver */
 struct CB_ENCHANT_VIEW {
     BYTE _pad[0x17C];
     CARD m_cardEnchant[2];
@@ -970,6 +966,19 @@ struct CB_ENCHANT_VIEW {
 static inline INT _getEnchantKind(CardBattle::CCardBattle* p, INT inUser) {
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
+BOOL CBattleEnemy::isLastLeave_(INT inResultHp) {
+    CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (cb && _getEnchantKind(cb, 2) == 0x29 && m_iHp >= 2 && inResultHp <= 0) {
+        m_iHp = 1;
+        notifyHP();
+        CardBattle::CCardBattle::decEnchantTime(2, 0x28, 0x29);
+        return TRUE;
+    }
+    return FALSE;
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", isReraise___12CBattleEnemy);
+/* CCardBattle's m_cardEnchant as the original's CARD[2] (Game/CardBattle.h declares bytes), and its
+ * getEnchantKind(INT inUser) inline (1-based user), as in Game/CardRevolver */
 BOOL CBattleEnemy::isQuickRecover_() {
     CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
     if (cb && _getEnchantKind(cb, 2) == 0x2C) {
