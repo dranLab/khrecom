@@ -1171,8 +1171,54 @@ void CCommonGauge::dispSeqCtrl(INT inIndex, INT inFlag, INT inDisp) {
     pSeqCtrl->setPos(pos);
     if (inFlag == 0x10) m_uiFlag = (INT)m_uiFlag & ~0x2000;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispSeq__Q25Gauge12CCommonGaugeii);
-__asm__(".rdata\n.align 4\n.word 0x002884A0\n.word 0x002884F0\n.word 0x002884B4\n.word 0x00288504\n.word 0x002884C8\n.word 0x002884DC\n.word 0x00288518\n.word 0x00000000\n.text\n");
+void CCommonGauge::setDispSeq(HANDLE inHandle, INT inIndex) {
+    CEntity* pEntity;
+    D2::C2DSeqCtrl* pSeqCtrl;
+    HANDLE target;
+    if (!m_pInstance) return;
+    if (inIndex != 4 && CPlayer::isNowExterminate()) return;
+    pEntity = (CEntity*)CTaskMan::getTask(inHandle);
+    if (!pEntity) return;
+    if (!PLM::isEntityTypeID(pEntity->getTypeID())) return;
+    switch (inIndex) {
+    case 1:
+    case 3:
+    case 6:
+        target = CEnemyGauge::getNowTarget();
+        if (target > 0 && target != inHandle) return;
+        break;
+    }
+    switch (inIndex) {
+    case 0:
+        _ref(m_pInstance)->m_uiFlag = (INT)(_ref(m_pInstance)->m_uiFlag | 0x1) & ~0x100;
+        break;
+    case 2:
+        _ref(m_pInstance)->m_uiFlag = (INT)(_ref(m_pInstance)->m_uiFlag | 0x4) & ~0x400;
+        break;
+    case 4:
+        _ref(m_pInstance)->m_uiFlag = (INT)(_ref(m_pInstance)->m_uiFlag | 0x2010) & ~0x1000;
+        break;
+    case 5:
+        _ref(m_pInstance)->m_uiFlag = (INT)(_ref(m_pInstance)->m_uiFlag | 0x20) & ~0x4000;
+        break;
+    case 1:
+        _ref(m_pInstance)->m_uiFlag = (INT)(_ref(m_pInstance)->m_uiFlag | 0x2) & ~0x200;
+        break;
+    case 3:
+        _ref(m_pInstance)->m_uiFlag = (INT)(_ref(m_pInstance)->m_uiFlag | 0x8) & ~0x800;
+        break;
+    case 6:
+        _ref(m_pInstance)->m_uiFlag = (INT)(_ref(m_pInstance)->m_uiFlag | 0x40) & ~0x8000;
+        break;
+    default:
+        return;
+    }
+    _ref(m_pInstance)->m_hOwner[inIndex] = inHandle;
+    pEntity->getHeadPos(_ref(m_pInstance)->m_vPos[inIndex]);
+    pSeqCtrl = &_ref(m_pInstance)->m_pSeqCtrls[inIndex];
+    pSeqCtrl->restart(0, 0.0f);
+    pSeqCtrl->enableDisp(0, FALSE);
+}
 CPrizeGauge::CPrizeGauge(CTask* p) : CTask(p ? p : getSysTask(1), 0x4000) {
     m_pInstance = this;
     if (p) m_uiMode = 1;

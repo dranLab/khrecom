@@ -188,6 +188,7 @@ public:
     virtual void main();
     void _initialize();
     void dispSeqCtrl(INT inIndex, INT inFlag, INT inDisp);
+    static void setDispSeq(HANDLE inHandle, INT inIndex);
 };
 
 class CPrizeGauge : public CTask {
