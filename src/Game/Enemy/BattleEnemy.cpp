@@ -27,6 +27,7 @@
 #include "System/Math3D.h"
 #include "Game/MessageManager.h"
 #include "Game/Collision/CollMap.h"
+#include "System/Buf.h"
 #include "Game/Enemy/MonstroEventBattle.h"
 #include "Game/Gimmick/GimmickManager.h"
 #include "System/Com.h"
@@ -63,6 +64,7 @@ extern CHAR* VexenGuardEffectEffectName;
 extern CHAR* BindEffectName;
 extern CHAR* MemoIDParamName;
 extern CHAR* SpeedParamName;
+extern CHAR* RikuParamName;
 extern CHAR* MagnetParamName;
 extern CHAR* MagnetEffectName;
 extern CHAR* QuakeEffectName;
@@ -91,6 +93,43 @@ extern "C" char D_004AD840[];
 extern "C" char D_004AD858[];
 extern "C" char D_004AD870[];
 extern "C" char D_004AD888[];
+extern "C" char D_004AD588[];
+extern "C" char D_004AC8E8[];
+extern "C" char D_004AC8F0[];
+extern "C" char D_004AC920[];
+class CRsrcData { /* PARTIAL: System/RsrcData.h declares the class only with RSRCDATA_H_FULL */
+    CBuf* m_pDataSrc; /* 0x00 */
+public:
+    BYTE* getRsrcData() const {
+        BYTE* p = NULL;
+        if (m_pDataSrc) p = m_pDataSrc->getBufPtr();
+        return p;
+    }
+};
+class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs RsrcData.h internals (as in Form/Menu/SaveLoad) */
+public:
+    static void initSeekRsrc(INT nRsrcType, INT nGroupID);
+    static CRsrcData* seekNextRsrc();
+};
+/* ENEMY_PARAM's inline relocation (as in Game/Enemy/MapEnemy): an already relocated file has the top bit of its
+ * version set. */
+static inline BOOL _setupEnemyParam(ENEMY_PARAM* inParam) {
+    INT* p = (INT*)inParam;
+    if (p[1] < 0) return TRUE;
+    if (strncmp((const char*)inParam, D_004AC8E8, 4)) return FALSE;
+    if (p[1] != 1) return FALSE;
+    p[1] = 0x80000001;
+    p[2] = (INT)inParam + p[2];
+    p[0x48 / 4] = (INT)inParam + p[0x48 / 4];
+    p[0x50 / 4] = (INT)inParam + p[0x50 / 4];
+    p[0x94 / 4] = (INT)inParam + p[0x94 / 4];
+    return TRUE;
+}
+/* ENEMY_PARAM's floor accessor (Game/Enemy/EnemyParam.h line 229 in the original) */
+static inline BASIC_ENEMY_PARAM* _getBasicParam(ENEMY_PARAM* inParam, INT inFloor) {
+    if (!(0 <= inFloor && inFloor < 13)) AssertApp(D_004AC8F0, 0xE5, D_004AC920, 0);
+    return &inParam->pBasic[inFloor];
+}
 extern int g_iDuelCardNum[3] asm("g_iDuelCardNum.6149"); // PARTIAL: setupDuelCard's static table, from the asm .data until SOURCE DATA
 struct DropPrize { // PARTIAL: Game/Gimmick/GimmickManager.h only forward-declares it outside its own unit
     INT StockKind;
@@ -1591,7 +1630,70 @@ void CBattleEnemy::setupHitBack() {
     m_tqHitBackTimer = 500;
     m_vHitBackVel = vel;
 }
+/* Parked: 34 lines - the Riku-game scan loop: the original places the getRsrcData() ternary before the inline
+ * getExtraParam's found block and keeps the parameter in s0 (ours: s2, blocks swapped); the rest (seek loops,
+ * relocation, floor mapping, basic param) matches; tried: while/for/continue loop forms, value local, implicit
+ * != 0 test, function-scope param, param = NULL placement, combined !param || !setup test, permuter 5 min
+ * (6235 candidates, no gain) */
+#if 0
+BOOL CBattleEnemy::initEnemyParam(INT inGroupID, INT inRsrcID, INT inIndex) {
+    INT start = 0;
+    if (CGame::isRikuGame()) {
+        INT count = 0;
+        CRsrcDB::initSeekRsrc(0x15, inGroupID * 10000 + inRsrcID);
+        CRsrcData* rsrc;
+        while ((rsrc = CRsrcDB::seekNextRsrc())) {
+            ENEMY_PARAM* param = (ENEMY_PARAM*)rsrc->getRsrcData();
+            if (!param) {
+                count++;
+                continue;
+            }
+            _setupEnemyParam(param);
+            if (param->getExtraParam(BattleEnemy::RikuParamName) != 0.0f) {
+                start = count;
+                break;
+            }
+            count++;
+        }
+    }
+    ENEMY_PARAM* param = NULL;
+    CRsrcDB::initSeekRsrc(0x15, inGroupID * 10000 + inRsrcID);
+    for (INT i = 0; i < start; i++) CRsrcDB::seekNextRsrc();
+    for (INT i = 0; i < inIndex + 1; i++) {
+        CRsrcData* rsrc = CRsrcDB::seekNextRsrc();
+        if (!rsrc) return FALSE;
+        param = (ENEMY_PARAM*)rsrc->getRsrcData();
+    }
+    if (!param || !_setupEnemyParam(param)) return FALSE;
+    m_pEnemyParam = param;
+    SHORT floor = CSceneInfo::getCurrentFloorNumber();
+    if (floor >= 0) {
+        switch (floor) {
+        case 15:
+            floor = 2;
+            break;
+        case 14:
+        case 100:
+            floor = 0;
+            break;
+        default:
+            floor--;
+            if (floor < 0) floor = 0;
+            break;
+        }
+    } else {
+        floor += 12;
+    }
+    if (!(0 <= floor && floor < 13)) AssertApp(D_004ACBC0, 0x1203, D_004AD588, 0);
+    m_pBasicParam = _getBasicParam(param, floor);
+    m_iHp = BattleEnemy::GameModeHp(m_pBasicParam->iHP);
+    m_iExp = m_pBasicParam->iExp;
+    if (DebugWork::g_dw.enemy.uiFlag & 0x800) m_iHp = m_iHp * DebugWork::g_dw.enemy.iHpPercent / 100;
+    return TRUE;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initEnemyParam__12CBattleEnemyiii);
+#endif
 /* Parked: the load of hitBody->m_pCollision (getDetectPos) is scheduled before the vol = -1 store in ours, after
  * it in the original (8 lines: registers a2/v1, order): our vol store is a fixed scalar MEM that cannot alias the
  * varying struct load; `INT vol[1]` matches but the ref says INT vol (same open issue: MapEnemy::hitTest_); tried:
