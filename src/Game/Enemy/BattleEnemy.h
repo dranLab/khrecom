@@ -132,6 +132,8 @@ public:
     void continuousDamageProc_();
     BOOL isNowPlayDamageMotion_();
     BOOL canBlackroomCard_();
+    INT checkHitPos();
+    void setupHitBack();
     void makeRoulettePrize(const FVECTOR* inPos);
     BOOL checkResist_(ATK_KIND inDmgKind);
     CBattleEnemyManager* getBattleEnemyManager() const;

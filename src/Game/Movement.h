@@ -252,7 +252,7 @@ public:
     UINT getFlag() const { return m_uiFlag; }                                          // PARTIAL: added for Game/Enemy/BattleEnemy
     void setPower(FLOAT inPower) { *(FLOAT*)&_m_0x124[0x12c - 0x124] = inPower; } // PARTIAL: added for Game/Enemy/BattleEnemy
     // PARTIAL: added for Game/Enemy/EnemyBluerhapsody
-    void setVel(const FVECTOR& inVel) { getVel() = inVel; } void setRot(const FVECTOR& inRot) { getRot() = inRot; } void setPos(const FVECTOR& inPos) { getPos() = inPos; } void setOldPos(const FVECTOR& inPos) { *(FVECTOR*)&_m_0x00[0x00] = inPos; } void setAcc(const FVECTOR& inAcc) { *(FVECTOR*)&_m_0x00[0x80] = inAcc; } void setOldPos2(const FVECTOR& inPos) { *(FVECTOR*)&_m_0x00[0x10] = inPos; } // setPos/setOldPos/setAcc: Game/Player/Player
+    void setVel(const FVECTOR& inVel) { getVel() = inVel; } void setRot(const FVECTOR& inRot) { getRot() = inRot; } void setPos(const FVECTOR& inPos) { getPos() = inPos; } void setOldPos(const FVECTOR& inPos) { *(FVECTOR*)&_m_0x00[0x00] = inPos; } void setAcc(const FVECTOR& inAcc) { *(FVECTOR*)&_m_0x00[0x80] = inAcc; } void setOldPos2(const FVECTOR& inPos) { *(FVECTOR*)&_m_0x00[0x10] = inPos; } void updateVelocity(); // setPos/setOldPos/setAcc: Game/Player/Player
     // PARTIAL: added for Game/Player/Player (isLadder is out of line in the original)
     UINT isLadder() const;
     const FVECTOR& getEscapeNormal() const { return m_vEscapeNormal; } // PARTIAL: added for Game/Player/Player

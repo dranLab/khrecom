@@ -39,10 +39,12 @@ template <class T> static inline T& _ref(T& x) { return x; }
 namespace BattleEnemy {
 extern CHAR* FreezeEffectName;
 extern CHAR* DuelMotionParamName;
+extern CHAR* DisionEffectName;
 }
 extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
 extern "C" char D_004AD568[];
+extern "C" char D_004AD3D8[];
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
@@ -242,7 +244,16 @@ void CBattleEnemy::updateBefore() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateAfter__12CBattleEnemy);
 void CBattleEnemy::updatePositionAfter() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", lastUpdate__12CBattleEnemy);
+void CBattleEnemy::lastUpdate() {
+    if (m_pBodyColl) m_pBodyColl->update();
+    if (m_pAttack) m_pAttack->update();
+    if (isBtlEnemyFlag(0x20000)) {
+        setVel(m_vBackupVel);
+        m_pMove->updateVelocity();
+        if (!isBtlEnemyFlag(0x100)) m_pMove->setCollisionFlag(1, TRUE);
+    }
+    updateBadStatusEffect(m_hBadStatus);
+}
 void CBattleEnemy::changeDefaultState() {
     m_tqCancelTimer = 250;
     if (m_pDefaultState) {
