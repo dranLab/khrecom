@@ -355,9 +355,31 @@ DEBUG_WINDOW_LINE debugWinPathEditPosCamLine[8] = {
 };
 
 DEBUG_WINDOW_TBL debugWinPathEditPosCam = {CDebugPathData::m_szPathActName, -248, -176, 7, 8, 12, 0, 6, debugWinPathEditPosCamLine, NULL, &debugWinPathEditPosCamAllCall};
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4130: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineCamPosCall__FP12CDebugWindowii);
+extern "C" char D_00486AF8[];
+BOOL debugWinPathEditLineCamPosCall(CDebugWindow* pObj, INT inY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if (inParam & 0x20) {
+            sprintf(CDebugPathData::m_szPathActName, D_00486AF8, CDebugPathData::m_szPathName,
+                    CDebugPathData::m_iActivePath, CDebugPathData::m_iActivePathNum);
+            pObj->sendMessage(1, &debugWinPathEditPosCam);
+            pObj->dispOff(0);
+            CDebugPathData::getCam()->Action(0x2F);
+            iStep++;
+        }
+        break;
+    case 1:
+        if (inParam & 0x800) {
+            pObj->dispOn(0);
+            CDebugPathData::getCam()->Action(0x1B);
+            iStep = 0;
+        }
+        break;
+    }
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddPoaCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddRotCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddSpdCall__FP12CDebugWindowii);
