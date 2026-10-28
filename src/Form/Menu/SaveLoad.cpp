@@ -498,8 +498,22 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMessageDlg_
 __asm__(".rdata\n.align 3\n.word 0x00350034\n.word 0x00340036\n.word 0x00360035\n.word 0x00380037\n.word 0x00370039\n.word 0x00390038\n.word 0x00000000\n.word 0x00000000\n.word 0x00000002\n.word 0x00000002\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32323532\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38323532\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x33333532\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32343532\n.word 0x00000029\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMessageDlgBtn__11CSaveLoadUIPQ22D210C2DSeqCtrli);
 __asm__(".rdata\n.align 3\n.word 0x00320031\n.word 0x00310033\n.word 0x00330032\n.word 0x00000000\n.word 0x00300030\n.word 0x00000000\n.word 0x00010000\n.word 0x00020000\n.word 0x00010000\n.word 0x00020000\n.word 0x00020002\n.word 0x00010002\n.word 0x00020002\n.word 0x00010002\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x37363532\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", setActiveSlotPlate__11CSaveLoadUIi);
-__asm__(".rdata\n.align 3\n.word 0x00020000\n.word 0x00020000\n.word 0x65766153\n.word 0x74616420\n.word 0x6F742061\n.word 0x00732520\n.word 0x64616F4C\n.word 0x74616420\n.word 0x72662061\n.word 0x25206D6F\n.word 0x00000073\n.word 0x00000000\n.text\n");
+void CSaveLoadUI::setActiveSlotPlate(INT nSlot) {
+    unsigned short seqTbl[2][2] = {{0, 2}, {0, 2}};
+    char szMes[64];
+    CHAR* pszFrm;
+    for (INT i = 0; i < 2; i++) {
+        m_pSelSlotPlate[i]->select(i == nSlot);
+    }
+    if (m_mode == SLMODE_SAVE) {
+        pszFrm = "Save data to %s";
+    } else {
+        pszFrm = "Load data from %s";
+    }
+    sprintf(szMes, pszFrm, s_pStrSlot[nSlot]);
+    setHelpMessage(szMes);
+    m_pResultPlateFnt[1]->setText(s_pStrSlot[nSlot]);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", setupDataPlate__11CSaveLoadUIs);
 __asm__(".rdata\n.align 3\n.word 0x76615343\n.word 0x616F4C65\n.word 0x3A495564\n.word 0x7465733A\n.word 0x61447075\n.word 0x6C506174\n.word 0x28657461\n.word 0x20296425\n.word 0x202E2E2E\n.word 0xCD88CD94\n.word 0xC5824F8A\n.word 0x000AB782\n.word 0x004C004B\n.word 0x0050004F\n.word 0x64323025\n.word 0x00000000\n.word 0x20207325\n.word 0x45F9564C\n.word 0x00643225\n.word 0x00000000\n.word 0x20207325\n.word 0x45F9564C\n.word 0x20643225\n.word 0x20202020\n.word 0x64352520\n.word 0x00504D20\n.word 0x72746E45\n.word 0x65636E61\n.word 0x6C614820\n.word 0x0000006C\n.word 0x00466425\n.word 0x00000000\n.word 0x00000020\n.word 0x00000000\n.word 0x25207325\n.word 0x00000073\n.word 0x3A643325\n.word 0x64323025\n.word 0x00000000\n.word 0x00000000\n.word 0x250A7325\n.word 0x73250A73\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", updateMemocaInfoBar__11CSaveLoadUI);
