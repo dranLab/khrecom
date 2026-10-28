@@ -551,7 +551,75 @@ void CCardRevolver::initReload(INT inMode) {
     if (inMode != 2) CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
     m_uiFlag &= ~0x20000;
 }
+/* Parked: 14 lines off: register allocation and latch order of the first loop - the original keeps i in t0 and
+   the card offset in a2 (decremented first in the latch, in the continue paths' delay slots), ours the reverse;
+   the second loop's i likewise. Worked (from 48 bytes over to same size): separate `m_uiFlag & 8` / `& 0x20000`
+   ifs, switch with `case 8: break;` first and case 4 falling into default, `card = NULL` in the for-increment,
+   the m_uiFlag &= ~0x20000 block placed after the first return (goto notyet out of the second loop), indexed
+   second loop. Tried: all 6 increment orders, pointer second loop; permuter 5 min (5990 candidates, no gain). */
+#if 0
+extern "C" char D_0047AE98[]; /* "CCardRevolver::exeReload(); RELOAD end.\n" */
+extern "C" char D_0047AEC8[]; /* "CCardRevolver::exeReload(); RELOAD complete!\n" */
+void CCardRevolver::exeReload() {
+    CBattleCard* card;
+    INT n;
+    INT i;
+    INT category;
+    m_tqTimer -= getFrameRate();
+    if (m_tqTimer > 0) return;
+    if (m_uiFlag & 8) {
+        if (m_uiFlag & 0x20000) {
+            rollDeck(0, 1, 300);
+            m_tqTimer = 0;
+            m_iState = 1;
+            CGameWork::setFlag(1, 0x13, 1);
+            TRACE(D_0047AE98);
+            return;
+        }
+    }
+    if (0) {
+    notyet:
+        m_uiFlag &= ~0x20000;
+        goto check;
+    }
+    m_tqTimer = 200;
+    card = NULL;
+    n = m_nLimit - 1;
+    for (i = 0; i < m_nLimit; i++, n--, card = NULL) {
+        card = &m_pCards[n];
+        if (!card) continue;
+        if (!card->isReloadSet()) continue;
+        card->resetReloadSet();
+        category = card->getCardData()->m_nCategory1;
+        switch (category) {
+        case 8:
+            break;
+        case 4:
+            if (m_uiFlag & 0x100) continue;
+        default:
+            m_nRemain[0]++;
+            break;
+        }
+        m_nActive[0] = n;
+        m_nReloadCount++;
+        break;
+    }
+    if (card) card->resetHand(m_iMax - m_nReloadCount, m_iMax);
+    m_uiFlag |= 0x20000;
+    for (i = 0; i < m_nLimit; i++) {
+        card = &m_pCards[i];
+        if (card && card->isReloadSet()) goto notyet;
+    }
+check:
+    if (m_uiFlag & 0x20000) {
+        m_tqTimer = 400;
+        TRACE(D_0047AEC8);
+    }
+    m_uiFlag |= 8;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeReload__Q210CardBattle13CCardRevolver);
+#endif
 INT CCardRevolver::getRemain(INT inMode, INT inKind, INT inCategory) {
     if (inMode < 0) return m_nRemain[m_iMode];
     if (inKind == 0 && inCategory == 0) return m_nRemain[inMode];
