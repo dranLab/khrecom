@@ -2222,20 +2222,11 @@ void CBattleEnemy::kill() {
     destroyCard();
     changeBattleEnemyState(30);
 }
-/* Parked: registers only - after destroyCard() the original loads m_ullBtlEnemyFlag into v1 and the ~1 mask into
- * v0 (ours: v0/v1; in our RTL the -2 constant is set before the load, so it gets the other register); the same ld
- * v1/li v0 pattern follows destroyCard() in endCardBattle and hitTest_; tried: setBattleEnemyFlag(0, 1), &= ~1 / -2 /
- * ~1ULL / (INT)~1, reversed operands, a flag local, a reference local, setBattleEnemyFlag(0, 1) (the weak (on,
- * off) inline), if (TRUE), permuter 6 min (20513 candidates, no gain) */
-#if 0
 void CBattleEnemy::attackStateCardDestroy(BOOL inColl) {
     destroyCard();
     setBattleEnemyFlag(0, 1);
     if (inColl) bodyCollOn(-1);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", attackStateCardDestroy__12CBattleEnemyi);
-#endif
 void CBattleEnemy::onBio(INT inSubHp) {
     if (m_iHp > 0) {
         if (CSceneEnv::getStopTypeBit() & (1 << getEntityType())) return;
