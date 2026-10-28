@@ -32,6 +32,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | decomp/Game-CardRevolver (partial 70/106, 4 parked; A1 reasons, BattleCard.h flag locals) | 1102 | 449 | 24 | 936 (927) | 20 |
 | 2026-10-28 | decomp/Game-CardRevolver (partial 93/106, 9 parked; .data/.rodata from source, weak tail) | 1102 | 449 | 24 | 940 (927) | 25 |
 | 2026-10-28 | decomp/Game-CardRevolver (96/106, 10 parked, no other asm; A2 part 1: own classes complete, mechanisms re-checked) | 1103 | 449 | 24 | 940 (927) | 30 |
+| 2026-10-28 | cleanup/Game-CardRevolver (A2 part 2: CardBattle.cpp includes CardRevolver.h) | 1103 | 447 | 24 | 938 (925) | 30 |
 
 <!-- partials:start -->
 ## Summary
@@ -39,12 +40,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1103 (1028 in 110 headers, 75 in 30 .cpp); MATCH: 30
   by category: method 468, data member 71, type 96, fwd decl 53, #include 29, changed in place 132, padding 33, path override 24, gate 40, guessed 43, header-level 75, stand-in 31, other 8
-stand-ins: 449 foreign in 136 files (132 names), 191 unattributed, 173 own
+stand-ins: 447 foreign in 136 files (130 names), 191 unattributed, 173 own
 duplicate class names across headers: 24
 padding: 36 arrays, 26 accessors
-mechanisms: 940 sites (927 untagged); #line: 1167
+mechanisms: 938 sites (925 untagged); #line: 1167
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 155, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 532, superset 123, partial 98, gated 108, missing 17, unattributed 309
+classes: complete 532, superset 123, partial 99, gated 107, missing 17, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -153,7 +154,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CDelayedFree` | superset | System/LinkedBuf.h | 1 |  | extra methods: addFreeMallocPtr; 1 PARTIAL |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CEffectMotion` | complete | Game/EffectMotion.h | 1 |  |  |
-| `CEnchantGauge` | complete | Game/CardRevolver.h | 1 |  |  |
 | `CEventLineDisp` | complete | Game/Atel/VSME.h | 1 |  |  |
 | `CFadeIOMask` | partial | System/Graphic/ScreenMask.h | 1 |  | missing methods: ~CFadeIOMask |
 | `CFriend` | partial | Game/Player/Friend.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
@@ -190,7 +190,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcVSV` | gated | System/RsrcData.h | 1 |  | missing methods: getBgmID, getFilePath, getSectorSize, getStartSector, ~CRsrcVSV |
 | `CShadowModel` | missing | System/Graphic/Model.h | 1 |  |  |
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
-| `CStockFolder` | complete | Game/CardRevolver.h | 1 |  |  |
 | `CSummon` | partial | Game/Player/Summon.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CTaskMan` | superset | System/TaskMan.h | 1 |  | 3 PARTIAL |
 | `CTexCtrl` | complete | System/Graphic/TexCtrl.h | 1 |  |  |
@@ -218,7 +217,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `C3DStripBase` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DStripBase; 1 PARTIAL |
 | `CARD_KIND` | partial | Game/Enemy/BattleEnemy.h | 0 | Game/AttachCard.h, Game/Gimmick/GimmickManager.h | missing fields: CARD_KIND_KingdomChain, CARD_KIND_DesireLamp, CARD_KIND_TreasureOfSea, CARD_KIND_PumpkinHead, CARD_KIND_FairyHarp, CARD_KIND_WishStar, ... (+217) |
 | `CCPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: setALPHA, setCLAMP, setSCISSOR, setTEST; virtual order differs; 5 PARTIAL |
-| `CCardRevolver` | gated | Game/CardBattle.h | 0 | Game/CardRevolver.h | missing fields: m_hOwner, m_uiUser, m_iState, m_iMode, m_nEnd, m_nTotal, ... (+58); missing methods: _init, _initCounter, _initNumEffect, _initialize, calcEnemyStockSkill, canSnatch, ... (+39); padding: _m_0x00, _m_0x4e, |
+| `CCardRevolver` | partial | Game/CardBattle.h | 0 | Game/CardRevolver.h | missing fields: m_hOwner, m_uiUser, m_iState, m_iMode, m_nEnd, m_nTotal, ... (+58); missing methods: _init, _initCounter, _initNumEffect, _initialize, calcEnemyStockSkill, canSnatch, ... (+39); padding: _m_0x00, _m_0x4e, |
 | `CCollBody` | superset | Game/Collision/CollBody.h | 0 | Game/BodyCollision.h | virtual order differs; 1 PARTIAL |
 | `CFSM` | gated | System/Fsm.h | 0 | Game/Entity.h |  |
 | `CGPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: isBackClip, isSemiTrans, isShading, isTexNearest, setShading, setTexNearest; extra methods: setIIP; virtual order differs; 3 PARTIAL |
@@ -263,7 +262,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/BodyCollision.h` | 22 | 0/1/0/0 | 55 |
 | `Game/Bullet/Bullet.h` | 8 | 2/3/0/0 | 30 |
 | `Game/Card.h` | 13 | 2/0/1/0 | 24 |
-| `Game/CardBattle.h` | 69 | 3/2/0/1 | 143 |
+| `Game/CardBattle.h` | 69 | 3/2/1/0 | 143 |
 | `Game/CardKind.h` | 0 | 0/0/2/0 | 150 |
 | `Game/CollParam.h` | 1 | 4/0/1/0 | 156 |
 | `Game/Collision/CollAttack.h` | 0 | 0/1/0/0 | 11 |
@@ -375,7 +374,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/pppPart.h` | 57 | 21/3/0/0 | 213 |
 | `System/Graphic/Effect/libppp/pppfunctbl.h` | 1 | 0/0/0/0 | 2 |
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
-| `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 35 |
+| `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 36 |
 | `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 2 |
 | `System/Graphic/Gprim.h` | 45 | 3/3/5/21 | 228 |
 | `System/Graphic/GprimFull.h` | 0 | 1/17/2/0 | 1 |
@@ -391,7 +390,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/ScreenMask.h` | 0 | 0/1/1/0 | 4 |
 | `System/Graphic/ShadowModel.h` | 3 | 0/0/1/0 | 5 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 136 |
-| `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 33 |
+| `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 34 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
 | `System/Graphic/modeldata.h` | 11 | 1/0/1/1 | 80 |
 | `System/LinkedBuf.h` | 6 | 1/2/1/0 | 6 |
@@ -566,7 +565,6 @@ or `untagged`.
 | unit gate | `GAME_ATEL_AVATAR_CPP` | 2 | 0 | untagged, e.g. Game/Atel/Avatar.cpp:2 |
 | unit gate | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.cpp:1 |
 | unit gate | `GAME_CARDBATTLE_CPP` | 1 | 0 | untagged, e.g. Game/CardBattle.cpp:1 |
-| unit gate | `GAME_CARDREVOLVER_CPP` | 1 | 0 | untagged, e.g. Game/CardRevolver.cpp:1 |
 | unit gate | `GAME_ENEMY_BATTLEENEMY_CPP` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:1 |
 | unit gate | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.cpp:1 |
 | unit gate | `GAME_GIMMICK_GIMMICKMANAGER_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/GimmickManager.cpp:1 |
@@ -587,7 +585,6 @@ or `untagged`.
 | unit gate site | `GAME_ATEL_AVATAR_CPP` | 2 | 0 | untagged, e.g. Game/Atel/Avatar.h:14 |
 | unit gate site | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.h:170 |
 | unit gate site | `GAME_CARDBATTLE_CPP` | 1 | 0 | untagged, e.g. Game/CardBattle.h:149 |
-| unit gate site | `GAME_CARDREVOLVER_CPP` | 1 | 0 | untagged, e.g. Game/CardBattle.h:291 |
 | unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:112 |
 | unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.h:49 |
 | unit gate site | `GAME_GIMMICK_GIMMICKMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Gimmick/GimmickManager.h:14 |
