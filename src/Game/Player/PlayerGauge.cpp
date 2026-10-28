@@ -30,6 +30,7 @@ inline void _emptyStringPlaceholderPlayerGauge() { TRACE(""); }
 #include "Game/Player/NaviMap.h"
 #include "System/Graphic/2d/2DCard.h"
 #include "System/Sound/SoundMan.h"
+#include "System/Graphic/2d/2DFnt.h"
 #include "include_asm.h"
 
 using namespace Gauge;
@@ -1527,8 +1528,69 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDropMp__Q
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setPrizeCard__Q25Gauge11CPrizeGaugeR4CARDii);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6C502F65\n.word 0x72657961\n.word 0x616C502F\n.word 0x47726579\n.word 0x65677561\n.word 0x7070632E\n.word 0x34363228\n.word 0x00002935\n.word 0x00000000\n.align 4\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6C502F65\n.word 0x72657961\n.word 0x616C502F\n.word 0x47726579\n.word 0x65677561\n.word 0x7070632E\n.word 0x30373228\n.word 0x00002935\n.word 0x00000000\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6C502F65\n.word 0x72657961\n.word 0x616C502F\n.word 0x47726579\n.word 0x65677561\n.word 0x7070632E\n.word 0x34373228\n.word 0x00002936\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", exePrizeCard__Q25Gauge11CPrizeGauge);
-__asm__(".rdata\n.align 4\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6C502F65\n.word 0x72657961\n.word 0x616C502F\n.word 0x47726579\n.word 0x65677561\n.word 0x7070632E\n.word 0x31383228\n.word 0x00002936\n.word 0x00000000\n.text\n");
+INT CPrizeGauge::exePrizeCard() {
+    BOOL flag;
+
+    switch (m_uiCardState) {
+    case 0:
+        break;
+    case 2: { /* MATCH: case 2 has its own flag (a0); case 1/3 uses the outer one (v1) */
+        BOOL flag;
+        m_tqTimer -= getFrameRate();
+        flag = m_tqTimer <= 0 && CPadHandler::isButtonTrg(0x40, 0);
+        if (flag || m_pCardSeqCtrls->isEnd(0)) {
+            INT nShiftKH2;
+            FVECTOR pos;
+            D2::C2DSeqCtrl* pSeq;
+            G_RGBA rgba;
+            D2::C2DFnt* p2DFnt;
+
+            m_uiCardState = 3;
+            m_pCardSeqCtrls[0].destroy();
+            m_pCardSeqCtrls[1].destroy();
+            nShiftKH2 = 0;
+            if ((UINT)(m_cardData.m_nKind - 0x13) < 6 || m_cardData.m_nKind == 0xF || (UINT)(m_cardData.m_nKind - 0x73) < 12) nShiftKH2 = 5;
+            pSeq = &m_pCardSeqCtrls[0];
+            pSeq->setLayer(8);
+            pSeq->addSeq(g_szSeqGetCard, nShiftKH2 + 3);
+            D2::C2DMan::getLayPosition(g_szLadGetCard, 1, 0, pos, FALSE);
+            pSeq->setPos(pos);
+            rgba.col = 0x80808080;
+#line 2816
+            p2DFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2816)", RET_ADDR())) D2::C2DFnt(0, 0, &rgba, 0x12, m_cardData.getName(), 2);
+            pSeq->addFnt(g_szSeqGetCard, p2DFnt);
+            pSeq->enableColorCtrl(TRUE);
+            pSeq = &m_pCardSeqCtrls[1];
+            pSeq->setLayer(8);
+            pSeq->addSeq(g_szSeqGetCard, 1);
+            D2::C2DMan::getLayPosition(g_szLadGetCard, 1, 0, pos, FALSE);
+            pSeq->setPos(pos);
+            m_pCard->setParent(pSeq);
+        }
+        break;
+    }
+    case 1:
+    case 3:
+        flag = m_uiCardState == 1 && CGameWork::getInt(1, 0xE2);
+        if (flag || m_pCardSeqCtrls->isEnd(0)) {
+            m_pCard->destroy();
+            m_pCardSeqCtrls[0].destroy();
+            m_pCardSeqCtrls[1].destroy();
+            if (m_nStack > 0) {
+                INT dispOff = m_uiCardState == 3 ? 2 : 1;
+                setPrizeCard(m_cardStack[0], dispOff, m_nStack);
+                break;
+            }
+            m_uiCardState = 0;
+            if (m_uiMode == 0) {
+                out();
+                return 1;
+            }
+        }
+        break;
+    }
+    return 0;
+}
 BOOL CPrizeGauge::isNowDispCard() {
     if (!m_pInstance) return FALSE;
     return m_pInstance->m_uiCardState != 0;

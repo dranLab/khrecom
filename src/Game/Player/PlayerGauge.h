@@ -221,8 +221,10 @@ public:
     virtual void main();
     void setDispMogSeq();
     void setDispSeq();
+    INT exePrizeCard();
     static void setPrizeExp(INT inExp);
     static void setPrizeMp(INT inMp);
+    static void setPrizeCard(CARD& inData, INT inMode, INT inStack);
     static void setDropMp(INT inMp);
     static BOOL isNowDispCard();
 };
