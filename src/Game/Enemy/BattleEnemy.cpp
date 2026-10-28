@@ -1990,10 +1990,6 @@ void CBattleEnemy::endStateVolley() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
     bodyCollOnBody(-1);
 }
-/* Parked: registers only (3 lines) - the second hit->getDetectPos() (for makePrize) loads m_pCollision into v0 in
- * the original, v1 in ours; tried: dmgType declared/initialized before or after the calls, a pos local, _ref(hit),
- * a second inline (getDitectPos), comma expression, permuter 4 min (5076 candidates, no gain) */
-#if 0
 void CBattleEnemy::beginStateDead() {
     m_ullBtlEnemyFlag &= ~0x200;
     setEntityFlag(0, 0x10000);
@@ -2047,9 +2043,6 @@ void CBattleEnemy::beginStateDead() {
     setEntityFlag(0x40000000, 0);
     setupFade(1.0f, 0.0f, 1500, -1);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDead__12CBattleEnemy);
-#endif
 void CBattleEnemy::stateDead() {
     if (m_pEnemyParam && m_iSysStep == 0 && m_pMove->getVel().y < 0.0f && (m_pMove->getCollisionFlag() & 5)) {
         clearSpeed();
