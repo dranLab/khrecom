@@ -346,7 +346,17 @@ INT CCardBattle::calcPointBreak(INT a, INT b) {
     INT d = abs(a - b);
     return d < 10 ? d : 9;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnemyCard__Q210CardBattle11CCardBattleiii);
+INT CCardBattle::setEnemyCard(HANDLE inEnemy, INT inKind, INT inNumber) {
+    if (m_uiFlag & 0xC0000000) return 0;
+    if (m_uiFlag & 0xC0000004) return 0;
+    if (((CARD*)m_cardGimmick)->m_nKind) return 0;
+    if (m_uiDuelState >= 2) return 0;
+    CARD card;
+    _setCard(card, inKind, inNumber);
+    INT result = setPlayCard(inEnemy, 2, NULL, &card, 0);
+    if (result > 0) initPlayingEnemy(inEnemy);
+    return result;
+}
 void CCardBattle::destroyEnemyCard(INT inHandle) {
     if (inHandle == m_hOwner[1]) destroyPlayCard(2, inHandle);
 }
