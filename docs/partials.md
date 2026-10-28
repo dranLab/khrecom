@@ -29,13 +29,14 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | decomp/Game-Debug-DebugPathData (62/87; weak tail from C) | 1115 | 455 | 25 | 935 (931) | 7 |
 | 2026-10-28 | decomp/Game-Debug-DebugPathData (complete 86/87 + 1 parked; A2 part 1: gate dropped) | 1101 | 455 | 25 | 936 (927) | 16 |
 | 2026-10-28 | cleanup/System-Graphic-Effect-libppp-draw-md0_p3f (OMD_PRIM_H) | 1101 | 449 | 24 | 936 (927) | 16 |
+| 2026-10-28 | decomp/Game-CardRevolver (partial 70/106, 4 parked; A1 reasons, BattleCard.h flag locals) | 1102 | 449 | 24 | 936 (927) | 20 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1101 (1027 in 110 headers, 74 in 30 .cpp); MATCH: 16
-  by category: method 467, data member 71, type 96, fwd decl 53, #include 29, changed in place 132, padding 33, path override 24, gate 39, guessed 43, header-level 75, stand-in 31, other 8
+PARTIAL: 1102 (1027 in 110 headers, 75 in 30 .cpp); MATCH: 20
+  by category: method 467, data member 71, type 96, fwd decl 53, #include 29, changed in place 132, padding 33, path override 24, gate 40, guessed 43, header-level 75, stand-in 31, other 8
 stand-ins: 449 foreign in 136 files (132 names), 191 unattributed, 173 own
 duplicate class names across headers: 24
 padding: 36 arrays, 26 accessors
@@ -283,8 +284,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Enemy/MapEnemy.h` | 10 | 0/0/0/1 | 7 |
 | `Game/Enemy/MapEnemyManager.h` | 1 | 1/1/0/0 | 8 |
 | `Game/Entity.h` | 106 | 0/0/2/0 | 144 |
-| `Game/EntityFactory.h` | 14 | 1/1/0/0 | 48 |
-| `Game/Game.h` | 20 | 0/1/0/0 | 41 |
+| `Game/EntityFactory.h` | 14 | 1/1/0/0 | 49 |
+| `Game/Game.h` | 20 | 0/1/0/0 | 42 |
 | `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
 | `Game/GameSubBattle.h` | 0 | 1/0/1/0 | 2 |
 | `Game/GameWork.h` | 3 | 2/1/3/0 | 57 |
@@ -326,7 +327,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Player/SummonGenie.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Player/SummonMushu.h` | 0 | 0/1/0/0 | 2 |
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 50 |
-| `Game/Prize.h` | 0 | 0/1/0/0 | 1 |
+| `Game/Prize.h` | 0 | 0/1/0/0 | 2 |
 | `Game/SEMotion.h` | 0 | 5/0/1/0 | 4 |
 | `Game/SceneEnv.h` | 1 | 0/0/1/0 | 29 |
 | `Game/SceneInfo.h` | 76 | 18/0/5/0 | 80 |
@@ -336,7 +337,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Buf.h` | 4 | 0/1/0/0 | 18 |
 | `System/Com.h` | 1 | 0/0/0/0 | 7 |
 | `System/Component.h` | 3 | 1/1/0/0 | 5 |
-| `System/Coord.h` | 3 | 0/1/0/0 | 14 |
+| `System/Coord.h` | 3 | 0/1/0/0 | 15 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 270 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 10 |
 | `System/Fsm.h` | 4 | 1/0/0/1 | 107 |
@@ -352,7 +353,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 8 |
 | `System/Graphic/3DCPrim.h` | 1 | 0/0/1/0 | 1 |
 | `System/Graphic/Anim.h` | 29 | 0/0/0/2 | 146 |
-| `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 85 |
+| `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 86 |
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
 | `System/Graphic/DeFocus.h` | 5 | 0/0/0/5 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
@@ -393,7 +394,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/modeldata.h` | 11 | 1/0/1/1 | 80 |
 | `System/LinkedBuf.h` | 6 | 1/2/1/0 | 6 |
 | `System/MainApp.h` | 5 | 0/0/0/2 | 267 |
-| `System/Math3D.h` | 1 | 2/0/1/0 | 55 |
+| `System/Math3D.h` | 1 | 2/0/1/0 | 56 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 4 |
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 91 |
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
