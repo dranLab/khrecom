@@ -254,6 +254,11 @@ public:
 class CRcf { /* PARTIAL: System/Rcf.h pulls in System/SJoint.h */
 public:
     static void reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLinkOwner);
+    static BOOL isCompleteLoadRCF(INT nGroup, INT nMember);
+};
+class CGame { /* PARTIAL: Game/Game.h needs the game headers */
+public:
+    static BOOL isRikuGame();
 };
 class CPackMan { /* PARTIAL: System/Graphic/PackMan.h is not written yet */
 public:
@@ -262,21 +267,21 @@ public:
 
 HANDLE CSaveLoadUI::m_hThis = 0;
 
-/* Placeholders for the inline helpers whose strings follow the headers' in the original's .rodata (exeCheckSlot
- * and main use them: the CTD text fallback, the memory card slot name and the update() loop guard). */
+/* The file's inline helpers, whose strings follow the headers' in .rodata: the CTD text with its "" fallback, the
+ * memory card slot name (createCheckingMsg, exeCheckSlot) and a placeholder for main's update() loop guard. */
 static inline const CHAR* _ctdText(UINT nID) {
     const CHAR* p = CCtdMan::getText(nID);
     return p ? p : "";
 }
-static inline void _slotName(CHAR* pOut, CHAR* pNum, INT nSlot) {
+static inline void _getSlotName(INT nSlot, CHAR* pszOutStr) {
+    char szNum[16];
     if (nSlot == 12) {
-        strcpy(pNum, "s 1 and 2");
-    } else if (nSlot == 2) {
-        strcpy(pNum, " 2");
+        strcpy(szNum, "s 1 and 2");
     } else {
-        strcpy(pNum, " 1");
+        strcpy(szNum, nSlot == 2 ? " 2" : " 1");
     }
-    sprintf(pOut, "%s%s", _ctdText(0x600001), pNum);
+    const CHAR* pszText = _ctdText(0x600001);
+    sprintf(pszOutStr, "%s%s", pszText, szNum);
 }
 static inline void _updateOverrun() { TRACE("CSaveLoadUI \x82\xcc update() \x82\xaa\x89\xf1\x82\xe8\x82\xb7\x82\xac\x81" "c\n"); }
 
@@ -294,8 +299,29 @@ void CSaveLoadUI::preInit() {
     if (!CSystemDataChecker::isExited()) CSystemDataChecker::abort();
     m_nTimer = 2;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeInit__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x29383037\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x29393037\n.word 0x00000000\n.text\n");
+void CSaveLoadUI::exeInit() {
+    if (m_nTimer > 0) m_nTimer--;
+    INT nID = !getRsrcType() ? 0x6A : 0x6B;
+    if (!CRcf::isCompleteLoadRCF(2, nID)) return;
+    if (!CSystemDataChecker::isExited()) return;
+    if (m_nTimer > 0) return;
+    D2::C2DMan::changeLevel(D2::C2DMan::D2MAN_LEVEL1);
+    switch (m_mode) {
+    case SLMODE_SAVE:
+        CGameWork::setByte(1, 0x140, 7);
+    case SLMODE_LOAD:
+        changeState(2);
+        break;
+    case SLMODE_BOOT:
+        changeState(1);
+        break;
+    case SLMODE_MESSAGE:
+        changeState(18);
+        break;
+    }
+    m_pMemoca = new (com_malloc_d(sizeof(CMemocaAgent), __FILE__ "(708)", RET_ADDR())) CMemocaAgent(this);
+    m_pGameDataEntries = new (com_malloc_d(sizeof(CMemocaDataEntries), __FILE__ "(709)", RET_ADDR())) CMemocaDataEntries(99);
+}
 void CSaveLoadUI::endInit() {}
 void CSaveLoadUI::preCheckBoot() {
     TRACE_COL((TtyColor)0x1F, "\x83\x81\x83\x82\x83J\x97" "e\x97\xca\x83`\x83" "F\x83" "b\x83N\x8aJ\x8en\x81" "E\x81" "E\x81" "E\n");
@@ -421,13 +447,49 @@ void CSaveLoadUI::endSelDataList() {
 void CSaveLoadUI::backtoSelSlot() {
     outDataList(6);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preSaveData__11CSaveLoadUI);
+void CSaveLoadUI::preSaveData() {
+    char szSlot[32];
+    _getSlotName(m_nSlot + 1, szSlot);
+    char szMsg[256];
+    const CHAR* pszFmt = _ctdText(0x600203);
+    const CHAR* pszText = _ctdText(0x600000);
+    sprintf(szMsg, pszFmt, pszText, szSlot, pszText);
+    openMessageDlg(szMsg, 0, 0);
+    m_nStep = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeSaveData__11CSaveLoadUI);
 __asm__(".rdata\n.align 4\n.word .L0034A8D4\n.word .L0034A8EC\n.word .L0034A90C\n.word .L0034A938\n.word .L0034A97C\n.word .L0034A994\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034A9CC\n.word .L0034A9E4\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLoadData__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x00000070\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeLoadData__11CSaveLoadUI);
-__asm__(".rdata\n.align 4\n.word .L0034ACE0\n.word .L0034ACF0\n.word .L0034AD10\n.word .L0034AD34\n.word .L0034AD5C\n.word 0\n.text\n");
+void CSaveLoadUI::exeLoadData() {
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqLoadSysData()) m_nStep++;
+        break;
+    case 1:
+        if (!m_pMemoca->isCompleteReq(NULL)) break;
+        m_nStep++;
+    case 2:
+        if (m_pMemoca->reqLoadGameData(m_nDataListSel)) m_nStep++;
+        break;
+    case 3:
+        if (!m_pMemoca->isCompleteReq(NULL)) break;
+        closeMessageDlg();
+        m_nStep++;
+    case 4:
+        if (!isPadEnable()) break;
+        if (m_pMemoca->getLastResult() == 0) {
+            s_bSaveLoadDone = TRUE;
+            changeState(3);
+            CSound::playSE(11, -1, 64);
+            m_pGameDataEntries->setLatestEntryIndex(m_nSlot, m_nDataListSel);
+        } else {
+            m_nExecError = 1;
+            changeState(17);
+        }
+        break;
+    }
+}
 void CSaveLoadUI::preCheckOverwrite() {
     openMessageDlg(_ctdText(0x600200), 1, 3);
     m_nStep = 0;
@@ -507,7 +569,15 @@ void CSaveLoadUI::exeCheckNoMemory() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckNoCard__11CSaveLoadUI);
+void CSaveLoadUI::preCheckNoCard() {
+    char szSlot[32];
+    _getSlotName(m_nSlot + 1, szSlot);
+    char szMsg[256];
+    const CHAR* pszFmt = _ctdText(0x600202);
+    sprintf(szMsg, pszFmt, _ctdText(0x600000), szSlot);
+    openMessageDlg(szMsg, 0, 1);
+    m_nStep = 0;
+}
 void CSaveLoadUI::exeCheckNoCard() {
     INT nResult = -9999;
     switch (m_nStep) {
@@ -576,7 +646,58 @@ void CSaveLoadUI::preMessageOnly() {
     m_nStep = 0;
     m_nTimer = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeMessageOnly__11CSaveLoadUI);
+void CSaveLoadUI::exeMessageOnly() {
+    switch (m_nStep) {
+    case 0: {
+        BOOL bSoraClear = CGameWork::getFlag(0, 9);
+        INT nCtd = 0;
+        INT nIcon;
+        INT nType;
+        switch (s_nMessage) {
+        case 0:
+            nCtd = bSoraClear ? 0x600501 : 0x600500;
+            nIcon = 0;
+            nType = 1;
+            break;
+        case 1:
+            nCtd = bSoraClear ? 0x600503 : 0x600502;
+            nIcon = 1;
+            nType = 3;
+            break;
+        }
+        if (!nCtd) {
+            changeState(4);
+            break;
+        }
+        openMessageDlg(_ctdText(nCtd), nIcon, nType);
+        m_nStep++;
+        break;
+    }
+    case 1:
+        if (!m_nDlgResult) break;
+        {
+            SLMSG_RESULT r;
+            switch (m_nDlgResult) {
+            case 1:
+                r = SLMSG_RESULT_OK;
+                break;
+            case 2:
+                r = SLMSG_RESULT_NO;
+                break;
+            default:
+                r = SLMSG_RESULT_CANCEL;
+                break;
+            }
+            s_nMsgResult = r;
+        }
+        closeMessageDlg();
+        m_nStep++;
+        break;
+    case 2:
+        if (isPadEnable()) changeState(4);
+        break;
+    }
+}
 C2DSeqAgent* CSaveLoadUI::createMainFrame() {
     C2DSeqAgent::SeqTbl tbl[2] = {{{2, 4, 5}}, {{3, 5, 6}}};
     C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(1990)", RET_ADDR())) C2DSeqAgent(this);
@@ -584,22 +705,62 @@ C2DSeqAgent* CSaveLoadUI::createMainFrame() {
     pAgent->setupState(tbl[getRsrcType()], callbackMainFrame, callbackMainFrame);
     return pAgent;
 }
-/* the local static of createWorldIcon (still assembly) */
-__asm__(".data\n.align 2\ns_pszWorldIcon.4602:\n.word D_004F3398\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createWorldIcon__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
-__asm__(".rdata\n.align 3\n.word 0x6C726F77\n.word 0x69745F64\n.word 0x2E656C74\n.word 0x0064616C\n.word 0x6C726F77\n.word 0x75645F64\n.word 0x2E796D6D\n.word 0x0064616C\n.word 0x00010000\n.word 0x00000002\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x36303032\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x34313032\n.word 0x00000029\n.text\n");
+C2DSeqAgent* CSaveLoadUI::createWorldIcon(D2::C2DSeqCtrl*& pOutCtrl) {
+    static CHAR* s_pszWorldIcon = "world_title.lad";
+    if (m_nFlag & 0x40) s_pszWorldIcon = "world_dummy.lad";
+    C2DSeqAgent::SeqTbl tbl = {{0, 1, 2}};
+    FVECTOR v;
+    C2DSeqAgent* pAgent;
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2006)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl->addSeq(s_pszWorldIcon, 0, tbl._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    v.init();
+    pOutCtrl->setPos(v);
+    pOutCtrl->enableColorCtrl(TRUE);
+    pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2014)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, s_pszWorldIcon, 0, 0);
+    pAgent->setupState(tbl);
+    return pAgent;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createRoomName__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
 __asm__(".rdata\n.align 3\n.word 0x002B002A\n.word 0x0000002C\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38323032\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x37343032\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31353032\n.word 0x00000029\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createCursor__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x00070008\n.word 0x00070008\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38363032\n.word 0x00000029\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createLightMark__11CSaveLoadUIQ211CSaveLoadUI14LIGHTMARK_TYPEii);
 __asm__(".rdata\n.align 3\n.word 0x00220021\n.word 0x00210023\n.word 0x00230022\n.word 0x000A0009\n.word 0x0009000B\n.word 0x000B000A\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x36383032\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createTimeLabel__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
-__asm__(".rdata\n.align 3\n.word 0x002E002D\n.word 0x0000002F\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31303132\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x30313132\n.word 0x00000029\n.text\n");
+C2DSeqAgent* CSaveLoadUI::createTimeLabel(D2::C2DSeqCtrl*& pOutCtrl) {
+    C2DSeqAgent::SeqTbl tbl = {{45, 46, 47}};
+    FVECTOR v;
+    C2DSeqAgent* pAgent;
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2101)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, tbl._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    v.init();
+    if (CGame::isRikuGame()) v.y = -35.0f;
+    pOutCtrl->setPos(v);
+    pOutCtrl->enableColorCtrl(TRUE);
+    pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2110)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
+    pAgent->setupState(tbl);
+    return pAgent;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createTimeCtrl__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32323132\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMPLabel__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
-__asm__(".rdata\n.align 3\n.word 0x00280027\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32343132\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x30353132\n.word 0x00000029\n.text\n");
+C2DSeqAgent* CSaveLoadUI::createMPLabel(D2::C2DSeqCtrl*& pOutCtrl) {
+    C2DSeqAgent::SeqTbl tbl = {{39, 40, 41}};
+    FVECTOR v;
+    C2DSeqAgent* pAgent;
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2142)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, tbl._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    v.init();
+    pOutCtrl->setPos(v);
+    pOutCtrl->enableColorCtrl(TRUE);
+    pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2150)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
+    pAgent->setupState(tbl);
+    return pAgent;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMPCtrl__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32363132\n.word 0x00000029\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMainHelp__11CSaveLoadUIRPQ22D210C2DSeqCtrlRPQ22D26C2DFnt);
@@ -732,8 +893,32 @@ void CSaveLoadUI::callbackSlotPlateIn(C2DSeqAgent& agent) {
     CSaveLoadUI* p = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
     if (p) p->changeState(7);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackResultPlate__11CSaveLoadUIR11C2DSeqAgent);
-__asm__(".rdata\n.align 3\n.word 0x43080000\n.word 0x42400000\n.word 0x42600000\n.word 0xC0800000\n.text\n");
+void CSaveLoadUI::callbackResultPlate(C2DSeqAgent& agent) {
+    CSaveLoadUI* pThis = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
+    if (!pThis) return;
+    INT idx = -1;
+    for (INT i = 0; i < 2; i++) {
+        if (&agent == pThis->m_pResultPlateAgent[i]) {
+            idx = i;
+            break;
+        }
+    }
+    if (idx < 0) return;
+    if (!agent.getSeqCtrl()) return;
+    float ofsTbl[2][2] = {{136.0f, 48.0f}, {56.0f, -4.0f}};
+    FLOAT* pTbl = ofsTbl[idx];
+    FVECTOR vPos = agent.getSeqCtrl()->m_seqControl.vPos;
+    vPos.x += pTbl[0];
+    vPos.y += pTbl[1];
+    C2DSeqAgent* pLight = pThis->m_pResultLightAgent[idx];
+    if (!pLight) return;
+    if (_isAgentState(pLight, C2DSeqAgent::_STATE_NOT_START)) {
+        pLight->getSeqCtrl()->setLocalPos(vPos);
+        pLight->start();
+    } else {
+        pLight->changeState(C2DSeqAgent::STATE_IN, TRUE, -1);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackDataList__11CSaveLoadUIR11C2DSeqAgent);
 void CSaveLoadUI::callbackMemocaInfo(C2DSeqAgent& agent) {
     CSaveLoadUI* p = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
@@ -768,7 +953,13 @@ void CSaveLoadUI::callbackMessageDlg(C2DSeqAgent& agent) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", checkSelector__11CSaveLoadUIRssiisii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createBootInfoMsg__11CSaveLoadUIiPc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createCheckingMsg__11CSaveLoadUIiPc);
+void CSaveLoadUI::createCheckingMsg(INT nSlot, CHAR* pszOutMsg) {
+    char szSlot[32];
+    pszOutMsg[0] = '\0';
+    _getSlotName(nSlot, szSlot);
+    const CHAR* pszText = _ctdText(0x600000);
+    sprintf(pszOutMsg, _ctdText(0x600105), pszText, szSlot, pszText);
+}
 HANDLE CSaveLoad::m_hThis = 0;
 
 CSaveLoad::CSaveLoad(CTask* pParent, SAVELOAD mode, GAMECLEAR clear) : CTask(pParent, 0x8000) {
