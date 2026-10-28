@@ -732,8 +732,32 @@ void CSaveLoadUI::callbackSlotPlateIn(C2DSeqAgent& agent) {
     CSaveLoadUI* p = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
     if (p) p->changeState(7);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackResultPlate__11CSaveLoadUIR11C2DSeqAgent);
-__asm__(".rdata\n.align 3\n.word 0x43080000\n.word 0x42400000\n.word 0x42600000\n.word 0xC0800000\n.text\n");
+void CSaveLoadUI::callbackResultPlate(C2DSeqAgent& agent) {
+    CSaveLoadUI* pThis = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
+    if (!pThis) return;
+    INT idx = -1;
+    for (INT i = 0; i < 2; i++) {
+        if (&agent == pThis->m_pResultPlateAgent[i]) {
+            idx = i;
+            break;
+        }
+    }
+    if (idx < 0) return;
+    if (!agent.getSeqCtrl()) return;
+    float ofsTbl[2][2] = {{136.0f, 48.0f}, {56.0f, -4.0f}};
+    FLOAT* pTbl = ofsTbl[idx];
+    FVECTOR vPos = agent.getSeqCtrl()->m_seqControl.vPos;
+    vPos.x += pTbl[0];
+    vPos.y += pTbl[1];
+    C2DSeqAgent* pLight = pThis->m_pResultLightAgent[idx];
+    if (!pLight) return;
+    if (_isAgentState(pLight, C2DSeqAgent::_STATE_NOT_START)) {
+        pLight->getSeqCtrl()->setLocalPos(vPos);
+        pLight->start();
+    } else {
+        pLight->changeState(C2DSeqAgent::STATE_IN, TRUE, -1);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", callbackDataList__11CSaveLoadUIR11C2DSeqAgent);
 void CSaveLoadUI::callbackMemocaInfo(C2DSeqAgent& agent) {
     CSaveLoadUI* p = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
