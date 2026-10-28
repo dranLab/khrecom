@@ -228,7 +228,42 @@ void CDebugPathData::makeFileName(const CHAR* pszName, BOOL bExt) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", newPath__14CDebugPathDataPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", entryPath__14CDebugPathDataPCc);
+extern "C" char D_004871B0[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp" */
+extern "C" char D_004871E0[]; /* "p->m_pPath" */
+extern "C" char D_00487228[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(2132)" */
+extern "C" char D_00487260[]; /* "pBuf" */
+extern "C" char D_00487268[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(2141)" */
+/* Weak tail first: this draft matches (V1), but `new CPathData` makes gcc emit the weak CVector<G_STRIP>
+   destructor (the original's unnamed func_0021F178, which follows savePath) at the end of the unit. Needs
+   CPathData(const PATH_DATA* pPathData, BOOL bAlloc) { init(pPathData, bAlloc); } in PathData.h. */
+#if 0
+BOOL CDebugPathData::loadPath(const CHAR* pName) {
+    CDebugPathData* p = getInstance();
+    INT iSize;
+    INT iFD;
+    void* pBuf;
+    makeFileName(pName, TRUE);
+    iSize = CFileIO::getFileSize(p->m_szFileName);
+    if (iSize <= 0) return FALSE;
+    iFD = CFileIO::openFile(p->m_szFileName, 1, 0x1FF);
+    if (iFD < 0) return FALSE;
+    pBuf = com_malloc_d(iSize, D_00487228, (UINT)-1);
+    if (!pBuf) AssertApp(D_004871B0, 2133, D_00487260, 0);
+    if (CFileIO::readFile(iFD, pBuf, iSize) < 0) {
+        if (pBuf) com_free(pBuf);
+        return FALSE;
+    }
+    delete p->m_pPath;
+    p->m_pPath = NULL;
+    p->m_pPath = new (com_malloc_d(0x5C, D_00487268, RET_ADDR())) CPathData((const PATH_DATA*)pBuf, TRUE);
+    if (!p->m_pPath) AssertApp(D_004871B0, 2142, D_004871E0, 0);
+    if (pBuf) com_free(pBuf);
+    CFileIO::closeFile(iFD);
+    return TRUE;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", loadPath__14CDebugPathDataPCc);
+#endif
 extern "C" void* memset(void*, int, unsigned int);
 extern "C" char* strncpy(char*, const char*, unsigned int);
 extern "C" int FlushCache(int op);

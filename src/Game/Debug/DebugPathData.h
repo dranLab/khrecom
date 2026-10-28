@@ -62,6 +62,10 @@ public:
     virtual void disp();
     static BOOL create(CTask* p, BOOL bEnd);
     static void makeFileName(const CHAR* pszName, BOOL bExt);
+    static BOOL entryPath(const CHAR* pName);
+    static BOOL newPath(const CHAR* pName);
+    static BOOL savePath(const CHAR* pName);
+    static BOOL loadPath(const CHAR* pName);
     static void entryCam();
     static CNakCamera* getCam();
     static void removeCam();
