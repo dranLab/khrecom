@@ -44,6 +44,7 @@ struct MODELDATA {
         if (!isSemiDataEmpty()) return ((UINT*)m_pSemiData)[7];
         return 0;
     }
+    USHORT getMode() const { return getRawMode(); }
     BOOL enablePointLight() const;
     BOOL enableLight() const;
     INT getBoneIndex(const CHAR* pName) const; // PARTIAL: added for System/Graphic/TriangleIK

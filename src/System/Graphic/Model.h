@@ -103,6 +103,14 @@ public:
     virtual void makePkt(); // PARTIAL: added for System/Graphic/Model
     BOOL isDataEmpty() const { return m_pData->isDataEmpty(); }
     CSemiModel* getSemiModel() { return m_pSemiModel; }
+    USHORT getMode() { return m_Mode; }
+    /* PARTIAL: added for System/Graphic/Model (body as its weak copy: lbu + dsrl, a 64-bit bit-field) */
+    u_long isUVScroll() const {
+        struct _flag { u_long b0 : 7; u_long b7 : 1; };
+        u_long b = 0;
+        if (m_TexUV) b = ((const _flag*)&m_nFlag)->b7;
+        return b;
+    }
 protected:
     BOOL isManagedSemiModel() const { return m_nFlag & 1; }
     BOOL isAvailableSemiModel() const { return m_nFlag & 2; }
@@ -114,6 +122,7 @@ public:
     void disp0(INT semikind, u_long nInTest, INT iFlags);
     void _disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0);
     void linksub();
+    void setLocal(INT index);
     void getChangeClut(INT inIdx, INT nInType);
     virtual void changeLayerExt(INT a, INT b);        // PARTIAL: parameters guessed, for Form/Menu/MenuModel
     FLOAT getAlphaScale() { return m_fAlphaScale; }
@@ -207,7 +216,7 @@ public:
 protected:
     void setDefaultSemiTrans();
     void replaceParentModel(CModel* pInModel);
-    void setPacketSize(USHORT nSize);
+    void setPacketSize(USHORT nSize) { m_nPacketSize = nSize; }
 };
 
 class CSemiZModel : public CSemiModel {

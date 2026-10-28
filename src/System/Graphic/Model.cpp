@@ -32,6 +32,9 @@ public:
 extern const FMATRIX ONE_MATRIX;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
 extern "C" char D_00460F30[];
+extern "C" char D_00460F60[];
+extern "C" char D_00460F78[];
+extern "C" char D_00460E00[];
 extern "C" char D_00460F38[];
 extern "C" char D_00460FB8[];
 extern "C" char D_00461110[];
@@ -242,7 +245,12 @@ INT CModel::getCoordNum() const {
     if (!(m_pCrds)) AssertApp(D_00460EB8, 737, D_00460F58, 0);
     return *(INT*)((BYTE*)m_pCrds + 4);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLocal__6CModeli);
+void CModel::setLocal(INT index) {
+    if (!(m_pCrds != __null)) AssertApp(D_00460EB8, 743, D_00460F60, 0);
+    if (!(0 <= index && index < m_pCrds->getCoordNum())) AssertApp(D_00460EB8, 744, D_00460F78, 0);
+    if (!(m_pData != __null)) AssertApp(D_00460EB8, 745, D_00460E00, 0);
+    m_pCrds->Crd(index).m_Local = ((const FMATRIX*)m_pData->m_pBones)[index]; /* PARTIAL: CCoord::setLocal is Camera's compare+touch form */
+}
 INT CModel::getTextureIndex(const CHAR* pName) const {
     INT n = -1;
     if (pName) {
@@ -548,7 +556,23 @@ void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
     if (!(nFlag & 6)) sendTexture(pTag);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_SetPacket__6CModelUiPA3_CiiUliPUl);
+/* Parked: 13 lines off: after getRawMode the original computes isDataEmpty && isSemiDataEmpty into a1 and never uses it (dead code left after a cross-jump?); ours drops the semi half. Tried: unused BOOL local, empty if, ternary, statement, duplicated identical arms (24 lines). */
+#if 0
+void CSemiModel::link(CModel* m) {
+    UINT rawMode;
+    m_pModel = m;
+    setPacketSize(m->getModelData()->m_nPacketSize);
+    rawMode = m->getModelData()->getRawMode();
+    BOOL bEmpty = m->getModelData()->isDataEmpty() && m->getModelData()->isSemiDataEmpty();
+    if (getLayerID() != 0x18 && getLayerID() != 0x17) {
+        if (rawMode & 0x10000000) setSemiTrans(ALPHA_BLEND);
+        else setSemiTrans(ALPHA_PLUS);
+    }
+    initSemiZModel();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__10CSemiModelP6CModel);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", initSemiZModel__10CSemiModel);
 void CSemiModel::releaseSemiZModel() {
     if (m_pSemiZ) delete m_pSemiZ;
@@ -577,7 +601,19 @@ void CSemiModel::setSemiTrans(ALPHA a) {
     }
     CDrawable::setSemiTrans(a);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispDirect__10CSemiModel);
+void CSemiModel::dispDirect() {
+    USHORT mode;
+    UINT rawMode;
+    INT nSemiKind;
+    ULONGLONG nInTest;
+    mode = m_pModel->getMode();
+    rawMode = m_pModel->getModelData()->getRawMode();
+    nSemiKind = getSemiTrans();
+    nInTest = getTestFlag();
+    if (m_pModel->getAlphaScale() < 1.0f && MODELDATA::isMap(mode)) nSemiKind = 2;
+    if (nSemiKind == 1 && MODELDATA::isCharacterAndMap(mode) && !(rawMode & 0x1200000)) nInTest = 0x5000D;
+    m_pModel->disp0(nSemiKind, nInTest, m_SemiDraw != 0);
+}
 void CSemiZModel::makePkt() {
     CPackMan::pkCloseDirectCode();
     CModel* m = getParentModel();
@@ -629,7 +665,26 @@ void CModel::setupUVScroll(INT bVal) {
         }
     }
 }
+/* Parked: 2 lines off: the original loads the flag byte into v0 and shifts into v1 (lbu v0; dsrl v1,v0,7, as the weak isUVScroll copy), ours into one register. Worked: isUVScroll() as a member inline returning the u_long bit-field. Tried: static helper with BOOL/u_long return, ternary; permuter 10 min (17866 candidates, stays 2). */
+#if 0
+void CModel::updateUVScroll(FLOAT fr) {
+    INT i;
+    if (isUVScroll()) {
+        for (i = 0; i < m_TransTexCount; i++) {
+            if (m_TexInfo[i].m_pTex[0x55] & 0x80) {
+                m_TexUV[i].fu += *(FLOAT*)(m_TexInfo[i].m_pTex + 0x58) * fr;
+                m_TexUV[i].fv += *(FLOAT*)(m_TexInfo[i].m_pTex + 0x5c) * fr;
+                if (m_TexUV[i].fu > 1.0f) m_TexUV[i].fu -= 1.0f;
+                else if (m_TexUV[i].fu < 0.0f) m_TexUV[i].fu += 1.0f;
+                if (m_TexUV[i].fv > 1.0f) m_TexUV[i].fv -= 1.0f;
+                else if (m_TexUV[i].fv < 0.0f) m_TexUV[i].fv += 1.0f;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateUVScroll__6CModelf);
+#endif
 void CModel::setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV) {
     /* MATCH: isUVScroll() as the weak copy shows it (lbu + dsrl: a 64-bit bit-field, result in a 64-bit local) */
     struct _flag { u_long b0 : 7; u_long b7 : 1; };
@@ -675,7 +730,12 @@ void CModel::getChangeClut(INT inIdx, INT nInType) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getChangeClut__6CModelii);
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", enablePointLight__C9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", enableLight__C9MODELDATA);
+BOOL MODELDATA::enableLight() const {
+    if (getRawMode() & 0x2000000) return FALSE;
+    USHORT mode = getMode();
+    if (mode == 2 || mode == 6 || mode == 0x406 || mode == 0x400B || mode == 0x4005 || mode == 0x4205) return TRUE;
+    return FALSE;
+}
 BOOL MODELDATA::isCharacter(UINT mode) {
     switch (mode) {
     case 5:
