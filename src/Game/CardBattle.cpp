@@ -4,6 +4,8 @@
 #include "Game/BattleCard.h"
 #include "Game/Entity.h"
 #include "Game/Player/Player.h"
+#include "Game/Enemy/BattleEnemy.h"
+#include "Game/Enemy/BattleEnemyManager.h"
 #include "Game/GameWork.h"
 #include "System/TaskMan.h"
 #include "System/HeapMan.h"
@@ -470,7 +472,28 @@ void CCardBattle::exeRegeneration() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeBio__Q210CardBattle11CCardBattle);
+void CCardBattle::exeBio() {
+    UINT flag = 0x1000;
+    if (m_uiFlag & flag) {
+        m_tqEnchantTimer[0] += getFrameRate();
+        if (m_tqEnchantTimer[0] >= 1000) m_tqEnchantTimer[0] = 0;
+    }
+    flag = 0x2000;
+    if (m_uiFlag & flag) {
+        m_tqEnchantTimer[1] += getFrameRate();
+        if (m_tqEnchantTimer[1] >= 1000) {
+            CBattleEnemyManager* pBEM = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+            if (pBEM) {
+                for (SLContainerT<CTask>* container = pBEM->getFirstBattleEnemy(); container;
+                     container = container->getNext()) {
+                    CBattleEnemy* pEnemy = (CBattleEnemy*)container->getValue();
+                    if (pEnemy && pEnemy->getTypeID() == 0x1004) pEnemy->onBio(1);
+                }
+            }
+            m_tqEnchantTimer[1] = 0;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropFriendCard__10CardBattleR4CARDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropPlutoCard__10CardBattleR4CARD);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeDuel__Q210CardBattle11CCardBattle);
