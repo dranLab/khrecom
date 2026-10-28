@@ -50,7 +50,6 @@ inline void _emptyStringPlaceholder0() {
 #include "Game/EntityFactory.h"
 #include "include_asm.h"
 
-extern "C" char D_004AD420[]; /* "m_pBodyColl": first used by stateStop (still assembly) */
 /* PARTIAL: until SOURCE DATA, the unit's copy of the header static BattleEnemy::BadStatusEffectName (its .data
  * comes from the original assembly) */
 template <class T> static inline T& _ref(T& x) { return x; }
@@ -93,7 +92,6 @@ struct CB_ENCHANT_VIEW {
 static inline INT _getEnchantKind(CardBattle::CCardBattle* p, INT inUser) {
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
-extern "C" char D_004AD430[];
 extern "C" char D_004AD588[];
 extern "C" char D_004AC8E8[];
 extern "C" char D_004AC8F0[];
@@ -1258,8 +1256,207 @@ void CBattleEnemy::beginStateStop() {
     m_sStopDamagePtr = 0;
     setEntityFlag(0x8000, 0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateStop__12CBattleEnemy);
-__asm__(".rdata\n.align 3\n.word 0x42705F6D\n.word 0x4379646F\n.word 0x006C6C6F\n.word 0x00000000\n.word 0x00746968\n.word 0x00000000\n.word 0x355F7865\n.word 0x00303130\n.word 0x70616577\n.word 0x00006E6F\n.word 0x79646F62\n.word 0x00000000\n.word 0x2D746968\n.word 0x7465673E\n.word 0x6C6C6F43\n.word 0x6F697369\n.word 0x0029286E\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word .L002AF8B8\n.word .L002AFBF4\n.word .L002AFFA0\n.word .L002AFFBC\n.word .L002B0014\n.word .L002B0034\n.word .L002B00AC\n.word .L002B0108\n.word .L002AF9AC\n.word .L002AF9AC\n.word .L002AF9AC\n.word .L002AF9AC\n.word .L002AF9AC\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002AF9AC\n.word .L002AFBD4\n.word .L002AFBD4\n.word .L002B0170\n.word .L002AF9AC\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002AF9AC\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002B0170\n.word .L002AFBD4\n.word func_0\n.word .L002AFA18\n.word .L002AFA20\n.word .L002AFA28\n.word .L002AFA30\n.word .L002AFA38\n.word func_0\n.word func_0\n.word func_0\n.text\n");
+void CBattleEnemy::stateStop() {
+    switch (m_iSysStep) {
+    case 0:
+        if (getTimer() <= 0) {
+            if (m_sStopDamageCount > 0) {
+                setEntityFlag(0, 0x8000);
+                m_ullBtlEnemyFlag &= ~0x4004000;
+                m_pAnim->setSpeed(1.0f);
+                killBadStatusEffect();
+                m_iSysStep = 1;
+            } else {
+                changeDefaultState();
+            }
+            break;
+        }
+        if (!m_pBodyColl) AssertApp(__FILE__, 0xA2D, "m_pBodyColl", 0);
+        if (!m_pBodyColl->isHit()) break;
+        if (m_pBodyColl->isGuard()) break;
+        {
+            CCollBody* hit = m_pBodyColl->getHitCollBody();
+            if (!hit) AssertApp(__FILE__, 0xA36, "hit", 0);
+            switch (hit->getDamageKind()) {
+            case ATK_KIND_DMG_SMALL:
+            case ATK_KIND_DMG_BIG:
+            case ATK_KIND_DMG_BLOWN:
+            case ATK_KIND_DMG_TOSS:
+            case ATK_KIND_DMG_BEAT:
+            case ATK_KIND_GRAVITY:
+            case ATK_KIND_TORNADO:
+            case ATK_KIND_DRAIN: {
+                if (m_sStopDamageCount >= 8) break;
+                if (!m_pEnemyParam) AssertApp(__FILE__, 0xA44, "m_pEnemyParam", 0);
+                FLOAT attr = _getAttrRate(m_pEnemyParam, hit->getDamageAttr());
+                if (attr >= 1000.0f) attr = 100.0f;
+                STOP_DAMAGE* stopDmg = &((STOP_DAMAGE*)m_StopDamage)[m_sStopDamageCount];
+                if (hit->getDamageKind() == ATK_KIND_GRAVITY) {
+                    INT dmg = m_iHp * (FLOAT)m_pBodyColl->getDamage() / 100.0f;
+                    stopDmg->iDamage = dmg * attr / 100.0f;
+                } else {
+                    stopDmg->iDamage = m_pBodyColl->getDamage() * attr / 100.0f;
+                }
+                stopDmg->dmgKind = hit->getDamageKind();
+                stopDmg->vDetectPos = *hit->getDetectPos();
+                stopDmg->vDetectPos.w = 1.0f;
+                FMATRIX m;
+                sceVu0InversMatrix(m, Crd(0).m_World);
+                ApplyMatrix(stopDmg->vDetectPos, m, stopDmg->vDetectPos);
+                if (hit->getHitEffectNo() >= 0) {
+                    if (CGame::isSoraGame()) {
+                        strcpy(stopDmg->szHitEffectName, "ex_5010");
+                        stopDmg->sHitEffectNo = 0;
+                    } else {
+                        strcpy(stopDmg->szHitEffectName, "weapon");
+                        stopDmg->sHitEffectNo = 12;
+                    }
+                    stopDmg->sHitIndex = m_pBodyColl->getHitCollBodyIndex();
+                    stopDmg->hitEffectObjType = (eObjType)hit->getHitEffectObjType();
+                } else {
+                    strcpy(stopDmg->szHitEffectName, "");
+                    stopDmg->sHitEffectNo = -1;
+                    stopDmg->sHitIndex = m_pBodyColl->getHitCollBodyIndex();
+                    stopDmg->hitEffectObjType = (eObjType)0;
+                }
+                m_sStopDamageCount++;
+                break;
+            }
+            case ATK_KIND_DEGENERATOR:
+            case ATK_KIND_DEGENERATE:
+            case ATK_KIND_DEGENERATE_BREAK:
+                if (m_pEnemyParam->getSpecialEffect(2)) changeBattleEnemyState(0x17);
+                break;
+            }
+        }
+        break;
+    case 1: {
+        if (m_sStopDamagePtr >= m_sStopDamageCount) {
+            if (isBtlEnemyFlag(0x100) || (m_pMove->getCollisionFlag() & 5)) {
+                changeDefaultState();
+            } else {
+                if (m_iFallMotionIndex != -1) changeMotion(m_iFallMotionIndex, 0, 0, -1, 0, 0);
+                m_iSysStep = 3;
+            }
+            break;
+        }
+        STOP_DAMAGE* stopDmg = &((STOP_DAMAGE*)m_StopDamage)[m_sStopDamagePtr];
+        if (!isBtlEnemyFlag(0x1000000)) {
+            if (!(DebugWork::g_dw.enemy.uiFlag & 1)) m_iHp -= stopDmg->iDamage;
+            if (getHp() >= getHpMax()) m_iHp = getHpMax();
+            notifyHP();
+            if (m_iHp <= 0 && !isReraise_()) {
+                changeBattleEnemyState(0x1E);
+                break;
+            }
+        } else {
+            CCollBody* body = m_pBodyColl->getCollBody(stopDmg->sHitIndex);
+            if (!body) AssertApp(__FILE__, 0xABC, "body", 0);
+            body->setHp(body->getHp() - stopDmg->iDamage);
+            m_pBodyColl->setHitCollBody(body);
+            m_pBodyColl->setHitCollBodyIndex(stopDmg->sHitIndex);
+            onDamage();
+            notifyHP();
+            if (stopDmg->sHitIndex == 0) {
+                m_iHp -= stopDmg->iDamage;
+                if (m_iHp <= 0 && !isReraise_()) {
+                    changeBattleEnemyState(0x1E);
+                    break;
+                }
+            } else if (body->getHp() <= 0) {
+                m_sStopDamagePtr++;
+                break;
+            }
+        }
+        if (stopDmg->iDamage <= 0) {
+            if (stopDmg->iDamage < 0) {
+                Gauge::CCommonGauge::setDispSeq(getHandle(), 1);
+            } else {
+                Gauge::CCommonGauge::setDispSeq(getHandle(), 6);
+            }
+            m_sStopDamagePtr++;
+            break;
+        }
+        CCollBody* hit = m_pBodyColl->getHitCollBody();
+        if (!hit) AssertApp(__FILE__, 0xAEE, "hit", 0);
+        if (!hit->getCollision()) AssertApp(__FILE__, 0xAEF, "hit->getCollision()", 0);
+        FVECTOR rot;
+        rot.init();
+        ApplyMatrix(stopDmg->vDetectPos, Crd(0).m_World, stopDmg->vDetectPos);
+        hit->getCollisionDetect() = stopDmg->vDetectPos;
+        hit->setHitEffectParam(stopDmg->szHitEffectName, stopDmg->sHitEffectNo, (ObjType::eObjType)stopDmg->hitEffectObjType, rot, 0.0f);
+        INT no = selectDamageMotion_();
+        if (no > 0 && !(m_ullBackupFlag & 0x80000) && !((m_ullBackupFlag & 0x200000) && stopDmg->dmgKind == ATK_KIND_DMG_SMALL)) {
+            changeMotion(no, 0, 0, -1, 0, 0);
+            setTimer(getMotionTotalTime() / 2);
+        } else {
+            setTimer(750);
+        }
+        playSmallDamageSE();
+        hit->setHitEffect();
+        if (stopDmg->dmgKind != ATK_KIND_GRAVITY) {
+            m_iSysStep = 2;
+        } else {
+            m_iSysStep = 5;
+            setTimer(250);
+            bodyCollOffBody(-1);
+            m_pMove->enableGravity(TRUE);
+            m_pMove->setMass(5.0f);
+            bodyCollOff(-1);
+            bodyCollOffBody(-1);
+        }
+        break;
+    }
+    case 2:
+        if (getTimer() > 0) break;
+        m_iSysStep = 1;
+        m_sStopDamagePtr++;
+        break;
+    case 3:
+        if (m_pMove->getCollisionFlag() & 5) {
+            if (m_iLandMotionIndex != -1) {
+                changeMotion(m_iLandMotionIndex, 0, 0, -1, 0, 0);
+                clearSpeed();
+                m_iSysStep = 4;
+            } else {
+                changeDefaultState();
+            }
+        }
+        break;
+    case 4:
+        if (isMotionEnd()) changeDefaultState();
+        break;
+    case 5: {
+        FVECTOR scale = getScale();
+        scale.y = getTimer() / 250.0f;
+        if (scale.y < 0.1f) scale.y = 0.1f;
+        setScale(scale);
+        if (getTimer() > 0) break;
+        setTimer(9000);
+        m_iSysStep = 6;
+        break;
+    }
+    case 6: {
+        if (getTimer() > 0) break;
+        FVECTOR scale = getScale();
+        scale.y = 1.0f;
+        setScale(scale);
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[0], 0, 0, -1);
+        m_iSysStep = 7;
+        break;
+    }
+    case 7:
+        if (isMotionEnd()) {
+            bodyCollOn(-1);
+            bodyCollOnBody(-1);
+            if (isBtlEnemyFlag(0x100)) m_pMove->enableGravity(FALSE);
+            m_pMove->setMass(1.0f);
+            m_iSysStep = 1;
+            m_sStopDamagePtr++;
+        }
+        break;
+    }
+}
 void CBattleEnemy::endStateStop() {
     setEntityFlag(0, 0x8000);
     m_pAnim->setSpeed(1.0f);
@@ -1391,7 +1588,7 @@ void CBattleEnemy::beginStateTornado() {
     bodyCollOffBody(-1);
 }
 void CBattleEnemy::stateTornado() {
-    if (!m_pBodyColl) AssertApp(__FILE__, 0xC65, D_004AD420, 0);
+    if (!m_pBodyColl) AssertApp(__FILE__, 0xC65, "m_pBodyColl", 0);
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
     if (!hitBody) AssertApp(__FILE__, 0xC67, "hitBody", 0);
     switch (m_iSysStep) {
@@ -1604,7 +1801,7 @@ void CBattleEnemy::stateBeat() {
         if (m_pMove->getCollisionFlag() & 5) {
             if (!m_pEnemyParam) AssertApp(__FILE__, 0xDEA, "m_pEnemyParam", 0);
             CCollBody* hit = m_pBodyColl->getHitCollBody();
-            if (!hit) AssertApp(__FILE__, 0xDEC, D_004AD430, 0);
+            if (!hit) AssertApp(__FILE__, 0xDEC, "hit", 0);
             FLOAT damage = hit->getDamage();
             FLOAT value = _getAttrRate(m_pEnemyParam, hit->getDamageAttr());
             computeDamage_(damage, value, hit->getDamageKind());
@@ -2674,7 +2871,7 @@ BOOL CBattleEnemy::hitTest_() {
     }
     if (!m_pBodyColl->isHit()) return FALSE;
     CCollBody* hit = m_pBodyColl->getHitCollBody();
-    if (!hit) AssertApp(__FILE__, 0x165D, D_004AD430, 0);
+    if (!hit) AssertApp(__FILE__, 0x165D, "hit", 0);
     FLOAT attr;
     if (m_pEnemyParam) {
         attr = _getAttrRate(m_pEnemyParam, hit->getDamageAttr());
@@ -3267,7 +3464,7 @@ void CBattleEnemy::createFriendCard_(INT inRate) {
 void CBattleEnemy::setHitEffect_() {
     if (isBtlEnemyFlag(0x4000000)) return;
     CCollBody* hit = m_pBodyColl->getHitCollBody();
-    if (!hit) AssertApp(__FILE__, 0x1C50, D_004AD430, 0);
+    if (!hit) AssertApp(__FILE__, 0x1C50, "hit", 0);
     switch (hit->getDamageKind()) {
     case ATK_KIND_QUAKE: {
         CCollMap* coll = m_pMove->getMapCollision();

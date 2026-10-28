@@ -4,6 +4,7 @@
 #include "khtypes.h"
 #include "System/MainApp.h"
 #include "Game/CollParam.h"
+#include "System/Graphic/Effect/ObjType.h" // PARTIAL: added for Game/Enemy/BattleEnemy (setHitEffectParam)
 
 union FVECTOR; // PARTIAL: added for Game/Gimmick/BaseGimmick
 class CEntity;
@@ -38,6 +39,10 @@ public:
     /* CCollObj::getDetectPos (m_pCollision->m_vDetectPos at 0x40) */
     FVECTOR* getDetectPos() { return m_pCollision ? (FVECTOR*)(m_pCollision + 0x40) : NULL; }
     HANDLE setHitEffect(); // PARTIAL: added for Game/Gimmick/BaseGimmick
+    // PARTIAL: added for Game/Enemy/BattleEnemy (CCollObj::getCollision, CCollision::m_outDetect at 0x40)
+    UBYTE* getCollision() { return m_pCollision; }
+    FVECTOR& getCollisionDetect() { return *(FVECTOR*)(m_pCollision + 0x40); }
+    void setHitEffectParam(const CHAR* inName, INT inNo, ObjType::eObjType inType, const FVECTOR& inRot, FLOAT inWait);
 };
 #endif
 
