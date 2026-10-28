@@ -18,6 +18,11 @@
 #include "System/Coord.h"
 #include "Game/CardKind.h"
 #include "Game/Enemy/BattleEnemyManager.h"
+#include "Game/Card.h"
+#include "Game/SceneInfo.h"
+#include "Game/Game.h"
+#include "Game/SceneEnv.h"
+#include "Game/EffectMotion.h"
 #include "include_asm.h"
 
 extern "C" char D_004AD680[];
@@ -33,6 +38,7 @@ extern "C" char D_004AD578[];
 template <class T> static inline T& _ref(T& x) { return x; }
 namespace BattleEnemy {
 extern CHAR* FreezeEffectName;
+extern CHAR* DuelMotionParamName;
 }
 extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
@@ -272,7 +278,16 @@ void CBattleEnemy::endStateDuel() {
     }
     bodyCollOnBody(-1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDuelSuccess__12CBattleEnemy);
+void CBattleEnemy::beginStateDuelSuccess() {
+    INT no = (INT)getExtraParam(BattleEnemy::DuelMotionParamName);
+    if (no <= 0) {
+        changeMotion(1, 0, 0, -1, 0, 0);
+    } else {
+        changeMotion(no, 0, 0, -1, 0, 0);
+    }
+    m_iSysStep = 0;
+    setTimer(15000);
+}
 void CBattleEnemy::stateDuelSuccess() {
     if (!isBtlEnemyFlag(0x4000000000ULL)) m_pMove->turnToTargetY(g_pPlayer, 0.17453292f);
     if (getTimer() <= 0) changeDefaultState();
