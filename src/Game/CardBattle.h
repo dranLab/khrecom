@@ -146,6 +146,7 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     TIMEQ getFrameRate() const { return *(const TIMEQ*)&_m_0x0[0x8]; } // PARTIAL: CTask::getFrameRate (base still opaque)
     HANDLE getHandle() const { return *(const HANDLE*)&_m_0x0[0x14]; } // PARTIAL: CTask::getHandle (base still opaque)
     void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
+    void disablePlayCard(UINT inSet) { setFlag(inSet, inSet ^ 0xC0000000); } // PARTIAL: added for Game/CardBattle
     void destroyPlayCard(INT inFlag, INT inP1);
     void transferPlayerEnchant(CPlayer* inPlayer);
     void setDuelEntry(INT inFlag);
