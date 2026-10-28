@@ -10,6 +10,8 @@
 #include "Game/Debug/DebugWork.h"
 #include "Game/Prize.h"
 #include "System/Math3D.h"
+#include "Game/Game.h"
+#include "Game/SceneInfo.h"
 #include "include_asm.h"
 
 using namespace CardBattle;
@@ -141,7 +143,65 @@ void CCardRevolver::_init() {
     m_iMax = 0;
     m_pEmpty = NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _initialize__Q210CardBattle13CCardRevolverP4CARDi);
+namespace CardBattle {
+extern BTL_DECK g_deckSoraTutorial[];
+extern BTL_DECK g_deckSoraDebug[];
+extern BTL_DECK g_deckSoraDebug99[];
+extern BTL_DECK g_deckSoraPoo[];
+extern BTL_DECK g_deckSoraStarter[];
+extern BTL_DECK g_deckRikuStarter[];
+}
+void CCardRevolver::_initialize(CARD* inDeck, INT inShortCut) {
+    switch (m_uiUser) {
+    case 1:
+        m_iReloadSEID = 0x12;
+        if (inDeck) {
+            if (CGame::isRikuGame()) m_uiFlag |= 0x80;
+            else if (CSceneInfo::isMinigameScene()) m_uiFlag |= 0x800;
+            setDeck(inDeck, inShortCut);
+        } else if (CGame::isSoraGame()) {
+            if (CGameWork::getFlag(1, 0x2C)) {
+                convBtlDeckToCard(g_deckSoraTutorial);
+                setDeck((CARD*)g_deckSoraTutorial, -1);
+            } else {
+                switch (DebugWork::g_dw.player.iUseDbgDeck) {
+                case 3:
+                    convBtlDeckToCard(g_deckSoraDebug99);
+                    setDeck((CARD*)g_deckSoraDebug99, -1);
+                    break;
+                case 2:
+                    convBtlDeckToCard(g_deckSoraDebug);
+                    setDeck((CARD*)g_deckSoraDebug, -1);
+                    break;
+                case 0:
+                default:
+                    if (CSceneInfo::isMinigameScene()) {
+                        convBtlDeckToCard(g_deckSoraPoo);
+                        setDeck((CARD*)g_deckSoraPoo, -1);
+                        m_uiFlag |= 0x800;
+                    } else {
+                        convBtlDeckToCard(g_deckSoraStarter);
+                        setDeck((CARD*)g_deckSoraStarter, -1);
+                    }
+                    break;
+                }
+            }
+        } else {
+            m_uiFlag |= 0x80;
+            convBtlDeckToCard(g_deckRikuStarter);
+            setDeck((CARD*)g_deckRikuStarter, inShortCut);
+        }
+        break;
+    case 2:
+        m_iReloadSEID = 0x1B;
+        if (inDeck) setDeck(inDeck, -1);
+        break;
+    }
+    if (m_uiFlag & 1) return;
+    CARD dummy;
+    _setCard(dummy, 0xFF, 0);
+    setDeck(&dummy, -1);
+}
 void CCardRevolver::_initCounter() {
     initCounter();
     m_pEmpty = new (com_malloc_d(sizeof(C2DCard), D_0047AAC0, RET_ADDR())) C2DCard;
