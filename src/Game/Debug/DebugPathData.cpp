@@ -1,7 +1,10 @@
 #include "khtypes.h"
 #define GAME_DEBUG_DEBUGPATHDATA_CPP
+#define FORM_DEBUGWINDOW_FULL /* MATCH: CNakCamera; the original has Gprim.h's strings (PathData.h includes it first) */
 #include "System/Graphic/PathData.h"
 #include "System/Graphic/HermitePath.h"
+#include "System/Graphic/Str.h"
+#include "System/DebugProcInfo.h"
 #include "Game/Debug/DebugPathData.h"
 #include "Form/DebugWindow.h"
 #include "System/TaskMan.h"
@@ -29,6 +32,7 @@ public:
 };
 #line 27
 extern "C" char D_004870B0[];
+extern "C" char D_00487120[];
 extern "C" char D_00487158[];
 extern "C" char D_00487168[];
 extern "C" char D_00486F18[];
@@ -107,7 +111,12 @@ BOOL CDebugPathData::isEnd() {
     }
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", entryCam__14CDebugPathData);
+void CDebugPathData::entryCam() {
+    CDebugPathData* p = getInstance();
+    FVECTOR vPos;
+    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&vPos) : "memory");
+    p->m_pDCam = new (com_malloc_d(0x140, D_00487120, RET_ADDR())) CNakCamera(p, 1, 0x100, &vPos, 0.0f, (void**)&p->m_pDCam);
+}
 CNakCamera* CDebugPathData::getCam() { return getInstance()->m_pDCam; }
 void CDebugPathData::removeCam() {
     CDebugPathData* pThis = getInstance();

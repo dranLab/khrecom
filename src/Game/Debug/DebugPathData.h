@@ -37,6 +37,7 @@ public:
     virtual void disp();
     static BOOL create(CTask* p, BOOL bEnd);
     static void makeFileName(const CHAR* pszName, BOOL bExt);
+    static void entryCam();
     static CNakCamera* getCam();
     static void removeCam();
     static INT getActivePathNum() { return m_iActivePath; }
