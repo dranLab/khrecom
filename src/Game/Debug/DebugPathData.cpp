@@ -104,10 +104,6 @@ FLOAT CDebugPathData::m_fValuePlus = 1.0f;
 CPDFrameTime* CDebugPathData::m_pFrame = NULL;
 UINT CDebugPathData::m_iCtrlFlg = 2;
 
-/* Parked: s2/s3 swapped (pVec vs &m_DDPathCamArrow) and the original recomputes &m_DDPathCamArrow and
-   &m_vRot for setCoord (ours reuses them); tried: statement order (m_pPath first), a pRot temporary - only
-   3 variants, retry at the unit's end; tools/permuter.py does not find constructor definitions */
-#if 0
 CHermitePathMoveS::CHermitePathMoveS(CTask* p, const CPathVector* pVec) : CTask(p, 0x4000) {
     ignorePause(TRUE);
     m_pPath = (CPathVector*)pVec;
@@ -125,13 +121,10 @@ CHermitePathMoveS::CHermitePathMoveS(CTask* p, const CPathVector* pVec) : CTask(
                  : "memory");
     Crd(0).m_Flag = 1;
     m_DDPathCamArrow.getCoord().setParent(&Crd(0));
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&m_vRot) : "memory");
+    m_vRot.init0();
     m_vRot.w = 5.0f;
     m_DDPathCamArrow.setCoord(NULL, &m_vRot);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __17CHermitePathMoveSP5CTaskPC11CPathVector);
-#endif
 CHermitePathMoveS::~CHermitePathMoveS() {}
 void CHermitePathMoveS::main() {
     PATH_PARAM sParam;
