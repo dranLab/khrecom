@@ -281,7 +281,6 @@ DEBUG_WINDOW_LINE debugWinPathEditEtcParamLine[28] = {
 };
 
 DEBUG_WINDOW_TBL debugWinPathEditEtcParam = {"\x82\xbb\x82\xcc\x91\xbc\x83p\x83\x89\x83\x81\x81[\x83^\x90\xdd\x92\xe8", -136, -176, 18, 26, 12, 0, 2, debugWinPathEditEtcParamLine, NULL, &debugWinPathEditEtcParamAllCall};
-extern "C" char D_00486A80[];
 BOOL debugWinPathEditPosCamGround(CDebugWindow* pObj, INT inY, INT inParam) {
     static INT iStep = 0;
     if (inParam & 5) iStep = 0;
@@ -313,7 +312,7 @@ BOOL debugWinPathEditPosCamGround(CDebugWindow* pObj, INT inY, INT inParam) {
                     CDebugPathData::setActivePathVecPositionXYZ(vPos);
                     CDebugPathData::getCam()->SetCameraLook(CDebugPathData::m_vActivePathPos);
                 } else {
-                    pObj->sendMessage(1, D_00486A80);
+                    pObj->sendMessage(1, "\x92n\x96\xca\x82\xaa\x8c\xa9\x82\xc2\x82\xa9\x82\xe8\x82\xdc\x82\xb9\x82\xf1!");
                 }
             }
             iStep = 0;
@@ -322,10 +321,28 @@ BOOL debugWinPathEditPosCamGround(CDebugWindow* pObj, INT inY, INT inParam) {
     }
     return TRUE;
 }
-__asm__(".rdata\n.align 3\n.word 0xCA966E92\n.word 0xA98CAA82\n.word 0xA982C282\n.word 0xDC82E882\n.word 0xF182B982\n.word 0x00000021\n.text\n");
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4123: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPosCamReset__FP12CDebugWindowii);
+BOOL debugWinPathEditPosCamReset(CDebugWindow* pObj, INT inY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if (inParam & 0x20) {
+            pObj->sendMessage(1, &DWT::debugWinYesNo);
+            iStep++;
+        }
+        break;
+    case 1:
+        if (inParam & 0x800) {
+            if (pObj->isChildAnswer() && pObj->getChildAnswer() == 1) {
+                CDebugPathData::setActivePathVecPosition(CDebugPathData::m_vBackUpPos);
+                CDebugPathData::getCam()->SetCameraLook(CDebugPathData::m_vActivePathPos);
+            }
+            iStep = 0;
+        }
+        break;
+    }
+    return TRUE;
+}
 INT debugWinPathEditPosCamAllCall(CDebugWindow* pObj, INT inParam) {
     if (inParam & 1) {
         CDebugPathData::m_vBackUpPos = CDebugPathData::m_vActivePathPos;
@@ -579,9 +596,39 @@ DEBUG_WINDOW_LINE debugWinPathListLine[2] = {
 };
 
 DEBUG_WINDOW_TBL debugWinPathList = {"\x83p\x83X\x83\x8a\x83X\x83g", -208, -136, 7, 20, 14, 0, 8, debugWinPathListLine, &debugWinPathListDispCall, &debugWinPathListAllCall};
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4189: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineNewCall__FP12CDebugWindowii);
+BOOL debugWinPathLineNewCall(CDebugWindow* pObj, INT inY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if (inParam & 0x20) {
+            pObj->sendMessage(1, &DWT::debugWinName);
+            iStep++;
+        }
+        break;
+    case 1:
+        if (inParam & 0x800) {
+            if (pObj->isChildAnswer()) {
+                strcpy(CDebugPathData::m_szPathName, (char*)pObj->getChildAnswer());
+                if (CDebugPathData::newPath(CDebugPathData::m_szPathName)) iStep++;
+            } else {
+                iStep--;
+            }
+        }
+        break;
+    case 2:
+        pObj->dispOff(0);
+        pObj->sendMessage(1, &debugWinPathEdit);
+        iStep++;
+        break;
+    case 3:
+        CDebugPathData::removePath();
+        pObj->dispOn(0);
+        iStep = 0;
+        break;
+    }
+    return TRUE;
+}
 /* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
 __asm__(".data\n.align 2\n" "iStep.4193: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineNameLoadCall__FP12CDebugWindowii);
@@ -605,9 +652,6 @@ DEBUG_WINDOW_LINE debugWinPathNoEndLine[4] = {
 };
 
 DEBUG_WINDOW_TBL debugWinPathNoEnd = {"\x83p\x83X\x90\xdd\x92\xe8\x95\xd2\x8fW\x83g\x83" "b\x83v", -240, -168, 34, 20, 12, 0, 22, debugWinPathNoEndLine, NULL, NULL};
-extern "C" char D_00487008[];
-extern "C" char D_00487040[];
-extern "C" char D_00487078[];
 /* Data step first: the inline CCPrim::create brings Gprim.h's "(613)"/"m_V" literals, and the unit's .rodata is
    still asm (objcopy: symbol .rodata required). Draft not compared yet. */
 CDebugPathData::CDebugPathData(CTask* p, BOOL bEnd) : CTask(p, 0x4000) {
@@ -616,19 +660,18 @@ CDebugPathData::CDebugPathData(CTask* p, BOOL bEnd) : CTask(p, 0x4000) {
     ignorePause(TRUE);
     m_szFileName[0] = 0;
     if (bEnd) {
-        pWnd = new (com_malloc_d(0x1C0, D_00487008, RET_ADDR())) CDebugWindow(this, debugWinPath);
+        pWnd = new (com_malloc_d(0x1C0, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(1928)", RET_ADDR())) CDebugWindow(this, debugWinPath);
     } else {
-        pWnd = new (com_malloc_d(0x1C0, D_00487040, RET_ADDR())) CDebugWindow(this, debugWinPathNoEnd);
+        pWnd = new (com_malloc_d(0x1C0, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(1929)", RET_ADDR())) CDebugWindow(this, debugWinPathNoEnd);
     }
     m_hChildWnd = pWnd ? pWnd->getHandle() : 0;
     m_iActivePathNum = 0;
-    m_pFrame = new (com_malloc_d(0xD8, D_00487078, RET_ADDR())) CPDFrameTime;
+    m_pFrame = new (com_malloc_d(0xD8, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(1938)", RET_ADDR())) CPDFrameTime;
     m_gpPArrowPoly.create(0xB, 3);
     m_gpPArrowPoly.setLayerFG(2);
     CDebugWindow::enableTopDebugWindow(FALSE);
     CPlayer::enableDbgPadControl(FALSE);
 }
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x39312870\n.word 0x00293832\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x39312870\n.word 0x00293932\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x39312870\n.word 0x00293833\n.word 0x00000000\n.text\n");
 CDebugPathData::~CDebugPathData() {
     delete m_pPath;
     m_pPath = NULL;
@@ -711,14 +754,11 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", newPath__14
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x30322870\n.word 0x00293838\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x00000070\n.word 0x6D3E2D70\n.word 0x6150705F\n.word 0x00006874\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", entryPath__14CDebugPathDataPCc);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x31322870\n.word 0x00293630\n.word 0x00000000\n.text\n");
-extern "C" char D_004871B0[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp" */
-extern "C" char D_004871E0[]; /* "p->m_pPath" */
-extern "C" char D_00487228[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(2132)" */
-extern "C" char D_00487260[]; /* "pBuf" */
-extern "C" char D_00487268[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(2141)" */
 /* Weak tail first: this draft matches (V1), but `new CPathData` makes gcc emit the weak CVector<G_STRIP>
    destructor (the original's unnamed func_0021F178, which follows savePath) at the end of the unit. Needs
    CPathData(const PATH_DATA* pPathData, BOOL bAlloc) { init(pPathData, bAlloc); } in PathData.h. */
+extern "C" char D_004871B0[]; /* newPath's (still asm) */
+extern "C" char D_004871E0[];
 BOOL CDebugPathData::loadPath(const CHAR* pName) {
     CDebugPathData* p = getInstance();
     INT iSize;
@@ -729,21 +769,20 @@ BOOL CDebugPathData::loadPath(const CHAR* pName) {
     if (iSize <= 0) return FALSE;
     iFD = CFileIO::openFile(p->m_szFileName, 1, 0x1FF);
     if (iFD < 0) return FALSE;
-    pBuf = com_malloc_d(iSize, D_00487228, (UINT)-1);
-    if (!pBuf) AssertApp(D_004871B0, 2133, D_00487260, 0);
+    pBuf = com_malloc_d(iSize, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(2132)", (UINT)-1);
+    if (!pBuf) AssertApp(D_004871B0, 2133, "pBuf", 0);
     if (CFileIO::readFile(iFD, pBuf, iSize) < 0) {
         if (pBuf) com_free(pBuf);
         return FALSE;
     }
     delete p->m_pPath;
     p->m_pPath = NULL;
-    p->m_pPath = new (com_malloc_d(0x5C, D_00487268, RET_ADDR())) CPathData((const PATH_DATA*)pBuf, TRUE);
+    p->m_pPath = new (com_malloc_d(0x5C, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(2141)", RET_ADDR())) CPathData((const PATH_DATA*)pBuf, TRUE);
     if (!p->m_pPath) AssertApp(D_004871B0, 2142, D_004871E0, 0);
     if (pBuf) com_free(pBuf);
     CFileIO::closeFile(iFD);
     return TRUE;
 }
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x31322870\n.word 0x00293233\n.word 0x00000000\n.word 0x66754270\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x31322870\n.word 0x00293134\n.word 0x00000000\n.text\n");
 extern "C" void* memset(void*, int, unsigned int);
 extern "C" char* strncpy(char*, const char*, unsigned int);
 extern "C" int FlushCache(int op);
