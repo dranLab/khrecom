@@ -28,6 +28,12 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 inline void C2DSeqSelectable::setCaptionSize(INT nSize) {
     if (m_pCaption) m_pCaption->setSize(nSize);
 }
+inline void C2DSeqSelectable::setCaptionText(const CHAR* pszText) {
+    if (m_pCaption) m_pCaption->setText(pszText);
+}
+inline void C2DSeqSelectable::setCaptionSpace(INT nX, INT nY) {
+    if (m_pCaption) m_pCaption->setSpace(nX, nY);
+}
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
@@ -38,6 +44,240 @@ SLMSG_RESULT s_nMsgResult = SLMSG_RESULT_CANCEL;
 UINT s_nWorldIconRsrc = 0;
 SLMSG s_nMessage;
 }
+
+/* file-scope constant tables (deferred: emitted after the vtables, as in the original) */
+static const CARD_DATA cardDataTbl[224] = {
+    {{0}, 0, 0, 0, ""},
+    {{17}, 2, 0, 3, "Kingdom Key"},
+    {{17}, 2, 1, 3, "Three Wishes"},
+    {{17}, 2, 2, 3, "Crabclaw"},
+    {{17}, 2, 3, 3, "Pumpkinhead"},
+    {{17}, 2, 4, 3, "Fairy Harp"},
+    {{17}, 2, 5, 3, "Wishing Star"},
+    {{17}, 2, 6, 3, "Spellbinder"},
+    {{17}, 2, 7, 3, "Metal Chocobo"},
+    {{17}, 3, 0, 3, "Olympia"},
+    {{17}, 3, 1, 3, "Lionheart"},
+    {{17}, 3, 2, 3, "Lady Luck"},
+    {{17}, 3, 3, 3, "Divine Rose"},
+    {{17}, 3, 4, 3, "Oathkeeper"},
+    {{17}, 3, 5, 3, "Oblivion"},
+    {{17}, 3, 6, 3, "Ultima Weapon"},
+    {{17}, 3, 7, 3, "Diamond Dust"},
+    {{17}, 4, 0, 3, "One-Winged Angel"},
+    {{17}, 4, 1, 4, "Soul Eater"},
+    {{17}, 4, 2, 3, "Star Seeker"},
+    {{17}, 4, 3, 3, "Monochrome"},
+    {{17}, 4, 4, 3, "Follow the Wind"},
+    {{17}, 4, 5, 3, "Hidden Dragon"},
+    {{17}, 4, 6, 3, "Photon Debugger"},
+    {{17}, 4, 7, 3, "Bond of Flame"},
+    {{17}, 26, 0, 0, "-"},
+    {{34}, 5, 0, 3, "Fire"},
+    {{34}, 5, 1, 3, "Blizzard"},
+    {{34}, 5, 2, 3, "Thunder"},
+    {{34}, 5, 3, 3, "Cure"},
+    {{34}, 5, 4, 3, "Gravity"},
+    {{34}, 5, 5, 3, "Stop"},
+    {{34}, 5, 6, 3, "Aero"},
+    {{34}, 26, 2, 0, "-"},
+    {{34}, 26, 1, 0, "-"},
+    {{51}, 5, 7, 3, "Simba"},
+    {{51}, 6, 0, 3, "Genie"},
+    {{51}, 6, 1, 3, "Bambi"},
+    {{51}, 6, 2, 3, "Dumbo"},
+    {{51}, 6, 3, 3, "Tinker Bell"},
+    {{51}, 6, 4, 3, "Mushu"},
+    {{51}, 6, 5, 3, "Cloud"},
+    {{68}, 6, 6, 6, "Potion"},
+    {{68}, 6, 7, 6, "Hi-Potion"},
+    {{68}, 7, 0, 2, "Mega-Potion"},
+    {{68}, 7, 1, 2, "Ether"},
+    {{68}, 7, 2, 2, "Mega-Ether"},
+    {{68}, 7, 3, 2, "Elixir"},
+    {{68}, 7, 4, 2, "Megalixir"},
+    {{85}, 7, 5, 2, "Donald Duck"},
+    {{85}, 7, 6, 2, "Goofy"},
+    {{85}, 7, 7, 2, "Aladdin"},
+    {{85}, 8, 0, 2, "Ariel"},
+    {{85}, 8, 1, 2, "Jack"},
+    {{85}, 8, 2, 2, "Peter Pan"},
+    {{85}, 8, 3, 2, "The Beast"},
+    {{85}, 8, 4, 4, "The King"},
+    {{85}, 8, 5, 2, "Pluto"},
+    {{102}, 8, 6, 6, "Guard Armor"},
+    {{102}, 8, 6, 6, "Trickmaster"},
+    {{102}, 8, 6, 6, "Jafar"},
+    {{102}, 8, 6, 6, "Oogie Boogie"},
+    {{102}, 8, 6, 6, "Parasite Cage"},
+    {{102}, 8, 6, 6, "Ursula"},
+    {{102}, 8, 6, 6, "Dragon Maleficent"},
+    {{102}, 8, 6, 6, "Darkside"},
+    {{230}, 8, 7, 4, "-"},
+    {{230}, 9, 0, 0, "-"},
+    {{119}, 9, 1, 6, "Shadow"},
+    {{119}, 9, 2, 2, "Soldier"},
+    {{119}, 9, 3, 6, "Large Body"},
+    {{119}, 9, 4, 2, "Red Nocturne"},
+    {{119}, 9, 5, 2, "Blue Rhapsody"},
+    {{119}, 9, 6, 2, "Yellow Opera"},
+    {{119}, 9, 7, 2, "Green Requiem"},
+    {{119}, 10, 0, 6, "Powerwild"},
+    {{119}, 10, 1, 2, "Bouncywild"},
+    {{119}, 10, 2, 2, "Air Soldier"},
+    {{119}, 10, 3, 2, "Bandit"},
+    {{119}, 10, 4, 6, "Fat Bandit"},
+    {{119}, 10, 5, 2, "Barrel Spider"},
+    {{119}, 10, 6, 6, "Search Ghost"},
+    {{119}, 10, 7, 6, "Sea Neon"},
+    {{119}, 11, 0, 2, "Screwdiver"},
+    {{119}, 11, 1, 2, "Aquatank"},
+    {{119}, 11, 2, 6, "Wight Knight"},
+    {{119}, 11, 3, 2, "Gargoyle"},
+    {{119}, 11, 4, 6, "Pirate"},
+    {{119}, 11, 5, 2, "Air Pirate"},
+    {{119}, 11, 6, 4, "Darkball"},
+    {{119}, 11, 7, 6, "Defender"},
+    {{119}, 12, 0, 2, "Wyvern"},
+    {{119}, 12, 1, 2, "Wizard"},
+    {{119}, 12, 2, 2, "Neoshadow"},
+    {{119}, 12, 3, 2, "White Mushroom"},
+    {{119}, 12, 4, 2, "Black Fungus"},
+    {{119}, 12, 5, 2, "Creeper Plant"},
+    {{119}, 12, 6, 2, "Tornado Step"},
+    {{119}, 12, 7, 2, "Crescendo"},
+    {{119}, 13, 0, 6, "Guard Armor"},
+    {{119}, 13, 1, 6, "Parasite Cage"},
+    {{119}, 13, 2, 6, "Trickmaster"},
+    {{119}, 13, 3, 6, "Darkside"},
+    {{119}, 13, 4, 2, "Card Soldier"},
+    {{119}, 13, 5, 6, "Hades"},
+    {{119}, 13, 6, 6, "Jafar"},
+    {{119}, 13, 7, 6, "Oogie Boogie"},
+    {{119}, 14, 0, 6, "Ursula"},
+    {{119}, 14, 1, 6, "Hook"},
+    {{119}, 14, 2, 6, "Dragon Maleficent"},
+    {{119}, 14, 3, 2, "Riku"},
+    {{119}, 14, 4, 2, "Axel"},
+    {{119}, 14, 5, 2, "Larxene"},
+    {{119}, 14, 6, 2, "Vexen"},
+    {{119}, 14, 7, 2, "Marluxia"},
+    {{119}, 15, 0, 6, "Lexaeus"},
+    {{119}, 15, 1, 2, "Ansem"},
+    {{119}, 15, 3, 6, "Zexion"},
+    {{119}, 15, 4, 2, "Xemnas"},
+    {{119}, 15, 5, 2, "Xigbar"},
+    {{119}, 15, 6, 2, "Xaldin"},
+    {{119}, 15, 7, 2, "Sa\x83\xc7x"},
+    {{119}, 16, 0, 2, "Demyx"},
+    {{119}, 16, 1, 2, "Luxord"},
+    {{119}, 16, 2, 2, "Roxas"},
+    {{119}, 21, 6, 2, "Gold Card"},
+    {{119}, 21, 7, 2, "Platinum Card"},
+    {{119}, 15, 2, 0, "Card Soldier Spade"},
+    {{119}, 13, 4, 0, "Card Soldier Heart"},
+    {{23}, 22, 0, 0, "\x83N\x83\x89\x83" "E\x83hA"},
+    {{23}, 22, 1, 0, "\x83N\x83\x89\x83" "E\x83hB"},
+    {{23}, 22, 2, 0, "\x83n\x83" "f\x83XA"},
+    {{39}, 22, 3, 0, "\x83n\x83" "f\x83XB"},
+    {{23}, 22, 4, 0, "\x83t\x83" "b\x83NA"},
+    {{23}, 22, 5, 0, "\x83t\x83" "b\x83NB"},
+    {{23}, 22, 6, 0, "\x83t\x83" "b\x83NC"},
+    {{39}, 22, 7, 0, "\x83t\x83" "b\x83ND"},
+    {{23}, 23, 0, 0, "\x83" "A\x83N\x83Z\x83\x8b" "A"},
+    {{23}, 23, 1, 0, "\x83" "A\x83N\x83Z\x83\x8b" "B"},
+    {{23}, 23, 2, 0, "\x83\x89\x83N\x83V\x81[\x83kA"},
+    {{23}, 23, 3, 0, "\x83\x89\x83N\x83V\x81[\x83kB"},
+    {{39}, 23, 4, 0, "\x83\x89\x83N\x83V\x81[\x83kC"},
+    {{23}, 23, 5, 0, "\x83\x8a\x83NA"},
+    {{23}, 23, 6, 0, "\x83\x8a\x83NB"},
+    {{23}, 23, 7, 0, "\x83\x8a\x83NC"},
+    {{23}, 24, 0, 0, "\x83\x8a\x83ND"},
+    {{23}, 24, 1, 0, "\x83\x94\x83" "B\x83N\x83Z\x83\x93" "A"},
+    {{39}, 24, 2, 0, "\x83\x94\x83" "B\x83N\x83Z\x83\x93" "B"},
+    {{23}, 24, 3, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "A"},
+    {{23}, 24, 4, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "B"},
+    {{39}, 24, 5, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "C"},
+    {{119}, 24, 6, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "2"},
+    {{119}, 24, 7, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "3"},
+    {{23}, 25, 0, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XA"},
+    {{23}, 25, 1, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XB"},
+    {{39}, 25, 2, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XC"},
+    {{23}, 25, 3, 0, "\x83" "A\x83\x93\x83Z\x83\x80" "A"},
+    {{39}, 25, 4, 0, "\x83" "A\x83\x93\x83Z\x83\x80" "B"},
+    {{39}, 25, 5, 0, "\x83[\x83N\x83V\x83I\x83\x93" "A"},
+    {{119}, 26, 3, 0, "-"},
+    {{136}, 0, 0, 6, "\x83\x8a\x83\x8d\x81[\x83h"},
+    {{153}, 16, 3, 6, "Tranquil Darkness"},
+    {{153}, 16, 4, 6, "Teeming Darkness"},
+    {{153}, 16, 5, 6, "Feeble Darkness"},
+    {{153}, 16, 6, 6, "Almighty Darkness"},
+    {{153}, 16, 7, 6, "Sleeping Darkness"},
+    {{153}, 17, 0, 6, "Looming Darkness"},
+    {{153}, 17, 1, 2, "Premium Room"},
+    {{153}, 17, 2, 2, "White Room"},
+    {{153}, 17, 3, 6, "Black Room"},
+    {{153}, 17, 4, 6, "Bottomless Darkness"},
+    {{153}, 17, 5, 6, "Roulette Room"},
+    {{169}, 17, 6, 6, "Martial Waking"},
+    {{169}, 17, 7, 2, "Sorcerous Waking"},
+    {{169}, 18, 0, 2, "Alchemic Waking"},
+    {{169}, 18, 1, 6, "Meeting Ground"},
+    {{169}, 18, 2, 6, "Stagnant Space"},
+    {{169}, 18, 3, 6, "Strong Initiative"},
+    {{169}, 18, 4, 6, "Lasting Daze"},
+    {{185}, 18, 5, 2, "Calm Bounty"},
+    {{185}, 18, 6, 2, "Guarded Trove"},
+    {{185}, 18, 7, 2, "False Bounty"},
+    {{185}, 19, 0, 6, "Moment's Reprieve"},
+    {{185}, 19, 1, 6, "Mingling Worlds"},
+    {{185}, 19, 2, 2, "Moogle Room"},
+    {{185}, 19, 3, 6, "Random Joker"},
+    {{202}, 19, 4, 6, "Key of Beginnings"},
+    {{202}, 19, 5, 6, "Key of Guidance"},
+    {{202}, 19, 6, 6, "Key to Truth"},
+    {{202}, 19, 7, 2, "Key to Rewards"},
+    {{219}, 20, 0, 6, "Traverse Town"},
+    {{219}, 20, 3, 6, "Agrabah"},
+    {{219}, 20, 2, 6, "Olympus Coliseum"},
+    {{219}, 20, 1, 6, "Wonderland"},
+    {{219}, 20, 5, 6, "Monstro"},
+    {{219}, 20, 4, 6, "Halloween Town"},
+    {{219}, 20, 6, 6, "Atlantica"},
+    {{219}, 20, 7, 6, "Neverland"},
+    {{219}, 21, 0, 6, "Hollow Bastion"},
+    {{219}, 21, 1, 2, "100 Acre Woods"},
+    {{219}, 21, 2, 6, "Twilight Town"},
+    {{219}, 21, 3, 6, "Destiny Islands"},
+    {{219}, 21, 4, 4, "Castle Oblivion"},
+    {{13}, 0, 0, 0, "EXP\x90\xc2\x8f\xac"},
+    {{13}, 0, 1, 0, "EXP\x90\xc2\x92\x86"},
+    {{13}, 0, 2, 0, "EXP\x90\xc2\x91\xe5"},
+    {{13}, 0, 3, 0, "EXP\x90\xd4\x8f\xac"},
+    {{13}, 0, 4, 0, "EXP\x90\xd4\x92\x86"},
+    {{13}, 0, 5, 0, "EXP\x90\xd4\x91\xe5"},
+    {{13}, 0, 6, 0, "EXP\x8b\xe2"},
+    {{13}, 1, 0, 0, "HP\x8f\xac"},
+    {{13}, 1, 1, 0, "HP\x91\xe5"},
+    {{13}, 2, 0, 0, "MP\x8f\xac"},
+    {{13}, 2, 1, 0, "MP\x91\xe5"},
+    {{13}, 3, 0, 0, "P"},
+    {{13}, 4, 0, 0, "R"},
+    {{12}, 0, 0, 0, "Unknown Room"},
+    {{12}, 0, 0, 0, "Conqueror's Respite"},
+    {{12}, 0, 0, 0, "Room of Rewards"},
+    {{12}, 0, 0, 0, ""},
+    {{12}, 0, 0, 0, ""},
+    {{0}, 0, 0, 0, ""},
+    {{0}, 0, 0, 0, ""},
+    {{0}, 0, 0, 0, ""},
+};
+static const C2DSeqAgent::SeqTbl s_seqDataPlateTbl[3][2] = {
+    {{{100, 101, 102}}, {{97, 98, 99}}},
+    {{{111, 112, 113}}, {{108, 109, 110}}},
+    {{{115, 116, 117}}, {{112, 113, 114}}},
+};
+static const short s_seqDataActPlateTbl[3][2] = {{99, 96}, {110, 107}, {114, 111}};
 
 /* The file's inline helpers, whose strings follow the headers' in .rodata (then CSaveLoadUI::main's): the CTD text with
  * its "" fallback and the memory card slot name (createCheckingMsg, exeCheckSlot). */
@@ -297,18 +537,27 @@ public:
     static void reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLinkOwner);
     static BOOL isCompleteLoadRCF(INT nGroup, INT nMember);
 };
+struct RoomInfo { /* PARTIAL: Game/SceneInfo.h needs the game headers */
+    BYTE _m_0x00[0x60];
+    void* _pSrcInfo;      /* 0x60 */
+    void* _pStorageInfo;  /* 0x64 */
+    void* _pStorageInfo2; /* 0x68 */
+    BYTE getRoomNameCardID() const;
+};
 class CSceneInfo { /* PARTIAL: Game/SceneInfo.h needs the game headers */
 public:
     static void initNewGame(BOOL bSora);
+    static RoomInfo* getRoomInfo(INT nRoomID);
+    static INT getCurrentWorldID(BOOL bCheck);
 };
 class CGame { /* PARTIAL: Game/Game.h needs the game headers */
 public:
     static BOOL isRikuGame();
     static BOOL isSoraGame();
 };
-struct ObjType { /* PARTIAL: System/Graphic/Effect/EffectMan.h is too heavy here */
-    enum eObjBit { OBJBIT_NONE = 0 };
-};
+namespace ObjType { /* PARTIAL: System/Graphic/Effect/EffectMan.h is too heavy here (an 8-byte enum there too) */
+enum eObjBit { OBJ_BIT_CLEAR = 0, OBJ_BIT_STILL_SCR = 0x80000000L, OBJ_BIT_ALL = 0xFFFEFFFFL, OBJ_BIT_TRUE_ALL = -1 };
+}
 class CSceneEnv { /* PARTIAL: Game/SceneEnv.h needs EffectMan.h */
 public:
     static void setStop(ObjType::eObjBit iBit);
@@ -322,16 +571,84 @@ public:
 HANDLE CSaveLoadUI::m_hThis = 0;
 
 
-/* Placeholder (stripped) for the constructor, still assembly: it inlines CStateTemplate::set, whose assert strings
- * come first in its .rodata (the CStateTemplate functions compiled at the end share them), and constructs m_State[]. */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _saveLoadUiCtorStrings_placeholder(CStateTemplate<CSaveLoadUI>* pState,
-                                                                        CSaveLoadUI* pThis, void (CSaveLoadUI::*pfn)()) {
-    new (pState) CStateTemplate<CSaveLoadUI>;
-    pState->set(pThis, pfn, pfn, pfn);
+CSaveLoadUI::CSaveLoadUI(CSaveLoad& parent, SAVELOAD mode, GAMECLEAR clear)
+    : CTask(&parent, 0x4000), m_mode(mode), m_pMemoca(NULL), m_pGameDataEntries(NULL), m_hLay(0), m_nFlag(0),
+      m_pMainFrameAgent(NULL), m_pRoomNameAgent(NULL), m_pRoomNameCtrl(NULL), m_pWorldIconAgent(NULL),
+      m_pWorldIconCtrl(NULL), m_pMainFrameHelpAgent(NULL), m_pMainFrameHelpCtrl(NULL), m_pMainFrameHelpFnt(NULL),
+      m_pMainCursor(NULL), m_pMainLightMark(NULL), m_pTimeLabelAgent(NULL), m_pTimeLabelCtrl(NULL), m_pTimeCtrl(NULL),
+      m_pMPLabelAgent(NULL), m_pMPLabelCtrl(NULL), m_pMPCtrl(NULL), m_pMemocaInfoAgent(NULL), m_pMemocaInfoCtrl(NULL),
+      m_pDataListContainerAgent(NULL), m_pDataListContainerCtrl(NULL), m_pDataListScrollbar(NULL), m_nDataListTop(0),
+      m_nDataListSel(0), m_pMessageDlgAgent(NULL), m_pMessageDlgCtrl(NULL), m_pMessageDlgFntInf(NULL),
+      m_pMessageDlgCursor(NULL) {
+    ignorePause(TRUE);
+    m_hParent = parent.getHandle();
+    m_hThis = getHandle();
+    s_pFadeMask = NULL;
+    s_nMsgResult = SLMSG_RESULT_CANCEL;
+    m_nSlot = CMemocaDataEntries::getLatestSlot();
+    if (clear == GAMECLEAR_CLEAR) m_nFlag |= 0x40;
+    if (CMainApp::isWarningPauseDisable()) m_nFlag |= 0x8000;
+    CMainApp::enableWarningPause(FALSE);
+    for (INT i = 0; i < 2; i++) {
+        m_pResultPlateCtrl[i] = NULL;
+        m_pResultPlateAgent[i] = NULL;
+        m_pResultLightAgent[i] = NULL;
+    }
+    for (INT j = 0; j < 2; j++) {
+        m_pSelSlotPlate[j] = NULL;
+    }
+    for (INT k = 0; k < 4; k++) {
+        m_pDataItemPlate[k] = NULL;
+        m_pDataItemNumCircle[k] = NULL;
+        m_pDataItemNumFnt[k] = NULL;
+        m_pDataItemIcon[k] = NULL;
+        m_pDataItemClearIcon[k] = NULL;
+    }
+    for (INT l = 0; l < 3; l++) {
+        m_pMemocaInfoBar[l] = NULL;
+    }
+    for (INT m = 0; m < 2; m++) {
+        m_pMessageDlgBtnAgent[m] = NULL;
+    }
+    m_State[0].set(this, &CSaveLoadUI::preInit, &CSaveLoadUI::exeInit, &CSaveLoadUI::endInit);
+    m_State[1].set(this, &CSaveLoadUI::preCheckBoot, &CSaveLoadUI::exeCheckBoot, NULL);
+    m_State[2].set(this, &CSaveLoadUI::preLayIn, &CSaveLoadUI::exeLayIn, NULL);
+    m_State[3].set(this, &CSaveLoadUI::preLayOut, &CSaveLoadUI::exeLayOut, NULL);
+    m_State[4].set(this, &CSaveLoadUI::preExit, &CSaveLoadUI::exeExit, NULL);
+    m_State[5].set(this, &CSaveLoadUI::preNop, &CSaveLoadUI::exeNop, NULL);
+    m_State[6].set(this, &CSaveLoadUI::preOpenSlot, &CSaveLoadUI::exeOpenSlot, NULL);
+    m_State[7].set(this, &CSaveLoadUI::preSelSlot, &CSaveLoadUI::exeSelSlot, &CSaveLoadUI::endSelSlot);
+    m_State[8].set(this, &CSaveLoadUI::preCheckSlot, &CSaveLoadUI::exeCheckSlot, &CSaveLoadUI::endCheckSlot);
+    m_State[9].set(this, &CSaveLoadUI::preOpenDataList, &CSaveLoadUI::exeOpenDataList, NULL);
+    m_State[10].set(this, &CSaveLoadUI::preSelDataList, &CSaveLoadUI::exeSelDataList, &CSaveLoadUI::endSelDataList);
+    m_State[11].set(this, &CSaveLoadUI::preSaveData, &CSaveLoadUI::exeSaveData, NULL);
+    m_State[12].set(this, &CSaveLoadUI::preLoadData, &CSaveLoadUI::exeLoadData, NULL);
+    m_State[13].set(this, &CSaveLoadUI::preCheckOverwrite, &CSaveLoadUI::exeCheckOverwrite, NULL);
+    m_State[14].set(this, &CSaveLoadUI::preCheckNoMemory, &CSaveLoadUI::exeCheckNoMemory, NULL);
+    m_State[15].set(this, &CSaveLoadUI::preCheckNoCard, &CSaveLoadUI::exeCheckNoCard, NULL);
+    m_State[16].set(this, &CSaveLoadUI::preCheckUnformat, &CSaveLoadUI::exeCheckUnformat, NULL);
+    m_State[17].set(this, &CSaveLoadUI::preConfirmExecErr, &CSaveLoadUI::exeConfirmExecErr, NULL);
+    m_State[18].set(this, &CSaveLoadUI::preMessageOnly, &CSaveLoadUI::exeMessageOnly, NULL);
+    if (m_mode == SLMODE_SAVE) {
+        m_pszLad = "save.lad";
+        m_nMainSeqUnit = 0;
+        m_nIconSeqUnit = 1;
+        s_nWorldIconRsrc = CSceneInfo::getCurrentWorldID(1);
+        if (!s_nWorldIconRsrc) s_nWorldIconRsrc = 13;
+        s_nWorldIconRsrc += 0x95;
+    } else {
+        m_pszLad = "load.lad";
+        m_nMainSeqUnit = 0;
+        m_nIconSeqUnit = 1;
+        s_nWorldIconRsrc = 0;
+    }
+    if (mode != SLMODE_BOOT && mode != SLMODE_MESSAGE) {
+        CSceneEnv::setStop(ObjType::OBJ_BIT_ALL);
+        CSceneEnv::setStopGauge(TRUE);
+        CSound::pauseAllSE();
+    }
+    changeState(0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", __11CSaveLoadUIR9CSaveLoad8SAVELOAD9GAMECLEAR);
-__asm__(".rdata\n.align 3\n.word 0xFFFF0000\n.word 0x00348F38\n.word 0xFFFF0000\n.word 0x00349018\n.word 0xFFFF0000\n.word 0x00349148\n.word 0xFFFF0000\n.word 0x00349150\n.word 0xFFFF0000\n.word 0x00349248\n.word 0xFFFF0000\n.word 0x003493F8\n.word 0xFFFF0000\n.word 0x00349788\n.word 0xFFFF0000\n.word 0x00349790\n.word 0xFFFF0000\n.word 0x00349860\n.word 0xFFFF0000\n.word 0x003498D8\n.word 0xFFFF0000\n.word 0x00349938\n.word 0xFFFF0000\n.word 0x00349940\n.word 0xFFFF0000\n.word 0x00349948\n.word 0xFFFF0000\n.word 0x00349950\n.word 0xFFFF0000\n.word 0x003499D0\n.word 0xFFFF0000\n.word 0x003499D8\n.word 0xFFFF0000\n.word 0x00349A18\n.word 0xFFFF0000\n.word 0x00349B18\n.word 0xFFFF0000\n.word 0x00349B98\n.word 0xFFFF0000\n.word 0x00349C48\n.word 0xFFFF0000\n.word 0x00349FE8\n.word 0xFFFF0000\n.word 0x00349FF0\n.word 0xFFFF0000\n.word 0x0034A1D0\n.word 0xFFFF0000\n.word 0x0034A1D8\n.word 0xFFFF0000\n.word 0x0034A2D8\n.word 0xFFFF0000\n.word 0x0034A6A8\n.word 0xFFFF0000\n.word 0x0034A6E8\n.word 0xFFFF0000\n.word 0x0034A890\n.word 0xFFFF0000\n.word 0x0034AAC0\n.word 0xFFFF0000\n.word 0x0034ACA8\n.word 0xFFFF0000\n.word 0x0034ADE0\n.word 0xFFFF0000\n.word 0x0034AE68\n.word 0xFFFF0000\n.word 0x0034AF80\n.word 0xFFFF0000\n.word 0x0034B228\n.word 0xFFFF0000\n.word 0x0034B338\n.word 0xFFFF0000\n.word 0x0034B4E0\n.word 0xFFFF0000\n.word 0x0034B5A8\n.word 0xFFFF0000\n.word 0x0034B7B8\n.word 0xFFFF0000\n.word 0x0034BB00\n.word 0xFFFF0000\n.word 0x0034BCF0\n.word 0xFFFF0000\n.word 0x0034BDC0\n.word 0xFFFF0000\n.word 0x0034BEA0\n.word 0x65766173\n.word 0x64616C2E\n.word 0x00000000\n.word 0x00000000\n.word 0x64616F6C\n.word 0x64616C2E\n.word 0x00000000\n.word 0x00000000\n.text\n");
 CSaveLoadUI::~CSaveLoadUI() {
     CTask* pParent = CTaskMan::getTask(m_hParent);
     if (pParent) pParent->out();
@@ -363,7 +680,7 @@ CSaveLoadUI::~CSaveLoadUI() {
     delete m_pMessageDlgCursor;
     _ref(m_hThis) = 0;
     if (m_mode != SLMODE_BOOT && m_mode != SLMODE_MESSAGE) {
-        CSceneEnv::setStop((ObjType::eObjBit)0);
+        CSceneEnv::setStop(ObjType::OBJ_BIT_CLEAR);
         CSceneEnv::setStopGauge(FALSE);
         CPackMan::changeDrawMode(0);
         CSound::startAllPausedSE();
@@ -1261,8 +1578,43 @@ C2DSeqAgent* CSaveLoadUI::createWorldIcon(D2::C2DSeqCtrl*& pOutCtrl) {
     pAgent->setupState(tbl);
     return pAgent;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createRoomName__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
-__asm__(".rdata\n.align 3\n.word 0x002B002A\n.word 0x0000002C\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38323032\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x37343032\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31353032\n.word 0x00000029\n.text\n");
+/* CARD's inline constructor (Game/Card.cpp's _setCard) */
+static inline void _setCard(CARD& c, USHORT nKind, CHAR nNumber) {
+    c.m_nId = 0;
+    c.m_nNumber2 = nNumber;
+    c.m_nKind2 = nKind;
+    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
+}
+C2DSeqAgent* CSaveLoadUI::createRoomName(D2::C2DSeqCtrl*& pOutCtrl) {
+    C2DSeqAgent::SeqTbl tbl = {{42, 43, 44}};
+    FVECTOR v;
+    BYTE nCardID;
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2028)", RET_ADDR())) D2::C2DSeqCtrl;
+    nCardID = 0;
+    pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, tbl._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    v.init();
+    pOutCtrl->setPos(v);
+    if (!(m_nFlag & 0x40)) {
+        RoomInfo* pInfo = CSceneInfo::getRoomInfo(-1);
+        if (pInfo && ((UINT)pInfo->_pSrcInfo | (UINT)pInfo->_pStorageInfo | (UINT)pInfo->_pStorageInfo2)) {
+            nCardID = pInfo->getRoomNameCardID();
+        }
+    }
+    CARD card;
+    _setCard(card, nCardID, 0);
+    G_RGBA rgba;
+    rgba.col = 0x80707070;
+    D2::C2DFnt* pFnt =
+        new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2047)", RET_ADDR())) D2::C2DFnt(0, 0, &rgba, 16, card.getName(), 0x241);
+    pOutCtrl->addFnt(m_pszLad, m_nMainSeqUnit, pFnt);
+    pOutCtrl->enableColorCtrl(TRUE);
+    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2051)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
+    pAgent->setupState(tbl);
+    return pAgent;
+}
 C2DSeqCursorCtrl* CSaveLoadUI::createCursor() {
     short tbl[2][2] = {{8, 7}, {8, 7}};
     SHORT* pTbl = tbl[getRsrcType()];
@@ -1471,8 +1823,69 @@ C2DSeqAgent* CSaveLoadUI::createDataListContainer(D2::C2DSeqCtrl*& pOutCtrl, C2D
     pOutScrollbar->setBasePos(vPos);
     return pAgent;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createDataItemPlate__11CSaveLoadUIRQ22D210C2DSeqCtrlRPQ22D210C2DSeqCtrlRPQ22D26C2DFntT2T2i);
-__asm__(".rdata\n.align 3\n.word 0x00010007\n.word 0x00010008\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38323432\n.word 0x00000029\n.word 0x004F004B\n.word 0x00000000\n.word 0x00010001\n.word 0x00010001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31353432\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32363432\n.word 0x00000029\n.word 0x00020001\n.word 0x00020001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x39363432\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31383432\n.word 0x00000029\n.word 0x00730076\n.word 0x00000000\n.word 0x00030001\n.word 0x00030001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32393432\n.word 0x00000029\n.text\n");
+C2DSeqSelectable* CSaveLoadUI::createDataItemPlate(D2::C2DSeqCtrl& parent, D2::C2DSeqCtrl*& pOutNumCircle,
+                                                   D2::C2DFnt*& pOutNumFnt, D2::C2DSeqCtrl*& pOutIcon,
+                                                   D2::C2DSeqCtrl*& pOutClearIcon, INT nIdx) {
+    _LayoutInfo ltbl[2] = {{7, 1}, {8, 1}};
+    const C2DSeqAgent::SeqTbl& t = s_seqDataPlateTbl[0][getRsrcType()];
+    C2DSeqSelectable* pPlate =
+        new (com_malloc_d(sizeof(C2DSeqSelectable), __FILE__ "(2428)", RET_ADDR())) C2DSeqSelectable(this);
+    pPlate->setupSeq(t, m_pszLad, m_nMainSeqUnit, s_seqDataActPlateTbl[0][getRsrcType()], 12);
+    pPlate->setCtrlParent(&parent);
+    G_RGBA rgba;
+    rgba.col = 0x802864FA;
+    pPlate->setCaptionParam(s_pStrSlot[nIdx], 11, &rgba, 0x40);
+    pPlate->setCaptionText(m_szDataItemContent[nIdx]);
+    pPlate->setCaptionSpace(0, 48);
+    FVECTOR vPos;
+    _LayoutInfo& info = ltbl[getRsrcType()];
+    D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx + nIdx, vPos, FALSE);
+    pPlate->setCtrlLocalPos(vPos);
+    pPlate->setupState(t);
+    pPlate->setCursorOfs(-104.0f, -16.0f);
+    pPlate->setLightMarkOfs(210.0f, -20.0f);
+
+    short cirTbl[2] = {75, 79};
+    _LayoutInfo cirltbl[2] = {{1, 1}, {1, 1}};
+    pOutNumCircle = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2451)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutNumCircle->setParent(pPlate->getSeqCtrl());
+    pOutNumCircle->addSeq(m_pszLad, m_nMainSeqUnit, cirTbl[getRsrcType()]);
+    _LayoutInfo& info2 = cirltbl[getRsrcType()];
+    D2::C2DMan::getLayPosition(m_pszLad, info2._nLayIdx, info2._nSeqIdx, vPos, FALSE);
+    pOutNumCircle->setLocalPos(vPos);
+    pOutNumCircle->changeLayer(12);
+    pOutNumCircle->enableColorCtrl(TRUE);
+    rgba.col = 0x80707070;
+    pOutNumFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2462)", RET_ADDR()))
+        D2::C2DFnt(0, 0, &rgba, 12, m_szDataItemID[nIdx], 0x40);
+    pOutNumCircle->addFntShift(m_pszLad, m_nMainSeqUnit, pOutNumFnt, -6.5f, 5.5f);
+
+    _LayoutInfo icontbl[2] = {{1, 2}, {1, 2}};
+    pOutIcon = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2469)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutIcon->setParent(pPlate->getSeqCtrl());
+    pOutIcon->addSeq(m_pszLad, m_nIconSeqUnit, 0);
+    _LayoutInfo& info3 = icontbl[getRsrcType()];
+    D2::C2DMan::getLayPosition(m_pszLad, info3._nLayIdx, info3._nSeqIdx, vPos, FALSE);
+    pOutIcon->setLocalPos(vPos);
+    pOutIcon->changeLayer(12);
+    pOutIcon->enableColorCtrl(TRUE);
+    rgba.col = 0x802864FA;
+    D2::C2DFnt* pTimeFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2481)", RET_ADDR()))
+        D2::C2DFnt(0, 0, &rgba, 12, m_szDataItemTime[nIdx], 0x40);
+    pPlate->getSeqCtrl()->addFntShift(m_pszLad, m_nMainSeqUnit, pTimeFnt, 112.0f, 20.0f);
+
+    short clrIcon[2] = {118, 115};
+    _LayoutInfo clr_icontbl[2] = {{1, 3}, {1, 3}};
+    pOutClearIcon = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2492)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutClearIcon->setParent(pPlate->getSeqCtrl());
+    pOutClearIcon->addSeq(m_pszLad, m_nMainSeqUnit, clrIcon[getRsrcType()]);
+    _LayoutInfo& info4 = clr_icontbl[getRsrcType()];
+    D2::C2DMan::getLayPosition(m_pszLad, info4._nLayIdx, info4._nSeqIdx, vPos, FALSE);
+    pOutClearIcon->setLocalPos(vPos);
+    pOutClearIcon->changeLayer(12);
+    pOutClearIcon->enableColorCtrl(TRUE);
+    return pPlate;
+}
 C2DSeqAgent* CSaveLoadUI::createMessageDlg(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt*& pOutFntInf) {
     C2DSeqAgent::SeqTbl tbl[4] = {{{52, 53, 54}}, {{52, 53, 54}}, {{55, 56, 57}}, {{55, 56, 57}}};
     _LayoutInfo ltbl[4] = {{0, 0}, {0, 0}, {2, 0}, {2, 0}};
@@ -1500,8 +1913,27 @@ C2DSeqAgent* CSaveLoadUI::createMessageDlg(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt
     pAgent->setupState(t, callbackMessageDlg, callbackMessageDlg);
     return pAgent;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMessageDlgBtn__11CSaveLoadUIPQ22D210C2DSeqCtrli);
-__asm__(".rdata\n.align 3\n.word 0x00320031\n.word 0x00310033\n.word 0x00330032\n.word 0x00000000\n.word 0x00300030\n.word 0x00000000\n.word 0x00010000\n.word 0x00020000\n.word 0x00010000\n.word 0x00020000\n.word 0x00020002\n.word 0x00010002\n.word 0x00020002\n.word 0x00010002\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x37363532\n.word 0x00000029\n.text\n");
+C2DSeqSelectable* CSaveLoadUI::createMessageDlgBtn(D2::C2DSeqCtrl* pParent, INT nIdx) {
+    C2DSeqAgent::SeqTbl tbl[2] = {{{49, 50, 51}}, {{49, 50, 51}}};
+    short actTbl[2] = {48, 48};
+    _LayoutInfo ltbl[4][2] = {{{0, 1}, {0, 2}}, {{0, 1}, {0, 2}}, {{2, 2}, {2, 1}}, {{2, 2}, {2, 1}}};
+    C2DSeqAgent::SeqTbl& t = tbl[getRsrcType()];
+    C2DSeqSelectable* pBtn =
+        new (com_malloc_d(sizeof(C2DSeqSelectable), __FILE__ "(2567)", RET_ADDR())) C2DSeqSelectable(this);
+    pBtn->setupSeq(t, m_pszLad, m_nMainSeqUnit, actTbl[getRsrcType()], 14);
+    pBtn->getSeqCtrl()->setParent(pParent);
+    G_RGBA rgba;
+    rgba.col = 0x80707070;
+    pBtn->setCaptionParam(NULL, 15, &rgba, 0x42);
+    pBtn->setCaptionShift(48.0f, 16.0f);
+    FVECTOR vPos;
+    _LayoutInfo& info = ltbl[m_mode][nIdx];
+    D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
+    pBtn->setCtrlPos(vPos);
+    pBtn->setupState(t);
+    pBtn->setLightMarkOfs(100.0f, 2.0f);
+    return pBtn;
+}
 void CSaveLoadUI::setActiveSlotPlate(INT nSlot) {
     unsigned short seqTbl[2][2] = {{0, 2}, {0, 2}};
     char szMes[64];
@@ -1518,239 +1950,6 @@ void CSaveLoadUI::setActiveSlotPlate(INT nSlot) {
     setHelpMessage(szMes);
     m_pResultPlateFnt[1]->setText(s_pStrSlot[nSlot]);
 }
-/* file-scope constant tables (deferred: emitted after the vtables, as in the original) */
-static const CARD_DATA cardDataTbl[224] = {
-    {{0}, 0, 0, 0, ""},
-    {{17}, 2, 0, 3, "Kingdom Key"},
-    {{17}, 2, 1, 3, "Three Wishes"},
-    {{17}, 2, 2, 3, "Crabclaw"},
-    {{17}, 2, 3, 3, "Pumpkinhead"},
-    {{17}, 2, 4, 3, "Fairy Harp"},
-    {{17}, 2, 5, 3, "Wishing Star"},
-    {{17}, 2, 6, 3, "Spellbinder"},
-    {{17}, 2, 7, 3, "Metal Chocobo"},
-    {{17}, 3, 0, 3, "Olympia"},
-    {{17}, 3, 1, 3, "Lionheart"},
-    {{17}, 3, 2, 3, "Lady Luck"},
-    {{17}, 3, 3, 3, "Divine Rose"},
-    {{17}, 3, 4, 3, "Oathkeeper"},
-    {{17}, 3, 5, 3, "Oblivion"},
-    {{17}, 3, 6, 3, "Ultima Weapon"},
-    {{17}, 3, 7, 3, "Diamond Dust"},
-    {{17}, 4, 0, 3, "One-Winged Angel"},
-    {{17}, 4, 1, 4, "Soul Eater"},
-    {{17}, 4, 2, 3, "Star Seeker"},
-    {{17}, 4, 3, 3, "Monochrome"},
-    {{17}, 4, 4, 3, "Follow the Wind"},
-    {{17}, 4, 5, 3, "Hidden Dragon"},
-    {{17}, 4, 6, 3, "Photon Debugger"},
-    {{17}, 4, 7, 3, "Bond of Flame"},
-    {{17}, 26, 0, 0, "-"},
-    {{34}, 5, 0, 3, "Fire"},
-    {{34}, 5, 1, 3, "Blizzard"},
-    {{34}, 5, 2, 3, "Thunder"},
-    {{34}, 5, 3, 3, "Cure"},
-    {{34}, 5, 4, 3, "Gravity"},
-    {{34}, 5, 5, 3, "Stop"},
-    {{34}, 5, 6, 3, "Aero"},
-    {{34}, 26, 2, 0, "-"},
-    {{34}, 26, 1, 0, "-"},
-    {{51}, 5, 7, 3, "Simba"},
-    {{51}, 6, 0, 3, "Genie"},
-    {{51}, 6, 1, 3, "Bambi"},
-    {{51}, 6, 2, 3, "Dumbo"},
-    {{51}, 6, 3, 3, "Tinker Bell"},
-    {{51}, 6, 4, 3, "Mushu"},
-    {{51}, 6, 5, 3, "Cloud"},
-    {{68}, 6, 6, 6, "Potion"},
-    {{68}, 6, 7, 6, "Hi-Potion"},
-    {{68}, 7, 0, 2, "Mega-Potion"},
-    {{68}, 7, 1, 2, "Ether"},
-    {{68}, 7, 2, 2, "Mega-Ether"},
-    {{68}, 7, 3, 2, "Elixir"},
-    {{68}, 7, 4, 2, "Megalixir"},
-    {{85}, 7, 5, 2, "Donald Duck"},
-    {{85}, 7, 6, 2, "Goofy"},
-    {{85}, 7, 7, 2, "Aladdin"},
-    {{85}, 8, 0, 2, "Ariel"},
-    {{85}, 8, 1, 2, "Jack"},
-    {{85}, 8, 2, 2, "Peter Pan"},
-    {{85}, 8, 3, 2, "The Beast"},
-    {{85}, 8, 4, 4, "The King"},
-    {{85}, 8, 5, 2, "Pluto"},
-    {{102}, 8, 6, 6, "Guard Armor"},
-    {{102}, 8, 6, 6, "Trickmaster"},
-    {{102}, 8, 6, 6, "Jafar"},
-    {{102}, 8, 6, 6, "Oogie Boogie"},
-    {{102}, 8, 6, 6, "Parasite Cage"},
-    {{102}, 8, 6, 6, "Ursula"},
-    {{102}, 8, 6, 6, "Dragon Maleficent"},
-    {{102}, 8, 6, 6, "Darkside"},
-    {{230}, 8, 7, 4, "-"},
-    {{230}, 9, 0, 0, "-"},
-    {{119}, 9, 1, 6, "Shadow"},
-    {{119}, 9, 2, 2, "Soldier"},
-    {{119}, 9, 3, 6, "Large Body"},
-    {{119}, 9, 4, 2, "Red Nocturne"},
-    {{119}, 9, 5, 2, "Blue Rhapsody"},
-    {{119}, 9, 6, 2, "Yellow Opera"},
-    {{119}, 9, 7, 2, "Green Requiem"},
-    {{119}, 10, 0, 6, "Powerwild"},
-    {{119}, 10, 1, 2, "Bouncywild"},
-    {{119}, 10, 2, 2, "Air Soldier"},
-    {{119}, 10, 3, 2, "Bandit"},
-    {{119}, 10, 4, 6, "Fat Bandit"},
-    {{119}, 10, 5, 2, "Barrel Spider"},
-    {{119}, 10, 6, 6, "Search Ghost"},
-    {{119}, 10, 7, 6, "Sea Neon"},
-    {{119}, 11, 0, 2, "Screwdiver"},
-    {{119}, 11, 1, 2, "Aquatank"},
-    {{119}, 11, 2, 6, "Wight Knight"},
-    {{119}, 11, 3, 2, "Gargoyle"},
-    {{119}, 11, 4, 6, "Pirate"},
-    {{119}, 11, 5, 2, "Air Pirate"},
-    {{119}, 11, 6, 4, "Darkball"},
-    {{119}, 11, 7, 6, "Defender"},
-    {{119}, 12, 0, 2, "Wyvern"},
-    {{119}, 12, 1, 2, "Wizard"},
-    {{119}, 12, 2, 2, "Neoshadow"},
-    {{119}, 12, 3, 2, "White Mushroom"},
-    {{119}, 12, 4, 2, "Black Fungus"},
-    {{119}, 12, 5, 2, "Creeper Plant"},
-    {{119}, 12, 6, 2, "Tornado Step"},
-    {{119}, 12, 7, 2, "Crescendo"},
-    {{119}, 13, 0, 6, "Guard Armor"},
-    {{119}, 13, 1, 6, "Parasite Cage"},
-    {{119}, 13, 2, 6, "Trickmaster"},
-    {{119}, 13, 3, 6, "Darkside"},
-    {{119}, 13, 4, 2, "Card Soldier"},
-    {{119}, 13, 5, 6, "Hades"},
-    {{119}, 13, 6, 6, "Jafar"},
-    {{119}, 13, 7, 6, "Oogie Boogie"},
-    {{119}, 14, 0, 6, "Ursula"},
-    {{119}, 14, 1, 6, "Hook"},
-    {{119}, 14, 2, 6, "Dragon Maleficent"},
-    {{119}, 14, 3, 2, "Riku"},
-    {{119}, 14, 4, 2, "Axel"},
-    {{119}, 14, 5, 2, "Larxene"},
-    {{119}, 14, 6, 2, "Vexen"},
-    {{119}, 14, 7, 2, "Marluxia"},
-    {{119}, 15, 0, 6, "Lexaeus"},
-    {{119}, 15, 1, 2, "Ansem"},
-    {{119}, 15, 3, 6, "Zexion"},
-    {{119}, 15, 4, 2, "Xemnas"},
-    {{119}, 15, 5, 2, "Xigbar"},
-    {{119}, 15, 6, 2, "Xaldin"},
-    {{119}, 15, 7, 2, "Sa\x83\xc7x"},
-    {{119}, 16, 0, 2, "Demyx"},
-    {{119}, 16, 1, 2, "Luxord"},
-    {{119}, 16, 2, 2, "Roxas"},
-    {{119}, 21, 6, 2, "Gold Card"},
-    {{119}, 21, 7, 2, "Platinum Card"},
-    {{119}, 15, 2, 0, "Card Soldier Spade"},
-    {{119}, 13, 4, 0, "Card Soldier Heart"},
-    {{23}, 22, 0, 0, "\x83N\x83\x89\x83" "E\x83hA"},
-    {{23}, 22, 1, 0, "\x83N\x83\x89\x83" "E\x83hB"},
-    {{23}, 22, 2, 0, "\x83n\x83" "f\x83XA"},
-    {{39}, 22, 3, 0, "\x83n\x83" "f\x83XB"},
-    {{23}, 22, 4, 0, "\x83t\x83" "b\x83NA"},
-    {{23}, 22, 5, 0, "\x83t\x83" "b\x83NB"},
-    {{23}, 22, 6, 0, "\x83t\x83" "b\x83NC"},
-    {{39}, 22, 7, 0, "\x83t\x83" "b\x83ND"},
-    {{23}, 23, 0, 0, "\x83" "A\x83N\x83Z\x83\x8b" "A"},
-    {{23}, 23, 1, 0, "\x83" "A\x83N\x83Z\x83\x8b" "B"},
-    {{23}, 23, 2, 0, "\x83\x89\x83N\x83V\x81[\x83kA"},
-    {{23}, 23, 3, 0, "\x83\x89\x83N\x83V\x81[\x83kB"},
-    {{39}, 23, 4, 0, "\x83\x89\x83N\x83V\x81[\x83kC"},
-    {{23}, 23, 5, 0, "\x83\x8a\x83NA"},
-    {{23}, 23, 6, 0, "\x83\x8a\x83NB"},
-    {{23}, 23, 7, 0, "\x83\x8a\x83NC"},
-    {{23}, 24, 0, 0, "\x83\x8a\x83ND"},
-    {{23}, 24, 1, 0, "\x83\x94\x83" "B\x83N\x83Z\x83\x93" "A"},
-    {{39}, 24, 2, 0, "\x83\x94\x83" "B\x83N\x83Z\x83\x93" "B"},
-    {{23}, 24, 3, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "A"},
-    {{23}, 24, 4, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "B"},
-    {{39}, 24, 5, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "C"},
-    {{119}, 24, 6, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "2"},
-    {{119}, 24, 7, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "3"},
-    {{23}, 25, 0, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XA"},
-    {{23}, 25, 1, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XB"},
-    {{39}, 25, 2, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XC"},
-    {{23}, 25, 3, 0, "\x83" "A\x83\x93\x83Z\x83\x80" "A"},
-    {{39}, 25, 4, 0, "\x83" "A\x83\x93\x83Z\x83\x80" "B"},
-    {{39}, 25, 5, 0, "\x83[\x83N\x83V\x83I\x83\x93" "A"},
-    {{119}, 26, 3, 0, "-"},
-    {{136}, 0, 0, 6, "\x83\x8a\x83\x8d\x81[\x83h"},
-    {{153}, 16, 3, 6, "Tranquil Darkness"},
-    {{153}, 16, 4, 6, "Teeming Darkness"},
-    {{153}, 16, 5, 6, "Feeble Darkness"},
-    {{153}, 16, 6, 6, "Almighty Darkness"},
-    {{153}, 16, 7, 6, "Sleeping Darkness"},
-    {{153}, 17, 0, 6, "Looming Darkness"},
-    {{153}, 17, 1, 2, "Premium Room"},
-    {{153}, 17, 2, 2, "White Room"},
-    {{153}, 17, 3, 6, "Black Room"},
-    {{153}, 17, 4, 6, "Bottomless Darkness"},
-    {{153}, 17, 5, 6, "Roulette Room"},
-    {{169}, 17, 6, 6, "Martial Waking"},
-    {{169}, 17, 7, 2, "Sorcerous Waking"},
-    {{169}, 18, 0, 2, "Alchemic Waking"},
-    {{169}, 18, 1, 6, "Meeting Ground"},
-    {{169}, 18, 2, 6, "Stagnant Space"},
-    {{169}, 18, 3, 6, "Strong Initiative"},
-    {{169}, 18, 4, 6, "Lasting Daze"},
-    {{185}, 18, 5, 2, "Calm Bounty"},
-    {{185}, 18, 6, 2, "Guarded Trove"},
-    {{185}, 18, 7, 2, "False Bounty"},
-    {{185}, 19, 0, 6, "Moment's Reprieve"},
-    {{185}, 19, 1, 6, "Mingling Worlds"},
-    {{185}, 19, 2, 2, "Moogle Room"},
-    {{185}, 19, 3, 6, "Random Joker"},
-    {{202}, 19, 4, 6, "Key of Beginnings"},
-    {{202}, 19, 5, 6, "Key of Guidance"},
-    {{202}, 19, 6, 6, "Key to Truth"},
-    {{202}, 19, 7, 2, "Key to Rewards"},
-    {{219}, 20, 0, 6, "Traverse Town"},
-    {{219}, 20, 3, 6, "Agrabah"},
-    {{219}, 20, 2, 6, "Olympus Coliseum"},
-    {{219}, 20, 1, 6, "Wonderland"},
-    {{219}, 20, 5, 6, "Monstro"},
-    {{219}, 20, 4, 6, "Halloween Town"},
-    {{219}, 20, 6, 6, "Atlantica"},
-    {{219}, 20, 7, 6, "Neverland"},
-    {{219}, 21, 0, 6, "Hollow Bastion"},
-    {{219}, 21, 1, 2, "100 Acre Woods"},
-    {{219}, 21, 2, 6, "Twilight Town"},
-    {{219}, 21, 3, 6, "Destiny Islands"},
-    {{219}, 21, 4, 4, "Castle Oblivion"},
-    {{13}, 0, 0, 0, "EXP\x90\xc2\x8f\xac"},
-    {{13}, 0, 1, 0, "EXP\x90\xc2\x92\x86"},
-    {{13}, 0, 2, 0, "EXP\x90\xc2\x91\xe5"},
-    {{13}, 0, 3, 0, "EXP\x90\xd4\x8f\xac"},
-    {{13}, 0, 4, 0, "EXP\x90\xd4\x92\x86"},
-    {{13}, 0, 5, 0, "EXP\x90\xd4\x91\xe5"},
-    {{13}, 0, 6, 0, "EXP\x8b\xe2"},
-    {{13}, 1, 0, 0, "HP\x8f\xac"},
-    {{13}, 1, 1, 0, "HP\x91\xe5"},
-    {{13}, 2, 0, 0, "MP\x8f\xac"},
-    {{13}, 2, 1, 0, "MP\x91\xe5"},
-    {{13}, 3, 0, 0, "P"},
-    {{13}, 4, 0, 0, "R"},
-    {{12}, 0, 0, 0, "Unknown Room"},
-    {{12}, 0, 0, 0, "Conqueror's Respite"},
-    {{12}, 0, 0, 0, "Room of Rewards"},
-    {{12}, 0, 0, 0, ""},
-    {{12}, 0, 0, 0, ""},
-    {{0}, 0, 0, 0, ""},
-    {{0}, 0, 0, 0, ""},
-    {{0}, 0, 0, 0, ""},
-};
-static const C2DSeqAgent::SeqTbl s_seqDataPlateTbl[3][2] = {
-    {{{100, 101, 102}}, {{97, 98, 99}}},
-    {{{111, 112, 113}}, {{108, 109, 110}}},
-    {{{115, 116, 117}}, {{112, 113, 114}}},
-};
-static const short s_seqDataActPlateTbl[3][2] = {{99, 96}, {110, 107}, {114, 111}};
 
 void CSaveLoadUI::setupDataPlate(SHORT nDataIdx) {
     if (nDataIdx < m_nDataListTop || nDataIdx >= m_nDataListTop + 4) {
