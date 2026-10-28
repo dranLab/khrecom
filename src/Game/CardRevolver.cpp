@@ -1632,7 +1632,51 @@ CEnchantGauge::CEnchantGauge(CTask* pParent, INT inUser, CARD& inCard) : CTask(p
     _initialize();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _$_Q210CardBattle13CEnchantGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _initialize__Q210CardBattle13CEnchantGauge);
+extern "C" char D_0047B4E8[]; /* "c:/KHCOM/MainApp/Game/CardRevolver.cpp(5825)" */
+extern "C" char D_0047B518[]; /* "c:/KHCOM/MainApp/Game/CardRevolver.cpp" */
+extern "C" char D_0047B540[]; /* "m_pSeqCtrls" */
+extern "C" char D_0047B550[]; /* "CEnchantGauge:: m_pSeqCtrls=New..." */
+extern "C" char D_0047B578[]; /* "c:/KHCOM/MainApp/Game/CardRevolver.cpp(5840)" */
+inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+void CEnchantGauge::_initialize() {
+    FVECTOR pos;
+    INT layout;
+    G_RGBA rgba;
+    BC_PARAM* param;
+    INT num;
+    m_uiState = 1;
+    m_pSeqCtrls = new (D_0047B4E8) D2::C2DSeqCtrl[3];
+    if (!m_pSeqCtrls) AssertApp(D_0047B518, 5826, D_0047B540, D_0047B550);
+    m_pSeqCtrls[0].setLayer(6);
+    m_pSeqCtrls[0].addSeq(g_szSeqCockpit, 0x36);
+    layout = (m_uiUser == 1) ? 6 : 5;
+    D2::C2DMan::getLayPosition(g_szLadCockpit, layout, 0, pos, FALSE);
+    m_pSeqCtrls[0].setPos(pos);
+    rgba.col = 0x80808080;
+    _ref(m_pFntName) = new (D_0047B578) D2::C2DFnt(0, 0, &rgba, 12, NULL, 2); // MATCH: store via reference keeps it before the m_pSeqCtrls reload
+    m_pSeqCtrls[0].addFntShift(g_szSeqCockpit, m_pFntName, 0.0f, 2.0f);
+    m_pSeqCtrls[0].enableColorCtrl(TRUE);
+    setText();
+    param = &g_pBattleCardList[m_cardData.m_nKind];
+    m_pSeqCtrls[0].addSeq(g_szSeqCockpit, param->EFF_PART);
+    m_nCount = param->EFF_TIMES;
+    pos.x -= 35.0f;
+    pos.y -= 5.0f;
+    num = m_nCount / 10;
+    m_pSeqCtrls[1].setLayer(8);
+    if (num > 0) m_pSeqCtrls[1].addSeq(g_szSeqCockpit, num + 0x2B);
+    else m_pSeqCtrls[1].addSeq(g_szSeqCockpit, 0x35);
+    m_pSeqCtrls[1].setPos(pos);
+    m_pSeqCtrls[1].enableDisp(0, FALSE);
+    pos.x += 16.0f;
+    num = m_nCount % 10;
+    m_pSeqCtrls[2].setLayer(8);
+    m_pSeqCtrls[2].addSeq(g_szSeqCockpit, num + 0x2B);
+    m_pSeqCtrls[2].setPos(pos);
+    m_pSeqCtrls[2].enableDisp(0, FALSE);
+    m_nStack = m_nNext = m_nCount;
+}
 void CEnchantGauge::setText() {
     if (!m_pSeqCtrls) return;
     if (!m_pFntName) return;
