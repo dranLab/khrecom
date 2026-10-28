@@ -25,6 +25,9 @@
 #include "Game/EffectMotion.h"
 #include "System/Sound/SoundMan.h"
 #include "System/Math3D.h"
+#include "System/Com.h"
+#include "System/Rnd.h"
+#include "Game/EntityFactory.h"
 #include "include_asm.h"
 
 extern "C" char D_004AD680[];
@@ -741,7 +744,23 @@ void CBattleEnemy::setBadStatusEffect(INT inNo, FLOAT inWait) {
     m_hBadStatus = 0;
     m_hBadStatus = CEntity::setBadStatusEffect(_ref(g_BadStatusEffectName), inNo, inWait);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", killBadStatusEffect__12CBattleEnemy);
+void CBattleEnemy::killBadStatusEffect() {
+    CEffectMan::killEffect(m_hBadStatus, 0.0f);
+    m_hBadStatus = 0;
+    if (isBtlEnemyFlag(0x40000000000ULL)) {
+        m_hBadStatus = CEntity::setBadStatusEffect(g_BadStatusEffectName, 3, 0.0f);
+    } else if (isBtlEnemyFlag(0x80000000000ULL)) {
+        m_hBadStatus = CEntity::setBadStatusEffect(g_BadStatusEffectName, 1, 0.0f);
+    } else if (isBtlEnemyFlag(0x20000)) {
+        if (isBtlEnemyFlag(0x40000) && m_tqConfuseTimer < m_tqBindTimer) {
+            m_hBadStatus = CEntity::setBadStatusEffect(g_BadStatusEffectName, 2, 0.0f);
+        } else {
+            m_hBadStatus = CEntity::setBadStatusEffect(g_BadStatusEffectName, 0, 0.0f);
+        }
+    } else if (isBtlEnemyFlag(0x40000)) {
+        m_hBadStatus = CEntity::setBadStatusEffect(g_BadStatusEffectName, 2, 0.0f);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setupFlick__12CBattleEnemy);
 void CBattleEnemy::commonBeginAttack() {
     bodyCollOff(-1);
