@@ -560,7 +560,15 @@ void CSaveLoadUI::exeCheckNoMemory() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckNoCard__11CSaveLoadUI);
+void CSaveLoadUI::preCheckNoCard() {
+    char szSlot[32];
+    _getSlotName(m_nSlot + 1, szSlot);
+    char szMsg[256];
+    const CHAR* pszFmt = _ctdText(0x600202);
+    sprintf(szMsg, pszFmt, _ctdText(0x600000), szSlot);
+    openMessageDlg(szMsg, 0, 1);
+    m_nStep = 0;
+}
 void CSaveLoadUI::exeCheckNoCard() {
     INT nResult = -9999;
     switch (m_nStep) {
