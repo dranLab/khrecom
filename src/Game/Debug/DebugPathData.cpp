@@ -900,7 +900,25 @@ INT debugWinPathEditDispCall(char* pStr, INT iLineY, const void* pValue) {
     }
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditAllCall__FP12CDebugWindowi);
+INT debugWinPathEditAllCall(CDebugWindow* pObj, INT inParam) {
+    if (inParam & 1) {
+        CDebugPathData::setActivePathNum(0, 0);
+        CDebugPathData::entryCam();
+        CDebugPathData::getCam()->ChangeType(0);
+        CDebugPathData::getCam()->Action(0x1B);
+        CDebugPathData::m_fValuePlus = 1.0f;
+        CDebugPathData::m_iCtrlFlg &= ~1;
+    } else if (inParam & 2) {
+        CDebugPathData::removeCam();
+        return TRUE;
+    } else if (dbgButtonTrg(USR_SYSTEM, 2, 1)) {
+        CDebugPathData::incActivePathVecNum(TRUE);
+    } else if (dbgButtonTrg(USR_SYSTEM, 1, 1)) {
+        CDebugPathData::decActivePathVecNum(TRUE);
+    }
+    CDebugPathData::getCam()->SetCameraLookAim(CDebugPathData::m_vActivePathPos);
+    return TRUE;
+}
 __asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text */
 DEBUG_WINDOW_LINE debugWinPathEditPathAddLine[5] = {
     {"\x83p\x83X%d\x82\xcc\x83R\x83s\x81[\x82\xf0\x92\xc7\x89\xc1", &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditPathAddLineCall, NULL},
