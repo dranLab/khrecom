@@ -5,10 +5,12 @@
 #include "khtypes.h"
 #include "System/Task.h"
 #include "System/Vector.h"
+#include "Game/CardKind.h"
 
 namespace D2 { class C2DSeqCtrl; }
 class CPlayer;
 
+class C2DCard;
 namespace Gauge {
 class CEnemyGauge;
 
@@ -171,8 +173,8 @@ public:
 class CFriendGauge : public CTask {
     UINT m_uiState;              /* 0x40 */
     UINT m_uiCount;              /* 0x44 */
-    UINT m_cardFriend[3];        /* 0x48 CARD */
-    class C2DCard* m_pCards;     /* 0x54 */
+    CARD m_cardFriend[3];        /* 0x48 */
+    ::C2DCard* m_pCards;     /* 0x54 */
     D2::C2DSeqCtrl* m_pSeqCtrls; /* 0x58 */
 public:
     CFriendGauge(CTask* p);
@@ -201,7 +203,7 @@ public:
     UINT m_uiCardState;          /* 0x80 */
     UINT m_cardData;             /* 0x84 CARD */
     D2::C2DSeqCtrl* m_pCardSeqCtrls; /* 0x88 */
-    class C2DCard* m_pCard;      /* 0x8c */
+    ::C2DCard* m_pCard;      /* 0x8c */
     TIMEQ m_tqTimer;             /* 0x90 */
     CPrizeGauge(CTask* p);
     void _initialize();

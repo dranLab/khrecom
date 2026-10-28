@@ -12,6 +12,9 @@
 #include "Game/CardKind.h"
 #include "Game/Player/Player.h"
 #include "System/Graphic/WorldEnv.h"
+#include "Game/SceneInfo.h"
+#include "Game/Player/PlayerManager.h"
+#include "System/Graphic/2d/2DCard.h"
 #include "include_asm.h"
 
 using namespace Gauge;
@@ -53,6 +56,19 @@ static inline FLOAT _sqrtf(FLOAT x) {
 extern "C" char D_004A3238[];
 extern "C" char D_004A2F38[];
 extern "C" char D_004A2F00[];
+extern "C" char D_004A2E38[];
+extern "C" char D_004A2E70[];
+extern "C" char D_004A2EA8[];
+extern "C" char D_004A3270[];
+extern "C" char D_004A32A8[];
+extern "C" const CARD_DATA cardDataTbl_004A4070[];
+static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
+    c.m_nId = 0;
+    c.m_nKind2 = kind;
+    c.m_nNumber2 = num;
+    c.m_nCategory20 = cardDataTbl_004A4070[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl_004A4070[c.m_nKind].nCategory1;
+}
 inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 template <class T> static inline T& _ref(T& v) { return v; }
@@ -140,7 +156,39 @@ void CPlayerGauge::exeDPGauge() {
 }
 CLockonMarker::CLockonMarker(CTask* inParent, BOOL inFlag) : CTask(inParent, 0x4000), m_pGauge(NULL), m_bFlag(inFlag) { _initialize(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge13CLockonMarker);
+void CLockonMarker::_initialize() {
+    m_nPreSeqNo = 99;
+    m_nSeqNo = 99;
+    m_uiFlag = 0;
+    m_hTarget = 0;
+    m_hLockon = 0;
+    m_hHoldTarget = 0;
+    m_iDist = 0;
+    m_iMode = 0;
+    m_bTarget = FALSE;
+    m_bLockon = FALSE;
+    m_bDisp = FALSE;
+    m_bTrg = FALSE;
+    m_fDist = 0.0f;
+    m_fScale = 1.0f;
+    m_vPos.init();
+    m_vUseCardPos.init();
+    m_vCameraTargetPos.init();
+
+    m_uiKind = 0;
+    m_pSeqCtrl = NULL;
+    m_pSeqCtrl = new (D_004A2E38) D2::C2DSeqCtrl(2);
+    m_pSeqCtrl->setLayer(2);
+    m_pSeqCtrl->addSeq(g_szSeqCockpit, m_nSeqNo);
+    m_pSeqCtrl->enableDisp(0, FALSE);
+    m_pSeqCtrlPush = NULL;
+    m_pSeqCtrlPush = new (D_004A2E70) D2::C2DSeqCtrl(2);
+    m_vDispPos.init();
+    if (CSceneInfo::isBattleScene() || CSceneInfo::isMinigameScene()) {
+        m_uiFlag |= 4;
+        m_pGauge = new (D_004A2EA8) CEnemyGauge(this);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge13CLockonMarker);
 void CLockonMarker::calcMarkerScale() {
     FVECTOR pos = getPlayerPos(FALSE);
@@ -497,7 +545,25 @@ void CEscapeGauge::destroy() {
 }
 CFriendGauge::CFriendGauge(CTask* p) : CTask(p, 0x4000) { _initialize(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge12CFriendGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge12CFriendGauge);
+void CFriendGauge::_initialize() {
+    INT i;
+    INT kind;
+    PLM::CPlayerManager* pPLM;
+    m_uiState = 0;
+    m_uiCount = 0;
+    pPLM = PLM::CPlayerManager::getPLM();
+    for (i = 0; i < 3; i++) _setCard(m_cardFriend[i], 0, 0);
+    for (i = 0; i < 3; i++) {
+        kind = pPLM->getAppearFriendCard(i, 1);
+        if (kind) {
+            _setCard(m_cardFriend[m_uiCount], kind, 0xFF);
+            m_uiCount++;
+        }
+    }
+    if (m_uiCount) m_pCards = new (D_004A3270) C2DCard[m_uiCount];
+    else m_pCards = NULL;
+    m_pSeqCtrls = new (D_004A32A8) D2::C2DSeqCtrl[3];
+}
 void CFriendGauge::main() {
     if (CSceneEnv::isStopGauge()) return;
     if (m_uiState < 2) return;
