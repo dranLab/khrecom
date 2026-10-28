@@ -14,6 +14,48 @@ class C2DCard;
 namespace Gauge {
 class CEnemyGauge;
 
+#ifdef GAME_PLAYER_PLAYERGAUGE_CPP
+/* PARTIAL: the other gauge classes, for Game/Player/PlayerGauge only. MATCH: declared in reverse vtable order
+   (CPlayerGauge first, then CLockonMarker, CEnemyGauge, CCommonGauge, CPrizeGauge, CEscapeGauge, CFriendGauge) */
+class CNaviMap;
+class CFriendGauge;
+class CPrizeGauge;
+class CCommonGauge;
+class CPlayerGauge : public CTask {
+    CNaviMap* m_pNaviMap;        /* 0x40 */
+    CFriendGauge* m_pFriend;     /* 0x44 */
+    CCommonGauge* m_pCommon;     /* 0x48 */
+    CPrizeGauge* m_pPrize;       /* 0x4c */
+    D2::C2DSeqCtrl* m_pSeqCtrl;   /* 0x50 */
+    D2::C2DSeqCtrl* m_pSeqCtrlDP; /* 0x54 */
+    LPCSTR m_szSeqFace;          /* 0x58 */
+    UINT m_uiFlag;               /* 0x5c */
+    TIMEQ m_tqRed;               /* 0x60 */
+    TIMEQ m_tqTimer;             /* 0x64 */
+    HANDLE m_hAlertSE;           /* 0x68 */
+    USHORT m_nHP;                /* 0x6c */
+    USHORT m_nRedHP;             /* 0x6e */
+    USHORT m_nMaxHP;             /* 0x70 */
+    USHORT m_iState;             /* 0x72 */
+    USHORT m_nDP;                /* 0x74 */
+    USHORT m_nMaxDP;             /* 0x76 */
+    USHORT m_nStateDP;           /* 0x78 */
+    USHORT dum;                  /* 0x7a */
+public:
+    CPlayerGauge(CTask* p);
+    virtual ~CPlayerGauge();
+    virtual void main();
+    void _initialize();
+    static void setBattleEnd();
+    void setMaxHP(INT n);
+    void changeTimeHP(D2::C2DSeqCtrl* p, UINT nIdx, UINT nHP);
+    void setHP(INT inHP, INT inFlag);
+    void exeDPGauge();
+    void setDPGauge(INT n); void setDP(INT inDP, INT inMax);
+    void setDMode(INT inMode, INT inDP, INT inMax);
+};
+#endif
+
 class CLockonMarker : public CTask {
     friend class ::CPlayer; // PARTIAL: added for Game/Player/Player (chkLockon reads the marker state)
 private:
@@ -54,6 +96,32 @@ public:
     void holdTarget(INT inFlag);
     void cancelLockon(INT& ioHandle, INT inFlag); // PARTIAL: added for Game/Player/PlayerRiku
     void chkLockon(INT& ioHandle);                // PARTIAL: added for Game/Player/PlayerRiku
+#ifdef GAME_PLAYER_PLAYERGAUGE_CPP
+    /* the ref's inline members, in its definition order (Game/Player/PlayerGauge emits them all with the key function) */
+private:
+    void setDistance(INT inDist) { m_iDist = inDist; }
+public:
+    void on() { m_bFlag = TRUE; }
+    void off() { m_bFlag = FALSE; }
+    BOOL isFlag() { return m_bFlag; }
+    void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
+    void changeMode() {
+        m_iMode ^= 1;
+        m_bTrg = TRUE;
+        m_hLockon = 0;
+    }
+    HANDLE getTarget() { return m_hTarget; }
+    HANDLE getLockon() { return m_hLockon; }
+    FVECTOR& getPos() { return m_vPos; }
+    FVECTOR& getUseCardPos() { return m_vUseCardPos; }
+    FVECTOR& getCameraTargetPos() { return m_vCameraTargetPos; }
+    void changeMode(INT inMode) {
+        m_iMode = inMode;
+        m_bTrg = TRUE;
+        m_hLockon = 0;
+    }
+    INT getMode() { return m_iMode; }
+#else
     void setFlag(BOOL inFlag) { m_bFlag = inFlag; } // PARTIAL: added for Game/Player/PlayerRiku (original name unknown)
     void changeMode() {
         m_iMode = 1;
@@ -71,6 +139,7 @@ public:
         m_iMode = inMode;
         m_hLockon = 0;
     }
+#endif
 };
 
 #ifndef GAME_PLAYER_PLAYERGAUGE_CPP
@@ -82,59 +151,6 @@ public:
 #endif
 
 #ifdef GAME_PLAYER_PLAYERGAUGE_CPP
-/* PARTIAL: the other gauge classes, for Game/Player/PlayerGauge only */
-class CNaviMap;
-class CFriendGauge;
-class CPrizeGauge;
-
-class CCommonGauge : public CTask {
-public:
-    static CCommonGauge* m_pInstance;
-    UINT m_uiFlag;               /* 0x40 */
-    D2::C2DSeqCtrl* m_pSeqCtrls; /* 0x44 */
-    FVECTOR m_vPos[7];           /* 0x50 */
-    INT m_hOwner[7];             /* 0xc0 */
-    CCommonGauge(CTask* p);
-    virtual ~CCommonGauge();
-    virtual void main();
-    void _initialize();
-    void dispSeqCtrl(INT inIndex, INT inFlag, INT inDisp);
-};
-
-class CPlayerGauge : public CTask {
-    CNaviMap* m_pNaviMap;        /* 0x40 */
-    CFriendGauge* m_pFriend;     /* 0x44 */
-    CCommonGauge* m_pCommon;     /* 0x48 */
-    CPrizeGauge* m_pPrize;       /* 0x4c */
-    D2::C2DSeqCtrl* m_pSeqCtrl;   /* 0x50 */
-    D2::C2DSeqCtrl* m_pSeqCtrlDP; /* 0x54 */
-    LPCSTR m_szSeqFace;          /* 0x58 */
-    UINT m_uiFlag;               /* 0x5c */
-    TIMEQ m_tqRed;               /* 0x60 */
-    TIMEQ m_tqTimer;             /* 0x64 */
-    HANDLE m_hAlertSE;           /* 0x68 */
-    USHORT m_nHP;                /* 0x6c */
-    USHORT m_nRedHP;             /* 0x6e */
-    USHORT m_nMaxHP;             /* 0x70 */
-    USHORT m_iState;             /* 0x72 */
-    USHORT m_nDP;                /* 0x74 */
-    USHORT m_nMaxDP;             /* 0x76 */
-    USHORT m_nStateDP;           /* 0x78 */
-    USHORT dum;                  /* 0x7a */
-public:
-    CPlayerGauge(CTask* p);
-    virtual ~CPlayerGauge();
-    virtual void main();
-    void _initialize();
-    static void setBattleEnd();
-    void setMaxHP(INT n);
-    void changeTimeHP(D2::C2DSeqCtrl* p, UINT nIdx, UINT nHP);
-    void setHP(INT inHP, INT inFlag);
-    void exeDPGauge();
-    void setDPGauge(INT n); void setDP(INT inDP, INT inMax);
-    void setDMode(INT inMode, INT inDP, INT inMax);
-};
-
 class CEnemyGauge : public CTask {
 public:
     static CEnemyGauge* m_pInstance;
@@ -159,31 +175,18 @@ public:
     static HANDLE getNowTarget();
 };
 
-class CEscapeGauge : public CTask {
-    UINT m_uiState;              /* 0x40 */
-    UINT m_uiFlag;               /* 0x44 */
-    D2::C2DSeqCtrl* m_pSeqCtrl;  /* 0x48 */
+class CCommonGauge : public CTask {
 public:
-    CEscapeGauge(CTask* p);
-    virtual ~CEscapeGauge();
+    static CCommonGauge* m_pInstance;
+    UINT m_uiFlag;               /* 0x40 */
+    D2::C2DSeqCtrl* m_pSeqCtrls; /* 0x44 */
+    FVECTOR m_vPos[7];           /* 0x50 */
+    INT m_hOwner[7];             /* 0xc0 */
+    CCommonGauge(CTask* p);
+    virtual ~CCommonGauge();
     virtual void main();
     void _initialize();
-    void setCharge(FLOAT inRate);
-    void destroy();
-};
-
-class CFriendGauge : public CTask {
-    UINT m_uiState;              /* 0x40 */
-    UINT m_uiCount;              /* 0x44 */
-    CARD m_cardFriend[3];        /* 0x48 */
-    ::C2DCard* m_pCards;     /* 0x54 */
-    D2::C2DSeqCtrl* m_pSeqCtrls; /* 0x58 */
-public:
-    CFriendGauge(CTask* p);
-    virtual ~CFriendGauge();
-    void _initialize();
-    virtual void main();
-    void setGauge(INT n);
+    void dispSeqCtrl(INT inIndex, INT inFlag, INT inDisp);
 };
 
 class CPrizeGauge : public CTask {
@@ -213,10 +216,44 @@ public:
     CPrizeGauge(CTask* p);
     void _initialize();
     virtual ~CPrizeGauge();
+    virtual void main();
     void setDispMogSeq();
     static void setDropMp(INT inMp);
     static BOOL isNowDispCard();
 };
+
+class CEscapeGauge : public CTask {
+    UINT m_uiState;              /* 0x40 */
+    UINT m_uiFlag;               /* 0x44 */
+    D2::C2DSeqCtrl* m_pSeqCtrl;  /* 0x48 */
+public:
+    CEscapeGauge(CTask* p);
+    virtual ~CEscapeGauge();
+    virtual void main();
+    void _initialize();
+    void setCharge(FLOAT inRate);
+    void destroy();
+};
+
+class CFriendGauge : public CTask {
+    UINT m_uiState;              /* 0x40 */
+    UINT m_uiCount;              /* 0x44 */
+    CARD m_cardFriend[3];        /* 0x48 */
+    ::C2DCard* m_pCards;     /* 0x54 */
+    D2::C2DSeqCtrl* m_pSeqCtrls; /* 0x58 */
+public:
+    CFriendGauge(CTask* p);
+    virtual ~CFriendGauge();
+    void _initialize();
+    virtual void main();
+    void setGauge(INT n);
+};
+
+
+
+
+
+
 #endif
 
 } // namespace Gauge

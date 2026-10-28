@@ -1,6 +1,19 @@
 #include "khtypes.h"
 #define GAME_PLAYER_PLAYERGAUGE_CPP
+/* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
+#include "System/Graphic/Model.h"
+#include "System/RsrcData.h"
+#include "System/Graphic/Anim.h"
+#include "System/Task.h"
+#include "System/Graphic/2d/2DMan.h"
+#include "Game/CardBattle.h"
+#include "Game/Enemy/BattleEnemy.h"
+#include "System/Graphic/Str.h"
+#include "Game/Collision/CollUtil.h"
+/* MATCH: placeholder: an empty string follows CollUtil.h's strings in .rodata (as in PlayerManager and CardRevolver) */
+inline void _emptyStringPlaceholderPlayerGauge() { TRACE(""); }
+#include "Game/Player/DWTPlayer.h"
 #include "Game/Player/PlayerGauge.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/TaskMan.h"
@@ -13,10 +26,10 @@
 #include "Game/Player/Player.h"
 #include "System/Graphic/WorldEnv.h"
 #include "Game/SceneInfo.h"
-#include "Game/Enemy/BattleEnemy.h"
 #include "Game/Player/PlayerManager.h"
 #include "Game/Player/NaviMap.h"
 #include "System/Graphic/2d/2DCard.h"
+#include "System/Sound/SoundMan.h"
 #include "include_asm.h"
 
 using namespace Gauge;
@@ -24,14 +37,23 @@ using namespace Gauge;
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(unsigned int, void* p) throw() { return p; }
 namespace Gauge {
-extern LPCSTR g_szSeqCockpit;
-extern LPCSTR g_szSeqGauge;
-extern LPCSTR g_szLadCockpit;
-extern LPCSTR g_szLadGauge;
-extern LPCSTR g_szSeqFace;
-extern LPCSTR g_szSeqDFace;
-extern G_UV g_uvNumberTex[2][10];
+LPCSTR g_szLadGauge = "gauge.lad";
+LPCSTR g_szSeqFace = "gauge:00";
+LPCSTR g_szSeqGauge = "gauge:01";
+LPCSTR g_szSeqDFace = "gauge:02";
+LPCSTR g_szLadCockpit = "Cockpit.lad";
+LPCSTR g_szSeqCockpit = "Cockpit:00";
+LPCSTR g_szLadGetCard = "get_card.lad";
+LPCSTR g_szSeqGetCard = "get_card:00";
+G_UV g_uvNumberTex[2][10] = {
+    {{98, 53}, {115, 53}, {128, 54}, {144, 53}, {161, 53}, {176, 53}, {192, 53}, {208, 53}, {224, 53}, {240, 53}},
+    {{112, 67}, {125, 67}, {143, 67}, {159, 67}, {174, 67}, {191, 67}, {207, 67}, {222, 67}, {238, 67}, {253, 67}},
+};
+int g_RikuSeqIDData[2][3] = {{40, 41, 30}, {17, 18, 19}};
 }
+CEnemyGauge* CEnemyGauge::m_pInstance = NULL;
+CCommonGauge* CCommonGauge::m_pInstance = NULL;
+CPrizeGauge* CPrizeGauge::m_pInstance = NULL;
 FVECTOR getPlayerPos(BOOL flag);
 namespace D2 {
 class C2DMan { /* PARTIAL: stand-in for System/Graphic/2d/2DMan C2DMan: gated by SYSTEM_GRAPHIC_2D_2DMAN_CPP */
@@ -57,49 +79,271 @@ static inline FLOAT _sqrtf(FLOAT x) {
     asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
     return ret;
 }
-extern "C" char D_004A3238[];
-extern "C" char D_004A2F38[];
-extern "C" char D_004A2F00[];
-extern "C" char D_004A2E38[];
-extern "C" char D_004A2E70[];
-extern "C" char D_004A2EA8[];
-extern "C" char D_004A3270[];
-extern "C" char D_004A2F90[];
-extern "C" char D_004A2FC8[];
-extern "C" char D_004A3000[];
-extern "C" char D_004A3038[];
-extern "C" char D_004A2BD8[];
-extern "C" char D_004A2C10[];
-extern "C" char D_004A2C48[];
-extern "C" char D_004A2C80[];
-extern "C" char D_004A2CB8[];
-extern "C" char D_004A2CF0[];
-extern "C" char D_004A32A8[];
-extern "C" const CARD_DATA cardDataTbl_004A4070[];
+static const CARD_DATA cardDataTbl[224] = {
+    { { 0x00 }, 0, 0, 0, "" }, // 0
+    { { 0x11 }, 2, 0, 3, "Kingdom Key" }, // 1
+    { { 0x11 }, 2, 1, 3, "Three Wishes" }, // 2
+    { { 0x11 }, 2, 2, 3, "Crabclaw" }, // 3
+    { { 0x11 }, 2, 3, 3, "Pumpkinhead" }, // 4
+    { { 0x11 }, 2, 4, 3, "Fairy Harp" }, // 5
+    { { 0x11 }, 2, 5, 3, "Wishing Star" }, // 6
+    { { 0x11 }, 2, 6, 3, "Spellbinder" }, // 7
+    { { 0x11 }, 2, 7, 3, "Metal Chocobo" }, // 8
+    { { 0x11 }, 3, 0, 3, "Olympia" }, // 9
+    { { 0x11 }, 3, 1, 3, "Lionheart" }, // 10
+    { { 0x11 }, 3, 2, 3, "Lady Luck" }, // 11
+    { { 0x11 }, 3, 3, 3, "Divine Rose" }, // 12
+    { { 0x11 }, 3, 4, 3, "Oathkeeper" }, // 13
+    { { 0x11 }, 3, 5, 3, "Oblivion" }, // 14
+    { { 0x11 }, 3, 6, 3, "Ultima Weapon" }, // 15
+    { { 0x11 }, 3, 7, 3, "Diamond Dust" }, // 16
+    { { 0x11 }, 4, 0, 3, "One-Winged Angel" }, // 17
+    { { 0x11 }, 4, 1, 4, "Soul Eater" }, // 18
+    { { 0x11 }, 4, 2, 3, "Star Seeker" }, // 19
+    { { 0x11 }, 4, 3, 3, "Monochrome" }, // 20
+    { { 0x11 }, 4, 4, 3, "Follow the Wind" }, // 21
+    { { 0x11 }, 4, 5, 3, "Hidden Dragon" }, // 22
+    { { 0x11 }, 4, 6, 3, "Photon Debugger" }, // 23
+    { { 0x11 }, 4, 7, 3, "Bond of Flame" }, // 24
+    { { 0x11 }, 26, 0, 0, "-" }, // 25
+    { { 0x22 }, 5, 0, 3, "Fire" }, // 26
+    { { 0x22 }, 5, 1, 3, "Blizzard" }, // 27
+    { { 0x22 }, 5, 2, 3, "Thunder" }, // 28
+    { { 0x22 }, 5, 3, 3, "Cure" }, // 29
+    { { 0x22 }, 5, 4, 3, "Gravity" }, // 30
+    { { 0x22 }, 5, 5, 3, "Stop" }, // 31
+    { { 0x22 }, 5, 6, 3, "Aero" }, // 32
+    { { 0x22 }, 26, 2, 0, "-" }, // 33
+    { { 0x22 }, 26, 1, 0, "-" }, // 34
+    { { 0x33 }, 5, 7, 3, "Simba" }, // 35
+    { { 0x33 }, 6, 0, 3, "Genie" }, // 36
+    { { 0x33 }, 6, 1, 3, "Bambi" }, // 37
+    { { 0x33 }, 6, 2, 3, "Dumbo" }, // 38
+    { { 0x33 }, 6, 3, 3, "Tinker Bell" }, // 39
+    { { 0x33 }, 6, 4, 3, "Mushu" }, // 40
+    { { 0x33 }, 6, 5, 3, "Cloud" }, // 41
+    { { 0x44 }, 6, 6, 6, "Potion" }, // 42
+    { { 0x44 }, 6, 7, 6, "Hi-Potion" }, // 43
+    { { 0x44 }, 7, 0, 2, "Mega-Potion" }, // 44
+    { { 0x44 }, 7, 1, 2, "Ether" }, // 45
+    { { 0x44 }, 7, 2, 2, "Mega-Ether" }, // 46
+    { { 0x44 }, 7, 3, 2, "Elixir" }, // 47
+    { { 0x44 }, 7, 4, 2, "Megalixir" }, // 48
+    { { 0x55 }, 7, 5, 2, "Donald Duck" }, // 49
+    { { 0x55 }, 7, 6, 2, "Goofy" }, // 50
+    { { 0x55 }, 7, 7, 2, "Aladdin" }, // 51
+    { { 0x55 }, 8, 0, 2, "Ariel" }, // 52
+    { { 0x55 }, 8, 1, 2, "Jack" }, // 53
+    { { 0x55 }, 8, 2, 2, "Peter Pan" }, // 54
+    { { 0x55 }, 8, 3, 2, "The Beast" }, // 55
+    { { 0x55 }, 8, 4, 4, "The King" }, // 56
+    { { 0x55 }, 8, 5, 2, "Pluto" }, // 57
+    { { 0x66 }, 8, 6, 6, "Guard Armor" }, // 58
+    { { 0x66 }, 8, 6, 6, "Trickmaster" }, // 59
+    { { 0x66 }, 8, 6, 6, "Jafar" }, // 60
+    { { 0x66 }, 8, 6, 6, "Oogie Boogie" }, // 61
+    { { 0x66 }, 8, 6, 6, "Parasite Cage" }, // 62
+    { { 0x66 }, 8, 6, 6, "Ursula" }, // 63
+    { { 0x66 }, 8, 6, 6, "Dragon Maleficent" }, // 64
+    { { 0x66 }, 8, 6, 6, "Darkside" }, // 65
+    { { 0xe6 }, 8, 7, 4, "-" }, // 66
+    { { 0xe6 }, 9, 0, 0, "-" }, // 67
+    { { 0x77 }, 9, 1, 6, "Shadow" }, // 68
+    { { 0x77 }, 9, 2, 2, "Soldier" }, // 69
+    { { 0x77 }, 9, 3, 6, "Large Body" }, // 70
+    { { 0x77 }, 9, 4, 2, "Red Nocturne" }, // 71
+    { { 0x77 }, 9, 5, 2, "Blue Rhapsody" }, // 72
+    { { 0x77 }, 9, 6, 2, "Yellow Opera" }, // 73
+    { { 0x77 }, 9, 7, 2, "Green Requiem" }, // 74
+    { { 0x77 }, 10, 0, 6, "Powerwild" }, // 75
+    { { 0x77 }, 10, 1, 2, "Bouncywild" }, // 76
+    { { 0x77 }, 10, 2, 2, "Air Soldier" }, // 77
+    { { 0x77 }, 10, 3, 2, "Bandit" }, // 78
+    { { 0x77 }, 10, 4, 6, "Fat Bandit" }, // 79
+    { { 0x77 }, 10, 5, 2, "Barrel Spider" }, // 80
+    { { 0x77 }, 10, 6, 6, "Search Ghost" }, // 81
+    { { 0x77 }, 10, 7, 6, "Sea Neon" }, // 82
+    { { 0x77 }, 11, 0, 2, "Screwdiver" }, // 83
+    { { 0x77 }, 11, 1, 2, "Aquatank" }, // 84
+    { { 0x77 }, 11, 2, 6, "Wight Knight" }, // 85
+    { { 0x77 }, 11, 3, 2, "Gargoyle" }, // 86
+    { { 0x77 }, 11, 4, 6, "Pirate" }, // 87
+    { { 0x77 }, 11, 5, 2, "Air Pirate" }, // 88
+    { { 0x77 }, 11, 6, 4, "Darkball" }, // 89
+    { { 0x77 }, 11, 7, 6, "Defender" }, // 90
+    { { 0x77 }, 12, 0, 2, "Wyvern" }, // 91
+    { { 0x77 }, 12, 1, 2, "Wizard" }, // 92
+    { { 0x77 }, 12, 2, 2, "Neoshadow" }, // 93
+    { { 0x77 }, 12, 3, 2, "White Mushroom" }, // 94
+    { { 0x77 }, 12, 4, 2, "Black Fungus" }, // 95
+    { { 0x77 }, 12, 5, 2, "Creeper Plant" }, // 96
+    { { 0x77 }, 12, 6, 2, "Tornado Step" }, // 97
+    { { 0x77 }, 12, 7, 2, "Crescendo" }, // 98
+    { { 0x77 }, 13, 0, 6, "Guard Armor" }, // 99
+    { { 0x77 }, 13, 1, 6, "Parasite Cage" }, // 100
+    { { 0x77 }, 13, 2, 6, "Trickmaster" }, // 101
+    { { 0x77 }, 13, 3, 6, "Darkside" }, // 102
+    { { 0x77 }, 13, 4, 2, "Card Soldier" }, // 103
+    { { 0x77 }, 13, 5, 6, "Hades" }, // 104
+    { { 0x77 }, 13, 6, 6, "Jafar" }, // 105
+    { { 0x77 }, 13, 7, 6, "Oogie Boogie" }, // 106
+    { { 0x77 }, 14, 0, 6, "Ursula" }, // 107
+    { { 0x77 }, 14, 1, 6, "Hook" }, // 108
+    { { 0x77 }, 14, 2, 6, "Dragon Maleficent" }, // 109
+    { { 0x77 }, 14, 3, 2, "Riku" }, // 110
+    { { 0x77 }, 14, 4, 2, "Axel" }, // 111
+    { { 0x77 }, 14, 5, 2, "Larxene" }, // 112
+    { { 0x77 }, 14, 6, 2, "Vexen" }, // 113
+    { { 0x77 }, 14, 7, 2, "Marluxia" }, // 114
+    { { 0x77 }, 15, 0, 6, "Lexaeus" }, // 115
+    { { 0x77 }, 15, 1, 2, "Ansem" }, // 116
+    { { 0x77 }, 15, 3, 6, "Zexion" }, // 117
+    { { 0x77 }, 15, 4, 2, "Xemnas" }, // 118
+    { { 0x77 }, 15, 5, 2, "Xigbar" }, // 119
+    { { 0x77 }, 15, 6, 2, "Xaldin" }, // 120
+    { { 0x77 }, 15, 7, 2, "Sa\203\307x" }, // 121
+    { { 0x77 }, 16, 0, 2, "Demyx" }, // 122
+    { { 0x77 }, 16, 1, 2, "Luxord" }, // 123
+    { { 0x77 }, 16, 2, 2, "Roxas" }, // 124
+    { { 0x77 }, 21, 6, 2, "Gold Card" }, // 125
+    { { 0x77 }, 21, 7, 2, "Platinum Card" }, // 126
+    { { 0x77 }, 15, 2, 0, "Card Soldier Spade" }, // 127
+    { { 0x77 }, 13, 4, 0, "Card Soldier Heart" }, // 128
+    { { 0x17 }, 22, 0, 0, "\203N\203\211\203E\203hA" }, // 129
+    { { 0x17 }, 22, 1, 0, "\203N\203\211\203E\203hB" }, // 130
+    { { 0x17 }, 22, 2, 0, "\203n\203f\203XA" }, // 131
+    { { 0x27 }, 22, 3, 0, "\203n\203f\203XB" }, // 132
+    { { 0x17 }, 22, 4, 0, "\203t\203b\203NA" }, // 133
+    { { 0x17 }, 22, 5, 0, "\203t\203b\203NB" }, // 134
+    { { 0x17 }, 22, 6, 0, "\203t\203b\203NC" }, // 135
+    { { 0x27 }, 22, 7, 0, "\203t\203b\203ND" }, // 136
+    { { 0x17 }, 23, 0, 0, "\203A\203N\203Z\203\213A" }, // 137
+    { { 0x17 }, 23, 1, 0, "\203A\203N\203Z\203\213B" }, // 138
+    { { 0x17 }, 23, 2, 0, "\203\211\203N\203V\201[\203kA" }, // 139
+    { { 0x17 }, 23, 3, 0, "\203\211\203N\203V\201[\203kB" }, // 140
+    { { 0x27 }, 23, 4, 0, "\203\211\203N\203V\201[\203kC" }, // 141
+    { { 0x17 }, 23, 5, 0, "\203\212\203NA" }, // 142
+    { { 0x17 }, 23, 6, 0, "\203\212\203NB" }, // 143
+    { { 0x17 }, 23, 7, 0, "\203\212\203NC" }, // 144
+    { { 0x17 }, 24, 0, 0, "\203\212\203ND" }, // 145
+    { { 0x17 }, 24, 1, 0, "\203\224\203B\203N\203Z\203\223A" }, // 146
+    { { 0x27 }, 24, 2, 0, "\203\224\203B\203N\203Z\203\223B" }, // 147
+    { { 0x17 }, 24, 3, 0, "\203}\201[\203\213\201[\203V\203\203A" }, // 148
+    { { 0x17 }, 24, 4, 0, "\203}\201[\203\213\201[\203V\203\203B" }, // 149
+    { { 0x27 }, 24, 5, 0, "\203}\201[\203\213\201[\203V\203\203C" }, // 150
+    { { 0x77 }, 24, 6, 0, "\203}\201[\203\213\201[\203V\203\2032" }, // 151
+    { { 0x77 }, 24, 7, 0, "\203}\201[\203\213\201[\203V\203\2033" }, // 152
+    { { 0x17 }, 25, 0, 0, "\203\214\203N\203Z\203E\203XA" }, // 153
+    { { 0x17 }, 25, 1, 0, "\203\214\203N\203Z\203E\203XB" }, // 154
+    { { 0x27 }, 25, 2, 0, "\203\214\203N\203Z\203E\203XC" }, // 155
+    { { 0x17 }, 25, 3, 0, "\203A\203\223\203Z\203\200A" }, // 156
+    { { 0x27 }, 25, 4, 0, "\203A\203\223\203Z\203\200B" }, // 157
+    { { 0x27 }, 25, 5, 0, "\203[\203N\203V\203I\203\223A" }, // 158
+    { { 0x77 }, 26, 3, 0, "-" }, // 159
+    { { 0x88 }, 0, 0, 6, "\203\212\203\215\201[\203h" }, // 160
+    { { 0x99 }, 16, 3, 6, "Tranquil Darkness" }, // 161
+    { { 0x99 }, 16, 4, 6, "Teeming Darkness" }, // 162
+    { { 0x99 }, 16, 5, 6, "Feeble Darkness" }, // 163
+    { { 0x99 }, 16, 6, 6, "Almighty Darkness" }, // 164
+    { { 0x99 }, 16, 7, 6, "Sleeping Darkness" }, // 165
+    { { 0x99 }, 17, 0, 6, "Looming Darkness" }, // 166
+    { { 0x99 }, 17, 1, 2, "Premium Room" }, // 167
+    { { 0x99 }, 17, 2, 2, "White Room" }, // 168
+    { { 0x99 }, 17, 3, 6, "Black Room" }, // 169
+    { { 0x99 }, 17, 4, 6, "Bottomless Darkness" }, // 170
+    { { 0x99 }, 17, 5, 6, "Roulette Room" }, // 171
+    { { 0xa9 }, 17, 6, 6, "Martial Waking" }, // 172
+    { { 0xa9 }, 17, 7, 2, "Sorcerous Waking" }, // 173
+    { { 0xa9 }, 18, 0, 2, "Alchemic Waking" }, // 174
+    { { 0xa9 }, 18, 1, 6, "Meeting Ground" }, // 175
+    { { 0xa9 }, 18, 2, 6, "Stagnant Space" }, // 176
+    { { 0xa9 }, 18, 3, 6, "Strong Initiative" }, // 177
+    { { 0xa9 }, 18, 4, 6, "Lasting Daze" }, // 178
+    { { 0xb9 }, 18, 5, 2, "Calm Bounty" }, // 179
+    { { 0xb9 }, 18, 6, 2, "Guarded Trove" }, // 180
+    { { 0xb9 }, 18, 7, 2, "False Bounty" }, // 181
+    { { 0xb9 }, 19, 0, 6, "Moment's Reprieve" }, // 182
+    { { 0xb9 }, 19, 1, 6, "Mingling Worlds" }, // 183
+    { { 0xb9 }, 19, 2, 2, "Moogle Room" }, // 184
+    { { 0xb9 }, 19, 3, 6, "Random Joker" }, // 185
+    { { 0xca }, 19, 4, 6, "Key of Beginnings" }, // 186
+    { { 0xca }, 19, 5, 6, "Key of Guidance" }, // 187
+    { { 0xca }, 19, 6, 6, "Key to Truth" }, // 188
+    { { 0xca }, 19, 7, 2, "Key to Rewards" }, // 189
+    { { 0xdb }, 20, 0, 6, "Traverse Town" }, // 190
+    { { 0xdb }, 20, 3, 6, "Agrabah" }, // 191
+    { { 0xdb }, 20, 2, 6, "Olympus Coliseum" }, // 192
+    { { 0xdb }, 20, 1, 6, "Wonderland" }, // 193
+    { { 0xdb }, 20, 5, 6, "Monstro" }, // 194
+    { { 0xdb }, 20, 4, 6, "Halloween Town" }, // 195
+    { { 0xdb }, 20, 6, 6, "Atlantica" }, // 196
+    { { 0xdb }, 20, 7, 6, "Neverland" }, // 197
+    { { 0xdb }, 21, 0, 6, "Hollow Bastion" }, // 198
+    { { 0xdb }, 21, 1, 2, "100 Acre Woods" }, // 199
+    { { 0xdb }, 21, 2, 6, "Twilight Town" }, // 200
+    { { 0xdb }, 21, 3, 6, "Destiny Islands" }, // 201
+    { { 0xdb }, 21, 4, 4, "Castle Oblivion" }, // 202
+    { { 0x0d }, 0, 0, 0, "EXP\220\302\217\254" }, // 203
+    { { 0x0d }, 0, 1, 0, "EXP\220\302\222\206" }, // 204
+    { { 0x0d }, 0, 2, 0, "EXP\220\302\221\345" }, // 205
+    { { 0x0d }, 0, 3, 0, "EXP\220\324\217\254" }, // 206
+    { { 0x0d }, 0, 4, 0, "EXP\220\324\222\206" }, // 207
+    { { 0x0d }, 0, 5, 0, "EXP\220\324\221\345" }, // 208
+    { { 0x0d }, 0, 6, 0, "EXP\213\342" }, // 209
+    { { 0x0d }, 1, 0, 0, "HP\217\254" }, // 210
+    { { 0x0d }, 1, 1, 0, "HP\221\345" }, // 211
+    { { 0x0d }, 2, 0, 0, "MP\217\254" }, // 212
+    { { 0x0d }, 2, 1, 0, "MP\221\345" }, // 213
+    { { 0x0d }, 3, 0, 0, "P" }, // 214
+    { { 0x0d }, 4, 0, 0, "R" }, // 215
+    { { 0x0c }, 0, 0, 0, "Unknown Room" }, // 216
+    { { 0x0c }, 0, 0, 0, "Conqueror's Respite" }, // 217
+    { { 0x0c }, 0, 0, 0, "Room of Rewards" }, // 218
+    { { 0x0c }, 0, 0, 0, "" }, // 219
+    { { 0x0c }, 0, 0, 0, "" }, // 220
+    { { 0x00 }, 0, 0, 0, "" }, // 221
+    { { 0x00 }, 0, 0, 0, "" }, // 222
+    { { 0x00 }, 0, 0, 0, "" }, // 223
+};
 static inline void _setCard(CARD& c, USHORT kind, BYTE num) {
     c.m_nId = 0;
     c.m_nKind2 = kind;
     c.m_nNumber2 = num;
-    c.m_nCategory20 = cardDataTbl_004A4070[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl_004A4070[c.m_nKind].nCategory1;
+    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
 /* MATCH: this CARD init stores the number before the kind (as CardRevolver's debug cards) */
 static inline void _setCardNum(CARD& c, USHORT kind, BYTE num) {
     c.m_nId = 0;
     c.m_nNumber2 = num;
     c.m_nKind2 = kind;
-    c.m_nCategory20 = cardDataTbl_004A4070[c.m_nKind].nCategory0;
-    c.m_nCategory21 = cardDataTbl_004A4070[c.m_nKind].nCategory1;
+    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
 inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+inline void operator delete[](void* mem) { com_free(mem); }
 inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 template <class T> static inline T& _ref(T& v) { return v; }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", DebugPlayerCamera__9DWTPlayerP12CDebugWindowii_00284530);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", DebugPlayerAttack__9DWTPlayerP12CDebugWindowii_00284640);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", DebugWinPlayer__9DWTPlayerP12CDebugWindowii_002848F0);
 CPlayerGauge::CPlayerGauge(CTask* p) : CTask(p, 0x4000), m_pNaviMap(NULL), m_pFriend(NULL) { _initialize(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge12CPlayerGauge);
+CPlayerGauge::~CPlayerGauge() {
+    delete m_pNaviMap;
+    m_pNaviMap = NULL;
+    delete m_pFriend;
+    m_pFriend = NULL;
+    delete m_pCommon;
+    m_pCommon = NULL;
+    delete m_pPrize;
+    m_pPrize = NULL;
+    delete m_pSeqCtrl;
+    m_pSeqCtrl = NULL;
+    delete[] m_pSeqCtrlDP;
+    m_pSeqCtrlDP = NULL;
+    if (m_hAlertSE > 0) {
+        CSound::stopSE(m_hAlertSE, 9);
+        m_hAlertSE = 0;
+    }
+}
 void CPlayerGauge::_initialize() {
     FVECTOR pos;
     m_nMaxHP = 300;
@@ -112,7 +356,7 @@ void CPlayerGauge::_initialize() {
     m_tqRed = 0;
     m_szSeqFace = _ref(g_szSeqFace); // MATCH: global load kept after the field stores
     m_pSeqCtrl = NULL;
-    m_pSeqCtrl = new (D_004A2BD8) D2::C2DSeqCtrl;
+    m_pSeqCtrl = new (__FILE__ "(134)") D2::C2DSeqCtrl;
     m_pSeqCtrl->setLayer(2);
     m_pSeqCtrl->addSeq(g_szSeqGauge, 0xE);
     m_pSeqCtrl->addSeq(g_szSeqGauge, 7);
@@ -124,13 +368,13 @@ void CPlayerGauge::_initialize() {
     changeTimeHP(m_pSeqCtrl, 3, m_nMaxHP);
     D2::C2DMan::getLayPosition(g_szLadGauge, 1, 0, pos, FALSE);
     m_pSeqCtrl->setPos(pos);
-    m_pCommon = new (D_004A2C10) CCommonGauge(this);
-    m_pPrize = new (D_004A2C48) CPrizeGauge(this);
+    m_pCommon = new (__FILE__ "(161)") CCommonGauge(this);
+    m_pPrize = new (__FILE__ "(162)") CPrizeGauge(this);
     if (!CSceneInfo::isBattleScene() && !CSceneInfo::isMinigameScene()) {
-        m_pNaviMap = new (D_004A2C80) CNaviMap(this);
+        m_pNaviMap = new (__FILE__ "(166)") CNaviMap(this);
         INT mode = CGame::getDbgGameMode();
-        if (mode >= 7) m_pFriend = new (D_004A2CB8) CFriendGauge(this);
-        else if (mode < 4) m_pFriend = new (D_004A2CB8) CFriendGauge(this);
+        if (mode >= 7) m_pFriend = new (__FILE__ "(178)") CFriendGauge(this);
+        else if (mode < 4) m_pFriend = new (__FILE__ "(178)") CFriendGauge(this);
     }
     if (CGameWork::getInt(1, 0xE2) & 1) {
         m_iState = 7;
@@ -147,13 +391,14 @@ void CPlayerGauge::_initialize() {
     m_nDP = 0;
     m_nStateDP = 0;
     if (CGame::isRikuGame() && CSceneInfo::isBattleScene()) {
-        m_pSeqCtrlDP = new (D_004A2CF0) D2::C2DSeqCtrl[3];
+        m_pSeqCtrlDP = new (__FILE__ "(206)") D2::C2DSeqCtrl[3];
         m_nMaxDP = 30;
         if (CGameWork::getInt(0, 0x24) & 8) m_uiFlag |= 4;
     }
     setDPGauge(m_iState);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge12CPlayerGauge);
+__asm__(".rdata\n.align 4\n.word 0x00285094\n.word 0x00284F04\n.word 0x00284F04\n.word 0x00284F04\n.word 0x00284F04\n.word 0x00284F04\n.word 0x00284FD0\n.word 0x00284FDC\n.align 4\n.word 0x002851A8\n.word 0x0028540C\n.word 0x00285248\n.word 0x002851F8\n.word 0x00285240\n.word 0x002853AC\n.word 0x002853D4\n.word 0x00000000\n.text\n");
 void CPlayerGauge::changeTimeHP(D2::C2DSeqCtrl* p, UINT nIdx, UINT nHP) {
     p->changeTime(nIdx, (UINT)((FLOAT)nHP / 560.0f * 470.0f));
 }
@@ -182,8 +427,10 @@ void CPlayerGauge::setHP(INT inHP, INT inFlag) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDamage__Q25Gauge12CPlayerGaugeii);
+__asm__(".rdata\n.align 4\n.word 0x002856A4\n.word 0x002856C0\n.word 0x002856F0\n.word 0x002856C0\n.word 0x002856C0\n.word 0x002856C0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856F0\n.word 0x002856F0\n.word 0x002856F0\n.word 0x002856F0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856A4\n.text\n");
 void CPlayerGauge::setBattleEnd() { CNaviMap::m_bBattleEnd = TRUE; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDPGauge__Q25Gauge12CPlayerGaugei);
+__asm__(".rdata\n.align 4\n.word 0x00285874\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285874\n.word 0x00285874\n.word 0x00000000\n.text\n");
 void CPlayerGauge::setDP(INT inDP, INT inMax) {
     INT gauge;
     D2::C2DSeqCtrl* pSeq;
@@ -268,7 +515,14 @@ void CPlayerGauge::exeDPGauge() {
     }
 }
 CLockonMarker::CLockonMarker(CTask* inParent, BOOL inFlag) : CTask(inParent, 0x4000), m_pGauge(NULL), m_bFlag(inFlag) { _initialize(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge13CLockonMarker);
+CLockonMarker::~CLockonMarker() {
+    delete m_pSeqCtrlPush;
+    m_pSeqCtrlPush = NULL;
+    delete m_pSeqCtrl;
+    m_pSeqCtrl = NULL;
+    delete m_pGauge;
+    m_pGauge = NULL;
+}
 void CLockonMarker::_initialize() {
     m_nPreSeqNo = 99;
     m_nSeqNo = 99;
@@ -290,16 +544,16 @@ void CLockonMarker::_initialize() {
 
     m_uiKind = 0;
     m_pSeqCtrl = NULL;
-    m_pSeqCtrl = new (D_004A2E38) D2::C2DSeqCtrl(2);
+    m_pSeqCtrl = new (__FILE__ "(850)") D2::C2DSeqCtrl(2);
     m_pSeqCtrl->setLayer(2);
     m_pSeqCtrl->addSeq(g_szSeqCockpit, m_nSeqNo);
     m_pSeqCtrl->enableDisp(0, FALSE);
     m_pSeqCtrlPush = NULL;
-    m_pSeqCtrlPush = new (D_004A2E70) D2::C2DSeqCtrl(2);
+    m_pSeqCtrlPush = new (__FILE__ "(856)") D2::C2DSeqCtrl(2);
     m_vDispPos.init();
     if (CSceneInfo::isBattleScene() || CSceneInfo::isMinigameScene()) {
         m_uiFlag |= 4;
-        m_pGauge = new (D_004A2EA8) CEnemyGauge(this);
+        m_pGauge = new (__FILE__ "(865)") CEnemyGauge(this);
     }
 }
 void CLockonMarker::main() {
@@ -526,6 +780,7 @@ void CLockonMarker::cancelLockon(INT& ioHandle, INT inFlag) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", onPush__Q25Gauge13CLockonMarkeri);
+__asm__(".rdata\n.align 4\n.word 0x00286D98\n.word 0x00286DAC\n.word 0x00286DC0\n.word 0x00286DD4\n.word 0x00286E38\n.word 0x00286DE8\n.word 0x00286E14\n.word 0x00000000\n.text\n");
 void CLockonMarker::offPush() {
     if (m_uiFlag & 2) {
         UINT f = m_uiFlag;
@@ -550,7 +805,11 @@ CEnemyGauge::CEnemyGauge(CTask* p) : CTask(p, 0x4000) {
     m_pInstance = this;
     _initialize();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge11CEnemyGauge);
+CEnemyGauge::~CEnemyGauge() {
+    delete m_pSeqCtrl;
+    m_pSeqCtrl = NULL;
+    m_pInstance = NULL;
+}
 void CEnemyGauge::_initialize() {
     m_nMaxHP = 200;
     m_nRedHP = 200;
@@ -562,7 +821,7 @@ void CEnemyGauge::_initialize() {
     m_hTarget = 0;
     m_tqRed = 0;
     m_pSeqCtrl = NULL;
-    m_pSeqCtrl = new (D_004A2F00) D2::C2DSeqCtrl(1);
+    m_pSeqCtrl = new (__FILE__ "(1484)") D2::C2DSeqCtrl(1);
     m_pSeqCtrl->setLayer(2);
     m_pSeqCtrl->addSeq(g_szLadGauge, 1, 2);
     m_pSeqCtrl->addSeq(g_szLadGauge, 1, 0);
@@ -776,12 +1035,16 @@ CCommonGauge::CCommonGauge(CTask* p) : CTask(p, 0x4000) {
     m_pInstance = this;
     _initialize();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge12CCommonGauge);
+CCommonGauge::~CCommonGauge() {
+    delete[] m_pSeqCtrls;
+    m_pSeqCtrls = NULL;
+    m_pInstance = NULL;
+}
 void CCommonGauge::_initialize() {
     INT i;
     m_uiFlag = 0;
     m_pSeqCtrls = NULL;
-    m_pSeqCtrls = new (D_004A2F38) D2::C2DSeqCtrl[7];
+    m_pSeqCtrls = new (__FILE__ "(1901)") D2::C2DSeqCtrl[7];
     m_pSeqCtrls[0].addSeq(_ref(g_szSeqCockpit), 0xD);
     m_pSeqCtrls[1].addSeq(g_szSeqCockpit, 0xD);
     m_pSeqCtrls[2].addSeq(g_szSeqCockpit, 0xC);
@@ -852,6 +1115,7 @@ void CCommonGauge::dispSeqCtrl(INT inIndex, INT inFlag, INT inDisp) {
     if (inFlag == 0x10) m_uiFlag = (INT)m_uiFlag & ~0x2000;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispSeq__Q25Gauge12CCommonGaugeii);
+__asm__(".rdata\n.align 4\n.word 0x002884A0\n.word 0x002884F0\n.word 0x002884B4\n.word 0x00288504\n.word 0x002884C8\n.word 0x002884DC\n.word 0x00288518\n.word 0x00000000\n.text\n");
 CPrizeGauge::CPrizeGauge(CTask* p) : CTask(p ? p : getSysTask(1), 0x4000) {
     m_pInstance = this;
     if (p) m_uiMode = 1;
@@ -859,7 +1123,17 @@ CPrizeGauge::CPrizeGauge(CTask* p) : CTask(p ? p : getSysTask(1), 0x4000) {
     m_tqTimer = 0;
     _initialize();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge11CPrizeGauge);
+CPrizeGauge::~CPrizeGauge() {
+    delete[] m_pSeqCtrls;
+    m_pSeqCtrls = NULL;
+    delete[] m_pMogSeqCtrls;
+    m_pMogSeqCtrls = NULL;
+    delete[] m_pCardSeqCtrls;
+    m_pCardSeqCtrls = NULL;
+    delete m_pCard;
+    m_pCard = NULL;
+    m_pInstance = NULL;
+}
 void CPrizeGauge::_initialize() {
     INT i;
     FVECTOR pos;
@@ -869,7 +1143,7 @@ void CPrizeGauge::_initialize() {
     m_iExp = 0;
     m_iOldExp = 0;
     m_pSeqCtrls = NULL;
-    m_pSeqCtrls = new (D_004A2F90) D2::C2DSeqCtrl[6];
+    m_pSeqCtrls = new (__FILE__ "(2119)") D2::C2DSeqCtrl[6];
     size = 16;
     m_pSeqCtrls->setLayer(8);
     m_pSeqCtrls->addSeq(g_szSeqCockpit, 0x51);
@@ -891,7 +1165,7 @@ void CPrizeGauge::_initialize() {
     m_iOldMp = 0;
     m_iDropMp = 0;
     m_pMogSeqCtrls = NULL;
-    m_pMogSeqCtrls = new (D_004A2FC8) D2::C2DSeqCtrl[6];
+    m_pMogSeqCtrls = new (__FILE__ "(2148)") D2::C2DSeqCtrl[6];
     m_pMogSeqCtrls->setLayer(8);
     m_pMogSeqCtrls->addSeq(g_szSeqCockpit, 0x66);
     D2::C2DMan::getLayPosition(g_szLadCockpit, 0x10, 0, pos, FALSE);
@@ -909,18 +1183,23 @@ void CPrizeGauge::_initialize() {
     m_uiCardState = 0;
     _setCardNum(m_cardData, 0, 0);
     m_pCardSeqCtrls = NULL;
-    m_pCardSeqCtrls = new (D_004A3000) D2::C2DSeqCtrl[2];
-    m_pCard = new (D_004A3038) C2DCard;
+    m_pCardSeqCtrls = new (__FILE__ "(2173)") D2::C2DSeqCtrl[2];
+    m_pCard = new (__FILE__ "(2174)") C2DCard;
     for (i = 0; i < 4; i++) _setCard(m_cardStack[i], 0, 0);
     m_nStack = 0;
     m_nTexID = 0;
     if (PLM::CPlayerManager::getPLM() && PLM::CPlayerManager::getPLM()->is100AcreWood()) m_nTexID = 4;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge11CPrizeGauge);
+__asm__(".rdata\n.align 4\n.word 0x002890EC\n.word 0x00288E64\n.word 0x00288EE8\n.word 0x00288F58\n.word 0x00288FA8\n.word 0x00289028\n.word 0x00289098\n.word 0x00000000\n.align 4\n.word 0x0028953C\n.word 0x0028911C\n.word 0x002891A0\n.word 0x00289210\n.word 0x00289260\n.word 0x002892E0\n.word 0x00289350\n.word 0x002893A8\n.word 0x00289428\n.word 0x00289498\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispSeq__Q25Gauge11CPrizeGauge);
+__asm__(".rdata\n.align 4\n.word 0x00289764\n.word 0x00289764\n.word 0x00289708\n.word 0x00289764\n.word 0x00289764\n.word 0x00289708\n.word 0x00289764\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispMogSeq__Q25Gauge11CPrizeGauge);
+__asm__(".rdata\n.align 4\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setPrizeExp__Q25Gauge11CPrizeGaugei);
+__asm__(".rdata\n.align 4\n.word 0x00289A4C\n.word 0x00289A7C\n.word 0x00289A7C\n.word 0x00289A7C\n.word 0x00289A8C\n.word 0x00289A8C\n.word 0x00289A8C\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setPrizeMp__Q25Gauge11CPrizeGaugei);
+__asm__(".rdata\n.align 4\n.word 0x00289B94\n.word 0x00289BC4\n.word 0x00289BC4\n.word 0x00289BC4\n.word 0x00289BD4\n.word 0x00289BD4\n.word 0x00289BD4\n.word 0x00289BD4\n.word 0x00289BD4\n.word 0x00289BD4\n.text\n");
 /* Parked: 18 lines off: the %hi(m_pInstance) base and its loop copy swap s2/s3, and the inMp <= 0 return
    branch doesn't get the epilogue's lq s0 in its delay slot, so the loop top gets an alignment nop. Worked:
    *(T*)& stores for m_uiMogState and m_iDropMp (m_pInstance reloaded after them, as resetHP). Tried: loop shapes
@@ -949,17 +1228,22 @@ void CPrizeGauge::setDropMp(INT inMp) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDropMp__Q25Gauge11CPrizeGaugei);
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setPrizeCard__Q25Gauge11CPrizeGaugeR4CARDii);
+__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6C502F65\n.word 0x72657961\n.word 0x616C502F\n.word 0x47726579\n.word 0x65677561\n.word 0x7070632E\n.word 0x34363228\n.word 0x00002935\n.word 0x00000000\n.align 4\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6C502F65\n.word 0x72657961\n.word 0x616C502F\n.word 0x47726579\n.word 0x65677561\n.word 0x7070632E\n.word 0x30373228\n.word 0x00002935\n.word 0x00000000\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6C502F65\n.word 0x72657961\n.word 0x616C502F\n.word 0x47726579\n.word 0x65677561\n.word 0x7070632E\n.word 0x34373228\n.word 0x00002936\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", exePrizeCard__Q25Gauge11CPrizeGauge);
+__asm__(".rdata\n.align 4\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x6C502F65\n.word 0x72657961\n.word 0x616C502F\n.word 0x47726579\n.word 0x65677561\n.word 0x7070632E\n.word 0x31383228\n.word 0x00002936\n.word 0x00000000\n.text\n");
 BOOL CPrizeGauge::isNowDispCard() {
     if (!m_pInstance) return FALSE;
     return m_pInstance->m_uiCardState != 0;
 }
 CEscapeGauge::CEscapeGauge(CTask* p) : CTask(p, 0x4000) { _initialize(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge12CEscapeGauge);
+CEscapeGauge::~CEscapeGauge() {
+    delete m_pSeqCtrl;
+    m_pSeqCtrl = NULL;
+}
 void CEscapeGauge::_initialize() {
     m_uiState = 0;
     m_uiFlag = 0;
-    m_pSeqCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_004A3238, RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2903)", RET_ADDR())) D2::C2DSeqCtrl;
     m_pSeqCtrl->setLayer(8);
 }
 void CEscapeGauge::main() {
@@ -1023,7 +1307,12 @@ void CEscapeGauge::destroy() {
     }
 }
 CFriendGauge::CFriendGauge(CTask* p) : CTask(p, 0x4000) { _initialize(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge12CFriendGauge);
+CFriendGauge::~CFriendGauge() {
+    delete[] m_pSeqCtrls;
+    m_pSeqCtrls = NULL;
+    delete[] m_pCards;
+    m_pCards = NULL;
+}
 void CFriendGauge::_initialize() {
     INT i;
     INT kind;
@@ -1039,9 +1328,9 @@ void CFriendGauge::_initialize() {
             m_uiCount++;
         }
     }
-    if (m_uiCount) m_pCards = new (D_004A3270) C2DCard[m_uiCount];
+    if (m_uiCount) m_pCards = new (__FILE__ "(3041)") C2DCard[m_uiCount];
     else m_pCards = NULL;
-    m_pSeqCtrls = new (D_004A32A8) D2::C2DSeqCtrl[3];
+    m_pSeqCtrls = new (__FILE__ "(3045)") D2::C2DSeqCtrl[3];
 }
 void CFriendGauge::main() {
     if (CSceneEnv::isStopGauge()) return;
@@ -1107,18 +1396,4 @@ void CFriendGauge::setGauge(INT inState) {
     }
     m_uiState = inState;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", __static_initialization_and_destruction_0_0028B0E0);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDistance__Q25Gauge13CLockonMarkeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", on__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", off__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", isFlag__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setFlag__Q25Gauge13CLockonMarkerUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", changeMode__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", getTarget__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", getLockon__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", getPos__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", getUseCardPos__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", getCameraTargetPos__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", changeMode__Q25Gauge13CLockonMarkeri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", getMode__Q25Gauge13CLockonMarker);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _GLOBAL_$I$c__KHCOM_MainApp_Game_Player_PlayerGauge.cppWQaaaa);
+// SOURCE DATA: .data .rodata .bss
