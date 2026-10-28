@@ -45,6 +45,7 @@ extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
 extern "C" char D_004AD568[];
 extern "C" char D_004AD3D8[];
+extern ATK_ATTR g_AtkAttrTbl[] asm("g_AtkAttrTbl.5784"); // PARTIAL: getAttackAttr's static table, from the asm .data until SOURCE DATA
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
@@ -102,7 +103,18 @@ FLOAT CBattleEnemy::getExtraParam(const CHAR* inParamName) {
     return 0.0f;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackPoint__12CBattleEnemyi8ATK_KINDUsP8ATK_KINDi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackAttr__C12CBattleEnemyi);
+ATK_ATTR CBattleEnemy::getAttackAttr(INT inIndex) const {
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0x465, D_004AD2A0, 0);
+    ENEMY_ACT* act = NULL;
+    for (INT i = 0; i < m_pEnemyParam->iActCount; i++) {
+        if (m_pEnemyParam->pActs[i].iActNo == inIndex) {
+            act = &m_pEnemyParam->pActs[i];
+            break;
+        }
+    }
+    if (!act) return ATK_ATTR_PHYSICAL;
+    return g_AtkAttrTbl[act->iAttribute];
+}
 INT CBattleEnemy::getAttackRate() const {
     if (!m_pEnemyParam) return 10000;
     INT power = 1;
@@ -295,7 +307,22 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateSmallDam
 void CBattleEnemy::endStateSmallDamage() {
     m_ullBtlEnemyFlag &= ~0x10000000;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateBigDamage__12CBattleEnemy);
+void CBattleEnemy::beginStateBigDamage() {
+    if (!isBtlEnemyFlag(0x200000000ULL)) {
+        setupFlick();
+        m_ullBackupFlag = m_pMove->getFlag();
+        m_pMove->enableGravity(TRUE);
+        m_iSysStep = 0;
+    } else {
+        if (checkHitPos() & 1) {
+            changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
+        } else {
+            changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[8], 0, 0, -1);
+        }
+        m_iSysStep = 1;
+    }
+    playBigDamageSE();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateBigDamage__12CBattleEnemy);
 void CBattleEnemy::endStateBigDamage() {
     if (!(m_ullBackupFlag & 4)) m_pMove->enableGravity(FALSE);
@@ -314,7 +341,20 @@ void CBattleEnemy::stateZero() {
     changeDefaultState();
 }
 void CBattleEnemy::endStateZero() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDuel__12CBattleEnemy);
+void CBattleEnemy::beginStateDuel() {
+    setupDuelCard();
+    INT no = (INT)getExtraParam(BattleEnemy::DuelMotionParamName);
+    if (no <= 0) {
+        changeMotion(1, 0, 0, -1, 0, 0);
+    } else {
+        changeMotion(no, 0, 0, -1, 0, 0);
+    }
+    CBulletManager* p = (CBulletManager*)CTaskMan::getSysTask(0x1B);
+    if (p) p->kill(getHandle());
+    m_iSysStep = 0;
+    setTimer(0);
+    bodyCollOffBody(-1);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDuel__12CBattleEnemy);
 void CBattleEnemy::endStateDuel() {
     for (INT i = 0; i < 2; i++) {
@@ -357,7 +397,30 @@ void CBattleEnemy::endStateFaint() {
     m_ullBtlEnemyFlag &= ~0x80000000000ULL;
     killBadStatusEffect();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateStop__12CBattleEnemy);
+void CBattleEnemy::beginStateStop() {
+    m_ullBackupFlag = m_ullBtlEnemyFlag;
+    CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+    if (hitBody) {
+        switch (hitBody->getDamageKind()) {
+        case ATK_KIND_STOP:
+        default:
+            setBadStatusEffect(4, hitBody->getBadStatusParam());
+            break;
+        case ATK_KIND_ABSOLUTE_STOP:
+            m_ullBtlEnemyFlag |= 0x4000000;
+            break;
+        }
+    } else {
+        setBadStatusEffect(4, 0.0f);
+    }
+    setTimer(m_tqTime);
+    m_pAnim->setSpeed(0.0f);
+    m_iSysStep = 0;
+    m_ullBtlEnemyFlag |= 0x84000;
+    m_sStopDamageCount = 0;
+    m_sStopDamagePtr = 0;
+    setEntityFlag(0x8000, 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateStop__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateStop__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateTerror__12CBattleEnemy);
@@ -380,7 +443,19 @@ void CBattleEnemy::stateFreeze() {
     setEffect(BattleEnemy::FreezeEffectName, 4, &pos, NULL, 0.0f);
     changeDefaultState();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateFreeze__12CBattleEnemy);
+void CBattleEnemy::endStateFreeze() {
+    FVECTOR pos;
+    CEffect* effect = CEffectMan::getEffect(m_hFreeze);
+    if (effect) {
+        effect->loopEnd();
+        getLockOnPos(pos);
+        setEffect(BattleEnemy::FreezeEffectName, 5, &pos, NULL, 0.0f);
+    }
+    m_pAnim->setSpeed(1.0f);
+    if (isBtlEnemyFlag(0x100)) m_pMove->enableGravity(FALSE);
+    m_pBodyColl->setRadiusScale(1.0f);
+    m_hFreeze = 0;
+}
 void CBattleEnemy::beginStateShock() {
     if (!isBtlEnemyFlag(0x200000000ULL)) {
         setupFlick();
@@ -503,7 +578,13 @@ void CBattleEnemy::endStateVolley() {
     bodyCollOnBody(-1);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDead__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDead__12CBattleEnemy);
+void CBattleEnemy::stateDead() {
+    if (m_pEnemyParam && m_iSysStep == 0 && m_pMove->getVel().y < 0.0f && (m_pMove->getCollisionFlag() & 5)) {
+        clearSpeed();
+        m_iSysStep++;
+    }
+    if (getTimer() <= 0) out();
+}
 void CBattleEnemy::endStateDead() {}
 CBattleEnemyManager* CBattleEnemy::getBattleEnemyManager() const {
     CTask* parent = (CTask*)getParent();
@@ -951,7 +1032,24 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", hitTest___12C
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", computeDamage___12CBattleEnemyff8ATK_KIND);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", computeDamage___12CBattleEnemyff);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", changeDamageState___12CBattleEnemy8ATK_KIND);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", canAttack___12CBattleEnemyPC9ENEMY_ACT);
+BOOL CBattleEnemy::canAttack_(const ENEMY_ACT* inAct) {
+    if (!inAct) return FALSE;
+    FLOAT viewAngle = inAct->fViewAngle;
+    FLOAT dist = inAct->fDistance;
+    if (viewAngle != 0.0f) {
+        if (dist != 0.0f) {
+            if (entityVisibleAxisY(*g_pPlayer, viewAngle) && calcDistanceSq(*g_pPlayer) <= dist * dist) return TRUE;
+            return FALSE;
+        }
+        if (entityVisibleAxisY(*g_pPlayer, viewAngle)) return TRUE;
+        return FALSE;
+    }
+    if (dist != 0.0f) {
+        if (calcDistanceSq(*g_pPlayer) <= dist * dist) return TRUE;
+        return FALSE;
+    }
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", selectDamageMotion___12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", enableBind___12CBattleEnemyi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", enableConfuse___12CBattleEnemyi);
@@ -959,10 +1057,6 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setGuardEffec
 FLOAT CBattleEnemy::getDamageRate_() const {
     return m_fDamageRate;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", isLastLeave___12CBattleEnemyi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", isReraise___12CBattleEnemy);
-/* CCardBattle's m_cardEnchant as the original's CARD[2] (Game/CardBattle.h declares bytes), and its
- * getEnchantKind(INT inUser) inline (1-based user), as in Game/CardRevolver */
 struct CB_ENCHANT_VIEW {
     BYTE _pad[0x17C];
     CARD m_cardEnchant[2];
@@ -970,6 +1064,29 @@ struct CB_ENCHANT_VIEW {
 static inline INT _getEnchantKind(CardBattle::CCardBattle* p, INT inUser) {
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
+BOOL CBattleEnemy::isLastLeave_(INT inResultHp) {
+    CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (cb && _getEnchantKind(cb, 2) == 0x29 && m_iHp >= 2 && inResultHp <= 0) {
+        m_iHp = 1;
+        notifyHP();
+        CardBattle::CCardBattle::decEnchantTime(2, 0x28, 0x29);
+        return TRUE;
+    }
+    return FALSE;
+}
+BOOL CBattleEnemy::isReraise_() {
+    CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (cb && _getEnchantKind(cb, 2) == 0x2E) {
+        m_iHp = getHpMax() / 4;
+        notifyHP();
+        Gauge::CCommonGauge::setDispSeq(getHandle(), 1);
+        CardBattle::CCardBattle::decEnchantTime(2, 0x28, 0x2E);
+        return TRUE;
+    }
+    return FALSE;
+}
+/* CCardBattle's m_cardEnchant as the original's CARD[2] (Game/CardBattle.h declares bytes), and its
+ * getEnchantKind(INT inUser) inline (1-based user), as in Game/CardRevolver */
 BOOL CBattleEnemy::isQuickRecover_() {
     CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
     if (cb && _getEnchantKind(cb, 2) == 0x2C) {
@@ -992,7 +1109,20 @@ void CBattleEnemy::createFriendCard_(INT inRate) {
     if (card.m_nKind) createFriendCard((CARD_KIND)card.m_nKind, card.m_nNumber);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setHitEffect___12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", cardBattleProc___12CBattleEnemy);
+void CBattleEnemy::cardBattleProc_() {
+    if (!isBtlEnemyFlag(0x800000000ULL) && isBtlEnemyFlag(0x10) && m_iHp > 0 && m_tqCancelTimer <= 0 &&
+        !(DebugWork::g_dw.enemy.uiFlag & 0x400)) {
+        if (isBtlEnemyFlag(0x800)) {
+            startCardBattle();
+            return;
+        }
+        if (DebugWork::g_dw.enemy.uiFlag & 0x10) return;
+        if (isBtlEnemyFlag(1)) return;
+        aiCardBattle();
+        return;
+    }
+    m_ullBtlEnemyFlag &= ~0x800;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", reviseObject___12CBattleEnemy);
 void CBattleEnemy::updateBindTimer_() {
     if (m_tqBindTimer > 0) {

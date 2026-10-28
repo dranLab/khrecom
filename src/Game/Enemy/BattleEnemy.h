@@ -133,6 +133,10 @@ public:
     BOOL isNowPlayDamageMotion_();
     BOOL canBlackroomCard_();
     INT checkHitPos();
+    BOOL isLastLeave_(INT inResultHp);
+    BOOL isReraise_();
+    BOOL setupDuelCard();
+    void cardBattleProc_();
     void setupHitBack();
     void makeRoulettePrize(const FVECTOR* inPos);
     BOOL checkResist_(ATK_KIND inDmgKind);
