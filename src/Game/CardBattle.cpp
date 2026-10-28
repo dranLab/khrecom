@@ -4,7 +4,6 @@
 #include "Game/BattleCard.h"
 #include "System/HeapMan.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
-#include "System/Graphic/2d/2DMan.h"
 #include "System/Sound/SoundMan.h"
 #include "include_asm.h"
 
@@ -62,6 +61,12 @@ public:
 /* the unit's own copy of the header static (data still from assembly) */
 extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039AF98");
 extern "C" char D_00477690[]; /* "...CardBattle.cpp(4378)" */
+namespace D2 {
+class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the classes only for its own unit */
+public:
+    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
+};
+}
 namespace CardBattle {
 extern LPCSTR g_szLadDuel; /* the file's statics (data still from assembly) */
 extern LPCSTR g_szSeqDuel;
@@ -315,7 +320,32 @@ void CDuelGauge::_initialize() {
     m_pSeqCtrls = new (D_00477690) D2::C2DSeqCtrl[12];
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", main__Q210CardBattle10CDuelGauge);
+/* Parked: one store slot - the original schedules the m_tqTimer store (0x5c) after the zero stores of m_uiCount and
+ * m_uiResult, ours before them (and the setLayer sb one slot earlier); the statement order is the $LM line order;
+ * tried: all 720 orders of the six stores (200 tested), chained/temp assignments for timer/limit, pSeq load forms
+ * (_ref, m_pSeqCtrls, &[0]), permuter 4 min (13841 candidates, no gain) */
+#if 0
+void CDuelGauge::setStart(TIMEQ inTime, UINT inCount) {
+    m_uiState = 1;
+    m_uiCount = 0;
+    m_uiCountMax = inCount;
+    m_uiResult = 0;
+    m_tqTimer = inTime;
+    m_tqLimit = inTime;
+    D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[0];
+    pSeq->setLayer(8);
+    pSeq->addSeq(g_szSeqDuel, 30);
+    FVECTOR pos;
+    D2::C2DMan::getLayPosition(g_szLadDuel, 1, 0, pos, FALSE);
+    pSeq->setPos(pos);
+    setTimer(1);
+    setCount(1);
+    CSound::playSE(0x14B, -1, 64);
+    m_hTimerSE = CSound::playSE(0x14C, -1, 64);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setStart__Q210CardBattle10CDuelGaugeiUi);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setResult__Q210CardBattle10CDuelGaugeUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setTimer__Q210CardBattle10CDuelGaugeUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", changeTimer__Q210CardBattle10CDuelGaugei);
