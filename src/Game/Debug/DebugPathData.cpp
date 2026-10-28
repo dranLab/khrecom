@@ -11,6 +11,8 @@
 #include "Game/CardKind.h"
 #include "Game/Player/Player.h"
 #include "Form/DebugWindow.h"
+#include "Form/DebugWindowTBL.h"
+#include "Game/Debug/DebugWork.h"
 #include "System/Graphic/WorldEnv.h"
 #include "System/Coord.h"
 #include "System/FileIO.h"
@@ -44,6 +46,133 @@ extern "C" char D_00487120[];
 extern "C" char D_00487158[];
 extern "C" char D_00487168[];
 extern "C" char D_00486F18[];
+
+/* PARTIAL: .rodata still asm - the tables' strings by label */
+extern "C" char D_00486138[];
+extern "C" char D_00486280[];
+extern "C" char D_00486298[];
+extern "C" char D_004862F0[];
+extern "C" char D_00486340[];
+extern "C" char D_00486380[];
+extern "C" char D_004863C0[];
+extern "C" char D_00486410[];
+extern "C" char D_00486460[];
+extern "C" char D_004864B8[];
+extern "C" char D_00486500[];
+extern "C" char D_00486558[];
+extern "C" char D_004865B0[];
+extern "C" char D_00486608[];
+extern "C" char D_00486648[];
+extern "C" char D_00486688[];
+extern "C" char D_004866D8[];
+extern "C" char D_00486710[];
+extern "C" char D_00486738[];
+extern "C" char D_00486760[];
+extern "C" char D_00486788[];
+extern "C" char D_004867A0[];
+extern "C" char D_004867C8[];
+extern "C" char D_004867F8[];
+extern "C" char D_00486820[];
+extern "C" char D_00486848[];
+extern "C" char D_00486858[];
+extern "C" char D_00486880[];
+extern "C" char D_004868A8[];
+extern "C" char D_004868B8[];
+extern "C" char D_004868E0[];
+extern "C" char D_004868F0[];
+extern "C" char D_00486918[];
+extern "C" char D_00486940[];
+extern "C" char D_00486950[];
+extern "C" char D_00486978[];
+extern "C" char D_004869A0[];
+extern "C" char D_004869C8[];
+extern "C" char D_004869F0[];
+extern "C" char D_00486A18[];
+extern "C" char D_00486A40[];
+extern "C" char D_00486A68[];
+extern "C" char D_00486A98[];
+extern "C" char D_00486AA8[];
+extern "C" char D_00486AB8[];
+extern "C" char D_00486AC8[];
+extern "C" char D_00486AD8[];
+extern "C" char D_00486AE8[];
+extern "C" char D_00486C78[];
+extern "C" char D_00486C90[];
+extern "C" char D_00486CD8[];
+extern "C" char D_00486D20[];
+extern "C" char D_00486D30[];
+extern "C" char D_00486D40[];
+extern "C" char D_00486D58[];
+extern "C" char D_00486D70[];
+extern "C" char D_00486D88[];
+extern "C" char D_00486D98[];
+extern "C" char D_00486DA8[];
+extern "C" char D_00486DC8[];
+extern "C" char D_00486DE0[];
+extern "C" char D_00486DF8[];
+extern "C" char D_00486E18[];
+extern "C" char D_00486E38[];
+extern "C" char D_00486E50[];
+extern "C" char D_00486E68[];
+extern "C" char D_00486E80[];
+extern "C" char D_00486EA0[];
+extern "C" char D_00486EB0[];
+extern "C" char D_00486ED0[];
+extern "C" char D_00486EE0[];
+extern "C" char D_00486EF0[];
+extern "C" char D_00486F08[];
+extern "C" char D_00486F20[];
+extern "C" char D_00486F58[];
+extern "C" char D_00486FA8[];
+extern "C" char D_00486FD0[];
+extern "C" char D_00486FE8[];
+extern "C" char D_00486FF0[];
+BOOL debugWinPathEditAdd(CDebugWindow* pObj, INT inY, INT inParam);
+INT debugWinPathEditAllCall(CDebugWindow* pWin, INT iMes);
+BOOL debugWinPathEditDel(CDebugWindow* pObj, INT inY, INT inParam);
+INT debugWinPathEditDispCall(char* pBuf, INT iIdx, const void* pParam);
+INT debugWinPathEditEtcParamAllCall(CDebugWindow* pWin, INT iMes);
+BOOL debugWinPathEditLineAddPoaCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditLineAddRotCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditLineAddSpdCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditLineCamPosCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditNum(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditPathAddLineCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditPathDel(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditPathNum(CDebugWindow* pObj, INT inY, INT inParam);
+INT debugWinPathEditPosCamAllCall(CDebugWindow* pWin, INT iMes);
+BOOL debugWinPathEditPosCamGround(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditPosCamReset(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditSimulateLineCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditSimulateSpeedCamLineCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditSimulateSpeedCamLineLookCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEditSimulateSpeedLineCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEndOneCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathEndOneYNCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathLineAddSubCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathLineNameLoadCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathLineNameSaveCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathLineNewCall(CDebugWindow* pObj, INT inY, INT inParam);
+BOOL debugWinPathLineSaveCall(CDebugWindow* pObj, INT inY, INT inParam);
+INT debugWinPathListAllCall(CDebugWindow* pWin, INT iMes);
+INT debugWinPathListDispCall(char* pBuf, INT iIdx, const void* pParam);
+BOOL debugWinPathListLineCall(CDebugWindow* pObj, INT inY, INT inParam);
+extern DEBUG_WINDOW_TBL debugWinPathEditSimulate;
+extern DEBUG_WINDOW_TBL debugWinPathEditEtcParam;
+extern DEBUG_WINDOW_TBL debugWinPathEditPosCam;
+extern DEBUG_WINDOW_TBL debugWinPathEditPathAdd;
+extern DEBUG_WINDOW_TBL debugWinPathSave;
+extern DEBUG_WINDOW_TBL debugWinPathEdit;
+extern DEBUG_WINDOW_TBL debugWinPathList;
+extern DEBUG_WINDOW_TBL debugWinPath;
+extern DEBUG_WINDOW_TBL debugWinPathNoEnd;
+
+CDebugPathData* CDebugPathData::m_pInstance = NULL;
+INT CDebugPathData::m_iActivePath = 0;
+INT CDebugPathData::m_iActivePathNum = 0;
+FLOAT CDebugPathData::m_fValuePlus = 1.0f;
+CPDFrameTime* CDebugPathData::m_pFrame = NULL;
+UINT CDebugPathData::m_iCtrlFlg = 2;
 
 /* Parked: s2/s3 swapped (pVec vs &m_DDPathCamArrow) and the original recomputes &m_DDPathCamArrow and
    &m_vRot for setCoord (ours reuses them); tried: statement order (m_pPath first), a pRot temporary - only
@@ -101,6 +230,8 @@ INT debugWinPathEndOneCall(CDebugWindow* pWin, INT iMes, INT iParam) {
     if (iParam & 0x20) pWin->sendMessage(2, 0);
     return 1;
 }
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4083: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEndOneYNCall__FP12CDebugWindowii);
 INT debugWinPathLineAddSubCall(CDebugWindow* pWin, INT iMes, INT iParam) {
     if (iParam & 0x80) pWin->addValue(-1, NULL, NULL, &CDebugPathData::m_fValuePlus, NULL);
@@ -118,28 +249,170 @@ void __simuCamPause(CPathDataCamera* pHPC) {
         }
     }
 }
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4093: .word 0\n""pHPC.4094: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditSimulateLineCall__FP12CDebugWindowii);
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4098: .word 0\n""pHPC.4099: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditSimulateSpeedLineCall__FP12CDebugWindowii);
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4103: .word 0\n""pHPC.4104: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditSimulateSpeedCamLineCall__FP12CDebugWindowii);
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4108: .word 0\n""pHPC.4109: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditSimulateSpeedCamLineLookCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditEtcParamAllCall__FP12CDebugWindowi);
+__asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text */
+DEBUG_WINDOW_LINE debugWinPathEditSimulateLine[17] = {
+    {D_00486280, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditSimulateSpeedLineCall, NULL},
+    {D_00486298, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_004862F0, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditSimulateSpeedCamLineCall, NULL},
+    {D_00486340, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditSimulateSpeedCamLineLookCall, NULL},
+    {D_00486380, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditSimulateLineCall, NULL},
+    {D_004863C0, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditSimulateSpeedCamLineCall, NULL},
+    {D_00486410, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditSimulateSpeedCamLineCall, NULL},
+    {D_00486460, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditSimulateSpeedCamLineCall, NULL},
+    {D_004864B8, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditSimulateSpeedCamLineLookCall, NULL},
+    {D_00486500, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditSimulateSpeedCamLineCall, NULL},
+    {D_00486558, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditSimulateSpeedCamLineCall, NULL},
+    {D_004865B0, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_00486608, &CDebugPathData::m_iCtrlFlg, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x2, NULL, NULL},
+    {D_00486648, &CDebugPathData::m_iCtrlFlg, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x4, NULL, NULL},
+    {D_004865B0, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_00486688, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+};
+
+DEBUG_WINDOW_TBL debugWinPathEditSimulate = {D_004866D8, -240, -144, 40, 16, 12, 0, 2, debugWinPathEditSimulateLine, NULL, NULL};
+
+DEBUG_WINDOW_LINE debugWinPathEditEtcParamLine[28] = {
+    {D_00486710, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_00486738, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x4000000, NULL, NULL},
+    {D_00486760, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x1, NULL, NULL},
+    {D_00486788, &CDebugPathData::m_sParam.fTime, 4, {0}, 1, 0.01f, 1e+04f, 0.0f, NULL, 0, &debugWinPathLineAddSubCall, NULL},
+    {D_004867A0, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x2, NULL, NULL},
+    {D_004867C8, &CDebugPathData::m_sParam.fSpeed, 4, {0}, 1, 0.01f, 1e+04f, 0.0f, NULL, 0, &debugWinPathLineAddSubCall, NULL},
+    {D_004867F8, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_00486820, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x4, NULL, NULL},
+    {D_00486848, &CDebugPathData::m_sParam.fTargetDistance, 4, {0}, 1, 0.01f, 1e+04f, 0.0f, NULL, 0, &debugWinPathLineAddSubCall, NULL},
+    {D_00486858, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x8, NULL, NULL},
+    {D_00486848, &CDebugPathData::m_sParam.fTargetOffsetY, 4, {0}, 1, -1e+04f, 1e+04f, 0.0f, NULL, 0, &debugWinPathLineAddSubCall, NULL},
+    {D_00486880, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x40, NULL, NULL},
+    {D_004868A8, &CDebugPathData::m_sParam.fLookDelay, 4, {0}, 1, 0.01f, 1.0f, 0.0f, NULL, 0, &debugWinPathLineAddSubCall, NULL},
+    {D_004868B8, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x20, NULL, NULL},
+    {D_004868E0, &CDebugPathData::m_sParam.fProj, 4, {0}, 1, 1.0f, 1.8e+02f, 0.0f, NULL, 0, &debugWinPathLineAddSubCall, NULL},
+    {D_004868F0, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x200, NULL, NULL},
+    {D_004868E0, &CDebugPathData::m_sParam.fProj2, 4, {0}, 1, 1.0f, 1.8e+02f, 0.0f, NULL, 0, &debugWinPathLineAddSubCall, NULL},
+    {D_00486918, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x80, NULL, NULL},
+    {D_00486940, &CDebugPathData::m_sParam.fLearpIn, 4, {0}, 1, 1.0f, 999.0f, 0.0f, NULL, 0, &debugWinPathLineAddSubCall, NULL},
+    {D_00486950, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x100, NULL, NULL},
+    {D_00486940, &CDebugPathData::m_sParam.fLearpOut, 4, {0}, 1, 1.0f, 999.0f, 0.0f, NULL, 0, &debugWinPathLineAddSubCall, NULL},
+    {D_00486978, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x20000000, NULL, NULL},
+    {D_004869A0, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_004869C8, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x40000000, NULL, NULL},
+    {D_004869F0, &CDebugPathData::m_sParam.iFlags, 4, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOffOn, 0x80000000, NULL, NULL},
+    {D_00486A18, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_00486A40, &CDebugPathData::m_fValuePlus, 4, {0}, 17, 0.01f, 1e+03f, 1e+01f, NULL, 0, NULL, NULL},
+    {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+};
+
+DEBUG_WINDOW_TBL debugWinPathEditEtcParam = {D_00486A68, -136, -176, 18, 26, 12, 0, 2, debugWinPathEditEtcParamLine, NULL, &debugWinPathEditEtcParamAllCall};
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4116: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPosCamGround__FP12CDebugWindowii);
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4123: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPosCamReset__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPosCamAllCall__FP12CDebugWindowi);
+__asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text */
+DEBUG_WINDOW_LINE debugWinPathEditPosCamLine[8] = {
+    {D_00486A98, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEndOneCall, NULL},
+    {D_00486AA8, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_00486AB8, &CDebugWindow::none, 1, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOnOff, 0, &debugWinPathEditPosCamGround, NULL},
+    {D_00486AC8, &CDebugWindow::none, 1, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOnOff, 0, &debugWinPathEditPosCamReset, NULL},
+    {D_00486AA8, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_00486AD8, (char*)&DebugWork::g_dw + 0x18D, 1, {0}, 0, 0.0f, 3.0f, 1.0f, DWT::szCamSpeed, 0, NULL, NULL},
+    {D_00486AE8, (char*)&DebugWork::g_dw + 0x18C, 1, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOnOff, 0, NULL, NULL},
+    {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+};
+
+DEBUG_WINDOW_TBL debugWinPathEditPosCam = {CDebugPathData::m_szPathActName, -248, -176, 7, 8, 12, 0, 6, debugWinPathEditPosCamLine, NULL, &debugWinPathEditPosCamAllCall};
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4130: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineCamPosCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddPoaCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddRotCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddSpdCall__FP12CDebugWindowii);
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4143: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineNameSaveCall__FP12CDebugWindowii);
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4147: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineSaveCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditNum__FP12CDebugWindowii);
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4154: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditAdd__FP12CDebugWindowii);
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4158: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditDel__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPathNum__FP12CDebugWindowii);
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4165: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPathAddLineCall__FP12CDebugWindowii);
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4169: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPathDel__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditDispCall__FPciPCv);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditAllCall__FP12CDebugWindowi);
+__asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text */
+DEBUG_WINDOW_LINE debugWinPathEditPathAddLine[5] = {
+    {D_00486C78, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditPathAddLineCall, NULL},
+    {D_00486C90, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditPathAddLineCall, NULL},
+    {D_00486CD8, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditPathAddLineCall, NULL},
+    {D_00486D20, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditPathAddLineCall, NULL},
+    {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+};
+
+DEBUG_WINDOW_TBL debugWinPathEditPathAdd = {D_00486D30, -216, -144, 33, 8, 12, 0, 2, debugWinPathEditPathAddLine, NULL, NULL};
+
+DEBUG_WINDOW_LINE debugWinPathSaveLine[3] = {
+    {D_00486D40, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathLineSaveCall, NULL},
+    {D_00486D58, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathLineNameSaveCall, NULL},
+    {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+};
+
+DEBUG_WINDOW_TBL debugWinPathSave = {D_00486D70, -216, -144, 10, 2, 14, 0, 2, debugWinPathSaveLine, NULL, NULL};
+
+DEBUG_WINDOW_LINE debugWinPathEditLine[23] = {
+    {D_00486138, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditPathNum, NULL},
+    {D_00486D88, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPathEditPathAdd},
+    {D_00486D98, &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditPathDel, NULL},
+    {D_00486DA8, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPathEditEtcParam},
+    {D_00486DC8, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPathEditSimulate},
+    {D_00486138, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditNum, NULL},
+    {D_00486DE0, &CDebugPathData::m_iActivePathNum, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditAdd, NULL},
+    {D_00486DF8, &CDebugPathData::m_iActivePathNum, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditLineCamPosCall, NULL},
+    {D_00486E18, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_00486E38, &CDebugPathData::m_vActivePathPos.x, 4, {0}, 1, -1e+05f, 1e+05f, 0.0f, NULL, 0, &debugWinPathEditLineAddPoaCall, NULL},
+    {D_00486E50, &CDebugPathData::m_vActivePathPos.y, 4, {0}, 1, -1e+05f, 1e+05f, 0.0f, NULL, 0, &debugWinPathEditLineAddPoaCall, NULL},
+    {D_00486E68, &CDebugPathData::m_vActivePathPos.z, 4, {0}, 1, -1e+05f, 1e+05f, 0.0f, NULL, 0, &debugWinPathEditLineAddPoaCall, NULL},
+    {D_00486138, &CDebugPathData::m_vActivePathPos.w, 4, {0}, 1, -3.1415927f, 3.1415927f, 0.0f, NULL, 0, &debugWinPathEditLineAddRotCall, NULL},
+    {D_00486138, &CDebugPathData::m_vActivePathPos.w, 4, {0}, 1, -3.1415927f, 3.1415927f, 0.0f, NULL, 0, &debugWinPathEditLineAddSpdCall, NULL},
+    {D_00486E80, &CDebugPathData::m_fValuePlus, 4, {0}, 17, 0.01f, 1e+03f, 1e+01f, NULL, 0, NULL, NULL},
+    {D_00486EA0, &CDebugPathData::m_iActivePathNum, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditDel, NULL},
+    {D_00486EB0, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_00486ED0, (char*)&DebugWork::g_dw + 0x18D, 1, {0}, 0, 0.0f, 3.0f, 1.0f, DWT::szCamSpeed, 0, NULL, NULL},
+    {D_00486EE0, (char*)&DebugWork::g_dw + 0x18C, 1, {0}, 0, 0.0f, 1.0f, 1.0f, DWT::szOnOff, 0, NULL, NULL},
+    {D_00486EB0, &CDebugWindow::none, 1, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+    {D_00486EF0, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPathSave},
+    {D_00486F08, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEndOneYNCall, NULL},
+    {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+};
+
+DEBUG_WINDOW_TBL debugWinPathEdit = {CDebugPathData::m_szPathName, -248, -176, 13, 22, 12, 0, 6, debugWinPathEditLine, &debugWinPathEditDispCall, &debugWinPathEditAllCall};
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4179: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathListLineCall__FP12CDebugWindowii);
 INT debugWinPathListDispCall(char* pBuf, INT iIdx, const void* pParam) {
     sprintf(pBuf, D_00486F18, CDebugPathData::m_szNames[iIdx]);
@@ -157,10 +430,38 @@ INT debugWinPathListAllCall(CDebugWindow* pWin, INT iMes) {
     }
     return 1;
 }
+__asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text */
+DEBUG_WINDOW_LINE debugWinPathListLine[2] = {
+    {D_00486138, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathListLineCall, &DWT::debugWinYesNo},
+    {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+};
+
+DEBUG_WINDOW_TBL debugWinPathList = {D_00486F20, -208, -136, 7, 20, 14, 0, 8, debugWinPathListLine, &debugWinPathListDispCall, &debugWinPathListAllCall};
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4189: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineNewCall__FP12CDebugWindowii);
+/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
+__asm__(".data\n.align 2\n" "iStep.4193: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineNameLoadCall__FP12CDebugWindowii);
-extern const DEBUG_WINDOW_TBL debugWinPath;      /* PARTIAL: file statics, data still asm */
-extern const DEBUG_WINDOW_TBL debugWinPathNoEnd;
+__asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text */
+DEBUG_WINDOW_LINE debugWinPathLine[5] = {
+    {D_00486F58, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPathList},
+    {D_00486FA8, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathLineNameLoadCall, NULL},
+    {D_00486FD0, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathLineNewCall, NULL},
+    {D_00486FE8, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEndOneCall, NULL},
+    {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+};
+
+DEBUG_WINDOW_TBL debugWinPath = {D_00486FF0, -240, -168, 34, 20, 12, 0, 20, debugWinPathLine, NULL, NULL};
+
+DEBUG_WINDOW_LINE debugWinPathNoEndLine[4] = {
+    {D_00486F58, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, &debugWinPathList},
+    {D_00486FA8, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathLineNameLoadCall, NULL},
+    {D_00486FD0, &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathLineNewCall, NULL},
+    {NULL, NULL, 0, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
+};
+
+DEBUG_WINDOW_TBL debugWinPathNoEnd = {D_00486FF0, -240, -168, 34, 20, 12, 0, 22, debugWinPathNoEndLine, NULL, NULL};
 extern "C" char D_00487008[];
 extern "C" char D_00487040[];
 extern "C" char D_00487078[];
@@ -516,3 +817,4 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getInstance
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220AD0);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220B00);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220B30);
+// SOURCE DATA: .data

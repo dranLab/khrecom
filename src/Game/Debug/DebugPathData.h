@@ -66,6 +66,10 @@ public:
     static INT m_iActivePathNum;
     static FVECTOR m_vActivePathPos;
     static FLOAT m_fValuePlus;
+    static PATH_PARAM m_sParam;
+    static FVECTOR m_vBackUpPos;
+    static char m_szPathName[64];
+    static char m_szPathActName[64];
     static char m_szNames[128][16];
     static CPDFrameTime* m_pFrame;
     static UINT m_iCtrlFlg;
