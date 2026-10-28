@@ -596,7 +596,24 @@ BOOL CCardBattle::setEnemyDuelCard(HANDLE inHandle, INT inIndex, INT inNumber) {
     return result;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelEnd__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelPlayStock__Q210CardBattle11CCardBattlePPQ210CardBattle11CBattleCardi);
+INT CCardBattle::setDuelPlayStock(CBattleCard** inCard, INT inSkill) {
+    m_uiState[0] = 12;
+    m_uiResult[0] = 0;
+    for (INT i = 0; i < m_nDuelBreakCountMax; inCard++, i++) {
+        CBattleCard* pCard = *inCard;
+        m_pCard[0][i] = pCard;
+        if (pCard) {
+            *(CARD*)m_cardData[0][i] = *pCard->getCardData();
+            pCard->setPlayDuelStock(m_nDuelBreakCountMax);
+        } else {
+            _setCard(*(CARD*)m_cardData[0][i], 0, 0);
+        }
+    }
+    m_iStock[0] = inSkill;
+    m_iExtra[0] = 0;
+    m_iFirst[0] = 0;
+    return 1;
+}
 BOOL CCardBattle::isDuelEntryingCard(INT inSide) {
     if (!m_pInstance) return FALSE;
     if ((UINT)inSide < 2) {
