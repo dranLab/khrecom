@@ -408,7 +408,22 @@ void ENCHANT_PARAM::init(INT inOwner, UINT inUser) {
     iNormal = 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcEnchantParam__Q210CardBattle11CCardBattleRQ210CardBattle13ENCHANT_PARAM);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcEnchant_AttackPoint__Q210CardBattle11CCardBattleRiR8ATK_KIND8ATK_ATTRUi);
+void CCardBattle::calcEnchant_AttackPoint(INT& inPoint, ATK_KIND& inAtkKind, ATK_ATTR inAttr, UINT inUpKind) {
+    if (m_pInstance && g_pPlayer) {
+        ENCHANT_PARAM param;
+        param.init(g_pPlayer->getHandle(), 1);
+        param.uiState = 1;
+        param.AtkKind = inAtkKind;
+        param.UpKind = inUpKind;
+        param.AtkAttr = inAttr;
+        param.iAttackPoint = inPoint;
+        param.iHp = g_pPlayer->getHP();
+        param.iHpMax = g_pPlayer->getMaxHP();
+        m_pInstance->calcEnchantParam(param);
+        inPoint = param.iAttackPoint;
+        inAtkKind = param.AtkKind;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayerEnchant__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", resetPlayerEnchant__Q210CardBattle11CCardBattlei);
 void CCardBattle::transferPlayerEnchant(CPlayer* inPL) {
