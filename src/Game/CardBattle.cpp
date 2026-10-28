@@ -1,6 +1,20 @@
 #include "khtypes.h"
+#define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+/* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Task.h"
+#include "System/Graphic/Gprim.h"
+#include "Game/Enemy/BattleEnemyManager.h"
+#include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
+#include "Game/Enemy/BattleEnemy.h"
+#include "System/Graphic/Anim.h"
+#include "System/Graphic/Str.h"
+#include "Game/Collision/CollUtil.h"
+/* Placeholder: an empty string follows CollUtil.h's strings in .rodata; which header it comes from is not known. */
+inline void _emptyStringPlaceholder0() {
+    TRACE("");
+}
 #include "Game/BattleCard.h"
 #include "Game/Entity.h"
 #include "Game/Player/Player.h"
@@ -82,26 +96,240 @@ public:
     void exeDuelNG();
 };
 }
-/* the unit's own copy of the header static (data still from assembly) */
-extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039AF98");
-extern "C" char D_00477690[]; /* "...CardBattle.cpp(4378)" */
-extern "C" char D_00477338[]; /* "...CardBattle.cpp(NNNN)" */
-extern "C" char D_004769E8[]; /* "...CardBattle.cpp(NNNN)" */
-extern "C" char D_00477090[]; /* "inData" */
-extern "C" char D_00477098[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_004772C0[]; /* "...CardBattle.cpp(NNNN)" */
-extern "C" char D_00476A18[]; /* "...CardBattle.cpp(NNNN)" */
-extern "C" char D_00476A48[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_004772F0[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_00477320[]; /* break effect name */
 extern "C" char D_00477328[]; /* speed break effect name */
-extern "C" char D_00476938[]; /* "m_pInstance" */
-extern "C" char D_00477298[]; /* notifyCompleteGimmick's TRACE format */
 namespace PL {
 extern FLOAT g_fDefAttr[18][6];
 }
-/* the unit's copy of Game/CardKind's header static table (data still from assembly) */
-extern const CARD_DATA cardDataTbl[224] __asm__("cardDataTbl_00478270");
+/* file-scope constant table (deferred: emitted after the vtables, as in the original) */
+static const CARD_DATA cardDataTbl[224] = {
+    {{0}, 0, 0, 0, ""},
+    {{17}, 2, 0, 3, "Kingdom Key"},
+    {{17}, 2, 1, 3, "Three Wishes"},
+    {{17}, 2, 2, 3, "Crabclaw"},
+    {{17}, 2, 3, 3, "Pumpkinhead"},
+    {{17}, 2, 4, 3, "Fairy Harp"},
+    {{17}, 2, 5, 3, "Wishing Star"},
+    {{17}, 2, 6, 3, "Spellbinder"},
+    {{17}, 2, 7, 3, "Metal Chocobo"},
+    {{17}, 3, 0, 3, "Olympia"},
+    {{17}, 3, 1, 3, "Lionheart"},
+    {{17}, 3, 2, 3, "Lady Luck"},
+    {{17}, 3, 3, 3, "Divine Rose"},
+    {{17}, 3, 4, 3, "Oathkeeper"},
+    {{17}, 3, 5, 3, "Oblivion"},
+    {{17}, 3, 6, 3, "Ultima Weapon"},
+    {{17}, 3, 7, 3, "Diamond Dust"},
+    {{17}, 4, 0, 3, "One-Winged Angel"},
+    {{17}, 4, 1, 4, "Soul Eater"},
+    {{17}, 4, 2, 3, "Star Seeker"},
+    {{17}, 4, 3, 3, "Monochrome"},
+    {{17}, 4, 4, 3, "Follow the Wind"},
+    {{17}, 4, 5, 3, "Hidden Dragon"},
+    {{17}, 4, 6, 3, "Photon Debugger"},
+    {{17}, 4, 7, 3, "Bond of Flame"},
+    {{17}, 26, 0, 0, "-"},
+    {{34}, 5, 0, 3, "Fire"},
+    {{34}, 5, 1, 3, "Blizzard"},
+    {{34}, 5, 2, 3, "Thunder"},
+    {{34}, 5, 3, 3, "Cure"},
+    {{34}, 5, 4, 3, "Gravity"},
+    {{34}, 5, 5, 3, "Stop"},
+    {{34}, 5, 6, 3, "Aero"},
+    {{34}, 26, 2, 0, "-"},
+    {{34}, 26, 1, 0, "-"},
+    {{51}, 5, 7, 3, "Simba"},
+    {{51}, 6, 0, 3, "Genie"},
+    {{51}, 6, 1, 3, "Bambi"},
+    {{51}, 6, 2, 3, "Dumbo"},
+    {{51}, 6, 3, 3, "Tinker Bell"},
+    {{51}, 6, 4, 3, "Mushu"},
+    {{51}, 6, 5, 3, "Cloud"},
+    {{68}, 6, 6, 6, "Potion"},
+    {{68}, 6, 7, 6, "Hi-Potion"},
+    {{68}, 7, 0, 2, "Mega-Potion"},
+    {{68}, 7, 1, 2, "Ether"},
+    {{68}, 7, 2, 2, "Mega-Ether"},
+    {{68}, 7, 3, 2, "Elixir"},
+    {{68}, 7, 4, 2, "Megalixir"},
+    {{85}, 7, 5, 2, "Donald Duck"},
+    {{85}, 7, 6, 2, "Goofy"},
+    {{85}, 7, 7, 2, "Aladdin"},
+    {{85}, 8, 0, 2, "Ariel"},
+    {{85}, 8, 1, 2, "Jack"},
+    {{85}, 8, 2, 2, "Peter Pan"},
+    {{85}, 8, 3, 2, "The Beast"},
+    {{85}, 8, 4, 4, "The King"},
+    {{85}, 8, 5, 2, "Pluto"},
+    {{102}, 8, 6, 6, "Guard Armor"},
+    {{102}, 8, 6, 6, "Trickmaster"},
+    {{102}, 8, 6, 6, "Jafar"},
+    {{102}, 8, 6, 6, "Oogie Boogie"},
+    {{102}, 8, 6, 6, "Parasite Cage"},
+    {{102}, 8, 6, 6, "Ursula"},
+    {{102}, 8, 6, 6, "Dragon Maleficent"},
+    {{102}, 8, 6, 6, "Darkside"},
+    {{230}, 8, 7, 4, "-"},
+    {{230}, 9, 0, 0, "-"},
+    {{119}, 9, 1, 6, "Shadow"},
+    {{119}, 9, 2, 2, "Soldier"},
+    {{119}, 9, 3, 6, "Large Body"},
+    {{119}, 9, 4, 2, "Red Nocturne"},
+    {{119}, 9, 5, 2, "Blue Rhapsody"},
+    {{119}, 9, 6, 2, "Yellow Opera"},
+    {{119}, 9, 7, 2, "Green Requiem"},
+    {{119}, 10, 0, 6, "Powerwild"},
+    {{119}, 10, 1, 2, "Bouncywild"},
+    {{119}, 10, 2, 2, "Air Soldier"},
+    {{119}, 10, 3, 2, "Bandit"},
+    {{119}, 10, 4, 6, "Fat Bandit"},
+    {{119}, 10, 5, 2, "Barrel Spider"},
+    {{119}, 10, 6, 6, "Search Ghost"},
+    {{119}, 10, 7, 6, "Sea Neon"},
+    {{119}, 11, 0, 2, "Screwdiver"},
+    {{119}, 11, 1, 2, "Aquatank"},
+    {{119}, 11, 2, 6, "Wight Knight"},
+    {{119}, 11, 3, 2, "Gargoyle"},
+    {{119}, 11, 4, 6, "Pirate"},
+    {{119}, 11, 5, 2, "Air Pirate"},
+    {{119}, 11, 6, 4, "Darkball"},
+    {{119}, 11, 7, 6, "Defender"},
+    {{119}, 12, 0, 2, "Wyvern"},
+    {{119}, 12, 1, 2, "Wizard"},
+    {{119}, 12, 2, 2, "Neoshadow"},
+    {{119}, 12, 3, 2, "White Mushroom"},
+    {{119}, 12, 4, 2, "Black Fungus"},
+    {{119}, 12, 5, 2, "Creeper Plant"},
+    {{119}, 12, 6, 2, "Tornado Step"},
+    {{119}, 12, 7, 2, "Crescendo"},
+    {{119}, 13, 0, 6, "Guard Armor"},
+    {{119}, 13, 1, 6, "Parasite Cage"},
+    {{119}, 13, 2, 6, "Trickmaster"},
+    {{119}, 13, 3, 6, "Darkside"},
+    {{119}, 13, 4, 2, "Card Soldier"},
+    {{119}, 13, 5, 6, "Hades"},
+    {{119}, 13, 6, 6, "Jafar"},
+    {{119}, 13, 7, 6, "Oogie Boogie"},
+    {{119}, 14, 0, 6, "Ursula"},
+    {{119}, 14, 1, 6, "Hook"},
+    {{119}, 14, 2, 6, "Dragon Maleficent"},
+    {{119}, 14, 3, 2, "Riku"},
+    {{119}, 14, 4, 2, "Axel"},
+    {{119}, 14, 5, 2, "Larxene"},
+    {{119}, 14, 6, 2, "Vexen"},
+    {{119}, 14, 7, 2, "Marluxia"},
+    {{119}, 15, 0, 6, "Lexaeus"},
+    {{119}, 15, 1, 2, "Ansem"},
+    {{119}, 15, 3, 6, "Zexion"},
+    {{119}, 15, 4, 2, "Xemnas"},
+    {{119}, 15, 5, 2, "Xigbar"},
+    {{119}, 15, 6, 2, "Xaldin"},
+    {{119}, 15, 7, 2, "Sa\x83\xc7x"},
+    {{119}, 16, 0, 2, "Demyx"},
+    {{119}, 16, 1, 2, "Luxord"},
+    {{119}, 16, 2, 2, "Roxas"},
+    {{119}, 21, 6, 2, "Gold Card"},
+    {{119}, 21, 7, 2, "Platinum Card"},
+    {{119}, 15, 2, 0, "Card Soldier Spade"},
+    {{119}, 13, 4, 0, "Card Soldier Heart"},
+    {{23}, 22, 0, 0, "\x83N\x83\x89\x83" "E\x83hA"},
+    {{23}, 22, 1, 0, "\x83N\x83\x89\x83" "E\x83hB"},
+    {{23}, 22, 2, 0, "\x83n\x83" "f\x83XA"},
+    {{39}, 22, 3, 0, "\x83n\x83" "f\x83XB"},
+    {{23}, 22, 4, 0, "\x83t\x83" "b\x83NA"},
+    {{23}, 22, 5, 0, "\x83t\x83" "b\x83NB"},
+    {{23}, 22, 6, 0, "\x83t\x83" "b\x83NC"},
+    {{39}, 22, 7, 0, "\x83t\x83" "b\x83ND"},
+    {{23}, 23, 0, 0, "\x83" "A\x83N\x83Z\x83\x8b" "A"},
+    {{23}, 23, 1, 0, "\x83" "A\x83N\x83Z\x83\x8b" "B"},
+    {{23}, 23, 2, 0, "\x83\x89\x83N\x83V\x81[\x83kA"},
+    {{23}, 23, 3, 0, "\x83\x89\x83N\x83V\x81[\x83kB"},
+    {{39}, 23, 4, 0, "\x83\x89\x83N\x83V\x81[\x83kC"},
+    {{23}, 23, 5, 0, "\x83\x8a\x83NA"},
+    {{23}, 23, 6, 0, "\x83\x8a\x83NB"},
+    {{23}, 23, 7, 0, "\x83\x8a\x83NC"},
+    {{23}, 24, 0, 0, "\x83\x8a\x83ND"},
+    {{23}, 24, 1, 0, "\x83\x94\x83" "B\x83N\x83Z\x83\x93" "A"},
+    {{39}, 24, 2, 0, "\x83\x94\x83" "B\x83N\x83Z\x83\x93" "B"},
+    {{23}, 24, 3, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "A"},
+    {{23}, 24, 4, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "B"},
+    {{39}, 24, 5, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "C"},
+    {{119}, 24, 6, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "2"},
+    {{119}, 24, 7, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "3"},
+    {{23}, 25, 0, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XA"},
+    {{23}, 25, 1, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XB"},
+    {{39}, 25, 2, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XC"},
+    {{23}, 25, 3, 0, "\x83" "A\x83\x93\x83Z\x83\x80" "A"},
+    {{39}, 25, 4, 0, "\x83" "A\x83\x93\x83Z\x83\x80" "B"},
+    {{39}, 25, 5, 0, "\x83[\x83N\x83V\x83I\x83\x93" "A"},
+    {{119}, 26, 3, 0, "-"},
+    {{136}, 0, 0, 6, "\x83\x8a\x83\x8d\x81[\x83h"},
+    {{153}, 16, 3, 6, "Tranquil Darkness"},
+    {{153}, 16, 4, 6, "Teeming Darkness"},
+    {{153}, 16, 5, 6, "Feeble Darkness"},
+    {{153}, 16, 6, 6, "Almighty Darkness"},
+    {{153}, 16, 7, 6, "Sleeping Darkness"},
+    {{153}, 17, 0, 6, "Looming Darkness"},
+    {{153}, 17, 1, 2, "Premium Room"},
+    {{153}, 17, 2, 2, "White Room"},
+    {{153}, 17, 3, 6, "Black Room"},
+    {{153}, 17, 4, 6, "Bottomless Darkness"},
+    {{153}, 17, 5, 6, "Roulette Room"},
+    {{169}, 17, 6, 6, "Martial Waking"},
+    {{169}, 17, 7, 2, "Sorcerous Waking"},
+    {{169}, 18, 0, 2, "Alchemic Waking"},
+    {{169}, 18, 1, 6, "Meeting Ground"},
+    {{169}, 18, 2, 6, "Stagnant Space"},
+    {{169}, 18, 3, 6, "Strong Initiative"},
+    {{169}, 18, 4, 6, "Lasting Daze"},
+    {{185}, 18, 5, 2, "Calm Bounty"},
+    {{185}, 18, 6, 2, "Guarded Trove"},
+    {{185}, 18, 7, 2, "False Bounty"},
+    {{185}, 19, 0, 6, "Moment's Reprieve"},
+    {{185}, 19, 1, 6, "Mingling Worlds"},
+    {{185}, 19, 2, 2, "Moogle Room"},
+    {{185}, 19, 3, 6, "Random Joker"},
+    {{202}, 19, 4, 6, "Key of Beginnings"},
+    {{202}, 19, 5, 6, "Key of Guidance"},
+    {{202}, 19, 6, 6, "Key to Truth"},
+    {{202}, 19, 7, 2, "Key to Rewards"},
+    {{219}, 20, 0, 6, "Traverse Town"},
+    {{219}, 20, 3, 6, "Agrabah"},
+    {{219}, 20, 2, 6, "Olympus Coliseum"},
+    {{219}, 20, 1, 6, "Wonderland"},
+    {{219}, 20, 5, 6, "Monstro"},
+    {{219}, 20, 4, 6, "Halloween Town"},
+    {{219}, 20, 6, 6, "Atlantica"},
+    {{219}, 20, 7, 6, "Neverland"},
+    {{219}, 21, 0, 6, "Hollow Bastion"},
+    {{219}, 21, 1, 2, "100 Acre Woods"},
+    {{219}, 21, 2, 6, "Twilight Town"},
+    {{219}, 21, 3, 6, "Destiny Islands"},
+    {{219}, 21, 4, 4, "Castle Oblivion"},
+    {{13}, 0, 0, 0, "EXP\x90\xc2\x8f\xac"},
+    {{13}, 0, 1, 0, "EXP\x90\xc2\x92\x86"},
+    {{13}, 0, 2, 0, "EXP\x90\xc2\x91\xe5"},
+    {{13}, 0, 3, 0, "EXP\x90\xd4\x8f\xac"},
+    {{13}, 0, 4, 0, "EXP\x90\xd4\x92\x86"},
+    {{13}, 0, 5, 0, "EXP\x90\xd4\x91\xe5"},
+    {{13}, 0, 6, 0, "EXP\x8b\xe2"},
+    {{13}, 1, 0, 0, "HP\x8f\xac"},
+    {{13}, 1, 1, 0, "HP\x91\xe5"},
+    {{13}, 2, 0, 0, "MP\x8f\xac"},
+    {{13}, 2, 1, 0, "MP\x91\xe5"},
+    {{13}, 3, 0, 0, "P"},
+    {{13}, 4, 0, 0, "R"},
+    {{12}, 0, 0, 0, "Unknown Room"},
+    {{12}, 0, 0, 0, "Conqueror's Respite"},
+    {{12}, 0, 0, 0, "Room of Rewards"},
+    {{12}, 0, 0, 0, ""},
+    {{12}, 0, 0, 0, ""},
+    {{0}, 0, 0, 0, ""},
+    {{0}, 0, 0, 0, ""},
+    {{0}, 0, 0, 0, ""},
+};
 /* CARD's inline constructor (Game/Card.cpp's _setCard) */
 static inline void _setCard(CARD& c, USHORT nKind, BYTE nNumber) {
     c.m_nId = 0;
@@ -116,28 +344,76 @@ public:
     static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
 };
 }
-namespace CardBattle {
-extern G_UV g_uvCRCounterNumTex[8][10];
-extern INT g_DuelSeqIDX_TimerNumDmy[6][3];
-extern G_UV g_uvDuelNumTex[4][10];
-extern LPCSTR g_szLadDuel; /* the file's statics (data still from assembly) */
-extern LPCSTR g_szSeqDuel;
-}
 extern "C" char D_00476980[]; /* __FILE__ */
-extern "C" char D_00476730[];
 extern "C" int abs(int);
 template <class T> static inline T& _ref(T& v) { return v; }
+
+namespace CardBattle {
+static LPCSTR g_szBinBattleCardList = "BattleCardList";
+static LPCSTR g_szBinStockSkillList = "StockSkillList";
+static LPCSTR g_szSeqCockpit = "Cockpit:00";
+}
+CCardBattle* CCardBattle::m_pInstance = NULL;
+namespace CardBattle {
+BC_PARAM* g_pBattleCardList = NULL;
+SS_PARAM* g_pStockSkillList = NULL;
+G_UV g_uvCRCounterNumTex[8][10] = {
+    {{0, 0}, {143, 40}, {30, 0}, {49, 0}, {68, 0}, {85, 0}, {103, 0}, {120, 0}, {137, 0}, {156, 0}},
+    {{19, 17}, {162, 57}, {49, 17}, {68, 17}, {85, 17}, {103, 17}, {120, 17}, {137, 17}, {156, 17}, {173, 17}},
+    {{2, 19}, {16, 19}, {29, 19}, {44, 19}, {59, 19}, {73, 19}, {88, 19}, {102, 19}, {116, 19}, {131, 19}},
+    {{16, 33}, {29, 33}, {44, 33}, {58, 33}, {72, 33}, {88, 33}, {102, 33}, {116, 33}, {131, 33}, {145, 33}},
+    {{0, 0}, {178, 0}, {30, 0}, {49, 0}, {68, 0}, {85, 0}, {103, 0}, {120, 0}, {137, 0}, {156, 0}},
+    {{19, 17}, {196, 17}, {49, 17}, {68, 17}, {85, 17}, {103, 17}, {120, 17}, {137, 17}, {156, 17}, {173, 17}},
+    {{0, 20}, {0, 86}, {47, 19}, {70, 18}, {92, 18}, {115, 18}, {139, 18}, {166, 19}, {190, 18}, {218, 19}},
+    {{26, 49}, {29, 117}, {70, 50}, {92, 50}, {115, 50}, {138, 51}, {165, 50}, {190, 50}, {218, 50}, {244, 50}},
+};
+unsigned char g_DropFriendCardList[32][8] = {
+    {0, 0, 0, 0, 0, 0, 0, 0},
+    {150, 50, 50, 0, 49, 50, 0, 0},
+    {150, 30, 20, 50, 49, 50, 51, 0},
+    {150, 60, 40, 0, 49, 50, 0, 0},
+    {150, 40, 60, 0, 49, 50, 0, 0},
+    {150, 50, 50, 0, 49, 50, 0, 0},
+    {150, 20, 30, 50, 49, 50, 53, 0},
+    {150, 20, 20, 60, 49, 50, 52, 0},
+    {150, 20, 30, 50, 49, 50, 54, 0},
+    {150, 30, 30, 40, 49, 50, 55, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0},
+    {150, 50, 50, 0, 49, 50, 0, 0},
+    {150, 50, 50, 0, 49, 50, 0, 0},
+    {150, 50, 50, 0, 49, 50, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {125, 100, 0, 0, 56, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0},
+};
+}
 
 void CardBattle::calcFreezeDamage(INT& ioDamage) {
     INT nPower = g_pStockSkillList[35].POWER[1];
     ioDamage += nPower / 10;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", __Q210CardBattle11CCardBattle);
+__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61432F65\n.word 0x61426472\n.word 0x656C7474\n.word 0x7070632E\n.word 0x00000000\n.word 0x42705F67\n.word 0x6C747461\n.word 0x72614365\n.word 0x73694C64\n.word 0x00000074\n.word 0x00000000\n.word 0x53705F67\n.word 0x6B636F74\n.word 0x6C696B53\n.word 0x73694C6C\n.word 0x00000074\n.word 0x00000000\n.word 0x4D705F6D\n.word 0x67617365\n.word 0x00000065\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _$_Q210CardBattle11CCardBattle);
 CCardBattle* CCardBattle::getInstance() {
     if (!m_pInstance) {
-        m_pInstance = new (com_malloc_d(sizeof(CCardBattle), D_004769E8, RET_ADDR())) CCardBattle;
-        if (!(m_pInstance)) AssertApp(D_00476980, 163, D_00476938, 0);
+        m_pInstance = new (com_malloc_d(sizeof(CCardBattle), __FILE__ "(162)", RET_ADDR())) CCardBattle;
+        if (!(m_pInstance)) AssertApp(D_00476980, 163, "m_pInstance", 0);
     }
     return m_pInstance;
 }
@@ -193,7 +469,7 @@ void CCardBattle::init() {
     }
     _setCard(m_cardRoom, cardID, cardNum);
     if (!m_pSeqCtrlEnemy) {
-        m_pSeqCtrlEnemy = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_00476A18, RET_ADDR())) D2::C2DSeqCtrl(2);
+        m_pSeqCtrlEnemy = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(237)", RET_ADDR())) D2::C2DSeqCtrl(2);
     }
     initCardBreak(0, 0);
     m_uiDuelState = 0;
@@ -204,7 +480,7 @@ void CCardBattle::init() {
     UINT flag = 0x20000;
     if (m_uiFlag & flag) {
         if (CGameWork::getInt(0, 0x24) & 0x20) m_uiDuelState = 1;
-        m_pDuelGauge = new (com_malloc_d(sizeof(CDuelGauge), D_00476A48, RET_ADDR())) CDuelGauge(asTask());
+        m_pDuelGauge = new (com_malloc_d(sizeof(CDuelGauge), __FILE__ "(265)", RET_ADDR())) CDuelGauge(asTask());
     }
 }
 void CCardBattle::main() {
@@ -292,6 +568,7 @@ void CCardBattle::calcPlayingCard() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exePlaying__Q210CardBattle11CCardBattlei);
+__asm__(".rdata\n.align 3\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x5453203B\n.word 0x5F455441\n.word 0x52415453\n.word 0x4C503A54\n.word 0x4D49542D\n.word 0x64253D45\n.word 0x4E45202C\n.word 0x4D49542D\n.word 0x64253D45\n.word 0x0000000A\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x85836683\n.word 0x8B834783\n.word 0xB690AD94\n.word 0x64284981\n.word 0x00000A29\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x85836683\n.word 0x8B834783\n.word 0xB690AD94\n.word 0x61284981\n.word 0x00000A29\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x458E8A91\n.word 0x73763028\n.word 0xAD942930\n.word 0x4981B690\n.word 0x0A296128\n.word 0x00000000\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x73835883\n.word 0x68835B81\n.word 0x8C837583\n.word 0x4E834383\n.word 0xB690AD94\n.word 0x61284981\n.word 0x64252029\n.word 0x25202B20\n.word 0x00000A64\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x58455F45\n.word 0x5F203A45\n.word 0x3E2D4C50\n.word 0x42746573\n.word 0x6B616572\n.word 0x000A2928\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x85836683\n.word 0x8B834783\n.word 0xB690AD94\n.word 0x62284981\n.word 0x00000A29\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x458E8A91\n.word 0x73763028\n.word 0xAD942930\n.word 0x4981B690\n.word 0x0A296228\n.word 0x00000000\n.word 0x00000000\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x58455F45\n.word 0x30203A45\n.word 0x64257376\n.word 0x4C505F20\n.word 0x65733E2D\n.word 0x65724274\n.word 0x25286B61\n.word 0x000A2964\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x85836683\n.word 0x8B834783\n.word 0xB690AD94\n.word 0x63284981\n.word 0x00000A29\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x58455F45\n.word 0x25203A45\n.word 0x25737664\n.word 0x505F2064\n.word 0x733E2D4C\n.word 0x72427465\n.word 0x286B6165\n.word 0x0A296425\n.word 0x00000000\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x45525F45\n.word 0x43455246\n.word 0x25203A54\n.word 0x25737664\n.word 0x455F2064\n.word 0x733E2D4E\n.word 0x72427465\n.word 0x286B6165\n.word 0x0A296425\n.word 0x00000000\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x5453203B\n.word 0x5F455441\n.word 0x54494157\n.word 0x2C642520\n.word 0x52524520\n.word 0x2021524F\n.word 0x452E2E2E\n.word 0x0A2E444E\n.word 0x00000000\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x6148203B\n.word 0x656C646E\n.word 0x2064253D\n.word 0x5453203A\n.word 0x5F455441\n.word 0x0A444E45\n.word 0x00000000\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x5453203B\n.word 0x5F455441\n.word 0x4C455544\n.word 0x4941575F\n.word 0x64252054\n.word 0x5245202C\n.word 0x21524F52\n.word 0x2E2E2E20\n.word 0x2E444E45\n.word 0x0000000A\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x55445F45\n.word 0x505F4C45\n.word 0x5F59414C\n.word 0x3A455845\n.word 0x76642520\n.word 0x20642573\n.word 0x2D4E455F\n.word 0x7465733E\n.word 0x61657242\n.word 0x0A29286B\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x6148203B\n.word 0x656C646E\n.word 0x2064253D\n.word 0x5453203A\n.word 0x5F455441\n.word 0x4C455544\n.word 0x414C505F\n.word 0x4E455F59\n.word 0x00000A44\n.word 0x00000000\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x52505F45\n.word 0x554F4E4F\n.word 0x5F45434E\n.word 0x3A455845\n.word 0x76642520\n.word 0x20642573\n.word 0x2D4E455F\n.word 0x7465733E\n.word 0x61657242\n.word 0x0A29286B\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x6148203B\n.word 0x656C646E\n.word 0x2064253D\n.word 0x5453203A\n.word 0x5F455441\n.word 0x4E4F5250\n.word 0x434E554F\n.word 0x4E455F45\n.word 0x00000A44\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word .L001DAA6C\n.word .L001DAA80\n.word .L001DB160\n.word .L001DB97C\n.word .L001DBB5C\n.word .L001DBBD8\n.word .L001DBD54\n.word .L001DBDF8\n.word .L001DC2D4\n.word .L001DBE78\n.word .L001DBEBC\n.word .L001DC2D4\n.word .L001DC2D4\n.word .L001DC03C\n.word .L001DC04C\n.word .L001DC090\n.word .L001DC2D4\n.word .L001DC2D4\n.word .L001DC1F4\n.word 0\n.text\n");
 void CCardBattle::setNumberBreak(UINT _PLAYER, UINT _ENEMY) {
     if (m_cardEnchant[_PLAYER].m_nKind == 0x65) {
         INT iCountE = m_iCount[_ENEMY];
@@ -309,16 +586,18 @@ void CCardBattle::setNumberBreak(UINT _PLAYER, UINT _ENEMY) {
     }
 }
 BOOL CCardBattle::checkNowPlaying(INT inSide, CBattleCard* pCard) {
-    if (!(inSide)) AssertApp(D_00476980, 1425, D_00476730, 0);
+    if (!(inSide)) AssertApp(D_00476980, 1425, "inUser", 0);
     for (INT i = 0; i < 7; i++) {
         if (m_pCard[inSide - 1][i] == pCard) return TRUE;
     }
     return FALSE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testPlayingCard__Q210CardBattle11CCardBattleUi);
+__asm__(".rdata\n.align 3\n.word .L001DC4E0\n.word .L001DC4E0\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC4E0\n.word .L001DC4E0\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC4E0\n.word .L001DC4E0\n.word 0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testBreakingCard__Q210CardBattle11CCardBattleUi);
+__asm__(".rdata\n.align 3\n.word 0x72614343\n.word 0x74614264\n.word 0x3A656C74\n.word 0x7365743A\n.word 0x65724274\n.word 0x6E696B61\n.word 0x72614367\n.word 0xA6812064\n.word 0x2D424370\n.word 0x5073693E\n.word 0x6979616C\n.word 0x6143676E\n.word 0x74536472\n.word 0x4E646E61\n.word 0x3D3D776F\n.word 0x2021474E\n.word 0x6F4EA681\n.word 0x3737322E\n.word 0xCE912039\n.word 0x0A31888F\n.word 0x00000000\n.word 0x00000000\n.word 0x72614343\n.word 0x74614264\n.word 0x3A656C74\n.word 0x7365743A\n.word 0x65724274\n.word 0x6E696B61\n.word 0x72614367\n.word 0xA6812064\n.word 0x2D424370\n.word 0x5073693E\n.word 0x6979616C\n.word 0x6143676E\n.word 0x74536472\n.word 0x4E646E61\n.word 0x3D3D776F\n.word 0x20214B4F\n.word 0x6F4EA681\n.word 0x3737322E\n.word 0xCE912039\n.word 0x0A32888F\n.word 0x00000000\n.word 0x00000000\n.word 0x72614343\n.word 0x74614264\n.word 0x3A656C74\n.word 0x7365743A\n.word 0x65724274\n.word 0x6E696B61\n.word 0x72614367\n.word 0xA6812064\n.word 0x2D424370\n.word 0x5073693E\n.word 0x6979616C\n.word 0x6143676E\n.word 0x74536472\n.word 0x4E646E61\n.word 0x3D3D776F\n.word 0x20214B4F\n.word 0x6F4EA681\n.word 0x3737322E\n.word 0xCE912039\n.word 0x0A33888F\n.word 0x00000000\n.word 0x00000000\n.word 0x72614343\n.word 0x74614264\n.word 0x3A656C74\n.word 0x7365743A\n.word 0x65724274\n.word 0x6E696B61\n.word 0x72614367\n.word 0xA6812064\n.word 0x2D424370\n.word 0x5073693E\n.word 0x6979616C\n.word 0x6143676E\n.word 0x74536472\n.word 0x4E646E61\n.word 0x3D3D776F\n.word 0x20214B4F\n.word 0x6F4EA681\n.word 0x3737322E\n.word 0xCE912039\n.word 0x0A34888F\n.word 0x00000000\n.word 0x00000000\n.word .L001DC68C\n.word .L001DC68C\n.word .L001DC680\n.word .L001DC680\n.word .L001DC680\n.word .L001DC680\n.word .L001DC680\n.word .L001DC680\n.word .L001DC68C\n.word .L001DC68C\n.word .L001DC680\n.word .L001DC680\n.word .L001DC680\n.word .L001DC68C\n.word .L001DC68C\n.word 0\n.text\n");
 INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, CARD* inData, INT inTest) {
-    if (!(inUser)) AssertApp(D_00476980, 1660, D_00476730, 0);
+    if (!(inUser)) AssertApp(D_00476980, 1660, "inUser", 0);
     UINT _PLAYER = inUser - 1;
     if (m_uiState[_PLAYER]) return 0;
     m_hOwner[_PLAYER] = inHandle;
@@ -335,9 +614,9 @@ INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, C
         m_cardData[_PLAYER][0] = *inCard->getCardData();
         checkNowPlaying(inUser, inCard);
     } else {
-        if (!(inData)) AssertApp(D_00476980, 1708, D_00477090, 0);
+        if (!(inData)) AssertApp(D_00476980, 1708, "inData", 0);
         m_cardData[_PLAYER][0] = *inData;
-        m_pCard[_PLAYER][0] = new (com_malloc_d(sizeof(CBattleCard), D_00477098, RET_ADDR()))
+        m_pCard[_PLAYER][0] = new (com_malloc_d(sizeof(CBattleCard), __FILE__ "(1710)", RET_ADDR()))
             CBattleCard(asTask(), inData->m_nKind, inData->m_nNumber, inUser, 0);
         if (m_pCard[_PLAYER][0]) m_pCard[_PLAYER][0]->setRoomEffect(NULL);
         m_cardData[_PLAYER][0] = *m_pCard[_PLAYER][0]->getCardData();
@@ -364,7 +643,7 @@ INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, C
 #if 0
 INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard, INT inSkill, INT inExtra, INT inFirst,
                               INT inTest) {
-    if (!(inUser)) AssertApp(D_00476980, 1754, D_00476730, 0);
+    if (!(inUser)) AssertApp(D_00476980, 1754, "inUser", 0);
     UINT _PLAYER = inUser - 1;
     if (m_uiState[_PLAYER]) return 0;
     m_hOwner[_PLAYER] = inHandle;
@@ -398,6 +677,7 @@ INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard,
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayStock__Q210CardBattle11CCardBattleiiPPQ210CardBattle11CBattleCardiiii);
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnchantCard__Q210CardBattle11CCardBattleiiPQ210CardBattle11CBattleCard);
+__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61432F65\n.word 0x61426472\n.word 0x656C7474\n.word 0x7070632E\n.word 0x35383128\n.word 0x00002938\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word .L001DCF5C\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCDE4\n.word .L001DCFC8\n.word .L001DCF5C\n.word .L001DCFC8\n.word .L001DCF78\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCF98\n.word .L001DCDF4\n.word .L001DCFC8\n.word .L001DCE08\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFB4\n.word .L001DCFC8\n.word .L001DCEB4\n.word .L001DCFC8\n.word .L001DCED8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCF38\n.text\n");
 /* Parked: address forms - the original computes &m_cardEnchant[_PLAYER] as (idx*4+0x17c)+base and loads the kind with
  * offset 0 (kept in two registers), and &m_nEnchantTime[_PLAYER] as (base+0x184)+idx*4; ours folds the offsets the
  * other way round; the reload of m_pInstance after the decrement matches via the INT* pTime pointer; tried: CARD view
@@ -405,7 +685,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnchantCard__Q210
  * permuter 4 min (8263 candidates, no gain) */
 #if 0
 void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
-    if (!(inUser)) AssertApp(D_00476980, 1977, D_00476730, 0);
+    if (!(inUser)) AssertApp(D_00476980, 1977, "inUser", 0);
     UINT _PLAYER = inUser - 1;
     INT kind = m_pInstance->m_cardEnchant[_PLAYER].m_nKind;
     if (!kind) return;
@@ -427,7 +707,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", decEnchantTime__Q210
 #endif
 void CCardBattle::destroyPlayCard(INT inFlag, INT inP1) { resetNowPlaying(inFlag); }
 void CCardBattle::resetNowPlaying(INT inUser) {
-    if (!(inUser)) AssertApp(D_00476980, 2028, D_00476730, 0);
+    if (!(inUser)) AssertApp(D_00476980, 2028, "inUser", 0);
     UINT _PLAYER = inUser - 1;
     if (inUser == 1) {
         if (m_iStock[_PLAYER] > 0) {
@@ -454,7 +734,7 @@ void CCardBattle::resetNowPlaying(INT inUser) {
     m_iFirst[_PLAYER] = 0;
 }
 void CCardBattle::resetEnchantCard(INT inUser) {
-    if (!(inUser)) AssertApp(D_00476980, 2069, D_00476730, 0);
+    if (!(inUser)) AssertApp(D_00476980, 2069, "inUser", 0);
     UINT _PLAYER = inUser - 1;
     if (!_PLAYER) {
         resetPlayerEnchant(m_cardEnchant[0].m_nKind);
@@ -476,6 +756,7 @@ HANDLE CCardBattle::getPlayingHandle(INT inSide) {
     return 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isStandingCard__Q210CardBattle11CCardBattlei);
+__asm__(".rdata\n.align 3\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5AC\n.word .L001DD5AC\n.word .L001DD5AC\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5AC\n.word .L001DD5AC\n.word .L001DD5AC\n.word .L001DD5A4\n.word .L001DD5A4\n.word 0\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5EC\n.word .L001DD5EC\n.word .L001DD5EC\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5EC\n.word .L001DD5EC\n.word .L001DD5EC\n.word .L001DD5A4\n.word .L001DD5A4\n.word 0\n.text\n");
 BOOL CCardBattle::isPlayingCardStandNow(INT inSide) {
     if (!m_pInstance) return FALSE;
     if ((UINT)inSide < 2) {
@@ -497,6 +778,7 @@ BOOL CCardBattle::isPlayingCardStandNow(INT inSide) {
     return FALSE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isExecutingCard__Q210CardBattle11CCardBattlei);
+__asm__(".rdata\n.align 3\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6F4\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6F4\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word 0\n.word 0\n.word 0\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD734\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD734\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word .L001DD6EC\n.word 0\n.text\n");
 BOOL CCardBattle::isPlayingCard(INT inSide) {
     if (!m_pInstance) return FALSE;
     if ((UINT)inSide < 2 && !m_pInstance->m_uiState[0]) return FALSE;
@@ -567,7 +849,7 @@ void CCardBattle::notifyMakeGimmick(CARD* inData, INT inFlag) {
 }
 void CCardBattle::notifyCompleteGimmick() {
     if (m_pInstance) {
-        TRACE(D_00477298, m_pInstance->m_cardGimmick.m_nKind);
+        TRACE("CB:: notifyCompleteGimmick() =%d,\n", m_pInstance->m_cardGimmick.m_nKind);
         _setCard(m_pInstance->m_cardGimmick, 0, 0);
         _ref(m_pInstance)->m_uiFlag &= ~0x8000;
     }
@@ -666,6 +948,7 @@ void CCardBattle::initCardBreak(HANDLE inHandle, UINT inUser) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", initCardBreak__Q210CardBattle11CCardBattleiUi);
 #endif
+__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61432F65\n.word 0x61426472\n.word 0x656C7474\n.word 0x7070632E\n.word 0x39353228\n.word 0x00002938\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61432F65\n.word 0x61426472\n.word 0x656C7474\n.word 0x7070632E\n.word 0x31363228\n.word 0x00002936\n.word 0x00000000\n.word 0x61657262\n.word 0x0000006B\n.word 0x65657073\n.word 0x72625F64\n.word 0x006B6165\n.word 0x00000000\n.text\n");
 void CCardBattle::dispCardBreak() {
     if (m_hBreak > 0) {
         if (m_pSeqCtrlBreak->isEnd(0)) {
@@ -705,7 +988,7 @@ void CCardBattle::destroyEnemyCard(INT inHandle) {
     if (inHandle == m_hOwner[1]) destroyPlayCard(2, inHandle);
 }
 void CCardBattle::destroyRevolver(INT inSide) {
-    if (!(inSide)) AssertApp(D_00476980, 2764, D_00476730, 0);
+    if (!(inSide)) AssertApp(D_00476980, 2764, "inUser", 0);
     UINT _PLAYER = inSide - 1;
     if (m_pRevolver[_PLAYER]) {
         m_pRevolver[_PLAYER]->destroy();
@@ -713,11 +996,11 @@ void CCardBattle::destroyRevolver(INT inSide) {
     }
 }
 void CCardBattle::setRevolver(INT inSide, CCardRevolver* pRevolver) {
-    if (!(inSide)) AssertApp(D_00476980, 2774, D_00476730, 0);
+    if (!(inSide)) AssertApp(D_00476980, 2774, "inUser", 0);
     m_pRevolver[inSide - 1] = pRevolver;
 }
 CCardRevolver* CCardBattle::getRevolver(INT inSide) {
-    if (!(inSide)) AssertApp(D_00476980, 2779, D_00476730, 0);
+    if (!(inSide)) AssertApp(D_00476980, 2779, "inUser", 0);
     return m_pRevolver[inSide - 1];
 }
 void CCardBattle::setBattleEnd() {
@@ -769,13 +1052,13 @@ CStockFolder* CCardBattle::setStockFolder(::CTask* pParent, INT inUser) {
     UINT _PLAYER = inUser - 1;
     if (!m_pInstance->m_pStockFolder[_PLAYER]) {
         m_pInstance->m_pStockFolder[_PLAYER] =
-            new (com_malloc_d(sizeof(CStockFolder), D_00477338, RET_ADDR())) CStockFolder(pParent, inUser);
+            new (com_malloc_d(sizeof(CStockFolder), __FILE__ "(2898)", RET_ADDR())) CStockFolder(pParent, inUser);
         _ref(m_pInstance)->m_hDuelEnemy = pParent->getHandle();
     }
     return m_pInstance->m_pStockFolder[_PLAYER];
 }
 void CCardBattle::destroyStockFolder(INT inSide) {
-    if (!(inSide)) AssertApp(D_00476980, 2905, D_00476730, 0);
+    if (!(inSide)) AssertApp(D_00476980, 2905, "inUser", 0);
     UINT _PLAYER = inSide - 1;
     if (m_pStockFolder[_PLAYER]) {
         m_pStockFolder[_PLAYER]->destroy();
@@ -819,6 +1102,7 @@ void ENCHANT_PARAM::init(INT inOwner, UINT inUser) {
     iNormal = 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcEnchantParam__Q210CardBattle11CCardBattleRQ210CardBattle13ENCHANT_PARAM);
+__asm__(".rdata\n.align 3\n.word 0x61506F69\n.word 0x2E6D6172\n.word 0x73556975\n.word 0x00007265\n.word 0x00000000\n.word 0x00000000\n.word .L001DEA28\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DE9B8\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEAFC\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DE9EC\n.word .L001DEBA4\n.word .L001DEA34\n.word 0\n.word 0\n.word 0\n.word .L001DEA8C\n.word .L001DEA98\n.word .L001DEAA4\n.word .L001DEAB0\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEABC\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEAD4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEAEC\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEB24\n.text\n");
 void CCardBattle::calcEnchant_AttackPoint(INT& inPoint, ATK_KIND& inAtkKind, ATK_ATTR inAttr, UINT inUpKind) {
     if (m_pInstance && g_pPlayer) {
         ENCHANT_PARAM param;
@@ -836,6 +1120,7 @@ void CCardBattle::calcEnchant_AttackPoint(INT& inPoint, ATK_KIND& inAtkKind, ATK
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayerEnchant__Q210CardBattle11CCardBattlei);
+__asm__(".rdata\n.align 3\n.word .L001DEDA4\n.word .L001DEE4C\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEE18\n.word .L001DEF48\n.word .L001DEDB4\n.word .L001DEDC4\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEE38\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEDD0\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEDE4\n.word .L001DECCC\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DED74\n.word .L001DEDF8\n.word .L001DECE4\n.word .L001DED44\n.word .L001DED14\n.word .L001DED5C\n.word .L001DECFC\n.word .L001DED8C\n.word .L001DED2C\n.word .L001DEE60\n.word .L001DEE78\n.word .L001DEE9C\n.word .L001DEEB4\n.word .L001DEED8\n.word .L001DEEF4\n.word .L001DEF0C\n.word .L001DEF24\n.text\n");
 void CCardBattle::resetPlayerEnchant(INT inKind) {
     if (_ref(g_pPlayer)) {
         _ref(g_pPlayer)->setDefAttr(PL::g_fDefAttr[0]);
@@ -924,6 +1209,7 @@ void CCardBattle::exeBio() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropFriendCard__10CardBattleR4CARDi);
+__asm__(".rdata\n.align 3\n.word .L001DF53C\n.word .L001DF550\n.word .L001DF564\n.word .L001DF58C\n.word .L001DF578\n.word .L001DF5A0\n.word .L001DF5B4\n.word .L001DF5D0\n.text\n");
 INT CardBattle::getDropPlutoCard(CARD& outData) {
     if (CGame::isRikuGame()) return 0;
     if (CSceneInfo::isMinigameScene()) return 0;
@@ -949,6 +1235,7 @@ INT CardBattle::getDropPlutoCard(CARD& outData) {
     return 1;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeDuel__Q210CardBattle11CCardBattle);
+__asm__(".rdata\n.align 3\n.word .L001DFA98\n.word .L001DF8C0\n.word .L001DF938\n.word .L001DFA98\n.word .L001DF960\n.word .L001DF980\n.word .L001DF9B0\n.word .L001DFA2C\n.word .L001DFA4C\n.word .L001DFA98\n.word .L001DFA98\n.word .L001DFA70\n.word .L001DFA8C\n.word 0\n.word 0\n.word 0\n.text\n");
 void CCardBattle::setDuelEntry(INT inFlag) {
     if (inFlag > 0) {
         if (m_uiDuelState == 1) m_uiDuelState = 2;
@@ -969,7 +1256,9 @@ void CCardBattle::setDuelEntry(INT inFlag) {
     m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 9, &m_mesCardInfo[1]);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelStart__Q210CardBattle11CCardBattlei);
+__asm__(".rdata\n.align 3\n.word .L001DFE74\n.word .L001DFE80\n.word .L001DFE8C\n.word .L001DFE98\n.word .L001DFEA4\n.word .L001DFECC\n.word 0\n.word 0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelBreakCount__Q210CardBattle11CCardBattleii);
+__asm__(".rdata\n.align 3\n.word .L001DFF6C\n.word .L001DFF6C\n.word .L001DFF6C\n.word .L001DFF6C\n.word .L001DFF74\n.word .L001DFF74\n.word .L001DFF7C\n.word .L001DFF7C\n.text\n");
 BOOL CCardBattle::setEnemyDuelCard(HANDLE inHandle, INT inIndex, INT inNumber) {
     if (m_uiDuelState != 5) return 0;
     if (m_uiState[0]) return 0;
@@ -1037,6 +1326,19 @@ BOOL CCardBattle::isDuelEntryingCard(INT inSide) {
     }
     return FALSE;
 }
+namespace CardBattle {
+static LPCSTR g_szLadDuel = "duelmode.lad";
+static LPCSTR g_szSeqDuel = "duelmode:00";
+INT g_DuelSeqIDX_TimerNumDmy[6][3] = {
+    {47, 48, 49}, {50, 51, 52}, {53, 54, 55}, {56, 57, 58}, {59, 60, 61}, {62, 63, 64},
+};
+G_UV g_uvDuelNumTex[4][10] = {
+    {{153, 144}, {178, 144}, {193, 144}, {214, 144}, {236, 144}, {154, 163}, {174, 163}, {193, 163}, {214, 163}, {235, 163}},
+    {{174, 163}, {191, 163}, {214, 163}, {235, 163}, {255, 163}, {174, 182}, {193, 182}, {212, 182}, {235, 182}, {254, 182}},
+    {{2, 225}, {2, 194}, {24, 194}, {58, 194}, {94, 194}, {125, 194}, {36, 225}, {69, 225}, {102, 225}, {136, 225}},
+    {{34, 256}, {23, 224}, {57, 225}, {91, 225}, {123, 224}, {158, 225}, {68, 256}, {100, 256}, {135, 256}, {167, 256}},
+};
+}
 CDuelGauge::CDuelGauge(::CTask* pParent) : ::CTask(pParent, 0x4000) {
     m_pSeqCtrls = NULL;
     _initialize();
@@ -1053,9 +1355,10 @@ void CDuelGauge::_initialize() {
     m_tqTimer = 0;
     m_tqLimit = 0;
     m_hTimerSE = 0;
-    m_pSeqCtrls = new (D_00477690) D2::C2DSeqCtrl[12];
+    m_pSeqCtrls = new (__FILE__ "(4378)") D2::C2DSeqCtrl[12];
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", main__Q210CardBattle10CDuelGauge);
+__asm__(".rdata\n.align 3\n.word .L001E0638\n.word .L001E05F0\n.word .L001E0638\n.word .L001E060C\n.word .L001E0634\n.word 0\n.text\n");
 /* Parked: one store slot - the original schedules the m_tqTimer store (0x5c) after the zero stores of m_uiCount and
  * m_uiResult, ours before them (and the setLayer sb one slot earlier); the statement order is the $LM line order;
  * tried: all 720 orders of the six stores (200 tested), chained/temp assignments for timer/limit, pSeq load forms
@@ -1424,3 +1727,6 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getEnchantCard__Q210
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getStockCount__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getState__CQ210CardBattle10CDuelGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getTimer__CQ210CardBattle10CDuelGauge);
+/* The vtables (their key functions, the destructors, are still assembly). */
+__asm__(".rdata\n.align 3\n.globl _vt$Q210CardBattle10CDuelGauge\n_vt$Q210CardBattle10CDuelGauge:\n.word 0\n.word 0\n.word 0\n.word _$_Q210CardBattle10CDuelGauge\n.word 0\n.word main__Q210CardBattle10CDuelGauge\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.globl _vt$Q210CardBattle11CCardBattle\n_vt$Q210CardBattle11CCardBattle:\n.word 0\n.word 0\n.word 0\n.word _$_Q210CardBattle11CCardBattle\n.word 0\n.word main__Q210CardBattle11CCardBattle\n.word 0\n.word disp__Q210CardBattle11CCardBattle\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.text\n");
+// SOURCE DATA: .data .rodata
