@@ -361,12 +361,72 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPat
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddPoaCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddRotCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddSpdCall__FP12CDebugWindowii);
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4143: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineNameSaveCall__FP12CDebugWindowii);
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4147: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineSaveCall__FP12CDebugWindowii);
+extern "C" char D_00486B08[];
+extern "C" char D_00486B18[];
+__asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text (its static) */
+BOOL debugWinPathLineNameSaveCall(CDebugWindow* pObj, INT inY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if (inParam & 0x20) {
+            pObj->sendMessage(1, &DWT::debugWinName);
+            iStep++;
+        }
+        break;
+    case 1:
+        if (inParam & 0x800) {
+            if (pObj->isChildAnswer()) {
+                strcpy(CDebugPathData::m_szPathName, (char*)pObj->getChildAnswer());
+                if (CDebugPathData::savePath(CDebugPathData::m_szPathName)) {
+                    pObj->sendMessage(1, D_00486B08);
+                    iStep++;
+                } else {
+                    pObj->sendMessage(1, D_00486B18);
+                    iStep--;
+                }
+            } else {
+                iStep--;
+            }
+        }
+        break;
+    case 2:
+        iStep = 0;
+        break;
+    }
+    return TRUE;
+}
+BOOL debugWinPathLineSaveCall(CDebugWindow* pObj, INT inY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if (inParam & 0x20) {
+            pObj->sendMessage(1, &DWT::debugWinYesNo);
+            iStep++;
+        }
+        break;
+    case 1:
+        if (inParam & 0x800) {
+            if (pObj->isChildAnswer() && pObj->getChildAnswer() == 1) {
+                if (CDebugPathData::savePath(NULL)) {
+                    pObj->sendMessage(1, D_00486B08);
+                    iStep++;
+                } else {
+                    pObj->sendMessage(1, D_00486B18);
+                    iStep--;
+                }
+            } else {
+                iStep--;
+            }
+        }
+        break;
+    case 2:
+        iStep = 0;
+        break;
+    }
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditNum__FP12CDebugWindowii);
 /* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
 __asm__(".data\n.align 2\n" "iStep.4154: .word 0\n" ".text\n");
