@@ -8,6 +8,11 @@
 #include "System/Debug.h"
 #include "System/HeapMan.h"
 #include "Game/Debug/DebugWork.h"
+#include "Game/Prize.h"
+#include "System/Math3D.h"
+#include "System/Coord.h"
+#include "Game/Game.h"
+#include "Game/SceneInfo.h"
 #include "include_asm.h"
 
 using namespace CardBattle;
@@ -19,7 +24,7 @@ extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039B2E4");
 template <class T> static inline T& _ref(T& v) { return v; }
 extern "C" char D_00479D40[]; /* "Game/CardBattle.h" */
 extern "C" char D_00479D68[]; /* "inUser" */
-/* CCardBattle's m_cardEnchant as the original's CARD[2] (Game/CardBattle.h declares bytes) */
+/* PARTIAL: stand-in for Game/CardBattle CCardBattle (m_cardEnchant, getEnchantKind): gated by GAME_CARDBATTLE_CPP */
 struct CB_ENCHANT_VIEW {
     BYTE _pad[0x17C];
     CARD m_cardEnchant[2];
@@ -35,7 +40,7 @@ extern char* g_szStockSkillName[150];
 extern LPCSTR g_szLadCockpit;
 }
 namespace D2 {
-class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the class only for its own unit */
+class C2DMan { /* PARTIAL: stand-in for System/Graphic/2d/2DMan C2DMan: gated by SYSTEM_GRAPHIC_2D_2DMAN_CPP */
 public:
     static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
 };
@@ -139,7 +144,65 @@ void CCardRevolver::_init() {
     m_iMax = 0;
     m_pEmpty = NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _initialize__Q210CardBattle13CCardRevolverP4CARDi);
+namespace CardBattle {
+extern BTL_DECK g_deckSoraTutorial[];
+extern BTL_DECK g_deckSoraDebug[];
+extern BTL_DECK g_deckSoraDebug99[];
+extern BTL_DECK g_deckSoraPoo[];
+extern BTL_DECK g_deckSoraStarter[];
+extern BTL_DECK g_deckRikuStarter[];
+}
+void CCardRevolver::_initialize(CARD* inDeck, INT inShortCut) {
+    switch (m_uiUser) {
+    case 1:
+        m_iReloadSEID = 0x12;
+        if (inDeck) {
+            if (CGame::isRikuGame()) m_uiFlag |= 0x80;
+            else if (CSceneInfo::isMinigameScene()) m_uiFlag |= 0x800;
+            setDeck(inDeck, inShortCut);
+        } else if (CGame::isSoraGame()) {
+            if (CGameWork::getFlag(1, 0x2C)) {
+                convBtlDeckToCard(g_deckSoraTutorial);
+                setDeck((CARD*)g_deckSoraTutorial, -1);
+            } else {
+                switch (DebugWork::g_dw.player.iUseDbgDeck) {
+                case 3:
+                    convBtlDeckToCard(g_deckSoraDebug99);
+                    setDeck((CARD*)g_deckSoraDebug99, -1);
+                    break;
+                case 2:
+                    convBtlDeckToCard(g_deckSoraDebug);
+                    setDeck((CARD*)g_deckSoraDebug, -1);
+                    break;
+                case 0:
+                default:
+                    if (CSceneInfo::isMinigameScene()) {
+                        convBtlDeckToCard(g_deckSoraPoo);
+                        setDeck((CARD*)g_deckSoraPoo, -1);
+                        m_uiFlag |= 0x800;
+                    } else {
+                        convBtlDeckToCard(g_deckSoraStarter);
+                        setDeck((CARD*)g_deckSoraStarter, -1);
+                    }
+                    break;
+                }
+            }
+        } else {
+            m_uiFlag |= 0x80;
+            convBtlDeckToCard(g_deckRikuStarter);
+            setDeck((CARD*)g_deckRikuStarter, inShortCut);
+        }
+        break;
+    case 2:
+        m_iReloadSEID = 0x1B;
+        if (inDeck) setDeck(inDeck, -1);
+        break;
+    }
+    if (m_uiFlag & 1) return;
+    CARD dummy;
+    _setCard(dummy, 0xFF, 0);
+    setDeck(&dummy, -1);
+}
 void CCardRevolver::_initCounter() {
     initCounter();
     m_pEmpty = new (com_malloc_d(sizeof(C2DCard), D_0047AAC0, RET_ADDR())) C2DCard;
@@ -151,7 +214,61 @@ void CCardRevolver::_initCounter() {
     m_pEmpty->setPos(vPos);
     m_pEmpty->enableDisp(FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeWait__Q210CardBattle13CCardRevolver);
+void CCardRevolver::exeWait() {
+    UINT flag = (m_uiUser == 1) ? 2 : 4;
+    if (!(m_uiFlag & 0x40)) {
+        INT i;
+        CBattleCard* card;
+        m_bActive = FALSE;
+        m_tqTimer = 0;
+        m_nRemain[0] = 0;
+        m_iMax = 0;
+        m_nReloadCount = 0;
+        m_nActive[0] = 0;
+        for (i = 0; i < m_nLimit; i++) {
+            card = &m_pCards[i];
+            if (!card) continue;
+            if (card->isNowPlaying()) continue;
+            if (card->isDuelStock()) continue;
+            card->resetReloadSet();
+            if (card->getHand() >= 0) {
+                card->hideHand();
+                card->outHand();
+            }
+            if (card->getHand() != -1) continue;
+            if (card->getStock() != -1) continue;
+            if (card->isReloadNG()) continue;
+            if ((m_uiFlag & 0x100) && card->isDModeNG()) continue;
+            m_iMax++;
+            card->setReloadSet();
+        }
+        m_tqTimer = 400;
+        m_uiFlag |= 0x40;
+    }
+    if (CGameWork::getInt(1, 0xE2) & flag) return;
+    if (m_uiFlag & 0x40) {
+        m_iState = 2;
+        m_uiFlag = (INT)m_uiFlag & ~0x40;
+        m_uiFlag = (INT)m_uiFlag & ~8;
+        m_hPlaySE = CSound::playSE(m_iReloadSEID, -1, 0x40);
+        INT j = m_nLimit - 1;
+        for (INT i = 0; i < m_nLimit; i++, j--) {
+            CBattleCard* card = &m_pCards[j];
+            if (!card) continue;
+            if (card->isReloadSet()) {
+                card->resetReloadSet();
+                m_nActive[0] = j;
+                if (card->getCardData()->m_nCategory1 != 8) m_nRemain[0]++;
+                card->resetHand(m_iMax - m_nRemain[0] - 1, m_iMax);
+                m_nReloadCount++;
+            } else {
+                card->setStartIn();
+            }
+        }
+    } else {
+        m_iState = 1;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle13CCardRevolver);
 void CCardRevolver::exeMain() {
     if (DebugWork::g_dw.player.iDeckDbgDisp) {
@@ -261,8 +378,155 @@ void CCardRevolver::initHide() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setDeck__Q210CardBattle13CCardRevolverP4CARDi);
+/* Parked: 5 lines off, the direction `a`: the original computes it as li t3,1 / slt v0,v1,a1 / movz t3,v1,v0
+   with v1 = -1 set in both predecessors of the join, then negates num with bltzl; ours branches (bgez). Worked:
+   one `i` for all three loops (s0), !m_iMode-first rc/pCards select, hand++ after setHand, if/else direction.
+   Tried: 11 forms of a/abs (ternaries, -1 < num, a = -1 before the rc block); permuter 5 min (5534, no gain). */
+#if 0
+void CCardRevolver::rollDeck(INT inNum, INT inFlag, TIMEQ inTime) {
+    INT iRemain;
+    INT i;
+    INT nLimit;
+    INT iEnd;
+    INT iMax;
+    CBattleCard* pCards;
+    INT rc;
+    INT num;
+    INT target;
+    INT n;
+    INT a;
+    INT loop;
+    INT hand;
+    iRemain = m_nRemain[m_iMode];
+    if (!inFlag) {
+        if (CGameWork::getFlag(1, 9)) return;
+        if (m_iState != 1) return;
+        if (!m_bActive) return;
+        if (!inTime) return;
+        if (m_iMode == 0) {
+            if (m_nTotal[0] == m_nReloadCard) return;
+        } else {
+            if (m_nTotal[m_iMode] == 0) return;
+        }
+        if (m_uiUser == 1) {
+            if (m_iMode == 0) {
+                if (inTime == 100 && m_pCards[m_nActive[0]].getCardCategory() == 8) return;
+                if (inNum && iRemain > 0) {
+                    CSound::playSE(0xE, -1, 0x40);
+                    CGameWork::setFlag(1, 0x17, 1);
+                }
+            } else {
+                if (inNum && iRemain >= 2) {
+                    CSound::playSE(0xE, -1, 0x40);
+                    CGameWork::setFlag(1, 0x17, 1);
+                }
+            }
+        }
+    }
+    if (m_iMode == 0) {
+        nLimit = m_nLimit;
+        iMax = m_nRemain[0] + m_nReloadCard;
+        for (i = nLimit - 1; i >= 0; i--) {
+            CBattleCard* pCard = &m_pCards[i];
+            if (!pCard) continue;
+            if (pCard->getHand() == -1) continue;
+            m_nEnd = i;
+            break;
+        }
+        iEnd = m_nEnd + 1;
+        if (!m_nReloadCard && iMax == 1) m_nActive[m_iMode] = m_nEnd;
+    } else {
+        nLimit = m_nTotal[m_iMode];
+        iMax = m_nRemain[m_iMode];
+        iEnd = nLimit;
+    }
+    m_bActive = FALSE;
+    m_tqTimer = 0;
+    SHORT& iActive = m_nActive[m_iMode];
+    if (!iMax && m_nReloadCard > 0) return;
+    if (!m_iMode) {
+        rc = m_nReloadCard;
+        pCards = m_pCards;
+    } else {
+        pCards = m_pCardsE;
+        rc = 0;
+    }
+    num = inNum;
+    target = iActive;
+    if (!rc && !iMax) {
+        num = 0;
+        if (!m_iMode) target = m_nReloadID;
+    }
+    if (num < 0) {
+        a = -1;
+        num = -num;
+    } else {
+        a = 1;
+    }
+    loop = 0;
+    while (num > 0) {
+        for (i = 0; i < nLimit; i++) {
+            target += a;
+            if (target < 0) target = iEnd - 1;
+            else if (target >= iEnd) target = 0;
+            CBattleCard* pCard = &pCards[target];
+            if (!pCard) continue;
+            if (pCard->getHand() == -1) continue;
+            if (pCard->getCardOwner() == 1 || pCard->getCardOwner() == m_uiUser) {
+                num--;
+                break;
+            }
+        }
+        if (++loop > nLimit) return;
+    }
+    iActive = target;
+    hand = 0;
+    m_tqRollSpeed = inTime;
+    for (i = 0; i < nLimit; i++) {
+        CBattleCard* pCard = &pCards[(iActive + i) % nLimit];
+        if (!pCard) continue;
+        if (pCard->getHand() == -1) continue;
+        pCard->setHand(*pCard->getCardData(), hand, iMax, 1);
+        hand++;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", rollDeck__Q210CardBattle13CCardRevolveriii);
+#endif
+/* Parked: 12 lines off, all in `limit`: the original loads m_nTotal[m_iMode] (lhu + sll 16) above the m_iMode
+   branch and sign-extends (sra 16) only in that arm (interblock-scheduled split extension); ours branches first
+   and uses lh. Worked: `if (inMode == -1) ^= 1; else =`, `!old_mode ? m_pCards : m_pCardsE`, indexed
+   pCards[i] loop (copy into the loop register). Tried for limit: ternary both ways, if/else, assignment +
+   override, SHORT temporary (4 forms), (SHORT) cast. */
+#if 0
+void CCardRevolver::changeMode(INT inMode, INT inFlag) {
+    INT old_mode;
+    INT limit;
+    CBattleCard* pCards;
+    INT i;
+    if (m_iState != 1) return;
+    old_mode = m_iMode;
+    if (!inFlag) {
+        if (CGameWork::getFlag(1, 0xB)) return;
+        if (old_mode == inMode) return;
+        if (!m_bActive) return;
+    }
+    limit = m_iMode ? m_nTotal[m_iMode] : m_nLimit;
+    pCards = !old_mode ? m_pCards : m_pCardsE;
+    for (i = 0; i < limit; i++) {
+        if (&pCards[i] && pCards[i].getHand() != -1) pCards[i].hideHand();
+    }
+    if (inMode == -1) m_iMode ^= 1;
+    else m_iMode = inMode;
+    rollDeck(0, 1, 300);
+    if (!inFlag) CSound::playSE(3, -1, 0x40);
+    if (m_iMode > 0 && m_nRemain[m_iMode] == 0) m_pEmpty->enableDisp(1);
+    else m_pEmpty->enableDisp(0);
+    if (m_iMode == 0) CGameWork::setFlag(1, 0x12, 1);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", changeMode__Q210CardBattle13CCardRevolverii);
+#endif
 void CCardRevolver::rollShortCut(INT inMode) {
     if (m_iMode != 0) return;
     if (CGameWork::getFlag(1, 9)) return;
@@ -324,7 +588,48 @@ INT CCardRevolver::isEnableCharge() {
     m_uiFlag |= 4;
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", chargeReloadCard__Q210CardBattle13CCardRevolveri);
+INT CCardRevolver::chargeReloadCard(INT inMode) {
+    if (CGameWork::getFlag(1, 8)) return -1;
+    if (m_uiFlag & 0x10000) return -1;
+    if (!isEnableCharge() && !inMode) return -1;
+    if (m_uiFlag & 0x80) {
+        if (!inMode) CSound::playSE(0x15, -1, 0x40);
+        initReload(inMode);
+        return 1;
+    }
+    m_tqCharge += getFrameRate() * m_tqChargeRate / 100;
+    CBattleCard* card = getActiveCard();
+    INT charge = m_tqCharge / 30;
+    if (charge - m_iCharge * 100 >= 100) {
+        if (m_iCharge > 0) {
+            m_iCharge--;
+            m_tqCharge = m_iCharge * 3000;
+            charge = m_iCharge * 100;
+            CSound::playSE(0x14, -1, 0x40);
+        } else {
+            CCardBattle* pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+            INT kind = _getEnchantKind(pCB, m_uiUser);
+            if (kind != 0x18) {
+                if (m_iChargeCount < 3) m_iChargeCount++;
+                if (kind == 0x1E) m_iChargeCount = 1;
+            }
+            m_iCharge = m_iChargeCount - 1;
+            m_tqCharge = m_iCharge * 3000;
+            card->updateReload(m_iCharge * 100);
+            CSound::playSE(0x15, -1, 0x40);
+            if (kind == 0xD) {
+                setAction(0x50, 0);
+                return 1;
+            }
+            initReload(0);
+            return 1;
+        }
+    }
+    card->updateReload(charge);
+    m_uiFlag |= 0x20;
+    if (!m_hChargeSE) m_hChargeSE = CSound::playSE(0x13, -1, 0x40);
+    return 0;
+}
 void CCardRevolver::initReload(INT inMode) {
     TRACE(D_0047AE78, inMode);
     m_iState = 2;
@@ -361,7 +666,75 @@ void CCardRevolver::initReload(INT inMode) {
     if (inMode != 2) CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
     m_uiFlag &= ~0x20000;
 }
+/* Parked: 14 lines off: register allocation and latch order of the first loop - the original keeps i in t0 and
+   the card offset in a2 (decremented first in the latch, in the continue paths' delay slots), ours the reverse;
+   the second loop's i likewise. Worked (from 48 bytes over to same size): separate `m_uiFlag & 8` / `& 0x20000`
+   ifs, switch with `case 8: break;` first and case 4 falling into default, `card = NULL` in the for-increment,
+   the m_uiFlag &= ~0x20000 block placed after the first return (goto notyet out of the second loop), indexed
+   second loop. Tried: all 6 increment orders, pointer second loop; permuter 5 min (5990 candidates, no gain). */
+#if 0
+extern "C" char D_0047AE98[]; /* "CCardRevolver::exeReload(); RELOAD end.\n" */
+extern "C" char D_0047AEC8[]; /* "CCardRevolver::exeReload(); RELOAD complete!\n" */
+void CCardRevolver::exeReload() {
+    CBattleCard* card;
+    INT n;
+    INT i;
+    INT category;
+    m_tqTimer -= getFrameRate();
+    if (m_tqTimer > 0) return;
+    if (m_uiFlag & 8) {
+        if (m_uiFlag & 0x20000) {
+            rollDeck(0, 1, 300);
+            m_tqTimer = 0;
+            m_iState = 1;
+            CGameWork::setFlag(1, 0x13, 1);
+            TRACE(D_0047AE98);
+            return;
+        }
+    }
+    if (0) {
+    notyet:
+        m_uiFlag &= ~0x20000;
+        goto check;
+    }
+    m_tqTimer = 200;
+    card = NULL;
+    n = m_nLimit - 1;
+    for (i = 0; i < m_nLimit; i++, n--, card = NULL) {
+        card = &m_pCards[n];
+        if (!card) continue;
+        if (!card->isReloadSet()) continue;
+        card->resetReloadSet();
+        category = card->getCardData()->m_nCategory1;
+        switch (category) {
+        case 8:
+            break;
+        case 4:
+            if (m_uiFlag & 0x100) continue;
+        default:
+            m_nRemain[0]++;
+            break;
+        }
+        m_nActive[0] = n;
+        m_nReloadCount++;
+        break;
+    }
+    if (card) card->resetHand(m_iMax - m_nReloadCount, m_iMax);
+    m_uiFlag |= 0x20000;
+    for (i = 0; i < m_nLimit; i++) {
+        card = &m_pCards[i];
+        if (card && card->isReloadSet()) goto notyet;
+    }
+check:
+    if (m_uiFlag & 0x20000) {
+        m_tqTimer = 400;
+        TRACE(D_0047AEC8);
+    }
+    m_uiFlag |= 8;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeReload__Q210CardBattle13CCardRevolver);
+#endif
 INT CCardRevolver::getRemain(INT inMode, INT inKind, INT inCategory) {
     if (inMode < 0) return m_nRemain[m_iMode];
     if (inKind == 0 && inCategory == 0) return m_nRemain[inMode];
@@ -389,7 +762,66 @@ INT CCardRevolver::getRemain(INT inMode, INT inKind, INT inCategory) {
     return n;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockCard__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", returnStockCard__Q210CardBattle13CCardRevolveri);
+extern "C" char D_0047AF38[]; /* "CR::returnStockCard NowDuel NG!\n" */
+extern "C" char D_0047AF60[]; /* "CR::returnStockCard Now Reload Lost NG!\n" */
+extern "C" char D_0047AF90[]; /* "CR::returnStockCard DESTROY\n" */
+extern "C" char D_0047AFB0[]; /* "CR::returnStockCard RETURN\n" */
+INT CCardRevolver::returnStockCard(INT inFlag) {
+    INT nStock;
+    BOOL bDestroy;
+    INT i;
+    if (((CCardBattle*)CTaskMan::getSysTask(0x16))->isNowDuel()) {
+        TRACE(D_0047AF38);
+        return 0;
+    }
+    if (!m_nReloadCard) {
+        TRACE(D_0047AF60);
+        return 0;
+    }
+    nStock = getStock(1);
+    if (!nStock && !m_iStock) return 0;
+    bDestroy = FALSE;
+    if (!inFlag) {
+        if (m_iState != 1) return 0;
+        if (m_iMode) return 0;
+        if (nStock != m_iStock) return 0;
+        if (m_nRemain[0] > 0 && !getActiveCard()) return 0;
+        if (CCardBattle::isExecutingCard(m_uiUser)) return 0;
+    } else {
+        if (m_iState != 1) bDestroy = TRUE;
+        if (m_iMode) bDestroy = TRUE;
+        if (nStock != m_iStock) bDestroy = TRUE;
+        if (m_nRemain[0] > 0 && !m_iMode && !getActiveCard()) bDestroy = TRUE;
+        if (CCardBattle::isExecutingCard(m_uiUser)) bDestroy = TRUE;
+    }
+    m_uiFlag = (INT)m_uiFlag & ~0x200;
+    if (bDestroy) {
+        TRACE(D_0047AF90);
+        for (i = 0; i < 7; i++) {
+            if (m_pCardsS[i]) m_pCardsS[i]->destroy(0);
+            m_pCardsS[i] = NULL;
+            m_pDataS[i] = NULL;
+        }
+    } else {
+        TRACE(D_0047AFB0);
+        for (i = 0; i < 7; i++) {
+            if (m_pCardsS[i]) m_pCardsS[i]->resetHand(++m_nRemain[0], m_nTotal[0]);
+            m_pCardsS[i] = NULL;
+            m_pDataS[i] = NULL;
+        }
+        m_iState = 3;
+        m_tqTimer = 400;
+        m_iMax = m_nRemain[0] + m_nReloadCard;
+        m_uiFlag = (INT)m_uiFlag & ~8;
+        m_bActive = FALSE;
+    }
+    m_iStock = 0;
+    m_iStockSum = 0;
+    m_iStockSkill = 0;
+    m_iExtraSkill = 0;
+    m_iFirstSkill = 0;
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", calcStockSkill__Q210CardBattle13CCardRevolver);
 INT CCardRevolver::calcEnemyStockSkill() {
     UINT uiKinds = 0;
@@ -602,7 +1034,39 @@ void CCardRevolver::addCard(CARD* pData, INT inReturn) {
         m_uiFlag |= 0x400;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeAddCard__Q210CardBattle13CCardRevolver);
+INT CCardRevolver::exeAddCard() {
+    INT num;
+    INT i;
+    INT count;
+    if (!(m_uiFlag & 0x400)) return 0;
+    if (!(m_uiFlag & 0x20000)) return 0;
+    num = -1;
+    for (i = 0; i < 39; i++) {
+        if (m_cardAdd[i].m_nKind) {
+            num = i;
+            break;
+        }
+    }
+    if (num < 0) {
+        m_uiFlag = (INT)m_uiFlag & ~0x400;
+        return 0;
+    }
+    if (m_iMode > 0) changeMode(0, 1);
+    else m_pEmpty->enableDisp(0);
+    {
+        INT next = num + 1; // MATCH: num + 1 as its own value (not reassociated with m_nReloadID)
+        count = m_nReloadID + next;
+    }
+    if (!m_pCards[count].getCardKind()) m_nTotal[0]++;
+    m_pCards[count].setHand(m_cardAdd[num], m_nRemain[0], m_nTotal[0], 0);
+    m_pCards[count].resetReloadNG();
+    if (m_uiFlag & 0x2000) m_pCards[count].setCardOwner(1);
+    m_pCards[count].testDisp();
+    m_nRemain[0]++;
+    _setCard(m_cardAdd[num], 0, 0);
+    rollDeck(0, 1, 300);
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initCounter__Q210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeCounter__Q210CardBattle13CCardRevolver);
 void CCardRevolver::destroyCounter() {
@@ -875,8 +1339,106 @@ void CCardRevolver::snatchCard() {
 INT CCardRevolver::returnSnatch(INT inNum) {
     return returnSnatchCard(inNum);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", returnSnatchCard__Q210CardBattle13CCardRevolveri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeReturnCard__Q210CardBattle13CCardRevolver);
+INT CCardRevolver::returnSnatchCard(INT inNum) {
+    PRIZE_PARAM param;
+    INT num;
+    INT i;
+    INT n;
+    CBattleCard* card;
+    if (m_uiUser != 2) return 0;
+    returnStockCard(1);
+    if (m_iMode > 0) changeMode(0, 1);
+    else m_pEmpty->enableDisp(0);
+    num = inNum;
+    CTask* pOwner = CTaskMan::getTask(m_hOwner); // MATCH: the call before the flag stores (no such local in the ref)
+    param.uiFlag = 0;
+    param.uiPrizeFlag = 0;
+    param.vPos = pOwner->Crd(0).m_World.v[3];
+    param.vPos.y += 1.0f;
+    param.fSpeed = 0.25f;
+    if (num <= 0) num = m_nAdd;
+    n = m_nLimit - 1;
+    for (i = 0; i < m_nLimit; i++, n--) {
+        card = &m_pCards[n];
+        if (!card) continue;
+        if (card->getCardOwner() != 1) continue;
+        if (card->getHand() != -1) m_nRemain[0]--;
+        param.PrizeKind = card->getCardKind();
+        param.iNumber = card->getBaseCardNumber();
+        FLOAT rx = (-70.0f - RND::genrand_real1() * 10.0f) * 0.017453292f;
+        FLOAT ry = RND::genrand_real1() * 360.0f * 0.017453292f;
+        param.vRot.set(rx, ry, 0.0f);
+        Math3D::LimitPIVector(param.vRot);
+        CPrize* pPrize = (CPrize*)CEntityFactory::getInstance()->createPrize(param, 0);
+        if (pPrize) pPrize->enableReturnCard(TRUE);
+        card->resetSnatch();
+        num--;
+        if (--m_nAdd == 0) break;
+        if (num == 0) break;
+    }
+    initReload(2);
+    CCardBattle::setGimmickOwner(m_hOwner);
+    param.PrizeKind = 0x42;
+    param.iNumber = 0;
+    FLOAT rx = (-70.0f - RND::genrand_real1() * 10.0f) * 0.017453292f;
+    FLOAT ry = RND::genrand_real1() * 360.0f * 0.017453292f;
+    param.vRot.set(rx, ry, 0.0f);
+    Math3D::LimitPIVector(param.vRot);
+    CEntityFactory::getInstance()->createPrize(param, 0);
+    return 1;
+}
+INT CCardRevolver::exeReturnCard() {
+    INT count;
+    INT i;
+    CBattleCard* card;
+    CARD* cardData;
+    if (!(m_uiFlag & 0x4000)) return 0;
+    if (!(m_uiFlag & 0x20000)) return 0;
+    count = m_nReturn + 8;
+    if (count < 9) {
+        m_uiFlag = (INT)m_uiFlag & ~0x4000;
+        return 0;
+    }
+    if (m_iMode > 0) changeMode(0, 1);
+    else m_pEmpty->enableDisp(0);
+    cardData = NULL;
+    for (i = 0; i < m_nLimit; i++) {
+        card = &m_pCards[i];
+        if (!card) continue;
+        if (card->getCardOwner() == 1) continue;
+        cardData = card->getCardData();
+        if (cardData->m_nKind == m_cardAdd[count].m_nKind && card->getBaseCardNumber() == m_cardAdd[count].m_nNumber) {
+            card->setBaseCardNumber();
+            break;
+        }
+        cardData = NULL;
+    }
+    if (cardData) {
+        if (card->getCardOwner() == 2) {
+            card->setCardOwner(1);
+            card->setHand(*cardData, m_nRemain[0], m_nTotal[0], 0);
+            card->updateNumberEffect();
+            card->testDisp();
+            if (cardData->m_nCategory1 == 8) {
+                m_nReloadCard = 1;
+                card->updateReload(m_tqCharge / 30);
+            } else {
+                m_nRemain[0]++;
+            }
+            m_nReturn--;
+            _setCard(m_cardAdd[count], 0, 0);
+            rollDeck(0, 1, 300);
+            return 1;
+        }
+        card->resetReloadNG();
+        card->setCardOwner(1);
+        card->updateNumberEffect();
+        card->testDisp();
+    }
+    m_nReturn--;
+    _setCard(m_cardAdd[count], 0, 0);
+    return 1;
+}
 INT CCardRevolver::canSnatch() {
     if (getHave(1, 1, 0, 0, 0) > 6) return TRUE;
     return FALSE;
@@ -895,7 +1457,81 @@ INT CCardRevolver::exeDiscard() {
     m_uiFlag &= ~0x8000;
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", discard__Q210CardBattle13CCardRevolver);
+void CCardRevolver::discard() {
+    PRIZE_PARAM param;
+    INT discard;
+    INT hand;
+    INT i;
+    CBattleCard* card;
+    m_tqDiscard = 3000;
+    if (m_iMode > 0) changeMode(0, 1);
+    else m_pEmpty->enableDisp(0);
+    switch (m_iState) {
+    case 2:
+        m_uiFlag |= 0x20008;
+        m_nReloadCount = m_iMax;
+        rollDeck(0, 1, 300);
+        m_tqTimer = 0;
+        m_iState = 1;
+        break;
+    case 3:
+        m_uiFlag |= 0x20008;
+        rollDeck(0, 1, 300);
+        m_tqTimer = 0;
+        m_iState = 1;
+        break;
+    }
+    CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+    CCardBattle* pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+    INT kind = _getEnchantKind(pCB, m_uiUser);
+    if (kind != 0x18) {
+        if (m_iChargeCount < 3) m_iChargeCount++;
+        if (kind == 0x1E) m_iChargeCount = 1;
+    }
+    m_iCharge = m_iChargeCount - 1;
+    m_tqCharge = m_iCharge * 3000;
+    param.uiFlag = 0;
+    param.uiPrizeFlag = 0;
+    _ref(g_pPlayer)->getLockOnPos(param.vPos);
+    param.fSpeed = 0.25f;
+    discard = 1;
+    for (i = 0; i < m_nLimit; i++) {
+        card = &m_pCards[i];
+        if (!card) continue;
+        if (card->getCardOwner() != 1) continue;
+        if (card->isNowPlaying()) continue;
+        if (card->getStock() != -1) continue;
+        if (card->isReloadNG()) continue;
+        if (discard < 30 || card->getCardData()->m_nCategory1 == 8) {
+            if (m_nReloadID < i) {
+                hand = card->getHand();
+                card->setDiscard(0);
+            } else {
+                param.PrizeKind = card->getCardKind();
+                param.iNumber = card->getBaseCardNumber();
+                FLOAT rx = (-70.0f - RND::genrand_real1() * 10.0f) * 0.017453292f;
+                FLOAT ry = RND::genrand_real1() * 360.0f * 0.017453292f;
+                param.vRot.set(rx, ry, 0.0f);
+                Math3D::LimitPIVector(param.vRot);
+                CPrize* pPrize = (CPrize*)CEntityFactory::getInstance()->createPrize(param, 0);
+                if (pPrize) {
+                    pPrize->enableReturnCard(TRUE);
+                    pPrize->enableMarluxia3Mode(TRUE);
+                    discard++;
+                }
+                hand = card->getHand();
+                card->setDiscard(1);
+            }
+        } else {
+            hand = card->getHand();
+            card->setDiscard(0);
+        }
+        if (hand != -1) m_nRemain[m_iMode]--;
+    }
+    m_nRemain[m_iMode] = 0;
+    m_nReloadCard = 0;
+    rollDeck(0, 1, 300);
+}
 void CCardRevolver::resetCardOwner(INT inOld, INT inNew) {
     for (INT i = 0; i < m_nLimit; i++) {
         CBattleCard* pCard = &m_pCards[i];
@@ -924,7 +1560,52 @@ INT CCardRevolver::calcPlutoMark() {
     }
     return m_nPlutoMark;
 }
+extern "C" char D_0047AC08[]; /* "%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n" */
+static inline void _clearPrizeFlags(PRIZE_PARAM* p) {
+    p->uiFlag = 0;
+    p->uiPrizeFlag = 0;
+}
+/* Parked: 1 line off: the TRACE's card-kind argument - the original reloads it (lbu 0x150(s0)) as the last argument
+   load; card->getCardKind() / getCardData()->m_nKind schedule it right after a3, param.PrizeKind (below) puts it
+   last but from the stack. Worked: _clearPrizeFlags(&param), getCardData()->m_nKind for PrizeKind, BattleCard.h's
+   isPlutoON with an `unsigned int flag` local (hoisted mask). Tried: kind sources, card-test/loop shapes;
+   permuter 5 min (5834 candidates, no gain). */
+#if 0
+void CCardRevolver::dropPlutoMarkCard(const FVECTOR* inPos) {
+    CBattleCard* card;
+    INT i;
+    INT n;
+    PRIZE_PARAM param;
+    if (!m_nPlutoMark) return;
+    n = RND::genrand_int31() % m_nReloadID;
+    _clearPrizeFlags(&param);
+    param.vPos = *inPos;
+    param.fSpeed = 0.25f;
+    for (i = 0; i < m_nReloadID; i++) {
+        card = &m_pCards[n];
+        if (card && card->isPlutoON()) {
+            param.PrizeKind = card->getCardData()->m_nKind;
+            param.iNumber = card->getBaseCardNumber();
+            FLOAT rx = (-70.0f - RND::genrand_real1() * 10.0f) * 0.017453292f;
+            FLOAT ry = RND::genrand_real1() * 360.0f * 0.017453292f;
+            param.vRot.set(rx, ry, 0.0f);
+            Math3D::LimitPIVector(param.vRot);
+            CPrize* pPrize = (CPrize*)CEntityFactory::getInstance()->createPrize(param, 0);
+            if (!pPrize) return;
+            pPrize->enableReturnCard(TRUE);
+            TRACE(D_0047AC08, n, param.PrizeKind, card->getCardData()->m_nNumber, card->getBaseCardNumber(),
+                  card->getStock(), card->getHand(), card->getHandMax(), card->getFlag(), card->getCardOwner());
+            card->setCardOwner(2);
+            card->resetPlutoON();
+            m_nPlutoMark--;
+            return;
+        }
+        if (++n >= m_nReloadID) n = 0;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", dropPlutoMarkCard__Q210CardBattle13CCardRevolverPC7FVECTOR);
+#endif
 void CCardRevolver::setPlayNG(INT inFlag, INT inCategory) {
     INT i;
     if (inFlag) {
@@ -1171,7 +1852,31 @@ ok:
     m_iStock++;
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayPronounce__Q210CardBattle12CStockFolder);
+INT CStockFolder::setPlayPronounce() {
+    CCardBattle* pCB;
+    INT i;
+    INT num;
+    CBattleCard* card;
+    if (m_uiState >= 6) {
+        pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+        if (pCB && pCB->isNowPronounce() && !CCardBattle::isExecutingCard(0) && m_iStock >= 6) goto ok;
+    }
+    return 0;
+ok:
+    for (i = 0; i < 6; i++) {
+        card = m_pCards[i];
+        if (card) {
+            num = i;
+            break;
+        }
+    }
+    if (!card) return 0;
+    if (!pCB->setEnemyPronounceCard(m_hOwner, card)) return 0;
+    m_pCards[num] = NULL;
+    m_pData[num] = NULL;
+    m_uiFlag |= 2;
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getRollSpeed__CQ210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", isActive__CQ210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setChargeRate__Q210CardBattle13CCardRevolveri);
