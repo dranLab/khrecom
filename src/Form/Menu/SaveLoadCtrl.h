@@ -176,6 +176,9 @@ public:
     void setCaptionParam(const CHAR* pszText, INT nSize, const G_RGBA* pCol, UINT nStyle);
     void getCursorPos(FVECTOR& vOut) const;
     void getLightMarkPos(FVECTOR& vOut) const;
+    // PARTIAL: added for Form/Menu/SaveLoad
+    void attachCursor(C2DSeqCursorCtrl* pCursor) { m_pCursor = pCursor; }
+    void attachLightMark(C2DSeqLightMarkAgent* pLight) { m_pLightMark = pLight; }
 };
 
 class C2DSeqScrollbarCtrl {

@@ -472,7 +472,21 @@ void CSaveLoadUI::exeConfirmExecErr() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preMessageOnly__11CSaveLoadUI);
+void CSaveLoadUI::preMessageOnly() {
+    m_pMessageDlgAgent = createMessageDlg(m_pMessageDlgCtrl, m_pMessageDlgFntInf);
+    for (INT i = 0; i < 2; i++) {
+        m_pMessageDlgBtnAgent[i] = createMessageDlgBtn(m_pMessageDlgCtrl, i);
+    }
+    m_pMessageDlgCursor = createCursor();
+    m_pMessageDlgCursor->changeLayer(14);
+    m_pMainLightMark = createLightMark(LIGHTMARK_TYPE_CURSOR, 16, TRUE);
+    for (INT i = 0; i < 2; i++) {
+        m_pMessageDlgBtnAgent[i]->attachCursor(m_pMessageDlgCursor);
+        m_pMessageDlgBtnAgent[i]->attachLightMark(m_pMainLightMark);
+    }
+    m_nStep = 0;
+    m_nTimer = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeMessageOnly__11CSaveLoadUI);
 C2DSeqAgent* CSaveLoadUI::createMainFrame() {
     C2DSeqAgent::SeqTbl tbl[2] = {{{2, 4, 5}}, {{3, 5, 6}}};
