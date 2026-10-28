@@ -1109,7 +1109,20 @@ void CBattleEnemy::createFriendCard_(INT inRate) {
     if (card.m_nKind) createFriendCard((CARD_KIND)card.m_nKind, card.m_nNumber);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setHitEffect___12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", cardBattleProc___12CBattleEnemy);
+void CBattleEnemy::cardBattleProc_() {
+    if (!isBtlEnemyFlag(0x800000000ULL) && isBtlEnemyFlag(0x10) && m_iHp > 0 && m_tqCancelTimer <= 0 &&
+        !(DebugWork::g_dw.enemy.uiFlag & 0x400)) {
+        if (isBtlEnemyFlag(0x800)) {
+            startCardBattle();
+            return;
+        }
+        if (DebugWork::g_dw.enemy.uiFlag & 0x10) return;
+        if (isBtlEnemyFlag(1)) return;
+        aiCardBattle();
+        return;
+    }
+    m_ullBtlEnemyFlag &= ~0x800;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", reviseObject___12CBattleEnemy);
 void CBattleEnemy::updateBindTimer_() {
     if (m_tqBindTimer > 0) {
