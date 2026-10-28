@@ -628,7 +628,103 @@ void CSaveLoadUI::preSelDataList() {
     setHelpMessage(pszMes);
     m_nStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeSelDataList__11CSaveLoadUI);
+void CSaveLoadUI::exeSelDataList() {
+    if (m_pDataListContainerAgent->getState() != C2DSeqAgent::STATE_LOOP) return;
+    INT r = -9999;
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqIdleCheckCard()) m_nStep++;
+        break;
+    case 1:
+        if (m_pMemoca->isCompleteReq(NULL)) {
+            r = m_pMemoca->getLastResult();
+            m_nStep = 0;
+        }
+        break;
+    default:
+        return;
+    }
+    if (r == -2) {
+        changeState(15);
+        return;
+    }
+    if (isTrgCANCEL()) {
+        m_nStep = 99;
+        backtoSelSlot();
+        CSound::playSE(4, -1, 64);
+        return;
+    }
+    if (isTrgOK()) {
+        INT nNext = -1;
+        GameDataHeader* p = m_pGameDataEntries->getEntry(m_nDataListSel);
+        if (m_mode == SLMODE_SAVE) {
+            if (!p) {
+                m_nFlag |= 0x80;
+                nNext = 14;
+            } else {
+                m_nFlag &= ~0x100;
+                if (m_pGameDataEntries->isUnformated()) {
+                    nNext = 16;
+                } else if (p->isDirBroken()) {
+                    CSound::playSE(5, -1, 64);
+                } else if (p->isDataBroken()) {
+                    if (!m_pGameDataEntries->getDataUnitCountByType(0)) {
+                        m_nFlag |= 0x80;
+                        nNext = 14;
+                    } else {
+                        nNext = 11;
+                    }
+                } else {
+                    nNext = p->hasData() ? 13 : 11;
+                }
+            }
+        } else {
+            if (p && p->hasData()) {
+                nNext = 12;
+            } else {
+                CSound::playSE(5, -1, 64);
+            }
+        }
+        if (nNext >= 0) {
+            changeState(nNext);
+            continueProc();
+            CSound::playSE(2, -1, 64);
+            m_nStep = 99;
+            return;
+        }
+    }
+    SHORT nOldOfs = m_nDataListSel - m_nDataListTop;
+    SHORT nNewTop = m_nDataListTop;
+    BOOL bUpdate = checkSelectorV(m_nDataListSel, 99, TRUE, TRUE);
+    if (bUpdate) {
+        SHORT n = m_nDataListSel - m_nDataListTop;
+        if (n < 0) {
+            nNewTop = m_nDataListSel;
+        } else if (n >= 4) {
+            nNewTop = m_nDataListSel - 3;
+        }
+    } else {
+        bUpdate = checkSelector(m_nDataListSel, 99, 4, 8, 4, TRUE, TRUE);
+        if (!bUpdate) return;
+        nNewTop = m_nDataListSel - nOldOfs;
+        if (nNewTop < 0) {
+            nNewTop = 0;
+        } else if (nNewTop >= 96) {
+            nNewTop = 95;
+        }
+    }
+    if (!bUpdate) return;
+    if (nNewTop != m_nDataListTop) {
+        m_nDataListTop = nNewTop;
+        for (INT i = 0; i < 4; i++) {
+            setupDataPlate(m_nDataListTop + i);
+        }
+        m_pDataListScrollbar->setScrollPos(m_nDataListTop, TRUE);
+    }
+    SHORT nOfs = m_nDataListSel - m_nDataListTop;
+    if (nOfs != nOldOfs) m_pDataItemPlate[nOldOfs]->select(FALSE);
+    m_pDataItemPlate[nOfs]->select(TRUE);
+}
 void CSaveLoadUI::endSelDataList() {
     outHelpMessage();
 }
