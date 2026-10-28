@@ -19,7 +19,7 @@ extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039B2E4");
 template <class T> static inline T& _ref(T& v) { return v; }
 extern "C" char D_00479D40[]; /* "Game/CardBattle.h" */
 extern "C" char D_00479D68[]; /* "inUser" */
-/* CCardBattle's m_cardEnchant as the original's CARD[2] (Game/CardBattle.h declares bytes) */
+/* PARTIAL: stand-in for Game/CardBattle CCardBattle (m_cardEnchant, getEnchantKind): gated by GAME_CARDBATTLE_CPP */
 struct CB_ENCHANT_VIEW {
     BYTE _pad[0x17C];
     CARD m_cardEnchant[2];
@@ -35,7 +35,7 @@ extern char* g_szStockSkillName[150];
 extern LPCSTR g_szLadCockpit;
 }
 namespace D2 {
-class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the class only for its own unit */
+class C2DMan { /* PARTIAL: stand-in for System/Graphic/2d/2DMan C2DMan: gated by SYSTEM_GRAPHIC_2D_2DMAN_CPP */
 public:
     static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
 };
