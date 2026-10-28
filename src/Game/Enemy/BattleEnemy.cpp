@@ -389,7 +389,17 @@ void CBattleEnemy::endStateTornado() {
         m_pMove->enableGravity(TRUE);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDegenerator__12CBattleEnemy);
+void CBattleEnemy::beginStateDegenerator() {
+    FVECTOR pos;
+    bodyCollOff(-1);
+    bodyCollOffBody(-1);
+    getLockOnPos(pos);
+    if (!m_pBodyColl->getHitCollBody()) AssertApp(D_004ACBC0, 0xCC3, D_004AD3D8, 0);
+    m_hDision = setEffect(BattleEnemy::DisionEffectName, 0, &pos, NULL, 0.0f);
+    m_iHp = 0;
+    m_pMove->enableGravity(FALSE);
+    m_iSysStep = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDegenerator__12CBattleEnemy);
 void CBattleEnemy::endStateDegenerator() {}
 void CBattleEnemy::beginStateGravity() {
