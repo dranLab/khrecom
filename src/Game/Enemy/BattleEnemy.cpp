@@ -1495,7 +1495,27 @@ BOOL CBattleEnemy::changeSmallDamageState_(ATK_KIND inDmgKind) {
     return FALSE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateSpotLight___12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", canCreateEnemyCard___12CBattleEnemy);
+BOOL CBattleEnemy::canCreateEnemyCard_() {
+    if (CGame::isRikuGame()) return FALSE;
+    if (CGameWork::getFlag(1, 7)) return FALSE;
+    CARD_KIND kind = m_CardKind;
+    if (kind == 0x59) return FALSE;
+    if (!CCard::canAddCard((USHORT)kind, 0)) return FALSE;
+    if (CCard::m_pCardInfo->_nMapTotal < 5) return FALSE;
+    if (DebugWork::g_dw.enemy.uiFlag & 0x2000) return TRUE;
+    INT rate = m_pEnemyParam->uiEnemyCardDrop;
+    RoomInfo* room = CSceneInfo::getRoomInfo(-1);
+    if (room) {
+        switch (room->getCardID()) {
+        case 0xA2:
+        case 0xA4:
+        case 0xA6:
+            rate = (INT)(rate * 2.5f);
+            break;
+        }
+    }
+    return RND::genrand_int31() % 100 < rate;
+}
 void CBattleEnemy::continuousDamageProc_() {
     if ((UINT)getID() % 10000 - 100 < 100) {
         if (++m_iHitCount >= 6) {
