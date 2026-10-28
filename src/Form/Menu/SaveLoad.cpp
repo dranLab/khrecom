@@ -28,6 +28,12 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 inline void C2DSeqSelectable::setCaptionSize(INT nSize) {
     if (m_pCaption) m_pCaption->setSize(nSize);
 }
+inline void C2DSeqSelectable::setCaptionText(const CHAR* pszText) {
+    if (m_pCaption) m_pCaption->setText(pszText);
+}
+inline void C2DSeqSelectable::setCaptionSpace(INT nX, INT nY) {
+    if (m_pCaption) m_pCaption->setSpace(nX, nY);
+}
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
@@ -1748,8 +1754,69 @@ C2DSeqAgent* CSaveLoadUI::createDataListContainer(D2::C2DSeqCtrl*& pOutCtrl, C2D
     pOutScrollbar->setBasePos(vPos);
     return pAgent;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createDataItemPlate__11CSaveLoadUIRQ22D210C2DSeqCtrlRPQ22D210C2DSeqCtrlRPQ22D26C2DFntT2T2i);
-__asm__(".rdata\n.align 3\n.word 0x00010007\n.word 0x00010008\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38323432\n.word 0x00000029\n.word 0x004F004B\n.word 0x00000000\n.word 0x00010001\n.word 0x00010001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31353432\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32363432\n.word 0x00000029\n.word 0x00020001\n.word 0x00020001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x39363432\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31383432\n.word 0x00000029\n.word 0x00730076\n.word 0x00000000\n.word 0x00030001\n.word 0x00030001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32393432\n.word 0x00000029\n.text\n");
+C2DSeqSelectable* CSaveLoadUI::createDataItemPlate(D2::C2DSeqCtrl& parent, D2::C2DSeqCtrl*& pOutNumCircle,
+                                                   D2::C2DFnt*& pOutNumFnt, D2::C2DSeqCtrl*& pOutIcon,
+                                                   D2::C2DSeqCtrl*& pOutClearIcon, INT nIdx) {
+    _LayoutInfo ltbl[2] = {{7, 1}, {8, 1}};
+    const C2DSeqAgent::SeqTbl& t = s_seqDataPlateTbl[0][getRsrcType()];
+    C2DSeqSelectable* pPlate =
+        new (com_malloc_d(sizeof(C2DSeqSelectable), __FILE__ "(2428)", RET_ADDR())) C2DSeqSelectable(this);
+    pPlate->setupSeq(t, m_pszLad, m_nMainSeqUnit, s_seqDataActPlateTbl[0][getRsrcType()], 12);
+    pPlate->setCtrlParent(&parent);
+    G_RGBA rgba;
+    rgba.col = 0x802864FA;
+    pPlate->setCaptionParam(s_pStrSlot[nIdx], 11, &rgba, 0x40);
+    pPlate->setCaptionText(m_szDataItemContent[nIdx]);
+    pPlate->setCaptionSpace(0, 48);
+    FVECTOR vPos;
+    _LayoutInfo& info = ltbl[getRsrcType()];
+    D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx + nIdx, vPos, FALSE);
+    pPlate->setCtrlLocalPos(vPos);
+    pPlate->setupState(t);
+    pPlate->setCursorOfs(-104.0f, -16.0f);
+    pPlate->setLightMarkOfs(210.0f, -20.0f);
+
+    short cirTbl[2] = {75, 79};
+    _LayoutInfo cirltbl[2] = {{1, 1}, {1, 1}};
+    pOutNumCircle = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2451)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutNumCircle->setParent(pPlate->getSeqCtrl());
+    pOutNumCircle->addSeq(m_pszLad, m_nMainSeqUnit, cirTbl[getRsrcType()]);
+    _LayoutInfo& info2 = cirltbl[getRsrcType()];
+    D2::C2DMan::getLayPosition(m_pszLad, info2._nLayIdx, info2._nSeqIdx, vPos, FALSE);
+    pOutNumCircle->setLocalPos(vPos);
+    pOutNumCircle->changeLayer(12);
+    pOutNumCircle->enableColorCtrl(TRUE);
+    rgba.col = 0x80707070;
+    pOutNumFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2462)", RET_ADDR()))
+        D2::C2DFnt(0, 0, &rgba, 12, m_szDataItemID[nIdx], 0x40);
+    pOutNumCircle->addFntShift(m_pszLad, m_nMainSeqUnit, pOutNumFnt, -6.5f, 5.5f);
+
+    _LayoutInfo icontbl[2] = {{1, 2}, {1, 2}};
+    pOutIcon = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2469)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutIcon->setParent(pPlate->getSeqCtrl());
+    pOutIcon->addSeq(m_pszLad, m_nIconSeqUnit, 0);
+    _LayoutInfo& info3 = icontbl[getRsrcType()];
+    D2::C2DMan::getLayPosition(m_pszLad, info3._nLayIdx, info3._nSeqIdx, vPos, FALSE);
+    pOutIcon->setLocalPos(vPos);
+    pOutIcon->changeLayer(12);
+    pOutIcon->enableColorCtrl(TRUE);
+    rgba.col = 0x802864FA;
+    D2::C2DFnt* pTimeFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2481)", RET_ADDR()))
+        D2::C2DFnt(0, 0, &rgba, 12, m_szDataItemTime[nIdx], 0x40);
+    pPlate->getSeqCtrl()->addFntShift(m_pszLad, m_nMainSeqUnit, pTimeFnt, 112.0f, 20.0f);
+
+    short clrIcon[2] = {118, 115};
+    _LayoutInfo clr_icontbl[2] = {{1, 3}, {1, 3}};
+    pOutClearIcon = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2492)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutClearIcon->setParent(pPlate->getSeqCtrl());
+    pOutClearIcon->addSeq(m_pszLad, m_nMainSeqUnit, clrIcon[getRsrcType()]);
+    _LayoutInfo& info4 = clr_icontbl[getRsrcType()];
+    D2::C2DMan::getLayPosition(m_pszLad, info4._nLayIdx, info4._nSeqIdx, vPos, FALSE);
+    pOutClearIcon->setLocalPos(vPos);
+    pOutClearIcon->changeLayer(12);
+    pOutClearIcon->enableColorCtrl(TRUE);
+    return pPlate;
+}
 C2DSeqAgent* CSaveLoadUI::createMessageDlg(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt*& pOutFntInf) {
     C2DSeqAgent::SeqTbl tbl[4] = {{{52, 53, 54}}, {{52, 53, 54}}, {{55, 56, 57}}, {{55, 56, 57}}};
     _LayoutInfo ltbl[4] = {{0, 0}, {0, 0}, {2, 0}, {2, 0}};

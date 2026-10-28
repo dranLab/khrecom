@@ -246,6 +246,14 @@ public:
     void setCtrlPos(FVECTOR& vPos) {
         if (m_pCtrl) m_pCtrl->setPos(vPos);
     }
+    void setCtrlLocalPos(FVECTOR& vPos) {
+        if (m_pCtrl) m_pCtrl->setLocalPos(vPos);
+    }
+    void setCtrlParent(D2::C2DSeqCtrl* pParent) {
+        if (m_pCtrl) m_pCtrl->setParent(pParent);
+    }
+    inline void setCaptionText(const CHAR* pszText); // defined where D2::C2DFnt is complete (Form/Menu/SaveLoad)
+    inline void setCaptionSpace(INT nX, INT nY);     // likewise
     void setCursorOfs(FLOAT fX, FLOAT fY) {
         m_fptCursorOfs.x = fX;
         m_fptCursorOfs.y = fY;
