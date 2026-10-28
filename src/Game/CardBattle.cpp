@@ -367,7 +367,18 @@ void CDuelGauge::setResult(UINT inResult) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setTimer__Q210CardBattle10CDuelGaugeUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", changeTimer__Q210CardBattle10CDuelGaugei);
+void CDuelGauge::changeTimer(TIMEQ inTime) {
+    INT n = inTime * 100 / m_tqLimit;
+    m_pSeqCtrls[1].changeTime(1, 100 - n);
+    n = inTime % 3000 / 30 % 10;
+    m_pSeqCtrls[2].changeTexture(1, 0, NULL, &g_uvDuelNumTex[0][n], &g_uvDuelNumTex[1][n]);
+    n = inTime % 3000 / 300 % 10;
+    m_pSeqCtrls[3].changeTexture(1, 0, NULL, &g_uvDuelNumTex[0][n], &g_uvDuelNumTex[1][n]);
+    n = inTime / 3000 % 10;
+    m_pSeqCtrls[4].changeTexture(1, 0, NULL, &g_uvDuelNumTex[0][n], &g_uvDuelNumTex[1][n]);
+    n = inTime / 30000 % 10;
+    m_pSeqCtrls[5].changeTexture(1, 0, NULL, &g_uvDuelNumTex[0][n], &g_uvDuelNumTex[1][n]);
+}
 void CDuelGauge::exeTimer() {
     D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[1];
     switch (m_uiTimerState) {
