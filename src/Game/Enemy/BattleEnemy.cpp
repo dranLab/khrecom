@@ -130,7 +130,12 @@ static inline BASIC_ENEMY_PARAM* _getBasicParam(ENEMY_PARAM* inParam, INT inFloo
     if (!(0 <= inFloor && inFloor < 13)) AssertApp(D_004AC8F0, 0xE5, D_004AC920, 0);
     return &inParam->pBasic[inFloor];
 }
-extern int g_iDuelCardNum[3] asm("g_iDuelCardNum.6149"); // PARTIAL: setupDuelCard's static table, from the asm .data until SOURCE DATA
+extern int g_iDuelCardNum[3] asm("g_iDuelCardNum.6149");
+struct PRIZE_DATA {
+    INT PrizeKind; /* CARD_KIND */
+    INT iPoint;
+};
+extern PRIZE_DATA g_PrizeDataTbl[7] asm("g_PrizeDataTbl.6082"); // PARTIAL: makeExpPrize's static table, from the asm .data until SOURCE DATA // PARTIAL: setupDuelCard's static table, from the asm .data until SOURCE DATA
 struct DropPrize { // PARTIAL: Game/Gimmick/GimmickManager.h only forward-declares it outside its own unit
     INT StockKind;
     CARD_KIND Kind;
@@ -1394,7 +1399,28 @@ void CBattleEnemy::makePrize(const FVECTOR* inPos) {
     makeRoulettePrize(inPos);
     makeCard(inPos);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeExpPrize__12CBattleEnemyPC7FVECTOR);
+void CBattleEnemy::makeExpPrize(const FVECTOR* inPos) {
+    PRIZE_PARAM param;
+    if (!m_pBasicParam) return;
+    param.vPos = *inPos;
+    param.fSpeed = 0.25f;
+    param.uiFlag = 1;
+    param.uiPrizeFlag = 0;
+    INT exp = m_iExp;
+    for (INT i = 0; i < sizeof(g_PrizeDataTbl) / sizeof(g_PrizeDataTbl[0]); i++) {
+        INT num = exp / g_PrizeDataTbl[i].iPoint;
+        if (num > 0) {
+            param.iNumber = g_PrizeDataTbl[i].iPoint;
+            param.PrizeKind = g_PrizeDataTbl[i].PrizeKind;
+            for (INT j = 0; j < num; j++) {
+                param.vRot.set(DEG2RAD(-70.0f - RND::genrand_real1() * 10.0f), DEG2RAD(RND::genrand_real1() * 360.0f), 0.0f);
+                Math3D::LimitPIVector(param.vRot);
+                CEntityFactory::getInstance()->createPrize(param, NULL);
+            }
+        }
+        exp %= g_PrizeDataTbl[i].iPoint;
+    }
+}
 void CBattleEnemy::makePremiumPrize(const FVECTOR* inPos) {
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
     if (!bem) AssertApp(D_004ACBC0, 0xF9A, D_004AD3B8, 0);
