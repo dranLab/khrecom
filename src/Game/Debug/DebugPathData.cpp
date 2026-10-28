@@ -660,13 +660,13 @@ CDebugPathData::CDebugPathData(CTask* p, BOOL bEnd) : CTask(p, 0x4000) {
     ignorePause(TRUE);
     m_szFileName[0] = 0;
     if (bEnd) {
-        pWnd = new (com_malloc_d(0x1C0, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(1928)", RET_ADDR())) CDebugWindow(this, debugWinPath);
+        pWnd = new (com_malloc_d(0x1C0, __FILE__ "(1928)", RET_ADDR())) CDebugWindow(this, debugWinPath);
     } else {
-        pWnd = new (com_malloc_d(0x1C0, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(1929)", RET_ADDR())) CDebugWindow(this, debugWinPathNoEnd);
+        pWnd = new (com_malloc_d(0x1C0, __FILE__ "(1929)", RET_ADDR())) CDebugWindow(this, debugWinPathNoEnd);
     }
     m_hChildWnd = pWnd ? pWnd->getHandle() : 0;
     m_iActivePathNum = 0;
-    m_pFrame = new (com_malloc_d(0xD8, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(1938)", RET_ADDR())) CPDFrameTime;
+    m_pFrame = new (com_malloc_d(0xD8, __FILE__ "(1938)", RET_ADDR())) CPDFrameTime;
     m_gpPArrowPoly.create(0xB, 3);
     m_gpPArrowPoly.setLayerFG(2);
     CDebugWindow::enableTopDebugWindow(FALSE);
@@ -684,7 +684,7 @@ CDebugPathData::~CDebugPathData() {
 }
 BOOL CDebugPathData::create(CTask* p, BOOL bEnd) {
     if (!m_pInstance) {
-        m_pInstance = new (com_malloc_d(sizeof(CDebugPathData), "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(1963)", RET_ADDR())) CDebugPathData(p, bEnd);
+        m_pInstance = new (com_malloc_d(sizeof(CDebugPathData), __FILE__ "(1963)", RET_ADDR())) CDebugPathData(p, bEnd);
         return TRUE;
     }
     return FALSE;
@@ -737,7 +737,7 @@ void CDebugPathData::entryCam() {
     CDebugPathData* p = getInstance();
     FVECTOR vPos;
     asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&vPos) : "memory");
-    p->m_pDCam = new (com_malloc_d(0x140, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(2054)", RET_ADDR())) CNakCamera(p, 1, 0x100, &vPos, 0.0f, (void**)&p->m_pDCam);
+    p->m_pDCam = new (com_malloc_d(0x140, __FILE__ "(2054)", RET_ADDR())) CNakCamera(p, 1, 0x100, &vPos, 0.0f, (void**)&p->m_pDCam);
 }
 CNakCamera* CDebugPathData::getCam() { return getInstance()->m_pDCam; }
 void CDebugPathData::removeCam() {
@@ -750,15 +750,29 @@ void CDebugPathData::makeFileName(const CHAR* pszName, BOOL bExt) {
     if (bExt) sprintf(pThis->m_szFileName, "host0:/%s.PTD", pszName);
     else sprintf(pThis->m_szFileName, "host0:/%s", pszName);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", newPath__14CDebugPathDataPCc);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x30322870\n.word 0x00293838\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x00000070\n.word 0x6D3E2D70\n.word 0x6150705F\n.word 0x00006874\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", entryPath__14CDebugPathDataPCc);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x31322870\n.word 0x00293630\n.word 0x00000000\n.text\n");
+BOOL CDebugPathData::newPath(const CHAR* pName) {
+    CDebugPathData* p = getInstance();
+    makeFileName(pName, TRUE);
+    delete p->m_pPath;
+    p->m_pPath = NULL;
+    p->m_pPath = new (com_malloc_d(0x5C, __FILE__ "(2088)", RET_ADDR())) CPathData((const PATH_DATA*)NULL, TRUE);
+    if (!p->m_pPath) AssertApp(__FILE__, 2089, "p->m_pPath", 0);
+    setActivePathNum(0, 0);
+    return TRUE;
+}
+BOOL CDebugPathData::entryPath(const CHAR* pName) {
+    CDebugPathData* p = getInstance();
+    makeFileName(pName, FALSE);
+    delete p->m_pPath;
+    p->m_pPath = NULL;
+    p->m_pPath = new (com_malloc_d(0x5C, __FILE__ "(2106)", RET_ADDR())) CPathData(pName, TRUE);
+    if (!p->m_pPath) AssertApp(__FILE__, 2107, "p->m_pPath", 0);
+    setActivePathNum(0, 0);
+    return TRUE;
+}
 /* Weak tail first: this draft matches (V1), but `new CPathData` makes gcc emit the weak CVector<G_STRIP>
    destructor (the original's unnamed func_0021F178, which follows savePath) at the end of the unit. Needs
    CPathData(const PATH_DATA* pPathData, BOOL bAlloc) { init(pPathData, bAlloc); } in PathData.h. */
-extern "C" char D_004871B0[]; /* newPath's (still asm) */
-extern "C" char D_004871E0[];
 BOOL CDebugPathData::loadPath(const CHAR* pName) {
     CDebugPathData* p = getInstance();
     INT iSize;
@@ -769,16 +783,16 @@ BOOL CDebugPathData::loadPath(const CHAR* pName) {
     if (iSize <= 0) return FALSE;
     iFD = CFileIO::openFile(p->m_szFileName, 1, 0x1FF);
     if (iFD < 0) return FALSE;
-    pBuf = com_malloc_d(iSize, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(2132)", (UINT)-1);
-    if (!pBuf) AssertApp(D_004871B0, 2133, "pBuf", 0);
+    pBuf = com_malloc_d(iSize, __FILE__ "(2132)", (UINT)-1);
+    if (!pBuf) AssertApp(__FILE__, 2133, "pBuf", 0);
     if (CFileIO::readFile(iFD, pBuf, iSize) < 0) {
         if (pBuf) com_free(pBuf);
         return FALSE;
     }
     delete p->m_pPath;
     p->m_pPath = NULL;
-    p->m_pPath = new (com_malloc_d(0x5C, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(2141)", RET_ADDR())) CPathData((const PATH_DATA*)pBuf, TRUE);
-    if (!p->m_pPath) AssertApp(D_004871B0, 2142, D_004871E0, 0);
+    p->m_pPath = new (com_malloc_d(0x5C, __FILE__ "(2141)", RET_ADDR())) CPathData((const PATH_DATA*)pBuf, TRUE);
+    if (!p->m_pPath) AssertApp(__FILE__, 2142, "p->m_pPath", 0);
     if (pBuf) com_free(pBuf);
     CFileIO::closeFile(iFD);
     return TRUE;
@@ -797,7 +811,7 @@ BOOL __BackUpFile(const CHAR* szFileName) {
     if (iSize > 0) {
         iFD = CFileIO::openFile(szFileName, 1, 0x1FF);
         if (iFD >= 0) {
-            pBuf = com_malloc_d(iSize, "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(2163)", (UINT)-1);
+            pBuf = com_malloc_d(iSize, __FILE__ "(2163)", (UINT)-1);
             if (pBuf) {
                 iRet = CFileIO::readFile(iFD, pBuf, iSize);
                 if (iRet < 0) {
