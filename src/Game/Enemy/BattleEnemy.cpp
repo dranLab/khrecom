@@ -2723,8 +2723,141 @@ INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
     setDamageNumber(*hitBody->getDetectPos(), result);
     return result;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", changeDamageState___12CBattleEnemy8ATK_KIND);
-__asm__(".rdata\n.align 3\n.word .L002B60A0\n.word .L002B5F60\n.word .L002B5FA0\n.word .L002B5FD8\n.word .L002B6010\n.word .L002B6048\n.word .L002B6090\n.word .L002B60B4\n.word .L002B60C8\n.word .L002B60DC\n.word .L002B615C\n.word .L002B6170\n.word .L002B6228\n.word .L002B6198\n.word .L002B6198\n.word .L002B61BC\n.word .L002B61D0\n.word .L002B5FA0\n.word .L002B60A0\n.word .L002B623C\n.word .L002B60A0\n.word .L002B6250\n.word .L002B60B4\n.word .L002B60A0\n.word .L002B60A0\n.word .L002B60A0\n.word .L002B60A0\n.word .L002B60A0\n.word .L002B5F60\n.word .L002B5FA0\n.word .L002B6184\n.word func_0\n.text\n");
+void CBattleEnemy::changeDamageState_(ATK_KIND inDmgKind) {
+    if (isBtlEnemyFlag(0x80000)) {
+        switch (inDmgKind) {
+        case ATK_KIND_FREEZE:
+            if (isBtlEnemyFlag(0x10000000000ULL)) {
+                changeBattleEnemyState(0x14);
+                return;
+            }
+            break;
+        case ATK_KIND_MAGNET:
+            if (isBtlEnemyFlag(0x100000000000ULL)) {
+                changeBattleEnemyState(0x1B);
+                return;
+            }
+            break;
+        case ATK_KIND_ABSOLUTE_STOP:
+            changeBattleEnemyState(0x12);
+            return;
+        }
+        playDamageSE(inDmgKind);
+        return;
+    }
+    switch (inDmgKind) {
+    case ATK_KIND_DMG_BIG:
+    case ATK_KIND_THUNDRA:
+        if (getSize() > 0 || isBtlEnemyFlag(0x100000)) {
+            changeSmallDamageState_(inDmgKind);
+        } else if (!isBtlEnemyFlag(0x200000000ULL)) {
+            changeBattleEnemyState(0xC);
+        } else {
+            changeBattleEnemyState(0xB);
+        }
+        break;
+    case ATK_KIND_DMG_BLOWN:
+    case ATK_KIND_QUAKE:
+    case ATK_KIND_THUNDAGA:
+        if (isBtlEnemyFlag(0x100000)) {
+            changeSmallDamageState_(inDmgKind);
+        } else if (!isBtlEnemyFlag(0x200000000ULL)) {
+            changeBattleEnemyState(0xC);
+        } else {
+            changeBattleEnemyState(0xB);
+        }
+        break;
+    case ATK_KIND_DMG_TOSS:
+        if (isBtlEnemyFlag(0x100000)) {
+            changeSmallDamageState_(inDmgKind);
+        } else if (!isBtlEnemyFlag(0x200000000ULL)) {
+            changeBattleEnemyState(0x19);
+        } else {
+            changeBattleEnemyState(0xB);
+        }
+        break;
+    case ATK_KIND_DMG_BEAT:
+        if (isBtlEnemyFlag(0x100000)) {
+            changeSmallDamageState_(inDmgKind);
+        } else if (!isBtlEnemyFlag(0x200000000ULL)) {
+            changeBattleEnemyState(0x1A);
+        } else {
+            changeBattleEnemyState(0xB);
+        }
+        break;
+    case ATK_KIND_DMG_VOLLEY:
+        if (isBtlEnemyFlag(0x100000)) {
+            changeSmallDamageState_(inDmgKind);
+        } else if (!isBtlEnemyFlag(0x200000000ULL)) {
+            changeBattleEnemyState(0x1D);
+        } else {
+            changeBattleEnemyState(0xB);
+        }
+        break;
+    case ATK_KIND_STUN:
+        if (m_pEnemyParam->getSpecialEffect(0)) {
+            changeBattleEnemyState(0x11);
+            break;
+        }
+    case ATK_KIND_DMG_SMALL:
+    default:
+        changeSmallDamageState_(inDmgKind);
+        break;
+    case ATK_KIND_STOP:
+    case ATK_KIND_ABSOLUTE_STOP:
+        changeBattleEnemyState(0x12);
+        break;
+    case ATK_KIND_BIND:
+        enableBind_(TRUE);
+        if (isBtlEnemyFlag(0x80000000000ULL) || isBtlEnemyFlag(8) || isBtlEnemyFlag(0x20000000000ULL) || isCurrentState(0x14)) changeDefaultState();
+        break;
+    case ATK_KIND_CONFUSE:
+        if (m_pEnemyParam->getSpecialEffect(4)) {
+            enableConfuse_(TRUE);
+        } else {
+            changeSmallDamageState_(inDmgKind);
+        }
+        if (isBtlEnemyFlag(0x80000000000ULL) || isBtlEnemyFlag(8) || isBtlEnemyFlag(0x20000000000ULL) || isCurrentState(0x14)) changeDefaultState();
+        break;
+    case ATK_KIND_TERROR:
+        changeBattleEnemyState(0x13);
+        break;
+    case ATK_KIND_FREEZE:
+        changeBattleEnemyState(0x14);
+        break;
+    case ATK_KIND_DEGENERATOR:
+    case ATK_KIND_DEGENERATE:
+        changeBattleEnemyState(0x17);
+        break;
+    case ATK_KIND_DEGENERATE_BREAK:
+        if (m_pEnemyParam->getSpecialEffect(2) == 1) {
+            changeBattleEnemyState(0x17);
+        } else {
+            changeBattleEnemyState(0x11);
+        }
+        break;
+    case ATK_KIND_SHOCK:
+        changeBattleEnemyState(0x15);
+        break;
+    case ATK_KIND_TORNADO:
+        m_fDamage = m_pBodyColl->getDamage();
+        if (isBtlEnemyFlag(0x8000000000ULL) || isBtlEnemyFlag(0x20000)) {
+            changeSmallDamageState_(ATK_KIND_DMG_BLOWN);
+        } else {
+            changeBattleEnemyState(0x16);
+        }
+        break;
+    case ATK_KIND_GRAVITY:
+        changeBattleEnemyState(0x18);
+        break;
+    case ATK_KIND_MAGNET:
+        changeBattleEnemyState(0x1B);
+        break;
+    case ATK_KIND_SUSPEND:
+        changeBattleEnemyState(0x1C);
+        break;
+    }
+}
 BOOL CBattleEnemy::canAttack_(const ENEMY_ACT* inAct) {
     if (!inAct) return FALSE;
     FLOAT viewAngle = inAct->fViewAngle;
