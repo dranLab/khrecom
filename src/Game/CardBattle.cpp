@@ -86,6 +86,8 @@ public:
 extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039AF98");
 extern "C" char D_00477690[]; /* "...CardBattle.cpp(4378)" */
 extern "C" char D_00477338[]; /* "...CardBattle.cpp(NNNN)" */
+extern "C" char D_004769E8[]; /* "...CardBattle.cpp(NNNN)" */
+extern "C" char D_00476938[]; /* "m_pInstance" */
 extern "C" char D_00477298[]; /* notifyCompleteGimmick's TRACE format */
 namespace PL {
 extern FLOAT g_fDefAttr[18][6];
@@ -136,7 +138,13 @@ void CardBattle::calcFreezeDamage(INT& ioDamage) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", __Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _$_Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getInstance__Q210CardBattle11CCardBattle);
+CCardBattle* CCardBattle::getInstance() {
+    if (!m_pInstance) {
+        m_pInstance = new (com_malloc_d(sizeof(CCardBattle), D_004769E8, RET_ADDR())) CCardBattle;
+        if (!(m_pInstance)) AssertApp(D_00476980, 163, D_00476938, 0);
+    }
+    return m_pInstance;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", init__Q210CardBattle11CCardBattle);
 void CCardBattle::main() {
     TIMEQ tqFrameRate = getFrameRate();
