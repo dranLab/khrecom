@@ -74,4 +74,6 @@ private:
     friend class CCoordMan;
 };
 
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1); // PARTIAL: added for Game/Debug/DebugPathData
+
 #endif /* SYSTEM_COORD_H */

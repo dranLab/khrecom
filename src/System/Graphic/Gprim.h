@@ -280,6 +280,8 @@ public:
     INT m_iMax;
     FVERTEX* m_V;
 
+    CCPrim() { init(); }                // PARTIAL: added for Game/Debug/DebugPathData
+    virtual ~CCPrim() { remove(); }     // PARTIAL: added for Game/Debug/DebugPathData
     void create(ULONGLONG iPrim, INT iVertexNum) {
         remove();
         m_iMax = iVertexNum;
@@ -290,6 +292,8 @@ public:
     }
     void remove();
     BOOL isRect(INT i, const FVECTOR* vRect); // PARTIAL: added for System/Graphic/Gprim
+private:
+    void init(); // PARTIAL: added for Game/Debug/DebugPathData
 };
 
 class CTPrim : public CGTexPrim {

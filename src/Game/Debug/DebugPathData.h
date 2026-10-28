@@ -12,20 +12,59 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 /* PARTIAL: the full class, for Game/Debug/DebugPathData only (no SOURCE DATA yet: the inline's strings are labels) */
 class CPathData;
 class CNakCamera;
-class CPDFrameTime;
 extern "C" char D_00485FA8[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.h" */
 extern "C" char D_00485FD8[]; /* "m_pInstance" */
+extern "C" char D_00485FA0[]; /* "%d" */
+class CPDFrameTime {
+    INT m_iFlags;      /* 0x00 */
+    FLOAT m_fTimer;    /* 0x04 */
+    char m_szStr[32];  /* 0x08 */
+    CFnt m_cFnt;
+    CTile m_cTile;
+
+public:
+    CPDFrameTime() {
+        m_iFlags = 0;
+        m_fTimer = 0.0f;
+        m_szStr[0] = 0;
+        m_cFnt.setText(m_szStr);
+        m_cFnt.setLayerFG(8);
+        m_cFnt.setStyle(1);
+        m_cFnt.setSize(16);
+        m_cFnt.m_P0.set(240 << 4, -168 << 4, 0xFFFF280);
+        m_cTile.m_C0.set(0, 0, 0, 0x60);
+        m_cTile.setSemiTrans((ALPHA)1);
+        m_cTile.setLayerFG(8);
+        m_cTile.m_P0.set(112 << 4, -184 << 4, 0xFFFF280);
+        m_cTile.m_P1.set(244 << 4, -166 << 4, 0xFFFF280);
+    }
+    ~CPDFrameTime() {}
+    void reset();
+    void start() { m_iFlags |= 2; }
+    void stop() { m_iFlags &= ~2; }
+    void on();
+    void off();
+    void disp(FLOAT fRate) {
+        if (m_iFlags & 1) {
+            if (m_iFlags & 2) m_fTimer += fRate;
+            sprintf(m_szStr, D_00485FA0, (INT)m_fTimer);
+            m_cTile.disp();
+            m_cFnt.disp();
+        }
+    }
+};
 class CDebugPathData : public CTask {
     CPathData* m_pPath;       /* 0x40 */
     CNakCamera* m_pDCam;      /* 0x44 */
     char m_szFileName[64];    /* 0x48 */
     HANDLE m_hChildWnd;       /* 0x88 */
-    UBYTE m_gpPArrowPoly[0x50] __attribute__((aligned(16))); /* 0x90 CCPrim */
+    CCPrim m_gpPArrowPoly;    /* 0x90 */
     static CDebugPathData* m_pInstance;
 
 public:
     static INT m_iActivePath;
     static INT m_iActivePathNum;
+    static FVECTOR m_vActivePathPos;
     static FLOAT m_fValuePlus;
     static char m_szNames[128][16];
     static CPDFrameTime* m_pFrame;
@@ -37,6 +76,11 @@ public:
     virtual void disp();
     static BOOL create(CTask* p, BOOL bEnd);
     static void makeFileName(const CHAR* pszName, BOOL bExt);
+    static BOOL entryPath(const CHAR* pName);
+    static BOOL newPath(const CHAR* pName);
+    static BOOL savePath(const CHAR* pName);
+    static BOOL loadPath(const CHAR* pName);
+    static void entryCam();
     static CNakCamera* getCam();
     static void removeCam();
     static INT getActivePathNum() { return m_iActivePath; }
