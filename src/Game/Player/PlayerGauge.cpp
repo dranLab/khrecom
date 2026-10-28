@@ -401,8 +401,148 @@ void CPlayerGauge::_initialize() {
     }
     setDPGauge(m_iState);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge12CPlayerGauge);
-__asm__(".rdata\n.align 4\n.word 0x00285094\n.word 0x00284F04\n.word 0x00284F04\n.word 0x00284F04\n.word 0x00284F04\n.word 0x00284F04\n.word 0x00284FD0\n.word 0x00284FDC\n.align 4\n.word 0x002851A8\n.word 0x0028540C\n.word 0x00285248\n.word 0x002851F8\n.word 0x00285240\n.word 0x002853AC\n.word 0x002853D4\n.word 0x00000000\n.text\n");
+/* MATCH: signed /4 of the USHORT max HP (as the INT max locals of setHP/setDMode) */
+static inline INT _max(INT v) { return v; }
+void CPlayerGauge::main() {
+    if (CSceneEnv::isStopGauge()) return;
+    switch (m_iState) {
+    case 0:
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+        if (CGameWork::getInt(1, 0xE2) & 1) {
+            *(USHORT*)&m_iState = 7; // MATCH: not a struct-field store (register of the constant)
+            m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0x10);
+            m_nRedHP = m_nHP;
+            m_pSeqCtrl->enableDisp(1, FALSE);
+            m_pSeqCtrl->enableDisp(2, FALSE);
+            m_pSeqCtrl->enableDisp(3, FALSE);
+            m_pSeqCtrl->enableDisp(4, FALSE);
+            if (m_hAlertSE > 0) {
+                CSound::stopSE(m_hAlertSE, 9);
+                m_hAlertSE = 0;
+            }
+            if (m_pFriend) m_pFriend->setGauge(2);
+            setDPGauge(m_iState);
+        }
+        break;
+    case 6:
+        m_nRedHP = m_nHP;
+        break;
+    case 7:
+        if (!(CGameWork::getInt(1, 0xE2) & 1)) {
+            *(USHORT*)&m_iState = 1; // MATCH: as above
+            m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xE);
+            m_uiFlag = (INT)m_uiFlag & ~1;
+            m_pSeqCtrl->enableDisp(0, TRUE);
+            m_pSeqCtrl->enableDisp(1, TRUE);
+            m_pSeqCtrl->enableDisp(3, TRUE);
+            m_pSeqCtrl->enableDisp(4, TRUE);
+            if (m_pFriend) m_pFriend->setGauge(1);
+            setDPGauge(m_iState);
+        }
+        break;
+    }
+    if (m_nRedHP != m_nHP && m_iState != 7) {
+        if (!(m_uiFlag & 2)) {
+            m_uiFlag |= 2;
+            m_pSeqCtrl->enableDisp(2, TRUE);
+        }
+        if (m_nRedHP < m_nHP) {
+            m_nRedHP = m_nHP;
+        } else if (m_tqRed <= 0) {
+            m_tqRed = 0;
+            m_nRedHP -= (m_nRedHP - m_nHP) / 10 + 1;
+        }
+        changeTimeHP(m_pSeqCtrl, 2, m_nRedHP);
+    } else if (m_uiFlag & 2) {
+        m_uiFlag = (INT)m_uiFlag & ~2;
+        m_pSeqCtrl->enableDisp(2, FALSE);
+    }
+    m_tqRed -= getFrameRate();
+    switch (m_iState) {
+    case 1:
+        if (m_pSeqCtrl->isEnd(0)) {
+            m_tqTimer = 0;
+            if (m_nHP == 0) {
+                m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xF);
+                m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 2);
+                m_iState = 5;
+            } else if (m_nHP <= _max(m_nMaxHP) / 4) {
+                m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xA);
+                m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 0);
+                m_iState = 4;
+            } else {
+                m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xF);
+                m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 3);
+                m_iState = 2;
+                if (m_hAlertSE > 0) {
+                    CSound::stopSE(m_hAlertSE, 9);
+                    m_hAlertSE = 0;
+                }
+            }
+        }
+        break;
+    case 4:
+        if (_max(m_nMaxHP) / 4 < m_nHP) {
+            m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xF);
+            m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 3);
+            m_iState = 2;
+            if (m_hAlertSE > 0) {
+                CSound::stopSE(m_hAlertSE, 9);
+                m_hAlertSE = 0;
+            }
+        } else if (m_hAlertSE == 0) {
+            m_hAlertSE = CSound::playSE(9, -1, 64);
+        }
+        break;
+    case 5:
+        if (m_hAlertSE > 0) {
+            CSound::stopSE(m_hAlertSE, 9);
+            m_hAlertSE = 0;
+        }
+        break;
+    case 3:
+        m_tqTimer += getFrameRate();
+        if (m_tqTimer >= 3000) {
+            m_tqTimer = 0;
+            if (m_nHP == 0) {
+                m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xF);
+                m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 2);
+                m_iState = 5;
+            } else if (m_nHP <= _max(m_nMaxHP) / 4) {
+                m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xA);
+                m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 0);
+                m_iState = 4;
+            } else {
+                m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xF);
+                m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 3);
+                m_iState = 2;
+                if (m_hAlertSE > 0) {
+                    CSound::stopSE(m_hAlertSE, 9);
+                    m_hAlertSE = 0;
+                }
+            }
+        }
+        break;
+    case 6:
+        if (m_pSeqCtrl->isEnd(0)) {
+            m_iState = 0;
+            m_pSeqCtrl->enableDispEach(FALSE);
+        }
+        break;
+    case 7:
+        if ((m_uiFlag & 1) == 0 && m_pSeqCtrl->isEnd(0)) {
+            m_uiFlag |= 1;
+            m_pSeqCtrl->enableDispEach(FALSE);
+        }
+        break;
+    }
+    exeDPGauge();
+}
 void CPlayerGauge::changeTimeHP(D2::C2DSeqCtrl* p, UINT nIdx, UINT nHP) {
     p->changeTime(nIdx, (UINT)((FLOAT)nHP / 560.0f * 470.0f));
 }
