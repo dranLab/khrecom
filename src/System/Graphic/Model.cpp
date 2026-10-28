@@ -37,7 +37,11 @@ public:
     static void pkCloseGifTagManual(UINT* p);
     static void pkRefLoadImage(USHORT nTBP, const VTransInfo& info);
     static UINT getEnableDraw();
+    static void pkOpenGifTag(u_long128 tag);
+    static void pkAddGsData(u_long data);
+    static void pkCloseGifTag();
 };
+FLOAT RotTransPers(IVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 extern const FMATRIX ONE_MATRIX;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
 SHADERDESC* searchShaderDesc(USHORT mode);
@@ -1194,7 +1198,122 @@ void CModelBG::makePkt() {
     CPackMan::pkOpenDirectCode(0);
 }
 FIX4 CBBox::calcZ() { return 0x640; }
+/* Parked: 116 lines off, register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers. Tried: x[0] > x[1] compare, a G_RGBA set helper (worse). */
+#if 0
+static inline u_long _xyz(const IVECTOR& v) { return (u_long)v.x | ((u_long)v.y << 16) | ((u_long)v.z << 32); }
+void CBBox::makePkt() {
+    int abort;
+    FMATRIX rtp;
+    FVECTOR v;
+    IVECTOR c[2][2][2];
+    float w[2][2][2];
+    int x;
+    int y;
+    int z;
+    INT xmin;
+    INT xmax;
+    INT ymin;
+    INT ymax;
+    FLOAT wmax;
+    FLOAT wmin;
+    QWdata giftag;
+    if (m_bbox.x[0] > m_bbox.x[1]) return;
+    abort = 0;
+    m_pCrd->getRotTransPersMatrix(rtp);
+    wmax = 0.0f;
+    wmin = 1.0f;
+    m_C0.r = 0xFF;
+    m_C0.g = 0;
+    m_C0.b = 0;
+    xmin = 0x10000;
+    xmax = 0;
+    ymin = 0x10000;
+    ymax = 0;
+    for (x = 0; x < 2; x++) {
+        for (y = 0; y < 2; y++) {
+            for (z = 0; z < 2; z++) {
+                v.x = m_bbox.x[x];
+                v.y = m_bbox.y[y];
+                v.z = m_bbox.z[z];
+                v.w = 1.0f;
+                w[x][y][z] = RotTransPers(c[x][y][z], rtp, v);
+                if (w[x][y][z] < 0.0f) {
+                    m_C0.r = 0;
+                    abort = 1;
+                    m_C0.g = 0;
+                    m_C0.b = 0xFF;
+                } else {
+                    if (wmax < w[x][y][z]) wmax = w[x][y][z];
+                    if (w[x][y][z] < wmin) wmin = w[x][y][z];
+                }
+                if (c[x][y][z].x < 0 || c[x][y][z].x > 0xFFFF || c[x][y][z].y < 0 || c[x][y][z].y > 0xFFFF) {
+                    m_C0.r = 0;
+                    abort = 1;
+                    m_C0.g = 0xFF;
+                    m_C0.b = 0xFF;
+                }
+                if (c[x][y][z].x < xmin) xmin = c[x][y][z].x;
+                if (c[x][y][z].x > xmax) xmax = c[x][y][z].x;
+                if (c[x][y][z].y < ymin) ymin = c[x][y][z].y;
+                if (c[x][y][z].y > ymax) ymax = c[x][y][z].y;
+            }
+        }
+    }
+    if (abort) return;
+    if (wmax < 1.0f / CWorldEnv::getDispFar()) {
+        m_C0.r = 0xFF;
+        m_C0.g = 0xFF;
+        m_C0.b = 0;
+    }
+    if (1.0f / CWorldEnv::getFogNear() < wmin) {
+        m_C0.r = 0xFF;
+        m_C0.b = 0xFF;
+        m_C0.g = 0;
+    }
+    if (xmin > 0x9000 || xmax < 0x7000 || ymin > 0x8C00 || ymax < 0x7400) {
+        m_C0.r = 0xFF;
+        m_C0.b = 0xFF;
+        m_C0.g = 0xFF;
+    }
+    giftag.ul64[0] = 0x6400000000008000;
+    giftag.ul64[1] = 0x444410;
+        CPackMan::pkOpenGifTag(giftag.ul128);
+        CPackMan::pkAddGsData(0x282 | ((u_long)(m_nAttribute & 1) << 6));
+        CPackMan::pkAddGsData(m_C0.col);
+        CPackMan::pkAddGsData(_xyz(c[0][0][0]));
+        CPackMan::pkAddGsData(_xyz(c[1][0][0]));
+        CPackMan::pkAddGsData(_xyz(c[1][1][0]));
+        CPackMan::pkAddGsData(_xyz(c[1][1][1]));
+        CPackMan::pkCloseGifTag();
+        CPackMan::pkOpenGifTag(giftag.ul128);
+        CPackMan::pkAddGsData(0x282 | ((u_long)(m_nAttribute & 1) << 6));
+        CPackMan::pkAddGsData(m_C0.col);
+        CPackMan::pkAddGsData(_xyz(c[1][1][0]));
+        CPackMan::pkAddGsData(_xyz(c[0][1][0]));
+        CPackMan::pkAddGsData(_xyz(c[0][0][0]));
+        CPackMan::pkAddGsData(_xyz(c[0][0][1]));
+        CPackMan::pkCloseGifTag();
+        CPackMan::pkOpenGifTag(giftag.ul128);
+        CPackMan::pkAddGsData(0x282 | ((u_long)(m_nAttribute & 1) << 6));
+        CPackMan::pkAddGsData(m_C0.col);
+        CPackMan::pkAddGsData(_xyz(c[1][0][1]));
+        CPackMan::pkAddGsData(_xyz(c[1][1][1]));
+        CPackMan::pkAddGsData(_xyz(c[0][1][1]));
+        CPackMan::pkAddGsData(_xyz(c[0][1][0]));
+        CPackMan::pkCloseGifTag();
+        CPackMan::pkOpenGifTag(giftag.ul128);
+        CPackMan::pkAddGsData(0x282 | ((u_long)(m_nAttribute & 1) << 6));
+        CPackMan::pkAddGsData(m_C0.col);
+        CPackMan::pkAddGsData(_xyz(c[0][1][1]));
+        CPackMan::pkAddGsData(_xyz(c[0][0][1]));
+        CPackMan::pkAddGsData(_xyz(c[1][0][1]));
+        CPackMan::pkAddGsData(_xyz(c[1][0][0]));
+        CPackMan::pkCloseGifTag();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__5CBBox);
+#endif
+
 void CModel::linkTexAnm(CTexAnm* pATbl, INT nANum) {
     INT nTexMax;
     if (pATbl && nANum > 0) {
