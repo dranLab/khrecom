@@ -492,7 +492,27 @@ void CCardBattle::calcEnchant_AttackPoint(INT& inPoint, ATK_KIND& inAtkKind, ATK
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayerEnchant__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", resetPlayerEnchant__Q210CardBattle11CCardBattlei);
+void CCardBattle::resetPlayerEnchant(INT inKind) {
+    if (_ref(g_pPlayer)) {
+        _ref(g_pPlayer)->setDefAttr(PL::g_fDefAttr[0]);
+        _ref(g_pPlayer)->m_iMaxCombo = 3;
+        { CPlayer* pPL = _ref(g_pPlayer); pPL->m_fPrizeDraw = 5.0f; pPL->m_fCardDraw = 5.0f; }
+        _ref(g_pPlayer)->setBanish(FALSE);
+        _ref(g_pPlayer)->setConditionFlag(0, 0x100000);
+        _ref(g_pPlayer)->setConditionFlag(0, 0x80);
+        _ref(g_pPlayer)->setConditionFlag(0, 0x100);
+        _ref(g_pPlayer)->setConditionFlag(0, 0x20000000);
+        _ref(g_pPlayer)->setConditionFlag(0, 0x40000000);
+        _ref(g_pPlayer)->setConditionFlag(0, 0x1000);
+        _ref(g_pPlayer)->setReflectGuard(FALSE);
+        _ref(g_pPlayer)->setAeroGuard(FALSE);
+        CCardRevolver* pRev = _ref(g_pPlayer)->getRevolver();
+        if (pRev) {
+            pRev->setChargeRate(100);
+            pRev->setPlayNG(0, 0);
+        }
+    }
+}
 void CCardBattle::transferPlayerEnchant(CPlayer* inPL) {
     if (inPL && m_cardEnchant[0][0] >= 0x44) {
         setPlayerEnchant(m_cardEnchant[0][0]);

@@ -233,7 +233,8 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
 class CCardRevolver {
     UBYTE _m_0x00[0x4c]; // PARTIAL: added for Game/Enemy/HumanBoss
     SHORT m_sMode;       /* 0x4c */ // PARTIAL: name unknown
-    UBYTE _m_0x4e[0x26]; // PARTIAL: added for Game/Player/Player
+    UBYTE _m_0x4e[0x22]; // PARTIAL: added for Game/Player/Player
+    TIMEQ m_tqChargeRate; /* 0x70 */ // PARTIAL: added for Game/CardBattle
     BOOL m_bActive;      /* 0x74 */ // PARTIAL: added for Game/Player/Player
     UBYTE _m_0x78[0x168]; /* 0x078 .. sizeof 0x1e0 */ // PARTIAL: added for Game/Player/Player (makeRevolver)
 public:
@@ -241,6 +242,8 @@ public:
     INT isActive() const { return m_bActive; } // PARTIAL: added for Game/Player/Player
     // PARTIAL: added for Game/Enemy/HumanBoss
     INT getMode() const { return m_sMode; } // PARTIAL: name unknown
+    void setChargeRate(INT inRate) { m_tqChargeRate = inRate; } // PARTIAL: added for Game/CardBattle
+    void setPlayNG(INT inFlag, INT inCategory);
     INT getRemain(INT inKind, INT inCardKind, INT inFlag);
     BOOL isEnableCharge();
     CARD* getActiveCardData();
