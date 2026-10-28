@@ -1326,7 +1326,8 @@ extern "C" char D_004875D0[];
    paths loop into a stack slot, like &sVecParam and &vPath; ours computes it before the parameter loop.
    Worked: one j per inner loop, the 0xFFFFFFF0 mask, the _zeroVec helper (45 -> 5 lines). Tried for the
    pointer: init before iCount / at its declaration / (INT*)&s + 1 / &((INT*)&s)[1] / base + j inside the
-   loop / indexed writeFile argument; permuter 15 min (42581 candidates, no gain). Needs
+   loop / indexed writeFile argument / set-once pointer + &p[j] (2026-10-28: still addiu sp,36 straight into the
+   induction register; the original copies a hoisted pseudo); permuter 15 min (42581 candidates, no gain). Needs
    CPathData::makeVertexSpeedAll (PathData.h). */
 #if 0
 static inline void _zeroVec(FVECTOR& v) { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory"); }
