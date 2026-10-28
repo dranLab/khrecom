@@ -679,7 +679,32 @@ void CSaveLoadUI::exeCheckNoCard() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckUnformat__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckUnformat__11CSaveLoadUI);
 __asm__(".rdata\n.align 4\n.word .L0034B86C\n.word .L0034B86C\n.word .L0034B88C\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034B8C4\n.word .L0034BA3C\n.word .L0034BA54\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAA4\n.word .L0034BABC\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preConfirmExecErr__11CSaveLoadUI);
+void CSaveLoadUI::preConfirmExecErr() {
+    INT nCtd;
+    switch (m_nExecError) {
+    case 2:
+        nCtd = 0x600204;
+        break;
+    case 3:
+        nCtd = 0x60020B;
+        break;
+    case 4:
+        nCtd = 0x600208;
+        break;
+    case 1:
+    default:
+        nCtd = 0x600301;
+        break;
+    }
+    char szMsg[256];
+    CHAR* pszMsg = szMsg;
+    char szSlot[32];
+    _getSlotName(m_nSlot + 1, szSlot);
+    const CHAR* pszFmt = _ctdText(nCtd);
+    sprintf(szMsg, pszFmt, _ctdText(0x600000), szSlot);
+    openMessageDlg(pszMsg, 0, 1);
+    m_nStep = 0;
+}
 void CSaveLoadUI::exeConfirmExecErr() {
     switch (m_nStep) {
     case 0:
