@@ -216,16 +216,8 @@ public:
     static unsigned long getStopTypeBit();
 };
 
-class CSound {
-public:
-    static void coldReset();
-    static void initialize();
-    static void finalize();
-    static void mainProc();
-    static void setWarningPause(INT bPause, INT bFlag);
-    static void pauseAllSE();
-    static void startAllPausedSE();
-};
+#include "System/Sound/SoundMan.h"
+#line 229
 
 class CMovie {
 public:

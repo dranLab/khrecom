@@ -122,11 +122,8 @@ __asm__(
     ".weak __25CMini100AcreBeeBattleMainP5CTask\n__25CMini100AcreBeeBattleMainP5CTask = 0\n"
 );
 
-class CSound {
-public:
-    static void fadeoutAllSE(INT nFrame, BOOL bFlag);
-    static void fadeoutAllVoice(INT nFrame);
-};
+#include "System/Sound/SoundMan.h"
+#line 130
 
 class CJiminyMemoFlag {
 public:
