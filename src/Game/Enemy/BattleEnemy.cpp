@@ -800,7 +800,14 @@ BOOL CBattleEnemy::isQuickRecover_() {
     }
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", enemyCardDash___12CBattleEnemy);
+void CBattleEnemy::enemyCardDash_() {
+    CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (cb && _getEnchantKind(cb, 2) == 0x2D) {
+        m_pMove->setPower(1.7f);
+    } else {
+        m_pMove->setPower(1.0f);
+    }
+}
 void CBattleEnemy::createFriendCard_(INT inRate) {
     CARD card;
     CardBattle::getDropFriendCard(card, inRate);
