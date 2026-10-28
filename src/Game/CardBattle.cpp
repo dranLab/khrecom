@@ -217,7 +217,33 @@ void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", decEnchantTime__Q210CardBattle11CCardBattleiii);
 #endif
 void CCardBattle::destroyPlayCard(INT inFlag, INT inP1) { resetNowPlaying(inFlag); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", resetNowPlaying__Q210CardBattle11CCardBattlei);
+void CCardBattle::resetNowPlaying(INT inUser) {
+    if (!(inUser)) AssertApp(D_00476980, 2028, D_00476730, 0);
+    UINT _PLAYER = inUser - 1;
+    if (inUser == 1) {
+        if (m_iStock[_PLAYER] > 0) {
+            CGameWork::setFlag(1, 0x16, TRUE);
+        } else {
+            CGameWork::setFlag(1, 0x14, TRUE);
+        }
+        _setCard(*(CARD*)m_cardGimmick, 0, 0);
+        m_uiFlag &= ~0x8000;
+    }
+    if (m_iStock[_PLAYER] > 0) decEnchantTime(inUser, 0x2A, 0);
+    m_uiResult[_PLAYER] = 0;
+    m_uiState[_PLAYER] = 0;
+    m_hOwner[_PLAYER] = 0;
+    for (INT i = 0; i < 7; i++) {
+        _setCard(*(CARD*)m_cardData[_PLAYER][i], 0, 0);
+        if (m_pCard[_PLAYER][i]) {
+            m_pCard[_PLAYER][i]->setUseEnd();
+            m_pCard[_PLAYER][i] = NULL;
+        }
+    }
+    m_iStock[_PLAYER] = 0;
+    m_iExtra[_PLAYER] = 0;
+    m_iFirst[_PLAYER] = 0;
+}
 void CCardBattle::resetEnchantCard(INT inUser) {
     if (!(inUser)) AssertApp(D_00476980, 2069, D_00476730, 0);
     UINT _PLAYER = inUser - 1;
