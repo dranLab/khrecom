@@ -5,6 +5,9 @@
 #include "Game/Entity.h"
 #include "Game/Player/Player.h"
 #include "Game/Player/PlayerManager.h"
+#include "Game/Game.h"
+#include "Game/SceneInfo.h"
+#include "Game/Debug/DebugWork.h"
 #include "Game/Enemy/BattleEnemy.h"
 #include "Game/Enemy/BattleEnemyManager.h"
 #include "Game/MessageManager.h"
@@ -40,6 +43,7 @@ public:
     void destroy();
 };
 void calcFreezeDamage(INT& ioDamage);
+INT getDropPlutoCard(CARD& outData);
 
 class CDuelGauge : public ::CTask {
 private:
@@ -620,7 +624,30 @@ void CCardBattle::exeBio() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropFriendCard__10CardBattleR4CARDi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropPlutoCard__10CardBattleR4CARD);
+INT CardBattle::getDropPlutoCard(CARD& outData) {
+    if (CGame::isRikuGame()) return 0;
+    if (CSceneInfo::isMinigameScene()) return 0;
+    if (CCardBattle::getPlutoCount() >= 3) return 0;
+    CCardRevolver* pRev = g_pPlayer ? g_pPlayer->getRevolver() : NULL;
+    if (!pRev) return 0;
+    BOOL bCheck2 = TRUE;
+    INT r = RND::genrand_int31() % 1000;
+    BOOL bCheck = TRUE;
+    if (DebugWork::g_dw.player.iFriend > 0) {
+        r = 0;
+        bCheck = FALSE;
+    }
+    if (DebugWork::g_dw.player.iPluto > 0) {
+        r = 0;
+        bCheck = FALSE;
+        bCheck2 = FALSE;
+    }
+    if (r >= 200) return 0;
+    if (bCheck && !(CGameWork::getInt(0, 0x22) & 0x100)) return 0;
+    if (bCheck2 && pRev->getHave(0, 1, 1, 0, 0) >= 10) return 0;
+    _setCard(outData, 0x39, RND::genrand_int31() % 10);
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeDuel__Q210CardBattle11CCardBattle);
 void CCardBattle::setDuelEntry(INT inFlag) {
     if (inFlag > 0) {
