@@ -95,7 +95,10 @@ INT CBattleEnemy::getSize() const {
     return 1;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getNearestChild__12CBattleEnemyRfR7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getExtraParam__12CBattleEnemyPCc);
+FLOAT CBattleEnemy::getExtraParam(const CHAR* inParamName) {
+    if (m_pEnemyParam) return m_pEnemyParam->getExtraParam((char*)inParamName);
+    return 0.0f;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackPoint__12CBattleEnemyi8ATK_KINDUsP8ATK_KINDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackAttr__C12CBattleEnemyi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackRate__C12CBattleEnemy);
