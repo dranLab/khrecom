@@ -305,12 +305,8 @@ public:
     static void changeDrawMode(INT nMode);
 };
 
-class CSound {
-public:
-    static HANDLE playSE(INT nID, INT nCh, INT nVol);
-    static void pauseAllSE();
-    static void startAllPausedSE();
-};
+#include "System/Sound/SoundMan.h"
+#line 314
 
 extern "C" {
 int sprintf(char*, const char*, ...);
