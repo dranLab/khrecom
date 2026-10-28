@@ -189,6 +189,12 @@ public:
     // PARTIAL: added for Form/Menu/SaveLoad
     void attachCursor(C2DSeqCursorCtrl* pCursor) { m_pCursor = pCursor; }
     void attachLightMark(C2DSeqLightMarkAgent* pLight) { m_pLightMark = pLight; }
+    void enableDisp(BOOL bDisp) {
+        if (m_pCtrl) m_pCtrl->enableDisp(bDisp);
+    }
+    void enableDispCaption(BOOL bDisp) {
+        if (m_pCtrl) m_pCtrl->enableDisp(1, bDisp);
+    }
 };
 
 class C2DSeqScrollbarCtrl {
@@ -211,6 +217,12 @@ public:
     void setBasePos(FVECTOR& vPos);
     void setScrollRange(FLOAT fMaxBodySize, USHORT nItemCount, USHORT nDispCount, BOOL bUpdateForm);
     void setScrollPos(USHORT nPos, BOOL bUpdateForm);
+    // PARTIAL: added for Form/Menu/SaveLoad
+    void startOrRestart() {
+        for (INT i = 0; i < 3; i++) {
+            m_pParts[i]->startOrRestart();
+        }
+    }
 
 protected:
     void updateForm();
@@ -248,6 +260,10 @@ private:
 public:
     void setupSeq(const CHAR* pszLad, SHORT nUnit, SHORT nSeqNum0, SHORT nSeqColon, SHORT nSeqBlank);
     void show();
+    void hide() { // PARTIAL: added for Form/Menu/SaveLoad
+        if (m_nState == 2) enableDisp(FALSE);
+        if (m_nState) m_nState = 3;
+    }
     BOOL update();
 };
 
@@ -267,6 +283,10 @@ private:
 public:
     void setupSeq(const CHAR* pszLad, SHORT nUnit, SHORT nSeqNum0, SHORT nSeqBlank, UINT nMaxValue);
     void show();
+    void hide() { // PARTIAL: added for Form/Menu/SaveLoad
+        if (m_nState == 2) enableDisp(FALSE);
+        if (m_nState) m_nState = 3;
+    }
     BOOL updateValue(UINT nValue);
 };
 
