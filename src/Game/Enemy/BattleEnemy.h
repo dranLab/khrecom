@@ -126,6 +126,10 @@ public:
     ATK_ATTR getAttackAttr(INT inIndex) const;
     HANDLE getPlayerHandle(); // PARTIAL: added for Game/Enemy/EnemyFatbandit
     void makePrize();
+    void setupFlick();
+    BOOL isQuickRecover_();
+    void enemyCardDash_();
+    void continuousDamageProc_();
     void makeRoulettePrize(const FVECTOR* inPos);
     BOOL checkResist_(ATK_KIND inDmgKind);
     CBattleEnemyManager* getBattleEnemyManager() const;
@@ -162,7 +166,7 @@ public:
     INT getAttackRate() const;
     INT getAttackState() const { return m_iAttackState; } // PARTIAL: added for Game/Enemy/Heartless
     BOOL canAttack_(const ENEMY_ACT* inAct);
-    void destroyCard(); // PARTIAL: added for Game/Enemy/EnemyBarrelspider
+    BOOL destroyCard(); // PARTIAL: added for Game/Enemy/EnemyBarrelspider
     // PARTIAL: added for Game/Enemy/EnemyWhitemushroom
     void changeBattleEnemyState(INT inState);
     void makePrize(const FVECTOR* inPos);
