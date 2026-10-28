@@ -26,6 +26,7 @@
 #include "System/Sound/SoundMan.h"
 #include "System/Math3D.h"
 #include "Game/MessageManager.h"
+#include "Game/Collision/CollMap.h"
 #include "System/Com.h"
 #include "System/Rnd.h"
 #include "Game/EntityFactory.h"
@@ -80,6 +81,20 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
 extern "C" float sinf(float);
 extern "C" float cosf(float);
 extern "C" float atan2f(float, float);
@@ -1753,7 +1768,34 @@ void CBattleEnemy::enableBind_(BOOL inSw) {
         m_tqBindTimer = 0;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", enableConfuse___12CBattleEnemyi);
+void CBattleEnemy::enableConfuse_(BOOL inSw) {
+    FMATRIX m;
+    FVECTOR start;
+    if (inSw) {
+        CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+        if (hitBody) {
+            setBadStatusEffect(2, hitBody->getBadStatusParam());
+        } else {
+            setBadStatusEffect(2, 0.0f);
+        }
+        m_ullBtlEnemyFlag |= 0x40000;
+        m_tqConfuseTimer = 21000;
+        _unitMatrixVu0(m);
+        sceVu0RotMatrixY(m, m, Math3D::LimitPI(DEG2RAD(RND::genrand_real1() * 360.0f)));
+        m_vConfusePlayerPos.set(0.0f, 0.0f, RND::genrand_real1() * 3.0f + 2.0f);
+        ApplyMatrix(m_vConfusePlayerPos, m, m_vConfusePlayerPos);
+        AddVectorXYZ(m_vConfusePlayerPos, m_vConfusePlayerPos, getPos());
+        start = getPos();
+        CCollMap* coll = m_pMove->getMapCollision();
+        coll->setStartPos(start);
+        coll->setEndPos(m_vConfusePlayerPos);
+        if (coll->collideMap()) m_vConfusePlayerPos = *coll->getOutPos();
+    } else {
+        m_ullBtlEnemyFlag &= ~0x40000;
+        killBadStatusEffect();
+        m_tqConfuseTimer = 0;
+    }
+}
 void CBattleEnemy::setGuardEffect_(const FVECTOR* inPos) {
     switch ((UINT)getID() % 10000) {
     case 9:
