@@ -1958,8 +1958,57 @@ INT CCardRevolver::canSnatch() {
     if (getHave(1, 1, 0, 0, 0) > 6) return TRUE;
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayerPronounceCard__Q210CardBattle13CCardRevolveri);
-__asm__(".rdata\n.align 4\n.word 0x001E9814\n.word 0x001E9840\n.word 0x001E9864\n.word 0x001E9864\n.word 0x001E9A0C\n.word 0x001E9A0C\n.word 0x001E9A0C\n.word 0x001E9864\n.word 0x001E9864\n.word 0x001E9864\n.word 0x001E9864\n.word 0x001E9864\n.word 0x001E9A0C\n.word 0x00000000\n.text\n");
+INT CCardRevolver::setPlayerPronounceCard(INT inTest) {
+    CCardBattle* pCB;
+    CBattleCard* card;
+    CARD* data;
+    INT num;
+    INT category;
+    INT result;
+    CARD tmp;
+    if (m_iState != 1) return 0;
+    if (CGameWork::getFlag(1, 8)) return 0;
+    if (CGameWork::getInt(1, 0xE2) & 2) return 0;
+    pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (!pCB->isNowPronounce()) return 0;
+    if (!pCB->isNowSetEnemyPronounce()) return 0;
+    if (CCardBattle::isExecutingCard(1)) return 0;
+    card = getActiveCard();
+    if (!card) return 0;
+    data = card->getCardData();
+    category = data->m_nCategory1;
+    switch (category) {
+    case 2:
+        if (pCB->getEnchantKind() == 0x1F) return 0;
+        break;
+    case 3:
+        if (pCB->getEnchantKind() == 0x19) return 0;
+        break;
+    case 6:
+    case 7:
+    case 8:
+    case 14:
+        return 0;
+    }
+    if (DebugWork::g_dw.player.iCardNumLock != -1) {
+        if (DebugWork::g_dw.player.iCardNumLock < 10) {
+            _setCard(tmp, data->m_nKind, DebugWork::g_dw.player.iCardNumLock);
+            card->changeData(tmp);
+        } else {
+            num = CCardBattle::getPlayingCardPoint(0);
+            if (num != -1 && num < 10) {
+                _setCard(tmp, data->m_nKind, num);
+                card->changeData(tmp);
+            }
+        }
+    }
+    result = pCB->setPlayCard(m_hOwner, m_uiUser, card, NULL, inTest);
+    if (!result) return 0;
+    m_nRemain[m_iMode]--;
+    m_tqRollSpeed = 300;
+    rollDeck(1, 1, 300);
+    return result;
+}
 void CCardRevolver::setDiscard() {
     if (isDiscard()) return;
     discard();
