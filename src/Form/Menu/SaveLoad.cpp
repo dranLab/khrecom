@@ -256,6 +256,10 @@ public:
     static void reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLinkOwner);
     static BOOL isCompleteLoadRCF(INT nGroup, INT nMember);
 };
+class CGame { /* PARTIAL: Game/Game.h needs the game headers */
+public:
+    static BOOL isRikuGame();
+};
 class CPackMan { /* PARTIAL: System/Graphic/PackMan.h is not written yet */
 public:
     static void changeDrawMode(INT nMode);
@@ -643,8 +647,22 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createCursor__11C
 __asm__(".rdata\n.align 3\n.word 0x00070008\n.word 0x00070008\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38363032\n.word 0x00000029\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createLightMark__11CSaveLoadUIQ211CSaveLoadUI14LIGHTMARK_TYPEii);
 __asm__(".rdata\n.align 3\n.word 0x00220021\n.word 0x00210023\n.word 0x00230022\n.word 0x000A0009\n.word 0x0009000B\n.word 0x000B000A\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x36383032\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createTimeLabel__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
-__asm__(".rdata\n.align 3\n.word 0x002E002D\n.word 0x0000002F\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31303132\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x30313132\n.word 0x00000029\n.text\n");
+C2DSeqAgent* CSaveLoadUI::createTimeLabel(D2::C2DSeqCtrl*& pOutCtrl) {
+    C2DSeqAgent::SeqTbl tbl = {{45, 46, 47}};
+    FVECTOR v;
+    C2DSeqAgent* pAgent;
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2101)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, tbl._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    v.init();
+    if (CGame::isRikuGame()) v.y = -35.0f;
+    pOutCtrl->setPos(v);
+    pOutCtrl->enableColorCtrl(TRUE);
+    pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2110)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
+    pAgent->setupState(tbl);
+    return pAgent;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createTimeCtrl__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32323132\n.word 0x00000029\n.text\n");
 C2DSeqAgent* CSaveLoadUI::createMPLabel(D2::C2DSeqCtrl*& pOutCtrl) {
