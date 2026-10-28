@@ -28,6 +28,8 @@ union FVECTOR {
     // PARTIAL: added for Form/Menu/Camp
     void setAll(FLOAT f) { x = y = z = w = f; }
     void setAllXYZ(FLOAT f) { x = y = z = f; }
+    // PARTIAL: added for Game/Debug/DebugPathData (body from the asm: vf0 = 0,0,0,1)
+    void init0() { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(this)); }
     // PARTIAL: added for Game/Player/FriendAriel
     void init() {
         _q = 0;

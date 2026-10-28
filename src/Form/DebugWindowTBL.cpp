@@ -2,6 +2,7 @@
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Str.h"
 #include "System/Task.h"
+#define DEBUGPATHDATA_H_PATH "Game/Debug/DebugPathData.h" /* MATCH: the original includes it under this name */
 #include "Game/Debug/DebugPathData.h"
 #include "Game/Collision/CollUtil.h"
 #include "Game/Collision/CollDisp.h"

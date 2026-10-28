@@ -143,6 +143,7 @@ private:
 
 public:
     CPathData(const CHAR* pszName) { init(pszName, 0); }
+    CPathData(const CHAR* pszInName, BOOL bAlloc) { init(pszInName, bAlloc); }
     CPathData(const PATH_DATA* pPathData) { init(pPathData, 0); }
     CPathData(const PATH_DATA* pPathData, BOOL bAlloc) { init(pPathData, bAlloc); }
     ~CPathData();
