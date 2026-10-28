@@ -21,6 +21,7 @@ union _TEX_UV_OFFSET { // PARTIAL: added for System/Graphic/Model
         FLOAT fv;
     };
     ULONGLONG luv;
+    _TEX_UV_OFFSET() { luv = 0; }
 };
 class CLightUnit; // PARTIAL: added for Game/ModelObj
 struct MODELDATA;
@@ -29,6 +30,7 @@ struct MODELDATA;
 // its virtual functions added for Form/Menu/MenuModel
 class CModel : public CDrawable {
     friend class CSemiZModel; // PARTIAL: guessed (CSemiZModel::makePkt sets m_ShaderOption, no accessor exists)
+    friend class CSemiModel;  // PARTIAL: guessed (CSemiModel::calcZ reads m_pFadeModel, no accessor exists)
 public:
     // PARTIAL: added for System/Graphic/ModelMan
     static void resetSendCtrl(INT nMode);
@@ -102,6 +104,26 @@ public:
     virtual void makePkt(); // PARTIAL: added for System/Graphic/Model
     BOOL isDataEmpty() const { return m_pData->isDataEmpty(); }
     CSemiModel* getSemiModel() { return m_pSemiModel; }
+    USHORT getMode() { return m_Mode; }
+    FIX4 getOTZ() const { return m_iOTZ; }
+    BOOL isDispOff() const { return (USHORT)m_nFlag & 0x4000; }
+    BOOL isDispWireframe() const { return m_nFlag & 0x4; }
+    BOOL isShadowMap() const { return !((USHORT)m_nFlag & 0x100); }
+    BOOL isAutoEffSemiSort() const { return !((USHORT)m_nFlag & 0x1000); }
+    BOOL isSemiSortFlag() const { return (USHORT)m_nFlag & 0x400; }
+    void setDispFlag(BOOL bOn) {
+        if (bOn) m_nFlag |= 8;
+        else m_nFlag &= ~8;
+    }
+    BOOL isOTZFlag() const { return m_nFlag & 0x10; }
+    void updateOTZ(FIX4 nZ) { m_iOTZ = nZ; }
+    /* PARTIAL: added for System/Graphic/Model (body as its weak copy: lbu + dsrl, a 64-bit bit-field) */
+    u_long isUVScroll() const {
+        struct _flag { u_long b0 : 7; u_long b7 : 1; };
+        u_long b = 0;
+        if (m_TexUV) b = ((const _flag*)&m_nFlag)->b7;
+        return b;
+    }
 protected:
     BOOL isManagedSemiModel() const { return m_nFlag & 1; }
     BOOL isAvailableSemiModel() const { return m_nFlag & 2; }
@@ -110,8 +132,13 @@ public:
     FIX4 getSemiZ();
     INT checkBBox();
     void getWorldBBoxScr(IVECTOR& vScr, const FMATRIX* pWS);
-    void disp0(INT nFlag, u_long nTest, INT nPass);
+    void disp0(INT semikind, u_long nInTest, INT iFlags);
+    void _disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0);
+    void linksub();
+    void setLocal(INT index);
+    void getChangeClut(INT inIdx, INT nInType);
     virtual void changeLayerExt(INT a, INT b);        // PARTIAL: parameters guessed, for Form/Menu/MenuModel
+    virtual CSemiModel* createSemiModel(); // PARTIAL: added for System/Graphic/Model (vtable[9])
     FLOAT getAlphaScale() { return m_fAlphaScale; }
     INT getBeforeDirectNum() const { return m_iBeforeDirectQNum; } // PARTIAL: added for System/Graphic/Model
     INT getAfterDirectNum() const { return m_iAfterDirectQNum; }
@@ -125,7 +152,7 @@ public:
     void setShadowSize(INT nSize);
     void setModelData(const MODELDATA* pData);
     void releaseData();
-    void sendTexture(u_long* pTag);
+    BOOL sendTexture(u_long* tex0);
     void _disp0_SetTexture(INT nFlag, u_long* pTag);
     u_long* _disp0_GetData(UINT& nSize, INT nFlag);
     void disp(FLOAT fRate);
@@ -141,6 +168,9 @@ public:
     INT assign(CCoords& crds, const CHAR* pName, INT n);
     INT assign(CTask* p, const CHAR* pName, INT n);
     void changeTextureSub(INT nIdx, const struct TexInfo* pTex);
+    void addTexture(const CHAR* texName, INT idx); // PARTIAL: added for System/Graphic/Model
+    INT getTexParam(u_long* tex0);
+    void setShadowMapModel();
     void setupUVScroll(INT n);
     void setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV); // PARTIAL: added for System/Graphic/Model
     void updateUVScroll(FLOAT fR);
@@ -182,7 +212,16 @@ protected:
     BYTE __pad;              /* 0x27 */
 
 public:
-    CSemiModel();
+    CSemiModel() {
+        m_iFlag = 0;
+        m_nZ = 0;
+        m_pModel = NULL;
+        m_pSemiZ = NULL;
+        m_nOldZ = 0;
+        m_nPacketSize = 0;
+        m_SemiDraw = TRUE;
+        reset();
+    }
     virtual ~CSemiModel();
     void reset();
     virtual void disp();
@@ -191,7 +230,10 @@ public:
     void link(CModel* m);
     void relink(CModel* m);
     void setSemiTrans(ALPHA a);
-    void setSemiSort(BOOL bVal);
+    void setSemiSort(BOOL bVal) {
+        if (bVal) m_iFlag |= 1;
+        else m_iFlag &= ~1;
+    }
     virtual UINT getPacketSize() const;
     void dispDirect();
     CModel* getParentModel() { return m_pModel; }
@@ -203,12 +245,16 @@ public:
 protected:
     void setDefaultSemiTrans();
     void replaceParentModel(CModel* pInModel);
-    void setPacketSize(USHORT nSize);
+    void setPacketSize(USHORT nSize) { m_nPacketSize = nSize; }
 };
 
 class CSemiZModel : public CSemiModel {
 public:
-    CSemiZModel();
+    CSemiZModel() {
+        CDrawable::setSemiTrans(ALPHA_PLUS);
+        setTestFlag(0x52001);
+        setLayer(0x15, 0);
+    }
     virtual ~CSemiZModel();
     virtual void changeLayerExt(BOOL bOn, INT nDepth);
     virtual FIX4 calcZ();
@@ -217,7 +263,7 @@ public:
 
 class CFadeModel : public CSemiModel {
 public:
-    CFadeModel();
+    CFadeModel() { m_SemiDraw = FALSE; }
     virtual ~CFadeModel();
     virtual void makePkt();
     virtual UINT getPacketSize() const;
