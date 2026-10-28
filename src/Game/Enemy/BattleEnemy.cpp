@@ -1,5 +1,6 @@
 #define GAME_ENEMY_BATTLEENEMY_CPP
 #include "khtypes.h"
+#define BATTLEENEMY_H_STATE_TEMPLATE
 #include "Game/Enemy/BattleEnemy.h"
 #include "System/Debug.h"
 #include "System/Fsm.h"
@@ -1564,7 +1565,7 @@ HANDLE CBattleEnemy::recover(INT inPoint, const CHAR* inEffectName, INT inEffect
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", recover__12CBattleEnemyiPCciRC7FVECTORPC6CCoord);
 #endif
 void CBattleEnemy::kill() {
-    if (isState(*(CState*)&m_EnemyState[30 * 0x20])) return;
+    if (isState(m_EnemyState[30])) return;
     m_iHp = 0;
     m_ullBtlEnemyFlag |= 0x200000000000ULL;
     destroyCard();
@@ -2191,6 +2192,8 @@ void CBattleEnemy::notifyHP() {
     HANDLE hThis = getHandle();
     Gauge::CEnemyGauge::notifyHP(hThis, nHp, getHpMax());
 }
+/* Not attempted: CStateTemplate::set()'s assert strings (System/Fsm.h) need the unit's .rodata from source (draft:
+ * build/progress/Game/Enemy/initFSM_draft.c) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initFSM___12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initRoom___12CBattleEnemy);
 void CBattleEnemy::changeBattleEnemyState(INT inState) {
