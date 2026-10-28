@@ -10,6 +10,7 @@
 #include "Game/Debug/DebugWork.h"
 #include "Game/Prize.h"
 #include "System/Math3D.h"
+#include "System/Coord.h"
 #include "Game/Game.h"
 #include "Game/SceneInfo.h"
 #include "include_asm.h"
@@ -1224,7 +1225,54 @@ void CCardRevolver::snatchCard() {
 INT CCardRevolver::returnSnatch(INT inNum) {
     return returnSnatchCard(inNum);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", returnSnatchCard__Q210CardBattle13CCardRevolveri);
+INT CCardRevolver::returnSnatchCard(INT inNum) {
+    PRIZE_PARAM param;
+    INT num;
+    INT i;
+    INT n;
+    CBattleCard* card;
+    if (m_uiUser != 2) return 0;
+    returnStockCard(1);
+    if (m_iMode > 0) changeMode(0, 1);
+    else m_pEmpty->enableDisp(0);
+    num = inNum;
+    CTask* pOwner = CTaskMan::getTask(m_hOwner); // MATCH: the call before the flag stores (no such local in the ref)
+    param.uiFlag = 0;
+    param.uiPrizeFlag = 0;
+    param.vPos = pOwner->Crd(0).m_World.v[3];
+    param.vPos.y += 1.0f;
+    param.fSpeed = 0.25f;
+    if (num <= 0) num = m_nAdd;
+    n = m_nLimit - 1;
+    for (i = 0; i < m_nLimit; i++, n--) {
+        card = &m_pCards[n];
+        if (!card) continue;
+        if (card->getCardOwner() != 1) continue;
+        if (card->getHand() != -1) m_nRemain[0]--;
+        param.PrizeKind = card->getCardKind();
+        param.iNumber = card->getBaseCardNumber();
+        FLOAT rx = (-70.0f - RND::genrand_real1() * 10.0f) * 0.017453292f;
+        FLOAT ry = RND::genrand_real1() * 360.0f * 0.017453292f;
+        param.vRot.set(rx, ry, 0.0f);
+        Math3D::LimitPIVector(param.vRot);
+        CPrize* pPrize = (CPrize*)CEntityFactory::getInstance()->createPrize(param, 0);
+        if (pPrize) pPrize->enableReturnCard(TRUE);
+        card->resetSnatch();
+        num--;
+        if (--m_nAdd == 0) break;
+        if (num == 0) break;
+    }
+    initReload(2);
+    CCardBattle::setGimmickOwner(m_hOwner);
+    param.PrizeKind = 0x42;
+    param.iNumber = 0;
+    FLOAT rx = (-70.0f - RND::genrand_real1() * 10.0f) * 0.017453292f;
+    FLOAT ry = RND::genrand_real1() * 360.0f * 0.017453292f;
+    param.vRot.set(rx, ry, 0.0f);
+    Math3D::LimitPIVector(param.vRot);
+    CEntityFactory::getInstance()->createPrize(param, 0);
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeReturnCard__Q210CardBattle13CCardRevolver);
 INT CCardRevolver::canSnatch() {
     if (getHave(1, 1, 0, 0, 0) > 6) return TRUE;
