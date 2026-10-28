@@ -637,10 +637,23 @@ C2DSeqAgent* CSaveLoadUI::createMainFrame() {
     pAgent->setupState(tbl[getRsrcType()], callbackMainFrame, callbackMainFrame);
     return pAgent;
 }
-/* the local static of createWorldIcon (still assembly) */
-__asm__(".data\n.align 2\ns_pszWorldIcon.4602:\n.word D_004F3398\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createWorldIcon__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
-__asm__(".rdata\n.align 3\n.word 0x6C726F77\n.word 0x69745F64\n.word 0x2E656C74\n.word 0x0064616C\n.word 0x6C726F77\n.word 0x75645F64\n.word 0x2E796D6D\n.word 0x0064616C\n.word 0x00010000\n.word 0x00000002\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x36303032\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x34313032\n.word 0x00000029\n.text\n");
+C2DSeqAgent* CSaveLoadUI::createWorldIcon(D2::C2DSeqCtrl*& pOutCtrl) {
+    static CHAR* s_pszWorldIcon = "world_title.lad";
+    if (m_nFlag & 0x40) s_pszWorldIcon = "world_dummy.lad";
+    C2DSeqAgent::SeqTbl tbl = {{0, 1, 2}};
+    FVECTOR v;
+    C2DSeqAgent* pAgent;
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2006)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl->addSeq(s_pszWorldIcon, 0, tbl._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    v.init();
+    pOutCtrl->setPos(v);
+    pOutCtrl->enableColorCtrl(TRUE);
+    pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2014)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, s_pszWorldIcon, 0, 0);
+    pAgent->setupState(tbl);
+    return pAgent;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createRoomName__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
 __asm__(".rdata\n.align 3\n.word 0x002B002A\n.word 0x0000002C\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38323032\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x37343032\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31353032\n.word 0x00000029\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createCursor__11CSaveLoadUI);
