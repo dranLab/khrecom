@@ -1635,7 +1635,106 @@ BOOL CBattleEnemy::canAttack_(const ENEMY_ACT* inAct) {
     }
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", selectDamageMotion___12CBattleEnemy);
+INT CBattleEnemy::selectDamageMotion_() {
+    INT res = checkHitPos();
+    if (isBtlEnemyFlag(0x100)) {
+        if (res & 1) {
+            if (res & 4) {
+                INT index = m_pEnemyParam->iDamageMotionIndex[0];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[1];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[2];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            } else {
+                INT index = m_pEnemyParam->iDamageMotionIndex[1];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[0];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[3];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            }
+        } else {
+            if (res & 4) {
+                INT index = m_pEnemyParam->iDamageMotionIndex[2];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[3];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[0];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            } else {
+                INT index = m_pEnemyParam->iDamageMotionIndex[3];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[2];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[1];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            }
+        }
+    } else if (res & 1) {
+        if (m_pMove->getCollisionFlag() & 5) {
+            if (res & 4) {
+                INT index = m_pEnemyParam->iDamageMotionIndex[0];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[1];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[2];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            } else {
+                INT index = m_pEnemyParam->iDamageMotionIndex[1];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[0];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[3];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            }
+        } else {
+            INT index = m_pEnemyParam->iDamageMotionIndex[4];
+            if (m_pAnim->getAnimID() == index) return m_pEnemyParam->iDamageMotionIndex[5];
+            m_iDamageCounter = 0;
+            return index;
+        }
+    } else {
+        if (m_pMove->getCollisionFlag() & 5) {
+            if (res & 4) {
+                INT index = m_pEnemyParam->iDamageMotionIndex[2];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[3];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[0];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            } else {
+                INT index = m_pEnemyParam->iDamageMotionIndex[3];
+                if (m_pAnim->getAnimID() == index) {
+                    INT newIndex = m_pEnemyParam->iDamageMotionIndex[2];
+                    if (newIndex == index) newIndex = m_pEnemyParam->iDamageMotionIndex[1];
+                    return newIndex;
+                }
+                m_iDamageCounter = 0;
+                return index;
+            }
+        } else {
+            INT index = m_pEnemyParam->iDamageMotionIndex[5];
+            if (m_pAnim->getAnimID() == index) return m_pEnemyParam->iDamageMotionIndex[4];
+            m_iDamageCounter = 0;
+            return index;
+        }
+    }
+}
 void CBattleEnemy::enableBind_(BOOL inSw) {
     if (inSw) {
         CCollBody* hitBody = m_pBodyColl->getHitCollBody();
