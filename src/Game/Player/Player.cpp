@@ -4238,16 +4238,6 @@ INT CPlayer::chkPlayCardCombo() {
     }
     return FALSE;
 }
-struct MES_CARD_INFO { // 0x24
-    CARD m_cardData[7];
-    SHORT m_nStock;
-    BYTE m_nExtra;
-    BYTE m_nFirst;
-    BYTE m_nBreak;
-    BYTE m_nBonus;
-    BYTE m_nWork0;
-    BYTE m_nWork1;
-};
 #define INFO (*(MES_CARD_INFO*)m_recvCardInfo)
 #define CARD0 (*pCard)
 void CPlayer::onMsg(INT inMsg, void* inExtraInfo) {

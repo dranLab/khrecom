@@ -96,19 +96,6 @@ extern FLOAT g_fDefAttr[18][6];
 }
 /* the unit's copy of Game/CardKind's header static table (data still from assembly) */
 extern const CARD_DATA cardDataTbl[224] __asm__("cardDataTbl_00478270");
-struct MES_CARD_INFO { /* the message payload (Game/MessageManager.h does not declare it yet) */
-    CARD m_cardData[7];
-    SHORT m_nStock;
-    BYTE m_nExtra;
-    BYTE m_nFirst;
-    BYTE m_nBreak;
-    BYTE m_nBonus;
-};
-/* CCardBattle's CARD members as the original's CARD types (Game/CardBattle.h declares bytes) */
-struct CB_CARD_VIEW {
-    BYTE _pad[0x17C];
-    CARD m_cardEnchant[2];
-};
 /* CARD's inline constructor (Game/Card.cpp's _setCard) */
 static inline void _setCard(CARD& c, USHORT nKind, BYTE nNumber) {
     c.m_nId = 0;
@@ -169,10 +156,72 @@ void CCardBattle::main() {
     dispCardBreak();
 }
 void CCardBattle::disp() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcPlayingCard__Q210CardBattle11CCardBattle);
+void CCardBattle::calcPlayingCard() {
+    INT i;
+    INT j;
+    for (i = 0; i < 2; i++) {
+        m_iCount[i] = 0;
+        m_iPoint[i] = 0;
+        for (j = 0; j < 7; j++) {
+            if (m_cardData[i][j].m_nKind) {
+                m_iCount[i]++;
+                m_iPoint[i] += m_cardData[i][j].m_nNumber;
+            }
+            m_mesCardInfo[i].m_cardData[j] = m_cardData[i][j];
+        }
+        m_mesCardInfo[i].m_nStock = m_iStock[i];
+        m_mesCardInfo[i].m_nExtra = m_iExtra[i];
+        m_mesCardInfo[i].m_nFirst = m_iFirst[i];
+    }
+    UINT flag = 0x20000;
+    if (m_uiFlag & flag) {
+        if (m_iCount[1] > 0) {
+            m_iPointBreak = calcPointBreak(m_iPoint[0], m_iPoint[1]);
+        } else {
+            m_iPointBreak = 0;
+            m_iPointBonus = 0;
+        }
+        m_mesCardInfo[0].m_nBreak = 0;
+        m_mesCardInfo[0].m_nBonus = 0;
+    }
+    m_uiFlag = (INT)m_uiFlag & ~0x300;
+    m_uiFlag &= ~0x100000;
+    for (i = 0; i < 2; i++) {
+        switch (m_cardEnchant[i].m_nKind) {
+        case 0x58:
+            for (j = 0; j < m_iCount[i]; j++) {
+                if (m_cardData[i][j].m_nCategory21 == 4) {
+                    m_uiFlag |= 0x100 << i;
+                    break;
+                }
+            }
+            break;
+        case 0x60:
+            for (j = 0; j < m_iCount[i]; j++) {
+                if (m_cardData[i][j].m_nKind == 0x1D) {
+                    m_uiFlag |= 0x100 << i;
+                    break;
+                }
+            }
+            break;
+        case 0x69:
+            for (j = 0; j < m_iCount[i]; j++) {
+                if (m_cardData[i][j].m_nCategory21 == 1) {
+                    m_uiFlag |= 0x100 << i;
+                    break;
+                }
+            }
+            break;
+        case 0x7B:
+            if (i == 0) setFlag(0x100000, 0);
+            break;
+        }
+        if (m_cardData[i][0].m_nCategory20 == 6) m_uiFlag |= 0x100 << i;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exePlaying__Q210CardBattle11CCardBattlei);
 void CCardBattle::setNumberBreak(UINT _PLAYER, UINT _ENEMY) {
-    if (m_cardEnchant[_PLAYER][0] == 0x65) {
+    if (m_cardEnchant[_PLAYER].m_nKind == 0x65) {
         INT iCountE = m_iCount[_ENEMY];
         INT iPoint = m_iPoint[_PLAYER];
         for (INT i = 0; i < iCountE; i++) {
@@ -182,7 +231,7 @@ void CCardBattle::setNumberBreak(UINT _PLAYER, UINT _ENEMY) {
                 pCard->setNumberBreak(iPoint);
                 iPoint -= iPointE;
                 if (iPoint < 0) iPoint = 0;
-                *(CARD*)m_cardData[_ENEMY][i] = *m_pCard[_ENEMY][i]->getCardData();
+                m_cardData[_ENEMY][i] = *m_pCard[_ENEMY][i]->getCardData();
             }
         }
     }
@@ -211,15 +260,15 @@ INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, C
         inCard->setEnchantEffect(0x44, 0);
         m_pCard[_PLAYER][0]->setEnchantEffect(0x52, 0);
         m_pCard[_PLAYER][0]->setEnchantEffect(0x53, 0);
-        *(CARD*)m_cardData[_PLAYER][0] = *inCard->getCardData();
+        m_cardData[_PLAYER][0] = *inCard->getCardData();
         checkNowPlaying(inUser, inCard);
     } else {
         if (!(inData)) AssertApp(D_00476980, 1708, D_00477090, 0);
-        *(CARD*)m_cardData[_PLAYER][0] = *inData;
+        m_cardData[_PLAYER][0] = *inData;
         m_pCard[_PLAYER][0] = new (com_malloc_d(sizeof(CBattleCard), D_00477098, RET_ADDR()))
             CBattleCard(asTask(), inData->m_nKind, inData->m_nNumber, inUser, 0);
         if (m_pCard[_PLAYER][0]) m_pCard[_PLAYER][0]->setRoomEffect(NULL);
-        *(CARD*)m_cardData[_PLAYER][0] = *m_pCard[_PLAYER][0]->getCardData();
+        m_cardData[_PLAYER][0] = *m_pCard[_PLAYER][0]->getCardData();
     }
     m_iStock[_PLAYER] = 0;
     m_iExtra[_PLAYER] = 0;
@@ -260,10 +309,10 @@ INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard,
         CBattleCard* pCard = *inCard;
         m_pCard[_PLAYER][i] = pCard;
         if (pCard) {
-            *(CARD*)m_cardData[_PLAYER][i] = *pCard->getCardData();
+            m_cardData[_PLAYER][i] = *pCard->getCardData();
             pCard->setPlayStock(count);
         } else {
-            _setCard(*(CARD*)m_cardData[_PLAYER][i], 0, 0);
+            _setCard(m_cardData[_PLAYER][i], 0, 0);
         }
         inCard++;
     }
@@ -286,7 +335,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnchantCard__Q210
 void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
     if (!(inUser)) AssertApp(D_00476980, 1977, D_00476730, 0);
     UINT _PLAYER = inUser - 1;
-    INT kind = m_pInstance->m_cardEnchant[_PLAYER][0];
+    INT kind = m_pInstance->m_cardEnchant[_PLAYER].m_nKind;
     if (!kind) return;
     if (inPart != g_pBattleCardList[kind].EFF_PART) return;
     if (inKind && inKind != kind - 0x43) return;
@@ -314,7 +363,7 @@ void CCardBattle::resetNowPlaying(INT inUser) {
         } else {
             CGameWork::setFlag(1, 0x14, TRUE);
         }
-        _setCard(*(CARD*)m_cardGimmick, 0, 0);
+        _setCard(m_cardGimmick, 0, 0);
         m_uiFlag &= ~0x8000;
     }
     if (m_iStock[_PLAYER] > 0) decEnchantTime(inUser, 0x2A, 0);
@@ -322,7 +371,7 @@ void CCardBattle::resetNowPlaying(INT inUser) {
     m_uiState[_PLAYER] = 0;
     m_hOwner[_PLAYER] = 0;
     for (INT i = 0; i < 7; i++) {
-        _setCard(*(CARD*)m_cardData[_PLAYER][i], 0, 0);
+        _setCard(m_cardData[_PLAYER][i], 0, 0);
         if (m_pCard[_PLAYER][i]) {
             m_pCard[_PLAYER][i]->setUseEnd();
             m_pCard[_PLAYER][i] = NULL;
@@ -336,13 +385,13 @@ void CCardBattle::resetEnchantCard(INT inUser) {
     if (!(inUser)) AssertApp(D_00476980, 2069, D_00476730, 0);
     UINT _PLAYER = inUser - 1;
     if (!_PLAYER) {
-        resetPlayerEnchant(m_cardEnchant[0][0]);
+        resetPlayerEnchant(m_cardEnchant[0].m_nKind);
         m_uiFlag &= ~0x80000;
         m_uiFlag = (INT)m_uiFlag & ~0x4000;
     }
     m_uiFlag &= ~(0x400 << _PLAYER);
     m_uiFlag &= ~(0x1000 << (_PLAYER ^ 1));
-    _setCard(*(CARD*)m_cardEnchant[_PLAYER], 0, 0);
+    _setCard(m_cardEnchant[_PLAYER], 0, 0);
     m_nEnchantTime[_PLAYER] = 0;
     if (m_pEnchantGauge[_PLAYER]) m_pEnchantGauge[_PLAYER]->destroy();
     m_pEnchantGauge[_PLAYER] = NULL;
@@ -396,8 +445,8 @@ INT CCardBattle::getPlayingCardPoint(INT inSide) {
 }
 INT CCardBattle::getPlayingCardID(INT inSide, INT inIdx) {
     if (!m_pInstance) return -1;
-    if ((UINT)inSide < 2 && m_pInstance->m_uiState[0]) return m_pInstance->m_cardData[0][inIdx][0];
-    if ((inSide == 0 || inSide == 2) && m_pInstance->m_uiState[1]) return m_pInstance->m_cardData[1][inIdx][0];
+    if ((UINT)inSide < 2 && m_pInstance->m_uiState[0]) return m_pInstance->m_cardData[0][inIdx].m_nKind;
+    if ((inSide == 0 || inSide == 2) && m_pInstance->m_uiState[1]) return m_pInstance->m_cardData[1][inIdx].m_nKind;
     return -1;
 }
 void CCardBattle::addGimmickCount(INT n) {
@@ -430,7 +479,7 @@ HANDLE CCardBattle::getGimmickOwner() {
 }
 void CCardBattle::notifyMakeGimmick(CARD* inData, INT inFlag) {
     if (!m_pInstance) return;
-    if (inData) *(CARD*)m_pInstance->m_cardGimmick = *inData;
+    if (inData) m_pInstance->m_cardGimmick = *inData;
     _ref(m_pInstance)->m_uiFlag |= 0x8000;
     if (inFlag) return;
     CCardBattle* p = _ref(m_pInstance);
@@ -439,21 +488,21 @@ void CCardBattle::notifyMakeGimmick(CARD* inData, INT inFlag) {
     mesInfo.m_nStock = 0;
     mesInfo.m_nExtra = 0;
     mesInfo.m_nFirst = 0;
-    mesInfo.m_cardData[0] = *(CARD*)p->m_cardGimmick;
+    mesInfo.m_cardData[0] = p->m_cardGimmick;
     _setCard(mesInfo.m_cardData[1], 0, 0);
     _setCard(mesInfo.m_cardData[2], 0, 0);
     p->m_pMesage->sendMessage(0, p->getHandle(), p->m_hGimmickOwner, 6, &mesInfo);
 }
 void CCardBattle::notifyCompleteGimmick() {
     if (m_pInstance) {
-        TRACE(D_00477298, ((CARD*)m_pInstance->m_cardGimmick)->m_nKind);
-        _setCard(*(CARD*)m_pInstance->m_cardGimmick, 0, 0);
+        TRACE(D_00477298, m_pInstance->m_cardGimmick.m_nKind);
+        _setCard(m_pInstance->m_cardGimmick, 0, 0);
         _ref(m_pInstance)->m_uiFlag &= ~0x8000;
     }
 }
 BOOL CCardBattle::isPlayingGimmickCard() {
     if (!m_pInstance) return FALSE;
-    return m_pInstance->m_cardGimmick[0];
+    return m_pInstance->m_cardGimmick.m_nKind;
 }
 void CCardBattle::initPlayingEnemy(HANDLE inHandle) {
     m_uiFlag |= 1;
@@ -507,7 +556,7 @@ INT CCardBattle::calcPointBreak(INT a, INT b) {
 INT CCardBattle::setEnemyCard(HANDLE inEnemy, INT inKind, INT inNumber) {
     if (m_uiFlag & 0xC0000000) return 0;
     if (m_uiFlag & 0xC0000004) return 0;
-    if (((CARD*)m_cardGimmick)->m_nKind) return 0;
+    if (m_cardGimmick.m_nKind) return 0;
     if (m_uiDuelState >= 2) return 0;
     CARD card;
     _setCard(card, inKind, inNumber);
@@ -672,8 +721,8 @@ void CCardBattle::resetPlayerEnchant(INT inKind) {
     }
 }
 void CCardBattle::transferPlayerEnchant(CPlayer* inPL) {
-    if (inPL && m_cardEnchant[0][0] >= 0x44) {
-        setPlayerEnchant(m_cardEnchant[0][0]);
+    if (inPL && m_cardEnchant[0].m_nKind >= 0x44) {
+        setPlayerEnchant(m_cardEnchant[0].m_nKind);
         inPL->setDefAttr(PL::g_fDefAttr[0]);
         inPL->m_iMaxCombo = 3;
         inPL->m_fPrizeDraw = 5.0f;
@@ -780,7 +829,7 @@ void CCardBattle::setDuelEntry(INT inFlag) {
         }
         m_uiState[owner] = 5;
     }
-    m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 9, m_mesCardInfo[1]);
+    m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 9, &m_mesCardInfo[1]);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelStart__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelBreakCount__Q210CardBattle11CCardBattleii);
@@ -798,8 +847,8 @@ void CCardBattle::setDuelEnd() {
     if (!m_iDuelSkill) {
         m_uiDuelState = 1;
         CGameWork::setByte(1, 3, 2);
-        m_pMesage->sendMessage(0, getHandle(), g_pPlayer->getHandle(), 11, m_mesCardInfo[0]);
-        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 11, m_mesCardInfo[1]);
+        m_pMesage->sendMessage(0, getHandle(), g_pPlayer->getHandle(), 11, &m_mesCardInfo[0]);
+        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 11, &m_mesCardInfo[1]);
         if (!CGameWork::getFlag(1, 7)) CGameWork::setFlag(1, 10, FALSE);
         if (m_pRevolver[0]) m_pRevolver[0]->returnStockCard(1);
         CGameWork::setFlag(1, 11, FALSE);
@@ -807,9 +856,9 @@ void CCardBattle::setDuelEnd() {
     } else {
         m_uiDuelState = 8;
         CGameWork::setByte(1, 3, 1);
-        *(SHORT*)&m_mesCardInfo[0][0x1C] = m_iDuelSkill;
-        m_pMesage->sendMessage(0, getHandle(), g_pPlayer->getHandle(), 12, m_mesCardInfo[0]);
-        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 12, m_mesCardInfo[1]);
+        _ref(m_mesCardInfo[0].m_nStock) = m_iDuelSkill;
+        m_pMesage->sendMessage(0, getHandle(), g_pPlayer->getHandle(), 12, &m_mesCardInfo[0]);
+        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 12, &m_mesCardInfo[1]);
         if (!CGameWork::getFlag(1, 7)) CGameWork::setFlag(1, 10, FALSE);
         CGameWork::setFlag(1, 11, FALSE);
         CGameWork::setInt(1, 0xE2, CGameWork::getInt(1, 0xE2) ^ 0x14);
@@ -824,10 +873,10 @@ INT CCardBattle::setDuelPlayStock(CBattleCard** inCard, INT inSkill) {
         CBattleCard* pCard = *inCard;
         m_pCard[0][i] = pCard;
         if (pCard) {
-            *(CARD*)m_cardData[0][i] = *pCard->getCardData();
+            m_cardData[0][i] = *pCard->getCardData();
             pCard->setPlayDuelStock(m_nDuelBreakCountMax);
         } else {
-            _setCard(*(CARD*)m_cardData[0][i], 0, 0);
+            _setCard(m_cardData[0][i], 0, 0);
         }
     }
     m_iStock[0] = inSkill;
@@ -1151,7 +1200,7 @@ INT CCardBattle::setPronounceStart(INT inFlag) {
     if (inFlag) {
         if (m_uiDuelState != 9) return 0;
         m_uiDuelState = 10;
-        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 13, m_mesCardInfo[1]);
+        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 13, &m_mesCardInfo[1]);
         return 1;
     }
     m_uiFlag |= 0xC0000000;
@@ -1194,7 +1243,7 @@ INT CCardBattle::setEnemyPronounceCard(HANDLE inOwner, CBattleCard* inCard) {
         m_pCard[1][0]->setEnchantEffect(0x52, 0);
         m_pCard[1][0]->setEnchantEffect(0x53, 0);
     }
-    *(CARD*)m_cardData[1][0] = *inCard->getCardData();
+    m_cardData[1][0] = *inCard->getCardData();
     m_iStock[1] = 0;
     m_iExtra[1] = 0;
     m_iFirst[1] = 0;
@@ -1208,12 +1257,12 @@ void CCardBattle::setPronounceEnd(INT inCount) {
     if (inCount > 0) {
         CGameWork::setFlag(1, 10, FALSE);
         CGameWork::setFlag(1, 11, FALSE);
-        m_pMesage->sendMessage(0, getHandle(), g_pPlayer->getHandle(), 15, m_mesCardInfo[0]);
-        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 3, m_mesCardInfo[1]);
+        m_pMesage->sendMessage(0, getHandle(), g_pPlayer->getHandle(), 15, &m_mesCardInfo[0]);
+        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 3, &m_mesCardInfo[1]);
     } else {
         resetEnchantCard(1);
-        m_pMesage->sendMessage(0, getHandle(), g_pPlayer->getHandle(), 14, m_mesCardInfo[0]);
-        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 14, m_mesCardInfo[1]);
+        m_pMesage->sendMessage(0, getHandle(), g_pPlayer->getHandle(), 14, &m_mesCardInfo[0]);
+        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 14, &m_mesCardInfo[1]);
         if (g_pPlayer->getRevolver()) g_pPlayer->getRevolver()->rollDeck(0, 1, 300);
     }
 }

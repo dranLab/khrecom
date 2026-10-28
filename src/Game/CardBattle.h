@@ -7,6 +7,7 @@
 #include "Game/CollParam.h"     // PARTIAL: added for Game/Player/SummonDumbo (ATK_KIND)
 #include "Game/AttackMotion.h" // PARTIAL: added for Game/Player/SummonDumbo (ATK_ATTR)
 #include "System/Vector.h"     // PARTIAL: added for Game/CardBattle (m_vBreakPos)
+#include "Game/CardKind.h"     // PARTIAL: added for Game/CardBattle (CARD members)
 
 class CPlayer; // PARTIAL: added for Game/Player/PlayerRiku
 class CTask; // PARTIAL: added for Game/CardBattle
@@ -56,7 +57,17 @@ struct SS_PARAM {
     LPCSTR NAME;
 };
 
-struct CARD; // PARTIAL: added for Game/Enemy/HumanBoss
+// PARTIAL: added for Game/CardBattle (the card info sent with the duel messages)
+struct MES_CARD_INFO {
+    CARD m_cardData[7];
+    SHORT m_nStock;
+    BYTE m_nExtra;
+    BYTE m_nFirst;
+    BYTE m_nBreak;
+    BYTE m_nBonus;
+    BYTE m_nWork0;
+    BYTE m_nWork1;
+};
 namespace CardBattle {
 extern BC_PARAM* g_pBattleCardList;
 extern SS_PARAM* g_pStockSkillList; // PARTIAL: added for Game/Player/SummonDumbo
@@ -90,14 +101,14 @@ class CCardBattle {
     UBYTE _m_0x0[0x40];       /* 0x000 CTask */
     // PARTIAL: split for Game/CardBattle
     Message::CMessageManager* m_pMesage; /* 0x040 */
-    UBYTE m_mesCardInfo[2][0x24];  /* 0x044 MES_CARD_INFO[2] */
+    MES_CARD_INFO m_mesCardInfo[2]; /* 0x044 */
     TIMEQ m_tqMainTimer;           /* 0x08c */
     TIMEQ m_tqSubTimer;            /* 0x090 */
     HANDLE m_hOwner[2];       /* 0x094 */
     UINT m_uiState[2];        /* 0x09c */
     UINT m_uiResult[2];       /* 0x0a4 */
     INT m_tqPlayTimer[2];     /* 0x0ac */
-    BYTE m_cardData[2][7][4]; /* 0x0b4 CARD */
+    CARD m_cardData[2][7];    /* 0x0b4 */
     class CBattleCard* m_pCard[2][7]; /* 0x0ec */
     class CBattleCard* m_pEnchant[2]; /* 0x124 */
     class CCardRevolver* m_pRevolver[2]; /* 0x12c */
@@ -112,12 +123,12 @@ class CCardBattle {
     INT m_iCountPluto;        /* 0x16c */
     INT m_iPointBreak;        /* 0x170 */
     INT m_iPointBonus;        /* 0x174 */
-    BYTE m_cardGimmick[4];    /* 0x178 CARD */
-    BYTE m_cardEnchant[2][4]; /* 0x17c CARD[2] */
+    CARD m_cardGimmick;       /* 0x178 */
+    CARD m_cardEnchant[2];    /* 0x17c */
     INT m_nEnchantTime[2];    /* 0x184 */
     INT m_tqEnchantTimer[2];  /* 0x18c */
     HANDLE m_hGimmickOwner;   /* 0x194 */
-    BYTE m_cardRoom[4];       /* 0x198 CARD */
+    CARD m_cardRoom;          /* 0x198 */
 public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void setDuelBreakCount(INT inSide, INT inCount); // PARTIAL: added for Game/Enemy/BattleEnemy (parameter names guessed)
     UINT m_uiFlag;            /* 0x19c */
     UINT m_uiDuelState;       /* 0x1a0 */
@@ -135,9 +146,9 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     class CEnchantGauge* m_pEnchantGauge[2]; /* 0x1e0 */
     class CDuelGauge* m_pDuelGauge; /* 0x1e8 */
     // PARTIAL: added for Game/Player/PlayerRiku
-    INT getEnchantKind() { return m_cardEnchant[0][0] < 0x44 ? 0 : m_cardEnchant[0][0] - 0x43; }
+    INT getEnchantKind() { return m_cardEnchant[0].m_nKind < 0x44 ? 0 : m_cardEnchant[0].m_nKind - 0x43; }
     // PARTIAL: added for Game/Enemy/HumanBoss (the enemy side's enchant)
-    INT getEnchantKind(INT inSide) { return m_cardEnchant[inSide][0] < 0x44 ? 0 : m_cardEnchant[inSide][0] - 0x43; }
+    INT getEnchantKind(INT inSide) { return m_cardEnchant[inSide].m_nKind < 0x44 ? 0 : m_cardEnchant[inSide].m_nKind - 0x43; }
     HANDLE getDuelEnemy() { return m_hDuelEnemy; }
     // PARTIAL: added for Game/Player/PlayerSora (out of line in Game/CardBattle, inlined elsewhere)
     INT isNowDuelEntry() const { return m_uiDuelState == 2; } // PARTIAL: added for Game/CardBattle
