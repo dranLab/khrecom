@@ -64,6 +64,10 @@ extern CHAR* SpeedParamName;
 extern CHAR* MagnetParamName;
 extern CHAR* MagnetEffectName;
 extern CHAR* QuakeEffectName;
+extern CHAR* DuelEffectName;
+extern const FLOAT g_vSpotSizeTbl[9];
+extern const unsigned char g_byHeartlessSpotSizeIndexTbl[39];
+extern const unsigned char g_byBossSpotSizeIndexTbl[38];
 }
 extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
@@ -503,7 +507,52 @@ void CBattleEnemy::beginStateSmallDamage() {
         m_iSysStep = 0;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateSmallDamage__12CBattleEnemy);
+void CBattleEnemy::stateSmallDamage() {
+    if (m_pEnemyParam) {
+        switch (m_iSysStep) {
+        case 0:
+            if (getMotionCurrentTime() >= getMotionTotalTime() / 4) {
+                if (!isBtlEnemyFlag(8) && !isBtlEnemyFlag(0x10000000)) setBattleEnemyFlag(0x1010, 1);
+                m_iSysStep = 1;
+            }
+        case 1:
+            if (isBtlEnemyFlag(0x10000000) && (m_pMove->getCollisionFlag() & 5) && m_iLandMotionIndex != -1) {
+                changeMotion(m_iLandMotionIndex, 0, 0, -1, 0, 0);
+                m_iSysStep = 3;
+            } else if (isMotionEnd()) {
+                if (isBtlEnemyFlag(8)) {
+                    changeBattleEnemyState(17);
+                } else if (isBtlEnemyFlag(0x100) || (m_pMove->getCollisionFlag() & 5)) {
+                    changeDefaultState();
+                } else {
+                    if (m_iFallMotionIndex != -1) changeMotion(m_iFallMotionIndex, 0, 0, -1, 0, 0);
+                    m_iSysStep = 2;
+                }
+            }
+            break;
+        case 2:
+            if (m_pMove->getCollisionFlag() & 5) {
+                if (m_iLandMotionIndex == -1) {
+                    changeDefaultState();
+                } else {
+                    changeMotion(m_iLandMotionIndex, 0, 0, -1, 0, 0);
+                    clearSpeed();
+                    m_iSysStep = 3;
+                }
+            }
+            break;
+        case 3:
+            if (isMotionEnd()) changeDefaultState();
+            break;
+        }
+    } else if (getTimer() <= 0) {
+        if (isBtlEnemyFlag(8)) {
+            changeBattleEnemyState(17);
+        } else {
+            changeDefaultState();
+        }
+    }
+}
 void CBattleEnemy::endStateSmallDamage() {
     m_ullBtlEnemyFlag &= ~0x10000000;
 }
@@ -1112,7 +1161,66 @@ void CBattleEnemy::endStateVolley() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
     bodyCollOnBody(-1);
 }
+/* Parked: registers only (3 lines) - the second hit->getDetectPos() (for makePrize) loads m_pCollision into v0 in
+ * the original, v1 in ours; tried: dmgType declared/initialized before or after the calls, a pos local, _ref(hit),
+ * a second inline (getDitectPos), comma expression, permuter 4 min (5076 candidates, no gain) */
+#if 0
+void CBattleEnemy::beginStateDead() {
+    m_ullBtlEnemyFlag &= ~0x200;
+    setEntityFlag(0, 0x10000);
+    setEntityFlag(0, 0x7C);
+    bodyCollOff(-1);
+    m_pMove->enableGravity(TRUE);
+    enableBind_(FALSE);
+    notifyDead();
+    setTimer(1500);
+    CCollBody* hit = m_pBodyColl->getHitCollBody();
+    if (hit) {
+        setDeathEffect(hit->getDetectPos());
+        makePrize(hit->getDetectPos());
+        INT dmgType = 0;
+        if (!isBtlEnemyFlag(0x100000)) {
+            switch (hit->getDamageKind()) {
+            case ATK_KIND_DMG_BIG:
+                dmgType = getSize() < 1;
+                break;
+            case ATK_KIND_DMG_BLOWN:
+                dmgType = 1;
+                break;
+            }
+        }
+        if (dmgType) {
+            setupFlick();
+            playBigDamageSE();
+            if (!isBtlEnemyFlag(0x100)) {
+                m_iSysStep = 0;
+            } else {
+                FVECTOR vel = m_pMove->getVel();
+                vel.y = 0.0f;
+                m_pMove->setVel(vel);
+                m_pMove->enableGravity(FALSE);
+                m_iSysStep = 1;
+            }
+        } else {
+            changeMotion(selectDamageMotion_(), 0, 0, -1, 0, 0);
+            playSmallDamageSE();
+            m_iSysStep = 1;
+        }
+    } else {
+        FVECTOR pos;
+        getLockOnPos(pos);
+        setDeathEffect(&pos);
+        makePrize(&pos);
+        changeMotion(m_pEnemyParam->iDamageMotionIndex[2], 0, 0, -1, 0, 0);
+        playSmallDamageSE();
+        m_iSysStep = 1;
+    }
+    setEntityFlag(0x40000000, 0);
+    setupFade(1.0f, 0.0f, 1500, -1);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDead__12CBattleEnemy);
+#endif
 void CBattleEnemy::stateDead() {
     if (m_pEnemyParam && m_iSysStep == 0 && m_pMove->getVel().y < 0.0f && (m_pMove->getCollisionFlag() & 5)) {
         clearSpeed();

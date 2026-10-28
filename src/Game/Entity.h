@@ -185,7 +185,7 @@ public:
     // PARTIAL: added for Game/Player/FriendJack
     void setTimer(TIMEQ inTq) { m_tqTimer = inTq; }
     TIMEQ getTimer() { return m_tqTimer; }
-    HANDLE setDeathEffect(); // PARTIAL: added for Game/Enemy/BattleEnemy
+    HANDLE setDeathEffect(); HANDLE setDeathEffect(const FVECTOR* inPos); // PARTIAL: added for Game/Enemy/BattleEnemy
     void rideModelSetAttachMatrix(const FMATRIX* inpMat); // PARTIAL: added for Game/Gimmick/GimmickRideOn
     // PARTIAL: added for Game/Enemy/MapEnemyShadow
     FLOAT calcDistanceSq(const CEntity* inEntity) const;

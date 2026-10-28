@@ -165,6 +165,9 @@ public:
     INT getParam() { return m_iParam; }
     void makeExpPrize();              // PARTIAL: added for Game/Enemy/BossDeadDemo
     static void setBossKilledFlag();
+    static INT m_iDuelCardNum;        // PARTIAL: added for Game/Enemy/BattleEnemy
+    static INT m_iDuelCardPtr;
+    static int m_iDuelCardArray[10];
     void setParam(INT inParam) { m_iParam = inParam; } // PARTIAL: added for Game/Enemy/CreateEnemy
     // PARTIAL: added for Game/Enemy/BattleEnemyManager
     UINT getBattleEnemyFlag() const { return m_ullBtlEnemyFlag; }
