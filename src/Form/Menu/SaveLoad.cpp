@@ -676,7 +676,18 @@ void CSaveLoadUI::exeCheckNoCard() {
         backtoSelSlot();
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckUnformat__11CSaveLoadUI);
+extern "C" char D_004F32F8[]; /* "%s\n%s": first used by preCheckNoMemory (still assembly) */
+void CSaveLoadUI::preCheckUnformat() {
+    char szSlot[32];
+    _getSlotName(m_nSlot + 1, szSlot);
+    char szLine1[128];
+    const CHAR* pszFmt = _ctdText(0x600205);
+    sprintf(szLine1, pszFmt, _ctdText(0x600000), szSlot);
+    char szMsg[256];
+    sprintf(szMsg, D_004F32F8, szLine1, _ctdText(0x600206));
+    openMessageDlg(szMsg, 1, 3);
+    m_nStep = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckUnformat__11CSaveLoadUI);
 __asm__(".rdata\n.align 4\n.word .L0034B86C\n.word .L0034B86C\n.word .L0034B88C\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034B8C4\n.word .L0034BA3C\n.word .L0034BA54\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAA4\n.word .L0034BABC\n.text\n");
 void CSaveLoadUI::preConfirmExecErr() {
