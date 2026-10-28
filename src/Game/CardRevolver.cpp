@@ -1371,7 +1371,148 @@ void CCardRevolver::setAction(INT inID, INT inNum) {
     }
     if (m_iAction > 0) initAction();
 }
+/* Parked: ~165 lines off, mostly register allocation: ours keeps one more value live across calls (the
+   getStock() == -1 value is CSE'd into an s-register for the later getHand() test), so two flags spill instead of
+   one (bReloadOC) and every flag moves one register. Structure found: decEnchantTime inside every case (cross-
+   jumped), cases 0x50 then 0x38 last, default return, the category jump table with case 4 falling into default.
+   Tried: separate flag initialisation, a boolean helper for the stock test (153 lines); retry at the unit's end. */
+#if 0
+void CCardRevolver::initAction() {
+    BOOL bReloadAC = FALSE;
+    BOOL bReloadAllAC = FALSE;
+    BOOL bReloadReset = FALSE;
+    BOOL bReloadMC = FALSE;
+    BOOL bReloadAllMC = FALSE;
+    BOOL bReloadOC = FALSE;
+    INT i;
+    CBattleCard* card;
+    TRACE("CCardRevolver::initAction() %d,\n", m_iAction);
+    m_iState = 3;
+    m_bActive = FALSE;
+    switch (m_iAction) {
+    case 0x2A:
+        bReloadAC = TRUE;
+        CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+        break;
+    case 0x2B:
+        bReloadAC = TRUE;
+        bReloadAllAC = TRUE;
+        CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+        break;
+    case 0x2C:
+        bReloadAC = TRUE;
+        bReloadAllAC = TRUE;
+        bReloadReset = TRUE;
+        CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+        break;
+    case 0x2D:
+        bReloadMC = TRUE;
+        CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+        break;
+    case 0x2E:
+        bReloadMC = TRUE;
+        bReloadAllMC = TRUE;
+        bReloadReset = TRUE;
+        CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+        break;
+    case 0x2F:
+        bReloadAC = TRUE;
+        bReloadAllAC = TRUE;
+        bReloadMC = TRUE;
+        bReloadAllMC = TRUE;
+        CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+        break;
+    case 0x30:
+        bReloadAC = TRUE;
+        bReloadAllAC = TRUE;
+        bReloadMC = TRUE;
+        bReloadAllMC = TRUE;
+        bReloadReset = TRUE;
+        CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+        break;
+    case 0x50:
+        bReloadMC = TRUE;
+        bReloadAC = TRUE;
+        bReloadOC = TRUE;
+        CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+        break;
+    case 0x38:
+        bReloadMC = TRUE;
+        bReloadAC = TRUE;
+        bReloadOC = TRUE;
+        CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+        break;
+    default:
+        return;
+    }
+    if (m_iMode == 1) {
+        for (i = 0; i < m_nTotal[1]; i++) {
+            card = &m_pCardsE[i];
+            if (card->getHand() != -1) card->hideHand();
+        }
+        if (m_pEmpty) m_pEmpty->enableDisp(0);
+        m_iMode = 0;
+    }
+    m_nRemain[0] = 0;
+    INT n = m_nLimit - 1;
+    for (i = 0; i < m_nLimit; i++, n--) {
+        card = &m_pCards[n];
+        if (!card) continue;
+        if (card->isNowPlaying()) continue;
+        if (card->getStock() != -1) continue;
+        if (card->getCardOwner() != m_uiUser && m_uiUser == 1) continue;
+        card->hideHand();
+        INT category = card->getCardData()->m_nCategory1;
+        if (card->getHand() != -1) {
+            m_nActive[0] = n;
+            if (category == 8) {
+                if (bReloadReset) {
+                    m_iCharge = 0;
+                    m_tqCharge = 0;
+                    m_iChargeCount = 1;
+                    card->updateReload(0);
+                }
+            } else if (category != 4 || !(m_uiFlag & 0x100)) {
+                m_nRemain[0]++;
+            }
+            card->resetHand(m_nActive[0], m_nTotal[0]);
+            continue;
+        }
+        switch (category) {
+        case 1:
+            if (!bReloadAC) continue;
+            if (bReloadAllAC) card->resetReloadNG();
+            break;
+        case 2:
+        case 3:
+            if (!bReloadMC) continue;
+            if (bReloadAllMC) card->resetReloadNG();
+            break;
+        case 8:
+            TRACE("**** CAUTION!! **** initAction()\n");
+            continue;
+        case 4:
+            if (m_uiFlag & 0x100) continue;
+        default:
+            if (!bReloadOC) continue;
+            if (card->isReloadNG()) continue;
+            m_nActive[0] = n;
+            m_nRemain[0]++;
+            card->resetHand(n, m_nTotal[0]);
+            continue;
+        }
+        if (card->isReloadNG()) continue;
+        m_nActive[0] = n;
+        m_nRemain[0]++;
+        card->resetHand(n, m_nTotal[0]);
+    }
+    m_uiFlag = (INT)m_uiFlag & ~8;
+    m_tqTimer = 400;
+    m_iMax = m_nRemain[0] + m_nReloadCard;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initAction__Q210CardBattle13CCardRevolver);
+#endif
 __asm__(".rdata\n.align 3\n.word 0x72614343\n.word 0x76655264\n.word 0x65766C6F\n.word 0x693A3A72\n.word 0x4174696E\n.word 0x6F697463\n.word 0x2029286E\n.word 0x0A2C6425\n.word 0x00000000\n.word 0x00000000\n.word 0x2A2A2A2A\n.word 0x55414320\n.word 0x4E4F4954\n.word 0x2A202121\n.word 0x202A2A2A\n.word 0x74696E69\n.word 0x69746341\n.word 0x29286E6F\n.word 0x0000000A\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001E68A8\n.word 0x001E68B4\n.word 0x001E68C4\n.word 0x001E68D8\n.word 0x001E68E4\n.word 0x001E68F8\n.word 0x001E6910\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6950\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E6C04\n.word 0x001E692C\n.word 0x00000000\n.word 0x001E6AF0\n.word 0x001E6B08\n.word 0x001E6B08\n.word 0x001E6B74\n.word 0x001E6B84\n.word 0x001E6B84\n.word 0x001E6B84\n.word 0x001E6B60\n.text\n");
 void CCardRevolver::exeAction() {
     m_tqTimer -= getFrameRate();
