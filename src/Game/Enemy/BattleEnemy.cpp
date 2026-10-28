@@ -24,6 +24,7 @@
 #include "Game/SceneEnv.h"
 #include "Game/EffectMotion.h"
 #include "System/Sound/SoundMan.h"
+#include "System/Math3D.h"
 #include "include_asm.h"
 
 extern "C" char D_004AD680[];
@@ -53,6 +54,9 @@ extern "C" char D_004AD3D8[];
 extern ATK_ATTR g_AtkAttrTbl[] asm("g_AtkAttrTbl.5784"); // PARTIAL: getAttackAttr's static table, from the asm .data until SOURCE DATA
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void Normalize(FVECTOR& v0, const FVECTOR& v1);
 extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
 FVECTOR getPlayerPos(INT inIndex);
 namespace BattleEnemy {
@@ -720,7 +724,27 @@ void CBattleEnemy::notifyDead() {
     bem->notifyDead(getHandle());
     m_ullBtlEnemyFlag |= 0x40000000;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setupHitBack__12CBattleEnemy);
+void CBattleEnemy::setupHitBack() {
+    if (isBtlEnemyFlag(0x8000)) return;
+    FVECTOR dir;
+    CCollBody* hit = m_pBodyColl->getHitCollBody();
+    CTask* task;
+    if (hit && (task = CTaskMan::getTask(hit->getEnemyHandle()))) {
+        dir = task->Crd(0).m_World.getTrans();
+    } else {
+        dir = getPlayerPos(0);
+    }
+    SubVector(dir, getPos(), dir);
+    dir.y = 0.0f;
+    Normalize(dir, dir);
+    ScaleVectorXYZ(dir, dir, 0.15f);
+    FVECTOR vel = m_pMove->getVel();
+    vel.x = dir.x;
+    vel.z = dir.z;
+    m_pMove->setHitBackVel(vel);
+    m_tqHitBackTimer = 500;
+    m_vHitBackVel = vel;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initEnemyParam__12CBattleEnemyiii);
 /* Parked: the load of hitBody->m_pCollision (getDetectPos) is scheduled before the vol = -1 store in ours, after
  * it in the original (8 lines: registers a2/v1, order): our vol store is a fixed scalar MEM that cannot alias the
