@@ -1458,8 +1458,92 @@ void CSaveLoadUI::setHelpMessage(const CHAR* pszMes) {
 void CSaveLoadUI::outHelpMessage() {
     m_pMainFrameHelpAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", openMessageDlg__11CSaveLoadUIPCcii);
-__asm__(".rdata\n.align 3\n.word 0x00000042\n.word 0x00000043\n.word 0x00000046\n.word 0x00000047\n.word 0x4F464E49\n.word 0x54414D52\n.word 0x004E4F49\n.word 0x00000000\n.word 0x53455551\n.word 0x4E4F4954\n.word 0x00000000\n.word 0x00000000\n.word D_004F3E18\n.word D_004F3E28\n.word 0xC3160000\n.word 0xC2600000\n.word 0xC1700000\n.word 0xC1F00000\n.word 0xC1F00000\n.word 0xC1F00000\n.word 0x00004B4F\n.word 0x00000000\n.word 0x00736559\n.word 0x00000000\n.word 0x00006F4E\n.word 0x00000000\n.text\n");
+void CSaveLoadUI::openMessageDlg(const CHAR* pszTxt, INT nIcon, INT nType) {
+    int tbl[2][2] = {{0x42, 0x43}, {0x46, 0x47}};
+    CHAR* pszInfTbl[2] = {"INFORMATION", "QUESTION"};
+    float infOfsTbl[2] = {-150.0f, -56.0f};
+    float bdyYofsTbl[4] = {-15.0f, -30.0f, -30.0f, -30.0f};
+    C2DSeqAgent* pAgent = m_pMessageDlgAgent;
+    D2::C2DSeqCtrl* pCtrl = m_pMessageDlgCtrl;
+    m_nDlgType = nType;
+    m_nDlgResult = 0;
+    m_nDlgSel = 1;
+    CHAR* pszInfo = pszInfTbl[nIcon];
+    INT nIconSeq = tbl[getRsrcType()][nIcon];
+    BOOL bOpened = pAgent->getState() < C2DSeqAgent::STATE_OUT;
+    BOOL bLooped = pAgent->getState() == C2DSeqAgent::STATE_LOOP;
+    if (!bOpened) {
+        if (m_pMainLightMark->getState() < C2DSeqAgent::STATE_OUT) {
+            m_nFlag |= 0x20;
+        } else {
+            m_nFlag &= ~0x20;
+        }
+    }
+    m_pMessageDlgFntInf->setText(pszInfo);
+    strcpy(m_szMessageDlgStr, pszTxt);
+    pCtrl->setFntPos(1, 0.0f, bdyYofsTbl[nType]);
+    BOOL bNew = pAgent->getState() == C2DSeqAgent::_STATE_NOT_START;
+    if (bNew) {
+        pCtrl->addSeqShift(m_pszLad, m_nMainSeqUnit, nIconSeq, infOfsTbl[0], infOfsTbl[1]);
+        if (!bOpened) pAgent->start();
+    } else {
+        pCtrl->replaceSeqShift(3, m_pszLad, m_nMainSeqUnit, nIconSeq, infOfsTbl[0], infOfsTbl[1]);
+        if (!bOpened) pAgent->changeState(C2DSeqAgent::STATE_IN, TRUE, -1);
+    }
+    CHAR* pszCapTbl[2];
+    int bOpenTbl[2];
+    BOOL bCursorActive = TRUE;
+    switch (nType) {
+    case 1:
+        bOpenTbl[0] = FALSE;
+        bOpenTbl[1] = TRUE;
+        pszCapTbl[1] = "OK";
+        break;
+    case 2:
+    case 3:
+        pszCapTbl[0] = "Yes";
+        pszCapTbl[1] = "No";
+        bOpenTbl[0] = TRUE;
+        bOpenTbl[1] = TRUE;
+        break;
+    default:
+        bOpenTbl[0] = FALSE;
+        bOpenTbl[1] = FALSE;
+        bCursorActive = FALSE;
+        break;
+    }
+    for (INT i = 0; i < 2; i++) {
+        C2DSeqSelectable* pBtn = m_pMessageDlgBtnAgent[i];
+        if (bOpenTbl[i]) {
+            CHAR* pszText = pszCapTbl[i];
+            if (pBtn->m_pCaption) pBtn->m_pCaption->setText(pszText);
+            if (bLooped) {
+                BOOL bSel = i == m_nDlgSel;
+                pBtn->select(bSel);
+                if (bSel) {
+                    FVECTOR vPos;
+                    pBtn->getCursorPos(vPos);
+                    m_pMessageDlgCursor->setPos(vPos);
+                    m_pMessageDlgCursor->enableDisp(TRUE);
+                    pBtn->getLightMarkPos(vPos);
+                    m_pMainLightMark->setPos(vPos);
+                    if (!(m_nFlag & 0x20)) m_pMainLightMark->startOrRestart();
+                }
+            } else {
+                pBtn->startOrRestart();
+            }
+        } else {
+            pBtn->dispOff();
+        }
+    }
+    if (bOpened && !bCursorActive) m_pMessageDlgCursor->enableDisp(FALSE);
+    if (!bCursorActive && m_pMainLightMark->getState() < C2DSeqAgent::STATE_OUT) {
+        m_pMainLightMark->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+        m_pMainLightMark->dispOff();
+    }
+    m_nFlag |= 6;
+    if (m_pMainCursor) m_pMainCursor->setHistorySeq();
+}
 void CSaveLoadUI::closeMessageDlg() {
     m_pMessageDlgAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
     for (INT i = 0; i < 2; i++) {
