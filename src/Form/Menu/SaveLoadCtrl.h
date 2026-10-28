@@ -212,6 +212,9 @@ private:
     friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
+#ifdef FORM_MENU_SAVELOAD_CPP
+    inline C2DSeqScrollbarCtrl(CTask* pParent); // PARTIAL: added for Form/Menu/SaveLoad (defined at the end)
+#endif
     void setupSeq(D2::C2DSeqCtrl* pParent, const C2DSeqAgent::SeqTbl* pTbl, const CHAR* pszLad, SHORT nUnit,
                   SHORT nLayer, SHORT nBodySize);
     void setBasePos(FVECTOR& vPos);
@@ -290,10 +293,28 @@ public:
     BOOL updateValue(UINT nValue);
 };
 
+#ifdef FORM_MENU_SAVELOAD_CPP
+/* The original header's line 310 is the allocation in this constructor (inlined in Form/Menu/SaveLoad). */
+#line 300 SAVELOADCTRL_H_PATH
+inline C2DSeqScrollbarCtrl::C2DSeqScrollbarCtrl(CTask* pParent)
+    : m_pParentCtrl(NULL), m_fBaseBodySize(1.0f), m_fMaxBodySize(1.0f), m_fBodyRatio(1.0f), m_fScrollPos(0.0f),
+      m_nAllItemCount(1), m_nDispItemCount(1) {
+    for (INT i = 0; i < 3; i++) {
+        m_pCtrls[i] = NULL;
+    }
+    for (INT j = 0; j < 3; j++) {
+        UINT nRA;
+        __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
+        m_pParts[j] = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(310)", nRA)) C2DSeqAgent(pParent);
+    }
+}
+
+#else
 /* Placeholder for an inline function of the original header at line 310 (an allocation message). */
 #line 310 SAVELOADCTRL_H_PATH
 inline void* _saveLoadCtrlAlloc310() {
     return com_malloc_d(4, __FILE__ "(310)", (UINT)-1);
 }
+#endif
 
 #endif /* FORM_MENU_SAVELOADCTRL_H */

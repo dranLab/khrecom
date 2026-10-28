@@ -1,4 +1,6 @@
 #include "khtypes.h"
+#define FORM_MENU_SAVELOAD_CPP
+inline void* operator new(unsigned int, void* p) throw() { return p; }
 #define SAVELOADCTRL_H_PATH "c:/KHCOM/MainApp/Form/Menu/SaveLoadCtrl.h"
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "Form/Menu/SaveLoad.h"
@@ -23,7 +25,6 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 #include "System/Graphic/2d/2DFnt.h"
 #include "include_asm.h"
 
-inline void* operator new(unsigned int, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 namespace {
@@ -999,8 +1000,30 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createSelSlotPlat
 __asm__(".rdata\n.align 3\n.word 0x00020001\n.word 0x00010003\n.word 0x00030002\n.word 0x00000000\n.word 0x00060003\n.word 0x00060004\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x39373232\n.word 0x00000029\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMemocaInfo__11CSaveLoadUIRPQ22D210C2DSeqCtrlPPQ22D210C2DSeqCtrl);
 __asm__(".rdata\n.align 3\n.word 0x006C006B\n.word 0x0000006D\n.word 0x00080003\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31313332\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x39313332\n.word 0x00000029\n.word 0x00390037\n.word 0x00000038\n.word 0x00010006\n.word 0x00000000\n.word 0x80208000\n.word 0x80204080\n.word 0x80804020\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31333332\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x34343332\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createDataListContainer__11CSaveLoadUIRPQ22D210C2DSeqCtrlRP19C2DSeqScrollbarCtrl);
-__asm__(".rdata\n.align 3\n.word 0x00610060\n.word 0x005D0062\n.word 0x005F005E\n.word 0x00000000\n.word 0x00030003\n.word 0x00030004\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x34363332\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x33373332\n.word 0x00000029\n.word 0x00540053\n.word 0x00500055\n.word 0x00520051\n.word 0x00570056\n.word 0x00540058\n.word 0x00560055\n.word 0x00520051\n.word 0x00570053\n.word 0x00590058\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x36383332\n.word 0x00000029\n.text\n");
+C2DSeqAgent* CSaveLoadUI::createDataListContainer(D2::C2DSeqCtrl*& pOutCtrl, C2DSeqScrollbarCtrl*& pOutScrollbar) {
+    C2DSeqAgent::SeqTbl tbl[2] = {{{96, 97, 98}}, {{93, 94, 95}}};
+    _LayoutInfo ltbl[2] = {{3, 3}, {4, 3}};
+    C2DSeqAgent::SeqTbl& t = tbl[getRsrcType()];
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2364)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, t._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    FVECTOR vPos;
+    _LayoutInfo& info = ltbl[getRsrcType()];
+    D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
+    pOutCtrl->setPos(vPos);
+    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2373)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
+    pAgent->setupState(t, callbackDataList, callbackDataList);
+    C2DSeqAgent::SeqTbl scr_tbl[2][3] = {{{{83, 84, 85}}, {{80, 81, 82}}, {{86, 87, 88}}},
+                                          {{{84, 85, 86}}, {{81, 82, 83}}, {{87, 88, 89}}}};
+    pOutScrollbar = new (com_malloc_d(sizeof(C2DSeqScrollbarCtrl), __FILE__ "(2386)", RET_ADDR())) C2DSeqScrollbarCtrl(this);
+    pOutScrollbar->setupSeq(pOutCtrl, scr_tbl[getRsrcType()], m_pszLad, m_nMainSeqUnit, 12, 100);
+    pOutScrollbar->setScrollRange(166.0f, 99, 4, FALSE);
+    vPos.x = 176.0f;
+    vPos.y = -82.0f;
+    pOutScrollbar->setBasePos(vPos);
+    return pAgent;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createDataItemPlate__11CSaveLoadUIRQ22D210C2DSeqCtrlRPQ22D210C2DSeqCtrlRPQ22D26C2DFntT2T2i);
 __asm__(".rdata\n.align 3\n.word 0x00010007\n.word 0x00010008\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38323432\n.word 0x00000029\n.word 0x004F004B\n.word 0x00000000\n.word 0x00010001\n.word 0x00010001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31353432\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32363432\n.word 0x00000029\n.word 0x00020001\n.word 0x00020001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x39363432\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31383432\n.word 0x00000029\n.word 0x00730076\n.word 0x00000000\n.word 0x00030001\n.word 0x00030001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32393432\n.word 0x00000029\n.text\n");
 C2DSeqAgent* CSaveLoadUI::createMessageDlg(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt*& pOutFntInf) {
