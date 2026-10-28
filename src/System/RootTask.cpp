@@ -36,15 +36,8 @@ public:
     static void setupFonts();
 };
 
-class CEffectMan {
-public:
-    static void initialize(CTask* pParent);
-};
-
-class CSceneEnv {
-public:
-    static void initialize(CTask* pParent);
-};
+#include "Game/SceneEnv.h"
+#line 48
 
 class CTexCtrl {
     char _pad[0x40];

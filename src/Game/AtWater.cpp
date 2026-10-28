@@ -9,10 +9,8 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 extern "C" float cosf(float);
 extern "C" float sinf(float);
 
-class CSceneEnv {
-public:
-    static UINT getStopTypeBit();
-};
+#include "Game/SceneEnv.h"
+#line 16
 
 class CPackMan {
 public:

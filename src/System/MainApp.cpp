@@ -166,16 +166,6 @@ public:
     static INT setupDbgPlaySpeed();
 };
 
-class CEffectMan {
-public:
-    static void finalize();
-    static void update();
-    static void setup();
-    static BOOL isLastDraw();
-    static void draw();
-    static void destroyer();
-};
-
 class CPadIO {
 public:
     static void initialize();
@@ -209,12 +199,8 @@ public:
     static void setLocale(INT nLocale);
 };
 
-class CSceneEnv {
-public:
-    static void finalize();
-    static void updateSys();
-    static unsigned long getStopTypeBit();
-};
+#include "Game/SceneEnv.h"
+#line 218
 
 #include "System/Sound/SoundMan.h"
 #line 229
