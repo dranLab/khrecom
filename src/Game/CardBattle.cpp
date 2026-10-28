@@ -6,6 +6,7 @@
 #include "Game/Player/Player.h"
 #include "Game/Enemy/BattleEnemy.h"
 #include "Game/Enemy/BattleEnemyManager.h"
+#include "Game/MessageManager.h"
 #include "Game/GameWork.h"
 #include "System/TaskMan.h"
 #include "System/HeapMan.h"
@@ -850,7 +851,28 @@ void CDuelGauge::exeDuelNG() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPronounceStart__Q210CardBattle11CCardBattlei);
+INT CCardBattle::setPronounceStart(INT inFlag) {
+    if (inFlag) {
+        if (m_uiDuelState != 9) return 0;
+        m_uiDuelState = 10;
+        m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 13, m_mesCardInfo[1]);
+        return 1;
+    }
+    m_uiFlag |= 0xC0000000;
+    m_uiDuelState = 9;
+    for (INT i = 0; i < m_iCount[0]; i++) {
+        if (m_pCard[0][i]) m_pCard[0][i]->setBreak(0);
+    }
+    m_uiState[0] = 5;
+    CGameWork::setFlag(1, 10, TRUE);
+    CCardRevolver* pRV = m_pRevolver[0];
+    if (pRV) {
+        pRV->returnStockCard(1);
+        pRV->changeMode(0, 1);
+    }
+    CGameWork::setFlag(1, 11, TRUE);
+    return 1;
+}
 INT CCardBattle::setPronouncePlay(INT inFlag) {
     CStockFolder* pSF = m_pStockFolder[1];
     if (!pSF) return 0;
