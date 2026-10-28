@@ -36,6 +36,8 @@ public:
     // PARTIAL: added for Game/GameSubField
     static void setAutomatic() { m_iStatus &= ~4; }
     static void setUpPer(FLOAT f) { m_fUpPer = f; }
+    static FLOAT getUpPer() { return m_fUpPer; }     // PARTIAL: added for System/Graphic/Model
+    static FLOAT getDownLen() { return m_fDownLen; }
     static void setDownLen(FLOAT f) { m_fDownLen = f; } static void setCDensity(FLOAT f) { m_fCDensity = f; } static void setADensity(FLOAT f) { m_fADensity = f; } // PARTIAL: densities added for Game/Atel/VSME
     static void initialize();
     static void finalize();

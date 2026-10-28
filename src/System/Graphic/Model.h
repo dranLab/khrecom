@@ -159,6 +159,7 @@ public:
     INT assign(CTask* p, const CHAR* pName, INT n);
     void changeTextureSub(INT nIdx, const struct TexInfo* pTex);
     void addTexture(const CHAR* texName, INT idx); // PARTIAL: added for System/Graphic/Model
+    INT getTexParam(u_long* tex0);
     void setupUVScroll(INT n);
     void setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV); // PARTIAL: added for System/Graphic/Model
     void updateUVScroll(FLOAT fR);

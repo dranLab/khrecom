@@ -8,6 +8,7 @@
 #include "System/Graphic/WorldEnv.h"
 #include "System/Graphic/TexAnm.h"
 #include "System/Graphic/TexUtil.h"
+#include "System/Graphic/ShadowModel.h"
 #include "include_asm.h"
 
 class CRsrcData;
@@ -33,8 +34,16 @@ public:
 };
 extern const FMATRIX ONE_MATRIX;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
+void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin); /* static in the original (parked, asm glabel) */
+extern "C" const FLOAT D_00460FB0; /* -FLT_MAX / 2 */
+extern "C" const FLOAT D_00460FB4; /* FLT_MAX / 2 */
+extern "C" char D_00460DD8[]; /* "System/Graphic/Model.h" */
 extern "C" const FLOAT D_00460FA8; /* -FLT_MAX / 2 */
 extern "C" const FLOAT D_00460FAC; /* FLT_MAX / 2 */
+namespace VRAM { /* PARTIAL: stand-in for System/VramMan VRAM: owner not written */
+extern INT _TEX_TMP1_START;
+extern INT _CLUT_TMP1_START;
+}
 extern "C" char D_00460D98[]; /* "System/Graphic/modeldata.h" */
 extern "C" char D_00460DC8[];
 extern "C" char D_00460F30[];
@@ -452,7 +461,54 @@ static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3);
 #endif
+/* Parked: 38 lines off: the original keeps &pCrd->m_World as the strength-reduced loop pointer (s3 += 0xd0, counter counted down), &vMax/&vMin in s8/s7 for the init stores and the VU0 block, and loads the final bbox into f4/f5/f0..f3 in max-then-min order. Tried: pCrd[i] indexing (keeps the counter, 41 lines), _x/_y/_z temporaries, set helpers. */
+#if 0
+void CModel::calcWorldBBox(BOOL bCalc) {
+    INT i;
+    FVECTOR v[2];
+    FVECTOR vMax;
+    FVECTOR vMin;
+    CCoord* pCrd;
+    INT iBoneNum;
+    if ((m_nFlag & 0x200) && !bCalc) return;
+    if (!(m_pData)) AssertApp(D_00460EB8, 1067, D_00460F30, 0);
+    pCrd = &getCrd(0);
+    iBoneNum = m_pData->m_nBoneNum;
+    vMax.set(D_00460FB0, D_00460FB0, D_00460FB0, 1.0f);
+    vMin.set(D_00460FB4, D_00460FB4, D_00460FB4, 1.0f);
+    for (i = 0; i < iBoneNum; i++, pCrd++) {
+        if (!(m_pData != __null)) AssertApp(D_00460DD8, 262, D_00460E00, 0);
+        BBOX* bb = &m_pData->m_pBBox[i];
+        if (bb->x[0] <= bb->x[1]) {
+            v[0].set(bb->x[1], bb->y[1], bb->z[1], 1.0f);
+            v[1].set(bb->x[0], bb->y[0], bb->z[0], 1.0f);
+            getApplyMatrixBBox(v[0], v[1], pCrd->getWorldMatrix(), v[0], v[1]);
+            asm volatile("lqc2 $vf4, 0x0(%0)\n"
+                         "lqc2 $vf5, 0x0(%1)\n"
+                         "lqc2 $vf6, 0x0(%2)\n"
+                         "lqc2 $vf7, 0x0(%3)\n"
+                         "vmax.xyz $vf4, $vf4, $vf6\n"
+                         "vmini.xyz $vf5, $vf5, $vf7\n"
+                         "sqc2 $vf4, 0x0(%0)\n"
+                         "sqc2 $vf5, 0x0(%1)" : : "r"(&vMax), "r"(&vMin), "r"(&v[0]), "r"(&v[1]) : "memory");
+        }
+    }
+    if (m_Mode == 0x10) {
+        FLOAT _y = vMin.y;
+        vMin.y = _y - CShadowModelMan::getDownLen();
+        vMax.y = _y + (vMax.y - _y) * CShadowModelMan::getUpPer();
+    }
+    m_nFlag |= 0x200;
+    m_BBox.x[1] = vMax.x;
+    m_BBox.y[1] = vMax.y;
+    m_BBox.z[1] = vMax.z;
+    m_BBox.x[0] = vMin.x;
+    m_BBox.y[0] = vMin.y;
+    m_BBox.z[0] = vMin.z;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcWorldBBox__6CModeli);
+#endif
 void CModel::getWorldBBox(FVECTOR& vMax, FVECTOR& vMin) {
     calcWorldBBox(0);
     vMax.x = m_BBox.x[1];
@@ -596,7 +652,34 @@ void CModel::attachSemiModel(CSemiModel& inModel, BOOL bInManage) {
     else m_nFlag &= ~1;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", sendTexture__6CModelPUl);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTexParam__6CModelPUl);
+INT CModel::getTexParam(u_long* tex0) {
+    INT nTexMax;
+    INT i;
+    nTexMax = m_TransTexCount;
+    if (nTexMax > 0) {
+        UINT nTexPos;
+        UINT nClutPos;
+        INT nTmpTex = VRAM::_TEX_TMP1_START;
+        INT nTmpClut = VRAM::_CLUT_TMP1_START;
+        for (i = 0; i < nTexMax; i++) {
+            TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
+            if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
+            if (t->_pTexInfo->isFix()) {
+                if (!t->_pTexInfo) AssertApp(D_00460D98, 204, D_00460DC8, 0);
+                tex0[i] = t->_pTexInfo->getTPage();
+            } else {
+                if (!t->_pTexInfo) AssertApp(D_00460D98, 201, D_00460DC8, 0);
+                if (t->_pTexInfo->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
+                else nTexPos = nTmpTex + t->_nTexPos;
+                if (!t->_pTexInfo) AssertApp(D_00460D98, 202, D_00460DC8, 0);
+                if (t->_pTexInfo->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
+                else nClutPos = nTmpClut + t->_nClutPos;
+                tex0[i] = t->_pTexInfo->getTPage() | (u_long)nTexPos | ((u_long)nClutPos << 37);
+            }
+        }
+    }
+    return nTexMax;
+}
 void CModel::dispUpdate(FLOAT fR) {
     setZ(0);
     if (m_pFadeModel) {
