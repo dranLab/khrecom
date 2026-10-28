@@ -39,12 +39,7 @@ void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 
-namespace Gauge {
-class CCommonGauge {
-public:
-    static void setDispSeq(HANDLE inHandle, INT inIndex);
-};
-}
+#include "Game/Player/PlayerGauge.h"
 
 static inline void _unitMatrix(FMATRIX& m) {
     sceVu0UnitMatrix(m);

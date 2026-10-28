@@ -15,11 +15,9 @@ class C2DCard;
 namespace Gauge {
 class CEnemyGauge;
 
-#ifdef GAME_PLAYER_PLAYERGAUGE_CPP
-/* PARTIAL: CPlayerGauge and CEscapeGauge for Game/Player/PlayerGauge only (Game/Player/Player and PlayerDRiku
-   still declare stand-ins); the other gauge classes are the unit's own (types.h: not in the ref header).
-   MATCH: declared in reverse vtable order (CPlayerGauge first, then CLockonMarker, CEnemyGauge, CCommonGauge,
-   CPrizeGauge, CEscapeGauge, CFriendGauge) */
+/* MATCH: declared in reverse vtable order (CPlayerGauge first, then CLockonMarker, CEnemyGauge, CCommonGauge,
+   CPrizeGauge, CEscapeGauge, CFriendGauge); the classes after CLockonMarker are not in the ref header
+   (types.h only), their home here is a guess. */
 class CNaviMap;
 class CFriendGauge;
 class CPrizeGauge;
@@ -63,7 +61,6 @@ public:
     void setDP(INT inDP, INT inMax);
     void setDMode(INT inMode, INT inDP, INT inMax);
 };
-#endif
 
 class CLockonMarker : public CTask {
     friend class ::CPlayer; // PARTIAL: added for Game/Player/Player (chkLockon reads the marker state)
@@ -100,7 +97,7 @@ private:
     void _initialize();
     void calcMarkerScale();
 #ifdef GAME_PLAYER_PLAYERGAUGE_CPP
-    /* the ref's inline members, in its definition order (Game/Player/PlayerGauge emits them all with the key function) */
+    /* MATCH: the ref inlines only for Game/Player/PlayerGauge (emitted with the key function, in ref definition order); Game/Player/PlayerRiku matches with its own forms below */
     void setDistance(INT inDist) { m_iDist = inDist; }
 public:
     void on() { m_bFlag = TRUE; }
@@ -113,7 +110,7 @@ public:
     void setLockon(HANDLE inTarget, INT inDist);
     void cancelLockon(HANDLE& inTarget, INT inFlag);
     void chkLockon(HANDLE& inTarget);
-#ifdef GAME_PLAYER_PLAYERGAUGE_CPP
+#ifdef GAME_PLAYER_PLAYERGAUGE_CPP /* MATCH: as above */
     void changeMode() {
         m_iMode ^= 1;
         m_bTrg = TRUE;
@@ -154,15 +151,6 @@ public:
     void holdTarget(INT inFlag);
 };
 
-#ifndef GAME_PLAYER_PLAYERGAUGE_CPP
-// PARTIAL: added for Game/Player/Player
-class CCommonGauge {
-public:
-    static void setDispSeq(HANDLE inOwner, INT inSeq);
-};
-#endif
-
-#ifdef GAME_PLAYER_PLAYERGAUGE_CPP
 class CEnemyGauge : public CTask {
 private:
     static CEnemyGauge* m_pInstance;
@@ -284,7 +272,6 @@ public:
 private:
     void _initialize();
 };
-#endif
 
 } // namespace Gauge
 

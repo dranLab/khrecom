@@ -47,12 +47,7 @@ public:
 extern CEntity* g_pPlayer; /* a CPlayer */
 static inline BOOL _isPlayerDead(CEntity* inPlayer) { return *(BOOL*)((CHAR*)inPlayer + 0x680); } /* CPlayer::m_bIsDead */
 
-namespace Gauge {
-class CPrizeGauge { /* Game/Player/PlayerGauge.h */
-public:
-    static BOOL isNowDispCard();
-};
-}
+#include "Game/Player/PlayerGauge.h"
 
 class CBattleEnemyManager { /* a CTask (Game/Enemy/BattleEnemyManager.h) */
 public:

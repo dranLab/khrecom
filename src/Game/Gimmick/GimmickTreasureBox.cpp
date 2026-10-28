@@ -79,12 +79,7 @@ public:
     CLevelUp(CTask* inParent, USHORT inKind);
 };
 
-namespace Gauge {
-class CPrizeGauge {
-public:
-    static BOOL isNowDispCard();
-};
-} // namespace Gauge
+#include "Game/Player/PlayerGauge.h"
 
 CGimmickTreasureBox::CGimmickTreasureBox(CTask* inParent) : CBaseGimmick(inParent) {
     m_Step = 0;
