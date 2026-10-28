@@ -736,7 +736,64 @@ void CFriendGauge::main() {
     if (m_uiState != 2) return;
     if (m_pSeqCtrls->isEnd(0)) setGauge(0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setGauge__Q25Gauge12CFriendGaugei);
+void CFriendGauge::setGauge(INT inState) {
+    INT i;
+    D2::C2DSeqCtrl* pSeq;
+    FVECTOR pos;
+    if (!m_uiCount) return;
+    if (inState == m_uiState) return;
+    if (m_uiState) {
+        for (i = 0; i < m_uiCount; i++) m_pCards[i].destroy();
+        for (i = 0; i < 3; i++) m_pSeqCtrls[i].destroy();
+    }
+    switch (inState) {
+    case 1:
+        pSeq = &m_pSeqCtrls[0];
+        pSeq->setLayer(5);
+        pSeq->addSeq(g_szSeqCockpit, 0x7C);
+        D2::C2DMan::getLayPosition(g_szLadCockpit, 0x16, 0, pos, FALSE);
+        pSeq->setPos(pos);
+        m_pCards[0].setLayer(4);
+        m_pCards[0].create(m_cardFriend[0]);
+        m_pCards[0].setParent(pSeq);
+        m_pCards[0].enableColorCtrl(TRUE);
+        for (i = 1; i < m_uiCount; i++) {
+            pSeq = &m_pSeqCtrls[i];
+            pSeq->setLayer(4);
+            pSeq->addSeq(g_szSeqCockpit, 0x7C + i * 2);
+            pSeq->setPos(pos);
+            m_pCards[i].setLayer(4);
+            m_pCards[i].create(m_cardFriend[i]);
+            m_pCards[i].setParent(pSeq);
+            m_pCards[i].enableColorCtrl(TRUE);
+        }
+        break;
+    case 2:
+        if (m_uiState == 1) {
+            pSeq = &m_pSeqCtrls[0];
+            pSeq->setLayer(5);
+            pSeq->addSeq(g_szSeqCockpit, 0x7D);
+            D2::C2DMan::getLayPosition(g_szLadCockpit, 0x16, 0, pos, FALSE);
+            pSeq->setPos(pos);
+            m_pCards[0].setLayer(4);
+            m_pCards[0].create(m_cardFriend[0]);
+            m_pCards[0].setParent(pSeq);
+            m_pCards[0].enableColorCtrl(TRUE);
+            for (i = 1; i < m_uiCount; i++) {
+                pSeq = &m_pSeqCtrls[i];
+                pSeq->setLayer(4);
+                pSeq->addSeq(g_szSeqCockpit, 0x7D + i * 2);
+                pSeq->setPos(pos);
+                m_pCards[i].setLayer(4);
+                m_pCards[i].create(m_cardFriend[i]);
+                m_pCards[i].setParent(pSeq);
+                m_pCards[i].enableColorCtrl(TRUE);
+            }
+        }
+        break;
+    }
+    m_uiState = inState;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", __static_initialization_and_destruction_0_0028B0E0);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDistance__Q25Gauge13CLockonMarkeri);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", on__Q25Gauge13CLockonMarker);
