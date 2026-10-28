@@ -36,6 +36,9 @@ extern CHAR* FreezeEffectName;
 }
 extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
+extern "C" char D_004AD568[];
+void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
 FVECTOR getPlayerPos(INT inIndex);
 namespace BattleEnemy {
@@ -403,7 +406,11 @@ CBattleEnemyManager* CBattleEnemy::getBattleEnemyManager() const {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makePrize__12CBattleEnemyPC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeExpPrize__12CBattleEnemyPC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makePremiumPrize__12CBattleEnemyPC7FVECTOR);
+void CBattleEnemy::makePremiumPrize(const FVECTOR* inPos) {
+    CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+    if (!bem) AssertApp(D_004ACBC0, 0xF9A, D_004AD3B8, 0);
+    bem->createPremiumPrize(*inPos, (UINT)getID() % 10000);
+}
 void CBattleEnemy::makeRoulettePrize(const FVECTOR* inPos) {
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
     if (!bem) AssertApp(D_004ACBC0, 0xFA4, D_004AD3B8, 0);
