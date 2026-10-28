@@ -1343,7 +1343,81 @@ INT CCardRevolver::exeDiscard() {
     m_uiFlag &= ~0x8000;
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", discard__Q210CardBattle13CCardRevolver);
+void CCardRevolver::discard() {
+    PRIZE_PARAM param;
+    INT discard;
+    INT hand;
+    INT i;
+    CBattleCard* card;
+    m_tqDiscard = 3000;
+    if (m_iMode > 0) changeMode(0, 1);
+    else m_pEmpty->enableDisp(0);
+    switch (m_iState) {
+    case 2:
+        m_uiFlag |= 0x20008;
+        m_nReloadCount = m_iMax;
+        rollDeck(0, 1, 300);
+        m_tqTimer = 0;
+        m_iState = 1;
+        break;
+    case 3:
+        m_uiFlag |= 0x20008;
+        rollDeck(0, 1, 300);
+        m_tqTimer = 0;
+        m_iState = 1;
+        break;
+    }
+    CCardBattle::decEnchantTime(m_uiUser, 0x29, 0);
+    CCardBattle* pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+    INT kind = _getEnchantKind(pCB, m_uiUser);
+    if (kind != 0x18) {
+        if (m_iChargeCount < 3) m_iChargeCount++;
+        if (kind == 0x1E) m_iChargeCount = 1;
+    }
+    m_iCharge = m_iChargeCount - 1;
+    m_tqCharge = m_iCharge * 3000;
+    param.uiFlag = 0;
+    param.uiPrizeFlag = 0;
+    _ref(g_pPlayer)->getLockOnPos(param.vPos);
+    param.fSpeed = 0.25f;
+    discard = 1;
+    for (i = 0; i < m_nLimit; i++) {
+        card = &m_pCards[i];
+        if (!card) continue;
+        if (card->getCardOwner() != 1) continue;
+        if (card->isNowPlaying()) continue;
+        if (card->getStock() != -1) continue;
+        if (card->isReloadNG()) continue;
+        if (discard < 30 || card->getCardData()->m_nCategory1 == 8) {
+            if (m_nReloadID < i) {
+                hand = card->getHand();
+                card->setDiscard(0);
+            } else {
+                param.PrizeKind = card->getCardKind();
+                param.iNumber = card->getBaseCardNumber();
+                FLOAT rx = (-70.0f - RND::genrand_real1() * 10.0f) * 0.017453292f;
+                FLOAT ry = RND::genrand_real1() * 360.0f * 0.017453292f;
+                param.vRot.set(rx, ry, 0.0f);
+                Math3D::LimitPIVector(param.vRot);
+                CPrize* pPrize = (CPrize*)CEntityFactory::getInstance()->createPrize(param, 0);
+                if (pPrize) {
+                    pPrize->enableReturnCard(TRUE);
+                    pPrize->enableMarluxia3Mode(TRUE);
+                    discard++;
+                }
+                hand = card->getHand();
+                card->setDiscard(1);
+            }
+        } else {
+            hand = card->getHand();
+            card->setDiscard(0);
+        }
+        if (hand != -1) m_nRemain[m_iMode]--;
+    }
+    m_nRemain[m_iMode] = 0;
+    m_nReloadCard = 0;
+    rollDeck(0, 1, 300);
+}
 void CCardRevolver::resetCardOwner(INT inOld, INT inNew) {
     for (INT i = 0; i < m_nLimit; i++) {
         CBattleCard* pCard = &m_pCards[i];
