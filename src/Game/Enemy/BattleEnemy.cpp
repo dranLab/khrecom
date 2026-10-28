@@ -1914,10 +1914,26 @@ void CBattleEnemy::playBigDamageSE() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playBigDamageSE__12CBattleEnemy);
 #endif
-/* Not attempted: its switch emits a jump table in .rodata, which needs the unit's data from source (draft:
- * build/progress/Game/Enemy/pdse_draft.c) */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playDamageSE__12CBattleEnemy8ATK_KIND);
-__asm__(".rdata\n.align 3\n.word .L002B33F0\n.word .L002B3410\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3410\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B3420\n.word .L002B33F0\n.word .L002B3410\n.word func_0\n.text\n");
+void CBattleEnemy::playDamageSE(ATK_KIND inDmgKind) {
+    switch (inDmgKind) {
+    case ATK_KIND_DMG_BIG:
+    case ATK_KIND_THUNDRA:
+        if (getSize() > 0) {
+            playSmallDamageSE();
+        } else {
+            playBigDamageSE();
+        }
+        break;
+    case ATK_KIND_DMG_BLOWN:
+    case ATK_KIND_QUAKE:
+    case ATK_KIND_THUNDAGA:
+        playBigDamageSE();
+        break;
+    default:
+        playSmallDamageSE();
+        break;
+    }
+}
 BOOL CBattleEnemy::setupDuelCard() {
     static int g_iDuelCardNum[3] = {3, 5, 7};
     ENEMY_CARD* cards = NULL;
