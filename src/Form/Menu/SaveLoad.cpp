@@ -254,6 +254,7 @@ public:
 class CRcf { /* PARTIAL: System/Rcf.h pulls in System/SJoint.h */
 public:
     static void reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLinkOwner);
+    static BOOL isCompleteLoadRCF(INT nGroup, INT nMember);
 };
 class CPackMan { /* PARTIAL: System/Graphic/PackMan.h is not written yet */
 public:
@@ -294,8 +295,29 @@ void CSaveLoadUI::preInit() {
     if (!CSystemDataChecker::isExited()) CSystemDataChecker::abort();
     m_nTimer = 2;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeInit__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x29383037\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x29393037\n.word 0x00000000\n.text\n");
+void CSaveLoadUI::exeInit() {
+    if (m_nTimer > 0) m_nTimer--;
+    INT nID = !getRsrcType() ? 0x6A : 0x6B;
+    if (!CRcf::isCompleteLoadRCF(2, nID)) return;
+    if (!CSystemDataChecker::isExited()) return;
+    if (m_nTimer > 0) return;
+    D2::C2DMan::changeLevel(D2::C2DMan::D2MAN_LEVEL1);
+    switch (m_mode) {
+    case SLMODE_SAVE:
+        CGameWork::setByte(1, 0x140, 7);
+    case SLMODE_LOAD:
+        changeState(2);
+        break;
+    case SLMODE_BOOT:
+        changeState(1);
+        break;
+    case SLMODE_MESSAGE:
+        changeState(18);
+        break;
+    }
+    m_pMemoca = new (com_malloc_d(sizeof(CMemocaAgent), __FILE__ "(708)", RET_ADDR())) CMemocaAgent(this);
+    m_pGameDataEntries = new (com_malloc_d(sizeof(CMemocaDataEntries), __FILE__ "(709)", RET_ADDR())) CMemocaDataEntries(99);
+}
 void CSaveLoadUI::endInit() {}
 void CSaveLoadUI::preCheckBoot() {
     TRACE_COL((TtyColor)0x1F, "\x83\x81\x83\x82\x83J\x97" "e\x97\xca\x83`\x83" "F\x83" "b\x83N\x8aJ\x8en\x81" "E\x81" "E\x81" "E\n");
