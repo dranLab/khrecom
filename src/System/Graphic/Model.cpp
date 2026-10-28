@@ -27,7 +27,15 @@ public:
     static u_long getDefault_TEST_1();
     static void pkCall(u_long128* pAddr, UINT nFlag);
     static void pkAddCode(UINT nCode);
+    static void pkCnt(UINT nCnt);
 };
+extern const FMATRIX ONE_MATRIX;
+INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
+extern "C" char D_00460F30[];
+extern "C" char D_00460F38[];
+extern "C" char D_00460FB8[];
+extern "C" char D_00461110[];
+inline void* operator new[](size_t, void* p) throw() { return p; }
 extern u_long128* g_mpg0;
 extern u_long128* g_mpg2;
 extern "C" char D_00461058[];
@@ -194,7 +202,22 @@ INT CModel::assign(CTask* p, INT n) {
     m_pTask = p;
     return assign(*pCrds, n);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsi);
+INT CModel::assign(CCoords& crds, INT crdidx) {
+    INT i;
+    if (!(m_pData)) AssertApp(D_00460EB8, 546, D_00460F30, 0);
+    m_pCrds = &crds;
+    m_BoneStart = crdidx;
+    m_BoneSkip = 0;
+    m_BoneIdx = 0;
+    m_TransTexCount = m_pData->m_nTexNum;
+    if (!(!(m_TransTexCount > 16))) AssertApp(D_00460EB8, 579, D_00460F38, 0);
+    for (i = 0; i < m_TransTexCount; i++) {
+        *(u_long*)&m_TexInfo[i] = *(u_long*)((BYTE*)m_pData->m_pTexParam + i * 0x20 + 0x10);
+    }
+    setupUVScroll(0);
+    linksub();
+    return 1;
+}
 void CModel::setModelData(const MODELDATA* pData) {
     releaseData();
     m_pData = pData;
@@ -413,7 +436,21 @@ INT resultCheckBBox(CCoord& crd, const BBOX* bbox) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resultCheckBBox__FR6CCoordPC4BBOX);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__6CModel);
+INT CModel::checkBBox() {
+    INT ret;
+    if (m_pCrds->getCoordNum() <= 0) return -1;
+    if (!m_pData) return -1;
+    if (getLayerID() == 0x1b) return 0;
+    if (m_BoneIdx != -1) {
+        ret = ::checkBBox(m_pCrds->Crd(m_BoneStart).getWorldMatrix(), &m_pData->m_pBBox[m_BoneIdx]);
+    } else {
+        calcWorldBBox(0);
+        ret = ::checkBBox(ONE_MATRIX, &m_BBox);
+        if (m_pTask) m_pTask->setLastClip(ret);
+    }
+    m_BBoxFlag = ret;
+    return ret;
+}
 void CModel::setColorScale(const FVECTOR& vColor) { getColorScale() = vColor; }
 void CModel::setColorScale(FLOAT r, FLOAT g, FLOAT b, FLOAT a) { getColorScale().set(r, g, b, a); }
 void CModel::setAlphaScale(FLOAT inScale) { m_fAlphaScale = inScale; }
@@ -465,7 +502,20 @@ void CModel::makePkt() {
     }
     CPackMan::pkOpenDirectCode(0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp0__6CModeliUli);
+void CModel::disp0(INT semikind, u_long nInTest, INT iFlags) {
+    const int (*pData)[4];
+    UINT nMode;
+    u_long tex0[16];
+    if (!(m_pShader)) AssertApp(D_00460EB8, 2446, D_00460FB8, 0);
+    pData = (const int (*)[4])_disp0_GetData(nMode, iFlags);
+    if (pData) {
+        if (!(m_iSendFlg & 1)) disp0_SetMicroCode(m_pShader->m_pMpg);
+        CPackMan::pkCnt(0);
+        CPackMan::pkAddCode(0x13000000);
+        if (!(m_iSendFlg & 2)) _disp0_SetTexture(iFlags, tex0);
+        _disp0_SetPacket(nMode, pData, semikind, nInTest, iFlags, tex0);
+    }
+}
 /* Parked: 2 lines off: the original loads *pData before the lui 0x6000 of the tag compare, ours lui first. Tried: d/mode locals, store forms, int (*)[4]/u_long/u_long128 pData, test forms (!=, ^, ternary, tag local); permuter 12 min (22337 candidates, stays 2). */
 #if 0
 u_long* CModel::_disp0_GetData(UINT& nMode, INT iFlags) {
@@ -564,7 +614,21 @@ void CModel::linkTexAnm(CTexAnm* pATbl, INT nANum) {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setupUVScroll__6CModeli);
+void CModel::setupUVScroll(INT bVal) {
+    INT i;
+    m_nFlag &= ~0x80;
+    if (m_TexUV) delete m_TexUV;
+    m_TexUV = NULL;
+    for (i = 0; i < m_TransTexCount; i++) {
+        if ((m_TexInfo[i].m_pTex[0x55] & 0x80) || bVal) {
+            m_nFlag |= 0x80;
+            bVal = m_TransTexCount;
+            m_TexUV = new (com_malloc_d(bVal * sizeof(_TEX_UV_OFFSET), D_00461110, RET_ADDR())) _TEX_UV_OFFSET[bVal];
+            m_nFlag |= 0x40;
+            break;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateUVScroll__6CModelf);
 void CModel::setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV) {
     /* MATCH: isUVScroll() as the weak copy shows it (lbu + dsrl: a 64-bit bit-field, result in a 64-bit local) */
@@ -587,7 +651,29 @@ void* CModel::getExtendClut(INT nTex, INT nType) {
 ret3:
     return *(void**)(m_TexInfo[nTex].m_pTex + 0x50);
 }
+/* Parked: 5 lines off, operand order only: the original adds this + idx*8 (addu a1,a0,v0), ours idx*8 + this. Worked: the if/else-if chain with `nInType == t && p[0x54] != t`, the direct p->ext arm first, raw this-relative addressing (m_TexInfo[inIdx] makes gcc pre-add this+0x68). Tried: switch, nested ifs, expression orders. */
+#if 0
+void CModel::getChangeClut(INT inIdx, INT nInType) {
+    BYTE* p;
+    if (inIdx < 0 || inIdx >= m_pData->m_nTexNum) return;
+    p = (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68));
+    if (!(p[0x55] & 0x40)) return;
+    if (nInType == 0 && p[0x54] != 0) {
+        (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(p + 0x48);
+    } else if (nInType == 1 && p[0x54] != 1) {
+        if (!p[0x54]) (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(p + 0x48);
+        else (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(*(BYTE**)(p + 0x48) + 0x48);
+    } else if (nInType == 2 && p[0x54] != 2) {
+        if (!p[0x54]) (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(p + 0x4c);
+        else (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(*(BYTE**)(p + 0x48) + 0x4c);
+    } else if (nInType == 3 && p[0x54] != 3) {
+        if (!p[0x54]) (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(p + 0x50);
+        else (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(*(BYTE**)(p + 0x48) + 0x50);
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getChangeClut__6CModelii);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", enablePointLight__C9MODELDATA);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", enableLight__C9MODELDATA);
 BOOL MODELDATA::isCharacter(UINT mode) {

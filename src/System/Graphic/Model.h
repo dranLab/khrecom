@@ -21,6 +21,7 @@ union _TEX_UV_OFFSET { // PARTIAL: added for System/Graphic/Model
         FLOAT fv;
     };
     ULONGLONG luv;
+    _TEX_UV_OFFSET() { luv = 0; }
 };
 class CLightUnit; // PARTIAL: added for Game/ModelObj
 struct MODELDATA;
@@ -110,7 +111,10 @@ public:
     FIX4 getSemiZ();
     INT checkBBox();
     void getWorldBBoxScr(IVECTOR& vScr, const FMATRIX* pWS);
-    void disp0(INT nFlag, u_long nTest, INT nPass);
+    void disp0(INT semikind, u_long nInTest, INT iFlags);
+    void _disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0);
+    void linksub();
+    void getChangeClut(INT inIdx, INT nInType);
     virtual void changeLayerExt(INT a, INT b);        // PARTIAL: parameters guessed, for Form/Menu/MenuModel
     FLOAT getAlphaScale() { return m_fAlphaScale; }
     INT getBeforeDirectNum() const { return m_iBeforeDirectQNum; } // PARTIAL: added for System/Graphic/Model
