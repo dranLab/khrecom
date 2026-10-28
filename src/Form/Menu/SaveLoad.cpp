@@ -209,12 +209,12 @@ private:
     }
     BOOL isPadEnable() const { return !(m_nFlag & 2); }
     INT isButtonRpt(UINT b) const {
-        if (!isPadEnable()) return 0;
-        return CPadHandler::isButtonRpt(b);
+        if (isPadEnable()) return CPadHandler::isButtonRpt(b);
+        return 0;
     }
     INT isButtonTrg(UINT b) const {
-        if (!isPadEnable()) return 0;
-        return CPadHandler::isButtonTrg(b);
+        if (isPadEnable()) return CPadHandler::isButtonTrg(b);
+        return 0;
     }
     BOOL isTrgOK() const { return isPadEnable() ? CPadHandler::isTrgOK() : FALSE; }
     BOOL isTrgCANCEL() const { return isPadEnable() ? CPadHandler::isTrgCANCEL() : FALSE; }
@@ -1088,7 +1088,46 @@ void CSaveLoadUI::callbackMessageDlg(C2DSeqAgent& agent) {
         break;
     }
 }
+/* Parked: registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours
+ * nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the
+ * if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min (5617 candidates, no gain) */
+#if 0
+BOOL CSaveLoadUI::checkSelector(SHORT& nOutIdx, SHORT nMax, INT nValDownKey, INT nValUpKey, SHORT nUpDownValue,
+                                BOOL bSetSE, BOOL bLoopChk) {
+    SHORT nNewIdx = nOutIdx;
+    if (isButtonRpt(nValDownKey)) {
+        nNewIdx -= nUpDownValue;
+        if (nNewIdx < 0) {
+            if (nOutIdx != 0) {
+                nNewIdx = 0;
+            } else if (!bLoopChk || isButtonTrg(nValDownKey)) {
+                nNewIdx = nMax - 1;
+            } else {
+                nNewIdx = 0;
+            }
+        }
+    } else if (isButtonRpt(nValUpKey)) {
+        nNewIdx += nUpDownValue;
+        if (nNewIdx > nMax - 1) {
+            if (nOutIdx != nMax - 1) {
+                nNewIdx = nMax - 1;
+            } else if (!bLoopChk || isButtonTrg(nValUpKey)) {
+                nNewIdx = 0;
+            } else {
+                nNewIdx = nMax - 1;
+            }
+        }
+    }
+    BOOL bUpdate = nNewIdx != nOutIdx;
+    if (bUpdate) {
+        nOutIdx = nNewIdx;
+        if (bSetSE) CSound::playSE(1, -1, 64);
+    }
+    return bUpdate;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", checkSelector__11CSaveLoadUIRssiisii);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createBootInfoMsg__11CSaveLoadUIiPc);
 void CSaveLoadUI::createCheckingMsg(INT nSlot, CHAR* pszOutMsg) {
     char szSlot[32];
