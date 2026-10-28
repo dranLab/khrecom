@@ -140,6 +140,7 @@ public:
     void setGuardEffect_(const FVECTOR* inPos);
     void reviseObject_();
     void setHitEffect_();
+    void updateSpotLight_();
     void setupHitBack();
     void makeRoulettePrize(const FVECTOR* inPos);
     BOOL checkResist_(ATK_KIND inDmgKind);

@@ -96,6 +96,12 @@ void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
+extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
+static inline FLOAT _sqrtf(FLOAT x) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
+    return ret;
+}
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
@@ -2105,7 +2111,20 @@ BOOL CBattleEnemy::changeSmallDamageState_(ATK_KIND inDmgKind) {
     playDamageSE(inDmgKind);
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateSpotLight___12CBattleEnemy);
+void CBattleEnemy::updateSpotLight_() {
+    CEffect* effect = CEffectMan::getEffect(m_hSpotLight[1]);
+    if (!effect) return;
+    FVECTOR n = m_pMove->getDetectNormal();
+    FMATRIX m;
+    _unitMatrixVu0(m);
+    sceVu0RotMatrixX(m, m, atan2f(_sqrtf(n.z * n.z + n.x * n.x), n.y));
+    sceVu0RotMatrixY(m, m, atan2f(n.x, n.z));
+    FVECTOR pos = getPos();
+    pos.w = 1.0f;
+    m.getTrans() = pos;
+    effect->getCoords()->Crd(0).m_Local = m;
+    effect->getCoords()->Crd(0).m_Flag = 1;
+}
 BOOL CBattleEnemy::canCreateEnemyCard_() {
     if (CGame::isRikuGame()) return FALSE;
     if (CGameWork::getFlag(1, 7)) return FALSE;
