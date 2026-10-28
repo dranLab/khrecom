@@ -158,6 +158,7 @@ public:
     void _initialize();
     static void resetHP();
     static void setHP(HANDLE inHandle, INT inHP, INT inMax);
+    static void notifyHP(HANDLE inHandle, INT inHP, INT inMax);
     static HANDLE getNowTarget();
 };
 

@@ -507,8 +507,118 @@ void CEnemyGauge::resetHP() {
     }
     m_pInstance->m_hTarget = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setHP__Q25Gauge11CEnemyGaugeiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", notifyHP__Q25Gauge11CEnemyGaugeiii);
+/* MATCH: _ref(m_pInstance) - the original reloads m_pInstance after every store */
+void CEnemyGauge::setHP(HANDLE inHandle, INT inHP, INT inMaxHP) {
+    if (!m_pInstance) return;
+    if (CGameWork::getInt(1, 0xE2) & 0x10) return;
+    if (_ref(m_pInstance)->m_hTarget == inHandle) return;
+    _ref(m_pInstance)->m_hTarget = inHandle;
+    _ref(m_pInstance)->m_nMaxHP = inMaxHP;
+    _ref(m_pInstance)->m_nRedHP = _ref(m_pInstance)->m_nHP = inHP > -1 ? inHP : 0;
+    if (_ref(m_pInstance)->m_nHP > _ref(m_pInstance)->m_nMaxHP) _ref(m_pInstance)->m_nRedHP = _ref(m_pInstance)->m_nHP = _ref(m_pInstance)->m_nMaxHP;
+    _ref(m_pInstance)->m_nMaxHPS = (_ref(m_pInstance)->m_nMaxHP - 1) / 200;
+    if (_ref(m_pInstance)->m_nMaxHPS < 0) _ref(m_pInstance)->m_nMaxHPS = 0;
+    _ref(m_pInstance)->m_nHPS = (_ref(m_pInstance)->m_nHP - 1) / 200;
+    if (_ref(m_pInstance)->m_nHPS < 0) _ref(m_pInstance)->m_nHPS = 0;
+    _ref(m_pInstance)->m_nRedHPS = _ref(m_pInstance)->m_nHPS;
+    _ref(m_pInstance)->m_uiFlag = (INT)_ref(m_pInstance)->m_uiFlag & ~2;
+    _ref(m_pInstance)->m_uiFlag = (INT)_ref(m_pInstance)->m_uiFlag & ~4;
+    if (_ref(m_pInstance)->m_nMaxHPS > 0) {
+        _ref(m_pInstance)->m_uiFlag |= 4;
+        if (_ref(m_pInstance)->m_nMaxHPS > 15) _ref(m_pInstance)->m_nMaxHPS = 15;
+        if (_ref(m_pInstance)->m_nHPS > 15) _ref(m_pInstance)->m_nHPS = 15;
+        _ref(m_pInstance)->m_pSeqCtrl->changeTime(4, _ref(m_pInstance)->m_nMaxHPS);
+        _ref(m_pInstance)->m_pSeqCtrl->changeTime(5, _ref(m_pInstance)->m_nRedHPS);
+        _ref(m_pInstance)->m_pSeqCtrl->changeTime(6, _ref(m_pInstance)->m_nHPS);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(4, TRUE);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(5, TRUE);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(6, TRUE);
+        if (_ref(m_pInstance)->m_nHPS == _ref(m_pInstance)->m_nMaxHPS) {
+            _ref(m_pInstance)->m_uiFlag |= 2;
+            _ref(m_pInstance)->m_pSeqCtrl->enableDisp(0, TRUE);
+            _ref(m_pInstance)->m_pSeqCtrl->changeTime(1, _ref(m_pInstance)->m_nMaxHP - _ref(m_pInstance)->m_nMaxHPS * 200);
+            _ref(m_pInstance)->m_pSeqCtrl->enableDisp(1, TRUE);
+        } else {
+            _ref(m_pInstance)->m_pSeqCtrl->enableDisp(0, FALSE);
+            _ref(m_pInstance)->m_pSeqCtrl->changeTime(1, 200);
+            _ref(m_pInstance)->m_pSeqCtrl->enableDisp(1, TRUE);
+        }
+        _ref(m_pInstance)->m_pSeqCtrl->changeTime(2, _ref(m_pInstance)->m_nRedHP - _ref(m_pInstance)->m_nRedHPS * 200);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(2, FALSE);
+        _ref(m_pInstance)->m_pSeqCtrl->changeTime(3, _ref(m_pInstance)->m_nHP - _ref(m_pInstance)->m_nHPS * 200);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(3, TRUE);
+    } else {
+        _ref(m_pInstance)->m_pSeqCtrl->changeTime(1, _ref(m_pInstance)->m_nMaxHP);
+        _ref(m_pInstance)->m_pSeqCtrl->changeTime(2, _ref(m_pInstance)->m_nRedHP);
+        _ref(m_pInstance)->m_pSeqCtrl->changeTime(3, _ref(m_pInstance)->m_nHP);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(1, TRUE);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(2, FALSE);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(3, TRUE);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(0, FALSE);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(4, FALSE);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(5, FALSE);
+        _ref(m_pInstance)->m_pSeqCtrl->enableDisp(6, FALSE);
+    }
+}
+/* MATCH: _ref(m_pInstance) as setHP */
+void CEnemyGauge::notifyHP(HANDLE inHandle, INT inHP, INT inMaxHP) {
+    D2::C2DSeqCtrl* pSeqCtrl;
+    if (!m_pInstance) return;
+    if (_ref(m_pInstance)->m_hTarget != inHandle) return;
+    if (CGameWork::getInt(1, 0xE2) & 0x10) return;
+    _ref(m_pInstance)->m_uiFlag = (INT)_ref(m_pInstance)->m_uiFlag & ~2;
+    _ref(m_pInstance)->m_uiFlag = (INT)_ref(m_pInstance)->m_uiFlag & ~4;
+    _ref(m_pInstance)->m_uiFlag = (INT)_ref(m_pInstance)->m_uiFlag & ~8;
+    pSeqCtrl = _ref(m_pInstance)->m_pSeqCtrl;
+    pSeqCtrl->enableDisp(0, FALSE);
+    pSeqCtrl->enableDisp(1, FALSE);
+    pSeqCtrl->enableDisp(2, FALSE);
+    pSeqCtrl->enableDisp(3, FALSE);
+    pSeqCtrl->enableDisp(4, FALSE);
+    pSeqCtrl->enableDisp(5, FALSE);
+    pSeqCtrl->enableDisp(6, FALSE);
+    _ref(m_pInstance)->m_nHP = inHP > -1 ? inHP : 0;
+    if (_ref(m_pInstance)->m_nHP > _ref(m_pInstance)->m_nMaxHP)
+        _ref(m_pInstance)->m_nRedHP = _ref(m_pInstance)->m_nHP = _ref(m_pInstance)->m_nMaxHP;
+    _ref(m_pInstance)->m_nHPS = (_ref(m_pInstance)->m_nHP - 1) / 200;
+    if (_ref(m_pInstance)->m_nHPS < 0) _ref(m_pInstance)->m_nHPS = 0;
+    pSeqCtrl->changeTime(3, _ref(m_pInstance)->m_nHP - _ref(m_pInstance)->m_nHPS * 200);
+    pSeqCtrl->enableDisp(3, TRUE);
+    _ref(m_pInstance)->m_tqRed = 1500;
+    if (_ref(m_pInstance)->m_nRedHP < _ref(m_pInstance)->m_nHP) {
+        _ref(m_pInstance)->m_nRedHP = _ref(m_pInstance)->m_nHP;
+        _ref(m_pInstance)->m_nRedHPS = (_ref(m_pInstance)->m_nRedHP - 1) / 200;
+        if (_ref(m_pInstance)->m_nRedHPS < 0) _ref(m_pInstance)->m_nRedHPS = 0;
+        pSeqCtrl->changeTime(2, _ref(m_pInstance)->m_nRedHP - _ref(m_pInstance)->m_nRedHPS * 200);
+        _ref(m_pInstance)->m_tqRed = 0;
+    }
+    if (_ref(m_pInstance)->m_nMaxHPS > 0) {
+        _ref(m_pInstance)->m_uiFlag |= 4;
+        pSeqCtrl->changeTime(6, _ref(m_pInstance)->m_nHPS);
+        pSeqCtrl->enableDisp(4, TRUE);
+        pSeqCtrl->enableDisp(5, TRUE);
+        pSeqCtrl->enableDisp(6, TRUE);
+        if (_ref(m_pInstance)->m_nHPS == _ref(m_pInstance)->m_nMaxHPS) {
+            _ref(m_pInstance)->m_uiFlag |= 2;
+            pSeqCtrl->enableDisp(0, TRUE);
+            pSeqCtrl->changeTime(1, _ref(m_pInstance)->m_nMaxHP - _ref(m_pInstance)->m_nMaxHPS * 200);
+            pSeqCtrl->enableDisp(1, TRUE);
+        } else {
+            pSeqCtrl->enableDisp(0, FALSE);
+            pSeqCtrl->changeTime(1, 200);
+            pSeqCtrl->enableDisp(1, TRUE);
+        }
+        if (_ref(m_pInstance)->m_nRedHPS > _ref(m_pInstance)->m_nHPS) {
+            pSeqCtrl->changeTime(2, 200);
+            pSeqCtrl->enableDisp(2, TRUE);
+        } else {
+            pSeqCtrl->changeTime(2, _ref(m_pInstance)->m_nRedHP - _ref(m_pInstance)->m_nRedHPS * 200);
+        }
+    } else {
+        pSeqCtrl->enableDisp(1, TRUE);
+        pSeqCtrl->enableDisp(3, TRUE);
+    }
+}
 HANDLE CEnemyGauge::getNowTarget() {
     if (!m_pInstance) return 0;
     if (CGameWork::getInt(1, 0xe2) & 0x10) return 0;
