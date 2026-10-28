@@ -154,6 +154,7 @@ public:
     FVECTOR m_vPos;              /* 0x60 */
     CEnemyGauge(CTask* p);
     virtual ~CEnemyGauge();
+    virtual void main();
     void _initialize();
     static void resetHP();
     static void setHP(HANDLE inHandle, INT inHP, INT inMax);

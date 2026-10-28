@@ -432,7 +432,73 @@ void CEnemyGauge::_initialize() {
     m_pSeqCtrl->enableDispEach(0);
     m_vPos.set(240.0f, -40.0f, 0.0f);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge11CEnemyGauge);
+void CEnemyGauge::main() {
+    if (CSceneEnv::isStopGauge()) return;
+    if ((CGameWork::getInt(1, 0xE2) & 0x10) || m_hTarget <= 0) {
+        resetHP();
+        return;
+    }
+    if (m_uiFlag & 1) {
+        m_uiFlag = (INT)m_uiFlag & ~1;
+        m_pSeqCtrl->enableDisp(1, TRUE);
+        m_pSeqCtrl->enableDisp(3, TRUE);
+        if (m_uiFlag & 4) {
+            m_pSeqCtrl->enableDisp(4, TRUE);
+            m_pSeqCtrl->enableDisp(6, TRUE);
+        }
+        if (m_uiFlag & 2) m_pSeqCtrl->enableDisp(0, TRUE);
+    }
+    if (!(m_uiFlag & 0x20)) {
+        INT flag = 0;
+        m_vPos.x -= getFrameRateF() * 8.0f;
+        if (m_vPos.x < 0.0f) {
+            m_vPos.x = 0.0f;
+            flag = 1;
+        }
+        m_vPos.y += getFrameRateF() * 8.0f;
+        if (0.0f < m_vPos.y) {
+            m_vPos.y = 0.0f;
+            flag++;
+        }
+        m_pSeqCtrl->setPos(m_vPos);
+        if (flag == 2) m_uiFlag |= 0x20;
+    }
+    if (m_nRedHP != m_nHP) {
+        if (!(m_uiFlag & 8)) {
+            m_uiFlag |= 8;
+            m_pSeqCtrl->enableDisp(2, TRUE);
+        }
+        if (m_nRedHP < m_nHP) {
+            m_nRedHP = m_nHP;
+        } else if (m_tqRed <= 0) {
+            m_tqRed = 0;
+            m_nRedHP -= (m_nRedHP - m_nHP) / 10 + 1;
+        }
+        if (m_nMaxHPS > 0) {
+            if (!(m_uiFlag & 0x10)) {
+                m_uiFlag |= 0x10;
+                m_pSeqCtrl->enableDisp(5, TRUE);
+            }
+            m_nRedHPS = (m_nRedHP - 1) / 200;
+            if (m_nRedHPS < 0) m_nRedHPS = 0;
+            if (m_nRedHPS > m_nHPS) m_pSeqCtrl->changeTime(2, 200);
+            else m_pSeqCtrl->changeTime(2, m_nRedHP - m_nRedHPS * 200);
+            m_pSeqCtrl->changeTime(5, m_nRedHPS);
+        } else {
+            m_pSeqCtrl->changeTime(2, m_nRedHP);
+        }
+    } else {
+        if (m_uiFlag & 8) {
+            m_uiFlag = (INT)m_uiFlag & ~8;
+            m_pSeqCtrl->enableDisp(2, FALSE);
+        }
+        if (m_uiFlag & 0x10) {
+            m_uiFlag = (INT)m_uiFlag & ~0x10;
+            m_pSeqCtrl->enableDisp(5, FALSE);
+        }
+    }
+    m_tqRed -= getFrameRate();
+}
 void CEnemyGauge::resetHP() {
     if (!m_pInstance) return;
     if ((m_pInstance->m_uiFlag & 1) == 0) {
