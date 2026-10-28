@@ -189,6 +189,9 @@ public:
     // PARTIAL: added for Form/Menu/SaveLoad
     void attachCursor(C2DSeqCursorCtrl* pCursor) { m_pCursor = pCursor; }
     void attachLightMark(C2DSeqLightMarkAgent* pLight) { m_pLightMark = pLight; }
+    void enableDispCaption(BOOL bDisp) {
+        if (m_pCtrl) m_pCtrl->enableDisp(1, bDisp);
+    }
 };
 
 class C2DSeqScrollbarCtrl {
@@ -211,6 +214,12 @@ public:
     void setBasePos(FVECTOR& vPos);
     void setScrollRange(FLOAT fMaxBodySize, USHORT nItemCount, USHORT nDispCount, BOOL bUpdateForm);
     void setScrollPos(USHORT nPos, BOOL bUpdateForm);
+    // PARTIAL: added for Form/Menu/SaveLoad
+    void startOrRestart() {
+        for (INT i = 0; i < 3; i++) {
+            m_pParts[i]->startOrRestart();
+        }
+    }
 
 protected:
     void updateForm();

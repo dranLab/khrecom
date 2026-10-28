@@ -461,7 +461,19 @@ void CSaveLoadUI::preCheckSlot() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckSlot__11CSaveLoadUI);
 __asm__(".rdata\n.align 4\n.word .L00349C88\n.word .L00349CAC\n.word .L00349CD0\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349CF0\n.word .L00349E5C\n.word .L00349E80\n.word 0\n.text\n");
 void CSaveLoadUI::endCheckSlot() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preOpenDataList__11CSaveLoadUI);
+void CSaveLoadUI::preOpenDataList() {
+    if (m_pMemocaInfoAgent) m_pMemocaInfoAgent->startOrRestart();
+    m_pDataListContainerAgent->startOrRestart();
+    m_pDataListScrollbar->setScrollPos(m_nDataListTop, TRUE);
+    m_pDataListScrollbar->startOrRestart();
+    for (INT i = 0; i < 4; i++) {
+        m_pDataItemPlate[i]->startOrRestart();
+        m_pDataItemPlate[i]->enableDispCaption(FALSE);
+        m_pDataItemNumCircle[i]->enableDisp(FALSE);
+        m_pDataItemIcon[i]->enableDisp(FALSE);
+        m_pDataItemClearIcon[i]->enableDisp(FALSE);
+    }
+}
 void CSaveLoadUI::exeOpenDataList() {}
 void CSaveLoadUI::preSelDataList() {
     SHORT n = m_nDataListSel - m_nDataListTop;
