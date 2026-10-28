@@ -237,6 +237,8 @@ struct SEQTBL2 {
     C2DSeqAgent::SeqTbl t[2];
 };
 
+/* Access through a reference: keeps the original's order of global stores and later loads. */
+template <class T> static inline T& _ref(T& x) { return x; }
 static inline BOOL _isFadeDone() { return s_pFadeMask ? s_pFadeMask->isFadeDone() : TRUE; }
 static inline BOOL _isAgentState(C2DSeqAgent* p, INT nState) { return p->getState() == nState; }
 
@@ -296,8 +298,18 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckBoot__11C
 __asm__(".rdata\n.align 3\n.word 0x82838183\n.word 0x65974A83\n.word 0x6083CA97\n.word 0x62834683\n.word 0x6E824E83\n.word 0x000A6A82\n.word 0x00000000\n.word 0x00000000\n.word .L00349280\n.word .L003492AC\n.word .L003492F8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L0034936C\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493CC\n.word 0\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLayIn__11CSaveLoadUI);
 void CSaveLoadUI::exeLayIn() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLayOut__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x29353139\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
+void CSaveLoadUI::preLayOut() {
+    if (m_mode == SLMODE_LOAD && s_bSaveLoadDone) {
+        _ref(s_pFadeMask) = new (com_malloc_d(sizeof(CFadeIOMask), __FILE__ "(915)", RET_ADDR()))
+            CFadeIOMask(*CTaskMan::getTask(m_hParent)->getParent(), 0x18);
+        s_pFadeMask->reqBlackOut(30, 1.0f);
+        CSound::fadeoutAllBGM(30);
+        m_nStep = 0;
+    } else {
+        outAllAgent();
+        CSound::playSE(4, -1, 64);
+    }
+}
 void CSaveLoadUI::exeLayOut() {
     if (m_mode != SLMODE_LOAD) return;
     if (m_nStep != 0) return;
@@ -359,7 +371,7 @@ void CSaveLoadUI::preCheckSlot() {
     m_nTargetIndex = 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckSlot__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word .L00349C88\n.word .L00349CAC\n.word .L00349CD0\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349CF0\n.word .L00349E5C\n.word .L00349E80\n.word 0\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L00349C88\n.word .L00349CAC\n.word .L00349CD0\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349CF0\n.word .L00349E5C\n.word .L00349E80\n.word 0\n.text\n");
 void CSaveLoadUI::endCheckSlot() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preOpenDataList__11CSaveLoadUI);
 void CSaveLoadUI::exeOpenDataList() {}
@@ -374,11 +386,11 @@ void CSaveLoadUI::backtoSelSlot() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preSaveData__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeSaveData__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word .L0034A8D4\n.word .L0034A8EC\n.word .L0034A90C\n.word .L0034A938\n.word .L0034A97C\n.word .L0034A994\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034A9CC\n.word .L0034A9E4\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L0034A8D4\n.word .L0034A8EC\n.word .L0034A90C\n.word .L0034A938\n.word .L0034A97C\n.word .L0034A994\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034A9CC\n.word .L0034A9E4\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLoadData__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x00000070\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeLoadData__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word .L0034ACE0\n.word .L0034ACF0\n.word .L0034AD10\n.word .L0034AD34\n.word .L0034AD5C\n.word 0\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L0034ACE0\n.word .L0034ACF0\n.word .L0034AD10\n.word .L0034AD34\n.word .L0034AD5C\n.word 0\n.text\n");
 void CSaveLoadUI::preCheckOverwrite() {
     openMessageDlg(_ctdText(0x600200), 1, 3);
     m_nStep = 0;
@@ -417,7 +429,7 @@ void CSaveLoadUI::exeCheckNoCard() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckUnformat__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckUnformat__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word .L0034B86C\n.word .L0034B86C\n.word .L0034B88C\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034B8C4\n.word .L0034BA3C\n.word .L0034BA54\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAA4\n.word .L0034BABC\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L0034B86C\n.word .L0034B86C\n.word .L0034B88C\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034B8C4\n.word .L0034BA3C\n.word .L0034BA54\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAA4\n.word .L0034BABC\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preConfirmExecErr__11CSaveLoadUI);
 void CSaveLoadUI::exeConfirmExecErr() {
     switch (m_nStep) {
