@@ -12,12 +12,16 @@
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+inline void* operator new(size_t, void* p) throw() { return p; }
 
 using namespace CardBattle;
 
 namespace CardBattle {
 class CStockFolder {
+    BYTE _m_0x00[0xb0];
+
 public:
+    CStockFolder(::CTask* pParent, INT inUser);
     void destroy();
     INT calcEnemyStockSkill();
     void setStockInfo();
@@ -67,6 +71,7 @@ public:
 /* the unit's own copy of the header static (data still from assembly) */
 extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039AF98");
 extern "C" char D_00477690[]; /* "...CardBattle.cpp(4378)" */
+extern "C" char D_00477338[]; /* "...CardBattle.cpp(NNNN)" */
 namespace D2 {
 class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the classes only for its own unit */
 public:
@@ -323,7 +328,16 @@ BOOL CCardBattle::isBlack() {
     UINT uiMask = 0x40000;
     return (m_pInstance->m_uiFlag & uiMask) != 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setStockFolder__Q210CardBattle11CCardBattleP5CTaski);
+CStockFolder* CCardBattle::setStockFolder(::CTask* pParent, INT inUser) {
+    if (!m_pInstance) return NULL;
+    UINT _PLAYER = inUser - 1;
+    if (!m_pInstance->m_pStockFolder[_PLAYER]) {
+        m_pInstance->m_pStockFolder[_PLAYER] =
+            new (com_malloc_d(sizeof(CStockFolder), D_00477338, RET_ADDR())) CStockFolder(pParent, inUser);
+        _ref(m_pInstance)->m_hDuelEnemy = pParent->getHandle();
+    }
+    return m_pInstance->m_pStockFolder[_PLAYER];
+}
 /* Parked: same as destroyRevolver - the original adds this+0x134 and (inSide-1)*4 separately, ours folds the -4 into
  * the offset; tried: the destroyRevolver variants */
 #if 0
