@@ -19,6 +19,8 @@ using namespace CardBattle;
 
 inline void* operator new(unsigned int, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 
 extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039B2E4");
 template <class T> static inline T& _ref(T& v) { return v; }
@@ -1067,7 +1069,62 @@ INT CCardRevolver::exeAddCard() {
     rollDeck(0, 1, 300);
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initCounter__Q210CardBattle13CCardRevolver);
+extern "C" char D_0047B240[];
+extern "C" char D_0047B270[];
+extern "C" char D_0047B2A0[];
+namespace CardBattle {
+extern G_UV g_uvCRCounterNumOfs[4];
+}
+void CCardRevolver::initCounter() {
+    FVECTOR pos;
+    INT ofsID;
+    m_pSeqCtrlCounter = NULL;
+    m_pSeqCtrlCounter_Num01 = NULL;
+    m_pSeqCtrlCounter_Num10 = NULL;
+    m_nOldMode = 0;
+    m_nOldRemain = 0;
+    m_uiCounterFlag = 0;
+    m_uiCounterState = 0;
+    m_uiScutState = 0;
+    _initNumEffect();
+    m_pSeqCtrlTrap = NULL;
+    m_uiNumTexID = 0;
+    if (m_uiUser == 1) {
+        m_uiCounterState = 1;
+        m_uiScutState = 1;
+        m_pSeqCtrlCounter = new (D_0047B240) D2::C2DSeqCtrl;
+        m_pSeqCtrlCounter->setLayer(6);
+        m_pSeqCtrlCounter->addSeq(g_szSeqCockpit, 0x42);
+        m_pSeqCtrlCounter->addSeq(g_szSeqCockpit, 0x3E);
+        m_pSeqCtrlCounter->addSeq(g_szSeqCockpit, 0x45);
+        D2::C2DMan::getLayPosition(g_szLadCockpit, 9, 0, pos, FALSE);
+        m_pSeqCtrlCounter->setPos(pos);
+        m_pSeqCtrlCounter->enableDisp(0, FALSE);
+        m_pSeqCtrlCounter->enableDisp(1, FALSE);
+        m_pSeqCtrlCounter->enableDisp(2, FALSE);
+        m_pSeqCtrlCounter->changeTime(2, 0);
+        ofsID = 0;
+        if (CSceneInfo::isMinigameScene()) {
+            ofsID = 2;
+            m_uiNumTexID = 4;
+        }
+        FVECTOR start = pos;
+        m_pSeqCtrlCounter_Num01 = new (D_0047B270) D2::C2DSeqCtrl;
+        m_pSeqCtrlCounter_Num01->setLayer(8);
+        m_pSeqCtrlCounter_Num01->addSeq(g_szSeqCockpit, 0x46);
+        pos.x = start.x + g_uvCRCounterNumOfs[ofsID].u;
+        pos.y = start.y + g_uvCRCounterNumOfs[ofsID].v;
+        m_pSeqCtrlCounter_Num01->setPos(pos);
+        m_pSeqCtrlCounter_Num01->enableDisp(FALSE);
+        m_pSeqCtrlCounter_Num10 = new (D_0047B2A0) D2::C2DSeqCtrl;
+        m_pSeqCtrlCounter_Num10->setLayer(8);
+        m_pSeqCtrlCounter_Num10->addSeq(g_szSeqCockpit, 0x46);
+        pos.x = start.x + g_uvCRCounterNumOfs[ofsID + 1].u;
+        pos.y = start.y + g_uvCRCounterNumOfs[ofsID + 1].v;
+        m_pSeqCtrlCounter_Num10->setPos(pos);
+        m_pSeqCtrlCounter_Num10->enableDisp(FALSE);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeCounter__Q210CardBattle13CCardRevolver);
 void CCardRevolver::destroyCounter() {
     if (!m_pSeqCtrlCounter) return;
@@ -1637,8 +1694,6 @@ extern "C" char D_0047B518[]; /* "c:/KHCOM/MainApp/Game/CardRevolver.cpp" */
 extern "C" char D_0047B540[]; /* "m_pSeqCtrls" */
 extern "C" char D_0047B550[]; /* "CEnchantGauge:: m_pSeqCtrls=New..." */
 extern "C" char D_0047B578[]; /* "c:/KHCOM/MainApp/Game/CardRevolver.cpp(5840)" */
-inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
-inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 void CEnchantGauge::_initialize() {
     FVECTOR pos;
     INT layout;
