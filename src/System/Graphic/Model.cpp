@@ -9,6 +9,7 @@
 #include "System/Graphic/TexAnm.h"
 #include "System/Graphic/TexUtil.h"
 #include "System/Graphic/ShadowModel.h"
+#include "System/Graphic/ModelMan.h"
 #include "include_asm.h"
 
 class CRsrcData;
@@ -34,6 +35,7 @@ public:
     static u_long getDefault_FRAME_1();
     static u_long* pkOpenGifTagManual(u_long128 tag);
     static void pkCloseGifTagManual(UINT* p);
+    static void pkRefLoadImage(USHORT nTBP, const VTransInfo& info);
 };
 extern const FMATRIX ONE_MATRIX;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
@@ -50,6 +52,7 @@ extern INT _CLUT_TMP1_START;
 extern "C" char D_00460D98[]; /* "System/Graphic/modeldata.h" */
 extern "C" char D_00460DC8[];
 extern "C" char D_00461090[];
+extern "C" char D_00460FF8[];
 extern "C" char D_00460F30[];
 extern "C" char D_00460F60[];
 extern "C" char D_00460F78[];
@@ -72,6 +75,13 @@ extern "C" int strncmp(const char*, const char*, unsigned int);
 class CShadowMapModel : public CFadeModel { /* PARTIAL: stand-in for CShadowMapModel: owner not written */
     HANDLE m_hHnd; /* 0x28 */
 public:
+    CShadowMapModel() {
+        CDrawable::setSemiTrans(ALPHA_BLEND);
+        setTestFlag(0x5000D);
+        setLayer(0x18, 0);
+        m_SemiDraw = FALSE;
+        m_hHnd = 0;
+    }
     virtual ~CShadowMapModel();
 };
 namespace Mad {
@@ -648,14 +658,87 @@ void CModel::addTexture(const CHAR* texName, INT idx) {
     }
     setupUVScroll(0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShadowMapModel__6CModel);
+void CModel::setShadowMapModel() {
+    UINT rawMode;
+    if (m_pShadowMapModel) return;
+    switch (m_pData->getMode()) {
+    case 0:
+    case 5:
+    case 0x200:
+    case 0x406:
+        break;
+    default:
+        return;
+    }
+    rawMode = m_pData->getRawMode();
+    if (!(rawMode & 0x100000)) return;
+    m_pShadowMapModel = new (com_malloc_d(sizeof(CShadowMapModel), D_00460FF8, RET_ADDR())) CShadowMapModel;
+    if (m_pShadowMapModel) {
+        m_pShadowMapModel->link(this);
+        m_fAlphaScale = 1.0f;
+    }
+}
 void CModel::attachSemiModel(CSemiModel& inModel, BOOL bInManage) {
     if (m_pSemiModel && isManagedSemiModel()) delete m_pSemiModel;
     m_pSemiModel = &inModel;
     if (bInManage) m_nFlag |= 1;
     else m_nFlag &= ~1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", sendTexture__6CModelPUl);
+BOOL CModel::sendTexture(u_long* tex0) {
+    u_long* tex;
+    BOOL bSend;
+    INT nTexMax;
+    INT i;
+    tex = tex0;
+    bSend = FALSE;
+    nTexMax = m_TransTexCount;
+    if (nTexMax > 0) {
+        INT nTmpTex = VRAM::_TEX_TMP1_START;
+        INT nTmpClut = VRAM::_CLUT_TMP1_START;
+        INT nTransIndex = 0;
+        for (i = 0; i < nTexMax; i++) {
+            TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
+            BOOL bUpdate;
+            BOOL bTexAnm;
+            UINT nTexPos;
+            UINT nClutPos;
+            if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
+            if (t->_pTexInfo->isFix()) {
+                if (tex) {
+                    if (!t->_pTexInfo) AssertApp(D_00460D98, 204, D_00460DC8, 0);
+                    *tex = t->_pTexInfo->getTPage();
+                    tex++;
+                }
+                continue;
+            }
+            bUpdate = TRUE;
+            if (!(m_iSendFlg & 0x200)) bUpdate = CModelMan::updateTexCache(nTransIndex++, *t);
+            bTexAnm = FALSE;
+            if (m_pTexAnm && m_pTexAnm->check(i)) {
+                bUpdate = TRUE;
+                bTexAnm = TRUE;
+            }
+            bSend |= bUpdate;
+            if (!t->_pTexInfo) AssertApp(D_00460D98, 201, D_00460DC8, 0);
+            if (t->_pTexInfo->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
+            else nTexPos = nTmpTex + t->_nTexPos;
+            if (!t->_pTexInfo) AssertApp(D_00460D98, 202, D_00460DC8, 0);
+            if (t->_pTexInfo->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
+            else nClutPos = nTmpClut + t->_nClutPos;
+            if (bUpdate) {
+                CPackMan::pkRefLoadImage(nClutPos, t->_pTexInfo->_ClutInfo);
+                CPackMan::pkRefLoadImage(nTexPos, t->_pTexInfo->_TexInfo);
+                CModelMan::incTexSendCount(0);
+                if (bTexAnm) m_pTexAnm->sendTexture(i, nTexPos, t->_pTexInfo->_TexInfo, nClutPos, t->_pTexInfo->_ClutInfo);
+            }
+            if (tex) {
+                *tex = t->_pTexInfo->getTPage() | (u_long)nTexPos | ((u_long)nClutPos << 37);
+                tex++;
+            }
+        }
+    }
+    return bSend;
+}
 INT CModel::getTexParam(u_long* tex0) {
     INT nTexMax;
     INT i;

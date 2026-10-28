@@ -142,7 +142,7 @@ public:
     void setShadowSize(INT nSize);
     void setModelData(const MODELDATA* pData);
     void releaseData();
-    void sendTexture(u_long* pTag);
+    BOOL sendTexture(u_long* tex0);
     void _disp0_SetTexture(INT nFlag, u_long* pTag);
     u_long* _disp0_GetData(UINT& nSize, INT nFlag);
     void disp(FLOAT fRate);
@@ -160,6 +160,7 @@ public:
     void changeTextureSub(INT nIdx, const struct TexInfo* pTex);
     void addTexture(const CHAR* texName, INT idx); // PARTIAL: added for System/Graphic/Model
     INT getTexParam(u_long* tex0);
+    void setShadowMapModel();
     void setupUVScroll(INT n);
     void setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV); // PARTIAL: added for System/Graphic/Model
     void updateUVScroll(FLOAT fR);
@@ -249,7 +250,7 @@ public:
 
 class CFadeModel : public CSemiModel {
 public:
-    CFadeModel();
+    CFadeModel() { m_SemiDraw = FALSE; }
     virtual ~CFadeModel();
     virtual void makePkt();
     virtual UINT getPacketSize() const;
