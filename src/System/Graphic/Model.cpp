@@ -2,6 +2,8 @@
 #define SYSTEM_GRAPHIC_MODEL_CPP
 #include "System/Graphic/Model.h"
 #include "System/Task.h"
+#include "System/Coord.h"
+#include "System/Math3D.h"
 #include "include_asm.h"
 
 class CRsrcData;
@@ -18,7 +20,10 @@ class CPackMan { /* PARTIAL: stand-in for System/Graphic/PackMan CPackMan: owner
 public:
     static void pkCloseDirectCode();
     static void pkOpenDirectCode(INT stall);
+    static BOOL isOverFlow(UINT nSize);
 };
+extern "C" SHADERDESC D_00505118[]; /* the shader table */
+extern "C" char D_00460E80[];
 extern "C" char D_00460EB8[]; /* __FILE__ */
 extern "C" char D_00460EE8[];
 extern "C" char D_00460F18[];
@@ -44,7 +49,22 @@ u_long128* CModel::getMicroProg() {
     if (m_pShader) return *(u_long128**)((BYTE*)m_pShader + 4);
     return NULL;
 }
+/* Parked: 12 lines off, registers only: the original keeps the masked mode in a1, the table pointer in a2, 0xffff in a3 and the TRACE string's %hi in a0; ours mode a0, pointer a1, 0xffff a2, string a3. Tried: for/while/break loop shapes, a UINT copy of mode; permuter 12 min (24539 candidates, stays 12). */
+#if 0
+SHADERDESC* searchShaderDesc(USHORT mode) {
+    SHADERDESC* ret = D_00505118;
+    while (TRUE) {
+        if (ret->m_Mode == 0xFFFF) {
+            TRACE(D_00460E80);
+            return NULL;
+        }
+        if (ret->m_Mode == (mode & ret->m_Mask)) return ret;
+        ret++;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", searchShaderDesc__FUs);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", releaseData__6CModel);
 INT CModel::link(CTask* p, const CHAR* pName) {
     if (!(p)) AssertApp(D_00460EB8, 451, D_00460EE8, 0);
@@ -128,7 +148,10 @@ INT CModel::link(CTask* p) {
     return link(*pCrds);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoords);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getCrd__6CModeli);
+CCoord& CModel::getCrd(INT idx) {
+    if (m_BoneIdx != -1) idx = 0;
+    return m_pCrds->Crd(m_BoneStart + idx);
+}
 INT CModel::getCoordNum() const {
     if (!(m_pCrds)) AssertApp(D_00460EB8, 737, D_00460F58, 0);
     return *(INT*)((BYTE*)m_pCrds + 4);
@@ -174,7 +197,18 @@ void CModel::getWorldBBox(FVECTOR& vMax, FVECTOR& vMin) {
     vMin.y = m_BBox.y[0];
     vMin.z = m_BBox.z[0];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBSphere__FR6CCoordRC7FVECTORf);
+INT checkBSphere(CCoord& crd, const FVECTOR& ctr, FLOAT rad) {
+    FVECTOR b; // MATCH: the copy of ctr2 has the lowest stack slot (an inline's temp in the original)
+    FVECTOR ctr2;
+    FVECTOR frustum[6];
+    BOUNDING_SPHERE sphere;
+    ApplyMatrix(ctr2, crd.getWorldMatrix(), ctr);
+    b = ctr2;
+    Math3D::CalcFrustum(frustum);
+    sphere.vCenter = b;
+    sphere.fR = rad;
+    return Math3D::CheckVisibleBoundingSphere(sphere, frustum) ? 0 : 0x80000000;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBSphere__FR6CCoordPC4BBOX);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__FRC7FMATRIXPC4BBOX);
 void resultCheckBBox(FVECTOR& min, FVECTOR& max) {
@@ -206,8 +240,23 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShadowMapMod
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", attachSemiModel__6CModelR10CSemiModeli);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", sendTexture__6CModelPUl);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTexParam__6CModelPUl);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispUpdate__6CModelf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispCheck__6CModel);
+void CModel::dispUpdate(FLOAT fR) {
+    setZ(0);
+    if (m_pFadeModel) {
+        m_pFadeModel->setOldZ(m_pFadeModel->getZ());
+        m_pFadeModel->setZ(0);
+    }
+    if (m_pSemiModel) {
+        m_pSemiModel->setOldZ(m_pSemiModel->getZ());
+        m_pSemiModel->setZ(0);
+    }
+    updateUVScroll(fR);
+}
+BOOL CModel::dispCheck() {
+    if (m_pCrds->getCoordNum() <= 0) return FALSE;
+    if (m_fAlphaScale <= 0.0f) return FALSE;
+    return !CPackMan::isOverFlow(getPacketSize());
+}
 void CModel::disp() { disp(m_pTask ? m_pTask->getFrameRate() * 0.020000001f : 1.0f); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__6CModelf);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispImpl__6CModel);

@@ -88,7 +88,7 @@ public:
     void setColorScale(const FVECTOR& vColor);        // PARTIAL: added for Form/Menu/MenuModel
     void setWorldScreenMatrix(FMATRIX* pWSMat) { m_pWSMat = pWSMat; } // PARTIAL: added for Form/Menu/MenuModel
     virtual void dispImpl();                          // PARTIAL: added for Form/Menu/MenuModel
-    virtual void dispUpdate();
+    virtual void dispUpdate(FLOAT fR);
     virtual BOOL dispCheck();
     virtual void changeLayerExt(INT a, INT b);        // PARTIAL: parameters guessed, for Form/Menu/MenuModel
     FLOAT getAlphaScale() { return m_fAlphaScale; }
@@ -122,6 +122,7 @@ public:
     void changeTextureSub(INT nIdx, const struct TexInfo* pTex);
     void setupUVScroll(INT n);
     void setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV); // PARTIAL: added for System/Graphic/Model
+    void updateUVScroll(FLOAT fR);
 #ifdef FORM_MENU_JIMINYMEMO_CPP
     inline void setSemiTrans(ALPHA nAlpha); // PARTIAL: added for Form/Menu/JiminyMemo (defined there)
 #endif
@@ -133,6 +134,20 @@ inline CModel* CEntity::getModel(INT inIndex) { return &m_pModels[inIndex]; }
 #endif
 
 #ifdef SYSTEM_GRAPHIC_MODEL_CPP
+class CShader;
+struct SHADERDESC {
+    USHORT m_Mode;                 /* 0x00 */
+    USHORT m_Mask;                 /* 0x02 */
+    u_long128* m_pMpg;             /* 0x04 */
+    INT m_BoneSize;                /* 0x08 */
+    INT m_WorkSize;                /* 0x0c */
+    CShader* (*createInstance)();  /* 0x10 */
+    ALPHA m_BaseAlpha;             /* 0x14 */
+    ALPHA m_SemiAlpha;             /* 0x16 */
+    ULONGLONG m_BaseTest;          /* 0x18 */
+    ULONGLONG m_SemiTest;          /* 0x20 */
+};
+
 /* PARTIAL: CSemiModel, CSemiZModel, CFadeModel and CBBox for System/Graphic/Model only (System/Graphic/DispList
    and Form/Menu/JiminyMemo still declare CSemiModel stand-ins) */
 class CSemiZModel;
@@ -162,8 +177,8 @@ public:
     void initSemiZModel();
     void releaseSemiZModel();
     virtual void changeLayerExt(BOOL bOn, INT nDepth);
-    void setOldZ(FIX4 nZ);
-    FIX4 getOldZ();
+    void setOldZ(FIX4 nZ) { m_nOldZ = nZ; }
+    FIX4 getOldZ() { return m_nOldZ; }
 protected:
     void setDefaultSemiTrans();
     void replaceParentModel(CModel* pInModel);
