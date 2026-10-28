@@ -31,6 +31,9 @@ public:
     static void pkCall(u_long128* pAddr, UINT nFlag);
     static void pkAddCode(UINT nCode);
     static void pkCnt(UINT nCnt);
+    static u_long getDefault_FRAME_1();
+    static u_long* pkOpenGifTagManual(u_long128 tag);
+    static void pkCloseGifTagManual(UINT* p);
 };
 extern const FMATRIX ONE_MATRIX;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
@@ -46,6 +49,7 @@ extern INT _CLUT_TMP1_START;
 }
 extern "C" char D_00460D98[]; /* "System/Graphic/modeldata.h" */
 extern "C" char D_00460DC8[];
+extern "C" char D_00461090[];
 extern "C" char D_00460F30[];
 extern "C" char D_00460F60[];
 extern "C" char D_00460F78[];
@@ -780,7 +784,33 @@ void CSemiModel::link(CModel* m) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__10CSemiModelP6CModel);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", initSemiZModel__10CSemiModel);
+void CSemiModel::initSemiZModel() {
+    USHORT mode;
+    UINT rawMode;
+    mode = m_pModel->getMode();
+    rawMode = m_pModel->getModelData()->getRawMode();
+    if (MODELDATA::isCharacterAndMap(mode) && !(rawMode & 0x1200000) && !(getSemiTrans() == ALPHA_BLEND)) {
+        m_pSemiZ = new (com_malloc_d(sizeof(CSemiZModel), D_00461090, RET_ADDR())) CSemiZModel;
+        if (m_pSemiZ) {
+            m_pSemiZ->m_SemiDraw = m_SemiDraw;
+            m_pSemiZ->m_pModel = m_pModel;
+            m_pSemiZ->setPacketSize(m_pModel->getModelData()->m_nPacketSize);
+        }
+    } else {
+        m_pSemiZ = NULL;
+    }
+    if (MODELDATA::isMap(mode) && !(rawMode & 0x200000) && getSemiTrans() == ALPHA_BLEND) {
+        CCoord& crd = m_pModel->getCrd(0);
+        FVECTOR vMax;
+        FVECTOR vMin;
+        FVECTOR& p = crd.getWorldMatrix().v[3];
+        m_pModel->getWorldBBox(vMax, vMin);
+        if (vMin.x < p.x && p.x < vMax.x && vMin.z < p.z && p.z < vMax.z && vMin.y - 0.1f <= p.y && p.y <= vMax.y + 0.1f
+            && vMax.x - vMin.x > 3.0f && vMax.z - vMin.z > 3.0f) {
+            m_pModel->m_nFlag |= 0x2000;
+        }
+    }
+}
 void CSemiModel::releaseSemiZModel() {
     if (m_pSemiZ) delete m_pSemiZ;
 }
@@ -859,7 +889,59 @@ void CSemiZModel::makePkt() {
     }
     CPackMan::pkOpenDirectCode(0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__10CFadeModel);
+void CFadeModel::makePkt() {
+    USHORT mode;
+    ULONGLONG lTest;
+    INT iA;
+    CPackMan::pkCloseDirectCode();
+    mode = m_pModel->getMode();
+    if (getLayerID() == 0x18) {
+        m_pModel->disp0(getSemiTrans(), getTestFlag(), 2);
+    } else if (getLayerID() == 0x17) {
+        m_pModel->disp0(getSemiTrans(), getTestFlag(), 4);
+    } else if (MODELDATA::isMap(mode)) {
+        m_pModel->disp0(2, getTestFlag(), m_SemiDraw != 0);
+    } else {
+        iA = 0;
+        if ((m_pModel->m_nFlag & 0x20)
+            || (MODELDATA::isCharacter(m_pModel->getMode()) && !(m_pModel->getModelData()->getRawMode() & 0x1000000))) {
+            iA = (INT)(m_pModel->getAlphaScale() * 96.0f);
+            lTest = ((ULONGLONG)iA << 4) | 0x5000D;
+        } else {
+            lTest = getTestFlag();
+        }
+        if (m_pModel->m_nFlag & 0x20) {
+            ULONGLONG lFrame;
+            u_long* pQw;
+            u_long128 tag;
+            lFrame = CPackMan::getDefault_FRAME_1() | 0xFFFFFFFF00000000;
+            CPackMan::pkCnt(0);
+            CPackMan::pkAddCode(0x13000000);
+            CPackMan::pkOpenDirectCode(0);
+            __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008001), "0"((u_long)0xE));
+            pQw = CPackMan::pkOpenGifTagManual(tag);
+            pQw[0] = lFrame;
+            pQw[1] = 0x4C;
+            CPackMan::pkCloseGifTagManual((UINT*)(pQw + 2));
+            CPackMan::pkCloseDirectCode();
+            m_pModel->disp0(2, lTest, m_SemiDraw != 0);
+            if (m_pModel->m_nFlag & 0x800) {
+                if (m_pModel->m_nFlag & 2) {
+                    if (m_pModel->m_nFlag & 1) m_pModel->disp0(2, ((ULONGLONG)(iA >> 2) << 4) | 0x5000D, 1);
+                }
+            }
+            CPackMan::pkOpenDirectCode(0);
+            __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008001), "0"((u_long)0xE));
+            pQw = CPackMan::pkOpenGifTagManual(tag);
+            pQw[0] = CPackMan::getDefault_FRAME_1();
+            pQw[1] = 0x4C;
+            CPackMan::pkCloseGifTagManual((UINT*)(pQw + 2));
+            CPackMan::pkCloseDirectCode();
+        }
+        m_pModel->disp0(1, lTest, m_SemiDraw != 0);
+    }
+    CPackMan::pkOpenDirectCode(0);
+}
 UINT CFadeModel::getPacketSize() const {
     UINT nPacketSize = m_nPacketSize;
     if (m_pModel && (m_pModel->m_nFlag & 0x20)) nPacketSize *= 2;

@@ -201,7 +201,16 @@ protected:
     BYTE __pad;              /* 0x27 */
 
 public:
-    CSemiModel();
+    CSemiModel() {
+        m_iFlag = 0;
+        m_nZ = 0;
+        m_pModel = NULL;
+        m_pSemiZ = NULL;
+        m_nOldZ = 0;
+        m_nPacketSize = 0;
+        m_SemiDraw = TRUE;
+        reset();
+    }
     virtual ~CSemiModel();
     void reset();
     virtual void disp();
@@ -227,7 +236,11 @@ protected:
 
 class CSemiZModel : public CSemiModel {
 public:
-    CSemiZModel();
+    CSemiZModel() {
+        CDrawable::setSemiTrans(ALPHA_PLUS);
+        setTestFlag(0x52001);
+        setLayer(0x15, 0);
+    }
     virtual ~CSemiZModel();
     virtual void changeLayerExt(BOOL bOn, INT nDepth);
     virtual FIX4 calcZ();
