@@ -139,6 +139,7 @@ public:
     void cardBattleProc_();
     void setGuardEffect_(const FVECTOR* inPos);
     void reviseObject_();
+    void setHitEffect_();
     void setupHitBack();
     void makeRoulettePrize(const FVECTOR* inPos);
     BOOL checkResist_(ATK_KIND inDmgKind);

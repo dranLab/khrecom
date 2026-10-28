@@ -63,11 +63,24 @@ extern CHAR* MemoIDParamName;
 extern CHAR* SpeedParamName;
 extern CHAR* MagnetParamName;
 extern CHAR* MagnetEffectName;
+extern CHAR* QuakeEffectName;
 }
 extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
 extern "C" char D_004AD568[];
 extern "C" char D_004AD3D8[];
+extern "C" char D_004AD430[];
+extern "C" char D_004AD920[];
+extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
+struct STOP_DAMAGE {
+    FVECTOR vDetectPos;
+    char szHitEffectName[16];
+    SHORT sHitEffectNo;
+    SHORT sHitIndex;
+    eObjType hitEffectObjType;
+    ATK_KIND dmgKind;
+    INT iDamage;
+};
 class CJiminyMemoFlag {
 public:
     static void checkEvent(INT inEvent, INT inParam0, INT inParam1);
@@ -1860,7 +1873,43 @@ void CBattleEnemy::createFriendCard_(INT inRate) {
     CardBattle::getDropFriendCard(card, inRate);
     if (card.m_nKind) createFriendCard((CARD_KIND)card.m_nKind, card.m_nNumber);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setHitEffect___12CBattleEnemy);
+void CBattleEnemy::setHitEffect_() {
+    if (isBtlEnemyFlag(0x4000000)) return;
+    CCollBody* hit = m_pBodyColl->getHitCollBody();
+    if (!hit) AssertApp(D_004ACBC0, 0x1C50, D_004AD430, 0);
+    switch (hit->getDamageKind()) {
+    case ATK_KIND_QUAKE: {
+        CCollMap* coll = m_pMove->getMapCollision();
+        if (!coll) AssertApp(D_004ACBC0, 0x1C57, D_004AD920, 0);
+        FVECTOR pos = getPos();
+        coll->setStartPos(pos);
+        pos.y -= 1.0f;
+        coll->setEndPos(pos);
+        if (coll->collideMap()) {
+            pos = *coll->getOutPos();
+        } else {
+            pos.y += 1.0f;
+        }
+        CEffectMan::setEffect(BattleEnemy::QuakeEffectName, 1, (ObjType::eObjType)hit->getHitEffectObjType(), &pos, NULL, 0.0f);
+        break;
+    }
+    case ATK_KIND_CONFUSE:
+    case ATK_KIND_TERROR: {
+        FVECTOR pos;
+        pos.init();
+        CEffectMan::killEffect(m_hHitEffect, 0.0f);
+        m_hHitEffect = CEffectMan::attachEffect(hit->getHitEffectName(), hit->getHitEffectNo(),
+                                                (ObjType::eObjType)hit->getHitEffectObjType(), &Crd(1), &pos, NULL,
+                                                hit->getBadStatusParam());
+        CEffect* effect = CEffectMan::getEffect(m_hHitEffect);
+        if (effect) effect->m_iFlag |= 4;
+        break;
+    }
+    default:
+        hit->setHitEffect();
+        break;
+    }
+}
 void CBattleEnemy::cardBattleProc_() {
     if (!isBtlEnemyFlag(0x800000000ULL) && isBtlEnemyFlag(0x10) && m_iHp > 0 && m_tqCancelTimer <= 0 &&
         !(DebugWork::g_dw.enemy.uiFlag & 0x400)) {
