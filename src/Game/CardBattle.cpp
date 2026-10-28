@@ -72,6 +72,17 @@ public:
 extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039AF98");
 extern "C" char D_00477690[]; /* "...CardBattle.cpp(4378)" */
 extern "C" char D_00477338[]; /* "...CardBattle.cpp(NNNN)" */
+extern "C" char D_00477298[]; /* notifyCompleteGimmick's TRACE format */
+/* the unit's copy of Game/CardKind's header static table (data still from assembly) */
+extern const CARD_DATA cardDataTbl[224] __asm__("cardDataTbl_00478270");
+/* CARD's inline constructor (Game/Card.cpp's _setCard) */
+static inline void _setCard(CARD& c, USHORT nKind, CHAR nNumber) {
+    c.m_nId = 0;
+    c.m_nKind2 = nKind;
+    c.m_nNumber2 = nNumber;
+    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
+}
 namespace D2 {
 class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the classes only for its own unit */
 public:
@@ -214,7 +225,13 @@ HANDLE CCardBattle::getGimmickOwner() {
     return m_pInstance->m_hGimmickOwner;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", notifyMakeGimmick__Q210CardBattle11CCardBattleP4CARDi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", notifyCompleteGimmick__Q210CardBattle11CCardBattle);
+void CCardBattle::notifyCompleteGimmick() {
+    if (m_pInstance) {
+        TRACE(D_00477298, ((CARD*)m_pInstance->m_cardGimmick)->m_nKind);
+        _setCard(*(CARD*)m_pInstance->m_cardGimmick, 0, 0);
+        _ref(m_pInstance)->m_uiFlag &= ~0x8000;
+    }
+}
 BOOL CCardBattle::isPlayingGimmickCard() {
     if (!m_pInstance) return FALSE;
     return m_pInstance->m_cardGimmick[0];
