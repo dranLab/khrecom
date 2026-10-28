@@ -2564,8 +2564,103 @@ void CBattleEnemy::changeBattleEnemyState(INT inState) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", hitTest___12CBattleEnemy);
 __asm__(".rdata\n.align 3\n.word 0x42705F6D\n.word 0x4379646F\n.word 0x2D6C6C6F\n.word 0x7465673E\n.word 0x43746948\n.word 0x426C6C6F\n.word 0x2879646F\n.word 0x00000029\n.word 0x00000000\n.word 0x00000000\n.word .L002B543C\n.word .L002B5444\n.word .L002B544C\n.word .L002B5454\n.word .L002B545C\n.word func_0\n.word func_0\n.word func_0\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", computeDamage___12CBattleEnemyff8ATK_KIND);
-__asm__(".rdata\n.align 3\n.word .L002B57B4\n.word .L002B57CC\n.word .L002B5A70\n.word .L002B580C\n.word .L002B57E4\n.word .L002B5818\n.word .L002B5870\n.word .L002B589C\n.word .L002B5A60\n.word .L002B5998\n.word .L002B59AC\n.word .L002B58B4\n.word .L002B59C8\n.word .L002B59F0\n.word .L002B5A68\n.word .L002B5A60\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B5A70\n.word .L002B589C\n.text\n");
+INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr, ATK_KIND inAtkKind) {
+    FLOAT damage = inDamage;
+    BOOL special = TRUE;
+    CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+    if (!hitBody) AssertApp(__FILE__, 0x1703, "hitBody", 0);
+    switch (inAtkKind) {
+    case ATK_KIND_STOP:
+        if (m_pEnemyParam->getSpecialEffect(1)) {
+            m_tqTime = (INT)damage;
+            return TRUE;
+        }
+        return FALSE;
+    case ATK_KIND_BIND:
+        if (!m_pEnemyParam->getSpecialEffect(3)) return FALSE;
+        if (!(m_pMove->getCollisionFlag() & 5)) return FALSE;
+        break;
+    case ATK_KIND_FREEZE:
+        if ((INT)getExtraParam(BattleEnemy::FreezeParamName) <= 0) return FALSE;
+        break;
+    case ATK_KIND_TERROR:
+        if (!m_pEnemyParam->getSpecialEffect(5)) return FALSE;
+        break;
+    case ATK_KIND_GRAVITY:
+        if (!m_pEnemyParam->getSpecialEffect(6)) return FALSE;
+        damage = m_iHp * inDamage / 100.0f;
+        if (m_hFreeze) {
+            INT dmg = (INT)damage;
+            CardBattle::calcFreezeDamage(dmg);
+            damage = dmg;
+        }
+        break;
+    case ATK_KIND_DEGENERATOR:
+        if (!m_pEnemyParam->getSpecialEffect(2)) return FALSE;
+        if (RND::genrand_int31() & 1) return FALSE;
+        break;
+    case ATK_KIND_DEGENERATE:
+    case ATK_KIND_DEGENERATE_BREAK:
+        if (!m_pEnemyParam->getSpecialEffect(2)) return FALSE;
+        break;
+    case ATK_KIND_SYNCHRO: {
+        CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+        if (!bem) AssertApp(__FILE__, 0x176E, "bem", 0);
+        INT hp = m_iHp;
+        FLOAT wait = 0.0f;
+        for (SLContainerT<CTask>* container = bem->getFirstBattleEnemy(); container; container = container->getNext()) {
+            CBattleEnemy* enemy = (CBattleEnemy*)container->getValue();
+            if (!enemy || enemy == this) continue;
+            if (enemy->getTypeID() != 0x1004) continue;
+            if (enemy->isValidSynchro()) {
+                enemy->m_iHp = hp;
+                FVECTOR pos;
+                enemy->getLockOnPos(pos);
+                enemy->setEffect(BattleEnemy::SynchroEffectName, 3, &pos, NULL, wait);
+                wait += 3.0f;
+            }
+        }
+        break;
+    }
+    case ATK_KIND_TORNADO:
+        damage = inDamage * 0.1f;
+        break;
+    case ATK_KIND_QUAKE:
+        if (!(m_pMove->getCollisionFlag() & 5)) return FALSE;
+        break;
+    case ATK_KIND_MAGNET:
+        if ((INT)getExtraParam(BattleEnemy::MagnetParamName)) {
+            m_tqTime = (INT)damage;
+            return TRUE;
+        }
+        return FALSE;
+    case ATK_KIND_DRAIN: {
+        m_iExp = m_iExp * 3 / 4;
+        INT addPlayerHp = m_iHp / 8;
+        if (addPlayerHp > 20) {
+            addPlayerHp = 20;
+        } else if (addPlayerHp <= 0) {
+            addPlayerHp = 1;
+        }
+        g_pPlayer->addHP(addPlayerHp, 0, 0);
+        break;
+    }
+    case ATK_KIND_SHOCK:
+    case ATK_KIND_ABSOLUTE_STOP:
+        m_tqTime = (INT)damage;
+        return TRUE;
+    case ATK_KIND_SUSPEND:
+        return TRUE;
+    case ATK_KIND_CONFUSE:
+    default:
+        special = FALSE;
+        break;
+    }
+    m_fDamage = damage;
+    INT result = computeDamage_(damage, inAttr);
+    if (result <= 0 && special) result = 1;
+    return result;
+}
 INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
     INT result = (INT)(inDamage * inAttr * getDamageRate_() / 100.0f);
     if (!isBtlEnemyFlag(0x400) && !isBtlEnemyFlag(0x4000)) {

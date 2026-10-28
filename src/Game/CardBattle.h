@@ -57,7 +57,7 @@ namespace CardBattle {
 extern BC_PARAM* g_pBattleCardList;
 extern SS_PARAM* g_pStockSkillList; // PARTIAL: added for Game/Player/SummonDumbo
 extern unsigned char g_DropFriendCardList[32][8]; // PARTIAL: added for Game/Player/PlayerManager
-void getDropFriendCard(CARD& outCard, INT inRate); // PARTIAL: added for Game/Enemy/BattleEnemy
+void getDropFriendCard(CARD& outCard, INT inRate); void calcFreezeDamage(INT& ioDamage); // PARTIAL: calcFreezeDamage added for Game/Enemy/BattleEnemy // PARTIAL: added for Game/Enemy/BattleEnemy
 // PARTIAL: added for Game/Player/PlayerManager (Game/CardRevolver.h in the original)
 extern char* g_szDbgDeckName[10];
 extern char* g_szEnemyCardEffName[60];
