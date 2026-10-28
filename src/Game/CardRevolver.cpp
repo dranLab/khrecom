@@ -1667,8 +1667,71 @@ void CCardRevolver::initStockSkillName(D2::C2DSeqCtrl* inSeq) {
     inSeq->m_seqControl.fgColor = 1;
     inSeq->m_seqControl.fgFntScale = 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeStock__Q210CardBattle13CCardRevolver);
-__asm__(".rdata\n.align 4\n.word 0x001E8590\n.word 0x001E84B0\n.word 0x001E84E8\n.word 0x001E8524\n.word 0x001E8570\n.word 0x001E8590\n.word 0x00000000\n.word 0x00000000\n.text\n");
+void CCardRevolver::exeStock() {
+    UINT flag = (m_uiUser == 1) ? 2 : 4;
+    switch (m_uiStockState) {
+    case 0:
+        if (m_iStock > 0 && (CGameWork::getInt(1, 0xE2) & flag)) {
+            m_uiStockState = 5;
+            m_uiStockFlag = (INT)m_uiStockFlag & ~1;
+            m_pSeqCtrlStock_Num01->enableDisp(0, FALSE);
+            m_pSeqCtrlStock_Num10->enableDisp(0, FALSE);
+        }
+        break;
+    case 1:
+    case 2:
+    case 3:
+        if (CGameWork::getInt(1, 0xE2) & flag) {
+            m_uiStockState = 5;
+            m_pSeqCtrlStock->enableDisp(FALSE);
+            m_uiStockFlag = (INT)m_uiStockFlag & ~1;
+            m_uiStockCategory = 0;
+            m_pSeqCtrlStock_Num01->enableDisp(0, FALSE);
+            m_pSeqCtrlStock_Num10->enableDisp(0, FALSE);
+        }
+        break;
+    case 5:
+        if (!(CGameWork::getInt(1, 0xE2) & flag)) setStockInfo();
+        break;
+    }
+    if (m_iStock == 0 && (m_uiStockFlag & 1)) {
+        m_uiStockFlag = (INT)m_uiStockFlag & ~1;
+        m_pSeqCtrlStock_Num10->enableDisp(0, FALSE);
+        m_pSeqCtrlStock_Num01->enableDisp(0, FALSE);
+    }
+    switch (m_uiStockState) {
+    case 0:
+        break;
+    case 1:
+        if (m_pSeqCtrlStock->isEnd(0)) {
+            m_uiStockState = 2;
+            m_pSeqCtrlStock->replaceSeq(0, _ref(g_szSeqCockpit), m_uiStockCategory + 1);
+        }
+        break;
+    case 2:
+        if (m_iStock) break;
+        if (!CCardBattle::isExecutingCard(m_uiUser)) {
+            m_uiStockState = 0;
+            m_pSeqCtrlStock->enableDisp(FALSE);
+        } else {
+            m_uiStockState = 3;
+        }
+        break;
+    case 3:
+        if (CCardBattle::isExecutingCard(m_uiUser)) break;
+        m_uiStockState = 4;
+        m_pSeqCtrlStock->replaceSeq(0, _ref(g_szSeqCockpit), m_uiStockCategory + 2);
+        break;
+    case 4:
+        if (m_pSeqCtrlStock->isEnd(0)) {
+            m_uiStockState = 0;
+            m_pSeqCtrlStock->enableDisp(FALSE);
+        }
+        break;
+    case 5:
+        break;
+    }
+}
 void CCardRevolver::deleteStock() {
     delete m_pSeqCtrlStock;
     m_pSeqCtrlStock = NULL;
