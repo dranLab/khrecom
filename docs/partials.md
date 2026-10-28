@@ -26,19 +26,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | cleanup/System-Sound-SoundMan (CSound pilot) | 1091 | 456 | 25 | 929 (929) | 0 |
 | 2026-10-28 | decomp/Game-Debug-DebugPathData (partial 19/87; A1 + hook edits) | 1097 | 455 | 25 | 931 (929) | 2 |
 | 2026-10-28 | decomp/Game-Debug-DebugPathData (20/87; data from source, temporary data-block PARTIALs) | 1115 | 455 | 25 | 934 (931) | 3 |
+| 2026-10-28 | decomp/Game-Debug-DebugPathData (62/87; weak tail from C) | 1115 | 455 | 25 | 935 (931) | 7 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1115 (1028 in 111 headers, 87 in 30 .cpp); MATCH: 3
+PARTIAL: 1115 (1029 in 111 headers, 86 in 30 .cpp); MATCH: 7
   by category: method 478, data member 72, type 96, fwd decl 54, #include 29, changed in place 132, padding 33, path override 24, gate 39, guessed 43, header-level 76, stand-in 31, other 8
 stand-ins: 455 foreign in 139 files (133 names), 191 unattributed, 173 own
 duplicate class names across headers: 25
 padding: 36 arrays, 26 accessors
-mechanisms: 934 sites (931 untagged); #line: 1168
+mechanisms: 935 sites (931 untagged); #line: 1168
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 155, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 529, superset 122, partial 100, gated 110, missing 17, unattributed 309
+classes: complete 530, superset 123, partial 98, gated 110, missing 17, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -212,7 +213,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `C3DPolyG4` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DPolyG4 |
 | `C3DStripBase` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DStripBase; 1 PARTIAL |
 | `CARD_KIND` | partial | Game/Enemy/BattleEnemy.h | 0 | Game/AttachCard.h, Game/Gimmick/GimmickManager.h | missing fields: CARD_KIND_KingdomChain, CARD_KIND_DesireLamp, CARD_KIND_TreasureOfSea, CARD_KIND_PumpkinHead, CARD_KIND_FairyHarp, CARD_KIND_WishStar, ... (+217) |
-| `CCPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: calcZ, getPacketSize, makePkt, setALPHA, setCLAMP, setSCISSOR, ... (+1); 4 PARTIAL |
+| `CCPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: setALPHA, setCLAMP, setSCISSOR, setTEST; virtual order differs; 5 PARTIAL |
 | `CCardRevolver` | gated | Game/CardBattle.h | 0 | Game/CardRevolver.h | missing fields: m_hOwner, m_uiUser, m_iState, m_iMode, m_nEnd, m_nTotal, ... (+58); missing methods: _init, _initCounter, _initNumEffect, _initialize, calcEnemyStockSkill, canSnatch, ... (+39); padding: _m_0x00, _m_0x4e, |
 | `CCollBody` | superset | Game/Collision/CollBody.h | 0 | Game/BodyCollision.h | virtual order differs; 1 PARTIAL |
 | `CFSM` | gated | System/Fsm.h | 0 | Game/Entity.h |  |
@@ -268,7 +269,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
 | `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 171 |
 | `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 145 |
-| `Game/Collision/CollUtilA.h` | 11 | 2/2/2/0 | 23 |
+| `Game/Collision/CollUtilA.h` | 11 | 2/2/2/0 | 24 |
 | `Game/Collision/Ride.h` | 1 | 6/0/1/0 | 5 |
 | `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
 | `Game/Debug/DebugPathData.h` | 3 | 0/0/0/2 | 4 |
@@ -373,7 +374,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 33 |
 | `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 2 |
-| `System/Graphic/Gprim.h` | 44 | 3/3/5/21 | 228 |
+| `System/Graphic/Gprim.h` | 45 | 3/3/5/21 | 228 |
 | `System/Graphic/GprimFull.h` | 0 | 1/17/2/0 | 1 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/LightUnit.h` | 3 | 4/0/3/0 | 8 |
@@ -382,7 +383,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 5 |
 | `System/Graphic/MotData.h` | 1 | 4/0/3/0 | 3 |
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
-| `System/Graphic/PathData.h` | 3 | 7/0/2/0 | 7 |
+| `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 7 |
 | `System/Graphic/PathDataCamera.h` | 1 | 0/1/0/0 | 3 |
 | `System/Graphic/ScreenMask.h` | 0 | 0/1/1/0 | 4 |
 | `System/Graphic/ShadowModel.h` | 3 | 0/0/1/0 | 5 |
@@ -410,7 +411,7 @@ or `untagged`.
 | kind | key | sites | tagged | reason, or an untagged site |
 |---|---|---:|---:|---|
 | feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:3 |
-| feature | `COLLOBJ_H_COLLISION_CLASSES` | 4 | 0 | untagged, e.g. Game/Collision/CollMap.cpp:2 |
+| feature | `COLLOBJ_H_COLLISION_CLASSES` | 5 | 1 | CPointCollision (debugWinPathEditPosCamGround) |
 | feature | `COLLOBJ_H_INFO_UNION` | 3 | 0 | untagged, e.g. Game/Movement.cpp:2 |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 1 | 0 | untagged, e.g. Game/Atel/Avatar.cpp:3 |
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 0 | untagged, e.g. Game/Atel/Atel.cpp:30 |
@@ -485,7 +486,7 @@ or `untagged`.
 | placeholder | `_createEnemyMotionName*` | 1 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:14 |
 | placeholder | `_emptyString*` | 1 | 0 | untagged, e.g. System/MainTaskFactory.cpp:90 |
 | placeholder | `_emptyStringPlaceholder*` | 180 | 0 | untagged, e.g. Form/DebugWindowTBL.cpp:13 |
-| placeholder | `_emptyStringPlaceholderDebugPathData*` | 1 | 0 | untagged, e.g. Game/Debug/DebugPathData.cpp:21 |
+| placeholder | `_emptyStringPlaceholderDebugPathData*` | 1 | 0 | untagged, e.g. Game/Debug/DebugPathData.cpp:23 |
 | placeholder | `_emptyTrace*` | 1 | 0 | untagged, e.g. Game/EffectMotion.cpp:29 |
 | placeholder | `_enemyAirpirateEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAirpirate.cpp:13 |
 | placeholder | `_enemyAirsoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAirsoldier.cpp:13 |
@@ -542,7 +543,7 @@ or `untagged`.
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:418 |
 | placeholder | `_statusEmptyString*` | 1 | 0 | untagged, e.g. Game/Status.cpp:14 |
 | placeholder | `_taskSLCOverflow*` | 3 | 0 | untagged, e.g. Form/Menu/BtlReportCtrl.cpp:8 |
-| placeholder | `_taskSLCOverflowDebugPathData*` | 1 | 0 | untagged, e.g. Game/Debug/DebugPathData.cpp:11 |
+| placeholder | `_taskSLCOverflowDebugPathData*` | 1 | 0 | untagged, e.g. Game/Debug/DebugPathData.cpp:12 |
 | placeholder | `_taskSLCOverflowHere*` | 1 | 0 | untagged, e.g. Game/Player/SummonCloud.cpp:23 |
 | placeholder | `_taskSLCOverflowLate*` | 1 | 0 | untagged, e.g. Game/Gimmick/GimmickTutorial.cpp:26 |
 | placeholder | `_taskSLCOverflowLevelUp*` | 1 | 0 | untagged, e.g. Form/Menu/LevelUp.cpp:20 |
