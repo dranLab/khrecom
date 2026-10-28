@@ -1032,7 +1032,24 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", hitTest___12C
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", computeDamage___12CBattleEnemyff8ATK_KIND);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", computeDamage___12CBattleEnemyff);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", changeDamageState___12CBattleEnemy8ATK_KIND);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", canAttack___12CBattleEnemyPC9ENEMY_ACT);
+BOOL CBattleEnemy::canAttack_(const ENEMY_ACT* inAct) {
+    if (!inAct) return FALSE;
+    FLOAT viewAngle = inAct->fViewAngle;
+    FLOAT dist = inAct->fDistance;
+    if (viewAngle != 0.0f) {
+        if (dist != 0.0f) {
+            if (entityVisibleAxisY(*g_pPlayer, viewAngle) && calcDistanceSq(*g_pPlayer) <= dist * dist) return TRUE;
+            return FALSE;
+        }
+        if (entityVisibleAxisY(*g_pPlayer, viewAngle)) return TRUE;
+        return FALSE;
+    }
+    if (dist != 0.0f) {
+        if (calcDistanceSq(*g_pPlayer) <= dist * dist) return TRUE;
+        return FALSE;
+    }
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", selectDamageMotion___12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", enableBind___12CBattleEnemyi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", enableConfuse___12CBattleEnemyi);
