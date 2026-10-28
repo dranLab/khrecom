@@ -25,18 +25,19 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | tools/partials (baseline) | 1092 | 470 | 25 | 929 (929) | 0 |
 | 2026-10-28 | cleanup/System-Sound-SoundMan (CSound pilot) | 1091 | 456 | 25 | 929 (929) | 0 |
 | 2026-10-28 | decomp/Game-Debug-DebugPathData (partial 19/87; A1 + hook edits) | 1097 | 455 | 25 | 931 (929) | 2 |
+| 2026-10-28 | decomp/Game-Debug-DebugPathData (20/87; data from source, temporary data-block PARTIALs) | 1115 | 455 | 25 | 934 (931) | 3 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1097 (1028 in 111 headers, 69 in 30 .cpp); MATCH: 2
-  by category: method 465, data member 72, type 96, fwd decl 54, #include 29, changed in place 127, padding 33, path override 24, gate 39, guessed 43, header-level 76, stand-in 31, other 8
+PARTIAL: 1115 (1028 in 111 headers, 87 in 30 .cpp); MATCH: 3
+  by category: method 478, data member 72, type 96, fwd decl 54, #include 29, changed in place 132, padding 33, path override 24, gate 39, guessed 43, header-level 76, stand-in 31, other 8
 stand-ins: 455 foreign in 139 files (133 names), 191 unattributed, 173 own
 duplicate class names across headers: 25
 padding: 36 arrays, 26 accessors
-mechanisms: 931 sites (929 untagged); #line: 1168
-opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 154, MAPENEMY_H_NO_COLL_ANIM 2
+mechanisms: 934 sites (931 untagged); #line: 1168
+opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 155, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 529, superset 122, partial 100, gated 110, missing 17, unattributed 309
 ```
 
@@ -257,7 +258,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/BodyCollision.h` | 22 | 0/1/0/0 | 55 |
 | `Game/Bullet/Bullet.h` | 8 | 2/3/0/0 | 30 |
 | `Game/Card.h` | 13 | 2/0/1/0 | 24 |
-| `Game/CardBattle.h` | 68 | 3/2/0/1 | 142 |
+| `Game/CardBattle.h` | 68 | 3/2/0/1 | 143 |
 | `Game/CardKind.h` | 0 | 0/0/2/0 | 150 |
 | `Game/CollParam.h` | 1 | 4/0/1/0 | 156 |
 | `Game/Collision/CollAttack.h` | 0 | 0/1/0/0 | 11 |
@@ -266,7 +267,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollMap.h` | 0 | 0/1/0/0 | 29 |
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
 | `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 171 |
-| `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 144 |
+| `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 145 |
 | `Game/Collision/CollUtilA.h` | 11 | 2/2/2/0 | 23 |
 | `Game/Collision/Ride.h` | 1 | 6/0/1/0 | 5 |
 | `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
@@ -342,14 +343,14 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/2d/2DFntObj.h` | 0 | 0/1/0/0 | 3 |
 | `System/Graphic/2d/2DLay.h` | 0 | 3/1/0/0 | 4 |
 | `System/Graphic/2d/2DLayObj.h` | 1 | 0/1/0/0 | 3 |
-| `System/Graphic/2d/2DMan.h` | 3 | 0/0/0/3 | 160 |
+| `System/Graphic/2d/2DMan.h` | 3 | 0/0/0/3 | 161 |
 | `System/Graphic/2d/2DObj.h` | 4 | 0/1/0/0 | 17 |
 | `System/Graphic/2d/2DSeq.h` | 1 | 1/1/0/0 | 4 |
 | `System/Graphic/2d/2DSeqCtrl.h` | 2 | 1/1/0/0 | 31 |
 | `System/Graphic/2d/2DSeqObj.h` | 8 | 3/3/0/0 | 16 |
 | `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 8 |
 | `System/Graphic/3DCPrim.h` | 1 | 0/0/1/0 | 1 |
-| `System/Graphic/Anim.h` | 29 | 0/0/0/2 | 145 |
+| `System/Graphic/Anim.h` | 29 | 0/0/0/2 | 146 |
 | `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 85 |
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
 | `System/Graphic/DeFocus.h` | 5 | 0/0/0/5 | 6 |
@@ -442,7 +443,7 @@ or `untagged`.
 | guard skip | `SYSTEM_COORD_H` | 1 | 0 | untagged, e.g. System/Graphic/Effect/effect_inl.h:9 |
 | guard skip | `SYSTEM_FSM_H` | 1 | 0 | untagged, e.g. Game/Entity.h:29 |
 | opt-out | `MAPENEMY_H_NO_COLL_ANIM` | 2 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:3 |
-| opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 155 | 0 | untagged, e.g. Form/Menu/BtlReportCtrl.cpp:4 |
+| opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 156 | 1 | the message comes after DebugPathData.h's strings (placeholder below) |
 | opt-out site | `MAPENEMY_H_NO_COLL_ANIM` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.h:8 |
 | opt-out site | `TASK_H_NO_SLC_OVERFLOW_MSG` | 1 | 0 | untagged, e.g. System/Task.h:201 |
 | path override | `ANIM_H_PATH` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:2 |
@@ -484,6 +485,7 @@ or `untagged`.
 | placeholder | `_createEnemyMotionName*` | 1 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:14 |
 | placeholder | `_emptyString*` | 1 | 0 | untagged, e.g. System/MainTaskFactory.cpp:90 |
 | placeholder | `_emptyStringPlaceholder*` | 180 | 0 | untagged, e.g. Form/DebugWindowTBL.cpp:13 |
+| placeholder | `_emptyStringPlaceholderDebugPathData*` | 1 | 0 | untagged, e.g. Game/Debug/DebugPathData.cpp:21 |
 | placeholder | `_emptyTrace*` | 1 | 0 | untagged, e.g. Game/EffectMotion.cpp:29 |
 | placeholder | `_enemyAirpirateEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAirpirate.cpp:13 |
 | placeholder | `_enemyAirsoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAirsoldier.cpp:13 |
@@ -540,6 +542,7 @@ or `untagged`.
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:418 |
 | placeholder | `_statusEmptyString*` | 1 | 0 | untagged, e.g. Game/Status.cpp:14 |
 | placeholder | `_taskSLCOverflow*` | 3 | 0 | untagged, e.g. Form/Menu/BtlReportCtrl.cpp:8 |
+| placeholder | `_taskSLCOverflowDebugPathData*` | 1 | 0 | untagged, e.g. Game/Debug/DebugPathData.cpp:11 |
 | placeholder | `_taskSLCOverflowHere*` | 1 | 0 | untagged, e.g. Game/Player/SummonCloud.cpp:23 |
 | placeholder | `_taskSLCOverflowLate*` | 1 | 0 | untagged, e.g. Game/Gimmick/GimmickTutorial.cpp:26 |
 | placeholder | `_taskSLCOverflowLevelUp*` | 1 | 0 | untagged, e.g. Form/Menu/LevelUp.cpp:20 |
@@ -603,15 +606,15 @@ than our includers (units with a source only). A heuristic: stand-ins and opt-ou
 |---|---:|---:|---|---|
 | `Form/Menu/JiminyMemo.h` | 3 | 2 | 1: System/MainTaskFactory | 0:  |
 | `Game/Card.h` | 25 | 24 | 1: Game/SceneInfo | 0:  |
-| `Game/CardBattle.h` | 146 | 142 | 4: Game/Debug/DebugPathData, Game/Entity, Game/Player/PlayerGauge, Game/SceneInfo | 0:  |
+| `Game/CardBattle.h` | 146 | 143 | 3: Game/Entity, Game/Player/PlayerGauge, Game/SceneInfo | 0:  |
 | `Game/Collision/CollDisp.h` | 7 | 6 | 1: Game/Entity | 0:  |
-| `Game/Collision/CollUtil.h` | 153 | 144 | 9: Game/BattleCard, Game/CardRevolver, Game/Collision/CollUtil, Game/Collision/CollUtilO, ... (+5) | 0:  |
+| `Game/Collision/CollUtil.h` | 153 | 145 | 8: Game/BattleCard, Game/CardRevolver, Game/Collision/CollUtil, Game/Collision/CollUtilO, ... (+4) | 0:  |
 | `Game/Enemy/BattleEnemy.h` | 58 | 57 | 1: Game/Player/PlayerGauge | 0:  |
 | `Game/OsdDef.h` | 8 | 7 | 1: System/MainTaskFactory | 0:  |
 | `Game/Status.h` | 15 | 14 | 1: Game/SceneInfo | 0:  |
 | `Game/Technic.h` | 19 | 18 | 1: Game/CardRevolver | 0:  |
-| `System/Graphic/2d/2DMan.h` | 166 | 160 | 6: Game/BattleCard, Game/CardRevolver, Game/Debug/DebugPathData, Game/Entity, ... (+2) | 0:  |
-| `System/Graphic/Anim.h` | 149 | 145 | 4: Game/BattleCard, Game/CardRevolver, Game/Debug/DebugPathData, Game/Player/PlayerGauge | 2: Game/Gimmick/CreateGimmick, Game/Gimmick/SampleGimmick |
+| `System/Graphic/2d/2DMan.h` | 166 | 161 | 5: Game/BattleCard, Game/CardRevolver, Game/Entity, Game/Player/PlayerGauge, ... (+1) | 0:  |
+| `System/Graphic/Anim.h` | 149 | 146 | 3: Game/BattleCard, Game/CardRevolver, Game/Player/PlayerGauge | 2: Game/Gimmick/CreateGimmick, Game/Gimmick/SampleGimmick |
 | `System/Graphic/Gprim.h` | 233 | 228 | 4: Game/Collision/CollUtil, Game/Player/PlayerGauge, Game/SceneInfo, System/Graphic/PackMan | 0:  |
 | `System/Graphic/Model.h` | 70 | 68 | 2: Game/Player/PlayerGauge, System/Graphic/PackMan | 0:  |
 | `System/Graphic/Str.h` | 141 | 135 | 6: Game/BattleCard, Game/CardRevolver, Game/Collision/CollUtil, Game/Entity, ... (+2) | 0:  |
