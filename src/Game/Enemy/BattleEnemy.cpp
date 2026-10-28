@@ -989,7 +989,16 @@ void CBattleEnemy::continuousDamageProc_() {
         m_tqDamageTimer = 1500;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", canBlackroomCard___12CBattleEnemy);
+BOOL CBattleEnemy::canBlackroomCard_() {
+    if (CCard::isMapCardFull()) return FALSE;
+    RoomInfo* room = CSceneInfo::getRoomInfo(-1);
+    if (!room) return FALSE;
+    if (room->getCardID() != 0xA9) return FALSE;
+    UINT id = (UINT)getID() % 10000;
+    if (id != 17 && id != 35) return FALSE;
+    if (CGame::isSoraGame() && CSceneInfo::getCurrentWorldID() == 1) return FALSE;
+    return TRUE;
+}
 BOOL CBattleEnemy::checkResist_(ATK_KIND inDmgKind) {
     BOOL resist = FALSE;
     switch (inDmgKind) {
