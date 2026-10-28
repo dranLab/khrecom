@@ -911,7 +911,7 @@ void CLockonMarker::setLockon(HANDLE inTarget, INT inDist) {
     m_bLockon = FALSE;
     if (inTarget > 0 && CTaskMan::getTask(inTarget)) m_bLockon = TRUE;
 }
-void CLockonMarker::chkLockon(INT& inTarget) {
+void CLockonMarker::chkLockon(HANDLE& inTarget) {
     CEntity* pTargetEntity;
     FVECTOR v;
     FLOAT dist;
@@ -989,7 +989,7 @@ void CLockonMarker::chkLockon(INT& inTarget) {
     m_bTrg = FALSE;
     m_uiFlag = (INT)m_uiFlag & ~0x80;
 }
-void CLockonMarker::cancelLockon(INT& ioHandle, INT inFlag) {
+void CLockonMarker::cancelLockon(HANDLE& ioHandle, INT inFlag) {
     if (!inFlag) {
         m_hTarget = 0;
         m_bLockon = FALSE;
@@ -1976,7 +1976,7 @@ INT CPrizeGauge::exePrizeCard() {
     }
     return 0;
 }
-BOOL CPrizeGauge::isNowDispCard() {
+INT CPrizeGauge::isNowDispCard() {
     if (!m_pInstance) return FALSE;
     return m_pInstance->m_uiCardState != 0;
 }
