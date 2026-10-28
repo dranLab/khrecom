@@ -1632,8 +1632,76 @@ void CCardBattle::setDuelEntry(INT inFlag) {
     }
     m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 9, &m_mesCardInfo[1]);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelStart__Q210CardBattle11CCardBattlei);
-__asm__(".rdata\n.align 4\n.word .L001DFE74\n.word .L001DFE80\n.word .L001DFE8C\n.word .L001DFE98\n.word .L001DFEA4\n.word .L001DFECC\n.word 0\n.word 0\n.text\n");
+void CCardBattle::setDuelStart(INT inFlag) {
+    if (inFlag) {
+        if (m_uiDuelState == 3) m_uiDuelState = 4;
+        return;
+    }
+    if (m_uiDuelState != 2) return;
+    m_uiDuelState = 3;
+    for (INT owner = 0; owner < 2; owner++) {
+        for (INT i = 0; i < m_iCount[owner]; i++) {
+            if (m_pCard[owner][i]) m_pCard[owner][i]->setBreak(0);
+        }
+        m_uiState[owner] = 5;
+    }
+    m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 10, &m_mesCardInfo[1]);
+    CGameWork::setFlag(1, 10, TRUE);
+    CCardRevolver* pRV = m_pRevolver[0];
+    if (pRV) {
+        pRV->returnStockCard(1);
+        pRV->changeMode(0, 1);
+    }
+    pRV = m_pRevolver[1];
+    if (pRV) {
+        pRV->returnStockCard(1);
+        pRV->changeMode(0, 1);
+    }
+    CGameWork::setFlag(1, 11, TRUE);
+    CGameWork::setInt(1, 0xE2, CGameWork::getInt(1, 0xE2) | 0x14);
+    TIMEQ time = m_nDuelBreakCountMax * 3000 + 3000;
+    if (DebugWork::g_dw.player.iDuelTime > 0) time = DebugWork::g_dw.player.iDuelTime * 3000;
+    m_pDuelGauge->setStart(time, m_nDuelBreakCountMax);
+    PLM::CPlayerManager* pPLM = (PLM::CPlayerManager*)CTaskMan::getSysTask(0x1F);
+    INT shiftID = (g_pPlayer->m_uiConditionFlag & 0x400000) ? 3 : 0;
+    m_iDuelSkill = 0;
+    switch (m_nDuelBreakCountMax) {
+    case 3:
+        m_iDuelSkill = shiftID + 0x66;
+        break;
+    case 5:
+        m_iDuelSkill = shiftID + 0x67;
+        break;
+    case 7:
+        m_iDuelSkill = shiftID + 0x68;
+        break;
+    }
+    pPLM->setReqLoad(m_iDuelSkill, 0);
+    switch (m_iDuelSkill) {
+    case 0x66:
+        pPLM->setReqLoad(0x93, 0);
+        break;
+    case 0x67:
+        pPLM->setReqLoad(0x94, 0);
+        break;
+    case 0x68:
+        pPLM->setReqLoad(0x95, 0);
+        break;
+    case 0x69:
+        pPLM->setReqLoad(0x93, 0);
+        break;
+    case 0x6A:
+        pPLM->setReqLoad(0x94, 0);
+        pPLM->setReqLoad(0x92, 0);
+        break;
+    case 0x6B:
+        pPLM->setReqLoad(0x95, 0);
+        pPLM->setReqLoad(0x92, 0);
+        break;
+    }
+    CGameWork::setFlag(1, 0x2B, TRUE);
+    PLM::addIntBR(0x43);
+}
 void CCardBattle::setDuelBreakCount(INT inCount, INT inMax) {
     INT max = inMax;
     if (m_uiDuelState < 9) {
