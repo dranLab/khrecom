@@ -1257,8 +1257,30 @@ void CCardBattle::setDuelEntry(INT inFlag) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelStart__Q210CardBattle11CCardBattlei);
 __asm__(".rdata\n.align 3\n.word .L001DFE74\n.word .L001DFE80\n.word .L001DFE8C\n.word .L001DFE98\n.word .L001DFEA4\n.word .L001DFECC\n.word 0\n.word 0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelBreakCount__Q210CardBattle11CCardBattleii);
-__asm__(".rdata\n.align 3\n.word .L001DFF6C\n.word .L001DFF6C\n.word .L001DFF6C\n.word .L001DFF6C\n.word .L001DFF74\n.word .L001DFF74\n.word .L001DFF7C\n.word .L001DFF7C\n.text\n");
+void CCardBattle::setDuelBreakCount(INT inCount, INT inMax) {
+    INT max = inMax;
+    if (m_uiDuelState < 9) {
+        switch (inMax) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+            max = 3;
+            break;
+        case 4:
+        case 5:
+            max = 5;
+            break;
+        case 6:
+        case 7:
+        default:
+            max = 7;
+            break;
+        }
+    }
+    m_nDuelBreakCount = inCount;
+    m_nDuelBreakCountMax = max;
+}
 BOOL CCardBattle::setEnemyDuelCard(HANDLE inHandle, INT inIndex, INT inNumber) {
     if (m_uiDuelState != 5) return 0;
     if (m_uiState[0]) return 0;
