@@ -2502,8 +2502,60 @@ void CBattleEnemy::initFSM_() {
     }
     if (!m_pDefaultState) m_pDefaultState = &m_EnemyState[1];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initRoom___12CBattleEnemy);
-__asm__(".rdata\n.align 3\n.word .L002B4FF0\n.word .L002B4FAC\n.word .L002B506C\n.word .L002B5060\n.word .L002B515C\n.word .L002B5118\n.word .L002B4FF0\n.word .L002B4FAC\n.word .L002B5250\n.word .L002B520C\n.text\n");
+void CBattleEnemy::initRoom_() {
+    _MapEnemyRoomInfo* info = CSceneInfo::getCurrentRoomMapEnemyInfo();
+    RoomInfo* room;
+    if (!info || !(room = CSceneInfo::getRoomInfo(-1))) {
+        changeBattleEnemyState(0);
+        return;
+    }
+    switch (info->_byHitPlayerAttack) {
+    case 1:
+    case 7:
+        m_iHp >>= 1;
+        if (room->getCardID() == 0xB1) m_iHp = (INT)(m_iHp * 0.2f);
+    case 0:
+    case 6:
+        if (room->getCardID() == 0xAF) createFriendCard_(1000);
+        if (info->_byHitPlayerAttack == 6 || info->_byHitPlayerAttack == 7) m_ullBtlEnemyFlag |= 0x1000000000ULL;
+        setEntityFlag(0, 0x10000);
+        changeBattleEnemyState(0);
+        break;
+    case 3:
+        m_iHp >>= 1;
+    case 2:
+        if (room->getCardID() == 0xB1) {
+            m_iHp = (INT)(m_iHp * 0.2f);
+        } else {
+            m_iHp = (INT)(m_iHp * 0.9f);
+        }
+        createFriendCard_(room->getCardID() == 0xAF ? 1000 : -1);
+        m_ullBtlEnemyFlag |= 8;
+        setEntityFlag(0, 0x10000);
+        changeBattleEnemyState(0);
+        break;
+    case 5:
+        m_iHp >>= 1;
+        if (room->getCardID() == 0xB1) m_iHp = (INT)(m_iHp * 0.2f);
+    case 4:
+        changeMotion(1, 500, 0, 0, 0, 0);
+        setEntityFlag(0x40000000, 0);
+        setupFade(0.0f, 1.0f, 3000, -1);
+        Message::CMessageManager::getInstance().sendMessage(150, getHandle(), getHandle(), 0x70F0F0F0, NULL);
+        m_tqTime = 12000;
+        setEntityFlag(0x10000, 0);
+        changeBattleEnemyState(18);
+        break;
+    case 9:
+        m_iHp >>= 1;
+        if (room->getCardID() == 0xB1) m_iHp = (INT)(m_iHp * 0.2f);
+    case 8:
+        m_ullBtlEnemyFlag |= 0x20000000000ULL;
+        setEntityFlag(0, 0x10000);
+        changeBattleEnemyState(0);
+        break;
+    }
+}
 void CBattleEnemy::changeBattleEnemyState(INT inState) {
     if (!((UINT)inState < 31)) AssertApp(__FILE__, 0x162B, "0 <= inState && inState < BTL_ENEMY_STATE_MAX", 0);
     CState& NewState = *(CState*)((inState * 0x20 + (INT)this) + 0x450);
