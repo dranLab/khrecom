@@ -295,7 +295,22 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateSmallDam
 void CBattleEnemy::endStateSmallDamage() {
     m_ullBtlEnemyFlag &= ~0x10000000;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateBigDamage__12CBattleEnemy);
+void CBattleEnemy::beginStateBigDamage() {
+    if (!isBtlEnemyFlag(0x200000000ULL)) {
+        setupFlick();
+        m_ullBackupFlag = m_pMove->getFlag();
+        m_pMove->enableGravity(TRUE);
+        m_iSysStep = 0;
+    } else {
+        if (checkHitPos() & 1) {
+            changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
+        } else {
+            changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[8], 0, 0, -1);
+        }
+        m_iSysStep = 1;
+    }
+    playBigDamageSE();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateBigDamage__12CBattleEnemy);
 void CBattleEnemy::endStateBigDamage() {
     if (!(m_ullBackupFlag & 4)) m_pMove->enableGravity(FALSE);
