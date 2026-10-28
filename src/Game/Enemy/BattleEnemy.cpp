@@ -424,7 +424,14 @@ CBattleEnemyManager* CBattleEnemy::getBattleEnemyManager() const {
     }
     return NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makePrize__12CBattleEnemyPC7FVECTOR);
+void CBattleEnemy::makePrize(const FVECTOR* inPos) {
+    if (!inPos) AssertApp(D_004ACBC0, 0xF4B, D_004AD568, 0);
+    if (isBtlEnemyFlag(0x400000)) return;
+    makeExpPrize(inPos);
+    makePremiumPrize(inPos);
+    makeRoulettePrize(inPos);
+    makeCard(inPos);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeExpPrize__12CBattleEnemyPC7FVECTOR);
 void CBattleEnemy::makePremiumPrize(const FVECTOR* inPos) {
     CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
