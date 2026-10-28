@@ -492,7 +492,66 @@ INT CCardRevolver::getRemain(INT inMode, INT inKind, INT inCategory) {
     return n;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockCard__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", returnStockCard__Q210CardBattle13CCardRevolveri);
+extern "C" char D_0047AF38[]; /* "CR::returnStockCard NowDuel NG!\n" */
+extern "C" char D_0047AF60[]; /* "CR::returnStockCard Now Reload Lost NG!\n" */
+extern "C" char D_0047AF90[]; /* "CR::returnStockCard DESTROY\n" */
+extern "C" char D_0047AFB0[]; /* "CR::returnStockCard RETURN\n" */
+INT CCardRevolver::returnStockCard(INT inFlag) {
+    INT nStock;
+    BOOL bDestroy;
+    INT i;
+    if (((CCardBattle*)CTaskMan::getSysTask(0x16))->isNowDuel()) {
+        TRACE(D_0047AF38);
+        return 0;
+    }
+    if (!m_nReloadCard) {
+        TRACE(D_0047AF60);
+        return 0;
+    }
+    nStock = getStock(1);
+    if (!nStock && !m_iStock) return 0;
+    bDestroy = FALSE;
+    if (!inFlag) {
+        if (m_iState != 1) return 0;
+        if (m_iMode) return 0;
+        if (nStock != m_iStock) return 0;
+        if (m_nRemain[0] > 0 && !getActiveCard()) return 0;
+        if (CCardBattle::isExecutingCard(m_uiUser)) return 0;
+    } else {
+        if (m_iState != 1) bDestroy = TRUE;
+        if (m_iMode) bDestroy = TRUE;
+        if (nStock != m_iStock) bDestroy = TRUE;
+        if (m_nRemain[0] > 0 && !m_iMode && !getActiveCard()) bDestroy = TRUE;
+        if (CCardBattle::isExecutingCard(m_uiUser)) bDestroy = TRUE;
+    }
+    m_uiFlag = (INT)m_uiFlag & ~0x200;
+    if (bDestroy) {
+        TRACE(D_0047AF90);
+        for (i = 0; i < 7; i++) {
+            if (m_pCardsS[i]) m_pCardsS[i]->destroy(0);
+            m_pCardsS[i] = NULL;
+            m_pDataS[i] = NULL;
+        }
+    } else {
+        TRACE(D_0047AFB0);
+        for (i = 0; i < 7; i++) {
+            if (m_pCardsS[i]) m_pCardsS[i]->resetHand(++m_nRemain[0], m_nTotal[0]);
+            m_pCardsS[i] = NULL;
+            m_pDataS[i] = NULL;
+        }
+        m_iState = 3;
+        m_tqTimer = 400;
+        m_iMax = m_nRemain[0] + m_nReloadCard;
+        m_uiFlag = (INT)m_uiFlag & ~8;
+        m_bActive = FALSE;
+    }
+    m_iStock = 0;
+    m_iStockSum = 0;
+    m_iStockSkill = 0;
+    m_iExtraSkill = 0;
+    m_iFirstSkill = 0;
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", calcStockSkill__Q210CardBattle13CCardRevolver);
 INT CCardRevolver::calcEnemyStockSkill() {
     UINT uiKinds = 0;
