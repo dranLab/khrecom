@@ -1329,7 +1329,24 @@ BOOL CBattleEnemy::canAttack_(const ENEMY_ACT* inAct) {
     return TRUE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", selectDamageMotion___12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", enableBind___12CBattleEnemyi);
+void CBattleEnemy::enableBind_(BOOL inSw) {
+    if (inSw) {
+        CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+        if (!hitBody) AssertApp(D_004ACBC0, 0x1B8A, D_004AD3D8, 0);
+        setEntityFlag(0x8000, 0);
+        m_ullBtlEnemyFlag |= 0x20000;
+        setBadStatusEffect(0, hitBody->getBadStatusParam());
+        m_pMove->setFlag(8, TRUE);
+        m_tqBindTimer = 33000;
+        setEffect(BattleEnemy::BindEffectName, 1, &getPos(), NULL, hitBody->getBadStatusParam());
+    } else {
+        setEntityFlag(0, 0x8000);
+        m_ullBtlEnemyFlag &= ~0x20000;
+        killBadStatusEffect();
+        m_pMove->setFlag(8, FALSE);
+        m_tqBindTimer = 0;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", enableConfuse___12CBattleEnemyi);
 void CBattleEnemy::setGuardEffect_(const FVECTOR* inPos) {
     switch ((UINT)getID() % 10000) {
