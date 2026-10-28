@@ -1,6 +1,13 @@
 #include "khtypes.h"
+#include "System/Task.h"
 #include "Game/CardBattle.h"
+#include "Game/BattleCard.h"
+#include "System/HeapMan.h"
+#include "System/Graphic/2d/2DSeqCtrl.h"
 #include "include_asm.h"
+
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 
 using namespace CardBattle;
 
@@ -12,7 +19,47 @@ public:
     void setStockInfo();
 };
 void calcFreezeDamage(INT& ioDamage);
+
+class CDuelGauge : public ::CTask {
+private:
+    UINT m_uiState;        /* 0x40 */
+    UINT m_uiTimerState;   /* 0x44 */
+    UINT m_uiCountState;   /* 0x48 */
+    UINT m_uiCount;        /* 0x4c */
+    UINT m_uiCountMax;     /* 0x50 */
+    UINT m_uiResult;       /* 0x54 */
+    UINT m_uiFlag;         /* 0x58 */
+    TIMEQ m_tqTimer;       /* 0x5c */
+    TIMEQ m_tqLimit;       /* 0x60 */
+    HANDLE m_hTimerSE;     /* 0x64 */
+    D2::C2DSeqCtrl* m_pSeqCtrls; /* 0x68 */
+
+public:
+    CDuelGauge(::CTask* pParent);
+    virtual ~CDuelGauge();
+    virtual void main();
+
+private:
+    void _initialize();
+    void setTimer(UINT inState);
+    void exeTimer();
+    void changeTimer(INT inTime);
+    void setCount(UINT inState);
+    void exeCount();
+
+public:
+    UINT getState() const { return m_uiState; }
+    void setStart(TIMEQ inTime, UINT inCount);
+    void setResult(UINT inResult);
+    TIMEQ getTimer() const { return m_tqTimer; }
+    void changeCount(UINT inCount, UINT inMax);
+    void setDuelNG();
+    void exeDuelNG();
+};
 }
+/* the unit's own copy of the header static (data still from assembly) */
+extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039AF98");
+extern "C" char D_00477690[]; /* "...CardBattle.cpp(4378)" */
 extern "C" char D_00476980[]; /* __FILE__ */
 extern "C" char D_00476730[];
 extern "C" int abs(int);
@@ -243,7 +290,10 @@ BOOL CCardBattle::isDuelEntryingCard(INT inSide) {
     }
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", __Q210CardBattle10CDuelGaugeP5CTask);
+CDuelGauge::CDuelGauge(::CTask* pParent) : ::CTask(pParent, 0x4000) {
+    m_pSeqCtrls = NULL;
+    _initialize();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _$_Q210CardBattle10CDuelGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _initialize__Q210CardBattle10CDuelGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", main__Q210CardBattle10CDuelGauge);
