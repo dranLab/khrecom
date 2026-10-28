@@ -23,7 +23,21 @@ class CPDFrameTime {
     CTile m_cTile;
 
 public:
-    CPDFrameTime();
+    CPDFrameTime() {
+        m_iFlags = 0;
+        m_fTimer = 0.0f;
+        m_szStr[0] = 0;
+        m_cFnt.setText(m_szStr);
+        m_cFnt.setLayerFG(8);
+        m_cFnt.setStyle(1);
+        m_cFnt.setSize(16);
+        m_cFnt.m_P0.set(240 << 4, -168 << 4, 0xFFFF280);
+        m_cTile.m_C0.set(0, 0, 0, 0x60);
+        m_cTile.setSemiTrans((ALPHA)1);
+        m_cTile.setLayerFG(8);
+        m_cTile.m_P0.set(112 << 4, -184 << 4, 0xFFFF280);
+        m_cTile.m_P1.set(244 << 4, -166 << 4, 0xFFFF280);
+    }
     ~CPDFrameTime() {}
     void reset();
     void start() { m_iFlags |= 2; }

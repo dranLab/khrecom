@@ -8,6 +8,8 @@
 #include "Game/Debug/DebugPathData.h"
 #define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h" /* MATCH: the original includes it under this name */
 #include "System/Graphic/PathDataCamera.h"
+#include "Game/CardKind.h"
+#include "Game/Player/Player.h"
 #include "Form/DebugWindow.h"
 #include "System/Graphic/WorldEnv.h"
 #include "System/Coord.h"
@@ -157,7 +159,35 @@ INT debugWinPathListAllCall(CDebugWindow* pWin, INT iMes) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineNewCall__FP12CDebugWindowii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathLineNameLoadCall__FP12CDebugWindowii);
+extern const DEBUG_WINDOW_TBL debugWinPath;      /* PARTIAL: file statics, data still asm */
+extern const DEBUG_WINDOW_TBL debugWinPathNoEnd;
+extern "C" char D_00487008[];
+extern "C" char D_00487040[];
+extern "C" char D_00487078[];
+/* Data step first: the inline CCPrim::create brings Gprim.h's "(613)"/"m_V" literals, and the unit's .rodata is
+   still asm (objcopy: symbol .rodata required). Draft not compared yet. */
+#if 0
+CDebugPathData::CDebugPathData(CTask* p, BOOL bEnd) : CTask(p, 0x4000) {
+    CTask* pWnd;
+    m_pPath = NULL;
+    ignorePause(TRUE);
+    m_szFileName[0] = 0;
+    if (bEnd) {
+        pWnd = new (com_malloc_d(0x1C0, D_00487008, RET_ADDR())) CDebugWindow(this, debugWinPath);
+    } else {
+        pWnd = new (com_malloc_d(0x1C0, D_00487040, RET_ADDR())) CDebugWindow(this, debugWinPathNoEnd);
+    }
+    m_hChildWnd = pWnd ? pWnd->getHandle() : 0;
+    m_iActivePathNum = 0;
+    m_pFrame = new (com_malloc_d(0xD8, D_00487078, RET_ADDR())) CPDFrameTime;
+    m_gpPArrowPoly.create(0xB, 3);
+    m_gpPArrowPoly.setLayerFG(2);
+    CDebugWindow::enableTopDebugWindow(FALSE);
+    CPlayer::enableDbgPadControl(FALSE);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __14CDebugPathDataP5CTaski);
+#endif
 /* Not attempted yet: the key function; defining it emits every in-class inline (the weak tail, still asm).
    Draft (needs Game/CardKind.h + Game/Player/Player.h after PathDataCamera.h, ~CPDFrameTime() {} inline):
    delete m_pPath; m_pPath = NULL; delete m_pFrame; m_pFrame = NULL; m_pInstance = NULL;
