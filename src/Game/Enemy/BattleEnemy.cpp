@@ -2331,10 +2331,12 @@ void CBattleEnemy::notifyHP() {
     HANDLE hThis = getHandle();
     Gauge::CEnemyGauge::notifyHP(hThis, nHp, getHpMax());
 }
-/* Not attempted: CStateTemplate::set()'s assert strings (System/Fsm.h) need the unit's .rodata from source (draft:
- * build/progress/Game/Enemy/initFSM_draft.c) */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initFSM___12CBattleEnemy);
-__asm__(".rdata\n.align 3\n.word 0x74737953\n.word 0x462F6D65\n.word 0x682E6D73\n.word 0x00000000\n.word 0x736E4970\n.word 0x636E6174\n.word 0x00000065\n.word 0x00000000\n.word 0x426E6670\n.word 0x6E696765\n.word 0x74617453\n.word 0x00000065\n.text\n");
+void CBattleEnemy::initFSM_() {
+    for (INT i = 0; i < 31; i++) {
+        m_EnemyState[i].set(this, m_pBeginStateTbl[i], m_pStateTbl[i], m_pEndStateTbl[i]);
+    }
+    if (!m_pDefaultState) m_pDefaultState = &m_EnemyState[1];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initRoom___12CBattleEnemy);
 __asm__(".rdata\n.align 3\n.word .L002B4FF0\n.word .L002B4FAC\n.word .L002B506C\n.word .L002B5060\n.word .L002B515C\n.word .L002B5118\n.word .L002B4FF0\n.word .L002B4FAC\n.word .L002B5250\n.word .L002B520C\n.text\n");
 void CBattleEnemy::changeBattleEnemyState(INT inState) {
