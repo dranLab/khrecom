@@ -40,7 +40,13 @@ private:
     class CSemiModel* m_pSemiModel; /* 0x034 */
     class CFadeModel* m_pFadeModel; /* 0x038 */
     CLightUnit* m_pLightUnit; /* 0x03c PARTIAL: split out for Game/ModelObj */
-    UBYTE _m_0x40[0x14]; /* 0x040 .. 0x054 */
+    u_long128* m_pBeforeDirect;  /* 0x040 */
+    u_long128* m_pAfterDirect;   /* 0x044 */
+    USHORT m_iBeforeDirectQNum;  /* 0x048 */
+    USHORT m_iAfterDirectQNum;   /* 0x04a */
+    FIX4 m_iOTZ;                 /* 0x04c */
+    SHORT m_BoneIdx;             /* 0x050 */
+    SHORT m_BoneStart;           /* 0x052 */
     CCoords* m_pCrds;    /* 0x054 PARTIAL: split out for System/Graphic/DispList */
     const MODELDATA* m_pData; /* 0x058 */
     USHORT m_Mode;       /* 0x05c */ // PARTIAL: split out for System/Graphic/Model
@@ -86,6 +92,8 @@ public:
     virtual BOOL dispCheck();
     virtual void changeLayerExt(INT a, INT b);        // PARTIAL: parameters guessed, for Form/Menu/MenuModel
     FLOAT getAlphaScale() { return m_fAlphaScale; }
+    INT getBeforeDirectNum() const { return m_iBeforeDirectQNum; } // PARTIAL: added for System/Graphic/Model
+    INT getAfterDirectNum() const { return m_iAfterDirectQNum; }
     // PARTIAL: added for Game/ModelObj (m_ColorScale is the FVECTOR at 0x020)
     FVECTOR& getColorScale() { return *(FVECTOR*)&_m_0x18[8]; }
     void setLightUnit(CLightUnit* p) { m_pLightUnit = p; } // PARTIAL: added for Game/ModelObj
@@ -121,6 +129,76 @@ public:
 #ifdef GAME_ENTITY_H
 inline CModel* CEntity::getModel() { return m_pModels; }
 inline CModel* CEntity::getModel(INT inIndex) { return &m_pModels[inIndex]; }
+#endif
+
+#ifdef SYSTEM_GRAPHIC_MODEL_CPP
+/* PARTIAL: CSemiModel, CSemiZModel, CFadeModel and CBBox for System/Graphic/Model only (System/Graphic/DispList
+   and Form/Menu/JiminyMemo still declare CSemiModel stand-ins) */
+class CSemiZModel;
+class CSemiModel : public CDrawable {
+protected:
+    CModel* m_pModel;        /* 0x18 */
+    CSemiZModel* m_pSemiZ;   /* 0x1c */
+    FIX4 m_nOldZ;            /* 0x20 */
+    USHORT m_nPacketSize;    /* 0x24 */
+    BYTE m_SemiDraw;         /* 0x26 */
+    BYTE __pad;              /* 0x27 */
+
+public:
+    CSemiModel();
+    virtual ~CSemiModel();
+    void reset();
+    virtual void disp();
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+    void link(CModel* m);
+    void relink(CModel* m);
+    void setSemiTrans(ALPHA a);
+    void setSemiSort(BOOL bVal);
+    virtual UINT getPacketSize() const;
+    void dispDirect();
+    CModel* getParentModel();
+    void initSemiZModel();
+    void releaseSemiZModel();
+    virtual void changeLayerExt(BOOL bOn, INT nDepth);
+    void setOldZ(FIX4 nZ);
+    FIX4 getOldZ();
+protected:
+    void setDefaultSemiTrans();
+    void replaceParentModel(CModel* pInModel);
+    void setPacketSize(USHORT nSize);
+};
+
+class CSemiZModel : public CSemiModel {
+public:
+    CSemiZModel();
+    virtual ~CSemiZModel();
+    virtual void changeLayerExt(BOOL bOn, INT nDepth);
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
+class CFadeModel : public CSemiModel {
+public:
+    CFadeModel();
+    virtual ~CFadeModel();
+    virtual void makePkt();
+    virtual UINT getPacketSize() const;
+};
+
+class CBBox : public CGPrim {
+    CCoord* m_pCrd;  /* 0x1c */
+    G_RGBA m_C0;     /* 0x20 */
+    BBOX m_bbox;     /* 0x24 */
+
+public:
+    CBBox();
+    virtual ~CBBox();
+    virtual UINT getPacketSize() const;
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
 #endif
 
 /* Placeholders for the original header's inline functions: their strings ("System/Graphic/Model.h",

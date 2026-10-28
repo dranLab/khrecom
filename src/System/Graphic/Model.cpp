@@ -1,4 +1,5 @@
 #include "khtypes.h"
+#define SYSTEM_GRAPHIC_MODEL_CPP
 #include "System/Graphic/Model.h"
 #include "System/Task.h"
 #include "include_asm.h"
@@ -171,7 +172,11 @@ void CModel::getWorldBBox(FVECTOR& vMax, FVECTOR& vMin) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBSphere__FR6CCoordRC7FVECTORf);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBSphere__FR6CCoordPC4BBOX);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__FRC7FMATRIXPC4BBOX);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resultCheckBBox__FR7FVECTORT0);
+void resultCheckBBox(FVECTOR& min, FVECTOR& max) {
+    asm volatile("qmfc2.i $0, $vf0");
+    asm volatile("sqc2 $vf2, 0(%0)" : : "r"(&min) : "memory");
+    asm volatile("sqc2 $vf3, 0(%0)" : : "r"(&max) : "memory");
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resultCheckBBox__FR6CCoordPC4BBOX);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBBox__6CModel);
 void CModel::setColorScale(const FVECTOR& vColor) { getColorScale() = vColor; }
@@ -198,18 +203,26 @@ void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_SetPacket__6CModelUiPA3_CiiUliPUl);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__10CSemiModelP6CModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", initSemiZModel__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", releaseSemiZModel__10CSemiModel);
+void CSemiModel::releaseSemiZModel() {
+    if (m_pSemiZ) delete m_pSemiZ;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__10CSemiModelii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getPacketSize__C10CSemiModel);
+UINT CSemiModel::getPacketSize() const {
+    return m_nPacketSize + m_pModel->getBeforeDirectNum() + m_pModel->getAfterDirectNum();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__10CSemiModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiTrans__10CSemiModelG5ALPHA);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispDirect__10CSemiModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__11CSemiZModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__10CFadeModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getPacketSize__C10CFadeModel);
+UINT CFadeModel::getPacketSize() const {
+    UINT nPacketSize = m_nPacketSize;
+    if (m_pModel && (m_pModel->m_nFlag & 0x20)) nPacketSize *= 2;
+    return nPacketSize + m_pModel->getBeforeDirectNum() + m_pModel->getAfterDirectNum();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__8CModelBG);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__5CBBox);
+FIX4 CBBox::calcZ() { return 0x640; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__5CBBox);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", linkTexAnm__6CModelP7CTexAnmi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setupUVScroll__6CModeli);
