@@ -18,6 +18,11 @@
 #include "System/Coord.h"
 #include "Game/CardKind.h"
 #include "Game/Enemy/BattleEnemyManager.h"
+#include "Game/Card.h"
+#include "Game/SceneInfo.h"
+#include "Game/Game.h"
+#include "Game/SceneEnv.h"
+#include "Game/EffectMotion.h"
 #include "include_asm.h"
 
 extern "C" char D_004AD680[];
@@ -33,10 +38,13 @@ extern "C" char D_004AD578[];
 template <class T> static inline T& _ref(T& x) { return x; }
 namespace BattleEnemy {
 extern CHAR* FreezeEffectName;
+extern CHAR* DuelMotionParamName;
+extern CHAR* DisionEffectName;
 }
 extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
 extern "C" char D_004AD568[];
+extern "C" char D_004AD3D8[];
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
@@ -89,10 +97,25 @@ INT CBattleEnemy::getSize() const {
     return 1;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getNearestChild__12CBattleEnemyRfR7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getExtraParam__12CBattleEnemyPCc);
+FLOAT CBattleEnemy::getExtraParam(const CHAR* inParamName) {
+    if (m_pEnemyParam) return m_pEnemyParam->getExtraParam((char*)inParamName);
+    return 0.0f;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackPoint__12CBattleEnemyi8ATK_KINDUsP8ATK_KINDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackAttr__C12CBattleEnemyi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackRate__C12CBattleEnemy);
+INT CBattleEnemy::getAttackRate() const {
+    if (!m_pEnemyParam) return 10000;
+    INT power = 1;
+    if (m_tqConfuseTimer > 0) power = 10;
+    if ((UINT)getID() % 10000 < 100) {
+        CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+        if (bem) {
+            power *= bem->getEnemyCount();
+            if (power <= 0) power = 1;
+        }
+    }
+    return m_pEnemyParam->iAttackRate[m_iActiveAttackRate] * power;
+}
 void CBattleEnemy::getUseCardPos(FVECTOR& outPos) {
     FLOAT offset = getExtraParam(BattleEnemy::CamTrgOfsParamName);
     outPos = Crd(0).m_World.getTrans();
@@ -202,7 +225,16 @@ void CBattleEnemy::makeExpPrize() {
 void CBattleEnemy::makePrize() {
     if (m_pBodyColl->getHitCollBody()) makePrize(m_pBodyColl->getHitCollBody()->getDetectPos());
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", bossDeadDemoDispOff__12CBattleEnemy);
+void CBattleEnemy::bossDeadDemoDispOff() {
+    m_pEffect->kill(0.0f);
+    m_pSE->stop();
+    setEntityFlag(0, 0x80000000);
+    setModelAlphaScale(0.0f, -1);
+    bodyCollOffBody(-1);
+    loadModelColor_();
+    killLoopEffect(0);
+    killBadStatusEffect();
+}
 INT CBattleEnemy::getPlayerState() {
     if (g_pPlayer) return g_pPlayer->getPlayerState();
     return 2;
@@ -224,7 +256,16 @@ void CBattleEnemy::updateBefore() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateAfter__12CBattleEnemy);
 void CBattleEnemy::updatePositionAfter() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", lastUpdate__12CBattleEnemy);
+void CBattleEnemy::lastUpdate() {
+    if (m_pBodyColl) m_pBodyColl->update();
+    if (m_pAttack) m_pAttack->update();
+    if (isBtlEnemyFlag(0x20000)) {
+        setVel(m_vBackupVel);
+        m_pMove->updateVelocity();
+        if (!isBtlEnemyFlag(0x100)) m_pMove->setCollisionFlag(1, TRUE);
+    }
+    updateBadStatusEffect(m_hBadStatus);
+}
 void CBattleEnemy::changeDefaultState() {
     m_tqCancelTimer = 250;
     if (m_pDefaultState) {
@@ -235,7 +276,21 @@ void CBattleEnemy::changeDefaultState() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateAppear__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateAppear__12CBattleEnemy);
 void CBattleEnemy::endStateAppear() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateSmallDamage__12CBattleEnemy);
+void CBattleEnemy::beginStateSmallDamage() {
+    if (m_pEnemyParam) {
+        if (!isBtlEnemyFlag(0x100) && !(m_pMove->getCollisionFlag() & 5)) m_ullBtlEnemyFlag |= 0x10000000;
+        changeDamageMotion(selectDamageMotion_(), 0, 0, -1);
+    } else {
+        setTimer(3000);
+    }
+    setupHitBack();
+    playSmallDamageSE();
+    if (isQuickRecover_()) {
+        m_iSysStep = 1;
+    } else {
+        m_iSysStep = 0;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateSmallDamage__12CBattleEnemy);
 void CBattleEnemy::endStateSmallDamage() {
     m_ullBtlEnemyFlag &= ~0x10000000;
@@ -272,7 +327,16 @@ void CBattleEnemy::endStateDuel() {
     }
     bodyCollOnBody(-1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDuelSuccess__12CBattleEnemy);
+void CBattleEnemy::beginStateDuelSuccess() {
+    INT no = (INT)getExtraParam(BattleEnemy::DuelMotionParamName);
+    if (no <= 0) {
+        changeMotion(1, 0, 0, -1, 0, 0);
+    } else {
+        changeMotion(no, 0, 0, -1, 0, 0);
+    }
+    m_iSysStep = 0;
+    setTimer(15000);
+}
 void CBattleEnemy::stateDuelSuccess() {
     if (!isBtlEnemyFlag(0x4000000000ULL)) m_pMove->turnToTargetY(g_pPlayer, 0.17453292f);
     if (getTimer() <= 0) changeDefaultState();
@@ -351,7 +415,17 @@ void CBattleEnemy::endStateTornado() {
         m_pMove->enableGravity(TRUE);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateDegenerator__12CBattleEnemy);
+void CBattleEnemy::beginStateDegenerator() {
+    FVECTOR pos;
+    bodyCollOff(-1);
+    bodyCollOffBody(-1);
+    getLockOnPos(pos);
+    if (!m_pBodyColl->getHitCollBody()) AssertApp(D_004ACBC0, 0xCC3, D_004AD3D8, 0);
+    m_hDision = setEffect(BattleEnemy::DisionEffectName, 0, &pos, NULL, 0.0f);
+    m_iHp = 0;
+    m_pMove->enableGravity(FALSE);
+    m_iSysStep = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDegenerator__12CBattleEnemy);
 void CBattleEnemy::endStateDegenerator() {}
 void CBattleEnemy::beginStateGravity() {
@@ -375,7 +449,22 @@ void CBattleEnemy::endStateToss() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
     bodyCollOnBody(-1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateBeat__12CBattleEnemy);
+void CBattleEnemy::beginStateBeat() {
+    FVECTOR vel;
+    if (checkHitPos() & 1) {
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
+    } else {
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[8], 0, 0, -1);
+    }
+    vel.x = 0.0f;
+    vel.y = -0.2f;
+    vel.z = 0.0f;
+    vel.w = 1.0f;
+    m_pMove->setVel(vel);
+    m_pMove->enableGravity(TRUE);
+    playBigDamageSE();
+    m_iSysStep = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateBeat__12CBattleEnemy);
 void CBattleEnemy::endStateBeat() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
@@ -474,7 +563,16 @@ void CBattleEnemy::attackStateCardDestroy(BOOL inColl) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", attackStateCardDestroy__12CBattleEnemyi);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", onBio__12CBattleEnemyi);
+void CBattleEnemy::onBio(INT inSubHp) {
+    if (m_iHp > 0) {
+        if (CSceneEnv::getStopTypeBit() & (1 << getEntityType())) return;
+        if (getFlag() & 0x80000000) return;
+        if (isCurrentState(18)) return;
+        m_iHp -= inSubHp;
+        if (m_iHp <= 0) m_iHp = 1;
+        notifyHP();
+    }
+}
 void CBattleEnemy::onGift(INT inAddHp) {
     if (m_iHp > 0) {
         FVECTOR pos;
@@ -953,7 +1051,16 @@ void CBattleEnemy::continuousDamageProc_() {
         m_tqDamageTimer = 1500;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", canBlackroomCard___12CBattleEnemy);
+BOOL CBattleEnemy::canBlackroomCard_() {
+    if (CCard::isMapCardFull()) return FALSE;
+    RoomInfo* room = CSceneInfo::getRoomInfo(-1);
+    if (!room) return FALSE;
+    if (room->getCardID() != 0xA9) return FALSE;
+    UINT id = (UINT)getID() % 10000;
+    if (id != 17 && id != 35) return FALSE;
+    if (CGame::isSoraGame() && CSceneInfo::getCurrentWorldID() == 1) return FALSE;
+    return TRUE;
+}
 BOOL CBattleEnemy::checkResist_(ATK_KIND inDmgKind) {
     BOOL resist = FALSE;
     switch (inDmgKind) {
