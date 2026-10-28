@@ -469,7 +469,88 @@ void CDuelGauge::exeTimer() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setCount__Q210CardBattle10CDuelGaugeUi);
+void CDuelGauge::setCount(UINT inState) {
+    D2::C2DSeqCtrl* pSeq;
+    FVECTOR pos;
+    switch (inState) {
+    case 0:
+        m_uiCountState = inState;
+        m_pSeqCtrls[8].destroy();
+        m_pSeqCtrls[9].destroy();
+        m_pSeqCtrls[10].destroy();
+        break;
+    case 1:
+        m_uiCountState = inState;
+        D2::C2DMan::getLayPosition(_ref(g_szLadDuel), 1, 0, pos, FALSE);
+        pSeq = &m_pSeqCtrls[8];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 0);
+        pSeq->setPos(pos);
+        pSeq = &m_pSeqCtrls[9];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 6);
+        pSeq->addSeq(g_szSeqDuel, m_uiCountMax + 20);
+        pSeq->setPos(pos);
+        pSeq->enableColorCtrl(TRUE);
+        pSeq = &m_pSeqCtrls[10];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 3);
+        pSeq->addSeq(g_szSeqDuel, m_uiCount + 9);
+        pSeq->setPos(pos);
+        pSeq->enableColorCtrl(TRUE);
+        break;
+    case 2:
+        m_uiCountState = inState;
+        pSeq = &m_pSeqCtrls[8];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 1);
+        pSeq = &m_pSeqCtrls[9];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 7);
+        pSeq->addSeq(g_szSeqDuel, m_uiCountMax + 20);
+        pSeq->enableColorCtrl(TRUE);
+        pSeq = &m_pSeqCtrls[10];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 4);
+        if (m_uiCount) {
+            pSeq->addSeq(g_szSeqDuel, m_uiCount + 9);
+        } else {
+            pSeq->addSeq(g_szSeqDuel, 9);
+        }
+        pSeq->enableColorCtrl(TRUE);
+        break;
+    case 3:
+        m_uiCountState = inState;
+        pSeq = &m_pSeqCtrls[8];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 2);
+        pSeq = &m_pSeqCtrls[9];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 8);
+        pSeq->addSeq(g_szSeqDuel, m_uiCountMax + 20);
+        pSeq->enableColorCtrl(TRUE);
+        pSeq = &m_pSeqCtrls[10];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 5);
+        if (m_uiResult) {
+            pSeq->addSeq(g_szSeqDuel, m_uiCount + 9);
+        } else {
+            pSeq->addSeq(g_szSeqDuel, 9);
+            m_pSeqCtrls[10].changeTexture(1, 0, NULL, &g_uvDuelNumTex[2][m_uiCount], &g_uvDuelNumTex[3][m_uiCount]);
+        }
+        pSeq->enableColorCtrl(TRUE);
+        break;
+    }
+}
 void CDuelGauge::exeCount() {
     D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[8];
     switch (m_uiCountState) {
