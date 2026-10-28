@@ -146,7 +146,7 @@ public:
     inline CCoord& Crd(INT nNum) const;
     inline INT getCoordNum() const;
 #ifndef EFFECT_CPP
-    CCoords* getCoords() { return m_pCrds; } // PARTIAL: added for Game/Bullet/Bullet
+    CCoords* getCoords() { return m_pCrds; } const FVECTOR& getScale() const { return m_vScale; } // PARTIAL: added for Game/Bullet/Bullet (getScale: Game/Enemy/BattleEnemy, name unknown)
     // PARTIAL: added for Game/Player/FriendDonald
     void setScale(FLOAT _x, FLOAT _y, FLOAT _z) { m_vScale.set(_x, _y, _z); }
 #endif

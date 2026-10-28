@@ -380,5 +380,18 @@ inline INT getRand() {
 }
 #line 581
 inline FLOAT getRandF() { return RND::genrand_real1(); }
+/* PARTIAL: added for Game/Enemy/BattleEnemy (setupDuelCard): shuffles an array (name unknown, lines from the debug info) */
+#line 588
+inline void shuffleArray(INT* inArray, INT inNum) {
+    INT i;
+    INT* array = inArray;
+    for (i = inNum - 1; i > 0; i--) {
+        INT j;
+        j = (INT)((i + 1) * getRandF());
+        INT tmp = array[i];
+        array[i] = array[j];
+        array[j] = tmp;
+    }
+}
 
 #endif /* GAME_ENTITY_H */

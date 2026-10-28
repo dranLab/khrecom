@@ -25,11 +25,15 @@ public:
     FLOAT getBadStatusParam() { return m_fBadStatusParam; } // PARTIAL: added for Game/Enemy/EnemyCreapplant (name unknown)
     ATK_KIND getDamageKind() { return m_DamageKind; }
     HANDLE getEnemyHandle() { return m_hEnemyTask; } // PARTIAL: added for Game/Enemy/BattleEnemy
+    INT getDamage(); // PARTIAL: added for Game/Enemy/BattleEnemy
     const FVECTOR& getEnemyPos() const { return *(const FVECTOR*)&_m_0x10[0x10]; } // PARTIAL: added for Game/Enemy/BattleEnemy (m_vEnemyPos)
     FVECTOR* getStartPos() { return (FVECTOR*)m_pCollision; } // PARTIAL: added for Game/Enemy/BattleEnemy
     const CHAR* getHitEffectName() const { return (const CHAR*)&_m_0x8c[0xe8 - 0x8c]; } // PARTIAL: added for Game/Enemy/BattleEnemy
     INT getHitEffectNo() const { return *(const INT*)&_m_0x8c[0xf8 - 0x8c]; }           // PARTIAL: added for Game/Enemy/BattleEnemy
     INT getHitEffectObjType() const { return *(const INT*)&_m_0x8c[0xfc - 0x8c]; }      // PARTIAL: added for Game/Enemy/BattleEnemy (ObjType::eObjType)
+    void setHp(INT inHp) { *(INT*)&_m_0x8c[0x90 - 0x8c] = inHp; }                         // PARTIAL: added for Game/Enemy/BattleEnemy
+    INT getHp() const { return *(const INT*)&_m_0x8c[0x90 - 0x8c]; }                      // PARTIAL: added for Game/Enemy/BattleEnemy
+    INT getMaxHp() const { return *(const INT*)&_m_0x8c[0x94 - 0x8c]; }                   // PARTIAL: added for Game/Enemy/BattleEnemy
     INT getDamageAttr() { return m_DamageAttr; } // PARTIAL: added for Game/Enemy/EnemyWhitemushroom (name unknown)
     /* CCollObj::getDetectPos (m_pCollision->m_vDetectPos at 0x40) */
     FVECTOR* getDetectPos() { return m_pCollision ? (FVECTOR*)(m_pCollision + 0x40) : NULL; }
@@ -67,7 +71,7 @@ private:
         if (!(0 <= inKind && inKind < 2)) AssertApp(__FILE__, __LINE__, "0 <= inKind && inKind < COLLISION_KIND_MAX", 0);
         m_uiUserBodyFlag[inKind] = (m_uiUserBodyFlag[inKind] | inSet) & ~inMask;
     }
-    void setHitCollBody(CCollBody* inHit) { m_pHit = inHit; }
+    void setHitCollBody(CCollBody* inHit) { m_pHit = inHit; } friend class CBattleEnemy; // PARTIAL: friend added for Game/Enemy/BattleEnemy (stateTornado)
     void setHitCollBodyIndex(INT inIndex) { m_iHitIndex = inIndex; }
 
 public:

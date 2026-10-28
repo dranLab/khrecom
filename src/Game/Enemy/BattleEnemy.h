@@ -7,14 +7,14 @@
 #include "Game/Entity.h"
 #include "Game/CollParam.h"     // PARTIAL: added for Game/Enemy/EnemyBluerhapsody (ATK_KIND)
 #include "Game/AttackMotion.h" // PARTIAL: added for Game/Enemy/EnemyBluerhapsody (ATK_ATTR)
+#ifdef BATTLEENEMY_H_STATE_TEMPLATE // PARTIAL: Game/Enemy/BattleEnemy sees m_EnemyState as the real CStateTemplate array
+#include "System/Fsm.h"
+#endif
 
 struct ENEMY_PARAM; // PARTIAL: added for Game/Enemy/EnemyAirpirate
 struct ENEMY_ACT;   // PARTIAL: added for Game/Enemy/Heartless
 namespace BattleEnemy {
 INT GameModeHp(INT inHp); // PARTIAL: added for Game/Enemy/BattleEnemy
-extern CHAR* SynchroParamName;
-extern CHAR* CamTrgOfsParamName;
-extern INT GameModeParamHp[];
 }
 
 enum CARD_KIND {
@@ -90,7 +90,14 @@ private:
     SHORT m_sStopDamageCount;    /* 0x2cc */
     SHORT m_sStopDamagePtr;      /* 0x2ce */
     UBYTE m_StopDamage[0x180];   /* 0x2d0 STOP_DAMAGE[8] */
+#ifdef BATTLEENEMY_H_STATE_TEMPLATE
+    CStateTemplate<CBattleEnemy> m_EnemyState[31]; /* 0x450 */
+    static void (CBattleEnemy::*m_pBeginStateTbl[])();
+    static void (CBattleEnemy::*m_pStateTbl[])();
+    static void (CBattleEnemy::*m_pEndStateTbl[])();
+#else
     UBYTE m_EnemyState[0x3e0];   /* 0x450 CStateTemplate<CBattleEnemy>[31] */
+#endif
 
 public:
     CBattleEnemy(CTask* inParent, CState* inDefaultState, CState* inMainState);
@@ -141,6 +148,10 @@ public:
     void reviseObject_();
     void setHitEffect_();
     void updateSpotLight_();
+    INT computeDamage_(FLOAT inDamage, FLOAT inAttr);
+    INT computeDamage_(FLOAT inDamage, FLOAT inAttr, ATK_KIND inAtkKind);
+    BOOL initEnemyParam(INT inGroupID, INT inRsrcID, INT inIndex);
+    void initFSM_();
     void setupHitBack();
     void makeRoulettePrize(const FVECTOR* inPos);
     BOOL checkResist_(ATK_KIND inDmgKind);
