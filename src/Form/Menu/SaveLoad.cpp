@@ -249,6 +249,15 @@ public:
 class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs RsrcData.h internals */
 public:
     static void removeGroup(INT nGroupID, INT nMemberID);
+    static class CRsrcData* getFirstRsrc(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
+};
+class CRcf { /* PARTIAL: System/Rcf.h pulls in System/SJoint.h */
+public:
+    static void reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLinkOwner);
+};
+class CPackMan { /* PARTIAL: System/Graphic/PackMan.h is not written yet */
+public:
+    static void changeDrawMode(INT nMode);
 };
 
 HANDLE CSaveLoadUI::m_hThis = 0;
@@ -274,7 +283,17 @@ static inline void _updateOverrun() { TRACE("CSaveLoadUI \x82\xcc update() \x82\
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", __11CSaveLoadUIR9CSaveLoad8SAVELOAD9GAMECLEAR);
 __asm__(".rdata\n.align 3\n.word 0x74737953\n.word 0x462F6D65\n.word 0x682E6D73\n.word 0x00000000\n.word 0x736E4970\n.word 0x636E6174\n.word 0x00000065\n.word 0x00000000\n.word 0x426E6670\n.word 0x6E696765\n.word 0x74617453\n.word 0x00000065\n.word 0xFFFF0000\n.word 0x00348F38\n.word 0xFFFF0000\n.word 0x00349018\n.word 0xFFFF0000\n.word 0x00349148\n.word 0xFFFF0000\n.word 0x00349150\n.word 0xFFFF0000\n.word 0x00349248\n.word 0xFFFF0000\n.word 0x003493F8\n.word 0xFFFF0000\n.word 0x00349788\n.word 0xFFFF0000\n.word 0x00349790\n.word 0xFFFF0000\n.word 0x00349860\n.word 0xFFFF0000\n.word 0x003498D8\n.word 0xFFFF0000\n.word 0x00349938\n.word 0xFFFF0000\n.word 0x00349940\n.word 0xFFFF0000\n.word 0x00349948\n.word 0xFFFF0000\n.word 0x00349950\n.word 0xFFFF0000\n.word 0x003499D0\n.word 0xFFFF0000\n.word 0x003499D8\n.word 0xFFFF0000\n.word 0x00349A18\n.word 0xFFFF0000\n.word 0x00349B18\n.word 0xFFFF0000\n.word 0x00349B98\n.word 0xFFFF0000\n.word 0x00349C48\n.word 0xFFFF0000\n.word 0x00349FE8\n.word 0xFFFF0000\n.word 0x00349FF0\n.word 0xFFFF0000\n.word 0x0034A1D0\n.word 0xFFFF0000\n.word 0x0034A1D8\n.word 0xFFFF0000\n.word 0x0034A2D8\n.word 0xFFFF0000\n.word 0x0034A6A8\n.word 0xFFFF0000\n.word 0x0034A6E8\n.word 0xFFFF0000\n.word 0x0034A890\n.word 0xFFFF0000\n.word 0x0034AAC0\n.word 0xFFFF0000\n.word 0x0034ACA8\n.word 0xFFFF0000\n.word 0x0034ADE0\n.word 0xFFFF0000\n.word 0x0034AE68\n.word 0xFFFF0000\n.word 0x0034AF80\n.word 0xFFFF0000\n.word 0x0034B228\n.word 0xFFFF0000\n.word 0x0034B338\n.word 0xFFFF0000\n.word 0x0034B4E0\n.word 0xFFFF0000\n.word 0x0034B5A8\n.word 0xFFFF0000\n.word 0x0034B7B8\n.word 0xFFFF0000\n.word 0x0034BB00\n.word 0xFFFF0000\n.word 0x0034BCF0\n.word 0xFFFF0000\n.word 0x0034BDC0\n.word 0xFFFF0000\n.word 0x0034BEA0\n.word 0x65766173\n.word 0x64616C2E\n.word 0x00000000\n.word 0x00000000\n.word 0x64616F6C\n.word 0x64616C2E\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preInit__11CSaveLoadUI);
+void CSaveLoadUI::preInit() {
+    if (!(m_mode == SLMODE_BOOT || m_mode == SLMODE_MESSAGE)) CPackMan::changeDrawMode(1);
+    INT nID = !getRsrcType() ? 0x6A : 0x6B;
+    if (!CRsrcDB::getFirstRsrc(0x11, nID + 20000, FALSE)) CRcf::reqLoadRCFFront(2, nID, 0, NULL, 0);
+    if (s_nWorldIconRsrc) {
+        INT nMember = s_nWorldIconRsrc;
+        if (!CRsrcDB::getFirstRsrc(0x11, nMember + 20000, FALSE)) CRcf::reqLoadRCFFront(2, s_nWorldIconRsrc, 0, NULL, 0);
+    }
+    if (!CSystemDataChecker::isExited()) CSystemDataChecker::abort();
+    m_nTimer = 2;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeInit__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x29383037\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x29393037\n.word 0x00000000\n.text\n");
 void CSaveLoadUI::endInit() {}
