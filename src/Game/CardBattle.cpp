@@ -295,7 +295,19 @@ CDuelGauge::CDuelGauge(::CTask* pParent) : ::CTask(pParent, 0x4000) {
     _initialize();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _$_Q210CardBattle10CDuelGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _initialize__Q210CardBattle10CDuelGauge);
+void CDuelGauge::_initialize() {
+    m_uiFlag = 0;
+    m_uiState = 0;
+    m_uiTimerState = 0;
+    m_uiCountState = 0;
+    m_uiCount = 0;
+    m_uiCountMax = 0;
+    m_uiResult = 0;
+    m_tqTimer = 0;
+    m_tqLimit = 0;
+    m_hTimerSE = 0;
+    m_pSeqCtrls = new (D_00477690) D2::C2DSeqCtrl[12];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", main__Q210CardBattle10CDuelGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setStart__Q210CardBattle10CDuelGaugeiUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setResult__Q210CardBattle10CDuelGaugeUi);
