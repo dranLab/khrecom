@@ -330,7 +330,14 @@ CStockFolder* CCardBattle::setStockFolder(::CTask* pParent, INT inUser) {
     }
     return m_pInstance->m_pStockFolder[_PLAYER];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", destroyStockFolder__Q210CardBattle11CCardBattlei);
+void CCardBattle::destroyStockFolder(INT inSide) {
+    if (!(inSide)) AssertApp(D_00476980, 2905, D_00476730, 0);
+    UINT _PLAYER = inSide - 1;
+    if (m_pStockFolder[_PLAYER]) {
+        m_pStockFolder[_PLAYER]->destroy();
+        m_pStockFolder[_PLAYER] = NULL;
+    }
+}
 CStockFolder* CCardBattle::getStockFolder(INT inSide) {
     if (!m_pInstance) return NULL;
     return m_pInstance->m_pStockFolder[inSide - 1];
