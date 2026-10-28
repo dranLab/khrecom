@@ -757,8 +757,78 @@ void CSaveLoadUI::preCheckUnformat() {
     openMessageDlg(szMsg, 1, 3);
     m_nStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckUnformat__11CSaveLoadUI);
-__asm__(".rdata\n.align 4\n.word .L0034B86C\n.word .L0034B86C\n.word .L0034B88C\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034B8C4\n.word .L0034BA3C\n.word .L0034BA54\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAA4\n.word .L0034BABC\n.text\n");
+void CSaveLoadUI::exeCheckUnformat() {
+    INT r = -9999;
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqIdleCheckCard()) m_nStep++;
+        break;
+    case 1:
+        if (m_pMemoca->isCompleteReq(NULL)) {
+            r = m_pMemoca->getLastResult();
+            m_nStep = 0;
+        }
+        break;
+    }
+    if (r == -2) {
+        changeState(15);
+        return;
+    }
+    switch (m_nStep) {
+    case 0:
+    case 1:
+        if (m_nDlgResult) {
+            closeMessageDlg();
+            m_nStep = 2;
+        }
+        break;
+    case 2:
+        if (isPadEnable()) {
+            if (m_nDlgResult == 1) {
+                m_nStep = 10;
+            } else {
+                changeState(10);
+            }
+        }
+        break;
+    case 10: {
+        char szSlot[32];
+        _getSlotName(m_nSlot + 1, szSlot);
+        char szMsg[256];
+        const CHAR* pszFmt = _ctdText(0x600207);
+        const CHAR* pszText = _ctdText(0x600000);
+        sprintf(szMsg, pszFmt, pszText, szSlot, pszText);
+        openMessageDlg(szMsg, 0, 0);
+        m_nStep++;
+        break;
+    }
+    case 11:
+        if (CMemoca::reqFormat(m_nSlot)) m_nStep++;
+        break;
+    case 12:
+        r = CMemoca::formatProc();
+        if (r == -9999) break;
+        m_nLastResult = r;
+        if (r == 0) {
+            m_pGameDataEntries->formated();
+            m_nStep = 20;
+        } else {
+            m_nExecError = 4;
+            changeState(17);
+        }
+        break;
+    case 20:
+        closeMessageDlg();
+        m_nStep++;
+        break;
+    case 21:
+        if (isPadEnable()) {
+            changeState(11);
+            continueProc();
+        }
+        break;
+    }
+}
 void CSaveLoadUI::preConfirmExecErr() {
     INT nCtd;
     switch (m_nExecError) {
