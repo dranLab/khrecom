@@ -1122,8 +1122,48 @@ INT CCardRevolver::getRemain(INT inMode, INT inKind, INT inCategory) {
     }
     return n;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockCard__Q210CardBattle13CCardRevolver);
-__asm__(".rdata\n.align 4\n.word 0x001E4C70\n.word 0x001E4CC4\n.word 0x001E4D1C\n.word 0x001E4D1C\n.word 0x001E4DBC\n.word 0x001E4C5C\n.word 0x001E4DBC\n.word 0x001E4D1C\n.word 0x001E4D1C\n.word 0x001E4D1C\n.word 0x001E4D1C\n.word 0x001E4D1C\n.word 0x001E4DBC\n.word 0x00000000\n.text\n");
+void CCardRevolver::setStockCard() {
+    CBattleCard* card;
+    CCardBattle* pCB;
+    CARD* data;
+    INT num;
+    INT category;
+    if (CGameWork::getFlag(1, 10)) return;
+    if (m_iState != 1) return;
+    if (m_iMode) return;
+    card = getActiveCard();
+    if (!card) return;
+    pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (CCardBattle::isPlayingCard(m_uiUser)) return;
+    if (m_iStock == 3) return;
+    data = card->getCardData();
+    category = data->m_nCategory1;
+    num = data->m_nNumber;
+    switch (category) {
+    case 7:
+        if (num == -1) return;
+        break;
+    case 2:
+        if (_getEnchantKind(pCB, m_uiUser) == 0x1F) return;
+        break;
+    case 3:
+        if (_getEnchantKind(pCB, m_uiUser) == 0x19) return;
+        break;
+    case 6:
+    case 8:
+    case 14:
+        return;
+    }
+    card->setStock(m_iStock);
+    m_pCardsS[m_iStock] = card;
+    m_pDataS[m_iStock] = data;
+    m_tqRollSpeed = 300;
+    m_iStock++;
+    m_nRemain[0]--;
+    rollDeck(1, 1, 300);
+    CSound::playSE(0xF, -1, 0x40);
+    if (m_uiUser == 1 && m_iStock == 3) CGameWork::setFlag(1, 0x15, 1);
+}
 INT CCardRevolver::returnStockCard(INT inFlag) {
     INT nStock;
     BOOL bDestroy;
