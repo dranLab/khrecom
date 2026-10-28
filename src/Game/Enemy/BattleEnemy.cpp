@@ -109,7 +109,27 @@ INT CBattleEnemy::getSize() const {
     if (m_pEnemyParam) return m_pEnemyParam->uiSize;
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getNearestChild__12CBattleEnemyRfR7CEntity);
+HANDLE CBattleEnemy::getNearestChild(FLOAT& outDist, CEntity& inEntity) {
+    FLOAT nearest = 1e8f;
+    HANDLE handle = -1;
+    for (SLContainerT<CTask>* pContainer = getChildren().getHead(); pContainer; pContainer = pContainer->getNext()) {
+        CTask* task = pContainer->getValue();
+        if (!task) continue;
+        if (task->getTypeID() != 0x1004) continue;
+        FLOAT dist = ((CEntity*)task)->calcDistanceSq(inEntity);
+        FLOAT childDist;
+        HANDLE childHandle = ((CBattleEnemy*)task)->getNearestChild(childDist, inEntity);
+        if (childHandle != -1 && childDist < dist) {
+            dist = childDist;
+            task = CTaskMan::getTask(childHandle);
+        }
+        if (dist < nearest) {
+            handle = task->getHandle();
+            nearest = dist;
+        }
+    }
+    return handle;
+}
 FLOAT CBattleEnemy::getExtraParam(const CHAR* inParamName) {
     if (m_pEnemyParam) return m_pEnemyParam->getExtraParam((char*)inParamName);
     return 0.0f;
