@@ -318,7 +318,16 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setCount__Q210CardBa
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeCount__Q210CardBattle10CDuelGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", changeCount__Q210CardBattle10CDuelGaugeUiUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelNG__Q210CardBattle10CDuelGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeDuelNG__Q210CardBattle10CDuelGauge);
+void CDuelGauge::exeDuelNG() {
+    UINT flag = 1;
+    if (m_uiFlag & flag) {
+        D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[11];
+        if (pSeq && pSeq->isEnd(0)) {
+            pSeq->destroy();
+            m_uiFlag &= ~flag;
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPronounceStart__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPronouncePlay__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnemyPronounceCard__Q210CardBattle11CCardBattleiPQ210CardBattle11CBattleCard);
