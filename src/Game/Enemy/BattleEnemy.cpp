@@ -469,7 +469,13 @@ void CBattleEnemy::commonEndAttack() {
     m_ullBtlEnemyFlag &= ~5;
     bodyCollOn(-1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", notifyDead__12CBattleEnemy);
+void CBattleEnemy::notifyDead() {
+    if (isBtlEnemyFlag(0x40000000)) return;
+    CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+    if (!bem) AssertApp(D_004ACBC0, 0x116A, D_004AD3B8, 0);
+    bem->notifyDead(getHandle());
+    m_ullBtlEnemyFlag |= 0x40000000;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setupHitBack__12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initEnemyParam__12CBattleEnemyiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playSmallDamageSE__12CBattleEnemy);
