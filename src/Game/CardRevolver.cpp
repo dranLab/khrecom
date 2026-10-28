@@ -378,7 +378,40 @@ void CCardRevolver::initHide() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setDeck__Q210CardBattle13CCardRevolverP4CARDi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", rollDeck__Q210CardBattle13CCardRevolveriii);
+/* Parked: 12 lines off, all in `limit`: the original loads m_nTotal[m_iMode] (lhu + sll 16) above the m_iMode
+   branch and sign-extends (sra 16) only in that arm (interblock-scheduled split extension); ours branches first
+   and uses lh. Worked: `if (inMode == -1) ^= 1; else =`, `!old_mode ? m_pCards : m_pCardsE`, indexed
+   pCards[i] loop (copy into the loop register). Tried for limit: ternary both ways, if/else, assignment +
+   override, SHORT temporary (4 forms), (SHORT) cast. */
+#if 0
+void CCardRevolver::changeMode(INT inMode, INT inFlag) {
+    INT old_mode;
+    INT limit;
+    CBattleCard* pCards;
+    INT i;
+    if (m_iState != 1) return;
+    old_mode = m_iMode;
+    if (!inFlag) {
+        if (CGameWork::getFlag(1, 0xB)) return;
+        if (old_mode == inMode) return;
+        if (!m_bActive) return;
+    }
+    limit = m_iMode ? m_nTotal[m_iMode] : m_nLimit;
+    pCards = !old_mode ? m_pCards : m_pCardsE;
+    for (i = 0; i < limit; i++) {
+        if (&pCards[i] && pCards[i].getHand() != -1) pCards[i].hideHand();
+    }
+    if (inMode == -1) m_iMode ^= 1;
+    else m_iMode = inMode;
+    rollDeck(0, 1, 300);
+    if (!inFlag) CSound::playSE(3, -1, 0x40);
+    if (m_iMode > 0 && m_nRemain[m_iMode] == 0) m_pEmpty->enableDisp(1);
+    else m_pEmpty->enableDisp(0);
+    if (m_iMode == 0) CGameWork::setFlag(1, 0x12, 1);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", changeMode__Q210CardBattle13CCardRevolverii);
+#endif
 void CCardRevolver::rollShortCut(INT inMode) {
     if (m_iMode != 0) return;
     if (CGameWork::getFlag(1, 9)) return;
