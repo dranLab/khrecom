@@ -1,5 +1,6 @@
 #include "khtypes.h"
 #define GAME_PLAYER_PLAYERGAUGE_CPP
+#include "System/Graphic/Gprim.h"
 #include "Game/Player/PlayerGauge.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/TaskMan.h"
@@ -21,6 +22,7 @@ namespace Gauge {
 extern LPCSTR g_szSeqCockpit;
 extern LPCSTR g_szSeqGauge;
 extern LPCSTR g_szLadCockpit;
+extern G_UV g_uvNumberTex[2][10];
 }
 FVECTOR getPlayerPos(BOOL flag);
 namespace D2 {
@@ -87,7 +89,35 @@ void CPlayerGauge::setHP(INT inHP, INT inFlag) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDamage__Q25Gauge12CPlayerGaugeii);
 void CPlayerGauge::setBattleEnd() { CNaviMap::m_bBattleEnd = TRUE; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDPGauge__Q25Gauge12CPlayerGaugei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDP__Q25Gauge12CPlayerGaugeii);
+void CPlayerGauge::setDP(INT inDP, INT inMax) {
+    INT gauge;
+    D2::C2DSeqCtrl* pSeq;
+    if (!m_pSeqCtrlDP) return;
+    if (!(m_uiFlag & 4)) return;
+    if (m_nDP == inDP && m_nMaxDP == inMax) return;
+    m_nMaxDP = inMax;
+    if (m_nMaxDP > 99) m_nMaxDP = 99;
+    m_nDP = inDP > -1 ? inDP : 0;
+    if (m_nDP > m_nMaxDP) m_nDP = m_nMaxDP;
+    if (m_nMaxDP) gauge = m_nDP * 100 / m_nMaxDP;
+    else gauge = 0;
+    if (gauge > 100) gauge = 100;
+    pSeq = m_pSeqCtrlDP;
+    pSeq->changeTime(1, gauge);
+    if (gauge == 100 && !(m_uiFlag & 8)) {
+        if (!(m_uiFlag & 0x10)) {
+            pSeq->addSeq(g_szSeqGauge, 0x1D);
+            m_uiFlag |= 0x10;
+        }
+    } else if (m_uiFlag & 0x10) {
+        pSeq->destroyIndexToLast(2);
+        m_uiFlag = (INT)m_uiFlag & ~0x10;
+    }
+    gauge = m_nDP % 10; // MATCH: gauge reused for the digits
+    m_pSeqCtrlDP[1].changeTexture(1, 0, NULL, &g_uvNumberTex[0][gauge], &g_uvNumberTex[1][gauge]);
+    gauge = m_nDP / 10 % 10;
+    m_pSeqCtrlDP[2].changeTexture(1, 0, NULL, &g_uvNumberTex[0][gauge], &g_uvNumberTex[1][gauge]);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDMode__Q25Gauge12CPlayerGaugeiii);
 void CPlayerGauge::exeDPGauge() {
     if (!m_pSeqCtrlDP) return;
