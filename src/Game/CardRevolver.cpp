@@ -151,7 +151,69 @@ void CCardRevolver::_initCounter() {
     m_pEmpty->setPos(vPos);
     m_pEmpty->enableDisp(FALSE);
 }
+/* Parked: 2 lines off: in the first loop's preheader the original hoists lui 0x80000000 (setReloadSet) before the
+   index init (move s4,zero), ours after it. Worked: (INT) casts on both m_uiFlag ANDs, getCardData()->m_nCategory1,
+   m_nReloadCount before m_nActive[0], m_iMax++ before setReloadSet. Tried: setReloadSet first, i/card at function
+   or block scope, pointer-increment loop; permuter 6 min (7603 candidates, no gain). */
+#if 0
+void CCardRevolver::exeWait() {
+    UINT flag = (m_uiUser == 1) ? 2 : 4;
+    if (!(m_uiFlag & 0x40)) {
+        INT i;
+        CBattleCard* card;
+        m_bActive = FALSE;
+        m_tqTimer = 0;
+        m_nRemain[0] = 0;
+        m_iMax = 0;
+        m_nReloadCount = 0;
+        m_nActive[0] = 0;
+        for (i = 0; i < m_nLimit; i++) {
+            card = &m_pCards[i];
+            if (!card) continue;
+            if (card->isNowPlaying()) continue;
+            if (card->isDuelStock()) continue;
+            card->resetReloadSet();
+            if (card->getHand() >= 0) {
+                card->hideHand();
+                card->outHand();
+            }
+            if (card->getHand() != -1) continue;
+            if (card->getStock() != -1) continue;
+            if (card->isReloadNG()) continue;
+            if ((m_uiFlag & 0x100) && card->isDModeNG()) continue;
+            m_iMax++;
+            card->setReloadSet();
+        }
+        m_tqTimer = 400;
+        m_uiFlag |= 0x40;
+    }
+    if (CGameWork::getInt(1, 0xE2) & flag) return;
+    if (m_uiFlag & 0x40) {
+        m_iState = 2;
+        m_uiFlag = (INT)m_uiFlag & ~0x40;
+        m_uiFlag = (INT)m_uiFlag & ~8;
+        m_hPlaySE = CSound::playSE(m_iReloadSEID, -1, 0x40);
+        INT j = m_nLimit - 1;
+        for (INT i = 0; i < m_nLimit; i++, j--) {
+            CBattleCard* card = &m_pCards[j];
+            if (!card) continue;
+            if (card->isReloadSet()) {
+                card->resetReloadSet();
+                m_nActive[0] = j;
+                if (card->getCardData()->m_nCategory1 != 8) m_nRemain[0]++;
+                card->resetHand(m_iMax - m_nRemain[0] - 1, m_iMax);
+                m_nReloadCount++;
+            } else {
+                card->setStartIn();
+            }
+        }
+    } else {
+        m_iState = 1;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeWait__Q210CardBattle13CCardRevolver);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle13CCardRevolver);
 void CCardRevolver::exeMain() {
     if (DebugWork::g_dw.player.iDeckDbgDisp) {
