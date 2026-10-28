@@ -36,19 +36,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | cleanup/Game-SceneEnv (CSceneEnv stand-ins in 6 files) | 1101 | 437 | 24 | 938 (925) | 30 |
 | 2026-10-28 | decomp/Game-Player-PlayerGauge (partial 43/80, 2 parked; A1 no stand-ins; CNaviMap stand-in -> NaviMap.h) | 1103 | 438 | 23 | 938 (925) | 41 |
 | 2026-10-28 | decomp/Game-Player-PlayerGauge (complete 78/80, 2 parked; A2 part 1: gauge classes in ref form, CPadHandler base) | 1098 | 438 | 23 | 942 (928) | 49 |
+| 2026-10-28 | cleanup/Game-Player-PlayerGauge (A2 part 2: gauge classes ungated, stand-ins in 11 files) | 1090 | 422 | 23 | 939 (924) | 49 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1098 (1024 in 110 headers, 74 in 31 .cpp); MATCH: 49
-  by category: method 467, data member 71, type 96, fwd decl 53, #include 29, changed in place 130, padding 33, path override 24, gate 41, guessed 41, header-level 75, stand-in 30, other 8
-stand-ins: 438 foreign in 136 files (127 names), 191 unattributed, 173 own
+PARTIAL: 1090 (1022 in 110 headers, 68 in 31 .cpp); MATCH: 51
+  by category: method 467, data member 71, type 95, fwd decl 53, #include 29, changed in place 129, padding 33, path override 24, gate 36, guessed 41, header-level 75, stand-in 29, other 8
+stand-ins: 422 foreign in 135 files (122 names), 191 unattributed, 173 own
 duplicate class names across headers: 23
 padding: 35 arrays, 26 accessors
-mechanisms: 942 sites (928 untagged); #line: 1177
+mechanisms: 939 sites (924 untagged); #line: 1177
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 155, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 532, superset 124, partial 98, gated 107, missing 17, unattributed 309
+classes: complete 538, superset 124, partial 98, gated 101, missing 17, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -78,7 +79,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R0 | 2.0 | `System/RcfCD.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRcfCD (1 complete) |  |
 | R1 | 29.0 | `Game/Player/Player.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 34 PARTIAL | CPlayer (1 partial) | inline bodies or virtuals |
 | R1 | 22.0 | `Game/Enemy/BattleEnemyManager.h` | ready | 11 stand-in files, 0 dup headers, 0 gate users | CBattleEnemyManager (1 complete) | inline bodies or virtuals |
-| R1 | 22.0 | `Game/Player/PlayerGauge.h` | ready | 11 stand-in files, 0 dup headers, 0 gate users | CCommonGauge, CEnemyGauge, CEscapeGauge, CPlayerGauge, CPrizeGauge (5 gated) | inline bodies or virtuals (gate) |
+| R1 | 14.0 | `Game/Atel/Atel.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | CAtel (1 complete) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -97,7 +98,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `VTransInfo` | gated | System/Graphic/Gprim.h | 7 | System/Graphic/modeldata.h | 1 PARTIAL |
 | `CJiminyMemoFlag` | superset | Form/Menu/JMemoFlag.h | 6 |  | 1 PARTIAL |
 | `CPlayer` | partial | Game/Player/Player.h | 6 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; padding: _m_0x21c; extra methods: __attribute__, _instance, getCardDraw, getLockonHandle, getMarker, getPrizeDraw, ... (+1); virtual order differs; 3 |
-| `CPrizeGauge` | gated | Game/Player/PlayerGauge.h | 6 |  |  |
 | `CWorldEnv` | complete | System/Graphic/WorldEnv.h | 6 |  |  |
 | `CBuf` | superset | System/Buf.h | 5 |  | 3 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
@@ -108,10 +108,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 4 |  | missing methods: ~CPointCollision |
 | `CSceneInfo` | partial | Game/SceneInfo.h | 4 |  | missing methods: getCurrentRoomInfo, hasSceneCache, rollbackEventDoorState, setSeRangeRatio, updateBattleScene; 44 PARTIAL |
 | `CBossDeadDemo` | complete | Game/Enemy/BossDeadDemo.h | 3 |  |  |
-| `CEscapeGauge` | gated | Game/Player/PlayerGauge.h | 3 |  |  |
 | `CFileIO` | complete | System/FileIO.h | 3 |  |  |
 | `CFrecFont` | complete | System/Graphic/FrecFont.h | 3 |  |  |
-| `CPlayerGauge` | gated | Game/Player/PlayerGauge.h | 3 |  |  |
 | `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
 | `CSaveLoad` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
 | `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 3 |  | missing methods: getAlphaDensity, getClipDistanceSq, getColorDensity, getDownLen, getShadowParam, getTEX_0, ... (+14); extra methods: setADensity, setCDensity; 3 PARTIAL |
@@ -120,8 +118,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `SAVELOAD` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
 | `TIM2_PICTUREHEADER` | missing | System/Graphic/TexUtil.h | 3 |  |  |
 | `CCamp` | complete | Form/Menu/Camp.h | 2 |  |  |
-| `CCommonGauge` | gated | Game/Player/PlayerGauge.h | 2 |  | missing fields: m_uiFlag, m_pSeqCtrls, m_vPos, m_hOwner, m_pInstance; missing methods: CCommonGauge, _initialize, dispSeqCtrl, main, ~CCommonGauge |
-| `CEnemyGauge` | gated | Game/Player/PlayerGauge.h | 2 |  |  |
 | `CGameWork` | superset | Game/GameWork.h | 2 |  | 3 PARTIAL |
 | `CGlare` | complete | System/Graphic/Glare.h | 2 |  |  |
 | `CMemoca` | complete | System/Memoca.h | 2 |  |  |
@@ -319,7 +315,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Player/PlayerCamera.h` | 15 | 3/0/0/1 | 24 |
 | `Game/Player/PlayerControl.h` | 3 | 1/1/0/0 | 67 |
 | `Game/Player/PlayerDRiku.h` | 0 | 0/1/0/0 | 1 |
-| `Game/Player/PlayerGauge.h` | 5 | 0/1/0/6 | 7 |
+| `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
 | `Game/Player/PlayerManager.h` | 0 | 1/1/0/0 | 22 |
 | `Game/Player/PlayerRiku.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Player/PlayerSora.h` | 0 | 0/1/0/0 | 1 |
@@ -396,7 +392,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/MainApp.h` | 5 | 0/0/0/2 | 268 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 56 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 4 |
-| `System/PadHandler.h` | 0 | 0/0/1/0 | 92 |
+| `System/PadHandler.h` | 0 | 0/0/1/0 | 94 |
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
 | `System/RsrcData.h` | 3 | 0/0/0/32 | 27 |
 | `System/SJoint.h` | 9 | 0/0/0/0 | 199 |
@@ -540,8 +536,8 @@ or `untagged`.
 | placeholder | `_pathDataCameraSLCOverflow*` | 1 | 0 | untagged, e.g. System/Graphic/PathDataCamera.cpp:7 |
 | placeholder | `_premiumPrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:10 |
 | placeholder | `_roPh*` | 8 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:2193 |
-| placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:156 |
-| placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1756 |
+| placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:151 |
+| placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1751 |
 | placeholder | `_roulettePrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:13 |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/SampleEnemy.cpp:13 |
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:418 |
@@ -590,7 +586,7 @@ or `untagged`.
 | unit gate site | `GAME_GIMMICK_GIMMICKMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Gimmick/GimmickManager.h:14 |
 | unit gate site | `GAME_MAP_CPP` | 1 | 0 | untagged, e.g. Game/Map.h:74 |
 | unit gate site | `GAME_PLAYER_PLAYERCAMERA_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerCamera.h:35 |
-| unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 5 | 0 | untagged, e.g. Game/Player/PlayerGauge.h:18 |
+| unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 2 | 1 | as above |
 | unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Player/PlayerManager.h:93 |
 | unit gate site | `GAME_PLAYER_PLAYER_CPP` | 46 | 0 | untagged, e.g. Game/Player/Player.h:135 |
 | unit gate site | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.h:30 |
