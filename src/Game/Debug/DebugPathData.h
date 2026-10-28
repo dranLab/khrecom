@@ -9,12 +9,9 @@
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 #ifdef GAME_DEBUG_DEBUGPATHDATA_CPP
-/* PARTIAL: the full class, for Game/Debug/DebugPathData only (no SOURCE DATA yet: the inline's strings are labels) */
+/* PARTIAL: the full class, for Game/Debug/DebugPathData only */
 class CPathData;
 class CNakCamera;
-extern "C" char D_00485FA8[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.h" */
-extern "C" char D_00485FD8[]; /* "m_pInstance" */
-extern "C" char D_00485FA0[]; /* "%d" */
 class CPDFrameTime {
     INT m_iFlags;      /* 0x00 */
     FLOAT m_fTimer;    /* 0x04 */
@@ -47,7 +44,7 @@ public:
     void disp(FLOAT fRate) {
         if (m_iFlags & 1) {
             if (m_iFlags & 2) m_fTimer += fRate;
-            sprintf(m_szStr, D_00485FA0, (INT)m_fTimer);
+            sprintf(m_szStr, "%d", (INT)m_fTimer);
             m_cTile.disp();
             m_cFnt.disp();
         }
@@ -66,6 +63,10 @@ public:
     static INT m_iActivePathNum;
     static FVECTOR m_vActivePathPos;
     static FLOAT m_fValuePlus;
+    static PATH_PARAM m_sParam;
+    static FVECTOR m_vBackUpPos;
+    static char m_szPathName[64];
+    static char m_szPathActName[64];
     static char m_szNames[128][16];
     static CPDFrameTime* m_pFrame;
     static UINT m_iCtrlFlg;
@@ -88,8 +89,8 @@ public:
 private:
     BOOL isEnd();
     static CDebugPathData* getInstance() {
-#line 259 "Game/Debug/DebugPathData.h"
-        if (!(m_pInstance)) AssertApp(D_00485FA8, __LINE__, D_00485FD8, 0);
+#line 259
+        if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
         return m_pInstance;
     }
 };
