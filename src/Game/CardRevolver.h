@@ -160,7 +160,6 @@ public:
     void initStockSkillName(D2::C2DSeqCtrl* inSeq);
     void exeStock();
     void deleteStock();
-    static INT _getEnchantKind(CCardBattle* p, INT inUser); /* CCardBattle::getEnchantKind (inline) */
 };
 
 class CEnchantGauge : public CTask {

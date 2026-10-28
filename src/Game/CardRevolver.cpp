@@ -35,6 +35,7 @@ inline void* operator new(unsigned int, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+inline void operator delete[](void* mem) { com_free(mem); }
 
 namespace CardBattle {
 static LPCSTR g_szLadCockpit = "Cockpit.lad";
@@ -134,7 +135,7 @@ struct CB_ENCHANT_VIEW {
     CARD m_cardEnchant[2];
 };
 /* CCardBattle::getEnchantKind(INT inUser), an inline in Game/CardBattle.h */
-inline INT CCardRevolver::_getEnchantKind(CCardBattle* p, INT inUser) {
+static inline INT _getEnchantKind(CCardBattle* p, INT inUser) {
     if (!inUser) AssertApp("c:/KHCOM/MainApp/Game/CardBattle.h", 641, "inUser", 0);
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
@@ -396,7 +397,24 @@ CCardRevolver::CCardRevolver(CTask* pParent, CARD* inDeck, INT inUser, INT inSho
     CCardBattle* pBattle = (CCardBattle*)CTaskMan::getSysTask(0x16);
     if (pBattle) pBattle->setRevolver(m_uiUser, this);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _$_Q210CardBattle13CCardRevolver);
+CCardRevolver::~CCardRevolver() {
+    if (m_hPlaySE > 0) {
+        CSound::stopSE(m_hPlaySE, m_iReloadSEID);
+        m_hPlaySE = 0;
+    }
+    if (m_hChargeSE > 0) {
+        CSound::stopSE(m_hChargeSE, 0x13);
+        m_hChargeSE = 0;
+    }
+    deleteCounter();
+    deleteStock();
+    delete m_pEmpty;
+    m_pEmpty = NULL;
+    delete[] m_pCards;
+    m_pCards = NULL;
+    delete[] m_pCardsE;
+    m_pCardsE = NULL;
+}
 void CCardRevolver::_init() {
     INT i;
     m_pCards = NULL;
@@ -780,7 +798,6 @@ void CCardRevolver::initHide() {
         m_hChargeSE = 0;
     }
 }
-inline void operator delete[](void* mem) { com_free(mem); }
 void CCardRevolver::setDeck(CARD* pDeck, INT inShortCut) {
     INT i;
     CARD card;
@@ -2439,7 +2456,10 @@ CEnchantGauge::CEnchantGauge(CTask* pParent, INT inUser, CARD& inCard) : CTask(p
     m_pFntName = NULL;
     _initialize();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _$_Q210CardBattle13CEnchantGauge);
+CEnchantGauge::~CEnchantGauge() {
+    delete[] m_pSeqCtrls;
+    m_pSeqCtrls = NULL;
+}
 void CEnchantGauge::_initialize() {
     FVECTOR pos;
     INT layout;
@@ -2617,7 +2637,9 @@ CStockFolder::CStockFolder(CTask* pParent, INT inUser) : CTask(pParent, 0x4000) 
     m_hOwner = pParent->getHandle();
     _init();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", _$_Q210CardBattle12CStockFolder);
+CStockFolder::~CStockFolder() {
+    deleteGauge();
+}
 void CStockFolder::_init() {
     m_iStock = 0;
     m_iStockSum = 0;
@@ -2981,19 +3003,4 @@ ok:
     m_uiFlag |= 2;
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getRollSpeed__CQ210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", isActive__CQ210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setChargeRate__Q210CardBattle13CCardRevolveri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setReloadNG__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getMode__CQ210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", isNowAddCount__CQ210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getReloadID__CQ210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getStockSkill__CQ210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", changeOwner__Q210CardBattle13CCardRevolveri);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", isDiscard__Q210CardBattle13CCardRevolver);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", isEnableCount__Q210CardBattle13CEnchantGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getStockSkill__CQ210CardBattle12CStockFolder);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getStockSum__CQ210CardBattle12CStockFolder);
-/* The vtables: their key functions (the destructors) are still assembly. */
-__asm__(".rdata\n.align 3\n.globl _vt$Q210CardBattle12CStockFolder\n_vt$Q210CardBattle12CStockFolder:\n.word 0\n.word 0\n.word 0\n.word _$_Q210CardBattle12CStockFolder\n.word 0\n.word main__Q210CardBattle12CStockFolder\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.globl _vt$Q210CardBattle13CEnchantGauge\n_vt$Q210CardBattle13CEnchantGauge:\n.word 0\n.word 0\n.word 0\n.word _$_Q210CardBattle13CEnchantGauge\n.word 0\n.word main__Q210CardBattle13CEnchantGauge\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.globl _vt$Q210CardBattle13CCardRevolver\n_vt$Q210CardBattle13CCardRevolver:\n.word 0\n.word 0\n.word 0\n.word _$_Q210CardBattle13CCardRevolver\n.word 0\n.word main__Q210CardBattle13CCardRevolver\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.text\n");
 // SOURCE DATA: .data .rodata
