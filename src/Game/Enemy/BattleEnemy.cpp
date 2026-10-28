@@ -2562,8 +2562,87 @@ void CBattleEnemy::changeBattleEnemyState(INT inState) {
     clearBtlEnemyFlag(0x10);
     m_pNewState = &NewState;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", hitTest___12CBattleEnemy);
-__asm__(".rdata\n.align 3\n.word 0x42705F6D\n.word 0x4379646F\n.word 0x2D6C6C6F\n.word 0x7465673E\n.word 0x43746948\n.word 0x426C6C6F\n.word 0x2879646F\n.word 0x00000029\n.word 0x00000000\n.word 0x00000000\n.word .L002B543C\n.word .L002B5444\n.word .L002B544C\n.word .L002B5454\n.word .L002B545C\n.word func_0\n.word func_0\n.word func_0\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.word .L002B554C\n.word .L002B554C\n.word .L002B557C\n.text\n");
+BOOL CBattleEnemy::hitTest_() {
+    FVECTOR detectPos;
+    if (!m_pBodyColl) return FALSE;
+    m_pBodyColl->detect();
+    if (m_pBodyColl->isGuard() || m_pBodyColl->isHitMuteki()) {
+        if (!m_pBodyColl->getHitCollBody()) AssertApp(__FILE__, 0x164A, "m_pBodyColl->getHitCollBody()", 0);
+        setGuardEffect_(m_pBodyColl->getHitCollBody()->getDetectPos());
+        Gauge::CCommonGauge::setDispSeq(getHandle(), 3);
+        onGuard();
+        return FALSE;
+    }
+    if (!m_pBodyColl->isHit()) return FALSE;
+    CCollBody* hit = m_pBodyColl->getHitCollBody();
+    if (!hit) AssertApp(__FILE__, 0x165D, D_004AD430, 0);
+    FLOAT attr;
+    if (m_pEnemyParam) {
+        attr = _getAttrRate(m_pEnemyParam, hit->getDamageAttr());
+    } else {
+        attr = 100.0f;
+    }
+    if (attr >= 1000.0f) {
+        setBtlEnemyFlag(8);
+        attr = 100.0f;
+    }
+    if (isBtlEnemyFlag(0x2000)) {
+        setGuardEffect_(hit->getDetectPos());
+        return FALSE;
+    }
+    if (isBtlEnemyFlag(0x2000000) && isBtlEnemyFlag(1)) {
+        destroyCard();
+        clearBtlEnemyFlag(1);
+    }
+    if (isBtlEnemyFlag(1)) return FALSE;
+    FLOAT dmgPoint = m_pBodyColl->getDamage();
+    if (m_hFreeze) {
+        switch (hit->getDamageKind()) {
+        case ATK_KIND_STOP:
+        case ATK_KIND_GRAVITY:
+        case ATK_KIND_SHOCK:
+        case ATK_KIND_MAGNET:
+        case ATK_KIND_ABSOLUTE_STOP:
+            break;
+        default:
+            if (attr > 0.0f) {
+                INT dmg = (INT)dmgPoint;
+                CardBattle::calcFreezeDamage(dmg);
+                dmgPoint = dmg;
+            }
+            break;
+        }
+    }
+    INT damage = computeDamage_(dmgPoint, attr, hit->getDamageKind());
+    if (damage <= 0) {
+        if (isCurrentState(0x12)) return FALSE;
+        if (damage < 0) {
+            Gauge::CCommonGauge::setDispSeq(getHandle(), 1);
+            if (hit->getDamageKind() == ATK_KIND_RECOVER) {
+                if (hit->getHitEffectNo() >= 0) setEffect(hit->getHitEffectName(), hit->getHitEffectNo(), &getPos(), NULL, 0.0f);
+            } else {
+                onAbsorb();
+            }
+        } else {
+            Gauge::CCommonGauge::setDispSeq(getHandle(), 6);
+            onInvalid();
+        }
+        if (isCurrentState(0x14)) changeDefaultState();
+        return FALSE;
+    }
+    if (!isCurrentState(0x12)) checkResist_(hit->getDamageKind());
+    if (DebugWork::g_dw.enemy.uiFlag & 2) m_iHp = 0;
+    setHitEffect_();
+    if (m_iHp <= 0) {
+        if (!isReraise_()) changeBattleEnemyState(0x1E);
+        return TRUE;
+    }
+    continuousDamageProc_();
+    createFriendCard_(-1);
+    onDamage();
+    changeDamageState_(hit->getDamageKind());
+    return TRUE;
+}
 INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr, ATK_KIND inAtkKind) {
     FLOAT damage = inDamage;
     BOOL special = TRUE;
