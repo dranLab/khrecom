@@ -305,7 +305,19 @@ CCardRevolver* CCardBattle::getRevolver(INT inSide) {
     if (!(inSide)) AssertApp(D_00476980, 2779, D_00476730, 0);
     return m_pRevolver[inSide - 1];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setBattleEnd__Q210CardBattle11CCardBattle);
+void CCardBattle::setBattleEnd() {
+    if (m_pInstance) {
+        _ref(m_pInstance->m_uiFlag) |= 0xC0000004;
+        m_pInstance->initCardBreak(0, 0);
+        m_pInstance->destroyPlayCard(1, 0);
+        m_pInstance->resetEnchantCard(1);
+        m_pInstance->destroyRevolver(1);
+        m_pInstance->destroyPlayCard(2, 0);
+        m_pInstance->resetEnchantCard(2);
+        m_pInstance->destroyRevolver(2);
+        m_pInstance->destroyStockFolder(1);
+    }
+}
 BOOL CCardBattle::isBattleEnd() {
     if (!m_pInstance) return TRUE;
     return (m_pInstance->m_uiFlag & 0xc0000004) != 0;
