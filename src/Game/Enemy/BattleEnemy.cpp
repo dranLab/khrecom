@@ -690,7 +690,45 @@ void CBattleEnemy::beginStateDuel() {
     setTimer(0);
     bodyCollOffBody(-1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDuel__12CBattleEnemy);
+void CBattleEnemy::stateDuel() {
+    if (!isBtlEnemyFlag(0x4000000000ULL)) m_pMove->turnToTargetY(g_pPlayer, 0.17453292f);
+    switch (m_iSysStep) {
+    case 0:
+        if (isBtlEnemyFlag(0x100000000ULL)) {
+            INT id = (UINT)getID() % 10000;
+            INT idx = id % 100;
+            FLOAT scale;
+            if (id < 100) {
+                scale = BattleEnemy::g_vSpotSizeTbl[BattleEnemy::g_byHeartlessSpotSizeIndexTbl[idx]];
+            } else {
+                scale = BattleEnemy::g_vSpotSizeTbl[BattleEnemy::g_byBossSpotSizeIndexTbl[idx]];
+            }
+            if (scale > 0.0f) {
+                FVECTOR pos;
+                pos.init();
+                m_hSpotLight[0] = attachEffect(BattleEnemy::DuelEffectName, 2, &Crd(0), &pos, NULL, 0.0f);
+                if (!isBtlEnemyFlag(0x100)) m_hSpotLight[1] = setEffect(BattleEnemy::DuelEffectName, 3, &getPos(), NULL, 0.0f);
+                for (INT i = 0; i < 2; i++) {
+                    CEffect* effect = CEffectMan::getEffect(m_hSpotLight[i]);
+                    if (effect) effect->setScale(scale, scale, scale);
+                }
+            }
+            m_iSysStep++;
+        }
+        break;
+    case 1:
+        if (getTimer() <= 0) {
+            CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+            if (!cb) AssertApp(D_004ACBC0, 0x96B, D_004AD3C0, 0);
+            if (m_iDuelCardNum > 0 && m_iDuelCardPtr < m_iDuelCardNum) {
+                if (cb->setEnemyDuelCard(getHandle(), m_DuelCardKind, m_iDuelCardArray[m_iDuelCardPtr])) m_iDuelCardPtr++;
+            }
+            setTimer(200);
+        }
+        break;
+    }
+    updateSpotLight_();
+}
 void CBattleEnemy::endStateDuel() {
     for (INT i = 0; i < 2; i++) {
         CEffect* effect = CEffectMan::getEffect(m_hSpotLight[i]);
