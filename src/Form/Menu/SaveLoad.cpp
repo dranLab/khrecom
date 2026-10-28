@@ -233,6 +233,10 @@ typedef char _check_saveloadui_size[sizeof(CSaveLoadUI) == 0x890 ? 1 : -1];
 
 
 /* constant tables of the original (initializers in .rodata) */
+struct _LayoutInfo {
+    SHORT _nLayIdx;
+    SHORT _nSeqIdx;
+};
 struct SEQTBL2 {
     C2DSeqAgent::SeqTbl t[2];
 };
@@ -884,8 +888,29 @@ C2DSeqAgent* CSaveLoadUI::createMPLabel(D2::C2DSeqCtrl*& pOutCtrl) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMPCtrl__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32363132\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMainHelp__11CSaveLoadUIRPQ22D210C2DSeqCtrlRPQ22D26C2DFnt);
-__asm__(".rdata\n.align 3\n.word 0x005A0059\n.word 0x005A005B\n.word 0x005C005B\n.word 0x00000000\n.word 0x00090003\n.word 0x00090004\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x39383132\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38393132\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x36303232\n.word 0x00000029\n.text\n");
+C2DSeqAgent* CSaveLoadUI::createMainHelp(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt*& pOutFnt) {
+    C2DSeqAgent::SeqTbl tbl[2] = {{{89, 90, 91}}, {{90, 91, 92}}};
+    _LayoutInfo ltbl[2] = {{3, 9}, {4, 9}};
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2189)", RET_ADDR())) D2::C2DSeqCtrl;
+    C2DSeqAgent::SeqTbl& t = tbl[getRsrcType()];
+    pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, t._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    G_RGBA rgba;
+    rgba.col = 0x80707070;
+    _LayoutInfo& info = ltbl[getRsrcType()];
+    m_szMainFrameHelpStr[0] = '\0';
+    pOutFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2198)", RET_ADDR()))
+        D2::C2DFnt(0, 0, &rgba, 16, m_szMainFrameHelpStr, 64);
+    pOutCtrl->addFnt(m_pszLad, m_nMainSeqUnit, pOutFnt);
+    pOutCtrl->enableColorCtrl(TRUE);
+    FVECTOR vPos;
+    D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
+    pOutCtrl->setPos(vPos);
+    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2206)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
+    pAgent->setupState(t);
+    return pAgent;
+}
 static CHAR* s_pStrSaveLoad[2] = {"Save", "Load"};
 static CHAR* s_pStrSlot[2] = {"Slot 1", "Slot 2"};
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createResultPlate__11CSaveLoadUIRPQ22D210C2DSeqCtrlRPQ22D26C2DFnti);
