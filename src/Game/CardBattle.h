@@ -8,6 +8,7 @@
 #include "Game/AttackMotion.h" // PARTIAL: added for Game/Player/SummonDumbo (ATK_ATTR)
 #include "System/Vector.h"     // PARTIAL: added for Game/CardBattle (m_vBreakPos)
 #include "Game/CardKind.h"     // PARTIAL: added for Game/CardBattle (CARD members)
+#include "System/Task.h"        // PARTIAL: added for Game/CardBattle (CCardBattle is a CTask)
 
 class CPlayer; // PARTIAL: added for Game/Player/PlayerRiku
 class CTask; // PARTIAL: added for Game/CardBattle
@@ -95,10 +96,10 @@ struct ENCHANT_PARAM {
 };
 
 // PARTIAL: added for Game/Player/SummonDumbo
-class CCardBattle {
+class CCardBattle : public CTask {
+    /* 0x000 CTask */
     // PARTIAL: members added for Game/Player/PlayerRiku
     // PARTIAL: split out for Game/CardBattle
-    UBYTE _m_0x0[0x40];       /* 0x000 CTask */
     // PARTIAL: split for Game/CardBattle
     Message::CMessageManager* m_pMesage; /* 0x040 */
     MES_CARD_INFO m_mesCardInfo[2]; /* 0x044 */
@@ -162,9 +163,10 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     void disableDuelEntry(UINT inSet) { setFlag(inSet, inSet ^ 0x400000); }
     void setSubTimer(TIMEQ inTime) { m_tqSubTimer = inTime; }
     TIMEQ getSubTimer() const { return m_tqSubTimer; }
-    TIMEQ getFrameRate() const { return *(const TIMEQ*)&_m_0x0[0x8]; } // PARTIAL: CTask::getFrameRate (base still opaque)
-    HANDLE getHandle() const { return *(const HANDLE*)&_m_0x0[0x14]; } // PARTIAL: CTask::getHandle (base still opaque)
-    ::CTask* asTask() { return (::CTask*)this; } // PARTIAL: CCardBattle is a CTask in the original (base still opaque)
+    ::CTask* asTask() { return this; } // PARTIAL: added for Game/CardBattle
+
+
+
     void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
     void disablePlayCard(UINT inSet) { setFlag(inSet, inSet ^ 0xC0000000); } // PARTIAL: added for Game/CardBattle
     void destroyPlayCard(INT inFlag, INT inP1);
