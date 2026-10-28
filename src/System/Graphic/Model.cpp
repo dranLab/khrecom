@@ -5,6 +5,7 @@
 #include "System/Coord.h"
 #include "System/Math3D.h"
 #include "System/Graphic/WorldEnv.h"
+#include "System/Graphic/TexAnm.h"
 #include "include_asm.h"
 
 class CRsrcData;
@@ -15,6 +16,7 @@ public:
     static MODELDATA** getRsrcMDL(const CHAR* pszName, NAME_CASE nc);
     static MODELDATA** getRsrcMDL(INT nGroup);
     static TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
+    static void* getFirstData(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
     static MODELDATA* getRsrcAMF(const CHAR* pszName, NAME_CASE nc);
 };
 class CPackMan { /* PARTIAL: stand-in for System/Graphic/PackMan CPackMan: owner not written */
@@ -29,6 +31,39 @@ public:
 extern u_long128* g_mpg0;
 extern u_long128* g_mpg2;
 extern "C" char D_00461058[];
+extern "C" char D_004610C0[];
+extern "C" char D_004610D0[];
+extern "C" char D_00461100[];
+extern "C" char D_00461140[];
+extern "C" char D_00461148[];
+extern "C" char D_00461160[];
+extern "C" char D_00461178[];
+extern "C" int strncmp(const char*, const char*, unsigned int);
+class CShadowMapModel : public CFadeModel { /* PARTIAL: stand-in for CShadowMapModel: owner not written */
+    HANDLE m_hHnd; /* 0x28 */
+public:
+    virtual ~CShadowMapModel();
+};
+namespace Mad {
+struct MODEL_ATTACH_DATA {
+    char szBoneName[16]; /* 0x00 */
+    UINT uiID;           /* 0x10 */
+};
+struct MAD_HEADER {
+    char szCode[4];  /* 0x0 */
+    UINT uiVersion;  /* 0x4 */
+    UINT uiNum;      /* 0x8 */
+    UINT uiOffset;   /* 0xc */
+};
+INT getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId);
+}
+inline void* operator new(size_t, void* p) throw() { return p; }
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+static inline FLOAT _sqrtf(FLOAT x) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
+    return ret;
+}
 union FIVECTOR { /* PARTIAL: stand-in for FIVECTOR: owner not written */
     FVECTOR f;
     IVECTOR i;
@@ -76,7 +111,24 @@ SHADERDESC* searchShaderDesc(USHORT mode) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", searchShaderDesc__FUs);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", releaseData__6CModel);
+void CModel::releaseData() {
+    if (m_pSemiModel && isManagedSemiModel()) {
+        delete m_pSemiModel;
+        m_pSemiModel = NULL;
+    }
+    if (m_pFadeModel) {
+        delete m_pFadeModel;
+        m_pFadeModel = NULL;
+    }
+    if (m_pShadowMapModel) {
+        delete m_pShadowMapModel;
+        m_pShadowMapModel = NULL;
+    }
+    if (m_TexUV) delete m_TexUV;
+    m_TexUV = NULL;
+    if (m_pTexAnm) delete m_pTexAnm;
+    m_pTexAnm = NULL;
+}
 INT CModel::link(CTask* p, const CHAR* pName) {
     if (!(p)) AssertApp(D_00460EB8, 451, D_00460EE8, 0);
     CCoords* pCrds = p->getCoords();
@@ -285,7 +337,28 @@ INT checkBSphere(CCoord& crd, const FVECTOR& ctr, FLOAT rad) {
     sphere.fR = rad;
     return Math3D::CheckVisibleBoundingSphere(sphere, frustum) ? 0 : 0x80000000;
 }
+INT checkBSphere(CCoord& crd, const FVECTOR& ctr, FLOAT rad);
+/* Parked: 10 lines off, FP registers only: the original keeps the shared 0.5f in f5 (x sum f6, y[1] f7), ours 0.5f in f7. Worked: x[0] > x[1] compare, a copy tmp (declared first) of ctr as the call argument, sqrt after the copy. Tried: statement orders, w first/last, 0.5f local; permuter 12 min (37389 candidates, stays 10). */
+#if 0
+INT checkBSphere(CCoord& crd, const BBOX* bbox) {
+    FVECTOR tmp;
+    FVECTOR ctr;
+    FLOAT r;
+    FLOAT ret;
+    if (bbox->x[0] > bbox->x[1]) return 0xC0000000;
+    ctr.x = (bbox->x[0] + bbox->x[1]) * 0.5f;
+    ctr.y = (bbox->y[0] + bbox->y[1]) * 0.5f;
+    ctr.z = (bbox->z[0] + bbox->z[1]) * 0.5f;
+    ctr.w = 1.0f;
+    r = (bbox->x[0] - bbox->x[1]) * (bbox->x[0] - bbox->x[1]) + (bbox->y[0] - bbox->y[1]) * (bbox->y[0] - bbox->y[1])
+        + (bbox->z[0] - bbox->z[1]) * (bbox->z[0] - bbox->z[1]);
+    tmp = ctr;
+    r = _sqrtf(r) * 0.5f;
+    return checkBSphere(crd, tmp, r);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBSphere__FR6CCoordPC4BBOX);
+#endif
 /* Parked: 12 lines off, registers only: the original keeps the scratchpad pointer in v1 and the clip result in a0 (or a0,v0,a0; move v0,a0), ours v0/v1. Worked: the 0xC0000000 return last (if (!(x[1] < x[0])) {...}), v assigned inside the if, asm "nop" opening the if (ret) block (the original's extra nop after the beqz slot; same tail as the parked resultCheckBBox(CCoord&)). Tried: one/two-output cfc2 asm, 'm' operand lqc2 helpers, result local, decl order; permuter 15 min (45593 candidates, stays 16). */
 #if 0
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox) {
@@ -444,7 +517,16 @@ void CSemiModel::makePkt() {
     if (m_pModel->m_nFlag & 2) dispDirect();
     CPackMan::pkOpenDirectCode(0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiTrans__10CSemiModelG5ALPHA);
+void CSemiModel::setSemiTrans(ALPHA a) {
+    UINT rawMode;
+    if (!(a == ALPHA_PLUS) && !(a == ALPHA_MINUS) && !(a == ALPHA_BLEND)) {
+        if (!(m_pModel)) AssertApp(D_00460EB8, 3588, D_004610C0, 0);
+        rawMode = m_pModel->getModelData()->getRawMode();
+        if (rawMode & 0x10000000) a = ALPHA_BLEND;
+        else a = ALPHA_PLUS;
+    }
+    CDrawable::setSemiTrans(a);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispDirect__10CSemiModel);
 void CSemiZModel::makePkt() {
     CPackMan::pkCloseDirectCode();
@@ -471,7 +553,17 @@ void CModelBG::makePkt() {
 }
 FIX4 CBBox::calcZ() { return 0x640; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", makePkt__5CBBox);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", linkTexAnm__6CModelP7CTexAnmi);
+void CModel::linkTexAnm(CTexAnm* pATbl, INT nANum) {
+    INT nTexMax;
+    if (pATbl && nANum > 0) {
+        nTexMax = m_TransTexCount;
+        if (!m_pTexAnm && nTexMax > 0 && CModelTexAnm::getTexAnmCount(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax) > 0) {
+            m_pTexAnm = new (com_malloc_d(sizeof(CModelTexAnm), D_004610D0, RET_ADDR())) CModelTexAnm;
+            if (!(m_pTexAnm)) AssertApp(D_00460EB8, 4067, D_00461100, 0);
+            m_pTexAnm->setup(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setupUVScroll__6CModeli);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateUVScroll__6CModelf);
 void CModel::setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV) {
@@ -590,7 +682,25 @@ BOOL MODELDATA::isTexture(UINT mode) {
     }
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getModelAttachData__3MadPPCQ23Mad17MODEL_ATTACH_DATAi);
+INT Mad::getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId) {
+    MAD_HEADER* header;
+    MODEL_ATTACH_DATA* mad;
+    *outMad = NULL;
+    header = (MAD_HEADER*)CRsrcDB::getFirstData(0x23, iRId, TRUE);
+    if (!header) return 0;
+    if (strncmp(header->szCode, D_00461140, 4) != 0) {
+        TRACE(D_00461148);
+        return 0;
+    }
+    if (header->uiVersion != 0x100) {
+        TRACE(D_00461160);
+        return 0;
+    }
+    mad = (MODEL_ATTACH_DATA*)((BYTE*)header + header->uiOffset);
+    if (!(mad)) AssertApp(D_00460EB8, 4422, D_00461178, 0);
+    *outMad = mad;
+    return header->uiNum;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __static_initialization_and_destruction_0_00133620);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __10CSemiModel);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_10CSemiModel);

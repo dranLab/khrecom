@@ -15,6 +15,13 @@ class CCoord;
 class CCoords; // PARTIAL: added for System/Graphic/DispList
 class CTexAnm;
 class CSemiModel;
+union _TEX_UV_OFFSET { // PARTIAL: added for System/Graphic/Model
+    struct {
+        FLOAT fu;
+        FLOAT fv;
+    };
+    ULONGLONG luv;
+};
 class CLightUnit; // PARTIAL: added for Game/ModelObj
 struct MODELDATA;
 
@@ -58,11 +65,11 @@ private:
     SBYTE m_BoneSkip;      /* 0x065 */
     unsigned char m_Pad[2];
     struct { BYTE* m_pTex; INT m_n; } m_TexInfo[16]; /* 0x068 TexInfoStub */
-    void* m_TexUV;         /* 0x0e8 _TEX_UV_OFFSET* */
-    void* m_pTexAnm;       /* 0x0ec CModelTexAnm* */
+    union _TEX_UV_OFFSET* m_TexUV; /* 0x0e8 */
+    class CModelTexAnm* m_pTexAnm; /* 0x0ec */
     CTask* m_pTask;      /* 0x0f0 */
     FMATRIX* m_pWSMat;   /* 0x0f4 */
-    void* m_pShadowMapModel; /* 0x0f8 */
+    class CShadowMapModel* m_pShadowMapModel; /* 0x0f8 */
     BBOX m_BBox;         /* 0x0fc */
     struct SHADERDESC* m_pShader; /* 0x114 */
     UBYTE _m_0x118[0x8];

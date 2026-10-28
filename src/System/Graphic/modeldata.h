@@ -38,6 +38,12 @@ struct MODELDATA {
     BBOX* m_pBBox;
 
     BOOL isDataEmpty() const { return !m_pData || *(UINT*)m_pData == 0x60000000; } // PARTIAL: added for System/Graphic/Model
+    BOOL isSemiDataEmpty() const { return !m_pSemiData || *(UINT*)m_pSemiData == 0x60000000; }
+    UINT getRawMode() const {
+        if (!isDataEmpty()) return ((UINT*)m_pData)[7];
+        if (!isSemiDataEmpty()) return ((UINT*)m_pSemiData)[7];
+        return 0;
+    }
     BOOL enablePointLight() const;
     BOOL enableLight() const;
     INT getBoneIndex(const CHAR* pName) const; // PARTIAL: added for System/Graphic/TriangleIK
