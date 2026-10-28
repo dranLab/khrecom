@@ -1465,7 +1465,31 @@ ok:
     m_iStock++;
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayPronounce__Q210CardBattle12CStockFolder);
+INT CStockFolder::setPlayPronounce() {
+    CCardBattle* pCB;
+    INT i;
+    INT num;
+    CBattleCard* card;
+    if (m_uiState >= 6) {
+        pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+        if (pCB && pCB->isNowPronounce() && !CCardBattle::isExecutingCard(0) && m_iStock >= 6) goto ok;
+    }
+    return 0;
+ok:
+    for (i = 0; i < 6; i++) {
+        card = m_pCards[i];
+        if (card) {
+            num = i;
+            break;
+        }
+    }
+    if (!card) return 0;
+    if (!pCB->setEnemyPronounceCard(m_hOwner, card)) return 0;
+    m_pCards[num] = NULL;
+    m_pData[num] = NULL;
+    m_uiFlag |= 2;
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getRollSpeed__CQ210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", isActive__CQ210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setChargeRate__Q210CardBattle13CCardRevolveri);
