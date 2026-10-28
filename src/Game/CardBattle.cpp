@@ -1593,8 +1593,78 @@ void CCardBattle::exeBio() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropFriendCard__10CardBattleR4CARDi);
-__asm__(".rdata\n.align 4\n.word .L001DF53C\n.word .L001DF550\n.word .L001DF564\n.word .L001DF58C\n.word .L001DF578\n.word .L001DF5A0\n.word .L001DF5B4\n.word .L001DF5D0\n.text\n");
+void CardBattle::getDropFriendCard(CARD& outData, INT inRate) {
+    _setCard(outData, 0, 0);
+    if (getDropPlutoCard(outData)) return;
+    if (CCardBattle::getFriendCount() >= 5) return;
+    INT worldID = CSceneInfo::getCurrentWorldID(0);
+    INT r = RND::genrand_int31() % 1000;
+    if (worldID > 13) worldID = 13;
+    INT roomID = CSceneInfo::getCurrentRoomID();
+    if (roomID == 0 || roomID == 99) worldID = 13;
+    BOOL bCheck = TRUE;
+    if (CGame::isRikuGame()) worldID += 13;
+    if (DebugWork::g_dw.player.iFriend > 0) {
+        r = 0;
+        bCheck = FALSE;
+    }
+    if (inRate == -1) {
+        if (r >= g_DropFriendCardList[worldID][0]) return;
+    } else {
+        if (r >= inRate) return;
+    }
+    BOOL flag = FALSE;
+    INT no = 0;
+    do {
+        INT n = 0;
+        INT r2 = RND::genrand_int31() % 100;
+        for (INT i = 0; i < 3; i++) {
+            n += g_DropFriendCardList[worldID][i + 1];
+            if (r2 < n) {
+                no = i + 4;
+                n = g_DropFriendCardList[worldID][no];
+                if (bCheck) {
+                    switch (n) {
+                    case 0x31:
+                        if ((CGameWork::getInt(0, 0x22) & 0x1) == 0) return;
+                        flag = TRUE;
+                        break;
+                    case 0x32:
+                        if (!(CGameWork::getInt(0, 0x22) & 0x2)) return;
+                        flag = TRUE;
+                        break;
+                    case 0x33:
+                        if (CGameWork::getInt(0, 0x22) & 0x4) flag = TRUE;
+                        break;
+                    case 0x35:
+                        if (CGameWork::getInt(0, 0x22) & 0x10) flag = TRUE;
+                        break;
+                    case 0x34:
+                        if (CGameWork::getInt(0, 0x22) & 0x8) flag = TRUE;
+                        break;
+                    case 0x36:
+                        if (CGameWork::getInt(0, 0x22) & 0x20) flag = TRUE;
+                        break;
+                    case 0x37:
+                        if (CGameWork::getInt(0, 0x22) & 0x40) flag = TRUE;
+                        break;
+                    case 0x38:
+                        if (!(CGameWork::getInt(0, 0x22) & 0x80)) return;
+                        flag = TRUE;
+                        break;
+                    default:
+                        return;
+                    }
+                } else {
+                    if (!n) return;
+                    flag = TRUE;
+                }
+                break;
+            }
+        }
+    } while (!flag);
+    _setCard(outData, g_DropFriendCardList[worldID][no], RND::genrand_int31() % 10);
+}
 INT CardBattle::getDropPlutoCard(CARD& outData) {
     if (CGame::isRikuGame()) return 0;
     if (CSceneInfo::isMinigameScene()) return 0;
