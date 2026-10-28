@@ -651,7 +651,7 @@ void* CModel::getExtendClut(INT nTex, INT nType) {
 ret3:
     return *(void**)(m_TexInfo[nTex].m_pTex + 0x50);
 }
-/* Parked: 5 lines off, operand order only: the original adds this + idx*8 (addu a1,a0,v0), ours idx*8 + this. Worked: the if/else-if chain with `nInType == t && p[0x54] != t`, the direct p->ext arm first, raw this-relative addressing (m_TexInfo[inIdx] makes gcc pre-add this+0x68). Tried: switch, nested ifs, expression orders. */
+/* Parked: 5 lines off, operand order only: the original adds this + idx*8 (addu a1,a0,v0), ours idx*8 + this. Worked: the if/else-if chain with `nInType == t && p[0x54] != t`, the direct p->ext arm first, raw this-relative addressing (m_TexInfo[inIdx] makes gcc pre-add this+0x68). Tried: switch, nested ifs, expression orders; permuter 10 min (34061 candidates, stays 5). */
 #if 0
 void CModel::getChangeClut(INT inIdx, INT nInType) {
     BYTE* p;
