@@ -37,17 +37,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | decomp/Game-Player-PlayerGauge (partial 43/80, 2 parked; A1 no stand-ins; CNaviMap stand-in -> NaviMap.h) | 1103 | 438 | 23 | 938 (925) | 41 |
 | 2026-10-28 | decomp/Game-Player-PlayerGauge (complete 78/80, 2 parked; A2 part 1: gauge classes in ref form, CPadHandler base) | 1098 | 438 | 23 | 942 (928) | 49 |
 | 2026-10-28 | cleanup/Game-Player-PlayerGauge (A2 part 2: gauge classes ungated, stand-ins in 11 files) | 1090 | 422 | 23 | 939 (924) | 49 |
+| 2026-10-28 | cleanup/System-Graphic-WorldEnv (CWorldEnv stand-ins in 6 files) | 1089 | 416 | 23 | 939 (924) | 51 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1090 (1022 in 110 headers, 68 in 31 .cpp); MATCH: 51
-  by category: method 467, data member 71, type 95, fwd decl 53, #include 29, changed in place 129, padding 33, path override 24, gate 36, guessed 41, header-level 75, stand-in 29, other 8
-stand-ins: 422 foreign in 135 files (122 names), 191 unattributed, 173 own
+PARTIAL: 1089 (1022 in 110 headers, 67 in 31 .cpp); MATCH: 51
+  by category: method 467, data member 71, type 95, fwd decl 53, #include 29, changed in place 129, padding 33, path override 24, gate 36, guessed 41, header-level 75, stand-in 28, other 8
+stand-ins: 416 foreign in 131 files (121 names), 191 unattributed, 173 own
 duplicate class names across headers: 23
 padding: 35 arrays, 26 accessors
-mechanisms: 939 sites (924 untagged); #line: 1177
+mechanisms: 939 sites (924 untagged); #line: 1181
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 155, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 538, superset 124, partial 98, gated 101, missing 17, unattributed 309
 ```
@@ -60,7 +61,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 12.0 | `System/Graphic/WorldEnv.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | CWorldEnv (1 complete) |  |
 | R0 | 10.0 | `System/Graphic/ModelMan.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users | CDispListSemiSingleSort, CModelMan (1 missing, 1 complete) |  |
 | R0 | 6.0 | `System/FileIO.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CFileIO (1 complete) |  |
 | R0 | 6.0 | `System/Graphic/Effect/libppp/keProg/KeTh.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | KeData16, _sceDmaTag (1 partial, 1 complete) |  |
@@ -80,6 +80,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 29.0 | `Game/Player/Player.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 34 PARTIAL | CPlayer (1 partial) | inline bodies or virtuals |
 | R1 | 22.0 | `Game/Enemy/BattleEnemyManager.h` | ready | 11 stand-in files, 0 dup headers, 0 gate users | CBattleEnemyManager (1 complete) | inline bodies or virtuals |
 | R1 | 14.0 | `Game/Atel/Atel.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | CAtel (1 complete) | inline bodies or virtuals |
+| R1 | 14.0 | `Game/Atel/VSME.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -98,7 +99,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `VTransInfo` | gated | System/Graphic/Gprim.h | 7 | System/Graphic/modeldata.h | 1 PARTIAL |
 | `CJiminyMemoFlag` | superset | Form/Menu/JMemoFlag.h | 6 |  | 1 PARTIAL |
 | `CPlayer` | partial | Game/Player/Player.h | 6 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; padding: _m_0x21c; extra methods: __attribute__, _instance, getCardDraw, getLockonHandle, getMarker, getPrizeDraw, ... (+1); virtual order differs; 3 |
-| `CWorldEnv` | complete | System/Graphic/WorldEnv.h | 6 |  |  |
 | `CBuf` | superset | System/Buf.h | 5 |  | 3 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `COLL_INFO_UNION` | missing | Game/Movement.h | 5 |  |  |
