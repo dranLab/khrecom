@@ -3,6 +3,7 @@
 #include "System/Graphic/Gprim.h"
 #include "Game/Collision/CollUtil.h"
 #include "System/Graphic/Str.h"
+#define DEBUGPATHDATA_H_PATH "Game/Debug/DebugPathData.h" /* MATCH: the original includes it under this name */
 #include "Game/Debug/DebugPathData.h"
 #include "System/Graphic/HermitePathCamera.h"
 #include "System/Graphic/HermitePath.h"

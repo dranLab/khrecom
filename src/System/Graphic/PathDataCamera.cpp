@@ -9,6 +9,7 @@ inline void _pathDataCameraSLCOverflow() {
 }
 
 #include "System/Graphic/Str.h"
+#define DEBUGPATHDATA_H_PATH "Game/Debug/DebugPathData.h" /* MATCH: the original includes it under this name */
 #include "Game/Debug/DebugPathData.h"
 #include "System/Graphic/PathData.h"
 #include "System/Graphic/HermitePath.h"

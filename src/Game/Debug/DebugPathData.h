@@ -1,4 +1,3 @@
-// PARTIAL: added for Form/DebugWindowTBL
 #ifndef GAME_DEBUG_DEBUGPATHDATA_H
 #define GAME_DEBUG_DEBUGPATHDATA_H
 
@@ -8,8 +7,12 @@
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
-#ifdef GAME_DEBUG_DEBUGPATHDATA_CPP
-/* PARTIAL: the full class, for Game/Debug/DebugPathData only */
+#include "System/Graphic/PathData.h"
+#include "System/Graphic/Str.h"
+#include "System/DebugProcInfo.h"
+#ifndef DEBUGPATHDATA_H_PATH
+#define DEBUGPATHDATA_H_PATH __FILE__
+#endif
 class CPathData;
 class CNakCamera;
 class CPDFrameTime {
@@ -185,33 +188,10 @@ public:
 private:
     BOOL isEnd();
     static CDebugPathData* getInstance() {
-#line 259
+#line 259 DEBUGPATHDATA_H_PATH
         if (!(m_pInstance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
         return m_pInstance;
     }
 };
-#else
-class CDebugPathData : public CTask {
-private:
-    static CDebugPathData* m_pInstance;
-
-public:
-    static UINT m_iCtrlFlg; // PARTIAL: added for System/Graphic/PathDataCamera
-
-public:
-    CDebugPathData(CTask* p, BOOL bEnd);
-    static BOOL create(CTask* p, BOOL bEnd);
-    static BOOL isDebugPathData() { return m_pInstance != NULL; }
-
-    /* Placeholders for the original header's inline functions: their strings ("%d", then the assert of
-     * m_pInstance) are in .rodata of every includer. */
-#line 1 "Game/Debug/DebugPathData.h"
-    static void _formatNumber(char* pBuf, INT n) { sprintf(pBuf, "%d", n); }
-    static CDebugPathData* _getInstance() {
-        if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
-        return m_pInstance;
-    }
-};
-#endif
 
 #endif /* GAME_DEBUG_DEBUGPATHDATA_H */
