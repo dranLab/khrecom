@@ -9,6 +9,8 @@
 #define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h" /* MATCH: the original includes it under this name */
 #include "System/Graphic/PathDataCamera.h"
 #include "Form/DebugWindow.h"
+#include "System/Graphic/WorldEnv.h"
+#include "System/Coord.h"
 #include "System/TaskMan.h"
 #include "include_asm.h"
 
@@ -164,7 +166,37 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", create__14C
 void CDebugPathData::main() {
     if (isEnd()) out();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", disp__14CDebugPathData);
+extern "C" void sceVu0RotMatrixZ(FMATRIX& m0, FMATRIX& m1, float rz);
+struct _ArrowVecs { FVECTOR v[3]; };
+extern "C" const _ArrowVecs D_004870F0; /* {0,-64,0,1}, {16,0,0,1}, {-16,0,0,1} (PARTIAL: .rodata still asm) */
+void CDebugPathData::disp() {
+    m_pFrame->disp(getFrameRateF());
+    if (m_pDCam == CWorldEnv::getActiveCamera()) {
+        if (m_pPath) m_pPath->dispDebugLine();
+        if (m_iCtrlFlg & 1) {
+            FMATRIX mMat;
+            _ArrowVecs v = D_004870F0;
+            asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                         "sqc2 $vf0, 0x30(%0)\n"
+                         "vmr32.xyzw $vf2, $vf1\n"
+                         "sqc2 $vf1, 0x20(%0)\n"
+                         "vmr32.xyzw $vf3, $vf2\n"
+                         "sqc2 $vf2, 0x10(%0)\n"
+                         "sqc2 $vf3, 0x0(%0)\n"
+                         :
+                         : "r"(&mMat)
+                         : "memory");
+            sceVu0RotMatrixZ(mMat, mMat, _getPathVectorConvWRoll(m_vActivePathPos.w));
+            ApplyMatrix(*(FVECTOR*)&m_gpPArrowPoly.m_V[0], mMat, v.v[0]);
+            ApplyMatrix(*(FVECTOR*)&m_gpPArrowPoly.m_V[1], mMat, v.v[1]);
+            ApplyMatrix(*(FVECTOR*)&m_gpPArrowPoly.m_V[2], mMat, v.v[2]);
+            m_gpPArrowPoly.m_V[0].C.col = 0x800000FF;
+            m_gpPArrowPoly.m_V[1].C.col = 0x80C0C0C0;
+            m_gpPArrowPoly.m_V[2].C.col = 0x80C0C0C0;
+            m_gpPArrowPoly.disp();
+        }
+    }
+}
 BOOL CDebugPathData::isEnd() {
     if (m_hChildWnd) {
         CTask* pTask = CTaskMan::getTask(m_hChildWnd);

@@ -12,6 +12,9 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 /* PARTIAL: the full class, for Game/Debug/DebugPathData only (no SOURCE DATA yet: the inline's strings are labels) */
 class CPathData;
 class CNakCamera;
+extern "C" char D_00485FA8[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.h" */
+extern "C" char D_00485FD8[]; /* "m_pInstance" */
+extern "C" char D_00485FA0[]; /* "%d" */
 class CPDFrameTime {
     INT m_iFlags;      /* 0x00 */
     FLOAT m_fTimer;    /* 0x04 */
@@ -27,10 +30,15 @@ public:
     void stop() { m_iFlags &= ~2; }
     void on();
     void off();
-    void disp();
+    void disp(FLOAT fRate) {
+        if (m_iFlags & 1) {
+            if (m_iFlags & 2) m_fTimer += fRate;
+            sprintf(m_szStr, D_00485FA0, (INT)m_fTimer);
+            m_cTile.disp();
+            m_cFnt.disp();
+        }
+    }
 };
-extern "C" char D_00485FA8[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.h" */
-extern "C" char D_00485FD8[]; /* "m_pInstance" */
 class CDebugPathData : public CTask {
     CPathData* m_pPath;       /* 0x40 */
     CNakCamera* m_pDCam;      /* 0x44 */
@@ -42,6 +50,7 @@ class CDebugPathData : public CTask {
 public:
     static INT m_iActivePath;
     static INT m_iActivePathNum;
+    static FVECTOR m_vActivePathPos;
     static FLOAT m_fValuePlus;
     static char m_szNames[128][16];
     static CPDFrameTime* m_pFrame;
