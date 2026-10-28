@@ -34,7 +34,7 @@ extern "C" char D_00487168[];
 extern "C" char D_00486F18[];
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __17CHermitePathMoveSP5CTaskPC11CPathVector);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", _$_17CHermitePathMoveS);
+CHermitePathMoveS::~CHermitePathMoveS() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", main__17CHermitePathMoveS);
 void CHermitePathMoveS::disp() { m_DDPathCamArrow.disp(); }
 INT debugWinPathEndOneCall(CDebugWindow* pWin, INT iMes, INT iParam) {
