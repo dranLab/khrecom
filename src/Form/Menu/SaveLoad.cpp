@@ -268,6 +268,7 @@ public:
 class CGame { /* PARTIAL: Game/Game.h needs the game headers */
 public:
     static BOOL isRikuGame();
+    static BOOL isSoraGame();
 };
 class CPackMan { /* PARTIAL: System/Graphic/PackMan.h is not written yet */
 public:
@@ -393,7 +394,60 @@ void CSaveLoadUI::exeCheckBoot() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLayIn__11CSaveLoadUI);
+void CSaveLoadUI::preLayIn() {
+    m_pMainFrameAgent = createMainFrame();
+    m_pMainFrameAgent->start();
+    CSound::playSE(3, -1, 64);
+    m_pMainCursor = createCursor();
+    m_pMainCursor->changeLayer(13);
+    m_pMainLightMark = createLightMark(LIGHTMARK_TYPE_CURSOR, 16, TRUE);
+    if (m_mode == SLMODE_SAVE) {
+        m_pWorldIconAgent = createWorldIcon(m_pWorldIconCtrl);
+        m_pWorldIconAgent->start();
+        m_pRoomNameAgent = createRoomName(m_pRoomNameCtrl);
+        m_pRoomNameAgent->start();
+        m_pTimeLabelAgent = createTimeLabel(m_pTimeLabelCtrl);
+        m_pTimeLabelAgent->start();
+        m_pTimeCtrl = createTimeCtrl();
+        if (CGame::isSoraGame()) {
+            m_pMPLabelAgent = createMPLabel(m_pMPLabelCtrl);
+            m_pMPLabelAgent->start();
+            m_pMPCtrl = createMPCtrl();
+        }
+    }
+    m_pMainFrameHelpAgent = createMainHelp(m_pMainFrameHelpCtrl, m_pMainFrameHelpFnt);
+    for (INT i = 0; i < 2; i++) {
+        m_pResultPlateAgent[i] = createResultPlate(m_pResultPlateCtrl[i], m_pResultPlateFnt[i], i);
+        m_pResultLightAgent[i] = createLightMark(LIGHTMARK_TYPE_RESULT, 13, FALSE);
+    }
+    m_pResultPlateAgent[0]->start();
+    for (INT i = 0; i < 2; i++) {
+        m_pSelSlotPlate[i] = createSelSlotPlate(i);
+        m_pSelSlotPlate[i]->attachCursor(m_pMainCursor);
+        m_pSelSlotPlate[i]->attachLightMark(m_pMainLightMark);
+    }
+    m_pMemocaInfoAgent = createMemocaInfo(m_pMemocaInfoCtrl, m_pMemocaInfoBar);
+    m_pDataListContainerAgent = createDataListContainer(m_pDataListContainerCtrl, m_pDataListScrollbar);
+    for (INT i = 0; i < 4; i++) {
+        *m_szDataItemContent[i] = '\0';
+        *m_szDataItemID[i] = '\0';
+        *m_szDataItemTime[i] = '\0';
+        m_pDataItemPlate[i] = createDataItemPlate(*m_pDataListContainerCtrl, m_pDataItemNumCircle[i], m_pDataItemNumFnt[i],
+                                                  m_pDataItemIcon[i], m_pDataItemClearIcon[i], i);
+        m_pDataItemPlate[i]->attachCursor(m_pMainCursor);
+        m_pDataItemPlate[i]->attachLightMark(m_pMainLightMark);
+    }
+    m_pMessageDlgAgent = createMessageDlg(m_pMessageDlgCtrl, m_pMessageDlgFntInf);
+    for (INT i = 0; i < 2; i++) {
+        m_pMessageDlgBtnAgent[i] = createMessageDlgBtn(m_pMessageDlgCtrl, i);
+    }
+    m_pMessageDlgCursor = createCursor();
+    m_pMessageDlgCursor->changeLayer(14);
+    for (INT i = 0; i < 2; i++) {
+        m_pMessageDlgBtnAgent[i]->attachCursor(m_pMessageDlgCursor);
+        m_pMessageDlgBtnAgent[i]->attachLightMark(m_pMainLightMark);
+    }
+}
 void CSaveLoadUI::exeLayIn() {}
 void CSaveLoadUI::preLayOut() {
     if (m_mode == SLMODE_LOAD && s_bSaveLoadDone) {
