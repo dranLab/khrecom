@@ -75,6 +75,13 @@ extern "C" char D_004AD568[];
 extern "C" char D_004AD3D8[];
 extern "C" char D_004AD430[];
 extern "C" char D_004AD920[];
+extern "C" char D_004AD2B0[];
+extern "C" char D_004AD2E0[];
+extern "C" char D_004AD2F8[];
+extern "C" char D_004AD310[];
+extern "C" char D_004AD328[];
+extern "C" char D_004AD340[];
+extern "C" char D_004AD358[];
 extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 struct STOP_DAMAGE {
     FVECTOR vDetectPos;
@@ -195,7 +202,56 @@ FLOAT CBattleEnemy::getExtraParam(const CHAR* inParamName) {
     if (m_pEnemyParam) return m_pEnemyParam->getExtraParam((char*)inParamName);
     return 0.0f;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackPoint__12CBattleEnemyi8ATK_KINDUsP8ATK_KINDi);
+FLOAT CBattleEnemy::getAttackPoint(INT inIndex, ATK_KIND inAtkKind, USHORT inUpFlag, ATK_KIND* outAtkKind, INT inFinish) {
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0x414, D_004AD2A0, 0);
+    ENEMY_ACT* act = NULL;
+    for (INT i = 0; i < m_pEnemyParam->iActCount; i++) {
+        if (m_pEnemyParam->pActs[i].iActNo == inIndex) {
+            act = &m_pEnemyParam->pActs[i];
+            break;
+        }
+    }
+    if (act) {
+        CardBattle::ENCHANT_PARAM param;
+        param.init(getHandle(), 2);
+        param.AtkKind = inAtkKind;
+        param.uiState = 1;
+        param.AtkAttr = getAttackAttr(inIndex);
+        param.iAttackPoint = (INT)(BattleEnemy::GameModeAp((FLOAT)m_pBasicParam->iAP) * act->fPower + 0.5f);
+        param.iHp = getHp();
+        param.iHpMax = getHpMax();
+        param.iFinish = inFinish;
+        if (!inUpFlag) {
+            switch (param.AtkAttr) {
+            case ATK_ATTR_FIRE:
+                param.UpKind = 8;
+                break;
+            case ATK_ATTR_ICE:
+                param.UpKind = 0x10;
+                break;
+            case ATK_ATTR_THUNDER:
+                param.UpKind = 0x20;
+                break;
+            }
+        } else {
+            param.UpKind = inUpFlag;
+        }
+        CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+        if (cb) {
+            cb->calcEnchantParam(param);
+            if (outAtkKind) *outAtkKind = param.AtkKind;
+            TRACE_USER((USER)5, D_004AD2B0);
+            TRACE_USER((USER)5, D_004AD2E0, getID());
+            TRACE_USER((USER)5, D_004AD2F8, param.iAttackPoint);
+            TRACE_USER((USER)5, D_004AD310, param.AtkKind);
+            TRACE_USER((USER)5, D_004AD328, param.AtkAttr);
+            TRACE_USER((USER)5, D_004AD340, act->iActNo);
+            TRACE_USER((USER)5, D_004AD358);
+            return param.iAttackPoint;
+        }
+    }
+    return 0.0f;
+}
 ATK_ATTR CBattleEnemy::getAttackAttr(INT inIndex) const {
     if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0x465, D_004AD2A0, 0);
     ENEMY_ACT* act = NULL;
