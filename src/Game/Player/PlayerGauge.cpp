@@ -1196,8 +1196,36 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispSeq__
 __asm__(".rdata\n.align 4\n.word 0x00289764\n.word 0x00289764\n.word 0x00289708\n.word 0x00289764\n.word 0x00289764\n.word 0x00289708\n.word 0x00289764\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispMogSeq__Q25Gauge11CPrizeGauge);
 __asm__(".rdata\n.align 4\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x00000000\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setPrizeExp__Q25Gauge11CPrizeGaugei);
-__asm__(".rdata\n.align 4\n.word 0x00289A4C\n.word 0x00289A7C\n.word 0x00289A7C\n.word 0x00289A7C\n.word 0x00289A8C\n.word 0x00289A8C\n.word 0x00289A8C\n.word 0x00000000\n.text\n");
+void CPrizeGauge::setPrizeExp(INT inExp) {
+    if (!m_pInstance) return;
+    if (CGameWork::getInt(1, 0xE2)) return;
+    switch (_ref(m_pInstance)->m_uiState) {
+    case 0:
+        _ref(m_pInstance)->m_iExp = inExp;
+        _ref(m_pInstance)->m_uiState = 1;
+        _ref(m_pInstance)->m_pSeqCtrls->enableDisp(0, TRUE);
+        break;
+    case 1:
+    case 2:
+    case 3:
+        _ref(m_pInstance)->m_iExp += inExp;
+        break;
+    case 4:
+    case 5:
+    case 6:
+        if (g_pPlayer && g_pPlayer->getLV() >= 99) {
+            _ref(m_pInstance)->m_iExp = 0;
+            _ref(m_pInstance)->m_uiState = 0;
+            _ref(m_pInstance)->m_pSeqCtrls->replaceSeq(0, _ref(g_szSeqCockpit), 0x51);
+            _ref(m_pInstance)->m_pSeqCtrls->enableDisp(0, FALSE);
+            _ref(m_pInstance)->m_iOldExp = 0;
+            return;
+        }
+        _ref(m_pInstance)->m_iExp = CPlayer::getNowNextEXP();
+        break;
+    }
+    _ref(m_pInstance)->setDispSeq();
+}
 void CPrizeGauge::setPrizeMp(INT inMp) {
     if (!m_pInstance) return;
     if (CGameWork::getInt(1, 0xE2)) return;

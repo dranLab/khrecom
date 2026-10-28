@@ -218,6 +218,8 @@ public:
     virtual ~CPrizeGauge();
     virtual void main();
     void setDispMogSeq();
+    void setDispSeq();
+    static void setPrizeExp(INT inExp);
     static void setPrizeMp(INT inMp);
     static void setDropMp(INT inMp);
     static BOOL isNowDispCard();
