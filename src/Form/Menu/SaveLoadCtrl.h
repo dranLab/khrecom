@@ -128,6 +128,9 @@ private:
 
 public:
     void setupSeq(const CHAR* pszLad, SHORT nUnit, SHORT nSeqNormal, SHORT nSeqHistory);
+    // PARTIAL: added for Form/Menu/SaveLoad
+    void setNormalSeq() { replaceSeq(0, m_pszLad, m_nSeqUnit, m_nSeqTbl[0]); }
+    void setHistorySeq() { replaceSeq(0, m_pszLad, m_nSeqUnit, m_nSeqTbl[1]); }
 };
 
 class C2DSeqLightMarkAgent : public C2DSeqAgent {
@@ -148,6 +151,14 @@ public:
             m_nFlag |= 1;
         } else {
             m_nFlag &= ~1;
+        }
+    }
+    // PARTIAL: added for Form/Menu/SaveLoad
+    void setSleep(BOOL bSleep) {
+        if (bSleep) {
+            m_nFlag |= 2;
+        } else {
+            m_nFlag &= ~2;
         }
     }
 
@@ -173,6 +184,9 @@ public:
     void setCaptionParam(const CHAR* pszText, INT nSize, const G_RGBA* pCol, UINT nStyle);
     void getCursorPos(FVECTOR& vOut) const;
     void getLightMarkPos(FVECTOR& vOut) const;
+    // PARTIAL: added for Form/Menu/SaveLoad
+    void attachCursor(C2DSeqCursorCtrl* pCursor) { m_pCursor = pCursor; }
+    void attachLightMark(C2DSeqLightMarkAgent* pLight) { m_pLightMark = pLight; }
 };
 
 class C2DSeqScrollbarCtrl {
