@@ -646,7 +646,58 @@ void CSaveLoadUI::preMessageOnly() {
     m_nStep = 0;
     m_nTimer = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeMessageOnly__11CSaveLoadUI);
+void CSaveLoadUI::exeMessageOnly() {
+    switch (m_nStep) {
+    case 0: {
+        BOOL bSoraClear = CGameWork::getFlag(0, 9);
+        INT nCtd = 0;
+        INT nIcon;
+        INT nType;
+        switch (s_nMessage) {
+        case 0:
+            nCtd = bSoraClear ? 0x600501 : 0x600500;
+            nIcon = 0;
+            nType = 1;
+            break;
+        case 1:
+            nCtd = bSoraClear ? 0x600503 : 0x600502;
+            nIcon = 1;
+            nType = 3;
+            break;
+        }
+        if (!nCtd) {
+            changeState(4);
+            break;
+        }
+        openMessageDlg(_ctdText(nCtd), nIcon, nType);
+        m_nStep++;
+        break;
+    }
+    case 1:
+        if (!m_nDlgResult) break;
+        {
+            SLMSG_RESULT r;
+            switch (m_nDlgResult) {
+            case 1:
+                r = SLMSG_RESULT_OK;
+                break;
+            case 2:
+                r = SLMSG_RESULT_NO;
+                break;
+            default:
+                r = SLMSG_RESULT_CANCEL;
+                break;
+            }
+            s_nMsgResult = r;
+        }
+        closeMessageDlg();
+        m_nStep++;
+        break;
+    case 2:
+        if (isPadEnable()) changeState(4);
+        break;
+    }
+}
 C2DSeqAgent* CSaveLoadUI::createMainFrame() {
     C2DSeqAgent::SeqTbl tbl[2] = {{{2, 4, 5}}, {{3, 5, 6}}};
     C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(1990)", RET_ADDR())) C2DSeqAgent(this);
