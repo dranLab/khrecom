@@ -413,7 +413,22 @@ void CBattleEnemy::endStateToss() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
     bodyCollOnBody(-1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateBeat__12CBattleEnemy);
+void CBattleEnemy::beginStateBeat() {
+    FVECTOR vel;
+    if (checkHitPos() & 1) {
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
+    } else {
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[8], 0, 0, -1);
+    }
+    vel.x = 0.0f;
+    vel.y = -0.2f;
+    vel.z = 0.0f;
+    vel.w = 1.0f;
+    m_pMove->setVel(vel);
+    m_pMove->enableGravity(TRUE);
+    playBigDamageSE();
+    m_iSysStep = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateBeat__12CBattleEnemy);
 void CBattleEnemy::endStateBeat() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
