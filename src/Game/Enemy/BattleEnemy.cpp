@@ -820,7 +820,17 @@ void CBattleEnemy::beginStateAppear_() {
 void CBattleEnemy::stateAppear_() {
     stateAppear();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", endStateAppear___12CBattleEnemy);
+void CBattleEnemy::endStateAppear_() {
+    if (isBtlEnemyFlag(8) || isBtlEnemyFlag(0x20000000000ULL)) killBadStatusEffect();
+    if (isBtlEnemyFlag(0x1000000000ULL)) enableConfuse_(TRUE);
+    setEntityFlag(0x10000, 0);
+    endStateAppear();
+    m_ullBtlEnemyFlag &= ~0x20000000008ULL;
+    if ((UINT)getID() % 10000 < 100 && (DebugWork::g_dw.enemy.uiFlag & 0x1000)) {
+        m_iHp = 0;
+        changeBattleEnemyState(30);
+    }
+}
 void CBattleEnemy::beginStateMain_() {
     beginStateMain();
 }
