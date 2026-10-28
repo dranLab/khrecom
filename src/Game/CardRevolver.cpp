@@ -569,7 +569,109 @@ void CCardRevolver::exeWait() {
         m_iState = 1;
     }
 }
+/* Parked: 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag
+   into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state
+   switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), debug guards in
+   this order. Tried: kind/owner accessor forms; permuter 4 min (no gain). */
+#if 0
+void CCardRevolver::main() {
+    INT i;
+    CBattleCard* pBC;
+    m_uiFlag = (INT)m_uiFlag & ~6;
+    if (dbgCheckUser(USR_PROG) && m_uiUser == 1 && dbgButtonDown(USR_SYSTEM, 8, 1)) {
+        TRACE("PLCR: ========================================\n");
+        TRACE("Rev: Mode = MODE_NORMAL\n");
+        TRACE("Rev: nTotal = %d, nRemain = %d, nActive = %d,\n", m_nTotal[0], m_nRemain[0], m_nActive[0]);
+        TRACE("Rev: nLimit = %d, nExtra = %d, iMax = %d\n", m_nLimit, m_nExtra, m_iMax);
+        TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);
+        TRACE("PLCR: Cards--------------------------------\n");
+        for (i = 0; i < m_nLimit; i++) {
+            if (&m_pCards[i]) {
+                TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, m_pCards[i].getCardKind(),
+                      m_pCards[i].getCardData()->m_nNumber, m_pCards[i].getBaseCardNumber(), m_pCards[i].getStock(), m_pCards[i].getHand(),
+                      m_pCards[i].getHandMax(), m_pCards[i].getFlag(), m_pCards[i].getCardOwner());
+            } else {
+                TRACE("%3d: NULL,\n", i);
+            }
+        }
+        TRACE("PLCR: ========================================\n");
+    }
+    switch (m_iState) {
+    case 0:
+        exeWait();
+        break;
+    case 1:
+        if (m_hPlaySE > 0) {
+            CSound::stopSE(m_hPlaySE, m_iReloadSEID);
+            m_hPlaySE = 0;
+        }
+        if (exeReturnCard()) break;
+        if (exeAddCard()) break;
+        if (exeSnatchCard()) break;
+        if (exeDiscard()) break;
+        exeMain();
+        break;
+    case 2:
+        exeReload();
+        break;
+    case 3:
+        exeAction();
+        break;
+    case 4:
+        exeCounter();
+        exeNumEffect();
+        exeStock();
+        return;
+    }
+    if (m_hChargeSE > 0 && !(m_uiFlag & 0x20)) {
+        CSound::stopSE(m_hChargeSE, 0x13);
+        m_hChargeSE = 0;
+    }
+    m_uiFlag &= ~0x10020;
+    exeCounter();
+    exeNumEffect();
+    exeStock();
+    if (dbgCheckUser(USR_PROG) && dbgButtonTrg(USR_SYSTEM, 2, 1)) {
+        if (dbgButtonDown(USR_SYSTEM, 4, 1) && m_uiUser == 1) {
+            TRACE("PLCR: ========================================\n");
+            TRACE("Rev: Mode = MODE_NORMAL\n");
+            TRACE("Rev: nTotal = %d, nRemain = %d, nActive = %d,\n", m_nTotal[0], m_nRemain[0], m_nActive[0]);
+            TRACE("Rev: nLimit = %d, nExtra = %d, iMax = %d\n", m_nLimit, m_nExtra, m_iMax);
+            TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);
+            TRACE("PLCR: Cards--------------------------------\n");
+            for (i = 0; i < m_nLimit; i++) {
+                if (&m_pCards[i]) {
+                    TRACE("%3d: [Card%03d:%d(%d)] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, m_pCards[i].getCardKind(),
+                          m_pCards[i].getCardData()->m_nNumber, m_pCards[i].getBaseCardNumber(), m_pCards[i].getStock(), m_pCards[i].getHand(),
+                          m_pCards[i].getHandMax(), m_pCards[i].getFlag(), m_pCards[i].getCardOwner());
+                } else {
+                    TRACE("%3d: NULL,\n", i);
+                }
+            }
+            TRACE("PLCR: ========================================\n");
+        }
+        if (dbgButtonDown(USR_SYSTEM, 1, 1) && m_uiUser == 2) {
+            TRACE("ENCR: ========================================\n");
+            TRACE("Rev: nTotal = %d, nRemain = %d, nActive = %d,\n", m_nTotal[0], m_nRemain[0], m_nActive[0]);
+            TRACE("Rev: nLimit = %d, nExtra = %d, iMax = %d\n", m_nLimit, m_nExtra, m_iMax);
+            TRACE("Rev: bActive = %d, tqTimer = %d, uiFlag = %08x,\n", m_bActive, m_tqTimer, m_uiFlag);
+            TRACE("ENCR: Cards--------------------------------\n");
+            for (i = 0; i < m_nLimit; i++) {
+                if (&m_pCards[i]) {
+                    TRACE("%3d: [Card%03d:%d] iStock=%d, iHand=%d/%d, uiFlag=%08x, uiOwner=%d,\n", i, m_pCards[i].getCardKind(),
+                          m_pCards[i].getCardData()->m_nNumber, m_pCards[i].getStock(), m_pCards[i].getHand(), m_pCards[i].getHandMax(),
+                          m_pCards[i].getFlag(), m_pCards[i].getCardOwner());
+                } else {
+                    TRACE("%3d: NULL,\n", i);
+                }
+            }
+            TRACE("ENCR: ========================================\n");
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle13CCardRevolver);
+#endif
 __asm__(".rdata\n.align 3\n.word 0x52434C50\n.word 0x3D3D203A\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x000A3D3D\n.word 0x3A766552\n.word 0x646F4D20\n.word 0x203D2065\n.word 0x45444F4D\n.word 0x524F4E5F\n.word 0x0A4C414D\n.word 0x00000000\n.word 0x00000000\n.word 0x3A766552\n.word 0x6F546E20\n.word 0x206C6174\n.word 0x6425203D\n.word 0x526E202C\n.word 0x69616D65\n.word 0x203D206E\n.word 0x202C6425\n.word 0x7463416E\n.word 0x20657669\n.word 0x6425203D\n.word 0x00000A2C\n.word 0x3A766552\n.word 0x694C6E20\n.word 0x2074696D\n.word 0x6425203D\n.word 0x456E202C\n.word 0x61727478\n.word 0x25203D20\n.word 0x69202C64\n.word 0x2078614D\n.word 0x6425203D\n.word 0x0000000A\n.word 0x00000000\n.word 0x3A766552\n.word 0x63416220\n.word 0x65766974\n.word 0x25203D20\n.word 0x74202C64\n.word 0x6D695471\n.word 0x3D207265\n.word 0x2C642520\n.word 0x46697520\n.word 0x2067616C\n.word 0x3025203D\n.word 0x0A2C7838\n.word 0x00000000\n.word 0x00000000\n.word 0x52434C50\n.word 0x6143203A\n.word 0x2D736472\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x0A2D2D2D\n.word 0x00000000\n.word 0x3A643325\n.word 0x61435B20\n.word 0x30256472\n.word 0x253A6433\n.word 0x64252864\n.word 0x69205D29\n.word 0x636F7453\n.word 0x64253D6B\n.word 0x4869202C\n.word 0x3D646E61\n.word 0x252F6425\n.word 0x75202C64\n.word 0x616C4669\n.word 0x30253D67\n.word 0x202C7838\n.word 0x774F6975\n.word 0x3D72656E\n.word 0x0A2C6425\n.word 0x00000000\n.word 0x00000000\n.word 0x3A643325\n.word 0x4C554E20\n.word 0x000A2C4C\n.word 0x00000000\n.word 0x52434E45\n.word 0x3D3D203A\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x3D3D3D3D\n.word 0x000A3D3D\n.word 0x52434E45\n.word 0x6143203A\n.word 0x2D736472\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x0A2D2D2D\n.word 0x00000000\n.word 0x3A643325\n.word 0x61435B20\n.word 0x30256472\n.word 0x253A6433\n.word 0x69205D64\n.word 0x636F7453\n.word 0x64253D6B\n.word 0x4869202C\n.word 0x3D646E61\n.word 0x252F6425\n.word 0x75202C64\n.word 0x616C4669\n.word 0x30253D67\n.word 0x202C7838\n.word 0x774F6975\n.word 0x3D72656E\n.word 0x0A2C6425\n.word 0x00000000\n.word 0x001E2810\n.word 0x001E2820\n.word 0x001E2888\n.word 0x001E2898\n.word 0x001E28A8\n.word 0x00000000\n.text\n");
 void CCardRevolver::exeMain() {
     if (DebugWork::g_dw.player.iDeckDbgDisp) {
