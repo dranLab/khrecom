@@ -96,7 +96,22 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", main__Q210CardBattle
 void CCardBattle::disp() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcPlayingCard__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exePlaying__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setNumberBreak__Q210CardBattle11CCardBattleUiUi);
+void CCardBattle::setNumberBreak(UINT _PLAYER, UINT _ENEMY) {
+    if (m_cardEnchant[_PLAYER][0] == 0x65) {
+        INT iCountE = m_iCount[_ENEMY];
+        INT iPoint = m_iPoint[_PLAYER];
+        for (INT i = 0; i < iCountE; i++) {
+            CBattleCard* pCard = m_pCard[_ENEMY][i];
+            if (pCard) {
+                INT iPointE = pCard->getCardData()->m_nNumber;
+                pCard->setNumberBreak(iPoint);
+                iPoint -= iPointE;
+                if (iPoint < 0) iPoint = 0;
+                *(CARD*)m_cardData[_ENEMY][i] = *m_pCard[_ENEMY][i]->getCardData();
+            }
+        }
+    }
+}
 BOOL CCardBattle::checkNowPlaying(INT inSide, CBattleCard* pCard) {
     if (!(inSide)) AssertApp(D_00476980, 1425, D_00476730, 0);
     for (INT i = 0; i < 7; i++) {
