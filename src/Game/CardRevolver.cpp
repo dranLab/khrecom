@@ -127,6 +127,7 @@ char* g_szEnemyCardEffName[60] = {
     "Combo Boost", "Water Charge", "Omni Break", "Double Strike", "Premium Guard", "Damage Zero",
 };
 G_UV g_uvCRCounterNumOfs[4] = {{67, 30}, {52, 30}, {56, 20}, {37, 29}};
+extern G_UV g_uvCRCounterNumTex[8][10];
 }
 template <class T> static inline T& _ref(T& v) { return v; }
 /* PARTIAL: stand-in for Game/CardBattle CCardBattle (m_cardEnchant, getEnchantKind): gated by GAME_CARDBATTLE_CPP */
@@ -2000,7 +2001,119 @@ void CCardRevolver::deleteStock() {
     delete m_pSeqCtrlStock_Num10;
     m_pSeqCtrlStock_Num10 = NULL;
 }
+/* Parked: 22 lines off, two places: the first block has CStockFolder::setStockInfo's open issue (the original issues
+   the div before the pos.init() zero stores and the changeTexture zero arguments, ours after); the num > 0 arms
+   load a0/a1 for setPos at the top of each arm with one shared jal in the original. A setPos per arm gives that
+   setup but no cross-jump (sched1 puts a (use (const_int 0)) after a block-ending call, jump2 then stops), and
+   pos.x += 15 duplicated into both arms cross-jumps but moves the add into the arm. Worked: setText before
+   ofsY = 0, m_uiStockState before m_uiStockCategory in default. Tried: 5 pos.init placements; permuter 5 min
+   (4399 candidates, 41 -> 37, applied). */
+#if 0
+void CCardRevolver::setStockInfo() {
+    CB_LAYOUT* pLayout;
+    FLOAT ofsY;
+    FVECTOR pos;
+    INT num;
+    INT category;
+    if (m_uiUser == 2) {
+        CCardBattle* pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+        if (_getEnchantKind(pCB, m_uiUser) == 0x31) {
+            m_pSeqCtrlStock->enableDisp(FALSE);
+            m_uiStockState = 0;
+            m_uiStockCategory = 0;
+            m_uiStockFlag = (INT)m_uiStockFlag & ~1;
+            m_pSeqCtrlStock_Num10->enableDisp(0, FALSE);
+            m_pSeqCtrlStock_Num01->enableDisp(0, FALSE);
+            return;
+        }
+    }
+    m_p2DFntStockName->setText(g_szStockSkillName[m_iStockSkill]);
+    ofsY = 0.0f;
+    switch (m_uiUser) {
+    case 1:
+        if (m_iStockSkill >= 0x66) {
+            pLayout = &g_LayoutData[35 + m_iStock];
+            ofsY = 20.0f;
+        } else if (m_iStockSkill >= 4) {
+            pLayout = &g_LayoutData[26 + m_iStock];
+        } else {
+            pLayout = &g_LayoutData[23 + m_iStock];
+        }
+        break;
+    case 2:
+        pLayout = (m_iStockSkill >= 0x6F) ? &g_LayoutData[32 + m_iStock] : &g_LayoutData[29 + m_iStock];
+        break;
+    }
+    pos.init();
+    num = m_iStockSum % 10;
+    m_pSeqCtrlStock_Num01->changeTexture(0, 0, 0, NULL, &g_uvCRCounterNumTex[m_uiNumTexID][num], &g_uvCRCounterNumTex[m_uiNumTexID + 1][num]);
+    m_pSeqCtrlStock_Num01->changeTexture(0, 1, 0, NULL, &g_uvCRCounterNumTex[m_uiNumTexID][num], &g_uvCRCounterNumTex[m_uiNumTexID + 1][num]);
+    m_pSeqCtrlStock_Num01->enableDisp(0, TRUE);
+    num = m_iStockSum / 10;
+    if (num > 0) {
+        m_pSeqCtrlStock_Num10->changeTexture(0, 0, 0, NULL, &g_uvCRCounterNumTex[m_uiNumTexID][num], &g_uvCRCounterNumTex[m_uiNumTexID + 1][num]);
+        m_pSeqCtrlStock_Num10->changeTexture(0, 1, 0, NULL, &g_uvCRCounterNumTex[m_uiNumTexID][num], &g_uvCRCounterNumTex[m_uiNumTexID + 1][num]);
+        m_pSeqCtrlStock_Num10->enableDisp(0, TRUE);
+        if (m_uiUser == 1) {
+            pos.x = pLayout->x + 0x1A;
+            pos.y = pLayout->y - 0xB + ofsY;
+            m_pSeqCtrlStock_Num10->setPos(pos);
+        } else {
+            pos.x = pLayout->x - 0x2B;
+            pos.y = pLayout->y - 0xC;
+            m_pSeqCtrlStock_Num10->setPos(pos);
+        }
+        pos.x += 15.0f;
+        m_pSeqCtrlStock_Num01->setPos(pos);
+    } else {
+        if (m_uiUser == 1) {
+            pos.x = pLayout->x + 0x1A;
+            pos.y = pLayout->y - 0xB + ofsY;
+            m_pSeqCtrlStock_Num01->setPos(pos);
+        } else {
+            pos.x = pLayout->x - 0x1C;
+            pos.y = pLayout->y - 0xC;
+            m_pSeqCtrlStock_Num01->setPos(pos);
+        }
+        m_pSeqCtrlStock_Num10->enableDisp(0, FALSE);
+    }
+    m_uiStockFlag |= 1;
+    if (m_iStock > 0) {
+        UINT flag = (m_uiUser == 1) ? 2 : 4;
+        if (CGameWork::getInt(1, 0xE2) & flag) {
+            m_uiStockFlag = (INT)m_uiStockFlag & ~1;
+            m_pSeqCtrlStock_Num01->enableDisp(0, FALSE);
+            m_pSeqCtrlStock_Num10->enableDisp(0, FALSE);
+        }
+    }
+    category = g_pStockSkillList[m_iStockSkill].CATEGORY;
+    switch (category) {
+    case 1:
+        m_uiStockCategory = 0x1B;
+        break;
+    case 2:
+        m_uiStockCategory = 0x1E;
+        break;
+    case 3:
+    case 5:
+        m_uiStockCategory = 0x21;
+        break;
+    case 7:
+        m_uiStockCategory = 0x18;
+        break;
+    default:
+        m_pSeqCtrlStock->enableDisp(FALSE);
+        m_uiStockState = 0;
+        m_uiStockCategory = 0;
+        return;
+    }
+    m_pSeqCtrlStock->replaceSeq(0, g_szSeqCockpit, m_uiStockCategory);
+    m_pSeqCtrlStock->enableDisp(TRUE);
+    m_uiStockState = 1;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockInfo__Q210CardBattle13CCardRevolver);
+#endif
 __asm__(".rdata\n.align 4\n.word 0x001E8AF4\n.word 0x001E8B00\n.word 0x001E8B0C\n.word 0x001E8B24\n.word 0x001E8B0C\n.word 0x001E8B24\n.word 0x001E8B18\n.word 0x00000000\n.text\n");
 void CCardRevolver::changeDarkMode(HANDLE inHandle, INT inFlag) {
     changeOwner(inHandle);
@@ -2804,9 +2917,6 @@ void CStockFolder::deleteGauge() {
     m_pSeqCtrl_Num01 = NULL;
     delete m_pSeqCtrl_Num10;
     m_pSeqCtrl_Num10 = NULL;
-}
-namespace CardBattle {
-extern G_UV g_uvCRCounterNumTex[8][10];
 }
 /* Parked: 17 lines off, scheduling of the first block: the original issues div, then the changeTexture argument
    zeros interleaved with pos.init(), the trap check after; ours keeps them apart. Worked: inverted layout ternary
