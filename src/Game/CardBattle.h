@@ -140,11 +140,20 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     INT getEnchantKind(INT inSide) { return m_cardEnchant[inSide][0] < 0x44 ? 0 : m_cardEnchant[inSide][0] - 0x43; }
     HANDLE getDuelEnemy() { return m_hDuelEnemy; }
     // PARTIAL: added for Game/Player/PlayerSora (out of line in Game/CardBattle, inlined elsewhere)
+    INT isNowDuelEntry() const { return m_uiDuelState == 2; } // PARTIAL: added for Game/CardBattle
+    INT isNowDuel() const { return m_uiDuelState == 5; }
+    INT isNowSetEnemyDuelCard() const { return m_uiState[1] == 10; }
+    INT isPronounceMode() const { return m_uiDuelState >= 9; }
     INT isNowPronounce() const { return m_uiDuelState == 0xB; }
+    INT isNowSetEnemyPronounce() const { return m_uiState[1] == 15; }
+    USHORT getDuelBreakCountMax() const { return m_nDuelBreakCountMax; }
+    static INT getDuelSkill() { return m_pInstance ? m_pInstance->m_iDuelSkill : 0; }
+    void disableDuelEntry(UINT inSet) { setFlag(inSet, inSet ^ 0x400000); }
     void setSubTimer(TIMEQ inTime) { m_tqSubTimer = inTime; }
     TIMEQ getSubTimer() const { return m_tqSubTimer; }
     TIMEQ getFrameRate() const { return *(const TIMEQ*)&_m_0x0[0x8]; } // PARTIAL: CTask::getFrameRate (base still opaque)
     HANDLE getHandle() const { return *(const HANDLE*)&_m_0x0[0x14]; } // PARTIAL: CTask::getHandle (base still opaque)
+    ::CTask* asTask() { return (::CTask*)this; } // PARTIAL: CCardBattle is a CTask in the original (base still opaque)
     void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
     void disablePlayCard(UINT inSet) { setFlag(inSet, inSet ^ 0xC0000000); } // PARTIAL: added for Game/CardBattle
     void destroyPlayCard(INT inFlag, INT inP1);

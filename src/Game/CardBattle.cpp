@@ -87,6 +87,8 @@ extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039AF98");
 extern "C" char D_00477690[]; /* "...CardBattle.cpp(4378)" */
 extern "C" char D_00477338[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_004769E8[]; /* "...CardBattle.cpp(NNNN)" */
+extern "C" char D_00477090[]; /* "inData" */
+extern "C" char D_00477098[]; /* "...CardBattle.cpp(NNNN)" */
 extern "C" char D_00476938[]; /* "m_pInstance" */
 extern "C" char D_00477298[]; /* notifyCompleteGimmick's TRACE format */
 namespace PL {
@@ -194,7 +196,46 @@ BOOL CCardBattle::checkNowPlaying(INT inSide, CBattleCard* pCard) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testPlayingCard__Q210CardBattle11CCardBattleUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testBreakingCard__Q210CardBattle11CCardBattleUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayCard__Q210CardBattle11CCardBattleiiPQ210CardBattle11CBattleCardP4CARDi);
+INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, CARD* inData, INT inTest) {
+    if (!(inUser)) AssertApp(D_00476980, 1660, D_00476730, 0);
+    UINT _PLAYER = inUser - 1;
+    if (m_uiState[_PLAYER]) return 0;
+    m_hOwner[_PLAYER] = inHandle;
+    m_uiState[_PLAYER] = 1;
+    m_uiResult[_PLAYER] = 0;
+    m_tqPlayTimer[_PLAYER] = 0;
+    CBattleCard* pOld = m_pCard[_PLAYER][0];
+    if (pOld && !pOld->getRevolver()) pOld->out();
+    if (inCard) {
+        m_pCard[_PLAYER][0] = inCard;
+        inCard->setEnchantEffect(0x44, 0);
+        m_pCard[_PLAYER][0]->setEnchantEffect(0x52, 0);
+        m_pCard[_PLAYER][0]->setEnchantEffect(0x53, 0);
+        *(CARD*)m_cardData[_PLAYER][0] = *inCard->getCardData();
+        checkNowPlaying(inUser, inCard);
+    } else {
+        if (!(inData)) AssertApp(D_00476980, 1708, D_00477090, 0);
+        *(CARD*)m_cardData[_PLAYER][0] = *inData;
+        m_pCard[_PLAYER][0] = new (com_malloc_d(sizeof(CBattleCard), D_00477098, RET_ADDR()))
+            CBattleCard(asTask(), inData->m_nKind, inData->m_nNumber, inUser, 0);
+        if (m_pCard[_PLAYER][0]) m_pCard[_PLAYER][0]->setRoomEffect(NULL);
+        *(CARD*)m_cardData[_PLAYER][0] = *m_pCard[_PLAYER][0]->getCardData();
+    }
+    m_iStock[_PLAYER] = 0;
+    m_iExtra[_PLAYER] = 0;
+    m_iFirst[_PLAYER] = 0;
+    m_pCard[_PLAYER][0]->setPlayCard();
+    if (isNowDuel()) {
+        m_uiState[_PLAYER] = 9;
+        m_pCard[_PLAYER][0]->setFlagDuelPlay();
+    }
+    if (isNowPronounce()) {
+        m_uiState[_PLAYER] = 14;
+        m_pCard[_PLAYER][0]->setFlagPronouncePlay();
+    }
+    if (inTest) return testPlayingCard(_PLAYER);
+    return 1;
+}
 /* Parked: induction variable - the original's copy loop runs on &m_pCard[_PLAYER][i] (cardData at -0x38), ours on
  * &m_cardData[_PLAYER][i] (m_pCard at +0x38); all else matches; tried: pointer/index forms of inCard (in-body and
  * for-header increments), the m_pCard store per branch, an m_pCard row pointer, call/copy order, permuter 4 min
