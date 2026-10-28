@@ -98,6 +98,7 @@ public:
     virtual ~CCommonGauge();
     virtual void main();
     void _initialize();
+    void dispSeqCtrl(INT inIndex, INT inFlag, INT inDisp);
 };
 
 class CPlayerGauge : public CTask {

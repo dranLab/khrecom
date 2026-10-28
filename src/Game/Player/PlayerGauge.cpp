@@ -8,6 +8,9 @@
 #include "Game/Game.h"
 #include "Game/Entity.h"
 #include "Game/Player/PlayerCamera.h"
+#include "Game/CardKind.h"
+#include "Game/Player/Player.h"
+#include "System/Graphic/WorldEnv.h"
 #include "include_asm.h"
 
 using namespace Gauge;
@@ -28,6 +31,17 @@ public:
 }
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
+FLOAT RotTransPersClipW(IVECTOR& out_v, const FVECTOR& in_v);
+static inline void _setRotTransPersMatrix(FMATRIX& m) {
+    __asm__ volatile(
+        "vsub.xyzw $vf3, $vf0, $vf0\n"
+        "lqc2 $vf4, 0x0(%0)\n"
+        "lqc2 $vf5, 0x10(%0)\n"
+        "lqc2 $vf6, 0x20(%0)\n"
+        "lqc2 $vf7, 0x30(%0)\n"
+        :
+        : "r"(&m));
+}
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
     asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
@@ -229,8 +243,62 @@ CCommonGauge::CCommonGauge(CTask* p) : CTask(p, 0x4000) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _$_Q25Gauge12CCommonGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", _initialize__Q25Gauge12CCommonGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge12CCommonGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", dispSeqCtrl__Q25Gauge12CCommonGaugeiii);
+void CCommonGauge::main() {
+    INT i;
+    if (CSceneEnv::isStopGauge()) return;
+    if (CPlayer::isNowExterminate()) {
+        if (m_uiFlag & 0xCF6F) {
+            for (i = 0; i < 7; i++) {
+                if (i == 4) continue;
+                if (m_uiFlag & (1 << i)) {
+                    m_pSeqCtrls[i].restart(0, 0.0f);
+                    m_pSeqCtrls[i].enableDisp(0, FALSE);
+                }
+            }
+            m_uiFlag = (m_uiFlag | 0x10000) & ~0xCF6F;
+        }
+        dispSeqCtrl(4, 0x10, 0x1000);
+        return;
+    }
+    m_uiFlag &= ~0x10000;
+    dispSeqCtrl(0, 1, 0x100);
+    dispSeqCtrl(1, 2, 0x200);
+    dispSeqCtrl(2, 4, 0x400);
+    dispSeqCtrl(3, 8, 0x800);
+    dispSeqCtrl(4, 0x10, 0x1000);
+    dispSeqCtrl(5, 0x20, 0x4000);
+    dispSeqCtrl(6, 0x40, 0x8000);
+}
+void CCommonGauge::dispSeqCtrl(INT inIndex, INT inFlag, INT inDisp) {
+    D2::C2DSeqCtrl* pSeqCtrl;
+    IVECTOR out;
+    FVECTOR pos;
+    if (!(m_uiFlag & inFlag)) return;
+    pSeqCtrl = &m_pSeqCtrls[inIndex];
+    if (pSeqCtrl->isEnd(0)) {
+        m_uiFlag &= ~(inFlag | inDisp);
+        pSeqCtrl->restart(0, 0.0f);
+        pSeqCtrl->enableDisp(0, FALSE);
+        return;
+    }
+    if (inFlag == 0x10 && !(m_uiFlag & 0x2000)) return;
+    _setRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
+    RotTransPersClipW(out, m_vPos[inIndex]);
+    if (out.w) {
+        if (m_uiFlag & inDisp) {
+            m_uiFlag &= ~inDisp;
+            pSeqCtrl->enableDisp(0, FALSE);
+        }
+        return;
+    }
+    if (!(m_uiFlag & inDisp)) {
+        m_uiFlag |= inDisp;
+        pSeqCtrl->enableDisp(0, TRUE);
+    }
+    pos.set((out.x >> 4) - 0x700, (out.y >> 4) - 0x740, 0.0f, 1.0f);
+    pSeqCtrl->setPos(pos);
+    if (inFlag == 0x10) m_uiFlag = (INT)m_uiFlag & ~0x2000;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispSeq__Q25Gauge12CCommonGaugeii);
 CPrizeGauge::CPrizeGauge(CTask* p) : CTask(p ? p : getSysTask(1), 0x4000) {
     m_pInstance = this;
