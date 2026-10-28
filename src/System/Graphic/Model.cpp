@@ -1,11 +1,13 @@
 #include "khtypes.h"
 #define SYSTEM_GRAPHIC_MODEL_CPP
+#define MODELDATA_H_TEXINFO /* PARTIAL: modeldata.h's TexInfo/TexInfoStub (gated for System/Graphic/ModelMan) */
 #include "System/Graphic/Model.h"
 #include "System/Task.h"
 #include "System/Coord.h"
 #include "System/Math3D.h"
 #include "System/Graphic/WorldEnv.h"
 #include "System/Graphic/TexAnm.h"
+#include "System/Graphic/TexUtil.h"
 #include "include_asm.h"
 
 class CRsrcData;
@@ -31,6 +33,10 @@ public:
 };
 extern const FMATRIX ONE_MATRIX;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
+extern "C" const FLOAT D_00460FA8; /* -FLT_MAX / 2 */
+extern "C" const FLOAT D_00460FAC; /* FLT_MAX / 2 */
+extern "C" char D_00460D98[]; /* "System/Graphic/modeldata.h" */
+extern "C" char D_00460DC8[];
 extern "C" char D_00460F30[];
 extern "C" char D_00460F60[];
 extern "C" char D_00460F78[];
@@ -273,7 +279,27 @@ void CModel::changeTexture(const CHAR* inSrc, const CHAR* inDst) {
     }
     setupUVScroll(0);
 }
+/* Parked: 4 lines off, scheduling: the original keeps the m_pData load after both zero stores of nTmpTex/nTmpClut, ours hoists it between them. addTexture (same loop) matches. Tried: store orders, chained assignment, i init outside the for, condition order. */
+#if 0
+void CModel::changeTextureSub(INT idx, const TexInfo* m) {
+    SHORT nTmpTex;
+    SHORT nTmpClut;
+    INT i;
+    if (idx >= 0 && idx < m_pData->m_nTexNum) {
+        ((TexInfoStub*)&m_TexInfo[idx])->init(m, -1, -1);
+        nTmpClut = 0;
+        nTmpTex = 0;
+        for (i = 0; i < m_pData->m_nTexNum; i++) {
+            TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
+            t->update(nTmpTex, nTmpClut);
+            if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
+            if (!t->_pTexInfo->isFix()) CTexUtil::sumupTmpTexSize(*t->_pTexInfo, nTmpTex, nTmpClut);
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTextureSub__6CModeliPC7TexInfo);
+#endif
 void CModel::setShadowSize(INT nSize) {
     if (m_Mode == 0x10 && m_pFadeModel) *(INT*)((BYTE*)m_pFadeModel + 0x28) = nSize;
 }
@@ -345,7 +371,87 @@ void CModel::getWorldBBoxScr(IVECTOR& vScr, const FMATRIX* pMWS) {
                  "vftoi4.xyz $vf8, $vf8");
     asm volatile("sqc2 $vf8, 0(%0)" : : "r"(&vScr) : "memory");
 }
+/* Parked: 3 lines off: the original stores vMN[1].z/.y through the &vMN[1] operand register (t1), ours through sp. Worked: vMN[i].set(MIN/MAX, ...) (default w = 1.0f), one asm statement with all operands, D_ labels for the +-1.7e38 constants. Tried: field stores, chained assignment, pointer local; permuter 10 min (32256 candidates, stays 3). */
+#if 0
+static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin) {
+    FVECTOR vMN[2];
+    vMN[0].set(D_00460FA8, D_00460FA8, D_00460FA8, 1.0f);
+    vMN[1].set(D_00460FAC, D_00460FAC, D_00460FAC, 1.0f);
+    asm volatile("lqc2 $vf4, 0x0(%0)\n"
+                 "lqc2 $vf5, 0x10(%0)\n"
+                 "lqc2 $vf6, 0x20(%0)\n"
+                 "lqc2 $vf7, 0x30(%0)\n"
+                 "lqc2 $vf8, 0x0(%1)\n"
+                 "lqc2 $vf9, 0x0(%2)\n"
+                 "lqc2 $vf10, 0x0(%3)\n"
+                 "lqc2 $vf16, 0x0(%4)\n"
+                 "vadd.yz $vf11, $vf10, $vf0\n"
+                 "vadd.y $vf12, $vf10, $vf0\n"
+                 "vadd.xy $vf13, $vf10, $vf0\n"
+                 "vadd.xz $vf14, $vf10, $vf0\n"
+                 "vadd.z $vf15, $vf10, $vf0\n"
+                 "vadd.x $vf17, $vf10, $vf0\n"
+                 "vmulw.xw $vf11, $vf16, $vf0w\n"
+                 "vmulw.xzw $vf12, $vf16, $vf0w\n"
+                 "vmulw.zw $vf13, $vf16, $vf0w\n"
+                 "vmulw.yw $vf14, $vf16, $vf0w\n"
+                 "vmulw.xyw $vf15, $vf16, $vf0w\n"
+                 "vmulw.yzw $vf17, $vf16, $vf0w\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf10x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf10y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf10z\n"
+                 "vmaddw.xyzw $vf10, $vf7, $vf0w\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf11x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf11y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf11z\n"
+                 "vmaddw.xyzw $vf11, $vf7, $vf0w\n"
+                 "vmax.xyz $vf8, $vf8, $vf10\n"
+                 "vmini.xyz $vf9, $vf9, $vf10\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf12x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf12y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf12z\n"
+                 "vmaddw.xyzw $vf12, $vf7, $vf0w\n"
+                 "vmax.xyz $vf8, $vf8, $vf11\n"
+                 "vmini.xyz $vf9, $vf9, $vf11\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf13x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf13y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf13z\n"
+                 "vmaddw.xyzw $vf13, $vf7, $vf0w\n"
+                 "vmax.xyz $vf8, $vf8, $vf12\n"
+                 "vmini.xyz $vf9, $vf9, $vf12\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf14x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf14y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf14z\n"
+                 "vmaddw.xyzw $vf14, $vf7, $vf0w\n"
+                 "vmax.xyz $vf8, $vf8, $vf13\n"
+                 "vmini.xyz $vf9, $vf9, $vf13\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf15x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf15y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf15z\n"
+                 "vmaddw.xyzw $vf15, $vf7, $vf0w\n"
+                 "vmax.xyz $vf8, $vf8, $vf14\n"
+                 "vmini.xyz $vf9, $vf9, $vf14\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf16x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf16y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf16z\n"
+                 "vmaddw.xyzw $vf16, $vf7, $vf0w\n"
+                 "vmax.xyz $vf8, $vf8, $vf15\n"
+                 "vmini.xyz $vf9, $vf9, $vf15\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf17x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf17y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf17z\n"
+                 "vmaddw.xyzw $vf17, $vf7, $vf0w\n"
+                 "vmax.xyz $vf8, $vf8, $vf16\n"
+                 "vmini.xyz $vf9, $vf9, $vf16\n"
+                 "vmax.xyz $vf8, $vf8, $vf17\n"
+                 "vmini.xyz $vf9, $vf9, $vf17\n"
+                 "sqc2 $vf8, 0x0(%5)\n"
+                 "sqc2 $vf9, 0x0(%6)"
+                 : : "r"(&Mat), "r"(&vMN[0]), "r"(&vMN[1]), "r"(&vInMax), "r"(&vInMin), "r"(&vOutMax), "r"(&vOutMin) : "memory");
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcWorldBBox__6CModeli);
 void CModel::getWorldBBox(FVECTOR& vMax, FVECTOR& vMin) {
     calcWorldBBox(0);
@@ -463,7 +569,25 @@ void CModel::setColorScale(const FVECTOR& vColor) { getColorScale() = vColor; }
 void CModel::setColorScale(FLOAT r, FLOAT g, FLOAT b, FLOAT a) { getColorScale().set(r, g, b, a); }
 void CModel::setAlphaScale(FLOAT inScale) { m_fAlphaScale = inScale; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", linksub__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", addTexture__6CModelPCci);
+void CModel::addTexture(const CHAR* texName, INT idx) {
+    SHORT nTmpTex;
+    SHORT nTmpClut;
+    INT i;
+    if (m_TransTexCount < m_pData->m_nTexNum + 1) {
+        m_TransTexCount = m_pData->m_nTexNum + 1;
+        if (!(!(m_TransTexCount > 16))) AssertApp(D_00460EB8, 1867, D_00460F38, 0);
+    }
+    ((TexInfoStub*)&m_TexInfo[m_pData->m_nTexNum])->init(CRsrcDB::getRsrcTex(texName, NAME_CASE_SENSITIVE), -1, -1);
+    nTmpTex = 0;
+    nTmpClut = 0;
+    for (i = 0; i < m_TransTexCount; i++) {
+        TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
+        t->update(nTmpTex, nTmpClut);
+        if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
+        if (!t->_pTexInfo->isFix()) CTexUtil::sumupTmpTexSize(*t->_pTexInfo, nTmpTex, nTmpClut);
+    }
+    setupUVScroll(0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShadowMapModel__6CModel);
 void CModel::attachSemiModel(CSemiModel& inModel, BOOL bInManage) {
     if (m_pSemiModel && isManagedSemiModel()) delete m_pSemiModel;
@@ -582,7 +706,34 @@ void CSemiModel::changeLayerExt(BOOL bOn, INT nDepth) {
     else setLayer(0x10, 0);
     if (m_pSemiZ) m_pSemiZ->changeLayerExt(bOn, nDepth + 1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__10CSemiModel);
+FIX4 CSemiModel::calcZ() {
+    BOOL bSemiZ;
+    FIX4 nZ;
+    IVECTOR vScr;
+    if ((m_pModel->getModelData()->getRawMode() & 0x200000) && m_pModel->getAlphaScale() >= 1.0f) {
+        m_LayerInfo._nID = 0x11;
+        if (m_pSemiZ) m_pSemiZ->disp();
+        return 0;
+    }
+    if (m_LayerInfo._nID == 0x11) {
+        if (m_LayerInfo._nDepth) m_LayerInfo._nID = 0x1b;
+        else m_LayerInfo._nID = 0x10;
+    }
+    bSemiZ = TRUE;
+    nZ = 0;
+    if (m_pModel->getAlphaScale() < 1.0f && m_SemiDraw && (m_iFlag & 1) && m_pModel->m_pFadeModel) {
+        nZ = m_pModel->m_pFadeModel->getZ() + 1;
+        if (m_pModel->m_nFlag & 0x20) {
+            if (m_pModel->m_nFlag & 0x800) bSemiZ = FALSE;
+        }
+    }
+    if (m_pSemiZ && bSemiZ) m_pSemiZ->disp();
+    if (m_pModel->isOTZFlag()) return m_pModel->getOTZ();
+    if (nZ > 0) return nZ;
+    m_pModel->getWorldBBoxScr(vScr, NULL);
+    m_pModel->updateOTZ(vScr.z);
+    return vScr.z;
+}
 UINT CSemiModel::getPacketSize() const {
     return m_nPacketSize + m_pModel->getBeforeDirectNum() + m_pModel->getAfterDirectNum();
 }
@@ -729,7 +880,13 @@ void CModel::getChangeClut(INT inIdx, INT nInType) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getChangeClut__6CModelii);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", enablePointLight__C9MODELDATA);
+BOOL MODELDATA::enablePointLight() const {
+    BOOL ret;
+    if (getRawMode() & 0x2000000) return FALSE;
+    ret = FALSE;
+    if (getMode() == 0x40EE || getMode() == 0x406E) ret = TRUE;
+    return ret;
+}
 BOOL MODELDATA::enableLight() const {
     if (getRawMode() & 0x2000000) return FALSE;
     USHORT mode = getMode();

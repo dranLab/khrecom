@@ -30,6 +30,7 @@ struct MODELDATA;
 // its virtual functions added for Form/Menu/MenuModel
 class CModel : public CDrawable {
     friend class CSemiZModel; // PARTIAL: guessed (CSemiZModel::makePkt sets m_ShaderOption, no accessor exists)
+    friend class CSemiModel;  // PARTIAL: guessed (CSemiModel::calcZ reads m_pFadeModel, no accessor exists)
 public:
     // PARTIAL: added for System/Graphic/ModelMan
     static void resetSendCtrl(INT nMode);
@@ -104,6 +105,9 @@ public:
     BOOL isDataEmpty() const { return m_pData->isDataEmpty(); }
     CSemiModel* getSemiModel() { return m_pSemiModel; }
     USHORT getMode() { return m_Mode; }
+    FIX4 getOTZ() const { return m_iOTZ; }
+    BOOL isOTZFlag() const { return m_nFlag & 0x10; }
+    void updateOTZ(FIX4 nZ) { m_iOTZ = nZ; }
     /* PARTIAL: added for System/Graphic/Model (body as its weak copy: lbu + dsrl, a 64-bit bit-field) */
     u_long isUVScroll() const {
         struct _flag { u_long b0 : 7; u_long b7 : 1; };
@@ -154,6 +158,7 @@ public:
     INT assign(CCoords& crds, const CHAR* pName, INT n);
     INT assign(CTask* p, const CHAR* pName, INT n);
     void changeTextureSub(INT nIdx, const struct TexInfo* pTex);
+    void addTexture(const CHAR* texName, INT idx); // PARTIAL: added for System/Graphic/Model
     void setupUVScroll(INT n);
     void setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV); // PARTIAL: added for System/Graphic/Model
     void updateUVScroll(FLOAT fR);
