@@ -28,7 +28,8 @@ public:
     virtual ~CHermitePathMoveS();
     virtual void main();
     virtual void disp();
-    CHermitePath* getHermitePath();
+    BOOL isEnd() { return m_HPath.isEnd(); }
+    CHermitePath* getHermitePath() { return &m_HPath; }
 };
 #line 27
 extern "C" char D_004870B0[];
@@ -168,5 +169,3 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getInstance
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220AD0);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220B00);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220B30);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", isEnd__17CHermitePathMoveS);
-CHermitePath* CHermitePathMoveS::getHermitePath() { return &m_HPath; }
