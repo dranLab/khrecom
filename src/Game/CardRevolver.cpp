@@ -2318,8 +2318,90 @@ void CStockFolder::initName(D2::C2DSeqCtrl* inSeq) {
     inSeq->m_seqControl.fgColor = 1;
     inSeq->m_seqControl.fgFntScale = 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeGauge__Q210CardBattle12CStockFolder);
-__asm__(".rdata\n.align 4\n.word 0x001EB268\n.word 0x001EB2B4\n.word 0x001EB2B4\n.word 0x001EB2B4\n.word 0x001EB340\n.word 0x001EB320\n.word 0x001EB2B4\n.word 0x00000000\n.word 0x001EB524\n.word 0x001EB3AC\n.word 0x001EB3E4\n.word 0x001EB408\n.word 0x001EB474\n.word 0x001EB524\n.word 0x001EB4A0\n.word 0x00000000\n.text\n");
+void CStockFolder::exeGauge() {
+    switch (m_uiState) {
+    case 0:
+        if (m_iStock > 0 && (CGameWork::getInt(1, 0xE2) & 4)) {
+            m_uiState = 5;
+            if (m_uiFlag & 1) {
+                m_uiFlag = (INT)m_uiFlag & ~1;
+                m_pSeqCtrl_Num01->enableDisp(0, FALSE);
+                m_pSeqCtrl_Num10->enableDisp(0, FALSE);
+            }
+        }
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 6:
+        if (CGameWork::getInt(1, 0xE2) & 4) {
+            m_uiState = 5;
+            m_pSeqCtrl->enableDisp(FALSE);
+            m_uiCategory = 0;
+            if (m_uiFlag & 1) {
+                m_uiFlag = (INT)m_uiFlag & ~1;
+                m_pSeqCtrl_Num01->enableDisp(0, FALSE);
+                m_pSeqCtrl_Num10->enableDisp(0, FALSE);
+            }
+        }
+        break;
+    case 4:
+        break;
+    case 5:
+        if (!(CGameWork::getInt(1, 0xE2) & 4)) setStockInfo();
+        break;
+    }
+    if (m_iStock == 0 && (m_uiFlag & 1)) {
+        m_uiFlag = (INT)m_uiFlag & ~1;
+        m_pSeqCtrl_Num10->enableDisp(0, FALSE);
+        m_pSeqCtrl_Num01->enableDisp(0, FALSE);
+    }
+    switch (m_uiState) {
+    case 0:
+        break;
+    case 1:
+        if (m_pSeqCtrl->isEnd(0)) {
+            m_uiState = 2;
+            m_pSeqCtrl->replaceSeq(0, _ref(g_szSeqCockpit), m_uiCategory + 1);
+        }
+        break;
+    case 2:
+        if (m_iStock) break;
+        if (!CCardBattle::isExecutingCard(m_uiUser)) {
+            m_uiState = 0;
+            m_pSeqCtrl->enableDisp(FALSE);
+        } else {
+            m_uiState = 3;
+        }
+        break;
+    case 3:
+        if (!CCardBattle::isExecutingCard(m_uiUser)) {
+            m_uiState = 4;
+            m_pSeqCtrl->replaceSeq(0, _ref(g_szSeqCockpit), m_uiCategory + 2);
+        } else if (((CCardBattle*)CTaskMan::getSysTask(0x16))->isPronounceMode()) {
+            m_uiState = 6;
+        }
+        break;
+    case 4:
+        if (m_pSeqCtrl->isEnd(0)) {
+            m_uiState = 0;
+            m_pSeqCtrl->enableDisp(FALSE);
+        }
+        break;
+    case 5:
+        break;
+    case 6:
+        if (((CCardBattle*)CTaskMan::getSysTask(0x16))->isPronounceMode()) {
+            if (m_uiFlag & 2) setPlayPronounce();
+        } else {
+            m_uiState = 4;
+            m_pSeqCtrl->replaceSeq(0, _ref(g_szSeqCockpit), m_uiCategory + 2);
+            m_uiFlag = (INT)m_uiFlag & ~2;
+            returnStockCard();
+        }
+        break;
+    }
+}
 void CStockFolder::deleteGauge() {
     delete m_pSeqCtrl;
     m_pSeqCtrl = NULL;
