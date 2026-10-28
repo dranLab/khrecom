@@ -543,7 +543,25 @@ void CBattleEnemy::endStateGravity() {
     m_pMove->setMass(1.0f);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateToss__12CBattleEnemy);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateToss__12CBattleEnemy);
+void CBattleEnemy::stateToss() {
+    switch (m_iSysStep) {
+    case 0:
+        if (m_pMove->getVel().y < 0.0f && (m_pMove->getCollisionFlag() & 5)) {
+            if (m_pAnim->getAnimID() == m_pEnemyParam->iDamageMotionIndex[6]) {
+                changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[7], 0, 1, -1);
+            } else {
+                changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[9], 0, 1, -1);
+            }
+            clearSpeed();
+            bodyCollOnBody(-1);
+            m_iSysStep++;
+        }
+        break;
+    case 1:
+        if (isMotionEnd()) changeDefaultState();
+        break;
+    }
+}
 void CBattleEnemy::endStateToss() {
     if (m_ullBtlEnemyFlag & 0x100) m_pMove->enableGravity(FALSE);
     bodyCollOnBody(-1);
