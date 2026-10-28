@@ -21,7 +21,7 @@ class CPDFrameTime {
 
 public:
     CPDFrameTime();
-    ~CPDFrameTime();
+    ~CPDFrameTime() {}
     void reset();
     void start() { m_iFlags |= 2; }
     void stop() { m_iFlags &= ~2; }
@@ -36,7 +36,7 @@ class CDebugPathData : public CTask {
     CNakCamera* m_pDCam;      /* 0x44 */
     char m_szFileName[64];    /* 0x48 */
     HANDLE m_hChildWnd;       /* 0x88 */
-    UBYTE m_gpPArrowPoly[0x50] __attribute__((aligned(16))); /* 0x90 CCPrim */
+    CCPrim m_gpPArrowPoly;    /* 0x90 */
     static CDebugPathData* m_pInstance;
 
 public:
