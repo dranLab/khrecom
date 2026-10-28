@@ -1,9 +1,12 @@
 #include "khtypes.h"
+#define FORM_MENU_SAVELOAD_CPP
+inline void* operator new(unsigned int, void* p) throw() { return p; }
 #define SAVELOADCTRL_H_PATH "c:/KHCOM/MainApp/Form/Menu/SaveLoadCtrl.h"
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "Form/Menu/SaveLoad.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
+#include "System/Fsm.h"
 #include "Form/Menu/SaveLoadCtrl.h"
 #include "System/Ctd/CtdMan.h"
 #include "System/Graphic/Anim.h"
@@ -11,19 +14,21 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 #include "Form/Menu/SaveLoadUtil.h"
-#include "System/Fsm.h"
 #include "System/TaskMan.h"
 #include "System/Debug.h"
 #include "System/PadHandler.h"
 #include "System/Sound/SoundMan.h"
 #include "Game/GameWork.h"
+#include "Game/CardKind.h"
 #include <string.h>
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 #include "System/Graphic/ScreenMask.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "include_asm.h"
+inline void C2DSeqSelectable::setCaptionSize(INT nSize) {
+    if (m_pCaption) m_pCaption->setSize(nSize);
+}
 
-inline void* operator new(unsigned int, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 namespace {
@@ -34,6 +39,22 @@ UINT s_nWorldIconRsrc = 0;
 SLMSG s_nMessage;
 }
 
+/* The file's inline helpers, whose strings follow the headers' in .rodata (then CSaveLoadUI::main's): the CTD text with
+ * its "" fallback and the memory card slot name (createCheckingMsg, exeCheckSlot). */
+static inline const CHAR* _ctdText(UINT nID) {
+    const CHAR* p = CCtdMan::getText(nID);
+    return p ? p : "";
+}
+static inline void _getSlotName(INT nSlot, CHAR* pszOutStr) {
+    char szNum[16];
+    if (nSlot == 12) {
+        strcpy(szNum, "s 1 and 2");
+    } else {
+        strcpy(szNum, nSlot == 2 ? " 2" : " 1");
+    }
+    const CHAR* pszText = _ctdText(0x600001);
+    sprintf(pszOutStr, "%s%s", pszText, szNum);
+}
 
 class CSaveLoadUI : public CTask, public CFSM {
 public:
@@ -115,7 +136,23 @@ private:
 public:
     CSaveLoadUI(CSaveLoad& parent, SAVELOAD mode, GAMECLEAR clear);
     virtual ~CSaveLoadUI();
-    virtual void main();
+    virtual void main() {
+        if ((m_nFlag & 4) && exeMessageDlg()) return;
+        INT nCount = 10;
+        BOOL bContinue;
+        do {
+            update();
+            bContinue = m_nFlag & 1;
+            if (bContinue) {
+                m_nFlag &= ~1;
+                if (--nCount == 0) {
+                    TRACE("CSaveLoadUI \x82\xcc update() \x82\xaa\x89\xf1\x82\xe8\x82\xb7\x82\xac\x81" "c\n");
+                    bContinue = FALSE;
+                }
+            }
+        } while (bContinue);
+        if (m_pTimeCtrl) m_pTimeCtrl->update();
+    }
     void changeState(INT nNextState) { gotoState(m_State[nNextState]); }
     void changeNextState() {
         if (m_nNextState >= 0) changeState(m_nNextState);
@@ -267,6 +304,15 @@ public:
 class CGame { /* PARTIAL: Game/Game.h needs the game headers */
 public:
     static BOOL isRikuGame();
+    static BOOL isSoraGame();
+};
+struct ObjType { /* PARTIAL: System/Graphic/Effect/EffectMan.h is too heavy here */
+    enum eObjBit { OBJBIT_NONE = 0 };
+};
+class CSceneEnv { /* PARTIAL: Game/SceneEnv.h needs EffectMan.h */
+public:
+    static void setStop(ObjType::eObjBit iBit);
+    static void setStopGauge(BOOL bStop);
 };
 class CPackMan { /* PARTIAL: System/Graphic/PackMan.h is not written yet */
 public:
@@ -275,27 +321,56 @@ public:
 
 HANDLE CSaveLoadUI::m_hThis = 0;
 
-/* The file's inline helpers, whose strings follow the headers' in .rodata: the CTD text with its "" fallback, the
- * memory card slot name (createCheckingMsg, exeCheckSlot) and a placeholder for main's update() loop guard. */
-static inline const CHAR* _ctdText(UINT nID) {
-    const CHAR* p = CCtdMan::getText(nID);
-    return p ? p : "";
-}
-static inline void _getSlotName(INT nSlot, CHAR* pszOutStr) {
-    char szNum[16];
-    if (nSlot == 12) {
-        strcpy(szNum, "s 1 and 2");
-    } else {
-        strcpy(szNum, nSlot == 2 ? " 2" : " 1");
-    }
-    const CHAR* pszText = _ctdText(0x600001);
-    sprintf(pszOutStr, "%s%s", pszText, szNum);
-}
-static inline void _updateOverrun() { TRACE("CSaveLoadUI \x82\xcc update() \x82\xaa\x89\xf1\x82\xe8\x82\xb7\x82\xac\x81" "c\n"); }
 
+/* Placeholder (stripped) for the constructor, still assembly: it inlines CStateTemplate::set, whose assert strings
+ * come first in its .rodata (the CStateTemplate functions compiled at the end share them), and constructs m_State[]. */
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) void _saveLoadUiCtorStrings_placeholder(CStateTemplate<CSaveLoadUI>* pState,
+                                                                        CSaveLoadUI* pThis, void (CSaveLoadUI::*pfn)()) {
+    new (pState) CStateTemplate<CSaveLoadUI>;
+    pState->set(pThis, pfn, pfn, pfn);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", __11CSaveLoadUIR9CSaveLoad8SAVELOAD9GAMECLEAR);
-__asm__(".rdata\n.align 3\n.word 0x74737953\n.word 0x462F6D65\n.word 0x682E6D73\n.word 0x00000000\n.word 0x736E4970\n.word 0x636E6174\n.word 0x00000065\n.word 0x00000000\n.word 0x426E6670\n.word 0x6E696765\n.word 0x74617453\n.word 0x00000065\n.word 0xFFFF0000\n.word 0x00348F38\n.word 0xFFFF0000\n.word 0x00349018\n.word 0xFFFF0000\n.word 0x00349148\n.word 0xFFFF0000\n.word 0x00349150\n.word 0xFFFF0000\n.word 0x00349248\n.word 0xFFFF0000\n.word 0x003493F8\n.word 0xFFFF0000\n.word 0x00349788\n.word 0xFFFF0000\n.word 0x00349790\n.word 0xFFFF0000\n.word 0x00349860\n.word 0xFFFF0000\n.word 0x003498D8\n.word 0xFFFF0000\n.word 0x00349938\n.word 0xFFFF0000\n.word 0x00349940\n.word 0xFFFF0000\n.word 0x00349948\n.word 0xFFFF0000\n.word 0x00349950\n.word 0xFFFF0000\n.word 0x003499D0\n.word 0xFFFF0000\n.word 0x003499D8\n.word 0xFFFF0000\n.word 0x00349A18\n.word 0xFFFF0000\n.word 0x00349B18\n.word 0xFFFF0000\n.word 0x00349B98\n.word 0xFFFF0000\n.word 0x00349C48\n.word 0xFFFF0000\n.word 0x00349FE8\n.word 0xFFFF0000\n.word 0x00349FF0\n.word 0xFFFF0000\n.word 0x0034A1D0\n.word 0xFFFF0000\n.word 0x0034A1D8\n.word 0xFFFF0000\n.word 0x0034A2D8\n.word 0xFFFF0000\n.word 0x0034A6A8\n.word 0xFFFF0000\n.word 0x0034A6E8\n.word 0xFFFF0000\n.word 0x0034A890\n.word 0xFFFF0000\n.word 0x0034AAC0\n.word 0xFFFF0000\n.word 0x0034ACA8\n.word 0xFFFF0000\n.word 0x0034ADE0\n.word 0xFFFF0000\n.word 0x0034AE68\n.word 0xFFFF0000\n.word 0x0034AF80\n.word 0xFFFF0000\n.word 0x0034B228\n.word 0xFFFF0000\n.word 0x0034B338\n.word 0xFFFF0000\n.word 0x0034B4E0\n.word 0xFFFF0000\n.word 0x0034B5A8\n.word 0xFFFF0000\n.word 0x0034B7B8\n.word 0xFFFF0000\n.word 0x0034BB00\n.word 0xFFFF0000\n.word 0x0034BCF0\n.word 0xFFFF0000\n.word 0x0034BDC0\n.word 0xFFFF0000\n.word 0x0034BEA0\n.word 0x65766173\n.word 0x64616C2E\n.word 0x00000000\n.word 0x00000000\n.word 0x64616F6C\n.word 0x64616C2E\n.word 0x00000000\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_11CSaveLoadUI);
+__asm__(".rdata\n.align 3\n.word 0xFFFF0000\n.word 0x00348F38\n.word 0xFFFF0000\n.word 0x00349018\n.word 0xFFFF0000\n.word 0x00349148\n.word 0xFFFF0000\n.word 0x00349150\n.word 0xFFFF0000\n.word 0x00349248\n.word 0xFFFF0000\n.word 0x003493F8\n.word 0xFFFF0000\n.word 0x00349788\n.word 0xFFFF0000\n.word 0x00349790\n.word 0xFFFF0000\n.word 0x00349860\n.word 0xFFFF0000\n.word 0x003498D8\n.word 0xFFFF0000\n.word 0x00349938\n.word 0xFFFF0000\n.word 0x00349940\n.word 0xFFFF0000\n.word 0x00349948\n.word 0xFFFF0000\n.word 0x00349950\n.word 0xFFFF0000\n.word 0x003499D0\n.word 0xFFFF0000\n.word 0x003499D8\n.word 0xFFFF0000\n.word 0x00349A18\n.word 0xFFFF0000\n.word 0x00349B18\n.word 0xFFFF0000\n.word 0x00349B98\n.word 0xFFFF0000\n.word 0x00349C48\n.word 0xFFFF0000\n.word 0x00349FE8\n.word 0xFFFF0000\n.word 0x00349FF0\n.word 0xFFFF0000\n.word 0x0034A1D0\n.word 0xFFFF0000\n.word 0x0034A1D8\n.word 0xFFFF0000\n.word 0x0034A2D8\n.word 0xFFFF0000\n.word 0x0034A6A8\n.word 0xFFFF0000\n.word 0x0034A6E8\n.word 0xFFFF0000\n.word 0x0034A890\n.word 0xFFFF0000\n.word 0x0034AAC0\n.word 0xFFFF0000\n.word 0x0034ACA8\n.word 0xFFFF0000\n.word 0x0034ADE0\n.word 0xFFFF0000\n.word 0x0034AE68\n.word 0xFFFF0000\n.word 0x0034AF80\n.word 0xFFFF0000\n.word 0x0034B228\n.word 0xFFFF0000\n.word 0x0034B338\n.word 0xFFFF0000\n.word 0x0034B4E0\n.word 0xFFFF0000\n.word 0x0034B5A8\n.word 0xFFFF0000\n.word 0x0034B7B8\n.word 0xFFFF0000\n.word 0x0034BB00\n.word 0xFFFF0000\n.word 0x0034BCF0\n.word 0xFFFF0000\n.word 0x0034BDC0\n.word 0xFFFF0000\n.word 0x0034BEA0\n.word 0x65766173\n.word 0x64616C2E\n.word 0x00000000\n.word 0x00000000\n.word 0x64616F6C\n.word 0x64616C2E\n.word 0x00000000\n.word 0x00000000\n.text\n");
+CSaveLoadUI::~CSaveLoadUI() {
+    CTask* pParent = CTaskMan::getTask(m_hParent);
+    if (pParent) pParent->out();
+    delete m_pMemoca;
+    delete m_pGameDataEntries;
+    delete m_pRoomNameCtrl;
+    delete m_pWorldIconCtrl;
+    delete m_pMainFrameHelpCtrl;
+    delete m_pMainCursor;
+    delete m_pTimeLabelCtrl;
+    delete m_pMPLabelCtrl;
+    delete m_pTimeCtrl;
+    delete m_pMPCtrl;
+    for (INT i = 0; i < 2; i++) {
+        delete m_pResultPlateCtrl[i];
+    }
+    delete m_pMemocaInfoCtrl;
+    delete m_pDataListContainerCtrl;
+    delete m_pDataListScrollbar;
+    for (INT j = 0; j < 4; j++) {
+        delete m_pDataItemNumCircle[j];
+        delete m_pDataItemIcon[j];
+        delete m_pDataItemClearIcon[j];
+    }
+    for (INT k = 0; k < 3; k++) {
+        delete m_pMemocaInfoBar[k];
+    }
+    delete m_pMessageDlgCtrl;
+    delete m_pMessageDlgCursor;
+    _ref(m_hThis) = 0;
+    if (m_mode != SLMODE_BOOT && m_mode != SLMODE_MESSAGE) {
+        CSceneEnv::setStop((ObjType::eObjBit)0);
+        CSceneEnv::setStopGauge(FALSE);
+        CPackMan::changeDrawMode(0);
+        CSound::startAllPausedSE();
+    }
+    CMainApp::enableWarningPause(!(m_nFlag & 0x8000));
+    D2::C2DMan::changeLevel(D2::C2DMan::D2MAN_LEVEL0);
+}
 void CSaveLoadUI::preInit() {
     if (!(m_mode == SLMODE_BOOT || m_mode == SLMODE_MESSAGE)) CPackMan::changeDrawMode(1);
     INT nID = !getRsrcType() ? 0x6A : 0x6B;
@@ -392,7 +467,60 @@ void CSaveLoadUI::exeCheckBoot() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLayIn__11CSaveLoadUI);
+void CSaveLoadUI::preLayIn() {
+    m_pMainFrameAgent = createMainFrame();
+    m_pMainFrameAgent->start();
+    CSound::playSE(3, -1, 64);
+    m_pMainCursor = createCursor();
+    m_pMainCursor->changeLayer(13);
+    m_pMainLightMark = createLightMark(LIGHTMARK_TYPE_CURSOR, 16, TRUE);
+    if (m_mode == SLMODE_SAVE) {
+        m_pWorldIconAgent = createWorldIcon(m_pWorldIconCtrl);
+        m_pWorldIconAgent->start();
+        m_pRoomNameAgent = createRoomName(m_pRoomNameCtrl);
+        m_pRoomNameAgent->start();
+        m_pTimeLabelAgent = createTimeLabel(m_pTimeLabelCtrl);
+        m_pTimeLabelAgent->start();
+        m_pTimeCtrl = createTimeCtrl();
+        if (CGame::isSoraGame()) {
+            m_pMPLabelAgent = createMPLabel(m_pMPLabelCtrl);
+            m_pMPLabelAgent->start();
+            m_pMPCtrl = createMPCtrl();
+        }
+    }
+    m_pMainFrameHelpAgent = createMainHelp(m_pMainFrameHelpCtrl, m_pMainFrameHelpFnt);
+    for (INT i = 0; i < 2; i++) {
+        m_pResultPlateAgent[i] = createResultPlate(m_pResultPlateCtrl[i], m_pResultPlateFnt[i], i);
+        m_pResultLightAgent[i] = createLightMark(LIGHTMARK_TYPE_RESULT, 13, FALSE);
+    }
+    m_pResultPlateAgent[0]->start();
+    for (INT i = 0; i < 2; i++) {
+        m_pSelSlotPlate[i] = createSelSlotPlate(i);
+        m_pSelSlotPlate[i]->attachCursor(m_pMainCursor);
+        m_pSelSlotPlate[i]->attachLightMark(m_pMainLightMark);
+    }
+    m_pMemocaInfoAgent = createMemocaInfo(m_pMemocaInfoCtrl, m_pMemocaInfoBar);
+    m_pDataListContainerAgent = createDataListContainer(m_pDataListContainerCtrl, m_pDataListScrollbar);
+    for (INT i = 0; i < 4; i++) {
+        *m_szDataItemContent[i] = '\0';
+        *m_szDataItemID[i] = '\0';
+        *m_szDataItemTime[i] = '\0';
+        m_pDataItemPlate[i] = createDataItemPlate(*m_pDataListContainerCtrl, m_pDataItemNumCircle[i], m_pDataItemNumFnt[i],
+                                                  m_pDataItemIcon[i], m_pDataItemClearIcon[i], i);
+        m_pDataItemPlate[i]->attachCursor(m_pMainCursor);
+        m_pDataItemPlate[i]->attachLightMark(m_pMainLightMark);
+    }
+    m_pMessageDlgAgent = createMessageDlg(m_pMessageDlgCtrl, m_pMessageDlgFntInf);
+    for (INT i = 0; i < 2; i++) {
+        m_pMessageDlgBtnAgent[i] = createMessageDlgBtn(m_pMessageDlgCtrl, i);
+    }
+    m_pMessageDlgCursor = createCursor();
+    m_pMessageDlgCursor->changeLayer(14);
+    for (INT i = 0; i < 2; i++) {
+        m_pMessageDlgBtnAgent[i]->attachCursor(m_pMessageDlgCursor);
+        m_pMessageDlgBtnAgent[i]->attachLightMark(m_pMainLightMark);
+    }
+}
 void CSaveLoadUI::exeLayIn() {}
 void CSaveLoadUI::preLayOut() {
     if (m_mode == SLMODE_LOAD && s_bSaveLoadDone) {
@@ -466,8 +594,78 @@ void CSaveLoadUI::preCheckSlot() {
     m_nStep = 0;
     m_nTargetIndex = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckSlot__11CSaveLoadUI);
-__asm__(".rdata\n.align 4\n.word .L00349C88\n.word .L00349CAC\n.word .L00349CD0\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349EA8\n.word .L00349CF0\n.word .L00349E5C\n.word .L00349E80\n.word 0\n.text\n");
+void CSaveLoadUI::exeCheckSlot() {
+    INT nRes;
+    UINT nIdx;
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqGetEntries(*m_pGameDataEntries, m_mode == SLMODE_SAVE)) m_nStep++;
+        return;
+    case 1:
+        if (!m_pMemoca->isCompleteReq(NULL)) return;
+        m_nStep++;
+        break;
+    case 2:
+        if (isPadEnable()) changeState(9);
+        return;
+    case 10: {
+        char szMsg[256];
+        char szSlot[32];
+        _getSlotName(m_nSlot + 1, szSlot);
+        const CHAR* pszFmt = _ctdText(0x600302);
+        sprintf(szMsg, pszFmt, _ctdText(0x600000), szSlot);
+        openMessageDlg(szMsg, 0, 1);
+        m_nStep++;
+        return;
+    }
+    case 11:
+        if (!m_nDlgResult) return;
+        closeMessageDlg();
+        m_nStep++;
+        return;
+    case 12:
+        if (isPadEnable()) backtoSelSlot();
+        return;
+    }
+    nRes = m_pMemoca->getLastResult();
+    if (nRes < 0) {
+        BOOL bExit = TRUE;
+        switch (nRes) {
+        case -2:
+            changeState(15);
+            break;
+        case -4:
+            if (m_mode == SLMODE_SAVE) {
+                changeState(14);
+                m_nFlag &= ~0x80;
+            } else {
+                bExit = FALSE;
+            }
+            break;
+        case -3:
+            bExit = FALSE;
+            break;
+        default:
+            m_nStep = 10;
+            return;
+        }
+        if (bExit) {
+            m_nStep = -1;
+            return;
+        }
+    }
+    nIdx = m_pMemoca->getLatestDataIndex();
+    m_nDataListSel = nIdx;
+    if (nIdx >= 96) {
+        m_nDataListTop = 95;
+    } else {
+        m_nDataListTop = nIdx < 4 ? 0 : nIdx - 3;
+    }
+    for (INT i = 0; i < 4; i++) {
+        setupDataPlate(m_nDataListTop + i);
+    }
+    if (m_nFlag & 4) closeMessageDlg();
+}
 void CSaveLoadUI::endCheckSlot() {}
 void CSaveLoadUI::preOpenDataList() {
     if (m_pMemocaInfoAgent) m_pMemocaInfoAgent->startOrRestart();
@@ -503,7 +701,103 @@ void CSaveLoadUI::preSelDataList() {
     setHelpMessage(pszMes);
     m_nStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeSelDataList__11CSaveLoadUI);
+void CSaveLoadUI::exeSelDataList() {
+    if (m_pDataListContainerAgent->getState() != C2DSeqAgent::STATE_LOOP) return;
+    INT r = -9999;
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqIdleCheckCard()) m_nStep++;
+        break;
+    case 1:
+        if (m_pMemoca->isCompleteReq(NULL)) {
+            r = m_pMemoca->getLastResult();
+            m_nStep = 0;
+        }
+        break;
+    default:
+        return;
+    }
+    if (r == -2) {
+        changeState(15);
+        return;
+    }
+    if (isTrgCANCEL()) {
+        m_nStep = 99;
+        backtoSelSlot();
+        CSound::playSE(4, -1, 64);
+        return;
+    }
+    if (isTrgOK()) {
+        INT nNext = -1;
+        GameDataHeader* p = m_pGameDataEntries->getEntry(m_nDataListSel);
+        if (m_mode == SLMODE_SAVE) {
+            if (!p) {
+                m_nFlag |= 0x80;
+                nNext = 14;
+            } else {
+                m_nFlag &= ~0x100;
+                if (m_pGameDataEntries->isUnformated()) {
+                    nNext = 16;
+                } else if (p->isDirBroken()) {
+                    CSound::playSE(5, -1, 64);
+                } else if (p->isDataBroken()) {
+                    if (!m_pGameDataEntries->getDataUnitCountByType(0)) {
+                        m_nFlag |= 0x80;
+                        nNext = 14;
+                    } else {
+                        nNext = 11;
+                    }
+                } else {
+                    nNext = p->hasData() ? 13 : 11;
+                }
+            }
+        } else {
+            if (p && p->hasData()) {
+                nNext = 12;
+            } else {
+                CSound::playSE(5, -1, 64);
+            }
+        }
+        if (nNext >= 0) {
+            changeState(nNext);
+            continueProc();
+            CSound::playSE(2, -1, 64);
+            m_nStep = 99;
+            return;
+        }
+    }
+    SHORT nOldOfs = m_nDataListSel - m_nDataListTop;
+    SHORT nNewTop = m_nDataListTop;
+    BOOL bUpdate = checkSelectorV(m_nDataListSel, 99, TRUE, TRUE);
+    if (bUpdate) {
+        SHORT n = m_nDataListSel - m_nDataListTop;
+        if (n < 0) {
+            nNewTop = m_nDataListSel;
+        } else if (n >= 4) {
+            nNewTop = m_nDataListSel - 3;
+        }
+    } else {
+        bUpdate = checkSelector(m_nDataListSel, 99, 4, 8, 4, TRUE, TRUE);
+        if (!bUpdate) return;
+        nNewTop = m_nDataListSel - nOldOfs;
+        if (nNewTop < 0) {
+            nNewTop = 0;
+        } else if (nNewTop >= 96) {
+            nNewTop = 95;
+        }
+    }
+    if (!bUpdate) return;
+    if (nNewTop != m_nDataListTop) {
+        m_nDataListTop = nNewTop;
+        for (INT i = 0; i < 4; i++) {
+            setupDataPlate(m_nDataListTop + i);
+        }
+        m_pDataListScrollbar->setScrollPos(m_nDataListTop, TRUE);
+    }
+    SHORT nOfs = m_nDataListSel - m_nDataListTop;
+    if (nOfs != nOldOfs) m_pDataItemPlate[nOldOfs]->select(FALSE);
+    m_pDataItemPlate[nOfs]->select(TRUE);
+}
 void CSaveLoadUI::endSelDataList() {
     outHelpMessage();
 }
@@ -756,8 +1050,78 @@ void CSaveLoadUI::preCheckUnformat() {
     openMessageDlg(szMsg, 1, 3);
     m_nStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckUnformat__11CSaveLoadUI);
-__asm__(".rdata\n.align 4\n.word .L0034B86C\n.word .L0034B86C\n.word .L0034B88C\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034B8C4\n.word .L0034BA3C\n.word .L0034BA54\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAE4\n.word .L0034BAA4\n.word .L0034BABC\n.text\n");
+void CSaveLoadUI::exeCheckUnformat() {
+    INT r = -9999;
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqIdleCheckCard()) m_nStep++;
+        break;
+    case 1:
+        if (m_pMemoca->isCompleteReq(NULL)) {
+            r = m_pMemoca->getLastResult();
+            m_nStep = 0;
+        }
+        break;
+    }
+    if (r == -2) {
+        changeState(15);
+        return;
+    }
+    switch (m_nStep) {
+    case 0:
+    case 1:
+        if (m_nDlgResult) {
+            closeMessageDlg();
+            m_nStep = 2;
+        }
+        break;
+    case 2:
+        if (isPadEnable()) {
+            if (m_nDlgResult == 1) {
+                m_nStep = 10;
+            } else {
+                changeState(10);
+            }
+        }
+        break;
+    case 10: {
+        char szSlot[32];
+        _getSlotName(m_nSlot + 1, szSlot);
+        char szMsg[256];
+        const CHAR* pszFmt = _ctdText(0x600207);
+        const CHAR* pszText = _ctdText(0x600000);
+        sprintf(szMsg, pszFmt, pszText, szSlot, pszText);
+        openMessageDlg(szMsg, 0, 0);
+        m_nStep++;
+        break;
+    }
+    case 11:
+        if (CMemoca::reqFormat(m_nSlot)) m_nStep++;
+        break;
+    case 12:
+        r = CMemoca::formatProc();
+        if (r == -9999) break;
+        m_nLastResult = r;
+        if (r == 0) {
+            m_pGameDataEntries->formated();
+            m_nStep = 20;
+        } else {
+            m_nExecError = 4;
+            changeState(17);
+        }
+        break;
+    case 20:
+        closeMessageDlg();
+        m_nStep++;
+        break;
+    case 21:
+        if (isPadEnable()) {
+            changeState(11);
+            continueProc();
+        }
+        break;
+    }
+}
 void CSaveLoadUI::preConfirmExecErr() {
     INT nCtd;
     switch (m_nExecError) {
@@ -899,10 +1263,23 @@ C2DSeqAgent* CSaveLoadUI::createWorldIcon(D2::C2DSeqCtrl*& pOutCtrl) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createRoomName__11CSaveLoadUIRPQ22D210C2DSeqCtrl);
 __asm__(".rdata\n.align 3\n.word 0x002B002A\n.word 0x0000002C\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38323032\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x37343032\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31353032\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createCursor__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x00070008\n.word 0x00070008\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38363032\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createLightMark__11CSaveLoadUIQ211CSaveLoadUI14LIGHTMARK_TYPEii);
-__asm__(".rdata\n.align 3\n.word 0x00220021\n.word 0x00210023\n.word 0x00230022\n.word 0x000A0009\n.word 0x0009000B\n.word 0x000B000A\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x36383032\n.word 0x00000029\n.text\n");
+C2DSeqCursorCtrl* CSaveLoadUI::createCursor() {
+    short tbl[2][2] = {{8, 7}, {8, 7}};
+    SHORT* pTbl = tbl[getRsrcType()];
+    C2DSeqCursorCtrl* pCursor =
+        new (com_malloc_d(sizeof(C2DSeqCursorCtrl), __FILE__ "(2068)", RET_ADDR())) C2DSeqCursorCtrl;
+    pCursor->setupSeq(m_pszLad, m_nMainSeqUnit, pTbl[0], pTbl[1]);
+    return pCursor;
+}
+C2DSeqLightMarkAgent* CSaveLoadUI::createLightMark(LIGHTMARK_TYPE nType, INT nLayer, BOOL bFollow) {
+    C2DSeqAgent::SeqTbl tbl[2][2] = {{{{33, 34, 35}}, {{33, 34, 35}}}, {{{9, 10, 11}}, {{9, 10, 11}}}};
+    C2DSeqAgent::SeqTbl& t = tbl[nType][getRsrcType()];
+    C2DSeqLightMarkAgent* pLight =
+        new (com_malloc_d(sizeof(C2DSeqLightMarkAgent), __FILE__ "(2086)", RET_ADDR())) C2DSeqLightMarkAgent(this);
+    pLight->setupSeq(t, m_pszLad, m_nMainSeqUnit, nLayer, bFollow);
+    pLight->setupState(t);
+    return pLight;
+}
 C2DSeqAgent* CSaveLoadUI::createTimeLabel(D2::C2DSeqCtrl*& pOutCtrl) {
     C2DSeqAgent::SeqTbl tbl = {{45, 46, 47}};
     FVECTOR v;
@@ -919,8 +1296,16 @@ C2DSeqAgent* CSaveLoadUI::createTimeLabel(D2::C2DSeqCtrl*& pOutCtrl) {
     pAgent->setupState(tbl);
     return pAgent;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createTimeCtrl__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32323132\n.word 0x00000029\n.text\n");
+C2DSeqTimeCtrl* CSaveLoadUI::createTimeCtrl() {
+    C2DSeqTimeCtrl* pCtrl = new (com_malloc_d(sizeof(C2DSeqTimeCtrl), __FILE__ "(2122)", RET_ADDR())) C2DSeqTimeCtrl;
+    pCtrl->setupSeq(m_pszLad, m_nMainSeqUnit, 22, 32, 65);
+    pCtrl->setLayer(12);
+    FVECTOR v;
+    v.set(28.0f, 357.0f, 0.0f);
+    if (CGame::isRikuGame()) v.y += -35.0f;
+    pCtrl->setPos(v);
+    return pCtrl;
+}
 C2DSeqAgent* CSaveLoadUI::createMPLabel(D2::C2DSeqCtrl*& pOutCtrl) {
     C2DSeqAgent::SeqTbl tbl = {{39, 40, 41}};
     FVECTOR v;
@@ -936,8 +1321,17 @@ C2DSeqAgent* CSaveLoadUI::createMPLabel(D2::C2DSeqCtrl*& pOutCtrl) {
     pAgent->setupState(tbl);
     return pAgent;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMPCtrl__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32363132\n.word 0x00000029\n.text\n");
+C2DSeqNumericCtrl* CSaveLoadUI::createMPCtrl() {
+    C2DSeqNumericCtrl* pCtrl =
+        new (com_malloc_d(sizeof(C2DSeqNumericCtrl), __FILE__ "(2162)", RET_ADDR())) C2DSeqNumericCtrl;
+    pCtrl->setupSeq(m_pszLad, m_nMainSeqUnit, 12, 65, 99999);
+    pCtrl->setLayer(12);
+    FVECTOR v;
+    v.set(36.0f, 322.0f, 0.0f);
+    pCtrl->setPos(v);
+    pCtrl->updateValue(CGameWork::progMCW()._statusInfo[8]);
+    return pCtrl;
+}
 C2DSeqAgent* CSaveLoadUI::createMainHelp(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt*& pOutFnt) {
     C2DSeqAgent::SeqTbl tbl[2] = {{{89, 90, 91}}, {{90, 91, 92}}};
     _LayoutInfo ltbl[2] = {{3, 9}, {4, 9}};
@@ -963,14 +1357,120 @@ C2DSeqAgent* CSaveLoadUI::createMainHelp(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt*&
 }
 static CHAR* s_pStrSaveLoad[2] = {"Save", "Load"};
 static CHAR* s_pStrSlot[2] = {"Slot 1", "Slot 2"};
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createResultPlate__11CSaveLoadUIRPQ22D210C2DSeqCtrlRPQ22D26C2DFnti);
-__asm__(".rdata\n.align 3\n.word 0x00250024\n.word 0x00240026\n.word 0x00260025\n.word 0x00050004\n.word 0x00040006\n.word 0x00060005\n.word 0x00040003\n.word 0x00040004\n.word 0x00050003\n.word 0x00050004\n.word 0x40800000\n.word 0x41800000\n.word 0xC2300000\n.word 0x40E00000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x34333232\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x34343232\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x37343232\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38353232\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createSelSlotPlate__11CSaveLoadUIi);
-__asm__(".rdata\n.align 3\n.word 0x00020001\n.word 0x00010003\n.word 0x00030002\n.word 0x00000000\n.word 0x00060003\n.word 0x00060004\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x39373232\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createMemocaInfo__11CSaveLoadUIRPQ22D210C2DSeqCtrlPPQ22D210C2DSeqCtrl);
-__asm__(".rdata\n.align 3\n.word 0x006C006B\n.word 0x0000006D\n.word 0x00080003\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31313332\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x39313332\n.word 0x00000029\n.word 0x00390037\n.word 0x00000038\n.word 0x00010006\n.word 0x00000000\n.word 0x80208000\n.word 0x80204080\n.word 0x80804020\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31333332\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x34343332\n.word 0x00000029\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createDataListContainer__11CSaveLoadUIRPQ22D210C2DSeqCtrlRP19C2DSeqScrollbarCtrl);
-__asm__(".rdata\n.align 3\n.word 0x00610060\n.word 0x005D0062\n.word 0x005F005E\n.word 0x00000000\n.word 0x00030003\n.word 0x00030004\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x34363332\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x33373332\n.word 0x00000029\n.word 0x00540053\n.word 0x00500055\n.word 0x00520051\n.word 0x00570056\n.word 0x00540058\n.word 0x00560055\n.word 0x00520051\n.word 0x00570053\n.word 0x00590058\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x36383332\n.word 0x00000029\n.text\n");
+C2DSeqAgent* CSaveLoadUI::createResultPlate(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt*& pOutFnt, INT nIdx) {
+    C2DSeqAgent::SeqTbl tbl[2][2] = {{{{36, 37, 38}}, {{36, 37, 38}}}, {{{4, 5, 6}}, {{4, 5, 6}}}};
+    _LayoutInfo ltbl[2][2] = {{{3, 4}, {4, 4}}, {{3, 5}, {4, 5}}};
+    float ftbl[2][2] = {{4.0f, 16.0f}, {-44.0f, 7.0f}};
+    C2DSeqAgent::SeqTbl& t = tbl[nIdx][getRsrcType()];
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2234)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, t._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    _LayoutInfo& info = ltbl[nIdx][getRsrcType()];
+    G_RGBA rgba;
+    rgba.col = 0x80707070;
+    switch (nIdx) {
+    case 0:
+        pOutFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2244)", RET_ADDR()))
+            D2::C2DFnt(0, 0, &rgba, 15, s_pStrSaveLoad[getRsrcType()], 0x40);
+        break;
+    case 1:
+        pOutFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2247)", RET_ADDR()))
+            D2::C2DFnt(0, 0, &rgba, 15, s_pStrSlot[m_nSlot], 0x40);
+        break;
+    }
+    FLOAT* ofsTbl = ftbl[nIdx];
+    pOutCtrl->addFntShift(m_pszLad, m_nMainSeqUnit, pOutFnt, ofsTbl[0], ofsTbl[1]);
+    pOutCtrl->enableColorCtrl(TRUE);
+    FVECTOR vPos;
+    D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
+    pOutCtrl->setPos(vPos);
+    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2258)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
+    pAgent->setupState(t, callbackResultPlate, NULL);
+    return pAgent;
+}
+C2DSeqSelectable* CSaveLoadUI::createSelSlotPlate(INT nIdx) {
+    C2DSeqAgent::SeqTbl tbl[2] = {{{1, 2, 3}}, {{1, 2, 3}}};
+    short actTbl[2] = {0, 0};
+    _LayoutInfo ltbl[2] = {{3, 6}, {4, 6}};
+    C2DSeqAgent::SeqTbl& t = tbl[getRsrcType()];
+    C2DSeqSelectable* pPlate =
+        new (com_malloc_d(sizeof(C2DSeqSelectable), __FILE__ "(2279)", RET_ADDR())) C2DSeqSelectable(this);
+    pPlate->setupSeq(t, m_pszLad, m_nMainSeqUnit, actTbl[getRsrcType()], 12);
+    G_RGBA rgba;
+    rgba.col = 0x80707070;
+    pPlate->setCaptionParam(s_pStrSlot[nIdx], 15, &rgba, 0x40);
+    pPlate->setCaptionShift(-44.0f, 7.0f);
+    FVECTOR vPos;
+    _LayoutInfo& info = ltbl[getRsrcType()];
+    D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx + nIdx, vPos, FALSE);
+    pPlate->setCtrlPos(vPos);
+    pPlate->setupState(t, nIdx == 0 ? callbackSlotPlateIn : NULL, NULL);
+    pPlate->setCursorOfs(-32.0f, -8.0f);
+    pPlate->setLightMarkOfs(64.0f, -4.0f);
+    return pPlate;
+}
+C2DSeqAgent* CSaveLoadUI::createMemocaInfo(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DSeqCtrl** ppOutInfoBar) {
+    if (m_mode == SLMODE_LOAD) {
+        pOutCtrl = NULL;
+        return NULL;
+    }
+    C2DSeqAgent::SeqTbl t = {{107, 108, 109}};
+    _LayoutInfo info = {3, 8};
+    FVECTOR vPos;
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2311)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, t._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
+    pOutCtrl->setPos(vPos);
+    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2319)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
+    pAgent->setupState(t, callbackMemocaInfo, callbackMemocaInfo);
+    unsigned short barTbl[3] = {55, 57, 56};
+    _LayoutInfo barInfo = {6, 1};
+    unsigned int fntCol[3] = {0x80208000, 0x80204080, 0x80804020};
+    for (INT i = 0; i < 3; i++) {
+        D2::C2DSeqCtrl* pCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2331)", RET_ADDR())) D2::C2DSeqCtrl;
+        *ppOutInfoBar++ = pCtrl;
+        pCtrl->addSeq(m_pszLad, m_nMainSeqUnit, barTbl[i]);
+        pCtrl->setParent(pOutCtrl);
+        pCtrl->changeLayer(12);
+        pCtrl->enableColorCtrl(TRUE);
+        D2::C2DMan::getLayPosition(m_pszLad, barInfo._nLayIdx, barInfo._nSeqIdx, vPos, FALSE);
+        pCtrl->setLocalPos(vPos);
+        G_RGBA col;
+        col.col = fntCol[i];
+        m_szMemocaInfoStr[i][0] = '\0';
+        D2::C2DFnt* pFont = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2344)", RET_ADDR()))
+            D2::C2DFnt(0, 0, &col, 12, m_szMemocaInfoStr[i], 0x40);
+        pOutCtrl->addFntShift(m_pszLad, m_nMainSeqUnit, pFont, -36.0f, i * 58.0f - 52.0f);
+    }
+    return pAgent;
+}
+C2DSeqAgent* CSaveLoadUI::createDataListContainer(D2::C2DSeqCtrl*& pOutCtrl, C2DSeqScrollbarCtrl*& pOutScrollbar) {
+    C2DSeqAgent::SeqTbl tbl[2] = {{{96, 97, 98}}, {{93, 94, 95}}};
+    _LayoutInfo ltbl[2] = {{3, 3}, {4, 3}};
+    C2DSeqAgent::SeqTbl& t = tbl[getRsrcType()];
+    pOutCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2364)", RET_ADDR())) D2::C2DSeqCtrl;
+    pOutCtrl->addSeq(m_pszLad, m_nMainSeqUnit, t._tbl[0]);
+    pOutCtrl->changeLayer(12);
+    FVECTOR vPos;
+    _LayoutInfo& info = ltbl[getRsrcType()];
+    D2::C2DMan::getLayPosition(m_pszLad, info._nLayIdx, info._nSeqIdx, vPos, FALSE);
+    pOutCtrl->setPos(vPos);
+    C2DSeqAgent* pAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(2373)", RET_ADDR())) C2DSeqAgent(this);
+    pAgent->setupSeq(*pOutCtrl, m_pszLad, m_nMainSeqUnit, 0);
+    pAgent->setupState(t, callbackDataList, callbackDataList);
+    C2DSeqAgent::SeqTbl scr_tbl[2][3] = {{{{83, 84, 85}}, {{80, 81, 82}}, {{86, 87, 88}}},
+                                          {{{84, 85, 86}}, {{81, 82, 83}}, {{87, 88, 89}}}};
+    pOutScrollbar = new (com_malloc_d(sizeof(C2DSeqScrollbarCtrl), __FILE__ "(2386)", RET_ADDR())) C2DSeqScrollbarCtrl(this);
+    pOutScrollbar->setupSeq(pOutCtrl, scr_tbl[getRsrcType()], m_pszLad, m_nMainSeqUnit, 12, 100);
+    pOutScrollbar->setScrollRange(166.0f, 99, 4, FALSE);
+    vPos.x = 176.0f;
+    vPos.y = -82.0f;
+    pOutScrollbar->setBasePos(vPos);
+    return pAgent;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createDataItemPlate__11CSaveLoadUIRQ22D210C2DSeqCtrlRPQ22D210C2DSeqCtrlRPQ22D26C2DFntT2T2i);
 __asm__(".rdata\n.align 3\n.word 0x00010007\n.word 0x00010008\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x38323432\n.word 0x00000029\n.word 0x004F004B\n.word 0x00000000\n.word 0x00010001\n.word 0x00010001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31353432\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32363432\n.word 0x00000029\n.word 0x00020001\n.word 0x00020001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x39363432\n.word 0x00000029\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x31383432\n.word 0x00000029\n.word 0x00730076\n.word 0x00000000\n.word 0x00030001\n.word 0x00030001\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x726F462F\n.word 0x654D2F6D\n.word 0x532F756E\n.word 0x4C657661\n.word 0x2E64616F\n.word 0x28707063\n.word 0x32393432\n.word 0x00000029\n.text\n");
 C2DSeqAgent* CSaveLoadUI::createMessageDlg(D2::C2DSeqCtrl*& pOutCtrl, D2::C2DFnt*& pOutFntInf) {
@@ -1018,8 +1518,361 @@ void CSaveLoadUI::setActiveSlotPlate(INT nSlot) {
     setHelpMessage(szMes);
     m_pResultPlateFnt[1]->setText(s_pStrSlot[nSlot]);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", setupDataPlate__11CSaveLoadUIs);
-__asm__(".rdata\n.align 3\n.word 0x76615343\n.word 0x616F4C65\n.word 0x3A495564\n.word 0x7465733A\n.word 0x61447075\n.word 0x6C506174\n.word 0x28657461\n.word 0x20296425\n.word 0x202E2E2E\n.word 0xCD88CD94\n.word 0xC5824F8A\n.word 0x000AB782\n.word 0x004C004B\n.word 0x0050004F\n.word 0x64323025\n.word 0x00000000\n.word 0x20207325\n.word 0x45F9564C\n.word 0x00643225\n.word 0x00000000\n.word 0x20207325\n.word 0x45F9564C\n.word 0x20643225\n.word 0x20202020\n.word 0x64352520\n.word 0x00504D20\n.word 0x72746E45\n.word 0x65636E61\n.word 0x6C614820\n.word 0x0000006C\n.word 0x00466425\n.word 0x00000000\n.word 0x00000020\n.word 0x00000000\n.word 0x25207325\n.word 0x00000073\n.word 0x3A643325\n.word 0x64323025\n.word 0x00000000\n.word 0x00000000\n.word 0x250A7325\n.word 0x73250A73\n.word 0x00000000\n.word 0x00000000\n.text\n");
+/* file-scope constant tables (deferred: emitted after the vtables, as in the original) */
+static const CARD_DATA cardDataTbl[224] = {
+    {{0}, 0, 0, 0, ""},
+    {{17}, 2, 0, 3, "Kingdom Key"},
+    {{17}, 2, 1, 3, "Three Wishes"},
+    {{17}, 2, 2, 3, "Crabclaw"},
+    {{17}, 2, 3, 3, "Pumpkinhead"},
+    {{17}, 2, 4, 3, "Fairy Harp"},
+    {{17}, 2, 5, 3, "Wishing Star"},
+    {{17}, 2, 6, 3, "Spellbinder"},
+    {{17}, 2, 7, 3, "Metal Chocobo"},
+    {{17}, 3, 0, 3, "Olympia"},
+    {{17}, 3, 1, 3, "Lionheart"},
+    {{17}, 3, 2, 3, "Lady Luck"},
+    {{17}, 3, 3, 3, "Divine Rose"},
+    {{17}, 3, 4, 3, "Oathkeeper"},
+    {{17}, 3, 5, 3, "Oblivion"},
+    {{17}, 3, 6, 3, "Ultima Weapon"},
+    {{17}, 3, 7, 3, "Diamond Dust"},
+    {{17}, 4, 0, 3, "One-Winged Angel"},
+    {{17}, 4, 1, 4, "Soul Eater"},
+    {{17}, 4, 2, 3, "Star Seeker"},
+    {{17}, 4, 3, 3, "Monochrome"},
+    {{17}, 4, 4, 3, "Follow the Wind"},
+    {{17}, 4, 5, 3, "Hidden Dragon"},
+    {{17}, 4, 6, 3, "Photon Debugger"},
+    {{17}, 4, 7, 3, "Bond of Flame"},
+    {{17}, 26, 0, 0, "-"},
+    {{34}, 5, 0, 3, "Fire"},
+    {{34}, 5, 1, 3, "Blizzard"},
+    {{34}, 5, 2, 3, "Thunder"},
+    {{34}, 5, 3, 3, "Cure"},
+    {{34}, 5, 4, 3, "Gravity"},
+    {{34}, 5, 5, 3, "Stop"},
+    {{34}, 5, 6, 3, "Aero"},
+    {{34}, 26, 2, 0, "-"},
+    {{34}, 26, 1, 0, "-"},
+    {{51}, 5, 7, 3, "Simba"},
+    {{51}, 6, 0, 3, "Genie"},
+    {{51}, 6, 1, 3, "Bambi"},
+    {{51}, 6, 2, 3, "Dumbo"},
+    {{51}, 6, 3, 3, "Tinker Bell"},
+    {{51}, 6, 4, 3, "Mushu"},
+    {{51}, 6, 5, 3, "Cloud"},
+    {{68}, 6, 6, 6, "Potion"},
+    {{68}, 6, 7, 6, "Hi-Potion"},
+    {{68}, 7, 0, 2, "Mega-Potion"},
+    {{68}, 7, 1, 2, "Ether"},
+    {{68}, 7, 2, 2, "Mega-Ether"},
+    {{68}, 7, 3, 2, "Elixir"},
+    {{68}, 7, 4, 2, "Megalixir"},
+    {{85}, 7, 5, 2, "Donald Duck"},
+    {{85}, 7, 6, 2, "Goofy"},
+    {{85}, 7, 7, 2, "Aladdin"},
+    {{85}, 8, 0, 2, "Ariel"},
+    {{85}, 8, 1, 2, "Jack"},
+    {{85}, 8, 2, 2, "Peter Pan"},
+    {{85}, 8, 3, 2, "The Beast"},
+    {{85}, 8, 4, 4, "The King"},
+    {{85}, 8, 5, 2, "Pluto"},
+    {{102}, 8, 6, 6, "Guard Armor"},
+    {{102}, 8, 6, 6, "Trickmaster"},
+    {{102}, 8, 6, 6, "Jafar"},
+    {{102}, 8, 6, 6, "Oogie Boogie"},
+    {{102}, 8, 6, 6, "Parasite Cage"},
+    {{102}, 8, 6, 6, "Ursula"},
+    {{102}, 8, 6, 6, "Dragon Maleficent"},
+    {{102}, 8, 6, 6, "Darkside"},
+    {{230}, 8, 7, 4, "-"},
+    {{230}, 9, 0, 0, "-"},
+    {{119}, 9, 1, 6, "Shadow"},
+    {{119}, 9, 2, 2, "Soldier"},
+    {{119}, 9, 3, 6, "Large Body"},
+    {{119}, 9, 4, 2, "Red Nocturne"},
+    {{119}, 9, 5, 2, "Blue Rhapsody"},
+    {{119}, 9, 6, 2, "Yellow Opera"},
+    {{119}, 9, 7, 2, "Green Requiem"},
+    {{119}, 10, 0, 6, "Powerwild"},
+    {{119}, 10, 1, 2, "Bouncywild"},
+    {{119}, 10, 2, 2, "Air Soldier"},
+    {{119}, 10, 3, 2, "Bandit"},
+    {{119}, 10, 4, 6, "Fat Bandit"},
+    {{119}, 10, 5, 2, "Barrel Spider"},
+    {{119}, 10, 6, 6, "Search Ghost"},
+    {{119}, 10, 7, 6, "Sea Neon"},
+    {{119}, 11, 0, 2, "Screwdiver"},
+    {{119}, 11, 1, 2, "Aquatank"},
+    {{119}, 11, 2, 6, "Wight Knight"},
+    {{119}, 11, 3, 2, "Gargoyle"},
+    {{119}, 11, 4, 6, "Pirate"},
+    {{119}, 11, 5, 2, "Air Pirate"},
+    {{119}, 11, 6, 4, "Darkball"},
+    {{119}, 11, 7, 6, "Defender"},
+    {{119}, 12, 0, 2, "Wyvern"},
+    {{119}, 12, 1, 2, "Wizard"},
+    {{119}, 12, 2, 2, "Neoshadow"},
+    {{119}, 12, 3, 2, "White Mushroom"},
+    {{119}, 12, 4, 2, "Black Fungus"},
+    {{119}, 12, 5, 2, "Creeper Plant"},
+    {{119}, 12, 6, 2, "Tornado Step"},
+    {{119}, 12, 7, 2, "Crescendo"},
+    {{119}, 13, 0, 6, "Guard Armor"},
+    {{119}, 13, 1, 6, "Parasite Cage"},
+    {{119}, 13, 2, 6, "Trickmaster"},
+    {{119}, 13, 3, 6, "Darkside"},
+    {{119}, 13, 4, 2, "Card Soldier"},
+    {{119}, 13, 5, 6, "Hades"},
+    {{119}, 13, 6, 6, "Jafar"},
+    {{119}, 13, 7, 6, "Oogie Boogie"},
+    {{119}, 14, 0, 6, "Ursula"},
+    {{119}, 14, 1, 6, "Hook"},
+    {{119}, 14, 2, 6, "Dragon Maleficent"},
+    {{119}, 14, 3, 2, "Riku"},
+    {{119}, 14, 4, 2, "Axel"},
+    {{119}, 14, 5, 2, "Larxene"},
+    {{119}, 14, 6, 2, "Vexen"},
+    {{119}, 14, 7, 2, "Marluxia"},
+    {{119}, 15, 0, 6, "Lexaeus"},
+    {{119}, 15, 1, 2, "Ansem"},
+    {{119}, 15, 3, 6, "Zexion"},
+    {{119}, 15, 4, 2, "Xemnas"},
+    {{119}, 15, 5, 2, "Xigbar"},
+    {{119}, 15, 6, 2, "Xaldin"},
+    {{119}, 15, 7, 2, "Sa\x83\xc7x"},
+    {{119}, 16, 0, 2, "Demyx"},
+    {{119}, 16, 1, 2, "Luxord"},
+    {{119}, 16, 2, 2, "Roxas"},
+    {{119}, 21, 6, 2, "Gold Card"},
+    {{119}, 21, 7, 2, "Platinum Card"},
+    {{119}, 15, 2, 0, "Card Soldier Spade"},
+    {{119}, 13, 4, 0, "Card Soldier Heart"},
+    {{23}, 22, 0, 0, "\x83N\x83\x89\x83" "E\x83hA"},
+    {{23}, 22, 1, 0, "\x83N\x83\x89\x83" "E\x83hB"},
+    {{23}, 22, 2, 0, "\x83n\x83" "f\x83XA"},
+    {{39}, 22, 3, 0, "\x83n\x83" "f\x83XB"},
+    {{23}, 22, 4, 0, "\x83t\x83" "b\x83NA"},
+    {{23}, 22, 5, 0, "\x83t\x83" "b\x83NB"},
+    {{23}, 22, 6, 0, "\x83t\x83" "b\x83NC"},
+    {{39}, 22, 7, 0, "\x83t\x83" "b\x83ND"},
+    {{23}, 23, 0, 0, "\x83" "A\x83N\x83Z\x83\x8b" "A"},
+    {{23}, 23, 1, 0, "\x83" "A\x83N\x83Z\x83\x8b" "B"},
+    {{23}, 23, 2, 0, "\x83\x89\x83N\x83V\x81[\x83kA"},
+    {{23}, 23, 3, 0, "\x83\x89\x83N\x83V\x81[\x83kB"},
+    {{39}, 23, 4, 0, "\x83\x89\x83N\x83V\x81[\x83kC"},
+    {{23}, 23, 5, 0, "\x83\x8a\x83NA"},
+    {{23}, 23, 6, 0, "\x83\x8a\x83NB"},
+    {{23}, 23, 7, 0, "\x83\x8a\x83NC"},
+    {{23}, 24, 0, 0, "\x83\x8a\x83ND"},
+    {{23}, 24, 1, 0, "\x83\x94\x83" "B\x83N\x83Z\x83\x93" "A"},
+    {{39}, 24, 2, 0, "\x83\x94\x83" "B\x83N\x83Z\x83\x93" "B"},
+    {{23}, 24, 3, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "A"},
+    {{23}, 24, 4, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "B"},
+    {{39}, 24, 5, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "C"},
+    {{119}, 24, 6, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "2"},
+    {{119}, 24, 7, 0, "\x83}\x81[\x83\x8b\x81[\x83V\x83\x83" "3"},
+    {{23}, 25, 0, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XA"},
+    {{23}, 25, 1, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XB"},
+    {{39}, 25, 2, 0, "\x83\x8c\x83N\x83Z\x83" "E\x83XC"},
+    {{23}, 25, 3, 0, "\x83" "A\x83\x93\x83Z\x83\x80" "A"},
+    {{39}, 25, 4, 0, "\x83" "A\x83\x93\x83Z\x83\x80" "B"},
+    {{39}, 25, 5, 0, "\x83[\x83N\x83V\x83I\x83\x93" "A"},
+    {{119}, 26, 3, 0, "-"},
+    {{136}, 0, 0, 6, "\x83\x8a\x83\x8d\x81[\x83h"},
+    {{153}, 16, 3, 6, "Tranquil Darkness"},
+    {{153}, 16, 4, 6, "Teeming Darkness"},
+    {{153}, 16, 5, 6, "Feeble Darkness"},
+    {{153}, 16, 6, 6, "Almighty Darkness"},
+    {{153}, 16, 7, 6, "Sleeping Darkness"},
+    {{153}, 17, 0, 6, "Looming Darkness"},
+    {{153}, 17, 1, 2, "Premium Room"},
+    {{153}, 17, 2, 2, "White Room"},
+    {{153}, 17, 3, 6, "Black Room"},
+    {{153}, 17, 4, 6, "Bottomless Darkness"},
+    {{153}, 17, 5, 6, "Roulette Room"},
+    {{169}, 17, 6, 6, "Martial Waking"},
+    {{169}, 17, 7, 2, "Sorcerous Waking"},
+    {{169}, 18, 0, 2, "Alchemic Waking"},
+    {{169}, 18, 1, 6, "Meeting Ground"},
+    {{169}, 18, 2, 6, "Stagnant Space"},
+    {{169}, 18, 3, 6, "Strong Initiative"},
+    {{169}, 18, 4, 6, "Lasting Daze"},
+    {{185}, 18, 5, 2, "Calm Bounty"},
+    {{185}, 18, 6, 2, "Guarded Trove"},
+    {{185}, 18, 7, 2, "False Bounty"},
+    {{185}, 19, 0, 6, "Moment's Reprieve"},
+    {{185}, 19, 1, 6, "Mingling Worlds"},
+    {{185}, 19, 2, 2, "Moogle Room"},
+    {{185}, 19, 3, 6, "Random Joker"},
+    {{202}, 19, 4, 6, "Key of Beginnings"},
+    {{202}, 19, 5, 6, "Key of Guidance"},
+    {{202}, 19, 6, 6, "Key to Truth"},
+    {{202}, 19, 7, 2, "Key to Rewards"},
+    {{219}, 20, 0, 6, "Traverse Town"},
+    {{219}, 20, 3, 6, "Agrabah"},
+    {{219}, 20, 2, 6, "Olympus Coliseum"},
+    {{219}, 20, 1, 6, "Wonderland"},
+    {{219}, 20, 5, 6, "Monstro"},
+    {{219}, 20, 4, 6, "Halloween Town"},
+    {{219}, 20, 6, 6, "Atlantica"},
+    {{219}, 20, 7, 6, "Neverland"},
+    {{219}, 21, 0, 6, "Hollow Bastion"},
+    {{219}, 21, 1, 2, "100 Acre Woods"},
+    {{219}, 21, 2, 6, "Twilight Town"},
+    {{219}, 21, 3, 6, "Destiny Islands"},
+    {{219}, 21, 4, 4, "Castle Oblivion"},
+    {{13}, 0, 0, 0, "EXP\x90\xc2\x8f\xac"},
+    {{13}, 0, 1, 0, "EXP\x90\xc2\x92\x86"},
+    {{13}, 0, 2, 0, "EXP\x90\xc2\x91\xe5"},
+    {{13}, 0, 3, 0, "EXP\x90\xd4\x8f\xac"},
+    {{13}, 0, 4, 0, "EXP\x90\xd4\x92\x86"},
+    {{13}, 0, 5, 0, "EXP\x90\xd4\x91\xe5"},
+    {{13}, 0, 6, 0, "EXP\x8b\xe2"},
+    {{13}, 1, 0, 0, "HP\x8f\xac"},
+    {{13}, 1, 1, 0, "HP\x91\xe5"},
+    {{13}, 2, 0, 0, "MP\x8f\xac"},
+    {{13}, 2, 1, 0, "MP\x91\xe5"},
+    {{13}, 3, 0, 0, "P"},
+    {{13}, 4, 0, 0, "R"},
+    {{12}, 0, 0, 0, "Unknown Room"},
+    {{12}, 0, 0, 0, "Conqueror's Respite"},
+    {{12}, 0, 0, 0, "Room of Rewards"},
+    {{12}, 0, 0, 0, ""},
+    {{12}, 0, 0, 0, ""},
+    {{0}, 0, 0, 0, ""},
+    {{0}, 0, 0, 0, ""},
+    {{0}, 0, 0, 0, ""},
+};
+static const C2DSeqAgent::SeqTbl s_seqDataPlateTbl[3][2] = {
+    {{{100, 101, 102}}, {{97, 98, 99}}},
+    {{{111, 112, 113}}, {{108, 109, 110}}},
+    {{{115, 116, 117}}, {{112, 113, 114}}},
+};
+static const short s_seqDataActPlateTbl[3][2] = {{99, 96}, {110, 107}, {114, 111}};
+
+void CSaveLoadUI::setupDataPlate(SHORT nDataIdx) {
+    if (nDataIdx < m_nDataListTop || nDataIdx >= m_nDataListTop + 4) {
+        TRACE("CSaveLoadUI::setupDataPlate(%d) ... \x94\xcd\x88\xcd\x8aO\x82\xc5\x82\xb7\n", nDataIdx);
+        return;
+    }
+    SHORT n = nDataIdx - m_nDataListTop;
+    short cirTbl[2][2] = {{0x4B, 0x4C}, {0x4F, 0x50}};
+    C2DSeqSelectable* pPlate = m_pDataItemPlate[n];
+    D2::C2DSeqCtrl* pCircle = m_pDataItemNumCircle[n];
+    D2::C2DSeqCtrl* pWorldIcon = m_pDataItemIcon[n];
+    D2::C2DSeqCtrl* pClearIcon = m_pDataItemClearIcon[n];
+    INT nCircle = 0;
+    INT nGameMode;
+    sprintf(m_szDataItemID[n], "%02d", nDataIdx + 1);
+    BOOL bUpdateIcon = FALSE;
+    BOOL bClearIcon = FALSE;
+    GameDataHeader* pHead = m_pGameDataEntries->getEntry(nDataIdx);
+    char szLine[3][64];
+    *m_szDataItemTime[n] = 0;
+    if (pHead && pHead->hasData()) {
+        pPlate->setCaptionShift(-50.0f, -8.0f);
+        pPlate->setCaptionSize(12);
+        if (pHead->_cFlag & 2) {
+            sprintf(szLine[0], "%s  LV\xf9" "E%2d", _ctdText(0x100002), pHead->_cLevel);
+        } else {
+            sprintf(szLine[0], "%s  LV\xf9" "E%2d      %5d MP", _ctdText(0x100001), pHead->_cLevel, pHead->_nMoogle);
+        }
+        szLine[1][0] = 0;
+        if (pHead->_cGameLevel) {
+            INT id = pHead->_cGameLevel < 4 ? pHead->_cGameLevel : 0;
+            UINT ctdID = 0x100200 + id;
+            strcpy(szLine[1], _ctdText(ctdID));
+        }
+        INT nFloor = pHead->_cFloor;
+        CHAR* pszFloor = szLine[2];
+        if (nFloor < 0) {
+            *pszFloor++ = 'B';
+            nFloor = -nFloor;
+        } else {
+            *pszFloor++ = ' ';
+        }
+        const CHAR* pszWorld;
+        BYTE w = pHead->_cWorld & 0xF;
+        if ((pHead->_cWorld & 0x10) || !w) {
+            pszWorld = "Entrance Hall";
+        } else {
+            pszWorld = cardDataTbl[w + 0xBD].pName;
+        }
+        bUpdateIcon = w < 14;
+        char szFloor[8];
+        sprintf(szFloor, "%dF", nFloor);
+        if (nFloor < 10) strcat(szFloor, " ");
+        sprintf(pszFloor, "%s %s", szFloor, pszWorld);
+        if (pPlate->getState() == C2DSeqAgent::STATE_LOOP) {
+            INT nH = pHead->_nTime / 3600;
+            INT nM = pHead->_nTime % 3600 / 60;
+            sprintf(m_szDataItemTime[n], "%3d:%02d", nH, nM);
+        }
+        nCircle = (pHead->_cFlag & 2) ? 2 : 1;
+        nGameMode = 0;
+        bClearIcon = pHead->isGameCleared();
+    } else {
+        szLine[0][0] = 0;
+        pPlate->setCaptionShift(-110.0f, -8.0f);
+        pPlate->setCaptionSize(12);
+        UINT nCtd;
+        INT nArgc = 0;
+        if (m_mode == SLMODE_SAVE) {
+            if (pHead) {
+                if (pHead->isDirBroken()) {
+                    nCtd = 0x600404;
+                } else {
+                    nCtd = pHead->isDataBroken() ? 0x600403 : 0x600401;
+                }
+            } else {
+                nArgc = 1;
+                nCtd = 0x600400;
+            }
+        } else {
+            nCtd = 0x600402;
+            if (pHead && (pHead->isDataBroken() || pHead->isDirBroken())) nCtd = 0x600403;
+        }
+        if (nArgc) {
+            const CHAR* pszArg = _ctdText(0x600000);
+            sprintf(szLine[1], _ctdText(nCtd), pszArg);
+        } else {
+            strcpy(szLine[1], _ctdText(nCtd));
+        }
+        nGameMode = 1;
+        szLine[2][0] = 0;
+        FLOAT fY = strchr(szLine[1], '\n') ? -14.0f : -8.0f;
+        pPlate->setCaptionShift(-110.0f, fY);
+    }
+    sprintf(m_szDataItemContent[n], "%s\n%s\n%s", szLine[0], szLine[1], szLine[2]);
+    BOOL bSelected = pPlate->getCurerntSeq() == pPlate->m_nActiveLoopSeq;
+    pPlate->setupState(s_seqDataPlateTbl[nCircle][getRsrcType()]);
+    pPlate->setupActiveSeq(s_seqDataActPlateTbl[nCircle][getRsrcType()]);
+    BOOL bNew = pPlate->getState() == C2DSeqAgent::_STATE_NOT_START;
+    if (bNew) {
+        pPlate->changeSeq(s_seqDataPlateTbl[nCircle][getRsrcType()]._tbl[0]);
+        if (pPlate->m_pCtrl) pPlate->m_pCtrl->enableDisp(FALSE);
+    } else if (pPlate->getState() == C2DSeqAgent::STATE_LOOP) {
+        pPlate->changeSeq(bSelected ? s_seqDataActPlateTbl[nCircle][getRsrcType()]
+                                    : s_seqDataPlateTbl[nCircle][getRsrcType()]._tbl[1]);
+    }
+    if (bUpdateIcon) {
+        INT id = pHead->_cWorld & 0xF;
+        if (id) {
+            id--;
+        } else {
+            id = 13;
+        }
+        pWorldIcon->replaceSeq(0, m_pszLad, m_nIconSeqUnit, id);
+        BOOL bShow = pPlate->getState() != C2DSeqAgent::_STATE_NOT_START;
+        if (bShow) pWorldIcon->enableDisp(TRUE);
+    } else {
+        pWorldIcon->enableDisp(FALSE);
+    }
+    pCircle->replaceSeq(0, m_pszLad, m_nMainSeqUnit, cirTbl[getRsrcType()][nGameMode]);
+    pClearIcon->enableDisp(bClearIcon);
+}
 void CSaveLoadUI::updateMemocaInfoBar() {
     INT nY = 0;
     INT nH;
@@ -1080,8 +1933,92 @@ void CSaveLoadUI::setHelpMessage(const CHAR* pszMes) {
 void CSaveLoadUI::outHelpMessage() {
     m_pMainFrameHelpAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", openMessageDlg__11CSaveLoadUIPCcii);
-__asm__(".rdata\n.align 3\n.word 0x00000042\n.word 0x00000043\n.word 0x00000046\n.word 0x00000047\n.word 0x4F464E49\n.word 0x54414D52\n.word 0x004E4F49\n.word 0x00000000\n.word 0x53455551\n.word 0x4E4F4954\n.word 0x00000000\n.word 0x00000000\n.word D_004F3E18\n.word D_004F3E28\n.word 0xC3160000\n.word 0xC2600000\n.word 0xC1700000\n.word 0xC1F00000\n.word 0xC1F00000\n.word 0xC1F00000\n.word 0x00004B4F\n.word 0x00000000\n.word 0x00736559\n.word 0x00000000\n.word 0x00006F4E\n.word 0x00000000\n.text\n");
+void CSaveLoadUI::openMessageDlg(const CHAR* pszTxt, INT nIcon, INT nType) {
+    int tbl[2][2] = {{0x42, 0x43}, {0x46, 0x47}};
+    CHAR* pszInfTbl[2] = {"INFORMATION", "QUESTION"};
+    float infOfsTbl[2] = {-150.0f, -56.0f};
+    float bdyYofsTbl[4] = {-15.0f, -30.0f, -30.0f, -30.0f};
+    C2DSeqAgent* pAgent = m_pMessageDlgAgent;
+    D2::C2DSeqCtrl* pCtrl = m_pMessageDlgCtrl;
+    m_nDlgType = nType;
+    m_nDlgResult = 0;
+    m_nDlgSel = 1;
+    CHAR* pszInfo = pszInfTbl[nIcon];
+    INT nIconSeq = tbl[getRsrcType()][nIcon];
+    BOOL bOpened = pAgent->getState() < C2DSeqAgent::STATE_OUT;
+    BOOL bLooped = pAgent->getState() == C2DSeqAgent::STATE_LOOP;
+    if (!bOpened) {
+        if (m_pMainLightMark->getState() < C2DSeqAgent::STATE_OUT) {
+            m_nFlag |= 0x20;
+        } else {
+            m_nFlag &= ~0x20;
+        }
+    }
+    m_pMessageDlgFntInf->setText(pszInfo);
+    strcpy(m_szMessageDlgStr, pszTxt);
+    pCtrl->setFntPos(1, 0.0f, bdyYofsTbl[nType]);
+    BOOL bNew = pAgent->getState() == C2DSeqAgent::_STATE_NOT_START;
+    if (bNew) {
+        pCtrl->addSeqShift(m_pszLad, m_nMainSeqUnit, nIconSeq, infOfsTbl[0], infOfsTbl[1]);
+        if (!bOpened) pAgent->start();
+    } else {
+        pCtrl->replaceSeqShift(3, m_pszLad, m_nMainSeqUnit, nIconSeq, infOfsTbl[0], infOfsTbl[1]);
+        if (!bOpened) pAgent->changeState(C2DSeqAgent::STATE_IN, TRUE, -1);
+    }
+    CHAR* pszCapTbl[2];
+    int bOpenTbl[2];
+    BOOL bCursorActive = TRUE;
+    switch (nType) {
+    case 1:
+        bOpenTbl[0] = FALSE;
+        bOpenTbl[1] = TRUE;
+        pszCapTbl[1] = "OK";
+        break;
+    case 2:
+    case 3:
+        pszCapTbl[0] = "Yes";
+        pszCapTbl[1] = "No";
+        bOpenTbl[0] = TRUE;
+        bOpenTbl[1] = TRUE;
+        break;
+    default:
+        bOpenTbl[0] = FALSE;
+        bOpenTbl[1] = FALSE;
+        bCursorActive = FALSE;
+        break;
+    }
+    for (INT i = 0; i < 2; i++) {
+        C2DSeqSelectable* pBtn = m_pMessageDlgBtnAgent[i];
+        if (bOpenTbl[i]) {
+            CHAR* pszText = pszCapTbl[i];
+            if (pBtn->m_pCaption) pBtn->m_pCaption->setText(pszText);
+            if (bLooped) {
+                BOOL bSel = i == m_nDlgSel;
+                pBtn->select(bSel);
+                if (bSel) {
+                    FVECTOR vPos;
+                    pBtn->getCursorPos(vPos);
+                    m_pMessageDlgCursor->setPos(vPos);
+                    m_pMessageDlgCursor->enableDisp(TRUE);
+                    pBtn->getLightMarkPos(vPos);
+                    m_pMainLightMark->setPos(vPos);
+                    if (!(m_nFlag & 0x20)) m_pMainLightMark->startOrRestart();
+                }
+            } else {
+                pBtn->startOrRestart();
+            }
+        } else {
+            pBtn->dispOff();
+        }
+    }
+    if (bOpened && !bCursorActive) m_pMessageDlgCursor->enableDisp(FALSE);
+    if (!bCursorActive && m_pMainLightMark->getState() < C2DSeqAgent::STATE_OUT) {
+        m_pMainLightMark->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+        m_pMainLightMark->dispOff();
+    }
+    m_nFlag |= 6;
+    if (m_pMainCursor) m_pMainCursor->setHistorySeq();
+}
 void CSaveLoadUI::closeMessageDlg() {
     m_pMessageDlgAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
     for (INT i = 0; i < 2; i++) {
@@ -1240,7 +2177,6 @@ void CSaveLoadUI::callbackResultPlate(C2DSeqAgent& agent) {
         pLight->changeState(C2DSeqAgent::STATE_IN, TRUE, -1);
     }
 }
-extern "C" char D_004F3D90[]; /* "%3d:%02d": first used by setupDataPlate (still assembly) */
 void CSaveLoadUI::callbackDataList(C2DSeqAgent& agent) {
     CSaveLoadUI* pThis = (CSaveLoadUI*)CTaskMan::getTask(m_hThis);
     if (!pThis) return;
@@ -1253,7 +2189,7 @@ void CSaveLoadUI::callbackDataList(C2DSeqAgent& agent) {
             GameDataHeader* pInfo = pThis->m_pGameDataEntries->getEntry(pThis->m_nDataListTop + i);
             BOOL bDispIcon;
             if (pInfo && pInfo->hasData()) {
-                sprintf(pThis->m_szDataItemTime[i], D_004F3D90, pInfo->_nTime / 3600, pInfo->_nTime % 3600 / 60);
+                sprintf(pThis->m_szDataItemTime[i], "%3d:%02d", pInfo->_nTime / 3600, pInfo->_nTime % 3600 / 60);
                 bDispIcon = (pInfo->_cWorld & 0xF) < 14;
             } else {
                 *pThis->m_szDataItemTime[i] = '\0';
@@ -1345,7 +2281,48 @@ BOOL CSaveLoadUI::checkSelector(SHORT& nOutIdx, SHORT nMax, INT nValDownKey, INT
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", checkSelector__11CSaveLoadUIRssiisii);
 #endif
+/* Parked: 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0`
+ * (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function
+ * scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter 4 min (5641 candidates) */
+#if 0
+void CSaveLoadUI::createBootInfoMsg(INT nRes, CHAR* pszOutMsg) {
+    INT nSlot = 0;
+    INT nCtd = 0x600100;
+    pszOutMsg[0] = '\0';
+    const CHAR* pszMemoca = _ctdText(0x600000);
+    switch (nRes) {
+    case -4:
+        nSlot = 12;
+        break;
+    case -5:
+        nSlot = 1;
+        break;
+    case -6:
+        nSlot = 2;
+        break;
+    default:
+        nCtd = 0x600102;
+        break;
+    }
+    char szLine1[128];
+    CHAR* pszForm = (CHAR*)_ctdText(nCtd);
+    if (nSlot) {
+        char szSlot[32];
+        _getSlotName(nSlot, szSlot);
+        sprintf(szLine1, pszForm, pszMemoca, szSlot);
+    } else {
+        sprintf(szLine1, pszForm, pszMemoca);
+    }
+    char szLine2[256];
+    const CHAR* pszNum = _ctdText(0x100000);
+    const CHAR* pszFmt = _ctdText(0x600103);
+    sprintf(szLine2, pszFmt, 100, pszNum);
+    const CHAR* pszInfo = _ctdText(0x600104);
+    sprintf(pszOutMsg, "%s\n%s\n%s", szLine1, szLine2, pszInfo);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", createBootInfoMsg__11CSaveLoadUIiPc);
+#endif
 void CSaveLoadUI::createCheckingMsg(INT nSlot, CHAR* pszOutMsg) {
     char szSlot[32];
     pszOutMsg[0] = '\0';
@@ -1366,7 +2343,11 @@ CSaveLoad::CSaveLoad(CTask* pParent, SLMSG msg) : CTask(pParent, 0x8000) {
     s_nMessage = msg;
     new (com_malloc_d(sizeof(CSaveLoadUI), __FILE__ "(3493)", RET_ADDR())) CSaveLoadUI(*this, SLMODE_MESSAGE, GAMECLEAR_NONE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_9CSaveLoad);
+CSaveLoad::~CSaveLoad() {
+    _ref(m_hThis) = 0;
+    CMainApp::enableSoftReset(!(m_nFlag & 4));
+    if (m_nFlag & 2) CMainApp::setFpsHalf();
+}
 void CSaveLoad::construct(SAVELOAD mode) {
     if (m_hThis) {
         TRACE("\x82\xb7\x82\xc5\x82\xc9 SAVE-LOAD \x83\x81\x83j\x83\x85\x81[\x82\xcd\x8d\xec\x90\xac\x8d\xcf\x82\xdd\x82\xc5\x82\xb7\n");
@@ -1403,7 +2384,6 @@ BOOL CSaveLoad::isSuccessSave() {
 SLMSG_RESULT CSaveLoad::getMsgResult() {
     return s_nMsgResult;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", main__23CSystemDataCheckerLocal);
 static HANDLE s_hSystemDataChecker = 0;
 
 class CSystemDataCheckerLocal : public CTask {
@@ -1419,10 +2399,30 @@ public:
         s_hSystemDataChecker = getHandle();
         m_pMemoca = new (com_malloc_d(sizeof(CMemocaAgent), __FILE__ "(3599)", RET_ADDR())) CMemocaAgent(this);
     }
-    virtual ~CSystemDataCheckerLocal() {}
+    virtual ~CSystemDataCheckerLocal() { s_hSystemDataChecker = 0; }
     virtual void main();
     void abort() { m_nFlag |= 1; }
 };
+
+void CSystemDataCheckerLocal::main() {
+    switch (m_nStep) {
+    case 0:
+        m_nStep = 10;
+        break;
+    case 10:
+        if (m_pMemoca->reqLoadSysData()) m_nStep++;
+        break;
+    case 11:
+        if (m_pMemoca->isCompleteReq(NULL)) {
+            if (m_nFlag & 1) {
+                out();
+            } else {
+                m_nStep = 0;
+            }
+        }
+        break;
+    }
+}
 
 void CSystemDataChecker::start() {
     if (s_hSystemDataChecker) {
@@ -1440,36 +2440,4 @@ void CSystemDataChecker::abort() {
 BOOL CSystemDataChecker::isExited() {
     return s_hSystemDataChecker == 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", func_00350FC8);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_16C2DSeqCursorCtrl);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_20C2DSeqLightMarkAgent);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", procLoop__20C2DSeqLightMarkAgent);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", onOutSeq__20C2DSeqLightMarkAgent);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_16C2DSeqSelectable);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", dispose__16C2DSeqSelectable);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_14C2DSeqTimeCtrl);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_17C2DSeqNumericCtrl);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_t14CStateTemplate1Z11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", main__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", changeState__11CSaveLoadUIi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", changeNextState__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", getRsrcType__C11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", continueProc__11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", getDlgResult__C11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", lockPadControl__11CSaveLoadUIi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", isPadEnable__C11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", isButtonRpt__C11CSaveLoadUIUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", isButtonTrg__C11CSaveLoadUIUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", isTrgOK__C11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", isTrgCANCEL__C11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", checkSelectorV__11CSaveLoadUIRssii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", checkSelectorH__11CSaveLoadUIRssii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", __23CSystemDataCheckerLocalP5CTask);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", _$_23CSystemDataCheckerLocal);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", abort__23CSystemDataCheckerLocal);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", executeBeginState__t14CStateTemplate1Z11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", executeState__t14CStateTemplate1Z11CSaveLoadUI);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", executeEndState__t14CStateTemplate1Z11CSaveLoadUI);
-/* The vtables (their key functions are still assembly), the CStateTemplate assert string and the constant tables only assembly uses, with their strings. */
-__asm__(".rdata\n.align 3\n.globl _vt$23CSystemDataCheckerLocal\n_vt$23CSystemDataCheckerLocal:\n.word 0\n.word 0\n.word 0\n.word _$_23CSystemDataCheckerLocal\n.word 0\n.word main__23CSystemDataCheckerLocal\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.globl _vt$11CSaveLoadUI$4CFSM\n_vt$11CSaveLoadUI$4CFSM:\n.word 0x0000FFC0\n.word 0\n.word 0x0000FFC0\n.word _$_11CSaveLoadUI\n.word 0\n.word update__4CFSM\n.word 0\n.word beginStateInitial__4CFSM\n.word 0\n.word stateInitial__4CFSM\n.word 0\n.word endStateInitial__4CFSM\n.word 0\n.word endStateProc__4CFSM\n.word 0\n.word 0\n.globl _vt$11CSaveLoadUI\n_vt$11CSaveLoadUI:\n.word 0\n.word 0\n.word 0\n.word _$_11CSaveLoadUI\n.word 0\n.word main__11CSaveLoadUI\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.word 0x49705F6D\n.word 0x6174736E\n.word 0x0065636E\n.word 0x00000000\n.globl _vt$t14CStateTemplate1Z11CSaveLoadUI\n_vt$t14CStateTemplate1Z11CSaveLoadUI:\n.word 0\n.word 0\n.word 0\n.word _$_t14CStateTemplate1Z11CSaveLoadUI\n.word 0\n.word executeBeginState__t14CStateTemplate1Z11CSaveLoadUI\n.word 0\n.word executeState__t14CStateTemplate1Z11CSaveLoadUI\n.word 0\n.word executeEndState__t14CStateTemplate1Z11CSaveLoadUI\n.word 0\n.word 0\n.globl _vt$17C2DSeqNumericCtrl\n_vt$17C2DSeqNumericCtrl:\n.word 0\n.word 0\n.word 0\n.word _$_17C2DSeqNumericCtrl\n.word 0\n.word addSeq__Q22D210C2DSeqCtrlPCcUiUi\n.word 0\n.word addSeq__Q22D210C2DSeqCtrlPCcUi\n.word 0\n.word addFnt__Q22D210C2DSeqCtrlPCcUiPQ22D26C2DFnt\n.word 0\n.word addFnt__Q22D210C2DSeqCtrlPCcPQ22D26C2DFnt\n.word 0\n.word replaceSeq__Q22D210C2DSeqCtrlUiPCcUiUi\n.word 0\n.word replaceSeq__Q22D210C2DSeqCtrlUiPCcUi\n.word 0\n.word replaceFnt__Q22D210C2DSeqCtrlUiPCcUiPQ22D26C2DFnt\n.word 0\n.word replaceFnt__Q22D210C2DSeqCtrlUiPCcPQ22D26C2DFnt\n.word 0\n.word addSeqShift__Q22D210C2DSeqCtrlPCcUiUiff\n.word 0\n.word addSeqShift__Q22D210C2DSeqCtrlPCcUiff\n.word 0\n.word addFntShift__Q22D210C2DSeqCtrlPCcUiPQ22D26C2DFntff\n.word 0\n.word addFntShift__Q22D210C2DSeqCtrlPCcPQ22D26C2DFntff\n.word 0\n.word replaceSeqShift__Q22D210C2DSeqCtrlUiPCcUiUiff\n.word 0\n.word replaceSeqShift__Q22D210C2DSeqCtrlUiPCcUiff\n.word 0\n.word replaceFntShift__Q22D210C2DSeqCtrlUiPCcUiPQ22D26C2DFntff\n.word 0\n.word replaceFntShift__Q22D210C2DSeqCtrlUiPCcPQ22D26C2DFntff\n.word 0\n.word shiftSeqPos__Q22D210C2DSeqCtrlUiff\n.word 0\n.word setFntPos__Q22D210C2DSeqCtrlUiff\n.word 0\n.word 0\n.globl _vt$14C2DSeqTimeCtrl\n_vt$14C2DSeqTimeCtrl:\n.word 0\n.word 0\n.word 0\n.word _$_14C2DSeqTimeCtrl\n.word 0\n.word addSeq__Q22D210C2DSeqCtrlPCcUiUi\n.word 0\n.word addSeq__Q22D210C2DSeqCtrlPCcUi\n.word 0\n.word addFnt__Q22D210C2DSeqCtrlPCcUiPQ22D26C2DFnt\n.word 0\n.word addFnt__Q22D210C2DSeqCtrlPCcPQ22D26C2DFnt\n.word 0\n.word replaceSeq__Q22D210C2DSeqCtrlUiPCcUiUi\n.word 0\n.word replaceSeq__Q22D210C2DSeqCtrlUiPCcUi\n.word 0\n.word replaceFnt__Q22D210C2DSeqCtrlUiPCcUiPQ22D26C2DFnt\n.word 0\n.word replaceFnt__Q22D210C2DSeqCtrlUiPCcPQ22D26C2DFnt\n.word 0\n.word addSeqShift__Q22D210C2DSeqCtrlPCcUiUiff\n.word 0\n.word addSeqShift__Q22D210C2DSeqCtrlPCcUiff\n.word 0\n.word addFntShift__Q22D210C2DSeqCtrlPCcUiPQ22D26C2DFntff\n.word 0\n.word addFntShift__Q22D210C2DSeqCtrlPCcPQ22D26C2DFntff\n.word 0\n.word replaceSeqShift__Q22D210C2DSeqCtrlUiPCcUiUiff\n.word 0\n.word replaceSeqShift__Q22D210C2DSeqCtrlUiPCcUiff\n.word 0\n.word replaceFntShift__Q22D210C2DSeqCtrlUiPCcUiPQ22D26C2DFntff\n.word 0\n.word replaceFntShift__Q22D210C2DSeqCtrlUiPCcPQ22D26C2DFntff\n.word 0\n.word shiftSeqPos__Q22D210C2DSeqCtrlUiff\n.word 0\n.word setFntPos__Q22D210C2DSeqCtrlUiff\n.word 0\n.word 0\n.globl _vt$16C2DSeqSelectable\n_vt$16C2DSeqSelectable:\n.word 0\n.word 0\n.word 0\n.word _$_16C2DSeqSelectable\n.word 0\n.word main__11C2DSeqAgent\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word dispose__16C2DSeqSelectable\n.word 0\n.word procLoop__11C2DSeqAgent\n.word 0\n.word onOutSeq__11C2DSeqAgent\n.word 0\n.word 0\n.globl _vt$20C2DSeqLightMarkAgent\n_vt$20C2DSeqLightMarkAgent:\n.word 0\n.word 0\n.word 0\n.word _$_20C2DSeqLightMarkAgent\n.word 0\n.word main__11C2DSeqAgent\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word dispose__11C2DSeqAgent\n.word 0\n.word procLoop__20C2DSeqLightMarkAgent\n.word 0\n.word onOutSeq__20C2DSeqLightMarkAgent\n.word 0\n.word 0\n.globl _vt$16C2DSeqCursorCtrl\n_vt$16C2DSeqCursorCtrl:\n.word 0\n.word 0\n.word 0\n.word _$_16C2DSeqCursorCtrl\n.word 0\n.word addSeq__Q22D210C2DSeqCtrlPCcUiUi\n.word 0\n.word addSeq__Q22D210C2DSeqCtrlPCcUi\n.word 0\n.word addFnt__Q22D210C2DSeqCtrlPCcUiPQ22D26C2DFnt\n.word 0\n.word addFnt__Q22D210C2DSeqCtrlPCcPQ22D26C2DFnt\n.word 0\n.word replaceSeq__Q22D210C2DSeqCtrlUiPCcUiUi\n.word 0\n.word replaceSeq__Q22D210C2DSeqCtrlUiPCcUi\n.word 0\n.word replaceFnt__Q22D210C2DSeqCtrlUiPCcUiPQ22D26C2DFnt\n.word 0\n.word replaceFnt__Q22D210C2DSeqCtrlUiPCcPQ22D26C2DFnt\n.word 0\n.word addSeqShift__Q22D210C2DSeqCtrlPCcUiUiff\n.word 0\n.word addSeqShift__Q22D210C2DSeqCtrlPCcUiff\n.word 0\n.word addFntShift__Q22D210C2DSeqCtrlPCcUiPQ22D26C2DFntff\n.word 0\n.word addFntShift__Q22D210C2DSeqCtrlPCcPQ22D26C2DFntff\n.word 0\n.word replaceSeqShift__Q22D210C2DSeqCtrlUiPCcUiUiff\n.word 0\n.word replaceSeqShift__Q22D210C2DSeqCtrlUiPCcUiff\n.word 0\n.word replaceFntShift__Q22D210C2DSeqCtrlUiPCcUiPQ22D26C2DFntff\n.word 0\n.word replaceFntShift__Q22D210C2DSeqCtrlUiPCcPQ22D26C2DFntff\n.word 0\n.word shiftSeqPos__Q22D210C2DSeqCtrlUiff\n.word 0\n.word setFntPos__Q22D210C2DSeqCtrlUiff\n.word 0\n.word 0\n.word 0\n.word 0\n.word 0\n.word _$_6CState\n.word 0\n.word __pure_virtual\n.word 0\n.word __pure_virtual\n.word 0\n.word __pure_virtual\n.word 0\n.word 0\n.globl _vt$9CSaveLoad\n_vt$9CSaveLoad:\n.word 0\n.word 0\n.word 0\n.word _$_9CSaveLoad\n.word 0\n.word main__5CTask\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.word 0x676E694B\n.word 0x206D6F64\n.word 0x0079654B\n.word 0x00000000\n.word 0x65726854\n.word 0x69572065\n.word 0x73656873\n.word 0x00000000\n.word 0x62617243\n.word 0x77616C63\n.word 0x00000000\n.word 0x00000000\n.word 0x706D7550\n.word 0x686E696B\n.word 0x00646165\n.word 0x00000000\n.word 0x72696146\n.word 0x61482079\n.word 0x00007072\n.word 0x00000000\n.word 0x68736957\n.word 0x20676E69\n.word 0x72617453\n.word 0x00000000\n.word 0x6C657053\n.word 0x6E69626C\n.word 0x00726564\n.word 0x00000000\n.word 0x6174654D\n.word 0x6843206C\n.word 0x626F636F\n.word 0x0000006F\n.word 0x6D796C4F\n.word 0x00616970\n.word 0x6E6F694C\n.word 0x72616568\n.word 0x00000074\n.word 0x00000000\n.word 0x7964614C\n.word 0x63754C20\n.word 0x0000006B\n.word 0x00000000\n.word 0x69766944\n.word 0x5220656E\n.word 0x0065736F\n.word 0x00000000\n.word 0x6874614F\n.word 0x7065656B\n.word 0x00007265\n.word 0x00000000\n.word 0x696C624F\n.word 0x6E6F6976\n.word 0x00000000\n.word 0x00000000\n.word 0x69746C55\n.word 0x5720616D\n.word 0x6F706165\n.word 0x0000006E\n.word 0x6D616944\n.word 0x20646E6F\n.word 0x74737544\n.word 0x00000000\n.word 0x2D656E4F\n.word 0x676E6957\n.word 0x41206465\n.word 0x6C65676E\n.word 0x00000000\n.word 0x00000000\n.word 0x6C756F53\n.word 0x74614520\n.word 0x00007265\n.word 0x00000000\n.word 0x72617453\n.word 0x65655320\n.word 0x0072656B\n.word 0x00000000\n.word 0x6F6E6F4D\n.word 0x6F726863\n.word 0x0000656D\n.word 0x00000000\n.word 0x6C6C6F46\n.word 0x7420776F\n.word 0x57206568\n.word 0x00646E69\n.word 0x64646948\n.word 0x44206E65\n.word 0x6F676172\n.word 0x0000006E\n.word 0x746F6850\n.word 0x44206E6F\n.word 0x67756265\n.word 0x00726567\n.word 0x646E6F42\n.word 0x20666F20\n.word 0x6D616C46\n.word 0x00000065\n.word 0x0000002D\n.word 0x00000000\n.word 0x65726946\n.word 0x00000000\n.word 0x7A696C42\n.word 0x6472617A\n.word 0x00000000\n.word 0x00000000\n.word 0x6E756854\n.word 0x00726564\n.word 0x65727543\n.word 0x00000000\n.word 0x76617247\n.word 0x00797469\n.word 0x706F7453\n.word 0x00000000\n.word 0x6F726541\n.word 0x00000000\n.word 0x626D6953\n.word 0x00000061\n.word 0x696E6547\n.word 0x00000065\n.word 0x626D6142\n.word 0x00000069\n.word 0x626D7544\n.word 0x0000006F\n.word 0x6B6E6954\n.word 0x42207265\n.word 0x006C6C65\n.word 0x00000000\n.word 0x6873754D\n.word 0x00000075\n.word 0x756F6C43\n.word 0x00000064\n.word 0x69746F50\n.word 0x00006E6F\n.word 0x502D6948\n.word 0x6F69746F\n.word 0x0000006E\n.word 0x00000000\n.word 0x6167654D\n.word 0x746F502D\n.word 0x006E6F69\n.word 0x00000000\n.word 0x65687445\n.word 0x00000072\n.word 0x6167654D\n.word 0x6874452D\n.word 0x00007265\n.word 0x00000000\n.word 0x78696C45\n.word 0x00007269\n.word 0x6167654D\n.word 0x6978696C\n.word 0x00000072\n.word 0x00000000\n.word 0x616E6F44\n.word 0x4420646C\n.word 0x006B6375\n.word 0x00000000\n.word 0x666F6F47\n.word 0x00000079\n.word 0x64616C41\n.word 0x006E6964\n.word 0x65697241\n.word 0x0000006C\n.word 0x6B63614A\n.word 0x00000000\n.word 0x65746550\n.word 0x61502072\n.word 0x0000006E\n.word 0x00000000\n.word 0x20656854\n.word 0x73616542\n.word 0x00000074\n.word 0x00000000\n.word 0x20656854\n.word 0x676E694B\n.word 0x00000000\n.word 0x00000000\n.word 0x74756C50\n.word 0x0000006F\n.word 0x72617547\n.word 0x72412064\n.word 0x00726F6D\n.word 0x00000000\n.word 0x63697254\n.word 0x73616D6B\n.word 0x00726574\n.word 0x00000000\n.word 0x6166614A\n.word 0x00000072\n.word 0x69676F4F\n.word 0x6F422065\n.word 0x6569676F\n.word 0x00000000\n.word 0x61726150\n.word 0x65746973\n.word 0x67614320\n.word 0x00000065\n.word 0x75737255\n.word 0x0000616C\n.word 0x67617244\n.word 0x4D206E6F\n.word 0x66656C61\n.word 0x6E656369\n.word 0x00000074\n.word 0x00000000\n.word 0x6B726144\n.word 0x65646973\n.word 0x00000000\n.word 0x00000000\n.word 0x64616853\n.word 0x0000776F\n.word 0x646C6F53\n.word 0x00726569\n.word 0x6772614C\n.word 0x6F422065\n.word 0x00007964\n.word 0x00000000\n.word 0x20646552\n.word 0x74636F4E\n.word 0x656E7275\n.word 0x00000000\n.word 0x65756C42\n.word 0x61685220\n.word 0x646F7370\n.word 0x00000079\n.word 0x6C6C6559\n.word 0x4F20776F\n.word 0x61726570\n.word 0x00000000\n.word 0x65657247\n.word 0x6552206E\n.word 0x65697571\n.word 0x0000006D\n.word 0x65776F50\n.word 0x6C697772\n.word 0x00000064\n.word 0x00000000\n.word 0x6E756F42\n.word 0x69777963\n.word 0x0000646C\n.word 0x00000000\n.word 0x20726941\n.word 0x646C6F53\n.word 0x00726569\n.word 0x00000000\n.word 0x646E6142\n.word 0x00007469\n.word 0x20746146\n.word 0x646E6142\n.word 0x00007469\n.word 0x00000000\n.word 0x72726142\n.word 0x53206C65\n.word 0x65646970\n.word 0x00000072\n.word 0x72616553\n.word 0x47206863\n.word 0x74736F68\n.word 0x00000000\n.word 0x20616553\n.word 0x6E6F654E\n.word 0x00000000\n.word 0x00000000\n.word 0x65726353\n.word 0x76696477\n.word 0x00007265\n.word 0x00000000\n.word 0x61757141\n.word 0x6B6E6174\n.word 0x00000000\n.word 0x00000000\n.word 0x68676957\n.word 0x6E4B2074\n.word 0x74686769\n.word 0x00000000\n.word 0x67726147\n.word 0x656C796F\n.word 0x00000000\n.word 0x00000000\n.word 0x61726950\n.word 0x00006574\n.word 0x20726941\n.word 0x61726950\n.word 0x00006574\n.word 0x00000000\n.word 0x6B726144\n.word 0x6C6C6162\n.word 0x00000000\n.word 0x00000000\n.word 0x65666544\n.word 0x7265646E\n.word 0x00000000\n.word 0x00000000\n.word 0x65767957\n.word 0x00006E72\n.word 0x617A6957\n.word 0x00006472\n.word 0x736F654E\n.word 0x6F646168\n.word 0x00000077\n.word 0x00000000\n.word 0x74696857\n.word 0x754D2065\n.word 0x6F726873\n.word 0x00006D6F\n.word 0x63616C42\n.word 0x7546206B\n.word 0x7375676E\n.word 0x00000000\n.word 0x65657243\n.word 0x20726570\n.word 0x6E616C50\n.word 0x00000074\n.word 0x6E726F54\n.word 0x206F6461\n.word 0x70657453\n.word 0x00000000\n.word 0x73657243\n.word 0x646E6563\n.word 0x0000006F\n.word 0x00000000\n.word 0x64726143\n.word 0x6C6F5320\n.word 0x72656964\n.word 0x00000000\n.word 0x65646148\n.word 0x00000073\n.word 0x6B6F6F48\n.word 0x00000000\n.word 0x756B6952\n.word 0x00000000\n.word 0x6C657841\n.word 0x00000000\n.word 0x7872614C\n.word 0x00656E65\n.word 0x65786556\n.word 0x0000006E\n.word 0x6C72614D\n.word 0x61697875\n.word 0x00000000\n.word 0x00000000\n.word 0x6178654C\n.word 0x00737565\n.word 0x65736E41\n.word 0x0000006D\n.word 0x6978655A\n.word 0x00006E6F\n.word 0x6E6D6558\n.word 0x00007361\n.word 0x62676958\n.word 0x00007261\n.word 0x646C6158\n.word 0x00006E69\n.word 0xC7836153\n.word 0x00000078\n.word 0x796D6544\n.word 0x00000078\n.word 0x6F78754C\n.word 0x00006472\n.word 0x61786F52\n.word 0x00000073\n.word 0x646C6F47\n.word 0x72614320\n.word 0x00000064\n.word 0x00000000\n.word 0x74616C50\n.word 0x6D756E69\n.word 0x72614320\n.word 0x00000064\n.word 0x64726143\n.word 0x6C6F5320\n.word 0x72656964\n.word 0x61705320\n.word 0x00006564\n.word 0x00000000\n.word 0x64726143\n.word 0x6C6F5320\n.word 0x72656964\n.word 0x61654820\n.word 0x00007472\n.word 0x00000000\n.word 0x89834E83\n.word 0x68834583\n.word 0x00000041\n.word 0x00000000\n.word 0x89834E83\n.word 0x68834583\n.word 0x00000042\n.word 0x00000000\n.word 0x66836E83\n.word 0x00415883\n.word 0x66836E83\n.word 0x00425883\n.word 0x62837483\n.word 0x00414E83\n.word 0x62837483\n.word 0x00424E83\n.word 0x62837483\n.word 0x00434E83\n.word 0x62837483\n.word 0x00444E83\n.word 0x4E834183\n.word 0x8B835A83\n.word 0x00000041\n.word 0x00000000\n.word 0x4E834183\n.word 0x8B835A83\n.word 0x00000042\n.word 0x00000000\n.word 0x4E838983\n.word 0x5B815683\n.word 0x00416B83\n.word 0x00000000\n.word 0x4E838983\n.word 0x5B815683\n.word 0x00426B83\n.word 0x00000000\n.word 0x4E838983\n.word 0x5B815683\n.word 0x00436B83\n.word 0x00000000\n.word 0x4E838A83\n.word 0x00000041\n.word 0x4E838A83\n.word 0x00000042\n.word 0x4E838A83\n.word 0x00000043\n.word 0x4E838A83\n.word 0x00000044\n.word 0x42839483\n.word 0x5A834E83\n.word 0x00419383\n.word 0x00000000\n.word 0x42839483\n.word 0x5A834E83\n.word 0x00429383\n.word 0x00000000\n.word 0x5B817D83\n.word 0x5B818B83\n.word 0x83835683\n.word 0x00000041\n.word 0x5B817D83\n.word 0x5B818B83\n.word 0x83835683\n.word 0x00000042\n.word 0x5B817D83\n.word 0x5B818B83\n.word 0x83835683\n.word 0x00000043\n.word 0x5B817D83\n.word 0x5B818B83\n.word 0x83835683\n.word 0x00000032\n.word 0x5B817D83\n.word 0x5B818B83\n.word 0x83835683\n.word 0x00000033\n.word 0x4E838C83\n.word 0x45835A83\n.word 0x00415883\n.word 0x00000000\n.word 0x4E838C83\n.word 0x45835A83\n.word 0x00425883\n.word 0x00000000\n.word 0x4E838C83\n.word 0x45835A83\n.word 0x00435883\n.word 0x00000000\n.word 0x93834183\n.word 0x80835A83\n.word 0x00000041\n.word 0x00000000\n.word 0x93834183\n.word 0x80835A83\n.word 0x00000042\n.word 0x00000000\n.word 0x4E835B83\n.word 0x49835683\n.word 0x00419383\n.word 0x00000000\n.word 0x8D838A83\n.word 0x68835B81\n.word 0x00000000\n.word 0x00000000\n.word 0x6E617254\n.word 0x6C697571\n.word 0x72614420\n.word 0x73656E6B\n.word 0x00000073\n.word 0x00000000\n.word 0x6D656554\n.word 0x20676E69\n.word 0x6B726144\n.word 0x7373656E\n.word 0x00000000\n.word 0x00000000\n.word 0x62656546\n.word 0x4420656C\n.word 0x6E6B7261\n.word 0x00737365\n.word 0x696D6C41\n.word 0x79746867\n.word 0x72614420\n.word 0x73656E6B\n.word 0x00000073\n.word 0x00000000\n.word 0x65656C53\n.word 0x676E6970\n.word 0x72614420\n.word 0x73656E6B\n.word 0x00000073\n.word 0x00000000\n.word 0x6D6F6F4C\n.word 0x20676E69\n.word 0x6B726144\n.word 0x7373656E\n.word 0x00000000\n.word 0x00000000\n.word 0x6D657250\n.word 0x206D7569\n.word 0x6D6F6F52\n.word 0x00000000\n.word 0x74696857\n.word 0x6F522065\n.word 0x00006D6F\n.word 0x00000000\n.word 0x63616C42\n.word 0x6F52206B\n.word 0x00006D6F\n.word 0x00000000\n.word 0x74746F42\n.word 0x656C6D6F\n.word 0x44207373\n.word 0x6E6B7261\n.word 0x00737365\n.word 0x00000000\n.word 0x6C756F52\n.word 0x65747465\n.word 0x6F6F5220\n.word 0x0000006D\n.word 0x7472614D\n.word 0x206C6169\n.word 0x696B6157\n.word 0x0000676E\n.word 0x63726F53\n.word 0x756F7265\n.word 0x61572073\n.word 0x676E696B\n.word 0x00000000\n.word 0x00000000\n.word 0x68636C41\n.word 0x63696D65\n.word 0x6B615720\n.word 0x00676E69\n.word 0x7465654D\n.word 0x20676E69\n.word 0x756F7247\n.word 0x0000646E\n.word 0x67617453\n.word 0x746E616E\n.word 0x61705320\n.word 0x00006563\n.word 0x6F727453\n.word 0x4920676E\n.word 0x6974696E\n.word 0x76697461\n.word 0x00000065\n.word 0x00000000\n.word 0x7473614C\n.word 0x20676E69\n.word 0x657A6144\n.word 0x00000000\n.word 0x6D6C6143\n.word 0x756F4220\n.word 0x0079746E\n.word 0x00000000\n.word 0x72617547\n.word 0x20646564\n.word 0x766F7254\n.word 0x00000065\n.word 0x736C6146\n.word 0x6F422065\n.word 0x79746E75\n.word 0x00000000\n.word 0x656D6F4D\n.word 0x7327746E\n.word 0x70655220\n.word 0x76656972\n.word 0x00000065\n.word 0x00000000\n.word 0x676E694D\n.word 0x676E696C\n.word 0x726F5720\n.word 0x0073646C\n.word 0x676F6F4D\n.word 0x5220656C\n.word 0x006D6F6F\n.word 0x00000000\n.word 0x646E6152\n.word 0x4A206D6F\n.word 0x72656B6F\n.word 0x00000000\n.word 0x2079654B\n.word 0x4220666F\n.word 0x6E696765\n.word 0x676E696E\n.word 0x00000073\n.word 0x00000000\n.word 0x2079654B\n.word 0x4720666F\n.word 0x61646975\n.word 0x0065636E\n.word 0x2079654B\n.word 0x54206F74\n.word 0x68747572\n.word 0x00000000\n.word 0x2079654B\n.word 0x52206F74\n.word 0x72617765\n.word 0x00007364\n.word 0x76617254\n.word 0x65737265\n.word 0x776F5420\n.word 0x0000006E\n.word 0x61726741\n.word 0x00686162\n.word 0x6D796C4F\n.word 0x20737570\n.word 0x696C6F43\n.word 0x6D756573\n.word 0x00000000\n.word 0x00000000\n.word 0x646E6F57\n.word 0x616C7265\n.word 0x0000646E\n.word 0x00000000\n.word 0x736E6F4D\n.word 0x006F7274\n.word 0x6C6C6148\n.word 0x6565776F\n.word 0x6F54206E\n.word 0x00006E77\n.word 0x616C7441\n.word 0x6369746E\n.word 0x00000061\n.word 0x00000000\n.word 0x6576654E\n.word 0x6E616C72\n.word 0x00000064\n.word 0x00000000\n.word 0x6C6C6F48\n.word 0x4220776F\n.word 0x69747361\n.word 0x00006E6F\n.word 0x20303031\n.word 0x65726341\n.word 0x6F6F5720\n.word 0x00007364\n.word 0x6C697754\n.word 0x74686769\n.word 0x776F5420\n.word 0x0000006E\n.word 0x74736544\n.word 0x20796E69\n.word 0x616C7349\n.word 0x0073646E\n.word 0x74736143\n.word 0x4F20656C\n.word 0x76696C62\n.word 0x006E6F69\n.word 0x90505845\n.word 0x00AC8FC2\n.word 0x90505845\n.word 0x008692C2\n.word 0x90505845\n.word 0x00E591C2\n.word 0x90505845\n.word 0x00AC8FD4\n.word 0x90505845\n.word 0x008692D4\n.word 0x90505845\n.word 0x00E591D4\n.word 0x8B505845\n.word 0x000000E2\n.word 0xAC8F5048\n.word 0x00000000\n.word 0xE5915048\n.word 0x00000000\n.word 0xAC8F504D\n.word 0x00000000\n.word 0xE591504D\n.word 0x00000000\n.word 0x00000050\n.word 0x00000000\n.word 0x00000052\n.word 0x00000000\n.word 0x6E6B6E55\n.word 0x206E776F\n.word 0x6D6F6F52\n.word 0x00000000\n.word 0x716E6F43\n.word 0x6F726575\n.word 0x20732772\n.word 0x70736552\n.word 0x00657469\n.word 0x00000000\n.word 0x6D6F6F52\n.word 0x20666F20\n.word 0x61776552\n.word 0x00736472\n.globl cardDataTbl_004F4ED0\ncardDataTbl_004F4ED0:\n.word 0x00000000\n.word D_004F2EC8\n.word 0x03000211\n.word D_004F43B8\n.word 0x03010211\n.word D_004F43C8\n.word 0x03020211\n.word D_004F43D8\n.word 0x03030211\n.word D_004F43E8\n.word 0x03040211\n.word D_004F43F8\n.word 0x03050211\n.word D_004F4408\n.word 0x03060211\n.word D_004F4418\n.word 0x03070211\n.word D_004F4428\n.word 0x03000311\n.word D_004F4438\n.word 0x03010311\n.word D_004F4440\n.word 0x03020311\n.word D_004F4450\n.word 0x03030311\n.word D_004F4460\n.word 0x03040311\n.word D_004F4470\n.word 0x03050311\n.word D_004F4480\n.word 0x03060311\n.word D_004F4490\n.word 0x03070311\n.word D_004F44A0\n.word 0x03000411\n.word D_004F44B0\n.word 0x04010411\n.word D_004F44C8\n.word 0x03020411\n.word D_004F44D8\n.word 0x03030411\n.word D_004F44E8\n.word 0x03040411\n.word D_004F44F8\n.word 0x03050411\n.word D_004F4508\n.word 0x03060411\n.word D_004F4518\n.word 0x03070411\n.word D_004F4528\n.word 0x00001A11\n.word D_004F4538\n.word 0x03000522\n.word D_004F4540\n.word 0x03010522\n.word D_004F4548\n.word 0x03020522\n.word D_004F4558\n.word 0x03030522\n.word D_004F4560\n.word 0x03040522\n.word D_004F4568\n.word 0x03050522\n.word D_004F4570\n.word 0x03060522\n.word D_004F4578\n.word 0x00021A22\n.word D_004F4538\n.word 0x00011A22\n.word D_004F4538\n.word 0x03070533\n.word D_004F4580\n.word 0x03000633\n.word D_004F4588\n.word 0x03010633\n.word D_004F4590\n.word 0x03020633\n.word D_004F4598\n.word 0x03030633\n.word D_004F45A0\n.word 0x03040633\n.word D_004F45B0\n.word 0x03050633\n.word D_004F45B8\n.word 0x06060644\n.word D_004F45C0\n.word 0x06070644\n.word D_004F45C8\n.word 0x02000744\n.word D_004F45D8\n.word 0x02010744\n.word D_004F45E8\n.word 0x02020744\n.word D_004F45F0\n.word 0x02030744\n.word D_004F4600\n.word 0x02040744\n.word D_004F4608\n.word 0x02050755\n.word D_004F4618\n.word 0x02060755\n.word D_004F4628\n.word 0x02070755\n.word D_004F4630\n.word 0x02000855\n.word D_004F4638\n.word 0x02010855\n.word D_004F4640\n.word 0x02020855\n.word D_004F4648\n.word 0x02030855\n.word D_004F4658\n.word 0x04040855\n.word D_004F4668\n.word 0x02050855\n.word D_004F4678\n.word 0x06060866\n.word D_004F4680\n.word 0x06060866\n.word D_004F4690\n.word 0x06060866\n.word D_004F46A0\n.word 0x06060866\n.word D_004F46A8\n.word 0x06060866\n.word D_004F46B8\n.word 0x06060866\n.word D_004F46C8\n.word 0x06060866\n.word D_004F46D0\n.word 0x06060866\n.word D_004F46E8\n.word 0x040708E6\n.word D_004F4538\n.word 0x000009E6\n.word D_004F4538\n.word 0x06010977\n.word D_004F46F8\n.word 0x02020977\n.word D_004F4700\n.word 0x06030977\n.word D_004F4708\n.word 0x02040977\n.word D_004F4718\n.word 0x02050977\n.word D_004F4728\n.word 0x02060977\n.word D_004F4738\n.word 0x02070977\n.word D_004F4748\n.word 0x06000A77\n.word D_004F4758\n.word 0x02010A77\n.word D_004F4768\n.word 0x02020A77\n.word D_004F4778\n.word 0x02030A77\n.word D_004F4788\n.word 0x06040A77\n.word D_004F4790\n.word 0x02050A77\n.word D_004F47A0\n.word 0x06060A77\n.word D_004F47B0\n.word 0x06070A77\n.word D_004F47C0\n.word 0x02000B77\n.word D_004F47D0\n.word 0x02010B77\n.word D_004F47E0\n.word 0x06020B77\n.word D_004F47F0\n.word 0x02030B77\n.word D_004F4800\n.word 0x06040B77\n.word D_004F4810\n.word 0x02050B77\n.word D_004F4818\n.word 0x04060B77\n.word D_004F4828\n.word 0x06070B77\n.word D_004F4838\n.word 0x02000C77\n.word D_004F4848\n.word 0x02010C77\n.word D_004F4850\n.word 0x02020C77\n.word D_004F4858\n.word 0x02030C77\n.word D_004F4868\n.word 0x02040C77\n.word D_004F4878\n.word 0x02050C77\n.word D_004F4888\n.word 0x02060C77\n.word D_004F4898\n.word 0x02070C77\n.word D_004F48A8\n.word 0x06000D77\n.word D_004F4680\n.word 0x06010D77\n.word D_004F46B8\n.word 0x06020D77\n.word D_004F4690\n.word 0x06030D77\n.word D_004F46E8\n.word 0x02040D77\n.word D_004F48B8\n.word 0x06050D77\n.word D_004F48C8\n.word 0x06060D77\n.word D_004F46A0\n.word 0x06070D77\n.word D_004F46A8\n.word 0x06000E77\n.word D_004F46C8\n.word 0x06010E77\n.word D_004F48D0\n.word 0x06020E77\n.word D_004F46D0\n.word 0x02030E77\n.word D_004F48D8\n.word 0x02040E77\n.word D_004F48E0\n.word 0x02050E77\n.word D_004F48E8\n.word 0x02060E77\n.word D_004F48F0\n.word 0x02070E77\n.word D_004F48F8\n.word 0x06000F77\n.word D_004F4908\n.word 0x02010F77\n.word D_004F4910\n.word 0x06030F77\n.word D_004F4918\n.word 0x02040F77\n.word D_004F4920\n.word 0x02050F77\n.word D_004F4928\n.word 0x02060F77\n.word D_004F4930\n.word 0x02070F77\n.word D_004F4938\n.word 0x02001077\n.word D_004F4940\n.word 0x02011077\n.word D_004F4948\n.word 0x02021077\n.word D_004F4950\n.word 0x02061577\n.word D_004F4958\n.word 0x02071577\n.word D_004F4968\n.word 0x00020F77\n.word D_004F4978\n.word 0x00040D77\n.word D_004F4990\n.word 0x00001617\n.word D_004F49A8\n.word 0x00011617\n.word D_004F49B8\n.word 0x00021617\n.word D_004F49C8\n.word 0x00031627\n.word D_004F49D0\n.word 0x00041617\n.word D_004F49D8\n.word 0x00051617\n.word D_004F49E0\n.word 0x00061617\n.word D_004F49E8\n.word 0x00071627\n.word D_004F49F0\n.word 0x00001717\n.word D_004F49F8\n.word 0x00011717\n.word D_004F4A08\n.word 0x00021717\n.word D_004F4A18\n.word 0x00031717\n.word D_004F4A28\n.word 0x00041727\n.word D_004F4A38\n.word 0x00051717\n.word D_004F4A48\n.word 0x00061717\n.word D_004F4A50\n.word 0x00071717\n.word D_004F4A58\n.word 0x00001817\n.word D_004F4A60\n.word 0x00011817\n.word D_004F4A68\n.word 0x00021827\n.word D_004F4A78\n.word 0x00031817\n.word D_004F4A88\n.word 0x00041817\n.word D_004F4A98\n.word 0x00051827\n.word D_004F4AA8\n.word 0x00061877\n.word D_004F4AB8\n.word 0x00071877\n.word D_004F4AC8\n.word 0x00001917\n.word D_004F4AD8\n.word 0x00011917\n.word D_004F4AE8\n.word 0x00021927\n.word D_004F4AF8\n.word 0x00031917\n.word D_004F4B08\n.word 0x00041927\n.word D_004F4B18\n.word 0x00051927\n.word D_004F4B28\n.word 0x00031A77\n.word D_004F4538\n.word 0x06000088\n.word D_004F4B38\n.word 0x06031099\n.word D_004F4B48\n.word 0x06041099\n.word D_004F4B60\n.word 0x06051099\n.word D_004F4B78\n.word 0x06061099\n.word D_004F4B88\n.word 0x06071099\n.word D_004F4BA0\n.word 0x06001199\n.word D_004F4BB8\n.word 0x02011199\n.word D_004F4BD0\n.word 0x02021199\n.word D_004F4BE0\n.word 0x06031199\n.word D_004F4BF0\n.word 0x06041199\n.word D_004F4C00\n.word 0x06051199\n.word D_004F4C18\n.word 0x060611A9\n.word D_004F4C28\n.word 0x020711A9\n.word D_004F4C38\n.word 0x020012A9\n.word D_004F4C50\n.word 0x060112A9\n.word D_004F4C60\n.word 0x060212A9\n.word D_004F4C70\n.word 0x060312A9\n.word D_004F4C80\n.word 0x060412A9\n.word D_004F4C98\n.word 0x020512B9\n.word D_004F4CA8\n.word 0x020612B9\n.word D_004F4CB8\n.word 0x020712B9\n.word D_004F4CC8\n.word 0x060013B9\n.word D_004F4CD8\n.word 0x060113B9\n.word D_004F4CF0\n.word 0x020213B9\n.word D_004F4D00\n.word 0x060313B9\n.word D_004F4D10\n.word 0x060413CA\n.word D_004F4D20\n.word 0x060513CA\n.word D_004F4D38\n.word 0x060613CA\n.word D_004F4D48\n.word 0x020713CA\n.word D_004F4D58\n.word 0x060014DB\n.word D_004F4D68\n.word 0x060314DB\n.word D_004F4D78\n.word 0x060214DB\n.word D_004F4D80\n.word 0x060114DB\n.word D_004F4D98\n.word 0x060514DB\n.word D_004F4DA8\n.word 0x060414DB\n.word D_004F4DB0\n.word 0x060614DB\n.word D_004F4DC0\n.word 0x060714DB\n.word D_004F4DD0\n.word 0x060015DB\n.word D_004F4DE0\n.word 0x020115DB\n.word D_004F4DF0\n.word 0x060215DB\n.word D_004F4E00\n.word 0x060315DB\n.word D_004F4E10\n.word 0x040415DB\n.word D_004F4E20\n.word 0x0000000D\n.word D_004F4E30\n.word 0x0001000D\n.word D_004F4E38\n.word 0x0002000D\n.word D_004F4E40\n.word 0x0003000D\n.word D_004F4E48\n.word 0x0004000D\n.word D_004F4E50\n.word 0x0005000D\n.word D_004F4E58\n.word 0x0006000D\n.word D_004F4E60\n.word 0x0000010D\n.word D_004F4E68\n.word 0x0001010D\n.word D_004F4E70\n.word 0x0000020D\n.word D_004F4E78\n.word 0x0001020D\n.word D_004F4E80\n.word 0x0000030D\n.word D_004F4E88\n.word 0x0000040D\n.word D_004F4E90\n.word 0x0000000C\n.word D_004F4E98\n.word 0x0000000C\n.word D_004F4EA8\n.word 0x0000000C\n.word D_004F4EC0\n.word 0x0000000C\n.word D_004F2EC8\n.word 0x0000000C\n.word D_004F2EC8\n.word 0x00000000\n.word D_004F2EC8\n.word 0x00000000\n.word D_004F2EC8\n.word 0x00000000\n.word D_004F2EC8\n.globl s_seqDataPlateTbl\ns_seqDataPlateTbl:\n.word 0x00650064\n.word 0x00610066\n.word 0x00630062\n.word 0x0070006F\n.word 0x006C0071\n.word 0x006E006D\n.word 0x00740073\n.word 0x00700075\n.word 0x00720071\n.word 0x00000000\n.globl s_seqDataActPlateTbl\ns_seqDataActPlateTbl:\n.word 0x00600063\n.word 0x006B006E\n.word 0x006F0072\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
 // SOURCE DATA: .data .rodata .bss
