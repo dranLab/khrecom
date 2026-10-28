@@ -851,7 +851,39 @@ void CCardRevolver::addCard(CARD* pData, INT inReturn) {
         m_uiFlag |= 0x400;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeAddCard__Q210CardBattle13CCardRevolver);
+INT CCardRevolver::exeAddCard() {
+    INT num;
+    INT i;
+    INT count;
+    if (!(m_uiFlag & 0x400)) return 0;
+    if (!(m_uiFlag & 0x20000)) return 0;
+    num = -1;
+    for (i = 0; i < 39; i++) {
+        if (m_cardAdd[i].m_nKind) {
+            num = i;
+            break;
+        }
+    }
+    if (num < 0) {
+        m_uiFlag = (INT)m_uiFlag & ~0x400;
+        return 0;
+    }
+    if (m_iMode > 0) changeMode(0, 1);
+    else m_pEmpty->enableDisp(0);
+    {
+        INT next = num + 1; // MATCH: num + 1 as its own value (not reassociated with m_nReloadID)
+        count = m_nReloadID + next;
+    }
+    if (!m_pCards[count].getCardKind()) m_nTotal[0]++;
+    m_pCards[count].setHand(m_cardAdd[num], m_nRemain[0], m_nTotal[0], 0);
+    m_pCards[count].resetReloadNG();
+    if (m_uiFlag & 0x2000) m_pCards[count].setCardOwner(1);
+    m_pCards[count].testDisp();
+    m_nRemain[0]++;
+    _setCard(m_cardAdd[num], 0, 0);
+    rollDeck(0, 1, 300);
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", initCounter__Q210CardBattle13CCardRevolver);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", exeCounter__Q210CardBattle13CCardRevolver);
 void CCardRevolver::destroyCounter() {

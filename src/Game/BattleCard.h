@@ -110,7 +110,7 @@ public:
     void resetHand(INT inNum, INT inMax);
     BOOL isReloadNG() { return m_uiFlag & 0x20; }
     void setReloadNG() { m_uiFlag |= 0x20; }
-    void resetReloadNG() { m_uiFlag &= ~0x20; }
+    void resetReloadNG() { m_uiFlag = (INT)m_uiFlag & ~0x20; } // MATCH: li -33 (the original's weak copy and CardRevolver exeAddCard)
     BOOL isNowPlaying() { return m_uiFlag & 0x40; }
     BOOL isNowReloadNG() { return m_uiFlag & 0x60; }
     INT isDModeNG() { return m_uiFlag & 0x8000; }
