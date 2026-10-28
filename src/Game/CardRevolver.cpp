@@ -2192,7 +2192,88 @@ void CEnchantGauge::setText() {
     if (m_cardData.m_nKind < 0x43) return;
     m_pFntName->setText(g_szEnemyCardEffName[m_cardData.m_nKind - 0x43]);
 }
+/* Parked: 15 lines off, all one register: the original keeps m_nNext and num = m_nNext / 10 in a1 (then a3 =
+   a1 + 0x2B), ours in a3 (same family as changeCount). Worked: the first switch without case 0 (gives the beqz /
+   sltiu 3 / == 6 tree), explicit cases 0 and 6 in the jump-table switch, _ref(g_szSeqCockpit). Tried: compare
+   operand order, UINT num, num before the zero test, shared num variable; permuter 4 min (3468, no gain). */
+#if 0
+void CEnchantGauge::main() {
+    UINT flag = (m_uiUser == 1) ? 2 : 4;
+    INT num;
+    switch (m_uiState) {
+    case 1:
+    case 2:
+        if (CGameWork::getInt(1, 0xE2) & flag) {
+            m_uiState = 5;
+            m_pSeqCtrls[0].replaceSeq(0, _ref(g_szSeqCockpit), 0x38);
+            m_pSeqCtrls[0].enableDisp(1, FALSE);
+            m_pSeqCtrls[2].enableDisp(0, FALSE);
+            m_pSeqCtrls[1].enableDisp(0, FALSE);
+        }
+        break;
+    case 6:
+        if (!(CGameWork::getInt(1, 0xE2) & flag)) {
+            m_uiState = 1;
+            m_pSeqCtrls[0].replaceSeq(0, _ref(g_szSeqCockpit), 0x36);
+            m_pSeqCtrls[0].enableDisp(0, TRUE);
+            m_pSeqCtrls[0].enableDisp(1, TRUE);
+        }
+        break;
+    }
+    switch (m_uiState) {
+    case 0:
+        break;
+    case 1:
+        if (m_pSeqCtrls[0].isEnd(0)) {
+            m_uiState = 2;
+            m_pSeqCtrls[0].replaceSeq(0, _ref(g_szSeqCockpit), 0x37);
+            m_pSeqCtrls[2].enableDisp(0, TRUE);
+            m_pSeqCtrls[1].enableDisp(0, TRUE);
+            CCardBattle::decEnchantTime(m_uiUser, 0, 0);
+        }
+        break;
+    case 2:
+        if (m_nStack < m_nNext) changeCount(m_nNext - 1);
+        break;
+    case 3:
+        if (m_pSeqCtrls[2].isEnd(0)) {
+            if (!m_nNext) {
+                m_nCount = 0;
+                m_nStack = 0;
+                m_uiState = 4;
+                destroy();
+                break;
+            }
+            num = m_nNext / 10;
+            if (m_nCount / 10 != num) {
+                if (num > 0) m_pSeqCtrls[1].replaceSeq(0, _ref(g_szSeqCockpit), num + 0x2B);
+                else m_pSeqCtrls[1].replaceSeq(0, _ref(g_szSeqCockpit), 0x35);
+            }
+            m_pSeqCtrls[2].replaceSeq(0, _ref(g_szSeqCockpit), m_nNext % 10 + 0x2B);
+            m_uiState = 2;
+            m_nCount = m_nNext;
+        }
+        break;
+    case 4:
+        if (m_pSeqCtrls[0].isEnd(0)) {
+            m_uiState = 0;
+            m_pSeqCtrls[0].enableDisp(0, FALSE);
+            out();
+        }
+        break;
+    case 5:
+        if (m_pSeqCtrls[0].isEnd(0)) {
+            m_uiState = 6;
+            m_pSeqCtrls[0].enableDisp(0, FALSE);
+        }
+        break;
+    case 6:
+        break;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle13CEnchantGauge);
+#endif
 __asm__(".rdata\n.align 4\n.word 0x001EAB74\n.word 0x001EA934\n.word 0x001EA9B4\n.word 0x001EA9D8\n.word 0x001EAAF4\n.word 0x001EAB4C\n.word 0x001EAB74\n.word 0x00000000\n.text\n");
 /* Parked: 14 lines off, register allocation of the two quotients: the original keeps inNum / 10 in a0 and
    m_nCount / 10 in v0 (then a3 = v0 + 0x6C); ours puts num into a3. Worked: `if (m_uiState == 4) return;`
