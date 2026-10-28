@@ -628,8 +628,520 @@ void CCardBattle::calcPlayingCard() {
         if (m_cardData[i][0].m_nCategory20 == 6) m_uiFlag |= 0x100 << i;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exePlaying__Q210CardBattle11CCardBattlei);
-__asm__(".rdata\n.align 3\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x5453203B\n.word 0x5F455441\n.word 0x52415453\n.word 0x4C503A54\n.word 0x4D49542D\n.word 0x64253D45\n.word 0x4E45202C\n.word 0x4D49542D\n.word 0x64253D45\n.word 0x0000000A\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x85836683\n.word 0x8B834783\n.word 0xB690AD94\n.word 0x64284981\n.word 0x00000A29\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x85836683\n.word 0x8B834783\n.word 0xB690AD94\n.word 0x61284981\n.word 0x00000A29\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x458E8A91\n.word 0x73763028\n.word 0xAD942930\n.word 0x4981B690\n.word 0x0A296128\n.word 0x00000000\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x73835883\n.word 0x68835B81\n.word 0x8C837583\n.word 0x4E834383\n.word 0xB690AD94\n.word 0x61284981\n.word 0x64252029\n.word 0x25202B20\n.word 0x00000A64\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x58455F45\n.word 0x5F203A45\n.word 0x3E2D4C50\n.word 0x42746573\n.word 0x6B616572\n.word 0x000A2928\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x85836683\n.word 0x8B834783\n.word 0xB690AD94\n.word 0x62284981\n.word 0x00000A29\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x458E8A91\n.word 0x73763028\n.word 0xAD942930\n.word 0x4981B690\n.word 0x0A296228\n.word 0x00000000\n.word 0x00000000\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x58455F45\n.word 0x30203A45\n.word 0x64257376\n.word 0x4C505F20\n.word 0x65733E2D\n.word 0x65724274\n.word 0x25286B61\n.word 0x000A2964\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0xA681203B\n.word 0x85836683\n.word 0x8B834783\n.word 0xB690AD94\n.word 0x63284981\n.word 0x00000A29\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x58455F45\n.word 0x25203A45\n.word 0x25737664\n.word 0x505F2064\n.word 0x733E2D4C\n.word 0x72427465\n.word 0x286B6165\n.word 0x0A296425\n.word 0x00000000\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x45525F45\n.word 0x43455246\n.word 0x25203A54\n.word 0x25737664\n.word 0x455F2064\n.word 0x733E2D4E\n.word 0x72427465\n.word 0x286B6165\n.word 0x0A296425\n.word 0x00000000\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x5453203B\n.word 0x5F455441\n.word 0x54494157\n.word 0x2C642520\n.word 0x52524520\n.word 0x2021524F\n.word 0x452E2E2E\n.word 0x0A2E444E\n.word 0x00000000\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x6148203B\n.word 0x656C646E\n.word 0x2064253D\n.word 0x5453203A\n.word 0x5F455441\n.word 0x0A444E45\n.word 0x00000000\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x5453203B\n.word 0x5F455441\n.word 0x4C455544\n.word 0x4941575F\n.word 0x64252054\n.word 0x5245202C\n.word 0x21524F52\n.word 0x2E2E2E20\n.word 0x2E444E45\n.word 0x0000000A\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x55445F45\n.word 0x505F4C45\n.word 0x5F59414C\n.word 0x3A455845\n.word 0x76642520\n.word 0x20642573\n.word 0x2D4E455F\n.word 0x7465733E\n.word 0x61657242\n.word 0x0A29286B\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x6148203B\n.word 0x656C646E\n.word 0x2064253D\n.word 0x5453203A\n.word 0x5F455441\n.word 0x4C455544\n.word 0x414C505F\n.word 0x4E455F59\n.word 0x00000A44\n.word 0x00000000\n.word 0x3A3A4243\n.word 0x50657865\n.word 0x6979616C\n.word 0x2020676E\n.word 0x54415453\n.word 0x52505F45\n.word 0x554F4E4F\n.word 0x5F45434E\n.word 0x3A455845\n.word 0x76642520\n.word 0x20642573\n.word 0x2D4E455F\n.word 0x7465733E\n.word 0x61657242\n.word 0x0A29286B\n.word 0x00000000\n.word 0x4C544243\n.word 0x78653A3A\n.word 0x616C5065\n.word 0x676E6979\n.word 0x6148203B\n.word 0x656C646E\n.word 0x2064253D\n.word 0x5453203A\n.word 0x5F455441\n.word 0x4E4F5250\n.word 0x434E554F\n.word 0x4E455F45\n.word 0x00000A44\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word .L001DAA6C\n.word .L001DAA80\n.word .L001DB160\n.word .L001DB97C\n.word .L001DBB5C\n.word .L001DBBD8\n.word .L001DBD54\n.word .L001DBDF8\n.word .L001DC2D4\n.word .L001DBE78\n.word .L001DBEBC\n.word .L001DC2D4\n.word .L001DC2D4\n.word .L001DC03C\n.word .L001DC04C\n.word .L001DC090\n.word .L001DC2D4\n.word .L001DC2D4\n.word .L001DC1F4\n.word 0\n.text\n");
+void CCardBattle::exePlaying(INT inUser) {
+    if (!(inUser)) AssertApp(__FILE__, 440, "inUser", 0);
+    UINT _PLAYER = inUser - 1;
+    UINT _ENEMY = _PLAYER ^ 1;
+    TIMEQ tqFrameRate = getFrameRate();
+    HANDLE& hPlayer = m_hOwner[_PLAYER];
+    HANDLE& hEnemy = m_hOwner[_ENEMY];
+    UINT& uiState = m_uiState[_PLAYER];
+    UINT& uiStateE = m_uiState[_ENEMY];
+    UINT& uiResult = m_uiResult[_PLAYER];
+    UINT& uiResultE = m_uiResult[_ENEMY];
+    CARD& cardData = m_cardData[_PLAYER][0];
+    CARD& cardDataE = m_cardData[_ENEMY][0];
+    MES_CARD_INFO& mesInfo = m_mesCardInfo[_PLAYER];
+    MES_CARD_INFO& mesInfoE = m_mesCardInfo[_ENEMY];
+    CBattleCard* pCard = m_pCard[_PLAYER][0];
+    CBattleCard* pCardE = m_pCard[_ENEMY][0];
+    INT iCount = m_iCount[_PLAYER];
+    INT iCountE = m_iCount[_ENEMY];
+    INT iPoint = m_iPoint[_PLAYER];
+    INT iPointE = m_iPoint[_ENEMY];
+    INT i;
+    INT n;
+    INT nSEID = 0;
+    INT iStart = 0;
+    INT iVeil = m_uiFlag & (0x100 << _PLAYER);
+    INT iVeilE = m_uiFlag & (0x100 << _ENEMY);
+    INT iZantetsuken = m_iStock[_ENEMY] == 7;
+    INT iDark = m_uiFlag & 0x80000;
+    INT iAllBreak = (m_uiFlag & 0x100000) ? inUser : 0;
+    INT iDuelNG = 0;
+    INT iTrg = m_uiFlag & 0x600000;
+    switch (uiState) {
+    case 0:
+        m_tqPlayTimer[_PLAYER] = 0;
+        return;
+    case 1:
+        if (_PLAYER == 0 && uiStateE == 1 && pCardE && m_tqPlayTimer[_PLAYER] < m_tqPlayTimer[_ENEMY]) {
+            iStart = 1;
+            TRACE("CBTL::exePlaying; STATE_START:PL-TIME=%d, EN-TIME=%d\n", m_tqPlayTimer[_PLAYER], m_tqPlayTimer[_ENEMY]);
+        }
+        if (iStart || (uiStateE == 2 && pCardE && pCardE->isSet())) {
+            if ((cardData.m_nId & 0x0F000000) == 0x06000000 || iAllBreak == 1) {
+                iDuelNG = 1;
+            } else if (iDark > 0 && m_uiDuelState == 1 && _PLAYER == 0) {
+                if (!iTrg) {
+                    TRACE("CBTL::exePlaying; \x81\xa6\x83" "f\x83\x85\x83G\x83\x8b\x94\xad\x90\xb6\x81I(d)\n");
+                    uiResult = 8;
+                    uiResultE = 8;
+                    uiState = 6;
+                    for (i = 0; i < iCount; i++) {
+                        if (m_pCard[_PLAYER][i]) {
+                            m_pCard[_PLAYER][i]->setDuel(0);
+                            decEnchantTime(inUser, 0x26, 0);
+                        }
+                    }
+                    m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+                    m_pMesage->sendMessage(0, getHandle(), hEnemy, uiResultE, &mesInfoE);
+                    uiStateE = 7;
+                    m_hDuelEnemy = m_hOwner[1];
+                    break;
+                } else {
+                    if (m_pDuelGauge) m_pDuelGauge->setDuelNG();
+                }
+            }
+            if (!iDuelNG) {
+                if (iVeilE || (iPoint > 0 && iPoint < iPointE)) {
+                    uiResult = 4;
+                    uiState = 3;
+                    m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+                    for (i = 0; i < iCount; i++) {
+                        if (m_pCard[_PLAYER][i]) m_pCard[_PLAYER][i]->setRefrect();
+                    }
+                    break;
+                }
+                if (iPoint == iPointE) {
+                    if (m_uiDuelState == 1 && _PLAYER == 0) {
+                        if (!iTrg) {
+                            TRACE("CBTL::exePlaying; \x81\xa6\x83" "f\x83\x85\x83G\x83\x8b\x94\xad\x90\xb6\x81I(a)\n");
+                            uiResult = 8;
+                            uiResultE = 8;
+                            uiState = 6;
+                            for (i = 0; i < iCount; i++) {
+                                if (m_pCard[_PLAYER][i]) {
+                                    m_pCard[_PLAYER][i]->setDuel(0);
+                                    decEnchantTime(inUser, 0x26, 0);
+                                }
+                            }
+                            m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+                            m_pMesage->sendMessage(0, getHandle(), hEnemy, uiResultE, &mesInfoE);
+                            uiStateE = 7;
+                            m_hDuelEnemy = m_hOwner[1];
+                            break;
+                        } else {
+                            if (m_pDuelGauge) m_pDuelGauge->setDuelNG();
+                        }
+                    }
+                    if (iPoint == 0) {
+                        TRACE("CBTL::exePlaying; \x81\xa6\x91\x8a\x8e" "E(0vs0)\x94\xad\x90\xb6\x81I(a)\n");
+                        uiResult = 7;
+                        uiResultE = 7;
+                    } else {
+                        uiResult = 4;
+                        uiResultE = 3;
+                    }
+                    uiState = 3;
+                    for (i = 0; i < iCount; i++) {
+                        if (m_pCard[_PLAYER][i]) m_pCard[_PLAYER][i]->setRefrect();
+                    }
+                    m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+                    m_pMesage->sendMessage(0, getHandle(), hEnemy, uiResultE, &mesInfoE);
+                    uiStateE = 4;
+                    break;
+                }
+            }
+            mesInfo.m_nBreak = m_iPointBreak;
+        }
+        if (!uiResult) {
+            uiResult = 1;
+            if (_PLAYER == 0) {
+                if (m_iPointBreak > 0 && (CGameWork::getInt(0, 0x24) & 0x10) && m_tqPlayTimer[_ENEMY] < 1500) {
+                    m_iPointBonus = 5;
+                    TRACE("CBTL::exePlaying; \x81\xa6\x83X\x83s\x81[\x83h\x83u\x83\x8c\x83" "C\x83N\x94\xad\x90\xb6\x81I(a) %d + %d\n", m_iPointBreak, 5);
+                    mesInfo.m_nBonus = m_iPointBonus;
+                    CGameWork::setFlag(1, 0x29, TRUE);
+                }
+            }
+            m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+        }
+        n = 0;
+        for (i = 0; i < iCount; i++) {
+            if (m_pCard[_PLAYER][i]) {
+                if (m_pCard[_PLAYER][i]->isSet()) n++;
+            }
+        }
+        if (n == iCount) {
+            uiResult = 2;
+            m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+            uiState = 2;
+            for (i = 0; i < iCount; i++) {
+                if (m_pCard[_PLAYER][i]) decEnchantTime(inUser, 0x26, 0);
+            }
+            if (_PLAYER == 0) {
+                if (!g_pPlayer) break;
+                if (g_pPlayer->m_PlayerState == 0x20) break;
+                if (m_iStock[_PLAYER] < 4) {
+                    for (i = 0; i < iCount; i++) {
+                        if ((m_cardData[_PLAYER][i].m_nId >> 28) == 1) decEnchantTime(inUser, 0x24, 0);
+                    }
+                }
+                if (m_iExtra[_PLAYER] > 0 && (m_cardData[_PLAYER][2].m_nId >> 28) == 1) decEnchantTime(inUser, 0x24, 0);
+                if (m_iFirst[_PLAYER] > 0 && (m_cardData[_PLAYER][0].m_nId >> 28) == 1) decEnchantTime(inUser, 0x24, 0);
+            } else {
+                if (n == 1 && (cardData.m_nId & 0xF0000000) == 0x10000000) decEnchantTime(inUser, 0x24, 0);
+            }
+        }
+        break;
+    case 2:
+        if ((cardData.m_nId & 0x0F000000) == 0x06000000) break;
+        if (((cardDataE.m_nId & 0x0F000000) == 0x06000000 || iAllBreak == 2) && uiStateE == 2 && pCardE && pCardE->isSet()) {
+            uiResult = 3;
+            mesInfo.m_nBreak = m_iPointBreak;
+            TRACE("CB::exePlaying  STATE_EXE: _PL->setBreak()\n");
+            for (i = 0; i < iCount; i++) {
+                if (m_pCard[_PLAYER][i]) m_pCard[_PLAYER][i]->setBreak(0);
+            }
+            uiState = 5;
+            m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+            if (_PLAYER == 0) {
+                nSEID = 0x18;
+            } else if (_ENEMY == 0) {
+                nSEID = 0x16;
+                if (!m_iPointBonus) {
+                    PLM::addIntBR(0x3C);
+                } else {
+                    PLM::addIntBR(0x3F);
+                }
+            }
+            initCardBreak(hPlayer, inUser);
+            setNumberBreak(_PLAYER, _ENEMY);
+            decEnchantTime(inUser, 0x25, 0);
+            break;
+        }
+        if (iVeil) break;
+        if (uiStateE != 2) break;
+        if (!pCardE) break;
+        if (!pCardE->isSet()) break;
+        if (iDark > 0 && m_uiDuelState == 1 && _ENEMY == 0 && (iPointE >= iPoint || !iPointE)) {
+            if (!iTrg) {
+                uiResult = 8;
+                uiResultE = 8;
+                uiState = 8;
+                for (i = 0; i < iCount; i++) {
+                    if (m_pCard[_PLAYER][i]) m_pCard[_PLAYER][i]->setDuel(0);
+                }
+                for (i = 0; i < iCountE; i++) {
+                    if (m_pCard[_ENEMY][i]) m_pCard[_ENEMY][i]->setDuel(0);
+                }
+                nSEID = 0x16;
+                m_pMesage->sendMessage(0, getHandle(), hEnemy, uiResultE, &mesInfoE);
+                uiState = 8;
+                m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+                m_hDuelEnemy = m_hOwner[1];
+                break;
+            } else {
+                if (m_pDuelGauge) m_pDuelGauge->setDuelNG();
+            }
+        }
+        if (iPoint == 0) {
+            if (iPointE == 0) {
+                if (m_uiDuelState == 1 && _ENEMY == 0) {
+                    if (!iTrg) {
+                        TRACE("CBTL::exePlaying; \x81\xa6\x83" "f\x83\x85\x83G\x83\x8b\x94\xad\x90\xb6\x81I(b)\n");
+                        uiResult = 8;
+                        uiResultE = 8;
+                        uiStateE = 8;
+                        for (i = 0; i < iCount; i++) {
+                            if (m_pCard[_PLAYER][i]) m_pCard[_PLAYER][i]->setDuel(0);
+                        }
+                        for (i = 0; i < iCountE; i++) {
+                            if (m_pCard[_ENEMY][i]) m_pCard[_ENEMY][i]->setDuel(0);
+                        }
+                        nSEID = 0x16;
+                        m_pMesage->sendMessage(0, getHandle(), hEnemy, uiResultE, &mesInfoE);
+                        uiState = 8;
+                        m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+                        m_hDuelEnemy = m_hOwner[1];
+                        break;
+                    } else {
+                        if (m_pDuelGauge) m_pDuelGauge->setDuelNG();
+                    }
+                }
+                TRACE("CBTL::exePlaying; \x81\xa6\x91\x8a\x8e" "E(0vs0)\x94\xad\x90\xb6\x81I(b)\n");
+                uiResult = 7;
+                uiResultE = 7;
+                uiStateE = 5;
+                for (i = 0; i < iCount; i++) {
+                    if (m_pCard[_PLAYER][i]) m_pCard[_PLAYER][i]->setRefrect();
+                }
+                for (i = 0; i < iCountE; i++) {
+                    if (m_pCard[_ENEMY][i]) m_pCard[_ENEMY][i]->setRefrect();
+                }
+                nSEID = 0x16;
+                m_pMesage->sendMessage(0, getHandle(), hEnemy, uiResultE, &mesInfoE);
+                uiState = 5;
+                m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+                break;
+            }
+            if (!pCard) break;
+            if (!pCard->isSet()) break;
+            uiResult = 3;
+            mesInfo.m_nBreak = m_iPointBreak;
+            TRACE("CB::exePlaying  STATE_EXE: 0vs%d _PL->setBreak(%d)\n", iPointE, iZantetsuken);
+            for (i = 0; i < iCount; i++) {
+                if (m_pCard[_PLAYER][i]) m_pCard[_PLAYER][i]->setBreak(iZantetsuken);
+            }
+            uiState = 5;
+            m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+            if (_PLAYER == 0) {
+                nSEID = 0x18;
+            } else if (_ENEMY == 0) {
+                nSEID = 0x16;
+                if (!m_iPointBonus) {
+                    PLM::addIntBR(0x3C);
+                } else {
+                    PLM::addIntBR(0x3F);
+                }
+            }
+            initCardBreak(hPlayer, inUser);
+            setNumberBreak(_PLAYER, _ENEMY);
+            decEnchantTime(inUser, 0x25, 0);
+            break;
+        }
+        if (iPointE < iPoint && iPointE) break;
+        if (iPoint == iPointE && m_uiDuelState == 1 && _ENEMY == 0) {
+            if (!iTrg) {
+                TRACE("CBTL::exePlaying; \x81\xa6\x83" "f\x83\x85\x83G\x83\x8b\x94\xad\x90\xb6\x81I(c)\n");
+                uiResult = 8;
+                uiResultE = 8;
+                uiStateE = 8;
+                for (i = 0; i < iCount; i++) {
+                    if (m_pCard[_PLAYER][i]) m_pCard[_PLAYER][i]->setDuel(0);
+                }
+                for (i = 0; i < iCountE; i++) {
+                    if (m_pCard[_ENEMY][i]) m_pCard[_ENEMY][i]->setDuel(0);
+                }
+                nSEID = 0x16;
+                m_pMesage->sendMessage(0, getHandle(), hEnemy, uiResultE, &mesInfoE);
+                uiState = 8;
+                m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+                m_hDuelEnemy = m_hOwner[1];
+                break;
+            } else {
+                if (m_pDuelGauge) m_pDuelGauge->setDuelNG();
+            }
+        }
+        uiResult = 3;
+        if (!_PLAYER && !iPointE) m_iPointBreak = 0;
+        mesInfo.m_nBreak = m_iPointBreak;
+        TRACE("CB::exePlaying  STATE_EXE: %dvs%d _PL->setBreak(%d)\n", iPoint, iPointE, iZantetsuken);
+        for (i = 0; i < iCount; i++) {
+            if (m_pCard[_PLAYER][i]) m_pCard[_PLAYER][i]->setBreak(iZantetsuken);
+        }
+        uiState = 5;
+        m_pMesage->sendMessage(0, getHandle(), hPlayer, uiResult, &mesInfo);
+        if (_PLAYER == 0) {
+            nSEID = 0x18;
+        } else if (_ENEMY == 0) {
+            nSEID = 0x16;
+            if (!m_iPointBonus) {
+                PLM::addIntBR(0x3C);
+            } else {
+                PLM::addIntBR(0x3F);
+            }
+        }
+        initCardBreak(hPlayer, inUser);
+        setNumberBreak(_PLAYER, _ENEMY);
+        decEnchantTime(inUser, 0x25, 0);
+        break;
+    case 3:
+        if (!pCard) break;
+        if (pCard->getMode() != 5) break;
+        if (uiStateE == 4) {
+            uiStateE = 5;
+            if (iPoint == 0 && iPointE == 0) {
+                for (i = 0; i < iCountE; i++) {
+                    if (m_pCard[_ENEMY][i]) m_pCard[_ENEMY][i]->setRefrect();
+                }
+                if (_ENEMY == 0) {
+                    nSEID = 0x18;
+                } else if (_ENEMY == 1) {
+                    nSEID = 0x16;
+                }
+            } else if (iPoint != iPointE || !iPointE) {
+                for (i = 0; i < iCountE; i++) {
+                    if (m_pCard[_ENEMY][i]) m_pCard[_ENEMY][i]->setRefrect();
+                }
+                nSEID = _ENEMY ? 0 : 0x17;
+            } else {
+                TRACE("CB::exePlaying  STATE_REFRECT: %dvs%d _EN->setBreak(%d)\n", iPointE, iPoint, iZantetsuken);
+                for (i = 0; i < iCountE; i++) {
+                    if (m_pCard[_ENEMY][i]) m_pCard[_ENEMY][i]->setBreak(iZantetsuken);
+                }
+                nSEID = 0x18;
+                if (_ENEMY) {
+                    nSEID = 0x16;
+                    if (!m_iPointBonus) {
+                        PLM::addIntBR(0x3C);
+                    } else {
+                        PLM::addIntBR(0x3F);
+                    }
+                }
+                initCardBreak(hEnemy, _ENEMY + 1);
+                setNumberBreak(_ENEMY, _PLAYER);
+                decEnchantTime(_ENEMY + 1, 0x25, 0);
+            }
+        } else {
+            nSEID = _PLAYER ? 0 : 0x17;
+        }
+        uiState = 5;
+        break;
+    case 4:
+        if (uiStateE == 5 || uiStateE == 0) {
+            TRACE("CBTL::exePlaying; STATE_WAIT %d, ERROR! ...END.\n", _PLAYER);
+            uiState = 5;
+            for (i = 0; i < iCount; i++) {
+                if (m_pCard[_ENEMY][i]) m_pCard[_ENEMY][i]->destroy(1);
+            }
+        }
+        break;
+    case 5:
+        TRACE("CBTL::exePlaying; Handle=%d : STATE_END\n", hPlayer);
+        uiResult = 0;
+        uiState = 0;
+        hPlayer = 0;
+        if (_PLAYER == 0) {
+            if (iCount >= 2) {
+                CGameWork::setFlag(1, 0x16, TRUE);
+            } else {
+                CGameWork::setFlag(1, 0x14, TRUE);
+            }
+        }
+        if (iCount >= 2) decEnchantTime(inUser, 0x2A, 0);
+        for (i = 0; i < iCount; i++) {
+            _setCard(m_cardData[_PLAYER][i], 0, 0);
+            if (m_pCard[_PLAYER][i]) m_pCard[_PLAYER][i] = NULL;
+        }
+        m_iCount[_PLAYER] = 0;
+        m_iStock[_PLAYER] = 0;
+        m_iExtra[_PLAYER] = 0;
+        m_iFirst[_PLAYER] = 0;
+        m_tqPlayTimer[_PLAYER] = 0;
+        return;
+    case 6:
+        if (!pCard) break;
+        if (pCard->getMode() != 0x10) break;
+        if (uiStateE == 7) {
+            uiStateE = 8;
+            for (i = 0; i < iCountE; i++) {
+                if (m_pCard[_ENEMY][i]) m_pCard[_ENEMY][i]->setDuel(0);
+            }
+            nSEID = _ENEMY ? 0 : 0x16;
+        }
+        uiState = 8;
+        if (!_PLAYER) nSEID = 0x16;
+        break;
+    case 7:
+        if (_PLAYER == 1 && uiStateE == 0) {
+            TRACE("CBTL::exePlaying; STATE_DUEL_WAIT %d, ERROR! ...END.\n", _PLAYER);
+            uiState = 5;
+            for (i = 0; i < iCount; i++) {
+                if (m_pCard[_ENEMY][i]) m_pCard[_ENEMY][i]->destroy(1);
+            }
+        }
+        break;
+    case 9:
+        if (!pCard->isSet()) break;
+        if (_PLAYER == 1) decEnchantTime(inUser, 0x26, 0);
+        uiState = 10;
+    case 10:
+        if (_PLAYER == 0) {
+            if (iVeilE || (iPoint > 0 && iPoint < iPointE)) {
+                uiState = 13;
+                pCard->setDuelRefrect();
+                nSEID = 0x17;
+            } else if (iPoint == iPointE) {
+                uiStateE = 13;
+                TRACE("CB::exePlaying  STATE_DUEL_PLAY_EXE: %dvs%d _EN->setBreak()\n", iPointE, iPointE);
+                pCardE->setBreak(0);
+                nSEID = 0x14D;
+                CSound::playSE(0x16, -1, 0x40);
+                pCard->setDuelStock(m_nDuelBreakCount);
+                m_nDuelBreakCount++;
+                m_pDuelGauge->changeCount(m_nDuelBreakCount, 0);
+                uiState = 13;
+                decEnchantTime(inUser, 0x26, 0);
+            } else {
+                uiStateE = 13;
+                TRACE("CB::exePlaying  STATE_DUEL_PLAY_EXE: %dvs%d _EN->setBreak()\n", iPoint, iPointE);
+                pCardE->setBreak(0);
+                nSEID = 0x14D;
+                CSound::playSE(0x16, -1, 0x40);
+                pCard->setDuelStock(m_nDuelBreakCount);
+                m_nDuelBreakCount++;
+                m_pDuelGauge->changeCount(m_nDuelBreakCount, 0);
+                uiState = 13;
+                decEnchantTime(inUser, 0x26, 0);
+            }
+        } else if (m_uiDuelState == 1) {
+            uiState = 2;
+        }
+        break;
+    case 13:
+        TRACE("CBTL::exePlaying; Handle=%d : STATE_DUEL_PLAY_END\n", hPlayer);
+        uiResult = 0;
+        uiState = 0;
+        hPlayer = 0;
+        _setCard(m_cardData[_PLAYER][0], 0, 0);
+        m_pCard[_PLAYER][0] = NULL;
+        m_iCount[_PLAYER] = 0;
+        m_tqPlayTimer[_PLAYER] = 0;
+        return;
+    case 14:
+        if (!pCard->isSet()) break;
+        if (_PLAYER == 1) decEnchantTime(inUser, 0x26, 0);
+        uiState = 15;
+    case 15:
+        if (_PLAYER == 0) {
+            if (iAllBreak != 1) {
+                if (iVeilE || (iPoint > 0 && iPoint < iPointE)) {
+                    uiState = 18;
+                    pCard->setDuelRefrect();
+                    nSEID = 0x17;
+                    break;
+                }
+                if (iPoint == iPointE) {
+                    uiStateE = 18;
+                    TRACE("CB::exePlaying  STATE_PRONOUNCE_EXE: %dvs%d _EN->setBreak()\n", iPointE, iPointE);
+                    pCardE->setBreak(0);
+                    nSEID = 0x14D;
+                    CSound::playSE(0x16, -1, 0x40);
+                    m_nDuelBreakCount++;
+                    uiState = 18;
+                    pCard->setDuelRefrect();
+                    break;
+                }
+            }
+            uiStateE = 18;
+            TRACE("CB::exePlaying  STATE_PRONOUNCE_EXE: %dvs%d _EN->setBreak()\n", iPoint, iPointE);
+            pCardE->setBreak(0);
+            nSEID = 0x14D;
+            CSound::playSE(0x16, -1, 0x40);
+            m_nDuelBreakCount++;
+            uiState = 18;
+            pCard->destroy(1);
+            decEnchantTime(inUser, 0x26, 0);
+        } else if (m_uiDuelState == 0) {
+            uiState = 18;
+        }
+        break;
+    case 18:
+        TRACE("CBTL::exePlaying; Handle=%d : STATE_PRONOUNCE_END\n", hPlayer);
+        uiResult = 0;
+        uiState = 0;
+        hPlayer = 0;
+        _setCard(m_cardData[_PLAYER][0], 0, 0);
+        m_pCard[_PLAYER][0] = NULL;
+        m_iCount[_PLAYER] = 0;
+        m_tqPlayTimer[_PLAYER] = 0;
+        return;
+    }
+    if (nSEID > 0) CSound::playSE(nSEID, -1, 0x40);
+    m_tqPlayTimer[_PLAYER] += tqFrameRate;
+}
 void CCardBattle::setNumberBreak(UINT _PLAYER, UINT _ENEMY) {
     if (m_cardEnchant[_PLAYER].m_nKind == 0x65) {
         INT iCountE = m_iCount[_ENEMY];
