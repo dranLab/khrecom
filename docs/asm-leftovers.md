@@ -30,13 +30,13 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Form/Menu/Camp` | 12 | 6098 | 12 |  |
 | `System/Graphic/Model` | 170 | 5996 |  | .bss .data .rodata |
 | `Game/Player/PlayerDRiku` | 5 | 5620 | 1 |  |
-| `Game/CardRevolver` | 36 | 5484 | 4 | .data .rodata |
 | `Game/BattleCard` | 73 | 5375 |  | .bss .data .rodata |
 | `Form/Menu/JiminyMemo` | 83 | 5244 | 19 | .bss |
 | `Game/Atel/Avatar` | 113 | 4856 |  | .rodata |
 | `Game/SceneInfo` | 57 | 4635 |  | .bss .data .rodata |
 | `System/Graphic/PackMan` | 42 | 4290 |  | .bss .rodata |
 | `Game/Entity` | 117 | 3865 |  | .rodata |
+| `Game/CardRevolver` | 13 | 3858 | 9 |  |
 | `Game/Map` | 26 | 3779 |  | .data .rodata |
 | `Game/Player/Player` | 11 | 3573 | 11 |  |
 | `Game/Player/PlayerRiku` | 2 | 2940 | 2 |  |
@@ -202,10 +202,15 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/CardBattle` | `decEnchantTime__Q210CardBattle11CCardBattleiii` | 66 | address forms - the original computes &m_cardEnchant[_PLAYER] as (idx*4+0x17c)+base and loads the kind with offset 0 (kept in two registers), and &m_nEnchantTime[_PLAYER] as (base+0x184)+idx*4; ours folds the offsets the other way round; the reload of m_pInstance after the decrement matches via … |
 | `Game/CardBattle` | `initCardBreak__Q210CardBattle11CCardBattleiUi` | 248 | registers/scheduling only (12 lines) - the m_pSeqCtrlBreak null test loads into v0 (ours a0, reused by the else call), and in the speed branch the original stores m_hSpeed before loading m_pSeqCtrlSpeed for enableDisp (jal delay slot); tried: _ref/== NULL test forms, m_hBreak store placement, … |
 | `Game/CardBattle` | `setStart__Q210CardBattle10CDuelGaugeiUi` | 53 | one store slot - the original schedules the m_tqTimer store (0x5c) after the zero stores of m_uiCount and m_uiResult, ours before them (and the setLayer sb one slot earlier); the statement order is the $LM line order; tried: all 720 orders of the six stores (200 tested), chained/temp assignments … |
+| `Game/CardRevolver` | `main__Q210CardBattle13CCardRevolver` | 321 | 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), … |
 | `Game/CardRevolver` | `rollDeck__Q210CardBattle13CCardRevolveriii` | 248 | 5 lines off, the direction `a`: the original computes it as li t3,1 / slt v0,v1,a1 / movz t3,v1,v0 with v1 = -1 set in both predecessors of the join, then negates num with bltzl; ours branches (bgez). Worked: one `i` for all three loops (s0), !m_iMode-first rc/pCards select, hand++ after setHand, … |
 | `Game/CardRevolver` | `changeMode__Q210CardBattle13CCardRevolverii` | 101 | 12 lines off, all in `limit`: the original loads m_nTotal[m_iMode] (lhu + sll 16) above the m_iMode branch and sign-extends (sra 16) only in that arm (interblock-scheduled split extension); ours branches first and uses lh. Worked: `if (inMode == -1) ^= 1; else =`, `!old_mode ? m_pCards : … |
 | `Game/CardRevolver` | `exeReload__Q210CardBattle13CCardRevolver` | 127 | 14 lines off: register allocation and latch order of the first loop - the original keeps i in t0 and the card offset in a2 (decremented first in the latch, in the continue paths' delay slots), ours the reverse; the second loop's i likewise. Worked (from 48 bytes over to same size): separate … |
+| `Game/CardRevolver` | `initAction__Q210CardBattle13CCardRevolver` | 265 | ~165 lines off, mostly register allocation: ours keeps one more value live across calls (the getStock() == -1 value is CSE'd into an s-register for the later getHand() test), so two flags spill instead of one (bReloadOC) and every flag moves one register. Structure found: decEnchantTime inside … |
 | `Game/CardRevolver` | `dropPlutoMarkCard__Q210CardBattle13CCardRevolverPC7FVECTOR` | 131 | 1 line off: the TRACE's card-kind argument - the original reloads it (lbu 0x150(s0)) as the last argument load; card->getCardKind() / getCardData()->m_nKind schedule it right after a3, param.PrizeKind (below) puts it last but from the stack. Worked: _clearPrizeFlags(&param), getCardData()->m_nKind … |
+| `Game/CardRevolver` | `main__Q210CardBattle13CEnchantGauge` | 236 | 15 lines off, all one register: the original keeps m_nNext and num = m_nNext / 10 in a1 (then a3 = a1 + 0x2B), ours in a3 (same family as changeCount). Worked: the first switch without case 0 (gives the beqz / sltiu 3 / == 6 tree), explicit cases 0 and 6 in the jump-table switch, … |
+| `Game/CardRevolver` | `changeCount__Q210CardBattle13CEnchantGaugei` | 67 | 14 lines off, register allocation of the two quotients: the original keeps inNum / 10 in a0 and m_nCount / 10 in v0 (then a3 = v0 + 0x6C); ours puts num into a3. Worked: `if (m_uiState == 4) return;` before the switch (the extra beq), case 4 explicit, num = m_nCount / 10 computed once. Tried: 8 … |
+| `Game/CardRevolver` | `setStockInfo__Q210CardBattle12CStockFolder` | 217 | 17 lines off, scheduling of the first block: the original issues div, then the changeTexture argument zeros interleaved with pos.init(), the trap check after; ours keeps them apart. Worked: inverted layout ternary (>= 0x6F first), _ref(g_pStockSkillList), m_uiState before m_uiCategory in default. … |
 | `Game/EffectMotion` | `updateAttachEffect___17CEffectMotionCtrli` | 339 | (comment) Close: only case 2's "m_iStep = 0" tails differ - gcc cross-jumps them all into the second body's copy, the original keeps the one in the effect == NULL branch (the other bodies jump there). jump2's cross-jumping (find_cross_jump) merges a "sw $0; j" tail that follows a label after one … |
 | `Game/Movement` | `calcPos___9CMovement` | 369 | (comment) near-match (register copies of &end/&norm before the last two detect calls): kept as INCLUDE_ASM |
 | `Game/SEMotion` | `update__9CSEMotion` | 57 | (comment) Matches except that `this` and `ctrl` swap registers (s1/s2). |
@@ -310,7 +315,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 1028 functions (120613 instructions) in 85 units, 187 of them parked; 21 units take a data section from assembly.
+Totals: 1005 functions (118987 instructions) in 85 units, 192 of them parked; 20 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
