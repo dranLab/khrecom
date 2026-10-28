@@ -512,15 +512,41 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPat
 __asm__(".data\n.align 2\n" "iStep.4158: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditDel__FP12CDebugWindowii);
 __asm__(".rdata\n.align 3\n.word 0x5F93B892\n.word 0xC58DCD82\n.word 0xEA88E192\n.word 0x4B95C282\n.word 0xC5827697\n.word 0x4281B782\n.word 0x9C8FED8D\n.word 0xAB82C582\n.word 0xB982DC82\n.word 0x0021F182\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPathNum__FP12CDebugWindowii);
+BOOL debugWinPathEditPathNum(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x100) CDebugPathData::incActivePathNum(TRUE);
+    else if (inParam & 0x80) CDebugPathData::decActivePathNum(TRUE);
+    return TRUE;
+}
 /* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
 __asm__(".data\n.align 2\n" "iStep.4165: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPathAddLineCall__FP12CDebugWindowii);
 __asm__(".rdata\n.align 3\n.word 0x218D923C\n.word 0x8DBB8C3E\n.word 0x914991DD\n.word 0x828692F0\n.word 0x837083CC\n.word 0x81CD8258\n.word 0x82F98A41\n.word 0x826590C9\n.word 0x8DB691AA\n.word 0x82B782DD\n.word 0x82BD82E9\n.word 0x8DC08EDF\n.word 0x82B78273\n.word 0x90C682E9\n.word 0x95AA8265\n.word 0x82588DCF\n.word 0x82EA82B3\n.word 0x21B782DC\n.word 0x00000000\n.word 0x00000000\n.text\n");
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4169: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPathDel__FP12CDebugWindowii);
-__asm__(".rdata\n.align 3\n.word 0x58837083\n.word 0xC58DCD82\n.word 0xEA88E192\n.word 0x4B95C282\n.word 0xC5827697\n.word 0x4281B782\n.word 0x9C8FED8D\n.word 0xAB82C582\n.word 0xB982DC82\n.word 0x0021F182\n.text\n");
+BOOL debugWinPathEditPathDel(CDebugWindow* pObj, INT inY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if (inParam & 0x20) {
+            if (CDebugPathData::getPathNum() >= 2) {
+                pObj->sendMessage(1, &DWT::debugWinYesNo);
+                iStep++;
+            } else {
+                pObj->sendMessage(1, "\x83p\x83X\x82\xcd\x8d\xc5\x92\xe1\x88\xea\x82\xc2\x95K\x97v\x82\xc5\x82\xb7\x81" "B\x8d\xed\x8f\x9c\x82\xc5\x82\xab\x82\xdc\x82\xb9\x82\xf1!");
+            }
+        }
+        break;
+    case 1:
+        if (inParam & 0x800) {
+            if (pObj->isChildAnswer() && pObj->getChildAnswer() == 1) {
+                CDebugPathData::delPath(CDebugPathData::m_iActivePath);
+                CDebugPathData::decActivePathNum(FALSE);
+            }
+            iStep = 0;
+        }
+        break;
+    }
+    return TRUE;
+}
 INT debugWinPathEditDispCall(char* pStr, INT iLineY, const void* pValue) {
     if (iLineY == 0) {
         if (CDebugPathData::m_sParam.iFlags & 0x10) {
