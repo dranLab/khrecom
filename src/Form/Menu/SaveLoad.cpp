@@ -447,7 +447,16 @@ void CSaveLoadUI::endSelDataList() {
 void CSaveLoadUI::backtoSelSlot() {
     outDataList(6);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preSaveData__11CSaveLoadUI);
+void CSaveLoadUI::preSaveData() {
+    char szSlot[32];
+    _getSlotName(m_nSlot + 1, szSlot);
+    char szMsg[256];
+    const CHAR* pszFmt = _ctdText(0x600203);
+    const CHAR* pszText = _ctdText(0x600000);
+    sprintf(szMsg, pszFmt, pszText, szSlot, pszText);
+    openMessageDlg(szMsg, 0, 0);
+    m_nStep = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeSaveData__11CSaveLoadUI);
 __asm__(".rdata\n.align 4\n.word .L0034A8D4\n.word .L0034A8EC\n.word .L0034A90C\n.word .L0034A938\n.word .L0034A97C\n.word .L0034A994\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034A9CC\n.word .L0034A9E4\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLoadData__11CSaveLoadUI);
