@@ -154,6 +154,9 @@ public:
     FVECTOR& getPathPosition(INT iPathNum, INT iIdx) { return m_pPath[iPathNum].getPathPosition(iIdx); }
     void getPathParam(INT iPathNum, PATH_PARAM& sParam) { m_pPath[iPathNum].getPathParam(sParam); }
     INT getLinkChild(INT iPathNum, INT iStart);
+    void makeVertexSpeedAll() {
+        for (INT i = 0; i < getPathNum(); i++) getPathVectorData(i)->makeVertexSpeedAll();
+    }
     BOOL addPath(const FVECTOR* pVec, INT iNum);
     BOOL delPath(INT iNum);
     void dispDebugLine();

@@ -320,7 +320,131 @@ BOOL __BackUpFile(const CHAR* szFileName) {
     }
     return TRUE;
 }
+extern "C" char D_004873D0[];
+extern "C" char D_004873F0[];
+extern "C" char D_00487420[];
+extern "C" char D_00487440[];
+extern "C" char D_00487458[];
+extern "C" char D_00487480[];
+extern "C" char D_004874A0[];
+extern "C" char D_004874C0[];
+extern "C" char D_004874D8[];
+extern "C" char D_004874F0[];
+extern "C" char D_00487510[];
+extern "C" char D_00487530[];
+extern "C" char D_00487550[];
+extern "C" char D_00487570[];
+extern "C" char D_00487590[];
+extern "C" char D_004875B0[];
+extern "C" char D_004875D0[];
+/* Parked: 5 lines off: the original hoists &sPathParam.fTime (the start of the parameter pointer) out of the
+   paths loop into a stack slot, like &sVecParam and &vPath; ours computes it before the parameter loop.
+   Worked: one j per inner loop, the 0xFFFFFFF0 mask, the _zeroVec helper (45 -> 5 lines). Tried for the
+   pointer: init before iCount / at its declaration / (INT*)&s + 1 / &((INT*)&s)[1] / base + j inside the
+   loop / indexed writeFile argument; permuter 15 min (42581 candidates, no gain). Needs
+   CPathData::makeVertexSpeedAll (PathData.h). */
+#if 0
+static inline void _zeroVec(FVECTOR& v) { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory"); }
+BOOL CDebugPathData::savePath(const CHAR* pName) {
+    CDebugPathData* p = getInstance();
+    INT iFD;
+    INT iRet;
+    INT iSize;
+    PATH_DATA_HEAD sHead;
+    if (pName) makeFileName(pName, TRUE);
+    __BackUpFile(p->m_szFileName);
+    iFD = CFileIO::openFile(p->m_szFileName, 0x602, 0x1FF);
+    if (iFD < 0) return FALSE;
+    p->m_pPath->makeVertexSpeedAll();
+    memset(&sHead, 0, sizeof(sHead));
+    sHead.iVer = 2;
+    sHead.iId = 0x445450;
+    sHead.iPathNum = p->m_pPath->getPathNum();
+    TRACE(D_004873D0);
+    iRet = CFileIO::writeFile(iFD, &sHead, sizeof(sHead));
+    if (iRet < 0) {
+        TRACE(D_004873F0, iRet);
+        return FALSE;
+    }
+    iSize = sizeof(sHead);
+    TRACE(D_00487420);
+    TRACE(D_00487440, sHead.iPathNum);
+    for (INT i = 0; i < sHead.iPathNum; i++) {
+        PATH_VECTOR_PARAM sVecParam;
+        PATH_PARAM sPathParam;
+        FVECTOR vPath;
+        INT* pParam;
+        INT iCount;
+        INT iZero;
+        TRACE(D_00487458, i);
+        memset(&sVecParam, 0, sizeof(sVecParam));
+        sVecParam.iVer = 2;
+        sVecParam.iVecNum = p->m_pPath->getPathVectorNum(i);
+        iSize += sizeof(sVecParam) + sVecParam.iVecNum * sizeof(FVECTOR);
+        p->m_pPath->getPathParam(i, sPathParam);
+        for (INT j = 0; j < 10; j++) {
+            if (sPathParam.iFlags & (1 << j)) iSize += 4;
+        }
+        iSize = (iSize + 0xC) & 0xFFFFFFF0;
+        sVecParam.iFlags = sPathParam.iFlags;
+        sVecParam.iNext = iSize;
+        TRACE(D_00487480, i);
+        iRet = CFileIO::writeFile(iFD, &sVecParam, sizeof(sVecParam));
+        if (iRet < 0) {
+            TRACE(D_004873F0, iRet);
+            return FALSE;
+        }
+        TRACE(D_004874A0, i);
+        _zeroVec(vPath);
+        TRACE(D_004874C0, sVecParam.iVecNum);
+        TRACE(D_004874D8, i);
+        for (INT j = 0; j < sVecParam.iVecNum; j++) {
+            vPath = p->m_pPath->getPathPosition(i, j);
+            iRet = CFileIO::writeFile(iFD, &vPath, sizeof(vPath));
+            if (iRet < 0) {
+                TRACE(D_004873F0, iRet);
+                return FALSE;
+            }
+        }
+        TRACE(D_004874F0, i);
+        iCount = 0;
+        iZero = 0;
+        TRACE(D_00487510, i);
+        pParam = (INT*)&sPathParam.fTime;
+        for (INT j = 0; j < 10; j++, pParam++) {
+            if (sPathParam.iFlags & (1 << j)) {
+                iRet = CFileIO::writeFile(iFD, pParam, sizeof(INT));
+                if (iRet < 0) {
+                    TRACE(D_004873F0, iRet);
+                    return FALSE;
+                }
+                iCount++;
+            }
+        }
+        TRACE(D_00487530, i);
+        TRACE(D_00487550, iCount);
+        iCount = -(iCount & 3) & 3;
+        TRACE(D_00487570, iCount);
+        TRACE(D_00487590, i);
+        for (INT j = 0; j < iCount; j++) {
+            iRet = CFileIO::writeFile(iFD, &iZero, sizeof(iZero));
+            if (iRet < 0) {
+                TRACE(D_004873F0, iRet);
+                return FALSE;
+            }
+        }
+        TRACE(D_004875B0, i);
+    }
+    iRet = CFileIO::closeFile(iFD);
+    if (iRet < 0) {
+        TRACE(D_004875D0, iRet);
+        return FALSE;
+    }
+    return TRUE;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", savePath__14CDebugPathDataPCc);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_0021F178);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_0021F208);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_0021F230);
