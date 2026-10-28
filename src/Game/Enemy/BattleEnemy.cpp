@@ -1151,7 +1151,54 @@ void CBattleEnemy::killBossDeadEffect() {
     if (pEffect) pEffect->kill();
     m_hDeath = 0;
 }
+/* Parked: 3 lines - the original keeps the hp <= 0 `return 0` as a stub right after the bgtz (the count >= 8 and
+ * inParent paths jump to it) and a separate return-0 copy after ApplyMatrix; ours (this goto form) merges the stub
+ * into the ApplyMatrix copy; tried: early returns, nested if/else with final return 0, if (hp > 0) {...} return 0,
+ * ApplyMatrix path falling to a final return, goto fail (closest), permuter 5 min (5739 candidates, no gain) */
+#if 0
+HANDLE CBattleEnemy::recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent) {
+    if (m_iHp <= 0) {
+    fail:
+        return 0;
+    }
+    CEffectMan::killEffect(m_hRecover, 0.0f);
+    m_hRecover = 0;
+    if (isCurrentState(18) && m_iSysStep == 0) {
+        if (m_sStopDamageCount >= 8) goto fail;
+        STOP_DAMAGE* stopDmg = &((STOP_DAMAGE*)m_StopDamage)[m_sStopDamageCount++];
+        stopDmg->iDamage = -inPoint;
+        stopDmg->dmgKind = ATK_KIND_DMG_SMALL;
+        stopDmg->sHitEffectNo = inEffectNo;
+        stopDmg->sHitIndex = 0;
+        stopDmg->hitEffectObjType = getEntityType();
+        FMATRIX m;
+        if (inParent) {
+            sceVu0InversMatrix(m, inParent->m_World);
+            stopDmg->vDetectPos = m.getTrans();
+            goto fail;
+        }
+        stopDmg->vDetectPos = inPos;
+        stopDmg->vDetectPos.w = 1.0f;
+        sceVu0InversMatrix(m, Crd(0).m_World);
+        ApplyMatrix(stopDmg->vDetectPos, m, stopDmg->vDetectPos);
+        return 0;
+    }
+    m_iHp += inPoint;
+    if (getHpMax() < m_iHp) m_iHp = getHpMax();
+    if (inEffectName) {
+        if (inParent) {
+            m_hRecover = attachEffect(inEffectName, inEffectNo, inParent, &inPos, NULL, 0.0f);
+        } else {
+            m_hRecover = setEffect(inEffectName, inEffectNo, &inPos, NULL, 0.0f);
+        }
+    }
+    notifyHP();
+    Gauge::CCommonGauge::setDispSeq(getHandle(), 1);
+    return m_hRecover;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", recover__12CBattleEnemyiPCciRC7FVECTORPC6CCoord);
+#endif
 void CBattleEnemy::kill() {
     if (isState(*(CState*)&m_EnemyState[30 * 0x20])) return;
     m_iHp = 0;
