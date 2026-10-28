@@ -374,7 +374,28 @@ void CBattleEnemy::changeDefaultState() {
         m_ullBtlEnemyFlag |= 0x10;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateAppear__12CBattleEnemy);
+void CBattleEnemy::beginStateAppear() {
+    if (isBtlEnemyFlag(8) || isBtlEnemyFlag(0x20000000000ULL)) {
+        setEntityFlag(0x10000, 0);
+        if (m_pEnemyParam) changeMotion(m_pEnemyParam->iFaintMotionIndex[1], 0, 0, 0, 0, 0);
+        if (isBtlEnemyFlag(8)) {
+            setTimer(15000);
+            setBadStatusEffect(1, 0.0f);
+        } else {
+            setTimer(18000);
+            setBadStatusEffect(5, 0.0f);
+        }
+        m_iSysStep = 0;
+    } else if (m_pEnemyParam && m_pEnemyParam->iAppearMotionIndex != -1) {
+        changeMotion(m_pEnemyParam->iAppearMotionIndex, 0, 0, 0, 0, 0);
+        m_iSysStep = 0;
+    } else {
+        m_iSysStep = 1;
+    }
+    setEntityFlag(0x40000000, 0);
+    setupFade(0.0f, 1.0f, 3000, -1);
+    Message::CMessageManager::getInstance().sendMessage(150, getHandle(), getHandle(), 0x70F0F0F0, NULL);
+}
 void CBattleEnemy::stateAppear() {
     if (isBtlEnemyFlag(8) || isBtlEnemyFlag(0x20000000000ULL)) {
         if (m_pEnemyParam) {
