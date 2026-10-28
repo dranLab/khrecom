@@ -31,13 +31,14 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | cleanup/System-Graphic-Effect-libppp-draw-md0_p3f (OMD_PRIM_H) | 1101 | 449 | 24 | 936 (927) | 16 |
 | 2026-10-28 | decomp/Game-CardRevolver (partial 70/106, 4 parked; A1 reasons, BattleCard.h flag locals) | 1102 | 449 | 24 | 936 (927) | 20 |
 | 2026-10-28 | decomp/Game-CardRevolver (partial 93/106, 9 parked; .data/.rodata from source, weak tail) | 1102 | 449 | 24 | 940 (927) | 25 |
+| 2026-10-28 | decomp/Game-CardRevolver (96/106, 10 parked, no other asm; A2 part 1: own classes complete, mechanisms re-checked) | 1103 | 449 | 24 | 940 (927) | 30 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1102 (1027 in 110 headers, 75 in 30 .cpp); MATCH: 25
-  by category: method 467, data member 71, type 96, fwd decl 53, #include 29, changed in place 132, padding 33, path override 24, gate 40, guessed 43, header-level 75, stand-in 31, other 8
+PARTIAL: 1103 (1028 in 110 headers, 75 in 30 .cpp); MATCH: 30
+  by category: method 468, data member 71, type 96, fwd decl 53, #include 29, changed in place 132, padding 33, path override 24, gate 40, guessed 43, header-level 75, stand-in 31, other 8
 stand-ins: 449 foreign in 136 files (132 names), 191 unattributed, 173 own
 duplicate class names across headers: 24
 padding: 36 arrays, 26 accessors
@@ -262,7 +263,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/BodyCollision.h` | 22 | 0/1/0/0 | 55 |
 | `Game/Bullet/Bullet.h` | 8 | 2/3/0/0 | 30 |
 | `Game/Card.h` | 13 | 2/0/1/0 | 24 |
-| `Game/CardBattle.h` | 68 | 3/2/0/1 | 143 |
+| `Game/CardBattle.h` | 69 | 3/2/0/1 | 143 |
 | `Game/CardKind.h` | 0 | 0/0/2/0 | 150 |
 | `Game/CollParam.h` | 1 | 4/0/1/0 | 156 |
 | `Game/Collision/CollAttack.h` | 0 | 0/1/0/0 | 11 |
@@ -586,7 +587,7 @@ or `untagged`.
 | unit gate site | `GAME_ATEL_AVATAR_CPP` | 2 | 0 | untagged, e.g. Game/Atel/Avatar.h:14 |
 | unit gate site | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.h:170 |
 | unit gate site | `GAME_CARDBATTLE_CPP` | 1 | 0 | untagged, e.g. Game/CardBattle.h:149 |
-| unit gate site | `GAME_CARDREVOLVER_CPP` | 1 | 0 | untagged, e.g. Game/CardBattle.h:290 |
+| unit gate site | `GAME_CARDREVOLVER_CPP` | 1 | 0 | untagged, e.g. Game/CardBattle.h:291 |
 | unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:112 |
 | unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.h:49 |
 | unit gate site | `GAME_GIMMICK_GIMMICKMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Gimmick/GimmickManager.h:14 |
