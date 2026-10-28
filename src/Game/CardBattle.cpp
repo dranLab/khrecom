@@ -330,7 +330,18 @@ void CDuelGauge::exeCount() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", changeCount__Q210CardBattle10CDuelGaugeUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelNG__Q210CardBattle10CDuelGauge);
+void CDuelGauge::setDuelNG() {
+    D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[11];
+    if (pSeq) {
+        m_uiFlag |= 1;
+        pSeq->destroy();
+        pSeq->setLayer(8);
+        pSeq->addSeq(g_szSeqCockpit, 0x97);
+        CB_LAYOUT* pLayout = &g_LayoutData[1];
+        FVECTOR pos = {{pLayout->x, pLayout->y, 0.0f, 1.0f}};
+        pSeq->setPos(pos);
+    }
+}
 void CDuelGauge::exeDuelNG() {
     UINT flag = 1;
     if (m_uiFlag & flag) {
