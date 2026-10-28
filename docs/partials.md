@@ -27,19 +27,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | decomp/Game-Debug-DebugPathData (partial 19/87; A1 + hook edits) | 1097 | 455 | 25 | 931 (929) | 2 |
 | 2026-10-28 | decomp/Game-Debug-DebugPathData (20/87; data from source, temporary data-block PARTIALs) | 1115 | 455 | 25 | 934 (931) | 3 |
 | 2026-10-28 | decomp/Game-Debug-DebugPathData (62/87; weak tail from C) | 1115 | 455 | 25 | 935 (931) | 7 |
+| 2026-10-28 | decomp/Game-Debug-DebugPathData (complete 86/87 + 1 parked; A2 part 1: gate dropped) | 1101 | 455 | 25 | 936 (927) | 16 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1115 (1029 in 111 headers, 86 in 30 .cpp); MATCH: 7
-  by category: method 478, data member 72, type 96, fwd decl 54, #include 29, changed in place 132, padding 33, path override 24, gate 39, guessed 43, header-level 76, stand-in 31, other 8
+PARTIAL: 1101 (1027 in 110 headers, 74 in 30 .cpp); MATCH: 16
+  by category: method 467, data member 71, type 96, fwd decl 53, #include 29, changed in place 132, padding 33, path override 24, gate 39, guessed 43, header-level 75, stand-in 31, other 8
 stand-ins: 455 foreign in 139 files (133 names), 191 unattributed, 173 own
 duplicate class names across headers: 25
 padding: 36 arrays, 26 accessors
-mechanisms: 935 sites (931 untagged); #line: 1168
+mechanisms: 936 sites (927 untagged); #line: 1167
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 155, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 530, superset 123, partial 98, gated 110, missing 17, unattributed 309
+classes: complete 532, superset 123, partial 98, gated 108, missing 17, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -272,7 +273,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollUtilA.h` | 11 | 2/2/2/0 | 24 |
 | `Game/Collision/Ride.h` | 1 | 6/0/1/0 | 5 |
 | `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
-| `Game/Debug/DebugPathData.h` | 3 | 0/0/0/2 | 4 |
 | `Game/EffectMotion.h` | 0 | 5/0/2/0 | 7 |
 | `Game/Enemy/BattleEnemy.h` | 35 | 0/0/2/0 | 57 |
 | `Game/Enemy/EnemyParam.h` | 14 | 2/1/1/0 | 16 |
@@ -338,7 +338,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Component.h` | 3 | 1/1/0/0 | 5 |
 | `System/Coord.h` | 3 | 0/1/0/0 | 14 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 270 |
-| `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 8 |
+| `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 10 |
 | `System/Fsm.h` | 4 | 1/0/0/1 | 107 |
 | `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 11 |
 | `System/Graphic/2d/2DFntObj.h` | 0 | 0/1/0/0 | 3 |
@@ -372,7 +372,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/pppPart.h` | 57 | 21/3/0/0 | 213 |
 | `System/Graphic/Effect/libppp/pppfunctbl.h` | 1 | 0/0/0/0 | 2 |
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
-| `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 33 |
+| `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 35 |
 | `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 2 |
 | `System/Graphic/Gprim.h` | 45 | 3/3/5/21 | 228 |
 | `System/Graphic/GprimFull.h` | 0 | 1/17/2/0 | 1 |
@@ -383,17 +383,17 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 5 |
 | `System/Graphic/MotData.h` | 1 | 4/0/3/0 | 3 |
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
-| `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 7 |
+| `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 8 |
 | `System/Graphic/PathDataCamera.h` | 1 | 0/1/0/0 | 3 |
 | `System/Graphic/ScreenMask.h` | 0 | 0/1/1/0 | 4 |
 | `System/Graphic/ShadowModel.h` | 3 | 0/0/1/0 | 5 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 135 |
-| `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 31 |
+| `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 33 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
 | `System/Graphic/modeldata.h` | 11 | 1/0/1/1 | 80 |
 | `System/LinkedBuf.h` | 6 | 1/2/1/0 | 6 |
 | `System/MainApp.h` | 5 | 0/0/0/2 | 267 |
-| `System/Math3D.h` | 1 | 2/0/1/0 | 54 |
+| `System/Math3D.h` | 1 | 2/0/1/0 | 55 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 4 |
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 91 |
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
@@ -401,7 +401,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/SJoint.h` | 9 | 0/0/0/0 | 198 |
 | `System/Task.h` | 27 | 1/2/0/1 | 233 |
 | `System/TaskMan.h` | 7 | 1/2/0/0 | 82 |
-| `System/Vector.h` | 20 | 0/0/3/0 | 264 |
+| `System/Vector.h` | 21 | 0/0/3/0 | 264 |
 
 ## Mechanisms
 
@@ -461,6 +461,7 @@ or `untagged`.
 | path override | `COLLUTIL_H_PATH` | 12 | 0 | untagged, e.g. Game/AttackMotion.cpp:4 |
 | path override | `CTDMAN_H_PATH` | 6 | 0 | untagged, e.g. Form/Menu/DecknameEdit.cpp:2 |
 | path override | `D2MAN_H_PATH` | 10 | 0 | untagged, e.g. System/Graphic/2d/2DCard.cpp:3 |
+| path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
 | path override | `EFFECT_H_PATH` | 5 | 0 | untagged, e.g. Game/Enemy/EnemyBarrelspider.cpp:4 |
 | path override | `FSM_H_PATH` | 1 | 0 | untagged, e.g. System/Fsm.cpp:1 |
 | path override | `GPRIM_H_PATH` | 161 | 0 | untagged, e.g. Game/Atel/AtelBlur.cpp:3 |
@@ -485,8 +486,8 @@ or `untagged`.
 | placeholder | `_collUtilCreate*` | 1 | 0 | untagged, e.g. Game/Collision/CollUtil.h:20 |
 | placeholder | `_createEnemyMotionName*` | 1 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:14 |
 | placeholder | `_emptyString*` | 1 | 0 | untagged, e.g. System/MainTaskFactory.cpp:90 |
-| placeholder | `_emptyStringPlaceholder*` | 180 | 0 | untagged, e.g. Form/DebugWindowTBL.cpp:13 |
-| placeholder | `_emptyStringPlaceholderDebugPathData*` | 1 | 0 | untagged, e.g. Game/Debug/DebugPathData.cpp:23 |
+| placeholder | `_emptyStringPlaceholder*` | 180 | 0 | untagged, e.g. Form/DebugWindowTBL.cpp:14 |
+| placeholder | `_emptyStringPlaceholderDebugPathData*` | 1 | 1 | placeholder: an empty string follows CardBattle.h's strings in .rodata; which header it comes from is not known |
 | placeholder | `_emptyTrace*` | 1 | 0 | untagged, e.g. Game/EffectMotion.cpp:29 |
 | placeholder | `_enemyAirpirateEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAirpirate.cpp:13 |
 | placeholder | `_enemyAirsoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAirsoldier.cpp:13 |
@@ -543,7 +544,7 @@ or `untagged`.
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:418 |
 | placeholder | `_statusEmptyString*` | 1 | 0 | untagged, e.g. Game/Status.cpp:14 |
 | placeholder | `_taskSLCOverflow*` | 3 | 0 | untagged, e.g. Form/Menu/BtlReportCtrl.cpp:8 |
-| placeholder | `_taskSLCOverflowDebugPathData*` | 1 | 0 | untagged, e.g. Game/Debug/DebugPathData.cpp:12 |
+| placeholder | `_taskSLCOverflowDebugPathData*` | 1 | 1 | placeholder: the task container overflow message (System/TaskMan.h in the original) comes here |
 | placeholder | `_taskSLCOverflowHere*` | 1 | 0 | untagged, e.g. Game/Player/SummonCloud.cpp:23 |
 | placeholder | `_taskSLCOverflowLate*` | 1 | 0 | untagged, e.g. Game/Gimmick/GimmickTutorial.cpp:26 |
 | placeholder | `_taskSLCOverflowLevelUp*` | 1 | 0 | untagged, e.g. Form/Menu/LevelUp.cpp:20 |
@@ -562,7 +563,6 @@ or `untagged`.
 | unit gate | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.cpp:1 |
 | unit gate | `GAME_CARDBATTLE_CPP` | 1 | 0 | untagged, e.g. Game/CardBattle.cpp:1 |
 | unit gate | `GAME_CARDREVOLVER_CPP` | 1 | 0 | untagged, e.g. Game/CardRevolver.cpp:1 |
-| unit gate | `GAME_DEBUG_DEBUGPATHDATA_CPP` | 1 | 0 | untagged, e.g. Game/Debug/DebugPathData.cpp:2 |
 | unit gate | `GAME_ENEMY_BATTLEENEMY_CPP` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:1 |
 | unit gate | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.cpp:1 |
 | unit gate | `GAME_GIMMICK_GIMMICKMANAGER_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/GimmickManager.cpp:1 |
@@ -584,7 +584,6 @@ or `untagged`.
 | unit gate site | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.h:170 |
 | unit gate site | `GAME_CARDBATTLE_CPP` | 1 | 0 | untagged, e.g. Game/CardBattle.h:149 |
 | unit gate site | `GAME_CARDREVOLVER_CPP` | 1 | 0 | untagged, e.g. Game/CardBattle.h:290 |
-| unit gate site | `GAME_DEBUG_DEBUGPATHDATA_CPP` | 1 | 0 | untagged, e.g. Game/Debug/DebugPathData.h:11 |
 | unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:112 |
 | unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.h:49 |
 | unit gate site | `GAME_GIMMICK_GIMMICKMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Gimmick/GimmickManager.h:14 |
