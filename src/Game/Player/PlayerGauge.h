@@ -5,10 +5,12 @@
 #include "khtypes.h"
 #include "System/Task.h"
 #include "System/Vector.h"
+#include "Game/CardKind.h"
 
 namespace D2 { class C2DSeqCtrl; }
 class CPlayer;
 
+class C2DCard;
 namespace Gauge {
 class CEnemyGauge;
 
@@ -42,7 +44,9 @@ private:
 public:
     CLockonMarker(CTask* inParent, BOOL inFlag);
     virtual ~CLockonMarker(); // PARTIAL: declared for Game/Player/PlayerGauge
+    virtual void main();
     void _initialize();
+    void calcMarkerScale();
     void setTarget(HANDLE inTarget);
     void setLockon(HANDLE inTarget, INT inDist);
     void onPush(INT inKind);
@@ -79,10 +83,7 @@ public:
 
 #ifdef GAME_PLAYER_PLAYERGAUGE_CPP
 /* PARTIAL: the other gauge classes, for Game/Player/PlayerGauge only */
-class CNaviMap {
-public:
-    static BOOL m_bBattleEnd;
-};
+class CNaviMap;
 class CFriendGauge;
 class CPrizeGauge;
 
@@ -97,6 +98,7 @@ public:
     virtual ~CCommonGauge();
     virtual void main();
     void _initialize();
+    void dispSeqCtrl(INT inIndex, INT inFlag, INT inDisp);
 };
 
 class CPlayerGauge : public CTask {
@@ -127,8 +129,10 @@ public:
     static void setBattleEnd();
     void setMaxHP(INT n);
     void changeTimeHP(D2::C2DSeqCtrl* p, UINT nIdx, UINT nHP);
+    void setHP(INT inHP, INT inFlag);
     void exeDPGauge();
     void setDPGauge(INT n); void setDP(INT inDP, INT inMax);
+    void setDMode(INT inMode, INT inDP, INT inMax);
 };
 
 class CEnemyGauge : public CTask {
@@ -147,8 +151,11 @@ public:
     FVECTOR m_vPos;              /* 0x60 */
     CEnemyGauge(CTask* p);
     virtual ~CEnemyGauge();
+    virtual void main();
     void _initialize();
     static void resetHP();
+    static void setHP(HANDLE inHandle, INT inHP, INT inMax);
+    static void notifyHP(HANDLE inHandle, INT inHP, INT inMax);
     static HANDLE getNowTarget();
 };
 
@@ -161,14 +168,15 @@ public:
     virtual ~CEscapeGauge();
     virtual void main();
     void _initialize();
+    void setCharge(FLOAT inRate);
     void destroy();
 };
 
 class CFriendGauge : public CTask {
     UINT m_uiState;              /* 0x40 */
     UINT m_uiCount;              /* 0x44 */
-    UINT m_cardFriend[3];        /* 0x48 CARD */
-    class C2DCard* m_pCards;     /* 0x54 */
+    CARD m_cardFriend[3];        /* 0x48 */
+    ::C2DCard* m_pCards;     /* 0x54 */
     D2::C2DSeqCtrl* m_pSeqCtrls; /* 0x58 */
 public:
     CFriendGauge(CTask* p);
@@ -195,13 +203,18 @@ public:
     D2::C2DSeqCtrl* m_pMogSeqCtrls; /* 0x78 */
     INT m_iDropMp;               /* 0x7c */
     UINT m_uiCardState;          /* 0x80 */
-    UINT m_cardData;             /* 0x84 CARD */
+    CARD m_cardData;             /* 0x84 */
     D2::C2DSeqCtrl* m_pCardSeqCtrls; /* 0x88 */
-    class C2DCard* m_pCard;      /* 0x8c */
+    ::C2DCard* m_pCard;      /* 0x8c */
     TIMEQ m_tqTimer;             /* 0x90 */
+    CARD m_cardStack[4];         /* 0x94 */
+    SHORT m_nStack;              /* 0xa4 */
+    SHORT m_nTexID;              /* 0xa6 */
     CPrizeGauge(CTask* p);
     void _initialize();
     virtual ~CPrizeGauge();
+    void setDispMogSeq();
+    static void setDropMp(INT inMp);
     static BOOL isNowDispCard();
 };
 #endif

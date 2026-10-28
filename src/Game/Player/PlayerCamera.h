@@ -191,6 +191,7 @@ public:
     static void setBattleCamData(HANDLE inHandle, const BCAM_PARAM* inParam);
     static void getBattleCamData(BCAM_PARAM& outParam);
     static INT getNowCamMode() { return m_pInstance ? m_pInstance->m_iMode : 0; } // PARTIAL: added for Game/Player/PlayerManager
+    static INT getPlayerCameraPos(FVECTOR& outPos); // PARTIAL: added for Game/Player/PlayerGauge
 };
 
 } // namespace PlayerCamera
