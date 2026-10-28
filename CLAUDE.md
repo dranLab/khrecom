@@ -25,6 +25,9 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
 - `.venv/bin/python tools/leftovers.py lib|game [--update docs/sdk-leftovers.md|docs/asm-leftovers.md]` - what is left
   per function (parked `#if 0` drafts with their `Parked:` notes, hand-written, not attempted), asm data sections;
   `game --unit <unit>` lists every function of one unit that is still INCLUDE_ASM.
+- `.venv/bin/python tools/partials.py [--summary|--unit <unit>|--header <h>|--class <C>|--queue|--strings [<h>]]` -
+  PARTIAL/stand-in/mechanism inventory and class readiness vs the ref (`docs/plan-partials.md`);
+  `--update docs/partials.md` regenerates the report.
 - `tools/setup_worktree.sh` - prepare a fresh git worktree (links game files and tools, runs configure).
 
 A *unit* is one original object file, named after its source path, e.g. `System/Graphic/ColorFader`
