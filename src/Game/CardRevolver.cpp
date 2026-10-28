@@ -1055,8 +1055,115 @@ CARD* CCardRevolver::getActiveCardData() {
     if (pCard) return pCard->getCardData();
     return NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setPlayCard__Q210CardBattle13CCardRevolverii);
-__asm__(".rdata\n.align 3\n.word 0x72614343\n.word 0x76655264\n.word 0x65766C6F\n.word 0x733A3A72\n.word 0x6C507465\n.word 0x61437961\n.word 0x81206472\n.word 0x424370A6\n.word 0x73693E2D\n.word 0x79616C50\n.word 0x43676E69\n.word 0x53647261\n.word 0x646E6174\n.word 0x3D776F4E\n.word 0x214B4F3D\n.word 0x42437020\n.word 0x65723E2D\n.word 0x4E746573\n.word 0x6C50776F\n.word 0x6E697961\n.word 0x00000A67\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word 0x001E3E10\n.word 0x001E3E64\n.word 0x001E3F44\n.word 0x001E3F44\n.word 0x001E3EC4\n.word 0x001E3E04\n.word 0x001E3D6C\n.word 0x001E3F44\n.word 0x001E3F44\n.word 0x001E3F44\n.word 0x001E3F44\n.word 0x001E3F44\n.word 0x001E3EC4\n.word 0x00000000\n.text\n");
+/* MATCH: the debug cards store the number before the kind (the ref has CARD member inlines here) */
+static inline void _setCardNum(CARD& c, USHORT kind, BYTE num) {
+    c.m_nId = 0;
+    c.m_nNumber2 = num;
+    c.m_nKind2 = kind;
+    c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
+}
+INT CCardRevolver::setPlayCard(INT inFlag, INT inTest) {
+    UINT flag;
+    CBattleCard* card;
+    CARD* data;
+    INT num;
+    INT category;
+    BOOL bEnchant;
+    CCardBattle* pCB;
+    INT result;
+    if (CCardBattle::isDisablePlayCard()) return 0;
+    if (m_iState != 1) return 0;
+    if (CGameWork::getFlag(1, 8)) return 0;
+    flag = (m_uiUser == 1) ? 2 : 4;
+    if (CGameWork::getInt(1, 0xE2) & flag) return 0;
+    card = getActiveCard();
+    if (!card) return 0;
+    data = card->getCardData();
+    num = data->m_nNumber;
+    category = data->m_nCategory1;
+    bEnchant = FALSE;
+    pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (pCB->isPlayingGimmickCard()) return 0;
+    switch (category) {
+    case 7:
+        bEnchant = (num == -1);
+        break;
+    case 2:
+        if (_getEnchantKind(pCB, m_uiUser) == 0x1F) return 0;
+        break;
+    case 3:
+        if (_getEnchantKind(pCB, m_uiUser) == 0x19) return 0;
+        break;
+    case 6:
+    case 14: {
+        CARD gimmick;
+        _setCard(gimmick, data->m_nKind, 0);
+        pCB->notifyMakeGimmick(&gimmick, 1);
+        break;
+    }
+    case 8:
+        return 0;
+    }
+    if (inFlag) {
+        if (!pCB->testBreakingCard(m_uiUser)) return 0;
+        TRACE("CCardRevolver::setPlayCard \x81\xa6pCB->isPlayingCardStandNow==OK! pCB->resetNowPlaying\n");
+        pCB->resetNowPlaying(m_uiUser);
+    }
+    if (!bEnchant) {
+        if (DebugWork::g_dw.player.iCardNumLock != -1) {
+            CARD dbug_card;
+            if (DebugWork::g_dw.player.iCardNumLock < 10) {
+                _setCardNum(dbug_card, data->m_nKind, DebugWork::g_dw.player.iCardNumLock);
+                card->changeData(dbug_card);
+            } else {
+                num = CCardBattle::getPlayingCardPoint(0);
+                if (num != -1 && num < 10) {
+                    _setCardNum(dbug_card, data->m_nKind, num);
+                    card->changeData(dbug_card);
+                }
+            }
+        }
+        result = pCB->setPlayCard(m_hOwner, m_uiUser, card, NULL, inTest);
+    } else {
+        if (DebugWork::g_dw.player.iEnemyCardLock) {
+            CARD dbug_card;
+            _setCardNum(dbug_card, DebugWork::g_dw.player.iEnemyCardLock + 0x43, 0xFF);
+            card->changeData(dbug_card);
+        }
+        result = pCB->setEnchantCard(m_hOwner, m_uiUser, card);
+    }
+    if (!result) return 0;
+    if (data->m_fgPremium && _getEnchantKind(pCB, m_uiUser) != 0x3A) {
+        if (!DebugWork::g_dw.player.iCardSpend) {
+            if (data->m_nCategory1 != 1 || getHave(1, 1, 1, 0, 0) != 1) card->setReloadNG();
+        }
+    } else {
+        switch (category) {
+        case 7:
+            if (num == -1 && !DebugWork::g_dw.player.iCardSpend) card->setReloadNG();
+            break;
+        case 4:
+        case 5:
+        case 6:
+            if (!DebugWork::g_dw.player.iCardSpend) card->setReloadNG();
+            break;
+        case 14:
+            card->setReloadNG();
+            break;
+        }
+    }
+    m_nRemain[m_iMode]--;
+    m_tqRollSpeed = 300;
+    if (m_iMode > 0) {
+        rollDeck(1, 1, 300);
+        changeMode(0, 1);
+    } else {
+        m_pEmpty->enableDisp(0);
+        rollDeck(1, 1, 300);
+    }
+    return result;
+}
 INT CCardRevolver::isEnableCharge() {
     if (m_uiFlag & 0x10000) return 0;
     if (m_uiFlag & 2) return m_uiFlag & 4;
