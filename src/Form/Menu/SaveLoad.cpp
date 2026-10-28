@@ -640,8 +640,24 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", setupDataPlate__1
 __asm__(".rdata\n.align 3\n.word 0x76615343\n.word 0x616F4C65\n.word 0x3A495564\n.word 0x7465733A\n.word 0x61447075\n.word 0x6C506174\n.word 0x28657461\n.word 0x20296425\n.word 0x202E2E2E\n.word 0xCD88CD94\n.word 0xC5824F8A\n.word 0x000AB782\n.word 0x004C004B\n.word 0x0050004F\n.word 0x64323025\n.word 0x00000000\n.word 0x20207325\n.word 0x45F9564C\n.word 0x00643225\n.word 0x00000000\n.word 0x20207325\n.word 0x45F9564C\n.word 0x20643225\n.word 0x20202020\n.word 0x64352520\n.word 0x00504D20\n.word 0x72746E45\n.word 0x65636E61\n.word 0x6C614820\n.word 0x0000006C\n.word 0x00466425\n.word 0x00000000\n.word 0x00000020\n.word 0x00000000\n.word 0x25207325\n.word 0x00000073\n.word 0x3A643325\n.word 0x64323025\n.word 0x00000000\n.word 0x00000000\n.word 0x250A7325\n.word 0x73250A73\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", updateMemocaInfoBar__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x6C6C416E\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", updateMemocaInfoStr__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x69617641\n.word 0x6C62616C\n.word 0x40810A65\n.word 0x40814081\n.word 0x33254081\n.word 0x00000064\n.word 0x65766153\n.word 0x40810A64\n.word 0x40814081\n.word 0x33254081\n.word 0x00000064\n.word 0x00000000\n.word 0x6568744F\n.word 0x61642072\n.word 0x00006174\n.word 0x00000000\n.word D_004F3DB8\n.word D_004F3DD0\n.word D_004F3DE8\n.word 0x00000000\n.text\n");
+void CSaveLoadUI::updateMemocaInfoStr() {
+    CHAR* pszStrTbl[3] = {"Available\n\x81@\x81@\x81@\x81@%3d", "Saved\n\x81@\x81@\x81@\x81@%3d", "Other data"};
+    USHORT nSavable = m_pGameDataEntries->getDataUnitCountByType(0);
+    USHORT nSaved = m_pGameDataEntries->getDataUnitCountByType(1);
+    if (nSavable + nSaved >= 100) nSavable = 99 - nSaved;
+    for (INT i = 0; i < 3; i++) {
+        m_pMemocaInfoBar[i]->enableDisp(TRUE);
+        switch (i) {
+        case 0:
+        case 1:
+            sprintf(m_szMemocaInfoStr[i], pszStrTbl[i], !i ? nSavable : nSaved);
+            break;
+        case 2:
+            strcpy(m_szMemocaInfoStr[2], pszStrTbl[2]);
+            break;
+        }
+    }
+}
 void CSaveLoadUI::setHelpMessage(const CHAR* pszMes) {
     strcpy(m_szMainFrameHelpStr, pszMes);
     if (_isAgentState(m_pMainFrameHelpAgent, C2DSeqAgent::_STATE_NOT_START)) m_pMainFrameHelpAgent->start();
