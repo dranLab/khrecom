@@ -124,7 +124,26 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", __Q210CardBattle11CC
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _$_Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getInstance__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", init__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", main__Q210CardBattle11CCardBattle);
+void CCardBattle::main() {
+    TIMEQ tqFrameRate = getFrameRate();
+    UINT flag = 0x20000;
+    if ((m_uiFlag & flag) && (CGameWork::getInt(0, 0x24) & 0x20)) {
+        if (CGameWork::getFlag(1, 0x2A)) {
+            if (m_uiDuelState == 1) m_uiDuelState = 0;
+        } else {
+            if (!m_uiDuelState) m_uiDuelState = 1;
+        }
+    }
+    calcPlayingCard();
+    exePlaying(1);
+    exePlaying(2);
+    exeRegeneration();
+    exeBio();
+    exeDuel();
+    m_tqMainTimer += tqFrameRate;
+    dispPlayingEnemy();
+    dispCardBreak();
+}
 void CCardBattle::disp() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcPlayingCard__Q210CardBattle11CCardBattle);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exePlaying__Q210CardBattle11CCardBattlei);
