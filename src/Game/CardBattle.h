@@ -284,7 +284,7 @@ public:
     INT setPlayerDuelPlayStock();
     INT setPlayerDuelStock(class CBattleCard* inCard, UINT inPri); // PARTIAL: added for Game/BattleCard
     INT setPlayerDuelCard(INT inNo);
-    void setAction(INT inAction, INT inParam);
+    void setAction(INT inAction, INT inParam); INT calcStockSkill(); // PARTIAL: calcStockSkill added for Game/CardBattle
     // PARTIAL: added for Game/Player/FriendPluto
     INT getHave(INT inKind, INT inA, INT inB, INT inC, INT inD);
     INT calcPlutoMark();

@@ -1263,7 +1263,7 @@ void CCardBattle::calcEnchant_AttackPoint(INT& inPoint, ATK_KIND& inAtkKind, ATK
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayerEnchant__Q210CardBattle11CCardBattlei);
-__asm__(".rdata\n.align 3\n.word .L001DEDA4\n.word .L001DEE4C\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEE18\n.word .L001DEF48\n.word .L001DEDB4\n.word .L001DEDC4\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEE38\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEDD0\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEDE4\n.word .L001DECCC\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DED74\n.word .L001DEDF8\n.word .L001DECE4\n.word .L001DED44\n.word .L001DED14\n.word .L001DED5C\n.word .L001DECFC\n.word .L001DED8C\n.word .L001DED2C\n.word .L001DEE60\n.word .L001DEE78\n.word .L001DEE9C\n.word .L001DEEB4\n.word .L001DEED8\n.word .L001DEEF4\n.word .L001DEF0C\n.word .L001DEF24\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L001DEDA4\n.word .L001DEE4C\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEE18\n.word .L001DEF48\n.word .L001DEDB4\n.word .L001DEDC4\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEE38\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEDD0\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEDE4\n.word .L001DECCC\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DED74\n.word .L001DEDF8\n.word .L001DECE4\n.word .L001DED44\n.word .L001DED14\n.word .L001DED5C\n.word .L001DECFC\n.word .L001DED8C\n.word .L001DED2C\n.word .L001DEE60\n.word .L001DEE78\n.word .L001DEE9C\n.word .L001DEEB4\n.word .L001DEED8\n.word .L001DEEF4\n.word .L001DEF0C\n.word .L001DEF24\n.text\n");
 void CCardBattle::resetPlayerEnchant(INT inKind) {
     if (_ref(g_pPlayer)) {
         _ref(g_pPlayer)->setDefAttr(PL::g_fDefAttr[0]);
@@ -1352,7 +1352,7 @@ void CCardBattle::exeBio() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropFriendCard__10CardBattleR4CARDi);
-__asm__(".rdata\n.align 3\n.word .L001DF53C\n.word .L001DF550\n.word .L001DF564\n.word .L001DF58C\n.word .L001DF578\n.word .L001DF5A0\n.word .L001DF5B4\n.word .L001DF5D0\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L001DF53C\n.word .L001DF550\n.word .L001DF564\n.word .L001DF58C\n.word .L001DF578\n.word .L001DF5A0\n.word .L001DF5B4\n.word .L001DF5D0\n.text\n");
 INT CardBattle::getDropPlutoCard(CARD& outData) {
     if (CGame::isRikuGame()) return 0;
     if (CSceneInfo::isMinigameScene()) return 0;
@@ -1377,8 +1377,82 @@ INT CardBattle::getDropPlutoCard(CARD& outData) {
     _setCard(outData, 0x39, RND::genrand_int31() % 10);
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeDuel__Q210CardBattle11CCardBattle);
-__asm__(".rdata\n.align 3\n.word .L001DFA98\n.word .L001DF8C0\n.word .L001DF938\n.word .L001DFA98\n.word .L001DF960\n.word .L001DF980\n.word .L001DF9B0\n.word .L001DFA2C\n.word .L001DFA4C\n.word .L001DFA98\n.word .L001DFA98\n.word .L001DFA70\n.word .L001DFA8C\n.word 0\n.word 0\n.word 0\n.text\n");
+void CCardBattle::exeDuel() {
+    switch (m_uiDuelState) {
+    case 0:
+        break;
+    case 1:
+        if (m_uiFlag & 0x400000) {
+            m_uiFlag |= 0x200000;
+        } else {
+            if (!g_pPlayer) return;
+            CCardRevolver* pRV = m_pRevolver[0];
+            if (!pRV) break;
+            if (pRV->getHave(0, 1, 0, 0, 1) < 8) {
+                m_uiFlag |= 0x200000;
+            } else {
+                m_uiFlag &= ~0x200000;
+            }
+        }
+        break;
+    case 2:
+        if (g_pPlayer->m_PlayerState != PL::DUEL) {
+            setDuelEntry(0);
+            return;
+        }
+        break;
+    case 3:
+        break;
+    case 4:
+        if (m_pDuelGauge->getState() == 2) m_uiDuelState = 5;
+        break;
+    case 5:
+        if (m_nDuelBreakCount == m_nDuelBreakCountMax) {
+            m_uiDuelState = 7;
+            m_pDuelGauge->setResult(1);
+            if (m_pRevolver[0]) m_pRevolver[0]->calcStockSkill();
+            g_pPlayer->m_uiBattleFlag |= 0x8000000;
+        } else if (m_pDuelGauge->getTimer() == 0) {
+            m_tqMainTimer = 0;
+            m_uiDuelState = 6;
+            _ref(g_pPlayer)->m_uiBattleFlag |= 0x8000000;
+        }
+        break;
+    case 6:
+        if (m_nDuelBreakCount == m_nDuelBreakCountMax) {
+            m_uiDuelState = 7;
+            m_pDuelGauge->setResult(1);
+            if (m_pRevolver[0]) m_pRevolver[0]->calcStockSkill();
+            g_pPlayer->m_uiBattleFlag |= 0x8000000;
+        } else if (m_tqMainTimer >= 1000) {
+            m_uiDuelState = 7;
+            m_pDuelGauge->setResult(0);
+            m_iDuelSkill = 0;
+        }
+        break;
+    case 7:
+        if (m_pDuelGauge->getState() == 0) {
+            setDuelEnd();
+            return;
+        }
+        break;
+    case 8:
+        if (g_pPlayer->m_PlayerState != PL::DUEL) {
+            m_iDuelSkill = 0;
+            m_uiDuelState = 1;
+        }
+        break;
+    case 9:
+    case 10:
+        break;
+    case 11:
+        if (m_nDuelBreakCount == m_nDuelBreakCountMax) m_uiDuelState = 12;
+        break;
+    case 12:
+        setPronounceEnd(m_nDuelBreakCount);
+        break;
+    }
+}
 void CCardBattle::setDuelEntry(INT inFlag) {
     if (inFlag > 0) {
         if (m_uiDuelState == 1) m_uiDuelState = 2;
@@ -1399,7 +1473,7 @@ void CCardBattle::setDuelEntry(INT inFlag) {
     m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 9, &m_mesCardInfo[1]);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelStart__Q210CardBattle11CCardBattlei);
-__asm__(".rdata\n.align 3\n.word .L001DFE74\n.word .L001DFE80\n.word .L001DFE8C\n.word .L001DFE98\n.word .L001DFEA4\n.word .L001DFECC\n.word 0\n.word 0\n.text\n");
+__asm__(".rdata\n.align 4\n.word .L001DFE74\n.word .L001DFE80\n.word .L001DFE8C\n.word .L001DFE98\n.word .L001DFEA4\n.word .L001DFECC\n.word 0\n.word 0\n.text\n");
 void CCardBattle::setDuelBreakCount(INT inCount, INT inMax) {
     INT max = inMax;
     if (m_uiDuelState < 9) {
