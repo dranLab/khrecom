@@ -288,7 +288,7 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     INT setPronouncePlay(INT inFlag);
 };
 
-#ifndef GAME_CARDREVOLVER_CPP /* full class in Game/CardRevolver.h */
+#if !defined(GAME_CARDREVOLVER_CPP) && !defined(GAME_CARDBATTLE_CPP) /* full class in Game/CardRevolver.h */
 // PARTIAL: added for Game/Player/FriendKing
 class CCardRevolver {
     UBYTE _m_0x00[0x4c]; // PARTIAL: added for Game/Enemy/HumanBoss
