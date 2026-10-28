@@ -1514,7 +1514,30 @@ BOOL CBattleEnemy::isNowPlayDamageMotion_() {
     if (!m_pAnim) AssertApp(D_004ACBC0, 0x1D28, D_004AD928, 0);
     return m_pEnemyParam->isDamageMotion(m_pAnim->getAnimID());
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", addEnemyKillCount___12CBattleEnemy);
+BOOL CBattleEnemy::addEnemyKillCount_() {
+    if (isBtlEnemyFlag(0x200000000000ULL)) return FALSE;
+    CJiminyMemoFlag::checkEvent(3, (INT)getExtraParam(BattleEnemy::MemoIDParamName), 1);
+    if ((UINT)getID() / 10000 != 12) return FALSE;
+    INT id = (UINT)getID() % 10000;
+    if (id >= 200) return FALSE;
+    switch (id) {
+    case 0x25:
+    case 0x7D:
+    case 0x7E:
+    case 0x85:
+    case 0x87:
+    case 0x88:
+    case 0x89:
+    case 0x8A:
+    case 0x8B:
+    case 0xD1:
+        return FALSE;
+    }
+    INT count = CGameWork::getInt(0, 0xB3) + 1;
+    if (count > 99999) count = 99999;
+    CGameWork::setInt(0, 0xB3, count);
+    return TRUE;
+}
 BOOL CBattleEnemy::changeSmallDamageState_(ATK_KIND inDmgKind) {
     if (!isBtlEnemyFlag(0x200000)) {
         changeBattleEnemyState(11);
