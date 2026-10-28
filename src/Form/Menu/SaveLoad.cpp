@@ -339,8 +339,51 @@ void CSaveLoadUI::preCheckBoot() {
     m_nStep = 0;
     m_nTimer = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckBoot__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x82838183\n.word 0x65974A83\n.word 0x6083CA97\n.word 0x62834683\n.word 0x6E824E83\n.word 0x000A6A82\n.word 0x00000000\n.word 0x00000000\n.word .L00349280\n.word .L003492AC\n.word .L003492F8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L0034936C\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493E8\n.word .L003493CC\n.word 0\n.text\n");
+void CSaveLoadUI::exeCheckBoot() {
+    char szMsg[256];
+    switch (m_nStep) {
+    case 0:
+        m_nTimer--;
+        if (m_pMemoca->reqCheckFreeMem()) m_nStep++;
+        break;
+    case 1:
+        m_nTimer--;
+        if (!m_pMemoca->isCompleteReq(NULL)) break;
+        m_nLastResult = m_pMemoca->getLastResult();
+        if (m_nLastResult >= 0) TRACE_COL((TtyColor)0x1F, "\x83\x81\x83\x82\x83J\x97" "e\x97\xca\x83`\x83" "F\x83" "b\x83N\x82n\x82j\n");
+        m_nStep++;
+    case 2:
+        if (m_nTimer > 0) {
+            m_nTimer--;
+            break;
+        }
+        if (m_nLastResult >= 0) {
+            closeMessageDlg();
+            m_pMainLightMark->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+            m_nStep = 20;
+        } else {
+            createBootInfoMsg(m_nLastResult, szMsg);
+            openMessageDlg(szMsg, 0, 2);
+            m_nStep = 10;
+        }
+        break;
+    case 10:
+        if (!m_nDlgResult) break;
+        if (m_nDlgResult == 1) {
+            m_nLastResult = 0;
+            m_nStep = 2;
+        } else if (m_nDlgResult == 2) {
+            createCheckingMsg(12, szMsg);
+            openMessageDlg(szMsg, 0, 0);
+            m_nStep = 0;
+            m_nTimer = 60;
+        }
+        break;
+    case 20:
+        if (isPadEnable()) changeState(4);
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLayIn__11CSaveLoadUI);
 void CSaveLoadUI::exeLayIn() {}
 void CSaveLoadUI::preLayOut() {
