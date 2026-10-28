@@ -8,6 +8,7 @@
 #include "Game/AttackMotion.h" // PARTIAL: added for Game/Player/SummonDumbo (ATK_ATTR)
 #include "System/Vector.h"     // PARTIAL: added for Game/CardBattle (m_vBreakPos)
 #include "Game/CardKind.h"     // PARTIAL: added for Game/CardBattle (CARD members)
+#include "System/Task.h"        // PARTIAL: added for Game/CardBattle (CCardBattle is a CTask)
 
 class CPlayer; // PARTIAL: added for Game/Player/PlayerRiku
 class CTask; // PARTIAL: added for Game/CardBattle
@@ -95,10 +96,10 @@ struct ENCHANT_PARAM {
 };
 
 // PARTIAL: added for Game/Player/SummonDumbo
-class CCardBattle {
+class CCardBattle : public CTask {
+    /* 0x000 CTask */
     // PARTIAL: members added for Game/Player/PlayerRiku
     // PARTIAL: split out for Game/CardBattle
-    UBYTE _m_0x0[0x40];       /* 0x000 CTask */
     // PARTIAL: split for Game/CardBattle
     Message::CMessageManager* m_pMesage; /* 0x040 */
     MES_CARD_INFO m_mesCardInfo[2]; /* 0x044 */
@@ -145,6 +146,40 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     FVECTOR m_vBreakPos;         /* 0x1d0 */
     class CEnchantGauge* m_pEnchantGauge[2]; /* 0x1e0 */
     class CDuelGauge* m_pDuelGauge; /* 0x1e8 */
+#ifdef GAME_CARDBATTLE_CPP
+    /* the original's inline members, in its definition order (Game/CardBattle emits them all with the key function) */
+    void disablePlayCard(UINT inSet) { m_uiFlag = (m_uiFlag | inSet) & ~(inSet ^ 0xC0000000); }
+    static UINT isDisablePlayCard() { return m_pInstance ? m_pInstance->m_uiFlag & 0xC0000000 : 0; }
+    static UINT isCardBattleEnd() { return m_pInstance ? m_pInstance->m_uiFlag & 0x4 : 0; }
+    void disableDuelEntry(UINT inSet) { m_uiFlag = (m_uiFlag | inSet) & ~(inSet ^ 0x400000); }
+    HANDLE getDuelEnemy() const { return m_hDuelEnemy; }
+    USHORT getDuelBreakCountMax() const { return m_nDuelBreakCountMax; }
+    INT isNowDuelEntry() const { return m_uiDuelState == 2; }
+    INT isNowDuel() const { return m_uiDuelState == 5; }
+    INT isNowSetEnemyDuelCard() const { return m_uiState[1] == 10; }
+    static INT getDuelSkill() { return m_pInstance ? m_pInstance->m_iDuelSkill : 0; }
+    INT isPronounceMode() const { return m_uiDuelState >= 9; }
+    INT isNowPronounce() const { return m_uiDuelState == 0xB; }
+    INT isNowSetEnemyPronounce() const { return m_uiState[1] == 15; }
+    void setSubTimer(TIMEQ inTime) { m_tqSubTimer = inTime; }
+    TIMEQ getSubTimer() const { return m_tqSubTimer; }
+    INT getEnchantKind(INT inUser) const {
+#line 641
+        if (!(inUser)) AssertApp(__FILE__, __LINE__, "inUser", 0);
+        return m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : m_cardEnchant[inUser - 1].m_nKind - 0x43;
+    }
+    static CARD* getRoomCard() { return m_pInstance ? &m_pInstance->m_cardRoom : NULL; }
+    static CARD* getEnchantCard(INT inUser) {
+#line 644
+        if (!(inUser)) AssertApp(__FILE__, __LINE__, "inUser", 0);
+        return m_pInstance ? &m_pInstance->m_cardEnchant[inUser - 1] : NULL;
+    }
+    static INT getStockCount(INT inUser) {
+#line 658
+        if (!(inUser)) AssertApp(__FILE__, __LINE__, "inUser", 0);
+        return m_pInstance ? m_pInstance->m_iCount[inUser - 1] : 0;
+    }
+#else
     // PARTIAL: added for Game/Player/PlayerRiku
     INT getEnchantKind() { return m_cardEnchant[0].m_nKind < 0x44 ? 0 : m_cardEnchant[0].m_nKind - 0x43; }
     // PARTIAL: added for Game/Enemy/HumanBoss (the enemy side's enchant)
@@ -162,11 +197,13 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     void disableDuelEntry(UINT inSet) { setFlag(inSet, inSet ^ 0x400000); }
     void setSubTimer(TIMEQ inTime) { m_tqSubTimer = inTime; }
     TIMEQ getSubTimer() const { return m_tqSubTimer; }
-    TIMEQ getFrameRate() const { return *(const TIMEQ*)&_m_0x0[0x8]; } // PARTIAL: CTask::getFrameRate (base still opaque)
-    HANDLE getHandle() const { return *(const HANDLE*)&_m_0x0[0x14]; } // PARTIAL: CTask::getHandle (base still opaque)
-    ::CTask* asTask() { return (::CTask*)this; } // PARTIAL: CCardBattle is a CTask in the original (base still opaque)
+    ::CTask* asTask() { return this; } // PARTIAL: added for Game/CardBattle
+
+
+
     void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
     void disablePlayCard(UINT inSet) { setFlag(inSet, inSet ^ 0xC0000000); } // PARTIAL: added for Game/CardBattle
+#endif
     void destroyPlayCard(INT inFlag, INT inP1);
     void transferPlayerEnchant(CPlayer* inPlayer);
     void setDuelEntry(INT inFlag);
@@ -284,7 +321,7 @@ public:
     INT setPlayerDuelPlayStock();
     INT setPlayerDuelStock(class CBattleCard* inCard, UINT inPri); // PARTIAL: added for Game/BattleCard
     INT setPlayerDuelCard(INT inNo);
-    void setAction(INT inAction, INT inParam);
+    void setAction(INT inAction, INT inParam); INT calcStockSkill(); // PARTIAL: calcStockSkill added for Game/CardBattle
     // PARTIAL: added for Game/Player/FriendPluto
     INT getHave(INT inKind, INT inA, INT inB, INT inC, INT inD);
     INT calcPlutoMark();

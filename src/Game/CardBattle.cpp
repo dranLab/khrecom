@@ -1,3 +1,4 @@
+#define GAME_CARDBATTLE_CPP
 #include "khtypes.h"
 #define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
@@ -35,6 +36,7 @@ inline void _emptyStringPlaceholder0() {
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 inline void* operator new(size_t, void* p) throw() { return p; }
+inline void operator delete[](void* mem) { com_free(mem); }
 
 using namespace CardBattle;
 
@@ -51,8 +53,12 @@ public:
     void setPronounceCard(INT inKind, INT inNumber);
     INT setPlayPronounce();
 };
-class CEnchantGauge {
+class CEnchantGauge : public ::CTask {
+    BYTE _m_0x40[0x20];
+
 public:
+    CEnchantGauge(::CTask* pParent, INT inUser, CARD& inCard);
+    virtual ~CEnchantGauge();
     void changeCount(INT inCount);
     void destroy();
 };
@@ -344,9 +350,9 @@ public:
     static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
 };
 }
-extern "C" char D_00476980[]; /* __FILE__ */
 extern "C" int abs(int);
 template <class T> static inline T& _ref(T& v) { return v; }
+static inline void _setFlag(UINT& ioFlag, UINT inSet, UINT inMask) { ioFlag = (ioFlag | inSet) & ~inMask; }
 
 namespace CardBattle {
 static LPCSTR g_szBinBattleCardList = "BattleCardList";
@@ -407,13 +413,68 @@ void CardBattle::calcFreezeDamage(INT& ioDamage) {
     INT nPower = g_pStockSkillList[35].POWER[1];
     ioDamage += nPower / 10;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", __Q210CardBattle11CCardBattle);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61432F65\n.word 0x61426472\n.word 0x656C7474\n.word 0x7070632E\n.word 0x00000000\n.word 0x42705F67\n.word 0x6C747461\n.word 0x72614365\n.word 0x73694C64\n.word 0x00000074\n.word 0x00000000\n.word 0x53705F67\n.word 0x6B636F74\n.word 0x6C696B53\n.word 0x73694C6C\n.word 0x00000074\n.word 0x00000000\n.word 0x4D705F6D\n.word 0x67617365\n.word 0x00000065\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _$_Q210CardBattle11CCardBattle);
+enum NAME_CASE { /* PARTIAL: System/RsrcData.h (its allocation string would shift .rodata) */
+    NAME_CASE_SENSITIVE = 0,
+    NAME_CASE_UPPER = 1,
+    NAME_CASE_LOWER = 2
+};
+class CRsrcData;
+class CRsrcDB { /* PARTIAL: System/RsrcDB.h */
+public:
+    static CRsrcData* getRsrc(INT nRsrcType, const CHAR* pszName, NAME_CASE nc);
+    static void* getRsrcData(const CRsrcData& data);
+};
+CCardBattle::CCardBattle() : CTask(getSysTask(1), 0x4000) {
+    m_pSeqCtrlEnemy = NULL;
+    m_pSeqCtrlBreak = NULL;
+    m_pSeqCtrlSpeed = NULL;
+    declareSysTask(0x16);
+    {
+        CRsrcData* pData = CRsrcDB::getRsrc(1, g_szBinBattleCardList, NAME_CASE_SENSITIVE);
+        void* p = pData ? CRsrcDB::getRsrcData(*pData) : NULL;
+        g_pBattleCardList = (BC_PARAM*)p;
+    }
+    if (!(g_pBattleCardList)) AssertApp(__FILE__, 101, "g_pBattleCardList", 0);
+    {
+        CRsrcData* pData = CRsrcDB::getRsrc(1, g_szBinStockSkillList, NAME_CASE_SENSITIVE);
+        void* p = pData ? CRsrcDB::getRsrcData(*pData) : NULL;
+        g_pStockSkillList = (SS_PARAM*)p;
+    }
+    if (!(g_pStockSkillList)) AssertApp(__FILE__, 105, "g_pStockSkillList", 0);
+    initLayoutData();
+    init();
+    m_pMesage = (Message::CMessageManager*)CTaskMan::getSysTask(0x17);
+    if (!(m_pMesage)) AssertApp(__FILE__, 118, "m_pMesage", 0);
+}
+CCardBattle::~CCardBattle() {
+    for (INT i = 0; i < 2; i++) {
+        for (INT j = 0; j < 7; j++) {
+            CBattleCard* pCard = m_pCard[i][j];
+            if (pCard) {
+                if (!pCard->getRevolver() && !pCard->isFolderON()) {
+                    delete pCard;
+                    m_pCard[i][j] = NULL;
+                }
+                m_pCard[i][j] = NULL;
+            }
+        }
+        if (m_pEnchantGauge[i]) delete m_pEnchantGauge[i];
+        m_pEnchantGauge[i] = NULL;
+    }
+    if (m_pSeqCtrlEnemy) delete m_pSeqCtrlEnemy;
+    m_pSeqCtrlEnemy = NULL;
+    if (m_pSeqCtrlBreak) delete m_pSeqCtrlBreak;
+    m_pSeqCtrlBreak = NULL;
+    if (m_pSeqCtrlSpeed) delete m_pSeqCtrlSpeed;
+    m_pSeqCtrlSpeed = NULL;
+    if (m_pDuelGauge) delete m_pDuelGauge;
+    m_pDuelGauge = NULL;
+    m_pInstance = NULL;
+}
 CCardBattle* CCardBattle::getInstance() {
     if (!m_pInstance) {
         m_pInstance = new (com_malloc_d(sizeof(CCardBattle), __FILE__ "(162)", RET_ADDR())) CCardBattle;
-        if (!(m_pInstance)) AssertApp(D_00476980, 163, "m_pInstance", 0);
+        if (!(m_pInstance)) AssertApp(__FILE__, 163, "m_pInstance", 0);
     }
     return m_pInstance;
 }
@@ -480,7 +541,7 @@ void CCardBattle::init() {
     UINT flag = 0x20000;
     if (m_uiFlag & flag) {
         if (CGameWork::getInt(0, 0x24) & 0x20) m_uiDuelState = 1;
-        m_pDuelGauge = new (com_malloc_d(sizeof(CDuelGauge), __FILE__ "(265)", RET_ADDR())) CDuelGauge(asTask());
+        m_pDuelGauge = new (com_malloc_d(sizeof(CDuelGauge), __FILE__ "(265)", RET_ADDR())) CDuelGauge(this);
     }
 }
 void CCardBattle::main() {
@@ -561,7 +622,7 @@ void CCardBattle::calcPlayingCard() {
             }
             break;
         case 0x7B:
-            if (i == 0) setFlag(0x100000, 0);
+            if (i == 0) _setFlag(m_uiFlag, 0x100000, 0);
             break;
         }
         if (m_cardData[i][0].m_nCategory20 == 6) m_uiFlag |= 0x100 << i;
@@ -586,13 +647,49 @@ void CCardBattle::setNumberBreak(UINT _PLAYER, UINT _ENEMY) {
     }
 }
 BOOL CCardBattle::checkNowPlaying(INT inSide, CBattleCard* pCard) {
-    if (!(inSide)) AssertApp(D_00476980, 1425, "inUser", 0);
+    if (!(inSide)) AssertApp(__FILE__, 1425, "inUser", 0);
     for (INT i = 0; i < 7; i++) {
         if (m_pCard[inSide - 1][i] == pCard) return TRUE;
     }
     return FALSE;
 }
+/* Parked: final return only - the original computes 4 into v0 and movn's 1 from v1 when iDuelOK (the != path sets v0 = 1 in the bne delay slot, one exit); ours keeps 1 in v1/v0 and movz's or branches; tried: ~35 return forms (?: nests, ret locals, if chains, && forms), iDuelOK as INT/UINT/BOOL/SHORT and its if/ternary forms, inPlayer vs _PLAYER uses, permuter 4 min (7128 candidates, no gain) */
+#if 0
+INT CCardBattle::testPlayingCard(UINT inPlayer) {
+    UINT _PLAYER = inPlayer;
+    UINT _ENEMY = _PLAYER ^ 1;
+    switch (m_uiState[_ENEMY]) {
+    case 1:
+    case 2:
+    case 9:
+    case 10:
+    case 14:
+    case 15:
+        break;
+    default:
+        return 1;
+    }
+    INT iPoint = 0;
+    INT iPointE = m_iPoint[_ENEMY];
+    for (INT i = 0; i < 7; i++) {
+        if (m_cardData[_PLAYER][i].m_nKind) iPoint += m_cardData[_PLAYER][i].m_nNumber;
+    }
+    if (m_uiState[_PLAYER] == 9 || m_uiState[_PLAYER] == 14) {
+        if (!iPoint || iPoint >= iPointE) return 1;
+        return 4;
+    }
+    if (m_cardEnchant[_PLAYER].m_nKind == 0x7B) return 1;
+    if (m_cardData[_PLAYER][0].m_nCategory20 == 6) return 1;
+    INT iDuelOK = FALSE;
+    if (inPlayer == 0 && m_uiDuelState == 1 && !(m_uiFlag & 0x600000)) iDuelOK = TRUE;
+    if (iDuelOK && (m_uiFlag & 0x80000)) return 1;
+    if (m_uiFlag & (0x100 << _ENEMY)) return 4;
+    if (iPoint > 0 && iPoint < iPointE) return 4;
+    return (iPoint != iPointE) ? 1 : (!iDuelOK ? 4 : 1);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testPlayingCard__Q210CardBattle11CCardBattleUi);
+#endif
 __asm__(".rdata\n.align 3\n.word .L001DC4E0\n.word .L001DC4E0\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC4E0\n.word .L001DC4E0\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC5BC\n.word .L001DC4E0\n.word .L001DC4E0\n.word 0\n.text\n");
 INT CCardBattle::testBreakingCard(UINT inPlayer) {
     UINT _PLAYER = inPlayer - 1;
@@ -632,7 +729,7 @@ INT CCardBattle::testBreakingCard(UINT inPlayer) {
     return 0;
 }
 INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, CARD* inData, INT inTest) {
-    if (!(inUser)) AssertApp(D_00476980, 1660, "inUser", 0);
+    if (!(inUser)) AssertApp(__FILE__, 1660, "inUser", 0);
     UINT _PLAYER = inUser - 1;
     if (m_uiState[_PLAYER]) return 0;
     m_hOwner[_PLAYER] = inHandle;
@@ -649,10 +746,10 @@ INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, C
         m_cardData[_PLAYER][0] = *inCard->getCardData();
         checkNowPlaying(inUser, inCard);
     } else {
-        if (!(inData)) AssertApp(D_00476980, 1708, "inData", 0);
+        if (!(inData)) AssertApp(__FILE__, 1708, "inData", 0);
         m_cardData[_PLAYER][0] = *inData;
         m_pCard[_PLAYER][0] = new (com_malloc_d(sizeof(CBattleCard), __FILE__ "(1710)", RET_ADDR()))
-            CBattleCard(asTask(), inData->m_nKind, inData->m_nNumber, inUser, 0);
+            CBattleCard(this, inData->m_nKind, inData->m_nNumber, inUser, 0);
         if (m_pCard[_PLAYER][0]) m_pCard[_PLAYER][0]->setRoomEffect(NULL);
         m_cardData[_PLAYER][0] = *m_pCard[_PLAYER][0]->getCardData();
     }
@@ -678,7 +775,7 @@ INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, C
 #if 0
 INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard, INT inSkill, INT inExtra, INT inFirst,
                               INT inTest) {
-    if (!(inUser)) AssertApp(D_00476980, 1754, "inUser", 0);
+    if (!(inUser)) AssertApp(__FILE__, 1754, "inUser", 0);
     UINT _PLAYER = inUser - 1;
     if (m_uiState[_PLAYER]) return 0;
     m_hOwner[_PLAYER] = inHandle;
@@ -711,8 +808,86 @@ INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard,
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayStock__Q210CardBattle11CCardBattleiiPPQ210CardBattle11CBattleCardiiii);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnchantCard__Q210CardBattle11CCardBattleiiPQ210CardBattle11CBattleCard);
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61432F65\n.word 0x61426472\n.word 0x656C7474\n.word 0x7070632E\n.word 0x35383128\n.word 0x00002938\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.word .L001DCF5C\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCDE4\n.word .L001DCFC8\n.word .L001DCF5C\n.word .L001DCFC8\n.word .L001DCF78\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCF98\n.word .L001DCDF4\n.word .L001DCFC8\n.word .L001DCE08\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFB4\n.word .L001DCFC8\n.word .L001DCEB4\n.word .L001DCFC8\n.word .L001DCED8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCFC8\n.word .L001DCF38\n.text\n");
+INT CCardBattle::setEnchantCard(HANDLE inHandle, INT inUser, CBattleCard* inCard) {
+    if (!(inUser)) AssertApp(__FILE__, 1823, "inUser", 0);
+    UINT _PLAYER = inUser - 1;
+    if (m_uiState[_PLAYER]) return 0;
+    if (m_pEnchant[_PLAYER]) resetEnchantCard(inUser);
+    m_pEnchant[_PLAYER] = inCard;
+    m_cardEnchant[_PLAYER] = *inCard->getCardData();
+    inCard->setEnchant();
+    CSound::playSE(0x20, -1, 0x40);
+    if (m_pEnchantGauge[_PLAYER]) delete m_pEnchantGauge[_PLAYER];
+    m_pEnchantGauge[_PLAYER] = NULL;
+    m_pEnchantGauge[_PLAYER] = new (com_malloc_d(sizeof(CEnchantGauge), __FILE__ "(1858)", RET_ADDR()))
+        CEnchantGauge(this, inUser, m_cardEnchant[_PLAYER]);
+    m_nEnchantTime[_PLAYER] = _ref(g_pBattleCardList)[m_cardEnchant[_PLAYER].m_nKind].EFF_TIMES;
+    if (_PLAYER == 0) setPlayerEnchant(m_cardEnchant[0].m_nKind);
+    UINT _ENEMY = _PLAYER ^ 1;
+    switch (m_cardEnchant[_PLAYER].m_nKind) {
+    case 0x55:
+        m_uiFlag |= 0x4000;
+        break;
+    case 0x5D: {
+        UINT flag = 0x1000 << _ENEMY;
+        m_uiFlag |= flag;
+        m_tqEnchantTimer[_ENEMY] = 0;
+        break;
+    }
+    case 0x5F: {
+        INT kind = m_cardEnchant[_PLAYER].m_nKind;
+        while (kind == 0x5F || kind == 0x66 || (kind == 0x59 && !(m_uiFlag & 0x20000))) {
+            if (CGameWork::getInt(0, 0x2D)) {
+                kind = RND::genrand_int31() % 0x39 + 0x44;
+            } else {
+                kind = RND::genrand_int31() % 0x32 + 0x44;
+            }
+        }
+        m_cardEnchant[_PLAYER].m_nKind = kind;
+        inCard->changeData(m_cardEnchant[_PLAYER]);
+        setEnchantCard(inHandle, inUser, inCard);
+        return 1;
+    }
+    case 0x64:
+        if (m_cardEnchant[_ENEMY].m_nKind) resetEnchantCard(_ENEMY + 1);
+        resetEnchantCard(inUser);
+        return 1;
+    case 0x66:
+        if (m_cardEnchant[_ENEMY].m_nKind) {
+            m_cardEnchant[_PLAYER].m_nKind = m_cardEnchant[_ENEMY].m_nKind;
+            inCard->changeData(m_cardEnchant[_PLAYER]);
+            setEnchantCard(inHandle, inUser, inCard);
+        } else {
+            resetEnchantCard(inUser);
+        }
+        break;
+    case 0x6A: {
+        UINT flag = 0x400 << _PLAYER;
+        m_uiFlag |= flag;
+        m_tqEnchantTimer[_PLAYER] = 0;
+        break;
+    }
+    case 0x4B:
+    case 0x57:
+        inCard->getRevolver()->rollDeck(0, 1, 300);
+        return 1;
+    case 0x59:
+        if (CGame::isRikuGame()) m_uiFlag |= 0x80000;
+        break;
+    case 0x5C:
+        if (inCard->getRevolver()) {
+            inCard->getRevolver()->setPlayNG(1, 3);
+            return 1;
+        }
+        break;
+    case 0x62:
+        if (inCard->getRevolver()) {
+            inCard->getRevolver()->setPlayNG(1, 2);
+        }
+        break;
+    }
+    return 1;
+}
 /* Parked: address forms - the original computes &m_cardEnchant[_PLAYER] as (idx*4+0x17c)+base and loads the kind with
  * offset 0 (kept in two registers), and &m_nEnchantTime[_PLAYER] as (base+0x184)+idx*4; ours folds the offsets the
  * other way round; the reload of m_pInstance after the decrement matches via the INT* pTime pointer; tried: CARD view
@@ -720,7 +895,7 @@ __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\
  * permuter 4 min (8263 candidates, no gain) */
 #if 0
 void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
-    if (!(inUser)) AssertApp(D_00476980, 1977, "inUser", 0);
+    if (!(inUser)) AssertApp(__FILE__, 1977, "inUser", 0);
     UINT _PLAYER = inUser - 1;
     INT kind = m_pInstance->m_cardEnchant[_PLAYER].m_nKind;
     if (!kind) return;
@@ -742,7 +917,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", decEnchantTime__Q210
 #endif
 void CCardBattle::destroyPlayCard(INT inFlag, INT inP1) { resetNowPlaying(inFlag); }
 void CCardBattle::resetNowPlaying(INT inUser) {
-    if (!(inUser)) AssertApp(D_00476980, 2028, "inUser", 0);
+    if (!(inUser)) AssertApp(__FILE__, 2028, "inUser", 0);
     UINT _PLAYER = inUser - 1;
     if (inUser == 1) {
         if (m_iStock[_PLAYER] > 0) {
@@ -769,7 +944,7 @@ void CCardBattle::resetNowPlaying(INT inUser) {
     m_iFirst[_PLAYER] = 0;
 }
 void CCardBattle::resetEnchantCard(INT inUser) {
-    if (!(inUser)) AssertApp(D_00476980, 2069, "inUser", 0);
+    if (!(inUser)) AssertApp(__FILE__, 2069, "inUser", 0);
     UINT _PLAYER = inUser - 1;
     if (!_PLAYER) {
         resetPlayerEnchant(m_cardEnchant[0].m_nKind);
@@ -1095,7 +1270,7 @@ void CCardBattle::destroyEnemyCard(INT inHandle) {
     if (inHandle == m_hOwner[1]) destroyPlayCard(2, inHandle);
 }
 void CCardBattle::destroyRevolver(INT inSide) {
-    if (!(inSide)) AssertApp(D_00476980, 2764, "inUser", 0);
+    if (!(inSide)) AssertApp(__FILE__, 2764, "inUser", 0);
     UINT _PLAYER = inSide - 1;
     if (m_pRevolver[_PLAYER]) {
         m_pRevolver[_PLAYER]->destroy();
@@ -1103,11 +1278,11 @@ void CCardBattle::destroyRevolver(INT inSide) {
     }
 }
 void CCardBattle::setRevolver(INT inSide, CCardRevolver* pRevolver) {
-    if (!(inSide)) AssertApp(D_00476980, 2774, "inUser", 0);
+    if (!(inSide)) AssertApp(__FILE__, 2774, "inUser", 0);
     m_pRevolver[inSide - 1] = pRevolver;
 }
 CCardRevolver* CCardBattle::getRevolver(INT inSide) {
-    if (!(inSide)) AssertApp(D_00476980, 2779, "inUser", 0);
+    if (!(inSide)) AssertApp(__FILE__, 2779, "inUser", 0);
     return m_pRevolver[inSide - 1];
 }
 void CCardBattle::setBattleEnd() {
@@ -1165,7 +1340,7 @@ CStockFolder* CCardBattle::setStockFolder(::CTask* pParent, INT inUser) {
     return m_pInstance->m_pStockFolder[_PLAYER];
 }
 void CCardBattle::destroyStockFolder(INT inSide) {
-    if (!(inSide)) AssertApp(D_00476980, 2905, "inUser", 0);
+    if (!(inSide)) AssertApp(__FILE__, 2905, "inUser", 0);
     UINT _PLAYER = inSide - 1;
     if (m_pStockFolder[_PLAYER]) {
         m_pStockFolder[_PLAYER]->destroy();
@@ -1208,8 +1383,83 @@ void ENCHANT_PARAM::init(INT inOwner, UINT inUser) {
     iGuard = 0;
     iNormal = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcEnchantParam__Q210CardBattle11CCardBattleRQ210CardBattle13ENCHANT_PARAM);
-__asm__(".rdata\n.align 3\n.word 0x61506F69\n.word 0x2E6D6172\n.word 0x73556975\n.word 0x00007265\n.word 0x00000000\n.word 0x00000000\n.word .L001DEA28\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DE9B8\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEAFC\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DE9EC\n.word .L001DEBA4\n.word .L001DEA34\n.word 0\n.word 0\n.word 0\n.word .L001DEA8C\n.word .L001DEA98\n.word .L001DEAA4\n.word .L001DEAB0\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEABC\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEAD4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEAEC\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEB24\n.text\n");
+void CCardBattle::calcEnchantParam(ENCHANT_PARAM& ioParam) {
+    if (!(ioParam.uiUser)) AssertApp(__FILE__, 3103, "ioParam.uiUser", 0);
+    UINT _PLAYER = ioParam.uiUser - 1;
+    CARD& enchant = m_pInstance->m_cardEnchant[_PLAYER];
+    if (enchant.m_nKind < 0x44) return;
+    switch (ioParam.uiState) {
+    case 1: {
+        INT iCount = m_iCount[_PLAYER];
+        CARD* pCard = m_cardData[_PLAYER];
+        if (iCount == 1 && (pCard->m_nId & 0xF0000000) == 0x10000000) ioParam.iNormal = 1;
+        if (ioParam.iNormal) {
+            switch (enchant.m_nKind) {
+            case 0x68:
+                if (ioParam.iHp < ioParam.iHpMax / 4) ioParam.iAttackPoint *= 2;
+                break;
+            case 0x73:
+                if (ioParam.iFinish > 0) {
+                    if (RND::genrand_int31() % 100 < 0x43) ioParam.AtkKind = (ATK_KIND)0x1F;
+                }
+                break;
+            case 0x51:
+                ioParam.AtkKind = (ATK_KIND)0x15;
+                break;
+            case 0x75:
+                if (RND::genrand_int31() % 100 < 25) ioParam.AtkKind = (ATK_KIND)10;
+                break;
+            case 0x6D:
+                ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            }
+        } else {
+            switch (enchant.m_nKind) {
+            case 0x47:
+                if (ioParam.UpKind & 0x8) ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            case 0x48:
+                if (ioParam.UpKind & 0x10) ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            case 0x49:
+                if (ioParam.UpKind & 0x20) ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            case 0x4A:
+                if (ioParam.UpKind & 0x40) ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            case 0x5C:
+                if (ioParam.UpKind & 0x4) ioParam.iAttackPoint = ioParam.iAttackPoint * 130 / 100;
+                break;
+            case 0x62:
+                if (ioParam.UpKind & 0x80) ioParam.iAttackPoint = ioParam.iAttackPoint * 130 / 100;
+                break;
+            case 0x77:
+                if (ioParam.UpKind & 0x118) ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            case 0x7A:
+                if (ioParam.UpKind & 0x210) ioParam.iAttackPoint *= 2;
+                break;
+            }
+        }
+        break;
+    }
+    case 2:
+        switch (enchant.m_nKind) {
+        case 0x5A:
+            if (!ioParam.AtkAttr) {
+                ioParam.iGuard = 1;
+                ioParam.iAttackPoint /= 2;
+            }
+            break;
+        case 0x6B:
+            if (ioParam.AtkAttr < 5) {
+                if (ioParam.AtkAttr >= 2) ioParam.iAttackPoint /= 2;
+            }
+            break;
+        }
+        break;
+    }
+}
 void CCardBattle::calcEnchant_AttackPoint(INT& inPoint, ATK_KIND& inAtkKind, ATK_ATTR inAttr, UINT inUpKind) {
     if (m_pInstance && g_pPlayer) {
         ENCHANT_PARAM param;
@@ -1226,8 +1476,93 @@ void CCardBattle::calcEnchant_AttackPoint(INT& inPoint, ATK_KIND& inAtkKind, ATK
         inAtkKind = param.AtkKind;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayerEnchant__Q210CardBattle11CCardBattlei);
-__asm__(".rdata\n.align 3\n.word .L001DEDA4\n.word .L001DEE4C\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEE18\n.word .L001DEF48\n.word .L001DEDB4\n.word .L001DEDC4\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEE38\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEDD0\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEDE4\n.word .L001DECCC\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DED74\n.word .L001DEDF8\n.word .L001DECE4\n.word .L001DED44\n.word .L001DED14\n.word .L001DED5C\n.word .L001DECFC\n.word .L001DED8C\n.word .L001DED2C\n.word .L001DEE60\n.word .L001DEE78\n.word .L001DEE9C\n.word .L001DEEB4\n.word .L001DEED8\n.word .L001DEEF4\n.word .L001DEF0C\n.word .L001DEF24\n.text\n");
+void CCardBattle::setPlayerEnchant(INT inKind) {
+    if (!g_pPlayer) return;
+    switch (inKind) {
+    case 0x68:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[2]);
+        break;
+    case 0x6E:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[3]);
+        break;
+    case 0x72:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[7]);
+        break;
+    case 0x70:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[5]);
+        break;
+    case 0x74:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[8]);
+        break;
+    case 0x6F:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[4]);
+        break;
+    case 0x71:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[6]);
+        break;
+    case 0x6C:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[1]);
+        break;
+    case 0x73:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[9]);
+        break;
+    case 0x45:
+        g_pPlayer->m_iMaxCombo = 4;
+        break;
+    case 0x4E:
+        g_pPlayer->m_iMaxCombo = 1;
+        break;
+    case 0x4F:
+        g_pPlayer->setConditionFlag(0x100000, 0);
+        break;
+    case 0x63:
+        g_pPlayer->setConditionFlag(0x80, 0);
+        break;
+    case 0x67:
+        g_pPlayer->setConditionFlag(0x100, 0);
+        break;
+    case 0x6D:
+        if (CGame::isSoraGame()) g_pPlayer->getRevolver()->setChargeRate(0x43);
+        break;
+    case 0x4C:
+        { CPlayer* pPL = g_pPlayer; pPL->m_fPrizeDraw = 30.0f; pPL->m_fCardDraw = 10.0f; }
+        break;
+    case 0x56:
+        g_pPlayer->setBanish(TRUE);
+        break;
+    case 0x46:
+        g_pPlayer->setReflectGuard(TRUE);
+        break;
+    case 0x75:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[10]);
+        break;
+    case 0x76:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[11]);
+        g_pPlayer->setConditionFlag(0x1000, 0);
+        break;
+    case 0x77:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[12]);
+        break;
+    case 0x78:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[13]);
+        g_pPlayer->setAeroGuard(TRUE);
+        break;
+    case 0x79:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[14]);
+        g_pPlayer->setConditionFlag(0x40000000, 0);
+        break;
+    case 0x7A:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[15]);
+        break;
+    case 0x7B:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[16]);
+        break;
+    case 0x7C:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[17]);
+        g_pPlayer->setConditionFlag(0x20000000, 0);
+        break;
+    }
+}
 void CCardBattle::resetPlayerEnchant(INT inKind) {
     if (_ref(g_pPlayer)) {
         _ref(g_pPlayer)->setDefAttr(PL::g_fDefAttr[0]);
@@ -1315,8 +1650,78 @@ void CCardBattle::exeBio() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDropFriendCard__10CardBattleR4CARDi);
-__asm__(".rdata\n.align 3\n.word .L001DF53C\n.word .L001DF550\n.word .L001DF564\n.word .L001DF58C\n.word .L001DF578\n.word .L001DF5A0\n.word .L001DF5B4\n.word .L001DF5D0\n.text\n");
+void CardBattle::getDropFriendCard(CARD& outData, INT inRate) {
+    _setCard(outData, 0, 0);
+    if (getDropPlutoCard(outData)) return;
+    if (CCardBattle::getFriendCount() >= 5) return;
+    INT worldID = CSceneInfo::getCurrentWorldID(0);
+    INT r = RND::genrand_int31() % 1000;
+    if (worldID > 13) worldID = 13;
+    INT roomID = CSceneInfo::getCurrentRoomID();
+    if (roomID == 0 || roomID == 99) worldID = 13;
+    BOOL bCheck = TRUE;
+    if (CGame::isRikuGame()) worldID += 13;
+    if (DebugWork::g_dw.player.iFriend > 0) {
+        r = 0;
+        bCheck = FALSE;
+    }
+    if (inRate == -1) {
+        if (r >= g_DropFriendCardList[worldID][0]) return;
+    } else {
+        if (r >= inRate) return;
+    }
+    BOOL flag = FALSE;
+    INT no = 0;
+    do {
+        INT n = 0;
+        INT r2 = RND::genrand_int31() % 100;
+        for (INT i = 0; i < 3; i++) {
+            n += g_DropFriendCardList[worldID][i + 1];
+            if (r2 < n) {
+                no = i + 4;
+                n = g_DropFriendCardList[worldID][no];
+                if (bCheck) {
+                    switch (n) {
+                    case 0x31:
+                        if ((CGameWork::getInt(0, 0x22) & 0x1) == 0) return;
+                        flag = TRUE;
+                        break;
+                    case 0x32:
+                        if (!(CGameWork::getInt(0, 0x22) & 0x2)) return;
+                        flag = TRUE;
+                        break;
+                    case 0x33:
+                        if (CGameWork::getInt(0, 0x22) & 0x4) flag = TRUE;
+                        break;
+                    case 0x35:
+                        if (CGameWork::getInt(0, 0x22) & 0x10) flag = TRUE;
+                        break;
+                    case 0x34:
+                        if (CGameWork::getInt(0, 0x22) & 0x8) flag = TRUE;
+                        break;
+                    case 0x36:
+                        if (CGameWork::getInt(0, 0x22) & 0x20) flag = TRUE;
+                        break;
+                    case 0x37:
+                        if (CGameWork::getInt(0, 0x22) & 0x40) flag = TRUE;
+                        break;
+                    case 0x38:
+                        if (!(CGameWork::getInt(0, 0x22) & 0x80)) return;
+                        flag = TRUE;
+                        break;
+                    default:
+                        return;
+                    }
+                } else {
+                    if (!n) return;
+                    flag = TRUE;
+                }
+                break;
+            }
+        }
+    } while (!flag);
+    _setCard(outData, g_DropFriendCardList[worldID][no], RND::genrand_int31() % 10);
+}
 INT CardBattle::getDropPlutoCard(CARD& outData) {
     if (CGame::isRikuGame()) return 0;
     if (CSceneInfo::isMinigameScene()) return 0;
@@ -1341,8 +1746,82 @@ INT CardBattle::getDropPlutoCard(CARD& outData) {
     _setCard(outData, 0x39, RND::genrand_int31() % 10);
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeDuel__Q210CardBattle11CCardBattle);
-__asm__(".rdata\n.align 3\n.word .L001DFA98\n.word .L001DF8C0\n.word .L001DF938\n.word .L001DFA98\n.word .L001DF960\n.word .L001DF980\n.word .L001DF9B0\n.word .L001DFA2C\n.word .L001DFA4C\n.word .L001DFA98\n.word .L001DFA98\n.word .L001DFA70\n.word .L001DFA8C\n.word 0\n.word 0\n.word 0\n.text\n");
+void CCardBattle::exeDuel() {
+    switch (m_uiDuelState) {
+    case 0:
+        break;
+    case 1:
+        if (m_uiFlag & 0x400000) {
+            m_uiFlag |= 0x200000;
+        } else {
+            if (!g_pPlayer) return;
+            CCardRevolver* pRV = m_pRevolver[0];
+            if (!pRV) break;
+            if (pRV->getHave(0, 1, 0, 0, 1) < 8) {
+                m_uiFlag |= 0x200000;
+            } else {
+                m_uiFlag &= ~0x200000;
+            }
+        }
+        break;
+    case 2:
+        if (g_pPlayer->m_PlayerState != PL::DUEL) {
+            setDuelEntry(0);
+            return;
+        }
+        break;
+    case 3:
+        break;
+    case 4:
+        if (m_pDuelGauge->getState() == 2) m_uiDuelState = 5;
+        break;
+    case 5:
+        if (m_nDuelBreakCount == m_nDuelBreakCountMax) {
+            m_uiDuelState = 7;
+            m_pDuelGauge->setResult(1);
+            if (m_pRevolver[0]) m_pRevolver[0]->calcStockSkill();
+            g_pPlayer->m_uiBattleFlag |= 0x8000000;
+        } else if (m_pDuelGauge->getTimer() == 0) {
+            m_tqMainTimer = 0;
+            m_uiDuelState = 6;
+            _ref(g_pPlayer)->m_uiBattleFlag |= 0x8000000;
+        }
+        break;
+    case 6:
+        if (m_nDuelBreakCount == m_nDuelBreakCountMax) {
+            m_uiDuelState = 7;
+            m_pDuelGauge->setResult(1);
+            if (m_pRevolver[0]) m_pRevolver[0]->calcStockSkill();
+            g_pPlayer->m_uiBattleFlag |= 0x8000000;
+        } else if (m_tqMainTimer >= 1000) {
+            m_uiDuelState = 7;
+            m_pDuelGauge->setResult(0);
+            m_iDuelSkill = 0;
+        }
+        break;
+    case 7:
+        if (m_pDuelGauge->getState() == 0) {
+            setDuelEnd();
+            return;
+        }
+        break;
+    case 8:
+        if (g_pPlayer->m_PlayerState != PL::DUEL) {
+            m_iDuelSkill = 0;
+            m_uiDuelState = 1;
+        }
+        break;
+    case 9:
+    case 10:
+        break;
+    case 11:
+        if (m_nDuelBreakCount == m_nDuelBreakCountMax) m_uiDuelState = 12;
+        break;
+    case 12:
+        setPronounceEnd(m_nDuelBreakCount);
+        break;
+    }
+}
 void CCardBattle::setDuelEntry(INT inFlag) {
     if (inFlag > 0) {
         if (m_uiDuelState == 1) m_uiDuelState = 2;
@@ -1362,8 +1841,76 @@ void CCardBattle::setDuelEntry(INT inFlag) {
     }
     m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 9, &m_mesCardInfo[1]);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelStart__Q210CardBattle11CCardBattlei);
-__asm__(".rdata\n.align 3\n.word .L001DFE74\n.word .L001DFE80\n.word .L001DFE8C\n.word .L001DFE98\n.word .L001DFEA4\n.word .L001DFECC\n.word 0\n.word 0\n.text\n");
+void CCardBattle::setDuelStart(INT inFlag) {
+    if (inFlag) {
+        if (m_uiDuelState == 3) m_uiDuelState = 4;
+        return;
+    }
+    if (m_uiDuelState != 2) return;
+    m_uiDuelState = 3;
+    for (INT owner = 0; owner < 2; owner++) {
+        for (INT i = 0; i < m_iCount[owner]; i++) {
+            if (m_pCard[owner][i]) m_pCard[owner][i]->setBreak(0);
+        }
+        m_uiState[owner] = 5;
+    }
+    m_pMesage->sendMessage(0, getHandle(), m_hDuelEnemy, 10, &m_mesCardInfo[1]);
+    CGameWork::setFlag(1, 10, TRUE);
+    CCardRevolver* pRV = m_pRevolver[0];
+    if (pRV) {
+        pRV->returnStockCard(1);
+        pRV->changeMode(0, 1);
+    }
+    pRV = m_pRevolver[1];
+    if (pRV) {
+        pRV->returnStockCard(1);
+        pRV->changeMode(0, 1);
+    }
+    CGameWork::setFlag(1, 11, TRUE);
+    CGameWork::setInt(1, 0xE2, CGameWork::getInt(1, 0xE2) | 0x14);
+    TIMEQ time = m_nDuelBreakCountMax * 3000 + 3000;
+    if (DebugWork::g_dw.player.iDuelTime > 0) time = DebugWork::g_dw.player.iDuelTime * 3000;
+    m_pDuelGauge->setStart(time, m_nDuelBreakCountMax);
+    PLM::CPlayerManager* pPLM = (PLM::CPlayerManager*)CTaskMan::getSysTask(0x1F);
+    INT shiftID = (g_pPlayer->m_uiConditionFlag & 0x400000) ? 3 : 0;
+    m_iDuelSkill = 0;
+    switch (m_nDuelBreakCountMax) {
+    case 3:
+        m_iDuelSkill = shiftID + 0x66;
+        break;
+    case 5:
+        m_iDuelSkill = shiftID + 0x67;
+        break;
+    case 7:
+        m_iDuelSkill = shiftID + 0x68;
+        break;
+    }
+    pPLM->setReqLoad(m_iDuelSkill, 0);
+    switch (m_iDuelSkill) {
+    case 0x66:
+        pPLM->setReqLoad(0x93, 0);
+        break;
+    case 0x67:
+        pPLM->setReqLoad(0x94, 0);
+        break;
+    case 0x68:
+        pPLM->setReqLoad(0x95, 0);
+        break;
+    case 0x69:
+        pPLM->setReqLoad(0x93, 0);
+        break;
+    case 0x6A:
+        pPLM->setReqLoad(0x94, 0);
+        pPLM->setReqLoad(0x92, 0);
+        break;
+    case 0x6B:
+        pPLM->setReqLoad(0x95, 0);
+        pPLM->setReqLoad(0x92, 0);
+        break;
+    }
+    CGameWork::setFlag(1, 0x2B, TRUE);
+    PLM::addIntBR(0x43);
+}
 void CCardBattle::setDuelBreakCount(INT inCount, INT inMax) {
     INT max = inMax;
     if (m_uiDuelState < 9) {
@@ -1472,7 +2019,14 @@ CDuelGauge::CDuelGauge(::CTask* pParent) : ::CTask(pParent, 0x4000) {
     m_pSeqCtrls = NULL;
     _initialize();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", _$_Q210CardBattle10CDuelGauge);
+CDuelGauge::~CDuelGauge() {
+    if (m_hTimerSE > 0) {
+        CSound::stopSE(m_hTimerSE, 0x14C);
+        m_hTimerSE = 0;
+    }
+    delete[] m_pSeqCtrls;
+    m_pSeqCtrls = NULL;
+}
 void CDuelGauge::_initialize() {
     m_uiFlag = 0;
     m_uiState = 0;
@@ -1859,27 +2413,4 @@ void CCardBattle::setPronounceEnd(INT inCount) {
         if (g_pPlayer->getRevolver()) g_pPlayer->getRevolver()->rollDeck(0, 1, 300);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", disablePlayCard__Q210CardBattle11CCardBattleUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isDisablePlayCard__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isCardBattleEnd__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", disableDuelEntry__Q210CardBattle11CCardBattleUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDuelEnemy__CQ210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDuelBreakCountMax__CQ210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isNowDuelEntry__CQ210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isNowDuel__CQ210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isNowSetEnemyDuelCard__CQ210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getDuelSkill__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isPronounceMode__CQ210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isNowPronounce__CQ210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isNowSetEnemyPronounce__CQ210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setSubTimer__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getSubTimer__CQ210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getEnchantKind__CQ210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getRoomCard__Q210CardBattle11CCardBattle);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getEnchantCard__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getStockCount__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getState__CQ210CardBattle10CDuelGauge);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", getTimer__CQ210CardBattle10CDuelGauge);
-/* The vtables (their key functions, the destructors, are still assembly). */
-__asm__(".rdata\n.align 3\n.globl _vt$Q210CardBattle10CDuelGauge\n_vt$Q210CardBattle10CDuelGauge:\n.word 0\n.word 0\n.word 0\n.word _$_Q210CardBattle10CDuelGauge\n.word 0\n.word main__Q210CardBattle10CDuelGauge\n.word 0\n.word disp__5CTask\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.globl _vt$Q210CardBattle11CCardBattle\n_vt$Q210CardBattle11CCardBattle:\n.word 0\n.word 0\n.word 0\n.word _$_Q210CardBattle11CCardBattle\n.word 0\n.word main__Q210CardBattle11CCardBattle\n.word 0\n.word disp__Q210CardBattle11CCardBattle\n.word 0\n.word after__5CTask\n.word 0\n.word onOut__5CTask\n.word 0\n.word getTypeID__C5CTask\n.word 0\n.word 0\n.text\n");
 // SOURCE DATA: .data .rodata
