@@ -1198,8 +1198,31 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispMogSe
 __asm__(".rdata\n.align 4\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setPrizeExp__Q25Gauge11CPrizeGaugei);
 __asm__(".rdata\n.align 4\n.word 0x00289A4C\n.word 0x00289A7C\n.word 0x00289A7C\n.word 0x00289A7C\n.word 0x00289A8C\n.word 0x00289A8C\n.word 0x00289A8C\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setPrizeMp__Q25Gauge11CPrizeGaugei);
-__asm__(".rdata\n.align 4\n.word 0x00289B94\n.word 0x00289BC4\n.word 0x00289BC4\n.word 0x00289BC4\n.word 0x00289BD4\n.word 0x00289BD4\n.word 0x00289BD4\n.word 0x00289BD4\n.word 0x00289BD4\n.word 0x00289BD4\n.text\n");
+void CPrizeGauge::setPrizeMp(INT inMp) {
+    if (!m_pInstance) return;
+    if (CGameWork::getInt(1, 0xE2)) return;
+    switch (_ref(m_pInstance)->m_uiMogState) {
+    case 0:
+        _ref(m_pInstance)->m_iMp = inMp;
+        _ref(m_pInstance)->m_uiMogState = 1;
+        _ref(m_pInstance)->m_pMogSeqCtrls->enableDisp(0, TRUE);
+        break;
+    case 1:
+    case 2:
+    case 3:
+        _ref(m_pInstance)->m_iMp += inMp;
+        break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+        _ref(m_pInstance)->m_iMp = CPlayer::getNowTotalMP();
+        break;
+    }
+    _ref(m_pInstance)->setDispMogSeq();
+}
 /* Parked: 18 lines off: the %hi(m_pInstance) base and its loop copy swap s2/s3, and the inMp <= 0 return
    branch doesn't get the epilogue's lq s0 in its delay slot, so the loop top gets an alignment nop. Worked:
    *(T*)& stores for m_uiMogState and m_iDropMp (m_pInstance reloaded after them, as resetHP). Tried: loop shapes
