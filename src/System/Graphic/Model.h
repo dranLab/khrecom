@@ -106,6 +106,15 @@ public:
     CSemiModel* getSemiModel() { return m_pSemiModel; }
     USHORT getMode() { return m_Mode; }
     FIX4 getOTZ() const { return m_iOTZ; }
+    BOOL isDispOff() const { return (USHORT)m_nFlag & 0x4000; }
+    BOOL isDispWireframe() const { return m_nFlag & 0x4; }
+    BOOL isShadowMap() const { return !((USHORT)m_nFlag & 0x100); }
+    BOOL isAutoEffSemiSort() const { return !((USHORT)m_nFlag & 0x1000); }
+    BOOL isSemiSortFlag() const { return (USHORT)m_nFlag & 0x400; }
+    void setDispFlag(BOOL bOn) {
+        if (bOn) m_nFlag |= 8;
+        else m_nFlag &= ~8;
+    }
     BOOL isOTZFlag() const { return m_nFlag & 0x10; }
     void updateOTZ(FIX4 nZ) { m_iOTZ = nZ; }
     /* PARTIAL: added for System/Graphic/Model (body as its weak copy: lbu + dsrl, a 64-bit bit-field) */
@@ -221,7 +230,10 @@ public:
     void link(CModel* m);
     void relink(CModel* m);
     void setSemiTrans(ALPHA a);
-    void setSemiSort(BOOL bVal);
+    void setSemiSort(BOOL bVal) {
+        if (bVal) m_iFlag |= 1;
+        else m_iFlag &= ~1;
+    }
     virtual UINT getPacketSize() const;
     void dispDirect();
     CModel* getParentModel() { return m_pModel; }

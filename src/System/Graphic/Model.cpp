@@ -36,6 +36,7 @@ public:
     static u_long* pkOpenGifTagManual(u_long128 tag);
     static void pkCloseGifTagManual(UINT* p);
     static void pkRefLoadImage(USHORT nTBP, const VTransInfo& info);
+    static UINT getEnableDraw();
 };
 extern const FMATRIX ONE_MATRIX;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
@@ -53,6 +54,7 @@ extern INT _CLUT_TMP1_START;
 extern "C" char D_00460D98[]; /* "System/Graphic/modeldata.h" */
 extern "C" char D_00460DC8[];
 extern "C" char D_00461090[];
+extern "C" char D_00461028[];
 extern "C" char D_00460FC8[];
 struct BONELABEL { /* PARTIAL: stand-in for BONELABEL (modeldata.h): owner not written */
     char m_Name[16];     /* 0x00 */
@@ -894,7 +896,63 @@ void CModel::disp(FLOAT fR) {
     if (bUpdate) dispImpl();
     else m_nFlag &= ~0x18;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispImpl__6CModel);
+void CModel::dispImpl() {
+    setDispFlag(FALSE);
+    if (!isDispOff()) {
+        if (!isDataEmpty() && m_fAlphaScale > 0.0f) {
+            if (isDispWireframe() && MODELDATA::isCharacter(m_Mode)) {
+                disp0(-1, getTestFlag(), 0);
+                m_ShaderOption |= 0x80;
+                disp0(-1, getTestFlag(), 0);
+                m_ShaderOption &= ~0x80;
+            } else if (m_fAlphaScale >= 1.0f && m_Mode != 0x10) {
+                INT id = getLayerID() & 0xF;
+                if (id >= 2 && (id < 4 || id == 0xB)) {
+                    CModelMan::add2DispList(*this, 0);
+                } else if (CPackMan::getEnableDraw() & 2) {
+                    disp0(-1, getTestFlag(), 0);
+                    if (m_pShadowMapModel && isShadowMap()) m_pShadowMapModel->disp();
+                }
+            } else {
+                if (!m_pFadeModel) {
+                    m_pFadeModel = new (com_malloc_d(sizeof(CFadeModel), D_00461028, RET_ADDR())) CFadeModel;
+                    if (m_pFadeModel) {
+                        INT id;
+                        m_pFadeModel->link(this);
+                        id = getLayerID() & 0xF;
+                        if (id >= 2) {
+                            if (id >= 4) {
+                                if (id == 0xB) m_pFadeModel->changeLayerExt(TRUE, getLayerDepth() + 1);
+                            } else {
+                                m_pFadeModel->setLayer(getLayerID(), getLayerDepth());
+                            }
+                        }
+                    }
+                }
+                if (m_pFadeModel) {
+                    if (m_Mode != 0x10) {
+                        if (isAutoEffSemiSort()) m_pFadeModel->setSemiSort(TRUE);
+                        else m_pFadeModel->setSemiSort(isSemiSortFlag());
+                    }
+                    m_pFadeModel->disp();
+                }
+            }
+            setDispFlag(TRUE);
+        }
+        if (isAvailableSemiModel()) {
+            if (m_pSemiModel) {
+                if (m_pFadeModel) {
+                    if (m_fAlphaScale >= 1.0f) m_pSemiModel->setSemiSort(isSemiSortFlag());
+                    else if (isAutoEffSemiSort()) m_pSemiModel->setSemiSort(TRUE);
+                    else m_pSemiModel->setSemiSort(isSemiSortFlag());
+                }
+                m_pSemiModel->disp();
+            }
+            setDispFlag(TRUE);
+        }
+    }
+    m_nFlag &= ~0x10;
+}
 void CModel::makePkt() {
     CPackMan::pkCloseDirectCode();
     if (!m_pData->isDataEmpty()) {
