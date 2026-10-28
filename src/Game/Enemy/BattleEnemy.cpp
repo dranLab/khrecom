@@ -945,7 +945,31 @@ void CBattleEnemy::beginStateMagnet() {
     m_iSysStep = 0;
     setTimer(m_tqTime);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateMagnet__12CBattleEnemy);
+void CBattleEnemy::stateMagnet() {
+    FVECTOR dir = getPlayerPos(0);
+    SubVectorXYZ(dir, dir, getPos());
+    Normalize(dir, dir);
+    if ((INT)getExtraParam(BattleEnemy::MagnetParamName) == 1) {
+        ScaleVectorXYZ(dir, dir, 0.1f);
+    } else {
+        ScaleVectorXYZ(dir, dir, 0.033333335f);
+    }
+    m_pMove->setVel(dir);
+    if (isMotionEnd() && !m_pAnim->isLoop(-1)) {
+        if (getMotionName(1)) changeMotion(1, 0, 0, -1, 0, 0);
+    }
+    if (arriveTarget(getPlayerPos(0), 1.25f)) {
+        FVECTOR v;
+        v.init();
+        m_pMove->setAcc(v);
+        m_pMove->setVel(v);
+        if (m_iSysStep == 0) {
+            setEffect(BattleEnemy::MagnetEffectName, 5, &Crd(1).m_World.getTrans(), NULL, 0.0f);
+            m_iSysStep++;
+        }
+    }
+    if (getTimer() <= 0) changeDefaultState();
+}
 void CBattleEnemy::endStateMagnet() {
     FVECTOR v;
     v.init();
