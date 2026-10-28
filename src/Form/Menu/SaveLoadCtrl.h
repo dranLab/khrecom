@@ -260,6 +260,10 @@ private:
 public:
     void setupSeq(const CHAR* pszLad, SHORT nUnit, SHORT nSeqNum0, SHORT nSeqColon, SHORT nSeqBlank);
     void show();
+    void hide() { // PARTIAL: added for Form/Menu/SaveLoad
+        if (m_nState == 2) enableDisp(FALSE);
+        if (m_nState) m_nState = 3;
+    }
     BOOL update();
 };
 
@@ -279,6 +283,10 @@ private:
 public:
     void setupSeq(const CHAR* pszLad, SHORT nUnit, SHORT nSeqNum0, SHORT nSeqBlank, UINT nMaxValue);
     void show();
+    void hide() { // PARTIAL: added for Form/Menu/SaveLoad
+        if (m_nState == 2) enableDisp(FALSE);
+        if (m_nState) m_nState = 3;
+    }
     BOOL updateValue(UINT nValue);
 };
 

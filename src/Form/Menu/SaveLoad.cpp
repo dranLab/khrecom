@@ -1028,7 +1028,34 @@ BOOL CSaveLoadUI::exeMessageDlg() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeMessageDlg__11CSaveLoadUI);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", outAllAgent__11CSaveLoadUI);
+void CSaveLoadUI::outAllAgent() {
+    m_pMainFrameAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+    if (m_pRoomNameAgent) m_pRoomNameAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+    if (m_pWorldIconAgent) m_pWorldIconAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+    m_pMainFrameHelpCtrl->enableDisp(FALSE);
+    if (m_pMainCursor) m_pMainCursor->enableDisp(FALSE);
+    if (m_pMainLightMark && m_pMainLightMark->isSeqCtrlVisible()) {
+        m_pMainLightMark->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+    }
+    if (m_pRoomNameCtrl) m_pRoomNameCtrl->enableDisp(FALSE);
+    if (m_pWorldIconCtrl) m_pWorldIconCtrl->enableDisp(FALSE);
+    if (m_pTimeLabelAgent) m_pTimeLabelAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+    if (m_pMPLabelAgent) m_pMPLabelAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+    if (m_pTimeCtrl) m_pTimeCtrl->hide();
+    if (m_pMPCtrl) m_pMPCtrl->hide();
+    for (INT i = 0; i < 2; i++) {
+        if (m_pResultPlateAgent[i]->getState() < C2DSeqAgent::STATE_OUT) {
+            m_pResultPlateAgent[i]->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+            m_pResultLightAgent[i]->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+        }
+    }
+    for (INT i = 0; i < 2; i++) {
+        m_pSelSlotPlate[i]->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
+    }
+    if (m_nFlag & 4) closeMessageDlg();
+    outDataList(-1);
+    CSound::setBGMMasterVolume(-1, -1);
+}
 void CSaveLoadUI::outDataList(INT nNextState) {
     if (m_pResultPlateAgent[1]->getState() < C2DSeqAgent::STATE_OUT) {
         m_pResultPlateAgent[1]->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
