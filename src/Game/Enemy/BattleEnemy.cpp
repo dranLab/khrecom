@@ -75,16 +75,6 @@ static inline FLOAT _getAttrRate(ENEMY_PARAM* inParam, INT inAttr) {
     }
     return value;
 }
-struct MES_CARD_INFO {
-    CARD m_cardData[7];
-    SHORT m_nStock;
-    BYTE m_nExtra;
-    BYTE m_nFirst;
-    BYTE m_nBreak;
-    BYTE m_nBonus;
-    BYTE m_nWork0;
-    BYTE m_nWork1;
-};
 struct CB_ENCHANT_VIEW {
     BYTE _pad[0x17C];
     CARD m_cardEnchant[2];
