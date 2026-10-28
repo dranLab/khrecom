@@ -315,7 +315,20 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setTimer__Q210CardBa
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", changeTimer__Q210CardBattle10CDuelGaugei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeTimer__Q210CardBattle10CDuelGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setCount__Q210CardBattle10CDuelGaugeUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", exeCount__Q210CardBattle10CDuelGauge);
+void CDuelGauge::exeCount() {
+    D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[8];
+    switch (m_uiCountState) {
+    case 1:
+        if (pSeq->isEnd(0)) setCount(2);
+        break;
+    case 0:
+    case 2:
+        break;
+    case 3:
+        if (pSeq->isEnd(0)) setCount(0);
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", changeCount__Q210CardBattle10CDuelGaugeUiUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setDuelNG__Q210CardBattle10CDuelGauge);
 void CDuelGauge::exeDuelNG() {
