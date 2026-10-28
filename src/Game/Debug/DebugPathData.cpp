@@ -230,9 +230,27 @@ INT debugWinPathEndOneCall(CDebugWindow* pWin, INT iMes, INT iParam) {
     if (iParam & 0x20) pWin->sendMessage(2, 0);
     return 1;
 }
-/* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
-__asm__(".data\n.align 2\n" "iStep.4083: .word 0\n" ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEndOneYNCall__FP12CDebugWindowii);
+BOOL debugWinPathEndOneYNCall(CDebugWindow* pObj, INT inY, INT inParam) {
+    static INT iStep = 0;
+    if (inParam & 5) iStep = 0;
+    switch (iStep) {
+    case 0:
+        if (inParam & 0x20) {
+            pObj->sendMessage(1, &DWT::debugWinYesNo);
+            iStep++;
+        }
+        break;
+    case 1:
+        if (inParam & 0x800) {
+            if (pObj->isChildAnswer()) {
+                if (pObj->getChildAnswer() == 1) pObj->sendMessage(2, 0);
+            }
+            iStep = 0;
+        }
+        break;
+    }
+    return TRUE;
+}
 INT debugWinPathLineAddSubCall(CDebugWindow* pWin, INT iMes, INT iParam) {
     if (iParam & 0x80) pWin->addValue(-1, NULL, NULL, &CDebugPathData::m_fValuePlus, NULL);
     else if (iParam & 0x100) pWin->addValue(1, NULL, NULL, &CDebugPathData::m_fValuePlus, NULL);
