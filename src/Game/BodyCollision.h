@@ -30,6 +30,9 @@ public:
     const CHAR* getHitEffectName() const { return (const CHAR*)&_m_0x8c[0xe8 - 0x8c]; } // PARTIAL: added for Game/Enemy/BattleEnemy
     INT getHitEffectNo() const { return *(const INT*)&_m_0x8c[0xf8 - 0x8c]; }           // PARTIAL: added for Game/Enemy/BattleEnemy
     INT getHitEffectObjType() const { return *(const INT*)&_m_0x8c[0xfc - 0x8c]; }      // PARTIAL: added for Game/Enemy/BattleEnemy (ObjType::eObjType)
+    void setHp(INT inHp) { *(INT*)&_m_0x8c[0x90 - 0x8c] = inHp; }                         // PARTIAL: added for Game/Enemy/BattleEnemy
+    INT getHp() const { return *(const INT*)&_m_0x8c[0x90 - 0x8c]; }                      // PARTIAL: added for Game/Enemy/BattleEnemy
+    INT getMaxHp() const { return *(const INT*)&_m_0x8c[0x94 - 0x8c]; }                   // PARTIAL: added for Game/Enemy/BattleEnemy
     INT getDamageAttr() { return m_DamageAttr; } // PARTIAL: added for Game/Enemy/EnemyWhitemushroom (name unknown)
     /* CCollObj::getDetectPos (m_pCollision->m_vDetectPos at 0x40) */
     FVECTOR* getDetectPos() { return m_pCollision ? (FVECTOR*)(m_pCollision + 0x40) : NULL; }

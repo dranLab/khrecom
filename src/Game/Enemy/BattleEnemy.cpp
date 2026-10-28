@@ -86,6 +86,11 @@ extern "C" char D_004AD340[];
 extern "C" char D_004AD358[];
 extern "C" char D_004AD570[];
 extern "C" char D_004AD638[];
+extern "C" char D_004AD810[];
+extern "C" char D_004AD840[];
+extern "C" char D_004AD858[];
+extern "C" char D_004AD870[];
+extern "C" char D_004AD888[];
 extern int g_iDuelCardNum[3] asm("g_iDuelCardNum.6149"); // PARTIAL: setupDuelCard's static table, from the asm .data until SOURCE DATA
 struct DropPrize { // PARTIAL: Game/Gimmick/GimmickManager.h only forward-declares it outside its own unit
     INT StockKind;
@@ -2044,7 +2049,68 @@ void CBattleEnemy::changeBattleEnemyState(INT inState) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", hitTest___12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", computeDamage___12CBattleEnemyff8ATK_KIND);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", computeDamage___12CBattleEnemyff);
+INT CBattleEnemy::computeDamage_(FLOAT inDamage, FLOAT inAttr) {
+    INT result = (INT)(inDamage * inAttr * getDamageRate_() / 100.0f);
+    if (!isBtlEnemyFlag(0x400) && !isBtlEnemyFlag(0x4000)) {
+        if (isBtlEnemyFlag(0x1000000)) {
+            CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+            if (!hitBody) AssertApp(D_004ACBC0, 0x1846, D_004AD3D8, 0);
+            INT bodyHp = hitBody->getHp();
+            if (!(DebugWork::g_dw.enemy.uiFlag & 1)) {
+                if (!isLastLeave_(bodyHp - result)) {
+                    bodyHp -= result;
+                } else {
+                    result = 0;
+                }
+            }
+            if (result >= 2) {
+                CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+                if (!cb) AssertApp(D_004ACBC0, 0x1864, D_004AD3C0, 0);
+                CardBattle::CCardBattle::decEnchantTime(2, 0x27, 0);
+                TRACE_USER((USER)5, D_004AD810);
+                TRACE_USER((USER)5, D_004AD840, getID());
+                TRACE_USER((USER)5, D_004AD858, result);
+                TRACE_USER((USER)5, D_004AD870, hitBody->getDamageKind());
+                TRACE_USER((USER)5, D_004AD888, hitBody->getDamageAttr());
+                TRACE_USER((USER)5, D_004AD358);
+            }
+            hitBody->setHp(bodyHp);
+            if (hitBody->getMaxHp() < bodyHp) hitBody->setHp(hitBody->getMaxHp());
+            notifyHP();
+            if (m_pBodyColl->getHitCollBodyIndex() == 0) {
+                m_iHp = bodyHp;
+                if (getHpMax() < m_iHp) m_iHp = getHpMax();
+            }
+        } else {
+            if (!(DebugWork::g_dw.enemy.uiFlag & 1)) {
+                if (!isLastLeave_(m_iHp - result)) {
+                    m_iHp -= result;
+                } else {
+                    result = 0;
+                }
+            }
+            if (result >= 2) {
+                CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+                if (!cb) AssertApp(D_004ACBC0, 0x18A3, D_004AD3C0, 0);
+                CardBattle::CCardBattle::decEnchantTime(2, 0x27, 0);
+                CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+                if (!hitBody) AssertApp(D_004ACBC0, 0x18A8, D_004AD3D8, 0);
+                TRACE_USER((USER)5, D_004AD810);
+                TRACE_USER((USER)5, D_004AD840, getID());
+                TRACE_USER((USER)5, D_004AD858, result);
+                TRACE_USER((USER)5, D_004AD870, hitBody->getDamageKind());
+                TRACE_USER((USER)5, D_004AD888, hitBody->getDamageAttr());
+                TRACE_USER((USER)5, D_004AD358);
+            }
+            if (getHpMax() < m_iHp) m_iHp = getHpMax();
+            notifyHP();
+        }
+    }
+    CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+    if (!hitBody) AssertApp(D_004ACBC0, 0x18BD, D_004AD3D8, 0);
+    setDamageNumber(*hitBody->getDetectPos(), result);
+    return result;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", changeDamageState___12CBattleEnemy8ATK_KIND);
 BOOL CBattleEnemy::canAttack_(const ENEMY_ACT* inAct) {
     if (!inAct) return FALSE;

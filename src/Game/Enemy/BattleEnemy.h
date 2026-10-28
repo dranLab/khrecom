@@ -141,6 +141,7 @@ public:
     void reviseObject_();
     void setHitEffect_();
     void updateSpotLight_();
+    INT computeDamage_(FLOAT inDamage, FLOAT inAttr);
     void setupHitBack();
     void makeRoulettePrize(const FVECTOR* inPos);
     BOOL checkResist_(ATK_KIND inDmgKind);
