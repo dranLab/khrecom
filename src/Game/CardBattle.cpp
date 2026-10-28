@@ -377,7 +377,20 @@ void CCardBattle::setStockFolderStockInfo(INT inSide) {
         if (p) p->setStockInfo();
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", init__Q210CardBattle13ENCHANT_PARAMiUi);
+void ENCHANT_PARAM::init(INT inOwner, UINT inUser) {
+    uiUser = inUser;
+    hOwner = inOwner;
+    AtkKind = (ATK_KIND)0;
+    AtkAttr = (ATK_ATTR)0;
+    uiState = 0;
+    UpKind = 0;
+    iAttackPoint = 0;
+    iHp = 0;
+    iHpMax = 0;
+    iFinish = 0;
+    iGuard = 0;
+    iNormal = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcEnchantParam__Q210CardBattle11CCardBattleRQ210CardBattle13ENCHANT_PARAM);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcEnchant_AttackPoint__Q210CardBattle11CCardBattleRiR8ATK_KIND8ATK_ATTRUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayerEnchant__Q210CardBattle11CCardBattlei);
