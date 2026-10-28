@@ -210,7 +210,18 @@ INT CBattleEnemy::getPlayerState() {
 void CBattleEnemy::setBossKilledFlag() {
     CGameWork::setFlag(1, 2, 1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateBefore__12CBattleEnemy);
+void CBattleEnemy::updateBefore() {
+    enemyCardDash_();
+    if (m_pAttack) {
+        if (m_pAttack->test()) {
+            m_ullBtlEnemyFlag |= 0x40;
+        } else {
+            m_ullBtlEnemyFlag &= ~0x40;
+        }
+    }
+    hitTest_();
+    if (isBtlEnemyFlag(0x20000)) m_pMove->setOldPos2(getPos());
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateAfter__12CBattleEnemy);
 void CBattleEnemy::updatePositionAfter() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", lastUpdate__12CBattleEnemy);
