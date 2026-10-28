@@ -68,6 +68,7 @@ public:
 };
 }
 namespace CardBattle {
+extern INT g_DuelSeqIDX_TimerNumDmy[6][3];
 extern G_UV g_uvDuelNumTex[4][10];
 extern LPCSTR g_szLadDuel; /* the file's statics (data still from assembly) */
 extern LPCSTR g_szSeqDuel;
@@ -366,7 +367,76 @@ void CDuelGauge::setResult(UINT inResult) {
         m_hTimerSE = 0;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setTimer__Q210CardBattle10CDuelGaugeUi);
+void CDuelGauge::setTimer(UINT inState) {
+    D2::C2DSeqCtrl* pSeq;
+    INT i;
+    FVECTOR pos;
+    switch (inState) {
+    case 0:
+        m_uiTimerState = inState;
+        for (i = 1; i < 8; i++) {
+            m_pSeqCtrls[i].destroy();
+        }
+        break;
+    case 1:
+        m_uiTimerState = 1;
+        D2::C2DMan::getLayPosition(_ref(g_szLadDuel), 1, 0, pos, FALSE);
+        pSeq = &m_pSeqCtrls[1];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 0x21);
+        pSeq->setPos(pos);
+        pSeq->addSeq(g_szSeqDuel, 0x24);
+        pSeq->enableColorCtrl(TRUE);
+        for (i = 0; i < 6; i++) {
+            pSeq = &m_pSeqCtrls[i + 2];
+            pSeq->destroy();
+            pSeq->setLayer(2);
+            pSeq->addSeq(g_szSeqDuel, g_DuelSeqIDX_TimerNumDmy[i][0]);
+            pSeq->addSeq(g_szSeqDuel, 0x25);
+            pSeq->enableColorCtrl(TRUE);
+            pSeq->setPos(pos);
+        }
+        changeTimer(m_tqLimit);
+        break;
+    case 2:
+        m_uiTimerState = inState;
+        pSeq = &m_pSeqCtrls[1];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 0x22);
+        pSeq->addSeq(g_szSeqDuel, 0x24);
+        pSeq->enableColorCtrl(TRUE);
+        for (i = 0; i < 6; i++) {
+            pSeq = &m_pSeqCtrls[i + 2];
+            pSeq->destroy();
+            pSeq->setLayer(2);
+            pSeq->addSeq(g_szSeqDuel, g_DuelSeqIDX_TimerNumDmy[i][1]);
+            pSeq->addSeq(g_szSeqDuel, 0x25);
+            pSeq->enableColorCtrl(TRUE);
+        }
+        changeTimer(m_tqTimer);
+        break;
+    case 3:
+        m_uiTimerState = inState;
+        pSeq = &m_pSeqCtrls[1];
+        pSeq->destroy();
+        pSeq->setLayer(2);
+        pSeq->addSeq(g_szSeqDuel, 0x23);
+        pSeq->addSeq(g_szSeqDuel, 0x24);
+        pSeq->enableColorCtrl(TRUE);
+        for (i = 0; i < 6; i++) {
+            pSeq = &m_pSeqCtrls[i + 2];
+            pSeq->destroy();
+            pSeq->setLayer(2);
+            pSeq->addSeq(g_szSeqDuel, g_DuelSeqIDX_TimerNumDmy[i][2]);
+            pSeq->addSeq(g_szSeqDuel, 0x25);
+            pSeq->enableColorCtrl(TRUE);
+        }
+        changeTimer(m_tqTimer);
+        break;
+    }
+}
 void CDuelGauge::changeTimer(TIMEQ inTime) {
     INT n = inTime * 100 / m_tqLimit;
     m_pSeqCtrls[1].changeTime(1, 100 - n);
