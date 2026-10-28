@@ -747,7 +747,11 @@ BOOL debugWinPathLineSaveCall(CDebugWindow* pObj, INT inY, INT inParam) {
     }
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditNum__FP12CDebugWindowii);
+BOOL debugWinPathEditNum(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x100) CDebugPathData::incActivePathVecNum(TRUE);
+    else if (inParam & 0x80) CDebugPathData::decActivePathVecNum(TRUE);
+    return TRUE;
+}
 BOOL debugWinPathEditAdd(CDebugWindow* pObj, INT inY, INT inParam) {
     static INT iStep = 0;
     if (inParam & 5) iStep = 0;
