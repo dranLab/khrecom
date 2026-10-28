@@ -256,6 +256,10 @@ public:
     static void reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLinkOwner);
     static BOOL isCompleteLoadRCF(INT nGroup, INT nMember);
 };
+class CSceneInfo { /* PARTIAL: Game/SceneInfo.h needs the game headers */
+public:
+    static void initNewGame(BOOL bSora);
+};
 class CGame { /* PARTIAL: Game/Game.h needs the game headers */
 public:
     static BOOL isRikuGame();
@@ -514,8 +518,20 @@ void CSaveLoadUI::preSaveData() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeSaveData__11CSaveLoadUI);
 __asm__(".rdata\n.align 4\n.word .L0034A8D4\n.word .L0034A8EC\n.word .L0034A90C\n.word .L0034A938\n.word .L0034A97C\n.word .L0034A994\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034A9CC\n.word .L0034A9E4\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLoadData__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x00000070\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
+void CSaveLoadUI::preLoadData() {
+    char szSlot[32];
+    _getSlotName(m_nSlot + 1, szSlot);
+    char szMsg[256];
+    const CHAR* pszFmt = _ctdText(0x600300);
+    const CHAR* pszText = _ctdText(0x600000);
+    sprintf(szMsg, pszFmt, pszText, szSlot, pszText);
+    openMessageDlg(szMsg, 0, 0);
+    GameDataHeader* p = m_pGameDataEntries->getEntry(m_nDataListSel);
+    if (!p) AssertApp(__FILE__, 1474, "p", 0);
+    CGameWork::resetAll();
+    CSceneInfo::initNewGame(p->_cFlag & 1);
+    m_nStep = 0;
+}
 void CSaveLoadUI::exeLoadData() {
     switch (m_nStep) {
     case 0:
