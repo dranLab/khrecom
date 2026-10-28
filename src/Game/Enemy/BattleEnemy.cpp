@@ -521,7 +521,36 @@ void CBattleEnemy::beginStateFaint() {
     setBadStatusEffect(1, 0.0f);
     m_ullBtlEnemyFlag |= 0x80000000000ULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateFaint__12CBattleEnemy);
+void CBattleEnemy::stateFaint() {
+    if (m_pEnemyParam) {
+        switch (m_iSysStep) {
+        case 0:
+            if (isMotionEnd()) {
+                if (m_pEnemyParam->getSpecialEffect(0) == TRUE) {
+                    setTimer(15000);
+                } else {
+                    setTimer(5000);
+                }
+                changeMotion(m_pEnemyParam->iFaintMotionIndex[1], 0, 0, -1, 0, 0);
+                m_iSysStep++;
+            }
+            break;
+        case 1:
+            if (getTimer() <= 0) {
+                changeMotion(m_pEnemyParam->iFaintMotionIndex[2], 0, 0, -1, 0, 0);
+                m_ullBtlEnemyFlag &= ~0x80000000000ULL;
+                killBadStatusEffect();
+                m_iSysStep++;
+            }
+            break;
+        case 2:
+            if (isMotionEnd()) changeDefaultState();
+            break;
+        }
+    } else if (getTimer() <= 0) {
+        changeDefaultState();
+    }
+}
 void CBattleEnemy::endStateFaint() {
     m_ullBtlEnemyFlag &= ~0x80000000000ULL;
     killBadStatusEffect();
