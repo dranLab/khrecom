@@ -58,6 +58,7 @@ extern CHAR* LargebodyGuardEffectEffectName;
 extern CHAR* VexenGuardEffectEffectName;
 extern CHAR* BindEffectName;
 extern CHAR* MemoIDParamName;
+extern CHAR* SpeedParamName;
 }
 extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
@@ -73,6 +74,9 @@ void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
+extern "C" float sinf(float);
+extern "C" float cosf(float);
+extern "C" float atan2f(float, float);
 extern CHAR* g_BadStatusEffectName asm("_11BattleEnemy$BadStatusEffectName_003A85F0");
 FVECTOR getPlayerPos(INT inIndex);
 namespace BattleEnemy {
@@ -563,7 +567,21 @@ void CBattleEnemy::endStateStop() {
         m_ullBtlEnemyFlag |= 0x4000000;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateTerror__12CBattleEnemy);
+void CBattleEnemy::beginStateTerror() {
+    CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+    if (!hitBody) AssertApp(D_004ACBC0, 0xBA0, D_004AD3D8, 0);
+    setTimer(18000);
+    setBadStatusEffect(3, hitBody->getBadStatusParam());
+    m_ullBtlEnemyFlag |= 0x40000000000ULL;
+    FLOAT speed = getExtraParam(_ref(BattleEnemy::SpeedParamName));
+    if (speed == 0.0f) speed = 0.05f;
+    startTargetEvade(g_pPlayer, speed, 0.1f);
+    if (getMotionName(2)) {
+        changeMotion(2, 0, 0, -1, 0, 0);
+    } else {
+        changeMotion(1, 0, 0, -1, 0, 0);
+    }
+}
 void CBattleEnemy::stateTerror() {
     if (getTimer() <= 0) changeDefaultState();
 }
