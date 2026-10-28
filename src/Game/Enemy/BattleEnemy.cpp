@@ -72,6 +72,10 @@ extern CHAR* DuelEffectName;
 extern const FLOAT g_vSpotSizeTbl[9];
 extern const unsigned char g_byHeartlessSpotSizeIndexTbl[39];
 extern const unsigned char g_byBossSpotSizeIndexTbl[38];
+extern CHAR* FreezeParamName;
+extern const FVECTOR g_vIceSizeTbl[8];
+extern const unsigned char g_byHeartlessIceSizeIndexTbl[39];
+extern const unsigned char g_byBossIceSizeIndexTbl[38];
 }
 extern "C" char D_004AD928[];
 extern "C" char D_004AD2A0[];
@@ -979,7 +983,27 @@ void CBattleEnemy::endStateTerror() {
     m_ullBtlEnemyFlag &= ~0x40000000000ULL;
     killBadStatusEffect();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateFreeze__12CBattleEnemy);
+void CBattleEnemy::beginStateFreeze() {
+    FVECTOR pos;
+    setTimer(24000 / (INT)getExtraParam(BattleEnemy::FreezeParamName));
+    m_pAnim->setSpeed(0.0f);
+    m_pAnim->setRootMove(FALSE, FALSE);
+    m_pMove->enableGravity(TRUE);
+    pos.init();
+    m_hFreeze = attachEffect(BattleEnemy::FreezeEffectName, 3, &Crd(0), &pos, NULL, 0.0f);
+    CEffect* effect = CEffectMan::getEffect(m_hFreeze);
+    if (effect) {
+        INT id = (UINT)getID() % 10000;
+        INT idx = id % 100;
+        if (id < 100) {
+            effect->setScale(BattleEnemy::g_vIceSizeTbl[BattleEnemy::g_byHeartlessIceSizeIndexTbl[idx]]);
+        } else {
+            effect->setScale(BattleEnemy::g_vIceSizeTbl[BattleEnemy::g_byBossIceSizeIndexTbl[idx]]);
+        }
+        FLOAT base = effect->getScale().y < effect->getScale().x ? effect->getScale().x : effect->getScale().y;
+        m_pBodyColl->setRadiusScale(base * 0.5f / m_pBodyColl->getLargeRadius());
+    }
+}
 void CBattleEnemy::stateFreeze() {
     if (getTimer() > 0) return;
     CEffect* effect = CEffectMan::getEffect(m_hFreeze);
