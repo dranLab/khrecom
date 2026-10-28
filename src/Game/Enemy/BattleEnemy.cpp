@@ -693,7 +693,32 @@ void CBattleEnemy::beginStateGravity() {
     m_pMove->enableGravity(TRUE);
     m_pMove->setMass(5.0f);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateGravity__12CBattleEnemy);
+void CBattleEnemy::stateGravity() {
+    switch (m_iSysStep) {
+    case 0: {
+        FVECTOR scale = getScale();
+        scale.y = getTimer() / 250.0f;
+        if (scale.y < 0.1f) scale.y = 0.1f;
+        setScale(scale);
+        if (getTimer() > 0) break;
+        setTimer(9000);
+        m_iSysStep++;
+        break;
+    }
+    case 1: {
+        if (getTimer() > 0) break;
+        FVECTOR scale = getScale();
+        scale.y = 1.0f;
+        setScale(scale);
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[0], 0, 0, -1);
+        m_iSysStep++;
+        break;
+    }
+    case 2:
+        if (isMotionEnd()) changeDefaultState();
+        break;
+    }
+}
 void CBattleEnemy::endStateGravity() {
     bodyCollOn(-1);
     bodyCollOnBody(-1);
