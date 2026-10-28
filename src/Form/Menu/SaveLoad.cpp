@@ -601,8 +601,23 @@ void CSaveLoadUI::exeCheckOverwrite() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckNoMemory__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x250A7325\n.word 0x00000073\n.text\n");
+void CSaveLoadUI::preCheckNoMemory() {
+    char szSlot[32];
+    _getSlotName(m_nSlot + 1, szSlot);
+    char szLine1[128];
+    CCtdMan::getText(0x600201);
+    CHAR* pszLine1 = szLine1;
+    const CHAR* pszFmt = _ctdText(0x600201);
+    sprintf(pszLine1, pszFmt, _ctdText(0x600000), szSlot);
+    char szLine2[128];
+    CHAR* pszLine2 = szLine2;
+    const CHAR* pszFmt2 = _ctdText(0x60020A);
+    sprintf(pszLine2, pszFmt2, 100, _ctdText(0x100000));
+    char szMsg[256];
+    sprintf(szMsg, "%s\n%s", pszLine1, pszLine2);
+    openMessageDlg(szMsg, 0, 1);
+    m_nStep = 0;
+}
 void CSaveLoadUI::exeCheckNoMemory() {
     INT r = -9999;
     switch (m_nStep) {
@@ -676,7 +691,6 @@ void CSaveLoadUI::exeCheckNoCard() {
         backtoSelSlot();
     }
 }
-extern "C" char D_004F32F8[]; /* "%s\n%s": first used by preCheckNoMemory (still assembly) */
 void CSaveLoadUI::preCheckUnformat() {
     char szSlot[32];
     _getSlotName(m_nSlot + 1, szSlot);
@@ -684,7 +698,7 @@ void CSaveLoadUI::preCheckUnformat() {
     const CHAR* pszFmt = _ctdText(0x600205);
     sprintf(szLine1, pszFmt, _ctdText(0x600000), szSlot);
     char szMsg[256];
-    sprintf(szMsg, D_004F32F8, szLine1, _ctdText(0x600206));
+    sprintf(szMsg, "%s\n%s", szLine1, _ctdText(0x600206));
     openMessageDlg(szMsg, 1, 3);
     m_nStep = 0;
 }
