@@ -426,8 +426,39 @@ void CPlayerGauge::setHP(INT inHP, INT inFlag) {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDamage__Q25Gauge12CPlayerGaugeii);
-__asm__(".rdata\n.align 4\n.word 0x002856A4\n.word 0x002856C0\n.word 0x002856F0\n.word 0x002856C0\n.word 0x002856C0\n.word 0x002856C0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856F0\n.word 0x002856F0\n.word 0x002856F0\n.word 0x002856F0\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856A4\n.word 0x002856F0\n.word 0x002856A4\n.text\n");
+void CPlayerGauge::setDamage(INT inHP, INT inKind) {
+    setHP(inHP, 0);
+    if (CGameWork::getInt(1, 0xE2) & 1) return;
+    m_iState = 3;
+    m_tqTimer = 0;
+    switch (inKind) {
+    case 1:
+    case 40:
+    default:
+        m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xD);
+        break;
+    case 2:
+    case 4:
+    case 5:
+    case 6:
+        m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xC);
+        break;
+    case 3:
+    case 12:
+    case 17:
+    case 24:
+    case 27:
+    case 31:
+    case 32:
+    case 33:
+    case 34:
+    case 35:
+    case 39:
+        m_pSeqCtrl->replaceSeq(0, g_szSeqGauge, 0xB);
+        break;
+    }
+    m_pSeqCtrl->replaceSeq(4, m_szSeqFace, 1);
+}
 void CPlayerGauge::setBattleEnd() { CNaviMap::m_bBattleEnd = TRUE; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDPGauge__Q25Gauge12CPlayerGaugei);
 __asm__(".rdata\n.align 4\n.word 0x00285874\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285A9C\n.word 0x00285874\n.word 0x00285874\n.word 0x00000000\n.text\n");
@@ -779,8 +810,34 @@ void CLockonMarker::cancelLockon(INT& ioHandle, INT inFlag) {
         offPush();
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", onPush__Q25Gauge13CLockonMarkeri);
-__asm__(".rdata\n.align 4\n.word 0x00286D98\n.word 0x00286DAC\n.word 0x00286DC0\n.word 0x00286DD4\n.word 0x00286E38\n.word 0x00286DE8\n.word 0x00286E14\n.word 0x00000000\n.text\n");
+void CLockonMarker::onPush(INT inKind) {
+    if (m_uiFlag & 2) return;
+    if (m_iMode != 1) changeMode();
+    m_uiKind = inKind;
+    m_uiFlag |= 2;
+    switch (inKind) {
+    case 1:
+        m_pSeqCtrlPush->addSeq(g_szSeqCockpit, 0x65);
+        break;
+    case 2:
+        m_pSeqCtrlPush->addSeq(g_szSeqCockpit, 0x7B);
+        break;
+    case 3:
+        m_pSeqCtrlPush->addSeq(g_szSeqCockpit, 0x7A);
+        break;
+    case 4:
+        m_pSeqCtrlPush->addSeq(g_szSeqCockpit, 0x92);
+        break;
+    case 5:
+        break;
+    case 6:
+        m_pSeqCtrlPush->addSeq(g_szSeqCockpit, 0x90);
+        break;
+    case 7:
+        m_pSeqCtrlPush->addSeq(g_szSeqCockpit, 0x94);
+        break;
+    }
+}
 void CLockonMarker::offPush() {
     if (m_uiFlag & 2) {
         UINT f = m_uiFlag;

@@ -50,6 +50,7 @@ public:
     void setMaxHP(INT n);
     void changeTimeHP(D2::C2DSeqCtrl* p, UINT nIdx, UINT nHP);
     void setHP(INT inHP, INT inFlag);
+    void setDamage(INT inHP, INT inKind);
     void exeDPGauge();
     void setDPGauge(INT n); void setDP(INT inDP, INT inMax);
     void setDMode(INT inMode, INT inDP, INT inMax);
