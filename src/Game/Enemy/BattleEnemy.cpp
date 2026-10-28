@@ -103,7 +103,18 @@ FLOAT CBattleEnemy::getExtraParam(const CHAR* inParamName) {
     return 0.0f;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackPoint__12CBattleEnemyi8ATK_KINDUsP8ATK_KINDi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", getAttackAttr__C12CBattleEnemyi);
+ATK_ATTR CBattleEnemy::getAttackAttr(INT inIndex) const {
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0x465, D_004AD2A0, 0);
+    ENEMY_ACT* act = NULL;
+    for (INT i = 0; i < m_pEnemyParam->iActCount; i++) {
+        if (m_pEnemyParam->pActs[i].iActNo == inIndex) {
+            act = &m_pEnemyParam->pActs[i];
+            break;
+        }
+    }
+    if (!act) return ATK_ATTR_PHYSICAL;
+    return g_AtkAttrTbl[act->iAttribute];
+}
 INT CBattleEnemy::getAttackRate() const {
     if (!m_pEnemyParam) return 10000;
     INT power = 1;
