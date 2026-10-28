@@ -379,7 +379,10 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLoadData__11CS
 __asm__(".rdata\n.align 3\n.word 0x00000070\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeLoadData__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word .L0034ACE0\n.word .L0034ACF0\n.word .L0034AD10\n.word .L0034AD34\n.word .L0034AD5C\n.word 0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckOverwrite__11CSaveLoadUI);
+void CSaveLoadUI::preCheckOverwrite() {
+    openMessageDlg(_ctdText(0x600200), 1, 3);
+    m_nStep = 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeCheckOverwrite__11CSaveLoadUI);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preCheckNoMemory__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x250A7325\n.word 0x00000073\n.text\n");
