@@ -448,8 +448,35 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeSaveData__11CS
 __asm__(".rdata\n.align 4\n.word .L0034A8D4\n.word .L0034A8EC\n.word .L0034A90C\n.word .L0034A938\n.word .L0034A97C\n.word .L0034A994\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034AAA4\n.word .L0034A9CC\n.word .L0034A9E4\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", preLoadData__11CSaveLoadUI);
 __asm__(".rdata\n.align 3\n.word 0x00000070\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", exeLoadData__11CSaveLoadUI);
-__asm__(".rdata\n.align 4\n.word .L0034ACE0\n.word .L0034ACF0\n.word .L0034AD10\n.word .L0034AD34\n.word .L0034AD5C\n.word 0\n.text\n");
+void CSaveLoadUI::exeLoadData() {
+    switch (m_nStep) {
+    case 0:
+        if (m_pMemoca->reqLoadSysData()) m_nStep++;
+        break;
+    case 1:
+        if (!m_pMemoca->isCompleteReq(NULL)) break;
+        m_nStep++;
+    case 2:
+        if (m_pMemoca->reqLoadGameData(m_nDataListSel)) m_nStep++;
+        break;
+    case 3:
+        if (!m_pMemoca->isCompleteReq(NULL)) break;
+        closeMessageDlg();
+        m_nStep++;
+    case 4:
+        if (!isPadEnable()) break;
+        if (m_pMemoca->getLastResult() == 0) {
+            s_bSaveLoadDone = TRUE;
+            changeState(3);
+            CSound::playSE(11, -1, 64);
+            m_pGameDataEntries->setLatestEntryIndex(m_nSlot, m_nDataListSel);
+        } else {
+            m_nExecError = 1;
+            changeState(17);
+        }
+        break;
+    }
+}
 void CSaveLoadUI::preCheckOverwrite() {
     openMessageDlg(_ctdText(0x600200), 1, 3);
     m_nStep = 0;
