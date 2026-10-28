@@ -193,7 +193,13 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __14CDebugP
    delete m_pPath; m_pPath = NULL; delete m_pFrame; m_pFrame = NULL; m_pInstance = NULL;
    CDebugWindow::enableTopDebugWindow(TRUE); CPlayer::enableDbgPadControl(TRUE); */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", _$_14CDebugPathData);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", create__14CDebugPathDataP5CTaski);
+BOOL CDebugPathData::create(CTask* p, BOOL bEnd) {
+    if (!m_pInstance) {
+        m_pInstance = new (com_malloc_d(sizeof(CDebugPathData), D_004870B0, RET_ADDR())) CDebugPathData(p, bEnd);
+        return TRUE;
+    }
+    return FALSE;
+}
 void CDebugPathData::main() {
     if (isEnd()) out();
 }
