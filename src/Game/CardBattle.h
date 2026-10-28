@@ -109,7 +109,7 @@ class CCardBattle {
     INT m_tqEnchantTimer[2];  /* 0x18c */
     HANDLE m_hGimmickOwner;   /* 0x194 */
     BYTE m_cardRoom[4];       /* 0x198 CARD */
-public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); // PARTIAL: setEnemyDuelCard added for Game/Enemy/BattleEnemy (parameter names guessed)
+public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void setDuelBreakCount(INT inSide, INT inCount); // PARTIAL: added for Game/Enemy/BattleEnemy (parameter names guessed)
     UINT m_uiFlag;            /* 0x19c */
     UINT m_uiDuelState;       /* 0x1a0 */
     HANDLE m_hDuelEnemy;      /* 0x1a4 */
@@ -209,7 +209,7 @@ public:
     void rollDeck(INT inFlag, INT inParam, TIMEQ inTime); void rollShortCut(INT inFlag); // PARTIAL: rollShortCut added for Game/Player/Player
     BOOL setPlayCard(INT inA, INT inB);
     BOOL setPlayStock(INT inA, INT inB);
-    void setStockCard();
+    void setStockCard(); INT checkBreakCard(INT inNum, INT inZero, BOOL inCheckGreater); // PARTIAL: checkBreakCard added for Game/Enemy/BattleEnemy
     // PARTIAL: added for Game/Player/PlayerRiku
     void changeDarkMode(HANDLE inHandle, INT inFlag);
     // PARTIAL: added for Game/Player/PlayerDRiku

@@ -85,6 +85,8 @@ extern "C" char D_004AD328[];
 extern "C" char D_004AD340[];
 extern "C" char D_004AD358[];
 extern "C" char D_004AD570[];
+extern "C" char D_004AD638[];
+extern int g_iDuelCardNum[3] asm("g_iDuelCardNum.6149"); // PARTIAL: setupDuelCard's static table, from the asm .data until SOURCE DATA
 struct DropPrize { // PARTIAL: Game/Gimmick/GimmickManager.h only forward-declares it outside its own unit
     INT StockKind;
     CARD_KIND Kind;
@@ -1636,7 +1638,47 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playBigDamage
 /* Not attempted: its switch emits a jump table in .rodata, which needs the unit's data from source (draft:
  * build/progress/Game/Enemy/pdse_draft.c) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playDamageSE__12CBattleEnemy8ATK_KIND);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setupDuelCard__12CBattleEnemy);
+BOOL CBattleEnemy::setupDuelCard() {
+    ENEMY_CARD* cards = NULL;
+    BOOL result;
+    INT cardNum;
+    for (INT i = 0; i < m_pEnemyParam->iCardCount; i++) {
+        if (m_pEnemyParam->pCards[i].iCardKind == 0xE) {
+            cards = &m_pEnemyParam->pCards[i];
+            break;
+        }
+    }
+    if (cards) {
+        cardNum = cards->bNumber[0];
+        result = TRUE;
+    } else {
+        TRACE(D_004AD638, (UINT)getID() % 10000);
+        result = FALSE;
+        cardNum = g_iDuelCardNum[(UINT)RND::genrand_int31() % 3];
+    }
+    for (INT i = 0; i < 10; i++) m_iDuelCardArray[i] = 0;
+    if (!g_pPlayer) AssertApp(D_004ACBC0, 0x128E, D_004AD3C8, 0);
+    CardBattle::CCardRevolver* revolver = g_pPlayer->getRevolver();
+    if (!revolver) return FALSE;
+    INT number = 9;
+    for (INT i = 0; i < cardNum; i++) {
+        for (INT n = number; n >= 0; n--) {
+            if (revolver->checkBreakCard(n, 0, TRUE)) {
+                m_iDuelCardArray[i] = n;
+                number = n - 1;
+                if (number < 0) number = 0;
+                break;
+            }
+        }
+    }
+    shuffleArray(m_iDuelCardArray, cardNum);
+    m_iDuelCardNum = cardNum;
+    m_iDuelCardPtr = 0;
+    CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
+    if (!cb) AssertApp(D_004ACBC0, 0x12AC, D_004AD3C0, 0);
+    cb->setDuelBreakCount(0, cardNum);
+    return result;
+}
 BOOL CBattleEnemy::destroyCard() {
     CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
     if (!cb) AssertApp(D_004ACBC0, 0x12F9, D_004AD3C0, 0);
