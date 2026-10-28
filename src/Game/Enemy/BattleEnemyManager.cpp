@@ -76,12 +76,7 @@ public:
     CRoulette(CTask* inParent, INT inMode);
 };
 
-namespace Gauge {
-class CPrizeGauge {
-public:
-    static BOOL isNowDispCard();
-};
-}
+#include "Game/Player/PlayerGauge.h"
 
 class CBuf {
 public:

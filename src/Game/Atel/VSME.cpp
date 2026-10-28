@@ -114,12 +114,7 @@ static inline void _setRTP(RTP& r, USHORT lv, USHORT actor, SHORT tag, SHORT mac
     r.rq_tag = tag;
     r.rq_m_actor = mactor;
 }
-namespace Gauge {
-class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
-public:
-    static BOOL isNowDispCard();
-};
-}
+#include "Game/Player/PlayerGauge.h"
 
 namespace DWTEvent {
 static BOOL DebugSetNpcIDWindow(CDebugWindow* pObj, INT inY, INT inParam) {

@@ -26,12 +26,7 @@ public:
     static void checkEvent(INT inKind, INT inID, INT inFlag);
 };
 
-namespace Gauge { /* Game/Player/PlayerGauge.h */
-class CEnemyGauge {
-public:
-    static void notifyHP(HANDLE inHandle, INT inHp, INT inHpMax);
-};
-}
+#include "Game/Player/PlayerGauge.h"
 
 namespace Whitemushroom {
 static CHAR* IdlingMotion = "e016_001";

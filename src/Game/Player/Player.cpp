@@ -159,27 +159,6 @@ class CPlayerDebug : public CTask { /* main() is still INCLUDE_ASM; the members 
 public: CPlayerDebug(CTask* inParent); virtual ~CPlayerDebug();
     virtual void main();
 };
-namespace Gauge {
-class CPlayerGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
-    UBYTE _m_0x00[0x80];
-public:
-    CPlayerGauge(CTask* p);
-    void setMaxHP(INT n); void setDamage(INT inHP, INT inFlag);
-    void setHP(INT inHP, INT inFlag);
-    void setDP(INT inDP, INT inFlag);
-    void setBattleEnd();
-};
-class CEscapeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
-    UBYTE _m_0x00[0x50];
-public:
-    CEscapeGauge(CTask* p);
-    void destroy(); void setCharge(FLOAT inCharge);
-};
-class CPrizeGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
-public:
-    static void setPrizeMp(INT inMP); static void setDropMp(INT inMP); static void setPrizeExp(INT inEXP); static void setPrizeCard(CARD& inCard, INT inKind, INT inFlag);
-};
-}
 class CJiminyMemoFlag { public: static void checkEvent(INT inEvent, INT inParam0, INT inParam1); }; namespace Friend { class CFriend { public: void setExit(INT inFlag); }; } namespace Summon { class CSummon { public: void setExit(INT inFlag); }; } class CEffectMotion { public: void kill(FLOAT inFadeTime); }; namespace MG_SKILL { void killMGSkill(); } /* PARTIAL: the headers are not included here */
 #include "System/Sound/SoundMan.h"
 #line 188

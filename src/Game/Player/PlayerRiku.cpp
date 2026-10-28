@@ -71,17 +71,6 @@ BCAM_PARAM g_DuelCamParam = {
 };
 } // namespace PL
 
-namespace Gauge {
-class CPlayerGauge {
-public:
-    void setDP(INT inDP, INT inFlag);
-    void setDMode(INT inP0, INT inP1, INT inP2);
-};
-class CEscapeGauge {
-public:
-    void destroy();
-};
-} // namespace Gauge
 
 /* Stores/loads through a reference: gcc then can't tell them apart from the globals' and other members'
  * accesses, which keeps the original's order (the original sets these members through inline helpers). */

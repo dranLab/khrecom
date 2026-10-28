@@ -56,12 +56,7 @@ public:
     void warpPrize(const FVECTOR& inPos);
 };
 
-namespace Gauge {
-class CPrizeGauge { /* Game/Player/PlayerGauge.h */
-public:
-    static BOOL isNowDispCard();
-};
-}
+#include "Game/Player/PlayerGauge.h"
 
 struct BOSS_DEAD_DEMO_DATA {
     INT iEnemyID;

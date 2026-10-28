@@ -191,16 +191,7 @@ public:
     static BOOL registerLockOnObject(HANDLE inHandle);
 };
 }
-namespace Gauge {
-class CCommonGauge { /* PARTIAL: Game/Player/PlayerGauge.h */
-public:
-    static void setDispSeq(HANDLE inOwner, INT inSeq);
-};
-class CEnemyGauge { /* PARTIAL: Game/Player/PlayerGauge.h declares the class only for its own unit */
-public:
-    static void notifyHP(HANDLE inHandle, INT inHp, INT inHpMax);
-};
-}
+#include "Game/Player/PlayerGauge.h"
 
 namespace BattleEnemy {
 CARD_KIND g_HeartlessCardKindTbl[39] = {
