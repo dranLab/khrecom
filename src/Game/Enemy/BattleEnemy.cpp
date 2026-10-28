@@ -796,7 +796,26 @@ void CBattleEnemy::endStateSuspend() {
     if (!(m_ullBackupFlag & 0x80000)) clearBtlEnemyFlag(0x80000);
     if (!(m_ullBackupFlag & 0x4000)) clearBtlEnemyFlag(0x4000);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", beginStateVolley__12CBattleEnemy);
+void CBattleEnemy::beginStateVolley() {
+    CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+    if (!hitBody) AssertApp(D_004ACBC0, 0xE83, D_004AD3D8, 0);
+    const FVECTOR& enemyPos = hitBody->getEnemyPos();
+    if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xE86, D_004AD2A0, 0);
+    if (checkHitPos() & 1) {
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[6], 0, 0, -1);
+        getRot().y = calcDirection(enemyPos);
+    } else {
+        changeDamageMotion(m_pEnemyParam->iDamageMotionIndex[8], 0, 0, -1);
+        FVECTOR dir;
+        SubVectorXYZ(dir, enemyPos, getPos());
+        getRot().y = atan2f(dir.x, dir.z);
+    }
+    m_pMove->calcVelocityXZ(0.25f);
+    m_pMove->enableGravity(TRUE);
+    playBigDamageSE();
+    bodyCollOffBody(-1);
+    m_iSysStep = 0;
+}
 void CBattleEnemy::stateVolley() {
     switch (m_iSysStep) {
     case 0:
