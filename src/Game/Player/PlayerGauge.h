@@ -83,10 +83,7 @@ public:
 
 #ifdef GAME_PLAYER_PLAYERGAUGE_CPP
 /* PARTIAL: the other gauge classes, for Game/Player/PlayerGauge only */
-class CNaviMap {
-public:
-    static BOOL m_bBattleEnd;
-};
+class CNaviMap;
 class CFriendGauge;
 class CPrizeGauge;
 

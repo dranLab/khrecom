@@ -15,6 +15,7 @@
 #include "Game/SceneInfo.h"
 #include "Game/Enemy/BattleEnemy.h"
 #include "Game/Player/PlayerManager.h"
+#include "Game/Player/NaviMap.h"
 #include "System/Graphic/2d/2DCard.h"
 #include "include_asm.h"
 
