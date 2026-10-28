@@ -23,7 +23,309 @@ inline void* operator new(unsigned int, void* p) throw() { return p; }
 inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 
-extern LPCSTR g_szSeqCockpit __asm__("_10CardBattle$g_szSeqCockpit_0039B2E4");
+extern "C" char D_00479EA0[];
+extern "C" char D_00479EA8[];
+extern "C" char D_00479EB8[];
+extern "C" char D_00479EC8[];
+extern "C" char D_00479ED8[];
+extern "C" char D_00479EE8[];
+extern "C" char D_00479EF8[];
+extern "C" char D_00479F08[];
+extern "C" char D_00479F10[];
+extern "C" char D_00479F18[];
+extern "C" char D_00479F20[];
+extern "C" char D_00479F28[];
+extern "C" char D_00479F30[];
+extern "C" char D_00479F38[];
+extern "C" char D_00479F48[];
+extern "C" char D_00479F50[];
+extern "C" char D_00479F60[];
+extern "C" char D_00479F70[];
+extern "C" char D_00479F80[];
+extern "C" char D_00479F90[];
+extern "C" char D_00479FA0[];
+extern "C" char D_00479FB0[];
+extern "C" char D_00479FC0[];
+extern "C" char D_00479FC8[];
+extern "C" char D_00479FD8[];
+extern "C" char D_00479FE8[];
+extern "C" char D_00479FF0[];
+extern "C" char D_00479FF8[];
+extern "C" char D_0047A000[];
+extern "C" char D_0047A008[];
+extern "C" char D_0047A010[];
+extern "C" char D_0047A020[];
+extern "C" char D_0047A030[];
+extern "C" char D_0047A038[];
+extern "C" char D_0047A040[];
+extern "C" char D_0047A048[];
+extern "C" char D_0047A050[];
+extern "C" char D_0047A060[];
+extern "C" char D_0047A070[];
+extern "C" char D_0047A080[];
+extern "C" char D_0047A090[];
+extern "C" char D_0047A0A0[];
+extern "C" char D_0047A0B0[];
+extern "C" char D_0047A0C0[];
+extern "C" char D_0047A0D0[];
+extern "C" char D_0047A0D8[];
+extern "C" char D_0047A0E8[];
+extern "C" char D_0047A0F8[];
+extern "C" char D_0047A108[];
+extern "C" char D_0047A118[];
+extern "C" char D_0047A128[];
+extern "C" char D_0047A130[];
+extern "C" char D_0047A138[];
+extern "C" char D_0047A148[];
+extern "C" char D_0047A150[];
+extern "C" char D_0047A158[];
+extern "C" char D_0047A160[];
+extern "C" char D_0047A168[];
+extern "C" char D_0047A170[];
+extern "C" char D_0047A180[];
+extern "C" char D_0047A190[];
+extern "C" char D_0047A198[];
+extern "C" char D_0047A1A8[];
+extern "C" char D_0047A1B8[];
+extern "C" char D_0047A1C8[];
+extern "C" char D_0047A1D8[];
+extern "C" char D_0047A1E8[];
+extern "C" char D_0047A1F8[];
+extern "C" char D_0047A208[];
+extern "C" char D_0047A220[];
+extern "C" char D_0047A238[];
+extern "C" char D_0047A248[];
+extern "C" char D_0047A258[];
+extern "C" char D_0047A268[];
+extern "C" char D_0047A278[];
+extern "C" char D_0047A288[];
+extern "C" char D_0047A298[];
+extern "C" char D_0047A2A8[];
+extern "C" char D_0047A2B8[];
+extern "C" char D_0047A2C8[];
+extern "C" char D_0047A2D8[];
+extern "C" char D_0047A2F0[];
+extern "C" char D_0047A308[];
+extern "C" char D_0047A318[];
+extern "C" char D_0047A328[];
+extern "C" char D_0047A338[];
+extern "C" char D_0047A348[];
+extern "C" char D_0047A358[];
+extern "C" char D_0047A368[];
+extern "C" char D_0047A378[];
+extern "C" char D_0047A388[];
+extern "C" char D_0047A398[];
+extern "C" char D_0047A3A8[];
+extern "C" char D_0047A3C0[];
+extern "C" char D_0047A3D8[];
+extern "C" char D_0047A3F0[];
+extern "C" char D_0047A408[];
+extern "C" char D_0047A418[];
+extern "C" char D_0047A428[];
+extern "C" char D_0047A438[];
+extern "C" char D_0047A440[];
+extern "C" char D_0047A450[];
+extern "C" char D_0047A460[];
+extern "C" char D_0047A470[];
+extern "C" char D_0047A480[];
+extern "C" char D_0047A490[];
+extern "C" char D_0047A4A0[];
+extern "C" char D_0047A4B0[];
+extern "C" char D_0047A4C0[];
+extern "C" char D_0047A4D0[];
+extern "C" char D_0047A4E0[];
+extern "C" char D_0047A4E8[];
+extern "C" char D_0047A4F8[];
+extern "C" char D_0047A500[];
+extern "C" char D_0047A510[];
+extern "C" char D_0047A520[];
+extern "C" char D_0047A530[];
+extern "C" char D_0047A540[];
+extern "C" char D_0047A548[];
+extern "C" char D_0047A550[];
+extern "C" char D_0047A560[];
+extern "C" char D_0047A570[];
+extern "C" char D_0047A580[];
+extern "C" char D_0047A590[];
+extern "C" char D_0047A5A0[];
+extern "C" char D_0047A5B0[];
+extern "C" char D_0047A5C0[];
+extern "C" char D_0047A5D0[];
+extern "C" char D_0047A5E0[];
+extern "C" char D_0047A5F0[];
+extern "C" char D_0047A600[];
+extern "C" char D_0047A610[];
+extern "C" char D_0047A620[];
+extern "C" char D_0047A630[];
+extern "C" char D_0047A640[];
+extern "C" char D_0047A650[];
+extern "C" char D_0047A660[];
+extern "C" char D_0047A670[];
+extern "C" char D_0047A678[];
+extern "C" char D_0047A690[];
+extern "C" char D_0047A6A8[];
+extern "C" char D_0047A6B8[];
+extern "C" char D_0047A6C8[];
+extern "C" char D_0047A6D8[];
+extern "C" char D_0047A6E8[];
+extern "C" char D_0047A6F8[];
+extern "C" char D_0047A708[];
+extern "C" char D_0047A718[];
+extern "C" char D_0047A728[];
+extern "C" char D_0047A738[];
+extern "C" char D_0047A748[];
+extern "C" char D_0047A758[];
+extern "C" char D_0047A768[];
+extern "C" char D_0047A778[];
+extern "C" char D_0047A788[];
+extern "C" char D_0047A798[];
+extern "C" char D_0047A7A0[];
+extern "C" char D_0047A7B0[];
+extern "C" char D_0047A7C0[];
+extern "C" char D_0047A7D0[];
+extern "C" char D_0047A7E0[];
+extern "C" char D_0047A7F0[];
+extern "C" char D_0047A7F8[];
+extern "C" char D_0047A808[];
+extern "C" char D_0047A818[];
+extern "C" char D_0047A828[];
+extern "C" char D_0047A838[];
+extern "C" char D_0047A840[];
+extern "C" char D_0047A850[];
+extern "C" char D_0047A860[];
+extern "C" char D_0047A870[];
+extern "C" char D_0047A878[];
+extern "C" char D_0047A880[];
+extern "C" char D_0047A890[];
+extern "C" char D_0047A8A0[];
+extern "C" char D_0047A8B0[];
+extern "C" char D_0047A8B8[];
+extern "C" char D_0047A8C8[];
+extern "C" char D_0047A8D8[];
+extern "C" char D_0047A8E0[];
+extern "C" char D_0047A8F0[];
+extern "C" char D_0047A900[];
+extern "C" char D_0047A910[];
+extern "C" char D_0047A920[];
+extern "C" char D_0047A930[];
+extern "C" char D_0047A940[];
+extern "C" char D_0047A948[];
+extern "C" char D_0047A958[];
+extern "C" char D_0047A960[];
+extern "C" char D_0047A970[];
+extern "C" char D_0047A978[];
+extern "C" char D_0047A988[];
+extern "C" char D_0047A990[];
+extern "C" char D_0047A998[];
+extern "C" char D_0047A9A8[];
+extern "C" char D_0047A9B8[];
+extern "C" char D_0047A9C8[];
+extern "C" char D_0047A9D8[];
+extern "C" char D_0047A9E0[];
+extern "C" char D_0047A9F0[];
+extern "C" char D_0047AA00[];
+extern "C" char D_0047AA10[];
+extern "C" char D_0047AA20[];
+extern "C" char D_0047AA30[];
+extern "C" char D_0047AA40[];
+extern "C" char D_0047AA50[];
+extern "C" char D_0047AA60[];
+extern "C" char D_0047AA70[];
+extern "C" char D_0047AA80[];
+extern "C" char D_0047AA90[];
+extern "C" char D_0047AAA0[];
+extern "C" char D_0047AAB0[];
+namespace CardBattle {
+static LPCSTR g_szLadCockpit = D_00479EA8;
+static LPCSTR g_szSeqCockpit = D_00479EB8;
+BTL_DECK g_deckSoraTutorial[17] = {
+    {1, 4}, {1, 5}, {1, 6}, {1, 1}, {1, 3}, {1, 9}, {1, 0}, {1, 2},
+    {1, 7}, {1, 7}, {1, 6}, {1, 5}, {1, 4}, {1, 5}, {1, 6}, {68, -1},
+    {255, 0},
+};
+BTL_DECK g_deckSoraStarter[16] = {
+    {1, 7}, {1, 6}, {1, 5}, {1, 5}, {1, 4}, {1, 3}, {1, 4}, {1, 3},
+    {1, 2}, {1, 2}, {1, 1}, {1, 0}, {27, 5}, {42, 6}, {29, 5}, {255, 0},
+};
+BTL_DECK g_deckRikuStarter[42] = {
+    {18, 8}, {18, 8}, {18, 8}, {18, 7}, {18, 7}, {18, 7}, {18, 6}, {18, 6},
+    {18, 6}, {18, 9}, {18, 9}, {18, 9}, {18, 6}, {18, 7}, {18, 8}, {18, 9},
+    {18, 8}, {18, 6}, {18, 7}, {18, 9}, {18, 9}, {18, 6}, {18, 7}, {18, 8},
+    {43, 9}, {43, 0}, {18, 0}, {18, 0}, {18, 0}, {18, 0}, {99, -1}, {100, -1},
+    {101, -1}, {102, -1}, {104, -1}, {105, -1}, {106, -1}, {107, -1}, {108, -1}, {109, -1},
+    {115, -1}, {255, 0},
+};
+BTL_DECK g_deckSoraDebug[32] = {
+    {1, 7}, {1, 6}, {1, 5}, {1, 5}, {1, 4}, {1, 3}, {1, 4}, {1, 3},
+    {1, 2}, {1, 2}, {1, 1}, {1, 0}, {27, 5}, {42, 6}, {29, 5}, {72, -1},
+    {106, -1}, {35, 9}, {36, 9}, {37, 9}, {38, 9}, {39, 9}, {40, 9}, {41, 9},
+    {68, -1}, {75, -1}, {82, -1}, {83, -1}, {87, -1}, {101, -1}, {94, -1}, {255, 0},
+};
+BTL_DECK g_deckSoraDebug99[100] = {
+    {1, 0}, {1, 1}, {1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7},
+    {1, 8}, {1, 9}, {2, 0}, {2, 1}, {2, 2}, {2, 3}, {2, 4}, {2, 5},
+    {2, 6}, {2, 7}, {2, 8}, {2, 9}, {3, 0}, {3, 1}, {3, 2}, {3, 3},
+    {3, 4}, {3, 5}, {3, 6}, {3, 7}, {3, 8}, {3, 9}, {4, 0}, {4, 1},
+    {4, 2}, {4, 3}, {4, 4}, {4, 5}, {4, 6}, {4, 7}, {4, 8}, {4, 9},
+    {5, 0}, {5, 1}, {5, 2}, {5, 3}, {5, 4}, {5, 5}, {5, 6}, {5, 7},
+    {5, 8}, {5, 9}, {6, 0}, {6, 1}, {6, 2}, {6, 3}, {6, 4}, {6, 5},
+    {6, 6}, {6, 7}, {6, 8}, {6, 9}, {7, 0}, {7, 1}, {7, 2}, {7, 3},
+    {7, 4}, {7, 5}, {7, 6}, {7, 7}, {7, 8}, {7, 9}, {8, 0}, {8, 1},
+    {8, 2}, {8, 3}, {8, 4}, {8, 5}, {8, 6}, {8, 7}, {8, 8}, {8, 9},
+    {9, 0}, {9, 1}, {9, 2}, {9, 3}, {9, 4}, {9, 5}, {9, 6}, {9, 7},
+    {9, 8}, {9, 9}, {10, 0}, {10, 1}, {10, 2}, {10, 3}, {10, 4}, {10, 5},
+    {10, 6}, {10, 7}, {10, 8}, {255, 0},
+};
+char* g_szDbgDeckName[10] = {
+    D_00479EC8, D_00479ED8, D_00479EE8, D_00479EF8, D_00479F08, D_00479F10,
+    D_00479F18, D_00479F20, D_00479F28, D_00479F30,
+};
+BTL_DECK g_deckSoraPoo[19] = {
+    {25, 9}, {25, 0}, {25, 2}, {25, 6}, {25, 9}, {25, 0}, {25, 6}, {25, 2},
+    {25, 0}, {33, 7}, {34, 6}, {34, 8}, {25, 0}, {25, 2}, {25, 9}, {25, 3},
+    {25, 6}, {25, 8}, {255, 0},
+};
+static char* g_szStockSkillName[150] = {
+    D_00479EA0, D_00479EA0, D_00479EA0, D_00479EA0, D_00479F38, D_00479F48,
+    D_00479F50, D_00479F60, D_00479F70, D_00479F80, D_00479F90, D_00479FA0,
+    D_00479FB0, D_00479FC0, D_00479FC8, D_00479FD8, D_00479FE8, D_00479FF0,
+    D_00479FF8, D_0047A000, D_0047A008, D_0047A010, D_0047A020, D_0047A030,
+    D_0047A038, D_0047A040, D_0047A048, D_0047A050, D_0047A060, D_0047A070,
+    D_0047A080, D_0047A090, D_0047A0A0, D_0047A0B0, D_0047A0C0, D_0047A0D0,
+    D_0047A0D8, D_0047A0E8, D_0047A0F8, D_0047A108, D_0047A118, D_0047A128,
+    D_0047A130, D_0047A138, D_0047A148, D_0047A150, D_0047A158, D_0047A160,
+    D_0047A168, D_0047A170, D_0047A180, D_0047A190, D_0047A198, D_0047A1A8,
+    D_0047A1B8, D_0047A1C8, D_0047A1D8, D_0047A1E8, D_0047A1F8, D_0047A208,
+    D_0047A220, D_0047A238, D_0047A248, D_0047A258, D_0047A268, D_0047A278,
+    D_0047A288, D_0047A298, D_0047A2A8, D_0047A2B8, D_0047A2C8, D_0047A2D8,
+    D_0047A2F0, D_0047A308, D_0047A318, D_0047A328, D_0047A338, D_0047A348,
+    D_0047A358, D_0047A368, D_0047A378, D_0047A388, D_0047A398, D_0047A3A8,
+    D_0047A3C0, D_0047A3D8, D_0047A3F0, D_0047A408, D_0047A418, D_0047A418,
+    D_0047A428, D_0047A438, D_0047A440, D_0047A450, D_0047A460, D_0047A470,
+    D_0047A480, D_0047A490, D_0047A4A0, D_0047A4B0, D_0047A4C0, D_0047A4D0,
+    D_0047A4E0, D_0047A4E8, D_0047A4F8, D_0047A500, D_0047A510, D_0047A520,
+    D_0047A530, D_0047A540, D_0047A548, D_0047A278, D_0047A288, D_0047A550,
+    D_0047A560, D_0047A570, D_0047A580, D_0047A590, D_0047A5A0, D_0047A5B0,
+    D_0047A5C0, D_0047A5D0, D_0047A5E0, D_0047A480, D_0047A490, D_0047A0D0,
+    D_0047A5F0, D_0047A600, D_0047A610, D_0047A620, D_0047A630, D_0047A640,
+    D_0047A650, D_0047A660, D_0047A670, D_0047A678, D_0047A690, D_0047A6A8,
+    D_0047A6B8, D_0047A6C8, D_0047A6D8, D_0047A6E8, D_0047A6F8, D_0047A708,
+    D_0047A718, D_0047A728, D_0047A738, D_0047A748, D_0047A758, D_0047A768,
+};
+char* g_szEnemyCardEffName[60] = {
+    D_00479EA0, D_0047A778, D_0047A788, D_0047A798, D_0047A7A0, D_0047A7B0,
+    D_0047A7C0, D_0047A7D0, D_0047A7E0, D_0047A7F0, D_0047A7F8, D_0047A808,
+    D_0047A818, D_0047A828, D_0047A838, D_0047A840, D_0047A850, D_0047A860,
+    D_0047A870, D_0047A878, D_0047A880, D_0047A890, D_0047A8A0, D_0047A8B0,
+    D_0047A8B8, D_0047A8C8, D_0047A8D8, D_0047A8E0, D_0047A8F0, D_0047A900,
+    D_0047A910, D_0047A920, D_0047A930, D_0047A940, D_0047A948, D_0047A958,
+    D_0047A960, D_0047A970, D_0047A978, D_0047A988, D_0047A990, D_0047A998,
+    D_0047A9A8, D_0047A9B8, D_0047A9C8, D_0047A9D8, D_0047A9E0, D_0047A9F0,
+    D_0047AA00, D_0047AA10, D_0047AA20, D_0047AA30, D_0047AA40, D_0047AA50,
+    D_0047AA60, D_0047AA70, D_0047AA80, D_0047AA90, D_0047AAA0, D_0047AAB0,
+};
+G_UV g_uvCRCounterNumOfs[4] = {{67, 30}, {52, 30}, {56, 20}, {37, 29}};
+}
 template <class T> static inline T& _ref(T& v) { return v; }
 extern "C" char D_00479D40[]; /* "Game/CardBattle.h" */
 extern "C" char D_00479D68[]; /* "inUser" */
@@ -38,10 +340,6 @@ inline INT CCardRevolver::_getEnchantKind(CCardBattle* p, INT inUser) {
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
 static inline BOOL _isEqual(UINT a, UINT b) { return a == b; }
-namespace CardBattle {
-extern char* g_szStockSkillName[150];
-extern LPCSTR g_szLadCockpit;
-}
 namespace D2 {
 class C2DMan { /* PARTIAL: stand-in for System/Graphic/2d/2DMan C2DMan: gated by SYSTEM_GRAPHIC_2D_2DMAN_CPP */
 public:
@@ -146,14 +444,6 @@ void CCardRevolver::_init() {
     m_nReloadCount = 0;
     m_iMax = 0;
     m_pEmpty = NULL;
-}
-namespace CardBattle {
-extern BTL_DECK g_deckSoraTutorial[];
-extern BTL_DECK g_deckSoraDebug[];
-extern BTL_DECK g_deckSoraDebug99[];
-extern BTL_DECK g_deckSoraPoo[];
-extern BTL_DECK g_deckSoraStarter[];
-extern BTL_DECK g_deckRikuStarter[];
 }
 void CCardRevolver::_initialize(CARD* inDeck, INT inShortCut) {
     switch (m_uiUser) {
@@ -1135,9 +1425,6 @@ INT CCardRevolver::exeAddCard() {
 extern "C" char D_0047B240[];
 extern "C" char D_0047B270[];
 extern "C" char D_0047B2A0[];
-namespace CardBattle {
-extern G_UV g_uvCRCounterNumOfs[4];
-}
 void CCardRevolver::initCounter() {
     FVECTOR pos;
     INT ofsID;
@@ -2052,3 +2339,4 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", isDiscard__Q210Car
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", isEnableCount__Q210CardBattle13CEnchantGauge);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getStockSkill__CQ210CardBattle12CStockFolder);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", getStockSum__CQ210CardBattle12CStockFolder);
+// SOURCE DATA: .data
