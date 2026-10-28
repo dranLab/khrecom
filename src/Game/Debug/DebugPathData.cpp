@@ -1,6 +1,7 @@
 #include "khtypes.h"
 #define GAME_DEBUG_DEBUGPATHDATA_CPP
 #include "System/Graphic/PathData.h"
+#include "System/Graphic/HermitePath.h"
 #include "Game/Debug/DebugPathData.h"
 #include "Form/DebugWindow.h"
 #include "System/TaskMan.h"
@@ -15,13 +16,18 @@ public:
 };
 #line 19
 class CHermitePathMoveS : public CTask {
-    UBYTE _m_0x40[0x50];
-    CDbgArrow m_cArrow; /* 0x90 */
+    CPathVector* m_pPath;        /* 0x40 */
+    CHermitePath m_HPath;        /* 0x44 */
+    FVECTOR m_vRot;              /* 0x80 */
+    CDbgArrow m_DDPathCamArrow;  /* 0x90 */
 public:
-    CHermitePathMoveS(CTask* p, const class CPathVector* pVec);
+    CHermitePathMoveS(CTask* p, const CPathVector* pVec);
     virtual ~CHermitePathMoveS();
+    virtual void main();
     virtual void disp();
+    CHermitePath* getHermitePath();
 };
+#line 27
 extern "C" char D_004870B0[];
 extern "C" char D_00487158[];
 extern "C" char D_00487168[];
@@ -30,7 +36,7 @@ extern "C" char D_00486F18[];
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __17CHermitePathMoveSP5CTaskPC11CPathVector);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", _$_17CHermitePathMoveS);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", main__17CHermitePathMoveS);
-void CHermitePathMoveS::disp() { m_cArrow.disp(); }
+void CHermitePathMoveS::disp() { m_DDPathCamArrow.disp(); }
 INT debugWinPathEndOneCall(CDebugWindow* pWin, INT iMes, INT iParam) {
     if (iParam & 0x20) pWin->sendMessage(2, 0);
     return 1;
@@ -154,4 +160,4 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220A
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220B00);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_00220B30);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", isEnd__17CHermitePathMoveS);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", getHermitePath__17CHermitePathMoveS);
+CHermitePath* CHermitePathMoveS::getHermitePath() { return &m_HPath; }
