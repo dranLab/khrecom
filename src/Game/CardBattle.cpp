@@ -1244,8 +1244,83 @@ void ENCHANT_PARAM::init(INT inOwner, UINT inUser) {
     iGuard = 0;
     iNormal = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", calcEnchantParam__Q210CardBattle11CCardBattleRQ210CardBattle13ENCHANT_PARAM);
-__asm__(".rdata\n.align 3\n.word 0x61506F69\n.word 0x2E6D6172\n.word 0x73556975\n.word 0x00007265\n.word 0x00000000\n.word 0x00000000\n.word .L001DEA28\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DE9B8\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEAFC\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DE9EC\n.word .L001DEBA4\n.word .L001DEA34\n.word 0\n.word 0\n.word 0\n.word .L001DEA8C\n.word .L001DEA98\n.word .L001DEAA4\n.word .L001DEAB0\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEABC\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEAD4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEAEC\n.word .L001DEBA4\n.word .L001DEBA4\n.word .L001DEB24\n.text\n");
+void CCardBattle::calcEnchantParam(ENCHANT_PARAM& ioParam) {
+    if (!(ioParam.uiUser)) AssertApp(D_00476980, 3103, "ioParam.uiUser", 0);
+    UINT _PLAYER = ioParam.uiUser - 1;
+    CARD& enchant = m_pInstance->m_cardEnchant[_PLAYER];
+    if (enchant.m_nKind < 0x44) return;
+    switch (ioParam.uiState) {
+    case 1: {
+        INT iCount = m_iCount[_PLAYER];
+        CARD* pCard = m_cardData[_PLAYER];
+        if (iCount == 1 && (pCard->m_nId & 0xF0000000) == 0x10000000) ioParam.iNormal = 1;
+        if (ioParam.iNormal) {
+            switch (enchant.m_nKind) {
+            case 0x68:
+                if (ioParam.iHp < ioParam.iHpMax / 4) ioParam.iAttackPoint *= 2;
+                break;
+            case 0x73:
+                if (ioParam.iFinish > 0) {
+                    if (RND::genrand_int31() % 100 < 0x43) ioParam.AtkKind = (ATK_KIND)0x1F;
+                }
+                break;
+            case 0x51:
+                ioParam.AtkKind = (ATK_KIND)0x15;
+                break;
+            case 0x75:
+                if (RND::genrand_int31() % 100 < 25) ioParam.AtkKind = (ATK_KIND)10;
+                break;
+            case 0x6D:
+                ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            }
+        } else {
+            switch (enchant.m_nKind) {
+            case 0x47:
+                if (ioParam.UpKind & 0x8) ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            case 0x48:
+                if (ioParam.UpKind & 0x10) ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            case 0x49:
+                if (ioParam.UpKind & 0x20) ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            case 0x4A:
+                if (ioParam.UpKind & 0x40) ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            case 0x5C:
+                if (ioParam.UpKind & 0x4) ioParam.iAttackPoint = ioParam.iAttackPoint * 130 / 100;
+                break;
+            case 0x62:
+                if (ioParam.UpKind & 0x80) ioParam.iAttackPoint = ioParam.iAttackPoint * 130 / 100;
+                break;
+            case 0x77:
+                if (ioParam.UpKind & 0x118) ioParam.iAttackPoint = ioParam.iAttackPoint * 150 / 100;
+                break;
+            case 0x7A:
+                if (ioParam.UpKind & 0x210) ioParam.iAttackPoint *= 2;
+                break;
+            }
+        }
+        break;
+    }
+    case 2:
+        switch (enchant.m_nKind) {
+        case 0x5A:
+            if (!ioParam.AtkAttr) {
+                ioParam.iGuard = 1;
+                ioParam.iAttackPoint /= 2;
+            }
+            break;
+        case 0x6B:
+            if (ioParam.AtkAttr < 5) {
+                if (ioParam.AtkAttr >= 2) ioParam.iAttackPoint /= 2;
+            }
+            break;
+        }
+        break;
+    }
+}
 void CCardBattle::calcEnchant_AttackPoint(INT& inPoint, ATK_KIND& inAtkKind, ATK_ATTR inAttr, UINT inUpKind) {
     if (m_pInstance && g_pPlayer) {
         ENCHANT_PARAM param;
