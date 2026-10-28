@@ -27,6 +27,8 @@
 #include "System/Math3D.h"
 #include "Game/MessageManager.h"
 #include "Game/Collision/CollMap.h"
+#include "Game/Enemy/MonstroEventBattle.h"
+#include "Game/Gimmick/GimmickManager.h"
 #include "System/Com.h"
 #include "System/Rnd.h"
 #include "Game/EntityFactory.h"
@@ -82,6 +84,13 @@ extern "C" char D_004AD310[];
 extern "C" char D_004AD328[];
 extern "C" char D_004AD340[];
 extern "C" char D_004AD358[];
+extern "C" char D_004AD570[];
+struct DropPrize { // PARTIAL: Game/Gimmick/GimmickManager.h only forward-declares it outside its own unit
+    INT StockKind;
+    CARD_KIND Kind;
+    SHORT Num;
+    SHORT No;
+};
 extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 struct STOP_DAMAGE {
     FVECTOR vDetectPos;
@@ -1350,7 +1359,58 @@ void CBattleEnemy::makeRoulettePrize(const FVECTOR* inPos) {
     if (!bem) AssertApp(D_004ACBC0, 0xFA4, D_004AD3B8, 0);
     bem->createRoulettePrize(*inPos);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", makeCard__12CBattleEnemyPC7FVECTOR);
+void CBattleEnemy::makeCard(const FVECTOR* inPos) {
+    if (!m_pBasicParam) return;
+    if (isBtlEnemyFlag(0x20)) return;
+    CBattleEnemyManager* bem = (CBattleEnemyManager*)CTaskMan::getSysTask(0x19);
+    if (!bem) AssertApp(D_004ACBC0, 0xFB4, D_004AD3B8, 0);
+    if (!bem->canCreateEnemyCard()) return;
+    if (bem->isRoulettePrizeGet()) return;
+    if (bem->isAppearRoulettePrize()) return;
+    PRIZE_PARAM param;
+    param.vPos = *inPos;
+    param.fSpeed = 0.2f;
+    param.uiFlag = 1;
+    param.uiPrizeFlag = 0;
+    param.vRot.set(DEG2RAD(-45.0f - RND::genrand_real1() * 15.0f), DEG2RAD(RND::genrand_real1() * 360.0f), 0.0f);
+    Math3D::LimitPIVector(param.vRot);
+    if (CMonstroEventBattle::isMonstroEventBattleScene()) {
+        param.PrizeKind = 0x26;
+        param.iNumber = 4;
+    } else {
+        CARD_KIND kind = (CARD_KIND)CGameWork::getInt(1, 0xE3);
+        if (kind) {
+            param.PrizeKind = kind;
+            param.iNumber = CGameWork::getInt(1, 0xE4);
+            if (CEntityFactory::getInstance()->createPrize(param, NULL)) {
+                bem->setCreateCard(TRUE);
+                CGameWork::setInt(1, 0xE3, 0);
+            }
+            return;
+        }
+        if (canCreateEnemyCard_()) {
+            param.PrizeKind = m_CardKind;
+            param.iNumber = 0;
+        } else {
+            if (canBlackroomCard_()) {
+                if (CGame::isSoraGame()) {
+                    param.PrizeKind = 0xB3;
+                } else {
+                    param.PrizeKind = 0xAB;
+                }
+                param.iNumber = RND::genrand_int31() % 10;
+            } else {
+                CGimmickManager* gm = (CGimmickManager*)CTaskMan::getSysTask(0x11);
+                if (!gm) AssertApp(D_004ACBC0, 0x103B, D_004AD570, 0);
+                DropPrize drop = gm->DecideMapCardPrize(TRUE);
+                param.PrizeKind = drop.Kind;
+                param.iNumber = drop.No;
+            }
+            if (!param.PrizeKind) return;
+        }
+    }
+    if (CEntityFactory::getInstance()->createPrize(param, NULL)) bem->setCreateCard(TRUE);
+}
 void CBattleEnemy::setBossDeadEffect() {
     m_hDeath = setDeathEffect();
 }
