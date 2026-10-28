@@ -54,6 +54,9 @@ int g_RikuSeqIDData[2][3] = {{40, 41, 30}, {17, 18, 19}};
 CEnemyGauge* CEnemyGauge::m_pInstance = NULL;
 CCommonGauge* CCommonGauge::m_pInstance = NULL;
 CPrizeGauge* CPrizeGauge::m_pInstance = NULL;
+namespace CardBattle {
+extern G_UV g_uvCRCounterNumTex[8][10];
+}
 FVECTOR getPlayerPos(BOOL flag);
 namespace D2 {
 class C2DMan { /* PARTIAL: stand-in for System/Graphic/2d/2DMan C2DMan: gated by SYSTEM_GRAPHIC_2D_2DMAN_CPP */
@@ -1295,8 +1298,42 @@ void CPrizeGauge::_initialize() {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", main__Q25Gauge11CPrizeGauge);
 __asm__(".rdata\n.align 4\n.word 0x002890EC\n.word 0x00288E64\n.word 0x00288EE8\n.word 0x00288F58\n.word 0x00288FA8\n.word 0x00289028\n.word 0x00289098\n.word 0x00000000\n.align 4\n.word 0x0028953C\n.word 0x0028911C\n.word 0x002891A0\n.word 0x00289210\n.word 0x00289260\n.word 0x002892E0\n.word 0x00289350\n.word 0x002893A8\n.word 0x00289428\n.word 0x00289498\n.word 0x00000000\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispSeq__Q25Gauge11CPrizeGauge);
-__asm__(".rdata\n.align 4\n.word 0x00289764\n.word 0x00289764\n.word 0x00289708\n.word 0x00289764\n.word 0x00289764\n.word 0x00289708\n.word 0x00289764\n.word 0x00000000\n.text\n");
+void CPrizeGauge::setDispSeq() {
+    INT i;
+    INT pow;
+    FVECTOR pos;
+    pow = 10000;
+    m_iFigure = 0;
+    for (i = 5; i > 0; i--) {
+        INT n = m_iExp / pow % 10;
+        if (n > 0 && m_iFigure == 0) m_iFigure = i;
+        m_pSeqCtrls[i].changeTexture(0, 0, NULL, &CardBattle::g_uvCRCounterNumTex[m_nTexID][n], &CardBattle::g_uvCRCounterNumTex[m_nTexID + 1][n]);
+        pow /= 10;
+    }
+    D2::C2DMan::getLayPosition(g_szLadCockpit, 10, 0, pos, FALSE);
+    pos.x += m_iFigure * 15 + 35;
+    pos.y += 20.0f;
+    for (i = 1; i <= m_iFigure; i++) {
+        pos.x -= 15.0f;
+        m_pSeqCtrls[i].setPos(pos);
+    }
+    switch (m_uiState) {
+    case 0:
+    case 1:
+    case 3:
+    case 4:
+    case 6:
+        break;
+    case 2:
+    case 5:
+    default:
+        for (i = 1; i < 6; i++) {
+            if (i <= m_iFigure) m_pSeqCtrls[i].enableDisp(0, TRUE);
+            else m_pSeqCtrls[i].enableDisp(0, FALSE);
+        }
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDispMogSeq__Q25Gauge11CPrizeGauge);
 __asm__(".rdata\n.align 4\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x002899B4\n.word 0x00289958\n.word 0x002899B4\n.word 0x00000000\n.word 0x00000000\n.text\n");
 void CPrizeGauge::setPrizeExp(INT inExp) {
