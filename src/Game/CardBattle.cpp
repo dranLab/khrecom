@@ -1262,8 +1262,93 @@ void CCardBattle::calcEnchant_AttackPoint(INT& inPoint, ATK_KIND& inAtkKind, ATK
         inAtkKind = param.AtkKind;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayerEnchant__Q210CardBattle11CCardBattlei);
-__asm__(".rdata\n.align 4\n.word .L001DEDA4\n.word .L001DEE4C\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEE18\n.word .L001DEF48\n.word .L001DEDB4\n.word .L001DEDC4\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEE38\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEDD0\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEDE4\n.word .L001DECCC\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DEF48\n.word .L001DED74\n.word .L001DEDF8\n.word .L001DECE4\n.word .L001DED44\n.word .L001DED14\n.word .L001DED5C\n.word .L001DECFC\n.word .L001DED8C\n.word .L001DED2C\n.word .L001DEE60\n.word .L001DEE78\n.word .L001DEE9C\n.word .L001DEEB4\n.word .L001DEED8\n.word .L001DEEF4\n.word .L001DEF0C\n.word .L001DEF24\n.text\n");
+void CCardBattle::setPlayerEnchant(INT inKind) {
+    if (!g_pPlayer) return;
+    switch (inKind) {
+    case 0x68:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[2]);
+        break;
+    case 0x6E:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[3]);
+        break;
+    case 0x72:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[7]);
+        break;
+    case 0x70:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[5]);
+        break;
+    case 0x74:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[8]);
+        break;
+    case 0x6F:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[4]);
+        break;
+    case 0x71:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[6]);
+        break;
+    case 0x6C:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[1]);
+        break;
+    case 0x73:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[9]);
+        break;
+    case 0x45:
+        g_pPlayer->m_iMaxCombo = 4;
+        break;
+    case 0x4E:
+        g_pPlayer->m_iMaxCombo = 1;
+        break;
+    case 0x4F:
+        g_pPlayer->setConditionFlag(0x100000, 0);
+        break;
+    case 0x63:
+        g_pPlayer->setConditionFlag(0x80, 0);
+        break;
+    case 0x67:
+        g_pPlayer->setConditionFlag(0x100, 0);
+        break;
+    case 0x6D:
+        if (CGame::isSoraGame()) g_pPlayer->getRevolver()->setChargeRate(0x43);
+        break;
+    case 0x4C:
+        { CPlayer* pPL = g_pPlayer; pPL->m_fPrizeDraw = 30.0f; pPL->m_fCardDraw = 10.0f; }
+        break;
+    case 0x56:
+        g_pPlayer->setBanish(TRUE);
+        break;
+    case 0x46:
+        g_pPlayer->setReflectGuard(TRUE);
+        break;
+    case 0x75:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[10]);
+        break;
+    case 0x76:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[11]);
+        g_pPlayer->setConditionFlag(0x1000, 0);
+        break;
+    case 0x77:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[12]);
+        break;
+    case 0x78:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[13]);
+        g_pPlayer->setAeroGuard(TRUE);
+        break;
+    case 0x79:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[14]);
+        g_pPlayer->setConditionFlag(0x40000000, 0);
+        break;
+    case 0x7A:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[15]);
+        break;
+    case 0x7B:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[16]);
+        break;
+    case 0x7C:
+        g_pPlayer->setDefAttr(PL::g_fDefAttr[17]);
+        g_pPlayer->setConditionFlag(0x20000000, 0);
+        break;
+    }
+}
 void CCardBattle::resetPlayerEnchant(INT inKind) {
     if (_ref(g_pPlayer)) {
         _ref(g_pPlayer)->setDefAttr(PL::g_fDefAttr[0]);
