@@ -39,7 +39,7 @@ inline void _battleEnemyCheckIndex(INT inIndex, INT inState) {
     if (!(inState < 8)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);
 }
 
-class CBattleEnemyManager;
+class CBattleEnemyManager; struct MES_CARD_INFO;
 
 class CBattleEnemy : public CEntity {
 private:
@@ -109,6 +109,92 @@ public:
     virtual BOOL initalize(INT inGroupID, INT inRsrcID) { return initalize(inGroupID, inRsrcID, 0); }
     virtual void onMsg(INT inMsg, void* inExtraInfo);
     virtual void onOut();
+#ifdef GAME_ENEMY_BATTLEENEMY_CPP
+    /* The original inline members, in the order this object emits them (weak). */
+    void setBattleEnemyFlag(ULONGLONG inOn, ULONGLONG inOff) { m_ullBtlEnemyFlag = (m_ullBtlEnemyFlag | inOn) & ~inOff; }
+    void setHp(INT inHp) { m_iHp = inHp; }
+    void setGroupNo(INT inNo) { m_iGroupNo = inNo; }
+    void setDefaultState(CState* inState) { m_pDefaultState = inState; }
+    void setFallMotionIndex(INT inIndex) { m_iFallMotionIndex = inIndex; }
+    void setLandMotionIndex(INT inIndex) { m_iLandMotionIndex = inIndex; }
+    void setParam(INT inParam) { m_iParam = inParam; }
+    void setBodyRviseCoefficient(FLOAT inCoefficient) { m_fBodyRviseCoefficient = inCoefficient; }
+#line 226 BATTLEENEMY_H_PATH
+    void setAttrDmgSeIdentifyNo(INT inIndex, INT inNo) {
+        if (!(0 <= inIndex && inIndex < 6)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < ATK_ATTR_MAX", 0);
+        m_sAttrDmgSeIdentifyNo[inIndex] = inNo;
+    }
+    void setCardBreakSeIdentifyNo(INT inNo) { m_iCardBreakSeIdentifyNo = inNo; }
+    void setExp(INT inExp) { m_iExp = inExp; }
+    UINT getBattleEnemyFlag() const { return m_ullBtlEnemyFlag; }
+    INT getHp() const { return m_iHp; }
+    INT getGroupNo() const { return m_iGroupNo; }
+    CARD_KIND getCardKind() const { return m_CardKind; }
+    CARD_KIND getDuelCardKind() const { return m_DuelCardKind; }
+    INT getParam() const { return m_iParam; }
+    ENEMY_PARAM* getEnemyParam() const { return m_pEnemyParam; }
+    INT getHpPercent() const { return getHp() * 100 / getHpMax(); }
+    const struct MES_CARD_INFO* getMesCardInfo() const { return (const struct MES_CARD_INFO*)m_MesCardInfo; }
+    TIMEQ getStopTime() const { return m_tqTime; }
+    INT getExp() const { return m_iExp; }
+    ULONGLONG isCardBattle() const { return m_ullBtlEnemyFlag & 0x1ULL; }
+    ULONGLONG isCardBattleFailed() const { return m_ullBtlEnemyFlag & 0x2ULL; }
+    ULONGLONG isAttack() const { return m_ullBtlEnemyFlag & 0x4ULL; }
+    ULONGLONG isStartFaint() const { return m_ullBtlEnemyFlag & 0x8ULL; }
+    ULONGLONG isPermissionCardBattle() const { return m_ullBtlEnemyFlag & 0x10ULL; }
+    ULONGLONG isNoCreateCard() const { return m_ullBtlEnemyFlag & 0x20ULL; }
+    ULONGLONG isHitAttack() const { return m_ullBtlEnemyFlag & 0x40ULL; }
+    ULONGLONG isReload() const { return m_ullBtlEnemyFlag & 0x80ULL; }
+    ULONGLONG isFly() const { return m_ullBtlEnemyFlag & 0x100ULL; }
+    ULONGLONG isPutCardReady() const { return m_ullBtlEnemyFlag & 0x200ULL; }
+    ULONGLONG isNoHpSub() const { return m_ullBtlEnemyFlag & 0x400ULL; }
+    ULONGLONG isStartCardBattle() const { return m_ullBtlEnemyFlag & 0x800ULL; }
+    ULONGLONG isCounter() const { return m_ullBtlEnemyFlag & 0x1000ULL; }
+    ULONGLONG isInvincible() const { return m_ullBtlEnemyFlag & 0x2000ULL; }
+    ULONGLONG isMatchless() const { return m_ullBtlEnemyFlag & 0x4000ULL; }
+    ULONGLONG isNoHitBack() const { return m_ullBtlEnemyFlag & 0x8000ULL; }
+    ULONGLONG isNoPlayDamageMotion() const { return m_ullBtlEnemyFlag & 0x10000ULL; }
+    ULONGLONG isBind() const { return m_ullBtlEnemyFlag & 0x20000ULL; }
+    ULONGLONG isConfuse() const { return m_ullBtlEnemyFlag & 0x40000ULL; }
+    ULONGLONG isNoDmgResponse() const { return m_ullBtlEnemyFlag & 0x80000ULL; }
+    ULONGLONG isNoBigDamage() const { return m_ullBtlEnemyFlag & 0x100000ULL; }
+    ULONGLONG isNoSmallDmgResponse() const { return m_ullBtlEnemyFlag & 0x200000ULL; }
+    ULONGLONG isNoMakePrize() const { return m_ullBtlEnemyFlag & 0x400000ULL; }
+    ULONGLONG isHitBody() const { return m_ullBtlEnemyFlag & 0x800000ULL; }
+    ULONGLONG isHitPoints() const { return m_ullBtlEnemyFlag & 0x1000000ULL; }
+    ULONGLONG isOnDamageEndCardBattle() const { return m_ullBtlEnemyFlag & 0x2000000ULL; }
+    ULONGLONG isNoSetHitEffect() const { return m_ullBtlEnemyFlag & 0x4000000ULL; }
+    ULONGLONG isAlwaysSetCard() const { return m_ullBtlEnemyFlag & 0x8000000ULL; }
+    ULONGLONG isDamageAir() const { return m_ullBtlEnemyFlag & 0x10000000ULL; }
+    ULONGLONG isStockAct() const { return m_ullBtlEnemyFlag & 0x20000000ULL; }
+    ULONGLONG isNotifyDead() const { return m_ullBtlEnemyFlag & 0x40000000ULL; }
+    ULONGLONG isRotMove() const { return m_ullBtlEnemyFlag & 0x80000000ULL; }
+    ULONGLONG isStartDuel() const { return m_ullBtlEnemyFlag & 0x100000000ULL; }
+    ULONGLONG isNoFlick() const { return m_ullBtlEnemyFlag & 0x200000000ULL; }
+    ULONGLONG isNoPlayDamageSE() const { return m_ullBtlEnemyFlag & 0x400000000ULL; }
+    ULONGLONG isNoCardBattle() const { return m_ullBtlEnemyFlag & 0x800000000ULL; }
+    ULONGLONG isStartConfuse() const { return m_ullBtlEnemyFlag & 0x1000000000ULL; }
+    ULONGLONG isNoMakeFriendCard() const { return m_ullBtlEnemyFlag & 0x2000000000ULL; }
+    ULONGLONG isNoDuelPlayerTurn() const { return m_ullBtlEnemyFlag & 0x4000000000ULL; }
+    ULONGLONG isNoResponseTornado() const { return m_ullBtlEnemyFlag & 0x8000000000ULL; }
+    ULONGLONG isNoDmgResponseOnFreeze() const { return m_ullBtlEnemyFlag & 0x10000000000ULL; }
+    ULONGLONG isStartSleep() const { return m_ullBtlEnemyFlag & 0x20000000000ULL; }
+    ULONGLONG isTerror() const { return m_ullBtlEnemyFlag & 0x40000000000ULL; }
+    ULONGLONG isFaint() const { return m_ullBtlEnemyFlag & 0x80000000000ULL; }
+    ULONGLONG isNoDmgResponseOnMagnet() const { return m_ullBtlEnemyFlag & 0x100000000000ULL; }
+    ULONGLONG isNoKillCount() const { return m_ullBtlEnemyFlag & 0x200000000000ULL; }
+    BOOL canFlick() const {
+        if (isNoDmgResponse()) return FALSE;
+        if (isNoBigDamage()) return FALSE;
+        return TRUE;
+    }
+#line 399 BATTLEENEMY_H_PATH
+    void changeAttackRate(INT inIndex) {
+        if (!(0 <= inIndex && inIndex < 2)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < 2", 0);
+        m_iActiveAttackRate = inIndex;
+    }
+#line 2000 BATTLEENEMY_H_PATH
+#else
     void setHp(INT inHp) { m_iHp = inHp; }
     INT getHp() const { return m_iHp; } // PARTIAL: added for Game/Enemy/EnemyGreenrequiem
     void setFallMotionIndex(INT inIndex) { m_iFallMotionIndex = inIndex; } // PARTIAL: added for Game/Enemy/EnemyPirate
@@ -121,6 +207,7 @@ public:
     void setBtlEnemyFlag(ULONGLONG inFlag) { m_ullBtlEnemyFlag |= inFlag; }
     void setBattleEnemyFlag(ULONGLONG inOn, ULONGLONG inOff) { m_ullBtlEnemyFlag = (m_ullBtlEnemyFlag | inOn) & ~inOff; }
     void clearBtlEnemyFlag(ULONGLONG inFlag) { m_ullBtlEnemyFlag &= ~inFlag; } // PARTIAL: added for Game/Enemy/EnemyTornadostep
+#endif
     void getPlayerPosition(FVECTOR& outPos);
     FLOAT getExtraParam(const CHAR* inParamName);
     void endCardBattle(CState* inState, TIMEQ inNextAttackWait);
@@ -174,27 +261,39 @@ public:
     void playSmallDamageSE();
     void playBigDamageSE();
     INT selectDamageMotion_();
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP
     INT getParam() { return m_iParam; }
+#endif
     void makeExpPrize();              // PARTIAL: added for Game/Enemy/BossDeadDemo
     static void setBossKilledFlag();
     static INT m_iDuelCardNum;        // PARTIAL: added for Game/Enemy/BattleEnemy
     static INT m_iDuelCardPtr;
     static int m_iDuelCardArray[10];
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP
     void setParam(INT inParam) { m_iParam = inParam; } // PARTIAL: added for Game/Enemy/CreateEnemy
+#endif
     // PARTIAL: added for Game/Enemy/BattleEnemyManager
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP
     UINT getBattleEnemyFlag() const { return m_ullBtlEnemyFlag; }
     void setGroupNo(INT inNo) { m_iGroupNo = inNo; }
     INT getGroupNo() const { return m_iGroupNo; }
+#endif
     HANDLE getNearestChild(FLOAT& outDist, CEntity& inEntity);
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP
     ULONGLONG isPermissionCardBattle() const { return m_ullBtlEnemyFlag & 0x200; }
+#endif
     INT getHpMax() const;
     BOOL isCurrentState(INT inState); // PARTIAL: added for Game/Enemy/HumanBoss
     INT getPlayerState();             // PARTIAL: added for Game/Enemy/HumanBoss
     // PARTIAL: added for Game/Enemy/EnemyAirpirate
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP
     ENEMY_PARAM* getEnemyParam() { return m_pEnemyParam; }
     ENEMY_PARAM* getEnemyParam() const { return m_pEnemyParam; } // PARTIAL: added for Game/Enemy/HumanBoss
+#endif
     INT getAttackRate() const;
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP
     INT getAttackState() const { return m_iAttackState; } // PARTIAL: added for Game/Enemy/Heartless
+#endif
     BOOL canAttack_(const ENEMY_ACT* inAct);
     BOOL destroyCard(); // PARTIAL: added for Game/Enemy/EnemyBarrelspider
     // PARTIAL: added for Game/Enemy/EnemyWhitemushroom
@@ -208,6 +307,15 @@ public:
     virtual void getUseCardPos(FVECTOR& outPos);
     virtual void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     virtual BOOL startCardBattle();
+#ifdef GAME_ENEMY_BATTLEENEMY_CPP
+    virtual void bossDeadDemoCallback() {}
+    virtual void setBossDeadEffect();
+    virtual void killBossDeadEffect();
+    virtual void bossCardRevolverDestroy() {}
+    virtual void bossDeadDemoDispOff();
+    virtual BOOL bossDeadDemoSpecial() { return TRUE; }
+    virtual void bossDeadDemoEnd() {}
+#else
     virtual void bossDeadDemoCallback();
     virtual void setBossDeadEffect();
     virtual void killBossDeadEffect();
@@ -215,6 +323,7 @@ public:
     virtual void bossDeadDemoDispOff();
     virtual BOOL bossDeadDemoSpecial();
     virtual void bossDeadDemoEnd();
+#endif
     virtual void onBio(INT inParam);
     virtual void onGift(INT inParam);
 
@@ -226,6 +335,38 @@ protected:
     virtual void beginStateAppear();
     virtual void stateAppear();
     virtual void endStateAppear();
+#ifdef GAME_ENEMY_BATTLEENEMY_CPP
+    virtual void beginStateMain() {}
+    virtual void stateMain() {}
+    virtual void endStateMain() {}
+    virtual void beginStateAttack1() {}
+    virtual void stateAttack1() {}
+    virtual void endStateAttack1() {}
+    virtual void beginStateAttack2() {}
+    virtual void stateAttack2() {}
+    virtual void endStateAttack2() {}
+    virtual void beginStateAttack3() {}
+    virtual void stateAttack3() {}
+    virtual void endStateAttack3() {}
+    virtual void beginStateAttack4() {}
+    virtual void stateAttack4() {}
+    virtual void endStateAttack4() {}
+    virtual void beginStateAttack5() {}
+    virtual void stateAttack5() {}
+    virtual void endStateAttack5() {}
+    virtual void beginStateAttack6() {}
+    virtual void stateAttack6() {}
+    virtual void endStateAttack6() {}
+    virtual void beginStateAttack7() {}
+    virtual void stateAttack7() {}
+    virtual void endStateAttack7() {}
+    virtual void beginStateAttack8() {}
+    virtual void stateAttack8() {}
+    virtual void endStateAttack8() {}
+    virtual void beginStateItem() {}
+    virtual void stateItem() {}
+    virtual void endStateItem() {}
+#else
     virtual void beginStateMain();
     virtual void stateMain();
     virtual void endStateMain();
@@ -256,6 +397,7 @@ protected:
     virtual void beginStateItem();
     virtual void stateItem();
     virtual void endStateItem();
+#endif
     virtual void beginStateSmallDamage();
     virtual void stateSmallDamage();
     virtual void endStateSmallDamage();
@@ -316,6 +458,19 @@ protected:
     virtual void beginStateDead();
     virtual void stateDead();
     virtual void endStateDead();
+#ifdef GAME_ENEMY_BATTLEENEMY_CPP
+    virtual void aiCardBattle() {}
+    virtual void onGuard() {}
+    virtual void onDamage() {}
+    virtual void onAbsorb() {}
+    virtual void onInvalid() {}
+    virtual void onGimmickCard() {}
+    virtual void onCardBreak() {}
+    virtual void onReflect() {}
+    virtual void onAttackCancel() {}
+    virtual void onCardBattleFailed() {}
+    virtual INT getDuelAttackState() { return -1; }
+#else
     virtual void aiCardBattle();
     virtual void onGuard();
     virtual void onDamage();
@@ -327,6 +482,7 @@ protected:
     virtual void onAttackCancel();
     virtual void onCardBattleFailed();
     virtual INT getDuelAttackState();
+#endif
     virtual CEntity* createFriendCard(CARD_KIND inKind, INT inParam);
     virtual void notifyHP();
     virtual void commonBeginAttack();
@@ -445,7 +601,9 @@ public: // PARTIAL: state wrappers added for Game/Enemy/BattleEnemy
     void stateDead_();
     void endStateDead_();
 public:
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP
     void setAttackState_(INT inState) { m_iAttackState = inState; } // PARTIAL: added for Game/Enemy/Heartless (no range check)
+#endif
 public:
     // PARTIAL: added for Game/Enemy/EnemyAirpirate (last in the class: it sets the original line number)
 #line 673 BATTLEENEMY_H_PATH
@@ -453,6 +611,10 @@ public:
         if (!(2 <= inState && inState < 10)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);
         m_iAttackState = inState;
     }
+#ifdef GAME_ENEMY_BATTLEENEMY_CPP
+    BOOL canAttack(const ENEMY_ACT* inAct) { return canAttack_(inAct); }
+    BOOL cancelTimeOver_() const { return m_tqCancelTimer <= 0; }
+#endif
 };
 
 #endif /* GAME_ENEMY_BATTLEENEMY_H */
