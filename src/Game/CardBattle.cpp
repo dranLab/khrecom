@@ -68,6 +68,7 @@ public:
 };
 }
 namespace CardBattle {
+extern G_UV g_uvDuelNumTex[4][10];
 extern LPCSTR g_szLadDuel; /* the file's statics (data still from assembly) */
 extern LPCSTR g_szSeqDuel;
 }
@@ -402,7 +403,18 @@ void CDuelGauge::exeCount() {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", changeCount__Q210CardBattle10CDuelGaugeUiUi);
+void CDuelGauge::changeCount(UINT inCount, UINT inMax) {
+    m_uiCount = inCount % 10;
+    if (m_uiCount) {
+        m_pSeqCtrls[10].replaceSeq(1, g_szSeqDuel, m_uiCount + 9);
+    } else {
+        m_pSeqCtrls[10].replaceSeq(1, g_szSeqDuel, 9);
+    }
+    if (inMax) {
+        m_uiCountMax = inMax % 10;
+        m_pSeqCtrls[9].changeTexture(1, 0, NULL, &g_uvDuelNumTex[2][m_uiCountMax], &g_uvDuelNumTex[3][m_uiCountMax]);
+    }
+}
 void CDuelGauge::setDuelNG() {
     D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[11];
     if (pSeq) {
