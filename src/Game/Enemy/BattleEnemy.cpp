@@ -863,7 +863,51 @@ void CBattleEnemy::beginStateDegenerator() {
     m_pMove->enableGravity(FALSE);
     m_iSysStep = 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateDegenerator__12CBattleEnemy);
+void CBattleEnemy::stateDegenerator() {
+    CEffect* effect = CEffectMan::getEffect(m_hDision);
+    switch (m_iSysStep) {
+    case 0: {
+        if (!effect) break;
+        FLOAT t = effect->getNowFrame() / (effect->getTotalFrame() * 0.5f);
+        if (t >= 1.0f) {
+            t = 1.0f;
+            setEntityFlag(1, 0);
+            m_iSysStep++;
+        }
+        FVECTOR s2;
+        FVECTOR s0;
+        FVECTOR s1;
+        s0.set(1.0f, 1.0f, 1.0f, 1.0f);
+        s1.set(0.0f, 2.0f, 0.0f, 1.0f);
+        Math3D::VectorLerp(s2, s0, s1, t);
+        setScale(s2);
+        break;
+    }
+    case 1:
+        if (effect) break;
+        notifyDead();
+        switch (m_pBodyColl->getHitCollBody()->getDamageKind()) {
+        case ATK_KIND_DEGENERATOR:
+        case ATK_KIND_DEGENERATE_BREAK: {
+            FVECTOR pos;
+            getLockOnPos(pos);
+            makePrize(&pos);
+            break;
+        }
+        case ATK_KIND_DEGENERATE:
+            if (!isBtlEnemyFlag(0x400000)) {
+                FVECTOR pos;
+                getLockOnPos(pos);
+                makePremiumPrize(&pos);
+                makeRoulettePrize(&pos);
+                makeCard(&pos);
+            }
+            break;
+        }
+        out();
+        break;
+    }
+}
 void CBattleEnemy::endStateDegenerator() {}
 void CBattleEnemy::beginStateGravity() {
     m_iSysStep = 0;
