@@ -780,7 +780,26 @@ INT CCardBattle::setPronouncePlay(INT inFlag) {
     setDuelBreakCount(0, 6);
     return pSF->setPlayPronounce();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnemyPronounceCard__Q210CardBattle11CCardBattleiPQ210CardBattle11CBattleCard);
+INT CCardBattle::setEnemyPronounceCard(HANDLE inOwner, CBattleCard* inCard) {
+    if (m_uiState[1]) return 0;
+    m_hOwner[1] = inOwner;
+    m_uiState[1] = 14;
+    m_uiResult[1] = 0;
+    CBattleCard* pOld = m_pCard[1][0];
+    if (pOld && !pOld->getRevolver()) pOld->out();
+    m_pCard[1][0] = inCard;
+    if (inCard) {
+        inCard->setEnchantEffect(0x44, 0);
+        m_pCard[1][0]->setEnchantEffect(0x52, 0);
+        m_pCard[1][0]->setEnchantEffect(0x53, 0);
+    }
+    *(CARD*)m_cardData[1][0] = *inCard->getCardData();
+    m_iStock[1] = 0;
+    m_iExtra[1] = 0;
+    m_iFirst[1] = 0;
+    m_pCard[1][0]->setPlayPronounce();
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPronounceEnd__Q210CardBattle11CCardBattlei);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", disablePlayCard__Q210CardBattle11CCardBattleUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isDisablePlayCard__Q210CardBattle11CCardBattle);
