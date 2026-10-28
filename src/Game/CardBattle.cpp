@@ -272,22 +272,14 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setEnemyCard__Q210Ca
 void CCardBattle::destroyEnemyCard(INT inHandle) {
     if (inHandle == m_hOwner[1]) destroyPlayCard(2, inHandle);
 }
-/* Parked: address arithmetic only - the original computes this+0x12c and (inSide-1)*4 separately and adds them, ours
- * folds the -4 into the offset (addiu 296); same for destroyStockFolder (this+0x134); tried: reference local, INT/UINT
- * index locals, pointer base local, pointer arithmetic, a cast base, an inline array-reference helper, permuter 4 min
- * (12562 candidates, no gain) */
-#if 0
 void CCardBattle::destroyRevolver(INT inSide) {
     if (!(inSide)) AssertApp(D_00476980, 2764, D_00476730, 0);
-    CCardRevolver*& rpRevolver = m_pRevolver[inSide - 1];
-    if (rpRevolver) {
-        rpRevolver->destroy();
-        rpRevolver = NULL;
+    UINT _PLAYER = inSide - 1;
+    if (m_pRevolver[_PLAYER]) {
+        m_pRevolver[_PLAYER]->destroy();
+        m_pRevolver[_PLAYER] = NULL;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", destroyRevolver__Q210CardBattle11CCardBattlei);
-#endif
 void CCardBattle::setRevolver(INT inSide, CCardRevolver* pRevolver) {
     if (!(inSide)) AssertApp(D_00476980, 2774, D_00476730, 0);
     m_pRevolver[inSide - 1] = pRevolver;
@@ -338,20 +330,7 @@ CStockFolder* CCardBattle::setStockFolder(::CTask* pParent, INT inUser) {
     }
     return m_pInstance->m_pStockFolder[_PLAYER];
 }
-/* Parked: same as destroyRevolver - the original adds this+0x134 and (inSide-1)*4 separately, ours folds the -4 into
- * the offset; tried: the destroyRevolver variants */
-#if 0
-void CCardBattle::destroyStockFolder(INT inSide) {
-    if (!(inSide)) AssertApp(D_00476980, 2905, D_00476730, 0);
-    CStockFolder*& rpFolder = m_pStockFolder[inSide - 1];
-    if (rpFolder) {
-        rpFolder->destroy();
-        rpFolder = NULL;
-    }
-}
-#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", destroyStockFolder__Q210CardBattle11CCardBattlei);
-#endif
 CStockFolder* CCardBattle::getStockFolder(INT inSide) {
     if (!m_pInstance) return NULL;
     return m_pInstance->m_pStockFolder[inSide - 1];
