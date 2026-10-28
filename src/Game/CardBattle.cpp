@@ -755,8 +755,38 @@ HANDLE CCardBattle::getPlayingHandle(INT inSide) {
     if ((inSide == 0 || inSide == 2) && m_pInstance->m_uiState[1]) return m_pInstance->m_hOwner[1];
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", isStandingCard__Q210CardBattle11CCardBattlei);
-__asm__(".rdata\n.align 3\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5AC\n.word .L001DD5AC\n.word .L001DD5AC\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5AC\n.word .L001DD5AC\n.word .L001DD5AC\n.word .L001DD5A4\n.word .L001DD5A4\n.word 0\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5EC\n.word .L001DD5EC\n.word .L001DD5EC\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5A4\n.word .L001DD5EC\n.word .L001DD5EC\n.word .L001DD5EC\n.word .L001DD5A4\n.word .L001DD5A4\n.word 0\n.text\n");
+BOOL CCardBattle::isStandingCard(INT inSide) {
+    if (!m_pInstance) return FALSE;
+    if ((UINT)inSide < 2) {
+        switch (m_pInstance->m_uiState[0]) {
+        case 1:
+        case 2:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 14:
+        case 15:
+            return TRUE;
+        }
+    }
+    if (inSide == 0 || inSide == 2) {
+        switch (m_pInstance->m_uiState[1]) {
+        case 1:
+        case 2:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 14:
+        case 15:
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
 BOOL CCardBattle::isPlayingCardStandNow(INT inSide) {
     if (!m_pInstance) return FALSE;
     if ((UINT)inSide < 2) {
