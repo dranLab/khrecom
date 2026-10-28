@@ -1139,7 +1139,23 @@ BOOL CBattleEnemy::canAttack_(const ENEMY_ACT* inAct) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", selectDamageMotion___12CBattleEnemy);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", enableBind___12CBattleEnemyi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", enableConfuse___12CBattleEnemyi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", setGuardEffect___12CBattleEnemyPC7FVECTOR);
+void CBattleEnemy::setGuardEffect_(const FVECTOR* inPos) {
+    switch ((UINT)getID() % 10000) {
+    case 9:
+        setEffect(BattleEnemy::LargebodyGuardEffectEffectName, 15, inPos, NULL, 0.0f);
+        break;
+    case 114:
+        setEffect(BattleEnemy::VexenGuardEffectEffectName, 6, inPos, NULL, 0.0f);
+        break;
+    default:
+        if (getSize() <= 0) {
+            setEffect(BattleEnemy::AlwaysEffectName, 10, inPos, NULL, 0.0f);
+        } else {
+            setEffect(BattleEnemy::AlwaysEffectName, 11, inPos, NULL, 0.0f);
+        }
+        break;
+    }
+}
 FLOAT CBattleEnemy::getDamageRate_() const {
     return m_fDamageRate;
 }
