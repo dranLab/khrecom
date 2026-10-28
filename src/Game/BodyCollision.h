@@ -71,7 +71,7 @@ private:
         if (!(0 <= inKind && inKind < 2)) AssertApp(__FILE__, __LINE__, "0 <= inKind && inKind < COLLISION_KIND_MAX", 0);
         m_uiUserBodyFlag[inKind] = (m_uiUserBodyFlag[inKind] | inSet) & ~inMask;
     }
-    void setHitCollBody(CCollBody* inHit) { m_pHit = inHit; }
+    void setHitCollBody(CCollBody* inHit) { m_pHit = inHit; } friend class CBattleEnemy; // PARTIAL: friend added for Game/Enemy/BattleEnemy (stateTornado)
     void setHitCollBodyIndex(INT inIndex) { m_iHitIndex = inIndex; }
 
 public:

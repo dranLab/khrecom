@@ -51,9 +51,32 @@ inline void _emptyStringPlaceholder0() {
 #include "include_asm.h"
 
 extern "C" char D_004ACBC0[];
+extern "C" char D_004AD420[]; /* "m_pBodyColl": first used by stateStop (still assembly) */
 /* PARTIAL: until SOURCE DATA, the unit's copy of the header static BattleEnemy::BadStatusEffectName (its .data
  * comes from the original assembly) */
 template <class T> static inline T& _ref(T& x) { return x; }
+/* ENEMY_PARAM's inline attribute rate (name unknown) */
+static inline FLOAT _getAttrRate(ENEMY_PARAM* inParam, INT inAttr) {
+    FLOAT value = 100.0f;
+    switch (inAttr) {
+    case 0:
+        value = inParam->fAttr[0];
+        break;
+    case 1:
+        value = inParam->fAttr[1];
+        break;
+    case 2:
+        value = inParam->fAttr[2];
+        break;
+    case 3:
+        value = inParam->fAttr[3];
+        break;
+    case 4:
+        value = inParam->fAttr[4];
+        break;
+    }
+    return value;
+}
 struct CB_ENCHANT_VIEW {
     BYTE _pad[0x17C];
     CARD m_cardEnchant[2];
@@ -1192,8 +1215,48 @@ void CBattleEnemy::beginStateTornado() {
     bodyCollOff(-1);
     bodyCollOffBody(-1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", stateTornado__12CBattleEnemy);
-__asm__(".rdata\n.align 3\n.word .L002B0B20\n.word .L002B0B28\n.word .L002B0B30\n.word .L002B0B38\n.word .L002B0B40\n.word func_0\n.word func_0\n.word func_0\n.text\n");
+void CBattleEnemy::stateTornado() {
+    if (!m_pBodyColl) AssertApp(D_004ACBC0, 0xC65, D_004AD420, 0);
+    CCollBody* hitBody = m_pBodyColl->getHitCollBody();
+    if (!hitBody) AssertApp(D_004ACBC0, 0xC67, "hitBody", 0);
+    switch (m_iSysStep) {
+    case 0: {
+        CEntity* tornado = (CEntity*)CTaskMan::getTask(hitBody->getEnemyHandle());
+        if (!tornado) {
+            m_pMove->enableGravity(TRUE);
+            m_iSysStep++;
+            break;
+        }
+        getRot().y += 0.34906584f;
+        getRot().y = Math3D::LimitPI(getRot().y);
+        FVECTOR pos = tornado->getPos();
+        FLOAT r = RND::genrand_real1();
+        pos.y += 2.0f;
+        pos.x += r * cosf(getRot().y);
+        pos.z += r * sinf(getRot().y);
+        setPos(pos);
+        break;
+    }
+    case 1:
+        if (m_pMove->getCollisionFlag() & 5) {
+            if (!m_pEnemyParam) AssertApp(D_004ACBC0, 0xC8A, "m_pEnemyParam", 0);
+            computeDamage_(m_fDamage, _getAttrRate(m_pEnemyParam, hitBody->getDamageAttr()));
+            if (m_iHp <= 0 && !isReraise_()) {
+                m_pBodyColl->setHitCollBody(NULL);
+                changeBattleEnemyState(30);
+                break;
+            }
+            if (hitBody->getHitEffectNo() != -1) {
+                FVECTOR pos;
+                getLockOnPos(pos);
+                CEffectMan::setEffect(hitBody->getHitEffectName(), hitBody->getHitEffectNo(),
+                                      (ObjType::eObjType)hitBody->getHitEffectObjType(), &pos, NULL, 0.0f);
+            }
+            changeBattleEnemyState(17);
+        }
+        break;
+    }
+}
 void CBattleEnemy::endStateTornado() {
     bodyCollOn(-1);
     bodyCollOnBody(-1);
@@ -1359,28 +1422,6 @@ void CBattleEnemy::beginStateBeat() {
     m_pMove->enableGravity(TRUE);
     playBigDamageSE();
     m_iSysStep = 0;
-}
-/* ENEMY_PARAM's inline attribute rate (name unknown) */
-static inline FLOAT _getAttrRate(ENEMY_PARAM* inParam, INT inAttr) {
-    FLOAT value = 100.0f;
-    switch (inAttr) {
-    case 0:
-        value = inParam->fAttr[0];
-        break;
-    case 1:
-        value = inParam->fAttr[1];
-        break;
-    case 2:
-        value = inParam->fAttr[2];
-        break;
-    case 3:
-        value = inParam->fAttr[3];
-        break;
-    case 4:
-        value = inParam->fAttr[4];
-        break;
-    }
-    return value;
 }
 void CBattleEnemy::stateBeat() {
     switch (m_iSysStep) {
