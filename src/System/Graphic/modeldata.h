@@ -45,6 +45,7 @@ struct MODELDATA {
         return 0;
     }
     USHORT getMode() const { return getRawMode(); }
+    BOOL isShadow() const { return getMode() == 0x10; } // PARTIAL: added for System/Graphic/Model
     USHORT getShaderOption() const {
         const SHORT* tag = (const SHORT*)(!isDataEmpty() ? m_pData : m_pSemiData);
         INT version = tag[0x16 / 2];

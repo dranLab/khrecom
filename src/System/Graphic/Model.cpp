@@ -60,11 +60,6 @@ extern "C" char D_00460DC8[];
 extern "C" char D_00461090[];
 extern "C" char D_00461028[];
 extern "C" char D_00460FC8[];
-struct BONELABEL { /* PARTIAL: stand-in for BONELABEL (modeldata.h): owner not written */
-    char m_Name[16];     /* 0x00 */
-    SHORT m_ParentIndex; /* 0x10 */
-    SHORT m_BuddyIndex;  /* 0x12 */
-};
 extern "C" char D_00460FF8[];
 extern "C" char D_00460F30[];
 extern "C" char D_00460F60[];
@@ -85,18 +80,6 @@ extern "C" char D_00461148[];
 extern "C" char D_00461160[];
 extern "C" char D_00461178[];
 extern "C" int strncmp(const char*, const char*, unsigned int);
-class CShadowMapModel : public CFadeModel { /* PARTIAL: stand-in for CShadowMapModel: owner not written */
-    HANDLE m_hHnd; /* 0x28 */
-public:
-    CShadowMapModel() {
-        CDrawable::setSemiTrans(ALPHA_BLEND);
-        setTestFlag(0x5000D);
-        setLayer(0x18, 0);
-        m_SemiDraw = FALSE;
-        m_hHnd = 0;
-    }
-    virtual ~CShadowMapModel();
-};
 class CShadowModel : public CFadeModel { /* PARTIAL: stand-in for CShadowModel: owner not written */
     INT m_nSize; /* 0x28 */
 public:
@@ -108,7 +91,21 @@ public:
         m_SemiDraw = FALSE;
         m_nSize = 0;
     }
-    virtual ~CShadowModel();
+    virtual void changeLayerExt(BOOL bOn, INT nDepth) { setLayer(0x17, 0); }
+    virtual FIX4 calcZ() { return 0; }
+};
+class CShadowMapModel : public CFadeModel { /* PARTIAL: stand-in for CShadowMapModel: owner not written */
+    HANDLE m_hHnd; /* 0x28 */
+public:
+    CShadowMapModel() {
+        CDrawable::setSemiTrans(ALPHA_BLEND);
+        setTestFlag(0x5000D);
+        setLayer(0x18, 0);
+        m_SemiDraw = FALSE;
+        m_hHnd = 0;
+    }
+    virtual void changeLayerExt(BOOL bOn, INT nDepth) { setLayer(0x18, 0); }
+    virtual FIX4 calcZ() { return 0; }
 };
 namespace Mad {
 struct MODEL_ATTACH_DATA {
@@ -123,7 +120,6 @@ struct MAD_HEADER {
 };
 INT getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId);
 }
-inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
@@ -150,9 +146,55 @@ struct TexInfo;
 
 class CShader;
 
+CShader* createDummyShader();
+/* MATCH: the MPG_START initializer reads a symbol at address 0 (lui/addiu 0): an undefined weak symbol (as 2DSprObj) */
+__asm__(".weak vu1mpg_zero\nvu1mpg_zero = 0\n");
+extern u_long128 vu1mpg_zero;
+static u_int MPG_START = (u_int)&vu1mpg_zero >> 3;
+static SHADERDESC g_ShaderDescTbl[11] = {
+    { 5, 0xFFFF, g_mpg0, 4, 0x86, createDummyShader },
+    { 0x24, 0xFFFF, g_mpg0, 4, 0x86, createDummyShader },
+    { 0, 0xFDFF, g_mpg0, 4, 0x86, createDummyShader },
+    { 0x406E, 0xFF7F, g_mpg2, 0x11, 0x86, createDummyShader },
+    { 6, 0xFFFF, g_mpg0, 4, 0, createDummyShader },
+    { 0x406, 0xFFFF, g_mpg0, 4, 0x86, createDummyShader },
+    { 0x400B, 0xFFFF, g_mpg0, 4, 0, createDummyShader },
+    { 0x10, 0xFFFF, g_mpg0, 4, 0, createDummyShader },
+    { 0x4005, 0xFDFF, g_mpg2, 7, 0, createDummyShader },
+    { 2, 0xFFFF, g_mpg2, 7, 0, createDummyShader },
+    { 0xFFFF, 0xFFFF },
+};
 CShader* createDummyShader() { return NULL; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __6CModelPC9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_6CModel);
+/* MATCH: the colour scale (1, 1, 1, 1) is built in a GPR (lui 1.0f, two pextlw) and stored with one sq */
+static inline u_long128 _oneVector() {
+    u_long128 ret;
+    __asm__ volatile("lui %0, 0x3f80\n"
+                     "pextlw %0, %0, %0\n"
+                     "pextlw %0, %0, %0\n"
+                     : "=r"(ret));
+    return ret;
+}
+CModel::CModel(const MODELDATA* pData) {
+    m_pData = pData;
+    _ZeroInitializer = 0;
+    m_iFlag = 0;
+    _ZeroInitializer2 = 0;
+    m_nZ = 0;
+    m_pCrds = NULL;
+    m_TexUV = NULL;
+    m_pTexAnm = NULL;
+    m_pTask = NULL;
+    m_pShadowMapModel = NULL;
+    *(u_long128*)&getColorScale() = _oneVector();
+    setTestFlag(0x500FD);
+    setLayer(0x1A, 0);
+    m_pWSMat = &CWorldEnv::getWorldScreenMatrix();
+    CModelMan::incModelCount();
+}
+CModel::~CModel() {
+    releaseData();
+    CModelMan::decModelCount();
+}
 void CModel::resetWorldScreenMatrix() { m_pWSMatCache = NULL; }
 void CModel::resetMicroProgram() { m_pMpg = NULL; }
 void CModel::resetSendCtrl(INT nMode) { m_iSendFlg &= ~nMode; }
@@ -1340,8 +1382,6 @@ void CModel::setupUVScroll(INT bVal) {
         }
     }
 }
-/* Parked: 2 lines off: the original loads the flag byte into v0 and shifts into v1 (lbu v0; dsrl v1,v0,7, as the weak isUVScroll copy), ours into one register. Worked: isUVScroll() as a member inline returning the u_long bit-field. Tried: static helper with BOOL/u_long return, ternary; permuter 10 min (17866 candidates, stays 2). */
-#if 0
 void CModel::updateUVScroll(FLOAT fr) {
     INT i;
     if (isUVScroll()) {
@@ -1357,15 +1397,8 @@ void CModel::updateUVScroll(FLOAT fr) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateUVScroll__6CModelf);
-#endif
 void CModel::setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV) {
-    /* MATCH: isUVScroll() as the weak copy shows it (lbu + dsrl: a 64-bit bit-field, result in a 64-bit local) */
-    struct _flag { u_long b0 : 7; u_long b7 : 1; };
-    u_long b = 0;
-    if (m_TexUV) b = ((_flag*)&m_nFlag)->b7;
-    if (b && nNum < m_TransTexCount) {
+    if (isUVScroll() && nNum < m_TransTexCount) {
         ((FLOAT*)m_TexUV)[nNum * 2] = fU;
         ((FLOAT*)m_TexUV)[nNum * 2 + 1] = fV;
     }
@@ -1528,115 +1561,5 @@ INT Mad::getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId) {
     *outMad = mad;
     return header->uiNum;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __static_initialization_and_destruction_0_00133620);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", reset__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", relink__10CSemiModelP6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiSort__10CSemiModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getParentModel__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setOldZ__10CSemiModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getOldZ__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setDefaultSemiTrans__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", replaceParentModel__10CSemiModelP6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setPacketSize__10CSemiModelUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_10CFadeModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __10CFadeModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_11CSemiZModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __11CSemiZModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__11CSemiZModelii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__11CSemiZModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelP5CTaskRC9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelP5CTaskPC9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoordsRC9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoordsPC9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaskR9MODELDATAi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaskP9MODELDATAi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsR9MODELDATAi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsP9MODELDATAi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiTrans__6CModelG5ALPHA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getSemiModel__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiSort__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLightUnit__6CModelR10CLightUnit);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLightUnit__6CModelP10CLightUnit);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getCoords__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getPacketSize__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDataEmpty__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isSemiDataEmpty__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTexture__6CModeliPC7TexInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBoneName__C6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getParentBoneName__C6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getMode__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBBoxFlag__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setBBoxFlag__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBBox__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getModelData__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTextureInfo__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setTextureInfo__6CModeliPC11TexInfoStub);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateTextureInfo__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTextureNum__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTransTextureNum__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", fade2Path__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isFade2Path__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", notSemi__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isNotSemi__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispOff__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDispOff__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDisp__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setBeforeDirect__6CModelPCUxi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", clearBeforeDirect__6CModelPCUxi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBeforeDirectNum__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setAfterDirect__6CModelPCUxi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", clearAfterDirect__6CModelPCUxi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getAfterDirectNum__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getOTZ__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setOTZ__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getColorScale__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getAlphaScale__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispWireframe__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDispWireframe__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setWorldScreenMatrix__6CModelPC7FMATRIX);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", defaultShaderOption__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShaderOption__6CModelUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resetShaderOption__6CModelUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__6CModelii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isClampRepeat__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setClampRepeat__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isShadowMap__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShadowMap__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isAutoEffSemiSort__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setAutoEffSemiSort__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isRootZSort__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setRootZSort__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isShadow__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isMap__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", createSemiModel__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isManagedSemiModel__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", manageSemiModel__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isAvailableSemiModel__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", availableSemiModel__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setDispFlag__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isOTZFlag__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setOTZFlag__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateOTZ__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isUVScroll__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setUVScroll__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isWBBox__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setWBBox__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isSemiSortFlag__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiSortFlag__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_8CModelBG);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __8CModelBGUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__8CModelBG);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLayerFG__8CModelBGUc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_5CBBox);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __5CBBox);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getPacketSize__C5CBBox);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_12CShadowModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__12CShadowModelii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__12CShadowModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_15CShadowMapModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__15CShadowMapModelii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__15CShadowMapModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _GLOBAL_$I$c__KHCOM_MainApp_System_Graphic_Model.cppI3aaaa);
+
+// SOURCE DATA: .bss
