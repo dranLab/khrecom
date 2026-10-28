@@ -1,6 +1,7 @@
 #include "pppRyjDrawKekoto.h"
 #include "System/Graphic/Effect/libppp/eiProg/pppColor.h"
 #include "System/Graphic/Effect/libppp/draw/md.h"
+#include "System/Graphic/Effect/libppp/draw/md0_p3f.h"
 #include "System/Graphic/Effect/libppp/draw/draw_w.h"
 #include "System/Graphic/Effect/libppp/draw/global_w.h"
 
@@ -11,17 +12,6 @@ void sceVu0SubVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2);
 void sceVu0FTOI4Vector(sceVu0IVECTOR v0, sceVu0FVECTOR v1);
 int sceVu0ClipScreen(sceVu0FVECTOR v0);
 sceDmaChan *sceDmaGetChan(int id);
-
-typedef struct { /* 0x10 */
-    char flag;
-    char ptype;
-    short pc;
-    u_char tno;
-    u_char timposx;
-    u_char res[2];
-    u_word tex0l;
-    u_word tex0h;
-} OMD_PRIM_H;
 
 typedef union {
     char *pch;

@@ -2,22 +2,12 @@
 #include "System/Graphic/Effect/libppp/pppAlloc.h"
 #include "System/Graphic/Effect/libppp/eiProg/pppColor.h"
 #include "System/Graphic/Effect/libppp/draw/md.h"
+#include "System/Graphic/Effect/libppp/draw/md0_p3f.h"
 #include "System/Debug.h"
 
 extern sceVu0FMATRIX ppvSCMatrix;
 void sceVu0SubVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2);
 void sceVu0InterVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2, float t);
-
-typedef struct { /* 0x10 */
-    char flag;
-    char ptype;
-    short pc;
-    u_char tno;
-    u_char timposx;
-    u_char res[2];
-    u_word tex0l;
-    u_word tex0h;
-} OMD_PRIM_H;
 
 typedef struct { /* 0x18 */
     u_char r0, g0, b0, a0;

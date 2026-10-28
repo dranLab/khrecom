@@ -1,21 +1,11 @@
 #include "pppSnoMdlDttNorm.h"
 #include "System/Graphic/Effect/libppp/eiProg/pppColor.h"
 #include "System/Graphic/Effect/libppp/draw/md.h"
+#include "System/Graphic/Effect/libppp/draw/md0_p3f.h"
 #include "System/Graphic/Effect/libppp/draw/draw_w.h"
 #include "System/Graphic/Effect/libppp/keProg/pppKeDMat.h"
 
 void pppSendGsPacket(u_long128 *pkt_top);
-
-typedef struct { /* 0x10 */
-    char flag;
-    char ptype;
-    short pc;
-    u_char tno;
-    u_char timposx;
-    u_char res[2];
-    u_word tex0l;
-    u_word tex0h;
-} OMD_PRIM_H;
 
 typedef struct { /* 0x1c */
     u_char r0;
