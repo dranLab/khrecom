@@ -11,6 +11,7 @@
 #include "Form/DebugWindow.h"
 #include "System/Graphic/WorldEnv.h"
 #include "System/Coord.h"
+#include "System/FileIO.h"
 #include "System/TaskMan.h"
 #include "include_asm.h"
 
@@ -228,7 +229,62 @@ void CDebugPathData::makeFileName(const CHAR* pszName, BOOL bExt) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", newPath__14CDebugPathDataPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", entryPath__14CDebugPathDataPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", loadPath__14CDebugPathDataPCc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", __BackUpFile__FPCc);
+extern "C" void* memset(void*, int, unsigned int);
+extern "C" char* strncpy(char*, const char*, unsigned int);
+extern "C" int FlushCache(int op);
+extern "C" char D_004872A0[]; /* "c:/KHCOM/MainApp/Game/Debug/DebugPathData.cpp(2163)" */
+extern "C" char D_004872D8[];
+extern "C" char D_00487318[];
+extern "C" char D_00487358[]; /* ".BAK" */
+extern "C" char D_00487360[];
+extern "C" char D_00487398[];
+BOOL __BackUpFile(const CHAR* szFileName) {
+    void* pBuf = NULL;
+    INT iRet;
+    INT iSize = CFileIO::getFileSize(szFileName);
+    INT iFD;
+    INT i;
+    char szOutFileName[64];
+    INT iOutFD;
+    if (iSize > 0) {
+        iFD = CFileIO::openFile(szFileName, 1, 0x1FF);
+        if (iFD >= 0) {
+            pBuf = com_malloc_d(iSize, D_004872A0, (UINT)-1);
+            if (pBuf) {
+                iRet = CFileIO::readFile(iFD, pBuf, iSize);
+                if (iRet < 0) {
+                    TRACE(D_004872D8, iRet);
+                    com_free(pBuf);
+                    pBuf = NULL;
+                }
+            } else {
+                TRACE(D_00487318);
+            }
+            CFileIO::closeFile(iFD);
+        }
+    }
+    if (pBuf) {
+        FlushCache(0);
+        memset(szOutFileName, 0, sizeof(szOutFileName));
+        strncpy(szOutFileName, szFileName, sizeof(szOutFileName) - 1);
+        for (i = sizeof(szOutFileName) - 1; i >= 0; i--) {
+            if (szOutFileName[i] == '.') break;
+        }
+        if (i >= 0) {
+            sprintf(&szOutFileName[i], D_00487358);
+            iOutFD = CFileIO::openFile(szOutFileName, 0x602, 0x1FF);
+            if (iOutFD < 0) {
+                TRACE(D_00487360, iOutFD);
+            } else {
+                iRet = CFileIO::writeFile(iOutFD, pBuf, iSize);
+                if (iRet < 0) TRACE(D_00487398, iRet);
+                CFileIO::closeFile(iOutFD);
+            }
+        }
+        if (pBuf) com_free(pBuf);
+    }
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", savePath__14CDebugPathDataPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_0021F178);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", func_0021F208);
