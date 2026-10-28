@@ -76,6 +76,16 @@ static inline FLOAT _getAttrRate(ENEMY_PARAM* inParam, INT inAttr) {
     }
     return value;
 }
+struct MES_CARD_INFO {
+    CARD m_cardData[7];
+    SHORT m_nStock;
+    BYTE m_nExtra;
+    BYTE m_nFirst;
+    BYTE m_nBreak;
+    BYTE m_nBonus;
+    BYTE m_nWork0;
+    BYTE m_nWork1;
+};
 struct CB_ENCHANT_VIEW {
     BYTE _pad[0x17C];
     CARD m_cardEnchant[2];
@@ -443,8 +453,97 @@ BOOL CBattleEnemy::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", onMsg__12CBattleEnemyiPv);
-__asm__(".rdata\n.align 3\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4154535F\n.word 0x202C5452\n.word 0x6D656E45\n.word 0x20444979\n.word 0x6425203D\n.word 0x0000000A\n.word 0x00000000\n.word 0x5F4C5442\n.word 0x4D454E45\n.word 0x54535F59\n.word 0x5F455441\n.word 0x41545441\n.word 0x20314B43\n.word 0x6D203D3C\n.word 0x7441695F\n.word 0x6B636174\n.word 0x74617453\n.word 0x26262065\n.word 0x695F6D20\n.word 0x61747441\n.word 0x74536B63\n.word 0x20657461\n.word 0x42203D3C\n.word 0x455F4C54\n.word 0x594D454E\n.word 0x4154535F\n.word 0x495F4554\n.word 0x004D4554\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x5445535F\n.word 0x6E45202C\n.word 0x49796D65\n.word 0x203D2044\n.word 0x000A6425\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4552425F\n.word 0x202C4B41\n.word 0x6D656E45\n.word 0x20444979\n.word 0x6425203D\n.word 0x0000000A\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4645525F\n.word 0x54434552\n.word 0x6E45202C\n.word 0x49796D65\n.word 0x203D2044\n.word 0x000A6425\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x52455A5F\n.word 0x45202C4F\n.word 0x796D656E\n.word 0x3D204449\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4D49475F\n.word 0x4B43494D\n.word 0x6E45202C\n.word 0x49796D65\n.word 0x203D2044\n.word 0x000A6425\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4555445F\n.word 0x45202C4C\n.word 0x796D656E\n.word 0x3D204449\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4555445F\n.word 0x41435F4C\n.word 0x4C45434E\n.word 0x6E45202C\n.word 0x49796D65\n.word 0x203D2044\n.word 0x000A6425\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4555445F\n.word 0x54535F4C\n.word 0x2C545241\n.word 0x656E4520\n.word 0x4449796D\n.word 0x25203D20\n.word 0x00000A64\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4555445F\n.word 0x4F545F4C\n.word 0x4F4C534F\n.word 0x45202C57\n.word 0x796D656E\n.word 0x3D204449\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.word 0x74614243\n.word 0x45656C74\n.word 0x796D656E\n.word 0x6E6F3A3A\n.word 0x2067734D\n.word 0x4243203D\n.word 0x53454D5F\n.word 0x4555445F\n.word 0x55535F4C\n.word 0x53454343\n.word 0x45202C53\n.word 0x796D656E\n.word 0x3D204449\n.word 0x0A642520\n.word 0x00000000\n.word 0x00000000\n.word .L002ACDA8\n.word .L002ACDC8\n.word .L002ACEB0\n.word .L002ACF28\n.word .L002AD1E0\n.word .L002ACFF0\n.word .L002ACF88\n.word .L002AD034\n.word .L002AD09C\n.word .L002AD0D4\n.word .L002AD10C\n.word .L002AD1B0\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE7C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE7C\n.word .L002ACE6C\n.word .L002ACE6C\n.word .L002ACE6C\n.text\n");
+void CBattleEnemy::onMsg(INT inMsg, void* inExtraInfo) {
+    if (inMsg == 0x70F0F0F0) setAppearEffect();
+    if (m_iHp <= 0) return;
+    if (inExtraInfo) *(MES_CARD_INFO*)m_MesCardInfo = *(MES_CARD_INFO*)inExtraInfo;
+    switch (inMsg) {
+    case 1:
+        TRACE("CBattleEnemy::onMsg = CB_MES_START, EnemyID = %d\n", (UINT)getID() % 10000);
+        break;
+    case 2:
+        clearBtlEnemyFlag(0x200);
+        if (isPlayingCardBattle()) {
+            setBtlEnemyFlag(4);
+            if (!(2 <= m_iAttackState && m_iAttackState <= 10)) AssertApp(__FILE__, 0x32E, "BTL_ENEMY_STATE_ATTACK1 <= m_iAttackState && m_iAttackState <= BTL_ENEMY_STATE_ITEM", 0);
+            changeBattleEnemyState(m_iAttackState);
+        }
+        if (!inExtraInfo) return;
+        switch (((MES_CARD_INFO*)inExtraInfo)->m_nStock) {
+        case 111: case 112: case 113: case 114: case 115: case 116: case 117: case 118: case 119: case 120:
+        case 122: case 123: case 124: case 125: case 126: case 127: case 128: case 129: case 130: case 131:
+        case 140: case 141: case 142:
+            setBtlEnemyFlag(0x20000000);
+            break;
+        default:
+            clearBtlEnemyFlag(0x20000000);
+            break;
+        }
+        TRACE("CBattleEnemy::onMsg = CB_MES_SET, EnemyID = %d\n", (UINT)getID() % 10000);
+        break;
+    case 3:
+        if (!isBtlEnemyFlag(4)) onCardBattleFailed();
+        clearBtlEnemyFlag(0x201);
+        if (m_pEffect) m_pEffect->kill(10.0f);
+        changeBattleEnemyState(0xD);
+        TRACE("CBattleEnemy::onMsg = CB_MES_BREAK, EnemyID = %d\n", (UINT)getID() % 10000);
+        break;
+    case 4:
+        clearBtlEnemyFlag(0x201);
+        m_tqCancelTimer = 3000;
+        onReflect();
+        onCardBattleFailed();
+        TRACE("CBattleEnemy::onMsg = CB_MES_REFRECT, EnemyID = %d\n", (UINT)getID() % 10000);
+        break;
+    case 7:
+        clearBtlEnemyFlag(0x201);
+        if (m_pEffect) m_pEffect->kill(10.0f);
+        changeBattleEnemyState(0xE);
+        onCardBattleFailed();
+        TRACE("CBattleEnemy::onMsg = CB_MES_ZERO, EnemyID = %d\n", (UINT)getID() % 10000);
+        break;
+    case 6:
+        clearBtlEnemyFlag(0x201);
+        onGimmickCard();
+        TRACE("CBattleEnemy::onMsg = CB_MES_GIMMICK, EnemyID = %d\n", (UINT)getID() % 10000);
+        break;
+    case 8:
+        clearBtlEnemyFlag(0x201);
+        if (m_pEffect) m_pEffect->kill(10.0f);
+        changeBattleEnemyState(0xF);
+        onCardBattleFailed();
+        TRACE("CBattleEnemy::onMsg = CB_MES_DUEL, EnemyID = %d\n", (UINT)getID() % 10000);
+        break;
+    case 9:
+        clearBtlEnemyFlag(0x201);
+        changeDefaultState();
+        TRACE("CBattleEnemy::onMsg = CB_MES_DUEL_CANCEL, EnemyID = %d\n", (UINT)getID() % 10000);
+        break;
+    case 10:
+        setBtlEnemyFlag(0x100000000ULL);
+        TRACE("CBattleEnemy::onMsg = CB_MES_DUEL_START, EnemyID = %d\n", (UINT)getID() % 10000);
+        break;
+    case 11:
+        if (isPlayingCardBattle()) {
+            INT state = getDuelAttackState();
+            if (2 <= state && state < 10) {
+                m_iAttackState = state;
+                setBtlEnemyFlag(5);
+                changeBattleEnemyState(state);
+            } else {
+                changeDefaultState();
+            }
+        } else {
+            changeDefaultState();
+        }
+        TRACE("CBattleEnemy::onMsg = CB_MES_DUEL_TOOSLOW, EnemyID = %d\n", (UINT)getID() % 10000);
+        break;
+    case 12:
+        changeBattleEnemyState(0x10);
+        TRACE("CBattleEnemy::onMsg = CB_MES_DUEL_SUCCESS, EnemyID = %d\n", (UINT)getID() % 10000);
+        break;
+    }
+}
 void CBattleEnemy::onOut() {
     if (!(m_ullBtlEnemyFlag & 0x40000000)) notifyDead();
 }
