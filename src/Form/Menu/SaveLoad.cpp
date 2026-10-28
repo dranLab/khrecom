@@ -995,8 +995,40 @@ void CSaveLoadUI::setActiveSlotPlate(INT nSlot) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", setupDataPlate__11CSaveLoadUIs);
 __asm__(".rdata\n.align 3\n.word 0x76615343\n.word 0x616F4C65\n.word 0x3A495564\n.word 0x7465733A\n.word 0x61447075\n.word 0x6C506174\n.word 0x28657461\n.word 0x20296425\n.word 0x202E2E2E\n.word 0xCD88CD94\n.word 0xC5824F8A\n.word 0x000AB782\n.word 0x004C004B\n.word 0x0050004F\n.word 0x64323025\n.word 0x00000000\n.word 0x20207325\n.word 0x45F9564C\n.word 0x00643225\n.word 0x00000000\n.word 0x20207325\n.word 0x45F9564C\n.word 0x20643225\n.word 0x20202020\n.word 0x64352520\n.word 0x00504D20\n.word 0x72746E45\n.word 0x65636E61\n.word 0x6C614820\n.word 0x0000006C\n.word 0x00466425\n.word 0x00000000\n.word 0x00000020\n.word 0x00000000\n.word 0x25207325\n.word 0x00000073\n.word 0x3A643325\n.word 0x64323025\n.word 0x00000000\n.word 0x00000000\n.word 0x250A7325\n.word 0x73250A73\n.word 0x00000000\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", updateMemocaInfoBar__11CSaveLoadUI);
-__asm__(".rdata\n.align 3\n.word 0x6C6C416E\n.word 0x00000000\n.text\n");
+void CSaveLoadUI::updateMemocaInfoBar() {
+    INT nY = 0;
+    INT nH;
+    FVECTOR v;
+    FVECTOR vScale;
+    vScale.set(1.0f, 1.0f, 1.0f, 0.0f);
+    UINT nAll = 0;
+    unsigned int nTbl[3];
+    nTbl[0] = m_pGameDataEntries->getDataUnitCountByType(0);
+    nTbl[1] = m_pGameDataEntries->getDataUnitCountByType(1);
+    nTbl[2] = m_pGameDataEntries->getDataUnitCountByType(2);
+    if (nTbl[0] + nTbl[1] >= 100) nTbl[0] = 99 - nTbl[1];
+    INT i;
+    for (i = 0; i < 3; i++) {
+        nAll += nTbl[i];
+    }
+    if (!nAll) AssertApp(__FILE__, 2807, "nAll", 0);
+    for (i = 0; i < 3; i++) {
+        UINT nCount = nTbl[i];
+        if (!nCount) m_pMemocaInfoBar[i]->enableDisp(FALSE);
+        vScale.y = (FLOAT)nCount / (FLOAT)nAll;
+        if (i == 2) {
+            nH = 128 - nY;
+        } else {
+            INT n = (vScale.y * 128.0f + 0.5f) * 10.0f;
+            nH = n / 10;
+        }
+        v = m_pMemocaInfoBar[i]->m_seqControl.vPos;
+        v.y = nY + (nH - 128.0f) * 0.5f;
+        m_pMemocaInfoBar[i]->setScl(vScale);
+        m_pMemocaInfoBar[i]->setLocalPos(v);
+        nY += nH;
+    }
+}
 void CSaveLoadUI::updateMemocaInfoStr() {
     CHAR* pszStrTbl[3] = {"Available\n\x81@\x81@\x81@\x81@%3d", "Saved\n\x81@\x81@\x81@\x81@%3d", "Other data"};
     USHORT nSavable = m_pGameDataEntries->getDataUnitCountByType(0);
