@@ -28,6 +28,7 @@ inline void _emptyStringPlaceholderDebugPathData() { TRACE(""); }
 #include "Game/Debug/DebugWork.h"
 #include "System/Graphic/WorldEnv.h"
 #include "System/Coord.h"
+#include "System/Math3D.h"
 #include "System/FileIO.h"
 #include "System/TaskMan.h"
 #include "include_asm.h"
@@ -212,7 +213,19 @@ __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\
 __asm__(".data\n.align 2\n" "iStep.4108: .word 0\n""pHPC.4109: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditSimulateSpeedCamLineLookCall__FP12CDebugWindowii);
 __asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x65442F65\n.word 0x2F677562\n.word 0x75626544\n.word 0x74615067\n.word 0x74614468\n.word 0x70632E61\n.word 0x30362870\n.word 0x00002933\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditEtcParamAllCall__FP12CDebugWindowi);
+INT debugWinPathEditEtcParamAllCall(CDebugWindow* pObj, INT inParam) {
+    if (inParam & 1) {
+        CDebugPathData::getActiveParam();
+        CDebugPathData::m_sParam.fProj = ProjectionToViewAngle(CDebugPathData::m_sParam.fProj);
+        CDebugPathData::m_sParam.fProj2 = ProjectionToViewAngle(CDebugPathData::m_sParam.fProj2);
+    }
+    if (inParam & 2) {
+        CDebugPathData::m_sParam.fProj = ViewAngleToProjection(CDebugPathData::m_sParam.fProj);
+        CDebugPathData::m_sParam.fProj2 = ViewAngleToProjection(CDebugPathData::m_sParam.fProj2);
+        CDebugPathData::setActiveParam();
+    }
+    return TRUE;
+}
 __asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text */
 DEBUG_WINDOW_LINE debugWinPathEditSimulateLine[17] = {
     {"\x83p\x83X%d\x8f\xe3\x82\xf0\x95\xa8\x91\xcc\x82\xaa\x88\xda\x93\xae", &CDebugPathData::m_iActivePath, 4, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEditSimulateSpeedLineCall, NULL},
@@ -313,7 +326,18 @@ __asm__(".rdata\n.align 3\n.word 0xCA966E92\n.word 0xA98CAA82\n.word 0xA982C282\
 /* PARTIAL: the local statics of the asm function below (data from source, function still asm) */
 __asm__(".data\n.align 2\n" "iStep.4123: .word 0\n" ".text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPosCamReset__FP12CDebugWindowii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditPosCamAllCall__FP12CDebugWindowi);
+INT debugWinPathEditPosCamAllCall(CDebugWindow* pObj, INT inParam) {
+    if (inParam & 1) {
+        CDebugPathData::m_vBackUpPos = CDebugPathData::m_vActivePathPos;
+        CDebugPathData::getCam()->SetCameraLook(CDebugPathData::m_vActivePathPos);
+    }
+    if (!CDebugPathData::getCam()->GetType()) {
+        FVECTOR vLook;
+        CDebugPathData::getCam()->GetCameraLook(vLook);
+        CDebugPathData::setActivePathVecPositionXYZ(vLook);
+    }
+    return TRUE;
+}
 __asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text */
 DEBUG_WINDOW_LINE debugWinPathEditPosCamLine[8] = {
     {"\x88\xca\x92u\x95\xcf\x8dX\x82\xcc\x8fI\x97\xb9", &CDebugWindow::none, 1, {0}, 0, 0.0f, 0.0f, 0.0f, NULL, 0, &debugWinPathEndOneCall, NULL},
@@ -351,9 +375,54 @@ BOOL debugWinPathEditLineCamPosCall(CDebugWindow* pObj, INT inY, INT inParam) {
     }
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddPoaCall__FP12CDebugWindowii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddRotCall__FP12CDebugWindowii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", debugWinPathEditLineAddSpdCall__FP12CDebugWindowii);
+BOOL debugWinPathEditLineAddPoaCall(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 0x80) {
+        pObj->addValue(-1, NULL, NULL, &CDebugPathData::m_fValuePlus, NULL);
+        CDebugPathData::setActivePathVecPosition(CDebugPathData::m_vActivePathPos);
+        CDebugPathData::getCam()->SetCameraLook(CDebugPathData::m_vActivePathPos);
+    } else if (inParam & 0x100) {
+        pObj->addValue(1, NULL, NULL, &CDebugPathData::m_fValuePlus, NULL);
+        CDebugPathData::setActivePathVecPosition(CDebugPathData::m_vActivePathPos);
+        CDebugPathData::getCam()->SetCameraLook(CDebugPathData::m_vActivePathPos);
+    }
+    return TRUE;
+}
+BOOL debugWinPathEditLineAddRotCall(CDebugWindow* pObj, INT inY, INT inParam) {
+    if (inParam & 4) CDebugPathData::m_iCtrlFlg |= 1;
+    if (inParam & 0xA) CDebugPathData::m_iCtrlFlg &= ~1;
+    FLOAT fRoll = _getPathVectorConvWRoll(CDebugPathData::m_vActivePathPos.w);
+    FLOAT fPlus = CDebugPathData::m_fValuePlus * 0.017453292f;
+    if (inParam & 0x80) {
+        fRoll = Math3D::LimitPI(fRoll - fPlus);
+        _setPathVectorConvWRoll(&CDebugPathData::m_vActivePathPos.w, fRoll);
+        CDebugPathData::setActivePathVecPosition(CDebugPathData::m_vActivePathPos);
+        CDebugPathData::getCam()->SetCameraLook(CDebugPathData::m_vActivePathPos);
+    } else if (inParam & 0x100) {
+        fRoll = Math3D::LimitPI(fRoll + fPlus);
+        _setPathVectorConvWRoll(&CDebugPathData::m_vActivePathPos.w, fRoll);
+        CDebugPathData::setActivePathVecPosition(CDebugPathData::m_vActivePathPos);
+        CDebugPathData::getCam()->SetCameraLook(CDebugPathData::m_vActivePathPos);
+    }
+    return TRUE;
+}
+BOOL debugWinPathEditLineAddSpdCall(CDebugWindow* pObj, INT inY, INT inParam) {
+    FLOAT fSpeed = _getPathVectorConvWSpeed(CDebugPathData::m_vActivePathPos.w);
+    FLOAT fPlus = CDebugPathData::m_fValuePlus;
+    if (inParam & 0x80) {
+        fSpeed -= fPlus;
+        if (fSpeed < 0.01f) fSpeed = 0.0f;
+        _setPathVectorConvWSpeed(&CDebugPathData::m_vActivePathPos.w, fSpeed);
+        CDebugPathData::setActivePathVecPosition(CDebugPathData::m_vActivePathPos);
+        CDebugPathData::getCam()->SetCameraLook(CDebugPathData::m_vActivePathPos);
+    } else if (inParam & 0x100) {
+        fSpeed += fPlus;
+        if (fSpeed > 1023.0f) fSpeed = 1023.0f;
+        _setPathVectorConvWSpeed(&CDebugPathData::m_vActivePathPos.w, fSpeed);
+        CDebugPathData::setActivePathVecPosition(CDebugPathData::m_vActivePathPos);
+        CDebugPathData::getCam()->SetCameraLook(CDebugPathData::m_vActivePathPos);
+    }
+    return TRUE;
+}
 __asm__(".section .data"); /* PARTIAL: gcc doesn't know the asm functions above switched to .text (its static) */
 BOOL debugWinPathLineNameSaveCall(CDebugWindow* pObj, INT inY, INT inParam) {
     static INT iStep = 0;
