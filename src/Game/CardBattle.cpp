@@ -36,6 +36,7 @@ public:
 class CEnchantGauge {
 public:
     void changeCount(INT inCount);
+    void destroy();
 };
 void calcFreezeDamage(INT& ioDamage);
 
@@ -204,7 +205,22 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", decEnchantTime__Q210
 #endif
 void CCardBattle::destroyPlayCard(INT inFlag, INT inP1) { resetNowPlaying(inFlag); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", resetNowPlaying__Q210CardBattle11CCardBattlei);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", resetEnchantCard__Q210CardBattle11CCardBattlei);
+void CCardBattle::resetEnchantCard(INT inUser) {
+    if (!(inUser)) AssertApp(D_00476980, 2069, D_00476730, 0);
+    UINT _PLAYER = inUser - 1;
+    if (!_PLAYER) {
+        resetPlayerEnchant(m_cardEnchant[0][0]);
+        m_uiFlag &= ~0x80000;
+        m_uiFlag = (INT)m_uiFlag & ~0x4000;
+    }
+    m_uiFlag &= ~(0x400 << _PLAYER);
+    m_uiFlag &= ~(0x1000 << (_PLAYER ^ 1));
+    _setCard(*(CARD*)m_cardEnchant[_PLAYER], 0, 0);
+    m_nEnchantTime[_PLAYER] = 0;
+    if (m_pEnchantGauge[_PLAYER]) m_pEnchantGauge[_PLAYER]->destroy();
+    m_pEnchantGauge[_PLAYER] = NULL;
+    m_pEnchant[_PLAYER] = NULL;
+}
 HANDLE CCardBattle::getPlayingHandle(INT inSide) {
     if (!m_pInstance) return 0;
     if ((UINT)inSide < 2 && m_pInstance->m_uiState[0]) return m_pInstance->m_hOwner[0];
