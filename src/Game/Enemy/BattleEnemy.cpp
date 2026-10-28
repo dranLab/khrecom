@@ -278,7 +278,26 @@ void CBattleEnemy::updateBefore() {
     hitTest_();
     if (isBtlEnemyFlag(0x20000)) m_pMove->setOldPos2(getPos());
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", updateAfter__12CBattleEnemy);
+void CBattleEnemy::updateAfter() {
+    cardBattleProc_();
+    reviseObject_();
+    updateBindTimer_();
+    updateConfuseTimer_();
+    updateHitBackTimer_();
+    updateDamageTimer_();
+    if (m_tqCancelTimer > 0) m_tqCancelTimer -= getFrameRate();
+    if (isBtlEnemyFlag(0x20000)) {
+        FVECTOR pos = getOldPos();
+        pos.y += 0.01f;
+        setOldPos(pos);
+        pos.y -= 0.02f;
+        setPos(pos);
+        m_vBackupVel = getVel();
+        FVECTOR vel;
+        vel.init();
+        setVel(vel);
+    }
+}
 void CBattleEnemy::updatePositionAfter() {}
 void CBattleEnemy::lastUpdate() {
     if (m_pBodyColl) m_pBodyColl->update();
