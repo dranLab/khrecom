@@ -339,7 +339,33 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", RotateAvatarMain__Q
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", RotateAvatarEnd__Q24ATEL7CAvatar);
 INT CAvatar::onSetDirection(INT nCmd, void* pParam, INT nID) { return -1; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onFadeing__Q24ATEL7CAvatariPvi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", FadeAvatarMain__Q24ATEL7CAvatar);
+BOOL CAvatar::FadeAvatarMain() {
+    TIMEQ nTQ = getFrameRate();
+    for (INT i = 0; i < 5; i++) {
+        if (m_pFadeStruct[i]) {
+            countAvatarFadeTime(m_pFadeStruct[i], nTQ);
+            if (!isOverAvatarFadeTimeLimit(m_pFadeStruct[i])) {
+                if (isOverAvatarFadeTimeLimit(m_pFadeStruct[i], nTQ)) setAvatarState(0x8000, FALSE);
+                FLOAT fFadeSpeed = getAvatarFadeSpeed(m_pFadeStruct[i]) * nTQ;
+                FLOAT fFade;
+                if (m_pFadeStruct[i]->_ModelNo == -1) {
+                    getFade(-1, fFade);
+                    fFade += fFadeSpeed;
+                    setModelAlphaScale(fFade, -1);
+                } else {
+                    fFade = ((CModel*)(m_pFadeStruct[i]->_ModelNo * sizeof(CModel) + (UINT)m_pModels))->getAlphaScale() + fFadeSpeed;
+                    m_pModels[m_pFadeStruct[i]->_ModelNo].setAlphaScale(fFade);
+                }
+            } else {
+                if (m_pFadeStruct[i]->_ModelNo == -1) setModelAlphaScale(m_pFadeStruct[i]->_fTargetFade, -1);
+                else m_pModels[m_pFadeStruct[i]->_ModelNo].setAlphaScale(m_pFadeStruct[i]->_fTargetFade);
+                com_free(m_pFadeStruct[i]);
+                m_pFadeStruct[i] = NULL;
+            }
+        }
+    }
+    return FALSE;
+}
 void CAvatar::FadeAvatarEnd() {}
 void CAvatar::cancelFadeAvatar() {}
 INT CAvatar::onScaling(INT nCmd, void* pParam, INT nID) {

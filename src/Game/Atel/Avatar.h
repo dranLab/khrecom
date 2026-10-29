@@ -25,6 +25,7 @@ namespace ATEL {
 #ifdef GAME_ATEL_AVATAR_CPP
 extern "C" char D_0048AB50[]; /* "c:/KHCOM/MainApp/Game/Atel/Avatar.h" (PARTIAL: no SOURCE DATA yet) */
 extern "C" char D_0048AB88[];
+extern "C" char D_0048AB78[]; /* "in_pFadeStruct" */
 extern "C" char D_0048ABA8[];
 struct ETMoveInfo;
 class CVSM;
@@ -83,6 +84,8 @@ struct AvatarFadeStruct { // 0x14
     TIMEQ _nFadeTimeLimit;  /* 0x08 */
     TIMEQ _nFadeTimeCount;  /* 0x0c */
     INT _ModelNo;           /* 0x10 */
+    BOOL isOverTimeLimit() { return _nFadeTimeCount >= _nFadeTimeLimit; }
+    BOOL isOverTimeLimit(INT t) { return _nFadeTimeCount + t >= _nFadeTimeLimit; }
 };
 
 struct AvatarLookStruct { // 0x8
@@ -235,6 +238,27 @@ public:
         m_pMoveStruct->_vTargetPos = inV;
         m_pMoveStruct->_vTargetPos.w = 1.0f;
     }
+    FLOAT getAvatarFadeSpeed(AvatarFadeStruct* in_pFadeStruct) const {
+#line 508 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        return in_pFadeStruct->_fFadeSpeed;
+    }
+    BOOL isOverAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct) const {
+#line 520 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        return in_pFadeStruct->isOverTimeLimit();
+    }
+    BOOL isOverAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct, INT t) const {
+#line 521 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        return in_pFadeStruct->isOverTimeLimit(t);
+    }
+    void countAvatarFadeTime(AvatarFadeStruct* in_pFadeStruct, INT t) {
+#line 536 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        in_pFadeStruct->_nFadeTimeCount += t;
+    }
+    BOOL FadeAvatarMain();
     void setAvatarScaleTimeLimit(INT f) {
 #line 547 AVATAR_H_PATH
         if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
