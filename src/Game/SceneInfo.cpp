@@ -697,8 +697,66 @@ DOOR_ID _checkAvailableDoorID(INT nRoomID, DOOR_ID nDoor) {
     }
     return (DOOR_ID)4;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setEventRoomSceneNum__10CSceneInfoUis);
-__asm__(".rdata\n.align 4\n.word .L0021351C\n.word .L00213528\n.word .L00213534\n.word .L00213544\n.word .L00213554\n.word .L00213568\n.text\n");
+RoomInfo* CSceneInfo::setEventRoomSceneNum(UINT nEventRoomType, SHORT nScene) {
+    FloorInfo& floor = s_CurrentFloor;
+    USHORT nFloorIdx = getCurrentFloorIndex();
+    RoomInfo* pRoom = NULL;
+    INT nEntrance = -1;
+    if ((INT)nEventRoomType < __EVENTROOM_MAX) {
+        INT nIdx = floor.getEventRoomIdx((EVENTROOM_TBLIDX)nEventRoomType);
+        if (nIdx >= 0) pRoom = &floor._rooms[nIdx];
+        if (nEventRoomType == _EVENTROOM_GOAL) _setGoalRoomScene((WORLD_ID)getCurrentWorldID(FALSE), nScene);
+    } else {
+        switch (nEventRoomType) {
+        case _EVENTROOM_START_ENTRANCE:
+            pRoom = &floor._roomStartEnt;
+            nEntrance = 0;
+            break;
+        case _EVENTROOM_GOAL_ENTRANCE:
+            pRoom = &floor._roomGoalEnt;
+            nEntrance = 1;
+            break;
+        case _EVENTROOM_LOWER_START_ENTRANCE:
+            if (nFloorIdx) {
+                nEntrance = 0;
+                nFloorIdx--;
+            }
+            break;
+        case _EVENTROOM_LOWER_GOAL_ENTRANCE:
+            if (nFloorIdx) {
+                nEntrance = 1;
+                nFloorIdx--;
+            }
+            break;
+        case _EVENTROOM_UPPER_START_ENTRANCE:
+            if (nFloorIdx < 15) {
+                nEntrance = 0;
+                nFloorIdx++;
+            }
+            /* MATCH: no break in the original (falls into the upper goal entrance) */
+        case _EVENTROOM_UPPER_GOAL_ENTRANCE:
+            if (nFloorIdx < 15) {
+                nEntrance = 1;
+                nFloorIdx++;
+            }
+            break;
+        }
+        if (nEntrance >= 0) {
+            SHORT* pEntSceneTbl = _SceneInfoWork::mc()->_nEntranceSceneTbl[nFloorIdx];
+            pEntSceneTbl[nEntrance] = nScene;
+        }
+    }
+    if (pRoom) {
+        pRoom->setScene(nScene);
+        if (getCurrentFloorIndex() == nFloorIdx) {
+            INT nRoomID;
+            if (nEntrance < 0) nRoomID = pRoom->_pSrcInfo->_nID;
+            else nRoomID = nEntrance == 0 ? 0 : 99;
+            if (getCurrentRoomID() == nRoomID && getCurrentSceneNum() == getCurrentBattleSceneNum()) s_nCurrentFieldScene = nScene;
+        }
+    }
+    return pRoom;
+}
 BOOL CSceneInfo::reqChangeFloor(SHORT nFloor, BOOL bWarp) {
     if (hasAnyRequest()) return FALSE;
     BOOL bSora = CGame::isSoraGame();
