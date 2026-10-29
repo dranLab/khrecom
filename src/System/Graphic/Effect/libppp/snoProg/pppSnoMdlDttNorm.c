@@ -4,6 +4,7 @@
 #include "System/Graphic/Effect/libppp/draw/md0_p3f.h"
 #include "System/Graphic/Effect/libppp/draw/draw_w.h"
 #include "System/Graphic/Effect/libppp/keProg/pppKeDMat.h"
+#include "System/Graphic/Effect/libppp/keProg/KeTh.h"
 
 void pppSendGsPacket(u_long128 *pkt_top);
 
@@ -29,11 +30,6 @@ typedef struct { /* 0x1c */
     u_short n2;
     u_short res;
 } OMD_G3L;
-
-typedef union { /* 0x10 */
-    u_long U64[2];
-    u_long128 U128;
-} KeData16;
 
 typedef struct { /* 0x50 */
     u_long XYOFFSET;
