@@ -146,7 +146,7 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     FVECTOR m_vBreakPos;         /* 0x1d0 */
     class CEnchantGauge* m_pEnchantGauge[2]; /* 0x1e0 */
     class CDuelGauge* m_pDuelGauge; /* 0x1e8 */
-#ifdef GAME_CARDBATTLE_CPP
+#if defined(GAME_CARDBATTLE_CPP) || defined(GAME_BATTLECARD_CPP) /* Game/BattleCard inlines the original members too */
     /* the original's inline members, in its definition order (Game/CardBattle emits them all with the key function) */
     void disablePlayCard(UINT inSet) { m_uiFlag = (m_uiFlag | inSet) & ~(inSet ^ 0xC0000000); }
     static UINT isDisablePlayCard() { return m_pInstance ? m_pInstance->m_uiFlag & 0xC0000000 : 0; }
@@ -293,13 +293,22 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
 class CCardRevolver {
     UBYTE _m_0x00[0x4c]; // PARTIAL: added for Game/Enemy/HumanBoss
     SHORT m_sMode;       /* 0x4c */ // PARTIAL: name unknown
-    UBYTE _m_0x4e[0x22]; // PARTIAL: added for Game/Player/Player
+    UBYTE _m_0x4e[0x1e]; // PARTIAL: added for Game/Player/Player
+    TIMEQ m_tqRollSpeed; /* 0x6c */ // PARTIAL: split out for Game/BattleCard
     TIMEQ m_tqChargeRate; /* 0x70 */ // PARTIAL: added for Game/CardBattle
     BOOL m_bActive;      /* 0x74 */ // PARTIAL: added for Game/Player/Player
-    UBYTE _m_0x78[0x168]; /* 0x078 .. sizeof 0x1e0 */ // PARTIAL: added for Game/Player/Player (makeRevolver)
+    UBYTE _m_0x78[0x64]; /* 0x078 */ // PARTIAL: added for Game/Player/Player (makeRevolver)
+    SHORT m_iStockSkill; /* 0x0dc */ // PARTIAL: split out for Game/BattleCard
+    UBYTE _m_0xde[0x102]; /* 0x0de .. sizeof 0x1e0 */
 public:
     CCardRevolver(class CTask* pParent, CARD* inDeck, INT inUser, INT inShortCut); void setDiscard(); // PARTIAL: added for Game/Player/Player
     INT isActive() const { return m_bActive; } // PARTIAL: added for Game/Player/Player
+    INT getStockSkill() const { return m_iStockSkill; } // PARTIAL: added for Game/BattleCard
+    TIMEQ getRollSpeed() { return m_tqRollSpeed; } // PARTIAL: added for Game/BattleCard
+    INT exeTrapEffect(INT inFlag); // PARTIAL: added for Game/BattleCard
+    void setTrapEffect(); // PARTIAL: added for Game/BattleCard
+    void setStockInfo(); // PARTIAL: added for Game/BattleCard
+    void setNumberEffect(INT inKind); // PARTIAL: added for Game/BattleCard (parameter name guessed)
     // PARTIAL: added for Game/Enemy/HumanBoss
     INT getMode() const { return m_sMode; } // PARTIAL: name unknown
     void setChargeRate(INT inRate) { m_tqChargeRate = inRate; } // PARTIAL: added for Game/CardBattle

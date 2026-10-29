@@ -23,6 +23,7 @@ extern CB_LAYOUT g_LayoutData[65];
 void initLayoutData();
 
 class CBattleCard : public CTask, public CFSM {
+    friend struct CBattleCardPH; // MATCH: placeholder of the parked constructor (Game/BattleCard)
     CStateTemplate<CBattleCard> m_State[7]; /* 0x06c */
     INT m_iState;            /* 0x14c */
     CARD m_cardData;         /* 0x150 */
@@ -93,6 +94,7 @@ public:
     INT isSet() { return m_uiFlag & 0x2; }
     void setStock(UINT inPri);
     INT isNowStock() { return m_uiFlag & 0x4; }
+    void exeStock();
     void setEnchant();
     void setHand(const CARD& inData, INT inNum, INT inMax, INT inMode);
     void setHandLocate(INT inNum, INT inMax);
