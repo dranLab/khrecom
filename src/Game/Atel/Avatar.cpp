@@ -372,7 +372,46 @@ void CAvatar::setAvatarRotTimeLimit(TIMEQ nTime) {
     if (bEternal) pRot->_nRotateType |= 0x10;
     else pRot->_nRotateType &= ~0x10;
 }
+void roundPI(FVECTOR& vInOut, INT nInClip);
+/* Parked: 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with
+   li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not
+   change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an inline
+   parameter the vRotSpeed address lands in v1 instead of sp. */
+#if 0
+BOOL CAvatar::RotateAvatarMain() {
+    BOOL bRes;
+    TIMEQ nTQ = getFrameRate();
+    countAvatarRotTime(nTQ);
+    bRes = isOverAvatarRotTimeLimit();
+    if (!bRes) {
+        FVECTOR& vRot = getRot();
+        FVECTOR vRotSpeed;
+        ScaleVectorXYZ(vRotSpeed, getAvatarRotSpeed(), nTQ);
+        {
+            FLOAT fPI = 3.1415927f;
+            INT nFlag;
+            __asm__ volatile("qmtc2.ni %0, $vf3\n"
+                             "vmr32.w $vf3, $vf3\n" : : "r"(fPI));
+            __asm__ volatile("lqc2 $vf1, 0x0(%1)\n"
+                             "lqc2 $vf2, 0x0(%2)\n"
+                             "vadd.xyz $vf1, $vf1, $vf2\n"
+                             "vclipw.xyz $vf1, $vf3w\n"
+                             "vnop\n"
+                             "vnop\n"
+                             "vnop\n"
+                             "sqc2 $vf1, 0x0(%1)\n"
+                             "vnop\n"
+                             "cfc2.ni %0, $vi18\n"
+                             : "=r"(nFlag) : "r"(&vRot), "r"(&vRotSpeed) : "memory");
+            if (nFlag & 0x3f) roundPI(vRot, nFlag);
+        }
+        if (isOverAvatarRotTimeLimit(nTQ)) setAvatarState(0x1000, FALSE);
+    }
+    return bRes;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", RotateAvatarMain__Q24ATEL7CAvatar);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", RotateAvatarEnd__Q24ATEL7CAvatar);
 INT CAvatar::onSetDirection(INT nCmd, void* pParam, INT nID) { return -1; }
 INT CAvatar::onFadeing(INT nCmd, void* pParam, INT nID) {

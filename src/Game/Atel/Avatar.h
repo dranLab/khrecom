@@ -26,6 +26,7 @@ namespace ATEL {
 extern "C" char D_0048AB50[]; /* "c:/KHCOM/MainApp/Game/Atel/Avatar.h" (PARTIAL: no SOURCE DATA yet) */
 extern "C" char D_0048AB88[];
 extern "C" char D_0048AB78[]; /* "in_pFadeStruct" */
+extern "C" char D_0048AB98[]; /* "m_pRotateStruct" */
 extern "C" char D_0048ABA8[];
 struct ETMoveInfo;
 class CVSM;
@@ -250,6 +251,31 @@ public:
 #line 500 AVATAR_H_PATH
         if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
         in_pFadeStruct->_fFadeSpeed = f;
+    }
+    FVECTOR& getAvatarRotSpeed() const {
+#line 627 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
+        return m_pRotateStruct->_vRotSpeed;
+    }
+    BOOL isAvatarRotEternal() const {
+#line 633 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
+        return m_pRotateStruct->_nRotateType & 0x10;
+    }
+    BOOL isOverAvatarRotTimeLimit() const {
+#line 635 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
+        return !isAvatarRotEternal() && m_pRotateStruct->_nRotTimeCount >= m_pRotateStruct->_nRotTimeLimit;
+    }
+    BOOL isOverAvatarRotTimeLimit(INT t) const {
+#line 636 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
+        return !isAvatarRotEternal() && m_pRotateStruct->_nRotTimeCount + t >= m_pRotateStruct->_nRotTimeLimit;
+    }
+    void countAvatarRotTime(INT t) {
+#line 647 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
+        m_pRotateStruct->_nRotTimeCount += t;
     }
     FLOAT getAvatarFadeSpeed(AvatarFadeStruct* in_pFadeStruct) const {
 #line 508 AVATAR_H_PATH
