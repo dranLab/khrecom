@@ -296,6 +296,11 @@ inline void operator*=(FVECTOR& v, FLOAT inF) { /* PARTIAL: as in System/Coord (
     v.z *= inF;
     v.w *= inF;
 }
+static inline FVECTOR _applyMatrix(FMATRIX& m, FVECTOR& v) {
+    FVECTOR b;
+    ApplyMatrix(b, m, v);
+    return b;
+}
 static inline FMATRIX _mulMatrix(FMATRIX& m, FMATRIX& r) {
     FMATRIX b;
     MulMatrix(b, m, r);
@@ -319,7 +324,7 @@ static inline void _rotMatrixZ(FMATRIX& m, const TDEG& a) {
 static inline void _rotMatrixY(FMATRIX& m, const TDEG& a) {
     FMATRIX ry;
     _unitMatrixVu0(ry);
-    ry.m[0][0] = ry.m[2][2] = tcos(a);
+    ry.m[2][2] = ry.m[0][0] = tcos(a);
     FLOAT s = tsin(a);
     ry.m[2][0] = s;
     ry.m[0][2] = -s;
@@ -334,8 +339,10 @@ static inline void _rotMatrixX(FMATRIX& m, const TDEG& a) {
     rx.m[2][1] = -s;
     m = _mulMatrix(m, rx);
 }
-/* Parked: 165 of 1211 lines (work in progress) - same size; left: partsIdx in s4 instead of a stack home + s3, the
-   rotation matrices' address in s3 for Y/X, later register/stack differences. */
+/* Parked: 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original
+   recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/
+   while/goto loop shapes, by-value apply inline and a 10 min permuter run (12.9k candidates) keep it. Worked: by-value
+   _mulMatrix, _getAZFTbl inline, angles by const TDEG&, vec in its own scope, min/max init before v[], zero-store order. */
 #if 0
 void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
     INT nModelCount = 0;
@@ -452,6 +459,7 @@ void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
         CMapModel& model = m_pModelTbl[i];
         model.m_nGridID = -2;
         CCoord& crd = Crd(i + 1);
+        {
         FVECTOR vec;
         vec._q = 0;
         _unitMatrixVu0(crd.m_Local);
@@ -465,15 +473,20 @@ void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
         crd.m_Local.v[3].y = parts->trans[1];
         crd.m_Local.v[3].z = parts->trans[2];
         crd.m_Local.v[3].w = 1.0f;
-        crd.m_Local.m[2][3] = 0.0f;
         crd.m_Local.m[0][3] = 0.0f;
         crd.m_Local.m[1][3] = 0.0f;
+        crd.m_Local.m[2][3] = 0.0f;
+        }
         Crd(i + 1).m_pParent = &Crd(0);
         Crd(i + 1).recalcWorldMatrix();
         Crd(i + 1).m_Flag = 1;
         model.assign(this, pTbl, i + 1);
         model.linkTexAnm(m_pTexAnm, m_nTexAnmNum);
         BBOX* bb = model.getBBox(0);
+        FLOAT xminf = 16000000.0f;
+        FLOAT xmaxf = -16000000.0f;
+        FLOAT zminf = xminf;
+        FLOAT zmaxf = xmaxf;
         FVECTOR v[4];
         for (int zz = 0; zz < 2; zz++) {
             for (int xx = 0; xx < 2; xx++) {
@@ -483,10 +496,6 @@ void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
                 v[zz * 2 + xx].w = 1.0f;
             }
         }
-        FLOAT xminf = 16000000.0f;
-        FLOAT xmaxf = -16000000.0f;
-        FLOAT zminf = xminf;
-        FLOAT zmaxf = xmaxf;
         for (int qq = 0; qq < 4; qq++) {
             FVECTOR p;
             FVECTOR b;
