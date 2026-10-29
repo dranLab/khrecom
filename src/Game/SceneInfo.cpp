@@ -8,6 +8,7 @@
 #include "Game/Status.h"
 #include "Game/Atel/Atel.h"
 #include "Form/Menu/MoogleShop.h"
+#include "Game/Card.h"
 #include "include_asm.h"
 
 class CRsrcData;
@@ -157,6 +158,7 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_004849C8[];
 extern "C" char D_00484C18[];
 extern "C" char D_00484C20[];
 extern "C" char D_00484A10[];
@@ -375,7 +377,53 @@ void CSceneInfo::showAllHiddenDoorsOfCurrentFloor() {
     BYTE* p = _SceneInfoWork::mc()->_nEventDoorStateTbl[getCurrentFloorIndex()];
     p[5] = 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initFloor__10CSceneInfoi8WORLD_ID);
+void CSceneInfo::initFloor(INT nFloorIdx, WORLD_ID world) {
+    BOOL bSora = CGame::isSoraGame();
+    INT nIdx = nFloorIdx;
+    if (world == 10) nIdx = getFloorIndex(100, TRUE);
+    FLOOR::FloorLayout* pFloorSrc = getFloorDataSrc(nIdx, bSora);
+    RCNORMA::FloorNormaSrc* pFloorNormaSrc = getFloorNormaDataSrc(nIdx, bSora);
+    if (!(pFloorSrc && pFloorNormaSrc)) AssertApp(D_00484980, 586, D_004849A8, 0);
+    _SceneInfoWork::mc()->_nFloorIdx = nFloorIdx;
+    if (!(nIdx < 16)) AssertApp(D_00484980, 590, D_004849C8, 0);
+    s_nCurrentFloorNumber = getFloorNumber(nFloorIdx, bSora);
+    if (CGameWork::getInt(0, 0x35) < s_nCurrentFloorNumber) CGameWork::setInt(0, 0x35, s_nCurrentFloorNumber);
+    FloorInfo& floor = s_CurrentFloor;
+    STORAGE::MCWork2* p = _SceneInfoWork::mc2();
+    BYTE* pTbl = p->_nWorldOnFloor[!bSora];
+    pTbl[nFloorIdx] = world;
+    floor._nRoomCount = pFloorSrc->_nRoomCount;
+    floor.clearEventRoomTbl();
+    EventRoomData* pEventData = bSora ? s_pEventRoomFile_Sora : s_pEventRoomFile_Riku;
+    for (INT i = 0; i < floor._nRoomCount; i++) {
+        FLOOR::RoomSrcInfo& roomSrc = pFloorSrc->_rooms[i];
+        RoomInfo& room = floor._rooms[i];
+        _initRoomInfo(room, _SceneInfoWork::mc()->_roomInfo[i], _SceneInfoWork::mc2()->_roomInfo2[i], &roomSrc, pFloorSrc, pFloorNormaSrc, FALSE);
+        INT nTblIdx = _getEventRoomSceneIndex(roomSrc._nRoomType);
+        SHORT nScene = roomSrc.isFixSceneRoom() ? roomSrc._nFixScene : 0;
+        if (nTblIdx >= 0) {
+            floor._nEventRoomIdxTbl[nTblIdx] = i;
+            if (world) {
+                INT nEvTblIdx = world - 1;
+                if (roomSrc._nRoomType == 5 || roomSrc._nRoomType == 7) {
+                    nScene = _getGoalRoomScene(world);
+                } else {
+                    nScene = pEventData ? pEventData->_nSceneTbl[nEvTblIdx][nTblIdx] : 0;
+                }
+                if (!bSora && world == 12 && nTblIdx == 1) {
+                    if (CGameWork::getInt(0, 0x2a) & 0x1000000) nScene = 30;
+                }
+            }
+        }
+        if (nScene > 0) room.setScene(world, nScene);
+    }
+    rollbackEventDoorState(1);
+    SHORT* pEntSceneTbl = _SceneInfoWork::mc()->_nEntranceSceneTbl[nFloorIdx];
+    _setWorldEntrance(world, pEntSceneTbl[0], pEntSceneTbl[1], FALSE);
+    if (bSora && world == 13 && *_SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx] == 4) showAllHiddenDoorsOfCurrentFloor();
+    _SceneInfoWork::mc()->_nNextRCNormaNum = 0;
+    if (world) CCard::setCardPossibleWorld(world);
+}
 /* Parked: 26 lines - the block after getFloorNumber: the original computes the s_CurrentFloor address and the
    clearEventRoomTbl loop pointer after the s_nCurrentFloorNumber store (lui order) with other registers; the loop
    body matches with the shared pSrc pointer. Statement orders and 5 min of permuter (7k candidates) gave nothing. */
