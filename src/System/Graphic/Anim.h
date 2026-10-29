@@ -249,6 +249,12 @@ public:
     void init(UINT nId, INT n);
     void play(TIMEQ tq, INT n);
     void changeEx(INT nRsrcID, ANIMID inId, TIMEQ inTq, BOOL inLoop);
+    // PARTIAL: added for Game/Entity
+    void start(ANIMID id, TIMEQ tq);
+    void getRootMove(FVECTOR& outTrs, FLOAT& outRotY);
+    BOOL startEx(INT inRsrcId, ANIMID id, TIMEQ tq);
+    BOOL startEx(const CHAR* rsrc_name, ANIMID id, TIMEQ tq);
+    BOOL changeEx(const CHAR* rsrc_name, ANIMID id, TIMEQ tq, TIMEQ gr);
     void setSpeed(FLOAT s) { m_Speed = s; }
     void endLookPosition(FLOAT fFrame); // PARTIAL: added for Game/Atel/Avatar
     void setRootMove(BOOL inRootMove, BOOL bContinue); // PARTIAL: added for Game/Player/Player
