@@ -1111,8 +1111,65 @@ void CSceneInfo::setupCompleteFloorWorld(WORLD_ID excludeWorld) {
         _setGoalRoomScene(w, 2);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setEventDoorUnavailable__10CSceneInfoii);
-__asm__(".rdata\n.align 4\n.word .L00214B60\n.word .L00214B68\n.word .L00214B70\n.word .L00214B78\n.word .L00214B80\n.word .L00214B78\n.text\n");
+void CSceneInfo::setEventDoorUnavailable(INT nFloorIdx, INT nRoomID) {
+    FLOOR::FloorLayout* pFloorSrc = getFloorDataSrc(nFloorIdx, CGame::isSoraGame());
+    if (!pFloorSrc) return;
+    INT nEvIdx;
+    BOOL bAll = nRoomID == 0 || nRoomID == 99;
+    if (bAll) {
+        nEvIdx = nRoomID == 99 ? 4 : -1;
+    } else {
+        FLOOR::RoomSrcInfo* pRoom = NULL;
+        for (INT i = 0; i < pFloorSrc->_nRoomCount; i++) {
+            if (pFloorSrc->_rooms[i]._nID == nRoomID) {
+                pRoom = &pFloorSrc->_rooms[i];
+                break;
+            }
+        }
+        if (!pRoom) return;
+        switch (pRoom->_nRoomType) {
+        case 2:
+            nEvIdx = 0;
+            break;
+        case 3:
+            nEvIdx = 1;
+            break;
+        case 4:
+            nEvIdx = 2;
+            break;
+        case 5:
+        case 7:
+            nEvIdx = 4;
+            break;
+        default:
+            {
+                BOOL bSora = CGame::isSoraGame();
+                nEvIdx = -1;
+                if (bSora && nFloorIdx == 12 && nRoomID == 19) nEvIdx = 0;
+            }
+            break;
+        }
+    }
+    for (INT i = 0; i < nFloorIdx; i++) {
+        BYTE* pTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[i];
+        pTbl[1] = 4;
+        pTbl[2] = 4;
+        pTbl[4] = 1;
+        pTbl[0] = 4;
+        pTbl = _SceneInfoWork::mc2()->_nEventDoorOpenTbl[i];
+        pTbl[0] = 1;
+        pTbl[1] = 1;
+        pTbl[2] = 1;
+    }
+    BYTE* pTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx];
+    BYTE* pTbl2 = _SceneInfoWork::mc2()->_nEventDoorOpenTbl[nFloorIdx];
+    for (INT r = 0; r <= nEvIdx; r++) {
+        if (r == 3) continue;
+        BYTE st = r == 4 ? 2 : 4;
+        pTbl[r] = st;
+        if (r < 3) pTbl2[r] = 1;
+    }
+}
 DOOR_ID CSceneInfo::setTmpCurrentRoomID(SHORT nRoomType) {
     DOOR_TYPE nType;
     switch (nRoomType) {
