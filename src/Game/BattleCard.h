@@ -94,6 +94,7 @@ public:
     INT isSet() { return m_uiFlag & 0x2; }
     void setStock(UINT inPri);
     INT isNowStock() { return m_uiFlag & 0x4; }
+    void exeStock();
     void setEnchant();
     void setHand(const CARD& inData, INT inNum, INT inMax, INT inMode);
     void setHandLocate(INT inNum, INT inMax);
