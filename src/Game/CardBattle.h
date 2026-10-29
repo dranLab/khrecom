@@ -304,6 +304,7 @@ public:
     CCardRevolver(class CTask* pParent, CARD* inDeck, INT inUser, INT inShortCut); void setDiscard(); // PARTIAL: added for Game/Player/Player
     INT isActive() const { return m_bActive; } // PARTIAL: added for Game/Player/Player
     INT getStockSkill() const { return m_iStockSkill; } // PARTIAL: added for Game/BattleCard
+    INT exeTrapEffect(INT inFlag); // PARTIAL: added for Game/BattleCard
     // PARTIAL: added for Game/Enemy/HumanBoss
     INT getMode() const { return m_sMode; } // PARTIAL: name unknown
     void setChargeRate(INT inRate) { m_tqChargeRate = inRate; } // PARTIAL: added for Game/CardBattle

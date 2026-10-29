@@ -1,6 +1,7 @@
 #include "khtypes.h"
 #include "Game/BattleCard.h"
 #include "Game/GameWork.h"
+#include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
 
 using namespace CardBattle;
@@ -25,6 +26,7 @@ static inline void _setCard(CARD& c, USHORT inKind, BYTE num) {
     c.m_nCategory21 = cardDataTbl_00474480[c.m_nKind].nCategory1;
 }
 extern "C" char D_00473558[];
+extern "C" char D_00473580[]; /* "BC::destroy(); handle=%d\n" */
 extern "C" char D_004730D8[]; /* "Game/CardBattle.h" */
 extern "C" char D_00473100[]; /* "inUser" */
 
@@ -173,7 +175,55 @@ void CBattleCard::setBreak(INT inFlag) {
     m_uiFlag = (INT)m_uiFlag & ~0x2;
     if (inFlag > 0) m_uiFlag |= 0x20;
 }
+/* Parked: 5 lines - the original keeps two copies of `addGimmickCount(-1); break;` (cases 0xe and 6); our jump2
+   cross-jumps case 0xe's tail into case 6. Per-case flag sets, gotos, labels, argument spellings and block scopes
+   all merge too (synthetic tests build/ps/cj/d*.cpp, e*.cpp, f1.cpp). */
+#if 0
+void CBattleCard::destroy(INT inFlag) {
+    if (m_uiMode < 8) {
+        if (m_uiMode >= 3) return;
+    }
+    if (m_pRevolver) {
+        TRACE(D_00473580, getHandle());
+        m_uiFlag = (INT)m_uiFlag & ~0x1;
+        m_uiFlag = (INT)m_uiFlag & ~0x2;
+        m_uiFlag = (INT)m_uiFlag & ~0x4;
+        m_uiFlag = (INT)m_uiFlag & ~0x40;
+        m_uiFlag &= ~0x10000;
+        m_uiFlag &= ~0x200000;
+        m_uiFlag = (INT)m_uiFlag & ~0x10;
+        m_uiMode = 0xe;
+        m_iHand = -1;
+        m_iStock = -1;
+        m_pCard->enableColorCtrl(FALSE);
+        m_vRot.set(0.0f, 0.0f, 0.0f, 1.0f);
+        m_uiFlag = (INT)m_uiFlag & ~0x2008;
+        changeState(2);
+        resetEnchantEffect(0);
+        if (DebugWork::g_dw.player.iCardSpend) return;
+        if (!inFlag) return;
+        switch (getCardCategory()) {
+        case 0xe:
+            m_pRevolver->exeTrapEffect(0);
+            CCardBattle::addGimmickCount(-1);
+            break;
+        case 6:
+            CCardBattle::addGimmickCount(-1);
+            break;
+        case 5:
+            if (m_cardData.m_nKind == 0x39) CCardBattle::addPlutoCount(-1);
+            break;
+        default:
+            return;
+        }
+        m_uiFlag |= 0x20;
+    } else {
+        out();
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", destroy__Q210CardBattle11CBattleCardi);
+#endif
 void CBattleCard::setEnchant() {
     changeState(3);
     m_uiMode = 7;
