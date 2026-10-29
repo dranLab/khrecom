@@ -21,10 +21,10 @@ public:
     static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
 };
 
-class CMemoca {
-public:
-    static void setupMcName(INT nType);
-};
+#include "System/Memoca.h"
+
+
+
 
 #include "System/Graphic/ModelMan.h"
 

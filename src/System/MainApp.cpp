@@ -222,11 +222,11 @@ public:
 
 #include "System/Graphic/FrecFont.h"
 
-class CMemoca {
-public:
-    static void initialize();
-    static void finalize();
-};
+#include "System/Memoca.h"
+
+
+
+
 
 #include "System/Graphic/WorldEnv.h"
 #line 257
