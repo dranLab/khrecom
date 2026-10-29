@@ -50,19 +50,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-29 | cleanup/System-Graphic-Effect-libppp-pppPart (sceGsLoadImage stand-ins in 2 files) | 1010 | 355 | 24 | 950 (920) | 98 |
 | 2026-10-29 | decomp/Game-Entity (partial 164/265, 15 matched, 1 parked; OTHER_PARAM, SE_MANAGED_DATA, CCollRideModelDisp, CRsrcDB stand-in) | 1017 | 356 | 24 | 950 (920) | 98 |
 | 2026-10-29 | decomp/Game-Entity (partial 180/265, 16 more; CAnim start/startEx/getRootMove, isRootMoveOff/isFlashing, SE/Fade declarations) | 1023 | 356 | 24 | 950 (920) | 98 |
+| 2026-10-29 | decomp/Game-Entity (done 265/265, no asm; weak tail + ctor/dtor + .rodata from C; CFnt/CState/CLightUnit copies named; A2 part 1: no ref-owned class (CEntity is Game/Movement's), mechanisms re-checked) | 1023 | 356 | 24 | 958 (925) | 101 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1023 (950 in 109 headers, 73 in 31 .cpp); MATCH: 98
-  by category: method 405, data member 69, type 87, fwd decl 53, #include 29, changed in place 126, padding 33, path override 24, gate 40, guessed 46, header-level 74, stand-in 31, other 6
+PARTIAL: 1023 (948 in 109 headers, 75 in 32 .cpp); MATCH: 101
+  by category: method 405, data member 69, type 87, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 39, guessed 43, header-level 74, stand-in 31, other 6
 stand-ins: 356 foreign in 121 files (107 names), 200 unattributed, 172 own
 duplicate class names across headers: 24
-padding: 33 arrays, 25 accessors
-mechanisms: 950 sites (920 untagged); #line: 1238
+padding: 33 arrays, 26 accessors
+mechanisms: 958 sites (925 untagged); #line: 1238
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 562, superset 129, partial 94, gated 96, missing 12, unattributed 309
+classes: complete 562, superset 130, partial 93, gated 96, missing 12, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -255,8 +256,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/BodyCollision.h` | 22 | 0/1/0/0 | 55 |
 | `Game/Bullet/Bullet.h` | 8 | 2/3/0/0 | 30 |
 | `Game/Card.h` | 13 | 2/0/1/0 | 25 |
-| `Game/CardBattle.h` | 77 | 3/2/1/0 | 145 |
-| `Game/CardKind.h` | 0 | 0/0/2/0 | 152 |
+| `Game/CardBattle.h` | 77 | 3/2/1/0 | 146 |
+| `Game/CardKind.h` | 0 | 0/0/2/0 | 153 |
 | `Game/CollParam.h` | 1 | 5/0/1/0 | 158 |
 | `Game/Collision/CollAttack.h` | 0 | 0/1/0/0 | 11 |
 | `Game/Collision/CollBody.h` | 2 | 0/1/0/0 | 5 |
@@ -264,7 +265,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollMap.h` | 0 | 0/1/0/0 | 29 |
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
 | `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 173 |
-| `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 148 |
+| `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 149 |
 | `Game/Collision/CollUtilA.h` | 11 | 2/2/2/0 | 24 |
 | `Game/Collision/Ride.h` | 1 | 6/0/1/0 | 5 |
 | `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
@@ -277,7 +278,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Enemy/HumanBoss.h` | 0 | 0/1/0/0 | 4 |
 | `Game/Enemy/MapEnemy.h` | 10 | 0/0/0/1 | 7 |
 | `Game/Enemy/MapEnemyManager.h` | 1 | 1/1/0/0 | 8 |
-| `Game/Entity.h` | 114 | 1/0/2/0 | 146 |
+| `Game/Entity.h` | 110 | 1/1/1/0 | 146 |
 | `Game/EntityFactory.h` | 14 | 1/1/0/0 | 49 |
 | `Game/Game.h` | 20 | 0/1/0/0 | 42 |
 | `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
@@ -303,7 +304,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/InterpolateMove.h` | 0 | 0/0/3/0 | 1 |
 | `Game/Map.h` | 8 | 4/2/1/1 | 8 |
 | `Game/MapUnitTable.h` | 2 | 0/1/1/0 | 11 |
-| `Game/Movement.h` | 48 | 0/0/0/1 | 105 |
+| `Game/Movement.h` | 49 | 0/0/0/1 | 105 |
 | `Game/OsdDef.h` | 4 | 3/0/3/0 | 7 |
 | `Game/Player/DWTPlayer.h` | 2 | 0/0/0/0 | 5 |
 | `Game/Player/Friend.h` | 0 | 0/0/1/0 | 15 |
@@ -323,7 +324,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 51 |
 | `Game/Prize.h` | 0 | 0/1/0/0 | 2 |
 | `Game/SEMotion.h` | 0 | 5/0/1/0 | 4 |
-| `Game/SceneEnv.h` | 1 | 0/0/1/0 | 35 |
+| `Game/SceneEnv.h` | 1 | 0/0/1/0 | 36 |
 | `Game/SceneInfo.h` | 5 | 29/0/1/0 | 85 |
 | `Game/Status.h` | 11 | 1/0/1/0 | 15 |
 | `Game/StorageWork.h` | 2 | 2/1/1/0 | 59 |
@@ -333,13 +334,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Component.h` | 3 | 1/1/0/0 | 5 |
 | `System/Coord.h` | 3 | 0/1/0/0 | 17 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 271 |
-| `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 10 |
-| `System/Fsm.h` | 4 | 1/0/0/1 | 109 |
+| `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 11 |
+| `System/Fsm.h` | 4 | 1/0/0/1 | 110 |
 | `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 11 |
 | `System/Graphic/2d/2DFntObj.h` | 0 | 0/1/0/0 | 3 |
 | `System/Graphic/2d/2DLay.h` | 0 | 3/1/0/0 | 4 |
 | `System/Graphic/2d/2DLayObj.h` | 1 | 0/1/0/0 | 3 |
-| `System/Graphic/2d/2DMan.h` | 3 | 0/0/0/3 | 165 |
+| `System/Graphic/2d/2DMan.h` | 3 | 0/0/0/3 | 166 |
 | `System/Graphic/2d/2DObj.h` | 4 | 0/1/0/0 | 17 |
 | `System/Graphic/2d/2DSeq.h` | 1 | 1/1/0/0 | 4 |
 | `System/Graphic/2d/2DSeqCtrl.h` | 2 | 1/1/0/0 | 31 |
@@ -374,7 +375,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 10 |
 | `System/Graphic/MapUnit.h` | 2 | 0/0/0/0 | 3 |
-| `System/Graphic/Model.h` | 10 | 0/3/5/0 | 70 |
+| `System/Graphic/Model.h` | 11 | 0/3/5/0 | 70 |
 | `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 75 |
 | `System/Graphic/MotData.h` | 1 | 4/0/3/0 | 3 |
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
@@ -382,8 +383,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/PathDataCamera.h` | 1 | 0/1/0/0 | 3 |
 | `System/Graphic/ScreenMask.h` | 0 | 0/1/1/0 | 4 |
 | `System/Graphic/ShadowModel.h` | 5 | 0/0/1/0 | 6 |
-| `System/Graphic/Str.h` | 1 | 0/0/0/0 | 139 |
-| `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 35 |
+| `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
+| `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 36 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
 | `System/Graphic/modeldata.h` | 15 | 1/2/0/1 | 82 |
 | `System/LinkedBuf.h` | 6 | 1/2/1/0 | 7 |
@@ -392,7 +393,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Memoca.h` | 2 | 4/0/0/0 | 4 |
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 94 |
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
-| `System/RsrcData.h` | 3 | 0/0/0/32 | 27 |
+| `System/RsrcData.h` | 3 | 0/0/0/32 | 28 |
 | `System/SJoint.h` | 9 | 0/0/0/0 | 200 |
 | `System/Task.h` | 27 | 1/2/0/1 | 233 |
 | `System/TaskMan.h` | 7 | 1/2/0/0 | 83 |
@@ -408,14 +409,14 @@ or `untagged`.
 | feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:3 |
 | feature | `COLLOBJ_H_COLLISION_CLASSES` | 5 | 1 | CPointCollision (debugWinPathEditPosCamGround) |
 | feature | `COLLOBJ_H_INFO_UNION` | 3 | 0 | untagged, e.g. Game/Movement.cpp:2 |
-| feature | `ENTITY_H_SETFLAG_DIRECT` | 1 | 1 | setEntityFlag on the CEntity base subobject (constructor, InitAvatar) |
-| feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 0 | untagged, e.g. Game/Atel/Atel.cpp:30 |
+| feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
+| feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 0 | untagged, e.g. Game/Atel/Atel.cpp:31 |
 | feature | `MODELDATA_H_TEXINFO` | 5 | 0 | untagged, e.g. System/Graphic/DispList.cpp:1 |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 1 | 0 | untagged, e.g. System/RsrcData.cpp:6 |
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 0 | untagged, e.g. Game/Collision/CollObj.h:90 |
 | feature site | `COLLOBJ_H_INFO_UNION` | 1 | 0 | untagged, e.g. Game/Collision/CollObj.h:205 |
-| feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 0 | untagged, e.g. Game/Entity.h:170 |
+| feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 0 | untagged, e.g. Game/Entity.h:427 |
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 0 | untagged, e.g. System/LinkedBuf.h:10 |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:78 |
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:115 |
@@ -439,7 +440,7 @@ or `untagged`.
 | guard skip | `SYSTEM_COORD_H` | 1 | 0 | untagged, e.g. System/Graphic/Effect/effect_inl.h:9 |
 | guard skip | `SYSTEM_FSM_H` | 1 | 0 | untagged, e.g. Game/Entity.h:29 |
 | opt-out | `MAPENEMY_H_NO_COLL_ANIM` | 2 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:3 |
-| opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 159 | 4 | the original .rodata has no Task.h container-overflow message |
+| opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 159 | 5 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
 | opt-out site | `MAPENEMY_H_NO_COLL_ANIM` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.h:8 |
 | opt-out site | `TASK_H_NO_SLC_OVERFLOW_MSG` | 1 | 0 | untagged, e.g. System/Task.h:201 |
 | path override | `ANIM_H_PATH` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:2 |
@@ -447,13 +448,13 @@ or `untagged`.
 | path override | `ATELCROSSFADE_H_PATH` | 3 | 0 | untagged, e.g. System/MainApp.cpp:2 |
 | path override | `ATELFOG_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/AtelFog.cpp:2 |
 | path override | `BATTLEENEMY_H_PATH` | 46 | 0 | untagged, e.g. Game/AttackMotion.cpp:3 |
-| path override | `BODYCOLLISION_H_PATH` | 1 | 0 | untagged, e.g. Game/BodyCollision.cpp:3 |
+| path override | `BODYCOLLISION_H_PATH` | 2 | 1 | __FILE__ of these headers as in the original .rodata |
 | path override | `CAMERAMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/CameraMan.cpp:2 |
-| path override | `CARDBATTLE_H_PATH` | 4 | 2 | the original includes it under this name |
+| path override | `CARDBATTLE_H_PATH` | 5 | 2 | the original includes it under this name |
 | path override | `CARD_H_PATH` | 6 | 1 | the original's Card.h/Status.h strings carry |
 | path override | `CHATMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/ChatMan.cpp:2 |
-| path override | `COLLDISP_H_PATH` | 3 | 0 | untagged, e.g. Game/Collision/CollDisp.cpp:3 |
-| path override | `COLLUTIL_H_PATH` | 12 | 0 | untagged, e.g. Game/AttackMotion.cpp:4 |
+| path override | `COLLDISP_H_PATH` | 4 | 0 | untagged, e.g. Game/Collision/CollDisp.cpp:3 |
+| path override | `COLLUTIL_H_PATH` | 13 | 0 | untagged, e.g. Game/AttackMotion.cpp:4 |
 | path override | `CTDMAN_H_PATH` | 6 | 0 | untagged, e.g. Form/Menu/DecknameEdit.cpp:2 |
 | path override | `D2MAN_H_PATH` | 10 | 0 | untagged, e.g. System/Graphic/2d/2DCard.cpp:3 |
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
@@ -475,7 +476,7 @@ or `untagged`.
 | placeholder | `_2dManCreate*` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.h:22 |
 | placeholder | `_addCardStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:1170 |
 | placeholder | `_alloc*` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:87 |
-| placeholder | `_atelTaskSLCOverflow*` | 1 | 0 | untagged, e.g. Game/Atel/Atel.cpp:6 |
+| placeholder | `_atelTaskSLCOverflow*` | 1 | 0 | untagged, e.g. Game/Atel/Atel.cpp:7 |
 | placeholder | `_bossDeadDemoEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:22 |
 | placeholder | `_collDispCreate*` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.h:22 |
 | placeholder | `_collUtilCreate*` | 1 | 0 | untagged, e.g. Game/Collision/CollUtil.h:20 |
@@ -517,6 +518,7 @@ or `untagged`.
 | placeholder | `_enemyWizardEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyWizard.cpp:13 |
 | placeholder | `_enemyWyvernEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyWyvern.cpp:13 |
 | placeholder | `_enemyYellowoperaEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyYellowopera.cpp:13 |
+| placeholder | `_entityEmptyStringPlaceholder*` | 1 | 0 | untagged, e.g. Game/Entity.cpp:20 |
 | placeholder | `_gameTaskSLCOverflow*` | 1 | 0 | untagged, e.g. Game/Game.cpp:15 |
 | placeholder | `_heartlessEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/Heartless.cpp:13 |
 | placeholder | `_humanBossEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/HumanBoss.cpp:17 |
@@ -527,10 +529,10 @@ or `untagged`.
 | placeholder | `_mapEnemyAirEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyAir.cpp:11 |
 | placeholder | `_mapEnemyGroundEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyGround.cpp:11 |
 | placeholder | `_mapEnemyMushroomEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyMushroom.cpp:11 |
-| placeholder | `_mcShaderCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:511 |
-| placeholder | `_mcShaderDelete*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:514 |
-| placeholder | `_modelAssertZero*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:508 |
-| placeholder | `_modelCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:505 |
+| placeholder | `_mcShaderCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:514 |
+| placeholder | `_mcShaderDelete*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:517 |
+| placeholder | `_modelAssertZero*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:511 |
+| placeholder | `_modelCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:508 |
 | placeholder | `_monstroEventBattleEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MonstroEventBattle.cpp:27 |
 | placeholder | `_pathDataCameraSLCOverflow*` | 1 | 0 | untagged, e.g. System/Graphic/PathDataCamera.cpp:7 |
 | placeholder | `_premiumPrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:10 |
@@ -560,6 +562,7 @@ or `untagged`.
 | unit gate | `FORM_MENU_SAVELOAD_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoad.cpp:2 |
 | unit gate | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.cpp:1 |
 | unit gate | `GAME_ENEMY_BATTLEENEMY_CPP` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:1 |
+| unit gate | `GAME_ENTITY_CPP` | 1 | 0 | untagged, e.g. Game/Entity.cpp:1 |
 | unit gate | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.cpp:1 |
 | unit gate | `GAME_GIMMICK_GIMMICKMANAGER_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/GimmickManager.cpp:1 |
 | unit gate | `GAME_MAP_CPP` | 1 | 0 | untagged, e.g. Game/Map.cpp:1 |
@@ -578,6 +581,7 @@ or `untagged`.
 | unit gate site | `FORM_MENU_SAVELOAD_CPP` | 6 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:148 |
 | unit gate site | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.h:170 |
 | unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:112 |
+| unit gate site | `GAME_ENTITY_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:450 |
 | unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.h:49 |
 | unit gate site | `GAME_GIMMICK_GIMMICKMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Gimmick/GimmickManager.h:14 |
 | unit gate site | `GAME_MAP_CPP` | 1 | 0 | untagged, e.g. Game/Map.h:74 |
@@ -598,14 +602,12 @@ than our includers (units with a source only). A heuristic: stand-ins and opt-ou
 | header | originals | ours | only originals | only ours |
 |---|---:|---:|---|---|
 | `Form/Menu/JiminyMemo.h` | 3 | 2 | 1: System/MainTaskFactory | 0:  |
-| `Game/CardBattle.h` | 146 | 145 | 1: Game/Entity | 0:  |
-| `Game/Collision/CollUtil.h` | 153 | 148 | 5: Game/Collision/CollUtil, Game/Collision/CollUtilO, Game/Collision/Ride, Game/Entity, ... (+1) | 0:  |
+| `Game/Collision/CollUtil.h` | 153 | 149 | 4: Game/Collision/CollUtil, Game/Collision/CollUtilO, Game/Collision/Ride, Game/Map | 0:  |
 | `Game/OsdDef.h` | 8 | 7 | 1: System/MainTaskFactory | 0:  |
-| `System/Graphic/2d/2DMan.h` | 166 | 165 | 1: Game/Entity | 0:  |
 | `System/Graphic/Anim.h` | 149 | 149 | 0:  | 2: Game/Gimmick/CreateGimmick, Game/Gimmick/SampleGimmick |
 | `System/Graphic/Gprim.h` | 233 | 231 | 1: Game/Collision/CollUtil | 0:  |
-| `System/Graphic/Str.h` | 141 | 139 | 2: Game/Collision/CollUtil, Game/Entity | 0:  |
-| `System/RsrcData.h` | 29 | 27 | 2: Game/Entity, Game/Map | 0:  |
+| `System/Graphic/Str.h` | 141 | 140 | 1: Game/Collision/CollUtil | 0:  |
+| `System/RsrcData.h` | 29 | 28 | 1: Game/Map | 0:  |
 
 Generated by `tools/partials.py --update docs/partials.md`.
 <!-- partials:end -->
