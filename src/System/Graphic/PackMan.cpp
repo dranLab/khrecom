@@ -259,7 +259,7 @@ void sceVif1PkRefe(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int op
 void sceVif1PkRefs(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt1, u_int opt2, u_int flag);
 void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_short bw, u_long128* image, u_int size, u_int x, u_int y, u_int w, u_int h);
 void _makePkt_SaveScreen(); /* static in the original (still INCLUDE_ASM) */
-extern "C" int FlushCache(int op);
+extern "C" void FlushCache(int op); /* MATCH: void (the SDK returns int): v0 stays free for the lui after the call in saveScreen */
 extern "C" void sceDmaSend(sceDmaChan* d, void* tag);
 extern "C" void AssertApp(const char* pFile, int nLine, const char* pExpr, int n);
 extern "C" char D_00461BE0[], D_00461C10[]; /* PARTIAL: __FILE__ and the assert text (data still asm) */
@@ -440,11 +440,22 @@ void CPackMan::pkAddGsDataN(u_long* pData, UINT count) { sceVif1PkAddGsDataN(s_p
 void CPackMan::pkAddGsPacked(u_long128 data) { sceVif1PkAddGsPacked(s_pPktVif1, data); }
 void CPackMan::pkAddGsPackedN(u_long128* pData, UINT count) { sceVif1PkAddGsPackedN(s_pPktVif1, pData, count); }
 void CPackMan::pkAddGsAD(UINT addr, u_long data) { sceVif1PkAddGsAD(s_pPktVif1, addr, data); }
-void CPackMan::pkRefLoadImage(u_short bp, u_char psm, u_short bw, u_long128* image, UINT size, UINT x, UINT y, UINT w, UINT h) {
-    sceVif1PkRefLoadImage(s_pPktVif1, bp, psm, bw, image, size, x, y, w, h);
+/* MATCH: the three pkRefLoadImage overloads inline one helper (the ref lists its parameters as their locals) */
+static inline void _pkRefLoadImage(USHORT nInBp, BYTE cInPsm, USHORT nInBw, u_long128* pInImage, UINT nInSize, UINT nInX, UINT nInY,
+                                   UINT nInW, UINT nInH) {
+    sceVif1PkRefLoadImage(s_pPktVif1, nInBp, cInPsm, nInBw, pInImage, nInSize, nInX, nInY, nInW, nInH);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefLoadImage__8CPackManRC10VTransInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", pkRefLoadImage__8CPackManUsRC10VTransInfo);
+void CPackMan::pkRefLoadImage(u_short bp, u_char psm, u_short bw, u_long128* image, UINT size, UINT x, UINT y, UINT w, UINT h) {
+    _pkRefLoadImage(bp, psm, bw, image, size, x, y, w, h);
+}
+void CPackMan::pkRefLoadImage(const VTransInfo& info) {
+    _pkRefLoadImage(info._nDistPos, info._nFormat, info._nDistBufW, (u_long128*)info._pImage, info._qwImage, info._nDistX,
+                   info._nDistY, info._nDistW, info._nDistH);
+}
+void CPackMan::pkRefLoadImage(u_short nBP, const VTransInfo& info) {
+    _pkRefLoadImage(nBP, info._nFormat, info._nDistBufW, (u_long128*)info._pImage, info._qwImage, info._nDistX, info._nDistY,
+                   info._nDistW, info._nDistH);
+}
 void CPackMan::pkRefMpg(u_short vuaddr, u_long128* pMicro, UINT size, UINT opt1) { sceVif1PkRefMpg(s_pPktVif1, vuaddr, pMicro, size, opt1); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initialize__8CPackMan);
 void CPackMan::finalize() { CDelayedFree::disposeFreeList(); }
@@ -472,7 +483,11 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", terminateSemi
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initFGPacket__8CPackMan);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", terminateFGPacket__8CPackMan);
 BOOL CPackMan::isStartStillMode() { return s_nReqDrawMode == 1 && s_nDrawMode == 0; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", saveScreen__8CPackMan);
+void CPackMan::saveScreen() {
+    _makePkt_SaveScreen();
+    FlushCache(0);
+    sceDmaSend(s_pDmaChanVif1, (void*)((u_int)s_pktVif1.pBase & 0x0fffffff));
+}
 void CPackMan::setMovieEnv(UINT nDrawW, UINT nDrawH, UINT nDispW, UINT nDispH) {
     s_nMovieDrawW = nDrawW;
     s_nMovieDrawH = nDrawH;
