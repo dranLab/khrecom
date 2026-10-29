@@ -134,6 +134,7 @@ USHORT _getGoalRoomScene(WORLD_ID w);
 void _clearMapRsrcCache();
 FloorLayoutDataHeader* _isValidFloorIdx(USHORT nIdx, BOOL bSora);
 extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
+extern "C" int rand();
 
 /* The file's statics, in the original order */
 namespace {
@@ -718,8 +719,77 @@ void CSceneInfo::makeRoom(const RoomInfo& room, DOOR_ID nDoorID, SHORT nScene, B
     }
     if ((USHORT)nScene == 4 && r._pStorageInfo) CMoogleShopMain::initMcWork((STORAGE::MCWork::_RoomInfo*)r._pStorageInfo);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", makeRoom__10CSceneInfoR8DoorInfoi);
-__asm__(".rdata\n.align 3\n.word 0x74734470\n.word 0x6D6F6F52\n.word 0x00000000\n.word 0x00000000\ns_RndSceneTblSora.2454:\n.word 0x06050403\n.word 0x0A090807\n.word 0x0E0D0C0B\n.word 0x1211100F\n.word 0x16151413\n.word 0x001A1917\ns_RndSceneTblRiku.2455:\n.word 0x0B090603\n.word 0x100E0D0C\n.word 0x16151312\n.word 0x001A1917\n.word 0x202A2A2A\n.word 0x61657243\n.word 0x52206574\n.word 0x206D6F6F\n.word 0x52207441\n.word 0x6F646E61\n.word 0x2E2E206D\n.word 0x535B202E\n.word 0x656E6563\n.word 0x5D64253A\n.word 0x0000000A\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
+void CSceneInfo::makeRoom(DoorInfo& door, BOOL bFromEventRoom) {
+    if (door.getDoorState() == DOOR_STAT_CLOSED) door.setDoorState(bFromEventRoom ? DOOR_STAT_UNAVAILABLE : DOOR_STAT_OPENED);
+    RoomInfo* pDstRoom = getRoomInfo(door._nDstRoom);
+    if (!(pDstRoom)) AssertApp(__FILE__, 1094, "pDstRoom", 0);
+    INT nCardNumber;
+    SHORT nScene;
+    BYTE nCardID;
+    if ((!door.isNormaCardUsed() && pDstRoom->isFixSceneRoom()) ||
+        (pDstRoom->_pSrcInfo->_nRoomType == FLOOR::ROOM_TYPE_EXTRA && !pDstRoom->hasEntered())) {
+        nScene = pDstRoom->getSceneNum();
+        nCardID = getCardIDFromSceneNum(nScene);
+        nCardNumber = CGameWork::m_pMCWork->_nNextRCNormaNum;
+        if (pDstRoom->_pSrcInfo->_nRoomType == FLOOR::ROOM_TYPE_EXTRA) {
+            nCardNumber = door.getFirstUsedCardNumForNorma();
+            CGameWork::m_pMCWork->_nNextRCNormaNum = nCardNumber + 1 < 10 ? nCardNumber + 1 : 0;
+        }
+    } else {
+        nCardNumber = door.getFirstUsedCardNumForNorma();
+        if ((UINT)nCardNumber >= 10) nCardNumber = CGameWork::m_pMCWork->_nNextRCNormaNum;
+        nCardID = door.getFirstUsedCardIDForNorma();
+        if (door.isEventDoor()) {
+            for (INT i = 0; i < 4; i++) {
+                DoorInfo& d = pDstRoom->_doors[i];
+                if (d.getDoorState() == DOOR_STAT_CLOSED) d.setFirstUsedCardInfo(nCardID, nCardNumber);
+            }
+            return;
+        }
+        nScene = getSceneNumFromCardID(nCardID);
+        if (nScene == 0) {
+            static const char s_RndSceneTblSora[23] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26 };
+            static const char s_RndSceneTblRiku[15] = { 3, 6, 9, 11, 12, 13, 14, 16, 18, 19, 21, 22, 23, 25, 26 };
+            const char* pTbl;
+            INT nNum;
+            if (CGame::isSoraGame()) {
+                pTbl = s_RndSceneTblSora;
+                nNum = 23;
+                nScene = pTbl[rand() % nNum];
+            } else {
+                nNum = 15;
+                INT w = getCurrentWorldID(0);
+                pTbl = s_RndSceneTblRiku;
+                do {
+                    nScene = pTbl[rand() % nNum];
+                } while (w == 9 && nScene == 6);
+            }
+            TRACE_COL(_TTY_RED, "*** Create Room At Random ... [Scene:%d]\n", nScene);
+            if (nCardID == 0xb7 || nCardID == 0xb9) nCardID = getCardIDFromSceneNum(nScene);
+        }
+        if (bFromEventRoom) nCardID = 0xd8;
+    }
+    DOOR_ID dstDoorID = _getDstDoorID(door._id);
+    if (bFromEventRoom) {
+        for (INT i = 0; i < 4; i++) {
+            if (dstDoorID == i) continue;
+            DoorInfo& d = pDstRoom->_doors[i];
+            DOOR_STAT st = d.getDoorState();
+            if (st != DOOR_STAT_CLOSED) continue;
+            if (d.isSpecialDoor()) continue;
+            if (d.isWorldEntrance()) continue;
+            RoomInfo* pRoom = getRoomInfo(d._nDstRoom);
+            if (!pRoom) continue;
+            if (pRoom->isExceptRoom()) continue;
+            if (!pRoom->isCreated()) continue;
+            d.setDoorState(DOOR_STAT_OPENED);
+            DoorInfo& d2 = pRoom->_doors[_getDstDoorID((DOOR_ID)i)];
+            if (d2.getDoorState() != st) continue;
+            d2.setDoorState(DOOR_STAT_OPENED);
+        }
+    }
+    makeRoom(*pDstRoom, dstDoorID, nScene, nCardID, nCardNumber);
+}
 BOOL CSceneInfo::hasAnyRequest() {
     BOOL b = FALSE;
     if (hasReqChangeScene() || s_nReqEnterBattle || s_nReqExitBattle) b = TRUE;
