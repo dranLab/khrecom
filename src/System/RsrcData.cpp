@@ -571,19 +571,19 @@ BOOL CRsrcAMF::setupAMF(MODELDATA* pData, BOOL bExitOnTexErr) {
     return setupAMFTex(pData, bExitOnTexErr);
 }
 
-struct ZONEDATA {
-    SHORT partsnum;
-    SHORT skynum;
-    void* parts;
-    SHORT gridsizeX;
-    SHORT zoneSizeX;
-    SHORT gridsizeZ;
-    SHORT zoneSizeZ;
-    INT group_suu;
-    INT** grouptable;
-    INT chip_suu;
-    INT __parts_suu;
-};
+#include "Game/Map.h"
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct TEXPARAM {
     char m_szName[16];
@@ -787,7 +787,7 @@ void CRsrcAZF::_setupAZF() {
     if (!ppAmdTop) return;
     ZONEDATA* pZone = (ZONEDATA*)((INT)ppAmdTop[0] + (INT)ppAmdTop);
     ppAmdTop[0] = (MODELDATA*)pZone;
-    pZone->parts = (void*)((INT)pZone->parts + (INT)pZone);
+    pZone->parts = (ZONEPARTS*)((INT)pZone->parts + (INT)pZone);
     MODELDATA** ppAmd = ppAmdTop + 1;
     if (((ZONEDATA*)ppAmdTop[0])->group_suu > 0) {
         ((ZONEDATA*)ppAmdTop[0])->grouptable = (INT**)((INT)((ZONEDATA*)ppAmdTop[0])->grouptable + (INT)pZone);
@@ -910,15 +910,15 @@ struct POINTLIGHT_NEW {
     FLOAT pad[6];
 };
 
-struct ALF_DATA {
-    USHORT infinite_suu;
-    USHORT nVer;
-    USHORT point_suu;
-    USHORT nPad0;
-    USHORT spot_suu;
-    USHORT nPad1;
-    INT dum0;
-};
+
+
+
+
+
+
+
+
+
 
 void CRsrcALF::_setupALF() {
     BYTE* pSrc = getRsrcData();
