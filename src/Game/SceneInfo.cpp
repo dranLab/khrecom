@@ -788,9 +788,45 @@ BOOL DoorInfo::isValidNormaIndex(USHORT nIndex) const {
     TRACE(D_00484EC8);
     return FALSE;
 }
+/* Parked: 15 lines - the first `return 0` (key && idx+1 == count) stays an inline `b end` block after a bne in the original, ours branches straight to the epilogue; the bValid test comes out as movn here, as bnel + sltu there. */
+#if 0
+RCNORMA_COLOR DoorInfo::getNormaColor(USHORT nIndex) const {
+    INT nKey = getNormaKeyCardID();
+    if (nKey && nIndex + 1 == getNormaCount()) return (RCNORMA_COLOR)0;
+    BOOL bValid = FALSE;
+    if (isValidNormaIndex(nIndex) && _pNormaSrcInfo) bValid = nKey != 0;
+    if (bValid) return (RCNORMA_COLOR)((RCNORMA::DoorNormaSrc*)_pNormaSrcInfo)->_normas[nIndex]._nColor;
+    return (RCNORMA_COLOR)0;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getNormaColor__C8DoorInfoUs);
+#endif
+/* Parked: 3 lines - the first `return 0` stays an inline `b end` block after a bne in the original; ours inverts it into a beq to the epilogue. ~12 structural variants (nested, else-if, result var, !(..) &&) give the same; the permuter cannot find const methods. */
+#if 0
+USHORT DoorInfo::getNormaNumber(USHORT nIndex) const {
+    if (getNormaKeyCardID() && nIndex + 1 == getNormaCount()) return 0;
+    if (isValidNormaIndex(nIndex)) {
+        DOOR_STORAGE* p = (DOOR_STORAGE*)_pStorageInfo;
+        return p ? p->_nNormaNums[nIndex] : 0;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getNormaNumber__C8DoorInfoUs);
+#endif
+/* Parked: first `return 0` and bValid as in getNormaColor (same shape, not iterated further). */
+#if 0
+RCNORMA_OP DoorInfo::getNormaOperation(USHORT nIndex) const {
+    INT nKey = getNormaKeyCardID();
+    if (nKey && nIndex + 1 == getNormaCount()) return (RCNORMA_OP)0;
+    BOOL bValid = FALSE;
+    if (isValidNormaIndex(nIndex) && _pNormaSrcInfo) bValid = nKey != 0;
+    if (bValid) return (RCNORMA_OP)((RCNORMA::DoorNormaSrc*)_pNormaSrcInfo)->_normas[nIndex]._nOp;
+    return getNormaNumber(nIndex) ? (RCNORMA_OP)2 : (RCNORMA_OP)3;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getNormaOperation__C8DoorInfoUs);
+#endif
 BOOL DoorInfo::isNormaCardUsed() const {
     DOOR_STORAGE* p = (DOOR_STORAGE*)_pStorageInfo;
     BOOL b = FALSE;
