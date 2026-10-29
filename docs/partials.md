@@ -47,14 +47,15 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-29 | cleanup/System-FileIO (CFileIO stand-ins in 3 files) | 1076 | 404 | 23 | 943 (926) | 61 |
 | 2026-10-29 | decomp/System-Graphic-PackMan (done 183/185, 2 parked; .bss/.rodata + static init from C; A2 part 1: PackMan.h with CPackMan/pacVif1Packet/GpuRegsInfoSep) | 1014 | 390 | 24 | 950 (920) | 98 |
 | 2026-10-29 | cleanup/System-Graphic-PackMan (A2 part 2: CPackMan stand-ins in 32 files, EffectMan pacVif1Packet) | 1011 | 357 | 24 | 950 (920) | 98 |
+| 2026-10-29 | cleanup/System-Graphic-Effect-libppp-pppPart (sceGsLoadImage stand-ins in 2 files) | 1010 | 355 | 24 | 950 (920) | 98 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1011 (938 in 109 headers, 73 in 30 .cpp); MATCH: 98
-  by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 125, padding 32, path override 24, gate 39, guessed 46, header-level 74, stand-in 32, other 6
-stand-ins: 357 foreign in 120 files (108 names), 200 unattributed, 172 own
+PARTIAL: 1010 (938 in 109 headers, 72 in 30 .cpp); MATCH: 98
+  by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 125, padding 32, path override 24, gate 39, guessed 46, header-level 74, stand-in 31, other 6
+stand-ins: 355 foreign in 120 files (107 names), 200 unattributed, 172 own
 duplicate class names across headers: 24
 padding: 33 arrays, 25 accessors
 mechanisms: 950 sites (920 untagged); #line: 1238
@@ -70,7 +71,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 4.0 | `System/Graphic/Effect/libppp/pppPart.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | sceGsLoadImage (1 complete) |  |
 | R0 | 4.0 | `System/Memoca.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMemoca (1 complete) |  |
 | R0 | 4.0 | `System/VramMan.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CVramMan (1 complete) |  |
 | R0 | 2.0 | `Game/SceneEnv.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CSceneEnv (1 partial) |  |
@@ -90,6 +90,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
 | R1 | 12.5 | `Form/Menu/JMemoFlag.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CJiminyMemoFlag (1 superset) | inline bodies or virtuals |
 | R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
+| R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -134,7 +135,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CTextWnd` | complete | System/Wnd.h | 2 |  |  |
 | `CVramMan` | complete | System/VramMan.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
-| `sceGsLoadImage` | complete | System/Graphic/Effect/libppp/pppPart.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `ALF_DATA` | superset | Game/Map.h | 1 |  | 1 PARTIAL |
 | `ATP` | complete | Game/Atel/VSME.h | 1 |  |  |
@@ -362,7 +362,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/keProg/KeDttSpr.h` | 1 | 1/0/0/0 | 2 |
 | `System/Graphic/Effect/libppp/keProg/KeLns.h` | 0 | 12/0/1/0 | 3 |
 | `System/Graphic/Effect/libppp/keProg/KeTh.h` | 4 | 18/0/0/0 | 7 |
-| `System/Graphic/Effect/libppp/pppPart.h` | 57 | 21/3/0/0 | 213 |
+| `System/Graphic/Effect/libppp/pppPart.h` | 57 | 21/3/0/0 | 215 |
 | `System/Graphic/Effect/libppp/pppfunctbl.h` | 1 | 0/0/0/0 | 2 |
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 37 |
