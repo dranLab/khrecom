@@ -39,6 +39,12 @@ public:
     static FLOAT getUpPer() { return m_fUpPer; }     // PARTIAL: added for System/Graphic/Model
     static FLOAT getDownLen() { return m_fDownLen; }
     static FMATRIX& getWorldScreenMatrix() { return m_mWorldScreen; }
+    // PARTIAL: added for System/Graphic/Model
+    static FLOAT getColorDensity() { return m_fCDensity; }
+    static FLOAT getAlphaDensity() { return m_fADensity; }
+    static FMATRIX& getWorldTextureMatrix() { return m_mWorldTexture; }
+    static FVECTOR& getShadowParam() { return m_vParam; }
+    static ULONGLONG getTEX_0() { return m_lTex0; }
     static void setDownLen(FLOAT f) { m_fDownLen = f; } static void setCDensity(FLOAT f) { m_fCDensity = f; } static void setADensity(FLOAT f) { m_fADensity = f; } // PARTIAL: densities added for Game/Atel/VSME
     static void initialize();
     static void finalize();

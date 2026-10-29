@@ -1,6 +1,12 @@
+#define TASK_H_NO_SLC_OVERFLOW_MSG /* MATCH: this unit's original lacks Task.h's SLC overflow message */
 #include "khtypes.h"
 #define SYSTEM_GRAPHIC_MODEL_CPP
 #define MODELDATA_H_TEXINFO /* PARTIAL: modeldata.h's TexInfo/TexInfoStub (gated for System/Graphic/ModelMan) */
+/* MATCH: this unit's original names the headers with their full path (c:/KHCOM/MainApp/...) */
+#define GPRIM_H_PATH "src/System/Graphic/Gprim.h"
+#define MODELDATA_H_PATH "src/System/Graphic/modeldata.h"
+#define MODEL_H_PATH "src/System/Graphic/Model.h"
+#include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"
 #include "System/Task.h"
 #include "System/Coord.h"
@@ -9,6 +15,7 @@
 #include "System/Graphic/TexAnm.h"
 #include "System/Graphic/TexUtil.h"
 #include "System/Graphic/ShadowModel.h"
+#include "System/Graphic/LightUnit.h"
 #include "System/Graphic/ModelMan.h"
 #include "include_asm.h"
 
@@ -40,63 +47,24 @@ public:
     static void pkOpenGifTag(u_long128 tag);
     static void pkAddGsData(u_long data);
     static void pkCloseGifTag();
+    static ULONGLONG getDefault_ZBUF_1();
+    static u_int* pkOpenUpkCodeV4_32(u_short vuaddr, UINT cl, UINT wl);
+    static void pkCloseUpkCodeV4_32(void* p);
+    static void* pkGetCurrentPointer();
+    static void pkSetCurrentPointer(void* p);
 };
 FLOAT RotTransPers(IVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 extern const FMATRIX ONE_MATRIX;
+extern const FVECTOR ONE_VECTOR;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
 SHADERDESC* searchShaderDesc(USHORT mode);
 void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin); /* static in the original (parked, asm glabel) */
-extern "C" const FLOAT D_00460FB0; /* -FLT_MAX / 2 */
-extern "C" const FLOAT D_00460FB4; /* FLT_MAX / 2 */
-extern "C" char D_00460DD8[]; /* "System/Graphic/Model.h" */
-extern "C" const FLOAT D_00460FA8; /* -FLT_MAX / 2 */
-extern "C" const FLOAT D_00460FAC; /* FLT_MAX / 2 */
 namespace VRAM { /* PARTIAL: stand-in for System/VramMan VRAM: owner not written */
 extern INT _TEX_TMP1_START;
 extern INT _CLUT_TMP1_START;
 }
-extern "C" char D_00460D98[]; /* "System/Graphic/modeldata.h" */
-extern "C" char D_00460DC8[];
-extern "C" char D_00461090[];
-extern "C" char D_00461028[];
-extern "C" char D_00460FC8[];
-struct BONELABEL { /* PARTIAL: stand-in for BONELABEL (modeldata.h): owner not written */
-    char m_Name[16];     /* 0x00 */
-    SHORT m_ParentIndex; /* 0x10 */
-    SHORT m_BuddyIndex;  /* 0x12 */
-};
-extern "C" char D_00460FF8[];
-extern "C" char D_00460F30[];
-extern "C" char D_00460F60[];
-extern "C" char D_00460F78[];
-extern "C" char D_00460E00[];
-extern "C" char D_00460F38[];
-extern "C" char D_00460FB8[];
-extern "C" char D_00461110[];
 inline void* operator new[](size_t, void* p) throw() { return p; }
-extern u_long128* g_mpg0;
-extern u_long128* g_mpg2;
-extern "C" char D_00461058[];
-extern "C" char D_004610C0[];
-extern "C" char D_004610D0[];
-extern "C" char D_00461100[];
-extern "C" char D_00461140[];
-extern "C" char D_00461148[];
-extern "C" char D_00461160[];
-extern "C" char D_00461178[];
 extern "C" int strncmp(const char*, const char*, unsigned int);
-class CShadowMapModel : public CFadeModel { /* PARTIAL: stand-in for CShadowMapModel: owner not written */
-    HANDLE m_hHnd; /* 0x28 */
-public:
-    CShadowMapModel() {
-        CDrawable::setSemiTrans(ALPHA_BLEND);
-        setTestFlag(0x5000D);
-        setLayer(0x18, 0);
-        m_SemiDraw = FALSE;
-        m_hHnd = 0;
-    }
-    virtual ~CShadowMapModel();
-};
 class CShadowModel : public CFadeModel { /* PARTIAL: stand-in for CShadowModel: owner not written */
     INT m_nSize; /* 0x28 */
 public:
@@ -108,7 +76,21 @@ public:
         m_SemiDraw = FALSE;
         m_nSize = 0;
     }
-    virtual ~CShadowModel();
+    virtual void changeLayerExt(BOOL bOn, INT nDepth) { setLayer(0x17, 0); }
+    virtual FIX4 calcZ() { return 0; }
+};
+class CShadowMapModel : public CFadeModel { /* PARTIAL: stand-in for CShadowMapModel: owner not written */
+    HANDLE m_hHnd; /* 0x28 */
+public:
+    CShadowMapModel() {
+        CDrawable::setSemiTrans(ALPHA_BLEND);
+        setTestFlag(0x5000D);
+        setLayer(0x18, 0);
+        m_SemiDraw = FALSE;
+        m_hHnd = 0;
+    }
+    virtual void changeLayerExt(BOOL bOn, INT nDepth) { setLayer(0x18, 0); }
+    virtual FIX4 calcZ() { return 0; }
 };
 namespace Mad {
 struct MODEL_ATTACH_DATA {
@@ -123,7 +105,6 @@ struct MAD_HEADER {
 };
 INT getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId);
 }
-inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
@@ -134,25 +115,69 @@ union FIVECTOR { /* PARTIAL: stand-in for FIVECTOR: owner not written */
     FVECTOR f;
     IVECTOR i;
 };
-extern "C" SHADERDESC D_00505118[]; /* the shader table */
-extern "C" char D_00460E80[];
-extern "C" char D_00460EB8[]; /* __FILE__ */
-extern "C" char D_00460EE8[];
-extern "C" char D_00460F18[];
-extern "C" char D_00460F58[];
-extern "C" char D_00460EF0[];
-extern "C" char D_00460F10[];
-extern "C" char D_00460F20[];
-extern "C" char D_00460F28[];
 extern "C" int strcmp(const char*, const char*);
 extern "C" int strncasecmp(const char*, const char*, unsigned int);
 struct TexInfo;
 
+extern "C" u_long128 vu1mpg_start[];
+extern "C" u_long128 vu1mpg2_start[];
+static u_long128* g_mpg0 = vu1mpg_start;
+static u_long128* g_mpg2 = vu1mpg2_start;
+FMATRIX* CModel::m_pWSMatCache = NULL;
+u_long128* CModel::m_pMpg = NULL;
+INT CModel::m_iSendFlg = 0;
+
 class CShader;
 
+CShader* createDummyShader();
+/* MATCH: the MPG_START initializer reads a symbol at address 0 (lui/addiu 0): an undefined weak symbol (as 2DSprObj) */
+__asm__(".weak vu1mpg_zero\nvu1mpg_zero = 0\n");
+extern u_long128 vu1mpg_zero;
+static u_int MPG_START = (u_int)&vu1mpg_zero >> 3;
+static SHADERDESC g_ShaderDescTbl[11] = {
+    { 5, 0xFFFF, g_mpg0, 4, 0x86, createDummyShader },
+    { 0x24, 0xFFFF, g_mpg0, 4, 0x86, createDummyShader },
+    { 0, 0xFDFF, g_mpg0, 4, 0x86, createDummyShader },
+    { 0x406E, 0xFF7F, g_mpg2, 0x11, 0x86, createDummyShader },
+    { 6, 0xFFFF, g_mpg0, 4, 0, createDummyShader },
+    { 0x406, 0xFFFF, g_mpg0, 4, 0x86, createDummyShader },
+    { 0x400B, 0xFFFF, g_mpg0, 4, 0, createDummyShader },
+    { 0x10, 0xFFFF, g_mpg0, 4, 0, createDummyShader },
+    { 0x4005, 0xFDFF, g_mpg2, 7, 0, createDummyShader },
+    { 2, 0xFFFF, g_mpg2, 7, 0, createDummyShader },
+    { 0xFFFF, 0xFFFF },
+};
 CShader* createDummyShader() { return NULL; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __6CModelPC9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_6CModel);
+/* MATCH: the colour scale (1, 1, 1, 1) is built in a GPR (lui 1.0f, two pextlw) and stored with one sq */
+static inline u_long128 _oneVector() {
+    u_long128 ret;
+    __asm__ volatile("lui %0, 0x3f80\n"
+                     "pextlw %0, %0, %0\n"
+                     "pextlw %0, %0, %0\n"
+                     : "=r"(ret));
+    return ret;
+}
+CModel::CModel(const MODELDATA* pData) {
+    m_pData = pData;
+    _ZeroInitializer = 0;
+    m_iFlag = 0;
+    _ZeroInitializer2 = 0;
+    m_nZ = 0;
+    m_pCrds = NULL;
+    m_TexUV = NULL;
+    m_pTexAnm = NULL;
+    m_pTask = NULL;
+    m_pShadowMapModel = NULL;
+    *(u_long128*)&getColorScale() = _oneVector();
+    setTestFlag(0x500FD);
+    setLayer(0x1A, 0);
+    m_pWSMat = &CWorldEnv::getWorldScreenMatrix();
+    CModelMan::incModelCount();
+}
+CModel::~CModel() {
+    releaseData();
+    CModelMan::decModelCount();
+}
 void CModel::resetWorldScreenMatrix() { m_pWSMatCache = NULL; }
 void CModel::resetMicroProgram() { m_pMpg = NULL; }
 void CModel::resetSendCtrl(INT nMode) { m_iSendFlg &= ~nMode; }
@@ -164,10 +189,10 @@ u_long128* CModel::getMicroProg() {
 /* Parked: 12 lines off, registers only: the original keeps the masked mode in a1, the table pointer in a2, 0xffff in a3 and the TRACE string's %hi in a0; ours mode a0, pointer a1, 0xffff a2, string a3. Tried: for/while/break loop shapes, a UINT copy of mode; permuter 12 min (24539 candidates, stays 12). */
 #if 0
 SHADERDESC* searchShaderDesc(USHORT mode) {
-    SHADERDESC* ret = D_00505118;
+    SHADERDESC* ret = g_ShaderDescTbl;
     while (TRUE) {
         if (ret->m_Mode == 0xFFFF) {
-            TRACE(D_00460E80);
+            TRACE("\203V\203F\201[\203_\203f\203B\203X\203N\203\212\203v\203^\202\252\214\251\202\302\202\251\202\350\202\334\202\271\202\361\202\305\202\265\202\275(%04x).\n");
             return NULL;
         }
         if (ret->m_Mode == (mode & ret->m_Mask)) return ret;
@@ -177,6 +202,9 @@ SHADERDESC* searchShaderDesc(USHORT mode) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", searchShaderDesc__FUs);
 #endif
+/* MATCH: stripped placeholder (.sdata): the parked searchShaderDesc's string at its .rodata position */
+__asm__(".section .sdata\n");
+void __attribute__((section(".sdata"))) _searchShaderDesc_rodata() { TRACE("\203V\203F\201[\203_\203f\203B\203X\203N\203\212\203v\203^\202\252\214\251\202\302\202\251\202\350\202\334\202\271\202\361\202\305\202\265\202\275(%04x).\n", 0); }
 void CModel::releaseData() {
     if (m_pSemiModel && isManagedSemiModel()) {
         delete m_pSemiModel;
@@ -196,7 +224,7 @@ void CModel::releaseData() {
     m_pTexAnm = NULL;
 }
 INT CModel::link(CTask* p, const CHAR* pName) {
-    if (!(p)) AssertApp(D_00460EB8, 451, D_00460EE8, 0);
+    if (!(p)) AssertApp(__FILE__, 451, "p", 0);
     CCoords* pCrds = p->getCoords();
     if (!pCrds) {
         p->createCoords();
@@ -208,8 +236,8 @@ INT CModel::link(CTask* p, const CHAR* pName) {
 INT CModel::link(CCoords& crds, const CHAR* pName) {
     MODELDATA* m = CRsrcDB::getRsrcAMF(pName, NAME_CASE_SENSITIVE);
     if (!m) {
-        TRACE(D_00460EF0, pName);
-        AssertApp(D_00460EB8, 469, D_00460F10, 0);
+        TRACE("\203\202\203f\203\213\203f\201[\203^%s\202\252\202\240\202\350\202\334\202\271\202\361\n", pName);
+        AssertApp(__FILE__, 469, "m", 0);
     }
     m_pData = m;
     return link(crds);
@@ -229,46 +257,46 @@ INT CModel::getBoneIndex(const CHAR* pName) const {
 }
 MODELDATA* AMFfromMDL(const CHAR* pszName, INT nIdx) {
     MODELDATA** ret = CRsrcDB::getRsrcMDL(pszName, NAME_CASE_SENSITIVE);
-    if (!(ret)) AssertApp(D_00460EB8, 500, D_00460F18, 0);
+    if (!(ret)) AssertApp(__FILE__, 500, "ret", 0);
     return ret[nIdx];
 }
 MODELDATA* AMFfromMDL(INT nGroup, INT nIdx) {
     MODELDATA** ret = CRsrcDB::getRsrcMDL(nGroup);
-    if (!(ret)) AssertApp(D_00460EB8, 508, D_00460F18, 0);
+    if (!(ret)) AssertApp(__FILE__, 508, "ret", 0);
     return ret[nIdx];
 }
 INT CModel::assign(CTask* p, const CHAR* pName, INT n) {
-    if (!(p)) AssertApp(D_00460EB8, 516, D_00460EE8, 0);
+    if (!(p)) AssertApp(__FILE__, 516, "p", 0);
     CCoords* pCrds = p->getCoords();
-    if (!(pCrds)) AssertApp(D_00460EB8, 518, D_00460F20, 0);
+    if (!(pCrds)) AssertApp(__FILE__, 518, "pCrds", 0);
     m_pTask = p;
     return assign(*pCrds, pName, n);
 }
 INT CModel::assign(CCoords& crds, const CHAR* pName, INT n) {
     MODELDATA* d = CRsrcDB::getRsrcAMF(pName, NAME_CASE_SENSITIVE);
     if (!d) {
-        TRACE(D_00460EF0, pName);
-        AssertApp(D_00460EB8, 530, D_00460F28, 0);
+        TRACE("\203\202\203f\203\213\203f\201[\203^%s\202\252\202\240\202\350\202\334\202\271\202\361\n", pName);
+        AssertApp(__FILE__, 530, "d", 0);
     }
     m_pData = d;
     return assign(crds, n);
 }
 INT CModel::assign(CTask* p, INT n) {
-    if (!(p)) AssertApp(D_00460EB8, 537, D_00460EE8, 0);
+    if (!(p)) AssertApp(__FILE__, 537, "p", 0);
     CCoords* pCrds = p->getCoords();
-    if (!(pCrds)) AssertApp(D_00460EB8, 539, D_00460F20, 0);
+    if (!(pCrds)) AssertApp(__FILE__, 539, "pCrds", 0);
     m_pTask = p;
     return assign(*pCrds, n);
 }
 INT CModel::assign(CCoords& crds, INT crdidx) {
     INT i;
-    if (!(m_pData)) AssertApp(D_00460EB8, 546, D_00460F30, 0);
+    if (!(m_pData)) AssertApp(__FILE__, 546, "m_pData", 0);
     m_pCrds = &crds;
     m_BoneStart = crdidx;
     m_BoneSkip = 0;
     m_BoneIdx = 0;
     m_TransTexCount = m_pData->m_nTexNum;
-    if (!(!(m_TransTexCount > 16))) AssertApp(D_00460EB8, 579, D_00460F38, 0);
+    if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 579, "! (m_TransTexCount > TEXMAX)", 0);
     for (i = 0; i < m_TransTexCount; i++) {
         *(u_long*)&m_TexInfo[i] = *(u_long*)((BYTE*)m_pData->m_pTexParam + i * 0x20 + 0x10);
     }
@@ -282,7 +310,7 @@ void CModel::setModelData(const MODELDATA* pData) {
     link(m_pTask);
 }
 INT CModel::link(CTask* p) {
-    if (!(p)) AssertApp(D_00460EB8, 620, D_00460EE8, 0);
+    if (!(p)) AssertApp(__FILE__, 620, "p", 0);
     CCoords* pCrds = p->getCoords();
     if (!pCrds) {
         p->createCoords();
@@ -297,7 +325,7 @@ INT CModel::link(CCoords& crds) {
     BOOL add;
     INT nBoneNum;
     INT i;
-    if (!(m_pData)) AssertApp(D_00460EB8, 633, D_00460F30, 0);
+    if (!(m_pData)) AssertApp(__FILE__, 633, "m_pData", 0);
     m_pCrds = &crds;
     INT nCrd = crds.getCoordNum();
     m_BoneSkip = nCrd;
@@ -324,7 +352,7 @@ INT CModel::link(CCoords& crds) {
         m_BoneIdx = m_BoneStart = m_pData->m_BoneIndex - 1;
     }
     m_TransTexCount = m_pData->m_nTexNum;
-    if (!(!(m_TransTexCount > 16))) AssertApp(D_00460EB8, 707, D_00460F38, 0);
+    if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 707, "! (m_TransTexCount > TEXMAX)", 0);
     for (i = 0; i < m_TransTexCount; i++) {
         *(u_long*)&m_TexInfo[i] = *(u_long*)((BYTE*)m_pData->m_pTexParam + i * 0x20 + 0x10);
     }
@@ -340,13 +368,13 @@ CCoord& CModel::getCrd(INT idx) {
     return m_pCrds->Crd(m_BoneStart + idx);
 }
 INT CModel::getCoordNum() const {
-    if (!(m_pCrds)) AssertApp(D_00460EB8, 737, D_00460F58, 0);
+    if (!(m_pCrds)) AssertApp(__FILE__, 737, "m_pCrds", 0);
     return *(INT*)((BYTE*)m_pCrds + 4);
 }
 void CModel::setLocal(INT index) {
-    if (!(m_pCrds != __null)) AssertApp(D_00460EB8, 743, D_00460F60, 0);
-    if (!(0 <= index && index < m_pCrds->getCoordNum())) AssertApp(D_00460EB8, 744, D_00460F78, 0);
-    if (!(m_pData != __null)) AssertApp(D_00460EB8, 745, D_00460E00, 0);
+    if (!(m_pCrds != __null)) AssertApp(__FILE__, 743, "m_pCrds != __null", 0);
+    if (!(0 <= index && index < m_pCrds->getCoordNum())) AssertApp(__FILE__, 744, "0 <= index && index < m_pCrds->getCoordNum()", 0);
+    if (!(m_pData != __null)) AssertApp(__FILE__, 745, "m_pData != __null", 0);
     m_pCrds->Crd(index).m_Local = ((const FMATRIX*)m_pData->m_pBones)[index]; /* PARTIAL: CCoord::setLocal is Camera's compare+touch form */
 }
 INT CModel::getTextureIndex(const CHAR* pName) const {
@@ -384,8 +412,7 @@ void CModel::changeTextureSub(INT idx, const TexInfo* m) {
         for (i = 0; i < m_pData->m_nTexNum; i++) {
             TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
             t->update(nTmpTex, nTmpClut);
-            if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
-            if (!t->_pTexInfo->isFix()) CTexUtil::sumupTmpTexSize(*t->_pTexInfo, nTmpTex, nTmpClut);
+            if (!t->isFix()) CTexUtil::sumupTmpTexSize(*t->_pTexInfo, nTmpTex, nTmpClut);
         }
     }
 }
@@ -467,8 +494,8 @@ void CModel::getWorldBBoxScr(IVECTOR& vScr, const FMATRIX* pMWS) {
 #if 0
 static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin) {
     FVECTOR vMN[2];
-    vMN[0].set(D_00460FA8, D_00460FA8, D_00460FA8, 1.0f);
-    vMN[1].set(D_00460FAC, D_00460FAC, D_00460FAC, 1.0f);
+    vMN[0].set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
+    vMN[1].set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
     asm volatile("lqc2 $vf4, 0x0(%0)\n"
                  "lqc2 $vf5, 0x10(%0)\n"
                  "lqc2 $vf6, 0x20(%0)\n"
@@ -544,6 +571,9 @@ static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3);
 #endif
+/* MATCH: stripped placeholder (.sdata): the parked getApplyMatrixBBox's float constants at their .rodata position */
+__asm__(".section .sdata\n");
+BOOL __attribute__((section(".sdata"))) _getApplyMatrixBBox_rodata(FLOAT a, FLOAT b) { return a < -1.70141183e+38f && b > 1.70141183e+38f; }
 /* Parked: 38 lines off: the original keeps &pCrd->m_World as the strength-reduced loop pointer (s3 += 0xd0, counter counted down), &vMax/&vMin in s8/s7 for the init stores and the VU0 block, and loads the final bbox into f4/f5/f0..f3 in max-then-min order. Tried: pCrd[i] indexing (keeps the counter, 41 lines), _x/_y/_z temporaries, set helpers. */
 #if 0
 void CModel::calcWorldBBox(BOOL bCalc) {
@@ -554,14 +584,13 @@ void CModel::calcWorldBBox(BOOL bCalc) {
     CCoord* pCrd;
     INT iBoneNum;
     if ((m_nFlag & 0x200) && !bCalc) return;
-    if (!(m_pData)) AssertApp(D_00460EB8, 1067, D_00460F30, 0);
+    if (!(m_pData)) AssertApp(__FILE__, 1067, "m_pData", 0);
     pCrd = &getCrd(0);
     iBoneNum = m_pData->m_nBoneNum;
-    vMax.set(D_00460FB0, D_00460FB0, D_00460FB0, 1.0f);
-    vMin.set(D_00460FB4, D_00460FB4, D_00460FB4, 1.0f);
+    vMax.set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
+    vMin.set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
     for (i = 0; i < iBoneNum; i++, pCrd++) {
-        if (!(m_pData != __null)) AssertApp(D_00460DD8, 262, D_00460E00, 0);
-        BBOX* bb = &m_pData->m_pBBox[i];
+        BBOX* bb = getBBox(i);
         if (bb->x[0] <= bb->x[1]) {
             v[0].set(bb->x[1], bb->y[1], bb->z[1], 1.0f);
             v[1].set(bb->x[0], bb->y[0], bb->z[0], 1.0f);
@@ -592,6 +621,9 @@ void CModel::calcWorldBBox(BOOL bCalc) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcWorldBBox__6CModeli);
 #endif
+/* MATCH: stripped placeholder (.sdata): the parked calcWorldBBox's float constants at their .rodata position */
+__asm__(".section .sdata\n");
+BOOL __attribute__((section(".sdata"))) _calcWorldBBox_rodata(FLOAT a, FLOAT b) { return a < -1.70141183e+38f && b > 1.70141183e+38f; }
 void CModel::getWorldBBox(FVECTOR& vMax, FVECTOR& vMin) {
     calcWorldBBox(0);
     vMax.x = m_BBox.x[1];
@@ -712,7 +744,7 @@ void CModel::linksub() {
     BOOL bHasSemiData;
     m_Mode = m_pData->getMode();
     m_pShader = searchShaderDesc(m_Mode);
-    if (!(m_pShader)) AssertApp(D_00460EB8, 1738, D_00460FB8, 0);
+    if (!(m_pShader)) AssertApp(__FILE__, 1738, "m_pShader", 0);
     rawMode = m_pData->getRawMode();
     if (rawMode & 0x20000000) m_nTestFlag = (INT)m_nTestFlag & -2;
     else m_nTestFlag = ((INT)m_nTestFlag & -0x4000) | 0xFD;
@@ -733,7 +765,7 @@ void CModel::linksub() {
         }
     }
     if (m_Mode == 0x10 && !m_pFadeModel) {
-        m_pFadeModel = new (com_malloc_d(sizeof(CShadowModel), D_00460FC8, RET_ADDR())) CShadowModel;
+        m_pFadeModel = new (com_malloc_d(sizeof(CShadowModel), __FILE__ "(1781)", RET_ADDR())) CShadowModel;
         if (m_pFadeModel) {
             m_pFadeModel->link(this);
             m_pWSMat = &CShadowModelMan::getWorldScreenMatrix();
@@ -750,7 +782,7 @@ void CModel::addTexture(const CHAR* texName, INT idx) {
     INT i;
     if (m_TransTexCount < m_pData->m_nTexNum + 1) {
         m_TransTexCount = m_pData->m_nTexNum + 1;
-        if (!(!(m_TransTexCount > 16))) AssertApp(D_00460EB8, 1867, D_00460F38, 0);
+        if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 1867, "! (m_TransTexCount > TEXMAX)", 0);
     }
     ((TexInfoStub*)&m_TexInfo[m_pData->m_nTexNum])->init(CRsrcDB::getRsrcTex(texName, NAME_CASE_SENSITIVE), -1, -1);
     nTmpTex = 0;
@@ -758,8 +790,7 @@ void CModel::addTexture(const CHAR* texName, INT idx) {
     for (i = 0; i < m_TransTexCount; i++) {
         TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
         t->update(nTmpTex, nTmpClut);
-        if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
-        if (!t->_pTexInfo->isFix()) CTexUtil::sumupTmpTexSize(*t->_pTexInfo, nTmpTex, nTmpClut);
+        if (!t->isFix()) CTexUtil::sumupTmpTexSize(*t->_pTexInfo, nTmpTex, nTmpClut);
     }
     setupUVScroll(0);
 }
@@ -777,7 +808,7 @@ void CModel::setShadowMapModel() {
     }
     rawMode = m_pData->getRawMode();
     if (!(rawMode & 0x100000)) return;
-    m_pShadowMapModel = new (com_malloc_d(sizeof(CShadowMapModel), D_00460FF8, RET_ADDR())) CShadowMapModel;
+    m_pShadowMapModel = new (com_malloc_d(sizeof(CShadowMapModel), __FILE__ "(1909)", RET_ADDR())) CShadowMapModel;
     if (m_pShadowMapModel) {
         m_pShadowMapModel->link(this);
         m_fAlphaScale = 1.0f;
@@ -807,11 +838,9 @@ BOOL CModel::sendTexture(u_long* tex0) {
             BOOL bTexAnm;
             UINT nTexPos;
             UINT nClutPos;
-            if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
-            if (t->_pTexInfo->isFix()) {
+            if (t->isFix()) {
                 if (tex) {
-                    if (!t->_pTexInfo) AssertApp(D_00460D98, 204, D_00460DC8, 0);
-                    *tex = t->_pTexInfo->getTPage();
+                    *tex = t->getTPage();
                     tex++;
                 }
                 continue;
@@ -824,11 +853,9 @@ BOOL CModel::sendTexture(u_long* tex0) {
                 bTexAnm = TRUE;
             }
             bSend |= bUpdate;
-            if (!t->_pTexInfo) AssertApp(D_00460D98, 201, D_00460DC8, 0);
-            if (t->_pTexInfo->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
+            if (t->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
             else nTexPos = nTmpTex + t->_nTexPos;
-            if (!t->_pTexInfo) AssertApp(D_00460D98, 202, D_00460DC8, 0);
-            if (t->_pTexInfo->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
+            if (t->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
             else nClutPos = nTmpClut + t->_nClutPos;
             if (bUpdate) {
                 CPackMan::pkRefLoadImage(nClutPos, t->_pTexInfo->_ClutInfo);
@@ -855,16 +882,12 @@ INT CModel::getTexParam(u_long* tex0) {
         INT nTmpClut = VRAM::_CLUT_TMP1_START;
         for (i = 0; i < nTexMax; i++) {
             TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
-            if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
-            if (t->_pTexInfo->isFix()) {
-                if (!t->_pTexInfo) AssertApp(D_00460D98, 204, D_00460DC8, 0);
-                tex0[i] = t->_pTexInfo->getTPage();
+            if (t->isFix()) {
+                tex0[i] = t->getTPage();
             } else {
-                if (!t->_pTexInfo) AssertApp(D_00460D98, 201, D_00460DC8, 0);
-                if (t->_pTexInfo->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
+                if (t->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
                 else nTexPos = nTmpTex + t->_nTexPos;
-                if (!t->_pTexInfo) AssertApp(D_00460D98, 202, D_00460DC8, 0);
-                if (t->_pTexInfo->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
+                if (t->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
                 else nClutPos = nTmpClut + t->_nClutPos;
                 tex0[i] = t->_pTexInfo->getTPage() | (u_long)nTexPos | ((u_long)nClutPos << 37);
             }
@@ -919,7 +942,7 @@ void CModel::dispImpl() {
                 }
             } else {
                 if (!m_pFadeModel) {
-                    m_pFadeModel = new (com_malloc_d(sizeof(CFadeModel), D_00461028, RET_ADDR())) CFadeModel;
+                    m_pFadeModel = new (com_malloc_d(sizeof(CFadeModel), __FILE__ "(2262)", RET_ADDR())) CFadeModel;
                     if (m_pFadeModel) {
                         INT id;
                         m_pFadeModel->link(this);
@@ -969,7 +992,7 @@ void CModel::disp0(INT semikind, u_long nInTest, INT iFlags) {
     const int (*pData)[4];
     UINT nMode;
     u_long tex0[16];
-    if (!(m_pShader)) AssertApp(D_00460EB8, 2446, D_00460FB8, 0);
+    if (!(m_pShader)) AssertApp(__FILE__, 2446, "m_pShader", 0);
     pData = (const int (*)[4])_disp0_GetData(nMode, iFlags);
     if (pData) {
         if (!(m_iSendFlg & 1)) disp0_SetMicroCode(m_pShader->m_pMpg);
@@ -999,7 +1022,7 @@ u_long* CModel::_disp0_GetData(UINT& nMode, INT iFlags) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_GetData__6CModelRUii);
 #endif
 void CModel::disp0_SetMicroCode(u_long128* pMProg) {
-    if (!((m_pMpg == g_mpg0) || (m_pMpg == g_mpg2) || (m_pMpg == __null))) AssertApp(D_00460EB8, 2539, D_00461058, 0);
+    if (!((m_pMpg == g_mpg0) || (m_pMpg == g_mpg2) || (m_pMpg == __null))) AssertApp(__FILE__, 2539, "(m_pMpg==g_mpg0)||(m_pMpg==g_mpg2)||(m_pMpg == __null)", 0);
     if (pMProg != m_pMpg || (m_iSendFlg & 0x100)) {
         m_pMpg = pMProg;
         CPackMan::pkCall(pMProg, 0);
@@ -1010,7 +1033,293 @@ void CModel::disp0_SetMicroCode(u_long128* pMProg) {
 void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
     if (!(nFlag & 6)) sendTexture(pTag);
 }
+/* Parked: 137 of 659 lines off, same size; mostly registers: the original gives this s5 and iFlags&2 s4 (ours swapped), the bone/light min() selects use movn (an if-form gives that but swaps s0/s1 globally), the no-light branch materializes zero twice. Worked: case 2 with default, (USHORT) mode compares inline, pcpyld tied to the tag word, _ref(m_iSendFlg) after the GIF stores, cache-hit close in the else arm, x/y/z/w colour stores, pextlw pack with a non-early-clobber temp. Tried: iFlags &= 2, a BOOL copy, zero variants; permuter 20 min (19316 candidates, stays 145). */
+#if 0
+template <class T> static inline T& _ref(T& v) { return v; }
+static inline u_long128 _packWord(INT x, INT y, INT z, INT w) {
+    u_long128 tmp;
+    u_long128 out128;
+    __asm__ volatile("pextlw %0, %3, %2\n"
+                     "pextlw %1, %5, %4\n"
+                     "pextlw %0, %1, %0\n"
+                     : "=&r"(out128), "=r"(tmp)
+                     : "r"(x), "r"(z), "r"(y), "r"(w));
+    return out128;
+}
+static inline ULONGLONG _lo64(u_long128 x) {
+    ULONGLONG out64;
+    __asm__ volatile("por %0, $0, %1" : "=r"(out64) : "r"(x));
+    return out64;
+}
+static inline ULONGLONG _hi64(u_long128 x) {
+    ULONGLONG out64;
+    __asm__ volatile("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
+    return out64;
+}
+void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0) {
+    QWdata* pQw;
+    ULONGLONG lTest;
+    ULONGLONG lAlpha;
+    ULONGLONG lClamp;
+    UINT version;
+    u_long128 qColorScale;
+    u_long128 qOBLM;
+    u_long128 qPP;
+    INT i;
+    u_long tex0Buf[16];
+    u_long128 tag;
+
+    version = pData[1][3];
+    CPackMan::pkCall((u_long128*)pData, 0);
+    CPackMan::pkAddCode(0x10000000);
+    if (m_pWSMatCache != m_pWSMat || (m_iSendFlg & 0x400)) {
+        pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(0, 4, 4);
+        pQw[0].ul128 = ((QWdata*)m_pWSMat)[0].ul128;
+        pQw[1].ul128 = ((QWdata*)m_pWSMat)[1].ul128;
+        pQw[2].ul128 = ((QWdata*)m_pWSMat)[2].ul128;
+        pQw[3].ul128 = ((QWdata*)m_pWSMat)[3].ul128;
+        CPackMan::pkCloseUpkCodeV4_32(pQw + 4);
+        m_pWSMatCache = m_pWSMat;
+    }
+    if (semikind <= 0) {
+        lAlpha = 0x80000000A8;
+        lTest = nInTest;
+    } else {
+        UINT rawMode = getMode();
+        if ((USHORT)rawMode == 0x4005 || (USHORT)rawMode == 0x4205) lTest = 0x53001;
+        else lTest = nInTest;
+        switch (semikind) {
+        case 1:
+            lAlpha = 0x44;
+            break;
+        case 3:
+            lAlpha = 0x42;
+            break;
+        case 2:
+        default:
+            if ((USHORT)rawMode == 0x4005 || (USHORT)rawMode == 0x4205) lAlpha = 0x58;
+            else lAlpha = 0x48;
+            break;
+        }
+    }
+    lClamp = 5;
+    if (isClampRepeat() && !(iFlags & 2)) lClamp = 0;
+
+    CPackMan::pkOpenDirectCode(0);
+    __asm__ volatile("pcpyld %0, %1, %2" : "=r"(tag) : "r"((u_long)0xE), "0"((u_long)(m_iBeforeDirectQNum + 4) | 0x8000 | 0x1000000000000000));
+    pQw = (QWdata*)CPackMan::pkOpenGifTagManual(tag);
+    pQw[0].ul64[0] = lTest;
+    pQw[0].ul64[1] = 0x47;
+    pQw[1].ul64[0] = lAlpha;
+    pQw[1].ul64[1] = 0x42;
+    pQw[2].ul64[0] = lClamp;
+    pQw[2].ul64[1] = 8;
+    if (_ref(m_iSendFlg) & 4) {
+        pQw[3].ul64[1] = 3;
+    } else {
+        pQw[3].ul64[0] = CPackMan::getDefault_ZBUF_1();
+        pQw[3].ul64[1] = 0x4E;
+    }
+    pQw += 4;
+    if (m_pBeforeDirect) {
+        QWdata* pQwSrc = (QWdata*)m_pBeforeDirect;
+        for (i = 0; i < m_iBeforeDirectQNum; i++) {
+            pQw->ul128 = pQwSrc->ul128;
+            pQw++;
+            pQwSrc++;
+        }
+    }
+    CPackMan::pkCloseGifTagManual((UINT*)pQw);
+    CPackMan::pkCloseDirectCode();
+
+    if (iFlags & 2) {
+        pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(0x18, 4, 4);
+        pQw[0].ul64[0] = CShadowModelMan::getTEX_0();
+        pQw[0].ul64[1] = 6;
+        *(FMATRIX*)&pQw[1] = CShadowModelMan::getWorldTextureMatrix();
+        pQw[5].ul128 = *(u_long128*)&CShadowModelMan::getShadowParam();
+        CPackMan::pkCloseUpkCodeV4_32(pQw + 6);
+    } else if (m_TransTexCount) {
+        if (!tex0) {
+            tex0 = tex0Buf;
+            getTexParam(tex0Buf);
+        }
+        pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(0x18, 4, 4);
+        for (i = 0; i < m_TransTexCount; i++) {
+            if (!tex0[i]) {
+                pQw->ul128 = 0;
+            } else {
+                if (version & 0x400000) tex0[i] &= ~((u_long)1 << 34);
+                pQw->ul64[0] = tex0[i];
+                if (m_TexUV) pQw->ul64[1] = m_TexUV[i].luv;
+                else pQw->ul64[1] = 0;
+            }
+            pQw++;
+        }
+        CPackMan::pkCloseUpkCodeV4_32(pQw);
+    }
+
+    {
+        const QWdata* pHead = (const QWdata*)pData;
+        INT y;
+        if (!pHead[1].s16[3]) {
+            y = pHead[1].u16[7];
+            if (!y) y = 0x92;
+        } else {
+            y = pHead[1].s16[5];
+        }
+        qPP = _packWord(m_BBoxFlag, y, iFlags & 2, m_ShaderOption);
+    }
+    if (iFlags & 2) {
+        FVECTOR* pColor = (FVECTOR*)&qColorScale;
+        pColor->x = 1.0f;
+        pColor->y = 1.0f;
+        pColor->z = 1.0f;
+        pColor->w = 1.0f;
+    } else if (m_Mode == 0x10) {
+        u_long128 tmp;
+        __asm__ volatile("lqc2 $vf4, 0x0(%2)\n"
+                         "mfc1 %0, %3\n"
+                         "pcpyld %0, %0, $0\n"
+                         "mfc1 %0, %4\n"
+                         "qmtc2.ni %0, $vf5\n"
+                         "vmulz.xyz $vf4, $vf4, $vf5z\n"
+                         "vmulx.w $vf4, $vf4, $vf5x\n"
+                         "sqc2 $vf4, 0x0(%1)\n"
+                         : "=&r"(tmp)
+                         : "r"(&qColorScale), "r"(&getColorScale()), "f"(CShadowModelMan::getColorDensity()), "f"(CShadowModelMan::getAlphaDensity())
+                         : "memory");
+    } else {
+        qColorScale = *(u_long128*)&getColorScale();
+    }
+    pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(0x12, 4, 4);
+    pQw->ul128 = 0;
+    pQw++;
+    qOBLM = _packWord((INT)m_pCrds, m_BoneStart, (INT)m_pLightUnit, nMode);
+    MODEL_SEND_CACHE& sModelCache = CModelMan::getModelCacheRef();
+    if (sModelCache.lOBLM_L != _lo64(qOBLM) || sModelCache.lOBLM_H != _hi64(qOBLM) ||
+        ((u_long*)&sModelCache.ivPP)[0] != _lo64(qPP) || ((u_long*)&sModelCache.ivPP)[1] != _hi64(qPP) ||
+        ((u_long*)&sModelCache.fvColorScale)[0] != *(u_long*)&qColorScale ||
+        ((u_long*)&sModelCache.fvColorScale)[1] != _hi64(qColorScale) || (m_iSendFlg & 0x800)) {
+        INT boneNum;
+        INT boneSize;
+        INT w;
+        CCoord* pCrd;
+        INT iSize;
+        INT bottom;
+        UINT* p32;
+        sModelCache.qOBLM = qOBLM;
+        *(u_long128*)&sModelCache.ivPP = qPP;
+        *(u_long128*)&sModelCache.fvColorScale = qColorScale;
+        pQw[0].ul128 = qColorScale;
+        pQw[1].ul64[1] = 3;
+        pQw[2].ul64[1] = 3;
+        pQw[3].ul128 = qPP;
+        pQw[4].ul64[1] = 0x3F;
+        CPackMan::pkCloseUpkCodeV4_32(pQw + 5);
+
+        if (m_pLightUnit) {
+            m_pLightUnit->calc(TRUE);
+            pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(4, 4, 4);
+            {
+                FMATRIX& mLight = m_pLightUnit->getLightMatrix();
+                pQw[0].ul128 = ((QWdata*)&mLight)[0].ul128;
+                pQw[1].ul128 = ((QWdata*)&mLight)[1].ul128;
+                pQw[2].ul128 = ((QWdata*)&mLight)[2].ul128;
+            }
+            pQw[3].ul128 = *(u_long128*)&m_pLightUnit->getAmbientVector();
+            *(FMATRIX*)&pQw[4] = m_pLightUnit->getColorMatrix();
+        } else {
+            pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(4, 4, 4);
+            pQw[0].ul128 = 0;
+            pQw[1].ul128 = 0;
+            pQw[2].ul128 = 0;
+            pQw[3].ul128 = *(u_long128*)&ONE_VECTOR;
+            pQw[4].ul128 = 0;
+            pQw[5].ul128 = 0;
+            pQw[6].ul128 = 0;
+            pQw[7].ul128 = 0;
+        }
+        pQw += 8;
+        if (m_BoneIdx == -1) boneNum = m_pCrds->getCoordNum();
+        else boneNum = 1;
+        boneSize = m_pShader->m_BoneSize;
+        pQw->ul128 = _packWord(boneNum, 0, boneSize, m_Mode);
+        CPackMan::pkCloseUpkCodeV4_32(pQw + 1);
+
+        pCrd = &m_pCrds->Crd(m_BoneStart);
+        {
+            INT addr = 0x28;
+            i = 0;
+            w = boneNum;
+            do {
+                iSize = w >= 0x40 ? 0x3F : w;
+                pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(addr, boneSize, 4);
+                w -= iSize;
+                do {
+                    *(FMATRIX*)pQw = pCrd[i].m_World;
+                    addr += boneSize;
+                    i++;
+                    pQw += 4;
+                } while (--iSize > 0);
+                CPackMan::pkCloseUpkCodeV4_32(pQw);
+            } while (w > 0);
+        }
+        if ((nMode == 0x40EE || nMode == 0x406E) && m_pLightUnit) {
+            u_long128* p = (u_long128*)m_pLightUnit->getPointLightData();
+            if (p) {
+                INT k = 0;
+                w = boneNum;
+                do {
+                    iSize = w >= 0x1A ? 0x19 : w;
+                    w -= iSize;
+                    pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(k * boneSize + 0x2F, boneSize, 10);
+                    do {
+                        INT offset;
+                        for (offset = 0; offset < 10; offset++) {
+                            pQw->ul128 = p[offset];
+                            pQw++;
+                        }
+                        k++;
+                    } while (--iSize > 0);
+                    CPackMan::pkCloseUpkCodeV4_32(pQw);
+                } while (w > 0);
+            }
+        }
+        iSize = boneSize * boneNum + 0x28;
+        bottom = 0x400 - m_pShader->m_WorkSize;
+        p32 = (UINT*)CPackMan::pkGetCurrentPointer();
+        bottom = (bottom - iSize) / 2;
+        p32[0] = iSize | 0x03000000;
+        p32[1] = bottom | 0x02000000;
+        p32[2] = MPG_START | 0x14000000;
+        p32[3] = 0x11000000;
+        CPackMan::pkSetCurrentPointer(p32 + 4);
+    } else {
+        CPackMan::pkCloseUpkCodeV4_32(pQw);
+    }
+    CPackMan::pkCnt(0);
+    CPackMan::pkAddCode(0x11000000);
+    if (m_pAfterDirect) {
+        CPackMan::pkOpenDirectCode(0);
+        __asm__ volatile("pcpyld %0, %1, %2" : "=r"(tag) : "r"((u_long)0xE), "0"((u_long)m_iAfterDirectQNum | 0x8000 | 0x1000000000000000));
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(tag);
+        {
+            QWdata* pQwSrc = (QWdata*)m_pAfterDirect;
+            for (i = 0; i < m_iAfterDirectQNum; i++) {
+                pQw->ul128 = pQwSrc->ul128;
+                pQw++;
+                pQwSrc++;
+            }
+        }
+        CPackMan::pkCloseGifTagManual((UINT*)pQw);
+        CPackMan::pkCloseDirectCode();
+    }
+    CModelMan::incDrawCount();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_SetPacket__6CModelUiPA3_CiiUliPUl);
+#endif
 /* Parked: 13 lines off: after getRawMode the original computes isDataEmpty && isSemiDataEmpty into a1 and never uses it (dead code left after a cross-jump?); ours drops the semi half. Tried: unused BOOL local, empty if, ternary, statement, duplicated identical arms (24 lines). */
 #if 0
 void CSemiModel::link(CModel* m) {
@@ -1034,7 +1343,7 @@ void CSemiModel::initSemiZModel() {
     mode = m_pModel->getMode();
     rawMode = m_pModel->getModelData()->getRawMode();
     if (MODELDATA::isCharacterAndMap(mode) && !(rawMode & 0x1200000) && !(getSemiTrans() == ALPHA_BLEND)) {
-        m_pSemiZ = new (com_malloc_d(sizeof(CSemiZModel), D_00461090, RET_ADDR())) CSemiZModel;
+        m_pSemiZ = new (com_malloc_d(sizeof(CSemiZModel), __FILE__ "(3441)", RET_ADDR())) CSemiZModel;
         if (m_pSemiZ) {
             m_pSemiZ->m_SemiDraw = m_SemiDraw;
             m_pSemiZ->m_pModel = m_pModel;
@@ -1102,7 +1411,7 @@ void CSemiModel::makePkt() {
 void CSemiModel::setSemiTrans(ALPHA a) {
     UINT rawMode;
     if (!(a == ALPHA_PLUS) && !(a == ALPHA_MINUS) && !(a == ALPHA_BLEND)) {
-        if (!(m_pModel)) AssertApp(D_00460EB8, 3588, D_004610C0, 0);
+        if (!(m_pModel)) AssertApp(__FILE__, 3588, "m_pModel", 0);
         rawMode = m_pModel->getModelData()->getRawMode();
         if (rawMode & 0x10000000) a = ALPHA_BLEND;
         else a = ALPHA_PLUS;
@@ -1319,8 +1628,8 @@ void CModel::linkTexAnm(CTexAnm* pATbl, INT nANum) {
     if (pATbl && nANum > 0) {
         nTexMax = m_TransTexCount;
         if (!m_pTexAnm && nTexMax > 0 && CModelTexAnm::getTexAnmCount(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax) > 0) {
-            m_pTexAnm = new (com_malloc_d(sizeof(CModelTexAnm), D_004610D0, RET_ADDR())) CModelTexAnm;
-            if (!(m_pTexAnm)) AssertApp(D_00460EB8, 4067, D_00461100, 0);
+            m_pTexAnm = new (com_malloc_d(sizeof(CModelTexAnm), __FILE__ "(4066)", RET_ADDR())) CModelTexAnm;
+            if (!(m_pTexAnm)) AssertApp(__FILE__, 4067, "m_pTexAnm", 0);
             m_pTexAnm->setup(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax);
         }
     }
@@ -1334,14 +1643,12 @@ void CModel::setupUVScroll(INT bVal) {
         if ((m_TexInfo[i].m_pTex[0x55] & 0x80) || bVal) {
             m_nFlag |= 0x80;
             bVal = m_TransTexCount;
-            m_TexUV = new (com_malloc_d(bVal * sizeof(_TEX_UV_OFFSET), D_00461110, RET_ADDR())) _TEX_UV_OFFSET[bVal];
+            m_TexUV = new (com_malloc_d(bVal * sizeof(_TEX_UV_OFFSET), __FILE__ "(4086)", RET_ADDR())) _TEX_UV_OFFSET[bVal];
             m_nFlag |= 0x40;
             break;
         }
     }
 }
-/* Parked: 2 lines off: the original loads the flag byte into v0 and shifts into v1 (lbu v0; dsrl v1,v0,7, as the weak isUVScroll copy), ours into one register. Worked: isUVScroll() as a member inline returning the u_long bit-field. Tried: static helper with BOOL/u_long return, ternary; permuter 10 min (17866 candidates, stays 2). */
-#if 0
 void CModel::updateUVScroll(FLOAT fr) {
     INT i;
     if (isUVScroll()) {
@@ -1357,15 +1664,8 @@ void CModel::updateUVScroll(FLOAT fr) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateUVScroll__6CModelf);
-#endif
 void CModel::setUVScrollOffset(INT nNum, FLOAT fU, FLOAT fV) {
-    /* MATCH: isUVScroll() as the weak copy shows it (lbu + dsrl: a 64-bit bit-field, result in a 64-bit local) */
-    struct _flag { u_long b0 : 7; u_long b7 : 1; };
-    u_long b = 0;
-    if (m_TexUV) b = ((_flag*)&m_nFlag)->b7;
-    if (b && nNum < m_TransTexCount) {
+    if (isUVScroll() && nNum < m_TransTexCount) {
         ((FLOAT*)m_TexUV)[nNum * 2] = fU;
         ((FLOAT*)m_TexUV)[nNum * 2 + 1] = fV;
     }
@@ -1515,128 +1815,18 @@ INT Mad::getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId) {
     *outMad = NULL;
     header = (MAD_HEADER*)CRsrcDB::getFirstData(0x23, iRId, TRUE);
     if (!header) return 0;
-    if (strncmp(header->szCode, D_00461140, 4) != 0) {
-        TRACE(D_00461148);
+    if (strncmp(header->szCode, "@MAD", 4) != 0) {
+        TRACE("MAD\203t\203@\203C\203\213\202\305\202\315\202\310\202\242\n");
         return 0;
     }
     if (header->uiVersion != 0x100) {
-        TRACE(D_00461160);
+        TRACE("MAD\202\314\203o\201[\203W\203\207\203\223\202\252\210\341\202\244\n");
         return 0;
     }
     mad = (MODEL_ATTACH_DATA*)((BYTE*)header + header->uiOffset);
-    if (!(mad)) AssertApp(D_00460EB8, 4422, D_00461178, 0);
+    if (!(mad)) AssertApp(__FILE__, 4422, "mad", 0);
     *outMad = mad;
     return header->uiNum;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __static_initialization_and_destruction_0_00133620);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", reset__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", relink__10CSemiModelP6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiSort__10CSemiModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getParentModel__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setOldZ__10CSemiModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getOldZ__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setDefaultSemiTrans__10CSemiModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", replaceParentModel__10CSemiModelP6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setPacketSize__10CSemiModelUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_10CFadeModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __10CFadeModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_11CSemiZModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __11CSemiZModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__11CSemiZModelii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__11CSemiZModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelP5CTaskRC9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelP5CTaskPC9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoordsRC9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__6CModelR7CCoordsPC9MODELDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaskR9MODELDATAi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelP5CTaskP9MODELDATAi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsR9MODELDATAi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", assign__6CModelR7CCoordsP9MODELDATAi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiTrans__6CModelG5ALPHA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getSemiModel__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiSort__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLightUnit__6CModelR10CLightUnit);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLightUnit__6CModelP10CLightUnit);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getCoords__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getPacketSize__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDataEmpty__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isSemiDataEmpty__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTexture__6CModeliPC7TexInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBoneName__C6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getParentBoneName__C6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getMode__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBBoxFlag__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setBBoxFlag__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBBox__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getModelData__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTextureInfo__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setTextureInfo__6CModeliPC11TexInfoStub);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateTextureInfo__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTextureNum__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getTransTextureNum__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", fade2Path__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isFade2Path__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", notSemi__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isNotSemi__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispOff__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDispOff__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDisp__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setBeforeDirect__6CModelPCUxi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", clearBeforeDirect__6CModelPCUxi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getBeforeDirectNum__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setAfterDirect__6CModelPCUxi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", clearAfterDirect__6CModelPCUxi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getAfterDirectNum__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getOTZ__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setOTZ__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getColorScale__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getAlphaScale__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", dispWireframe__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isDispWireframe__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setWorldScreenMatrix__6CModelPC7FMATRIX);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", defaultShaderOption__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShaderOption__6CModelUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resetShaderOption__6CModelUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__6CModelii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isClampRepeat__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setClampRepeat__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isShadowMap__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setShadowMap__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isAutoEffSemiSort__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setAutoEffSemiSort__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isRootZSort__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setRootZSort__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isShadow__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isMap__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", createSemiModel__6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isManagedSemiModel__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", manageSemiModel__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isAvailableSemiModel__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", availableSemiModel__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setDispFlag__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isOTZFlag__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setOTZFlag__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", updateOTZ__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isUVScroll__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setUVScroll__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isWBBox__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setWBBox__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", isSemiSortFlag__C6CModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setSemiSortFlag__6CModeli);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_8CModelBG);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __8CModelBGUs);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", disp__8CModelBG);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", setLayerFG__8CModelBGUc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_5CBBox);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", __5CBBox);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getPacketSize__C5CBBox);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_12CShadowModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__12CShadowModelii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__12CShadowModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _$_15CShadowMapModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeLayerExt__15CShadowMapModelii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcZ__15CShadowMapModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _GLOBAL_$I$c__KHCOM_MainApp_System_Graphic_Model.cppI3aaaa);
+
+// SOURCE DATA: .data .rodata .bss

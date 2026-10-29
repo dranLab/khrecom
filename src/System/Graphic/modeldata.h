@@ -45,6 +45,7 @@ struct MODELDATA {
         return 0;
     }
     USHORT getMode() const { return getRawMode(); }
+    BOOL isShadow() const { return getMode() == 0x10; } // PARTIAL: added for System/Graphic/Model
     USHORT getShaderOption() const {
         const SHORT* tag = (const SHORT*)(!isDataEmpty() ? m_pData : m_pSemiData);
         INT version = tag[0x16 / 2];
@@ -120,10 +121,12 @@ struct TexInfoStub {
         };
         ULONGLONG _nValue;
     };
-    void init(const TexInfo* pInInfo, SHORT nInTexPos, SHORT nInClutPos);
-    void update(SHORT nInTexPos, SHORT nInClutPos);
+    void init(const TexInfo* pInInfo, SHORT nInTexPos, SHORT nInClutPos); void update(SHORT nInTexPos, SHORT nInClutPos);
+    BOOL isFix() { if (!_pTexInfo) AssertApp(__FILE__, __LINE__, "_pTexInfo", 0); return _pTexInfo->isFix(); } // PARTIAL: isFix/getTPage added for System/Graphic/Model
     BOOL isFixTex() { if (!_pTexInfo) AssertApp(__FILE__, __LINE__, "_pTexInfo", 0); return _pTexInfo->isFixTex(); }
     BOOL isFixClut() { if (!_pTexInfo) AssertApp(__FILE__, __LINE__, "_pTexInfo", 0); return _pTexInfo->isFixClut(); }
+
+    ULONGLONG getTPage() { if (!_pTexInfo) AssertApp(__FILE__, __LINE__, "_pTexInfo", 0); return _pTexInfo->getTPage(); }
 };
 #endif
 

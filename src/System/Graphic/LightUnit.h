@@ -128,6 +128,13 @@ public:
     const FVECTOR& getAmbient() const { return m_Ambient; }
     const FMATRIX& getColor() const { return m_Color; }
     void betaShade(FVECTOR& out, const FVECTOR& in);
+    // PARTIAL: added for System/Graphic/Model (types.h lists a second calc() and these getters; bodies guessed)
+    void calc(BOOL bInCheck) {
+        if (!isCalc()) _calc();
+    }
+    FMATRIX& getLightMatrix() { return m_Light; }
+    FMATRIX& getColorMatrix() { return m_Color; }
+    FVECTOR& getAmbientVector() { return m_Ambient; }
 
 protected:
     void getCenter(FVECTOR& ctr);
