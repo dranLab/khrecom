@@ -6,6 +6,7 @@
 #include "System/Graphic/Camera.h"
 #include "System/Graphic/LightUnit.h"
 #include "System/Graphic/TexAnm.h"
+#include "System/Graphic/TexCtrl.h"
 #include "Game/Map.h"
 #include "Game/MapUnitTable.h"
 #include "Game/Game.h"
@@ -168,7 +169,22 @@ void CMap::_createEffIdProc(ZONEPARTS* parts, INT nEType) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", __4CMapP5CTaskUi);
+/* Parked: draft not verified yet; waits for the weak tail - as CMap's key function it emits every CMap inline,
+   which collide with the INCLUDE_ASM'd weak copies. */
+#if 0
+CMap::~CMap() {
+    CTexCtrl::delFixTexAnm(m_pTexAnm, m_nTexAnmNum);
+    delete[] m_pModelTbl;
+    m_pModelTbl = NULL;
+    delete[] m_LightUnit;
+    m_LightUnit = NULL;
+    delete[] m_pTexAnm;
+    m_pTexAnm = NULL;
+    CGame::stopConstEnvSE(-1);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _$_4CMap);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", init__4CMapii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _exclusiveSetup__4CMapi);
 void CMap::resetFog() {

@@ -96,6 +96,11 @@ class CMapLightUnit;
 class CTexAnm;
 class CMapModel;
 
+class CMapGrid : public CBBox {
+public:
+    INT flg; /* 0x3c */
+};
+
 class CMap : public CTask {
 private:
     FVECTOR m_vColor;         /* 0x040 */
@@ -106,16 +111,16 @@ private:
     INT m_nModelMax;          /* 0x060 */
     FLOAT m_Deg;              /* 0x064 */
     UINT m_uiMapFlag;         /* 0x068 */
-    UBYTE _m_0x6c[0x404];     /* 0x06c m_LightMarker[8] (C3DTile, 16-aligned at 0x70) */
+    C3DTile m_LightMarker[8]; /* 0x070 */
     CPolyG4 m_Back[4];        /* 0x470 */
-    UBYTE _m_0x5e0[0x1000];   /* 0x5e0 m_grid[64] */
+    CMapGrid m_grid[64];      /* 0x5e0 */
     FOGDATA* m_pFog;          /* 0x15e0 */
     ZONEDATA* m_pZone;        /* 0x15e4 */
     LIGHTDATA m_Light;        /* 0x15e8 */
     LIGHTDATA m_MapLight;     /* 0x1608 */
     CSky* m_pSky;             /* 0x1628 */
     CMapLightUnit* m_LightUnit; /* 0x162c */
-    UBYTE _m_0x1630[0x50];    /* 0x1630 m_gpPosDir */
+    C3DLineStrip m_gpPosDir;  /* 0x1630 */
 
 public:
     CMap(CTask* p, UINT nRsrcGrpID);

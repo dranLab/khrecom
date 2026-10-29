@@ -517,6 +517,29 @@ typedef CVector<G_STRIP> G_STRIP_VECTOR;
 
 class CCoords;
 
+// PARTIAL: added for Game/Map (as in System/Graphic/GprimFull.h)
+class C3DTile : public CGPrim {
+protected:
+    IVECTOR p0;
+    IVECTOR p1;
+public:
+    FVECTOR m_Center;
+    FVECTOR m_P0;
+    FVECTOR m_P1;
+    G_RGBA m_C0;
+    CCoord* m_pCrd;
+
+    virtual ~C3DTile() {}
+    C3DTile() {
+        m_P0.set(-0.5f, -0.5f, 0.0f);
+        m_P1.set(0.5f, 0.5f, 0.0f);
+    }
+    virtual UINT getPacketSize() const { return 3; }
+private:
+    virtual FIX4 calcZ();
+    virtual void makePkt();
+};
+
 class C3DStripBase : public CGPrim {
 public:
     G_STRIP_VECTOR m_vVERT;
