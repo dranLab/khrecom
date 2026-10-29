@@ -267,6 +267,20 @@ extern "C" void FlushCache(int op); /* MATCH: void (the SDK returns int): v0 sta
 extern "C" void sceDmaSend(sceDmaChan* d, void* tag);
 extern "C" int sceGsSyncPath(int mode, u_short timeout);
 extern "C" void TRACE(char* fmt, ...);
+typedef struct { /* 0x60 */ /* PARTIAL: stand-in for System/Graphic/Effect/libppp/pppPart sceGsLoadImage: libgraph.h not written */
+    u_long giftag0[2];
+    u_long bitbltbuf;
+    u_long bitbltbufaddr;
+    u_long trxpos;
+    u_long trxposaddr;
+    u_long trxreg;
+    u_long trxregaddr;
+    u_long trxdir;
+    u_long trxdiraddr;
+    u_long giftag1[2];
+} sceGsLoadImage;
+extern "C" int sceGsSetDefLoadImage(sceGsLoadImage* lp, short dbp, short dbw, short dpsm, short x, short y, short w, short h);
+extern "C" int sceGsExecLoadImage(sceGsLoadImage* lp, u_long128* srcaddr);
 extern "C" char D_00461B70[], D_00461C28[]; /* PARTIAL: assert text "0" and the semi-packet overflow message (data still asm) */
 extern u_long128 My_dma_start[];
 extern u_long128 My_VU0_start[];
@@ -306,6 +320,7 @@ static inline void _checkDmaTag() {
 
 /* The file's statics; the data still comes from the original (no SOURCE DATA yet) */
 namespace {
+extern u_long s_pPktBufVif1[2][36992];
 extern u_long s_pPktBufVif1Frame[320];
 extern pacVif1Packet s_pktVif1;
 extern pacVif1Packet s_pktVif1BG;
@@ -494,7 +509,18 @@ void CPackMan::resetDmaChanVif1() {
     s_pDmaChanVif1 = pChan;
     *(volatile u_int*)&pChan->chcr |= 0x40;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _clearVram__Fv);
+static void _clearVram() {
+    sceGsLoadImage li;
+    u_long128* p = (u_long128*)s_pPktBufVif1;
+    UINT i;
+    for (i = 0; i < 0x800; i++) p[i] = 0;
+    for (i = 0; i < 0x80; i++) {
+        sceGsSetDefLoadImage(&li, i * 128, 2, 0, 0, 0, 128, 64);
+        FlushCache(0);
+        sceGsExecLoadImage(&li, p);
+        sceGsSyncPath(0, 0);
+    }
+}
 static void _setupSysContext() {
     s_SysGpuRegs2._nCLAMP = 5;
     s_SysGpuRegs2._nSCISSOR = ((u_long)(SCREEN_HEIGHT - 1) << 48) | (511 << 16);
