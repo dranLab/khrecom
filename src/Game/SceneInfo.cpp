@@ -104,6 +104,14 @@ struct _CardScene {
     BYTE _nScene;
 };
 
+/* The ref has it only in lost+found.h (owner unknown) */
+enum RCNORMA_DOOR {
+    RCNORMA_DOOR_EVENT1 = 0,
+    RCNORMA_DOOR_EVENT2 = 1,
+    RCNORMA_DOOR_EVENT3 = 2,
+    RCNORMA_DOOR_EXTRA = 3,
+    _RCNORMA_DOOR_MAX = 4
+};
 struct _SceneInfoWork {
     static STORAGE::MCWork* mc() { return CGameWork::m_pMCWork; }
     static STORAGE::MCWork2* mc2() { return CGameWork::m_pMCWork2; }
@@ -509,8 +517,62 @@ void CSceneInfo::initFloor() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initFloor__10CSceneInfo);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _initDoor__FR8DoorInfoPCQ25FLOOR11DoorSrcInfo7DOOR_IDPCQ25FLOOR11FloorLayoutPCQ27RCNORMA13FloorNormaSrcRQ37STORAGE7MCWork29_DoorInfoRC8RoomInfoi);
-__asm__(".rdata\n.align 4\n.word .L00212680\n.word .L00212688\n.word .L00212690\n.word .L002126A0\n.word .L002126A0\n.word .L00212698\n.text\n");
+void _initDoor(DoorInfo& door, const FLOOR::DoorSrcInfo* pSrcInfo, DOOR_ID id, const FLOOR::FloorLayout* pFloorLayout, const RCNORMA::FloorNormaSrc* pFloorNormaSrc, STORAGE::MCWork2::_DoorInfo& st_info, const RoomInfo& room, BOOL bContinue) {
+    BYTE* pDoorState = bContinue ? NULL : &st_info._nStat;
+    door._id = id;
+    door._pStorageInfo = &st_info;
+    if (!pSrcInfo) {
+        door._type = DOOR_TYPE_NORMAL;
+        door._nDstRoom = -1;
+        if (pDoorState) *pDoorState = DOOR_STAT_NOTHING;
+        return;
+    }
+    door._type = (DOOR_TYPE)pSrcInfo->_nDoorType;
+    if (door._type == DOOR_TYPE_NORMAL && room._pSrcInfo && room._pSrcInfo->_nRoomType < FLOOR::ROOM_TYPE_GOAL &&
+        room._pSrcInfo->_nRoomType >= FLOOR::ROOM_TYPE_EVENT1)
+        door._type = DOOR_TYPE_EVENTROOM;
+    door._nDstRoom = pSrcInfo->_nDstRoom;
+    if (door._nDstRoom <= 0 || (pFloorLayout && pFloorLayout->_nRoomCount < door._nDstRoom)) {
+        door._nDstRoom = -1;
+        if (pDoorState) *pDoorState = pSrcInfo->_nDoorType == DOOR_TYPE_ONEWAY ? DOOR_STAT_ONE_WAY : DOOR_STAT_NOTHING;
+        door._pNormaSrcInfo = NULL;
+        door._shape = DOOR_SHAPE_NORMAL;
+        return;
+    }
+    DOOR_STAT stat;
+    RCNORMA_DOOR nd = _RCNORMA_DOOR_MAX;
+    if (pFloorLayout && pFloorLayout->_nID == 100) {
+        stat = DOOR_STAT_OPENED;
+    } else if (room._pSrcInfo && room._pSrcInfo->_nRoomType == FLOOR::ROOM_TYPE_LAST) {
+        stat = DOOR_STAT_OPENED;
+    } else {
+        stat = pSrcInfo->_nDoorType == DOOR_TYPE_ONEWAY ? DOOR_STAT_ONE_WAY : DOOR_STAT_CLOSED;
+        switch (pSrcInfo->_nDoorType) {
+        case DOOR_TYPE_TO_EVENT1:
+            nd = RCNORMA_DOOR_EVENT1;
+            break;
+        case DOOR_TYPE_TO_EVENT2:
+            nd = RCNORMA_DOOR_EVENT2;
+            break;
+        case DOOR_TYPE_TO_EVENT3:
+            nd = RCNORMA_DOOR_EVENT3;
+            break;
+        case DOOR_TYPE_TO_EXTRA:
+            nd = RCNORMA_DOOR_EXTRA;
+            break;
+        case DOOR_TYPE_OPEN_AFTER_EVENT:
+            stat = DOOR_STAT_UNAVAILABLE;
+            break;
+        case DOOR_TYPE_TO_GOAL: /* MATCH: separate copy (cross-jumped); its extra stat set wins stat the register priority over nd */
+            stat = DOOR_STAT_UNAVAILABLE;
+            break;
+        }
+    }
+    if (pDoorState) *pDoorState = stat;
+    door._pNormaSrcInfo = (pFloorNormaSrc && nd != _RCNORMA_DOOR_MAX) ? (void*)&pFloorNormaSrc->_normas[nd] : NULL;
+    if (!bContinue) door.initNorma();
+    door._shape = door.isSpecialDoor() ? DOOR_SHAPE_EVENT : DOOR_SHAPE_NORMAL;
+}
 void _initDoor(DoorInfo& door, const FLOOR::DoorSrcInfo* pSrcInfo, DOOR_ID id, const FLOOR::FloorLayout* pFloorLayout, const RCNORMA::FloorNormaSrc* pFloorNormaSrc, STORAGE::MCWork2::_DoorInfo& st_info, const RoomInfo& room, BOOL bContinue);
 void _initRoomInfo(RoomInfo& roomInfo, STORAGE::MCWork::_RoomInfo& st_info, STORAGE::MCWork2::_RoomInfo2& st_info2, const FLOOR::RoomSrcInfo* pSrcInfo, const FLOOR::FloorLayout* pFloorLayout, const RCNORMA::FloorNormaSrc* pFloorNormaSrc, BOOL bContinue) {
     roomInfo._pStorageInfo = &st_info;
