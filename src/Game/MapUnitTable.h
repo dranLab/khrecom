@@ -19,6 +19,7 @@ struct MAPUNITTABLE {
     MAPUNITID id;
     CTask* (*maptable)(CTask*, const ZONEPARTS&); // const: NewClass<T>(CTask*, const ZONEPARTS&) (Game/Gimmick/SampleGimmick)
     INT kind;
+    CTask* create(CTask* inParent, ZONEPARTS* inParts); // PARTIAL: added for Game/Map (defined after ZONEPARTS)
 };
 
 extern MAPUNITTABLE* mapUnitTable_G[1];

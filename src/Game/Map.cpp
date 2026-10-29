@@ -55,6 +55,9 @@ public:
 extern LIGHTDATA ALF_default;
 extern "C" char D_004809E0[];
 extern "C" char D_00480EB0[];
+extern "C" char D_00480A10[];
+extern "C" char D_00480A38[];
+extern MAPUNITTABLE g_DefaultGimmick;
 void RotMatrixZ(FMATRIX& out, FMATRIX& in);
 void setTransparency(const CCoord& crd, CModel& model);
 
@@ -108,7 +111,44 @@ INT CMap::_checkEffId(ZONEPARTS* parts, BOOL bUseMapUnit) {
     if (id.c[0] != 'P') return 0;
     return (id.c[1] != '1') ? -1 : 3;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _createEffIdProc__4CMapP9ZONEPARTSi);
+inline CTask* MAPUNITTABLE::create(CTask* inParent, ZONEPARTS* inParts) {
+    if (inParts->effectId != id.ui) return NULL;
+    return maptable(inParent, *inParts);
+}
+void CMap::_createEffIdProc(ZONEPARTS* parts, INT nEType) {
+    if (!parts->effectId) return;
+    if (nEType < 0) return;
+    switch (nEType) {
+    case 1:
+        createMapEffect_(*parts);
+        break;
+    case 2:
+        createEnvSE(*parts);
+        break;
+    case 3:
+        break;
+    case 0:
+    default: {
+        int flg = 0;
+        MAPUNITTABLE* t;
+        MAPUNITTABLE defaultTbl = g_DefaultGimmick;
+        while ((t = mapUnitTableSearch(parts)) != NULL) {
+            if (t->create(getSysTask(t->kind), parts)) {
+                flg = 1;
+                break;
+            }
+        }
+        if (!flg) {
+            char szEffIDName[5];
+            defaultTbl.id.ui = parts->effectId;
+            strncpy(szEffIDName, defaultTbl.id.c, 4);
+            szEffIDName[4] = 0;
+            TRACE(D_00480A10, parts->effectId, szEffIDName);
+            if (!defaultTbl.create(getSysTask(defaultTbl.kind), parts)) TRACE(D_00480A38);
+        }
+    }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", __4CMapP5CTaskUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _$_4CMap);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", init__4CMapii);
