@@ -71,8 +71,6 @@ struct LIGHTDATA {
     void set(const ALF_DATA* pData); // PARTIAL: added for Game/Map
 };
 
-#ifdef GAME_MAP_CPP
-/* The complete class, for Game/Map (graphics members as padding). */
 struct FOGDATA { // 0xb0
     IVECTOR color;
     FLOAT fognear;
@@ -103,6 +101,9 @@ struct ZONEDATA { // 0x20
     INT chip_suu;
     INT __parts_suu;
 };
+
+#ifdef GAME_MAP_CPP /* MATCH: the full classes need System/Task.h, Gprim.h and Model.h, whose strings Game/MapUnitTable's .rodata lacks; other includers see the partial CMap below */
+/* The complete class, for Game/Map (graphics members as padding). */
 class CSky;
 class CMapLightUnit;
 class CTexAnm;
@@ -116,6 +117,8 @@ public:
 class CMapModel : public CModel {
 public:
     CMapModel() : CModel(NULL) { setTestFlag(0x500FD); }
+    INT getGridID();
+    void setGridID(INT nInID);
     INT m_nGridID; /* 0x120 */
     INT _pad[3];   /* PARTIAL: the original CModel is 16-byte aligned (size 0x130) */
 };
