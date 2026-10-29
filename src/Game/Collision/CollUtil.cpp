@@ -268,5 +268,17 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", distanceLine
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectPSphere__9CCollUtil);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", distanceSphere__9CCollUtilP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", slidingHosei__9CCollUtilR7FVECTORN21);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _initDbg__9CCollUtil);
+/* MATCH: the original links no CCollDbg (debug build only) and calls address 0. Ps2EeAs makes undefined weak symbols
+   global, so the method is a weak absolute 0, as in Game/Gimmick/CreateGimmick (the relocation names func_0 there) */
+class CCollDbg {
+public:
+    void initEveryInt(INT nMax);
+};
+__asm__(".weak initEveryInt__8CCollDbgi\ninitEveryInt__8CCollDbgi = 0\n");
+void CCollUtil::_initDbg() {
+    if (m_pCollDbg) {
+        ((CCollDbg*)m_pCollDbg)->initEveryInt(m_PrimInfoMax);
+        m_PrimInfoMax = 0;
+    }
+}
 // SOURCE DATA: .data
