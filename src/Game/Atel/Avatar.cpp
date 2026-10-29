@@ -44,6 +44,10 @@ struct AvatarMotionParamEfx { // 0x1c
     UINT _nEfxNo;       /* 0x14 */
     UINT _nFlag;        /* 0x18 */
 };
+struct AvatarFadeParam { // 0x8
+    FLOAT _fTarget;    /* 0x0 */
+    UINT _nTime;       /* 0x4 */
+};
 struct AvatarScaleParam { // 0x20
     FVECTOR _vTarget;  /* 0x00 */
     UINT _nTime;       /* 0x10 */
@@ -338,7 +342,31 @@ void CAvatar::setAvatarRotTimeLimit(TIMEQ nTime) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", RotateAvatarMain__Q24ATEL7CAvatar);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", RotateAvatarEnd__Q24ATEL7CAvatar);
 INT CAvatar::onSetDirection(INT nCmd, void* pParam, INT nID) { return -1; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onFadeing__Q24ATEL7CAvatariPvi);
+INT CAvatar::onFadeing(INT nCmd, void* pParam, INT nID) {
+    AvatarFadeParam* p = (AvatarFadeParam*)pParam;
+    AvatarFadeStruct* pFadeStruct;
+    FLOAT alp;
+    FLOAT f;
+    if (!(p)) AssertApp(D_0048AD68, 1468, D_0048AF30, 0);
+    pFadeStruct = createFadeStruct();
+    if (!pFadeStruct) return -1;
+    pFadeStruct->_ModelNo = nID;
+    pFadeStruct->_fTargetFade = p->_fTarget;
+    getFade(nID, alp);
+    if (p->_fTarget == 1.0f && alp == 1.0f) {
+        if (pFadeStruct->_ModelNo == -1) setModelAlphaScale(0.0f, -1);
+        else m_pModels[pFadeStruct->_ModelNo].setAlphaScale(0.0f);
+    }
+    getFade(pFadeStruct->_ModelNo, f);
+    INT t = p->_nTime * 50;
+    FLOAT fRate = 1.0f / t;
+    f = (p->_fTarget - f) * fRate;
+    setAvatarFadeSpeed(pFadeStruct, f);
+    clearAvatarFadeTimeCount(pFadeStruct);
+    setAvatarFadeTimeLimit(pFadeStruct, t);
+    setAvatarState(0x200, TRUE);
+    return -1;
+}
 BOOL CAvatar::FadeAvatarMain() {
     TIMEQ nTQ = getFrameRate();
     for (INT i = 0; i < 5; i++) {

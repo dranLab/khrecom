@@ -238,6 +238,16 @@ public:
         m_pMoveStruct->_vTargetPos = inV;
         m_pMoveStruct->_vTargetPos.w = 1.0f;
     }
+    void setAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct, INT f) {
+#line 494 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        in_pFadeStruct->_nFadeTimeLimit = f;
+    }
+    void setAvatarFadeSpeed(AvatarFadeStruct* in_pFadeStruct, const FLOAT& f) {
+#line 500 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        in_pFadeStruct->_fFadeSpeed = f;
+    }
     FLOAT getAvatarFadeSpeed(AvatarFadeStruct* in_pFadeStruct) const {
 #line 508 AVATAR_H_PATH
         if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
@@ -252,6 +262,11 @@ public:
 #line 521 AVATAR_H_PATH
         if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
         return in_pFadeStruct->isOverTimeLimit(t);
+    }
+    void clearAvatarFadeTimeCount(AvatarFadeStruct* in_pFadeStruct) {
+#line 534 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        in_pFadeStruct->_nFadeTimeCount = 0;
     }
     void countAvatarFadeTime(AvatarFadeStruct* in_pFadeStruct, INT t) {
 #line 536 AVATAR_H_PATH
