@@ -294,8 +294,31 @@ void CSceneInfo::dispose() {
     s_pFloorNormaFile_Sora = NULL;
     s_pFloorNormaFile_Riku = NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _getEventRoomSceneIndex__Fs);
-__asm__(".rdata\n.align 4\n.word .L002118FC\n.word .L00211904\n.word .L0021190C\n.word .L00211914\n.word .L0021191C\n.word .L00211924\n.word .L0021191C\n.word 0\n.text\n");
+INT _getEventRoomSceneIndex(SHORT nRoomType) {
+    INT nTblIdx;
+    switch (nRoomType) {
+    case 1:
+        nTblIdx = 0;
+        break;
+    case 2:
+        nTblIdx = 1;
+        break;
+    case 3:
+        nTblIdx = 2;
+        break;
+    case 4:
+        nTblIdx = 3;
+        break;
+    case 5:
+    case 7:
+        nTblIdx = 4;
+        break;
+    default:
+        nTblIdx = -1;
+        break;
+    }
+    return nTblIdx;
+}
 void _initEntranceSceneTbl(BOOL bSora) {
     for (INT i = 0; i < 16; i++) {
         FLOOR::FloorLayout* pFloorSrc = CSceneInfo::getFloorDataSrc(i, bSora);
