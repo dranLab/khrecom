@@ -24,6 +24,7 @@
 extern "C" char D_0047D330[]; /* __FILE__ */
 extern "C" char D_0047D080[]; /* "" */
 extern "C" char D_0047D660[];
+extern "C" char D_0047D3E0[];
 extern "C" char D_0047D548[];
 extern "C" char D_0047D570[];
 extern "C" char D_0047D4F8[];
@@ -475,7 +476,20 @@ void CEntity::changeMotionFileName(const CHAR* inName, TIMEQ inTq, BOOL inRootMo
     INT nIndex = getMotionIndex(inName);
     if (nIndex != -1) changeMotion(nIndex, inTq, inRootMove, inGr, inEffectNo, inSENo);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", changeMotion__7CEntityiiiiii);
+void CEntity::changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
+    if (m_pAnim) {
+        if (m_pAnim->isFlag1Bit9()) {
+            if (m_pEffectEx) m_pEffectEx->stop();
+            if (m_pSEEx) m_pSEEx->stop();
+        }
+        if (inGr < 0) m_pAnim->start(inIndex, inTq);
+        else m_pAnim->change(inIndex, inTq, inGr);
+        m_pAnim->setRootMove(inRootMove, FALSE);
+        m_pAnim->clearFlag1(3);
+        if (m_pEffect && !(m_uiEntityFlag & 0x400)) m_pEffect->set(inIndex, inEffectNo, TRUE);
+        if (m_pSE && !(m_uiEntityFlag & 0x4000)) ((CSEMotion*)m_pSE)->set(inIndex, inSENo, TRUE);
+    }
+}
 void CEntity::changeMotionFileNameWithSameCheck(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
     if (!(inName)) AssertApp(D_0047D330, 1433, D_0047D398, 0);
     INT nIndex = getMotionIndex(inName);
@@ -485,8 +499,36 @@ void CEntity::changeMotionWithSameCheck(INT inIndex, TIMEQ inTq, BOOL inRootMove
     if (!(m_pAnim)) AssertApp(D_0047D330, 1445, D_0047D3D8, 0);
     if (m_pAnim->getAnimID() != inIndex) changeMotion(inIndex, inTq, inRootMove, inGr, inEffectNo, inSENo);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", changeMotionEx__7CEntityiiiiiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", changeMotionEx__7CEntityPCciiiiii);
+void CEntity::changeMotionEx(INT inRsrcID, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
+    if (m_pAnim) {
+        if (!m_pAnim->isFlag1Bit9()) {
+            if (m_pEffect) m_pEffect->stop();
+            if (m_pSE) m_pSE->stop();
+        }
+        if (inGr < 0) m_pAnim->startEx(inRsrcID, inIndex, inTq);
+        else m_pAnim->changeEx(inRsrcID, inIndex, inTq, inGr);
+        m_pAnim->setRootMove(inRootMove, FALSE);
+        m_pAnim->clearFlag1(3);
+        if (m_pEffectEx) {
+            m_pEffectEx->initalize(inRsrcID);
+            if (m_pEffectEx && !(m_uiEntityFlag & 0x400)) m_pEffectEx->set(inIndex, inEffectNo, TRUE);
+        }
+        if (m_pSEEx) {
+            ((CSEMotion*)m_pSEEx)->initalize(inRsrcID);
+            if (m_pSEEx && !(m_uiEntityFlag & 0x4000)) ((CSEMotion*)m_pSEEx)->set(inIndex, inSENo, TRUE);
+        }
+    }
+}
+void CEntity::changeMotionEx(const CHAR* inRsrcName, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
+    if (!(inRsrcName)) AssertApp(D_0047D330, 1515, D_0047D3E0, 0);
+    if (m_pAnim) {
+        if (inGr < 0) m_pAnim->startEx(inRsrcName, inIndex, inTq);
+        else m_pAnim->changeEx(inRsrcName, inIndex, inTq, inGr);
+        m_pAnim->setRootMove(inRootMove, FALSE);
+        m_pAnim->clearFlag1(3);
+        if (m_pEffectEx && !(m_uiEntityFlag & 0x400)) m_pEffectEx->set(inIndex, inEffectNo, TRUE);
+    }
+}
 void CEntity::setMotion(TIMEQ inTq) {
     if (m_pAnim) m_pAnim->setMotion(inTq, 0, FALSE);
 }

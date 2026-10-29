@@ -289,6 +289,7 @@ public:
     void killLoopEffect(INT inNo); // PARTIAL: added for Game/Player/Summon
     // PARTIAL: added for Game/Gimmick/GimmickCarry
     void changeMotionEx(INT inRsrcID, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
+    void changeMotionEx(const CHAR* inRsrcName, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo); // PARTIAL: added for Game/Entity
     void enableFade2Path(BOOL inSw, INT inIndex);
     UINT isPermissionLockOn() const { return m_uiEntityFlag & 0x10000; }
     FLOAT calcDistanceXZSq(const FVECTOR& inPos) const;
