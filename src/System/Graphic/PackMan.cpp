@@ -1,8 +1,8 @@
 #define MODELDATA_H_TEXINFO /* PARTIAL: modeldata.h's VTransInfo (gated for System/Graphic/ModelMan) */
-#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
-#define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h"
-#define MODEL_H_PATH "c:/KHCOM/MainApp/System/Graphic/Model.h"
-#define LINKEDBUF_H_PATH "System/LinkedBuf.h"
+#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: __FILE__ as in the original .rodata */
+#define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h" /* MATCH: __FILE__ as in the original .rodata */
+#define MODEL_H_PATH "c:/KHCOM/MainApp/System/Graphic/Model.h" /* MATCH: __FILE__ as in the original .rodata */
+#define LINKEDBUF_H_PATH "System/LinkedBuf.h" /* MATCH: __FILE__ as in the original .rodata */
 #include "khtypes.h"
 #include "include_asm.h"
 #include "System/Graphic/Gprim.h"
