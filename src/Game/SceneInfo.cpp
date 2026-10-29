@@ -139,6 +139,10 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_00484DC8[];
+extern "C" char D_00484DD0[];
+extern "C" char D_00484DD8[];
+extern "C" int sprintf(char*, const char*, ...);
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", clear__10CSceneInfo);
 void CSceneInfo::initNewGame(BOOL bSora) {
@@ -272,7 +276,19 @@ BOOL CSceneInfo::reqEnterBattle() {
     if (reqChangeScene(getCurrentAreaNum(), nScene, nScene, TRUE, 1)) _acceptReqEnterBattle();
     return s_nReqEnterBattle != GAMEMODE_FIELD;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqEnterBattle__10CSceneInfos);
+BOOL CSceneInfo::reqEnterBattle(SHORT nBtlScene) {
+    if (getCurrentWorldID(TRUE) == 10) return reqEnterMinigame();
+    if (hasAnyRequest()) return FALSE;
+    if (s_nGameMode != GAMEMODE_FIELD) return FALSE;
+    if (nBtlScene <= 0) {
+        nBtlScene = getCurrentBattleSceneNum();
+        if (nBtlScene <= 0) nBtlScene = s_nCurrentFieldScene;
+    }
+    if (nBtlScene > 0) {
+        if (reqChangeScene(getCurrentAreaNum(), nBtlScene, nBtlScene, TRUE, 1)) _acceptReqEnterBattle();
+    }
+    return s_nReqEnterBattle != GAMEMODE_FIELD;
+}
 BOOL CSceneInfo::reqExitBattle() {
     if (hasAnyRequest()) return FALSE;
     if (s_nGameMode == GAMEMODE_FIELD) return FALSE;
@@ -303,7 +319,15 @@ BOOL CSceneInfo::reqRetryMinigame() {
     if (b) s_nReqExitBattle = 2;
     return b;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqChangeScene__10CSceneInfosssii);
+BOOL CSceneInfo::reqChangeScene(SHORT nArea, SHORT nScene, SHORT nBtlScene, BOOL bSkipIfSame, INT nAtelSrcID) {
+    if (hasAnyRequest()) return FALSE;
+    if (!bSkipIfSame || (!hasReqChangeScene() && (getCurrentAreaNum() != nArea || getCurrentSceneNum() != nScene))) {
+        setNextAreaScene(nArea, nScene, nBtlScene);
+        s_nAtelSrcID = nAtelSrcID;
+        s_nReqChangeScene |= 1;
+    }
+    return hasReqChangeScene();
+}
 SHORT CSceneInfo::getCurrentAreaNum() { return CGameWork::m_pMCWork->_nArea; }
 SHORT CSceneInfo::getCurrentSceneNum() { return CGameWork::m_pMCWork->_nScene; }
 INT CSceneInfo::getCurrentAreaScene() {
@@ -483,7 +507,19 @@ BYTE CSceneInfo::getReverbVal(const AREA_SCENE& as) {
     INT i = getSceneCacheID(as);
     return i < 0 ? s_GlobalScene._nReverb : s_SceneCacheTbl[i]._nReverb;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setSeRangeRatio__10CSceneInfoUc);
+void CSceneInfo::setSeRangeRatio(BYTE nRatio) {
+    char szTmp[64];
+    CHAR* pTmp = szTmp;
+    if (CRsrcDB::isSceneAttachMode()) {
+        _SceneInfo& info = s_SceneCacheTbl[CRsrcDB::getSceneAttachNum()];
+        info._nSeRangeRatio = nRatio;
+        sprintf(szTmp, D_00484DC8, info._as._nArea, info._as._nScene);
+    } else {
+        s_GlobalScene._nSeRangeRatio = nRatio;
+        pTmp = D_00484DD0;
+    }
+    TRACE_COL(_TTY_RED, D_00484DD8, pTmp, nRatio * 10);
+}
 BYTE CSceneInfo::getSeRangeRatio() {
     INT i = getCurrentSceneCacheID();
     return i < 0 ? s_GlobalScene._nSeRangeRatio : s_SceneCacheTbl[i]._nSeRangeRatio;

@@ -387,6 +387,7 @@ public:
     static BOOL removeFromSceneCacheWithRsrc(const union AREA_SCENE& as);
     static void setReverbVal(BYTE nRev);
     static BYTE getReverbVal(const union AREA_SCENE& as);
+    static void setSeRangeRatio(BYTE nRatio);
     static BYTE getSeRangeRatio(const union AREA_SCENE& as);
     static RCNORMA::FloorNormaSrc* getFloorNormaDataSrc(USHORT nIdx, BOOL bSora);
     static BOOL setDoorStat(DOOR_STAT stat, DOOR_ID id, INT nRoomID);
