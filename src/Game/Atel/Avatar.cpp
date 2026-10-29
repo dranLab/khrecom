@@ -44,6 +44,10 @@ struct AvatarMotionParamEfx { // 0x1c
     UINT _nEfxNo;       /* 0x14 */
     UINT _nFlag;        /* 0x18 */
 };
+struct AvatarScaleParam { // 0x20
+    FVECTOR _vTarget;  /* 0x00 */
+    UINT _nTime;       /* 0x10 */
+};
 struct AvatarEffectAttach { // 0x10
     char* EffectName;  /* 0x0 */
     INT EfxNo;         /* 0x4 */
@@ -74,6 +78,7 @@ public:
     static void removeRsrc(INT nID);
 };
 extern "C" char D_0048AD68[]; /* __FILE__ */
+extern "C" char D_0048AF30[]; /* "p" */
 extern "C" char D_0048ADC0[];
 extern "C" char D_0048ADC8[];
 extern "C" char D_0048AD90[];
@@ -337,7 +342,23 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onFadeing__Q24ATEL7
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", FadeAvatarMain__Q24ATEL7CAvatar);
 void CAvatar::FadeAvatarEnd() {}
 void CAvatar::cancelFadeAvatar() {}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onScaling__Q24ATEL7CAvatariPvi);
+INT CAvatar::onScaling(INT nCmd, void* pParam, INT nID) {
+    AvatarScaleParam* p = (AvatarScaleParam*)pParam;
+    FVECTOR v;
+    if (!(p)) AssertApp(D_0048AD68, 1607, D_0048AF30, 0);
+    if (!m_pScaleStruct && !createScaleStruct()) return -1;
+    setAvatarTargetScale(p->_vTarget);
+    getScale(v);
+    INT f = p->_nTime * 50;
+    FLOAT fRate = 1.0f / f;
+    SubVector(v, p->_vTarget, v);
+    ScaleVector(v, v, fRate);
+    setAvatarScaleSpeed(v);
+    clearAvatarScaleTimeCount();
+    setAvatarScaleTimeLimit(f);
+    setAvatarState(0x80, TRUE);
+    return -1;
+}
 BOOL CAvatar::ScaleAvatarMain() {
     TIMEQ nTQ = getFrameRate();
     countAvatarScaleTime(nTQ);
