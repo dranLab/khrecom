@@ -117,7 +117,7 @@ private:
     SE_MANAGED_DATA m_SeManagedData[4]; /* 0x130 */ // PARTIAL: split out for Game/Entity
     TIMEQ m_tqDamageDispTimer;          /* 0x1b0 */
     char m_szNumberString[16];          /* 0x1b4 */
-    class CFnt* m_pDamageString;        /* 0x1c4 */
+    class CFntM2* m_pDamageString;      /* 0x1c4 (the ref types it CFnt*; the code calls CFntM2::setText) */
 
 public:
     CEntity(CTask* inParent);
@@ -228,6 +228,7 @@ public:
     void updateRootMove(); // PARTIAL: added for Game/Entity
     void updateAnimation();
     BOOL initRideModel_(INT inGroup);
+    BOOL initCollision_(INT inGroupID, INT inRsrcID);
     void updateSE_();
     // PARTIAL: added for Game/EntityFactory
     void positionFix(const FVECTOR& inPos, FLOAT inDir);

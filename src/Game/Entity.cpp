@@ -16,14 +16,32 @@
 #include "Game/Collision/CollMap.h"
 #include "Game/Collision/CollDisp.h"
 #include "Game/Debug/DebugWork.h"
+#include "Game/AttackMotion.h"
+#include "System/Graphic/Fnt.h"
+#include "System/Graphic/WorldEnv.h"
 #include "include_asm.h"
 
 extern "C" char D_0047D330[]; /* __FILE__ */
 extern "C" char D_0047D080[]; /* "" */
 extern "C" char D_0047D660[];
+extern "C" char D_0047D548[];
+extern "C" char D_0047D570[];
+extern "C" char D_0047D4F8[];
+extern "C" int sprintf(char*, const char*, ...);
+void RotTransPersClipW(IVECTOR& iVec, const FVECTOR& fVec);
+static inline void _loadRotTransPersMatrix(const FMATRIX& m) {
+    asm volatile("vsub.xyzw $vf3, $vf0, $vf0\n"
+                 "lqc2 $vf4, 0x0(%0)\n"
+                 "lqc2 $vf5, 0x10(%0)\n"
+                 "lqc2 $vf6, 0x20(%0)\n"
+                 "lqc2 $vf7, 0x30(%0)\n"
+                 :
+                 : "r"(&m));
+}
 class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: gated by RSRCDATA_H_FULL */
 public:
     static BYTE* getRsrcOCD(INT nGroup);
+    static void* getFirstData(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
 };
 extern "C" char D_0047D688[];
 extern "C" int strcmp(const char*, const char*);
@@ -385,7 +403,19 @@ BOOL CEntity::testFront(const FVECTOR& inTarget) const {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", testFront__C7CEntityRC7FVECTOR);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", entityVisible__7CEntityRC7CEntityff);
+BOOL CEntity::entityVisible(const CEntity& inTarget, FLOAT inDegX, FLOAT inDegY) {
+    FVECTOR dir;
+    calcDirection(dir, inTarget);
+    FLOAT dir0 = dir.y;
+    getRot();
+    FLOAT fDiff = _fabsf(Math3D::LimitPI(dir0 - getRot().y));
+    if (inDegY * 0.5f * 0.017453292f < fDiff) return FALSE;
+    dir0 = dir.x;
+    getRot();
+    fDiff = _fabsf(Math3D::LimitPI(dir0 - getRot().x));
+    if (inDegX * 0.5f * 0.017453292f < fDiff) return FALSE;
+    return TRUE;
+}
 BOOL CEntity::entityVisible(const CEntity* inEntity, FLOAT inAngle, FLOAT inDist) {
     if (inEntity) return entityVisible(*inEntity, inAngle, inDist);
     return FALSE;
@@ -545,7 +575,18 @@ void CEntity::updateAnimation() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateBadStatusEffect__7CEntityi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setDamageNumber__7CEntityRC7FVECTORi);
+void CEntity::setDamageNumber(const FVECTOR& inPos, INT inDamage) {
+    if (!DebugWork::g_dw.sys.m_iDagameNumber) return;
+    if (!m_pDamageString) return;
+    IVECTOR ivec;
+    _loadRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
+    RotTransPersClipW(ivec, inPos);
+    if (ivec.w) return;
+    sprintf(m_szNumberString, D_0047D4F8, inDamage);
+    m_pDamageString->setPosition((ivec.x >> 4) - 0x800, (ivec.y >> 4) - 0x800, 0xFFFF28);
+    m_pDamageString->setText(m_szNumberString);
+    m_tqDamageDispTimer = 6000;
+}
 BOOL CEntity::startTargetChase(CEntity* inTarget, FLOAT inSpeed, FLOAT inRate) {
     if (m_uiEntityFlag & 0x78) return FALSE;
     if (!inTarget) return FALSE;
@@ -697,7 +738,25 @@ void CEntity::playSEManaged(INT inFileID, INT inID, INT inBoneIndex, const FVECT
     }
 }
 FLOAT CEntity::rndArea(FLOAT inMin, FLOAT inMax) { return inMin + getRandF() * _fabsf(inMax - inMin); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", initCollision___7CEntityii);
+BOOL CEntity::initCollision_(INT inGroupID, INT inRsrcID) {
+    COLL_PARAM_HEADER* header = (COLL_PARAM_HEADER*)CRsrcDB::getFirstData(0x24, inGroupID * 10000 + inRsrcID, FALSE);
+    if (!header) return FALSE;
+    if (header->addrMapping()) {
+        if (header->iBodyCollParamNum > 0) {
+            m_pBodyColl = new (com_malloc_d(sizeof(CBodyCollision), D_0047D548, RET_ADDR())) CBodyCollision(this);
+            if (!m_pBodyColl) return FALSE;
+            m_pBodyColl->initalize(header->pBodyCollParam, header->iBodyCollParamNum);
+        }
+        if (header->iAtkCollParamNum > 0) {
+            m_pAttack = new (com_malloc_d(sizeof(CAttackMotion), D_0047D570, RET_ADDR())) CAttackMotion(this);
+            if (!m_pAttack) return FALSE;
+            m_pAttack->initialize(header->pAtkCollParam, header->iAtkCollParamNum);
+        }
+        m_pCollParam = header;
+        return TRUE;
+    }
+    return FALSE;
+}
 BOOL CEntity::initEffect_(INT inID) {
     m_pEffect = new (com_malloc_d(sizeof(CEffectMotion), D_0047D598, RET_ADDR())) CEffectMotion(this);
     if (!m_pEffect) return FALSE;
@@ -904,8 +963,29 @@ HANDLE CEntity::setDisappearEffect() {
     }
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setDeathEffect__7CEntityPC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setDeathEffect__7CEntity);
+void CEntity::setDeathEffect(const FVECTOR* inPos) {
+    if (m_pCollParam) {
+        OTHER_PARAM* other = m_pCollParam->pOtherParam;
+        if (!(other)) AssertApp(D_0047D330, 3235, D_0047D3D0, 0);
+        if (strcmp(other->szDeathEffectDpx, D_0047D080)) {
+            if (other->iDeathEffectNo1 >= 0) setEffect(other->szDeathEffectDpx, other->iDeathEffectNo1, inPos, &getRot(), 0.0f);
+            if (other->iDeathEffectNo2 >= 0) setEffect(other->szDeathEffectDpx, other->iDeathEffectNo2, inPos, &getRot(), 0.0f);
+        }
+    }
+}
+HANDLE CEntity::setDeathEffect() {
+    COLL_PARAM_HEADER* coll = m_pCollParam;
+    if (!coll) return 0;
+    OTHER_PARAM* other = coll->pOtherParam;
+    if (!(other)) AssertApp(D_0047D330, 3257, D_0047D3D0, 0);
+    if (!strcmp(other->szDeathEffectDpx, D_0047D080)) return 0;
+    if (other->iDeathEffectNo1 >= 0) {
+        FVECTOR pos;
+        pos.set(other->DeathPos.fOffsetX, other->DeathPos.fOffsetY, other->DeathPos.fOffsetZ);
+        return attachEffect(other->szDeathEffectDpx, other->iDeathEffectNo1, &Crd(other->DeathPos.iBoneIndex), &pos, NULL, 0.0f);
+    }
+    return 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setBadStatusEffect__7CEntityPCcif);
 HANDLE CEntity::setRecoverEffect(const CHAR* inName, INT inNo) {
     if (!m_pCollParam) return 0;
