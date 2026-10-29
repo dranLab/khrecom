@@ -32,6 +32,12 @@ extern "C" char D_0047D330[]; /* __FILE__ */
 extern "C" char D_0047D080[]; /* "" */
 extern "C" char D_0047D660[];
 extern "C" char D_0047D3E0[];
+extern "C" char D_0047D408[];
+extern "C" char D_0047D430[];
+extern "C" char D_0047D458[];
+extern "C" char D_0047D480[];
+extern "C" char D_0047D4A8[];
+extern "C" char D_0047D4D0[];
 extern "C" FLOAT D_0047D6B0; /* PARTIAL: -1.7e+38 bounding-box seed (data still asm) */
 extern "C" FLOAT D_0047D6B4; /* PARTIAL: +1.7e+38 */
 extern "C" char D_0047D290[];
@@ -62,6 +68,10 @@ class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: gated by RSRCDAT
 public:
     static BYTE* getRsrcOCD(INT nGroup);
     static void* getFirstData(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
+    static INT getModelCount(INT nGroup);
+    static MODELDATA** getRsrcMDL(INT nGroup);
+    static TEXANM_DATA* getRsrcTXA(INT nGroup);
+    static CRsrcANN* getRsrcANN(INT nGroup);
 };
 extern "C" char D_0047D688[];
 extern "C" int strcmp(const char*, const char*);
@@ -94,6 +104,7 @@ void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" float atan2f(float, float);
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 inline void* operator new(size_t, void* p) throw() { return p; }
 
 static inline FLOAT _sqrtf(FLOAT x) {
@@ -833,7 +844,66 @@ void CEntity::land(FLOAT inDownLength, FLOAT inUpLength, BOOL inFirstHit) {
     if (!(m_pMove)) AssertApp(D_0047D330, 1696, D_0047D358, 0);
     m_pMove->land(inDownLength, inUpLength, inFirstHit);
 }
+/* Parked: matches (V1), but constructing CLightUnit makes gcc emit its weak copies (dtor, setAnchor, reCalc, getPointLightData, _calc, calc) at the end of the object, while the original has them in the weak tail (func_001F3E00..func_001F4318, unnamed): it goes in with the weak tail. */
+#if 0
+BOOL CEntity::initalizeModel(INT inGroup, BOOL bLight) {
+    if ((m_iModelCount = CRsrcDB::getModelCount(inGroup)) <= 0) return FALSE;
+    MODELDATA** pModelTbl = CRsrcDB::getRsrcMDL(inGroup);
+    if (!pModelTbl) return FALSE;
+    m_pModels = new (D_0047D408) CModel[m_iModelCount];
+    if (!m_pModels) return FALSE;
+    m_pvModelColor = new (D_0047D430) FVECTOR[m_iModelCount];
+    if (!m_pvModelColor) return FALSE;
+    if (bLight) {
+        for (INT i = 0; i < m_iModelCount; i++) {
+            if (pModelTbl[i]->enableLight()) {
+                m_pNLight = new (com_malloc_d(sizeof(CLightUnit), D_0047D458, RET_ADDR())) CLightUnit;
+                if (!m_pNLight) return FALSE;
+                break;
+            }
+        }
+        for (INT i = 0; i < m_iModelCount; i++) {
+            if (pModelTbl[i]->enablePointLight()) {
+                m_pGLight = new (com_malloc_d(sizeof(CGimmickLightUnit), D_0047D480, RET_ADDR())) CGimmickLightUnit;
+                if (!m_pGLight) return FALSE;
+                break;
+            }
+        }
+    }
+    TEXANM_DATA* pTXAData = CRsrcDB::getRsrcTXA(inGroup);
+    if (pTXAData) {
+        if ((m_nTexAnmNum = pTXAData->getDataNum()) > 0) {
+            m_pTexAnm = new (D_0047D4A8) CTexAnm[m_nTexAnmNum];
+            if (m_pTexAnm) {
+                for (INT i = 0; i < m_nTexAnmNum; i++) m_pTexAnm[i].setup(*pTXAData, i);
+            }
+        }
+    }
+    for (INT i = 0; i < m_iModelCount; i++) {
+        m_pModels[i].link(this, pModelTbl[i]);
+        m_pModels[i].linkTexAnm(m_pTexAnm, m_nTexAnmNum);
+        if (bLight) {
+            if (pModelTbl[i]->enablePointLight()) m_pModels[i].setLightUnit(m_pGLight);
+            else if (pModelTbl[i]->enableLight()) m_pModels[i].setLightUnit(m_pNLight);
+        }
+        m_pvModelColor[i] = m_pModels[i].getColorScale();
+        if ((UINT)inGroup / 10000 == 11) m_pModels[i].m_nFlag |= 0x40;
+    }
+    enableFade2Path(TRUE, -1);
+    m_pAnim = new (com_malloc_d(sizeof(CAnim), D_0047D4D0, RET_ADDR())) CAnim;
+    if (!m_pAnim) return FALSE;
+    m_pAnim->link(this, CRsrcDB::getRsrcANN(inGroup), pModelTbl[0]);
+    m_pAnim->init(0, 0);
+    m_pAnim->clearFlag1(0x100);
+    INT kind = (m_EntityType == 1 || m_EntityType == 0x11) ? 1 : 2;
+    if (m_pNLight) m_pNLight->setAnchor(&Crd(0), kind);
+    if (m_pGLight) m_pGLight->setAnchor(&Crd(0), kind);
+    m_iID = inGroup;
+    return TRUE;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", initalizeModel__7CEntityii);
+#endif
 void CEntity::updateAnimation() {
     if (m_pAnim) {
         if (m_pAnim->isRootMove()) updateCoord();
