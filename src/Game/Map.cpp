@@ -60,6 +60,11 @@ public:
 extern LIGHTDATA ALF_default;
 extern "C" char D_004809E0[];
 extern "C" char D_00480EB0[];
+extern "C" char D_00480FA0[];
+extern "C" char D_00480FC8[];
+extern "C" char D_00480FF0[];
+extern "C" char D_00480CE8[];
+extern "C" char D_00480D08[];
 class CBuf;
 class CRsrcData { /* PARTIAL: stand-in for System/RsrcData CRsrcData: gated by RSRCDATA_H_FULL */
     CBuf* m_pDataSrc;
@@ -345,7 +350,72 @@ void CMap::createEnvSE(const ZONEPARTS& inParts) {
     nFile += unitId.c[3] - '0';
     if (unitId.c[1] == '0') CGame::playConstEnvSE(nFile * 1000 + nID, -1, FALSE);
 }
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
+extern "C" FLOAT sinf(FLOAT);
+/* Parked: 3 lines - the three &m_pRotShift[i] before the LimitPI/sinf calls come out as base+offset (addu s0,s0,s1), the
+   original adds offset+base; reference, pointer, index-first, inline-helper forms all keep it (permuter can't take the
+   initializer-list constructor). */
+#if 0
+CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInParent) {
+    setPriority((TASK_PRIORITY)0x8000);
+    m_modelSuu = pZone->skynum;
+    m_pModel = new (D_00480FA0) CModelBG[m_modelSuu];
+    m_pRot = new (D_00480FC8) FVECTOR[m_modelSuu];
+    m_pRotShift = new (D_00480FF0) FVECTOR[m_modelSuu];
+    m_vColor.setAll(1.0f);
+    addCoord(m_modelSuu + 1);
+    CCoord& crd = Crd(0);
+    _unitMatrixVu0(crd.m_Local);
+    crd.m_Flag = 1;
+    USHORT nLayer = 3;
+    for (INT i = 0; i < m_modelSuu; i++) {
+        CModelBG& model = m_pModel[i];
+        ZONEPARTS* pZoneparts = &pZone->parts[i];
+        m_pRot[i].set(0.0f, 0.0f, 0.0f, 0.0f);
+        m_pRotShift[i]._q = 0;
+        if (pZoneparts->rot.x) {
+            FVECTOR& v = m_pRotShift[i];
+            v.x = sinf(Math3D::LimitPI(pZoneparts->rot.x * 0.01f * 0.017453292f)) * 0.1f;
+        }
+        if (pZoneparts->rot.y) {
+            FVECTOR& v = m_pRotShift[i];
+            v.y = sinf(Math3D::LimitPI(pZoneparts->rot.y * 0.01f * 0.017453292f)) * 0.1f;
+        }
+        if (pZoneparts->rot.z) {
+            FVECTOR& v = m_pRotShift[i];
+            v.z = sinf(Math3D::LimitPI(pZoneparts->rot.z * 0.01f * 0.017453292f)) * 0.1f;
+        }
+        m_pRotShift[i].w = 0.0f;
+        model.setLayerDepth(nLayer);
+        INT nIndex = pZone->parts[i].modelIndex + 1;
+        MODELDATA* d;
+        if (!pAZF) d = NULL;
+        else d = ((MODELDATA**)pAZF)[nIndex];
+        if (!d) AssertApp(D_00480CE8, 1846, D_00480D08, 0);
+        _unitMatrixVu0(Crd(i + 1).m_Local);
+        Crd(i + 1).m_pParent = &Crd(0);
+        Crd(i + 1).m_Flag = 1;
+        model.assign(this, d, i + 1);
+        if (model.getSemiModel()) model.getSemiModel()->setTestFlag(0x3360D);
+        if (nLayer < 9) nLayer += 2;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", __4CSkyP5CTaskPvP8ZONEDATA);
+#endif
 CSky::~CSky() {
     if (m_pModel) delete[] m_pModel;
     m_pModel = NULL;

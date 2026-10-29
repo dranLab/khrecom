@@ -90,7 +90,19 @@ struct FOGDATA { // 0xb0
     IVECTOR ivdum1;
     IVECTOR ivdum0;
 };
-struct ZONEDATA;
+struct ZONEDATA { // 0x20
+    SHORT partsnum;
+    SHORT skynum;
+    ZONEPARTS* parts;
+    SHORT gridsizeX;
+    SHORT zoneSizeX;
+    SHORT gridsizeZ;
+    SHORT zoneSizeZ;
+    INT group_suu;
+    INT** grouptable;
+    INT chip_suu;
+    INT __parts_suu;
+};
 class CSky;
 class CMapLightUnit;
 class CTexAnm;

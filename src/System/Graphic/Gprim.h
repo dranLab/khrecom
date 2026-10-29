@@ -185,6 +185,7 @@ public:
         m_LayerInfo._nDepth = nDepth;
     }
     void setLayerFG(USHORT nDepth) { setLayer(3, nDepth); }
+    void setLayerDepth(USHORT nInDepth) { m_LayerInfo._nDepth = nInDepth; } // PARTIAL: added for Game/Map
     void setSemiTrans(ALPHA nInAlpha) { m_nAlphaMode = nInAlpha; }
     USHORT getLayerDepth() const { return m_LayerInfo._nDepth; } // PARTIAL: added for System/Graphic/2d/2DSprObj
     void setZ(FIX4 nZ) { m_nZ = nZ; } // PARTIAL: added for System/Graphic/Model
