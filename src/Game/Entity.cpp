@@ -663,7 +663,20 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setSEPan__7CEntityiiiiiP
 void CEntity::playVoice(INT inFileID, INT inID, INT inPriority) {
     if (m_pSE) ((CSEMotion*)m_pSE)->playVoice(inFileID, inID, inPriority);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", playSEManaged__7CEntityiiiPC7FVECTOR);
+void CEntity::playSEManaged(INT inFileID, INT inID, INT inBoneIndex, const FVECTOR* inOffset) {
+    SE_MANAGED_DATA* data = m_SeManagedData;
+    for (INT i = 0; i < 4; i++, data++) {
+        if (!data->hHandle) {
+            data->hHandle = playSEPanAndVol(inFileID, inID, inBoneIndex, inOffset, 0);
+            data->iFileID = inFileID;
+            data->iSeID = inID;
+            data->iBoneIndex = inBoneIndex;
+            if (inOffset) data->vOffset = *inOffset;
+            else data->vOffset.init();
+            break;
+        }
+    }
+}
 FLOAT CEntity::rndArea(FLOAT inMin, FLOAT inMax) { return inMin + getRandF() * _fabsf(inMax - inMin); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", initCollision___7CEntityii);
 BOOL CEntity::initEffect_(INT inID) {

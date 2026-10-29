@@ -49,6 +49,14 @@ public:
 };
 #endif
 
+struct SE_MANAGED_DATA {
+    FVECTOR vOffset;
+    INT iBoneIndex;
+    INT iFileID;
+    INT iSeID;
+    HANDLE hHandle;
+};
+
 class CEntity : public CTask, public CFSM {
     friend class CSEMotionCtrl; // PARTIAL: added for Game/SEMotion
     friend class CSEMotion;
@@ -106,7 +114,10 @@ private:
     INT m_iFadeModel;      /* 0x120 */
     struct COLL_PARAM_HEADER* m_pCollParam; /* 0x124 */ // PARTIAL: split out for Game/Entity
     class CRideModel* m_pRideModel;         /* 0x128 */
-    UBYTE _m_0x12c[0xa4];  /* 0x12c .. 0x1c4 m_pDamageString */
+    SE_MANAGED_DATA m_SeManagedData[4]; /* 0x130 */ // PARTIAL: split out for Game/Entity
+    TIMEQ m_tqDamageDispTimer;          /* 0x1b0 */
+    char m_szNumberString[16];          /* 0x1b4 */
+    class CFnt* m_pDamageString;        /* 0x1c4 */
 
 public:
     CEntity(CTask* inParent);
@@ -288,6 +299,7 @@ public:
     INT getFlashingCounter() const { return m_iFlashingCounter; } // PARTIAL: added for Game/Prize (name unknown)
     FLOAT calcDistanceSq(const FVECTOR& inPos) const;
     HANDLE playSEPanAndVol(INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
+    void playSEManaged(INT inFileID, INT inID, INT inBoneIndex, const FVECTOR* inOffset); // PARTIAL: added for Game/Entity
     void setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
     void fadeoutSE(HANDLE inHandle, INT inFile, INT inID, INT inTime, INT inFlag);
     // PARTIAL: added for Game/Entity
