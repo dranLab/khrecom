@@ -87,7 +87,20 @@ struct ATK_COLL_PARAM { // 0xa0
     UINT isFinish() const { return uiFlag & 2; }
 };
 
-struct OTHER_PARAM; // 0xc0
+struct OTHER_PARAM { // 0xc0
+    /* 0x00 */ BONE_OFFSET LockOnPos;
+    /* 0x20 */ BONE_OFFSET BadStatusPos;
+    /* 0x40 */ BONE_OFFSET AppearPos;
+    /* 0x60 */ BONE_OFFSET DeathPos;
+    /* 0x80 */ char szAppearEffectDpx[16];
+    /* 0x90 */ char szDeathEffectDpx[16];
+    /* 0xa0 */ INT iAppearEffectNo;
+    /* 0xa4 */ INT iDeathEffectNo1;
+    /* 0xa8 */ INT iDeathEffectNo2;
+    /* 0xac */ FLOAT fBadStatusScale;
+    /* 0xb0 */ INT iDisappearEffectNo;
+    /* 0xb4 */ int pad[3];
+};
 
 struct COLL_PARAM_HEADER {
     /* 0x00 */ char szCode[4];
