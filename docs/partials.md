@@ -53,19 +53,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-29 | decomp/Game-Entity (done 265/265, no asm; weak tail + ctor/dtor + .rodata from C; CFnt/CState/CLightUnit copies named; A2 part 1: no ref-owned class (CEntity is Game/Movement's), mechanisms re-checked) | 1023 | 356 | 24 | 958 (925) | 101 |
 | 2026-10-29 | cleanup/System-Memoca (CMemoca stand-ins in 2 files) | 1023 | 354 | 24 | 958 (925) | 101 |
 | 2026-10-29 | decomp/Game-Map (partial 37/39; A1 stand-in reasons, .data/.rodata from source, weak tail via stripped placeholders; FOGDATA/ZONEDATA/CMapGrid/C3DTile, setLayerDepth, setColor/AlphaDensity, FVECTOR::addRot) | 1033 | 356 | 25 | 960 (925) | 107 |
+| 2026-10-30 | decomp/Game-Map (finished: 33 in C, 6 parked; ctor/_exclusiveSetup matched, init/disp drafts; A2 part 1: FOGDATA/ZONEDATA ungated, gate MATCH-tagged) | 1036 | 357 | 25 | 960 (924) | 108 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1033 (955 in 109 headers, 78 in 32 .cpp); MATCH: 107
-  by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 41, guessed 43, header-level 74, stand-in 33, other 6
-stand-ins: 356 foreign in 121 files (106 names), 200 unattributed, 171 own
+PARTIAL: 1036 (956 in 109 headers, 80 in 32 .cpp); MATCH: 108
+  by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 42, guessed 43, header-level 74, stand-in 33, other 6
+stand-ins: 357 foreign in 121 files (107 names), 200 unattributed, 171 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
-mechanisms: 960 sites (925 untagged); #line: 1238
+mechanisms: 960 sites (924 untagged); #line: 1238
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 159, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 562, superset 130, partial 92, gated 101, missing 11, unattributed 309
+classes: complete 564, superset 130, partial 92, gated 99, missing 11, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -186,6 +187,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRideModel` | complete | Game/Collision/Ride.h | 1 |  |  |
 | `CRoomCreation` | complete | Form/Menu/RoomCreation.h | 1 |  |  |
 | `CRoulette` | complete | Form/Menu/Roulette.h | 1 |  |  |
+| `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
 | `CRsrcTex` | gated | System/RsrcData.h | 1 |  |  |
 | `CRsrcVSV` | gated | System/RsrcData.h | 1 |  | missing methods: getBgmID, getFilePath, getSectorSize, getStartSector, ~CRsrcVSV |
 | `CSceneEnv` | partial | Game/SceneEnv.h | 1 |  | missing methods: clearStop, ~CSceneEnv |
@@ -205,7 +207,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `RcfMapInfo` | complete | System/Rcf.h | 1 |  |  |
 | `TexInfoStub` | gated | System/Graphic/modeldata.h | 1 |  | 1 PARTIAL |
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
-| `ZONEDATA` | gated | Game/Map.h | 1 |  |  |
+| `ZONEDATA` | complete | Game/Map.h | 1 |  |  |
 | `sceGsStoreImage` | complete | System/Graphic/Effect/libppp/keProg/pppKeLns.h | 1 |  |  |
 | `C3DCPrim` | partial | System/Graphic/3DCPrim.h | 0 | System/Graphic/GprimFull.h | missing methods: getObjPtr, makePkt_Line0, makePkt_Line1, makePkt_LineStrip0, makePkt_LineStrip1, makePkt_None, ... (+13); parameter count differs: create; virtual order differs |
 | `C3DLine` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h |  |
@@ -304,7 +306,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Gimmick/GimmickWarpPoint.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Gimmick/GimmickWindowLid.h` | 0 | 0/1/0/0 | 2 |
 | `Game/InterpolateMove.h` | 0 | 0/0/3/0 | 1 |
-| `Game/Map.h` | 9 | 4/2/1/5 | 8 |
+| `Game/Map.h` | 9 | 6/2/1/3 | 8 |
 | `Game/MapUnitTable.h` | 3 | 0/2/0/0 | 11 |
 | `Game/Movement.h` | 49 | 0/0/0/1 | 105 |
 | `Game/OsdDef.h` | 4 | 3/0/3/0 | 7 |
@@ -377,7 +379,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 10 |
 | `System/Graphic/MapUnit.h` | 2 | 0/0/0/0 | 3 |
-| `System/Graphic/Model.h` | 12 | 0/3/5/0 | 70 |
+| `System/Graphic/Model.h` | 13 | 0/3/5/0 | 70 |
 | `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 75 |
 | `System/Graphic/MotData.h` | 1 | 4/0/3/0 | 3 |
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
@@ -531,10 +533,10 @@ or `untagged`.
 | placeholder | `_mapEnemyAirEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyAir.cpp:11 |
 | placeholder | `_mapEnemyGroundEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyGround.cpp:11 |
 | placeholder | `_mapEnemyMushroomEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyMushroom.cpp:11 |
-| placeholder | `_mcShaderCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:514 |
-| placeholder | `_mcShaderDelete*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:517 |
-| placeholder | `_modelAssertZero*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:511 |
-| placeholder | `_modelCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:508 |
+| placeholder | `_mcShaderCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:515 |
+| placeholder | `_mcShaderDelete*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:518 |
+| placeholder | `_modelAssertZero*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:512 |
+| placeholder | `_modelCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:509 |
 | placeholder | `_monstroEventBattleEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MonstroEventBattle.cpp:27 |
 | placeholder | `_pathDataCameraSLCOverflow*` | 1 | 0 | untagged, e.g. System/Graphic/PathDataCamera.cpp:7 |
 | placeholder | `_premiumPrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:10 |
@@ -586,7 +588,7 @@ or `untagged`.
 | unit gate site | `GAME_ENTITY_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:450 |
 | unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.h:49 |
 | unit gate site | `GAME_GIMMICK_GIMMICKMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Gimmick/GimmickManager.h:14 |
-| unit gate site | `GAME_MAP_CPP` | 1 | 0 | untagged, e.g. Game/Map.h:74 |
+| unit gate site | `GAME_MAP_CPP` | 1 | 1 | the full classes need System/Task.h, Gprim.h and Model.h, whose strings Game/MapUnitTable's .rodata lacks; other includers see the partial CMap below |
 | unit gate site | `GAME_PLAYER_PLAYERCAMERA_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerCamera.h:35 |
 | unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 2 | 1 | as above |
 | unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Player/PlayerManager.h:93 |
