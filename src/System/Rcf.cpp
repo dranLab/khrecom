@@ -73,11 +73,11 @@ int CancelWakeupThread(int thread_id);
 
 extern char _gp;
 
-class CVramMan {
-public:
-    static void waitTransTexDone(INT nThreadID);
-    static BOOL isTransTexDone();
-};
+#include "System/VramMan.h"
+
+
+
+
 
 namespace Thread {
 void delayThread_1Frame();
