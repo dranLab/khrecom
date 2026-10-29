@@ -45,20 +45,20 @@ typedef struct { /* 0x70 */
 int sceGsSetDefStoreImage(sceGsStoreImage* sp, short sbp, short sbw, short spsm, short x, short y, short w, short h);
 int sceGsExecStoreImage(sceGsStoreImage* sp, u_long128* dstaddr);
 int sceGsSyncPath(int mode, u_short timeout);
-typedef struct { /* 0x60 */
-    u_long giftag0[2];
-    u_long bitbltbuf;
-    u_long bitbltbufaddr;
-    u_long trxpos;
-    u_long trxposaddr;
-    u_long trxreg;
-    u_long trxregaddr;
-    u_long trxdir;
-    u_long trxdiraddr;
-    u_long giftag1[2];
-} sceGsLoadImage;
-int sceGsSetDefLoadImage(sceGsLoadImage* lp, short dbp, short dbw, short dpsm, short x, short y, short w, short h);
-int sceGsExecLoadImage(sceGsLoadImage* lp, u_long128* srcaddr);
+#include "System/Graphic/Effect/libppp/pppPart.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
 struct sceDmaChan;
 sceDmaChan* sceDmaGetChan(int id);
 void sceDmaSendN(sceDmaChan* d, void* addr, int size);

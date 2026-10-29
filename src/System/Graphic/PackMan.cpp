@@ -125,20 +125,20 @@ extern "C" int sceGsSyncPath(int mode, u_short timeout);
 extern "C" void TRACE(char* fmt, ...);
 extern "C" int DIntr();
 extern "C" int EIntr();
-typedef struct { /* 0x60 */ /* PARTIAL: stand-in for System/Graphic/Effect/libppp/pppPart sceGsLoadImage: libgraph.h not written */
-    u_long giftag0[2];
-    u_long bitbltbuf;
-    u_long bitbltbufaddr;
-    u_long trxpos;
-    u_long trxposaddr;
-    u_long trxreg;
-    u_long trxregaddr;
-    u_long trxdir;
-    u_long trxdiraddr;
-    u_long giftag1[2];
-} sceGsLoadImage;
-extern "C" int sceGsSetDefLoadImage(sceGsLoadImage* lp, short dbp, short dbw, short dpsm, short x, short y, short w, short h);
-extern "C" int sceGsExecLoadImage(sceGsLoadImage* lp, u_long128* srcaddr);
+extern "C" {
+#include "System/Graphic/Effect/libppp/pppPart.h"
+}
+
+
+
+
+
+
+
+
+
+
+
 extern u_long128 My_dma_start[];
 extern u_long128 My_VU0_start[];
 extern INT SCREEN_HEIGHT;
