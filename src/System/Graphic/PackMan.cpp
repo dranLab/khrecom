@@ -56,6 +56,9 @@ struct sceDmaChan { /* PARTIAL: stand-in for System/Graphic/Effect/libppp/draw/d
     tD_CHCR chcr;
 };
 extern "C" sceDmaChan* sceDmaGetChan(int id);
+extern "C" void sceDmaReset(int mode);
+extern "C" void sceGsResetPath();
+extern "C" void sceGsResetGraph(short mode, short inter, short omode, short ffmode);
 
 struct sceGsDispEnv {
     u_long pmode;
@@ -109,6 +112,8 @@ public:
     static void transFrameEffect();
     static void initSemiPacket();
     static void enableZWrite(BOOL inEnable, INT inAddr);
+    static void resetGsDma();
+    static void setFrameEffect(INT nKind, INT n1, INT n2, INT n3);
     static void terminateSemiPacket();
     static void resetDmaChanVif1();
     static INT getDBIdx();
@@ -287,6 +292,10 @@ extern "C" char D_00461B70[], D_00461C28[]; /* PARTIAL: assert text "0" and the 
 extern u_long128 My_dma_start[];
 extern u_long128 My_VU0_start[];
 extern INT SCREEN_HEIGHT;
+class CMainApp { /* PARTIAL: stand-in for System/MainApp CMainApp: strings: MainApp.h (.rodata still asm) */
+public:
+    static BOOL isNTSC();
+};
 class CModel { /* PARTIAL: stand-in for System/Graphic/Model CModel: strings: Model.h (.rodata still asm) */
 public:
     static void resetMicroProgram();
@@ -333,6 +342,7 @@ extern pacVif1Packet s_pktVif1FrameEff;
 extern pacVif1Packet s_pktVif1Frame;
 extern sceDmaChan* s_pDmaChanVif1;
 extern sceDmaChan* s_pDmaChanVif0;
+extern sceDmaChan* s_pDmaChanGif;
 extern pacVif1Packet* s_pPktVif1;
 extern UINT s_nMaxPktSizeVif1;
 extern UINT s_nMaxPktSizeVif1Normal;
@@ -508,7 +518,19 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initialize__8
 void CPackMan::finalize() { CDelayedFree::disposeFreeList(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initGsDefDrawEnv__FR12sceGsDBuffDc12_GS_BUF_SIDEsssssUiUii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initDBuf__Fv);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", resetGsDma__8CPackMan);
+void CPackMan::resetGsDma() {
+    sceGsResetPath();
+    sceDmaReset(1);
+    if (CMainApp::isNTSC()) sceGsResetGraph(0, 1, 2, 0);
+    else sceGsResetGraph(0, 1, 3, 0);
+    s_pDmaChanVif0 = sceDmaGetChan(0);
+    *(u_int*)&s_pDmaChanVif0->chcr |= 0x40;
+    s_pDmaChanVif1 = sceDmaGetChan(1);
+    *(u_int*)&s_pDmaChanVif1->chcr |= 0x40;
+    s_pDmaChanGif = sceDmaGetChan(2);
+    *(int*)&s_pDmaChanGif->chcr &= ~0x40;
+    *(volatile u_int*)0x10003010 = 4;
+}
 void CPackMan::resetDmaChanVif1() {
     sceDmaChan* pChan = sceDmaGetChan(1);
     s_pDmaChanVif1 = pChan;
@@ -622,7 +644,23 @@ static void _loadMicroProgram() {
     sceDmaSend(s_pDmaChanVif0, My_VU0_start);
     CModel::resetMicroProgram();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", setFrameEffect__8CPackManiiii);
+void _initFramePacket(INT nKind);                          /* static in the original (still INCLUDE_ASM) */
+void _initFramePacketForMovie(INT n);                       /* static in the original (still INCLUDE_ASM) */
+void _initFrameEffPacket(INT nKind, INT n1, INT n2, INT n3); /* static in the original (still INCLUDE_ASM) */
+void CPackMan::setFrameEffect(INT nKind, INT n1, INT n2, INT n3) {
+    if (nKind >= 6) return;
+    INT nMode = getDrawMode();
+    if (nKind == 5) {
+        if (nMode != 0 && nMode != 2) return;
+        nKind = 0;
+    } else if (nMode == 2 && nKind != 4) {
+        return;
+    }
+    s_transFrameKind = nKind;
+    if (nKind == 4) _initFramePacketForMovie(n3);
+    else _initFramePacket(nKind);
+    _initFrameEffPacket(nKind, n1, n2, n3);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFramePacket__Fi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFramePacketForMovie__Fi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFrameEffPacket__Fiiii);
