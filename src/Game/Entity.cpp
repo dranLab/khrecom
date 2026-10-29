@@ -544,6 +544,8 @@ void CEntity::positionFix(const FVECTOR& inPos, const FVECTOR& inRot) {
 void CEntity::updateCoord() {
     if (!(m_pMove)) AssertApp(D_0047D330, 1286, D_0047D358, 0);
     FMATRIX& m = Crd(0).m_Local;
+    /* MATCH: the scale diagonal as one asm on fixed registers with only input operands (outputs or C stores make
+     * gcc reload m_pMove afterwards) */
     asm volatile("lq $5, 0x0(%0)\n"
                  "pextuw $2, $5, $0\n"
                  "pextlw $4, $0, $2\n"
