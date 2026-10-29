@@ -113,6 +113,8 @@ public:
     static void initSemiPacket();
     static void enableZWrite(BOOL inEnable, INT inAddr);
     static void resetGsDma();
+    static void kickDMAFG(INT n);
+    static void changeLayer(INT nLayer);
     static void setFrameEffect(INT nKind, INT n1, INT n2, INT n3);
     static void terminateSemiPacket();
     static void resetDmaChanVif1();
@@ -288,10 +290,12 @@ typedef struct { /* 0x60 */ /* PARTIAL: stand-in for System/Graphic/Effect/libpp
 } sceGsLoadImage;
 extern "C" int sceGsSetDefLoadImage(sceGsLoadImage* lp, short dbp, short dbw, short dpsm, short x, short y, short w, short h);
 extern "C" int sceGsExecLoadImage(sceGsLoadImage* lp, u_long128* srcaddr);
-extern "C" char D_00461B70[], D_00461C28[]; /* PARTIAL: assert text "0" and the semi-packet overflow message (data still asm) */
+extern "C" char D_00461B70[], D_00461C28[], D_00461D60[]; /* PARTIAL: assert text "0" and the semi-packet overflow message (data still asm) */
 extern u_long128 My_dma_start[];
 extern u_long128 My_VU0_start[];
 extern INT SCREEN_HEIGHT;
+extern INT DISP_HEIGHT;
+extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short h, short dx, short dy);
 class CMainApp { /* PARTIAL: stand-in for System/MainApp CMainApp: strings: MainApp.h (.rodata still asm) */
 public:
     static BOOL isNTSC();
@@ -347,6 +351,7 @@ extern pacVif1Packet* s_pPktVif1;
 extern UINT s_nMaxPktSizeVif1;
 extern UINT s_nMaxPktSizeVif1Normal;
 extern INT s_nMaxPktSizeVif1FG;
+extern void* s_pktVif1FGBase;
 extern UINT s_nTmpPacketSize;
 extern INT s_nDB;
 extern sceGsDBuffDc s_DBuf;
@@ -517,7 +522,18 @@ void CPackMan::pkRefMpg(u_short vuaddr, u_long128* pMicro, UINT size, UINT opt1)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initialize__8CPackMan);
 void CPackMan::finalize() { CDelayedFree::disposeFreeList(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initGsDefDrawEnv__FR12sceGsDBuffDc12_GS_BUF_SIDEsssssUiUii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initDBuf__Fv);
+enum _GS_BUF_SIDE {
+    _GS_BUF_SIDE0 = 0,
+    _GS_BUF_SIDE1 = 1
+};
+void _initGsDefDrawEnv(sceGsDBuffDc& dbuf, _GS_BUF_SIDE side, short psm, short w, short h, short ztest, short zpsm, UINT fbp, UINT zbp,
+                       INT clear); /* static in the original (still INCLUDE_ASM) */
+static void _initDBuf() {
+    sceGsSetDefDispEnv(&s_DBuf.disp[0], 1, 512, DISP_HEIGHT, 0, 0);
+    s_DBuf.disp[0].dispfb = (s_DBuf.disp[0].dispfb & ~0x1ff) | ((VRAM::_FRAME1_START / 32) & 0x1ff);
+    _initGsDefDrawEnv(s_DBuf, _GS_BUF_SIDE0, 0, 512, SCREEN_HEIGHT, 2, 0x31, VRAM::_FRAME0_START / 32, VRAM::_ZBUF_START / 32, 1);
+    s_nDB = 0;
+}
 void CPackMan::resetGsDma() {
     sceGsResetPath();
     sceDmaReset(1);
@@ -636,7 +652,22 @@ void CPackMan::updateBGBlend(INT nAlpha) {
 ULONGLONG CPackMan::getDefaultTEST() { return s_DBuf.clear0.testb; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", swapDBuf__8CPackMani);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", kickDMA__8CPackMani);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", kickDMAFG__8CPackMani);
+void CPackMan::kickDMAFG(INT n) {
+    s_nPkUseSize = 0;
+    changeLayer(2);
+    INT nSize = sceVif1PkSize(s_pPktVif1);
+    s_nPkUseSize += nSize;
+    if (s_nMaxPktSizeVif1FG + 0x880 < nSize) {
+        TRACE(D_00461D60, nSize);
+        AssertApp(D_00461BE0, 2172, D_00461B70, 0);
+    }
+    changeLayer(0);
+    if (s_pktVif1FGBase && s_nDrawMode != 3) {
+        *(u_int*)&s_pDmaChanVif1->chcr |= 0x40;
+        FlushCache(0);
+        sceDmaSend(s_pDmaChanVif1, (void*)((u_int)s_pktVif1FGBase & 0x0fffffff));
+    }
+}
 static void _loadMicroProgram() {
     FlushCache(0);
     sceGsSyncPath(0, 0);
