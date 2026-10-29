@@ -39,13 +39,8 @@ struct VTransInfo {
     UINT _nTransSize;
 };
 
-class CTexAnm {
-private:
-    BYTE m_pad[0x24];
-public:
-    CHAR* getDstTexName();
-    void sendTexture(USHORT nTex, const VTransInfo& rTex, USHORT nClut, const VTransInfo& rClut);
-};
+#include "System/Graphic/TexAnm.h"
+#line 49
 
 struct TexInfo {
     ULONGLONG _nTPage;
