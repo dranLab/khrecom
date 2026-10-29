@@ -16,19 +16,10 @@ inline void* operator new[](size_t size, char* msg) throw() {
 }
 inline void operator delete[](void* mem) { com_free(mem); }
 
-struct TEXANM_DATA {
-    INT getDataNum() const;
-};
+#include "System/Graphic/TexAnm.h"
+#line 22
 
-class CTexAnm {
-private:
-    BYTE m_pad[0x24];
-public:
-    CTexAnm();
-    ~CTexAnm();
-    void setup(const TEXANM_DATA& data, INT n);
-    void update(FLOAT fRate);
-};
+#line 31
 
 class CRsrcDB {
 public:
