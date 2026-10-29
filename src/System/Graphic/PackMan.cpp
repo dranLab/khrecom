@@ -826,38 +826,30 @@ void CPackMan::terminateBGPacket() {
     sceVif1PkTerminate(s_pPktVif1);
     changeLayer(0);
 }
-/* Parked: 29 lines - case 1: the original loads %hi(s_nMaxPktSizeVif1) before %hi(s_pPktVif1) but stores s_pPktVif1 first (and its ZBUF temps land in a1/a2); per-case store orders from an exhaustive search (104 -> 29), cases 2 and 3 match. */
-#if 0
 void CPackMan::changeLayer(INT nInLayer) {
     if (nInLayer == 1) {
-        u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32);
         s_DefaultGpuRegs1._nTEST = 0x300fd;
         s_DefaultGpuRegs2._nTEST = 0x3000d;
-        s_DefaultGpuRegs2._nZBUF = nZ;
-        s_DefaultGpuRegs1._nZBUF = nZ;
-        s_nMaxPktSizeVif1 = 0x600;
+        s_DefaultGpuRegs2._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32);
+        s_DefaultGpuRegs1._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32);
         s_pPktVif1 = &s_pktVif1BG;
+        s_nMaxPktSizeVif1 = 0x600;
     } else if (nInLayer == 2) {
-        u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000;
         s_DefaultGpuRegs2._nTEST = 0x3000d;
-        s_DefaultGpuRegs2._nZBUF = nZ | ((u_long)1 << 32);
+        s_DefaultGpuRegs2._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32);
         s_DefaultGpuRegs1._nTEST = 0x500fd;
-        s_DefaultGpuRegs1._nZBUF = nZ;
+        s_DefaultGpuRegs1._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000;
         s_pPktVif1 = &s_pktVif1FG;
         s_nMaxPktSizeVif1 = s_nMaxPktSizeVif1Normal;
     } else {
-        u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000;
         s_DefaultGpuRegs1._nTEST = 0x500fd;
+        s_DefaultGpuRegs2._nTEST = s_DBuf.clear0.testb;
+        s_DefaultGpuRegs2._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000;
+        s_DefaultGpuRegs1._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000;
         s_pPktVif1 = &s_pktVif1;
         s_nMaxPktSizeVif1 = 0x8000;
-        s_DefaultGpuRegs2._nTEST = s_DBuf.clear0.testb;
-        s_DefaultGpuRegs2._nZBUF = nZ;
-        s_DefaultGpuRegs1._nZBUF = nZ;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", changeLayer__8CPackMani);
-#endif
 void CPackMan::initSemiPacket() {
     if (!s_pktVif1SemiBase) return;
     _pkInit(s_pktVif1SemiBase, &s_pktVif1Semi, s_nMaxPktSizeVif1Semi);
