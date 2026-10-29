@@ -69,7 +69,33 @@ void CBattleCard::changeData(CARD& inData) {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", main__Q210CardBattle11CBattleCard);
+void CBattleCard::main() {
+    ((CFSM*)this)->update();
+    /* MATCH: the category is read through a 64-bit bit-field over m_cardData (see updateNumberEffect) */
+    struct _bits { u_long b0 : 28; u_long cat1 : 4; };
+    if (m_uiUser == 1 && ((_bits*)&m_cardData)->cat1 != 8) {
+        if (CCardBattle::isBlack()) {
+            if (m_fBright > 0.0f) {
+                m_fBright -= getFrameRateF() * 0.05f;
+                if (m_fBright < 0.0f) m_fBright = 0.0f;
+                m_uiFlag |= 0x4000;
+            }
+        } else if ((m_uiFlag & 0x80000) && m_iState == 2) {
+            if (m_fBright > 0.4f) {
+                m_fBright -= getFrameRateF() * 0.05f;
+                if (m_fBright < 0.4f) m_fBright = 0.4f;
+                m_uiFlag |= 0x4000;
+            }
+        } else {
+            if (m_fBright < 1.0f) {
+                m_fBright += getFrameRateF() * 0.05f;
+                if (m_fBright > 1.0f) m_fBright = 1.0f;
+                m_uiFlag |= 0x4000;
+            }
+        }
+    }
+    dispCard();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", dispCard__Q210CardBattle11CBattleCard);
 void CBattleCard::testDisp() {
     if (m_pCard) {
@@ -165,7 +191,37 @@ void CBattleCard::setStock(UINT inPri) {
     setEnchantEffect(0x53, 0);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setPlayStock__Q210CardBattle11CBattleCardi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateStock__Q210CardBattle11CBattleCard);
+void CBattleCard::preStateStock() {
+    CB_LAYOUT* pLayout;
+    m_iState = 1;
+    m_uiFlag |= 0x1;
+    switch (m_uiUser) {
+    case 1:
+        pLayout = &g_LayoutData[7];
+        m_StartPos.set(pLayout->x, pLayout->y);
+        m_fStartScale = pLayout->scale * 0.01f;
+        pLayout = &g_LayoutData[24 + m_iStock];
+        if (m_pRevolver->getStockSkill() >= 4) pLayout = &g_LayoutData[27 + m_iStock];
+        m_EndPos.set(pLayout->x, pLayout->y);
+        m_fEndScale = pLayout->scale * 0.01f;
+        break;
+    case 2:
+        pLayout = &g_LayoutData[16];
+        m_StartPos.set(pLayout->x, pLayout->y);
+        m_fStartScale = pLayout->scale * 0.01f;
+        pLayout = &g_LayoutData[30 + m_iStock];
+        if (m_pRevolver && m_pRevolver->getStockSkill() >= 0x6f) pLayout = &g_LayoutData[33 + m_iStock];
+        else if (CCardBattle::getStockFolderStockSkill(2) >= 0x6f) pLayout = &g_LayoutData[33 + m_iStock];
+        m_EndPos.set(pLayout->x, pLayout->y);
+        m_fEndScale = pLayout->scale * 0.01f;
+        break;
+    }
+    m_tqTimer = 400;
+    m_Pos = m_StartPos;
+    m_vRot.w = m_fStartScale;
+    m_iLayer = pLayout->layer;
+    m_pCard->changeLayer(m_iLayer);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateStock__Q210CardBattle11CBattleCard);
 void CBattleCard::preStateHand() { m_iState = 2; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateHand__Q210CardBattle11CBattleCard);

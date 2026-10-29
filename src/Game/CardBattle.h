@@ -297,10 +297,13 @@ class CCardRevolver {
     UBYTE _m_0x4e[0x22]; // PARTIAL: added for Game/Player/Player
     TIMEQ m_tqChargeRate; /* 0x70 */ // PARTIAL: added for Game/CardBattle
     BOOL m_bActive;      /* 0x74 */ // PARTIAL: added for Game/Player/Player
-    UBYTE _m_0x78[0x168]; /* 0x078 .. sizeof 0x1e0 */ // PARTIAL: added for Game/Player/Player (makeRevolver)
+    UBYTE _m_0x78[0x64]; /* 0x078 */ // PARTIAL: added for Game/Player/Player (makeRevolver)
+    SHORT m_iStockSkill; /* 0x0dc */ // PARTIAL: split out for Game/BattleCard
+    UBYTE _m_0xde[0x102]; /* 0x0de .. sizeof 0x1e0 */
 public:
     CCardRevolver(class CTask* pParent, CARD* inDeck, INT inUser, INT inShortCut); void setDiscard(); // PARTIAL: added for Game/Player/Player
     INT isActive() const { return m_bActive; } // PARTIAL: added for Game/Player/Player
+    INT getStockSkill() const { return m_iStockSkill; } // PARTIAL: added for Game/BattleCard
     // PARTIAL: added for Game/Enemy/HumanBoss
     INT getMode() const { return m_sMode; } // PARTIAL: name unknown
     void setChargeRate(INT inRate) { m_tqChargeRate = inRate; } // PARTIAL: added for Game/CardBattle
