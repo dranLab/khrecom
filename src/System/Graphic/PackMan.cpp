@@ -104,6 +104,7 @@ public:
 class CPackMan {
 public:
     static void finalize();
+    static void transFrame();
     static void resetDmaChanVif1();
     static INT getDBIdx();
     static BOOL isPacketForBG();
@@ -261,6 +262,14 @@ void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_sho
 void _makePkt_SaveScreen(); /* static in the original (still INCLUDE_ASM) */
 extern "C" void FlushCache(int op); /* MATCH: void (the SDK returns int): v0 stays free for the lui after the call in saveScreen */
 extern "C" void sceDmaSend(sceDmaChan* d, void* tag);
+extern "C" int sceGsSyncPath(int mode, u_short timeout);
+extern u_long128 My_dma_start[];
+extern u_long128 My_VU0_start[];
+extern INT SCREEN_HEIGHT;
+class CModel { /* PARTIAL: stand-in for System/Graphic/Model CModel: strings: Model.h (.rodata still asm) */
+public:
+    static void resetMicroProgram();
+};
 extern "C" void AssertApp(const char* pFile, int nLine, const char* pExpr, int n);
 extern "C" char D_00461BE0[], D_00461C10[]; /* PARTIAL: __FILE__ and the assert text (data still asm) */
 void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv); /* static in the original (still INCLUDE_ASM) */
@@ -295,7 +304,9 @@ namespace {
 extern u_long s_pPktBufVif1Frame[320];
 extern pacVif1Packet s_pktVif1;
 extern pacVif1Packet s_pktVif1BG;
+extern pacVif1Packet s_pktVif1Frame;
 extern sceDmaChan* s_pDmaChanVif1;
+extern sceDmaChan* s_pDmaChanVif0;
 extern pacVif1Packet* s_pPktVif1;
 extern UINT s_nMaxPktSizeVif1;
 extern UINT s_nMaxPktSizeVif1Normal;
@@ -468,12 +479,25 @@ void CPackMan::resetDmaChanVif1() {
     *(volatile u_int*)&pChan->chcr |= 0x40;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _clearVram__Fv);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _setupSysContext__Fv);
+static void _setupSysContext() {
+    s_SysGpuRegs2._nCLAMP = 5;
+    s_SysGpuRegs2._nSCISSOR = ((u_long)(SCREEN_HEIGHT - 1) << 48) | (511 << 16);
+    s_SysGpuRegs2._nALPHA = 0x44;
+    s_SysGpuRegs2._nTEST = *(u_long*)&s_DBuf.draw02.reg[7];
+    s_SysGpuRegs2._nFBA = 0;
+    s_SysGpuRegs2._nZBUF = *(u_long*)&s_DBuf.draw02.reg[1];
+    s_SysGpuRegs2._nFRAME = *(u_long*)&s_DBuf.draw02.reg[0];
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", beginScene__8CPackMan);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", endScene__8CPackMan);
 INT CPackMan::getDBIdx() { return s_nDB & 1; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", transFrameEffect__8CPackMan);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", transFrame__8CPackMan);
+void CPackMan::transFrame() {
+    if (s_nDrawMode == 3) return;
+    *(u_int*)&s_pDmaChanVif1->chcr |= 0x40;
+    FlushCache(0);
+    sceDmaSend(s_pDmaChanVif1, (void*)((u_int)s_pktVif1Frame.pBase & 0x0fffffff));
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initBGPacket__8CPackMani);
 BOOL CPackMan::isPacketForBG() { return s_pPktVif1 == &s_pktVif1BG; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", terminateBGPacket__8CPackMan);
@@ -506,7 +530,13 @@ ULONGLONG CPackMan::getDefaultTEST() { return s_DBuf.clear0.testb; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", swapDBuf__8CPackMani);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", kickDMA__8CPackMani);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", kickDMAFG__8CPackMani);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _loadMicroProgram__Fv);
+static void _loadMicroProgram() {
+    FlushCache(0);
+    sceGsSyncPath(0, 0);
+    sceDmaSend(s_pDmaChanVif1, My_dma_start);
+    sceDmaSend(s_pDmaChanVif0, My_VU0_start);
+    CModel::resetMicroProgram();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", setFrameEffect__8CPackManiiii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFramePacket__Fi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFramePacketForMovie__Fi);
