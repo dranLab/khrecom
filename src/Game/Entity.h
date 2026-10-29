@@ -117,7 +117,7 @@ private:
     SE_MANAGED_DATA m_SeManagedData[4]; /* 0x130 */ // PARTIAL: split out for Game/Entity
     TIMEQ m_tqDamageDispTimer;          /* 0x1b0 */
     char m_szNumberString[16];          /* 0x1b4 */
-    class CFntM2* m_pDamageString;      /* 0x1c4 (the ref types it CFnt*; the code calls CFntM2::setText) */
+    class CFnt* m_pDamageString;        /* 0x1c4 */
 
 public:
     CEntity(CTask* inParent);
@@ -376,6 +376,7 @@ public:
     void targetMove_();
     BOOL initEffectEx_(const CHAR* inRsrcName);
     BOOL initEffectEx_(INT inID);
+    BOOL initalizeModel(INT inGroup, BOOL bLight); // PARTIAL: added for Game/Entity
     BOOL initEffect_(INT inID);
     BOOL initSEEx_(INT inID);
     BOOL initSE_(INT inID);

@@ -20,6 +20,8 @@
 #include "Game/CardBattle.h"
 #include "Game/SceneEnv.h"
 #include "System/Graphic/Fnt.h"
+#define DEBUGPROCINFO_H_CFNT_DECL_ONLY /* MATCH: see System/DebugProcInfo.h */
+#include "System/DebugProcInfo.h"
 #include "System/Graphic/WorldEnv.h"
 #include "System/Graphic/LightUnit.h"
 #include "System/Coord.h"
@@ -30,6 +32,10 @@ extern "C" char D_0047D330[]; /* __FILE__ */
 extern "C" char D_0047D080[]; /* "" */
 extern "C" char D_0047D660[];
 extern "C" char D_0047D3E0[];
+extern "C" char D_0047D290[];
+extern "C" char D_0047D2B8[];
+extern "C" char D_0047D2E0[];
+extern "C" char D_0047D308[];
 extern "C" char D_0047D3A0[];
 extern "C" unsigned int strlen(const char*);
 extern "C" char D_0047D518[];
@@ -102,7 +108,30 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", __7CEntityP5CTaskQ27ObjT
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", _$_7CEntity);
 INT CEntity::getTypeID() const { return 0x1000; }
 BOOL CEntity::initalize(INT inGroupID, INT inRsrcID) { return initalize(inGroupID, inRsrcID, 0); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", initalize__7CEntityiiUi);
+BOOL CEntity::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
+    m_pMove = new (com_malloc_d(sizeof(CMovement), D_0047D290, RET_ADDR())) CMovement(this);
+    if (!m_pMove) return FALSE;
+    INT group = inGroupID * 10000 + inRsrcID;
+    if (!initalizeModel(group, !(iFlag & 1))) return FALSE;
+    initCollision_(inGroupID, inRsrcID);
+    initRideModel_(group);
+    initEffect_(group);
+    initSE_(group);
+    m_pEffectEx = new (com_malloc_d(sizeof(CEffectMotion), D_0047D2B8, RET_ADDR())) CEffectMotion(this);
+    if (!m_pEffectEx) return FALSE;
+    m_pSEEx = new (com_malloc_d(sizeof(CSEMotion), D_0047D2E0, RET_ADDR())) CSEMotion(this);
+    if (!m_pSEEx) return FALSE;
+    if (DebugWork::g_dw.sys.m_iDagameNumber) {
+        m_pDamageString = new (com_malloc_d(sizeof(CFnt), D_0047D308, RET_ADDR())) CFnt;
+        if (m_pDamageString) {
+            m_pDamageString->CFntM2::setStyle(0x8002);
+            m_pDamageString->setSize(24);
+            m_pDamageString->setLayerFG(1);
+            m_pDamageString->setColor(255, 255, 255);
+        }
+    }
+    return TRUE;
+}
 void CEntity::main() {
     if ((1 << m_EntityType) & CSceneEnv::getStopTypeBit()) return;
     if (m_uiEntityFlag & 0x80000000) return;
