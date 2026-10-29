@@ -383,7 +383,59 @@ INT CBattleCard::isNowSelect() {
     if (m_uiMode != 11) return FALSE;
     return m_iHand == 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setHand__Q210CardBattle11CBattleCardRC4CARDiii);
+void CBattleCard::setHand(const CARD& inData, INT inNum, INT inMax, INT inMode) {
+    if (inMode) {
+        m_StartPos = m_Pos;
+    } else {
+        m_pCard->destroy();
+        if (!inData.m_nKind) {
+            m_uiFlag |= 0x20;
+            m_pCard->enableDisp(FALSE);
+            m_cardData = inData;
+            m_iHandMax = 0;
+            m_iHand = -1;
+            m_uiFlag = (INT)m_uiFlag & ~0x1;
+            m_uiMode = 10;
+            return;
+        }
+        m_pCard->create(inData);
+        FVECTOR pos = {{m_Pos.x, m_Pos.y, 0.0f, 1.0f}};
+        m_pCard->setPos(pos);
+        m_pCard->enableDisp(FALSE);
+        m_uiFlag = (INT)m_uiFlag & ~0x20;
+        if (inData.m_nKind == 0xa0) m_pCard->changeTime(0);
+    }
+    m_cardData = inData;
+    if (!inMode && !(m_uiFlag & 0x1e00)) m_nNumber = m_cardData.m_nNumber;
+    m_iHand = inNum;
+    m_iHandMax = inMax;
+    m_uiFlag |= 0x1;
+    m_uiMode = 0xb;
+    setHandLocate(m_iHand, m_iHandMax);
+    if (inMode) {
+        m_Pos = m_StartPos;
+        m_uiMode = 0xc;
+        if (m_pRevolver) m_tqTimer = m_pRevolver->getRollSpeed();
+    }
+    setRoomEffect(NULL);
+    {
+        INT inUser = m_uiUser;
+        if (!(inUser)) AssertApp(D_004730D8, 644, D_00473100, 0);
+        CARD* pEnchant = CCardBattle::m_pInstance ? &CCardBattle::m_pInstance->m_cardEnchant[inUser - 1] : NULL;
+        if (!pEnchant || pEnchant->m_nKind != 0x4b) {
+            setEnchantEffect(0x4b, 0);
+            setEnchantEffect(0x57, 0);
+        } else {
+            setEnchantEffect(0x57, 0);
+            setEnchantEffect(0x4b, 0);
+        }
+    }
+    {
+        /* MATCH: 64-bit bit-field category read, see updateNumberEffect */
+        struct _bits { u_long b0 : 28; u_long cat1 : 4; };
+        if (((_bits*)&m_cardData)->cat1 == 4) m_uiFlag |= 0x8000;
+    }
+}
 void CBattleCard::setHandLocate(INT inNum, INT inMax) {
     CB_LAYOUT* pLayout;
     INT n = 0;
