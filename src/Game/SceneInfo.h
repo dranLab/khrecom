@@ -364,7 +364,7 @@ public:
     static void reqChangeGoalRoom();
     static BOOL reqChangeRoom(INT nRoomID, DOOR_ID nDoorID, SHORT nScene); // PARTIAL: BOOL result (Game/Atel/VSME)
     static void ignoreFloorInfo();
-    static void reqChangeScene(SHORT nArea, SHORT nScene, SHORT nEntrance, INT nMode, INT nAtel);
+    static BOOL reqChangeScene(SHORT nArea, SHORT nScene, SHORT nBtlScene, BOOL bSkipIfSame, INT nAtelSrcID);
     // PARTIAL: added for Game/SceneInfo
     static struct EventRoomData* getEventRoomData(BOOL bSora);
     static void setNextBattleScene(SHORT nScene);
