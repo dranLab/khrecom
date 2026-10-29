@@ -156,6 +156,8 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_00484B48[];
+extern "C" char D_00484B98[];
 extern "C" char D_00484AD0[];
 extern "C" char D_00484AF8[];
 extern "C" char D_00484B18[];
@@ -557,7 +559,53 @@ BOOL CSceneInfo::reqChangeRoom(INT nRoomID, DOOR_ID nDoor, SHORT nScene) {
     }
     return bResult;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqChangeEventRoom__10CSceneInfoUi7DOOR_IDs);
+BOOL CSceneInfo::reqChangeEventRoom(UINT nEventRoomType, DOOR_ID nDoor, SHORT nScene) {
+    if (hasAnyRequest()) return FALSE;
+    if (s_nGameMode != GAMEMODE_FIELD && !((UINT)(s_nCurrentFieldScene - 2000) < 1000)) {
+        SHORT nCur = getCurrentSceneNum();
+        if (!(nCur >= 0x41a && nCur <= 0x4ae)) {
+            TRACE_COL(_TTY_RED, D_00484B48);
+            return FALSE;
+        }
+    }
+    RoomInfo* pRoom;
+    if (nScene > 0) pRoom = setEventRoomSceneNum(nEventRoomType, nScene);
+    else pRoom = getEventRoomInfo(nEventRoomType);
+    if (!pRoom || pRoom->isExceptRoom()) {
+        TRACE_COL(_TTY_RED, D_00484B98);
+        if (s_nGameMode == GAMEMODE_FIELD) reqChangeScene(getCurrentAreaNum(), getCurrentSceneNum(), -1, FALSE, 1);
+        else reqExitBattle();
+        return FALSE;
+    }
+    if ((UINT)nDoor >= 4) nDoor = getEnteredDoorID();
+    if (nEventRoomType == 4) nDoor = _openGoalDoor(*pRoom);
+    INT nRoomID;
+    SHORT nArea = 0;
+    switch (nEventRoomType) {
+    case 5:
+        nRoomID = 0;
+        break;
+    case 6:
+        nRoomID = 99;
+        break;
+    default:
+        nRoomID = pRoom->_pSrcInfo->_nID;
+        nArea = getCurrentWorldID(FALSE);
+        break;
+    }
+    nDoor = _checkAvailableDoorID(nRoomID, nDoor);
+    if (nScene > 0 && !(nScene >= 2000 && nScene < 3000)) {
+        INT id = nRoomID == 0 || nRoomID == 99;
+        if (!id) makeRoom(*pRoom, nDoor, nScene, getCardIDFromSceneNum(nScene), CGameWork::m_pMCWork->_nNextRCNormaNum);
+    }
+    BOOL bResult = reqChangeScene(nArea, pRoom->getSceneNum(), -1, FALSE, 1);
+    if (bResult) {
+        s_nNextRoomID = nRoomID;
+        s_nNextDoorID = nDoor;
+        if (s_nGameMode != GAMEMODE_FIELD) s_nReqExitBattle = 1;
+    }
+    return bResult;
+}
 void CSceneInfo::reqChangeGoalRoom() { reqChangeEventRoom(4, (DOOR_ID)4, -1); }
 BOOL CSceneInfo::reqChangeBackupRoom() {
     if (hasAnyRequest()) return FALSE;

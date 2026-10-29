@@ -386,7 +386,7 @@ public:
     static void setEventDoorUnavailable(INT nFloorIndex, INT nRoomID);
     static void setupCompleteFloorWorld(WORLD_ID w);
     static DOOR_ID setTmpCurrentRoomID(SHORT nRoomID);
-    static void openGoalDoor(); static void showAllHiddenDoorsOfCurrentFloor(); static void setEventRoomSceneNum(UINT nRoom, SHORT nScene); // PARTIAL: added for Game/Atel/VSME
+    static void openGoalDoor(); static void showAllHiddenDoorsOfCurrentFloor(); static RoomInfo* setEventRoomSceneNum(UINT nRoom, SHORT nScene); // PARTIAL: added for Game/Atel/VSME
     static RoomInfo* getEventRoomInfo(UINT nIndex);
     static void reqChangeGoalRoom();
     static BOOL reqChangeRoom(INT nRoomID, DOOR_ID nDoorID, SHORT nScene); // PARTIAL: BOOL result (Game/Atel/VSME)
@@ -395,7 +395,7 @@ public:
     // PARTIAL: added for Game/SceneInfo
     static struct EventRoomData* getEventRoomData(BOOL bSora);
     static void setNextBattleScene(SHORT nScene);
-    static void reqChangeEventRoom(UINT nIndex, DOOR_ID nDoorID, SHORT nScene);
+    static BOOL reqChangeEventRoom(UINT nIndex, DOOR_ID nDoorID, SHORT nScene);
     static void cancelBattleRequest();
     static BOOL reqEnterMinigame();
     static BOOL reqEnterMinigame(SHORT inID);
