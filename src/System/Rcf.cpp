@@ -120,11 +120,7 @@ public:
 
 #include "System/FileIO.h"
 
-class CSceneInfo {
-public:
-    static void setReverbVal(UBYTE nVal);
-    static void setSeRangeRatio(UBYTE nVal);
-};
+#include "Game/SceneInfo.h"
 
 class CRcfCD {
 public:
