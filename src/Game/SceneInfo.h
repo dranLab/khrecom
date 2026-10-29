@@ -373,6 +373,7 @@ public:
     static SHORT getNextAreaNum();
     static void setNextAreaScene(SHORT nArea, SHORT nField, SHORT nScene);
     static void update();
+    static void rollbackEventDoorState(INT n);
     static void updateBattleScene();
     static void initNewGame(BOOL bSora);
     static void setEventDoorUnavailable(INT nFloorIndex, INT nRoomID);
