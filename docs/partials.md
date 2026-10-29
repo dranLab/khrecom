@@ -54,6 +54,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-29 | cleanup/System-Memoca (CMemoca stand-ins in 2 files) | 1023 | 354 | 24 | 958 (925) | 101 |
 | 2026-10-29 | decomp/Game-Map (partial 37/39; A1 stand-in reasons, .data/.rodata from source, weak tail via stripped placeholders; FOGDATA/ZONEDATA/CMapGrid/C3DTile, setLayerDepth, setColor/AlphaDensity, FVECTOR::addRot) | 1033 | 356 | 25 | 960 (925) | 107 |
 | 2026-10-30 | decomp/Game-Map (finished: 33 in C, 6 parked; ctor/_exclusiveSetup matched, init/disp drafts; A2 part 1: FOGDATA/ZONEDATA ungated, gate MATCH-tagged) | 1036 | 357 | 25 | 960 (924) | 108 |
+| 2026-10-30 | cleanup/Game-Map (A2 part 2: ZONEDATA/ALF_DATA stand-ins in RsrcData.cpp) | 1036 | 355 | 25 | 960 (924) | 108 |
 
 <!-- partials:start -->
 ## Summary
@@ -61,7 +62,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1036 (956 in 109 headers, 80 in 32 .cpp); MATCH: 108
   by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 42, guessed 43, header-level 74, stand-in 33, other 6
-stand-ins: 357 foreign in 121 files (107 names), 200 unattributed, 171 own
+stand-ins: 355 foreign in 121 files (105 names), 200 unattributed, 171 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
 mechanisms: 960 sites (924 untagged); #line: 1238
@@ -141,7 +142,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CVramMan` | complete | System/VramMan.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
-| `ALF_DATA` | superset | Game/Map.h | 1 |  | 1 PARTIAL |
 | `ATP` | complete | Game/Atel/VSME.h | 1 |  |  |
 | `C2DSeq` | superset | System/Graphic/2d/2DSeq.h | 1 |  | virtual order differs; 1 PARTIAL |
 | `C2DSpr` | superset | System/Graphic/2d/2DSpr.h | 1 |  | virtual order differs |
@@ -207,7 +207,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `RcfMapInfo` | complete | System/Rcf.h | 1 |  |  |
 | `TexInfoStub` | gated | System/Graphic/modeldata.h | 1 |  | 1 PARTIAL |
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
-| `ZONEDATA` | complete | Game/Map.h | 1 |  |  |
 | `sceGsStoreImage` | complete | System/Graphic/Effect/libppp/keProg/pppKeLns.h | 1 |  |  |
 | `C3DCPrim` | partial | System/Graphic/3DCPrim.h | 0 | System/Graphic/GprimFull.h | missing methods: getObjPtr, makePkt_Line0, makePkt_Line1, makePkt_LineStrip0, makePkt_LineStrip1, makePkt_None, ... (+13); parameter count differs: create; virtual order differs |
 | `C3DLine` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h |  |
@@ -306,7 +305,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Gimmick/GimmickWarpPoint.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Gimmick/GimmickWindowLid.h` | 0 | 0/1/0/0 | 2 |
 | `Game/InterpolateMove.h` | 0 | 0/0/3/0 | 1 |
-| `Game/Map.h` | 9 | 6/2/1/3 | 8 |
+| `Game/Map.h` | 9 | 6/2/1/3 | 9 |
 | `Game/MapUnitTable.h` | 3 | 0/2/0/0 | 11 |
 | `Game/Movement.h` | 49 | 0/0/0/1 | 105 |
 | `Game/OsdDef.h` | 4 | 3/0/3/0 | 7 |
