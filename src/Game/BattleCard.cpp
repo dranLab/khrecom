@@ -25,6 +25,8 @@ static inline void _setCard(CARD& c, USHORT inKind, BYTE num) {
     c.m_nCategory21 = cardDataTbl_00474480[c.m_nKind].nCategory1;
 }
 extern "C" char D_00473558[];
+extern "C" char D_004730D8[]; /* "Game/CardBattle.h" */
+extern "C" char D_00473100[]; /* "inUser" */
 
 void CardBattle::initLayoutData() {
     FVECTOR vPos;
@@ -245,7 +247,34 @@ void CBattleCard::setNumberBreak(INT inNum) {
     m_pCard->replaceNumberBlue(m_nNumberE);
     m_uiFlag |= 0x200;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", updateNumberEffect__Q210CardBattle11CBattleCard);
+void CBattleCard::updateNumberEffect() {
+    if (!(m_uiFlag & 0x100)) {
+        m_cardData.m_nNumber = m_nNumber;
+        m_pCard->replaceNumberNormal(m_nNumber);
+    } else {
+        m_cardData.m_nNumber = m_nNumberR;
+        m_pCard->replaceNumberBlue(m_nNumberR);
+    }
+    resetEnchantEffect(0);
+    {
+        INT inUser = m_uiUser;
+        if (!(inUser)) AssertApp(D_004730D8, 644, D_00473100, 0);
+        CARD* pEnchant = CCardBattle::m_pInstance ? &CCardBattle::m_pInstance->m_cardEnchant[inUser - 1] : NULL;
+        if (!pEnchant || pEnchant->m_nKind != 0x4b) {
+            setEnchantEffect(0x4b, 0);
+            setEnchantEffect(0x57, 0);
+        } else {
+            setEnchantEffect(0x57, 0);
+            setEnchantEffect(0x4b, 0);
+        }
+    }
+    {
+        /* MATCH: the category is read through a 64-bit bit-field over m_cardData (ld + mask); getCardCategory()'s
+           BYTE bit-field gives lbu, and the header form changes Game/CardRevolver */
+        struct _bits { u_long b0 : 28; u_long cat1 : 4; };
+        if (((_bits*)&m_cardData)->cat1 == 4) m_uiFlag |= 0x8000;
+    }
+}
 void CBattleCard::setDuel(INT inMode) {
     changeState(4);
     if (!inMode) m_uiMode = 16;

@@ -97,6 +97,7 @@ struct ENCHANT_PARAM {
 
 // PARTIAL: added for Game/Player/SummonDumbo
 class CCardBattle : public CTask {
+    friend class CBattleCard; // PARTIAL: guessed (Game/BattleCard inlines getEnchantCard, which is gated to Game/CardBattle)
     /* 0x000 CTask */
     // PARTIAL: members added for Game/Player/PlayerRiku
     // PARTIAL: split out for Game/CardBattle
