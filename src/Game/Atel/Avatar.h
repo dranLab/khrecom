@@ -253,6 +253,11 @@ public:
         if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
         in_pFadeStruct->_fFadeSpeed = f;
     }
+    FVECTOR& getAvatarTargetRot() const {
+#line 619 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
+        return m_pRotateStruct->_vTargetRot;
+    }
     FVECTOR& getAvatarRotSpeed() const {
 #line 627 AVATAR_H_PATH
         if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
@@ -272,6 +277,11 @@ public:
 #line 636 AVATAR_H_PATH
         if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
         return !isAvatarRotEternal() && m_pRotateStruct->_nRotTimeCount + t >= m_pRotateStruct->_nRotTimeLimit;
+    }
+    void clearAvatarRotSpeed() {
+#line 645 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
+        m_pRotateStruct->_vRotSpeed._q = 0;
     }
     void countAvatarRotTime(INT t) {
 #line 647 AVATAR_H_PATH

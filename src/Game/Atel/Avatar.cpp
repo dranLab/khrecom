@@ -441,7 +441,24 @@ BOOL CAvatar::RotateAvatarMain() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", RotateAvatarMain__Q24ATEL7CAvatar);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", RotateAvatarEnd__Q24ATEL7CAvatar);
+static inline FLOAT _wrapRad(FLOAT f) {
+    if (3.1415927f < f) {
+        f -= (INT)(f / 6.2831855f) * 6.2831855f;
+        if (3.1415927f < f) f -= 6.2831855f;
+    } else if (f < -3.1415927f) {
+        f -= (INT)(f / 6.2831855f) * 6.2831855f;
+        if (f < -3.1415927f) f += 6.2831855f;
+    }
+    return f;
+}
+void CAvatar::RotateAvatarEnd() {
+    clearAvatarRotSpeed();
+    if (isAvatarRotEternal()) return;
+    FVECTOR& v = getRot();
+    v.x = _wrapRad(getAvatarTargetRot().x);
+    v.y = _wrapRad(getAvatarTargetRot().y);
+    v.z = _wrapRad(getAvatarTargetRot().z);
+}
 INT CAvatar::onSetDirection(INT nCmd, void* pParam, INT nID) { return -1; }
 INT CAvatar::onFadeing(INT nCmd, void* pParam, INT nID) {
     AvatarFadeParam* p = (AvatarFadeParam*)pParam;
