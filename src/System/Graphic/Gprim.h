@@ -405,7 +405,7 @@ struct G_LINE {
 
 typedef CVector<G_LINE> G_LINE_VECTOR;
 
-// PARTIAL: added for Game/Atel/Avatar (the full class with its inlines is in GprimFull.h)
+// PARTIAL: added for Game/Atel/VSME (its full CAvatar has C3DLine members; the full class with its inlines is in GprimFull.h)
 class C3DLine : public CGPrim {
 protected:
     IVECTOR p0;
