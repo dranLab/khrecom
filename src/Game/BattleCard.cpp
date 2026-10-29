@@ -4,6 +4,9 @@
 #include "Game/Debug/DebugWork.h"
 #include "System/Rnd.h"
 #include "System/TaskMan.h"
+#include "System/Com.h"
+#include "System/Graphic/WorldEnv.h"
+#include "Game/Entity.h"
 #include "include_asm.h"
 
 extern "C" int abs(int);
@@ -31,6 +34,31 @@ static inline void _setCard(CARD& c, USHORT inKind, BYTE num) {
     c.m_nCategory21 = cardDataTbl_00474480[c.m_nKind].nCategory1;
 }
 extern "C" char D_00473558[];
+extern "C" char D_004736E0[];
+extern "C" char D_004736F8[];
+namespace CardBattle {
+extern LPCSTR g_szDpxZexion2;
+}
+FLOAT RotTransPersClipW(IVECTOR& out_v, const FVECTOR& in_v);
+static inline void _setRotTransPersMatrix(FMATRIX& m) {
+    __asm__ volatile(
+        "vsub.xyzw $vf3, $vf0, $vf0\n"
+        "lqc2 $vf4, 0x0(%0)\n"
+        "lqc2 $vf5, 0x10(%0)\n"
+        "lqc2 $vf6, 0x20(%0)\n"
+        "lqc2 $vf7, 0x30(%0)\n"
+        :
+        : "r"(&m));
+}
+static inline FLOAT _adjustRad(FLOAT r) {
+    FLOAT ret = r;
+    if (r < -3.1415927f) {
+        ret = r + 6.2831855f;
+    } else if (ret > 3.1415927f) {
+        ret -= 6.2831855f;
+    }
+    return ret;
+}
 extern "C" char D_00473580[]; /* "BC::destroy(); handle=%d\n" */
 extern "C" char D_004730D8[]; /* "Game/CardBattle.h" */
 extern "C" char D_00473100[]; /* "inUser" */
@@ -960,7 +988,74 @@ void CBattleCard::preStateSnatch() {
     m_iLayer = lay.layer;
     m_pCard->changeLayer(m_iLayer);
 }
+/* Parked: 4 lines - the first _adjustRad (m_vRot.y) keeps the sum in the loaded m_vRot.y register (f4) and copies it to
+   ret (mov.s f6,f4); ours computes the sum straight into ret (f6). In-place sums, explicit wrap code, operand order and
+   10 min of permuter (15k candidates) did not change it; the m_vRot.z wrap matches. */
+#if 0
+void CBattleCard::stateSnatch() {
+    switch (m_uiMode) {
+    case 0x11:
+        m_uiFlag |= 0x2008;
+        m_tqTimer -= getFrameRate();
+        if (m_tqTimer <= 0) {
+            m_tqTimer = 1600;
+            m_uiMode = 0x12;
+            m_Pos = m_EndPos;
+            m_StartPos = m_Pos;
+            m_vRot.w = m_fEndScale;
+        } else {
+            INT dx = (m_EndPos.x - m_StartPos.x) * m_tqTimer / 800;
+            INT dy = (m_EndPos.y - m_StartPos.y) * m_tqTimer / 800;
+            m_Pos.x = m_EndPos.x - dx;
+            m_Pos.y = m_EndPos.y - dy;
+        }
+        break;
+    case 0x12: {
+        m_uiFlag |= 0x2008;
+        m_tqTimer -= getFrameRate();
+        CEntity* pEntity = (CEntity*)CTaskMan::getTask(m_hTarget);
+        if (pEntity) {
+            FVECTOR pos;
+            IVECTOR out;
+            pEntity->getLockOnPos(pos);
+            _setRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
+            RotTransPersClipW(out, pos);
+            if (!out.w && out.x >= 0x5000 && out.x <= 0xb000 && out.y >= 0x5000 && out.y <= 0xb000) {
+                m_EndPos.x = (out.x >> 4) - 0x700;
+                m_EndPos.y = (out.y >> 4) - 0x740;
+            }
+            INT dx = (m_EndPos.x - m_StartPos.x) * m_tqTimer / 1600;
+            INT dy = (m_EndPos.y - m_StartPos.y) * m_tqTimer / 1600;
+            m_Pos.x = m_EndPos.x - dx;
+            m_Pos.y = m_EndPos.y - dy;
+            if (m_tqTimer <= 0) {
+                INT count = CCardBattle::m_pInstance ? CCardBattle::m_pInstance->m_iCount[1] : 0;
+                if (count == 3) pEntity->attachEffect(g_szDpxZexion2, 10, &pEntity->Crd(1), (const FVECTOR*)NULL, (const FVECTOR*)NULL, 0.0f);
+                else pEntity->attachEffect(g_szDpxZexion2, 11, &pEntity->Crd(1), (const FVECTOR*)NULL, (const FVECTOR*)NULL, 0.0f);
+            }
+        }
+        m_vRot.y = _adjustRad(m_vRot.y + getFrameRateF() * DEG2RAD((1600 - m_tqTimer) * 0.01f));
+        m_vRot.z = _adjustRad(m_vRot.z + getFrameRateF() * DEG2RAD(m_cardData.m_nNumber * 0.5f));
+        m_vRot.w = m_tqTimer / 1600.0f;
+        if (m_tqTimer <= 0) {
+            m_tqTimer = 0;
+            TRACE(D_004736E0);
+            TRACE(D_004736F8, m_cardData.m_nKind, m_cardData.m_nNumber, m_iStock, m_iHand, m_iHandMax, m_uiFlag, m_hTarget);
+            CCardBattle* pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+            if (pCB) {
+                CCardRevolver* pRV = pCB->getRevolver(2);
+                if (pRV) pRV->addCard(&m_cardData, 0);
+            }
+            m_uiOwner = 2;
+            destroy(1);
+        }
+        break;
+    }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateSnatch__Q210CardBattle11CBattleCard);
+#endif
 void CBattleCard::setPronounce(UINT inPri) {
     changeState(6);
     m_uiMode = 8;
