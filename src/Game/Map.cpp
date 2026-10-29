@@ -361,7 +361,27 @@ void CSky::main() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", main__4CSky);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", disp__4CSky);
+void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void CSky::disp() {
+    if (DebugWork::g_dw.sys.m_iSkyDisp < -1) DebugWork::g_dw.sys.m_iSkyDisp = m_modelSuu;
+    else if (m_modelSuu < DebugWork::g_dw.sys.m_iSkyDisp) DebugWork::g_dw.sys.m_iSkyDisp = -1;
+    if (DebugWork::g_dw.sys.m_iSkyDisp < 0) return;
+    CCamera* pCamera = CWorldEnv::getActiveCamera();
+    if (!pCamera) return;
+    Crd(0).m_Local.v[3] = pCamera->Crd(0).m_World.v[3];
+    adjustCoord();
+    FVECTOR vColor;
+    FVECTOR* pSceneColor = CSceneEnv::getTypeColor((ObjType::eObjType)0xC);
+    if (pSceneColor) MulVector(vColor, m_vColor, *pSceneColor);
+    else vColor = m_vColor;
+    FLOAT fR = getFrameRateF();
+    if (CSceneEnv::getStopTypeBit() & 0x1000) fR = 0.0f;
+    for (INT i = 0; i < m_modelSuu; i++) {
+        m_pModel[i].setColorScale(vColor);
+        m_pModel[i].dispUpdate(fR);
+        if (!DebugWork::g_dw.sys.m_iSkyDisp || DebugWork::g_dw.sys.m_iSkyDisp - 1 == i) m_pModel[i].disp();
+    }
+}
 void CSky::setColorScale(FVECTOR& inColorScale) { m_vColor = inColorScale; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", func_00206010);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", func_00206028);
