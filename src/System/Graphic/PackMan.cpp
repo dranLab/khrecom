@@ -8,6 +8,7 @@
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"
 #include "System/LinkedBuf.h"
+#include "System/Graphic/PackMan.h"
 #include "System/VramMan.h"
 #include "System/Vector.h"
 #include "System/Graphic/Effect/ObjType.h"
@@ -24,19 +25,6 @@ namespace EERAM {
 static INT _HEAP_START = (((INT)_end - 1) / 64 + 1) * 64;
 static INT _HEAP_SIZE = 0x1FC0000 - _HEAP_START;
 }
-
-struct pacVif1Packet {
-    u_int* pCurrent;    /* 0x00 */
-    u_long128* pBase;   /* 0x04 */
-    u_long128* pDmaTag; /* 0x08 */
-    u_int* pVifCode;    /* 0x0c */
-    u_int numlen;       /* 0x10 */
-    u_long* pGifTag;    /* 0x14 */
-    u_int pad12;        /* 0x18 */
-    u_int iVifCode;     /* 0x1c */
-    QWdata lDmaTag;     /* 0x20 */
-    QWdata lGifTag;     /* 0x30 */
-};
 
 struct tD_CHCR { /* PARTIAL: stand-in for System/Graphic/Effect/libppp/draw/draw_w tD_CHCR: owner not written */
     u_int DIR : 1;
@@ -87,148 +75,6 @@ struct sceGsDBuffDc {
     sceGsClear clear1;
 };
 
-struct GpuRegsInfoSep {
-    ULONGLONG _nCLAMP;
-    ULONGLONG _nSCISSOR;
-    ULONGLONG _nALPHA;
-    ULONGLONG _nTEST;
-    ULONGLONG _nFBA;
-    ULONGLONG _nZBUF;
-    ULONGLONG _nFRAME;
-};
-
-class CPackMan {
-public:
-    static void finalize();
-    static void transFrame();
-    static void transFrameEffect();
-    static void initSemiPacket();
-    static void enableZWrite(BOOL inEnable, INT inAddr);
-    static void resetGsDma();
-    static void kickDMAFG(INT n);
-    static void kickDMA(INT n);
-    static void initialize();
-    static void beginScene();
-    static void swapDBuf(INT nInFrame);
-    static void initFGPacket();
-    static u_long128* initBGPacket(INT nInIdx);
-    static void endScene();
-    static void terminateBGPacket();
-    static void terminateFGPacket();
-    static void changeLayer(INT nLayer);
-    static void setFrameEffect(INT nKind, INT n1, INT n2, INT n3);
-    static void terminateSemiPacket();
-    static void resetDmaChanVif1();
-    static INT getDBIdx();
-    static BOOL isPacketForBG();
-    static BOOL isStartStillMode();
-    static void setMovieEnv(UINT nDrawW, UINT nDrawH, UINT nDispW, UINT nDispH);
-    static void updateBGBlend(INT nAlpha);
-    static ULONGLONG getDefaultTEST();
-    static GpuRegsInfoSep* getSysGpuRegs2();
-    static GpuRegsInfoSep* getDefaultGpuRegs2();
-    static ULONGLONG getSys_CLAMP_2();
-    static ULONGLONG getSys_SCISSOR_2();
-    static ULONGLONG getSys_ALPHA_2();
-    static ULONGLONG getSys_TEST_2();
-    static ULONGLONG getSys_FBA_2();
-    static ULONGLONG getSys_ZBUF_2();
-    static ULONGLONG getSys_FRAME_2();
-    static ULONGLONG getDefault_CLAMP_2();
-    static ULONGLONG getDefault_SCISSOR_2();
-    static ULONGLONG getDefault_ALPHA_2();
-    static ULONGLONG getDefault_TEST_2();
-    static ULONGLONG getDefault_FBA_2();
-    static ULONGLONG getDefault_ZBUF_2();
-    static ULONGLONG getDefault_FRAME_2();
-    static ULONGLONG getDefault_TEST_1();
-    static ULONGLONG getDefault_ZBUF_1();
-    static ULONGLONG getDefault_FRAME_1();
-    static void setSys_CLAMP_2(ULONGLONG n);
-    static void setSys_SCISSOR_2(ULONGLONG n);
-    static void setSys_ALPHA_2(ULONGLONG n);
-    static void setSys_TEST_2(ULONGLONG n);
-    static void setSys_FBA_2(ULONGLONG n);
-    static void setDefault_CLAMP_2(ULONGLONG n);
-    static void setDefault_SCISSOR_2(ULONGLONG n);
-    static void setDefault_ALPHA_2(ULONGLONG n);
-    static void setDefault_TEST_2(ULONGLONG n);
-    static void setDefault_FBA_2(ULONGLONG n);
-    static void setDefault_ZBUF_2(ULONGLONG n);
-    static u_long* getPktVif1Frame();
-    static INT getTransFrameKind();
-    static void enableDraw(INT nBit);
-    static void disableDraw(INT nBit);
-    static UINT getEnableDraw();
-    static void changeDrawMode(INT nMode);
-    static BOOL isSkipPacketDMA();
-    static void changePcrtcMode(INT nMode);
-    static INT getPcrtcMode();
-    static void setBGColor(INT nColor);
-    static INT getBGColor();
-    static void setDisp1Alpha(INT nAlpha);
-    static INT getDisp1Alpha();
-    static void startCountTmpSize();
-    static UINT getTmpCountSize();
-    static void setFGPacketMaxNorml();
-    static void extFGPacketMaxForFlex();
-    static INT getPkUseSize();
-    static INT getPkTotalSize();
-    static void pkReset();
-    static void pkNext(u_long128* pNext, UINT flag);
-    static void pkRet(UINT flag);
-    static void pkEnd(UINT flag);
-    static void pkRefe(u_long128* pRef, UINT size, UINT opt1, UINT opt2, UINT flag);
-    static void pkRefs(u_long128* pRef, UINT size, UINT opt1, UINT opt2, UINT flag);
-    static void pkRefLoadImage(const VTransInfo& info);
-    static void pkRefLoadImage(u_short bp, const VTransInfo& info);
-    static void pkRefLoadImage(u_short bp, u_char psm, u_short bw, u_long128* image, UINT size, UINT x, UINT y, UINT w, UINT h);
-    static INT getDrawMode();
-    static BOOL isOverFlow(UINT nSize);
-    static u_int* pkOpenUpkCodeV4_32(u_short vuaddr, UINT cl, UINT wl);
-    static void pkRefMpg(u_short vuaddr, u_long128* pMicro, UINT size, UINT opt1);
-    static void pkInit(u_long128* pBase, pacVif1Packet* pPkt, UINT nMax);
-    static u_int* pkOpenUpkCode(u_short vuaddr, UINT upkcmd, UINT cl, UINT wl);
-    static void saveScreen();
-    static void pkOpenDirectCode(INT stall);
-    static void pkCloseDirectCode();
-    static void pkCloseDirectHLCode();
-    static void pkTerminate();
-    static void pkCnt(UINT flag);
-    static void pkCall(u_long128* pCall, UINT flag);
-    static void pkRef(u_long128* pRef, UINT size, UINT opt1, UINT opt2, UINT flag);
-    static UINT pkSize();
-    static void* pkGetCurrentPointer();
-    static void pkSetCurrentPointer(void* p);
-    static void pkCloseUpkCode(void* p);
-    static void pkCloseUpkCode();
-    static void pkCloseUpkCodeV4_32(void* p);
-    static void pkCloseUpkCodeV4_32();
-    static void pkOpenDirectHLCode(INT stall);
-    static u_long128* pkOpenGifTag(u_long128 tag);
-    static void pkCloseGifTag(void* p);
-    static void pkCloseGifTag();
-    static u_long128* pkOpenGifTagManual(u_long128 tag);
-    static void pkCloseGifTagManual(UINT* p);
-    static u_int* pkReserve(UINT count);
-    static void pkAlign(UINT bit, UINT pos);
-    static void pkAddCode(u_int data);
-    static void pkAddData(u_int data);
-    static void pkAddDataN(u_int* pData, UINT count);
-    static void pkAddUpkData32(u_int data);
-    static void pkAddUpkData64(u_long data);
-    static void pkAddUpkData128(u_long128 data);
-    static void pkAddUpkData32N(u_int* pData, UINT count);
-    static void pkAddUpkData64N(u_long* pData, UINT count);
-    static void pkAddUpkData128N(u_long128* pData, UINT count);
-    static void pkAddDirectData(u_long128 data);
-    static void pkAddDirectDataN(u_long128* pData, UINT count);
-    static void pkAddGsData(u_long data);
-    static void pkAddGsDataN(u_long* pData, UINT count);
-    static void pkAddGsPacked(u_long128 data);
-    static void pkAddGsPackedN(u_long128* pData, UINT count);
-    static void pkAddGsAD(UINT addr, u_long data);
-};
 
 void sceVif1PkInit(pacVif1Packet* pPacket, u_long128* pBase);
 void sceVif1PkReset(pacVif1Packet* pPacket);
@@ -412,9 +258,9 @@ void CPackMan::pkInit(u_long128* pBase, pacVif1Packet* pPkt, UINT nMax) {
 }
 void CPackMan::pkReset() { sceVif1PkReset(s_pPktVif1); }
 UINT CPackMan::pkSize() { return sceVif1PkSize(s_pPktVif1); }
-void CPackMan::pkTerminate() {
+u_long128* CPackMan::pkTerminate() {
     _checkDmaTag();
-    sceVif1PkTerminate(s_pPktVif1);
+    return sceVif1PkTerminate(s_pPktVif1);
 }
 void CPackMan::pkCnt(UINT flag) {
     _checkDmaTag();
@@ -451,22 +297,22 @@ void CPackMan::pkRefs(u_long128* pRef, UINT size, UINT opt1, UINT opt2, UINT fla
     _checkSize(size);
     sceVif1PkRefs(s_pPktVif1, pRef, size, opt1, opt2, flag);
 }
-void* CPackMan::pkGetCurrentPointer() { return s_pPktVif1->pCurrent; }
+UINT* CPackMan::pkGetCurrentPointer() { return s_pPktVif1->pCurrent; }
 void CPackMan::pkSetCurrentPointer(void* p) { s_pPktVif1->pCurrent = (u_int*)p; }
-u_int* CPackMan::pkOpenUpkCode(u_short vuaddr, UINT upkcmd, UINT cl, UINT wl) {
+u_long128* CPackMan::pkOpenUpkCode(u_short vuaddr, UINT upkcmd, UINT cl, UINT wl) {
     pacVif1Packet* pPkt = s_pPktVif1;
     sceVif1PkOpenUpkCode(pPkt, vuaddr, upkcmd, cl, wl);
-    return pPkt->pCurrent;
+    return (u_long128*)pPkt->pCurrent;
 }
 void CPackMan::pkCloseUpkCode(void* p) {
     s_pPktVif1->pCurrent = (u_int*)p;
     sceVif1PkCloseUpkCode(s_pPktVif1);
 }
 void CPackMan::pkCloseUpkCode() { sceVif1PkCloseUpkCode(s_pPktVif1); }
-u_int* CPackMan::pkOpenUpkCodeV4_32(u_short vuaddr, UINT cl, UINT wl) {
+u_long128* CPackMan::pkOpenUpkCodeV4_32(u_short vuaddr, UINT cl, UINT wl) {
     pacVif1Packet* pPkt = s_pPktVif1;
     sceVif1PkOpenUpkCodeV4_32(pPkt, vuaddr, cl, wl);
-    return pPkt->pCurrent;
+    return (u_long128*)pPkt->pCurrent;
 }
 void CPackMan::pkCloseUpkCodeV4_32(void* p) {
     s_pPktVif1->pCurrent = (u_int*)p;
@@ -1381,8 +1227,8 @@ void CPackMan::enableZWrite(BOOL inEnable, INT inAddr) {
     qp++;
     _pkCloseGifTag(qp);
 }
-GpuRegsInfoSep* CPackMan::getSysGpuRegs2() { return &s_SysGpuRegs2; }
-GpuRegsInfoSep* CPackMan::getDefaultGpuRegs2() { return &s_DefaultGpuRegs2; }
+GpuRegsInfoSep& CPackMan::getSysGpuRegs2() { return s_SysGpuRegs2; }
+GpuRegsInfoSep& CPackMan::getDefaultGpuRegs2() { return s_DefaultGpuRegs2; }
 ULONGLONG CPackMan::getSys_CLAMP_2() { return s_SysGpuRegs2._nCLAMP; }
 ULONGLONG CPackMan::getSys_SCISSOR_2() { return s_SysGpuRegs2._nSCISSOR; }
 ULONGLONG CPackMan::getSys_ALPHA_2() { return s_SysGpuRegs2._nALPHA; }
@@ -1411,11 +1257,11 @@ void CPackMan::setDefault_ALPHA_2(ULONGLONG n) { s_DefaultGpuRegs2._nALPHA = n; 
 void CPackMan::setDefault_TEST_2(ULONGLONG n) { s_DefaultGpuRegs2._nTEST = n; }
 void CPackMan::setDefault_FBA_2(ULONGLONG n) { s_DefaultGpuRegs2._nFBA = n; }
 void CPackMan::setDefault_ZBUF_2(ULONGLONG n) { s_DefaultGpuRegs2._nZBUF = n; }
-u_long* CPackMan::getPktVif1Frame() { return (u_long*)s_pPktBufVif1Frame; }
+u_long128* CPackMan::getPktVif1Frame() { return s_pPktBufVif1Frame; }
 INT CPackMan::getTransFrameKind() { return s_transFrameKind; }
 void CPackMan::enableDraw(INT nBit) { s_nDawEnableBit |= nBit; }
 void CPackMan::disableDraw(INT nBit) { s_nDawEnableBit &= ~nBit; }
-UINT CPackMan::getEnableDraw() { return s_nDawEnableBit; }
+INT CPackMan::getEnableDraw() { return s_nDawEnableBit; }
 void CPackMan::changeDrawMode(INT nMode) { s_nReqDrawMode = nMode; }
 INT CPackMan::getDrawMode() {
     INT nMode = s_nDrawMode;
