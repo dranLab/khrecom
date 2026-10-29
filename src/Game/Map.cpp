@@ -24,6 +24,8 @@
 #include "include_asm.h"
 
 inline void operator delete[](void* pv) { com_free(pv); }
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 
 #define SJ_FOREACH(T, pEntry, list) \
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
@@ -37,10 +39,6 @@ public:
 };
 class CCMCSemiModelList : public CSJointListT<CMCSemiModel> {}; /* PARTIAL: stand-in for Game/Collision/CollMapCamera CCMCSemiModelList: owner not written */
 
-class CMapModel : public CModel {
-    INT m_nGridID; /* 0x120 */
-    INT _pad[3];   /* PARTIAL: the original CModel is 16-byte aligned (size 0x130) */
-};
 
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
@@ -60,9 +58,8 @@ public:
 };
 
 extern LIGHTDATA ALF_default;
-extern "C" char D_004809E0[];
-extern "C" char D_00480EB0[];
 extern "C" char D_00480FA0[];
+extern "C" char D_00480B70[];
 extern "C" char D_00480FC8[];
 extern "C" char D_00480FF0[];
 extern "C" char D_00480CE8[];
@@ -79,13 +76,24 @@ class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: gated by RSRCDAT
 public:
     static CRsrcData* getFirstRsrc(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
 };
-extern "C" char D_00480F58[];
-extern "C" char D_00480F80[];
-extern "C" char D_00480A10[];
-extern "C" char D_00480A38[];
 extern MAPUNITTABLE g_DefaultGimmick;
 void RotMatrixZ(FMATRIX& out, FMATRIX& in);
 void setTransparency(const CCoord& crd, CModel& model);
+
+FOGDATA FOG_default = {
+    {{0, 0, 0, 0}}, 200.0f, 300.0f, 0.0f, 1,
+    {{{0, 0x21, 0x1D, 0}}, {{0, 9, 9, 0x1C0}}, {{0, 0, 0, 0}}, {{0, 0, 0, 0}}, {{0, 0, 0, 0}}},
+    255.0f, 0.0f, 0.0f, {0}, {0xFFFFFFFF, 0xFFFFFFFF}, 0.200000003f, 0.300000012f,
+    {{-1, -1, -1, -1}}, {{-1, -1, -1, -1}}
+};
+static INFINITELIGHT map_inflight[4] = {
+    {{{-822.740173f, 547.139526f, -646.249939f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}},
+    {{{822.740173f, 547.139526f, -646.249939f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}},
+    {{{-822.740173f, 547.139526f, 646.249939f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}},
+    {{{822.740173f, 547.139526f, 646.249939f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}},
+};
+static AMBIENTLIGHT map_ambientlight = {{{0.0f, 0.0f, 0.0f, 0.0f}}};
+LIGHTDATA ALF_map_default = {4, 0, 0, 0, map_inflight, NULL, NULL, &map_ambientlight};
 
 void LIGHTDATA::set(const ALF_DATA* pData) {
     if (!pData) {
@@ -114,7 +122,7 @@ void LIGHTDATA::set(const ALF_DATA* pData) {
         }
         ambient = (AMBIENTLIGHT*)d;
     }
-    TRACE(D_004809E0, infinite_suu, point_suu, spot_suu, dum0);
+    TRACE("LIGHT infinite:%d point:%d spot:%d ??:%d\n", infinite_suu, point_suu, spot_suu, dum0);
 }
 void RotMatrixZ(FMATRIX& out, FMATRIX& in) {
     FMATRIX tmp = in;
@@ -169,16 +177,43 @@ void CMap::_createEffIdProc(ZONEPARTS* parts, INT nEType) {
             defaultTbl.id.ui = parts->effectId;
             strncpy(szEffIDName, defaultTbl.id.c, 4);
             szEffIDName[4] = 0;
-            TRACE(D_00480A10, parts->effectId, szEffIDName);
-            if (!defaultTbl.create(getSysTask(defaultTbl.kind), parts)) TRACE(D_00480A38);
+            TRACE("\225\317\202\310\203G\203t\203F\203N\203g\202h\202c\202\305\202\267 => %x (%s)\n", parts->effectId, szEffIDName);
+            if (!defaultTbl.create(getSysTask(defaultTbl.kind), parts)) TRACE("\201\252\201\252\201\252\225\317\202\310\203G\203t\203F\203N\203g\202h\202c\202\305\201A\215X\202\311\203f\203t\203H\203\213\203g\211\274\224z\222u\202\340\202\305\202\253\202\334\202\271\202\361\n");
         }
     }
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", __4CMapP5CTaskUi);
-/* Parked: draft not verified yet; waits for the weak tail - as CMap's key function it emits every CMap inline,
-   which collide with the INCLUDE_ASM'd weak copies. */
-#if 0
+/* MATCH: CMap::CMap's .rodata while it is INCLUDE_ASM */
+__asm__(".rdata\n"
+        ".align 3\n"
+        ".asciz \"CMap::CMap() nRsrcGrpID %d\\n\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".word 0x70614D43\n"
+        ".word 0x4D433A3A\n"
+        ".word 0x29287061\n"
+        ".word 0x83203A20\n"
+        ".word 0x835B815D\n"
+        ".word 0x81668393\n"
+        ".word 0x825E835B\n"
+        ".word 0x82A98CAA\n"
+        ".word 0x82A982C2\n"
+        ".word 0x82DC82E8\n"
+        ".word 0x0AF182B9\n"
+        ".word 0x00000000\n"
+        ".align 3\n"
+        ".asciz \"CMap::CMap() m_nRsrcGrpID %d\\n\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".text\n");
+/* MATCH: CMap::CMap constructs CMapGrid and C3DLineStrip (their vtables and weak copies); stripped section */
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) void _mapCtorPlaceholder() {
+    CMapGrid grid;
+    C3DLineStrip strip;
+}
 CMap::~CMap() {
     CTexCtrl::delFixTexAnm(m_pTexAnm, m_nTexAnmNum);
     delete[] m_pModelTbl;
@@ -189,11 +224,194 @@ CMap::~CMap() {
     m_pTexAnm = NULL;
     CGame::stopConstEnvSE(-1);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _$_4CMap);
-#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", init__4CMapii);
+/* MATCH: CMap::init's .rodata while it is INCLUDE_ASM */
+__asm__(".rdata\n"
+        ".align 3\n"
+        ".asciz \"---------------- CMap::init() start ----------------\\n\"\n"
+        ".align 2\n"
+        ".word 0x70614D43\n"
+        ".word 0x6E693A3A\n"
+        ".word 0x29287469\n"
+        ".word 0x465A4120\n"
+        ".word 0xA98CAA82\n"
+        ".word 0xA982C282\n"
+        ".word 0xDC82E882\n"
+        ".word 0xF182B982\n"
+        ".word 0x0000000A\n"
+        ".word 0x00000000\n"
+        ".word 0x70614D43\n"
+        ".word 0x6E693A3A\n"
+        ".word 0x29287469\n"
+        ".word 0x705F6D20\n"
+        ".word 0x656E6F5A\n"
+        ".word 0xA082AA82\n"
+        ".word 0xDC82E882\n"
+        ".word 0xF182B982\n"
+        ".word 0x0000000A\n"
+        ".word 0x00000000\n"
+        ".align 3\n"
+        ".asciz \"c:/KHCOM/MainApp/Game/Map.cpp(576)\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"c:/KHCOM/MainApp/Game/Map.cpp(596)\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"c:/KHCOM/MainApp/Game/Map.cpp(606)\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"c:/KHCOM/MainApp/Game/Map.cpp(611)\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"CMap::init()  All:%d Model:%d/%d Sky:%d Group:%d Chip:%d\\n\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"zoneSizeX == 0\\n\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"CMap::init()  gX = %d gZ = %d\\n\"\n"
+        ".align 2\n"
+        ".word 0x5B815D83\n"
+        ".word 0x74839383\n"
+        ".word 0x43834083\n"
+        ".word 0x86928B83\n"
+        ".word 0x6F93C982\n"
+        ".word 0xB5825E98\n"
+        ".word 0xA282C482\n"
+        ".word 0xA282C882\n"
+        ".word 0x66838283\n"
+        ".word 0xD6828B83\n"
+        ".word 0x518ECC82\n"
+        ".word 0xAA82C68F\n"
+        ".word 0xE882A082\n"
+        ".word 0xB782DC82\n"
+        ".word 0x0000000A\n"
+        ".word 0x00000000\n"
+        ".word 0x833A6425\n"
+        ".word 0x83668382\n"
+        ".word 0x8166838B\n"
+        ".word 0x825E835B\n"
+        ".word 0x82A98CAA\n"
+        ".word 0x82A982C2\n"
+        ".word 0x82DC82E8\n"
+        ".word 0x20F182B9\n"
+        ".word 0x000A6425\n"
+        ".word 0x00000000\n"
+        ".align 3\n"
+        ".asciz \"c:/KHCOM/MainApp/Game/Map.cpp\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"d\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"i<m_nModelMax\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"%d: Z(%f %f)->(%d %d) X(%f %f)->(%d %d)\\n\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"%d: Z(%d %d) X(%d %d) = %d\\n\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"CMap::init()  DispModel:%d\\n\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"---------------- CMap::init() end ----------------\\n\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".text\n");
+/* MATCH: CMap::init allocates CMapModel[] and grows CVector<G_STRIP> (vtable, weak copies); stripped section */
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) void _mapInitPlaceholder(G_STRIP_VECTOR& v, const G_STRIP& x) {
+    new (D_00480B70) CMapModel[1];
+    v.push_back(x);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _exclusiveSetup__4CMapi);
+/* MATCH: _exclusiveSetup's .rodata (priTbl, jump tables) while it is INCLUDE_ASM */
+__asm__(".rdata\n"
+        ".align 3\n"
+        ".asciz \"rec_bg_E062\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"rec_bg_E111\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".word 0x00000000\n"
+        ".word 0x00000001\n"
+        ".word 0x00000002\n"
+        ".word 0x00000003\n"
+        ".word 0x00000004\n"
+        ".word 0x00000005\n"
+        ".word 0x00000006\n"
+        ".word 0x00000007\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".align 3\n"
+        ".word .L00203EA0\n"
+        ".word .L00203EA0\n"
+        ".word .L00203CAC\n"
+        ".word .L00203EA0\n"
+        ".word .L00203EA0\n"
+        ".word .L00203EA0\n"
+        ".word .L00203EA0\n"
+        ".word .L00203CC0\n"
+        ".word .L00203EA0\n"
+        ".word .L00203EA0\n"
+        ".word .L00203EA0\n"
+        ".word .L00203C84\n"
+        ".word .L00203CD0\n"
+        ".word .L00203D1C\n"
+        ".word 0x00000000\n"
+        ".word 0x00000000\n"
+        ".align 3\n"
+        ".word .L00203D88\n"
+        ".word .L00203D88\n"
+        ".word .L00203D88\n"
+        ".word .L00203D88\n"
+        ".word .L00203D88\n"
+        ".word .L00203D88\n"
+        ".word .L00203D88\n"
+        ".word .L00203DBC\n"
+        ".word .L00203DBC\n"
+        ".word .L00203DBC\n"
+        ".word .L00203D88\n"
+        ".word .L00203DBC\n"
+        ".word .L00203DBC\n"
+        ".word .L00203DBC\n"
+        ".word .L00203DBC\n"
+        ".word .L00203DBC\n"
+        ".word .L00203D88\n"
+        ".word .L00203DBC\n"
+        ".word .L00203DBC\n"
+        ".word .L00203DBC\n"
+        ".word .L00203DBC\n"
+        ".word .L00203D88\n"
+        ".word .L00203D88\n"
+        ".word 0x00000000\n"
+        ".text\n");
 void CMap::resetFog() {
     CWorldEnv::setFogParam(m_pFog->fognear, m_pFog->fogfar, m_pFog->fogmax, m_pFog->fogmin);
     CWorldEnv::setDispFar(m_pFog->dispfar);
@@ -203,7 +421,7 @@ void CMap::resetFog() {
     DebugWork::g_dw.nakamich.fCamVAngle = ProjectionToViewAngle(m_pFog->screenz);
     INT max = m_pFog->skynum;
     if (max > 4) {
-        TRACE(D_00480EB0);
+        TRACE("FOG\203f\201[\203^\202\252\211\363\202\352\202\304\202\351\202\251\202\340\202\346\n");
         max = 4;
     }
     for (INT i = 0; i < max; i++) {
@@ -213,6 +431,8 @@ void CMap::resetFog() {
         m_Back[i].m_C3.set(m_pFog->sky[i].x, m_pFog->sky[i].y, m_pFog->sky[i].z, 0x80);
     }
 }
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: __FILE__ as in the original .rodata */
+#include "Game/Collision/CollUtil.h" /* MATCH: included here: its strings follow resetFog's */
 void CMap::main() {
     if (CSceneEnv::getStopTypeBit() & 0x800) return;
     if (!m_pTexAnm) return;
@@ -324,7 +544,7 @@ HANDLE CMap::createMapEffect_(const ZONEPARTS& inParts) {
     id += 8000;
     CRsrcData* rsrc = CRsrcDB::getFirstRsrc(5, id + 30000, TRUE);
     if (!rsrc) {
-        TRACE(D_00480F58, id);
+        TRACE("DPX\202\252\203\215\201[\203h\202\263\202\352\202\304\202\334\202\271\202\361\202\252\202\310 = %d\n", id);
         return 0;
     }
     INT no = (USHORT)(inParts.effectParam / 100);
@@ -335,7 +555,7 @@ HANDLE CMap::createMapEffect_(const ZONEPARTS& inParts) {
     rot.w = 1.0f;
     Math3D::LimitPIVector(rot);
     HANDLE handle = 0;
-    TRACE(D_00480F80, rsrc->getName(), no);
+    TRACE("    \203}\203b\203v\203G\203t\203F\203N\203g %s %d\n", rsrc->getName(), no);
     if (!DebugWork::g_dw.sys.m_iEffectNoEntry) {
         handle = CEffectMan::setEffect(rsrc->getName(), no, (ObjType::eObjType)0xB, (const FVECTOR*)inParts.trans, &rot, 0.0f);
         CEffect* effect = CEffectMan::getEffect(handle);
@@ -352,8 +572,6 @@ void CMap::createEnvSE(const ZONEPARTS& inParts) {
     nFile += unitId.c[3] - '0';
     if (unitId.c[1] == '0') CGame::playConstEnvSE(nFile * 1000 + nID, -1, FALSE);
 }
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
@@ -418,6 +636,25 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", __4CSkyP5CTaskPvP8ZONEDATA);
 #endif
+/* MATCH: CSky::CSky's .rodata while it is INCLUDE_ASM */
+__asm__(".rdata\n"
+        ".align 3\n"
+        ".asciz \"c:/KHCOM/MainApp/Game/Map.cpp(1813)\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"c:/KHCOM/MainApp/Game/Map.cpp(1816)\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".asciz \"c:/KHCOM/MainApp/Game/Map.cpp(1817)\"\n"
+        ".align 2\n"
+        ".asciz \"\"\n"
+        ".align 2\n"
+        ".align 3\n"
+        ".text\n");
 CSky::~CSky() {
     if (m_pModel) delete[] m_pModel;
     m_pModel = NULL;
@@ -471,18 +708,4 @@ void CSky::disp() {
     }
 }
 void CSky::setColorScale(FVECTOR& inColorScale) { m_vColor = inColorScale; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", func_00206010);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", func_00206028);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", func_002060F8);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _$_8CMapGrid);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _$_9CMapModel);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", getMapID__C4CMap);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", getFogData__4CMap);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", setFogData__4CMapP7FOGDATA);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", getLightData__4CMap);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", getMapLightData__C4CMap);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", getModel__4CMap);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", getModel__4CMapi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", getModelMax__4CMap);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", getMapFlag__4CMap);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", setMapFlag__4CMapUiUi);
+// SOURCE DATA: .data .rodata

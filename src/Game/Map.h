@@ -113,6 +113,11 @@ public:
     INT flg; /* 0x3c */
 };
 
+class CMapModel : public CModel {
+    INT m_nGridID; /* 0x120 */
+    INT _pad[3];   /* PARTIAL: the original CModel is 16-byte aligned (size 0x130) */
+};
+
 class CMap : public CTask {
 private:
     FVECTOR m_vColor;         /* 0x040 */
@@ -140,9 +145,20 @@ public:
     void init(BOOL bUseMapUnit, BOOL bTexClampRepeat);
     virtual void main();
     virtual void disp();
+    INT getMapID() const { return m_nRsrcGrpID; }
+    FOGDATA* getFogData() { return m_pFog; }
+    void setFogData(FOGDATA* pFogData) { m_pFog = pFogData; }
     void resetFog();
     LIGHTDATA* getLightData() { return &m_Light; }
-    LIGHTDATA* getMapLightData() { return &m_MapLight; }
+    LIGHTDATA* getMapLightData() const { return (LIGHTDATA*)&m_MapLight; }
+    CMapModel* getModel() { return m_pModelTbl; }
+    CMapModel* getModel(INT nIdx) {
+        if (nIdx >= 0 && nIdx < m_nModelMax) return &m_pModelTbl[nIdx];
+        return NULL;
+    }
+    INT getModelMax() { return m_nModelMax; }
+    UINT getMapFlag() { return m_uiMapFlag; }
+    void setMapFlag(UINT inOn, UINT inOff) { m_uiMapFlag = (m_uiMapFlag | inOn) & ~inOff; }
     void getBBoxMax(FVECTOR& outMax);
     void getBBoxMin(FVECTOR& outMin);
     void setColorScale(FVECTOR& inColorScale);
