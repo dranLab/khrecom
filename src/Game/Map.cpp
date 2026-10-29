@@ -14,6 +14,10 @@
 #include "System/SJoint.h"
 #include "System/Graphic/WorldEnv.h"
 #include "Game/Debug/DebugWork.h"
+#include "System/Math3D.h"
+#include "System/Graphic/Effect/EffectMan.h"
+#include "System/Graphic/Effect/effect.h"
+#include "System/Graphic/Effect/effect_inl.h"
 #include "include_asm.h"
 
 inline void operator delete[](void* pv) { com_free(pv); }
@@ -55,6 +59,20 @@ public:
 extern LIGHTDATA ALF_default;
 extern "C" char D_004809E0[];
 extern "C" char D_00480EB0[];
+class CBuf;
+class CRsrcData { /* PARTIAL: stand-in for System/RsrcData CRsrcData: gated by RSRCDATA_H_FULL */
+    CBuf* m_pDataSrc;
+    CHAR m_szName[1];
+
+public:
+    CHAR* getName() const { return (CHAR*)m_szName; }
+};
+class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: gated by RSRCDATA_H_FULL */
+public:
+    static CRsrcData* getFirstRsrc(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
+};
+extern "C" char D_00480F58[];
+extern "C" char D_00480F80[];
 extern "C" char D_00480A10[];
 extern "C" char D_00480A38[];
 extern MAPUNITTABLE g_DefaultGimmick;
@@ -275,7 +293,33 @@ void CMap::getBBoxMin(FVECTOR& outMin) {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", createMapEffect___4CMapRC9ZONEPARTS);
+HANDLE CMap::createMapEffect_(const ZONEPARTS& inParts) {
+    MAPUNITID unitId;
+    unitId.ui = inParts.effectId;
+    INT id = (unitId.c[1] - '0') * 100 + (unitId.c[2] - '0') * 10;
+    id += unitId.c[3] - '0';
+    id += 8000;
+    CRsrcData* rsrc = CRsrcDB::getFirstRsrc(5, id + 30000, TRUE);
+    if (!rsrc) {
+        TRACE(D_00480F58, id);
+        return 0;
+    }
+    INT no = (USHORT)(inParts.effectParam / 100);
+    FVECTOR rot;
+    rot.x = inParts.rot.x * 0.1f * 0.017453292f;
+    rot.y = inParts.rot.y * 0.1f * 0.017453292f;
+    rot.z = inParts.rot.z * 0.1f * 0.017453292f;
+    rot.w = 1.0f;
+    Math3D::LimitPIVector(rot);
+    HANDLE handle = 0;
+    TRACE(D_00480F80, rsrc->getName(), no);
+    if (!DebugWork::g_dw.sys.m_iEffectNoEntry) {
+        handle = CEffectMan::setEffect(rsrc->getName(), no, (ObjType::eObjType)0xB, (const FVECTOR*)inParts.trans, &rot, 0.0f);
+        CEffect* effect = CEffectMan::getEffect(handle);
+        if (effect) effect->setScale(*(const FVECTOR*)inParts.scale);
+    }
+    return handle;
+}
 void CMap::createEnvSE(const ZONEPARTS& inParts) {
     MAPUNITID unitId;
     unitId.ui = inParts.effectId;
