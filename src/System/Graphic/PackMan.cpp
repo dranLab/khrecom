@@ -102,6 +102,7 @@ struct GpuRegsInfoSep {
 
 class CDelayedFree { /* PARTIAL: stand-in for System/LinkedBuf CDelayedFree: strings: LinkedBuf.h (.rodata still asm) */
 public:
+    static void initFreeList();
     static void disposeFreeList();
 };
 
@@ -114,6 +115,10 @@ public:
     static void enableZWrite(BOOL inEnable, INT inAddr);
     static void resetGsDma();
     static void kickDMAFG(INT n);
+    static void kickDMA(INT n);
+    static void initialize();
+    static void endScene();
+    static void terminateBGPacket();
     static void changeLayer(INT nLayer);
     static void setFrameEffect(INT nKind, INT n1, INT n2, INT n3);
     static void terminateSemiPacket();
@@ -290,7 +295,7 @@ typedef struct { /* 0x60 */ /* PARTIAL: stand-in for System/Graphic/Effect/libpp
 } sceGsLoadImage;
 extern "C" int sceGsSetDefLoadImage(sceGsLoadImage* lp, short dbp, short dbw, short dpsm, short x, short y, short w, short h);
 extern "C" int sceGsExecLoadImage(sceGsLoadImage* lp, u_long128* srcaddr);
-extern "C" char D_00461B70[], D_00461C28[], D_00461D60[]; /* PARTIAL: assert text "0" and the semi-packet overflow message (data still asm) */
+extern "C" char D_00461B70[], D_00461C28[], D_00461D10[], D_00461D38[], D_00461D60[]; /* PARTIAL: assert text "0" and the semi-packet overflow message (data still asm) */
 extern u_long128 My_dma_start[];
 extern u_long128 My_VU0_start[];
 extern INT SCREEN_HEIGHT;
@@ -339,6 +344,7 @@ extern u_long s_pPktBufVif1[2][36992];
 extern u_long s_pPktBufVif1Frame[320];
 extern pacVif1Packet s_pktVif1;
 extern pacVif1Packet s_pktVif1BG;
+extern pacVif1Packet s_pktVif1FG;
 extern INT s_nMaxPktSizeVif1Semi;
 extern u_long128* s_pktVif1SemiBase;
 extern pacVif1Packet s_pktVif1Semi;
@@ -519,7 +525,41 @@ void CPackMan::pkRefLoadImage(u_short nBP, const VTransInfo& info) {
                    info._nDistW, info._nDistH);
 }
 void CPackMan::pkRefMpg(u_short vuaddr, u_long128* pMicro, UINT size, UINT opt1) { sceVif1PkRefMpg(s_pPktVif1, vuaddr, pMicro, size, opt1); }
+static void _clearVram();
+static void _initDBuf();
+static void _loadMicroProgram();
+static void _setupSysContext();
+void _initFramePacket(INT nKind); /* static in the original (still INCLUDE_ASM) */
+/* Parked: ~73 lines - the run of init stores: the original keeps five %hi parts (s_pktVif1FG+4 .. s_nReqDrawMode) in s0-s4 and issues the stores in another order (same pattern as Game/SceneInfo clear); the isNTSC() call's result is unused. Store orders not iterated further. */
+#if 0
+void CPackMan::initialize() {
+    s_pPktVif1 = &s_pktVif1;
+    s_transFrameKind = 0;
+    s_pktVif1FGBase = NULL;
+    s_pktVif1FG.pBase = NULL;
+    s_pktVif1SemiBase = NULL;
+    s_pktVif1Semi.pBase = NULL;
+    s_nDrawMode = -1;
+    s_nReqDrawMode = 0;
+    s_nPcrtcMode = -1;
+    s_nReqPcrtcMode = 0;
+    s_nBGColor = 0;
+    s_nDisp1Alpha = 0xff;
+    s_nFSAA_Sharpness = 0;
+    s_nDispOffsetX = 0;
+    s_nDawEnableBit = 0xf;
+    s_nDispOffsetY = CMainApp::isNTSC() ? 0 : 0;
+    resetGsDma();
+    _clearVram();
+    _initDBuf();
+    _initFramePacket(0);
+    _loadMicroProgram();
+    _setupSysContext();
+    CDelayedFree::initFreeList();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initialize__8CPackMan);
+#endif
 void CPackMan::finalize() { CDelayedFree::disposeFreeList(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initGsDefDrawEnv__FR12sceGsDBuffDc12_GS_BUF_SIDEsssssUiUii);
 enum _GS_BUF_SIDE {
@@ -574,7 +614,14 @@ static void _setupSysContext() {
     s_SysGpuRegs2._nFRAME = *(u_long*)&s_DBuf.draw02.reg[0];
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", beginScene__8CPackMan);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", endScene__8CPackMan);
+void CPackMan::endScene() {
+    _checkDmaTag();
+    sceVif1PkEnd(s_pPktVif1, 0);
+    sceVif1PkAddCode(s_pPktVif1, 0x13000000);
+    _checkDmaTag();
+    sceVif1PkTerminate(s_pPktVif1);
+    terminateBGPacket();
+}
 INT CPackMan::getDBIdx() { return s_nDB & 1; }
 void CPackMan::transFrameEffect() {
     if (s_nDrawMode != 0) return;
@@ -595,7 +642,35 @@ void CPackMan::transFrame() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initBGPacket__8CPackMani);
 BOOL CPackMan::isPacketForBG() { return s_pPktVif1 == &s_pktVif1BG; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", terminateBGPacket__8CPackMan);
+/* Parked: ~100 lines - store scheduling: the original stores the ZBUF value before the s_pPktVif1/s_nMaxPktSizeVif1 stores (lui order ZBUF_START, Regs1, pktVif1BG, Max, pPkt, Regs2), ours hoists the packet pointer stores; 6 min of permuter (9k candidates, 104 -> 103) did not move it. */
+#if 0
+void CPackMan::changeLayer(INT nInLayer) {
+    if (nInLayer == 1) {
+        s_DefaultGpuRegs1._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32);
+        s_pPktVif1 = &s_pktVif1BG;
+        s_nMaxPktSizeVif1 = 0x600;
+        s_DefaultGpuRegs1._nTEST = 0x300fd;
+        s_DefaultGpuRegs2._nTEST = 0x3000d;
+        s_DefaultGpuRegs2._nZBUF = s_DefaultGpuRegs1._nZBUF;
+    } else if (nInLayer == 2) {
+        s_DefaultGpuRegs2._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32);
+        s_DefaultGpuRegs1._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000;
+        s_pPktVif1 = &s_pktVif1FG;
+        s_nMaxPktSizeVif1 = s_nMaxPktSizeVif1Normal;
+        s_DefaultGpuRegs2._nTEST = 0x3000d;
+        s_DefaultGpuRegs1._nTEST = 0x500fd;
+    } else {
+        s_DefaultGpuRegs1._nZBUF = (VRAM::_ZBUF_START / 32) | 0x31000000;
+        s_pPktVif1 = &s_pktVif1;
+        s_nMaxPktSizeVif1 = 0x8000;
+        s_DefaultGpuRegs1._nTEST = 0x500fd;
+        s_DefaultGpuRegs2._nTEST = s_DBuf.clear0.testb;
+        s_DefaultGpuRegs2._nZBUF = s_DefaultGpuRegs1._nZBUF;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", changeLayer__8CPackMani);
+#endif
 void CPackMan::initSemiPacket() {
     if (!s_pktVif1SemiBase) return;
     _pkInit(s_pktVif1SemiBase, &s_pktVif1Semi, s_nMaxPktSizeVif1Semi);
@@ -651,7 +726,24 @@ void CPackMan::updateBGBlend(INT nAlpha) {
 }
 ULONGLONG CPackMan::getDefaultTEST() { return s_DBuf.clear0.testb; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", swapDBuf__8CPackMani);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", kickDMA__8CPackMani);
+void CPackMan::kickDMA(INT n) {
+    if (isSkipPacketDMA()) return;
+    changeLayer(1);
+    INT nSize = sceVif1PkSize(s_pPktVif1);
+    if (nSize > 0x680) {
+        TRACE(D_00461D10, nSize);
+        AssertApp(D_00461BE0, 2128, D_00461B70, 0);
+    }
+    changeLayer(0);
+    nSize = sceVif1PkSize(s_pPktVif1);
+    s_nPkUseSize += nSize;
+    if (nSize > 0x9080) {
+        TRACE(D_00461D38, nSize);
+        AssertApp(D_00461BE0, 2137, D_00461B70, 0);
+    }
+    FlushCache(0);
+    sceDmaSend(s_pDmaChanVif1, (void*)((u_int)s_pktVif1.pBase & 0x0fffffff));
+}
 void CPackMan::kickDMAFG(INT n) {
     s_nPkUseSize = 0;
     changeLayer(2);
