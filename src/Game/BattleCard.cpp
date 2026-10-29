@@ -3,6 +3,7 @@
 #include "Game/GameWork.h"
 #include "Game/Debug/DebugWork.h"
 #include "System/Rnd.h"
+#include "System/TaskMan.h"
 #include "include_asm.h"
 
 extern "C" int abs(int);
@@ -211,7 +212,49 @@ void CBattleCard::preStateUse() {
     m_iLayer = pLayout->layer;
     m_pCard->changeLayer(m_iLayer);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateUse__Q210CardBattle11CBattleCard);
+void CBattleCard::stateUse() {
+    switch (m_uiMode) {
+    case 1: {
+        ((CCardBattle*)CTaskMan::getSysTask(0x16))->checkNowPlaying(m_uiUser, this);
+        m_tqTimer -= getFrameRate();
+        if (m_tqTimer <= 0) m_tqTimer = 0;
+        INT dx = (m_EndPos.x - m_StartPos.x) * m_tqTimer / 400;
+        INT dy = (m_EndPos.y - m_StartPos.y) * m_tqTimer / 400;
+        FLOAT sc = m_fEndScale - (m_fEndScale - m_fStartScale) * m_tqTimer / 400.0f;
+        m_vRot.w = sc;
+        m_Pos.x = m_EndPos.x - dx;
+        m_Pos.y = m_EndPos.y - dy;
+        if (!isSet()) {
+            if (abs(dx) <= 64) m_uiFlag |= 0x2;
+        } else if (!m_tqTimer) {
+            m_uiMode = 2;
+            struct _bits { u_long b0 : 28; u_long cat1 : 4; };
+            if (((_bits*)&m_cardData)->cat1 == 0xe) {
+                if (m_pRevolver) m_pRevolver->setTrapEffect();
+                m_uiMode = 0x13;
+                m_tqTimer = 800;
+            }
+        }
+        ((CCardBattle*)CTaskMan::getSysTask(0x16))->checkNowPlaying(m_uiUser, this);
+        break;
+    }
+    case 2:
+        if (!((CCardBattle*)CTaskMan::getSysTask(0x16))->checkNowPlaying(m_uiUser, this)) destroy(1);
+        break;
+    case 0x13:
+        m_tqTimer -= getFrameRate();
+        if (m_tqTimer <= 0) {
+            m_tqTimer = 0;
+            _setCard(m_cardData, 0x43, 0);
+            m_pCard->destroy();
+            m_pCard->create(m_cardData);
+            m_iLayer = g_LayoutData[58].layer;
+            m_pCard->changeLayer(m_iLayer);
+            m_uiMode = 2;
+        }
+        break;
+    }
+}
 void CBattleCard::setRefrect() {
     changeState(3);
     if (m_uiMode == 16) m_iState = 8;
