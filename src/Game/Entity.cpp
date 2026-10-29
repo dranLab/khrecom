@@ -19,6 +19,8 @@
 #include "Game/AttackMotion.h"
 #include "System/Graphic/Fnt.h"
 #include "System/Graphic/WorldEnv.h"
+#include "System/Graphic/LightUnit.h"
+#include "System/Coord.h"
 #include "System/Graphic/Effect/effect.h"
 #include "include_asm.h"
 
@@ -93,7 +95,21 @@ INT CEntity::getTypeID() const { return 0x1000; }
 BOOL CEntity::initalize(INT inGroupID, INT inRsrcID) { return initalize(inGroupID, inRsrcID, 0); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", initalize__7CEntityiiUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", main__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", disp__7CEntity);
+void CEntity::disp() {
+    translucence_();
+    if (isDispOFF()) return;
+    if (isFlashing()) {
+        if ((m_iFlashingCounter ^= 1)) return;
+    }
+    if (m_pModels) {
+        if (m_pNLight) m_pNLight->calc();
+        if (m_pGLight) m_pGLight->calc();
+        for (INT i = 0; i < m_iModelCount; i++) {
+            if (!(m_uiDispOffFlag & (1 << i))) m_pModels[i].disp();
+        }
+    }
+    if (DebugWork::g_dw.sys.m_iDagameNumber && m_pDamageString && m_tqDamageDispTimer > 0) m_pDamageString->disp();
+}
 void CEntity::setPos(const FVECTOR& inV) {
     if (!(m_pMove)) AssertApp(D_0047D330, 369, D_0047D358, 0);
     *(FVECTOR*)((BYTE*)m_pMove + 0x20) = inV;
@@ -637,7 +653,20 @@ void CEntity::updateAnimation() {
         for (INT i = 0; i < m_nTexAnmNum; i++) m_pTexAnm[i].update(getFrameRateF());
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateBadStatusEffect__7CEntityi);
+void CEntity::updateBadStatusEffect(HANDLE inHandle) {
+    CEffect* effect = CEffectMan::getEffect(inHandle);
+    if (!effect) return;
+    if (!m_pCollParam) return;
+    OTHER_PARAM* other = m_pCollParam->pOtherParam;
+    if (!(other)) AssertApp(D_0047D330, 1860, D_0047D3D0, 0);
+    FVECTOR ofs;
+    ofs.set(other->BadStatusPos.fOffsetX, other->BadStatusPos.fOffsetY, other->BadStatusPos.fOffsetZ);
+    ApplyMatrix(ofs, *(FMATRIX*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0x90), ofs);
+    FVECTOR pos = *(FVECTOR*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0xc0);
+    pos.y += Math3D::PointToPointDistance(ofs, pos);
+    effect->Crd(0).m_Local.v[3] = pos;
+    effect->Crd(0).m_Flag = 1;
+}
 void CEntity::setDamageNumber(const FVECTOR& inPos, INT inDamage) {
     if (!DebugWork::g_dw.sys.m_iDagameNumber) return;
     if (!m_pDamageString) return;

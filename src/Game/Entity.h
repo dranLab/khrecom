@@ -231,6 +231,7 @@ public:
     BOOL initCollision_(INT inGroupID, INT inRsrcID);
     void updateSE_();
     void updateFade_();
+    void translucence_();
     // PARTIAL: added for Game/EntityFactory
     void positionFix(const FVECTOR& inPos, FLOAT inDir);
     void positionFix(const FVECTOR& inPos, const FVECTOR& inRot);
@@ -304,6 +305,7 @@ public:
     FLOAT getEndAlpha() const { return m_fEndAlpha; } // PARTIAL: added for Game/Player/PlayerDRiku (original name unknown)
     UINT isFade() const { return m_uiEntityFlag & 0x40000000; }
     UINT isRootMoveOff() const { return m_uiEntityFlag & 0x8000; } // PARTIAL: added for Game/Entity
+    UINT isFlashing() const { return m_uiEntityFlag & 0x800; } // PARTIAL: added for Game/Entity
     INT getFlashingCounter() const { return m_iFlashingCounter; } // PARTIAL: added for Game/Prize (name unknown)
     FLOAT calcDistanceSq(const FVECTOR& inPos) const;
     HANDLE playSEPanAndVol(INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
