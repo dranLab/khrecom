@@ -92,6 +92,21 @@ static inline FLOAT _limitPI(FLOAT r) {
     return r;
 }
 
+static inline FLOAT _abs(FLOAT inValue) {
+    FLOAT ret;
+    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
+    return ret;
+}
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void Normalize(FVECTOR& v0, const FVECTOR& v1);
+FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT s);
+extern "C" float atan2f(float y, float x);
+static inline FLOAT _sqrtf(FLOAT inValue) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(inValue));
+    return ret;
+}
 static inline INT _getNowCamMode() {
     INT mode = 0;
     PlayerCamera::CPlayerCamera* cam = PlayerCamera::CPlayerCamera::getInstanceRef();
@@ -635,7 +650,110 @@ void CPlayerDRiku::initJump2nd() {
     m_fJumpSpdY = g_fAntiGravity * m_fJumpPow;
 }
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", exeJump2nd__Q22PL12CPlayerDRiku);
+void CPlayerDRiku::exeJump2nd() {
+    TIMEQ frame = getMotionCurrentTime() / 50;
+    FVECTOR vel = m_pMove->getVel();
+    FVECTOR vec;
+    setBattleFlag(0, 8);
+    switch (m_JumpState) {
+    case 2: {
+        BOOL bFloat = TRUE;
+        m_fJumpGravity = g_fGravity;
+        m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        if (m_hMark > 0) {
+            SubVectorXYZ(vec, m_vMarkPos, getPos());
+            m_fDistY = _abs(vec.y);
+            if (vec.y < -1.0f) {
+                if (m_fJumpSpdY > 0.0f) {
+                    if (m_fDistY < 3.0f) m_fJumpSpdY *= g_fJumpStopRate;
+                    else m_fJumpSpdY = 0.0f;
+                }
+                bFloat = FALSE;
+            }
+        }
+        if (bFloat && m_fJumpSpdY < 0.0f) {
+            if (frame < m_pAtkData->MOVE_END_FRAME) m_fJumpSpdY = 0.0f;
+        }
+        vel.y = m_fJumpSpdY;
+        FLOAT rate = 0.0f;
+        FVECTOR rot = getRot();
+        FLOAT dirY = rot.y;
+        CEntity* pTarget = m_hTarget > 0 ? (CEntity*)CTaskMan::getTask(m_hTarget) : NULL;
+        if (pTarget) {
+            if (frame < 6) {
+                rate = 1.0f;
+                m_fDir = pTarget->getRot().y;
+                pTarget->getLockOnPos(m_vMarkPos);
+                calcAppearPos(-2.0f, 0.5f, &m_vMarkPos);
+                m_vMarkPos = m_vAppearPos;
+                m_hMark = m_hTarget;
+                m_fDir = dirY;
+            }
+            if (frame < m_pAtkData->MOVE_END_FRAME) m_fDir = calcDirection(pTarget);
+        }
+        FVECTOR dir;
+        FLOAT speed = 0.0f;
+        SubVectorXYZ(vec, m_vMarkPos, m_vCenterPos);
+        Normalize(dir, vec);
+        vec.y = 0.0f;
+        m_fDistXZ = _sqrtf(InnerProduct(vec, vec));
+        m_fJumpDir = Movement::Homing(m_fJumpDir, atan2f(dir.x, dir.z), rate, m_fFrameRate);
+        vec.set(0.0f, m_fJumpDir, 0.0f, 1.0f);
+        setRot(vec);
+        if (frame < m_pAtkData->MOVE_END_FRAME && m_pAtkData->RADIUS * 0.1f < m_fDistXZ) speed = m_pAtkData->MAX_SPEED / 60.0f;
+        if ((m_pAtkData->FLAG & 0x10) && frame < m_pAtkData->MOVE_END_FRAME) speed += m_pAtkData->WORK0 / 60.0f;
+        if (speed > 0.0f) m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.2f, m_fFrameRate);
+        else m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.4f, m_fFrameRate);
+        FMATRIX m;
+        _unitMatrixVu0(m);
+        vec.set(0.0f, 0.0f, 1.0f, 1.0f);
+        sceVu0RotMatrixY(m, m, m_fJumpDir);
+        ApplyMatrix33(vec, m, vec);
+        ScaleVector(vec, vec, m_fMoveSpdXZ);
+        vel.x = vec.x;
+        vel.z = vec.z;
+        m_pMove->setVel(vel);
+        rot.set(0.0f, m_fDir, 0.0f, 1.0f);
+        setRot(rot);
+        if (isMotionEnd()) {
+            m_JumpState = 3;
+            setAnimForce(6, -1, 0, 0, 0, 0);
+            m_pMarker->holdTarget(0);
+        }
+        break;
+    }
+    case 3:
+        m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        vel.y = m_fJumpSpdY;
+        m_pMove->setVel(vel);
+        break;
+    case 6:
+        setGroundIK(1);
+        exeJumpLand();
+        return;
+    }
+    if (isActionFlag(0x2000000)) {
+        if (isTrgFlag(0x10)) chkChargeMove(0);
+    }
+    if (chkTrgAction(0, 0)) {
+        m_pMarker->holdTarget(0);
+        return;
+    }
+    if (!isAir()) {
+        m_JumpState = 6;
+        setAnimForce(7, -1, 0, 0, 0, 0);
+        m_fJumpSpdXZ = 0.0f;
+        clearSpeed();
+        setBattleFlag(0, 8);
+        m_fJumpSpdY = 0.0f;
+        m_fJumpGravity = 0.0f;
+        m_pMarker->holdTarget(0);
+        return;
+    }
+    m_fJumpHeight = getPos().y - m_vJumpStartPos.y;
+    if (m_fJumpTop < m_fJumpHeight) m_fJumpTop = m_fJumpHeight;
+    m_tqJumpTimer += m_tqFrameRate;
+}
 INT CPlayerDRiku::startStockSkillAction() {
     INT id;
     switch (m_iStockSkill) {
