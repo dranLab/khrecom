@@ -29,29 +29,29 @@ public:
     static void* getFirstData(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
     static MODELDATA* getRsrcAMF(const CHAR* pszName, NAME_CASE nc);
 };
-class CPackMan { /* PARTIAL: stand-in for System/Graphic/PackMan CPackMan: owner not written */
-public:
-    static void pkCloseDirectCode();
-    static void pkOpenDirectCode(INT stall);
-    static BOOL isOverFlow(UINT nSize);
-    static u_long getDefault_TEST_1();
-    static void pkCall(u_long128* pAddr, UINT nFlag);
-    static void pkAddCode(UINT nCode);
-    static void pkCnt(UINT nCnt);
-    static u_long getDefault_FRAME_1();
-    static u_long* pkOpenGifTagManual(u_long128 tag);
-    static void pkCloseGifTagManual(UINT* p);
-    static void pkRefLoadImage(USHORT nTBP, const VTransInfo& info);
-    static UINT getEnableDraw();
-    static void pkOpenGifTag(u_long128 tag);
-    static void pkAddGsData(u_long data);
-    static void pkCloseGifTag();
-    static ULONGLONG getDefault_ZBUF_1();
-    static u_int* pkOpenUpkCodeV4_32(u_short vuaddr, UINT cl, UINT wl);
-    static void pkCloseUpkCodeV4_32(void* p);
-    static void* pkGetCurrentPointer();
-    static void pkSetCurrentPointer(void* p);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 FLOAT RotTransPers(IVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 extern const FMATRIX ONE_MATRIX;
 extern const FVECTOR ONE_VECTOR;
@@ -1472,7 +1472,7 @@ void CFadeModel::makePkt() {
             CPackMan::pkAddCode(0x13000000);
             CPackMan::pkOpenDirectCode(0);
             __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008001), "0"((u_long)0xE));
-            pQw = CPackMan::pkOpenGifTagManual(tag);
+            pQw = (u_long*)CPackMan::pkOpenGifTagManual(tag);
             pQw[0] = lFrame;
             pQw[1] = 0x4C;
             CPackMan::pkCloseGifTagManual((UINT*)(pQw + 2));
@@ -1485,7 +1485,7 @@ void CFadeModel::makePkt() {
             }
             CPackMan::pkOpenDirectCode(0);
             __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008001), "0"((u_long)0xE));
-            pQw = CPackMan::pkOpenGifTagManual(tag);
+            pQw = (u_long*)CPackMan::pkOpenGifTagManual(tag);
             pQw[0] = CPackMan::getDefault_FRAME_1();
             pQw[1] = 0x4C;
             CPackMan::pkCloseGifTagManual((UINT*)(pQw + 2));

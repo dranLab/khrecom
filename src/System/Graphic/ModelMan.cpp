@@ -31,26 +31,26 @@ public:
     static struct TexInfo* getRsrcTex(const char* pName, NAME_CASE eCase);
 };
 
-class CPackMan { /* System/Graphic/PackMan.h */
-public:
-    static UINT getEnableDraw();
-    static void pkAddCode(UINT nCode);
-    static void pkOpenUpkCode(USHORT nAddr, UINT nMode, UINT nWL, UINT nCL);
-    static void pkAddUpkData128(u_long128 qData);
-    static void pkAddUpkData64(u_long lData);
-    static void pkCloseUpkCode();
-    static BOOL isOverFlow(UINT nSize);
-    static void pkCnt(UINT nCnt);
-    static void pkOpenDirectCode(INT nFlag);
-    static void pkCloseDirectCode();
-    static void initSemiPacket();
-    static void terminateSemiPacket();
-    static void initFGPacket();
-    static void setFGPacketMaxNorml();
-    static void extFGPacketMaxForFlex();
-    static void terminateFGPacket();
-    static void changeLayer(INT nLayer);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class CShadowModelMan { /* System/Graphic/ShadowModelMan.h */
 public:

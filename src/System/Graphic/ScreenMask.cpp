@@ -2,12 +2,12 @@
 #define TASK_H_NO_SLC_OVERFLOW_MSG
 #include "System/Graphic/ScreenMask.h"
 
-class CPackMan { /* System/Graphic/PackMan.h */
-public:
-    static u_long128* pkOpenGifTag(u_long128 tag);
-    static void pkCloseGifTag(void* p);
-    static u_long getDefault_TEST_2();
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
+
 
 namespace VRAM {
 extern INT _ZBUF_START;

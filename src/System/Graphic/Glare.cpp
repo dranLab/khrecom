@@ -9,11 +9,11 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-class CPackMan { /* System/Graphic/PackMan.h */
-public:
-    static QWdata* pkOpenGifTag(u_long128 tag);
-    static void pkCloseGifTag(void* p);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
 
 extern INT SCREEN_HEIGHT;
 QWdata* set_csprite64(QWdata* qp, INT x, INT y, UINT col, INT w, INT h);

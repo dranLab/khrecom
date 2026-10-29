@@ -125,11 +125,11 @@ public:
     static CRsrcList& getScrollTexList();
 };
 
-class CPackMan {
-public:
-    static UINT getEnableDraw();
-    static void pkRefLoadImage(const VTransInfo& rInfo);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
 
 #define _getTexInfo(p) ((p) ? ((CRsrcTex*)(p))->getTexInfo() : NULL)
 

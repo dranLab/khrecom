@@ -45,13 +45,13 @@ void sceVu0UnitMatrix(float m[4][4]);
 void sceVu0InversMatrix(float m0[4][4], float m1[4][4]);
 }
 
-class CPackMan { /* System/Graphic/PackMan.h */
-public:
-    static QWdata* pkOpenGifTag(u_long128 tag);
-    static void pkCloseGifTag(void* p);
-    static ULONGLONG* pkOpenGifTagManual(u_long128 tag);
-    static void pkCloseGifTagManual(UINT* p);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
+
+
 
 extern INT SCREEN_HEIGHT;
 
@@ -350,7 +350,7 @@ static QWdata* setSdwTSprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, FLOAT f
     }
     u_long128 tag;
     __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)cnt | 0x4400000000000000UL), "r"((u_long)0x4343));
-    pul64 = CPackMan::pkOpenGifTagManual(tag);
+    pul64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(tag);
     for (i = 0; i < cnt; i++) {
         pul64[0] = uv[0].ul64;
         pul64[1] = pv[0].ul64;
@@ -365,7 +365,7 @@ static QWdata* setSdwTSprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, FLOAT f
     CPackMan::pkCloseGifTagManual((UINT*)pul64);
     if (qp) {
         __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000000000UL), "0"((u_long)0xE));
-        qp = CPackMan::pkOpenGifTag(tag);
+        qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
     }
     return qp;
 }
@@ -374,7 +374,7 @@ void CShadowModelMan::drawAfter() {
     static int cnt = 1;
     u_long128 tag;
     __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-    qp = CPackMan::pkOpenGifTag(tag);
+    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
     _setADConst(&qp[0], 0x30000, 0x47);
     _setADConst(&qp[1], 5, 8);
     _setADConst(&qp[2], 0, 0x3F);
@@ -400,7 +400,7 @@ void CShadowModelMan::drawAfter() {
         setSdwTSprite32(NULL, -16, -16, 0, 1.0f);
     }
     __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-    qp = CPackMan::pkOpenGifTag(tag);
+    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
     _setADConst(&qp[0], 2, 0);
     _setADConst(&qp[1], 0, 1);
     _setAD(&qp[2], (u_long)(0x8000 + (-(sdw_SCREEN_WIDTH / 2) << 4)) | ((u_long)(0x8000 + ((sdw_SCREEN_HEIGHT / 2 - 1) << 4)) << 16), 5);
