@@ -303,7 +303,7 @@ typedef struct { /* 0x60 */ /* PARTIAL: stand-in for System/Graphic/Effect/libpp
 } sceGsLoadImage;
 extern "C" int sceGsSetDefLoadImage(sceGsLoadImage* lp, short dbp, short dbw, short dpsm, short x, short y, short w, short h);
 extern "C" int sceGsExecLoadImage(sceGsLoadImage* lp, u_long128* srcaddr);
-extern "C" char D_00461B70[], D_00461C28[], D_00461D10[], D_00461D38[], D_00461D60[]; /* PARTIAL: assert text "0" and the semi-packet overflow message (data still asm) */
+extern "C" char D_00461B70[], D_00461C28[], D_00461D10[], D_00461D38[], D_00461D60[], D_00461D88[], D_00461DA8[], D_00461DD0[]; /* PARTIAL: assert text "0" and the semi-packet overflow message (data still asm) */
 extern u_long128 My_dma_start[];
 extern u_long128 My_VU0_start[];
 extern INT SCREEN_HEIGHT;
@@ -1420,7 +1420,44 @@ void sceVif1PkAddGsAD(pacVif1Packet* pPacket, u_int addr, u_long data) {
     *p = _pack(data, addr);
     pPacket->pCurrent = (u_int*)(p + 1);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkRefLoadImage__FP13pacVif1PacketUsUcUsPUxUiUiUiUiUi);
+void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_short bw, u_long128* image, u_int size, u_int x, u_int y,
+                           u_int w, u_int h) {
+    UINT iLoadImageMaxSize = 0x10000;
+    UINT iLoadImageStartAddr = 0x100000;
+    UINT iLoadImageEndAddr = 0x1fc0000;
+    if (!(!(size > iLoadImageMaxSize))) AssertApp(D_00461BE0, 3668, D_00461D88, 0);
+    if (!(!((UINT)image < iLoadImageStartAddr))) AssertApp(D_00461BE0, 3669, D_00461DA8, 0);
+    if (!(!((UINT)image >= iLoadImageEndAddr))) AssertApp(D_00461BE0, 3670, D_00461DD0, 0);
+    sceVif1PkCnt(pPacket, 0);
+    ULONGLONG* p64 = (ULONGLONG*)pPacket->pCurrent;
+    p64[0] = 0x5100000500000000;
+    QWdata* pQw = (QWdata*)(p64 + 1);
+    ((u_long128*)pQw)[0] = _pack(0x1000000000000004, 0xe);
+    ((u_long128*)pQw)[1] = _pack(((u_long)bp << 32) | ((u_long)bw << 48) | ((u_long)psm << 56), 0x50);
+    ((u_long128*)pQw)[2] = _pack(((u_long)x << 32) | ((u_long)y << 48), 0x51);
+    ((u_long128*)pQw)[3] = _pack((u_long)w | ((u_long)h << 32), 0x52);
+    ((u_long128*)pQw)[4] = _pack(0, 0x53);
+    pPacket->pCurrent = (u_int*)(pQw + 5);
+    while (size) {
+        u_int n = size > 0x7fff ? 0x7fff : size;
+        sceVif1PkCnt(pPacket, 0);
+        p64 = (ULONGLONG*)pPacket->pCurrent;
+        p64[0] = 0x5100000100000000;
+        pQw = (QWdata*)(p64 + 1);
+        ((u_long128*)pQw)[0] = _pack((u_long)n | 0x0800000000000000, 0);
+        pPacket->pCurrent = (u_int*)(pQw + 1);
+        sceVif1PkRef(pPacket, image, n, 0, n | 0x51000000, 0);
+        size -= n;
+        image += n;
+    }
+    sceVif1PkCnt(pPacket, 0);
+    p64 = (ULONGLONG*)pPacket->pCurrent;
+    p64[0] = 0x5100000200000000;
+    pQw = (QWdata*)(p64 + 1);
+    ((u_long128*)pQw)[0] = _pack(0x1000000000008001, 0xe);
+    pQw[1].ul64[1] = 0x3f;
+    pPacket->pCurrent = (u_int*)(pQw + 2);
+}
 void sceVif1PkRefMpg(pacVif1Packet* pPacket, u_short vuaddr, u_long128* pMicro, u_int size, u_int opt1) {
     while (size) {
         u_int n = size <= 128 ? size : 128;
