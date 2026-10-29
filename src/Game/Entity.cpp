@@ -28,6 +28,8 @@ extern "C" char D_0047D330[]; /* __FILE__ */
 extern "C" char D_0047D080[]; /* "" */
 extern "C" char D_0047D660[];
 extern "C" char D_0047D3E0[];
+extern "C" char D_0047D3A0[];
+extern "C" unsigned int strlen(const char*);
 extern "C" char D_0047D518[];
 extern "C" char D_0047D548[];
 extern "C" char D_0047D570[];
@@ -324,8 +326,57 @@ const CHAR* CEntity::getMotionName(INT inIndex) const {
     if (!m_pAnim) return NULL;
     return m_pAnim->getMotFilename(inIndex);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getMotionIndex__C7CEntityPCc);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getHeight__C7CEntity);
+INT CEntity::getMotionIndex(const CHAR* inName) const {
+    if (!(inName)) AssertApp(D_0047D330, 865, D_0047D398, 0);
+    if (!m_pAnim) return -1;
+    INT n = m_pAnim->getMotCount();
+    INT start = 0;
+    const CHAR* str = &inName[strlen(inName) - 1];
+    if (*str >= '0' && *str <= '9') {
+        INT value = 0;
+        INT digit = 1;
+        for (INT i = 0; i < 3; i++) {
+            value += (*str-- - '0') * digit;
+            digit *= 10;
+        }
+        if (value < n) {
+            const CHAR* name = m_pAnim->getMotFilename(value);
+            if (name && !strcmp(name, inName)) return value;
+            start = value + 1;
+            value--;
+        } else {
+            value = n - 1;
+        }
+        for (INT i = value; i >= 0; i--) {
+            const CHAR* name = m_pAnim->getMotFilename(i);
+            if (name && !strcmp(name, inName)) return i;
+        }
+    }
+    for (INT i = start; i < n; i++) {
+        const CHAR* name = m_pAnim->getMotFilename(i);
+        if (name && !strcmp(name, inName)) return i;
+    }
+    TRACE(D_0047D3A0, inName);
+    return -1;
+}
+FLOAT CEntity::getHeight() const {
+    FLOAT heightRide = 1e+04f;
+    FLOAT heightMap = 1e+04f;
+    if (!(m_pMove)) AssertApp(D_0047D330, 929, D_0047D358, 0);
+    CCollMap* coll = m_pMove->getMapCollision();
+    FVECTOR pos = getPos();
+    coll->setStartPos(pos);
+    pos.y -= 10.0f;
+    coll->setEndPos(pos);
+    if (coll->collideRide(FALSE)) {
+        if (coll->getDetectNormal()->y >= 0.64278764f) heightRide = _fabsf(getPos().y - coll->getOutPos()->y);
+    }
+    if (coll->collideMap()) {
+        if (coll->getDetectNormal()->y >= 0.64278764f) heightMap = _fabsf(getPos().y - coll->getOutPos()->y);
+    }
+    if (heightRide < heightMap) return heightRide;
+    return heightMap;
+}
 void CEntity::getHeadPos(FVECTOR& outPos) const {
     COLL_PARAM_HEADER* coll = m_pCollParam;
     if (!coll) {
