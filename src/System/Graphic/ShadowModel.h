@@ -46,6 +46,9 @@ public:
     static FVECTOR& getShadowParam() { return m_vParam; }
     static ULONGLONG getTEX_0() { return m_lTex0; }
     static void setDownLen(FLOAT f) { m_fDownLen = f; } static void setCDensity(FLOAT f) { m_fCDensity = f; } static void setADensity(FLOAT f) { m_fADensity = f; } // PARTIAL: densities added for Game/Atel/VSME
+    // PARTIAL: added for Game/Map (the stores go through a reference: the original reloads m_pFog after each)
+    static void setColorDensity(FLOAT fDensity) { FLOAT& r = m_fCDensity; r = fDensity; }
+    static void setAlphaDensity(FLOAT fDensity) { FLOAT& r = m_fADensity; r = fDensity; }
     static void initialize();
     static void finalize();
     static void updateMatrix();

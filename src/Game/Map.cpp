@@ -18,6 +18,8 @@
 #include "Game/Debug/DebugWork.h"
 #include "System/Math3D.h"
 #include "System/RsrcData.h"
+#include "System/Buf.h"
+#include "System/Graphic/ShadowModel.h"
 #include "System/Graphic/Glare.h"
 #include "Game/AtWater.h"
 #include "Game/SceneInfo.h"
@@ -68,17 +70,27 @@ extern "C" char D_00480FC8[];
 extern "C" char D_00480FF0[];
 extern "C" char D_00480CE8[];
 extern "C" char D_00480D08[];
-class CBuf;
 class CRsrcData { /* PARTIAL: stand-in for System/RsrcData CRsrcData: gated by RSRCDATA_H_FULL */
-    CBuf* m_pDataSrc;
-    CHAR m_szName[1];
+    CBuf* m_pDataSrc;      /* 0x00 */
+    char m_szName[24];     /* 0x04 */
+    INT m_nRsrcType;       /* 0x1c */
+    INT m_nRsrcGroup;      /* 0x20 */
 
 public:
     CHAR* getName() const { return (CHAR*)m_szName; }
+    CBuf* getDataSrc() const { return m_pDataSrc; }
+    BYTE* getRsrcData() const {
+        BYTE* p = NULL;
+        if (getDataSrc()) p = getDataSrc()->getBufPtr();
+        return p;
+    }
+    INT getRsrcGroupID() const { return m_nRsrcGroup; }
 };
 class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: gated by RSRCDATA_H_FULL */
 public:
     static CRsrcData* getFirstRsrc(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
+    static CRsrcData* getFirstRsrc_Scene(INT nRsrcType);
+    static void* getFirstData(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
 };
 extern MAPUNITTABLE g_DefaultGimmick;
 void RotMatrixZ(FMATRIX& out, FMATRIX& in);
@@ -187,36 +199,61 @@ void CMap::_createEffIdProc(ZONEPARTS* parts, INT nEType) {
     }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", __4CMapP5CTaskUi);
-/* MATCH: CMap::CMap's .rodata while it is INCLUDE_ASM */
-__asm__(".rdata\n"
-        ".align 3\n"
-        ".asciz \"CMap::CMap() nRsrcGrpID %d\\n\"\n"
-        ".align 2\n"
-        ".asciz \"\"\n"
-        ".align 2\n"
-        ".word 0x70614D43\n"
-        ".word 0x4D433A3A\n"
-        ".word 0x29287061\n"
-        ".word 0x83203A20\n"
-        ".word 0x835B815D\n"
-        ".word 0x81668393\n"
-        ".word 0x825E835B\n"
-        ".word 0x82A98CAA\n"
-        ".word 0x82A982C2\n"
-        ".word 0x82DC82E8\n"
-        ".word 0x0AF182B9\n"
-        ".word 0x00000000\n"
-        ".align 3\n"
-        ".asciz \"CMap::CMap() m_nRsrcGrpID %d\\n\"\n"
-        ".align 2\n"
-        ".align 3\n"
-        ".text\n");
-/* MATCH: CMap::CMap constructs CMapGrid and C3DLineStrip (their vtables and weak copies); stripped section */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _mapCtorPlaceholder() {
-    CMapGrid grid;
-    C3DLineStrip strip;
+CMap::CMap(CTask* p, UINT nRsrcGrpID)
+    : CTask(p, 0x4000), m_nRsrcGrpID(nRsrcGrpID), m_pTexAnm(NULL), m_nTexAnmNum(0), m_pModelTbl(NULL), m_nModelMax(0),
+      m_uiMapFlag(0), m_pZone(NULL), m_pSky(NULL), m_LightUnit(NULL) {
+    declareSysTask(2);
+    enableCoordCalc(FALSE);
+    TRACE("CMap::CMap() nRsrcGrpID %d\n", nRsrcGrpID);
+    m_vColor.setAll(1.0f);
+    CRsrcData* rsrc = nRsrcGrpID ? CRsrcDB::getFirstRsrc(9, nRsrcGrpID, TRUE) : NULL;
+    if (!rsrc) {
+        rsrc = CRsrcDB::getFirstRsrc_Scene(9);
+        if (rsrc) m_nRsrcGrpID = rsrc->getRsrcGroupID() & 0x0FFFFFFF;
+    }
+    if (rsrc) {
+        BYTE* pData = rsrc->getRsrcData();
+        m_pZone = pData ? *(ZONEDATA**)pData : NULL;
+    } else {
+        TRACE("CMap::CMap() : \203]\201[\203\223\203f\201[\203^\202\252\214\251\202\302\202\251\202\350\202\334\202\271\202\361\n");
+    }
+    TRACE("CMap::CMap() m_nRsrcGrpID %d\n", m_nRsrcGrpID);
+    m_pFog = (FOGDATA*)CRsrcDB::getFirstData(0xD, m_nRsrcGrpID, TRUE);
+    if (!m_pFog) {
+        m_pFog = &FOG_default;
+    } else if (m_pFog->dispfar < 1.0f || 65536.0f < m_pFog->dispfar) {
+        m_pFog->dispfar = m_pFog->fogfar;
+        m_pFog->fogmax = 255.0f;
+        m_pFog->fogmin = 0.0f;
+    }
+    resetFog();
+    if (*(UINT*)&m_pFog->sdwColor == 0xFFFFFFFF) m_pFog->sdwColor = 0.2f;
+    if (*(UINT*)&m_pFog->sdwAlpha == 0xFFFFFFFF) m_pFog->sdwAlpha = 0.3f;
+    CShadowModelMan::setColorDensity(m_pFog->sdwColor);
+    CShadowModelMan::setAlphaDensity(m_pFog->sdwAlpha);
+    m_gpPosDir.setCoord(NULL);
+    m_gpPosDir.setLayerFG(0);
+    G_STRIP Line[2];
+    Line[0].P.init0();
+    Line[1].Term = 1;
+    Line[0].Bone = 0;
+    Line[0].Term = 0;
+    Line[1].Bone = 0;
+    Line[0].C.set(0xFF, 0, 0, 0x80);
+    Line[1].C.set(0xFF, 0, 0, 0x80);
+    Line[1].P.set(1.0f, 0.0f, 0.0f, 1.0f);
+    m_gpPosDir.m_vVERT.push_back(Line[0]);
+    m_gpPosDir.m_vVERT.push_back(Line[1]);
+    Line[0].C.set(0, 0xFF, 0, 0x80);
+    Line[1].C.set(0, 0xFF, 0, 0x80);
+    Line[1].P.set(0.0f, 1.0f, 0.0f, 1.0f);
+    m_gpPosDir.m_vVERT.push_back(Line[0]);
+    m_gpPosDir.m_vVERT.push_back(Line[1]);
+    Line[0].C.set(0, 0, 0xFF, 0x80);
+    Line[1].C.set(0, 0, 0xFF, 0x80);
+    Line[1].P.set(0.0f, 0.0f, 1.0f, 1.0f);
+    m_gpPosDir.m_vVERT.push_back(Line[0]);
+    m_gpPosDir.m_vVERT.push_back(Line[1]);
 }
 CMap::~CMap() {
     CTexCtrl::delFixTexAnm(m_pTexAnm, m_nTexAnmNum);
