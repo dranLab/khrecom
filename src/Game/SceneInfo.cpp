@@ -6,10 +6,9 @@
 #include "System/Debug.h"
 #include "include_asm.h"
 
-/* PARTIAL: System/RsrcDB.h needs the full RsrcData.h classes */
 class CRsrcData;
-enum NAME_CASE { NAME_CASE_SENSITIVE = 0 };
-class CRsrcDB {
+enum NAME_CASE { NAME_CASE_SENSITIVE = 0 }; /* PARTIAL: stand-in for System/RsrcDB NAME_CASE: gated by RSRCDATA_H_FULL (strings: System/RsrcData.h(156)) */
+class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: System/RsrcData.h(156) (owner partial; RsrcDB.h needs the full RsrcData.h classes) */
 public:
     static BOOL isSceneAttachMode();
     static UINT getSceneAttachNum();
