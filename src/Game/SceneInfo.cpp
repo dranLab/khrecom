@@ -7,6 +7,7 @@
 #include "Form/Menu/JMemoFlag.h"
 #include "Game/Status.h"
 #include "Game/Atel/Atel.h"
+#include "Form/Menu/MoogleShop.h"
 #include "include_asm.h"
 
 class CRsrcData;
@@ -221,7 +222,28 @@ void _initGoalRoomSceneTbl(BOOL bSora) {
         _setGoalRoomScene((WORLD_ID)(i + 1), n);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _initAllEventDoorState__Fi);
+void _initAllEventDoorState(BOOL bSora) {
+    for (INT i = 0; i < 16; i++) {
+        RCNORMA::FloorNormaSrc* pFloorNormaSrc = CSceneInfo::getFloorNormaDataSrc(i, bSora);
+        if (pFloorNormaSrc) {
+            for (INT j = 0; j < 4; j++) {
+                RCNORMA::DoorNormaSrc& src = pFloorNormaSrc->_normas[j];
+                STORAGE::_EventDoorInfo& dst = _SceneInfoWork::mc()->_nEventDoorInfoTbl[i][j];
+                for (INT k = 0; k < 3; k++) dst._nNormaNums[k] = src._normas[k]._nNumber;
+                dst._nClearedNorma = 0;
+            }
+        }
+        BYTE* p = _SceneInfoWork::mc()->_nEventDoorStateTbl[i];
+        p[0] = 1;
+        p[1] = 1;
+        p[2] = 1;
+        p[3] = 1;
+        p[4] = 4;
+        p[5] = 4;
+        p = _SceneInfoWork::mc2()->_nEventDoorOpenTbl[i];
+        for (INT j = 0; j < 3; j++) *p++ = 0;
+    }
+}
 INT CSceneInfo::getFloorDataCount(BOOL bSora) {
     FloorLayoutDataHeader* p = bSora ? s_pFloorFile_Sora : s_pFloorFile_Riku;
     INT n = 0;
@@ -307,7 +329,28 @@ DOOR_ID _getDstDoorID(DOOR_ID door) {
     return (DOOR_ID)2;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _setWorldEntrance__F8WORLD_IDssi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", makeRoom__10CSceneInfoRC8RoomInfo7DOOR_IDsUcUc);
+void CSceneInfo::makeRoom(const RoomInfo& room, DOOR_ID nDoorID, SHORT nScene, BYTE nCardID, BYTE nCardNum) {
+    RoomInfo& r = (RoomInfo&)room;
+    ROOM_STORAGE* p = (ROOM_STORAGE*)r._pStorageInfo;
+    if (p) p->_bFirstTimeAfterRC = 1;
+    r.setScene(getCurrentWorldID(FALSE), nScene);
+    r.setCardInfo(nCardID, nCardNum);
+    nCardNum++;
+    if (nCardNum >= 10) nCardNum = 0;
+    CGameWork::m_pMCWork->_nNextRCNormaNum = nCardNum;
+    if (!(nScene >= 2000 && nScene < 3000)) {
+        DoorInfo& door = r._doors[nDoorID];
+        if (door.getDoorState() == DOOR_STAT_CLOSED) door.setDoorState(DOOR_STAT_OPENED);
+    }
+    for (INT i = 0; i < 4; i++) {
+        DoorInfo& d = r._doors[i];
+        if (getRoomInfo(d._nDstRoom) && d.canCreateRoom() && !d.getNormaKeyCardID()) {
+            DOOR_STORAGE* pInfo = (DOOR_STORAGE*)d._pStorageInfo;
+            if (pInfo) pInfo->_nNormaNums[0] = nCardNum;
+        }
+    }
+    if ((USHORT)nScene == 4 && r._pStorageInfo) CMoogleShopMain::initMcWork((STORAGE::MCWork::_RoomInfo*)r._pStorageInfo);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", makeRoom__10CSceneInfoR8DoorInfoi);
 BOOL CSceneInfo::hasAnyRequest() {
     BOOL b = FALSE;
