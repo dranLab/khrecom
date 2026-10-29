@@ -61,10 +61,10 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 
-class CPackMan {
-public:
-    static void setFrameEffect(INT nKind, INT a, INT b, INT c);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;

@@ -16,11 +16,11 @@ void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT r);
 
-class CPackMan { /* System/Graphic/PackMan.h */
-public:
-    static INT getTransFrameKind();
-    static void setFrameEffect(INT nKind, INT nX, INT nY, INT nAlpha);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
 
 namespace ATEL {
 

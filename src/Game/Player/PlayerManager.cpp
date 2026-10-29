@@ -111,10 +111,10 @@ union F_UL {
 #include "System/Sound/SoundMan.h"
 #line 120
 
-class CPackMan {
-public:
-    static void setFrameEffect(INT inType, INT inP0, INT inP1, INT inP2);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 class CShadowModelMan {
 public:

@@ -112,10 +112,10 @@ public:
     static void* getRsrcData(const CRsrcData& inData);
 };
 
-class CPackMan {
-public:
-    static void setFrameEffect(INT inType, INT inP0, INT inP1, INT inP2);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 static inline void* _getRsrcData(const char* inName) {
     CRsrcData* pData = CRsrcDB::getRsrc(1, inName, NAME_CASE_SENSITIVE);

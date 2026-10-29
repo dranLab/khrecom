@@ -20,11 +20,11 @@ void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT r);
 
-class CPackMan { /* System/Graphic/PackMan.h */
-public:
-    static INT getDrawMode();
-    static BOOL isStartStillMode();
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
 
 extern "C" {
 void FlushCache(int operation);
