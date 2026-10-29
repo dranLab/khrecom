@@ -18,6 +18,9 @@
 #include "Game/Debug/DebugWork.h"
 #include "System/Math3D.h"
 #include "System/RsrcData.h"
+#include "System/Graphic/Glare.h"
+#include "Game/AtWater.h"
+#include "Game/SceneInfo.h"
 #include "System/Graphic/Effect/EffectMan.h"
 #include "System/Graphic/Effect/effect.h"
 #include "System/Graphic/Effect/effect_inl.h"
@@ -59,6 +62,7 @@ public:
 
 extern LIGHTDATA ALF_default;
 extern "C" char D_00480FA0[];
+extern const FVECTOR ONE_VECTOR;
 extern "C" char D_00480B70[];
 extern "C" char D_00480FC8[];
 extern "C" char D_00480FF0[];
@@ -346,72 +350,99 @@ __attribute__((section(".sdata"))) void _mapInitPlaceholder(G_STRIP_VECTOR& v, c
     new (D_00480B70) CMapModel[1];
     v.push_back(x);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _exclusiveSetup__4CMapi);
-/* MATCH: _exclusiveSetup's .rodata (priTbl, jump tables) while it is INCLUDE_ASM */
-__asm__(".rdata\n"
-        ".align 3\n"
-        ".asciz \"rec_bg_E062\"\n"
-        ".align 2\n"
-        ".asciz \"\"\n"
-        ".align 2\n"
-        ".align 3\n"
-        ".asciz \"rec_bg_E111\"\n"
-        ".align 2\n"
-        ".asciz \"\"\n"
-        ".align 2\n"
-        ".word 0x00000000\n"
-        ".word 0x00000001\n"
-        ".word 0x00000002\n"
-        ".word 0x00000003\n"
-        ".word 0x00000004\n"
-        ".word 0x00000005\n"
-        ".word 0x00000006\n"
-        ".word 0x00000007\n"
-        ".word 0x00000000\n"
-        ".word 0x00000000\n"
-        ".align 3\n"
-        ".word .L00203EA0\n"
-        ".word .L00203EA0\n"
-        ".word .L00203CAC\n"
-        ".word .L00203EA0\n"
-        ".word .L00203EA0\n"
-        ".word .L00203EA0\n"
-        ".word .L00203EA0\n"
-        ".word .L00203CC0\n"
-        ".word .L00203EA0\n"
-        ".word .L00203EA0\n"
-        ".word .L00203EA0\n"
-        ".word .L00203C84\n"
-        ".word .L00203CD0\n"
-        ".word .L00203D1C\n"
-        ".word 0x00000000\n"
-        ".word 0x00000000\n"
-        ".align 3\n"
-        ".word .L00203D88\n"
-        ".word .L00203D88\n"
-        ".word .L00203D88\n"
-        ".word .L00203D88\n"
-        ".word .L00203D88\n"
-        ".word .L00203D88\n"
-        ".word .L00203D88\n"
-        ".word .L00203DBC\n"
-        ".word .L00203DBC\n"
-        ".word .L00203DBC\n"
-        ".word .L00203D88\n"
-        ".word .L00203DBC\n"
-        ".word .L00203DBC\n"
-        ".word .L00203DBC\n"
-        ".word .L00203DBC\n"
-        ".word .L00203DBC\n"
-        ".word .L00203D88\n"
-        ".word .L00203DBC\n"
-        ".word .L00203DBC\n"
-        ".word .L00203DBC\n"
-        ".word .L00203DBC\n"
-        ".word .L00203D88\n"
-        ".word .L00203D88\n"
-        ".word 0x00000000\n"
-        ".text\n");
+void CMap::_exclusiveSetup(BOOL bUseMapUnit) {
+    CGlare::create(this);
+    CSceneEnv::setColor((ObjType::eObjBit)0xFFFFFFFF, 0.0f, ONE_VECTOR, NULL, 3);
+    switch (CSceneInfo::getCurrentWorldID(TRUE)) {
+    case 0:
+        break;
+    case 11:
+        CGlare::sysOn(1.0f);
+        break;
+    case 2:
+        if (m_nRsrcGrpID != 0x7F35A) break;
+    case 7:
+        CAtWater::create(this);
+        break;
+    case 12:
+        if (CSceneInfo::getCurrentSceneNum() == 30) {
+            CGlare::sysOn(1.0f);
+            CGlare::checkZ(FALSE);
+        }
+        break;
+    case 13:
+        if (CSceneInfo::getCurrentSceneNum() == 90) {
+            CGlare::sysOn(1.0f);
+        } else switch (m_nRsrcGrpID) {
+        case 630003:
+        case 630004:
+        case 630005:
+        case 630006:
+        case 630007:
+        case 630008:
+        case 630009:
+        case 630013:
+        case 630019:
+        case 630024:
+        case 630025:
+            CGlare::sysOn(1.25f);
+            CGlare::checkZ(FALSE);
+            break;
+        }
+        switch (m_nRsrcGrpID) {
+        case 630001:
+        case 630005:
+        case 630006:
+        case 630007:
+        case 630008:
+        case 630010:
+        case 630011:
+        case 630012:
+        case 630014:
+        case 630015:
+        case 630016:
+        case 630017:
+        case 630018:
+        case 630020:
+        case 630021:
+        case 630022:
+        case 630023:
+        case 630024:
+        case 631001: {
+            FVECTOR vColor = {{0.82f, 0.82f, 0.82f, 1.0f}};
+            CSceneEnv::setColor((ObjType::eObjBit)0xF88, 0.0f, vColor, NULL, 3);
+            break;
+        }
+        }
+        break;
+    }
+    if (bUseMapUnit) {
+        switch (m_nRsrcGrpID) {
+        case 0x8B6AA: {
+            CEffect* pEff = CEffectMan::getEffect(CEffectMan::setEffect("rec_bg_E062", 0, (ObjType::eObjType)0xB, (const FVECTOR*)NULL, (const FVECTOR*)NULL, 0.0f));
+            if (pEff) pEff->setDrawFirst(0);
+            break;
+        }
+        case 0x975FE:
+        case 0x979FA:
+        case 0x97A5F:
+        case 0x97E17: {
+            char* pszMapEff12 = "rec_bg_E111";
+            int priTbl[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+            for (int i = 0; i < 8; i++) {
+                CEffect* pEff = CEffectMan::getEffect(CEffectMan::setEffect(pszMapEff12, i, (ObjType::eObjType)0xB, (const FVECTOR*)NULL, (const FVECTOR*)NULL, 0.0f));
+                if (pEff) {
+                    pEff->setDrawFirst(priTbl[i]);
+                    if (m_nRsrcGrpID == 0x979FA) {
+                        pEff->setScale(2.0f, 2.0f, 2.0f);
+                    }
+                }
+            }
+            break;
+        }
+        }
+    }
+}
 void CMap::resetFog() {
     CWorldEnv::setFogParam(m_pFog->fognear, m_pFog->fogfar, m_pFog->fogmax, m_pFog->fogmin);
     CWorldEnv::setDispFar(m_pFog->dispfar);
