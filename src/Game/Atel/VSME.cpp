@@ -4,7 +4,6 @@
 #define ATELFOG_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelFog.h"
 #define ATELCROSSFADE_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelCrossFade.h"
 #define ATELBLUR_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelBlur.h"
-#define GAME_ATEL_AVATAR_CPP /* the full CAvatar class (the other includers get a stub) */
 #include "khtypes.h"
 #include "System/Debug.h"
 #include "System/HeapMan.h"

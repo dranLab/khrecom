@@ -11,7 +11,6 @@
 #define AVATAR_H_PATH "c:/KHCOM/MainApp/Game/Atel/Avatar.h"
 #endif
 
-#ifdef GAME_ATEL_AVATAR_CPP
 #include "Game/Entity.h"
 #include "System/Fsm.h"
 #include "System/Graphic/Gprim.h"
@@ -19,11 +18,9 @@ union FMATRIX;
 class CPathData;
 class CHermitePath;
 class CAtel;
-#endif
 
 namespace ATEL {
 
-#ifdef GAME_ATEL_AVATAR_CPP
 struct ETMoveInfo;
 class CVSM;
 
@@ -93,8 +90,8 @@ struct AvatarLookStruct { // 0x8
     FLOAT _fOffsetY;
 };
 
-/* PARTIAL: the full class, for Game/Atel/Avatar (and Game/Atel/VSME) */
 class CAvatar : public ICommandAccepter, public CEntity {
+    friend class ::CAtel; // Game/Atel/Atel calls the private InitAvatar
     UINT m_nIndex;                         /* 0x1e0 */
     UINT m_nParentActorIdx;                /* 0x1e4 */
     INT m_nState;                          /* 0x1e8 */
@@ -582,26 +579,7 @@ public:
     void setAvatarGravity(BOOL bOn);
     FVECTOR* getPathStartPos(const CHAR* pszName) const;
 };
-#else
-/* CEntity is the second base in the original (CTask at 0x10). */
-class CAvatar : public ICommandAccepter, public CTask {
-public:
-    CAvatar();
-    CAvatar(CTask* pParent); // PARTIAL: added for Game/Atel/Atel
-    void InitAvatar(INT flag); // PARTIAL: added for Game/Atel/Atel
-    virtual INT reqCommand(INT nCmd, void* pParam, INT nID); // PARTIAL: added for Game/Atel/Atel
-};
-#endif
 
-/* Placeholder for the original header's inline functions: their assert strings are in .rodata of every
- * includer, in this order. Line numbers are not known. */
-#line 1 AVATAR_H_PATH
-inline void _avatarCheckStructs(void* in_pFadeStruct, void* m_pScaleStruct, void* m_pRotateStruct, void* m_pMoveStruct) {
-    if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
-    if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
-    if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
-    if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
-}
 
 } // namespace ATEL
 
