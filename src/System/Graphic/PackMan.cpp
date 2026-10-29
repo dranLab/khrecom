@@ -310,6 +310,7 @@ extern u_long128 My_dma_start[];
 extern u_long128 My_VU0_start[];
 extern INT SCREEN_HEIGHT;
 extern INT DISP_HEIGHT;
+extern INT NMSVIDEO_MAX_WIDTH;
 extern "C" int sceGsSetDefDrawEnv(sceGsDrawEnv12* draw, short psm, short w, short h, short ztest, short zpsm);
 extern "C" int sceGsSetDefDrawEnv2(sceGsDrawEnv12* draw, short psm, short w, short h, short ztest, short zpsm);
 extern "C" void sceGsSetDefClear(sceGsClear* cp, short ztest, short x, short y, short w, short h, u_char r, u_char g, u_char b, u_char a, u_int z);
@@ -1032,7 +1033,7 @@ static void _loadMicroProgram() {
     CModel::resetMicroProgram();
 }
 void _initFramePacket(INT nKind);                          /* static in the original (still INCLUDE_ASM) */
-void _initFramePacketForMovie(INT n);                       /* static in the original (still INCLUDE_ASM) */
+void _initFramePacketForMovie(INT nAlpha); /* static in the original (still INCLUDE_ASM) */
 void _initFrameEffPacket(INT nKind, INT n1, INT n2, INT n3); /* static in the original (still INCLUDE_ASM) */
 void CPackMan::setFrameEffect(INT nKind, INT n1, INT n2, INT n3) {
     if (nKind >= 6) return;
@@ -1093,7 +1094,93 @@ static void _initFramePacket(INT transKind) {
     sceVif1PkTerminate(pPkt);
     if (intr) EIntr();
 }
+/* Parked: 38 lines - loop 2's X values: the original computes (-(nDstW/2)) << 4 and (nDstW/2) << 4 separately (negu before the shift), ours CSEs them into one shift and a subu; nSrcW/nDstW get s5/s4 swapped. Loops 1 and 3, the TEX0/RGBAQ qwords and the tail match. */
+#if 0
+static void _initFramePacketForMovie(INT nAlpha) {
+    pacVif1Packet* pPkt = &s_pktVif1Frame;
+    INT intr = DIntr();
+    UINT nSrcW = s_nMovieDrawW;
+    UINT nSrcH = s_nMovieDrawH;
+    UINT nDstW = s_nMovieDispW;
+    UINT nDstH = s_nMovieDispH;
+    sceVif1PkInit(pPkt, (u_long128*)s_pPktBufVif1Frame);
+    sceVif1PkReset(pPkt);
+    sceVif1PkCnt(pPkt, 0);
+    sceVif1PkAddCode(pPkt, 0x13000000);
+    sceVif1PkOpenDirectCode(pPkt, 0);
+    sceVif1PkOpenGifTag(pPkt, _pack(0x1000800000008000, 0xe));
+    u_long128* qp = (u_long128*)pPkt->pCurrent;
+    qp[0] = _pack(0x30000, 0x47);
+    qp[1] = _pack((VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4e);
+    qp[2] = _pack((VRAM::_FRAME1_START / 32) | 0x1080000, 0x4c);
+    qp[3] = _pack(0x44, 0x42);
+    qp[4] = _pack(0x61, 0x14);
+    qp[5] = _pack(5, 8);
+    qp[6] = _pack(0, 0x4a);
+    qp += 7;
+    ULONGLONG x = *(u_long*)&s_DBuf.clear0.prim;
+    qp[0] = _pack(x, 0);
+    x = *(u_long*)&s_DBuf.clear0.rgbaq;
+    qp[1] = _pack(x, 1);
+    qp += 2;
+    for (INT i = 0; i < 16; i++) {
+        INT v = i + 1;
+        qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
+        INT ofs = 0x8000;
+        u_long x0 = 0x7000;
+        ULONGLONG z = (u_long)0xfffff << 32;
+        u_long x1 = 0x9000;
+        qp[1] = _pack(((u_long)((-(DISP_HEIGHT / 2) + 32) * 16 + ofs) << 16) | x0 | z, 5);
+        qp[2] = _pack(((u_long)((-(INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | x1 | z, 5);
+        qp[3] = _pack(((u_long)(((INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | x0 | z, 5);
+        qp[4] = _pack(((u_long)((DISP_HEIGHT / 2 + 32) * 16 + ofs) << 16) | x1 | z, 5);
+        qp += 5;
+    }
+    qp[0] = _pack(VRAM::_TEX_PREFIX_START | ((u_long)(NMSVIDEO_MAX_WIDTH / 64) << 14) | 0x20000006a8000000, 6);
+    u_long a = nAlpha & 0xff;
+    qp[1] = _pack(a | (a << 8) | (a << 16) | 0x80000000, 1);
+    qp[2] = _pack(0x116, 0);
+    qp += 3;
+    for (INT i = 0; i < 16; i++) {
+        INT v = i + 1;
+        qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
+        qp[1] = _pack(0x80008, 3);
+        INT ofs = 0x8000;
+        ULONGLONG z = (u_long)0xfffff << 32;
+        qp[2] = _pack((u_long)(((INT)(nDstW / 2) * -16) + ofs) | ((u_long)((-(INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | z, 5);
+        qp[3] = _pack((u_long)(UINT)((nSrcW - 1) * 16 + 8) | ((u_long)(UINT)(nSrcH * 16 + 8) << 16), 3);
+        qp[4] = _pack((u_long)((INT)(nDstW / 2) * 16 + ofs) | ((u_long)(((INT)(nDstH / 2) + 32) * 16 + ofs) << 16) | z, 5);
+        qp += 5;
+    }
+    qp[0] = _pack(0x3000d, 0x47);
+    qp[1] = _pack(VRAM::_FRAME0_START | 0x28020000 | 0x2000000680000000, 6);
+    qp[2] = _pack(0x116, 0);
+    qp += 3;
+    for (INT i = 0; i < 16; i++) {
+        INT v = i + 1;
+        qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
+        qp[1] = _pack(0x80008, 3);
+        INT ofs = 0x8000;
+        u_long x0 = 0x7000;
+        ULONGLONG z = (u_long)0xfffff << 32;
+        qp[2] = _pack(((u_long)((-(DISP_HEIGHT >> 1) + 32) * 16 + ofs) << 16) | x0 | z, 5);
+        qp[3] = _pack(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+        u_long x1 = 0x9000;
+        qp[4] = _pack(((u_long)(((DISP_HEIGHT >> 1) + 32) * 16 + ofs) << 16) | x1 | z, 5);
+        qp += 5;
+    }
+    *qp++ = _pack((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
+    pPkt->pCurrent = (u_int*)qp;
+    sceVif1PkCloseGifTag(pPkt);
+    sceVif1PkCloseDirectCode(pPkt);
+    sceVif1PkEnd(pPkt, 0);
+    sceVif1PkAddCode(pPkt, 0x13000000);
+    sceVif1PkTerminate(pPkt);
+    if (intr) EIntr();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFramePacketForMovie__Fi);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFrameEffPacket__Fiiii);
 void CPackMan::enableZWrite(BOOL inEnable, INT inAddr) {
     QWdata* qp = (QWdata*)_pkOpenGifTag(_pack(0x1000800000008000, 0xe));
