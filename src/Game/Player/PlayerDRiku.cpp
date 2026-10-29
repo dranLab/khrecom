@@ -44,6 +44,10 @@ inline void _taskSLCOverflowMsg() {
 
 namespace PL {
 extern UINT g_uiStartCondition;
+extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; /* Game/Player/PlayerAttack.h */
+extern const BULLET_EFFECT_INFO g_EffTbl_HitMark[27];
+extern FVECTOR g_OffsetTbl_StockSkill[8];
+extern FVECTOR g_RotTbl_Magic[8];
 extern FVECTOR g_vBGFadeColor[7];
 extern FLOAT g_fDefAttr[];
 extern FLOAT g_fGravity;
@@ -92,6 +96,21 @@ static inline FLOAT _limitPI(FLOAT r) {
     return r;
 }
 
+static inline FLOAT _abs(FLOAT inValue) {
+    FLOAT ret;
+    __asm__ volatile("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
+    return ret;
+}
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void Normalize(FVECTOR& v0, const FVECTOR& v1);
+FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT s);
+extern "C" float atan2f(float y, float x);
+static inline FLOAT _sqrtf(FLOAT inValue) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(inValue));
+    return ret;
+}
 static inline INT _getNowCamMode() {
     INT mode = 0;
     PlayerCamera::CPlayerCamera* cam = PlayerCamera::CPlayerCamera::getInstanceRef();
@@ -99,10 +118,7 @@ static inline INT _getNowCamMode() {
     return mode;
 }
 
-class CRcf {
-public:
-    static BOOL isCompleteLoadRCF(INT nType, INT nID);
-};
+#include "System/Rcf.h"
 
 namespace Friend {
 extern BCAM_PARAM g_HolyBurstCamParam;
@@ -112,6 +128,14 @@ void ScaleVectorXYZ(FVECTOR& outV, const FVECTOR& inV, FLOAT inScale);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 extern "C" void sceVu0RotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry);
+extern "C" void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
+extern "C" void sceVu0UnitMatrix(FMATRIX& m);
+extern "C" float sinf(float);
+extern "C" float cosf(float);
+void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+namespace Math3D {
+FLOAT LimitPI(FLOAT pai);
+}
 
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
@@ -126,10 +150,7 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "memory");
 }
 
-class CGameWork {
-public:
-    static BOOL getFlag(UINT nLv, UINT nIdx);
-};
+#include "Game/GameWork.h"
 
 /* Game/Collision/CollBody.h (not decompiled yet): CPlayer's m_collBody */
 struct _CollBodyView {
@@ -578,6 +599,137 @@ void CPlayerDRiku::exeSpeedStep() {
         initIdle(-1, 1);
     }
 }
+/* Parked: 7 lines off, registers only: in the card branch the original keeps %hi(g_pBattleCardList) in t0 and the shared constant 1 (m_iAttackNo == 1, _upKind's shift) in a2, ours t1 and t0. Worked: CPlayer::setAttack's form, the player-flag 0x80000 arm first, `pre == 7 || isAir()` for the last hit, case 7 with its own body. Tried: _ref forms of the m_AtkKind/m_AtkAttr stores, up declared early or inline, an unsigned compare; permuter 15 min (7238 candidates, stays 8). */
+#if 0
+void CPlayerDRiku::setAttack() {
+    CEntity* pTarget;
+    FLOAT distY;
+    FLOAT dist;
+    FLOAT dir;
+    FLOAT rate;
+    FLOAT power;
+    CEffect* effect;
+    if (m_hTarget > 0) pTarget = (CEntity*)CTaskMan::getTask(m_hTarget);
+    else pTarget = NULL;
+    distY = 0.0f;
+    dist = 0.0f;
+    dir = 0.0f;
+    if (pTarget) {
+        pTarget->getLockOnPos(m_vMarkPos);
+        distY = m_vMarkPos.y - m_vCenterPos.y;
+        distY -= 1.0f;
+        dist = calcDistance(*pTarget);
+        dir = calcDirection(*pTarget) - m_fDir;
+        dir = _abs(dir);
+        m_hMark = m_hTarget;
+    } else {
+        m_iSubState = 3;
+        m_vMarkPos.set(0.0f, 0.0f, 0.0f);
+        m_hMark = 0;
+    }
+    m_fJumpSpdY = 0.0f;
+    if (isPlayerFlag(0x80000)) {
+        m_uiAttackKind = 6;
+    } else if (!(m_iAttackNo < m_iMaxCombo - 1)) {
+        if (m_uiPreAttackKind == 7 || isAir()) m_uiAttackKind = 7;
+        else m_uiAttackKind = 4;
+    } else {
+        switch (m_uiPreAttackKind) {
+        case 1:
+        case 2:
+        case 6:
+            if (distY > 0.0f) m_uiAttackKind = 5;
+            else if (isAir()) m_uiAttackKind = 5;
+            else m_uiAttackKind = 3;
+            break;
+        case 3:
+        case 5:
+            m_uiAttackKind = isAir() ? 6 : 1;
+            goto kindDone;
+        case 7:
+            m_uiAttackKind = 7;
+            break;
+        default:
+            if (isAir()) m_uiAttackKind = 7;
+            else if (!pTarget) m_uiAttackKind = 1;
+            else if (distY > 0.0f) m_uiAttackKind = 5;
+            else if (dist > 3.5f) m_uiAttackKind = 3;
+            else if (dir > 0.7853982f) {
+                if (dir < 2.3561945f) m_uiAttackKind = 2;
+                else m_uiAttackKind = 1;
+            } else m_uiAttackKind = 1;
+            break;
+        }
+    kindDone:
+        if (m_uiAttackKind == 1) {
+            if (getFrontAirHeight(NULL, 1.0f, 2.0f, 0.0f) > 0.0035f) m_uiAttackKind = 6;
+        }
+    }
+    m_uiAttackID = PL::g_DRikuAttackList[m_uiAttackKind];
+    if (m_iAttackNo == 0) {
+        if ((UINT)((USHORT)DebugWork::g_dw.player.iAttackID - 0x9E) < 7) m_uiAttackID = DebugWork::g_dw.player.iAttackID;
+    }
+    m_pAtkData = &PL::g_AttackDataList[m_uiAttackID];
+    switch (m_uiAttackID) {
+    case 0xA2:
+        power = 0.0f;
+        if (!isAir()) {
+            if (distY < 2.0f) power = (FLOAT)m_pAtkData->WORK1;
+            else power = distY * 10.0f + 24.0f;
+        } else {
+            if (power <= distY) power = distY * 10.0f + 4.0f;
+        }
+        if (power > 40.0f) power = 40.0f;
+        m_fJumpSpdY = PL::g_fAntiGravity * power;
+        procGravity(0, 1, 1);
+        break;
+    }
+    setAnimForce(m_pAtkData->ANIM_ID, 0, 1, 0, 0, 0);
+    if (isConditionFlag(0x4000000)) {
+        FVECTOR rot;
+        setAnimSpeed(1.5f);
+        rot.set(1.5707964f, 0.0f, 0.0f, 1.0f);
+        if (!m_hEffAttack[0]) {
+            m_hEffAttack[0] = attachEffect(PL::g_szDpxEX1580, 0x2A, &Crd(m_iBoneChest), NULL, &rot, 0.0f);
+            effect = CEffectMan::getEffect(m_hEffAttack[0]);
+            if (effect) effect->m_iFlag |= 4;
+        }
+        if (!m_hEffAttack[1]) {
+            m_hEffAttack[1] = attachEffect(PL::g_szDpxEX1580, 0x2D, &Crd(m_iBoneChest), NULL, NULL, 0.0f);
+            effect = CEffectMan::getEffect(m_hEffAttack[1]);
+            if (effect) effect->m_iFlag |= 4;
+        }
+        if (!m_hEffAttack[2]) {
+            m_hEffAttack[2] = attachEffect(PL::g_szDpxSpeedBreak, 4, &Crd(m_iBoneChest), NULL, NULL, 0.0f);
+            effect = CEffectMan::getEffect(m_hEffAttack[2]);
+            if (effect) effect->m_iFlag |= 4;
+        }
+    }
+    if (isConditionFlag(0x100)) setAnimSpeed(2.0f);
+    m_bDmgMuteki = FALSE;
+    if (m_uiCardID == 0) {
+        m_iAttackPower = m_iAP;
+        m_AtkKind = (ATK_KIND)m_pAtkData->DAMAGE;
+        m_AtkAttr = (ATK_ATTR)0;
+    } else {
+        INT power2;
+        power2 = (*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].POWER[m_pAtkData->POWER];
+        power2 += m_iComboBoost;
+        if (isConditionFlag(0x4000000)) power2 += power2 / 2;
+        m_iAttackPower = m_iAP * power2 / 100;
+        m_AtkKind = (ATK_KIND)m_pAtkData->DAMAGE;
+        if (m_iAttackNo == 1) m_AtkKind = (ATK_KIND)7;
+        _ref(m_AtkAttr) = (ATK_ATTR)(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].ATTR;
+        UINT up = _upKind((*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].UP_TYPE0, (*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].UP_TYPE1);
+        calcEnchant_AttackPoint(m_iAttackPower, m_AtkKind, m_AtkAttr, up);
+    }
+    m_bIsCanCombo = m_pAtkData->FLAG & 1;
+    m_uiPreAttackKind = m_uiAttackKind;
+    rate = m_fAnimSpeed * 100.0f;
+    m_tqAttackTimer = m_pAnim->getTotalTqCrd() * 100 / (INT)rate + 1000;
+    m_iAttackNo++;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", setAttack__Q22PL12CPlayerDRiku);
 // setAttack__Q22PL12CPlayerDRiku: its .rodata, for its INCLUDE_ASM; remove with it.
 asm(".section .rodata\n"
@@ -592,9 +744,8 @@ asm(".section .rodata\n"
     ".word .L0027E0E4\n"
     ".word 0\n"
     ".section .text");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", initJump2nd__Q22PL12CPlayerDRiku);
-
-/* Best attempt: with a target, the m_vMarkPos/m_hMark copies get swapped registers and rot.y is stored before m_fDir/m_fJumpDir instead of in the branch delay slot (11 lines differ). */
+#endif
+/* Parked: with a target, the m_vMarkPos/m_hMark copies get swapped registers and rot.y is stored before m_fDir/m_fJumpDir instead of in the branch delay slot (11 lines differ). */
 #if 0
 void CPlayerDRiku::initJump2nd() {
     if (isBattleFlag(0x200000)) return;
@@ -640,8 +791,113 @@ void CPlayerDRiku::initJump2nd() {
     m_fDistXZ = m_fDistY = 0.0f;
     m_fJumpSpdY = g_fAntiGravity * m_fJumpPow;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", initJump2nd__Q22PL12CPlayerDRiku);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", exeJump2nd__Q22PL12CPlayerDRiku);
+void CPlayerDRiku::exeJump2nd() {
+    TIMEQ frame = getMotionCurrentTime() / 50;
+    FVECTOR vel = m_pMove->getVel();
+    FVECTOR vec;
+    setBattleFlag(0, 8);
+    switch (m_JumpState) {
+    case 2: {
+        BOOL bFloat = TRUE;
+        m_fJumpGravity = g_fGravity;
+        m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        if (m_hMark > 0) {
+            SubVectorXYZ(vec, m_vMarkPos, getPos());
+            m_fDistY = _abs(vec.y);
+            if (vec.y < -1.0f) {
+                if (m_fJumpSpdY > 0.0f) {
+                    if (m_fDistY < 3.0f) m_fJumpSpdY *= g_fJumpStopRate;
+                    else m_fJumpSpdY = 0.0f;
+                }
+                bFloat = FALSE;
+            }
+        }
+        if (bFloat && m_fJumpSpdY < 0.0f) {
+            if (frame < m_pAtkData->MOVE_END_FRAME) m_fJumpSpdY = 0.0f;
+        }
+        vel.y = m_fJumpSpdY;
+        FLOAT rate = 0.0f;
+        FVECTOR rot = getRot();
+        FLOAT dirY = rot.y;
+        CEntity* pTarget = m_hTarget > 0 ? (CEntity*)CTaskMan::getTask(m_hTarget) : NULL;
+        if (pTarget) {
+            if (frame < 6) {
+                rate = 1.0f;
+                m_fDir = pTarget->getRot().y;
+                pTarget->getLockOnPos(m_vMarkPos);
+                calcAppearPos(-2.0f, 0.5f, &m_vMarkPos);
+                m_vMarkPos = m_vAppearPos;
+                m_hMark = m_hTarget;
+                m_fDir = dirY;
+            }
+            if (frame < m_pAtkData->MOVE_END_FRAME) m_fDir = calcDirection(pTarget);
+        }
+        FVECTOR dir;
+        FLOAT speed = 0.0f;
+        SubVectorXYZ(vec, m_vMarkPos, m_vCenterPos);
+        Normalize(dir, vec);
+        vec.y = 0.0f;
+        m_fDistXZ = _sqrtf(InnerProduct(vec, vec));
+        m_fJumpDir = Movement::Homing(m_fJumpDir, atan2f(dir.x, dir.z), rate, m_fFrameRate);
+        vec.set(0.0f, m_fJumpDir, 0.0f, 1.0f);
+        setRot(vec);
+        if (frame < m_pAtkData->MOVE_END_FRAME && m_pAtkData->RADIUS * 0.1f < m_fDistXZ) speed = m_pAtkData->MAX_SPEED / 60.0f;
+        if ((m_pAtkData->FLAG & 0x10) && frame < m_pAtkData->MOVE_END_FRAME) speed += m_pAtkData->WORK0 / 60.0f;
+        if (speed > 0.0f) m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.2f, m_fFrameRate);
+        else m_fMoveSpdXZ = Movement::Approach(m_fMoveSpdXZ, speed, 0.4f, m_fFrameRate);
+        FMATRIX m;
+        _unitMatrixVu0(m);
+        vec.set(0.0f, 0.0f, 1.0f, 1.0f);
+        sceVu0RotMatrixY(m, m, m_fJumpDir);
+        ApplyMatrix33(vec, m, vec);
+        ScaleVector(vec, vec, m_fMoveSpdXZ);
+        vel.x = vec.x;
+        vel.z = vec.z;
+        m_pMove->setVel(vel);
+        rot.set(0.0f, m_fDir, 0.0f, 1.0f);
+        setRot(rot);
+        if (isMotionEnd()) {
+            m_JumpState = 3;
+            setAnimForce(6, -1, 0, 0, 0, 0);
+            m_pMarker->holdTarget(0);
+        }
+        break;
+    }
+    case 3:
+        m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
+        vel.y = m_fJumpSpdY;
+        m_pMove->setVel(vel);
+        break;
+    case 6:
+        setGroundIK(1);
+        exeJumpLand();
+        return;
+    }
+    if (isActionFlag(0x2000000)) {
+        if (isTrgFlag(0x10)) chkChargeMove(0);
+    }
+    if (chkTrgAction(0, 0)) {
+        m_pMarker->holdTarget(0);
+        return;
+    }
+    if (!isAir()) {
+        m_JumpState = 6;
+        setAnimForce(7, -1, 0, 0, 0, 0);
+        m_fJumpSpdXZ = 0.0f;
+        clearSpeed();
+        setBattleFlag(0, 8);
+        m_fJumpSpdY = 0.0f;
+        m_fJumpGravity = 0.0f;
+        m_pMarker->holdTarget(0);
+        return;
+    }
+    m_fJumpHeight = getPos().y - m_vJumpStartPos.y;
+    if (m_fJumpTop < m_fJumpHeight) m_fJumpTop = m_fJumpHeight;
+    m_tqJumpTimer += m_tqFrameRate;
+}
 INT CPlayerDRiku::startStockSkillAction() {
     INT id;
     switch (m_iStockSkill) {
@@ -770,7 +1026,853 @@ void CPlayerDRiku::initStockSkill(INT inNo) {
     setTrgFlag(0, 0x40000);
     m_hMagicCore = 0;
 }
+/* Parked: structurally complete (35 cases in the original order, Riku's 0x6cc-0x6f9 group renumbered to 0x712-0x73f), same frame, 8 bytes long, 173 of 3903 lines off: case 1's attack-ID switch keeps a compare for the empty case 0x690 in the original; cross-jumped tails differ (0x67c's flag-and-return tail, 0x683); pTarget gets s2 instead of s0 in 0x69c; f0/f1 choices in 0x69c and 0x4a8; the original keeps 50 in s2 for the whole function; 0x4a8 has a dead (m_fAnalogViewDir - m_fDir) < -PI compare. Worked: two block-local FVECTORs in 0x4a8 (frame size), 0x69b's arrive/else arm order, 0x73c's offWeapon tail, 0x73d's setMagic(0xb9) loop with onWeapon(1). Tried: switch forms for case 1. Same family as the parked CPlayerRiku/CPlayerSora exeStockSkill drafts. */
+#if 0
+static inline void _setAttack(CPlayerDRiku* p, UINT inID) {
+    p->m_uiAttackID = inID;
+    p->m_pAtkData = &g_AttackDataList[inID];
+    p->m_iAttackPower = p->m_iAP * CardBattle::g_pStockSkillList[p->m_iStockSkill].POWER[p->m_pAtkData->POWER] / 100;
+    _ref(p->m_AtkKind) = (ATK_KIND)p->m_pAtkData->DAMAGE;
+    _ref(p->m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[p->m_iStockSkill].ATTR;
+    UINT up = _upKind(CardBattle::g_pStockSkillList[p->m_iStockSkill].UP_TYPE0,
+                      CardBattle::g_pStockSkillList[p->m_iStockSkill].UP_TYPE1);
+    p->calcEnchant_AttackPoint(p->m_iAttackPower, p->m_AtkKind, p->m_AtkAttr, up);
+}
+void CPlayerDRiku::exeStockSkill() {
+    INT SESeq;
+    FVECTOR pos;
+    FVECTOR rot;
+    FVECTOR vel;
+    CBattleEnemy* pTarget;
+    FVECTOR vec;
+    TIMEQ frame = getMotionCurrentTime() / 50;
+    setBattleFlag(0, 8);
+    m_fDistXZ = m_fDistY = 0.0f;
+    switch (m_iSubState) {
+    case 1:
+        if (!isPlayerFlag(0x800000) && isAir()) {
+            setAnim(6, 800, 0);
+            procGravity(frame, 0, 0);
+            return;
+        }
+        SESeq = getStateSESeq(3);
+        m_fJumpSpdY = 0.0f;
+        m_JumpState = 3;
+        clearSpeed();
+        m_hOldLockon = m_hLockon;
+        _ref(m_iOldCamMode) = _getNowCamMode();
+        if (CardBattle::g_pStockSkillList[m_iStockSkill].CATEGORY == 5) {
+            setBGFade(g_vBGFadeColor[0], 20.0f, 0);
+            setAnimForce(0x2e, -1, 1, 0, SESeq, 0);
+            setCastEffect(g_szDpxFriend, 0, &Crd(0), NULL);
+            calcAppearPosFS_toAttackID();
+            if ((m_pAtkData->FLAG & 0x20) && m_pPLM->isCompleteLoad(m_iStockSkill) != 1) {
+                setObjStop(1);
+                m_pCam->changeCamMode(5, 0);
+            }
+            m_iSubState = 0x69f;
+            return;
+        }
+        if (isPlayerFlag(0x800000)) {
+            setPlayerFlag(0x2000000, 0);
+            m_fJumpGravity = g_fGravity * 0.16f;
+        }
+        if (isBattleFlag(0x100000)) {
+            setBGFade(g_vBGFadeColor[0], 20.0f, 0);
+            setAnim(0x38, -1, 0);
+            if (m_pPLM->isCompleteLoad(m_iStockSkill) != 1) {
+                setObjStop(1);
+                m_pCam->changeCamMode(5, 0);
+            }
+            m_iSubState = 0x4ab;
+            return;
+        }
+        if (m_pAtkData->FLAG & 0x20) {
+            switch (m_uiAttackID * 10) {
+            case 0x690:
+                break;
+            case 0x67c:
+                setCastEffect(g_szDpxEX1580, 0x13, &Crd(m_iBoneCenter), NULL);
+                break;
+            }
+            setBGFade(g_vBGFadeColor[0], 20.0f, 0);
+            if (m_pPLM->isCompleteLoad(m_iStockSkill) != 1) {
+                setAnimForce(0x2e, -1, 1, 0, 0, 0);
+                setObjStop(1);
+                m_pCam->changeCamMode(5, 0);
+                m_iSubState = 4;
+                return;
+            }
+            setUseRsrcBlock(1);
+        }
+        m_iSubState = m_uiAttackID * 10;
+        if (!(m_pAtkData->FLAG & 0x40)) {
+            setAnimForce(m_pAtkData->ANIM_ID + m_iAerialAnimShift, 0, 1, m_pAtkData->ANIM_ESQ, SESeq, 0);
+        } else {
+            setAnimSkillEx(m_pAtkData->ANIM_ID + m_iAerialAnimShift, 0, 1, m_pAtkData->ANIM_ESQ, SESeq);
+        }
+        setPlayerFlag(0x100000, 0);
+        m_tqStateTimer = 0;
+        m_pMarker->holdTarget(8);
+        procTargetMark();
+        return;
+    case 4:
+        if (m_pPLM->isCompleteLoad(m_iStockSkill) != 1) return;
+        if (!isMotionLoop()) return;
+        setUseRsrcBlock(1);
+        setObjStop(0);
+        m_pCam->changeCamMode(-1, 0);
+        SESeq = getStateSESeq(3);
+        m_iSubState = m_uiAttackID * 10;
+        if (!(m_pAtkData->FLAG & 0x40)) {
+            setAnimForce(m_pAtkData->ANIM_ID + m_iAerialAnimShift, 0, 1, m_pAtkData->ANIM_ESQ, SESeq, 0);
+        } else {
+            setAnimSkillEx(m_pAtkData->ANIM_ID + m_iAerialAnimShift, 0, 1, m_pAtkData->ANIM_ESQ, SESeq);
+        }
+        setPlayerFlag(0x100000, 0);
+        m_tqStateTimer = 0;
+        m_pMarker->holdTarget(8);
+        procTargetMark();
+        return;
+    case 0x67c:
+        if (!m_bNextTrg) {
+            m_bNextTrg = TRUE;
+            m_fJumpSpdY = g_fAntiGravity * m_pAtkData->WORK1;
+            vel = m_pMove->getVel();
+            vel.y = m_fJumpSpdY;
+            m_pMove->setVel(vel);
+        }
+        procTargetMark();
+        procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, 1, 0.15f);
+        if (!isMotionEnd()) return;
+        m_iSubState = 0x67d;
+        m_fJumpSpdY = g_fGravity * m_pAtkData->WORK2;
+        vel = m_pMove->getVel();
+        vel.y = m_fJumpSpdY;
+        m_pMove->setVel(vel);
+        setAnimSkillEx(1, 0, 0, 0, 0);
+        m_bNextTrg = FALSE;
+        setPlayerFlag(0x100000, 0);
+        return;
+    case 0x67d:
+    case 0x67e:
+    case 0x67f:
+    case 0x680:
+    case 0x681:
+    case 0x682:
+        procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, 1, 0.15f);
+        if (!isTrgFlag(0x40000)) {
+            if (isTrgStock()) setTrgFlagRendaNG("exeStockSkill:  DARKBREAK  Entry NG...\n");
+        }
+        if (procAttackCollision(frame)) return;
+        if (m_bIsAttackHit) {
+            offAttack();
+            if (++m_nAttackCount < 6 && !isTrgFlag(0x40000)) {
+                m_iSubState = 0x683;
+                m_bIsCanCombo = FALSE;
+                m_bNextTrg = TRUE;
+                vel = m_pMove->getVel();
+                if (m_nAttackCount < 5) {
+                    setPushon(1);
+                    m_fJumpSpdY = 0.0f;
+                } else {
+                    setPushon(3);
+                    _setAttack(this, 0xa7);
+                    m_fJumpSpdY = g_fAntiGravity * m_pAtkData->WORK1;
+                }
+                vel.y = m_fJumpSpdY;
+                m_pMove->setVel(vel);
+                setAnimSkillEx(2, -1, 1, 0, 0);
+                setPlayerFlag(0x100000, 0);
+                return;
+            }
+        }
+        if (isMotionEnd()) {
+            m_iSubState = 0x684;
+            setAnimSkillEx(3, -1, 1, 0, 0);
+            clearSpeed();
+        }
+        break;
+    case 0x683:
+        if (!isTrgFlag(0x40000) && m_bNextTrg && isTrgStock()) {
+            m_bIsCanCombo = TRUE;
+            setPushon(0);
+            m_bNextTrg = FALSE;
+        }
+        procTargetMark();
+        procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, 1, 0.15f);
+        if (!isMotionEnd()) return;
+        setPushon(0);
+        if (m_bIsCanCombo) {
+            m_bIsCanCombo = FALSE;
+            m_iSubState = m_nAttackCount + 0x67d;
+            m_bNextTrg = FALSE;
+            m_bIsAttackHit = FALSE;
+            m_fJumpSpdY = g_fGravity * m_pAtkData->WORK2;
+            vel = m_pMove->getVel();
+            vel.y = m_fJumpSpdY;
+            m_pMove->setVel(vel);
+            setAnimSkillEx(1, 0, 0, 0, 0);
+            setPlayerFlag(0x100000, 0);
+            return;
+        }
+        clearSpeed();
+        procSkillEnd(-1);
+        return;
+    case 0x690:
+        setPlayerFlag(0x400000, 0);
+        procTargetMark();
+        procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+        if (frame < m_pAtkData->TRG_FRAME) break;
+        m_iSubState = 0x691;
+        setMagic(0xa8, 0, m_iStockSkill);
+        m_pCam->changeNowPlayer(getHandle(), m_hMagicCore);
+        m_pCam->changeCamMode(4, 0);
+        break;
+    case 0x691:
+        setPlayerFlag(0x400000, 0);
+        if (m_hMagicCore > 0 && !CTaskMan::getTask(m_hMagicCore)) m_hMagicCore = 0;
+        if (!isMotionEnd()) break;
+        m_iSubState = 0x692;
+        setAnim(0x2a, -1, 0);
+        setTimer(m_pAtkData->WORK2 * 100);
+        break;
+    case 0x692:
+        setPlayerFlag(0x400000, 0);
+        if (m_hMagicCore > 0 && !CTaskMan::getTask(m_hMagicCore)) m_hMagicCore = 0;
+        if (getTimer() > 0 && m_hMagicCore > 0) break;
+        m_hMagicCore = 0;
+        PlayerCamera::CPlayerCamera::setBattleCamData(0, NULL);
+        m_pCam->changeNowPlayer(0, 0);
+        m_pCam->changeCamMode(-1, 0);
+        procSkillEnd(-1);
+        return;
+    case 0x69a:
+        m_fJumpSpdY = 0.0f;
+        setPlayerFlag(0x400000, 0);
+        procTargetMark();
+        procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+        if (isMotionEnd()) {
+            m_vAppearPos = m_vCenterPos;
+            clearSpeed();
+            setAnimSkillEx(1, -1, 0, 0, 0);
+            setTimer(m_pAtkData->WORK2 * 100);
+            m_fJumpDir = calcDirection(m_vMarkPos);
+            searchWarpPos(m_fJumpDir);
+            m_iSubState = 0x69b;
+            m_nAttackCount = 0;
+        }
+        if (m_bNextTrg) return;
+        m_bNextTrg = TRUE;
+        m_pCam->changeNowPlayer(getHandle(), getHandle());
+        m_pCam->changeCamMode(4, 0);
+        return;
+    case 0x69b:
+        setPlayerFlag(0x400000, 0);
+        rot = getRot();
+        m_pMove->homingMove(m_vWarpPos[1], 1.0f, m_pAtkData->MAX_SPEED * 0.01f);
+        setRot(rot);
+        if (!m_pWeapon->getCollAttackID()) onAttack();
+        if (arriveTarget(m_vWarpPos[1], m_pAtkData->RADIUS * 0.1f) || getTimer() <= 0) {
+            offAttack();
+            clearSpeed();
+            setupFade(1.0f, 0.0f, m_pAtkData->MOVE_START_FRAME * 50, -1);
+            updateCoord();
+            coordFix();
+            m_vCenterPos = *(FVECTOR*)((UBYTE*)&Crd(m_iBoneCenter) + 0xc0); /* CCoord::m_World.v[3] */
+            setEffect(g_EffTbl_HitMark[21].pEffectName, 0x27, &m_vCenterPos, NULL, 0.0f);
+            m_iSubState = 0x69c;
+        } else {
+            if (m_pMove->isWall()) setTimer(getTimer() - m_tqFrameRate);
+        }
+        return;
+    case 0x69c:
+        setPlayerFlag(0x400000, 0);
+        if (isFade()) return;
+        pTarget = m_hTarget > 0 ? (CBattleEnemy*)CTaskMan::getTask(m_hMark) : NULL;
+        if (++m_nAttackCount >= m_pAtkData->TRG_FRAME) {
+            setAnimSkillEx(4, -1, 0, 0, 0);
+            searchWarpPos(m_fJumpDir);
+            m_vAppearPos = m_vEnemyPos;
+            setPos(m_vEnemyPos);
+            pos.x = m_vStartPos.x;
+            if (!(m_pPLM->getFlag() & 0x2000)) pos.y = m_vEnemyPos.y + 5.0f;
+            else pos.y = 7.0f;
+            pos.z = m_vStartPos.z;
+            setOldPos(pos);
+            m_iSubState = 0x69d;
+            _setAttack(this, 0xaa);
+            m_pCam->changeNowPlayer(getHandle(), getHandle());
+            m_pCam->changeCamMode(4, 0);
+            m_bNextTrg = FALSE;
+        } else {
+            if (pTarget) {
+                pTarget->getLockOnPos(m_vMarkPos);
+            } else {
+                pTarget = m_hTarget > 0 ? (CBattleEnemy*)CTaskMan::getTask(m_hTarget) : NULL;
+                if (pTarget) {
+                    m_hMark = m_hTarget;
+                    pTarget->getLockOnPos(m_vMarkPos);
+                }
+            }
+            setAnimSkillEx(m_nAttackCount % 3 + 1, -1, 0, 0, 0);
+            setTimer(m_pAtkData->WORK2 * 100);
+            m_fJumpDir = _limitPI(m_fJumpDir + 0.31415927f);
+            searchWarpPos(m_fJumpDir);
+            warp(m_vWarpPos[0]);
+            m_iSubState = 0x69b;
+            if (m_pPLM->getFlag() & 0x2000) {
+                pos.set(m_vWarpPos[0].x, 7.0f, m_vWarpPos[0].z, 1.0f);
+                setOldPos(pos);
+            }
+            if (pTarget) {
+                m_pCam->changeNowPlayer(m_hMark, 0);
+                m_pCam->changeCamMode(3, 0);
+            }
+        }
+        setupFade(0.0f, 1.0f, m_pAtkData->MOVE_START_FRAME * 50, -1);
+        updateCoord();
+        coordFix();
+        m_vCenterPos = *(FVECTOR*)((UBYTE*)&Crd(m_iBoneCenter) + 0xc0); /* CCoord::m_World.v[3] */
+        setEffect(g_EffTbl_HitMark[21].pEffectName, 0x26, &m_vCenterPos, NULL, 0.0f);
+        return;
+    case 0x69d:
+        setPlayerFlag(0x400000, 0);
+        if (frame >= m_pAtkData->COLL_START_FRAME && !m_pWeapon->getCollAttackID()) onAttack();
+        if (frame >= m_pAtkData->WORK1 && !m_bNextTrg) {
+            m_bNextTrg = TRUE;
+            setMagic(0xab, -1, m_iStockSkill);
+        }
+        if (frame < m_pAtkData->WORK0) break;
+        setMagic(0xab, 0, -1);
+        m_nAttackCount = 0;
+        m_iSubState = 0x69e;
+        setTimer(0);
+        break;
+    case 0x69e:
+        setPlayerFlag(0x400000, 0);
+        if (frame >= m_pAtkData->WORK2) offAttack();
+        if (getTimer() > 0) break;
+        if (++m_nAttackCount >= m_pAtkData->TRG_FRAME) {
+            if (!isMotionEnd()) break;
+            m_pCam->changeNowPlayer(0, 0);
+            m_pCam->changeCamMode(3, 0);
+            procSkillEnd(-1);
+            return;
+        }
+        if (m_nAttackCount == 1) {
+            _setAttack(this, 0xab);
+        }
+        setMagic(0xab, 0, m_iStockSkill);
+        setTimer(m_pAtkData->WORK0 * 50);
+        break;
+    case 0x69f:
+        if (m_iStockSkill == 0x65) {
+            if (!CRcf::isCompleteLoadRCF(0, 0)) break;
+            m_bNextTrg = FALSE;
+            if (m_pPLM->isCompleteLoad(0x62) != 1) {
+                m_pPLM->setReqLoad(0x62, 0);
+                m_bNextTrg = TRUE;
+            }
+            if (m_pPLM->isCompleteLoad(0x65) != 1) {
+                m_pPLM->setReqLoad(0x65, 0);
+                m_bNextTrg = TRUE;
+            }
+            if (m_bNextTrg) break;
+            if (!m_pPLM->isFriendReady()) {
+                m_pPLM->createFriend(m_pPLM->getFriendID_toSkill(m_iStockSkill), this);
+                break;
+            }
+            setUseRsrcBlock(1);
+        } else {
+            if (m_pPLM->isCompleteLoad(m_iStockSkill) != 1) break;
+            if (!m_pPLM->isFriendReady()) {
+                m_pPLM->createFriend(m_pPLM->getFriendID_toSkill(m_iStockSkill), NULL);
+                break;
+            }
+        }
+        if (!isMotionLoop()) break;
+        setObjStop(0);
+        m_pCam->changeCamMode(-1, 0);
+        calcAppearPosFS_toAttackID();
+        m_pPLM->getFriend()->setAppear();
+        fadeEffect(m_hEffCast, 1);
+        setEffect(g_szDpxFriend, 3, &getPos(), NULL, 0.0f);
+        m_iSubState = m_uiAttackID * 10;
+        setAnimForce(0x2a, -1, 0, 0, 0, 0);
+        setPlayerFlag(0x100000, 0);
+        m_tqStateTimer = 0;
+        m_pMarker->holdTarget(8);
+        procTargetMark();
+        break;
+    case 0x488:
+    case 0x492:
+        if (!m_pPLM->isFriendReady()) {
+            m_iSubState = 0x4aa;
+            break;
+        }
+        if (!m_bIsCanCombo) {
+            m_bIsCanCombo = m_pPLM->getFriend()->setSkill(m_uiAttackID);
+        }
+        exeStandUp_inFriend();
+        break;
+    case 0x4a6:
+        setPlayerFlag(0x400000, 0);
+        if (!m_pPLM->isFriendReady()) {
+            m_iSubState = 0x4aa;
+            break;
+        }
+        if (!m_bIsCanCombo) {
+            m_bIsCanCombo = m_pPLM->getFriend()->setSkill(m_uiAttackID);
+            if (!m_bIsCanCombo) break;
+        }
+        m_iSubState = 0x4a7;
+        setAnimSkillEx(0, 0, 0, 0, 0);
+        setConditionFlag(0x80000, 0);
+        break;
+    case 0x4a7:
+        setPlayerFlag(0x400000, 0);
+        if (!m_pPLM->isFriendReady()) {
+            m_iSubState = 0x4aa;
+            break;
+        }
+        if (!isMotionEnd()) break;
+        m_iSubState = 0x4a8;
+        setAnimSkillEx(1, 0, 0, 0, 0);
+        m_uiStep = 0;
+        m_iCount = 0;
+        setTimer(m_pAtkData->TRG_FRAME * 50);
+        PlayerCamera::CPlayerCamera::setBattleCamData(getHandle(), &Friend::g_HolyBurstCamParam);
+        m_pCam->changeNowPlayer(getHandle(), 0);
+        m_pCam->changeCamMode(3, 0);
+        break;
+    case 0x4a8:
+        if (!m_pPLM->isFriendReady()) {
+            m_iSubState = 0x4aa;
+            break;
+        }
+        if (isMotionEnd()) {
+            m_iCount = 0;
+            if (++m_uiStep >= 4) {
+                m_iSubState = 0x4a9;
+                setAnimSkillEx(2, -1, 1, 0, 0);
+                setConditionFlag(0, 0x80000);
+                m_fWallRadius = 0.5f;
+                m_fJumpSpdXZ = 0.0f;
+                m_fWalkSpeed = 0.0f;
+                m_pMove->calcVelocityXZ(0.0f);
+                clearSpeed();
+                PlayerCamera::CPlayerCamera::setBattleCamData(0, NULL);
+                m_pCam->changeNowPlayer(0, 0);
+                m_pCam->changeCamMode(3, 0);
+                break;
+            }
+        }
+        {
+            FLOAT speed = 0.0f;
+            if (m_fAnalogPower >= 0.3f) {
+                _limitPI(m_fAnalogViewDir - m_fDir);
+                speed = m_pAtkData->WORK2 * 0.1f;
+                m_fDir = Movement::Homing(m_fDir, m_fAnalogViewDir, 0.2f, m_fFrameRate);
+                FVECTOR r0;
+                r0._q = 0;
+                r0.y = m_fDir;
+                FVECTOR r1 = r0;
+                setRot(r1);
+            }
+            m_fWalkSpeed = speed / 60.0f;
+            m_fJumpSpdXZ = Movement::Approach(m_fJumpSpdXZ, m_fWalkSpeed, 0.02f, m_fFrameRate);
+            m_fWalkSpeed = m_fJumpSpdXZ;
+            m_pMove->calcVelocityXZ(m_fJumpSpdXZ);
+        }
+        if (getTimer() > 0) break;
+        setMagic(0x77, 0, m_iStockSkill);
+        m_iCount++;
+        setTimer(m_pAtkData->TRG_FRAME * 50);
+        break;
+    case 0x4a9:
+        if (isMotionEnd()) setAnim(0x2a, -1, 0);
+        if (m_pPLM->isFriendReady()) break;
+        procSkillEnd(-1);
+        break;
+    case 0x4ab:
+        if (!CRcf::isCompleteLoadRCF(0, 0)) break;
+        m_bNextTrg = FALSE;
+        if (m_pPLM->isCompleteLoad(m_iStockSkill) != 1) {
+            m_pPLM->setReqLoad(m_iStockSkill, 0);
+            m_bNextTrg = TRUE;
+        }
+        switch (m_iStockSkill) {
+        case 0x69:
+            if (m_pPLM->isCompleteLoad(0x93) != 1) {
+                m_pPLM->setReqLoad(0x93, 0);
+                m_bNextTrg = TRUE;
+            }
+            break;
+        case 0x6a:
+            if (m_pPLM->isCompleteLoad(0x94) != 1) {
+                m_pPLM->setReqLoad(0x94, 0);
+                m_bNextTrg = TRUE;
+            }
+            if (m_pPLM->isCompleteLoad(0x92) != 1) {
+                m_pPLM->setReqLoad(0x92, 0);
+                m_bNextTrg = TRUE;
+            }
+            break;
+        case 0x6b:
+            if (m_pPLM->isCompleteLoad(0x95) != 1) {
+                m_pPLM->setReqLoad(0x95, 0);
+                m_bNextTrg = TRUE;
+            }
+            if (m_pPLM->isCompleteLoad(0x92) != 1) {
+                m_pPLM->setReqLoad(0x92, 0);
+                m_bNextTrg = TRUE;
+            }
+            break;
+        }
+        if (m_bNextTrg) break;
+        setUseRsrcBlock(1);
+        setObjStop(0);
+        m_pCam->changeCamMode(-1, 0);
+        m_iSubState = m_uiAttackID * 10;
+        SESeq = getStateSESeq(3);
+        switch (m_iSubState) {
+        case 0x712:
+            setAnimSkillEx(m_pAtkData->ANIM_ID, 0, 1, m_pAtkData->ANIM_ESQ, SESeq);
+            break;
+        case 0x726: {
+            _setAttack(this, 0xac);
+            setAnimRsrcEx(0x51e, 0, -1, 1, 0, 0, 0);
+            break;
+        }
+        case 0x73a: {
+            _setAttack(this, 0xad);
+            setAnimRsrcEx(0x51e, 0, -1, 1, 0, 0, 0);
+            break;
+        }
+        }
+        setPlayerFlag(0x100000, 0);
+        m_tqStateTimer = 0;
+        m_pMarker->holdTarget(8);
+        procTargetMark();
+        return;
+    case 0x712:
+        setPlayerFlag(0x400000, 0);
+        procTargetMark();
+        procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+        if (!m_bNextTrg) {
+            if (frame >= m_pAtkData->TRG_FRAME) {
+                m_bNextTrg = TRUE;
+                setMagic(0xb5, 0, m_iStockSkill);
+            }
+        } else {
+            pTarget = NULL;
+        if (m_hMark > 0) pTarget = (CBattleEnemy*)CTaskMan::getTask(m_hMark);
+            if (pTarget && pTarget->isActiveTarget() && !pTarget->isBtlEnemyFlag(0x20000)) {
+                pos = pTarget->getPos();
+                vel = pTarget->getVel();
+                if (0.0f < vel.y && 3.5f < pos.y - m_vJumpStartPos.y) {
+                    pos.y = m_vJumpStartPos.y + 3.5f;
+                    pTarget->setPos(pos);
+                    ScaleVectorXYZ(vel, vel, 0.5f);
+                    vel.y = 0.0f;
+                    pTarget->setVel(vel);
+                }
+            }
+        }
+        if (!isMotionEnd()) break;
+        m_bNextTrg = FALSE;
+        m_bIsAttackHit = FALSE;
+        if (m_fDistXZ > 6.0f) {
+            m_iSubState = 0x713;
+            _setAttack(this, 0xac);
+            setAnimRsrcEx(0x51e, 0, -1, 1, 0, 0, 0);
+            setPlayerFlag(0x100000, 0);
+            break;
+        }
+        m_iSubState = 0x714;
+        _setAttack(this, 0xb6);
+        setAnimSkillEx(m_pAtkData->ANIM_ID, 0, 1, 0, 0);
+        setPlayerFlag(0x100000, 0);
+        clearSpeed();
+        return;
+    case 0x713:
+        pTarget = NULL;
+        if (m_hMark > 0) pTarget = (CBattleEnemy*)CTaskMan::getTask(m_hMark);
+        if (pTarget) {
+            pTarget->getLockOnPos(m_vMarkPos);
+            if (pTarget->isActiveTarget() && !pTarget->isBtlEnemyFlag(0x20000)) {
+                vel = pTarget->getVel();
+                if (vel.y < 0.0f) {
+                    pos = pTarget->getOldPos();
+                    pTarget->setPos(pos);
+                    vel.y = 0.0f;
+                    pTarget->setVel(vel);
+                } else if (0.0f < vel.y) {
+                    pos = pTarget->getPos();
+                    if (3.5f < pos.y - m_vJumpStartPos.y) {
+                        pos.y = m_vJumpStartPos.y + 3.5f;
+                        pTarget->setPos(pos);
+                        vel.y = 0.0f;
+                        pTarget->setVel(vel);
+                    }
+                }
+            }
+        } else {
+            m_hMark = m_hTarget;
+        }
+        if (m_pAnim->getAnimID()) {
+            procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, 1, 1.0f);
+        } else {
+            procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+            if (isMotionEnd()) {
+                setAnimRsrcEx(0x51e, 1, -1, 1, 0, 0, 0);
+                onAttack();
+            }
+            setTimer(6000);
+        }
+        if (m_fDistXZ <= 6.0f || getTimer() <= 0) {
+            offAttack();
+            m_iSubState = 0x714;
+            _setAttack(this, 0xb6);
+            setAnimSkillEx(m_pAtkData->ANIM_ID, 0, 1, 0, 0);
+            setPlayerFlag(0x100000, 0);
+            clearSpeed();
+            return;
+        }
+        break;
+    case 0x714:
+        if (procAttackCollision(frame)) return;
+        pTarget = NULL;
+        if (m_hMark > 0) pTarget = (CBattleEnemy*)CTaskMan::getTask(m_hMark);
+        if (pTarget) {
+            pTarget->getLockOnPos(m_vMarkPos);
+            if (!m_bIsAttackHit && pTarget->isActiveTarget() && !pTarget->isBtlEnemyFlag(0x20000)) {
+                vel = pTarget->getVel();
+                if (vel.y < 0.0f) {
+                    pos = pTarget->getOldPos();
+                    pTarget->setPos(pos);
+                    vel.y *= 0.5f;
+                    pTarget->setVel(vel);
+                } else if (0.0f < vel.y) {
+                    pos = pTarget->getPos();
+                    if (3.5f < pos.y - m_vJumpStartPos.y) {
+                        pos.y = m_vJumpStartPos.y + 3.5f;
+                        pTarget->setPos(pos);
+                        vel.y = 0.0f;
+                        pTarget->setVel(vel);
+                    }
+                }
+            }
+        } else {
+            m_hMark = m_hTarget;
+        }
+        if (!m_bIsAttackHit && frame < m_pAtkData->COLL_END_FRAME) {
+            procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, 1, 0.15f);
+        } else {
+            procAttackMove(frame, 0.0f, 0.0f, 0, 0.15f);
+        }
+        if (!m_bNextTrg && frame >= m_pAtkData->TRG_FRAME) {
+            m_iSubState = 0x715;
+            m_bNextTrg = TRUE;
+            offAttack();
+            setMagic(0xb5, 0, -1);
+            setTimer(9000);
+        }
+        if (!m_bIsAttackHit) return;
+        break;
+    case 0x715:
+        if (isMotionEnd()) setAnimForce(0x2a, -1, 0, 0, 0, 0);
+        if (m_hMagicCore > 0 && !CTaskMan::getTask(m_hMagicCore)) m_hMagicCore = 0;
+        if (getTimer() > 0 && m_hMagicCore) break;
+        procSkillEnd(-1);
+        return;
+    case 0x726:
+        pTarget = NULL;
+        if (m_hMark > 0) pTarget = (CBattleEnemy*)CTaskMan::getTask(m_hMark);
+        if (pTarget) {
+            pTarget->getLockOnPos(m_vMarkPos);
+        } else {
+            m_hMark = 0;
+        }
+        if (m_pAnim->getAnimID()) {
+            procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, 1, 1.0f);
+        } else {
+            procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+            if (isMotionEnd()) {
+                setAnimRsrcEx(0x51e, 1, -1, 1, 0, 0, 0);
+                onAttack();
+            }
+            setTimer(6000);
+        }
+        if (m_fDistXZ <= 6.0f || getTimer() <= 0) {
+            offAttack();
+            m_iSubState = 0x727;
+            _setAttack(this, 0xb7);
+            setAnimSkillEx(m_pAtkData->ANIM_ID, 0, 1, 0, 0);
+            setPlayerFlag(0x100000, 0);
+            clearSpeed();
+            setTimer((m_pAtkData->COLL_START_FRAME + m_pAtkData->TRG_FRAME) * 50);
+            m_bIsAttackHit = FALSE;
+            return;
+        }
+        break;
+    case 0x727:
+        if (procAttackCollision(frame)) return;
+        pTarget = NULL;
+        if (m_hMark > 0) pTarget = (CBattleEnemy*)CTaskMan::getTask(m_hMark);
+        if (pTarget) {
+            m_hMark = m_hTarget;
+            pTarget->getLockOnPos(m_vMarkPos);
+        } else {
+            m_hMark = m_hTarget;
+        }
+        if (frame < m_pAtkData->COLL_END_FRAME) {
+            procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, 1, 0.15f);
+            if (getTimer() <= 0) {
+                m_pWeapon->updateAttackID();
+                setTimer(m_pAtkData->TRG_FRAME * 50);
+                m_bIsAttackHit = FALSE;
+            }
+        } else {
+            procAttackMove(frame, 0.0f, 0.0f, 0, 0.15f);
+        }
+        if (!isMotionEnd()) break;
+        m_bIsAttackHit = FALSE;
+        offAttack();
+        m_iSubState = 0x728;
+        _setAttack(this, 0xb8);
+        setAnimSkillEx(m_pAtkData->ANIM_ID, 0, 1, 0, 0);
+        setPlayerFlag(0x100000, 0);
+        clearSpeed();
+        calcAppearPos(1.0f, 0.55f, NULL);
+        return;
+    case 0x728:
+        if (procAttackCollision(frame)) return;
+        if (!m_bIsAttackHit && frame < m_pAtkData->COLL_END_FRAME) {
+            procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, 1, 0.15f);
+        } else {
+            procAttackMove(frame, 0.0f, 0.0f, 0, 0.15f);
+        }
+        if (frame >= m_pAtkData->TRG_FRAME && !m_bNextTrg) {
+            m_bNextTrg = TRUE;
+            setMagic(0xb7, 0, -1);
+        }
+        if (!isMotionEnd()) return;
+        procSkillEnd(-1);
+        return;
+    case 0x73a:
+        pTarget = NULL;
+        if (m_hMark > 0) pTarget = (CBattleEnemy*)CTaskMan::getTask(m_hMark);
+        if (pTarget) {
+            pTarget->getLockOnPos(m_vMarkPos);
+        } else {
+            m_hMark = 0;
+        }
+        if (m_pAnim->getAnimID()) {
+            procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, 1, 1.0f);
+        } else {
+            procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+            if (isMotionEnd()) {
+                setAnimRsrcEx(0x51e, 1, -1, 1, 0, 0, 0);
+                onAttack();
+            }
+            setTimer(6000);
+        }
+        if (m_fDistXZ <= m_pAtkData->RADIUS * 0.1f || getTimer() <= 0) {
+            offAttack();
+            m_iSubState = 0x73b;
+            _setAttack(this, 0xb9);
+            setAnimSkillEx(m_pAtkData->ANIM_ID, 0, 1, 0, 0);
+            setPlayerFlag(0x100000, 0);
+            clearSpeed();
+            m_bIsAttackHit = FALSE;
+            return;
+        }
+        break;
+    case 0x73b:
+        if (isPlayerFlag(0x100000)) procTargetMark();
+        if (frame < m_pAtkData->COLL_END_FRAME) {
+            procAttackMove(frame, m_pAtkData->RADIUS * 0.1f, m_pAtkData->MAX_SPEED, 1, 0.15f);
+        } else {
+            procAttackMove(frame, 0.0f, 0.0f, 0, 0.15f);
+        }
+        if (procAttackCollision(frame)) return;
+        if (!isMotionEnd()) break;
+        offAttack();
+        m_iSubState = 0x73c;
+        _setAttack(this, 0xba);
+        setAnimSkillEx(m_pAtkData->ANIM_ID, 0, 0, 0, 0);
+        setPlayerFlag(0x100000, 0);
+        clearSpeed();
+        m_bIsAttackHit = FALSE;
+        procAttackMove(frame, 0.0f, 0.0f, 2, 1.0f);
+        calcAppearPos(2.0f, 0.55f, NULL);
+        m_vAppearPos.y = getPos().y;
+        break;
+    case 0x73c:
+        if (procAttackCollision(frame)) return;
+        if (frame >= m_pAtkData->MOVE_START_FRAME) {
+            if (!m_bNextTrg) {
+                _ref(m_bNextTrg) = TRUE;
+                m_fJumpSpdY = g_fAntiGravity * m_pAtkData->WORK1;
+                vel = m_pMove->getVel();
+                vel.y = m_fJumpSpdY;
+                m_pMove->getVel() = vel;
+            }
+            procAttackMove(frame, 0.0f, 0.0f, 0, 0.15f);
+        }
+        if (!isMotionEnd()) break;
+        offAttack();
+        m_iSubState = 0x73d;
+        _setAttack(this, 0xbb);
+        setAnimSkillEx(m_pAtkData->ANIM_ID, 0, 1, 0, 0);
+        setPlayerFlag(0x100000, 0);
+        clearSpeed();
+        m_bIsAttackHit = FALSE;
+        procAttackMove(frame, 0.0f, 0.0f, 2, 1.0f);
+        offWeapon();
+        m_vWarpPos[0] = m_vCenterPos;
+        setTimer(0);
+        break;
+    case 0x73d:
+        if (frame < m_pAtkData->COLL_START_FRAME) {
+            procTargetMark();
+            procAttackMove(frame, 0.0f, 0.0f, 2, 0.15f);
+        }
+        if (m_nAttackCount < 7 && getTimer() <= 0) {
+            m_nAttackCount++;
+            setMagic(0xb9, m_nAttackCount, m_iStockSkill);
+            setTimer(m_pAtkData->TRG_FRAME * 50);
+        }
+        if (!isMotionEnd()) return;
+        m_iSubState = 0x73e;
+        setAnimSkillEx(3, 0, 1, 0, 0);
+        onWeapon(1);
+        return;
+    case 0x73e:
+        if (isMotionEnd()) {
+            procSkillEnd(1);
+            return;
+        }
+        m_fJumpSpdY *= 0.5f;
+        break;
+    case 0x4aa:
+        procSkillEnd(-1);
+        return;
+    case 3:
+    case 0x684:
+    case 0x73f:
+        if (!isMotionEnd()) break;
+        procSkillEnd(-1);
+        return;
+    }
+    procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", exeStockSkill__Q22PL12CPlayerDRiku);
+#endif
+
 // exeStockSkill__Q22PL12CPlayerDRiku: its .rodata, for its INCLUDE_ASM; remove with it.
 asm(".section .rodata\n"
     ".align 3\n"
@@ -778,7 +1880,299 @@ asm(".section .rodata\n"
     ".asciz \"exeStockSkill:  DARKBREAK  Entry NG...\\n\"\n"
     ".align 2\n"
     ".section .text");
+/* Parked: same structure and size within 8 bytes, 310 of 1363 lines off: the BULLET_PARAM field stores and the member loads feeding them are scheduled differently in every case (the original loads m_AtkKind, m_AtkAttr, m_iAttackPower in that order and stores them together), plus registers in the stock-skill branch of 0xab; the same family as CPlayerRiku::setMagic. Cases 0x77/0xb5/0xb7 follow Riku's 0x162/0x20a/0x210. Tried: hill-climb of case 0xa8's field order (310 -> 291, no clean block); permuter 20 min (14978 candidates, stays 301). */
+#if 0
+void CPlayerDRiku::setMagic(INT inState, INT inCardID, INT inSkillID) {
+    FVECTOR pos;
+    FVECTOR rot;
+    BULLET_PARAM param;
+    CBullet* pBullet;
+    if (!inCardID && !inSkillID) return;
+    switch (inState) {
+    case 0xa8:
+        param.init(2, 3);
+        param.uiFlag = 0x1009100;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.CollKind = COLL_KIND_PSHOT;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.hHomingTarget = m_hTarget;
+        param.tqHomingTime = 9000;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.fHomingRadius = m_pAtkData->RADIUS;
+        param.fHomingRate = m_pAtkData->WORK1;
+        param.vPos = *(FVECTOR*)((UBYTE*)&Crd(m_iBoneLHand) + 0xc0); /* CCoord::m_World.v[3] */
+        param.vPos.w = 0.5f;
+        param.vRot = getRot();
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.01f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            m_hMagicCore = pBullet->getHandle();
+            pBullet->setBodyRadius(0.1f, 0.0f, 0, COLL_KIND_NONE);
+        }
+        break;
+    case 0xab:
+        if (inSkillID == -1) {
+            param.init(1, 3);
+            param.AtkKind = m_AtkKind;
+            param.CollKind = COLL_KIND_PSHOT;
+            param.AtkAttr = m_AtkAttr;
+            param.iAttackPoint = m_iAttackPower;
+            param.pEffectTbl = g_EffTbl_Skill[49];
+            param.uiFlag = 0x30002;
+            param.CollType = COLL_TYPE_CIRCLE;
+            param.tqCollAtkTime = 2000;
+            param.fChangeRadius = 0.075f;
+            param.fCollOffsetY = 0.4f;
+            param.fSpeed = 0.0f;
+            param.fCollRadius = 0.0f;
+            param.vPos = getPos();
+            m_pCollMap->setType(COLL_TYPE_SPHERE);
+            m_pCollMap->enableSliding(0);
+            m_pCollMap->setRadius(param.fCollRadius);
+            m_pCollMap->setStartPos(param.vPos);
+            param.vPos.y -= 4.0f;
+            m_pCollMap->setEndPos(param.vPos);
+            if (m_pCollMap->collideMap()) {
+                param.vPos = *m_pCollMap->getOutPos();
+            } else {
+                param.vPos.y += 4.0f;
+            }
+            param.vRot = getRot();
+        } else if (inCardID == -1) {
+            UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
+                              CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE1);
+            PATK_DATA* pAtkData = &g_AttackDataList[0xab];
+            param.init(1, 3);
+            param.CollKind = COLL_KIND_PSHOT;
+            param.AtkAttr = m_AtkAttr;
+            param.iAttackPoint = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[pAtkData->POWER] / 100;
+            param.AtkKind = pAtkData->DAMAGE;
+            calcEnchant_AttackPoint(param.iAttackPoint, *(ATK_KIND*)&param.AtkKind, (ATK_ATTR)param.AtkAttr, up);
+            param.fSpeed = 0.0f;
+            param.fCollRadius = param.fShiftY = pAtkData->RADIUS * 0.01f;
+            param.vPos = getPos();
+            m_pCollMap->setType(COLL_TYPE_SPHERE);
+            m_pCollMap->enableSliding(0);
+            m_pCollMap->setRadius(param.fCollRadius);
+            m_pCollMap->setStartPos(param.vPos);
+            param.vPos.y -= 4.0f;
+            m_pCollMap->setEndPos(param.vPos);
+            if (m_pCollMap->collideMap()) {
+                param.vPos = *m_pCollMap->getOutPos();
+            } else {
+                param.vPos.y += 4.0f;
+            }
+            param.vRot = getRot();
+            param.fScale = pAtkData->MAX_SPEED * 0.1f;
+            param.tqCollAtkTime = pAtkData->COLL_END_FRAME * 100;
+            param.pEffectTbl = g_EffTbl_Skill[pAtkData->EFFECT];
+            param.uiFlag = 0x20002;
+        } else {
+            FLOAT r;
+            FLOAT theta;
+            param.init(1, 3);
+            param.AtkAttr = m_AtkAttr;
+            param.CollKind = COLL_KIND_PSHOT;
+            param.AtkKind = m_AtkKind;
+            param.fSpeed = 0.0f;
+            param.iAttackPoint = m_iAttackPower;
+            param.fCollRadius = param.fShiftY = m_pAtkData->RADIUS * 0.01f;
+            r = RND::genrand_real1() * (m_pAtkData->COLL_START_FRAME * 0.1f);
+            theta = Math3D::LimitPI(RND::genrand_real1() * 360.0f * 0.017453292f);
+            param.vPos = getPos();
+            m_pCollMap->setType(COLL_TYPE_SPHERE);
+            m_pCollMap->enableSliding(0);
+            m_pCollMap->setRadius(param.fCollRadius);
+            m_pCollMap->setStartPos(param.vPos);
+            param.vPos.x += r * sinf(theta);
+            param.vPos.z += r * cosf(theta);
+            m_pCollMap->setEndPos(param.vPos);
+            if (m_pCollMap->collideMap()) param.vPos = *m_pCollMap->getOutPos();
+            param.vRot = getRot();
+            param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+            param.tqCollAtkTime = m_pAtkData->COLL_END_FRAME * 100;
+            param.uiFlag = 0x20002;
+            param.fScale = m_pAtkData->MAX_SPEED * 0.1f;
+        }
+        CEntityFactory::getInstance()->createBullet(param, this);
+        break;
+    case 0xb5:
+        if (inSkillID > 0) {
+            param.init(1, 3);
+            param.CollKind = COLL_KIND_PSHOT;
+            param.AtkKind = m_AtkKind;
+            param.AtkAttr = m_AtkAttr;
+            param.iAttackPoint = m_iAttackPower;
+            param.fSpeed = 0.4f;
+            param.fShiftY = 2.0f;
+            param.fCollRadius = 2.0f;
+            param.vPos = m_vMarkPos;
+            m_pCollMap->setType(COLL_TYPE_SPHERE);
+            m_pCollMap->enableSliding(0);
+            m_pCollMap->setRadius(param.fCollRadius);
+            m_pCollMap->setStartPos(param.vPos);
+            param.vPos.y -= 8.0f;
+            m_pCollMap->setEndPos(param.vPos);
+            if (m_pCollMap->collideMap()) {
+                param.vPos = *m_pCollMap->getOutPos();
+            } else {
+                param.vPos.y += 8.0f;
+            }
+            m_vJumpStartPos = param.vPos;
+            m_hEffCast = setEffect(g_szDpxImpals, 6, &m_vJumpStartPos, NULL, 0.0f);
+            param.vRot = getRot();
+            param.vRot.x = -1.5707964f;
+            param.uiFlag = 0x20003;
+            param.pEffectTbl = g_EffTbl_Skill[54];
+            param.tqFadeTime = 600;
+            param.fScale = 1.0f;
+            param.tqCollAtkTime = 600;
+            param.tqHomingTime = 600;
+            CEntityFactory::getInstance()->createBullet(param, this);
+        } else {
+            setQuake(10.0f, 0.25f, 50);
+            m_uiAttackID = 0xb6;
+            m_pAtkData = &g_AttackDataList[0xb6];
+            m_iAttackPower = m_iAP * CardBattle::g_pStockSkillList[m_iStockSkill].POWER[3] / 100;
+            _ref(m_AtkKind) = (ATK_KIND)3;
+            _ref(m_AtkAttr) = (ATK_ATTR)CardBattle::g_pStockSkillList[m_iStockSkill].ATTR;
+            UINT up = _upKind(CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE0,
+                              CardBattle::g_pStockSkillList[m_iStockSkill].UP_TYPE1);
+            calcEnchant_AttackPoint(m_iAttackPower, m_AtkKind, m_AtkAttr, up);
+            param.init(1, 3);
+            param.AtkKind = m_AtkKind;
+            param.AtkAttr = m_AtkAttr;
+            param.CollKind = COLL_KIND_PSHOT;
+            param.pEffectTbl = g_EffTbl_Skill[55];
+            param.iAttackPoint = m_iAttackPower;
+            param.uiFlag = 0x30002;
+            param.CollType = COLL_TYPE_CIRCLE;
+            param.tqCollAtkTime = 3000;
+            param.fChangeRadius = 0.15f;
+            param.fCollOffsetY = 0.4f;
+            param.fSpeed = 0.0f;
+            param.fCollRadius = 0.0f;
+            getWeaponTopPos(param.vPos);
+            m_pCollMap->setType(COLL_TYPE_SPHERE);
+            m_pCollMap->enableSliding(0);
+            m_pCollMap->setRadius(param.fCollRadius);
+            m_pCollMap->setStartPos(param.vPos);
+            param.vPos.y -= 4.0f;
+            m_pCollMap->setEndPos(param.vPos);
+            if (m_pCollMap->collideMap()) {
+                param.vPos = *m_pCollMap->getOutPos();
+            } else {
+                param.vPos.y += 4.0f;
+            }
+            param.vRot = getRot();
+            pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+            if (pBullet) m_hMagicCore = pBullet->getHandle();
+        }
+        break;
+    case 0xb9:
+        if (inCardID > 0) {
+            FVECTOR ofs;
+            FMATRIX m;
+            FLOAT r;
+            param.init(1, 3);
+            param.AtkKind = m_AtkKind;
+            param.iAttackPoint = m_iAttackPower;
+            param.CollKind = COLL_KIND_PSHOT;
+            param.AtkAttr = m_AtkAttr;
+            r = _limitPI(inCardID * -6.2831855f / 7.0f);
+            param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+            param.fMaxDist = 10.0f;
+            param.tqHomingTime = 3000;
+            param.pOffsetTbl = &g_OffsetTbl_StockSkill[4];
+            param.pRotTbl = &g_RotTbl_Magic[4];
+            param.iExtraEffectNum = 1;
+            param.pExtraEffectTbl = g_EffTbl_Skill[61];
+            param.tqFadeTime = 300;
+            param.fCollRadius = m_pAtkData->RADIUS * 0.01f;
+            param.uiFlag = 0x19000144;
+            param.fShiftY = 0.0f;
+            param.pEffectTbl = g_EffTbl_Skill[60];
+            param.fScale = 1.0f;
+            ofs.set(0.0f, 0.0f, 1.2f, 1.0f);
+            sceVu0UnitMatrix(m);
+            sceVu0RotMatrixY(m, m, r);
+            sceVu0RotMatrixX(m, m, -0.7853982f);
+            ApplyMatrixXYZ(ofs, m, ofs);
+            sceVu0UnitMatrix(m);
+            sceVu0RotMatrixY(m, m, m_fDir);
+            ApplyMatrixXYZ(ofs, m, ofs);
+            AddVectorXYZ(param.vPos, m_vWarpPos[0], ofs);
+            calcDirection(param.vRot, m_vAppearPos);
+            CEntityFactory::getInstance()->createBullet(param, this);
+        }
+        break;
+    case 0xb7:
+        param.init(1, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.iAttackPoint = m_iAttackPower;
+        param.fShiftY = 3.0f;
+        param.fSpeed = 0.0f;
+        param.fCollRadius = 3.0f;
+        param.vPos = m_vAppearPos;
+        m_pCollMap->setType(COLL_TYPE_SPHERE);
+        m_pCollMap->enableSliding(0);
+        m_pCollMap->setRadius(param.fCollRadius);
+        m_pCollMap->setStartPos(param.vPos);
+        param.vPos.y -= 4.0f;
+        m_pCollMap->setEndPos(param.vPos);
+        if (m_pCollMap->collideMap()) {
+            param.vPos = *m_pCollMap->getOutPos();
+        } else {
+            param.vPos.y += 4.0f;
+        }
+        param.vRot = getRot();
+        param.tqCollAtkTime = 1000;
+        param.uiFlag = 0x20002;
+        param.pEffectTbl = g_EffTbl_Skill[62];
+        param.fScale = 1.5f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) pBullet->setAttackID(m_pWeapon->getCollAttackID());
+        setEffect(g_szDpxMaelstrom, 7, &param.vPos, NULL, 0.0f);
+        break;
+    case 0x77:
+        getWeaponTopPos(pos);
+        param.init(2, 3);
+        param.CollKind = COLL_KIND_PSHOT;
+        param.iAttackPoint = m_iAttackPower;
+        param.AtkKind = m_AtkKind;
+        param.AtkAttr = m_AtkAttr;
+        param.uiFlag = 0x21008140;
+        param.fSpeed = m_pAtkData->MAX_SPEED * 0.01f;
+        param.tqHomingTime = 9000;
+        param.fMaxDist = m_pAtkData->WORK0;
+        param.fHomingRadius = m_pAtkData->RADIUS;
+        param.vPos = pos;
+        param.fHomingRate = m_pAtkData->WORK1;
+        param.tqFadeTime = 1000;
+        param.vRot = getRot();
+        param.vRot.y = _limitPI(calcDirection(pos));
+        param.pEffectTbl = g_EffTbl_Skill[m_pAtkData->EFFECT];
+        param.fCollRadius = m_pAtkData->COLL_START_FRAME * 0.01f;
+        pBullet = (CBullet*)CEntityFactory::getInstance()->createBullet(param, this);
+        if (pBullet) {
+            pBullet->setBodyRadius(0.1f, 0.0f, 0, COLL_KIND_NONE);
+            if (!m_iCount) {
+                m_pWeapon->setCollAttackID(pBullet->getAttackID());
+            } else {
+                pBullet->setAttackID(m_pWeapon->getCollAttackID());
+            }
+        }
+        break;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", setMagic__Q22PL12CPlayerDRikuiii);
+#endif
 void CPlayerDRiku::searchWarpPos(FLOAT inDir) {
     static FVECTOR g_vDir[2] = {
         { { 0.0f, 0.0f, -15.0f, 1.0f } },
