@@ -1,4 +1,13 @@
 #include "khtypes.h"
+#define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"
+#define STATUS_H_PATH "c:/KHCOM/MainApp/Game/Status.h"
+#define TASK_H_NO_SLC_OVERFLOW_MSG /* MATCH: the original .rodata has no Task.h container-overflow message */
+/* .rodata starts with the strings of the included headers' inline functions, in this order. */
+#include "System/Graphic/Gprim.h"
+#include "System/Graphic/2d/2DMan.h"
+#include "Game/CardBattle.h"
+#include "Game/Card.h"
+#include "Game/Status.h"
 #include "Game/SceneInfo.h"
 #include "Game/GameWork.h"
 #include "Game/Game.h"
@@ -150,49 +159,64 @@ extern INT s_nAvailableSceneCache;
 extern _SceneInfo s_GlobalScene;
 }
 extern _CardScene s_CardSceneTbl[26];
-extern WorldSelTable s_pWorldTableSora[16];
-extern WorldSelTable s_pWorldTableRiku[12];
-extern "C" char D_00484980[]; /* __FILE__ */
-extern "C" char D_00484A98[];
-extern "C" char D_00484D90[];
-extern "C" char D_00484EC8[];
-extern "C" char D_00484F28[];
-extern "C" char D_00484F68[];
-extern "C" char D_004849F8[];
-extern "C" char D_00484A08[];
-extern "C" char D_004849C8[];
-extern "C" char D_00484C18[];
-extern "C" char D_00484C20[];
+static const WORLD_ID s_WorldTableSora1[1] = { WORLD_ID_TRAVERSE };
+static const WORLD_ID s_WorldTableSora2[5] = { WORLD_ID_AGRABAH, WORLD_ID_OLYMPOS, WORLD_ID_WONDERLAND, WORLD_ID_MONSTRO, WORLD_ID_HALLOWEEN };
+static const WORLD_ID s_WorldTableSora3[4] = { WORLD_ID_ATLANTICA, WORLD_ID_NEVERLAND, WORLD_ID_HOLLOWBASTION, WORLD_ID_100ACRE };
+static const WORLD_ID s_WorldTableSora4[1] = { WORLD_ID_TWILIGHTTOWN };
+static const WORLD_ID s_WorldTableSora5[1] = { WORLD_ID_DISTINYISLAND };
+static const WORLD_ID s_WorldTableSora6[1] = { WORLD_ID_CASTLE };
+static const WORLD_ID s_WorldTableRiku1[1] = { WORLD_ID_HOLLOWBASTION };
+static const WORLD_ID s_WorldTableRiku2[4] = { WORLD_ID_TRAVERSE, WORLD_ID_AGRABAH, WORLD_ID_MONSTRO, WORLD_ID_NEVERLAND };
+static const WORLD_ID s_WorldTableRiku3[4] = { WORLD_ID_OLYMPOS, WORLD_ID_WONDERLAND, WORLD_ID_HALLOWEEN, WORLD_ID_ATLANTICA };
+static const WORLD_ID s_WorldTableRiku4[1] = { WORLD_ID_DISTINYISLAND };
+static const WORLD_ID s_WorldTableRiku5[1] = { WORLD_ID_TWILIGHTTOWN };
+static const WORLD_ID s_WorldTableRiku6[1] = { WORLD_ID_CASTLE };
+static const WORLD_ID s_WorldTableJF1[1] = { WORLD_ID_HALLOWEEN };
+static const WORLD_ID s_WorldTableTGS2[1] = { WORLD_ID_OLYMPOS };
+static const WORLD_ID s_WorldTablePOO[1] = { WORLD_ID_100ACRE };
+static const WorldSelTable s_pWorldTableSora[16] = {
+    { 1, (WORLD_ID*)s_WorldTableSora1 },
+    { 5, (WORLD_ID*)s_WorldTableSora2 },
+    { 5, (WORLD_ID*)s_WorldTableSora2 },
+    { 5, (WORLD_ID*)s_WorldTableSora2 },
+    { 5, (WORLD_ID*)s_WorldTableSora2 },
+    { 5, (WORLD_ID*)s_WorldTableSora2 },
+    { 4, (WORLD_ID*)s_WorldTableSora3 },
+    { 4, (WORLD_ID*)s_WorldTableSora3 },
+    { 4, (WORLD_ID*)s_WorldTableSora3 },
+    { 4, (WORLD_ID*)s_WorldTableSora3 },
+    { 1, (WORLD_ID*)s_WorldTableSora4 },
+    { 1, (WORLD_ID*)s_WorldTableSora5 },
+    { 1, (WORLD_ID*)s_WorldTableSora6 },
+    { 1, (WORLD_ID*)s_WorldTableJF1 },
+    { 1, (WORLD_ID*)s_WorldTableTGS2 },
+    { 1, (WORLD_ID*)s_WorldTablePOO }
+};
+static const WorldSelTable s_pWorldTableRiku[12] = {
+    { 1, (WORLD_ID*)s_WorldTableRiku1 },
+    { 4, (WORLD_ID*)s_WorldTableRiku2 },
+    { 4, (WORLD_ID*)s_WorldTableRiku2 },
+    { 4, (WORLD_ID*)s_WorldTableRiku2 },
+    { 4, (WORLD_ID*)s_WorldTableRiku2 },
+    { 4, (WORLD_ID*)s_WorldTableRiku3 },
+    { 4, (WORLD_ID*)s_WorldTableRiku3 },
+    { 4, (WORLD_ID*)s_WorldTableRiku3 },
+    { 4, (WORLD_ID*)s_WorldTableRiku3 },
+    { 1, (WORLD_ID*)s_WorldTableRiku4 },
+    { 1, (WORLD_ID*)s_WorldTableRiku5 },
+    { 1, (WORLD_ID*)s_WorldTableRiku6 }
+};
 extern "C" char D_00484A10[];
-extern "C" char D_00484C68[];
-extern "C" char D_00484C88[];
-extern "C" char D_00484B48[];
-extern "C" char D_00484B98[];
-extern "C" char D_00484AD0[];
-extern "C" char D_00484AF8[];
-extern "C" char D_00484B18[];
-extern "C" char D_004849A8[];
 extern "C" char D_00484900[];
 extern "C" char D_00484910[];
 extern "C" char D_00484920[];
 extern "C" char D_00484930[];
 extern "C" char D_00484940[];
 extern "C" char D_00484950[];
-extern "C" char D_00484BE0[];
-extern "C" char D_00484CD8[];
 namespace PLM {
 extern BOOL g_bIsLastSceneBattle;
 }
-extern "C" char D_00484E28[];
-extern "C" char D_00484CE8[];
-extern "C" char D_00484D50[];
-extern "C" char D_00484E08[];
-extern "C" char D_00484D20[];
-extern "C" char D_00484D70[];
 extern "C" char D_00484E38[];
-extern "C" char D_00484DC8[];
-extern "C" char D_00484DD0[];
-extern "C" char D_00484DD8[];
 extern "C" int sprintf(char*, const char*, ...);
 
 /* Parked: ~110 lines - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar
@@ -248,6 +272,7 @@ void CSceneInfo::clear() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", clear__10CSceneInfo);
 #endif
+__asm__(".rdata\n.align 3\n.word 0x6D6F6F52\n.word 0x422E3173\n.word 0x00004E49\n.word 0x00000000\n.word 0x6D6F6F52\n.word 0x422E3273\n.word 0x00004E49\n.word 0x00000000\n.word 0x6E657645\n.word 0x6F6F5274\n.word 0x2E31736D\n.word 0x004E4942\n.word 0x6E657645\n.word 0x6F6F5274\n.word 0x2E32736D\n.word 0x004E4942\n.word 0x6F4E4352\n.word 0x31616D72\n.word 0x4E49422E\n.word 0x00000000\n.word 0x6F4E4352\n.word 0x32616D72\n.word 0x4E49422E\n.word 0x00000000\n.text\n");
 void CSceneInfo::initNewGame(BOOL bSora) {
     clear();
     CGameWork::setByte(0, 0x60, !bSora);
@@ -268,6 +293,7 @@ void CSceneInfo::dispose() {
     s_pFloorNormaFile_Riku = NULL;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _getEventRoomSceneIndex__Fs);
+__asm__(".rdata\n.align 4\n.word .L002118FC\n.word .L00211904\n.word .L0021190C\n.word .L00211914\n.word .L0021191C\n.word .L00211924\n.word .L0021191C\n.word 0\n.text\n");
 void _initEntranceSceneTbl(BOOL bSora) {
     for (INT i = 0; i < 16; i++) {
         FLOOR::FloorLayout* pFloorSrc = CSceneInfo::getFloorDataSrc(i, bSora);
@@ -346,7 +372,7 @@ USHORT CSceneInfo::getFloorIndex(SHORT nFloor, BOOL bSora) {
 WorldSelTable* CSceneInfo::getSelectableWorldTable(INT nFloorIndex, BOOL bSora) {
     FloorLayoutDataHeader* p = bSora ? s_pFloorFile_Sora : s_pFloorFile_Riku;
     if (p && nFloorIndex >= 0 && nFloorIndex < p->nCount) {
-        WorldSelTable* pTbl = bSora ? s_pWorldTableSora : s_pWorldTableRiku;
+        WorldSelTable* pTbl = (WorldSelTable*)(bSora ? s_pWorldTableSora : s_pWorldTableRiku);
         return &pTbl[nFloorIndex];
     }
     return NULL;
@@ -385,9 +411,9 @@ void CSceneInfo::initFloor(INT nFloorIdx, WORLD_ID world) {
     if (world == 10) nIdx = getFloorIndex(100, TRUE);
     FLOOR::FloorLayout* pFloorSrc = getFloorDataSrc(nIdx, bSora);
     RCNORMA::FloorNormaSrc* pFloorNormaSrc = getFloorNormaDataSrc(nIdx, bSora);
-    if (!(pFloorSrc && pFloorNormaSrc)) AssertApp(D_00484980, 586, D_004849A8, 0);
+    if (!(pFloorSrc && pFloorNormaSrc)) AssertApp(__FILE__, 586, "pFloorSrc && pFloorNormaSrc", 0);
     _SceneInfoWork::mc()->_nFloorIdx = nFloorIdx;
-    if (!(nIdx < 16)) AssertApp(D_00484980, 590, D_004849C8, 0);
+    if (!(nIdx < 16)) AssertApp(__FILE__, 590, "nIdx < FLOOR_COUNT_MAX", 0);
     s_nCurrentFloorNumber = getFloorNumber(nFloorIdx, bSora);
     if (CGameWork::getInt(0, 0x35) < s_nCurrentFloorNumber) CGameWork::setInt(0, 0x35, s_nCurrentFloorNumber);
     FloorInfo& floor = s_CurrentFloor;
@@ -439,7 +465,7 @@ void CSceneInfo::initFloor() {
     if (world == 10) nIdx = getFloorIndex(100, TRUE);
     FLOOR::FloorLayout* pFloorSrc = getFloorDataSrc(nIdx, bSora);
     RCNORMA::FloorNormaSrc* pFloorNormaSrc = getFloorNormaDataSrc(nIdx, bSora);
-    if (!(pFloorSrc && pFloorNormaSrc)) AssertApp(D_00484980, 691, D_004849A8, 0);
+    if (!(pFloorSrc && pFloorNormaSrc)) AssertApp(__FILE__, 691, "pFloorSrc && pFloorNormaSrc", 0);
     s_nCurrentFloorNumber = getFloorNumber(nFloorIdx, bSora);
     FloorInfo& floor = s_CurrentFloor;
     floor._nRoomCount = pFloorSrc->_nRoomCount;
@@ -459,6 +485,7 @@ void CSceneInfo::initFloor() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initFloor__10CSceneInfo);
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _initDoor__FR8DoorInfoPCQ25FLOOR11DoorSrcInfo7DOOR_IDPCQ25FLOOR11FloorLayoutPCQ27RCNORMA13FloorNormaSrcRQ37STORAGE7MCWork29_DoorInfoRC8RoomInfoi);
+__asm__(".rdata\n.align 4\n.word .L00212680\n.word .L00212688\n.word .L00212690\n.word .L002126A0\n.word .L002126A0\n.word .L00212698\n.text\n");
 void _initDoor(DoorInfo& door, const FLOOR::DoorSrcInfo* pSrcInfo, DOOR_ID id, const FLOOR::FloorLayout* pFloorLayout, const RCNORMA::FloorNormaSrc* pFloorNormaSrc, STORAGE::MCWork2::_DoorInfo& st_info, const RoomInfo& room, BOOL bContinue);
 void _initRoomInfo(RoomInfo& roomInfo, STORAGE::MCWork::_RoomInfo& st_info, STORAGE::MCWork2::_RoomInfo2& st_info2, const FLOOR::RoomSrcInfo* pSrcInfo, const FLOOR::FloorLayout* pFloorLayout, const RCNORMA::FloorNormaSrc* pFloorNormaSrc, BOOL bContinue) {
     roomInfo._pStorageInfo = &st_info;
@@ -502,9 +529,9 @@ void _setWorldEntrance(WORLD_ID world, SHORT nStartEntScene, SHORT nGoalEntScene
                 break;
             }
         }
-        if (!(nIdx >= 0)) AssertApp(D_00484980, 923, D_004849F8, 0);
+        if (!(nIdx >= 0)) AssertApp(__FILE__, 923, "0 <= nIdx", 0);
         pRoom = CSceneInfo::getRoomInfo(pRoom->_doors[nIdx]._nDstRoom);
-        if (!(pRoom)) AssertApp(D_00484980, 925, D_00484A08, 0);
+        if (!(pRoom)) AssertApp(__FILE__, 925, "pRoom", 0);
         nDID = _getDstDoorID((DOOR_ID)nIdx);
     } else {
         RoomInfo* p = floor._rooms;
@@ -605,6 +632,7 @@ void CSceneInfo::makeRoom(const RoomInfo& room, DOOR_ID nDoorID, SHORT nScene, B
     if ((USHORT)nScene == 4 && r._pStorageInfo) CMoogleShopMain::initMcWork((STORAGE::MCWork::_RoomInfo*)r._pStorageInfo);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", makeRoom__10CSceneInfoR8DoorInfoi);
+__asm__(".rdata\n.align 3\n.word 0x74734470\n.word 0x6D6F6F52\n.word 0x00000000\n.word 0x00000000\ns_RndSceneTblSora.2454:\n.word 0x06050403\n.word 0x0A090807\n.word 0x0E0D0C0B\n.word 0x1211100F\n.word 0x16151413\n.word 0x001A1917\ns_RndSceneTblRiku.2455:\n.word 0x0B090603\n.word 0x100E0D0C\n.word 0x16151312\n.word 0x001A1917\n.word 0x202A2A2A\n.word 0x61657243\n.word 0x52206574\n.word 0x206D6F6F\n.word 0x52207441\n.word 0x6F646E61\n.word 0x2E2E206D\n.word 0x535B202E\n.word 0x656E6563\n.word 0x5D64253A\n.word 0x0000000A\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
 BOOL CSceneInfo::hasAnyRequest() {
     BOOL b = FALSE;
     if (hasReqChangeScene() || s_nReqEnterBattle || s_nReqExitBattle) b = TRUE;
@@ -645,6 +673,7 @@ DOOR_ID _checkAvailableDoorID(INT nRoomID, DOOR_ID nDoor) {
     return (DOOR_ID)4;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setEventRoomSceneNum__10CSceneInfoUis);
+__asm__(".rdata\n.align 4\n.word .L0021351C\n.word .L00213528\n.word .L00213534\n.word .L00213544\n.word .L00213554\n.word .L00213568\n.text\n");
 BOOL CSceneInfo::reqChangeFloor(SHORT nFloor, BOOL bWarp) {
     if (hasAnyRequest()) return FALSE;
     BOOL bSora = CGame::isSoraGame();
@@ -673,7 +702,7 @@ BOOL CSceneInfo::reqChangeFloor(SHORT nFloor, BOOL bWarp) {
     return bResult;
 }
 BOOL CSceneInfo::reqEnterWorld(WORLD_ID world) {
-    if (!((0 < world) && (14 > world))) AssertApp(D_00484980, 1410, D_00484A98, 0);
+    if (!((0 < world) && (14 > world))) AssertApp(__FILE__, 1410, "(WORLD_ID_COMMON < world) && (_WORLD_ID_MAX > world)", 0);
     initFloor(getCurrentFloorIndex(), world);
     reqChangeRoom(1, (DOOR_ID)2, -1);
     return TRUE;
@@ -687,8 +716,8 @@ BOOL CSceneInfo::reqChangeRoom(INT nRoomID, DOOR_ID nDoor, SHORT nScene) {
     if (nScene <= 0) {
         RoomInfo* pRoom = getRoomInfo(nRoomID);
         if (!pRoom || !pRoom->isCreated()) {
-            TRACE_COL(_TTY_RED, D_00484AD0, nRoomID);
-            TRACE_COL(_TTY_RED, !pRoom ? D_00484AF8 : D_00484B18);
+            TRACE_COL(_TTY_RED, "CSceneInfo::reqChangeRoom( %d ) ...", nRoomID);
+            TRACE_COL(_TTY_RED, (char*)(!pRoom ? "\x82\xbb\x82\xf1\x82\xc8\x83\x8b\x81[\x83\x80\x82\xcd\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1\n" : "\x82\xbb\x82\xcc\x83\x8b\x81[\x83\x80\x82\xc9\x82\xcd\x83V\x81[\x83\x93\x81\x94\x82\xaa\x90\xdd\x92\xe8\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb9\x82\xf1\n"));
             return FALSE;
         }
         nScene = pRoom->getSceneNum();
@@ -718,7 +747,7 @@ BOOL CSceneInfo::reqChangeEventRoom(UINT nEventRoomType, DOOR_ID nDoor, SHORT nS
     if (s_nGameMode != GAMEMODE_FIELD && !((UINT)(s_nCurrentFieldScene - 2000) < 1000)) {
         SHORT nCur = getCurrentSceneNum();
         if (!(nCur >= 0x41a && nCur <= 0x4ae)) {
-            TRACE_COL(_TTY_RED, D_00484B48);
+            TRACE_COL(_TTY_RED, "\x83" "C\x83x\x83\x93\x83g\x83\x8b\x81[\x83\x80\x95\xcf\x8dX\x82\xaa\x8ds\x82\xed\x82\xea\x82\xe6\x82\xa4\x82\xc6\x82\xb5\x82\xdc\x82\xb5\x82\xbd\x82\xaa\x81" "A\x83" "C\x83x\x83\x93\x83g\x83V\x81[\x83\x93\x88\xc8\x8aO\x82\xa9\x82\xe7\x82\xcd\x82\xc5\x82\xab\x82\xdc\x82\xb9\x82\xf1\n");
             return FALSE;
         }
     }
@@ -726,7 +755,7 @@ BOOL CSceneInfo::reqChangeEventRoom(UINT nEventRoomType, DOOR_ID nDoor, SHORT nS
     if (nScene > 0) pRoom = setEventRoomSceneNum(nEventRoomType, nScene);
     else pRoom = getEventRoomInfo(nEventRoomType);
     if (!pRoom || pRoom->isExceptRoom()) {
-        TRACE_COL(_TTY_RED, D_00484B98);
+        TRACE_COL(_TTY_RED, "\x81u\x83\x8b\x81[\x83\x80" "de\x83Z\x83\x8c\x83N\x83g\x81v\x88\xc8\x8aO\x82\xc5\x93\xfc\x82\xc1\x82\xc4\x82\xe9\x82\xcc\x82\xc5\x81" "A\x83\x8b\x81[\x83\x80\x83`\x83" "F\x83\x93\x83W\x82\xc5\x82\xab\x82\xdc\x82\xb9\x82\xf1\n");
         if (s_nGameMode == GAMEMODE_FIELD) reqChangeScene(getCurrentAreaNum(), getCurrentSceneNum(), -1, FALSE, 1);
         else reqExitBattle();
         return FALSE;
@@ -772,7 +801,7 @@ BOOL CSceneInfo::reqChangeBackupRoom() {
     SHORT nScene = getCurrentSceneNum();
     CGameWork::rollback(CGameWork::BACKUP_SECONDARY);
     if (nArea < 0 || nScene <= 0) {
-        TRACE_COL(_TTY_RED, D_00484BE0, nArea, nScene);
+        TRACE_COL(_TTY_RED, "\x83\x8d\x81[\x83\x8b\x83o\x83" "b\x83N\x90\xe6\x82\xcc AREA or SCENE \x82\xaa\x95s\x90\xb3\x82\xc5\x82\xb7\x81i%d, %d\x81j\n", nArea, nScene);
         return FALSE;
     }
     BOOL bResult = reqChangeScene(nArea, nScene, -1, FALSE, 1);
@@ -788,7 +817,7 @@ BOOL CSceneInfo::reqChangeBackupRoom() {
 BOOL CSceneInfo::reqEnterDoor(DOOR_ID door) {
     if (hasAnyRequest()) return FALSE;
     DoorInfo* pDoor = getDoorInfo(door, -1);
-    if (!(pDoor)) AssertApp(D_00484980, 1632, D_00484C18, 0);
+    if (!(pDoor)) AssertApp(__FILE__, 1632, "pDoor", 0);
     if (pDoor->_type == DOOR_TYPE_SELECT_WORLD) {
         WORLD_ID w = (WORLD_ID)getCurrentWorldID(FALSE);
         if ((UINT)(w - 1) < 13) {
@@ -799,13 +828,13 @@ BOOL CSceneInfo::reqEnterDoor(DOOR_ID door) {
     BOOL bResult = FALSE;
     DOOR_STAT stat = pDoor->getDoorState();
     if (stat == DOOR_STAT_CLOSED || stat == DOOR_STAT_OPENED) {
-        TRACE(D_00484C20, pDoor->_id, pDoor->_type, stat, pDoor->_nDstRoom);
+        TRACE(" >>> Try Enter The Door [%d], type = [%d], stat = [%d], dstRoom = [%d]\n", pDoor->_id, pDoor->_type, stat, pDoor->_nDstRoom);
         RoomInfo* pDstRoom = getRoomInfo(pDoor->_nDstRoom);
-        if (!(pDstRoom)) AssertApp(D_00484980, 1657, D_00484A10, 0);
+        if (!(pDstRoom)) AssertApp(__FILE__, 1657, D_00484A10, 0);
         if (pDoor->_shape == 5 && (USHORT)pDstRoom->getSceneNum() == 2 && !pDstRoom->hasEntered()) {
             makeRoom(*pDstRoom, _getDstDoorID(door), 2, getCardIDFromSceneNum(2), CGameWork::m_pMCWork->_nNextRCNormaNum);
         } else if (!pDstRoom->isCreated() || (pDstRoom->isFixSceneRoom() && !pDstRoom->hasEntered())) {
-            if (!pDstRoom->isCreated()) TRACE_COL(_TTY_RED, D_00484C68);
+            if (!pDstRoom->isCreated()) TRACE_COL(_TTY_RED, ">>>>> Create New Room !!\n");
             makeRoom(*pDoor, !pDstRoom->isCreated());
         }
         if (pDoor->_type == DOOR_TYPE_FLOOR_CHANGE) {
@@ -829,7 +858,7 @@ BOOL CSceneInfo::reqEnterDoor(DOOR_ID door) {
             }
             if (dbgCheckUser(TGOTO)) {
                 RoomInfo* pInfo = getRoomInfo(pDoor->_nDstRoom);
-                if (pInfo) TRACE(D_00484C88, pInfo->_doors[0].getDoorState(), pInfo->_doors[1].getDoorState(), pInfo->_doors[2].getDoorState(), pInfo->_doors[3].getDoorState());
+                if (pInfo) TRACE("*** DoorState : RU[%d] RD[%d] LD[%d] LU[%d]\n", pInfo->_doors[0].getDoorState(), pInfo->_doors[1].getDoorState(), pInfo->_doors[2].getDoorState(), pInfo->_doors[3].getDoorState());
             }
         }
     }
@@ -1000,6 +1029,7 @@ void CSceneInfo::setupCompleteFloorWorld(WORLD_ID excludeWorld) {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setEventDoorUnavailable__10CSceneInfoii);
+__asm__(".rdata\n.align 4\n.word .L00214B60\n.word .L00214B68\n.word .L00214B70\n.word .L00214B78\n.word .L00214B80\n.word .L00214B78\n.text\n");
 DOOR_ID CSceneInfo::setTmpCurrentRoomID(SHORT nRoomType) {
     DOOR_TYPE nType;
     switch (nRoomType) {
@@ -1158,7 +1188,7 @@ void _updateRoomInfo() {
     }
     _SceneInfoWork::mc()->_nDoorID = s_nNextDoorID;
     RoomInfo* pRoomInfo = CSceneInfo::getRoomInfo(-1);
-    if (!(pRoomInfo)) AssertApp(D_00484980, 2540, D_00484CD8, 0);
+    if (!(pRoomInfo)) AssertApp(__FILE__, 2540, "pRoomInfo", 0);
     for (INT i = 0; i < 4; i++) {
         DoorInfo& door = pRoomInfo->_doors[i];
         if (door._type == DOOR_TYPE_TO_EXTRA && _SceneInfoWork::mc()->_KeyRoomsTresureBox[CSceneInfo::getCurrentWorldID(FALSE)]) {
@@ -1186,15 +1216,15 @@ INT CSceneInfo::addToSceneCache(const AREA_SCENE& as) {
     INT nID = getSceneCacheID(as);
     if (nID >= 0) return nID;
     if (s_nAvailableSceneCache == 0) {
-        TRACE(D_00484CE8);
+        TRACE("CSceneInfo::addSceneCacheID() : \x82\xb1\x82\xea\x88\xc8\x8f\xe3\x92\xc7\x89\xc1\x82\xc5\x82\xab\x82\xdc\x82\xb9\x82\xf1\n");
         return -1;
     }
     for (INT i = 0; i < 7; i++) {
         if (s_SceneCacheTbl[i]._as._nAreaScene < 0) {
             s_SceneCacheTbl[i]._as._nAreaScene = as._nAreaScene;
-            if (!(7 >= s_nAvailableSceneCache)) AssertApp(D_00484980, 2622, D_00484D20, 0);
+            if (!(7 >= s_nAvailableSceneCache)) AssertApp(__FILE__, 2622, "_SCENE_CACHE_SIZE >= s_nAvailableSceneCache", 0);
             s_nAvailableSceneCache--;
-            if (!(0 <= s_nAvailableSceneCache)) AssertApp(D_00484980, 2624, D_00484D50, 0);
+            if (!(0 <= s_nAvailableSceneCache)) AssertApp(__FILE__, 2624, "0 <= s_nAvailableSceneCache", 0);
             return i;
         }
     }
@@ -1205,9 +1235,9 @@ INT CSceneInfo::removeFromSceneCache(const AREA_SCENE& as) {
     for (INT i = 0; i < 7; i++) {
         if (s_SceneCacheTbl[i]._as._nAreaScene == as._nAreaScene) {
             s_SceneCacheTbl[i].clear();
-            if (!(0 < s_nAvailableSceneCache)) AssertApp(D_00484980, 2643, D_00484D70, 0);
+            if (!(0 < s_nAvailableSceneCache)) AssertApp(__FILE__, 2643, "0 < s_nAvailableSceneCache", 0);
             s_nAvailableSceneCache++;
-            if (!(7 >= s_nAvailableSceneCache)) AssertApp(D_00484980, 2645, D_00484D20, 0);
+            if (!(7 >= s_nAvailableSceneCache)) AssertApp(__FILE__, 2645, "_SCENE_CACHE_SIZE >= s_nAvailableSceneCache", 0);
             return i;
         }
     }
@@ -1216,7 +1246,7 @@ INT CSceneInfo::removeFromSceneCache(const AREA_SCENE& as) {
 BOOL CSceneInfo::removeFromSceneCacheWithRsrc(const AREA_SCENE& as) {
     INT nID = removeFromSceneCache(as);
     if (nID < 0) return FALSE;
-    TRACE_USER_COL((USER)4, (TtyColor)0x22, D_00484D90, as._nArea, as._nScene);
+    TRACE_USER_COL((USER)4, (TtyColor)0x22, "=== Delete Scene (Attached) Resources (%d-%d) ===\n", as._nArea, as._nScene);
     CRsrcDB::removeSceneAttachedData(nID);
     return TRUE;
 }
@@ -1251,12 +1281,12 @@ void CSceneInfo::setSeRangeRatio(BYTE nRatio) {
     if (CRsrcDB::isSceneAttachMode()) {
         _SceneInfo& info = s_SceneCacheTbl[CRsrcDB::getSceneAttachNum()];
         info._nSeRangeRatio = nRatio;
-        sprintf(szTmp, D_00484DC8, info._as._nArea, info._as._nScene);
+        sprintf(szTmp, "%d-%d", info._as._nArea, info._as._nScene);
     } else {
         s_GlobalScene._nSeRangeRatio = nRatio;
-        pTmp = D_00484DD0;
+        pTmp = "Global";
     }
-    TRACE_COL(_TTY_RED, D_00484DD8, pTmp, nRatio * 10);
+    TRACE_COL(_TTY_RED, "=*=*=*=* SE_RANGE (%s) = [%d%%] *=*=*=*=\n", pTmp, nRatio * 10);
 }
 BYTE CSceneInfo::getSeRangeRatio() {
     INT i = getCurrentSceneCacheID();
@@ -1301,7 +1331,7 @@ void CSceneInfo::updateMapRsrcCache(INT nMapRsrcGrp, INT nSlot) {
         {
             INT n = s_nMapCacheField;
             if (n && nMapRsrcGrp != n) {
-                TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+                TRACE_USER_COL(TGOTO, _TTY_BLUE, ">>> REMOVE MAP-RSRC [[[%d]]]\n", n);
                 CRsrcDB::removeRsrc(n);
             }
         }
@@ -1310,7 +1340,7 @@ void CSceneInfo::updateMapRsrcCache(INT nMapRsrcGrp, INT nSlot) {
         {
             INT n = s_nMapCacheBattle;
             if (n && nMapRsrcGrp != n) {
-                TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+                TRACE_USER_COL(TGOTO, _TTY_BLUE, ">>> REMOVE MAP-RSRC [[[%d]]]\n", n);
                 CRsrcDB::removeRsrc(n);
             }
         }
@@ -1320,7 +1350,7 @@ void CSceneInfo::updateMapRsrcCache(INT nMapRsrcGrp, INT nSlot) {
         {
             INT n = s_nMapCacheField;
             if (n && nMapRsrcGrp != n) {
-                TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+                TRACE_USER_COL(TGOTO, _TTY_BLUE, ">>> REMOVE MAP-RSRC [[[%d]]]\n", n);
                 CRsrcDB::removeRsrc(n);
             }
         }
@@ -1333,13 +1363,13 @@ void CSceneInfo::removeMapRsrcCache(INT nSlot) {
     case 0: {
         INT n = s_nMapCacheField;
         if (n) {
-            TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+            TRACE_USER_COL(TGOTO, _TTY_BLUE, ">>> REMOVE MAP-RSRC [[[%d]]]\n", n);
             CRsrcDB::removeRsrc(n);
             s_nMapCacheField = 0;
         }
         n = s_nMapCacheBattle;
         if (n) {
-            TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+            TRACE_USER_COL(TGOTO, _TTY_BLUE, ">>> REMOVE MAP-RSRC [[[%d]]]\n", n);
             CRsrcDB::removeRsrc(n);
             s_nMapCacheBattle = 0;
         }
@@ -1349,7 +1379,7 @@ void CSceneInfo::removeMapRsrcCache(INT nSlot) {
         {
             INT n = s_nMapCacheField;
             if (n && s_nMapCacheBattle != n) {
-                TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+                TRACE_USER_COL(TGOTO, _TTY_BLUE, ">>> REMOVE MAP-RSRC [[[%d]]]\n", n);
                 CRsrcDB::removeRsrc(n);
             }
         }
@@ -1359,7 +1389,7 @@ void CSceneInfo::removeMapRsrcCache(INT nSlot) {
         {
             INT n = s_nMapCacheBattle;
             if (n && n != s_nMapCacheField) {
-                TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+                TRACE_USER_COL(TGOTO, _TTY_BLUE, ">>> REMOVE MAP-RSRC [[[%d]]]\n", n);
                 CRsrcDB::removeRsrc(n);
             }
         }
@@ -1475,7 +1505,7 @@ DOOR_ID _openGoalDoor(const RoomInfo& roomGoal) {
         }
         nDoor++;
     }
-    if (!(pGoalDoor)) AssertApp(D_00484980, 3094, D_00484E28, 0);
+    if (!(pGoalDoor)) AssertApp(__FILE__, 3094, "pGoalDoor", 0);
     pGoalDoor->setDoorState(DOOR_STAT_OPENED);
     return (DOOR_ID)nDoor;
 }
@@ -1495,8 +1525,11 @@ void CSceneInfo::openGoalDoor() {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", openGoalDoor__10CSceneInfo);
 #endif
+__asm__(".rdata\n.align 3\n.word 0x8B837581\n.word 0x80835B81\n.word 0x5A836564\n.word 0x4E838C83\n.word 0x76816783\n.word 0x4F8AC888\n.word 0xFC93C582\n.word 0xC482C182\n.word 0xCC82E982\n.word 0x4181C582\n.word 0x5B815383\n.word 0xE0948B83\n.word 0x4A8AF082\n.word 0xDC82AF82\n.word 0xF182B982\n.word 0x0000000A\n.word 0x00000000\n.word 0x00000000\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", backupEventDoorState__10CSceneInfo);
+__asm__(".rdata\n.align 4\n.word .L0021648C\n.word .L00216494\n.word .L0021649C\n.word .L002164B4\n.word .L002164AC\n.word .L002164A4\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", rollbackEventDoorState__10CSceneInfoi);
+__asm__(".rdata\n.align 3\n.word 0x726F6F64\n.word 0x4E705F2E\n.word 0x616D726F\n.word 0x49637253\n.word 0x006F666E\n.word 0x00000000\n.word .L0021664C\n.word .L00216654\n.word .L0021665C\n.word .L00216674\n.word .L0021666C\n.word .L00216664\n.text\n");
 void _setOpenFlagEventDoor(const DoorInfo& door) {
     USHORT nFloor = CSceneInfo::getCurrentFloorIndex();
     INT nEvIdx = door._type - 1;
@@ -1629,7 +1662,7 @@ USHORT DoorInfo::getNormaCount() const {
 }
 BOOL DoorInfo::isValidNormaIndex(USHORT nIndex) const {
     if (nIndex < getNormaCount()) return TRUE;
-    TRACE(D_00484EC8);
+    TRACE("\x83\x8b\x81[\x83\x80\x83N\x83\x8a\x83G\x83" "C\x83V\x83\x87\x83\x93\x83m\x83\x8b\x83}\x90\x94\x82\xc9\x91\xce\x82\xb7\x82\xe9 INDEX \x92l\x82\xaa\x95s\x90\xb3\x82\xc5\x82\xb7\n");
     return FALSE;
 }
 /* Parked: 15 lines - the first `return 0` (key && idx+1 == count) stays an inline `b end` block after a bne in the original, ours branches straight to the epilogue; the bValid test comes out as movn here, as bnel + sltu there. */
@@ -1726,6 +1759,7 @@ BOOL DoorInfo::isNormaCleared() const {
     return b;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", useNormaCard__8DoorInfoRC4CARD);
+__asm__(".rdata\n.align 4\n.word .L002172C4\n.word .L002172D0\n.word .L002172F0\n.word .L002172E0\n.word .L0021731C\n.word 0\n.text\n");
 void DoorInfo::initNorma() {
     DOOR_STORAGE* p = (DOOR_STORAGE*)_pStorageInfo;
     if (p) {
@@ -1764,7 +1798,7 @@ SHORT CSceneInfo::getSceneNumFromCardID(BYTE nCardID) {
             break;
         }
     }
-    if (!n) TRACE_COL((TtyColor)0x1f, D_00484F28, nCardID);
+    if (!n) TRACE_COL((TtyColor)0x1f, "CSceneInfo::getSceneNumFromCardID( %d ) ... invalid Card-ID\n", nCardID);
     return n;
 }
 BYTE CSceneInfo::getCardIDFromSceneNum(SHORT nScene) {
@@ -1779,7 +1813,7 @@ BYTE CSceneInfo::getCardIDFromSceneNum(SHORT nScene) {
             }
         }
     }
-    if (!nCardID) TRACE_COL(_TTY_RED, D_00484F68, nScene);
+    if (!nCardID) TRACE_COL(_TTY_RED, "CSceneInfo::getCardIDFromSceneNum( %d ) ... invalid Scene-Num\n", nScene);
     return nCardID;
 }
 INT CSceneInfo::getConstWorldRsrcID(INT nWorld, BOOL bSora) {
@@ -1790,3 +1824,4 @@ INT CSceneInfo::getInconstWorldRsrcID(INT nWorld, BOOL bSora) {
     if ((UINT)nWorld < 14) return !bSora ? nWorld + 1200 : nWorld + 200;
     return 0;
 }
+// SOURCE DATA: .rodata
