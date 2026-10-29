@@ -332,7 +332,7 @@ public:
     static void backupEventDoorState();
     // PARTIAL: added for Form/Menu/WorldWarp
     static SHORT getFloorNumber(USHORT nFloorIndex, BOOL bSora);
-    static void reqChangeFloor(SHORT nFloor, BOOL bFlag);
+    static BOOL reqChangeFloor(SHORT nFloor, BOOL bFlag);
     // PARTIAL: added for Form/DebugMenu
     static void doneChangeScene();
     static FLOOR::FloorLayout* getFloorDataSrc(USHORT nFloorIndex, BOOL bSora);
