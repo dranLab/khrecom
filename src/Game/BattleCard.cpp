@@ -384,7 +384,80 @@ INT CBattleCard::isNowSelect() {
     return m_iHand == 0;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setHand__Q210CardBattle11CBattleCardRC4CARDiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setHandLocate__Q210CardBattle11CBattleCardii);
+void CBattleCard::setHandLocate(INT inNum, INT inMax) {
+    CB_LAYOUT* pLayout;
+    INT n = 0;
+    if (m_uiUser == 1) {
+        if ((inMax >= 3 && inNum == inMax - 1) || inNum == -1) {
+            pLayout = &g_LayoutData[11];
+        } else {
+            if (inNum < 4) {
+                if (inNum >= 0) {
+                    pLayout = &g_LayoutData[7 + inNum];
+                    goto set1;
+                }
+            }
+            m_tqTimer = 0;
+            m_uiMode = 10;
+            if (DebugWork::g_dw.player.iDeckDbgDisp) {
+                n = inNum * 25;
+                pLayout = &g_LayoutData[15];
+            } else {
+                m_uiFlag = (INT)m_uiFlag & ~0x1;
+                if (inNum == inMax - 2) pLayout = &g_LayoutData[12];
+                else pLayout = &g_LayoutData[13];
+            }
+        }
+    set1:
+        m_Pos.set(pLayout->x, pLayout->y);
+        m_iLayer = pLayout->layer;
+        m_Pos.x += n;
+        m_vRot.set(0.0f, 0.0f, 0.0f, pLayout->scale * 0.01f);
+        m_fStartDir = 0.0f;
+        m_fEndDir = 0.0f;
+        m_fEndScale = m_fStartScale = m_vRot.w;
+    } else {
+        if (inNum == 0) {
+            pLayout = &g_LayoutData[16];
+            m_fEndDir = 0.0f;
+            m_vRot.y = 3.1415927f;
+            m_fStartDir = 3.1415927f;
+        } else if (inNum >= 0) {
+            if (inNum < 4) {
+                pLayout = &g_LayoutData[16 + inNum];
+                m_vRot.y = 3.1415927f;
+                m_fStartDir = 3.1415927f;
+                m_fEndDir = 3.1415927f;
+            } else goto other;
+        } else other: if (inNum == inMax - 1) {
+            pLayout = &g_LayoutData[20];
+            m_vRot.y = 3.1415927f;
+            m_fStartDir = 3.1415927f;
+            m_fEndDir = 3.1415927f;
+        } else {
+            m_tqTimer = 0;
+            m_uiMode = 10;
+            if (DebugWork::g_dw.player.iDeckDbgDisp) {
+                n = inNum * 35;
+                pLayout = &g_LayoutData[23];
+            } else {
+                m_uiFlag = (INT)m_uiFlag & ~0x1;
+                pLayout = &g_LayoutData[21];
+            }
+            m_vRot.y = 0.0f;
+            m_fStartDir = 0.0f;
+            m_fEndDir = 0.0f;
+        }
+        m_Pos.set(pLayout->x, pLayout->y);
+        m_iLayer = pLayout->layer;
+        m_vRot.x = m_vRot.z = 0.0f;
+        m_fEndScale = m_fStartScale = m_vRot.w = pLayout->scale * 0.01f;
+        m_Pos.y -= n;
+    }
+    m_EndPos = m_Pos;
+    m_pCard->changeLayer(m_iLayer);
+    m_uiFlag |= 0x2008;
+}
 void CBattleCard::hideHand() {
     m_uiMode = 13;
     m_tqTimer = 400;
