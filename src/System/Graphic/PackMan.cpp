@@ -123,6 +123,7 @@ public:
     static u_long128* initBGPacket(INT nInIdx);
     static void endScene();
     static void terminateBGPacket();
+    static void terminateFGPacket();
     static void changeLayer(INT nLayer);
     static void setFrameEffect(INT nKind, INT n1, INT n2, INT n3);
     static void terminateSemiPacket();
@@ -695,7 +696,32 @@ u_long128* CPackMan::initBGPacket(INT nInIdx) {
     return pRet;
 }
 BOOL CPackMan::isPacketForBG() { return s_pPktVif1 == &s_pktVif1BG; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", terminateBGPacket__8CPackMan);
+void CPackMan::terminateBGPacket() {
+    changeLayer(1);
+    u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000;
+    s_DefaultGpuRegs1._nTEST = 0x500fd;
+    s_DefaultGpuRegs2._nTEST = s_DBuf.clear0.testb;
+    s_DefaultGpuRegs2._nZBUF = nZ;
+    s_DefaultGpuRegs1._nZBUF = nZ;
+    _checkDmaTag();
+    sceVif1PkCnt(s_pPktVif1, 0);
+    sceVif1PkAddCode(s_pPktVif1, 0x13000000);
+    _pkOpenDirectCode(0);
+    QWdata* qp = (QWdata*)_pkOpenGifTag(_pack(0x1000800000008000, 0xe));
+    ((u_long128*)qp)[0] = _pack(s_DefaultGpuRegs1._nTEST, 0x47);
+    ((u_long128*)qp)[1] = _pack(s_DefaultGpuRegs2._nTEST, 0x48);
+    ((u_long128*)qp)[2] = _pack(s_DefaultGpuRegs1._nZBUF, 0x4e);
+    ((u_long128*)qp)[3] = _pack(s_DefaultGpuRegs2._nZBUF, 0x4f);
+    ((u_long128*)qp)[4] = _pack(5, 8);
+    _pkCloseGifTag(qp + 5);
+    _pkCloseDirectCode();
+    _checkDmaTag();
+    sceVif1PkRet(s_pPktVif1, 0);
+    sceVif1PkAddCode(s_pPktVif1, 0x13000000);
+    _checkDmaTag();
+    sceVif1PkTerminate(s_pPktVif1);
+    changeLayer(0);
+}
 /* Parked: ~100 lines - store scheduling: the original stores the ZBUF value before the s_pPktVif1/s_nMaxPktSizeVif1 stores (lui order ZBUF_START, Regs1, pktVif1BG, Max, pPkt, Regs2), ours hoists the packet pointer stores; 6 min of permuter (9k candidates, 104 -> 103) did not move it. */
 #if 0
 void CPackMan::changeLayer(INT nInLayer) {
@@ -764,7 +790,35 @@ void CPackMan::initFGPacket() {
     _pkCloseDirectCode();
     changeLayer(0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", terminateFGPacket__8CPackMan);
+void CPackMan::terminateFGPacket() {
+    changeLayer(2);
+    u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000;
+    s_DefaultGpuRegs1._nTEST = 0x500fd;
+    s_DefaultGpuRegs2._nTEST = s_DBuf.clear0.testb;
+    s_DefaultGpuRegs2._nZBUF = nZ;
+    s_DefaultGpuRegs1._nZBUF = nZ;
+    _checkDmaTag();
+    sceVif1PkCnt(s_pPktVif1, 0);
+    sceVif1PkAddCode(s_pPktVif1, 0x13000000);
+    _pkOpenDirectCode(0);
+    QWdata* qp = (QWdata*)_pkOpenGifTag(_pack(0x1000800000008000, 0xe));
+    ((u_long128*)qp)[0] = _pack(s_DefaultGpuRegs1._nTEST, 0x47);
+    ((u_long128*)qp)[1] = _pack(s_DefaultGpuRegs2._nTEST, 0x48);
+    ((u_long128*)qp)[2] = _pack(s_DefaultGpuRegs1._nZBUF, 0x4e);
+    ((u_long128*)qp)[3] = _pack(s_DefaultGpuRegs2._nZBUF, 0x4f);
+    ((u_long128*)qp)[4] = _pack(5, 8);
+    _pkCloseGifTag(qp + 5);
+    _pkCloseDirectCode();
+    _checkDmaTag();
+    sceVif1PkEnd(s_pPktVif1, 0);
+    sceVif1PkAddCode(s_pPktVif1, 0x13000000);
+    _checkDmaTag();
+    sceVif1PkTerminate(s_pPktVif1);
+    INT nSize = sceVif1PkSize(s_pPktVif1);
+    *(INT*)&s_nMaxPktSizeVif1Semi = s_nMaxPktSizeVif1FG - nSize; /* MATCH: scalar store through a cast keeps the pBase load after it */
+    s_pktVif1SemiBase = s_pPktVif1->pBase + nSize;
+    changeLayer(0);
+}
 BOOL CPackMan::isStartStillMode() { return s_nReqDrawMode == 1 && s_nDrawMode == 0; }
 void CPackMan::saveScreen() {
     _makePkt_SaveScreen();
