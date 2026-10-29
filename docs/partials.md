@@ -50,14 +50,14 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1084 (1013 in 110 headers, 71 in 30 .cpp); MATCH: 72
-  by category: method 455, data member 71, type 96, fwd decl 53, #include 29, changed in place 128, padding 32, path override 24, gate 37, guessed 46, header-level 75, stand-in 30, other 8
-stand-ins: 401 foreign in 126 files (114 names), 193 unattributed, 177 own
-duplicate class names across headers: 23
+PARTIAL: 1078 (1008 in 109 headers, 70 in 30 .cpp); MATCH: 77
+  by category: method 452, data member 71, type 97, fwd decl 53, #include 29, changed in place 126, padding 32, path override 24, gate 37, guessed 46, header-level 74, stand-in 29, other 8
+stand-ins: 399 foreign in 126 files (114 names), 197 unattributed, 177 own
+duplicate class names across headers: 24
 padding: 33 arrays, 25 accessors
-mechanisms: 945 sites (924 untagged); #line: 1182
-opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 156, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 542, superset 129, partial 98, gated 101, missing 14, unattributed 309
+mechanisms: 942 sites (919 untagged); #line: 1235
+opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 157, MAPENEMY_H_NO_COLL_ANIM 2
+classes: complete 547, superset 129, partial 98, gated 96, missing 14, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -85,9 +85,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 22.0 | `Game/Enemy/BattleEnemyManager.h` | ready | 11 stand-in files, 0 dup headers, 0 gate users | CBattleEnemyManager (1 complete) | inline bodies or virtuals |
 | R1 | 17.5 | `Game/CardBattle.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users, 29 PARTIAL | CCardRevolver (1 partial) | inline bodies or virtuals |
 | R1 | 14.0 | `Game/Atel/Atel.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | CAtel (1 complete) | inline bodies or virtuals |
-| R1 | 14.0 | `Game/Atel/VSME.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
 | R1 | 12.5 | `Form/Menu/JMemoFlag.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CJiminyMemoFlag (1 superset) | inline bodies or virtuals |
+| R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -109,10 +109,10 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CBuf` | superset | System/Buf.h | 5 |  | 3 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `COLL_INFO_UNION` | missing | Game/Movement.h | 5 |  |  |
-| `CVSM` | partial | Game/Atel/VSME.h | 5 |  | missing fields: m_ActorStateFnc; extra methods: BOOL |
-| `Actor` | complete | Game/Atel/VSME.h | 4 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 4 |  | missing methods: ~CPointCollision |
 | `CSceneInfo` | partial | Game/SceneInfo.h | 4 |  | missing methods: getCurrentRoomInfo, hasSceneCache, rollbackEventDoorState, setSeRangeRatio, updateBattleScene; 44 PARTIAL |
+| `CVSM` | partial | Game/Atel/VSME.h | 4 |  | missing fields: m_ActorStateFnc; extra methods: BOOL |
+| `Actor` | complete | Game/Atel/VSME.h | 3 |  |  |
 | `CBossDeadDemo` | complete | Game/Enemy/BossDeadDemo.h | 3 |  |  |
 | `CFrecFont` | complete | System/Graphic/FrecFont.h | 3 |  |  |
 | `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
@@ -208,6 +208,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `sceGsLoadImage` | complete | System/Graphic/Effect/libppp/pppPart.h | 1 |  |  |
 | `sceGsStoreImage` | complete | System/Graphic/Effect/libppp/keProg/pppKeLns.h | 1 |  |  |
 | `C3DCPrim` | partial | System/Graphic/3DCPrim.h | 0 | System/Graphic/GprimFull.h | missing methods: getObjPtr, makePkt_Line0, makePkt_Line1, makePkt_LineStrip0, makePkt_LineStrip1, makePkt_None, ... (+13); parameter count differs: create; virtual order differs |
+| `C3DLine` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h |  |
 | `C3DLines` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DLines |
 | `C3DPolyG4` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DPolyG4 |
 | `C3DStripBase` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DStripBase; 1 PARTIAL |
@@ -244,12 +245,12 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Atel/AtelBlur.h` | 0 | 1/1/0/0 | 3 |
 | `Game/Atel/AtelCrossFade.h` | 0 | 1/1/0/0 | 4 |
 | `Game/Atel/AtelFog.h` | 0 | 3/1/0/0 | 3 |
-| `Game/Atel/Avatar.h` | 6 | 0/0/0/6 | 4 |
+| `Game/Atel/Avatar.h` | 0 | 5/1/0/0 | 4 |
 | `Game/Atel/CameraMan.h` | 0 | 2/1/0/0 | 3 |
 | `Game/Atel/ChatMan.h` | 6 | 0/1/0/0 | 7 |
 | `Game/Atel/CommandAccepter.h` | 1 | 1/0/0/0 | 15 |
 | `Game/Atel/EventTrap.h` | 0 | 1/2/2/0 | 3 |
-| `Game/Atel/VSME.h` | 0 | 10/0/2/0 | 1 |
+| `Game/Atel/VSME.h` | 0 | 10/0/2/0 | 2 |
 | `Game/AttachCard.h` | 1 | 1/0/0/0 | 2 |
 | `Game/AttachMotion.h` | 1 | 1/0/0/0 | 154 |
 | `Game/AttackMotion.h` | 7 | 1/2/0/0 | 152 |
@@ -278,7 +279,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Enemy/HumanBoss.h` | 0 | 0/1/0/0 | 4 |
 | `Game/Enemy/MapEnemy.h` | 10 | 0/0/0/1 | 7 |
 | `Game/Enemy/MapEnemyManager.h` | 1 | 1/1/0/0 | 8 |
-| `Game/Entity.h` | 106 | 0/0/2/0 | 145 |
+| `Game/Entity.h` | 106 | 0/0/2/0 | 146 |
 | `Game/EntityFactory.h` | 14 | 1/1/0/0 | 49 |
 | `Game/Game.h` | 20 | 0/1/0/0 | 42 |
 | `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
@@ -321,7 +322,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Player/Summon.h` | 0 | 0/0/1/0 | 10 |
 | `Game/Player/SummonGenie.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Player/SummonMushu.h` | 0 | 0/1/0/0 | 2 |
-| `Game/PoolList.h` | 1 | 0/0/0/0 | 50 |
+| `Game/PoolList.h` | 1 | 0/0/0/0 | 51 |
 | `Game/Prize.h` | 0 | 0/1/0/0 | 2 |
 | `Game/SEMotion.h` | 0 | 5/0/1/0 | 4 |
 | `Game/SceneEnv.h` | 1 | 0/0/1/0 | 35 |
@@ -335,7 +336,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Coord.h` | 3 | 0/1/0/0 | 16 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 270 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 10 |
-| `System/Fsm.h` | 4 | 1/0/0/1 | 107 |
+| `System/Fsm.h` | 4 | 1/0/0/1 | 108 |
 | `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 11 |
 | `System/Graphic/2d/2DFntObj.h` | 0 | 0/1/0/0 | 3 |
 | `System/Graphic/2d/2DLay.h` | 0 | 3/1/0/0 | 4 |
@@ -352,9 +353,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
 | `System/Graphic/DeFocus.h` | 5 | 0/0/0/5 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
-| `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 168 |
-| `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 170 |
-| `System/Graphic/Effect/effect.h` | 7 | 1/1/4/0 | 74 |
+| `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 169 |
+| `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 171 |
+| `System/Graphic/Effect/effect.h` | 7 | 1/1/4/0 | 75 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 3 | 2/0/0/0 | 13 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
 | `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 30 |
@@ -370,8 +371,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 37 |
 | `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 2 |
-| `System/Graphic/Gprim.h` | 46 | 3/3/5/21 | 229 |
-| `System/Graphic/GprimFull.h` | 0 | 1/17/2/0 | 1 |
+| `System/Graphic/Gprim.h` | 47 | 3/3/5/22 | 229 |
+| `System/Graphic/GprimFull.h` | 0 | 1/16/2/0 | 1 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 9 |
 | `System/Graphic/MapUnit.h` | 2 | 0/0/0/0 | 3 |
@@ -409,7 +410,7 @@ or `untagged`.
 | feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:3 |
 | feature | `COLLOBJ_H_COLLISION_CLASSES` | 5 | 1 | CPointCollision (debugWinPathEditPosCamGround) |
 | feature | `COLLOBJ_H_INFO_UNION` | 3 | 0 | untagged, e.g. Game/Movement.cpp:2 |
-| feature | `ENTITY_H_SETFLAG_DIRECT` | 1 | 0 | untagged, e.g. Game/Atel/Avatar.cpp:3 |
+| feature | `ENTITY_H_SETFLAG_DIRECT` | 1 | 1 | setEntityFlag on the CEntity base subobject (constructor, InitAvatar) |
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 0 | untagged, e.g. Game/Atel/Atel.cpp:30 |
 | feature | `MODELDATA_H_TEXINFO` | 4 | 0 | untagged, e.g. System/Graphic/DispList.cpp:1 |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 1 | 0 | untagged, e.g. System/RsrcData.cpp:6 |
@@ -440,7 +441,7 @@ or `untagged`.
 | guard skip | `SYSTEM_COORD_H` | 1 | 0 | untagged, e.g. System/Graphic/Effect/effect_inl.h:9 |
 | guard skip | `SYSTEM_FSM_H` | 1 | 0 | untagged, e.g. Game/Entity.h:29 |
 | opt-out | `MAPENEMY_H_NO_COLL_ANIM` | 2 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:3 |
-| opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 157 | 2 | the message comes after DebugPathData.h's strings (placeholder below) |
+| opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 158 | 3 | the original .rodata has no Task.h container-overflow message |
 | opt-out site | `MAPENEMY_H_NO_COLL_ANIM` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.h:8 |
 | opt-out site | `TASK_H_NO_SLC_OVERFLOW_MSG` | 1 | 0 | untagged, e.g. System/Task.h:201 |
 | path override | `ANIM_H_PATH` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:2 |
@@ -536,8 +537,8 @@ or `untagged`.
 | placeholder | `_pathDataCameraSLCOverflow*` | 1 | 0 | untagged, e.g. System/Graphic/PathDataCamera.cpp:7 |
 | placeholder | `_premiumPrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:10 |
 | placeholder | `_roPh*` | 8 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:2186 |
-| placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:151 |
-| placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1751 |
+| placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:150 |
+| placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1750 |
 | placeholder | `_roulettePrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:13 |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/SampleEnemy.cpp:13 |
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:418 |
@@ -548,10 +549,10 @@ or `untagged`.
 | placeholder | `_taskSLCOverflowHere*` | 1 | 0 | untagged, e.g. Game/Player/SummonCloud.cpp:23 |
 | placeholder | `_taskSLCOverflowLate*` | 1 | 0 | untagged, e.g. Game/Gimmick/GimmickTutorial.cpp:26 |
 | placeholder | `_taskSLCOverflowLevelUp*` | 1 | 0 | untagged, e.g. Form/Menu/LevelUp.cpp:20 |
-| placeholder | `_taskSLCOverflowMsg*` | 6 | 0 | untagged, e.g. Game/Atel/VSME.cpp:26 |
+| placeholder | `_taskSLCOverflowMsg*` | 6 | 0 | untagged, e.g. Game/Atel/VSME.cpp:25 |
 | placeholder | `_taskSLCOverflowPlaceholder*` | 6 | 0 | untagged, e.g. Form/Menu/WorldCard.cpp:10 |
 | placeholder | `_taskSLCOverflowSaveLoadUtil*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadUtil.cpp:18 |
-| placeholder | `_vsmeMotionName*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:54 |
+| placeholder | `_vsmeMotionName*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:53 |
 | pragma | `#pragma implementation` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:2 |
 | pragma | `#pragma interface` | 1 | 0 | untagged, e.g. System/Graphic/GprimFull.h:4 |
 | unit gate | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.cpp:2 |
@@ -559,7 +560,6 @@ or `untagged`.
 | unit gate | `FORM_MENU_JIMINYMEMO_CPP` | 1 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:1 |
 | unit gate | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.cpp:2 |
 | unit gate | `FORM_MENU_SAVELOAD_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoad.cpp:2 |
-| unit gate | `GAME_ATEL_AVATAR_CPP` | 2 | 0 | untagged, e.g. Game/Atel/Avatar.cpp:2 |
 | unit gate | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.cpp:1 |
 | unit gate | `GAME_ENEMY_BATTLEENEMY_CPP` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:1 |
 | unit gate | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.cpp:1 |
@@ -570,7 +570,7 @@ or `untagged`.
 | unit gate | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerManager.cpp:1 |
 | unit gate | `GAME_PLAYER_PLAYER_CPP` | 1 | 0 | untagged, e.g. Game/Player/Player.cpp:1 |
 | unit gate | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.cpp:2 |
-| unit gate | `SYSTEM_GRAPHIC_DEFOCUS_CPP` | 2 | 0 | untagged, e.g. Game/Atel/VSME.cpp:76 |
+| unit gate | `SYSTEM_GRAPHIC_DEFOCUS_CPP` | 2 | 0 | untagged, e.g. Game/Atel/VSME.cpp:75 |
 | unit gate | `SYSTEM_GRAPHIC_GPRIM_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:1 |
 | unit gate | `SYSTEM_TASKMAN_CPP` | 1 | 0 | untagged, e.g. System/TaskMan.cpp:1 |
 | unit gate site | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.h:17 |
@@ -578,7 +578,6 @@ or `untagged`.
 | unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 2 | 0 | untagged, e.g. Form/Menu/JiminyMemo.h:12 |
 | unit gate site | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:93 |
 | unit gate site | `FORM_MENU_SAVELOAD_CPP` | 6 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:148 |
-| unit gate site | `GAME_ATEL_AVATAR_CPP` | 2 | 0 | untagged, e.g. Game/Atel/Avatar.h:14 |
 | unit gate site | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.h:170 |
 | unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:112 |
 | unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.h:49 |
