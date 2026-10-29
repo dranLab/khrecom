@@ -545,10 +545,10 @@ public:
 };
 #include "Game/SceneEnv.h"
 #line 566
-class CPackMan { /* PARTIAL: System/Graphic/PackMan.h is not written yet */
-public:
-    static void changeDrawMode(INT nMode);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 HANDLE CSaveLoadUI::m_hThis = 0;
 

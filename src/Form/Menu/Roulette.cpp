@@ -300,10 +300,10 @@ public:
     static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
 };
 
-class CPackMan {
-public:
-    static void changeDrawMode(INT nMode);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 #include "System/Sound/SoundMan.h"
 #line 314

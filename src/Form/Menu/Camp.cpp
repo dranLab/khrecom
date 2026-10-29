@@ -335,10 +335,10 @@ public:
 /* SceneInfo.h's inline */
 static inline RoomInfo* _getCurrentRoomInfo() { return CSceneInfo::getRoomInfo(-1); }
 
-class CPackMan {
-public:
-    static void changeDrawMode(INT nMode);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 extern "C" {
 int sprintf(char*, const char*, ...);
