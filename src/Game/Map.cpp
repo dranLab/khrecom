@@ -822,7 +822,204 @@ void setTransparency(const CCoord& crd, CModel& model) {
 void setTransparency(CModel& model) {
     setTransparency(model.getCrd(0), model);
 }
+/* Parked: first draft, 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes,
+   group selection by player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons);
+   not yet tuned. */
+#if 0
+void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+extern "C" void sceVu0InversMatrix(FMATRIX& m0, FMATRIX& m1);
+extern "C" void sceVu0ApplyMatrix(FVECTOR& v0, FMATRIX& m0, FVECTOR& v1);
+INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
+INT resultCheckBBox(CCoord& crd, const BBOX* bbox);
+void ITOF0Vector(FVECTOR& v0, const IVECTOR& v1);
+void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
+static inline void _kickCheckBBox(FMATRIX* m, const BBOX* bbox) {
+    if (!(bbox->x[1] < bbox->x[0])) {
+        FVECTOR* v = (FVECTOR*)0x70000000;
+        v[0].x = bbox->x[0];
+        v[0].y = bbox->y[0];
+        v[0].z = bbox->z[0];
+        v[1].x = bbox->x[1];
+        v[1].y = bbox->y[1];
+        v[1].z = bbox->z[1];
+        asm volatile("lqc2 $vf20, 0(%0)" : : "r"(v));
+        asm volatile("lqc2 $vf27, 0x10(%0)" : : "r"(v));
+        asm volatile("lqc2 $vf21, 0x0(%0)\n"
+                     "lqc2 $vf22, 0x10(%0)\n"
+                     "lqc2 $vf23, 0x20(%0)\n"
+                     "lqc2 $vf24, 0x30(%0)" : : "r"(m));
+        asm volatile("vcallms 0x20");
+    }
+}
+void CMap::disp() {
+    INT group_no;
+    FLOAT fR;
+    CMapModel* pModel;
+    INT nModel;
+    FVECTOR vColor;
+    FVECTOR* pSceneColor;
+    if (!m_pZone || !m_pModelTbl) return;
+    if (DebugWork::g_dw.sys.m_iMapDisp < -1) DebugWork::g_dw.sys.m_iMapDisp = m_nModelMax;
+    else if (m_nModelMax < DebugWork::g_dw.sys.m_iMapDisp) DebugWork::g_dw.sys.m_iMapDisp = -1;
+    if (DebugWork::g_dw.sys.m_iMapDisp < 0) return;
+    if (DebugWork::g_dw.sys.m_iMapDisp > 0) {
+        m_gpPosDir.setCoord(&Crd(DebugWork::g_dw.sys.m_iMapDisp));
+        m_gpPosDir.disp();
+    }
+    {
+    CMapModel* pModel = m_pModelTbl;
+    INT nModel = m_nModelMax;
+    if (DebugWork::g_dw.sys.m_iMapBack == 0) {
+        for (INT i = 0; i < nModel; i++, pModel++) pModel->defaultShaderOption();
+    } else if (DebugWork::g_dw.sys.m_iMapBack == 1) {
+        for (INT i = 0; i < nModel; i++, pModel++) pModel->setShaderOption(2);
+    } else if (DebugWork::g_dw.sys.m_iMapBack == 2) {
+        for (INT i = 0; i < nModel; i++, pModel++) pModel->resetShaderOption(2);
+    }
+    }
+    if (m_uiMapFlag & 1) return;
+    group_no = -1;
+    fR = getFrameRateF();
+    if (CSceneEnv::getStopTypeBit() & 0x800) fR = 0.0f;
+    pModel = m_pModelTbl;
+    nModel = m_nModelMax;
+    pSceneColor = CSceneEnv::getTypeColor((ObjType::eObjType)0xB);
+    if (pSceneColor) MulVector(vColor, m_vColor, *pSceneColor);
+    else vColor = m_vColor;
+    for (INT i = 0; i < nModel; i++, pModel++) {
+        pModel->setColorScale(vColor);
+        pModel->dispUpdate(fR);
+    }
+    if (m_pZone->group_suu > 0) {
+        CTask* pl = getSysTask(3);
+        if (pl) {
+            FVECTOR vec = pl->Crd(0).m_World.v[3];
+            for (int i = 0; i < m_pZone->chip_suu; i++) {
+                ZONEPARTS* zd = &m_pZone->parts[i];
+                if (zd->groupNo < 0) continue;
+                if (zd->crdIndex < 0) continue;
+                FMATRIX* m = &Crd(zd->crdIndex + 1).m_World;
+                BBOX* bb = m_pModelTbl[zd->crdIndex].getBBox(0);
+                FVECTOR lVec;
+                FMATRIX iMat;
+                sceVu0InversMatrix(iMat, *m);
+                sceVu0ApplyMatrix(lVec, iMat, vec);
+                if (bb->x[0] <= lVec.x && lVec.x < bb->x[1] && bb->z[0] <= lVec.z && lVec.z < bb->z[1]) {
+                    group_no = zd->groupNo;
+                    break;
+                }
+            }
+        }
+    }
+    if (group_no >= 0) {
+        INT ii = -1;
+        for (INT f = 0; f < m_pZone->grouptable[group_no][0]; f++) {
+            INT j = m_pZone->grouptable[group_no][f + 1];
+            CMapModel* pModel = &m_pModelTbl[j];
+            if (pModel->m_nGridID == 2) continue;
+            BBOX* bb = pModel->getBBox(0);
+            if (ii >= 0) {
+                INT r = resultCheckBBox(Crd(ii + 1), m_pModelTbl[ii].getBBox(0));
+                _kickCheckBBox(&Crd(j + 1).m_World, bb);
+                if (r >= 0) {
+                    setTransparency(Crd(ii + 1), m_pModelTbl[ii]);
+                    if (m_LightUnit) m_LightUnit[ii].calc();
+                    m_pModelTbl[ii].setBBoxFlag(r);
+                    if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii) m_pModelTbl[ii].dispImpl();
+                }
+            } else {
+                _kickCheckBBox(&Crd(j + 1).m_World, bb);
+            }
+            ii = j;
+        }
+        if (ii >= 0) {
+            INT r = resultCheckBBox(Crd(ii + 1), m_pModelTbl[ii].getBBox(0));
+            if (r >= 0) {
+                setTransparency(Crd(ii + 1), m_pModelTbl[ii]);
+                if (m_LightUnit) m_LightUnit[ii].calc();
+                m_pModelTbl[ii].setBBoxFlag(r);
+                if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii) m_pModelTbl[ii].dispImpl();
+            }
+        }
+    } else {
+        for (INT g = 0; g < 64; g++) {
+            CMapGrid& grid = m_grid[g];
+            if (grid.m_bbox.y[0] <= grid.m_bbox.y[1]) grid.flg = checkBBox(grid.m_pCrd->m_World, &grid.m_bbox);
+        }
+        INT ii = -1;
+        for (INT i = 0; i < m_nModelMax; i++) {
+            CMapModel* pModel = &m_pModelTbl[i];
+            if (pModel->m_nGridID == -2) continue;
+            if (pModel->m_nGridID != -1 && m_grid[pModel->m_nGridID].flg < 0) continue;
+            BBOX* bb = pModel->getBBox(0);
+            if (ii >= 0) {
+                INT r = resultCheckBBox(Crd(ii + 1), m_pModelTbl[ii].getBBox(0));
+                _kickCheckBBox(&Crd(i + 1).m_World, bb);
+                if (r >= 0) {
+                    setTransparency(Crd(ii + 1), m_pModelTbl[ii]);
+                    if (m_LightUnit) m_LightUnit[ii].calc();
+                    m_pModelTbl[ii].setBBoxFlag(r);
+                    if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii) m_pModelTbl[ii].dispImpl();
+                }
+            } else {
+                _kickCheckBBox(&Crd(i + 1).m_World, bb);
+            }
+            ii = i;
+        }
+        if (ii >= 0) {
+            INT r = resultCheckBBox(Crd(ii + 1), m_pModelTbl[ii].getBBox(0));
+            if (r >= 0) {
+                setTransparency(Crd(ii + 1), m_pModelTbl[ii]);
+                if (m_LightUnit) m_LightUnit[ii].calc();
+                m_pModelTbl[ii].setBBoxFlag(r);
+                if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii) m_pModelTbl[ii].dispImpl();
+            }
+        }
+    }
+    if (m_pFog->skynum > 0) {
+        pSceneColor = CSceneEnv::getTypeColor((ObjType::eObjType)0xC);
+        FMATRIX& wv = CWorldEnv::getWorldViewMatrix();
+        INT max = m_pFog->skynum;
+        INT nHorizon = (INT)((wv.m[0][1] * wv.m[2][0] + wv.m[2][1] * wv.m[2][2]) * 481.28f * 16.0f
+                             / (wv.m[0][2] * wv.m[2][0] + wv.m[2][2] * wv.m[2][2]));
+        if (max > 4) max = 4;
+        for (INT i = 0; i < max; i++) {
+            IVECTOR c0, c1;
+            FVECTOR v;
+            if (pSceneColor) {
+                if (i == 0) {
+                    ITOF0Vector(v, m_pFog->sky[0]);
+                    MulVector(v, v, *pSceneColor);
+                    FTOI0Vector(c1, v);
+                }
+                c0 = c1;
+                ITOF0Vector(v, m_pFog->sky[i + 1]);
+                MulVector(v, v, *pSceneColor);
+                FTOI0Vector(c1, v);
+            } else {
+                c0 = m_pFog->sky[i];
+                c1 = m_pFog->sky[i + 1];
+            }
+            CPolyG4& back = m_Back[i];
+            back.m_C0.set(c1.x, c1.y, c1.z, 0);
+            back.m_C1.set(c1.x, c1.y, c1.z, 0);
+            back.m_C2.set(c0.x, c0.y, c0.z, 0x80);
+            back.m_C3.set(c0.x, c0.y, c0.z, 0x80);
+            INT y0 = nHorizon - (m_pFog->sky[i].w << 4);
+            INT y1 = nHorizon - (m_pFog->sky[i + 1].w << 4);
+            if ((-0xF40 < y0 && y0 < 0xF40) || (-0xF40 < y1 && y1 < 0xF40)) {
+                back.m_P0.set(-0x1000, y1, 0);
+                back.m_P1.set(0x1000, y1, 0);
+                back.m_P2.set(-0x1000, y0, 0);
+                back.m_P3.set(0x1000, y0, 0);
+                back.disp();
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", disp__4CMap);
+#endif
 void CMap::setColorScale(FVECTOR& inColorScale) {
     m_vColor = inColorScale;
     if (m_pSky) m_pSky->setColorScale(inColorScale);
