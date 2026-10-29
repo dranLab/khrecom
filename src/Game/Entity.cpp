@@ -41,10 +41,7 @@ inline void _entityEmptyStringPlaceholder() { TRACE(""); }
 #include "System/Graphic/Fnt.h"
 #include "System/DebugProcInfo.h"
 #include "System/Graphic/WorldEnv.h"
-#include "include_asm.h"
 
-extern "C" FLOAT D_0047D6B0; /* PARTIAL: -1.7e+38 bounding-box seed (data still asm) */
-extern "C" FLOAT D_0047D6B4; /* PARTIAL: +1.7e+38 */
 extern "C" unsigned int strlen(const char*);
 extern "C" int sprintf(char*, const char*, ...);
 void RotTransPersClipW(IVECTOR& iVec, const FVECTOR& fVec);
@@ -1389,8 +1386,6 @@ void CEntity::storeModelColor_() {
         }
     }
 }
-/* Parked: 18 lines - the -1.7e38/+1.7e38 bounding-box seeds are stored x, z, y, w through a pointer in the original (set() gives x, y, z, w), and the inlined model->isShadow() test becomes `li 1; movn` there but sltiu here; layout, camera test and loops match. ~15 variants and a 15 min permuter run (13k candidates, 44 -> 26 on its scale). */
-#if 0
 void CEntity::translucence_() {
     if (!m_pvModelColor) return;
     INT n = m_iModelCount;
@@ -1418,8 +1413,8 @@ void CEntity::translucence_() {
                 FVECTOR maxVec, minVec;
                 FVECTOR v0, v1;
                 limitAlpha = 0.4f;
-                v0.set(D_0047D6B0, D_0047D6B0, D_0047D6B0);
-                v1.set(D_0047D6B4, D_0047D6B4, D_0047D6B4);
+                v0.set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f);
+                v1.set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f);
                 model = m_pModels;
                 for (INT i = 0; i < n; i++, model++) {
                     if (model->isShadow()) continue;
@@ -1462,11 +1457,6 @@ void CEntity::translucence_() {
         if (m_pEffectEx) m_pEffectEx->setAlpha(alpha);
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", translucence___7CEntity);
-#endif
-/* MATCH: translucence_'s constant pool (the -1.7e+38/+1.7e+38 bounding-box seeds) while it is INCLUDE_ASM */
-__asm__(".rdata\n.align 2\n.word 0xFF000000\n.word 0x7F000000\n.text\n");
 HANDLE CEntity::setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale) {
     return CEffectMan::setEffect(inName, inFlag, (ObjType::eObjType)getEntityType(), inPos, inRot, inScale);
 }
