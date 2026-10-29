@@ -119,7 +119,38 @@ void CAvatar::beginStateMain() {
     if (isAvatarScalingFuture()) setAvatarState(0x2000, FALSE);
     if (isAvatarFadeingFuture()) setAvatarState(0x8000, FALSE);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", stateMain__Q24ATEL7CAvatar);
+void CAvatar::stateMain() {
+    if (m_nState & 0x10000) {
+        FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(m_pLookStruct->_nTargetID)->Crd(0));
+        v.y += m_pLookStruct->_fOffsetY;
+        m_pAnim->updateLookPosition(v, 0.0f, 0);
+    }
+    if (m_pAnim && m_pAnim->isLoop(-1)) setAvatarState(0x4100, TRUE);
+    if (isAvatarAnimating() && isMotionEnd()) {
+        setAvatarState(0x100, FALSE);
+        setAvatarState(0x4000, FALSE);
+    }
+    if (m_pAnim && m_pAnim->getTotalTqCrd() - m_pAnim->getCurrentTqCrd() <= getFrameRate()) setAvatarState(0x4000, FALSE);
+    if (isAvatarRotating() && RotateAvatarMain()) {
+        RotateAvatarEnd();
+        setAvatarState(0x40, FALSE);
+        setAvatarState(0x1000, FALSE);
+    }
+    if (isAvatarMoving() && MoveAvatarMain()) {
+        MoveAvatarEnd();
+        setAvatarState(0x10, FALSE);
+        setAvatarState(0x400, FALSE);
+    }
+    if (isAvatarScaling() && ScaleAvatarMain()) {
+        ScaleAvatarEnd();
+        setAvatarState(0x80, FALSE);
+        setAvatarState(0x2000, FALSE);
+    }
+    if (isAvatarFadeing() && FadeAvatarMain()) {
+        setAvatarState(0x200, FALSE);
+        setAvatarState(0x8000, FALSE);
+    }
+}
 void CAvatar::stateMainEnd() {}
 void CAvatar::stateSkipMain() {}
 void CAvatar::updateBefore() {

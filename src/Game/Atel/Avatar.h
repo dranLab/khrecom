@@ -216,6 +216,9 @@ public:
     void cancelScaleAvatar();
     void setRotAhead();
     void MoveAvatarEnd();
+    BOOL MoveAvatarMain();
+    BOOL RotateAvatarMain();
+    void RotateAvatarEnd();
     void setAvatarGravity(BOOL bOn);
     void setAvatarRotTimeLimit(TIMEQ nTime);
     FMATRIX* getAvatarRideMatrix() const {
