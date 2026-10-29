@@ -41,6 +41,14 @@ public:
     static SHORT m_bMapZoneColG;
     static SHORT m_bMapZoneColB;
 };
+// PARTIAL: added for Game/Entity
+class CRideModel;
+class CCollRideModelDisp {
+private:
+    UBYTE _pad[0x60]; /* PARTIAL: the original derives from CTaskSecondary (size 0x60) */
+public:
+    CCollRideModelDisp(CTask* inBo, CRideModel* inRideModel, BOOL inAutoUpdate);
+};
 
 #else /* COLLDISP_CPP */
 

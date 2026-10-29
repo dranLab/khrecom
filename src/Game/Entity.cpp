@@ -14,9 +14,19 @@
 #include "System/Graphic/Camera.h"
 #include "System/Math3D.h"
 #include "Game/Collision/CollMap.h"
+#include "Game/Collision/CollDisp.h"
+#include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
 
 extern "C" char D_0047D330[]; /* __FILE__ */
+extern "C" char D_0047D080[]; /* "" */
+extern "C" char D_0047D660[];
+class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: gated by RSRCDATA_H_FULL */
+public:
+    static BYTE* getRsrcOCD(INT nGroup);
+};
+extern "C" char D_0047D688[];
+extern "C" int strcmp(const char*, const char*);
 extern "C" char D_0047D358[];
 extern "C" char D_0047D500[];
 extern "C" char D_0047D388[];
@@ -524,7 +534,16 @@ void CEntity::land(FLOAT inDownLength, FLOAT inUpLength, BOOL inFirstHit) {
     m_pMove->land(inDownLength, inUpLength, inFirstHit);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", initalizeModel__7CEntityii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateAnimation__7CEntity);
+void CEntity::updateAnimation() {
+    if (m_pAnim) {
+        if (m_pAnim->isRootMove()) updateCoord();
+        m_pAnim->play(getFrameRate(), isClippedLastTime());
+        updateRootMove();
+    }
+    if (m_pTexAnm) {
+        for (INT i = 0; i < m_nTexAnmNum; i++) m_pTexAnm[i].update(getFrameRateF());
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateBadStatusEffect__7CEntityi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setDamageNumber__7CEntityRC7FVECTORi);
 BOOL CEntity::startTargetChase(CEntity* inTarget, FLOAT inSpeed, FLOAT inRate) {
@@ -706,7 +725,16 @@ BOOL CEntity::initSEEx_(INT inID) {
     if (!pSE) return FALSE;
     return pSE->initalize(inID);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", initRideModel___7CEntityi);
+BOOL CEntity::initRideModel_(INT inGroup) {
+    void* ocd = CRsrcDB::getRsrcOCD(inGroup);
+    if (!ocd) return FALSE;
+    m_pRideModel = new (com_malloc_d(sizeof(CRideModel), D_0047D660, RET_ADDR())) CRideModel;
+    if (!m_pRideModel) return FALSE;
+    m_pRideModel->init(ocd, this);
+    m_pRideModel->on();
+    if (DebugWork::g_dw.collision.uiFlag & 1) new (com_malloc_d(sizeof(CCollRideModelDisp), D_0047D688, RET_ADDR())) CCollRideModelDisp(this, m_pRideModel, TRUE);
+    return TRUE;
+}
 void CEntity::updateTimer_() {
     if (m_tqTimer > 0) m_tqTimer -= getFrameRate();
 }
@@ -717,7 +745,19 @@ void CEntity::updateEffect_() {
     if (m_pEffect) m_pEffect->update();
     if (m_pEffectEx) m_pEffectEx->update();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateSE___7CEntity);
+void CEntity::updateSE_() {
+    if (m_pSE) m_pSE->update();
+    if (m_pSEEx) m_pSEEx->update();
+    SE_MANAGED_DATA* data = m_SeManagedData;
+    for (INT i = 0; i < 4; i++, data++) {
+        if (data->hHandle) {
+            INT nFile = data->iFileID;
+            INT nID = data->iSeID;
+            if (!CSound::isSEPlaying(data->hHandle, nFile * 1000 + nID)) data->hHandle = 0;
+            else setSEPanAndVol(data->hHandle, data->iFileID, data->iSeID, data->iBoneIndex, &data->vOffset, 0);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateFade___7CEntity);
 void CEntity::saveRideModelMatrix_() {
     if (m_pRideModel) m_pRideModel->setOldMatrix();
@@ -838,8 +878,32 @@ void CEntity::killLoopEffect(INT inNo) {
     if (m_pEffect) m_pEffect->killLoopEffect(inNo, 0);
     if (m_pEffectEx) m_pEffectEx->killLoopEffect(inNo, 0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setAppearEffect__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setDisappearEffect__7CEntity);
+HANDLE CEntity::setAppearEffect() {
+    COLL_PARAM_HEADER* coll = m_pCollParam;
+    if (!coll) return 0;
+    OTHER_PARAM* other = coll->pOtherParam;
+    if (!(other)) AssertApp(D_0047D330, 3183, D_0047D3D0, 0);
+    if (strcmp(other->szAppearEffectDpx, D_0047D080)) {
+        FVECTOR pos;
+        pos.set(other->AppearPos.fOffsetX, other->AppearPos.fOffsetY, other->AppearPos.fOffsetZ);
+        ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(other->AppearPos.iBoneIndex) + 0x90), pos);
+        return setEffect(other->szAppearEffectDpx, other->iAppearEffectNo, &pos, NULL, 0.0f);
+    }
+    return 0;
+}
+HANDLE CEntity::setDisappearEffect() {
+    COLL_PARAM_HEADER* coll = m_pCollParam;
+    if (!coll) return 0;
+    OTHER_PARAM* other = coll->pOtherParam;
+    if (!(other)) AssertApp(D_0047D330, 3210, D_0047D3D0, 0);
+    if (strcmp(other->szAppearEffectDpx, D_0047D080)) {
+        FVECTOR pos;
+        pos.set(other->AppearPos.fOffsetX, other->AppearPos.fOffsetY, other->AppearPos.fOffsetZ);
+        ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(other->AppearPos.iBoneIndex) + 0x90), pos);
+        return setEffect(other->szAppearEffectDpx, other->iDisappearEffectNo, &pos, NULL, 0.0f);
+    }
+    return 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setDeathEffect__7CEntityPC7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setDeathEffect__7CEntity);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setBadStatusEffect__7CEntityPCcif);
