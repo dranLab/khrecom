@@ -198,7 +198,7 @@ private:
     virtual void makePkt() GPRIM_DRAWABLE_PURE;
 };
 
-#if !defined(SYSTEM_GRAPHIC_GPRIM_CPP) && !defined(GPRIM_H_FULL_CLASSES) /* the partial classes, as the other units see them */
+#ifndef SYSTEM_GRAPHIC_GPRIM_CPP /* the partial classes, as the other units see them */
 class CGPrim : public CDrawable {
 protected:
     UINT m_nAttribute;
@@ -405,7 +405,7 @@ struct G_LINE {
 
 typedef CVector<G_LINE> G_LINE_VECTOR;
 
-// PARTIAL: added for Game/Atel/VSME (its full CAvatar has C3DLine members; the full class with its inlines is in GprimFull.h)
+// PARTIAL: added for the CAvatar includers (Game/Atel/Avatar, Atel, CameraMan, VSME: C3DLine members; the full class with its inlines is in GprimFull.h)
 class C3DLine : public CGPrim {
 protected:
     IVECTOR p0;
@@ -559,7 +559,7 @@ private:
     virtual QWdata* makePktSub();
 };
 
-#else /* SYSTEM_GRAPHIC_GPRIM_CPP or GPRIM_H_FULL_CLASSES (Game/Atel/Avatar inlines C3DLine's constructor): the full classes */
+#else /* SYSTEM_GRAPHIC_GPRIM_CPP: the full classes, for System/Graphic/Gprim itself */
 
 /* The types below have no #pragma interface (their inline functions are not emitted in Gprim.o); the classes are in
  * GprimFull.h. */

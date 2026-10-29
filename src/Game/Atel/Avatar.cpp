@@ -141,7 +141,8 @@ CAvatar::CAvatar(CTask* pParent)
     for (INT i = 4; i >= 0; i--) m_pFadeStruct[i] = NULL;
 }
 /* Parked: 6 lines - the implicit lineY/lineX destructor calls get s5/s4 instead of s4/s5: their address pseudos
-   tie on priority (2 refs / 17 insns) and ours numbers lineX first (lreg dump); no body form changed it. */
+   tie on priority (2 refs / 17 insns) and ours numbers lineX first (lreg dump); no body form changed it.
+   The draft needs the full classes of Gprim.h (inline ~C3DLine/~CGPrim; was GPRIM_H_FULL_CLASSES, fa94b30^). */
 #if 0
 ATEL::CAvatar::~CAvatar() {
     delete m_pMoveStruct;
