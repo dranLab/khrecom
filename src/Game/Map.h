@@ -73,12 +73,50 @@ struct LIGHTDATA {
 
 #ifdef GAME_MAP_CPP
 /* The complete class, for Game/Map (graphics members as padding). */
-struct FOGDATA;
-struct ZONEDATA;
+struct FOGDATA { // 0xb0
+    IVECTOR color;
+    FLOAT fognear;
+    FLOAT fogfar;
+    FLOAT screenz;
+    INT skynum;
+    IVECTOR sky[5];
+    FLOAT fogmax;
+    FLOAT fogmin;
+    FLOAT dispfar;
+    unsigned int Pad0[1];
+    unsigned int Pad1[2];
+    FLOAT sdwColor;
+    FLOAT sdwAlpha;
+    IVECTOR ivdum1;
+    IVECTOR ivdum0;
+};
+struct ZONEDATA { // 0x20
+    SHORT partsnum;
+    SHORT skynum;
+    ZONEPARTS* parts;
+    SHORT gridsizeX;
+    SHORT zoneSizeX;
+    SHORT gridsizeZ;
+    SHORT zoneSizeZ;
+    INT group_suu;
+    INT** grouptable;
+    INT chip_suu;
+    INT __parts_suu;
+};
 class CSky;
 class CMapLightUnit;
 class CTexAnm;
 class CMapModel;
+
+class CMapGrid : public CBBox {
+public:
+    INT flg; /* 0x3c */
+};
+
+class CMapModel : public CModel {
+    INT m_nGridID; /* 0x120 */
+    INT _pad[3];   /* PARTIAL: the original CModel is 16-byte aligned (size 0x130) */
+};
 
 class CMap : public CTask {
 private:
@@ -90,14 +128,16 @@ private:
     INT m_nModelMax;          /* 0x060 */
     FLOAT m_Deg;              /* 0x064 */
     UINT m_uiMapFlag;         /* 0x068 */
-    UBYTE _m_0x6c[0x1574];    /* 0x06c m_LightMarker[8], m_Back[4], m_grid[64] */
+    C3DTile m_LightMarker[8]; /* 0x070 */
+    CPolyG4 m_Back[4];        /* 0x470 */
+    CMapGrid m_grid[64];      /* 0x5e0 */
     FOGDATA* m_pFog;          /* 0x15e0 */
     ZONEDATA* m_pZone;        /* 0x15e4 */
     LIGHTDATA m_Light;        /* 0x15e8 */
     LIGHTDATA m_MapLight;     /* 0x1608 */
     CSky* m_pSky;             /* 0x1628 */
     CMapLightUnit* m_LightUnit; /* 0x162c */
-    UBYTE _m_0x1630[0x50];    /* 0x1630 m_gpPosDir */
+    C3DLineStrip m_gpPosDir;  /* 0x1630 */
 
 public:
     CMap(CTask* p, UINT nRsrcGrpID);
@@ -105,9 +145,20 @@ public:
     void init(BOOL bUseMapUnit, BOOL bTexClampRepeat);
     virtual void main();
     virtual void disp();
+    INT getMapID() const { return m_nRsrcGrpID; }
+    FOGDATA* getFogData() { return m_pFog; }
+    void setFogData(FOGDATA* pFogData) { m_pFog = pFogData; }
     void resetFog();
     LIGHTDATA* getLightData() { return &m_Light; }
-    LIGHTDATA* getMapLightData() { return &m_MapLight; }
+    LIGHTDATA* getMapLightData() const { return (LIGHTDATA*)&m_MapLight; }
+    CMapModel* getModel() { return m_pModelTbl; }
+    CMapModel* getModel(INT nIdx) {
+        if (nIdx >= 0 && nIdx < m_nModelMax) return &m_pModelTbl[nIdx];
+        return NULL;
+    }
+    INT getModelMax() { return m_nModelMax; }
+    UINT getMapFlag() { return m_uiMapFlag; }
+    void setMapFlag(UINT inOn, UINT inOff) { m_uiMapFlag = (m_uiMapFlag | inOn) & ~inOff; }
     void getBBoxMax(FVECTOR& outMax);
     void getBBoxMin(FVECTOR& outMin);
     void setColorScale(FVECTOR& inColorScale);

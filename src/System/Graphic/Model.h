@@ -454,7 +454,7 @@ inline CModel* CEntity::getModel(INT inIndex) { return &m_pModels[inIndex]; }
 
 class CModelBG : public CModel {
 public:
-    CModelBG(USHORT nInDepth) : CModel(NULL) {
+    CModelBG(USHORT nInDepth = 0) : CModel(NULL) { // PARTIAL: default argument added for Game/Map (new CModelBG[n])
         setLayer(0x12, nInDepth);
         setTestFlag(0x300FD);
         setClampRepeat(TRUE);
