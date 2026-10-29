@@ -58,6 +58,10 @@ _vt$6CState_00494A68 = 0x00494A68; // size:0x30
 _$_6CState_001FA798 = 0x001FA798; // type:func size:0x30
 _vt$6CState_0047EDB0 = 0x0047EDB0; // size:0x30
 
+// Game/BattleCard: CState's inline destructor and an unnamed copy of its vtable
+_$_6CState_001D3E70 = 0x001D3E70; // type:func size:0x30
+_vt$6CState_00473800 = 0x00473800; // size:0x30
+
 // System/Graphic/ScreenMask: unnamed copies of IColorFader's inline virtuals
 reqBlackIn__11IColorFaderUsf_00145248 = 0x00145248; // type:func size:0x34
 reqBlackOut__11IColorFaderUsf_00145280 = 0x00145280; // type:func size:0x30
