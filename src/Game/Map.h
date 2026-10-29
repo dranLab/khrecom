@@ -114,6 +114,8 @@ public:
 };
 
 class CMapModel : public CModel {
+public:
+    CMapModel() : CModel(NULL) { setTestFlag(0x500FD); }
     INT m_nGridID; /* 0x120 */
     INT _pad[3];   /* PARTIAL: the original CModel is 16-byte aligned (size 0x130) */
 };

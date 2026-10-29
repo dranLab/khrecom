@@ -469,6 +469,7 @@ private:
 };
 
 class CBBox : public CGPrim {
+public: // PARTIAL: public as in the ref (struct); for Game/Map
     CCoord* m_pCrd;  /* 0x1c */
     G_RGBA m_C0;     /* 0x20 */
     BBOX m_bbox;     /* 0x24 */
