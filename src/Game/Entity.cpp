@@ -32,6 +32,8 @@ extern "C" char D_0047D330[]; /* __FILE__ */
 extern "C" char D_0047D080[]; /* "" */
 extern "C" char D_0047D660[];
 extern "C" char D_0047D3E0[];
+extern "C" FLOAT D_0047D6B0; /* PARTIAL: -1.7e+38 bounding-box seed (data still asm) */
+extern "C" FLOAT D_0047D6B4; /* PARTIAL: +1.7e+38 */
 extern "C" char D_0047D290[];
 extern "C" char D_0047D2B8[];
 extern "C" char D_0047D2E0[];
@@ -89,6 +91,7 @@ void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT s);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" float atan2f(float, float);
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(size_t, void* p) throw() { return p; }
@@ -1278,7 +1281,82 @@ void CEntity::storeModelColor_() {
         }
     }
 }
+/* Parked: 18 lines - the -1.7e38/+1.7e38 bounding-box seeds are stored x, z, y, w through a pointer in the original (set() gives x, y, z, w), and the inlined model->isShadow() test becomes `li 1; movn` there but sltiu here; layout, camera test and loops match. ~15 variants and a 15 min permuter run (13k candidates, 44 -> 26 on its scale). */
+#if 0
+void CEntity::translucence_() {
+    if (!m_pvModelColor) return;
+    INT n = m_iModelCount;
+    CModel* model;
+    FLOAT alpha = 1.0f;
+    if (!(m_uiEntityFlag & 0x1000)) {
+        BOOL trans = FALSE;
+        model = m_pModels;
+        if (m_pRideModel) {
+            trans = (*(INT*)((BYTE*)m_pRideModel + 0x18) != 0);
+        } else {
+            for (INT i = 0; i < n; i++, model++) {
+                if (m_uiDispOffFlag & (1 << i)) continue;
+                if (model->getBBoxFlag() & 1) {
+                    trans = TRUE;
+                    break;
+                }
+            }
+        }
+        FLOAT limitAlpha = 1.0f;
+        if (trans) {
+            CCamera* camera = CWorldEnv::getActiveCamera();
+            if (camera && camera->getTypeID() == 0x8000) camera = NULL;
+            if (camera) {
+                FVECTOR maxVec, minVec;
+                FVECTOR v0, v1;
+                limitAlpha = 0.4f;
+                v0.set(D_0047D6B0, D_0047D6B0, D_0047D6B0);
+                v1.set(D_0047D6B4, D_0047D6B4, D_0047D6B4);
+                model = m_pModels;
+                for (INT i = 0; i < n; i++, model++) {
+                    if (model->isShadow()) continue;
+                    model->getWorldBBox(maxVec, minVec);
+                    Math3D::VectorMaxMinXYZ(v0, v1, maxVec, minVec);
+                }
+                FVECTOR camVec = *(FVECTOR*)((BYTE*)&camera->Crd(0) + 0xc0);
+                if (v1.x <= camVec.x && camVec.x <= v0.x && v1.y <= camVec.y && camVec.y <= v0.y && v1.z <= camVec.z && camVec.z <= v0.z) limitAlpha = 0.0f;
+            }
+        }
+        FLOAT fAdd = getFrameRateF() * 0.033333335f;
+        if (limitAlpha < m_fNearTranslucence) {
+            m_fNearTranslucence -= fAdd;
+            if (m_fNearTranslucence < limitAlpha) m_fNearTranslucence = limitAlpha;
+        } else {
+            m_fNearTranslucence += fAdd;
+            if (limitAlpha < m_fNearTranslucence) m_fNearTranslucence = limitAlpha;
+        }
+        alpha = m_fNearTranslucence;
+    }
+    FVECTOR* pSceneColor = CSceneEnv::getTypeColor((ObjType::eObjType)m_EntityType);
+    if (alpha < 1.0f || pSceneColor) {
+        FVECTOR* modelColor = m_pvModelColor;
+        model = m_pModels;
+        for (INT i = 0; i < n; i++, model++, modelColor++) {
+            FVECTOR result;
+            if (pSceneColor) MulVector(result, *modelColor, *pSceneColor);
+            else result = *modelColor;
+            if (!(m_uiCheckEyeOffFlag & (1 << i)) || !m_pRideModel) result.w *= alpha;
+            model->setColorScale(result);
+        }
+        if ((UINT)m_iID / 10000 == 11) {
+            if (m_pEffect) m_pEffect->setAlpha(alpha);
+            if (m_pEffectEx) m_pEffectEx->setAlpha(alpha);
+        }
+    }
+    if ((m_uiEntityFlag & 0x400000) && m_pModels) {
+        alpha = m_pModels->getAlphaScale();
+        if (m_pEffect) m_pEffect->setAlpha(alpha);
+        if (m_pEffectEx) m_pEffectEx->setAlpha(alpha);
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", translucence___7CEntity);
+#endif
 HANDLE CEntity::setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale) {
     return CEffectMan::setEffect(inName, inFlag, (ObjType::eObjType)getEntityType(), inPos, inRot, inScale);
 }
