@@ -16,6 +16,14 @@ namespace CardBattle {
 extern LPCSTR g_szLadLayoutCard;
 }
 extern "C" char D_00473530[]; /* __FILE__ */
+extern "C" const CARD_DATA cardDataTbl_00474480[]; /* CardKind.h's static table, this unit's copy (.rodata asm) */
+static inline void _setCard(CARD& c, USHORT inKind, BYTE num) {
+    c.m_nId = 0;
+    c.m_nKind2 = inKind;
+    c.m_nNumber2 = num;
+    c.m_nCategory20 = cardDataTbl_00474480[c.m_nKind].nCategory0;
+    c.m_nCategory21 = cardDataTbl_00474480[c.m_nKind].nCategory1;
+}
 extern "C" char D_00473558[];
 
 void CardBattle::initLayoutData() {
@@ -161,7 +169,18 @@ void CBattleCard::preStateHand() { m_iState = 2; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateHand__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateDestroy__Q210CardBattle11CBattleCard);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateDestroy__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", moveCard__Q210CardBattle11CBattleCardii);
+void CBattleCard::moveCard(TIMEQ inTime, TIMEQ inRoll) {
+    FLOAT sc;
+    if (!inTime) return;
+    INT x = m_EndPos.x - (m_EndPos.x - m_StartPos.x) * m_tqTimer / inTime;
+    INT y = m_EndPos.y - (m_EndPos.y - m_StartPos.y) * m_tqTimer / inTime;
+    sc = m_fEndScale - (m_fEndScale - m_fStartScale) * m_tqTimer / inTime;
+    m_vRot.w = sc;
+    m_Pos.x = x;
+    m_Pos.y = y;
+    if (!inRoll) return;
+    m_vRot.y = m_fEndDir - (m_fEndDir - m_fStartDir) * m_tqTimer / inRoll;
+}
 INT CBattleCard::isNowSelect() {
     if (m_uiMode != 11) return FALSE;
     return m_iHand == 0;
@@ -285,7 +304,24 @@ void CBattleCard::setSnatch(HANDLE inHandle) {
     m_iHand = -1;
     m_uiFlag |= 0x20;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", resetSnatch__Q210CardBattle11CBattleCard);
+void CBattleCard::resetSnatch() {
+    m_uiOwner = 2;
+    _setCard(m_cardData, 0, 0xff);
+    m_uiFlag |= 0x20;
+    m_uiFlag = (INT)m_uiFlag & ~0x1;
+    m_uiFlag = (INT)m_uiFlag & ~0x2;
+    m_uiFlag = (INT)m_uiFlag & ~0x4;
+    m_uiFlag = (INT)m_uiFlag & ~0x40;
+    m_iHand = -1;
+    m_uiMode = 0xe;
+    m_iStock = -1;
+    m_uiFlag &= ~0x10000;
+    m_iHandMax = 0;
+    m_vRot.set(0.0f, 0.0f, 0.0f, 1.0f);
+    m_uiFlag = (INT)m_uiFlag & ~0x2008;
+    changeState(2);
+    resetEnchantEffect(0);
+}
 void CBattleCard::preStateSnatch() {
     m_iState = 5;
     m_uiFlag |= 0x1;
