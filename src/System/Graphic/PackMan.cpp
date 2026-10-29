@@ -681,7 +681,15 @@ u_long128* sceVif1PkTerminate(pacVif1Packet* pPacket) {
     pPacket->pDmaTag = NULL;
     return (u_long128*)pc;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkRefe__FP13pacVif1PacketPUxUiUiUiUi);
+void sceVif1PkRefe(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt1, u_int opt2, u_int flag) {
+    sceVif1PkTerminate(pPacket);
+    u_int tag = flag | size;
+    u_int addr = (u_int)pRef & 0x8fffffff;
+    u_long128 q, t;
+    __asm__ volatile("pextlw %0, %2, %3\n\tpextlw %1, %4, %5\n\tpextlw %0, %1, %0" : "=&r"(q), "=&r"(t) : "r"(opt1), "r"(tag), "r"(opt2), "r"(addr));
+    *(u_long128*)pPacket->pCurrent = q;
+    pPacket->pCurrent += 4;
+}
 void sceVif1PkCnt(pacVif1Packet* pPacket, u_int flag) {
     pPacket->pDmaTag = sceVif1PkTerminate(pPacket);
     pPacket->lDmaTag.ul64[0] = (u_int)(flag | 0x10000000);
@@ -694,8 +702,26 @@ void sceVif1PkNext(pacVif1Packet* pPacket, u_long128* pNext, u_int flag) {
     pPacket->pCurrent += 2;
     pPacket->pVifCode = NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkRef__FP13pacVif1PacketPUxUiUiUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkRefs__FP13pacVif1PacketPUxUiUiUiUi);
+void sceVif1PkRef(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt1, u_int opt2, u_int flag) {
+    sceVif1PkTerminate(pPacket);
+    size |= 0x30000000;
+    u_int tag = flag | size;
+    u_int addr = (u_int)pRef & 0x8fffffff;
+    u_long128 q, t;
+    __asm__ volatile("pextlw %0, %2, %3\n\tpextlw %1, %4, %5\n\tpextlw %0, %1, %0" : "=&r"(q), "=&r"(t) : "r"(opt1), "r"(tag), "r"(opt2), "r"(addr));
+    *(u_long128*)pPacket->pCurrent = q;
+    pPacket->pCurrent += 4;
+}
+void sceVif1PkRefs(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt1, u_int opt2, u_int flag) {
+    sceVif1PkTerminate(pPacket);
+    size |= 0x40000000;
+    u_int tag = flag | size;
+    u_int addr = (u_int)pRef & 0x8fffffff;
+    u_long128 q, t;
+    __asm__ volatile("pextlw %0, %2, %3\n\tpextlw %1, %4, %5\n\tpextlw %0, %1, %0" : "=&r"(q), "=&r"(t) : "r"(opt1), "r"(tag), "r"(opt2), "r"(addr));
+    *(u_long128*)pPacket->pCurrent = q;
+    pPacket->pCurrent += 4;
+}
 void sceVif1PkCall(pacVif1Packet* pPacket, u_long128* pCall, u_int flag) {
     pPacket->pDmaTag = sceVif1PkTerminate(pPacket);
     pPacket->lDmaTag.ul64[0] = (u_int)(flag | 0x50000000) | ((u_long)((u_int)pCall & 0x8fffffff) << 32);
