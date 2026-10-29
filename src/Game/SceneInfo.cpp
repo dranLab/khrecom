@@ -156,6 +156,9 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_00484AD0[];
+extern "C" char D_00484AF8[];
+extern "C" char D_00484B18[];
 extern "C" char D_004849A8[];
 extern "C" char D_00484900[];
 extern "C" char D_00484910[];
@@ -519,7 +522,41 @@ BOOL CSceneInfo::reqEnterWorld(WORLD_ID world) {
     reqChangeRoom(1, (DOOR_ID)2, -1);
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqChangeRoom__10CSceneInfoi7DOOR_IDs);
+BOOL CSceneInfo::reqChangeRoom(INT nRoomID, DOOR_ID nDoor, SHORT nScene) {
+    if (hasAnyRequest()) return FALSE;
+    SHORT nArea = getCurrentWorldID(FALSE);
+    INT id = nRoomID == 0 || nRoomID == 99;
+    if (id) nArea = 0;
+    nDoor = _checkAvailableDoorID(nRoomID, nDoor);
+    if (nScene <= 0) {
+        RoomInfo* pRoom = getRoomInfo(nRoomID);
+        if (!pRoom || !pRoom->isCreated()) {
+            TRACE_COL(_TTY_RED, D_00484AD0, nRoomID);
+            TRACE_COL(_TTY_RED, !pRoom ? D_00484AF8 : D_00484B18);
+            return FALSE;
+        }
+        nScene = pRoom->getSceneNum();
+    } else {
+        RoomInfo* pRoom = getRoomInfo(nRoomID);
+        if (!pRoom) return FALSE;
+        if (!pRoom->_pSrcInfo) {
+            nArea = 0;
+        } else if (!pRoom->isCreated() || pRoom->isFixSceneRoom()) {
+            BYTE nCardID = getCardIDFromSceneNum(nScene);
+            if (!nCardID && !pRoom->isFixSceneRoom()) nCardID = 0xb7;
+            makeRoom(*pRoom, nDoor, nScene, nCardID, 0);
+        } else {
+            pRoom->setScene(nScene);
+        }
+    }
+    BOOL bResult = reqChangeScene(nArea, nScene, -1, FALSE, 1);
+    if (bResult) {
+        s_nNextRoomID = nRoomID;
+        s_nNextDoorID = nDoor;
+        if (isBossBattleScene(-1)) s_nReqExitBattle = 1;
+    }
+    return bResult;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqChangeEventRoom__10CSceneInfoUi7DOOR_IDs);
 void CSceneInfo::reqChangeGoalRoom() { reqChangeEventRoom(4, (DOOR_ID)4, -1); }
 BOOL CSceneInfo::reqChangeBackupRoom() {

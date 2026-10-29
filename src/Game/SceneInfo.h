@@ -220,6 +220,11 @@ struct RoomInfo {
     void setScene(SHORT nScene);
     void resetScene();
     void setCardInfo(BYTE nCardID, BYTE nCardNumber);
+    BOOL isFixSceneRoom() const {
+        BOOL b = FALSE;
+        if (_pSrcInfo) b = _pSrcInfo->isFixSceneRoom();
+        return b;
+    }
     BOOL isExceptRoom() const { return !((UINT)_pSrcInfo | (UINT)_pStorageInfo | (UINT)_pStorageInfo2); }
 };
 
