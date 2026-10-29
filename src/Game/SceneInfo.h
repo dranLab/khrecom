@@ -221,6 +221,16 @@ struct RoomInfo {
     void setCardInfo(BYTE nCardID, BYTE nCardNumber);
 };
 
+struct FloorInfo { // 0xd8c
+    RoomInfo _rooms[30];            /* 0x000 */
+    RoomInfo _roomStartEnt;         /* 0xca8 */
+    RoomInfo _roomGoalEnt;          /* 0xd14 */
+    USHORT _nRoomCount;             /* 0xd80 */
+    SHORT _nEventRoomIdxTbl[5];     /* 0xd82 */
+    void clearEventRoomTbl();
+    SHORT getEventRoomIdx();
+};
+
 // PARTIAL: added for Game/Gimmick/GimmickManager
 struct _GimmickInfo {
     BYTE _nStat;

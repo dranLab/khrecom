@@ -4,6 +4,7 @@
 #include "Game/Game.h"
 #include "System/Rcf.h"
 #include "System/Debug.h"
+#include "Form/Menu/JMemoFlag.h"
 #include "include_asm.h"
 
 class CRsrcData;
@@ -51,7 +52,12 @@ struct _SceneInfo {
         _nSeRangeRatio = 10;
     }
 };
-struct EventRoomData;
+struct EventRoomData { // 0x18
+    CHAR _cSig[4];             /* 0x00 */
+    USHORT _nVersion;          /* 0x04 */
+    USHORT _nWorldCount;       /* 0x06 */
+    USHORT _nSceneTbl[1][8];   /* 0x08 */
+};
 
 /* RoomInfo::_pStorageInfo, _pStorageInfo2 and DoorInfo::_pStorageInfo (names unknown) */
 struct ROOM_STORAGE {
@@ -85,6 +91,10 @@ struct _SceneInfoWork {
 };
 
 void _setGoalRoomScene(WORLD_ID w, USHORT nScene);
+INT _getEventRoomSceneIndex(SHORT nRoomType);
+void _initEntranceSceneTbl(BOOL bSora);
+void _initGoalRoomSceneTbl(BOOL bSora);
+void _initAllEventDoorState(BOOL bSora);
 USHORT _getGoalRoomScene(WORLD_ID w);
 void _clearMapRsrcCache();
 FloorLayoutDataHeader* _isValidFloorIdx(USHORT nIdx, BOOL bSora);
@@ -116,6 +126,7 @@ extern INT s_nCurrentSceneCacheID;
 extern INT s_nMapCacheField;
 extern INT s_nMapCacheBattle;
 extern _SceneInfo s_SceneCacheTbl[7];
+extern FloorInfo s_CurrentFloor;
 extern INT s_nAvailableSceneCache;
 extern _SceneInfo s_GlobalScene;
 }
@@ -129,7 +140,17 @@ extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", clear__10CSceneInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initNewGame__10CSceneInfoi);
+void CSceneInfo::initNewGame(BOOL bSora) {
+    clear();
+    CGameWork::setByte(0, 0x60, !bSora);
+    CGameWork::setInt(0, 0x35, -666);
+    CGameWork::setupGameClearInfo();
+    _initEntranceSceneTbl(bSora);
+    _initGoalRoomSceneTbl(bSora);
+    _initAllEventDoorState(bSora);
+    initFloor(0, (WORLD_ID)0);
+    CJiminyMemoFlag::checkEvent(0, 0, 0);
+}
 void CSceneInfo::dispose() {
     s_pFloorFile_Sora = NULL;
     s_pFloorFile_Riku = NULL;
@@ -178,7 +199,12 @@ WorldSelTable* CSceneInfo::getSelectableWorldTable(INT nFloorIndex, BOOL bSora) 
     return NULL;
 }
 EventRoomData* CSceneInfo::getEventRoomData(BOOL bSora) { return bSora ? s_pEventRoomFile_Sora : s_pEventRoomFile_Riku; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getEventRoomSceneNum__10CSceneInfo8WORLD_IDRCQ25FLOOR11RoomSrcInfoi);
+SHORT CSceneInfo::getEventRoomSceneNum(WORLD_ID world, const FLOOR::RoomSrcInfo& info, BOOL bSora) {
+    EventRoomData* pEventData = getEventRoomData(bSora);
+    INT nTblIdx = -1;
+    if (pEventData) nTblIdx = _getEventRoomSceneIndex(info._nRoomType);
+    return nTblIdx >= 0 ? pEventData->_nSceneTbl[world - 1][nTblIdx] : 0;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", showAllHiddenDoorsOfCurrentFloor__10CSceneInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initFloor__10CSceneInfoi8WORLD_ID);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initFloor__10CSceneInfo);
@@ -348,7 +374,19 @@ BOOL CSceneInfo::isFieldScene() {
     return b;
 }
 BOOL CSceneInfo::isBattleScene() { return s_nGameMode == GAMEMODE_BATTLE; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isBossBattleScene__10CSceneInfoi);
+BOOL CSceneInfo::isBossBattleScene(INT nEnemyID) {
+    SHORT s = getCurrentSceneNum();
+    WORLD_ID w = (WORLD_ID)getCurrentWorldID(TRUE);
+    BOOL bBoss = FALSE;
+    if (s_nGameMode == GAMEMODE_BATTLE) {
+        if (nEnemyID == 124) {
+            if (w == 12 && s == 0x47f) bBoss = TRUE;
+        } else {
+            bBoss = s >= 0x41a && s <= 0x4ae;
+        }
+    }
+    return bBoss;
+}
 BOOL CSceneInfo::isEventScene() { return (USHORT)(getCurrentSceneNum() - 2000) < 1000; }
 BOOL CSceneInfo::isMinigameScene() { return (USHORT)(getCurrentSceneNum() - 1200) < 56; }
 BOOL CSceneInfo::isLastFloorScene() {
@@ -504,7 +542,15 @@ RCNORMA::FloorNormaSrc* CSceneInfo::getFloorNormaDataSrc(USHORT nIdx, BOOL bSora
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getRoomInfo__10CSceneInfoi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getEventRoomInfo__10CSceneInfoUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getRoomIndex__10CSceneInfoi);
+INT CSceneInfo::getRoomIndex(INT nRoomID) {
+    if (getCurrentFloorIndex() >= 0xff) return -1;
+    if (nRoomID < 0) nRoomID = getCurrentRoomID();
+    RoomInfo* pRoom = s_CurrentFloor._rooms;
+    for (INT i = 0; i < s_CurrentFloor._nRoomCount; i++, pRoom++) {
+        if (pRoom->_pSrcInfo && pRoom->_pSrcInfo->_nID == nRoomID) return i;
+    }
+    return -1;
+}
 DoorInfo* CSceneInfo::getDoorInfo(DOOR_ID id, INT nRoomID) {
     RoomInfo* pRoom = getRoomInfo(nRoomID);
     if (!pRoom) return NULL;
