@@ -52,12 +52,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1084 (1013 in 110 headers, 71 in 30 .cpp); MATCH: 72
   by category: method 455, data member 71, type 96, fwd decl 53, #include 29, changed in place 128, padding 32, path override 24, gate 37, guessed 46, header-level 75, stand-in 30, other 8
-stand-ins: 404 foreign in 129 files (116 names), 193 unattributed, 177 own
+stand-ins: 401 foreign in 126 files (114 names), 193 unattributed, 177 own
 duplicate class names across headers: 23
 padding: 33 arrays, 25 accessors
 mechanisms: 945 sites (924 untagged); #line: 1182
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 156, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 539, superset 129, partial 100, gated 101, missing 14, unattributed 309
+classes: complete 542, superset 129, partial 98, gated 101, missing 14, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -68,7 +68,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 6.0 | `System/Graphic/Effect/libppp/keProg/KeTh.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | KeData16, _sceDmaTag (1 partial, 1 complete) |  |
 | R0 | 6.0 | `System/Graphic/FrecFont.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CFrecFont (1 complete) |  |
 | R0 | 4.0 | `System/Graphic/TexAnm.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CTexAnm, TEXANM_DATA (2 complete) |  |
 | R0 | 4.0 | `System/Memoca.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMemoca (1 complete) |  |
@@ -88,6 +87,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 14.0 | `Game/Atel/Atel.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | CAtel (1 complete) | inline bodies or virtuals |
 | R1 | 14.0 | `Game/Atel/VSME.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
+| R1 | 12.5 | `Form/Menu/JMemoFlag.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CJiminyMemoFlag (1 superset) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -133,7 +133,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CTexAnm` | complete | System/Graphic/TexAnm.h | 2 |  |  |
 | `CTextWnd` | complete | System/Wnd.h | 2 |  |  |
 | `CVramMan` | complete | System/VramMan.h | 2 |  |  |
-| `KeData16` | partial | System/Graphic/Effect/libppp/keProg/KeTh.h | 2 |  | missing fields: S8, S16, S32, S64, S128, U8, ... (+4) |
 | `QWdata` | complete | System/Graphic/Gprim.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
@@ -205,7 +204,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `TexInfoStub` | gated | System/Graphic/modeldata.h | 1 |  | 1 PARTIAL |
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
 | `ZONEDATA` | missing | Game/Map.h | 1 |  |  |
-| `_sceDmaTag` | complete | System/Graphic/Effect/libppp/keProg/KeTh.h | 1 |  |  |
 | `pacVif1Packet` | missing | System/Graphic/PackMan.h | 1 |  |  |
 | `sceGsLoadImage` | complete | System/Graphic/Effect/libppp/pppPart.h | 1 |  |  |
 | `sceGsStoreImage` | complete | System/Graphic/Effect/libppp/keProg/pppKeLns.h | 1 |  |  |
@@ -366,7 +364,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/keProg/KeDMat.h` | 1 | 0/0/0/0 | 3 |
 | `System/Graphic/Effect/libppp/keProg/KeDttSpr.h` | 1 | 1/0/0/0 | 2 |
 | `System/Graphic/Effect/libppp/keProg/KeLns.h` | 0 | 12/0/1/0 | 3 |
-| `System/Graphic/Effect/libppp/keProg/KeTh.h` | 4 | 15/0/2/0 | 4 |
+| `System/Graphic/Effect/libppp/keProg/KeTh.h` | 4 | 18/0/0/0 | 7 |
 | `System/Graphic/Effect/libppp/pppPart.h` | 57 | 21/3/0/0 | 213 |
 | `System/Graphic/Effect/libppp/pppfunctbl.h` | 1 | 0/0/0/0 | 2 |
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
