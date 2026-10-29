@@ -127,38 +127,40 @@ void _clearMapRsrcCache();
 FloorLayoutDataHeader* _isValidFloorIdx(USHORT nIdx, BOOL bSora);
 extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
-/* The file's statics; the data still comes from the original (no SOURCE DATA yet) */
+/* The file's statics, in the original order */
 namespace {
-extern INT s_nReqChangeScene;
-extern GAMEMODE s_nReqEnterBattle;
-extern INT s_nReqExitBattle;
-extern GAMEMODE s_nGameMode;
-extern INT s_nAtelSrcID;
-extern FloorLayoutDataHeader* s_pFloorFile_Sora;
-extern FloorLayoutDataHeader* s_pFloorFile_Riku;
-extern EventRoomData* s_pEventRoomFile_Sora;
-extern EventRoomData* s_pEventRoomFile_Riku;
-extern NormaDataHeader* s_pFloorNormaFile_Sora;
-extern NormaDataHeader* s_pFloorNormaFile_Riku;
-extern AREA_SCENE s_NextAreaScene;
-extern SHORT s_nNextBattleScene;
-extern SHORT s_nCurrentBattleScene;
-extern SHORT s_nCurrentBattleRsrc;
-extern SHORT s_nCurrentFieldScene;
-extern SHORT s_nCurrentFloorNumber;
-extern BYTE s_nNextRoomID;
-extern BYTE s_nNextFloorIdx;
-extern DOOR_ID s_nNextDoorID;
-extern INT s_nCurrentSceneCacheID;
-extern INT s_nMapCacheField;
-extern INT s_nMapCacheBattle;
-extern _SceneInfo s_SceneCacheTbl[7];
-extern FloorInfo s_CurrentFloor;
-extern RoomInfo s_roomExcept;
-extern INT s_nAvailableSceneCache;
-extern _SceneInfo s_GlobalScene;
+INT s_nReqChangeScene = 0;
+GAMEMODE s_nReqEnterBattle = GAMEMODE_FIELD;
+INT s_nReqExitBattle = 0;
+GAMEMODE s_nGameMode = GAMEMODE_FIELD;
+INT s_nAtelSrcID = 0;
+FloorLayoutDataHeader* s_pFloorFile_Sora = NULL;
+FloorLayoutDataHeader* s_pFloorFile_Riku = NULL;
+EventRoomData* s_pEventRoomFile_Sora = NULL;
+EventRoomData* s_pEventRoomFile_Riku = NULL;
+NormaDataHeader* s_pFloorNormaFile_Sora = NULL;
+NormaDataHeader* s_pFloorNormaFile_Riku = NULL;
 }
-extern _CardScene s_CardSceneTbl[26];
+static _CardScene s_CardSceneTbl[26] = { { 0xa1, 0x16 }, { 0xa2, 0x03 }, { 0xa3, 0x12 }, { 0xa4, 0x10 }, { 0xa5, 0x0d }, { 0xa6, 0x13 }, { 0xa7, 0x11 }, { 0xa8, 0x14 }, { 0xa9, 0x0c }, { 0xaa, 0x1a }, { 0xab, 0x19 }, { 0xac, 0x15 }, { 0xad, 0x0f }, { 0xae, 0x0a }, { 0xaf, 0x0b }, { 0xb0, 0x09 }, { 0xb1, 0x0e }, { 0xb2, 0x17 }, { 0xb3, 0x05 }, { 0xb4, 0x07 }, { 0xb5, 0x08 }, { 0xb6, 0x06 }, { 0xb7, 0x00 }, { 0xb8, 0x04 }, { 0xb9, 0x00 }, { 0xda, 0x18 } };
+namespace {
+_AREA_SCENE_REG s_NextAreaScene;
+SHORT s_nNextBattleScene;
+SHORT s_nCurrentBattleScene;
+SHORT s_nCurrentBattleRsrc;
+SHORT s_nCurrentFieldScene;
+SHORT s_nCurrentFloorNumber;
+BYTE s_nNextRoomID;
+BYTE s_nNextFloorIdx;
+DOOR_ID s_nNextDoorID;
+_SceneInfo s_SceneCacheTbl[7];
+INT s_nAvailableSceneCache;
+INT s_nCurrentSceneCacheID;
+_SceneInfo s_GlobalScene;
+INT s_nMapCacheField;
+INT s_nMapCacheBattle;
+FloorInfo s_CurrentFloor;
+RoomInfo s_roomExcept;
+}
 static const WORLD_ID s_WorldTableSora1[1] = { WORLD_ID_TRAVERSE };
 static const WORLD_ID s_WorldTableSora2[5] = { WORLD_ID_AGRABAH, WORLD_ID_OLYMPOS, WORLD_ID_WONDERLAND, WORLD_ID_MONSTRO, WORLD_ID_HALLOWEEN };
 static const WORLD_ID s_WorldTableSora3[4] = { WORLD_ID_ATLANTICA, WORLD_ID_NEVERLAND, WORLD_ID_HOLLOWBASTION, WORLD_ID_100ACRE };
@@ -1824,4 +1826,4 @@ INT CSceneInfo::getInconstWorldRsrcID(INT nWorld, BOOL bSora) {
     if ((UINT)nWorld < 14) return !bSora ? nWorld + 1200 : nWorld + 200;
     return 0;
 }
-// SOURCE DATA: .rodata
+// SOURCE DATA: .data .rodata .bss
