@@ -770,7 +770,67 @@ void CBattleCard::setPlayDuelStock(INT inCount) {
     }
     m_uiFlag &= ~0x200000;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateDuel__Q210CardBattle11CBattleCard);
+void CBattleCard::preStateDuel() {
+    CB_LAYOUT* pLayout;
+    switch (m_uiMode) {
+    case 0x10:
+        if (m_iStock == -1) {
+            switch (m_uiUser) {
+            case 1: pLayout = &g_LayoutData[7]; break;
+            case 2: pLayout = &g_LayoutData[16]; break;
+            }
+            m_StartPos.set(pLayout->x, pLayout->y);
+            pLayout = &g_LayoutData[1];
+            m_EndPos.set(pLayout->x, pLayout->y);
+            m_fEndScale = pLayout->scale * 0.01f;
+        } else {
+            switch (m_uiUser) {
+            case 1: pLayout = &g_LayoutData[27 + m_iStock]; break;
+            case 2: pLayout = &g_LayoutData[33 + m_iStock]; break;
+            }
+            m_StartPos.set(pLayout->x, pLayout->y);
+            switch (m_iStockCount) {
+            case 0:
+            case 1: pLayout = &g_LayoutData[1]; break;
+            case 2: pLayout = &g_LayoutData[2 + m_iStock]; break;
+            case 3: pLayout = &g_LayoutData[4 + m_iStock]; break;
+            }
+            m_EndPos.set(pLayout->x, pLayout->y);
+            m_fEndScale = pLayout->scale * 0.01f;
+        }
+        m_fStartScale = m_fEndScale;
+        m_StartPos.x = m_EndPos.x - (m_EndPos.x - m_StartPos.x) / 3;
+        m_StartPos.y = m_EndPos.y - (m_EndPos.y - m_StartPos.y) / 3;
+        m_tqTimer = 3000;
+        m_Pos = m_StartPos;
+        m_vRot.w = m_fEndScale;
+        m_iLayer = pLayout->layer;
+        m_pCard->changeLayer(m_iLayer);
+        m_iStock = -1;
+        m_uiFlag |= 0x40;
+        break;
+    case 8:
+        m_uiFlag |= 0x1;
+        pLayout = &g_LayoutData[1];
+        m_StartPos.set(pLayout->x, pLayout->y);
+        m_fStartScale = pLayout->scale * 0.01f;
+        pLayout = &g_LayoutData[36 + m_iStock];
+        m_EndPos.set(pLayout->x, pLayout->y);
+        m_fEndScale = pLayout->scale * 0.01f;
+        m_tqTimer = 400;
+        m_Pos = m_StartPos;
+        m_vRot.w = m_fStartScale;
+        m_iLayer = pLayout->layer;
+        m_pCard->changeLayer(m_iLayer);
+        break;
+    }
+    m_iState = 4;
+    m_uiFlag |= 0x1;
+    if (m_uiFlag & 0x10) {
+        m_uiFlag = (INT)m_uiFlag & ~0x10;
+        m_pCard->enableColorCtrl(FALSE);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateDuel__Q210CardBattle11CBattleCard);
 void CBattleCard::setSnatch(HANDLE inHandle) {
     changeState(5);
