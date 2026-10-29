@@ -99,10 +99,7 @@ static inline INT _getNowCamMode() {
     return mode;
 }
 
-class CRcf {
-public:
-    static BOOL isCompleteLoadRCF(INT nType, INT nID);
-};
+#include "System/Rcf.h"
 
 namespace Friend {
 extern BCAM_PARAM g_HolyBurstCamParam;
@@ -126,10 +123,7 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "memory");
 }
 
-class CGameWork {
-public:
-    static BOOL getFlag(UINT nLv, UINT nIdx);
-};
+#include "Game/GameWork.h"
 
 /* Game/Collision/CollBody.h (not decompiled yet): CPlayer's m_collBody */
 struct _CollBodyView {
