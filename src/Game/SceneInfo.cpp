@@ -1609,8 +1609,52 @@ void CSceneInfo::openGoalDoor() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", openGoalDoor__10CSceneInfo);
 #endif
 __asm__(".rdata\n.align 3\n.word 0x8B837581\n.word 0x80835B81\n.word 0x5A836564\n.word 0x4E838C83\n.word 0x76816783\n.word 0x4F8AC888\n.word 0xFC93C582\n.word 0xC482C182\n.word 0xCC82E982\n.word 0x4181C582\n.word 0x5B815383\n.word 0xE0948B83\n.word 0x4A8AF082\n.word 0xDC82AF82\n.word 0xF182B982\n.word 0x0000000A\n.word 0x00000000\n.word 0x00000000\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", backupEventDoorState__10CSceneInfo);
-__asm__(".rdata\n.align 4\n.word .L0021648C\n.word .L00216494\n.word .L0021649C\n.word .L002164B4\n.word .L002164AC\n.word .L002164A4\n.text\n");
+void CSceneInfo::backupEventDoorState() {
+    USHORT nFloorIdx = getCurrentFloorIndex();
+    if (nFloorIdx == 0xff) return;
+    FloorInfo& floor = s_CurrentFloor;
+    STORAGE::_EventDoorInfo* pInfoBackupTbl = _SceneInfoWork::mc()->_nEventDoorInfoTbl[nFloorIdx];
+    BYTE* pStateBackupTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx];
+    for (USHORT i = 0; i < floor._nRoomCount; i++) {
+        RoomInfo& room = floor._rooms[i];
+        for (INT j = 0; j < 4; j++) {
+            DoorInfo& door = room._doors[j];
+            if (door._nDstRoom < 0) continue;
+            INT nDoorType = door._type;
+            INT nType = -1;
+            switch (nDoorType) {
+            case 1:
+                nType = 0;
+                break;
+            case 2:
+                nType = 1;
+                break;
+            case 3:
+                nType = 2;
+                break;
+            case 6:
+                nType = 3;
+                break;
+            case 5:
+                nType = 4;
+                break;
+            case 4:
+                nType = 5;
+                break;
+            }
+            if (nType < 0) continue;
+            pStateBackupTbl[nType] = door.getDoorState();
+            if (nType < 4) {
+                DOOR_STORAGE* pSrc = (DOOR_STORAGE*)door._pStorageInfo;
+                if (pSrc) {
+                    STORAGE::_EventDoorInfo& info = pInfoBackupTbl[nType];
+                    for (INT k = 0; k < 3; k++) info._nNormaNums[k] = pSrc->_nNormaNums[k];
+                    info._nClearedNorma = pSrc->_nNextNorma;
+                }
+            }
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", rollbackEventDoorState__10CSceneInfoi);
 __asm__(".rdata\n.align 3\n.word 0x726F6F64\n.word 0x4E705F2E\n.word 0x616D726F\n.word 0x49637253\n.word 0x006F666E\n.word 0x00000000\n.word .L0021664C\n.word .L00216654\n.word .L0021665C\n.word .L00216674\n.word .L0021666C\n.word .L00216664\n.text\n");
 void _setOpenFlagEventDoor(const DoorInfo& door) {
