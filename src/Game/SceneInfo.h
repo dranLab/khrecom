@@ -4,7 +4,6 @@
 
 #include "khtypes.h"
 
-// PARTIAL: added for Form/Menu/WorldSelect
 enum WORLD_ID {
     WORLD_ID_COMMON = 0,
     WORLD_ID_TRAVERSE = 1,
@@ -23,7 +22,6 @@ enum WORLD_ID {
     _WORLD_ID_MAX = 14
 };
 
-// PARTIAL: added for Game/Gimmick/GimmickPlantParent
 enum DOOR_ID {
     DOOR_ID_RU = 0,
     DOOR_ID_RD = 1,
@@ -42,16 +40,6 @@ enum DOOR_SHAPE {
     _DOOR_SHAPE_MAX = 6
 };
 
-enum DOOR_STAT {
-    DOOR_STAT_NOTHING = 0,
-    DOOR_STAT_CLOSED = 1,
-    DOOR_STAT_OPENED = 2,
-    DOOR_STAT_ONE_WAY = 3,
-    DOOR_STAT_UNAVAILABLE = 4,
-    _DOOR_STAT_MAX = 5
-};
-
-// PARTIAL: added for Game/Player/NaviMap
 enum DOOR_TYPE {
     DOOR_TYPE_NORMAL = 0,
     DOOR_TYPE_TO_EVENT1 = 1,
@@ -66,99 +54,19 @@ enum DOOR_TYPE {
     DOOR_TYPE_FLOOR_CHANGE = 10,
     DOOR_TYPE_TO_LAST = 11,
     DOOR_TYPE_EVENTROOM = 12,
-    _DOOR_TYPE_DEBUG = 13
+    _DOOR_TYPE_DEBUG = 13,
+    _DOOR_TYPE_MAX = 14
 };
 
-// PARTIAL: added for Form/Menu/RoomCreation
-enum RCNORMA_OP {
-    RCNORMA_OP_NONE = 0,
-    RCNORMA_OP_EQ_LESS = 1,
-    RCNORMA_OP_EQ_GREATER = 2,
-    RCNORMA_OP_EQUAL = 3,
-    RCNORMA_OP_TOTAL = 4
+struct FloorLayoutDataHeader { // 0x10
+    CHAR _cSig[4];       /* 0x0 */
+    USHORT _nVersion;    /* 0x4 */
+    USHORT _nFloorCount; /* 0x6 */
+    INT* _pFloorOfsTbl;  /* 0x8 */
+    void* _pFloorData;   /* 0xc */
 };
 
-// PARTIAL: added for Form/Menu/RoomCreation
-enum RCNORMA_COLOR {
-    RCNORMA_COLOR_NONE = 0,
-    RCNORMA_COLOR_RED = 1,
-    RCNORMA_COLOR_GREEN = 2,
-    RCNORMA_COLOR_BLUE = 3
-};
-
-// PARTIAL: added for Form/Menu/RoomCreation
-namespace RCNORMA {
-struct NormaSrc { // 0x8
-    SHORT _nNumber;  /* 0x0 */
-    SHORT _nOp;      /* 0x2 */
-    SHORT _nColor;   /* 0x4 */
-    SHORT __nDummy;  /* 0x6 */
-};
-// PARTIAL: added for Game/SceneInfo
-struct DoorNormaSrc { // 0x1c
-    SHORT _nDoorType;      /* 0x00 */
-    SHORT _nCount;         /* 0x02 */
-    NormaSrc _normas[3];   /* 0x04 */
-};
-struct FloorNormaSrc { // 0x74
-    SHORT _nID;            /* 0x00 */
-    SHORT __nDummy;        /* 0x02 */
-    DoorNormaSrc _normas[4]; /* 0x04 */
-};
-}
-
-// PARTIAL: added for Form/Menu/RoomCreation
-enum DOOR_RC_RESULT {
-    DOOR_RC_RESULT_INVALID = -1,
-    DOOR_RC_RESULT_NOP = 0,
-    DOOR_RC_RESULT_USED = 1,
-    DOOR_RC_RESULT_CLEAR_ONE = 2,
-    DOOR_RC_RESULT_CLEAR_ALL = 3
-};
-
-struct CARD;
-
-struct DoorInfo { // 0x18
-    DOOR_ID _id;               /* 0x00 */
-    INT _shape;                /* 0x04 */ // PARTIAL: _shape/_type split out for Game/Player/NaviMap
-    DOOR_TYPE _type;           /* 0x08 */
-    INT _nDstRoom;             /* 0x0c PARTIAL: named for Form/Menu/Camp */
-    void* _pStorageInfo;       /* 0x10 */
-    void* _pNormaSrcInfo;      /* 0x14 */
-    DOOR_STAT getDoorState() const;
-    BOOL isSpecialDoor() const; // PARTIAL: added for Game/Player/NaviMap
-    // PARTIAL: added for Form/Menu/RoomCreation
-    RCNORMA_COLOR getNormaColor(USHORT idx) const;
-    USHORT getNormaNumber(USHORT idx) const;
-    RCNORMA_OP getNormaOperation(USHORT idx) const;
-    void resetNorma();
-    INT getNormaKeyCardID() const;
-    USHORT getNormaCount() const;
-    USHORT getNextNormaIndex() const;
-    DOOR_RC_RESULT useNormaCard(const CARD& card);
-    // PARTIAL: added for Game/Gimmick/GimmickDoor
-    BOOL isEventDoor() const {
-        BOOL ret = FALSE;
-        if (_type < DOOR_TYPE_OPEN_AFTER_EVENT) ret = _type > DOOR_TYPE_NORMAL;
-        return ret;
-    }
-    BOOL isWorldEntrance() const { return _type == DOOR_TYPE_WORLD_ENTRANCE; } // PARTIAL: added for Game/Player/NaviMap
-    BOOL isWorldExit() const { return _shape == 5; } // PARTIAL: added for Game/Player/PlayerManager
-    // PARTIAL: added for Game/SceneInfo
-    BOOL setDoorState(DOOR_STAT nStat);
-    BOOL isNormaCardUsed() const;
-    void setFirstUsedCardInfo(BYTE nCardID, BYTE nCardNum);
-    BYTE getFirstUsedCardIDForNorma() const;
-    BYTE getFirstUsedCardNumForNorma() const;
-    BOOL canSelectWorld() const; BOOL canCreateRoom() const;
-    BOOL isValidNormaIndex(USHORT nIndex) const;
-    BOOL clearOneNorma();
-    BOOL isNextNormaKeyCard() const;
-    BOOL isNormaCleared() const;
-    void initNorma();
-};
-
-// PARTIAL: added for Form/DebugMenu
+/* The namespaces FLOOR and RCNORMA come from the mangled names (the ref drops them). */
 namespace FLOOR {
 enum ROOM_TYPE {
     ROOM_TYPE_CARD = 0,
@@ -206,35 +114,163 @@ struct FloorLayout { // 0x2c
 };
 } // namespace FLOOR
 
-// PARTIAL: added for Form/DebugMenu
+struct EventRoomData { // 0x18
+    CHAR _cSig[4];           /* 0x00 */
+    USHORT _nVersion;        /* 0x04 */
+    USHORT _nWorldCount;     /* 0x06 */
+    USHORT _nSceneTbl[1][8]; /* 0x08 */
+};
+
+enum RCNORMA_OP {
+    RCNORMA_OP_NONE = 0,
+    RCNORMA_OP_EQ_LESS = 1,
+    RCNORMA_OP_EQ_GREATER = 2,
+    RCNORMA_OP_EQUAL = 3,
+    RCNORMA_OP_TOTAL = 4
+};
+
+enum RCNORMA_COLOR {
+    RCNORMA_COLOR_NONE = 0,
+    RCNORMA_COLOR_RED = 1,
+    RCNORMA_COLOR_GREEN = 2,
+    RCNORMA_COLOR_BLUE = 3
+};
+
+namespace RCNORMA {
+struct NormaSrc { // 0x8
+    SHORT _nNumber;  /* 0x0 */
+    SHORT _nOp;      /* 0x2 */
+    SHORT _nColor;   /* 0x4 */
+    SHORT __nDummy;  /* 0x6 */
+};
+struct DoorNormaSrc { // 0x1c
+    SHORT _nDoorType;      /* 0x00 */
+    SHORT _nCount;         /* 0x02 */
+    NormaSrc _normas[3];   /* 0x04 */
+};
+struct FloorNormaSrc { // 0x74
+    SHORT _nID;            /* 0x00 */
+    SHORT __nDummy;        /* 0x02 */
+    DoorNormaSrc _normas[4]; /* 0x04 */
+};
+}
+
+struct NormaDataHeader { // 0x7c
+    CHAR _cSig[4];                       /* 0x00 */
+    USHORT _nVersion;                    /* 0x04 */
+    USHORT _nFloorCount;                 /* 0x06 */
+    RCNORMA::FloorNormaSrc _FloorSrc[1]; /* 0x08 */
+};
+
 struct WorldSelTable { // 0x8
     UINT _nCount;
     WORLD_ID* _pTbl;
 };
 
-// PARTIAL: getCardID added for Game/Enemy/MapEnemyShadow
-struct RoomInfo {
-    DoorInfo _doors[4]; /* 0x00 */ // PARTIAL: added for Game/Gimmick/GimmickPlantParent
-    FLOOR::RoomSrcInfo* _pSrcInfo; /* 0x60 */ // PARTIAL: added for Form/DebugMenu
+// PARTIAL: the ref's default constructor, operator=, operator==, operator!=, set (2), clear and isEmpty are
+// missing (inline, never emitted: their parameters are unknown); AREA_SCENE(INT) is guessed for System/RsrcDB
+union AREA_SCENE {
+    struct {
+        SHORT _nScene;
+        SHORT _nArea;
+    };
+    INT _nAreaScene;
+    AREA_SCENE(INT nAreaScene) { _nAreaScene = nAreaScene; }
+    AREA_SCENE(SHORT nArea, SHORT nScene) {
+        _nArea = nArea;
+        _nScene = nScene;
+    }
+};
+
+enum GAMEMODE {
+    GAMEMODE_FIELD = 0,
+    GAMEMODE_BATTLE = 1,
+    GAMEMODE_MINIGAME = 2
+};
+
+enum DOOR_STAT {
+    DOOR_STAT_NOTHING = 0,
+    DOOR_STAT_CLOSED = 1,
+    DOOR_STAT_OPENED = 2,
+    DOOR_STAT_ONE_WAY = 3,
+    DOOR_STAT_UNAVAILABLE = 4,
+    _DOOR_STAT_MAX = 5
+};
+
+enum DOOR_RC_RESULT {
+    DOOR_RC_RESULT_INVALID = -1,
+    DOOR_RC_RESULT_NOP = 0,
+    DOOR_RC_RESULT_USED = 1,
+    DOOR_RC_RESULT_CLEAR_ONE = 2,
+    DOOR_RC_RESULT_CLEAR_ALL = 3
+};
+
+struct CARD;
+
+struct DoorInfo { // 0x18
+    DOOR_ID _id;                           /* 0x00 */
+    DOOR_SHAPE _shape;                     /* 0x04 */
+    DOOR_TYPE _type;                       /* 0x08 */
+    INT _nDstRoom;                         /* 0x0c */
+    void* _pStorageInfo;                   /* 0x10 */
+    RCNORMA::DoorNormaSrc* _pNormaSrcInfo; /* 0x14 */
+
+    DOOR_STAT getDoorState() const;
+    BOOL setDoorState(DOOR_STAT s);
+    BOOL isSpecialDoor() const;
+    BOOL isEventDoor() const {
+        BOOL ret = FALSE;
+        if (_type < DOOR_TYPE_OPEN_AFTER_EVENT) ret = _type > DOOR_TYPE_NORMAL;
+        return ret;
+    }
+    BOOL isSystemDoor() const;
+    BOOL canSelectWorld() const;
+    BOOL canCreateRoom() const;
+    BOOL isWorldEntrance() const { return _type == DOOR_TYPE_WORLD_ENTRANCE; }
+    BOOL isWorldExit() const { return _shape == DOOR_SHAPE_WORLD_EXIT_CA; }
+    INT getNormaKeyCardID() const;
+    USHORT getNormaCount() const;
+    RCNORMA_COLOR getNormaColor(USHORT nIndex) const;
+    USHORT getNormaNumber(USHORT nIndex) const;
+    RCNORMA_OP getNormaOperation(USHORT nIndex) const;
+    BOOL isNormaCardUsed() const;
+    void setFirstUsedCardInfo(BYTE nCardID, BYTE nCardNum);
+    BYTE getFirstUsedCardIDForNorma() const;
+    BYTE getFirstUsedCardNumForNorma() const;
+    BOOL clearOneNorma();
+    USHORT getNextNormaIndex() const;
+    BOOL isNextNormaKeyCard() const;
+    BOOL isNormaCleared() const;
+    DOOR_RC_RESULT useNormaCard(const CARD& card);
+    void initNorma();
+    void resetNorma();
+    BOOL isValidNormaIndex(USHORT nIndex) const;
+};
+
+struct RoomInfo { // 0x6c
+    DoorInfo _doors[4];            /* 0x00 */
+    FLOOR::RoomSrcInfo* _pSrcInfo; /* 0x60 */
     void* _pStorageInfo;           /* 0x64 */
     void* _pStorageInfo2;          /* 0x68 */
+
     BOOL isCreated() const;
-    BYTE getCardID() const;
-    BYTE getRoomNameCardID() const; // PARTIAL: added for Game/Player/NaviMap
-    SHORT getSceneNum() const;      // PARTIAL: added for Form/Menu/SaveLoadUtil
-    BYTE getCardNumber() const;     // PARTIAL: added for Game/Gimmick/GimmickManager
-    BOOL hasEntered() const;        // PARTIAL: added for Form/Menu/Camp
-    BOOL isFirstTimeAfterRC() const; // PARTIAL: added for Game/GameSubField
-    // PARTIAL: added for Game/SceneInfo
+    BOOL isFirstTimeAfterRC() const;
+    BOOL hasEntered() const;
     void setScene(SHORT nArea, SHORT nScene);
     void setScene(SHORT nScene);
     void resetScene();
-    void setCardInfo(BYTE nCardID, BYTE nCardNumber);
+    SHORT getSceneNum() const;
+    void setCardInfo(BYTE nID, BYTE nNum);
+    BYTE getCardID() const;
+    BYTE getCardNumber() const;
+    BYTE getRoomNameCardID() const;
     BOOL isFixSceneRoom() const {
         BOOL b = FALSE;
         if (_pSrcInfo) b = _pSrcInfo->isFixSceneRoom();
         return b;
     }
+    BOOL isStartRoom() const;
+    BOOL isEntranceRoom() const;
     BOOL isExceptRoom() const { return !((UINT)_pSrcInfo | (UINT)_pStorageInfo | (UINT)_pStorageInfo2); }
 };
 
@@ -290,20 +326,6 @@ struct _MapEnemyRoomInfo {
     BYTE _byFormationNo2;
     BYTE _byHitPlayerAttack;
     BYTE _byAppearType;
-};
-
-// PARTIAL: added for Form/DebugMenu, Game/GameSubBattle
-union AREA_SCENE {
-    struct {
-        SHORT _nScene;
-        SHORT _nArea;
-    };
-    INT _nAreaScene;
-    AREA_SCENE(INT nAreaScene) { _nAreaScene = nAreaScene; } // PARTIAL: added for System/RsrcDB
-    AREA_SCENE(SHORT nArea, SHORT nScene) {
-        _nArea = nArea;
-        _nScene = nScene;
-    }
 };
 
 class CSceneInfo {

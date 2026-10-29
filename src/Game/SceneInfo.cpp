@@ -42,21 +42,6 @@ union _AREA_SCENE_REG {
     INT _nAreaScene;
 };
 
-enum GAMEMODE { GAMEMODE_FIELD = 0, GAMEMODE_BATTLE = 1 };
-
-struct FloorLayoutDataHeader { // 0x10
-    CHAR _cSig[4];       /* 0x0 */
-    USHORT _nVersion;    /* 0x4 */
-    USHORT nCount;       /* 0x6 */
-    INT* _pFloorOfsTbl;  /* 0x8 */
-    void* _pFloorData;   /* 0xc */
-};
-struct NormaDataHeader { // 0x7c
-    CHAR _cSig[4];                     /* 0x04 */
-    USHORT _nVersion;                  /* 0x04 */
-    USHORT _nFloorCount;               /* 0x06 */
-    RCNORMA::FloorNormaSrc _FloorSrc[1]; /* 0x08 */
-};
 struct _SceneInfo {
     _AREA_SCENE_REG _as;
     BYTE _nReverb;
@@ -66,12 +51,6 @@ struct _SceneInfo {
         _nReverb = 20;
         _nSeRangeRatio = 10;
     }
-};
-struct EventRoomData { // 0x18
-    CHAR _cSig[4];             /* 0x00 */
-    USHORT _nVersion;          /* 0x04 */
-    USHORT _nWorldCount;       /* 0x06 */
-    USHORT _nSceneTbl[1][8];   /* 0x08 */
 };
 
 /* RoomInfo::_pStorageInfo, _pStorageInfo2 and DoorInfo::_pStorageInfo (names unknown) */
@@ -386,7 +365,7 @@ void _initAllEventDoorState(BOOL bSora) {
 INT CSceneInfo::getFloorDataCount(BOOL bSora) {
     FloorLayoutDataHeader* p = bSora ? s_pFloorFile_Sora : s_pFloorFile_Riku;
     INT n = 0;
-    if (p) n = p->nCount;
+    if (p) n = p->_nFloorCount;
     return n;
 }
 SHORT CSceneInfo::getFloorNumber(USHORT nFloorIndex, BOOL bSora) {
@@ -397,7 +376,7 @@ SHORT CSceneInfo::getFloorNumber(USHORT nFloorIndex, BOOL bSora) {
 USHORT CSceneInfo::getFloorIndex(SHORT nFloor, BOOL bSora) {
     FloorLayoutDataHeader* p = bSora ? s_pFloorFile_Sora : s_pFloorFile_Riku;
     if (p) {
-        for (USHORT i = 0; i < p->nCount; i++) {
+        for (USHORT i = 0; i < p->_nFloorCount; i++) {
             if (*(SHORT*)((BYTE*)p->_pFloorData + p->_pFloorOfsTbl[i]) == nFloor) return i;
         }
     }
@@ -405,7 +384,7 @@ USHORT CSceneInfo::getFloorIndex(SHORT nFloor, BOOL bSora) {
 }
 WorldSelTable* CSceneInfo::getSelectableWorldTable(INT nFloorIndex, BOOL bSora) {
     FloorLayoutDataHeader* p = bSora ? s_pFloorFile_Sora : s_pFloorFile_Riku;
-    if (p && nFloorIndex >= 0 && nFloorIndex < p->nCount) {
+    if (p && nFloorIndex >= 0 && nFloorIndex < p->_nFloorCount) {
         WorldSelTable* pTbl = (WorldSelTable*)(bSora ? s_pWorldTableSora : s_pWorldTableRiku);
         return &pTbl[nFloorIndex];
     }
@@ -570,7 +549,7 @@ void _initDoor(DoorInfo& door, const FLOOR::DoorSrcInfo* pSrcInfo, DOOR_ID id, c
         }
     }
     if (pDoorState) *pDoorState = stat;
-    door._pNormaSrcInfo = (pFloorNormaSrc && nd != _RCNORMA_DOOR_MAX) ? (void*)&pFloorNormaSrc->_normas[nd] : NULL;
+    door._pNormaSrcInfo = (pFloorNormaSrc && nd != _RCNORMA_DOOR_MAX) ? (RCNORMA::DoorNormaSrc*)&pFloorNormaSrc->_normas[nd] : NULL;
     if (!bContinue) door.initNorma();
     door._shape = door.isSpecialDoor() ? DOOR_SHAPE_EVENT : DOOR_SHAPE_NORMAL;
 }
@@ -635,11 +614,11 @@ void _setWorldEntrance(WORLD_ID world, SHORT nStartEntScene, SHORT nGoalEntScene
         DoorInfo& d = pRoom->_doors[nDID];
         d.setDoorState(DOOR_STAT_OPENED);
         d._nDstRoom = 0;
-        d._shape = 3;
+        d._shape = DOOR_SHAPE_WORLD_ENTRANCE;
         d._type = DOOR_TYPE_WORLD_ENTRANCE;
         DoorInfo& s = floor._roomStartEnt._doors[0];
         s.setDoorState(bWorldOK ? DOOR_STAT_OPENED : DOOR_STAT_CLOSED);
-        s._shape = 3;
+        s._shape = DOOR_SHAPE_WORLD_ENTRANCE;
         s._type = DOOR_TYPE_SELECT_WORLD;
         s._nDstRoom = pRoom->_pSrcInfo->_nID;
     }
@@ -647,7 +626,7 @@ void _setWorldEntrance(WORLD_ID world, SHORT nStartEntScene, SHORT nGoalEntScene
         DoorInfo& d = floor._roomStartEnt._doors[2];
         d.setDoorState(DOOR_STAT_OPENED);
         d._type = DOOR_TYPE_FLOOR_CHANGE;
-        d._shape = 0;
+        d._shape = DOOR_SHAPE_NORMAL;
         d._nDstRoom = 99;
     }
     _initRoomInfo(floor._roomGoalEnt, _SceneInfoWork::mc()->_roomInfoGoalEnt, _SceneInfoWork::mc2()->_roomInfo2GoalEnt, NULL, NULL, NULL, bContinue);
@@ -668,13 +647,13 @@ void _setWorldEntrance(WORLD_ID world, SHORT nStartEntScene, SHORT nGoalEntScene
     if (pRoom) {
         DoorInfo& d = floor._rooms[nIdx]._doors[0];
         d.setDoorState(DOOR_STAT_OPENED);
-        d._shape = 4;
+        d._shape = DOOR_SHAPE_WORLD_EXIT;
         d._type = DOOR_TYPE_WORLD_ENTRANCE;
         d._nDstRoom = 99;
         DoorInfo& g = floor._roomGoalEnt._doors[2];
         g.setDoorState(bWorldOK ? DOOR_STAT_OPENED : DOOR_STAT_CLOSED);
         g._type = DOOR_TYPE_WORLD_ENTRANCE;
-        g._shape = 5;
+        g._shape = DOOR_SHAPE_WORLD_EXIT_CA;
         g._nDstRoom = pRoom->_pSrcInfo->_nID;
         if (pRoom->_pSrcInfo->_nRoomType == 7) {
             for (INT i = 0; i < 4; i++) {
@@ -692,7 +671,7 @@ void _setWorldEntrance(WORLD_ID world, SHORT nStartEntScene, SHORT nGoalEntScene
             DoorInfo& f = floor._roomGoalEnt._doors[0];
             f.setDoorState(DOOR_STAT_OPENED);
             f._nDstRoom = 0;
-            f._shape = 0;
+            f._shape = DOOR_SHAPE_NORMAL;
             f._type = DOOR_TYPE_FLOOR_CHANGE;
         }
     }
@@ -1212,7 +1191,7 @@ INT CSceneInfo::getCurrentWorldID(BOOL bChkEntrance) {
     FloorLayoutDataHeader* pHeader = _isValidFloorIdx(nIdx, bSora);
     if (pHeader) {
         INT n = !bSora;
-        if (nIdx < pHeader->nCount) return _SceneInfoWork::mc2()->_nWorldOnFloor[n][nIdx];
+        if (nIdx < pHeader->_nFloorCount) return _SceneInfoWork::mc2()->_nWorldOnFloor[n][nIdx];
     }
     WORLD_ID w = (WORLD_ID)getCurrentAreaNum();
     if ((UINT)w >= 14) {
@@ -1226,7 +1205,7 @@ WORLD_ID CSceneInfo::getWorldID(USHORT nFloorIndex) {
     FloorLayoutDataHeader* p = _isValidFloorIdx(nFloorIndex, bSora);
     if (!p) return (WORLD_ID)0;
     INT n = !bSora;
-    if (nFloorIndex >= p->nCount) return (WORLD_ID)0;
+    if (nFloorIndex >= p->_nFloorCount) return (WORLD_ID)0;
     return (WORLD_ID)_SceneInfoWork::mc2()->_nWorldOnFloor[n][nFloorIndex];
 }
 void CSceneInfo::setupCompleteFloorWorld(WORLD_ID excludeWorld) {
@@ -1712,7 +1691,7 @@ NormaDataHeader* _linkNormaData(const CHAR* pszFile) {
 FloorLayoutDataHeader* _isValidFloorIdx(USHORT nIdx, BOOL bSora) {
     FloorLayoutDataHeader* pHeader = bSora ? s_pFloorFile_Sora : s_pFloorFile_Riku;
     FloorLayoutDataHeader* pRet = NULL;
-    if (pHeader) pRet = nIdx < pHeader->nCount ? pHeader : NULL;
+    if (pHeader) pRet = nIdx < pHeader->_nFloorCount ? pHeader : NULL;
     return pRet;
 }
 FLOOR::FloorLayout* CSceneInfo::getCurrentFloorDataSrc() {
