@@ -76,6 +76,8 @@ FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT s);
+void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" float atan2f(float, float);
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(size_t, void* p) throw() { return p; }
@@ -819,8 +821,56 @@ void CEntity::userBodyCollOff(INT inIndex) {
 void CEntity::userBodyCollOffBody(INT inIndex) {
     if (m_pBodyColl) m_pBodyColl->userOffBody(inIndex);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", arriveTarget__7CEntityRC7FVECTORf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", arriveTargetXZ__7CEntityRC7FVECTORf);
+BOOL CEntity::arriveTarget(const FVECTOR& inTarget, FLOAT inRadius) {
+    FLOAT r2 = inRadius * inRadius;
+    if (calcDistanceSq(inTarget) <= r2) return TRUE;
+    FVECTOR p = getOldPos();
+    FVECTOR d;
+    SubVector(d, getPos(), p);
+    Normalize(d, d);
+    FVECTOR m;
+    SubVector(m, p, inTarget);
+    FLOAT b = InnerProduct(m, d);
+    FLOAT c = InnerProduct(m, m) - r2;
+    if (c > 0.0f && b > 0.0f) return FALSE;
+    FLOAT discr = b * b - c;
+    if (discr < 0.0f) return FALSE;
+    FLOAT t = -b - _sqrtf(discr);
+    if (t < 0.0f) t = 0.0f;
+    FVECTOR q;
+    ScaleVector(d, d, t);
+    AddVector(q, p, d);
+    const FVECTOR& p0 = getOldPos();
+    const FVECTOR& p1 = getPos();
+    if ((p0.x <= q.x && q.x <= p1.x && p0.y <= q.y && q.y <= p1.y && p0.z <= q.z && q.z <= p1.z) || (p1.x <= q.x && q.x <= p0.x && p1.y <= q.y && q.y <= p0.y && p1.z <= q.z && q.z <= p0.z)) return TRUE;
+    return FALSE;
+}
+BOOL CEntity::arriveTargetXZ(const FVECTOR& inTarget, FLOAT inRadius) {
+    FLOAT r2 = inRadius * inRadius;
+    if (calcDistanceXZSq(inTarget) <= r2) return TRUE;
+    FVECTOR p = getOldPos();
+    FVECTOR d;
+    SubVector(d, getPos(), p);
+    d.y = 0.0f;
+    Normalize(d, d);
+    FVECTOR m;
+    SubVector(m, p, inTarget);
+    m.y = 0.0f;
+    FLOAT b = InnerProduct(m, d);
+    FLOAT c = InnerProduct(m, m) - r2;
+    if (c > 0.0f && b > 0.0f) return FALSE;
+    FLOAT discr = b * b - c;
+    if (discr < 0.0f) return FALSE;
+    FLOAT t = -b - _sqrtf(discr);
+    if (t < 0.0f) t = 0.0f;
+    FVECTOR q;
+    ScaleVector(d, d, t);
+    AddVector(q, p, d);
+    const FVECTOR& p0 = getOldPos();
+    const FVECTOR& p1 = getPos();
+    if ((p0.x <= q.x && q.x <= p1.x && p0.z <= q.z && q.z <= p1.z) || (p1.x <= q.x && q.x <= p0.x && p1.z <= q.z && q.z <= p0.z)) return TRUE;
+    return FALSE;
+}
 void CEntity::rideModelSetAttachMatrix(const FMATRIX* inpMat) {
     if (!(inpMat)) AssertApp(D_0047D330, 2207, D_0047D500, 0);
     if (m_pRideModel) m_pRideModel->setAttachMatrix(inpMat);
