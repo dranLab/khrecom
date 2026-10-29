@@ -16,6 +16,7 @@ public:
     static CRsrcData* getRsrc(INT nRsrcType, const CHAR* pszName, NAME_CASE nc);
     static void* getRsrcData(const CRsrcData& data);
     static void removeSceneAttachedData(UINT nNum);
+    static void removeRsrc(INT nID);
 };
 
 /* AREA_SCENE without its constructors (built in a register; PARTIAL) */
@@ -60,11 +61,15 @@ struct EventRoomData { // 0x18
 };
 
 /* RoomInfo::_pStorageInfo, _pStorageInfo2 and DoorInfo::_pStorageInfo (names unknown) */
-struct ROOM_STORAGE {
-    SHORT _nArea;
-    SHORT _nScene;
-    BYTE _bFirstTimeAfterRC;
-    BYTE _bEntered;
+struct ROOM_STORAGE { // 0xb8, STORAGE::MCWork::_RoomInfo
+    SHORT _nArea;               /* 0x00 */
+    SHORT _nScene;              /* 0x02 */
+    BYTE _bFirstTimeAfterRC;    /* 0x04 */
+    BYTE _bEntered;             /* 0x05 */
+    UBYTE __nFiller[2];         /* 0x06 */
+    UBYTE _gimmickInfo[0x62];   /* 0x08 _GimmickRoomInfo */
+    UBYTE _mapEnemyInfo[0x4a];  /* 0x6a _MapEnemyRoomInfo */
+    UINT _moogleShopFlag;       /* 0xb4 */
 };
 struct ROOM_STORAGE2 {
     UBYTE _m_0x00[0x28];
@@ -141,6 +146,9 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_00484CE8[];
+extern "C" char D_00484D50[];
+extern "C" char D_00484E08[];
 extern "C" char D_00484D20[];
 extern "C" char D_00484D70[];
 extern "C" char D_00484E38[];
@@ -570,7 +578,25 @@ INT CSceneInfo::getSceneCacheID(const AREA_SCENE& as) {
     }
     return -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", addToSceneCache__10CSceneInfoRC10AREA_SCENE);
+INT CSceneInfo::addToSceneCache(const AREA_SCENE& as) {
+    if (as._nAreaScene < 0) return -1;
+    INT nID = getSceneCacheID(as);
+    if (nID >= 0) return nID;
+    if (s_nAvailableSceneCache == 0) {
+        TRACE(D_00484CE8);
+        return -1;
+    }
+    for (INT i = 0; i < 7; i++) {
+        if (s_SceneCacheTbl[i]._as._nAreaScene < 0) {
+            s_SceneCacheTbl[i]._as._nAreaScene = as._nAreaScene;
+            if (!(7 >= s_nAvailableSceneCache)) AssertApp(D_00484980, 2622, D_00484D20, 0);
+            s_nAvailableSceneCache--;
+            if (!(0 <= s_nAvailableSceneCache)) AssertApp(D_00484980, 2624, D_00484D50, 0);
+            return i;
+        }
+    }
+    return -1;
+}
 INT CSceneInfo::removeFromSceneCache(const AREA_SCENE& as) {
     if (as._nAreaScene < 0) return -1;
     for (INT i = 0; i < 7; i++) {
@@ -666,7 +692,39 @@ void* CSceneInfo::getMapRsrcCache(INT nSlot) {
     }
     return NULL;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", updateMapRsrcCache__10CSceneInfoii);
+void CSceneInfo::updateMapRsrcCache(INT nMapRsrcGrp, INT nSlot) {
+    switch (nSlot) {
+    case 0:
+        {
+            INT n = s_nMapCacheField;
+            if (n && nMapRsrcGrp != n) {
+                TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+                CRsrcDB::removeRsrc(n);
+            }
+        }
+        s_nMapCacheField = nMapRsrcGrp;
+    case 2:
+        {
+            INT n = s_nMapCacheBattle;
+            if (n && nMapRsrcGrp != n) {
+                TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+                CRsrcDB::removeRsrc(n);
+            }
+        }
+        s_nMapCacheBattle = nMapRsrcGrp;
+        break;
+    case 1:
+        {
+            INT n = s_nMapCacheField;
+            if (n && nMapRsrcGrp != n) {
+                TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+                CRsrcDB::removeRsrc(n);
+            }
+        }
+        s_nMapCacheField = nMapRsrcGrp;
+        break;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", removeMapRsrcCache__10CSceneInfoi);
 FloorLayoutDataHeader* _linkFloorData(const CHAR* pszFile) {
     CRsrcData* pData = CRsrcDB::getRsrc(1, pszFile, NAME_CASE_SENSITIVE);
@@ -788,7 +846,11 @@ BYTE _getOpenFlagEventDoor(const DoorInfo& door) {
     INT nEvIdx = door._type - 1;
     return _SceneInfoWork::mc2()->_nEventDoorOpenTbl[nFloor][nEvIdx];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", isCreated__C8RoomInfo);
+BOOL RoomInfo::isCreated() const {
+    if (!_pSrcInfo) return TRUE;
+    ROOM_STORAGE info = *(ROOM_STORAGE*)_pStorageInfo;
+    return info._nArea >= 0 && info._nScene >= 0;
+}
 BOOL RoomInfo::isFirstTimeAfterRC() const {
     ROOM_STORAGE* p = (ROOM_STORAGE*)_pStorageInfo;
     if (!p) return FALSE;

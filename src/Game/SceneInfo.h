@@ -208,6 +208,7 @@ struct RoomInfo {
     FLOOR::RoomSrcInfo* _pSrcInfo; /* 0x60 */ // PARTIAL: added for Form/DebugMenu
     void* _pStorageInfo;           /* 0x64 */
     void* _pStorageInfo2;          /* 0x68 */
+    BOOL isCreated() const;
     BYTE getCardID() const;
     BYTE getRoomNameCardID() const; // PARTIAL: added for Game/Player/NaviMap
     SHORT getSceneNum() const;      // PARTIAL: added for Form/Menu/SaveLoadUtil
