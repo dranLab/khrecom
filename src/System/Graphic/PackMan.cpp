@@ -3,6 +3,8 @@
 #include "System/VramMan.h"
 #include "System/Vector.h"
 #include "System/Graphic/Effect/ObjType.h"
+#include "System/Debug.h"
+#include "Game/Debug/DebugWork.h"
 
 typedef unsigned int u_int;
 typedef unsigned long u_long;
@@ -119,6 +121,7 @@ public:
     static void kickDMAFG(INT n);
     static void kickDMA(INT n);
     static void initialize();
+    static void swapDBuf(INT nInFrame);
     static void initFGPacket();
     static u_long128* initBGPacket(INT nInIdx);
     static void endScene();
@@ -319,6 +322,19 @@ public:
 };
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void FTOI0Vector(IVECTOR& outVec, const FVECTOR& inVec);
+class CDebugWindow { /* PARTIAL: stand-in for Form/DebugWindow CDebugWindow: DebugWindow.h pulls in Task.h */
+public:
+    static BOOL isTopDebugWindow();
+};
+typedef struct { /* libgraph (eestruct.h) */
+    unsigned int FBP : 9;
+    unsigned int FBW : 6;
+    unsigned int PSM : 5;
+    unsigned int p0 : 12;
+    unsigned int DBX : 11;
+    unsigned int DBY : 11;
+    unsigned int p1 : 10;
+} tGS_DISPFB2;
 class CModel { /* PARTIAL: stand-in for System/Graphic/Model CModel: strings: Model.h (.rodata still asm) */
 public:
     static void resetMicroProgram();
@@ -890,7 +906,87 @@ void CPackMan::updateBGBlend(INT nAlpha) {
     _setPcrtcMode_BlendBG(s_DBuf.disp[0]);
 }
 ULONGLONG CPackMan::getDefaultTEST() { return s_DBuf.clear0.testb; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", swapDBuf__8CPackMani);
+void CPackMan::swapDBuf(INT nInFrame) {
+    switch (s_nDrawMode) {
+    case 3:
+        s_nDrawMode = 1;
+        break;
+    case 4:
+        s_nDrawMode = 0;
+        enableDraw(0xf);
+        break;
+    case 5:
+        s_nDrawMode = 2;
+        break;
+    case 6:
+        s_nDrawMode = 0;
+        enableDraw(0xf);
+        if (getTransFrameKind() == 4) setFrameEffect(5, 0, 0, 0);
+        break;
+    }
+    if (s_nReqDrawMode >= 0 && s_nReqDrawMode != s_nDrawMode) {
+        switch (s_nReqDrawMode) {
+        case 0:
+            if (s_nDrawMode == 1) {
+                s_nDrawMode = 4;
+                enableDraw(0xb);
+            } else if (s_nDrawMode == 2) {
+                s_nDrawMode = 6;
+                enableDraw(0xb);
+            } else {
+                s_nDrawMode = s_nReqDrawMode;
+                enableDraw(0xf);
+            }
+            break;
+        case 1:
+            if (s_nDrawMode == 0) {
+                s_nDrawMode = 3;
+                disableDraw(7);
+            }
+            break;
+        case 2:
+            if (s_nDrawMode == 0) {
+                s_nDrawMode = 5;
+                disableDraw(6);
+            }
+            break;
+        }
+        s_nReqDrawMode = -1;
+    }
+    sceGsDispEnv& env = s_DBuf.disp[0];
+    if (s_nReqPcrtcMode >= 0 && s_nReqPcrtcMode != s_nPcrtcMode) {
+        switch (s_nReqPcrtcMode) {
+        case 1:
+            _setPcrtcMode_BlendBG(env);
+            s_nPcrtcMode = s_nReqPcrtcMode;
+            break;
+        case 0:
+            s_nPcrtcMode = s_nReqPcrtcMode;
+        default:
+            _setPcrtcMode_FSAA(env);
+            break;
+        }
+        s_nReqPcrtcMode = -1;
+    }
+    tGS_DISPFB2 dispfb = *(tGS_DISPFB2*)&env.dispfb;
+    if (DebugWork::g_dw.nakamich.iVramDisp) {
+        if (!CDebugWindow::isTopDebugWindow()) {
+            INT pls = dbgButtonDown(USR_SYSTEM, 8, 1) ? 8 : 2;
+            if (dbgButtonDown(USR_SYSTEM, 0x1000, 1)) DebugWork::g_dw.nakamich.iVramDy -= pls;
+            else if (dbgButtonDown(USR_SYSTEM, 0x4000, 1)) DebugWork::g_dw.nakamich.iVramDy += pls;
+            else if (dbgButtonDown(USR_SYSTEM, 0x8000, 1)) DebugWork::g_dw.nakamich.iVramDx -= pls;
+            else if (dbgButtonDown(USR_SYSTEM, 0x2000, 1)) DebugWork::g_dw.nakamich.iVramDx += pls;
+            dispfb.PSM = 0;
+            dispfb.DBX = DebugWork::g_dw.nakamich.iVramDx;
+            dispfb.DBY = DebugWork::g_dw.nakamich.iVramDy;
+        }
+    } else {
+        DebugWork::g_dw.nakamich.iVramDy = 0;
+        DebugWork::g_dw.nakamich.iVramDx = 0;
+    }
+    *(volatile u_long*)0x12000070 = *(u_long*)&dispfb;
+    *(volatile u_long*)0x12000090 = *(u_long*)&dispfb;
+}
 void CPackMan::kickDMA(INT n) {
     if (isSkipPacketDMA()) return;
     changeLayer(1);
