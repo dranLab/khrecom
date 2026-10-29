@@ -17,6 +17,8 @@
 #include "Game/Collision/CollDisp.h"
 #include "Game/Debug/DebugWork.h"
 #include "Game/AttackMotion.h"
+#include "Game/CardBattle.h"
+#include "Game/SceneEnv.h"
 #include "System/Graphic/Fnt.h"
 #include "System/Graphic/WorldEnv.h"
 #include "System/Graphic/LightUnit.h"
@@ -101,7 +103,47 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", _$_7CEntity);
 INT CEntity::getTypeID() const { return 0x1000; }
 BOOL CEntity::initalize(INT inGroupID, INT inRsrcID) { return initalize(inGroupID, inRsrcID, 0); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", initalize__7CEntityiiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", main__7CEntity);
+void CEntity::main() {
+    if ((1 << m_EntityType) & CSceneEnv::getStopTypeBit()) return;
+    if (m_uiEntityFlag & 0x80000000) return;
+    storeModelColor_();
+    if (m_pMove) {
+        saveRideModelMatrix_();
+        m_pMove->save();
+        m_pMove->adjustRide();
+        updateTimer_();
+        updateBefore();
+        update();
+        updateAfter();
+        chase_();
+        evade_();
+        intercept_();
+        targetMove_();
+        targetMoveXZ_();
+        updateAnimation();
+        if (CTaskMan::getSysTask(0x16) && CardBattle::CCardBattle::isLevitate() && !(m_uiEntityFlag & 0x200000)) m_pMove->setForce(0.5f);
+        else m_pMove->setForce(1.0f);
+        m_pMove->update();
+        updatePositionAfter();
+        m_pMove->notifyRide();
+        updateCoord();
+        coordFix();
+        updateIK_();
+        lastUpdate();
+        updateEffect_();
+        updateSE_();
+        rideModelAdjustRiders_();
+        updateFade_();
+    } else {
+        updateTimer_();
+        updateBefore();
+        update();
+        updateAfter();
+        lastUpdate();
+    }
+    loadModelColor_();
+    if (m_tqDamageDispTimer > 0) m_tqDamageDispTimer -= getFrameRate();
+}
 void CEntity::disp() {
     translucence_();
     if (isDispOFF()) return;
