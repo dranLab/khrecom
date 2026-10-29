@@ -897,7 +897,22 @@ void sceVif1PkOpenGifTag(pacVif1Packet* pPacket, u_long128 tag) {
     pPacket->pGifTag = (u_long*)pPacket->pCurrent;
     pPacket->pCurrent += 4;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkCloseGifTag__FP13pacVif1Packet);
+void sceVif1PkCloseGifTag(pacVif1Packet* pPacket) {
+    u_long128 tag = pPacket->lGifTag.ul128;
+    u_long hi = _upper(tag);
+    u_long lo = (u_long)tag;
+    u_long flg = (lo >> 58) & 3;
+    u_int n = (u_long*)pPacket->pCurrent - pPacket->pGifTag - 2;
+    if (flg != 1) n >>= 1;
+    if (flg != 2) {
+        u_int nreg = lo >> 60;
+        if (!nreg) nreg = 16;
+        n = (n + nreg - 1) / nreg;
+    }
+    *(u_long128*)pPacket->pGifTag = _pack(lo + n, hi);
+    pPacket->pGifTag = NULL;
+    if ((u_int)pPacket->pCurrent & 8) pPacket->pCurrent += 2;
+}
 u_int* sceVif1PkReserve(pacVif1Packet* pPacket, u_int count) {
     u_int* p = pPacket->pCurrent;
     pPacket->pCurrent = p + count;
