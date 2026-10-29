@@ -230,6 +230,7 @@ public:
     BOOL initRideModel_(INT inGroup);
     BOOL initCollision_(INT inGroupID, INT inRsrcID);
     void updateSE_();
+    void updateFade_();
     // PARTIAL: added for Game/EntityFactory
     void positionFix(const FVECTOR& inPos, FLOAT inDir);
     void positionFix(const FVECTOR& inPos, const FVECTOR& inRot);
@@ -305,6 +306,7 @@ public:
     INT getFlashingCounter() const { return m_iFlashingCounter; } // PARTIAL: added for Game/Prize (name unknown)
     FLOAT calcDistanceSq(const FVECTOR& inPos) const;
     HANDLE playSEPanAndVol(INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
+    HANDLE playSEPan(INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType); // PARTIAL: added for Game/Entity
     void playSEManaged(INT inFileID, INT inID, INT inBoneIndex, const FVECTOR* inOffset); // PARTIAL: added for Game/Entity
     void setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
     void fadeoutSE(HANDLE inHandle, INT inFile, INT inID, INT inTime, INT inFlag);

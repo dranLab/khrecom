@@ -25,6 +25,7 @@ extern "C" char D_0047D330[]; /* __FILE__ */
 extern "C" char D_0047D080[]; /* "" */
 extern "C" char D_0047D660[];
 extern "C" char D_0047D3E0[];
+extern "C" char D_0047D518[];
 extern "C" char D_0047D548[];
 extern "C" char D_0047D570[];
 extern "C" char D_0047D4F8[];
@@ -747,7 +748,17 @@ void CEntity::rideModelChangeListRC() {
     if (m_pRideModel) m_pRideModel->changeListRC();
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", playSEPanAndVol__7CEntityiiiPC7FVECTORi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", playSEPan__7CEntityiiiiPC7FVECTORi);
+HANDLE CEntity::playSEPan(INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType) {
+    FVECTOR pos;
+    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(D_0047D330, 2313, D_0047D518, 0);
+    if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
+    else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
+    INT pan = CSound::getPan(pos);
+    INT id;
+    if (!inType) id = inFile * 1000 + inID;
+    else id = (inFile * 1000 + inID) | 0x10000000;
+    return CSound::playSE(id, inVol, pan);
+}
 void CEntity::stopSE(HANDLE inHandle, INT inFile, INT inID, INT inFlag) {
     INT nSeq;
     if (!inFlag) nSeq = inFile * 1000 + inID;
@@ -859,7 +870,22 @@ void CEntity::updateSE_() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateFade___7CEntity);
+void CEntity::updateFade_() {
+    if (!isFade()) return;
+    m_tqFadeTimer -= getFrameRate();
+    if (m_tqFadeTimer < 0) {
+        m_tqFadeTimer = 0;
+        setEntityFlag(0, 0x40000000);
+    }
+    FLOAT t = (FLOAT)m_tqFadeTimer / (FLOAT)m_tqFadeTime;
+    m_fFadeAlpha = t * m_fStartAlpha + (1.0f - t) * m_fEndAlpha;
+    if (m_iFadeModel == -1) setModelAlphaScale(m_fFadeAlpha, -1);
+    else {
+        for (INT i = 0; i < m_iModelCount; i++) {
+            if ((m_iFadeModel >> i) & 1) setModelAlphaScale(m_fFadeAlpha, i);
+        }
+    }
+}
 void CEntity::saveRideModelMatrix_() {
     if (m_pRideModel) m_pRideModel->setOldMatrix();
 }
