@@ -738,7 +738,7 @@ INT CModel::checkBBox() {
 }
 void CModel::setColorScale(const FVECTOR& vColor) { getColorScale() = vColor; }
 void CModel::setColorScale(FLOAT r, FLOAT g, FLOAT b, FLOAT a) { getColorScale().set(r, g, b, a); }
-void CModel::setAlphaScale(FLOAT inScale) { m_fAlphaScale = inScale; }
+void CModel::setAlphaScale(FLOAT inScale) { m_ColorScale.w = inScale; }
 void CModel::linksub() {
     UINT rawMode;
     BOOL bHasSemiData;
@@ -811,7 +811,7 @@ void CModel::setShadowMapModel() {
     m_pShadowMapModel = new (com_malloc_d(sizeof(CShadowMapModel), __FILE__ "(1909)", RET_ADDR())) CShadowMapModel;
     if (m_pShadowMapModel) {
         m_pShadowMapModel->link(this);
-        m_fAlphaScale = 1.0f;
+        m_ColorScale.w = 1.0f;
     }
 }
 void CModel::attachSemiModel(CSemiModel& inModel, BOOL bInManage) {
@@ -909,7 +909,7 @@ void CModel::dispUpdate(FLOAT fR) {
 }
 BOOL CModel::dispCheck() {
     if (m_pCrds->getCoordNum() <= 0) return FALSE;
-    if (m_fAlphaScale <= 0.0f) return FALSE;
+    if (m_ColorScale.w <= 0.0f) return FALSE;
     return !CPackMan::isOverFlow(getPacketSize());
 }
 void CModel::disp() { disp(m_pTask ? m_pTask->getFrameRate() * 0.020000001f : 1.0f); }
@@ -926,13 +926,13 @@ void CModel::disp(FLOAT fR) {
 void CModel::dispImpl() {
     setDispFlag(FALSE);
     if (!isDispOff()) {
-        if (!isDataEmpty() && m_fAlphaScale > 0.0f) {
+        if (!isDataEmpty() && m_ColorScale.w > 0.0f) {
             if (isDispWireframe() && MODELDATA::isCharacter(m_Mode)) {
                 disp0(-1, getTestFlag(), 0);
                 m_ShaderOption |= 0x80;
                 disp0(-1, getTestFlag(), 0);
                 m_ShaderOption &= ~0x80;
-            } else if (m_fAlphaScale >= 1.0f && m_Mode != 0x10) {
+            } else if (m_ColorScale.w >= 1.0f && m_Mode != 0x10) {
                 INT id = getLayerID() & 0xF;
                 if (id >= 2 && (id < 4 || id == 0xB)) {
                     CModelMan::add2DispList(*this, 0);
@@ -969,7 +969,7 @@ void CModel::dispImpl() {
         if (isAvailableSemiModel()) {
             if (m_pSemiModel) {
                 if (m_pFadeModel) {
-                    if (m_fAlphaScale >= 1.0f) m_pSemiModel->setSemiSort(isSemiSortFlag());
+                    if (m_ColorScale.w >= 1.0f) m_pSemiModel->setSemiSort(isSemiSortFlag());
                     else if (isAutoEffSemiSort()) m_pSemiModel->setSemiSort(TRUE);
                     else m_pSemiModel->setSemiSort(isSemiSortFlag());
                 }

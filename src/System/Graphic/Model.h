@@ -114,15 +114,14 @@ public:
     virtual void makePkt();
 };
 
-// PARTIAL: CModel derives from CDrawable (System/Graphic/Gprim.h, which every includer includes first) and
-// its virtual functions added for Form/Menu/MenuModel
+// PARTIAL: differs from the ref in m_pData (const), m_TexInfo (stand-in struct), the guessed friends and the public
+// 0x030 union
 class CModel : public CDrawable {
     friend class CSemiZModel; // PARTIAL: guessed (CSemiZModel::makePkt sets m_ShaderOption, no accessor exists)
     friend class CSemiModel;  // PARTIAL: guessed (CSemiModel::calcZ reads m_pFadeModel, no accessor exists)
     friend class CFadeModel;  // PARTIAL: guessed (CFadeModel::makePkt calls the protected disp0)
 private:
-    UBYTE _m_0x18[0x14]; /* 0x018 .. m_ColorScale.z */
-    FLOAT m_fAlphaScale; /* 0x02c m_ColorScale.w */
+    FVECTOR m_ColorScale; /* 0x020 */
 public:
     // PARTIAL: the 0x030 union is public for Game/Gimmick/GimmickDominoPillar, which sets bit 0x100 of m_nFlag
     // directly (an inline CModel setter adds an addiu per model and does not match)
@@ -149,9 +148,9 @@ private:
     };
     SHORT m_BoneIdx;             /* 0x050 */
     SHORT m_BoneStart;           /* 0x052 */
-    CCoords* m_pCrds;    /* 0x054 PARTIAL: split out for System/Graphic/DispList */
+    CCoords* m_pCrds;    /* 0x054 */
     const MODELDATA* m_pData; /* 0x058 */
-    USHORT m_Mode;       /* 0x05c */ // PARTIAL: split out for System/Graphic/Model
+    USHORT m_Mode;       /* 0x05c */
     USHORT m_ShaderOption; /* 0x05e */
     INT m_BBoxFlag;        /* 0x060 */
     BYTE m_TransTexCount;  /* 0x064 */
@@ -165,7 +164,6 @@ private:
     class CShadowMapModel* m_pShadowMapModel; /* 0x0f8 */
     BBOX m_BBox;         /* 0x0fc */
     struct SHADERDESC* m_pShader; /* 0x114 */
-    UBYTE _m_0x118[0x8];
     static FMATRIX* m_pWSMatCache;
     static u_long128* m_pMpg;
     static INT m_iSendFlg;
@@ -323,8 +321,8 @@ public:
     void setAlphaScale(FLOAT inScale);
     void linkTexAnm(CTexAnm* pTexAnm, INT nTexAnm);
     void setLocal(INT index);
-    FVECTOR& getColorScale() { return *(FVECTOR*)&_m_0x18[8]; }
-    FLOAT getAlphaScale() { return m_fAlphaScale; }
+    FVECTOR& getColorScale() { return m_ColorScale; }
+    FLOAT getAlphaScale() { return m_ColorScale.w; }
     void dispWireframe(BOOL bOn) {
         if (bOn) m_nFlag |= 4;
         else m_nFlag &= ~4;
@@ -491,6 +489,8 @@ public:
         m_SemiDraw = FALSE;
         m_nSize = 0;
     }
+    void setSize(INT nSize);
+    INT getSize();
     virtual void changeLayerExt(BOOL bOn, INT nDepth) { setLayer(0x17, 0); }
     virtual FIX4 calcZ() { return 0; }
 };
