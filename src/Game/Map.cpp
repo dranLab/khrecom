@@ -20,14 +20,13 @@ inline void operator delete[](void* pv) { com_free(pv); }
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL)
 
-/* Game/Collision/CollMapCamera.cpp */
-class CMCSemiModel : public CSJointT<CMCSemiModel> {
+class CMCSemiModel : public CSJointT<CMCSemiModel> { /* PARTIAL: stand-in for Game/Collision/CollMapCamera CMCSemiModel: owner not written (defined in CollMapCamera.cpp; ref: lost+found) */
 public:
     FVECTOR center;
     FLOAT transparency;
     INT flag;
 };
-class CCMCSemiModelList : public CSJointListT<CMCSemiModel> {};
+class CCMCSemiModelList : public CSJointListT<CMCSemiModel> {}; /* PARTIAL: stand-in for Game/Collision/CollMapCamera CCMCSemiModelList: owner not written */
 
 class CMapModel : public CModel {
     INT m_nGridID; /* 0x120 */
