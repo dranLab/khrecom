@@ -303,6 +303,7 @@ public:
     FLOAT getFadeAlpha() const { return m_fFadeAlpha; }
     FLOAT getEndAlpha() const { return m_fEndAlpha; } // PARTIAL: added for Game/Player/PlayerDRiku (original name unknown)
     UINT isFade() const { return m_uiEntityFlag & 0x40000000; }
+    UINT isRootMoveOff() const { return m_uiEntityFlag & 0x8000; } // PARTIAL: added for Game/Entity
     INT getFlashingCounter() const { return m_iFlashingCounter; } // PARTIAL: added for Game/Prize (name unknown)
     FLOAT calcDistanceSq(const FVECTOR& inPos) const;
     HANDLE playSEPanAndVol(INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);

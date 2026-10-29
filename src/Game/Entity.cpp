@@ -19,6 +19,7 @@
 #include "Game/AttackMotion.h"
 #include "System/Graphic/Fnt.h"
 #include "System/Graphic/WorldEnv.h"
+#include "System/Graphic/Effect/effect.h"
 #include "include_asm.h"
 
 extern "C" char D_0047D330[]; /* __FILE__ */
@@ -64,6 +65,9 @@ extern "C" char D_0047D3D8[];
 extern "C" char D_0047D400[];
 
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void MulVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
@@ -471,7 +475,23 @@ void CEntity::coordFix() {
     TIMEQ tick = CMainApp::getTickCount();
     for (INT i = 0; i < n; i++) Crd(i).fix(tick);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateRootMove__7CEntity);
+void CEntity::updateRootMove() {
+    if (!m_pAnim) return;
+    if (!m_pAnim->isRootMove()) return;
+    if (isRootMoveOff()) return;
+    FVECTOR trans;
+    FLOAT rot_y;
+    m_pAnim->getRootMove(trans, rot_y);
+    if (!(m_pMove)) AssertApp(D_0047D330, 1351, D_0047D358, 0);
+    FVECTOR diff;
+    SubVectorXYZ(diff, trans, getPos());
+    MulVectorXYZ(diff, diff, m_vRootMoveScale);
+    AddVectorXYZ(trans, getPos(), diff);
+    m_pMove->setPos(trans);
+    FVECTOR rot = m_pMove->getRot();
+    rot.y = rot_y;
+    m_pMove->setRot(rot);
+}
 void CEntity::changeMotionFileName(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
     if (!(inName)) AssertApp(D_0047D330, 1370, D_0047D398, 0);
     INT nIndex = getMotionIndex(inName);
@@ -1054,7 +1074,19 @@ HANDLE CEntity::setDeathEffect() {
     }
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setBadStatusEffect__7CEntityPCcif);
+HANDLE CEntity::setBadStatusEffect(const CHAR* inEffectName, INT inBadStatus, FLOAT inWait) {
+    COLL_PARAM_HEADER* coll = m_pCollParam;
+    if (!coll) return 0;
+    OTHER_PARAM* other = coll->pOtherParam;
+    if (!(other)) AssertApp(D_0047D330, 3290, D_0047D3D0, 0);
+    FVECTOR pos;
+    pos.set(other->BadStatusPos.fOffsetX, other->BadStatusPos.fOffsetY, other->BadStatusPos.fOffsetZ);
+    ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0x90), pos);
+    HANDLE handle = setEffect(inEffectName, inBadStatus, &pos, NULL, 0.0f);
+    CEffect* effect = CEffectMan::getEffect(handle);
+    if (effect) effect->setScale(other->fBadStatusScale, other->fBadStatusScale, other->fBadStatusScale);
+    return handle;
+}
 HANDLE CEntity::setRecoverEffect(const CHAR* inName, INT inNo) {
     if (!m_pCollParam) return 0;
     BYTE* pOther = *(BYTE**)((BYTE*)m_pCollParam + 0x18);

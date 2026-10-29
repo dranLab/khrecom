@@ -251,6 +251,7 @@ public:
     void changeEx(INT nRsrcID, ANIMID inId, TIMEQ inTq, BOOL inLoop);
     // PARTIAL: added for Game/Entity
     void start(ANIMID id, TIMEQ tq);
+    void getRootMove(FVECTOR& outTrs, FLOAT& outRotY);
     BOOL startEx(INT inRsrcId, ANIMID id, TIMEQ tq);
     BOOL startEx(const CHAR* rsrc_name, ANIMID id, TIMEQ tq);
     BOOL changeEx(const CHAR* rsrc_name, ANIMID id, TIMEQ tq, TIMEQ gr);
