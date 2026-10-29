@@ -6,6 +6,7 @@
 #include "System/Debug.h"
 #include "Form/Menu/JMemoFlag.h"
 #include "Game/Status.h"
+#include "Game/Atel/Atel.h"
 #include "include_asm.h"
 
 class CRsrcData;
@@ -149,6 +150,7 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_00484BE0[];
 extern "C" char D_00484CD8[];
 namespace PLM {
 extern BOOL g_bIsLastSceneBattle;
@@ -383,7 +385,30 @@ BOOL CSceneInfo::reqEnterWorld(WORLD_ID world) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqChangeRoom__10CSceneInfoi7DOOR_IDs);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqChangeEventRoom__10CSceneInfoUi7DOOR_IDs);
 void CSceneInfo::reqChangeGoalRoom() { reqChangeEventRoom(4, (DOOR_ID)4, -1); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqChangeBackupRoom__10CSceneInfo);
+BOOL CSceneInfo::reqChangeBackupRoom() {
+    if (hasAnyRequest()) return FALSE;
+    CGameWork::backup(CGameWork::BACKUP_SECONDARY);
+    CGameWork::rollback(CGameWork::BACKUP_PRIMARY);
+    USHORT nFloorIdx = getCurrentFloorIndex();
+    INT nRoomID = getCurrentRoomID();
+    DOOR_ID nDoorID = getEnteredDoorID();
+    SHORT nArea = getCurrentAreaNum();
+    SHORT nScene = getCurrentSceneNum();
+    CGameWork::rollback(CGameWork::BACKUP_SECONDARY);
+    if (nArea < 0 || nScene <= 0) {
+        TRACE_COL(_TTY_RED, D_00484BE0, nArea, nScene);
+        return FALSE;
+    }
+    BOOL bResult = reqChangeScene(nArea, nScene, -1, FALSE, 1);
+    if (bResult) {
+        s_nNextRoomID = nRoomID;
+        s_nNextDoorID = nDoorID;
+        s_nReqChangeScene |= 2;
+        if (getCurrentFloorIndex() != nFloorIdx) s_nNextFloorIdx = nFloorIdx;
+        if (s_nGameMode != GAMEMODE_FIELD) s_nReqExitBattle = 1;
+    }
+    return bResult;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqEnterDoor__10CSceneInfo7DOOR_ID);
 void _acceptReqEnterBattle() {
     s_nReqEnterBattle = CSceneInfo::getCurrentWorldID(TRUE) != 10 ? GAMEMODE_BATTLE : (GAMEMODE)2;
@@ -517,7 +542,38 @@ WORLD_ID CSceneInfo::getWorldID(USHORT nFloorIndex) {
     if (nFloorIndex >= p->nCount) return (WORLD_ID)0;
     return (WORLD_ID)_SceneInfoWork::mc2()->_nWorldOnFloor[n][nFloorIndex];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setupCompleteFloorWorld__10CSceneInfo8WORLD_ID);
+void CSceneInfo::setupCompleteFloorWorld(WORLD_ID excludeWorld) {
+    USHORT i = 0;
+    USHORT nFloorIdx = getCurrentFloorIndex();
+    BOOL bSora = CGame::isSoraGame();
+    STORAGE::MCWork2* p = _SceneInfoWork::mc2();
+    BYTE* pFloorTbl = !bSora ? p->_nWorldOnFloor[1] : p->_nWorldOnFloor[0];
+    WORLD_ID w;
+    for (; i < nFloorIdx; i++) {
+        WorldSelTable* pSel = getSelectableWorldTable(i, bSora);
+        if (pSel->_nCount == 1) {
+            w = pSel->_pTbl[0];
+        } else {
+            for (UINT j = 0; j < pSel->_nCount; j++) {
+                w = pSel->_pTbl[j];
+                if (excludeWorld == w) {
+                    w = (WORLD_ID)0;
+                    continue;
+                }
+                for (USHORT f = 0; f < nFloorIdx; f++) {
+                    if (pFloorTbl[f] == w) {
+                        w = (WORLD_ID)0;
+                        break;
+                    }
+                }
+                if (w) break;
+            }
+        }
+        pFloorTbl[i] = w;
+        CAtel::setWorldCompleteFlag(w);
+        _setGoalRoomScene(w, 2);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setEventDoorUnavailable__10CSceneInfoii);
 DOOR_ID CSceneInfo::setTmpCurrentRoomID(SHORT nRoomType) {
     DOOR_TYPE nType;
