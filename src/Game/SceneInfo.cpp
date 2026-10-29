@@ -106,6 +106,8 @@ void _initEntranceSceneTbl(BOOL bSora);
 void _initGoalRoomSceneTbl(BOOL bSora);
 void _initAllEventDoorState(BOOL bSora);
 void _updateRoomInfo();
+void _setWorldEntrance(WORLD_ID world, SHORT nStartEntScene, SHORT nGoalEntScene, BOOL bContinue);
+void _initRoomInfo(RoomInfo& roomInfo, STORAGE::MCWork::_RoomInfo& st_info, STORAGE::MCWork2::_RoomInfo2& st_info2, const FLOOR::RoomSrcInfo* pSrcInfo, const FLOOR::FloorLayout* pFloorLayout, const RCNORMA::FloorNormaSrc* pFloorNormaSrc, BOOL bContinue);
 FloorLayoutDataHeader* _linkFloorData(const CHAR* pszFile);
 EventRoomData* _linkEventRoomData(const CHAR* pszFile);
 NormaDataHeader* _linkNormaData(const CHAR* pszFile);
@@ -154,6 +156,7 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_004849A8[];
 extern "C" char D_00484900[];
 extern "C" char D_00484910[];
 extern "C" char D_00484920[];
@@ -362,7 +365,37 @@ void CSceneInfo::showAllHiddenDoorsOfCurrentFloor() {
     p[5] = 1;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initFloor__10CSceneInfoi8WORLD_ID);
+/* Parked: 26 lines - the block after getFloorNumber: the original computes the s_CurrentFloor address and the
+   clearEventRoomTbl loop pointer after the s_nCurrentFloorNumber store (lui order) with other registers; the loop
+   body matches with the shared pSrc pointer. Statement orders and 5 min of permuter (7k candidates) gave nothing. */
+#if 0
+void CSceneInfo::initFloor() {
+    BOOL bSora = CGame::isSoraGame();
+    INT nFloorIdx = _SceneInfoWork::mc()->_nFloorIdx;
+    INT nIdx = nFloorIdx;
+    WORLD_ID world = getWorldID(nFloorIdx);
+    if (world == 10) nIdx = getFloorIndex(100, TRUE);
+    FLOOR::FloorLayout* pFloorSrc = getFloorDataSrc(nIdx, bSora);
+    RCNORMA::FloorNormaSrc* pFloorNormaSrc = getFloorNormaDataSrc(nIdx, bSora);
+    if (!(pFloorSrc && pFloorNormaSrc)) AssertApp(D_00484980, 691, D_004849A8, 0);
+    s_nCurrentFloorNumber = getFloorNumber(nFloorIdx, bSora);
+    FloorInfo& floor = s_CurrentFloor;
+    floor._nRoomCount = pFloorSrc->_nRoomCount;
+    floor.clearEventRoomTbl();
+    for (INT i = 0; i < floor._nRoomCount; i++) {
+        FLOOR::RoomSrcInfo* pSrc = &pFloorSrc->_rooms[i];
+        _initRoomInfo(floor._rooms[i], _SceneInfoWork::mc()->_roomInfo[i], _SceneInfoWork::mc2()->_roomInfo2[i], pSrc, pFloorSrc, pFloorNormaSrc, TRUE);
+        INT nTblIdx = _getEventRoomSceneIndex(pSrc->_nRoomType);
+        if (nTblIdx >= 0) floor._nEventRoomIdxTbl[nTblIdx] = i;
+    }
+    rollbackEventDoorState(0);
+    SHORT* pEntSceneTbl = _SceneInfoWork::mc()->_nEntranceSceneTbl[nFloorIdx];
+    _setWorldEntrance(world, pEntSceneTbl[0], pEntSceneTbl[1], TRUE);
+    if (bSora && world == 13 && _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx][0] == 4) showAllHiddenDoorsOfCurrentFloor();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initFloor__10CSceneInfo);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _initDoor__FR8DoorInfoPCQ25FLOOR11DoorSrcInfo7DOOR_IDPCQ25FLOOR11FloorLayoutPCQ27RCNORMA13FloorNormaSrcRQ37STORAGE7MCWork29_DoorInfoRC8RoomInfoi);
 void _initDoor(DoorInfo& door, const FLOOR::DoorSrcInfo* pSrcInfo, DOOR_ID id, const FLOOR::FloorLayout* pFloorLayout, const RCNORMA::FloorNormaSrc* pFloorNormaSrc, STORAGE::MCWork2::_DoorInfo& st_info, const RoomInfo& room, BOOL bContinue);
 void _initRoomInfo(RoomInfo& roomInfo, STORAGE::MCWork::_RoomInfo& st_info, STORAGE::MCWork2::_RoomInfo2& st_info2, const FLOOR::RoomSrcInfo* pSrcInfo, const FLOOR::FloorLayout* pFloorLayout, const RCNORMA::FloorNormaSrc* pFloorNormaSrc, BOOL bContinue) {
