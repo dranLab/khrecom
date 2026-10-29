@@ -29,7 +29,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Form/Menu/Camp` | 12 | 6098 | 12 |  |
 | `Form/Menu/JiminyMemo` | 83 | 5244 | 19 | .bss |
 | `Game/Player/PlayerDRiku` | 4 | 5226 | 4 |  |
-| `Game/SceneInfo` | 57 | 4635 |  | .bss .data .rodata |
 | `System/Graphic/PackMan` | 42 | 4290 |  | .bss .rodata |
 | `Game/Entity` | 117 | 3865 |  | .rodata |
 | `Game/Map` | 26 | 3779 |  | .data .rodata |
@@ -60,6 +59,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Anim` | 4 | 742 | 4 |  |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `Form/DebugWindow` | 2 | 667 | 2 |  |
+| `Game/SceneInfo` | 8 | 651 | 8 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 |  |  |
 | `Game/Game` | 5 | 624 |  |  |
 | `Game/EffectMotion` | 4 | 609 | 1 |  |
@@ -231,6 +231,14 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/CardRevolver` | `setStockInfo__Q210CardBattle12CStockFolder` | 217 | 17 lines off, scheduling of the first block: the original issues div, then the changeTexture argument zeros interleaved with pos.init(), the trap check after; ours keeps them apart. Worked: inverted layout ternary (>= 0x6F first), _ref(g_pStockSkillList), m_uiState before m_uiCategory in default. … |
 | `Game/EffectMotion` | `updateAttachEffect___17CEffectMotionCtrli` | 339 | (comment) Close: only case 2's "m_iStep = 0" tails differ - gcc cross-jumps them all into the second body's copy, the original keeps the one in the effect == NULL branch (the other bodies jump there). jump2's cross-jumping (find_cross_jump) merges a "sw $0; j" tail that follows a label after one … |
 | `Game/Movement` | `calcPos___9CMovement` | 369 | (comment) near-match (register copies of &end/&norm before the last two detect calls): kept as INCLUDE_ASM |
+| `Game/SceneInfo` | `clear__10CSceneInfo` | 139 | ~110 lines - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders (incl. the lui order) and 7 min of permuter (10k candidates, 104 -> 98) did not get closer. |
+| `Game/SceneInfo` | `initFloor__10CSceneInfo` | 145 | 21 lines - the block after getFloorNumber: the original computes the s_CurrentFloor address and the clearEventRoomTbl loop pointer after the s_nCurrentFloorNumber store (lui order) with other registers; the loop body matches with the shared pSrc pointer, the tail with the *_nEventDoorStateTbl[i] … |
+| `Game/SceneInfo` | `_checkAvailableDoorID__FRC8DoorInfo` | 30 | 2 lines - the constant 5 of the second _type compare: the original loads it into v1 (li v1,5 in the beq delay slot), ours into v0. Structure matches (switch on getDoorState, `== 4 break; != 5 return TRUE`); ~25 forms (ifs, result variable, nested switch, local type) and 4 min of permuter (3k … |
+| `Game/SceneInfo` | `openGoalDoor__10CSceneInfo` | 41 | 2 lines - the nDoor copy (move s0,v0) is scheduled before the li a1,2 of setEventRoomSceneNum; the original issues li a1 first. nDoor declaration forms/types did not change it. |
+| `Game/SceneInfo` | `rollbackEventDoorState__10CSceneInfoi` | 175 | ~35 lines - the outer room loop: the original re-materializes the s_CurrentFloor address for the room (mtlo/madd) and for the count each iteration; ours shares one base. Door/state/norma logic matches; room addressing forms and 5 min of permuter (42 -> 38) did not get it. |
+| `Game/SceneInfo` | `getNormaColor__C8DoorInfoUs` | 41 | 15 lines - the first `return 0` (key && idx+1 == count) stays an inline `b end` block after a bne in the original, ours branches straight to the epilogue; the bValid test comes out as movn here, as bnel + sltu there. |
+| `Game/SceneInfo` | `getNormaNumber__C8DoorInfoUs` | 33 | 3 lines - the first `return 0` stays an inline `b end` block after a bne in the original; ours inverts it into a beq to the epilogue. ~12 structural variants (nested, else-if, result var, !(..) &&) give the same; the permuter cannot find const methods. |
+| `Game/SceneInfo` | `getNormaOperation__C8DoorInfoUs` | 47 | first `return 0` and bValid as in getNormaColor (same shape, not iterated further). |
 | `Game/SEMotion` | `update__9CSEMotion` | 57 | (comment) Matches except that `this` and `ctrl` swap registers (s1/s2). |
 | `Game/Debug/DebugPathData` | `savePath__14CDebugPathDataPCc` | 292 | 5 lines off: the original hoists &sPathParam.fTime (the start of the parameter pointer) out of the paths loop into a stack slot, like &sVecParam and &vPath; ours computes it before the parameter loop. Worked: one j per inner loop, the 0xFFFFFFF0 mask, the _zeroVec helper (45 -> 5 lines). Tried for … |
 | `Game/Collision/CollAttack` | `chkGuardSuccess__11CCollAttackP9CCollBody` | 112 | (comment) not matching: the original's last angle wrap branch has an empty delay slot (ours: bc1fl with the abs.s) |
@@ -342,7 +350,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 607 functions (97721 instructions) in 85 units, 219 of them parked; 16 units take a data section from assembly.
+Totals: 558 functions (93737 instructions) in 85 units, 227 of them parked; 15 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

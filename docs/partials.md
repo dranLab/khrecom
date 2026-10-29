@@ -50,14 +50,14 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1078 (1008 in 109 headers, 70 in 30 .cpp); MATCH: 77
-  by category: method 452, data member 71, type 97, fwd decl 53, #include 29, changed in place 126, padding 32, path override 24, gate 37, guessed 46, header-level 74, stand-in 29, other 8
-stand-ins: 396 foreign in 125 files (113 names), 197 unattributed, 177 own
+PARTIAL: 1009 (938 in 109 headers, 71 in 30 .cpp); MATCH: 83
+  by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 126, padding 32, path override 24, gate 38, guessed 46, header-level 74, stand-in 30, other 6
+stand-ins: 396 foreign in 125 files (113 names), 198 unattributed, 174 own
 duplicate class names across headers: 24
 padding: 33 arrays, 25 accessors
-mechanisms: 942 sites (919 untagged); #line: 1235
-opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 157, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 547, superset 129, partial 98, gated 96, missing 14, unattributed 309
+mechanisms: 945 sites (919 untagged); #line: 1235
+opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
+classes: complete 557, superset 129, partial 94, gated 96, missing 14, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -110,7 +110,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `COLL_INFO_UNION` | missing | Game/Movement.h | 5 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 4 |  | missing methods: ~CPointCollision |
-| `CSceneInfo` | partial | Game/SceneInfo.h | 4 |  | missing methods: getCurrentRoomInfo, hasSceneCache, rollbackEventDoorState, setSeRangeRatio, updateBattleScene; 44 PARTIAL |
+| `CSceneInfo` | complete | Game/SceneInfo.h | 4 |  |  |
 | `CVSM` | partial | Game/Atel/VSME.h | 4 |  | missing fields: m_ActorStateFnc; extra methods: BOOL |
 | `Actor` | complete | Game/Atel/VSME.h | 3 |  |  |
 | `CBossDeadDemo` | complete | Game/Enemy/BossDeadDemo.h | 3 |  |  |
@@ -198,7 +198,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
 | `RcfKey` | complete | System/Rcf.h | 1 |  |  |
 | `RcfMapInfo` | complete | System/Rcf.h | 1 |  |  |
-| `RoomInfo` | partial | Game/SceneInfo.h | 1 |  | missing methods: isCreated, isEntranceRoom, isExceptRoom, isFixSceneRoom, isStartRoom; 8 PARTIAL |
+| `RoomInfo` | complete | Game/SceneInfo.h | 1 |  |  |
 | `TEXANM_DATA` | complete | System/Graphic/TexAnm.h | 1 |  |  |
 | `TexInfoStub` | gated | System/Graphic/modeldata.h | 1 |  | 1 PARTIAL |
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
@@ -233,7 +233,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 |---|---:|---|---:|
 | `Form/DebugMenu.h` | 0 | 1/0/0/3 | 4 |
 | `Form/DebugWindow.h` | 0 | 2/1/0/4 | 10 |
-| `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 10 |
+| `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 11 |
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
 | `Form/Menu/Menu.h` | 0 | 0/0/1/0 | 15 |
 | `Form/Menu/SaveLoadCtrl.h` | 14 | 1/1/6/0 | 7 |
@@ -251,20 +251,20 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Atel/EventTrap.h` | 0 | 1/2/2/0 | 3 |
 | `Game/Atel/VSME.h` | 0 | 10/0/2/0 | 2 |
 | `Game/AttachCard.h` | 1 | 1/0/0/0 | 2 |
-| `Game/AttachMotion.h` | 1 | 1/0/0/0 | 154 |
-| `Game/AttackMotion.h` | 7 | 1/2/0/0 | 152 |
+| `Game/AttachMotion.h` | 1 | 1/0/0/0 | 155 |
+| `Game/AttackMotion.h` | 7 | 1/2/0/0 | 153 |
 | `Game/BodyCollision.h` | 22 | 0/1/0/0 | 55 |
 | `Game/Bullet/Bullet.h` | 8 | 2/3/0/0 | 30 |
-| `Game/Card.h` | 13 | 2/0/1/0 | 24 |
-| `Game/CardBattle.h` | 77 | 3/2/1/0 | 144 |
-| `Game/CardKind.h` | 0 | 0/0/2/0 | 151 |
-| `Game/CollParam.h` | 1 | 4/0/1/0 | 157 |
+| `Game/Card.h` | 13 | 2/0/1/0 | 25 |
+| `Game/CardBattle.h` | 77 | 3/2/1/0 | 145 |
+| `Game/CardKind.h` | 0 | 0/0/2/0 | 152 |
+| `Game/CollParam.h` | 1 | 4/0/1/0 | 158 |
 | `Game/Collision/CollAttack.h` | 0 | 0/1/0/0 | 11 |
 | `Game/Collision/CollBody.h` | 2 | 0/1/0/0 | 5 |
 | `Game/Collision/CollDisp.h` | 6 | 0/0/0/3 | 6 |
 | `Game/Collision/CollMap.h` | 0 | 0/1/0/0 | 29 |
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
-| `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 172 |
+| `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 173 |
 | `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 148 |
 | `Game/Collision/CollUtilA.h` | 11 | 2/2/2/0 | 24 |
 | `Game/Collision/Ride.h` | 1 | 6/0/1/0 | 5 |
@@ -325,9 +325,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Prize.h` | 0 | 0/1/0/0 | 2 |
 | `Game/SEMotion.h` | 0 | 5/0/1/0 | 4 |
 | `Game/SceneEnv.h` | 1 | 0/0/1/0 | 35 |
-| `Game/SceneInfo.h` | 76 | 18/0/5/0 | 81 |
-| `Game/Status.h` | 11 | 1/0/1/0 | 14 |
-| `Game/StorageWork.h` | 1 | 3/1/1/0 | 59 |
+| `Game/SceneInfo.h` | 5 | 29/0/1/0 | 81 |
+| `Game/Status.h` | 11 | 1/0/1/0 | 15 |
+| `Game/StorageWork.h` | 2 | 2/1/1/0 | 59 |
 | `Game/Technic.h` | 3 | 1/1/0/0 | 19 |
 | `System/Buf.h` | 4 | 0/1/0/0 | 18 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
@@ -335,12 +335,12 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Coord.h` | 3 | 0/1/0/0 | 16 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 270 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 10 |
-| `System/Fsm.h` | 4 | 1/0/0/1 | 108 |
+| `System/Fsm.h` | 4 | 1/0/0/1 | 109 |
 | `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 11 |
 | `System/Graphic/2d/2DFntObj.h` | 0 | 0/1/0/0 | 3 |
 | `System/Graphic/2d/2DLay.h` | 0 | 3/1/0/0 | 4 |
 | `System/Graphic/2d/2DLayObj.h` | 1 | 0/1/0/0 | 3 |
-| `System/Graphic/2d/2DMan.h` | 3 | 0/0/0/3 | 164 |
+| `System/Graphic/2d/2DMan.h` | 3 | 0/0/0/3 | 165 |
 | `System/Graphic/2d/2DObj.h` | 4 | 0/1/0/0 | 17 |
 | `System/Graphic/2d/2DSeq.h` | 1 | 1/1/0/0 | 4 |
 | `System/Graphic/2d/2DSeqCtrl.h` | 2 | 1/1/0/0 | 31 |
@@ -370,7 +370,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 37 |
 | `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 2 |
-| `System/Graphic/Gprim.h` | 47 | 3/3/5/22 | 229 |
+| `System/Graphic/Gprim.h` | 47 | 3/3/5/22 | 230 |
 | `System/Graphic/GprimFull.h` | 0 | 1/16/2/0 | 1 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 9 |
@@ -388,7 +388,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
 | `System/Graphic/modeldata.h` | 15 | 1/2/0/1 | 81 |
 | `System/LinkedBuf.h` | 6 | 1/2/1/0 | 6 |
-| `System/MainApp.h` | 5 | 0/0/0/2 | 268 |
+| `System/MainApp.h` | 5 | 0/0/0/2 | 269 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 57 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 4 |
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 94 |
@@ -397,7 +397,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/SJoint.h` | 9 | 0/0/0/0 | 199 |
 | `System/Task.h` | 27 | 1/2/0/1 | 233 |
 | `System/TaskMan.h` | 7 | 1/2/0/0 | 83 |
-| `System/Vector.h` | 21 | 0/0/3/0 | 264 |
+| `System/Vector.h` | 21 | 0/0/3/0 | 265 |
 
 ## Mechanisms
 
@@ -440,7 +440,7 @@ or `untagged`.
 | guard skip | `SYSTEM_COORD_H` | 1 | 0 | untagged, e.g. System/Graphic/Effect/effect_inl.h:9 |
 | guard skip | `SYSTEM_FSM_H` | 1 | 0 | untagged, e.g. Game/Entity.h:29 |
 | opt-out | `MAPENEMY_H_NO_COLL_ANIM` | 2 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:3 |
-| opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 158 | 3 | the original .rodata has no Task.h container-overflow message |
+| opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 159 | 4 | the original .rodata has no Task.h container-overflow message |
 | opt-out site | `MAPENEMY_H_NO_COLL_ANIM` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.h:8 |
 | opt-out site | `TASK_H_NO_SLC_OVERFLOW_MSG` | 1 | 0 | untagged, e.g. System/Task.h:201 |
 | path override | `ANIM_H_PATH` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:2 |
@@ -451,7 +451,7 @@ or `untagged`.
 | path override | `BODYCOLLISION_H_PATH` | 1 | 0 | untagged, e.g. Game/BodyCollision.cpp:3 |
 | path override | `CAMERAMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/CameraMan.cpp:2 |
 | path override | `CARDBATTLE_H_PATH` | 4 | 2 | the original includes it under this name |
-| path override | `CARD_H_PATH` | 5 | 0 | untagged, e.g. Game/AttachCard.cpp:2 |
+| path override | `CARD_H_PATH` | 6 | 1 | the original's Card.h/Status.h strings carry |
 | path override | `CHATMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/ChatMan.cpp:2 |
 | path override | `COLLDISP_H_PATH` | 3 | 0 | untagged, e.g. Game/Collision/CollDisp.cpp:3 |
 | path override | `COLLUTIL_H_PATH` | 12 | 0 | untagged, e.g. Game/AttackMotion.cpp:4 |
@@ -469,7 +469,7 @@ or `untagged`.
 | path override | `PATHDATACAMERA_H_PATH` | 2 | 1 | the original includes it under this name |
 | path override | `RSRCDATA_H_PATH` | 5 | 0 | untagged, e.g. System/Memoca.cpp:1 |
 | path override | `SAVELOADCTRL_H_PATH` | 5 | 0 | untagged, e.g. Form/Menu/TitleReportDllStarter.cpp:3 |
-| path override | `STATUS_H_PATH` | 4 | 0 | untagged, e.g. Game/Card.cpp:5 |
+| path override | `STATUS_H_PATH` | 5 | 1 | the original's Card.h/Status.h strings carry |
 | path override | `TECHNIC_H_PATH` | 4 | 1 | the original includes it under this name |
 | path override | `TITLEREPORTDLLSTARTER_H_PATH` | 1 | 0 | untagged, e.g. Form/Menu/TitleReportDllStarter.cpp:2 |
 | path override | `VECTOR_H_PATH` | 1 | 0 | untagged, e.g. System/TaskMan.cpp:3 |
@@ -599,15 +599,13 @@ than our includers (units with a source only). A heuristic: stand-ins and opt-ou
 | header | originals | ours | only originals | only ours |
 |---|---:|---:|---|---|
 | `Form/Menu/JiminyMemo.h` | 3 | 2 | 1: System/MainTaskFactory | 0:  |
-| `Game/Card.h` | 25 | 24 | 1: Game/SceneInfo | 0:  |
-| `Game/CardBattle.h` | 146 | 144 | 2: Game/Entity, Game/SceneInfo | 0:  |
+| `Game/CardBattle.h` | 146 | 145 | 1: Game/Entity | 0:  |
 | `Game/Collision/CollDisp.h` | 7 | 6 | 1: Game/Entity | 0:  |
 | `Game/Collision/CollUtil.h` | 153 | 148 | 5: Game/Collision/CollUtil, Game/Collision/CollUtilO, Game/Collision/Ride, Game/Entity, ... (+1) | 0:  |
 | `Game/OsdDef.h` | 8 | 7 | 1: System/MainTaskFactory | 0:  |
-| `Game/Status.h` | 15 | 14 | 1: Game/SceneInfo | 0:  |
-| `System/Graphic/2d/2DMan.h` | 166 | 164 | 2: Game/Entity, Game/SceneInfo | 0:  |
+| `System/Graphic/2d/2DMan.h` | 166 | 165 | 1: Game/Entity | 0:  |
 | `System/Graphic/Anim.h` | 149 | 149 | 0:  | 2: Game/Gimmick/CreateGimmick, Game/Gimmick/SampleGimmick |
-| `System/Graphic/Gprim.h` | 233 | 229 | 3: Game/Collision/CollUtil, Game/SceneInfo, System/Graphic/PackMan | 0:  |
+| `System/Graphic/Gprim.h` | 233 | 230 | 2: Game/Collision/CollUtil, System/Graphic/PackMan | 0:  |
 | `System/Graphic/Model.h` | 70 | 69 | 1: System/Graphic/PackMan | 0:  |
 | `System/Graphic/Str.h` | 141 | 138 | 3: Game/Collision/CollUtil, Game/Entity, System/Graphic/PackMan | 0:  |
 | `System/Graphic/modeldata.h` | 82 | 81 | 1: System/Graphic/PackMan | 0:  |
