@@ -219,6 +219,7 @@ struct RoomInfo {
     void setScene(SHORT nScene);
     void resetScene();
     void setCardInfo(BYTE nCardID, BYTE nCardNumber);
+    BOOL isExceptRoom() const { return !((UINT)_pSrcInfo | (UINT)_pStorageInfo | (UINT)_pStorageInfo2); }
 };
 
 enum EVENTROOM_TBLIDX {
@@ -317,6 +318,7 @@ public:
     static BOOL isFieldScene(); // PARTIAL: added for Game/Player/PlayerWeapon
     static DoorInfo* getDoorInfo(DOOR_ID inDoorID, INT inRoomID); // PARTIAL: added for Game/Player/NaviMap
     static BOOL reqEnterDoor(DOOR_ID inDoorID); // PARTIAL: added for Game/Gimmick/GimmickDoor
+    static void makeRoom(const RoomInfo& room, DOOR_ID nDoorID, SHORT nScene, BYTE nCardID, BYTE nCardNum);
     static void makeRoom(DoorInfo& door, INT n); // PARTIAL: added for Form/Menu/RoomCreation
     // PARTIAL: added for Form/Menu/WorldSelect
     static USHORT getCurrentFloorIndex();
@@ -370,6 +372,7 @@ public:
     static SHORT getNextAreaNum();
     static void setNextAreaScene(SHORT nArea, SHORT nField, SHORT nScene);
     static void update();
+    static void updateBattleScene();
     static void initNewGame(BOOL bSora);
     static void setEventDoorUnavailable(INT nFloorIndex, INT nRoomID);
     static void setupCompleteFloorWorld(WORLD_ID w);

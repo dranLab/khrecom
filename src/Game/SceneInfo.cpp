@@ -92,6 +92,7 @@ struct _SceneInfoWork {
 
 void _setGoalRoomScene(WORLD_ID w, USHORT nScene);
 INT _getEventRoomSceneIndex(SHORT nRoomType);
+DOOR_ID _openGoalDoor(const RoomInfo& roomGoal);
 void _initEntranceSceneTbl(BOOL bSora);
 void _initGoalRoomSceneTbl(BOOL bSora);
 void _initAllEventDoorState(BOOL bSora);
@@ -140,6 +141,7 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_00484E38[];
 extern "C" char D_00484DC8[];
 extern "C" char D_00484DD0[];
 extern "C" char D_00484DD8[];
@@ -483,7 +485,21 @@ void CSceneInfo::doneChangeScene() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", update__10CSceneInfo);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", updateBattleScene__10CSceneInfo);
+void CSceneInfo::updateBattleScene() {
+    if ((USHORT)s_nNextBattleScene == 0x4af) {
+        removeCurrentBattleSceneRsrc();
+        removeMapRsrcCache(2);
+        s_nCurrentBattleRsrc = -1;
+        s_nCurrentBattleScene = -1;
+        return;
+    }
+    if (isNextBattleRsrcUpdate()) {
+        removeCurrentBattleSceneRsrc();
+        if (checkMapRsrcCache(CRcf::getMapID(s_NextAreaScene._nArea, s_nNextBattleScene), 2) < 0) removeMapRsrcCache(2);
+        s_nCurrentBattleRsrc = s_nNextBattleScene;
+    }
+    s_nCurrentBattleScene = s_nNextBattleScene;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _updateRoomInfo__Fv);
 void CSceneInfo::clearSceneCache() {
     for (INT i = 0; i < 7; i++) s_SceneCacheTbl[i].clear();
@@ -676,7 +692,22 @@ BOOL CSceneInfo::setDoorStat(DOOR_STAT stat, DOOR_ID id, INT nRoomID) {
     return FALSE;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _openGoalDoor__FRC8RoomInfo);
+/* Parked: 2 lines - the nDoor copy (move s0,v0) is scheduled before the li a1,2 of setEventRoomSceneNum;
+   the original issues li a1 first. nDoor declaration forms/types did not change it. */
+#if 0
+void CSceneInfo::openGoalDoor() {
+    RoomInfo* pRoom = getEventRoomInfo(_EVENTROOM_GOAL);
+    if (!pRoom || pRoom->isExceptRoom()) {
+        TRACE(D_00484E38);
+        return;
+    }
+    DOOR_ID nDoor = _openGoalDoor(*pRoom);
+    setEventRoomSceneNum(_EVENTROOM_GOAL, 2);
+    makeRoom(*pRoom, nDoor, 2, getCardIDFromSceneNum(2), CGameWork::m_pMCWork->_nNextRCNormaNum);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", openGoalDoor__10CSceneInfo);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", backupEventDoorState__10CSceneInfo);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", rollbackEventDoorState__10CSceneInfoi);
 void _setOpenFlagEventDoor(const DoorInfo& door) {
@@ -891,7 +922,26 @@ void DoorInfo::initNorma() {
         p->_nFirstCardNum = 0xff;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", resetNorma__8DoorInfo);
+void DoorInfo::resetNorma() {
+    if (getDoorState() != DOOR_STAT_OPENED) return;
+    if (isSpecialDoor()) return;
+    initNorma();
+    RoomInfo* pCurrentRoom = CSceneInfo::getRoomInfo(-1);
+    if (!pCurrentRoom) return;
+    RoomInfo* pDstRoom = CSceneInfo::getRoomInfo(_nDstRoom);
+    if (!pDstRoom || !pDstRoom->_pSrcInfo) return;
+    switch (pDstRoom->_pSrcInfo->_nRoomType) {
+    case 0:
+    case 6:
+    case 8: {
+        DOOR_STORAGE* pInfo = (DOOR_STORAGE*)_pStorageInfo;
+        if (!pInfo) return;
+        USHORT n = pCurrentRoom->getCardNumber() + 1;
+        pInfo->_nNormaNums[0] = n < 10 ? n : 0;
+        break;
+    }
+    }
+}
 SHORT CSceneInfo::getSceneNumFromCardID(BYTE nCardID) {
     BYTE n = 0;
     _CardScene* p = s_CardSceneTbl;
