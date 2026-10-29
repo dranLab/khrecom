@@ -3,6 +3,7 @@
 #include "System/Graphic/Effect/libppp/draw/md.h"
 #include "System/Graphic/Effect/libppp/draw/md0_p3f.h"
 #include "pppKeDMat.h"
+#include "System/Graphic/Effect/libppp/keProg/KeTh.h"
 
 typedef struct { /* 0x14 */
     u_char r0;
@@ -23,10 +24,6 @@ typedef struct { /* 0x14 */
     u_short flag;
 } OMD_G3;
 
-typedef union { /* 0x10 */
-    u_long U64[2];
-    u_long128 U128;
-} KeData16;
 
 typedef struct { /* 0x48 */
     u_long XYOFFSET;

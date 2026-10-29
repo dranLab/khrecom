@@ -56,7 +56,20 @@ typedef union { /* 0x10 */
     u_long u8[2];
     u_long128 u16;
     float f4[4];
+    signed char S8[16];
+    short S16[8];
+    int S32[4];
+    long S64[2];
+    long128 S128;
+    u_char U8[16];
+    u_short U16[8];
+    u_int U32[4];
+    u_long U64[2];
+    u_long128 U128;
 } KeData16;
+
+typedef struct { /* 0x0 */
+} KeAdrTag16;
 
 typedef struct _KeListTag { /* 0x8 */
     void *NextItem;
@@ -111,6 +124,7 @@ typedef struct _KeThBP { /* 0x70 */
     u_char LowNum;
     char _P0[1];
     KeData16 Send;
+    KeAdrTag16 _SendTop;
     float OrgStep;
     u_short RootIdx;
     u_char LastIdx;

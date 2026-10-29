@@ -2,17 +2,10 @@
 #include "draw.h"
 #include "include_asm.h"
 #include "global_w.h"
+#include "System/Graphic/Effect/libppp/keProg/KeTh.h"
 
 typedef u_long128 u_qword;
 extern u_long128 ot1_mpg_table[];
-
-typedef struct _sceDmaTag { /* 0x10 */
-    u_short qwc;
-    u_char mark;
-    u_char id;
-    struct _sceDmaTag *next;
-    u_int p[2];
-} sceDmaTag;
 
 void AssertApp(char *file, int line, char *exp, int arg);
 void pppSendVu1Prog(int vu1prog);
