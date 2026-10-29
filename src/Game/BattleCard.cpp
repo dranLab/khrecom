@@ -207,7 +207,40 @@ void CBattleCard::outHand() {
 void CBattleCard::updateReload(INT inNum) {
     if (m_cardData.m_nKind == 0xa0) m_pCard->changeTime(inNum);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", resetHand__Q210CardBattle11CBattleCardii);
+void CBattleCard::resetHand(INT inNum, INT inMax) {
+    CB_LAYOUT* pLayout;
+    changeState(2);
+    m_iHand = inNum;
+    m_iHandMax = inMax;
+    m_iStock = -1;
+    if (m_uiUser == 1) {
+        pLayout = &g_LayoutData[14];
+        m_StartPos.set(pLayout->x, pLayout->y);
+        m_fStartScale = pLayout->scale * 0.01f;
+        pLayout = &g_LayoutData[7];
+        m_EndPos.set(pLayout->x, pLayout->y);
+        m_fEndScale = pLayout->scale * 0.01f;
+    } else {
+        pLayout = &g_LayoutData[22];
+        m_StartPos.set(pLayout->x, pLayout->y);
+        m_fStartScale = pLayout->scale * 0.01f;
+        pLayout = &g_LayoutData[16];
+        m_EndPos.set(pLayout->x, pLayout->y);
+        m_fEndScale = pLayout->scale * 0.01f;
+    }
+    m_tqTimer = 200;
+    m_Pos = m_StartPos;
+    m_vRot.w = m_fStartScale;
+    m_iLayer = pLayout->layer;
+    m_pCard->changeLayer(m_iLayer);
+    m_uiMode = 0xf;
+    m_iStep = 0;
+    m_uiFlag = (m_uiFlag | 1) & ~0x210044;
+    testDisp();
+    m_uiFlag = ((INT)m_uiFlag | 0x4000) & ~0x10;
+    m_pCard->enableColorCtrl(FALSE);
+    resetEnchantEffect(0);
+}
 void CBattleCard::setSelect(INT inFlag) {
     if (m_pCard) {
         if (inFlag) {
