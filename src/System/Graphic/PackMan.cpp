@@ -1,5 +1,6 @@
 #include "khtypes.h"
 #include "include_asm.h"
+#include "System/VramMan.h"
 
 typedef unsigned int u_int;
 typedef unsigned long u_long;
@@ -107,6 +108,7 @@ public:
     static void transFrame();
     static void transFrameEffect();
     static void initSemiPacket();
+    static void enableZWrite(BOOL inEnable, INT inAddr);
     static void terminateSemiPacket();
     static void resetDmaChanVif1();
     static INT getDBIdx();
@@ -448,15 +450,18 @@ void CPackMan::pkCloseDirectHLCode() {
     _checkSize((u_long128*)pEnd - (u_long128*)s_pPktVif1->pVifCode);
     sceVif1PkCloseDirectHLCode(s_pPktVif1);
 }
-u_long128* CPackMan::pkOpenGifTag(u_long128 tag) {
+/* MATCH: pkOpenGifTag/pkCloseGifTag(void*) are inlined by enableZWrite (the ref lists pPkt and p as its locals) */
+static inline u_long128* _pkOpenGifTag(u_long128 tag) {
     pacVif1Packet* pPkt = s_pPktVif1;
     sceVif1PkOpenGifTag(pPkt, tag);
     return (u_long128*)pPkt->pCurrent;
 }
-void CPackMan::pkCloseGifTag(void* p) {
+static inline void _pkCloseGifTag(void* p) {
     s_pPktVif1->pCurrent = (u_int*)p;
     sceVif1PkCloseGifTag(s_pPktVif1);
 }
+u_long128* CPackMan::pkOpenGifTag(u_long128 tag) { return _pkOpenGifTag(tag); }
+void CPackMan::pkCloseGifTag(void* p) { _pkCloseGifTag(p); }
 void CPackMan::pkCloseGifTag() { sceVif1PkCloseGifTag(s_pPktVif1); }
 u_long128* CPackMan::pkOpenGifTagManual(u_long128 tag) {
     u_long128* p = (u_long128*)s_pPktVif1->pCurrent;
@@ -621,7 +626,14 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", setFrameEffec
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFramePacket__Fi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFramePacketForMovie__Fi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFrameEffPacket__Fiiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", enableZWrite__8CPackManii);
+void CPackMan::enableZWrite(BOOL inEnable, INT inAddr) {
+    QWdata* qp = (QWdata*)_pkOpenGifTag(_pack(0x1000800000008000, 0xe));
+    u_long nZbuf = (VRAM::_ZBUF_START / 32) | 0x31000000;
+    if (inEnable != 1) nZbuf |= (u_long)1 << 32;
+    *(u_long128*)qp = _pack(nZbuf, inAddr);
+    qp++;
+    _pkCloseGifTag(qp);
+}
 GpuRegsInfoSep* CPackMan::getSysGpuRegs2() { return &s_SysGpuRegs2; }
 GpuRegsInfoSep* CPackMan::getDefaultGpuRegs2() { return &s_DefaultGpuRegs2; }
 ULONGLONG CPackMan::getSys_CLAMP_2() { return s_SysGpuRegs2._nCLAMP; }
@@ -945,6 +957,15 @@ void sceVif1PkAddGsAD(pacVif1Packet* pPacket, u_int addr, u_long data) {
     pPacket->pCurrent = (u_int*)(p + 1);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkRefLoadImage__FP13pacVif1PacketUsUcUsPUxUiUiUiUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkRefMpg__FP13pacVif1PacketUsPUxUiUi);
+void sceVif1PkRefMpg(pacVif1Packet* pPacket, u_short vuaddr, u_long128* pMicro, u_int size, u_int opt1) {
+    while (size) {
+        u_int n = size <= 128 ? size : 128;
+        size -= n;
+        sceVif1PkRef(pPacket, pMicro, n, opt1, vuaddr | ((n * 2 & 0xff) << 16) | 0x4a000000, 0);
+        pMicro += n;
+        vuaddr += n * 2;
+        opt1 = 0;
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", __static_initialization_and_destruction_0_0013E4E0);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _GLOBAL_$I$c__KHCOM_MainApp_System_Graphic_PackMan.cppcWbaaa);
