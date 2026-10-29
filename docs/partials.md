@@ -43,6 +43,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-29 | decomp/System-Graphic-Model (193/206, 13 parked; weak tail + static init from C, data from source; A2 part 1: g_mpg static, header paths/opt-out tagged MATCH) | 1114 | 417 | 23 | 950 (933) | 61 |
 | 2026-10-29 | cleanup/System-Graphic-Model (A2 part 2: Model classes ungated, CModel layout as ref, stand-ins in 3 files) | 1077 | 413 | 23 | 943 (926) | 61 |
 | 2026-10-29 | cleanup/System-Graphic-ModelMan (CModelMan stand-ins in 4 files; CDispListSemiSingleSort left) | 1076 | 409 | 23 | 943 (926) | 61 |
+| 2026-10-29 | decomp/Game-Player-PlayerDRiku (28/32, 4 parked; A1: CRcf, CGameWork stand-ins) | 1076 | 407 | 23 | 943 (926) | 61 |
 
 <!-- partials:start -->
 ## Summary
@@ -50,7 +51,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1076 (1005 in 110 headers, 71 in 30 .cpp); MATCH: 61
   by category: method 450, data member 71, type 96, fwd decl 53, #include 29, changed in place 126, padding 32, path override 24, gate 37, guessed 45, header-level 75, stand-in 30, other 8
-stand-ins: 409 foreign in 131 files (117 names), 192 unattributed, 177 own
+stand-ins: 407 foreign in 130 files (117 names), 192 unattributed, 177 own
 duplicate class names across headers: 23
 padding: 32 arrays, 25 accessors
 mechanisms: 943 sites (926 untagged); #line: 1182
@@ -95,7 +96,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPackMan` | missing | System/Graphic/PackMan.h | 32 |  |  |
 | `NAME_CASE` | gated | System/RsrcData.h | 30 |  |  |
 | `C2DMan` | gated | System/Graphic/2d/2DMan.h | 28 | Form/Menu/SaveLoadCtrl.h |  |
-| `CRcf` | complete | System/Rcf.h | 26 |  |  |
+| `CRcf` | complete | System/Rcf.h | 25 |  |  |
 | `CBattleEnemyManager` | complete | Game/Enemy/BattleEnemyManager.h | 11 |  |  |
 | `CRsrcData` | gated | System/RsrcData.h | 11 |  |  |
 | `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
@@ -122,7 +123,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `SAVELOAD` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
 | `TIM2_PICTUREHEADER` | missing | System/Graphic/TexUtil.h | 3 |  |  |
 | `CCamp` | complete | Form/Menu/Camp.h | 2 |  |  |
-| `CGameWork` | superset | Game/GameWork.h | 2 |  | 3 PARTIAL |
 | `CGlare` | complete | System/Graphic/Glare.h | 2 |  |  |
 | `CMemoca` | complete | System/Memoca.h | 2 |  |  |
 | `CMessageManager` | complete | Game/MessageManager.h | 2 |  |  |
@@ -158,6 +158,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CFriend` | partial | Game/Player/Friend.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CGame` | superset | Game/Game.h | 1 |  | 19 PARTIAL |
 | `CGameOver` | complete | Form/Menu/GameOver.h | 1 |  |  |
+| `CGameWork` | superset | Game/GameWork.h | 1 |  | 3 PARTIAL |
 | `CImageWnd` | complete | System/Wnd.h | 1 |  |  |
 | `CLevelUp` | complete | Form/Menu/LevelUp.h | 1 |  |  |
 | `CLockOnManager` | complete | Game/LockOnManager.h | 1 |  |  |
@@ -285,7 +286,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Game.h` | 20 | 0/1/0/0 | 42 |
 | `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
 | `Game/GameSubBattle.h` | 0 | 1/0/1/0 | 2 |
-| `Game/GameWork.h` | 3 | 2/1/3/0 | 57 |
+| `Game/GameWork.h` | 3 | 2/1/3/0 | 58 |
 | `Game/Gimmick/BaseGimmick.h` | 0 | 1/1/0/0 | 46 |
 | `Game/Gimmick/GimmickAngelArrow.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Gimmick/GimmickBell.h` | 0 | 0/1/0/0 | 2 |
@@ -329,7 +330,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/SceneEnv.h` | 1 | 0/0/1/0 | 35 |
 | `Game/SceneInfo.h` | 76 | 18/0/5/0 | 81 |
 | `Game/Status.h` | 11 | 1/0/1/0 | 14 |
-| `Game/StorageWork.h` | 1 | 3/1/1/0 | 58 |
+| `Game/StorageWork.h` | 1 | 3/1/1/0 | 59 |
 | `Game/Technic.h` | 3 | 1/1/0/0 | 19 |
 | `System/Buf.h` | 4 | 0/1/0/0 | 18 |
 | `System/Com.h` | 1 | 0/0/0/0 | 7 |

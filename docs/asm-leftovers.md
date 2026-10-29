@@ -27,9 +27,9 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 |---|---:|---:|---:|---|
 | `Game/Player/PlayerSora` | 2 | 7322 | 2 |  |
 | `Form/Menu/Camp` | 12 | 6098 | 12 |  |
-| `Game/Player/PlayerDRiku` | 5 | 5620 | 1 |  |
 | `Game/BattleCard` | 73 | 5375 |  | .bss .data .rodata |
 | `Form/Menu/JiminyMemo` | 83 | 5244 | 19 | .bss |
+| `Game/Player/PlayerDRiku` | 4 | 5226 | 4 |  |
 | `Game/Atel/Avatar` | 113 | 4856 |  | .rodata |
 | `Game/SceneInfo` | 57 | 4635 |  | .bss .data .rodata |
 | `System/Graphic/PackMan` | 42 | 4290 |  | .bss .rodata |
@@ -260,7 +260,10 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Player/Player` | `exeFooting__7CPlayer` | 293 | all but 4 instructions match (frame, branches, walk block registers). Left: in the analog walk arm the original issues `lw m_pMove` between the `sq t._q` and the `swc1 t.y` and loads `lq t` only after the m_fDir store; ours puts the lq right after the t.y store and the m_pMove load after it. … |
 | `Game/Player/PlayerCamera` | `getPlayerCameraDir__Q212PlayerCamera13CPlayerCamera` | 39 | (comment) Only the scheduling of the first block differs: the original zeroes dir (por/sq) before loading m_pInstance (the zero gets $v1, then m_pInstance), ours loads m_pInstance first. |
 | `Game/Player/PlayerCamera` | `procFieldNormal__Q212PlayerCamera13CPlayerCamera` | 332 |  |
-| `Game/Player/PlayerDRiku` | `initJump2nd__Q22PL12CPlayerDRiku` | 153 | (comment) Best attempt: with a target, the m_vMarkPos/m_hMark copies get swapped registers and rot.y is stored before m_fDir/m_fJumpDir instead of in the branch delay slot (11 lines differ). |
+| `Game/Player/PlayerDRiku` | `setAttack__Q22PL12CPlayerDRiku` | 451 | 7 lines off, registers only: in the card branch the original keeps %hi(g_pBattleCardList) in t0 and the shared constant 1 (m_iAttackNo == 1, _upKind's shift) in a2, ours t1 and t0. Worked: CPlayer::setAttack's form, the player-flag 0x80000 arm first, `pre == 7 \|\| isAir()` for the last hit, case 7 … |
+| `Game/Player/PlayerDRiku` | `initJump2nd__Q22PL12CPlayerDRiku` | 153 | with a target, the m_vMarkPos/m_hMark copies get swapped registers and rot.y is stored before m_fDir/m_fJumpDir instead of in the branch delay slot (11 lines differ). |
+| `Game/Player/PlayerDRiku` | `exeStockSkill__Q22PL12CPlayerDRiku` | 3473 | structurally complete (35 cases in the original order, Riku's 0x6cc-0x6f9 group renumbered to 0x712-0x73f), same frame, 8 bytes long, 173 of 3903 lines off: case 1's attack-ID switch keeps a compare for the empty case 0x690 in the original; cross-jumped tails differ (0x67c's flag-and-return tail, … |
+| `Game/Player/PlayerDRiku` | `setMagic__Q22PL12CPlayerDRikuiii` | 1149 | same structure and size within 8 bytes, 310 of 1363 lines off: the BULLET_PARAM field stores and the member loads feeding them are scheduled differently in every case (the original loads m_AtkKind, m_AtkAttr, m_iAttackPower in that order and stores them together), plus registers in the stock-skill … |
 | `Game/Player/PlayerGauge` | `setDropMp__Q25Gauge11CPrizeGaugei` | 82 | 18 lines off: the %hi(m_pInstance) base and its loop copy swap s2/s3, and the inMp <= 0 return branch doesn't get the epilogue's lq s0 in its delay slot, so the loop top gets an alignment nop. Worked: *(T*)& stores for m_uiMogState and m_iDropMp (m_pInstance reloaded after them, as resetHP). … |
 | `Game/Player/PlayerGauge` | `setCharge__Q25Gauge12CEscapeGaugef` | 77 | 3 lines off, the getLayPosition argument loads: the original sets a2 first and a1 (7) last (in the jal delay slot), ours a1 first. Worked: case 2 with its own copy of case 1's body (separate tree nodes 1/0/2/3, cross-jumped later), case 0 falling into it. Tried: _ref(g_szLadCockpit), FALSE vs 0, … |
 | `Game/Player/PlayerRiku` | `exeStockSkill__Q22PL11CPlayerRiku` | 2420 | (comment) Best attempt (same structure): the CBattleEnemy flag tests get swapped registers, 0x6CD doesn't reload the flag, and 0.0f isn't rematerialized in f20 in 0x6CC. |
@@ -331,7 +334,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 786 functions (106298 instructions) in 85 units, 208 of them parked; 18 units take a data section from assembly.
+Totals: 785 functions (105904 instructions) in 85 units, 211 of them parked; 18 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
