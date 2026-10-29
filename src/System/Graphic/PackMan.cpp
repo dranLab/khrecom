@@ -826,7 +826,34 @@ void sceVif1PkOpenUpkCode(pacVif1Packet* pPacket, u_short vuaddr, u_int upkcmd, 
     pPacket->iVifCode = (upkcmd << 24) | vuaddr;
     pPacket->pCurrent = pc + 2;
 }
+/* Parked: ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 min of permuter (9k candidates, 25 -> 24) did not get it. */
+#if 0
+void sceVif1PkCloseUpkCode(pacVif1Packet* pPacket) {
+    u_int* pEnd = pPacket->pCurrent - 1;
+    u_int code = pPacket->iVifCode;
+    u_int bits = (pEnd - pPacket->pVifCode) << 5;
+    u_int vn = ((code >> 26) & 3) + 1;
+    u_int vl = (code >> 24) & 3;
+    u_int wl = pPacket->numlen >> 8;
+    u_int cl = pPacket->numlen & 0xff;
+    u_int num;
+    if (!wl) wl = 256;
+    if (!cl) cl = 256;
+    if (vn != 3) {
+        u_int sh = (vn >> 1) + 5 - vl;
+        if (cl >= wl) num = bits >> sh;
+        else num = bits / (cl << sh) * wl;
+    } else {
+        u_int n = vn * (32 >> vl);
+        if (cl >= wl) num = bits / n;
+        else num = bits / (cl * n) * wl;
+    }
+    *pPacket->pVifCode = code + (num << 16);
+    pPacket->pVifCode = NULL;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", sceVif1PkCloseUpkCode__FP13pacVif1Packet);
+#endif
 void sceVif1PkOpenUpkCodeV4_32(pacVif1Packet* pPacket, u_short vuaddr, u_int cl, u_int wl) {
     u_int* pc = pPacket->pCurrent;
     while (((u_int)pc & 0xc) != 8) *pc++ = 0;
