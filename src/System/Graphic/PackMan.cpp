@@ -289,6 +289,8 @@ extern "C" void FlushCache(int op); /* MATCH: void (the SDK returns int): v0 sta
 extern "C" void sceDmaSend(sceDmaChan* d, void* tag);
 extern "C" int sceGsSyncPath(int mode, u_short timeout);
 extern "C" void TRACE(char* fmt, ...);
+extern "C" int DIntr();
+extern "C" int EIntr();
 typedef struct { /* 0x60 */ /* PARTIAL: stand-in for System/Graphic/Effect/libppp/pppPart sceGsLoadImage: libgraph.h not written */
     u_long giftag0[2];
     u_long bitbltbuf;
@@ -315,6 +317,7 @@ extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short 
 class CMainApp { /* PARTIAL: stand-in for System/MainApp CMainApp: strings: MainApp.h (.rodata still asm) */
 public:
     static BOOL isNTSC();
+    static BOOL isPAL();
 };
 class CSceneEnv { /* PARTIAL: stand-in for Game/SceneEnv CSceneEnv: SceneEnv.h pulls in EffectMan.h */
 public:
@@ -562,7 +565,7 @@ static void _clearVram();
 static void _initDBuf();
 static void _loadMicroProgram();
 static void _setupSysContext();
-void _initFramePacket(INT nKind); /* static in the original (still INCLUDE_ASM) */
+static void _initFramePacket(INT nKind);
 /* Parked: ~73 lines - the run of init stores: the original keeps five %hi parts (s_pktVif1FG+4 .. s_nReqDrawMode) in s0-s4 and issues the stores in another order (same pattern as Game/SceneInfo clear); the isNTSC() call's result is unused. Store orders not iterated further. */
 #if 0
 void CPackMan::initialize() {
@@ -1045,7 +1048,51 @@ void CPackMan::setFrameEffect(INT nKind, INT n1, INT n2, INT n3) {
     else _initFramePacket(nKind);
     _initFrameEffPacket(nKind, n1, n2, n3);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFramePacket__Fi);
+static void _initFramePacket(INT transKind) {
+    pacVif1Packet* pPkt = &s_pktVif1Frame;
+    INT intr = DIntr();
+    sceVif1PkInit(pPkt, (u_long128*)s_pPktBufVif1Frame);
+    sceVif1PkReset(pPkt);
+    sceVif1PkCnt(pPkt, 0);
+    sceVif1PkAddCode(pPkt, 0x13000000);
+    sceVif1PkOpenDirectCode(pPkt, 0);
+    sceVif1PkOpenGifTag(pPkt, _pack(0x1000800000008000, 0xe));
+    u_long128* qp = (u_long128*)pPkt->pCurrent;
+    qp[0] = _pack(0x30000, 0x47);
+    qp[1] = _pack((VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4e);
+    u_long nFbw = CMainApp::isPAL() ? 0x1080000 : 0x1080000;
+    qp += 2;
+    qp[0] = _pack((VRAM::_FRAME1_START / 32) | nFbw, 0x4c);
+    qp[1] = _pack(0x44, 0x42);
+    qp[2] = _pack(0x61, 0x14);
+    qp[3] = _pack(VRAM::_FRAME0_START | 0x24020000 | 0x2000000240000000, 6);
+    qp[4] = _pack((INT)0x80808080, 1);
+    qp[5] = _pack(((u_long)(SCREEN_HEIGHT - 1) << 34) | 0x7fc00a, 8);
+    qp[6] = _pack(0x116, 0);
+    qp += 7;
+    for (INT i = 0; i < 16; i++) {
+        INT v = i + 1;
+        qp[0] = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(DISP_HEIGHT - 1) << 48), 0x40);
+        qp[1] = _pack(0x80008, 3);
+        /* MATCH: constants in locals - kept unfolded (X and Z ORed separately) and hoisted in the original order */
+        INT ofs = 0x8000;
+        u_long x0 = 0x7000;
+        ULONGLONG z = (u_long)0xfffff << 32;
+        qp[2] = _pack(((u_long)((-(DISP_HEIGHT / 2) + 32) * 16 + ofs) << 16) | x0 | z, 5);
+        qp[3] = _pack(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+        u_long x1 = 0x9000;
+        qp[4] = _pack(((u_long)((DISP_HEIGHT / 2 + 32) * 16 + ofs) << 16) | x1 | z, 5);
+        qp += 5;
+    }
+    *qp++ = _pack((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
+    pPkt->pCurrent = (u_int*)qp;
+    sceVif1PkCloseGifTag(pPkt);
+    sceVif1PkCloseDirectCode(pPkt);
+    sceVif1PkEnd(pPkt, 0);
+    sceVif1PkAddCode(pPkt, 0x13000000);
+    sceVif1PkTerminate(pPkt);
+    if (intr) EIntr();
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFramePacketForMovie__Fi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initFrameEffPacket__Fiiii);
 void CPackMan::enableZWrite(BOOL inEnable, INT inAddr) {
