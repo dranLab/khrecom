@@ -2082,8 +2082,66 @@ BOOL DoorInfo::isNormaCleared() const {
     if (p) b = getNormaCount() == p->_nNextNorma;
     return b;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", useNormaCard__8DoorInfoRC4CARD);
-__asm__(".rdata\n.align 4\n.word .L002172C4\n.word .L002172D0\n.word .L002172F0\n.word .L002172E0\n.word .L0021731C\n.word 0\n.text\n");
+DOOR_RC_RESULT DoorInfo::useNormaCard(const CARD& card) {
+    if (isNormaCleared()) return DOOR_RC_RESULT_NOP;
+    BOOL bClear = FALSE;
+    BOOL bUsed = FALSE;
+    if (isNextNormaKeyCard()) {
+        if (getNormaKeyCardID() != card.m_nKind) return DOOR_RC_RESULT_INVALID;
+        bClear = TRUE;
+    } else {
+        if (card.m_nCategory0 != 9) return DOOR_RC_RESULT_INVALID;
+        USHORT nIdx = getNextNormaIndex();
+        RCNORMA_COLOR colNorma = getNormaColor(nIdx);
+        if (card.m_nKind == 0xb9) colNorma = RCNORMA_COLOR_NONE;
+        if (colNorma != RCNORMA_COLOR_NONE) {
+            RCNORMA_COLOR col = RCNORMA_COLOR_NONE;
+            switch (card.m_nCategory1) {
+            case 9:
+                col = RCNORMA_COLOR_RED;
+                break;
+            case 10:
+                col = RCNORMA_COLOR_GREEN;
+                break;
+            case 11:
+                col = RCNORMA_COLOR_BLUE;
+                break;
+            }
+            if (colNorma != col) return DOOR_RC_RESULT_INVALID;
+        }
+        RCNORMA_OP op = getNormaOperation(nIdx);
+        if (card.m_nKind == 0xb9) op = RCNORMA_OP_NONE;
+        USHORT nNormaNum = getNormaNumber(nIdx);
+        USHORT num = card.m_nNumber;
+        switch (op) {
+        case RCNORMA_OP_NONE:
+            bClear = TRUE;
+            bUsed = TRUE;
+            break;
+        case RCNORMA_OP_EQ_LESS:
+            bClear = bUsed = num <= nNormaNum;
+            break;
+        case RCNORMA_OP_EQUAL:
+            bClear = bUsed = nNormaNum == num;
+            break;
+        case RCNORMA_OP_EQ_GREATER:
+            bClear = num >= nNormaNum;
+            if (!bClear && num == 0) bClear = getNormaKeyCardID() == 0;
+            bUsed = bClear;
+            break;
+        case RCNORMA_OP_TOTAL:
+            if (num == 0) return DOOR_RC_RESULT_INVALID;
+            nNormaNum = nNormaNum >= num ? (USHORT)(nNormaNum - num) : 0;
+            ((DOOR_STORAGE*)_pStorageInfo)->_nNormaNums[nIdx] = nNormaNum;
+            bClear = nNormaNum == 0;
+            bUsed = TRUE;
+            break;
+        }
+    }
+    if (bUsed && !isNormaCardUsed()) setFirstUsedCardInfo(card.m_nKind, card.m_nNumber);
+    if (bClear) return clearOneNorma() ? DOOR_RC_RESULT_CLEAR_ALL : DOOR_RC_RESULT_CLEAR_ONE;
+    return bUsed ? DOOR_RC_RESULT_USED : DOOR_RC_RESULT_INVALID;
+}
 void DoorInfo::initNorma() {
     DOOR_STORAGE* p = (DOOR_STORAGE*)_pStorageInfo;
     if (p) {
