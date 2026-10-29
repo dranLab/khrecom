@@ -2,7 +2,10 @@
 #include "Game/BattleCard.h"
 #include "Game/GameWork.h"
 #include "Game/Debug/DebugWork.h"
+#include "System/Rnd.h"
 #include "include_asm.h"
+
+extern "C" int abs(int);
 
 using namespace CardBattle;
 
@@ -98,7 +101,55 @@ void CBattleCard::main() {
     }
     dispCard();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", dispCard__Q210CardBattle11CBattleCard);
+void CBattleCard::dispCard() {
+    BOOL disp = TRUE;
+    UINT shift;
+    UINT flag;
+    CGameWork::getInt(1, 0xe2);
+    shift = m_uiUser != 1;
+    flag = 0x20 << shift;
+    if (CGameWork::getInt(1, 0xe2) & flag) {
+        disp = FALSE;
+        goto end;
+    }
+    flag = 2 << shift;
+    if ((CGameWork::getInt(1, 0xe2) & flag) && m_iState == 2) {
+        disp = FALSE;
+    } else if (!isDisp()) {
+        disp = FALSE;
+    } else {
+        FVECTOR pos = {{m_Pos.x, m_Pos.y, 0.0f, 1.0f}};
+        m_pCard->setPos(pos);
+        if (m_uiFlag & 0x8) {
+            FVECTOR rot = {{m_vRot.x, m_vRot.y, m_vRot.z, 1.0f}};
+            m_uiFlag = (INT)m_uiFlag & ~0x8;
+            m_pCard->setRot(rot);
+            m_pCard->setScl(m_vRot.w);
+        }
+        if (m_uiFlag & 0x2000) {
+            m_uiFlag = (INT)m_uiFlag & ~0x2000;
+            m_pCard->setScl(m_vRot.w);
+        }
+        if (m_uiFlag & 0x4000) {
+            FVECTOR col = {{m_fBright, m_fBright, m_fBright, 1.0f}};
+            m_uiFlag = (INT)m_uiFlag & ~0x4000;
+            m_pCard->enableColorCtrl(TRUE);
+            m_pCard->setCol(col);
+        }
+    }
+end:
+    if (!disp) {
+        if (m_uiFlag & 0x80) {
+            m_uiFlag = (INT)m_uiFlag & ~0x80;
+            m_pCard->enableDisp(FALSE);
+        }
+    } else {
+        if (!(m_uiFlag & 0x80)) {
+            m_uiFlag |= 0x80;
+            m_pCard->enableDisp(TRUE);
+        }
+    }
+}
 void CBattleCard::testDisp() {
     if (m_pCard) {
         if (CGameWork::getInt(1, 0xe2)) {
@@ -275,7 +326,46 @@ void CBattleCard::preStateStock() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateStock__Q210CardBattle11CBattleCard);
 void CBattleCard::preStateHand() { m_iState = 2; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateHand__Q210CardBattle11CBattleCard);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", preStateDestroy__Q210CardBattle11CBattleCard);
+void CBattleCard::preStateDestroy() {
+    CB_LAYOUT* pLayout;
+    if (m_iState == 8 || m_iState == 2) {
+        if (m_iStock == -1) {
+            switch (m_uiUser) {
+            case 1: pLayout = &g_LayoutData[7]; break;
+            case 2: pLayout = &g_LayoutData[16]; break;
+            }
+            m_StartPos.set(pLayout->x, pLayout->y);
+            m_fStartScale = pLayout->scale * 0.01f;
+            pLayout = &g_LayoutData[1];
+            m_EndPos.set(pLayout->x, pLayout->y);
+            m_fEndScale = pLayout->scale * 0.01f;
+        } else {
+            switch (m_uiUser) {
+            case 1: pLayout = &g_LayoutData[27 + m_iStock]; break;
+            case 2: pLayout = &g_LayoutData[33 + m_iStock]; break;
+            }
+            m_StartPos.set(pLayout->x, pLayout->y);
+            m_fStartScale = pLayout->scale * 0.01f;
+            switch (m_iStockCount) {
+            case 0:
+            case 1: pLayout = &g_LayoutData[1]; break;
+            case 2: pLayout = &g_LayoutData[2 + m_iStock]; break;
+            case 3: pLayout = &g_LayoutData[4 + m_iStock]; break;
+            }
+            m_EndPos.set(pLayout->x, pLayout->y);
+            m_fEndScale = pLayout->scale * 0.01f;
+        }
+        if (m_uiMode != 7) m_tqTimer = 400;
+        m_Pos = m_StartPos;
+        m_vRot.w = m_fStartScale;
+        m_iLayer = pLayout->layer;
+        m_pCard->changeLayer(m_iLayer);
+    }
+    m_iState = 3;
+    m_uiFlag |= 0x1;
+    m_iStock = -1;
+    m_iStep = RND::genrand_int31() % 100;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateDestroy__Q210CardBattle11CBattleCard);
 void CBattleCard::moveCard(TIMEQ inTime, TIMEQ inRoll) {
     FLOAT sc;
@@ -549,7 +639,49 @@ void CBattleCard::preStatePronounce() {
         m_pCard->enableColorCtrl(FALSE);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", statePronounce__Q210CardBattle11CBattleCard);
+void CBattleCard::statePronounce() {
+    switch (m_uiMode) {
+    case 2:
+        break;
+    case 8:
+        m_uiFlag |= 0x2008;
+        m_tqTimer -= getFrameRate();
+        if (m_tqTimer <= 0) {
+            m_uiMode = 9;
+            m_uiFlag |= 0x4;
+            m_tqTimer = 0;
+            m_Pos = m_EndPos;
+            m_vRot.w = m_fEndScale;
+        } else {
+            INT dx = (m_EndPos.x - m_StartPos.x) * m_tqTimer / 400;
+            INT dy = (m_EndPos.y - m_StartPos.y) * m_tqTimer / 400;
+            FLOAT sc = m_fEndScale - (m_fEndScale - m_fStartScale) * m_tqTimer / 400.0f;
+            m_vRot.w = sc;
+            m_Pos.x = m_EndPos.x - dx;
+            m_Pos.y = m_EndPos.y - dy;
+        }
+        break;
+    case 1: {
+        m_uiFlag |= 0x2008;
+        m_tqTimer -= getFrameRate();
+        if (m_tqTimer <= 0) m_tqTimer = 0;
+        INT dx = (m_EndPos.x - m_StartPos.x) * m_tqTimer / 400;
+        INT dy = (m_EndPos.y - m_StartPos.y) * m_tqTimer / 400;
+        FLOAT sc = m_fEndScale - (m_fEndScale - m_fStartScale) * m_tqTimer / 400.0f;
+        m_vRot.w = sc;
+        m_Pos.y = m_EndPos.y - dy;
+        m_Pos.x = m_EndPos.x - dx;
+        if (m_iStock > 0) m_vRot.y = 3.1415927f - 3.1415927f * m_tqTimer / 400.0f;
+        if (!isSet()) {
+            if (abs(dx) <= 64 && abs(dy) <= 64) m_uiFlag |= 0x2;
+        } else if (!m_tqTimer) {
+            m_uiMode = 2;
+            m_vRot.y = 0.0f;
+        }
+        break;
+    }
+    }
+}
 void CBattleCard::setDiscard(INT inFlag) {
     m_uiMode = 20;
     if (inFlag) {
