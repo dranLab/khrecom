@@ -813,11 +813,7 @@ void CBattleCard::setPlayStock(INT inCount) {
         if (!m_iStock) {
             CCardBattle* pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
             if (DebugWork::g_dw.player.iCardSpend) return;
-            INT inUser = m_uiUser;
-            if (!(inUser)) AssertApp("c:/KHCOM/MainApp/Game/CardBattle.h", 641, "inUser", 0);
-            INT enchant;
-            if (pCB->m_cardEnchant[inUser - 1].m_nKind < 0x44) enchant = 0;
-            else enchant = pCB->m_cardEnchant[inUser - 1].m_nKind - 0x43;
+            INT enchant = pCB->getEnchantKind(m_uiUser);
             if (enchant == 0x2b) {
                 if (getCardCategory() < 4 && getCardCategory()) return;
             } else if (((_bits*)&m_cardData)->cat1 == 1) {
@@ -895,11 +891,7 @@ void CBattleCard::stateStock() {
         }
         if (m_uiUser == 2) {
             CCardBattle* pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
-            INT inUser = m_uiUser;
-            if (!(inUser)) AssertApp("c:/KHCOM/MainApp/Game/CardBattle.h", 641, "inUser", 0);
-            INT enchant;
-            if (pCB->m_cardEnchant[inUser - 1].m_nKind < 0x44) enchant = 0;
-            else enchant = pCB->m_cardEnchant[inUser - 1].m_nKind - 0x43;
+            INT enchant = pCB->getEnchantKind(m_uiUser);
             if (enchant == 0x31) {
                 if (!(m_uiFlag & 0x10)) {
                     m_uiFlag |= 0x10;
@@ -1234,9 +1226,7 @@ void CBattleCard::setHand(const CARD& inData, INT inNum, INT inMax, INT inMode) 
     }
     setRoomEffect(NULL);
     {
-        INT inUser = m_uiUser;
-        if (!(inUser)) AssertApp("c:/KHCOM/MainApp/Game/CardBattle.h", 644, "inUser", 0);
-        CARD* pEnchant = CCardBattle::m_pInstance ? &CCardBattle::m_pInstance->m_cardEnchant[inUser - 1] : NULL;
+        CARD* pEnchant = CCardBattle::getEnchantCard(m_uiUser);
         if (!pEnchant || pEnchant->m_nKind != 0x4b) {
             setEnchantEffect(0x4b, 0);
             setEnchantEffect(0x57, 0);
@@ -1452,9 +1442,7 @@ void CBattleCard::setEnchantEffect(INT inKind, UINT inFlag) {
         if (m_cardData.m_nNumber < 0) return;
     }
     {
-        INT inUser = m_uiUser;
-        if (!(inUser)) AssertApp("c:/KHCOM/MainApp/Game/CardBattle.h", 644, "inUser", 0);
-        CARD* pEnchant = CCardBattle::m_pInstance ? &CCardBattle::m_pInstance->m_cardEnchant[inUser - 1] : NULL;
+        CARD* pEnchant = CCardBattle::getEnchantCard(m_uiUser);
         if (!pEnchant || pEnchant->m_nKind != inKind) {
             if (inKind == 0x4b || inKind == 0x57) resetEnchantEffect(inKind);
             return;
@@ -1543,9 +1531,7 @@ void CBattleCard::updateNumberEffect() {
     }
     resetEnchantEffect(0);
     {
-        INT inUser = m_uiUser;
-        if (!(inUser)) AssertApp("c:/KHCOM/MainApp/Game/CardBattle.h", 644, "inUser", 0);
-        CARD* pEnchant = CCardBattle::m_pInstance ? &CCardBattle::m_pInstance->m_cardEnchant[inUser - 1] : NULL;
+        CARD* pEnchant = CCardBattle::getEnchantCard(m_uiUser);
         if (!pEnchant || pEnchant->m_nKind != 0x4b) {
             setEnchantEffect(0x4b, 0);
             setEnchantEffect(0x57, 0);
@@ -1810,7 +1796,7 @@ void CBattleCard::stateSnatch() {
             m_Pos.x = m_EndPos.x - dx;
             m_Pos.y = m_EndPos.y - dy;
             if (m_tqTimer <= 0) {
-                INT count = CCardBattle::m_pInstance ? CCardBattle::m_pInstance->m_iCount[1] : 0;
+                INT count = CCardBattle::getStockCount(2);
                 if (count == 3) pEntity->attachEffect(g_szDpxZexion2, 10, &pEntity->Crd(1), (const FVECTOR*)NULL, (const FVECTOR*)NULL, 0.0f);
                 else pEntity->attachEffect(g_szDpxZexion2, 11, &pEntity->Crd(1), (const FVECTOR*)NULL, (const FVECTOR*)NULL, 0.0f);
             }
