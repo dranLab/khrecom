@@ -26,10 +26,7 @@ public:
     static void setupMcName(INT nType);
 };
 
-class CModelMan {
-public:
-    static void reset();
-};
+#include "System/Graphic/ModelMan.h"
 
 class CFrecFont {
 public:

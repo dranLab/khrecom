@@ -144,16 +144,7 @@ public:
     static void changeDrawMode(INT nMode);
 };
 
-class CModelMan {
-public:
-    static void initialize();
-    static void finalize();
-    static void clearTexCache();
-    static void clearDispList();
-    static void drawDispList();
-    static void drawDispListFG();
-    static void drawDispListSemi();
-};
+#include "System/Graphic/ModelMan.h"
 
 class CTaskMan {
 public:
