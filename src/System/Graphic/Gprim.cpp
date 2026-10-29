@@ -240,11 +240,7 @@ public:
     static u_long getDefault_CLAMP_2();
     static u_long getDefault_ALPHA_2();
 };
-class CModelMan { /* PARTIAL: System/Graphic/ModelMan.h */
-public:
-    static void add2DispList(CDrawable& inPrim, FIX4 inZ);
-    static void incTexSendCount(INT n);
-};
+#include "System/Graphic/ModelMan.h"
 
 void CGPrim::disp() {
     FIX4 z = calcZ();

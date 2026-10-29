@@ -22,14 +22,7 @@ public:
     static float getUsedHeapRatio();
 };
 
-class CModelMan {
-public:
-    static INT getModelCount();
-    static INT getDrawCount();
-    static void clearDrawCount();
-    static INT getTexSendCount(INT n);
-    static void clearTexSendCount(INT n);
-};
+#include "System/Graphic/ModelMan.h"
 
 class CPackMan {
 public:
