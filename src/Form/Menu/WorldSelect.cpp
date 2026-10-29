@@ -298,10 +298,10 @@ public:
     static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
 };
 
-class CPackMan {
-public:
-    static void changeDrawMode(INT nMode);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 extern "C" {
 float sinf(float);

@@ -67,11 +67,11 @@ public:
     static TEXANM_DATA* getRsrcTXA(INT nRsrcID);
 };
 
-class CPackMan {
-public:
-    static void pkRefLoadImage(USHORT nDBP, unsigned char nPSM, USHORT nDBW, unsigned long long* pImage, UINT nQWC, UINT nX, UINT nY,
-                               UINT nW, UINT nH);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
 
 CTexAnm::CTexAnm() {
     m_pData = NULL;

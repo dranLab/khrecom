@@ -84,10 +84,10 @@ public:
     static void clearScreenFader(INT n);
 };
 
-class CPackMan { /* System/Graphic/PackMan.h */
-public:
-    static void changeDrawMode(INT nMode);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 /* Game/Collision/CollDisp.h's inline create/destroy (lines 48-50) and CollUtil.h's dispose accessor (line 202) */
 static inline void _collDispCreate(CTask* pParent, INT nDisp, INT nMapZoneDisp) {

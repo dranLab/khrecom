@@ -49,10 +49,10 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Form/Menu/JMemoFlag.h"
 #include "include_asm.h"
 
-class CPackMan {
-public:
-    static void setFrameEffect(INT nA, INT nB, INT nC, INT nD);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 // PARTIAL: System/RsrcDB.h would add RsrcData.h's string to .rodata
 class CRsrcDB {

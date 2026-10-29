@@ -91,10 +91,10 @@ public:
 
 
 
-class CPackMan {
-public:
-    static void setFrameEffect(INT iKind, INT a, INT b, INT c);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 class CRsrcData {
 private:

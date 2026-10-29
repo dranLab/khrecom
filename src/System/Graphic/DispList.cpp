@@ -19,23 +19,23 @@ extern "C" void qsort(void* base, size_t num, size_t size, int (*cmp)(const void
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-class CPackMan { /* System/Graphic/PackMan.h */
-public:
-    static void pkCnt(UINT n);
-    static void pkAddCode(UINT nCode);
-    static void pkOpenDirectCode(INT n);
-    static void pkCloseDirectCode();
-    static void changeLayer(INT nLayer);
-    static void* pkGetCurrentPointer();
-    static BOOL isOverFlow(UINT nSize);
-    static void setDefault_TEST_2(ULONGLONG n);
-    static void setDefault_ALPHA_2(ULONGLONG n);
-    static void setDefault_ZBUF_2(ULONGLONG n);
-    static u_long128* pkOpenGifTagManual(u_long128 tag);
-    static void pkCloseGifTagManual(UINT* p);
-    static void pkRet(UINT n);
-    static void pkTerminate();
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 static inline void _loadMatrixVf28(const FMATRIX& m) {

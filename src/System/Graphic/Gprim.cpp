@@ -220,26 +220,26 @@ static inline FVECTOR ApplyMatrix(const FMATRIX& m0, const FVECTOR& v1) { /* PAR
     ApplyMatrix(b, m0, v1);
     return b;
 }
-class CPackMan { /* PARTIAL: System/Graphic/PackMan.cpp */
-public:
-    static u_long128* pkOpenGifTag(u_long128 tag);
-    static void pkAddGsAD(UINT addr, u_long data);
-    static void pkCloseGifTag();
-    static u_long128* pkOpenGifTagManual(u_long128 tag);
-    static void pkCloseGifTagManual(UINT* p);
-    static void pkAddGsData(u_long data);
-    static void* pkGetCurrentPointer();
-    static void pkSetCurrentPointer(void* p);
-    static void pkCloseGifTag(void* p);
-    static void pkCloseDirectCode();
-    static void pkOpenDirectCode(int);
-    static void pkRefLoadImage(USHORT nPos, const VTransInfo& info);
-    static u_long getDefault_TEST_2();
-    static u_long getDefault_ZBUF_2();
-    static u_long getDefault_SCISSOR_2();
-    static u_long getDefault_CLAMP_2();
-    static u_long getDefault_ALPHA_2();
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include "System/Graphic/ModelMan.h"
 
 void CGPrim::disp() {

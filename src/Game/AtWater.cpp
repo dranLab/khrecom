@@ -12,11 +12,11 @@ extern "C" float sinf(float);
 #include "Game/SceneEnv.h"
 #line 16
 
-class CPackMan {
-public:
-    static u_long128* pkOpenGifTag(u_long128 tag);
-    static void pkCloseGifTag(void* p);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
 
 namespace VRAM {
 extern INT _FRAME0_START;

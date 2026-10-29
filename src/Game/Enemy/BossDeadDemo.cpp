@@ -45,10 +45,10 @@ template <class T> static inline T& _ref(T& v) { return v; }
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-class CPackMan { /* System/Graphic/PackMan.h */
-public:
-    static void setFrameEffect(INT inMode, INT inParam0, INT inParam1, INT inParam2);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 class CBattleEnemyManager { /* a CTask (Game/Enemy/BattleEnemyManager.h) */
 public:

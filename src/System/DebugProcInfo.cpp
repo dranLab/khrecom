@@ -24,11 +24,11 @@ public:
 
 #include "System/Graphic/ModelMan.h"
 
-class CPackMan {
-public:
-    static INT getPkUseSize();
-    static INT getPkTotalSize();
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
 
 extern INT SCREEN_HEIGHT;
 

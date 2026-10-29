@@ -136,18 +136,18 @@ typedef struct {
 typedef struct {
     tD_CHCR chcr;
 } sceDmaChan;
-typedef struct {
-    u_int* pCurrent;
-    u_long128* pBase;
-    u_long128* pDmaTag;
-    u_int* pVifCode;
-    u_int numlen;
-    u_long* pGifTag;
-    u_int pad12;
-    u_int iVifCode;
-    u_long128 lDmaTag;
-    u_long128 lGifTag;
-} pacVif1Packet;
+#include "System/Graphic/PackMan.h"
+
+
+
+
+
+
+
+
+
+
+
 
 extern "C" {
 void sceDmaSend(sceDmaChan* d, void* tag);
@@ -155,18 +155,18 @@ sceDmaChan* sceDmaGetChan(int id);
 int sceGsSyncPath(int mode, u_short timeout);
 }
 
-class CPackMan {
-public:
-    static UINT getEnableDraw();
-    static BOOL isSkipPacketDMA();
-    static void pkInit(u_long128* pBuf, pacVif1Packet* pPkt, UINT nSize);
-    static void pkReset();
-    static void pkCnt(UINT nCnt);
-    static void pkAddCode(UINT nCode);
-    static void pkCall(u_long128* pAddr, UINT nFlag);
-    static void pkEnd(UINT nFlag);
-    static void pkTerminate();
-};
+
+
+
+
+
+
+
+
+
+
+
+
 
 void MulVector(FVECTOR& p0, const FVECTOR& p1, const FVECTOR& p2);
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1);

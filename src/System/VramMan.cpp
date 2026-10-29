@@ -72,10 +72,10 @@ struct TexInfo {
     TexInfo() { memset(this, 0, sizeof(TexInfo)); }
 };
 
-class CPackMan {
-public:
-    static void pkRefLoadImage(const VTransInfo& rInfo);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 #line 30
 class CVtransReq : public CSJointT<CVtransReq> {
