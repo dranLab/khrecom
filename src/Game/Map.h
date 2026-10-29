@@ -73,7 +73,23 @@ struct LIGHTDATA {
 
 #ifdef GAME_MAP_CPP
 /* The complete class, for Game/Map (graphics members as padding). */
-struct FOGDATA;
+struct FOGDATA { // 0xb0
+    IVECTOR color;
+    FLOAT fognear;
+    FLOAT fogfar;
+    FLOAT screenz;
+    INT skynum;
+    IVECTOR sky[5];
+    FLOAT fogmax;
+    FLOAT fogmin;
+    FLOAT dispfar;
+    unsigned int Pad0[1];
+    unsigned int Pad1[2];
+    FLOAT sdwColor;
+    FLOAT sdwAlpha;
+    IVECTOR ivdum1;
+    IVECTOR ivdum0;
+};
 struct ZONEDATA;
 class CSky;
 class CMapLightUnit;
@@ -90,7 +106,9 @@ private:
     INT m_nModelMax;          /* 0x060 */
     FLOAT m_Deg;              /* 0x064 */
     UINT m_uiMapFlag;         /* 0x068 */
-    UBYTE _m_0x6c[0x1574];    /* 0x06c m_LightMarker[8], m_Back[4], m_grid[64] */
+    UBYTE _m_0x6c[0x404];     /* 0x06c m_LightMarker[8] (C3DTile, 16-aligned at 0x70) */
+    CPolyG4 m_Back[4];        /* 0x470 */
+    UBYTE _m_0x5e0[0x1000];   /* 0x5e0 m_grid[64] */
     FOGDATA* m_pFog;          /* 0x15e0 */
     ZONEDATA* m_pZone;        /* 0x15e4 */
     LIGHTDATA m_Light;        /* 0x15e8 */

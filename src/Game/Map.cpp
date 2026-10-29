@@ -12,6 +12,8 @@
 #include "Game/SceneEnv.h"
 #include "Game/Collision/CollMapCamera.h"
 #include "System/SJoint.h"
+#include "System/Graphic/WorldEnv.h"
+#include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
 
 inline void operator delete[](void* pv) { com_free(pv); }
@@ -52,6 +54,7 @@ public:
 
 extern LIGHTDATA ALF_default;
 extern "C" char D_004809E0[];
+extern "C" char D_00480EB0[];
 void RotMatrixZ(FMATRIX& out, FMATRIX& in);
 void setTransparency(const CCoord& crd, CModel& model);
 
@@ -110,7 +113,25 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", __4CMapP5CTaskUi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _$_4CMap);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", init__4CMapii);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", _exclusiveSetup__4CMapi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", resetFog__4CMap);
+void CMap::resetFog() {
+    CWorldEnv::setFogParam(m_pFog->fognear, m_pFog->fogfar, m_pFog->fogmax, m_pFog->fogmin);
+    CWorldEnv::setDispFar(m_pFog->dispfar);
+    CWorldEnv::setFogColor(m_pFog->color.x, m_pFog->color.y, m_pFog->color.z);
+    CWorldEnv::setScreenZ(m_pFog->screenz);
+    CWorldEnv::setDefScreenZ(m_pFog->screenz);
+    DebugWork::g_dw.nakamich.fCamVAngle = ProjectionToViewAngle(m_pFog->screenz);
+    INT max = m_pFog->skynum;
+    if (max > 4) {
+        TRACE(D_00480EB0);
+        max = 4;
+    }
+    for (INT i = 0; i < max; i++) {
+        m_Back[i].m_C0.set(m_pFog->sky[i + 1].x, m_pFog->sky[i + 1].y, m_pFog->sky[i + 1].z, 0);
+        m_Back[i].m_C1.set(m_pFog->sky[i + 1].x, m_pFog->sky[i + 1].y, m_pFog->sky[i + 1].z, 0);
+        m_Back[i].m_C2.set(m_pFog->sky[i].x, m_pFog->sky[i].y, m_pFog->sky[i].z, 0x80);
+        m_Back[i].m_C3.set(m_pFog->sky[i].x, m_pFog->sky[i].y, m_pFog->sky[i].z, 0x80);
+    }
+}
 void CMap::main() {
     if (CSceneEnv::getStopTypeBit() & 0x800) return;
     if (!m_pTexAnm) return;
