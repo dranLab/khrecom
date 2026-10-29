@@ -49,13 +49,14 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-29 | cleanup/System-Graphic-PackMan (A2 part 2: CPackMan stand-ins in 32 files, EffectMan pacVif1Packet) | 1011 | 357 | 24 | 950 (920) | 98 |
 | 2026-10-29 | cleanup/System-Graphic-Effect-libppp-pppPart (sceGsLoadImage stand-ins in 2 files) | 1010 | 355 | 24 | 950 (920) | 98 |
 | 2026-10-29 | decomp/Game-Entity (partial 164/265, 15 matched, 1 parked; OTHER_PARAM, SE_MANAGED_DATA, CCollRideModelDisp, CRsrcDB stand-in) | 1017 | 356 | 24 | 950 (920) | 98 |
+| 2026-10-29 | decomp/Game-Entity (partial 180/265, 16 more; CAnim start/startEx/getRootMove, isRootMoveOff/isFlashing, SE/Fade declarations) | 1023 | 356 | 24 | 950 (920) | 98 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1017 (944 in 109 headers, 73 in 31 .cpp); MATCH: 98
-  by category: method 399, data member 69, type 87, fwd decl 53, #include 29, changed in place 126, padding 33, path override 24, gate 40, guessed 46, header-level 74, stand-in 31, other 6
+PARTIAL: 1023 (950 in 109 headers, 73 in 31 .cpp); MATCH: 98
+  by category: method 405, data member 69, type 87, fwd decl 53, #include 29, changed in place 126, padding 33, path override 24, gate 40, guessed 46, header-level 74, stand-in 31, other 6
 stand-ins: 356 foreign in 121 files (107 names), 200 unattributed, 172 own
 duplicate class names across headers: 24
 padding: 33 arrays, 25 accessors
@@ -276,7 +277,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Enemy/HumanBoss.h` | 0 | 0/1/0/0 | 4 |
 | `Game/Enemy/MapEnemy.h` | 10 | 0/0/0/1 | 7 |
 | `Game/Enemy/MapEnemyManager.h` | 1 | 1/1/0/0 | 8 |
-| `Game/Entity.h` | 109 | 1/0/2/0 | 146 |
+| `Game/Entity.h` | 114 | 1/0/2/0 | 146 |
 | `Game/EntityFactory.h` | 14 | 1/1/0/0 | 49 |
 | `Game/Game.h` | 20 | 0/1/0/0 | 42 |
 | `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
@@ -330,7 +331,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Buf.h` | 4 | 0/1/0/0 | 18 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
 | `System/Component.h` | 3 | 1/1/0/0 | 5 |
-| `System/Coord.h` | 3 | 0/1/0/0 | 16 |
+| `System/Coord.h` | 3 | 0/1/0/0 | 17 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 271 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 10 |
 | `System/Fsm.h` | 4 | 1/0/0/1 | 109 |
@@ -345,14 +346,14 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/2d/2DSeqObj.h` | 8 | 3/3/0/0 | 16 |
 | `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 8 |
 | `System/Graphic/3DCPrim.h` | 1 | 0/0/1/0 | 1 |
-| `System/Graphic/Anim.h` | 30 | 0/0/0/2 | 149 |
+| `System/Graphic/Anim.h` | 31 | 0/0/0/2 | 149 |
 | `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 87 |
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
 | `System/Graphic/DeFocus.h` | 5 | 0/0/0/5 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
 | `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 169 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 172 |
-| `System/Graphic/Effect/effect.h` | 7 | 1/1/4/0 | 75 |
+| `System/Graphic/Effect/effect.h` | 7 | 1/1/4/0 | 76 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 3 | 2/0/0/0 | 13 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
 | `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 30 |
@@ -371,7 +372,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Gprim.h` | 47 | 3/3/5/22 | 231 |
 | `System/Graphic/GprimFull.h` | 0 | 1/16/2/0 | 1 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
-| `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 9 |
+| `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 10 |
 | `System/Graphic/MapUnit.h` | 2 | 0/0/0/0 | 3 |
 | `System/Graphic/Model.h` | 10 | 0/3/5/0 | 70 |
 | `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 75 |
