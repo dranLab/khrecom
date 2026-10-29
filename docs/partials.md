@@ -52,7 +52,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1078 (1008 in 109 headers, 70 in 30 .cpp); MATCH: 77
   by category: method 452, data member 71, type 97, fwd decl 53, #include 29, changed in place 126, padding 32, path override 24, gate 37, guessed 46, header-level 74, stand-in 29, other 8
-stand-ins: 399 foreign in 126 files (114 names), 197 unattributed, 177 own
+stand-ins: 396 foreign in 125 files (113 names), 197 unattributed, 177 own
 duplicate class names across headers: 24
 padding: 33 arrays, 25 accessors
 mechanisms: 942 sites (919 untagged); #line: 1235
@@ -68,7 +68,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 6.0 | `System/Graphic/FrecFont.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CFrecFont (1 complete) |  |
 | R0 | 4.0 | `System/Graphic/TexAnm.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CTexAnm, TEXANM_DATA (2 complete) |  |
 | R0 | 4.0 | `System/Memoca.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMemoca (1 complete) |  |
 | R0 | 4.0 | `System/VramMan.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CVramMan (1 complete) |  |
@@ -88,6 +87,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
 | R1 | 12.5 | `Form/Menu/JMemoFlag.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CJiminyMemoFlag (1 superset) | inline bodies or virtuals |
 | R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
+| R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -114,7 +114,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CVSM` | partial | Game/Atel/VSME.h | 4 |  | missing fields: m_ActorStateFnc; extra methods: BOOL |
 | `Actor` | complete | Game/Atel/VSME.h | 3 |  |  |
 | `CBossDeadDemo` | complete | Game/Enemy/BossDeadDemo.h | 3 |  |  |
-| `CFrecFont` | complete | System/Graphic/FrecFont.h | 3 |  |  |
 | `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
 | `CSaveLoad` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
 | `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 3 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, isDraw, setAlphaDensity, setAutomaticDistance, setAutomaticHeight, ... (+6); extra methods: setADensity, setCDensity; 5 PARTIAL |
