@@ -20,6 +20,7 @@
 #include "System/RsrcData.h"
 #include "System/Buf.h"
 #include "System/Graphic/ShadowModel.h"
+#include "System/Tsin.h"
 #include "System/Graphic/Glare.h"
 #include "Game/AtWater.h"
 #include "Game/SceneInfo.h"
@@ -64,8 +65,8 @@ public:
 
 extern LIGHTDATA ALF_default;
 extern "C" char D_00480FA0[];
-extern const FVECTOR ONE_VECTOR;
 extern "C" char D_00480B70[];
+extern const FVECTOR ONE_VECTOR;
 extern "C" char D_00480FC8[];
 extern "C" char D_00480FF0[];
 extern "C" char D_00480CE8[];
@@ -91,6 +92,7 @@ public:
     static CRsrcData* getFirstRsrc(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
     static CRsrcData* getFirstRsrc_Scene(INT nRsrcType);
     static void* getFirstData(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
+    static TEXANM_DATA* getRsrcTXA(INT nGroup);
 };
 extern MAPUNITTABLE g_DefaultGimmick;
 void RotMatrixZ(FMATRIX& out, FMATRIX& in);
@@ -265,7 +267,299 @@ CMap::~CMap() {
     m_pTexAnm = NULL;
     CGame::stopConstEnvSE(-1);
 }
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
+void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
+class CRsrcAZF : public CRsrcData { /* PARTIAL: stand-in for System/RsrcData CRsrcAZF: gated by RSRCDATA_H_FULL */
+    BYTE _pad24[0x48 - 0x24];
+    USHORT m_nAMFCount; /* 0x48 */
+    USHORT m_nFlag;     /* 0x4a */
+
+public:
+    BOOL isTexIncomplete() const { return m_nFlag & 1; }
+    void reSetupTex();
+};
+inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+inline void operator*=(FVECTOR& v, FLOAT inF) { /* PARTIAL: as in System/Coord (FVECTOR::operator*= in the original) */
+    v.x *= inF;
+    v.y *= inF;
+    v.z *= inF;
+    v.w *= inF;
+}
+static inline FVECTOR _applyMatrix(FMATRIX& m, FVECTOR& v) {
+    FVECTOR b;
+    ApplyMatrix(b, m, v);
+    return b;
+}
+static inline FMATRIX _mulMatrix(FMATRIX& m, FMATRIX& r) {
+    FMATRIX b;
+    MulMatrix(b, m, r);
+    return b;
+}
+static inline void* _getAZFTbl(void* pInAZF, INT nIndex) {
+    void* pTbl;
+    if (!pInAZF) pTbl = NULL;
+    else pTbl = ((void**)pInAZF)[nIndex];
+    return pTbl;
+}
+static inline void _rotMatrixZ(FMATRIX& m, const TDEG& a) {
+    FMATRIX rz;
+    _unitMatrixVu0(rz);
+    rz.m[0][0] = rz.m[1][1] = tcos(a);
+    FLOAT s = tsin(a);
+    rz.m[0][1] = s;
+    rz.m[1][0] = -s;
+    m = _mulMatrix(m, rz);
+}
+static inline void _rotMatrixY(FMATRIX& m, const TDEG& a) {
+    FMATRIX ry;
+    _unitMatrixVu0(ry);
+    ry.m[2][2] = ry.m[0][0] = tcos(a);
+    FLOAT s = tsin(a);
+    ry.m[2][0] = s;
+    ry.m[0][2] = -s;
+    m = _mulMatrix(m, ry);
+}
+static inline void _rotMatrixX(FMATRIX& m, const TDEG& a) {
+    FMATRIX rx;
+    _unitMatrixVu0(rx);
+    rx.m[1][1] = rx.m[2][2] = tcos(a);
+    FLOAT s = tsin(a);
+    rx.m[1][2] = s;
+    rx.m[2][1] = -s;
+    m = _mulMatrix(m, rx);
+}
+/* Parked: 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original
+   recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/
+   while/goto loop shapes, by-value apply inline and a 10 min permuter run (12.9k candidates) keep it. Worked: by-value
+   _mulMatrix, _getAZFTbl inline, angles by const TDEG&, vec in its own scope, min/max init before v[], zero-store order. */
+#if 0
+void CMap::init(BOOL bUseMapUnit, BOOL bTexClampRepeat) {
+    INT nModelCount = 0;
+    TRACE("---------------- CMap::init() start ----------------\n");
+    m_nModelMax = 0;
+    if (m_pZone) {
+        nModelCount = m_pZone->partsnum - m_pZone->skynum;
+        INT partsIdx = m_pZone->skynum;
+        for (INT i = 0; i < nModelCount; i++, partsIdx++) {
+            if (_checkEffId(&m_pZone->parts[partsIdx], bUseMapUnit) < 0) m_nModelMax++;
+        }
+    }
+    void* pAZF = NULL;
+    addCoord(m_nModelMax + 1);
+    CRsrcAZF* pRsrcAzf = (CRsrcAZF*)CRsrcDB::getFirstRsrc(9, m_nRsrcGrpID, TRUE);
+    if (pRsrcAzf) {
+        pAZF = pRsrcAzf->getRsrcData();
+        if (pRsrcAzf->isTexIncomplete()) pRsrcAzf->reSetupTex();
+    }
+    ALF_DATA* pALF = (ALF_DATA*)CRsrcDB::getFirstData(0x16, m_nRsrcGrpID, TRUE);
+    m_Light.set(pALF);
+    pALF = (ALF_DATA*)CRsrcDB::getFirstData(0x29, m_nRsrcGrpID, TRUE);
+    if (pALF) m_MapLight.set(pALF);
+    else m_MapLight = ALF_map_default;
+    {
+        CCoord& crd = Crd(0);
+        _unitMatrixVu0(crd.m_Local);
+        crd.recalcWorldMatrix();
+        crd.m_Flag = 1;
+    }
+    if (!pAZF || !m_pZone) {
+        if (!pAZF) TRACE("CMap::init() AZF\202\252\214\251\202\302\202\251\202\350\202\334\202\271\202\361\n");
+        if (!m_pZone) TRACE("CMap::init() m_pZone\202\252\202\240\202\350\202\334\202\271\202\361\n");
+        return;
+    }
+    TEXANM_DATA* pTXAData = CRsrcDB::getRsrcTXA(m_nRsrcGrpID);
+    if (pTXAData) {
+        m_nTexAnmNum = pTXAData->getDataNum();
+        if (m_nTexAnmNum > 0) {
+            m_pTexAnm = new (__FILE__ "(576)") CTexAnm[m_nTexAnmNum];
+            for (INT i = 0; i < m_nTexAnmNum; i++) {
+                m_pTexAnm[i].setup(*pTXAData, i);
+                m_pTexAnm[i].setSeq(0);
+            }
+        }
+    }
+    _exclusiveSetup(bUseMapUnit);
+    m_pModelTbl = new (__FILE__ "(596)") CMapModel[m_nModelMax];
+    if (bTexClampRepeat) {
+        for (INT i = 0; i < m_nModelMax; i++) m_pModelTbl[i].setClampRepeat(TRUE);
+    }
+    {
+        MODELDATA* pTbl = (MODELDATA*)_getAZFTbl(pAZF, m_pZone->parts[m_pZone->skynum].modelIndex + 1);
+        if (pTbl->getRawMode() & 4) {
+            m_LightUnit = new (__FILE__ "(606)") CMapLightUnit[m_nModelMax];
+        }
+    }
+    if (m_pZone->skynum) {
+        m_pSky = new (__FILE__ "(611)") CSky(this, pAZF, m_pZone);
+    }
+    INT iGridSizeX = 40;
+    INT iGridSizeZ = 40;
+    TRACE("CMap::init()  All:%d Model:%d/%d Sky:%d Group:%d Chip:%d\n", m_pZone->partsnum, m_nModelMax, nModelCount,
+          m_pZone->skynum, m_pZone->group_suu, m_pZone->chip_suu);
+    if (m_pZone->zoneSizeX > 0) {
+        iGridSizeX = (m_pZone->zoneSizeX * m_pZone->gridsizeX) >> 3;
+        iGridSizeZ = (m_pZone->zoneSizeZ * m_pZone->gridsizeZ) >> 3;
+        if (iGridSizeX > 40) iGridSizeX = 40;
+        if (iGridSizeZ > 40) iGridSizeZ = 40;
+    } else {
+        TRACE("zoneSizeX == 0\n");
+    }
+    FLOAT fGridSizeX = iGridSizeX;
+    FLOAT fGridSizeZ = iGridSizeZ;
+    TRACE("CMap::init()  gX = %d gZ = %d\n", iGridSizeX, iGridSizeZ);
+    for (INT z = 0; z < 8; z++) {
+        for (INT x = 0; x < 8; x++) {
+            CMapGrid& grid = m_grid[z * 8 + x];
+            grid.m_bbox.y[0] = 16000000.0f;
+            grid.m_bbox.y[1] = -16000000.0f;
+            grid.m_bbox.z[0] = fGridSizeZ * (z - 4);
+            grid.m_bbox.z[1] = grid.m_bbox.z[0] + fGridSizeZ;
+            grid.m_bbox.x[0] = fGridSizeX * (x - 4);
+            grid.m_bbox.x[1] = grid.m_bbox.x[0] + fGridSizeX;
+            grid.m_pCrd = &Crd(0);
+            grid.flg = -1;
+        }
+    }
+    INT i;
+    INT nDispModel;
+    nDispModel = 0;
+    i = 0;
+    INT nPartsMax = m_pZone->partsnum;
+    for (INT partsIdx = m_pZone->skynum; partsIdx < nPartsMax; partsIdx++) {
+        ZONEPARTS* parts = &m_pZone->parts[partsIdx];
+        parts->crdIndex = -1;
+        INT nEType = _checkEffId(parts, bUseMapUnit);
+        if (nEType >= 0) {
+            _createEffIdProc(parts, nEType);
+            continue;
+        }
+        if (parts->modelIndex < 0) {
+            TRACE("\203]\201[\203\223\203t\203@\203C\203\213\222\206\202\311\223o\230^\202\265\202\304\202\242\202\310\202\242\203\202\203f\203\213\202\326\202\314\216Q\217\306\202\252\202\240\202\350\202\334\202\267\n");
+            continue;
+        }
+        MODELDATA* pTbl = (MODELDATA*)_getAZFTbl(pAZF, m_pZone->parts[partsIdx].modelIndex + 1);
+        if (!pTbl) {
+            TRACE("%d:\203\202\203f\203\213\203f\201[\203^\202\252\214\251\202\302\202\251\202\350\202\334\202\271\202\361 %d\n", partsIdx, m_pZone->parts[partsIdx].modelIndex);
+            AssertApp(__FILE__, 703, "d", 0);
+        }
+        nDispModel++;
+        if (!(i < m_nModelMax)) AssertApp(__FILE__, 706, "i<m_nModelMax", 0);
+        parts->crdIndex = i;
+        CMapModel& model = m_pModelTbl[i];
+        model.m_nGridID = -2;
+        CCoord& crd = Crd(i + 1);
+        {
+        FVECTOR vec;
+        vec._q = 0;
+        _unitMatrixVu0(crd.m_Local);
+        if (parts->rot.z) _rotMatrixZ(crd.m_Local, parts->rot.z);
+        if (parts->rot.y) _rotMatrixY(crd.m_Local, parts->rot.y);
+        if (parts->rot.x) _rotMatrixX(crd.m_Local, parts->rot.x);
+        crd.m_Local.v[0] *= parts->scale[0];
+        crd.m_Local.v[1] *= parts->scale[1];
+        crd.m_Local.v[2] *= parts->scale[2];
+        crd.m_Local.v[3].x = parts->trans[0];
+        crd.m_Local.v[3].y = parts->trans[1];
+        crd.m_Local.v[3].z = parts->trans[2];
+        crd.m_Local.v[3].w = 1.0f;
+        crd.m_Local.m[0][3] = 0.0f;
+        crd.m_Local.m[1][3] = 0.0f;
+        crd.m_Local.m[2][3] = 0.0f;
+        }
+        Crd(i + 1).m_pParent = &Crd(0);
+        Crd(i + 1).recalcWorldMatrix();
+        Crd(i + 1).m_Flag = 1;
+        model.assign(this, pTbl, i + 1);
+        model.linkTexAnm(m_pTexAnm, m_nTexAnmNum);
+        BBOX* bb = model.getBBox(0);
+        FLOAT xminf = 16000000.0f;
+        FLOAT xmaxf = -16000000.0f;
+        FLOAT zminf = xminf;
+        FLOAT zmaxf = xmaxf;
+        FVECTOR v[4];
+        for (int zz = 0; zz < 2; zz++) {
+            for (int xx = 0; xx < 2; xx++) {
+                v[zz * 2 + xx].x = bb->x[xx];
+                v[zz * 2 + xx].y = 0.0f;
+                v[zz * 2 + xx].z = bb->z[zz];
+                v[zz * 2 + xx].w = 1.0f;
+            }
+        }
+        for (int qq = 0; qq < 4; qq++) {
+            FVECTOR p;
+            FVECTOR b;
+            ApplyMatrix(b, Crd(i + 1).m_Local, v[qq]);
+            p = b;
+            if (p.x < xminf) xminf = p.x;
+            if (xmaxf < p.x) xmaxf = p.x;
+            if (p.z < zminf) zminf = p.z;
+            if (zmaxf < p.z) zmaxf = p.z;
+        }
+        int xmin = (int)xminf;
+        int xmax = (int)xmaxf;
+        int zmin = (int)zminf;
+        int zmax = (int)zmaxf;
+        TRACE("%d: Z(%f %f)->(%d %d) X(%f %f)->(%d %d)\n", i, zmaxf, zminf, zmax, zmin, xmaxf, xminf, xmax, xmin);
+        xmin += iGridSizeX * 4;
+        xmax += iGridSizeX * 4;
+        zmin += iGridSizeZ * 4;
+        zmax += iGridSizeX * 4;
+        if (zmin < 0) zmin -= iGridSizeZ;
+        zmin /= iGridSizeZ;
+        if (xmin < 0) xmin -= iGridSizeX;
+        xmin /= iGridSizeX;
+        if (xmax < 0) xmax -= iGridSizeX;
+        xmax /= iGridSizeX;
+        if (zmax < 0) zmax -= iGridSizeZ;
+        zmax /= iGridSizeX;
+        INT idx = zmin * 8 + xmin;
+        TRACE("%d: Z(%d %d) X(%d %d) = %d\n", i, zmax, zmin, xmax, xmin, idx);
+        if (xmax - xmin < 2 && zmax - zmin < 2 && xmin >= 0 && xmin < 8 && zmin >= 0 && zmin < 8) {
+            FLOAT ymin = bb->y[0] + Crd(i + 1).m_Local.v[3].y;
+            FLOAT ymax = bb->y[1] + Crd(i + 1).m_Local.v[3].y;
+            model.m_nGridID = idx;
+            CMapGrid& grid = m_grid[idx];
+            if (ymin < grid.m_bbox.y[0]) grid.m_bbox.y[0] = ymin;
+            if (grid.m_bbox.y[1] < ymax) grid.m_bbox.y[1] = ymax;
+            if (xminf < grid.m_bbox.x[0]) grid.m_bbox.x[0] = xminf;
+            if (grid.m_bbox.x[1] < xmaxf) grid.m_bbox.x[1] = xmaxf;
+            if (zminf < grid.m_bbox.z[0]) grid.m_bbox.z[0] = zminf;
+            if (grid.m_bbox.z[1] < zmaxf) grid.m_bbox.z[1] = zmaxf;
+        } else {
+            model.m_nGridID = -1;
+        }
+        if (m_LightUnit) {
+            CMapLightUnit& lu = m_LightUnit[i];
+            lu.setAnchor(&Crd(i + 1), *pTbl->m_pBBox, 0);
+            m_LightUnit[i].init();
+            model.setLightUnit(&m_LightUnit[i]);
+        }
+        i++;
+    }
+    TRACE("CMap::init()  DispModel:%d\n", nDispModel);
+    CTexCtrl::addFixTexAnm(m_pTexAnm, m_nTexAnmNum);
+    if (m_pFog->skynum) {
+        for (i = 0; i < m_pFog->skynum; i++) {
+            m_Back[i].setLayer(2, 3);
+            m_Back[i].setSemiTrans((ALPHA)1);
+        }
+    }
+    TRACE("---------------- CMap::init() end ----------------\n");
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", init__4CMapii);
+#endif
 /* MATCH: CMap::init's .rodata while it is INCLUDE_ASM */
 __asm__(".rdata\n"
         ".align 3\n"
@@ -528,7 +822,205 @@ void setTransparency(const CCoord& crd, CModel& model) {
 void setTransparency(CModel& model) {
     setTransparency(model.getCrd(0), model);
 }
+/* Parked: 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes, group selection by
+   player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons). The 44 bytes: the
+   original keeps two copies of the "flush the last model" block (group and grid path; s1/s2 swapped), ours gets the same
+   registers in both and jump2 cross-jumps them into one; the rest is register allocation. */
+#if 0
+void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+extern "C" void sceVu0InversMatrix(FMATRIX& m0, FMATRIX& m1);
+extern "C" void sceVu0ApplyMatrix(FVECTOR& v0, FMATRIX& m0, FVECTOR& v1);
+INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
+INT resultCheckBBox(CCoord& crd, const BBOX* bbox);
+void ITOF0Vector(FVECTOR& v0, const IVECTOR& v1);
+void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
+static inline void _kickCheckBBox(FMATRIX* m, const BBOX* bbox) {
+    if (!(bbox->x[1] < bbox->x[0])) {
+        FVECTOR* v = (FVECTOR*)0x70000000;
+        v[0].x = bbox->x[0];
+        v[0].y = bbox->y[0];
+        v[0].z = bbox->z[0];
+        v[1].x = bbox->x[1];
+        v[1].y = bbox->y[1];
+        v[1].z = bbox->z[1];
+        asm volatile("lqc2 $vf20, 0(%0)" : : "r"(v));
+        asm volatile("lqc2 $vf27, 0x10(%0)" : : "r"(v));
+        asm volatile("lqc2 $vf21, 0x0(%0)\n"
+                     "lqc2 $vf22, 0x10(%0)\n"
+                     "lqc2 $vf23, 0x20(%0)\n"
+                     "lqc2 $vf24, 0x30(%0)" : : "r"(m));
+        asm volatile("vcallms 0x20");
+    }
+}
+void CMap::disp() {
+    INT group_no;
+    FLOAT fR;
+    CMapModel* pModel;
+    INT nModel;
+    FVECTOR vColor;
+    FVECTOR* pSceneColor;
+    if (!m_pZone || !m_pModelTbl) return;
+    if (DebugWork::g_dw.sys.m_iMapDisp < -1) DebugWork::g_dw.sys.m_iMapDisp = m_nModelMax;
+    else if (m_nModelMax < DebugWork::g_dw.sys.m_iMapDisp) DebugWork::g_dw.sys.m_iMapDisp = -1;
+    if (DebugWork::g_dw.sys.m_iMapDisp < 0) return;
+    if (DebugWork::g_dw.sys.m_iMapDisp > 0) {
+        m_gpPosDir.setCoord(&Crd(DebugWork::g_dw.sys.m_iMapDisp));
+        m_gpPosDir.disp();
+    }
+    {
+    CMapModel* pModel = m_pModelTbl;
+    INT nModel = m_nModelMax;
+    if (DebugWork::g_dw.sys.m_iMapBack == 0) {
+        for (INT i = 0; i < nModel; i++, pModel++) pModel->defaultShaderOption();
+    } else if (DebugWork::g_dw.sys.m_iMapBack == 1) {
+        for (INT i = 0; i < nModel; i++, pModel++) pModel->setShaderOption(2);
+    } else if (DebugWork::g_dw.sys.m_iMapBack == 2) {
+        for (INT i = 0; i < nModel; i++, pModel++) pModel->resetShaderOption(2);
+    }
+    }
+    if (m_uiMapFlag & 1) return;
+    group_no = -1;
+    fR = getFrameRateF();
+    if (CSceneEnv::getStopTypeBit() & 0x800) fR = 0.0f;
+    pModel = m_pModelTbl;
+    nModel = m_nModelMax;
+    pSceneColor = CSceneEnv::getTypeColor((ObjType::eObjType)0xB);
+    if (pSceneColor) MulVector(vColor, m_vColor, *pSceneColor);
+    else vColor = m_vColor;
+    for (INT i = 0; i < nModel; i++, pModel++) {
+        pModel->setColorScale(vColor);
+        pModel->dispUpdate(fR);
+    }
+    if (m_pZone->group_suu > 0) {
+        CTask* pl = getSysTask(3);
+        if (pl) {
+            FVECTOR vec = pl->Crd(0).m_World.v[3];
+            for (int i = 0; i < m_pZone->chip_suu; i++) {
+                ZONEPARTS* zd = &m_pZone->parts[i];
+                if (zd->groupNo < 0) continue;
+                if (zd->crdIndex < 0) continue;
+                FMATRIX* m = &Crd(zd->crdIndex + 1).m_World;
+                BBOX* bb = m_pModelTbl[zd->crdIndex].getBBox(0);
+                FVECTOR lVec;
+                FMATRIX iMat;
+                sceVu0InversMatrix(iMat, *m);
+                sceVu0ApplyMatrix(lVec, iMat, vec);
+                if (bb->x[0] <= lVec.x && lVec.x < bb->x[1] && bb->z[0] <= lVec.z && lVec.z < bb->z[1]) {
+                    group_no = zd->groupNo;
+                    break;
+                }
+            }
+        }
+    }
+    if (group_no >= 0) {
+        INT ii = -1;
+        for (INT f = 0; f < m_pZone->grouptable[group_no][0]; f++) {
+            INT j = m_pZone->grouptable[group_no][f + 1];
+            CMapModel* pModel = &m_pModelTbl[j];
+            if (pModel->m_nGridID == 2) continue;
+            BBOX* bb = pModel->getBBox(0);
+            if (ii >= 0) {
+                INT r = resultCheckBBox(Crd(ii + 1), m_pModelTbl[ii].getBBox(0));
+                _kickCheckBBox(&Crd(j + 1).m_World, bb);
+                if (r >= 0) {
+                    setTransparency(Crd(ii + 1), m_pModelTbl[ii]);
+                    if (m_LightUnit) m_LightUnit[ii].calc();
+                    m_pModelTbl[ii].setBBoxFlag(r);
+                    if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii) m_pModelTbl[ii].dispImpl();
+                }
+            } else {
+                _kickCheckBBox(&Crd(j + 1).m_World, bb);
+            }
+            ii = j;
+        }
+        if (ii >= 0) {
+            INT r = resultCheckBBox(Crd(ii + 1), m_pModelTbl[ii].getBBox(0));
+            if (r >= 0) {
+                setTransparency(Crd(ii + 1), m_pModelTbl[ii]);
+                if (m_LightUnit) m_LightUnit[ii].calc();
+                m_pModelTbl[ii].setBBoxFlag(r);
+                if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii) m_pModelTbl[ii].dispImpl();
+            }
+        }
+    } else {
+        for (INT g = 0; g < 64; g++) {
+            CMapGrid& grid = m_grid[g];
+            if (grid.m_bbox.y[0] <= grid.m_bbox.y[1]) grid.flg = checkBBox(grid.m_pCrd->m_World, &grid.m_bbox);
+        }
+        INT ii = -1;
+        for (INT i = 0; i < m_nModelMax; i++) {
+            CMapModel* pModel = &m_pModelTbl[i];
+            if (pModel->m_nGridID == -2) continue;
+            if (pModel->m_nGridID != -1 && m_grid[pModel->m_nGridID].flg < 0) continue;
+            BBOX* bb = pModel->getBBox(0);
+            if (ii >= 0) {
+                INT r = resultCheckBBox(Crd(ii + 1), m_pModelTbl[ii].getBBox(0));
+                _kickCheckBBox(&Crd(i + 1).m_World, bb);
+                if (r >= 0) {
+                    setTransparency(Crd(ii + 1), m_pModelTbl[ii]);
+                    if (m_LightUnit) m_LightUnit[ii].calc();
+                    m_pModelTbl[ii].setBBoxFlag(r);
+                    if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii) m_pModelTbl[ii].dispImpl();
+                }
+            } else {
+                _kickCheckBBox(&Crd(i + 1).m_World, bb);
+            }
+            ii = i;
+        }
+        if (ii >= 0) {
+            INT r = resultCheckBBox(Crd(ii + 1), m_pModelTbl[ii].getBBox(0));
+            if (r >= 0) {
+                setTransparency(Crd(ii + 1), m_pModelTbl[ii]);
+                if (m_LightUnit) m_LightUnit[ii].calc();
+                m_pModelTbl[ii].setBBoxFlag(r);
+                if (!DebugWork::g_dw.sys.m_iMapDisp || DebugWork::g_dw.sys.m_iMapDisp - 1 == ii) m_pModelTbl[ii].dispImpl();
+            }
+        }
+    }
+    if (m_pFog->skynum > 0) {
+        pSceneColor = CSceneEnv::getTypeColor((ObjType::eObjType)0xC);
+        FMATRIX& wv = CWorldEnv::getWorldViewMatrix();
+        INT max = m_pFog->skynum;
+        INT nHorizon = (INT)((wv.m[0][1] * wv.m[2][0] + wv.m[2][1] * wv.m[2][2]) * 481.28f * 16.0f
+                             / (wv.m[0][2] * wv.m[2][0] + wv.m[2][2] * wv.m[2][2]));
+        if (max > 4) max = 4;
+        for (INT i = 0; i < max; i++) {
+            IVECTOR c0, c1;
+            FVECTOR v;
+            if (pSceneColor) {
+                if (i == 0) {
+                    ITOF0Vector(v, m_pFog->sky[0]);
+                    MulVector(v, v, *pSceneColor);
+                    FTOI0Vector(c1, v);
+                }
+                c0 = c1;
+                ITOF0Vector(v, m_pFog->sky[i + 1]);
+                MulVector(v, v, *pSceneColor);
+                FTOI0Vector(c1, v);
+            } else {
+                c0 = m_pFog->sky[i];
+                c1 = m_pFog->sky[i + 1];
+            }
+            CPolyG4& back = m_Back[i];
+            back.m_C0.set(c1.x, c1.y, c1.z, 0);
+            back.m_C1.set(c1.x, c1.y, c1.z, 0);
+            back.m_C2.set(c0.x, c0.y, c0.z, 0x80);
+            back.m_C3.set(c0.x, c0.y, c0.z, 0x80);
+            INT y0 = nHorizon - (m_pFog->sky[i].w << 4);
+            INT y1 = nHorizon - (m_pFog->sky[i + 1].w << 4);
+            if ((-0xF40 < y0 && y0 < 0xF40) || (-0xF40 < y1 && y1 < 0xF40)) {
+                back.m_P0.set(-0x1000, y1, 0);
+                back.m_P1.set(0x1000, y1, 0);
+                back.m_P2.set(-0x1000, y0, 0);
+                back.m_P3.set(0x1000, y0, 0);
+                back.disp();
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", disp__4CMap);
+#endif
 void CMap::setColorScale(FVECTOR& inColorScale) {
     m_vColor = inColorScale;
     if (m_pSky) m_pSky->setColorScale(inColorScale);
@@ -639,18 +1131,6 @@ void CMap::createEnvSE(const ZONEPARTS& inParts) {
     nFile += 100;
     nFile += unitId.c[3] - '0';
     if (unitId.c[1] == '0') CGame::playConstEnvSE(nFile * 1000 + nID, -1, FALSE);
-}
-static inline void _unitMatrixVu0(FMATRIX& m) {
-    asm volatile("vmr32.xyzw $vf1, $vf0\n"
-                 "sqc2 $vf0, 0x30(%0)\n"
-                 "vmr32.xyzw $vf2, $vf1\n"
-                 "sqc2 $vf1, 0x20(%0)\n"
-                 "vmr32.xyzw $vf3, $vf2\n"
-                 "sqc2 $vf2, 0x10(%0)\n"
-                 "sqc2 $vf3, 0x0(%0)\n"
-                 :
-                 : "r"(&m)
-                 : "memory");
 }
 extern "C" FLOAT sinf(FLOAT);
 /* Parked: 3 lines - the three &m_pRotShift[i] before the LimitPI/sinf calls come out as base+offset (addu s0,s0,s1), the
