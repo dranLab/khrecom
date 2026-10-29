@@ -119,6 +119,7 @@ public:
     static void kickDMAFG(INT n);
     static void kickDMA(INT n);
     static void initialize();
+    static u_long128* initBGPacket(INT nInIdx);
     static void endScene();
     static void terminateBGPacket();
     static void changeLayer(INT nLayer);
@@ -351,6 +352,7 @@ static inline void _checkDmaTag() {
 /* The file's statics; the data still comes from the original (no SOURCE DATA yet) */
 namespace {
 extern u_long s_pPktBufVif1[2][36992];
+extern u_long128 s_pPktBufVif1BG[2][1664];
 extern u_long s_pPktBufVif1Frame[320];
 extern pacVif1Packet s_pktVif1;
 extern pacVif1Packet s_pktVif1BG;
@@ -465,16 +467,19 @@ void CPackMan::pkCloseUpkCodeV4_32(void* p) {
     sceVif1PkCloseUpkCodeV4_32(s_pPktVif1);
 }
 void CPackMan::pkCloseUpkCodeV4_32() { sceVif1PkCloseUpkCodeV4_32(s_pPktVif1); }
-void CPackMan::pkOpenDirectCode(INT stall) {
+/* MATCH: pkOpenDirectCode/pkCloseDirectCode bodies are inlined by the init*Packet functions */
+static inline void _pkOpenDirectCode(INT stall) {
     sceVif1PkOpenDirectCode(s_pPktVif1, stall);
     *(u_long*)s_pPktVif1->pCurrent = 0x8000;
     s_pPktVif1->pCurrent += 4;
 }
-void CPackMan::pkCloseDirectCode() {
+static inline void _pkCloseDirectCode() {
     u_int* pEnd = s_pPktVif1->pCurrent - 1;
     _checkSize((u_long128*)pEnd - (u_long128*)s_pPktVif1->pVifCode);
     sceVif1PkCloseDirectCode(s_pPktVif1);
 }
+void CPackMan::pkOpenDirectCode(INT stall) { _pkOpenDirectCode(stall); }
+void CPackMan::pkCloseDirectCode() { _pkCloseDirectCode(); }
 void CPackMan::pkOpenDirectHLCode(INT stall) { sceVif1PkOpenDirectHLCode(s_pPktVif1, stall); }
 void CPackMan::pkCloseDirectHLCode() {
     u_int* pEnd = s_pPktVif1->pCurrent - 1;
@@ -665,7 +670,34 @@ void CPackMan::transFrame() {
     FlushCache(0);
     sceDmaSend(s_pDmaChanVif1, (void*)((u_int)s_pktVif1Frame.pBase & 0x0fffffff));
 }
+/* Parked: 15 lines - after the inlined pkOpenDirectCode (sd 0x8000; pCurrent += 4) the original reloads s_pPktVif1 for pkOpenGifTag's pPkt and builds the GIF tag before that load; ours reuses the pointer loaded for the += (and puts qp + 5 in v0, not a1). Register-default store order found by permutation (T1 T2 Z2 Z1); 5 min of permuter (8k candidates) gave nothing. */
+#if 0
+u_long128* CPackMan::initBGPacket(INT nInIdx) {
+    u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32);
+    s_DefaultGpuRegs1._nTEST = 0x300fd;
+    s_DefaultGpuRegs2._nTEST = 0x3000d;
+    s_DefaultGpuRegs2._nZBUF = nZ;
+    s_DefaultGpuRegs1._nZBUF = nZ;
+    _pkInit(s_pPktBufVif1BG[nInIdx], &s_pktVif1BG, 0x600);
+    sceVif1PkReset(s_pPktVif1);
+    u_long128* pRet = s_pPktVif1->pBase;
+    _checkDmaTag();
+    sceVif1PkCnt(s_pPktVif1, 0);
+    _pkOpenDirectCode(0);
+    QWdata* qp = (QWdata*)_pkOpenGifTag(_pack(0x1000800000008000, 0xe));
+    qp[0].ul128 = _pack(s_DefaultGpuRegs1._nTEST, 0x47);
+    qp[1].ul128 = _pack(s_DefaultGpuRegs2._nTEST, 0x48);
+    qp[2].ul128 = _pack(s_DefaultGpuRegs1._nZBUF, 0x4e);
+    qp[3].ul128 = _pack(s_DefaultGpuRegs2._nZBUF, 0x4f);
+    qp[4].ul128 = _pack(0, 8);
+    _pkCloseGifTag(qp + 5);
+    _pkCloseDirectCode();
+    changeLayer(0);
+    return pRet;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initBGPacket__8CPackMani);
+#endif
 BOOL CPackMan::isPacketForBG() { return s_pPktVif1 == &s_pktVif1BG; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", terminateBGPacket__8CPackMan);
 /* Parked: ~100 lines - store scheduling: the original stores the ZBUF value before the s_pPktVif1/s_nMaxPktSizeVif1 stores (lui order ZBUF_START, Regs1, pktVif1BG, Max, pPkt, Regs2), ours hoists the packet pointer stores; 6 min of permuter (9k candidates, 104 -> 103) did not move it. */
