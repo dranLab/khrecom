@@ -59,15 +59,15 @@ int DelayThread(int usec);
 
 extern INT SCREEN_HEIGHT;
 
-class CPackMan {
-public:
-    static void changeDrawMode(INT nMode);
-    static INT getDrawMode();
-    static void setMovieEnv(UINT nWidth, UINT nHeight, UINT nX, UINT nY);
-    static void setFrameEffect(INT nMode, INT a, INT b, INT c);
-    static void enableDraw(INT nFlag);
-    static void disableDraw(INT nFlag);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
+
+
+
+
 
 class CPause : public CTask {
 private:

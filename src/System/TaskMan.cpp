@@ -24,10 +24,10 @@
 
 extern "C" int rand();
 
-class CPackMan {
-public:
-    static INT getDrawMode();
-};
+#include "System/Graphic/PackMan.h"
+
+
+
 
 class CRsrcDB {
 public:

@@ -124,25 +124,25 @@ extern "C" char _gp[];
 #define T1_COUNT ((volatile u_int*)0x10000800)
 #define T1_MODE ((volatile u_int*)0x10000810)
 
-class CPackMan {
-public:
-    static void initialize();
-    static void finalize();
-    static void beginScene();
-    static void endScene();
-    static void swapDBuf(INT nIdx);
-    static void kickDMA(INT nFrame);
-    static void kickDMAFG(INT nFrame);
-    static INT getDrawMode();
-    static BOOL isStartStillMode();
-    static void transFrameEffect();
-    static void saveScreen();
-    static void transFrame();
-    static void setBGColor(INT nCol);
-    static void updateBGBlend(INT nAlpha);
-    static void changePcrtcMode(INT nMode);
-    static void changeDrawMode(INT nMode);
-};
+#include "System/Graphic/PackMan.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "System/Graphic/ModelMan.h"
 
