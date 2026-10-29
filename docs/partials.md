@@ -42,14 +42,15 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-29 | decomp/System-Graphic-Model (partial 91/206, 19 parked; ctor-chain inlines, CModel flag predicates) | 1111 | 417 | 23 | 942 (927) | 53 |
 | 2026-10-29 | decomp/System-Graphic-Model (193/206, 13 parked; weak tail + static init from C, data from source; A2 part 1: g_mpg static, header paths/opt-out tagged MATCH) | 1114 | 417 | 23 | 950 (933) | 61 |
 | 2026-10-29 | cleanup/System-Graphic-Model (A2 part 2: Model classes ungated, CModel layout as ref, stand-ins in 3 files) | 1077 | 413 | 23 | 943 (926) | 61 |
+| 2026-10-29 | cleanup/System-Graphic-ModelMan (CModelMan stand-ins in 4 files; CDispListSemiSingleSort left) | 1076 | 409 | 23 | 943 (926) | 61 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1077 (1005 in 110 headers, 72 in 30 .cpp); MATCH: 61
-  by category: method 450, data member 71, type 96, fwd decl 53, #include 29, changed in place 126, padding 32, path override 24, gate 37, guessed 45, header-level 75, stand-in 31, other 8
-stand-ins: 413 foreign in 131 files (118 names), 192 unattributed, 177 own
+PARTIAL: 1076 (1005 in 110 headers, 71 in 30 .cpp); MATCH: 61
+  by category: method 450, data member 71, type 96, fwd decl 53, #include 29, changed in place 126, padding 32, path override 24, gate 37, guessed 45, header-level 75, stand-in 30, other 8
+stand-ins: 409 foreign in 131 files (117 names), 192 unattributed, 177 own
 duplicate class names across headers: 23
 padding: 32 arrays, 25 accessors
 mechanisms: 943 sites (926 untagged); #line: 1182
@@ -65,7 +66,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 10.0 | `System/Graphic/ModelMan.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users | CDispListSemiSingleSort, CModelMan (1 missing, 1 complete) |  |
 | R0 | 6.0 | `System/FileIO.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CFileIO (1 complete) |  |
 | R0 | 6.0 | `System/Graphic/Effect/libppp/keProg/KeTh.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | KeData16, _sceDmaTag (1 partial, 1 complete) |  |
 | R0 | 6.0 | `System/Graphic/FrecFont.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CFrecFont (1 complete) |  |
@@ -85,6 +85,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 22.0 | `Game/Enemy/BattleEnemyManager.h` | ready | 11 stand-in files, 0 dup headers, 0 gate users | CBattleEnemyManager (1 complete) | inline bodies or virtuals |
 | R1 | 14.0 | `Game/Atel/Atel.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | CAtel (1 complete) | inline bodies or virtuals |
 | R1 | 14.0 | `Game/Atel/VSME.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
+| R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
 
 ## Classes with foreign copies
 
@@ -108,7 +109,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `COLL_INFO_UNION` | missing | Game/Movement.h | 5 |  |  |
 | `CVSM` | partial | Game/Atel/VSME.h | 5 |  | missing fields: m_ActorStateFnc; extra methods: BOOL |
 | `Actor` | complete | Game/Atel/VSME.h | 4 |  |  |
-| `CModelMan` | complete | System/Graphic/ModelMan.h | 4 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 4 |  | missing methods: ~CPointCollision |
 | `CSceneInfo` | partial | Game/SceneInfo.h | 4 |  | missing methods: getCurrentRoomInfo, hasSceneCache, rollbackEventDoorState, setSeRangeRatio, updateBattleScene; 44 PARTIAL |
 | `CBossDeadDemo` | complete | Game/Enemy/BossDeadDemo.h | 3 |  |  |
@@ -378,7 +378,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 9 |
 | `System/Graphic/MapUnit.h` | 2 | 0/0/0/0 | 3 |
 | `System/Graphic/Model.h` | 10 | 0/3/5/0 | 69 |
-| `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 70 |
+| `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 74 |
 | `System/Graphic/MotData.h` | 1 | 4/0/3/0 | 3 |
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
 | `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 8 |
