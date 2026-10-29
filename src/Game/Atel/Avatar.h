@@ -14,6 +14,7 @@
 #ifdef GAME_ATEL_AVATAR_CPP
 #include "Game/Entity.h"
 #include "System/Fsm.h"
+#include "System/Graphic/Gprim.h"
 union FMATRIX;
 class CPathData;
 class CHermitePath;
@@ -107,9 +108,9 @@ class CAvatar : public ICommandAccepter, public CEntity {
     AvatarScaleStruct* m_pScaleStruct;     /* 0x200 */
     AvatarFadeStruct* m_pFadeStruct[5];    /* 0x204 */
     CStateTemplate<CAvatar> m_MainState[2]; /* 0x218 */
-    UBYTE lineX[0x70] __attribute__((aligned(16))); /* 0x260 C3DLine */
-    UBYTE lineY[0x70];                     /* 0x2d0 C3DLine */
-    UBYTE lineZ[0x70];                     /* 0x340 C3DLine */
+    C3DLine lineX;                         /* 0x260 */
+    C3DLine lineY;                         /* 0x2d0 */
+    C3DLine lineZ;                         /* 0x340 */
 
 public:
     CAvatar(CTask* pParent);

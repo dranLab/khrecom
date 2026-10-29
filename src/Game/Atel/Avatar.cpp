@@ -14,6 +14,7 @@
 #include "System/Math3D.h"
 #include "System/Graphic/Gprim.h"
 #include "Game/Debug/DebugWork.h"
+#include "Game/LockOnManager.h"
 #include "include_asm.h"
 
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
@@ -74,6 +75,7 @@ void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+extern "C" char D_0048AD58[];
 extern "C" char D_0048B000[]; /* "LIP_TALK" */
 extern "C" char D_0048B010[];
 class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: System/RsrcData.h(156) (owner partial; RsrcDB.h needs the full RsrcData.h classes) */
@@ -104,7 +106,34 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", __Q24ATEL7CAvatarP5CTask);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", _$_Q24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", InitAvatar__Q24ATEL7CAvatari);
+void CAvatar::InitAvatar(INT in_flag) {
+    m_pMove->setFlag(0x40, FALSE);
+    m_pMove->setFlag(0x200, TRUE);
+    enableFade2Path(1, -1);
+    setTexAnmSeq(0, D_0048AD58);
+    if (in_flag == 1) setEntityFlag(1, 0);
+    lineX.m_pCrd = &Crd(0);
+    lineY.m_pCrd = &Crd(0);
+    lineZ.m_pCrd = &Crd(0);
+    lineX.m_C0.set(255, 0, 0, 255);
+    lineX.m_C1.set(255, 0, 0, 255);
+    lineY.m_C0.set(0, 255, 0, 255);
+    lineY.m_C1.set(0, 255, 0, 255);
+    lineZ.m_C0.set(0, 0, 255, 255);
+    lineZ.m_C1.set(0, 0, 255, 255);
+    lineX.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);
+    lineX.m_P1.set(1.0f, 0.0f, 0.0f, 1.0f);
+    lineY.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);
+    lineY.m_P1.set(0.0f, 1.0f, 0.0f, 1.0f);
+    lineZ.m_P0.set(0.0f, 0.0f, 0.0f, 1.0f);
+    lineZ.m_P1.set(0.0f, 0.0f, 1.0f, 1.0f);
+    if ((UINT)getID() % 10000 == 1007 && m_pMove) {
+        m_pMove->setRadius(0.15f);
+        m_pMove->setShiftY(0.18f);
+    }
+    getSysTask(0x20);
+    LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
+}
 void CAvatar::changeAvatarMainState(INT nState) {
     if (!((0 <= nState) && (2 > nState))) AssertApp(D_0048AD68, 154, D_0048AD90, 0);
     gotoState(m_MainState[nState]);
@@ -762,9 +791,9 @@ FVECTOR* CAvatar::getPathStartPos(const CHAR* pszName) const {
 void CAvatar::disp() {
     CEntity::disp();
     if (DebugWork::g_dw.event.iAtelCoord) {
-        ((CGPrim*)lineX)->CGPrim::disp();
-        ((CGPrim*)lineY)->CGPrim::disp();
-        ((CGPrim*)lineZ)->CGPrim::disp();
+        lineX.CGPrim::disp();
+        lineY.CGPrim::disp();
+        lineZ.CGPrim::disp();
     }
 }
 AvatarMoveStruct::~AvatarMoveStruct() {
