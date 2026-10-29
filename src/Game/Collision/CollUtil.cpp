@@ -257,8 +257,74 @@ MC_CHIP* CCollUtil::_searchChipCollisionNext() {
 }
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _detectOCD__9CCollUtilR10CCollisionP8MCD_INFOP8OCD_WORKi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", __detectMCInitInit__9CCollUtilP7MC_CHIP);
+#if 0 /* the parked draft below is static, as in the original */
+static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal);
+#else
+INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal); /* MATCH: INCLUDE_ASM'd (parked): global label */
+#endif
+INT CCollUtil::__detectMCInitInit(MC_CHIP* pChip) {
+    asm volatile("lqc2 $vf4, 0x30(%0)" : : "r"(this));
+    asm volatile("lqc2 $vf8, 0x80(%0)\n"
+                 "lqc2 $vf9, 0x90(%0)\n"
+                 "lqc2 $vf10, 0xa0(%0)\n"
+                 "lqc2 $vf11, 0xb0(%0)" : : "r"(pChip));
+    asm volatile("vmulax.xyzw $ACC, $vf8, $vf4x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf4y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf4z\n"
+                 "vmaddw.xyzw $vf4, $vf11, $vf4w");
+    return __detectMCInitInit_Check((MC_DATA*)pChip->data, m_fMDVal);
+}
+static inline INT _vecX(u_long128 x) {
+    INT out32;
+    asm("sll %0, %1, 0" : "=r"(out32) : "r"(x));
+    return out32;
+}
+static inline INT _vecY(u_long128 x) {
+    INT out32;
+    asm("dsra32 %0, %1, 0" : "=r"(out32) : "r"(x));
+    return out32;
+}
+static inline INT _vecZ(u_long128 x) {
+    ULONGLONG out64;
+    INT out32;
+    asm("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
+    asm("sll %0, %1, 0" : "=r"(out32) : "r"(out64));
+    return out32;
+}
+/* Parked: 23 lines, registers only - the original keeps the VU0 flag and iRet in a2 and fMDVal/zoneVec in v1, ours
+   v0/a0; iRet-as-flag, if/else and early-return forms and a 5 min permuter run (14.5k candidates) keep it. */
+#if 0
+static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal) {
+    INT iRet;
+    u_long128 zoneVec;
+    INT flag;
+    asm volatile("lqc2 $vf5, 0x0(%0)\n"
+                 "lqc2 $vf6, 0x10(%0)" : : "r"(pMCData));
+    asm volatile("qmtc2.ni %0, $vf7" : : "r"(fMDVal));
+    asm volatile("vmulax.xyzw $ACC, $vf4, $vf7x\n"
+                 "vmsubw.xyz $vf4, $vf5, $vf0w\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "ctc2.ni $0, $vi16\n"
+                 "vsub.xyz $vf0, $vf4, $vf0\n"
+                 "vsub.xyz $vf0, $vf6, $vf4\n"
+                 "vftoi0.xyzw $vf4, $vf4\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "vnop\n"
+                 "vnop");
+    asm volatile("cfc2.ni %0, $vi16" : "=r"(flag));
+    iRet = -1;
+    if (!(flag & 0xC0)) {
+        asm volatile("qmfc2.ni %0, $vf4" : "=r"(zoneVec));
+        iRet = (_vecZ(zoneVec) * pMCData->xw + _vecX(zoneVec)) * pMCData->yw + _vecY(zoneVec);
+        if (pMCData->tbl[iRet][0] == 0xFFFF) iRet = -1;
+    }
+    return iRet;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", __detectMCInitInit_Check__FP7MC_DATAf);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMCInit__9CCollUtilP7MC_CHIPi);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _detectMCD__9CCollUtilR10CCollision);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMap__9CCollUtilP7FVECTORT1);
