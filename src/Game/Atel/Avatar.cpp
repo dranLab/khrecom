@@ -1,5 +1,6 @@
 #include "khtypes.h"
 #define GAME_ATEL_AVATAR_CPP
+#define GPRIM_H_FULL_CLASSES /* MATCH: the constructor inlines the full C3DLine/CGPrim constructors */
 #define ENTITY_H_SETFLAG_DIRECT
 #include "Game/Atel/Avatar.h"
 #include "Game/Atel/Atel.h"

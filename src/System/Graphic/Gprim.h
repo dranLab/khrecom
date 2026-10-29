@@ -198,7 +198,7 @@ private:
     virtual void makePkt() GPRIM_DRAWABLE_PURE;
 };
 
-#ifndef SYSTEM_GRAPHIC_GPRIM_CPP /* the partial classes, as the other units see them */
+#if !defined(SYSTEM_GRAPHIC_GPRIM_CPP) && !defined(GPRIM_H_FULL_CLASSES) /* the partial classes, as the other units see them */
 class CGPrim : public CDrawable {
 protected:
     UINT m_nAttribute;
@@ -559,7 +559,7 @@ private:
     virtual QWdata* makePktSub();
 };
 
-#else /* SYSTEM_GRAPHIC_GPRIM_CPP: the full classes, for System/Graphic/Gprim itself */
+#else /* SYSTEM_GRAPHIC_GPRIM_CPP or GPRIM_H_FULL_CLASSES (Game/Atel/Avatar inlines C3DLine's constructor): the full classes */
 
 /* The types below have no #pragma interface (their inline functions are not emitted in Gprim.o); the classes are in
  * GprimFull.h. */
