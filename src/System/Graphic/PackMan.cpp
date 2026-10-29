@@ -108,6 +108,7 @@ class CDelayedFree { /* PARTIAL: stand-in for System/LinkedBuf CDelayedFree: str
 public:
     static void initFreeList();
     static void disposeFreeList();
+    static void flipFreeList(INT nID);
 };
 
 class CPackMan {
@@ -121,6 +122,7 @@ public:
     static void kickDMAFG(INT n);
     static void kickDMA(INT n);
     static void initialize();
+    static void beginScene();
     static void swapDBuf(INT nInFrame);
     static void initFGPacket();
     static u_long128* initBGPacket(INT nInIdx);
@@ -284,7 +286,7 @@ void sceVif1PkEnd(pacVif1Packet* pPacket, u_int flag);
 void sceVif1PkRefe(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt1, u_int opt2, u_int flag);
 void sceVif1PkRefs(pacVif1Packet* pPacket, u_long128* pRef, u_int size, u_int opt1, u_int opt2, u_int flag);
 void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_short bw, u_long128* image, u_int size, u_int x, u_int y, u_int w, u_int h);
-void _makePkt_SaveScreen(); /* static in the original (still INCLUDE_ASM) */
+static void _makePkt_SaveScreen();
 extern "C" void FlushCache(int op); /* MATCH: void (the SDK returns int): v0 stays free for the lui after the call in saveScreen */
 extern "C" void sceDmaSend(sceDmaChan* d, void* tag);
 extern "C" int sceGsSyncPath(int mode, u_short timeout);
@@ -339,6 +341,14 @@ typedef struct { /* libgraph (eestruct.h) */
     unsigned int DBY : 11;
     unsigned int p1 : 10;
 } tGS_DISPFB2;
+class CWorldEnv { /* PARTIAL: stand-in for System/Graphic/WorldEnv CWorldEnv: strings: WorldEnv.h (.rodata still asm) */
+public:
+    static IVECTOR& getFogColor();
+};
+class CTexCtrl { /* PARTIAL: stand-in for System/Graphic/TexCtrl CTexCtrl: strings: TexCtrl.h (.rodata still asm) */
+public:
+    static void transPrefixTex();
+};
 class CModel { /* PARTIAL: stand-in for System/Graphic/Model CModel: strings: Model.h (.rodata still asm) */
 public:
     static void resetMicroProgram();
@@ -667,7 +677,84 @@ static void _setupSysContext() {
     s_SysGpuRegs2._nZBUF = *(u_long*)&s_DBuf.draw02.reg[1];
     s_SysGpuRegs2._nFRAME = *(u_long*)&s_DBuf.draw02.reg[0];
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", beginScene__8CPackMan);
+typedef struct { /* libgraph (eestruct.h) */
+    u_long X : 16;
+    u_long Y : 16;
+    u_long Z : 32;
+} sceGsXyz;
+static u_long128* _makePkt_StillScreen(u_long128* qp);
+void CPackMan::beginScene() {
+    s_nDB ^= 1;
+    INT nIdx = s_nDB & 1;
+    sceGsDrawEnv12* pDraw1 = &s_DBuf.draw01;
+    sceGsDrawEnv12* pDraw2 = &s_DBuf.draw02;
+    sceGsClear* pClear = (s_nDawEnableBit & 1) ? &s_DBuf.clear0 : NULL;
+    _pkInit(s_pPktBufVif1[nIdx], NULL, 0x8000);
+    sceVif1PkReset(s_pPktVif1);
+    _checkDmaTag();
+    sceVif1PkCnt(s_pPktVif1, 0);
+    sceVif1PkAddCode(s_pPktVif1, 0x13000000);
+    sceVif1PkAddCode(s_pPktVif1, 0x20000000);
+    sceVif1PkAddCode(s_pPktVif1, 0x05000000);
+    _pkOpenDirectCode(0);
+    u_long128* qp = _pkOpenGifTag(_pack(0x1000800000008000, 0xe));
+    UINT nCount;
+    ULONGLONG* pSrc = (ULONGLONG*)pDraw1;
+    for (nCount = 16; nCount != 0; nCount -= 2, pSrc += 2) {
+        *qp++ = _pack(pSrc[0], pSrc[1]);
+    }
+    *qp++ = _pack(0, 0x4a);
+    *qp++ = _pack(0, 0x4b);
+    *qp++ = _pack(0, 0x49);
+    *qp++ = _pack(0, 0x22);
+    *qp++ = _pack(0x8000008000, 0x3b);
+    IVECTOR& colFog = CWorldEnv::getFogColor();
+    if (pClear) {
+        pClear->rgbaq = colFog.x | ((u_long)colFog.y << 8) | ((u_long)colFog.z << 16) | 0x3f80000000000000;
+        *qp++ = _pack(pClear->testa, 0x47);
+        *qp++ = _pack(pClear->prim, 0);
+        *qp++ = _pack(pClear->rgbaq, 1);
+        UINT x0 = ((sceGsXyz*)&pClear->xyz2a)->X;
+        INT y0 = ((sceGsXyz*)&pClear->xyz2a)->Y;
+        UINT xmax = ((sceGsXyz*)&pClear->xyz2b)->X;
+        INT y1 = ((sceGsXyz*)&pClear->xyz2b)->Y;
+        UINT x1 = x0 + 0x400;
+        for (; x1 <= xmax; x1 = x0 + 0x400) {
+            *qp++ = _pack((u_long)x0 | ((u_long)y0 << 16), 5);
+            *qp++ = _pack((u_long)x1 | ((u_long)y1 << 16), 5);
+            x0 = x1;
+        }
+        if (x0 < xmax) {
+            *qp++ = _pack((u_long)x0 | ((u_long)y0 << 16), 5);
+            *qp++ = _pack((u_long)xmax | ((u_long)y1 << 16), 5);
+        }
+        *qp++ = _pack(pClear->testb, 0x47);
+    }
+    if (s_nDrawMode == 1 || s_nDrawMode == 3) qp = _makePkt_StillScreen(qp);
+    *qp++ = _pack(5, 8);
+    *qp++ = _pack(0x44, 0x42);
+    *qp++ = _pack(0x60, 0x14);
+    *qp++ = _pack(colFog.x | ((u_long)colFog.y << 8) | ((u_long)colFog.z << 16), 0x3d);
+    for (nCount = 16, pSrc = (ULONGLONG*)pDraw2; nCount != 0; nCount -= 2, pSrc += 2) {
+        *qp++ = _pack(pSrc[0], pSrc[1]);
+    }
+    *qp++ = _pack(0x60, 0x15);
+    *qp++ = _pack(s_SysGpuRegs2._nCLAMP, 9);
+    *qp++ = _pack(s_SysGpuRegs2._nFBA, 0x4b);
+    _pkCloseGifTag(qp);
+    _pkCloseDirectCode();
+    s_SysGpuRegs2._nTEST = pDraw2->reg[7][0];
+    s_SysGpuRegs2._nZBUF = pDraw2->reg[1][0];
+    s_SysGpuRegs2._nFRAME = pDraw2->reg[0][0];
+    s_DefaultGpuRegs1 = s_DefaultGpuRegs2 = s_SysGpuRegs2;
+    CTexCtrl::transPrefixTex();
+    u_long128* pBG = initBGPacket(nIdx);
+    if (pBG) {
+        _checkDmaTag();
+        sceVif1PkCall(s_pPktVif1, pBG, 0);
+    }
+    CDelayedFree::flipFreeList(s_nDB & 1);
+}
 void CPackMan::endScene() {
     _checkDmaTag();
     sceVif1PkEnd(s_pPktVif1, 0);
@@ -855,11 +942,9 @@ void CPackMan::setMovieEnv(UINT nDrawW, UINT nDrawH, UINT nDispW, UINT nDispH) {
     s_nMovieDispW = nDispW;
     s_nMovieDispH = nDispH;
 }
-/* Parked: 22 lines - the start: the original keeps %hi(s_pPktVif1) in s0 for the inlined pkInit store and the Reset argument and copies it to s1 for the rest (move s1,s0), and stores s_nMaxPktSizeVif1 = 0x8000 first; ours uses one register (8 bytes shorter, so the loop-head nop also differs). Body, loop and tail match; init-call forms and 4 min of permuter gave nothing. */
-#if 0
 static void _makePkt_SaveScreen() {
     INT nIdx = s_nDB & 1;
-    _pkInit(s_pPktBufVif1[nIdx], &s_pktVif1, 0x8000);
+    _pkInit(s_pPktBufVif1[nIdx], NULL, 0x8000);
     sceVif1PkReset(s_pPktVif1);
     _checkDmaTag();
     sceVif1PkCnt(s_pPktVif1, 0);
@@ -896,9 +981,6 @@ static void _makePkt_SaveScreen() {
     _checkDmaTag();
     sceVif1PkTerminate(s_pPktVif1);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _makePkt_SaveScreen__Fv);
-#endif
 static u_long128* _makePkt_StillScreen(u_long128* qp) {
     UINT nCol = 0x80808080;
     FVECTOR* pColor = CSceneEnv::getTypeColor((ObjType::eObjType)31);
