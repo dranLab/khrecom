@@ -1,4 +1,3 @@
-// PARTIAL: added for Game/Atel/CameraMan (only what that unit uses)
 #ifndef GAME_ATEL_AVATAR_H
 #define GAME_ATEL_AVATAR_H
 
@@ -66,6 +65,10 @@ struct AvatarRotateStruct { // 0x50
     USHORT _nRotateType;           /* 0x44 */
     AvatarRotateStruct() { _nRotIntervalTime = 0; }
     BOOL isOverTimeLimit() { return _nRotTimeCount >= _nRotTimeLimit; }
+    BOOL isOverTimeLimit(INT t) { return _nRotTimeCount + t >= _nRotTimeLimit; }
+    void stopRotRegulalry();
+    BOOL isRotRegularly();
+    BOOL isOverIntervalTime();
 };
 
 struct AvatarScaleStruct { // 0x30
@@ -73,6 +76,8 @@ struct AvatarScaleStruct { // 0x30
     FVECTOR _vScaleSpeed;    /* 0x10 */
     TIMEQ _nScaleTimeLimit;  /* 0x20 */
     TIMEQ _nScaleTimeCount;  /* 0x24 */
+    BOOL isOverTimeLimit() { return _nScaleTimeCount >= _nScaleTimeLimit; }
+    BOOL isOverTimeLimit(INT t) { return _nScaleTimeCount + t >= _nScaleTimeLimit; }
 };
 
 struct AvatarFadeStruct { // 0x14
