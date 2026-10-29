@@ -45,6 +45,10 @@ static inline void _unitMatrix(FMATRIX& m) { sceVu0UnitMatrix(m); }
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 FLOAT InnerProduct(const FVECTOR& v0);
+FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
+void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void Normalize(FVECTOR& v0, const FVECTOR& v1);
 
 struct MCD_HEADER {
     unsigned char code[4];
@@ -358,7 +362,44 @@ INT CCollUtil::detectPSphere() {
     } while (0);
     return TRUE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", distanceSphere__9CCollUtilP7FVECTOR);
+static inline FLOAT _sqrtf(FLOAT x) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
+    return ret;
+}
+static inline FLOAT _distance(FVECTOR& v, const FVECTOR& p0, const FVECTOR& p1) {
+    SubVector(v, p0, p1);
+    return _sqrtf(InnerProduct(v));
+}
+INT CCollUtil::distanceSphere(FVECTOR* pP0) {
+    FVECTOR vc0;
+    FVECTOR vc1;
+    FLOAT u;
+    FVECTOR p;
+    FVECTOR s;
+    FVECTOR vec0;
+    FVECTOR nvec;
+    SubVector(vc0, *pP0, m_vCk0);
+    SubVector(vc1, *pP0, m_vCk1);
+    u = InnerProduct(vc0, m_vCkVec) / m_CkVecl;
+    if (u < 0.0f) return 0;
+    ScaleVector(p, m_vCkVec, u);
+    AddVector(p, m_vCk0, p);
+    FLOAT l = _distance(s, *pP0, p);
+    if (m_RadiusL < l) return 0;
+    FLOAT len = _sqrtf(m_Radius2 - l * l);
+    Normalize(s, m_vCkVec);
+    ScaleVector(s, s, len);
+    SubVector(s, p, s);
+    SubVector(vec0, s, m_vCk0);
+    if (InnerProduct(m_vCkVec, vec0) < 0.0f) return 0;
+    SubVector(vec0, s, m_vCk1);
+    if (0.0f < InnerProduct(m_vCkVec, vec0)) return 0;
+    if (!slidingHosei(*pP0, s, nvec)) return 0;
+    m_vNormal = nvec;
+    m_vDetect = m_vCk2;
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", slidingHosei__9CCollUtilR7FVECTORN21);
 /* MATCH: the original links no CCollDbg (debug build only) and calls address 0. Ps2EeAs makes undefined weak symbols
    global, so the method is a weak absolute 0, as in Game/Gimmick/CreateGimmick (the relocation names func_0 there) */
