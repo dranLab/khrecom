@@ -7,7 +7,7 @@ using namespace CardBattle;
 
 extern INT SCREEN_HEIGHT;
 namespace D2 {
-class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the class only for its own unit */
+class C2DMan { /* PARTIAL: stand-in for System/Graphic/2d/2DMan C2DMan: gated by SYSTEM_GRAPHIC_2D_2DMAN_CPP */
 public:
     static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
 };
