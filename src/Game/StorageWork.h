@@ -56,14 +56,23 @@ struct MCWork { // 0x2ad4
     void postLoad();
 };
 
-struct _RoomInfo2 { // 0x2c
-    unsigned char _doors[4][0xa]; // _DoorInfo
-    BYTE _nCreatedCardNum;
-    BYTE _nCreatedCardID;
-    unsigned char __nFiller[2];
-};
-
 struct MCWork2 { // 0x62e
+    // PARTIAL: nested as in the original (Game/SceneInfo's _initRoomInfo/_initDoor signatures)
+    struct _DoorInfo { // 0xa
+        BYTE _nStat;
+        unsigned char __nFiller[3];
+        unsigned char _nNormaNums[3];
+        BYTE _nClearedNorma;
+        BYTE _nFirstCardID;
+        BYTE _nFirstCardNum;
+    };
+    struct _RoomInfo2 { // 0x2c
+        _DoorInfo _doors[4];
+        BYTE _nCreatedCardNum;
+        BYTE _nCreatedCardID;
+        unsigned char __nFiller[2];
+    };
+
     /* 0x000 */ _RoomInfo2 _roomInfo2[32];
     /* 0x580 */ _RoomInfo2 _roomInfo2StartEnt;
     /* 0x5ac */ _RoomInfo2 _roomInfo2GoalEnt;
