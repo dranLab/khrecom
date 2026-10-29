@@ -1346,7 +1346,10 @@ INT CSceneInfo::getCurrentRoomID() {
 }
 INT CSceneInfo::getNextRoomID() { return (SBYTE)s_nNextRoomID; }
 INT CSceneInfo::getPrevRoomID() { return CGameWork::m_pMCWork->_nPrevRoomID; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", getEnteredDoorID__10CSceneInfo);
+DOOR_ID CSceneInfo::getEnteredDoorID() {
+    DOOR_ID id = (DOOR_ID)CGameWork::m_pMCWork->_nDoorID;
+    return (UINT)id >= _DOOR_ID_MAX ? DOOR_ID_LD : id;
+}
 DOOR_ID CSceneInfo::getNextDoorID() { return s_nNextDoorID; }
 BOOL CSceneInfo::isFieldScene() {
     BOOL b = FALSE;
