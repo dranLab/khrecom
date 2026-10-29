@@ -3,6 +3,7 @@
 #define ENTITY_H_SETFLAG_DIRECT
 #include "Game/Atel/Avatar.h"
 #include "Game/Atel/Atel.h"
+#include "Game/Atel/VSME.h"
 #include "Game/Movement.h"
 #include "Game/BodyCollision.h"
 #include "System/Graphic/Anim.h"
@@ -18,20 +19,6 @@
 using namespace ATEL;
 
 namespace ATEL {
-/* PARTIAL: only the actor table (CVSM is not decompiled yet) */
-struct Actor { // 0x1dc
-    INT _nID;            /* 0x000 */
-    INT _nRsrcID;        /* 0x004 */
-    INT _GroupID;        /* 0x008 */
-    INT _nMembarID;      /* 0x00c */
-    CAvatar* _pAvatar;   /* 0x010 */
-    UBYTE _m_0x14[0x1c8];
-};
-class CVSM {
-    UBYTE _m_0x00[0x70];
-public:
-    Actor m_ActorTbl[64]; /* 0x70 */
-};
 struct AvatarMotionParam { // 0xc
     FLOAT _fPlaySpeed;        /* 0x0 */
     INT _iChangeHokanRate;    /* 0x4 */
@@ -78,7 +65,7 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 extern "C" char D_0048B000[]; /* "LIP_TALK" */
 extern "C" char D_0048B010[];
-class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs the full RsrcData.h classes */
+class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: System/RsrcData.h(156) (owner partial; RsrcDB.h needs the full RsrcData.h classes) */
 public:
     static BYTE* getRsrcPTD(const CHAR* pszName);
     static void removeRsrc(INT nID);
@@ -441,7 +428,7 @@ INT CAvatar::onAvatarStart(INT nCmd, void* pParam, INT nID) {
     return -1;
 }
 INT CAvatar::onAvatarAttach(INT nCmd, void* pParam, INT nID) {
-    CAvatar* pTarget = getAtel().getVSM()->m_ActorTbl[nID]._pAvatar;
+    CAvatar* pTarget = getAtel().getVSM()->getAvatar(nID);
     CCoord& crd = Crd(0);
     *(CCoord**)((BYTE*)&crd + 0x4c) = &pTarget->Crd(pTarget->getBoneIndex((const CHAR*)pParam, 0));
     return -1;
@@ -449,7 +436,7 @@ INT CAvatar::onAvatarAttach(INT nCmd, void* pParam, INT nID) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onAvatarAttachEffect__Q24ATEL7CAvatariPvi);
 INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
-    FVECTOR v = _crdWorldPos(getAtel().getVSM()->m_ActorTbl[p->TargetID]._pAvatar->Crd(0));
+    FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));
     if (!m_pLookStruct) m_pLookStruct = (AvatarLookStruct*)com_malloc_d(sizeof(AvatarLookStruct), D_0048B030, RET_ADDR());
     m_pLookStruct->_nTargetID = p->TargetID;
     m_pLookStruct->_fOffsetY = p->OffsetY;
@@ -459,7 +446,7 @@ INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
 }
 INT CAvatar::onAvatarSetLookUpdatePosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
-    FVECTOR v = _crdWorldPos(getAtel().getVSM()->m_ActorTbl[p->TargetID]._pAvatar->Crd(0));
+    FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));
     if (!m_pLookStruct) m_pLookStruct = (AvatarLookStruct*)com_malloc_d(sizeof(AvatarLookStruct), D_0048B060, RET_ADDR());
     m_pLookStruct->_nTargetID = p->TargetID;
     m_pLookStruct->_fOffsetY = p->OffsetY;
