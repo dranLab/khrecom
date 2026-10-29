@@ -405,27 +405,6 @@ struct G_LINE {
 
 typedef CVector<G_LINE> G_LINE_VECTOR;
 
-// PARTIAL: added for Game/Atel/Avatar (the full class with its inlines is in GprimFull.h)
-class C3DLine : public CGPrim {
-protected:
-    IVECTOR p0;
-    IVECTOR p1;
-public:
-    FVECTOR m_P0;
-    FVECTOR m_P1;
-    G_RGBA m_C0;
-    G_RGBA m_C1;
-    CCoord* m_pCrd;
-
-    virtual UINT getPacketSize() const;
-private:
-    virtual void makePkt();
-public:
-    virtual ~C3DLine();
-private:
-    virtual FIX4 calcZ();
-};
-
 class C3DLines : public CGPrim {
 public:
     CCoord* m_pCrd;
