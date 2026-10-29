@@ -363,7 +363,18 @@ BOOL CEntity::testFront(const CEntity* inEntity) const {
     if (inEntity) return testFront(inEntity->getPos());
     return FALSE;
 }
+/* Parked: 2 lines - the original stores n.w (swc1 1.0) before n.x (sw zero) at the start; set(), per-field stores in all 24 orders, chained, INT-cast and aggregate forms and a 15 min permuter run (22k candidates) all keep x first. */
+#if 0
+BOOL CEntity::testFront(const FVECTOR& inTarget) const {
+    FVECTOR n;
+    n.set(0.0f, 0.0f, 1.0f);
+    ApplyMatrix33(n, *(FMATRIX*)((BYTE*)&Crd(0) + 0x90), n);
+    n.w = InnerProduct(n, *(FVECTOR*)((BYTE*)&Crd(0) + 0xc0));
+    return InnerProduct(n, inTarget) - n.w > 0.0f;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", testFront__C7CEntityRC7FVECTOR);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", entityVisible__7CEntityRC7CEntityff);
 BOOL CEntity::entityVisible(const CEntity* inEntity, FLOAT inAngle, FLOAT inDist) {
     if (inEntity) return entityVisible(*inEntity, inAngle, inDist);
