@@ -52,10 +52,10 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1007 (938 in 109 headers, 69 in 30 .cpp); MATCH: 83
   by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 126, padding 32, path override 24, gate 38, guessed 46, header-level 74, stand-in 28, other 6
-stand-ins: 391 foreign in 125 files (111 names), 198 unattributed, 174 own
+stand-ins: 388 foreign in 125 files (109 names), 198 unattributed, 174 own
 duplicate class names across headers: 24
 padding: 33 arrays, 25 accessors
-mechanisms: 945 sites (919 untagged); #line: 1235
+mechanisms: 945 sites (919 untagged); #line: 1238
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 557, superset 129, partial 94, gated 96, missing 14, unattributed 309
 ```
@@ -68,7 +68,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 4.0 | `System/Graphic/TexAnm.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CTexAnm, TEXANM_DATA (2 complete) |  |
 | R0 | 4.0 | `System/Memoca.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMemoca (1 complete) |  |
 | R0 | 4.0 | `System/VramMan.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CVramMan (1 complete) |  |
 | R0 | 2.0 | `System/CoordMan.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CCoordMan (1 complete) |  |
@@ -88,6 +87,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 12.5 | `Form/Menu/JMemoFlag.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CJiminyMemoFlag (1 superset) | inline bodies or virtuals |
 | R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 | R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
+| R1 | 11.5 | `System/Buf.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users, 3 PARTIAL | CBuf (1 superset) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -128,7 +128,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPause` | complete | Form/Menu/Pause.h | 2 |  |  |
 | `CPlayerDRiku` | superset | Game/Player/PlayerDRiku.h | 2 |  | virtual order differs |
 | `CPrize` | superset | Game/Prize.h | 2 |  | virtual order differs |
-| `CTexAnm` | complete | System/Graphic/TexAnm.h | 2 |  |  |
 | `CTextWnd` | complete | System/Wnd.h | 2 |  |  |
 | `CVramMan` | complete | System/VramMan.h | 2 |  |  |
 | `QWdata` | complete | System/Graphic/Gprim.h | 2 |  |  |
@@ -197,7 +196,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
 | `RcfKey` | complete | System/Rcf.h | 1 |  |  |
 | `RcfMapInfo` | complete | System/Rcf.h | 1 |  |  |
-| `TEXANM_DATA` | complete | System/Graphic/TexAnm.h | 1 |  |  |
 | `TexInfoStub` | gated | System/Graphic/modeldata.h | 1 |  | 1 PARTIAL |
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
 | `ZONEDATA` | missing | Game/Map.h | 1 |  |  |
