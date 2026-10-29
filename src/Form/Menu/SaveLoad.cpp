@@ -537,19 +537,7 @@ public:
     static void reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLinkOwner);
     static BOOL isCompleteLoadRCF(INT nGroup, INT nMember);
 };
-struct RoomInfo { /* PARTIAL: Game/SceneInfo.h needs the game headers */
-    BYTE _m_0x00[0x60];
-    void* _pSrcInfo;      /* 0x60 */
-    void* _pStorageInfo;  /* 0x64 */
-    void* _pStorageInfo2; /* 0x68 */
-    BYTE getRoomNameCardID() const;
-};
-class CSceneInfo { /* PARTIAL: Game/SceneInfo.h needs the game headers */
-public:
-    static void initNewGame(BOOL bSora);
-    static RoomInfo* getRoomInfo(INT nRoomID);
-    static INT getCurrentWorldID(BOOL bCheck);
-};
+#include "Game/SceneInfo.h"
 class CGame { /* PARTIAL: Game/Game.h needs the game headers */
 public:
     static BOOL isRikuGame();
