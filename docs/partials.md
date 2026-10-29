@@ -40,6 +40,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | cleanup/System-Graphic-WorldEnv (CWorldEnv stand-ins in 6 files) | 1089 | 416 | 23 | 939 (924) | 51 |
 | 2026-10-28 | decomp/System-Graphic-Model (partial 66/206, 6 parked; A1 reasons; semi classes gated in Model.h) | 1101 | 417 | 23 | 941 (926) | 53 |
 | 2026-10-29 | decomp/System-Graphic-Model (partial 91/206, 19 parked; ctor-chain inlines, CModel flag predicates) | 1111 | 417 | 23 | 942 (927) | 53 |
+| 2026-10-29 | decomp/System-Graphic-Model (193/206, 13 parked; weak tail + static init from C, data from source; A2 part 1: g_mpg static, header paths/opt-out tagged MATCH) | 1114 | 417 | 23 | 950 (933) | 61 |
 
 <!-- partials:start -->
 ## Summary
