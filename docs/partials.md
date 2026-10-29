@@ -51,6 +51,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-29 | decomp/Game-Entity (partial 164/265, 15 matched, 1 parked; OTHER_PARAM, SE_MANAGED_DATA, CCollRideModelDisp, CRsrcDB stand-in) | 1017 | 356 | 24 | 950 (920) | 98 |
 | 2026-10-29 | decomp/Game-Entity (partial 180/265, 16 more; CAnim start/startEx/getRootMove, isRootMoveOff/isFlashing, SE/Fade declarations) | 1023 | 356 | 24 | 950 (920) | 98 |
 | 2026-10-29 | decomp/Game-Entity (done 265/265, no asm; weak tail + ctor/dtor + .rodata from C; CFnt/CState/CLightUnit copies named; A2 part 1: no ref-owned class (CEntity is Game/Movement's), mechanisms re-checked) | 1023 | 356 | 24 | 958 (925) | 101 |
+| 2026-10-29 | cleanup/System-Memoca (CMemoca stand-ins in 2 files) | 1023 | 354 | 24 | 958 (925) | 101 |
 
 <!-- partials:start -->
 ## Summary
@@ -58,7 +59,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1023 (948 in 109 headers, 75 in 32 .cpp); MATCH: 101
   by category: method 405, data member 69, type 87, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 39, guessed 43, header-level 74, stand-in 31, other 6
-stand-ins: 356 foreign in 121 files (107 names), 200 unattributed, 172 own
+stand-ins: 354 foreign in 121 files (106 names), 200 unattributed, 172 own
 duplicate class names across headers: 24
 padding: 33 arrays, 26 accessors
 mechanisms: 958 sites (925 untagged); #line: 1238
@@ -74,7 +75,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 4.0 | `System/Memoca.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMemoca (1 complete) |  |
 | R0 | 4.0 | `System/VramMan.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CVramMan (1 complete) |  |
 | R0 | 2.0 | `Game/SceneEnv.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CSceneEnv (1 partial) |  |
 | R0 | 2.0 | `System/CoordMan.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CCoordMan (1 complete) |  |
@@ -94,6 +94,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 12.5 | `Form/Menu/JMemoFlag.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CJiminyMemoFlag (1 superset) | inline bodies or virtuals |
 | R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 | R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
+| R1 | 11.5 | `System/Buf.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users, 3 PARTIAL | CBuf (1 superset) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -128,7 +129,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CCamp` | complete | Form/Menu/Camp.h | 2 |  |  |
 | `CDebugWindow` | superset | Form/DebugWindow.h | 2 |  | padding: _m_0x40; virtual order differs |
 | `CGlare` | complete | System/Graphic/Glare.h | 2 |  |  |
-| `CMemoca` | complete | System/Memoca.h | 2 |  |  |
 | `CMessageManager` | complete | Game/MessageManager.h | 2 |  |  |
 | `CMotData` | partial | System/Graphic/MotData.h | 2 |  | missing methods: CalcCmpDataSiz, CalcOrgSiz, CheckGosa, CompressAll, CompressData, CompressSkl, ... (+16); extra methods: GetRetFrame; 1 PARTIAL |
 | `CPause` | complete | Form/Menu/Pause.h | 2 |  |  |
@@ -390,7 +390,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/LinkedBuf.h` | 6 | 1/2/1/0 | 7 |
 | `System/MainApp.h` | 5 | 0/0/0/2 | 270 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 57 |
-| `System/Memoca.h` | 2 | 4/0/0/0 | 4 |
+| `System/Memoca.h` | 2 | 4/0/0/0 | 6 |
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 94 |
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
 | `System/RsrcData.h` | 3 | 0/0/0/32 | 28 |
