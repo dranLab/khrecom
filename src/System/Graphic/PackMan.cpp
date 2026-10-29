@@ -854,7 +854,50 @@ void CPackMan::setMovieEnv(UINT nDrawW, UINT nDrawH, UINT nDispW, UINT nDispH) {
     s_nMovieDispW = nDispW;
     s_nMovieDispH = nDispH;
 }
+/* Parked: 22 lines - the start: the original keeps %hi(s_pPktVif1) in s0 for the inlined pkInit store and the Reset argument and copies it to s1 for the rest (move s1,s0), and stores s_nMaxPktSizeVif1 = 0x8000 first; ours uses one register (8 bytes shorter, so the loop-head nop also differs). Body, loop and tail match; init-call forms and 4 min of permuter gave nothing. */
+#if 0
+static void _makePkt_SaveScreen() {
+    INT nIdx = s_nDB & 1;
+    _pkInit(s_pPktBufVif1[nIdx], &s_pktVif1, 0x8000);
+    sceVif1PkReset(s_pPktVif1);
+    _checkDmaTag();
+    sceVif1PkCnt(s_pPktVif1, 0);
+    sceVif1PkAddCode(s_pPktVif1, 0x20000000);
+    sceVif1PkAddCode(s_pPktVif1, 0x05000000);
+    _pkOpenDirectCode(0);
+    u_long128* qp = _pkOpenGifTag(_pack(0x1000800000008000, 0xe));
+    *qp++ = _pack((VRAM::_TEX_PREFIX_START / 32) | 0x80000, 0x4c);
+    *qp++ = _pack((VRAM::_ZBUF_START / 32) | 0x31000000 | ((u_long)1 << 32), 0x4e);
+    *qp++ = _pack(0x30000, 0x47);
+    *qp++ = _pack(1, 0x14);
+    *qp++ = _pack(VRAM::_FRAME0_START | 0x28020000 | 0x2000000280000000, 6);
+    *qp++ = _pack(0x80808080, 1);
+    *qp++ = _pack(5, 8);
+    *qp++ = _pack(0x116, 0);
+    for (INT i = 0; i < 16; i++) {
+        INT v = i + 1;
+        *qp++ = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
+        *qp++ = _pack(0x80008, 3);
+        *qp++ = _pack(((u_long)(0x8000 - (SCREEN_HEIGHT >> 1) * 16) << 16) | 0x7000, 5);
+        *qp++ = _pack(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+        *qp++ = _pack(((u_long)((SCREEN_HEIGHT >> 1) * 16 + 0x8000) << 16) | 0x9000, 5);
+    }
+    *qp++ = _pack((VRAM::_FRAME0_START / 32) | 0x80000, 0x4c);
+    *qp++ = _pack((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
+    *qp++ = _pack(((u_long)(SCREEN_HEIGHT - 1) << 48) | 0x1ff0000, 0x40);
+    *qp++ = _pack(CPackMan::getDefaultTEST(), 0x47);
+    *qp++ = _pack(0x61, 0x14);
+    _pkCloseGifTag(qp);
+    _pkCloseDirectCode();
+    _checkDmaTag();
+    sceVif1PkEnd(s_pPktVif1, 0);
+    sceVif1PkAddCode(s_pPktVif1, 0x13000000);
+    _checkDmaTag();
+    sceVif1PkTerminate(s_pPktVif1);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _makePkt_SaveScreen__Fv);
+#endif
 static u_long128* _makePkt_StillScreen(u_long128* qp) {
     UINT nCol = 0x80808080;
     FVECTOR* pColor = CSceneEnv::getTypeColor((ObjType::eObjType)31);
