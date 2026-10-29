@@ -1,5 +1,13 @@
+#define MODELDATA_H_TEXINFO /* PARTIAL: modeldata.h's VTransInfo (gated for System/Graphic/ModelMan) */
+#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
+#define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h"
+#define MODEL_H_PATH "c:/KHCOM/MainApp/System/Graphic/Model.h"
+#define LINKEDBUF_H_PATH "System/LinkedBuf.h"
 #include "khtypes.h"
 #include "include_asm.h"
+#include "System/Graphic/Gprim.h"
+#include "System/Graphic/Model.h"
+#include "System/LinkedBuf.h"
 #include "System/VramMan.h"
 #include "System/Vector.h"
 #include "System/Graphic/Effect/ObjType.h"
@@ -16,27 +24,6 @@ namespace EERAM {
 static INT _HEAP_START = (((INT)_end - 1) / 64 + 1) * 64;
 static INT _HEAP_SIZE = 0x1FC0000 - _HEAP_START;
 }
-
-struct VTransInfo { /* PARTIAL: stand-in for System/Graphic/TexUtil VTransInfo: gated by SYSTEM_GRAPHIC_GPRIM_CPP; strings: Gprim.h (.rodata still asm) */
-    UINT _nDistPos;
-    USHORT _nFormat;
-    USHORT _nDistBufW;
-    ULONGLONG* _pImage;
-    UINT _qwImage;
-    USHORT _nDistX;
-    USHORT _nDistY;
-    USHORT _nDistW;
-    USHORT _nDistH;
-    USHORT _nTw;
-    USHORT _nTh;
-    UINT _nTransSize;
-};
-
-union QWdata { /* PARTIAL: stand-in for System/Graphic/Gprim QWdata: strings: Gprim.h (.rodata still asm) */
-    u_long ul64[2];
-    u_long128 ul128;
-    u_int ui32[4];
-};
 
 struct pacVif1Packet {
     u_int* pCurrent;    /* 0x00 */
@@ -108,13 +95,6 @@ struct GpuRegsInfoSep {
     ULONGLONG _nFBA;
     ULONGLONG _nZBUF;
     ULONGLONG _nFRAME;
-};
-
-class CDelayedFree { /* PARTIAL: stand-in for System/LinkedBuf CDelayedFree: strings: LinkedBuf.h (.rodata still asm) */
-public:
-    static void initFreeList();
-    static void disposeFreeList();
-    static void flipFreeList(INT nID);
 };
 
 class CPackMan {
@@ -313,7 +293,6 @@ typedef struct { /* 0x60 */ /* PARTIAL: stand-in for System/Graphic/Effect/libpp
 } sceGsLoadImage;
 extern "C" int sceGsSetDefLoadImage(sceGsLoadImage* lp, short dbp, short dbw, short dpsm, short x, short y, short w, short h);
 extern "C" int sceGsExecLoadImage(sceGsLoadImage* lp, u_long128* srcaddr);
-extern "C" char D_00461B70[], D_00461C28[], D_00461D10[], D_00461D38[], D_00461D60[], D_00461D88[], D_00461DA8[], D_00461DD0[]; /* PARTIAL: assert text "0" and the semi-packet overflow message (data still asm) */
 extern u_long128 My_dma_start[];
 extern u_long128 My_VU0_start[];
 extern INT SCREEN_HEIGHT;
@@ -323,11 +302,6 @@ extern "C" int sceGsSetDefDrawEnv(sceGsDrawEnv12* draw, short psm, short w, shor
 extern "C" int sceGsSetDefDrawEnv2(sceGsDrawEnv12* draw, short psm, short w, short h, short ztest, short zpsm);
 extern "C" void sceGsSetDefClear(sceGsClear* cp, short ztest, short x, short y, short w, short h, u_char r, u_char g, u_char b, u_char a, u_int z);
 extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short h, short dx, short dy);
-class CMainApp { /* PARTIAL: stand-in for System/MainApp CMainApp: strings: MainApp.h (.rodata still asm) */
-public:
-    static BOOL isNTSC();
-    static BOOL isPAL();
-};
 class CSceneEnv { /* PARTIAL: stand-in for Game/SceneEnv CSceneEnv: SceneEnv.h pulls in EffectMan.h */
 public:
     static FVECTOR* getTypeColor(ObjType::eObjType eType);
@@ -355,11 +329,6 @@ class CTexCtrl { /* PARTIAL: stand-in for System/Graphic/TexCtrl CTexCtrl: strin
 public:
     static void transPrefixTex();
 };
-class CModel { /* PARTIAL: stand-in for System/Graphic/Model CModel: strings: Model.h (.rodata still asm) */
-public:
-    static void resetMicroProgram();
-};
-extern "C" char D_00461BE0[], D_00461C10[]; /* PARTIAL: __FILE__ and the assert text (data still asm) */
 static void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv);
 
 static inline u_long _upper(u_long128 q) {
@@ -423,7 +392,7 @@ INT s_nPkUseSize;
 
 #line 179
 static inline void _checkSize(UINT iSize) {
-    if (!(!(iSize >= 0x10000))) AssertApp(D_00461BE0, __LINE__, D_00461C10, 0);
+    if (!(!(iSize >= 0x10000))) AssertApp(__FILE__, __LINE__, "! (iSize >= 0x10000)", 0);
 }
 static inline void _checkDmaTag() {
     pacVif1Packet* pPkt = s_pPktVif1;
@@ -863,10 +832,12 @@ void CPackMan::terminateSemiPacket() {
     INT nSize = sceVif1PkSize(s_pPktVif1);
     s_nPkUseSize += nSize;
     if (s_nMaxPktSizeVif1Semi < nSize) {
-        TRACE(D_00461C28, nSize);
-        AssertApp(D_00461BE0, 1682, D_00461B70, 0);
+        TRACE("VIF1-SEMI \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);
+        AssertApp(__FILE__, 1682, "0", 0);
     }
 }
+/* MATCH: the original's Str.h strings follow the semi-packet message in .rodata */
+#include "System/Graphic/Str.h"
 void CPackMan::initFGPacket() {
     INT nIdx = s_nDB & 1;
     u_long nZ = (VRAM::_ZBUF_START / 32) | 0x31000000;
@@ -1114,15 +1085,15 @@ void CPackMan::kickDMA(INT n) {
     changeLayer(1);
     INT nSize = sceVif1PkSize(s_pPktVif1);
     if (nSize > 0x680) {
-        TRACE(D_00461D10, nSize);
-        AssertApp(D_00461BE0, 2128, D_00461B70, 0);
+        TRACE("VIF1-BG \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);
+        AssertApp(__FILE__, 2128, "0", 0);
     }
     changeLayer(0);
     nSize = sceVif1PkSize(s_pPktVif1);
     s_nPkUseSize += nSize;
     if (nSize > 0x9080) {
-        TRACE(D_00461D38, nSize);
-        AssertApp(D_00461BE0, 2137, D_00461B70, 0);
+        TRACE("VIF1 \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);
+        AssertApp(__FILE__, 2137, "0", 0);
     }
     FlushCache(0);
     sceDmaSend(s_pDmaChanVif1, (void*)((u_int)s_pktVif1.pBase & 0x0fffffff));
@@ -1133,8 +1104,8 @@ void CPackMan::kickDMAFG(INT n) {
     INT nSize = sceVif1PkSize(s_pPktVif1);
     s_nPkUseSize += nSize;
     if (s_nMaxPktSizeVif1FG + 0x880 < nSize) {
-        TRACE(D_00461D60, nSize);
-        AssertApp(D_00461BE0, 2172, D_00461B70, 0);
+        TRACE("VIF1-FG \x83\x70\x83\x50\x83\x62\x83\x67\x83\x49\x81\x5b\x83\x6f\x81\x5b\x81\x49\x81\x49\x81\x49(0x%X)\n", nSize);
+        AssertApp(__FILE__, 2172, "0", 0);
     }
     changeLayer(0);
     if (s_pktVif1FGBase && s_nDrawMode != 3) {
@@ -1779,9 +1750,9 @@ void sceVif1PkRefLoadImage(pacVif1Packet* pPacket, u_short bp, u_char psm, u_sho
     UINT iLoadImageMaxSize = 0x10000;
     UINT iLoadImageStartAddr = 0x100000;
     UINT iLoadImageEndAddr = 0x1fc0000;
-    if (!(!(size > iLoadImageMaxSize))) AssertApp(D_00461BE0, 3668, D_00461D88, 0);
-    if (!(!((UINT)image < iLoadImageStartAddr))) AssertApp(D_00461BE0, 3669, D_00461DA8, 0);
-    if (!(!((UINT)image >= iLoadImageEndAddr))) AssertApp(D_00461BE0, 3670, D_00461DD0, 0);
+    if (!(!(size > iLoadImageMaxSize))) AssertApp(__FILE__, 3668, "! (size > iLoadImageMaxSize)", 0);
+    if (!(!((UINT)image < iLoadImageStartAddr))) AssertApp(__FILE__, 3669, "! ((UINT)image < iLoadImageStartAddr)", 0);
+    if (!(!((UINT)image >= iLoadImageEndAddr))) AssertApp(__FILE__, 3670, "! ((UINT)image >= iLoadImageEndAddr )", 0);
     sceVif1PkCnt(pPacket, 0);
     ULONGLONG* p64 = (ULONGLONG*)pPacket->pCurrent;
     p64[0] = 0x5100000500000000;
@@ -1822,4 +1793,4 @@ void sceVif1PkRefMpg(pacVif1Packet* pPacket, u_short vuaddr, u_long128* pMicro, 
         opt1 = 0;
     }
 }
-// SOURCE DATA: .bss
+// SOURCE DATA: .bss .rodata
