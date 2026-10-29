@@ -166,14 +166,14 @@ public:
     static INT isButtonTrg(UINT nButton, UINT nPort);
 };
 
-class CVramMan {
-public:
-    static void initialize(INT nThreadID);
-    static void finalize();
-    static void halt(INT bFlag);
-    static void mapping(INT bNTSC);
-    static void transTexProc();
-};
+#include "System/VramMan.h"
+
+
+
+
+
+
+
 
 class CCoordMan {
 public:
