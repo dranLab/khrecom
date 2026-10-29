@@ -106,6 +106,7 @@ void _initEntranceSceneTbl(BOOL bSora);
 void _initGoalRoomSceneTbl(BOOL bSora);
 void _initAllEventDoorState(BOOL bSora);
 void _updateRoomInfo();
+void _setOpenFlagEventDoor(const DoorInfo& door);
 void _setWorldEntrance(WORLD_ID world, SHORT nStartEntScene, SHORT nGoalEntScene, BOOL bContinue);
 void _initRoomInfo(RoomInfo& roomInfo, STORAGE::MCWork::_RoomInfo& st_info, STORAGE::MCWork2::_RoomInfo2& st_info2, const FLOOR::RoomSrcInfo* pSrcInfo, const FLOOR::FloorLayout* pFloorLayout, const RCNORMA::FloorNormaSrc* pFloorNormaSrc, BOOL bContinue);
 FloorLayoutDataHeader* _linkFloorData(const CHAR* pszFile);
@@ -156,6 +157,11 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_00484C18[];
+extern "C" char D_00484C20[];
+extern "C" char D_00484A10[];
+extern "C" char D_00484C68[];
+extern "C" char D_00484C88[];
 extern "C" char D_00484B48[];
 extern "C" char D_00484B98[];
 extern "C" char D_00484AD0[];
@@ -631,7 +637,56 @@ BOOL CSceneInfo::reqChangeBackupRoom() {
     }
     return bResult;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", reqEnterDoor__10CSceneInfo7DOOR_ID);
+BOOL CSceneInfo::reqEnterDoor(DOOR_ID door) {
+    if (hasAnyRequest()) return FALSE;
+    DoorInfo* pDoor = getDoorInfo(door, -1);
+    if (!(pDoor)) AssertApp(D_00484980, 1632, D_00484C18, 0);
+    if (pDoor->_type == DOOR_TYPE_SELECT_WORLD) {
+        WORLD_ID w = (WORLD_ID)getCurrentWorldID(FALSE);
+        if ((UINT)(w - 1) < 13) {
+            INT nStartFlag = CGame::isSoraGame() ? 1 << (w - 1) : 1 << (w + 15);
+            if (!(CGameWork::getInt(0, 0xc1) & nStartFlag)) return reqEnterWorld(w);
+        }
+    }
+    BOOL bResult = FALSE;
+    DOOR_STAT stat = pDoor->getDoorState();
+    if (stat == DOOR_STAT_CLOSED || stat == DOOR_STAT_OPENED) {
+        TRACE(D_00484C20, pDoor->_id, pDoor->_type, stat, pDoor->_nDstRoom);
+        RoomInfo* pDstRoom = getRoomInfo(pDoor->_nDstRoom);
+        if (!(pDstRoom)) AssertApp(D_00484980, 1657, D_00484A10, 0);
+        if (pDoor->_shape == 5 && (USHORT)pDstRoom->getSceneNum() == 2 && !pDstRoom->hasEntered()) {
+            makeRoom(*pDstRoom, _getDstDoorID(door), 2, getCardIDFromSceneNum(2), CGameWork::m_pMCWork->_nNextRCNormaNum);
+        } else if (!pDstRoom->isCreated() || (pDstRoom->isFixSceneRoom() && !pDstRoom->hasEntered())) {
+            if (!pDstRoom->isCreated()) TRACE_COL(_TTY_RED, D_00484C68);
+            makeRoom(*pDoor, !pDstRoom->isCreated());
+        }
+        if (pDoor->_type == DOOR_TYPE_FLOOR_CHANGE) {
+            SHORT nFloor = getCurrentFloorNumber();
+            if (getCurrentRoomID()) nFloor++;
+            else nFloor--;
+            bResult = reqChangeFloor(nFloor, FALSE);
+        } else {
+            bResult = reqChangeRoom(pDoor->_nDstRoom, _getDstDoorID(door), -1);
+        }
+        if (bResult) {
+            if (pDoor->isEventDoor()) {
+                backupEventDoorState();
+                CGameWork::m_pMCWork->_nDoorID = pDoor->_id;
+                CGameWork::backup(CGameWork::BACKUP_PRIMARY);
+                pDoor->setDoorState(DOOR_STAT_UNAVAILABLE);
+                _setOpenFlagEventDoor(*pDoor);
+            } else if (!isEventScene()) {
+                CGameWork::m_pMCWork->_nDoorID = pDoor->_id;
+                CGameWork::backup(CGameWork::BACKUP_PRIMARY);
+            }
+            if (dbgCheckUser(TGOTO)) {
+                RoomInfo* pInfo = getRoomInfo(pDoor->_nDstRoom);
+                if (pInfo) TRACE(D_00484C88, pInfo->_doors[0].getDoorState(), pInfo->_doors[1].getDoorState(), pInfo->_doors[2].getDoorState(), pInfo->_doors[3].getDoorState());
+            }
+        }
+    }
+    return bResult;
+}
 void _acceptReqEnterBattle() {
     s_nReqEnterBattle = CSceneInfo::getCurrentWorldID(TRUE) != 10 ? GAMEMODE_BATTLE : (GAMEMODE)2;
 }
