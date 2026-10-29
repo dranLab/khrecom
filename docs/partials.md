@@ -55,6 +55,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-29 | decomp/Game-Map (partial 37/39; A1 stand-in reasons, .data/.rodata from source, weak tail via stripped placeholders; FOGDATA/ZONEDATA/CMapGrid/C3DTile, setLayerDepth, setColor/AlphaDensity, FVECTOR::addRot) | 1033 | 356 | 25 | 960 (925) | 107 |
 | 2026-10-30 | decomp/Game-Map (finished: 33 in C, 6 parked; ctor/_exclusiveSetup matched, init/disp drafts; A2 part 1: FOGDATA/ZONEDATA ungated, gate MATCH-tagged) | 1036 | 357 | 25 | 960 (924) | 108 |
 | 2026-10-30 | cleanup/Game-Map (A2 part 2: ZONEDATA/ALF_DATA stand-ins in RsrcData.cpp) | 1036 | 355 | 25 | 960 (924) | 108 |
+| 2026-10-30 | cleanup/System-VramMan (CVramMan stand-ins in 2 files) | 1036 | 353 | 25 | 960 (924) | 108 |
 
 <!-- partials:start -->
 ## Summary
@@ -62,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1036 (956 in 109 headers, 80 in 32 .cpp); MATCH: 108
   by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 42, guessed 43, header-level 74, stand-in 33, other 6
-stand-ins: 355 foreign in 121 files (105 names), 200 unattributed, 171 own
+stand-ins: 353 foreign in 121 files (104 names), 200 unattributed, 171 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
 mechanisms: 960 sites (924 untagged); #line: 1238
@@ -78,7 +79,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 4.0 | `System/VramMan.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CVramMan (1 complete) |  |
 | R0 | 2.0 | `Game/SceneEnv.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CSceneEnv (1 partial) |  |
 | R0 | 2.0 | `System/CoordMan.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CCoordMan (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/2d/2DLay.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | LAY_SCREEN (1 complete) |  |
@@ -98,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 | R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
 | R1 | 11.5 | `System/Buf.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users, 3 PARTIAL | CBuf (1 superset) | inline bodies or virtuals |
+| R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -139,7 +140,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPrize` | superset | Game/Prize.h | 2 |  | virtual order differs |
 | `CTexCtrl` | complete | System/Graphic/TexCtrl.h | 2 |  |  |
 | `CTextWnd` | complete | System/Wnd.h | 2 |  |  |
-| `CVramMan` | complete | System/VramMan.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `ATP` | complete | Game/Atel/VSME.h | 1 |  |  |
