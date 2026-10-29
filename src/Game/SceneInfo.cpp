@@ -1655,8 +1655,86 @@ void CSceneInfo::backupEventDoorState() {
         }
     }
 }
+/* Parked: ~35 lines - the outer room loop: the original re-materializes the s_CurrentFloor address for the room
+   (mtlo/madd) and for the count each iteration; ours shares one base. Door/state/norma logic matches; room
+   addressing forms and 5 min of permuter (42 -> 38) did not get it. */
+#if 0
+void CSceneInfo::rollbackEventDoorState(BOOL bInitFloor) {
+    USHORT nFloorIdx = getCurrentFloorIndex();
+    if (nFloorIdx == 0xff) return;
+    STORAGE::_EventDoorInfo* pInfoBackupTbl = _SceneInfoWork::mc()->_nEventDoorInfoTbl[nFloorIdx];
+    BYTE* pStateBackupTbl = _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx];
+    for (USHORT i = 0; i < s_CurrentFloor._nRoomCount; i++) {
+        RoomInfo& room = s_CurrentFloor._rooms[i];
+        for (INT j = 0; j < 4; j++) {
+            DoorInfo& door = room._doors[j];
+            if (door._nDstRoom < 0) continue;
+            DOOR_STAT stat;
+            INT nType = -1;
+            INT nDoorType = door._type;
+            switch (nDoorType) {
+            case 1:
+                nType = 0;
+                break;
+            case 2:
+                nType = 1;
+                break;
+            case 3:
+                nType = 2;
+                break;
+            case 6:
+                nType = 3;
+                break;
+            case 5:
+                nType = 4;
+                break;
+            case 4:
+                nType = 5;
+                break;
+            }
+            if (nType < 0) continue;
+            if (nType < 4) {
+                DOOR_STORAGE* pDst = (DOOR_STORAGE*)door._pStorageInfo;
+                if (pDst) {
+                    STORAGE::_EventDoorInfo& info = pInfoBackupTbl[nType];
+                    for (INT k = 0; k < 3; k++) pDst->_nNormaNums[k] = info._nNormaNums[k];
+                    pDst->_nNextNorma = info._nClearedNorma;
+                }
+            }
+            stat = (DOOR_STAT)pStateBackupTbl[nType];
+            if (nType == 5 && stat != DOOR_STAT_UNAVAILABLE) continue;
+            if (bInitFloor) {
+                BOOL bResetNorma = FALSE;
+                if (stat == DOOR_STAT_OPENED) {
+                    if (door.isSpecialDoor() || door._type == 5) {
+                        door.initNorma();
+                        stat = DOOR_STAT_CLOSED;
+                        if (door._type == 6) bResetNorma = TRUE;
+                        else bResetNorma = FALSE;
+                    }
+                } else if (stat == DOOR_STAT_CLOSED) {
+                    if (door.isSpecialDoor()) {
+                        bResetNorma = TRUE;
+                        door.initNorma();
+                    }
+                }
+                if (bResetNorma) {
+                    DOOR_STORAGE* pDst = (DOOR_STORAGE*)door._pStorageInfo;
+                    if (pDst) {
+                        if (!(door._pNormaSrcInfo)) AssertApp(__FILE__, 3249, "door._pNormaSrcInfo", 0);
+                        RCNORMA::DoorNormaSrc& src = *(RCNORMA::DoorNormaSrc*)door._pNormaSrcInfo;
+                        for (INT k = 0; k < 3; k++) pDst->_nNormaNums[k] = src._normas[k]._nNumber;
+                    }
+                }
+            }
+            door.setDoorState(stat);
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", rollbackEventDoorState__10CSceneInfoi);
 __asm__(".rdata\n.align 3\n.word 0x726F6F64\n.word 0x4E705F2E\n.word 0x616D726F\n.word 0x49637253\n.word 0x006F666E\n.word 0x00000000\n.word .L0021664C\n.word .L00216654\n.word .L0021665C\n.word .L00216674\n.word .L0021666C\n.word .L00216664\n.text\n");
+#endif
 void _setOpenFlagEventDoor(const DoorInfo& door) {
     USHORT nFloor = CSceneInfo::getCurrentFloorIndex();
     INT nEvIdx = door._type - 1;
