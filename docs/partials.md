@@ -50,9 +50,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1007 (938 in 109 headers, 69 in 30 .cpp); MATCH: 83
-  by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 126, padding 32, path override 24, gate 38, guessed 46, header-level 74, stand-in 28, other 6
-stand-ins: 388 foreign in 125 files (109 names), 198 unattributed, 174 own
+PARTIAL: 1018 (938 in 109 headers, 80 in 30 .cpp); MATCH: 92
+  by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 127, padding 32, path override 24, gate 39, guessed 46, header-level 74, stand-in 37, other 6
+stand-ins: 393 foreign in 125 files (112 names), 199 unattributed, 175 own
 duplicate class names across headers: 24
 padding: 33 arrays, 25 accessors
 mechanisms: 945 sites (919 untagged); #line: 1238
@@ -68,12 +68,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
+| R0 | 4.0 | `System/Graphic/Effect/libppp/pppPart.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | sceGsLoadImage (1 complete) |  |
 | R0 | 4.0 | `System/Memoca.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMemoca (1 complete) |  |
 | R0 | 4.0 | `System/VramMan.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CVramMan (1 complete) |  |
+| R0 | 2.0 | `Game/SceneEnv.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CSceneEnv (1 partial) |  |
 | R0 | 2.0 | `System/CoordMan.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CCoordMan (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/2d/2DLay.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | LAY_SCREEN (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/Effect/libppp/keProg/pppKeLns.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | sceGsStoreImage (1 complete) |  |
-| R0 | 2.0 | `System/Graphic/Effect/libppp/pppPart.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | sceGsLoadImage (1 complete) |  |
 | R0 | 2.0 | `System/Movie/Movie.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMovie (1 complete) |  |
 | R0 | 2.0 | `System/Movie/MovieFiles.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMovieFiles (1 complete) |  |
 | R0 | 2.0 | `System/PadIO.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPadIO (1 complete) |  |
@@ -87,7 +88,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 12.5 | `Form/Menu/JMemoFlag.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CJiminyMemoFlag (1 superset) | inline bodies or virtuals |
 | R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 | R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
-| R1 | 11.5 | `System/Buf.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users, 3 PARTIAL | CBuf (1 superset) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -121,6 +121,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `SAVELOAD` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
 | `TIM2_PICTUREHEADER` | missing | System/Graphic/TexUtil.h | 3 |  |  |
 | `CCamp` | complete | Form/Menu/Camp.h | 2 |  |  |
+| `CDebugWindow` | superset | Form/DebugWindow.h | 2 |  | padding: _m_0x40; virtual order differs |
 | `CGlare` | complete | System/Graphic/Glare.h | 2 |  |  |
 | `CMemoca` | complete | System/Memoca.h | 2 |  |  |
 | `CMessageManager` | complete | Game/MessageManager.h | 2 |  |  |
@@ -132,6 +133,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CVramMan` | complete | System/VramMan.h | 2 |  |  |
 | `QWdata` | complete | System/Graphic/Gprim.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
+| `sceGsLoadImage` | complete | System/Graphic/Effect/libppp/pppPart.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `ALF_DATA` | superset | Game/Map.h | 1 |  | 1 PARTIAL |
 | `ATP` | complete | Game/Atel/VSME.h | 1 |  |  |
@@ -145,7 +147,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CCollUtil` | partial | Game/Collision/CollUtilA.h | 1 |  | missing fields: m_iInfo, m_iInfo2; missing methods: backupChipStatus, checkHangEdge, checkLadderUp, clean, closestPointOnLine, detectActorTrapXZ, ... (+26); padding: _pad028, _pad224; extra methods: getInstance; 10 PARTI |
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
 | `CCoordMan` | complete | System/CoordMan.h | 1 |  |  |
-| `CDebugWindow` | superset | Form/DebugWindow.h | 1 |  | padding: _m_0x40; virtual order differs |
 | `CDelayedFree` | superset | System/LinkedBuf.h | 1 |  | extra methods: addFreeMallocPtr; 1 PARTIAL |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CEffectMotion` | complete | Game/EffectMotion.h | 1 |  |  |
@@ -159,9 +160,11 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CLevelUp` | complete | Form/Menu/LevelUp.h | 1 |  |  |
 | `CLockOnManager` | complete | Game/LockOnManager.h | 1 |  |  |
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
+| `CMainApp` | gated | System/MainApp.h | 1 |  | 1 PARTIAL |
 | `CMemocaAgent` | complete | Form/Menu/SaveLoadUtil.h | 1 |  |  |
 | `CMemocaDataEntries` | superset | Form/Menu/SaveLoadUtil.h | 1 |  | extra methods: setNoSpace |
 | `CMinigameManager` | complete | Game/MinigameManager.h | 1 |  |  |
+| `CModel` | superset | System/Graphic/Model.h | 1 |  | virtual order differs; 4 PARTIAL |
 | `CMovie` | complete | System/Movie/Movie.h | 1 |  |  |
 | `CMovieFiles` | complete | System/Movie/MovieFiles.h | 1 |  |  |
 | `CMovieScript` | complete | System/Movie/MovieScript.h | 1 |  |  |
@@ -183,6 +186,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRoulette` | complete | Form/Menu/Roulette.h | 1 |  |  |
 | `CRsrcTex` | gated | System/RsrcData.h | 1 |  |  |
 | `CRsrcVSV` | gated | System/RsrcData.h | 1 |  | missing methods: getBgmID, getFilePath, getSectorSize, getStartSector, ~CRsrcVSV |
+| `CSceneEnv` | partial | Game/SceneEnv.h | 1 |  | missing methods: clearStop, ~CSceneEnv |
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CSummon` | partial | Game/Player/Summon.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CTaskMan` | superset | System/TaskMan.h | 1 |  | 3 PARTIAL |
@@ -200,7 +204,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
 | `ZONEDATA` | missing | Game/Map.h | 1 |  |  |
 | `pacVif1Packet` | missing | System/Graphic/PackMan.h | 1 |  |  |
-| `sceGsLoadImage` | complete | System/Graphic/Effect/libppp/pppPart.h | 1 |  |  |
 | `sceGsStoreImage` | complete | System/Graphic/Effect/libppp/keProg/pppKeLns.h | 1 |  |  |
 | `C3DCPrim` | partial | System/Graphic/3DCPrim.h | 0 | System/Graphic/GprimFull.h | missing methods: getObjPtr, makePkt_Line0, makePkt_Line1, makePkt_LineStrip0, makePkt_LineStrip1, makePkt_None, ... (+13); parameter count differs: create; virtual order differs |
 | `C3DLine` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h |  |
@@ -329,7 +332,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
 | `System/Component.h` | 3 | 1/1/0/0 | 5 |
 | `System/Coord.h` | 3 | 0/1/0/0 | 16 |
-| `System/Debug.h` | 5 | 0/0/0/2 | 270 |
+| `System/Debug.h` | 5 | 0/0/0/2 | 271 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 10 |
 | `System/Fsm.h` | 4 | 1/0/0/1 | 109 |
 | `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 11 |
@@ -349,7 +352,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/DeFocus.h` | 5 | 0/0/0/5 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
 | `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 169 |
-| `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 171 |
+| `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 172 |
 | `System/Graphic/Effect/effect.h` | 7 | 1/1/4/0 | 75 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 3 | 2/0/0/0 | 13 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
@@ -393,7 +396,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/SJoint.h` | 9 | 0/0/0/0 | 199 |
 | `System/Task.h` | 27 | 1/2/0/1 | 233 |
 | `System/TaskMan.h` | 7 | 1/2/0/0 | 83 |
-| `System/Vector.h` | 21 | 0/0/3/0 | 265 |
+| `System/Vector.h` | 21 | 0/0/3/0 | 266 |
 
 ## Mechanisms
 

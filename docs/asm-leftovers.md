@@ -29,7 +29,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Form/Menu/Camp` | 12 | 6098 | 12 |  |
 | `Form/Menu/JiminyMemo` | 83 | 5244 | 19 | .bss |
 | `Game/Player/PlayerDRiku` | 4 | 5226 | 4 |  |
-| `System/Graphic/PackMan` | 42 | 4290 |  | .bss .rodata |
 | `Game/Entity` | 117 | 3865 |  | .rodata |
 | `Game/Map` | 26 | 3779 |  | .data .rodata |
 | `Game/Player/Player` | 11 | 3573 | 11 |  |
@@ -39,6 +38,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
 | `Game/CardRevolver` | 10 | 2061 | 10 |  |
 | `Form/Menu/RoomCreation` | 1 | 1995 | 1 |  |
+| `System/Graphic/PackMan` | 9 | 1830 | 5 | .bss .rodata |
 | `System/Graphic/Model` | 13 | 1812 | 13 |  |
 | `Game/Card` | 12 | 1794 | 12 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 | .rodata |
@@ -151,6 +151,11 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/ModelMan` | `reset__9CModelMan` | 43 | (comment) reset: near-match. The original reloads the 0.0f arguments (and stack addresses) after each call to FVECTOR::set (called out of line here); this build keeps them in callee-saved registers across the call. |
 | `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | (comment) setupDrawEnv: near-match. The original reloads the 0.0f arguments (and stack addresses) after each call to FVECTOR::set (called out of line here); this build keeps them in callee-saved registers across the call. |
 | `System/Graphic/ModelMan` | `setupDrawMode__9CModelMani` | 64 | (comment) setupDrawMode: near-match. The two halves of the first GIF tag get swapped registers ($v0/$v1). |
+| `System/Graphic/PackMan` | `initialize__8CPackMan` | 66 | ~73 lines - the run of init stores: the original keeps five %hi parts (s_pktVif1FG+4 .. s_nReqDrawMode) in s0-s4 and issues the stores in another order (same pattern as Game/SceneInfo clear); the isNTSC() call's result is unused. Store orders not iterated further. |
+| `System/Graphic/PackMan` | `changeLayer__8CPackMani` | 98 | 29 lines - case 1: the original loads %hi(s_nMaxPktSizeVif1) before %hi(s_pPktVif1) but stores s_pPktVif1 first (and its ZBUF temps land in a1/a2); per-case store orders from an exhaustive search (104 -> 29), cases 2 and 3 match. |
+| `System/Graphic/PackMan` | `_makePkt_SaveScreen__Fv` | 323 | 22 lines - the start: the original keeps %hi(s_pPktVif1) in s0 for the inlined pkInit store and the Reset argument and copies it to s1 for the rest (move s1,s0), and stores s_nMaxPktSizeVif1 = 0x8000 first; ours uses one register (8 bytes shorter, so the loop-head nop also differs). Body, loop and … |
+| `System/Graphic/PackMan` | `_initFramePacketForMovie__Fi` | 405 | 38 lines - loop 2's X values: the original computes (-(nDstW/2)) << 4 and (nDstW/2) << 4 separately (negu before the shift), ours CSEs them into one shift and a subu; nSrcW/nDstW get s5/s4 swapped. Loops 1 and 3, the TEX0/RGBAQ qwords and the tail match. |
+| `System/Graphic/PackMan` | `sceVif1PkCloseUpkCode__FP13pacVif1Packet` | 53 | ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 min of … |
 | `System/Graphic/ShadowModel` | `drawBefore__15CShadowModelMan` | 188 | (comment) Near match (two instructions: the original updates the i 64 + 63 induction register at the end of the loop body, not after i++), kept for reference: |
 | `System/Graphic/WorldEnv` | `initialize__9CWorldEnv` | 128 |  |
 | `System/Graphic/WorldEnv` | `mainProc__9CWorldEnv` | 111 | (comment) mainProc: near-match. The original stores _vecMikePos.z through a new %hi(_vecMikePos + 8) after the sqc2 of the unit vector (Coord.h's inline, lines 87-91); here the address register of the asm is reused. |
@@ -350,7 +355,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 558 functions (93737 instructions) in 85 units, 227 of them parked; 15 units take a data section from assembly.
+Totals: 525 functions (91277 instructions) in 85 units, 232 of them parked; 15 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
