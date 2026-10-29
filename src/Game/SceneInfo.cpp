@@ -1,6 +1,6 @@
 #include "khtypes.h"
-#define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"
-#define STATUS_H_PATH "c:/KHCOM/MainApp/Game/Status.h"
+#define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"     /* MATCH: the original's Card.h/Status.h strings carry */
+#define STATUS_H_PATH "c:/KHCOM/MainApp/Game/Status.h" /* the full path (SHA-1 fails without either) */
 #define TASK_H_NO_SLC_OVERFLOW_MSG /* MATCH: the original .rodata has no Task.h container-overflow message */
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
