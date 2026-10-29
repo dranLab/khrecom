@@ -32,10 +32,7 @@ private:
     UBYTE _m_0x40[0xc0];
 };
 
-class CSceneInfo { /* System/SceneInfo.h */
-public:
-    static INT getNextAtelSrcID();
-};
+#include "Game/SceneInfo.h"
 
 class CRsrcDB { /* System/RsrcDB.h */
 public:

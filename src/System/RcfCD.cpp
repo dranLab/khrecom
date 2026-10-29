@@ -73,11 +73,7 @@ public:
     static BOOL isSceneManagedMode();
 };
 
-class CSceneInfo { /* Game/SceneInfo.h */
-public:
-    static void setReverbVal(BYTE nVal);
-    static void setSeRangeRatio(BYTE nVal);
-};
+#include "Game/SceneInfo.h"
 
 struct RcrsExtData {
     CHAR* _szExt;
