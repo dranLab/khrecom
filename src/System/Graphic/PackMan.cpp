@@ -11,6 +11,12 @@ typedef unsigned long u_long;
 typedef unsigned short u_short;
 typedef unsigned char u_char;
 
+extern char _end[];
+namespace EERAM {
+static INT _HEAP_START = (((INT)_end - 1) / 64 + 1) * 64;
+static INT _HEAP_SIZE = 0x1FC0000 - _HEAP_START;
+}
+
 struct VTransInfo { /* PARTIAL: stand-in for System/Graphic/TexUtil VTransInfo: gated by SYSTEM_GRAPHIC_GPRIM_CPP; strings: Gprim.h (.rodata still asm) */
     UINT _nDistPos;
     USHORT _nFormat;
@@ -368,8 +374,51 @@ static inline u_long128 _pack(u_long lo, u_long hi) {
     return r;
 }
 
+/* The file's statics, in the original's .bss order */
 namespace {
-extern pacVif1Packet* s_pPktVif1;
+u_long128 s_pPktBufVif1[2][36992] __attribute__((aligned(64)));
+pacVif1Packet s_pktVif1;
+u_long128 s_pPktBufVif1BG[2][1664] __attribute__((aligned(64)));
+pacVif1Packet s_pktVif1BG;
+INT s_nMaxPktSizeVif1FG;
+void* s_pktVif1FGBase;
+pacVif1Packet s_pktVif1FG;
+INT s_nMaxPktSizeVif1Semi;
+u_long128* s_pktVif1SemiBase;
+pacVif1Packet s_pktVif1Semi;
+u_long128 s_pPktBufVif1FrameEff[320] __attribute__((aligned(64)));
+pacVif1Packet s_pktVif1FrameEff;
+u_long128 s_pPktBufVif1Frame[320] __attribute__((aligned(64)));
+pacVif1Packet s_pktVif1Frame;
+sceDmaChan* s_pDmaChanVif1;
+sceDmaChan* s_pDmaChanVif0;
+sceDmaChan* s_pDmaChanGif;
+pacVif1Packet* s_pPktVif1;
+UINT s_nMaxPktSizeVif1;
+UINT s_nMaxPktSizeVif1Normal;
+UINT s_nTmpPacketSize;
+INT s_nDB;
+sceGsDBuffDc s_DBuf;
+sceGsDBuffDc s_DBufMovie;
+SHORT s_nReqDrawMode;
+SHORT s_nDrawMode;
+SHORT s_nReqPcrtcMode;
+SHORT s_nPcrtcMode;
+INT s_nDispOffsetX;
+INT s_nDispOffsetY;
+INT s_nBGColor;
+INT s_nDisp1Alpha;
+INT s_nFSAA_Sharpness;
+INT s_transFrameKind;
+GpuRegsInfoSep s_SysGpuRegs2;
+GpuRegsInfoSep s_DefaultGpuRegs2;
+GpuRegsInfoSep s_DefaultGpuRegs1;
+UINT s_nDawEnableBit;
+UINT s_nMovieDrawW;
+UINT s_nMovieDrawH;
+UINT s_nMovieDispW;
+UINT s_nMovieDispH;
+INT s_nPkUseSize;
 }
 
 #line 179
@@ -381,51 +430,6 @@ static inline void _checkDmaTag() {
     if (pPkt->pDmaTag) _checkSize((u_long128*)(((UINT)pPkt->pCurrent + 15) & ~15) - pPkt->pDmaTag - 1);
 }
 
-/* The file's statics; the data still comes from the original (no SOURCE DATA yet) */
-namespace {
-extern u_long128 s_pPktBufVif1[2][36992];
-extern u_long128 s_pPktBufVif1BG[2][1664];
-extern u_long s_pPktBufVif1FrameEff[320];
-extern u_long s_pPktBufVif1Frame[320];
-extern pacVif1Packet s_pktVif1;
-extern pacVif1Packet s_pktVif1BG;
-extern pacVif1Packet s_pktVif1FG;
-extern INT s_nMaxPktSizeVif1Semi;
-extern u_long128* s_pktVif1SemiBase;
-extern pacVif1Packet s_pktVif1Semi;
-extern pacVif1Packet s_pktVif1FrameEff;
-extern pacVif1Packet s_pktVif1Frame;
-extern sceDmaChan* s_pDmaChanVif1;
-extern sceDmaChan* s_pDmaChanVif0;
-extern sceDmaChan* s_pDmaChanGif;
-extern pacVif1Packet* s_pPktVif1;
-extern UINT s_nMaxPktSizeVif1;
-extern UINT s_nMaxPktSizeVif1Normal;
-extern INT s_nMaxPktSizeVif1FG;
-extern void* s_pktVif1FGBase;
-extern UINT s_nTmpPacketSize;
-extern INT s_nDB;
-extern sceGsDBuffDc s_DBuf;
-extern SHORT s_nReqDrawMode;
-extern SHORT s_nDrawMode;
-extern SHORT s_nReqPcrtcMode;
-extern SHORT s_nPcrtcMode;
-extern INT s_nDispOffsetX;
-extern INT s_nDispOffsetY;
-extern INT s_nBGColor;
-extern INT s_nDisp1Alpha;
-extern INT s_nFSAA_Sharpness;
-extern INT s_transFrameKind;
-extern GpuRegsInfoSep s_SysGpuRegs2;
-extern GpuRegsInfoSep s_DefaultGpuRegs2;
-extern GpuRegsInfoSep s_DefaultGpuRegs1;
-extern UINT s_nDawEnableBit;
-extern UINT s_nMovieDrawW;
-extern UINT s_nMovieDrawH;
-extern UINT s_nMovieDispW;
-extern UINT s_nMovieDispH;
-extern INT s_nPkUseSize;
-}
 
 /* MATCH: pkInit and the init*Packet functions inline one helper (the ref lists its parameters as pkInit's locals) */
 static inline void _pkInit(u_long128* pInBase, pacVif1Packet* pPkt, UINT nInMaxPkt) {
@@ -1166,7 +1170,7 @@ void CPackMan::setFrameEffect(INT nKind, INT n1, INT n2, INT n3) {
 static void _initFramePacket(INT transKind) {
     pacVif1Packet* pPkt = &s_pktVif1Frame;
     INT intr = DIntr();
-    sceVif1PkInit(pPkt, (u_long128*)s_pPktBufVif1Frame);
+    sceVif1PkInit(pPkt, s_pPktBufVif1Frame);
     sceVif1PkReset(pPkt);
     sceVif1PkCnt(pPkt, 0);
     sceVif1PkAddCode(pPkt, 0x13000000);
@@ -1215,7 +1219,7 @@ static void _initFramePacketForMovie(INT nAlpha) {
     UINT nSrcH = s_nMovieDrawH;
     UINT nDstW = s_nMovieDispW;
     UINT nDstH = s_nMovieDispH;
-    sceVif1PkInit(pPkt, (u_long128*)s_pPktBufVif1Frame);
+    sceVif1PkInit(pPkt, s_pPktBufVif1Frame);
     sceVif1PkReset(pPkt);
     sceVif1PkCnt(pPkt, 0);
     sceVif1PkAddCode(pPkt, 0x13000000);
@@ -1297,7 +1301,7 @@ static void _initFramePacketForMovie(INT nAlpha) {
 static void _initFrameEffPacket(INT transKind, INT in_Xofs, INT in_Yofs, INT in_Alpha) {
     pacVif1Packet* pPkt = &s_pktVif1FrameEff;
     INT intr = DIntr();
-    sceVif1PkInit(pPkt, (u_long128*)s_pPktBufVif1FrameEff);
+    sceVif1PkInit(pPkt, s_pPktBufVif1FrameEff);
     sceVif1PkReset(pPkt);
     sceVif1PkCnt(pPkt, 0);
     sceVif1PkAddCode(pPkt, 0x13000000);
@@ -1436,7 +1440,7 @@ void CPackMan::setDefault_ALPHA_2(ULONGLONG n) { s_DefaultGpuRegs2._nALPHA = n; 
 void CPackMan::setDefault_TEST_2(ULONGLONG n) { s_DefaultGpuRegs2._nTEST = n; }
 void CPackMan::setDefault_FBA_2(ULONGLONG n) { s_DefaultGpuRegs2._nFBA = n; }
 void CPackMan::setDefault_ZBUF_2(ULONGLONG n) { s_DefaultGpuRegs2._nZBUF = n; }
-u_long* CPackMan::getPktVif1Frame() { return s_pPktBufVif1Frame; }
+u_long* CPackMan::getPktVif1Frame() { return (u_long*)s_pPktBufVif1Frame; }
 INT CPackMan::getTransFrameKind() { return s_transFrameKind; }
 void CPackMan::enableDraw(INT nBit) { s_nDawEnableBit |= nBit; }
 void CPackMan::disableDraw(INT nBit) { s_nDawEnableBit &= ~nBit; }
@@ -1818,5 +1822,4 @@ void sceVif1PkRefMpg(pacVif1Packet* pPacket, u_short vuaddr, u_long128* pMicro, 
         opt1 = 0;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", __static_initialization_and_destruction_0_0013E4E0);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _GLOBAL_$I$c__KHCOM_MainApp_System_Graphic_PackMan.cppcWbaaa);
+// SOURCE DATA: .bss
