@@ -33,11 +33,6 @@ struct MODELDATA;
    and CBBox after it) for that unit only: System/Graphic/DispList and Form/Menu/JiminyMemo still declare CSemiModel
    stand-ins. Every inline is defined in the class body, in the original's weak emission order. */
 #include "System/Graphic/ModelMan.h"
-/* PARTIAL: the header inlines' strings, while the unit's .rodata is asm */
-extern "C" char D_00460DD8[]; /* "System/Graphic/Model.h" */
-extern "C" char D_00460E00[]; /* "m_pData != __null" */
-extern "C" char D_00460E18[]; /* "System/Graphic/Model.h(569)" */
-extern "C" char D_00460E48[]; /* "0" */
 inline void* operator new(size_t, void* p) throw() { return p; }
 /* MATCH: the debug new reads the return address inside an inline operator new, after the size and the string */
 inline void* operator new(size_t size, const char* pMsg) throw() {
@@ -288,7 +283,7 @@ public:
     INT getBBoxFlag() { return m_BBoxFlag; }
     void setBBoxFlag(INT nFlag) { m_BBoxFlag = nFlag; }
     BBOX* getBBox(INT nIndex) {
-        if (!(m_pData != NULL)) AssertApp(D_00460DD8, 262, D_00460E00, 0);
+        if (!(m_pData != NULL)) AssertApp(__FILE__, 262, "m_pData != __null", 0);
         return &m_pData->m_pBBox[nIndex];
     }
     MODELDATA* getModelData() { return (MODELDATA*)m_pData; }
@@ -429,7 +424,7 @@ private:
     void _disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0);
 protected:
     void disp0(INT semikind, u_long nInTest, INT iFlags);
-    virtual CSemiModel* createSemiModel() { return new (D_00460E18) CSemiModel; }
+    virtual CSemiModel* createSemiModel() { return new (__FILE__ "(569)") CSemiModel; }
     BOOL isManagedSemiModel() const { return m_nFlag & 1; }
     void manageSemiModel(BOOL bOn) {
         if (bOn) m_nFlag |= 1;
@@ -603,7 +598,7 @@ public:
     }
 private:
     virtual void makePkt();
-    void setLayerFG(BYTE nInDepth) { AssertApp(D_00460DD8, 675, D_00460E48, 0); }
+    void setLayerFG(BYTE nInDepth) { AssertApp(__FILE__, 675, "0", 0); }
 };
 
 class CBBox : public CGPrim {

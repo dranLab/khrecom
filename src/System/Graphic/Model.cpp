@@ -1,6 +1,12 @@
+#define TASK_H_NO_SLC_OVERFLOW_MSG /* MATCH: this unit's original lacks Task.h's SLC overflow message */
 #include "khtypes.h"
 #define SYSTEM_GRAPHIC_MODEL_CPP
 #define MODELDATA_H_TEXINFO /* PARTIAL: modeldata.h's TexInfo/TexInfoStub (gated for System/Graphic/ModelMan) */
+/* MATCH: this unit's original names the headers with their full path (c:/KHCOM/MainApp/...) */
+#define GPRIM_H_PATH "src/System/Graphic/Gprim.h"
+#define MODELDATA_H_PATH "src/System/Graphic/modeldata.h"
+#define MODEL_H_PATH "src/System/Graphic/Model.h"
+#include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"
 #include "System/Task.h"
 #include "System/Coord.h"
@@ -53,39 +59,11 @@ extern const FVECTOR ONE_VECTOR;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
 SHADERDESC* searchShaderDesc(USHORT mode);
 void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin); /* static in the original (parked, asm glabel) */
-extern "C" const FLOAT D_00460FB0; /* -FLT_MAX / 2 */
-extern "C" const FLOAT D_00460FB4; /* FLT_MAX / 2 */
-extern "C" char D_00460DD8[]; /* "System/Graphic/Model.h" */
-extern "C" const FLOAT D_00460FA8; /* -FLT_MAX / 2 */
-extern "C" const FLOAT D_00460FAC; /* FLT_MAX / 2 */
 namespace VRAM { /* PARTIAL: stand-in for System/VramMan VRAM: owner not written */
 extern INT _TEX_TMP1_START;
 extern INT _CLUT_TMP1_START;
 }
-extern "C" char D_00460D98[]; /* "System/Graphic/modeldata.h" */
-extern "C" char D_00460DC8[];
-extern "C" char D_00461090[];
-extern "C" char D_00461028[];
-extern "C" char D_00460FC8[];
-extern "C" char D_00460FF8[];
-extern "C" char D_00460F30[];
-extern "C" char D_00460F60[];
-extern "C" char D_00460F78[];
-extern "C" char D_00460E00[];
-extern "C" char D_00460F38[];
-extern "C" char D_00460FB8[];
-extern "C" char D_00461110[];
 inline void* operator new[](size_t, void* p) throw() { return p; }
-extern u_long128* g_mpg0;
-extern u_long128* g_mpg2;
-extern "C" char D_00461058[];
-extern "C" char D_004610C0[];
-extern "C" char D_004610D0[];
-extern "C" char D_00461100[];
-extern "C" char D_00461140[];
-extern "C" char D_00461148[];
-extern "C" char D_00461160[];
-extern "C" char D_00461178[];
 extern "C" int strncmp(const char*, const char*, unsigned int);
 class CShadowModel : public CFadeModel { /* PARTIAL: stand-in for CShadowModel: owner not written */
     INT m_nSize; /* 0x28 */
@@ -137,19 +115,17 @@ union FIVECTOR { /* PARTIAL: stand-in for FIVECTOR: owner not written */
     FVECTOR f;
     IVECTOR i;
 };
-extern "C" SHADERDESC D_00505118[]; /* the shader table */
-extern "C" char D_00460E80[];
-extern "C" char D_00460EB8[]; /* __FILE__ */
-extern "C" char D_00460EE8[];
-extern "C" char D_00460F18[];
-extern "C" char D_00460F58[];
-extern "C" char D_00460EF0[];
-extern "C" char D_00460F10[];
-extern "C" char D_00460F20[];
-extern "C" char D_00460F28[];
 extern "C" int strcmp(const char*, const char*);
 extern "C" int strncasecmp(const char*, const char*, unsigned int);
 struct TexInfo;
+
+extern "C" u_long128 vu1mpg_start[];
+extern "C" u_long128 vu1mpg2_start[];
+u_long128* g_mpg0 = vu1mpg_start;
+u_long128* g_mpg2 = vu1mpg2_start;
+FMATRIX* CModel::m_pWSMatCache = NULL;
+u_long128* CModel::m_pMpg = NULL;
+INT CModel::m_iSendFlg = 0;
 
 class CShader;
 
@@ -213,10 +189,10 @@ u_long128* CModel::getMicroProg() {
 /* Parked: 12 lines off, registers only: the original keeps the masked mode in a1, the table pointer in a2, 0xffff in a3 and the TRACE string's %hi in a0; ours mode a0, pointer a1, 0xffff a2, string a3. Tried: for/while/break loop shapes, a UINT copy of mode; permuter 12 min (24539 candidates, stays 12). */
 #if 0
 SHADERDESC* searchShaderDesc(USHORT mode) {
-    SHADERDESC* ret = D_00505118;
+    SHADERDESC* ret = g_ShaderDescTbl;
     while (TRUE) {
         if (ret->m_Mode == 0xFFFF) {
-            TRACE(D_00460E80);
+            TRACE("\203V\203F\201[\203_\203f\203B\203X\203N\203\212\203v\203^\202\252\214\251\202\302\202\251\202\350\202\334\202\271\202\361\202\305\202\265\202\275(%04x).\n");
             return NULL;
         }
         if (ret->m_Mode == (mode & ret->m_Mask)) return ret;
@@ -226,6 +202,9 @@ SHADERDESC* searchShaderDesc(USHORT mode) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", searchShaderDesc__FUs);
 #endif
+/* MATCH: stripped placeholder (.sdata): the parked searchShaderDesc's string at its .rodata position */
+__asm__(".section .sdata\n");
+void __attribute__((section(".sdata"))) _searchShaderDesc_rodata() { TRACE("\203V\203F\201[\203_\203f\203B\203X\203N\203\212\203v\203^\202\252\214\251\202\302\202\251\202\350\202\334\202\271\202\361\202\305\202\265\202\275(%04x).\n", 0); }
 void CModel::releaseData() {
     if (m_pSemiModel && isManagedSemiModel()) {
         delete m_pSemiModel;
@@ -245,7 +224,7 @@ void CModel::releaseData() {
     m_pTexAnm = NULL;
 }
 INT CModel::link(CTask* p, const CHAR* pName) {
-    if (!(p)) AssertApp(D_00460EB8, 451, D_00460EE8, 0);
+    if (!(p)) AssertApp(__FILE__, 451, "p", 0);
     CCoords* pCrds = p->getCoords();
     if (!pCrds) {
         p->createCoords();
@@ -257,8 +236,8 @@ INT CModel::link(CTask* p, const CHAR* pName) {
 INT CModel::link(CCoords& crds, const CHAR* pName) {
     MODELDATA* m = CRsrcDB::getRsrcAMF(pName, NAME_CASE_SENSITIVE);
     if (!m) {
-        TRACE(D_00460EF0, pName);
-        AssertApp(D_00460EB8, 469, D_00460F10, 0);
+        TRACE("\203\202\203f\203\213\203f\201[\203^%s\202\252\202\240\202\350\202\334\202\271\202\361\n", pName);
+        AssertApp(__FILE__, 469, "m", 0);
     }
     m_pData = m;
     return link(crds);
@@ -278,46 +257,46 @@ INT CModel::getBoneIndex(const CHAR* pName) const {
 }
 MODELDATA* AMFfromMDL(const CHAR* pszName, INT nIdx) {
     MODELDATA** ret = CRsrcDB::getRsrcMDL(pszName, NAME_CASE_SENSITIVE);
-    if (!(ret)) AssertApp(D_00460EB8, 500, D_00460F18, 0);
+    if (!(ret)) AssertApp(__FILE__, 500, "ret", 0);
     return ret[nIdx];
 }
 MODELDATA* AMFfromMDL(INT nGroup, INT nIdx) {
     MODELDATA** ret = CRsrcDB::getRsrcMDL(nGroup);
-    if (!(ret)) AssertApp(D_00460EB8, 508, D_00460F18, 0);
+    if (!(ret)) AssertApp(__FILE__, 508, "ret", 0);
     return ret[nIdx];
 }
 INT CModel::assign(CTask* p, const CHAR* pName, INT n) {
-    if (!(p)) AssertApp(D_00460EB8, 516, D_00460EE8, 0);
+    if (!(p)) AssertApp(__FILE__, 516, "p", 0);
     CCoords* pCrds = p->getCoords();
-    if (!(pCrds)) AssertApp(D_00460EB8, 518, D_00460F20, 0);
+    if (!(pCrds)) AssertApp(__FILE__, 518, "pCrds", 0);
     m_pTask = p;
     return assign(*pCrds, pName, n);
 }
 INT CModel::assign(CCoords& crds, const CHAR* pName, INT n) {
     MODELDATA* d = CRsrcDB::getRsrcAMF(pName, NAME_CASE_SENSITIVE);
     if (!d) {
-        TRACE(D_00460EF0, pName);
-        AssertApp(D_00460EB8, 530, D_00460F28, 0);
+        TRACE("\203\202\203f\203\213\203f\201[\203^%s\202\252\202\240\202\350\202\334\202\271\202\361\n", pName);
+        AssertApp(__FILE__, 530, "d", 0);
     }
     m_pData = d;
     return assign(crds, n);
 }
 INT CModel::assign(CTask* p, INT n) {
-    if (!(p)) AssertApp(D_00460EB8, 537, D_00460EE8, 0);
+    if (!(p)) AssertApp(__FILE__, 537, "p", 0);
     CCoords* pCrds = p->getCoords();
-    if (!(pCrds)) AssertApp(D_00460EB8, 539, D_00460F20, 0);
+    if (!(pCrds)) AssertApp(__FILE__, 539, "pCrds", 0);
     m_pTask = p;
     return assign(*pCrds, n);
 }
 INT CModel::assign(CCoords& crds, INT crdidx) {
     INT i;
-    if (!(m_pData)) AssertApp(D_00460EB8, 546, D_00460F30, 0);
+    if (!(m_pData)) AssertApp(__FILE__, 546, "m_pData", 0);
     m_pCrds = &crds;
     m_BoneStart = crdidx;
     m_BoneSkip = 0;
     m_BoneIdx = 0;
     m_TransTexCount = m_pData->m_nTexNum;
-    if (!(!(m_TransTexCount > 16))) AssertApp(D_00460EB8, 579, D_00460F38, 0);
+    if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 579, "! (m_TransTexCount > TEXMAX)", 0);
     for (i = 0; i < m_TransTexCount; i++) {
         *(u_long*)&m_TexInfo[i] = *(u_long*)((BYTE*)m_pData->m_pTexParam + i * 0x20 + 0x10);
     }
@@ -331,7 +310,7 @@ void CModel::setModelData(const MODELDATA* pData) {
     link(m_pTask);
 }
 INT CModel::link(CTask* p) {
-    if (!(p)) AssertApp(D_00460EB8, 620, D_00460EE8, 0);
+    if (!(p)) AssertApp(__FILE__, 620, "p", 0);
     CCoords* pCrds = p->getCoords();
     if (!pCrds) {
         p->createCoords();
@@ -346,7 +325,7 @@ INT CModel::link(CCoords& crds) {
     BOOL add;
     INT nBoneNum;
     INT i;
-    if (!(m_pData)) AssertApp(D_00460EB8, 633, D_00460F30, 0);
+    if (!(m_pData)) AssertApp(__FILE__, 633, "m_pData", 0);
     m_pCrds = &crds;
     INT nCrd = crds.getCoordNum();
     m_BoneSkip = nCrd;
@@ -373,7 +352,7 @@ INT CModel::link(CCoords& crds) {
         m_BoneIdx = m_BoneStart = m_pData->m_BoneIndex - 1;
     }
     m_TransTexCount = m_pData->m_nTexNum;
-    if (!(!(m_TransTexCount > 16))) AssertApp(D_00460EB8, 707, D_00460F38, 0);
+    if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 707, "! (m_TransTexCount > TEXMAX)", 0);
     for (i = 0; i < m_TransTexCount; i++) {
         *(u_long*)&m_TexInfo[i] = *(u_long*)((BYTE*)m_pData->m_pTexParam + i * 0x20 + 0x10);
     }
@@ -389,13 +368,13 @@ CCoord& CModel::getCrd(INT idx) {
     return m_pCrds->Crd(m_BoneStart + idx);
 }
 INT CModel::getCoordNum() const {
-    if (!(m_pCrds)) AssertApp(D_00460EB8, 737, D_00460F58, 0);
+    if (!(m_pCrds)) AssertApp(__FILE__, 737, "m_pCrds", 0);
     return *(INT*)((BYTE*)m_pCrds + 4);
 }
 void CModel::setLocal(INT index) {
-    if (!(m_pCrds != __null)) AssertApp(D_00460EB8, 743, D_00460F60, 0);
-    if (!(0 <= index && index < m_pCrds->getCoordNum())) AssertApp(D_00460EB8, 744, D_00460F78, 0);
-    if (!(m_pData != __null)) AssertApp(D_00460EB8, 745, D_00460E00, 0);
+    if (!(m_pCrds != __null)) AssertApp(__FILE__, 743, "m_pCrds != __null", 0);
+    if (!(0 <= index && index < m_pCrds->getCoordNum())) AssertApp(__FILE__, 744, "0 <= index && index < m_pCrds->getCoordNum()", 0);
+    if (!(m_pData != __null)) AssertApp(__FILE__, 745, "m_pData != __null", 0);
     m_pCrds->Crd(index).m_Local = ((const FMATRIX*)m_pData->m_pBones)[index]; /* PARTIAL: CCoord::setLocal is Camera's compare+touch form */
 }
 INT CModel::getTextureIndex(const CHAR* pName) const {
@@ -433,8 +412,7 @@ void CModel::changeTextureSub(INT idx, const TexInfo* m) {
         for (i = 0; i < m_pData->m_nTexNum; i++) {
             TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
             t->update(nTmpTex, nTmpClut);
-            if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
-            if (!t->_pTexInfo->isFix()) CTexUtil::sumupTmpTexSize(*t->_pTexInfo, nTmpTex, nTmpClut);
+            if (!t->isFix()) CTexUtil::sumupTmpTexSize(*t->_pTexInfo, nTmpTex, nTmpClut);
         }
     }
 }
@@ -516,8 +494,8 @@ void CModel::getWorldBBoxScr(IVECTOR& vScr, const FMATRIX* pMWS) {
 #if 0
 static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin) {
     FVECTOR vMN[2];
-    vMN[0].set(D_00460FA8, D_00460FA8, D_00460FA8, 1.0f);
-    vMN[1].set(D_00460FAC, D_00460FAC, D_00460FAC, 1.0f);
+    vMN[0].set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
+    vMN[1].set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
     asm volatile("lqc2 $vf4, 0x0(%0)\n"
                  "lqc2 $vf5, 0x10(%0)\n"
                  "lqc2 $vf6, 0x20(%0)\n"
@@ -593,6 +571,9 @@ static void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3);
 #endif
+/* MATCH: stripped placeholder (.sdata): the parked getApplyMatrixBBox's float constants at their .rodata position */
+__asm__(".section .sdata\n");
+BOOL __attribute__((section(".sdata"))) _getApplyMatrixBBox_rodata(FLOAT a, FLOAT b) { return a < -1.70141183e+38f && b > 1.70141183e+38f; }
 /* Parked: 38 lines off: the original keeps &pCrd->m_World as the strength-reduced loop pointer (s3 += 0xd0, counter counted down), &vMax/&vMin in s8/s7 for the init stores and the VU0 block, and loads the final bbox into f4/f5/f0..f3 in max-then-min order. Tried: pCrd[i] indexing (keeps the counter, 41 lines), _x/_y/_z temporaries, set helpers. */
 #if 0
 void CModel::calcWorldBBox(BOOL bCalc) {
@@ -603,14 +584,13 @@ void CModel::calcWorldBBox(BOOL bCalc) {
     CCoord* pCrd;
     INT iBoneNum;
     if ((m_nFlag & 0x200) && !bCalc) return;
-    if (!(m_pData)) AssertApp(D_00460EB8, 1067, D_00460F30, 0);
+    if (!(m_pData)) AssertApp(__FILE__, 1067, "m_pData", 0);
     pCrd = &getCrd(0);
     iBoneNum = m_pData->m_nBoneNum;
-    vMax.set(D_00460FB0, D_00460FB0, D_00460FB0, 1.0f);
-    vMin.set(D_00460FB4, D_00460FB4, D_00460FB4, 1.0f);
+    vMax.set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
+    vMin.set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
     for (i = 0; i < iBoneNum; i++, pCrd++) {
-        if (!(m_pData != __null)) AssertApp(D_00460DD8, 262, D_00460E00, 0);
-        BBOX* bb = &m_pData->m_pBBox[i];
+        BBOX* bb = getBBox(i);
         if (bb->x[0] <= bb->x[1]) {
             v[0].set(bb->x[1], bb->y[1], bb->z[1], 1.0f);
             v[1].set(bb->x[0], bb->y[0], bb->z[0], 1.0f);
@@ -641,6 +621,9 @@ void CModel::calcWorldBBox(BOOL bCalc) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcWorldBBox__6CModeli);
 #endif
+/* MATCH: stripped placeholder (.sdata): the parked calcWorldBBox's float constants at their .rodata position */
+__asm__(".section .sdata\n");
+BOOL __attribute__((section(".sdata"))) _calcWorldBBox_rodata(FLOAT a, FLOAT b) { return a < -1.70141183e+38f && b > 1.70141183e+38f; }
 void CModel::getWorldBBox(FVECTOR& vMax, FVECTOR& vMin) {
     calcWorldBBox(0);
     vMax.x = m_BBox.x[1];
@@ -761,7 +744,7 @@ void CModel::linksub() {
     BOOL bHasSemiData;
     m_Mode = m_pData->getMode();
     m_pShader = searchShaderDesc(m_Mode);
-    if (!(m_pShader)) AssertApp(D_00460EB8, 1738, D_00460FB8, 0);
+    if (!(m_pShader)) AssertApp(__FILE__, 1738, "m_pShader", 0);
     rawMode = m_pData->getRawMode();
     if (rawMode & 0x20000000) m_nTestFlag = (INT)m_nTestFlag & -2;
     else m_nTestFlag = ((INT)m_nTestFlag & -0x4000) | 0xFD;
@@ -782,7 +765,7 @@ void CModel::linksub() {
         }
     }
     if (m_Mode == 0x10 && !m_pFadeModel) {
-        m_pFadeModel = new (com_malloc_d(sizeof(CShadowModel), D_00460FC8, RET_ADDR())) CShadowModel;
+        m_pFadeModel = new (com_malloc_d(sizeof(CShadowModel), __FILE__ "(1781)", RET_ADDR())) CShadowModel;
         if (m_pFadeModel) {
             m_pFadeModel->link(this);
             m_pWSMat = &CShadowModelMan::getWorldScreenMatrix();
@@ -799,7 +782,7 @@ void CModel::addTexture(const CHAR* texName, INT idx) {
     INT i;
     if (m_TransTexCount < m_pData->m_nTexNum + 1) {
         m_TransTexCount = m_pData->m_nTexNum + 1;
-        if (!(!(m_TransTexCount > 16))) AssertApp(D_00460EB8, 1867, D_00460F38, 0);
+        if (!(!(m_TransTexCount > 16))) AssertApp(__FILE__, 1867, "! (m_TransTexCount > TEXMAX)", 0);
     }
     ((TexInfoStub*)&m_TexInfo[m_pData->m_nTexNum])->init(CRsrcDB::getRsrcTex(texName, NAME_CASE_SENSITIVE), -1, -1);
     nTmpTex = 0;
@@ -807,8 +790,7 @@ void CModel::addTexture(const CHAR* texName, INT idx) {
     for (i = 0; i < m_TransTexCount; i++) {
         TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
         t->update(nTmpTex, nTmpClut);
-        if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
-        if (!t->_pTexInfo->isFix()) CTexUtil::sumupTmpTexSize(*t->_pTexInfo, nTmpTex, nTmpClut);
+        if (!t->isFix()) CTexUtil::sumupTmpTexSize(*t->_pTexInfo, nTmpTex, nTmpClut);
     }
     setupUVScroll(0);
 }
@@ -826,7 +808,7 @@ void CModel::setShadowMapModel() {
     }
     rawMode = m_pData->getRawMode();
     if (!(rawMode & 0x100000)) return;
-    m_pShadowMapModel = new (com_malloc_d(sizeof(CShadowMapModel), D_00460FF8, RET_ADDR())) CShadowMapModel;
+    m_pShadowMapModel = new (com_malloc_d(sizeof(CShadowMapModel), __FILE__ "(1909)", RET_ADDR())) CShadowMapModel;
     if (m_pShadowMapModel) {
         m_pShadowMapModel->link(this);
         m_fAlphaScale = 1.0f;
@@ -856,11 +838,9 @@ BOOL CModel::sendTexture(u_long* tex0) {
             BOOL bTexAnm;
             UINT nTexPos;
             UINT nClutPos;
-            if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
-            if (t->_pTexInfo->isFix()) {
+            if (t->isFix()) {
                 if (tex) {
-                    if (!t->_pTexInfo) AssertApp(D_00460D98, 204, D_00460DC8, 0);
-                    *tex = t->_pTexInfo->getTPage();
+                    *tex = t->getTPage();
                     tex++;
                 }
                 continue;
@@ -873,11 +853,9 @@ BOOL CModel::sendTexture(u_long* tex0) {
                 bTexAnm = TRUE;
             }
             bSend |= bUpdate;
-            if (!t->_pTexInfo) AssertApp(D_00460D98, 201, D_00460DC8, 0);
-            if (t->_pTexInfo->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
+            if (t->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
             else nTexPos = nTmpTex + t->_nTexPos;
-            if (!t->_pTexInfo) AssertApp(D_00460D98, 202, D_00460DC8, 0);
-            if (t->_pTexInfo->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
+            if (t->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
             else nClutPos = nTmpClut + t->_nClutPos;
             if (bUpdate) {
                 CPackMan::pkRefLoadImage(nClutPos, t->_pTexInfo->_ClutInfo);
@@ -904,16 +882,12 @@ INT CModel::getTexParam(u_long* tex0) {
         INT nTmpClut = VRAM::_CLUT_TMP1_START;
         for (i = 0; i < nTexMax; i++) {
             TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
-            if (!t->_pTexInfo) AssertApp(D_00460D98, 200, D_00460DC8, 0);
-            if (t->_pTexInfo->isFix()) {
-                if (!t->_pTexInfo) AssertApp(D_00460D98, 204, D_00460DC8, 0);
-                tex0[i] = t->_pTexInfo->getTPage();
+            if (t->isFix()) {
+                tex0[i] = t->getTPage();
             } else {
-                if (!t->_pTexInfo) AssertApp(D_00460D98, 201, D_00460DC8, 0);
-                if (t->_pTexInfo->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
+                if (t->isFixTex()) nTexPos = t->_pTexInfo->_TexInfo._nDistPos;
                 else nTexPos = nTmpTex + t->_nTexPos;
-                if (!t->_pTexInfo) AssertApp(D_00460D98, 202, D_00460DC8, 0);
-                if (t->_pTexInfo->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
+                if (t->isFixClut()) nClutPos = t->_pTexInfo->_ClutInfo._nDistPos;
                 else nClutPos = nTmpClut + t->_nClutPos;
                 tex0[i] = t->_pTexInfo->getTPage() | (u_long)nTexPos | ((u_long)nClutPos << 37);
             }
@@ -968,7 +942,7 @@ void CModel::dispImpl() {
                 }
             } else {
                 if (!m_pFadeModel) {
-                    m_pFadeModel = new (com_malloc_d(sizeof(CFadeModel), D_00461028, RET_ADDR())) CFadeModel;
+                    m_pFadeModel = new (com_malloc_d(sizeof(CFadeModel), __FILE__ "(2262)", RET_ADDR())) CFadeModel;
                     if (m_pFadeModel) {
                         INT id;
                         m_pFadeModel->link(this);
@@ -1018,7 +992,7 @@ void CModel::disp0(INT semikind, u_long nInTest, INT iFlags) {
     const int (*pData)[4];
     UINT nMode;
     u_long tex0[16];
-    if (!(m_pShader)) AssertApp(D_00460EB8, 2446, D_00460FB8, 0);
+    if (!(m_pShader)) AssertApp(__FILE__, 2446, "m_pShader", 0);
     pData = (const int (*)[4])_disp0_GetData(nMode, iFlags);
     if (pData) {
         if (!(m_iSendFlg & 1)) disp0_SetMicroCode(m_pShader->m_pMpg);
@@ -1048,7 +1022,7 @@ u_long* CModel::_disp0_GetData(UINT& nMode, INT iFlags) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_GetData__6CModelRUii);
 #endif
 void CModel::disp0_SetMicroCode(u_long128* pMProg) {
-    if (!((m_pMpg == g_mpg0) || (m_pMpg == g_mpg2) || (m_pMpg == __null))) AssertApp(D_00460EB8, 2539, D_00461058, 0);
+    if (!((m_pMpg == g_mpg0) || (m_pMpg == g_mpg2) || (m_pMpg == __null))) AssertApp(__FILE__, 2539, "(m_pMpg==g_mpg0)||(m_pMpg==g_mpg2)||(m_pMpg == __null)", 0);
     if (pMProg != m_pMpg || (m_iSendFlg & 0x100)) {
         m_pMpg = pMProg;
         CPackMan::pkCall(pMProg, 0);
@@ -1369,7 +1343,7 @@ void CSemiModel::initSemiZModel() {
     mode = m_pModel->getMode();
     rawMode = m_pModel->getModelData()->getRawMode();
     if (MODELDATA::isCharacterAndMap(mode) && !(rawMode & 0x1200000) && !(getSemiTrans() == ALPHA_BLEND)) {
-        m_pSemiZ = new (com_malloc_d(sizeof(CSemiZModel), D_00461090, RET_ADDR())) CSemiZModel;
+        m_pSemiZ = new (com_malloc_d(sizeof(CSemiZModel), __FILE__ "(3441)", RET_ADDR())) CSemiZModel;
         if (m_pSemiZ) {
             m_pSemiZ->m_SemiDraw = m_SemiDraw;
             m_pSemiZ->m_pModel = m_pModel;
@@ -1437,7 +1411,7 @@ void CSemiModel::makePkt() {
 void CSemiModel::setSemiTrans(ALPHA a) {
     UINT rawMode;
     if (!(a == ALPHA_PLUS) && !(a == ALPHA_MINUS) && !(a == ALPHA_BLEND)) {
-        if (!(m_pModel)) AssertApp(D_00460EB8, 3588, D_004610C0, 0);
+        if (!(m_pModel)) AssertApp(__FILE__, 3588, "m_pModel", 0);
         rawMode = m_pModel->getModelData()->getRawMode();
         if (rawMode & 0x10000000) a = ALPHA_BLEND;
         else a = ALPHA_PLUS;
@@ -1654,8 +1628,8 @@ void CModel::linkTexAnm(CTexAnm* pATbl, INT nANum) {
     if (pATbl && nANum > 0) {
         nTexMax = m_TransTexCount;
         if (!m_pTexAnm && nTexMax > 0 && CModelTexAnm::getTexAnmCount(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax) > 0) {
-            m_pTexAnm = new (com_malloc_d(sizeof(CModelTexAnm), D_004610D0, RET_ADDR())) CModelTexAnm;
-            if (!(m_pTexAnm)) AssertApp(D_00460EB8, 4067, D_00461100, 0);
+            m_pTexAnm = new (com_malloc_d(sizeof(CModelTexAnm), __FILE__ "(4066)", RET_ADDR())) CModelTexAnm;
+            if (!(m_pTexAnm)) AssertApp(__FILE__, 4067, "m_pTexAnm", 0);
             m_pTexAnm->setup(pATbl, nANum, (TexInfoStub*)m_TexInfo, nTexMax);
         }
     }
@@ -1669,7 +1643,7 @@ void CModel::setupUVScroll(INT bVal) {
         if ((m_TexInfo[i].m_pTex[0x55] & 0x80) || bVal) {
             m_nFlag |= 0x80;
             bVal = m_TransTexCount;
-            m_TexUV = new (com_malloc_d(bVal * sizeof(_TEX_UV_OFFSET), D_00461110, RET_ADDR())) _TEX_UV_OFFSET[bVal];
+            m_TexUV = new (com_malloc_d(bVal * sizeof(_TEX_UV_OFFSET), __FILE__ "(4086)", RET_ADDR())) _TEX_UV_OFFSET[bVal];
             m_nFlag |= 0x40;
             break;
         }
@@ -1841,18 +1815,18 @@ INT Mad::getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId) {
     *outMad = NULL;
     header = (MAD_HEADER*)CRsrcDB::getFirstData(0x23, iRId, TRUE);
     if (!header) return 0;
-    if (strncmp(header->szCode, D_00461140, 4) != 0) {
-        TRACE(D_00461148);
+    if (strncmp(header->szCode, "@MAD", 4) != 0) {
+        TRACE("MAD\203t\203@\203C\203\213\202\305\202\315\202\310\202\242\n");
         return 0;
     }
     if (header->uiVersion != 0x100) {
-        TRACE(D_00461160);
+        TRACE("MAD\202\314\203o\201[\203W\203\207\203\223\202\252\210\341\202\244\n");
         return 0;
     }
     mad = (MODEL_ATTACH_DATA*)((BYTE*)header + header->uiOffset);
-    if (!(mad)) AssertApp(D_00460EB8, 4422, D_00461178, 0);
+    if (!(mad)) AssertApp(__FILE__, 4422, "mad", 0);
     *outMad = mad;
     return header->uiNum;
 }
 
-// SOURCE DATA: .bss
+// SOURCE DATA: .data .rodata .bss
