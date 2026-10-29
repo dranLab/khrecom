@@ -36,13 +36,13 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Entity` | 117 | 3865 |  | .rodata |
 | `Game/Map` | 26 | 3779 |  | .data .rodata |
 | `Game/Player/Player` | 11 | 3573 | 11 |  |
-| `System/Graphic/Model` | 128 | 3195 | 17 | .bss .data .rodata |
 | `Game/Player/PlayerRiku` | 2 | 2940 | 2 |  |
 | `Game/Collision/CollUtil` | 13 | 2562 |  | .rodata |
 | `System/Graphic/Gprim` | 15 | 2159 | 15 |  |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
 | `Game/CardRevolver` | 10 | 2061 | 10 |  |
 | `Form/Menu/RoomCreation` | 1 | 1995 | 1 |  |
+| `System/Graphic/Model` | 13 | 1812 | 13 |  |
 | `Game/Card` | 12 | 1794 | 12 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 | .rodata |
 | `System/Rcf` | 18 | 1770 | 5 |  |
@@ -144,14 +144,10 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/Model` | `checkBBox__FRC7FMATRIXPC4BBOX` | 36 | 12 lines off, registers only: the original keeps the scratchpad pointer in v1 and the clip result in a0 (or a0,v0,a0; move v0,a0), ours v0/v1. Worked: the 0xC0000000 return last (if (!(x[1] < x[0])) {...}), v assigned inside the if, asm "nop" opening the if (ret) block (the original's extra nop … |
 | `System/Graphic/Model` | `resultCheckBBox__FR6CCoordPC4BBOX` | 18 | 5 lines off: the original leaves the bc1t delay slot empty (lui 0xc000 in the final jr slot), has an extra nop after the beqz slot and builds the result in v1 (move v0,v1); ours fills bc1t with the lui. Tried: compare forms (>, <=, !<), result locals (clip \|= ret, res), if/else return; permuter 15 … |
 | `System/Graphic/Model` | `_disp0_GetData__6CModelRUii` | 15 | 2 lines off: the original loads *pData before the lui 0x6000 of the tag compare, ours lui first. Tried: d/mode locals, store forms, int (*)[4]/u_long/u_long128 pData, test forms (!=, ^, ternary, tag local); permuter 12 min (22337 candidates, stays 2). |
+| `System/Graphic/Model` | `_disp0_SetPacket__6CModelUiPA3_CiiUliPUl` | 588 | 137 of 659 lines off, same size; mostly registers: the original gives this s5 and iFlags&2 s4 (ours swapped), the bone/light min() selects use movn (an if-form gives that but swaps s0/s1 globally), the no-light branch materializes zero twice. Worked: case 2 with default, (USHORT) mode compares … |
 | `System/Graphic/Model` | `link__10CSemiModelP6CModel` | 72 | 13 lines off: after getRawMode the original computes isDataEmpty && isSemiDataEmpty into a1 and never uses it (dead code left after a cross-jump?); ours drops the semi half. Tried: unused BOOL local, empty if, ternary, statement, duplicated identical arms (24 lines). |
 | `System/Graphic/Model` | `makePkt__5CBBox` | 412 | 116 lines off, register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers. Tried: x[0] > x[1] compare, a … |
-| `System/Graphic/Model` | `updateUVScroll__6CModelf` | 76 | 2 lines off: the original loads the flag byte into v0 and shifts into v1 (lbu v0; dsrl v1,v0,7, as the weak isUVScroll copy), ours into one register. Worked: isUVScroll() as a member inline returning the u_long bit-field. Tried: static helper with BOOL/u_long return, ternary; permuter 10 min … |
 | `System/Graphic/Model` | `getChangeClut__6CModelii` | 64 | 5 lines off, operand order only: the original adds this + idx*8 (addu a1,a0,v0), ours idx*8 + this. Worked: the if/else-if chain with `nInType == t && p[0x54] != t`, the direct p->ext arm first, raw this-relative addressing (m_TexInfo[inIdx] makes gcc pre-add this+0x68). Tried: switch, nested ifs, … |
-| `System/Graphic/Model` | `link__6CModelP5CTaskRC9MODELDATA` | 7 | 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 … |
-| `System/Graphic/Model` | `link__6CModelP5CTaskPC9MODELDATA` | 7 | 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 … |
-| `System/Graphic/Model` | `link__6CModelR7CCoordsRC9MODELDATA` | 7 | 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 … |
-| `System/Graphic/Model` | `link__6CModelR7CCoordsPC9MODELDATA` | 7 | 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 … |
 | `System/Graphic/ModelMan` | `reset__9CModelMan` | 43 | (comment) reset: near-match. The original reloads the 0.0f arguments (and stack addresses) after each call to FVECTOR::set (called out of line here); this build keeps them in callee-saved registers across the call. |
 | `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | (comment) setupDrawEnv: near-match. The original reloads the 0.0f arguments (and stack addresses) after each call to FVECTOR::set (called out of line here); this build keeps them in callee-saved registers across the call. |
 | `System/Graphic/ModelMan` | `setupDrawMode__9CModelMani` | 64 | (comment) setupDrawMode: near-match. The two halves of the first GIF tag get swapped registers ($v0/$v1). |
@@ -335,7 +331,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 901 functions (107681 instructions) in 85 units, 212 of them parked; 19 units take a data section from assembly.
+Totals: 786 functions (106298 instructions) in 85 units, 208 of them parked; 18 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
