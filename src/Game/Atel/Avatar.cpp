@@ -97,6 +97,8 @@ extern "C" char D_0048AF08[];
 extern "C" char D_0048AB98[];
 extern "C" char D_0048B030[];
 extern "C" char D_0048B060[];
+extern "C" char D_0048B090[];
+extern "C" char D_0048B0C0[];
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(size_t, void* p) throw() { return p; }
 
@@ -432,7 +434,44 @@ BOOL CAvatar::ScaleAvatarMain() {
 }
 void CAvatar::ScaleAvatarEnd() { clearAvatarScaleSpeed(); }
 void CAvatar::cancelScaleAvatar() { ScaleAvatarEnd(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", TexAnimTalk__Q24ATEL7CAvatari);
+void CAvatar::TexAnimTalk(INT in_MotID) {
+    char* pTalkName = D_0048B000;
+    CEntity* pEntity = this;
+    switch ((UINT)pEntity->getID() % 10000) {
+    case 307:
+    case 1001:
+        break;
+    case 2:
+        if (in_MotID == 5) pEntity->setTexAnmSeq(1, pTalkName);
+        break;
+    case 9:
+        if (in_MotID == 6) pEntity->setTexAnmSeq(1, pTalkName);
+        break;
+    case 106:
+        if (in_MotID == 9) pEntity->setTexAnmSeq(1, pTalkName);
+        break;
+    case 205:
+        if (in_MotID == 10) pEntity->setTexAnmSeq(1, pTalkName);
+        break;
+    case 805:
+        if (in_MotID == 5) pEntity->setTexAnmSeq(1, pTalkName);
+        break;
+    case 1206:
+        if (in_MotID == 9) pEntity->setTexAnmSeq(1, pTalkName);
+        break;
+    case 210:
+    case 1205:
+    case 1207:
+        if (in_MotID == 7) pEntity->setTexAnmSeq(1, pTalkName);
+        break;
+    default:
+        if (in_MotID == 4) {
+            TRACE(D_0048B010, 1, pTalkName);
+            setTexAnmSeq(1, pTalkName);
+        }
+        break;
+    }
+}
 INT CAvatar::onPlayMotion(INT nCmd, void* pParam, INT nID) {
     AvatarMotionParam* p = (AvatarMotionParam*)pParam;
     if (!p) {
@@ -641,7 +680,34 @@ AvatarMoveStruct::~AvatarMoveStruct() {
     delete _pPathData;
     delete _pHermiteHelper;
 }
+/* Parked: matches (V1), but `new CPathData` emits the weak CVector<G_STRIP> destructor (the original's unnamed
+   func_0023A008 in the weak tail): switch it on together with the weak tail. */
+#if 0
+BOOL AvatarMoveStruct::setupPath(const CHAR* pszPath, USHORT nMotion) {
+    delete _pPathData;
+    _pPathData = new (com_malloc_d(sizeof(CPathData), D_0048B090, RET_ADDR())) CPathData(pszPath);
+    _nMoveMotion = 0;
+    if (_pPathData) {
+        if (!_pHermiteHelper) {
+            _pHermiteHelper = new (com_malloc_d(sizeof(CHermitePath), D_0048B0C0, RET_ADDR())) CHermitePath;
+            if (!_pHermiteHelper) goto end;
+        }
+        {
+            PATH_PARAM param;
+            _pPathData->getPathParam(0, param);
+            _pHermiteHelper->makePathFromPathVector(_pPathData->getPathVectorData(0));
+        }
+        _nMoveMotion = nMotion;
+    } else {
+        delete _pHermiteHelper;
+        _pHermiteHelper = NULL;
+    }
+end:
+    return _pHermiteHelper != NULL;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setupPath__Q24ATEL16AvatarMoveStructPCcUs);
+#endif
 void AvatarMoveStruct::getPosOnPath(FVECTOR& vPos) {
     if (_pHermiteHelper) _pHermiteHelper->getNowPos(vPos);
 }
