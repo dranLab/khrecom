@@ -41,19 +41,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-28 | decomp/System-Graphic-Model (partial 66/206, 6 parked; A1 reasons; semi classes gated in Model.h) | 1101 | 417 | 23 | 941 (926) | 53 |
 | 2026-10-29 | decomp/System-Graphic-Model (partial 91/206, 19 parked; ctor-chain inlines, CModel flag predicates) | 1111 | 417 | 23 | 942 (927) | 53 |
 | 2026-10-29 | decomp/System-Graphic-Model (193/206, 13 parked; weak tail + static init from C, data from source; A2 part 1: g_mpg static, header paths/opt-out tagged MATCH) | 1114 | 417 | 23 | 950 (933) | 61 |
+| 2026-10-29 | cleanup/System-Graphic-Model (A2 part 2: Model classes ungated, CModel layout as ref, stand-ins in 3 files) | 1077 | 413 | 23 | 943 (926) | 61 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1114 (1039 in 110 headers, 75 in 31 .cpp); MATCH: 61
-  by category: method 479, data member 71, type 96, fwd decl 53, #include 30, changed in place 129, padding 33, path override 24, gate 37, guessed 45, header-level 75, stand-in 34, other 8
-stand-ins: 417 foreign in 131 files (121 names), 192 unattributed, 177 own
+PARTIAL: 1077 (1005 in 110 headers, 72 in 30 .cpp); MATCH: 61
+  by category: method 450, data member 71, type 96, fwd decl 53, #include 29, changed in place 126, padding 32, path override 24, gate 37, guessed 45, header-level 75, stand-in 31, other 8
+stand-ins: 413 foreign in 131 files (118 names), 192 unattributed, 177 own
 duplicate class names across headers: 23
-padding: 34 arrays, 26 accessors
-mechanisms: 950 sites (933 untagged); #line: 1181
+padding: 32 arrays, 25 accessors
+mechanisms: 943 sites (926 untagged); #line: 1182
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 156, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 538, superset 126, partial 97, gated 108, missing 15, unattributed 309
+classes: complete 538, superset 129, partial 101, gated 101, missing 14, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -129,7 +130,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPause` | complete | Form/Menu/Pause.h | 2 |  |  |
 | `CPlayerDRiku` | superset | Game/Player/PlayerDRiku.h | 2 |  | virtual order differs |
 | `CPrize` | superset | Game/Prize.h | 2 |  | virtual order differs |
-| `CSemiModel` | gated | System/Graphic/Model.h | 2 |  | virtual order differs |
 | `CTexAnm` | complete | System/Graphic/TexAnm.h | 2 |  |  |
 | `CTextWnd` | complete | System/Wnd.h | 2 |  |  |
 | `CVramMan` | complete | System/VramMan.h | 2 |  |  |
@@ -165,7 +165,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CMemocaAgent` | complete | Form/Menu/SaveLoadUtil.h | 1 |  |  |
 | `CMemocaDataEntries` | superset | Form/Menu/SaveLoadUtil.h | 1 |  | extra methods: setNoSpace |
 | `CMinigameManager` | complete | Game/MinigameManager.h | 1 |  |  |
-| `CModelBG` | gated | System/Graphic/Model.h | 1 |  | missing methods: ~CModelBG |
 | `CMovie` | complete | System/Movie/Movie.h | 1 |  |  |
 | `CMovieFiles` | complete | System/Movie/MovieFiles.h | 1 |  |  |
 | `CMovieScript` | complete | System/Movie/MovieScript.h | 1 |  |  |
@@ -187,7 +186,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRoulette` | complete | Form/Menu/Roulette.h | 1 |  |  |
 | `CRsrcTex` | gated | System/RsrcData.h | 1 |  |  |
 | `CRsrcVSV` | gated | System/RsrcData.h | 1 |  | missing methods: getBgmID, getFilePath, getSectorSize, getStartSector, ~CRsrcVSV |
-| `CShadowModel` | missing | System/Graphic/Model.h | 1 |  |  |
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CSummon` | partial | Game/Player/Summon.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CTaskMan` | superset | System/TaskMan.h | 1 |  | 3 PARTIAL |
@@ -379,8 +377,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 9 |
 | `System/Graphic/MapUnit.h` | 2 | 0/0/0/0 | 3 |
-| `System/Graphic/Model.h` | 45 | 0/1/1/7 | 69 |
-| `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 6 |
+| `System/Graphic/Model.h` | 10 | 0/3/5/0 | 69 |
+| `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 70 |
 | `System/Graphic/MotData.h` | 1 | 4/0/3/0 | 3 |
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
 | `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 8 |
@@ -390,7 +388,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 137 |
 | `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 35 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
-| `System/Graphic/modeldata.h` | 14 | 1/1/0/1 | 81 |
+| `System/Graphic/modeldata.h` | 15 | 1/2/0/1 | 81 |
 | `System/LinkedBuf.h` | 6 | 1/2/1/0 | 6 |
 | `System/MainApp.h` | 5 | 0/0/0/2 | 268 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 57 |
@@ -422,8 +420,8 @@ or `untagged`.
 | feature site | `COLLOBJ_H_INFO_UNION` | 1 | 0 | untagged, e.g. Game/Collision/CollObj.h:205 |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 0 | untagged, e.g. Game/Entity.h:159 |
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 0 | untagged, e.g. System/LinkedBuf.h:10 |
-| feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:72 |
-| feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:109 |
+| feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:78 |
+| feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:115 |
 | full-class | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.cpp:2 |
 | full-class | `FORM_DEBUGMENU_FULL` | 1 | 0 | untagged, e.g. Form/DebugMenu.cpp:3 |
 | full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 1 | CNakCamera; the original has Gprim.h's strings (PathData.h includes it first) |
@@ -531,14 +529,14 @@ or `untagged`.
 | placeholder | `_mapEnemyAirEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyAir.cpp:11 |
 | placeholder | `_mapEnemyGroundEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyGround.cpp:11 |
 | placeholder | `_mapEnemyMushroomEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyMushroom.cpp:11 |
-| placeholder | `_mcShaderCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:635 |
-| placeholder | `_mcShaderDelete*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:638 |
-| placeholder | `_modelAssertZero*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:632 |
-| placeholder | `_modelCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:629 |
+| placeholder | `_mcShaderCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:511 |
+| placeholder | `_mcShaderDelete*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:514 |
+| placeholder | `_modelAssertZero*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:508 |
+| placeholder | `_modelCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:505 |
 | placeholder | `_monstroEventBattleEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MonstroEventBattle.cpp:27 |
 | placeholder | `_pathDataCameraSLCOverflow*` | 1 | 0 | untagged, e.g. System/Graphic/PathDataCamera.cpp:7 |
 | placeholder | `_premiumPrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:10 |
-| placeholder | `_roPh*` | 8 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:2193 |
+| placeholder | `_roPh*` | 8 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:2186 |
 | placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:151 |
 | placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1751 |
 | placeholder | `_roulettePrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:13 |
@@ -575,11 +573,10 @@ or `untagged`.
 | unit gate | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.cpp:2 |
 | unit gate | `SYSTEM_GRAPHIC_DEFOCUS_CPP` | 2 | 0 | untagged, e.g. Game/Atel/VSME.cpp:76 |
 | unit gate | `SYSTEM_GRAPHIC_GPRIM_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:1 |
-| unit gate | `SYSTEM_GRAPHIC_MODEL_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Model.cpp:3 |
 | unit gate | `SYSTEM_TASKMAN_CPP` | 1 | 0 | untagged, e.g. System/TaskMan.cpp:1 |
 | unit gate site | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.h:17 |
 | unit gate site | `EFFECT_CPP` | 3 | 0 | untagged, e.g. System/Graphic/Effect/effect.h:13 |
-| unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 3 | 0 | untagged, e.g. Form/Menu/JiminyMemo.h:12 |
+| unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 2 | 0 | untagged, e.g. Form/Menu/JiminyMemo.h:12 |
 | unit gate site | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:93 |
 | unit gate site | `FORM_MENU_SAVELOAD_CPP` | 6 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:148 |
 | unit gate site | `GAME_ATEL_AVATAR_CPP` | 2 | 0 | untagged, e.g. Game/Atel/Avatar.h:14 |
@@ -596,7 +593,6 @@ or `untagged`.
 | unit gate site | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.h:30 |
 | unit gate site | `SYSTEM_GRAPHIC_DEFOCUS_CPP` | 1 | 0 | untagged, e.g. System/Graphic/DeFocus.h:9 |
 | unit gate site | `SYSTEM_GRAPHIC_GPRIM_CPP` | 2 | 0 | untagged, e.g. System/Graphic/Gprim.h:155 |
-| unit gate site | `SYSTEM_GRAPHIC_MODEL_CPP` | 5 | 0 | untagged, e.g. System/Graphic/Model.h:31 |
 | unit gate site | `SYSTEM_TASKMAN_CPP` | 2 | 0 | untagged, e.g. System/Task.h:183 |
 
 ## String evidence
