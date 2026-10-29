@@ -767,7 +767,21 @@ void CEntity::rideModelChangeListR() {
 void CEntity::rideModelChangeListRC() {
     if (m_pRideModel) m_pRideModel->changeListRC();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", playSEPanAndVol__7CEntityiiiPC7FVECTORi);
+HANDLE CEntity::playSEPanAndVol(INT inFile, INT inID, INT inBoneIndex, const FVECTOR* inOffset, INT inType) {
+    if (((m_uiEntityFlag & 0x80000) && !inType) || ((m_uiEntityFlag & 0x100000) && inType)) {
+        return playSEPan(inFile, inID, -1, inBoneIndex, inOffset, inType);
+    }
+    FVECTOR pos;
+    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(D_0047D330, 2283, D_0047D518, 0);
+    if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
+    else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
+    INT vol = -1;
+    INT pan = CSound::getPanAndVol(pos, vol);
+    INT id;
+    if (!inType) id = inFile * 1000 + inID;
+    else id = (inFile * 1000 + inID) | 0x10000000;
+    return CSound::playSE(id, vol, pan);
+}
 HANDLE CEntity::playSEPan(INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType) {
     FVECTOR pos;
     if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(D_0047D330, 2313, D_0047D518, 0);
@@ -791,8 +805,35 @@ void CEntity::fadeoutSE(HANDLE inHandle, INT inFile, INT inID, INT inTime, INT i
     else nSeq = (inFile * 1000 + inID) | 0x10000000;
     CSound::fadeoutSE(inHandle, nSeq, inTime);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setSEPanAndVol__7CEntityiiiiPC7FVECTORi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setSEPan__7CEntityiiiiiPC7FVECTORi);
+void CEntity::setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inBoneIndex, const FVECTOR* inOffset, INT inType) {
+    if (((m_uiEntityFlag & 0x80000) && !inType) || ((m_uiEntityFlag & 0x100000) && inType)) {
+        setSEPan(inHandle, inFile, inID, -1, inBoneIndex, inOffset, inType);
+        return;
+    }
+    FVECTOR pos;
+    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(D_0047D330, 2380, D_0047D518, 0);
+    if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
+    else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
+    INT vol = -1;
+    INT pan = CSound::getPanAndVol(pos, vol);
+    INT id;
+    if (!inType) id = inFile * 1000 + inID;
+    else id = (inFile * 1000 + inID) | 0x10000000;
+    if (pan < 0) CSound::setSEVolume(inHandle, id, 0, 1);
+    else CSound::setSEPanAndVol(inHandle, id, pan, vol, 1);
+}
+void CEntity::setSEPan(HANDLE inHandle, INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType) {
+    FVECTOR pos;
+    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(D_0047D330, 2417, D_0047D518, 0);
+    if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
+    else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
+    INT pan = CSound::getPan(pos);
+    INT id;
+    if (!inType) id = inFile * 1000 + inID;
+    else id = (inFile * 1000 + inID) | 0x10000000;
+    CSound::setSEPan(inHandle, id, pan, 1);
+    if (inVol >= 0) CSound::setSEVolume(inHandle, id, inVol, 1);
+}
 void CEntity::playVoice(INT inFileID, INT inID, INT inPriority) {
     if (m_pSE) ((CSEMotion*)m_pSE)->playVoice(inFileID, inID, inPriority);
 }

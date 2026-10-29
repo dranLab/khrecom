@@ -310,6 +310,7 @@ public:
     HANDLE playSEPan(INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType); // PARTIAL: added for Game/Entity
     void playSEManaged(INT inFileID, INT inID, INT inBoneIndex, const FVECTOR* inOffset); // PARTIAL: added for Game/Entity
     void setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
+    void setSEPan(HANDLE inHandle, INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType); // PARTIAL: added for Game/Entity
     void fadeoutSE(HANDLE inHandle, INT inFile, INT inID, INT inTime, INT inFlag);
     // PARTIAL: added for Game/Entity
     INT getMotionCurrentID() const;
