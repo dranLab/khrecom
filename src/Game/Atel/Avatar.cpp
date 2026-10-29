@@ -16,6 +16,9 @@
 #include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
 
+void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
+void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+
 using namespace ATEL;
 
 namespace ATEL {
@@ -335,7 +338,23 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", FadeAvatarMain__Q24
 void CAvatar::FadeAvatarEnd() {}
 void CAvatar::cancelFadeAvatar() {}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onScaling__Q24ATEL7CAvatariPvi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", ScaleAvatarMain__Q24ATEL7CAvatar);
+BOOL CAvatar::ScaleAvatarMain() {
+    TIMEQ nTQ = getFrameRate();
+    countAvatarScaleTime(nTQ);
+    BOOL bOver = isOverAvatarScaleTimeLimit();
+    if (!bOver) {
+        FVECTOR vScale;
+        FVECTOR vScaleSpeed;
+        getScale(vScale);
+        ScaleVectorXYZ(vScaleSpeed, getAvatarScaleSpeed(), nTQ);
+        AddVector(vScale, vScale, vScaleSpeed);
+        setScale(vScale);
+        if (isOverAvatarScaleTimeLimit(nTQ)) setAvatarState(0x2000, FALSE);
+    } else {
+        setScale(m_pScaleStruct->_vTargetScale);
+    }
+    return bOver;
+}
 void CAvatar::ScaleAvatarEnd() { clearAvatarScaleSpeed(); }
 void CAvatar::cancelScaleAvatar() { ScaleAvatarEnd(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", TexAnimTalk__Q24ATEL7CAvatari);
@@ -433,7 +452,29 @@ INT CAvatar::onAvatarAttach(INT nCmd, void* pParam, INT nID) {
     *(CCoord**)((BYTE*)&crd + 0x4c) = &pTarget->Crd(pTarget->getBoneIndex((const CHAR*)pParam, 0));
     return -1;
 }
+/* Parked: 4 lines - the original stores rot's zero quad (por/sq) first, before the callee saves; ours after
+   the p->Type load. Init forms/orders and 6 min of permuter (8.8k candidates) did not change it. */
+#if 0
+INT CAvatar::onAvatarAttachEffect(INT nCmd, void* pParam, INT nID) {
+    AvatarEffectAttach* p = (AvatarEffectAttach*)pParam;
+    FVECTOR rot;
+    rot.init();
+    switch (p->Type) {
+    case 0:
+        break;
+    case 1:
+        rot.z = -1.5707964f;
+        break;
+    case 2:
+        rot.set(0.0f, 4.712389f, 0.0f, 1.0f);
+        Math3D::LimitPIVector(rot);
+        break;
+    }
+    return CEffectMan::attachEffect(p->EffectName, p->EfxNo, (ObjType::eObjType)13, &Crd(getBoneIndex(p->BoneName, 0)), NULL, &rot, 0.0f);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onAvatarAttachEffect__Q24ATEL7CAvatariPvi);
+#endif
 INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
     FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));

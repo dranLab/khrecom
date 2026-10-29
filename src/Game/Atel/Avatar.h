@@ -235,11 +235,37 @@ public:
         m_pMoveStruct->_vTargetPos = inV;
         m_pMoveStruct->_vTargetPos.w = 1.0f;
     }
+    FVECTOR& getAvatarTargetScale() const {
+#line 560 AVATAR_H_PATH
+        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        return m_pScaleStruct->_vTargetScale;
+    }
+    FVECTOR& getAvatarScaleSpeed() const {
+#line 562 AVATAR_H_PATH
+        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        return m_pScaleStruct->_vScaleSpeed;
+    }
+    BOOL isOverAvatarScaleTimeLimit() const {
+#line 574 AVATAR_H_PATH
+        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        return m_pScaleStruct->_nScaleTimeCount >= m_pScaleStruct->_nScaleTimeLimit;
+    }
+    BOOL isOverAvatarScaleTimeLimit(INT t) const {
+#line 575 AVATAR_H_PATH
+        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        return m_pScaleStruct->_nScaleTimeCount + t >= m_pScaleStruct->_nScaleTimeLimit;
+    }
     void clearAvatarScaleSpeed() {
 #line 582 AVATAR_H_PATH
         if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
         m_pScaleStruct->_vScaleSpeed._q = 0;
     }
+    void countAvatarScaleTime(INT t) {
+#line 590 AVATAR_H_PATH
+        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        m_pScaleStruct->_nScaleTimeCount += t;
+    }
+    BOOL ScaleAvatarMain();
     BOOL updateAvatarPosOnPath(TIMEQ nTime);
     FVECTOR* getPathStartPos(const CHAR* pszName) const;
 };
