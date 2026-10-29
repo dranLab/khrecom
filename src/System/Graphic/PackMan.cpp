@@ -105,6 +105,9 @@ class CPackMan {
 public:
     static void finalize();
     static void transFrame();
+    static void transFrameEffect();
+    static void initSemiPacket();
+    static void terminateSemiPacket();
     static void resetDmaChanVif1();
     static INT getDBIdx();
     static BOOL isPacketForBG();
@@ -263,6 +266,8 @@ void _makePkt_SaveScreen(); /* static in the original (still INCLUDE_ASM) */
 extern "C" void FlushCache(int op); /* MATCH: void (the SDK returns int): v0 stays free for the lui after the call in saveScreen */
 extern "C" void sceDmaSend(sceDmaChan* d, void* tag);
 extern "C" int sceGsSyncPath(int mode, u_short timeout);
+extern "C" void TRACE(char* fmt, ...);
+extern "C" char D_00461B70[], D_00461C28[]; /* PARTIAL: assert text "0" and the semi-packet overflow message (data still asm) */
 extern u_long128 My_dma_start[];
 extern u_long128 My_VU0_start[];
 extern INT SCREEN_HEIGHT;
@@ -272,7 +277,7 @@ public:
 };
 extern "C" void AssertApp(const char* pFile, int nLine, const char* pExpr, int n);
 extern "C" char D_00461BE0[], D_00461C10[]; /* PARTIAL: __FILE__ and the assert text (data still asm) */
-void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv); /* static in the original (still INCLUDE_ASM) */
+static void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv);
 
 static inline u_long _upper(u_long128 q) {
     u_long r;
@@ -304,6 +309,10 @@ namespace {
 extern u_long s_pPktBufVif1Frame[320];
 extern pacVif1Packet s_pktVif1;
 extern pacVif1Packet s_pktVif1BG;
+extern INT s_nMaxPktSizeVif1Semi;
+extern u_long128* s_pktVif1SemiBase;
+extern pacVif1Packet s_pktVif1Semi;
+extern pacVif1Packet s_pktVif1FrameEff;
 extern pacVif1Packet s_pktVif1Frame;
 extern sceDmaChan* s_pDmaChanVif1;
 extern sceDmaChan* s_pDmaChanVif0;
@@ -318,8 +327,11 @@ extern SHORT s_nReqDrawMode;
 extern SHORT s_nDrawMode;
 extern SHORT s_nReqPcrtcMode;
 extern SHORT s_nPcrtcMode;
+extern INT s_nDispOffsetX;
+extern INT s_nDispOffsetY;
 extern INT s_nBGColor;
 extern INT s_nDisp1Alpha;
+extern INT s_nFSAA_Sharpness;
 extern INT s_transFrameKind;
 extern GpuRegsInfoSep s_SysGpuRegs2;
 extern GpuRegsInfoSep s_DefaultGpuRegs2;
@@ -332,11 +344,15 @@ extern UINT s_nMovieDispH;
 extern INT s_nPkUseSize;
 }
 
+/* MATCH: pkInit and the init*Packet functions inline one helper (the ref lists its parameters as pkInit's locals) */
+static inline void _pkInit(u_long128* pInBase, pacVif1Packet* pPkt, UINT nInMaxPkt) {
+    s_pPktVif1 = pPkt ? pPkt : &s_pktVif1;
+    s_nMaxPktSizeVif1 = nInMaxPkt;
+    sceVif1PkInit(s_pPktVif1, pInBase);
+}
 void CPackMan::pkInit(u_long128* pBase, pacVif1Packet* pPkt, UINT nMax) {
     UINT nSize = nMax ? nMax : 0x8000;
-    s_pPktVif1 = pPkt ? pPkt : &s_pktVif1;
-    s_nMaxPktSizeVif1 = nSize;
-    sceVif1PkInit(s_pPktVif1, pBase);
+    _pkInit(pBase, pPkt, nSize);
 }
 void CPackMan::pkReset() { sceVif1PkReset(s_pPktVif1); }
 UINT CPackMan::pkSize() { return sceVif1PkSize(s_pPktVif1); }
@@ -491,7 +507,16 @@ static void _setupSysContext() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", beginScene__8CPackMan);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", endScene__8CPackMan);
 INT CPackMan::getDBIdx() { return s_nDB & 1; }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", transFrameEffect__8CPackMan);
+void CPackMan::transFrameEffect() {
+    if (s_nDrawMode != 0) return;
+    if (s_transFrameKind >= 4) return;
+    if (s_transFrameKind > 0) {
+        *(u_int*)&s_pDmaChanVif1->chcr |= 0x40;
+        FlushCache(0);
+        sceDmaSend(s_pDmaChanVif1, (void*)((u_int)s_pktVif1FrameEff.pBase & 0x0fffffff));
+        sceGsSyncPath(0, 0);
+    }
+}
 void CPackMan::transFrame() {
     if (s_nDrawMode == 3) return;
     *(u_int*)&s_pDmaChanVif1->chcr |= 0x40;
@@ -502,8 +527,19 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initBGPacket_
 BOOL CPackMan::isPacketForBG() { return s_pPktVif1 == &s_pktVif1BG; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", terminateBGPacket__8CPackMan);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", changeLayer__8CPackMani);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initSemiPacket__8CPackMan);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", terminateSemiPacket__8CPackMan);
+void CPackMan::initSemiPacket() {
+    if (!s_pktVif1SemiBase) return;
+    _pkInit(s_pktVif1SemiBase, &s_pktVif1Semi, s_nMaxPktSizeVif1Semi);
+    sceVif1PkReset(s_pPktVif1);
+}
+void CPackMan::terminateSemiPacket() {
+    INT nSize = sceVif1PkSize(s_pPktVif1);
+    s_nPkUseSize += nSize;
+    if (s_nMaxPktSizeVif1Semi < nSize) {
+        TRACE(D_00461C28, nSize);
+        AssertApp(D_00461BE0, 1682, D_00461B70, 0);
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initFGPacket__8CPackMan);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", terminateFGPacket__8CPackMan);
 BOOL CPackMan::isStartStillMode() { return s_nReqDrawMode == 1 && s_nDrawMode == 0; }
@@ -520,8 +556,26 @@ void CPackMan::setMovieEnv(UINT nDrawW, UINT nDrawH, UINT nDispW, UINT nDispH) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _makePkt_SaveScreen__Fv);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _makePkt_StillScreen__FPUx);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _setPcrtcMode_FSAA__FR12sceGsDispEnv);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _setPcrtcMode_BlendBG__FR12sceGsDispEnv);
+static void _setPcrtcMode_FSAA(sceGsDispEnv& inEnv) {
+    ULONGLONG nPmode = ((ULONGLONG)(s_nFSAA_Sharpness + 0xc0) << 8) | 0x63;
+    *(volatile u_long*)0x12000000 = nPmode;
+    *(volatile u_long*)0x12000070 = inEnv.dispfb;
+    *(volatile u_long*)0x12000090 = inEnv.dispfb;
+    *(volatile INT*)&s_nBGColor = 0; /* MATCH: volatile store keeps its lui first (original lui order) */
+    ULONGLONG nDisplay2 = inEnv.display + s_nDispOffsetX + ((ULONGLONG)s_nDispOffsetY << 12);
+    *(volatile u_long*)0x120000a0 = nDisplay2;
+    *(volatile u_long*)0x12000080 = nDisplay2 - 0x1000;
+}
+static void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv) {
+    ULONGLONG nPmode = ((ULONGLONG)s_nDisp1Alpha << 8) | 0xa1;
+    *(volatile u_long*)0x12000000 = nPmode;
+    *(volatile u_long*)0x12000070 = inEnv.dispfb;
+    *(volatile u_long*)0x12000090 = inEnv.dispfb;
+    ULONGLONG nDisplay1 = inEnv.display;
+    nDisplay1 += s_nDispOffsetX;
+    nDisplay1 += (ULONGLONG)(s_nDispOffsetY - 1) << 12;
+    *(volatile u_long*)0x12000080 = nDisplay1;
+}
 void CPackMan::updateBGBlend(INT nAlpha) {
     s_nDisp1Alpha = nAlpha;
     _setPcrtcMode_BlendBG(s_DBuf.disp[0]);
