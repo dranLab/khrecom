@@ -244,7 +244,9 @@ struct FloorInfo { // 0xd8c
     RoomInfo _roomGoalEnt;          /* 0xd14 */
     USHORT _nRoomCount;             /* 0xd80 */
     SHORT _nEventRoomIdxTbl[5];     /* 0xd82 */
-    void clearEventRoomTbl();
+    void clearEventRoomTbl() {
+        for (INT i = 0; i < 5; i++) _nEventRoomIdxTbl[i] = -1;
+    }
     SHORT getEventRoomIdx(EVENTROOM_TBLIDX i) { return (UINT)i < __EVENTROOM_MAX ? _nEventRoomIdxTbl[i] : -1; }
 };
 

@@ -106,6 +106,9 @@ void _initEntranceSceneTbl(BOOL bSora);
 void _initGoalRoomSceneTbl(BOOL bSora);
 void _initAllEventDoorState(BOOL bSora);
 void _updateRoomInfo();
+FloorLayoutDataHeader* _linkFloorData(const CHAR* pszFile);
+EventRoomData* _linkEventRoomData(const CHAR* pszFile);
+NormaDataHeader* _linkNormaData(const CHAR* pszFile);
 USHORT _getGoalRoomScene(WORLD_ID w);
 void _clearMapRsrcCache();
 FloorLayoutDataHeader* _isValidFloorIdx(USHORT nIdx, BOOL bSora);
@@ -151,6 +154,12 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_00484900[];
+extern "C" char D_00484910[];
+extern "C" char D_00484920[];
+extern "C" char D_00484930[];
+extern "C" char D_00484940[];
+extern "C" char D_00484950[];
 extern "C" char D_00484BE0[];
 extern "C" char D_00484CD8[];
 namespace PLM {
@@ -168,7 +177,59 @@ extern "C" char D_00484DD0[];
 extern "C" char D_00484DD8[];
 extern "C" int sprintf(char*, const char*, ...);
 
+/* Parked: ~110 lines - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar
+   stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders
+   (incl. the lui order) and 7 min of permuter (10k candidates, 104 -> 98) did not get closer. */
+#if 0
+void CSceneInfo::clear() {
+    *(SHORT*)&CGameWork::m_pMCWork->_nArea = -1;
+    *(SHORT*)&CGameWork::m_pMCWork->_nScene = -1;
+    *(SHORT*)&CGameWork::m_pMCWork->_nPrevArea = -1;
+    *(SHORT*)&CGameWork::m_pMCWork->_nPrevScene = -1;
+    s_nCurrentFieldScene = -1;
+    s_NextAreaScene._nAreaScene = -1;
+    s_nNextBattleScene = -1;
+    s_nCurrentBattleScene = -1;
+    s_nCurrentBattleRsrc = -1;
+    *(BYTE*)&CGameWork::m_pMCWork->_nFloorIdx = 0xff;
+    *(BYTE*)&CGameWork::m_pMCWork->_nRoomID = 0xff;
+    *(BYTE*)&CGameWork::m_pMCWork->_nPrevRoomID = 0xff;
+    *(BYTE*)&CGameWork::m_pMCWork->_nDoorID = 0xff;
+    s_nNextDoorID = (DOOR_ID)2;
+    s_nNextFloorIdx = 0xff;
+    s_nNextRoomID = 0xff;
+    s_nCurrentFloorNumber = 0;
+    s_nReqChangeScene = 0;
+    s_nReqEnterBattle = GAMEMODE_FIELD;
+    s_nReqExitBattle = 0;
+    s_nGameMode = GAMEMODE_FIELD;
+    s_CurrentFloor._nRoomCount = 0;
+    s_CurrentFloor.clearEventRoomTbl();
+    clearSceneCache();
+    s_GlobalScene.clear();
+    _clearMapRsrcCache();
+    s_pFloorFile_Sora = _linkFloorData(D_00484900);
+    s_pFloorFile_Riku = _linkFloorData(D_00484910);
+    s_pEventRoomFile_Sora = _linkEventRoomData(D_00484920);
+    s_pEventRoomFile_Riku = _linkEventRoomData(D_00484930);
+    s_pFloorNormaFile_Sora = _linkNormaData(D_00484940);
+    s_pFloorNormaFile_Riku = _linkNormaData(D_00484950);
+    CGame::dbgStartFromBattle(FALSE);
+    s_roomExcept._pSrcInfo = NULL;
+    s_roomExcept._pStorageInfo = NULL;
+    s_roomExcept._pStorageInfo2 = NULL;
+    for (UINT i = 0; i < 4; i++) {
+        DoorInfo& d = s_roomExcept._doors[i];
+        d._id = (DOOR_ID)i;
+        d._shape = 0;
+        d._type = _DOOR_TYPE_DEBUG;
+        d._nDstRoom = 0;
+        d._pStorageInfo = NULL;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", clear__10CSceneInfo);
+#endif
 void CSceneInfo::initNewGame(BOOL bSora) {
     clear();
     CGameWork::setByte(0, 0x60, !bSora);
