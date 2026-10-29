@@ -24,11 +24,6 @@ class CAtel;
 namespace ATEL {
 
 #ifdef GAME_ATEL_AVATAR_CPP
-extern "C" char D_0048AB50[]; /* "c:/KHCOM/MainApp/Game/Atel/Avatar.h" (PARTIAL: no SOURCE DATA yet) */
-extern "C" char D_0048AB88[];
-extern "C" char D_0048AB78[]; /* "in_pFadeStruct" */
-extern "C" char D_0048AB98[]; /* "m_pRotateStruct" */
-extern "C" char D_0048ABA8[];
 struct ETMoveInfo;
 class CVSM;
 
@@ -55,6 +50,8 @@ struct AvatarMoveStruct { // 0x70
         _pHermiteHelper = NULL;
     }
     ~AvatarMoveStruct();
+    BOOL isOverTimeLimit() { return _nMoveTimeCount >= _nMoveTimeLimit; }
+    BOOL isOverTimeLimit(INT t) { return _nMoveTimeCount + t >= _nMoveTimeLimit; }
     BOOL setupPath(const CHAR* pszName, USHORT nType);
     void getPosOnPath(FVECTOR& vPos);
     BOOL updatePosOnPath(FLOAT fTime);
@@ -71,6 +68,7 @@ struct AvatarRotateStruct { // 0x50
     UINT _nRotTargetRegularly;     /* 0x40 */
     USHORT _nRotateType;           /* 0x44 */
     AvatarRotateStruct() { _nRotIntervalTime = 0; }
+    BOOL isOverTimeLimit() { return _nRotTimeCount >= _nRotTimeLimit; }
 };
 
 struct AvatarScaleStruct { // 0x30
@@ -95,7 +93,7 @@ struct AvatarLookStruct { // 0x8
     FLOAT _fOffsetY;
 };
 
-/* PARTIAL: the full class, for Game/Atel/Avatar only */
+/* PARTIAL: the full class, for Game/Atel/Avatar (and Game/Atel/VSME) */
 class CAvatar : public ICommandAccepter, public CEntity {
     UINT m_nIndex;                         /* 0x1e0 */
     UINT m_nParentActorIdx;                /* 0x1e4 */
@@ -112,11 +110,20 @@ class CAvatar : public ICommandAccepter, public CEntity {
     C3DLine lineY;                         /* 0x2d0 */
     C3DLine lineZ;                         /* 0x340 */
 
+private:
+    void setParentActorIdx(UINT nIdx) { m_nParentActorIdx = nIdx; }
+    void setActorIdx(UINT nIdx) { m_nIndex = nIdx; }
+    BOOL createMoveStruct();
+    BOOL createRotateStruct();
+    BOOL createScaleStruct();
+    AvatarFadeStruct* createFadeStruct();
+    void InitAvatar(INT flag);
+    void TexAnimTalk(INT nMotion);
+    virtual void disp();
+
 public:
     CAvatar(CTask* pParent);
     virtual ~CAvatar();
-    void InitAvatar(INT flag);
-    virtual void disp();
     UINT getParentActorIdx() const { return m_nParentActorIdx; }
     UINT getActorIdx() const { return m_nIndex; }
     INT getAvatarState() const { return m_nState; }
@@ -148,13 +155,51 @@ public:
     BOOL isAvatarScalingFuture() const { return m_nState & 0x2000; }
     BOOL isAvatarAnimatingFuture() const { return m_nState & 0x4000; }
     BOOL isAvatarFadeingFuture() const { return m_nState & 0x8000; }
-    virtual INT reqCommand(INT nCmd, void* pParam, INT nID);
-
-private:
-    BOOL createMoveStruct();
-    BOOL createRotateStruct();
-    BOOL createScaleStruct();
-    AvatarFadeStruct* createFadeStruct();
+    virtual INT reqCommand(INT nCmd, void* pParam, INT nID) {
+        if (nCmd == 8) return onSetActive(nCmd, pParam, nID);
+        if (nCmd == 6) return onSetVisible(nCmd, pParam, nID);
+        if (nCmd == 7) return onSetVisibleModel(nCmd, pParam, nID);
+        if (nCmd == 0x1d) return onSetGravity(nCmd, pParam, nID);
+        if (nCmd == 0x1f) return onSetCollision(nCmd, pParam, nID);
+        if (nCmd == 0x1e) return onSetMapCollision(nCmd, pParam, nID);
+        if (nCmd == 0x21) return onSetIK(nCmd, pParam, nID);
+        if (nCmd == 0x24) return onCreateLegIK(nCmd, pParam, nID);
+        if (nCmd == 0x22) return onSetLockOn(nCmd, pParam, nID);
+        if (nCmd == 0x23) return onSetNearClip(nCmd, pParam, nID);
+        if (nCmd == 0xa) return onSetPosistion(nCmd, pParam, nID);
+        if (nCmd == 0xb) return onSetPosPathTop(nCmd, pParam, nID);
+        if (nCmd == 0xd) return onMove(nCmd, pParam, nID);
+        if (nCmd == 0x11) return onStopMove(nCmd, pParam, nID);
+        if (nCmd == 0x12) return onContinueMove(nCmd, pParam, nID);
+        if (nCmd == 0xe) return onRotate(nCmd, pParam, nID);
+        if (nCmd == 0xc) return onSetDirection(nCmd, pParam, nID);
+        if (nCmd == 0xf) return onScaling(nCmd, pParam, nID);
+        if (nCmd == 0x10) return onFadeing(nCmd, pParam, nID);
+        if (nCmd == 0x13) return onPlayMotion(nCmd, pParam, nID);
+        if (nCmd == 0x14) return onPlayMotionDx(nCmd, pParam, nID);
+        if (nCmd == 0x15) return onPlayMotionEx(nCmd, pParam, nID);
+        if (nCmd == 0x16) return onPlayMotionExDx(nCmd, pParam, nID);
+        if (nCmd == 0x17) return onPlayMotionEfx(nCmd, pParam, nID);
+        if (nCmd == 0x19) return onSetMotionFrame(nCmd, pParam, nID);
+        if (nCmd == 0x1a) return onSetMakeUpMotionInValid(nCmd, pParam, nID);
+        if (nCmd == 1) return onRemoveAvatar(nCmd, pParam, nID);
+        if (nCmd == 2) return onInit(nCmd, pParam, nID);
+        if (nCmd == 0x2e) return onAvatarStop(nCmd, pParam, nID);
+        if (nCmd == 0x2f) return onAvatarStart(nCmd, pParam, nID);
+        if (nCmd == 5) return onAvatarAttach(nCmd, pParam, nID);
+        if (nCmd == 0x3a) return onAvatarAttachEffect(nCmd, pParam, nID);
+        if (nCmd == 0x30) return onAvatarSetLookPosition(nCmd, pParam, nID);
+        if (nCmd == 0x31) return onAvatarSetLookUpdatePosition(nCmd, pParam, nID);
+        if (nCmd == 0x32) return onAvatarSetLookAngle(nCmd, pParam, nID);
+        if (nCmd == 0x33) return onAvatarSetLookUpDateAngle(nCmd, pParam, nID);
+        if (nCmd == 0x34) return onAvatarLookStart(nCmd, pParam, nID);
+        if (nCmd == 0x35) return onAvatarLookStop(nCmd, pParam, nID);
+        if (nCmd == 0x36) return onAvatarLookEnd(nCmd, pParam, nID);
+        if (nCmd == 0x37) return onAvatarChangeTexture(nCmd, pParam, nID);
+        if (nCmd == 0x38) return onSetTexAnimSeq(nCmd, pParam, nID);
+        if (nCmd == 0x39) return onEnableNotSemiModel(nCmd, pParam, nID);
+        return 0;
+    }
 
 protected:
     CAtel& getAtel();
@@ -201,7 +246,6 @@ protected:
     INT onAvatarLookStop(INT nCmd, void* pParam, INT nID);
     INT onAvatarLookEnd(INT nCmd, void* pParam, INT nID);
     INT onAvatarChangeTexture(INT nCmd, void* pParam, INT nID);
-    void TexAnimTalk(INT nMotion);
     void changeAvatarMainState(INT nState);
     void beginStateMain();
     void stateMain();
@@ -212,160 +256,330 @@ protected:
     virtual void lastUpdate();
 
 public:
-    void FadeAvatarEnd();
-    void cancelFadeAvatar();
-    void ScaleAvatarEnd();
-    void cancelScaleAvatar();
-    void setRotAhead();
-    void MoveAvatarEnd();
-    BOOL MoveAvatarMain();
-    BOOL RotateAvatarMain();
-    void RotateAvatarEnd();
-    void setAvatarGravity(BOOL bOn);
-    void setAvatarRotTimeLimit(TIMEQ nTime);
-    FMATRIX* getAvatarRideMatrix() const {
-#line 623 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(D_0048AB50, __LINE__, D_0048ABA8, 0);
-        return m_pMoveStruct->_pMatRide;
+    TIMEQ secTQ(FLOAT f) const { return f * 3000.0f; }
+    FLOAT getTimeCountRate(INT nLimit, INT nCount) const {
+        if (nCount < nLimit) {
+            if (nLimit > 0) return (FLOAT)nCount / nLimit;
+            return 0.0f;
+        }
+        return 1.0f;
     }
-    FVECTOR& getAvatarTargetPos() const {
-#line 665 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(D_0048AB50, __LINE__, D_0048ABA8, 0);
-        return m_pMoveStruct->_vTargetPos;
-    }
-    FVECTOR& getAvatarTargetPosLocal() const { return m_pMoveStruct->_vTargetPosLocal; }
-    BOOL isArrivingTarget();
-    BOOL isArrivingTargetFuture();
-    FLOAT getAvatarDirY2Target(const FVECTOR* pvTarget, const FMATRIX* pMatRide);
-    void setAvatarTargetPos(const FVECTOR& inV) {
-#line 674 AVATAR_H_PATH
-        if (!(m_pMoveStruct)) AssertApp(D_0048AB50, __LINE__, D_0048ABA8, 0);
-        m_pMoveStruct->_vTargetPos = inV;
-        m_pMoveStruct->_vTargetPos.w = 1.0f;
-    }
-    void setAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct, INT f) {
+    void setAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct, INT t) {
 #line 494 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
-        in_pFadeStruct->_nFadeTimeLimit = f;
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        in_pFadeStruct->_nFadeTimeLimit = t;
+    }
+    void setAvatarFadeTimeLimit(FLOAT f) { setAvatarFadeTimeLimit(secTQ(f)); } // MATCH: the original's overload calls itself (TIMEQ -> FLOAT)
+    void setAvatarTargetFade(AvatarFadeStruct* in_pFadeStruct, const FLOAT& f) {
+#line 498 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        in_pFadeStruct->_fTargetFade = f;
     }
     void setAvatarFadeSpeed(AvatarFadeStruct* in_pFadeStruct, const FLOAT& f) {
 #line 500 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
         in_pFadeStruct->_fFadeSpeed = f;
     }
-    FVECTOR& getAvatarTargetRot() const {
-#line 619 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
-        return m_pRotateStruct->_vTargetRot;
+    FLOAT& getAvatarTargetFade(AvatarFadeStruct* in_pFadeStruct) const {
+#line 506 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        return in_pFadeStruct->_fTargetFade;
     }
-    FVECTOR& getAvatarRotSpeed() const {
-#line 627 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
-        return m_pRotateStruct->_vRotSpeed;
-    }
-    BOOL isAvatarRotEternal() const {
-#line 633 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
-        return m_pRotateStruct->_nRotateType & 0x10;
-    }
-    BOOL isOverAvatarRotTimeLimit() const {
-#line 635 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
-        return !isAvatarRotEternal() && m_pRotateStruct->_nRotTimeCount >= m_pRotateStruct->_nRotTimeLimit;
-    }
-    BOOL isOverAvatarRotTimeLimit(INT t) const {
-#line 636 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
-        return !isAvatarRotEternal() && m_pRotateStruct->_nRotTimeCount + t >= m_pRotateStruct->_nRotTimeLimit;
-    }
-    void clearAvatarRotSpeed() {
-#line 645 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
-        m_pRotateStruct->_vRotSpeed._q = 0;
-    }
-    void countAvatarRotTime(INT t) {
-#line 647 AVATAR_H_PATH
-        if (!(m_pRotateStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB98, 0);
-        m_pRotateStruct->_nRotTimeCount += t;
-    }
-    FLOAT getAvatarFadeSpeed(AvatarFadeStruct* in_pFadeStruct) const {
+    FLOAT& getAvatarFadeSpeed(AvatarFadeStruct* in_pFadeStruct) const {
 #line 508 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
         return in_pFadeStruct->_fFadeSpeed;
+    }
+    TIMEQ getAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct) const {
+#line 510 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        return in_pFadeStruct->_nFadeTimeLimit;
+    }
+    TIMEQ getAvatarFadeTimeCount(AvatarFadeStruct* in_pFadeStruct) const {
+#line 512 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        return in_pFadeStruct->_nFadeTimeCount;
+    }
+    FLOAT getAvatarFadeTimeCountRate(AvatarFadeStruct* in_pFadeStruct) const {
+#line 514 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        return getTimeCountRate(in_pFadeStruct->_nFadeTimeLimit, in_pFadeStruct->_nFadeTimeCount);
     }
     BOOL isOverAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct) const {
 #line 520 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
         return in_pFadeStruct->isOverTimeLimit();
     }
     BOOL isOverAvatarFadeTimeLimit(AvatarFadeStruct* in_pFadeStruct, INT t) const {
 #line 521 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
         return in_pFadeStruct->isOverTimeLimit(t);
     }
+    void clearAvatarFadeSpeed(AvatarFadeStruct* in_pFadeStruct) {
+#line 528 AVATAR_H_PATH
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
+        in_pFadeStruct->_fFadeSpeed = 0.0f;
+    }
+    void FadeAvatarEnd();
+    void cancelFadeAvatar();
     void clearAvatarFadeTimeCount(AvatarFadeStruct* in_pFadeStruct) {
 #line 534 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
         in_pFadeStruct->_nFadeTimeCount = 0;
     }
     void countAvatarFadeTime(AvatarFadeStruct* in_pFadeStruct, INT t) {
 #line 536 AVATAR_H_PATH
-        if (!(in_pFadeStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB78, 0);
+        if (!(in_pFadeStruct)) AssertApp(__FILE__, __LINE__, "in_pFadeStruct", 0);
         in_pFadeStruct->_nFadeTimeCount += t;
     }
     BOOL FadeAvatarMain();
-    void setAvatarScaleTimeLimit(INT f) {
+    void setAvatarScaleTimeLimit(INT t) {
 #line 547 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
-        m_pScaleStruct->_nScaleTimeLimit = f;
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        m_pScaleStruct->_nScaleTimeLimit = t;
     }
-    void setAvatarTargetScale(const FVECTOR& inV) {
+    void setAvatarScaleTimeLimit(FLOAT f) { setAvatarScaleTimeLimit(secTQ(f)); }
+    void setAvatarTargetScale(const FVECTOR& v) {
 #line 551 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
-        m_pScaleStruct->_vTargetScale = inV;
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        m_pScaleStruct->_vTargetScale = v;
     }
-    void setAvatarScaleSpeed(const FVECTOR& inV) {
+    void setAvatarScaleSpeed(const FVECTOR& v) {
 #line 553 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
-        m_pScaleStruct->_vScaleSpeed = inV;
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        m_pScaleStruct->_vScaleSpeed = v;
     }
     FVECTOR& getAvatarTargetScale() const {
 #line 560 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
         return m_pScaleStruct->_vTargetScale;
     }
     FVECTOR& getAvatarScaleSpeed() const {
 #line 562 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
         return m_pScaleStruct->_vScaleSpeed;
+    }
+    TIMEQ getAvatarScaleTimeLimit() const {
+#line 564 AVATAR_H_PATH
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        return m_pScaleStruct->_nScaleTimeLimit;
+    }
+    TIMEQ getAvatarScaleTimeCount() const {
+#line 566 AVATAR_H_PATH
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        return m_pScaleStruct->_nScaleTimeCount;
+    }
+    FLOAT getAvatarScaleTimeCountRate() const {
+#line 568 AVATAR_H_PATH
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
+        return getTimeCountRate(m_pScaleStruct->_nScaleTimeLimit, m_pScaleStruct->_nScaleTimeCount);
     }
     BOOL isOverAvatarScaleTimeLimit() const {
 #line 574 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
         return m_pScaleStruct->_nScaleTimeCount >= m_pScaleStruct->_nScaleTimeLimit;
     }
     BOOL isOverAvatarScaleTimeLimit(INT t) const {
 #line 575 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
         return m_pScaleStruct->_nScaleTimeCount + t >= m_pScaleStruct->_nScaleTimeLimit;
     }
     void clearAvatarScaleSpeed() {
 #line 582 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
         m_pScaleStruct->_vScaleSpeed._q = 0;
     }
+    void ScaleAvatarEnd();
+    void cancelScaleAvatar();
     void clearAvatarScaleTimeCount() {
 #line 588 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
         m_pScaleStruct->_nScaleTimeCount = 0;
     }
     void countAvatarScaleTime(INT t) {
 #line 590 AVATAR_H_PATH
-        if (!(m_pScaleStruct)) AssertApp(D_0048AB50, __LINE__, D_0048AB88, 0);
+        if (!(m_pScaleStruct)) AssertApp(__FILE__, __LINE__, "m_pScaleStruct", 0);
         m_pScaleStruct->_nScaleTimeCount += t;
     }
     BOOL ScaleAvatarMain();
+    void setAvatarRotTimeLimit(TIMEQ nTime);
+    void setAvatarRotTimeLimit(FLOAT f) { setAvatarRotTimeLimit(secTQ(f)); }
+    void setAvatarStartRot(const FVECTOR& v) {
+#line 605 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        m_pRotateStruct->_vStartRot = v;
+    }
+    void setAvatarTargetRot(const FVECTOR& v) {
+#line 607 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        m_pRotateStruct->_vTargetRot = v;
+    }
+    void setAvatarRotSpeed(const FVECTOR& v) {
+#line 609 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        m_pRotateStruct->_vRotSpeed = v;
+    }
+    USHORT getAvatarRotType() const {
+#line 615 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        return m_pRotateStruct->_nRotateType & 0xf;
+    }
+    TIMEQ getAvatarRotTimeLimit() const {
+#line 617 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        return m_pRotateStruct->_nRotTimeLimit;
+    }
+    FVECTOR& getAvatarTargetRot() const {
+#line 619 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        return m_pRotateStruct->_vTargetRot;
+    }
+    FLOAT getAvatarDirY2Target(const FVECTOR* pvTarget, const FMATRIX* pMatRide);
+    FMATRIX* getAvatarRideMatrix() const {
+#line 623 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        return m_pMoveStruct->_pMatRide;
+    }
+    FVECTOR& getAvatarStartRot() const {
+#line 625 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        return m_pRotateStruct->_vStartRot;
+    }
+    FVECTOR& getAvatarRotSpeed() const {
+#line 627 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        return m_pRotateStruct->_vRotSpeed;
+    }
+    BOOL isAvatarRotEternal() const {
+#line 633 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        return m_pRotateStruct->_nRotateType & 0x10;
+    }
+    BOOL isOverAvatarRotTimeLimit() const {
+#line 635 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        return !isAvatarRotEternal() && m_pRotateStruct->_nRotTimeCount >= m_pRotateStruct->_nRotTimeLimit;
+    }
+    BOOL isOverAvatarRotTimeLimit(INT t) const {
+#line 636 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        return !isAvatarRotEternal() && m_pRotateStruct->_nRotTimeCount + t >= m_pRotateStruct->_nRotTimeLimit;
+    }
+    void clearAvatarRotTimeCount() {
+#line 643 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        m_pRotateStruct->_nRotTimeCount = 0;
+    }
+    void clearAvatarRotSpeed() {
+#line 645 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        m_pRotateStruct->_vRotSpeed._q = 0;
+    }
+    void countAvatarRotTime(INT t) {
+#line 647 AVATAR_H_PATH
+        if (!(m_pRotateStruct)) AssertApp(__FILE__, __LINE__, "m_pRotateStruct", 0);
+        m_pRotateStruct->_nRotTimeCount += t;
+    }
+    BOOL RotateAvatarMain();
+    void RotateAvatarEnd();
+    void setRotAhead();
+    void setAvatarStartPos(const FVECTOR& v) {
+#line 659 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        m_pMoveStruct->_vStartPos = v;
+        m_pMoveStruct->_vStartPos.w = 1.0f;
+    }
+    FVECTOR& getAvatarStartPos() const {
+#line 662 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        return m_pMoveStruct->_vStartPos;
+    }
+    FVECTOR& getAvatarTargetPos() const {
+#line 665 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        return m_pMoveStruct->_vTargetPos;
+    }
+    FVECTOR& getAvatarStartPosLocal() const { return m_pMoveStruct->_vStartPosLocal; }
+    FVECTOR& getAvatarTargetPosLocal() const { return m_pMoveStruct->_vTargetPosLocal; }
+    void setAvatarTargetPos(const FVECTOR& v) {
+#line 674 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        m_pMoveStruct->_vTargetPos = v;
+        m_pMoveStruct->_vTargetPos.w = 1.0f;
+    }
+    void clearAvatarMoveTimeCount() {
+#line 677 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        m_pMoveStruct->_nMoveTimeCount = 0;
+    }
+    void countAvatarMoveTime(INT t) {
+#line 680 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        m_pMoveStruct->_nMoveTimeCount += t;
+    }
+    void setAvatarMoveTimeLimit(INT t) {
+#line 683 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        m_pMoveStruct->_nMoveTimeLimit = t;
+    }
+    void setAvatarMoveTimeLimit(FLOAT f) { setAvatarMoveTimeLimit(secTQ(f)); }
+    void setAvatarSpeed(FLOAT f) {
+#line 689 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        m_pMoveStruct->_fSpeed = f * 0.16666667f;
+    }
+    void calcAvatarMoveSpeed(FVECTOR& vOut);
+    USHORT getAvatarMoveType() const {
+#line 695 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        return m_pMoveStruct->_nMoveType & 0xf;
+    }
+    TIMEQ getAvatarMoveTimeLimit() const {
+#line 698 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        return m_pMoveStruct->_nMoveTimeLimit;
+    }
+    FLOAT getAvatarSpeed() const {
+#line 701 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        return m_pMoveStruct->_fSpeed;
+    }
+    BOOL isAvatarMoveWithGravity() const {
+#line 704 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        return m_pMoveStruct->_nMoveType & 0x200;
+    }
+    BOOL isOverAvatarMoveTimeLimit() const {
+#line 707 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        return m_pMoveStruct->isOverTimeLimit();
+    }
+    BOOL isOverAvatarMoveTimeLimit(INT t) const {
+#line 708 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        return m_pMoveStruct->isOverTimeLimit(t);
+    }
+    USHORT getAvatarMoveMotion() const {
+#line 711 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        return m_pMoveStruct->_nMoveMotion;
+    }
     BOOL updateAvatarPosOnPath(TIMEQ nTime);
+    void getAvatarPosOnPath(FVECTOR& vPos) {
+#line 717 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        m_pMoveStruct->getPosOnPath(vPos);
+    }
+    BOOL isAvatarRotAhead() const {
+#line 720 AVATAR_H_PATH
+        if (!(m_pMoveStruct)) AssertApp(__FILE__, __LINE__, "m_pMoveStruct", 0);
+        return !isAvatarRotating() && (m_pMoveStruct->_nMoveType & 0x10) != 0;
+    }
+    BOOL isArrivingTarget();
+    BOOL isArrivingTargetFuture();
+    BOOL MoveAvatarMain();
+    void MoveAvatarEnd();
+    void setAvatarGravity(BOOL bOn);
     FVECTOR* getPathStartPos(const CHAR* pszName) const;
 };
 #else

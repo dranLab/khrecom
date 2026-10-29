@@ -387,3 +387,7 @@ _vt$15CPointCollision_00487640 = 0x00487640; // size:0x20
 _vt$10CCollision_00487660 = 0x00487660; // size:0x18
 _vt$4CFnt_004876B8 = 0x004876B8; // size:0x48
 _vt$t7CVector1Z7G_STRIP_00487700 = 0x00487700; // size:0x18
+_$_t7CVector1Z7G_STRIP_0023A008 = 0x0023A008; // type:func size:0x8C
+_$_6CState_0023BF40 = 0x0023BF40; // type:func size:0x30
+_vt$t7CVector1Z7G_STRIP_0048B230 = 0x0048B230; // size:0x18
+_vt$6CState_0048B260 = 0x0048B260; // size:0x30

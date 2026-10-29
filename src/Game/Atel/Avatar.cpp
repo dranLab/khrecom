@@ -2,13 +2,15 @@
 #define GAME_ATEL_AVATAR_CPP
 #define GPRIM_H_FULL_CLASSES /* MATCH: the constructor inlines the full C3DLine/CGPrim constructors */
 #define ENTITY_H_SETFLAG_DIRECT
+#define TASK_H_NO_SLC_OVERFLOW_MSG
 #include "Game/Atel/Avatar.h"
+#include "System/Graphic/Anim.h"
+#include "System/Graphic/Model.h"
+#include "Game/BodyCollision.h"
+#include "System/Graphic/Effect/effect.h"
 #include "Game/Atel/Atel.h"
 #include "Game/Atel/VSME.h"
 #include "Game/Movement.h"
-#include "Game/BodyCollision.h"
-#include "System/Graphic/Anim.h"
-#include "System/Graphic/Model.h"
 #include "System/Graphic/HermitePath.h"
 #include "System/Graphic/PathData.h"
 #include "System/Debug.h"
@@ -24,6 +26,33 @@ void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 using namespace ATEL;
 
 namespace ATEL {
+struct AvatarMoveParam { // 0x20
+    union {
+        FVECTOR _vTarget;
+        struct {
+            FLOAT _fCx;
+            FLOAT _fCz;
+            FLOAT _fTargetRotY;
+        };
+        struct {
+            CHAR* _pszPathFile;
+            USHORT _nMotion;
+        };
+    };                  /* 0x00 */
+    UINT _nType;        /* 0x10 */
+    union {
+        FLOAT _fTime;
+        FLOAT _fSpeed;
+    };                  /* 0x14 */
+};
+struct AvatarRotateParam { // 0x20
+    union {
+        FVECTOR _vTarget;
+        UINT _nTargetID;
+    };                  /* 0x00 */
+    UINT _nType;        /* 0x10 */
+    FLOAT _fTime;       /* 0x14 */
+};
 struct AvatarMotionParam { // 0xc
     FLOAT _fPlaySpeed;        /* 0x0 */
     INT _iChangeHokanRate;    /* 0x4 */
@@ -76,42 +105,64 @@ void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-extern "C" char D_0048AD58[];
-extern "C" char D_0048B000[]; /* "LIP_TALK" */
-extern "C" char D_0048B010[];
 class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: System/RsrcData.h(156) (owner partial; RsrcDB.h needs the full RsrcData.h classes) */
 public:
     static BYTE* getRsrcPTD(const CHAR* pszName);
     static void removeRsrc(INT nID);
 };
-extern "C" char D_0048AD68[]; /* __FILE__ */
-extern "C" char D_0048AF30[]; /* "p" */
-extern "C" char D_0048ADC0[];
-extern "C" char D_0048ADC8[];
-extern "C" char D_0048AD90[];
-extern "C" char D_0048ADD0[];
-extern "C" char D_0048AE00[];
-extern "C" char D_0048AE28[];
-extern "C" char D_0048AE58[];
-extern "C" char D_0048AE80[];
-extern "C" char D_0048AEB0[];
-extern "C" char D_0048AED8[];
-extern "C" char D_0048AF08[];
-extern "C" char D_0048AB98[];
-extern "C" char D_0048B030[];
-extern "C" char D_0048B060[];
-extern "C" char D_0048B090[];
-extern "C" char D_0048B0C0[];
+extern "C" {
+void sceVu0RotMatrix(FMATRIX& m0, const FMATRIX& m1, const FVECTOR& rot);
+void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, FLOAT ry);
+}
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", __Q24ATEL7CAvatarP5CTask);
+CAvatar::CAvatar(CTask* pParent)
+    : CEntity(pParent, (ObjType::eObjType)4), m_nState(0) {
+    m_MainState[0].set(this, &CAvatar::beginStateMain, &CAvatar::stateMain, &CAvatar::stateMainEnd);
+    m_MainState[1].set(this, &CAvatar::beginStateMain, &CAvatar::stateSkipMain, NULL);
+    changeAvatarMainState(0);
+    m_nMotInValidFlag = 0;
+    setEntityFlag(0x1000, 0);
+    m_pMoveStruct = NULL;
+    m_pRotateStruct = NULL;
+    m_pScaleStruct = NULL;
+    m_pLookStruct = NULL;
+    for (INT i = 4; i >= 0; i--) m_pFadeStruct[i] = NULL;
+}
+/* Parked: 6 lines - the implicit lineY/lineX destructor calls get s5/s4 instead of s4/s5: their address pseudos
+   tie on priority (2 refs / 17 insns) and ours numbers lineX first (lreg dump); no body form changed it. */
+#if 0
+ATEL::CAvatar::~CAvatar() {
+    delete m_pMoveStruct;
+    if (m_pRotateStruct) com_free(m_pRotateStruct);
+    if (m_pScaleStruct) com_free(m_pScaleStruct);
+    if (m_pLookStruct) com_free(m_pLookStruct);
+    for (INT i = 0; i < 5; i++) {
+        void* pv = m_pFadeStruct[i];
+        if (pv) com_free(pv);
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", _$_Q24ATEL7CAvatar);
+#endif
 void CAvatar::InitAvatar(INT in_flag) {
     m_pMove->setFlag(0x40, FALSE);
     m_pMove->setFlag(0x200, TRUE);
     enableFade2Path(1, -1);
-    setTexAnmSeq(0, D_0048AD58);
+    setTexAnmSeq(0, "EYE_BLINK");
     if (in_flag == 1) setEntityFlag(1, 0);
     lineX.m_pCrd = &Crd(0);
     lineY.m_pCrd = &Crd(0);
@@ -136,7 +187,7 @@ void CAvatar::InitAvatar(INT in_flag) {
     LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
 }
 void CAvatar::changeAvatarMainState(INT nState) {
-    if (!((0 <= nState) && (2 > nState))) AssertApp(D_0048AD68, 154, D_0048AD90, 0);
+    if (!((0 <= nState) && (2 > nState))) AssertApp(__FILE__, 154, "(0 <= nState) && (_MAIN_STATE_MAX > nState)", 0);
     gotoState(m_MainState[nState]);
 }
 void CAvatar::beginStateMain() {
@@ -198,12 +249,12 @@ void CAvatar::lastUpdate() {
 }
 CAtel& CAvatar::getAtel() {
     CAtel* pAtel = (CAtel*)getParent();
-    if (!(pAtel)) AssertApp(D_0048AD68, 360, D_0048ADC0, 0);
+    if (!(pAtel)) AssertApp(__FILE__, 360, "pAtel", 0);
     return *pAtel;
 }
 CVSM& CAvatar::getVSM() {
     CVSM* pVSM = getAtel().getVSM();
-    if (!(pVSM)) AssertApp(D_0048AD68, 370, D_0048ADC8, 0);
+    if (!(pVSM)) AssertApp(__FILE__, 370, "pVSM", 0);
     return *pVSM;
 }
 void CAvatar::getNowPosition(FVECTOR& vPos) const { vPos = getPos(); }
@@ -221,27 +272,27 @@ FLOAT CAvatar::getDirection() const { return 0.0f; }
 INT CAvatar::getTypeID() const { return 0x4000; }
 BOOL CAvatar::createMoveStruct() {
     if (m_pMoveStruct) return TRUE;
-    m_pMoveStruct = new (com_malloc_d(sizeof(AvatarMoveStruct), D_0048ADD0, RET_ADDR())) AvatarMoveStruct;
+    m_pMoveStruct = new (com_malloc_d(sizeof(AvatarMoveStruct), __FILE__ "(458)", RET_ADDR())) AvatarMoveStruct;
     if (!m_pMoveStruct) {
-        TRACE(D_0048AE00);
+        TRACE(" ... Fail to create MoveStructure\n");
         return FALSE;
     }
     return TRUE;
 }
 BOOL CAvatar::createRotateStruct() {
     if (m_pRotateStruct) return TRUE;
-    m_pRotateStruct = new (com_malloc_d(sizeof(AvatarRotateStruct), D_0048AE28, RET_ADDR())) AvatarRotateStruct;
+    m_pRotateStruct = new (com_malloc_d(sizeof(AvatarRotateStruct), __FILE__ "(477)", RET_ADDR())) AvatarRotateStruct;
     if (!m_pRotateStruct) {
-        TRACE(D_0048AE58);
+        TRACE(" ... Fail to create RotateStructure\n");
         return FALSE;
     }
     return TRUE;
 }
 BOOL CAvatar::createScaleStruct() {
     if (m_pScaleStruct) return TRUE;
-    m_pScaleStruct = (AvatarScaleStruct*)com_malloc_d(sizeof(AvatarScaleStruct), D_0048AE80, RET_ADDR());
+    m_pScaleStruct = (AvatarScaleStruct*)com_malloc_d(sizeof(AvatarScaleStruct), __FILE__ "(494)", RET_ADDR());
     if (!m_pScaleStruct) {
-        TRACE(D_0048AEB0);
+        TRACE(" ... Fail to create ScalingStructure\n");
         return FALSE;
     }
     return TRUE;
@@ -249,9 +300,9 @@ BOOL CAvatar::createScaleStruct() {
 AvatarFadeStruct* CAvatar::createFadeStruct() {
     for (INT i = 0; i < 5; i++) {
         if (!m_pFadeStruct[i]) {
-            m_pFadeStruct[i] = (AvatarFadeStruct*)com_malloc_d(sizeof(AvatarFadeStruct), D_0048AED8, RET_ADDR());
+            m_pFadeStruct[i] = (AvatarFadeStruct*)com_malloc_d(sizeof(AvatarFadeStruct), __FILE__ "(514)", RET_ADDR());
             if (!m_pFadeStruct[i]) {
-                TRACE(D_0048AF08);
+                TRACE(" ... Fail to create FadeStructure\n");
                 return NULL;
             }
             return m_pFadeStruct[i];
@@ -351,8 +402,109 @@ INT CAvatar::onSetPosPathTop(INT nCmd, void* pParam, INT nID) {
     setAvatarTargetPos(*pV);
     return -1;
 }
+/* Parked: 8 lines - the original reads p->_nType once with lhu for nType and nFlag, keeps the signed slti
+   and tests nType twice before setVel; INT nType (lw) is the only form with the original registers (USHORT
+   loads move p/CEntity to other s-registers), permuter found nothing. */
+#if 0
+INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
+    AvatarMoveParam* p = (AvatarMoveParam*)pParam;
+    if (!(p)) AssertApp(__FILE__, 779, "p", 0);
+    if (!m_pMoveStruct && !createMoveStruct()) return -1;
+    m_nState = ((m_nState | 0x10) & ~0x20) | 0x400;
+    FVECTOR vOrigin;
+    FVECTOR vVel;
+    vOrigin = vVel = getPos();
+    setAvatarStartPos(vOrigin);
+    m_pMoveStruct->_nMoveType = p->_nType;
+    m_pMoveStruct->_nMoveMotion = p->_nMotion;
+    INT nType = p->_nType & 0xf;
+    USHORT nFlag = p->_nType & 0xfff0;
+    switch (nType) {
+    case 1:
+        if (nFlag & 0x80) {
+            FVECTOR* pV = getPathStartPos(p->_pszPathFile);
+            if (!pV) return -1;
+            m_pMoveStruct->_nMoveMotion = p->_nMotion;
+            changeMotion(getAvatarMoveMotion(), 0, FALSE, -1, 0, 0);
+            setAvatarTargetPos(*pV);
+        } else {
+            setAvatarTargetPos(p->_vTarget);
+        }
+        clearAvatarMoveTimeCount();
+        setAvatarMoveTimeLimit(p->_fTime);
+        break;
+    case 0:
+        if (nFlag & 0x80) {
+            FVECTOR* pV = getPathStartPos(p->_pszPathFile);
+            if (!pV) return -1;
+            setAvatarTargetPos(*pV);
+        } else {
+            setAvatarTargetPos(p->_vTarget);
+        }
+    case 8:
+        setAvatarSpeed(p->_fSpeed);
+        break;
+    case 7:
+        if (!m_pMoveStruct->setupPath(p->_pszPathFile, p->_nMotion)) return -1;
+        changeMotion(getAvatarMoveMotion(), 0, FALSE, -1, 0, 0);
+        break;
+    case 9:
+        clearSpeed();
+        m_nState &= ~0x10;
+        return -1;
+    }
+    calcAvatarMoveSpeed(vVel);
+    if (nType < 3) {
+        if (nType == 0) m_pMove->setVel(vVel);
+    }
+    return -1;
+}
+#else
+/* MATCH: placeholder for the asm onMove's assert string */
+inline void _onMoveStringPlaceholder(void* p) {
+    if (!(p)) AssertApp(__FILE__, 779, "p", 0);
+}
+/* MATCH: the parked function's jump table (compiled jump tables of the other switches sit around it in .rodata) */
+asm(".rdata\n.align 4\njtbl_0048AF40:\n"
+    ".word .L00236FD4\n.word .L00236E44\n.word .L00237160\n.word .L00237160\n.word .L00237160\n.word .L00237160\n.word .L00237160\n.word .L002370C4\n.word .L00237080\n.word .L00237140\n.text\n");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onMove__Q24ATEL7CAvatariPvi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", calcAvatarMoveSpeed__Q24ATEL7CAvatarR7FVECTOR);
+#endif
+void CAvatar::calcAvatarMoveSpeed(FVECTOR& vOut) {
+    switch (getAvatarMoveType()) {
+    case 1:
+    case 5:
+    case 6:
+        SubVector(vOut, getAvatarTargetPos(), getAvatarStartPos());
+        ScaleVector(vOut, vOut, 50.0f / getAvatarMoveTimeLimit());
+        vOut.w = 0.0f;
+        break;
+    case 8: {
+        FVECTOR v;
+        FMATRIX m;
+        _unitMatrixVu0(m);
+        v._q = 0;
+        v.z = getAvatarSpeed();
+        sceVu0RotMatrix(m, m, getRot());
+        ApplyMatrix(vOut, m, v);
+        vOut.w = 0.0f;
+        break;
+    }
+    case 0: {
+        FMATRIX m;
+        FVECTOR v;
+        _unitMatrixVu0(m);
+        sceVu0RotMatrixY(m, m, getAvatarDirY2Target(NULL, NULL));
+        v._q = 0;
+        v.z = getAvatarSpeed();
+        ApplyMatrix(vOut, m, v);
+        vOut.w = 0.0f;
+        break;
+    }
+    default:
+        vOut._q = 0;
+        break;
+    }
+}
 void CAvatar::setAvatarGravity(BOOL bOn) {
     if (bOn) m_pMove->enableGravity(TRUE);
     else m_pMove->enableGravity(FALSE);
@@ -382,16 +534,151 @@ BOOL CAvatar::isArrivingTargetFuture() {
     FLOAT fNext = vel.x * v.x + vel.y * v.y + vel.z * v.z;
     return fNext * fPrev < 0.0f;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", MoveAvatarMain__Q24ATEL7CAvatar);
+BOOL CAvatar::MoveAvatarMain() {
+    BOOL bRes = TRUE;
+    TIMEQ nTQ = getFrameRate();
+    FVECTOR vPos;
+    FVECTOR v;
+    switch (getAvatarMoveType()) {
+    case 1:
+        calcAvatarMoveSpeed(v);
+        m_pMove->setVel(v);
+    case 5:
+    case 6:
+        countAvatarMoveTime(nTQ);
+        bRes = isOverAvatarMoveTimeLimit();
+        if (!bRes) {
+            if (isAvatarRotAhead()) setRotAhead();
+            if (isOverAvatarMoveTimeLimit(nTQ)) m_nState &= ~0x400;
+        }
+        break;
+    case 0:
+        bRes = isArrivingTarget();
+        if (!bRes) {
+            if (isArrivingTargetFuture()) m_nState &= ~0x400;
+            calcAvatarMoveSpeed(v);
+            m_pMove->setVel(v);
+            if (isAvatarRotAhead()) setRotAhead();
+        }
+        break;
+    case 8:
+        calcAvatarMoveSpeed(v);
+        m_pMove->setVel(v);
+        bRes = FALSE;
+        break;
+    case 7: {
+        bRes = updateAvatarPosOnPath(nTQ);
+        FVECTOR v;
+        getAvatarPosOnPath(v);
+        if (m_pMove->isGravity()) v.y = getPos().y;
+        if (isAvatarRotAhead()) {
+            FVECTOR vVel;
+            SubVector(vVel, v, getPos());
+            getRot().y = atan2f(vVel.x, vVel.z);
+        }
+        setPos(v);
+        break;
+    }
+    }
+    if ((UINT)getID() % 10000 == 1007) land(0.25f, 1.0f, FALSE);
+    return bRes;
+}
 BOOL CAvatar::updateAvatarPosOnPath(TIMEQ nTime) {
     BOOL bRet = TRUE;
     if (m_pMoveStruct) bRet = m_pMoveStruct->updatePosOnPath(nTime * 0.02f);
     return bRet;
 }
 void CAvatar::MoveAvatarEnd() { clearSpeed(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onRotate__Q24ATEL7CAvatariPvi);
+static inline void _shortestRad(FLOAT& f, FLOAT fStart) {
+    FLOAT fDist = f - fStart;
+    if (3.1415927f < fDist) f = f - 6.2831855f;
+    else if (fDist < -3.1415927f) f = f + 6.2831855f;
+}
+INT CAvatar::onRotate(INT nCmd, void* pParam, INT nID) {
+    AvatarRotateParam* p = (AvatarRotateParam*)pParam;
+    if (!(p)) AssertApp(__FILE__, 1232, "p", 0);
+    if (!m_pRotateStruct && !createRotateStruct()) return -1;
+    m_pRotateStruct->_nRotateType = p->_nType;
+    USHORT nType = getAvatarRotType();
+    if (nType == 4) {
+        if (p->_fTime < 0.01f) {
+            m_pRotateStruct->_nRotIntervalTime = 0;
+            setAvatarState(0x40, FALSE);
+            setAvatarState(0x1000, FALSE);
+        } else {
+            m_pRotateStruct->_nRotIntervalTimeCount = 0;
+            m_pRotateStruct->_nRotIntervalTime = secTQ(p->_fTime);
+            m_pRotateStruct->_nRotTargetRegularly = p->_nTargetID;
+        }
+        return 1;
+    }
+    setAvatarState(0x1040, TRUE);
+    clearAvatarRotTimeCount();
+    setAvatarRotTimeLimit(p->_fTime);
+    FVECTOR vRot;
+    getRotation(vRot);
+    setAvatarStartRot(vRot);
+    BOOL bPos2Rot = FALSE;
+    BOOL bShortest = TRUE;
+    FVECTOR vTargetPos;
+    switch (nType) {
+    case 1:
+    case 7:
+    case 8:
+        AddVector(vRot, p->_vTarget, vRot);
+        bShortest = FALSE;
+        break;
+    case 0:
+    case 5:
+    case 6:
+        vRot = p->_vTarget;
+        break;
+    case 9:
+    case 10:
+        bShortest = FALSE;
+    case 2: {
+        CAvatar* pAvatar = getAtel().getVSM()->getAvatar(p->_nTargetID);
+        if (pAvatar && pAvatar != this) {
+            pAvatar->getNowPosition(vTargetPos);
+            bPos2Rot = TRUE;
+        }
+        break;
+    }
+    case 3:
+        vTargetPos = p->_vTarget;
+        bPos2Rot = TRUE;
+        break;
+    }
+    if (bPos2Rot) {
+        vRot._q = 0;
+        vRot.y = getAvatarDirY2Target(&vTargetPos, NULL);
+    }
+    if (bShortest) {
+        FVECTOR& vStart = getAvatarStartRot();
+        _shortestRad(vRot.x, vStart.x);
+        _shortestRad(vRot.y, vStart.y);
+        _shortestRad(vRot.z, vStart.z);
+    }
+    setAvatarTargetRot(vRot);
+    FVECTOR vVel;
+    if (nType == 7 || nType == 5 || nType == 9) {
+        SubVector(vVel, getAvatarStartRot(), getAvatarTargetRot());
+        if (vVel.y > 0.0f) vVel.y = -vVel.y;
+        else vVel.y = -6.2831855f - vVel.y;
+    } else if (nType == 8 || nType == 6 || nType == 10) {
+        SubVector(vVel, getAvatarStartRot(), getAvatarTargetRot());
+        if (vVel.y < 0.0f) vVel.y = -vVel.y;
+        else vVel.y = 6.2831855f - vVel.y;
+    } else {
+        SubVector(vVel, getAvatarTargetRot(), getAvatarStartRot());
+    }
+    if (getAvatarRotTimeLimit()) ScaleVector(vVel, vVel, 1.0f / getAvatarRotTimeLimit());
+    setAvatarRotSpeed(vVel);
+    setAvatarState(0x1040, TRUE);
+    return -1;
+}
 void CAvatar::setAvatarRotTimeLimit(TIMEQ nTime) {
-    if (!(m_pRotateStruct)) AssertApp(D_0048AD68, 1381, D_0048AB98, 0);
+    if (!(m_pRotateStruct)) AssertApp(__FILE__, 1381, "m_pRotateStruct", 0);
     BOOL bEternal = FALSE;
     if (nTime < 0) {
         bEternal = TRUE;
@@ -466,7 +753,7 @@ INT CAvatar::onFadeing(INT nCmd, void* pParam, INT nID) {
     AvatarFadeStruct* pFadeStruct;
     FLOAT alp;
     FLOAT f;
-    if (!(p)) AssertApp(D_0048AD68, 1468, D_0048AF30, 0);
+    if (!(p)) AssertApp(__FILE__, 1468, "p", 0);
     pFadeStruct = createFadeStruct();
     if (!pFadeStruct) return -1;
     pFadeStruct->_ModelNo = nID;
@@ -518,7 +805,7 @@ void CAvatar::cancelFadeAvatar() {}
 INT CAvatar::onScaling(INT nCmd, void* pParam, INT nID) {
     AvatarScaleParam* p = (AvatarScaleParam*)pParam;
     FVECTOR v;
-    if (!(p)) AssertApp(D_0048AD68, 1607, D_0048AF30, 0);
+    if (!(p)) AssertApp(__FILE__, 1607, "p", 0);
     if (!m_pScaleStruct && !createScaleStruct()) return -1;
     setAvatarTargetScale(p->_vTarget);
     getScale(v);
@@ -552,7 +839,7 @@ BOOL CAvatar::ScaleAvatarMain() {
 void CAvatar::ScaleAvatarEnd() { clearAvatarScaleSpeed(); }
 void CAvatar::cancelScaleAvatar() { ScaleAvatarEnd(); }
 void CAvatar::TexAnimTalk(INT in_MotID) {
-    char* pTalkName = D_0048B000;
+    char* pTalkName = "LIP_TALK";
     CEntity* pEntity = this;
     switch ((UINT)pEntity->getID() % 10000) {
     case 307:
@@ -583,7 +870,7 @@ void CAvatar::TexAnimTalk(INT in_MotID) {
         break;
     default:
         if (in_MotID == 4) {
-            TRACE(D_0048B010, 1, pTalkName);
+            TRACE("ATEL:setTexAnmSeq:%d, %s\n", 1, pTalkName);
             setTexAnmSeq(1, pTalkName);
         }
         break;
@@ -730,7 +1017,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onAvatarAttachEffec
 INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
     FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));
-    if (!m_pLookStruct) m_pLookStruct = (AvatarLookStruct*)com_malloc_d(sizeof(AvatarLookStruct), D_0048B030, RET_ADDR());
+    if (!m_pLookStruct) m_pLookStruct = (AvatarLookStruct*)com_malloc_d(sizeof(AvatarLookStruct), __FILE__ "(2058)", RET_ADDR());
     m_pLookStruct->_nTargetID = p->TargetID;
     m_pLookStruct->_fOffsetY = p->OffsetY;
     v.y += p->OffsetY;
@@ -740,7 +1027,7 @@ INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
 INT CAvatar::onAvatarSetLookUpdatePosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
     FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));
-    if (!m_pLookStruct) m_pLookStruct = (AvatarLookStruct*)com_malloc_d(sizeof(AvatarLookStruct), D_0048B060, RET_ADDR());
+    if (!m_pLookStruct) m_pLookStruct = (AvatarLookStruct*)com_malloc_d(sizeof(AvatarLookStruct), __FILE__ "(2079)", RET_ADDR());
     m_pLookStruct->_nTargetID = p->TargetID;
     m_pLookStruct->_fOffsetY = p->OffsetY;
     v.y += p->OffsetY;
@@ -818,16 +1105,13 @@ AvatarMoveStruct::~AvatarMoveStruct() {
     delete _pPathData;
     delete _pHermiteHelper;
 }
-/* Parked: matches (V1), but `new CPathData` emits the weak CVector<G_STRIP> destructor (the original's unnamed
-   func_0023A008 in the weak tail): switch it on together with the weak tail. */
-#if 0
 BOOL AvatarMoveStruct::setupPath(const CHAR* pszPath, USHORT nMotion) {
     delete _pPathData;
-    _pPathData = new (com_malloc_d(sizeof(CPathData), D_0048B090, RET_ADDR())) CPathData(pszPath);
+    _pPathData = new (com_malloc_d(sizeof(CPathData), __FILE__ "(2268)", RET_ADDR())) CPathData(pszPath);
     _nMoveMotion = 0;
     if (_pPathData) {
         if (!_pHermiteHelper) {
-            _pHermiteHelper = new (com_malloc_d(sizeof(CHermitePath), D_0048B0C0, RET_ADDR())) CHermitePath;
+            _pHermiteHelper = new (com_malloc_d(sizeof(CHermitePath), __FILE__ "(2274)", RET_ADDR())) CHermitePath;
             if (!_pHermiteHelper) goto end;
         }
         {
@@ -843,9 +1127,6 @@ BOOL AvatarMoveStruct::setupPath(const CHAR* pszPath, USHORT nMotion) {
 end:
     return _pHermiteHelper != NULL;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setupPath__Q24ATEL16AvatarMoveStructPCcUs);
-#endif
 void AvatarMoveStruct::getPosOnPath(FVECTOR& vPos) {
     if (_pHermiteHelper) _pHermiteHelper->getNowPos(vPos);
 }
@@ -854,98 +1135,4 @@ BOOL AvatarMoveStruct::updatePosOnPath(FLOAT fTime) {
     if (_pHermiteHelper) bRet = _pHermiteHelper->update(fTime);
     return bRet;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", func_0023A008);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", _$_t14CStateTemplate1ZQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setParentActorIdx__Q24ATEL7CAvatarUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setActorIdx__Q24ATEL7CAvatarUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getParentActorIdx__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getActorIdx__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarState__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getMovement__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarState__Q24ATEL7CAvatarii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarBusy__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarActive__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarVisible__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarMoving__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarSuspendingMove__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarRotating__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarScaling__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarAnimating__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarFadeing__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarMovingFuture__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarSuspendingMoveFuture__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarRotatingFuture__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarScalingFuture__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarAnimatingFuture__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarFadeingFuture__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", reqCommand__Q24ATEL7CAvatariPvi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", secTQ__CQ24ATEL7CAvatarf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getTimeCountRate__CQ24ATEL7CAvatarii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarFadeTimeLimit__Q24ATEL7CAvatarPQ24ATEL16AvatarFadeStructi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarFadeTimeLimit__Q24ATEL7CAvatarf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarTargetFade__Q24ATEL7CAvatarPQ24ATEL16AvatarFadeStructRCf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarFadeSpeed__Q24ATEL7CAvatarPQ24ATEL16AvatarFadeStructRCf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarTargetFade__CQ24ATEL7CAvatarPQ24ATEL16AvatarFadeStruct);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarFadeSpeed__CQ24ATEL7CAvatarPQ24ATEL16AvatarFadeStruct);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarFadeTimeLimit__CQ24ATEL7CAvatarPQ24ATEL16AvatarFadeStruct);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarFadeTimeCount__CQ24ATEL7CAvatarPQ24ATEL16AvatarFadeStruct);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarFadeTimeCountRate__CQ24ATEL7CAvatarPQ24ATEL16AvatarFadeStruct);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isOverAvatarFadeTimeLimit__CQ24ATEL7CAvatarPQ24ATEL16AvatarFadeStruct);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isOverAvatarFadeTimeLimit__CQ24ATEL7CAvatarPQ24ATEL16AvatarFadeStructi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", clearAvatarFadeSpeed__Q24ATEL7CAvatarPQ24ATEL16AvatarFadeStruct);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", clearAvatarFadeTimeCount__Q24ATEL7CAvatarPQ24ATEL16AvatarFadeStruct);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", countAvatarFadeTime__Q24ATEL7CAvatarPQ24ATEL16AvatarFadeStructi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarScaleTimeLimit__Q24ATEL7CAvatari);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarScaleTimeLimit__Q24ATEL7CAvatarf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarTargetScale__Q24ATEL7CAvatarRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarScaleSpeed__Q24ATEL7CAvatarRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarTargetScale__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarScaleSpeed__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarScaleTimeLimit__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarScaleTimeCount__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarScaleTimeCountRate__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isOverAvatarScaleTimeLimit__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isOverAvatarScaleTimeLimit__CQ24ATEL7CAvatari);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", clearAvatarScaleSpeed__Q24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", clearAvatarScaleTimeCount__Q24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", countAvatarScaleTime__Q24ATEL7CAvatari);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarRotTimeLimit__Q24ATEL7CAvatarf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarStartRot__Q24ATEL7CAvatarRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarTargetRot__Q24ATEL7CAvatarRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarRotSpeed__Q24ATEL7CAvatarRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarRotType__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarRotTimeLimit__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarTargetRot__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarRideMatrix__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarStartRot__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarRotSpeed__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarRotEternal__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isOverAvatarRotTimeLimit__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isOverAvatarRotTimeLimit__CQ24ATEL7CAvatari);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", clearAvatarRotTimeCount__Q24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", clearAvatarRotSpeed__Q24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", countAvatarRotTime__Q24ATEL7CAvatari);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarStartPos__Q24ATEL7CAvatarRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarStartPos__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarTargetPos__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarStartPosLocal__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarTargetPosLocal__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarTargetPos__Q24ATEL7CAvatarRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", clearAvatarMoveTimeCount__Q24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", countAvatarMoveTime__Q24ATEL7CAvatari);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarMoveTimeLimit__Q24ATEL7CAvatari);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarMoveTimeLimit__Q24ATEL7CAvatarf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", setAvatarSpeed__Q24ATEL7CAvatarf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarMoveType__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarMoveTimeLimit__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarSpeed__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarMoveWithGravity__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isOverAvatarMoveTimeLimit__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isOverAvatarMoveTimeLimit__CQ24ATEL7CAvatari);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarMoveMotion__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", getAvatarPosOnPath__Q24ATEL7CAvatarR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", isAvatarRotAhead__CQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", executeBeginState__t14CStateTemplate1ZQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", executeState__t14CStateTemplate1ZQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", executeEndState__t14CStateTemplate1ZQ24ATEL7CAvatar);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", func_0023BF40);
+// SOURCE DATA: .rodata
