@@ -334,7 +334,57 @@ void CBattleCard::setStock(UINT inPri) {
     setEnchantEffect(0x52, 0);
     setEnchantEffect(0x53, 0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", setPlayStock__Q210CardBattle11CBattleCardi);
+void CBattleCard::setPlayStock(INT inCount) {
+    CB_LAYOUT* pLayout;
+    m_uiMode = 1;
+    m_iStockCount = inCount;
+    switch (m_uiUser) {
+    case 1: pLayout = &g_LayoutData[27 + m_iStock]; break;
+    case 2: pLayout = &g_LayoutData[33 + m_iStock]; break;
+    }
+    m_StartPos.set(pLayout->x, pLayout->y);
+    m_fStartScale = pLayout->scale * 0.01f;
+    switch (inCount) {
+    case 0:
+    case 1: pLayout = &g_LayoutData[1]; break;
+    case 2: pLayout = &g_LayoutData[2 + m_iStock]; break;
+    case 3: pLayout = &g_LayoutData[4 + m_iStock]; break;
+    }
+    m_EndPos.set(pLayout->x, pLayout->y);
+    m_fEndScale = pLayout->scale * 0.01f;
+    m_tqTimer = 400;
+    m_Pos = m_StartPos;
+    m_vRot.w = m_fStartScale;
+    m_iLayer = pLayout->layer;
+    m_pCard->changeLayer(m_iLayer);
+    m_uiFlag = (INT)(m_uiFlag | 0x40) & ~0x2;
+    if (m_uiFlag & 0x10) {
+        m_uiFlag = (INT)m_uiFlag & ~0x10;
+        m_pCard->enableColorCtrl(FALSE);
+    }
+    if (m_pRevolver) {
+        struct _bits { u_long b0 : 28; u_long cat1 : 4; };
+        if (!m_iStock) {
+            CCardBattle* pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+            if (DebugWork::g_dw.player.iCardSpend) return;
+            INT inUser = m_uiUser;
+            if (!(inUser)) AssertApp(D_004730D8, 641, D_00473100, 0);
+            INT enchant;
+            if (pCB->m_cardEnchant[inUser - 1].m_nKind < 0x44) enchant = 0;
+            else enchant = pCB->m_cardEnchant[inUser - 1].m_nKind - 0x43;
+            if (enchant == 0x2b) {
+                if (getCardCategory() < 4 && getCardCategory()) return;
+            } else if (((_bits*)&m_cardData)->cat1 == 1) {
+                if (m_pRevolver->getHave(1, 1, 1, 0, 0) == 1) return;
+            }
+        } else {
+            if (DebugWork::g_dw.player.iCardSpend) return;
+            if (getCardCategory() >= 6) return;
+            if (getCardCategory() < 4) return;
+        }
+    }
+    m_uiFlag |= 0x20;
+}
 void CBattleCard::preStateStock() {
     CB_LAYOUT* pLayout;
     m_iState = 1;
