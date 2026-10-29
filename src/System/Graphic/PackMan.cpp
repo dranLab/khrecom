@@ -578,8 +578,6 @@ static void _initDBuf();
 static void _loadMicroProgram();
 static void _setupSysContext();
 static void _initFramePacket(INT nKind);
-/* Parked: ~73 lines - the run of init stores: the original keeps five %hi parts (s_pktVif1FG+4 .. s_nReqDrawMode) in s0-s4 and issues the stores in another order (same pattern as Game/SceneInfo clear); the isNTSC() call's result is unused. Store orders not iterated further. */
-#if 0
 void CPackMan::initialize() {
     s_pPktVif1 = &s_pktVif1;
     s_transFrameKind = 0;
@@ -596,7 +594,8 @@ void CPackMan::initialize() {
     s_nFSAA_Sharpness = 0;
     s_nDispOffsetX = 0;
     s_nDawEnableBit = 0xf;
-    s_nDispOffsetY = CMainApp::isNTSC() ? 0 : 0;
+    if (CMainApp::isNTSC()) s_nDispOffsetY = 0;
+    else s_nDispOffsetY = 0;
     resetGsDma();
     _clearVram();
     _initDBuf();
@@ -605,9 +604,6 @@ void CPackMan::initialize() {
     _setupSysContext();
     CDelayedFree::initFreeList();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initialize__8CPackMan);
-#endif
 void CPackMan::finalize() { CDelayedFree::disposeFreeList(); }
 enum _GS_BUF_SIDE {
     _GS_BUF_SIDE0 = 0,
@@ -1572,7 +1568,7 @@ void sceVif1PkOpenUpkCode(pacVif1Packet* pPacket, u_short vuaddr, u_int upkcmd, 
     pPacket->iVifCode = (upkcmd << 24) | vuaddr;
     pPacket->pCurrent = pc + 2;
 }
-/* Parked: ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 min of permuter (9k candidates, 25 -> 24) did not get it. */
+/* Parked: ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 + 15 min of permuter (9k + 19k candidates, 25 -> 24) did not get it. */
 #if 0
 void sceVif1PkCloseUpkCode(pacVif1Packet* pPacket) {
     u_int* pEnd = pPacket->pCurrent - 1;
