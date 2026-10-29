@@ -46,14 +46,15 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-29 | decomp/Game-Player-PlayerDRiku (28/32, 4 parked; A1: CRcf, CGameWork stand-ins) | 1076 | 407 | 23 | 943 (926) | 61 |
 | 2026-10-29 | cleanup/System-FileIO (CFileIO stand-ins in 3 files) | 1076 | 404 | 23 | 943 (926) | 61 |
 | 2026-10-29 | decomp/System-Graphic-PackMan (done 183/185, 2 parked; .bss/.rodata + static init from C; A2 part 1: PackMan.h with CPackMan/pacVif1Packet/GpuRegsInfoSep) | 1014 | 390 | 24 | 950 (920) | 98 |
+| 2026-10-29 | cleanup/System-Graphic-PackMan (A2 part 2: CPackMan stand-ins in 32 files, EffectMan pacVif1Packet) | 1011 | 357 | 24 | 950 (920) | 98 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1014 (938 in 109 headers, 76 in 30 .cpp); MATCH: 98
-  by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 125, padding 32, path override 24, gate 39, guessed 46, header-level 74, stand-in 35, other 6
-stand-ins: 390 foreign in 125 files (110 names), 200 unattributed, 172 own
+PARTIAL: 1011 (938 in 109 headers, 73 in 30 .cpp); MATCH: 98
+  by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 125, padding 32, path override 24, gate 39, guessed 46, header-level 74, stand-in 32, other 6
+stand-ins: 357 foreign in 120 files (108 names), 200 unattributed, 172 own
 duplicate class names across headers: 24
 padding: 33 arrays, 25 accessors
 mechanisms: 950 sites (920 untagged); #line: 1238
@@ -95,7 +96,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | class | readiness | home | stand-in files | also defined in | gaps vs ref |
 |---|---|---|---:|---|---|
 | `CRsrcDB` | partial | System/RsrcDB.h | 65 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene |
-| `CPackMan` | complete | System/Graphic/PackMan.h | 32 |  |  |
 | `NAME_CASE` | gated | System/RsrcData.h | 30 |  |  |
 | `C2DMan` | gated | System/Graphic/2d/2DMan.h | 28 | Form/Menu/SaveLoadCtrl.h |  |
 | `CRcf` | complete | System/Rcf.h | 25 |  |  |
@@ -202,7 +202,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `TexInfoStub` | gated | System/Graphic/modeldata.h | 1 |  | 1 PARTIAL |
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
 | `ZONEDATA` | missing | Game/Map.h | 1 |  |  |
-| `pacVif1Packet` | complete | System/Graphic/PackMan.h | 1 |  |  |
 | `sceGsStoreImage` | complete | System/Graphic/Effect/libppp/keProg/pppKeLns.h | 1 |  |  |
 | `C3DCPrim` | partial | System/Graphic/3DCPrim.h | 0 | System/Graphic/GprimFull.h | missing methods: getObjPtr, makePkt_Line0, makePkt_Line1, makePkt_LineStrip0, makePkt_LineStrip1, makePkt_None, ... (+13); parameter count differs: create; virtual order differs |
 | `C3DLine` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h |  |
