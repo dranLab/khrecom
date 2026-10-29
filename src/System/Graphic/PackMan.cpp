@@ -1,6 +1,8 @@
 #include "khtypes.h"
 #include "include_asm.h"
 #include "System/VramMan.h"
+#include "System/Vector.h"
+#include "System/Graphic/Effect/ObjType.h"
 
 typedef unsigned int u_int;
 typedef unsigned long u_long;
@@ -308,11 +310,16 @@ class CMainApp { /* PARTIAL: stand-in for System/MainApp CMainApp: strings: Main
 public:
     static BOOL isNTSC();
 };
+class CSceneEnv { /* PARTIAL: stand-in for Game/SceneEnv CSceneEnv: SceneEnv.h pulls in EffectMan.h */
+public:
+    static FVECTOR* getTypeColor(ObjType::eObjType eType);
+};
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
+void FTOI0Vector(IVECTOR& outVec, const FVECTOR& inVec);
 class CModel { /* PARTIAL: stand-in for System/Graphic/Model CModel: strings: Model.h (.rodata still asm) */
 public:
     static void resetMicroProgram();
 };
-extern "C" void AssertApp(const char* pFile, int nLine, const char* pExpr, int n);
 extern "C" char D_00461BE0[], D_00461C10[]; /* PARTIAL: __FILE__ and the assert text (data still asm) */
 static void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv);
 
@@ -718,7 +725,36 @@ void CPackMan::setMovieEnv(UINT nDrawW, UINT nDrawH, UINT nDispW, UINT nDispH) {
     s_nMovieDispH = nDispH;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _makePkt_SaveScreen__Fv);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _makePkt_StillScreen__FPUx);
+static u_long128* _makePkt_StillScreen(u_long128* qp) {
+    UINT nCol = 0x80808080;
+    FVECTOR* pColor = CSceneEnv::getTypeColor((ObjType::eObjType)31);
+    if (pColor) {
+        FVECTOR vCol;
+        IVECTOR ivCol;
+        ScaleVector(vCol, *pColor, 128.0f);
+        FTOI0Vector(ivCol, vCol);
+        u_long128 iCol = *(u_long128*)&ivCol;
+        __asm__("ppach %0, $0, %1\n\tppacb %0, $0, %0" : "=r"(nCol) : "r"(iCol));
+    }
+    *qp++ = _pack(0x30000, 0x47);
+    *qp++ = _pack((VRAM::_ZBUF_START / 32) | 0x31000000, 0x4e);
+    *qp++ = _pack(1, 0x14);
+    *qp++ = _pack(VRAM::_TEX_PREFIX_START | 0x28020000 | 0x2000000280000000, 6);
+    *qp++ = _pack(nCol, 1);
+    *qp++ = _pack(5, 8);
+    *qp++ = _pack(0x116, 0);
+    for (INT i = 0; i < 16; i++) {
+        INT v = i + 1;
+        *qp++ = _pack((i * 32) | ((u_long)(v * 32 - 1) << 16) | ((u_long)(SCREEN_HEIGHT - 1) << 48), 0x40);
+        *qp++ = _pack(0x80008, 3);
+        *qp++ = _pack(((u_long)(0x8000 - (SCREEN_HEIGHT >> 1) * 16) << 16) | 0x7000, 5);
+        *qp++ = _pack(((u_long)(UINT)(SCREEN_HEIGHT * 16 + 8) << 16) | 0x2008, 3);
+        *qp++ = _pack(((u_long)((SCREEN_HEIGHT >> 1) * 16 + 0x8000) << 16) | 0x9000, 5);
+    }
+    *qp++ = _pack(CPackMan::getDefaultTEST(), 0x47);
+    *qp++ = _pack(((u_long)(SCREEN_HEIGHT - 1) << 48) | 0x1ff0000, 0x40);
+    return qp;
+}
 static void _setPcrtcMode_FSAA(sceGsDispEnv& inEnv) {
     ULONGLONG nPmode = ((ULONGLONG)(s_nFSAA_Sharpness + 0xc0) << 8) | 0x63;
     *(volatile u_long*)0x12000000 = nPmode;
