@@ -9,6 +9,7 @@
 #include "System/Graphic/TexAnm.h"
 #include "System/Graphic/TexUtil.h"
 #include "System/Graphic/ShadowModel.h"
+#include "System/Graphic/LightUnit.h"
 #include "System/Graphic/ModelMan.h"
 #include "include_asm.h"
 
@@ -40,9 +41,15 @@ public:
     static void pkOpenGifTag(u_long128 tag);
     static void pkAddGsData(u_long data);
     static void pkCloseGifTag();
+    static ULONGLONG getDefault_ZBUF_1();
+    static u_int* pkOpenUpkCodeV4_32(u_short vuaddr, UINT cl, UINT wl);
+    static void pkCloseUpkCodeV4_32(void* p);
+    static void* pkGetCurrentPointer();
+    static void pkSetCurrentPointer(void* p);
 };
 FLOAT RotTransPers(IVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 extern const FMATRIX ONE_MATRIX;
+extern const FVECTOR ONE_VECTOR;
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox);
 SHADERDESC* searchShaderDesc(USHORT mode);
 void getApplyMatrixBBox(FVECTOR& vOutMax, FVECTOR& vOutMin, const FMATRIX& Mat, const FVECTOR& vInMax, const FVECTOR& vInMin); /* static in the original (parked, asm glabel) */
@@ -1052,7 +1059,293 @@ void CModel::disp0_SetMicroCode(u_long128* pMProg) {
 void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
     if (!(nFlag & 6)) sendTexture(pTag);
 }
+/* Parked: 137 of 659 lines off, same size; mostly registers: the original gives this s5 and iFlags&2 s4 (ours swapped), the bone/light min() selects use movn (an if-form gives that but swaps s0/s1 globally), the no-light branch materializes zero twice. Worked: case 2 with default, (USHORT) mode compares inline, pcpyld tied to the tag word, _ref(m_iSendFlg) after the GIF stores, cache-hit close in the else arm, x/y/z/w colour stores, pextlw pack with a non-early-clobber temp. Tried: iFlags &= 2, a BOOL copy, zero variants; permuter 20 min (19316 candidates, stays 145). */
+#if 0
+template <class T> static inline T& _ref(T& v) { return v; }
+static inline u_long128 _packWord(INT x, INT y, INT z, INT w) {
+    u_long128 tmp;
+    u_long128 out128;
+    __asm__ volatile("pextlw %0, %3, %2\n"
+                     "pextlw %1, %5, %4\n"
+                     "pextlw %0, %1, %0\n"
+                     : "=&r"(out128), "=r"(tmp)
+                     : "r"(x), "r"(z), "r"(y), "r"(w));
+    return out128;
+}
+static inline ULONGLONG _lo64(u_long128 x) {
+    ULONGLONG out64;
+    __asm__ volatile("por %0, $0, %1" : "=r"(out64) : "r"(x));
+    return out64;
+}
+static inline ULONGLONG _hi64(u_long128 x) {
+    ULONGLONG out64;
+    __asm__ volatile("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
+    return out64;
+}
+void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u_long nInTest, INT iFlags, u_long* tex0) {
+    QWdata* pQw;
+    ULONGLONG lTest;
+    ULONGLONG lAlpha;
+    ULONGLONG lClamp;
+    UINT version;
+    u_long128 qColorScale;
+    u_long128 qOBLM;
+    u_long128 qPP;
+    INT i;
+    u_long tex0Buf[16];
+    u_long128 tag;
+
+    version = pData[1][3];
+    CPackMan::pkCall((u_long128*)pData, 0);
+    CPackMan::pkAddCode(0x10000000);
+    if (m_pWSMatCache != m_pWSMat || (m_iSendFlg & 0x400)) {
+        pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(0, 4, 4);
+        pQw[0].ul128 = ((QWdata*)m_pWSMat)[0].ul128;
+        pQw[1].ul128 = ((QWdata*)m_pWSMat)[1].ul128;
+        pQw[2].ul128 = ((QWdata*)m_pWSMat)[2].ul128;
+        pQw[3].ul128 = ((QWdata*)m_pWSMat)[3].ul128;
+        CPackMan::pkCloseUpkCodeV4_32(pQw + 4);
+        m_pWSMatCache = m_pWSMat;
+    }
+    if (semikind <= 0) {
+        lAlpha = 0x80000000A8;
+        lTest = nInTest;
+    } else {
+        UINT rawMode = getMode();
+        if ((USHORT)rawMode == 0x4005 || (USHORT)rawMode == 0x4205) lTest = 0x53001;
+        else lTest = nInTest;
+        switch (semikind) {
+        case 1:
+            lAlpha = 0x44;
+            break;
+        case 3:
+            lAlpha = 0x42;
+            break;
+        case 2:
+        default:
+            if ((USHORT)rawMode == 0x4005 || (USHORT)rawMode == 0x4205) lAlpha = 0x58;
+            else lAlpha = 0x48;
+            break;
+        }
+    }
+    lClamp = 5;
+    if (isClampRepeat() && !(iFlags & 2)) lClamp = 0;
+
+    CPackMan::pkOpenDirectCode(0);
+    __asm__ volatile("pcpyld %0, %1, %2" : "=r"(tag) : "r"((u_long)0xE), "0"((u_long)(m_iBeforeDirectQNum + 4) | 0x8000 | 0x1000000000000000));
+    pQw = (QWdata*)CPackMan::pkOpenGifTagManual(tag);
+    pQw[0].ul64[0] = lTest;
+    pQw[0].ul64[1] = 0x47;
+    pQw[1].ul64[0] = lAlpha;
+    pQw[1].ul64[1] = 0x42;
+    pQw[2].ul64[0] = lClamp;
+    pQw[2].ul64[1] = 8;
+    if (_ref(m_iSendFlg) & 4) {
+        pQw[3].ul64[1] = 3;
+    } else {
+        pQw[3].ul64[0] = CPackMan::getDefault_ZBUF_1();
+        pQw[3].ul64[1] = 0x4E;
+    }
+    pQw += 4;
+    if (m_pBeforeDirect) {
+        QWdata* pQwSrc = (QWdata*)m_pBeforeDirect;
+        for (i = 0; i < m_iBeforeDirectQNum; i++) {
+            pQw->ul128 = pQwSrc->ul128;
+            pQw++;
+            pQwSrc++;
+        }
+    }
+    CPackMan::pkCloseGifTagManual((UINT*)pQw);
+    CPackMan::pkCloseDirectCode();
+
+    if (iFlags & 2) {
+        pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(0x18, 4, 4);
+        pQw[0].ul64[0] = CShadowModelMan::getTEX_0();
+        pQw[0].ul64[1] = 6;
+        *(FMATRIX*)&pQw[1] = CShadowModelMan::getWorldTextureMatrix();
+        pQw[5].ul128 = *(u_long128*)&CShadowModelMan::getShadowParam();
+        CPackMan::pkCloseUpkCodeV4_32(pQw + 6);
+    } else if (m_TransTexCount) {
+        if (!tex0) {
+            tex0 = tex0Buf;
+            getTexParam(tex0Buf);
+        }
+        pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(0x18, 4, 4);
+        for (i = 0; i < m_TransTexCount; i++) {
+            if (!tex0[i]) {
+                pQw->ul128 = 0;
+            } else {
+                if (version & 0x400000) tex0[i] &= ~((u_long)1 << 34);
+                pQw->ul64[0] = tex0[i];
+                if (m_TexUV) pQw->ul64[1] = m_TexUV[i].luv;
+                else pQw->ul64[1] = 0;
+            }
+            pQw++;
+        }
+        CPackMan::pkCloseUpkCodeV4_32(pQw);
+    }
+
+    {
+        const QWdata* pHead = (const QWdata*)pData;
+        INT y;
+        if (!pHead[1].s16[3]) {
+            y = pHead[1].u16[7];
+            if (!y) y = 0x92;
+        } else {
+            y = pHead[1].s16[5];
+        }
+        qPP = _packWord(m_BBoxFlag, y, iFlags & 2, m_ShaderOption);
+    }
+    if (iFlags & 2) {
+        FVECTOR* pColor = (FVECTOR*)&qColorScale;
+        pColor->x = 1.0f;
+        pColor->y = 1.0f;
+        pColor->z = 1.0f;
+        pColor->w = 1.0f;
+    } else if (m_Mode == 0x10) {
+        u_long128 tmp;
+        __asm__ volatile("lqc2 $vf4, 0x0(%2)\n"
+                         "mfc1 %0, %3\n"
+                         "pcpyld %0, %0, $0\n"
+                         "mfc1 %0, %4\n"
+                         "qmtc2.ni %0, $vf5\n"
+                         "vmulz.xyz $vf4, $vf4, $vf5z\n"
+                         "vmulx.w $vf4, $vf4, $vf5x\n"
+                         "sqc2 $vf4, 0x0(%1)\n"
+                         : "=&r"(tmp)
+                         : "r"(&qColorScale), "r"(&getColorScale()), "f"(CShadowModelMan::getColorDensity()), "f"(CShadowModelMan::getAlphaDensity())
+                         : "memory");
+    } else {
+        qColorScale = *(u_long128*)&getColorScale();
+    }
+    pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(0x12, 4, 4);
+    pQw->ul128 = 0;
+    pQw++;
+    qOBLM = _packWord((INT)m_pCrds, m_BoneStart, (INT)m_pLightUnit, nMode);
+    MODEL_SEND_CACHE& sModelCache = CModelMan::getModelCacheRef();
+    if (sModelCache.lOBLM_L != _lo64(qOBLM) || sModelCache.lOBLM_H != _hi64(qOBLM) ||
+        ((u_long*)&sModelCache.ivPP)[0] != _lo64(qPP) || ((u_long*)&sModelCache.ivPP)[1] != _hi64(qPP) ||
+        ((u_long*)&sModelCache.fvColorScale)[0] != *(u_long*)&qColorScale ||
+        ((u_long*)&sModelCache.fvColorScale)[1] != _hi64(qColorScale) || (m_iSendFlg & 0x800)) {
+        INT boneNum;
+        INT boneSize;
+        INT w;
+        CCoord* pCrd;
+        INT iSize;
+        INT bottom;
+        UINT* p32;
+        sModelCache.qOBLM = qOBLM;
+        *(u_long128*)&sModelCache.ivPP = qPP;
+        *(u_long128*)&sModelCache.fvColorScale = qColorScale;
+        pQw[0].ul128 = qColorScale;
+        pQw[1].ul64[1] = 3;
+        pQw[2].ul64[1] = 3;
+        pQw[3].ul128 = qPP;
+        pQw[4].ul64[1] = 0x3F;
+        CPackMan::pkCloseUpkCodeV4_32(pQw + 5);
+
+        if (m_pLightUnit) {
+            m_pLightUnit->calc(TRUE);
+            pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(4, 4, 4);
+            {
+                FMATRIX& mLight = m_pLightUnit->getLightMatrix();
+                pQw[0].ul128 = ((QWdata*)&mLight)[0].ul128;
+                pQw[1].ul128 = ((QWdata*)&mLight)[1].ul128;
+                pQw[2].ul128 = ((QWdata*)&mLight)[2].ul128;
+            }
+            pQw[3].ul128 = *(u_long128*)&m_pLightUnit->getAmbientVector();
+            *(FMATRIX*)&pQw[4] = m_pLightUnit->getColorMatrix();
+        } else {
+            pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(4, 4, 4);
+            pQw[0].ul128 = 0;
+            pQw[1].ul128 = 0;
+            pQw[2].ul128 = 0;
+            pQw[3].ul128 = *(u_long128*)&ONE_VECTOR;
+            pQw[4].ul128 = 0;
+            pQw[5].ul128 = 0;
+            pQw[6].ul128 = 0;
+            pQw[7].ul128 = 0;
+        }
+        pQw += 8;
+        if (m_BoneIdx == -1) boneNum = m_pCrds->getCoordNum();
+        else boneNum = 1;
+        boneSize = m_pShader->m_BoneSize;
+        pQw->ul128 = _packWord(boneNum, 0, boneSize, m_Mode);
+        CPackMan::pkCloseUpkCodeV4_32(pQw + 1);
+
+        pCrd = &m_pCrds->Crd(m_BoneStart);
+        {
+            INT addr = 0x28;
+            i = 0;
+            w = boneNum;
+            do {
+                iSize = w >= 0x40 ? 0x3F : w;
+                pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(addr, boneSize, 4);
+                w -= iSize;
+                do {
+                    *(FMATRIX*)pQw = pCrd[i].m_World;
+                    addr += boneSize;
+                    i++;
+                    pQw += 4;
+                } while (--iSize > 0);
+                CPackMan::pkCloseUpkCodeV4_32(pQw);
+            } while (w > 0);
+        }
+        if ((nMode == 0x40EE || nMode == 0x406E) && m_pLightUnit) {
+            u_long128* p = (u_long128*)m_pLightUnit->getPointLightData();
+            if (p) {
+                INT k = 0;
+                w = boneNum;
+                do {
+                    iSize = w >= 0x1A ? 0x19 : w;
+                    w -= iSize;
+                    pQw = (QWdata*)CPackMan::pkOpenUpkCodeV4_32(k * boneSize + 0x2F, boneSize, 10);
+                    do {
+                        INT offset;
+                        for (offset = 0; offset < 10; offset++) {
+                            pQw->ul128 = p[offset];
+                            pQw++;
+                        }
+                        k++;
+                    } while (--iSize > 0);
+                    CPackMan::pkCloseUpkCodeV4_32(pQw);
+                } while (w > 0);
+            }
+        }
+        iSize = boneSize * boneNum + 0x28;
+        bottom = 0x400 - m_pShader->m_WorkSize;
+        p32 = (UINT*)CPackMan::pkGetCurrentPointer();
+        bottom = (bottom - iSize) / 2;
+        p32[0] = iSize | 0x03000000;
+        p32[1] = bottom | 0x02000000;
+        p32[2] = MPG_START | 0x14000000;
+        p32[3] = 0x11000000;
+        CPackMan::pkSetCurrentPointer(p32 + 4);
+    } else {
+        CPackMan::pkCloseUpkCodeV4_32(pQw);
+    }
+    CPackMan::pkCnt(0);
+    CPackMan::pkAddCode(0x11000000);
+    if (m_pAfterDirect) {
+        CPackMan::pkOpenDirectCode(0);
+        __asm__ volatile("pcpyld %0, %1, %2" : "=r"(tag) : "r"((u_long)0xE), "0"((u_long)m_iAfterDirectQNum | 0x8000 | 0x1000000000000000));
+        pQw = (QWdata*)CPackMan::pkOpenGifTagManual(tag);
+        {
+            QWdata* pQwSrc = (QWdata*)m_pAfterDirect;
+            for (i = 0; i < m_iAfterDirectQNum; i++) {
+                pQw->ul128 = pQwSrc->ul128;
+                pQw++;
+                pQwSrc++;
+            }
+        }
+        CPackMan::pkCloseGifTagManual((UINT*)pQw);
+        CPackMan::pkCloseDirectCode();
+    }
+    CModelMan::incDrawCount();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_SetPacket__6CModelUiPA3_CiiUliPUl);
+#endif
 /* Parked: 13 lines off: after getRawMode the original computes isDataEmpty && isSemiDataEmpty into a1 and never uses it (dead code left after a cross-jump?); ours drops the semi half. Tried: unused BOOL local, empty if, ternary, statement, duplicated identical arms (24 lines). */
 #if 0
 void CSemiModel::link(CModel* m) {
