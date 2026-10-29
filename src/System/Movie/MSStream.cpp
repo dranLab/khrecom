@@ -38,12 +38,7 @@ int mcdEndStream();
 extern char _gp;
 }
 
-class CFileIO {
-public:
-    static void lock();
-    static void unlock();
-    static void setTrayOpened();
-};
+#include "System/FileIO.h"
 
 static CMSStream* s_pMSS = NULL;
 static INT s_nMssThreadStat = 0;

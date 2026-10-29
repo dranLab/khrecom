@@ -118,14 +118,7 @@ public:
     static INT getRsrcAlignmentSize(INT nType);
 };
 
-class CFileIO {
-public:
-    static INT loadFile(const CHAR* pszName, CBuf& buf, INT nOpt);
-    static INT openFile(const CHAR* pszName, INT nMode, USHORT nOpt);
-    static INT closeFile(INT hFile);
-    static INT getFileSize(const CHAR* pszName);
-    static INT loadFile(const CHAR* pszName, BYTE* pBuf, INT nSize);
-};
+#include "System/FileIO.h"
 
 class CSceneInfo {
 public:

@@ -212,14 +212,7 @@ public:
     static void setInt(UINT nKind, UINT nIdx, INT nValue);
 };
 
-class CFileIO {
-public:
-    static void initialize();
-    static void finalize();
-    static BOOL isTrayOpened();
-    static BOOL checkTrayOpened();
-    static BOOL checkTrayClosed();
-};
+#include "System/FileIO.h"
 
 class CRsrcDB {
 public:
