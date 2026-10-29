@@ -7,6 +7,7 @@
 #include "include_asm.h"
 
 extern "C" int abs(int);
+extern "C" float sinf(float);
 
 using namespace CardBattle;
 
@@ -416,7 +417,94 @@ void CBattleCard::preStateStock() {
     m_iLayer = pLayout->layer;
     m_pCard->changeLayer(m_iLayer);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateStock__Q210CardBattle11CBattleCard);
+void CBattleCard::stateStock() {
+    CB_LAYOUT* pLayout;
+    switch (m_uiMode) {
+    case 2:
+        break;
+    case 8:
+        m_uiFlag |= 0x2008;
+        m_tqTimer -= getFrameRate();
+        if (m_tqTimer <= 0) {
+            m_uiMode = 9;
+            m_uiFlag |= 0x4;
+            m_tqTimer = 0;
+            m_Pos = m_EndPos;
+            m_vRot.w = m_fEndScale;
+            if (m_pRevolver) m_pRevolver->calcStockSkill();
+            else CCardBattle::calcStockFolderEnemyStockSkill();
+        } else {
+            INT dx = (m_EndPos.x - m_StartPos.x) * m_tqTimer / 400;
+            INT dy = (m_EndPos.y - m_StartPos.y) * m_tqTimer / 400;
+            FLOAT sc = m_fEndScale - (m_fEndScale - m_fStartScale) * m_tqTimer / 400.0f;
+            m_vRot.w = sc;
+            m_Pos.x = m_EndPos.x - dx;
+            m_Pos.y = m_EndPos.y - dy;
+        }
+        break;
+    case 9:
+        m_tqTimer += getFrameRate();
+        {
+            FLOAT r = m_tqTimer * 0.1f * 3.1415927f / 180.0f;
+            m_Pos.y = (INT)(sinf(r) * 4.0f) + m_EndPos.y;
+        }
+        if (m_uiUser == 2) {
+            CCardBattle* pCB = (CCardBattle*)CTaskMan::getSysTask(0x16);
+            INT inUser = m_uiUser;
+            if (!(inUser)) AssertApp(D_004730D8, 641, D_00473100, 0);
+            INT enchant;
+            if (pCB->m_cardEnchant[inUser - 1].m_nKind < 0x44) enchant = 0;
+            else enchant = pCB->m_cardEnchant[inUser - 1].m_nKind - 0x43;
+            if (enchant == 0x31) {
+                if (!(m_uiFlag & 0x10)) {
+                    m_uiFlag |= 0x10;
+                    if (m_pRevolver) m_pRevolver->setStockInfo();
+                    else CCardBattle::setStockFolderStockInfo(2);
+                    FVECTOR col;
+                    col._q = 0;
+                    col.w = 1.0f;
+                    m_pCard->enableColorCtrl(TRUE);
+                    m_pCard->setCol(col);
+                }
+            } else if (m_uiFlag & 0x10) {
+                m_uiFlag = (INT)m_uiFlag & ~0x10;
+                if (m_pRevolver) m_pRevolver->setStockInfo();
+                else CCardBattle::setStockFolderStockInfo(2);
+                m_pCard->enableColorCtrl(FALSE);
+            }
+            if (m_pRevolver && m_pRevolver->getStockSkill() >= 0x6f) {
+                pLayout = &g_LayoutData[33 + m_iStock];
+                m_EndPos.set(pLayout->x, pLayout->y);
+            } else if (CCardBattle::getStockFolderStockSkill(2) >= 0x6f) {
+                pLayout = &g_LayoutData[33 + m_iStock];
+                m_EndPos.set(pLayout->x, pLayout->y);
+            }
+        } else {
+            if (m_pRevolver->getStockSkill() >= 4) {
+                pLayout = &g_LayoutData[27 + m_iStock];
+                m_EndPos.set(pLayout->x, pLayout->y);
+            }
+        }
+        break;
+    case 1: {
+        m_uiFlag |= 0x2008;
+        m_tqTimer -= getFrameRate();
+        if (m_tqTimer <= 0) m_tqTimer = 0;
+        INT dx = (m_EndPos.x - m_StartPos.x) * m_tqTimer / 400;
+        INT dy = (m_EndPos.y - m_StartPos.y) * m_tqTimer / 400;
+        FLOAT sc = m_fEndScale - (m_fEndScale - m_fStartScale) * m_tqTimer / 400.0f;
+        m_vRot.w = sc;
+        m_Pos.y = m_EndPos.y - dy;
+        m_Pos.x = m_EndPos.x - dx;
+        if (!isSet()) {
+            if (abs(dx) <= 64 && abs(dy) <= 64) m_uiFlag |= 0x2;
+        } else if (!m_tqTimer) {
+            m_uiMode = 2;
+        }
+        break;
+    }
+    }
+}
 void CBattleCard::preStateHand() { m_iState = 2; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateHand__Q210CardBattle11CBattleCard);
 void CBattleCard::preStateDestroy() {

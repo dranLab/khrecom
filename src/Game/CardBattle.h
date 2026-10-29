@@ -308,6 +308,7 @@ public:
     TIMEQ getRollSpeed() { return m_tqRollSpeed; } // PARTIAL: added for Game/BattleCard
     INT exeTrapEffect(INT inFlag); // PARTIAL: added for Game/BattleCard
     void setTrapEffect(); // PARTIAL: added for Game/BattleCard
+    void setStockInfo(); // PARTIAL: added for Game/BattleCard
     // PARTIAL: added for Game/Enemy/HumanBoss
     INT getMode() const { return m_sMode; } // PARTIAL: name unknown
     void setChargeRate(INT inRate) { m_tqChargeRate = inRate; } // PARTIAL: added for Game/CardBattle
