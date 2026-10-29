@@ -1,6 +1,5 @@
 #define TASK_H_NO_SLC_OVERFLOW_MSG /* MATCH: this unit's original lacks Task.h's SLC overflow message */
 #include "khtypes.h"
-#define SYSTEM_GRAPHIC_MODEL_CPP
 #define MODELDATA_H_TEXINFO /* PARTIAL: modeldata.h's TexInfo/TexInfoStub (gated for System/Graphic/ModelMan) */
 /* MATCH: this unit's original names the headers with their full path (c:/KHCOM/MainApp/...) */
 #define GPRIM_H_PATH "src/System/Graphic/Gprim.h"
@@ -65,20 +64,6 @@ extern INT _CLUT_TMP1_START;
 }
 inline void* operator new[](size_t, void* p) throw() { return p; }
 extern "C" int strncmp(const char*, const char*, unsigned int);
-class CShadowModel : public CFadeModel { /* PARTIAL: stand-in for CShadowModel: owner not written */
-    INT m_nSize; /* 0x28 */
-public:
-    CShadowModel() {
-        setTestFlag(0x70000);
-        m_LayerInfo._nID = 0x17;
-        CDrawable::setSemiTrans(ALPHA_OFF);
-        m_LayerInfo._nDepth = 0;
-        m_SemiDraw = FALSE;
-        m_nSize = 0;
-    }
-    virtual void changeLayerExt(BOOL bOn, INT nDepth) { setLayer(0x17, 0); }
-    virtual FIX4 calcZ() { return 0; }
-};
 class CShadowMapModel : public CFadeModel { /* PARTIAL: stand-in for CShadowMapModel: owner not written */
     HANDLE m_hHnd; /* 0x28 */
 public:
@@ -105,6 +90,7 @@ struct MAD_HEADER {
 };
 INT getModelAttachData(const MODEL_ATTACH_DATA** outMad, INT iRId);
 }
+inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
@@ -118,6 +104,20 @@ union FIVECTOR { /* PARTIAL: stand-in for FIVECTOR: owner not written */
 extern "C" int strcmp(const char*, const char*);
 extern "C" int strncasecmp(const char*, const char*, unsigned int);
 struct TexInfo;
+
+class CShader;
+struct SHADERDESC {
+    USHORT m_Mode;                 /* 0x00 */
+    USHORT m_Mask;                 /* 0x02 */
+    u_long128* m_pMpg;             /* 0x04 */
+    INT m_BoneSize;                /* 0x08 */
+    INT m_WorkSize;                /* 0x0c */
+    CShader* (*createInstance)();  /* 0x10 */
+    ALPHA m_BaseAlpha;             /* 0x14 */
+    ALPHA m_SemiAlpha;             /* 0x16 */
+    ULONGLONG m_BaseTest;          /* 0x18 */
+    ULONGLONG m_SemiTest;          /* 0x20 */
+};
 
 extern "C" u_long128 vu1mpg_start[];
 extern "C" u_long128 vu1mpg2_start[];
@@ -738,7 +738,7 @@ INT CModel::checkBBox() {
 }
 void CModel::setColorScale(const FVECTOR& vColor) { getColorScale() = vColor; }
 void CModel::setColorScale(FLOAT r, FLOAT g, FLOAT b, FLOAT a) { getColorScale().set(r, g, b, a); }
-void CModel::setAlphaScale(FLOAT inScale) { m_fAlphaScale = inScale; }
+void CModel::setAlphaScale(FLOAT inScale) { m_ColorScale.w = inScale; }
 void CModel::linksub() {
     UINT rawMode;
     BOOL bHasSemiData;
@@ -811,7 +811,7 @@ void CModel::setShadowMapModel() {
     m_pShadowMapModel = new (com_malloc_d(sizeof(CShadowMapModel), __FILE__ "(1909)", RET_ADDR())) CShadowMapModel;
     if (m_pShadowMapModel) {
         m_pShadowMapModel->link(this);
-        m_fAlphaScale = 1.0f;
+        m_ColorScale.w = 1.0f;
     }
 }
 void CModel::attachSemiModel(CSemiModel& inModel, BOOL bInManage) {
@@ -909,7 +909,7 @@ void CModel::dispUpdate(FLOAT fR) {
 }
 BOOL CModel::dispCheck() {
     if (m_pCrds->getCoordNum() <= 0) return FALSE;
-    if (m_fAlphaScale <= 0.0f) return FALSE;
+    if (m_ColorScale.w <= 0.0f) return FALSE;
     return !CPackMan::isOverFlow(getPacketSize());
 }
 void CModel::disp() { disp(m_pTask ? m_pTask->getFrameRate() * 0.020000001f : 1.0f); }
@@ -926,13 +926,13 @@ void CModel::disp(FLOAT fR) {
 void CModel::dispImpl() {
     setDispFlag(FALSE);
     if (!isDispOff()) {
-        if (!isDataEmpty() && m_fAlphaScale > 0.0f) {
+        if (!isDataEmpty() && m_ColorScale.w > 0.0f) {
             if (isDispWireframe() && MODELDATA::isCharacter(m_Mode)) {
                 disp0(-1, getTestFlag(), 0);
                 m_ShaderOption |= 0x80;
                 disp0(-1, getTestFlag(), 0);
                 m_ShaderOption &= ~0x80;
-            } else if (m_fAlphaScale >= 1.0f && m_Mode != 0x10) {
+            } else if (m_ColorScale.w >= 1.0f && m_Mode != 0x10) {
                 INT id = getLayerID() & 0xF;
                 if (id >= 2 && (id < 4 || id == 0xB)) {
                     CModelMan::add2DispList(*this, 0);
@@ -969,7 +969,7 @@ void CModel::dispImpl() {
         if (isAvailableSemiModel()) {
             if (m_pSemiModel) {
                 if (m_pFadeModel) {
-                    if (m_fAlphaScale >= 1.0f) m_pSemiModel->setSemiSort(isSemiSortFlag());
+                    if (m_ColorScale.w >= 1.0f) m_pSemiModel->setSemiSort(isSemiSortFlag());
                     else if (isAutoEffSemiSort()) m_pSemiModel->setSemiSort(TRUE);
                     else m_pSemiModel->setSemiSort(isSemiSortFlag());
                 }

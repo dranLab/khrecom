@@ -36,7 +36,6 @@ class CMapModel : public CModel {
 
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
-class CModelBG : public CModel {}; /* System/Graphic/ModelBG.h */
 
 class CSky : public CTaskSecondary {
 public:
