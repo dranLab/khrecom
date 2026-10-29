@@ -37,19 +37,6 @@ public:
     static void pkTerminate();
 };
 
-/* PARTIAL: only what this file needs (System/Graphic/SemiModel.h, FadeModel.h, ShadowModel.h) */
-class CSemiModel : public CDrawable {
-protected:
-    CModel* m_pModel;     /* 0x18 */
-    void* m_pSemiZ;       /* 0x1c CSemiZModel* */
-    FIX4 m_nOldZ;         /* 0x20 */
-    USHORT m_nPacketSize; /* 0x24 */
-    BYTE m_SemiDraw;      /* 0x26 */
-    BYTE __pad;           /* 0x27 */
-public:
-    CModel* getModel() { return m_pModel; }
-};
-class CShadowModel : public CSemiModel {};
 
 static inline void _loadMatrixVf28(const FMATRIX& m) {
     asm volatile("lqc2 $vf28, 0x0(%0)\n"
@@ -493,7 +480,7 @@ UINT CDispListSemiSingleSort::draw(SEMI_PACKET_LIST* pList) {
             CPackMan::pkAddCode(0x13000000);
             CPackMan::pkOpenDirectCode(0);
             if (pPrim->m_LayerInfo._nID & 0x10) {
-                pList[nIdx].pMProg = ((CSemiModel*)pPrim)->getModel()->getMicroProg();
+                pList[nIdx].pMProg = ((CSemiModel*)pPrim)->getParentModel()->getMicroProg();
             } else {
                 pList[nIdx].pMProg = NULL;
                 CGTexPrim::clearTexCache();
@@ -688,7 +675,7 @@ static void sortCShadowModel(SHADOWMODELBUF* pBuf, INT nEntryNum) {
     INT j;
     for (i = 0; i < nEntryNum; i++) {
         CShadowModel* pSdw = pBuf[i].pModel;
-        HANDLE hHnd = getCShadowModelCoordsHandle(pSdw->getModel());
+        HANDLE hHnd = getCShadowModelCoordsHandle(pSdw->getParentModel());
         if (hHnd != -1) {
             pBuf[i].hHnd = hHnd;
         } else {
@@ -729,7 +716,7 @@ void CDispListShadowDraw::_endDraw() {
     _endDirectMode();
 }
 void CDispListShadowMap::insert(CDrawable& inPrim, FIX4 inZ) {
-    CModel* pModel = ((CShadowModel&)inPrim).getModel();
+    CModel* pModel = ((CShadowModel&)inPrim).getParentModel();
     if (pModel) {
         FVECTOR v[2];
         FVECTOR& vCamPos = CShadowModelMan::m_vCamPos;

@@ -61,10 +61,6 @@ inline void* operator new[](size_t size, const char* pszFile) throw() {
     return com_malloc_d(size, (char*)pszFile, nRA);
 }
 
-inline void* operator new(size_t size, const char* pszFile) throw() {
-    UINT nRA = RSRCDATA_RET_ADDR();
-    return com_malloc_d(size, (char*)pszFile, nRA);
-}
 #define RSRC_NEW(line, T) new (__FILE__ "(" #line ")") T
 #define RSRC_ALLOC(line, n) operator new(n, __FILE__ "(" #line ")")
 #define _RSRC_STR(e) #e

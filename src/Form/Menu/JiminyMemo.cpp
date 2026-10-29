@@ -63,13 +63,6 @@ extern INT RsrcId[2];
 }
 
 class CLightUnit;
-class CSemiModel : public CDrawable { /* PARTIAL: declared in System/Graphic/DispList.cpp */
-public:
-    void setSemiTrans(ALPHA nAlpha);
-};
-inline void CModel::setSemiTrans(ALPHA nAlpha) {
-    if (m_pSemiModel) m_pSemiModel->setSemiTrans(nAlpha);
-}
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
