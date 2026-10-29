@@ -391,3 +391,17 @@ _$_t7CVector1Z7G_STRIP_0023A008 = 0x0023A008; // type:func size:0x8C
 _$_6CState_0023BF40 = 0x0023BF40; // type:func size:0x30
 _vt$t7CVector1Z7G_STRIP_0048B230 = 0x0048B230; // size:0x18
 _vt$6CState_0048B260 = 0x0048B260; // size:0x30
+
+// Game/Entity: CLightUnit's, CState's and CFnt's inline functions and unnamed copies of their vtables
+_$_10CLightUnit_001F3E00 = 0x001F3E00; // type:func size:0x30
+setAnchor__10CLightUnitPC6CCoordRC9MODELDATAi_001F3E30 = 0x001F3E30; // type:func size:0x1C
+reCalc__10CLightUnit_001F3E50 = 0x001F3E50; // type:func size:0x3C
+getPointLightData__C10CLightUnit_001F3E90 = 0x001F3E90; // type:func size:0x8
+_calc__10CLightUnit_001F3E98 = 0x001F3E98; // type:func size:0x34
+_$_6CState_001F3ED0 = 0x001F3ED0; // type:func size:0x30
+_$_4CFnt_001F42E0 = 0x001F42E0; // type:func size:0x28
+setStyle__4CFntUi_001F4308 = 0x001F4308; // type:func size:0xC
+calc__10CLightUnit_001F4318 = 0x001F4318; // type:func size:0x18
+_vt$4CFnt_0047D6B8 = 0x0047D6B8; // size:0x48
+_vt$6CState_0047D7E8 = 0x0047D7E8; // size:0x30
+_vt$10CLightUnit_0047D818 = 0x0047D818; // size:0x38
