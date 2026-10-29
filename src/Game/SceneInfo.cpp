@@ -362,7 +362,7 @@ void _initAllEventDoorState(BOOL bSora) {
         for (INT j = 0; j < 3; j++) *p++ = 0;
     }
 }
-INT CSceneInfo::getFloorDataCount(BOOL bSora) {
+USHORT CSceneInfo::getFloorDataCount(BOOL bSora) {
     FloorLayoutDataHeader* p = bSora ? s_pFloorFile_Sora : s_pFloorFile_Riku;
     INT n = 0;
     if (p) n = p->_nFloorCount;
@@ -1001,7 +1001,7 @@ BOOL CSceneInfo::reqChangeEventRoom(UINT nEventRoomType, DOOR_ID nDoor, SHORT nS
     }
     return bResult;
 }
-void CSceneInfo::reqChangeGoalRoom() { reqChangeEventRoom(4, (DOOR_ID)4, -1); }
+BOOL CSceneInfo::reqChangeGoalRoom() { return reqChangeEventRoom(4, (DOOR_ID)4, -1); }
 BOOL CSceneInfo::reqChangeBackupRoom() {
     if (hasAnyRequest()) return FALSE;
     CGameWork::backup(CGameWork::BACKUP_SECONDARY);
@@ -1107,7 +1107,7 @@ BOOL CSceneInfo::reqExitBattle() {
     s_nReqExitBattle = 1;
     return TRUE;
 }
-INT CSceneInfo::hasReqEnterBattle() { return s_nReqEnterBattle; }
+GAMEMODE CSceneInfo::hasReqEnterBattle() { return s_nReqEnterBattle; }
 BOOL CSceneInfo::hasReqExitBattle() { return s_nReqExitBattle != 0; }
 BOOL CSceneInfo::hasReqRetryBattle() { return s_nReqExitBattle == 2; }
 void CSceneInfo::cancelBattleRequest() {
@@ -1184,14 +1184,14 @@ BOOL CSceneInfo::isJFestaFloor() {
     if (CGame::isSoraGame()) b = n == 13;
     return b;
 }
-INT CSceneInfo::getCurrentWorldID(BOOL bChkEntrance) {
-    if (bChkEntrance && getCurrentAreaNum() == 0) return 0;
+WORLD_ID CSceneInfo::getCurrentWorldID(BOOL bChkEntrance) {
+    if (bChkEntrance && getCurrentAreaNum() == 0) return WORLD_ID_COMMON;
     USHORT nIdx = getCurrentFloorIndex();
     BOOL bSora = CGame::isSoraGame();
     FloorLayoutDataHeader* pHeader = _isValidFloorIdx(nIdx, bSora);
     if (pHeader) {
         INT n = !bSora;
-        if (nIdx < pHeader->_nFloorCount) return _SceneInfoWork::mc2()->_nWorldOnFloor[n][nIdx];
+        if (nIdx < pHeader->_nFloorCount) return (WORLD_ID)_SceneInfoWork::mc2()->_nWorldOnFloor[n][nIdx];
     }
     WORLD_ID w = (WORLD_ID)getCurrentAreaNum();
     if ((UINT)w >= 14) {
@@ -1475,7 +1475,7 @@ void CSceneInfo::clearSceneCache() {
     s_nAvailableSceneCache = 7;
     s_nCurrentSceneCacheID = -1;
 }
-UINT CSceneInfo::getCurrentSceneCacheID() { return s_nCurrentSceneCacheID; }
+INT CSceneInfo::getCurrentSceneCacheID() { return s_nCurrentSceneCacheID; }
 INT CSceneInfo::getSceneCacheID(const AREA_SCENE& as) {
     if (as._nAreaScene < 0) return -1;
     for (INT i = 0; i < 7; i++) {
@@ -1590,12 +1590,12 @@ INT CSceneInfo::checkMapRsrcCache(INT nMapRsrcGrp, INT nSlot) {
     }
     return -1;
 }
-void* CSceneInfo::getMapRsrcCache(INT nSlot) {
+INT CSceneInfo::getMapRsrcCache(INT nSlot) {
     switch (nSlot) {
-    case 1: return (void*)s_nMapCacheField;
-    case 2: return (void*)s_nMapCacheBattle;
+    case 1: return s_nMapCacheField;
+    case 2: return s_nMapCacheBattle;
     }
-    return NULL;
+    return 0;
 }
 void CSceneInfo::updateMapRsrcCache(INT nMapRsrcGrp, INT nSlot) {
     switch (nSlot) {
@@ -1987,7 +1987,7 @@ BYTE RoomInfo::getCardNumber() const {
 }
 BYTE RoomInfo::getCardID() const { return CSceneInfo::getCardIDFromSceneNum(getSceneNum()); }
 BYTE RoomInfo::getRoomNameCardID() const {
-    WORLD_ID w = (WORLD_ID)CSceneInfo::getCurrentWorldID(TRUE);
+    WORLD_ID w = CSceneInfo::getCurrentWorldID(TRUE);
     if (w == 10) return 0xdb;
     if (_pSrcInfo && _pSrcInfo->_nRoomType == 7) return 0xd8;
     if (w != 0) {

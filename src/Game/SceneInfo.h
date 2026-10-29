@@ -328,128 +328,126 @@ struct _MapEnemyRoomInfo {
     BYTE _byAppearType;
 };
 
+// PARTIAL: all public (the ref makes clear .. getMapRsrcCache private; the friends that would need are not
+// in the ref); hasSceneCache and getCurrentRoomInfo (inline or unused, never emitted) have guessed parameters
 class CSceneInfo {
 public:
-    static SHORT getCurrentFloorNumber();
-    static BYTE getSeRangeRatio(); // PARTIAL: added for System/Graphic/WorldEnv
-    static BYTE getReverbVal();
-    static SHORT getCurrentAreaNum(); // PARTIAL: added for System/DebugProcInfo
-    static BOOL reqExitBattle(); // PARTIAL: added for Game/Enemy/BattleEnemyManager
-    static SHORT getCurrentBattleSceneNum(); // PARTIAL: added for Game/MinigameManager
-    static BOOL reqExitMinigame(SHORT inNextScene); // PARTIAL: added for Game/MinigameManager
-    static BOOL reqRetryMinigame(); // PARTIAL: added for Game/MinigameManager
-    static BOOL hasReqChangeScene(); // PARTIAL: added for Game/Gimmick/GimmickWarpPoint
-    static INT getCurrentRoomID();
-    static RoomInfo* getRoomInfo(INT nRoomID);
-    static _GimmickRoomInfo* getCurrentRoomGimmickInfo(); // PARTIAL: added for Game/Gimmick/GimmickManager
-    static _MapEnemyRoomInfo* getCurrentRoomMapEnemyInfo(); // PARTIAL: added for Game/Enemy/MapEnemyManager
-    static INT getRoomIndex(INT nRoomID); // PARTIAL: added for Form/Menu/MoogleShop
-    static SHORT getCurrentSceneNum(); // PARTIAL: added for Game/Gimmick/GimmickRideOn
-    // PARTIAL: added for Game/Player/PlayerManager
-    static SHORT getNextBattleSceneNum();
-    static BOOL isBattleScene();
-    static BOOL isMinigameScene();
-    static DOOR_ID getEnteredDoorID();
-    static INT getCurrentWorldID(BOOL bChkEntrance = FALSE); // PARTIAL: added for Game/Gimmick/BaseGimmick (returns WORLD_ID)
-    static void clear(); // PARTIAL: added for System/RootTask
+    static void clear();
     static void dispose();
-    static BOOL reqEnterBattle(SHORT inID); // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy
-    static BOOL reqEnterBattle(); // PARTIAL: added for Game/Enemy/MapEnemy
-    static BOOL isFieldScene(); // PARTIAL: added for Game/Player/PlayerWeapon
-    static DoorInfo* getDoorInfo(DOOR_ID inDoorID, INT inRoomID); // PARTIAL: added for Game/Player/NaviMap
-    static BOOL reqEnterDoor(DOOR_ID inDoorID); // PARTIAL: added for Game/Gimmick/GimmickDoor
-    static void makeRoom(const RoomInfo& room, DOOR_ID nDoorID, SHORT nScene, BYTE nCardID, BYTE nCardNum);
-    static void makeRoom(DoorInfo& door, INT n); // PARTIAL: added for Form/Menu/RoomCreation
-    // PARTIAL: added for Form/Menu/WorldSelect
-    static USHORT getCurrentFloorIndex();
-    static WORLD_ID getWorldID(USHORT nFloorIndex);
-    static BOOL reqEnterWorld(WORLD_ID nWorldID);
-    // PARTIAL: added for Form/Menu/SaveLoadUtil
-    static USHORT getFloorIndex(SHORT nFloor, BOOL bSora);
-    static void initFloor(INT nFloorIndex, WORLD_ID nWorldID);
-    static void initFloor(); // PARTIAL: added for Game/Game
-    static INT getCurrentAreaScene();
-    static void backupEventDoorState();
-    // PARTIAL: added for Form/Menu/WorldWarp
-    static SHORT getFloorNumber(USHORT nFloorIndex, BOOL bSora);
-    static BOOL reqChangeFloor(SHORT nFloor, BOOL bFlag);
-    // PARTIAL: added for Form/DebugMenu
     static void doneChangeScene();
-    static FLOOR::FloorLayout* getFloorDataSrc(USHORT nFloorIndex, BOOL bSora);
-    static FLOOR::FloorLayout* getCurrentFloorDataSrc(); // PARTIAL: added for Form/Menu/Camp
-    static SHORT getEventRoomSceneNum(WORLD_ID w, const FLOOR::RoomSrcInfo& info, BOOL bSora);
-    static INT getFloorDataCount(BOOL bSora);
-    static WorldSelTable* getSelectableWorldTable(INT nFloorIndex, BOOL bSora);
-    static SHORT getNextSceneNum();
-    // PARTIAL: added for Game/GameSubBattle
-    static void removeCurrentBattleSceneRsrc();
-    static INT getSceneCacheID(const union AREA_SCENE& as);
-    static INT addToSceneCache(const union AREA_SCENE& as);
-    static BOOL isBossBattleScene(INT nScene);
-    static INT hasReqEnterBattle();
-    // PARTIAL: added for Game/GameSubField
+    static void update();
+    static void updateBattleScene();
+    static void setNextAreaScene(SHORT nArea, SHORT nField, SHORT nScene);
+    static void setNextScene(SHORT nScene, SHORT nBtlScene);
+    static void setNextBattleScene(SHORT nScene);
+    static void initFloor(INT nFloorIndex, WORLD_ID nWorldID);
+    static void initFloor();
+    static void clearSceneCache();
+    static INT addToSceneCache(const AREA_SCENE& as);
+    static INT removeFromSceneCache(const AREA_SCENE& as);
+    static BOOL removeFromSceneCacheWithRsrc(const AREA_SCENE& as);
     static void removeCurrentFieldSceneRsrc();
-    static BOOL isEventScene();
+    static void removeCurrentBattleSceneRsrc();
     static INT checkMapRsrcCache(INT nMapID, INT nMode);
     static void updateMapRsrcCache(INT nMapID, INT nMode);
-    static SHORT getPrevSceneNum();
-    static UINT getCurrentSceneCacheID();
-    static BOOL hasAnyRequest(); // PARTIAL: added for Game/Game
-    static INT getNextFloorIndex(); // PARTIAL: added for Game/Game
-    static INT getPrevRoomID(); // PARTIAL: added for Game/Game
-    static BOOL isNextBattleRsrcUpdate(); // PARTIAL: added for Game/Game
-    static void* getMapRsrcCache(INT nMode); // PARTIAL: added for Game/Game
-    static BOOL hasReqChangeFloor(); // PARTIAL: added for Game/Game
-    static void removeMapRsrcCache(INT nMode); // PARTIAL: added for Game/Game
-    static BOOL hasReqExitBattle(); // PARTIAL: added for Game/Game
-    static BOOL hasReqRetryBattle(); // PARTIAL: added for Game/Game
-    static SHORT getCurrentFieldSceneNum(); // PARTIAL: added for Game/Game
-    static INT getConstWorldRsrcID(INT nWorld, BOOL bSora); // PARTIAL: added for Game/Game
-    static INT getInconstWorldRsrcID(INT nWorld, BOOL bSora); // PARTIAL: added for Game/Game
-    static BOOL reqChangeBackupRoom(); // PARTIAL: added for Game/Game
-    static INT getNextRoomID();
-    static BOOL isLastFloorScene();
-    static SHORT getNextAreaNum();
-    static void setNextAreaScene(SHORT nArea, SHORT nField, SHORT nScene);
-    static void update();
-    static void rollbackEventDoorState(INT n);
-    static void updateBattleScene();
+    static void removeMapRsrcCache(INT nMode);
+    static INT getMapRsrcCache(INT nMode);
     static void initNewGame(BOOL bSora);
-    static void setEventDoorUnavailable(INT nFloorIndex, INT nRoomID);
-    static void setupCompleteFloorWorld(WORLD_ID w);
-    static DOOR_ID setTmpCurrentRoomID(SHORT nRoomID);
-    static void openGoalDoor(); static void showAllHiddenDoorsOfCurrentFloor(); static RoomInfo* setEventRoomSceneNum(UINT nRoom, SHORT nScene); // PARTIAL: added for Game/Atel/VSME
-    static RoomInfo* getEventRoomInfo(UINT nIndex);
-    static void reqChangeGoalRoom();
-    static BOOL reqChangeRoom(INT nRoomID, DOOR_ID nDoorID, SHORT nScene); // PARTIAL: BOOL result (Game/Atel/VSME)
-    static void ignoreFloorInfo();
-    static BOOL reqChangeScene(SHORT nArea, SHORT nScene, SHORT nBtlScene, BOOL bSkipIfSame, INT nAtelSrcID);
-    // PARTIAL: added for Game/SceneInfo
-    static struct EventRoomData* getEventRoomData(BOOL bSora);
-    static void setNextBattleScene(SHORT nScene);
+    static BOOL reqChangeFloor(SHORT nFloor, BOOL bFlag);
+    static BOOL reqEnterWorld(WORLD_ID nWorldID);
+    static BOOL reqChangeRoom(INT nRoomID, DOOR_ID nDoorID, SHORT nScene);
     static BOOL reqChangeEventRoom(UINT nIndex, DOOR_ID nDoorID, SHORT nScene);
-    static void cancelBattleRequest();
+    static BOOL reqEnterDoor(DOOR_ID inDoorID);
+    static BOOL reqChangeGoalRoom();
+    static BOOL reqChangeBackupRoom();
+    static BOOL reqEnterBattle();
+    static BOOL reqEnterBattle(SHORT inID);
+    static BOOL reqExitBattle();
     static BOOL reqEnterMinigame();
     static BOOL reqEnterMinigame(SHORT inID);
-    static SHORT getPrevAreaNum();
-    static INT getPrevAreaScene();
+    static BOOL reqExitMinigame(SHORT inNextScene);
+    static BOOL reqRetryMinigame();
+    static BOOL reqChangeScene(SHORT nArea, SHORT nScene, SHORT nBtlScene, BOOL bSkipIfSame, INT nAtelSrcID);
+    static SHORT getCurrentAreaNum();
+    static SHORT getCurrentSceneNum();
+    static INT getCurrentAreaScene();
+    static SHORT getCurrentFieldSceneNum();
+    static SHORT getCurrentBattleSceneNum();
+    static SHORT getNextAreaNum();
+    static SHORT getNextSceneNum();
     static INT getNextAreaScene();
+    static SHORT getNextBattleSceneNum();
+    static BOOL isNextBattleRsrcUpdate();
+    static SHORT getPrevAreaNum();
+    static SHORT getPrevSceneNum();
+    static INT getPrevAreaScene();
+    static BOOL isFieldScene();
+    static BOOL isBattleScene();
+    static BOOL isBossBattleScene(INT nScene);
+    static BOOL isEventScene();
+    static BOOL isMinigameScene();
+    static BOOL isLastFloorScene();
+    static BOOL hasReqChangeScene();
+    static BOOL hasReqChangeFloor();
+    static INT getNextFloorIndex();
+    static GAMEMODE hasReqEnterBattle();
+    static BOOL hasReqExitBattle();
+    static BOOL hasReqRetryBattle();
+    static void cancelBattleRequest();
+    static BOOL hasAnyRequest();
     static INT getNextAtelSrcID();
-    static DOOR_ID getNextDoorID();
-    static BYTE getCardIDFromSceneNum(SHORT nScene);
-    static void setNextScene(SHORT nScene, SHORT nBtlScene);
-    static INT removeFromSceneCache(const union AREA_SCENE& as);
+    static INT getCurrentSceneCacheID();
+    static INT getSceneCacheID(const AREA_SCENE& as);
+    static BOOL hasSceneCache(const AREA_SCENE& as);
     static SHORT getSceneNumFromCardID(BYTE nCardID);
+    static BYTE getCardIDFromSceneNum(SHORT nScene);
+    static INT getConstWorldRsrcID(INT nWorld, BOOL bSora);
+    static INT getInconstWorldRsrcID(INT nWorld, BOOL bSora);
+    static void setReverbVal(BYTE nRev);
+    static BYTE getReverbVal();
+    static BYTE getReverbVal(const AREA_SCENE& as);
+    static void setSeRangeRatio(BYTE nRatio);
+    static BYTE getSeRangeRatio();
+    static BYTE getSeRangeRatio(const AREA_SCENE& as);
+    static SHORT getCurrentFloorNumber();
+    static USHORT getCurrentFloorIndex();
+    static WORLD_ID getCurrentWorldID(BOOL bChkEntrance = FALSE);
+    static WORLD_ID getWorldID(USHORT nFloorIndex);
+    static void setupCompleteFloorWorld(WORLD_ID w);
+    static void setEventDoorUnavailable(INT nFloorIndex, INT nRoomID);
+    static DOOR_ID setTmpCurrentRoomID(SHORT nRoomID);
+    static void ignoreFloorInfo();
+    static USHORT getFloorDataCount(BOOL bSora);
+    static SHORT getFloorNumber(USHORT nFloorIndex, BOOL bSora);
+    static USHORT getFloorIndex(SHORT nFloor, BOOL bSora);
+    static FLOOR::FloorLayout* getCurrentFloorDataSrc();
+    static FLOOR::FloorLayout* getFloorDataSrc(USHORT nFloorIndex, BOOL bSora);
+    static RCNORMA::FloorNormaSrc* getFloorNormaDataSrc(USHORT nIdx, BOOL bSora);
+    static WorldSelTable* getSelectableWorldTable(INT nFloorIndex, BOOL bSora);
+    static EventRoomData* getEventRoomData(BOOL bSora);
+    static SHORT getEventRoomSceneNum(WORLD_ID w, const FLOOR::RoomSrcInfo& info, BOOL bSora);
+    static void showAllHiddenDoorsOfCurrentFloor();
     static BOOL isTgsFloor();
     static BOOL isJFestaFloor();
-    static void clearSceneCache();
-    static BOOL removeFromSceneCacheWithRsrc(const union AREA_SCENE& as);
-    static void setReverbVal(BYTE nRev);
-    static BYTE getReverbVal(const union AREA_SCENE& as);
-    static void setSeRangeRatio(BYTE nRatio);
-    static BYTE getSeRangeRatio(const union AREA_SCENE& as);
-    static RCNORMA::FloorNormaSrc* getFloorNormaDataSrc(USHORT nIdx, BOOL bSora);
+    static INT getCurrentRoomID();
+    static INT getNextRoomID();
+    static INT getPrevRoomID();
+    static _GimmickRoomInfo* getCurrentRoomGimmickInfo();
+    static _MapEnemyRoomInfo* getCurrentRoomMapEnemyInfo();
+    static RoomInfo* getRoomInfo(INT nRoomID);
+    static RoomInfo* getCurrentRoomInfo();
+    static RoomInfo* getEventRoomInfo(UINT nIndex);
+    static INT getRoomIndex(INT nRoomID);
+    static void makeRoom(const RoomInfo& room, DOOR_ID nDoorID, SHORT nScene, BYTE nCardID, BYTE nCardNum);
+    static void makeRoom(DoorInfo& door, INT n);
+    static RoomInfo* setEventRoomSceneNum(UINT nRoom, SHORT nScene);
+    static DoorInfo* getDoorInfo(DOOR_ID inDoorID, INT inRoomID);
+    static DOOR_ID getEnteredDoorID();
+    static DOOR_ID getNextDoorID();
     static BOOL setDoorStat(DOOR_STAT stat, DOOR_ID id, INT nRoomID);
+    static void openGoalDoor();
+    static void backupEventDoorState();
+    static void rollbackEventDoorState(INT n);
 };
 
 #endif /* GAME_SCENEINFO_H */
