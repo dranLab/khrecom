@@ -1,4 +1,5 @@
 #define GAME_MAP_CPP
+#define TASK_H_NO_SLC_OVERFLOW_MSG /* MATCH: the original Map .rodata has no SLC overflow message */
 #include "khtypes.h"
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
@@ -16,6 +17,7 @@
 #include "System/Graphic/WorldEnv.h"
 #include "Game/Debug/DebugWork.h"
 #include "System/Math3D.h"
+#include "System/RsrcData.h"
 #include "System/Graphic/Effect/EffectMan.h"
 #include "System/Graphic/Effect/effect.h"
 #include "System/Graphic/Effect/effect_inl.h"
