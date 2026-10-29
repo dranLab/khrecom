@@ -45,19 +45,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-29 | cleanup/System-Graphic-ModelMan (CModelMan stand-ins in 4 files; CDispListSemiSingleSort left) | 1076 | 409 | 23 | 943 (926) | 61 |
 | 2026-10-29 | decomp/Game-Player-PlayerDRiku (28/32, 4 parked; A1: CRcf, CGameWork stand-ins) | 1076 | 407 | 23 | 943 (926) | 61 |
 | 2026-10-29 | cleanup/System-FileIO (CFileIO stand-ins in 3 files) | 1076 | 404 | 23 | 943 (926) | 61 |
+| 2026-10-29 | decomp/System-Graphic-PackMan (done 183/185, 2 parked; .bss/.rodata + static init from C; A2 part 1: PackMan.h with CPackMan/pacVif1Packet/GpuRegsInfoSep) | 1014 | 390 | 24 | 950 (920) | 98 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 1018 (938 in 109 headers, 80 in 30 .cpp); MATCH: 92
-  by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 127, padding 32, path override 24, gate 39, guessed 46, header-level 74, stand-in 37, other 6
-stand-ins: 393 foreign in 125 files (112 names), 199 unattributed, 175 own
+PARTIAL: 1014 (938 in 109 headers, 76 in 30 .cpp); MATCH: 98
+  by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 125, padding 32, path override 24, gate 39, guessed 46, header-level 74, stand-in 35, other 6
+stand-ins: 390 foreign in 125 files (110 names), 200 unattributed, 172 own
 duplicate class names across headers: 24
 padding: 33 arrays, 25 accessors
-mechanisms: 945 sites (919 untagged); #line: 1238
+mechanisms: 950 sites (920 untagged); #line: 1238
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 557, superset 129, partial 94, gated 96, missing 14, unattributed 309
+classes: complete 560, superset 129, partial 94, gated 96, missing 12, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -75,6 +76,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R0 | 2.0 | `System/CoordMan.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CCoordMan (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/2d/2DLay.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | LAY_SCREEN (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/Effect/libppp/keProg/pppKeLns.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | sceGsStoreImage (1 complete) |  |
+| R0 | 2.0 | `System/Graphic/WorldEnv.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CWorldEnv (1 complete) |  |
 | R0 | 2.0 | `System/Movie/Movie.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMovie (1 complete) |  |
 | R0 | 2.0 | `System/Movie/MovieFiles.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMovieFiles (1 complete) |  |
 | R0 | 2.0 | `System/PadIO.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPadIO (1 complete) |  |
@@ -87,14 +89,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
 | R1 | 12.5 | `Form/Menu/JMemoFlag.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CJiminyMemoFlag (1 superset) | inline bodies or virtuals |
 | R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
-| R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
 | class | readiness | home | stand-in files | also defined in | gaps vs ref |
 |---|---|---|---:|---|---|
 | `CRsrcDB` | partial | System/RsrcDB.h | 65 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene |
-| `CPackMan` | missing | System/Graphic/PackMan.h | 32 |  |  |
+| `CPackMan` | complete | System/Graphic/PackMan.h | 32 |  |  |
 | `NAME_CASE` | gated | System/RsrcData.h | 30 |  |  |
 | `C2DMan` | gated | System/Graphic/2d/2DMan.h | 28 | Form/Menu/SaveLoadCtrl.h |  |
 | `CRcf` | complete | System/Rcf.h | 25 |  |  |
@@ -103,9 +104,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
 | `CAtel` | complete | Game/Atel/Atel.h | 7 |  |  |
 | `DropPrize` | gated | Game/Gimmick/GimmickManager.h | 7 |  |  |
-| `VTransInfo` | gated | System/Graphic/Gprim.h | 7 | System/Graphic/modeldata.h | 1 PARTIAL |
 | `CJiminyMemoFlag` | superset | Form/Menu/JMemoFlag.h | 6 |  | 1 PARTIAL |
 | `CPlayer` | partial | Game/Player/Player.h | 6 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; padding: _m_0x21c; extra methods: __attribute__, _instance, getCardDraw, getLockonHandle, getMarker, getPrizeDraw, ... (+1); virtual order differs; 3 |
+| `VTransInfo` | gated | System/Graphic/Gprim.h | 6 | System/Graphic/modeldata.h | 1 PARTIAL |
 | `CBuf` | superset | System/Buf.h | 5 |  | 3 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `COLL_INFO_UNION` | missing | Game/Movement.h | 5 |  |  |
@@ -129,9 +130,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPause` | complete | Form/Menu/Pause.h | 2 |  |  |
 | `CPlayerDRiku` | superset | Game/Player/PlayerDRiku.h | 2 |  | virtual order differs |
 | `CPrize` | superset | Game/Prize.h | 2 |  | virtual order differs |
+| `CTexCtrl` | complete | System/Graphic/TexCtrl.h | 2 |  |  |
 | `CTextWnd` | complete | System/Wnd.h | 2 |  |  |
 | `CVramMan` | complete | System/VramMan.h | 2 |  |  |
-| `QWdata` | complete | System/Graphic/Gprim.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `sceGsLoadImage` | complete | System/Graphic/Effect/libppp/pppPart.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
@@ -147,7 +148,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CCollUtil` | partial | Game/Collision/CollUtilA.h | 1 |  | missing fields: m_iInfo, m_iInfo2; missing methods: backupChipStatus, checkHangEdge, checkLadderUp, clean, closestPointOnLine, detectActorTrapXZ, ... (+26); padding: _pad028, _pad224; extra methods: getInstance; 10 PARTI |
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
 | `CCoordMan` | complete | System/CoordMan.h | 1 |  |  |
-| `CDelayedFree` | superset | System/LinkedBuf.h | 1 |  | extra methods: addFreeMallocPtr; 1 PARTIAL |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CEffectMotion` | complete | Game/EffectMotion.h | 1 |  |  |
 | `CEventLineDisp` | complete | Game/Atel/VSME.h | 1 |  |  |
@@ -160,11 +160,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CLevelUp` | complete | Form/Menu/LevelUp.h | 1 |  |  |
 | `CLockOnManager` | complete | Game/LockOnManager.h | 1 |  |  |
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
-| `CMainApp` | gated | System/MainApp.h | 1 |  | 1 PARTIAL |
 | `CMemocaAgent` | complete | Form/Menu/SaveLoadUtil.h | 1 |  |  |
 | `CMemocaDataEntries` | superset | Form/Menu/SaveLoadUtil.h | 1 |  | extra methods: setNoSpace |
 | `CMinigameManager` | complete | Game/MinigameManager.h | 1 |  |  |
-| `CModel` | superset | System/Graphic/Model.h | 1 |  | virtual order differs; 4 PARTIAL |
 | `CMovie` | complete | System/Movie/Movie.h | 1 |  |  |
 | `CMovieFiles` | complete | System/Movie/MovieFiles.h | 1 |  |  |
 | `CMovieScript` | complete | System/Movie/MovieScript.h | 1 |  |  |
@@ -190,7 +188,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CSummon` | partial | Game/Player/Summon.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CTaskMan` | superset | System/TaskMan.h | 1 |  | 3 PARTIAL |
-| `CTexCtrl` | complete | System/Graphic/TexCtrl.h | 1 |  |  |
+| `CWorldEnv` | complete | System/Graphic/WorldEnv.h | 1 |  |  |
 | `CZFill` | gated | System/Graphic/DeFocus.h | 1 | System/Graphic/GprimFull.h | missing methods: ~CZFill |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `F_UL` | complete | Game/Atel/VSME.h | 1 |  |  |
@@ -198,12 +196,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `LAY_SCREEN` | complete | System/Graphic/2d/2DLay.h | 1 |  |  |
 | `MCD_INFO` | complete | Game/Collision/Ride.h | 1 |  |  |
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
+| `QWdata` | complete | System/Graphic/Gprim.h | 1 |  |  |
 | `RcfKey` | complete | System/Rcf.h | 1 |  |  |
 | `RcfMapInfo` | complete | System/Rcf.h | 1 |  |  |
 | `TexInfoStub` | gated | System/Graphic/modeldata.h | 1 |  | 1 PARTIAL |
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
 | `ZONEDATA` | missing | Game/Map.h | 1 |  |  |
-| `pacVif1Packet` | missing | System/Graphic/PackMan.h | 1 |  |  |
+| `pacVif1Packet` | complete | System/Graphic/PackMan.h | 1 |  |  |
 | `sceGsStoreImage` | complete | System/Graphic/Effect/libppp/keProg/pppKeLns.h | 1 |  |  |
 | `C3DCPrim` | partial | System/Graphic/3DCPrim.h | 0 | System/Graphic/GprimFull.h | missing methods: getObjPtr, makePkt_Line0, makePkt_Line1, makePkt_LineStrip0, makePkt_LineStrip1, makePkt_None, ... (+13); parameter count differs: create; virtual order differs |
 | `C3DLine` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h |  |
@@ -369,31 +368,31 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 37 |
 | `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 2 |
-| `System/Graphic/Gprim.h` | 47 | 3/3/5/22 | 230 |
+| `System/Graphic/Gprim.h` | 47 | 3/3/5/22 | 231 |
 | `System/Graphic/GprimFull.h` | 0 | 1/16/2/0 | 1 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 9 |
 | `System/Graphic/MapUnit.h` | 2 | 0/0/0/0 | 3 |
-| `System/Graphic/Model.h` | 10 | 0/3/5/0 | 69 |
-| `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 74 |
+| `System/Graphic/Model.h` | 10 | 0/3/5/0 | 70 |
+| `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 75 |
 | `System/Graphic/MotData.h` | 1 | 4/0/3/0 | 3 |
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
 | `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 8 |
 | `System/Graphic/PathDataCamera.h` | 1 | 0/1/0/0 | 3 |
 | `System/Graphic/ScreenMask.h` | 0 | 0/1/1/0 | 4 |
 | `System/Graphic/ShadowModel.h` | 5 | 0/0/1/0 | 6 |
-| `System/Graphic/Str.h` | 1 | 0/0/0/0 | 138 |
+| `System/Graphic/Str.h` | 1 | 0/0/0/0 | 139 |
 | `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 35 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
-| `System/Graphic/modeldata.h` | 15 | 1/2/0/1 | 81 |
-| `System/LinkedBuf.h` | 6 | 1/2/1/0 | 6 |
-| `System/MainApp.h` | 5 | 0/0/0/2 | 269 |
+| `System/Graphic/modeldata.h` | 15 | 1/2/0/1 | 82 |
+| `System/LinkedBuf.h` | 6 | 1/2/1/0 | 7 |
+| `System/MainApp.h` | 5 | 0/0/0/2 | 270 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 57 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 4 |
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 94 |
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
 | `System/RsrcData.h` | 3 | 0/0/0/32 | 27 |
-| `System/SJoint.h` | 9 | 0/0/0/0 | 199 |
+| `System/SJoint.h` | 9 | 0/0/0/0 | 200 |
 | `System/Task.h` | 27 | 1/2/0/1 | 233 |
 | `System/TaskMan.h` | 7 | 1/2/0/0 | 83 |
 | `System/Vector.h` | 21 | 0/0/3/0 | 266 |
@@ -410,7 +409,7 @@ or `untagged`.
 | feature | `COLLOBJ_H_INFO_UNION` | 3 | 0 | untagged, e.g. Game/Movement.cpp:2 |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 1 | 1 | setEntityFlag on the CEntity base subobject (constructor, InitAvatar) |
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 0 | untagged, e.g. Game/Atel/Atel.cpp:30 |
-| feature | `MODELDATA_H_TEXINFO` | 4 | 0 | untagged, e.g. System/Graphic/DispList.cpp:1 |
+| feature | `MODELDATA_H_TEXINFO` | 5 | 0 | untagged, e.g. System/Graphic/DispList.cpp:1 |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 1 | 0 | untagged, e.g. System/RsrcData.cpp:6 |
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 0 | untagged, e.g. Game/Collision/CollObj.h:90 |
@@ -459,11 +458,11 @@ or `untagged`.
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
 | path override | `EFFECT_H_PATH` | 5 | 0 | untagged, e.g. Game/Enemy/EnemyBarrelspider.cpp:4 |
 | path override | `FSM_H_PATH` | 1 | 0 | untagged, e.g. System/Fsm.cpp:1 |
-| path override | `GPRIM_H_PATH` | 164 | 3 | the original includes it under this name |
-| path override | `LINKEDBUF_H_PATH` | 3 | 0 | untagged, e.g. Game/AttachCard.cpp:3 |
+| path override | `GPRIM_H_PATH` | 165 | 4 | the original includes it under this name |
+| path override | `LINKEDBUF_H_PATH` | 4 | 1 | __FILE__ as in the original .rodata |
 | path override | `MAPUNIT_H_PATH` | 1 | 0 | untagged, e.g. System/Graphic/MapUnit.cpp:5 |
-| path override | `MODELDATA_H_PATH` | 7 | 0 | untagged, e.g. System/Graphic/DispList.cpp:3 |
-| path override | `MODEL_H_PATH` | 7 | 0 | untagged, e.g. System/VramMan.cpp:3 |
+| path override | `MODELDATA_H_PATH` | 8 | 1 | __FILE__ as in the original .rodata |
+| path override | `MODEL_H_PATH` | 8 | 1 | __FILE__ as in the original .rodata |
 | path override | `OSDDEF_H_PATH` | 1 | 0 | untagged, e.g. Game/EntityFactory.cpp:1 |
 | path override | `PATHDATACAMERA_H_PATH` | 2 | 1 | the original includes it under this name |
 | path override | `RSRCDATA_H_PATH` | 5 | 0 | untagged, e.g. System/Memoca.cpp:1 |
@@ -604,11 +603,8 @@ than our includers (units with a source only). A heuristic: stand-ins and opt-ou
 | `Game/OsdDef.h` | 8 | 7 | 1: System/MainTaskFactory | 0:  |
 | `System/Graphic/2d/2DMan.h` | 166 | 165 | 1: Game/Entity | 0:  |
 | `System/Graphic/Anim.h` | 149 | 149 | 0:  | 2: Game/Gimmick/CreateGimmick, Game/Gimmick/SampleGimmick |
-| `System/Graphic/Gprim.h` | 233 | 230 | 2: Game/Collision/CollUtil, System/Graphic/PackMan | 0:  |
-| `System/Graphic/Model.h` | 70 | 69 | 1: System/Graphic/PackMan | 0:  |
-| `System/Graphic/Str.h` | 141 | 138 | 3: Game/Collision/CollUtil, Game/Entity, System/Graphic/PackMan | 0:  |
-| `System/Graphic/modeldata.h` | 82 | 81 | 1: System/Graphic/PackMan | 0:  |
-| `System/LinkedBuf.h` | 7 | 6 | 1: System/Graphic/PackMan | 0:  |
+| `System/Graphic/Gprim.h` | 233 | 231 | 1: Game/Collision/CollUtil | 0:  |
+| `System/Graphic/Str.h` | 141 | 139 | 2: Game/Collision/CollUtil, Game/Entity | 0:  |
 | `System/RsrcData.h` | 29 | 27 | 2: Game/Entity, Game/Map | 0:  |
 
 Generated by `tools/partials.py --update docs/partials.md`.
