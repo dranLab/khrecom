@@ -7,6 +7,9 @@
 #include "khtypes.h"
 
 typedef float _FVECTOR[4];
+union FVECTOR;
+void roundPI(FVECTOR& vInOut, INT nInClip); // System/Coord
+
 union FVECTOR {
     _FVECTOR v;
     struct {
@@ -34,6 +37,26 @@ union FVECTOR {
     void init() {
         _q = 0;
         w = 1.0f;
+    }
+    // PARTIAL: added for Game/Map (CSky::main; roundPI from System/Coord)
+    void addRot(const FVECTOR& vInSrc) {
+        FVECTOR& vOut = *this;
+        FLOAT fPI = 3.1415927f;
+        INT nFlag;
+        __asm__ volatile("qmtc2.ni %0, $vf3\n"
+                         "vmr32.w $vf3, $vf3\n" : : "r"(fPI));
+        __asm__ volatile("lqc2 $vf1, 0x0(%1)\n"
+                         "lqc2 $vf2, 0x0(%2)\n"
+                         "vadd.xyz $vf1, $vf1, $vf2\n"
+                         "vclipw.xyz $vf1, $vf3w\n"
+                         "vnop\n"
+                         "vnop\n"
+                         "vnop\n"
+                         "sqc2 $vf1, 0x0(%1)\n"
+                         "vnop\n"
+                         "cfc2.ni %0, $vi18\n"
+                         : "=r"(nFlag) : "r"(this), "r"(&vInSrc) : "memory");
+        if (nFlag & 0x3f) roundPI(vOut, nFlag);
     }
     // PARTIAL: added for System/Graphic/Camera
     BOOL operator!=(const FVECTOR& inV) const { return _ul[0] != inV._ul[0] || _ul[1] != inV._ul[1]; }

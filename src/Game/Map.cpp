@@ -294,7 +294,29 @@ CSky::~CSky() {
     if (m_pRotShift) delete m_pRotShift;
     m_pRotShift = NULL;
 }
+extern "C" void sceVu0UnitMatrix(FMATRIX& m);
+extern "C" void sceVu0RotMatrix(FMATRIX& m0, FMATRIX& m1, FVECTOR& rot);
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
+/* Parked: 6 lines - the loop's i*16 offset goes to v1 and is copied to s3 (the original computes it into s3 directly, so
+   `move a0,s4` fills the first test's delay slot); FVECTOR::addRot with `this` as asm operand, zero-test, reference,
+   declaration and index forms and an 8 min permuter run (12k candidates) all keep the copy. */
+#if 0
+void CSky::main() {
+    if (CSceneEnv::getStopTypeBit() & 0x1000) return;
+    FLOAT fRate = getFrameRateF();
+    for (INT i = 0; i < m_modelSuu; i++) {
+        FMATRIX lMat;
+        FVECTOR vAddRot;
+        if (m_pRotShift[i]._ul[0] == 0 && m_pRotShift[i]._ul[1] == 0) continue;
+        ScaleVector(vAddRot, m_pRotShift[i], fRate);
+        m_pRot[i].addRot(vAddRot);
+        sceVu0UnitMatrix(lMat);
+        sceVu0RotMatrix(Crd(i + 1).m_Local, lMat, m_pRot[i]);
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", main__4CSky);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", disp__4CSky);
 void CSky::setColorScale(FVECTOR& inColorScale) { m_vColor = inColorScale; }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", func_00206010);
