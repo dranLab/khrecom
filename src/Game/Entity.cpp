@@ -230,7 +230,21 @@ BOOL CEntity::isHangOnEnemy() {
     return m_pRideModel->isHangOnEnemy();
 }
 BOOL CEntity::isGround() const { return m_pMove->isGround(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", enableFade2Path__7CEntityii);
+void CEntity::enableFade2Path(BOOL inSw, INT inIndex) {
+    if (m_pModels) {
+        if (inIndex < 0) {
+            CModel* pModel = m_pModels;
+            INT n = m_iModelCount;
+            for (INT i = 0; i < n; i++) {
+                pModel->fade2Path(inSw);
+                pModel++;
+            }
+        } else {
+            if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(D_0047D330, 802, D_0047D360, 0);
+            m_pModels[inIndex].fade2Path(inSw);
+        }
+    }
+}
 void CEntity::enableNotSemiModel(INT inModel, UINT inFlag) {
     if (m_pModels) {
         CModel* pModel = m_pModels;
@@ -262,7 +276,18 @@ const CHAR* CEntity::getMotionName(INT inIndex) const {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getMotionIndex__C7CEntityPCc);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getHeight__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getHeadPos__C7CEntityR7FVECTOR);
+void CEntity::getHeadPos(FVECTOR& outPos) const {
+    COLL_PARAM_HEADER* coll = m_pCollParam;
+    if (!coll) {
+        outPos = *(FVECTOR*)((BYTE*)&Crd(0) + 0xc0);
+        outPos.y += 1.0f;
+    } else {
+        OTHER_PARAM* other = coll->pOtherParam;
+        if (!(other)) AssertApp(D_0047D330, 979, D_0047D3D0, 0);
+        outPos.set(other->BadStatusPos.fOffsetX, other->BadStatusPos.fOffsetY, other->BadStatusPos.fOffsetZ);
+        ApplyMatrix(outPos, *(FMATRIX*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0x90), outPos);
+    }
+}
 void CEntity::getUseCardPos(FVECTOR& outPos) { outPos = *(FVECTOR*)((BYTE*)&Crd(0) + 0xc0); }
 void CEntity::endStateProc() {
     if (!(m_uiEntityFlag & 2)) clearSpeed();
@@ -344,7 +369,16 @@ BOOL CEntity::entityVisible(const CEntity* inEntity, FLOAT inAngle, FLOAT inDist
     if (inEntity) return entityVisible(*inEntity, inAngle, inDist);
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", entityVisibleAxisX__7CEntityRC7CEntityf);
+BOOL CEntity::entityVisibleAxisX(const CEntity& inTarget, FLOAT inAngle) {
+    FVECTOR dir;
+    SubVector(dir, inTarget.getPos(), m_pMove->getPos());
+    Normalize(dir, dir);
+    FLOAT dir0 = -atan2f(dir.y, _sqrtf(dir.z * dir.z + dir.x * dir.x));
+    getRot();
+    FLOAT fDiff = _fabsf(Math3D::LimitPI(dir0 - getRot().x));
+    if (inAngle * 0.5f * 0.017453292f < fDiff) return FALSE;
+    return TRUE;
+}
 BOOL CEntity::entityVisibleAxisX(const CEntity* inEntity, FLOAT inAngle) {
     if (inEntity) return entityVisibleAxisX(*inEntity, inAngle);
     return FALSE;
@@ -717,7 +751,16 @@ void CEntity::loadModelColor_() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", storeModelColor___7CEntity);
+void CEntity::storeModelColor_() {
+    if (m_pvModelColor) {
+        FVECTOR* pColor = m_pvModelColor;
+        INT n = m_iModelCount;
+        CModel* pModel = m_pModels;
+        for (INT i = 0; i < n; i++, pModel++, pColor++) {
+            pModel->setColorScale(*pColor);
+        }
+    }
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", translucence___7CEntity);
 HANDLE CEntity::setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale) {
     return CEffectMan::setEffect(inName, inFlag, (ObjType::eObjType)getEntityType(), inPos, inRot, inScale);
