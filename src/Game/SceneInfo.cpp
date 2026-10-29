@@ -424,9 +424,10 @@ void CSceneInfo::initFloor(INT nFloorIdx, WORLD_ID world) {
     _SceneInfoWork::mc()->_nNextRCNormaNum = 0;
     if (world) CCard::setCardPossibleWorld(world);
 }
-/* Parked: 26 lines - the block after getFloorNumber: the original computes the s_CurrentFloor address and the
+/* Parked: 21 lines - the block after getFloorNumber: the original computes the s_CurrentFloor address and the
    clearEventRoomTbl loop pointer after the s_nCurrentFloorNumber store (lui order) with other registers; the loop
-   body matches with the shared pSrc pointer. Statement orders and 5 min of permuter (7k candidates) gave nothing. */
+   body matches with the shared pSrc pointer, the tail with the *_nEventDoorStateTbl[i] form. Statement orders and
+   5 min of permuter (7k candidates) gave nothing. */
 #if 0
 void CSceneInfo::initFloor() {
     BOOL bSora = CGame::isSoraGame();
@@ -450,7 +451,7 @@ void CSceneInfo::initFloor() {
     rollbackEventDoorState(0);
     SHORT* pEntSceneTbl = _SceneInfoWork::mc()->_nEntranceSceneTbl[nFloorIdx];
     _setWorldEntrance(world, pEntSceneTbl[0], pEntSceneTbl[1], TRUE);
-    if (bSora && world == 13 && _SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx][0] == 4) showAllHiddenDoorsOfCurrentFloor();
+    if (bSora && world == 13 && *_SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx] == 4) showAllHiddenDoorsOfCurrentFloor();
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initFloor__10CSceneInfo);
