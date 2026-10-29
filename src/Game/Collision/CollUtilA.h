@@ -31,6 +31,24 @@ struct MC_PRIM {
     /* 0x16 */ SHORT kind;
 };
 
+struct MC_CHIP;
+struct PRIM_INFO2 { // 0x40
+    FVECTOR vLS;
+    FVECTOR vLE;
+    FVECTOR vLVec;
+    FMATRIX* pMatLW;
+    FVECTOR* pNorm;
+    FVECTOR* pVert;
+    MC_CHIP* pMcChip;
+};
+
+struct PRIM_INFO { // 0x10
+    INT kind;
+    INT fgLine;
+    PRIM_INFO2* pInfo2;
+    MC_PRIM* pPrim;
+};
+
 struct MC_DATA {
     /* 0x00 */ FLOAT x_min;
     /* 0x04 */ FLOAT y_min;

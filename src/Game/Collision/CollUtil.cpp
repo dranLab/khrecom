@@ -329,9 +329,35 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMCInit
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _detectMCD__9CCollUtilR10CCollision);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMap__9CCollUtilP7FVECTORT1);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectPolygon__9CCollUtil);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectPLine__9CCollUtil);
+INT CCollUtil::detectPLine() {
+    PRIM_INFO2* pPrimInfo2 = m_pPrimInfoCurrent->pInfo2;
+    MC_PRIM* pPrim = m_pPrimInfoCurrent->pPrim;
+    FVECTOR* pVert = pPrimInfo2->pVert;
+    INT fg = m_pPrimInfoCurrent->fgLine;
+    do {
+        if ((fg & 1) && distanceLine(&pVert[pPrim->v0], &pVert[pPrim->v1])) break;
+        if ((fg & 2) && distanceLine(&pVert[pPrim->v1], &pVert[pPrim->v2])) break;
+        if ((fg & 4) && distanceLine(&pVert[pPrim->v2], &pVert[pPrim->v3])) break;
+        if (pPrim->kind && (fg & 8) && distanceLine(&pVert[pPrim->v3], &pVert[pPrim->v0])) break;
+        return FALSE;
+    } while (0);
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", distanceLine__9CCollUtilP7FVECTORT1);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectPSphere__9CCollUtil);
+INT CCollUtil::detectPSphere() {
+    PRIM_INFO2* pPrimInfo2 = m_pPrimInfoCurrent->pInfo2;
+    MC_PRIM* pPrim = m_pPrimInfoCurrent->pPrim;
+    FVECTOR* pVert = pPrimInfo2->pVert;
+    INT fg = m_pPrimInfoCurrent->fgLine;
+    do {
+        if ((fg & 0x10) && distanceSphere(&pVert[pPrim->v0])) break;
+        if ((fg & 0x20) && distanceSphere(&pVert[pPrim->v1])) break;
+        if ((fg & 0x40) && distanceSphere(&pVert[pPrim->v2])) break;
+        if (pPrim->kind && (fg & 0x80) && distanceSphere(&pVert[pPrim->v3])) break;
+        return FALSE;
+    } while (0);
+    return TRUE;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", distanceSphere__9CCollUtilP7FVECTOR);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", slidingHosei__9CCollUtilR7FVECTORN21);
 /* MATCH: the original links no CCollDbg (debug build only) and calls address 0. Ps2EeAs makes undefined weak symbols
