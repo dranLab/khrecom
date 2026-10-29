@@ -36,6 +36,9 @@ extern "C" char D_0047D570[];
 extern "C" char D_0047D4F8[];
 extern "C" int sprintf(char*, const char*, ...);
 void RotTransPersClipW(IVECTOR& iVec, const FVECTOR& fVec);
+extern "C" void sceVu0RotMatrixX(float m0[4][4], float m1[4][4], float rx);
+extern "C" void sceVu0RotMatrixY(float m0[4][4], float m1[4][4], float ry);
+extern "C" void sceVu0RotMatrixZ(float m0[4][4], float m1[4][4], float rz);
 static inline void _loadRotTransPersMatrix(const FMATRIX& m) {
     asm volatile("vsub.xyzw $vf3, $vf0, $vf0\n"
                  "lqc2 $vf4, 0x0(%0)\n"
@@ -538,7 +541,66 @@ void CEntity::positionFix(const FVECTOR& inPos, const FVECTOR& inRot) {
     coordFix();
     if (m_pBodyColl) m_pBodyColl->update();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateCoord__7CEntity);
+void CEntity::updateCoord() {
+    if (!(m_pMove)) AssertApp(D_0047D330, 1286, D_0047D358, 0);
+    FMATRIX& m = Crd(0).m_Local;
+    asm volatile("lq $5, 0x0(%0)\n"
+                 "pextuw $2, $5, $0\n"
+                 "pextlw $4, $0, $2\n"
+                 "pextlw $2, $0, $5\n"
+                 "pextuw $3, $2, $0\n"
+                 "pcpyld $2, $0, $2\n"
+                 "sq $2, 0x0(%1)\n"
+                 "sq $3, 0x10(%1)\n"
+                 "sq $4, 0x20(%1)\n"
+                 "sqc2 $vf0, 0x30(%1)"
+                 : : "r"(&m_pMove->getScl()), "r"(&m) : "$2", "$3", "$4", "$5");
+    if (m_pMove->isQuaternion()) {
+        FMATRIX mat;
+        Quaternion::QuaternionToMatrix(mat, m_pMove->getQuaternion());
+        asm volatile("lqc2 $vf2, 0x0(%0)\n"
+                     "lqc2 $vf3, 0x10(%0)\n"
+                     "lqc2 $vf4, 0x20(%0)\n"
+                     "lqc2 $vf5, 0x30(%0)\n"
+                     "lqc2 $vf6, 0x0(%1)\n"
+                     "lqc2 $vf7, 0x10(%1)\n"
+                     "lqc2 $vf8, 0x20(%1)\n"
+                     "lqc2 $vf9, 0x30(%1)\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf6x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf6y\n"
+                     "vmaddaz.xyzw $ACC, $vf4, $vf6z\n"
+                     "vmaddw.xyzw $vf6, $vf5, $vf6w\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf7x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf7y\n"
+                     "vmaddaz.xyzw $ACC, $vf4, $vf7z\n"
+                     "vmaddw.xyzw $vf7, $vf5, $vf7w\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf8x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf8y\n"
+                     "vmaddaz.xyzw $ACC, $vf4, $vf8z\n"
+                     "vmaddw.xyzw $vf8, $vf5, $vf8w\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf9x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf9y\n"
+                     "vmaddaz.xyzw $ACC, $vf4, $vf9z\n"
+                     "vmaddw.xyzw $vf9, $vf5, $vf9w\n"
+                     "sqc2 $vf6, 0x0(%0)\n"
+                     "sqc2 $vf7, 0x10(%0)\n"
+                     "sqc2 $vf8, 0x20(%0)\n"
+                     "sqc2 $vf9, 0x30(%0)"
+                     : : "r"(&m), "r"(&mat) : "memory");
+    } else if (m_uiEntityFlag & 0x2000) {
+        if (!(m_uiEntityFlag & 0x200)) sceVu0RotMatrixZ(m.m, m.m, m_pMove->getRot().z);
+        if (!(m_uiEntityFlag & 0x100)) sceVu0RotMatrixY(m.m, m.m, m_pMove->getRot().y);
+        if (!(m_uiEntityFlag & 0x80)) sceVu0RotMatrixX(m.m, m.m, m_pMove->getRot().x);
+    } else {
+        if (!(m_uiEntityFlag & 0x80)) sceVu0RotMatrixX(m.m, m.m, m_pMove->getRot().x);
+        if (!(m_uiEntityFlag & 0x100)) sceVu0RotMatrixY(m.m, m.m, m_pMove->getRot().y);
+        if (!(m_uiEntityFlag & 0x200)) sceVu0RotMatrixZ(m.m, m.m, m_pMove->getRot().z);
+    }
+    FVECTOR pos = getPos();
+    pos.w = 1.0f;
+    m.v[3] = pos;
+    Crd(0).m_Flag = 1;
+}
 void CEntity::coordFix() {
     INT n = getCoordNum();
     TIMEQ tick = CMainApp::getTickCount();
