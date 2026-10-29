@@ -50,9 +50,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1009 (938 in 109 headers, 71 in 30 .cpp); MATCH: 83
-  by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 126, padding 32, path override 24, gate 38, guessed 46, header-level 74, stand-in 30, other 6
-stand-ins: 396 foreign in 125 files (113 names), 198 unattributed, 174 own
+PARTIAL: 1007 (938 in 109 headers, 69 in 30 .cpp); MATCH: 83
+  by category: method 396, data member 69, type 87, fwd decl 52, #include 29, changed in place 126, padding 32, path override 24, gate 38, guessed 46, header-level 74, stand-in 28, other 6
+stand-ins: 391 foreign in 125 files (111 names), 198 unattributed, 174 own
 duplicate class names across headers: 24
 padding: 33 arrays, 25 accessors
 mechanisms: 945 sites (919 untagged); #line: 1235
@@ -110,7 +110,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `COLL_INFO_UNION` | missing | Game/Movement.h | 5 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 4 |  | missing methods: ~CPointCollision |
-| `CSceneInfo` | complete | Game/SceneInfo.h | 4 |  |  |
 | `CVSM` | partial | Game/Atel/VSME.h | 4 |  | missing fields: m_ActorStateFnc; extra methods: BOOL |
 | `Actor` | complete | Game/Atel/VSME.h | 3 |  |  |
 | `CBossDeadDemo` | complete | Game/Enemy/BossDeadDemo.h | 3 |  |  |
@@ -198,7 +197,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
 | `RcfKey` | complete | System/Rcf.h | 1 |  |  |
 | `RcfMapInfo` | complete | System/Rcf.h | 1 |  |  |
-| `RoomInfo` | complete | Game/SceneInfo.h | 1 |  |  |
 | `TEXANM_DATA` | complete | System/Graphic/TexAnm.h | 1 |  |  |
 | `TexInfoStub` | gated | System/Graphic/modeldata.h | 1 |  | 1 PARTIAL |
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
@@ -325,7 +323,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Prize.h` | 0 | 0/1/0/0 | 2 |
 | `Game/SEMotion.h` | 0 | 5/0/1/0 | 4 |
 | `Game/SceneEnv.h` | 1 | 0/0/1/0 | 35 |
-| `Game/SceneInfo.h` | 5 | 29/0/1/0 | 81 |
+| `Game/SceneInfo.h` | 5 | 29/0/1/0 | 85 |
 | `Game/Status.h` | 11 | 1/0/1/0 | 15 |
 | `Game/StorageWork.h` | 2 | 2/1/1/0 | 59 |
 | `Game/Technic.h` | 3 | 1/1/0/0 | 19 |
