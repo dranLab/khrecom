@@ -6,7 +6,7 @@ typedef unsigned long u_long;
 typedef unsigned short u_short;
 typedef unsigned char u_char;
 
-struct VTransInfo { /* System/Graphic/modeldata.h */
+struct VTransInfo { /* PARTIAL: stand-in for System/Graphic/TexUtil VTransInfo: gated by SYSTEM_GRAPHIC_GPRIM_CPP; strings: Gprim.h (.rodata still asm) */
     UINT _nDistPos;
     USHORT _nFormat;
     USHORT _nDistBufW;
@@ -21,7 +21,7 @@ struct VTransInfo { /* System/Graphic/modeldata.h */
     UINT _nTransSize;
 };
 
-union QWdata { /* System/Graphic/Gprim.h */
+union QWdata { /* PARTIAL: stand-in for System/Graphic/Gprim QWdata: strings: Gprim.h (.rodata still asm) */
     u_long ul64[2];
     u_long128 ul128;
     u_int ui32[4];
@@ -40,7 +40,7 @@ struct pacVif1Packet {
     QWdata lGifTag;     /* 0x30 */
 };
 
-struct tD_CHCR { /* libdma.h */
+struct tD_CHCR { /* PARTIAL: stand-in for System/Graphic/Effect/libppp/draw/draw_w tD_CHCR: owner not written */
     u_int DIR : 1;
     u_int p0 : 1;
     u_int MOD : 2;
@@ -51,7 +51,7 @@ struct tD_CHCR { /* libdma.h */
     u_int p1 : 7;
     u_int TAG : 16;
 };
-struct sceDmaChan { /* libdma.h (only chcr used here) */
+struct sceDmaChan { /* PARTIAL: stand-in for System/Graphic/Effect/libppp/draw/draw_w sceDmaChan: owner not written (only chcr used here) */
     tD_CHCR chcr;
 };
 extern "C" sceDmaChan* sceDmaGetChan(int id);
@@ -96,7 +96,7 @@ struct GpuRegsInfoSep {
     ULONGLONG _nFRAME;
 };
 
-class CDelayedFree {
+class CDelayedFree { /* PARTIAL: stand-in for System/LinkedBuf CDelayedFree: strings: LinkedBuf.h (.rodata still asm) */
 public:
     static void disposeFreeList();
 };
