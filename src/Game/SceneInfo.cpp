@@ -158,6 +158,8 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_004849F8[];
+extern "C" char D_00484A08[];
 extern "C" char D_004849C8[];
 extern "C" char D_00484C18[];
 extern "C" char D_00484C20[];
@@ -482,7 +484,104 @@ DOOR_ID _getDstDoorID(DOOR_ID door) {
     }
     return (DOOR_ID)2;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _setWorldEntrance__F8WORLD_IDssi);
+void _setWorldEntrance(WORLD_ID world, SHORT nStartEntScene, SHORT nGoalEntScene, BOOL bContinue) {
+    FloorInfo& floor = s_CurrentFloor;
+    BOOL bWorldOK = world != 0;
+    _initRoomInfo(floor._roomStartEnt, _SceneInfoWork::mc()->_roomInfoStartEnt, _SceneInfoWork::mc2()->_roomInfo2StartEnt, NULL, NULL, NULL, bContinue);
+    floor._roomStartEnt.setScene(0, nStartEntScene);
+    _SceneInfoWork::mc2()->_roomInfo2StartEnt._nCreatedCardID = 0xdc;
+    INT nIdx = floor._nEventRoomIdxTbl[0];
+    DOOR_ID nDID;
+    RoomInfo* pRoom = NULL;
+    if (nIdx >= 0) {
+        pRoom = &floor._rooms[nIdx];
+        nIdx = -1;
+        for (INT i = 0; i < 4; i++) {
+            if (pRoom->_doors[i].getDoorState() != DOOR_STAT_NOTHING) {
+                nIdx = i;
+                break;
+            }
+        }
+        if (!(nIdx >= 0)) AssertApp(D_00484980, 923, D_004849F8, 0);
+        pRoom = CSceneInfo::getRoomInfo(pRoom->_doors[nIdx]._nDstRoom);
+        if (!(pRoom)) AssertApp(D_00484980, 925, D_00484A08, 0);
+        nDID = _getDstDoorID((DOOR_ID)nIdx);
+    } else {
+        RoomInfo* p = floor._rooms;
+        for (INT i = 0; i < floor._nRoomCount; i++, p++) {
+            if (p->getSceneNum() == 1) {
+                pRoom = p;
+                break;
+            }
+        }
+        if (pRoom) nDID = (DOOR_ID)2;
+    }
+    if (pRoom) {
+        DoorInfo& d = pRoom->_doors[nDID];
+        d.setDoorState(DOOR_STAT_OPENED);
+        d._nDstRoom = 0;
+        d._shape = 3;
+        d._type = DOOR_TYPE_WORLD_ENTRANCE;
+        DoorInfo& s = floor._roomStartEnt._doors[0];
+        s.setDoorState(bWorldOK ? DOOR_STAT_OPENED : DOOR_STAT_CLOSED);
+        s._shape = 3;
+        s._type = DOOR_TYPE_SELECT_WORLD;
+        s._nDstRoom = pRoom->_pSrcInfo->_nID;
+    }
+    if (CSceneInfo::getCurrentFloorIndex()) {
+        DoorInfo& d = floor._roomStartEnt._doors[2];
+        d.setDoorState(DOOR_STAT_OPENED);
+        d._type = DOOR_TYPE_FLOOR_CHANGE;
+        d._shape = 0;
+        d._nDstRoom = 99;
+    }
+    _initRoomInfo(floor._roomGoalEnt, _SceneInfoWork::mc()->_roomInfoGoalEnt, _SceneInfoWork::mc2()->_roomInfo2GoalEnt, NULL, NULL, NULL, bContinue);
+    floor._roomGoalEnt.setScene(0, nGoalEntScene);
+    _SceneInfoWork::mc2()->_roomInfo2GoalEnt._nCreatedCardID = 0xdc;
+    nIdx = floor._nEventRoomIdxTbl[4];
+    if (nIdx < 0) {
+        INT nMaxID = floor._nRoomCount;
+        RoomInfo* p = floor._rooms;
+        for (INT i = 0; i < floor._nRoomCount; i++, p++) {
+            if (nMaxID == p->_pSrcInfo->_nID) {
+                nIdx = i;
+                break;
+            }
+        }
+    }
+    pRoom = nIdx >= 0 ? &floor._rooms[nIdx] : NULL;
+    if (pRoom) {
+        DoorInfo& d = floor._rooms[nIdx]._doors[0];
+        d.setDoorState(DOOR_STAT_OPENED);
+        d._shape = 4;
+        d._type = DOOR_TYPE_WORLD_ENTRANCE;
+        d._nDstRoom = 99;
+        DoorInfo& g = floor._roomGoalEnt._doors[2];
+        g.setDoorState(bWorldOK ? DOOR_STAT_OPENED : DOOR_STAT_CLOSED);
+        g._type = DOOR_TYPE_WORLD_ENTRANCE;
+        g._shape = 5;
+        g._nDstRoom = pRoom->_pSrcInfo->_nID;
+        if (pRoom->_pSrcInfo->_nRoomType == 7) {
+            for (INT i = 0; i < 4; i++) {
+                if (i == 0) continue;
+                DoorInfo& dd = pRoom->_doors[i];
+                if (dd.getDoorState() != DOOR_STAT_OPENED) continue;
+                RoomInfo* pDst = CSceneInfo::getRoomInfo(dd._nDstRoom);
+                DoorInfo& x = pDst->_doors[_getDstDoorID((DOOR_ID)i)];
+                x._type = DOOR_TYPE_TO_LAST;
+                x.setDoorState(DOOR_STAT_OPENED);
+            }
+        }
+        SHORT nFloor = CSceneInfo::getCurrentFloorNumber();
+        if (nFloor != 13 && nFloor != -1) {
+            DoorInfo& f = floor._roomGoalEnt._doors[0];
+            f.setDoorState(DOOR_STAT_OPENED);
+            f._nDstRoom = 0;
+            f._shape = 0;
+            f._type = DOOR_TYPE_FLOOR_CHANGE;
+        }
+    }
+}
 void CSceneInfo::makeRoom(const RoomInfo& room, DOOR_ID nDoorID, SHORT nScene, BYTE nCardID, BYTE nCardNum) {
     RoomInfo& r = (RoomInfo&)room;
     ROOM_STORAGE* p = (ROOM_STORAGE*)r._pStorageInfo;
