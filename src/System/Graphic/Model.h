@@ -445,8 +445,11 @@ public:
 };
 
 #ifdef GAME_ENTITY_H
-inline CModel* CEntity::getModel() { return m_pModels; }
+/* PARTIAL: getModel(INT) is not in the original CEntity (callers use it as getModel()[i]); kept out of Game/Entity,
+ * whose key function would emit it. */
+#ifndef GAME_ENTITY_CPP
 inline CModel* CEntity::getModel(INT inIndex) { return &m_pModels[inIndex]; }
+#endif
 #endif
 
 class CModelBG : public CModel {

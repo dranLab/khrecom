@@ -1,3 +1,4 @@
+#define ENTITY_H_SETFLAG_DIRECT /* MATCH: setEntityFlag(0, 0x1000) as a plain and (createAvatar) */
 #define TASK_H_NO_SLC_OVERFLOW_MSG
 #include "Game/Atel/Atel.h"
 #include "System/Graphic/Gprim.h"
@@ -218,7 +219,7 @@ BOOL CAtel::createAvatar(INT nRsrcID, Actor& act, INT flag) {
             act._pAvatar->reqCommand(7, &param, 0);
             break;
         case 0x4bc:
-            AVATAR_ENTITY(act._pAvatar)->clearEntityFlag(0x1000);
+            AVATAR_ENTITY(act._pAvatar)->setEntityFlag(0, 0x1000);
             break;
         case 0x525:
             AVATAR_INT(act._pAvatar, 0xf0) = 3;

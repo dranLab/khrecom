@@ -60,9 +60,9 @@ void CSummonDumbo::beginStateAppear() {
     setEntityFlag(0, 1);
     m_uiFlag |= 8;
     m_pMove->enableGravity(0);
-    ((FVECTOR*)_m_0x70)->y += 0.75f;
-    setPos(*(FVECTOR*)_m_0x70);
-    warp(*(FVECTOR*)_m_0x70);
+    m_vStartPos.y += 0.75f;
+    setPos(m_vStartPos);
+    warp(m_vStartPos);
     clearSpeed();
     setRot(((CEntity*)m_pPlayer)->getRot());
     bodyCollOnBody(-1);

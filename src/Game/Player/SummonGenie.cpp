@@ -68,8 +68,8 @@ void CSummonGenie::beginStateAppear() {
     m_iState = 0;
     m_uiFlag |= 8;
     m_pMove->enableGravity(0);
-    setPos(*(FVECTOR*)_m_0x70);
-    warp(*(FVECTOR*)_m_0x70);
+    setPos(m_vStartPos);
+    warp(m_vStartPos);
     updateCoord();
     coordFix();
     m_uiAttackID = g_GenieMagicID[0];

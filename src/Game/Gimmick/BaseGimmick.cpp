@@ -160,7 +160,7 @@ void CBaseGimmick::makeCoord(const ZONEPARTS& inParts) {
     setScale(*(const FVECTOR*)inParts.scale);
     setPos(*(const FVECTOR*)inParts.trans);
     setOldPos(*(const FVECTOR*)inParts.trans);
-    *(FVECTOR*)_m_0x70 = *(const FVECTOR*)inParts.trans;
+    m_vStartPos = *(const FVECTOR*)inParts.trans;
     updateCoord();
     coordFix();
 }

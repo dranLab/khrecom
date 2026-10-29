@@ -634,7 +634,7 @@ void CMapEnemy::getWarpPos(FVECTOR& outPos) {
         outPos = *coll->getOutPos();
         return;
     }
-    outPos = *(FVECTOR*)_m_0x70;
+    outPos = m_vStartPos;
 }
 void CMapEnemy::beginStateAppear() {
     m_iAppearType = 1;
@@ -751,7 +751,7 @@ void CMapEnemy::beginStateDamage() {
     if (m_pBodyColl->getHitCollBody()->getDamageKind() == 0x24) {
         m_iSysStep = 1;
     } else {
-        m_EntityType = (eObjType)3;
+        m_EntityType = (ObjType::eObjType)3;
         CSceneEnv::setStop((ObjType::eObjBit)4);
         CGameWork::setFlag(1, 5, TRUE);
         bodyCollOff(-1);
@@ -934,7 +934,7 @@ void CMapEnemy::stateDisappear() {
 }
 
 void CMapEnemy::endStateDisappear() {
-    warp(*(FVECTOR*)_m_0x70);
+    warp(m_vStartPos);
     updateCoord();
     coordFix();
 }

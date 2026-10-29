@@ -246,6 +246,14 @@ public:
     // PARTIAL: added for Game/Debug/KisEnemy (m_vPos 0x20, m_vRot 0x40, m_vVel 0x70)
     FVECTOR& getPos() { return *(FVECTOR*)&_m_0x00[0x20]; }
     FVECTOR& getRot() { return *(FVECTOR*)&_m_0x00[0x40]; }
+    // PARTIAL: added for Game/Entity
+    FVECTOR& getQuaternion() { return *(FVECTOR*)&_m_0x00[0x50]; } /* QUATERNION */
+    FVECTOR& getScl() { return *(FVECTOR*)&_m_0x00[0x60]; }
+    UINT isQuaternion() const { return m_uiFlag & 0x20; }
+    void setForce(FLOAT inForce) { *(FLOAT*)&_m_0x124[0x130 - 0x124] = inForce; }
+    void save();
+    BOOL adjustRide();
+    BOOL notifyRide();
     FVECTOR& getVel() { return *(FVECTOR*)&_m_0x00[0x70]; }
     const FVECTOR& getWallNormal() const { return *(const FVECTOR*)&_m_0x00[0xb0]; } // PARTIAL: added for Game/Player/PlayerSora
     void setHitBackVel(const FVECTOR& inVel) { *(FVECTOR*)&_m_0x00[0x90] = inVel; } // PARTIAL: added for Game/Enemy/BattleEnemy

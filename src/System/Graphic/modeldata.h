@@ -51,7 +51,7 @@ struct MODELDATA {
         return 0;
     }
     USHORT getMode() const { return getRawMode(); }
-    BOOL isShadow() const { return getMode() == 0x10; } // PARTIAL: added for System/Graphic/Model
+    BOOL isShadow() const { if (getMode() == 0x10) return TRUE; return FALSE; } // PARTIAL: added for System/Graphic/Model; if-form for Game/Entity translucence_ (li 1; movn)
     USHORT getShaderOption() const {
         const SHORT* tag = (const SHORT*)(!isDataEmpty() ? m_pData : m_pSemiData);
         INT version = tag[0x16 / 2];

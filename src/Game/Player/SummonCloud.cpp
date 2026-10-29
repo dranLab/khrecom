@@ -48,7 +48,7 @@ void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 /* CEntity::m_vStartPos (Game/Entity.h has it as raw bytes). */
-#define m_vStartPos (*(FVECTOR*)_m_0x70)
+
 
 static inline FLOAT _abs(FLOAT inValue) {
     FLOAT ret;

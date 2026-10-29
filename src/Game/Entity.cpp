@@ -1,10 +1,31 @@
+#define GAME_ENTITY_CPP
+/* MATCH: __FILE__ of these headers as in the original .rodata */
+#define BODYCOLLISION_H_PATH "c:/KHCOM/MainApp/Game/BodyCollision.h"
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
+#define COLLDISP_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollDisp.h"
+#define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h"
 #include "khtypes.h"
+#include "System/HeapMan.h"
+#include "System/Graphic/LightUnit.h"
+#include "System/Fsm.h"
 #include "Game/Entity.h"
-#include "Game/Movement.h"
-#include "Game/BodyCollision.h"
-#include "Game/Collision/Ride.h"
-#include "System/Graphic/Anim.h"
+#include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"
+#include "System/RsrcData.h"
+#include "System/Graphic/Anim.h"
+#include "Game/BodyCollision.h"
+#include "Game/Collision/CollUtil.h"
+/* PARTIAL: an empty string between the CollUtil.h and CollDisp.h strings (owner unknown; the effect setters' strcmp
+ * reuses it) */
+inline void _entityEmptyStringPlaceholder() { TRACE(""); }
+#include "Game/Collision/CollDisp.h"
+#include "System/Coord.h"
+#include "System/Graphic/Effect/effect.h"
+#include "System/Graphic/2d/2DMan.h"
+#include "Game/CardBattle.h"
+#include "System/Graphic/Str.h"
+#include "Game/Movement.h"
+#include "Game/Collision/Ride.h"
 #include "Game/EffectMotion.h"
 #include "System/Graphic/TexAnm.h"
 #include "System/TaskMan.h"
@@ -14,28 +35,19 @@
 #include "System/Graphic/Camera.h"
 #include "System/Math3D.h"
 #include "Game/Collision/CollMap.h"
-#include "Game/Collision/CollDisp.h"
 #include "Game/Debug/DebugWork.h"
 #include "Game/AttackMotion.h"
+#include "Game/SceneEnv.h"
 #include "System/Graphic/Fnt.h"
+#include "System/DebugProcInfo.h"
 #include "System/Graphic/WorldEnv.h"
-#include "System/Graphic/LightUnit.h"
-#include "System/Coord.h"
-#include "System/Graphic/Effect/effect.h"
-#include "include_asm.h"
 
-extern "C" char D_0047D330[]; /* __FILE__ */
-extern "C" char D_0047D080[]; /* "" */
-extern "C" char D_0047D660[];
-extern "C" char D_0047D3E0[];
-extern "C" char D_0047D3A0[];
 extern "C" unsigned int strlen(const char*);
-extern "C" char D_0047D518[];
-extern "C" char D_0047D548[];
-extern "C" char D_0047D570[];
-extern "C" char D_0047D4F8[];
 extern "C" int sprintf(char*, const char*, ...);
 void RotTransPersClipW(IVECTOR& iVec, const FVECTOR& fVec);
+extern "C" void sceVu0RotMatrixX(float m0[4][4], float m1[4][4], float rx);
+extern "C" void sceVu0RotMatrixY(float m0[4][4], float m1[4][4], float ry);
+extern "C" void sceVu0RotMatrixZ(float m0[4][4], float m1[4][4], float rz);
 static inline void _loadRotTransPersMatrix(const FMATRIX& m) {
     asm volatile("vsub.xyzw $vf3, $vf0, $vf0\n"
                  "lqc2 $vf4, 0x0(%0)\n"
@@ -49,24 +61,12 @@ class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: gated by RSRCDAT
 public:
     static BYTE* getRsrcOCD(INT nGroup);
     static void* getFirstData(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
+    static INT getModelCount(INT nGroup);
+    static MODELDATA** getRsrcMDL(INT nGroup);
+    static TEXANM_DATA* getRsrcTXA(INT nGroup);
+    static CRsrcANN* getRsrcANN(INT nGroup);
 };
-extern "C" char D_0047D688[];
 extern "C" int strcmp(const char*, const char*);
-extern "C" char D_0047D358[];
-extern "C" char D_0047D500[];
-extern "C" char D_0047D388[];
-extern "C" char D_0047D3F0[];
-extern "C" char D_0047D508[];
-extern "C" char D_0047D598[];
-extern "C" char D_0047D5C0[];
-extern "C" char D_0047D5E8[];
-extern "C" char D_0047D610[];
-extern "C" char D_0047D638[];
-extern "C" char D_0047D360[];
-extern "C" char D_0047D398[];
-extern "C" char D_0047D3D0[];
-extern "C" char D_0047D3D8[];
-extern "C" char D_0047D400[];
 
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -78,8 +78,11 @@ void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT s);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" float atan2f(float, float);
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
+inline void operator delete[](void* mem) { com_free(mem); }
 inline void* operator new(size_t, void* p) throw() { return p; }
 
 static inline FLOAT _sqrtf(FLOAT x) {
@@ -93,12 +96,142 @@ static inline FLOAT _fabsf(FLOAT x) {
     return ret;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", __7CEntityP5CTaskQ27ObjType8eObjType);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", _$_7CEntity);
+CEntity::CEntity(CTask* inParent, ObjType::eObjType inType) : CTask(inParent, 0x4000) {
+    m_pModels = NULL;
+    m_pvModelColor = NULL;
+    m_iModelCount = 0;
+    m_pNLight = NULL;
+    m_pGLight = NULL;
+    m_pAnim = NULL;
+    m_pTexAnm = NULL;
+    m_nTexAnmNum = 0;
+    m_pMove = NULL;
+    m_pBodyColl = NULL;
+    m_pAttack = NULL;
+    m_pEffect = NULL;
+    m_pEffectEx = NULL;
+    m_pSE = NULL;
+    m_pSEEx = NULL;
+    m_iID = -1;
+    setEntityType(inType);
+    m_iFlashingCounter = 1;
+    m_uiEntityFlag = 0x1000;
+    m_uiDispOffFlag = 0;
+    m_uiCheckEyeOffFlag = 0;
+    m_tqTimer = 0;
+    m_fNearTranslucence = 1.0f;
+    m_hTarget = 0;
+    m_fArriveRadius = 1.0f;
+    m_fFadeAlpha = 1.0f;
+    m_pCollParam = NULL;
+    m_pRideModel = NULL;
+    m_vStartPos.init();
+    m_vRootMoveScale.set(1.0f, 1.0f, 1.0f);
+    SE_MANAGED_DATA* data = m_SeManagedData;
+    for (INT i = 0; i < 4; i++, data++) data->hHandle = 0;
+    m_tqDamageDispTimer = 0;
+    m_pDamageString = NULL;
+}
+CEntity::~CEntity() {
+    delete m_pMove;
+    m_pMove = NULL;
+    delete m_pBodyColl;
+    m_pBodyColl = NULL;
+    delete m_pAttack;
+    m_pAttack = NULL;
+    delete m_pEffect;
+    m_pEffect = NULL;
+    delete m_pEffectEx;
+    m_pEffectEx = NULL;
+    delete m_pSE;
+    m_pSE = NULL;
+    delete m_pSEEx;
+    m_pSEEx = NULL;
+    delete[] m_pModels;
+    m_pModels = NULL;
+    delete[] m_pvModelColor;
+    m_pvModelColor = NULL;
+    delete m_pNLight;
+    m_pNLight = NULL;
+    delete m_pGLight;
+    m_pGLight = NULL;
+    delete m_pAnim;
+    m_pAnim = NULL;
+    delete[] m_pTexAnm;
+    m_pTexAnm = NULL;
+    delete m_pRideModel;
+    m_pRideModel = NULL;
+    delete m_pDamageString;
+    m_pDamageString = NULL;
+    TRACE("Delete entity ... ID = 0x%08x\n", getID());
+}
 INT CEntity::getTypeID() const { return 0x1000; }
 BOOL CEntity::initalize(INT inGroupID, INT inRsrcID) { return initalize(inGroupID, inRsrcID, 0); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", initalize__7CEntityiiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", main__7CEntity);
+BOOL CEntity::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
+    m_pMove = new (com_malloc_d(sizeof(CMovement), __FILE__ "(146)", RET_ADDR())) CMovement(this);
+    if (!m_pMove) return FALSE;
+    INT group = inGroupID * 10000 + inRsrcID;
+    if (!initalizeModel(group, !(iFlag & 1))) return FALSE;
+    initCollision_(inGroupID, inRsrcID);
+    initRideModel_(group);
+    initEffect_(group);
+    initSE_(group);
+    m_pEffectEx = new (com_malloc_d(sizeof(CEffectMotion), __FILE__ "(170)", RET_ADDR())) CEffectMotion(this);
+    if (!m_pEffectEx) return FALSE;
+    m_pSEEx = new (com_malloc_d(sizeof(CSEMotion), __FILE__ "(174)", RET_ADDR())) CSEMotion(this);
+    if (!m_pSEEx) return FALSE;
+    if (DebugWork::g_dw.sys.m_iDagameNumber) {
+        m_pDamageString = new (com_malloc_d(sizeof(CFnt), __FILE__ "(181)", RET_ADDR())) CFnt;
+        if (m_pDamageString) {
+            m_pDamageString->CFntM2::setStyle(0x8002);
+            m_pDamageString->setSize(24);
+            m_pDamageString->setLayerFG(1);
+            m_pDamageString->setColor(255, 255, 255);
+        }
+    }
+    return TRUE;
+}
+void CEntity::main() {
+    if ((1 << m_EntityType) & CSceneEnv::getStopTypeBit()) return;
+    if (m_uiEntityFlag & 0x80000000) return;
+    storeModelColor_();
+    if (m_pMove) {
+        saveRideModelMatrix_();
+        m_pMove->save();
+        m_pMove->adjustRide();
+        updateTimer_();
+        updateBefore();
+        update();
+        updateAfter();
+        chase_();
+        evade_();
+        intercept_();
+        targetMove_();
+        targetMoveXZ_();
+        updateAnimation();
+        if (CTaskMan::getSysTask(0x16) && CardBattle::CCardBattle::isLevitate() && !(m_uiEntityFlag & 0x200000)) m_pMove->setForce(0.5f);
+        else m_pMove->setForce(1.0f);
+        m_pMove->update();
+        updatePositionAfter();
+        m_pMove->notifyRide();
+        updateCoord();
+        coordFix();
+        updateIK_();
+        lastUpdate();
+        updateEffect_();
+        updateSE_();
+        rideModelAdjustRiders_();
+        updateFade_();
+    } else {
+        updateTimer_();
+        updateBefore();
+        update();
+        updateAfter();
+        lastUpdate();
+    }
+    loadModelColor_();
+    if (m_tqDamageDispTimer > 0) m_tqDamageDispTimer -= getFrameRate();
+}
 void CEntity::disp() {
     translucence_();
     if (isDispOFF()) return;
@@ -115,31 +248,31 @@ void CEntity::disp() {
     if (DebugWork::g_dw.sys.m_iDagameNumber && m_pDamageString && m_tqDamageDispTimer > 0) m_pDamageString->disp();
 }
 void CEntity::setPos(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(D_0047D330, 369, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 369, "m_pMove", 0);
     *(FVECTOR*)((BYTE*)m_pMove + 0x20) = inV;
 }
 void CEntity::setOldPos(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(D_0047D330, 377, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 377, "m_pMove", 0);
     *(FVECTOR*)((BYTE*)m_pMove + 0x0) = inV;
 }
 void CEntity::setRot(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(D_0047D330, 385, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 385, "m_pMove", 0);
     *(FVECTOR*)((BYTE*)m_pMove + 0x40) = inV;
 }
 void CEntity::setQuat(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(D_0047D330, 393, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 393, "m_pMove", 0);
     *(FVECTOR*)((BYTE*)m_pMove + 0x50) = inV;
 }
 void CEntity::setScale(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(D_0047D330, 401, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 401, "m_pMove", 0);
     *(FVECTOR*)((BYTE*)m_pMove + 0x60) = inV;
 }
 void CEntity::setVel(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(D_0047D330, 409, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 409, "m_pMove", 0);
     *(FVECTOR*)((BYTE*)m_pMove + 0x70) = inV;
 }
 void CEntity::setHitBackVel(const FVECTOR& inV) {
-    if (!(m_pMove)) AssertApp(D_0047D330, 417, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 417, "m_pMove", 0);
     *(FVECTOR*)((BYTE*)m_pMove + 0x90) = inV;
 }
 void CEntity::setModelAlphaScale(FLOAT inAlpha, INT inIndex) {
@@ -152,7 +285,7 @@ void CEntity::setModelAlphaScale(FLOAT inAlpha, INT inIndex) {
                 pModel++;
             }
         } else {
-            if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(D_0047D330, 440, D_0047D360, 0);
+            if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(__FILE__, 440, "0 <= inIndex && inIndex < m_iModelCount", 0);
             m_pModels[inIndex].setAlphaScale(inAlpha);
         }
     }
@@ -167,7 +300,7 @@ void CEntity::setModelColorScale(const FVECTOR& inColor, INT inIndex) {
                 pModel++;
             }
         } else {
-            if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(D_0047D330, 465, D_0047D360, 0);
+            if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(__FILE__, 465, "0 <= inIndex && inIndex < m_iModelCount", 0);
             m_pModels[inIndex].setColorScale(inColor);
         }
     }
@@ -176,44 +309,44 @@ void CEntity::setAnimSpeed(FLOAT inSpeed) {
     if (m_pAnim) m_pAnim->setSpeed(inSpeed);
 }
 void CEntity::setMoveFlag(UINT inSet, UINT inMask) {
-    if (!(m_pMove)) AssertApp(D_0047D330, 487, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 487, "m_pMove", 0);
     UINT* pFlag = (UINT*)((BYTE*)m_pMove + 0x108);
     *pFlag = (*pFlag | inSet) & ~inMask;
 }
 const FVECTOR& CEntity::getPos() const {
-    if (!(m_pMove)) AssertApp(D_0047D330, 495, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 495, "m_pMove", 0);
     return *(FVECTOR*)((BYTE*)m_pMove + 0x20);
 }
 const FVECTOR& CEntity::getOldPos() const {
-    if (!(m_pMove)) AssertApp(D_0047D330, 503, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 503, "m_pMove", 0);
     return *(FVECTOR*)((BYTE*)m_pMove + 0x10);
 }
 const FVECTOR& CEntity::getRot() const {
-    if (!(m_pMove)) AssertApp(D_0047D330, 511, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 511, "m_pMove", 0);
     return *(FVECTOR*)((BYTE*)m_pMove + 0x40);
 }
 FVECTOR& CEntity::getRot() {
-    if (!(m_pMove)) AssertApp(D_0047D330, 516, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 516, "m_pMove", 0);
     return *(FVECTOR*)((BYTE*)m_pMove + 0x40);
 }
 const FVECTOR& CEntity::getQuat() const {
-    if (!(m_pMove)) AssertApp(D_0047D330, 524, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 524, "m_pMove", 0);
     return *(FVECTOR*)((BYTE*)m_pMove + 0x50);
 }
 FVECTOR& CEntity::getQuat() {
-    if (!(m_pMove)) AssertApp(D_0047D330, 529, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 529, "m_pMove", 0);
     return *(FVECTOR*)((BYTE*)m_pMove + 0x50);
 }
 const FVECTOR& CEntity::getScale() const {
-    if (!(m_pMove)) AssertApp(D_0047D330, 538, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 538, "m_pMove", 0);
     return *(FVECTOR*)((BYTE*)m_pMove + 0x60);
 }
 const FVECTOR& CEntity::getVel() const {
-    if (!(m_pMove)) AssertApp(D_0047D330, 546, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 546, "m_pMove", 0);
     return *(FVECTOR*)((BYTE*)m_pMove + 0x70);
 }
 INT CEntity::getBoneIndex(const CHAR* inBoneName, INT inModelIndex) const {
-    if (!(inBoneName)) AssertApp(D_0047D330, 554, D_0047D388, 0);
+    if (!(inBoneName)) AssertApp(__FILE__, 554, "inBoneName", 0);
     if (m_pModels) return m_pModels[inModelIndex].getBoneIndex(inBoneName);
     return -1;
 }
@@ -222,7 +355,7 @@ const CHAR* CEntity::getBoneName(INT inBone, INT inModel) const {
     return NULL;
 }
 FMATRIX* CEntity::getBoneMatrix(const CHAR* inBoneName) const {
-    if (!(inBoneName)) AssertApp(D_0047D330, 581, D_0047D388, 0);
+    if (!(inBoneName)) AssertApp(__FILE__, 581, "inBoneName", 0);
     INT nIdx = getBoneIndex(inBoneName, 0);
     if (nIdx >= 0) return (FMATRIX*)((BYTE*)&Crd(nIdx) + 0x90);
     return NULL;
@@ -294,7 +427,7 @@ void CEntity::enableFade2Path(BOOL inSw, INT inIndex) {
                 pModel++;
             }
         } else {
-            if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(D_0047D330, 802, D_0047D360, 0);
+            if (!(0 <= inIndex && inIndex < m_iModelCount)) AssertApp(__FILE__, 802, "0 <= inIndex && inIndex < m_iModelCount", 0);
             m_pModels[inIndex].fade2Path(inSw);
         }
     }
@@ -329,7 +462,7 @@ const CHAR* CEntity::getMotionName(INT inIndex) const {
     return m_pAnim->getMotFilename(inIndex);
 }
 INT CEntity::getMotionIndex(const CHAR* inName) const {
-    if (!(inName)) AssertApp(D_0047D330, 865, D_0047D398, 0);
+    if (!(inName)) AssertApp(__FILE__, 865, "inName", 0);
     if (!m_pAnim) return -1;
     INT n = m_pAnim->getMotCount();
     INT start = 0;
@@ -358,13 +491,13 @@ INT CEntity::getMotionIndex(const CHAR* inName) const {
         const CHAR* name = m_pAnim->getMotFilename(i);
         if (name && !strcmp(name, inName)) return i;
     }
-    TRACE(D_0047D3A0, inName);
+    TRACE("\x8ew\x92\xe8\x82\xb3\x82\xea\x82\xbd\x83\x82\x81[\x83V\x83\x87\x83\x93\x96\xbc\x82\xcd\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1 ... %s\n", inName);
     return -1;
 }
 FLOAT CEntity::getHeight() const {
     FLOAT heightRide = 1e+04f;
     FLOAT heightMap = 1e+04f;
-    if (!(m_pMove)) AssertApp(D_0047D330, 929, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 929, "m_pMove", 0);
     CCollMap* coll = m_pMove->getMapCollision();
     FVECTOR pos = getPos();
     coll->setStartPos(pos);
@@ -386,7 +519,7 @@ void CEntity::getHeadPos(FVECTOR& outPos) const {
         outPos.y += 1.0f;
     } else {
         OTHER_PARAM* other = coll->pOtherParam;
-        if (!(other)) AssertApp(D_0047D330, 979, D_0047D3D0, 0);
+        if (!(other)) AssertApp(__FILE__, 979, "other", 0);
         outPos.set(other->BadStatusPos.fOffsetX, other->BadStatusPos.fOffsetY, other->BadStatusPos.fOffsetZ);
         ApplyMatrix(outPos, *(FMATRIX*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0x90), outPos);
     }
@@ -419,7 +552,7 @@ FLOAT CEntity::calcDistanceSq(const CEntity* inEntity) const {
 }
 FLOAT CEntity::calcDistanceSq(const FVECTOR& inPos) const {
     FVECTOR v;
-    if (!(m_pMove)) AssertApp(D_0047D330, 1072, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 1072, "m_pMove", 0);
     SubVector(v, m_pMove->getPos(), inPos);
     return InnerProduct(v, v);
 }
@@ -429,7 +562,7 @@ FLOAT CEntity::calcDistanceXZSq(const CEntity* inEntity) const {
     return 1e+08f;
 }
 FLOAT CEntity::calcDistanceXZSq(const FVECTOR& inPos) const {
-    if (!(m_pMove)) AssertApp(D_0047D330, 1095, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 1095, "m_pMove", 0);
     FVECTOR v0 = m_pMove->getPos();
     FVECTOR v1 = inPos;
     v0.y = v1.y = 0.0f;
@@ -443,7 +576,7 @@ FLOAT CEntity::calcDirection(const CEntity* inEntity) const {
 }
 FLOAT CEntity::calcDirection(const FVECTOR& inPos) const {
     FVECTOR v;
-    if (!(m_pMove)) AssertApp(D_0047D330, 1123, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 1123, "m_pMove", 0);
     SubVector(v, inPos, m_pMove->getPos());
     return atan2f(v.x, v.z);
 }
@@ -454,7 +587,7 @@ void CEntity::calcDirection(FVECTOR& outRot, const CEntity* inEntity) const {
 }
 void CEntity::calcDirection(FVECTOR& outRot, const FVECTOR& inPos) const {
     FVECTOR v;
-    if (!(m_pMove)) AssertApp(D_0047D330, 1147, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 1147, "m_pMove", 0);
     SubVector(v, inPos, m_pMove->getPos());
     Normalize(v, v);
     outRot.x = -atan2f(v.y, _sqrtf(v.z * v.z + v.x * v.x));
@@ -466,18 +599,12 @@ BOOL CEntity::testFront(const CEntity* inEntity) const {
     if (inEntity) return testFront(inEntity->getPos());
     return FALSE;
 }
-/* Parked: 2 lines - the original stores n.w (swc1 1.0) before n.x (sw zero) at the start; set(), per-field stores in all 24 orders, chained, INT-cast and aggregate forms and a 15 min permuter run (22k candidates) all keep x first. */
-#if 0
 BOOL CEntity::testFront(const FVECTOR& inTarget) const {
-    FVECTOR n;
-    n.set(0.0f, 0.0f, 1.0f);
+    FVECTOR n = {{0.0f, 0.0f, 1.0f, 1.0f}};
     ApplyMatrix33(n, *(FMATRIX*)((BYTE*)&Crd(0) + 0x90), n);
     n.w = InnerProduct(n, *(FVECTOR*)((BYTE*)&Crd(0) + 0xc0));
     return InnerProduct(n, inTarget) - n.w > 0.0f;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", testFront__C7CEntityRC7FVECTOR);
-#endif
 BOOL CEntity::entityVisible(const CEntity& inTarget, FLOAT inDegX, FLOAT inDegY) {
     FVECTOR dir;
     calcDirection(dir, inTarget);
@@ -538,7 +665,68 @@ void CEntity::positionFix(const FVECTOR& inPos, const FVECTOR& inRot) {
     coordFix();
     if (m_pBodyColl) m_pBodyColl->update();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateCoord__7CEntity);
+void CEntity::updateCoord() {
+    if (!(m_pMove)) AssertApp(__FILE__, 1286, "m_pMove", 0);
+    FMATRIX& m = Crd(0).m_Local;
+    /* MATCH: the scale diagonal as one asm on fixed registers with only input operands (outputs or C stores make
+     * gcc reload m_pMove afterwards) */
+    asm volatile("lq $5, 0x0(%0)\n"
+                 "pextuw $2, $5, $0\n"
+                 "pextlw $4, $0, $2\n"
+                 "pextlw $2, $0, $5\n"
+                 "pextuw $3, $2, $0\n"
+                 "pcpyld $2, $0, $2\n"
+                 "sq $2, 0x0(%1)\n"
+                 "sq $3, 0x10(%1)\n"
+                 "sq $4, 0x20(%1)\n"
+                 "sqc2 $vf0, 0x30(%1)"
+                 : : "r"(&m_pMove->getScl()), "r"(&m) : "$2", "$3", "$4", "$5");
+    if (m_pMove->isQuaternion()) {
+        FMATRIX mat;
+        Quaternion::QuaternionToMatrix(mat, m_pMove->getQuaternion());
+        asm volatile("lqc2 $vf2, 0x0(%0)\n"
+                     "lqc2 $vf3, 0x10(%0)\n"
+                     "lqc2 $vf4, 0x20(%0)\n"
+                     "lqc2 $vf5, 0x30(%0)\n"
+                     "lqc2 $vf6, 0x0(%1)\n"
+                     "lqc2 $vf7, 0x10(%1)\n"
+                     "lqc2 $vf8, 0x20(%1)\n"
+                     "lqc2 $vf9, 0x30(%1)\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf6x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf6y\n"
+                     "vmaddaz.xyzw $ACC, $vf4, $vf6z\n"
+                     "vmaddw.xyzw $vf6, $vf5, $vf6w\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf7x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf7y\n"
+                     "vmaddaz.xyzw $ACC, $vf4, $vf7z\n"
+                     "vmaddw.xyzw $vf7, $vf5, $vf7w\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf8x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf8y\n"
+                     "vmaddaz.xyzw $ACC, $vf4, $vf8z\n"
+                     "vmaddw.xyzw $vf8, $vf5, $vf8w\n"
+                     "vmulax.xyzw $ACC, $vf2, $vf9x\n"
+                     "vmadday.xyzw $ACC, $vf3, $vf9y\n"
+                     "vmaddaz.xyzw $ACC, $vf4, $vf9z\n"
+                     "vmaddw.xyzw $vf9, $vf5, $vf9w\n"
+                     "sqc2 $vf6, 0x0(%0)\n"
+                     "sqc2 $vf7, 0x10(%0)\n"
+                     "sqc2 $vf8, 0x20(%0)\n"
+                     "sqc2 $vf9, 0x30(%0)"
+                     : : "r"(&m), "r"(&mat) : "memory");
+    } else if (m_uiEntityFlag & 0x2000) {
+        if (!(m_uiEntityFlag & 0x200)) sceVu0RotMatrixZ(m.m, m.m, m_pMove->getRot().z);
+        if (!(m_uiEntityFlag & 0x100)) sceVu0RotMatrixY(m.m, m.m, m_pMove->getRot().y);
+        if (!(m_uiEntityFlag & 0x80)) sceVu0RotMatrixX(m.m, m.m, m_pMove->getRot().x);
+    } else {
+        if (!(m_uiEntityFlag & 0x80)) sceVu0RotMatrixX(m.m, m.m, m_pMove->getRot().x);
+        if (!(m_uiEntityFlag & 0x100)) sceVu0RotMatrixY(m.m, m.m, m_pMove->getRot().y);
+        if (!(m_uiEntityFlag & 0x200)) sceVu0RotMatrixZ(m.m, m.m, m_pMove->getRot().z);
+    }
+    FVECTOR pos = getPos();
+    pos.w = 1.0f;
+    m.v[3] = pos;
+    Crd(0).m_Flag = 1;
+}
 void CEntity::coordFix() {
     INT n = getCoordNum();
     TIMEQ tick = CMainApp::getTickCount();
@@ -551,7 +739,7 @@ void CEntity::updateRootMove() {
     FVECTOR trans;
     FLOAT rot_y;
     m_pAnim->getRootMove(trans, rot_y);
-    if (!(m_pMove)) AssertApp(D_0047D330, 1351, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 1351, "m_pMove", 0);
     FVECTOR diff;
     SubVectorXYZ(diff, trans, getPos());
     MulVectorXYZ(diff, diff, m_vRootMoveScale);
@@ -562,7 +750,7 @@ void CEntity::updateRootMove() {
     m_pMove->setRot(rot);
 }
 void CEntity::changeMotionFileName(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
-    if (!(inName)) AssertApp(D_0047D330, 1370, D_0047D398, 0);
+    if (!(inName)) AssertApp(__FILE__, 1370, "inName", 0);
     INT nIndex = getMotionIndex(inName);
     if (nIndex != -1) changeMotion(nIndex, inTq, inRootMove, inGr, inEffectNo, inSENo);
 }
@@ -581,12 +769,12 @@ void CEntity::changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr,
     }
 }
 void CEntity::changeMotionFileNameWithSameCheck(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
-    if (!(inName)) AssertApp(D_0047D330, 1433, D_0047D398, 0);
+    if (!(inName)) AssertApp(__FILE__, 1433, "inName", 0);
     INT nIndex = getMotionIndex(inName);
     if (nIndex != -1) changeMotionWithSameCheck(nIndex, inTq, inRootMove, inGr, inEffectNo, inSENo);
 }
 void CEntity::changeMotionWithSameCheck(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
-    if (!(m_pAnim)) AssertApp(D_0047D330, 1445, D_0047D3D8, 0);
+    if (!(m_pAnim)) AssertApp(__FILE__, 1445, "m_pAnim", 0);
     if (m_pAnim->getAnimID() != inIndex) changeMotion(inIndex, inTq, inRootMove, inGr, inEffectNo, inSENo);
 }
 void CEntity::changeMotionEx(INT inRsrcID, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
@@ -610,7 +798,7 @@ void CEntity::changeMotionEx(INT inRsrcID, INT inIndex, TIMEQ inTq, BOOL inRootM
     }
 }
 void CEntity::changeMotionEx(const CHAR* inRsrcName, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
-    if (!(inRsrcName)) AssertApp(D_0047D330, 1515, D_0047D3E0, 0);
+    if (!(inRsrcName)) AssertApp(__FILE__, 1515, "inRsrcName", 0);
     if (m_pAnim) {
         if (inGr < 0) m_pAnim->startEx(inRsrcName, inIndex, inTq);
         else m_pAnim->changeEx(inRsrcName, inIndex, inTq, inGr);
@@ -651,7 +839,7 @@ void CEntity::setGroundIK(INT inFlag) {
     }
 }
 void CEntity::setFootEffectIK(const CHAR* pszEffName, INT inFlag) {
-    if (!(pszEffName)) AssertApp(D_0047D330, 1621, D_0047D3F0, 0);
+    if (!(pszEffName)) AssertApp(__FILE__, 1621, "pszEffName", 0);
     if (m_pAnim) {
         BYTE* pIK = *(BYTE**)((BYTE*)m_pAnim + 0x100);
         if (pIK) {
@@ -681,10 +869,10 @@ INT CEntity::isFirstStandsGroundIK() {
     return 0;
 }
 void CEntity::warp(const FVECTOR& inPos) {
-    if (!(m_pMove)) AssertApp(D_0047D330, 1679, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 1679, "m_pMove", 0);
     if (*(UINT*)((BYTE*)m_pMove + 0x110) & 4) {
         CCollMap* coll = *(CCollMap**)((BYTE*)m_pMove + 0x144);
-        if (!(coll)) AssertApp(D_0047D330, 1683, D_0047D400, 0);
+        if (!(coll)) AssertApp(__FILE__, 1683, "coll", 0);
         coll->removeRide();
         *(UINT*)((BYTE*)m_pMove + 0x110) = (INT)*(UINT*)((BYTE*)m_pMove + 0x110) & ~4;
     }
@@ -692,10 +880,65 @@ void CEntity::warp(const FVECTOR& inPos) {
     *(FVECTOR*)((BYTE*)m_pMove + 0x00) = inPos;
 }
 void CEntity::land(FLOAT inDownLength, FLOAT inUpLength, BOOL inFirstHit) {
-    if (!(m_pMove)) AssertApp(D_0047D330, 1696, D_0047D358, 0);
+    if (!(m_pMove)) AssertApp(__FILE__, 1696, "m_pMove", 0);
     m_pMove->land(inDownLength, inUpLength, inFirstHit);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", initalizeModel__7CEntityii);
+BOOL CEntity::initalizeModel(INT inGroup, BOOL bLight) {
+    if ((m_iModelCount = CRsrcDB::getModelCount(inGroup)) <= 0) return FALSE;
+    MODELDATA** pModelTbl = CRsrcDB::getRsrcMDL(inGroup);
+    if (!pModelTbl) return FALSE;
+    m_pModels = new (__FILE__ "(1714)") CModel[m_iModelCount];
+    if (!m_pModels) return FALSE;
+    m_pvModelColor = new (__FILE__ "(1718)") FVECTOR[m_iModelCount];
+    if (!m_pvModelColor) return FALSE;
+    if (bLight) {
+        for (INT i = 0; i < m_iModelCount; i++) {
+            if (pModelTbl[i]->enableLight()) {
+                m_pNLight = new (com_malloc_d(sizeof(CLightUnit), __FILE__ "(1728)", RET_ADDR())) CLightUnit;
+                if (!m_pNLight) return FALSE;
+                break;
+            }
+        }
+        for (INT i = 0; i < m_iModelCount; i++) {
+            if (pModelTbl[i]->enablePointLight()) {
+                m_pGLight = new (com_malloc_d(sizeof(CGimmickLightUnit), __FILE__ "(1739)", RET_ADDR())) CGimmickLightUnit;
+                if (!m_pGLight) return FALSE;
+                break;
+            }
+        }
+    }
+    TEXANM_DATA* pTXAData = CRsrcDB::getRsrcTXA(inGroup);
+    if (pTXAData) {
+        if ((m_nTexAnmNum = pTXAData->getDataNum()) > 0) {
+            m_pTexAnm = new (__FILE__ "(1752)") CTexAnm[m_nTexAnmNum];
+            if (m_pTexAnm) {
+                for (INT i = 0; i < m_nTexAnmNum; i++) m_pTexAnm[i].setup(*pTXAData, i);
+            }
+        }
+    }
+    for (INT i = 0; i < m_iModelCount; i++) {
+        m_pModels[i].link(this, pModelTbl[i]);
+        m_pModels[i].linkTexAnm(m_pTexAnm, m_nTexAnmNum);
+        if (bLight) {
+            if (pModelTbl[i]->enablePointLight()) m_pModels[i].setLightUnit(m_pGLight);
+            else if (pModelTbl[i]->enableLight()) m_pModels[i].setLightUnit(m_pNLight);
+        }
+        m_pvModelColor[i] = m_pModels[i].getColorScale();
+        if ((UINT)inGroup / 10000 == 11) m_pModels[i].m_nFlag |= 0x40;
+    }
+    enableFade2Path(TRUE, -1);
+    m_pAnim = new (com_malloc_d(sizeof(CAnim), __FILE__ "(1788)", RET_ADDR())) CAnim;
+    if (!m_pAnim) return FALSE;
+    m_pAnim->link(this, CRsrcDB::getRsrcANN(inGroup), pModelTbl[0]);
+    m_pAnim->init(0, 0);
+    m_pAnim->clearFlag1(0x100);
+    INT kind = (m_EntityType == 1 || m_EntityType == 0x11) ? 1 : 2;
+    if (m_pNLight) m_pNLight->setAnchor(&Crd(0), kind);
+    if (m_pGLight) m_pGLight->setAnchor(&Crd(0), kind);
+    m_iID = inGroup;
+    return TRUE;
+}
+
 void CEntity::updateAnimation() {
     if (m_pAnim) {
         if (m_pAnim->isRootMove()) updateCoord();
@@ -711,7 +954,7 @@ void CEntity::updateBadStatusEffect(HANDLE inHandle) {
     if (!effect) return;
     if (!m_pCollParam) return;
     OTHER_PARAM* other = m_pCollParam->pOtherParam;
-    if (!(other)) AssertApp(D_0047D330, 1860, D_0047D3D0, 0);
+    if (!(other)) AssertApp(__FILE__, 1860, "other", 0);
     FVECTOR ofs;
     ofs.set(other->BadStatusPos.fOffsetX, other->BadStatusPos.fOffsetY, other->BadStatusPos.fOffsetZ);
     ApplyMatrix(ofs, *(FMATRIX*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0x90), ofs);
@@ -727,7 +970,7 @@ void CEntity::setDamageNumber(const FVECTOR& inPos, INT inDamage) {
     _loadRotTransPersMatrix(CWorldEnv::getWorldScreenMatrix());
     RotTransPersClipW(ivec, inPos);
     if (ivec.w) return;
-    sprintf(m_szNumberString, D_0047D4F8, inDamage);
+    sprintf(m_szNumberString, "%d", inDamage);
     m_pDamageString->setPosition((ivec.x >> 4) - 0x800, (ivec.y >> 4) - 0x800, 0xFFFF28);
     m_pDamageString->setText(m_szNumberString);
     m_tqDamageDispTimer = 6000;
@@ -872,11 +1115,11 @@ BOOL CEntity::arriveTargetXZ(const FVECTOR& inTarget, FLOAT inRadius) {
     return FALSE;
 }
 void CEntity::rideModelSetAttachMatrix(const FMATRIX* inpMat) {
-    if (!(inpMat)) AssertApp(D_0047D330, 2207, D_0047D500, 0);
+    if (!(inpMat)) AssertApp(__FILE__, 2207, "inpMat", 0);
     if (m_pRideModel) m_pRideModel->setAttachMatrix(inpMat);
 }
 void CEntity::rideModelSetChipLocalMatrix(INT inIndex, const FMATRIX* in_pMatrix) {
-    if (!(in_pMatrix)) AssertApp(D_0047D330, 2218, D_0047D508, 0);
+    if (!(in_pMatrix)) AssertApp(__FILE__, 2218, "in_pMatrix", 0);
     if (m_pRideModel) m_pRideModel->setChipLocalMatrix(inIndex, in_pMatrix);
 }
 void CEntity::rideModelEnableAllCollision(BOOL inEnable) {
@@ -902,7 +1145,7 @@ HANDLE CEntity::playSEPanAndVol(INT inFile, INT inID, INT inBoneIndex, const FVE
         return playSEPan(inFile, inID, -1, inBoneIndex, inOffset, inType);
     }
     FVECTOR pos;
-    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(D_0047D330, 2283, D_0047D518, 0);
+    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2283, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);
     if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
     else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
     INT vol = -1;
@@ -914,7 +1157,7 @@ HANDLE CEntity::playSEPanAndVol(INT inFile, INT inID, INT inBoneIndex, const FVE
 }
 HANDLE CEntity::playSEPan(INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType) {
     FVECTOR pos;
-    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(D_0047D330, 2313, D_0047D518, 0);
+    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2313, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);
     if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
     else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
     INT pan = CSound::getPan(pos);
@@ -941,7 +1184,7 @@ void CEntity::setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inBoneIn
         return;
     }
     FVECTOR pos;
-    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(D_0047D330, 2380, D_0047D518, 0);
+    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2380, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);
     if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
     else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
     INT vol = -1;
@@ -954,7 +1197,7 @@ void CEntity::setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inBoneIn
 }
 void CEntity::setSEPan(HANDLE inHandle, INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType) {
     FVECTOR pos;
-    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(D_0047D330, 2417, D_0047D518, 0);
+    if (!(0 <= inBoneIndex && inBoneIndex < getCoordNum())) AssertApp(__FILE__, 2417, "0 <= inBoneIndex && inBoneIndex < getCoordNum()", 0);
     if (inOffset) ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(inBoneIndex) + 0x90), *inOffset);
     else pos = *(FVECTOR*)((BYTE*)&Crd(inBoneIndex) + 0xc0);
     INT pan = CSound::getPan(pos);
@@ -987,12 +1230,12 @@ BOOL CEntity::initCollision_(INT inGroupID, INT inRsrcID) {
     if (!header) return FALSE;
     if (header->addrMapping()) {
         if (header->iBodyCollParamNum > 0) {
-            m_pBodyColl = new (com_malloc_d(sizeof(CBodyCollision), D_0047D548, RET_ADDR())) CBodyCollision(this);
+            m_pBodyColl = new (com_malloc_d(sizeof(CBodyCollision), __FILE__ "(2525)", RET_ADDR())) CBodyCollision(this);
             if (!m_pBodyColl) return FALSE;
             m_pBodyColl->initalize(header->pBodyCollParam, header->iBodyCollParamNum);
         }
         if (header->iAtkCollParamNum > 0) {
-            m_pAttack = new (com_malloc_d(sizeof(CAttackMotion), D_0047D570, RET_ADDR())) CAttackMotion(this);
+            m_pAttack = new (com_malloc_d(sizeof(CAttackMotion), __FILE__ "(2535)", RET_ADDR())) CAttackMotion(this);
             if (!m_pAttack) return FALSE;
             m_pAttack->initialize(header->pAtkCollParam, header->iAtkCollParamNum);
         }
@@ -1002,28 +1245,28 @@ BOOL CEntity::initCollision_(INT inGroupID, INT inRsrcID) {
     return FALSE;
 }
 BOOL CEntity::initEffect_(INT inID) {
-    m_pEffect = new (com_malloc_d(sizeof(CEffectMotion), D_0047D598, RET_ADDR())) CEffectMotion(this);
+    m_pEffect = new (com_malloc_d(sizeof(CEffectMotion), __FILE__ "(2563)", RET_ADDR())) CEffectMotion(this);
     if (!m_pEffect) return FALSE;
     return m_pEffect->initalize(inID);
 }
 BOOL CEntity::initEffectEx_(INT inID) {
-    m_pEffectEx = new (com_malloc_d(sizeof(CEffectMotion), D_0047D5C0, RET_ADDR())) CEffectMotion(this);
+    m_pEffectEx = new (com_malloc_d(sizeof(CEffectMotion), __FILE__ "(2574)", RET_ADDR())) CEffectMotion(this);
     if (!m_pEffectEx) return FALSE;
     return m_pEffectEx->initalize(inID);
 }
 BOOL CEntity::initEffectEx_(const CHAR* inRsrcName) {
-    m_pEffectEx = new (com_malloc_d(sizeof(CEffectMotion), D_0047D5E8, RET_ADDR())) CEffectMotion(this);
+    m_pEffectEx = new (com_malloc_d(sizeof(CEffectMotion), __FILE__ "(2585)", RET_ADDR())) CEffectMotion(this);
     if (!m_pEffectEx) return FALSE;
     return m_pEffectEx->initalize(inRsrcName);
 }
 BOOL CEntity::initSE_(INT inID) {
-    CSEMotion* pSE = new (com_malloc_d(sizeof(CSEMotion), D_0047D610, RET_ADDR())) CSEMotion(this);
+    CSEMotion* pSE = new (com_malloc_d(sizeof(CSEMotion), __FILE__ "(2596)", RET_ADDR())) CSEMotion(this);
     m_pSE = pSE;
     if (!pSE) return FALSE;
     return pSE->initalize(inID);
 }
 BOOL CEntity::initSEEx_(INT inID) {
-    CSEMotion* pSE = new (com_malloc_d(sizeof(CSEMotion), D_0047D638, RET_ADDR())) CSEMotion(this);
+    CSEMotion* pSE = new (com_malloc_d(sizeof(CSEMotion), __FILE__ "(2607)", RET_ADDR())) CSEMotion(this);
     m_pSEEx = pSE;
     if (!pSE) return FALSE;
     return pSE->initalize(inID);
@@ -1031,11 +1274,11 @@ BOOL CEntity::initSEEx_(INT inID) {
 BOOL CEntity::initRideModel_(INT inGroup) {
     void* ocd = CRsrcDB::getRsrcOCD(inGroup);
     if (!ocd) return FALSE;
-    m_pRideModel = new (com_malloc_d(sizeof(CRideModel), D_0047D660, RET_ADDR())) CRideModel;
+    m_pRideModel = new (com_malloc_d(sizeof(CRideModel), __FILE__ "(2622)", RET_ADDR())) CRideModel;
     if (!m_pRideModel) return FALSE;
     m_pRideModel->init(ocd, this);
     m_pRideModel->on();
-    if (DebugWork::g_dw.collision.uiFlag & 1) new (com_malloc_d(sizeof(CCollRideModelDisp), D_0047D688, RET_ADDR())) CCollRideModelDisp(this, m_pRideModel, TRUE);
+    if (DebugWork::g_dw.collision.uiFlag & 1) new (com_malloc_d(sizeof(CCollRideModelDisp), __FILE__ "(2632)", RET_ADDR())) CCollRideModelDisp(this, m_pRideModel, TRUE);
     return TRUE;
 }
 void CEntity::updateTimer_() {
@@ -1083,7 +1326,7 @@ void CEntity::saveRideModelMatrix_() {
 void CEntity::rideModelAdjustRiders_() {
     if (m_pRideModel) {
         FVECTOR v;
-        if (!(m_pMove)) AssertApp(D_0047D330, 2754, D_0047D358, 0);
+        if (!(m_pMove)) AssertApp(__FILE__, 2754, "m_pMove", 0);
         SubVector(v, *(FVECTOR*)((BYTE*)m_pMove + 0x40), *(FVECTOR*)((BYTE*)m_pMove + 0x30));
         m_pRideModel->hoseiRiders(v);
     }
@@ -1143,7 +1386,77 @@ void CEntity::storeModelColor_() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", translucence___7CEntity);
+void CEntity::translucence_() {
+    if (!m_pvModelColor) return;
+    INT n = m_iModelCount;
+    CModel* model;
+    FLOAT alpha = 1.0f;
+    if (!(m_uiEntityFlag & 0x1000)) {
+        BOOL trans = FALSE;
+        model = m_pModels;
+        if (m_pRideModel) {
+            trans = (*(INT*)((BYTE*)m_pRideModel + 0x18) != 0);
+        } else {
+            for (INT i = 0; i < n; i++, model++) {
+                if (m_uiDispOffFlag & (1 << i)) continue;
+                if (model->getBBoxFlag() & 1) {
+                    trans = TRUE;
+                    break;
+                }
+            }
+        }
+        FLOAT limitAlpha = 1.0f;
+        if (trans) {
+            CCamera* camera = CWorldEnv::getActiveCamera();
+            if (camera && camera->getTypeID() == 0x8000) camera = NULL;
+            if (camera) {
+                FVECTOR maxVec, minVec;
+                FVECTOR v0, v1;
+                limitAlpha = 0.4f;
+                v0.set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f);
+                v1.set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f);
+                model = m_pModels;
+                for (INT i = 0; i < n; i++, model++) {
+                    if (model->isShadow()) continue;
+                    model->getWorldBBox(maxVec, minVec);
+                    Math3D::VectorMaxMinXYZ(v0, v1, maxVec, minVec);
+                }
+                FVECTOR camVec = *(FVECTOR*)((BYTE*)&camera->Crd(0) + 0xc0);
+                if (v1.x <= camVec.x && camVec.x <= v0.x && v1.y <= camVec.y && camVec.y <= v0.y && v1.z <= camVec.z && camVec.z <= v0.z) limitAlpha = 0.0f;
+            }
+        }
+        FLOAT fAdd = getFrameRateF() * 0.033333335f;
+        if (limitAlpha < m_fNearTranslucence) {
+            m_fNearTranslucence -= fAdd;
+            if (m_fNearTranslucence < limitAlpha) m_fNearTranslucence = limitAlpha;
+        } else {
+            m_fNearTranslucence += fAdd;
+            if (limitAlpha < m_fNearTranslucence) m_fNearTranslucence = limitAlpha;
+        }
+        alpha = m_fNearTranslucence;
+    }
+    FVECTOR* pSceneColor = CSceneEnv::getTypeColor((ObjType::eObjType)m_EntityType);
+    if (alpha < 1.0f || pSceneColor) {
+        FVECTOR* modelColor = m_pvModelColor;
+        model = m_pModels;
+        for (INT i = 0; i < n; i++, model++, modelColor++) {
+            FVECTOR result;
+            if (pSceneColor) MulVector(result, *modelColor, *pSceneColor);
+            else result = *modelColor;
+            if (!(m_uiCheckEyeOffFlag & (1 << i)) || !m_pRideModel) result.w *= alpha;
+            model->setColorScale(result);
+        }
+        if ((UINT)m_iID / 10000 == 11) {
+            if (m_pEffect) m_pEffect->setAlpha(alpha);
+            if (m_pEffectEx) m_pEffectEx->setAlpha(alpha);
+        }
+    }
+    if ((m_uiEntityFlag & 0x400000) && m_pModels) {
+        alpha = m_pModels->getAlphaScale();
+        if (m_pEffect) m_pEffect->setAlpha(alpha);
+        if (m_pEffectEx) m_pEffectEx->setAlpha(alpha);
+    }
+}
 HANDLE CEntity::setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale) {
     return CEffectMan::setEffect(inName, inFlag, (ObjType::eObjType)getEntityType(), inPos, inRot, inScale);
 }
@@ -1200,8 +1513,8 @@ HANDLE CEntity::setAppearEffect() {
     COLL_PARAM_HEADER* coll = m_pCollParam;
     if (!coll) return 0;
     OTHER_PARAM* other = coll->pOtherParam;
-    if (!(other)) AssertApp(D_0047D330, 3183, D_0047D3D0, 0);
-    if (strcmp(other->szAppearEffectDpx, D_0047D080)) {
+    if (!(other)) AssertApp(__FILE__, 3183, "other", 0);
+    if (strcmp(other->szAppearEffectDpx, "")) {
         FVECTOR pos;
         pos.set(other->AppearPos.fOffsetX, other->AppearPos.fOffsetY, other->AppearPos.fOffsetZ);
         ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(other->AppearPos.iBoneIndex) + 0x90), pos);
@@ -1213,8 +1526,8 @@ HANDLE CEntity::setDisappearEffect() {
     COLL_PARAM_HEADER* coll = m_pCollParam;
     if (!coll) return 0;
     OTHER_PARAM* other = coll->pOtherParam;
-    if (!(other)) AssertApp(D_0047D330, 3210, D_0047D3D0, 0);
-    if (strcmp(other->szAppearEffectDpx, D_0047D080)) {
+    if (!(other)) AssertApp(__FILE__, 3210, "other", 0);
+    if (strcmp(other->szAppearEffectDpx, "")) {
         FVECTOR pos;
         pos.set(other->AppearPos.fOffsetX, other->AppearPos.fOffsetY, other->AppearPos.fOffsetZ);
         ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(other->AppearPos.iBoneIndex) + 0x90), pos);
@@ -1225,8 +1538,8 @@ HANDLE CEntity::setDisappearEffect() {
 void CEntity::setDeathEffect(const FVECTOR* inPos) {
     if (m_pCollParam) {
         OTHER_PARAM* other = m_pCollParam->pOtherParam;
-        if (!(other)) AssertApp(D_0047D330, 3235, D_0047D3D0, 0);
-        if (strcmp(other->szDeathEffectDpx, D_0047D080)) {
+        if (!(other)) AssertApp(__FILE__, 3235, "other", 0);
+        if (strcmp(other->szDeathEffectDpx, "")) {
             if (other->iDeathEffectNo1 >= 0) setEffect(other->szDeathEffectDpx, other->iDeathEffectNo1, inPos, &getRot(), 0.0f);
             if (other->iDeathEffectNo2 >= 0) setEffect(other->szDeathEffectDpx, other->iDeathEffectNo2, inPos, &getRot(), 0.0f);
         }
@@ -1236,8 +1549,8 @@ HANDLE CEntity::setDeathEffect() {
     COLL_PARAM_HEADER* coll = m_pCollParam;
     if (!coll) return 0;
     OTHER_PARAM* other = coll->pOtherParam;
-    if (!(other)) AssertApp(D_0047D330, 3257, D_0047D3D0, 0);
-    if (!strcmp(other->szDeathEffectDpx, D_0047D080)) return 0;
+    if (!(other)) AssertApp(__FILE__, 3257, "other", 0);
+    if (!strcmp(other->szDeathEffectDpx, "")) return 0;
     if (other->iDeathEffectNo1 >= 0) {
         FVECTOR pos;
         pos.set(other->DeathPos.fOffsetX, other->DeathPos.fOffsetY, other->DeathPos.fOffsetZ);
@@ -1249,7 +1562,7 @@ HANDLE CEntity::setBadStatusEffect(const CHAR* inEffectName, INT inBadStatus, FL
     COLL_PARAM_HEADER* coll = m_pCollParam;
     if (!coll) return 0;
     OTHER_PARAM* other = coll->pOtherParam;
-    if (!(other)) AssertApp(D_0047D330, 3290, D_0047D3D0, 0);
+    if (!(other)) AssertApp(__FILE__, 3290, "other", 0);
     FVECTOR pos;
     pos.set(other->BadStatusPos.fOffsetX, other->BadStatusPos.fOffsetY, other->BadStatusPos.fOffsetZ);
     ApplyMatrix(pos, *(FMATRIX*)((BYTE*)&Crd(other->BadStatusPos.iBoneIndex) + 0x90), pos);
@@ -1261,86 +1574,9 @@ HANDLE CEntity::setBadStatusEffect(const CHAR* inEffectName, INT inBadStatus, FL
 HANDLE CEntity::setRecoverEffect(const CHAR* inName, INT inNo) {
     if (!m_pCollParam) return 0;
     BYTE* pOther = *(BYTE**)((BYTE*)m_pCollParam + 0x18);
-    if (!(pOther)) AssertApp(D_0047D330, 3328, D_0047D3D0, 0);
+    if (!(pOther)) AssertApp(__FILE__, 3328, "other", 0);
     FVECTOR v;
     v.set(*(FLOAT*)(pOther + 0x34), *(FLOAT*)(pOther + 0x38), *(FLOAT*)(pOther + 0x3c));
     return attachEffect(inName, 0, &Crd(*(INT*)(pOther + 0x30)), &v, NULL, 0.0f);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", func_001F3E00);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", func_001F3E30);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", func_001F3E50);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", func_001F3E90);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", func_001F3E98);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", func_001F3ED0);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", AfterInit__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", onMsg__7CEntityiPv);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setEntityType__7CEntityQ27ObjType8eObjType);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setStartPos__7CEntityRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setEntityFlag__7CEntityUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setTimer__7CEntityi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setTimerFrame__7CEntityi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setTimerSecond__7CEntityf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setRate__7CEntityf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setSpeed__7CEntityf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setArriveRadius__7CEntityf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setTargetPos__7CEntityRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setDispOffFlag__7CEntityUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setCheckEyeOffFlag__7CEntityUiUi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setNearTranslucence__7CEntityf);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setRootMoveScale__7CEntityRC7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getStartPos__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getID__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getEntityType__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getFlag__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getFlashingCounter__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getTimer__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getRate__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getSpeed__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getArriveRadius__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getTargetPos__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getCollParam__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getFadeAlpha__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getNearTranslucence__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getCameraTargetPos__7CEntityR7FVECTOR);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getRootMoveScale__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getModel__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getModel__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getModelCount__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getAnim__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", getAnim__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isDispOFF__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isDisableClearSpeed__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isTargetChase__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isTargetEvade__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isTargetIntercept__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isTargetMove__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isTargetMoveXZ__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isRotXOff__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isRotYOff__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isRotZOff__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isEffectOff__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isFlashing__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isTransOff__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isRotZYX__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isSeOff__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isRootMoveOff__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isPermissionLockOn__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isHeartless__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isSetDataCreate__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isFade__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isStop__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isNoLevitate__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", isSetAlphaAttachEffect__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", timeOver__C7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setupFade__7CEntityffii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", loadModelColor__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", random__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", rnd__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", setID__7CEntityi);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateBefore__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updateAfter__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", updatePositionAfter__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", lastUpdate__7CEntity);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", func_001F42E0);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", func_001F4308);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Entity", func_001F4318);
+// SOURCE DATA: .rodata
