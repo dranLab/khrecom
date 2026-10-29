@@ -389,7 +389,8 @@ inline void* operator new(size_t, void* p) throw() { return p; }
    compare's reload); ours schedules them after the SCREEN_HEIGHT load and reloads inState. Store orders,
    changeState(inState), m_iState = 2, switch and hill.py did not change it. */
 #if 0
-CBattleCard::CBattleCard(CTask* pParent, INT inIndex, INT inNumber, INT inUser, INT inState) : CTask(pParent, 0x4000) {
+CardBattle::CBattleCard::CBattleCard(CTask* pParent, INT inIndex, INT inNumber, INT inUser, INT inState)
+    : CTask(pParent, 0x4000) {
     m_uiFlag = 0;
     m_uiUser = inUser;
     m_iStock = -1;
