@@ -121,8 +121,8 @@ struct TexInfo;
 
 extern "C" u_long128 vu1mpg_start[];
 extern "C" u_long128 vu1mpg2_start[];
-u_long128* g_mpg0 = vu1mpg_start;
-u_long128* g_mpg2 = vu1mpg2_start;
+static u_long128* g_mpg0 = vu1mpg_start;
+static u_long128* g_mpg2 = vu1mpg2_start;
 FMATRIX* CModel::m_pWSMatCache = NULL;
 u_long128* CModel::m_pMpg = NULL;
 INT CModel::m_iSendFlg = 0;
