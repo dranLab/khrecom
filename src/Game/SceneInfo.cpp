@@ -146,6 +146,7 @@ extern "C" char D_00484D90[];
 extern "C" char D_00484EC8[];
 extern "C" char D_00484F28[];
 extern "C" char D_00484F68[];
+extern "C" char D_00484E28[];
 extern "C" char D_00484CE8[];
 extern "C" char D_00484D50[];
 extern "C" char D_00484E08[];
@@ -475,7 +476,37 @@ WORLD_ID CSceneInfo::getWorldID(USHORT nFloorIndex) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setupCompleteFloorWorld__10CSceneInfo8WORLD_ID);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setEventDoorUnavailable__10CSceneInfoii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", setTmpCurrentRoomID__10CSceneInfos);
+DOOR_ID CSceneInfo::setTmpCurrentRoomID(SHORT nRoomType) {
+    DOOR_TYPE nType;
+    switch (nRoomType) {
+    case 2:
+        nType = DOOR_TYPE_TO_EVENT1;
+        break;
+    case 3:
+        nType = DOOR_TYPE_TO_EVENT2;
+        break;
+    case 4:
+        nType = DOOR_TYPE_TO_EVENT3;
+        break;
+    default:
+        return (DOOR_ID)4;
+    }
+    DOOR_ID doorID = (DOOR_ID)4;
+    FloorInfo& floor = s_CurrentFloor;
+    for (USHORT i = 0; i < floor._nRoomCount; i++) {
+        RoomInfo& room = floor._rooms[i];
+        for (INT j = 0; j < 4; j++) {
+            if (nType == room._doors[j]._type) {
+                if (room._pSrcInfo) {
+                    CGameWork::m_pMCWork->_nRoomID = room._pSrcInfo->_nID;
+                    doorID = _getDstDoorID((DOOR_ID)j);
+                }
+                break;
+            }
+        }
+    }
+    return doorID;
+}
 void CSceneInfo::ignoreFloorInfo() {
     CGameWork::m_pMCWork->_nFloorIdx = 0xff;
     s_nCurrentFloorNumber = 0;
@@ -725,7 +756,45 @@ void CSceneInfo::updateMapRsrcCache(INT nMapRsrcGrp, INT nSlot) {
         break;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", removeMapRsrcCache__10CSceneInfoi);
+void CSceneInfo::removeMapRsrcCache(INT nSlot) {
+    switch (nSlot) {
+    case 0: {
+        INT n = s_nMapCacheField;
+        if (n) {
+            TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+            CRsrcDB::removeRsrc(n);
+            s_nMapCacheField = 0;
+        }
+        n = s_nMapCacheBattle;
+        if (n) {
+            TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+            CRsrcDB::removeRsrc(n);
+            s_nMapCacheBattle = 0;
+        }
+        break;
+    }
+    case 1:
+        {
+            INT n = s_nMapCacheField;
+            if (n && s_nMapCacheBattle != n) {
+                TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+                CRsrcDB::removeRsrc(n);
+            }
+        }
+        s_nMapCacheField = 0;
+        break;
+    case 2:
+        {
+            INT n = s_nMapCacheBattle;
+            if (n && n != s_nMapCacheField) {
+                TRACE_USER_COL(TGOTO, _TTY_BLUE, D_00484E08, n);
+                CRsrcDB::removeRsrc(n);
+            }
+        }
+        s_nMapCacheBattle = 0;
+        break;
+    }
+}
 FloorLayoutDataHeader* _linkFloorData(const CHAR* pszFile) {
     CRsrcData* pData = CRsrcDB::getRsrc(1, pszFile, NAME_CASE_SENSITIVE);
     FloorLayoutDataHeader* p = pData ? (FloorLayoutDataHeader*)CRsrcDB::getRsrcData(*pData) : NULL;
@@ -817,7 +886,27 @@ BOOL CSceneInfo::setDoorStat(DOOR_STAT stat, DOOR_ID id, INT nRoomID) {
     if (pDoor) return pDoor->setDoorState(stat);
     return FALSE;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _openGoalDoor__FRC8RoomInfo);
+DOOR_ID _openGoalDoor(const RoomInfo& roomGoal) {
+    DoorInfo* pGoalDoor = NULL;
+    INT nDoor = 0;
+    while (nDoor < 4) {
+        const DoorInfo& d = roomGoal._doors[nDoor];
+        if (d.getDoorState() != DOOR_STAT_NOTHING) {
+            RoomInfo* pDstRoom = CSceneInfo::getRoomInfo(d._nDstRoom);
+            if (pDstRoom) {
+                DoorInfo& dd = pDstRoom->_doors[_getDstDoorID((DOOR_ID)nDoor)];
+                if (dd._type == DOOR_TYPE_TO_GOAL || dd._type == DOOR_TYPE_TO_LAST) {
+                    pGoalDoor = &dd;
+                    break;
+                }
+            }
+        }
+        nDoor++;
+    }
+    if (!(pGoalDoor)) AssertApp(D_00484980, 3094, D_00484E28, 0);
+    pGoalDoor->setDoorState(DOOR_STAT_OPENED);
+    return (DOOR_ID)nDoor;
+}
 /* Parked: 2 lines - the nDoor copy (move s0,v0) is scheduled before the li a1,2 of setEventRoomSceneNum;
    the original issues li a1 first. nDoor declaration forms/types did not change it. */
 #if 0
