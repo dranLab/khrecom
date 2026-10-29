@@ -221,6 +221,21 @@ struct RoomInfo {
     void setCardInfo(BYTE nCardID, BYTE nCardNumber);
 };
 
+enum EVENTROOM_TBLIDX {
+    _EVENTROOM_START = 0,
+    _EVENTROOM_1 = 1,
+    _EVENTROOM_2 = 2,
+    _EVENTROOM_3 = 3,
+    _EVENTROOM_GOAL = 4,
+    __EVENTROOM_MAX = 5,
+    _EVENTROOM_START_ENTRANCE = 5,
+    _EVENTROOM_GOAL_ENTRANCE = 6,
+    _EVENTROOM_LOWER_START_ENTRANCE = 7,
+    _EVENTROOM_LOWER_GOAL_ENTRANCE = 8,
+    _EVENTROOM_UPPER_START_ENTRANCE = 9,
+    _EVENTROOM_UPPER_GOAL_ENTRANCE = 10
+};
+
 struct FloorInfo { // 0xd8c
     RoomInfo _rooms[30];            /* 0x000 */
     RoomInfo _roomStartEnt;         /* 0xca8 */
@@ -228,7 +243,7 @@ struct FloorInfo { // 0xd8c
     USHORT _nRoomCount;             /* 0xd80 */
     SHORT _nEventRoomIdxTbl[5];     /* 0xd82 */
     void clearEventRoomTbl();
-    SHORT getEventRoomIdx();
+    SHORT getEventRoomIdx(EVENTROOM_TBLIDX i) { return (UINT)i < __EVENTROOM_MAX ? _nEventRoomIdxTbl[i] : -1; }
 };
 
 // PARTIAL: added for Game/Gimmick/GimmickManager
