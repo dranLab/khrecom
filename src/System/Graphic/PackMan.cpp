@@ -300,6 +300,9 @@ extern u_long128 My_dma_start[];
 extern u_long128 My_VU0_start[];
 extern INT SCREEN_HEIGHT;
 extern INT DISP_HEIGHT;
+extern "C" int sceGsSetDefDrawEnv(sceGsDrawEnv12* draw, short psm, short w, short h, short ztest, short zpsm);
+extern "C" int sceGsSetDefDrawEnv2(sceGsDrawEnv12* draw, short psm, short w, short h, short ztest, short zpsm);
+extern "C" void sceGsSetDefClear(sceGsClear* cp, short ztest, short x, short y, short w, short h, u_char r, u_char g, u_char b, u_char a, u_int z);
 extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short h, short dx, short dy);
 class CMainApp { /* PARTIAL: stand-in for System/MainApp CMainApp: strings: MainApp.h (.rodata still asm) */
 public:
@@ -561,13 +564,29 @@ void CPackMan::initialize() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", initialize__8CPackMan);
 #endif
 void CPackMan::finalize() { CDelayedFree::disposeFreeList(); }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/PackMan", _initGsDefDrawEnv__FR12sceGsDBuffDc12_GS_BUF_SIDEsssssUiUii);
 enum _GS_BUF_SIDE {
     _GS_BUF_SIDE0 = 0,
     _GS_BUF_SIDE1 = 1
 };
-void _initGsDefDrawEnv(sceGsDBuffDc& dbuf, _GS_BUF_SIDE side, short psm, short w, short h, short ztest, short zpsm, UINT fbp, UINT zbp,
-                       INT clear); /* static in the original (still INCLUDE_ASM) */
+static void _initGsDefDrawEnv(sceGsDBuffDc& db, _GS_BUF_SIDE side, short psm, short w, short h, short ztest, short zpsm, UINT faddr,
+                              UINT zaddr, BOOL clear) {
+    sceGsDrawEnv12& env1 = !side ? db.draw01 : db.draw11;
+    sceGsDrawEnv12& env2 = !side ? db.draw02 : db.draw12;
+    sceGsClear& clr = !side ? db.clear0 : db.clear1;
+    sceGsSetDefDrawEnv(&env1, psm, w, h, ztest, zpsm);
+    sceGsSetDefDrawEnv2(&env2, psm, w, h, ztest, zpsm);
+    faddr &= 0x1ff;
+    zaddr &= 0x1ff;
+    env2.reg[0][0] = (env2.reg[0][0] & ~0x1ff) | faddr;
+    env1.reg[0][0] = (env1.reg[0][0] & ~0x1ff) | faddr;
+    env2.reg[1][0] = (env2.reg[1][0] & ~0x1ff) | zaddr;
+    env1.reg[1][0] = (env1.reg[1][0] & ~0x1ff) | zaddr;
+    if (clear) sceGsSetDefClear(&clr, ztest, 2048 - (w >> 1), 2048 - (h >> 1), w, h, 0, 0, 0, 0, 0);
+    clr.testb = (clr.testb | 1);
+    clr.testb = (clr.testb & ~0xe) | 0xc;
+    clr.testb = clr.testb & ~0xff0;
+    env2.reg[7][0] = clr.testb;
+}
 static void _initDBuf() {
     sceGsSetDefDispEnv(&s_DBuf.disp[0], 1, 512, DISP_HEIGHT, 0, 0);
     s_DBuf.disp[0].dispfb = (s_DBuf.disp[0].dispfb & ~0x1ff) | ((VRAM::_FRAME1_START / 32) & 0x1ff);
