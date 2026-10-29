@@ -65,7 +65,7 @@ class CEntity : public CTask, public CFSM {
 protected:
     // PARTIAL: m_pMove split out for Game/Gimmick/GimmickBreakable
     // PARTIAL: m_pModels, m_iModelCount split out for Game/Gimmick/GimmickPlantChild
-    UBYTE _m_0x70[0x10] __attribute__((aligned(16))); /* 0x070 m_vStartPos */
+    FVECTOR m_vStartPos;          /* 0x070 */
     CModel* m_pModels;            /* 0x080 */
     FVECTOR* m_pvModelColor;      /* 0x084 */
     INT m_iModelCount;            /* 0x088 */
@@ -90,7 +90,7 @@ protected:
     FVECTOR m_vTargetPos;     /* 0x0c0 */ // PARTIAL: split out for Game/Entity
     FVECTOR m_vRootMoveScale; /* 0x0d0 */
 private:
-    eObjType m_EntityType; /* 0x0e0 */
+    ObjType::eObjType m_EntityType; /* 0x0e0 */
     UINT m_uiEntityFlag;   /* 0x0e4 */
     // PARTIAL: m_tqTimer split out for Game/Player/FriendJack
     // PARTIAL: m_uiDispOffFlag/m_uiCheckEyeOffFlag split out for Game/Gimmick/GimmickStatue
@@ -150,31 +150,27 @@ public:
     void rideModelChangeListR2();
     void rideModelChangeListRC(); // PARTIAL: added for Game/Gimmick/GimmickRideDest
 
-    void setEntityType(eObjType inType) { m_EntityType = inType; }
-    eObjType getEntityType() { return m_EntityType; }
-    UINT getFlag() { return m_uiEntityFlag; }
-    UINT isHeartless() const { return m_uiEntityFlag & 0x20000; } // PARTIAL: added for Game/Bullet/CreateBullet
+    void setEntityType(ObjType::eObjType inType);
+    ObjType::eObjType getEntityType() const;
+    UINT getFlag() const;
+    UINT isHeartless() const;
     // PARTIAL: added for Game/Gimmick/GimmickPlantChild (getModel needs CModel's definition: System/Graphic/Model.h)
-    INT getID() const { return m_iID; } // PARTIAL: added for Game/Gimmick/GimmickToldPipe
+    INT getID() const;
     INT isFirstStandsGroundIK(); // PARTIAL: added for Game/Movement
     void updateBadStatusEffect(HANDLE inHandle); // PARTIAL: added for Game/Enemy/MapEnemy
     BOOL testFront(const FVECTOR& inPos) const; // PARTIAL: added for Game/Enemy/MapEnemy
     BOOL entityVisibleAxisY(const CEntity* inEntity, FLOAT inAngle); // PARTIAL: added for Game/Enemy/MapEnemy
     HANDLE setBadStatusEffect(const CHAR* inName, INT inKind, FLOAT inScale); // PARTIAL: added for Game/Enemy/MapEnemy (parameter names guessed)
-    INT getModelCount() { return m_iModelCount; }
-    inline CModel* getModel();
+    INT getModelCount() const;
+    CModel* getModel();
+    CModel* getModel() const;
     inline CModel* getModel(INT inIndex);
     // Entity.cpp also emits this out of line (setEntityFlag__7CEntityUiUi): or inSet, then clear inMask.
     // PARTIAL: changed for Game/Gimmick/GimmickSavePoint - the store goes through a reference (not a struct
     // member access), so the scheduler does not move a following global load above it.
-#ifdef ENTITY_H_SETFLAG_DIRECT // PARTIAL: the plain form, for Game/Atel/Avatar
-    void setEntityFlag(UINT inSet, UINT inMask) { m_uiEntityFlag = (m_uiEntityFlag | inSet) & ~inMask; }
-#else
-    void setEntityFlag(UINT inSet, UINT inMask) { UINT& f = m_uiEntityFlag; f = (f | inSet) & ~inMask; }
-#endif
-    void clearEntityFlag(INT inFlag) { m_uiEntityFlag &= ~inFlag; } // PARTIAL: added for Game/Atel/Atel (name unknown)
+    void setEntityFlag(UINT inSet, UINT inMask);
     // PARTIAL: added for Game/Gimmick/GimmickStatue (also out of line: setCheckEyeOffFlag__7CEntityUiUi)
-    void setCheckEyeOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiCheckEyeOffFlag; f = (f | inSet) & ~inMask; }
+    void setCheckEyeOffFlag(UINT inSet, UINT inMask);
     // PARTIAL: added for Game/Gimmick/GimmickSavePoint
     const FVECTOR& getPos() const;
     void setPos(const FVECTOR& inPos); // PARTIAL: added for Game/Gimmick/GimmickHitFlying
@@ -194,8 +190,8 @@ public:
     void rideModelEnableChipCollision(INT inIdx, BOOL inSw);
     void rideModelSetChipLocalMatrix(INT inIndex, const FMATRIX* in_pMatrix);
     // PARTIAL: added for Game/Player/FriendJack
-    void setTimer(TIMEQ inTq) { m_tqTimer = inTq; }
-    TIMEQ getTimer() { return m_tqTimer; }
+    void setTimer(TIMEQ inTq);
+    TIMEQ getTimer() const;
     HANDLE setDeathEffect(); void setDeathEffect(const FVECTOR* inPos); // PARTIAL: added for Game/Enemy/BattleEnemy (void: the caller keeps v0 free)
     void rideModelSetAttachMatrix(const FMATRIX* inpMat); // PARTIAL: added for Game/Gimmick/GimmickRideOn
     // PARTIAL: added for Game/Enemy/MapEnemyShadow
@@ -242,11 +238,7 @@ public:
     void setFootEffectIK(const CHAR* inName, INT inFlag);
     void setGroundIK(INT inFlag);
     // PARTIAL: added for Game/Player/FriendKing (also out of line: setDispOffFlag__7CEntityUiUi)
-#ifdef ENTITY_H_SETFLAG_DIRECT // PARTIAL: the plain form, for Game/Atel/Avatar
-    void setDispOffFlag(UINT inSet, UINT inMask) { m_uiDispOffFlag = (m_uiDispOffFlag | inSet) & ~inMask; }
-#else
-    void setDispOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiDispOffFlag; f = (f | inSet) & ~inMask; }
-#endif
+    void setDispOffFlag(UINT inSet, UINT inMask);
     TIMEQ getMotionCurrentTime() const;
     void userBodyCollOn(INT inIndex);
     void userBodyCollOnBody(INT inIndex);
@@ -255,10 +247,10 @@ public:
     HANDLE setAppearEffect();
     HANDLE setDisappearEffect(); // PARTIAL: added for Game/Player/Friend
     // PARTIAL: added for Game/Gimmick/GimmickDominoPillar
-    void setNearTranslucence(FLOAT inTrans) { m_fNearTranslucence = inTrans; }
-    FLOAT getNearTranslucence() const { return m_fNearTranslucence; }
+    void setNearTranslucence(FLOAT inTrans);
+    FLOAT getNearTranslucence() const;
     // PARTIAL: added for Game/Player/FriendPluto
-    UINT isTargetMoveXZ() const { return m_uiEntityFlag & 0x40; }
+    UINT isTargetMoveXZ() const;
     BOOL startTargetMoveXZ(const FVECTOR& inPos, FLOAT inSpeed, FLOAT inAccel, FLOAT inRange);
     void endTargetMoveXZ();
     // PARTIAL: added for Game/Player/FriendPan
@@ -278,9 +270,10 @@ public:
     BOOL isGround() const;
     FLOAT calcDistance(const FVECTOR& inPos) const;
     // PARTIAL: added for Game/Player/PlayerWeapon (weak in the original)
-    UINT isDispOFF() const { return m_uiEntityFlag & 1; }
+    UINT isDispOFF() const;
     // PARTIAL: added for Game/EffectMotion
-    CAnim* getAnim() { return m_pAnim; }
+    CAnim* getAnim();
+    CAnim* getAnim() const;
     HANDLE setEffect(const CHAR* inName, UINT inFlag, const FMATRIX* inMat, FLOAT inScale);
     HANDLE attachEffect3(const CHAR* inName, UINT inNo, const CCoord* inParent1, const CCoord* inParent2,
                          const CCoord* inParent3, const FVECTOR* inPos1, const FVECTOR* inPos2, const FVECTOR* inPos3,
@@ -293,20 +286,19 @@ public:
     void changeMotionEx(INT inRsrcID, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     void changeMotionEx(const CHAR* inRsrcName, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo); // PARTIAL: added for Game/Entity
     void enableFade2Path(BOOL inSw, INT inIndex);
-    UINT isPermissionLockOn() const { return m_uiEntityFlag & 0x10000; }
+    UINT isPermissionLockOn() const;
     FLOAT calcDistanceXZSq(const FVECTOR& inPos) const;
     FLOAT calcDistanceXZSq(const CEntity* inEntity) const;
     // PARTIAL: added for Game/Bullet/Bullet
-    const FVECTOR& getStartPos() const { return *(const FVECTOR*)_m_0x70; }
-    void setStartPos(const FVECTOR& inPos) { *(FVECTOR*)_m_0x70 = inPos; }
-    void setRate(FLOAT inRate) { m_fRate = inRate; }
-    FLOAT getRate() const { return m_fRate; }
-    FLOAT getFadeAlpha() const { return m_fFadeAlpha; }
-    FLOAT getEndAlpha() const { return m_fEndAlpha; } // PARTIAL: added for Game/Player/PlayerDRiku (original name unknown)
-    UINT isFade() const { return m_uiEntityFlag & 0x40000000; }
-    UINT isRootMoveOff() const { return m_uiEntityFlag & 0x8000; } // PARTIAL: added for Game/Entity
-    UINT isFlashing() const { return m_uiEntityFlag & 0x800; } // PARTIAL: added for Game/Entity
-    INT getFlashingCounter() const { return m_iFlashingCounter; } // PARTIAL: added for Game/Prize (name unknown)
+    const FVECTOR& getStartPos() const;
+    void setStartPos(const FVECTOR& inPos);
+    void setRate(FLOAT inRate);
+    FLOAT getRate() const;
+    FLOAT getFadeAlpha() const;
+    UINT isFade() const;
+    UINT isRootMoveOff() const;
+    UINT isFlashing() const;
+    INT getFlashingCounter() const;
     FLOAT calcDistanceSq(const FVECTOR& inPos) const;
     HANDLE playSEPanAndVol(INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
     HANDLE playSEPan(INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType); // PARTIAL: added for Game/Entity
@@ -386,19 +378,134 @@ public:
     void changeMotionFileNameWithSameCheck(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     void changeMotionWithSameCheck(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     HANDLE setRecoverEffect(const CHAR* inName, INT inNo);
-    void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel) {
-        setEntityFlag(0x40000000, 0);
-        m_fStartAlpha = inStart;
-        m_fEndAlpha = inEnd;
-        m_tqFadeTimer = inTime;
-        m_tqFadeTime = inTime;
-        m_iFadeModel = inModel;
-    }
+    void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel);
+    // PARTIAL: added for Game/Entity (the rest of the original's inline members; defined after the class)
+    void setTimerFrame(INT inFrame);
+    void setTimerSecond(FLOAT inSecond);
+    void setSpeed(FLOAT inSpeed);
+    void setArriveRadius(FLOAT inRadius);
+    void setTargetPos(const FVECTOR& inPos);
+    void setRootMoveScale(const FVECTOR& inScale);
+    FLOAT getSpeed() const;
+    FLOAT getArriveRadius() const;
+    const FVECTOR& getTargetPos() const;
+    COLL_PARAM_HEADER* getCollParam() const;
+    const FVECTOR& getRootMoveScale() const;
+    UINT isDisableClearSpeed() const;
+    UINT isTargetChase() const;
+    UINT isTargetEvade() const;
+    UINT isTargetIntercept() const;
+    UINT isTargetMove() const;
+    UINT isRotXOff() const;
+    UINT isRotYOff() const;
+    UINT isRotZOff() const;
+    UINT isEffectOff() const;
+    UINT isTransOff() const;
+    UINT isRotZYX() const;
+    UINT isSeOff() const;
+    UINT isSetDataCreate() const;
+    UINT isStop() const;
+    UINT isNoLevitate() const;
+    UINT isSetAlphaAttachEffect() const;
+    BOOL timeOver() const;
+    void loadModelColor();
+    static INT random();
+    static FLOAT rnd();
+    void setID(INT inID);
 };
 
 /* PARTIAL: added for Game/Gimmick/GimmickManager: the original header's random helpers (names unknown; lines
  * from the debug info, their line notes decide the assembler's padding before a following division). */
 #include "System/Rnd.h"
+
+/* The inline members of CEntity, in the original's emission order (Game/Entity emits them all: its key function
+ * ~CEntity is there). Defined after the class so the order does not depend on the declaration order. */
+inline void CEntity::AfterInit() {}
+inline void CEntity::onMsg(INT inMsg, void* inExtraInfo) {}
+inline void CEntity::setEntityType(ObjType::eObjType inType) { m_EntityType = inType; }
+inline void CEntity::setStartPos(const FVECTOR& inPos) { m_vStartPos = inPos; }
+#ifdef ENTITY_H_SETFLAG_DIRECT // PARTIAL: the plain form, for Game/Atel/Avatar
+inline void CEntity::setEntityFlag(UINT inSet, UINT inMask) { m_uiEntityFlag = (m_uiEntityFlag | inSet) & ~inMask; }
+#else
+// PARTIAL: changed for Game/Gimmick/GimmickSavePoint - the store goes through a reference (not a struct member
+// access), so the scheduler does not move a following global load above it.
+inline void CEntity::setEntityFlag(UINT inSet, UINT inMask) { UINT& f = m_uiEntityFlag; f = (f | inSet) & ~inMask; }
+#endif
+inline void CEntity::setTimer(TIMEQ inTq) { m_tqTimer = inTq; }
+inline void CEntity::setTimerFrame(INT inFrame) { m_tqTimer = inFrame * 50; }
+inline void CEntity::setTimerSecond(FLOAT inSecond) { m_tqTimer = (TIMEQ)(inSecond * 60.0f * 50.0f); }
+inline void CEntity::setRate(FLOAT inRate) { m_fRate = inRate; }
+inline void CEntity::setSpeed(FLOAT inSpeed) { m_fSpeed = inSpeed; }
+inline void CEntity::setArriveRadius(FLOAT inRadius) { m_fArriveRadius = inRadius; }
+inline void CEntity::setTargetPos(const FVECTOR& inPos) { m_vTargetPos = inPos; }
+#ifdef ENTITY_H_SETFLAG_DIRECT // PARTIAL: the plain form, for Game/Atel/Avatar
+inline void CEntity::setDispOffFlag(UINT inSet, UINT inMask) { m_uiDispOffFlag = (m_uiDispOffFlag | inSet) & ~inMask; }
+#else
+inline void CEntity::setDispOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiDispOffFlag; f = (f | inSet) & ~inMask; }
+#endif
+inline void CEntity::setCheckEyeOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiCheckEyeOffFlag; f = (f | inSet) & ~inMask; }
+inline void CEntity::setNearTranslucence(FLOAT inTrans) { m_fNearTranslucence = inTrans; }
+inline void CEntity::setRootMoveScale(const FVECTOR& inScale) { m_vRootMoveScale = inScale; }
+inline const FVECTOR& CEntity::getStartPos() const { return m_vStartPos; }
+inline INT CEntity::getID() const { return m_iID; }
+inline ObjType::eObjType CEntity::getEntityType() const { return m_EntityType; }
+inline UINT CEntity::getFlag() const { return m_uiEntityFlag; }
+inline INT CEntity::getFlashingCounter() const { return m_iFlashingCounter; }
+inline TIMEQ CEntity::getTimer() const { return m_tqTimer; }
+inline FLOAT CEntity::getRate() const { return m_fRate; }
+inline FLOAT CEntity::getSpeed() const { return m_fSpeed; }
+inline FLOAT CEntity::getArriveRadius() const { return m_fArriveRadius; }
+inline const FVECTOR& CEntity::getTargetPos() const { return m_vTargetPos; }
+inline COLL_PARAM_HEADER* CEntity::getCollParam() const { return m_pCollParam; }
+inline FLOAT CEntity::getFadeAlpha() const { return m_fFadeAlpha; }
+inline FLOAT CEntity::getNearTranslucence() const { return m_fNearTranslucence; }
+inline void CEntity::getCameraTargetPos(FVECTOR& outPos) { getUseCardPos(outPos); }
+inline const FVECTOR& CEntity::getRootMoveScale() const { return m_vRootMoveScale; }
+inline CModel* CEntity::getModel() { return m_pModels; }
+inline CModel* CEntity::getModel() const { return m_pModels; }
+inline INT CEntity::getModelCount() const { return m_iModelCount; }
+inline CAnim* CEntity::getAnim() { return m_pAnim; }
+inline CAnim* CEntity::getAnim() const { return m_pAnim; }
+inline UINT CEntity::isDispOFF() const { return m_uiEntityFlag & 0x1; }
+inline UINT CEntity::isDisableClearSpeed() const { return m_uiEntityFlag & 0x2; }
+inline UINT CEntity::isTargetChase() const { return m_uiEntityFlag & 0x4; }
+inline UINT CEntity::isTargetEvade() const { return m_uiEntityFlag & 0x8; }
+inline UINT CEntity::isTargetIntercept() const { return m_uiEntityFlag & 0x10; }
+inline UINT CEntity::isTargetMove() const { return m_uiEntityFlag & 0x20; }
+inline UINT CEntity::isTargetMoveXZ() const { return m_uiEntityFlag & 0x40; }
+inline UINT CEntity::isRotXOff() const { return m_uiEntityFlag & 0x80; }
+inline UINT CEntity::isRotYOff() const { return m_uiEntityFlag & 0x100; }
+inline UINT CEntity::isRotZOff() const { return m_uiEntityFlag & 0x200; }
+inline UINT CEntity::isEffectOff() const { return m_uiEntityFlag & 0x400; }
+inline UINT CEntity::isFlashing() const { return m_uiEntityFlag & 0x800; }
+inline UINT CEntity::isTransOff() const { return m_uiEntityFlag & 0x1000; }
+inline UINT CEntity::isRotZYX() const { return m_uiEntityFlag & 0x2000; }
+inline UINT CEntity::isSeOff() const { return m_uiEntityFlag & 0x4000; }
+inline UINT CEntity::isRootMoveOff() const { return m_uiEntityFlag & 0x8000; }
+inline UINT CEntity::isPermissionLockOn() const { return m_uiEntityFlag & 0x10000; }
+inline UINT CEntity::isHeartless() const { return m_uiEntityFlag & 0x20000; }
+inline UINT CEntity::isSetDataCreate() const { return m_uiEntityFlag & 0x40000; }
+inline UINT CEntity::isFade() const { return m_uiEntityFlag & 0x40000000; }
+inline UINT CEntity::isStop() const { return m_uiEntityFlag & 0x80000000; }
+inline UINT CEntity::isNoLevitate() const { return m_uiEntityFlag & 0x200000; }
+inline UINT CEntity::isSetAlphaAttachEffect() const { return m_uiEntityFlag & 0x400000; }
+inline BOOL CEntity::timeOver() const { return m_tqTimer <= 0; }
+inline void CEntity::setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel) {
+    setEntityFlag(0x40000000, 0);
+    m_fStartAlpha = inStart;
+    m_fEndAlpha = inEnd;
+    m_tqFadeTimer = inTime;
+    m_tqFadeTime = inTime;
+    m_iFadeModel = inModel;
+}
+inline void CEntity::loadModelColor() { loadModelColor_(); }
+inline INT CEntity::random() { return RND::genrand_int31(); }
+inline FLOAT CEntity::rnd() { return RND::genrand_real1(); }
+inline void CEntity::setID(INT inID) { m_iID = inID; }
+inline void CEntity::updateBefore() {}
+inline void CEntity::updateAfter() {}
+inline void CEntity::updatePositionAfter() {}
+inline void CEntity::lastUpdate() {}
 #line 574
 inline INT getRand() {
     return RND::genrand_int31();

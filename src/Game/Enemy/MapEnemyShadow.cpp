@@ -168,7 +168,7 @@ void CMapEnemyShadow::stateDisappear() {
 }
 
 void CMapEnemyShadow::endStateDisappear() {
-    warp(*(FVECTOR*)_m_0x70);
+    warp(m_vStartPos);
     setEntityFlag(1, 0);
     m_pMove->enableGravity(TRUE);
 }

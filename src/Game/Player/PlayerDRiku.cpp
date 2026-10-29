@@ -494,7 +494,7 @@ void CPlayerDRiku::exeTransform() {
             m_pCB = NULL;
             setPrizeHealing(0);
             setupFade(1.0f, 0.0f, 1500, -1);
-            setAnimSpeed(getEndAlpha());
+            setAnimSpeed(*(FLOAT*)((BYTE*)(CEntity*)this + 0x110)); /* PARTIAL: CEntity::m_fEndAlpha (private) */
             setBattleFlag(0, 0x443f90);
             setTrgFlag(0, 0x80bff);
             setBattleFlag(0, 0x80000);

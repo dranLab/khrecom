@@ -112,7 +112,7 @@ BOOL CSummon::initalize() {
     setScale(scale);
     FVECTOR pos = m_pPlayer->getAppearPos();
     pos.y += 0.1f;
-    *(FVECTOR*)_m_0x70 = pos;
+    m_vStartPos = pos;
     m_fDir = calcDirection(m_pPlayer);
     warp(pos);
     FVECTOR rot = getRot();

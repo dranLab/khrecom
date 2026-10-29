@@ -65,7 +65,7 @@ CGimmickDoor::CGimmickDoor(CTask* inParent, const ZONEPARTS& inParts) : CBaseGim
     INT rsrcid;
     DoorInfo* info;
 
-    setEntityType((eObjType)7);
+    setEntityType((ObjType::eObjType)7);
     m_iStep = 0;
     m_hEffect[1] = 0;
     m_hEffect[0] = 0;
@@ -78,10 +78,10 @@ CGimmickDoor::CGimmickDoor(CTask* inParent, const ZONEPARTS& inParts) : CBaseGim
            && PASS_OR_CANCEL((info = CSceneInfo::getDoorInfo(m_DoorID = (DOOR_ID)inParts.effectParam, -1)) != NULL)
            && PASS_OR_CANCEL((m_DoorState = info->getDoorState()) != DOOR_STAT_NOTHING)) {
         switch (info->_id) {
-        case DOOR_ID_RU: setEntityType((eObjType)7); break;
-        case DOOR_ID_RD: setEntityType((eObjType)8); break;
-        case DOOR_ID_LD: setEntityType((eObjType)9); break;
-        case DOOR_ID_LU: setEntityType((eObjType)10); break;
+        case DOOR_ID_RU: setEntityType((ObjType::eObjType)7); break;
+        case DOOR_ID_RD: setEntityType((ObjType::eObjType)8); break;
+        case DOOR_ID_LD: setEntityType((ObjType::eObjType)9); break;
+        case DOOR_ID_LU: setEntityType((ObjType::eObjType)10); break;
         }
         if (info->_shape == 1) {
             switch (rsrcid % 100) {

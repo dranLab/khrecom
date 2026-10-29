@@ -142,9 +142,9 @@ BOOL CFriend::initalize() {
     scale.y = 0.5f;
     scale.z = m_fScale;
     setScale(scale);
-    *(FVECTOR*)_m_0x70 = m_pPlayer->getAppearPos();
+    m_vStartPos = m_pPlayer->getAppearPos();
     m_fDir = calcDirection(m_pPlayer);
-    warp(*(FVECTOR*)_m_0x70);
+    warp(m_vStartPos);
     FVECTOR rot = getRot();
     rot.y = m_fDir;
     setRot(rot);
