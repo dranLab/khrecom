@@ -1,12 +1,7 @@
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
 #include "System/Graphic/StrPrim.h"
 
-class CFrecFont {
-public:
-    static void makePkt(CFntM2& fnt);
-    static INT getDispSize(G_XY& outSize, const CFntM2& fnt, G_XY* pLineSize, INT* pNumCharcter);
-    static UINT getPacketSize(const CFntM2& fnt);
-};
+#include "System/Graphic/FrecFont.h"
 
 UINT CStrPrim::getPacketSize() const {
     return CFrecFont::getPacketSize(*this);

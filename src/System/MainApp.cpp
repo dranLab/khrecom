@@ -220,11 +220,7 @@ public:
     static void finalize();
 };
 
-class CFrecFont {
-public:
-    static void initialize();
-    static void finalize();
-};
+#include "System/Graphic/FrecFont.h"
 
 class CMemoca {
 public:

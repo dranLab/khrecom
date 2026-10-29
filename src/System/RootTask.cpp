@@ -28,10 +28,7 @@ public:
 
 #include "System/Graphic/ModelMan.h"
 
-class CFrecFont {
-public:
-    static void setupFonts();
-};
+#include "System/Graphic/FrecFont.h"
 
 #include "Game/SceneEnv.h"
 #line 48
