@@ -822,9 +822,10 @@ void setTransparency(const CCoord& crd, CModel& model) {
 void setTransparency(CModel& model) {
     setTransparency(model.getCrd(0), model);
 }
-/* Parked: first draft, 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes,
-   group selection by player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons);
-   not yet tuned. */
+/* Parked: 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes, group selection by
+   player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons). The 44 bytes: the
+   original keeps two copies of the "flush the last model" block (group and grid path; s1/s2 swapped), ours gets the same
+   registers in both and jump2 cross-jumps them into one; the rest is register allocation. */
 #if 0
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" void sceVu0InversMatrix(FMATRIX& m0, FMATRIX& m1);
