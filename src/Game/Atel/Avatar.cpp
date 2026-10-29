@@ -519,7 +519,28 @@ INT CAvatar::onPlayMotionEx(INT nCmd, void* pParam, INT nID) {
     }
     return -1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onPlayMotionEfx__Q24ATEL7CAvatariPvi);
+INT CAvatar::onPlayMotionEfx(INT nCmd, void* pParam, INT nID) {
+    AvatarMotionParamEfx* p = (AvatarMotionParamEfx*)pParam;
+    if (!p) {
+        changeMotion(nID, 0, FALSE, -1, 0, 0);
+    } else {
+        if (p->_nRsrcID) {
+            changeMotionEx(p->_nRsrcID, p->_nMotionID, 0, p->_nFlag & 1, p->_nHokanFrame * 50, p->_nEfxNo, 0);
+            m_pAnim->setSpeed(p->_fPlaySpeed);
+            m_pAnim->setZeroHokan(p->_nFlag & 4);
+            m_pAnim->setMotion(p->_StartFrame * 50, 0, 0);
+            setAvatarState(0x4100, TRUE);
+        } else {
+            changeMotion(p->_nMotionID, 0, p->_nFlag & 1, p->_nHokanFrame * 50, p->_nEfxNo, 0);
+            m_pAnim->setSpeed(p->_fPlaySpeed);
+            m_pAnim->setZeroHokan(p->_nFlag & 4);
+            m_pAnim->setMotion(p->_StartFrame * 50, 0, 0);
+            setAvatarState(0x4100, TRUE);
+        }
+    }
+    TexAnimTalk(p->_nMotionID);
+    return -1;
+}
 INT CAvatar::onPlayMotionExDx(INT nCmd, void* pParam, INT nID) {
     AvatarMotionParamEx2* p = (AvatarMotionParamEx2*)pParam;
     if (!p) {
