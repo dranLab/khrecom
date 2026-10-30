@@ -104,24 +104,6 @@ struct TexInfo { /* System/Graphic/modeldata.h */
 
     BOOL isFixTex() const { return !_TexInfo._pImage || (_nFlag & 1); }
     BOOL isFixClut() const { return !_ClutInfo._pImage || (_nFlag & 2); }
-    const TexInfo* getExtendInfo(INT nIdx) const {
-        const TexInfo* p = NULL;
-        switch (nIdx) {
-        case 0:
-            p = this;
-            break;
-        case 1:
-            p = _pExtendInfo0;
-            break;
-        case 2:
-            p = _pExtendInfo1;
-            break;
-        case 3:
-            p = _pExtendInfo2;
-            break;
-        }
-        return p;
-    }
 };
 
 struct IMD_HEADER {
@@ -455,9 +437,7 @@ void CTexUtil::makeMonochromeClut(const TexInfo* inpInfo, INT inBufIdx, FLOAT in
     makeMonochromeClut(inpInfo, 0, inBufIdx, inRate);
 }
 
-/* Placeholder: the C of makeMonochromeClut__8CTexUtilPC7TexInfoiif (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static void _makeMonochromeClut_c(const TexInfo* inpInfo, INT inSrcBufIdx, INT inOutBufIdx, FLOAT inRate) {
+void CTexUtil::makeMonochromeClut(const TexInfo* inpInfo, INT inSrcBufIdx, INT inOutBufIdx, FLOAT inRate) {
     static const FVECTOR _cfvClampClut = { { 255.f, 255.f, 255.f, 0.f } };
     const TexInfo* pInfoSrc;
     const TexInfo* pInfoDes;
@@ -473,8 +453,36 @@ __attribute__((section(".sdata"))) static void _makeMonochromeClut_c(const TexIn
 
     if (!inpInfo || !(inpInfo->_nType & 0x40)) return;
     if (inpInfo->_nInfoType) inpInfo = inpInfo->_pExtendInfo0;
-    pInfoSrc = inpInfo->getExtendInfo(inSrcBufIdx);
-    pInfoDes = inpInfo->getExtendInfo(inOutBufIdx);
+    pInfoSrc = NULL;
+    pInfoDes = NULL;
+    switch (inSrcBufIdx) {
+    case 0:
+        pInfoSrc = inpInfo;
+        break;
+    case 1:
+        pInfoSrc = inpInfo->_pExtendInfo0;
+        break;
+    case 2:
+        pInfoSrc = inpInfo->_pExtendInfo1;
+        break;
+    case 3:
+        pInfoSrc = inpInfo->_pExtendInfo2;
+        break;
+    }
+    switch (inOutBufIdx) {
+    case 0:
+        pInfoDes = inpInfo;
+        break;
+    case 1:
+        pInfoDes = inpInfo->_pExtendInfo0;
+        break;
+    case 2:
+        pInfoDes = inpInfo->_pExtendInfo1;
+        break;
+    case 3:
+        pInfoDes = inpInfo->_pExtendInfo2;
+        break;
+    }
     if (!pInfoSrc || !pInfoDes) return;
     pSrc = (UINT*)pInfoSrc->_ClutInfo._pImage;
     pDes = (UINT*)pInfoDes->_ClutInfo._pImage;
@@ -499,7 +507,6 @@ __attribute__((section(".sdata"))) static void _makeMonochromeClut_c(const TexIn
         pDes++;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", makeMonochromeClut__8CTexUtilPC7TexInfoiif);
 
 void CTexUtil::makeWhiteClut(const TexInfo* inpInfo, INT inOutBufIdx, FLOAT inRate) {
     makeWhiteClut(inpInfo, 0, inOutBufIdx, inRate);
