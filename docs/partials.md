@@ -63,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1035 (953 in 109 headers, 82 in 35 .cpp); MATCH: 119
   by category: method 409, data member 69, type 88, fwd decl 53, #include 29, changed in place 133, padding 31, path override 24, gate 43, guessed 41, header-level 74, stand-in 35, other 6
-stand-ins: 346 foreign in 122 files (96 names), 201 unattributed, 172 own
+stand-ins: 345 foreign in 122 files (95 names), 201 unattributed, 172 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
 mechanisms: 959 sites (920 untagged); #line: 1238
@@ -79,7 +79,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 2.0 | `System/Graphic/2d/2DLay.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | LAY_SCREEN (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/Effect/libppp/keProg/pppKeLns.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | sceGsStoreImage (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/WorldEnv.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CWorldEnv (1 complete) |  |
 | R0 | 2.0 | `System/Movie/Movie.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMovie (1 complete) |  |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
 | R1 | 6.0 | `Form/Menu/SaveLoad.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CSaveLoad, GAMECLEAR, SAVELOAD (3 complete) | inline bodies or virtuals |
 | R1 | 6.0 | `Game/Enemy/BossDeadDemo.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CBossDeadDemo (1 complete) | inline bodies or virtuals |
+| R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -192,7 +192,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `F_UL` | complete | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | superset | System/Graphic/Gprim.h | 1 |  | 2 PARTIAL |
-| `LAY_SCREEN` | complete | System/Graphic/2d/2DLay.h | 1 |  |  |
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
 | `QWdata` | complete | System/Graphic/Gprim.h | 1 |  |  |
 | `RcfKey` | complete | System/Rcf.h | 1 |  |  |
@@ -333,7 +332,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Fsm.h` | 4 | 1/0/0/1 | 110 |
 | `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 11 |
 | `System/Graphic/2d/2DFntObj.h` | 0 | 0/1/0/0 | 3 |
-| `System/Graphic/2d/2DLay.h` | 0 | 3/1/0/0 | 4 |
+| `System/Graphic/2d/2DLay.h` | 0 | 3/1/0/0 | 5 |
 | `System/Graphic/2d/2DLayObj.h` | 1 | 0/1/0/0 | 3 |
 | `System/Graphic/2d/2DMan.h` | 3 | 0/0/0/3 | 166 |
 | `System/Graphic/2d/2DObj.h` | 4 | 0/1/0/0 | 17 |
