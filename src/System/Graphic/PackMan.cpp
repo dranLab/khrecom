@@ -164,10 +164,7 @@ typedef struct { /* libgraph (eestruct.h) */
     unsigned int DBY : 11;
     unsigned int p1 : 10;
 } tGS_DISPFB2;
-class CWorldEnv { /* PARTIAL: stand-in for System/Graphic/WorldEnv CWorldEnv: strings: WorldEnv.h (.rodata still asm) */
-public:
-    static IVECTOR& getFogColor();
-};
+#include "System/Graphic/WorldEnv.h"
 class CTexCtrl { /* PARTIAL: stand-in for System/Graphic/TexCtrl CTexCtrl: strings: TexCtrl.h (.rodata still asm) */
 public:
     static void transPrefixTex();
