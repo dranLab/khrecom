@@ -27,6 +27,7 @@ FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
+void DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q);
 
 struct COLL_CUBE {
     FVECTOR vMin;
@@ -318,7 +319,185 @@ INT CCollUtil::_detectSphereSphere(CSphereCollision& sphereColl0, CSphereCollisi
     }
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", distanceLineO__9CCollUtilP7FVECTORT1i);
+/* MATCH: distanceLineO's square roots never share the input register (early-clobber output) */
+static inline FLOAT _sqrtfE(FLOAT x) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=&f"(ret) : "f"(x));
+    return ret;
+}
+
+static inline FLOAT _distanceE(FVECTOR& v, const FVECTOR& p0, const FVECTOR& p1) {
+    SubVector(v, p0, p1);
+    return _sqrtfE(InnerProduct(v));
+}
+
+static inline INT _normalizeQ(FVECTOR& v) {
+    FLOAT l = _sqrtfE(InnerProduct(v));
+    DivVector(v, v, l);
+    return l != 0.0f;
+}
+
+INT CCollUtil::distanceLineO(FVECTOR* pP0, FVECTOR* pP1, INT fg) {
+    FVECTOR p;
+    FVECTOR v0;
+    FVECTOR s0;
+    FVECTOR s1;
+    FVECTOR vec0;
+    FLOAT pv0;
+    FLOAT pv1;
+    FLOAT v00;
+    FLOAT v11;
+    FLOAT v01;
+    FLOAT denom;
+    FLOAT s;
+    FLOAT t;
+    FVECTOR v;
+    FVECTOR u;
+    FVECTOR su;
+    INT ret;
+    FVECTOR s2;
+    FLOAT ss;
+    FVECTOR qs;
+    FVECTOR pq;
+    FVECTOR nvec;
+    FVECTOR vSurf;
+    FLOAT f0;
+    FLOAT f1;
+    FLOAT m;
+    FLOAT l2;
+
+    SubVector(v0, *pP1, *pP0);
+    SubVector(p, m_vCk0, *pP0);
+    pv0 = InnerProduct(p, v0);
+    pv1 = InnerProduct(p, m_vCkVec);
+    v00 = InnerProduct(v0);
+    if (v00 == 0.0f) return 0;
+    v11 = m_CkVecl;
+    v01 = InnerProduct(v0, m_vCkVec);
+    denom = v00 * v11 - v01 * v01;
+    ret = 1;
+    for (;;) {
+    if (denom < -1e-05f || 1e-05f <= denom) {
+        s = (pv0 * v01 - pv1 * v00) / denom;
+        if (s < 0.0f) break;
+        t = (pv0 * v11 - pv1 * v01) / denom;
+    } else {
+        t = pv0 / v00;
+        s = 0.0f;
+    }
+    ScaleVector(vec0, v0, t);
+    AddVector(s0, *pP0, vec0);
+    ScaleVector(vec0, m_vCkVec, s);
+    AddVector(s1, m_vCk0, vec0);
+    f0 = _distanceE(qs, s1, s0);
+    if (m_Radius < f0) break;
+    if (!fg) {
+        m = _sqrtfE(m_Radius2 - f0 * f0);
+        SubVector(pq, s1, s0);
+        OuterProduct(qs, v0, pq);
+        if (_normalizeQ(qs) && 1e-05f <= f0) {
+            if (0.0f < InnerProduct(qs, m_vCkVec)) ScaleVector(qs, qs, -1.0f);
+            ScaleVector(qs, qs, m);
+            Normalize(su, v0);
+            if (0.0f < InnerProduct(su, m_vCkVec)) ScaleVector(su, su, -1.0f);
+            f1 = _sqrtfE(v00);
+            l2 = m_CkVecl2;
+            if (1e-05f <= v01 || v01 < -1e-05f) {
+                f1 = f1 * l2 / v01;
+                ScaleVector(su, su, m / _sqrtfE(f1 * f1 - 1.0f));
+            } else {
+                su._q = 0;
+            }
+        } else {
+            Normalize(v, v0);
+            if (0.0f < InnerProduct(v, m_vCkVec)) ScaleVector(v, v, -1.0f);
+            f1 = _sqrtfE(v00);
+            l2 = m_CkVecl2;
+            if (1e-05f <= v01 || v01 < -1e-05f) {
+                f1 = f1 * l2 / v01;
+                m = m / _sqrtfE(f1 * f1 - 1.0f);
+                ScaleVector(su, v, m);
+                m = m * f1;
+            } else {
+                m = m_Radius;
+                su._q = 0;
+            }
+            Normalize(qs, m_vCkVec);
+            ScaleVector(qs, qs, -m);
+            SubVector(qs, qs, su);
+        }
+    } else {
+        qs._q = 0;
+        su._q = 0;
+    }
+    AddVector(vec0, qs, su);
+    AddVector(u, s1, vec0);
+    SubVector(vec0, u, m_vCk0);
+    if (InnerProduct(m_vCkVec, vec0) < 0.0f) break;
+    SubVector(vec0, u, m_vCk1);
+    if (0.0f < InnerProduct(m_vCkVec, vec0)) break;
+    AddVector(v, s0, su);
+    SubVector(vec0, v, *pP0);
+    if (InnerProduct(v0, vec0) < 0.0f) break;
+    SubVector(vec0, v, *pP1);
+    if (0.0f < InnerProduct(v0, vec0)) break;
+    SubVector(nvec, v, u);
+    Normalize(nvec, nvec);
+    m_vCk2 = u;
+    m_vCk2.w = 1.0f;
+    m_vNormal = nvec;
+    m_vDetect2 = m_vCk2;
+    m_vDetect = m_vCk2;
+    return 1;
+    }
+    for (;;) {
+        SubVector(vec0, m_vCk0, *pP0);
+        ss = InnerProduct(vec0, v0) / v00;
+        ScaleVector(vec0, v0, ss);
+        AddVector(s2, *pP0, vec0);
+        if (_distanceE(qs, m_vCk0, s2) <= m_Radius && ss <= 1.0f && 0.0f <= ss) {
+            m_vCk2 = m_vCk0;
+            break;
+        }
+        SubVector(vec0, m_vCk1, *pP0);
+        ss = InnerProduct(vec0, v0) / v00;
+        ScaleVector(vec0, v0, ss);
+        AddVector(s2, *pP0, vec0);
+        if (_distanceE(qs, m_vCk1, s2) <= m_Radius && ss <= 1.0f && 0.0f <= ss) {
+            m_vCk2 = m_vCk1;
+            break;
+        }
+        SubVector(vec0, *pP0, m_vCk0);
+        ss = InnerProduct(vec0, m_vCkVec) / m_CkVecl;
+        ScaleVector(vec0, m_vCkVec, ss);
+        AddVector(s2, m_vCk0, vec0);
+        if (_distanceE(qs, *pP0, s2) <= m_Radius && ss <= 1.0f && 0.0f <= ss) {
+            m_vCk2 = s2;
+            break;
+        }
+        SubVector(vec0, *pP1, m_vCk0);
+        ss = InnerProduct(vec0, m_vCkVec) / m_CkVecl;
+        ScaleVector(vec0, m_vCkVec, ss);
+        AddVector(s2, m_vCk0, vec0);
+        if (_distanceE(qs, *pP1, s2) <= m_Radius && ss <= 1.0f && 0.0f <= ss) {
+            m_vCk2 = s2;
+            break;
+        }
+        ret = 0;
+        break;
+    }
+    if (ret) {
+        m_vDetect2 = m_vCk2;
+        SubVector(qs, m_vCk2, s2);
+        Normalize(qs, qs);
+        m_vNormal = qs;
+        ScaleVector(qs, qs, m_Radius);
+        AddVector(m_vCk2, s2, qs);
+        m_vDetect = m_vCk2;
+        return 1;
+    }
+    return 0;
+}
 INT CCollUtil::distanceSphereO(FVECTOR* pP0) {
     FVECTOR vc0;
     FVECTOR vc1;
