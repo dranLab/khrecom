@@ -201,10 +201,7 @@ public:
     static INT getMaxFreeBlockSize();
 };
 
-class CDebugWindow {
-public:
-    static void enableTopDebugWindow(INT bEnable);
-};
+#include "Form/DebugWindow.h"
 
 #include "System/PlaySpeedCtrl.h"
 
