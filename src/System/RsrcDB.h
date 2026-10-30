@@ -2,8 +2,6 @@
 #define SYSTEM_RSRCDB_H
 
 #include "khtypes.h"
-#include "System/Task.h"
-#include "System/RsrcData.h"
 
 class CBuf;
 class CRsrcData;
@@ -20,23 +18,14 @@ struct MEP_DATA;
 
 typedef char SBYTE;
 
-#ifdef RSRCDATA_H_FULL
-struct PackedRsrcHeader {
-    void* _pBody;
-    char _szName[22];
-    BYTE _cType;
-    BYTE _cPram;
-    INT _cSize;
-
-    static void coodinateVersion(void* pHead);
+enum NAME_CASE {
+    NAME_CASE_SENSITIVE = 0,
+    NAME_CASE_UPPER = 1,
+    NAME_CASE_LOWER = 2
 };
 
-class CRsrcIMZ : public CRsrcData {
-public:
-    CRsrcIMZ(const RsrcInfo& info, CBuf& data) : CRsrcData(info, data) {}
-};
+struct RsrcInfo;
 
-#endif /* RSRCDATA_H_FULL */
 
 class CRsrcDB {
 public:
