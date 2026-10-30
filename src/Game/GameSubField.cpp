@@ -59,11 +59,11 @@ inline void* operator new(size_t size, char* msg) throw() {
     return com_malloc_d(size, msg, RET_ADDR());
 }
 
-class CRsrcDB { /* System/RsrcDB.h */
-public:
-    static void* getRsrcMCD(INT nID);
-    static void setSceneAttachMode(UINT nMode);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 #include "System/Rcf.h"
 

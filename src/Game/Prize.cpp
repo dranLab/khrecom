@@ -52,11 +52,11 @@ inline void* operator new[](size_t size, char* msg) throw() {
 
 typedef int MODELTAG[4];
 
-class CRsrcDB {
-public:
-    static INT getModelCount(INT nGroup);
-    static MODELDATA** getRsrcMDL(INT nGroup);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 extern "C" {
 float sinf(float x);

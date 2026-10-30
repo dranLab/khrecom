@@ -18,18 +18,18 @@
 #include <string.h>
 #include "include_asm.h"
 
-enum NAME_CASE {
-    NAME_CASE_NONE = 0,
-};
+
+
+
 
 class CRsrcData;
 
-class CRsrcDB {
-public:
-    static CRsrcData* getRsrc(INT nGroup, const char* pszName, NAME_CASE eCase);
-    static void* getRsrcData(const CRsrcData& data);
-    static TexInfo* getRsrcTex(const char* pName, NAME_CASE eCase);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
 
 struct VTransInfo {
     UINT _nDistPos;
@@ -374,7 +374,7 @@ void CCard::initCardWorld() {
         }
     }
     if (!m_pCardInitRsrc) {
-        CRsrcData* pData = CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_NONE);
+        CRsrcData* pData = CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_SENSITIVE);
         void* p = pData ? CRsrcDB::getRsrcData(*pData) : NULL;
         m_pCardInitRsrc = p;
 #line 118
@@ -412,7 +412,7 @@ void CCard::initCardWorld() {
 /* placeholder for initCardWorld's .rodata strings */
 __asm__(".rdata\n"); /* the preceding INCLUDE_ASM left .text; gcc assumes .rdata for these strings */
 inline void _initCardWorldStrings() {
-    CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_NONE);
+    CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_SENSITIVE);
 #line 118
     if (!CCard::m_pCardInitRsrc) AssertApp(__FILE__, __LINE__, "m_pCardInitRsrc", 0);
 #line 121
@@ -433,7 +433,7 @@ void CCard::initCard(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFloorN
     INT cnt;
 
     if (!m_pCardInitRsrc) {
-        CRsrcData* pData = CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_NONE);
+        CRsrcData* pData = CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_SENSITIVE);
         void* p = pData ? CRsrcDB::getRsrcData(*pData) : NULL;
         m_pCardInitRsrc = p;
 #line 160
@@ -888,7 +888,7 @@ BOOL CCard::isCurrentDeckPremiumFull() {
 INT CCard::getCP(CARD card) {
     INT nCost;
     if (!m_pBCParam) {
-        CRsrcData* pData = CRsrcDB::getRsrc(1, "BattleCardList", NAME_CASE_NONE);
+        CRsrcData* pData = CRsrcDB::getRsrc(1, "BattleCardList", NAME_CASE_SENSITIVE);
         void* p = pData ? CRsrcDB::getRsrcData(*pData) : NULL;
         m_pBCParam = (BC_PARAM*)p;
 #line 932
@@ -909,7 +909,7 @@ INT CCard::getCP(CARD card) {
 INT CCard::getMP(CARD card) {
     INT nMooglePoint;
     if (!m_pBCParam) {
-        CRsrcData* pData = CRsrcDB::getRsrc(1, "BattleCardList", NAME_CASE_NONE);
+        CRsrcData* pData = CRsrcDB::getRsrc(1, "BattleCardList", NAME_CASE_SENSITIVE);
         void* p = pData ? CRsrcDB::getRsrcData(*pData) : NULL;
         m_pBCParam = (BC_PARAM*)p;
 #line 953
@@ -1028,7 +1028,7 @@ void CCard::setDeckName(INT inDeckIdx, const CHAR* pDeckName) {
 void CCard::getCardTexInfo(CARD inCard, CHAR* outTexName, FVECTOR& outST) {
     IVECTOR vecUV;
     getCardTexInfo(inCard, outTexName, vecUV);
-    VTransInfo& transInfo = CRsrcDB::getRsrcTex(outTexName, NAME_CASE_NONE)->_TexInfo;
+    VTransInfo& transInfo = CRsrcDB::getRsrcTex(outTexName, NAME_CASE_SENSITIVE)->_TexInfo;
     FLOAT fW;
     FLOAT fH;
     INT w = transInfo._nDistW;
@@ -1085,7 +1085,7 @@ TexInfo* CCard::getCardTexInfo(CARD inCard, IVECTOR& outUV) {
     outUV.z = (iIdx & 3) * 64 + 63;
     outUV.w = (iIdx & 0xC) * 16 + 63;
     sprintf(buf, "card:%02d", ((CARD_DATA*)cardDataTbl)[inCard.m_nKind].nTexNo);
-    return CRsrcDB::getRsrcTex(buf, NAME_CASE_NONE);
+    return CRsrcDB::getRsrcTex(buf, NAME_CASE_SENSITIVE);
 }
 BOOL CCard::addCard(CARD card) { return addCard(card.m_nKind2, card.m_nNumber2); }
 

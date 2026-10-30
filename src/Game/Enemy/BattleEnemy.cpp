@@ -95,11 +95,11 @@ public:
         return p;
     }
 };
-class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs RsrcData.h internals (as in Form/Menu/SaveLoad) */
-public:
-    static void initSeekRsrc(INT nRsrcType, INT nGroupID);
-    static CRsrcData* seekNextRsrc();
-};
+#include "System/RsrcDB.h"
+
+
+
+
 /* ENEMY_PARAM's inline relocation (as in Game/Enemy/MapEnemy): an already relocated file has the top bit of its
  * version set. */
 static inline BOOL _setupEnemyParam(ENEMY_PARAM* inParam) {

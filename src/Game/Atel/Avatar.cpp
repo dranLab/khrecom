@@ -103,11 +103,11 @@ void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: System/RsrcData.h(156) (owner partial; RsrcDB.h needs the full RsrcData.h classes) */
-public:
-    static BYTE* getRsrcPTD(const CHAR* pszName);
-    static void removeRsrc(INT nID);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 extern "C" {
 void sceVu0RotMatrix(FMATRIX& m0, const FMATRIX& m1, const FVECTOR& rot);
 void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, FLOAT ry);

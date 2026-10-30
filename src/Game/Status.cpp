@@ -22,17 +22,17 @@ inline void _statusEmptyString() {
 #include "Game/Game.h"
 #include "Game/GameWork.h"
 
-enum NAME_CASE {
-    NAME_CASE_NONE = 0,
-};
+
+
+
 
 class CRsrcData;
 
-class CRsrcDB {
-public:
-    static CRsrcData* getRsrc(INT nGroup, const char* pszName, NAME_CASE eCase);
-    static void* getRsrcData(const CRsrcData& data);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 #include "Game/Player/Player.h"
 
@@ -63,7 +63,7 @@ void CStatus::initStatus(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFl
     unsigned char (*pInitCardTbl)[2];
     INT idx;
     INT idxCard;
-    CRsrcData* pData = CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_NONE);
+    CRsrcData* pData = CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_SENSITIVE);
     CARD_INIT_HEADER* pCardInitRsrc = pData ? (CARD_INIT_HEADER*)CRsrcDB::getRsrcData(*pData) : NULL;
     if (!pCardInitRsrc) AssertApp(__FILE__, __LINE__, "pCardInitRsrc", 0);
     CARD_INIT_HEADER* pCIHeader = pCardInitRsrc;

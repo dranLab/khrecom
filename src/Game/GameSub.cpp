@@ -34,10 +34,10 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #include "Game/SceneInfo.h"
 
-class CRsrcDB { /* System/RsrcDB.h */
-public:
-    static unsigned char** getRsrcABC(INT nID);
-};
+#include "System/RsrcDB.h"
+#include "System/Buf.h"
+
+
 
 #include "System/Rcf.h"
 
@@ -67,11 +67,11 @@ void CGameSub::endStateProc() {
 void CGameSub::preSetupAtel() {
     m_nAtelTimeOut = 300;
     if (!m_pAtel) {
-        unsigned char** abc = CRsrcDB::getRsrcABC(CSceneInfo::getNextAtelSrcID());
+        CBuf* abc = CRsrcDB::getRsrcABC(CSceneInfo::getNextAtelSrcID());
         if (abc) {
             m_pAtel = new (com_malloc_d(sizeof(CAtel), __FILE__ "(79)", RET_ADDR())) CAtel(CTaskMan::getSysTask(1));
             if (!(m_pAtel)) AssertApp(__FILE__, __LINE__, "m_pAtel", 0);
-            m_pAtel->loadFromMem(*abc);
+            m_pAtel->loadFromMem(abc->getBufPtr());
             m_pAtel->setupActor();
         }
     }

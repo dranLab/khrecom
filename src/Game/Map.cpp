@@ -87,13 +87,13 @@ public:
     }
     INT getRsrcGroupID() const { return m_nRsrcGroup; }
 };
-class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: gated by RSRCDATA_H_FULL */
-public:
-    static CRsrcData* getFirstRsrc(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
-    static CRsrcData* getFirstRsrc_Scene(INT nRsrcType);
-    static void* getFirstData(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
-    static TEXANM_DATA* getRsrcTXA(INT nGroup);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
+
 extern MAPUNITTABLE g_DefaultGimmick;
 void RotMatrixZ(FMATRIX& out, FMATRIX& in);
 void setTransparency(const CCoord& crd, CModel& model);

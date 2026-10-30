@@ -21,17 +21,17 @@
 #include "include_asm.h"
 
 class CRsrcData;
-enum NAME_CASE { NAME_CASE_SENSITIVE = 0 }; /* PARTIAL: stand-in for System/RsrcDB NAME_CASE: gated by RSRCDATA_H_FULL (strings: System/RsrcData.h(156)) */
-class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: System/RsrcData.h(156) (owner partial; RsrcDB.h needs the full RsrcData.h classes) */
-public:
-    static BOOL isSceneAttachMode();
-    static UINT getSceneAttachNum();
-    static CRsrcData* getRsrc(INT nRsrcType, const CHAR* pszName, NAME_CASE nc);
-    static void* getRsrcData(const CRsrcData& data);
-    static void removeSceneAttachedData(UINT nNum);
-    static void removeRsrc(INT nID);
-    static void setSceneAttachMode(UINT nNum);
-};
+/* PARTIAL: stand-in for System/RsrcDB NAME_CASE: gated by RSRCDATA_H_FULL (strings: System/RsrcData.h(156)) */
+#include "System/RsrcDB.h"
+
+
+
+
+
+
+
+
+
 
 /* AREA_SCENE without its constructors (built in a register; PARTIAL) */
 union _AREA_SCENE_REG {

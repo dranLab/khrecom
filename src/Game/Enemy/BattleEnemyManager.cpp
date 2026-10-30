@@ -86,11 +86,11 @@ public:
     void* getRsrcData() { return m_pDataSrc ? m_pDataSrc->getBufPtr() : NULL; }
 };
 
-class CRsrcDB {
-public:
-    static void initSeekRsrc(INT nType, INT nGroup);
-    static CRsrcData* seekNextRsrc_Scene();
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 /* CBaseGimmick::setParam (Game/Gimmick/BaseGimmick.h): m_iParam at 0x1d4 */
 static inline void _setGimmickParam(CEntity* inEntity, INT inParam) {

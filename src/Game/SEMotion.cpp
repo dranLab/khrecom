@@ -106,11 +106,11 @@ public:
     }
 };
 
-class CRsrcDB {
-public:
-    static void* getFirstData(INT inType, INT inID, INT inIndex);
-    static CRsrcANN* getRsrcANN(INT nGroup);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 /* Inline in the original's collision header: the weak copies of its destructors and collideMap end this
  * object. */

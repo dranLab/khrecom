@@ -89,14 +89,14 @@ static inline UINT RET_ADDR() {
 
 
 
-class CRsrcDB {
-public:
-    static void removeGroup(INT nType, INT nID);
-    static UINT getRsrcGrpSizeOnMemory(INT nType, INT nID);
-    static void* getFirstRsrc(INT nType, INT nID, INT nFlag);
-    static BOOL hasRsrcGroup(INT nType, INT nID);
-    static void removeRsrc(INT nID);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
+
+
 
 class CHeapMan {
 public:

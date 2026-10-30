@@ -39,11 +39,11 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 #include "System/Buf.h"
 
@@ -64,11 +64,11 @@ public:
     }
 };
 
-class CRsrcDB {
-public:
-    static CRsrcData* getRsrc(INT nGroup, const char* pszName, NAME_CASE eCase);
-    static void* getFirstData_Scene(INT nType);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 extern INT SCREEN_HEIGHT;
 

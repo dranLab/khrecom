@@ -93,10 +93,10 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "memory");
 }
 
-class CRsrcDB {
-public:
-    static void* getFirstData(INT inType, INT inID, INT inIndex);
-};
+#include "System/RsrcDB.h"
+
+
+
 
 /* ENEMY_PARAM's inline relocation (its "@ENP" signature check is EnemyParam.h's placeholder): an already
  * relocated file has the top bit of its version set. */

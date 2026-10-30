@@ -61,12 +61,12 @@ public:
     void* getRsrcData() { return m_pDataSrc ? m_pDataSrc->getBufPtr() : NULL; }
 };
 
-class CRsrcDB {
-public:
-    static void* getFirstData_Scene(INT nType);
-    static void initSeekRsrc(INT nType, INT nGroup);
-    static CRsrcData* seekNextRsrc();
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
 
 /* the enemy parameter file (original name unknown) */
 struct ENEMY_PARAM_VALUE {
