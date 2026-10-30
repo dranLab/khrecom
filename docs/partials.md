@@ -61,9 +61,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 991 (910 in 109 headers, 81 in 36 .cpp); MATCH: 140
-  by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 33, other 6
-stand-ins: 269 foreign in 111 files (67 names), 201 unattributed, 170 own
+PARTIAL: 992 (910 in 109 headers, 82 in 37 .cpp); MATCH: 140
+  by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 34, other 6
+stand-ins: 268 foreign in 111 files (67 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 960 sites (910 untagged); #line: 1242
@@ -84,7 +84,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
 | R1 | 4.5 | `Game/Collision/CollBody.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users, 1 PARTIAL | CCollBody (1 superset) | inline bodies or virtuals (gate) |
-| R1 | 4.0 | `Form/Menu/Pause.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Enemy/BossDeadDemo.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CBossDeadDemo (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/MessageManager.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMessageManager (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Player/PlayerDRiku.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPlayerDRiku (1 superset) | inline bodies or virtuals |
@@ -98,6 +97,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.5 | `System/Graphic/2d/2DSeq.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | C2DSeq (1 superset) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/GameOver.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CGameOver (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/LevelUp.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CLevelUp (1 complete) | inline bodies or virtuals |
+| R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/RoomCreation.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRoomCreation (1 complete) | inline bodies or virtuals |
 
 ## Classes with foreign copies
@@ -121,7 +121,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CBossDeadDemo` | complete | Game/Enemy/BossDeadDemo.h | 2 |  |  |
 | `CGlare` | complete | System/Graphic/Glare.h | 2 |  |  |
 | `CMessageManager` | complete | Game/MessageManager.h | 2 |  |  |
-| `CPause` | complete | Form/Menu/Pause.h | 2 |  |  |
 | `CPlayerDRiku` | superset | Game/Player/PlayerDRiku.h | 2 |  | virtual order differs |
 | `CPrize` | superset | Game/Prize.h | 2 |  | virtual order differs |
 | `CTexCtrl` | complete | System/Graphic/TexCtrl.h | 2 |  |  |
@@ -150,6 +149,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CMovieScript` | complete | System/Movie/MovieScript.h | 1 |  |  |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
+| `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
 | `CPlayerCamera` | gated | Game/Player/PlayerCamera.h | 1 |  |  |
 | `CPlayerRiku` | superset | Game/Player/PlayerRiku.h | 1 |  | virtual order differs |
 | `CPlayerSora` | superset | Game/Player/PlayerSora.h | 1 |  | virtual order differs |
