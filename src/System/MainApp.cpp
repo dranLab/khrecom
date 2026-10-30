@@ -146,16 +146,7 @@ extern "C" char _gp[];
 
 #include "System/Graphic/ModelMan.h"
 
-class CTaskMan {
-public:
-    static void initialize();
-    static void finalize();
-    static void update(INT nTickCount, INT nFrameRate, INT bPause);
-    static void postprocess();
-    static void setDbgSteppingMode(INT nMode);
-    static void resetDbgPlaySpeed();
-    static INT setupDbgPlaySpeed();
-};
+#include "System/TaskMan.h"
 
 #include "System/PadIO.h"
 
