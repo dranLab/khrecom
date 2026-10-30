@@ -63,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 981 (912 in 110 headers, 69 in 38 .cpp); MATCH: 140
   by category: method 381, data member 67, type 85, fwd decl 53, #include 32, changed in place 132, padding 27, path override 24, gate 41, guessed 39, header-level 74, stand-in 20, other 6
-stand-ins: 130 foreign in 77 files (52 names), 201 unattributed, 170 own
+stand-ins: 129 foreign in 77 files (51 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 959 sites (909 untagged); #line: 1242
@@ -129,7 +129,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CFadeIOMask` | partial | System/Graphic/ScreenMask.h | 1 |  | missing methods: ~CFadeIOMask |
 | `CFriend` | partial | Game/Player/Friend.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
-| `CMemocaAgent` | complete | Form/Menu/SaveLoadUtil.h | 1 |  |  |
 | `CMemocaDataEntries` | superset | Form/Menu/SaveLoadUtil.h | 1 |  | extra methods: setNoSpace |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
@@ -187,7 +186,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
 | `Form/Menu/Menu.h` | 0 | 0/0/1/0 | 19 |
 | `Form/Menu/SaveLoadCtrl.h` | 14 | 1/1/6/0 | 7 |
-| `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 2 |
+| `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 3 |
 | `Form/Menu/TechHelp.h` | 2 | 0/1/0/0 | 3 |
 | `Form/Menu/TitleReportDllStarter.h` | 2 | 1/0/0/0 | 4 |
 | `Game/AtWater.h` | 0 | 1/1/0/0 | 2 |
@@ -279,7 +278,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Status.h` | 11 | 1/0/1/0 | 15 |
 | `Game/StorageWork.h` | 2 | 2/1/1/0 | 61 |
 | `Game/Technic.h` | 3 | 1/1/0/0 | 19 |
-| `System/Buf.h` | 4 | 0/1/0/0 | 25 |
+| `System/Buf.h` | 4 | 0/1/0/0 | 26 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
 | `System/Component.h` | 3 | 1/1/0/0 | 5 |
 | `System/Coord.h` | 3 | 0/1/0/0 | 18 |
