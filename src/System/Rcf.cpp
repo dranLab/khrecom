@@ -818,16 +818,15 @@ BOOL _isStr_END(INT nInPtr) {
     CHAR* p = (CHAR*)s_pFileBuf->getBufPtr() + nInPtr;
     return p[0] == '#' && p[1] == 'e' && p[2] == 'n' && p[3] == 'd';
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _parseRCF_Tag_c(INT nInType) {
+INT _parseRCF_Tag(INT nInType) {
     INT nDataID;
 
     if (!_isStr_Comment(s_nFilePtr) && !_isStr_CR(s_nFilePtr) && *_getParsePtr() == '#') {
         nDataID = _atoi(_getParsePtr());
-        s_nFilePtr++;
+        INT nGroupNo = (ULONG)s_nReadGroup % 10000; /* MATCH: not in the ref's locals; the modulo goes before both stores */
         s_nModeFlag = 0;
-        if (nDataID == (ULONG)s_nReadGroup % 10000) {
+        s_nFilePtr++;
+        if (nDataID == nGroupNo) {
             while (*_getParsePtr() != '\n') {
                 if (_isStr_PAL(s_nFilePtr)) {
                     s_nModeFlag = 1;
@@ -854,7 +853,6 @@ __attribute__((section(".sdata"))) INT _parseRCF_Tag_c(INT nInType) {
     _skipLine();
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRCF_Tag__Fi);
 void _makeDataName(const CHAR* lpszInPath, CHAR* lpszOutName) {
     CHAR* p;
     CHAR* p2;
