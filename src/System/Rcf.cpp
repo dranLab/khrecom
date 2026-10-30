@@ -124,7 +124,7 @@ public:
 
 class CRCFQueueData {
 private:
-    volatile INT m_nStep;
+    volatile INT m_nStep; /* MATCH: volatile (thread-shared step; the original reloads it after every store) */
     SHORT m_nGroupID;
     SHORT m_nMemeberID;
     INT m_nOwnerID;
@@ -144,22 +144,20 @@ public:
     INT getID() { return m_nGroupID * 10000 + m_nMemeberID; }
     INT getGroupID() { return m_nGroupID; }
     INT getMemberID() { return m_nMemeberID; }
+    BOOL hasLinkOwner() { return m_nOwnerID != 0; }
+    INT getLinkOwnerID() { return m_nOwnerID; }
     INT getType() { return m_nType; }
     BYTE* getBuff() { return m_pBuff; }
     CRCFQueueData* getNextData() { return m_pNext; }
     void setNextData(CRCFQueueData* p) { m_pNext = p; }
-    BOOL hasLinkOwner() { return m_nOwnerID != 0; }
-    INT getLinkOwnerID() { return m_nOwnerID; }
     BOOL isNOP() { return m_nStep == 0; }
-    BOOL isCANCEL() { return m_nStep == 3; }
     void setExec() { m_nStep = 1; }
     void setEnd() { m_nStep = 2; }
     void setCancel() { m_nStep = 3; }
-    BOOL isMatch(INT nGroup, INT nMember, INT nID) {
-        return ((m_nGroupID & 0x0FFFFFFF) == nGroup && m_nMemeberID == nMember) || m_nOwnerID == nID;
-    }
+    BOOL isCANCEL() { return m_nStep == 3; }
 };
 
+/* PARTIAL: CRCFAliasData lacks the ref's init, linkTail, setSrc, setDst, setID (parameters unknown, no users here) */
 class CRCFAliasData {
 private:
     char m_szSrc[33];
@@ -172,8 +170,8 @@ public:
     CHAR* getSrc() { return m_szSrc; }
     CHAR* getDst() { return m_szDst; }
     INT getID() { return m_nID; }
-    INT getSrcLen() { return m_nSrcLen; }
     CRCFAliasData* getNextData() { return m_pNext; }
+    BOOL isMatchSrc(const CHAR* pszLabel) { return !strncmp(pszLabel, m_szSrc, m_nSrcLen); }
 };
 
 void _loadDbgRcfSceneInfo();
@@ -1048,7 +1046,7 @@ CHAR* _getRCFAlias(const CHAR* pInData, CHAR* szOut, INT* pOutID) {
     }
     pRet = __null;
     for (pData = s_pAliasList; pData; pData = pData->getNextData()) {
-        if (!strncmp(szLabel, pData->getSrc(), pData->getSrcLen())) {
+        if (pData->isMatchSrc(szLabel)) {
             strcpy(szOut, pData->getDst());
             pRet = (CHAR*)p + 1;
             if (pOutID) {
