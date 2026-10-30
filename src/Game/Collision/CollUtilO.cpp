@@ -57,7 +57,68 @@ static inline FLOAT _distance(FVECTOR& v, const FVECTOR& p0, const FVECTOR& p1) 
     return _sqrtf(InnerProduct(v));
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", _detectSpherePoly3__9CCollUtilR16CSphereCollisionR15CPoly3Collision);
+INT CCollUtil::_detectSpherePoly3(CSphereCollision& sphereColl0, CPoly3Collision& poly3Coll1) {
+    INT ret;
+    FVECTOR sphereWS;
+    FVECTOR sphereWE;
+    FVECTOR vec;
+    FVECTOR vec0;
+    FVECTOR vec2; // MATCH: vec2/norm2 declared before vec1/norm1 (the ref's order swaps their stack slots)
+    FVECTOR vec1;
+    FVECTOR norm;
+    FVECTOR norm0;
+    FVECTOR norm2;
+    FVECTOR norm1;
+    FLOAT d;
+    FLOAT t1;
+
+    poly3Coll1.m_outWE = poly3Coll1.m_inWE;
+    m_pCheckColl->m_inWS = poly3Coll1.m_inWS;
+    m_pCheckColl->m_inWE = poly3Coll1.m_inWE;
+    m_pCheckColl->m_Radius = poly3Coll1.m_Radius;
+    m_fgSliding = 0;
+    while (!(ret = _detectSphereSphere(sphereColl0, *(CSphereCollision*)m_pCheckColl)) && (m_pCheckColl->m_inWS = poly3Coll1.m_BasePos, !(ret = _detectSphereSphere(sphereColl0, *(CSphereCollision*)m_pCheckColl))) &&
+           (m_pCheckColl->m_inWE = poly3Coll1.m_inWS, !(ret = _detectSphereSphere(sphereColl0, *(CSphereCollision*)m_pCheckColl)))) {
+        sphereWS = sphereColl0.m_inWE;
+        sphereWS.y += sphereColl0.m_shiftY;
+        sphereWE = sphereWS;
+        sphereWS.y -= sphereColl0.m_Radius;
+        sphereWE.y += sphereColl0.m_Radius;
+        SubVector(vec0, poly3Coll1.m_inWS, poly3Coll1.m_BasePos);
+        SubVector(vec1, poly3Coll1.m_BasePos, poly3Coll1.m_inWE);
+        OuterProduct(norm, vec1, vec0);
+        if (norm.x == 0.0f && norm.y == 0.0f && norm.z == 0.0f) goto end;
+        d = InnerProduct(norm, poly3Coll1.m_BasePos);
+        t1 = InnerProduct(norm, sphereWS) - d;
+        t1 = -t1 / InnerProduct(norm);
+        ScaleVector(vec, norm, t1);
+        AddVector(vec, sphereWS, vec);
+        OuterProduct(norm0, norm, vec0);
+        SubVector(vec0, vec, poly3Coll1.m_BasePos);
+        if (InnerProduct(norm0, vec0) < 0.0f) goto end;
+        OuterProduct(norm1, norm, vec1);
+        SubVector(vec1, vec, poly3Coll1.m_inWE);
+        if (InnerProduct(norm1, vec1) < 0.0f) goto end;
+        SubVector(vec2, poly3Coll1.m_inWE, poly3Coll1.m_inWS);
+        OuterProduct(norm2, norm, vec2);
+        SubVector(vec2, vec, poly3Coll1.m_inWS);
+        if (InnerProduct(norm2, vec2) < 0.0f) goto end;
+        m_pCheckColl->m_inWE = vec;
+        ret = _detectSphereSphere(sphereColl0, *(CSphereCollision*)m_pCheckColl);
+        break;
+    }
+end:
+    if (!ret) return 0;
+hit:
+    m_vCk2.w = 1.0f;
+    m_vNormal.w = 1.0f;
+    poly3Coll1.m_outWE = m_vCk2;
+    poly3Coll1.m_outNormal = m_vNormal;
+    sphereColl0.m_outNormal = m_vNormal;
+    poly3Coll1.m_outDetect = m_vDetect;
+    sphereColl0.m_outDetect = m_vDetect;
+    return 1;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", _detectColumnPoly3__9CCollUtilR16CColumnCollisionR15CPoly3Collision);
 /* Near match (the original sets up the distanceLineO arguments after the p0/p1 copies), kept for reference: */
 #if 0
