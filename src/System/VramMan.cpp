@@ -1,3 +1,4 @@
+#define MODELDATA_H_TEXINFO_CTOR /* MATCH: reqTransTex declares a TexInfo local (constructor memsets it) */
 #include "System/VramMan.h"
 #include "System/Graphic/Gprim.h"
 #define MODEL_H_PATH "System/Graphic/model.h"
@@ -35,42 +36,42 @@ int WaitSema(int sid);
 extern INT SCREEN_HEIGHT;
 extern INT DISP_HEIGHT;
 
-struct VTransInfo {
-    UINT _nDistPos;
-    USHORT _nFormat;
-    USHORT _nDistBufW;
-    ULONGLONG* _pImage;
-    UINT _qwImage;
-    USHORT _nDistX;
-    USHORT _nDistY;
-    USHORT _nDistW;
-    USHORT _nDistH;
-    USHORT _nTw;
-    USHORT _nTh;
-    UINT _nTransSize;
-};
+#include "System/Graphic/TexInfo.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class CTexAnm;
 
-struct TexInfo {
-    ULONGLONG _nTPage;
-    VTransInfo _TexInfo;
-    VTransInfo _ClutInfo;
-    TexInfo* _pExtendInfo0;
-    TexInfo* _pExtendInfo1;
-    TexInfo* _pExtendInfo2;
-    UBYTE _nInfoType;
-    UBYTE _nType;
-    UBYTE _nParam;
-    UBYTE _nFlag;
-    float _fOfs[2];
-    CHAR* _pName;
-    CTexAnm* _pTexAnm;
-    INT _nTexSize;
-    INT _nClutSize;
 
-    TexInfo() { memset(this, 0, sizeof(TexInfo)); }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "System/Graphic/PackMan.h"
 

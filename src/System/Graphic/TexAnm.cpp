@@ -13,40 +13,40 @@ extern "C" int rand();
 /* non-volatile: the size load may be scheduled before it (CModelTexAnm::setup) */
 #define RET_ADDR_NV() ({ UINT nRA; __asm__("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-struct VTransInfo {
-    UINT _nDistPos;
-    USHORT _nFormat;
-    USHORT _nDistBufW;
-    ULONGLONG* _pImage;
-    UINT _qwImage;
-    USHORT _nDistX;
-    USHORT _nDistY;
-    USHORT _nDistW;
-    USHORT _nDistH;
-    USHORT _nTw;
-    USHORT _nTh;
-    UINT _nTransSize;
-};
+#include "System/Graphic/TexInfo.h"
 
-struct TexInfo {
-    ULONGLONG _nTPage;
-    VTransInfo _TexInfo;
-    VTransInfo _ClutInfo;
-    TexInfo* _pExtendInfo0;
-    TexInfo* _pExtendInfo1;
-    TexInfo* _pExtendInfo2;
-    UBYTE _nInfoType;
-    UBYTE _nType;
-    UBYTE _nParam;
-    UBYTE _nFlag;
-    float _fOfs[2];
-    CHAR* _pName;
-    CTexAnm* _pTexAnm;
-    INT _nTexSize;
-    INT _nClutSize;
 
-    CHAR* getName() { return _pName; }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct TexInfoStub {
     union {

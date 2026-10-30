@@ -31,26 +31,26 @@ class CRsrcData;
 
 
 
-struct VTransInfo {
-    UINT _nDistPos;
-    USHORT _nFormat;
-    USHORT _nDistBufW;
-    ULONGLONG* _pImage;
-    UINT _qwImage;
-    USHORT _nDistX;
-    USHORT _nDistY;
-    USHORT _nDistW;
-    USHORT _nDistH;
-    USHORT _nTw;
-    USHORT _nTh;
-    UINT _nTransSize;
-};
+#include "System/Graphic/TexInfo.h"
 
-struct TexInfo {
-    ULONGLONG _nTPage;
-    VTransInfo _TexInfo;
-    VTransInfo _ClutInfo;
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
