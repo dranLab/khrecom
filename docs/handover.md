@@ -9,8 +9,7 @@ V1-V6) and `CLAUDE.md`.
 - `main` clean (last commit: `docs: regenerate partials`); `tools/check.sh` exits 0 on main.
 - Totals (check.sh): 12135 functions decompiled in 662 files; 588 files complete, 74 not.
   Libraries: 916/985 functions in 153 files (134 complete).
-- `partials.py --summary`: PARTIAL 981, MATCH 140; foreign stand-ins 129 (77 files, was 323 at the start of the
-  previous session); padding 26 arrays; mechanisms 959 sites (909 untagged); classes complete 575, superset 129,
+- `partials.py --summary`: see `docs/partials.md` (PARTIAL about 930, foreign stand-ins 102 in 68 files; they were 323 two sessions ago); padding 26 arrays; mechanisms 959 sites (909 untagged); classes complete 575, superset 129,
   partial 93, gated 92, missing 9.
 - Units of the "never attempted" table are done except the ones below (every remaining function there is either
   parked or noted `Not attempted:` with the reason). Local leftovers, not part of the work: `stash@{0}` (old
@@ -39,6 +38,12 @@ Second session (cleanup batches, all merged; scripts `build/batch_swap.sh <Class
 | Rcf.h | 23 of 24 CRcf stand-ins replaced (DebugMenu keeps its own RcfSceneInfo/RcfMapInfo; cc1plus fails silently) |
 | RsrcDB.h (R3) | `NAME_CASE` + `struct RsrcInfo;` live in RsrcDB.h, which no longer includes RsrcData.h/Task.h; RsrcData.h includes it and holds PackedRsrcHeader/CRsrcIMZ; 66 CRsrcDB and 30 NAME_CASE stand-ins replaced (stand-ins -96) |
 
+Third round (item 2 of the suggestions, merged): `Game/Collision/CollInfo.h` (COLL_INFO_UNION; `CCollObj::getDetectInfo`
+returns it, TriangleIK keeps INT via `COLLOBJ_H_INFO_AS_INT`), the partial `CMovement` and `MOVEMENT_H_FULL_CLASS` are gone
+(191 call sites moved to the real `setFlag/setCollisionFlag(set, mask)`, `setVel/setScl/setPos`), `Game/CardKindEnum.h` (full
+`CARD_KIND`) with `GimmickManager.h` ungated and 7 `DropPrize` stand-ins replaced, `System/Graphic/TexInfo.h` (one TexInfo/VTransInfo
+for Gprim.h, modeldata.h and 9 units; TexCtrl reads the flag bits itself, MATCH).
+
 Kept stand-ins with a `PARTIAL: stand-in for ...` reason: MSVideo CPause (`_ref(getResult)` scheduling), TexCtrl CRsrcDB
 (CRsrcList typedef clash), MovieScript CTextWnd (assembler crash), DebugMenu CRcf.
 
@@ -53,10 +58,8 @@ Per-unit and per-cleanup logs: `build/progress/<Unit-dashes>.md`, `build/progres
      `TaskMan.h` includers are among them, but 15 more originals have it without our TaskMan.h include
      (BtlReportCtrl, GameOver, LevelUp, TitleReportDllStarter, WorldCard, BulletManager, BaseGimmick, ...), so the
      partition is not decided by the evidence: ask the user before moving `CTaskSLCManager`.
-   - `Game/Gimmick/GimmickManager.h` (`DropPrize`): needs the `CARD_KIND` enum unified first (3 headers).
    - `ShadowModel.h` (`CShadowModelMan`, 3 files use its private statics): complete the class in the ShadowModel unit's
-     finish hook; `CPlayerDRiku`/`CPrize`/`C2DSeq` (virtual order differs); `COLL_INFO_UNION` (6 stand-ins + 7 unit
-     copies, needs a header and `COLLOBJ_H_INFO_UNION` unified); `TexInfo`/`VTransInfo` (Gprim.h vs modeldata.h).
+     finish hook; `CPlayerDRiku`/`CPrize`/`C2DSeq` (virtual order differs).
 2. **Units that still have functions never attempted** (all large, each 300-670 instructions):
 
    | Unit | not attempted | note |
