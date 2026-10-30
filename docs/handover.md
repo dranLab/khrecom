@@ -6,49 +6,54 @@ V1-V6) and `CLAUDE.md`.
 
 ## Where things stand
 
-- `main` at `dd4e3af`, clean; `tools/check.sh` exits 0 on main.
-- Totals (check.sh): 12131 functions decompiled in 662 files; 588 files complete, 74 not.
+- `main` at `3337009`, clean; `tools/check.sh` exits 0 on main.
+- Totals (check.sh): 12135 functions decompiled in 662 files; 588 files complete, 74 not.
   Libraries: 916/985 functions in 153 files (134 complete).
-- `partials.py --summary`: PARTIAL 1023, MATCH 136; foreign stand-ins 323 (120 files); padding 30 arrays;
-  mechanisms 958 sites (911 untagged); classes complete 573, superset 129, partial 94, gated 93, missing 9.
-- All units of `plan-big-units.md` are done. Units are now taken in the order "most asm left among units that still
-  have never-attempted functions".
-- No git remote: never push. Local leftovers, not part of the work: `stash@{0}` (old Game-Entity WIP) and the
-  untracked `docs/plan-partials-prompt.md`; leave both alone.
+- `partials.py --summary`: PARTIAL 992, MATCH 138; foreign stand-ins 299 (113 files); padding 26 arrays;
+  mechanisms 958 sites (911 untagged); classes complete 574, superset 129, partial 93, gated 93, missing 9.
+- Units of the "never attempted" table are done except the ones below (every remaining function there is either
+  parked or noted `Not attempted:` with the reason). Local leftovers, not part of the work: `stash@{0}` (old
+  Game-Entity WIP) and the untracked `docs/plan-partials-prompt.md` (never `git add docs` blindly: use file names).
 
 ## Done in the last session (all merged into main)
 
 | Item | Result |
 |---|---|
-| Game/Collision/CollUtilO | 15/16 from C (`_detectColumnColumnEz` parked); CCollUtil all ref methods in CollUtilA.h; COLL_CUBE/MCD_INFO/OCD_WORK moved there; MainApp's CCollUtil copy removed |
-| System/MainApp | +5 matched (`_VBlankStartHandler`, `_initFntTbl`, `_halt`, `_mainProc`, `_mainLoop`); `setSysPause` parked; 5 stand-ins replaced; MainApp.h SOFTRESET_MODE/CMainApp in ref form |
-| Game/Enemy/HumanBoss | +2 matched (`enemyCardProc`, `stockActProc`); `setupCardRevolver` drafted and parked; 7 parked in total; ENEMY_PARAM `iEnemyCard`/`byEnemyCards` fields |
-| Cleanup batches | WorldEnv.h (PackMan), PadIO/Movie/PlaySpeedCtrl (MainApp), Player.h (6 files) |
+| Cleanup BattleEnemyManager.h | 11 stand-ins replaced (`build/swap_keep.py` keeps the line layout with blank lines) |
+| Cleanup CardBattle.h | full `CCardRevolver` moved from CardRevolver.h into CardBattle.h (ref owner); partial copy and its gate removed (PARTIAL -30, duplicates -1) |
+| Cleanup Atel.h | 7 stand-ins replaced; `friend class CEntityFactory` (MATCH) for the protected static `createAvatar`; DebugWindowTBL's ATP/Actor/CVSM stand-ins now in `namespace ATEL` |
+| Cleanup JMemoFlag.h | 6 stand-ins replaced |
+| Game/Movement | `detectWall_` matched (permuter found the statement order; 4 plain C moves); constructor parked (named statics vs the original's constant-pool loads, 54/143), `calcPos_` stays parked (5 lines) |
+| System/Graphic/FrecFont | `getDispSize` matched; `makePkt` noted `Not attempted:` (656 instr, stack-heavy MMI colour code) |
+| System/Graphic/2d/2DSprObj | `initForSeq` parked at 20/342 lines (prologue schedule + sway block); `move` noted `Not attempted:` (flow written in the note) |
+| Game/Collision/CollUtil | `distanceLine` matched with the distanceLineO levers (`for (;;)` + `break`, `_sqrtfE`, one `l2` temp, `g = f1*f1; g -= 1.0f;`) |
 
 Per-unit and per-cleanup logs: `build/progress/<Unit-dashes>.md`, `build/progress/cleanup-*.md`.
 
 ## Next steps, in plan order
 
-1. **Between-units cleanup batch (A3):** top of `partials.py --queue` is `Game/Enemy/BattleEnemyManager.h`
-   (11 stand-in files, R1). Then `Game/CardBattle.h`, `Game/Atel/Atel.h`, `Game/Gimmick/GimmickManager.h`, ...
+1. **Between-units cleanup batch (A3):** top of `partials.py --queue` is `Game/Atel/VSME.h` (6 stand-in files), then
+   `Game/Game.h`, `System/Buf.h` (5 files, owner Form/Menu/SaveLoadUtil), `System/Graphic/ShadowModel.h`, ...
+   Skipped on purpose: `Game/Gimmick/GimmickManager.h` (`DropPrize` stand-ins use `INT Kind`; the real struct needs
+   the `CARD_KIND` enum, which is defined partially in three headers - unify that enum first).
    One queue item per gap between units.
-2. **Next unit** (start hook A1, functions, finish hook A2 parts 1+2). Units with never-attempted functions:
+2. **Units that still have functions never attempted** (all large, each 300-670 instructions):
 
-   | Unit | not attempted | INCLUDE_ASM left |
+   | Unit | not attempted | note |
    |---|---|---|
-   | Game/Movement | 2 | 3 |
-   | System/Graphic/FrecFont | 2 | 3 |
-   | System/Graphic/PathData | 2 | 2 |
-   | System/Graphic/2d/2DSprObj | 2 | 2 |
-   | System/Graphic/ShadowModel | 1 | 2 |
-   | System/Graphic/HermitePathCamera | 1 | 1 |
+   | Game/Movement | constructor (listed as "not attempted": leftovers.py misses constructors in drafts) | parked 54/143 |
+   | System/Graphic/FrecFont | makePkt (656) | see its `Not attempted:` note |
+   | System/Graphic/PathData | getNearPath (586), dispDebugLine (489) | |
+   | System/Graphic/2d/2DSprObj | move (438) | flow in its note |
+   | System/Graphic/ShadowModel | getScreenAreaClipToWorldPos (671) | drawBefore parked |
+   | System/Graphic/HermitePathCamera | updatePos (632) | |
 
    After these, every remaining function is parked: revisit parked drafts with the levers below
-   (`tools/leftovers.py game|lib` lists them with their `Parked:` notes).
-3. Candidate follow-up: CollUtil's parked `distanceLine` (215/506) has the same layout as CollUtilO's
-   `distanceLineO`, matched with the loop-rotation levers below.
+   (`tools/leftovers.py game|lib` lists them with their `Parked:` notes). Near misses worth another look:
+   2DSprObj `initForSeq` 20/342, Movement `calcPos_` 5 lines (`move t0,v0` / `move s2,v0` around the last two
+   detect calls), CollUtil's other parked functions (`_detectOCD` 2 lines, `detectMap`, `detectMCInit`).
 
-## Parked functions touched last session (diff lines / total)
+## Parked functions touched in earlier sessions (diff lines / total)
 
 - HumanBoss: `initalize` 4/71 (setEntityFlag vs getParam schedule), `setStockCard` 6/97 (reorg/cross-jump of the
   return-FALSE paths), `itemCardProc` 15/269 (first rollDeck tail cross-jumped; tail shapes tried),
@@ -71,6 +76,17 @@ Per-unit and per-cleanup logs: `build/progress/<Unit-dashes>.md`, `build/progres
 - **Reloads:** `volatile` globals (`_nVWaitCount`) or volatile reads of a pointer/field where the original reloads.
 - **Cross-jump shapes:** two identical tails where the original merges only part: write the last copy as
   `if ((x & 1) == 0) { ...; return TRUE; } return FALSE;` and the earlier one the other way round.
+
+- **Bitfield test as a value:** `BOOL b = m_status.x_stop; if (b) ...` gives the original's `dsll/dsra32/andi 1`
+  extraction instead of a plain `andi` (2DSprObj initForSeq).
+- **Duplicate arms the original keeps:** write the arms inside one case with preloaded locals
+  (`FIX4 ww = prim.m_Size; FIX4 sp = space.x; if (!b) x += A; else x += A;`); an inline helper lets gcc cross-jump them.
+- **Reuse a variable for the intermediate:** `nStyle &= 7;` before the loop (register reuse of the style word),
+  `FIX4 xNew = x + d; x = xNew;` (temp + move), `g = f1*f1; g -= 1.0f;` (product and difference share a register),
+  `USHORT nPPW` for a byte width that keeps `if (n < base) n++` as a branch.
+- **Signed vs unsigned compares:** `UINT c` with `switch ((INT)c)` gives sltiu for range tests and slti inside the switch.
+- **permuter on a member function:** `build/progress/Game/Player/permute_method.py <unit> <name> <mangled>` needs a name
+  that the source regex finds: use the bare method name (`CMovement`, not `CMovement::CMovement`).
 
 ## Working rules (unchanged)
 
