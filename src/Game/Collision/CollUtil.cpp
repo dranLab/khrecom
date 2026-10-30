@@ -342,7 +342,122 @@ static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", __detectMCInitInit_Check__FP7MC_DATAf);
 #endif
+extern char D_004892F8[]; /* PRIM_INFO overflow message */
+extern char D_00489310[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.cpp" */
+extern char D_00489340[]; /* "m_PrimInfoIdx < PRIM_INFO_MAX" */
+extern char D_00489360[]; /* "m_PrimInfoIdx2 < PRIM_INFO2_MAX" */
+static inline INT _dotN(FVECTOR& v) {
+    u_long128 ret;
+    INT iTmp;
+    asm volatile("lqc2 $vf4, 0x0(%1)\n"
+                 "vmulax.x $ACC, $vf21, $vf4x\n"
+                 "vmadday.x $ACC, $vf22, $vf4y\n"
+                 "vmaddz.x $vf4, $vf23, $vf4z\n"
+                 "qmfc2.ni %0, $vf4" : "=r"(ret) : "r"(&v));
+    asm("sll %0, %1, 0" : "=r"(iTmp) : "r"(ret));
+    return iTmp;
+}
+static inline FLOAT _dotNf(FVECTOR& v) {
+    INT iTmp;
+    FLOAT ret;
+    asm volatile("lqc2 $vf4, 0x0(%1)\n"
+                 "vmulax.x $ACC, $vf21, $vf4x\n"
+                 "vmadday.x $ACC, $vf22, $vf4y\n"
+                 "vmaddz.x $vf4, $vf23, $vf4z\n"
+                 "qmfc2.ni %0, $vf4" : "=r"(iTmp) : "r"(&v));
+    asm("mtc1 %1, %0" : "=f"(ret) : "r"(iTmp));
+    return ret;
+}
+/* Parked: 48 of 185 lines, 4 bytes long - structure, frame (unused primInfo/primInfo2/v0 locals) and VU0 blocks as the
+   original; left: the t-register numbering of pMCData/iCnt/entryCnt/pPrimInfo2 (t0/t1/t2/a3 there) and one extra
+   instruction. hill.py over the setup statements and a 5 min permuter run (14.5k candidates) gain 1 line. */
+#if 0
+void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
+    FVECTOR vCk0;
+    FVECTOR vCk1;
+    FVECTOR vCkM;
+    FVECTOR vCkVec;
+    MC_DATA* pMCData;
+    USHORT* pPrimIdx;
+    INT iCnt;
+    MC_PRIM* pPrim;
+    PRIM_INFO primInfo;
+    PRIM_INFO2 primInfo2;
+    INT entryCnt;
+    PRIM_INFO2* pPrimInfo2;
+    FVECTOR& _vCkS0 = m_vCkS0;
+    FVECTOR& _vCkE = m_vCkE;
+    asm volatile("lqc2 $vf4, 0x0(%0)\n"
+                 "lqc2 $vf5, 0x0(%1)\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf4x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf4y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf4z\n"
+                 "vmaddw.xyzw $vf4, $vf11, $vf4w\n"
+                 "vmulax.xyzw $ACC, $vf8, $vf5x\n"
+                 "vmadday.xyzw $ACC, $vf9, $vf5y\n"
+                 "vmaddaz.xyzw $ACC, $vf10, $vf5z\n"
+                 "vmaddw.xyzw $vf6, $vf11, $vf5w\n"
+                 "vmaddaw.xyzw $ACC, $vf11, $vf5w\n"
+                 "vmsubw.xyzw $vf5, $vf4, $vf0w\n"
+                 "sqc2 $vf4, 0x0(%2)\n"
+                 "sqc2 $vf6, 0x0(%3)\n"
+                 "sqc2 $vf5, 0x0(%4)" : : "r"(&_vCkS0), "r"(&_vCkE), "r"(&vCk0), "r"(&vCk1), "r"(&vCkVec) : "memory");
+    pMCData = (MC_DATA*)pChip->data;
+    pPrimInfo2 = &m_pPrimInfo2[m_PrimInfoIdx2];
+    entryCnt = 0;
+    pPrimIdx = &pMCData->prim[pMCData->tbl[iArea][0]];
+    iCnt = pMCData->tbl[iArea][1];
+    for (; iCnt; iCnt--, pPrimIdx++) {
+        FVECTOR v0;
+        FVECTOR v1;
+        FVECTOR* pN0;
+        FLOAT d0;
+        pPrim = &pMCData->prim4[*pPrimIdx];
+        if (!m_fgCamera && pPrim->info < 0) continue;
+        pN0 = &pMCData->norm[pPrim->n0];
+        asm volatile("lqc2 $vf21, 0x0(%0)\n"
+                     "vaddy.x $vf22, $vf0, $vf21y\n"
+                     "vaddz.x $vf23, $vf0, $vf21z" : : "r"(pN0));
+        if (_dotN(vCkVec) >= 0) continue;
+        if (m_SphereDetectFg) {
+            asm volatile("lqc2 $vf5, 0x0(%0)\n"
+                         "lqc2 $vf4, 0x0(%1)\n"
+                         "qmtc2.ni %2, $vf6\n"
+                         "vaddax.xyzw $ACC, $vf5, $vf0x\n"
+                         "vmsubx.xyzw $vf4, $vf4, $vf6x\n"
+                         "sqc2 $vf4, 0x0(%3)" : : "r"(&vCk1), "r"(pN0), "r"(m_Radius), "r"(&v1) : "memory");
+        } else {
+            v1 = vCk1;
+        }
+        d0 = -pN0->w;
+        if (d0 < _dotNf(v1)) continue;
+        if (_dotNf(vCk0) < d0) continue;
+        entryCnt++;
+        PRIM_INFO* pPrimInfo = &m_pPrimInfo[m_PrimInfoIdx];
+        pPrimInfo->pPrim = pPrim;
+        pPrimInfo->pInfo2 = pPrimInfo2;
+        pPrimInfo->fgLine = 0;
+        m_PrimInfoIdx++;
+    }
+    if (entryCnt) {
+        m_PrimInfoIdx2++;
+        pPrimInfo2->pMatLW = &pChip->matLW;
+        pPrimInfo2->vLS = vCk0;
+        pPrimInfo2->vLE = vCk1;
+        pPrimInfo2->vLVec = vCkVec;
+        pPrimInfo2->pNorm = pMCData->norm;
+        pPrimInfo2->pMcChip = pChip;
+        pPrimInfo2->pVert = pMCData->vert;
+    }
+    if (!(m_PrimInfoIdx < 0x240)) {
+        TRACE(D_004892F8);
+        if (!(m_PrimInfoIdx < 0x240)) AssertApp(D_00489310, 818, D_00489340, 0);
+    }
+    if (!(m_PrimInfoIdx2 < 0x40)) AssertApp(D_00489310, 819, D_00489360, 0);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMCInit__9CCollUtilP7MC_CHIPi);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _detectMCD__9CCollUtilR10CCollision);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMap__9CCollUtilP7FVECTORT1);
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectPolygon__9CCollUtil);
