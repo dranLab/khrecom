@@ -61,9 +61,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1024 (942 in 109 headers, 82 in 35 .cpp); MATCH: 128
-  by category: method 401, data member 68, type 88, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 42, guessed 41, header-level 74, stand-in 35, other 6
-stand-ins: 339 foreign in 120 files (91 names), 201 unattributed, 170 own
+PARTIAL: 1023 (942 in 109 headers, 81 in 35 .cpp); MATCH: 128
+  by category: method 401, data member 68, type 88, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 42, guessed 41, header-level 74, stand-in 34, other 6
+stand-ins: 338 foreign in 120 files (90 names), 201 unattributed, 170 own
 duplicate class names across headers: 25
 padding: 31 arrays, 26 accessors
 mechanisms: 958 sites (916 untagged); #line: 1238
@@ -79,7 +79,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 2.0 | `System/Graphic/WorldEnv.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CWorldEnv (1 complete) |  |
 | R0 | 2.0 | `System/Movie/Movie.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMovie (1 complete) |  |
 | R0 | 2.0 | `System/PadIO.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPadIO (1 complete) |  |
 | R0 | 2.0 | `System/PlaySpeedCtrl.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlaySpeedCtrl (1 complete) |  |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
 | R1 | 4.5 | `Game/Collision/CollBody.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users, 1 PARTIAL | CCollBody (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 4.5 | `System/Graphic/MotData.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CMotData (1 partial) | inline bodies or virtuals |
+| R1 | 4.0 | `Form/Menu/Camp.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CCamp (1 complete) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -184,7 +184,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CSummon` | partial | Game/Player/Summon.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CTaskMan` | superset | System/TaskMan.h | 1 |  | 3 PARTIAL |
-| `CWorldEnv` | complete | System/Graphic/WorldEnv.h | 1 |  |  |
 | `CZFill` | partial | System/Graphic/DeFocus.h | 1 | System/Graphic/GprimFull.h | missing methods: ~CZFill |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `F_UL` | complete | Game/Atel/VSME.h | 1 |  |  |
