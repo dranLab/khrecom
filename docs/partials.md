@@ -63,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 982 (912 in 110 headers, 70 in 38 .cpp); MATCH: 140
   by category: method 381, data member 67, type 85, fwd decl 53, #include 32, changed in place 132, padding 27, path override 24, gate 41, guessed 39, header-level 74, stand-in 21, other 6
-stand-ins: 133 foreign in 77 files (55 names), 201 unattributed, 170 own
+stand-ins: 132 foreign in 77 files (54 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 959 sites (909 untagged); #line: 1242
@@ -95,10 +95,10 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.5 | `System/Graphic/2d/2DSeq.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | C2DSeq (1 superset) | inline bodies or virtuals |
 | R1 | 2.5 | `System/RsrcDB.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CRsrcDB (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
-| R1 | 2.0 | `Form/Menu/Roulette.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRoulette (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/LockOnManager.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CLockOnManager (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/MinigameManager.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMinigameManager (1 complete) | inline bodies or virtuals |
+| R1 | 2.0 | `Game/Player/Friend.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFriend (1 partial) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -142,7 +142,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPoly3Collision` | gated | Game/Collision/CollObj.h | 1 |  |  |
 | `CPolyGT4` | superset | System/Graphic/GprimFull.h | 1 |  | virtual order differs |
 | `CRcf` | complete | System/Rcf.h | 1 |  |  |
-| `CRoulette` | complete | Form/Menu/Roulette.h | 1 |  |  |
 | `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
 | `CRsrcDB` | partial | System/RsrcDB.h | 1 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene; 1 PARTIAL |
 | `CRsrcTex` | gated | System/RsrcData.h | 1 |  |  |
@@ -188,7 +187,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Form/DebugWindow.h` | 0 | 2/1/0/4 | 11 |
 | `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 17 |
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
-| `Form/Menu/Menu.h` | 0 | 0/0/1/0 | 18 |
+| `Form/Menu/Menu.h` | 0 | 0/0/1/0 | 19 |
 | `Form/Menu/SaveLoadCtrl.h` | 14 | 1/1/6/0 | 7 |
 | `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 2 |
 | `Form/Menu/TechHelp.h` | 2 | 0/1/0/0 | 3 |
