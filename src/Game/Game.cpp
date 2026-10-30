@@ -76,14 +76,14 @@ public:
     static INT m_nResult;
 };
 
-class CCamp : public CTask {
-private:
-    BYTE _pad[0x1b80 - 0x40];
+#include "Form/Menu/Camp.h"
 
-public:
-    CCamp(CTask* pParent, INT nMode);
-    static void removeRsrc();
-};
+
+
+
+
+
+
 
 #include "Form/Menu/SaveLoad.h"
 
