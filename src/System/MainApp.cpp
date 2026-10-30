@@ -157,14 +157,7 @@ public:
     static INT setupDbgPlaySpeed();
 };
 
-class CPadIO {
-public:
-    static void initialize();
-    static void finalize();
-    static void mainProc(INT nTickCount, INT nTQ);
-    static INT isButtonDown(UINT nButton, UINT nPort);
-    static INT isButtonTrg(UINT nButton, UINT nPort);
-};
+#include "System/PadIO.h"
 
 #include "System/VramMan.h"
 
@@ -191,12 +184,7 @@ public:
 #include "System/Sound/SoundMan.h"
 #line 229
 
-class CMovie {
-public:
-    static void initialize();
-    static void finalize();
-    static void draw();
-};
+#include "System/Movie/Movie.h"
 
 class CGameWork {
 public:
@@ -240,10 +228,7 @@ public:
     static void enableTopDebugWindow(INT bEnable);
 };
 
-class CPlaySpeedCtrl {
-public:
-    static void setPlaySpeed(FLOAT fSpeed);
-};
+#include "System/PlaySpeedCtrl.h"
 
 class CCollObj {
 public:
