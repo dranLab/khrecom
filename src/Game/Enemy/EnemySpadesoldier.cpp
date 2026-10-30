@@ -27,12 +27,12 @@ inline void _roulettePrizeMessage() {
 #include "Game/GameWork.h"
 #include "System/TaskMan.h"
 
+#include "Game/MessageManager.h"
 namespace Message {
-class CMessageManager {
-public:
-    static CMessageManager& getInstance();
-    BOOL sendMessage(TIMEQ inDelay, HANDLE inSender, HANDLE inReceiver, INT inMsg, void* inExtraInfo);
-};
+
+
+
+
 }
 
 #include "Game/Enemy/BattleEnemyManager.h"
