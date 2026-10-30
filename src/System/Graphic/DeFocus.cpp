@@ -151,7 +151,38 @@ FIX4 CBlurPrim::calcZ() {
     }
     return m_nCalcZOfs + 0xffffc08;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", setTSspriteScissor32__FP6QWdataiiiiiiii);
+extern INT SCREEN_HEIGHT;
+/* one A+D qword (register address addr, value data) */
+static inline void _setAD(QWdata* qp, u_long data, u_long addr) {
+    u_long128 out128;
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(out128) : "r"(data), "r"(addr));
+    *(u_long128*)qp = out128;
+}
+QWdata* setTSspriteScissor32(QWdata* qp, FIX4 ofsx, FIX4 ofsy, INT width, INT height, FIX4 u0, FIX4 v0, FIX4 u1, FIX4 v1) {
+    INT cnt;
+    INT scix0;
+    INT scix1;
+    INT i;
+    cnt = width / 32;
+    scix0 = 0;
+    scix1 = 31;
+    for (i = 0; i < cnt; i++) {
+        _setAD(qp, (u_long)scix0 | ((u_long)scix1 << 16) | ((u_long)(height - 1) << 48), 0x41);
+        qp++;
+        _setAD(qp, (u_long)u0 | ((u_long)v0 << 16), 3);
+        qp++;
+        _setAD(qp, (u_long)(ofsx + ((0x800 - 0x200 / 2) << 4)) | ((u_long)((((0x800 - SCREEN_HEIGHT / 2) << 4)) + ofsy) << 16), 4);
+        qp++;
+        _setAD(qp, (u_long)u1 | ((u_long)v1 << 16), 3);
+        qp++;
+        _setAD(qp, (u_long)(((width + (0x800 - 0x200 / 2)) << 4) + ofsx) | ((u_long)(((height + (0x800 - SCREEN_HEIGHT / 2)) << 4) + ofsy) << 16), 4);
+        qp++;
+        scix0 += 32;
+        scix1 += 32;
+    }
+    _setAD(qp, ((u_long)(width - 1) << 16) | ((u_long)(height - 1) << 48), 0x41);
+    return qp + 1;
+}
 union PRIMIVECTOR {
     struct {
         SHORT x;
@@ -160,7 +191,6 @@ union PRIMIVECTOR {
     };
     ULONGLONG ul64;
 };
-extern INT SCREEN_HEIGHT;
 QWdata* set_csprite64(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, INT ScrW, INT ScrH) {
     PRIMIVECTOR pv[2];
     int i;
