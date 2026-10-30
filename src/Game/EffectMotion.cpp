@@ -56,14 +56,14 @@ inline BOOL EET_HEADER::addrMapping() {
 #include "System/Math3D.h"
 #include "Game/Entity.h"
 
-class CMotData {
-private:
-    char m_Name[16];
-    UBYTE _m_0x10[0x14];
+#include "System/Graphic/MotData.h"
 
-public:
-    CHAR* GetName() { return m_Name; }
-};
+
+
+
+
+
+
 
 class CRsrcData {
 private:
