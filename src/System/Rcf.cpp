@@ -201,7 +201,7 @@ volatile BOOL s_bThreadEnable;
 ULONG s_nReadRsrcID;
 INT s_nReadGroup;
 volatile INT s_nReadFileSize;
-INT s_nLinkOwnerGroup;
+volatile INT s_nLinkOwnerGroup; /* volatile: _parseRCF_EntryFile reloads it in a bnezl slot (thread-shared, like s_nReadStep) */
 INT s_nFilePtr;
 INT s_nReadThreadID;
 INT s_RcfSemaID;
@@ -877,9 +877,13 @@ INT CRcf::getRsrcFileSize(ULONG nID) {
 INT CRcf::getCdStatus() {
     return 0;
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _parseRCF_EntryFile_c(ULONG nGroup, INT nType) {
+/* Parked: 28 of 169 lines, same size - the 0x7F (sound list) branch's CBuf/RsrcInfo setup: the original loads
+ * s_nReadGroup/s_nLinkOwnerGroup/s_bSceneManagedMode into t2/t0/t1 before the CBuf vtable lui and keeps the
+ * constant 1 in a3; ours schedules the vtable first (t3/t1/t2, t0). Rest matches with s_nLinkOwnerGroup
+ * volatile and `if (s_nLinkOwnerGroup) nGroupID = s_nLinkOwnerGroup;`. Tried: buf/info and szName
+ * declaration order, hill.py over the info assignments, permuter 6 min. */
+#if 0
+INT _parseRCF_EntryFile(ULONG nGroup, INT nType) {
     char szFilePath[256];
     INT nRsrcID;
     INT nGroupID;
@@ -916,12 +920,21 @@ __attribute__((section(".sdata"))) INT _parseRCF_EntryFile_c(ULONG nGroup, INT n
     if (!pData) {
         _parseRCF_FirstEntryFile(szFilePath, szName, nGroupID, nRsrcID);
     } else {
-        CRsrcDB::addRsrcTag(*pData, s_nLinkOwnerGroup ? s_nLinkOwnerGroup : nGroupID, s_bSceneManagedMode);
+        if (s_nLinkOwnerGroup) {
+            nGroupID = s_nLinkOwnerGroup;
+        }
+        CRsrcDB::addRsrcTag(*pData, nGroupID, s_bSceneManagedMode);
     }
     _skipLine();
     return 0;
 }
+#else
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) void _parseRCF_EntryFile_strings(INT n) {
+    TRACE("%07d%07d");
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRCF_EntryFile__FUii);
+#endif
 /* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
 __asm__(".section .sdata\n");
 __attribute__((section(".sdata"))) void _parseRCF_FirstEntryFile_c(CHAR* szFilePath, CHAR* szName, INT nGroupID, INT nRsrcID) {
