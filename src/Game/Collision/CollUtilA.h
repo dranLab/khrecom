@@ -18,7 +18,10 @@ struct EventTrapData {
 class CCollision;
 
 struct MC_PRIM {
-    /* 0x00 */ INT info;
+    /* 0x00 */ union {
+        INT info;
+        unsigned char infoB[4];
+    };
     /* 0x04 */ SHORT n0;
     /* 0x06 */ SHORT n1;
     /* 0x08 */ SHORT n2;
@@ -71,7 +74,10 @@ struct MC_DATA {
 };
 
 struct MC_CHIP {
-    /* 0x00 */ UINT id;
+    /* 0x00 */ union {
+        UINT id;
+        UINT fgDisable;
+    };
     /* 0x04 */ UINT flag;
     /* 0x08 */ UINT idx;
     /* 0x0c */ BYTE* data;
