@@ -185,11 +185,11 @@ public:
     static void setBossCamID(INT inID);
 };
 }
+#include "Game/LockOnManager.h"
 namespace LockOnManager {
-class CLockOnManager { /* PARTIAL: Game/LockOnManager.h is not included here */
-public:
-    static BOOL registerLockOnObject(HANDLE inHandle);
-};
+
+
+
 }
 #include "Game/Player/PlayerGauge.h"
 
