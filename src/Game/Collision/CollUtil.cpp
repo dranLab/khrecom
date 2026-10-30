@@ -62,6 +62,16 @@ void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q);
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+static inline FLOAT _sqrtf(FLOAT x) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
+    return ret;
+}
+static inline FLOAT _distance(FVECTOR& v, const FVECTOR& p0, const FVECTOR& p1) {
+    SubVector(v, p0, p1);
+    return _sqrtf(InnerProduct(v));
+}
 
 struct MCD_HEADER {
     unsigned char code[4];
@@ -459,7 +469,80 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMCInit__9CCollUtilP7MC_CHIPi);
 #endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _detectMCD__9CCollUtilR10CCollision);
+/* Parked: 39 of 213 lines, 4 bytes long - two passes, renew test and info merge as the original; left: the pPrimInfo2/i
+   init order and an extra delay-slot load at the second pass, the attr byte's `andi` copy (a0) and the return-1 block
+   (the original sets v0 after the m_pDetectMatA/ChipA/NormalA stores). */
+#if 0
+INT CCollUtil::detectMap(FVECTOR* pWS, FVECTOR* pWE) {
+    FVECTOR vecT;
+    PRIM_INFO2* pPrimInfo2;
+    INT i;
+    FMATRIX* pMatLW;
+    INT fgRenewInfo;
+    if (m_PrimInfoIdx) {
+        pPrimInfo2 = NULL;
+        for (i = 0, m_pPrimInfoCurrent = m_pPrimInfo; i < m_PrimInfoIdx; i++, m_pPrimInfoCurrent++) {
+            if (m_pPrimInfoCurrent->pInfo2 != pPrimInfo2) {
+                pPrimInfo2 = m_pPrimInfoCurrent->pInfo2;
+                m_vCk0 = pPrimInfo2->vLS;
+                m_vCk1 = pPrimInfo2->vLE;
+                m_vCkVec = pPrimInfo2->vLVec;
+            }
+            if (detectPolygon()) break;
+        }
+        if (i == m_PrimInfoIdx && m_SphereDetectFg) {
+            pPrimInfo2 = NULL;
+            for (i = 0, m_pPrimInfoCurrent = m_pPrimInfo; i < m_PrimInfoIdx; i++, m_pPrimInfoCurrent++) {
+                if (!m_pPrimInfoCurrent->fgLine) continue;
+                if (m_pPrimInfoCurrent->pInfo2 != pPrimInfo2) {
+                    pPrimInfo2 = m_pPrimInfoCurrent->pInfo2;
+                    m_vCk0 = pPrimInfo2->vLS;
+                    m_vCk1 = pPrimInfo2->vLE;
+                    m_vCkVec = pPrimInfo2->vLVec;
+                    m_CkVecl = InnerProduct(m_vCkVec);
+                    m_CkVecl2 = _sqrtf(m_CkVecl);
+                }
+                if (detectPLine()) break;
+                if (detectPSphere()) break;
+            }
+        }
+    }
+    if (i == m_PrimInfoIdx) return 0;
+    pMatLW = pPrimInfo2->pMatLW;
+    ApplyMatrix(*pWE, *pMatLW, m_vCk1);
+    vecT = m_vNormal;
+    vecT.w = 0.0f;
+    ApplyMatrix(vecT, *pMatLW, vecT);
+    if (vecT.y <= 0.64278764f) m_DetectStatus = 1;
+    fgRenewInfo = 1;
+    if (!m_fgSliding || m_vNormal2.y <= 0.64278764f || m_vNormal2.y <= vecT.y) {
+        m_vNormal2 = vecT;
+        ApplyMatrix(m_vDetect2, *pMatLW, m_vDetect);
+    } else {
+        fgRenewInfo = 0;
+    }
+    if (fgRenewInfo) {
+        if (!m_iInfo2.infoPID) {
+            m_iInfo2.info = (m_iInfo2.info & 0xFF00) | (m_iInfo.info & 0xFFFF00FF);
+        } else {
+            m_iInfo2.info = (m_iInfo2.info & 0x00FFFF00) | (m_iInfo.info & 0xFF0000FF);
+        }
+    }
+    BYTE attr = m_iInfo.infoATTR;
+    if (!attr) return 1;
+    if (m_iInfo2.infoATTR) return 1;
+    m_iInfo2.infoATTR = attr;
+    if (attr == 6) {
+        m_vNormal2.set(0.0f, 0.0f, 1.0f, 0.0f);
+    }
+    m_pDetectMatA = m_pPrimInfoCurrent->pInfo2->pMatLW;
+    m_pDetectChipA = m_pPrimInfoCurrent->pInfo2->pMcChip;
+    m_vNormalA = m_pPrimInfoCurrent->pInfo2->pNorm[m_pPrimInfoCurrent->pPrim->n0];
+    return 1;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMap__9CCollUtilP7FVECTORT1);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectPolygon__9CCollUtil);
 INT CCollUtil::detectPLine() {
     PRIM_INFO2* pPrimInfo2 = m_pPrimInfoCurrent->pInfo2;
@@ -474,15 +557,6 @@ INT CCollUtil::detectPLine() {
         return FALSE;
     } while (0);
     return TRUE;
-}
-static inline FLOAT _sqrtf(FLOAT x) {
-    FLOAT ret;
-    asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
-    return ret;
-}
-static inline FLOAT _distance(FVECTOR& v, const FVECTOR& p0, const FVECTOR& p1) {
-    SubVector(v, p0, p1);
-    return _sqrtf(InnerProduct(v));
 }
 /* Parked: 215 of 506 lines, 52 bytes long - first draft, structure decoded (closest points of the two segments, two
    normal/offset branches, four range checks, slidingHosei). Left: the original keeps pP0/pP1 in stack slots, lays the
