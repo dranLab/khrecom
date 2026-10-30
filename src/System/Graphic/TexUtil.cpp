@@ -1,4 +1,4 @@
-#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
+#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: Gprim.h strings in .rodata use the full path */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/TexUtil.h"
 #include "System/Buf.h"
