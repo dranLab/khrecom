@@ -327,7 +327,7 @@ BOOL _bSetupManagers;
 }
 
 INT _mainLoop(); // INCLUDE_ASM: declared extern (static in the original)
-INT _mainProc(INT nTcount, TIMEQ nTQ); // INCLUDE_ASM: declared extern (static in the original)
+static INT _mainProc(INT nTcount, TIMEQ nTQ);
 static void _coldReset(BOOL bNTSC);
 static void _initPS2();
 static void _loadIopModules();
@@ -432,10 +432,7 @@ static INT _mainLoop() {
 }
 #endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", _mainProc__Fii);
-__asm__(".section .sdata\n");
-/* placeholder for _mainProc (INCLUDE_ASM): its string; near match (one register swap at the g_dw.sys.m_HeapDispDetail test) */
-__attribute__((section(".sdata"))) INT _mainProc_placeholder(INT nTcount, TIMEQ nTQ) {
+static INT _mainProc(INT nTcount, TIMEQ nTQ) {
     BOOL bPause;
     USHORT pc;
     USHORT dc;
