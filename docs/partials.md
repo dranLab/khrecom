@@ -63,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1023 (942 in 109 headers, 81 in 35 .cpp); MATCH: 128
   by category: method 401, data member 68, type 88, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 42, guessed 41, header-level 74, stand-in 34, other 6
-stand-ins: 338 foreign in 120 files (90 names), 201 unattributed, 170 own
+stand-ins: 335 foreign in 120 files (87 names), 201 unattributed, 170 own
 duplicate class names across headers: 25
 padding: 31 arrays, 26 accessors
 mechanisms: 958 sites (916 untagged); #line: 1238
@@ -79,9 +79,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 2.0 | `System/Movie/Movie.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMovie (1 complete) |  |
-| R0 | 2.0 | `System/PadIO.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPadIO (1 complete) |  |
-| R0 | 2.0 | `System/PlaySpeedCtrl.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlaySpeedCtrl (1 complete) |  |
 | R1 | 29.0 | `Game/Player/Player.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 34 PARTIAL | CPlayer (1 partial) | inline bodies or virtuals |
 | R1 | 22.0 | `Game/Enemy/BattleEnemyManager.h` | ready | 11 stand-in files, 0 dup headers, 0 gate users | CBattleEnemyManager (1 complete) | inline bodies or virtuals |
 | R1 | 17.5 | `Game/CardBattle.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users, 29 PARTIAL | CCardRevolver (1 partial) | inline bodies or virtuals |
@@ -99,6 +96,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 4.5 | `Game/Collision/CollBody.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users, 1 PARTIAL | CCollBody (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 4.5 | `System/Graphic/MotData.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CMotData (1 partial) | inline bodies or virtuals |
 | R1 | 4.0 | `Form/Menu/Camp.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CCamp (1 complete) | inline bodies or virtuals |
+| R1 | 4.0 | `Form/Menu/Pause.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
+| R1 | 4.0 | `Game/MessageManager.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMessageManager (1 complete) | inline bodies or virtuals |
+| R1 | 4.0 | `Game/Player/PlayerDRiku.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPlayerDRiku (1 superset) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -165,12 +165,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CMemocaAgent` | complete | Form/Menu/SaveLoadUtil.h | 1 |  |  |
 | `CMemocaDataEntries` | superset | Form/Menu/SaveLoadUtil.h | 1 |  | extra methods: setNoSpace |
 | `CMinigameManager` | complete | Game/MinigameManager.h | 1 |  |  |
-| `CMovie` | complete | System/Movie/Movie.h | 1 |  |  |
 | `CMovieScript` | complete | System/Movie/MovieScript.h | 1 |  |  |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
-| `CPadIO` | complete | System/PadIO.h | 1 |  |  |
-| `CPlaySpeedCtrl` | complete | System/PlaySpeedCtrl.h | 1 |  |  |
 | `CPlayerCamera` | gated | Game/Player/PlayerCamera.h | 1 |  |  |
 | `CPlayerRiku` | superset | Game/Player/PlayerRiku.h | 1 |  | virtual order differs |
 | `CPlayerSora` | superset | Game/Player/PlayerSora.h | 1 |  | virtual order differs |
@@ -380,7 +377,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/MainApp.h` | 5 | 0/0/0/2 | 270 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 59 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 6 |
-| `System/PadHandler.h` | 0 | 0/0/1/0 | 94 |
+| `System/PadHandler.h` | 0 | 0/0/1/0 | 95 |
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
 | `System/RsrcData.h` | 3 | 0/0/0/32 | 29 |
 | `System/SJoint.h` | 9 | 0/0/0/0 | 200 |
