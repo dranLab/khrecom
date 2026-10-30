@@ -14,11 +14,9 @@ inline void* operator new(size_t, void* p) throw() { return p; }
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL)
 
-struct MCD_INFO {
-    BYTE _m[0x20];
-};
-struct OCD_WORK;
+#include "Game/Collision/Ride.h"
 
+/* PARTIAL: stand-in for Game/Movement COLL_INFO_UNION: owner not written */
 union COLL_INFO_UNION {
     INT info;
     struct {
@@ -27,22 +25,6 @@ union COLL_INFO_UNION {
         BYTE infoPID;
         BYTE infoSTAT;
     };
-};
-
-class CRide : public CCollObj { /* Game/Collision/CollRide.h */
-public:
-    class CRiderList* m_pRiderList; /* 0x14 */
-private:
-    INT m_fgOnLook; /* 0x18 */
-public:
-    void setFgOnLook(INT fg) { m_fgOnLook = fg; }
-};
-
-class CRideModel : public CRide {
-public:
-    MCD_INFO m_MCDInfo;    /* 0x1c */
-    FMATRIX* m_pMatIOld;   /* 0x3c */
-    OCD_WORK* m_pOCDWork;  /* 0x40 */
 };
 
 class CMCSemiModel : public CSJointT<CMCSemiModel> {
