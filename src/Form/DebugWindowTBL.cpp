@@ -70,19 +70,19 @@ public:
     static FLOAT m_fADensity;
 };
 
-class CActorDebug : public CTask {
-public:
-    CDebugWindow* m_pWindow;
-    CActorDebug(CTask* p);
-    virtual ~CActorDebug();
-    virtual void main();
-};
 
-class CEventLineDisp : public CTask {
-public:
-    CEventLineDisp(CTask* p);
-    virtual ~CEventLineDisp();
-};
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* CGimmickProbDebug: Game/Gimmick/GimmickManager.h */
 
@@ -112,44 +112,44 @@ public:
     static CRsrcData* seekNextRsrc();
 };
 
-namespace ATEL { struct ATP {
-    USHORT tag_count;
-    char name[32];
-    int tname[64];
-    unsigned short loc[64];
-    SHORT id;
-    BYTE* Dseg;
-    INT Freg;
-    USHORT next_address;
-    USHORT wait_timer;
-    SHORT wait_key;
-    USHORT rq_lv;
-    SHORT rq_tag;
-    SHORT rq_m_actor;
-    SHORT status;
-    USHORT address;
-};
+#include "Game/Atel/VSME.h"
 
-struct Actor {
-    INT _nID;
-    INT _nRsrcID;
-    INT _GroupID;
-    INT _nMembarID;
-    void* _pAvatar;
-    void* _pEventTrap;
-    ATP _ATP;
-    FLOAT _fTalkableRadius;
-};
 
-class CVSM {
-public:
-    UBYTE _pad0[0x34];
-    INT m_ActorCount;
-    UBYTE _pad38[0x38];
-    Actor m_ActorTbl[64];
-    INT getActorCount() { return m_ActorCount; }
-    Actor* getActor(INT i) { return &m_ActorTbl[i]; }
-}; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "Game/Atel/Atel.h"
 
@@ -806,7 +806,7 @@ static INT debugWinNPCListAllCall(CDebugWindow* pObj, INT inParam) {
         CTask* pA = CTaskMan::getSysTask(0x1A);
         INT ret = 0;
         if (pA && ((CAtel*)pA)->getVSM()) {
-            ret = ((CAtel*)pA)->getVSM()->getActorCount();
+            ret = ((CAtel*)pA)->getVSM()->getActorNum();
         }
         return ret;
     }
@@ -816,7 +816,7 @@ static INT debugWinNPCListAllCall(CDebugWindow* pObj, INT inParam) {
 static INT debugWinNPCListDispCall(LPSTR pStr, INT iLineY, const void* pValue) {
     CTask* pA = CTaskMan::getSysTask(0x1A);
     if (pA && ((CAtel*)pA)->getVSM()) {
-        sprintf(pStr, " %s", ((CAtel*)pA)->getVSM()->getActor(iLineY)->_ATP.name);
+        sprintf(pStr, " %s", ((CAtel*)pA)->getVSM()->getAvatarName(iLineY));
     }
     return TRUE;
 }

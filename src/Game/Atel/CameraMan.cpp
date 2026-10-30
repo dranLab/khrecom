@@ -16,24 +16,24 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #include "Game/Atel/Avatar.h"
 
+#include "Game/Atel/VSME.h"
 namespace ATEL {
 
-struct Actor { /* 0x1dc */
-    INT _nID;
-    INT _nRsrcID;
-    INT _GroupID;
-    INT _nMembarID;
-    CAvatar* _pAvatar; /* 0x10 */
-    UBYTE _m_0x14[0x1c8];
-};
 
-class CVSM {
-    UBYTE _m_0x0000[0x70];
-    Actor m_ActorTbl[64]; /* 0x70 */
 
-public:
-    CAvatar* getAvatar(INT nIdx) { return m_ActorTbl[nIdx]._pAvatar; }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 } // namespace ATEL
 

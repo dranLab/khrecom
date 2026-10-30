@@ -36,39 +36,39 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #define ATEL_NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", ATEL_RET_ADDR())) T
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
+#include "Game/Atel/VSME.h"
 namespace ATEL {
 
-class CVSM {
-private:
-    UBYTE _pad[0x7d08];
 
-public:
-    CVSM(CAtel& atel, INT n);
-    virtual ~CVSM();
-    void loadFromMem(const BYTE* pAddr);
-    BOOL isFlagOn(INT nFlag) const;
-    void clearFlag(INT nFlag);
-    void execInit();
-    void exec(INT nTime);
-    INT getActorIndex(const CHAR* pszName) const;
-    void AtelEventSkip();
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct AvatarModelDispParam {
     INT _iNo;
     INT _nState;
 };
 
-struct Actor {
-    INT _nID;
-    INT _nRsrcID;
-    INT _GroupID;
-    INT _nMembarID;
-    CAvatar* _pAvatar;
-    CEventTrap* _pEventTrap;
-    UBYTE _ATP[0x1c0];
-    FLOAT _fTalkableRadius;
-};
+
+
+
+
+
+
+
+
+
+
 
 CFadeIOMask* s_pFadeIOMask[2] = {NULL, NULL};
 
@@ -182,8 +182,8 @@ BOOL CAtel::createAvatar(INT nRsrcID, Actor& act, INT flag) {
     CEntity* pEntity = CEntityFactory::getInstance()->createEntity(10, nRsrcID, this, NULL);
     act._pAvatar = pEntity ? (CAvatar*)((BYTE*)pEntity - 0x10) : NULL;
     if (act._pAvatar) {
-        AVATAR_INT(act._pAvatar, 0x1e4) = *(SHORT*)&act._ATP[0x1a4];
-        AVATAR_INT(act._pAvatar, 0x1e0) = m_pVSM->getActorIndex((CHAR*)&act._ATP[2]);
+        AVATAR_INT(act._pAvatar, 0x1e4) = act._ATP.id;
+        AVATAR_INT(act._pAvatar, 0x1e0) = m_pVSM->getActorIndex(act._ATP.name);
         act._pAvatar->InitAvatar(flag);
         param._iNo = 0;
         param._nState = 3;

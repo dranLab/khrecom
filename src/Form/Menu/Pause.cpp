@@ -31,12 +31,12 @@ public:
 };
 }
 
-namespace ATEL {
-class CVSM {
-public:
-    void AtelEventSkip();
-};
-}
+#include "Game/Atel/VSME.h"
+
+
+
+
+
 
 #include "System/Graphic/PackMan.h"
 
