@@ -17,6 +17,7 @@ extern CFadeIOMask* s_pFadeIOMask[2];
 }  // namespace ATEL
 
 class CAtel : public CTask, public CFSM {
+    friend class CEntityFactory; // MATCH: the original's CEntityFactory::createEntity calls the protected static createAvatar
 private:
     INT m_nFsmState;                 /* 0x6c */
     ATEL::CVSM* m_pVSM;              /* 0x70 */
