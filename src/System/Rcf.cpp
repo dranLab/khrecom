@@ -1036,9 +1036,7 @@ CHAR* _getRCFAlias(const CHAR* pInData, CHAR* szOut, INT* pOutID) {
     }
     return pRet;
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _parseFileType_c(const CHAR* pInData) {
+INT _parseFileType(const CHAR* pInData) {
     INT nType = 0xFF;
     const CHAR* p;
     char szTmp[16];
@@ -1050,20 +1048,18 @@ __attribute__((section(".sdata"))) INT _parseFileType_c(const CHAR* pInData) {
             break;
         }
     }
-    if (nType) {
-        return nType;
-    }
-    p++;
-    nType = 0xFF;
-    if (*p == '(') {
+    if (!nType) {
         p++;
-        if (_getRCFAlias(p, szTmp, &nID)) {
-            nType = nID;
+        nType = 0xFF;
+        if (*p == '(') {
+            p++;
+            if (_getRCFAlias(p, szTmp, &nID)) {
+                nType = nID;
+            }
         }
     }
     return nType;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseFileType__FPCc);
 INT CRcf::getMapID(SHORT nArea, SHORT nScene) {
     RcfSceneInfo* pScene = getSceneInfo(nArea, nScene);
     RcfMapInfo* pMap;
