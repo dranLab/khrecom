@@ -368,6 +368,11 @@ void _makeFontPkt(const _FontInfo& font, USHORT nCode, FIX4 x, FIX4 y, FIX4 w, F
     }
 }
 
+/* Not attempted: 656 instructions whose locals all live in stack slots (nStyle, bDebugMode, nPalette, space, the
+ * colour words ... are stored and reloaded around every use), with PS2 MMI colour arithmetic (pextlb/pmulth/ppacb on
+ * u_long128 ivCol/iMul), a pkOpenGifTag packet, the control-code switch (jump table below) and _makeFontPkt calls;
+ * the stack layout needs the ref's inline-expansion structure (several inline groups with their own iCol/ivCol
+ * parameters) rebuilt first. getDispSize (same control-code loop) is matched and is the model for the loop. */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/FrecFont", makePkt__9CFrecFontR6CFntM2);
 /* placeholder for makePkt's data: the colour table it reads, then its jump table (labels of the included assembly) */
 __asm__(".section .sdata\n");
@@ -389,19 +394,168 @@ __asm__(
     ".word .L00126A28\n"
     ".text\n");
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/FrecFont", getDispSize__9CFrecFontR4G_XYRC6CFntM2P4G_XYPi);
-/* placeholder for getDispSize's jump table */
-__asm__(
-    ".rdata\n"
-    ".align 4\n"
-    ".word .L001272EC\n"
-    ".word .L00127314\n"
-    ".word .L00127314\n"
-    ".word .L00127380\n"
-    ".word .L00127348\n"
-    ".word .L00127364\n"
-    ".word .L00127364\n"
-    ".text\n");
+INT CFrecFont::getDispSize(G_XY& outSize, const CFntM2& prim, G_XY* pLineSize, INT* pNumCharcter) {
+    UINT nStyle = prim.m_Style;
+    INT nFontType = (nStyle & 0x1000) >> 12;
+    BOOL bDebugMode = nStyle & 0x8000;
+    if (nFontType >= s_nAvailableFontTypes) {
+        return 0;
+    }
+    _FontInfo& font = s_FontInfo[nFontType];
+    if (!font._pSjisCnvTbl) {
+        return 0;
+    }
+    BYTE* pStr = (BYTE*)prim.getText();
+    if (!pStr) {
+        return 0;
+    }
+    INT nLine = 1;
+    INT nChar = 0;
+    FIX4 xOld = 0;
+    FIX4 xMax = 0;
+    FIX4 x = 0;
+    FIX4 w = prim.m_Size;
+    FIX4 h = w;
+    INT nBaseSize = font._nFontSize;
+    BOOL bIsBaseW = (w >> 4) == nBaseSize;
+    G_XY space = prim.m_Space;
+    FIX4 y = h + space.y;
+    G_XY* pLs = pLineSize;
+    if (pLs) {
+        pLs->x = 0x80000000;
+    }
+    BOOL bHalfSpaceExt = !(nStyle & 0x9000);
+    while (*pStr) {
+        USHORT c = *pStr++;
+        USHORT nSJIS;
+        if (c < 0x80) {
+            if (c <= 0x20) {
+                switch (c) {
+                case 9:
+                    {
+                        FIX4 ww = prim.m_Size;
+                        FIX4 sp = space.x;
+                        if (!bHalfSpaceExt) {
+                            x += ((ww >> 1) + sp) << 2;
+                        } else {
+                            x += (ww / 2 + sp) << 2;
+                        }
+                    }
+                    break;
+                case 0x20:
+                    {
+                        FIX4 ww = prim.m_Size;
+                        FIX4 sp = space.x;
+                        if (!bHalfSpaceExt) {
+                            x += (ww >> 1) - (ww >> 3) + sp;
+                        } else {
+                            x += (ww >> 1) - (ww >> 3) + sp;
+                        }
+                    }
+                    break;
+                case 10:
+                    if (xMax < x) xMax = x;
+                    if (pLs) {
+                        pLs->y = x;
+                        pLs++;
+                        pLs->x = 0x80000000;
+                    }
+                    x = 0;
+                    nLine++;
+                    y += h + space.y;
+                    break;
+                }
+                continue;
+            } else {
+                if (bDebugMode) w = h >> 1;
+                nSJIS = c;
+            }
+        } else {
+            USHORT c2 = *pStr;
+            if (c2) pStr++;
+            if (c >= 0xF9) {
+                switch (c2) {
+                case 0x40:
+                    x = xOld;
+                    break;
+                case 0x42:
+                    {
+                        FIX4 t = x - 2;
+                        x = t - space.x;
+                    }
+                    break;
+                case 0x43:
+                case 0x44:
+                case 0x45:
+                    x += 0x10 << (c2 - 0x43);
+                    break;
+                default:
+                    if (c2 >= 0x80) {
+                        if (c2 < 0x98) x += 0x200;
+                        else if (c2 < 0xA0) x += 0x280;
+                        else x += 0x180;
+                    }
+                    break;
+                }
+                continue;
+            }
+            nSJIS = (c << 8) | c2;
+            if (nSJIS == 0x8140) {
+                x += ((prim.m_Size >> 1) + space.x) << 1;
+                continue;
+            }
+            if (bDebugMode) w = h;
+        }
+        USHORT nCode = _fromSJIS(font, nSJIS);
+        if (pLs && pLs->x == 0x80000000) pLs->x = x;
+        xOld = x;
+        if (bDebugMode) {
+            x += w;
+        } else {
+            USHORT nPPW = font._pFontWidthTbl[nCode];
+            if (nPPW < nBaseSize) nPPW++;
+            FIX4 xNew;
+            if (bIsBaseW) xNew = x + (nPPW << 4);
+            else xNew = x + nPPW * w / nBaseSize;
+            x = xNew;
+        }
+        nChar++;
+        x += space.x;
+    }
+    if (!(x < xMax)) xMax = x;
+    outSize.x = xMax;
+    outSize.y = y - space.y;
+    if (pLs) {
+        pLs->y = x;
+        nStyle &= 7;
+        for (INT i = 0; i < nLine; i++) {
+            switch (nStyle) {
+            case 1:
+                pLineSize[i].x = -outSize.x;
+                pLineSize[i].y -= outSize.x;
+                break;
+            case 2:
+            case 3:
+                pLineSize[i].y -= outSize.x >> 1;
+                pLineSize[i].x -= outSize.x >> 1;
+                break;
+            case 5:
+                pLineSize[i].x = -pLineSize[i].y;
+                pLineSize[i].y = 0;
+                break;
+            case 6:
+            case 7: {
+                FIX4 hv = pLineSize[i].y >> 1;
+                pLineSize[i].x = -hv;
+                pLineSize[i].y = hv;
+                break;
+            }
+            }
+        }
+    }
+    if (pNumCharcter) *pNumCharcter = nChar;
+    return nLine;
+}
 
 UINT CFrecFont::getPacketSize(const CFntM2& prim) {
     INT nLen = prim.getLength();
