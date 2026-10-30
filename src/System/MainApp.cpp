@@ -171,14 +171,7 @@ extern "C" char _gp[];
 
 #include "System/Movie/Movie.h"
 
-class CGameWork {
-public:
-    static void coldReset();
-    static void initialize();
-    static void finalize();
-    static INT getInt(UINT nKind, UINT nIdx);
-    static void setInt(UINT nKind, UINT nIdx, INT nValue);
-};
+#include "Game/GameWork.h"
 
 #include "System/FileIO.h"
 
