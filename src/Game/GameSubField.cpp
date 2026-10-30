@@ -73,10 +73,10 @@ public:
     static BOOL isCompleteLoadRCF(INT nNum0, INT nNum1);
 };
 
-class CBattleEnemyManager { /* Game/Enemy/BattleEnemyManager.h */
-public:
-    static void clearBeforeFormation();
-};
+#include "Game/Enemy/BattleEnemyManager.h"
+
+
+
 
 class CAtel { /* Game/Atel/Atel.h */
 public:

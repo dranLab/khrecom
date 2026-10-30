@@ -81,12 +81,12 @@ public:
     static BOOL isCompleteLoadRCF(INT nNum0, INT nNum1);
 };
 
-class CBattleEnemyManager { /* Game/Enemy/BattleEnemyManager.h */
-private:
-    UBYTE _pad[0xD0]; /* PARTIAL: the original derives from CTask */
-public:
-    CBattleEnemyManager(CTask* pParent);
-};
+#include "Game/Enemy/BattleEnemyManager.h"
+
+
+
+
+
 
 class CAtel { /* Game/Atel/Atel.h */
 public:
