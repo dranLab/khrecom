@@ -23,26 +23,26 @@ public:
 
 using namespace D2;
 
-/* System/Graphic/modeldata.h (its inline functions' strings are not in this object) */
-struct VTransInfo {
-    UINT _nDistPos;
-    USHORT _nFormat;
-    USHORT _nDistBufW;
-    ULONGLONG* _pImage;
-    UINT _qwImage;
-    USHORT _nDistX;
-    USHORT _nDistY;
-    USHORT _nDistW;
-    USHORT _nDistH;
-    USHORT _nTw;
-    USHORT _nTh;
-    UINT _nTransSize;
-};
-struct TexInfo {
-    ULONGLONG _nTPage;
-    VTransInfo _TexInfo;
-    VTransInfo _ClutInfo;
-};
+#include "System/Graphic/TexInfo.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 

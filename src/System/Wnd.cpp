@@ -36,12 +36,12 @@ inline void* operator new(size_t size, char* msg) throw() {
     return com_malloc_d(size, msg, RET_ADDR());
 }
 
-/* (only the texture size: System/Graphic/modeldata.h's strings are not in this object) */
-struct TexInfo {
-    UBYTE _m_0x00[0x1c];
-    USHORT _nDistW; /* 0x1c _TexInfo._nDistW */
-    USHORT _nDistH; /* 0x1e _TexInfo._nDistH */
-};
+#include "System/Graphic/TexInfo.h"
+
+
+
+
+
 
 class CPolyGT4 : public CGTexPrim {
 public:
@@ -1168,8 +1168,8 @@ void CImageWndPH::init_c(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& si
             delete pPoly;
             return;
         }
-        USHORT w = pTexInfo->_nDistW - 1;
-        USHORT h = pTexInfo->_nDistH - 1;
+        USHORT w = pTexInfo->_TexInfo._nDistW - 1;
+        USHORT h = pTexInfo->_TexInfo._nDistH - 1;
         USHORT h2 = 0;
         USHORT w2 = 0;
         if (fgFlip & 1) {
@@ -1191,8 +1191,8 @@ void CImageWndPH::init_c(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& si
     }
     TexInfo* pTexInfo = m_pPolyGT4->getTexInfo();
     if (!pTexInfo) return;
-    USHORT tw = pTexInfo->_nDistW;
-    USHORT th = pTexInfo->_nDistH;
+    USHORT tw = pTexInfo->_TexInfo._nDistW;
+    USHORT th = pTexInfo->_TexInfo._nDistH;
     if (pos0.m_x != (INT)0x80000000) {
         m_initPos.x = pos0.m_x - 256;
         m_initPos.y = pos0.m_y - _screenHeight() / 2;

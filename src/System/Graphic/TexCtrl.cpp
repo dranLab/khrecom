@@ -12,45 +12,45 @@ TIM2_PICTUREHEADER* Tim2GetPictureHeader(void* pTim2, int imgno);
 void* Tim2GetImage(TIM2_PICTUREHEADER* ph, int mipmap);
 }
 
-struct VTransInfo {
-    UINT _nDistPos;
-    USHORT _nFormat;
-    USHORT _nDistBufW;
-    ULONGLONG* _pImage;
-    UINT _qwImage;
-    USHORT _nDistX;
-    USHORT _nDistY;
-    USHORT _nDistW;
-    USHORT _nDistH;
-    USHORT _nTw;
-    USHORT _nTh;
-    UINT _nTransSize;
-};
+#include "System/Graphic/TexInfo.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "System/Graphic/TexAnm.h"
 #line 49
 
-struct TexInfo {
-    ULONGLONG _nTPage;
-    VTransInfo _TexInfo;
-    VTransInfo _ClutInfo;
-    TexInfo* _pExtendInfo0;
-    TexInfo* _pExtendInfo1;
-    TexInfo* _pExtendInfo2;
-    UBYTE _nInfoType;
-    UBYTE _nType;
-    UBYTE _nParam;
-    UBYTE _nFlag;
-    float _fOfs[2];
-    CHAR* _pName;
-    CTexAnm* _pTexAnm;
-    INT _nTexSize;
-    INT _nClutSize;
 
-    BOOL isFixTex() { return _nFlag & 1; }
-    BOOL isFixClut() { return _nFlag & 2; }
-    BOOL isFix() { return _nFlag & 3; }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct TexMemScroll {
     INT m_UvTime;
@@ -333,11 +333,11 @@ static void _transPrefixTex(INT nRsrcType) {
         if (!pInfo) {
             continue;
         }
-        if (pInfo->isFix()) {
-            if (pInfo->isFixTex() && pInfo->_TexInfo._pImage) {
+        if (pInfo->_nFlag & 3) { // MATCH: the original reads the flag bits directly (TexInfo::isFix/isFixTex/isFixClut also test the image)
+            if ((pInfo->_nFlag & 1) && pInfo->_TexInfo._pImage) {
                 CPackMan::pkRefLoadImage(pInfo->_TexInfo);
             }
-            if (pInfo->isFixClut() && pInfo->_ClutInfo._pImage) {
+            if ((pInfo->_nFlag & 2) && pInfo->_ClutInfo._pImage) {
                 CPackMan::pkRefLoadImage(pInfo->_ClutInfo);
             }
             if (pInfo->_pTexAnm) {
@@ -367,7 +367,7 @@ void CTexCtrl::addFixTexAnm(CTexAnm* pTexAnm, INT nTexAnm) {
         if (!pInfo) {
             continue;
         }
-        if (!pInfo->isFix()) {
+        if (!(pInfo->_nFlag & 3)) {
             continue;
         }
         for (i = 0; i < nTexAnm; i++) {
@@ -395,7 +395,7 @@ void CTexCtrl::delFixTexAnm(CTexAnm* pTexAnm, INT nTexAnm) {
         if (!pInfo) {
             continue;
         }
-        if (!pInfo->isFix()) {
+        if (!(pInfo->_nFlag & 3)) {
             continue;
         }
         if (!pTexAnm || nTexAnm <= 0) {
