@@ -1363,9 +1363,11 @@ void _getStageInfo(SHORT& nOutGroup, SHORT& nOutMember, CHAR* pOutLabel, INT* pO
     }
     _skipDbgLine();
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) BOOL _loadRcfInfoFile_c(const CHAR* pszFile) {
+/* Parked: 6 of 108 lines, only %hi(s_pDbgFileBuf) - ours computes it into v0 and copies it to s2 (gcse PRE copy),
+ * the original loads it into s2 directly. Tried: plain delete, a CBuf*& reference, return in the success branch,
+ * permuter 5 min. */
+#if 0
+BOOL _loadRcfInfoFile(const CHAR* pszFile) {
     INT nLen;
     BYTE* pBuf;
 
@@ -1388,7 +1390,15 @@ ok:
     pBuf[nLen] = 0;
     return TRUE;
 }
+#else
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) void _loadRcfInfoFile_strings(INT n) {
+    TRACE(__FILE__ "(2257)");
+    if (n) AssertApp(__FILE__, 0, "s_pDbgFileBuf", 0);
+    if (n) AssertApp(__FILE__, 0, "pBuf", 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _loadRcfInfoFile__FPCc);
+#endif
 void _disposeRcfInfoFile() {
     if (s_pDbgFileBuf) delete s_pDbgFileBuf;
     s_pDbgFileBuf = __null;
