@@ -12,7 +12,7 @@
 
 class CPlayer; // PARTIAL: added for Game/Player/PlayerRiku
 class CTask; // PARTIAL: added for Game/CardBattle
-namespace D2 { class C2DSeqCtrl; } // PARTIAL: added for Game/CardBattle
+namespace D2 { class C2DSeqCtrl; class C2DFnt; } namespace CardBattle { class CBattleCard; } class C2DCard; // PARTIAL: added for Game/CardBattle
 namespace Message { class CMessageManager; } // PARTIAL: added for Game/CardBattle
 union FVECTOR; // PARTIAL: added for Game/Player/FriendPluto
 
@@ -288,59 +288,154 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     INT setPronouncePlay(INT inFlag);
 };
 
-#if !defined(GAME_CARDREVOLVER_CPP) && !defined(GAME_CARDBATTLE_CPP) /* full class in Game/CardRevolver.h */
-// PARTIAL: added for Game/Player/FriendKing
-class CCardRevolver {
-    UBYTE _m_0x00[0x4c]; // PARTIAL: added for Game/Enemy/HumanBoss
-    SHORT m_sMode;       /* 0x4c */ // PARTIAL: name unknown
-    UBYTE _m_0x4e[0x1e]; // PARTIAL: added for Game/Player/Player
-    TIMEQ m_tqRollSpeed; /* 0x6c */ // PARTIAL: split out for Game/BattleCard
-    TIMEQ m_tqChargeRate; /* 0x70 */ // PARTIAL: added for Game/CardBattle
-    BOOL m_bActive;      /* 0x74 */ // PARTIAL: added for Game/Player/Player
-    UBYTE _m_0x78[0x64]; /* 0x078 */ // PARTIAL: added for Game/Player/Player (makeRevolver)
-    SHORT m_iStockSkill; /* 0x0dc */ // PARTIAL: split out for Game/BattleCard
-    UBYTE _m_0xde[0x102]; /* 0x0de .. sizeof 0x1e0 */
+class CCardRevolver : public CTask {
 public:
-    CCardRevolver(class CTask* pParent, CARD* inDeck, INT inUser, INT inShortCut); void setDiscard(); // PARTIAL: added for Game/Player/Player
-    INT isActive() const { return m_bActive; } // PARTIAL: added for Game/Player/Player
-    INT getStockSkill() const { return m_iStockSkill; } // PARTIAL: added for Game/BattleCard
-    TIMEQ getRollSpeed() { return m_tqRollSpeed; } // PARTIAL: added for Game/BattleCard
-    INT exeTrapEffect(INT inFlag); // PARTIAL: added for Game/BattleCard
-    void setTrapEffect(); // PARTIAL: added for Game/BattleCard
-    void setStockInfo(); // PARTIAL: added for Game/BattleCard
-    void setNumberEffect(INT inKind); // PARTIAL: added for Game/BattleCard (parameter name guessed)
-    // PARTIAL: added for Game/Enemy/HumanBoss
-    INT getMode() const { return m_sMode; } // PARTIAL: name unknown
-    void setChargeRate(INT inRate) { m_tqChargeRate = inRate; } // PARTIAL: added for Game/CardBattle
-    void setPlayNG(INT inFlag, INT inCategory);
-    INT getRemain(INT inKind, INT inCardKind, INT inFlag);
-    BOOL isEnableCharge();
-    CARD* getActiveCardData();
+    HANDLE m_hOwner;          /* 0x040 */
+    UINT m_uiUser;            /* 0x044 */
+    INT m_iState;             /* 0x048 */
+    SHORT m_iMode;            /* 0x04c */
+    SHORT m_nEnd;             /* 0x04e */
+    short int m_nTotal[2];    /* 0x050 */
+    short int m_nRemain[2];   /* 0x054 */
+    short int m_nActive[2];   /* 0x058 */
+    SHORT m_nLimit;           /* 0x05c */
+    SHORT m_nExtra;           /* 0x05e */
+    SHORT m_nReloadCount;     /* 0x060 */
+    SHORT m_iMax;             /* 0x062 */
+    SHORT m_iChargeCount;     /* 0x064 */
+    SHORT m_iCharge;          /* 0x066 */
+    TIMEQ m_tqCharge;         /* 0x068 */
+    TIMEQ m_tqRollSpeed;      /* 0x06c */
+    TIMEQ m_tqChargeRate;     /* 0x070 */
+    BOOL m_bActive;           /* 0x074 */
+    TIMEQ m_tqTimer;          /* 0x078 */
+    UINT m_uiFlag;            /* 0x07c */
+    TIMEQ m_tqDiscard;        /* 0x080 */
+    TIMEQ m_tqSnatch;         /* 0x084 */
+    HANDLE m_hSnatch;         /* 0x088 */
+    SHORT m_nSnatchCount;     /* 0x08c */
+    SHORT m_nPlutoMark;       /* 0x08e */
+    CBattleCard* m_pCards;    /* 0x090 */
+    CBattleCard* m_pCardsE;   /* 0x094 */
+    CBattleCard* m_pCardsS[7]; /* 0x098 */
+    CBattleCard* m_pActiveCard; /* 0x0b4 */
+    C2DCard* m_pEmpty;        /* 0x0b8 */
+    CARD* m_pDataS[7];        /* 0x0bc */
+    SHORT m_iStock;           /* 0x0d8 */
+    SHORT m_iStockSum;        /* 0x0da */
+    SHORT m_iStockSkill;      /* 0x0dc */
+    SHORT m_iExtraSkill;      /* 0x0de */
+    SHORT m_iFirstSkill;      /* 0x0e0 */
+    SHORT m_iAction;          /* 0x0e2 */
+    SHORT m_nReloadID;        /* 0x0e4 */
+    SHORT m_nShortCutID;      /* 0x0e6 */
+    SHORT m_nAdd;             /* 0x0e8 */
+    SHORT m_nReturn;          /* 0x0ea */
+    SHORT m_nReloadCard;      /* 0x0ec */
+    SHORT dum0;               /* 0x0ee */
+    CARD m_cardAdd[39];       /* 0x0f0 */
+    HANDLE m_hPlaySE;         /* 0x18c */
+    HANDLE m_hChargeSE;       /* 0x190 */
+    INT m_iReloadSEID;        /* 0x194 */
+    UINT m_uiCounterState;    /* 0x198 */
+    UINT m_uiScutState;       /* 0x19c */
+    UINT m_uiCounterFlag;     /* 0x1a0 */
+    D2::C2DSeqCtrl* m_pSeqCtrlCounter;       /* 0x1a4 */
+    D2::C2DSeqCtrl* m_pSeqCtrlTrap;          /* 0x1a8 */
+    D2::C2DSeqCtrl* m_pSeqCtrlCounter_Num01; /* 0x1ac */
+    D2::C2DSeqCtrl* m_pSeqCtrlCounter_Num10; /* 0x1b0 */
+    SHORT m_nOldMode;         /* 0x1b4 */
+    SHORT m_nOldRemain;       /* 0x1b6 */
+    UINT m_uiNumTexID;        /* 0x1b8 */
+    UINT m_uiNumEffState;     /* 0x1bc */
+    D2::C2DSeqCtrl* m_pSeqCtrlNumEff;        /* 0x1c0 */
+    D2::C2DFnt* m_p2DFntStockName;           /* 0x1c4 */
+    UINT m_uiStockState;      /* 0x1c8 */
+    UINT m_uiStockFlag;       /* 0x1cc */
+    UINT m_uiStockCategory;   /* 0x1d0 */
+    D2::C2DSeqCtrl* m_pSeqCtrlStock;         /* 0x1d4 */
+    D2::C2DSeqCtrl* m_pSeqCtrlStock_Num01;   /* 0x1d8 */
+    D2::C2DSeqCtrl* m_pSeqCtrlStock_Num10;   /* 0x1dc */
+
+    CCardRevolver(CTask* pParent, CARD* inDeck, INT inUser, INT inShortCut);
+    virtual ~CCardRevolver();
+    virtual void main();
     void destroy();
-    INT getStock(INT inFlag);
-    BOOL returnStockCard(INT inFlag);
-    void rollDeck(INT inFlag, INT inParam, TIMEQ inTime); void rollShortCut(INT inFlag); // PARTIAL: rollShortCut added for Game/Player/Player
-    BOOL setPlayCard(INT inA, INT inB);
-    BOOL setPlayStock(INT inA, INT inB);
-    void setStockCard(); INT checkBreakCard(INT inNum, INT inZero, BOOL inCheckGreater); // PARTIAL: checkBreakCard added for Game/Enemy/BattleEnemy
-    // PARTIAL: added for Game/Player/PlayerRiku
-    void changeDarkMode(HANDLE inHandle, INT inFlag);
-    // PARTIAL: added for Game/Player/PlayerDRiku
+    void _init();
+    void _initialize(CARD* inDeck, INT inShortCut);
+    void _initCounter();
+    void exeWait();
+    void exeMain();
+    void initReload(INT inMode);
+    void exeReload();
+    void initAction();
+    void exeAction();
+    void initHide();
+    INT exeAddCard();
+    INT exeSnatchCard();
+    void snatchCard();
+    INT returnSnatchCard(INT inNum);
+    INT exeReturnCard();
+    INT exeDiscard();
+    void discard();
+    void setDeck(CARD* pDeck, INT inShortCut);
+    TIMEQ getRollSpeed() const { return m_tqRollSpeed; }
+    void rollDeck(INT inNum, INT inFlag, TIMEQ inTime);
     void changeMode(INT inMode, INT inFlag);
-    INT chargeReloadCard(INT inFlag);
+    void rollShortCut(INT inMode);
+    INT isActive() const { return m_bActive; }
+    CBattleCard* getActiveCard() const;
+    CARD* getActiveCardData();
+    INT setPlayCard(INT inFlag, INT inTest);
+    INT isEnableCharge();
+    INT chargeReloadCard(INT inMode);
+    void setChargeRate(INT inRate) { m_tqChargeRate = inRate; }
+    void setReloadNG() {}
+    INT getMode() const { return m_iMode; }
+    INT getRemain(INT inMode, INT inKind, INT inCategory);
+    INT getHave(INT inCategory, INT inPlay, INT inOwner, INT inReload, INT inNoGimmick);
+    INT checkBreakCard(INT inNum, INT inZero, BOOL inCheckGreater);
+    void setStockCard();
+    INT returnStockCard(INT inFlag);
+    INT setPlayStock(INT inFlag, INT inTest);
+    void setAction(INT inID, INT inNum);
+    void addCard(CARD* pData, INT inReturn);
+    INT isNowAddCount() const { return m_nAdd; }
+    void setNumberEffect(INT inKind);
+    void setPlayNG(INT inFlag, INT inCategory);
+    INT getStock(INT inFlag);
+    INT getReloadID() const { return m_nReloadID; }
+    INT getStockSkill() const { return m_iStockSkill; }
+    void changeOwner(HANDLE inHandle) { m_hOwner = inHandle; }
+    void changeDarkMode(HANDLE inHandle, INT inFlag);
+    INT setPlayerDuelCard(INT inTest);
+    void setPlayerDuelStock(CBattleCard* inCard, UINT inPri);
     INT setPlayerDuelPlayStock();
-    INT setPlayerDuelStock(class CBattleCard* inCard, UINT inPri); // PARTIAL: added for Game/BattleCard
-    INT setPlayerDuelCard(INT inNo);
-    void setAction(INT inAction, INT inParam); INT calcStockSkill(); // PARTIAL: calcStockSkill added for Game/CardBattle
-    // PARTIAL: added for Game/Player/FriendPluto
-    INT getHave(INT inKind, INT inA, INT inB, INT inC, INT inD);
+    void setSnatch(HANDLE inHandle);
+    INT returnSnatch(INT inNum);
+    INT canSnatch();
+    void setTrapEffect();
+    INT exeTrapEffect(INT inFlag);
+    INT setPlayerPronounceCard(INT inTest);
+    void setDiscard();
+    void resetCardOwner(INT inOld, INT inNew);
+    INT isDiscard() { return m_uiFlag & 0x8000; }
     INT calcPlutoMark();
     void dropPlutoMarkCard(const FVECTOR* inPos);
-    void setSnatch(HANDLE inHandle); // PARTIAL: added for Game/Player/Player
-    INT setPlayerPronounceCard(INT inTest); // PARTIAL: added for Game/Player/PlayerSora
-    void addCard(CARD* pData, INT inReturn); void resetCardOwner(INT inOld, INT inNew); // PARTIAL: added for Game/Player/Player
+    void initCounter();
+    void exeCounter();
+    void destroyCounter();
+    void deleteCounter();
+    void _initNumEffect();
+    void exeNumEffect();
+    INT calcStockSkill();
+    void setStockInfo();
+    INT calcEnemyStockSkill();
+    void initStock();
+    void initStockSkillName(D2::C2DSeqCtrl* inSeq);
+    void exeStock();
+    void deleteStock();
 };
-#endif
 }
 
 #endif /* GAME_CARDBATTLE_H */
