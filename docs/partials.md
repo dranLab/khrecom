@@ -61,9 +61,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1039 (957 in 109 headers, 82 in 34 .cpp); MATCH: 114
-  by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 43, guessed 43, header-level 74, stand-in 35, other 6
-stand-ins: 351 foreign in 122 files (101 names), 200 unattributed, 172 own
+PARTIAL: 1038 (957 in 109 headers, 81 in 34 .cpp); MATCH: 114
+  by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 43, guessed 43, header-level 74, stand-in 34, other 6
+stand-ins: 350 foreign in 122 files (100 names), 200 unattributed, 172 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
 mechanisms: 962 sites (924 untagged); #line: 1238
@@ -79,7 +79,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 2.0 | `Game/SceneEnv.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CSceneEnv (1 partial) |  |
 | R0 | 2.0 | `System/CoordMan.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CCoordMan (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/2d/2DLay.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | LAY_SCREEN (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/Effect/libppp/keProg/pppKeLns.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | sceGsStoreImage (1 complete) |  |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
 | R1 | 11.5 | `System/Buf.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users, 3 PARTIAL | CBuf (1 superset) | inline bodies or virtuals |
 | R1 | 9.5 | `Game/Collision/CollUtilA.h` | ready | 1 stand-in files, 0 dup headers, 2 gate users, 11 PARTIAL | CCollUtil (1 partial) |  (gate) |
+| R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -188,7 +188,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
 | `CRsrcTex` | gated | System/RsrcData.h | 1 |  |  |
 | `CRsrcVSV` | gated | System/RsrcData.h | 1 |  | missing methods: getBgmID, getFilePath, getSectorSize, getStartSector, ~CRsrcVSV |
-| `CSceneEnv` | partial | Game/SceneEnv.h | 1 |  | missing methods: clearStop, ~CSceneEnv |
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CSummon` | partial | Game/Player/Summon.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CTaskMan` | superset | System/TaskMan.h | 1 |  | 3 PARTIAL |
@@ -324,7 +323,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 51 |
 | `Game/Prize.h` | 0 | 0/1/0/0 | 2 |
 | `Game/SEMotion.h` | 0 | 5/0/1/0 | 4 |
-| `Game/SceneEnv.h` | 1 | 0/0/1/0 | 36 |
+| `Game/SceneEnv.h` | 1 | 0/0/1/0 | 37 |
 | `Game/SceneInfo.h` | 5 | 29/0/1/0 | 86 |
 | `Game/Status.h` | 11 | 1/0/1/0 | 15 |
 | `Game/StorageWork.h` | 2 | 2/1/1/0 | 59 |
@@ -352,7 +351,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
 | `System/Graphic/DeFocus.h` | 5 | 0/0/0/5 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
-| `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 169 |
+| `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 170 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 172 |
 | `System/Graphic/Effect/effect.h` | 7 | 1/1/4/0 | 77 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 3 | 2/0/0/0 | 13 |
