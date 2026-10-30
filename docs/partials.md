@@ -61,12 +61,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1021 (939 in 109 headers, 82 in 36 .cpp); MATCH: 132
-  by category: method 400, data member 68, type 86, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 42, guessed 41, header-level 74, stand-in 35, other 6
-stand-ins: 324 foreign in 120 files (83 names), 201 unattributed, 170 own
+PARTIAL: 1023 (940 in 109 headers, 83 in 37 .cpp); MATCH: 136
+  by category: method 400, data member 69, type 86, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 43, guessed 41, header-level 74, stand-in 35, other 6
+stand-ins: 323 foreign in 120 files (83 names), 201 unattributed, 170 own
 duplicate class names across headers: 25
-padding: 31 arrays, 26 accessors
-mechanisms: 958 sites (914 untagged); #line: 1238
+padding: 30 arrays, 26 accessors
+mechanisms: 958 sites (911 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 573, superset 129, partial 94, gated 93, missing 9, unattributed 309
 ```
@@ -90,12 +90,12 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
 | R1 | 6.0 | `Form/Menu/SaveLoad.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CSaveLoad, GAMECLEAR, SAVELOAD (3 complete) | inline bodies or virtuals |
-| R1 | 6.0 | `Game/Enemy/BossDeadDemo.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CBossDeadDemo (1 complete) | inline bodies or virtuals |
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
 | R1 | 4.5 | `Game/Collision/CollBody.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users, 1 PARTIAL | CCollBody (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 4.5 | `System/Graphic/MotData.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CMotData (1 partial) | inline bodies or virtuals |
 | R1 | 4.0 | `Form/Menu/Camp.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CCamp (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Form/Menu/Pause.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
+| R1 | 4.0 | `Game/Enemy/BossDeadDemo.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CBossDeadDemo (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/MessageManager.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMessageManager (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Player/PlayerDRiku.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPlayerDRiku (1 superset) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Prize.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPrize (1 superset) | inline bodies or virtuals |
@@ -121,13 +121,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 4 |  | missing methods: ~CPointCollision |
 | `CVSM` | partial | Game/Atel/VSME.h | 4 |  | missing fields: m_ActorStateFnc; extra methods: BOOL |
 | `Actor` | complete | Game/Atel/VSME.h | 3 |  |  |
-| `CBossDeadDemo` | complete | Game/Enemy/BossDeadDemo.h | 3 |  |  |
 | `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
 | `CSaveLoad` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
 | `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 3 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, isDraw, setAutomaticDistance, setAutomaticHeight, setClipDistance, ... (+4); extra methods: setADensity, setCDensity; 6 PARTIAL |
 | `GAMECLEAR` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
 | `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
 | `SAVELOAD` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
+| `CBossDeadDemo` | complete | Game/Enemy/BossDeadDemo.h | 2 |  |  |
 | `CCamp` | complete | Form/Menu/Camp.h | 2 |  |  |
 | `CGlare` | complete | System/Graphic/Glare.h | 2 |  |  |
 | `CMessageManager` | complete | Game/MessageManager.h | 2 |  |  |
@@ -253,7 +253,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
 | `Game/EffectMotion.h` | 0 | 5/0/2/0 | 7 |
 | `Game/Enemy/BattleEnemy.h` | 35 | 0/0/2/0 | 58 |
-| `Game/Enemy/EnemyParam.h` | 14 | 2/1/1/0 | 16 |
+| `Game/Enemy/EnemyParam.h` | 15 | 2/1/1/0 | 16 |
 | `Game/Enemy/EnemyTornadostep.h` | 0 | 0/0/1/0 | 2 |
 | `Game/Enemy/EnemyWhitemushroom.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Enemy/Heartless.h` | 5 | 0/1/0/0 | 36 |
@@ -431,7 +431,7 @@ or `untagged`.
 | path override | `ATELBLUR_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/AtelBlur.cpp:2 |
 | path override | `ATELCROSSFADE_H_PATH` | 3 | 1 | the original spelled the directory "ATEL" |
 | path override | `ATELFOG_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/AtelFog.cpp:2 |
-| path override | `BATTLEENEMY_H_PATH` | 46 | 0 | untagged, e.g. Game/AttackMotion.cpp:3 |
+| path override | `BATTLEENEMY_H_PATH` | 46 | 1 | the original included it by its full path |
 | path override | `BODYCOLLISION_H_PATH` | 2 | 1 | __FILE__ of these headers as in the original .rodata |
 | path override | `CAMERAMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/CameraMan.cpp:2 |
 | path override | `CARDBATTLE_H_PATH` | 5 | 2 | the original includes it under this name |
@@ -444,7 +444,7 @@ or `untagged`.
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
 | path override | `EFFECT_H_PATH` | 5 | 0 | untagged, e.g. Game/Enemy/EnemyBarrelspider.cpp:4 |
 | path override | `FSM_H_PATH` | 1 | 0 | untagged, e.g. System/Fsm.cpp:1 |
-| path override | `GPRIM_H_PATH` | 165 | 5 | the original includes it under this name |
+| path override | `GPRIM_H_PATH` | 165 | 6 | the original includes it under this name |
 | path override | `LINKEDBUF_H_PATH` | 4 | 1 | __FILE__ as in the original .rodata |
 | path override | `MAPUNIT_H_PATH` | 1 | 0 | untagged, e.g. System/Graphic/MapUnit.cpp:5 |
 | path override | `MODELDATA_H_PATH` | 8 | 1 | __FILE__ as in the original .rodata |
@@ -505,7 +505,7 @@ or `untagged`.
 | placeholder | `_entityEmptyStringPlaceholder*` | 1 | 0 | untagged, e.g. Game/Entity.cpp:20 |
 | placeholder | `_gameTaskSLCOverflow*` | 1 | 0 | untagged, e.g. Game/Game.cpp:15 |
 | placeholder | `_heartlessEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/Heartless.cpp:13 |
-| placeholder | `_humanBossEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/HumanBoss.cpp:17 |
+| placeholder | `_humanBossEmptyString*` | 1 | 1 | placeholder - .rodata has an empty string literal after Str.h's strings (from an unidentified header). |
 | placeholder | `_initCardStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:503 |
 | placeholder | `_initCardWorldStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:414 |
 | placeholder | `_initializeStrings*` | 1 | 0 | untagged, e.g. System/Graphic/WorldEnv.cpp:151 |
