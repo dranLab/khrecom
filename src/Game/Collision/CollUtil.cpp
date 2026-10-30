@@ -16,6 +16,7 @@ union COLL_INFO_UNION {
 #include "Game/Collision/CollUtilA.h"
 #include "System/HeapMan.h"
 #include "System/Debug.h"
+#include "System/Spad.h"
 
 extern char D_004891D0[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" */
 extern char D_00489248[]; /* "m_pInstance" */
@@ -58,6 +59,7 @@ void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 FLOAT InnerProduct(const FVECTOR& v0);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
+void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -284,7 +286,201 @@ MC_CHIP* CCollUtil::_searchChipCollisionNext() {
     return __null;
 }
 
+static inline FVECTOR operator-(const FVECTOR& v0, const FVECTOR& dVec) {
+    FVECTOR vec = v0;
+    vec.x -= dVec.x;
+    vec.y -= dVec.y;
+    vec.z -= dVec.z;
+    vec.w -= dVec.w;
+    return vec;
+}
+
+static inline FLOAT _getLength(const FVECTOR& p0, const FVECTOR& p1) {
+    FVECTOR v;
+    FLOAT ret;
+    SubVector(v, p0, p1);
+    ret = _sqrtf(InnerProduct(v));
+    return ret;
+}
+
+static inline void _mulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1) {
+    asm volatile("lqc2 $vf2, 0x0(%1)\n"
+                 "lqc2 $vf3, 0x10(%1)\n"
+                 "lqc2 $vf4, 0x20(%1)\n"
+                 "lqc2 $vf5, 0x30(%1)\n"
+                 "lqc2 $vf6, 0x0(%2)\n"
+                 "lqc2 $vf7, 0x10(%2)\n"
+                 "lqc2 $vf8, 0x20(%2)\n"
+                 "lqc2 $vf9, 0x30(%2)\n"
+                 "vmulax.xyzw $ACC, $vf2, $vf6x\n"
+                 "vmadday.xyzw $ACC, $vf3, $vf6y\n"
+                 "vmaddaz.xyzw $ACC, $vf4, $vf6z\n"
+                 "vmaddw.xyzw $vf6, $vf5, $vf6w\n"
+                 "vmulax.xyzw $ACC, $vf2, $vf7x\n"
+                 "vmadday.xyzw $ACC, $vf3, $vf7y\n"
+                 "vmaddaz.xyzw $ACC, $vf4, $vf7z\n"
+                 "vmaddw.xyzw $vf7, $vf5, $vf7w\n"
+                 "vmulax.xyzw $ACC, $vf2, $vf8x\n"
+                 "vmadday.xyzw $ACC, $vf3, $vf8y\n"
+                 "vmaddaz.xyzw $ACC, $vf4, $vf8z\n"
+                 "vmaddw.xyzw $vf8, $vf5, $vf8w\n"
+                 "vmulax.xyzw $ACC, $vf2, $vf9x\n"
+                 "vmadday.xyzw $ACC, $vf3, $vf9y\n"
+                 "vmaddaz.xyzw $ACC, $vf4, $vf9z\n"
+                 "vmaddw.xyzw $vf9, $vf5, $vf9w\n"
+                 "sqc2 $vf6, 0x0(%0)\n"
+                 "sqc2 $vf7, 0x10(%0)\n"
+                 "sqc2 $vf8, 0x20(%0)\n"
+                 "sqc2 $vf9, 0x30(%0)\n"
+                 : : "r"(&res), "r"(&m0), "r"(&m1) : "memory");
+}
+
+/* Parked: _detectOCD: 2 of 440 lines differ, only the stack slot of the second _getLength temp (original sp+0x30 = the
+ * operator-'s frame, ours sp+0x20 = its return temp; RTL: temp-slot reuse). Tried: _getLength2 without ret, block-local
+ * FVECTOR, by-value dVec, vec0 = inside the DivVector call, no block scope, permuter 8 min. Levers that got it here:
+ * invariant iChipSuu local (loop reversal), increments in the for header, retry block inside while (1), hill-climbed
+ * store orders, collision spilled once the inner loop held iLoopCnt in fp. */
+#if 0
+INT CCollUtil::_detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork, INT fgLocal) {
+    INT i;
+    FVECTOR vec0;
+    FVECTOR vec1;
+    INT iFg;
+    FLOAT fLenCnt;
+    INT iLenCnt;
+    INT ret;
+    FLOAT l2;
+    if (!pMCDInfo || !pOCDWork) return 0;
+    if (collision.m_Type == COLL_TYPE_SPHERE) {
+        m_Radius = collision.m_Radius;
+    } else {
+        m_Radius = 0.0f;
+    }
+    m_ShiftY = collision.m_shiftY;
+    *(FLOAT*)&m_SphereDetectFg = m_Radius;
+    m_fgSliding = collision.m_fgStatus & 1;
+    m_iKind = collision.m_Kind;
+    m_vCkS0 = collision.m_inWS;
+    m_vCkS0.y += m_ShiftY;
+    m_vCkE0 = collision.m_inWE;
+    m_vCkE0.w = 1.0f;
+    m_vCkE0.y += m_ShiftY;
+    m_vCkS0.w = 1.0f;
+    m_vCkS00 = m_vCkS0;
+    if (!fgLocal) {
+        ApplyMatrix(m_vCkS0, *pMCDInfo->pMatrixIOld, m_vCkS0);
+        ApplyMatrix(m_vCkS0, *pMCDInfo->pMatrix, m_vCkS0);
+    }
+    if (m_SphereDetectFg) {
+        SubVectorXYZ(vec0, m_vCkE0, m_vCkS0);
+        if (!fgLocal) {
+            l2 = InnerProduct(vec0);
+            if (l2 < 0.00015625001f && l2 != 0.0f) {
+                SubVectorXYZ(vec0, pMCDInfo->pMatrix->v[3], m_vCkE0);
+            }
+        }
+        Normalize(vec0, vec0);
+        ScaleVectorXYZ(vec0, vec0, (0.25f < m_Radius) ? 0.25f : m_Radius);
+        SubVectorXYZ(m_vCkS0, m_vCkS0, vec0);
+    }
+    collision.m_outWE = collision.m_inWE;
+    ret = 0;
+    fLenCnt = (_getLength(m_vCkE0, m_vCkS0) + m_Radius) * 0.9903441f;
+    if (fLenCnt == 0.0f) return 0;
+    iLenCnt = (INT)fLenCnt;
+    if (iLenCnt >= 30) return 0;
+    m_pOCDInfo = pMCDInfo;
+    m_fMDVal = 1.0f / pMCDInfo->fMDVal;
+    m_DetectStatus = 0;
+    m_fgCamera = (UINT)m_iKind >= (UINT)COLL_KIND_CAMERA;
+    m_iInfo2.info = 0;
+    vec0 = m_vCkE0 - m_vCkS0;
+    DivVector(vec1, vec0, fLenCnt);
+    m_pPrimInfo = (PRIM_INFO*)SPAD::allocSpad(0x2400);
+    m_pPrimInfo2 = (PRIM_INFO2*)SPAD::allocSpad(0x1000);
+    m_Radius2 = m_Radius * m_Radius;
+    m_RadiusPlus = m_Radius + 0.0035f;
+    m_RadiusHosei = m_RadiusPlus / m_Radius;
+    m_vCkE = m_vCkS0;
+    m_RadiusL = m_Radius;
+    m_vNormal2.init();
+    for (i = 0; i <= iLenCnt; i++) {
+        if (iLenCnt != 0) {
+            m_vCkS = m_vCkE;
+            if (iLenCnt == i) {
+                ScaleVector(vec1, vec1, (FLOAT)iLenCnt);
+                SubVector(vec1, vec0, vec1);
+            }
+            AddVector(m_vCkE, m_vCkE, vec1);
+            m_vCkS.w = 1.0f;
+            m_vCkE.w = 1.0f;
+        } else {
+            m_vCkS = m_vCkS0;
+            m_vCkE = m_vCkE0;
+        }
+        {
+            INT iLoopCnt;
+            INT iCnt;
+            MC_CHIP* pChip;
+            OCD_WORK* pOcdW;
+            FMATRIX* pChipMat;
+            INT iArea;
+            INT iChipSuu;
+            iLoopCnt = 0;
+            while (1) {
+                m_PrimInfoIdx = 0;
+                m_PrimInfoIdx2 = 0;
+                pOcdW = pOCDWork;
+                pChip = m_pOCDInfo->pMCChip;
+                pChipMat = m_pOCDInfo->pMatrixIOld + 1;
+                iChipSuu = m_pOCDInfo->iChipSuu;
+                for (iCnt = 0; iCnt < iChipSuu; iCnt++, pChip++, pOcdW++, pChipMat++) {
+                    if (m_pOCDInfo->pMatrix && pOcdW->fgEnable) {
+                        _mulMatrix(pChip->matLW, *m_pOCDInfo->pMatrix, *pChipMat);
+                        sceVu0InversMatrix(pChip->matWL, pChip->matLW);
+                        iArea = __detectMCInitInit(pChip);
+                        if (iArea >= 0) detectMCInit(pChip, iArea);
+                    }
+                }
+                if (!detectMap(&m_vCkS, &m_vCkE)) goto next;
+                ret = 1;
+                if (_getLength(m_vCkE, m_vCkS00) < 0.00375f) {
+                    m_vCkE = m_vCkS00;
+                    iLenCnt = 0;
+                    goto next;
+                }
+                if (++iLoopCnt >= 5) {
+                    m_vCkE = m_vCkS;
+                    iLenCnt = 0;
+                    m_vNormal2.set(0.0f, 1.0f, 0.0f, 0.0f);
+                    break;
+                }
+            }
+        }
+    next:
+        if (ret && (!m_fgSliding || !iLenCnt)) break;
+    }
+    SPAD::freeSpad(0x2400);
+    SPAD::freeSpad(0x1000);
+    iFg = 0;
+    if (ret) {
+        iFg = 1;
+        m_vCkE.y -= m_ShiftY;
+        m_vDetect2.y -= m_ShiftY;
+        collision.m_outNormal = m_vNormal2;
+        collision.m_outStatus = m_DetectStatus;
+        collision.m_outDetect = m_vDetect2;
+        collision.m_outWE = m_vCkE;
+    }
+    if (!collision.m_outInfoO) {
+        m_iInfo2.infoPID &= 0x7F;
+        collision.m_outInfoO = m_iInfo2.info;
+    }
+    return iFg;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _detectOCD__9CCollUtilR10CCollisionP8MCD_INFOP8OCD_WORKi);
+#endif
 #if 0 /* the parked draft below is static, as in the original */
 static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal);
 #else
