@@ -524,11 +524,11 @@ static inline BOOL _isFadeDone() { return s_pFadeMask ? s_pFadeMask->isFadeDone(
 static inline BOOL _isAgentState(C2DSeqAgent* p, INT nState) { return p->getState() == nState; }
 
 #include "Game/Player/Player.h"
-class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs RsrcData.h internals */
-public:
-    static void removeGroup(INT nGroupID, INT nMemberID);
-    static class CRsrcData* getFirstRsrc(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 #include "System/Rcf.h"
 
 

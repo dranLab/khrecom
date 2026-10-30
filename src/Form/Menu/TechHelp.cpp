@@ -7,11 +7,11 @@
 
 struct TexInfo;
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 namespace D2 {
 class C2DMan {
@@ -23,11 +23,11 @@ public:
 };
 }
 
-class CRsrcDB {
-public:
-    static void removeGroup(INT nGroup, INT nID);
-    static TexInfo* getRsrcTex(const char* pName, NAME_CASE eCase);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 #include "System/Rcf.h"
 

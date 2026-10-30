@@ -267,11 +267,11 @@ static const CARD_DATA cardDataTbl[224] = {
     { { 0x00 }, 0, 0, 0, "" }, // 223
 };
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 namespace D2 {
 class C2DMan {
@@ -287,10 +287,10 @@ public:
 };
 }
 
-class CRsrcDB {
-public:
-    static struct TexInfo* getRsrcTex(const char* pName, NAME_CASE eCase);
-};
+#include "System/RsrcDB.h"
+
+
+
 
 #include "System/Rcf.h"
 

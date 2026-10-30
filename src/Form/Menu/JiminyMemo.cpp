@@ -42,14 +42,14 @@ public:
     static BOOL isEnd(HANDLE handle);
 };
 }
-class CRsrcDB { /* PARTIAL: System/RsrcDB.h would add RsrcData.h's string, which this unit's .rodata lacks */
-public:
-    static INT getModelCount(INT nRsrcID);
-    static MODELDATA** getRsrcMDL(INT nRsrcID);
-    static TEXANM_DATA* getRsrcTXA(INT nRsrcID);
-    static void removeGroup(INT nGroupID, INT nMemberID);
-    static BOOL hasRsrcGroup(INT nGroupID, INT nMemberID);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
+
+
 
 
 namespace JiminyMemo {

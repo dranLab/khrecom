@@ -105,12 +105,12 @@ public:
     char* getName() { return m_szName; }
 };
 
-class CRsrcDB {
-public:
-    static CRsrcData* getFirstRsrc(INT nType);
-    static void initSeekRsrc(INT nType, INT nGroup);
-    static CRsrcData* seekNextRsrc();
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
 
 #include "Game/Atel/VSME.h"
 

@@ -71,10 +71,10 @@ public:
     static SHORT getMapInfoCount();
 };
 
-class CRsrcDB {
-public:
-    static void removeGroup(INT nType, INT nGroup);
-};
+#include "System/RsrcDB.h"
+
+
+
 
 #include "Form/Menu/SaveLoad.h"
 
