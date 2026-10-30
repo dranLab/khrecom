@@ -1,5 +1,5 @@
-#define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h"
-#define ATELCROSSFADE_H_PATH "Game/ATEL/AtelCrossFade.h"
+#define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h" // MATCH: the original spelled this include with the full path ("c:/KHCOM/...", "System/CTD")
+#define ATELCROSSFADE_H_PATH "Game/ATEL/AtelCrossFade.h" // MATCH: the original spelled the directory "ATEL"
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
@@ -75,12 +75,12 @@ int CreateSema(SemaParam* param);
 int DeleteSema(int sid);
 int SignalSema(int sid);
 int WaitSema(int sid);
-int ReferSemaStatus(int sid, SemaParam* param);
+int ReferSemaStatus(int sid, SemaParam* param); int iReferSemaStatus(int sid, SemaParam* param); int iSignalSema(int sid);
 int GetThreadId();
 int ChangeThreadPriority(int tid, int prio);
 int CreateThread(ThreadParam* param);
 int StartThread(int tid, void* arg);
-int SleepThread();
+int SleepThread(); int iWakeupThread(int tid); int iCancelWakeupThread(int tid);
 int TerminateThread(int tid);
 int DeleteThread(int tid);
 int SuspendThread(int tid);
@@ -146,16 +146,7 @@ extern "C" char _gp[];
 
 #include "System/Graphic/ModelMan.h"
 
-class CTaskMan {
-public:
-    static void initialize();
-    static void finalize();
-    static void update(INT nTickCount, INT nFrameRate, INT bPause);
-    static void postprocess();
-    static void setDbgSteppingMode(INT nMode);
-    static void resetDbgPlaySpeed();
-    static INT setupDbgPlaySpeed();
-};
+#include "System/TaskMan.h"
 
 #include "System/PadIO.h"
 
@@ -170,13 +161,7 @@ public:
 
 #include "System/CoordMan.h"
 
-class CRcf {
-public:
-    static void initialize();
-    static void finalize();
-    static void mainProc();
-    static void setLocale(INT nLocale);
-};
+#include "System/Rcf.h"
 
 #include "Game/SceneEnv.h"
 #line 218
@@ -186,18 +171,11 @@ public:
 
 #include "System/Movie/Movie.h"
 
-class CGameWork {
-public:
-    static void coldReset();
-    static void initialize();
-    static void finalize();
-    static INT getInt(UINT nKind, UINT nIdx);
-    static void setInt(UINT nKind, UINT nIdx, INT nValue);
-};
+#include "Game/GameWork.h"
 
 #include "System/FileIO.h"
 
-class CRsrcDB {
+class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: RsrcDB.h adds 'System/RsrcData.h(156)' */
 public:
     static void initialize();
     static void finalize();
@@ -214,7 +192,7 @@ public:
 #include "System/Graphic/WorldEnv.h"
 #line 257
 
-class CHeapMan {
+class CHeapMan { /* PARTIAL: stand-in for System/HeapMan CHeapMan: owner not written */
 public:
     static FLOAT getUsedHeapRatio();
     static void resetHeap();
@@ -223,18 +201,11 @@ public:
     static INT getMaxFreeBlockSize();
 };
 
-class CDebugWindow {
-public:
-    static void enableTopDebugWindow(INT bEnable);
-};
+#include "Form/DebugWindow.h"
 
 #include "System/PlaySpeedCtrl.h"
 
-class CCollObj {
-public:
-    static void collisionInit();
-    static void collisionDelete();
-};
+#include "Game/Collision/CollObj.h"
 
 #include "Game/Collision/CollUtilA.h"
 
@@ -328,7 +299,7 @@ CColorFader* _pMasterFader;
 UINT _nFrameCount;
 volatile UINT _nVSyncCount;
 volatile INT _nVProcCount;
-INT _nVWaitCount;
+volatile INT _nVWaitCount;
 volatile INT _nDrawEnd;
 BOOL _bForceHalfFps;
 INT _nBackToFullFpsTimer;
@@ -355,8 +326,8 @@ INT _nProcCountMax;
 BOOL _bSetupManagers;
 }
 
-INT _mainLoop(); // INCLUDE_ASM: declared extern (static in the original)
-INT _mainProc(INT nTcount, TIMEQ nTQ); // INCLUDE_ASM: declared extern (static in the original)
+static INT _mainLoop();
+static INT _mainProc(INT nTcount, TIMEQ nTQ);
 static void _coldReset(BOOL bNTSC);
 static void _initPS2();
 static void _loadIopModules();
@@ -377,15 +348,15 @@ static INT _installIntcHandler(INT cause, INT (*handler)(INT), INT next);
 static INT _uninstallIntcHandler(INT cause, INT hid);
 static void _disposeThread();
 static TIMEQ _getTimePerFrame(INT nHCount);
-INT _VBlankStartHandler(INT nCH); // INCLUDE_ASM: declared extern (static in the original)
+static INT _VBlankStartHandler(INT nCH);
 static void procFlipThread(void*);
 static void _checkSnapShot();
 static void _checkReportMemory();
 static void _setVideoMode(BOOL bNTSC);
-void _halt(const CHAR* pszMsg, const CHAR* pszExp); // INCLUDE_ASM: declared extern (static in the original)
+static void _halt(const CHAR* pszMsg, const CHAR* pszExp);
 static void _initTraceOnScreen();
 static void _disposeTraceOnScreen();
-void _initFntTbl(); // INCLUDE_ASM: declared extern (static in the original)
+static void _initFntTbl();
 static void _dispTraceOnScreen();
 
 void CMainApp::initialize(BOOL bNTSC) {
@@ -408,8 +379,6 @@ INT CMainApp::run() {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", _mainLoop__Fv);
-#if 0 /* near match: the loop hoists other invariants (_nDispFrameRate, _bTickCountOverflow instead of 200, _FlipSema) */
 static INT _mainLoop() {
     INT nResult;
     INT nTcount;
@@ -438,9 +407,7 @@ static INT _mainLoop() {
         SPAD::freeAllSpad();
         CPadIO::mainProc(_nTickCount, nTQ);
         nResult = _mainProc(nTcount, nTQ);
-        if (nResult == 1) {
-            return nResult;
-        }
+        if (nResult == 1) goto end;
         _nDrawEnd = 1;
         WaitSema(_FlipSema);
         sceGsSyncPath(0, 0);
@@ -450,21 +417,20 @@ static INT _mainLoop() {
         }
         nHcount = (USHORT)*T1_COUNT - nTcount;
         nTcount = (USHORT)*T1_COUNT;
+        TIMEQ nMax = 200;
         nTQ = _getTimePerFrame(nHcount);
-        if (nTQ > 200) {
-            nTQ = 200;
+        if (nTQ > nMax) {
+            nTQ = nMax;
         }
         _checkSnapShot();
         _checkReportMemory();
         CPackMan::kickDMA(++_nFrameCount);
     }
+end:
+    return nResult;
 }
-#endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", _mainProc__Fii);
-__asm__(".section .sdata\n");
-/* placeholder for _mainProc (INCLUDE_ASM): its string; near match (one register swap at the g_dw.sys.m_HeapDispDetail test) */
-__attribute__((section(".sdata"))) INT _mainProc_placeholder(INT nTcount, TIMEQ nTQ) {
+static INT _mainProc(INT nTcount, TIMEQ nTQ) {
     BOOL bPause;
     USHORT pc;
     USHORT dc;
@@ -1033,11 +999,15 @@ BOOL CMainApp::isSysPauseNow() {
 }
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", setSysPause__8CMainAppi);
-#if 0 /* near match: lhu/andi 0xfffe and sign extension instead of lh/and -2 */
+/* Parked: 5 of 12 lines - registers only (the original keeps -2 in a1 and n|5 in v1, movz). `INT n = _nSysPauseReq; n &= ~1;`
+   keeps the full-width lh/and -2 (`_nSysPauseReq & ~1` narrows to lhu/andi); tried m/n order, ternaries, if/else arms,
+   permuter 5 min. */
+#if 0
 void CMainApp::setSysPause(BOOL bFlag) {
-    INT n = _nSysPauseReq & ~1;
-    INT m = n | 5;
-    if (!bFlag) m = n | 4;
+    INT n = _nSysPauseReq;
+    n &= ~1;
+    INT m = n | 4;
+    if (bFlag) m = n | 5;
     _nSysPauseReq = m;
 }
 #endif
@@ -1087,7 +1057,58 @@ BOOL CMainApp::isDbgUsrPauseDisable() {
     return !(_nUsrPause & 2);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", _VBlankStartHandler__Fi);
+static INT _VBlankStartHandler(INT nCH) {
+    SemaParam sema;
+    BOOL bFlip;
+    CColorFader* pFader;
+
+    _nVSyncCount++;
+    _nVProcCount++;
+    iReferSemaStatus(_VsyncSema, &sema);
+    if (sema.numWaitThreads) iSignalSema(_VsyncSema);
+    bFlip = FALSE;
+    _nBackToFullFpsTimer--;
+    if (_nDrawEnd) {
+        *(volatile u_int*)0x10000000 = 0;
+        INT nOverFrame = _nVProcCount - _nVWaitCount;
+        if (nOverFrame > 0) {
+            bFlip = TRUE;
+            if (!_nVWaitCount && nOverFrame >= 2) {
+                _nVWaitCount = 1;
+                _nBackToFullFpsTimer = _nBackToFullFpsLag;
+            }
+        } else if (!_bForceHalfFps && _nBackToFullFpsTimer <= 0) {
+            if (_nVProcCount == 1) {
+                _nVWaitCount = 0;
+                bFlip = TRUE;
+            }
+            _nBackToFullFpsTimer = 0;
+        }
+    }
+    if (bFlip) {
+        INT nID = _nFlipThreadID;
+        iWakeupThread(nID);
+        iCancelWakeupThread(nID);
+        _nVProcCount = 0;
+    }
+    pFader = _pMasterFader;
+    if (pFader && (pFader->hasReqFade() || pFader->isFadeDone())) {
+        BOOL bRetFSAA = FALSE;
+        INT nAlpha = (INT)((1.0f - pFader->getAlpha()) * 255.5f);
+        CPackMan::setBGColor(pFader->getColor());
+        CPackMan::updateBGBlend(nAlpha);
+        if (pFader->isFadeDone()) {
+            pFader->clearReq();
+            bRetFSAA = nAlpha == 255;
+        } else {
+            pFader->main(VSYNC_TIMEQ);
+        }
+        if (bRetFSAA) CPackMan::changePcrtcMode(0);
+    }
+    __asm__ volatile("sync.l");
+    __asm__ volatile("ei");
+    return 0;
+}
 
 static void procFlipThread(void*) {
     for (;;) {
@@ -1238,14 +1259,71 @@ void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp) {
     CMainApp::halt(pszFile, nLine, pszMsg, pszExp);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", _halt__FPCcT0);
-/* placeholder for _halt (INCLUDE_ASM): its strings and the CFnt locals */
-__attribute__((section(".sdata"))) void _halt_placeholder(const CHAR* pszExp) {
+static void _halt(const CHAR* pszMsg, const CHAR* pszExp) {
+    extern CHAR* __BUILD;
+    INT nThreadID;
+
+    _bHalt = 1;
+    nThreadID = GetThreadId();
+    if (nThreadID != _nMainThreadID) {
+        SemaParam sema;
+        if (nThreadID == _nFlipThreadID) return;
+        SuspendThread(_nMainThreadID);
+        ChangeThreadPriority(nThreadID, 1);
+        ReferSemaStatus(_FlipSema, &sema);
+        if (sema.numWaitThreads) SignalSema(_FlipSema);
+    }
+    _nDrawEnd = 1;
+    WaitSema(_FlipSema);
+    _nFrameCount++;
+    CWorldEnv::setFogColor(0, 0, 0);
+    CMainApp::setFpsFull();
     char szBuf[256];
+    sprintf(szBuf, "BUILD-VER.: %s", __BUILD);
     CFnt strBuild;
-    sprintf(szBuf, "BUILD-VER.: %s", pszExp);
-    sprintf(szBuf, "FREE-HEAP: %d  /  MAX-SIZE: %d", CHeapMan::getFreeHeapSize(), CHeapMan::getMaxFreeBlockSize());
     strBuild.setText(szBuf);
+    strBuild.setPosition(-240, 40 - SCREEN_HEIGHT / 2, 0xFFFF28);
+    strBuild.setLayerFG(25);
+    strBuild.setStyle(0x40);
+    CFnt strMsg;
+    strMsg.setText(pszMsg);
+    strMsg.setPosition(-240, 60 - SCREEN_HEIGHT / 2, 0xFFFF28);
+    strMsg.setLayerFG(25);
+    strMsg.setStyle(0x40);
+    char szEtc[256];
+    sprintf(szEtc, "FREE-HEAP: %d  /  MAX-SIZE: %d", CHeapMan::getFreeHeapSize(), CHeapMan::getMaxFreeBlockSize());
+    CFnt strEtc;
+    strEtc.setText(szEtc);
+    strEtc.setPosition(-240, 80 - SCREEN_HEIGHT / 2, 0xFFFF28);
+    strEtc.setLayerFG(25);
+    strEtc.setStyle(0x40);
+    CFnt strExp;
+    strExp.setText(pszExp);
+    strExp.setPosition(-240, 100 - SCREEN_HEIGHT / 2, 0xFFFF28);
+    strExp.setLayerFG(25);
+    strExp.setStyle(0x40);
+    INT nCount = 2;
+    while (nCount--) {
+        CPackMan::beginScene();
+        CGTexPrim::clearTexCache();
+        CModelMan::clearDispList();
+        strBuild.disp();
+        strMsg.disp();
+        strEtc.disp();
+        if (pszExp) strExp.disp();
+        CModelMan::drawDispList();
+        CPackMan::endScene();
+        FlushCache(0);
+        sceGsSyncPath(0, 0);
+        CModelMan::drawDispListFG();
+        CPackMan::kickDMAFG(_nFrameCount);
+        sceGsSyncPath(0, 0);
+        _nDrawEnd = 1;
+        WaitSema(_FlipSema);
+        _nFrameCount++;
+        sceGsSyncPath(0, 0);
+        CPackMan::kickDMA(_nFrameCount);
+    }
 }
 
 void CMainApp::halt(const CHAR* pszFile, INT nLine, const CHAR* pszMsg, const CHAR* pszExp) {
@@ -1293,14 +1371,25 @@ static void _disposeTraceOnScreen() {
     g_bTraceOnScreen = 0;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", _initFntTbl__Fv);
-/* placeholder for _initFntTbl (INCLUDE_ASM): its strings */
-__attribute__((section(".sdata"))) void _initFntTbl_placeholder() {
+static void _initFntTbl() {
 #line 2334
     s_pTrScrStrTbl = new (__FILE__ "(2334)") CFnt[24];
     if (!(s_pTrScrStrTbl)) AssertApp(__FILE__, __LINE__, "s_pTrScrStrTbl", 0);
+    for (UINT i = 0; i < 24; i++) {
+        CFnt& f = s_pTrScrStrTbl[i];
+        f.setSize(13);
+        f.setPosition(-220, i * 14 - 156, 0xFFFF28);
+        f.setStyle(0x8000);
+        f.setColor(0x80, 0x80, 0x80);
+        f.setLayerFG(25);
+    }
 #line 2348
     s_pTrScrZabu = new (__FILE__ "(2348)") CTile;
+    s_pTrScrZabu->m_P0.set(-0xDC0, -0xAA0); // MATCH: the original reloads s_pTrScrZabu for each later statement (volatile reads)
+    (*(CTile* volatile*)&s_pTrScrZabu)->m_P1.set(0xDC0, 0xAA0);
+    (*(CTile* volatile*)&s_pTrScrZabu)->m_C0.set(1, 1, 1, 0x40);
+    (*(CTile* volatile*)&s_pTrScrZabu)->setSemiTrans(ALPHA_BLEND);
+    (*(CTile* volatile*)&s_pTrScrZabu)->setLayerFG(25);
 }
 
 void addTraceString(CHAR* pszSrc) {
