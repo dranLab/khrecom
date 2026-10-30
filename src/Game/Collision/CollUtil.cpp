@@ -665,7 +665,171 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMCInit__9CCollUtilP7MC_CHIPi);
 #endif
+extern char D_00489380[]; /* "m_pPrimInfo" */
+extern char D_00489390[]; /* "m_pPrimInfo2" */
+
+/* Parked: _detectMCD: 146 of 467 lines, 8 bytes short - structure as the original (MCD path of _detectOCD: area
+ * chip table walk, two allocSpad asserts, same segment loop); ret declared after i for its spill slot, the vf4 asm
+ * before the vCkS reference. Left: this in s3 instead of s2 (most lines), the retry loop's bottom (original
+ * `beqz` to the 5-tries block + `b` back, ours rotated `bnez`; while/for/do/goto/continue forms tried) and the
+ * original recomputing iArea0*4 inside the retry loop. Permuter 8 min: no real gain. */
+#if 0
+INT CCollUtil::_detectMCD(CCollision& collision) {
+    INT i;
+    INT ret;
+    INT j;
+    FVECTOR vec0;
+    FVECTOR vec1;
+    INT iFg;
+    FLOAT fLenCnt;
+    INT iLenCnt;
+    MC_DATA* pMCData;
+    MC_CHIP* pMCChip;
+    FLOAT fMDVal2;
+    collision.m_outInfo = 0;
+    if (!m_pMCDInfo) {
+        if (collision.m_inWE.y < -1.0f) {
+            collision.m_outWE = collision.m_inWE;
+            collision.m_outWE.y = -1.0f;
+            collision.m_outNormal.set(0.0f, 1.0f, 0.0f, 0.0f);
+            return 1;
+        }
+        return 0;
+    }
+    if (collision.m_Type == COLL_TYPE_SPHERE) {
+        m_Radius = collision.m_Radius;
+    } else {
+        m_Radius = 0.0f;
+    }
+    m_ShiftY = collision.m_shiftY;
+    *(FLOAT*)&m_SphereDetectFg = m_Radius;
+    m_iKind = collision.m_Kind;
+    m_vCkS0 = collision.m_inWS;
+    m_vCkS0.y += m_ShiftY;
+    m_vCkE0 = collision.m_inWE;
+    m_vCkE0.w = 1.0f;
+    m_vCkE0.y += m_ShiftY;
+    m_vCkS0.w = 1.0f;
+    m_fgSliding = collision.m_fgStatus & 1;
+    if (m_SphereDetectFg && (collision.m_fgStatus & 6)) {
+        SubVectorXYZ(vec0, m_vCkE0, m_vCkS0);
+        Normalize(vec0, vec0);
+        ScaleVectorXYZ(vec0, vec0, (0.25f < m_Radius) ? 0.25f : m_Radius);
+        SubVectorXYZ(m_vCkS0, m_vCkS0, vec0);
+        if (collision.m_fgStatus & 4) collision.m_fgStatus ^= 4;
+    }
+    collision.m_outWE = collision.m_inWE;
+    ret = 0;
+    fLenCnt = (_getLength(m_vCkE0, m_vCkS0) + m_Radius) * 0.9903441f;
+    if (fLenCnt == 0.0f) return 0;
+    iLenCnt = (INT)fLenCnt;
+    if (iLenCnt >= 30) {
+        collision.m_outNormal.set(0.0f, 1.0f, 0.0f, 0.0f);
+        collision.m_outWE = collision.m_inWS;
+        collision.m_outDetect = collision.m_inWS;
+        return 1;
+    }
+    m_DetectStatus = 0;
+    m_fgCamera = (UINT)m_iKind >= (UINT)COLL_KIND_CAMERA;
+    vec0 = m_vCkE0 - m_vCkS0;
+    DivVector(vec1, vec0, fLenCnt);
+    m_pPrimInfo = (PRIM_INFO*)SPAD::allocSpad(0x2400);
+    if (!m_pPrimInfo) AssertApp(D_00489310, 890, D_00489380, 0);
+    m_pPrimInfo2 = (PRIM_INFO2*)SPAD::allocSpad(0x1000);
+    if (!m_pPrimInfo2) AssertApp(D_00489310, 892, D_00489390, 0);
+    if (m_Radius != 0.0f) {
+        m_RadiusL = m_Radius;
+        m_Radius2 = m_Radius * m_Radius;
+        m_RadiusPlus = m_Radius + 0.0035f;
+        m_RadiusHosei = m_RadiusPlus / m_Radius;
+    }
+    m_SemiTransMatIdx = 0;
+    m_iInfo2.info = 0;
+    pMCData = m_pMCDInfo->pMCData;
+    pMCChip = m_pMCDInfo->pMCChip;
+    m_vCkE = m_vCkS0;
+    m_vNormal2.init();
+    m_fMDVal = 1.0f / m_pMCDInfo->fMDVal;
+    fMDVal2 = 1.0f / m_pMCDInfo->fMDVal2;
+    for (i = 0; i <= iLenCnt; i++) {
+        if (iLenCnt != 0) {
+            m_vCkS = m_vCkE;
+            if (iLenCnt == i) {
+                ScaleVector(vec1, vec1, (FLOAT)iLenCnt);
+                SubVector(vec1, vec0, vec1);
+            }
+            AddVector(m_vCkE, m_vCkE, vec1);
+            m_vCkS.w = 1.0f;
+            m_vCkE.w = 1.0f;
+        } else {
+            m_vCkS = m_vCkS0;
+            m_vCkE = m_vCkE0;
+        }
+        {
+            INT iArea;
+            USHORT* pPrimIdx0;
+            USHORT* pPrimIdx;
+            INT iLoopCnt;
+            INT iArea0;
+            INT iCnt;
+            MC_CHIP* pChip;
+            asm volatile("lqc2 $vf4, 0x0(%0)" : : "r"(&m_vCkS));
+            FVECTOR& vCkS = m_vCkS;
+            iArea0 = __detectMCInitInit_Check(pMCData, fMDVal2);
+            if (iArea0 < 0) continue;
+            pPrimIdx0 = &pMCData->prim[pMCData->tbl[iArea0][0]];
+            iLoopCnt = 0;
+            while (iLoopCnt < 5) {
+                if (iArea0 != -1) {
+                    m_PrimInfoIdx = 0;
+                    m_PrimInfoIdx2 = 0;
+                    iCnt = pMCData->tbl[iArea0][1];
+                    if (iCnt) {
+                        pPrimIdx = pPrimIdx0;
+                        do {
+                            pChip = &pMCChip[*pPrimIdx++];
+                            if (!pChip->id) {
+                                iArea = __detectMCInitInit(pChip);
+                                if (iArea >= 0) detectMCInit(pChip, iArea);
+                            }
+                        } while (--iCnt);
+                    }
+                }
+                if (!detectMap(&vCkS, &m_vCkE)) goto next;
+                ret = 1;
+                if (_getLength(m_vCkE, vCkS) < 0.00375f) {
+                    m_vCkE = m_vCkS;
+                    iLenCnt = 0;
+                    goto next;
+                }
+                iLoopCnt++;
+            }
+            m_vCkE = m_vCkS;
+            iLenCnt = 0;
+            m_vNormal2.set(0.0f, 1.0f, 0.0f, 0.0f);
+        }
+    next:
+        if (ret && (!m_fgSliding || !iLenCnt)) break;
+    }
+    SPAD::freeSpad(0x2400);
+    SPAD::freeSpad(0x1000);
+    iFg = 0;
+    if (ret) {
+        iFg = 1;
+        m_vCkE.y -= m_ShiftY;
+        collision.m_outWE = m_vCkE;
+        collision.m_outNormal = m_vNormal2;
+        m_vDetect2.y -= m_ShiftY;
+        collision.m_outDetect = m_vDetect2;
+        collision.m_outStatus = m_DetectStatus;
+    }
+    m_iInfo2.infoPID &= 0x7F;
+    collision.m_outInfo = m_iInfo2.info;
+    return iFg;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _detectMCD__9CCollUtilR10CCollision);
+#endif
 /* Parked: 39 of 213 lines, 4 bytes long - two passes, renew test and info merge as the original; left: the pPrimInfo2/i
    init order and an extra delay-slot load at the second pass, the attr byte's `andi` copy (a0) and the return-1 block
    (the original sets v0 after the m_pDetectMatA/ChipA/NormalA stores). */
