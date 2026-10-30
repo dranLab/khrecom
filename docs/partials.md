@@ -63,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 991 (910 in 109 headers, 81 in 37 .cpp); MATCH: 140
   by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 33, other 6
-stand-ins: 257 foreign in 109 files (60 names), 201 unattributed, 170 own
+stand-ins: 256 foreign in 109 files (59 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 960 sites (910 untagged); #line: 1242
@@ -95,10 +95,10 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Roulette.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRoulette (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
-| R1 | 2.0 | `Game/EffectMotion.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CEffectMotion (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/LockOnManager.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CLockOnManager (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/MinigameManager.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMinigameManager (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/Friend.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFriend (1 partial) | inline bodies or virtuals |
+| R1 | 2.0 | `Game/Player/PlayerCamera.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerCamera (1 gated) | inline bodies or virtuals (gate) |
 
 ## Classes with foreign copies
 
@@ -131,7 +131,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
 | `CDebugWindow` | superset | Form/DebugWindow.h | 1 |  | padding: _m_0x40; virtual order differs |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
-| `CEffectMotion` | complete | Game/EffectMotion.h | 1 |  |  |
 | `CFadeIOMask` | partial | System/Graphic/ScreenMask.h | 1 |  | missing methods: ~CFadeIOMask |
 | `CFriend` | partial | Game/Player/Friend.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CImageWnd` | complete | System/Wnd.h | 1 |  |  |
@@ -227,7 +226,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollUtilA.h` | 1 | 9/1/1/0 | 26 |
 | `Game/Collision/Ride.h` | 1 | 4/0/1/0 | 6 |
 | `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
-| `Game/EffectMotion.h` | 0 | 5/0/2/0 | 7 |
+| `Game/EffectMotion.h` | 0 | 5/0/2/0 | 8 |
 | `Game/Enemy/BattleEnemy.h` | 35 | 0/0/2/0 | 58 |
 | `Game/Enemy/EnemyParam.h` | 15 | 2/1/1/0 | 16 |
 | `Game/Enemy/EnemyTornadostep.h` | 0 | 0/0/1/0 | 2 |
