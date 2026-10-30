@@ -47,12 +47,7 @@ inline void* operator new(size_t size, char* msg) throw() {
 #define DEG2RAD 0.017453292f
 template <class T> static inline T& _ref(T& v) { return v; }
 
-class CPlayer : public CEntity { /* Game/Player/Player.h */
-public:
-    CPlayer(CTask* inParent);
-    static BOOL isEnableBattleEnd();
-    static void notifyExterminate();
-};
+#include "Game/Player/Player.h"
 
 extern CPlayer* g_pPlayer;
 
