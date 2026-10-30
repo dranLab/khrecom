@@ -1084,13 +1084,11 @@ BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
 }
 #endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", stockActProc__10CHumanBossPC4CARD);
 /* placeholder for stockActProc (INCLUDE_ASM): its strings */
 __attribute__((section(".sdata"))) void _stockActProc_placeholder(INT n) {
     TRACE("CHumanBoss::\x83X\x83g\x83" "b\x83N\x82\xc5\x82\xab\x82\xc8\x82\xa2\n");
     TRACE("----------- stock boss card = 0x%08x\n", n);
 }
-#if 0 /* near match: the first random rollDeck block is cross-jumped whole (the original keeps its own random call) */
 BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
     INT attackCardNum;
     INT magicCardNum;
@@ -1192,15 +1190,14 @@ BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
             }
             return FALSE;
         }
-        if (RND::genrand_int31() & 1) {
-            return FALSE;
+        if ((RND::genrand_int31() & 1) == 0) {
+            m_pCardRevolver->rollDeck(1, 0, 300);
+            return TRUE;
         }
-        m_pCardRevolver->rollDeck(1, 0, 300);
-        return TRUE;
+        return FALSE;
     }
     return FALSE;
 }
-#endif
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", normalActProc__10CHumanBossPC4CARD);
 #if 0 /* near match: the two setDoBattleAct/useCard tails are cross-jumped (the original keeps both) */
