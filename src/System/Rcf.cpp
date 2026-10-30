@@ -1403,13 +1403,10 @@ void _disposeRcfInfoFile() {
     if (s_pDbgFileBuf) delete s_pDbgFileBuf;
     s_pDbgFileBuf = __null;
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _countRcfSceneAndMap_c() {
-    BOOL bCont;
+void _countRcfSceneAndMap() {
+    BOOL bCont = TRUE;
     CHAR* p = _getDbgParsePtr();
 
-    bCont = TRUE;
     while (*p && bCont) {
         _skipDbgLine();
         bCont = !isTokenSCENE(p);
@@ -1442,7 +1439,6 @@ __attribute__((section(".sdata"))) void _countRcfSceneAndMap_c() {
         p = _getDbgParsePtr();
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _countRcfSceneAndMap__Fv);
 /* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
 __asm__(".section .sdata\n");
 __attribute__((section(".sdata"))) void _parseRcfSceneAndMapInfo_c() {
