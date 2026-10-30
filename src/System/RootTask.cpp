@@ -33,12 +33,12 @@ public:
 #include "Game/SceneEnv.h"
 #line 48
 
-class CTexCtrl {
-    char _pad[0x40];
+#include "System/Graphic/TexCtrl.h"
 
-public:
-    CTexCtrl(CTask* pParent);
-};
+
+
+
+
 
 #include "Form/Menu/SaveLoad.h"
 

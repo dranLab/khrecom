@@ -165,10 +165,10 @@ typedef struct { /* libgraph (eestruct.h) */
     unsigned int p1 : 10;
 } tGS_DISPFB2;
 #include "System/Graphic/WorldEnv.h"
-class CTexCtrl { /* PARTIAL: stand-in for System/Graphic/TexCtrl CTexCtrl: strings: TexCtrl.h (.rodata still asm) */
-public:
-    static void transPrefixTex();
-};
+#include "System/Graphic/TexCtrl.h"
+
+
+
 static void _setPcrtcMode_BlendBG(sceGsDispEnv& inEnv);
 
 static inline u_long _upper(u_long128 q) {
