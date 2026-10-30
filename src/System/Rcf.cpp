@@ -1520,11 +1520,9 @@ __attribute__((section(".sdata"))) void _parseRcfSceneAndMapInfo_c() {
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRcfSceneAndMapInfo__Fv);
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _loadDbgRcfSceneInfo_c() {
-    s_nDbgFilePtr = 0;
+void _loadDbgRcfSceneInfo() {
     s_nRcfSceneCount = 0;
+    s_nDbgFilePtr = 0;
     s_nRcfMapCount = 0;
     if (_loadRcfInfoFile("cdrom0:\\rcf\\scene.dat")) {
         _countRcfSceneAndMap();
@@ -1542,7 +1540,6 @@ __attribute__((section(".sdata"))) void _loadDbgRcfSceneInfo_c() {
     _parseRcfSceneAndMapInfo();
     _disposeRcfInfoFile();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _loadDbgRcfSceneInfo__Fv);
 
 RcfSceneInfo* CRcf::getSceneInfo(SHORT nIndex) {
     if (!s_pRcfSceneArray || s_nRcfSceneCount <= 0 || nIndex < 0 || nIndex >= s_nRcfSceneCount) {
