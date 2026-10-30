@@ -63,12 +63,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1035 (953 in 109 headers, 82 in 35 .cpp); MATCH: 121
   by category: method 409, data member 69, type 88, fwd decl 53, #include 29, changed in place 133, padding 31, path override 24, gate 43, guessed 41, header-level 74, stand-in 35, other 6
-stand-ins: 345 foreign in 122 files (95 names), 201 unattributed, 172 own
+stand-ins: 342 foreign in 122 files (94 names), 201 unattributed, 171 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
 mechanisms: 959 sites (919 untagged); #line: 1238
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 159, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 570, superset 128, partial 95, gated 94, missing 11, unattributed 309
+classes: complete 571, superset 128, partial 95, gated 94, missing 10, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -129,7 +129,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `GAMECLEAR` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
 | `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
 | `SAVELOAD` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
-| `TIM2_PICTUREHEADER` | missing | System/Graphic/TexUtil.h | 3 |  |  |
 | `CCamp` | complete | Form/Menu/Camp.h | 2 |  |  |
 | `CDebugWindow` | superset | Form/DebugWindow.h | 2 |  | padding: _m_0x40; virtual order differs |
 | `CGlare` | complete | System/Graphic/Glare.h | 2 |  |  |
