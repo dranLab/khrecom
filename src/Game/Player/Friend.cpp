@@ -166,7 +166,7 @@ BOOL CFriend::initalize() {
     bodyCollOffBody(-1);
     m_uiCollAttackID = 0;
     setBodyRviseCoefficient(0.5f);
-    m_pMove->setFlag(0x40, TRUE);
+    m_pMove->setFlag(0x40, 0);
     m_pMove->setFootRadius(0.25f);
     m_pMove->setWallRadius(0.5f);
     return TRUE;

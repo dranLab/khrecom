@@ -2,6 +2,7 @@
 #define GAME_COLLISION_COLLUTILA_H
 
 #include "khtypes.h"
+#include "Game/Collision/CollInfo.h"
 #include "System/Vector.h"
 
 struct ETMoveData {
@@ -255,12 +256,8 @@ public:
     /* 0x19c */ struct PRIM_INFO* m_pPrimInfoCurrent;
     /* 0x1a0 */ FMATRIX* m_pSemiTransMat[32];
     /* 0x220 */ INT m_SemiTransMatIdx;
-#ifdef COLLUTILA_H_INFO_MEMBERS /* MATCH: COLL_INFO_UNION has no header yet (ref owner Game/Movement); CollUtil, CollUtilF, CollMapCamera, MapEnemy, SEMotion, Player and Movement define their own copy */
     /* 0x224 */ COLL_INFO_UNION m_iInfo;
     /* 0x228 */ COLL_INFO_UNION m_iInfo2;
-#else
-    /* 0x224 */ char _pad224[0x8];
-#endif
     /* 0x22c */ FMATRIX* m_pDetectMatP;
     /* 0x230 */ FMATRIX* m_pDetectMatA;
     /* 0x234 */ MC_CHIP* m_pDetectChipA;

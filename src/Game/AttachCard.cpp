@@ -279,7 +279,7 @@ BOOL CAttachCard::setup(CARD_KIND inKind, CCoord* inParent, const FVECTOR* inPos
 #line 54
     m_pMove = new (__FILE__ "(54)") CMovement(this);
     if (!m_pMove) return FALSE;
-    m_pMove->setFlag(9, TRUE);
+    m_pMove->setFlag(9, 0);
     FVECTOR pos;
     if (inPos) {
         pos = *inPos;

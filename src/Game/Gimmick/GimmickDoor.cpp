@@ -183,9 +183,9 @@ CGimmickDoor::CGimmickDoor(CTask* inParent, const ZONEPARTS& inParts) : CBaseGim
 
     TRACE("\x83\x68\x83\x41\x81\x46\x83\x8a\x83\x5c\x81\x5b\x83\x58:%d\n", rsrcid);
     m_pMove->enableGravity(FALSE);
-    m_pMove->setFlag(1, TRUE);
-    m_pMove->setCollisionFlag(0xF, FALSE);
-    m_pMove->setFlag(8, TRUE);
+    m_pMove->setFlag(1, 0);
+    m_pMove->setCollisionFlag(0, 0xF);
+    m_pMove->setFlag(8, 0);
     enableFade2Path(TRUE, -1);
     changeGimmickState(GM_STATE_MAIN);
 }

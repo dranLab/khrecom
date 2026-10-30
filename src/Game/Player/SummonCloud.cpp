@@ -410,7 +410,7 @@ void CSummonCloud::stateAction2() {
             m_tqSubTimer = 0;
             vel = m_pMove->getVel();
             vel.y = m_pAtkData->WORK0 * 0.001f;
-            m_pMove->getVel() = vel;
+            m_pMove->setVel(vel);
             m_pMove->homingMoveXZ(m_vAimPos, m_fRotDir, m_fMoveSpdXZ);
             setTimer(m_pAtkData->MOVE_START_FRAME * 50);
         }
@@ -453,7 +453,7 @@ void CSummonCloud::stateAction2() {
             FVECTOR vel = m_pMove->getVel();
             vel.x = 0.0f;
             vel.z = 0.0f;
-            m_pMove->getVel() = vel;
+            m_pMove->setVel(vel);
             m_uiFlag |= 0x800;
         } else if (calcDistanceXZSq(m_vAimPos) > m_fDist) {
             m_pMove->homingMoveXZ(m_vAimPos, m_fRotDir, m_fMoveSpdXZ);
@@ -483,7 +483,7 @@ void CSummonCloud::stateAction2() {
                         changeMotion(9, 0, 1, -1, 0, 0, 0);
                         FVECTOR vel = m_pMove->getVel();
                         vel.y = m_pAtkData->WORK0 * 0.001f;
-                        m_pMove->getVel() = vel;
+                        m_pMove->setVel(vel);
                         m_pMove->homingMoveXZ(m_vAimPos, m_fRotDir, m_fMoveSpdXZ);
                         setTimer(m_pAtkData->MOVE_START_FRAME * 50);
                     } else {

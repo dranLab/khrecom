@@ -39,9 +39,9 @@ BOOL CGimmickGuillotine::initalize(INT inGroupID, INT inRsrcID) {
     bodyCollOnBody(-1);
     bodyCollOn(-1);
     m_pMove->enableGravity(FALSE);
-    m_pMove->setFlag(1, TRUE);
-    m_pMove->setCollisionFlag(0xF, FALSE);
-    m_pMove->setFlag(8, TRUE);
+    m_pMove->setFlag(1, 0);
+    m_pMove->setCollisionFlag(0, 0xF);
+    m_pMove->setFlag(8, 0);
     getSysTask(32);
     LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
     return TRUE;

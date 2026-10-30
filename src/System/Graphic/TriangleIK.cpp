@@ -3,6 +3,7 @@
 #define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h"
 #define MODEL_H_PATH "c:/KHCOM/MainApp/System/Graphic/Model.h"
 #define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h"
+#define COLLOBJ_H_INFO_AS_INT
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/modeldata.h"
 #include "System/Graphic/Model.h"

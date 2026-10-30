@@ -86,7 +86,7 @@ CPlayerWeapon::CPlayerWeapon(CTask* inParent, INT inID, INT inBone)
     m_collAttack.init(COLL_KIND_PLAYER, COLL_TYPE_POLY3, inParent->getHandle(), 0);
     m_collAttack.setAttack(0, 0);
     m_collAttack.off();
-    m_pMove->setFlag(1, TRUE);
+    m_pMove->setFlag(1, 0);
     if (CSceneInfo::isFieldScene()) {
         m_uiFlag |= 0x40;
         m_pCollMap = m_pMove->getMapCollision();

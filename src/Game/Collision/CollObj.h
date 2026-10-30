@@ -5,6 +5,7 @@
 #define GAME_COLLISION_COLLOBJ_H_ENUMS
 
 #include "khtypes.h"
+#include "Game/Collision/CollInfo.h"
 
 // PARTIAL: added for Game/Player/PlayerWeapon
 enum COLL_TYPE {
@@ -202,21 +203,7 @@ public:
     void setShiftY(FLOAT inShiftY);
     FLOAT getShiftY() { return m_pCollision ? m_pCollision->m_shiftY : 0.0f; }
     FLOAT getRadius() { return m_pCollision ? m_pCollision->m_Radius : 0.0f; }
-#ifdef COLLOBJ_H_INFO_UNION
-    /* PARTIAL: the original's return type (COLL_INFO_UNION, defined by the includer), for Game/SEMotion */
-    COLL_INFO_UNION getDetectInfo() {
-        COLL_INFO_UNION info;
-        if (m_pCollision) info.info = m_pCollision->m_outInfo;
-        else info.info = 0;
-        return info;
-    }
-    COLL_INFO_UNION getDetectInfoO() {
-        COLL_INFO_UNION info;
-        if (m_pCollision) info.info = m_pCollision->m_outInfoO;
-        else info.info = 0;
-        return info;
-    }
-#else
+#ifdef COLLOBJ_H_INFO_AS_INT /* MATCH: System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently */
     INT getDetectInfo() {
         if (m_pCollision) return m_pCollision->m_outInfo;
         return 0;
@@ -224,6 +211,25 @@ public:
     INT getDetectInfoO() {
         if (m_pCollision) return m_pCollision->m_outInfoO;
         return 0;
+    }
+#else
+    COLL_INFO_UNION getDetectInfo() {
+        COLL_INFO_UNION info;
+        if (m_pCollision) {
+            info.info = m_pCollision->m_outInfo;
+            return info;
+        }
+        info.info = 0;
+        return info;
+    }
+    COLL_INFO_UNION getDetectInfoO() {
+        COLL_INFO_UNION info;
+        if (m_pCollision) {
+            info.info = m_pCollision->m_outInfoO;
+            return info;
+        }
+        info.info = 0;
+        return info;
     }
 #endif
     INT getOutStatus() { return m_pCollision ? m_pCollision->m_outStatus : 0; }

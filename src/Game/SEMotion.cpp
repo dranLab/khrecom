@@ -4,16 +4,16 @@
 #include "include_asm.h"
 #include "khtypes.h"
 
-union COLL_INFO_UNION {
-    INT info;
-    struct {
-        BYTE infoID;
-        BYTE infoATTR;
-        BYTE infoPID;
-        BYTE infoSTAT;
-    };
-};
-#define COLLOBJ_H_INFO_UNION
+#include "Game/Collision/CollInfo.h"
+
+
+
+
+
+
+
+
+
 
 
 /* The unit's .text has an unnamed copy of CAttachMotion's inline destructor (and .rodata one of its vtable): our

@@ -52,7 +52,7 @@ void CMapEnemyShadow::beginStateAppear() {
     setEntityFlag(1, 0);
     setMapEnemyFlag(1, FALSE);
     setEntityFlag(0, 0x10000);
-    m_pMove->setFlag(9, TRUE);
+    m_pMove->setFlag(9, 0);
 }
 
 void CMapEnemyShadow::stateAppear() {
@@ -62,12 +62,12 @@ void CMapEnemyShadow::stateAppear() {
         if (calcDistanceSq(g_pPlayer) <= getAppearDistance()) {
             if (canAppear()) {
                 FVECTOR s = {{1.0f, 0.0f, 1.0f, 1.0f}};
-                m_pMove->setScale(s);
+                m_pMove->setScl(s);
                 setEntityFlag(0, 1);
                 setMapEnemyFlag(1, TRUE);
                 changeMotion(11, 0, FALSE, -1, 0, 0);
                 setTimer(getMotionTotalTime());
-                m_pMove->setFlag(9, FALSE);
+                m_pMove->setFlag(0, 9);
                 m_iStep++;
             }
         }
@@ -79,9 +79,9 @@ void CMapEnemyShadow::stateAppear() {
         FVECTOR s2 = {{1.0f, 1.0f, 1.0f, 1.0f}};
         FLOAT rate = 1.0f - (FLOAT)getTimer() / (FLOAT)getMotionTotalTime();
         Math3D::VectorLerp(s0, s1, s2, rate);
-        m_pMove->setScale(s0);
+        m_pMove->setScl(s0);
         if (isMotionEnd()) {
-            m_pMove->setScale(s2);
+            m_pMove->setScl(s2);
             changeMapEnemyState(1);
         }
         break;
@@ -163,7 +163,7 @@ void CMapEnemyShadow::stateDisappear() {
     FVECTOR s1 = {{1.0f, 1.0f, 1.0f, 1.0f}};
     FVECTOR s2 = {{1.0f, 0.0f, 1.0f, 1.0f}};
     Math3D::VectorLerp(s0, s1, s2, 1.0f - (FLOAT)getTimer() / 1500.0f);
-    m_pMove->setScale(s0);
+    m_pMove->setScl(s0);
     if (getTimer() <= 0) changeMapEnemyState(0);
 }
 

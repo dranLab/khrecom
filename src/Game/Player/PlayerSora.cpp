@@ -4803,7 +4803,7 @@ void CPlayerSora::initGlide(INT inFlag) {
     setBattleFlag(0, 0x4060);
     setBattleFlag(0, 0x3000000);
     setFaceAnim(0, 0);
-    m_pMove->setFlag(0x40, TRUE);
+    m_pMove->setFlag(0x40, 0);
 }
 /* Parked: only the analog-steering block after Homing differs: the original loads m_pMove (lw v1,0xa0) before
    the y store into the {0, dir, 0, 0} temporary at sp+0x20 and copies it (lq/sq to sp+0x10) after the m_fDir

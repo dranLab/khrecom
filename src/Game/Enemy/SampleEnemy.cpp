@@ -25,7 +25,7 @@ CSampleEnemy::~CSampleEnemy() {}
 BOOL CSampleEnemy::initalize(INT inGroupID, INT inRsrcID) {
     CHeartless* pThis = this;
     if (!pThis->initalize(inGroupID, inRsrcID, 0)) return FALSE;
-    m_pMove->setFlag(1, TRUE);
+    m_pMove->setFlag(1, 0);
     return TRUE;
 }
 

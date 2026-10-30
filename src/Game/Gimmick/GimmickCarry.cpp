@@ -112,8 +112,8 @@ BOOL CGimmickCarry::initalize(INT inGroupID, INT inRsrcID) {
     getSysTask(32);
     LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
     m_pMove->enableGravity(FALSE);
-    m_pMove->setFlag(1, TRUE);
-    m_pMove->setCollisionFlag(0xF, FALSE);
+    m_pMove->setFlag(1, 0);
+    m_pMove->setCollisionFlag(0, 0xF);
     bodyCollOffBody(-1);
     bodyCollOff(-1);
     rideModelEnableAllCollision(FALSE);
@@ -156,7 +156,7 @@ INT CGimmickCarry::getTypeID() const {
 }
 
 void CGimmickCarry::beginStateMain() {
-    if (m_Stat == 3) m_pMove->getVel() = m_throwDir;
+    if (m_Stat == 3) m_pMove->setVel(m_throwDir);
 }
 
 void CGimmickCarry::stateMain() {
@@ -166,7 +166,7 @@ void CGimmickCarry::stateMain() {
     case 2:
         if (m_pAnim->getTotalTqCrd() - m_pAnim->getCurrentTqCrd() <= getFrameRate()) {
             CarryThrow();
-            if (m_Stat == 3) m_pMove->getVel() = m_throwDir;
+            if (m_Stat == 3) m_pMove->setVel(m_throwDir);
         }
         break;
     case 3:
@@ -195,7 +195,7 @@ void CGimmickCarry::stateMain() {
                     m_Stat = 9;
                     bodyCollOffBody(-1);
                     bodyCollOff(-1);
-                    m_pMove->setFlag(1, TRUE);
+                    m_pMove->setFlag(1, 0);
                     m_Wait = 0.0f;
                 }
                 break;
@@ -206,9 +206,9 @@ void CGimmickCarry::stateMain() {
                 v.w = 1.0f;
                 v.y = 0.0f;
                 v.z = 0.0f;
-                m_pMove->getVel() = v;
+                m_pMove->setVel(v);
                 changeMotion(2, 0, FALSE, 0, 0, 0);
-                m_pMove->setFlag(1, TRUE);
+                m_pMove->setFlag(1, 0);
                 m_pAttack->setCollKind(0);
                 m_Wait = 0.0f;
                 m_Stat = 10;
@@ -223,9 +223,9 @@ void CGimmickCarry::stateMain() {
             v.w = 1.0f;
             v.y = 0.0f;
             v.z = 0.0f;
-            m_pMove->getVel() = v;
+            m_pMove->setVel(v);
             changeMotion(2, 0, FALSE, 0, 0, 0);
-            m_pMove->setFlag(1, TRUE);
+            m_pMove->setFlag(1, 0);
             m_pAttack->setCollKind(0);
             m_Wait = 0.0f;
             m_Stat = 10;
@@ -457,9 +457,9 @@ void CGimmickCarry::CarryThrow() {
     setGimmickFlag(0x10, FALSE);
     bodyCollOn(-1);
     m_pMove->enableGravity(TRUE);
-    m_pMove->setFlag(1, FALSE);
-    m_pMove->setFlag(0x40, TRUE);
-    m_pMove->setFlag(0x10, TRUE);
+    m_pMove->setFlag(0, 1);
+    m_pMove->setFlag(0x40, 0);
+    m_pMove->setFlag(0x10, 0);
     m_pMove->setFootRadius(0.25f);
     m_pMove->setWallRadius(0.5f);
     CPointCollision cColl;
@@ -478,7 +478,7 @@ void CGimmickCarry::CarryThrow() {
         SubVector(v, cColl.m_outWE, v);
         warp(v);
         v.set(0.0f, 0.0f, 0.0f);
-        m_pMove->getVel() = v;
+        m_pMove->setVel(v);
         setEntityFlag(1, 0);
         m_pMove->enableGravity(FALSE);
         m_Stat = 8;
@@ -528,9 +528,9 @@ void CGimmickCarry::CancelCarry() {
     }
     setGimmickFlag(0x10, FALSE);
     m_pMove->enableGravity(TRUE);
-    m_pMove->setFlag(1, FALSE);
-    m_pMove->setFlag(0x40, TRUE);
-    m_pMove->setFlag(0x10, TRUE);
+    m_pMove->setFlag(0, 1);
+    m_pMove->setFlag(0x40, 0);
+    m_pMove->setFlag(0x10, 0);
     m_pMove->setFootRadius(0.25f);
     m_pMove->setWallRadius(0.5f);
     CPointCollision cColl;
@@ -549,7 +549,7 @@ void CGimmickCarry::CancelCarry() {
         SubVector(v, cColl.m_outWE, v);
         warp(v);
         v.set(0.0f, 0.0f, 0.0f);
-        m_pMove->getVel() = v;
+        m_pMove->setVel(v);
         m_pMove->enableGravity(FALSE);
         m_Stat = 8;
     }

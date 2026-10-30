@@ -1,16 +1,16 @@
 #define GAME_PLAYER_PLAYER_CPP
 #define TASK_H_NO_SLC_OVERFLOW_MSG
 #include "khtypes.h"
-#define COLLOBJ_H_INFO_UNION
-union COLL_INFO_UNION {
-    INT info;
-    struct {
-        BYTE infoID;
-        BYTE infoATTR;
-        BYTE infoPID;
-        BYTE infoSTAT;
-    };
-};
+#include "Game/Collision/CollInfo.h"
+
+
+
+
+
+
+
+
+
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"
@@ -546,7 +546,7 @@ CPlayer::CPlayer(CTask* inParent, UINT inChara, INT inEx) : CEntity(inParent, (O
     m_bIsBattleScene = CSceneInfo::isBattleScene();
     m_bIsMinigameScene = CSceneInfo::isMinigameScene();
     m_bIsBattleScene |= m_bIsMinigameScene;
-    if (CSceneInfo::getCurrentWorldID(0) == 10) m_pMove->setFlag(0x80, TRUE);
+    if (CSceneInfo::getCurrentWorldID(0) == 10) m_pMove->setFlag(0x80, 0);
 }
 CPlayer::~CPlayer() {
     if (this == *(CPlayer**)&g_pPlayer) exportStatus();
@@ -827,7 +827,7 @@ void CPlayer::initStartPos() {
         setPos(m_vStartPos);
         m_fDir = m_fStartDir;
         changeState(0);
-        m_pMove->setFlag(2, TRUE);
+        m_pMove->setFlag(2, 0);
     } else {
         if (m_bIsMinigameScene) {
             m_vStartPos.set(-19.54f, 3.01f, -8.96f);
@@ -851,8 +851,8 @@ void CPlayer::initStartPos() {
     m_pMove->getRot() = v;
     updateCoord();
     coordFix();
-    m_pMove->setFlag(0x40, TRUE);
-    m_pMove->setFlag(0x10, TRUE);
+    m_pMove->setFlag(0x40, 0);
+    m_pMove->setFlag(0x10, 0);
     m_pMove->setFootRadius(0.25f);
     m_pMove->setWallRadius(0.5f);
     m_pMove->land(5.0f, 1.0f, 0);
@@ -1265,7 +1265,7 @@ void CPlayer::setControl() {
                     m_pCB->setFlag(0, 0x400000);
                 }
                 setConditionFlag(0, 0x8810000);
-                m_pMove->setFlag(1, FALSE);
+                m_pMove->setFlag(0, 1);
                 setOldPos(m_vCenterPos);
             }
             exeUseStock(0);
@@ -1354,7 +1354,7 @@ void CPlayer::setDownForce() {
         if (pos.y <= m_fJumpLandLimit) {
             pos.y = m_fJumpLandLimit;
             if (vel.y < 0.0f) vel.y = 0.0f;
-            m_pMove->getPos() = pos;
+            m_pMove->setPos(pos);
             m_pMove->setVel(vel);
             m_bAir = FALSE;
         }
@@ -1797,7 +1797,7 @@ BOOL CPlayer::isAir() {
     FVECTOR pos = m_pMove->getPos();
     if (pos.y <= m_fJumpLandLimit) {
         pos.y = m_fJumpLandLimit;
-        m_pMove->getPos() = pos;
+        m_pMove->setPos(pos);
         m_bAir = FALSE;
         return FALSE;
     }
@@ -1940,7 +1940,7 @@ void CPlayer::initStandUp(INT inFlag) {
     setConditionFlag(0, 0x08810023);
     setBattleFlag(0, 0x00443F90);
     setFaceAnim(0, 0);
-    m_pMove->setFlag(0x40, TRUE); // partial CMovement: (flag, on)
+    m_pMove->setFlag(0x40, 0); // partial CMovement: (flag, on)
 }
 __asm__(".rdata\n");
 void CPlayer::exeStandUp() {
@@ -2380,7 +2380,7 @@ void CPlayer::initWall() {
     else setAnimRsrcEx(0xFD4, 0, -1, 0, 0, 0, 1);
     setPos(m_vWallPos);
     m_JumpState = 6;
-    m_pMove->setFlag(0x40, FALSE); // partial CMovement: (flag, on)
+    m_pMove->setFlag(0, 0x40); // partial CMovement: (flag, on)
     m_fFootRadius = 0.5f;
 }
 /* Parked: 4 lines differ (size, frame, every branch, call and register allocation match): at the start the
@@ -2429,18 +2429,18 @@ void CPlayer::exeWall() {
         return;
     }
     if (isTrgFlag(4)) {
-        m_pMove->setFlag(0x40, TRUE);
+        m_pMove->setFlag(0x40, 0);
         m_bAirCheck = TRUE;
         m_bAir = TRUE;
         initAttackField(0);
         cancel_power = 2.5f;
         cancel_speed = 2.0f;
     } else if (isTrgFlag(1)) {
-        m_pMove->setFlag(0x40, TRUE);
+        m_pMove->setFlag(0x40, 0);
         initJump(0);
         cancel_speed = 1.3f;
     } else if (!chkWall(1)) {
-        m_pMove->setFlag(0x40, TRUE);
+        m_pMove->setFlag(0x40, 0);
         initJump(0);
         cancel_power = 2.5f;
         cancel_speed = 1.3f;
@@ -2610,7 +2610,7 @@ void CPlayer::initLadder(INT inStep) {
     setOldPos(pos);
     m_iLadderStepMax = getLadderStepNow(m_vLadderPos.y + m_pMove->getLadderHeight()) - 4;
     m_JumpState = 6;
-    m_pMove->setFlag(0x40, FALSE);
+    m_pMove->setFlag(0, 0x40);
     m_pCam->setFlag(8, TRUE);
 }
 void CPlayer::exeLadder() {
@@ -2752,7 +2752,7 @@ INT CPlayer::isStartLadderJump() {
         m_fJumpSpdY = vel.y;
         m_pMove->setVel(vel);
     }
-    m_pMove->setFlag(0x40, TRUE); // partial CMovement: (flag, on)
+    m_pMove->setFlag(0x40, 0); // partial CMovement: (flag, on)
     return TRUE;
 }
 #else
@@ -2864,13 +2864,13 @@ void CPlayer::initFall() {
     setPlayerFlag(0, 0x020C2000);
     setBattleFlag(0, 0x00443F90);
     setFaceAnim(0, 0);
-    m_pMove->setFlag(0x40, TRUE); // partial CMovement: (flag, on)
+    m_pMove->setFlag(0x40, 0); // partial CMovement: (flag, on)
 }
 void CPlayer::setFallFloat() {
     FVECTOR v = m_pMove->getVel();
     m_fJumpSpdY = 0.0f;
     v.y = m_fJumpSpdY;
-    m_pMove->getVel() = v;
+    m_pMove->setVel(v);
 }
 void CPlayer::exeJump() {
     FVECTOR vel = m_pMove->getVel();
@@ -3242,7 +3242,7 @@ void CPlayer::initHang() {
     setAnimForce(0xF, 0, 0, 0, 0, 100);
     updateCoord();
     coordFix();
-    m_pMove->setFlag(0x40, FALSE); // partial CMovement: (flag, on)
+    m_pMove->setFlag(0, 0x40); // partial CMovement: (flag, on)
     m_pCam->setFlag(2, TRUE);      // partial CPlayerCamera: (flag, on)
     m_JumpState = 6;
     clearSpeed();
@@ -3607,7 +3607,7 @@ void CPlayer::exeRoomCreation() {
     case 2:
         if (isMotionEnd()) {
             m_iSubState = 3;
-            m_pMove->setFlag(1, TRUE);
+            m_pMove->setFlag(1, 0);
             setPlayerFlag(1, 0);
             setAnim(1, -1, 0);
             m_tqStateTimer = 0;
@@ -3691,7 +3691,7 @@ void CPlayer::exeWorldSelect() {
     case 2:
         if (isMotionEnd()) {
             m_iSubState = 3;
-            m_pMove->setFlag(1, TRUE);
+            m_pMove->setFlag(1, 0);
             setPlayerFlag(1, 0);
             setAnim(1, -1, 0);
             m_tqStateTimer = 0;
@@ -3905,8 +3905,8 @@ void CPlayer::resetAction(INT inMode) {
         setEntityFlag(0, 1);
         setPushon(0);
         m_pMarker->holdTarget(0);
-        m_pMove->setFlag(1, FALSE);
-        m_pMove->setFlag(0x40, TRUE);
+        m_pMove->setFlag(0, 1);
+        m_pMove->setFlag(0x40, 0);
         setConditionFlag(0, 0x200000);
         if (m_bIsMinigameScene) MG_SKILL::killMGSkill();
         switch (m_iStockSkill) {
@@ -3949,7 +3949,7 @@ void CPlayer::resetAction(INT inMode) {
         setPlayerFlag(1, 0x00401000);
         setPushon(0);
         m_pMarker->holdTarget(0);
-        m_pMove->setFlag(1, FALSE);
+        m_pMove->setFlag(0, 1);
         if (m_bIsMinigameScene) MG_SKILL::killMGSkill();
         if (m_iStockSkill == 0x61) warp(m_vAppearPos);
         break;
@@ -5350,7 +5350,7 @@ BOOL CPlayer::chkDamage() {
     }
     if (old_condition & 0x800000) {
         setConditionFlag(0, 0x800000);
-        m_pMove->setFlag(1, FALSE);
+        m_pMove->setFlag(0, 1);
         setOldPos(m_vCenterPos);
     }
     if (getPlayerState() == 0x1E) {
@@ -5838,7 +5838,7 @@ void CPlayer::initDead() {
         fadeEffect(m_hEffBad, 0);
     }
     setConditionFlag(0, 0x0881803F);
-    m_pMove->setFlag(1, FALSE);
+    m_pMove->setFlag(0, 1);
     setOldPos(m_vCenterPos);
     if (isConditionFlag(0x1000000)) {
         setEntityFlag(0, 1);
@@ -5953,7 +5953,7 @@ void CPlayer::notifyDead(INT inCmd) {
         setPlayerFlag(0, 0x020C2000);
         setBattleFlag(0, 0x03000000);
         CEffectMan::killAll((ObjType::eObjBit)2, 0.0f);
-        m_pMove->setFlag(0x10, TRUE);
+        m_pMove->setFlag(0x10, 0);
         CEffectMan::killAll(*(LPCSTR*)&PL::g_szDpxBreak, 0.0f);
 
         CEffectMan::killAll(PL::g_szDpxSpeedBreak, 0.0f);
@@ -5968,7 +5968,7 @@ void CPlayer::notifyDead(INT inCmd) {
         }
         m_iSubState = 1;
         m_bDmgMuteki = TRUE;
-        m_pMove->setFlag(1, TRUE);
+        m_pMove->setFlag(1, 0);
         setPlayerFlag(1, 0);
         m_collBody.off();
         m_collBody.offBody();
@@ -6032,7 +6032,7 @@ void CPlayer::initBadCondition() {
         m_fJumpGravity = 0.0f;
         m_JumpState = 3;
         m_fJumpSpdY = 0.0f;
-        m_pMove->setFlag(1, TRUE);
+        m_pMove->setFlag(1, 0);
         setOldPos(m_vCenterPos);
         setTrgFlag(0, 0x8000);
     } else if (isConditionFlag(0x800000)) {
@@ -6043,7 +6043,7 @@ void CPlayer::initBadCondition() {
         m_fJumpGravity = 0.0f;
         m_JumpState = 3;
         m_fJumpSpdY = 0.0f;
-        m_pMove->setFlag(1, TRUE);
+        m_pMove->setFlag(1, 0);
         setOldPos(m_vCenterPos);
         setTrgFlag(0, 0x8000);
     } else if (isConditionFlag(0x8000000)) {
@@ -6053,7 +6053,7 @@ void CPlayer::initBadCondition() {
         m_fJumpGravity = 0.0f;
         m_JumpState = 3;
         m_fJumpSpdY = 0.0f;
-        m_pMove->setFlag(1, TRUE);
+        m_pMove->setFlag(1, 0);
         setOldPos(m_vCenterPos);
         setTrgFlag(0, 0x8000);
         m_pCB->setFlag(0x400000, 0);
@@ -6105,13 +6105,13 @@ void CPlayer::exeBadCondition() {
         if (getMotionCurrentTime() >= 400) setAnimForce(0x20, 0, 1, 99, 99, 200);
         if (isTrgFlag(0x8000)) {
             setConditionFlag(1, 0x10000);
-            m_pMove->setFlag(1, FALSE);
+            m_pMove->setFlag(0, 1);
             setOldPos(m_vCenterPos);
             setFaceAnim(3, 0);
             initBadCondition();
         } else if (chkTrgAction(0, 0)) {
             setConditionFlag(0, 0x10000);
-            m_pMove->setFlag(1, FALSE);
+            m_pMove->setFlag(0, 1);
             setOldPos(m_vCenterPos);
         }
         break;
@@ -6123,7 +6123,7 @@ void CPlayer::exeBadCondition() {
         }
         if (isTrgFlag(0x8000)) {
             setConditionFlag(1, 0x800000);
-            m_pMove->setFlag(1, FALSE);
+            m_pMove->setFlag(0, 1);
             setOldPos(m_vCenterPos);
             m_iSubState = 12;
             setAnimForce(0x28, -1, 0, 0, 0, 0);
@@ -6132,7 +6132,7 @@ void CPlayer::exeBadCondition() {
             m_fJumpSpdY = 0.0f;
         } else if (chkTrgAction(0, 0)) {
             setConditionFlag(0, 0x800000);
-            m_pMove->setFlag(1, FALSE);
+            m_pMove->setFlag(0, 1);
             setOldPos(m_vCenterPos);
         }
         break;
@@ -6145,21 +6145,21 @@ void CPlayer::exeBadCondition() {
         if (isTrgFlag(0x40)) {
             TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : [TRG_GIMMICK]\n");
             setConditionFlag(0, 0x8000000);
-            m_pMove->setFlag(1, FALSE);
+            m_pMove->setFlag(0, 1);
             setOldPos(m_vCenterPos);
             setAnimRsrcEx(0xFCB, 2, -1, 1, 0, 0, 0);
             initGimmickCard(0);
         } else if (isTrgFlag(0x8000)) {
             TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : [TRG_CANCEL]\n");
             setConditionFlag(0, 0x8000000);
-            m_pMove->setFlag(1, FALSE);
+            m_pMove->setFlag(0, 1);
             setOldPos(m_vCenterPos);
             m_iSubState = 12;
             setAnimRsrcEx(0xFCB, 2, -1, 1, 0, 0, 0);
         } else if (chkTrgAction(0, 0)) {
             TRACE("CPlayer::exeBadCondition(); DARKPUNISHER : chkTrgAction=OK! ...enableDuelEntry\n");
             setConditionFlag(0, 0x8000000);
-            m_pMove->setFlag(1, FALSE);
+            m_pMove->setFlag(0, 1);
             setOldPos(m_vCenterPos);
         } else {
             break;
@@ -6538,7 +6538,7 @@ INT CPlayer::chkEscape() {
     bPlay = FALSE;
     if (m_pCB && (CardBattle::CCardBattle::isPlayingCard(1) || isBattleFlag(0x10200000))) bPlay = TRUE;
     if (m_fAnalogPower < 0.3f) bPlay = TRUE;
-    if (bPlay || isBattleFlag(4) || m_pMove->getWallCollATTR() != 5 || m_PlayerState == 0x20) {
+    if (bPlay || isBattleFlag(4) || m_pMove->getWallCollInfo().infoATTR != 5 || m_PlayerState == 0x20) {
         if (isBattleFlag(2)) {
             m_tqEscape = 0;
             setBattleFlag(0, 2);
@@ -6596,7 +6596,7 @@ void CPlayer::initEscape() {
     rot = getRot();
     rot.y = m_fDir;
     setRot(rot);
-    m_pMove->setFlag(1, TRUE); // partial CMovement: (flag, on)
+    m_pMove->setFlag(1, 0); // partial CMovement: (flag, on)
     setPlayerFlag(0x400001, 0);
     setAnim(0x2C, -1, 0);
     m_WalkMode = 2;
@@ -7512,7 +7512,7 @@ INT CPlayer::setMDFooting(HANDLE inFooting) {
         setTrgFlag(0, 0x400);
         m_fJumpLandLimit = -100.0f;
         m_hFooting = 0;
-        m_pMove->setFlag(0x200, FALSE); // partial CMovement: (flag, on)
+        m_pMove->setFlag(0, 0x200); // partial CMovement: (flag, on)
         return 0;
     }
     switch (m_PlayerState) {
@@ -7529,7 +7529,7 @@ INT CPlayer::setMDFooting(HANDLE inFooting) {
         m_fJumpLandLimit = 2.0f;
         return 0;
     }
-    m_pMove->setFlag(0x200, TRUE);
+    m_pMove->setFlag(0x200, 0);
     return 1;
 }
 void CPlayer::initFooting(INT inFlag) {
@@ -7581,7 +7581,7 @@ void CPlayer::initFooting(INT inFlag) {
         setConditionFlag(0, 0x08810023);
         setBattleFlag(0, 0x00443F90);
         setFaceAnim(0, 0);
-        m_pMove->setFlag(0x40, TRUE);
+        m_pMove->setFlag(0x40, 0);
     }
 }
 /* Parked: all but 4 instructions match (frame, branches, walk block registers). Left: in the analog walk arm the
@@ -7642,7 +7642,7 @@ void CPlayer::exeFooting() {
         setConditionFlag(0, 0x10000000);
         setTrgFlag(0, 0x400);
         m_fJumpLandLimit = -100.0f;
-        m_pMove->setFlag(0x200, FALSE);
+        m_pMove->setFlag(0, 0x200);
         initIdle(-1, 0);
         return;
     }
@@ -7762,8 +7762,8 @@ INT CPlayer::cmdRevolver_isActive() {
     return m_pRevolver->isActive();
 }
 void CPlayer::cmdMove_WaterSurfaceCheck(INT inFlag) {
-    if (inFlag) m_pMove->setFlag(0x80, TRUE);
-    else m_pMove->setFlag(0x80, FALSE);
+    if (inFlag) m_pMove->setFlag(0x80, 0);
+    else m_pMove->setFlag(0, 0x80);
 }
 __asm__(".rdata\n");
 void CPlayer::cmdState_initWorldSelect(HANDLE inDoor) {

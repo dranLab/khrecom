@@ -912,7 +912,7 @@ void CBattleEnemy::lastUpdate() {
     if (isBind()) {
         setVel(m_vBackupVel);
         m_pMove->updateVelocity();
-        if (!isFly()) m_pMove->setCollisionFlag(1, TRUE);
+        if (!isFly()) m_pMove->setCollisionFlag(1, 0);
     }
     updateBadStatusEffect(m_hBadStatus);
 }
@@ -3393,14 +3393,14 @@ void CBattleEnemy::enableBind_(BOOL inSw) {
         setEntityFlag(0x8000, 0);
         m_ullBtlEnemyFlag |= 0x20000;
         setBadStatusEffect(0, hitBody->getBadStatusParam());
-        m_pMove->setFlag(8, TRUE);
+        m_pMove->setFlag(8, 0);
         m_tqBindTimer = 33000;
         setEffect(BattleEnemy::BindEffectName, 1, &getPos(), NULL, hitBody->getBadStatusParam());
     } else {
         setEntityFlag(0, 0x8000);
         m_ullBtlEnemyFlag &= ~0x20000;
         killBadStatusEffect();
-        m_pMove->setFlag(8, FALSE);
+        m_pMove->setFlag(0, 8);
         m_tqBindTimer = 0;
     }
 }

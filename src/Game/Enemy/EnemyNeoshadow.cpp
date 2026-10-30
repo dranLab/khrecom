@@ -69,10 +69,10 @@ void CEnemyNeoshadow::updateAfter() {
     }
     FLOAT t = 1.0f - (FLOAT)getTimer() / (FLOAT)m_tqDigTime;
     Math3D::VectorLerp(vScale, vStart, vEnd, t);
-    m_pMove->setScale(vScale);
+    m_pMove->setScl(vScale);
     if (getTimer() <= 0) {
         m_iDigStep = 0;
-        m_pMove->setScale(vEnd);
+        m_pMove->setScl(vEnd);
     }
 }
 

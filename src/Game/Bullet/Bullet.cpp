@@ -1155,7 +1155,7 @@ BOOL CHomingBullet::bound_() {
             ApplyMatrix33(reflect, m, reflect);
         }
     }
-    m_pMove->getVel() = reflect;
+    m_pMove->setVel(reflect);
     if (m_pMove->getDetectNormal().y < 0.64278764f) {
         return TRUE;
     }

@@ -16,8 +16,8 @@ CSampleGimmick::~CSampleGimmick() {}
 BOOL CSampleGimmick::initalize(INT inGroupID, INT inRsrcID) {
     if (!CBaseGimmick::initalize(inGroupID, inRsrcID)) return FALSE;
     m_pMove->enableGravity(FALSE);
-    m_pMove->setFlag(1, TRUE);
-    m_pMove->setCollisionFlag(0xF, FALSE);
+    m_pMove->setFlag(1, 0);
+    m_pMove->setCollisionFlag(0, 0xF);
     rideModelChangeListR2();
     return TRUE;
 }

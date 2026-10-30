@@ -58,8 +58,8 @@ BOOL CGimmickBreakableTu::initalize(INT inGroupID, INT inRsrcID) {
     getSysTask(32);
     LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
     m_pMove->enableGravity(FALSE);
-    m_pMove->setFlag(1, TRUE);
-    m_pMove->setCollisionFlag(0xF, FALSE);
+    m_pMove->setFlag(1, 0);
+    m_pMove->setCollisionFlag(0, 0xF);
     bodyCollOnBody(-1);
     rideModelEnableAllCollision(TRUE);
     v.set(0.0f, 0.1f, -2.0f, 1.0f);
@@ -134,8 +134,8 @@ BOOL CGimmickCarryTu::initalize(INT inGroupID, INT inRsrcID) {
     getSysTask(32);
     LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
     m_pMove->enableGravity(FALSE);
-    m_pMove->setFlag(1, TRUE);
-    m_pMove->setCollisionFlag(0xF, FALSE);
+    m_pMove->setFlag(1, 0);
+    m_pMove->setCollisionFlag(0, 0xF);
     v.set(0.0f, 3.0f, -17.0f, 1.0f);
     warp(v);
     pEfx = CEffectMan::getEffect(CEffectMan::setEffect("barrel_app", 0, ObjType::OBJ_TYPE_GIMMICK, &v, NULL, 0.0f));
@@ -193,8 +193,8 @@ BOOL CGimmickShadowTu::initalize(INT inGroupID, INT inRsrcID) {
     getSysTask(32);
     LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
     m_pMove->enableGravity(FALSE);
-    m_pMove->setFlag(1, TRUE);
-    m_pMove->setCollisionFlag(0xF, FALSE);
+    m_pMove->setFlag(1, 0);
+    m_pMove->setCollisionFlag(0, 0xF);
     bodyCollOnBody(-1);
     rideModelEnableAllCollision(TRUE);
     v.set(0.0f, 3.0f, -25.0f, 1.0f);

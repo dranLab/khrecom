@@ -104,9 +104,9 @@ CGimmickSearchLaser::~CGimmickSearchLaser() {
 BOOL CGimmickSearchLaser::initalize(INT inGroupID, INT inRsrcID) {
     if (!CBaseGimmick::initalize(inGroupID, inRsrcID)) return FALSE;
     m_pMove->enableGravity(FALSE);
-    m_pMove->setFlag(1, TRUE);
-    m_pMove->setCollisionFlag(0xF, FALSE);
-    m_pMove->setFlag(8, TRUE);
+    m_pMove->setFlag(1, 0);
+    m_pMove->setCollisionFlag(0, 0xF);
+    m_pMove->setFlag(8, 0);
     bodyCollOffBody(-1);
     getSysTask(32);
     LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
