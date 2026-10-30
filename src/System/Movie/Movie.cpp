@@ -8,12 +8,12 @@
 
 inline void* operator new(size_t, void* p) { return p; }
 
-class CMovieScript {
-public:
-    static void setupRsrc(const CHAR* pszFile);
-    static BOOL isCompleteSetupRsrc();
-    static void disposeRsrc();
-};
+#include "System/Movie/MovieScript.h"
+
+
+
+
+
 
 extern "C" int TsSdMpegGetAddrIOP();
 extern "C" int sceGsSyncPath(int mode, u_short timeout);
