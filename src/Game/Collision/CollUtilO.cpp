@@ -539,7 +539,9 @@ INT CCollUtil::distanceSphereO(FVECTOR* pP0) {
     m_vDetect2 = s;
     return 1;
 }
-/* Near match (the load order of the first coordinates and radii), kept for reference: */
+/* Parked: 7 of 125 lines - the original loads columnColl1's radius after columnColl0's (sched1 hoists ours above the
+   z subtraction, so c0.z/c1.R swap f3/f4). Tried: radius statement order, r1 split, direct/SubVector differences,
+   permuter 9 min (23k candidates, no gain). */
 #if 0
 INT CCollUtil::_detectColumnColumnEz(CColumnCollision& columnColl0, CColumnCollision& columnColl1) {
     FVECTOR v0;
