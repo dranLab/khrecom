@@ -61,9 +61,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1023 (940 in 109 headers, 83 in 37 .cpp); MATCH: 136
-  by category: method 400, data member 69, type 86, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 43, guessed 41, header-level 74, stand-in 35, other 6
-stand-ins: 323 foreign in 120 files (83 names), 201 unattributed, 170 own
+PARTIAL: 1022 (940 in 109 headers, 82 in 36 .cpp); MATCH: 136
+  by category: method 400, data member 69, type 86, fwd decl 53, #include 29, changed in place 132, padding 30, path override 24, gate 43, guessed 41, header-level 74, stand-in 35, other 6
+stand-ins: 312 foreign in 115 files (82 names), 201 unattributed, 170 own
 duplicate class names across headers: 25
 padding: 30 arrays, 26 accessors
 mechanisms: 958 sites (911 untagged); #line: 1242
@@ -79,7 +79,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R1 | 22.0 | `Game/Enemy/BattleEnemyManager.h` | ready | 11 stand-in files, 0 dup headers, 0 gate users | CBattleEnemyManager (1 complete) | inline bodies or virtuals |
 | R1 | 17.5 | `Game/CardBattle.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users, 29 PARTIAL | CCardRevolver (1 partial) | inline bodies or virtuals |
 | R1 | 14.0 | `Game/Atel/Atel.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | CAtel (1 complete) | inline bodies or virtuals |
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 4.0 | `Game/MessageManager.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMessageManager (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Player/PlayerDRiku.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPlayerDRiku (1 superset) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Prize.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPrize (1 superset) | inline bodies or virtuals |
+| R1 | 4.0 | `System/Fsm.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users | CFSM (1 gated) | inline bodies or virtuals (gate) |
 
 ## Classes with foreign copies
 
@@ -109,7 +109,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `C2DMan` | gated | System/Graphic/2d/2DMan.h | 28 | Form/Menu/SaveLoadCtrl.h |  |
 | `CRcf` | complete | System/Rcf.h | 24 |  |  |
 | `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
-| `CBattleEnemyManager` | complete | Game/Enemy/BattleEnemyManager.h | 11 |  |  |
 | `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
 | `CAtel` | complete | Game/Atel/Atel.h | 7 |  |  |
 | `DropPrize` | gated | Game/Gimmick/GimmickManager.h | 7 |  |  |
