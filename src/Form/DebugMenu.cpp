@@ -93,12 +93,12 @@ public:
     static BOOL isSuccessLoad();
 };
 
-class CAtel {
-public:
-    static void setFloorCompleteFlag(INT nFloor, INT nRoomID);
-    static void setWorldStepFlag(INT nWorld, INT nStep);
-    static void setSceneDeSelectInitFlags();
-};
+#include "Game/Atel/Atel.h"
+
+
+
+
+
 
 struct RoomStorageInfo {
     BYTE _pad[5];

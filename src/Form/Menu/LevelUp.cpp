@@ -67,10 +67,10 @@ public:
 #include "System/Sound/SoundMan.h"
 #line 72
 
-class CAtel {
-public:
-    static void reqWhiteFadeOut(USHORT nFrame);
-};
+#include "Game/Atel/Atel.h"
+
+
+
 
 extern "C" {
 int sprintf(char*, const char*, ...);
