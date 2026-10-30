@@ -186,6 +186,9 @@ private:
 public:
     CVSM(CAtel& atel, BOOL bTrace);
     virtual ~CVSM();
+    void loadFromMem(const BYTE* pAddr);
+    void execInit();
+    void exec(TIMEQ nTQ);
     INT getActorIndex(INT nID) const;
     INT getActorIndex(const CHAR* pszName) const;
     BOOL isInitComplete() const { return !isFlagOn(1); }
@@ -197,14 +200,19 @@ public:
     INT getActorNum() { return m_ActorCount; }
     void setPC(INT nPC) { m_Pctr = nPC; }
     INT getPC() const { return m_Pctr; }
+#ifdef GAME_ATEL_VSME_CPP /* MATCH: Game/Atel/Atel (CAtel::start ...) calls these out of line: inline-called-not-inlined */
     void clearFlag(INT nFlag) { m_nFlag &= ~nFlag; }
     void setFlag(INT nFlag) { m_nFlag |= nFlag; }
     BOOL isFlagOn(INT nFlag) const { return (m_nFlag & nFlag) == nFlag; }
+#else
+    void clearFlag(INT nFlag);
+    void setFlag(INT nFlag);
+    BOOL isFlagOn(INT nFlag) const;
+#endif
 
 protected:
     void deleteActorAll();
     void clearReq();
-    void execInit();
     eATEL_REQ_RET execCode(INT nAddr);
     INT execStdCode(INT op, INT& addr, eATEL_REQ_RET& ret);
     INT execExt1Code(INT op, eATEL_REQ_RET& ret);
@@ -213,13 +221,10 @@ protected:
     INT searchLockOnNpc();
     BOOL cam_ctrl(INT nCmnd, INT nID, INT& nRet);
     void ctd_cal(const CAvatar* in_pAvatar, int i2, int i3, ChatWndCreateCTDParam* CWCP);
-    void loadFromMem(const BYTE* pAddr);
     void initActor();
-    void exec(TIMEQ nTQ);
     void execActor();
     void checkEvents();
     void tuneReq();
-    void AtelEventSkip();
     void setReq(const RTP& rq);
 
 private:
@@ -288,6 +293,8 @@ private:
     BOOL actor_ref(INT nCmnd, INT nArg);
     void cam_ajt(INT nCmnd, F_UL& arg, INT nID);
     BOOL player_rsrc(INT nCmnd, INT nArg);
+public:
+    void AtelEventSkip();
 };
 typedef char _check_vsm_size[sizeof(CVSM) == 0x7d0c ? 1 : -1];
 

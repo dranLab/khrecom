@@ -1,4 +1,5 @@
 #define TASK_H_NO_SLC_OVERFLOW_MSG
+#define GAME_ATEL_VSME_CPP /* MATCH: CVSM's flag accessors are only inline in this unit (Game/Atel/VSME.h) */
 #define CAMERAMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/CameraMan.h"
 #define CHATMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/ChatMan.h"
 #define ATELFOG_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelFog.h"
