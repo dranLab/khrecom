@@ -61,9 +61,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 992 (910 in 109 headers, 82 in 37 .cpp); MATCH: 140
-  by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 34, other 6
-stand-ins: 262 foreign in 109 files (64 names), 201 unattributed, 170 own
+PARTIAL: 991 (910 in 109 headers, 81 in 37 .cpp); MATCH: 140
+  by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 33, other 6
+stand-ins: 260 foreign in 109 files (63 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 960 sites (910 untagged); #line: 1242
@@ -82,12 +82,12 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
+| R1 | 5.0 | `Form/DebugWindow.h` | ready | 1 stand-in files, 0 dup headers, 3 gate users | CDebugWindow (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
 | R1 | 4.5 | `Game/Collision/CollBody.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users, 1 PARTIAL | CCollBody (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 4.0 | `Game/Player/PlayerDRiku.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPlayerDRiku (1 superset) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Prize.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPrize (1 superset) | inline bodies or virtuals |
 | R1 | 4.0 | `System/Fsm.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users | CFSM (1 gated) | inline bodies or virtuals (gate) |
-| R1 | 4.0 | `System/Graphic/TexCtrl.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CTexCtrl (1 complete) | inline bodies or virtuals |
 | R1 | 3.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `System/Graphic/3DCPrim.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users | C3DCPrim (1 partial) | inline bodies or virtuals |
 | R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
@@ -120,7 +120,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
 | `CPlayerDRiku` | superset | Game/Player/PlayerDRiku.h | 2 |  | virtual order differs |
 | `CPrize` | superset | Game/Prize.h | 2 |  | virtual order differs |
-| `CTexCtrl` | complete | System/Graphic/TexCtrl.h | 2 |  |  |
 | `CTextWnd` | complete | System/Wnd.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
@@ -357,7 +356,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
 | `System/RsrcData.h` | 3 | 0/0/0/32 | 29 |
 | `System/SJoint.h` | 9 | 0/0/0/0 | 201 |
-| `System/Task.h` | 27 | 1/2/0/1 | 234 |
+| `System/Task.h` | 27 | 1/2/0/1 | 235 |
 | `System/TaskMan.h` | 7 | 1/2/0/0 | 84 |
 | `System/Vector.h` | 22 | 0/0/3/0 | 266 |
 
