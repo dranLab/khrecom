@@ -61,9 +61,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 992 (910 in 109 headers, 82 in 36 .cpp); MATCH: 140
-  by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 34, other 6
-stand-ins: 274 foreign in 111 files (70 names), 201 unattributed, 170 own
+PARTIAL: 991 (910 in 109 headers, 81 in 36 .cpp); MATCH: 140
+  by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 33, other 6
+stand-ins: 273 foreign in 111 files (69 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 960 sites (910 untagged); #line: 1242
@@ -80,7 +80,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
-| R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 3.0 | `System/Graphic/3DCPrim.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users | C3DCPrim (1 partial) | inline bodies or virtuals |
 | R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 2.5 | `System/Graphic/2d/2DSeq.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | C2DSeq (1 superset) | inline bodies or virtuals |
+| R1 | 2.0 | `Form/Menu/GameOver.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CGameOver (1 complete) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -141,7 +141,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CEffectMotion` | complete | Game/EffectMotion.h | 1 |  |  |
 | `CFadeIOMask` | partial | System/Graphic/ScreenMask.h | 1 |  | missing methods: ~CFadeIOMask |
 | `CFriend` | partial | Game/Player/Friend.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
-| `CGame` | superset | Game/Game.h | 1 |  | 19 PARTIAL |
 | `CGameOver` | complete | Form/Menu/GameOver.h | 1 |  |  |
 | `CImageWnd` | complete | System/Wnd.h | 1 |  |  |
 | `CLevelUp` | complete | Form/Menu/LevelUp.h | 1 |  |  |
@@ -248,7 +247,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Enemy/MapEnemyManager.h` | 1 | 1/1/0/0 | 8 |
 | `Game/Entity.h` | 110 | 1/1/1/0 | 150 |
 | `Game/EntityFactory.h` | 14 | 1/1/0/0 | 49 |
-| `Game/Game.h` | 20 | 0/1/0/0 | 42 |
+| `Game/Game.h` | 20 | 0/1/0/0 | 43 |
 | `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
 | `Game/GameSubBattle.h` | 0 | 1/0/1/0 | 2 |
 | `Game/GameWork.h` | 3 | 2/1/3/0 | 60 |
