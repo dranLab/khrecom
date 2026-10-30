@@ -4,6 +4,7 @@
 #include "System/Graphic/Effect/libppp/pppPart.h"
 #include "System/Graphic/Effect/libppp/keProg/KeLns.h"
 #include "System/Graphic/Effect/libppp/keProg/Ke.h"
+#include "System/Graphic/Effect/libppp/draw/draw_w.h"
 
 /* libgraph */
 typedef struct { /* 0x8 */
@@ -59,20 +60,6 @@ typedef struct { /* 0x80 */
     long test1addr;
 } sceGsDrawEnv1;
 
-typedef struct { /* 0x70 */
-    u_long128 vifcode;
-    u_long128 giftag;
-    u_long bitbltbuf;
-    long bitbltbufaddr;
-    u_long trxpos;
-    long trxposaddr;
-    u_long trxreg;
-    long trxregaddr;
-    u_long finish;
-    long finishaddr;
-    u_long trxdir;
-    long trxdiraddr;
-} sceGsStoreImage;
 
 extern u_long ppvGsFrame;
 extern u_long ppvGsZbuf;
