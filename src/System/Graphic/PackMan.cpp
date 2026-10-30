@@ -148,10 +148,7 @@ extern "C" int sceGsSetDefDrawEnv(sceGsDrawEnv12* draw, short psm, short w, shor
 extern "C" int sceGsSetDefDrawEnv2(sceGsDrawEnv12* draw, short psm, short w, short h, short ztest, short zpsm);
 extern "C" void sceGsSetDefClear(sceGsClear* cp, short ztest, short x, short y, short w, short h, u_char r, u_char g, u_char b, u_char a, u_int z);
 extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short h, short dx, short dy);
-class CSceneEnv { /* PARTIAL: stand-in for Game/SceneEnv CSceneEnv: SceneEnv.h pulls in EffectMan.h */
-public:
-    static FVECTOR* getTypeColor(ObjType::eObjType eType);
-};
+#include "Game/SceneEnv.h"
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void FTOI0Vector(IVECTOR& outVec, const FVECTOR& inVec);
 class CDebugWindow { /* PARTIAL: stand-in for Form/DebugWindow CDebugWindow: DebugWindow.h pulls in Task.h */
