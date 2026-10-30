@@ -83,11 +83,7 @@ namespace Thread {
 void delayThread_1Frame();
 }
 
-class CMovieFiles {
-public:
-    static void initialize();
-    static void finalize();
-};
+#include "System/Movie/MovieFiles.h"
 
 struct RsrcInfo {
     CHAR* _pszName;
@@ -122,26 +118,9 @@ public:
 
 #include "Game/SceneInfo.h"
 
-class CRcfCD {
-public:
-    static INT getRsrcFileSize(UINT nID);
-    static INT setupRcfAlias();
-    static void initReadThreadProc();
-    static INT procReadThread(UINT nGroup, INT nType, BYTE*& pExtBuff);
-    static INT cancelReadThread();
-    static INT getMemberOption(UINT nGroup);
-    static void initialize();
-    static void finalize();
-};
+#include "System/RcfCD.h"
 
-class CNowLoading {
-public:
-    static void start();
-    static void enable(BOOL bEnable);
-    static void setMode(INT nMode);
-    static INT getMode();
-    static void end(BOOL bForce);
-};
+#include "Game/NowLoading.h"
 
 class CRCFQueueData {
 private:
