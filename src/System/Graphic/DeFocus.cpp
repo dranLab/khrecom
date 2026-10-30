@@ -493,7 +493,156 @@ void CDeFocusPrim::_makePktDeFocus() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", _makePktDeFocus__12CDeFocusPrim);
 #endif
 void CBlurPrim::makePkt() { _makePktBlur(); }
+/* Parked: 97 of 586 lines, 4 bytes long - structure as the original (debug override, camera-distance Z or
+ * 0xFFFF28, A+D header, 6-kind switch of set_tsprite32 patterns, defaults restore). Left: `this` and iZ swap
+ * s2/s3 (most lines), the Bak_ registers (original spills the colour, keeps the rate in fp) and the store order
+ * of the {1|0x61, 0x15} pairs between cases. hill.py on the Bak_ copies, permuter 7 min: no real gain. */
+#if 0
+void CBlurPrim::_makePktBlur() {
+    INT Bak_iBlurKind;
+    INT Bak_iBlurRate;
+    FLOAT Bak_fBlurLen;
+    UINT Bak_iBlurCol;
+    UINT Bak_iBlurAlpha;
+    INT iZ;
+    QWdata* qp;
+    CCamera* pCam;
+    FVECTOR vFPos;
+    FVECTOR vCam;
+    FVECTOR vLook;
+    FVECTOR vN;
+    IVECTOR vIPos;
+    u_long128 tag;
+
+    Bak_iBlurKind = m_iKind;
+    Bak_iBlurRate = m_iRate;
+    Bak_fBlurLen = m_fLen;
+    Bak_iBlurCol = m_iColor.col;
+    Bak_iBlurAlpha = m_iAlpha;
+    if (DebugWork::g_dw.sys.m_iBlurKind && DebugWork::g_dw.sys.m_iBlurCh == m_iDebugID) {
+        m_iKind = DebugWork::g_dw.sys.m_iBlurKind;
+        m_iRate = DebugWork::g_dw.sys.m_iBlurRate;
+        m_fLen = DebugWork::g_dw.sys.m_fBlurLen;
+        setColor((u_char)DebugWork::g_dw.sys.m_iBlurCR | ((u_char)DebugWork::g_dw.sys.m_iBlurCG << 8) | ((u_char)DebugWork::g_dw.sys.m_iBlurCB << 16) | ((u_char)DebugWork::g_dw.sys.m_iBlurCA << 24));
+        m_iAlpha = DebugWork::g_dw.sys.m_iBlurAlpha;
+    }
+    if (!m_iKind) goto end;
+    if (m_iRate <= 0) goto end;
+    if (m_fLen <= 0.0f) {
+        iZ = 0xFFFF28;
+    } else {
+        pCam = CWorldEnv::getActiveCamera();
+        if (!pCam) goto end;
+        if (!pCam->getLook()) goto end;
+        vCam = ((const CCamera*)pCam)->Crd(0).m_World.v[3];
+        vLook = *pCam->getLook();
+        SubVectorXYZ(vN, vLook, vCam);
+        Normalize(vN, vN);
+        ScaleVectorXYZ(vFPos, vN, m_fLen);
+        AddVectorXYZ(vFPos, vCam, vFPos);
+        _loadRotTransPers(CWorldEnv::getWorldScreenMatrix());
+        RotTransPersClipW(vIPos, vFPos);
+        if (vIPos.w) goto end;
+        iZ = vIPos.z >> 4;
+    }
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000000000UL), "0"((u_long)0xE));
+    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+    _setADq(qp, (u_long)VRAM::_FRAME0_START | 0x24020000 | ((u_long)0x9000 << 18), 7);
+    qp++;
+    _setADq(qp, 0x51001, 0x48);
+    qp++;
+    _setADq(qp, getAlphaMode(), 0x43);
+    qp++;
+    _setADq(qp, 0x356, 0);
+    qp++;
+    _setADq(qp, m_iColor.col, 1);
+    qp++;
+    switch (m_iKind) {
+    case 1:
+        _setADq(qp, 1, 0x15);
+        CPackMan::pkCloseGifTag(qp + 1);
+        set_tsprite32(__null, m_iRate << 4, 0, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        set_tsprite32(__null, -(m_iRate << 4), 0, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        set_tsprite32(__null, 0, (m_iRate - 1) << 4, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        set_tsprite32(__null, 0, -((m_iRate + 3) << 4), iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        break;
+    case 2:
+        _setADq(qp, 0x61, 0x15);
+        CPackMan::pkCloseGifTag(qp + 1);
+        set_tsprite32(__null, (m_iRate - 1) << 4, 0, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        set_tsprite32(__null, -((m_iRate + 1) << 4), 0, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        set_tsprite32(__null, 0, (m_iRate - 1) << 4, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        set_tsprite32(__null, 0, -((m_iRate + 1) << 4), iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        break;
+    case 3: {
+        INT i;
+        _setADq(qp, 1, 0x15);
+        CPackMan::pkCloseGifTag(qp + 1);
+        for (i = 0; i < m_iRate; i++) {
+            set_tsprite32(__null, 16, 0, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+            set_tsprite32(__null, -16, 0, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+            set_tsprite32(__null, 0, -48, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        }
+        break;
+    }
+    case 4: {
+        INT i;
+        _setADq(qp, 0x61, 0x15);
+        CPackMan::pkCloseGifTag(qp + 1);
+        for (i = 0; i < m_iRate; i++) {
+            set_tsprite32(__null, -16, 0, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+            set_tsprite32(__null, 0, -16, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        }
+        break;
+    }
+    case 5: {
+        INT i;
+        INT iRate;
+        _setADq(qp, 1, 0x15);
+        CPackMan::pkCloseGifTag(qp + 1);
+        for (i = 0; i < 2; i++) {
+            iRate = m_iRate << i;
+            set_tsprite32(__null, iRate << 4, 0, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+            set_tsprite32(__null, -(iRate << 4), 0, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+            set_tsprite32(__null, 0, (iRate - 1) << 4, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+            set_tsprite32(__null, 0, -((iRate + 3) << 4), iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        }
+        break;
+    }
+    case 6: {
+        INT i;
+        INT iRate;
+        _setADq(qp, 0x61, 0x15);
+        CPackMan::pkCloseGifTag(qp + 1);
+        for (i = 0; i < 2; i++) {
+            iRate = m_iRate << i;
+            set_tsprite32(__null, (iRate - 1) << 4, 0, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+            set_tsprite32(__null, -((iRate + 1) << 4), 0, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+            set_tsprite32(__null, 0, (iRate - 1) << 4, iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+            set_tsprite32(__null, 0, -((iRate + 1) << 4), iZ, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        }
+        break;
+    }
+    default:
+        CPackMan::pkCloseGifTag(qp);
+        break;
+    }
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
+    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+    _setADp(&qp[0], CPackMan::getDefault_ALPHA_2(), 0x43);
+    _setADp(&qp[1], CPackMan::getDefault_TEST_2(), 0x48);
+    _setADp(&qp[2], 0x60, 0x15);
+    CPackMan::pkCloseGifTag(qp + 3);
+end:
+    m_iAlpha = Bak_iBlurAlpha;
+    m_iKind = Bak_iBlurKind;
+    m_iRate = Bak_iBlurRate;
+    m_fLen = Bak_fBlurLen;
+    m_iColor.col = Bak_iBlurCol;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", _makePktBlur__9CBlurPrim);
 __asm__(".rdata\n.align 3\n.word 0x001232F0\n.word 0x001233A4\n.word 0x00123480\n.word 0x00123534\n.word 0x001235C0\n.word 0x001236A4\n.text\n");
+#endif
 
 // SOURCE DATA: .data .rodata
