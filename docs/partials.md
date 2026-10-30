@@ -61,9 +61,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1038 (957 in 109 headers, 81 in 33 .cpp); MATCH: 114
-  by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 43, guessed 43, header-level 74, stand-in 34, other 6
-stand-ins: 354 foreign in 122 files (104 names), 200 unattributed, 172 own
+PARTIAL: 1039 (957 in 109 headers, 82 in 34 .cpp); MATCH: 114
+  by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 43, guessed 43, header-level 74, stand-in 35, other 6
+stand-ins: 351 foreign in 122 files (101 names), 200 unattributed, 172 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
 mechanisms: 962 sites (924 untagged); #line: 1238
@@ -183,8 +183,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPoly3Collision` | gated | Game/Collision/CollObj.h | 1 |  |  |
 | `CPolyGT4` | superset | System/Graphic/GprimFull.h | 1 |  | virtual order differs |
 | `CRcfCD` | complete | System/RcfCD.h | 1 |  |  |
-| `CRide` | complete | Game/Collision/Ride.h | 1 |  |  |
-| `CRideModel` | complete | Game/Collision/Ride.h | 1 |  |  |
 | `CRoomCreation` | complete | Form/Menu/RoomCreation.h | 1 |  |  |
 | `CRoulette` | complete | Form/Menu/Roulette.h | 1 |  |  |
 | `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
@@ -200,7 +198,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `F_UL` | complete | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | superset | System/Graphic/Gprim.h | 1 |  | 2 PARTIAL |
 | `LAY_SCREEN` | complete | System/Graphic/2d/2DLay.h | 1 |  |  |
-| `MCD_INFO` | complete | Game/Collision/Ride.h | 1 |  |  |
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
 | `QWdata` | complete | System/Graphic/Gprim.h | 1 |  |  |
 | `RcfKey` | complete | System/Rcf.h | 1 |  |  |
@@ -270,7 +267,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 173 |
 | `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 150 |
 | `Game/Collision/CollUtilA.h` | 12 | 6/0/2/0 | 24 |
-| `Game/Collision/Ride.h` | 1 | 6/0/1/0 | 5 |
+| `Game/Collision/Ride.h` | 1 | 6/0/1/0 | 6 |
 | `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
 | `Game/EffectMotion.h` | 0 | 5/0/2/0 | 7 |
 | `Game/Enemy/BattleEnemy.h` | 35 | 0/0/2/0 | 58 |
