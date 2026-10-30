@@ -205,11 +205,7 @@ public:
 
 #include "System/PlaySpeedCtrl.h"
 
-class CCollObj {
-public:
-    static void collisionInit();
-    static void collisionDelete();
-};
+#include "Game/Collision/CollObj.h"
 
 #include "Game/Collision/CollUtilA.h"
 
