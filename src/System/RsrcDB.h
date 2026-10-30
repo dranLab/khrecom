@@ -60,6 +60,10 @@ public:
     static CRsrcData* getRsrcWithHash(INT nRsrcType, INT nNameHash);
     static CRsrcData* getRsrcWithIndex(INT nRsrcType, INT nIndex, BOOL bOnlyCurrentScene);
     static void* getRsrcData(const CRsrcData& data);
+    static void* getRsrcData(INT nRsrcType, const CHAR* pszName) { // PARTIAL: inline added for Form/Menu/Camp (the original's name unknown)
+        CRsrcData* pData = getRsrc(nRsrcType, pszName, NAME_CASE_SENSITIVE);
+        return pData ? getRsrcData(*pData) : NULL;
+    }
     static CRsrcData* getFirstRsrc(INT nRsrcType);
     static void* getFirstData(INT nRsrcType);
     static CRsrcData* getFirstRsrc(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
