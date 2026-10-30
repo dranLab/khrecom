@@ -9,12 +9,7 @@ class CEntity;
 union FVECTOR;
 class CDebugWindow;
 
-/* DropPrize and CARD_KIND: other includers (decompiled before this unit) define DropPrize / CARD_KIND themselves,
- * so the full definitions are only seen by Game/Gimmick/GimmickManager.cpp. */
-#ifdef GAME_GIMMICK_GIMMICKMANAGER_CPP
-enum CARD_KIND {
-    CARD_KIND_None = 0 /* values not needed yet */
-};
+#include "Game/CardKindEnum.h"
 
 struct DropPrize {
     INT StockKind;
@@ -22,9 +17,14 @@ struct DropPrize {
     SHORT Num;
     SHORT No;
 };
-#else
-struct DropPrize;
-#endif
+
+
+
+
+
+
+
+
 
 struct GimParam; /* Game/Gimmick/BaseGimmick.h */
 
@@ -118,10 +118,10 @@ private:
     INT DecideGimmickCardNo(SHORT* pCardProbTable);
     DropPrize DecideKeyTreasurePrize();
     DropPrize DecideOpenCountTreasurePrize();
-#ifdef GAME_GIMMICK_GIMMICKMANAGER_CPP
+
     BOOL checkPossibleCard(CARD_KIND in_Kind);
     CARD_KIND changePossibleCard(CARD_KIND in_Kind);
-#endif
+
     INT DecidePrizeKind(const GimParam* in_pParam);
     DropPrize DecideGPrize(INT in_DataIndex);
     DropPrize DecideRPrize(INT in_DataIndex);

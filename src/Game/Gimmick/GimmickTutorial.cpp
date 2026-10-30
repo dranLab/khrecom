@@ -38,12 +38,12 @@ inline void _taskSLCOverflowLate() {
 #include "Game/Enemy/MapEnemyManager.h"
 #include "System/Graphic/Camera.h"
 
-struct DropPrize {
-    INT StockKind;
-    INT Kind; /* CARD_KIND */
-    SHORT Num;
-    SHORT No;
-};
+#include "Game/Gimmick/GimmickManager.h"
+
+
+
+
+
 
 CGimmickBreakableTu::CGimmickBreakableTu(CTask* inParent) : CBaseGimmick(inParent) {
     m_Step = 0;
@@ -94,12 +94,12 @@ void CGimmickBreakableTu::beginStateHitAttack() {
     DropPrize prize;
     FVECTOR v;
     prize.StockKind = 0;
-    prize.Kind = 0;
+    prize.Kind = CARD_KIND_None;
     prize.Num = 0;
     prize.No = 0;
     if (m_Stat == 0) {
         CGimmickManager* mgr = (CGimmickManager*)getSysTask(17);
-        prize.Kind = 27;
+        prize.Kind = CARD_KIND_Blizzard;
         prize.No = 5;
         prize.Num = 1;
         v.set(0.0f, 0.0f, 0.0f, 1.0f);

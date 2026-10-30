@@ -5,9 +5,9 @@
 #include "khtypes.h"
 #include "Game/Entity.h"
 
-enum CARD_KIND {
-    CARD_KIND_NONE = 0
-};
+#include "Game/CardKindEnum.h"
+
+
 
 class CAttachCard : public CEntity {
 private:

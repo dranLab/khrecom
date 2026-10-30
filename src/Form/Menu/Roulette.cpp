@@ -315,12 +315,12 @@ float cosf(float);
 float powf(float, float);
 }
 
-struct DropPrize {
-    INT StockKind;
-    INT Kind; /* CARD_KIND */
-    SHORT Num;
-    SHORT No;
-};
+#include "Game/Gimmick/GimmickManager.h"
+
+
+
+
+
 
 using namespace D2;
 
@@ -448,7 +448,7 @@ void CRoulette::main() {
             }
             DropPrize dorpPrize;
             dorpPrize.StockKind = 0;
-            dorpPrize.Kind = 0;
+            dorpPrize.Kind = CARD_KIND_None;
             dorpPrize.Num = 0;
             dorpPrize.No = 0;
             for (INT i = 0; i < 22; i++) {

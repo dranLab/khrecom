@@ -39,12 +39,12 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-struct DropPrize {
-    INT StockKind;
-    INT Kind; /* CARD_KIND */
-    SHORT Num;
-    SHORT No;
-};
+#include "Game/Gimmick/GimmickManager.h"
+
+
+
+
+
 
 /* Local stand-ins (original: Game/Atel/VSME.h ChatWndCreateCTDParam with CPointI, Form/Menu/LevelUp.h,
  * Game/Player/PlayerGauge.h, the sound header). */
@@ -283,7 +283,7 @@ void CGimmickTreasureBox::NormalMain() {
             CGimmickManager* mgr = (CGimmickManager*)getSysTask(17);
             DropPrize prize;
             prize.StockKind = 0;
-            prize.Kind = 0;
+            prize.Kind = CARD_KIND_None;
             prize.Num = 0;
             prize.No = 0;
             prize = mgr->DecideTreasurePrize();

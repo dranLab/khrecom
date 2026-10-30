@@ -123,12 +123,12 @@ struct PRIZE_DATA {
     INT PrizeKind; /* CARD_KIND */
     INT iPoint;
 };
-struct DropPrize { // PARTIAL: Game/Gimmick/GimmickManager.h only forward-declares it outside its own unit
-    INT StockKind;
-    CARD_KIND Kind;
-    SHORT Num;
-    SHORT No;
-};
+#include "Game/Gimmick/GimmickManager.h"
+
+
+
+
+
 extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 struct STOP_DAMAGE {
     FVECTOR vDetectPos;
