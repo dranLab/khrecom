@@ -1,4 +1,4 @@
-# Handover (2026-10-30)
+# Handover (2026-10-30, updated after the second session)
 
 State of the matching decompilation and the PARTIAL cleanup at the end of the last session, and how to continue.
 Read with `docs/plan-partials.md` (cleanup plan, hooks A0-A5), `docs/plan-big-units.md` (unit workflow, validation
@@ -6,11 +6,12 @@ V1-V6) and `CLAUDE.md`.
 
 ## Where things stand
 
-- `main` at `3337009`, clean; `tools/check.sh` exits 0 on main.
+- `main` clean (last commit: `docs: regenerate partials`); `tools/check.sh` exits 0 on main.
 - Totals (check.sh): 12135 functions decompiled in 662 files; 588 files complete, 74 not.
   Libraries: 916/985 functions in 153 files (134 complete).
-- `partials.py --summary`: PARTIAL 992, MATCH 138; foreign stand-ins 299 (113 files); padding 26 arrays;
-  mechanisms 958 sites (911 untagged); classes complete 574, superset 129, partial 93, gated 93, missing 9.
+- `partials.py --summary`: PARTIAL 981, MATCH 140; foreign stand-ins 129 (77 files, was 323 at the start of the
+  previous session); padding 26 arrays; mechanisms 959 sites (909 untagged); classes complete 575, superset 129,
+  partial 93, gated 92, missing 9.
 - Units of the "never attempted" table are done except the ones below (every remaining function there is either
   parked or noted `Not attempted:` with the reason). Local leftovers, not part of the work: `stash@{0}` (old
   Game-Entity WIP) and the untracked `docs/plan-partials-prompt.md` (never `git add docs` blindly: use file names).
@@ -28,15 +29,34 @@ V1-V6) and `CLAUDE.md`.
 | System/Graphic/2d/2DSprObj | `initForSeq` parked at 20/342 lines (prologue schedule + sway block); `move` noted `Not attempted:` (flow written in the note) |
 | Game/Collision/CollUtil | `distanceLine` matched with the distanceLineO levers (`for (;;)` + `break`, `_sqrtfE`, one `l2` temp, `g = f1*f1; g -= 1.0f;`) |
 
+Second session (cleanup batches, all merged; scripts `build/batch_swap.sh <Class> <header> <branch>` and
+`build/finish_batch.sh <branch> <commit msg> <merge msg>` do swap+build and commit+gate+merge+docs):
+
+| Item | Result |
+|---|---|
+| Buf.h, VSME.h, SaveLoad.h, Game.h, Camp.h, MotData.h | small stand-in swaps; VSME.h: CVSM `loadFromMem/execInit/exec` public as in the ref, flag accessors inline only under `GAME_ATEL_VSME_CPP` (MATCH: Atel.o calls them out of line) |
+| Pause, BossDeadDemo, MessageManager, Glare, TexCtrl, GameOver, LevelUp, RoomCreation, EffectMotion, Wnd, MovieScript, Roulette, LockOnManager, MinigameManager, SaveLoadUtil | 1-3 files each; includes inside `namespace X {` must move out (the stand-in sat inside it) |
+| Rcf.h | 23 of 24 CRcf stand-ins replaced (DebugMenu keeps its own RcfSceneInfo/RcfMapInfo; cc1plus fails silently) |
+| RsrcDB.h (R3) | `NAME_CASE` + `struct RsrcInfo;` live in RsrcDB.h, which no longer includes RsrcData.h/Task.h; RsrcData.h includes it and holds PackedRsrcHeader/CRsrcIMZ; 66 CRsrcDB and 30 NAME_CASE stand-ins replaced (stand-ins -96) |
+
+Kept stand-ins with a `PARTIAL: stand-in for ...` reason: MSVideo CPause (`_ref(getResult)` scheduling), TexCtrl CRsrcDB
+(CRsrcList typedef clash), MovieScript CTextWnd (assembler crash), DebugMenu CRcf.
+
 Per-unit and per-cleanup logs: `build/progress/<Unit-dashes>.md`, `build/progress/cleanup-*.md`.
 
 ## Next steps, in plan order
 
-1. **Between-units cleanup batch (A3):** top of `partials.py --queue` is `Game/Atel/VSME.h` (6 stand-in files), then
-   `Game/Game.h`, `System/Buf.h` (5 files, owner Form/Menu/SaveLoadUtil), `System/Graphic/ShadowModel.h`, ...
-   Skipped on purpose: `Game/Gimmick/GimmickManager.h` (`DropPrize` stand-ins use `INT Kind`; the real struct needs
-   the `CARD_KIND` enum, which is defined partially in three headers - unify that enum first).
-   One queue item per gap between units.
+1. **Cleanup (A3), what is left needs a decision or a unit hook:**
+   - `C2DMan` (28 files, gated by `D2MAN_H_PATH`/2DMan.h) and `CRsrcData`/`RsrcInfo`/`CRsrcANN` (RSRCDATA_H_FULL):
+     plan items 7 and 8; the string evidence for 2DMan.h is ambiguous: ask the user.
+   - Task SLC overflow message (plan item 3, 158 opt-out defines): 99 originals have the message; all 84 of our
+     `TaskMan.h` includers are among them, but 15 more originals have it without our TaskMan.h include
+     (BtlReportCtrl, GameOver, LevelUp, TitleReportDllStarter, WorldCard, BulletManager, BaseGimmick, ...), so the
+     partition is not decided by the evidence: ask the user before moving `CTaskSLCManager`.
+   - `Game/Gimmick/GimmickManager.h` (`DropPrize`): needs the `CARD_KIND` enum unified first (3 headers).
+   - `ShadowModel.h` (`CShadowModelMan`, 3 files use its private statics): complete the class in the ShadowModel unit's
+     finish hook; `CPlayerDRiku`/`CPrize`/`C2DSeq` (virtual order differs); `COLL_INFO_UNION` (6 stand-ins + 7 unit
+     copies, needs a header and `COLLOBJ_H_INFO_UNION` unified); `TexInfo`/`VTransInfo` (Gprim.h vs modeldata.h).
 2. **Units that still have functions never attempted** (all large, each 300-670 instructions):
 
    | Unit | not attempted | note |
