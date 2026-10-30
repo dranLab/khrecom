@@ -353,7 +353,7 @@ static void procFlipThread(void*);
 static void _checkSnapShot();
 static void _checkReportMemory();
 static void _setVideoMode(BOOL bNTSC);
-void _halt(const CHAR* pszMsg, const CHAR* pszExp); // INCLUDE_ASM: declared extern (static in the original)
+static void _halt(const CHAR* pszMsg, const CHAR* pszExp);
 static void _initTraceOnScreen();
 static void _disposeTraceOnScreen();
 static void _initFntTbl();
@@ -1260,14 +1260,71 @@ void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp) {
     CMainApp::halt(pszFile, nLine, pszMsg, pszExp);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", _halt__FPCcT0);
-/* placeholder for _halt (INCLUDE_ASM): its strings and the CFnt locals */
-__attribute__((section(".sdata"))) void _halt_placeholder(const CHAR* pszExp) {
+static void _halt(const CHAR* pszMsg, const CHAR* pszExp) {
+    extern CHAR* __BUILD;
+    INT nThreadID;
+
+    _bHalt = 1;
+    nThreadID = GetThreadId();
+    if (nThreadID != _nMainThreadID) {
+        SemaParam sema;
+        if (nThreadID == _nFlipThreadID) return;
+        SuspendThread(_nMainThreadID);
+        ChangeThreadPriority(nThreadID, 1);
+        ReferSemaStatus(_FlipSema, &sema);
+        if (sema.numWaitThreads) SignalSema(_FlipSema);
+    }
+    _nDrawEnd = 1;
+    WaitSema(_FlipSema);
+    _nFrameCount++;
+    CWorldEnv::setFogColor(0, 0, 0);
+    CMainApp::setFpsFull();
     char szBuf[256];
+    sprintf(szBuf, "BUILD-VER.: %s", __BUILD);
     CFnt strBuild;
-    sprintf(szBuf, "BUILD-VER.: %s", pszExp);
-    sprintf(szBuf, "FREE-HEAP: %d  /  MAX-SIZE: %d", CHeapMan::getFreeHeapSize(), CHeapMan::getMaxFreeBlockSize());
     strBuild.setText(szBuf);
+    strBuild.setPosition(-240, 40 - SCREEN_HEIGHT / 2, 0xFFFF28);
+    strBuild.setLayerFG(25);
+    strBuild.setStyle(0x40);
+    CFnt strMsg;
+    strMsg.setText(pszMsg);
+    strMsg.setPosition(-240, 60 - SCREEN_HEIGHT / 2, 0xFFFF28);
+    strMsg.setLayerFG(25);
+    strMsg.setStyle(0x40);
+    char szEtc[256];
+    sprintf(szEtc, "FREE-HEAP: %d  /  MAX-SIZE: %d", CHeapMan::getFreeHeapSize(), CHeapMan::getMaxFreeBlockSize());
+    CFnt strEtc;
+    strEtc.setText(szEtc);
+    strEtc.setPosition(-240, 80 - SCREEN_HEIGHT / 2, 0xFFFF28);
+    strEtc.setLayerFG(25);
+    strEtc.setStyle(0x40);
+    CFnt strExp;
+    strExp.setText(pszExp);
+    strExp.setPosition(-240, 100 - SCREEN_HEIGHT / 2, 0xFFFF28);
+    strExp.setLayerFG(25);
+    strExp.setStyle(0x40);
+    INT nCount = 2;
+    while (nCount--) {
+        CPackMan::beginScene();
+        CGTexPrim::clearTexCache();
+        CModelMan::clearDispList();
+        strBuild.disp();
+        strMsg.disp();
+        strEtc.disp();
+        if (pszExp) strExp.disp();
+        CModelMan::drawDispList();
+        CPackMan::endScene();
+        FlushCache(0);
+        sceGsSyncPath(0, 0);
+        CModelMan::drawDispListFG();
+        CPackMan::kickDMAFG(_nFrameCount);
+        sceGsSyncPath(0, 0);
+        _nDrawEnd = 1;
+        WaitSema(_FlipSema);
+        _nFrameCount++;
+        sceGsSyncPath(0, 0);
+        CPackMan::kickDMA(_nFrameCount);
+    }
 }
 
 void CMainApp::halt(const CHAR* pszFile, INT nLine, const CHAR* pszMsg, const CHAR* pszExp) {
