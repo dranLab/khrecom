@@ -1,6 +1,6 @@
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
-#define COLLOBJ_H_ENUMS_ONLY /* the collision classes come later (their vtables follow CHumanBoss's) */
-#define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" // MATCH: the original spelled the include "GPrim.h"
+#define COLLOBJ_H_ENUMS_ONLY /* MATCH: the collision classes come later (their vtables follow CHumanBoss's) */
+#define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h" // MATCH: the original included it by its full path
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -13,7 +13,7 @@
 #include "System/Graphic/Anim.h"
 #include "System/Graphic/Str.h"
 
-/* Placeholder: .rodata has an empty string literal after Str.h's strings (from an unidentified header). */
+/* MATCH: placeholder - .rodata has an empty string literal after Str.h's strings (from an unidentified header). */
 inline void _humanBossEmptyString() {
     TRACE("");
 }
