@@ -180,8 +180,6 @@ end:
     columnColl0.m_outDetect = m_vDetect;
     return 1;
 }
-/* Near match (the original sets up the distanceLineO arguments after the p0/p1 copies), kept for reference: */
-#if 0
 INT CCollUtil::_detectColumnPoint(CColumnCollision& columnColl0, CPointCollision& pointColl1) {
     FVECTOR p0;
     FVECTOR p1;
@@ -203,6 +201,7 @@ INT CCollUtil::_detectColumnPoint(CColumnCollision& columnColl0, CPointCollision
     p0.y += columnColl0.m_shiftY;
     p1.y += columnColl0.m_shiftY;
     m_pPrimInfoCurrent = 0;
+    do {} while (0); // MATCH: scheduling barrier (loop notes) before the distanceLineO arguments, an empty macro in the original?
     if (distanceLineO(&p0, &p1, 0) || distanceSphereO(&p1)) {
         m_vCk2.w = 1.0f;
         m_vNormal.w = 1.0f;
@@ -215,10 +214,6 @@ INT CCollUtil::_detectColumnPoint(CColumnCollision& columnColl0, CPointCollision
     }
     return 0;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", _detectColumnPoint__9CCollUtilR16CColumnCollisionR15CPointCollision);
-/* Near match (as _detectColumnPoint, and its distanceSphereO delay slot), kept for reference: */
-#if 0
 INT CCollUtil::_detectColumnSphere(CColumnCollision& columnColl0, CSphereCollision& sphereColl1, INT fg) {
     FVECTOR p0;
     FVECTOR p1;
@@ -243,6 +238,7 @@ INT CCollUtil::_detectColumnSphere(CColumnCollision& columnColl0, CSphereCollisi
     p0.y += columnColl0.m_shiftY;
     p1.y += columnColl0.m_shiftY;
     m_pPrimInfoCurrent = 0;
+    do {} while (0); // MATCH: scheduling barrier, as in _detectColumnPoint
     ret = distanceLineO(&p0, &p1, 1);
     if (!ret && !fg) {
         ret = distanceSphereO(&p1);
@@ -259,8 +255,6 @@ INT CCollUtil::_detectColumnSphere(CColumnCollision& columnColl0, CSphereCollisi
     }
     return 0;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", _detectColumnSphere__9CCollUtilR16CColumnCollisionR16CSphereCollisioni);
 INT CCollUtil::_detectSpherePoint(CSphereCollision& sphereColl0, CPointCollision& pointColl1) {
     FVECTOR p0;
     pointColl1.m_outWE = pointColl1.m_inWE;
