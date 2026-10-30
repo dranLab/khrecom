@@ -3,7 +3,38 @@
 
 #include "khtypes.h"
 
-struct TIM2_PICTUREHEADER;
+typedef unsigned char TIM2_UCHAR8;
+typedef unsigned int TIM2_UINT32;
+typedef unsigned short TIM2_UINT16;
+typedef unsigned long TIM2_UINT64;
+
+struct TIM2_PICTUREHEADER {
+    TIM2_UINT32 TotalSize;
+    TIM2_UINT32 ClutSize;
+    TIM2_UINT32 ImageSize;
+    TIM2_UINT16 HeaderSize;
+    TIM2_UINT16 ClutColors;
+    TIM2_UCHAR8 PictFormat;
+    TIM2_UCHAR8 MipMapTextures;
+    TIM2_UCHAR8 ClutType;
+    TIM2_UCHAR8 ImageType;
+    TIM2_UINT16 ImageWidth;
+    TIM2_UINT16 ImageHeight;
+    union {
+        struct {
+            FLOAT fSOfs;
+            FLOAT fTOfs;
+            unsigned int pad[4];
+        };
+        struct {
+            TIM2_UINT64 GsTex0;
+            TIM2_UINT64 GsTex1;
+            TIM2_UINT32 GsTexaFbaPabe;
+            TIM2_UINT32 GsTexClut;
+        };
+    };
+};
+
 struct VTransInfo;
 struct TexInfo;
 class CBuf;

@@ -5,19 +5,7 @@
 #include "System/Debug.h"
 #include <string.h>
 
-struct TIM2_PICTUREHEADER {
-    TIM2_UINT32 TotalSize;
-    TIM2_UINT32 ClutSize;
-    TIM2_UINT32 ImageSize;
-    TIM2_UINT16 HeaderSize;
-    TIM2_UINT16 ClutColors;
-    TIM2_UCHAR8 PictFormat;
-    TIM2_UCHAR8 MipMapTextures;
-    TIM2_UCHAR8 ClutType;
-    TIM2_UCHAR8 ImageType;
-    TIM2_UINT16 ImageWidth;
-    TIM2_UINT16 ImageHeight;
-};
+#include "System/Graphic/TexUtil.h"
 
 extern "C" {
 TIM2_PICTUREHEADER* Tim2GetPictureHeader(void* pTim2, int imgno);
