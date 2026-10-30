@@ -39,13 +39,7 @@ inline void _monstroEventBattleEmptyString() {
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-class CPlayer { /* Game/Player/Player.h */
-public:
-    static void notifyExterminate();
-    static BOOL isEnableBattleEnd();
-};
-extern CEntity* g_pPlayer; /* a CPlayer */
-static inline BOOL _isPlayerDead(CEntity* inPlayer) { return *(BOOL*)((CHAR*)inPlayer + 0x680); } /* CPlayer::m_bIsDead */
+#include "Game/Player/Player.h"
 
 #include "Game/Player/PlayerGauge.h"
 
@@ -228,7 +222,7 @@ void CMonstroEventBattle::main() {
         }
         break;
     case 8:
-        if (g_pPlayer && !_isPlayerDead(g_pPlayer)) {
+        if (g_pPlayer && !g_pPlayer->m_bIsDead) {
             m_bReraise = FALSE;
             m_iStep = 4;
         }
@@ -246,7 +240,7 @@ void CMonstroEventBattle::main() {
 #line 254
     ASSERT(cb);
     if (cb->getEnchantKind() == 0x2E) m_bReraise = TRUE;
-    if (g_pPlayer && _isPlayerDead(g_pPlayer)) {
+    if (g_pPlayer && g_pPlayer->m_bIsDead) {
         if (!m_bReraise) {
             CMostroGauge* gauge = (CMostroGauge*)CTaskMan::getTask(m_hGauge);
             if (gauge) {
