@@ -39,13 +39,7 @@ public:
     virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
 };
 
-class CBossDeadDemo {
-public:
-    CBossDeadDemo(CTask* inParent, INT inParam);
-    void setup(HANDLE inHandle, const FVECTOR* inPlayerPos, INT inParam);
-private:
-    UBYTE _m_0x00[0x80];
-};
+#include "Game/Enemy/BossDeadDemo.h"
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
