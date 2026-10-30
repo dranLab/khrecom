@@ -139,10 +139,10 @@ static inline INT _getEnchantKind(CTask* pCB) {
     return *pKind < 0x44 ? 0 : *pKind - 0x43;
 }
 
-class CCamp {
-public:
-    static void removeRsrc();
-};
+#include "Form/Menu/Camp.h"
+
+
+
 
 #include "Form/Menu/JMemoFlag.h"
 
