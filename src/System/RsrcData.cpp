@@ -23,22 +23,6 @@
 #include "System/MainApp.h"
 #include <string.h>
 
-struct TIM2_PICTUREHEADER {
-    UINT TotalSize;
-    UINT ClutSize;
-    UINT ImageSize;
-    USHORT HeaderSize;
-    USHORT ClutColors;
-    UBYTE PictFormat;
-    UBYTE MipMapTextures;
-    UBYTE ClutType;
-    UBYTE ImageType;
-    USHORT ImageWidth;
-    USHORT ImageHeight;
-    FLOAT fSOfs;
-    FLOAT fTOfs;
-    UINT pad[4];
-};
 
 namespace D2 {
 class C2DMan {
