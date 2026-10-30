@@ -76,22 +76,22 @@ public:
     static void removeGroup(INT nType, INT nGroup);
 };
 
-enum SAVELOAD {
-    SAVELOAD_SAVE = 0,
-    SAVELOAD_LOAD = 1
-};
+#include "Form/Menu/SaveLoad.h"
 
-enum GAMECLEAR {
-    GAMECLEAR_NONE = 0
-};
 
-class CSaveLoad {
-public:
-    CSaveLoad(CTask* pParent, SAVELOAD nMode, GAMECLEAR nClear);
-    static void disposeRsrc();
-    static BOOL isExited();
-    static BOOL isSuccessLoad();
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "Game/Atel/Atel.h"
 
@@ -1634,7 +1634,7 @@ void CDebugMenuLocal::_prepareLoadGame() {
 void CDebugMenuLocal::_loadGame() {
     switch (m_nDebugStep) {
     case 6:
-        NEW_SIZE(2046, 0x50, CSaveLoad)(&m_Parent, SAVELOAD_LOAD, GAMECLEAR_NONE);
+        NEW_SIZE(2046, 0x50, CSaveLoad)(&m_Parent, SLMODE_LOAD, GAMECLEAR_NONE);
         m_nDebugStep = 7;
         break;
     case 7:

@@ -85,17 +85,17 @@ public:
     static void removeRsrc();
 };
 
-enum SAVELOAD { SAVELOAD_SAVE = 0 };
-enum GAMECLEAR { GAMECLEAR_NO = 0 };
+#include "Form/Menu/SaveLoad.h"
 
-class CSaveLoad : public CTask {
-private:
-    BYTE _pad[0x50 - 0x40];
 
-public:
-    CSaveLoad(CTask* pParent, SAVELOAD nMode, GAMECLEAR nClear);
-    static BOOL isExited();
-};
+
+
+
+
+
+
+
+
 
 extern "C" void TsSdDebugPrint();
 extern "C" char D_0047E328[];

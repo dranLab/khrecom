@@ -40,26 +40,26 @@ public:
     CTexCtrl(CTask* pParent);
 };
 
-enum SAVELOAD {
-    SLMODE_SAVE = 0,
-    SLMODE_LOAD = 1,
-    SLMODE_BOOT = 2,
-    SLMODE_MESSAGE = 3
-};
+#include "Form/Menu/SaveLoad.h"
 
-enum GAMECLEAR {
-    GAMECLEAR_NONE = 0,
-    GAMECLEAR_CLEAR = 1
-};
 
-class CSaveLoad {
-    char _pad[0x50];
 
-public:
-    CSaveLoad(CTask* pParent, SAVELOAD nMode, GAMECLEAR nClear);
-    static BOOL isExited();
-    static void disposeRsrc();
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class CMemocaAgent : public CTask {
     char _pad[0xd0 - 0x40];
