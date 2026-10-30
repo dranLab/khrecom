@@ -538,9 +538,12 @@ __attribute__((section(".sdata"))) static void _makeWhiteClut_c(const TexInfo* i
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", makeWhiteClut__8CTexUtilPC7TexInfoiif);
 
-/* Placeholder: the C of setupTexInfo__8CTexUtilR7TexInfoPCUcii (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static BOOL _setupTexInfo_c(TexInfo& outInfo, const BYTE* pInTex, INT nWidth, INT nHeight) {
+/* Parked: 19 of 123 lines, 8 bytes short - structure as the original; _nDistBufW = (UINT)(w - 1) / 64 + 1 (the
+ * original's unmasked ((w-1)+64)>>6, not CSE'd with the first _align). Left: the nWidth * nHeight mult (the
+ * original computes it in the alloc-check delay slot) and the two loop-alignment nops that follow from it.
+ * Statement positions and permuter 5 min: no gain. */
+#if 0
+BOOL CTexUtil::setupTexInfo(TexInfo& outInfo, const BYTE* pInTex, INT nWidth, INT nHeight) {
     INT nTexSize;
     INT nTexPos;
     INT nClutPos;
@@ -559,7 +562,7 @@ __attribute__((section(".sdata"))) static BOOL _setupTexInfo_c(TexInfo& outInfo,
     tex._nDistH = nHeight;
     tex._nTw = CTexUtil::getBitDepth(nWidth);
     tex._nTh = CTexUtil::getBitDepth(nHeight);
-    tex._nDistBufW = _align(nWidth, 64) >> 6;
+    tex._nDistBufW = (UINT)(nWidth - 1) / 64 + 1;
     tex._qwImage = nImageSize >> 2;
     tex._nTransSize = nTexSize;
     clut._nDistBufW = 1;
@@ -573,7 +576,9 @@ __attribute__((section(".sdata"))) static BOOL _setupTexInfo_c(TexInfo& outInfo,
                                       clut._nFormat, 0, 0, 1);
     return TRUE;
 }
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", setupTexInfo__8CTexUtilR7TexInfoPCUcii);
+#endif
 
 /* Placeholder: the C of setupTexInfoImd__8CTexUtilR7TexInfoPCUci (not matching yet). */
 __asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
