@@ -535,11 +535,11 @@ public:
     static BOOL isCompleteLoadRCF(INT nGroup, INT nMember);
 };
 #include "Game/SceneInfo.h"
-class CGame { /* PARTIAL: Game/Game.h needs the game headers */
-public:
-    static BOOL isRikuGame();
-    static BOOL isSoraGame();
-};
+#include "Game/Game.h"
+
+
+
+
 #include "Game/SceneEnv.h"
 #line 566
 #include "System/Graphic/PackMan.h"
