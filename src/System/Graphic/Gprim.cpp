@@ -10,11 +10,11 @@
 #include "include_asm.h"
 
 extern INT SCREEN_HEIGHT;
-enum NAME_CASE { NAME_CASE_SENSITIVE = 0 }; /* PARTIAL: System/RsrcData.h */
-class CRsrcDB { /* PARTIAL: System/RsrcDB.h does not compile on its own here */
-public:
-    static struct TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
-};
+/* PARTIAL: System/RsrcData.h */
+#include "System/RsrcDB.h"
+
+
+
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
 ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end);
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd);

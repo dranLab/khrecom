@@ -11,10 +11,10 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 inline void* operator new(size_t, void* p) { return p; }
 
-class CRsrcDB {
-public:
-    static void* getRsrcCAM(const char* pszName);
-};
+#include "System/RsrcDB.h"
+
+
+
 
 #define PI 3.14159265358979323846
 

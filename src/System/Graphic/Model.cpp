@@ -20,15 +20,15 @@
 
 class CRsrcData;
 /* PARTIAL: stand-in for System/RsrcDB NAME_CASE: strings: RsrcData.h brings "System/RsrcData.h(156)", not in the original (queue: RsrcDB partition) */
-enum NAME_CASE { NAME_CASE_SENSITIVE = 0 };
-class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: RsrcDB.h brings "System/RsrcData.h(156)", not in the original (queue: RsrcDB partition) */
-public:
-    static MODELDATA** getRsrcMDL(const CHAR* pszName, NAME_CASE nc);
-    static MODELDATA** getRsrcMDL(INT nGroup);
-    static TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
-    static void* getFirstData(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
-    static MODELDATA* getRsrcAMF(const CHAR* pszName, NAME_CASE nc);
-};
+
+#include "System/RsrcDB.h"
+
+
+
+
+
+
+
 #include "System/Graphic/PackMan.h"
 
 

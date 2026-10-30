@@ -18,12 +18,12 @@ inline void* operator new(size_t, void* p) throw() { return p; }
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL)
 
-enum NAME_CASE { NAME_CASE_SENSITIVE = 0, NAME_CASE_UPPER = 1, NAME_CASE_LOWER = 2 };
 
-class CRsrcDB {
-public:
-    static TexInfo* getRsrcTex(const char* pName, NAME_CASE eCase);
-};
+
+#include "System/RsrcDB.h"
+
+
+
 
 namespace D2 {
 

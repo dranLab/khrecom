@@ -39,7 +39,7 @@ int sprintf(char* buf, const char* fmt, ...);
 
 BYTE* ExpandData(BYTE* pSrc, BYTE* pDst);
 
-enum NAME_CASE { NAME_CASE_0 };
+
 
 class CRsrcData;
 
@@ -55,16 +55,16 @@ struct RsrcInfo {
     RsrcInfo() : _nRefGroupID(0), _cOption(0), _cParam(1) {}
 };
 
-class CRsrcDB { /* System/RsrcDB.h */
-public:
-    static void addRsrcType(const CHAR* pszExt, INT nID);
-    static INT getRsrcAlignmentSize(INT nType);
-    static CRsrcData* getRsrc(INT nType, const CHAR* pszName, NAME_CASE nCase);
-    static void addRsrcTag(CRsrcData& data, INT nGroupID, INT bSceneManaged);
-    static INT addRsrc(const RsrcInfo& info, CBuf& buf, CRsrcData** ppData);
-    static INT addRsrc_NoCheck(const RsrcInfo& info, CBuf& buf, CRsrcData** ppData);
-    static void addStreamInfo(const CHAR* pszName, INT nGroupID, UINT nStart, UINT nSize, INT nType);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
+
+
+
+
 
 #include "System/Rcf.h"
 
@@ -536,7 +536,7 @@ __attribute__((section(".sdata"))) static INT _analyzeCdMemberHeader_c(BYTE*& pE
             _addStreamInfoToDB(*pCdHed, s_pCurrentGrp->_nStart);
             pCdHed++;
         } else {
-            CRsrcData* pData = CRsrcDB::getRsrc(pCdHed->_nType, pCdHed->_szDataName, NAME_CASE_0);
+            CRsrcData* pData = CRsrcDB::getRsrc(pCdHed->_nType, pCdHed->_szDataName, NAME_CASE_SENSITIVE);
             if (pData) {
                 INT nGroupID = pCdHed->_nGroupID;
                 if (pCdHed->_nLinkID) nGroupID = _ref(s_nCurrentGrp);

@@ -22,14 +22,14 @@ void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 
-enum NAME_CASE { NAME_CASE_0 };
+
 
 #define TEXMAX 16
 
-class CRsrcDB { /* System/RsrcDB.h */
-public:
-    static struct TexInfo* getRsrcTex(const char* pName, NAME_CASE eCase);
-};
+#include "System/RsrcDB.h"
+
+
+
 
 #include "System/Graphic/PackMan.h"
 
@@ -192,9 +192,9 @@ static inline void _vu0SetDisp(FVECTOR& v0, FVECTOR& v1) {
  * (called out of line here); this build keeps them in callee-saved registers across the call. */
 #if 0
 void CModelMan::reset() {
-    TexInfo* pInfo = CRsrcDB::getRsrcTex("errer", NAME_CASE_0);
+    TexInfo* pInfo = CRsrcDB::getRsrcTex("errer", NAME_CASE_SENSITIVE);
     if (pInfo) s_ToonTex0 = pInfo->getTPage();
-    pInfo = CRsrcDB::getRsrcTex("speclar", NAME_CASE_0);
+    pInfo = CRsrcDB::getRsrcTex("speclar", NAME_CASE_SENSITIVE);
     if (pInfo) s_SpecTex0 = pInfo->getTPage();
     FVECTOR vMax;
     FVECTOR vMin;
@@ -211,8 +211,8 @@ void CModelMan::reset() {
 #endif
 /* placeholder for reset's .rodata (its resource names): code in .sdata, which the build strips */
 __attribute__((section(".sdata"))) void _resetPlaceholder() {
-    CRsrcDB::getRsrcTex("errer", NAME_CASE_0);
-    CRsrcDB::getRsrcTex("speclar", NAME_CASE_0);
+    CRsrcDB::getRsrcTex("errer", NAME_CASE_SENSITIVE);
+    CRsrcDB::getRsrcTex("speclar", NAME_CASE_SENSITIVE);
 }
 /* a reference to FVECTOR::set makes gcc output its weak copy (that the included assembly calls); stripped as well */
 __attribute__((section(".sdata"))) void (FVECTOR::*_pSetRef)(FLOAT, FLOAT, FLOAT, FLOAT) = &FVECTOR::set;

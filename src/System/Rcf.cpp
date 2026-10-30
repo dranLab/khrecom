@@ -97,22 +97,22 @@ struct RsrcInfo {
     RsrcInfo() : _nRefGroupID(0), _cOption(0), _cParam(1) {}
 };
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 class CRsrcData;
 
-class CRsrcDB {
-public:
-    static CRsrcData* getRsrc(INT nType, const CHAR* pszName, NAME_CASE nCase);
-    static void addRsrcTag(CRsrcData& data, INT nGroupID, INT bSceneManaged);
-    static INT addRsrc(const RsrcInfo& info, CBuf& buf, CRsrcData** ppData);
-    static INT addRsrc_NoCheck(const RsrcInfo& info, CBuf& buf, CRsrcData** ppData);
-    static INT getRsrcAlignmentSize(INT nType);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
+
+
 
 #include "System/FileIO.h"
 

@@ -14,20 +14,20 @@ int strncasecmp(const char* s1, const char* s2, size_t n);
 
 inline void* operator new(size_t, void* p) { return p; }
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 class CRsrcData;
 
-class CRsrcDB {
-public:
-    static void removeGroup(INT nGroup, INT nID);
-    static CRsrcData* getRsrc(INT nGroup, const char* pszName, NAME_CASE eCase);
-    static void* getRsrcData(const CRsrcData& data);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
 
 #include "System/Rcf.h"
 

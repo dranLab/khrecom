@@ -65,19 +65,19 @@ struct RsrcInfo {
     BYTE _cParam;
 };
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 class CRsrcData;
 
-class CRsrcDB {
-public:
-    static CRsrcData* getRsrc(INT nType, const CHAR* pName, NAME_CASE eCase);
-    static void* getRsrcData(const CRsrcData& data);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 struct _FontInfo {
     unsigned long _nTex0[4][8];

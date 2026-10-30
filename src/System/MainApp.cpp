@@ -175,11 +175,11 @@ extern "C" char _gp[];
 
 #include "System/FileIO.h"
 
-class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: RsrcDB.h adds 'System/RsrcData.h(156)' */
-public:
-    static void initialize();
-    static void finalize();
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 #include "System/Graphic/FrecFont.h"
 
