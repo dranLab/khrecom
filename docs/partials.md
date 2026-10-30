@@ -61,12 +61,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1035 (953 in 109 headers, 82 in 35 .cpp); MATCH: 119
+PARTIAL: 1035 (953 in 109 headers, 82 in 35 .cpp); MATCH: 121
   by category: method 409, data member 69, type 88, fwd decl 53, #include 29, changed in place 133, padding 31, path override 24, gate 43, guessed 41, header-level 74, stand-in 35, other 6
 stand-ins: 345 foreign in 122 files (95 names), 201 unattributed, 172 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
-mechanisms: 959 sites (920 untagged); #line: 1238
+mechanisms: 959 sites (919 untagged); #line: 1238
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 159, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 570, superset 128, partial 95, gated 94, missing 11, unattributed 309
 ```
@@ -456,7 +456,7 @@ or `untagged`.
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
 | path override | `EFFECT_H_PATH` | 5 | 0 | untagged, e.g. Game/Enemy/EnemyBarrelspider.cpp:4 |
 | path override | `FSM_H_PATH` | 1 | 0 | untagged, e.g. System/Fsm.cpp:1 |
-| path override | `GPRIM_H_PATH` | 165 | 4 | the original includes it under this name |
+| path override | `GPRIM_H_PATH` | 165 | 5 | the original includes it under this name |
 | path override | `LINKEDBUF_H_PATH` | 4 | 1 | __FILE__ as in the original .rodata |
 | path override | `MAPUNIT_H_PATH` | 1 | 0 | untagged, e.g. System/Graphic/MapUnit.cpp:5 |
 | path override | `MODELDATA_H_PATH` | 8 | 1 | __FILE__ as in the original .rodata |

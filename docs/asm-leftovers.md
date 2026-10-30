@@ -46,7 +46,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
 | `System/Graphic/FrecFont` | 3 | 1208 | 1 |  |
 | `System/Rcf` | 11 | 1152 | 11 |  |
-| `System/Graphic/TexUtil` | 8 | 1133 |  |  |
 | `System/Graphic/PathData` | 2 | 1075 |  |  |
 | `System/Graphic/DeFocus` | 3 | 1065 | 3 |  |
 | `Game/Movement` | 3 | 1020 | 1 |  |
@@ -57,6 +56,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Anim` | 4 | 742 | 4 |  |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `Form/DebugWindow` | 2 | 667 | 2 |  |
+| `System/Graphic/TexUtil` | 4 | 651 | 4 |  |
 | `Game/SceneInfo` | 8 | 651 | 8 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 |  |  |
 | `Game/Game` | 5 | 624 |  |  |
@@ -156,6 +156,10 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/PackMan` | `_initFrameEffPacket__Fiiii` | 487 | 2 lines - case 2's two XYZ2 ORs: the original has the X register first (or v0,s2,v0 / or v0,t7,v0), ours puts the shifted Y first; x \| y and y \| x source order, a shared macro for the three cases, case 3's h/nh form with constant 12 and a 15 min permuter run (21k candidates) all stay at 2. |
 | `System/Graphic/PackMan` | `sceVif1PkCloseUpkCode__FP13pacVif1Packet` | 53 | ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 + 15 min … |
 | `System/Graphic/ShadowModel` | `drawBefore__15CShadowModelMan` | 188 | (comment) Near match (two instructions: the original updates the i 64 + 63 induction register at the end of the loop body, not after i++), kept for reference: |
+| `System/Graphic/TexUtil` | `takeSnapShot__8CTexUtilPCc` | 234 | 72 of 280 lines, 4 bytes short - structure as the original (default display env -> width/height/PSM via (INT)(u_long >> n) & mask, TIM2 file and picture headers, per-line StoreImage + writeFile). Left: the reserved-bytes loop (pointer + own counter in the original), the GsTex0 TBW/PSM/TW/TH writes … |
+| `System/Graphic/TexUtil` | `makeCustomClut__8CTexUtilPUlT1ii` | 163 | 20 of 168 lines, same size - up-counting j (the original's reversed count-down), *pSrc read per term (lbu for the low byte) and `iI \| (iI << 16 \| iI << 8)` fixed most of it. Left: the register order of case 1's three channel terms (the original computes the >> 8 term into a1 first) and two … |
+| `System/Graphic/TexUtil` | `setupTexInfo__8CTexUtilR7TexInfoPCUcii` | 116 | 19 of 123 lines, 8 bytes short - structure as the original; _nDistBufW = (UINT)(w - 1) / 64 + 1 (the original's unmasked ((w-1)+64)>>6, not CSE'd with the first _align). Left: the nWidth nHeight mult (the original computes it in the alloc-check delay slot) and the two loop-alignment nops that … |
+| `System/Graphic/TexUtil` | `setupTexInfoImd__8CTexUtilR7TexInfoPCUci` | 138 | 93 of 153 lines, 16 bytes short - control flow as the original (tex_cnv PSM 19/20 cases, getTransSize else, allocTex, getTransInfo, TEX0). Left: the original keeps &outInfo._TexInfo/_ClutInfo in s1/s0 across the getTransInfo call (one more saved register, frame 0x90), which renumbers most … |
 | `System/Graphic/WorldEnv` | `initialize__9CWorldEnv` | 128 |  |
 | `System/Graphic/WorldEnv` | `mainProc__9CWorldEnv` | 111 | (comment) mainProc: near-match. The original stores _vecMikePos.z through a new %hi(_vecMikePos + 8) after the sqc2 of the unit vector (Coord.h's inline, lines 87-91); here the address register of the asm is reused. |
 | `System/Graphic/WorldEnv` | `getBillboardMatrix__9CWorldEnvR7FMATRIXRC7FVECTORi` | 29 | (comment) getBillboardMatrix: near-match. The original compares nFlag with -1 in a register (slt) and copies the constant 1 it also compares with; a constant -1 is folded to slti here, a variable keeps slt but not the shared 1. |
@@ -369,7 +373,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 362 functions (82790 instructions) in 84 units, 247 of them parked; 12 units take a data section from assembly.
+Totals: 358 functions (82308 instructions) in 84 units, 251 of them parked; 12 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
