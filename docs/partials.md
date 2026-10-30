@@ -61,12 +61,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1038 (957 in 109 headers, 81 in 34 .cpp); MATCH: 114
-  by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 43, guessed 43, header-level 74, stand-in 34, other 6
-stand-ins: 350 foreign in 122 files (100 names), 200 unattributed, 172 own
+PARTIAL: 1039 (957 in 109 headers, 82 in 35 .cpp); MATCH: 117
+  by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 43, guessed 43, header-level 74, stand-in 35, other 6
+stand-ins: 347 foreign in 122 files (97 names), 200 unattributed, 172 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
-mechanisms: 962 sites (924 untagged); #line: 1238
+mechanisms: 962 sites (923 untagged); #line: 1238
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 159, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 568, superset 128, partial 92, gated 99, missing 11, unattributed 309
 ```
@@ -84,10 +84,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R0 | 2.0 | `System/Graphic/Effect/libppp/keProg/pppKeLns.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | sceGsStoreImage (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/WorldEnv.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CWorldEnv (1 complete) |  |
 | R0 | 2.0 | `System/Movie/Movie.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMovie (1 complete) |  |
-| R0 | 2.0 | `System/Movie/MovieFiles.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMovieFiles (1 complete) |  |
 | R0 | 2.0 | `System/PadIO.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPadIO (1 complete) |  |
 | R0 | 2.0 | `System/PlaySpeedCtrl.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlaySpeedCtrl (1 complete) |  |
-| R0 | 2.0 | `System/RcfCD.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRcfCD (1 complete) |  |
 | R1 | 29.0 | `Game/Player/Player.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 34 PARTIAL | CPlayer (1 partial) | inline bodies or virtuals |
 | R1 | 22.0 | `Game/Enemy/BattleEnemyManager.h` | ready | 11 stand-in files, 0 dup headers, 0 gate users | CBattleEnemyManager (1 complete) | inline bodies or virtuals |
 | R1 | 17.5 | `Game/CardBattle.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users, 29 PARTIAL | CCardRevolver (1 partial) | inline bodies or virtuals |
@@ -99,6 +97,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 11.5 | `System/Buf.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users, 3 PARTIAL | CBuf (1 superset) | inline bodies or virtuals |
 | R1 | 9.5 | `Game/Collision/CollUtilA.h` | ready | 1 stand-in files, 0 dup headers, 2 gate users, 11 PARTIAL | CCollUtil (1 partial) |  (gate) |
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
+| R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
+| R1 | 6.0 | `Form/Menu/SaveLoad.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CSaveLoad, GAMECLEAR, SAVELOAD (3 complete) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -169,9 +169,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CMemocaDataEntries` | superset | Form/Menu/SaveLoadUtil.h | 1 |  | extra methods: setNoSpace |
 | `CMinigameManager` | complete | Game/MinigameManager.h | 1 |  |  |
 | `CMovie` | complete | System/Movie/Movie.h | 1 |  |  |
-| `CMovieFiles` | complete | System/Movie/MovieFiles.h | 1 |  |  |
 | `CMovieScript` | complete | System/Movie/MovieScript.h | 1 |  |  |
-| `CNowLoading` | complete | Game/NowLoading.h | 1 |  |  |
 | `COLL_CUBE` | missing | Game/Collision/CollUtilO.h | 1 |  |  |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
@@ -182,7 +180,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPlayerSora` | superset | Game/Player/PlayerSora.h | 1 |  | virtual order differs |
 | `CPoly3Collision` | gated | Game/Collision/CollObj.h | 1 |  |  |
 | `CPolyGT4` | superset | System/Graphic/GprimFull.h | 1 |  | virtual order differs |
-| `CRcfCD` | complete | System/RcfCD.h | 1 |  |  |
 | `CRoomCreation` | complete | Form/Menu/RoomCreation.h | 1 |  |  |
 | `CRoulette` | complete | Form/Menu/Roulette.h | 1 |  |  |
 | `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
@@ -394,7 +391,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
 | `System/RsrcData.h` | 3 | 0/0/0/32 | 29 |
 | `System/SJoint.h` | 9 | 0/0/0/0 | 200 |
-| `System/Task.h` | 27 | 1/2/0/1 | 233 |
+| `System/Task.h` | 27 | 1/2/0/1 | 234 |
 | `System/TaskMan.h` | 7 | 1/2/0/0 | 83 |
 | `System/Vector.h` | 22 | 0/0/3/0 | 266 |
 
@@ -468,7 +465,7 @@ or `untagged`.
 | path override | `MODEL_H_PATH` | 8 | 1 | __FILE__ as in the original .rodata |
 | path override | `OSDDEF_H_PATH` | 1 | 0 | untagged, e.g. Game/EntityFactory.cpp:1 |
 | path override | `PATHDATACAMERA_H_PATH` | 2 | 1 | the original includes it under this name |
-| path override | `RSRCDATA_H_PATH` | 5 | 0 | untagged, e.g. System/Memoca.cpp:1 |
+| path override | `RSRCDATA_H_PATH` | 5 | 1 | RsrcData.h strings in .rodata use the full path |
 | path override | `SAVELOADCTRL_H_PATH` | 5 | 0 | untagged, e.g. Form/Menu/TitleReportDllStarter.cpp:3 |
 | path override | `STATUS_H_PATH` | 5 | 1 | the original's Card.h/Status.h strings carry |
 | path override | `TECHNIC_H_PATH` | 4 | 1 | the original includes it under this name |
