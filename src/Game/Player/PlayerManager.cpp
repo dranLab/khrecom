@@ -121,10 +121,10 @@ public:
     static UINT m_iStatus;
 };
 
-class CBattleEnemyManager {
-public:
-    void deleteAllEnemies();
-};
+#include "Game/Enemy/BattleEnemyManager.h"
+
+
+
 
 static inline void _setSceneColor(ObjType::eObjBit inBit, FLOAT inFrame, const FVECTOR* inColor) {
     CSceneEnv::setColor(inBit, inFrame, *inColor, inColor, 0);

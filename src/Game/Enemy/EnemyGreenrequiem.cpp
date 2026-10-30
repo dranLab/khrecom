@@ -32,10 +32,10 @@ inline void _enemyGreenrequiemEmptyString() {
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-class CBattleEnemyManager { /* a CTask (Game/Enemy/BattleEnemyManager.h) */
-public:
-    SLContainerT<CTask>* getFirstBattleEnemy();
-};
+#include "Game/Enemy/BattleEnemyManager.h"
+
+
+
 
 namespace Greenrequiem {
 static CHAR* IdlingMotion = "e003_001";

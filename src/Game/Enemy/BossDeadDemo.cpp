@@ -50,11 +50,11 @@ template <class T> static inline T& _ref(T& v) { return v; }
 
 
 
-class CBattleEnemyManager { /* a CTask (Game/Enemy/BattleEnemyManager.h) */
-public:
-    INT getPrizeCount() const;
-    void warpPrize(const FVECTOR& inPos);
-};
+#include "Game/Enemy/BattleEnemyManager.h"
+
+
+
+
 
 #include "Game/Player/PlayerGauge.h"
 

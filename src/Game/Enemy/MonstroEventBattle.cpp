@@ -43,10 +43,10 @@ inline void _monstroEventBattleEmptyString() {
 
 #include "Game/Player/PlayerGauge.h"
 
-class CBattleEnemyManager { /* a CTask (Game/Enemy/BattleEnemyManager.h) */
-public:
-    INT getEnemyCount() const;
-};
+#include "Game/Enemy/BattleEnemyManager.h"
+
+
+
 
 class CBuf {
 public:

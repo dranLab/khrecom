@@ -37,10 +37,10 @@ extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 FVECTOR getPlayerPos(BOOL flag);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
-class CBattleEnemyManager { /* a CTask (Game/Enemy/BattleEnemyManager.h) */
-public:
-    void monstroEventBattleGaugeUp();
-};
+#include "Game/Enemy/BattleEnemyManager.h"
+
+
+
 
 namespace Shadow {
 static CHAR* IdlingMotion = "e001_001";
