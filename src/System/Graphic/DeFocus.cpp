@@ -4,6 +4,7 @@
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/DeFocus.h"
 #include "Game/Debug/DebugWork.h"
+#include "System/Graphic/PackMan.h"
 #include "include_asm.h"
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
@@ -151,7 +152,55 @@ FIX4 CBlurPrim::calcZ() {
     return m_nCalcZOfs + 0xffffc08;
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", setTSspriteScissor32__FP6QWdataiiiiiiii);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", set_csprite64__FP6QWdataiiUiii);
+union PRIMIVECTOR {
+    struct {
+        SHORT x;
+        SHORT y;
+        UINT z;
+    };
+    ULONGLONG ul64;
+};
+extern INT SCREEN_HEIGHT;
+QWdata* set_csprite64(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, INT ScrW, INT ScrH) {
+    PRIMIVECTOR pv[2];
+    int i;
+    int cnt;
+    SHORT ofsXP;
+    ULONGLONG* pul64;
+    pv[0].x = plsx;
+    pv[0].y = plsy;
+    pv[1].z = z;
+    ofsXP = 0;
+    if (pv[0].x < 0) {
+        pv[0].x = 0;
+    } else if (pv[0].x > 0) {
+        ofsXP = pv[0].x;
+    }
+    pv[0].x += (0x800 - 0x200 / 2) << 4;
+    pv[0].y += (0x800 - SCREEN_HEIGHT / 2) << 4;
+    pv[1].x = pv[0].x + (64 << 4) - ofsXP;
+    pv[1].y = pv[0].y + (ScrH << 4);
+    cnt = (ScrW << 4) / (64 << 4);
+    if (qp) {
+        CPackMan::pkCloseGifTag(qp);
+    }
+    u_long128 tag;
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)cnt | 0x2400000000000000UL), "r"((u_long)0x44));
+    pul64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(tag);
+    for (i = 0; i < cnt; i++) {
+        pul64[0] = pv[0].ul64;
+        pul64[1] = pv[1].ul64;
+        pul64 += 2;
+        pv[0].x = pv[1].x;
+        pv[1].x += 64 << 4;
+    }
+    CPackMan::pkCloseGifTagManual((UINT*)pul64);
+    if (qp) {
+        __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
+        qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+    }
+    return qp;
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", set_tsprite32__FP6QWdataiiUiiiii);
 void CDeFocusPrim::makePkt() { _makePktDeFocus(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", _makePktDeFocus__12CDeFocusPrim);
