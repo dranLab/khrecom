@@ -26,10 +26,10 @@ using STORAGE::MCWork2;
 
 #include "Game/Player/Player.h"
 
-class CJiminyMemoFlag {
-public:
-    static INT getContentOpenPercentage(INT nType);
-};
+#include "Form/Menu/JMemoFlag.h"
+
+
+
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 

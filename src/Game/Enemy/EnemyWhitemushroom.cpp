@@ -21,10 +21,10 @@
 
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */
 
-class CJiminyMemoFlag { /* Form/Menu/JMemoFlag.h */
-public:
-    static void checkEvent(INT inKind, INT inID, INT inFlag);
-};
+#include "Form/Menu/JMemoFlag.h"
+
+
+
 
 #include "Game/Player/PlayerGauge.h"
 

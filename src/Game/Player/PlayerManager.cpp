@@ -144,10 +144,10 @@ public:
     static void removeRsrc();
 };
 
-class CJiminyMemoFlag {
-public:
-    static void outTask();
-};
+#include "Form/Menu/JMemoFlag.h"
+
+
+
 
 namespace PL {
 class CPlayerSora : public CPlayer {
