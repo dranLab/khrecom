@@ -52,6 +52,7 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 extern "C" void sceVu0RotMatrixX(FMATRIX& m0, const FMATRIX& m1, float rx);
 extern "C" void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, float ry);
 extern "C" void sceVu0RotMatrixZ(FMATRIX& m0, const FMATRIX& m1, float rz);
+extern "C" void sceVu0TransMatrix(FMATRIX& m0, const FMATRIX& m1, const FVECTOR& tv);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -180,8 +181,7 @@ void Movement::CalcPlaneMatrix(FMATRIX& outMat, const FVECTOR& inNormal, const F
     outMat.v[3] = inPos;
 }
 
-/* near-match: the original loads its two vectors from gcc constant-pool entries (unnamed .rodata, hoisted over
- * the vtable store); kept as INCLUDE_ASM. The constants and the constructor's strings are emitted here. */
+/* The constants and the constructor's strings below are emitted here. */
 __asm__(".rdata\n"
         ".align 4\n"
         ".word 0x00000000, 0x00000000, 0x00000000, 0x3f800000\n"
@@ -191,7 +191,11 @@ inline void _ctorStrings(void* p) {
     TRACE(__FILE__ "(211)");
     if (!p) AssertApp(__FILE__, 212, "m_pMapCollision", 0);
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Movement", __9CMovementP7CEntity);
+/* Parked: 54/143 lines differ with the draft below (size 420 = original): the original loads its two vectors
+ * ({0,0,0,1} and {1,1,1,1}) from unnamed gcc constant-pool entries (D_004824A0/B0) into registers before all stores
+ * and stores the vtable late; `static const FVECTOR` gives the right size but named statics, loaded one by one with
+ * the vtable store first. Tried: static/local/const locals, const compound literals, const refs (memset + stores,
+ * 440 bytes), a 7 min permuter run (55 -> 54). */
 #if 0
 CMovement::CMovement(CEntity* inOwner) {
     static const FVECTOR vZero = {{0.0f, 0.0f, 0.0f, 1.0f}};
@@ -237,6 +241,8 @@ CMovement::CMovement(CEntity* inOwner) {
     }
     m_pMapCollision->init(coll_kind, (COLL_TYPE)2, 1, inOwner->getHandle());
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Movement", __9CMovementP7CEntity);
 #endif
 
 CMovement::~CMovement() {
@@ -838,7 +844,146 @@ void CMovement::detect_() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Movement", detectWall___9CMovement);
+INT CMovement::detectWall_() {
+    UINT ret;
+    FVECTOR v;
+    v.set(0.0f, 0.0f, m_fWallRadius - m_fFootRadius, 1.0f);
+    m_WallCollInfo.info = 0;
+    m_WallCollInfoO.info = 0;
+    ret = 0;
+    FLOAT theta;
+    for (theta = 0.0f; theta < 360.0f; theta += 20.0f) {
+        FMATRIX m;
+        FVECTOR end;
+        FVECTOR pos;
+        FVECTOR normal;
+        FVECTOR diff;
+        FLOAT rad = Math3D::LimitPI(theta * 0.017453292f + m_vRot.y);
+        _unitMatrixVu0(m);
+        sceVu0RotMatrixX(m, m, m_vRot.x);
+        sceVu0RotMatrixY(m, m, rad);
+        sceVu0RotMatrixZ(m, m, m_vRot.z);
+        sceVu0TransMatrix(m, m, m_vPos);
+        ApplyMatrix(end, m, v);
+        if (rideCollisionDetect_(m_vPos, end, &pos, &normal)) {
+            COLL_INFO_UNION info = m_pMapCollision->getDetectInfoO();
+            if (info.info) {
+                m_WallCollInfoO = info;
+                if ((UINT)(info.infoATTR - 4) < 2) m_vEscapeNormal = normal;
+            }
+            if (normal.y < 0.64278764f || m_pMapCollision->getOutStatus() == 1) {
+                m_vWallNormal = normal;
+                setCollisionFlag(8, 0);
+                SubVectorXYZ(diff, pos, end);
+                diff.y = 0.0f;
+                AddVectorXYZ(m_vPos, m_vPos, diff);
+                ret = 1;
+            }
+        }
+        if (mapCollisionDetect_(m_vPos, end, &pos, &normal)) {
+            COLL_INFO_UNION info = m_pMapCollision->getDetectInfo();
+            if (info.info) {
+                m_WallCollInfo = info;
+                if ((UINT)(info.infoATTR - 4) < 2) m_vEscapeNormal = normal;
+            }
+            if (isEnableLadder() && m_WallCollInfo.infoATTR == 2) {
+                m_fLadderHeight = _getLadderPosition(m_vLadderPos, m_vLadderNormal);
+                setCollisionFlag(0x10, 0);
+            }
+            if (normal.y < 0.64278764f || m_pMapCollision->getOutStatus() == 1) {
+                ret = 1;
+                m_vWallNormal = normal;
+                setCollisionFlag(2, 0);
+                SubVectorXYZ(diff, pos, end);
+                diff.y = 0.0f;
+                AddVectorXYZ(m_vPos, m_vPos, diff);
+            }
+        }
+    }
+    for (theta = 0.0f; theta < 360.0f; theta += 20.0f) {
+        FMATRIX m;
+        FVECTOR end;
+        FVECTOR pos;
+        FVECTOR normal;
+        FVECTOR diff;
+        FLOAT rad = Math3D::LimitPI(theta * 0.017453292f + m_vRot.y);
+        _unitMatrixVu0(m);
+        sceVu0RotMatrixX(m, m, m_vRot.x);
+        sceVu0RotMatrixY(m, m, rad);
+        sceVu0RotMatrixZ(m, m, m_vRot.z);
+        sceVu0TransMatrix(m, m, m_vPos);
+        ApplyMatrix(end, m, v);
+        if (rideCollisionDetect_(end, m_vPos, &pos, &normal)) {
+            COLL_INFO_UNION info = m_pMapCollision->getDetectInfoO();
+            if (info.info) {
+                m_WallCollInfoO = info;
+                if ((UINT)(info.infoATTR - 4) < 2) m_vEscapeNormal = normal;
+            }
+            if (normal.y < 0.64278764f || m_pMapCollision->getOutStatus() == 1) {
+                m_vWallNormal = normal;
+                setCollisionFlag(8, 0);
+                ret = 1;
+                SubVectorXYZ(diff, pos, m_vPos);
+                diff.y = 0.0f;
+                AddVectorXYZ(m_vPos, m_vPos, diff);
+            }
+        }
+        if (mapCollisionDetect_(end, m_vPos, &pos, &normal)) {
+            COLL_INFO_UNION info = m_pMapCollision->getDetectInfo();
+            if (info.info) {
+                m_WallCollInfo = info;
+                if ((UINT)(info.infoATTR - 4) < 2) m_vEscapeNormal = normal;
+            }
+            if (isEnableLadder() && m_WallCollInfo.infoATTR == 2) {
+                m_fLadderHeight = _getLadderPosition(m_vLadderPos, m_vLadderNormal);
+                setCollisionFlag(0x10, 0);
+            }
+            if (normal.y < 0.64278764f || m_pMapCollision->getOutStatus() == 1) {
+                m_vWallNormal = normal;
+                setCollisionFlag(2, 0);
+                SubVectorXYZ(diff, pos, m_vPos);
+                ret = 1;
+                diff.y = 0.0f;
+                AddVectorXYZ(m_vPos, m_vPos, diff);
+            }
+        }
+    }
+    {
+        FVECTOR start = m_vPos;
+        start.y += 1.0f;
+        FVECTOR pos;
+        FVECTOR normal;
+        FVECTOR diff;
+        if (rideCollisionDetect_(m_vPos, start, &pos, &normal)) {
+            COLL_INFO_UNION info = m_pMapCollision->getDetectInfoO();
+            if (info.info) m_WallCollInfoO = info;
+            if (normal.y < 0.64278764f || m_pMapCollision->getOutStatus() == 1) {
+                m_vWallNormal = normal;
+                setCollisionFlag(8, 0);
+                ret = 1;
+                SubVectorXYZ(diff, pos, start);
+                AddVectorXYZ(m_vPos, m_vPos, diff);
+            }
+        }
+        if (mapCollisionDetect_(m_vPos, start, &pos, &normal)) {
+            COLL_INFO_UNION info = m_pMapCollision->getDetectInfo();
+            if (info.info) m_WallCollInfo = info;
+            if (isEnableLadder() && m_WallCollInfo.infoATTR == 2) {
+                m_fLadderHeight = _getLadderPosition(m_vLadderPos, m_vLadderNormal);
+                setCollisionFlag(0x10, 0);
+            }
+            if (normal.y < 0.64278764f || m_pMapCollision->getOutStatus() == 1) {
+                m_vWallNormal = normal;
+                ret = 1;
+                setCollisionFlag(2, 0);
+                SubVectorXYZ(diff, pos, start);
+                AddVectorXYZ(m_vPos, m_vPos, diff);
+            }
+        }
+    }
+    if (!ret) m_WallCollInfo.info = 0;
+    return ret;
+}
 void CMovement::setWallEffect_() {
     if (isWallEffectOn() && m_iCounter <= 0 && !setRideWallEffect_()) setMapWallEffect_();
 }
