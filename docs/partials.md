@@ -63,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 991 (910 in 109 headers, 81 in 37 .cpp); MATCH: 140
   by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 33, other 6
-stand-ins: 260 foreign in 109 files (63 names), 201 unattributed, 170 own
+stand-ins: 259 foreign in 109 files (62 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 960 sites (910 untagged); #line: 1242
@@ -92,13 +92,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 3.0 | `System/Graphic/3DCPrim.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users | C3DCPrim (1 partial) | inline bodies or virtuals |
 | R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 2.5 | `System/Graphic/2d/2DSeq.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | C2DSeq (1 superset) | inline bodies or virtuals |
-| R1 | 2.0 | `Form/Menu/GameOver.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CGameOver (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/LevelUp.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CLevelUp (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/RoomCreation.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRoomCreation (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Roulette.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRoulette (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/EffectMotion.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CEffectMotion (1 complete) | inline bodies or virtuals |
+| R1 | 2.0 | `Game/LockOnManager.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CLockOnManager (1 complete) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -134,7 +134,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CEffectMotion` | complete | Game/EffectMotion.h | 1 |  |  |
 | `CFadeIOMask` | partial | System/Graphic/ScreenMask.h | 1 |  | missing methods: ~CFadeIOMask |
 | `CFriend` | partial | Game/Player/Friend.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
-| `CGameOver` | complete | Form/Menu/GameOver.h | 1 |  |  |
 | `CImageWnd` | complete | System/Wnd.h | 1 |  |  |
 | `CLevelUp` | complete | Form/Menu/LevelUp.h | 1 |  |  |
 | `CLockOnManager` | complete | Game/LockOnManager.h | 1 |  |  |
