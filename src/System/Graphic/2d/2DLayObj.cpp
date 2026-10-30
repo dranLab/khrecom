@@ -7,13 +7,9 @@
 #include "System/Graphic/2d/2DBase.h"
 #include "System/Task.h"
 
-namespace D2 {
+#include "System/Graphic/2d/2DLay.h"
 
-struct LAY_SCREEN {
-    INT _00;
-    INT nSeqIdx; /* 0x4 */
-    INT _08[4];
-};
+namespace D2 {
 
 class C2DSeq : public C2DBase {
 public:
@@ -71,7 +67,7 @@ HANDLE C2DLayObj::create(HANDLE handle, UINT nScreen, LAY_SCREEN* pLayScreen, HA
     m_nSeqObj = nScreen;
     m_pSeqObjHandle = (HANDLE*)com_malloc_d(nScreen * sizeof(HANDLE), __FILE__ "(65)", RET_ADDR());
     for (i = 0; i < nScreen; i++, pLayScreen++) {
-        C2DBase* p2DBase = C2DMan::getBase(pSeqHandle[pLayScreen->nSeqIdx]);
+        C2DBase* p2DBase = C2DMan::getBase(pSeqHandle[pLayScreen->sequence_unit]);
         if (p2DBase) {
             HANDLE hSeq = ((C2DSeq*)p2DBase)->create(pLayScreen);
             TIMEQ qTimeMax = p2DBase->getTimeMax(hSeq);
