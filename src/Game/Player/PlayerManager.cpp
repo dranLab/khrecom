@@ -103,10 +103,10 @@ public:
     static float getUsedHeapRatio();
 };
 
-union F_UL {
-    FLOAT f;
-    ULONG ul;
-};
+#include "Game/Atel/VSME.h"
+
+
+
 
 #include "System/Sound/SoundMan.h"
 #line 120
