@@ -112,7 +112,7 @@ public:
     static CRsrcData* seekNextRsrc();
 };
 
-struct ATP {
+namespace ATEL { struct ATP {
     USHORT tag_count;
     char name[32];
     int tname[64];
@@ -149,15 +149,15 @@ public:
     Actor m_ActorTbl[64];
     INT getActorCount() { return m_ActorCount; }
     Actor* getActor(INT i) { return &m_ActorTbl[i]; }
-};
+}; }
 
-class CAtel : public CTask {
-public:
-    UBYTE _pad40[0x30];
-    CVSM* m_pVSM;
-    CAtel();
-    CVSM* getVSM() { return m_pVSM; }
-};
+#include "Game/Atel/Atel.h"
+
+
+
+
+
+
 
 /* Game/CardKind's card table: a static in the original's header, emitted (with its strings) at the end of
  * .rodata. */

@@ -18,19 +18,19 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-class CAtel : public CTask { /* Game/Atel/Atel.h */
-public:
-    CAtel(CTask* pParent);
-    BOOL loadFromMem(const unsigned char* pData);
-    void setupActor();
-    BOOL canStart() const;
-    void start();
-    BOOL isStarted() const;
-    static BOOL isFadeActive();
-    static void clearScreenFader(INT n);
-private:
-    UBYTE _m_0x40[0xc0];
-};
+#include "Game/Atel/Atel.h"
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "Game/SceneInfo.h"
 

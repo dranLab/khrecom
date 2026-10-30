@@ -88,11 +88,11 @@ public:
 
 
 
-class CAtel { /* Game/Atel/Atel.h */
-public:
-    static BOOL isFadeActive();
-    static void clearScreenFader(INT n);
-};
+#include "Game/Atel/Atel.h"
+
+
+
+
 
 #include "System/Graphic/PackMan.h"
 

@@ -22,10 +22,10 @@ private:
     UBYTE _m_0x1d0[0x90];
 };
 
-class CAtel { /* Game/Atel.h */
-public:
-    static CEntity* createAvatar(INT inID, CTask* inParent);
-};
+#include "Game/Atel/Atel.h"
+
+
+
 
 class CRcf { /* System/Rcf.h */
 public:
