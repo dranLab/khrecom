@@ -61,9 +61,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 981 (912 in 110 headers, 69 in 37 .cpp); MATCH: 140
-  by category: method 381, data member 67, type 85, fwd decl 53, #include 32, changed in place 132, padding 27, path override 24, gate 41, guessed 39, header-level 74, stand-in 20, other 6
-stand-ins: 137 foreign in 79 files (58 names), 201 unattributed, 170 own
+PARTIAL: 982 (912 in 110 headers, 70 in 38 .cpp); MATCH: 140
+  by category: method 381, data member 67, type 85, fwd decl 53, #include 32, changed in place 132, padding 27, path override 24, gate 41, guessed 39, header-level 74, stand-in 21, other 6
+stand-ins: 134 foreign in 78 files (56 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 959 sites (909 untagged); #line: 1242
@@ -117,12 +117,10 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
 | `CPlayerDRiku` | superset | Game/Player/PlayerDRiku.h | 2 |  | virtual order differs |
 | `CPrize` | superset | Game/Prize.h | 2 |  | virtual order differs |
-| `CTextWnd` | complete | System/Wnd.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `C2DSeq` | superset | System/Graphic/2d/2DSeq.h | 1 |  | virtual order differs; 1 PARTIAL |
 | `C2DSpr` | superset | System/Graphic/2d/2DSpr.h | 1 |  | virtual order differs |
-| `CBaseWnd` | complete | System/Wnd.h | 1 |  |  |
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CCircleCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CCircleCollision |
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
@@ -130,7 +128,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CFadeIOMask` | partial | System/Graphic/ScreenMask.h | 1 |  | missing methods: ~CFadeIOMask |
 | `CFriend` | partial | Game/Player/Friend.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
-| `CImageWnd` | complete | System/Wnd.h | 1 |  |  |
 | `CLockOnManager` | complete | Game/LockOnManager.h | 1 |  |  |
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CMemocaAgent` | complete | Form/Menu/SaveLoadUtil.h | 1 |  |  |
@@ -153,6 +150,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcVSV` | gated | System/RsrcData.h | 1 |  | missing methods: getBgmID, getFilePath, getSectorSize, getStartSector, ~CRsrcVSV |
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CSummon` | partial | Game/Player/Summon.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
+| `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
 | `CZFill` | partial | System/Graphic/DeFocus.h | 1 | System/Graphic/GprimFull.h | missing methods: ~CZFill |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | superset | System/Graphic/Gprim.h | 1 |  | 2 PARTIAL |
@@ -309,7 +307,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/DeFocus.h` | 1 | 2/0/3/0 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
 | `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 172 |
-| `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 174 |
+| `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 175 |
 | `System/Graphic/Effect/effect.h` | 7 | 1/1/4/0 | 77 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 3 | 3/0/0/0 | 15 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
