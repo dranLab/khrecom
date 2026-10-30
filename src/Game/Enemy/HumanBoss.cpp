@@ -912,14 +912,12 @@ BOOL CHumanBoss::reloadCardProc() {
     return TRUE;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", enemyCardProc__10CHumanBossPC4CARD);
 /* placeholder for enemyCardProc (INCLUDE_ASM): its strings */
 __attribute__((section(".sdata"))) void _enemyCardProc_placeholder(void* cb) {
     TRACE("----------- change normal card mode.\n");
     if (!cb) AssertApp(__FILE__, 0, "cb", 0);
     TRACE("----------- change enemy card mode.\n");
 }
-#if 0 /* near match: the enemy side enchant is read at 0x180(cb) instead of 0x17c(cb + 4) */
 BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
     INT n;
     CardBattle::CCardBattle* cb;
@@ -966,7 +964,6 @@ BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
     TRACE("----------- change enemy card mode.\n");
     return TRUE;
 }
-#endif
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", itemCardProc__10CHumanBossPC4CARD);
 asm(".rdata\n.align 4\njtbl_004C3C80:\n"
