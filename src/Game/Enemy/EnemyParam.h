@@ -49,7 +49,8 @@ struct ENEMY_PARAM {
     struct ENEMY_CARD* pCards; /* 0x48 */
     INT iActCount;       /* 0x4c */
     ENEMY_ACT* pActs;    /* 0x50 */
-    UBYTE _m_0x54[0x8];  /* 0x54 iEnemyCard, byEnemyCards */
+    INT iEnemyCard;      /* 0x54 */ // PARTIAL: added for Game/Enemy/HumanBoss
+    unsigned char byEnemyCards[4]; /* 0x58 */
     int iDamageMotionIndex[10]; /* 0x5c */ // PARTIAL: added for Game/SEMotion
     int iFaintMotionIndex[3]; /* 0x84 */ // PARTIAL: added for Game/Enemy/EnemyNeoshadow
     // PARTIAL: iExtraParamCount, pExtraParam split out for Game/Enemy/MapEnemy
