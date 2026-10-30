@@ -339,26 +339,29 @@ INT CTexUtil::getTmpTexTransInfo(const void* pInTim2, VTransInfo& outTex, VTrans
 
 static inline BOOL _sumupTmpSize(SHORT& nOutPos, USHORT nSize, USHORT nMax) {
     nOutPos = nSize + nOutPos;
-    if (nOutPos < nMax) return TRUE;
-    nOutPos = -1;
-    return FALSE;
+    if (nOutPos >= nMax) {
+        nOutPos = -1;
+        return FALSE;
+    }
+    return TRUE;
 }
 
-/* Placeholder: the C of sumupTmpTexSize__8CTexUtilRC7TexInfoRsT2 (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static BOOL _sumupTmpTexSize_c(const TexInfo& inInfo, SHORT& nOutTex, SHORT& nOutClut) {
+BOOL CTexUtil::sumupTmpTexSize(const TexInfo& inInfo, SHORT& nOutTex, SHORT& nOutClut) {
     const VTransInfo& texInfo = inInfo._TexInfo;
     const VTransInfo& clutInfo = inInfo._ClutInfo;
-    BOOL bResult = TRUE;
+    BOOL bResult;
 
-    if (!inInfo.isFixTex()) bResult = _sumupTmpSize(nOutTex, texInfo._nTransSize, VRAM::_TEX_TMP1_SIZE);
+    if (inInfo.isFixTex()) {
+        bResult = TRUE;
+    } else {
+        bResult = _sumupTmpSize(nOutTex, texInfo._nTransSize, VRAM::_TEX_TMP1_SIZE);
+    }
     if (bResult && !inInfo.isFixClut()) {
-        USHORT nSize = clutInfo._nTransSize;
+        UINT nSize = (USHORT)clutInfo._nTransSize; /* MATCH: not in the ref's locals; lhu + UINT compare gives the original's movn */
         bResult = _sumupTmpSize(nOutClut, nSize > 3 ? nSize : 4, VRAM::_CLUT_TMP1_SIZE);
     }
     return bResult;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", sumupTmpTexSize__8CTexUtilRC7TexInfoRsT2);
 
 INT CTexUtil::getFixTexTransInfo(const void* pInData, VTransInfo& outTex, VTransInfo& outClut, INT nInType) {
     INT nRet;
