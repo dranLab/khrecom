@@ -35,12 +35,12 @@ inline void operator delete[](void* mem) { com_free(mem); }
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-class CRsrcDB {
-public:
-    static INT getFirstRsrc(INT nType, INT nGroup, INT nNum);
-    static INT getModelCount(INT nGroup);
-    static MODELDATA** getRsrcMDL(INT nGroup);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
 
 namespace D2 {
 class C2DMan {

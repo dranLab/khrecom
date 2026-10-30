@@ -27,11 +27,11 @@ inline void operator delete[](void* mem) { com_free(mem); }
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 MODELDATA* AMFfromMDL(INT nGrpID, INT index);
 
@@ -149,11 +149,11 @@ static inline void _unitMatrix(FMATRIX& m) { sceVu0UnitMatrix(m); }
 static inline void _rotMatrixY(FMATRIX& m0, FMATRIX& m1, float ry) { sceVu0RotMatrixY(m0, m1, ry); }
 
 
-class CRsrcDB {
-public:
-    static CRsrcANN* getRsrcANN(const CHAR* name, NAME_CASE nc);
-    static CRsrcANN* getRsrcANN(INT nGroup);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 /* Placeholders (in .sdata, stripped) for the strings of INCLUDE_ASM functions, at their position */
 __asm__(".section .sdata\n");

@@ -393,17 +393,17 @@ void CardBattle::calcFreezeDamage(INT& ioDamage) {
     INT nPower = g_pStockSkillList[35].POWER[1];
     ioDamage += nPower / 10;
 }
-enum NAME_CASE { /* PARTIAL: System/RsrcData.h (its allocation string would shift .rodata) */
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 class CRsrcData;
-class CRsrcDB { /* PARTIAL: System/RsrcDB.h */
-public:
-    static CRsrcData* getRsrc(INT nRsrcType, const CHAR* pszName, NAME_CASE nc);
-    static void* getRsrcData(const CRsrcData& data);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 CCardBattle::CCardBattle() : CTask(getSysTask(1), 0x4000) {
     m_pSeqCtrlEnemy = NULL;
     m_pSeqCtrlBreak = NULL;

@@ -18,10 +18,10 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 
 
-class CRsrcDB {
-public:
-    static void removeGroup(INT nGroup, INT nID);
-};
+#include "System/RsrcDB.h"
+
+
+
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 

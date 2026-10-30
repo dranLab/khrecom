@@ -73,11 +73,11 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 extern "C" const char _ctype_[];
 #define ISUPPER(c) ((_ctype_ + 1)[c] & 1)
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 class CRsrcData {
 private:
@@ -115,11 +115,11 @@ public:
     UINT getBgmID() { return m_nBgmID; }
 };
 
-class CRsrcDB {
-public:
-    static CRsrcData* getRsrc(INT nType, const CHAR* pszName, NAME_CASE eCase);
-    static BYTE* getRsrcData(const CRsrcData& inData);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 class CSoundAgent {
 private:
@@ -1159,7 +1159,7 @@ HANDLE CSound::playVsb(const CHAR* pszVsb, INT nType, INT nSeq, INT nVol, INT nP
         return 0;
     }
     pRsrc = CRsrcDB::getRsrc(0x2F, pszVsb, NAME_CASE_LOWER);
-    pData = pRsrc ? CRsrcDB::getRsrcData(*pRsrc) : NULL;
+    pData = pRsrc ? (BYTE*)CRsrcDB::getRsrcData(*pRsrc) : NULL;
     if (!pData) {
         return 0;
     }

@@ -43,11 +43,11 @@ struct EFFECT_DATA;
 struct MEP_DATA;
 class CMotData;
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+#include "System/RsrcDB.h" /* NAME_CASE moved there, as in the ref */
+
+
+
+
 
 struct RsrcInfo {
     CHAR* _pszName;
@@ -525,6 +525,23 @@ class CRsrcDataFactory {
 public:
     static CRsrcData* createRsrcData(const RsrcInfo& info, CBuf& data);
 };
+
+/* PARTIAL: PackedRsrcHeader and CRsrcIMZ are in System/RsrcDB.h in the ref (they need CRsrcData, so they are here) */
+struct PackedRsrcHeader {
+    void* _pBody;
+    char _szName[22];
+    BYTE _cType;
+    BYTE _cPram;
+    INT _cSize;
+
+    static void coodinateVersion(void* pHead);
+};
+
+class CRsrcIMZ : public CRsrcData {
+public:
+    CRsrcIMZ(const RsrcInfo& info, CBuf& data) : CRsrcData(info, data) {}
+};
+
 #endif /* RSRCDATA_H_FULL */
 
 #endif /* SYSTEM_RSRCDATA_H */

@@ -7,20 +7,20 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 class CRsrcData;
 
-class CRsrcDB {
-public:
-    static void removeRsrc(INT nID);
-    static CRsrcData* getFirstRsrc(INT nType, INT nID, INT nFlag);
-    static struct TexInfo* getRsrcTex(const char* pName, NAME_CASE eCase);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
 
 #include "System/Rcf.h"
 

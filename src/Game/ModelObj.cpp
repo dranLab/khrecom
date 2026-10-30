@@ -22,12 +22,12 @@ inline void operator delete[](void* mem) { com_free(mem); }
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-class CRsrcDB {
-public:
-    static INT getModelCount(INT nGroup);
-    static MODELDATA** getRsrcMDL(INT nGroup);
-    static CRsrcANN* getRsrcANN(INT nGroup);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
 
 void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 

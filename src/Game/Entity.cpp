@@ -57,15 +57,15 @@ static inline void _loadRotTransPersMatrix(const FMATRIX& m) {
                  :
                  : "r"(&m));
 }
-class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: gated by RSRCDATA_H_FULL */
-public:
-    static BYTE* getRsrcOCD(INT nGroup);
-    static void* getFirstData(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
-    static INT getModelCount(INT nGroup);
-    static MODELDATA** getRsrcMDL(INT nGroup);
-    static TEXANM_DATA* getRsrcTXA(INT nGroup);
-    static CRsrcANN* getRsrcANN(INT nGroup);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
+
+
+
 extern "C" int strcmp(const char*, const char*);
 
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);

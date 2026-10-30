@@ -130,11 +130,11 @@ __asm__(
 
 
 
-class CRsrcDB {
-public:
-    static BOOL hasRsrcGroup(INT nKind, INT nGroup);
-    static void removeRsrc(INT nID);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 namespace PLM {
 CPlayer* createPlayer(UINT nKind, CTask* pParent, INT nParam);

@@ -29,11 +29,11 @@ extern "C" int rand();
 
 
 
-class CRsrcDB {
-public:
-    static void removeRsrcWithType(INT nID, INT nType);
-    static void* getFirstRsrc(INT nType, INT nID, INT nFlag);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 #include "System/Rcf.h"
 

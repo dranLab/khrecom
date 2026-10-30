@@ -21,12 +21,12 @@ inline void operator delete[](void* mem) { com_free(mem); }
 
 #line 31
 
-class CRsrcDB {
-public:
-    static INT getModelCount(INT nRsrcID);
-    static MODELDATA** getRsrcMDL(INT nRsrcID);
-    static TEXANM_DATA* getRsrcTXA(INT nRsrcID);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
 
 extern FLOAT ASPECT_RATE_X;
 extern FLOAT ASPECT_RATE_Y;

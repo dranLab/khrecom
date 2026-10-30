@@ -27,11 +27,11 @@ inline void* operator new[](size_t size, char* msg) throw() {
 
 typedef int MODELTAG[4];
 
-class CRsrcDB {
-public:
-    static INT getModelCount(INT nGroup);
-    static MODELDATA** getRsrcMDL(INT nGroup);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 /* Game/CardKind's card table: a static in the original's header, emitted (with its strings) at the end of
  * .rodata. */

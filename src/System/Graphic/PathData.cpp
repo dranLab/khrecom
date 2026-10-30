@@ -53,10 +53,10 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 // PARTIAL: System/RsrcDB.h would add RsrcData.h's string to .rodata
-class CRsrcDB {
-public:
-    static BYTE* getRsrcPTD(const CHAR* pszName);
-};
+#include "System/RsrcDB.h"
+
+
+
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)

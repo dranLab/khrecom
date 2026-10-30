@@ -55,12 +55,12 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 // PARTIAL: System/RsrcDB.h would add RsrcData.h's string to .rodata
-class CRsrcDB {
-public:
-    static void removeGroup(INT nGroupID, INT nMemberID);
-    static void clearSceneAttachMode();
-    static void resetRsrc(INT nRsrcType, INT nArg);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
 
 #include "Form/Menu/RoomCreation.h"
 

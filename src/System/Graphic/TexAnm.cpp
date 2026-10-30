@@ -59,13 +59,13 @@ struct TexInfoStub {
     };
 };
 
-enum NAME_CASE { NAME_CASE_SENSITIVE = 0, NAME_CASE_UPPER = 1, NAME_CASE_LOWER = 2 };
 
-class CRsrcDB {
-public:
-    static TexInfo* getRsrcTex(const char* pName, NAME_CASE eCase);
-    static TEXANM_DATA* getRsrcTXA(INT nRsrcID);
-};
+
+#include "System/RsrcDB.h"
+
+
+
+
 
 #include "System/Graphic/PackMan.h"
 

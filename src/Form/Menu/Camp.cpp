@@ -306,26 +306,26 @@ public:
 }
 
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 class CRsrcData;
 struct TexInfo;
-class CRsrcDB {
-public:
-    static void removeGroup(INT nGroup, INT nID);
-    static CRsrcData* getRsrc(INT nRsrcType, const CHAR* pszName, NAME_CASE nc);
-    static void* getRsrcData(const CRsrcData& data);
-    static TexInfo* getRsrcTex(const CHAR* pszName, NAME_CASE nc);
-    /* RsrcDB.h's inline */
-    static void* getRsrcData(INT nRsrcType, const CHAR* pszName) {
-        CRsrcData* pData = getRsrc(nRsrcType, pszName, NAME_CASE_SENSITIVE);
-        return pData ? getRsrcData(*pData) : NULL;
-    }
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
+
+
+
+
+
+
 
 #include "Game/Player/Player.h"
 

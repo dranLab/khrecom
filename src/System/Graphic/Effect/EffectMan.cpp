@@ -31,12 +31,12 @@ inline void* operator new(size_t size, char* msg) throw() {
 #include "Game/SceneEnv.h"
 #line 36
 
-class CRsrcDB {
-public:
-    static char* getRsrcDPD(const CHAR* pszName);
-    static EFFECT_DATA* getRsrcDPX(const CHAR* pszName);
-    static EFFECT_SE* getRsrcESE(const CHAR* pszName);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
 
 namespace VRAM {
 extern INT _FRAME0_START;

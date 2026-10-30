@@ -3480,10 +3480,10 @@ static inline void setEntityFlagBit(CEntity* p, UINT nFlag, BOOL bSet) {
 static inline void sceneSetColor(INT nType, INT nFrame, const FVECTOR& vCol) {
     CSceneEnv::setColor((ObjType::eObjBit)(nType & 0xFFFF), (FLOAT)nFrame, vCol, NULL, (UINT)nType >> 16);
 }
-class CRsrcDB {
-public:
-    static void removeGroup(INT nGroup, INT nMember);
-};
+#include "System/RsrcDB.h"
+
+
+
 /* RsrcDef.h:171 in the original */
 static inline INT makeRsrcID(INT nGroup, INT nMember) { return nGroup * 10000 + nMember; }
 /* SceneInfo.h:223 in the original */

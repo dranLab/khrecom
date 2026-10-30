@@ -17,11 +17,11 @@
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-class CRsrcDB {
-public:
-    static BOOL hasRsrcGroup(INT nGroup, INT nID);
-    static void removeGroup(INT nGroup, INT nID);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 #include "System/Rcf.h"
 

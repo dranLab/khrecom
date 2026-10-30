@@ -35,10 +35,10 @@ inline void _emptyStringPlaceholderDebugPathData() { TRACE(""); }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 inline void* operator new(unsigned int, void* p) throw() { return p; }
 extern "C" char* strcpy(char*, const char*);
-class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: RsrcDB.h brings "System/RsrcData.h(156)", not in the original (queue: RsrcDB partition) */
-public:
-    static CHAR* getRsrcPTDName(INT nPtdNo);
-};
+#include "System/RsrcDB.h"
+
+
+
 #line 19
 class CHermitePathMoveS : public CTask {
     CPathVector* m_pPath;        /* 0x40 */

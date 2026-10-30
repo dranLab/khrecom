@@ -93,12 +93,12 @@ public:
     }
 };
 
-class CRsrcDB {
-public:
-    static void* getFirstData(INT inType, INT inID, INT inIndex);
-    static BYTE* getRsrcEET(const CHAR* inName);
-    static CRsrcANN* getRsrcANN(INT nGroup);
-};
+#include "System/RsrcDB.h"
+
+
+
+
+
 
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);

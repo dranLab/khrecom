@@ -145,11 +145,11 @@ static inline void _addAssign(FVECTOR& a, const FVECTOR& b) {
     a.w += b.w;
 }
 /* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
-enum NAME_CASE { NAME_CASE_SENSITIVE = 0, NAME_CASE_UPPER = 1, NAME_CASE_LOWER = 2 };
-class CRsrcDB {
-public:
-    static INT getMotionIdxFromMotName(const CHAR* pszName, const CHAR* pszMotName, NAME_CASE nc);
-};
+
+#include "System/RsrcDB.h"
+
+
+
 namespace PL {
 extern BULLET_EFFECT_INFO g_EffTbl_Skill[67][4]; // PlayerAttack.h in the original
 extern INT g_CardBreakTime[8]; // PlayerAttack.h in the original

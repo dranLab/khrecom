@@ -107,6 +107,7 @@ public:
 
 typedef CSLCListT<CRsrcData> CRsrcList;
 
+/* PARTIAL: stand-in for System/RsrcDB CRsrcDB: TexCtrl keeps its CRsrcList typedef (CSLCListT<CRsrcData>), which conflicts with RsrcDB.h's forward declaration */
 class CRsrcDB {
 public:
     static CRsrcList& getRsrcList(UINT nType);

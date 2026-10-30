@@ -16,10 +16,10 @@
 #define _ASSERT_STR(e) #e
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, _ASSERT_STR(e), 0)
 
-class CRsrcDB { /* System/RsrcDB.h */
-public:
-    static void* getFirstData(INT inType);
-};
+#include "System/RsrcDB.h"
+
+
+
 
 void MulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1); /* System/Coord.h */
 

@@ -287,11 +287,11 @@ void sceVu0InterVectorXYZ(float* v0, float* v1, float* v2, float t);
 
 using namespace D2;
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 namespace D2 {
 class C2DMan {
@@ -312,11 +312,11 @@ public:
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern INT SCREEN_HEIGHT;
 
-class CRsrcDB {
-public:
-    static void removeGroup(INT nGroup, INT nID);
-    static struct TexInfo* getRsrcTex(const char* pName, NAME_CASE eCase);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 #include "System/Rcf.h"
 

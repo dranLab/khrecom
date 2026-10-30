@@ -98,19 +98,19 @@ static inline FLOAT _sqrtf(FLOAT x) {
     return ret;
 }
 
-enum NAME_CASE {
-    NAME_CASE_SENSITIVE = 0,
-    NAME_CASE_UPPER = 1,
-    NAME_CASE_LOWER = 2
-};
+
+
+
+
+
 
 class CRsrcData;
 
-class CRsrcDB {
-public:
-    static CRsrcData* getRsrc(INT inGroupID, const char* inName, NAME_CASE inCase);
-    static void* getRsrcData(const CRsrcData& inData);
-};
+#include "System/RsrcDB.h"
+
+
+
+
 
 #include "System/Graphic/PackMan.h"
 

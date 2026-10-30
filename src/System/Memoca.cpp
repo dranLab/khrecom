@@ -41,9 +41,9 @@ int sprintf(char* buf, const char* fmt, ...);
 int atoi(const char* s);
 }
 
-enum NAME_CASE {
-    NAME_CASE_NONE = 0 /* values not needed */
-};
+
+
+
 
 class CRsrcData {
     CBuf* m_pBuf;
@@ -56,10 +56,10 @@ public:
     INT getSize() { return m_pBuf ? m_pBuf->getBufSize() : -1; }
 };
 
-class CRsrcDB {
-public:
-    static CRsrcData* getRsrc(INT nGroup, const CHAR* pszName, NAME_CASE nCase);
-};
+#include "System/RsrcDB.h"
+
+
+
 
 class CMemocaDataEntries {
 public:
