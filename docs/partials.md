@@ -61,14 +61,14 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1035 (953 in 109 headers, 82 in 35 .cpp); MATCH: 121
-  by category: method 409, data member 69, type 88, fwd decl 53, #include 29, changed in place 133, padding 31, path override 24, gate 43, guessed 41, header-level 74, stand-in 35, other 6
-stand-ins: 341 foreign in 121 files (93 names), 201 unattributed, 171 own
+PARTIAL: 1024 (942 in 109 headers, 82 in 35 .cpp); MATCH: 128
+  by category: method 401, data member 68, type 88, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 42, guessed 41, header-level 74, stand-in 35, other 6
+stand-ins: 340 foreign in 120 files (92 names), 201 unattributed, 170 own
 duplicate class names across headers: 25
-padding: 32 arrays, 26 accessors
-mechanisms: 959 sites (919 untagged); #line: 1238
-opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 159, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 571, superset 128, partial 95, gated 94, missing 10, unattributed 309
+padding: 31 arrays, 26 accessors
+mechanisms: 958 sites (916 untagged); #line: 1238
+opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
+classes: complete 572, superset 129, partial 94, gated 94, missing 9, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -92,13 +92,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 | R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
 | R1 | 11.5 | `System/Buf.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users, 3 PARTIAL | CBuf (1 superset) | inline bodies or virtuals |
-| R1 | 9.5 | `Game/Collision/CollUtilA.h` | ready | 1 stand-in files, 0 dup headers, 2 gate users, 11 PARTIAL | CCollUtil (1 partial) |  (gate) |
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
 | R1 | 6.0 | `Form/Menu/SaveLoad.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CSaveLoad, GAMECLEAR, SAVELOAD (3 complete) | inline bodies or virtuals |
 | R1 | 6.0 | `Game/Enemy/BossDeadDemo.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CBossDeadDemo (1 complete) | inline bodies or virtuals |
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
 | R1 | 4.5 | `Game/Collision/CollBody.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users, 1 PARTIAL | CCollBody (1 superset) | inline bodies or virtuals (gate) |
+| R1 | 4.5 | `System/Graphic/MotData.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CMotData (1 partial) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -149,7 +149,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CCircleCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CCircleCollision |
 | `CCollObj` | superset | Game/Collision/CollObj.h | 1 |  | 1 PARTIAL |
-| `CCollUtil` | partial | Game/Collision/CollUtilA.h | 1 |  | missing methods: backupChipStatus, checkHangEdge, checkLadderUp, clean, closestPointOnLine, detectActorTrapXZ, ... (+26); padding: _pad028, _pad224; extra methods: getInstance; 11 PARTIAL |
+| `CCollUtil` | superset | Game/Collision/CollUtilA.h | 1 |  | padding: _pad224; extra methods: getInstance |
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CEffectMotion` | complete | Game/EffectMotion.h | 1 |  |  |
@@ -168,7 +168,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CMinigameManager` | complete | Game/MinigameManager.h | 1 |  |  |
 | `CMovie` | complete | System/Movie/Movie.h | 1 |  |  |
 | `CMovieScript` | complete | System/Movie/MovieScript.h | 1 |  |  |
-| `COLL_CUBE` | missing | Game/Collision/CollUtilO.h | 1 |  |  |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CPadIO` | complete | System/PadIO.h | 1 |  |  |
@@ -258,8 +257,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
 | `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 173 |
 | `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 150 |
-| `Game/Collision/CollUtilA.h` | 12 | 6/0/2/0 | 24 |
-| `Game/Collision/Ride.h` | 1 | 6/0/1/0 | 6 |
+| `Game/Collision/CollUtilA.h` | 1 | 9/1/1/0 | 25 |
+| `Game/Collision/Ride.h` | 1 | 4/0/1/0 | 6 |
 | `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
 | `Game/EffectMotion.h` | 0 | 5/0/2/0 | 7 |
 | `Game/Enemy/BattleEnemy.h` | 35 | 0/0/2/0 | 58 |
@@ -399,7 +398,7 @@ or `untagged`.
 | kind | key | sites | tagged | reason, or an untagged site |
 |---|---|---:|---:|---|
 | feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:3 |
-| feature | `COLLOBJ_H_COLLISION_CLASSES` | 5 | 2 | CCollUtil() constructs a CSphereCollision (CollObj.h gates the collision classes) |
+| feature | `COLLOBJ_H_COLLISION_CLASSES` | 5 | 3 | CCollUtil() constructs a CSphereCollision (CollObj.h gates the collision classes) |
 | feature | `COLLOBJ_H_INFO_UNION` | 3 | 0 | untagged, e.g. Game/Movement.cpp:2 |
 | feature | `COLLUTILA_H_INFO_MEMBERS` | 1 | 1 | m_iInfo/m_iInfo2 need the COLL_INFO_UNION below; CollUtilF, CollMapCamera keep own copies |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
@@ -409,7 +408,7 @@ or `untagged`.
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 0 | untagged, e.g. Game/Collision/CollObj.h:90 |
 | feature site | `COLLOBJ_H_INFO_UNION` | 1 | 0 | untagged, e.g. Game/Collision/CollObj.h:205 |
-| feature site | `COLLUTILA_H_INFO_MEMBERS` | 1 | 0 | untagged, e.g. Game/Collision/CollUtilA.h:211 |
+| feature site | `COLLUTILA_H_INFO_MEMBERS` | 1 | 1 | COLL_INFO_UNION has no header yet (ref owner Game/Movement); CollUtil, CollUtilF, CollMapCamera, MapEnemy, SEMotion, Player and Movement define their own copy |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 0 | untagged, e.g. Game/Entity.h:427 |
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 0 | untagged, e.g. System/LinkedBuf.h:10 |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:78 |
@@ -434,7 +433,7 @@ or `untagged`.
 | guard skip | `SYSTEM_COORD_H` | 1 | 0 | untagged, e.g. System/Graphic/Effect/effect_inl.h:9 |
 | guard skip | `SYSTEM_FSM_H` | 1 | 0 | untagged, e.g. Game/Entity.h:29 |
 | opt-out | `MAPENEMY_H_NO_COLL_ANIM` | 2 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:3 |
-| opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 160 | 6 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
+| opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 159 | 6 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
 | opt-out site | `MAPENEMY_H_NO_COLL_ANIM` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.h:8 |
 | opt-out site | `TASK_H_NO_SLC_OVERFLOW_MSG` | 1 | 0 | untagged, e.g. System/Task.h:201 |
 | path override | `ANIM_H_PATH` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:2 |
