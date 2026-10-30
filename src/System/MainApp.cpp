@@ -175,7 +175,7 @@ extern "C" char _gp[];
 
 #include "System/FileIO.h"
 
-class CRsrcDB {
+class CRsrcDB { /* PARTIAL: stand-in for System/RsrcDB CRsrcDB: strings: RsrcDB.h adds 'System/RsrcData.h(156)' */
 public:
     static void initialize();
     static void finalize();
@@ -192,7 +192,7 @@ public:
 #include "System/Graphic/WorldEnv.h"
 #line 257
 
-class CHeapMan {
+class CHeapMan { /* PARTIAL: stand-in for System/HeapMan CHeapMan: owner not written */
 public:
     static FLOAT getUsedHeapRatio();
     static void resetHeap();
