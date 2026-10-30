@@ -48,17 +48,17 @@ inline void _monstroEventBattleEmptyString() {
 
 
 
-class CBuf {
-public:
-    void* m_pBuf;
-};
+#include "System/Buf.h"
+
+
+
 
 class CRsrcData {
 private:
     CBuf* m_pDataSrc;
 
 public:
-    void* getRsrcData() { return m_pDataSrc ? m_pDataSrc->m_pBuf : NULL; }
+    void* getRsrcData() { return m_pDataSrc ? m_pDataSrc->getBufPtr() : NULL; }
 };
 
 class CRsrcDB {
