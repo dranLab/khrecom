@@ -70,14 +70,14 @@ struct ChatWndCreateCTDParam {
 #include "System/Sound/SoundMan.h"
 #line 74
 
-class CLevelUp {
-private:
-    char _pad[0x1d0];
+#include "Form/Menu/LevelUp.h"
 
-public:
-    static BOOL m_bEnd;
-    CLevelUp(CTask* inParent, USHORT inKind);
-};
+
+
+
+
+
+
 
 #include "Game/Player/PlayerGauge.h"
 
