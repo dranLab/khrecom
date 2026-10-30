@@ -630,9 +630,12 @@ BOOL CTexUtil::setupTexInfo(TexInfo& outInfo, const BYTE* pInTex, INT nWidth, IN
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", setupTexInfo__8CTexUtilR7TexInfoPCUcii);
 #endif
 
-/* Placeholder: the C of setupTexInfoImd__8CTexUtilR7TexInfoPCUci (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static BOOL _setupTexInfoImd_c(TexInfo& outInfo, const BYTE* pInImd, INT nAllocType) {
+/* Parked: 93 of 153 lines, 16 bytes short - control flow as the original (tex_cnv PSM 19/20 cases, getTransSize
+ * else, allocTex, getTransInfo, TEX0). Left: the original keeps &outInfo._TexInfo/_ClutInfo in s1/s0 across the
+ * getTransInfo call (one more saved register, frame 0x90), which renumbers most registers; it also tests tex_cnv
+ * with andi 4 where ours shifts (bitfield types and ==1/!=0 tests tried). */
+#if 0
+BOOL CTexUtil::setupTexInfoImd(TexInfo& outInfo, const BYTE* pInImd, INT nAllocType) {
     const IMD_HEADER* pImd = (const IMD_HEADER*)pInImd;
     INT nTexSize = 0;
     INT nClutSize = 0;
@@ -684,5 +687,7 @@ __attribute__((section(".sdata"))) static BOOL _setupTexInfoImd_c(TexInfo& outIn
                                       outInfo._ClutInfo._nFormat, 0, 0, 1);
     return TRUE;
 }
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", setupTexInfoImd__8CTexUtilR7TexInfoPCUci);
+#endif
 // SOURCE DATA: .data .rodata
