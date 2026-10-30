@@ -62,8 +62,8 @@ One row per merge into main (`partials.py --summary` before and after).
 
 ```
 PARTIAL: 992 (910 in 109 headers, 82 in 36 .cpp); MATCH: 138
-  by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 130, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 35, other 6
-stand-ins: 305 foreign in 115 files (81 names), 201 unattributed, 170 own
+  by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 34, other 6
+stand-ins: 299 foreign in 113 files (80 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 958 sites (911 untagged); #line: 1242
@@ -80,7 +80,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
-| R1 | 12.5 | `Form/Menu/JMemoFlag.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CJiminyMemoFlag (1 superset) | inline bodies or virtuals |
 | R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 | R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
 | R1 | 11.5 | `System/Buf.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users, 3 PARTIAL | CBuf (1 superset) | inline bodies or virtuals |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 4.0 | `System/Fsm.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users | CFSM (1 gated) | inline bodies or virtuals (gate) |
 | R1 | 4.0 | `System/Graphic/Glare.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CGlare (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `System/Graphic/TexCtrl.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CTexCtrl (1 complete) | inline bodies or virtuals |
+| R1 | 3.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 
 ## Classes with foreign copies
 
@@ -111,7 +111,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
 | `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
 | `DropPrize` | gated | Game/Gimmick/GimmickManager.h | 7 |  |  |
-| `CJiminyMemoFlag` | superset | Form/Menu/JMemoFlag.h | 6 |  | 1 PARTIAL |
 | `COLL_INFO_UNION` | missing | Game/Movement.h | 6 |  |  |
 | `VTransInfo` | gated | System/Graphic/Gprim.h | 6 | System/Graphic/modeldata.h | 1 PARTIAL |
 | `CBuf` | superset | System/Buf.h | 5 |  | 3 PARTIAL |
@@ -212,7 +211,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 |---|---:|---|---:|
 | `Form/DebugMenu.h` | 0 | 1/0/0/3 | 4 |
 | `Form/DebugWindow.h` | 0 | 2/1/0/4 | 11 |
-| `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 11 |
+| `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 17 |
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
 | `Form/Menu/Menu.h` | 0 | 0/0/1/0 | 15 |
 | `Form/Menu/SaveLoadCtrl.h` | 14 | 1/1/6/0 | 7 |
@@ -262,7 +261,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Game.h` | 20 | 0/1/0/0 | 42 |
 | `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
 | `Game/GameSubBattle.h` | 0 | 1/0/1/0 | 2 |
-| `Game/GameWork.h` | 3 | 2/1/3/0 | 59 |
+| `Game/GameWork.h` | 3 | 2/1/3/0 | 60 |
 | `Game/Gimmick/BaseGimmick.h` | 0 | 1/1/0/0 | 46 |
 | `Game/Gimmick/GimmickAngelArrow.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Gimmick/GimmickBell.h` | 0 | 0/1/0/0 | 2 |
@@ -306,7 +305,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/SceneEnv.h` | 1 | 0/0/1/0 | 37 |
 | `Game/SceneInfo.h` | 5 | 29/0/1/0 | 86 |
 | `Game/Status.h` | 11 | 1/0/1/0 | 15 |
-| `Game/StorageWork.h` | 2 | 2/1/1/0 | 60 |
+| `Game/StorageWork.h` | 2 | 2/1/1/0 | 61 |
 | `Game/Technic.h` | 3 | 1/1/0/0 | 19 |
 | `System/Buf.h` | 4 | 0/1/0/0 | 19 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
