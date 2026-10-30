@@ -20,80 +20,80 @@ inline void* operator new(size_t size, char* msg) throw() {
 }
 
 /* The window classes (original headers unknown): only what this unit uses. */
-class CBaseWnd : public CComponent { /* CComponentObj in the original */
-public:
-    virtual ~CBaseWnd(); /* vtable at 0x10 */
-protected:
-    UBYTE _m_0x14[0x74];
-    INT m_step;     /* 0x88 */
-    INT m_phaseCnt; /* 0x8c */
-    static INT m_nLayerFG;
+#include "System/Wnd.h"
 
-public:
-    INT getStatus() { return m_step; }
-    INT getPhaseCnt() { return m_phaseCnt; }
-    static void setLayerFG(BOOL bTutorial) { m_nLayerFG = bTutorial ? 0x18 : 9; }
-};
 
-class CTextWnd : public CBaseWnd {
-private:
-    UBYTE _m_0x90[0x90];
-    FLOAT m_fOpenDelay; /* 0x120 */
-    UBYTE _m_0x124[0x1c];
 
-public:
-    CTextWnd(CTask& inParent, INT nMode);
-    void createWindow(CPointI& pos, CSizeI& size, UINT a, const CHAR* pText, UINT b, UINT c, UINT d, CPointI& pt,
-                      UINT e, UINT f);
-    void createWindowC(CPointI& pos, CSizeI& size, UINT a, const CHAR* pText, UINT b, UINT c, UINT d, CPointI& pt,
-                       UINT e, UINT f);
-    void createWindowCTD(UINT nCtdID, CPointI* pPos, CPointI* pPos2, UINT a, UINT* pB, UINT c);
-    void setText(const CHAR* pText, UINT* pWords);
-    void open();
-    void close();
-    void closeDestroy();
-    void setTextColor(UINT nColor);
-    void setTextExColor(UINT nColor);
-    void setTextDispDelay(INT nDelay);
-    void setTextOffset(CPointI offset);
-    void setFontSize(UINT nSize);
-    void setFontStyle(UINT nStyle);
-    void setFontSpace(CSizeI space);
-    void setWndStyle(UINT nStyle);
-    void setWndRate(FVECTOR& rate);
-    void changeWndStyle(UINT nStyle);
-    void clearText();
-    void changeTextSelect(INT nSelect, INT nFlag);
-    void changeText(const CHAR* pText, UINT* pWords);
-    void setSelectOffset(UINT nOffset);
-    void changeCursorColor(UINT nColor);
-    void setDispInterval(UINT nInterval);
-    void changeTextNext(UINT* pWords);
-    void enableWndDisp(UINT bEnable);
-    void enableDisp(UINT bEnable);
-    void setWords(UINT* pWords);
-    void setTextCTD(UINT nCtdID, UINT* pWords);
-    void changeTextCTD(UINT nCtdID, UINT* pWords);
-    void setOpenDelay(UINT nOpenDelay) { m_fOpenDelay = nOpenDelay; }
-    void setCharFadeInDelay(FLOAT fDelay);
-    void setTextFadeOutTime(FLOAT fTime);
-    void enableLFDisp(INT bEnable);
-};
 
-class CImageWnd : public CBaseWnd {
-private:
-    UBYTE _m_0x90[0x58];
-    INT m_fgDestroy; /* 0xe8 */
-    UBYTE _m_0xec[0x4];
 
-public:
-    CImageWnd(CTask& inParent);
-    void createWindow(CPointI& pos, CSizeI& size, CPointI& pos2, CSizeI& size2, const CHAR* pName, FLOAT fRate,
-                      G_RGBA col0, G_RGBA col1, INT nMode);
-    void init(CPointI& pos, CSizeI& size, CPointI& pos2, CSizeI& size2, const CHAR* pName, FLOAT fRate, G_RGBA col0,
-              G_RGBA col1, INT nMode);
-    void setDestroy() { m_fgDestroy = TRUE; }
-};
+
+
+
+
+
+
+
+
+
+#include "System/Wnd.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include "System/Wnd.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 template <class T> static inline T& _ref(T& v) { return v; }
 
@@ -270,7 +270,7 @@ INT CChatMan::onDestroyChatWindowAll(INT nCmd, void* pParam, INT nID) {
 }
 
 INT CChatMan::onSetLayerTutorial(INT nCmd, void* pParam, INT nID) {
-    CBaseWnd::setLayerFG(nID);
+    CBaseWnd::setLayerFG(nID ? 0x18 : 9);
     return 1;
 }
 
@@ -362,7 +362,7 @@ TEXT_WND_COMMAND(onEnableLFDisp, enableLFDisp(*(INT*)pParam))
 TEXT_WND_COMMAND(onChangeCursorColor, changeCursorColor(*(UINT*)pParam))
 TEXT_WND_COMMAND(onSetDispInterval, setDispInterval(*(UINT*)pParam))
 TEXT_WND_COMMAND(onSetSelectOffset, setSelectOffset(*(UINT*)pParam))
-TEXT_WND_COMMAND(onChangeText, changeText((const CHAR*)pParam, NULL))
+TEXT_WND_COMMAND(onChangeText, changeText((const CHAR*)pParam, (UINT*)NULL))
 TEXT_WND_COMMAND(onChangeTextCTD, changeTextCTD(((ChatWndCTDParam*)pParam)->nCtdID, ((ChatWndCTDParam*)pParam)->pB))
 TEXT_WND_COMMAND(onEnableDisp, enableWndDisp(*(UINT*)pParam))
 TEXT_WND_COMMAND(onSetCharFadeInDelay, setCharFadeInDelay(*(FLOAT*)pParam))
