@@ -1092,17 +1092,19 @@ static inline INT _hexValue(INT c) {
     if (isdigit(c)) {
         n = c - '0';
     } else {
-        c = _tolower(c);
-        if ((UINT)(c - 'a') <= 5) {
-            n = c - 'a' + 10;
+        INT l = _tolower(c);
+        if ((UINT)(l - 'a') <= 5) {
+            n = l - 'a' + 10;
         }
     }
     return n;
 }
 
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _atoi_c(const CHAR* lpszInStr) {
+/* Parked: _atoi: 11 of 77 lines, 8 bytes short - hex/decimal paths as the original; left: the original keeps a
+ * branch for the isupper() lowercase step where ours makes movz (ternary, if/else, inline and !isupper forms
+ * all give movz), and the decimal loop's p++/return tail scheduling. Permuter 6 min: no gain. */
+#if 0
+INT _atoi(const CHAR* lpszInStr) {
     INT nRet = 0;
     const CHAR* p = lpszInStr;
     INT n;
@@ -1126,12 +1128,12 @@ __attribute__((section(".sdata"))) INT _atoi_c(const CHAR* lpszInStr) {
         }
         return nRet;
     dec:
-        p = (*lpszInStr == '#') ? lpszInStr + 1 : lpszInStr;
+        p = lpszInStr + 1;
+        if (*lpszInStr != '#') p = lpszInStr;
         for (;;) {
             c = *p;
-            if (!c || !isdigit(c)) {
-                break;
-            }
+            if (!c) goto end;
+            if (!isdigit(c)) goto end;
             nRet = nRet * 10 + c - '0';
             p++;
         }
@@ -1139,7 +1141,9 @@ __attribute__((section(".sdata"))) INT _atoi_c(const CHAR* lpszInStr) {
 end:
     return nRet;
 }
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _atoi__FPCc);
+#endif
 void CRcf::setLocale(INT nID) {
     s_nLocale = nID;
 }
