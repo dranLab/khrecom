@@ -49,7 +49,7 @@ template <class T> struct CSizeT {
 typedef CPointT<int> CPointI;
 typedef CSizeT<int> CSizeI;
 
-class CTextWnd {
+class CTextWnd { /* PARTIAL: stand-in for System/Wnd CTextWnd: the assembler step crashes with Wnd.h here (cause unknown) */
 public:
     CTextWnd(CTask& parent, INT nID);
     void createWindow(CPointI& pos, CSizeI& size, UINT nAttr, const char* pszText, UINT nCol, UINT nFontSize,
