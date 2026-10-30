@@ -592,35 +592,32 @@ int CRcf::isSceneManagedMode() {
 }
 void _setLinkreqRead() {
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) BOOL _isCompleteLoadRCF_c(INT nGroup, INT nMember) {
+BOOL _isCompleteLoadRCF(INT nGroup, INT nMember) {
     BOOL bResult;
     INT nID;
     CRCFQueueData* pData;
 
-    if (nGroup == 0 && nMember == 0) {
+    if ((nGroup | nMember) == 0) {
         bResult = FALSE;
         if (_isReadThreadSleeping() && CVramMan::isTransTexDone()) {
             bResult = !_hasReadQueue();
         }
-        return bResult;
-    }
-    nID = nGroup * 10000 + nMember;
-    bResult = TRUE;
-    for (pData = s_pReadQueue; pData; pData = pData->getNextData()) {
-        if (pData->getGroupID() == nGroup && pData->getMemberID() == nMember) {
-            bResult = FALSE;
-            break;
-        }
-        if (pData->getLinkOwnerID() == nID) {
-            bResult = FALSE;
-            break;
+    } else {
+        nID = nGroup * 10000 + nMember;
+        bResult = TRUE;
+        for (pData = s_pReadQueue; pData; pData = pData->getNextData()) {
+            if (pData->getGroupID() == nGroup && pData->getMemberID() == nMember) {
+                bResult = FALSE;
+                break;
+            }
+            if (pData->getLinkOwnerID() == nID) {
+                bResult = FALSE;
+                break;
+            }
         }
     }
     return bResult;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _isCompleteLoadRCF__Fii);
 BOOL CRcf::isCompleteLoadRCF(INT nGroup, INT nMember) {
     BOOL result;
 
