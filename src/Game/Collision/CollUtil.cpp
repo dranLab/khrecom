@@ -128,8 +128,8 @@ void CCollUtil::_initializeData(void* pDtHead, MCD_INFO* pMCDInfo) {
     }
     fgIsObject = FALSE;
     if (!pMCDInfo) {
-        m_pMCDInfo = (MCD_INFO*)m_MCDInfo;
-        pMCDInfo = (MCD_INFO*)m_MCDInfo;
+        m_pMCDInfo = &m_MCDInfo;
+        pMCDInfo = &m_MCDInfo;
     } else {
         fgIsObject = TRUE;
     }

@@ -29,12 +29,6 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q);
 
-struct COLL_CUBE {
-    FVECTOR vMin;
-    FVECTOR vMax;
-    FMATRIX* pMatrix;
-};
-
 extern "C" void sceVu0InversMatrix(float m0[4][4], float m1[4][4]);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 

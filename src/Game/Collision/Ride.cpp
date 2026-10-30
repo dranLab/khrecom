@@ -56,12 +56,6 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT r);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
-struct COLL_CUBE {
-    FVECTOR vMin;
-    FVECTOR vMax;
-    FMATRIX* pMatrix;
-};
-
 
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;

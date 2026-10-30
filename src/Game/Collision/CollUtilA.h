@@ -88,6 +88,27 @@ struct MC_CHIP {
     /* 0x80 */ FMATRIX matWL;
 };
 
+struct MCD_INFO {
+    MC_DATA* pMCData;     /* 0x00 */
+    MC_CHIP* pMCChip;     /* 0x04 */
+    FMATRIX* pMatrix;     /* 0x08 */
+    FMATRIX* pMatrixIOld; /* 0x0c */
+    INT iChipSuu;         /* 0x10 */
+    FLOAT fScale;         /* 0x14 */
+    FLOAT fMDVal;         /* 0x18 */
+    FLOAT fMDVal2;        /* 0x1c */
+};
+
+struct OCD_WORK {
+    BYTE fgEnable;
+};
+
+struct COLL_CUBE {
+    FVECTOR vMin;
+    FVECTOR vMax;
+    FMATRIX* pMatrix;
+};
+
 // PARTIAL: CCollUtil members used by CollUtilA/CollUtilF (CollUtil.h's inline strings must not be in these objects)
 class CCollUtil {
 public:
@@ -161,10 +182,9 @@ public:
     INT slidingHosei(FVECTOR& v0, FVECTOR& v1, FVECTOR& v2);
     void _initDbg();
 
-    /* 0x000 */ char m_MCDInfo[0x20]; /* MCD_INFO (Game/Collision/Ride.h) */
-    /* 0x020 */ struct MCD_INFO* m_pMCDInfo;
-    /* 0x024 */ struct MCD_INFO* m_pOCDInfo;
-    /* 0x028 */ char _pad028[0x8];
+    /* 0x000 */ MCD_INFO m_MCDInfo;
+    /* 0x020 */ MCD_INFO* m_pMCDInfo;
+    /* 0x024 */ MCD_INFO* m_pOCDInfo;
     /* 0x030 */ FVECTOR m_vCkS;
     /* 0x040 */ FLOAT m_fMDVal;
     /* 0x044 */ FLOAT m_Radius;
