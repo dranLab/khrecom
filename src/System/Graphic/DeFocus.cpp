@@ -201,7 +201,78 @@ QWdata* set_csprite64(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, INT ScrW, INT Sc
     }
     return qp;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", set_tsprite32__FP6QWdataiiUiiiii);
+QWdata* set_tsprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, INT ScrW, INT ScrH, INT uvW, INT uvH) {
+    PRIMIVECTOR pv[2];
+    PRIMIVECTOR uv[2];
+    int i;
+    int cnt;
+    SHORT ofsXM;
+    SHORT ofsXP;
+    IVECTOR ivUVPosUL;
+    IVECTOR ivUVRect;
+    ULONGLONG* pul64;
+    cnt = (ScrW << 4) / (32 << 4);
+    INT nStep = (uvW << 4) / cnt; /* MATCH: not in the ref's locals; the original keeps the UV step in s5 from before isPAL() */
+    if (CMainApp::isPAL()) {
+        plsy += 8;
+    }
+    pv[0].x = plsx;
+    pv[0].y = plsy;
+    pv[1].z = z;
+    ofsXM = 0;
+    ofsXP = 0;
+    if (pv[0].x < 0) {
+        ofsXM = pv[0].x;
+        pv[0].x = 0;
+    } else if (pv[0].x > 0) {
+        ofsXP = pv[0].x;
+    }
+    pv[0].x += (0x800 - 0x200 / 2) << 4;
+    pv[0].y += (0x800 - SCREEN_HEIGHT / 2) << 4;
+    pv[1].x = pv[0].x + (32 << 4) - ofsXP;
+    pv[1].y = pv[0].y + (ScrH << 4);
+    ivUVRect.y = uvH << 4;
+    ivUVPosUL.x = 0;
+    ivUVPosUL.y = 0;
+    ivUVPosUL.z = 0;
+    ivUVPosUL.w = 0;
+    ivUVRect.x = nStep;
+    ivUVRect.z = 0;
+    ivUVRect.w = 0;
+    uv[0].x = ivUVPosUL.x;
+    uv[0].y = ivUVPosUL.y;
+    if (ofsXM) {
+        uv[0].x -= ofsXM;
+    }
+    uv[1].x = uv[0].x + nStep;
+    if (ofsXP) {
+        uv[1].x -= ofsXP;
+    }
+    uv[1].y = uv[0].y + ivUVRect.y;
+    if (qp) {
+        CPackMan::pkCloseGifTag(qp);
+    }
+    u_long128 tag;
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)cnt | 0x4400000000000000UL), "r"((u_long)0x4343));
+    pul64 = (ULONGLONG*)CPackMan::pkOpenGifTagManual(tag);
+    for (i = 0; i < cnt; i++) {
+        pul64[0] = uv[0].ul64;
+        pul64[1] = pv[0].ul64;
+        pul64[2] = uv[1].ul64;
+        pul64[3] = pv[1].ul64;
+        pul64 += 4;
+        pv[0].x = pv[1].x;
+        pv[1].x += 32 << 4;
+        uv[0].x = uv[1].x;
+        uv[1].x += nStep;
+    }
+    CPackMan::pkCloseGifTagManual((UINT*)pul64);
+    if (qp) {
+        __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
+        qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+    }
+    return qp;
+}
 void CDeFocusPrim::makePkt() { _makePktDeFocus(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", _makePktDeFocus__12CDeFocusPrim);
 void CBlurPrim::makePkt() { _makePktBlur(); }
