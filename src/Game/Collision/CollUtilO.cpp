@@ -1,7 +1,6 @@
 /* .rodata comes from the original assembly: the split puts the unit's data at 0x4893B4 (4 mod 8), so string
  * literals can't be placed from source; the code refers to the original's strings by their labels. */
-#define TASK_H_NO_SLC_OVERFLOW_MSG
-#define COLLOBJ_H_COLLISION_CLASSES
+#define COLLOBJ_H_COLLISION_CLASSES // MATCH: CollObj.h's point/circle/poly3 classes are gated (other includers keep local copies)
 #include "Game/Collision/CollUtilA.h"
 #include "System/HeapMan.h"
 #include "System/MainApp.h"
@@ -27,12 +26,7 @@ FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
-
-struct COLL_CUBE {
-    FVECTOR vMin;
-    FVECTOR vMax;
-    FMATRIX* pMatrix;
-};
+void DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q);
 
 extern "C" void sceVu0InversMatrix(float m0[4][4], float m1[4][4]);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
@@ -57,10 +51,128 @@ static inline FLOAT _distance(FVECTOR& v, const FVECTOR& p0, const FVECTOR& p1) 
     return _sqrtf(InnerProduct(v));
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", _detectSpherePoly3__9CCollUtilR16CSphereCollisionR15CPoly3Collision);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", _detectColumnPoly3__9CCollUtilR16CColumnCollisionR15CPoly3Collision);
-/* Near match (the original sets up the distanceLineO arguments after the p0/p1 copies), kept for reference: */
-#if 0
+INT CCollUtil::_detectSpherePoly3(CSphereCollision& sphereColl0, CPoly3Collision& poly3Coll1) {
+    INT ret;
+    FVECTOR sphereWS;
+    FVECTOR sphereWE;
+    FVECTOR vec;
+    FVECTOR vec0;
+    FVECTOR vec2; // MATCH: vec2/norm2 declared before vec1/norm1 (the ref's order swaps their stack slots)
+    FVECTOR vec1;
+    FVECTOR norm;
+    FVECTOR norm0;
+    FVECTOR norm2;
+    FVECTOR norm1;
+    FLOAT d;
+    FLOAT t1;
+
+    poly3Coll1.m_outWE = poly3Coll1.m_inWE;
+    m_pCheckColl->m_inWS = poly3Coll1.m_inWS;
+    m_pCheckColl->m_inWE = poly3Coll1.m_inWE;
+    m_pCheckColl->m_Radius = poly3Coll1.m_Radius;
+    m_fgSliding = 0;
+    while (!(ret = _detectSphereSphere(sphereColl0, *(CSphereCollision*)m_pCheckColl)) && (m_pCheckColl->m_inWS = poly3Coll1.m_BasePos, !(ret = _detectSphereSphere(sphereColl0, *(CSphereCollision*)m_pCheckColl))) &&
+           (m_pCheckColl->m_inWE = poly3Coll1.m_inWS, !(ret = _detectSphereSphere(sphereColl0, *(CSphereCollision*)m_pCheckColl)))) {
+        sphereWS = sphereColl0.m_inWE;
+        sphereWS.y += sphereColl0.m_shiftY;
+        sphereWE = sphereWS;
+        sphereWS.y -= sphereColl0.m_Radius;
+        sphereWE.y += sphereColl0.m_Radius;
+        SubVector(vec0, poly3Coll1.m_inWS, poly3Coll1.m_BasePos);
+        SubVector(vec1, poly3Coll1.m_BasePos, poly3Coll1.m_inWE);
+        OuterProduct(norm, vec1, vec0);
+        if (norm.x == 0.0f && norm.y == 0.0f && norm.z == 0.0f) goto end;
+        d = InnerProduct(norm, poly3Coll1.m_BasePos);
+        t1 = InnerProduct(norm, sphereWS) - d;
+        t1 = -t1 / InnerProduct(norm);
+        ScaleVector(vec, norm, t1);
+        AddVector(vec, sphereWS, vec);
+        OuterProduct(norm0, norm, vec0);
+        SubVector(vec0, vec, poly3Coll1.m_BasePos);
+        if (InnerProduct(norm0, vec0) < 0.0f) goto end;
+        OuterProduct(norm1, norm, vec1);
+        SubVector(vec1, vec, poly3Coll1.m_inWE);
+        if (InnerProduct(norm1, vec1) < 0.0f) goto end;
+        SubVector(vec2, poly3Coll1.m_inWE, poly3Coll1.m_inWS);
+        OuterProduct(norm2, norm, vec2);
+        SubVector(vec2, vec, poly3Coll1.m_inWS);
+        if (InnerProduct(norm2, vec2) < 0.0f) goto end;
+        m_pCheckColl->m_inWE = vec;
+        ret = _detectSphereSphere(sphereColl0, *(CSphereCollision*)m_pCheckColl);
+        break;
+    }
+end:
+    if (!ret) return 0;
+hit:
+    m_vCk2.w = 1.0f;
+    m_vNormal.w = 1.0f;
+    poly3Coll1.m_outWE = m_vCk2;
+    poly3Coll1.m_outNormal = m_vNormal;
+    sphereColl0.m_outNormal = m_vNormal;
+    poly3Coll1.m_outDetect = m_vDetect;
+    sphereColl0.m_outDetect = m_vDetect;
+    return 1;
+}
+INT CCollUtil::_detectColumnPoly3(CColumnCollision& columnColl0, CPoly3Collision& poly3Coll1) {
+    INT ret;
+    FVECTOR columnWS;
+    FVECTOR columnWE;
+    FVECTOR vec;
+    FVECTOR vec0;
+    FVECTOR vec2; // MATCH: vec2/norm2 declared before vec1/norm1 (the ref's order swaps their stack slots)
+    FVECTOR vec1;
+    FVECTOR norm;
+    FVECTOR norm0;
+    FVECTOR norm2;
+    FVECTOR norm1;
+    FLOAT d;
+    FLOAT t1;
+
+    poly3Coll1.m_outWE = poly3Coll1.m_inWE;
+    m_pCheckColl->m_inWS = poly3Coll1.m_inWS;
+    m_pCheckColl->m_inWE = poly3Coll1.m_inWE;
+    m_pCheckColl->m_Radius = poly3Coll1.m_Radius;
+    while (!(ret = _detectColumnSphere(columnColl0, *(CSphereCollision*)m_pCheckColl, 0)) && (m_pCheckColl->m_inWS = poly3Coll1.m_BasePos, !(ret = _detectColumnSphere(columnColl0, *(CSphereCollision*)m_pCheckColl, 0))) &&
+           (m_pCheckColl->m_inWE = poly3Coll1.m_inWS, !(ret = _detectColumnSphere(columnColl0, *(CSphereCollision*)m_pCheckColl, 0)))) {
+        columnWS = columnColl0.m_inWS;
+        columnWE = columnColl0.m_inWE;
+        columnWS.y += columnColl0.m_shiftY;
+        columnWE.y += columnColl0.m_shiftY;
+        SubVector(vec0, poly3Coll1.m_inWS, poly3Coll1.m_BasePos);
+        SubVector(vec1, poly3Coll1.m_BasePos, poly3Coll1.m_inWE);
+        OuterProduct(norm, vec1, vec0);
+        if (norm.x == 0.0f && norm.y == 0.0f && norm.z == 0.0f) goto end;
+        d = InnerProduct(norm, poly3Coll1.m_BasePos);
+        SubVector(vec, columnWE, columnWS);
+        t1 = InnerProduct(norm, columnWS) - d;
+        t1 = -t1 / InnerProduct(norm, vec);
+        ScaleVector(vec, vec, t1);
+        AddVector(vec, columnWS, vec);
+        OuterProduct(norm0, norm, vec0);
+        SubVector(vec0, vec, poly3Coll1.m_BasePos);
+        if (InnerProduct(norm0, vec0) < 0.0f) goto end;
+        OuterProduct(norm1, norm, vec1);
+        SubVector(vec1, vec, poly3Coll1.m_inWE);
+        if (InnerProduct(norm1, vec1) < 0.0f) goto end;
+        SubVector(vec2, poly3Coll1.m_inWE, poly3Coll1.m_inWS);
+        OuterProduct(norm2, norm, vec2);
+        SubVector(vec2, vec, poly3Coll1.m_inWS);
+        if (InnerProduct(norm2, vec2) < 0.0f) goto end;
+        m_pCheckColl->m_inWE = vec;
+        ret = _detectColumnSphere(columnColl0, *(CSphereCollision*)m_pCheckColl, 0);
+        break;
+    }
+end:
+    if (!ret) return 0;
+    m_vCk2.w = 1.0f;
+    m_vNormal.w = 1.0f;
+    poly3Coll1.m_outWE = m_vCk2;
+    poly3Coll1.m_outNormal = m_vNormal;
+    columnColl0.m_outNormal = m_vNormal;
+    poly3Coll1.m_outDetect = m_vDetect;
+    columnColl0.m_outDetect = m_vDetect;
+    return 1;
+}
 INT CCollUtil::_detectColumnPoint(CColumnCollision& columnColl0, CPointCollision& pointColl1) {
     FVECTOR p0;
     FVECTOR p1;
@@ -82,6 +194,7 @@ INT CCollUtil::_detectColumnPoint(CColumnCollision& columnColl0, CPointCollision
     p0.y += columnColl0.m_shiftY;
     p1.y += columnColl0.m_shiftY;
     m_pPrimInfoCurrent = 0;
+    do {} while (0); // MATCH: scheduling barrier (loop notes) before the distanceLineO arguments, an empty macro in the original?
     if (distanceLineO(&p0, &p1, 0) || distanceSphereO(&p1)) {
         m_vCk2.w = 1.0f;
         m_vNormal.w = 1.0f;
@@ -94,10 +207,6 @@ INT CCollUtil::_detectColumnPoint(CColumnCollision& columnColl0, CPointCollision
     }
     return 0;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", _detectColumnPoint__9CCollUtilR16CColumnCollisionR15CPointCollision);
-/* Near match (as _detectColumnPoint, and its distanceSphereO delay slot), kept for reference: */
-#if 0
 INT CCollUtil::_detectColumnSphere(CColumnCollision& columnColl0, CSphereCollision& sphereColl1, INT fg) {
     FVECTOR p0;
     FVECTOR p1;
@@ -122,6 +231,7 @@ INT CCollUtil::_detectColumnSphere(CColumnCollision& columnColl0, CSphereCollisi
     p0.y += columnColl0.m_shiftY;
     p1.y += columnColl0.m_shiftY;
     m_pPrimInfoCurrent = 0;
+    do {} while (0); // MATCH: scheduling barrier, as in _detectColumnPoint
     ret = distanceLineO(&p0, &p1, 1);
     if (!ret && !fg) {
         ret = distanceSphereO(&p1);
@@ -138,8 +248,6 @@ INT CCollUtil::_detectColumnSphere(CColumnCollision& columnColl0, CSphereCollisi
     }
     return 0;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", _detectColumnSphere__9CCollUtilR16CColumnCollisionR16CSphereCollisioni);
 INT CCollUtil::_detectSpherePoint(CSphereCollision& sphereColl0, CPointCollision& pointColl1) {
     FVECTOR p0;
     pointColl1.m_outWE = pointColl1.m_inWE;
@@ -198,7 +306,185 @@ INT CCollUtil::_detectSphereSphere(CSphereCollision& sphereColl0, CSphereCollisi
     }
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", distanceLineO__9CCollUtilP7FVECTORT1i);
+/* MATCH: distanceLineO's square roots never share the input register (early-clobber output) */
+static inline FLOAT _sqrtfE(FLOAT x) {
+    FLOAT ret;
+    asm volatile("sqrt.s %0, %1" : "=&f"(ret) : "f"(x));
+    return ret;
+}
+
+static inline FLOAT _distanceE(FVECTOR& v, const FVECTOR& p0, const FVECTOR& p1) {
+    SubVector(v, p0, p1);
+    return _sqrtfE(InnerProduct(v));
+}
+
+static inline INT _normalizeQ(FVECTOR& v) {
+    FLOAT l = _sqrtfE(InnerProduct(v));
+    DivVector(v, v, l);
+    return l != 0.0f;
+}
+
+INT CCollUtil::distanceLineO(FVECTOR* pP0, FVECTOR* pP1, INT fg) {
+    FVECTOR p;
+    FVECTOR v0;
+    FVECTOR s0;
+    FVECTOR s1;
+    FVECTOR vec0;
+    FLOAT pv0;
+    FLOAT pv1;
+    FLOAT v00;
+    FLOAT v11;
+    FLOAT v01;
+    FLOAT denom;
+    FLOAT s;
+    FLOAT t;
+    FVECTOR v;
+    FVECTOR u;
+    FVECTOR su;
+    INT ret;
+    FVECTOR s2;
+    FLOAT ss;
+    FVECTOR qs;
+    FVECTOR pq;
+    FVECTOR nvec;
+    FVECTOR vSurf;
+    FLOAT f0;
+    FLOAT f1;
+    FLOAT m;
+    FLOAT l2;
+
+    SubVector(v0, *pP1, *pP0);
+    SubVector(p, m_vCk0, *pP0);
+    pv0 = InnerProduct(p, v0);
+    pv1 = InnerProduct(p, m_vCkVec);
+    v00 = InnerProduct(v0);
+    if (v00 == 0.0f) return 0;
+    v11 = m_CkVecl;
+    v01 = InnerProduct(v0, m_vCkVec);
+    denom = v00 * v11 - v01 * v01;
+    ret = 1;
+    for (;;) {
+    if (denom < -1e-05f || 1e-05f <= denom) {
+        s = (pv0 * v01 - pv1 * v00) / denom;
+        if (s < 0.0f) break;
+        t = (pv0 * v11 - pv1 * v01) / denom;
+    } else {
+        t = pv0 / v00;
+        s = 0.0f;
+    }
+    ScaleVector(vec0, v0, t);
+    AddVector(s0, *pP0, vec0);
+    ScaleVector(vec0, m_vCkVec, s);
+    AddVector(s1, m_vCk0, vec0);
+    f0 = _distanceE(qs, s1, s0);
+    if (m_Radius < f0) break;
+    if (!fg) {
+        m = _sqrtfE(m_Radius2 - f0 * f0);
+        SubVector(pq, s1, s0);
+        OuterProduct(qs, v0, pq);
+        if (_normalizeQ(qs) && 1e-05f <= f0) {
+            if (0.0f < InnerProduct(qs, m_vCkVec)) ScaleVector(qs, qs, -1.0f);
+            ScaleVector(qs, qs, m);
+            Normalize(su, v0);
+            if (0.0f < InnerProduct(su, m_vCkVec)) ScaleVector(su, su, -1.0f);
+            f1 = _sqrtfE(v00);
+            l2 = m_CkVecl2;
+            if (1e-05f <= v01 || v01 < -1e-05f) {
+                f1 = f1 * l2 / v01;
+                ScaleVector(su, su, m / _sqrtfE(f1 * f1 - 1.0f));
+            } else {
+                su._q = 0;
+            }
+        } else {
+            Normalize(v, v0);
+            if (0.0f < InnerProduct(v, m_vCkVec)) ScaleVector(v, v, -1.0f);
+            f1 = _sqrtfE(v00);
+            l2 = m_CkVecl2;
+            if (1e-05f <= v01 || v01 < -1e-05f) {
+                f1 = f1 * l2 / v01;
+                m = m / _sqrtfE(f1 * f1 - 1.0f);
+                ScaleVector(su, v, m);
+                m = m * f1;
+            } else {
+                m = m_Radius;
+                su._q = 0;
+            }
+            Normalize(qs, m_vCkVec);
+            ScaleVector(qs, qs, -m);
+            SubVector(qs, qs, su);
+        }
+    } else {
+        qs._q = 0;
+        su._q = 0;
+    }
+    AddVector(vec0, qs, su);
+    AddVector(u, s1, vec0);
+    SubVector(vec0, u, m_vCk0);
+    if (InnerProduct(m_vCkVec, vec0) < 0.0f) break;
+    SubVector(vec0, u, m_vCk1);
+    if (0.0f < InnerProduct(m_vCkVec, vec0)) break;
+    AddVector(v, s0, su);
+    SubVector(vec0, v, *pP0);
+    if (InnerProduct(v0, vec0) < 0.0f) break;
+    SubVector(vec0, v, *pP1);
+    if (0.0f < InnerProduct(v0, vec0)) break;
+    SubVector(nvec, v, u);
+    Normalize(nvec, nvec);
+    m_vCk2 = u;
+    m_vCk2.w = 1.0f;
+    m_vNormal = nvec;
+    m_vDetect2 = m_vCk2;
+    m_vDetect = m_vCk2;
+    return 1;
+    }
+    for (;;) {
+        SubVector(vec0, m_vCk0, *pP0);
+        ss = InnerProduct(vec0, v0) / v00;
+        ScaleVector(vec0, v0, ss);
+        AddVector(s2, *pP0, vec0);
+        if (_distanceE(qs, m_vCk0, s2) <= m_Radius && ss <= 1.0f && 0.0f <= ss) {
+            m_vCk2 = m_vCk0;
+            break;
+        }
+        SubVector(vec0, m_vCk1, *pP0);
+        ss = InnerProduct(vec0, v0) / v00;
+        ScaleVector(vec0, v0, ss);
+        AddVector(s2, *pP0, vec0);
+        if (_distanceE(qs, m_vCk1, s2) <= m_Radius && ss <= 1.0f && 0.0f <= ss) {
+            m_vCk2 = m_vCk1;
+            break;
+        }
+        SubVector(vec0, *pP0, m_vCk0);
+        ss = InnerProduct(vec0, m_vCkVec) / m_CkVecl;
+        ScaleVector(vec0, m_vCkVec, ss);
+        AddVector(s2, m_vCk0, vec0);
+        if (_distanceE(qs, *pP0, s2) <= m_Radius && ss <= 1.0f && 0.0f <= ss) {
+            m_vCk2 = s2;
+            break;
+        }
+        SubVector(vec0, *pP1, m_vCk0);
+        ss = InnerProduct(vec0, m_vCkVec) / m_CkVecl;
+        ScaleVector(vec0, m_vCkVec, ss);
+        AddVector(s2, m_vCk0, vec0);
+        if (_distanceE(qs, *pP1, s2) <= m_Radius && ss <= 1.0f && 0.0f <= ss) {
+            m_vCk2 = s2;
+            break;
+        }
+        ret = 0;
+        break;
+    }
+    if (ret) {
+        m_vDetect2 = m_vCk2;
+        SubVector(qs, m_vCk2, s2);
+        Normalize(qs, qs);
+        m_vNormal = qs;
+        ScaleVector(qs, qs, m_Radius);
+        AddVector(m_vCk2, s2, qs);
+        m_vDetect = m_vCk2;
+        return 1;
+    }
+    return 0;
+}
 INT CCollUtil::distanceSphereO(FVECTOR* pP0) {
     FVECTOR vc0;
     FVECTOR vc1;
@@ -246,7 +532,9 @@ INT CCollUtil::distanceSphereO(FVECTOR* pP0) {
     m_vDetect2 = s;
     return 1;
 }
-/* Near match (the load order of the first coordinates and radii), kept for reference: */
+/* Parked: 7 of 125 lines - the original loads columnColl1's radius after columnColl0's (sched1 hoists ours above the
+   z subtraction, so c0.z/c1.R swap f3/f4). Tried: radius statement order, r1 split, direct/SubVector differences,
+   permuter 9 min (23k candidates, no gain). */
 #if 0
 INT CCollUtil::_detectColumnColumnEz(CColumnCollision& columnColl0, CColumnCollision& columnColl1) {
     FVECTOR v0;

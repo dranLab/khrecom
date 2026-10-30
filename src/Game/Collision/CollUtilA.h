@@ -88,83 +88,130 @@ struct MC_CHIP {
     /* 0x80 */ FMATRIX matWL;
 };
 
-// PARTIAL: CCollUtil members used by CollUtilA/CollUtilF (CollUtil.h's inline strings must not be in these objects)
+struct MCD_INFO {
+    MC_DATA* pMCData;     /* 0x00 */
+    MC_CHIP* pMCChip;     /* 0x04 */
+    FMATRIX* pMatrix;     /* 0x08 */
+    FMATRIX* pMatrixIOld; /* 0x0c */
+    INT iChipSuu;         /* 0x10 */
+    FLOAT fScale;         /* 0x14 */
+    FLOAT fMDVal;         /* 0x18 */
+    FLOAT fMDVal2;        /* 0x1c */
+};
+
+struct OCD_WORK {
+    BYTE fgEnable;
+};
+
+struct COLL_CUBE {
+    FVECTOR vMin;
+    FVECTOR vMax;
+    FMATRIX* pMatrix;
+};
+
+// PARTIAL: all members public (the ref's private ones are called directly where CollUtil.h's static inline
+// wrappers stand expanded: its inline strings must not be in those objects); getInstance() for the ref's instance()
 class CCollUtil {
 public:
+    static CCollUtil* m_pInstance;
+    static CCollUtil* getInstance();
+    CCollUtil();
+    ~CCollUtil();
+
+    static CCollUtil& initialize();
+    static void finalize();
+    static CCollUtil& instance();
+    static void init();
+    static void clean();
+    static void initializeData(void* pDtHead, MCD_INFO* pMCDInfo);
+    static INT detectMCD(CCollision& collision);
+    static INT detectSpherePoint(class CSphereCollision& sphereColl0, class CPointCollision& pointColl1);
+    static INT detectSphereSphere(class CSphereCollision& sphereColl0, class CSphereCollision& sphereColl1);
+    static INT detectSpherePoly3(class CSphereCollision& sphereColl0, class CPoly3Collision& poly3Coll1);
+    static INT detectColumnPoint(class CColumnCollision& columnColl0, class CPointCollision& pointColl1);
+    static INT detectColumnSphere(class CColumnCollision& columnColl0, class CSphereCollision& sphereColl1, INT fg);
+    static INT detectColumnPoly3(class CColumnCollision& columnColl0, class CPoly3Collision& poly3Coll1);
+    static INT detectColumnColumnEz(class CColumnCollision& columnColl0, class CColumnCollision& columnColl1);
+    static INT detectColumnColumn(class CColumnCollision& columnColl0, class CColumnCollision& columnColl1);
+    static INT detectColumnColumnR(class CColumnCollision& columnColl0, class CColumnCollision& columnColl1);
+    static INT detectSphereCircle(class CSphereCollision& sphereColl0, class CCircleCollision& circleColl1);
+    static INT detectBBoxPointEZ(COLL_CUBE& collCube, CCollision& collision);
+    static INT detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork);
+    static INT detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork, INT fgLocal);
+    static void initDbg();
+    static void setCollDbg();
+    static PRIM_INFO* getPrimInfo();
+    static INT getPrimInfoIdx();
+    static INT detectActorTrapXZ(const ETMoveData& moveData, const EventTrapData& trapData);
+    static INT checkHangEdge(CCollision& collision, FVECTOR& inDir, FVECTOR& inHeightDepth);
+    static INT checkLadderUp(FVECTOR& inPos, FVECTOR& inDir, FVECTOR& inHeightDepth);
+    static void getPassingPosition(FVECTOR& outPos, FVECTOR& outNorm);
+    static FLOAT getLadderPosition(FVECTOR& outPos, FVECTOR& outNorm);
+    static INT getSemiTransMat();
+    static INT checkWaterSurface(FVECTOR& inPos);
+    static MCD_INFO* getMapMCDInfo();
+    static void enableChipCollision(FVECTOR& vChipCenter, BOOL fg);
+    static void backupChipStatus();
+    static void restoreChipStatus();
+    static MC_CHIP* searchChipCollisionFirst(FVECTOR& vChipCenter, FLOAT fRange);
+    static MC_CHIP* searchChipCollisionNext();
+    static void recalcChipCollision(MC_CHIP* pChip);
+
+    void setup();
+    void dispose();
+    void _initializeData(void* pDtHead, MCD_INFO* pMCDInfo);
+    INT mappingData(MC_DATA* pDtHead);
+    void _enableChipCollision(FVECTOR& vChipCenter, BOOL fg);
+    void _backupChipStatus();
+    void _restoreChipStatus();
+    MC_CHIP* _searchChipCollisionFirst(FVECTOR& vChipCenter, FLOAT fRange);
+    MC_CHIP* _searchChipCollisionNext();
     INT _detectMCD(CCollision& collision);
+    INT _detectSpherePoint(class CSphereCollision& sphereColl0, class CPointCollision& pointColl1);
+    INT _detectSphereSphere(class CSphereCollision& sphereColl0, class CSphereCollision& sphereColl1);
+    INT _detectSpherePoly3(class CSphereCollision& sphereColl0, class CPoly3Collision& poly3Coll1);
+    INT _detectColumnPoint(class CColumnCollision& columnColl0, class CPointCollision& pointColl1);
+    INT _detectColumnSphere(class CColumnCollision& columnColl0, class CSphereCollision& sphereColl1, INT fg);
+    INT _detectColumnPoly3(class CColumnCollision& columnColl0, class CPoly3Collision& poly3Coll1);
+    INT _detectColumnColumnEz(class CColumnCollision& columnColl0, class CColumnCollision& columnColl1);
+    INT _detectColumnColumn(class CColumnCollision& columnColl0, class CColumnCollision& columnColl1);
+    INT _detectColumnColumnR(class CColumnCollision& columnColl0, class CColumnCollision& columnColl1);
+    INT _detectSphereCircle(class CSphereCollision& sphereColl0, class CCircleCollision& circleColl1);
+    INT _detectBBoxPointEZ(COLL_CUBE& collCube, CCollision& collision);
     INT _checkHangEdge(CCollision& collision, FVECTOR& inDir, FVECTOR& inHeightDepth);
     INT _checkLadderUp(FVECTOR& inPos, FVECTOR& inDir, FVECTOR& inHeightDepth);
+    void _initDbg();
+    INT _detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork, INT fgLocal);
     void _getPassingPosition(FVECTOR& outPos, FVECTOR& outNorm);
     FLOAT _getLadderPosition(FVECTOR& outPos, FVECTOR& outNorm);
     INT _checkWaterSurface(FVECTOR& inPos);
     INT _detectActorTrapXZ(const ETMoveData& moveData, const EventTrapData& trapData);
     INT detect2DLineLine(const FVECTOR& vP0, const FVECTOR& vP1);
     INT detect2DLinePoint(const FVECTOR& vP0, const FVECTOR& vP1, const FVECTOR& vPC);
-    // PARTIAL: added for Game/Atel/EventTrap (defined inline in CollUtil.h)
-    static CCollUtil* m_pInstance;
-    static CCollUtil* getInstance();
-    // PARTIAL: added for Game/Collision/CollMapCamera (defined inline in CollUtil.h)
-    INT _detectOCD(CCollision& collision, struct MCD_INFO* pMCDInfo, struct OCD_WORK* pOCDWork, INT inFlag);
-    static INT detectMCD(CCollision& collision);
-    // PARTIAL: added for Game/Collision/CollBody
-    INT _detectColumnColumnEz(class CColumnCollision& coll0, class CColumnCollision& coll1);
-    INT _detectColumnColumn(class CColumnCollision& coll0, class CColumnCollision& coll1);
-    static INT detectColumnColumnEz(class CColumnCollision& coll0, class CColumnCollision& coll1);
-    static INT detectColumnColumn(class CColumnCollision& coll0, class CColumnCollision& coll1);
-    static INT detectOCD(CCollision& collision, struct MCD_INFO* pMCDInfo, struct OCD_WORK* pOCDWork);
-    // PARTIAL: added for Game/Collision/CollMap
-    static INT detectOCD(CCollision& collision, struct MCD_INFO* pMCDInfo, struct OCD_WORK* pOCDWork, INT fgLocal);
-    static INT checkWaterSurface(FVECTOR& inPos);
-    // PARTIAL: added for Game/Collision/Ride
-    void _initializeData(void* pData, struct MCD_INFO* pMCDInfo);
-    static void initializeData(void* pData, struct MCD_INFO* pMCDInfo);
-    INT _detectBBoxPointEZ(struct COLL_CUBE& cube, CCollision& collision);
-    // PARTIAL: added for Game/Collision/CollAttack
-    INT _detectSpherePoint(class CSphereCollision& coll0, class CPointCollision& coll1);
-    INT _detectSphereSphere(class CSphereCollision& coll0, class CSphereCollision& coll1);
-    INT _detectSpherePoly3(class CSphereCollision& coll0, class CPoly3Collision& coll1);
-    INT _detectSphereCircle(class CSphereCollision& coll0, class CCircleCollision& coll1);
-    INT _detectColumnPoint(class CColumnCollision& coll0, class CPointCollision& coll1);
-    INT _detectColumnSphere(class CColumnCollision& coll0, class CSphereCollision& coll1, INT inFlag);
-    INT _detectColumnPoly3(class CColumnCollision& coll0, class CPoly3Collision& coll1);
-    static INT detectSpherePoint(class CSphereCollision& coll0, class CPointCollision& coll1);
-    static INT detectSphereSphere(class CSphereCollision& coll0, class CSphereCollision& coll1);
-    static INT detectSpherePoly3(class CSphereCollision& coll0, class CPoly3Collision& coll1);
-    static INT detectSphereCircle(class CSphereCollision& coll0, class CCircleCollision& coll1);
-    static INT detectColumnPoint(class CColumnCollision& coll0, class CPointCollision& coll1);
-    static INT detectColumnSphere(class CColumnCollision& coll0, class CSphereCollision& coll1, INT inFlag);
-    static INT detectColumnPoly3(class CColumnCollision& coll0, class CPoly3Collision& coll1);
-    // PARTIAL: added for Game/Collision/CollUtilO
-    INT distanceLineO(FVECTOR* pP0, FVECTOR* pP1, INT fg);
-    void dispose(); // PARTIAL: added for Game/GameSubField
+    FLOAT distancePlane();
+    FLOAT distancePoint();
+    FLOAT innerProduct();
+    void outerProduct();
+    void vectorNormalize0();
+    INT vectorNormalize();
+    INT vectorNormalizeXZ();
+    FLOAT closestPointOnLine();
+    INT slidingHosei(FVECTOR& vCenter, FVECTOR& vSurface, FVECTOR& vNormal);
+    INT detectMC();
+    INT detectPolygon();
+    INT distanceSphere(FVECTOR* pP0);
     INT distanceSphereO(FVECTOR* pP0);
-    INT _detectColumnColumnR(class CColumnCollision& coll0, class CColumnCollision& coll1);
-    // PARTIAL: added for Game/Collision/CollUtil
-    CCollUtil();
-    ~CCollUtil();
-    void setup();
-    INT mappingData(MC_DATA* pDtHead);
-    static void recalcChipCollision(MC_CHIP* pChip);
-    void _enableChipCollision(FVECTOR& vChipCenter, BOOL fg);
-    void _backupChipStatus();
-    void _restoreChipStatus();
-    MC_CHIP* _searchChipCollisionFirst(FVECTOR& vChipCenter, FLOAT fRange);
-    MC_CHIP* _searchChipCollisionNext();
+    INT distanceLine(FVECTOR* pP0, FVECTOR* pP1);
+    INT distanceLineO(FVECTOR* pP0, FVECTOR* pP1, INT fg);
+    INT detectPLine();
+    INT detectPSphere();
     INT __detectMCInitInit(MC_CHIP* pChip);
     void detectMCInit(MC_CHIP* pChip, INT iArea);
-    INT detectMap(FVECTOR* pP0, FVECTOR* pP1);
-    INT detectPolygon();
-    INT detectPLine();
-    INT distanceLine(FVECTOR* pP0, FVECTOR* pP1);
-    INT detectPSphere();
-    INT distanceSphere(FVECTOR* pP0);
-    INT slidingHosei(FVECTOR& v0, FVECTOR& v1, FVECTOR& v2);
-    void _initDbg();
+    INT detectMap(FVECTOR* pWS, FVECTOR* pWE);
 
-    /* 0x000 */ char m_MCDInfo[0x20]; /* MCD_INFO (Game/Collision/Ride.h) */
-    /* 0x020 */ struct MCD_INFO* m_pMCDInfo;
-    /* 0x024 */ struct MCD_INFO* m_pOCDInfo;
-    /* 0x028 */ char _pad028[0x8];
+    /* 0x000 */ MCD_INFO m_MCDInfo;
+    /* 0x020 */ MCD_INFO* m_pMCDInfo;
+    /* 0x024 */ MCD_INFO* m_pOCDInfo;
     /* 0x030 */ FVECTOR m_vCkS;
     /* 0x040 */ FLOAT m_fMDVal;
     /* 0x044 */ FLOAT m_Radius;
@@ -206,9 +253,9 @@ public:
     /* 0x194 */ INT m_PrimInfoIdx2;
     /* 0x198 */ INT m_PrimInfoMax;
     /* 0x19c */ struct PRIM_INFO* m_pPrimInfoCurrent;
-    /* 0x1a0 */ FMATRIX* m_pSemiTransMat[32]; // PARTIAL: split out for Game/Collision/CollMapCamera
+    /* 0x1a0 */ FMATRIX* m_pSemiTransMat[32];
     /* 0x220 */ INT m_SemiTransMatIdx;
-#ifdef COLLUTILA_H_INFO_MEMBERS /* PARTIAL: gate for Game/Collision/CollUtil, which defines COLL_INFO_UNION; several includers define their own copy */
+#ifdef COLLUTILA_H_INFO_MEMBERS /* MATCH: COLL_INFO_UNION has no header yet (ref owner Game/Movement); CollUtil, CollUtilF, CollMapCamera, MapEnemy, SEMotion, Player and Movement define their own copy */
     /* 0x224 */ COLL_INFO_UNION m_iInfo;
     /* 0x228 */ COLL_INFO_UNION m_iInfo2;
 #else

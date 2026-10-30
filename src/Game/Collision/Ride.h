@@ -5,25 +5,9 @@
 #include "System/Vector.h"
 #include "System/SJoint.h"
 #include "Game/Collision/CollObj.h"
+#include "Game/Collision/CollUtilA.h"
 
 class CTask;
-struct MC_DATA;
-struct MC_CHIP;
-
-struct MCD_INFO {
-    MC_DATA* pMCData;     /* 0x00 */
-    MC_CHIP* pMCChip;     /* 0x04 */
-    FMATRIX* pMatrix;     /* 0x08 */
-    FMATRIX* pMatrixIOld; /* 0x0c */
-    INT iChipSuu;         /* 0x10 */
-    FLOAT fScale;         /* 0x14 */
-    FLOAT fMDVal;         /* 0x18 */
-    FLOAT fMDVal2;        /* 0x1c */
-};
-
-struct OCD_WORK {
-    BYTE fgEnable;
-};
 
 class CRider;
 class CRiderList;
