@@ -46,11 +46,11 @@ public:
 #include "System/Sound/SoundMan.h"
 #line 52
 
-class CMinigameManager {
-public:
-    static BOOL reqDispHelp(CTask* pParent, INT nKind, INT nPage);
-    static BOOL isEndDispHelp();
-};
+#include "Game/MinigameManager.h"
+
+
+
+
 
 extern "C" void sceVu0InterVectorXYZ(float* v0, float* v1, float* v2, float t);
 extern "C" float powf(float, float);
