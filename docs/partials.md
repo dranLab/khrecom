@@ -61,9 +61,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 992 (910 in 109 headers, 82 in 36 .cpp); MATCH: 136
+PARTIAL: 992 (910 in 109 headers, 82 in 36 .cpp); MATCH: 137
   by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 130, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 35, other 6
-stand-ins: 312 foreign in 115 files (82 names), 201 unattributed, 170 own
+stand-ins: 305 foreign in 115 files (81 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 958 sites (911 untagged); #line: 1242
@@ -79,7 +79,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R1 | 14.0 | `Game/Atel/Atel.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | CAtel (1 complete) | inline bodies or virtuals |
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
 | R1 | 12.5 | `Form/Menu/JMemoFlag.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CJiminyMemoFlag (1 superset) | inline bodies or virtuals |
 | R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 4.0 | `Game/Prize.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPrize (1 superset) | inline bodies or virtuals |
 | R1 | 4.0 | `System/Fsm.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users | CFSM (1 gated) | inline bodies or virtuals (gate) |
 | R1 | 4.0 | `System/Graphic/Glare.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CGlare (1 complete) | inline bodies or virtuals |
+| R1 | 4.0 | `System/Graphic/TexCtrl.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CTexCtrl (1 complete) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -110,7 +110,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRcf` | complete | System/Rcf.h | 24 |  |  |
 | `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
 | `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
-| `CAtel` | complete | Game/Atel/Atel.h | 7 |  |  |
 | `DropPrize` | gated | Game/Gimmick/GimmickManager.h | 7 |  |  |
 | `CJiminyMemoFlag` | superset | Form/Menu/JMemoFlag.h | 6 |  | 1 PARTIAL |
 | `COLL_INFO_UNION` | missing | Game/Movement.h | 6 |  |  |
@@ -315,7 +314,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Coord.h` | 3 | 0/1/0/0 | 18 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 271 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 11 |
-| `System/Fsm.h` | 4 | 1/0/0/1 | 110 |
+| `System/Fsm.h` | 4 | 1/0/0/1 | 114 |
 | `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 11 |
 | `System/Graphic/2d/2DFntObj.h` | 0 | 0/1/0/0 | 3 |
 | `System/Graphic/2d/2DLay.h` | 0 | 3/1/0/0 | 5 |
