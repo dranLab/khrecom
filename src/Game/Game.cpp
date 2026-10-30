@@ -67,14 +67,14 @@ public:
     static void removeRsrc();
 };
 
-class CPause : public CTask {
-private:
-    BYTE _pad[0x100 - 0x40];
+#include "Form/Menu/Pause.h"
 
-public:
-    CPause(CTask* pParent, INT nMode);
-    static INT m_nResult;
-};
+
+
+
+
+
+
 
 #include "Form/Menu/Camp.h"
 
