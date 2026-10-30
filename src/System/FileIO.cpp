@@ -35,21 +35,21 @@ extern const char _ctype_[];
 
 extern char _gp;
 
-class CBuf {
-private:
-    BYTE* m_pBuf;
-    INT m_nBufSize;
-    BOOL m_bManaged;
+#include "System/Buf.h"
 
-public:
-    virtual ~CBuf();
-    BYTE* allocBuf_A64(INT nSize);
-    BYTE* allocBuf_A128(INT nSize);
-    BYTE* allocBuf_A256(INT nSize);
-    BYTE* getBufPtr() { return m_pBuf; }
-    const BYTE* getBufPtr() const { return m_pBuf; }
-    INT getBufSize() const { return m_nBufSize; }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class CRcf {
 public:

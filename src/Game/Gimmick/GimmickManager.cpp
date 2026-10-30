@@ -45,12 +45,12 @@ enum NAME_CASE {
     NAME_CASE_LOWER = 2
 };
 
-class CBuf {
-    BYTE* m_pBuf;
+#include "System/Buf.h"
 
-public:
-    BYTE* getBuf() { return m_pBuf; }
-};
+
+
+
+
 
 class CRsrcData {
     CBuf* m_pDataSrc;
@@ -59,7 +59,7 @@ public:
     CBuf* getDataSrc() { return m_pDataSrc; }
     BYTE* getRsrcData() {
         BYTE* p = NULL;
-        if (getDataSrc()) p = getDataSrc()->getBuf();
+        if (getDataSrc()) p = getDataSrc()->getBufPtr();
         return p;
     }
 };

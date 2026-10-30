@@ -60,15 +60,15 @@ struct TexMemScroll {
     INT m_MaxLine;
 };
 
-class CBuf {
-private:
-    BYTE* m_pBuf;
-    INT m_nBufSize;
-    BOOL m_bManaged;
-public:
-    virtual ~CBuf();
-    BYTE* getBuf() { return m_pBuf; }
-};
+#include "System/Buf.h"
+
+
+
+
+
+
+
+
 
 class CRsrcData {
 private:
@@ -88,7 +88,7 @@ public:
     BYTE* getRsrcData() {
         BYTE* pData = NULL;
         if (getDataSrc()) {
-            pData = getDataSrc()->getBuf();
+            pData = getDataSrc()->getBufPtr();
         }
         return pData;
     }
