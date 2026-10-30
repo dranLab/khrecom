@@ -16,16 +16,16 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #include "Game/Collision/Ride.h"
 
-/* PARTIAL: stand-in for Game/Movement COLL_INFO_UNION: owner not written */
-union COLL_INFO_UNION {
-    INT info;
-    struct {
-        BYTE infoID;
-        BYTE infoATTR;
-        BYTE infoPID;
-        BYTE infoSTAT;
-    };
-};
+#include "Game/Collision/CollInfo.h"
+
+
+
+
+
+
+
+
+
 
 class CMCSemiModel : public CSJointT<CMCSemiModel> {
 public:

@@ -34,15 +34,15 @@ inline void _emptyStringPlaceholder() {
 #include "Game/LockOnManager.h"
 #include "System/Sound/SoundMan.h"
 #include "Game/Enemy/MapEnemyManager.h"
-union COLL_INFO_UNION {
-    INT info;
-    struct {
-        BYTE infoID;
-        BYTE infoATTR;
-        BYTE infoPID;
-        BYTE infoSTAT;
-    };
-};
+#include "Game/Collision/CollInfo.h"
+
+
+
+
+
+
+
+
 #define MOVEMENT_H_FULL_CLASS
 #include "Game/Movement.h"
 #include "Game/MessageManager.h"

@@ -1,16 +1,16 @@
 #define GAME_PLAYER_PLAYER_CPP
 #define TASK_H_NO_SLC_OVERFLOW_MSG
 #include "khtypes.h"
-#define COLLOBJ_H_INFO_UNION
-union COLL_INFO_UNION {
-    INT info;
-    struct {
-        BYTE infoID;
-        BYTE infoATTR;
-        BYTE infoPID;
-        BYTE infoSTAT;
-    };
-};
+#include "Game/Collision/CollInfo.h"
+
+
+
+
+
+
+
+
+
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"

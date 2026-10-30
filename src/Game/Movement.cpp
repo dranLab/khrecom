@@ -1,17 +1,17 @@
 #define MOVEMENT_H_FULL_CLASS
-#define COLLOBJ_H_INFO_UNION
 #define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
 #define GPRIM_H_PATH "System/Graphic/Gprim.h"
 #include "System/Task.h"
-union COLL_INFO_UNION {
-    INT info;
-    struct {
-        BYTE infoID;
-        BYTE infoATTR;
-        BYTE infoPID;
-        BYTE infoSTAT;
-    };
-};
+#include "Game/Collision/CollInfo.h"
+
+
+
+
+
+
+
+
+
 #include "Game/Collision/CollUtilA.h"
 #include "Game/Collision/CollUtil.h"
 #include "System/Graphic/Effect/effect.h"

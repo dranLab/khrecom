@@ -13,15 +13,15 @@ enum COLL_KIND {
     COLL_KIND_PLAYER = 0,
 };
 
-union COLL_INFO_UNION {
-    INT info;
-    struct {
-        BYTE infoID;
-        BYTE infoATTR;
-        BYTE infoPID;
-        BYTE infoSTAT;
-    };
-};
+#include "Game/Collision/CollInfo.h"
+
+
+
+
+
+
+
+
 
 class CCollision {
 public:

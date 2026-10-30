@@ -2,18 +2,18 @@
  * vtable (Game/Collision/CollUtilO's data holds the rest and CCollision's vtable). The code refers to the
  * original's strings by their labels instead. */
 #define COLLOBJ_H_COLLISION_CLASSES /* MATCH: CCollUtil() constructs a CSphereCollision (CollObj.h gates the collision classes) */
-#define COLLUTILA_H_INFO_MEMBERS /* MATCH: m_iInfo/m_iInfo2 need the COLL_INFO_UNION below; CollUtilF, CollMapCamera keep own copies */
+
 #include "khtypes.h"
-/* PARTIAL: stand-in for Game/Movement COLL_INFO_UNION: owner not written */
-union COLL_INFO_UNION {
-    INT info;
-    struct {
-        BYTE infoID;
-        BYTE infoATTR;
-        BYTE infoPID;
-        BYTE infoSTAT;
-    };
-};
+#include "Game/Collision/CollInfo.h"
+
+
+
+
+
+
+
+
+
 #include "Game/Collision/CollUtilA.h"
 #include "System/HeapMan.h"
 #include "System/Debug.h"
