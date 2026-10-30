@@ -40,16 +40,13 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Card` | 12 | 1794 | 12 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 | .rodata |
 | `Game/Collision/CollUtil` | 6 | 1643 | 6 | .rodata |
-| `Game/Enemy/HumanBoss` | 9 | 1467 | 8 |  |
 | `Game/BattleCard` | 4 | 1461 | 4 |  |
-| `Game/Collision/CollUtilO` | 6 | 1363 | 3 | .rodata |
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
 | `System/Graphic/FrecFont` | 3 | 1208 | 1 |  |
 | `System/Rcf` | 11 | 1152 | 11 |  |
+| `Game/Enemy/HumanBoss` | 7 | 1088 | 7 |  |
 | `System/Graphic/PathData` | 2 | 1075 |  |  |
 | `System/Graphic/DeFocus` | 3 | 1065 | 3 |  |
-| `Game/Movement` | 3 | 1020 | 1 |  |
-| `System/MainApp` | 6 | 940 | 2 |  |
 | `Game/Gimmick/GimmickTreasureBox` | 4 | 908 | 4 | .rodata |
 | `System/Graphic/ShadowModel` | 2 | 859 | 1 |  |
 | `System/Graphic/2d/2DSprObj` | 2 | 763 |  |  |
@@ -71,6 +68,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Atel/CameraMan` | 1 | 536 |  |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
+| `Game/Movement` | 2 | 474 | 1 |  |
 | `Form/Menu/SaveLoad` | 3 | 447 | 3 |  |
 | `System/Graphic/Glare` | 1 | 446 | 1 | .data |
 | `System/Memoca` | 3 | 442 | 3 |  |
@@ -100,6 +98,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Player/PlayerGauge` | 2 | 159 | 2 |  |
 | `Game/Enemy/BattleEnemyManager` | 1 | 149 | 1 |  |
 | `Game/AttackMotion` | 1 | 136 | 1 |  |
+| `Game/Collision/CollUtilO` | 1 | 121 | 1 | .rodata |
 | `Game/Gimmick/GimmickPlantParent` | 1 | 108 | 1 |  |
 | `Form/DebugWindowTBL` | 3 | 105 |  |  |
 | `System/Movie/AudioDec` | 1 | 97 |  |  |
@@ -109,6 +108,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Player/SummonTink` | 1 | 37 | 1 |  |
 | `System/Graphic/2d/2DCard` | 1 | 30 | 1 |  |
 | `System/dlmalloc` | 1 | 14 | 1 |  |
+| `System/MainApp` | 1 | 9 | 1 |  |
 
 Units with all functions in C but data from asm: `Game/Atel/AtelBlur` (.data), `Game/Collision/Ride` (.rodata), `Game/EntityFactory` (.data).
 
@@ -121,8 +121,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 
 | unit | function | instr | note |
 |---|---|---:|---|
-| `System/MainApp` | `_mainLoop__Fv` | 118 |  |
-| `System/MainApp` | `setSysPause__8CMainAppi` | 9 |  |
+| `System/MainApp` | `setSysPause__8CMainAppi` | 9 | 5 of 12 lines - registers only (the original keeps -2 in a1 and n\|5 in v1, movz). `INT n = _nSysPauseReq; n &= ~1;` keeps the full-width lh/and -2 (`_nSysPauseReq & ~1` narrows to lhu/andi); tried m/n order, ternaries, if/else arms, permuter 5 min. |
 | `System/Math3D` | `InvMatrix__6Math3DR7FMATRIXRC7FMATRIX` | 234 | (comment) Same code apart from register allocation: gcc hoists the 1e-8 constants and a "li 20" out of the outer loop (the original keeps them inside), which moves &c into s1. |
 | `System/Memoca` | `_setupIconSys__FPCc` | 199 |  |
 | `System/Memoca` | `_McCheckDataFileExist__FiPCc` | 99 |  |
@@ -271,9 +270,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Collision/CollUtil` | `_detectMCD__9CCollUtilR10CCollision` | 424 | _detectMCD: 146 of 467 lines, 8 bytes short - structure as the original (MCD path of _detectOCD: area chip table walk, two allocSpad asserts, same segment loop); ret declared after i for its spill slot, the vf4 asm before the vCkS reference. Left: this in s3 instead of s2 (most lines), the retry … |
 | `Game/Collision/CollUtil` | `detectMap__9CCollUtilP7FVECTORT1` | 188 | 39 of 213 lines, 4 bytes long - two passes, renew test and info merge as the original; left: the pPrimInfo2/i init order and an extra delay-slot load at the second pass, the attr byte's `andi` copy (a0) and the return-1 block (the original sets v0 after the m_pDetectMatA/ChipA/NormalA stores). |
 | `Game/Collision/CollUtil` | `distanceLine__9CCollUtilP7FVECTORT1` | 405 | 215 of 506 lines, 52 bytes long - first draft, structure decoded (closest points of the two segments, two normal/offset branches, four range checks, slidingHosei). Left: the original keeps pP0/pP1 in stack slots, lays the denom if/else out with the test at the bottom (do-while(0) forms tried: … |
-| `Game/Collision/CollUtilO` | `_detectColumnPoint__9CCollUtilR16CColumnCollisionR15CPointCollision` | 90 | (comment) Near match (the original sets up the distanceLineO arguments after the p0/p1 copies), kept for reference: |
-| `Game/Collision/CollUtilO` | `_detectColumnSphere__9CCollUtilR16CColumnCollisionR16CSphereCollisioni` | 105 | (comment) Near match (as _detectColumnPoint, and its distanceSphereO delay slot), kept for reference: |
-| `Game/Collision/CollUtilO` | `_detectColumnColumnEz__9CCollUtilR16CColumnCollisionT1` | 121 | (comment) Near match (the load order of the first coordinates and radii), kept for reference: |
+| `Game/Collision/CollUtilO` | `_detectColumnColumnEz__9CCollUtilR16CColumnCollisionT1` | 121 | 7 of 125 lines - the original loads columnColl1's radius after columnColl0's (sched1 hoists ours above the z subtraction, so c0.z/c1.R swap f3/f4). Tried: radius statement order, r1 split, direct/SubVector differences, permuter 9 min (23k candidates, no gain). |
 | `Game/Atel/AtelCrossFade` | `onCreateTexMemory__Q24ATEL14CAtelCrossFadeiPvi` | 34 | (comment) Near-match: the three TRACE/return paths are tail-merged here (one jal TRACE), separate in the original. |
 | `Game/Atel/AtelCrossFade` | `AnimColor__Q24ATEL14CAtelCrossFade` | 69 | (comment) Near-match: the original keeps the temporary vector at sp+0x20 in s0 (a 0x70 frame); here it is at sp. |
 | `Game/Atel/AtelCrossFade` | `drawCrossFadeImage__Q24ATEL14CAtelCrossFade` | 188 | (comment) Near-match: the second loop schedules the packet stores differently and hoists the GIF tag constant. |
@@ -319,10 +316,9 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Enemy/EnemyWhitemushroom` | `damage___19CEnemyWhitemushroom` | 184 | (comment) Near-match (3 lines): in case 4 the original loads the vtable pointer for getLockOnPos right after the two TIMEQ stores of setupFade; here the vtable entry loads depend on all six setupFade stores (unknown alias), so the vptr load ranks below them and comes last. Tried (~45 min): … |
 | `Game/Enemy/HumanBoss` | `initalize__10CHumanBossiiUi` | 58 |  |
 | `Game/Enemy/HumanBoss` | `getAttackCardNum__C10CHumanBossUi` | 43 |  |
-| `Game/Enemy/HumanBoss` | `setupAct__10CHumanBoss` | 181 |  |
-| `Game/Enemy/HumanBoss` | `enemyCardProc__10CHumanBossPC4CARD` | 125 |  |
+| `Game/Enemy/HumanBoss` | `setupCardRevolver__10CHumanBoss` | 334 | 21 of 371 lines - the param pointer is carried in a register copy through the build and enemy-card loops (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here: the id % 10000 in a local, UINT search index, one INT i per loop, `cards = … |
+| `Game/Enemy/HumanBoss` | `setupAct__10CHumanBoss` | 181 | 21 of 371 lines - the param pointer is carried in a register copy through the build and enemy-card loops (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here: the id % 10000 in a local, UINT search index, one INT i per loop, `cards = … |
 | `Game/Enemy/HumanBoss` | `itemCardProc__10CHumanBossPC4CARD` | 242 |  |
-| `Game/Enemy/HumanBoss` | `stockActProc__10CHumanBossPC4CARD` | 254 |  |
 | `Game/Enemy/HumanBoss` | `normalActProc__10CHumanBossPC4CARD` | 142 |  |
 | `Game/Enemy/HumanBoss` | `setStockCard__10CHumanBossPC4CARD` | 88 |  |
 | `Game/Enemy/MapEnemy` | `getRandomTargetPos__9CMapEnemyR7FVECTORfi` | 290 | (comment) near-match (one getOutPos() is if-converted; s3/s4 swapped): kept as INCLUDE_ASM |
@@ -373,7 +369,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 358 functions (82308 instructions) in 84 units, 251 of them parked; 12 units take a data section from assembly.
+Totals: 345 functions (79210 instructions) in 84 units, 247 of them parked; 12 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
