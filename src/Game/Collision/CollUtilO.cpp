@@ -119,7 +119,66 @@ hit:
     sphereColl0.m_outDetect = m_vDetect;
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtilO", _detectColumnPoly3__9CCollUtilR16CColumnCollisionR15CPoly3Collision);
+INT CCollUtil::_detectColumnPoly3(CColumnCollision& columnColl0, CPoly3Collision& poly3Coll1) {
+    INT ret;
+    FVECTOR columnWS;
+    FVECTOR columnWE;
+    FVECTOR vec;
+    FVECTOR vec0;
+    FVECTOR vec2; // MATCH: vec2/norm2 declared before vec1/norm1 (the ref's order swaps their stack slots)
+    FVECTOR vec1;
+    FVECTOR norm;
+    FVECTOR norm0;
+    FVECTOR norm2;
+    FVECTOR norm1;
+    FLOAT d;
+    FLOAT t1;
+
+    poly3Coll1.m_outWE = poly3Coll1.m_inWE;
+    m_pCheckColl->m_inWS = poly3Coll1.m_inWS;
+    m_pCheckColl->m_inWE = poly3Coll1.m_inWE;
+    m_pCheckColl->m_Radius = poly3Coll1.m_Radius;
+    while (!(ret = _detectColumnSphere(columnColl0, *(CSphereCollision*)m_pCheckColl, 0)) && (m_pCheckColl->m_inWS = poly3Coll1.m_BasePos, !(ret = _detectColumnSphere(columnColl0, *(CSphereCollision*)m_pCheckColl, 0))) &&
+           (m_pCheckColl->m_inWE = poly3Coll1.m_inWS, !(ret = _detectColumnSphere(columnColl0, *(CSphereCollision*)m_pCheckColl, 0)))) {
+        columnWS = columnColl0.m_inWS;
+        columnWE = columnColl0.m_inWE;
+        columnWS.y += columnColl0.m_shiftY;
+        columnWE.y += columnColl0.m_shiftY;
+        SubVector(vec0, poly3Coll1.m_inWS, poly3Coll1.m_BasePos);
+        SubVector(vec1, poly3Coll1.m_BasePos, poly3Coll1.m_inWE);
+        OuterProduct(norm, vec1, vec0);
+        if (norm.x == 0.0f && norm.y == 0.0f && norm.z == 0.0f) goto end;
+        d = InnerProduct(norm, poly3Coll1.m_BasePos);
+        SubVector(vec, columnWE, columnWS);
+        t1 = InnerProduct(norm, columnWS) - d;
+        t1 = -t1 / InnerProduct(norm, vec);
+        ScaleVector(vec, vec, t1);
+        AddVector(vec, columnWS, vec);
+        OuterProduct(norm0, norm, vec0);
+        SubVector(vec0, vec, poly3Coll1.m_BasePos);
+        if (InnerProduct(norm0, vec0) < 0.0f) goto end;
+        OuterProduct(norm1, norm, vec1);
+        SubVector(vec1, vec, poly3Coll1.m_inWE);
+        if (InnerProduct(norm1, vec1) < 0.0f) goto end;
+        SubVector(vec2, poly3Coll1.m_inWE, poly3Coll1.m_inWS);
+        OuterProduct(norm2, norm, vec2);
+        SubVector(vec2, vec, poly3Coll1.m_inWS);
+        if (InnerProduct(norm2, vec2) < 0.0f) goto end;
+        m_pCheckColl->m_inWE = vec;
+        ret = _detectColumnSphere(columnColl0, *(CSphereCollision*)m_pCheckColl, 0);
+        break;
+    }
+end:
+    if (!ret) return 0;
+    m_vCk2.w = 1.0f;
+    m_vNormal.w = 1.0f;
+    poly3Coll1.m_outWE = m_vCk2;
+    poly3Coll1.m_outNormal = m_vNormal;
+    columnColl0.m_outNormal = m_vNormal;
+    poly3Coll1.m_outDetect = m_vDetect;
+    columnColl0.m_outDetect = m_vDetect;
+    return 1;
+}
 /* Near match (the original sets up the distanceLineO arguments after the p0/p1 copies), kept for reference: */
 #if 0
 INT CCollUtil::_detectColumnPoint(CColumnCollision& columnColl0, CPointCollision& pointColl1) {
