@@ -175,12 +175,7 @@ public:
 
 
 
-class CCoordMan {
-public:
-    static void initialize();
-    static void finalize();
-    static void resetTimeStamp();
-};
+#include "System/CoordMan.h"
 
 class CRcf {
 public:
