@@ -72,7 +72,6 @@ inline void _vsmeMotionName() {
 #include "Form/Menu/JMemoFlag.h"
 #include "System/Component.h"
 #include "System/Graphic/WorldEnv.h"
-#define SYSTEM_GRAPHIC_DEFOCUS_CPP /* the complete DeFocus classes (other includers get partial ones) */
 #include "System/Graphic/DeFocus.h"
 #include "System/PadIO.h"
 #include "Game/Enemy/MapEnemyManager.h"
