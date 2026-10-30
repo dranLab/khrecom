@@ -5,6 +5,10 @@
 #include "System/Graphic/DeFocus.h"
 #include "Game/Debug/DebugWork.h"
 #include "System/Graphic/PackMan.h"
+#include "System/Graphic/Camera.h"
+#include "System/Graphic/WorldEnv.h"
+#include "System/VramMan.h"
+#include "System/Math3D.h"
 #include "include_asm.h"
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
@@ -304,7 +308,190 @@ QWdata* set_tsprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, INT ScrW, INT Sc
     return qp;
 }
 void CDeFocusPrim::makePkt() { _makePktDeFocus(); }
+FLOAT RotTransPersClipW(IVECTOR& out_v, const FVECTOR& in_v);
+void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void Normalize(FVECTOR& v0, const FVECTOR& v1);
+static inline void _loadRotTransPers(const FMATRIX& m) {
+    __asm__ volatile("vsub.xyzw $vf3, $vf0, $vf0\n"
+                     "lqc2 $vf4, 0x0(%0)\n"
+                     "lqc2 $vf5, 0x10(%0)\n"
+                     "lqc2 $vf6, 0x20(%0)\n"
+                     "lqc2 $vf7, 0x30(%0)\n" : : "r"(&m));
+}
+static inline void _setADq(QWdata* qp, u_long data, u_long addr) {
+    qp->ul64[1] = addr;
+    qp->ul64[0] = data;
+}
+static inline void _setADp(QWdata* qp, u_long data, u_long addr) {
+    u_long128 out128;
+    __asm__ volatile("pcpyld %0, %1, %0" : "=r"(out128) : "r"(addr), "0"(data));
+    qp->ul128 = out128;
+}
+/* Parked: 83 of 596 lines, same size - structure, branches and calls as the original (debug near/far override,
+ * auto near/far from the look distance, FRAME/TEST/ALPHA/PRIM A+D blocks with debug colours, sprites, defaults
+ * restore). Left: scheduling inside the A+D blocks (store pair order, the _FRAME0_START load ahead of the first
+ * stores in ours) and a copy of the g_dw.sys pointer. Address-first stores in _setADq helped (93->83); permuter
+ * 10 min: 80 on its scale with no structural change. */
+#if 0
+void CDeFocusPrim::_makePktDeFocus() {
+    FVECTOR vPos;
+    FVECTOR vLook;
+    FVECTOR vN;
+    FVECTOR vNear;
+    FVECTOR vFar[2];
+    IVECTOR vIPos;
+    FLOAT fLookLen;
+    FLOAT fNearLen;
+    FLOAT fFarLen;
+    CCamera* pCam;
+    UINT BAK_Status;
+    FLOAT BAK_Near;
+    FLOAT BAK_Far;
+    QWdata* qp;
+    u_long128 tag;
+
+    if (DebugWork::g_dw.sys.m_iDeFocus) return;
+    if (m_iStatus & 0x10000) return;
+    if ((m_iStatus & 3) == 3) return;
+    pCam = CWorldEnv::getActiveCamera();
+    if (!pCam) return;
+    if (!pCam->getLook()) return;
+    vPos = ((const CCamera*)pCam)->Crd(0).m_World.v[3];
+    vLook = *pCam->getLook();
+    SubVectorXYZ(vN, vLook, vPos);
+    Normalize(vN, vN);
+    BAK_Status = m_iStatus;
+    BAK_Near = m_fNear;
+    BAK_Far = m_fFar;
+    if (0.0f < DebugWork::g_dw.sys.m_fDeFocusNear) {
+        m_iStatus = (m_iStatus | 4) & ~2;
+        m_fNear = DebugWork::g_dw.sys.m_fDeFocusNear;
+    }
+    if (0.0f < DebugWork::g_dw.sys.m_fDeFocusFar) {
+        m_iStatus = (m_iStatus | 4) & ~1;
+        m_fFar = DebugWork::g_dw.sys.m_fDeFocusFar;
+    }
+    if (m_iStatus & 4) {
+        ScaleVectorXYZ(vNear, vN, m_fNear);
+        AddVectorXYZ(vNear, vPos, vNear);
+        ScaleVectorXYZ(vFar[0], vN, m_fFar + m_fFar);
+        AddVectorXYZ(vFar[0], vPos, vFar[0]);
+        ScaleVectorXYZ(vFar[1], vN, m_fFar);
+        AddVectorXYZ(vFar[1], vPos, vFar[1]);
+    } else {
+        fLookLen = Math3D::PointToPointDistance(vLook, vPos);
+        fNearLen = fLookLen * 0.5f;
+        if (fNearLen > 3.0f) fNearLen = 3.0f;
+        ScaleVectorXYZ(vNear, vN, fNearLen);
+        AddVectorXYZ(vNear, vPos, vNear);
+        fFarLen = fLookLen * 4.0f;
+        if (fFarLen > 20.0f) fFarLen = 20.0f;
+        ScaleVectorXYZ(vFar[0], vN, fFarLen + fFarLen);
+        AddVectorXYZ(vFar[0], vLook, vFar[0]);
+        ScaleVectorXYZ(vFar[1], vN, fFarLen);
+        AddVectorXYZ(vFar[1], vLook, vFar[1]);
+    }
+    _loadRotTransPers(CWorldEnv::getWorldScreenMatrix());
+    if (!(m_iStatus & 1)) {
+        __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000000000UL), "0"((u_long)0xE));
+        qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+        _setADq(qp, 0x60, 0x15);
+        qp++;
+        _setADq(qp, (u_long)VRAM::_FRAME0_START | 0x24020000 | ((u_long)0x9000 << 18), 7);
+        qp++;
+        RotTransPersClipW(vIPos, vFar[0]);
+        if (!vIPos.w) {
+            _setADq(qp, 0x51001, 0x48);
+            qp++;
+            _setADq(qp, 0x44, 0x43);
+            qp++;
+            _setADq(qp, 0x356, 0);
+            qp++;
+            qp->ul64[0] = 0x50808080;
+            if (DebugWork::g_dw.sys.m_iDeFocusCol) qp->ul64[0] = 0x504040FF;
+            qp->ul64[1] = 1;
+            CPackMan::pkCloseGifTag(qp + 1);
+            qp = __null;
+            set_tsprite32(__null, 0, 0, vIPos.z >> 4, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        }
+        RotTransPersClipW(vIPos, vFar[1]);
+        if (!vIPos.w) {
+            if (!qp) {
+                __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000000000UL), "0"((u_long)0xE));
+                qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+            }
+            _setADq(qp, 0x51001, 0x48);
+            qp++;
+            _setADq(qp, 0x44, 0x43);
+            qp++;
+            _setADq(qp, 0x356, 0);
+            qp++;
+            qp->ul64[0] = 0x50808080;
+            if (DebugWork::g_dw.sys.m_iDeFocusCol) qp->ul64[0] = 0x5040FF40;
+            qp->ul64[1] = 1;
+            CPackMan::pkCloseGifTag(qp + 1);
+            qp = __null;
+            set_tsprite32(__null, 0, 0, vIPos.z >> 4, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        }
+        if (qp) CPackMan::pkCloseGifTag(qp);
+    }
+    if (!(m_iStatus & 2)) {
+        RotTransPersClipW(vIPos, vNear);
+        if (!vIPos.w) {
+            __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000000000UL), "0"((u_long)0xE));
+            qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+            _setADq(qp, 1, 0x15);
+            qp++;
+            _setADq(qp, (u_long)VRAM::_FRAME0_START | 0x24020000 | ((u_long)0xC800 << 19), 7);
+            qp++;
+            _setADq(qp, 0x31001, 0x48);
+            qp++;
+            _setADq(qp, 0x4A, 0x43);
+            qp++;
+            _setADq(qp, 0x246, 0);
+            qp++;
+            _setADq(qp, 0x38808080, 1);
+            qp++;
+            qp = set_csprite64(qp, 0, 0, 0, 0x200, SCREEN_HEIGHT);
+            _setADq(qp, 0x51001, 0x48);
+            qp++;
+            _setADq(qp, 0x4A, 0x43);
+            qp++;
+            _setADq(qp, 0x246, 0);
+            qp++;
+            _setADq(qp, 0x80808080, 1);
+            qp++;
+            qp = set_csprite64(qp, 0, 0, vIPos.z >> 4, 0x200, SCREEN_HEIGHT);
+            _setADq(qp, 0x30805, 0x48);
+            qp++;
+            _setADq(qp, 0x44, 0x43);
+            qp++;
+            _setADq(qp, 0x356, 0);
+            qp++;
+            qp->ul64[0] = 0x80808080;
+            if (DebugWork::g_dw.sys.m_iDeFocusCol) qp->ul64[0] = 0x80FF4040;
+            qp->ul64[1] = 1;
+            CPackMan::pkCloseGifTag(qp + 1);
+            set_tsprite32(__null, 32, 0, 0xFFFF28, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+            set_tsprite32(__null, -32, 0, 0xFFFF28, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+            set_tsprite32(__null, 0, -48, 0xFFFF28, 0x200, SCREEN_HEIGHT, 0x200, SCREEN_HEIGHT);
+        }
+    }
+    __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
+    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
+    _setADp(&qp[0], CPackMan::getDefault_ALPHA_2(), 0x43);
+    _setADp(&qp[1], CPackMan::getDefault_TEST_2(), 0x48);
+    _setADp(&qp[2], 0x60, 0x15);
+    CPackMan::pkCloseGifTag(qp + 3);
+    m_fFar = BAK_Far;
+    m_fNear = BAK_Near;
+    m_iStatus = BAK_Status;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", _makePktDeFocus__12CDeFocusPrim);
+#endif
 void CBlurPrim::makePkt() { _makePktBlur(); }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", _makePktBlur__9CBlurPrim);
 __asm__(".rdata\n.align 3\n.word 0x001232F0\n.word 0x001233A4\n.word 0x00123480\n.word 0x00123534\n.word 0x001235C0\n.word 0x001236A4\n.text\n");
