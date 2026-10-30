@@ -64,12 +64,12 @@ public:
     void flyHigh(BOOL bAll);
 };
 
-class CRoulette { /* a CMenu (Form/Menu/Roulette.h) */
-    UBYTE _m_0x000[0x3a0];
+#include "Form/Menu/Roulette.h"
 
-public:
-    CRoulette(CTask* inParent, INT inMode);
-};
+
+
+
+
 
 #include "Game/Player/PlayerGauge.h"
 
