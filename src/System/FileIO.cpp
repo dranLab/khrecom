@@ -51,10 +51,10 @@ extern char _gp;
 
 
 
-class CRcf {
-public:
-    static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
-};
+#include "System/Rcf.h"
+
+
+
 
 struct _BgLoadInfo {
     union {

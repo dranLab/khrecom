@@ -39,10 +39,10 @@ public:
     static unsigned char** getRsrcABC(INT nID);
 };
 
-class CRcf { /* System/Rcf.h */
-public:
-    static BOOL isCompleteLoadRCF(INT n0, INT n1);
-};
+#include "System/Rcf.h"
+
+
+
 
 CGameSub::CGameSub(CStateTemplate<CGameSub>* pStateTbl) : m_pStateTbl(pStateTbl) {
     m_nNewStateID = -1;

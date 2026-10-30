@@ -35,11 +35,11 @@ public:
     static void* getFirstRsrc(INT nType, INT nID, INT nFlag);
 };
 
-class CRcf {
-public:
-    static void reqLoadRCF(INT nGroup, INT nID, INT nFlag, unsigned char* pBuf, INT nSize);
-    static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
-};
+#include "System/Rcf.h"
+
+
+
+
 
 template <class T> static inline T& _ref(T& v) { return v; }
 

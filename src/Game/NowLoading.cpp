@@ -22,11 +22,11 @@ public:
     static struct TexInfo* getRsrcTex(const char* pName, NAME_CASE eCase);
 };
 
-class CRcf {
-public:
-    static void reqLoadRCFFront(INT nGroup, INT nID, INT nFlag, unsigned char* pBuf, INT nSize);
-    static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
-};
+#include "System/Rcf.h"
+
+
+
+
 
 extern INT SCREEN_HEIGHT;
 

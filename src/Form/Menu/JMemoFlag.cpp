@@ -23,12 +23,12 @@ public:
     static void removeGroup(INT nGroup, INT nID);
 };
 
-class CRcf {
-public:
-    static void reqLoadRCFFront(INT nGroup, INT nID, INT nFlag, unsigned char* pBuf, INT nSize);
-    static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
-    static void cancelLoadRCF(INT nGroup, INT nID);
-};
+#include "System/Rcf.h"
+
+
+
+
+
 
 namespace PLM {
 BYTE* getBattleRsrcFirst();

@@ -65,13 +65,13 @@ public:
     static void setSceneAttachMode(UINT nMode);
 };
 
-class CRcf { /* System/Rcf.h */
-public:
-    static INT getMapID(SHORT nArea, SHORT nScene);
-    static void reqLoadRCF(INT nNum0, INT nNum1, INT nMode, unsigned char* pBuf, INT nSize);
-    static void reqLoadScene(INT nArea, INT nScene);
-    static BOOL isCompleteLoadRCF(INT nNum0, INT nNum1);
-};
+#include "System/Rcf.h"
+
+
+
+
+
+
 
 #include "Game/Enemy/BattleEnemyManager.h"
 

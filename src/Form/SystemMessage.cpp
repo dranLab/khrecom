@@ -12,11 +12,11 @@
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
-class CRcf {
-public:
-    static void reqLoadRCF(INT nGroup, INT nID, INT nFlag, unsigned char* pBuf, INT nSize);
-    static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
-};
+#include "System/Rcf.h"
+
+
+
+
 
 class CRsrcDB {
 public:

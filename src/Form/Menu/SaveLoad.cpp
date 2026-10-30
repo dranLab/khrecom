@@ -529,11 +529,11 @@ public:
     static void removeGroup(INT nGroupID, INT nMemberID);
     static class CRsrcData* getFirstRsrc(INT nRsrcType, INT nGroupID, BOOL bFollowLink);
 };
-class CRcf { /* PARTIAL: System/Rcf.h pulls in System/SJoint.h */
-public:
-    static void reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLinkOwner);
-    static BOOL isCompleteLoadRCF(INT nGroup, INT nMember);
-};
+#include "System/Rcf.h"
+
+
+
+
 #include "Game/SceneInfo.h"
 #include "Game/Game.h"
 

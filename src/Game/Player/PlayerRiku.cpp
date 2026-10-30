@@ -96,10 +96,10 @@ static inline INT _getNowCamMode() {
     return mode;
 }
 
-class CRcf {
-public:
-    static BOOL isCompleteLoadRCF(INT nType, INT nID);
-};
+#include "System/Rcf.h"
+
+
+
 
 namespace Friend {
 extern BCAM_PARAM g_HolyBurstCamParam;
