@@ -63,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1024 (942 in 109 headers, 82 in 35 .cpp); MATCH: 128
   by category: method 401, data member 68, type 88, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 42, guessed 41, header-level 74, stand-in 35, other 6
-stand-ins: 340 foreign in 120 files (92 names), 201 unattributed, 170 own
+stand-ins: 339 foreign in 120 files (91 names), 201 unattributed, 170 own
 duplicate class names across headers: 25
 padding: 31 arrays, 26 accessors
 mechanisms: 958 sites (916 untagged); #line: 1238
@@ -149,7 +149,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CCircleCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CCircleCollision |
 | `CCollObj` | superset | Game/Collision/CollObj.h | 1 |  | 1 PARTIAL |
-| `CCollUtil` | superset | Game/Collision/CollUtilA.h | 1 |  | padding: _pad224; extra methods: getInstance |
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CEffectMotion` | complete | Game/EffectMotion.h | 1 |  |  |
@@ -257,7 +256,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
 | `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 173 |
 | `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 150 |
-| `Game/Collision/CollUtilA.h` | 1 | 9/1/1/0 | 25 |
+| `Game/Collision/CollUtilA.h` | 1 | 9/1/1/0 | 26 |
 | `Game/Collision/Ride.h` | 1 | 4/0/1/0 | 6 |
 | `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
 | `Game/EffectMotion.h` | 0 | 5/0/2/0 | 7 |
