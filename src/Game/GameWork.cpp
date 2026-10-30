@@ -24,10 +24,7 @@ inline void _emptyStringPlaceholder2() {
 using STORAGE::MCWork;
 using STORAGE::MCWork2;
 
-class CPlayer {
-public:
-    static void exportStatus();
-};
+#include "Game/Player/Player.h"
 
 class CJiminyMemoFlag {
 public:

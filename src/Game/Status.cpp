@@ -34,10 +34,7 @@ public:
     static void* getRsrcData(const CRsrcData& data);
 };
 
-class CPlayer {
-public:
-    static INT calcNextEXP(INT inNowLV);
-};
+#include "Game/Player/Player.h"
 
 /* the CardInit resource (original type name unknown) */
 struct CARD_INIT_HEADER {
