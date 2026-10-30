@@ -1,4 +1,4 @@
-#define MOVEMENT_H_FULL_CLASS
+
 #define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
 #define GPRIM_H_PATH "System/Graphic/Gprim.h"
 #include "System/Task.h"
