@@ -61,12 +61,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 992 (910 in 109 headers, 82 in 36 .cpp); MATCH: 138
+PARTIAL: 992 (910 in 109 headers, 82 in 36 .cpp); MATCH: 140
   by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 34, other 6
-stand-ins: 294 foreign in 113 files (79 names), 201 unattributed, 170 own
+stand-ins: 283 foreign in 111 files (73 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
-mechanisms: 958 sites (911 untagged); #line: 1242
+mechanisms: 960 sites (910 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 574, superset 129, partial 93, gated 93, missing 9, unattributed 309
 ```
@@ -80,7 +80,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
-| R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 | R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 4.0 | `System/Graphic/TexCtrl.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CTexCtrl (1 complete) | inline bodies or virtuals |
 | R1 | 3.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `System/Graphic/3DCPrim.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users | C3DCPrim (1 partial) | inline bodies or virtuals |
+| R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 
 ## Classes with foreign copies
 
@@ -115,8 +115,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `VTransInfo` | gated | System/Graphic/Gprim.h | 6 | System/Graphic/modeldata.h | 1 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 4 |  | missing methods: ~CPointCollision |
-| `CVSM` | partial | Game/Atel/VSME.h | 4 |  | missing fields: m_ActorStateFnc; extra methods: BOOL |
-| `Actor` | complete | Game/Atel/VSME.h | 3 |  |  |
 | `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
 | `CSaveLoad` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
 | `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 3 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, isDraw, setAutomaticDistance, setAutomaticHeight, setClipDistance, ... (+4); extra methods: setADensity, setCDensity; 6 PARTIAL |
@@ -135,10 +133,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CTextWnd` | complete | System/Wnd.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
-| `ATP` | complete | Game/Atel/VSME.h | 1 |  |  |
 | `C2DSeq` | superset | System/Graphic/2d/2DSeq.h | 1 |  | virtual order differs; 1 PARTIAL |
 | `C2DSpr` | superset | System/Graphic/2d/2DSpr.h | 1 |  | virtual order differs |
-| `CActorDebug` | complete | Game/Atel/VSME.h | 1 |  |  |
 | `CBaseWnd` | complete | System/Wnd.h | 1 |  |  |
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CCircleCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CCircleCollision |
@@ -146,7 +142,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CDebugWindow` | superset | Form/DebugWindow.h | 1 |  | padding: _m_0x40; virtual order differs |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CEffectMotion` | complete | Game/EffectMotion.h | 1 |  |  |
-| `CEventLineDisp` | complete | Game/Atel/VSME.h | 1 |  |  |
 | `CFadeIOMask` | partial | System/Graphic/ScreenMask.h | 1 |  | missing methods: ~CFadeIOMask |
 | `CFriend` | partial | Game/Player/Friend.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CGame` | superset | Game/Game.h | 1 |  | 19 PARTIAL |
@@ -175,7 +170,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CSummon` | partial | Game/Player/Summon.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CZFill` | partial | System/Graphic/DeFocus.h | 1 | System/Graphic/GprimFull.h | missing methods: ~CZFill |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
-| `F_UL` | complete | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | superset | System/Graphic/Gprim.h | 1 |  | 2 PARTIAL |
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
 | `QWdata` | complete | System/Graphic/Gprim.h | 1 |  |  |
@@ -226,7 +220,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Atel/ChatMan.h` | 6 | 0/1/0/0 | 7 |
 | `Game/Atel/CommandAccepter.h` | 1 | 1/0/0/0 | 15 |
 | `Game/Atel/EventTrap.h` | 0 | 1/2/2/0 | 3 |
-| `Game/Atel/VSME.h` | 0 | 10/0/2/0 | 2 |
+| `Game/Atel/VSME.h` | 0 | 10/0/2/0 | 7 |
 | `Game/AttachCard.h` | 1 | 1/0/0/0 | 2 |
 | `Game/AttachMotion.h` | 1 | 1/0/0/0 | 155 |
 | `Game/AttackMotion.h` | 7 | 1/2/0/0 | 154 |
@@ -428,7 +422,7 @@ or `untagged`.
 | path override | `ATELFOG_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/AtelFog.cpp:2 |
 | path override | `BATTLEENEMY_H_PATH` | 46 | 1 | the original included it by its full path |
 | path override | `BODYCOLLISION_H_PATH` | 2 | 1 | __FILE__ of these headers as in the original .rodata |
-| path override | `CAMERAMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/CameraMan.cpp:2 |
+| path override | `CAMERAMAN_H_PATH` | 2 | 1 | CVSM's flag accessors are only inline in this unit (Game/Atel/VSME.h) |
 | path override | `CARDBATTLE_H_PATH` | 5 | 2 | the original includes it under this name |
 | path override | `CARD_H_PATH` | 6 | 1 | the original's Card.h/Status.h strings carry |
 | path override | `CHATMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/ChatMan.cpp:2 |
@@ -516,8 +510,8 @@ or `untagged`.
 | placeholder | `_pathDataCameraSLCOverflow*` | 1 | 0 | untagged, e.g. System/Graphic/PathDataCamera.cpp:7 |
 | placeholder | `_premiumPrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:10 |
 | placeholder | `_roPh*` | 8 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:2186 |
-| placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:149 |
-| placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1749 |
+| placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:150 |
+| placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1750 |
 | placeholder | `_roulettePrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:13 |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/SampleEnemy.cpp:13 |
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:418 |
@@ -528,10 +522,10 @@ or `untagged`.
 | placeholder | `_taskSLCOverflowHere*` | 1 | 0 | untagged, e.g. Game/Player/SummonCloud.cpp:23 |
 | placeholder | `_taskSLCOverflowLate*` | 1 | 0 | untagged, e.g. Game/Gimmick/GimmickTutorial.cpp:26 |
 | placeholder | `_taskSLCOverflowLevelUp*` | 1 | 0 | untagged, e.g. Form/Menu/LevelUp.cpp:20 |
-| placeholder | `_taskSLCOverflowMsg*` | 6 | 0 | untagged, e.g. Game/Atel/VSME.cpp:25 |
+| placeholder | `_taskSLCOverflowMsg*` | 6 | 0 | untagged, e.g. Game/Atel/VSME.cpp:26 |
 | placeholder | `_taskSLCOverflowPlaceholder*` | 6 | 0 | untagged, e.g. Form/Menu/WorldCard.cpp:10 |
 | placeholder | `_taskSLCOverflowSaveLoadUtil*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadUtil.cpp:18 |
-| placeholder | `_vsmeMotionName*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:53 |
+| placeholder | `_vsmeMotionName*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:54 |
 | pragma | `#pragma implementation` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:2 |
 | pragma | `#pragma interface` | 1 | 0 | untagged, e.g. System/Graphic/GprimFull.h:4 |
 | unit gate | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.cpp:2 |
@@ -539,6 +533,7 @@ or `untagged`.
 | unit gate | `FORM_MENU_JIMINYMEMO_CPP` | 1 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:1 |
 | unit gate | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.cpp:2 |
 | unit gate | `FORM_MENU_SAVELOAD_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoad.cpp:2 |
+| unit gate | `GAME_ATEL_VSME_CPP` | 1 | 1 | CVSM's flag accessors are only inline in this unit (Game/Atel/VSME.h) |
 | unit gate | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.cpp:1 |
 | unit gate | `GAME_ENEMY_BATTLEENEMY_CPP` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:1 |
 | unit gate | `GAME_ENTITY_CPP` | 1 | 0 | untagged, e.g. Game/Entity.cpp:1 |
@@ -557,6 +552,7 @@ or `untagged`.
 | unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 2 | 0 | untagged, e.g. Form/Menu/JiminyMemo.h:12 |
 | unit gate site | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:93 |
 | unit gate site | `FORM_MENU_SAVELOAD_CPP` | 6 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:148 |
+| unit gate site | `GAME_ATEL_VSME_CPP` | 1 | 1 | Game/Atel/Atel (CAtel::start ...) calls these out of line: inline-called-not-inlined |
 | unit gate site | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.h:170 |
 | unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:112 |
 | unit gate site | `GAME_ENTITY_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:450 |
