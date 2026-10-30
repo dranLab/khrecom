@@ -1,4 +1,4 @@
-#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
+#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: Gprim.h strings in .rodata use the full path */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/TexUtil.h"
 #include "System/Buf.h"
@@ -54,7 +54,7 @@ void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 static inline u_long128 _colToVec(UINT iCol) {
     u_long128 ivCol;
-    __asm__("pextlb %0, $0, %1\n"
+    __asm__ volatile("pextlb %0, $0, %1\n"
             "pextlh %0, $0, %0\n"
             : "=r"(ivCol)
             : "r"(iCol));
@@ -63,7 +63,7 @@ static inline u_long128 _colToVec(UINT iCol) {
 
 static inline UINT _vecToCol(u_long128 iCol) {
     UINT ivCol;
-    __asm__("ppach %0, $0, %1\n"
+    __asm__ volatile("ppach %0, $0, %1\n"
             "ppacb %0, $0, %0\n"
             : "=r"(ivCol)
             : "r"(iCol));
@@ -104,19 +104,6 @@ struct TexInfo { /* System/Graphic/modeldata.h */
 
     BOOL isFixTex() const { return !_TexInfo._pImage || (_nFlag & 1); }
     BOOL isFixClut() const { return !_ClutInfo._pImage || (_nFlag & 2); }
-    const TexInfo* getExtendInfo(INT nIdx) const {
-        switch (nIdx) {
-        case 0:
-            return this;
-        case 1:
-            return _pExtendInfo0;
-        case 2:
-            return _pExtendInfo1;
-        case 3:
-            return _pExtendInfo2;
-        }
-        return NULL;
-    }
 };
 
 struct IMD_HEADER {
@@ -183,9 +170,7 @@ void CTexUtil::getTransSize(const TIM2_PICTUREHEADER& inData, INT& nOutTexSize, 
     }
 }
 
-/* Placeholder: the C of getTransInfo__8CTexUtilRC18TIM2_PICTUREHEADERR10VTransInfoT2ii (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static INT _getTransInfo_c(const TIM2_PICTUREHEADER& inTim2Head, VTransInfo& outTex, VTransInfo& outClut, INT nInTexPos,
+INT CTexUtil::getTransInfo(const TIM2_PICTUREHEADER& inTim2Head, VTransInfo& outTex, VTransInfo& outClut, INT nInTexPos,
                            INT nInClutPos) {
     INT nAlignW;
     INT nImageSize;
@@ -202,9 +187,6 @@ __attribute__((section(".sdata"))) static INT _getTransInfo_c(const TIM2_PICTURE
     nAlignW = 64;
     nImageSize = inTim2Head.ImageWidth * inTim2Head.ImageHeight;
     switch (outTex._nFormat) {
-    case 2:
-        nImageSize >>= 3;
-        break;
     case 20:
         outClut._qwImage = 4;
         outClut._nDistW = 8;
@@ -213,27 +195,29 @@ __attribute__((section(".sdata"))) static INT _getTransInfo_c(const TIM2_PICTURE
         nImageSize >>= 5;
         break;
     case 19:
+        nAlignW = 128;
         outClut._qwImage = 64;
         outClut._nDistW = 16;
-        outClut._nDistH = 16;
-        nAlignW = 128;
         nImageSize >>= 4;
+        outClut._nDistH = 16;
+        break;
+    case 2:
+        nImageSize >>= 3;
         break;
     default:
         nImageSize >>= 2;
         break;
     }
-    outTex._qwImage = nImageSize;
     outTex._nDistBufW = _align(inTim2Head.ImageWidth, nAlignW) >> 6;
+    outTex._qwImage = nImageSize;
     outClut._nDistPos = nInClutPos;
     outClut._nFormat = 0;
     outClut._pImage = (ULONGLONG*)Tim2GetClut(&inTim2Head);
-    outClut._nDistX = 0;
-    outClut._nDistBufW = 1;
     outClut._nDistY = 0;
+    outClut._nDistBufW = 1;
+    outClut._nDistX = 0;
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", getTransInfo__8CTexUtilRC18TIM2_PICTUREHEADERR10VTransInfoT2ii);
 
 INT CTexUtil::getTransInfo(const void* pInTim2, VTransInfo& outTex, VTransInfo& outClut, INT nInTexPos, INT nInClutPos) {
     TIM2_PICTUREHEADER* pHead = Tim2GetPictureHeader(pInTim2, 0);
@@ -339,26 +323,29 @@ INT CTexUtil::getTmpTexTransInfo(const void* pInTim2, VTransInfo& outTex, VTrans
 
 static inline BOOL _sumupTmpSize(SHORT& nOutPos, USHORT nSize, USHORT nMax) {
     nOutPos = nSize + nOutPos;
-    if (nOutPos < nMax) return TRUE;
-    nOutPos = -1;
-    return FALSE;
+    if (nOutPos >= nMax) {
+        nOutPos = -1;
+        return FALSE;
+    }
+    return TRUE;
 }
 
-/* Placeholder: the C of sumupTmpTexSize__8CTexUtilRC7TexInfoRsT2 (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static BOOL _sumupTmpTexSize_c(const TexInfo& inInfo, SHORT& nOutTex, SHORT& nOutClut) {
+BOOL CTexUtil::sumupTmpTexSize(const TexInfo& inInfo, SHORT& nOutTex, SHORT& nOutClut) {
     const VTransInfo& texInfo = inInfo._TexInfo;
     const VTransInfo& clutInfo = inInfo._ClutInfo;
-    BOOL bResult = TRUE;
+    BOOL bResult;
 
-    if (!inInfo.isFixTex()) bResult = _sumupTmpSize(nOutTex, texInfo._nTransSize, VRAM::_TEX_TMP1_SIZE);
+    if (inInfo.isFixTex()) {
+        bResult = TRUE;
+    } else {
+        bResult = _sumupTmpSize(nOutTex, texInfo._nTransSize, VRAM::_TEX_TMP1_SIZE);
+    }
     if (bResult && !inInfo.isFixClut()) {
-        USHORT nSize = clutInfo._nTransSize;
+        UINT nSize = (USHORT)clutInfo._nTransSize; /* MATCH: not in the ref's locals; lhu + UINT compare gives the original's movn */
         bResult = _sumupTmpSize(nOutClut, nSize > 3 ? nSize : 4, VRAM::_CLUT_TMP1_SIZE);
     }
     return bResult;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", sumupTmpTexSize__8CTexUtilRC7TexInfoRsT2);
 
 INT CTexUtil::getFixTexTransInfo(const void* pInData, VTransInfo& outTex, VTransInfo& outClut, INT nInType) {
     INT nRet;
@@ -384,6 +371,137 @@ INT CTexUtil::getFixTexTransInfo(const void* pInData, VTransInfo& outTex, VTrans
     return nRet;
 }
 
+/* Parked: 72 of 280 lines, 4 bytes short - structure as the original (default display env -> width/height/PSM
+ * via (INT)(u_long >> n) & mask, TIM2 file and picture headers, per-line StoreImage + writeFile). Left: the
+ * reserved-bytes loop (pointer + own counter in the original), the GsTex0 TBW/PSM/TW/TH writes (the original
+ * goes through a pointer and a 64-bit shift) and the header store order. Bitfield/shift forms, a separate loop
+ * variable and permuter 6 min tried. */
+#if 0
+struct sceGsDispEnv { /* libgraph */
+    u_long pmode;
+    u_long smode2;
+    u_long dispfb;
+    u_long display;
+    u_long bgcolor;
+};
+struct tGS_DISPFB { /* libgraph (eestruct.h) */
+    u_long FBP : 9;
+    u_long FBW : 6;
+    u_long PSM : 5;
+    u_long p0 : 12;
+    u_long DBX : 11;
+    u_long DBY : 11;
+    u_long p1 : 10;
+};
+struct tGS_DISPLAY { /* libgraph (eestruct.h) */
+    u_long DX : 12;
+    u_long DY : 11;
+    u_long MAGH : 4;
+    u_long MAGV : 2;
+    u_long p0 : 3;
+    u_long DW : 12;
+    u_long DH : 11;
+    u_long p1 : 9;
+};
+struct tGS_TEX0 { /* libgraph (eestruct.h) */
+    u_long TBP0 : 14;
+    u_long TBW : 6;
+    u_long PSM : 6;
+    u_long TW : 4;
+    u_long TH : 4;
+    u_long TCC : 1;
+    u_long TFX : 2;
+    u_long CBP : 14;
+    u_long CPSM : 4;
+    u_long CSM : 1;
+    u_long CSA : 5;
+    u_long CLD : 3;
+};
+struct sceGsStoreImage { /* libgraph */
+    u_long128 data[7];
+};
+struct TIM2_FILEHEADER {
+    TIM2_UCHAR8 FileId[4];
+    TIM2_UCHAR8 FormatVersion;
+    TIM2_UCHAR8 FormatId;
+    TIM2_UINT16 Pictures;
+    TIM2_UCHAR8 Reserved[8];
+};
+extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short h, short dx, short dy);
+extern "C" int sceGsSetDefStoreImage(sceGsStoreImage* sp, short sbp, short sbw, short spsm, short x, short y, short w, short h);
+extern "C" int sceGsExecStoreImage(sceGsStoreImage* sp, u_long128* dstaddr);
+extern "C" int sceGsSyncPath(int mode, unsigned short timeout);
+extern "C" void FlushCache(int operation);
+extern INT SCREEN_HEIGHT;
+BOOL CTexUtil::takeSnapShot(const CHAR* lpszInFile) {
+    sceGsDispEnv disp;
+    INT nWidth;
+    INT nHeight;
+    INT nFormat;
+    INT nBytes;
+    INT hFile;
+    TIM2_FILEHEADER fhdr;
+    TIM2_PICTUREHEADER phdr;
+    INT nImageSize;
+    INT i;
+    unsigned char pBuf[4096];
+    sceGsStoreImage si;
+
+    sceGsSetDefDispEnv(&disp, 1, 0x200, SCREEN_HEIGHT, 0, 0);
+    nWidth = (UINT)(((INT)(disp.display >> 32) & 0xFFF) + 1) / (UINT)(((INT)(disp.display >> 23) & 0xF) + 1);
+    nHeight = ((INT)(disp.display >> 44) & 0x7FF) + 1;
+    nFormat = (INT)(disp.dispfb >> 15) & 0x1F;
+    nBytes = nWidth * 3;
+    hFile = CFileIO::openFile(lpszInFile, 0x202, 0);
+    if (hFile < 0) {
+        TRACE("file create failure.\n");
+        return FALSE;
+    }
+    fhdr.FileId[0] = 'T';
+    fhdr.FileId[1] = 'I';
+    fhdr.FileId[2] = 'M';
+    fhdr.FileId[3] = '2';
+    fhdr.FormatVersion = 3;
+    fhdr.FormatId = 0;
+    fhdr.Pictures = 1;
+    for (i = 7; i >= 0; i--) fhdr.Reserved[i] = 0;
+    nImageSize = nBytes * nHeight;
+    phdr.TotalSize = nImageSize + 0x30;
+    phdr.ClutSize = 0;
+    phdr.ImageSize = nImageSize;
+    phdr.HeaderSize = 0x30;
+    phdr.ClutColors = 0;
+    phdr.PictFormat = 0;
+    phdr.MipMapTextures = 1;
+    phdr.ClutType = 0;
+    phdr.ImageType = 2;
+    phdr.ImageWidth = nWidth;
+    phdr.ImageHeight = nHeight;
+    phdr.GsTex0 = ((u_long)((nWidth + 63) / 64 & 0x3F) << 14) | ((u_long)nFormat << 20);
+    ((tGS_TEX0*)&phdr.GsTex0)->TW = CTexUtil::getBitDepth(nWidth);
+    ((tGS_TEX0*)&phdr.GsTex0)->TH = CTexUtil::getBitDepth(nHeight);
+    phdr.GsTex1 = 0;
+    phdr.GsTexaFbaPabe = 0;
+    phdr.GsTexClut = 0;
+    CFileIO::writeFile(hFile, &fhdr, 0x10);
+    CFileIO::writeFile(hFile, &phdr, 0x30);
+    sceGsSyncPath(0, 0);
+    TRACE("Start SnapShot\n");
+    for (i = 0; i < nHeight; i++) {
+        memset(pBuf, 0, 0x1000);
+        TRACE(".");
+        sceGsSetDefStoreImage(&si, VRAM::_FRAME0_START, (INT)(disp.dispfb >> 9) & 0x3F, nFormat, (INT)(disp.dispfb >> 32) & 0x7FF,
+                              ((INT)(disp.dispfb >> 43) & 0x7FF) + i, nWidth, 1);
+        FlushCache(0);
+        sceGsExecStoreImage(&si, (u_long128*)pBuf);
+        sceGsSyncPath(0, 0);
+        CFileIO::writeFile(hFile, pBuf, nBytes);
+    }
+    TRACE("\nEnd SnapShot!!\n");
+    CFileIO::closeFile(hFile);
+    return TRUE;
+}
+#else
 /* Placeholder: takeSnapShot's strings (INCLUDE_ASM below). */
 __attribute__((section(".sdata"))) void _takeSnapShotStrings() {
     TRACE("file create failure.\n");
@@ -392,6 +510,7 @@ __attribute__((section(".sdata"))) void _takeSnapShotStrings() {
     TRACE("\nEnd SnapShot!!\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", takeSnapShot__8CTexUtilPCc);
+#endif
 
 INT CTexUtil::getClutSize(const BYTE* pInTim2) {
     TIM2_PICTUREHEADER* pHead = Tim2GetPictureHeader(pInTim2, 0);
@@ -400,9 +519,12 @@ INT CTexUtil::getClutSize(const BYTE* pInTim2) {
     return pHead->ClutSize;
 }
 
-/* Placeholder: the C of makeCustomClut__8CTexUtilPUlT1ii (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static void _makeCustomClut_c(ULONGLONG* inSrc, ULONGLONG* inDest, INT inType, INT inColNum) {
+/* Parked: 20 of 168 lines, same size - up-counting j (the original's reversed count-down), *pSrc read per term
+ * (lbu for the low byte) and `iI | (iI << 16 | iI << 8)` fixed most of it. Left: the register order of case 1's
+ * three channel terms (the original computes the >> 8 term into a1 first) and two instructions in case 2's loop.
+ * Term forms and permuter 6 min: no gain. */
+#if 0
+void CTexUtil::makeCustomClut(ULONGLONG* inSrc, ULONGLONG* inDest, INT inType, INT inColNum) {
     UINT* pSrc;
     UINT* pDes;
 
@@ -413,46 +535,54 @@ __attribute__((section(".sdata"))) static void _makeCustomClut_c(ULONGLONG* inSr
     case 0:
         memcpy(pDes, pSrc, inColNum * 4);
         break;
-    case 1:
-        for (INT j = inColNum; j > 0; j--) {
-            UINT iCol = *pSrc;
-            *pDes = (iCol & 0xFF000000) | ((UBYTE)(0xFF - (UBYTE)iCol) >> 1) | (((0xFF - (iCol >> 8)) << 7) & 0x7F00) |
-                    (((UBYTE)(0xFF - (iCol >> 16)) >> 1) << 16);
+    case 1: {
+        INT j;
+        for (j = 0; j < inColNum; j++) {
+            *pDes = (*pSrc & 0xFF000000) | ((UBYTE)(0xFF - (UBYTE)*pSrc) >> 1) | (((0xFF - (*pSrc >> 8)) << 7) & 0x7F00) |
+                    (((UBYTE)(0xFF - (*pSrc >> 16)) >> 1) << 16);
             pSrc++;
             pDes++;
         }
         break;
-    case 2:
-        for (INT j = inColNum; j > 0; j--) {
-            UINT iCol = *pSrc;
-            FLOAT fR = (FLOAT)(iCol & 0xFF);
-            FLOAT fG = (FLOAT)((iCol & 0xFF00) >> 8);
-            FLOAT fB = (FLOAT)((iCol & 0xFF0000) >> 16);
-            UINT iI = (UINT)(fR * 0.2989f + fG * 0.5866f + fB * 0.1145f);
+    }
+    case 2: {
+        INT j;
+        FLOAT fR;
+        FLOAT fG;
+        FLOAT fB;
+        UINT iI;
+        for (j = 0; j < inColNum; j++) {
+            fR = (FLOAT)(*pSrc & 0xFF);
+            fG = (FLOAT)((*pSrc & 0xFF00) >> 8);
+            fB = (FLOAT)((*pSrc & 0xFF0000) >> 16);
+            iI = (UINT)(fR * 0.2989f + fG * 0.5866f + fB * 0.1145f);
             if (iI >= 0x100) iI = 0xFF;
-            *pDes = (iCol & 0xFF000000) | iI | (iI << 16 | iI << 8);
+            *pDes = (*pSrc & 0xFF000000) | (iI | (iI << 16 | iI << 8));
             pSrc++;
             pDes++;
         }
         break;
-    default:
-        for (INT j = inColNum; j > 0; j--) {
+    }
+    default: {
+        INT j;
+        for (j = 0; j < inColNum; j++) {
             *pDes = *pSrc & 0xFF000000;
             pSrc++;
             pDes++;
         }
         break;
     }
+    }
 }
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", makeCustomClut__8CTexUtilPUlT1ii);
+#endif
 
 void CTexUtil::makeMonochromeClut(const TexInfo* inpInfo, INT inBufIdx, FLOAT inRate) {
     makeMonochromeClut(inpInfo, 0, inBufIdx, inRate);
 }
 
-/* Placeholder: the C of makeMonochromeClut__8CTexUtilPC7TexInfoiif (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static void _makeMonochromeClut_c(const TexInfo* inpInfo, INT inSrcBufIdx, INT inOutBufIdx, FLOAT inRate) {
+void CTexUtil::makeMonochromeClut(const TexInfo* inpInfo, INT inSrcBufIdx, INT inOutBufIdx, FLOAT inRate) {
     static const FVECTOR _cfvClampClut = { { 255.f, 255.f, 255.f, 0.f } };
     const TexInfo* pInfoSrc;
     const TexInfo* pInfoDes;
@@ -468,8 +598,36 @@ __attribute__((section(".sdata"))) static void _makeMonochromeClut_c(const TexIn
 
     if (!inpInfo || !(inpInfo->_nType & 0x40)) return;
     if (inpInfo->_nInfoType) inpInfo = inpInfo->_pExtendInfo0;
-    pInfoSrc = inpInfo->getExtendInfo(inSrcBufIdx);
-    pInfoDes = inpInfo->getExtendInfo(inOutBufIdx);
+    pInfoSrc = NULL;
+    pInfoDes = NULL;
+    switch (inSrcBufIdx) {
+    case 0:
+        pInfoSrc = inpInfo;
+        break;
+    case 1:
+        pInfoSrc = inpInfo->_pExtendInfo0;
+        break;
+    case 2:
+        pInfoSrc = inpInfo->_pExtendInfo1;
+        break;
+    case 3:
+        pInfoSrc = inpInfo->_pExtendInfo2;
+        break;
+    }
+    switch (inOutBufIdx) {
+    case 0:
+        pInfoDes = inpInfo;
+        break;
+    case 1:
+        pInfoDes = inpInfo->_pExtendInfo0;
+        break;
+    case 2:
+        pInfoDes = inpInfo->_pExtendInfo1;
+        break;
+    case 3:
+        pInfoDes = inpInfo->_pExtendInfo2;
+        break;
+    }
     if (!pInfoSrc || !pInfoDes) return;
     pSrc = (UINT*)pInfoSrc->_ClutInfo._pImage;
     pDes = (UINT*)pInfoDes->_ClutInfo._pImage;
@@ -494,15 +652,12 @@ __attribute__((section(".sdata"))) static void _makeMonochromeClut_c(const TexIn
         pDes++;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", makeMonochromeClut__8CTexUtilPC7TexInfoiif);
 
 void CTexUtil::makeWhiteClut(const TexInfo* inpInfo, INT inOutBufIdx, FLOAT inRate) {
     makeWhiteClut(inpInfo, 0, inOutBufIdx, inRate);
 }
 
-/* Placeholder: the C of makeWhiteClut__8CTexUtilPC7TexInfoiif (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static void _makeWhiteClut_c(const TexInfo* inpInfo, INT inSrcBufIdx, INT inOutBufIdx, FLOAT inRate) {
+void CTexUtil::makeWhiteClut(const TexInfo* inpInfo, INT inSrcBufIdx, INT inOutBufIdx, FLOAT inRate) {
     static const FVECTOR _cfvWhiteClut = { { 255.f, 255.f, 255.f, 0.f } };
     const TexInfo* pInfoSrc;
     const TexInfo* pInfoDes;
@@ -515,8 +670,36 @@ __attribute__((section(".sdata"))) static void _makeWhiteClut_c(const TexInfo* i
 
     if (!inpInfo || !(inpInfo->_nType & 0x40)) return;
     if (inpInfo->_nInfoType) inpInfo = inpInfo->_pExtendInfo0;
-    pInfoSrc = inpInfo->getExtendInfo(inSrcBufIdx);
-    pInfoDes = inpInfo->getExtendInfo(inOutBufIdx);
+    pInfoSrc = NULL;
+    pInfoDes = NULL;
+    switch (inSrcBufIdx) {
+    case 0:
+        pInfoSrc = inpInfo;
+        break;
+    case 1:
+        pInfoSrc = inpInfo->_pExtendInfo0;
+        break;
+    case 2:
+        pInfoSrc = inpInfo->_pExtendInfo1;
+        break;
+    case 3:
+        pInfoSrc = inpInfo->_pExtendInfo2;
+        break;
+    }
+    switch (inOutBufIdx) {
+    case 0:
+        pInfoDes = inpInfo;
+        break;
+    case 1:
+        pInfoDes = inpInfo->_pExtendInfo0;
+        break;
+    case 2:
+        pInfoDes = inpInfo->_pExtendInfo1;
+        break;
+    case 3:
+        pInfoDes = inpInfo->_pExtendInfo2;
+        break;
+    }
     if (!pInfoSrc || !pInfoDes) return;
     pSrc = (UINT*)pInfoSrc->_ClutInfo._pImage;
     pDes = (UINT*)pInfoDes->_ClutInfo._pImage;
@@ -536,11 +719,13 @@ __attribute__((section(".sdata"))) static void _makeWhiteClut_c(const TexInfo* i
         pDes++;
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", makeWhiteClut__8CTexUtilPC7TexInfoiif);
 
-/* Placeholder: the C of setupTexInfo__8CTexUtilR7TexInfoPCUcii (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static BOOL _setupTexInfo_c(TexInfo& outInfo, const BYTE* pInTex, INT nWidth, INT nHeight) {
+/* Parked: 19 of 123 lines, 8 bytes short - structure as the original; _nDistBufW = (UINT)(w - 1) / 64 + 1 (the
+ * original's unmasked ((w-1)+64)>>6, not CSE'd with the first _align). Left: the nWidth * nHeight mult (the
+ * original computes it in the alloc-check delay slot) and the two loop-alignment nops that follow from it.
+ * Statement positions and permuter 5 min: no gain. */
+#if 0
+BOOL CTexUtil::setupTexInfo(TexInfo& outInfo, const BYTE* pInTex, INT nWidth, INT nHeight) {
     INT nTexSize;
     INT nTexPos;
     INT nClutPos;
@@ -559,7 +744,7 @@ __attribute__((section(".sdata"))) static BOOL _setupTexInfo_c(TexInfo& outInfo,
     tex._nDistH = nHeight;
     tex._nTw = CTexUtil::getBitDepth(nWidth);
     tex._nTh = CTexUtil::getBitDepth(nHeight);
-    tex._nDistBufW = _align(nWidth, 64) >> 6;
+    tex._nDistBufW = (UINT)(nWidth - 1) / 64 + 1;
     tex._qwImage = nImageSize >> 2;
     tex._nTransSize = nTexSize;
     clut._nDistBufW = 1;
@@ -573,11 +758,16 @@ __attribute__((section(".sdata"))) static BOOL _setupTexInfo_c(TexInfo& outInfo,
                                       clut._nFormat, 0, 0, 1);
     return TRUE;
 }
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", setupTexInfo__8CTexUtilR7TexInfoPCUcii);
+#endif
 
-/* Placeholder: the C of setupTexInfoImd__8CTexUtilR7TexInfoPCUci (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static BOOL _setupTexInfoImd_c(TexInfo& outInfo, const BYTE* pInImd, INT nAllocType) {
+/* Parked: 93 of 153 lines, 16 bytes short - control flow as the original (tex_cnv PSM 19/20 cases, getTransSize
+ * else, allocTex, getTransInfo, TEX0). Left: the original keeps &outInfo._TexInfo/_ClutInfo in s1/s0 across the
+ * getTransInfo call (one more saved register, frame 0x90), which renumbers most registers; it also tests tex_cnv
+ * with andi 4 where ours shifts (bitfield types and ==1/!=0 tests tried). */
+#if 0
+BOOL CTexUtil::setupTexInfoImd(TexInfo& outInfo, const BYTE* pInImd, INT nAllocType) {
     const IMD_HEADER* pImd = (const IMD_HEADER*)pInImd;
     INT nTexSize = 0;
     INT nClutSize = 0;
@@ -629,5 +819,7 @@ __attribute__((section(".sdata"))) static BOOL _setupTexInfoImd_c(TexInfo& outIn
                                       outInfo._ClutInfo._nFormat, 0, 0, 1);
     return TRUE;
 }
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", setupTexInfoImd__8CTexUtilR7TexInfoPCUci);
+#endif
 // SOURCE DATA: .data .rodata
