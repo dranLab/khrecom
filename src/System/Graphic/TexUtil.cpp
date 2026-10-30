@@ -371,6 +371,137 @@ INT CTexUtil::getFixTexTransInfo(const void* pInData, VTransInfo& outTex, VTrans
     return nRet;
 }
 
+/* Parked: 72 of 280 lines, 4 bytes short - structure as the original (default display env -> width/height/PSM
+ * via (INT)(u_long >> n) & mask, TIM2 file and picture headers, per-line StoreImage + writeFile). Left: the
+ * reserved-bytes loop (pointer + own counter in the original), the GsTex0 TBW/PSM/TW/TH writes (the original
+ * goes through a pointer and a 64-bit shift) and the header store order. Bitfield/shift forms, a separate loop
+ * variable and permuter 6 min tried. */
+#if 0
+struct sceGsDispEnv { /* libgraph */
+    u_long pmode;
+    u_long smode2;
+    u_long dispfb;
+    u_long display;
+    u_long bgcolor;
+};
+struct tGS_DISPFB { /* libgraph (eestruct.h) */
+    u_long FBP : 9;
+    u_long FBW : 6;
+    u_long PSM : 5;
+    u_long p0 : 12;
+    u_long DBX : 11;
+    u_long DBY : 11;
+    u_long p1 : 10;
+};
+struct tGS_DISPLAY { /* libgraph (eestruct.h) */
+    u_long DX : 12;
+    u_long DY : 11;
+    u_long MAGH : 4;
+    u_long MAGV : 2;
+    u_long p0 : 3;
+    u_long DW : 12;
+    u_long DH : 11;
+    u_long p1 : 9;
+};
+struct tGS_TEX0 { /* libgraph (eestruct.h) */
+    u_long TBP0 : 14;
+    u_long TBW : 6;
+    u_long PSM : 6;
+    u_long TW : 4;
+    u_long TH : 4;
+    u_long TCC : 1;
+    u_long TFX : 2;
+    u_long CBP : 14;
+    u_long CPSM : 4;
+    u_long CSM : 1;
+    u_long CSA : 5;
+    u_long CLD : 3;
+};
+struct sceGsStoreImage { /* libgraph */
+    u_long128 data[7];
+};
+struct TIM2_FILEHEADER {
+    TIM2_UCHAR8 FileId[4];
+    TIM2_UCHAR8 FormatVersion;
+    TIM2_UCHAR8 FormatId;
+    TIM2_UINT16 Pictures;
+    TIM2_UCHAR8 Reserved[8];
+};
+extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short h, short dx, short dy);
+extern "C" int sceGsSetDefStoreImage(sceGsStoreImage* sp, short sbp, short sbw, short spsm, short x, short y, short w, short h);
+extern "C" int sceGsExecStoreImage(sceGsStoreImage* sp, u_long128* dstaddr);
+extern "C" int sceGsSyncPath(int mode, unsigned short timeout);
+extern "C" void FlushCache(int operation);
+extern INT SCREEN_HEIGHT;
+BOOL CTexUtil::takeSnapShot(const CHAR* lpszInFile) {
+    sceGsDispEnv disp;
+    INT nWidth;
+    INT nHeight;
+    INT nFormat;
+    INT nBytes;
+    INT hFile;
+    TIM2_FILEHEADER fhdr;
+    TIM2_PICTUREHEADER phdr;
+    INT nImageSize;
+    INT i;
+    unsigned char pBuf[4096];
+    sceGsStoreImage si;
+
+    sceGsSetDefDispEnv(&disp, 1, 0x200, SCREEN_HEIGHT, 0, 0);
+    nWidth = (UINT)(((INT)(disp.display >> 32) & 0xFFF) + 1) / (UINT)(((INT)(disp.display >> 23) & 0xF) + 1);
+    nHeight = ((INT)(disp.display >> 44) & 0x7FF) + 1;
+    nFormat = (INT)(disp.dispfb >> 15) & 0x1F;
+    nBytes = nWidth * 3;
+    hFile = CFileIO::openFile(lpszInFile, 0x202, 0);
+    if (hFile < 0) {
+        TRACE("file create failure.\n");
+        return FALSE;
+    }
+    fhdr.FileId[0] = 'T';
+    fhdr.FileId[1] = 'I';
+    fhdr.FileId[2] = 'M';
+    fhdr.FileId[3] = '2';
+    fhdr.FormatVersion = 3;
+    fhdr.FormatId = 0;
+    fhdr.Pictures = 1;
+    for (i = 7; i >= 0; i--) fhdr.Reserved[i] = 0;
+    nImageSize = nBytes * nHeight;
+    phdr.TotalSize = nImageSize + 0x30;
+    phdr.ClutSize = 0;
+    phdr.ImageSize = nImageSize;
+    phdr.HeaderSize = 0x30;
+    phdr.ClutColors = 0;
+    phdr.PictFormat = 0;
+    phdr.MipMapTextures = 1;
+    phdr.ClutType = 0;
+    phdr.ImageType = 2;
+    phdr.ImageWidth = nWidth;
+    phdr.ImageHeight = nHeight;
+    phdr.GsTex0 = ((u_long)((nWidth + 63) / 64 & 0x3F) << 14) | ((u_long)nFormat << 20);
+    ((tGS_TEX0*)&phdr.GsTex0)->TW = CTexUtil::getBitDepth(nWidth);
+    ((tGS_TEX0*)&phdr.GsTex0)->TH = CTexUtil::getBitDepth(nHeight);
+    phdr.GsTex1 = 0;
+    phdr.GsTexaFbaPabe = 0;
+    phdr.GsTexClut = 0;
+    CFileIO::writeFile(hFile, &fhdr, 0x10);
+    CFileIO::writeFile(hFile, &phdr, 0x30);
+    sceGsSyncPath(0, 0);
+    TRACE("Start SnapShot\n");
+    for (i = 0; i < nHeight; i++) {
+        memset(pBuf, 0, 0x1000);
+        TRACE(".");
+        sceGsSetDefStoreImage(&si, VRAM::_FRAME0_START, (INT)(disp.dispfb >> 9) & 0x3F, nFormat, (INT)(disp.dispfb >> 32) & 0x7FF,
+                              ((INT)(disp.dispfb >> 43) & 0x7FF) + i, nWidth, 1);
+        FlushCache(0);
+        sceGsExecStoreImage(&si, (u_long128*)pBuf);
+        sceGsSyncPath(0, 0);
+        CFileIO::writeFile(hFile, pBuf, nBytes);
+    }
+    TRACE("\nEnd SnapShot!!\n");
+    CFileIO::closeFile(hFile);
+    return TRUE;
+}
+#else
 /* Placeholder: takeSnapShot's strings (INCLUDE_ASM below). */
 __attribute__((section(".sdata"))) void _takeSnapShotStrings() {
     TRACE("file create failure.\n");
@@ -379,6 +510,7 @@ __attribute__((section(".sdata"))) void _takeSnapShotStrings() {
     TRACE("\nEnd SnapShot!!\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", takeSnapShot__8CTexUtilPCc);
+#endif
 
 INT CTexUtil::getClutSize(const BYTE* pInTim2) {
     TIM2_PICTUREHEADER* pHead = Tim2GetPictureHeader(pInTim2, 0);
