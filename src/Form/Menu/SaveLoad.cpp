@@ -523,10 +523,7 @@ template <class T> static inline T& _ref(T& x) { return x; }
 static inline BOOL _isFadeDone() { return s_pFadeMask ? s_pFadeMask->isFadeDone() : TRUE; }
 static inline BOOL _isAgentState(C2DSeqAgent* p, INT nState) { return p->getState() == nState; }
 
-class CPlayer { /* PARTIAL: Game/Player/Player.h needs the game headers */
-public:
-    static void exportStatus();
-};
+#include "Game/Player/Player.h"
 class CRsrcDB { /* PARTIAL: System/RsrcDB.h needs RsrcData.h internals */
 public:
     static void removeGroup(INT nGroupID, INT nMemberID);
