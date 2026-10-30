@@ -63,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 981 (912 in 110 headers, 69 in 38 .cpp); MATCH: 140
   by category: method 381, data member 67, type 85, fwd decl 53, #include 32, changed in place 132, padding 27, path override 24, gate 41, guessed 39, header-level 74, stand-in 20, other 6
-stand-ins: 131 foreign in 77 files (53 names), 201 unattributed, 170 own
+stand-ins: 130 foreign in 77 files (52 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 959 sites (909 untagged); #line: 1242
@@ -96,9 +96,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.5 | `System/RsrcDB.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CRsrcDB (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
-| R1 | 2.0 | `Game/MinigameManager.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMinigameManager (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/Friend.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFriend (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/PlayerCamera.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerCamera (1 gated) | inline bodies or virtuals (gate) |
+| R1 | 2.0 | `Game/Player/PlayerRiku.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerRiku (1 superset) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -131,7 +131,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CMemocaAgent` | complete | Form/Menu/SaveLoadUtil.h | 1 |  |  |
 | `CMemocaDataEntries` | superset | Form/Menu/SaveLoadUtil.h | 1 |  | extra methods: setNoSpace |
-| `CMinigameManager` | complete | Game/MinigameManager.h | 1 |  |  |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
@@ -286,7 +285,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Coord.h` | 3 | 0/1/0/0 | 18 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 271 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 11 |
-| `System/Fsm.h` | 4 | 1/0/0/1 | 114 |
+| `System/Fsm.h` | 4 | 1/0/0/1 | 115 |
 | `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 11 |
 | `System/Graphic/2d/2DFntObj.h` | 0 | 0/1/0/0 | 3 |
 | `System/Graphic/2d/2DLay.h` | 0 | 3/1/0/0 | 5 |
