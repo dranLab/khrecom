@@ -1,5 +1,5 @@
-#define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h"
-#define ATELCROSSFADE_H_PATH "Game/ATEL/AtelCrossFade.h"
+#define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h" // MATCH: the original spelled this include with the full path ("c:/KHCOM/...", "System/CTD")
+#define ATELCROSSFADE_H_PATH "Game/ATEL/AtelCrossFade.h" // MATCH: the original spelled the directory "ATEL"
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
