@@ -935,9 +935,11 @@ __attribute__((section(".sdata"))) void _parseRCF_EntryFile_strings(INT n) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRCF_EntryFile__FUii);
 #endif
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _parseRCF_FirstEntryFile_c(CHAR* szFilePath, CHAR* szName, INT nGroupID, INT nRsrcID) {
+/* Parked: 18 of 250 lines, same size - the original keeps the alignment in a0 (ours v1), computes
+ * (s_pExtBuf - 1 + align) & -align in that order, and interleaves the parameter copies differently in the
+ * prologue; rest matches. Tried: -1 placement, statement order at the start, permuter 7 min. */
+#if 0
+void _parseRCF_FirstEntryFile(CHAR* szFilePath, CHAR* szName, INT nGroupID, INT nRsrcID) {
     CBuf buf;
     INT nFileSize;
     INT nAllocAlign;
@@ -1017,7 +1019,15 @@ __attribute__((section(".sdata"))) void _parseRCF_FirstEntryFile_c(CHAR* szFileP
         ASSERT(0);
     }
 }
+#else
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) void _parseRCF_FirstEntryFile_strings(INT n) {
+    if (n) AssertApp(__FILE__, 0, "0 < nFileSize", 0);
+    TRACE_COL(_TTY_PURPLE, "\x93\xc7\x8d\x9e\x82\xdd\x83o\x83" "b\x83t\x83@\x82\xaa\x8am\x95\xdb\x8fo\x97\x88\x82\xc8\x82\xa2\x82\xe6\x81`\x83w(\x81@T\x84" "D)\xc9\x81@\xb3\xdc\xa7\xa7\xa7\xdd\n\x82\xaa\x82\xf1\x82\xaa\x82\xc1\x82\xc4\xa5\xa5\xa5\x93\xc7\x8d\x9e\x82\xe0\x82\xa4\x82\xc6\xa5\xa5\xa5\x82\xb5\x82\xbd\x83t\x83@\x83" "C\x83\x8b\x82\xcc\x96\xbc\x91O -> %s\n", (CHAR*)0);
+    if (n) AssertApp(__FILE__, 0, "0", 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRCF_FirstEntryFile__FPcT0ii);
+#endif
 INT _parseFilePath(const CHAR* pData, INT nRest, CHAR* pszOutPath, INT nType) {
     return 0;
 }
