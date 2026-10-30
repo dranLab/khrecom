@@ -1,7 +1,7 @@
 #define TASK_H_NO_SLC_OVERFLOW_MSG
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"
-#define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h"
+#define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h" /* MATCH: RsrcData.h strings in .rodata use the full path */
 #include "System/RsrcData.h"
 #include "System/Buf.h"
 #include "System/Debug.h"
