@@ -183,9 +183,7 @@ void CTexUtil::getTransSize(const TIM2_PICTUREHEADER& inData, INT& nOutTexSize, 
     }
 }
 
-/* Placeholder: the C of getTransInfo__8CTexUtilRC18TIM2_PICTUREHEADERR10VTransInfoT2ii (not matching yet). */
-__asm__(".section .sdata\n"); /* gcc may think it is still in .sdata after the INCLUDE_ASM */
-__attribute__((section(".sdata"))) static INT _getTransInfo_c(const TIM2_PICTUREHEADER& inTim2Head, VTransInfo& outTex, VTransInfo& outClut, INT nInTexPos,
+INT CTexUtil::getTransInfo(const TIM2_PICTUREHEADER& inTim2Head, VTransInfo& outTex, VTransInfo& outClut, INT nInTexPos,
                            INT nInClutPos) {
     INT nAlignW;
     INT nImageSize;
@@ -202,9 +200,6 @@ __attribute__((section(".sdata"))) static INT _getTransInfo_c(const TIM2_PICTURE
     nAlignW = 64;
     nImageSize = inTim2Head.ImageWidth * inTim2Head.ImageHeight;
     switch (outTex._nFormat) {
-    case 2:
-        nImageSize >>= 3;
-        break;
     case 20:
         outClut._qwImage = 4;
         outClut._nDistW = 8;
@@ -213,27 +208,29 @@ __attribute__((section(".sdata"))) static INT _getTransInfo_c(const TIM2_PICTURE
         nImageSize >>= 5;
         break;
     case 19:
+        nAlignW = 128;
         outClut._qwImage = 64;
         outClut._nDistW = 16;
-        outClut._nDistH = 16;
-        nAlignW = 128;
         nImageSize >>= 4;
+        outClut._nDistH = 16;
+        break;
+    case 2:
+        nImageSize >>= 3;
         break;
     default:
         nImageSize >>= 2;
         break;
     }
-    outTex._qwImage = nImageSize;
     outTex._nDistBufW = _align(inTim2Head.ImageWidth, nAlignW) >> 6;
+    outTex._qwImage = nImageSize;
     outClut._nDistPos = nInClutPos;
     outClut._nFormat = 0;
     outClut._pImage = (ULONGLONG*)Tim2GetClut(&inTim2Head);
-    outClut._nDistX = 0;
-    outClut._nDistBufW = 1;
     outClut._nDistY = 0;
+    outClut._nDistBufW = 1;
+    outClut._nDistX = 0;
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/TexUtil", getTransInfo__8CTexUtilRC18TIM2_PICTUREHEADERR10VTransInfoT2ii);
 
 INT CTexUtil::getTransInfo(const void* pInTim2, VTransInfo& outTex, VTransInfo& outClut, INT nInTexPos, INT nInClutPos) {
     TIM2_PICTUREHEADER* pHead = Tim2GetPictureHeader(pInTim2, 0);
