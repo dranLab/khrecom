@@ -1,6 +1,6 @@
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
-#define COLLOBJ_H_ENUMS_ONLY /* the collision classes come later (their vtables follow CHumanBoss's) */
-#define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" // MATCH: the original spelled the include "GPrim.h"
+#define COLLOBJ_H_ENUMS_ONLY /* MATCH: the collision classes come later (their vtables follow CHumanBoss's) */
+#define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h" // MATCH: the original included it by its full path
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -13,7 +13,7 @@
 #include "System/Graphic/Anim.h"
 #include "System/Graphic/Str.h"
 
-/* Placeholder: .rodata has an empty string literal after Str.h's strings (from an unidentified header). */
+/* MATCH: placeholder - .rodata has an empty string literal after Str.h's strings (from an unidentified header). */
 inline void _humanBossEmptyString() {
     TRACE("");
 }
@@ -32,20 +32,14 @@ inline void _humanBossEmptyString() {
 
 /* Inline in the original's collision header: the weak copies of its destructors and collideMap end this
  * object. */
-class CPointCollision : public CCollision {
+class CPointCollision : public CCollision { /* PARTIAL: stand-in for Game/Gimmick/GimmickCarry CPointCollision: gated by COLLOBJ_H_COLLISION_CLASSES (lacks the inline ~CPointCollision/collideMap) */
 public:
     CPointCollision() { m_Type = COLL_TYPE_POINT; }
     virtual ~CPointCollision() {}
     virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
 };
 
-class CBossDeadDemo {
-public:
-    CBossDeadDemo(CTask* inParent, INT inParam);
-    void setup(HANDLE inHandle, const FVECTOR* inPlayerPos, INT inParam);
-private:
-    UBYTE _m_0x00[0x80];
-};
+#include "Game/Enemy/BossDeadDemo.h"
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
@@ -517,6 +511,112 @@ void CHumanBoss::stateDead() {
 void CHumanBoss::endStateDead() {
 }
 
+/* Parked: 21 of 371 lines - the param pointer is carried in a register copy through the build and enemy-card loops
+   (the original's `move a3,v1`; ours reloads getEnemyParam() in the enemy-card loop body). Levers that got it here:
+   the id % 10000 in a local, UINT search index, one INT i per loop, `cards = deck` before ASSERT(deck) (callee-saved),
+   setHumanBossFlag(0, 1), BYTE card number, and a volatile read of the first loop's iCardCount (kept pointer, reloaded
+   count). Permuter 9 min: no gain. */
+#if 0
+static inline void _setCard(CARD& c, USHORT kind, BYTE num) { c.m_nId = 0; c.m_nKind2 = kind; c.m_nNumber2 = num; c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0; c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1; }
+void CHumanBoss::setupCardRevolver() {
+    CARD_DATA* cardData;
+    INT cardNum;
+    CARD* deck;
+    CARD* cards;
+
+    if (!getEnemyParam()) return;
+    UINT id = (UINT)getID() % 10000;
+    cardData = __null;
+    for (UINT n = 0; n < 12; n++) {
+        if (HumanBoss::g_CardDataTbl[n].iID == id) {
+            cardData = &HumanBoss::g_CardDataTbl[n];
+            m_pCardData = cardData;
+            break;
+        }
+    }
+    if (!cardData) return;
+    cardNum = 1;
+    for (INT i = 0; i < *(volatile INT*)&getEnemyParam()->iCardCount; i++) {
+        ENEMY_CARD* card = &getEnemyParam()->pCards[i];
+        INT j;
+        for (j = 0; j < 10; j++) {
+            if (card->iCardKind != 14) cardNum += card->bNumber[j];
+        }
+    }
+    cardNum += getEnemyParam()->iEnemyCard;
+    m_iTotalCardNum = cardNum;
+#line 537
+    deck = new (__FILE__ "(537)") CARD[cardNum];
+    cards = deck;
+#line 539
+    ASSERT(deck);
+    for (INT i = 0; i < getEnemyParam()->iCardCount; i++) {
+        ENEMY_CARD* card = &getEnemyParam()->pCards[i];
+        INT cardKind;
+        INT j;
+        if (card->iCardKind == 14) continue;
+        switch (card->iCardKind) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            cardKind = cardData->iCardKind[card->iCardKind];
+            break;
+        case 8:
+            cardKind = 0x2A;
+            break;
+        case 9:
+            cardKind = 0x2B;
+            break;
+        case 10:
+            cardKind = 0x2C;
+            break;
+        case 11:
+            cardKind = 0x2D;
+            break;
+        case 12:
+            cardKind = 0x2E;
+            break;
+        case 13:
+            cardKind = 0x2F;
+            break;
+        }
+        for (j = 0; j < 10; j++) {
+            INT k;
+            for (k = 0; k < card->bNumber[j]; k++) {
+                if (DebugWork::g_dw.enemy.uiFlag & 0x4000) {
+                    _setCard(*cards, cardKind, DebugWork::g_dw.enemy.iCardNumber);
+                } else {
+                    _setCard(*cards, cardKind, j);
+                }
+                cards++;
+            }
+        }
+    }
+    for (INT i = 0; i < getEnemyParam()->iEnemyCard; i++) {
+        _setCard(*cards, getEnemyParam()->byEnemyCards[i], 0xFF);
+        cards++;
+    }
+    _setCard(*cards, 0xFF, 0);
+    for (INT i = cardNum - 2; i > 0; i--) {
+        INT j = (INT)((FLOAT)(i + 1) * RND::genrand_real1());
+        CARD v = deck[i];
+        deck[i] = deck[j];
+        deck[j] = v;
+    }
+#line 622
+    m_pCardRevolver = new (com_malloc_d(sizeof(CardBattle::CCardRevolver), __FILE__ "(622)", RET_ADDR())) CardBattle::CCardRevolver(this, deck, 2, -1);
+#line 623
+    ASSERT(m_pCardRevolver);
+    if (deck) delete[] deck;
+    if (getEnemyParam()->iEnemyCard > 0) setHumanBossFlag(0, 1);
+    m_iRemainCardNum = getAttackCardNum(3);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", setupCardRevolver__10CHumanBoss);
 /* placeholder for setupCardRevolver (INCLUDE_ASM): its strings, then its jump table */
 __asm__(".section .sdata\n");
@@ -536,6 +636,7 @@ asm(".rdata\n.align 4\njtbl_004C3B00:\n"
     ".word .L002CBD50\n.word .L002CBD50\n.word .L002CBD50\n.word .L002CBD50\n"
     ".word .L002CBD64\n.word .L002CBD6C\n.word .L002CBD74\n.word .L002CBD7C\n"
     ".word .L002CBD84\n.word .L002CBD8C\n.text\n");
+#endif
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", setupAct__10CHumanBoss);
 /* placeholder for setupAct (INCLUDE_ASM): its strings */
@@ -811,14 +912,12 @@ BOOL CHumanBoss::reloadCardProc() {
     return TRUE;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", enemyCardProc__10CHumanBossPC4CARD);
 /* placeholder for enemyCardProc (INCLUDE_ASM): its strings */
 __attribute__((section(".sdata"))) void _enemyCardProc_placeholder(void* cb) {
     TRACE("----------- change normal card mode.\n");
     if (!cb) AssertApp(__FILE__, 0, "cb", 0);
     TRACE("----------- change enemy card mode.\n");
 }
-#if 0 /* near match: the enemy side enchant is read at 0x180(cb) instead of 0x17c(cb + 4) */
 BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
     INT n;
     CardBattle::CCardBattle* cb;
@@ -865,7 +964,6 @@ BOOL CHumanBoss::enemyCardProc(const CARD* inActiveCard) {
     TRACE("----------- change enemy card mode.\n");
     return TRUE;
 }
-#endif
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", itemCardProc__10CHumanBossPC4CARD);
 asm(".rdata\n.align 4\njtbl_004C3C80:\n"
@@ -986,13 +1084,11 @@ BOOL CHumanBoss::itemCardProc(const CARD* inActiveCard) {
 }
 #endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", stockActProc__10CHumanBossPC4CARD);
 /* placeholder for stockActProc (INCLUDE_ASM): its strings */
 __attribute__((section(".sdata"))) void _stockActProc_placeholder(INT n) {
     TRACE("CHumanBoss::\x83X\x83g\x83" "b\x83N\x82\xc5\x82\xab\x82\xc8\x82\xa2\n");
     TRACE("----------- stock boss card = 0x%08x\n", n);
 }
-#if 0 /* near match: the first random rollDeck block is cross-jumped whole (the original keeps its own random call) */
 BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
     INT attackCardNum;
     INT magicCardNum;
@@ -1094,15 +1190,14 @@ BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
             }
             return FALSE;
         }
-        if (RND::genrand_int31() & 1) {
-            return FALSE;
+        if ((RND::genrand_int31() & 1) == 0) {
+            m_pCardRevolver->rollDeck(1, 0, 300);
+            return TRUE;
         }
-        m_pCardRevolver->rollDeck(1, 0, 300);
-        return TRUE;
+        return FALSE;
     }
     return FALSE;
 }
-#endif
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", normalActProc__10CHumanBossPC4CARD);
 #if 0 /* near match: the two setDoBattleAct/useCard tails are cross-jumped (the original keeps both) */

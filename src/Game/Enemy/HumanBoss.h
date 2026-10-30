@@ -75,8 +75,8 @@ private:
 public:
     CHumanBoss(CTask* inParent, CState* inDefaultState, CState* inMainState);
     virtual ~CHumanBoss();
-    virtual BOOL initalize(INT inGroupID, INT inRsrcID, UINT iFlag);
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
+    virtual BOOL initalize(INT inGroupID, INT inRsrcID, UINT iFlag);
     void setHumanBossFlag(UINT inSet, UINT inMask);
     INT getTotalCardNum() const;
     INT getAttackCardNum(UINT inFlag) const;
