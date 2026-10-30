@@ -27,10 +27,10 @@ private:
 
 
 
-class CRcf { /* System/Rcf.h */
-public:
-    static void reqLoadEnemy(INT nInEnemyID);
-};
+#include "System/Rcf.h"
+
+
+
 
 CEntityFactory* CEntityFactory::m_pInstance;
 

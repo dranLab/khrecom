@@ -58,7 +58,7 @@ struct RcfMapInfo : RcfKey {
 /* CBuf after RcfSceneInfo and CSJointListT<RcfSceneInfo>: gcc emits the vtables in reverse order of definition */
 #include "System/Buf.h"
 
-class CRcf {
+class CRcf { /* PARTIAL: stand-in for System/Rcf CRcf: DebugMenu keeps its own RcfSceneInfo/RcfMapInfo copies (cc1plus fails with Rcf.h here) */
 public:
     static void reqLoadRCF(INT nType, INT nGroup, INT nMember, unsigned char* pBuf, INT nFlag);
     static BOOL isCompleteLoadRCF(INT nType, INT nGroup);

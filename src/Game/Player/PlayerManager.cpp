@@ -82,12 +82,12 @@ static inline UINT RET_ADDR() {
     return nRA;
 }
 
-class CRcf {
-public:
-    static void reqLoadRCF(INT nType, INT nID, INT nPrio, UBYTE* pAddr, INT nFlag);
-    static void reqLoadPlayer(INT nID);
-    static BOOL isCompleteLoadRCF(INT nType, INT nID);
-};
+#include "System/Rcf.h"
+
+
+
+
+
 
 class CRsrcDB {
 public:

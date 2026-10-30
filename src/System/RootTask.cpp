@@ -14,12 +14,12 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-class CRcf {
-public:
-    static void setLocale(INT nLocale);
-    static void reqLoadRCF(INT nGroup, INT nID, INT nFlag, unsigned char* pBuf, INT nSize);
-    static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
-};
+#include "System/Rcf.h"
+
+
+
+
+
 
 #include "System/Memoca.h"
 

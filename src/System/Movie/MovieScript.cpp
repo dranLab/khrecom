@@ -29,11 +29,11 @@ public:
     static void* getRsrcData(const CRsrcData& data);
 };
 
-class CRcf {
-public:
-    static void reqLoadRCF(INT nGroup, INT nID, INT nFlag, unsigned char* pBuf, INT nSize);
-    static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
-};
+#include "System/Rcf.h"
+
+
+
+
 
 template <class T> struct CPointT {
     T m_x;

@@ -19,11 +19,11 @@ public:
     static void removeGroup(INT nGroup, INT nID);
 };
 
-class CRcf {
-public:
-    static void reqLoadRCF(INT nGroup, INT nID, INT nFlag, unsigned char* pBuf, INT nSize);
-    static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
-};
+#include "System/Rcf.h"
+
+
+
+
 
 /* The battle report and title tasks live in a DLL: their constructors and static flags are not linked into the
  * main program (the original refers to address 0). Sizes from the allocations. */

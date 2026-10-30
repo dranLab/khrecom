@@ -66,12 +66,12 @@ public:
     static void addStreamInfo(const CHAR* pszName, INT nGroupID, UINT nStart, UINT nSize, INT nType);
 };
 
-class CRcf { /* System/Rcf.h */
-public:
-    static void setLocale(INT nLocale);
-    static INT getLocale();
-    static BOOL isSceneManagedMode();
-};
+#include "System/Rcf.h"
+
+
+
+
+
 
 #include "Game/SceneInfo.h"
 
