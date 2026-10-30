@@ -1198,43 +1198,50 @@ void _makeLocalizePath(CHAR* pszOut, const CHAR* pszSrc, INT nLocale) {
         strcpy(pszOut, pszSrc);
     }
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _atolen_c(const CHAR* lpszInStr) {
+/* Parked: _atolen: 14 of 81 lines, 4 bytes short - _atoi's shape (one return, goto exits, '$' test first with
+ * the 0x case inside `if (*p != '$')`); left: the same isupper branch-vs-movz in _hexValue as _atoi, and the
+ * original's block order (0x case jumps over the '$' block to `nRet = 2`, p = lpszInStr + 2 from a0). */
+#if 0
+INT _atolen(const CHAR* lpszInStr) {
     INT nRet = 0;
     const CHAR* p = lpszInStr;
 
-    if (!p) {
-        return 0;
-    }
-    if (*p == '$' || (*p == '0' && p[1] == 'x')) {
-        if (*p == '$') {
+    if (p) {
+        if (*p != '$') {
+            if (*p == '0' && p[1] == 'x') {
+                p = lpszInStr + 2;
+                nRet = 2;
+            } else {
+                goto dec;
+            }
+        } else {
             p++;
             nRet = 1;
-        } else {
-            p += 2;
-            nRet = 2;
         }
         while (*p) {
             if (_hexValue(*p) < 0) {
-                break;
+                goto end;
             }
             p++;
             nRet++;
         }
         return nRet;
+    dec:
+        if (*p == '#') {
+            p++;
+            nRet = 1;
+        }
+        while (*p && isdigit(*p)) {
+            nRet++;
+            p++;
+        }
     }
-    if (*p == '#') {
-        p++;
-        nRet = 1;
-    }
-    while (*p && isdigit(*p)) {
-        nRet++;
-        p++;
-    }
+end:
     return nRet;
 }
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _atolen__FPCc);
+#endif
 CHAR* _getDbgParsePtr() {
     return (CHAR*)s_pDbgFileBuf->getBufPtr() + s_nDbgFilePtr;
 }
