@@ -35,13 +35,13 @@ public:
 };
 }
 
-class CBattleEnemyManager {
-private:
-    UBYTE _m_0x00[0x74];
-    INT m_iTotalEnemyNum; /* 0x74 */
-public:
-    INT getTotalEnemyNum() { return m_iTotalEnemyNum; } /* name unknown */
-};
+#include "Game/Enemy/BattleEnemyManager.h"
+
+
+
+
+
+
 
 class CBossDeadDemo {
 public:

@@ -40,10 +40,10 @@ void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 
-class CBattleEnemyManager { /* a CTask (Game/Enemy/BattleEnemyManager.h) */
-public:
-    BOOL checkBattleEnemyFlag(ULONGLONG inFlag);
-};
+#include "Game/Enemy/BattleEnemyManager.h"
+
+
+
 
 template <class T> static inline T& _ref(T& v) { return v; }
 

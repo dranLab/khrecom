@@ -37,15 +37,15 @@ inline void _enemyLoudnessEmptyString() {
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-class CBattleEnemyManager { /* a CTask (Game/Enemy/BattleEnemyManager.h) */
-private:
-    UBYTE _m_0x00[0x74];
-    INT m_iTotalEnemyNum; /* 0x74 */
-public:
-    INT getTotalEnemyNum() { return m_iTotalEnemyNum; } /* name unknown */
-    SLContainerT<CTask>* getFirstBattleEnemy();
-    INT createRandomFormationEnemy(const FVECTOR& inPos, INT inID);
-};
+#include "Game/Enemy/BattleEnemyManager.h"
+
+
+
+
+
+
+
+
 
 namespace Loudness {
 static CHAR* IdlingMotion = "e030_001";
