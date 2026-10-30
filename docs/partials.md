@@ -63,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 1039 (957 in 109 headers, 82 in 35 .cpp); MATCH: 117
   by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 43, guessed 43, header-level 74, stand-in 35, other 6
-stand-ins: 347 foreign in 122 files (97 names), 200 unattributed, 172 own
+stand-ins: 346 foreign in 122 files (96 names), 200 unattributed, 172 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
 mechanisms: 962 sites (923 untagged); #line: 1238
@@ -79,7 +79,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 2.0 | `System/CoordMan.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CCoordMan (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/2d/2DLay.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | LAY_SCREEN (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/Effect/libppp/keProg/pppKeLns.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | sceGsStoreImage (1 complete) |  |
 | R0 | 2.0 | `System/Graphic/WorldEnv.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CWorldEnv (1 complete) |  |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
 | R1 | 6.0 | `Form/Menu/SaveLoad.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CSaveLoad, GAMECLEAR, SAVELOAD (3 complete) | inline bodies or virtuals |
+| R1 | 6.0 | `Game/Enemy/BossDeadDemo.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users | CBossDeadDemo (1 complete) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -152,7 +152,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CCollObj` | superset | Game/Collision/CollObj.h | 1 |  | 1 PARTIAL |
 | `CCollUtil` | partial | Game/Collision/CollUtilA.h | 1 |  | missing methods: backupChipStatus, checkHangEdge, checkLadderUp, clean, closestPointOnLine, detectActorTrapXZ, ... (+26); padding: _pad028, _pad224; extra methods: getInstance; 11 PARTIAL |
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
-| `CCoordMan` | complete | System/CoordMan.h | 1 |  |  |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CEffectMotion` | complete | Game/EffectMotion.h | 1 |  |  |
 | `CEventLineDisp` | complete | Game/Atel/VSME.h | 1 |  |  |
@@ -328,7 +327,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Buf.h` | 4 | 0/1/0/0 | 19 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
 | `System/Component.h` | 3 | 1/1/0/0 | 5 |
-| `System/Coord.h` | 3 | 0/1/0/0 | 17 |
+| `System/Coord.h` | 3 | 0/1/0/0 | 18 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 271 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 11 |
 | `System/Fsm.h` | 4 | 1/0/0/1 | 110 |
@@ -344,7 +343,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 8 |
 | `System/Graphic/3DCPrim.h` | 1 | 0/0/1/0 | 1 |
 | `System/Graphic/Anim.h` | 31 | 0/0/0/2 | 149 |
-| `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 87 |
+| `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 88 |
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
 | `System/Graphic/DeFocus.h` | 5 | 0/0/0/5 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
