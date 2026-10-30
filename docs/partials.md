@@ -61,14 +61,14 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 937 (870 in 111 headers, 67 in 36 .cpp); MATCH: 139
-  by category: method 354, data member 66, type 85, fwd decl 53, #include 32, changed in place 127, padding 18, path override 24, gate 41, guessed 39, header-level 74, stand-in 18, other 6
-stand-ins: 123 foreign in 75 files (50 names), 201 unattributed, 169 own
-duplicate class names across headers: 24
+PARTIAL: 937 (871 in 112 headers, 66 in 36 .cpp); MATCH: 139
+  by category: method 354, data member 66, type 85, fwd decl 53, #include 32, changed in place 128, padding 18, path override 24, gate 41, guessed 39, header-level 74, stand-in 17, other 6
+stand-ins: 116 foreign in 71 files (49 names), 201 unattributed, 169 own
+duplicate class names across headers: 23
 padding: 21 arrays, 9 accessors
-mechanisms: 952 sites (903 untagged); #line: 1242
+mechanisms: 949 sites (900 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 577, superset 128, partial 94, gated 91, missing 8, unattributed 309
+classes: complete 579, superset 128, partial 93, gated 90, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -80,7 +80,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
 | R0 | 2.0 | `System/Rcf.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRcf, RcfKey, RcfMapInfo (3 complete) |  |
-| R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
 | R1 | 5.0 | `Form/DebugWindow.h` | ready | 1 stand-in files, 0 dup headers, 3 gate users | CDebugWindow (1 superset) | inline bodies or virtuals (gate) |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Game/Player/PlayerCamera.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerCamera (1 gated) | inline bodies or virtuals (gate) |
 | R1 | 2.0 | `Game/Player/PlayerRiku.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerRiku (1 superset) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/PlayerSora.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerSora (1 superset) | inline bodies or virtuals |
+| R1 | 2.0 | `Game/Player/Summon.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CSummon (1 partial) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -107,7 +107,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `C2DMan` | gated | System/Graphic/2d/2DMan.h | 28 | Form/Menu/SaveLoadCtrl.h |  |
 | `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
 | `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
-| `DropPrize` | gated | Game/Gimmick/GimmickManager.h | 7 |  |  |
 | `VTransInfo` | gated | System/Graphic/Gprim.h | 6 | System/Graphic/modeldata.h | 1 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 4 |  | missing methods: ~CPointCollision |
@@ -160,7 +159,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `C3DPolyG4` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DPolyG4 |
 | `C3DStripBase` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DStripBase; 1 PARTIAL |
 | `C3DTile` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | virtual order differs |
-| `CARD_KIND` | partial | Game/Enemy/BattleEnemy.h | 0 | Game/AttachCard.h, Game/Gimmick/GimmickManager.h | missing fields: CARD_KIND_KingdomChain, CARD_KIND_DesireLamp, CARD_KIND_TreasureOfSea, CARD_KIND_PumpkinHead, CARD_KIND_FairyHarp, CARD_KIND_WishStar, ... (+217) |
 | `CCPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: setALPHA, setCLAMP, setSCISSOR, setTEST; virtual order differs; 5 PARTIAL |
 | `CCollBody` | superset | Game/Collision/CollBody.h | 0 | Game/BodyCollision.h | virtual order differs; 1 PARTIAL |
 | `CFSM` | gated | System/Fsm.h | 0 | Game/Entity.h |  |
@@ -206,6 +204,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Card.h` | 13 | 2/0/1/0 | 25 |
 | `Game/CardBattle.h` | 47 | 4/2/0/0 | 146 |
 | `Game/CardKind.h` | 0 | 0/0/2/0 | 153 |
+| `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
 | `Game/CollParam.h` | 1 | 5/0/1/0 | 158 |
 | `Game/Collision/CollAttack.h` | 0 | 0/1/0/0 | 11 |
 | `Game/Collision/CollBody.h` | 2 | 0/1/0/0 | 5 |
@@ -219,7 +218,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/Ride.h` | 1 | 4/0/1/0 | 6 |
 | `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
 | `Game/EffectMotion.h` | 0 | 5/0/2/0 | 8 |
-| `Game/Enemy/BattleEnemy.h` | 35 | 0/0/2/0 | 58 |
+| `Game/Enemy/BattleEnemy.h` | 35 | 0/0/1/0 | 58 |
 | `Game/Enemy/EnemyParam.h` | 15 | 2/1/1/0 | 16 |
 | `Game/Enemy/EnemyTornadostep.h` | 0 | 0/0/1/0 | 2 |
 | `Game/Enemy/EnemyWhitemushroom.h` | 0 | 0/1/0/0 | 2 |
@@ -242,7 +241,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Gimmick/GimmickFountain.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Gimmick/GimmickJackBox.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Gimmick/GimmickLotusLeaf.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickManager.h` | 0 | 6/0/0/1 | 42 |
 | `Game/Gimmick/GimmickSavePoint.h` | 0 | 0/1/0/0 | 3 |
 | `Game/Gimmick/GimmickThunderTrap.h` | 0 | 0/2/0/0 | 2 |
 | `Game/Gimmick/GimmickToldPipe.h` | 0 | 0/1/0/0 | 2 |
@@ -512,7 +510,6 @@ or `untagged`.
 | unit gate | `GAME_ENEMY_BATTLEENEMY_CPP` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:1 |
 | unit gate | `GAME_ENTITY_CPP` | 1 | 0 | untagged, e.g. Game/Entity.cpp:1 |
 | unit gate | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.cpp:1 |
-| unit gate | `GAME_GIMMICK_GIMMICKMANAGER_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/GimmickManager.cpp:1 |
 | unit gate | `GAME_MAP_CPP` | 1 | 0 | untagged, e.g. Game/Map.cpp:1 |
 | unit gate | `GAME_PLAYER_PLAYERCAMERA_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerCamera.cpp:1 |
 | unit gate | `GAME_PLAYER_PLAYERGAUGE_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerGauge.cpp:2 |
@@ -531,7 +528,6 @@ or `untagged`.
 | unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:112 |
 | unit gate site | `GAME_ENTITY_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:450 |
 | unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.h:49 |
-| unit gate site | `GAME_GIMMICK_GIMMICKMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Gimmick/GimmickManager.h:14 |
 | unit gate site | `GAME_MAP_CPP` | 1 | 1 | the full classes need System/Task.h, Gprim.h and Model.h, whose strings Game/MapUnitTable's .rodata lacks; other includers see the partial CMap below |
 | unit gate site | `GAME_PLAYER_PLAYERCAMERA_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerCamera.h:35 |
 | unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 2 | 1 | as above |
