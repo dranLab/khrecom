@@ -63,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 991 (910 in 109 headers, 81 in 36 .cpp); MATCH: 140
   by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 33, other 6
-stand-ins: 273 foreign in 111 files (69 names), 201 unattributed, 170 own
+stand-ins: 271 foreign in 111 files (68 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 960 sites (910 untagged); #line: 1242
@@ -85,7 +85,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
 | R1 | 4.5 | `Game/Collision/CollBody.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users, 1 PARTIAL | CCollBody (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 4.5 | `System/Graphic/MotData.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CMotData (1 partial) | inline bodies or virtuals |
-| R1 | 4.0 | `Form/Menu/Camp.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CCamp (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Form/Menu/Pause.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Enemy/BossDeadDemo.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CBossDeadDemo (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/MessageManager.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMessageManager (1 complete) | inline bodies or virtuals |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 2.5 | `System/Graphic/2d/2DSeq.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | C2DSeq (1 superset) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/GameOver.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CGameOver (1 complete) | inline bodies or virtuals |
+| R1 | 2.0 | `Form/Menu/LevelUp.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CLevelUp (1 complete) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -119,7 +119,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 3 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, isDraw, setAutomaticDistance, setAutomaticHeight, setClipDistance, ... (+4); extra methods: setADensity, setCDensity; 6 PARTIAL |
 | `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
 | `CBossDeadDemo` | complete | Game/Enemy/BossDeadDemo.h | 2 |  |  |
-| `CCamp` | complete | Form/Menu/Camp.h | 2 |  |  |
 | `CGlare` | complete | System/Graphic/Glare.h | 2 |  |  |
 | `CMessageManager` | complete | Game/MessageManager.h | 2 |  |  |
 | `CMotData` | partial | System/Graphic/MotData.h | 2 |  | missing methods: CalcCmpDataSiz, CalcOrgSiz, CheckGosa, CompressAll, CompressData, CompressSkl, ... (+16); extra methods: GetRetFrame; 1 PARTIAL |
@@ -202,7 +201,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Form/DebugWindow.h` | 0 | 2/1/0/4 | 11 |
 | `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 17 |
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
-| `Form/Menu/Menu.h` | 0 | 0/0/1/0 | 15 |
+| `Form/Menu/Menu.h` | 0 | 0/0/1/0 | 17 |
 | `Form/Menu/SaveLoadCtrl.h` | 14 | 1/1/6/0 | 7 |
 | `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 2 |
 | `Form/Menu/TechHelp.h` | 2 | 0/1/0/0 | 3 |
@@ -310,7 +309,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/2d/2DMan.h` | 3 | 0/0/0/3 | 166 |
 | `System/Graphic/2d/2DObj.h` | 4 | 0/1/0/0 | 17 |
 | `System/Graphic/2d/2DSeq.h` | 1 | 1/1/0/0 | 4 |
-| `System/Graphic/2d/2DSeqCtrl.h` | 2 | 1/1/0/0 | 31 |
+| `System/Graphic/2d/2DSeqCtrl.h` | 2 | 1/1/0/0 | 33 |
 | `System/Graphic/2d/2DSeqObj.h` | 8 | 3/3/0/0 | 16 |
 | `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 8 |
 | `System/Graphic/3DCPrim.h` | 1 | 0/0/1/0 | 1 |
