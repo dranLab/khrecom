@@ -28,24 +28,10 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT r);
 
 extern "C" {
 void FlushCache(int operation);
-typedef struct { /* 0x70 */
-    u_long128 vifcode;
-    u_long128 giftag;
-    u_long bitbltbuf;
-    long bitbltbufaddr;
-    u_long trxpos;
-    long trxposaddr;
-    u_long trxreg;
-    long trxregaddr;
-    u_long finish;
-    long finishaddr;
-    u_long trxdir;
-    long trxdiraddr;
-} sceGsStoreImage;
+#include "System/Graphic/Effect/libppp/pppPart.h"
+#include "System/Graphic/Effect/libppp/draw/draw_w.h"
 int sceGsSetDefStoreImage(sceGsStoreImage* sp, short sbp, short sbw, short spsm, short x, short y, short w, short h);
 int sceGsExecStoreImage(sceGsStoreImage* sp, u_long128* dstaddr);
-int sceGsSyncPath(int mode, u_short timeout);
-#include "System/Graphic/Effect/libppp/pppPart.h"
 
 
 
@@ -59,7 +45,6 @@ int sceGsSyncPath(int mode, u_short timeout);
 
 
 
-struct sceDmaChan;
 sceDmaChan* sceDmaGetChan(int id);
 void sceDmaSendN(sceDmaChan* d, void* addr, int size);
 }

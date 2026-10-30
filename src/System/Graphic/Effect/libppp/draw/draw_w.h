@@ -8,6 +8,22 @@ typedef struct _sceDmaChan sceDmaChan;
 void sceDmaSend(sceDmaChan *d, void *tag);
 int sceGsSyncPath(int mode, u_short timeout);
 
+/* libgraph */
+typedef struct { /* 0x70 */
+    u_long128 vifcode;
+    u_long128 giftag;
+    u_long bitbltbuf;
+    long bitbltbufaddr;
+    u_long trxpos;
+    long trxposaddr;
+    u_long trxreg;
+    long trxregaddr;
+    u_long finish;
+    long finishaddr;
+    u_long trxdir;
+    long trxdiraddr;
+} sceGsStoreImage;
+
 typedef struct { /* 0x90 */
     u_long128 dma_code;
     u_long gif_code;
