@@ -1450,9 +1450,7 @@ void _countRcfSceneAndMap() {
         p = _getDbgParsePtr();
     }
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _parseRcfSceneAndMapInfo_c() {
+void _parseRcfSceneAndMapInfo() {
     CHAR* p;
     BOOL bCont;
     USHORT nSceneIdx;
@@ -1486,8 +1484,8 @@ __attribute__((section(".sdata"))) void _parseRcfSceneAndMapInfo_c() {
             }
             if (*p == ';') {
                 _getStageInfo(pScene->_nGroup, pScene->_nMember, pScene->_szTitle, &nAtelCnt);
-                pScene->_nRcfMapIdx = -1;
                 pScene->_nAtelCount = nAtelCnt;
+                pScene->_nRcfMapIdx = -1;
                 nSceneIdx++;
                 pScene++;
             }
@@ -1505,23 +1503,21 @@ __attribute__((section(".sdata"))) void _parseRcfSceneAndMapInfo_c() {
         pMap = s_pRcfMapArray;
         nMapIdx = -1;
         pCurrentMap = __null;
-        i = 0;
         while (*p && nMapIdx < s_nRcfMapCount) {
             if (isTokenEND(p)) {
                 _skipDbgLine();
                 break;
             }
             if (*p == '#') {
-                nMapIdx = i++;
-                pCurrentMap = pMap;
+                nMapIdx++;
                 _getStageInfo(pMap->_nGroup, pMap->_nMember, pMap->_szTitle, __null);
+                pCurrentMap = pMap;
                 pMap++;
             } else if (*p == ';' && pCurrentMap) {
-                INT nIdx;
                 _getStageInfo(nGroup, nMember, __null, __null);
-                nIdx = _seekRcfSceneInfo(nGroup, nMember, s_pRcfSceneArray, s_nRcfSceneCount);
-                if (nIdx >= 0) {
-                    RcfSceneInfo& s = s_pRcfSceneArray[nIdx];
+                i = _seekRcfSceneInfo(nGroup, nMember, s_pRcfSceneArray, s_nRcfSceneCount);
+                if (i >= 0) {
+                    RcfSceneInfo& s = s_pRcfSceneArray[i];
                     pCurrentMap->_SceneList.pushBack(s);
                     s._nRcfMapIdx = nMapIdx;
                 }
@@ -1532,7 +1528,6 @@ __attribute__((section(".sdata"))) void _parseRcfSceneAndMapInfo_c() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRcfSceneAndMapInfo__Fv);
 void _loadDbgRcfSceneInfo() {
     s_nRcfSceneCount = 0;
     s_nDbgFilePtr = 0;
