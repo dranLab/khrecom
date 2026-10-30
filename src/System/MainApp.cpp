@@ -75,12 +75,12 @@ int CreateSema(SemaParam* param);
 int DeleteSema(int sid);
 int SignalSema(int sid);
 int WaitSema(int sid);
-int ReferSemaStatus(int sid, SemaParam* param);
+int ReferSemaStatus(int sid, SemaParam* param); int iReferSemaStatus(int sid, SemaParam* param); int iSignalSema(int sid);
 int GetThreadId();
 int ChangeThreadPriority(int tid, int prio);
 int CreateThread(ThreadParam* param);
 int StartThread(int tid, void* arg);
-int SleepThread();
+int SleepThread(); int iWakeupThread(int tid); int iCancelWakeupThread(int tid);
 int TerminateThread(int tid);
 int DeleteThread(int tid);
 int SuspendThread(int tid);
@@ -299,7 +299,7 @@ CColorFader* _pMasterFader;
 UINT _nFrameCount;
 volatile UINT _nVSyncCount;
 volatile INT _nVProcCount;
-INT _nVWaitCount;
+volatile INT _nVWaitCount;
 volatile INT _nDrawEnd;
 BOOL _bForceHalfFps;
 INT _nBackToFullFpsTimer;
@@ -348,7 +348,7 @@ static INT _installIntcHandler(INT cause, INT (*handler)(INT), INT next);
 static INT _uninstallIntcHandler(INT cause, INT hid);
 static void _disposeThread();
 static TIMEQ _getTimePerFrame(INT nHCount);
-INT _VBlankStartHandler(INT nCH); // INCLUDE_ASM: declared extern (static in the original)
+static INT _VBlankStartHandler(INT nCH);
 static void procFlipThread(void*);
 static void _checkSnapShot();
 static void _checkReportMemory();
@@ -1058,7 +1058,58 @@ BOOL CMainApp::isDbgUsrPauseDisable() {
     return !(_nUsrPause & 2);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", _VBlankStartHandler__Fi);
+static INT _VBlankStartHandler(INT nCH) {
+    SemaParam sema;
+    BOOL bFlip;
+    CColorFader* pFader;
+
+    _nVSyncCount++;
+    _nVProcCount++;
+    iReferSemaStatus(_VsyncSema, &sema);
+    if (sema.numWaitThreads) iSignalSema(_VsyncSema);
+    bFlip = FALSE;
+    _nBackToFullFpsTimer--;
+    if (_nDrawEnd) {
+        *(volatile u_int*)0x10000000 = 0;
+        INT nOverFrame = _nVProcCount - _nVWaitCount;
+        if (nOverFrame > 0) {
+            bFlip = TRUE;
+            if (!_nVWaitCount && nOverFrame >= 2) {
+                _nVWaitCount = 1;
+                _nBackToFullFpsTimer = _nBackToFullFpsLag;
+            }
+        } else if (!_bForceHalfFps && _nBackToFullFpsTimer <= 0) {
+            if (_nVProcCount == 1) {
+                _nVWaitCount = 0;
+                bFlip = TRUE;
+            }
+            _nBackToFullFpsTimer = 0;
+        }
+    }
+    if (bFlip) {
+        INT nID = _nFlipThreadID;
+        iWakeupThread(nID);
+        iCancelWakeupThread(nID);
+        _nVProcCount = 0;
+    }
+    pFader = _pMasterFader;
+    if (pFader && (pFader->hasReqFade() || pFader->isFadeDone())) {
+        BOOL bRetFSAA = FALSE;
+        INT nAlpha = (INT)((1.0f - pFader->getAlpha()) * 255.5f);
+        CPackMan::setBGColor(pFader->getColor());
+        CPackMan::updateBGBlend(nAlpha);
+        if (pFader->isFadeDone()) {
+            pFader->clearReq();
+            bRetFSAA = nAlpha == 255;
+        } else {
+            pFader->main(VSYNC_TIMEQ);
+        }
+        if (bRetFSAA) CPackMan::changePcrtcMode(0);
+    }
+    __asm__ volatile("sync.l");
+    __asm__ volatile("ei");
+    return 0;
+}
 
 static void procFlipThread(void*) {
     for (;;) {
