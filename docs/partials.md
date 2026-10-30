@@ -61,14 +61,14 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 937 (871 in 112 headers, 66 in 36 .cpp); MATCH: 139
-  by category: method 354, data member 66, type 85, fwd decl 53, #include 32, changed in place 128, padding 18, path override 24, gate 41, guessed 39, header-level 74, stand-in 17, other 6
-stand-ins: 116 foreign in 71 files (49 names), 201 unattributed, 169 own
-duplicate class names across headers: 23
+PARTIAL: 935 (869 in 113 headers, 66 in 36 .cpp); MATCH: 142
+  by category: method 353, data member 66, type 85, fwd decl 53, #include 32, changed in place 127, padding 18, path override 24, gate 41, guessed 39, header-level 74, stand-in 17, other 6
+stand-ins: 102 foreign in 68 files (47 names), 201 unattributed, 168 own
+duplicate class names across headers: 21
 padding: 21 arrays, 9 accessors
-mechanisms: 949 sites (900 untagged); #line: 1242
+mechanisms: 950 sites (899 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 579, superset 128, partial 93, gated 90, missing 8, unattributed 309
+classes: complete 580, superset 128, partial 94, gated 88, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -106,8 +106,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 |---|---|---|---:|---|---|
 | `C2DMan` | gated | System/Graphic/2d/2DMan.h | 28 | Form/Menu/SaveLoadCtrl.h |  |
 | `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
-| `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
-| `VTransInfo` | gated | System/Graphic/Gprim.h | 6 | System/Graphic/modeldata.h | 1 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 4 |  | missing methods: ~CPointCollision |
 | `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
@@ -317,7 +315,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 38 |
 | `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 5 |
-| `System/Graphic/Gprim.h` | 49 | 3/3/5/23 | 231 |
+| `System/Graphic/Gprim.h` | 48 | 3/3/5/21 | 231 |
 | `System/Graphic/GprimFull.h` | 0 | 1/15/2/0 | 1 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 10 |
@@ -332,8 +330,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/ShadowModel.h` | 6 | 0/0/1/0 | 7 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
 | `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 36 |
+| `System/Graphic/TexInfo.h` | 1 | 1/0/1/0 | 234 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
-| `System/Graphic/modeldata.h` | 15 | 1/2/0/1 | 82 |
+| `System/Graphic/modeldata.h` | 13 | 1/2/0/1 | 82 |
 | `System/LinkedBuf.h` | 6 | 1/2/1/0 | 7 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 59 |
@@ -359,14 +358,14 @@ or `untagged`.
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 0 | untagged, e.g. Game/Atel/Atel.cpp:31 |
 | feature | `MODELDATA_H_TEXINFO` | 5 | 0 | untagged, e.g. System/Graphic/DispList.cpp:1 |
-| feature | `MODELDATA_H_TEXINFO_CTOR` | 1 | 0 | untagged, e.g. System/RsrcData.cpp:6 |
+| feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 1 | reqTransTex declares a TexInfo local (constructor memsets it) |
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 0 | untagged, e.g. Game/Collision/CollObj.h:91 |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 0 | untagged, e.g. Game/Entity.h:427 |
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 0 | untagged, e.g. System/LinkedBuf.h:10 |
-| feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:78 |
-| feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:115 |
+| feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:79 |
+| feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
 | full-class | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.cpp:2 |
 | full-class | `FORM_DEBUGMENU_FULL` | 1 | 0 | untagged, e.g. Form/DebugMenu.cpp:3 |
 | full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 1 | CNakCamera; the original has Gprim.h's strings (PathData.h includes it first) |
@@ -534,7 +533,7 @@ or `untagged`.
 | unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Player/PlayerManager.h:93 |
 | unit gate site | `GAME_PLAYER_PLAYER_CPP` | 46 | 0 | untagged, e.g. Game/Player/Player.h:135 |
 | unit gate site | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.h:30 |
-| unit gate site | `SYSTEM_GRAPHIC_GPRIM_CPP` | 2 | 0 | untagged, e.g. System/Graphic/Gprim.h:155 |
+| unit gate site | `SYSTEM_GRAPHIC_GPRIM_CPP` | 2 | 0 | untagged, e.g. System/Graphic/Gprim.h:156 |
 | unit gate site | `SYSTEM_TASKMAN_CPP` | 2 | 0 | untagged, e.g. System/Task.h:183 |
 
 ## String evidence
