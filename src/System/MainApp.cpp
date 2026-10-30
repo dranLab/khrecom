@@ -251,16 +251,7 @@ public:
     static void collisionDelete();
 };
 
-class CCollUtil {
-public:
-    static CCollUtil* m_pInstance;
-private:
-    UBYTE _pad[0x240];
-public:
-    CCollUtil();
-    ~CCollUtil();
-    void setup();
-};
+#include "Game/Collision/CollUtilA.h"
 
 /* the singletons' inline creation/deletion (from their headers) */
 struct MainAppSingletons {
