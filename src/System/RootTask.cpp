@@ -61,14 +61,14 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 
-class CMemocaAgent : public CTask {
-    char _pad[0xd0 - 0x40];
+#include "Form/Menu/SaveLoadUtil.h"
 
-public:
-    CMemocaAgent(CTask* pParent);
-    BOOL reqLoadSysData();
-    BOOL isCompleteReq(INT* pResult) const;
-};
+
+
+
+
+
+
 
 namespace D2 {
 class C2DMan {
