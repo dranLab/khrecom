@@ -356,7 +356,7 @@ static void _setVideoMode(BOOL bNTSC);
 void _halt(const CHAR* pszMsg, const CHAR* pszExp); // INCLUDE_ASM: declared extern (static in the original)
 static void _initTraceOnScreen();
 static void _disposeTraceOnScreen();
-void _initFntTbl(); // INCLUDE_ASM: declared extern (static in the original)
+static void _initFntTbl();
 static void _dispTraceOnScreen();
 
 void CMainApp::initialize(BOOL bNTSC) {
@@ -1315,14 +1315,25 @@ static void _disposeTraceOnScreen() {
     g_bTraceOnScreen = 0;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", _initFntTbl__Fv);
-/* placeholder for _initFntTbl (INCLUDE_ASM): its strings */
-__attribute__((section(".sdata"))) void _initFntTbl_placeholder() {
+static void _initFntTbl() {
 #line 2334
     s_pTrScrStrTbl = new (__FILE__ "(2334)") CFnt[24];
     if (!(s_pTrScrStrTbl)) AssertApp(__FILE__, __LINE__, "s_pTrScrStrTbl", 0);
+    for (UINT i = 0; i < 24; i++) {
+        CFnt& f = s_pTrScrStrTbl[i];
+        f.setSize(13);
+        f.setPosition(-220, i * 14 - 156, 0xFFFF28);
+        f.setStyle(0x8000);
+        f.setColor(0x80, 0x80, 0x80);
+        f.setLayerFG(25);
+    }
 #line 2348
     s_pTrScrZabu = new (__FILE__ "(2348)") CTile;
+    s_pTrScrZabu->m_P0.set(-0xDC0, -0xAA0); // MATCH: the original reloads s_pTrScrZabu for each later statement (volatile reads)
+    (*(CTile* volatile*)&s_pTrScrZabu)->m_P1.set(0xDC0, 0xAA0);
+    (*(CTile* volatile*)&s_pTrScrZabu)->m_C0.set(1, 1, 1, 0x40);
+    (*(CTile* volatile*)&s_pTrScrZabu)->setSemiTrans(ALPHA_BLEND);
+    (*(CTile* volatile*)&s_pTrScrZabu)->setLayerFG(25);
 }
 
 void addTraceString(CHAR* pszSrc) {
