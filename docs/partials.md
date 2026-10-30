@@ -61,14 +61,14 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 991 (910 in 109 headers, 81 in 38 .cpp); MATCH: 140
-  by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 33, other 6
-stand-ins: 233 foreign in 108 files (59 names), 201 unattributed, 170 own
+PARTIAL: 981 (912 in 110 headers, 69 in 37 .cpp); MATCH: 140
+  by category: method 381, data member 67, type 85, fwd decl 53, #include 32, changed in place 132, padding 27, path override 24, gate 41, guessed 39, header-level 74, stand-in 20, other 6
+stand-ins: 137 foreign in 79 files (58 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
-mechanisms: 960 sites (910 untagged); #line: 1242
+mechanisms: 959 sites (909 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 574, superset 129, partial 93, gated 93, missing 9, unattributed 309
+classes: complete 575, superset 129, partial 93, gated 92, missing 9, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -93,19 +93,17 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 3.0 | `System/Graphic/3DCPrim.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users | C3DCPrim (1 partial) | inline bodies or virtuals |
 | R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 2.5 | `System/Graphic/2d/2DSeq.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | C2DSeq (1 superset) | inline bodies or virtuals |
+| R1 | 2.5 | `System/RsrcDB.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CRsrcDB (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Roulette.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRoulette (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/LockOnManager.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CLockOnManager (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/MinigameManager.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMinigameManager (1 complete) | inline bodies or virtuals |
-| R1 | 2.0 | `Game/Player/Friend.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFriend (1 partial) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
 | class | readiness | home | stand-in files | also defined in | gaps vs ref |
 |---|---|---|---:|---|---|
-| `CRsrcDB` | partial | System/RsrcDB.h | 67 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene |
-| `NAME_CASE` | gated | System/RsrcData.h | 30 |  |  |
 | `C2DMan` | gated | System/Graphic/2d/2DMan.h | 28 | Form/Menu/SaveLoadCtrl.h |  |
 | `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
 | `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
@@ -150,6 +148,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRcf` | complete | System/Rcf.h | 1 |  |  |
 | `CRoulette` | complete | Form/Menu/Roulette.h | 1 |  |  |
 | `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
+| `CRsrcDB` | partial | System/RsrcDB.h | 1 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene; 1 PARTIAL |
 | `CRsrcTex` | gated | System/RsrcData.h | 1 |  |  |
 | `CRsrcVSV` | gated | System/RsrcData.h | 1 |  | missing methods: getBgmID, getFilePath, getSectorSize, getStartSector, ~CRsrcVSV |
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
@@ -286,7 +285,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Status.h` | 11 | 1/0/1/0 | 15 |
 | `Game/StorageWork.h` | 2 | 2/1/1/0 | 61 |
 | `Game/Technic.h` | 3 | 1/1/0/0 | 19 |
-| `System/Buf.h` | 4 | 0/1/0/0 | 24 |
+| `System/Buf.h` | 4 | 0/1/0/0 | 25 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
 | `System/Component.h` | 3 | 1/1/0/0 | 5 |
 | `System/Coord.h` | 3 | 0/1/0/0 | 18 |
@@ -349,8 +348,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Math3D.h` | 1 | 2/0/1/0 | 59 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 6 |
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 97 |
-| `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
-| `System/RsrcData.h` | 3 | 0/0/0/32 | 29 |
+| `System/RsrcDB.h` | 1 | 1/0/1/0 | 68 |
+| `System/RsrcData.h` | 4 | 0/0/0/33 | 29 |
 | `System/SJoint.h` | 9 | 0/0/0/0 | 210 |
 | `System/Task.h` | 27 | 1/2/0/1 | 235 |
 | `System/TaskMan.h` | 7 | 1/2/0/0 | 84 |
@@ -390,7 +389,7 @@ or `untagged`.
 | full-class site | `FORM_DEBUGWINDOW_FULL` | 3 | 0 | untagged, e.g. Form/DebugWindow.h:42 |
 | full-class site | `MAPENEMY_H_FULL_CLASS` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.h:18 |
 | full-class site | `MOVEMENT_H_FULL_CLASS` | 1 | 0 | untagged, e.g. Game/Movement.h:12 |
-| full-class site | `RSRCDATA_H_FULL` | 2 | 0 | untagged, e.g. System/RsrcDB.h:23 |
+| full-class site | `RSRCDATA_H_FULL` | 1 | 0 | untagged, e.g. System/RsrcData.h:12 |
 | guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 0 | untagged, e.g. Game/Gimmick/CreateGimmick.cpp:1 |
 | guard skip | `GAME_COLLISION_COLLBODY_H` | 1 | 0 | untagged, e.g. Game/BodyCollision.h:13 |
 | guard skip | `GAME_COLLISION_COLLUTILA_H` | 1 | 0 | untagged, e.g. Game/Collision/CollUtil.h:28 |
