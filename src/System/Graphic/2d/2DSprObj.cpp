@@ -461,6 +461,12 @@ void C2DSprObj::_main(TIMEQ qTime) {
         m_Flg &= ~1;
     }
 }
+/* Not attempted: 438 instructions; read from the asm only. Flow: bilinear flag from m_status.bilinear_disable, mat =
+ * scale * RotMatrix(m_vRot) * translate(m_vPos + m_vSwy) * translate(m_vOfs), then the m_pSeqControl chain (the first
+ * object after m_fgParent == 0 stores parentMatrix/parentColor/controlMatrix/controlColor, later ones only multiply with
+ * pParentSeqControl; the m_fgParent < 0 / parentMatrix[3][3] == 0 cases choose parentMatrix or vCol), the bilinear
+ * decision (mat diagonal != 1), colour clamp (ScaleVector 128, sceVu0ClampVector 0..255, FTOI0Vector), then the
+ * getRect/getFukidasiRect loop and the per-vertex ApplyMatrix2 + MMI colour multiply (pextlb/pmulth/ppacb). */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", move__Q22D29C2DSprObj);
 void C2DSprObj::getRect(FVECTOR2* pvOut4, SprPrim& rSprPrim) {
     FVECTOR fVec;
