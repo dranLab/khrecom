@@ -61,14 +61,14 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1023 (942 in 109 headers, 81 in 35 .cpp); MATCH: 128
-  by category: method 401, data member 68, type 88, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 42, guessed 41, header-level 74, stand-in 34, other 6
-stand-ins: 335 foreign in 120 files (87 names), 201 unattributed, 170 own
+PARTIAL: 1022 (939 in 109 headers, 83 in 36 .cpp); MATCH: 132
+  by category: method 400, data member 68, type 86, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 42, guessed 41, header-level 74, stand-in 36, other 6
+stand-ins: 330 foreign in 120 files (84 names), 201 unattributed, 170 own
 duplicate class names across headers: 25
 padding: 31 arrays, 26 accessors
-mechanisms: 958 sites (916 untagged); #line: 1238
+mechanisms: 958 sites (914 untagged); #line: 1238
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 572, superset 129, partial 94, gated 94, missing 9, unattributed 309
+classes: complete 573, superset 129, partial 94, gated 93, missing 9, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -107,7 +107,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcDB` | partial | System/RsrcDB.h | 67 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene |
 | `NAME_CASE` | gated | System/RsrcData.h | 30 |  |  |
 | `C2DMan` | gated | System/Graphic/2d/2DMan.h | 28 | Form/Menu/SaveLoadCtrl.h |  |
-| `CRcf` | complete | System/Rcf.h | 25 |  |  |
+| `CRcf` | complete | System/Rcf.h | 24 |  |  |
 | `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
 | `CBattleEnemyManager` | complete | Game/Enemy/BattleEnemyManager.h | 11 |  |  |
 | `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
@@ -130,7 +130,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
 | `SAVELOAD` | complete | Form/Menu/SaveLoad.h | 3 |  |  |
 | `CCamp` | complete | Form/Menu/Camp.h | 2 |  |  |
-| `CDebugWindow` | superset | Form/DebugWindow.h | 2 |  | padding: _m_0x40; virtual order differs |
 | `CGlare` | complete | System/Graphic/Glare.h | 2 |  |  |
 | `CMessageManager` | complete | Game/MessageManager.h | 2 |  |  |
 | `CMotData` | partial | System/Graphic/MotData.h | 2 |  | missing methods: CalcCmpDataSiz, CalcOrgSiz, CheckGosa, CompressAll, CompressData, CompressSkl, ... (+16); extra methods: GetRetFrame; 1 PARTIAL |
@@ -148,8 +147,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CBaseWnd` | complete | System/Wnd.h | 1 |  |  |
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CCircleCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CCircleCollision |
-| `CCollObj` | superset | Game/Collision/CollObj.h | 1 |  | 1 PARTIAL |
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
+| `CDebugWindow` | superset | Form/DebugWindow.h | 1 |  | padding: _m_0x40; virtual order differs |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CEffectMotion` | complete | Game/EffectMotion.h | 1 |  |  |
 | `CEventLineDisp` | complete | Game/Atel/VSME.h | 1 |  |  |
@@ -157,7 +156,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CFriend` | partial | Game/Player/Friend.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CGame` | superset | Game/Game.h | 1 |  | 19 PARTIAL |
 | `CGameOver` | complete | Form/Menu/GameOver.h | 1 |  |  |
-| `CGameWork` | superset | Game/GameWork.h | 1 |  | 3 PARTIAL |
 | `CImageWnd` | complete | System/Wnd.h | 1 |  |  |
 | `CLevelUp` | complete | Form/Menu/LevelUp.h | 1 |  |  |
 | `CLockOnManager` | complete | Game/LockOnManager.h | 1 |  |  |
@@ -180,7 +178,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcVSV` | gated | System/RsrcData.h | 1 |  | missing methods: getBgmID, getFilePath, getSectorSize, getStartSector, ~CRsrcVSV |
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CSummon` | partial | Game/Player/Summon.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
-| `CTaskMan` | superset | System/TaskMan.h | 1 |  | 3 PARTIAL |
 | `CZFill` | partial | System/Graphic/DeFocus.h | 1 | System/Graphic/GprimFull.h | missing methods: ~CZFill |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `F_UL` | complete | Game/Atel/VSME.h | 1 |  |  |
@@ -218,7 +215,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | header | PARTIAL | classes complete/superset/partial/gated | includers |
 |---|---:|---|---:|
 | `Form/DebugMenu.h` | 0 | 1/0/0/3 | 4 |
-| `Form/DebugWindow.h` | 0 | 2/1/0/4 | 10 |
+| `Form/DebugWindow.h` | 0 | 2/1/0/4 | 11 |
 | `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 11 |
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
 | `Form/Menu/Menu.h` | 0 | 0/0/1/0 | 15 |
@@ -250,7 +247,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollDisp.h` | 8 | 0/0/0/3 | 7 |
 | `Game/Collision/CollMap.h` | 0 | 0/1/0/0 | 29 |
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
-| `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 173 |
+| `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 174 |
 | `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 150 |
 | `Game/Collision/CollUtilA.h` | 1 | 9/1/1/0 | 26 |
 | `Game/Collision/Ride.h` | 1 | 4/0/1/0 | 6 |
@@ -269,7 +266,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Game.h` | 20 | 0/1/0/0 | 42 |
 | `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
 | `Game/GameSubBattle.h` | 0 | 1/0/1/0 | 2 |
-| `Game/GameWork.h` | 3 | 2/1/3/0 | 58 |
+| `Game/GameWork.h` | 3 | 2/1/3/0 | 59 |
 | `Game/Gimmick/BaseGimmick.h` | 0 | 1/1/0/0 | 46 |
 | `Game/Gimmick/GimmickAngelArrow.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Gimmick/GimmickBell.h` | 0 | 0/1/0/0 | 2 |
@@ -313,7 +310,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/SceneEnv.h` | 1 | 0/0/1/0 | 37 |
 | `Game/SceneInfo.h` | 5 | 29/0/1/0 | 86 |
 | `Game/Status.h` | 11 | 1/0/1/0 | 15 |
-| `Game/StorageWork.h` | 2 | 2/1/1/0 | 59 |
+| `Game/StorageWork.h` | 2 | 2/1/1/0 | 60 |
 | `Game/Technic.h` | 3 | 1/1/0/0 | 19 |
 | `System/Buf.h` | 4 | 0/1/0/0 | 19 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
@@ -374,15 +371,15 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
 | `System/Graphic/modeldata.h` | 15 | 1/2/0/1 | 82 |
 | `System/LinkedBuf.h` | 6 | 1/2/1/0 | 7 |
-| `System/MainApp.h` | 5 | 0/0/0/2 | 270 |
+| `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 59 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 6 |
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 95 |
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
 | `System/RsrcData.h` | 3 | 0/0/0/32 | 29 |
-| `System/SJoint.h` | 9 | 0/0/0/0 | 200 |
+| `System/SJoint.h` | 9 | 0/0/0/0 | 201 |
 | `System/Task.h` | 27 | 1/2/0/1 | 234 |
-| `System/TaskMan.h` | 7 | 1/2/0/0 | 83 |
+| `System/TaskMan.h` | 7 | 1/2/0/0 | 84 |
 | `System/Vector.h` | 22 | 0/0/3/0 | 266 |
 
 ## Mechanisms
@@ -433,7 +430,7 @@ or `untagged`.
 | opt-out site | `TASK_H_NO_SLC_OVERFLOW_MSG` | 1 | 0 | untagged, e.g. System/Task.h:201 |
 | path override | `ANIM_H_PATH` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:2 |
 | path override | `ATELBLUR_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/AtelBlur.cpp:2 |
-| path override | `ATELCROSSFADE_H_PATH` | 3 | 0 | untagged, e.g. System/MainApp.cpp:2 |
+| path override | `ATELCROSSFADE_H_PATH` | 3 | 1 | the original spelled the directory "ATEL" |
 | path override | `ATELFOG_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/AtelFog.cpp:2 |
 | path override | `BATTLEENEMY_H_PATH` | 46 | 0 | untagged, e.g. Game/AttackMotion.cpp:3 |
 | path override | `BODYCOLLISION_H_PATH` | 2 | 1 | __FILE__ of these headers as in the original .rodata |
@@ -443,7 +440,7 @@ or `untagged`.
 | path override | `CHATMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/ChatMan.cpp:2 |
 | path override | `COLLDISP_H_PATH` | 4 | 0 | untagged, e.g. Game/Collision/CollDisp.cpp:3 |
 | path override | `COLLUTIL_H_PATH` | 14 | 1 | __FILE__ as in the original .rodata |
-| path override | `CTDMAN_H_PATH` | 6 | 0 | untagged, e.g. Form/Menu/DecknameEdit.cpp:2 |
+| path override | `CTDMAN_H_PATH` | 6 | 1 | the original spelled this include with the full path ("c:/KHCOM/...", "System/CTD") |
 | path override | `D2MAN_H_PATH` | 10 | 0 | untagged, e.g. System/Graphic/2d/2DCard.cpp:3 |
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
 | path override | `EFFECT_H_PATH` | 5 | 0 | untagged, e.g. Game/Enemy/EnemyBarrelspider.cpp:4 |
