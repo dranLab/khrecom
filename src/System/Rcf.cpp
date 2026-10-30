@@ -666,9 +666,7 @@ INT CRcf::_loadRCFAlias() {
     CRcfCD::setupRcfAlias();
     return TRUE;
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _loadRCF_c(ULONG nInGroup) {
+INT _loadRCF(ULONG nInGroup) {
     char szFileName[256];
 
     if (s_pFileBuf) delete s_pFileBuf;
@@ -677,9 +675,9 @@ __attribute__((section(".sdata"))) INT _loadRCF_c(ULONG nInGroup) {
     s_pFileBuf = new (__FILE__ "(1051)") CBuf;
     sprintf(szFileName, "cdrom0:\\RCF\\G%03d.RCF", nInGroup / 10000);
     s_nReadFileSize = CFileIO::loadFile(szFileName, *s_pFileBuf, 0);
-    return s_nReadFileSize > -1 ? 1 : -2;
+    if (s_nReadFileSize > -1) return 1;
+    return -2;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _loadRCF__FUi);
 void _disposeRCF() {
     if (s_pFileBuf) delete s_pFileBuf;
     s_pFileBuf = __null;
