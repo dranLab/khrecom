@@ -63,7 +63,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 992 (910 in 109 headers, 82 in 37 .cpp); MATCH: 140
   by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 34, other 6
-stand-ins: 264 foreign in 109 files (65 names), 201 unattributed, 170 own
+stand-ins: 262 foreign in 109 files (64 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 960 sites (910 untagged); #line: 1242
@@ -87,7 +87,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 4.0 | `Game/Player/PlayerDRiku.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPlayerDRiku (1 superset) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Prize.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPrize (1 superset) | inline bodies or virtuals |
 | R1 | 4.0 | `System/Fsm.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users | CFSM (1 gated) | inline bodies or virtuals (gate) |
-| R1 | 4.0 | `System/Graphic/Glare.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CGlare (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `System/Graphic/TexCtrl.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CTexCtrl (1 complete) | inline bodies or virtuals |
 | R1 | 3.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `System/Graphic/3DCPrim.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users | C3DCPrim (1 partial) | inline bodies or virtuals |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Form/Menu/RoomCreation.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRoomCreation (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Roulette.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRoulette (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
+| R1 | 2.0 | `Game/EffectMotion.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CEffectMotion (1 complete) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -118,7 +118,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
 | `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 3 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, isDraw, setAutomaticDistance, setAutomaticHeight, setClipDistance, ... (+4); extra methods: setADensity, setCDensity; 6 PARTIAL |
 | `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
-| `CGlare` | complete | System/Graphic/Glare.h | 2 |  |  |
 | `CPlayerDRiku` | superset | Game/Player/PlayerDRiku.h | 2 |  | virtual order differs |
 | `CPrize` | superset | Game/Prize.h | 2 |  | virtual order differs |
 | `CTexCtrl` | complete | System/Graphic/TexCtrl.h | 2 |  |  |
@@ -332,7 +331,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/pppfunctbl.h` | 1 | 0/0/0/0 | 2 |
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 38 |
-| `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 3 |
+| `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 5 |
 | `System/Graphic/Gprim.h` | 49 | 3/3/5/23 | 231 |
 | `System/Graphic/GprimFull.h` | 0 | 1/15/2/0 | 1 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
