@@ -6,7 +6,7 @@
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
 
-#ifdef SYSTEM_GRAPHIC_DEFOCUS_CPP
+#ifdef SYSTEM_GRAPHIC_DEFOCUS_CPP /* MATCH: DebugWindow/GameSubField/GameSubBattle still use the partial classes below (guessed setManual()/setShadow, public m_pInstance) */
 /* The complete classes, for System/Graphic/DeFocus (which emits every inline member, weak, in declaration order).
  * Other includers use the partial classes below. */
 class CZFill : public CGPrim { /* System/Graphic/Gprim.h */
