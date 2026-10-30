@@ -1,7 +1,7 @@
 #define TASK_H_NO_SLC_OVERFLOW_MSG
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"
-#define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h"
+#define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h" /* MATCH: RsrcData.h strings in .rodata use the full path */
 #include "System/RsrcData.h"
 #include "System/Buf.h"
 #include "System/Debug.h"
@@ -83,11 +83,7 @@ namespace Thread {
 void delayThread_1Frame();
 }
 
-class CMovieFiles {
-public:
-    static void initialize();
-    static void finalize();
-};
+#include "System/Movie/MovieFiles.h"
 
 struct RsrcInfo {
     CHAR* _pszName;
@@ -122,30 +118,13 @@ public:
 
 #include "Game/SceneInfo.h"
 
-class CRcfCD {
-public:
-    static INT getRsrcFileSize(UINT nID);
-    static INT setupRcfAlias();
-    static void initReadThreadProc();
-    static INT procReadThread(UINT nGroup, INT nType, BYTE*& pExtBuff);
-    static INT cancelReadThread();
-    static INT getMemberOption(UINT nGroup);
-    static void initialize();
-    static void finalize();
-};
+#include "System/RcfCD.h"
 
-class CNowLoading {
-public:
-    static void start();
-    static void enable(BOOL bEnable);
-    static void setMode(INT nMode);
-    static INT getMode();
-    static void end(BOOL bForce);
-};
+#include "Game/NowLoading.h"
 
 class CRCFQueueData {
 private:
-    volatile INT m_nStep;
+    volatile INT m_nStep; /* MATCH: volatile (thread-shared step; the original reloads it after every store) */
     SHORT m_nGroupID;
     SHORT m_nMemeberID;
     INT m_nOwnerID;
@@ -165,22 +144,20 @@ public:
     INT getID() { return m_nGroupID * 10000 + m_nMemeberID; }
     INT getGroupID() { return m_nGroupID; }
     INT getMemberID() { return m_nMemeberID; }
+    BOOL hasLinkOwner() { return m_nOwnerID != 0; }
+    INT getLinkOwnerID() { return m_nOwnerID; }
     INT getType() { return m_nType; }
     BYTE* getBuff() { return m_pBuff; }
     CRCFQueueData* getNextData() { return m_pNext; }
     void setNextData(CRCFQueueData* p) { m_pNext = p; }
-    BOOL hasLinkOwner() { return m_nOwnerID != 0; }
-    INT getLinkOwnerID() { return m_nOwnerID; }
     BOOL isNOP() { return m_nStep == 0; }
-    BOOL isCANCEL() { return m_nStep == 3; }
     void setExec() { m_nStep = 1; }
     void setEnd() { m_nStep = 2; }
     void setCancel() { m_nStep = 3; }
-    BOOL isMatch(INT nGroup, INT nMember, INT nID) {
-        return ((m_nGroupID & 0x0FFFFFFF) == nGroup && m_nMemeberID == nMember) || m_nOwnerID == nID;
-    }
+    BOOL isCANCEL() { return m_nStep == 3; }
 };
 
+/* PARTIAL: CRCFAliasData lacks the ref's init, linkTail, setSrc, setDst, setID (parameters unknown, no users here) */
 class CRCFAliasData {
 private:
     char m_szSrc[33];
@@ -193,8 +170,8 @@ public:
     CHAR* getSrc() { return m_szSrc; }
     CHAR* getDst() { return m_szDst; }
     INT getID() { return m_nID; }
-    INT getSrcLen() { return m_nSrcLen; }
     CRCFAliasData* getNextData() { return m_pNext; }
+    BOOL isMatchSrc(const CHAR* pszLabel) { return !strncmp(pszLabel, m_szSrc, m_nSrcLen); }
 };
 
 void _loadDbgRcfSceneInfo();
@@ -222,7 +199,7 @@ volatile BOOL s_bThreadEnable;
 ULONG s_nReadRsrcID;
 INT s_nReadGroup;
 volatile INT s_nReadFileSize;
-INT s_nLinkOwnerGroup;
+volatile INT s_nLinkOwnerGroup; /* volatile: _parseRCF_EntryFile reloads it in a bnezl slot (thread-shared, like s_nReadStep) */
 INT s_nFilePtr;
 INT s_nReadThreadID;
 INT s_RcfSemaID;
@@ -613,35 +590,32 @@ int CRcf::isSceneManagedMode() {
 }
 void _setLinkreqRead() {
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) BOOL _isCompleteLoadRCF_c(INT nGroup, INT nMember) {
+BOOL _isCompleteLoadRCF(INT nGroup, INT nMember) {
     BOOL bResult;
     INT nID;
     CRCFQueueData* pData;
 
-    if (nGroup == 0 && nMember == 0) {
+    if ((nGroup | nMember) == 0) {
         bResult = FALSE;
         if (_isReadThreadSleeping() && CVramMan::isTransTexDone()) {
             bResult = !_hasReadQueue();
         }
-        return bResult;
-    }
-    nID = nGroup * 10000 + nMember;
-    bResult = TRUE;
-    for (pData = s_pReadQueue; pData; pData = pData->getNextData()) {
-        if (pData->getGroupID() == nGroup && pData->getMemberID() == nMember) {
-            bResult = FALSE;
-            break;
-        }
-        if (pData->getLinkOwnerID() == nID) {
-            bResult = FALSE;
-            break;
+    } else {
+        nID = nGroup * 10000 + nMember;
+        bResult = TRUE;
+        for (pData = s_pReadQueue; pData; pData = pData->getNextData()) {
+            if (pData->getGroupID() == nGroup && pData->getMemberID() == nMember) {
+                bResult = FALSE;
+                break;
+            }
+            if (pData->getLinkOwnerID() == nID) {
+                bResult = FALSE;
+                break;
+            }
         }
     }
     return bResult;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _isCompleteLoadRCF__Fii);
 BOOL CRcf::isCompleteLoadRCF(INT nGroup, INT nMember) {
     BOOL result;
 
@@ -653,9 +627,11 @@ BOOL CRcf::isCompleteLoadRCF(INT nGroup, INT nMember) {
     _signalsema();
     return result;
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _LoadRCFProc_c(ULONG nGroup, INT nType) {
+/* Parked: _LoadRCFProc: 1 of 81 lines - our case-tree branch is `beqzl` where the original has `beqz` (same delay
+ * slot `li v0,2`): reorg sees v0 live on the default path's fall-off exit (return-value USE) and the original
+ * doesn't. `default: return nResult;` and a label before the final return are worse (10-11 lines). */
+#if 0
+INT _LoadRCFProc(ULONG nGroup, INT nType) {
     INT nResult;
 
     switch (s_nReadStep) {
@@ -685,14 +661,14 @@ __attribute__((section(".sdata"))) INT _LoadRCFProc_c(ULONG nGroup, INT nType) {
     return nResult;
 end:;
 }
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _LoadRCFProc__FUii);
+#endif
 INT CRcf::_loadRCFAlias() {
     CRcfCD::setupRcfAlias();
     return TRUE;
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _loadRCF_c(ULONG nInGroup) {
+INT _loadRCF(ULONG nInGroup) {
     char szFileName[256];
 
     if (s_pFileBuf) delete s_pFileBuf;
@@ -701,9 +677,9 @@ __attribute__((section(".sdata"))) INT _loadRCF_c(ULONG nInGroup) {
     s_pFileBuf = new (__FILE__ "(1051)") CBuf;
     sprintf(szFileName, "cdrom0:\\RCF\\G%03d.RCF", nInGroup / 10000);
     s_nReadFileSize = CFileIO::loadFile(szFileName, *s_pFileBuf, 0);
-    return s_nReadFileSize > -1 ? 1 : -2;
+    if (s_nReadFileSize > -1) return 1;
+    return -2;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _loadRCF__FUi);
 void _disposeRCF() {
     if (s_pFileBuf) delete s_pFileBuf;
     s_pFileBuf = __null;
@@ -840,16 +816,15 @@ BOOL _isStr_END(INT nInPtr) {
     CHAR* p = (CHAR*)s_pFileBuf->getBufPtr() + nInPtr;
     return p[0] == '#' && p[1] == 'e' && p[2] == 'n' && p[3] == 'd';
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _parseRCF_Tag_c(INT nInType) {
+INT _parseRCF_Tag(INT nInType) {
     INT nDataID;
 
     if (!_isStr_Comment(s_nFilePtr) && !_isStr_CR(s_nFilePtr) && *_getParsePtr() == '#') {
         nDataID = _atoi(_getParsePtr());
-        s_nFilePtr++;
+        INT nGroupNo = (ULONG)s_nReadGroup % 10000; /* MATCH: not in the ref's locals; the modulo goes before both stores */
         s_nModeFlag = 0;
-        if (nDataID == (ULONG)s_nReadGroup % 10000) {
+        s_nFilePtr++;
+        if (nDataID == nGroupNo) {
             while (*_getParsePtr() != '\n') {
                 if (_isStr_PAL(s_nFilePtr)) {
                     s_nModeFlag = 1;
@@ -876,7 +851,6 @@ __attribute__((section(".sdata"))) INT _parseRCF_Tag_c(INT nInType) {
     _skipLine();
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRCF_Tag__Fi);
 void _makeDataName(const CHAR* lpszInPath, CHAR* lpszOutName) {
     CHAR* p;
     CHAR* p2;
@@ -901,9 +875,13 @@ INT CRcf::getRsrcFileSize(ULONG nID) {
 INT CRcf::getCdStatus() {
     return 0;
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _parseRCF_EntryFile_c(ULONG nGroup, INT nType) {
+/* Parked: 28 of 169 lines, same size - the 0x7F (sound list) branch's CBuf/RsrcInfo setup: the original loads
+ * s_nReadGroup/s_nLinkOwnerGroup/s_bSceneManagedMode into t2/t0/t1 before the CBuf vtable lui and keeps the
+ * constant 1 in a3; ours schedules the vtable first (t3/t1/t2, t0). Rest matches with s_nLinkOwnerGroup
+ * volatile and `if (s_nLinkOwnerGroup) nGroupID = s_nLinkOwnerGroup;`. Tried: buf/info and szName
+ * declaration order, hill.py over the info assignments, permuter 6 min. */
+#if 0
+INT _parseRCF_EntryFile(ULONG nGroup, INT nType) {
     char szFilePath[256];
     INT nRsrcID;
     INT nGroupID;
@@ -940,15 +918,26 @@ __attribute__((section(".sdata"))) INT _parseRCF_EntryFile_c(ULONG nGroup, INT n
     if (!pData) {
         _parseRCF_FirstEntryFile(szFilePath, szName, nGroupID, nRsrcID);
     } else {
-        CRsrcDB::addRsrcTag(*pData, s_nLinkOwnerGroup ? s_nLinkOwnerGroup : nGroupID, s_bSceneManagedMode);
+        if (s_nLinkOwnerGroup) {
+            nGroupID = s_nLinkOwnerGroup;
+        }
+        CRsrcDB::addRsrcTag(*pData, nGroupID, s_bSceneManagedMode);
     }
     _skipLine();
     return 0;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRCF_EntryFile__FUii);
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
+#else
 __asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _parseRCF_FirstEntryFile_c(CHAR* szFilePath, CHAR* szName, INT nGroupID, INT nRsrcID) {
+__attribute__((section(".sdata"))) void _parseRCF_EntryFile_strings(INT n) {
+    TRACE("%07d%07d");
+}
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRCF_EntryFile__FUii);
+#endif
+/* Parked: 18 of 250 lines, same size - the original keeps the alignment in a0 (ours v1), computes
+ * (s_pExtBuf - 1 + align) & -align in that order, and interleaves the parameter copies differently in the
+ * prologue; rest matches. Tried: -1 placement, statement order at the start, permuter 7 min. */
+#if 0
+void _parseRCF_FirstEntryFile(CHAR* szFilePath, CHAR* szName, INT nGroupID, INT nRsrcID) {
     CBuf buf;
     INT nFileSize;
     INT nAllocAlign;
@@ -1028,7 +1017,15 @@ __attribute__((section(".sdata"))) void _parseRCF_FirstEntryFile_c(CHAR* szFileP
         ASSERT(0);
     }
 }
+#else
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) void _parseRCF_FirstEntryFile_strings(INT n) {
+    if (n) AssertApp(__FILE__, 0, "0 < nFileSize", 0);
+    TRACE_COL(_TTY_PURPLE, "\x93\xc7\x8d\x9e\x82\xdd\x83o\x83" "b\x83t\x83@\x82\xaa\x8am\x95\xdb\x8fo\x97\x88\x82\xc8\x82\xa2\x82\xe6\x81`\x83w(\x81@T\x84" "D)\xc9\x81@\xb3\xdc\xa7\xa7\xa7\xdd\n\x82\xaa\x82\xf1\x82\xaa\x82\xc1\x82\xc4\xa5\xa5\xa5\x93\xc7\x8d\x9e\x82\xe0\x82\xa4\x82\xc6\xa5\xa5\xa5\x82\xb5\x82\xbd\x83t\x83@\x83" "C\x83\x8b\x82\xcc\x96\xbc\x91O -> %s\n", (CHAR*)0);
+    if (n) AssertApp(__FILE__, 0, "0", 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRCF_FirstEntryFile__FPcT0ii);
+#endif
 INT _parseFilePath(const CHAR* pData, INT nRest, CHAR* pszOutPath, INT nType) {
     return 0;
 }
@@ -1049,7 +1046,7 @@ CHAR* _getRCFAlias(const CHAR* pInData, CHAR* szOut, INT* pOutID) {
     }
     pRet = __null;
     for (pData = s_pAliasList; pData; pData = pData->getNextData()) {
-        if (!strncmp(szLabel, pData->getSrc(), pData->getSrcLen())) {
+        if (pData->isMatchSrc(szLabel)) {
             strcpy(szOut, pData->getDst());
             pRet = (CHAR*)p + 1;
             if (pOutID) {
@@ -1060,9 +1057,7 @@ CHAR* _getRCFAlias(const CHAR* pInData, CHAR* szOut, INT* pOutID) {
     }
     return pRet;
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _parseFileType_c(const CHAR* pInData) {
+INT _parseFileType(const CHAR* pInData) {
     INT nType = 0xFF;
     const CHAR* p;
     char szTmp[16];
@@ -1074,20 +1069,18 @@ __attribute__((section(".sdata"))) INT _parseFileType_c(const CHAR* pInData) {
             break;
         }
     }
-    if (nType) {
-        return nType;
-    }
-    p++;
-    nType = 0xFF;
-    if (*p == '(') {
+    if (!nType) {
         p++;
-        if (_getRCFAlias(p, szTmp, &nID)) {
-            nType = nID;
+        nType = 0xFF;
+        if (*p == '(') {
+            p++;
+            if (_getRCFAlias(p, szTmp, &nID)) {
+                nType = nID;
+            }
         }
     }
     return nType;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseFileType__FPCc);
 INT CRcf::getMapID(SHORT nArea, SHORT nScene) {
     RcfSceneInfo* pScene = getSceneInfo(nArea, nScene);
     RcfMapInfo* pMap;
@@ -1120,17 +1113,19 @@ static inline INT _hexValue(INT c) {
     if (isdigit(c)) {
         n = c - '0';
     } else {
-        c = _tolower(c);
-        if ((UINT)(c - 'a') <= 5) {
-            n = c - 'a' + 10;
+        INT l = _tolower(c);
+        if ((UINT)(l - 'a') <= 5) {
+            n = l - 'a' + 10;
         }
     }
     return n;
 }
 
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _atoi_c(const CHAR* lpszInStr) {
+/* Parked: _atoi: 11 of 77 lines, 8 bytes short - hex/decimal paths as the original; left: the original keeps a
+ * branch for the isupper() lowercase step where ours makes movz (ternary, if/else, inline and !isupper forms
+ * all give movz), and the decimal loop's p++/return tail scheduling. Permuter 6 min: no gain. */
+#if 0
+INT _atoi(const CHAR* lpszInStr) {
     INT nRet = 0;
     const CHAR* p = lpszInStr;
     INT n;
@@ -1154,12 +1149,12 @@ __attribute__((section(".sdata"))) INT _atoi_c(const CHAR* lpszInStr) {
         }
         return nRet;
     dec:
-        p = (*lpszInStr == '#') ? lpszInStr + 1 : lpszInStr;
+        p = lpszInStr + 1;
+        if (*lpszInStr != '#') p = lpszInStr;
         for (;;) {
             c = *p;
-            if (!c || !isdigit(c)) {
-                break;
-            }
+            if (!c) goto end;
+            if (!isdigit(c)) goto end;
             nRet = nRet * 10 + c - '0';
             p++;
         }
@@ -1167,7 +1162,9 @@ __attribute__((section(".sdata"))) INT _atoi_c(const CHAR* lpszInStr) {
 end:
     return nRet;
 }
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _atoi__FPCc);
+#endif
 void CRcf::setLocale(INT nID) {
     s_nLocale = nID;
 }
@@ -1222,43 +1219,50 @@ void _makeLocalizePath(CHAR* pszOut, const CHAR* pszSrc, INT nLocale) {
         strcpy(pszOut, pszSrc);
     }
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _atolen_c(const CHAR* lpszInStr) {
+/* Parked: _atolen: 14 of 81 lines, 4 bytes short - _atoi's shape (one return, goto exits, '$' test first with
+ * the 0x case inside `if (*p != '$')`); left: the same isupper branch-vs-movz in _hexValue as _atoi, and the
+ * original's block order (0x case jumps over the '$' block to `nRet = 2`, p = lpszInStr + 2 from a0). */
+#if 0
+INT _atolen(const CHAR* lpszInStr) {
     INT nRet = 0;
     const CHAR* p = lpszInStr;
 
-    if (!p) {
-        return 0;
-    }
-    if (*p == '$' || (*p == '0' && p[1] == 'x')) {
-        if (*p == '$') {
+    if (p) {
+        if (*p != '$') {
+            if (*p == '0' && p[1] == 'x') {
+                p = lpszInStr + 2;
+                nRet = 2;
+            } else {
+                goto dec;
+            }
+        } else {
             p++;
             nRet = 1;
-        } else {
-            p += 2;
-            nRet = 2;
         }
         while (*p) {
             if (_hexValue(*p) < 0) {
-                break;
+                goto end;
             }
             p++;
             nRet++;
         }
         return nRet;
+    dec:
+        if (*p == '#') {
+            p++;
+            nRet = 1;
+        }
+        while (*p && isdigit(*p)) {
+            nRet++;
+            p++;
+        }
     }
-    if (*p == '#') {
-        p++;
-        nRet = 1;
-    }
-    while (*p && isdigit(*p)) {
-        nRet++;
-        p++;
-    }
+end:
     return nRet;
 }
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _atolen__FPCc);
+#endif
 CHAR* _getDbgParsePtr() {
     return (CHAR*)s_pDbgFileBuf->getBufPtr() + s_nDbgFilePtr;
 }
@@ -1378,9 +1382,11 @@ void _getStageInfo(SHORT& nOutGroup, SHORT& nOutMember, CHAR* pOutLabel, INT* pO
     }
     _skipDbgLine();
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) BOOL _loadRcfInfoFile_c(const CHAR* pszFile) {
+/* Parked: 6 of 108 lines, only %hi(s_pDbgFileBuf) - ours computes it into v0 and copies it to s2 (gcse PRE copy),
+ * the original loads it into s2 directly. Tried: plain delete, a CBuf*& reference, return in the success branch,
+ * permuter 5 min. */
+#if 0
+BOOL _loadRcfInfoFile(const CHAR* pszFile) {
     INT nLen;
     BYTE* pBuf;
 
@@ -1403,18 +1409,23 @@ ok:
     pBuf[nLen] = 0;
     return TRUE;
 }
+#else
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) void _loadRcfInfoFile_strings(INT n) {
+    TRACE(__FILE__ "(2257)");
+    if (n) AssertApp(__FILE__, 0, "s_pDbgFileBuf", 0);
+    if (n) AssertApp(__FILE__, 0, "pBuf", 0);
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _loadRcfInfoFile__FPCc);
+#endif
 void _disposeRcfInfoFile() {
     if (s_pDbgFileBuf) delete s_pDbgFileBuf;
     s_pDbgFileBuf = __null;
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _countRcfSceneAndMap_c() {
-    BOOL bCont;
+void _countRcfSceneAndMap() {
+    BOOL bCont = TRUE;
     CHAR* p = _getDbgParsePtr();
 
-    bCont = TRUE;
     while (*p && bCont) {
         _skipDbgLine();
         bCont = !isTokenSCENE(p);
@@ -1447,10 +1458,7 @@ __attribute__((section(".sdata"))) void _countRcfSceneAndMap_c() {
         p = _getDbgParsePtr();
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _countRcfSceneAndMap__Fv);
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _parseRcfSceneAndMapInfo_c() {
+void _parseRcfSceneAndMapInfo() {
     CHAR* p;
     BOOL bCont;
     USHORT nSceneIdx;
@@ -1484,8 +1492,8 @@ __attribute__((section(".sdata"))) void _parseRcfSceneAndMapInfo_c() {
             }
             if (*p == ';') {
                 _getStageInfo(pScene->_nGroup, pScene->_nMember, pScene->_szTitle, &nAtelCnt);
-                pScene->_nRcfMapIdx = -1;
                 pScene->_nAtelCount = nAtelCnt;
+                pScene->_nRcfMapIdx = -1;
                 nSceneIdx++;
                 pScene++;
             }
@@ -1503,23 +1511,21 @@ __attribute__((section(".sdata"))) void _parseRcfSceneAndMapInfo_c() {
         pMap = s_pRcfMapArray;
         nMapIdx = -1;
         pCurrentMap = __null;
-        i = 0;
         while (*p && nMapIdx < s_nRcfMapCount) {
             if (isTokenEND(p)) {
                 _skipDbgLine();
                 break;
             }
             if (*p == '#') {
-                nMapIdx = i++;
-                pCurrentMap = pMap;
+                nMapIdx++;
                 _getStageInfo(pMap->_nGroup, pMap->_nMember, pMap->_szTitle, __null);
+                pCurrentMap = pMap;
                 pMap++;
             } else if (*p == ';' && pCurrentMap) {
-                INT nIdx;
                 _getStageInfo(nGroup, nMember, __null, __null);
-                nIdx = _seekRcfSceneInfo(nGroup, nMember, s_pRcfSceneArray, s_nRcfSceneCount);
-                if (nIdx >= 0) {
-                    RcfSceneInfo& s = s_pRcfSceneArray[nIdx];
+                i = _seekRcfSceneInfo(nGroup, nMember, s_pRcfSceneArray, s_nRcfSceneCount);
+                if (i >= 0) {
+                    RcfSceneInfo& s = s_pRcfSceneArray[i];
                     pCurrentMap->_SceneList.pushBack(s);
                     s._nRcfMapIdx = nMapIdx;
                 }
@@ -1530,12 +1536,9 @@ __attribute__((section(".sdata"))) void _parseRcfSceneAndMapInfo_c() {
         }
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _parseRcfSceneAndMapInfo__Fv);
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _loadDbgRcfSceneInfo_c() {
-    s_nDbgFilePtr = 0;
+void _loadDbgRcfSceneInfo() {
     s_nRcfSceneCount = 0;
+    s_nDbgFilePtr = 0;
     s_nRcfMapCount = 0;
     if (_loadRcfInfoFile("cdrom0:\\rcf\\scene.dat")) {
         _countRcfSceneAndMap();
@@ -1553,7 +1556,6 @@ __attribute__((section(".sdata"))) void _loadDbgRcfSceneInfo_c() {
     _parseRcfSceneAndMapInfo();
     _disposeRcfInfoFile();
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _loadDbgRcfSceneInfo__Fv);
 
 RcfSceneInfo* CRcf::getSceneInfo(SHORT nIndex) {
     if (!s_pRcfSceneArray || s_nRcfSceneCount <= 0 || nIndex < 0 || nIndex >= s_nRcfSceneCount) {
