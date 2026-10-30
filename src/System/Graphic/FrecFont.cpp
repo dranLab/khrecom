@@ -368,6 +368,11 @@ void _makeFontPkt(const _FontInfo& font, USHORT nCode, FIX4 x, FIX4 y, FIX4 w, F
     }
 }
 
+/* Not attempted: 656 instructions whose locals all live in stack slots (nStyle, bDebugMode, nPalette, space, the
+ * colour words ... are stored and reloaded around every use), with PS2 MMI colour arithmetic (pextlb/pmulth/ppacb on
+ * u_long128 ivCol/iMul), a pkOpenGifTag packet, the control-code switch (jump table below) and _makeFontPkt calls;
+ * the stack layout needs the ref's inline-expansion structure (several inline groups with their own iCol/ivCol
+ * parameters) rebuilt first. getDispSize (same control-code loop) is matched and is the model for the loop. */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/FrecFont", makePkt__9CFrecFontR6CFntM2);
 /* placeholder for makePkt's data: the colour table it reads, then its jump table (labels of the included assembly) */
 __asm__(".section .sdata\n");
