@@ -334,7 +334,7 @@ void CGameSubField::setupTasks() {
         pMapEnemyManager->setup();
     }
     CDeFocus::create(pSysTask);
-    CDeFocus::setShadow();
+    CDeFocus::offNear();
     _collDispCreate(pSysTask, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);
     changeState(5);
 }
@@ -358,7 +358,7 @@ void CGameSubField::disposeTasks() {
     if ((pTask = CTaskMan::getSysTask(32))) pTask->out();
     if ((pTask = CTaskMan::getSysTask(23))) pTask->out();
     CWorldEnv::removeAllCamera();
-    if (CDeFocus::m_pInstance) CDeFocus::m_pInstance->out();
+    CDeFocus::remove();
     CEffectMan::killAll((ObjType::eObjBit)0xFFFFFFFF, 0.0f);
     if (!CGameWork::getFlag(1, 0x33)) {
         D2::C2DSpr::destroyAllForSceneChange();

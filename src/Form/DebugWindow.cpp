@@ -878,7 +878,7 @@ static float fCamSpeed[4] = {0.025f, 0.1f, 0.4f, 0.8f};
 
 CNakCamera::CNakCamera(CTask* p, INT iPad, UINT iFlg, FVECTOR* pvPos, FLOAT fDirY, void** pVoid) : CCamera(p, -1) {
     init(iPad, iFlg, pvPos, fDirY, pVoid);
-    CDeFocus::setManual();
+    { CDeFocusPrim* p = CDeFocus::getDeFocus(); if (p) p->stop(); }
 }
 
 void CNakCamera::init(INT iPad, UINT iFlg, FVECTOR* pvPos, FLOAT fDirY, void** pVoid) {
@@ -952,7 +952,7 @@ CNakCamera::~CNakCamera() {
     if (m_pVoid) {
         *m_pVoid = NULL;
     }
-    CDeFocus::setAutomatic();
+    { CDeFocusPrim* p = CDeFocus::getDeFocus(); if (p) p->start(); }
 }
 
 INT CNakCamera::getTypeID() const { return 0x8000; }
@@ -1036,7 +1036,7 @@ void CNakCamera::main() {
         if (m_pWin) {
             m_pWin->dispOff(0);
         }
-        CDeFocus::setAutomatic();
+        { CDeFocusPrim* p = CDeFocus::getDeFocus(); if (p) p->start(); }
         return;
     }
     {
@@ -1044,7 +1044,7 @@ void CNakCamera::main() {
         CDeFocusPrim* p = CDeFocus::getDeFocus();
         setProjectionDist(f);
         if (p) {
-            p->setManual();
+            p->stop();
         }
     }
     if ((m_iStatus & 0x30) && dbgButtonTrg(USR_SYSTEM, 0x200, m_iPad)) {

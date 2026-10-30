@@ -344,7 +344,7 @@ void CGameSubBattle::setupTasks() {
     CShadowModelMan::setUpPer(0.5f);
     CShadowModelMan::setDownLen(2.8f);
     CDeFocus::create(pGame);
-    CDeFocus::setShadow();
+    CDeFocus::offNear();
     _collDispCreate(pGame, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);
     changeState(4);
 }
@@ -463,7 +463,7 @@ void CGameSubBattle::disposeTasks() {
     if ((pTask = CTaskMan::getSysTask(32))) pTask->out();
     if ((pTask = CTaskMan::getSysTask(23))) pTask->out();
     CWorldEnv::removeAllCamera();
-    if (CDeFocus::m_pInstance) CDeFocus::m_pInstance->out();
+    CDeFocus::remove();
     CEffectMan::killAll((ObjType::eObjBit)0xFFFFFFFF, 0.0f);
     D2::C2DSpr::destroyAllForSceneChange();
     _collDispDestroy();

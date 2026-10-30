@@ -1,6 +1,5 @@
 #define TASK_H_NO_SLC_OVERFLOW_MSG
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
-#define SYSTEM_GRAPHIC_DEFOCUS_CPP /* MATCH: the complete classes (their inlines are emitted here, weak, in declaration order) */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/DeFocus.h"
 #include "Game/Debug/DebugWork.h"
