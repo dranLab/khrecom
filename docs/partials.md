@@ -61,9 +61,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1022 (939 in 109 headers, 83 in 36 .cpp); MATCH: 132
-  by category: method 400, data member 68, type 86, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 42, guessed 41, header-level 74, stand-in 36, other 6
-stand-ins: 330 foreign in 120 files (84 names), 201 unattributed, 170 own
+PARTIAL: 1021 (939 in 109 headers, 82 in 36 .cpp); MATCH: 132
+  by category: method 400, data member 68, type 86, fwd decl 53, #include 29, changed in place 132, padding 31, path override 24, gate 42, guessed 41, header-level 74, stand-in 35, other 6
+stand-ins: 324 foreign in 120 files (83 names), 201 unattributed, 170 own
 duplicate class names across headers: 25
 padding: 31 arrays, 26 accessors
 mechanisms: 958 sites (914 untagged); #line: 1238
@@ -79,7 +79,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R1 | 29.0 | `Game/Player/Player.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users, 34 PARTIAL | CPlayer (1 partial) | inline bodies or virtuals |
 | R1 | 22.0 | `Game/Enemy/BattleEnemyManager.h` | ready | 11 stand-in files, 0 dup headers, 0 gate users | CBattleEnemyManager (1 complete) | inline bodies or virtuals |
 | R1 | 17.5 | `Game/CardBattle.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users, 29 PARTIAL | CCardRevolver (1 partial) | inline bodies or virtuals |
 | R1 | 14.0 | `Game/Atel/Atel.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | CAtel (1 complete) | inline bodies or virtuals |
@@ -99,6 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 4.0 | `Form/Menu/Pause.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/MessageManager.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CMessageManager (1 complete) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Player/PlayerDRiku.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPlayerDRiku (1 superset) | inline bodies or virtuals |
+| R1 | 4.0 | `Game/Prize.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPrize (1 superset) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -115,7 +115,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `DropPrize` | gated | Game/Gimmick/GimmickManager.h | 7 |  |  |
 | `CJiminyMemoFlag` | superset | Form/Menu/JMemoFlag.h | 6 |  | 1 PARTIAL |
 | `COLL_INFO_UNION` | missing | Game/Movement.h | 6 |  |  |
-| `CPlayer` | partial | Game/Player/Player.h | 6 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; padding: _m_0x21c; extra methods: __attribute__, _instance, getCardDraw, getLockonHandle, getMarker, getPrizeDraw, ... (+1); virtual order differs; 3 |
 | `VTransInfo` | gated | System/Graphic/Gprim.h | 6 | System/Graphic/modeldata.h | 1 PARTIAL |
 | `CBuf` | superset | System/Buf.h | 5 |  | 3 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
@@ -261,7 +260,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Enemy/HumanBoss.h` | 0 | 0/1/0/0 | 4 |
 | `Game/Enemy/MapEnemy.h` | 10 | 0/0/0/1 | 7 |
 | `Game/Enemy/MapEnemyManager.h` | 1 | 1/1/0/0 | 8 |
-| `Game/Entity.h` | 110 | 1/1/1/0 | 146 |
+| `Game/Entity.h` | 110 | 1/1/1/0 | 150 |
 | `Game/EntityFactory.h` | 14 | 1/1/0/0 | 49 |
 | `Game/Game.h` | 20 | 0/1/0/0 | 42 |
 | `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
@@ -291,11 +290,11 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/OsdDef.h` | 4 | 3/0/3/0 | 7 |
 | `Game/Player/DWTPlayer.h` | 2 | 0/0/0/0 | 5 |
 | `Game/Player/Friend.h` | 0 | 0/0/1/0 | 15 |
-| `Game/Player/Player.h` | 44 | 2/0/1/0 | 66 |
+| `Game/Player/Player.h` | 44 | 2/0/1/0 | 72 |
 | `Game/Player/PlayerAnim.h` | 1 | 1/0/0/0 | 1 |
 | `Game/Player/PlayerAttack.h` | 2 | 1/0/0/0 | 26 |
 | `Game/Player/PlayerCamera.h` | 15 | 3/0/0/1 | 24 |
-| `Game/Player/PlayerControl.h` | 3 | 1/1/0/0 | 67 |
+| `Game/Player/PlayerControl.h` | 3 | 1/1/0/0 | 73 |
 | `Game/Player/PlayerDRiku.h` | 0 | 0/1/0/0 | 1 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
 | `Game/Player/PlayerManager.h` | 0 | 1/1/0/0 | 22 |
@@ -335,8 +334,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
 | `System/Graphic/DeFocus.h` | 1 | 2/0/3/0 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
-| `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 170 |
-| `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 172 |
+| `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 172 |
+| `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 174 |
 | `System/Graphic/Effect/effect.h` | 7 | 1/1/4/0 | 77 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 3 | 3/0/0/0 | 15 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
@@ -374,7 +373,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 59 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 6 |
-| `System/PadHandler.h` | 0 | 0/0/1/0 | 95 |
+| `System/PadHandler.h` | 0 | 0/0/1/0 | 97 |
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
 | `System/RsrcData.h` | 3 | 0/0/0/32 | 29 |
 | `System/SJoint.h` | 9 | 0/0/0/0 | 201 |
