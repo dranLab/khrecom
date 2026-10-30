@@ -31,7 +31,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Player/PlayerDRiku` | 4 | 5226 | 4 |  |
 | `Game/Player/Player` | 11 | 3573 | 11 |  |
 | `Game/Player/PlayerRiku` | 2 | 2940 | 2 |  |
-| `Game/Collision/CollUtil` | 13 | 2562 |  | .rodata |
 | `Game/Map` | 4 | 2306 | 3 |  |
 | `System/Graphic/Gprim` | 15 | 2159 | 15 |  |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
@@ -41,6 +40,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Card` | 12 | 1794 | 12 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 | .rodata |
 | `System/Rcf` | 18 | 1770 | 5 |  |
+| `Game/Collision/CollUtil` | 6 | 1643 | 6 | .rodata |
 | `Game/Enemy/HumanBoss` | 9 | 1467 | 8 |  |
 | `Game/BattleCard` | 4 | 1461 | 4 |  |
 | `System/Graphic/DeFocus` | 6 | 1387 |  |  |
@@ -252,6 +252,12 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Collision/CollDisp` | `setAttackLines__9CCollDispP14CCollisionList` | 167 |  |
 | `Game/Collision/CollMap` | `collideRide__8CCollMapi` | 224 | (comment) collideRide and collideRideR2 don't match yet. collideRide: the original's `pRideAtari = NULL` store is not a "fixed scalar" to the scheduler (it is ordered before the coll constructor's stores), as if pRideAtari's address had been taken before; every way of doing that here also moves … |
 | `Game/Collision/CollMap` | `collideRideR2__8CCollMapR10CCollisionPP5CRidei` | 141 |  |
+| `Game/Collision/CollUtil` | `_detectOCD__9CCollUtilR10CCollisionP8MCD_INFOP8OCD_WORKi` | 416 | _detectOCD: 2 of 440 lines differ, only the stack slot of the second _getLength temp (original sp+0x30 = the operator-'s frame, ours sp+0x20 = its return temp; RTL: temp-slot reuse). Tried: _getLength2 without ret, block-local FVECTOR, by-value dVec, vec0 = inside the DivVector call, no block … |
+| `Game/Collision/CollUtil` | `__detectMCInitInit_Check__FP7MC_DATAf` | 41 | 23 lines, registers only - the original keeps the VU0 flag and iRet in a2 and fMDVal/zoneVec in v1, ours v0/a0; iRet-as-flag, if/else and early-return forms and a 5 min permuter run (14.5k candidates) keep it. |
+| `Game/Collision/CollUtil` | `detectMCInit__9CCollUtilP7MC_CHIPi` | 169 | 48 of 185 lines, 4 bytes long - structure, frame (unused primInfo/primInfo2/v0 locals) and VU0 blocks as the original; left: the t-register numbering of pMCData/iCnt/entryCnt/pPrimInfo2 (t0/t1/t2/a3 there) and one extra instruction. hill.py over the setup statements and a 5 min permuter run (14.5k … |
+| `Game/Collision/CollUtil` | `_detectMCD__9CCollUtilR10CCollision` | 424 | _detectMCD: 146 of 467 lines, 8 bytes short - structure as the original (MCD path of _detectOCD: area chip table walk, two allocSpad asserts, same segment loop); ret declared after i for its spill slot, the vf4 asm before the vCkS reference. Left: this in s3 instead of s2 (most lines), the retry … |
+| `Game/Collision/CollUtil` | `detectMap__9CCollUtilP7FVECTORT1` | 188 | 39 of 213 lines, 4 bytes long - two passes, renew test and info merge as the original; left: the pPrimInfo2/i init order and an extra delay-slot load at the second pass, the attr byte's `andi` copy (a0) and the return-1 block (the original sets v0 after the m_pDetectMatA/ChipA/NormalA stores). |
+| `Game/Collision/CollUtil` | `distanceLine__9CCollUtilP7FVECTORT1` | 405 | 215 of 506 lines, 52 bytes long - first draft, structure decoded (closest points of the two segments, two normal/offset branches, four range checks, slidingHosei). Left: the original keeps pP0/pP1 in stack slots, lays the denom if/else out with the test at the bottom (do-while(0) forms tried: … |
 | `Game/Collision/CollUtilO` | `_detectColumnPoint__9CCollUtilR16CColumnCollisionR15CPointCollision` | 90 | (comment) Near match (the original sets up the distanceLineO arguments after the p0/p1 copies), kept for reference: |
 | `Game/Collision/CollUtilO` | `_detectColumnSphere__9CCollUtilR16CColumnCollisionR16CSphereCollisioni` | 105 | (comment) Near match (as _detectColumnPoint, and its distanceSphereO delay slot), kept for reference: |
 | `Game/Collision/CollUtilO` | `_detectColumnColumnEz__9CCollUtilR16CColumnCollisionT1` | 121 | (comment) Near match (the load order of the first coordinates and radii), kept for reference: |
@@ -354,7 +360,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 379 functions (84649 instructions) in 84 units, 232 of them parked; 12 units take a data section from assembly.
+Totals: 372 functions (83730 instructions) in 84 units, 238 of them parked; 12 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

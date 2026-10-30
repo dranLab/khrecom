@@ -61,14 +61,14 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1036 (956 in 109 headers, 80 in 32 .cpp); MATCH: 108
-  by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 42, guessed 43, header-level 74, stand-in 33, other 6
-stand-ins: 353 foreign in 121 files (104 names), 200 unattributed, 171 own
+PARTIAL: 1038 (957 in 109 headers, 81 in 33 .cpp); MATCH: 114
+  by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 43, guessed 43, header-level 74, stand-in 34, other 6
+stand-ins: 354 foreign in 122 files (104 names), 200 unattributed, 172 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
-mechanisms: 960 sites (924 untagged); #line: 1238
+mechanisms: 962 sites (924 untagged); #line: 1238
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 159, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 564, superset 130, partial 92, gated 99, missing 11, unattributed 309
+classes: complete 568, superset 128, partial 92, gated 99, missing 11, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -98,7 +98,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 12.0 | `Game/Atel/VSME.h` | ready | 6 stand-in files, 0 dup headers, 0 gate users | ATP, Actor, CActorDebug, CEventLineDisp, CVSM, ... (+2) (5 complete, 1 partial, 1 missing) | inline bodies or virtuals |
 | R1 | 11.5 | `Game/Game.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 19 PARTIAL | CGame (1 superset) | inline bodies or virtuals |
 | R1 | 11.5 | `System/Buf.h` | ready | 5 stand-in files, 0 dup headers, 0 gate users, 3 PARTIAL | CBuf (1 superset) | inline bodies or virtuals |
-| R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
+| R1 | 9.5 | `Game/Collision/CollUtilA.h` | ready | 1 stand-in files, 0 dup headers, 2 gate users, 11 PARTIAL | CCollUtil (1 partial) |  (gate) |
 
 ## Classes with foreign copies
 
@@ -114,11 +114,11 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CAtel` | complete | Game/Atel/Atel.h | 7 |  |  |
 | `DropPrize` | gated | Game/Gimmick/GimmickManager.h | 7 |  |  |
 | `CJiminyMemoFlag` | superset | Form/Menu/JMemoFlag.h | 6 |  | 1 PARTIAL |
+| `COLL_INFO_UNION` | missing | Game/Movement.h | 6 |  |  |
 | `CPlayer` | partial | Game/Player/Player.h | 6 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; padding: _m_0x21c; extra methods: __attribute__, _instance, getCardDraw, getLockonHandle, getMarker, getPrizeDraw, ... (+1); virtual order differs; 3 |
 | `VTransInfo` | gated | System/Graphic/Gprim.h | 6 | System/Graphic/modeldata.h | 1 PARTIAL |
 | `CBuf` | superset | System/Buf.h | 5 |  | 3 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
-| `COLL_INFO_UNION` | missing | Game/Movement.h | 5 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 4 |  | missing methods: ~CPointCollision |
 | `CVSM` | partial | Game/Atel/VSME.h | 4 |  | missing fields: m_ActorStateFnc; extra methods: BOOL |
 | `Actor` | complete | Game/Atel/VSME.h | 3 |  |  |
@@ -150,7 +150,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CCircleCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CCircleCollision |
 | `CCollObj` | superset | Game/Collision/CollObj.h | 1 |  | 1 PARTIAL |
-| `CCollUtil` | partial | Game/Collision/CollUtilA.h | 1 |  | missing fields: m_iInfo, m_iInfo2; missing methods: backupChipStatus, checkHangEdge, checkLadderUp, clean, closestPointOnLine, detectActorTrapXZ, ... (+26); padding: _pad028, _pad224; extra methods: getInstance; 10 PARTI |
+| `CCollUtil` | partial | Game/Collision/CollUtilA.h | 1 |  | missing methods: backupChipStatus, checkHangEdge, checkLadderUp, clean, closestPointOnLine, detectActorTrapXZ, ... (+26); padding: _pad028, _pad224; extra methods: getInstance; 11 PARTIAL |
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
 | `CCoordMan` | complete | System/CoordMan.h | 1 |  |  |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
@@ -269,7 +269,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
 | `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 173 |
 | `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 150 |
-| `Game/Collision/CollUtilA.h` | 11 | 2/2/2/0 | 24 |
+| `Game/Collision/CollUtilA.h` | 12 | 6/0/2/0 | 24 |
 | `Game/Collision/Ride.h` | 1 | 6/0/1/0 | 5 |
 | `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
 | `Game/EffectMotion.h` | 0 | 5/0/2/0 | 7 |
@@ -410,8 +410,9 @@ or `untagged`.
 | kind | key | sites | tagged | reason, or an untagged site |
 |---|---|---:|---:|---|
 | feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:3 |
-| feature | `COLLOBJ_H_COLLISION_CLASSES` | 5 | 1 | CPointCollision (debugWinPathEditPosCamGround) |
+| feature | `COLLOBJ_H_COLLISION_CLASSES` | 5 | 2 | CCollUtil() constructs a CSphereCollision (CollObj.h gates the collision classes) |
 | feature | `COLLOBJ_H_INFO_UNION` | 3 | 0 | untagged, e.g. Game/Movement.cpp:2 |
+| feature | `COLLUTILA_H_INFO_MEMBERS` | 1 | 1 | m_iInfo/m_iInfo2 need the COLL_INFO_UNION below; CollUtilF, CollMapCamera keep own copies |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 0 | untagged, e.g. Game/Atel/Atel.cpp:31 |
 | feature | `MODELDATA_H_TEXINFO` | 5 | 0 | untagged, e.g. System/Graphic/DispList.cpp:1 |
@@ -419,6 +420,7 @@ or `untagged`.
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 0 | untagged, e.g. Game/Collision/CollObj.h:90 |
 | feature site | `COLLOBJ_H_INFO_UNION` | 1 | 0 | untagged, e.g. Game/Collision/CollObj.h:205 |
+| feature site | `COLLUTILA_H_INFO_MEMBERS` | 1 | 0 | untagged, e.g. Game/Collision/CollUtilA.h:211 |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 0 | untagged, e.g. Game/Entity.h:427 |
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 0 | untagged, e.g. System/LinkedBuf.h:10 |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:78 |
