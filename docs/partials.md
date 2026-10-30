@@ -61,14 +61,14 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 981 (912 in 110 headers, 69 in 38 .cpp); MATCH: 140
-  by category: method 381, data member 67, type 85, fwd decl 53, #include 32, changed in place 132, padding 27, path override 24, gate 41, guessed 39, header-level 74, stand-in 20, other 6
-stand-ins: 129 foreign in 77 files (51 names), 201 unattributed, 170 own
+PARTIAL: 937 (870 in 111 headers, 67 in 36 .cpp); MATCH: 139
+  by category: method 354, data member 66, type 85, fwd decl 53, #include 32, changed in place 127, padding 18, path override 24, gate 41, guessed 39, header-level 74, stand-in 18, other 6
+stand-ins: 123 foreign in 75 files (50 names), 201 unattributed, 169 own
 duplicate class names across headers: 24
-padding: 26 arrays, 26 accessors
-mechanisms: 959 sites (909 untagged); #line: 1242
+padding: 21 arrays, 9 accessors
+mechanisms: 952 sites (903 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 575, superset 129, partial 93, gated 92, missing 9, unattributed 309
+classes: complete 577, superset 128, partial 94, gated 91, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -95,10 +95,10 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.5 | `System/Graphic/2d/2DSeq.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | C2DSeq (1 superset) | inline bodies or virtuals |
 | R1 | 2.5 | `System/RsrcDB.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CRsrcDB (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
-| R1 | 2.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/Player/Friend.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFriend (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/PlayerCamera.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerCamera (1 gated) | inline bodies or virtuals (gate) |
 | R1 | 2.0 | `Game/Player/PlayerRiku.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerRiku (1 superset) | inline bodies or virtuals |
+| R1 | 2.0 | `Game/Player/PlayerSora.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerSora (1 superset) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -108,7 +108,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
 | `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
 | `DropPrize` | gated | Game/Gimmick/GimmickManager.h | 7 |  |  |
-| `COLL_INFO_UNION` | missing | Game/Movement.h | 6 |  |  |
 | `VTransInfo` | gated | System/Graphic/Gprim.h | 6 | System/Graphic/modeldata.h | 1 PARTIAL |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 4 |  | missing methods: ~CPointCollision |
@@ -211,9 +210,10 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollAttack.h` | 0 | 0/1/0/0 | 11 |
 | `Game/Collision/CollBody.h` | 2 | 0/1/0/0 | 5 |
 | `Game/Collision/CollDisp.h` | 8 | 0/0/0/3 | 7 |
+| `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
 | `Game/Collision/CollMap.h` | 0 | 0/1/0/0 | 29 |
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
-| `Game/Collision/CollObj.h` | 12 | 3/1/2/7 | 174 |
+| `Game/Collision/CollObj.h` | 11 | 4/0/2/7 | 174 |
 | `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 150 |
 | `Game/Collision/CollUtilA.h` | 1 | 9/1/1/0 | 26 |
 | `Game/Collision/Ride.h` | 1 | 4/0/1/0 | 6 |
@@ -253,7 +253,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/InterpolateMove.h` | 0 | 0/0/3/0 | 1 |
 | `Game/Map.h` | 9 | 6/2/1/3 | 9 |
 | `Game/MapUnitTable.h` | 3 | 0/2/0/0 | 11 |
-| `Game/Movement.h` | 49 | 0/0/0/1 | 105 |
+| `Game/Movement.h` | 7 | 0/0/1/0 | 105 |
 | `Game/OsdDef.h` | 4 | 3/0/3/0 | 7 |
 | `Game/Player/DWTPlayer.h` | 2 | 0/0/0/0 | 5 |
 | `Game/Player/Friend.h` | 0 | 0/0/1/0 | 15 |
@@ -357,16 +357,14 @@ or `untagged`.
 |---|---|---:|---:|---|
 | feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:3 |
 | feature | `COLLOBJ_H_COLLISION_CLASSES` | 5 | 3 | CCollUtil() constructs a CSphereCollision (CollObj.h gates the collision classes) |
-| feature | `COLLOBJ_H_INFO_UNION` | 3 | 0 | untagged, e.g. Game/Movement.cpp:2 |
-| feature | `COLLUTILA_H_INFO_MEMBERS` | 1 | 1 | m_iInfo/m_iInfo2 need the COLL_INFO_UNION below; CollUtilF, CollMapCamera keep own copies |
+| feature | `COLLOBJ_H_INFO_AS_INT` | 1 | 0 | untagged, e.g. System/Graphic/TriangleIK.cpp:6 |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 0 | untagged, e.g. Game/Atel/Atel.cpp:31 |
 | feature | `MODELDATA_H_TEXINFO` | 5 | 0 | untagged, e.g. System/Graphic/DispList.cpp:1 |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 1 | 0 | untagged, e.g. System/RsrcData.cpp:6 |
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
-| feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 0 | untagged, e.g. Game/Collision/CollObj.h:90 |
-| feature site | `COLLOBJ_H_INFO_UNION` | 1 | 0 | untagged, e.g. Game/Collision/CollObj.h:205 |
-| feature site | `COLLUTILA_H_INFO_MEMBERS` | 1 | 1 | COLL_INFO_UNION has no header yet (ref owner Game/Movement); CollUtil, CollUtilF, CollMapCamera, MapEnemy, SEMotion, Player and Movement define their own copy |
+| feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 0 | untagged, e.g. Game/Collision/CollObj.h:91 |
+| feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 0 | untagged, e.g. Game/Entity.h:427 |
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 0 | untagged, e.g. System/LinkedBuf.h:10 |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:78 |
@@ -375,13 +373,11 @@ or `untagged`.
 | full-class | `FORM_DEBUGMENU_FULL` | 1 | 0 | untagged, e.g. Form/DebugMenu.cpp:3 |
 | full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 1 | CNakCamera; the original has Gprim.h's strings (PathData.h includes it first) |
 | full-class | `MAPENEMY_H_FULL_CLASS` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.cpp:1 |
-| full-class | `MOVEMENT_H_FULL_CLASS` | 2 | 0 | untagged, e.g. Game/Enemy/MapEnemy.cpp:46 |
 | full-class | `RSRCDATA_H_FULL` | 2 | 0 | untagged, e.g. System/RsrcDB.cpp:2 |
 | full-class site | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.h:16 |
 | full-class site | `FORM_DEBUGMENU_FULL` | 1 | 0 | untagged, e.g. Form/DebugMenu.h:35 |
 | full-class site | `FORM_DEBUGWINDOW_FULL` | 3 | 0 | untagged, e.g. Form/DebugWindow.h:42 |
 | full-class site | `MAPENEMY_H_FULL_CLASS` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.h:18 |
-| full-class site | `MOVEMENT_H_FULL_CLASS` | 1 | 0 | untagged, e.g. Game/Movement.h:12 |
 | full-class site | `RSRCDATA_H_FULL` | 1 | 0 | untagged, e.g. System/RsrcData.h:12 |
 | guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 0 | untagged, e.g. Game/Gimmick/CreateGimmick.cpp:1 |
 | guard skip | `GAME_COLLISION_COLLBODY_H` | 1 | 0 | untagged, e.g. Game/BodyCollision.h:13 |
