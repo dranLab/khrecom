@@ -629,9 +629,11 @@ BOOL CRcf::isCompleteLoadRCF(INT nGroup, INT nMember) {
     _signalsema();
     return result;
 }
-/* near-match (INCLUDE_ASM); the C is kept as a stripped placeholder for its strings */
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) INT _LoadRCFProc_c(ULONG nGroup, INT nType) {
+/* Parked: _LoadRCFProc: 1 of 81 lines - our case-tree branch is `beqzl` where the original has `beqz` (same delay
+ * slot `li v0,2`): reorg sees v0 live on the default path's fall-off exit (return-value USE) and the original
+ * doesn't. `default: return nResult;` and a label before the final return are worse (10-11 lines). */
+#if 0
+INT _LoadRCFProc(ULONG nGroup, INT nType) {
     INT nResult;
 
     switch (s_nReadStep) {
@@ -661,7 +663,9 @@ __attribute__((section(".sdata"))) INT _LoadRCFProc_c(ULONG nGroup, INT nType) {
     return nResult;
 end:;
 }
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _LoadRCFProc__FUii);
+#endif
 INT CRcf::_loadRCFAlias() {
     CRcfCD::setupRcfAlias();
     return TRUE;
