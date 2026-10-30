@@ -324,26 +324,26 @@ public:
     static BOOL isCompleteLoadRCF(INT nGroup, INT nID);
 };
 
-class CGlare : public CTask {
-private:
-    static CGlare* m_pInstance;
-    CGlare(CTask* p);
-    void _fade(FLOAT fTime, FLOAT fAim, FLOAT fOld);
-    void _off(FLOAT fTime);
-    void _on(FLOAT fTime);
+#include "System/Graphic/Glare.h"
 
-public:
-    static void fade(FLOAT fTime, FLOAT fAim, FLOAT fOld) {
-        CGlare*& pInstance = m_pInstance;
-        if (pInstance) pInstance->_fade(fTime, fAim, fOld);
-    }
-    static void off(FLOAT fTime) {
-        if (m_pInstance) m_pInstance->_off(fTime);
-    }
-    static void on(FLOAT fTime) {
-        if (m_pInstance) m_pInstance->_on(fTime);
-    }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 INT CRoomCreation::m_iWorldRsrc = 0;
 INT CRoomCreation::m_iPlayerRsrc = 0;
