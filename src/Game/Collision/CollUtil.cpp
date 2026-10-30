@@ -63,6 +63,7 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+FLOAT InnerProduct4(const FVECTOR& v0, const FVECTOR& v1);
 static inline FLOAT _sqrtf(FLOAT x) {
     FLOAT ret;
     asm volatile("sqrt.s %0, %1" : "=f"(ret) : "f"(x));
@@ -543,7 +544,167 @@ INT CCollUtil::detectMap(FVECTOR* pWS, FVECTOR* pWE) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectMap__9CCollUtilP7FVECTORT1);
 #endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", detectPolygon__9CCollUtil);
+INT CCollUtil::detectPolygon() {
+    PRIM_INFO2* pPrimInfo2;
+    MC_PRIM* pPrim;
+    FVECTOR* pNorm;
+    FVECTOR vCk0;
+    FVECTOR vCk1;
+    FVECTOR n0Radius;
+    FVECTOR r;
+    FVECTOR p;
+    FLOAT t1;
+    FLOAT t2;
+    FMATRIX m;
+    BYTE info2Kind;
+    FVECTOR vTmp0;
+    FVECTOR vTmp1;
+    FVECTOR vTmp2;
+    FVECTOR normalY;
+    FVECTOR p2;
+    FLOAT ret;
+    INT fg;
+    pPrimInfo2 = m_pPrimInfoCurrent->pInfo2;
+    pPrim = m_pPrimInfoCurrent->pPrim;
+    pNorm = pPrimInfo2->pNorm;
+    FVECTOR& n0 = pNorm[pPrim->n0];
+    if (m_SphereDetectFg) {
+        ScaleVector(n0Radius, n0, m_RadiusL);
+        SubVector(vCk0, m_vCk0, n0Radius);
+        SubVector(vCk1, m_vCk1, n0Radius);
+    } else {
+        vCk0 = m_vCk0;
+        vCk1 = m_vCk1;
+    }
+    vCk1.w = 1.0f;
+    vCk0.w = 1.0f;
+    do {
+        t1 = InnerProduct4(n0, vCk0);
+        t2 = InnerProduct(n0, m_vCkVec);
+        ret = -t1;
+        ScaleVector(p, m_vCkVec, ret / t2);
+        AddVector(p, vCk0, p);
+        p.w = 1.0f;
+        m.v[0] = pNorm[pPrim->n1];
+        m.v[1] = pNorm[pPrim->n2];
+        m.v[2] = pNorm[pPrim->n3];
+        m.v[3] = pNorm[pPrim->n4];
+        asm volatile("lq $8, 0x0(%2)\n"
+                     "lq $9, 0x10(%2)\n"
+                     "lq $10, 0x20(%2)\n"
+                     "lq $11, 0x30(%2)\n"
+                     "pextlw $12, $9, $8\n"
+                     "pextuw $13, $9, $8\n"
+                     "pextlw $14, $11, $10\n"
+                     "pextuw $15, $11, $10\n"
+                     "pcpyld $8, $14, $12\n"
+                     "pcpyud $9, $12, $14\n"
+                     "pcpyld $10, $15, $13\n"
+                     "pcpyud $11, $13, $15\n"
+                     "qmtc2.ni $8, $vf4\n"
+                     "qmtc2.ni $9, $vf5\n"
+                     "qmtc2.ni $10, $vf6\n"
+                     "qmtc2.ni $11, $vf7\n"
+                     "lqc2 $vf8, 0x0(%1)\n"
+                     "vmulax.xyzw $ACC, $vf4, $vf8x\n"
+                     "vmadday.xyzw $ACC, $vf5, $vf8y\n"
+                     "vmaddaz.xyzw $ACC, $vf6, $vf8z\n"
+                     "vmaddw.xyzw $vf9, $vf7, $vf8w\n"
+                     "sqc2 $vf9, 0x0(%0)" : : "r"(&r), "r"(&p), "r"(&m) : "$8", "$9", "$10", "$11", "$12", "$13", "$14", "$15", "memory");
+        if (t1 <= 0.0f || r.x < 0.0f || r.y < 0.0f || r.z < 0.0f) break;
+        if (pPrim->kind && r.w < 0.0f) break;
+        m_iInfo.info = pPrim->info;
+        info2Kind = m_iInfo.infoPID & 0x3F;
+        if (m_iKind >= 0) {
+            if (info2Kind >= 2) {
+                if (info2Kind == 2) {
+                    if (!m_iInfo2.infoPID) {
+                        m_iInfo2.infoPID = m_iInfo.infoPID;
+                        m_vDetectP = p;
+                        m_vNormalP = n0;
+                        m_pDetectMatP = m_pPrimInfoCurrent->pInfo2->pMatLW;
+                    }
+                    m_pPrimInfoCurrent->fgLine = 0;
+                    return 0;
+                }
+                if (m_iKind != 10) {
+                    m_pPrimInfoCurrent->fgLine = 0;
+                    return 0;
+                }
+            }
+        } else if (m_fgCamera) {
+            if (m_iInfo.infoPID) {
+                if (info2Kind == 1 && m_iKind == (INT)0x8000000E) {
+                    if (m_SemiTransMatIdx < 32) {
+                        m_pSemiTransMat[m_SemiTransMatIdx++] = m_pPrimInfoCurrent->pInfo2->pMatLW;
+                        m_iInfo2.infoPID = m_iInfo.infoPID;
+                    }
+                } else if (!m_iInfo2.infoPID) {
+                    m_iInfo2.infoPID = m_iInfo.infoPID;
+                }
+                m_pPrimInfoCurrent->fgLine = 0;
+                return 0;
+            }
+        } else if (m_iInfo.infoPID & 0x80) {
+            m_pPrimInfoCurrent->fgLine = 0;
+            return 0;
+        }
+        p2 = p;
+        if (m_fgSliding) if (m_fgSliding == 1) {
+            normalY.x = pPrimInfo2->pMatLW->m[0][1];
+            normalY.y = pPrimInfo2->pMatLW->m[1][1];
+            normalY.z = pPrimInfo2->pMatLW->m[2][1];
+            t2 = InnerProduct(n0, normalY);
+            if (0.64278764f < t2) {
+                {
+                    /* MATCH: negation as its own statement (original line 1200): $LM label pads div.s with a nop; ret here changes f0 */
+                    FLOAT nt = -InnerProduct4(n0, vCk1);
+                    ScaleVector(vTmp0, normalY, nt / t2);
+                }
+                AddVector(vTmp0, vCk1, vTmp0);
+                SubVector(vTmp2, vTmp0, p);
+                if (2.5e-05f <= InnerProduct(vTmp2)) {
+                    SubVector(vTmp1, vCk1, p);
+                    t2 = _sqrtf(InnerProduct(vTmp1));
+                    SubVector(vTmp0, vTmp0, p);
+                    Normalize(vTmp0, vTmp0);
+                    ScaleVector(vTmp0, vTmp0, t2);
+                    AddVector(p, p, vTmp0);
+                }
+            } else {
+                ScaleVector(vTmp0, n0, -InnerProduct4(n0, vCk1));
+                AddVector(p, vCk1, vTmp0);
+            }
+        }
+        ScaleVector(vTmp0, n0, 0.0035f);
+        AddVector(p, p, vTmp0);
+        AddVector(p2, p2, vTmp0);
+        if (m_SphereDetectFg) {
+            AddVector(m_vCk1, p, n0Radius);
+            AddVector(p2, p2, n0Radius);
+        } else {
+            m_vCk1 = p;
+        }
+        m_vCk1.w = 1.0f;
+        m_vNormal = n0;
+        m_vNormal.w = 1.0f;
+        m_vDetect = p2;
+        m_vDetect.w = 1.0f;
+        return 1;
+    } while (0);
+    if (m_SphereDetectFg) {
+        fg = 0;
+        if (r.x < m_RadiusL) fg = 0x31;
+        if (r.y < m_RadiusL) fg |= 0x62;
+        if (r.z < m_RadiusL) {
+            if (pPrim->kind) fg |= 0xC4;
+            else fg |= 0x54;
+        }
+        if (pPrim->kind && r.w < m_RadiusL) fg |= 0x98;
+        m_pPrimInfoCurrent->fgLine |= fg;
+    }
+    return 0;
+}
 INT CCollUtil::detectPLine() {
     PRIM_INFO2* pPrimInfo2 = m_pPrimInfoCurrent->pInfo2;
     MC_PRIM* pPrim = m_pPrimInfoCurrent->pPrim;
@@ -714,7 +875,6 @@ INT CCollUtil::distanceSphere(FVECTOR* pP0) {
     m_vDetect = m_vCk2;
     return 1;
 }
-FLOAT InnerProduct4(const FVECTOR& v0, const FVECTOR& v1);
 INT CCollUtil::slidingHosei(FVECTOR& vCenter, FVECTOR& vSurface, FVECTOR& vNormal) {
     FVECTOR vSurf;
     FVECTOR vTmp0;
