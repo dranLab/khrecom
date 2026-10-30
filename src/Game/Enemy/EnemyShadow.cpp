@@ -87,11 +87,11 @@ void CEnemyShadow::updateAfter() {
     FLOAT t = 1.0f - (FLOAT)m_tqDigTimer / (FLOAT)m_tqDigTime;
     if (t <= 0.0f) t = 0.0f;
     Math3D::VectorLerp(s0, s1, s2, t);
-    m_pMove->setScale(s0);
+    m_pMove->setScl(s0);
     m_tqDigTimer -= getFrameRate();
     if (m_tqDigTimer <= 0) {
         m_iDigStep = 0;
-        m_pMove->setScale(s2);
+        m_pMove->setScl(s2);
     }
 }
 

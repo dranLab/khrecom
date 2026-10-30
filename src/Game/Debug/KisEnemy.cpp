@@ -44,7 +44,7 @@ void CKisEnemy::stateMain() {
             vec.y = 0.01f;
             vec.z = 0.0f;
             vec.w = 0.0f;
-            m_pMove->getVel() = vec;
+            m_pMove->setVel(vec);
             if (m_pMove->getPos().y > 2.0f) m_iStep++;
             break;
         case 1:
@@ -52,7 +52,7 @@ void CKisEnemy::stateMain() {
             vec.y = -0.01f;
             vec.z = 0.0f;
             vec.w = 0.0f;
-            m_pMove->getVel() = vec;
+            m_pMove->setVel(vec);
             if (m_pMove->getPos().y < 1.0f) m_iStep--;
             break;
         case 2:
@@ -72,7 +72,7 @@ void CKisEnemy::stateMain() {
             vec.y = 0.02f;
             vec.z = 0.0f;
             vec.w = 0.0f;
-            m_pMove->getVel() = vec;
+            m_pMove->setVel(vec);
             if (m_pMove->getPos().y > 3.0f) m_iStep++;
             break;
         case 1:
@@ -80,7 +80,7 @@ void CKisEnemy::stateMain() {
             vec.y = -0.02f;
             vec.z = 0.0f;
             vec.w = 0.0f;
-            m_pMove->getVel() = vec;
+            m_pMove->setVel(vec);
             if (m_pMove->getPos().y < 1.0f) m_iStep--;
             break;
         case 2:

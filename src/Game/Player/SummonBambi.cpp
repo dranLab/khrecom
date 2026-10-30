@@ -135,7 +135,7 @@ void CSummonBambi::stateAction1() {
             FLOAT& spd = m_fMoveSpdXZ;
             spd = m_pAtkData->MAX_SPEED / 60.0f;
             vel.y = PL::g_fAntiGravity * m_pAtkData->WORK0;
-            m_pMove->getVel() = vel;
+            m_pMove->setVel(vel);
             m_pMove->enableGravity(1);
             m_uiFlag |= 4;
         }
@@ -182,7 +182,7 @@ void CSummonBambi::stateAction1() {
     m_pMove->calcVelocityXZ(m_fMoveSpdXZ);
     vel = m_pMove->getVel();
     vel.y = fMoveSpdY;
-    m_pMove->getVel() = vel;
+    m_pMove->setVel(vel);
     if (getTimer() <= 0) setExit(0);
 }
 
@@ -257,7 +257,7 @@ void CSummonBambi::stateAction2() {
                 FLOAT& spd = m_fMoveSpdXZ;
                 spd = m_pAtkData->MAX_SPEED / 60.0f;
                 vel.y = PL::g_fAntiGravity * m_pAtkData->WORK0;
-                m_pMove->getVel() = vel;
+                m_pMove->setVel(vel);
             }
             m_pMove->enableGravity(1);
             m_uiFlag |= 4;
@@ -301,7 +301,7 @@ void CSummonBambi::stateAction2() {
     m_pMove->calcVelocityXZ(m_fMoveSpdXZ);
     vel = m_pMove->getVel();
     vel.y = fMoveSpdY;
-    m_pMove->getVel() = vel;
+    m_pMove->setVel(vel);
     if (getTimer() <= 0) setExit(0);
 }
 

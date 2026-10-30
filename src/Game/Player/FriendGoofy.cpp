@@ -282,13 +282,13 @@ INT CFriendGoofy::exeGoofySmash() {
             if (!(m_uiFlag & 4)) {
                 vel = m_pMove->getVel();
                 vel.y = PL::g_fAntiGravity * m_pAtkData->WORK1;
-                m_pMove->getVel() = vel;
+                m_pMove->setVel(vel);
                 m_pMove->enableGravity(1);
                 m_uiFlag |= 4;
             } else {
                 vel = m_pMove->getVel();
                 vel.y = fMoveSpdY;
-                m_pMove->getVel() = vel;
+                m_pMove->setVel(vel);
             }
         }
         if (isMotionEnd()) return 1;
@@ -336,14 +336,14 @@ INT CFriendGoofy::exeGoofySmash() {
                 if (m_pAtkData->MOVE_END_FRAME < frame) {
                     vel = m_pMove->getVel();
                     vel.y = PL::g_fAntiGravity * m_pAtkData->WORK1;
-                    m_pMove->getVel() = vel;
+                    m_pMove->setVel(vel);
                     m_pMove->enableGravity(1);
                     m_uiFlag |= 4;
                 }
             } else {
                 vel = m_pMove->getVel();
                 vel.y = fMoveSpdY;
-                m_pMove->getVel() = vel;
+                m_pMove->setVel(vel);
             }
         } else {
             m_pMove->homingY(m_vAimPos, 0.1f);
@@ -379,13 +379,13 @@ INT CFriendGoofy::exeGoofySmash() {
             vel = m_pMove->getVel();
             FLOAT distY = m_vAimPos.y - getPos().y;
             vel.y = PL::g_fAntiGravity * (m_pAtkData->WORK2 + distY * 10.0f);
-            m_pMove->getVel() = vel;
+            m_pMove->setVel(vel);
             m_pMove->enableGravity(1);
             m_uiFlag |= 4;
         } else {
             vel = m_pMove->getVel();
             vel.y = fMoveSpdY;
-            m_pMove->getVel() = vel;
+            m_pMove->setVel(vel);
         }
         if (pos.y > m_vAimPos.y) {
             vel.y *= 0.85f;

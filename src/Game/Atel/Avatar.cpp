@@ -158,8 +158,8 @@ ATEL::CAvatar::~CAvatar() {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", _$_Q24ATEL7CAvatar);
 #endif
 void CAvatar::InitAvatar(INT in_flag) {
-    m_pMove->setFlag(0x40, FALSE);
-    m_pMove->setFlag(0x200, TRUE);
+    m_pMove->setFlag(0, 0x40);
+    m_pMove->setFlag(0x200, 0);
     enableFade2Path(1, -1);
     setTexAnmSeq(0, "EYE_BLINK");
     if (in_flag == 1) setEntityFlag(1, 0);
@@ -361,8 +361,8 @@ INT CAvatar::onSetCollision(INT nCmd, void* pParam, INT nID) {
     return -1;
 }
 INT CAvatar::onSetMapCollision(INT nCmd, void* pParam, INT nID) {
-    if (nID) m_pMove->setFlag(1, FALSE);
-    else m_pMove->setFlag(1, TRUE);
+    if (nID) m_pMove->setFlag(0, 1);
+    else m_pMove->setFlag(1, 0);
     return -1;
 }
 INT CAvatar::onCreateLegIK(INT nCmd, void* pParam, INT nID) {
@@ -511,7 +511,7 @@ void CAvatar::setAvatarGravity(BOOL bOn) {
 INT CAvatar::onStopMove(INT nCmd, void* pParam, INT nID) { return -1; }
 INT CAvatar::onContinueMove(INT nCmd, void* pParam, INT nID) { return -1; }
 void CAvatar::setRotAhead() {
-    FVECTOR& vVel = m_pMove->getVel();
+    const FVECTOR& vVel = m_pMove->getVel();
     getRot().y = atan2f(vVel.x, vVel.z);
 }
 BOOL CAvatar::isArrivingTarget() {

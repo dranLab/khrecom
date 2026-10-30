@@ -577,11 +577,11 @@ void CPlayerDRiku::exeSpeedStep() {
     FVECTOR vel = m_pMove->getVel();
     if (isAir()) {
         vel.y = m_fJumpSpdY += m_fJumpGravity * m_fFrameRate;
-        m_pMove->getVel() = vel;
+        m_pMove->setVel(vel);
     } else {
         if (m_fJumpSpdY < 0.0f) m_fJumpSpdY = 0.0f;
         vel.y = m_fJumpSpdY;
-        m_pMove->getVel() = vel;
+        m_pMove->setVel(vel);
     }
     if (getMotionCurrentTime() >= m_pParam->AVOID_TQ_MUTEKI) {
         setPlayerFlag(0, 1);
@@ -1818,7 +1818,7 @@ void CPlayerDRiku::exeStockSkill() {
                 m_fJumpSpdY = g_fAntiGravity * m_pAtkData->WORK1;
                 vel = m_pMove->getVel();
                 vel.y = m_fJumpSpdY;
-                m_pMove->getVel() = vel;
+                m_pMove->setVel(vel);
             }
             procAttackMove(frame, 0.0f, 0.0f, 0, 0.15f);
         }

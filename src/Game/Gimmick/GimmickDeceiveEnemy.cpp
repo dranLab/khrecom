@@ -62,8 +62,8 @@ BOOL CGimmickDeceiveEnemy::initalize(INT inGroupID, INT inRsrcID) {
         break;
     }
     m_pMove->enableGravity(FALSE);
-    m_pMove->setFlag(1, TRUE);
-    m_pMove->setCollisionFlag(0xF, FALSE);
+    m_pMove->setFlag(1, 0);
+    m_pMove->setCollisionFlag(0, 0xF);
     return TRUE;
 }
 

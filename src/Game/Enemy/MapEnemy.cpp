@@ -43,7 +43,7 @@ inline void _emptyStringPlaceholder() {
 
 
 
-#define MOVEMENT_H_FULL_CLASS
+
 #include "Game/Movement.h"
 #include "Game/MessageManager.h"
 #include "System/Graphic/Effect/EffectMan.h"

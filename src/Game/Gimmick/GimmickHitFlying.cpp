@@ -47,8 +47,8 @@ CGimmickHitFlying::~CGimmickHitFlying() {
 BOOL CGimmickHitFlying::initalize(INT inGroupID, INT inRsrcID) {
     if (!CBaseGimmick::initalize(inGroupID, inRsrcID)) return FALSE;
     m_pMove->enableGravity(FALSE);
-    m_pMove->setFlag(1, TRUE);
-    m_pMove->setCollisionFlag(0xF, FALSE);
+    m_pMove->setFlag(1, 0);
+    m_pMove->setCollisionFlag(0, 0xF);
     bodyCollOffBody(-1);
     rideModelEnableAllCollision(FALSE);
     getSysTask(32);
@@ -121,7 +121,7 @@ void CGimmickHitFlying::FlyGimmick() {
     vec.y += 0.1f;
     m_FlyDir = vec;
     m_pMove->enableGravity(TRUE);
-    m_pMove->setFlag(1, FALSE);
+    m_pMove->setFlag(0, 1);
     bodyCollOffBody(0);
     bodyCollOnBody(1);
     changeGimmickState(0);

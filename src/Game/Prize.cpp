@@ -392,7 +392,7 @@ BOOL CPrize::setup(const PRIZE_PARAM& inParam) {
         setOldPos(start);
         setPos(pos);
         FLOAT r = radius + 0.1f;
-        m_pMove->setFlag(0x40, TRUE);
+        m_pMove->setFlag(0x40, 0);
         m_pMove->setFootRadius(r * 0.5f);
         m_pMove->setWallRadius(r);
         if (inParam.PrizeKind >= 0xCB) {
@@ -401,8 +401,8 @@ BOOL CPrize::setup(const PRIZE_PARAM& inParam) {
             m_pMove->setShiftY(-0.2f);
         }
         m_pMove->update();
-        m_pMove->setFlag(0x40, FALSE);
-        m_pMove->setCollisionFlag(0xF, FALSE);
+        m_pMove->setFlag(0, 0x40);
+        m_pMove->setCollisionFlag(0, 0xF);
         m_pMove->setRadius(radius);
         if (inParam.PrizeKind >= 0xCB) {
             m_pMove->setShiftY(0.0f);
@@ -478,12 +478,12 @@ void CPrize::flyHigh(BOOL bAll) {
     if (m_PrizeKind != 0xA0 || bAll) {
         setupFade(1.0f, 0.0f, 3000, -1);
         ScaleVectorXYZ(v, v, 0.3f);
-        m_pMove->getVel() = v;
+        m_pMove->setVel(v);
         m_iStep = 2;
         m_bFlyHigh = TRUE;
     } else {
         ScaleVectorXYZ(v, v, 0.3f);
-        m_pMove->getVel() = v;
+        m_pMove->setVel(v);
     }
 }
 
@@ -514,7 +514,7 @@ void CPrize::prizeMain_() {
             FVECTOR v;
             v.set(0.0f, 1.0f, 0.0f, 1.0f);
             ScaleVector(v, v, m_pMove->getSpeed() * 0.7f);
-            m_pMove->getVel() = v;
+            m_pMove->setVel(v);
             if (m_pMove->getSpeed() <= 0.05f) clearSpeed();
             m_iBoundCounter++;
             if (m_iBoundCounter < 3) playBoundSE_();
@@ -523,13 +523,13 @@ void CPrize::prizeMain_() {
             FVECTOR n = m_pMove->getDetectNormal();
             Normalize(n, n);
             Math3D::CalcReflectionVector(v, m_pMove->getVel(), n);
-            m_pMove->getVel() = v;
+            m_pMove->setVel(v);
         }
         if (isDraw_()) {
             ((FVECTOR&)getRot()).x = 0.0f;
             ((FVECTOR&)getRot()).y = g_pPlayer->calcDirection(this);
             m_pMove->enableGravity(FALSE);
-            m_pMove->setFlag(1, TRUE);
+            m_pMove->setFlag(1, 0);
             m_iStep = 1;
         }
         break;
@@ -562,7 +562,7 @@ void CPrize::prizeMain_() {
                 sceVu0RotMatrixY(m, m, 0.5934119f);
                 ApplyMatrix(m_vGetVel, m, m_vGetVel);
                 ScaleVectorXYZ(v, m_vGetVel, s);
-                m_pMove->getVel() = v;
+                m_pMove->setVel(v);
                 warp(target);
             } else {
                 m_fSpeed = 0.3f;
@@ -576,7 +576,7 @@ void CPrize::prizeMain_() {
                 v1.y = 0.0f;
                 if (Math3D::VectorLength(v1) < v.y * 0.25f) v.set(0.0f, 1.0f, 0.0f, 1.0f);
                 ScaleVector(v, v, 0.75f);
-                m_pMove->getVel() = v;
+                m_pMove->setVel(v);
                 m_vGetVel = v;
                 warp(target);
                 setTimer(3000);
@@ -598,7 +598,7 @@ void CPrize::prizeMain_() {
             FVECTOR v;
             v.set(0.0f, 1.0f, 0.0f, 1.0f);
             ScaleVector(v, v, m_pMove->getSpeed() * 0.7f);
-            m_pMove->getVel() = v;
+            m_pMove->setVel(v);
             if (m_pMove->getSpeed() <= 0.05f) clearSpeed();
             m_iBoundCounter++;
             if (m_iBoundCounter < 3) playBoundSE_();
@@ -607,7 +607,7 @@ void CPrize::prizeMain_() {
             FVECTOR n = m_pMove->getDetectNormal();
             Normalize(n, n);
             Math3D::CalcReflectionVector(v, m_pMove->getVel(), n);
-            m_pMove->getVel() = v;
+            m_pMove->setVel(v);
         }
         if (!CGameWork::getFlag(1, 0x21)) {
             ((FVECTOR&)getRot()).x = 0.0f;
@@ -643,10 +643,10 @@ void CPrize::cardMain_() {
             Math3D::CalcReflectionVector(v, vel, m_pMove->getDetectNormal());
             Normalize(v, v);
             ScaleVector(v, v, 0.125f);
-            m_pMove->getVel() = v;
+            m_pMove->setVel(v);
         }
         if (isDraw_()) {
-            m_pMove->setFlag(1, TRUE);
+            m_pMove->setFlag(1, 0);
             m_iStep = 1;
             break;
         }
@@ -682,7 +682,7 @@ void CPrize::cardMain_() {
                 sceVu0RotMatrixY(m, m, 0.5934119f);
                 ApplyMatrix(m_vGetVel, m, m_vGetVel);
                 ScaleVectorXYZ(v, m_vGetVel, s);
-                m_pMove->getVel() = v;
+                m_pMove->setVel(v);
                 warp(target);
             } else {
                 m_fSpeed = 0.3f;
@@ -690,7 +690,7 @@ void CPrize::cardMain_() {
                 SubVectorXYZ(v, target, getPos());
                 Normalize(v, v);
                 ScaleVectorXYZ(v, v, 0.3f);
-                m_pMove->getVel() = v;
+                m_pMove->setVel(v);
             }
             if (calcDistanceSq(target) <= 4.0f && !m_bSECall) {
                 FVECTOR v;
@@ -700,7 +700,7 @@ void CPrize::cardMain_() {
                 v1.y = 0.0f;
                 if (Math3D::VectorLength(v1) < v.y * 0.25f) v.set(0.0f, 1.0f, 0.0f, 1.0f);
                 ScaleVector(v, v, 0.75f);
-                m_pMove->getVel() = v;
+                m_pMove->setVel(v);
                 m_vGetVel = v;
                 warp(target);
                 setTimer(3000);
@@ -718,7 +718,7 @@ void CPrize::cardMain_() {
             Math3D::CalcReflectionVector(v, m_pMove->getVel(), m_pMove->getDetectNormal());
             Normalize(v, v);
             ScaleVector(v, v, 0.125f);
-            m_pMove->getVel() = v;
+            m_pMove->setVel(v);
             m_bHoming = TRUE;
         }
         if (!isFade()) out();
@@ -744,7 +744,7 @@ void CPrize::cardMainSpecial_() {
             FVECTOR v;
             v.set(0.0f, 1.0f, 0.0f, 1.0f);
             ScaleVector(v, v, m_pMove->getSpeed() * 0.5f);
-            m_pMove->getVel() = v;
+            m_pMove->setVel(v);
             if (m_pMove->getSpeed() <= 0.05f) clearSpeed();
             m_bHoming = TRUE;
         } else if (m_pMove->isWall()) {
@@ -752,7 +752,7 @@ void CPrize::cardMainSpecial_() {
             FVECTOR n = m_pMove->getDetectNormal();
             Normalize(n, n);
             Math3D::CalcReflectionVector(v, m_pMove->getVel(), n);
-            m_pMove->getVel() = v;
+            m_pMove->setVel(v);
         }
         FLOAT dist;
         if (((CardBattle::CCardBattle*)CTaskMan::getSysTask(22))->getEnchantKind() == 9) {
@@ -762,7 +762,7 @@ void CPrize::cardMainSpecial_() {
             dist = 2.25f;
         }
         if (m_bHoming && calcDistanceSq(g_pPlayer) <= dist) {
-            m_pMove->setFlag(1, TRUE);
+            m_pMove->setFlag(1, 0);
             m_iStep = 1;
         }
         break;
@@ -793,7 +793,7 @@ void CPrize::cardMainSpecial_() {
                 sceVu0RotMatrixY(m, m, 0.5934119f);
                 ApplyMatrix(m_vGetVel, m, m_vGetVel);
                 ScaleVectorXYZ(v, m_vGetVel, s);
-                m_pMove->getVel() = v;
+                m_pMove->setVel(v);
                 warp(target);
             } else {
                 m_fSpeed = 0.3f;
@@ -801,7 +801,7 @@ void CPrize::cardMainSpecial_() {
                 SubVectorXYZ(v, target, getPos());
                 Normalize(v, v);
                 ScaleVectorXYZ(v, v, 0.3f);
-                m_pMove->getVel() = v;
+                m_pMove->setVel(v);
             }
             if (calcDistanceSq(target) <= 4.0f && !m_bSECall) {
                 FVECTOR v;
@@ -811,7 +811,7 @@ void CPrize::cardMainSpecial_() {
                 v1.y = 0.0f;
                 if (Math3D::VectorLength(v1) < v.y * 0.25f) v.set(0.0f, 1.0f, 0.0f, 1.0f);
                 ScaleVector(v, v, 0.75f);
-                m_pMove->getVel() = v;
+                m_pMove->setVel(v);
                 m_vGetVel = v;
                 warp(target);
                 setTimer(3000);
@@ -827,7 +827,7 @@ void CPrize::cardMainSpecial_() {
             CEffectMan::killEffect(m_hEffectHandle, 0.0f);
             m_hEffectHandle = 0;
             m_pMove->enableGravity(FALSE);
-            m_pMove->setFlag(9, TRUE);
+            m_pMove->setFlag(9, 0);
             m_iStep = 3;
         }
         break;

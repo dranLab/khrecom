@@ -236,10 +236,10 @@ void CHeartless::commonMove() {
             FVECTOR vel;
             computeRotMoveVelocity(vel, m_fRot);
             ((FVECTOR&)getRot()).y = atan2f(vel.x, vel.z);
-            FVECTOR v = m_pMove->getVelocity();
+            FVECTOR v = m_pMove->getVel();
             v.x = vel.x;
             v.z = vel.z;
-            m_pMove->getVelocity() = v;
+            m_pMove->setVel(v);
             if (calcDistanceXZSq(_ref(g_pPlayer)) > 16.0f) {
                 clearBtlEnemyFlag(0x80000000);
                 changeIdlingState_();
@@ -348,11 +348,11 @@ void CHeartless::commonFly() {
             FVECTOR vel;
             computeRotMoveVelocity(vel, m_fRot);
             ((FVECTOR&)getRot()).y = atan2f(vel.x, vel.z);
-            FVECTOR v = m_pMove->getVelocity();
+            FVECTOR v = m_pMove->getVel();
             v.x = vel.x;
             v.z = vel.z;
             v.y = 0.0f;
-            m_pMove->getVelocity() = v;
+            m_pMove->setVel(v);
             if (calcDistanceXZSq(_ref(g_pPlayer)) > 16.0f) {
                 clearBtlEnemyFlag(0x80000000);
                 changeIdlingState_();

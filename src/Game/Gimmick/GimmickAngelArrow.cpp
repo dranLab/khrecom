@@ -69,8 +69,8 @@ BOOL CGimmickAngelArrow::initalize(INT inGroupID, INT inRsrcID) {
     getSysTask(32);
     LockOnManager::CLockOnManager::registerLockOnObject(getHandle());
     m_pMove->enableGravity(FALSE);
-    m_pMove->setFlag(1, TRUE);
-    m_pMove->setCollisionFlag(0xF, FALSE);
+    m_pMove->setFlag(1, 0);
+    m_pMove->setCollisionFlag(0, 0xF);
     bodyCollOffBody(-1);
     changeMotion(1, 0, FALSE, -1, 0, 0);
     return TRUE;
