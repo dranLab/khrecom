@@ -69,14 +69,14 @@ inline BOOL SES_HEADER::addrMapping() {
 #include "System/Sound/SoundMan.h"
 #include "System/Rnd.h"
 
-class CMotData {
-private:
-    char m_Name[16];
-    UBYTE _m_0x10[0x14];
+#include "System/Graphic/MotData.h"
 
-public:
-    CHAR* GetName() { return m_Name; }
-};
+
+
+
+
+
+
 
 class CRsrcData {
 private:
