@@ -315,25 +315,25 @@ void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 #include "System/Sound/SoundMan.h"
 #line 322
 
-class CGlare : public CTask {
-private:
-    static CGlare* m_pInstance;
-    CGlare(CTask* p);
-    void _fade(FLOAT fTime, FLOAT fAim, FLOAT fOld);
-    void _off(FLOAT fTime);
-    void _on(FLOAT fTime);
+#include "System/Graphic/Glare.h"
 
-public:
-    static void fade(FLOAT fTime, FLOAT fAim, FLOAT fOld) {
-        if (m_pInstance) m_pInstance->_fade(fTime, fAim, fOld);
-    }
-    static void off(FLOAT fTime) {
-        if (m_pInstance) m_pInstance->_off(fTime);
-    }
-    static void on(FLOAT fTime) {
-        if (m_pInstance) m_pInstance->_on(fTime);
-    }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 CWorldSelect::CWorldSelect(CTask* p, HANDLE hDoor) : CMenu(p, -1) {
     INT i;
