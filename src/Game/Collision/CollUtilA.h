@@ -18,7 +18,10 @@ struct EventTrapData {
 class CCollision;
 
 struct MC_PRIM {
-    /* 0x00 */ INT info;
+    /* 0x00 */ union {
+        INT info;
+        unsigned char infoB[4];
+    };
     /* 0x04 */ SHORT n0;
     /* 0x06 */ SHORT n1;
     /* 0x08 */ SHORT n2;
@@ -29,6 +32,24 @@ struct MC_PRIM {
     /* 0x12 */ SHORT v2;
     /* 0x14 */ SHORT v3;
     /* 0x16 */ SHORT kind;
+};
+
+struct MC_CHIP;
+struct PRIM_INFO2 { // 0x40
+    FVECTOR vLS;
+    FVECTOR vLE;
+    FVECTOR vLVec;
+    FMATRIX* pMatLW;
+    FVECTOR* pNorm;
+    FVECTOR* pVert;
+    MC_CHIP* pMcChip;
+};
+
+struct PRIM_INFO { // 0x10
+    INT kind;
+    INT fgLine;
+    PRIM_INFO2* pInfo2;
+    MC_PRIM* pPrim;
 };
 
 struct MC_DATA {
@@ -53,7 +74,10 @@ struct MC_DATA {
 };
 
 struct MC_CHIP {
-    /* 0x00 */ UINT id;
+    /* 0x00 */ union {
+        UINT id;
+        UINT fgDisable;
+    };
     /* 0x04 */ UINT flag;
     /* 0x08 */ UINT idx;
     /* 0x0c */ BYTE* data;
@@ -184,7 +208,12 @@ public:
     /* 0x19c */ struct PRIM_INFO* m_pPrimInfoCurrent;
     /* 0x1a0 */ FMATRIX* m_pSemiTransMat[32]; // PARTIAL: split out for Game/Collision/CollMapCamera
     /* 0x220 */ INT m_SemiTransMatIdx;
+#ifdef COLLUTILA_H_INFO_MEMBERS /* PARTIAL: gate for Game/Collision/CollUtil, which defines COLL_INFO_UNION; several includers define their own copy */
+    /* 0x224 */ COLL_INFO_UNION m_iInfo;
+    /* 0x228 */ COLL_INFO_UNION m_iInfo2;
+#else
     /* 0x224 */ char _pad224[0x8];
+#endif
     /* 0x22c */ FMATRIX* m_pDetectMatP;
     /* 0x230 */ FMATRIX* m_pDetectMatA;
     /* 0x234 */ MC_CHIP* m_pDetectChipA;
