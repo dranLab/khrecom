@@ -100,13 +100,13 @@ public:
 extern "C" void TsSdDebugPrint();
 extern "C" char D_0047E328[];
 
-class CGameOver : public CTask {
-private:
-    BYTE _pad[0xe0 - 0x40];
+#include "Form/Menu/GameOver.h"
 
-public:
-    CGameOver(CTask* pParent, BOOL bHeartless);
-};
+
+
+
+
+
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define GAME_NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
