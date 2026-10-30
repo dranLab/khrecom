@@ -327,10 +327,7 @@ public:
     }
 };
 
-class CPlayer {
-public:
-    static INT exportStatus();
-};
+#include "Game/Player/Player.h"
 
 /* SceneInfo.h's inline */
 static inline RoomInfo* _getCurrentRoomInfo() { return CSceneInfo::getRoomInfo(-1); }
