@@ -125,10 +125,10 @@ __asm__(
 #include "System/Sound/SoundMan.h"
 #line 130
 
-class CJiminyMemoFlag {
-public:
-    static void checkEvent(INT nKind, INT nID, INT nParam);
-};
+#include "Form/Menu/JMemoFlag.h"
+
+
+
 
 class CRsrcDB {
 public:

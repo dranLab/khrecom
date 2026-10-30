@@ -139,10 +139,10 @@ struct STOP_DAMAGE {
     ATK_KIND dmgKind;
     INT iDamage;
 };
-class CJiminyMemoFlag {
-public:
-    static void checkEvent(INT inEvent, INT inParam0, INT inParam1);
-};
+#include "Form/Menu/JMemoFlag.h"
+
+
+
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);

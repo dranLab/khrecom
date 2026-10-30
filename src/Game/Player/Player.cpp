@@ -159,7 +159,8 @@ class CPlayerDebug : public CTask { /* main() is still INCLUDE_ASM; the members 
 public: CPlayerDebug(CTask* inParent); virtual ~CPlayerDebug();
     virtual void main();
 };
-class CJiminyMemoFlag { public: static void checkEvent(INT inEvent, INT inParam0, INT inParam1); }; namespace Friend { class CFriend { public: void setExit(INT inFlag); }; } namespace Summon { class CSummon { public: void setExit(INT inFlag); }; } class CEffectMotion { public: void kill(FLOAT inFadeTime); }; namespace MG_SKILL { void killMGSkill(); } /* PARTIAL: the headers are not included here */
+#include "Form/Menu/JMemoFlag.h"
+namespace Friend { class CFriend { public: void setExit(INT inFlag); }; } namespace Summon { class CSummon { public: void setExit(INT inFlag); }; } class CEffectMotion { public: void kill(FLOAT inFadeTime); }; namespace MG_SKILL { void killMGSkill(); } /* PARTIAL: the headers are not included here */
 #include "System/Sound/SoundMan.h"
 #line 188
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
