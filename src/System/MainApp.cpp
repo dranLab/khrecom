@@ -326,7 +326,7 @@ INT _nProcCountMax;
 BOOL _bSetupManagers;
 }
 
-INT _mainLoop(); // INCLUDE_ASM: declared extern (static in the original)
+static INT _mainLoop();
 static INT _mainProc(INT nTcount, TIMEQ nTQ);
 static void _coldReset(BOOL bNTSC);
 static void _initPS2();
@@ -379,8 +379,6 @@ INT CMainApp::run() {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", _mainLoop__Fv);
-#if 0 /* near match: the loop hoists other invariants (_nDispFrameRate, _bTickCountOverflow instead of 200, _FlipSema) */
 static INT _mainLoop() {
     INT nResult;
     INT nTcount;
@@ -409,9 +407,7 @@ static INT _mainLoop() {
         SPAD::freeAllSpad();
         CPadIO::mainProc(_nTickCount, nTQ);
         nResult = _mainProc(nTcount, nTQ);
-        if (nResult == 1) {
-            return nResult;
-        }
+        if (nResult == 1) goto end;
         _nDrawEnd = 1;
         WaitSema(_FlipSema);
         sceGsSyncPath(0, 0);
@@ -421,16 +417,18 @@ static INT _mainLoop() {
         }
         nHcount = (USHORT)*T1_COUNT - nTcount;
         nTcount = (USHORT)*T1_COUNT;
+        TIMEQ nMax = 200;
         nTQ = _getTimePerFrame(nHcount);
-        if (nTQ > 200) {
-            nTQ = 200;
+        if (nTQ > nMax) {
+            nTQ = nMax;
         }
         _checkSnapShot();
         _checkReportMemory();
         CPackMan::kickDMA(++_nFrameCount);
     }
+end:
+    return nResult;
 }
-#endif
 
 static INT _mainProc(INT nTcount, TIMEQ nTQ) {
     BOOL bPause;
