@@ -111,5 +111,6 @@ Per-unit and per-cleanup logs: `build/progress/<Unit-dashes>.md`, `build/progres
   member function (keep `timeout` below 590 s).
 - `build/act_if0.py` / `build/act_after.py <src> <mangled>`: variant JSON that enables a parked `#if 0` draft
   (before resp. after its INCLUDE_ASM).
-- `build/swap_one.py <src> <Class> <header>`: replace a stand-in class with an include.
+- `build/swap_one.py <src> <Class> <header>`: replace a stand-in class with an include (shortens the file);
+  `build/swap_keep.py` (same arguments) keeps the line count with blank lines, which is what `__LINE__` sites need.
 - `build/sbs.py`: side-by-side view of funcdiff output; `build/skel.py <mangled>`: call/branch skeleton compare.
