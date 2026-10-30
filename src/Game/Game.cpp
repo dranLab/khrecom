@@ -62,10 +62,10 @@ public:
     static void resetRsrc(INT nRsrcType, INT nArg);
 };
 
-class CRoomCreation {
-public:
-    static void removeRsrc();
-};
+#include "Form/Menu/RoomCreation.h"
+
+
+
 
 #include "Form/Menu/Pause.h"
 
