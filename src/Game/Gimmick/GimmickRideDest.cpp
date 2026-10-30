@@ -28,12 +28,12 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/SceneInfo.h"
 #include "System/Graphic/Camera.h"
 
-struct DropPrize {
-    INT StockKind;
-    INT Kind; /* CARD_KIND */
-    SHORT Num;
-    SHORT No;
-};
+#include "Game/Gimmick/GimmickManager.h"
+
+
+
+
+
 
 CGimmickRideDest::CGimmickRideDest(CTask* inParent) : CBaseGimmick(inParent) {
     m_Step = 0;
@@ -125,7 +125,7 @@ void CGimmickRideDest::beginStateHitAttack() {
         if (kind == ATK_KIND_DMG_BIG || kind == ATK_KIND_GM_BIG_DAMAGE) {
             DropPrize prize;
             prize.StockKind = 0;
-            prize.Kind = 0;
+            prize.Kind = CARD_KIND_None;
             prize.Num = 0;
             prize.No = 0;
             if (!m_Stat) createPrize(0, 0);

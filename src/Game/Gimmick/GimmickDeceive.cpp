@@ -29,12 +29,12 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/EntityFactory.h"
 #include "Game/Player/Player.h"
 
-struct DropPrize {
-    INT StockKind;
-    INT Kind; /* CARD_KIND */
-    SHORT Num;
-    SHORT No;
-};
+#include "Game/Gimmick/GimmickManager.h"
+
+
+
+
+
 
 CGimmickDeceive::CGimmickDeceive(CTask* inParent) : CBaseGimmick(inParent) {
     m_Step = 0;
@@ -82,7 +82,7 @@ void CGimmickDeceive::endStateMain() {}
 void CGimmickDeceive::beginStateHitAttack() {
     DropPrize prize;
     prize.StockKind = 0;
-    prize.Kind = 0;
+    prize.Kind = CARD_KIND_None;
     prize.Num = 0;
     prize.No = 0;
     if (m_Stat) return;

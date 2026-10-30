@@ -17,9 +17,9 @@ namespace BattleEnemy {
 INT GameModeHp(INT inHp); // PARTIAL: added for Game/Enemy/BattleEnemy
 }
 
-enum CARD_KIND {
-    CARD_KIND_None = 0 /* values not needed yet */
-};
+#include "Game/CardKindEnum.h"
+
+
 
 /* Effect names: file-local statics of the header (every includer has its own copy in .data). */
 namespace BattleEnemy {

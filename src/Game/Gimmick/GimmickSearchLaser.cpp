@@ -50,12 +50,12 @@ public:
     virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
 };
 
-struct DropPrize {
-    INT StockKind;
-    INT Kind; /* CARD_KIND */
-    SHORT Num;
-    SHORT No;
-};
+#include "Game/Gimmick/GimmickManager.h"
+
+
+
+
+
 
 // System/Coord.h
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -178,7 +178,7 @@ void CGimmickSearchLaser::beginStateHitAttack() {
     if (m_pBodyColl->getHitCollBody()->getDamageKind() == 2) {
         DropPrize prize;
         prize.StockKind = 0;
-        prize.Kind = 0;
+        prize.Kind = CARD_KIND_None;
         prize.Num = 0;
         prize.No = 0;
         if (!m_Stat) createPrize(0, 0);
