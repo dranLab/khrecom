@@ -305,7 +305,91 @@ void C2DSprObj::getFukidasiRect(FVECTOR2 (*vOut)[4]) {
         }
     }
 }
+/* Parked: 20 of 342 lines differ (same size, same structure): the order of the independent address computations and
+ * the 0.25f stores in the prologue (the original puts `addiu s3,sp,32` after the first two fVec2 stores) and the
+ * load/store order of the sway block (the original loads x_sway[0], y_sway[0], x_sway[1], y_sway[1] in that order and
+ * stores m_vSway[0] first); tried: fVec2 as fields/chain/set/setAll, iAlphaBlend order, six statement orders of the
+ * sway block with and without temporaries, an 8 min permuter run (23 -> 23). The five `BOOL b = m_status.x_stop;
+ * if (b)` blocks are what makes the original's dsll/dsra32/andi extraction. */
+#if 0
+TIMEQ C2DSprObj::initForSeq(SEQ_ANIMATION* pSeqAnim, LAY_SCREEN* pLayScreen) {
+    IVECTOR iVec;
+    FVECTOR fVec;
+    FVECTOR fVec2;
+    m_iStep = 1;
+    m_status = pSeqAnim->status;
+    { BOOL b = m_status.base_stop; if (b) m_status.base_disable = 1; }
+    { BOOL b = m_status.ofs_stop; if (b) m_status.ofs_disable = 1; }
+    { BOOL b = m_status.rotate_stop; if (b) m_status.rotate_disable = 1; }
+    { BOOL b = m_status.color_stop; if (b) m_status.color_disable = 1; }
+    { BOOL b = m_status.scale_stop; if (b) m_status.scale_disable = 1; }
+    fVec2.x = 0.25f;
+    fVec2.y = 0.25f;
+    fVec2.z = 0.25f;
+    fVec2.w = 0.25f;
+    INT iAlphaBlend = pSeqAnim->alpha_blend;
+    if (iAlphaBlend) {
+        ALPHA nInAlpha = iAlphaBlend == 1 ? ALPHA_PLUS : ALPHA_MINUS;
+        for (INT i = 0; i < m_nPoly; i++) {
+            m_pSprPrim[i].polyGT4.setSemiTrans(nInAlpha);
+        }
+    }
+    m_qTime[0] = pSeqAnim->time[0] * 50;
+    m_qTime[1] = pSeqAnim->time[1] * 50;
+    if (pLayScreen) {
+        m_qTime[0] += pLayScreen->time * 50;
+        m_qTime[1] += pLayScreen->time * 50;
+    }
+    iVec.set(pSeqAnim->x_base[0], pSeqAnim->y_base[0], pSeqAnim->x_base[1], pSeqAnim->y_base[1]);
+    if (pLayScreen) {
+        iVec.x += pLayScreen->x - 256;
+        iVec.z += pLayScreen->x - 256;
+        iVec.y += pLayScreen->y - SCREEN_HEIGHT / 2;
+        iVec.w += pLayScreen->y - SCREEN_HEIGHT / 2;
+    }
+    ITOF0Vector(fVec, iVec);
+    AddVector(fVec, fVec, fVec2);
+    m_vBase[0].set(fVec.x, fVec.y);
+    m_vBase[1].set(fVec.z, fVec.w);
+    m_vPos = m_vBase[0];
+    iVec.set(pSeqAnim->x_ofs[0], pSeqAnim->y_ofs[0], pSeqAnim->x_ofs[1], pSeqAnim->y_ofs[1]);
+    ITOF0Vector(fVec, iVec);
+    m_vOffset[0].set(fVec.x, fVec.y);
+    m_vOffset[1].set(fVec.z, fVec.w);
+    m_vOfs = m_vOffset[0];
+    m_vRotate[0].set(pSeqAnim->x_rotate[0], pSeqAnim->y_rotate[0], -pSeqAnim->z_rotate[0], 0.0f);
+    m_vRotate[1].set(pSeqAnim->x_rotate[1], pSeqAnim->y_rotate[1], -pSeqAnim->z_rotate[1], 0.0f);
+    m_vRot = m_vRotate[0];
+    Math3D::LimitPIVector(m_vRot);
+    m_vScale[0].set(pSeqAnim->scale[0] * pSeqAnim->scale_x[0], pSeqAnim->scale[0] * pSeqAnim->scale_y[0]);
+    m_vScale[1].set(pSeqAnim->scale[1] * pSeqAnim->scale_x[1], pSeqAnim->scale[1] * pSeqAnim->scale_y[1]);
+    m_vScl = m_vScale[0];
+    iVec.set(pSeqAnim->color[0].r, pSeqAnim->color[0].g, pSeqAnim->color[0].b, pSeqAnim->color[0].a);
+    ITOF0Vector(fVec, iVec);
+    ScaleVector(m_vColor[0], fVec, 0.0078125f);
+    iVec.set(pSeqAnim->color[1].r, pSeqAnim->color[1].g, pSeqAnim->color[1].b, pSeqAnim->color[1].a);
+    ITOF0Vector(fVec, iVec);
+    ScaleVector(m_vColor[1], fVec, 0.0078125f);
+    m_vCol = m_vColor[0];
+    if (!m_status.curve_disable) {
+        m_vCurve.set(pSeqAnim->curve[0][0], pSeqAnim->curve[0][1], pSeqAnim->curve[1][0], pSeqAnim->curve[1][1]);
+    }
+    if (!m_status.sway_disable) {
+        FLOAT xs0 = pSeqAnim->x_sway[0];
+        FLOAT xs1 = pSeqAnim->x_sway[1];
+        FLOAT ys0 = pSeqAnim->y_sway[0];
+        FLOAT ys1 = pSeqAnim->y_sway[1];
+        m_vSway[1].set(xs1, ys1);
+        fVec.set(xs0, ys0, xs1, ys1);
+        m_vSway[0].set(xs0, ys0);
+        m_vRotate[0].w = (FLOAT)pSeqAnim->x_sway_count;
+        m_vRotate[1].w = (FLOAT)pSeqAnim->y_sway_count;
+    }
+    return m_qTime[1] + (m_status.last_cut ? 0 : 50);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", initForSeq__Q22D29C2DSprObjPQ22D213SEQ_ANIMATIONPQ22D210LAY_SCREEN);
+#endif
 void C2DSprObj::_main(TIMEQ qTime) {
     FLOAT fRate;
     FVECTOR vec0;
@@ -377,6 +461,12 @@ void C2DSprObj::_main(TIMEQ qTime) {
         m_Flg &= ~1;
     }
 }
+/* Not attempted: 438 instructions; read from the asm only. Flow: bilinear flag from m_status.bilinear_disable, mat =
+ * scale * RotMatrix(m_vRot) * translate(m_vPos + m_vSwy) * translate(m_vOfs), then the m_pSeqControl chain (the first
+ * object after m_fgParent == 0 stores parentMatrix/parentColor/controlMatrix/controlColor, later ones only multiply with
+ * pParentSeqControl; the m_fgParent < 0 / parentMatrix[3][3] == 0 cases choose parentMatrix or vCol), the bilinear
+ * decision (mat diagonal != 1), colour clamp (ScaleVector 128, sceVu0ClampVector 0..255, FTOI0Vector), then the
+ * getRect/getFukidasiRect loop and the per-vertex ApplyMatrix2 + MMI colour multiply (pextlb/pmulth/ppacb). */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", move__Q22D29C2DSprObj);
 void C2DSprObj::getRect(FVECTOR2* pvOut4, SprPrim& rSprPrim) {
     FVECTOR fVec;
