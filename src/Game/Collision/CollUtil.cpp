@@ -2,6 +2,17 @@
  * vtable (Game/Collision/CollUtilO's data holds the rest and CCollision's vtable). The code refers to the
  * original's strings by their labels instead. */
 #define COLLOBJ_H_COLLISION_CLASSES
+#define COLLUTILA_H_INFO_MEMBERS
+#include "khtypes.h"
+union COLL_INFO_UNION {
+    INT info;
+    struct {
+        BYTE infoID;
+        BYTE infoATTR;
+        BYTE infoPID;
+        BYTE infoSTAT;
+    };
+};
 #include "Game/Collision/CollUtilA.h"
 #include "System/HeapMan.h"
 #include "System/Debug.h"
@@ -514,7 +525,101 @@ INT CCollUtil::distanceSphere(FVECTOR* pP0) {
     m_vDetect = m_vCk2;
     return 1;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", slidingHosei__9CCollUtilR7FVECTORN21);
+FLOAT InnerProduct4(const FVECTOR& v0, const FVECTOR& v1);
+INT CCollUtil::slidingHosei(FVECTOR& vCenter, FVECTOR& vSurface, FVECTOR& vNormal) {
+    FVECTOR vSurf;
+    FVECTOR vTmp0;
+    FVECTOR vTmp1;
+    FVECTOR vTmp2;
+    FVECTOR normalY;
+    MC_PRIM* pPrim;
+    BYTE info2Kind;
+    FLOAT t1;
+    register FLOAT t2 asm("$f0"); /* MATCH: the original keeps t2 in the call result register (f0), ours otherwise copies it to f1 */
+    if (m_pPrimInfoCurrent) {
+        pPrim = m_pPrimInfoCurrent->pPrim;
+        m_iInfo.info = pPrim->info;
+        info2Kind = m_iInfo.infoPID & 0x3F;
+        if (m_iKind >= 0) {
+            if (info2Kind >= 2) {
+                if (info2Kind == 2) {
+                    if (!m_iInfo2.infoPID) {
+                        m_iInfo2.infoPID = m_iInfo.infoPID;
+                        m_vDetectP = vSurface;
+                        m_vNormalP = vNormal;
+                        m_pDetectMatP = m_pPrimInfoCurrent->pInfo2->pMatLW;
+                    }
+                    m_pPrimInfoCurrent->fgLine = 0;
+                    return 0;
+                }
+                if (m_iKind != 10) return 0;
+            }
+        } else if (m_fgCamera) {
+            if (m_iInfo.infoPID) {
+                if (info2Kind == 1 && m_iKind == (INT)0x8000000E) {
+                    if (m_SemiTransMatIdx < 32) {
+                        m_pSemiTransMat[m_SemiTransMatIdx++] = m_pPrimInfoCurrent->pInfo2->pMatLW;
+                        m_iInfo2.infoPID = m_iInfo.infoPID;
+                    }
+                } else if (!m_iInfo2.infoPID) {
+                    m_iInfo2.infoPID = m_iInfo.infoPID;
+                }
+                m_pPrimInfoCurrent->fgLine = 0;
+                return 0;
+            }
+        } else if (m_iInfo.infoPID & 0x80) {
+            m_pPrimInfoCurrent->fgLine = 0;
+            return 0;
+        }
+    }
+    SubVector(vNormal, vSurface, vCenter);
+    Normalize(vNormal, vNormal);
+    ScaleVector(vSurf, vNormal, m_Radius);
+    AddVector(vSurf, vSurf, vCenter);
+    if (!m_fgSliding) {
+        m_vCk1 = vSurf;
+    } else {
+        vNormal.w = -InnerProduct(vSurf, vNormal);
+        if (m_pPrimInfoCurrent) {
+            PRIM_INFO2* pPrimInfo2 = m_pPrimInfoCurrent->pInfo2;
+            normalY.x = pPrimInfo2->pMatLW->m[0][1];
+            normalY.y = pPrimInfo2->pMatLW->m[1][1];
+            normalY.z = pPrimInfo2->pMatLW->m[2][1];
+        } else {
+            FLOAT f = 0.0f;
+            normalY.z = f;
+            normalY.y = 1.0f;
+            normalY.x = f;
+        }
+        m_vCk1.w = 1.0f;
+        t1 = -InnerProduct4(vNormal, m_vCk1);
+        t2 = InnerProduct(vNormal, normalY);
+        if (0.64278764f < t2) {
+            ScaleVector(vTmp0, normalY, t1 / t2);
+            AddVector(vTmp0, m_vCk1, vTmp0);
+            SubVector(vTmp2, vTmp0, vSurf);
+            if (2.5000003e-07f <= InnerProduct(vTmp2)) {
+                SubVector(vTmp1, m_vCk1, vSurf);
+                t1 = _sqrtf(InnerProduct(vTmp1));
+                SubVector(vTmp0, vTmp0, vSurf);
+                Normalize(vTmp0, vTmp0);
+                ScaleVector(vTmp0, vTmp0, t1);
+                AddVector(m_vCk1, vSurf, vTmp0);
+            } else {
+                m_vCk1 = vSurf;
+            }
+        } else {
+            ScaleVector(vTmp0, vNormal, t1);
+            AddVector(m_vCk1, m_vCk1, vTmp0);
+        }
+    }
+    ScaleVector(vTmp0, vNormal, 0.0035f);
+    AddVector(m_vCk1, m_vCk1, vTmp0);
+    AddVector(m_vCk2, vSurf, vTmp0);
+    m_vCk2.w = 1.0f;
+    m_vCk1.w = 1.0f;
+    return 1;
+}
 /* MATCH: the original links no CCollDbg (debug build only) and calls address 0. Ps2EeAs makes undefined weak symbols
    global, so the method is a weak absolute 0, as in Game/Gimmick/CreateGimmick (the relocation names func_0 there) */
 class CCollDbg {

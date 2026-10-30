@@ -202,7 +202,12 @@ public:
     /* 0x19c */ struct PRIM_INFO* m_pPrimInfoCurrent;
     /* 0x1a0 */ FMATRIX* m_pSemiTransMat[32]; // PARTIAL: split out for Game/Collision/CollMapCamera
     /* 0x220 */ INT m_SemiTransMatIdx;
+#ifdef COLLUTILA_H_INFO_MEMBERS /* PARTIAL: gate for Game/Collision/CollUtil, which defines COLL_INFO_UNION; several includers define their own copy */
+    /* 0x224 */ COLL_INFO_UNION m_iInfo;
+    /* 0x228 */ COLL_INFO_UNION m_iInfo2;
+#else
     /* 0x224 */ char _pad224[0x8];
+#endif
     /* 0x22c */ FMATRIX* m_pDetectMatP;
     /* 0x230 */ FMATRIX* m_pDetectMatA;
     /* 0x234 */ MC_CHIP* m_pDetectChipA;
