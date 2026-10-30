@@ -999,11 +999,15 @@ BOOL CMainApp::isSysPauseNow() {
 }
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/MainApp", setSysPause__8CMainAppi);
-#if 0 /* near match: lhu/andi 0xfffe and sign extension instead of lh/and -2 */
+/* Parked: 5 of 12 lines - registers only (the original keeps -2 in a1 and n|5 in v1, movz). `INT n = _nSysPauseReq; n &= ~1;`
+   keeps the full-width lh/and -2 (`_nSysPauseReq & ~1` narrows to lhu/andi); tried m/n order, ternaries, if/else arms,
+   permuter 5 min. */
+#if 0
 void CMainApp::setSysPause(BOOL bFlag) {
-    INT n = _nSysPauseReq & ~1;
-    INT m = n | 5;
-    if (!bFlag) m = n | 4;
+    INT n = _nSysPauseReq;
+    n &= ~1;
+    INT m = n | 4;
+    if (bFlag) m = n | 5;
     _nSysPauseReq = m;
 }
 #endif
