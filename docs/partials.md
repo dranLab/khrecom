@@ -61,14 +61,14 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 1039 (957 in 109 headers, 82 in 35 .cpp); MATCH: 120
-  by category: method 410, data member 69, type 88, fwd decl 53, #include 29, changed in place 134, padding 31, path override 24, gate 43, guessed 43, header-level 74, stand-in 35, other 6
+PARTIAL: 1035 (953 in 109 headers, 82 in 35 .cpp); MATCH: 119
+  by category: method 409, data member 69, type 88, fwd decl 53, #include 29, changed in place 133, padding 31, path override 24, gate 43, guessed 41, header-level 74, stand-in 35, other 6
 stand-ins: 346 foreign in 122 files (96 names), 201 unattributed, 172 own
 duplicate class names across headers: 25
 padding: 32 arrays, 26 accessors
-mechanisms: 962 sites (921 untagged); #line: 1238
+mechanisms: 959 sites (920 untagged); #line: 1238
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 159, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 568, superset 128, partial 92, gated 99, missing 11, unattributed 309
+classes: complete 570, superset 128, partial 95, gated 94, missing 11, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -188,7 +188,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CSummon` | partial | Game/Player/Summon.h | 1 |  | missing fields: m_pBeginStateTbl, m_pStateTbl, m_pEndStateTbl, struct; extra methods: void; virtual order differs |
 | `CTaskMan` | superset | System/TaskMan.h | 1 |  | 3 PARTIAL |
 | `CWorldEnv` | complete | System/Graphic/WorldEnv.h | 1 |  |  |
-| `CZFill` | gated | System/Graphic/DeFocus.h | 1 | System/Graphic/GprimFull.h | missing methods: ~CZFill |
+| `CZFill` | partial | System/Graphic/DeFocus.h | 1 | System/Graphic/GprimFull.h | missing methods: ~CZFill |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `F_UL` | complete | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | superset | System/Graphic/Gprim.h | 1 |  | 2 PARTIAL |
@@ -345,7 +345,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Anim.h` | 31 | 0/0/0/2 | 149 |
 | `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 89 |
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
-| `System/Graphic/DeFocus.h` | 5 | 0/0/0/5 | 6 |
+| `System/Graphic/DeFocus.h` | 1 | 2/0/3/0 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
 | `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 170 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 172 |
@@ -534,8 +534,8 @@ or `untagged`.
 | placeholder | `_pathDataCameraSLCOverflow*` | 1 | 0 | untagged, e.g. System/Graphic/PathDataCamera.cpp:7 |
 | placeholder | `_premiumPrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:10 |
 | placeholder | `_roPh*` | 8 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:2186 |
-| placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:150 |
-| placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1750 |
+| placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:149 |
+| placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1749 |
 | placeholder | `_roulettePrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:13 |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/SampleEnemy.cpp:13 |
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:418 |
@@ -568,7 +568,6 @@ or `untagged`.
 | unit gate | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerManager.cpp:1 |
 | unit gate | `GAME_PLAYER_PLAYER_CPP` | 1 | 0 | untagged, e.g. Game/Player/Player.cpp:1 |
 | unit gate | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.cpp:2 |
-| unit gate | `SYSTEM_GRAPHIC_DEFOCUS_CPP` | 2 | 1 | the complete classes (their inlines are emitted here, weak, in declaration order) |
 | unit gate | `SYSTEM_GRAPHIC_GPRIM_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:1 |
 | unit gate | `SYSTEM_TASKMAN_CPP` | 1 | 0 | untagged, e.g. System/TaskMan.cpp:1 |
 | unit gate site | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.h:17 |
@@ -587,7 +586,6 @@ or `untagged`.
 | unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Player/PlayerManager.h:93 |
 | unit gate site | `GAME_PLAYER_PLAYER_CPP` | 46 | 0 | untagged, e.g. Game/Player/Player.h:135 |
 | unit gate site | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.h:30 |
-| unit gate site | `SYSTEM_GRAPHIC_DEFOCUS_CPP` | 1 | 1 | DebugWindow/GameSubField/GameSubBattle still use the partial classes below (guessed setManual()/setShadow, public m_pInstance) |
 | unit gate site | `SYSTEM_GRAPHIC_GPRIM_CPP` | 2 | 0 | untagged, e.g. System/Graphic/Gprim.h:155 |
 | unit gate site | `SYSTEM_TASKMAN_CPP` | 2 | 0 | untagged, e.g. System/Task.h:183 |
 
