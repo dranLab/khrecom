@@ -161,13 +161,7 @@ extern "C" char _gp[];
 
 #include "System/CoordMan.h"
 
-class CRcf {
-public:
-    static void initialize();
-    static void finalize();
-    static void mainProc();
-    static void setLocale(INT nLocale);
-};
+#include "System/Rcf.h"
 
 #include "Game/SceneEnv.h"
 #line 218
