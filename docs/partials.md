@@ -61,9 +61,9 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 991 (910 in 109 headers, 81 in 37 .cpp); MATCH: 140
+PARTIAL: 991 (910 in 109 headers, 81 in 38 .cpp); MATCH: 140
   by category: method 381, data member 67, type 85, fwd decl 53, #include 29, changed in place 131, padding 27, path override 24, gate 43, guessed 38, header-level 74, stand-in 33, other 6
-stand-ins: 256 foreign in 109 files (59 names), 201 unattributed, 170 own
+stand-ins: 233 foreign in 108 files (59 names), 201 unattributed, 170 own
 duplicate class names across headers: 24
 padding: 26 arrays, 26 accessors
 mechanisms: 960 sites (910 untagged); #line: 1242
@@ -79,6 +79,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
+| R0 | 2.0 | `System/Rcf.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRcf, RcfKey, RcfMapInfo (3 complete) |  |
 | R1 | 14.0 | `Game/Gimmick/GimmickManager.h` | ready | 7 stand-in files, 0 dup headers, 0 gate users | DropPrize (1 gated) |  (gate) |
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
@@ -98,7 +99,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Game/LockOnManager.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CLockOnManager (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/MinigameManager.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CMinigameManager (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/Friend.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFriend (1 partial) | inline bodies or virtuals |
-| R1 | 2.0 | `Game/Player/PlayerCamera.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerCamera (1 gated) | inline bodies or virtuals (gate) |
 
 ## Classes with foreign copies
 
@@ -107,7 +107,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcDB` | partial | System/RsrcDB.h | 67 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene |
 | `NAME_CASE` | gated | System/RsrcData.h | 30 |  |  |
 | `C2DMan` | gated | System/Graphic/2d/2DMan.h | 28 | Form/Menu/SaveLoadCtrl.h |  |
-| `CRcf` | complete | System/Rcf.h | 24 |  |  |
 | `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
 | `TexInfo` | gated | System/Graphic/Gprim.h | 8 | System/Graphic/modeldata.h | missing methods: getName, getUVScrollOfs, isTexW, isUVScroll |
 | `DropPrize` | gated | Game/Gimmick/GimmickManager.h | 7 |  |  |
@@ -148,6 +147,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPlayerSora` | superset | Game/Player/PlayerSora.h | 1 |  | virtual order differs |
 | `CPoly3Collision` | gated | Game/Collision/CollObj.h | 1 |  |  |
 | `CPolyGT4` | superset | System/Graphic/GprimFull.h | 1 |  | virtual order differs |
+| `CRcf` | complete | System/Rcf.h | 1 |  |  |
 | `CRoulette` | complete | Form/Menu/Roulette.h | 1 |  |  |
 | `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
 | `CRsrcTex` | gated | System/RsrcData.h | 1 |  |  |
@@ -351,7 +351,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 97 |
 | `System/RsrcDB.h` | 0 | 0/0/1/2 | 2 |
 | `System/RsrcData.h` | 3 | 0/0/0/32 | 29 |
-| `System/SJoint.h` | 9 | 0/0/0/0 | 201 |
+| `System/SJoint.h` | 9 | 0/0/0/0 | 210 |
 | `System/Task.h` | 27 | 1/2/0/1 | 235 |
 | `System/TaskMan.h` | 7 | 1/2/0/0 | 84 |
 | `System/Vector.h` | 22 | 0/0/3/0 | 266 |
