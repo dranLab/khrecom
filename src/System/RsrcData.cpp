@@ -3,7 +3,7 @@
 #define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h"
 #define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h"
 #define MODELDATA_H_TEXINFO
-#define MODELDATA_H_TEXINFO_CTOR
+#define MODELDATA_H_TEXINFO_CTOR /* MATCH: RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) */
 #include <string.h>
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"

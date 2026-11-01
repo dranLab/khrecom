@@ -32,7 +32,7 @@ struct DebugParam {
 /* The full class definitions need System/Task.h, System/PadHandler.h and System/Graphic/Gprim.h, whose inline
  * functions put strings into .rodata of every includer: only Form/DebugMenu.cpp defines FORM_DEBUGMENU_FULL (after
  * including them); other includers see the static interface only. */
-#ifdef FORM_DEBUGMENU_FULL
+#ifdef FORM_DEBUGMENU_FULL // MATCH: the full classes need Gprim.h/PadHandler.h; System/Debug and System/RootTask originals lack Gprim.h's strings
 
 class CDebugMenuLocal;
 class CTile;
