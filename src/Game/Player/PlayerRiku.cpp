@@ -41,12 +41,12 @@ inline void _taskSLCOverflowMsg() {
 #include "System/Debug.h"
 #include "include_asm.h"
 
+#include "Game/Player/PlayerDRiku.h"
 namespace PL {
-class CPlayerDRiku : public CPlayer {
-public:
-    CPlayerDRiku(CTask* inParent, UINT inID, INT inEx);
-    void startDMode(CPlayerRiku* inRiku);
-};
+
+
+
+
 
 extern UINT g_uiStartCondition;
 extern FVECTOR g_vBGFadeColor[7];

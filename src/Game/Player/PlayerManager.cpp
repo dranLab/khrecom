@@ -149,20 +149,20 @@ static inline INT _getEnchantKind(CTask* pCB) {
 
 
 
-namespace PL {
-class CPlayerSora : public CPlayer {
-public:
-    CPlayerSora(CTask* inParent);
-};
-class CPlayerRiku : public CPlayer {
-public:
-    CPlayerRiku(CTask* inParent);
-};
-class CPlayerDRiku : public CPlayer {
-public:
-    CPlayerDRiku(CTask* inParent, UINT inID, INT inEx);
-};
-} // namespace PL
+#include "Game/Player/PlayerSora.h"
+#include "Game/Player/PlayerRiku.h"
+#include "Game/Player/PlayerDRiku.h"
+
+
+
+
+
+
+
+
+
+
+
 
 void ScaleVectorXYZ(FVECTOR& outV, const FVECTOR& inV, FLOAT inScale);
 void AddVectorXYZ(FVECTOR& outV, const FVECTOR& inV0, const FVECTOR& inV1);
