@@ -26,7 +26,7 @@ inline void _roulettePrizeMessage() {
 #include "Game/Movement.h"
 #include "Game/GameWork.h"
 #include "System/TaskMan.h"
-
+#include "Game/Collision/CollBody.h"
 #include "Game/MessageManager.h"
 namespace Message {
 

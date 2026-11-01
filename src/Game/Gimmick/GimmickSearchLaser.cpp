@@ -36,7 +36,7 @@ inline void _taskSLCOverflowPlaceholder() {
 #include "System/TaskMan.h"
 #include "System/Rnd.h"
 #include "include_asm.h"
-
+#include "Game/Collision/CollBody.h"
 /* Inline in the original's collision header: the weak copies of its destructors and collideMap end this
  * object (the vtables and the named copies are other objects'). */
 class CSphereCollision : public CCollision {

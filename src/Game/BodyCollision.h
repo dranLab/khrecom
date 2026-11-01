@@ -9,42 +9,7 @@
 union FVECTOR; // PARTIAL: added for Game/Gimmick/BaseGimmick
 class CEntity;
 
-/* PARTIAL: includers without Game/Collision/CollBody.h (the full class) get this partial copy (layouts partial) */
-#ifndef GAME_COLLISION_COLLBODY_H
-class CCollBody {
-private:
-    UBYTE _m_0x00[0x0c];   /* 0x000 CCollObj: CSJointT, m_Enable */
-    UBYTE* m_pCollision;   /* 0x00c CCollision* */ // PARTIAL: split out for Game/Enemy/EnemyWhitemushroom
-    UBYTE _m_0x10[0x60];   /* 0x010 m_hTask, m_vEnemyPos .. m_vHitEffectRot */
-    ATK_KIND m_DamageKind; /* 0x070 */
-    INT m_DamageAttr;      /* 0x074 ATK_ATTR */ // PARTIAL: added for Game/Enemy/EnemyWhitemushroom
-    UBYTE _m_0x78[0x10];   /* 0x078 .. */
-    HANDLE m_hEnemyTask;   /* 0x088 */ // PARTIAL: added for Game/Enemy/BattleEnemy
-    UBYTE _m_0x8c[0x74];   /* 0x08c .. */
-    FLOAT m_fBadStatusParam; /* 0x100 */ // PARTIAL: added for Game/Enemy/EnemyCreapplant (name unknown)
-public:
-    FLOAT getBadStatusParam() { return m_fBadStatusParam; } // PARTIAL: added for Game/Enemy/EnemyCreapplant (name unknown)
-    ATK_KIND getDamageKind() { return m_DamageKind; }
-    HANDLE getEnemyHandle() { return m_hEnemyTask; } // PARTIAL: added for Game/Enemy/BattleEnemy
-    INT getDamage(); // PARTIAL: added for Game/Enemy/BattleEnemy
-    const FVECTOR& getEnemyPos() const { return *(const FVECTOR*)&_m_0x10[0x10]; } // PARTIAL: added for Game/Enemy/BattleEnemy (m_vEnemyPos)
-    FVECTOR* getStartPos() { return (FVECTOR*)m_pCollision; } // PARTIAL: added for Game/Enemy/BattleEnemy
-    const CHAR* getHitEffectName() const { return (const CHAR*)&_m_0x8c[0xe8 - 0x8c]; } // PARTIAL: added for Game/Enemy/BattleEnemy
-    INT getHitEffectNo() const { return *(const INT*)&_m_0x8c[0xf8 - 0x8c]; }           // PARTIAL: added for Game/Enemy/BattleEnemy
-    INT getHitEffectObjType() const { return *(const INT*)&_m_0x8c[0xfc - 0x8c]; }      // PARTIAL: added for Game/Enemy/BattleEnemy (ObjType::eObjType)
-    void setHp(INT inHp) { *(INT*)&_m_0x8c[0x90 - 0x8c] = inHp; }                         // PARTIAL: added for Game/Enemy/BattleEnemy
-    INT getHp() const { return *(const INT*)&_m_0x8c[0x90 - 0x8c]; }                      // PARTIAL: added for Game/Enemy/BattleEnemy
-    INT getMaxHp() const { return *(const INT*)&_m_0x8c[0x94 - 0x8c]; }                   // PARTIAL: added for Game/Enemy/BattleEnemy
-    INT getDamageAttr() { return m_DamageAttr; } // PARTIAL: added for Game/Enemy/EnemyWhitemushroom (name unknown)
-    /* CCollObj::getDetectPos (m_pCollision->m_vDetectPos at 0x40) */
-    FVECTOR* getDetectPos() { return m_pCollision ? (FVECTOR*)(m_pCollision + 0x40) : NULL; }
-    HANDLE setHitEffect(); // PARTIAL: added for Game/Gimmick/BaseGimmick
-    // PARTIAL: added for Game/Enemy/BattleEnemy (CCollObj::getCollision, CCollision::m_outDetect at 0x40)
-    UBYTE* getCollision() { return m_pCollision; }
-    FVECTOR& getCollisionDetect() { return *(FVECTOR*)(m_pCollision + 0x40); }
-    void setHitEffectParam(const CHAR* inName, INT inNo, ObjType::eObjType inType, const FVECTOR& inRot, FLOAT inWait);
-};
-#endif
+class CCollBody;
 
 /* __FILE__ of the original's inline functions: "c:/KHCOM/MainApp/Game/BodyCollision.h" in Game/BodyCollision */
 #ifndef BODYCOLLISION_H_PATH

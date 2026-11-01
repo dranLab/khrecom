@@ -25,7 +25,7 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/AttackMotion.h"
 #include "Game/Gimmick/GimmickManager.h"
 #include "Game/LockOnManager.h"
-
+#include "Game/Collision/CollBody.h"
 CGimmickGuillotine::CGimmickGuillotine(CTask* inParent) : CBaseGimmick(inParent) {
     m_Step = 0;
     m_Stat = 0;

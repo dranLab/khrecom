@@ -24,7 +24,7 @@ inline void _enemyWizardEmptyString() {
 #include "System/Math3D.h"
 #include "System/Rnd.h"
 #include <math.h>
-
+#include "Game/Collision/CollBody.h"
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
 extern CEntity* g_pPlayer; /* a CPlayer (Game/Player/Player.h) */

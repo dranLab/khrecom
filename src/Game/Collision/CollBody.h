@@ -13,7 +13,6 @@ static inline void _unitVector(FVECTOR& v) {
     asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
 }
 
-/* Game/BodyCollision.h has a partial copy of this class for its includers (PARTIAL). */
 class CCollBody : public CCollObj {
     friend class CPlayer; // PARTIAL: added for Game/Player/Player (exeQuickBarrier stores m_uiFlag/m_GuardAttrFlag directly)
 private:
