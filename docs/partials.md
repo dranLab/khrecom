@@ -62,6 +62,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/Form-DebugWindow (FORM_DEBUGWINDOW_FULL tagged; PackMan stand-in blocked by the Task.h message) | 925 | 99 | 19 | 948 (890) | 150 |
 | 2026-11-01 | cleanup/Game-Collision-CollBody (partial CCollBody removed from BodyCollision.h; 18 users include CollBody.h) | 905 | 99 | 18 | 947 (889) | 150 |
 | 2026-11-01 | cleanup/Game-Player-PlayerDRiku (CPlayerSora/Riku/DRiku stand-ins in 2 files) | 905 | 95 | 18 | 947 (889) | 150 |
+| 2026-11-01 | cleanup/Game-Prize (CPrize stand-ins in 2 files) | 905 | 93 | 18 | 947 (889) | 150 |
 
 <!-- partials:start -->
 ## Summary
@@ -69,7 +70,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 905 (840 in 112 headers, 65 in 35 .cpp); MATCH: 150
   by category: method 346, data member 64, type 85, fwd decl 53, #include 32, changed in place 125, padding 11, path override 23, gate 35, guessed 36, header-level 73, stand-in 16, other 6
-stand-ins: 95 foreign in 66 files (41 names), 201 unattributed, 167 own
+stand-ins: 93 foreign in 65 files (40 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
 padding: 17 arrays, 2 accessors
 mechanisms: 947 sites (889 untagged); #line: 1242
@@ -88,7 +89,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 5.0 | `Form/DebugWindow.h` | ready | 1 stand-in files, 0 dup headers, 3 gate users | CDebugWindow (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
-| R1 | 4.0 | `Game/Prize.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPrize (1 superset) | inline bodies or virtuals |
 | R1 | 3.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `System/Graphic/3DCPrim.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users | C3DCPrim (1 partial) | inline bodies or virtuals |
@@ -105,6 +105,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
+| R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 
 ## Classes with foreign copies
 
@@ -117,7 +118,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
 | `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 3 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, isDraw, setAutomaticDistance, setAutomaticHeight, setClipDistance, ... (+4); extra methods: setADensity, setCDensity; 6 PARTIAL |
 | `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
-| `CPrize` | superset | Game/Prize.h | 2 |  | virtual order differs |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `C2DSeq` | superset | System/Graphic/2d/2DSeq.h | 1 |  | virtual order differs; 1 PARTIAL |
@@ -264,7 +264,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Player/SummonGenie.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Player/SummonMushu.h` | 0 | 0/1/0/0 | 2 |
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 53 |
-| `Game/Prize.h` | 0 | 0/1/0/0 | 2 |
+| `Game/Prize.h` | 0 | 0/1/0/0 | 4 |
 | `Game/SEMotion.h` | 0 | 5/0/1/0 | 4 |
 | `Game/SceneEnv.h` | 1 | 0/0/1/0 | 37 |
 | `Game/SceneInfo.h` | 5 | 29/0/1/0 | 86 |
