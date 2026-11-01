@@ -8,19 +8,18 @@
 #include "System/Task.h"
 
 #include "System/Graphic/2d/2DLay.h"
+#include "System/Graphic/2d/2DSeq.h"
+
+
 
 namespace D2 {
 
-class C2DSeq : public C2DBase {
-public:
-    HANDLE create(LAY_SCREEN* pLayScreen);
-};
 
-class C2DSpr {
-public:
-    static void addList(C2DO& r2DO);
-    static BOOL deleteList(C2DO& r2DO);
-};
+
+
+
+
+
 
 class C2DMan {
 public:
