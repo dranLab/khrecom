@@ -883,7 +883,7 @@ INT CAvatar::onPlayMotion(INT nCmd, void* pParam, INT nID) {
         if (m_nMotInValidFlag) {
             changeMotion(p->_nMotionID, 0, p->_nFlag & 1, 0, 0, 0);
             m_pAnim->setSpeed(p->_fPlaySpeed);
-            m_pAnim->clearFlag1(3);
+            m_pAnim->clearFlag();
             setAvatarState(0x4100, TRUE);
             m_pAnim->setZeroHokan(p->_nFlag & 4);
         } else {
@@ -903,7 +903,7 @@ INT CAvatar::onPlayMotionDx(INT nCmd, void* pParam, INT nID) {
     } else if (m_pAnim) {
         changeMotion(p->_nMotionID, 0, p->_nFlag & 1, p->_iChangeHokanRate * 50, 0, 0);
         m_pAnim->setSpeed(p->_fPlaySpeed);
-        m_pAnim->clearFlag1(3);
+        m_pAnim->clearFlag();
         setAvatarState(0x4100, TRUE);
         m_pAnim->setZeroHokan(p->_nFlag & 4);
     }
@@ -951,7 +951,7 @@ INT CAvatar::onPlayMotionExDx(INT nCmd, void* pParam, INT nID) {
     } else {
         changeMotionEx(p->_nRsrcID, p->_nMotionID, 0, p->_nInfo & 1, p->_nHokanFrame * 50, 0, 0);
         m_pAnim->setSpeed(p->_fPlaySpeed);
-        m_pAnim->clearFlag1(3);
+        m_pAnim->clearFlag();
         setAvatarState(0x4100, TRUE);
         m_pAnim->setZeroHokan(p->_nInfo & 4);
     }
@@ -961,7 +961,7 @@ INT CAvatar::onPlayMotionExDx(INT nCmd, void* pParam, INT nID) {
 INT CAvatar::onSetMotionFrame(INT nCmd, void* pParam, INT nID) {
     if (m_pAnim) {
         m_pAnim->setMotion(*(INT*)pParam * 50, 0, FALSE);
-        m_pAnim->clearFlag1(3);
+        m_pAnim->clearFlag();
         setAvatarState(0x4100, TRUE);
     }
     return -1;

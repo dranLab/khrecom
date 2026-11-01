@@ -187,7 +187,7 @@ BOOL CModelAnimObj::initAnimData() {
     }
     m_pAnim->link(this, m_pANNData, m_pModelData[0]);
     m_pAnim->init(0, 0);
-    m_pAnim->clearFlag1(0x100);
+    m_pAnim->setClipCheckFg(FALSE);
     return TRUE;
 }
 // SOURCE DATA: .rodata

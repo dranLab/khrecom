@@ -117,7 +117,7 @@ void CGimmickDeceiveEnemy::BarrelSpider() {
             CSceneInfo::reqEnterBattle(0);
             m_Step = 50;
         }
-        if (m_pAnim->isMotionLooped()) m_Step = 20;
+        if (m_pAnim->getFlag(1) & 2) m_Step = 20;
         break;
     case 20:
         changeMotion(3, 0, FALSE, -1, 0, 0);
