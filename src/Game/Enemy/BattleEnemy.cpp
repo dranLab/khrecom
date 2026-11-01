@@ -135,7 +135,7 @@ struct STOP_DAMAGE {
     char szHitEffectName[16];
     SHORT sHitEffectNo;
     SHORT sHitIndex;
-    eObjType hitEffectObjType;
+    ObjType::eObjType hitEffectObjType;
     ATK_KIND dmgKind;
     INT iDamage;
 };
@@ -1363,12 +1363,12 @@ void CBattleEnemy::stateStop() {
                         stopDmg->sHitEffectNo = 12;
                     }
                     stopDmg->sHitIndex = m_pBodyColl->getHitCollBodyIndex();
-                    stopDmg->hitEffectObjType = (eObjType)hit->getHitEffectObjType();
+                    stopDmg->hitEffectObjType = (ObjType::eObjType)hit->getHitEffectObjType();
                 } else {
                     strcpy(stopDmg->szHitEffectName, "");
                     stopDmg->sHitEffectNo = -1;
                     stopDmg->sHitIndex = m_pBodyColl->getHitCollBodyIndex();
-                    stopDmg->hitEffectObjType = (eObjType)0;
+                    stopDmg->hitEffectObjType = (ObjType::eObjType)0;
                 }
                 m_sStopDamageCount++;
                 break;
