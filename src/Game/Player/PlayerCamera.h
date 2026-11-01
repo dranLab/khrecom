@@ -192,6 +192,7 @@ public:
     static void getBattleCamData(BCAM_PARAM& outParam);
     static INT getNowCamMode() { return m_pInstance ? m_pInstance->m_iMode : 0; } // PARTIAL: added for Game/Player/PlayerManager
     static INT getPlayerCameraPos(FVECTOR& outPos); // PARTIAL: added for Game/Player/PlayerGauge
+    static void setBossCamID(INT inID); // PARTIAL: added for Game/Enemy/BattleEnemy
 };
 
 } // namespace PlayerCamera
