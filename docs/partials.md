@@ -68,18 +68,19 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/System-Graphic-2d-2DSeq (C2DSeq/C2DSpr stand-ins in 2DLayObj) | 895 | 91 | 18 | 945 (879) | 158 |
 | 2026-11-01 | cleanup/Game-Player-Friend-Summon (CFriend/CSummon/MG_SKILL stand-ins in Player.cpp) | 894 | 89 | 18 | 945 (879) | 158 |
 | 2026-11-01 | cleanup/Game-Player-PlayerCamera (CPlayerCamera stand-in in BattleEnemy) | 894 | 88 | 18 | 945 (879) | 158 |
+| 2026-11-01 | cleanup/Form-DebugMenu-gates (FORM_DEBUGMENU_FULL, MODELDATA_H_TEXINFO_CTOR tagged) | 894 | 87 | 18 | 945 (876) | 161 |
 | 2026-11-01 | cleanup/System-Graphic-ScreenMask (CFadeIOMask stand-in in MSVideo) | 894 | 87 | 18 | 945 (879) | 158 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 894 (831 in 112 headers, 63 in 34 .cpp); MATCH: 158
+PARTIAL: 894 (831 in 112 headers, 63 in 34 .cpp); MATCH: 161
   by category: method 342, data member 64, type 85, fwd decl 53, #include 32, changed in place 123, padding 10, path override 23, gate 33, guessed 35, header-level 73, stand-in 15, other 6
 stand-ins: 87 foreign in 64 files (34 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
 padding: 16 arrays, 1 accessors
-mechanisms: 945 sites (879 untagged); #line: 1242
+mechanisms: 945 sites (876 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 582, superset 128, partial 94, gated 86, missing 8, unattributed 309
 ```
@@ -354,7 +355,7 @@ or `untagged`.
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 3 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature | `MODELDATA_H_TEXINFO` | 5 | 0 | untagged, e.g. System/Graphic/DispList.cpp:1 |
-| feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 1 | reqTransTex declares a TexInfo local (constructor memsets it) |
+| feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 2 | RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) |
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 0 | untagged, e.g. Game/Collision/CollObj.h:91 |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
@@ -363,11 +364,11 @@ or `untagged`.
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:79 |
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
 | full-class | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.cpp:2 |
-| full-class | `FORM_DEBUGMENU_FULL` | 1 | 0 | untagged, e.g. Form/DebugMenu.cpp:3 |
+| full-class | `FORM_DEBUGMENU_FULL` | 1 | 1 | the owner sees the full classes |
 | full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the owner sees the full classes (Gprim.h included first) |
 | full-class | `RSRCDATA_H_FULL` | 2 | 0 | untagged, e.g. System/RsrcDB.cpp:2 |
 | full-class site | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.h:16 |
-| full-class site | `FORM_DEBUGMENU_FULL` | 1 | 0 | untagged, e.g. Form/DebugMenu.h:35 |
+| full-class site | `FORM_DEBUGMENU_FULL` | 1 | 1 | the full classes need Gprim.h/PadHandler.h; System/Debug and System/RootTask originals lack Gprim.h's strings |
 | full-class site | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings |
 | full-class site | `RSRCDATA_H_FULL` | 1 | 0 | untagged, e.g. System/RsrcData.h:12 |
 | guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 0 | untagged, e.g. Game/Gimmick/CreateGimmick.cpp:1 |
