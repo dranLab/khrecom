@@ -1,4 +1,4 @@
-#define MAPENEMY_H_FULL_CLASS
+
 #define COLLOBJ_H_ENUMS_ONLY /* the collision classes come after CMapEnemy (their vtables precede its own) */
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Task.h"
