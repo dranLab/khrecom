@@ -20,6 +20,7 @@ inline void _humanBossEmptyString() {
 
 #include "System/Graphic/Effect/effect.h"
 #include "Game/BodyCollision.h"
+#define COLLOBJ_H_COLLISION_CLASSES /* MATCH: constructs CPointCollision */
 #undef COLLOBJ_H_ENUMS_ONLY
 #include "Game/Collision/CollObj.h"
 #include "Game/CardKind.h"
@@ -32,12 +33,11 @@ inline void _humanBossEmptyString() {
 #include "Game/Collision/CollBody.h"
 /* Inline in the original's collision header: the weak copies of its destructors and collideMap end this
  * object. */
-class CPointCollision : public CCollision { /* PARTIAL: stand-in for Game/Gimmick/GimmickCarry CPointCollision: gated by COLLOBJ_H_COLLISION_CLASSES (lacks the inline ~CPointCollision/collideMap) */
-public:
-    CPointCollision() { m_Type = COLL_TYPE_POINT; }
-    virtual ~CPointCollision() {}
-    virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
-};
+
+
+
+
+
 
 #include "Game/Enemy/BossDeadDemo.h"
 
