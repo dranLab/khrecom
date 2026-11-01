@@ -1,5 +1,5 @@
 
-#define COLLOBJ_H_ENUMS_ONLY /* the collision classes come after CMapEnemy (their vtables precede its own) */
+#define COLLOBJ_H_ENUMS_ONLY /* MATCH: the collision classes come after CMapEnemy (their vtables precede its own) */
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Task.h"
 #include "Game/BodyCollision.h"
@@ -22,6 +22,7 @@ inline void _emptyStringPlaceholder() {
 #include "Game/Enemy/EnemyParam.h"
 #include "System/Graphic/Effect/effect.h"
 #include "Game/Enemy/MapEnemy.h"
+#define COLLOBJ_H_COLLISION_CLASSES /* MATCH: constructs CPointCollision */
 #undef COLLOBJ_H_ENUMS_ONLY
 #include "Game/Collision/CollObj.h"
 #include "Game/Collision/CollMap.h"
@@ -55,12 +56,11 @@ inline void _emptyStringPlaceholder() {
 
 /* Inline in the original's collision header: defined here, after CMapEnemy, so that its vtable copies come first
  * in .rodata (as in Game/Gimmick/GimmickCarry). */
-class CPointCollision : public CCollision {
-public:
-    CPointCollision() { m_Type = COLL_TYPE_POINT; }
-    virtual ~CPointCollision() {}
-    virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
-};
+
+
+
+
+
 
 #define MAP_ENEMY_STATE_MAX 9
 
