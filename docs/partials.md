@@ -60,17 +60,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/Game-Entity-eObjType (dummy eObjType removed, SETFLAG_DIRECT tagged) | 932 | 99 | 20 | 950 (897) | 144 |
 | 2026-11-01 | cleanup/System-Fsm (one CFSM: Entity.h includes Fsm.h) | 925 | 99 | 19 | 948 (895) | 145 |
 | 2026-11-01 | cleanup/Form-DebugWindow (FORM_DEBUGWINDOW_FULL tagged; PackMan stand-in blocked by the Task.h message) | 925 | 99 | 19 | 948 (890) | 150 |
+| 2026-11-01 | cleanup/Game-Collision-CollBody (partial CCollBody removed from BodyCollision.h; 18 users include CollBody.h) | 905 | 99 | 18 | 947 (889) | 150 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 925 (860 in 112 headers, 65 in 35 .cpp); MATCH: 150
-  by category: method 351, data member 66, type 85, fwd decl 53, #include 32, changed in place 127, padding 18, path override 23, gate 36, guessed 39, header-level 73, stand-in 16, other 6
+PARTIAL: 905 (840 in 112 headers, 65 in 35 .cpp); MATCH: 150
+  by category: method 346, data member 64, type 85, fwd decl 53, #include 32, changed in place 125, padding 11, path override 23, gate 35, guessed 36, header-level 73, stand-in 16, other 6
 stand-ins: 99 foreign in 67 files (44 names), 201 unattributed, 167 own
-duplicate class names across headers: 19
-padding: 21 arrays, 9 accessors
-mechanisms: 948 sites (890 untagged); #line: 1242
+duplicate class names across headers: 18
+padding: 17 arrays, 2 accessors
+mechanisms: 947 sites (889 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 582, superset 128, partial 93, gated 87, missing 8, unattributed 309
 ```
@@ -86,7 +87,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 5.0 | `Form/DebugWindow.h` | ready | 1 stand-in files, 0 dup headers, 3 gate users | CDebugWindow (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
-| R1 | 4.5 | `Game/Collision/CollBody.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users, 1 PARTIAL | CCollBody (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 4.0 | `Game/Player/PlayerDRiku.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPlayerDRiku (1 superset) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Prize.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPrize (1 superset) | inline bodies or virtuals |
 | R1 | 3.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
@@ -103,6 +103,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Game/Player/Summon.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CSummon (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Graphic/GprimFull.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPolyGT4 (1 superset) | inline bodies or virtuals |
+| R1 | 2.0 | `System/Graphic/ScreenMask.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFadeIOMask (1 partial) | inline bodies or virtuals |
 
 ## Classes with foreign copies
 
@@ -159,7 +160,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `C3DStripBase` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DStripBase; 1 PARTIAL |
 | `C3DTile` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | virtual order differs |
 | `CCPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: setALPHA, setCLAMP, setSCISSOR, setTEST; virtual order differs; 5 PARTIAL |
-| `CCollBody` | superset | Game/Collision/CollBody.h | 0 | Game/BodyCollision.h | virtual order differs; 1 PARTIAL |
 | `CGPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: isBackClip, isSemiTrans, isShading, isTexNearest, setShading, setTexNearest; extra methods: setIIP; virtual order differs; 3 PARTIAL |
 | `CGTexPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: getTPage, setTexture, setTmpTexAreaForAllPrims, updateTexCache; extra methods: getTexInfo; virtual order differs; 4 PARTIAL |
 | `CGTexPrim2D` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing fields: m_nCacheIdxOld; missing methods: setTexture, updateTexCache, ~CGTexPrim2D; 1 PARTIAL |
@@ -196,7 +196,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/AttachCard.h` | 1 | 1/0/0/0 | 2 |
 | `Game/AttachMotion.h` | 1 | 1/0/0/0 | 155 |
 | `Game/AttackMotion.h` | 7 | 1/2/0/0 | 154 |
-| `Game/BodyCollision.h` | 22 | 0/1/0/0 | 55 |
+| `Game/BodyCollision.h` | 3 | 0/1/0/0 | 55 |
 | `Game/Bullet/Bullet.h` | 8 | 2/3/0/0 | 30 |
 | `Game/Card.h` | 13 | 2/0/1/0 | 25 |
 | `Game/CardBattle.h` | 47 | 4/2/0/0 | 146 |
@@ -204,7 +204,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
 | `Game/CollParam.h` | 1 | 5/0/1/0 | 158 |
 | `Game/Collision/CollAttack.h` | 0 | 0/1/0/0 | 11 |
-| `Game/Collision/CollBody.h` | 2 | 0/1/0/0 | 5 |
+| `Game/Collision/CollBody.h` | 1 | 0/1/0/0 | 23 |
 | `Game/Collision/CollDisp.h` | 8 | 0/0/0/3 | 7 |
 | `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
 | `Game/Collision/CollMap.h` | 0 | 0/1/0/0 | 29 |
@@ -375,7 +375,6 @@ or `untagged`.
 | full-class site | `MAPENEMY_H_FULL_CLASS` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.h:18 |
 | full-class site | `RSRCDATA_H_FULL` | 1 | 0 | untagged, e.g. System/RsrcData.h:12 |
 | guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 0 | untagged, e.g. Game/Gimmick/CreateGimmick.cpp:1 |
-| guard skip | `GAME_COLLISION_COLLBODY_H` | 1 | 0 | untagged, e.g. Game/BodyCollision.h:13 |
 | guard skip | `GAME_COLLISION_COLLUTILA_H` | 1 | 0 | untagged, e.g. Game/Collision/CollUtil.h:28 |
 | guard skip | `GAME_ENTITY_H` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:447 |
 | guard skip | `GAME_SCENEINFO_H` | 2 | 0 | untagged, e.g. Game/Card.h:141 |
