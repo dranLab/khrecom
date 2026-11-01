@@ -25,29 +25,29 @@ class CTexAnm; // PARTIAL: added for Game/Entity
 
 
 
-// PARTIAL: skipped for Game/Player/PlayerCamera when System/Fsm.h (the full CFSM) came first
-#ifndef SYSTEM_FSM_H
-class CFSM {
-protected:
-    CState* m_pCurrentState;
-    CState* m_pNewState;
-    UBYTE m_StateInitial[0x20]; /* CStateTemplate<CFSM> */
-public:
-    // PARTIAL: added for Game/Enemy/MapEnemy (as in System/Fsm.h)
-    BOOL isState(CState& inState) { return m_pCurrentState == &inState; }
-    // PARTIAL: added for Game/Prize (as in System/Fsm.h)
-    BOOL gotoState(CState& inState) {
-        m_pNewState = &inState;
-        return TRUE;
-    }
-    virtual ~CFSM();
-    virtual void update();
-    virtual void beginStateInitial();
-    virtual void stateInitial();
-    virtual void endStateInitial();
-    virtual void endStateProc();
-};
-#endif
+#include "System/Fsm.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct SE_MANAGED_DATA {
     FVECTOR vOffset;
