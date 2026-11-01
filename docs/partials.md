@@ -61,6 +61,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/System-Fsm (one CFSM: Entity.h includes Fsm.h) | 925 | 99 | 19 | 948 (895) | 145 |
 | 2026-11-01 | cleanup/Form-DebugWindow (FORM_DEBUGWINDOW_FULL tagged; PackMan stand-in blocked by the Task.h message) | 925 | 99 | 19 | 948 (890) | 150 |
 | 2026-11-01 | cleanup/Game-Collision-CollBody (partial CCollBody removed from BodyCollision.h; 18 users include CollBody.h) | 905 | 99 | 18 | 947 (889) | 150 |
+| 2026-11-01 | cleanup/Game-Player-PlayerDRiku (CPlayerSora/Riku/DRiku stand-ins in 2 files) | 905 | 95 | 18 | 947 (889) | 150 |
 
 <!-- partials:start -->
 ## Summary
@@ -68,7 +69,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 905 (840 in 112 headers, 65 in 35 .cpp); MATCH: 150
   by category: method 346, data member 64, type 85, fwd decl 53, #include 32, changed in place 125, padding 11, path override 23, gate 35, guessed 36, header-level 73, stand-in 16, other 6
-stand-ins: 99 foreign in 67 files (44 names), 201 unattributed, 167 own
+stand-ins: 95 foreign in 66 files (41 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
 padding: 17 arrays, 2 accessors
 mechanisms: 947 sites (889 untagged); #line: 1242
@@ -87,7 +88,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 5.0 | `Form/DebugWindow.h` | ready | 1 stand-in files, 0 dup headers, 3 gate users | CDebugWindow (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
-| R1 | 4.0 | `Game/Player/PlayerDRiku.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPlayerDRiku (1 superset) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Prize.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPrize (1 superset) | inline bodies or virtuals |
 | R1 | 3.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
@@ -98,12 +98,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/Friend.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFriend (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/PlayerCamera.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerCamera (1 gated) | inline bodies or virtuals (gate) |
-| R1 | 2.0 | `Game/Player/PlayerRiku.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerRiku (1 superset) | inline bodies or virtuals |
-| R1 | 2.0 | `Game/Player/PlayerSora.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerSora (1 superset) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/Summon.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CSummon (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Graphic/GprimFull.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPolyGT4 (1 superset) | inline bodies or virtuals |
 | R1 | 2.0 | `System/Graphic/ScreenMask.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFadeIOMask (1 partial) | inline bodies or virtuals |
+| R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
+| R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
+| R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 
 ## Classes with foreign copies
 
@@ -116,7 +117,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
 | `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 3 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, isDraw, setAutomaticDistance, setAutomaticHeight, setClipDistance, ... (+4); extra methods: setADensity, setCDensity; 6 PARTIAL |
 | `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
-| `CPlayerDRiku` | superset | Game/Player/PlayerDRiku.h | 2 |  | virtual order differs |
 | `CPrize` | superset | Game/Prize.h | 2 |  | virtual order differs |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
@@ -135,8 +135,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
 | `CPlayerCamera` | gated | Game/Player/PlayerCamera.h | 1 |  |  |
-| `CPlayerRiku` | superset | Game/Player/PlayerRiku.h | 1 |  | virtual order differs |
-| `CPlayerSora` | superset | Game/Player/PlayerSora.h | 1 |  | virtual order differs |
 | `CPoly3Collision` | gated | Game/Collision/CollObj.h | 1 |  |  |
 | `CPolyGT4` | superset | System/Graphic/GprimFull.h | 1 |  | virtual order differs |
 | `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
@@ -257,11 +255,11 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Player/PlayerAttack.h` | 2 | 1/0/0/0 | 26 |
 | `Game/Player/PlayerCamera.h` | 15 | 3/0/0/1 | 24 |
 | `Game/Player/PlayerControl.h` | 3 | 1/1/0/0 | 73 |
-| `Game/Player/PlayerDRiku.h` | 0 | 0/1/0/0 | 1 |
+| `Game/Player/PlayerDRiku.h` | 0 | 0/1/0/0 | 3 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
 | `Game/Player/PlayerManager.h` | 0 | 1/1/0/0 | 22 |
-| `Game/Player/PlayerRiku.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Player/PlayerSora.h` | 0 | 0/1/0/0 | 1 |
+| `Game/Player/PlayerRiku.h` | 0 | 0/1/0/0 | 3 |
+| `Game/Player/PlayerSora.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Player/Summon.h` | 0 | 0/0/1/0 | 10 |
 | `Game/Player/SummonGenie.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Player/SummonMushu.h` | 0 | 0/1/0/0 | 2 |
