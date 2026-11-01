@@ -46,7 +46,7 @@ void FTOI15Vector(IVECTOR& v0, const FVECTOR& v1);
 void ITOF15Vector(FVECTOR& v0, const IVECTOR& v1);
 
 inline void operator delete[](void* mem) { com_free(mem); }
-#ifndef KH_PLACEMENT_NEW_DEFINED
+#ifndef KH_PLACEMENT_NEW_DEFINED // MATCH: placement new is not in the ref headers (the units define it themselves); defined once per unit
 #define KH_PLACEMENT_NEW_DEFINED
 inline void* operator new(size_t, void* p) throw() { return p; }
 #endif

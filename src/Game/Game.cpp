@@ -15,7 +15,7 @@ __asm__(".rdata\n.align 3\n.word 0\n.word 0\n"); /* stays in .rdata: gcc has not
 inline void _gameTaskSLCOverflow() {
     TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
 }
-#ifndef KH_PLACEMENT_NEW_DEFINED
+#ifndef KH_PLACEMENT_NEW_DEFINED // MATCH: placement new is not in the ref headers (the units define it themselves); defined once per unit
 #define KH_PLACEMENT_NEW_DEFINED
 inline void* operator new(size_t, void* p) throw() { return p; }
 #endif
