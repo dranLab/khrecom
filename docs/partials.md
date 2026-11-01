@@ -57,19 +57,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-30 | cleanup/Game-Map (A2 part 2: ZONEDATA/ALF_DATA stand-ins in RsrcData.cpp) | 1036 | 355 | 25 | 960 (924) | 108 |
 | 2026-10-30 | cleanup/System-VramMan (CVramMan stand-ins in 2 files) | 1036 | 353 | 25 | 960 (924) | 108 |
 | 2026-11-01 | cleanup/System-Rcf-DebugMenu (last CRcf stand-in; earlier sessions' merges not logged here: see git log) | 934 | 99 | 21 | 950 (899) | 142 |
+| 2026-11-01 | cleanup/Game-Entity-eObjType (dummy eObjType removed, SETFLAG_DIRECT tagged) | 932 | 99 | 20 | 950 (897) | 144 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 934 (869 in 113 headers, 65 in 35 .cpp); MATCH: 142
-  by category: method 353, data member 66, type 85, fwd decl 53, #include 32, changed in place 127, padding 18, path override 24, gate 41, guessed 39, header-level 74, stand-in 16, other 6
+PARTIAL: 932 (867 in 113 headers, 65 in 35 .cpp); MATCH: 144
+  by category: method 353, data member 66, type 85, fwd decl 53, #include 32, changed in place 127, padding 18, path override 24, gate 39, guessed 39, header-level 74, stand-in 16, other 6
 stand-ins: 99 foreign in 67 files (44 names), 201 unattributed, 167 own
-duplicate class names across headers: 21
+duplicate class names across headers: 20
 padding: 21 arrays, 9 accessors
-mechanisms: 950 sites (899 untagged); #line: 1242
+mechanisms: 950 sites (897 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 580, superset 128, partial 94, gated 88, missing 8, unattributed 309
+classes: complete 581, superset 128, partial 93, gated 88, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -81,10 +82,10 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
-| R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
 | R1 | 5.0 | `Form/DebugWindow.h` | ready | 1 stand-in files, 0 dup headers, 3 gate users | CDebugWindow (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
 | R1 | 4.5 | `Game/Collision/CollBody.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users, 1 PARTIAL | CCollBody (1 superset) | inline bodies or virtuals (gate) |
+| R1 | 4.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 4 gate users |  () |  (gate) |
 | R1 | 4.0 | `Game/Player/PlayerDRiku.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPlayerDRiku (1 superset) | inline bodies or virtuals |
 | R1 | 4.0 | `Game/Prize.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | CPrize (1 superset) | inline bodies or virtuals |
 | R1 | 4.0 | `System/Fsm.h` | ready | 0 stand-in files, 1 dup headers, 1 gate users | CFSM (1 gated) | inline bodies or virtuals (gate) |
@@ -167,7 +168,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CSprt` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | extra methods: setXY; virtual order differs |
 | `CTPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: calcZ, getPacketSize, init, makePkt, setALPHA, setCLAMP, ... (+3); 1 PARTIAL |
 | `CTile` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | virtual order differs |
-| `eObjType` | partial | Game/Entity.h | 0 | System/Graphic/Effect/ObjType.h | missing fields: OBJ_TYPE_NONE, OBJ_TYPE_PLAYER, OBJ_TYPE_ENEMY, OBJ_TYPE_GIMMICK, OBJ_TYPE_AVATAR, OBJ_TYPE_BULLET, ... (+15); extra fields: eObjType_dummy |
 
 ## Headers
 
@@ -222,7 +222,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Enemy/HumanBoss.h` | 0 | 0/1/0/0 | 4 |
 | `Game/Enemy/MapEnemy.h` | 10 | 0/0/0/1 | 7 |
 | `Game/Enemy/MapEnemyManager.h` | 1 | 1/1/0/0 | 8 |
-| `Game/Entity.h` | 110 | 1/1/1/0 | 150 |
+| `Game/Entity.h` | 108 | 1/1/0/0 | 150 |
 | `Game/EntityFactory.h` | 14 | 1/1/0/0 | 49 |
 | `Game/Game.h` | 20 | 0/1/0/0 | 43 |
 | `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
@@ -296,7 +296,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/DeFocus.h` | 1 | 2/0/3/0 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
 | `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 172 |
-| `System/Graphic/Effect/ObjType.h` | 1 | 0/0/0/0 | 175 |
+| `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 175 |
 | `System/Graphic/Effect/effect.h` | 7 | 1/1/4/0 | 77 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 3 | 3/0/0/0 | 15 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
@@ -360,7 +360,7 @@ or `untagged`.
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 0 | untagged, e.g. Game/Collision/CollObj.h:91 |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
-| feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 0 | untagged, e.g. Game/Entity.h:427 |
+| feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar) |
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 0 | untagged, e.g. System/LinkedBuf.h:10 |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:79 |
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
