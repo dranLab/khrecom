@@ -51,18 +51,18 @@ template <class T> static inline T& _ref(T& v) { return v; }
 
 extern CPlayer* g_pPlayer;
 
-class CPrize : public CEntity { /* Game/Prize.h */
-private:
-    UBYTE _m_0x1d0[0x14];
-    INT m_PrizeKind; /* 0x1e4 CARD_KIND */
+#include "Game/Prize.h"
 
-public:
-    CPrize(CTask* inParent);
-    INT getPrizeKind() const { return m_PrizeKind; }
-    void move(const FVECTOR& inPos);
-    void forceGetPrize();
-    void flyHigh(BOOL bAll);
-};
+
+
+
+
+
+
+
+
+
+
 
 #include "Form/Menu/Roulette.h"
 

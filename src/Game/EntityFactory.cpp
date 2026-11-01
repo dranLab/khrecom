@@ -14,13 +14,13 @@
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 
-class CPrize : public CEntity { /* Game/Prize.h */
-public:
-    CPrize(CTask* inParent);
-    BOOL setup(const PRIZE_PARAM& inParam);
-private:
-    UBYTE _m_0x1d0[0x90];
-};
+#include "Game/Prize.h"
+
+
+
+
+
+
 
 #include "Game/Atel/Atel.h"
 
