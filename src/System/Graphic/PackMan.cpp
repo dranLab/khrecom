@@ -151,7 +151,7 @@ extern "C" int sceGsSetDefDispEnv(sceGsDispEnv* disp, short psm, short w, short 
 #include "Game/SceneEnv.h"
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void FTOI0Vector(IVECTOR& outVec, const FVECTOR& inVec);
-class CDebugWindow { /* PARTIAL: stand-in for Form/DebugWindow CDebugWindow: DebugWindow.h pulls in Task.h */
+class CDebugWindow { /* PARTIAL: stand-in for Form/DebugWindow CDebugWindow: strings: Task.h's container overflow message (DebugWindow.h needs Task.h for CTask; the original PackMan lacks it) */
 public:
     static BOOL isTopDebugWindow();
 };

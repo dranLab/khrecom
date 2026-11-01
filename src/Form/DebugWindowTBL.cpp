@@ -40,7 +40,7 @@ inline void _emptyStringPlaceholder() {
 #include "Game/Debug/DebugWork.h"
 #include "Form/Menu/JMemoFlag.h"
 #include "System/DebugProcInfo.h"
-#define FORM_DEBUGWINDOW_FULL
+#define FORM_DEBUGWINDOW_FULL /* MATCH: CNakCamera/CGlidWorld; the original has Gprim.h's strings */
 #include "Form/DebugWindow.h"
 #include "Form/DebugWindowTBL.h"
 #include "include_asm.h"

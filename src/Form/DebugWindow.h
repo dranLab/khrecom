@@ -39,7 +39,7 @@ struct DEBUG_WINDOW_TBL {
 /* The full class definitions need System/Graphic/Gprim.h (CTile, CFnt), whose inline functions put strings into
  * .rodata of every includer: only Form/DebugWindow.cpp defines FORM_DEBUGWINDOW_FULL (after including them); other
  * includers see the same layout with the members as padding. */
-#ifdef FORM_DEBUGWINDOW_FULL
+#ifdef FORM_DEBUGWINDOW_FULL // MATCH: the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings
 
 struct DEBUG_WINDOW_LINE_BUF {
     CFnt fntString;
@@ -58,7 +58,7 @@ struct DEBUG_WINDOW_LINE_CURX {
 
 class CDebugWindow : public CTask {
 private:
-#ifdef FORM_DEBUGWINDOW_FULL
+#ifdef FORM_DEBUGWINDOW_FULL // MATCH: the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings
     UINT m_iStatus;
     INT m_iStep;
     INT m_iAnswer;
@@ -133,7 +133,7 @@ private:
     void init(const DEBUG_WINDOW_TBL& data);
 };
 
-#ifdef FORM_DEBUGWINDOW_FULL
+#ifdef FORM_DEBUGWINDOW_FULL // MATCH: the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings
 
 class CNakCamera : public CCamera {
 private:
