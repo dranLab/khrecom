@@ -79,13 +79,13 @@ public:
     CPause(CTask* p, INT nPauseKind);
 };
 
-class CFadeIOMask : public CColorFader, public CTask {
-private:
-    BYTE _pad[0x90 - 0x20 - sizeof(CTask)];
+#include "System/Graphic/ScreenMask.h"
 
-public:
-    CFadeIOMask(CTask& inParent, USHORT nLayerDepth);
-};
+
+
+
+
+
 
 /* The original's position setter converts y and z at RTL level (constants loaded as unsigned: lui/ori for -256). */
 static inline void _setXYZ(G_XYZ& xyz, FIX4 _x, UINT _y, UINT _z) {
