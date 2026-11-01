@@ -61,7 +61,7 @@ public:
 
 
 
-class CMemocaDataEntries {
+class CMemocaDataEntries { /* PARTIAL: stand-in for Form/Menu/SaveLoadUtil CMemocaDataEntries: strings: SaveLoadUtil.h pulls in Task.h's container overflow message (+0x20 .rodata), which the original Memoca lacks */
 public:
     static void initialize();
 };
