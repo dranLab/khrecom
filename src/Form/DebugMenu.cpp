@@ -36,40 +36,10 @@ extern CHAR* __BUILD;
 
 using namespace FLOOR;
 
-// System/Rcf
-struct RcfKey {
-    SHORT _nGroup;
-    SHORT _nMember;
-};
-
-struct RcfSceneInfo : RcfKey, CSJointT<RcfSceneInfo> {
-    char _szTitle[128];
-    USHORT _nAtelCount;
-    SHORT _nRcfMapIdx;
-};
-
-typedef CSJointListT<RcfSceneInfo> RcfSceneInfoList;
-
-struct RcfMapInfo : RcfKey {
-    char _szTitle[128];
-    RcfSceneInfoList _SceneList;
-};
+#include "System/Rcf.h"
 
 /* CBuf after RcfSceneInfo and CSJointListT<RcfSceneInfo>: gcc emits the vtables in reverse order of definition */
 #include "System/Buf.h"
-
-class CRcf { /* PARTIAL: stand-in for System/Rcf CRcf: DebugMenu keeps its own RcfSceneInfo/RcfMapInfo copies (cc1plus fails with Rcf.h here) */
-public:
-    static void reqLoadRCF(INT nType, INT nGroup, INT nMember, unsigned char* pBuf, INT nFlag);
-    static BOOL isCompleteLoadRCF(INT nType, INT nGroup);
-    static RcfSceneInfo* getSceneInfo(SHORT nIndex);
-    static RcfSceneInfo* getSceneInfo(SHORT nGroup, SHORT nMember);
-    static SHORT getSceneInfoIndex(SHORT nGroup, SHORT nMember);
-    static SHORT getSceneInfoCount();
-    static RcfMapInfo* getMapInfo(SHORT nIndex);
-    static SHORT getMapInfoIndex(SHORT nGroup, SHORT nMember);
-    static SHORT getMapInfoCount();
-};
 
 #include "System/RsrcDB.h"
 
