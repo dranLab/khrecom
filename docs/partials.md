@@ -67,14 +67,15 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/System-LinkedBuf (placement-new guard tagged; partials.py: #define value comments) | 895 | 93 | 18 | 945 (879) | 158 |
 | 2026-11-01 | cleanup/System-Graphic-2d-2DSeq (C2DSeq/C2DSpr stand-ins in 2DLayObj) | 895 | 91 | 18 | 945 (879) | 158 |
 | 2026-11-01 | cleanup/Game-Player-Friend-Summon (CFriend/CSummon/MG_SKILL stand-ins in Player.cpp) | 894 | 89 | 18 | 945 (879) | 158 |
+| 2026-11-01 | cleanup/Game-Player-PlayerCamera (CPlayerCamera stand-in in BattleEnemy) | 894 | 88 | 18 | 945 (879) | 158 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 894 (830 in 112 headers, 64 in 34 .cpp); MATCH: 158
-  by category: method 341, data member 64, type 85, fwd decl 53, #include 32, changed in place 123, padding 10, path override 23, gate 33, guessed 35, header-level 73, stand-in 16, other 6
-stand-ins: 89 foreign in 64 files (36 names), 201 unattributed, 167 own
+PARTIAL: 894 (831 in 112 headers, 63 in 34 .cpp); MATCH: 158
+  by category: method 342, data member 64, type 85, fwd decl 53, #include 32, changed in place 123, padding 10, path override 23, gate 33, guessed 35, header-level 73, stand-in 15, other 6
+stand-ins: 88 foreign in 64 files (35 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
 padding: 16 arrays, 1 accessors
 mechanisms: 945 sites (879 untagged); #line: 1242
@@ -99,7 +100,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.5 | `System/RsrcDB.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CRsrcDB (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
-| R1 | 2.0 | `Game/Player/PlayerCamera.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerCamera (1 gated) | inline bodies or virtuals (gate) |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Graphic/GprimFull.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPolyGT4 (1 superset) | inline bodies or virtuals |
 | R1 | 2.0 | `System/Graphic/ScreenMask.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFadeIOMask (1 partial) | inline bodies or virtuals |
@@ -110,6 +110,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R2 | 59.0 | `System/Graphic/2d/2DMan.h` | ready | 28 stand-in files, 1 dup headers, 0 gate users | C2DMan (1 gated) | adds strings: System/Graphic/2d/2DFntObj (1), System/Graphic/2d/2DSeqCtrl (1); weak hint: CSJointListT<C2DBase> not in Form/Menu/Camp, ISLCManagerT<C2DO> not in Form/Menu/Camp |
 | R2 | 32.0 | `System/RsrcData.h` | ready | 15 stand-in files, 0 dup headers, 2 gate users | CRsrcANN, CRsrcAZF, CRsrcData, CRsrcTex, CRsrcVSV, ... (+2) (7 gated) | gated strings: RSRCDATA_H_FULL |
 | R2 | 17.5 | `Game/Collision/CollObj.h` | ready | 5 stand-in files, 0 dup headers, 6 gate users, 3 PARTIAL | CCircleCollision, CCollision, COLL_KIND, COLL_TYPE, CPointCollision, ... (+2) (4 gated, 1 partial, 2 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollAttack, CSJointT<CCollObj> not in Game/Collision/CollAttack |
+| R2 | 16.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 1 dup headers, 0 gate users, 18 PARTIAL | C3DLine, C3DLines, C3DPolyG4, C3DStripBase, C3DTile, ... (+12) (15 gated, 1 superset, 1 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
 
 ## Classes with foreign copies
 
@@ -135,7 +136,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
-| `CPlayerCamera` | gated | Game/Player/PlayerCamera.h | 1 |  |  |
 | `CPoly3Collision` | gated | Game/Collision/CollObj.h | 1 |  |  |
 | `CPolyGT4` | superset | System/Graphic/GprimFull.h | 1 |  | virtual order differs |
 | `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
@@ -253,7 +253,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Player/Player.h` | 44 | 2/0/1/0 | 72 |
 | `Game/Player/PlayerAnim.h` | 1 | 1/0/0/0 | 1 |
 | `Game/Player/PlayerAttack.h` | 2 | 1/0/0/0 | 26 |
-| `Game/Player/PlayerCamera.h` | 15 | 3/0/0/1 | 24 |
+| `Game/Player/PlayerCamera.h` | 16 | 3/0/0/1 | 25 |
 | `Game/Player/PlayerControl.h` | 3 | 1/1/0/0 | 73 |
 | `Game/Player/PlayerDRiku.h` | 0 | 0/1/0/0 | 3 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
