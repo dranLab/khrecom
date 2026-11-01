@@ -21,9 +21,9 @@ class CEffectMotion;  // PARTIAL: added for Game/Player/PlayerWeapon
 class CAttachMotion; // PARTIAL: added for Game/Player/Summon
 class CTexAnm; // PARTIAL: added for Game/Entity
 
-enum eObjType {
-    eObjType_dummy = 0 /* values not needed yet */
-};
+
+
+
 
 // PARTIAL: skipped for Game/Player/PlayerCamera when System/Fsm.h (the full CFSM) came first
 #ifndef SYSTEM_FSM_H
@@ -424,7 +424,7 @@ inline void CEntity::AfterInit() {}
 inline void CEntity::onMsg(INT inMsg, void* inExtraInfo) {}
 inline void CEntity::setEntityType(ObjType::eObjType inType) { m_EntityType = inType; }
 inline void CEntity::setStartPos(const FVECTOR& inPos) { m_vStartPos = inPos; }
-#ifdef ENTITY_H_SETFLAG_DIRECT // PARTIAL: the plain form, for Game/Atel/Avatar
+#ifdef ENTITY_H_SETFLAG_DIRECT // MATCH: the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar)
 inline void CEntity::setEntityFlag(UINT inSet, UINT inMask) { m_uiEntityFlag = (m_uiEntityFlag | inSet) & ~inMask; }
 #else
 // PARTIAL: changed for Game/Gimmick/GimmickSavePoint - the store goes through a reference (not a struct member
@@ -438,7 +438,7 @@ inline void CEntity::setRate(FLOAT inRate) { m_fRate = inRate; }
 inline void CEntity::setSpeed(FLOAT inSpeed) { m_fSpeed = inSpeed; }
 inline void CEntity::setArriveRadius(FLOAT inRadius) { m_fArriveRadius = inRadius; }
 inline void CEntity::setTargetPos(const FVECTOR& inPos) { m_vTargetPos = inPos; }
-#ifdef ENTITY_H_SETFLAG_DIRECT // PARTIAL: the plain form, for Game/Atel/Avatar
+#ifdef ENTITY_H_SETFLAG_DIRECT // MATCH: the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar)
 inline void CEntity::setDispOffFlag(UINT inSet, UINT inMask) { m_uiDispOffFlag = (m_uiDispOffFlag | inSet) & ~inMask; }
 #else
 inline void CEntity::setDispOffFlag(UINT inSet, UINT inMask) { UINT& f = m_uiDispOffFlag; f = (f | inSet) & ~inMask; }
