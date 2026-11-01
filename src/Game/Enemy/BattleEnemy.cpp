@@ -179,12 +179,12 @@ namespace BattleEnemy {
 FLOAT GameModeAp(FLOAT inAp);
 INT GameModeHp(INT inHp);
 }
-namespace PlayerCamera {
-class CPlayerCamera { /* PARTIAL: Game/Player/PlayerCamera.h is not included here */
-public:
-    static void setBossCamID(INT inID);
-};
-}
+#include "Game/Player/PlayerCamera.h"
+
+
+
+
+
 #include "Game/LockOnManager.h"
 namespace LockOnManager {
 
