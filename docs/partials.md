@@ -71,17 +71,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/Game-Collision-CollObj (CPointCollision stand-ins in MapEnemy/HumanBoss; gates tagged) | 894 | 85 | 18 | 947 (870) | 169 |
 | 2026-11-01 | cleanup/Form-DebugMenu-gates (FORM_DEBUGMENU_FULL, MODELDATA_H_TEXINFO_CTOR tagged) | 894 | 87 | 18 | 945 (876) | 161 |
 | 2026-11-01 | cleanup/System-Graphic-ScreenMask (CFadeIOMask stand-in in MSVideo) | 894 | 87 | 18 | 945 (879) | 158 |
+| 2026-11-02 | cleanup/System-Graphic-modeldata (TexInfoStub stand-in in TexAnm; MODELDATA_H_TEXINFO tagged) | 891 | 84 | 18 | 948 (861) | 176 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 894 (831 in 112 headers, 63 in 34 .cpp); MATCH: 169
-  by category: method 342, data member 64, type 85, fwd decl 53, #include 32, changed in place 123, padding 10, path override 23, gate 33, guessed 35, header-level 73, stand-in 15, other 6
-stand-ins: 85 foreign in 62 files (34 names), 201 unattributed, 167 own
+PARTIAL: 891 (830 in 112 headers, 61 in 34 .cpp); MATCH: 176
+  by category: method 342, data member 64, type 85, fwd decl 53, #include 32, changed in place 123, padding 10, path override 23, gate 30, guessed 35, header-level 73, stand-in 15, other 6
+stand-ins: 84 foreign in 61 files (33 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
 padding: 16 arrays, 1 accessors
-mechanisms: 947 sites (870 untagged); #line: 1242
+mechanisms: 948 sites (861 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 582, superset 128, partial 94, gated 86, missing 8, unattributed 309
 ```
@@ -113,7 +114,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R2 | 32.0 | `System/RsrcData.h` | ready | 15 stand-in files, 0 dup headers, 2 gate users | CRsrcANN, CRsrcAZF, CRsrcData, CRsrcTex, CRsrcVSV, ... (+2) (7 gated) | gated strings: RSRCDATA_H_FULL |
 | R2 | 16.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 1 dup headers, 0 gate users, 18 PARTIAL | C3DLine, C3DLines, C3DPolyG4, C3DStripBase, C3DTile, ... (+12) (15 gated, 1 superset, 1 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
 | R2 | 15.5 | `Game/Collision/CollObj.h` | ready | 3 stand-in files, 0 dup headers, 8 gate users, 3 PARTIAL | CCircleCollision, CCollision, COLL_KIND, COLL_TYPE, CPointCollision, ... (+2) (4 gated, 1 partial, 2 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollAttack, CSJointT<CCollObj> not in Game/Collision/CollAttack |
-| R2 | 7.5 | `System/Graphic/modeldata.h` | ready | 1 stand-in files, 0 dup headers, 5 gate users, 1 PARTIAL | TexInfoStub (1 gated) | gated strings: MODELDATA_H_TEXINFO |
+| R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
 
 ## Classes with foreign copies
 
@@ -151,7 +152,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `G_RGBA` | superset | System/Graphic/Gprim.h | 1 |  | 2 PARTIAL |
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
 | `QWdata` | complete | System/Graphic/Gprim.h | 1 |  |  |
-| `TexInfoStub` | gated | System/Graphic/modeldata.h | 1 |  | 1 PARTIAL |
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
 | `C3DCPrim` | partial | System/Graphic/3DCPrim.h | 0 | System/Graphic/GprimFull.h | missing methods: getObjPtr, makePkt_Line0, makePkt_Line1, makePkt_LineStrip0, makePkt_LineStrip1, makePkt_None, ... (+13); parameter count differs: create; virtual order differs |
 | `C3DLine` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h |  |
@@ -330,7 +330,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 36 |
 | `System/Graphic/TexInfo.h` | 1 | 1/0/1/0 | 234 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
-| `System/Graphic/modeldata.h` | 13 | 1/2/0/1 | 82 |
+| `System/Graphic/modeldata.h` | 12 | 1/2/0/1 | 82 |
 | `System/LinkedBuf.h` | 5 | 1/2/1/0 | 7 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 59 |
@@ -355,14 +355,14 @@ or `untagged`.
 | feature | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | getDetectInfo as INT (see CollObj.h) |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 3 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
-| feature | `MODELDATA_H_TEXINFO` | 5 | 0 | untagged, e.g. System/Graphic/DispList.cpp:1 |
+| feature | `MODELDATA_H_TEXINFO` | 6 | 6 | TexInfoStub (the original has its assert strings) |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 2 | RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) |
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 2 | the inline collideMap needs CCollUtil (CollUtil.h): only units that construct these classes define it |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar) |
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 2 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
-| feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:79 |
+| feature site | `MODELDATA_H_TEXINFO` | 1 | 1 | only includers whose original .rodata has TexInfoStub's assert strings |
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
 | full-class | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.cpp:2 |
 | full-class | `FORM_DEBUGMENU_FULL` | 1 | 1 | the owner sees the full classes |
@@ -399,10 +399,10 @@ or `untagged`.
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
 | path override | `EFFECT_H_PATH` | 5 | 0 | untagged, e.g. Game/Enemy/EnemyBarrelspider.cpp:4 |
 | path override | `FSM_H_PATH` | 1 | 0 | untagged, e.g. System/Fsm.cpp:1 |
-| path override | `GPRIM_H_PATH` | 165 | 7 | the collision classes come after CMapEnemy (their vtables precede its own) |
+| path override | `GPRIM_H_PATH` | 165 | 9 | the collision classes come after CMapEnemy (their vtables precede its own) |
 | path override | `LINKEDBUF_H_PATH` | 4 | 1 | __FILE__ as in the original .rodata |
 | path override | `MAPUNIT_H_PATH` | 1 | 0 | untagged, e.g. System/Graphic/MapUnit.cpp:5 |
-| path override | `MODELDATA_H_PATH` | 8 | 1 | __FILE__ as in the original .rodata |
+| path override | `MODELDATA_H_PATH` | 8 | 2 | TexInfoStub (the original has its assert strings) |
 | path override | `MODEL_H_PATH` | 8 | 1 | __FILE__ as in the original .rodata |
 | path override | `OSDDEF_H_PATH` | 1 | 0 | untagged, e.g. Game/EntityFactory.cpp:1 |
 | path override | `PATHDATACAMERA_H_PATH` | 2 | 1 | the original includes it under this name |
