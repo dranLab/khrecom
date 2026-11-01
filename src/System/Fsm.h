@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Gimmick/BaseGimmick (CState, CStateTemplate<T>; CFSM itself is still in Game/Entity.h)
+// CState, CStateTemplate<T> and CFSM (System/Fsm)
 #ifndef SYSTEM_FSM_H
 #define SYSTEM_FSM_H
 
@@ -6,7 +6,7 @@
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
 
-#ifndef FSM_H_PATH // PARTIAL: path override added for System/Fsm ("c:/KHCOM/MainApp/System/Fsm.h")
+#ifndef FSM_H_PATH // MATCH: __FILE__ as in the original .rodata ("System/Fsm.h" in includers, the c:/KHCOM path in System/Fsm)
 #define FSM_H_PATH "System/Fsm.h"
 #endif
 
@@ -66,9 +66,9 @@ public:
     }
 };
 
-/* PARTIAL: added for Game/MinigameManager. CFSM is still declared (opaquely) in Game/Entity.h too: this one is
- * skipped when Entity.h came first; Entity.h skips its own when this one came first (PARTIAL: Game/Player/PlayerCamera). */
-#ifndef GAME_ENTITY_H
+
+
+
 class CFSM {
 protected:
     CState* m_pCurrentState;
@@ -90,6 +90,6 @@ public:
     virtual void endStateInitial() {}
     virtual void endStateProc() {}
 };
-#endif
+
 
 #endif /* SYSTEM_FSM_H */
