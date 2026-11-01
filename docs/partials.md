@@ -73,13 +73,14 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/System-Graphic-ScreenMask (CFadeIOMask stand-in in MSVideo) | 894 | 87 | 18 | 945 (879) | 158 |
 | 2026-11-02 | cleanup/System-Graphic-modeldata (TexInfoStub stand-in in TexAnm; MODELDATA_H_TEXINFO tagged) | 891 | 84 | 18 | 948 (861) | 176 |
 | 2026-11-02 | cleanup/System-Graphic-Anim (one CAnim; ANIM_H_FULL_CLASS dropped; ANIM_H_GETFLAG_DECL_ONLY for 4 units) | 860 | 84 | 18 | 952 (859) | 183 |
+| 2026-11-02 | cleanup/stand-in-reasons (Memoca, effect, pppEiDrawShipoly stand-ins documented) | 863 | 84 | 18 | 952 (859) | 183 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 860 (799 in 111 headers, 61 in 34 .cpp); MATCH: 183
-  by category: method 327, data member 63, type 84, fwd decl 50, #include 32, changed in place 120, padding 8, path override 22, gate 30, guessed 31, header-level 72, stand-in 15, other 6
+PARTIAL: 863 (799 in 111 headers, 64 in 37 .cpp); MATCH: 183
+  by category: method 327, data member 63, type 84, fwd decl 50, #include 32, changed in place 120, padding 8, path override 22, gate 30, guessed 31, header-level 72, stand-in 18, other 6
 stand-ins: 84 foreign in 61 files (33 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
 padding: 14 arrays, 0 accessors
