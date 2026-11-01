@@ -28,7 +28,7 @@ CMapEnemyGround::~CMapEnemyGround() {}
 
 void CMapEnemyGround::beginStateAppear() {
     changeMapEnemyMotion(0, 0, 0, 0);
-    setMapEnemyFlag(1, TRUE);
+    setMapEnemyFlag(1, 0);
     setEntityFlag(0, 1);
     bodyCollOn(-1);
 }

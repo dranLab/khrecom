@@ -31,7 +31,7 @@ CMapEnemyMushroom::~CMapEnemyMushroom() {}
 
 void CMapEnemyMushroom::beginStateAppear() {
     changeMapEnemyMotion(0, 0, 0, -1);
-    setMapEnemyFlag(1, TRUE);
+    setMapEnemyFlag(1, 0);
     setEntityFlag(0, 0x10001);
     bodyCollOff(-1);
     bodyCollOffBody(-1);
@@ -120,9 +120,9 @@ void CMapEnemyMushroom::beginStateDisappear() {
     changeMotion(m_pEnemyParam->iDisappearMotionIndex, 0, FALSE, -1, 0, 0);
     setupFade(1.0f, 0.0f, 3000, -1);
     setDisappearEffect();
-    setMapEnemyFlag(1, FALSE);
+    setMapEnemyFlag(0, 1);
     setEntityFlag(0, 0x10000);
-    setMapEnemyFlag(0x40, FALSE);
+    setMapEnemyFlag(0, 0x40);
 }
 
 void CMapEnemyMushroom::stateDisappear() {

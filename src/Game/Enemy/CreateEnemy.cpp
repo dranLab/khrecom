@@ -1,6 +1,6 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
-#define MAPENEMY_H_NO_COLL_ANIM
+#define MAPENEMY_H_NO_COLL_ANIM /* MATCH: the original has no BodyCollision.h/Anim.h strings */
 #include "Game/EntityFactory.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -669,7 +669,7 @@ CEntity* CEntityFactory::createMapEnemy(const OBJ_INFO& inObjInfo, CTask* inPare
     }
 
     if (enemy != NULL) {
-        enemy->setParam(*(INT*)inExtraInfo);
+        enemy->setMapEnemyParam(*(INT*)inExtraInfo);
         if (!enemy->initalize(inObjInfo.sGroupID, inObjInfo.sID)) {
             enemy->out();
             TRACE("Create entity failed!! ... GROUP_ID = 0x%08x, RSRC_ID = 0x%08x\n", inObjInfo.sGroupID, inObjInfo.sID);

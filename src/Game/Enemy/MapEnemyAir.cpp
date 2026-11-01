@@ -33,7 +33,7 @@ CMapEnemyAir::~CMapEnemyAir() {}
 
 void CMapEnemyAir::beginStateAppear() {
     changeMapEnemyMotion(0, 0, 0, -1);
-    setMapEnemyFlag(1, TRUE);
+    setMapEnemyFlag(1, 0);
     setEntityFlag(0, 1);
     bodyCollOn(-1);
 }
@@ -54,7 +54,7 @@ void CMapEnemyAir::beginStateMain() {
 }
 
 void CMapEnemyAir::stateMain() {
-    if (isMapEnemyFlag(8)) {
+    if (isLoomingDarkness()) {
         switch (m_iStep) {
         case 0:
             m_pMove->homingMove(g_pPlayer, 0.1f, m_fRunSpeed);

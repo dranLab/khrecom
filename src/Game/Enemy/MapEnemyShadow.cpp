@@ -50,7 +50,7 @@ void CMapEnemyShadow::beginStateAppear() {
     bodyCollOff(-1);
     bodyCollOffBody(-1);
     setEntityFlag(1, 0);
-    setMapEnemyFlag(1, FALSE);
+    setMapEnemyFlag(0, 1);
     setEntityFlag(0, 0x10000);
     m_pMove->setFlag(9, 0);
 }
@@ -64,7 +64,7 @@ void CMapEnemyShadow::stateAppear() {
                 FVECTOR s = {{1.0f, 0.0f, 1.0f, 1.0f}};
                 m_pMove->setScl(s);
                 setEntityFlag(0, 1);
-                setMapEnemyFlag(1, TRUE);
+                setMapEnemyFlag(1, 0);
                 changeMotion(11, 0, FALSE, -1, 0, 0);
                 setTimer(getMotionTotalTime());
                 m_pMove->setFlag(0, 9);
@@ -155,7 +155,7 @@ void CMapEnemyShadow::beginStateDisappear() {
     changeMapEnemyMotion(0, 0, 0, -1);
     m_pMove->enableGravity(FALSE);
     setEntityFlag(0, 0x10000);
-    setMapEnemyFlag(0x40, FALSE);
+    setMapEnemyFlag(0, 0x40);
 }
 
 void CMapEnemyShadow::stateDisappear() {
