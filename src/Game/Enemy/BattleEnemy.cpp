@@ -49,7 +49,7 @@ inline void _emptyStringPlaceholder0() {
 #include "System/Rnd.h"
 #include "Game/EntityFactory.h"
 #include "include_asm.h"
-
+#include "Game/Collision/CollBody.h"
 /* PARTIAL: until SOURCE DATA, the unit's copy of the header static BattleEnemy::BadStatusEffectName (its .data
  * comes from the original assembly) */
 template <class T> static inline T& _ref(T& x) { return x; }
@@ -1290,7 +1290,7 @@ void CBattleEnemy::beginStateStop() {
         switch (hitBody->getDamageKind()) {
         case ATK_KIND_STOP:
         default:
-            setBadStatusEffect(4, hitBody->getBadStatusParam());
+            setBadStatusEffect(4, hitBody->getHitEffectWait());
             break;
         case ATK_KIND_ABSOLUTE_STOP:
             m_ullBtlEnemyFlag |= 0x4000000;
@@ -1434,7 +1434,7 @@ void CBattleEnemy::stateStop() {
         FVECTOR rot;
         rot.init();
         ApplyMatrix(stopDmg->vDetectPos, Crd(0).m_World, stopDmg->vDetectPos);
-        hit->getCollisionDetect() = stopDmg->vDetectPos;
+        hit->getCollision()->m_outDetect = stopDmg->vDetectPos;
         hit->setHitEffectParam(stopDmg->szHitEffectName, stopDmg->sHitEffectNo, (ObjType::eObjType)stopDmg->hitEffectObjType, rot, 0.0f);
         INT no = selectDamageMotion_();
         if (no > 0 && !(m_ullBackupFlag & 0x80000) && !((m_ullBackupFlag & 0x200000) && stopDmg->dmgKind == ATK_KIND_DMG_SMALL)) {
@@ -1528,7 +1528,7 @@ void CBattleEnemy::beginStateTerror() {
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
     if (!hitBody) AssertApp(__FILE__, 0xBA0, "hitBody", 0);
     setTimer(18000);
-    setBadStatusEffect(3, hitBody->getBadStatusParam());
+    setBadStatusEffect(3, hitBody->getHitEffectWait());
     m_ullBtlEnemyFlag |= 0x40000000000ULL;
     FLOAT speed = getExtraParam(_ref(BattleEnemy::SpeedParamName));
     if (speed == 0.0f) speed = 0.05f;
@@ -3392,10 +3392,10 @@ void CBattleEnemy::enableBind_(BOOL inSw) {
         if (!hitBody) AssertApp(__FILE__, 0x1B8A, "hitBody", 0);
         setEntityFlag(0x8000, 0);
         m_ullBtlEnemyFlag |= 0x20000;
-        setBadStatusEffect(0, hitBody->getBadStatusParam());
+        setBadStatusEffect(0, hitBody->getHitEffectWait());
         m_pMove->setFlag(8, 0);
         m_tqBindTimer = 33000;
-        setEffect(BattleEnemy::BindEffectName, 1, &getPos(), NULL, hitBody->getBadStatusParam());
+        setEffect(BattleEnemy::BindEffectName, 1, &getPos(), NULL, hitBody->getHitEffectWait());
     } else {
         setEntityFlag(0, 0x8000);
         m_ullBtlEnemyFlag &= ~0x20000;
@@ -3410,7 +3410,7 @@ void CBattleEnemy::enableConfuse_(BOOL inSw) {
     if (inSw) {
         CCollBody* hitBody = m_pBodyColl->getHitCollBody();
         if (hitBody) {
-            setBadStatusEffect(2, hitBody->getBadStatusParam());
+            setBadStatusEffect(2, hitBody->getHitEffectWait());
         } else {
             setBadStatusEffect(2, 0.0f);
         }
@@ -3523,7 +3523,7 @@ void CBattleEnemy::setHitEffect_() {
         CEffectMan::killEffect(m_hHitEffect, 0.0f);
         m_hHitEffect = CEffectMan::attachEffect(hit->getHitEffectName(), hit->getHitEffectNo(),
                                                 (ObjType::eObjType)hit->getHitEffectObjType(), &Crd(1), &pos, NULL,
-                                                hit->getBadStatusParam());
+                                                hit->getHitEffectWait());
         CEffect* effect = CEffectMan::getEffect(m_hHitEffect);
         if (effect) effect->m_iFlag |= 4;
         break;

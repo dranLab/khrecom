@@ -16,7 +16,7 @@
 #include "Game/Movement.h"
 #include "System/Graphic/Camera.h"
 #include "System/Math3D.h"
-
+#include "Game/Collision/CollBody.h"
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
@@ -215,7 +215,7 @@ void CEnemyCreapplant::beginStateTerror() {
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
     ASSERT(hitBody);
     setTimer(18000);
-    setBadStatusEffect(3, hitBody->getBadStatusParam());
+    setBadStatusEffect(3, hitBody->getHitEffectWait());
     changeMotionFileName(Creapplant::IdlingMotion, 0, FALSE, -1, 0, 0);
 }
 

@@ -23,7 +23,7 @@ inline void _emptyStringPlaceholder() {
 #include "Game/EntityFactory.h"
 #include "System/Graphic/Camera.h"
 #include "System/Math3D.h"
-
+#include "Game/Collision/CollBody.h"
 static BULLET_EFFECT_INFO g_GimPlantBulletEffTbl[4] = {
     {NULL, 0, 0, 0},
     {"rec_aw_common", 3, 0, 0},

@@ -35,7 +35,7 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/Collision/CollObj.h"
 #include "Game/Gimmick/GimmickManager.h"
 #include "Game/SceneInfo.h"
-
+#include "Game/Collision/CollBody.h"
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 inline void* operator new(size_t size, char* msg) throw() {

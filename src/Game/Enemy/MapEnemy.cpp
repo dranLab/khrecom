@@ -35,7 +35,7 @@ inline void _emptyStringPlaceholder() {
 #include "System/Sound/SoundMan.h"
 #include "Game/Enemy/MapEnemyManager.h"
 #include "Game/Collision/CollInfo.h"
-
+#include "Game/Collision/CollBody.h"
 
 
 
