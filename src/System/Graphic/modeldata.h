@@ -74,9 +74,9 @@ struct MODELDATA {
     static BOOL isCharacterAndMap(UINT mode);
 };
 
-/* PARTIAL: added for System/Graphic/ModelMan, which defines MODELDATA_H_TEXINFO (System/Graphic/TexCtrl and
- * System/Graphic/TexAnm have local copies). */
-#ifdef MODELDATA_H_TEXINFO
+/* TexInfoStub's inline asserts put this header's path and "_pTexInfo" into the .rodata of every includer: only
+ * the units whose original has those strings define MODELDATA_H_TEXINFO. */
+#ifdef MODELDATA_H_TEXINFO // MATCH: only includers whose original .rodata has TexInfoStub's assert strings
 #line 190
 struct TexInfoStub {
     union {

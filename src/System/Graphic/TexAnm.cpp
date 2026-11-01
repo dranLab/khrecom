@@ -1,3 +1,4 @@
+#define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */
 #define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h"
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
 #include "System/Graphic/modeldata.h"
@@ -48,16 +49,15 @@ extern "C" int rand();
 
 
 
-struct TexInfoStub {
-    union {
-        struct {
-            TexInfo* _pTexInfo;
-            SHORT _nTexPos;
-            SHORT _nClutPos;
-        };
-        ULONGLONG _nValue;
-    };
-};
+
+
+
+
+
+
+
+
+
 
 
 
