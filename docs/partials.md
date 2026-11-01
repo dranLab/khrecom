@@ -63,19 +63,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/Game-Collision-CollBody (partial CCollBody removed from BodyCollision.h; 18 users include CollBody.h) | 905 | 99 | 18 | 947 (889) | 150 |
 | 2026-11-01 | cleanup/Game-Player-PlayerDRiku (CPlayerSora/Riku/DRiku stand-ins in 2 files) | 905 | 95 | 18 | 947 (889) | 150 |
 | 2026-11-01 | cleanup/Game-Prize (CPrize stand-ins in 2 files) | 905 | 93 | 18 | 947 (889) | 150 |
+| 2026-11-01 | cleanup/Game-Enemy-MapEnemy (one CMapEnemy, MAPENEMY_H_FULL_CLASS dropped, NO_COLL_ANIM tagged) | 896 | 93 | 18 | 945 (884) | 153 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 905 (840 in 112 headers, 65 in 35 .cpp); MATCH: 150
-  by category: method 346, data member 64, type 85, fwd decl 53, #include 32, changed in place 125, padding 11, path override 23, gate 35, guessed 36, header-level 73, stand-in 16, other 6
+PARTIAL: 896 (831 in 112 headers, 65 in 35 .cpp); MATCH: 153
+  by category: method 341, data member 64, type 85, fwd decl 53, #include 32, changed in place 124, padding 10, path override 23, gate 34, guessed 35, header-level 73, stand-in 16, other 6
 stand-ins: 93 foreign in 65 files (40 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
-padding: 17 arrays, 2 accessors
-mechanisms: 947 sites (889 untagged); #line: 1242
+padding: 16 arrays, 1 accessors
+mechanisms: 945 sites (884 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 582, superset 128, partial 93, gated 87, missing 8, unattributed 309
+classes: complete 582, superset 128, partial 94, gated 86, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -89,13 +90,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 5.0 | `Form/DebugWindow.h` | ready | 1 stand-in files, 0 dup headers, 3 gate users | CDebugWindow (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
-| R1 | 3.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `System/Graphic/3DCPrim.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users | C3DCPrim (1 partial) | inline bodies or virtuals |
 | R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 2.5 | `System/Graphic/2d/2DSeq.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | C2DSeq (1 superset) | inline bodies or virtuals |
 | R1 | 2.5 | `System/RsrcDB.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CRsrcDB (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
+| R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/Player/Friend.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFriend (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/PlayerCamera.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerCamera (1 gated) | inline bodies or virtuals (gate) |
 | R1 | 2.0 | `Game/Player/Summon.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CSummon (1 partial) | inline bodies or virtuals |
@@ -219,7 +220,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Enemy/EnemyWhitemushroom.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Enemy/Heartless.h` | 5 | 0/1/0/0 | 36 |
 | `Game/Enemy/HumanBoss.h` | 0 | 0/1/0/0 | 4 |
-| `Game/Enemy/MapEnemy.h` | 10 | 0/0/0/1 | 7 |
+| `Game/Enemy/MapEnemy.h` | 1 | 0/0/1/0 | 7 |
 | `Game/Enemy/MapEnemyManager.h` | 1 | 1/1/0/0 | 8 |
 | `Game/Entity.h` | 105 | 1/1/0/0 | 150 |
 | `Game/EntityFactory.h` | 14 | 1/1/0/0 | 49 |
@@ -365,21 +366,20 @@ or `untagged`.
 | full-class | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.cpp:2 |
 | full-class | `FORM_DEBUGMENU_FULL` | 1 | 0 | untagged, e.g. Form/DebugMenu.cpp:3 |
 | full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the owner sees the full classes (Gprim.h included first) |
-| full-class | `MAPENEMY_H_FULL_CLASS` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.cpp:1 |
 | full-class | `RSRCDATA_H_FULL` | 2 | 0 | untagged, e.g. System/RsrcDB.cpp:2 |
 | full-class site | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.h:16 |
 | full-class site | `FORM_DEBUGMENU_FULL` | 1 | 0 | untagged, e.g. Form/DebugMenu.h:35 |
 | full-class site | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings |
-| full-class site | `MAPENEMY_H_FULL_CLASS` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.h:18 |
 | full-class site | `RSRCDATA_H_FULL` | 1 | 0 | untagged, e.g. System/RsrcData.h:12 |
 | guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 0 | untagged, e.g. Game/Gimmick/CreateGimmick.cpp:1 |
 | guard skip | `GAME_COLLISION_COLLUTILA_H` | 1 | 0 | untagged, e.g. Game/Collision/CollUtil.h:28 |
 | guard skip | `GAME_ENTITY_H` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:447 |
 | guard skip | `GAME_SCENEINFO_H` | 2 | 0 | untagged, e.g. Game/Card.h:141 |
 | guard skip | `SYSTEM_COORD_H` | 1 | 0 | untagged, e.g. System/Graphic/Effect/effect_inl.h:9 |
-| opt-out | `MAPENEMY_H_NO_COLL_ANIM` | 2 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:3 |
+| opt-out | `MAPENEMY_H_NO_COLL_ANIM` | 2 | 2 | the original has no BodyCollision.h/Anim.h strings |
 | opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 159 | 6 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
-| opt-out site | `MAPENEMY_H_NO_COLL_ANIM` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.h:8 |
+| opt-out site | `MAPENEMY_H_NO_COLL_ANIM` | 1 | 1 | the .rodata of Game/Enemy/MapEnemyManager and Game/Enemy/CreateEnemy has no BodyCollision.h/Anim.h
+ * strings: they define MAPENEMY_H_NO_COLL_ANIM before includ |
 | opt-out site | `TASK_H_NO_SLC_OVERFLOW_MSG` | 1 | 0 | untagged, e.g. System/Task.h:201 |
 | path override | `ANIM_H_PATH` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:2 |
 | path override | `ATELBLUR_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/AtelBlur.cpp:2 |
