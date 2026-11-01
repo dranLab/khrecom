@@ -185,7 +185,7 @@ void CMenuModel::changeAnimEx(INT nRsrcID, INT nID, BOOL bHokan) {
 
 BOOL CMenuModel::isAnimEnd() {
     if (m_pAnim) {
-        if (m_pAnim->isMotionEnd()) {
+        if (m_pAnim->getFlag(0) & 3) {
             return TRUE;
         }
     }

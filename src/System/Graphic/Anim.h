@@ -1,24 +1,27 @@
-// PARTIAL: added for Game/Gimmick/GimmickHitMore
+// CAnim (System/Graphic/Anim)
 #ifndef SYSTEM_GRAPHIC_ANIM_H
 #define SYSTEM_GRAPHIC_ANIM_H
 
 #include "khtypes.h"
 #include "System/MainApp.h"
 
-/* Placeholder for the original header's inline function asserting an index into CAnim's two flag words
- * (probably CAnim::getFlag): its strings ("System/Graphic/Anim.h", "2 > idx") head .rodata of every
- * includer. The line number is not known (it is not part of the data). */
-/* PARTIAL: added for System/MainTaskFactory - __FILE__ of this header differs per includer ("System/Graphic/anim.h"
- * in System/MainTaskFactory): define ANIM_H_PATH before including it to pick another one. */
-#ifndef ANIM_H_PATH
+/* CAnim::getFlag's assert strings ("System/Graphic/Anim.h", "2 > idx") head .rodata of every includer. Units whose
+ * original calls getFlag out of line define ANIM_H_GETFLAG_DECL_ONLY: a placeholder keeps the strings there. */
+/* __FILE__ of this header differs per includer ("System/Graphic/anim.h" in System/MainTaskFactory): define ANIM_H_PATH
+ * before including it to pick another one. */
+#ifndef ANIM_H_PATH // MATCH: __FILE__ as in the original .rodata
 #define ANIM_H_PATH "System/Graphic/Anim.h"
 #endif
-#ifdef ANIM_H_FULL_CLASS
 #include "System/Vector.h"
-/* The complete class, for System/Graphic/Anim itself (its key unit: every inline member is emitted there, in this
- * order). The other includers keep the partial class below (their inline helpers were reconstructed under other
- * names). */
+/* System/Graphic/Anim is the key unit: every inline member is emitted there, in this order. */
+
+
 #line 1 ANIM_H_PATH
+#ifdef ANIM_H_GETFLAG_DECL_ONLY // MATCH: these units' originals call CAnim::getFlag out of line (Entity, EffectMotion, SEMotion, GimmickLotusLeaf)
+inline void _animCheckFlagIdx(UINT idx) {
+    if (!(2 > idx)) AssertApp(__FILE__, __LINE__, "2 > idx", 0);
+}
+#endif
 typedef ULONG ANIMID;
 class CTask;
 class CCoords;
@@ -160,11 +163,15 @@ public:
     void setSpeed(FLOAT s) { m_Speed = s; }
     void setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped);
     void setZeroHokan(BOOL in_bZeroHokan) { m_ZeroHokan = in_bZeroHokan; }
+#ifdef ANIM_H_GETFLAG_DECL_ONLY // MATCH: called out of line in these units
+    ULONG getFlag(UINT idx) const;
+#else
     ULONG getFlag(UINT idx) const {
 #line 296
         if (!(2 > idx)) AssertApp(__FILE__, __LINE__, "2 > idx", 0);
         return m_Flags[idx];
     }
+#endif
     void clearFlag() { m_Flags[1] &= ~3; }
     TIMEQ getTotalTqCrd() { return m_nMaxTq; }
     TIMEQ getCurrentTqCrd() { return m_Tq; }
@@ -212,76 +219,5 @@ public:
     CLegIK* getLegIK() const { return m_pLegIK; }
 };
 
-#else /* !ANIM_H_FULL_CLASS */
-#line 1 ANIM_H_PATH
-inline void _animCheckFlagIdx(UINT idx) {
-    if (!(2 > idx)) AssertApp(__FILE__, __LINE__, "2 > idx", 0);
-}
-
-// PARTIAL: added for Game/Gimmick/GimmickLotusLeaf
-typedef ULONG ANIMID;
-class CTask;
-class CRsrcANN;  // PARTIAL: added for Game/ModelObj
-union FVECTOR;   // PARTIAL: added for Game/Atel/Avatar
-struct MODELDATA; // PARTIAL: added for Game/ModelObj
-class CAnim {
-private:
-    UBYTE _m_0x00[0x14]; /* 0x000 m_pCrds .. 0x010 m_pMotData */
-    ANIMID m_noId;       /* 0x014 */
-    // PARTIAL: m_Flags added for Game/Gimmick/GimmickDeceiveEnemy
-    // PARTIAL: m_Tq split out for Game/Gimmick/GimmickOnceReaction
-    TIMEQ m_Tq;          /* 0x018 */
-    UBYTE _m_0x1c[0x8];  /* 0x01c .. 0x024 */
-    TIMEQ m_nMaxTq;      /* 0x024 */ // PARTIAL: split out for Game/Gimmick/GimmickCarry
-    FLOAT m_Speed;       /* 0x028 PARTIAL: split out for Form/Menu/MenuModel */
-    USHORT m_Flags[2];   /* 0x02c */
-    UBYTE _m_0x30[0xd8] __attribute__((aligned(16))); /* 0x030 .. 0x108 PARTIAL: added for Form/Menu/MenuModel (sizeof 0x110) */
-public:
-    /* 0x108 vtable */
-    // PARTIAL: added for Form/Menu/MenuModel
-    CAnim();
-    virtual ~CAnim();
-    void link(CTask* pTask, INT n);
-    void link(CTask* pTask, const CRsrcANN* pANN, MODELDATA* pData); // PARTIAL: added for Game/ModelObj
-    // PARTIAL: added for Game/ModelObj (name guessed: clears a bit of m_Flags[1] inline)
-    void clearFlag1(USHORT nBit) { m_Flags[1] &= ~nBit; }
-    void setFlag1(USHORT nBit) { m_Flags[1] |= nBit; } // PARTIAL: added for Game/Entity (name guessed)
-    void init(UINT nId, INT n);
-    void play(TIMEQ tq, INT n);
-    void changeEx(INT nRsrcID, ANIMID inId, TIMEQ inTq, BOOL inLoop);
-    // PARTIAL: added for Game/Entity
-    void start(ANIMID id, TIMEQ tq);
-    void getRootMove(FVECTOR& outTrs, FLOAT& outRotY);
-    BOOL startEx(INT inRsrcId, ANIMID id, TIMEQ tq);
-    BOOL startEx(const CHAR* rsrc_name, ANIMID id, TIMEQ tq);
-    BOOL changeEx(const CHAR* rsrc_name, ANIMID id, TIMEQ tq, TIMEQ gr);
-    void setSpeed(FLOAT s) { m_Speed = s; }
-    void endLookPosition(FLOAT fFrame); // PARTIAL: added for Game/Atel/Avatar
-    void setRootMove(BOOL inRootMove, BOOL bContinue); // PARTIAL: added for Game/Player/Player
-    // PARTIAL: added for Game/Entity
-    INT getMotCount();
-    const CHAR* getMotFilename(INT nIdx);
-    BOOL createLegIK(FLOAT fP0, FLOAT fP1);
-    BOOL createArmIK();
-    void updateIK(BOOL bBeforeCoordFix, BOOL bAfterCoordFix, FLOAT fr); // PARTIAL: added for Game/Entity
-    void setZeroHokan(BOOL b) { _m_0x1c[5] = b; } // PARTIAL: added for Game/Atel/Avatar (m_ZeroHokan at 0x021, name guessed)
-    void setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped); // PARTIAL: added for Game/Atel/Avatar
-    void setLookPosition(const FVECTOR& vLook, const FVECTOR& vMax, const FVECTOR& vMin, INT nBoneNum, FLOAT fRate, UINT iFlags); // PARTIAL: added for Game/Atel/Avatar
-    void updateLookPosition(const FVECTOR& vLook, FLOAT fRate, UINT iFlags); // PARTIAL: added for Game/Atel/Avatar
-    BOOL isMotionEnd() { return m_Flags[0] & 3; }
-
-    ULONG getFlag(UINT idx) const;
-    BOOL isLoop(INT n); // PARTIAL: added for Game/EffectMotion
-    ANIMID getAnimID() { return m_noId; }
-    TIMEQ getCurrentTqCrd() { return m_Tq; } // PARTIAL: added for Game/Gimmick/GimmickOnceReaction
-    TIMEQ getTotalTqCrd() { return m_nMaxTq; } // PARTIAL: added for Game/Gimmick/GimmickCarry
-    // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy (name guessed: tests m_Flags[1] bit 1 inline)
-    BOOL isMotionLooped() { return m_Flags[1] & 2; }
-    BOOL isFlag1Bit9() { return (m_Flags[1] >> 9) & 1; } // PARTIAL: added for Game/Player/Player (name unknown)
-    BOOL isRootMove() { return (m_Flags[1] >> 3) & 1; } // PARTIAL: added for Game/Entity
-    void change(ANIMID inId, TIMEQ inTq, BOOL inLoop); // PARTIAL: added for Game/Gimmick/GimmickDeceiveEnemy
-};
-
-#endif /* ANIM_H_FULL_CLASS */
 
 #endif /* SYSTEM_GRAPHIC_ANIM_H */

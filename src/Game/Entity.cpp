@@ -1,3 +1,5 @@
+#define ANIM_H_GETFLAG_DECL_ONLY /* MATCH: the original calls CAnim::getFlag out of line */
+#line 1
 #define GAME_ENTITY_CPP
 /* MATCH: __FILE__ of these headers as in the original .rodata */
 #define BODYCOLLISION_H_PATH "c:/KHCOM/MainApp/Game/BodyCollision.h"
@@ -756,14 +758,14 @@ void CEntity::changeMotionFileName(const CHAR* inName, TIMEQ inTq, BOOL inRootMo
 }
 void CEntity::changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
     if (m_pAnim) {
-        if (m_pAnim->isFlag1Bit9()) {
+        if (m_pAnim->isNowExAnim()) {
             if (m_pEffectEx) m_pEffectEx->stop();
             if (m_pSEEx) m_pSEEx->stop();
         }
         if (inGr < 0) m_pAnim->start(inIndex, inTq);
         else m_pAnim->change(inIndex, inTq, inGr);
         m_pAnim->setRootMove(inRootMove, FALSE);
-        m_pAnim->clearFlag1(3);
+        m_pAnim->clearFlag();
         if (m_pEffect && !(m_uiEntityFlag & 0x400)) m_pEffect->set(inIndex, inEffectNo, TRUE);
         if (m_pSE && !(m_uiEntityFlag & 0x4000)) ((CSEMotion*)m_pSE)->set(inIndex, inSENo, TRUE);
     }
@@ -779,14 +781,14 @@ void CEntity::changeMotionWithSameCheck(INT inIndex, TIMEQ inTq, BOOL inRootMove
 }
 void CEntity::changeMotionEx(INT inRsrcID, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo) {
     if (m_pAnim) {
-        if (!m_pAnim->isFlag1Bit9()) {
+        if (!m_pAnim->isNowExAnim()) {
             if (m_pEffect) m_pEffect->stop();
             if (m_pSE) m_pSE->stop();
         }
         if (inGr < 0) m_pAnim->startEx(inRsrcID, inIndex, inTq);
         else m_pAnim->changeEx(inRsrcID, inIndex, inTq, inGr);
         m_pAnim->setRootMove(inRootMove, FALSE);
-        m_pAnim->clearFlag1(3);
+        m_pAnim->clearFlag();
         if (m_pEffectEx) {
             m_pEffectEx->initalize(inRsrcID);
             if (m_pEffectEx && !(m_uiEntityFlag & 0x400)) m_pEffectEx->set(inIndex, inEffectNo, TRUE);
@@ -803,7 +805,7 @@ void CEntity::changeMotionEx(const CHAR* inRsrcName, INT inIndex, TIMEQ inTq, BO
         if (inGr < 0) m_pAnim->startEx(inRsrcName, inIndex, inTq);
         else m_pAnim->changeEx(inRsrcName, inIndex, inTq, inGr);
         m_pAnim->setRootMove(inRootMove, FALSE);
-        m_pAnim->clearFlag1(3);
+        m_pAnim->clearFlag();
         if (m_pEffectEx && !(m_uiEntityFlag & 0x400)) m_pEffectEx->set(inIndex, inEffectNo, TRUE);
     }
 }
@@ -834,8 +836,8 @@ BOOL CEntity::createArmIK() {
 }
 void CEntity::setGroundIK(INT inFlag) {
     if (m_pAnim) {
-        if (inFlag) m_pAnim->setFlag1(0x2000);
-        else m_pAnim->clearFlag1(0x2000);
+        m_pAnim->setGroundIK(inFlag);
+
     }
 }
 void CEntity::setFootEffectIK(const CHAR* pszEffName, INT inFlag) {
@@ -931,7 +933,7 @@ BOOL CEntity::initalizeModel(INT inGroup, BOOL bLight) {
     if (!m_pAnim) return FALSE;
     m_pAnim->link(this, CRsrcDB::getRsrcANN(inGroup), pModelTbl[0]);
     m_pAnim->init(0, 0);
-    m_pAnim->clearFlag1(0x100);
+    m_pAnim->setClipCheckFg(FALSE);
     INT kind = (m_EntityType == 1 || m_EntityType == 0x11) ? 1 : 2;
     if (m_pNLight) m_pNLight->setAnchor(&Crd(0), kind);
     if (m_pGLight) m_pGLight->setAnchor(&Crd(0), kind);

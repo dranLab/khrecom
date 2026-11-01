@@ -1045,7 +1045,7 @@ void CPlayer::setAnimRsrcEx(INT inRcid, INT inAnimID, TIMEQ inChangeTime, BOOL i
     setAnimSpeed(1.0f);
 }
 BOOL CPlayer::isNowIdleAnim() {
-    if (m_pAnim->isFlag1Bit9()) return FALSE;
+    if (m_pAnim->isNowExAnim()) return FALSE;
     switch (m_iNowAnimID) {
     case 1:
     case 8:
