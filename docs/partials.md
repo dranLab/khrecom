@@ -59,17 +59,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/System-Rcf-DebugMenu (last CRcf stand-in; earlier sessions' merges not logged here: see git log) | 934 | 99 | 21 | 950 (899) | 142 |
 | 2026-11-01 | cleanup/Game-Entity-eObjType (dummy eObjType removed, SETFLAG_DIRECT tagged) | 932 | 99 | 20 | 950 (897) | 144 |
 | 2026-11-01 | cleanup/System-Fsm (one CFSM: Entity.h includes Fsm.h) | 925 | 99 | 19 | 948 (895) | 145 |
+| 2026-11-01 | cleanup/Form-DebugWindow (FORM_DEBUGWINDOW_FULL tagged; PackMan stand-in blocked by the Task.h message) | 925 | 99 | 19 | 948 (890) | 150 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 925 (860 in 112 headers, 65 in 35 .cpp); MATCH: 145
+PARTIAL: 925 (860 in 112 headers, 65 in 35 .cpp); MATCH: 150
   by category: method 351, data member 66, type 85, fwd decl 53, #include 32, changed in place 127, padding 18, path override 23, gate 36, guessed 39, header-level 73, stand-in 16, other 6
 stand-ins: 99 foreign in 67 files (44 names), 201 unattributed, 167 own
 duplicate class names across headers: 19
 padding: 21 arrays, 9 accessors
-mechanisms: 948 sites (895 untagged); #line: 1242
+mechanisms: 948 sites (890 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 582, superset 128, partial 93, gated 87, missing 8, unattributed 309
 ```
@@ -365,12 +366,12 @@ or `untagged`.
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
 | full-class | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.cpp:2 |
 | full-class | `FORM_DEBUGMENU_FULL` | 1 | 0 | untagged, e.g. Form/DebugMenu.cpp:3 |
-| full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 1 | CNakCamera; the original has Gprim.h's strings (PathData.h includes it first) |
+| full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the owner sees the full classes (Gprim.h included first) |
 | full-class | `MAPENEMY_H_FULL_CLASS` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.cpp:1 |
 | full-class | `RSRCDATA_H_FULL` | 2 | 0 | untagged, e.g. System/RsrcDB.cpp:2 |
 | full-class site | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.h:16 |
 | full-class site | `FORM_DEBUGMENU_FULL` | 1 | 0 | untagged, e.g. Form/DebugMenu.h:35 |
-| full-class site | `FORM_DEBUGWINDOW_FULL` | 3 | 0 | untagged, e.g. Form/DebugWindow.h:42 |
+| full-class site | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings |
 | full-class site | `MAPENEMY_H_FULL_CLASS` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemy.h:18 |
 | full-class site | `RSRCDATA_H_FULL` | 1 | 0 | untagged, e.g. System/RsrcData.h:12 |
 | guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 0 | untagged, e.g. Game/Gimmick/CreateGimmick.cpp:1 |
