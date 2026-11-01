@@ -56,14 +56,15 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-10-30 | decomp/Game-Map (finished: 33 in C, 6 parked; ctor/_exclusiveSetup matched, init/disp drafts; A2 part 1: FOGDATA/ZONEDATA ungated, gate MATCH-tagged) | 1036 | 357 | 25 | 960 (924) | 108 |
 | 2026-10-30 | cleanup/Game-Map (A2 part 2: ZONEDATA/ALF_DATA stand-ins in RsrcData.cpp) | 1036 | 355 | 25 | 960 (924) | 108 |
 | 2026-10-30 | cleanup/System-VramMan (CVramMan stand-ins in 2 files) | 1036 | 353 | 25 | 960 (924) | 108 |
+| 2026-11-01 | cleanup/System-Rcf-DebugMenu (last CRcf stand-in; earlier sessions' merges not logged here: see git log) | 934 | 99 | 21 | 950 (899) | 142 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 935 (869 in 113 headers, 66 in 36 .cpp); MATCH: 142
-  by category: method 353, data member 66, type 85, fwd decl 53, #include 32, changed in place 127, padding 18, path override 24, gate 41, guessed 39, header-level 74, stand-in 17, other 6
-stand-ins: 102 foreign in 68 files (47 names), 201 unattributed, 168 own
+PARTIAL: 934 (869 in 113 headers, 65 in 35 .cpp); MATCH: 142
+  by category: method 353, data member 66, type 85, fwd decl 53, #include 32, changed in place 127, padding 18, path override 24, gate 41, guessed 39, header-level 74, stand-in 16, other 6
+stand-ins: 99 foreign in 67 files (44 names), 201 unattributed, 167 own
 duplicate class names across headers: 21
 padding: 21 arrays, 9 accessors
 mechanisms: 950 sites (899 untagged); #line: 1242
@@ -79,7 +80,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R0 | 2.0 | `System/Rcf.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CRcf, RcfKey, RcfMapInfo (3 complete) |  |
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 7.0 | `Game/Entity.h` | ready | 0 stand-in files, 1 dup headers, 4 gate users | eObjType (1 partial) |  (gate) |
 | R1 | 5.0 | `Form/DebugWindow.h` | ready | 1 stand-in files, 0 dup headers, 3 gate users | CDebugWindow (1 superset) | inline bodies or virtuals (gate) |
@@ -99,6 +99,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Game/Player/PlayerRiku.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerRiku (1 superset) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/PlayerSora.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPlayerSora (1 superset) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Player/Summon.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CSummon (1 partial) | inline bodies or virtuals |
+| R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 
 ## Classes with foreign copies
 
@@ -134,7 +135,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CPlayerSora` | superset | Game/Player/PlayerSora.h | 1 |  | virtual order differs |
 | `CPoly3Collision` | gated | Game/Collision/CollObj.h | 1 |  |  |
 | `CPolyGT4` | superset | System/Graphic/GprimFull.h | 1 |  | virtual order differs |
-| `CRcf` | complete | System/Rcf.h | 1 |  |  |
 | `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
 | `CRsrcDB` | partial | System/RsrcDB.h | 1 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene; 1 PARTIAL |
 | `CRsrcTex` | gated | System/RsrcData.h | 1 |  |  |
@@ -147,8 +147,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `G_RGBA` | superset | System/Graphic/Gprim.h | 1 |  | 2 PARTIAL |
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
 | `QWdata` | complete | System/Graphic/Gprim.h | 1 |  |  |
-| `RcfKey` | complete | System/Rcf.h | 1 |  |  |
-| `RcfMapInfo` | complete | System/Rcf.h | 1 |  |  |
 | `TexInfoStub` | gated | System/Graphic/modeldata.h | 1 |  | 1 PARTIAL |
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
 | `C3DCPrim` | partial | System/Graphic/3DCPrim.h | 0 | System/Graphic/GprimFull.h | missing methods: getObjPtr, makePkt_Line0, makePkt_Line1, makePkt_LineStrip0, makePkt_LineStrip1, makePkt_None, ... (+13); parameter count differs: create; virtual order differs |
