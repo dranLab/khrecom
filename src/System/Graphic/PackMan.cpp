@@ -1,4 +1,4 @@
-#define MODELDATA_H_TEXINFO /* PARTIAL: modeldata.h's VTransInfo (gated for System/Graphic/ModelMan) */
+#define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: __FILE__ as in the original .rodata */
 #define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h" /* MATCH: __FILE__ as in the original .rodata */
 #define MODEL_H_PATH "c:/KHCOM/MainApp/System/Graphic/Model.h" /* MATCH: __FILE__ as in the original .rodata */

@@ -2,7 +2,7 @@
 #define RSRCDATA_H_FULL
 #define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h"
 #define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h"
-#define MODELDATA_H_TEXINFO
+#define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */
 #define MODELDATA_H_TEXINFO_CTOR /* MATCH: RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) */
 #include <string.h>
 #include "System/Graphic/Gprim.h"

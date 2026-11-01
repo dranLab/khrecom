@@ -1,4 +1,4 @@
-#define MODELDATA_H_TEXINFO
+#define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
 #define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h"
 #define MODEL_H_PATH "c:/KHCOM/MainApp/System/Graphic/Model.h"
