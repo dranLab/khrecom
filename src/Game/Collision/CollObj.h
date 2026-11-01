@@ -88,7 +88,7 @@ public:
 };
 
 /* PARTIAL: the other collision classes, for Game/Collision/CollObj (some includers have local copies) */
-#ifdef COLLOBJ_H_COLLISION_CLASSES
+#ifdef COLLOBJ_H_COLLISION_CLASSES // MATCH: the inline collideMap needs CCollUtil (CollUtil.h): only units that construct these classes define it
 class CPointCollision : public CCollision {
 public:
     CPointCollision() { m_Type = COLL_TYPE_POINT; }
@@ -121,7 +121,7 @@ public:
     }
 };
 
-#ifdef COLLOBJ_H_COLLISION_CLASSES
+#ifdef COLLOBJ_H_COLLISION_CLASSES // MATCH: the inline collideMap needs CCollUtil (CollUtil.h): only units that construct these classes define it
 class CCircleCollision : public CCollision {
 public:
     CCircleCollision() {
