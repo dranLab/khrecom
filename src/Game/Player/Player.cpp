@@ -160,9 +160,10 @@ public: CPlayerDebug(CTask* inParent); virtual ~CPlayerDebug();
     virtual void main();
 };
 #include "Form/Menu/JMemoFlag.h"
-namespace Friend { class CFriend { public: void setExit(INT inFlag); }; } namespace Summon { class CSummon { public: void setExit(INT inFlag); }; }
+#include "Game/Player/Friend.h"
+#include "Game/Player/Summon.h"
 #include "Game/EffectMotion.h"
- namespace MG_SKILL { void killMGSkill(); } /* PARTIAL: the headers are not included here */
+#include "Game/MinigameManager.h"
 #include "System/Sound/SoundMan.h"
 #line 188
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
