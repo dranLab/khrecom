@@ -68,6 +68,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/System-Graphic-2d-2DSeq (C2DSeq/C2DSpr stand-ins in 2DLayObj) | 895 | 91 | 18 | 945 (879) | 158 |
 | 2026-11-01 | cleanup/Game-Player-Friend-Summon (CFriend/CSummon/MG_SKILL stand-ins in Player.cpp) | 894 | 89 | 18 | 945 (879) | 158 |
 | 2026-11-01 | cleanup/Game-Player-PlayerCamera (CPlayerCamera stand-in in BattleEnemy) | 894 | 88 | 18 | 945 (879) | 158 |
+| 2026-11-01 | cleanup/System-Graphic-ScreenMask (CFadeIOMask stand-in in MSVideo) | 894 | 87 | 18 | 945 (879) | 158 |
 
 <!-- partials:start -->
 ## Summary
@@ -75,7 +76,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 894 (831 in 112 headers, 63 in 34 .cpp); MATCH: 158
   by category: method 342, data member 64, type 85, fwd decl 53, #include 32, changed in place 123, padding 10, path override 23, gate 33, guessed 35, header-level 73, stand-in 15, other 6
-stand-ins: 88 foreign in 64 files (35 names), 201 unattributed, 167 own
+stand-ins: 87 foreign in 64 files (34 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
 padding: 16 arrays, 1 accessors
 mechanisms: 945 sites (879 untagged); #line: 1242
@@ -102,7 +103,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Graphic/GprimFull.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPolyGT4 (1 superset) | inline bodies or virtuals |
-| R1 | 2.0 | `System/Graphic/ScreenMask.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CFadeIOMask (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
@@ -111,6 +111,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R2 | 32.0 | `System/RsrcData.h` | ready | 15 stand-in files, 0 dup headers, 2 gate users | CRsrcANN, CRsrcAZF, CRsrcData, CRsrcTex, CRsrcVSV, ... (+2) (7 gated) | gated strings: RSRCDATA_H_FULL |
 | R2 | 17.5 | `Game/Collision/CollObj.h` | ready | 5 stand-in files, 0 dup headers, 6 gate users, 3 PARTIAL | CCircleCollision, CCollision, COLL_KIND, COLL_TYPE, CPointCollision, ... (+2) (4 gated, 1 partial, 2 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollAttack, CSJointT<CCollObj> not in Game/Collision/CollAttack |
 | R2 | 16.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 1 dup headers, 0 gate users, 18 PARTIAL | C3DLine, C3DLines, C3DPolyG4, C3DStripBase, C3DTile, ... (+12) (15 gated, 1 superset, 1 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
+| R2 | 7.5 | `System/Graphic/modeldata.h` | ready | 1 stand-in files, 0 dup headers, 5 gate users, 1 PARTIAL | TexInfoStub (1 gated) | gated strings: MODELDATA_H_TEXINFO |
 
 ## Classes with foreign copies
 
@@ -130,7 +131,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
 | `CDebugWindow` | superset | Form/DebugWindow.h | 1 |  | padding: _m_0x40; virtual order differs |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
-| `CFadeIOMask` | partial | System/Graphic/ScreenMask.h | 1 |  | missing methods: ~CFadeIOMask |
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CMemocaDataEntries` | superset | Form/Menu/SaveLoadUtil.h | 1 |  | extra methods: setNoSpace |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
@@ -322,7 +322,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
 | `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 8 |
 | `System/Graphic/PathDataCamera.h` | 1 | 0/1/0/0 | 3 |
-| `System/Graphic/ScreenMask.h` | 0 | 0/1/1/0 | 4 |
+| `System/Graphic/ScreenMask.h` | 0 | 0/1/1/0 | 5 |
 | `System/Graphic/ShadowModel.h` | 6 | 0/0/1/0 | 7 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
 | `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 36 |
