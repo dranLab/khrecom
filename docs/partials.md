@@ -65,6 +65,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/Game-Prize (CPrize stand-ins in 2 files) | 905 | 93 | 18 | 947 (889) | 150 |
 | 2026-11-01 | cleanup/Game-Enemy-MapEnemy (one CMapEnemy, MAPENEMY_H_FULL_CLASS dropped, NO_COLL_ANIM tagged) | 896 | 93 | 18 | 945 (884) | 153 |
 | 2026-11-01 | cleanup/System-LinkedBuf (placement-new guard tagged; partials.py: #define value comments) | 895 | 93 | 18 | 945 (879) | 158 |
+| 2026-11-01 | cleanup/System-Graphic-2d-2DSeq (C2DSeq/C2DSpr stand-ins in 2DLayObj) | 895 | 91 | 18 | 945 (879) | 158 |
 
 <!-- partials:start -->
 ## Summary
@@ -72,7 +73,7 @@ One row per merge into main (`partials.py --summary` before and after).
 ```
 PARTIAL: 895 (830 in 112 headers, 65 in 35 .cpp); MATCH: 158
   by category: method 341, data member 64, type 85, fwd decl 53, #include 32, changed in place 124, padding 10, path override 23, gate 33, guessed 35, header-level 73, stand-in 16, other 6
-stand-ins: 93 foreign in 65 files (40 names), 201 unattributed, 167 own
+stand-ins: 91 foreign in 65 files (38 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
 padding: 16 arrays, 1 accessors
 mechanisms: 945 sites (879 untagged); #line: 1242
@@ -94,7 +95,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `System/Graphic/3DCPrim.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users | C3DCPrim (1 partial) | inline bodies or virtuals |
 | R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
-| R1 | 2.5 | `System/Graphic/2d/2DSeq.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | C2DSeq (1 superset) | inline bodies or virtuals |
 | R1 | 2.5 | `System/RsrcDB.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CRsrcDB (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
@@ -108,6 +108,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
+| R2 | 59.0 | `System/Graphic/2d/2DMan.h` | ready | 28 stand-in files, 1 dup headers, 0 gate users | C2DMan (1 gated) | adds strings: System/Graphic/2d/2DFntObj (1), System/Graphic/2d/2DSeqCtrl (1); weak hint: CSJointListT<C2DBase> not in Form/Menu/Camp, ISLCManagerT<C2DO> not in Form/Menu/Camp |
 
 ## Classes with foreign copies
 
@@ -122,8 +123,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
-| `C2DSeq` | superset | System/Graphic/2d/2DSeq.h | 1 |  | virtual order differs; 1 PARTIAL |
-| `C2DSpr` | superset | System/Graphic/2d/2DSpr.h | 1 |  | virtual order differs |
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CCircleCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CCircleCollision |
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
@@ -285,10 +284,10 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/2d/2DLayObj.h` | 1 | 0/1/0/0 | 3 |
 | `System/Graphic/2d/2DMan.h` | 3 | 0/0/0/3 | 166 |
 | `System/Graphic/2d/2DObj.h` | 4 | 0/1/0/0 | 17 |
-| `System/Graphic/2d/2DSeq.h` | 1 | 1/1/0/0 | 4 |
+| `System/Graphic/2d/2DSeq.h` | 1 | 1/1/0/0 | 5 |
 | `System/Graphic/2d/2DSeqCtrl.h` | 2 | 1/1/0/0 | 33 |
 | `System/Graphic/2d/2DSeqObj.h` | 8 | 3/3/0/0 | 16 |
-| `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 8 |
+| `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 9 |
 | `System/Graphic/3DCPrim.h` | 1 | 0/0/1/0 | 1 |
 | `System/Graphic/Anim.h` | 31 | 0/0/0/2 | 149 |
 | `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 89 |
