@@ -52,6 +52,32 @@ LEX = re.compile(r"//[^\n]*|/\*.*?\*/|\"(?:\\.|[^\"\\\n])*\"|'(?:\\.|[^'\\\n])*'
 TOKEN = re.compile(r"\"(?:\\.|[^\"\\\n])*\"|'(?:\\.|[^'\\\n])*'|[A-Za-z_]\w*|\S")
 DIRECTIVE = re.compile(r"^\s*#\s*(\w+)\s*(.*?)\s*$")
 DEFINE = re.compile(r"^\s*#\s*define\s+(\w+)(?:\s+(.*?))?\s*$")
+
+
+def define_value(value):
+    """A #define's value without a trailing comment (outside string literals)."""
+    value = value or ""
+    out, i, q = [], 0, None
+    while i < len(value):
+        c = value[i]
+        if q:
+            out.append(c)
+            if c == "\\" and i + 1 < len(value):
+                out.append(value[i + 1])
+                i += 1
+            elif c == q:
+                q = None
+        elif c in "\"'":
+            q = c
+            out.append(c)
+        elif value.startswith("/*", i) or value.startswith("//", i):
+            break
+        else:
+            out.append(c)
+        i += 1
+    return "".join(out).strip()
+
+
 UNIT_IN_TEXT = re.compile(r"\bfor ((?:Form|Game|System)/[\w/]+)")
 PADDING = re.compile(r"^(_m_0x[0-9A-Fa-f]+|_pad\w*)$")
 PADDING_REF = re.compile(r"\b(_m_0x[0-9A-Fa-f]+|_pad\w*)\b")
@@ -415,7 +441,7 @@ class Source:
             for line in self.active.split("\n"):
                 m = DEFINE.match(line)
                 if m:
-                    self._defines.setdefault(m.group(1), m.group(2) or "")
+                    self._defines.setdefault(m.group(1), define_value(m.group(2)))
         return self._defines
 
     def template_ranges(self):
