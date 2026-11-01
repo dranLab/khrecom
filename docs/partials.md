@@ -64,17 +64,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/Game-Player-PlayerDRiku (CPlayerSora/Riku/DRiku stand-ins in 2 files) | 905 | 95 | 18 | 947 (889) | 150 |
 | 2026-11-01 | cleanup/Game-Prize (CPrize stand-ins in 2 files) | 905 | 93 | 18 | 947 (889) | 150 |
 | 2026-11-01 | cleanup/Game-Enemy-MapEnemy (one CMapEnemy, MAPENEMY_H_FULL_CLASS dropped, NO_COLL_ANIM tagged) | 896 | 93 | 18 | 945 (884) | 153 |
+| 2026-11-01 | cleanup/System-LinkedBuf (placement-new guard tagged; partials.py: #define value comments) | 895 | 93 | 18 | 945 (879) | 158 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 896 (831 in 112 headers, 65 in 35 .cpp); MATCH: 153
-  by category: method 341, data member 64, type 85, fwd decl 53, #include 32, changed in place 124, padding 10, path override 23, gate 34, guessed 35, header-level 73, stand-in 16, other 6
+PARTIAL: 895 (830 in 112 headers, 65 in 35 .cpp); MATCH: 158
+  by category: method 341, data member 64, type 85, fwd decl 53, #include 32, changed in place 124, padding 10, path override 23, gate 33, guessed 35, header-level 73, stand-in 16, other 6
 stand-ins: 93 foreign in 65 files (40 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
 padding: 16 arrays, 1 accessors
-mechanisms: 945 sites (884 untagged); #line: 1242
+mechanisms: 945 sites (879 untagged); #line: 1242
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 582, superset 128, partial 94, gated 86, missing 8, unattributed 309
 ```
@@ -330,7 +331,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/TexInfo.h` | 1 | 1/0/1/0 | 234 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
 | `System/Graphic/modeldata.h` | 13 | 1/2/0/1 | 82 |
-| `System/LinkedBuf.h` | 6 | 1/2/1/0 | 7 |
+| `System/LinkedBuf.h` | 5 | 1/2/1/0 | 7 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 59 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 6 |
@@ -353,14 +354,14 @@ or `untagged`.
 | feature | `COLLOBJ_H_COLLISION_CLASSES` | 5 | 3 | CCollUtil() constructs a CSphereCollision (CollObj.h gates the collision classes) |
 | feature | `COLLOBJ_H_INFO_AS_INT` | 1 | 0 | untagged, e.g. System/Graphic/TriangleIK.cpp:6 |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
-| feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 0 | untagged, e.g. Game/Atel/Atel.cpp:31 |
+| feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 3 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature | `MODELDATA_H_TEXINFO` | 5 | 0 | untagged, e.g. System/Graphic/DispList.cpp:1 |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 1 | reqTransTex declares a TexInfo local (constructor memsets it) |
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 0 | untagged, e.g. Game/Collision/CollObj.h:91 |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar) |
-| feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 0 | untagged, e.g. System/LinkedBuf.h:10 |
+| feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 2 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 0 | untagged, e.g. System/Graphic/modeldata.h:79 |
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
 | full-class | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.cpp:2 |
