@@ -72,19 +72,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-01 | cleanup/Form-DebugMenu-gates (FORM_DEBUGMENU_FULL, MODELDATA_H_TEXINFO_CTOR tagged) | 894 | 87 | 18 | 945 (876) | 161 |
 | 2026-11-01 | cleanup/System-Graphic-ScreenMask (CFadeIOMask stand-in in MSVideo) | 894 | 87 | 18 | 945 (879) | 158 |
 | 2026-11-02 | cleanup/System-Graphic-modeldata (TexInfoStub stand-in in TexAnm; MODELDATA_H_TEXINFO tagged) | 891 | 84 | 18 | 948 (861) | 176 |
+| 2026-11-02 | cleanup/System-Graphic-Anim (one CAnim; ANIM_H_FULL_CLASS dropped; ANIM_H_GETFLAG_DECL_ONLY for 4 units) | 860 | 84 | 18 | 952 (859) | 183 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 891 (830 in 112 headers, 61 in 34 .cpp); MATCH: 176
-  by category: method 342, data member 64, type 85, fwd decl 53, #include 32, changed in place 123, padding 10, path override 23, gate 30, guessed 35, header-level 73, stand-in 15, other 6
+PARTIAL: 860 (799 in 111 headers, 61 in 34 .cpp); MATCH: 183
+  by category: method 327, data member 63, type 84, fwd decl 50, #include 32, changed in place 120, padding 8, path override 22, gate 30, guessed 31, header-level 72, stand-in 15, other 6
 stand-ins: 84 foreign in 61 files (33 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
-padding: 16 arrays, 1 accessors
-mechanisms: 948 sites (861 untagged); #line: 1242
+padding: 14 arrays, 0 accessors
+mechanisms: 952 sites (859 untagged); #line: 1245
 opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 582, superset 128, partial 94, gated 86, missing 8, unattributed 309
+classes: complete 584, superset 128, partial 94, gated 84, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -114,7 +115,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R2 | 32.0 | `System/RsrcData.h` | ready | 15 stand-in files, 0 dup headers, 2 gate users | CRsrcANN, CRsrcAZF, CRsrcData, CRsrcTex, CRsrcVSV, ... (+2) (7 gated) | gated strings: RSRCDATA_H_FULL |
 | R2 | 16.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 1 dup headers, 0 gate users, 18 PARTIAL | C3DLine, C3DLines, C3DPolyG4, C3DStripBase, C3DTile, ... (+12) (15 gated, 1 superset, 1 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
 | R2 | 15.5 | `Game/Collision/CollObj.h` | ready | 3 stand-in files, 0 dup headers, 8 gate users, 3 PARTIAL | CCircleCollision, CCollision, COLL_KIND, COLL_TYPE, CPointCollision, ... (+2) (4 gated, 1 partial, 2 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollAttack, CSJointT<CCollObj> not in Game/Collision/CollAttack |
-| R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
+| R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 
 ## Classes with foreign copies
 
@@ -290,7 +291,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/2d/2DSeqObj.h` | 8 | 3/3/0/0 | 16 |
 | `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 9 |
 | `System/Graphic/3DCPrim.h` | 1 | 0/0/1/0 | 1 |
-| `System/Graphic/Anim.h` | 31 | 0/0/0/2 | 149 |
 | `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 89 |
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
 | `System/Graphic/DeFocus.h` | 1 | 2/0/3/0 | 6 |
@@ -350,6 +350,7 @@ or `untagged`.
 
 | kind | key | sites | tagged | reason, or an untagged site |
 |---|---|---:|---:|---|
+| feature | `ANIM_H_GETFLAG_DECL_ONLY` | 4 | 4 | the original calls CAnim::getFlag out of line |
 | feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:3 |
 | feature | `COLLOBJ_H_COLLISION_CLASSES` | 7 | 7 | constructs CPointCollision/CSphereCollision |
 | feature | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | getDetectInfo as INT (see CollObj.h) |
@@ -357,6 +358,7 @@ or `untagged`.
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 3 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature | `MODELDATA_H_TEXINFO` | 6 | 6 | TexInfoStub (the original has its assert strings) |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 2 | RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) |
+| feature site | `ANIM_H_GETFLAG_DECL_ONLY` | 2 | 2 | these units' originals call CAnim::getFlag out of line (Entity, EffectMotion, SEMotion, GimmickLotusLeaf) |
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 2 | the inline collideMap needs CCollUtil (CollUtil.h): only units that construct these classes define it |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
@@ -364,11 +366,9 @@ or `untagged`.
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 2 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 1 | only includers whose original .rodata has TexInfoStub's assert strings |
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
-| full-class | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.cpp:2 |
 | full-class | `FORM_DEBUGMENU_FULL` | 1 | 1 | the owner sees the full classes |
 | full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the owner sees the full classes (Gprim.h included first) |
 | full-class | `RSRCDATA_H_FULL` | 2 | 0 | untagged, e.g. System/RsrcDB.cpp:2 |
-| full-class site | `ANIM_H_FULL_CLASS` | 1 | 0 | untagged, e.g. System/Graphic/Anim.h:16 |
 | full-class site | `FORM_DEBUGMENU_FULL` | 1 | 1 | the full classes need Gprim.h/PadHandler.h; System/Debug and System/RootTask originals lack Gprim.h's strings |
 | full-class site | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings |
 | full-class site | `RSRCDATA_H_FULL` | 1 | 0 | untagged, e.g. System/RsrcData.h:12 |
@@ -426,7 +426,7 @@ or `untagged`.
 | placeholder | `_emptyStringPlaceholderCardRevolver*` | 1 | 1 | placeholder: an empty string follows CollUtil.h's strings in .rodata; which header it comes from is not known |
 | placeholder | `_emptyStringPlaceholderDebugPathData*` | 1 | 1 | placeholder: an empty string follows CardBattle.h's strings in .rodata; which header it comes from is not known |
 | placeholder | `_emptyStringPlaceholderPlayerGauge*` | 1 | 1 | placeholder: an empty string follows CollUtil.h's strings in .rodata (as in PlayerManager and CardRevolver) |
-| placeholder | `_emptyTrace*` | 1 | 0 | untagged, e.g. Game/EffectMotion.cpp:29 |
+| placeholder | `_emptyTrace*` | 1 | 0 | untagged, e.g. Game/EffectMotion.cpp:31 |
 | placeholder | `_enemyAirpirateEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAirpirate.cpp:13 |
 | placeholder | `_enemyAirsoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAirsoldier.cpp:13 |
 | placeholder | `_enemyAquatankEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAquatank.cpp:13 |
@@ -457,7 +457,7 @@ or `untagged`.
 | placeholder | `_enemyWizardEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyWizard.cpp:13 |
 | placeholder | `_enemyWyvernEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyWyvern.cpp:13 |
 | placeholder | `_enemyYellowoperaEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyYellowopera.cpp:13 |
-| placeholder | `_entityEmptyStringPlaceholder*` | 1 | 0 | untagged, e.g. Game/Entity.cpp:20 |
+| placeholder | `_entityEmptyStringPlaceholder*` | 1 | 0 | untagged, e.g. Game/Entity.cpp:22 |
 | placeholder | `_gameTaskSLCOverflow*` | 1 | 0 | untagged, e.g. Game/Game.cpp:15 |
 | placeholder | `_heartlessEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/Heartless.cpp:13 |
 | placeholder | `_humanBossEmptyString*` | 1 | 1 | placeholder - .rodata has an empty string literal after Str.h's strings (from an unidentified header). |
@@ -502,7 +502,7 @@ or `untagged`.
 | unit gate | `GAME_ATEL_VSME_CPP` | 1 | 1 | CVSM's flag accessors are only inline in this unit (Game/Atel/VSME.h) |
 | unit gate | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.cpp:1 |
 | unit gate | `GAME_ENEMY_BATTLEENEMY_CPP` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:1 |
-| unit gate | `GAME_ENTITY_CPP` | 1 | 0 | untagged, e.g. Game/Entity.cpp:1 |
+| unit gate | `GAME_ENTITY_CPP` | 1 | 0 | untagged, e.g. Game/Entity.cpp:3 |
 | unit gate | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.cpp:1 |
 | unit gate | `GAME_MAP_CPP` | 1 | 0 | untagged, e.g. Game/Map.cpp:1 |
 | unit gate | `GAME_PLAYER_PLAYERCAMERA_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerCamera.cpp:1 |
