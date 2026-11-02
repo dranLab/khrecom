@@ -98,6 +98,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/System-Graphic-Effect-effect-2 (finished: Setup 4/133, _updateSE 2/94, strcpyEffName 8/24 parked; A2: EFFECT_CPP gate kept, MATCH) | 810 | 27 | 0 | 750 (656) | 191 |
 | 2026-11-02 | decomp/Game-Atel-Atel-2 (finished: setScreenFader 37/206 parked; A2: features already MATCH) | 810 | 27 | 0 | 750 (656) | 191 |
 | 2026-11-02 | decomp/Form-DebugWindowTBL-2 (finished: debugWCMPFull matched; debugWinSeTestLineCall 2/51, _makeDispName 25/45 parked) | 810 | 27 | 0 | 750 (656) | 191 |
+| 2026-11-02 | decomp/System-Movie-AudioDec (finished: constructor 6/120 parked) | 810 | 27 | 0 | 750 (656) | 191 |
 
 <!-- partials:start -->
 ## Summary
