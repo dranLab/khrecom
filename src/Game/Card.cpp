@@ -411,7 +411,7 @@ void CCard::initCardWorld() {
 #else
 /* placeholder for initCardWorld's .rodata strings */
 __asm__(".rdata\n"); /* the preceding INCLUDE_ASM left .text; gcc assumes .rdata for these strings */
-inline void _initCardWorldStrings() {
+inline void _initCardWorldStrings() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_SENSITIVE);
 #line 118
     if (!CCard::m_pCardInitRsrc) AssertApp(__FILE__, __LINE__, "m_pCardInitRsrc", 0);
@@ -500,7 +500,7 @@ void CCard::initCard(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFloorN
 #else
 /* placeholder for initCard's static (.data) and its strings (emitted first from an inline, in .rodata) */
 __asm__(".rdata\n"); /* the preceding INCLUDE_ASM left .text; gcc assumes .rdata for these strings */
-inline void _initCardStrings() {
+inline void _initCardStrings() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("Deck 1");
     TRACE("Deck 2");
     TRACE("Deck 3");
@@ -1167,7 +1167,7 @@ BOOL CCard::addCard(USHORT inID, SHORT inNumber) {
 #else
 /* placeholder for addCard's .rodata string */
 __asm__(".rdata\n"); /* the preceding INCLUDE_ASM left .text; gcc assumes .rdata for these strings */
-inline void _addCardStrings() { AssertApp(__FILE__, 0, "0", 0); }
+inline void _addCardStrings() { AssertApp(__FILE__, 0, "0", 0); } /* MATCH: placeholder for the INCLUDE_ASM'd addCard's string */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Card", addCard__5CCardUss);
 __asm__(
     ".rdata\n"

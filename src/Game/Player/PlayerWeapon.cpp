@@ -15,7 +15,7 @@ inline void _emptyStringPlaceholder0() {
 
 #include "Game/Player/PlayerWeapon.h"
 
-inline void _emptyStringPlaceholder2() {
+inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("");
 }
 

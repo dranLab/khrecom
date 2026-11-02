@@ -2183,7 +2183,7 @@ void CJiminyMemo::setContentMode(INT inContentMode) {
 }
 /* placeholder: rodata of the items before createSequence__11CJiminyMemoPCiiiiP15CMemo2DSequence */
 __asm__(".rdata\n");
-inline void _roPh13() {
+inline void _roPh13() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE(__FILE__ "(3948)");
     TRACE(__FILE__ "(4012)");
     TRACE(__FILE__ "(4022)");
@@ -3139,7 +3139,7 @@ void CJiminyMemo::contentMenu() {
 #else
 /* placeholder: rodata of contentMenu__11CJiminyMemo */
 __asm__(".rdata\n");
-inline void _roPh25() {
+inline void _roPh25() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE(__FILE__ "(5252)");
     TRACE(__FILE__ "(5258)");
     TRACE(__FILE__ "(5350)");
@@ -4256,7 +4256,7 @@ void CJiminyMemo::contentCollection() {
 #else
 /* placeholder: rodata of contentCollection__11CJiminyMemo */
 __asm__(".rdata\n");
-inline void _roPh28() {
+inline void _roPh28() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE(__FILE__ "(6227)");
     TRACE(__FILE__ "(6234)");
     TRACE(__FILE__ "(6280)");
@@ -6182,7 +6182,7 @@ INT CJiminyMemo::contentCharaView_ModelView() {
 #else
 /* placeholder: rodata of contentCharaView_ModelView__11CJiminyMemo */
 __asm__(".rdata\n");
-inline void _roPh35() {
+inline void _roPh35() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE(__FILE__ "(9474)");
 }
 __asm__(".rdata\n.align 4\n.word .L0033464C\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L0033480C\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n");
@@ -6392,7 +6392,7 @@ void CJiminyMemo::contentMinigame() {
 #else
 /* placeholder: rodata of contentMinigame__11CJiminyMemo */
 __asm__(".rdata\n");
-inline void _roPh36() {
+inline void _roPh36() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE(__FILE__ "(9647)");
     TRACE(__FILE__ "(9654)");
     TRACE("%d%s");

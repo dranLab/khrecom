@@ -20,7 +20,7 @@
 #include "Game/Collision/CollUtil.h"
 /* PARTIAL: an empty string between the CollUtil.h and CollDisp.h strings (owner unknown; the effect setters' strcmp
  * reuses it) */
-inline void _entityEmptyStringPlaceholder() { TRACE(""); }
+inline void _entityEmptyStringPlaceholder() { TRACE(""); } /* MATCH: placeholder (see above) */
 #include "Game/Collision/CollDisp.h"
 #include "System/Coord.h"
 #include "System/Graphic/Effect/effect.h"

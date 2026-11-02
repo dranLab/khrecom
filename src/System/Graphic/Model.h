@@ -506,16 +506,16 @@ public:
 inline void _modelCheckData(void* inData) {
     if (!(inData != __null)) AssertApp(__FILE__, __LINE__, "m_pData != __null", 0);
 }
-inline void* _modelCreate() {
+inline void* _modelCreate() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     return com_malloc_d(4, __FILE__ "(569)", (UINT)-1);
 }
-inline void _modelAssertZero() {
+inline void _modelAssertZero() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     AssertApp(__FILE__, __LINE__, "0", 0);
 }
-inline void _mcShaderCreate() {
+inline void _mcShaderCreate() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("create CMCShader\n");
 }
-inline void _mcShaderDelete() {
+inline void _mcShaderDelete() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("delete CMCShader\n");
 }
 
