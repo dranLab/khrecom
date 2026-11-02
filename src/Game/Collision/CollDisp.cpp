@@ -1,5 +1,5 @@
 
-#define COLLDISP_CPP
+
 #define COLLDISP_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollDisp.h"
 
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
@@ -474,7 +474,7 @@ CCollDispMapZone::CCollDispMapZone(CTask* inParentObj, MCD_INFO* inInfo) : CTask
     m_pPoly = NULL;
     m_pInfo = inInfo;
     m_iChipNum = 0;
-    m_fgQuit = 0;
+    m_uiQuitReq = 0;
     if (inInfo && (m_iChipNum = inInfo->iChipSuu) > 0) {
         addCoord(m_iChipNum + 1);
         _unitMatrix(Crd(0).m_Local);
@@ -497,7 +497,7 @@ CCollDispMapZone::~CCollDispMapZone() {
 }
 
 void CCollDispMapZone::QuitReq() {
-    if (!m_fgQuit) m_fgQuit = 1;
+    if (!m_uiQuitReq) m_uiQuitReq = 1;
 }
 
 void CCollDispMapZone::_makeModelPrim() {
@@ -598,12 +598,12 @@ void CCollDispMapZone::changeLineColor(UINT inRGBA) {
 }
 
 void CCollDispMapZone::main() {
-    if (m_fgQuit >= 2) out();
+    if (m_uiQuitReq >= 2) out();
 }
 
 void CCollDispMapZone::disp() {
-    if (m_fgQuit) {
-        m_fgQuit++;
+    if (m_uiQuitReq) {
+        m_uiQuitReq++;
         return;
     }
     if (!m_pLine) return;
