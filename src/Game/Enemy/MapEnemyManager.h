@@ -19,7 +19,7 @@ struct MAP_ENEMY_PARAM {
 };
 
 class CMapEnemyManager : public CTask {
-    friend class CMapEnemy; // PARTIAL: added for Game/Enemy/MapEnemy (reads the distances directly)
+    friend class CMapEnemy; // MATCH: Game/Enemy/MapEnemy reads the distances inline (the getters are out of line; friends are not in the debug info)
 private:
     INT m_iStep;                        /* 0x40 */
     INT m_iEnemyAppearNum;              /* 0x44 */
