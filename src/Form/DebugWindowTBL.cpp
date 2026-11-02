@@ -63,12 +63,12 @@ static inline void _unitVectorVu0(FVECTOR& v) {
     asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
 }
 
-/* Other units' classes, as far as this file uses them (their headers don't exist yet). */
-class CShadowModelMan {
-public:
-    static FLOAT m_fCDensity;
-    static FLOAT m_fADensity;
-};
+/* Other units' classes, as far as this file uses them. */
+#include "System/Graphic/ShadowModel.h"
+
+
+
+
 
 
 
@@ -724,16 +724,16 @@ static DEBUG_WINDOW_LINE debugWinFocusTestLine[31] = {
 DEBUG_WINDOW_TBL debugWinFocusTest = {"\x83t\x83H\x81[\x83J\x83X\x83" "e\x83X\x83g", -208, -168, 12, 24, 12, 0, 0, debugWinFocusTestLine, NULL, debugWinFocusTestAllCall};
 
 static void __initDebugWorkShadow(INT i) {
-    DebugWork::g_dw.shadow.p.fDensityColor = CShadowModelMan::m_fCDensity;
-    DebugWork::g_dw.shadow.p.fDensityAlpha = CShadowModelMan::m_fADensity;
+    DebugWork::g_dw.shadow.p.fDensityColor = CShadowModelMan::getColorDensity();
+    DebugWork::g_dw.shadow.p.fDensityAlpha = CShadowModelMan::getAlphaDensity();
     DebugWork::g_dw.shadow.b = DebugWork::g_dw.shadow.p;
 }
 
 static void __setDebugWorkShadow(INT i) {
     DEBUG_SHADOW_TEST1* p = i == 0 ? &DebugWork::g_dw.shadow.b : &DebugWork::g_dw.shadow.p;
     FLOAT* pf = &p->fDensityColor;
-    CShadowModelMan::m_fCDensity = pf[0];
-    CShadowModelMan::m_fADensity = pf[1];
+    CShadowModelMan::setColorDensity(pf[0]);
+    CShadowModelMan::setAlphaDensity(pf[1]);
 }
 
 static BOOL debugWinDebugWorkShadowLineAddSubCall(CDebugWindow* pObj, INT inY, INT inParam) {

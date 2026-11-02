@@ -52,13 +52,13 @@ extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 
 
 
-class CShadowModelMan { /* System/Graphic/ShadowModelMan.h */
-public:
-    static INT m_iStatus;
-    static void initialize();
-    static void finalize();
-    static void updateMatrix();
-};
+#include "System/Graphic/ShadowModel.h"
+
+
+
+
+
+
 
 class CDispListSemiSingle : public CDispListSemiBase {
 public:
@@ -417,7 +417,7 @@ void CModelMan::drawDispList() {
     if (CPackMan::getEnableDraw() & 2) {
         CDispListBase* pList;
         if ((pList = s_pDispListTbl[1])) pList->draw(-1, -1);
-        if (!((CShadowModelMan::m_iStatus >> 2) & 1)) {
+        if (CShadowModelMan::isDraw()) {
             CDispListBase* pListSdw = s_pDispListTbl[8];
             if (pListSdw && pListSdw->getEntryCount()) {
                 CDispListBase* pListSmp = s_pDispListTbl[7];
