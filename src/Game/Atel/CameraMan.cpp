@@ -1,7 +1,7 @@
 
-#define CAMERAMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/CameraMan.h"
-#define GPRIM_H_PATH "System/Graphic/Gprim.h"
-#define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h"
+#define CAMERAMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/CameraMan.h" /* MATCH: this unit names its header Game/Atel (others: Game/ATEL) */
+
+#define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h" /* MATCH: this unit includes it by the relative path */
 #include <string.h>
 inline void* operator new(size_t, void* p) throw() { return p; }
 
