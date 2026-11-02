@@ -258,7 +258,7 @@ private:
 };
 
 class CImageWnd : public CBaseWnd {
-    friend struct CImageWndPH;
+
 private:
     FVECTOR m_initPos;       /* 0xa0 */
     FVECTOR m_targetPos;     /* 0xb0 */

@@ -1145,13 +1145,13 @@ void CImageWnd::createWindow(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI
     init(pos0, size0, pos1, size1, pTexName, fRate, color0, color1, fgFlip);
 }
 
-__asm__(".section .sdata\n");
-struct CImageWndPH : CImageWnd { CImageWndPH();
-    void init_c(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1, const CHAR* pTexName, FLOAT fRate,
-                G_RGBA color0, G_RGBA color1, INT fgFlip) __attribute__((section(".sdata")));
-};
+/* Parked: 16 of 239 lines, 4 bytes short - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other
+ * registers and the T0..T3 stores another order, and the second `if (!pTexInfo) return;` fills its delay slot from
+ * the fallthrough (lui 0x8000) where the original takes the epilogue's lq. Tried: declaration orders (ref's w, h, w2,
+ * h2), one pTexInfo for both getTPage calls, pos0.m_x in a local, hill.py (2026-10-19), permuter 10 min (21 -> 21). */
+#if 0
 #line 1900
-void CImageWndPH::init_c(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1, const CHAR* pTexName, FLOAT fRate,
+void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1, const CHAR* pTexName, FLOAT fRate,
                      G_RGBA color0, G_RGBA color1, INT fgFlip) {
     if (!m_pPolyGT4) {
 #line 2015
@@ -1222,7 +1222,13 @@ void CImageWndPH::init_c(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& si
     m_fCurrentRate = 0.0f;
     m_fRate = 1.0f / fRate;
 }
+#else
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) void _CImageWnd_init_strings(INT n) {
+    TRACE(__FILE__ "(2015)");
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Wnd", init__9CImageWndRt7CPointT1ZiRt6CSizeT1ZiT1T2PCcfG6G_RGBAT7i);
+#endif
 #line 2082
 void CImageWnd::mainImpl() {
     if (!m_pPolyGT4) return;
