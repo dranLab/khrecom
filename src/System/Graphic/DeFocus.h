@@ -1,4 +1,4 @@
-// PARTIAL: the ref's implicit destructors are not declared; CZFill is also in System/Graphic/GprimFull.h
+// PARTIAL: the ref's implicit destructors are not declared
 #ifndef SYSTEM_GRAPHIC_DEFOCUS_H
 #define SYSTEM_GRAPHIC_DEFOCUS_H
 
@@ -6,14 +6,14 @@
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
 
-class CZFill : public CGPrim { /* System/Graphic/Gprim.h */
-public:
-    INT m_nZ;
-    CZFill() { m_nZ = 0; }
-    virtual UINT getPacketSize() const;
-private:
-    virtual void makePkt();
-};
+
+
+
+
+
+
+
+
 
 class CDeFocusPrim : public CGPrim {
 private:

@@ -572,7 +572,7 @@ void CModelMan::incModelCount() { s_iModelCount++; }
 
 void CModelMan::decModelCount() { s_iModelCount--; }
 
-void CModelMan::changePrimMode(BOOL bOnlyPrim) { CGTexPrim::m_nTmpTexArea = !bOnlyPrim; }
+void CModelMan::changePrimMode(BOOL bOnlyPrim) { CGTexPrim::setTmpTexAreaForAllPrims(!bOnlyPrim); }
 
 G_LAYER CModelMan::getLayerInfo() { return s_sLayerInfo; }
 

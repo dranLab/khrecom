@@ -1,4 +1,4 @@
-#define SYSTEM_GRAPHIC_GPRIM_CPP
+
 #pragma implementation "GprimFull.h"
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
 

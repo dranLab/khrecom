@@ -1,7 +1,7 @@
-/* The full classes of System/Graphic/Gprim (included by Gprim.h for Gprim.cpp only). Gprim.cpp has the matching
+/* The classes of System/Graphic/Gprim (included by Gprim.h). Gprim.cpp has the matching
  * #pragma implementation: every class here gets its vtable and all its inline functions emitted there, as in the
  * original object (in class definition order). */
-#pragma interface
+#pragma interface /* MATCH: the inline functions and vtables only in Gprim.o, as in the originals */
 /* create()'s "#line N GPRIM_H_PATH" (the original's assert path and line) is followed by a #line back to this file:
  * gcc applies the interface/implementation pragmas by file name, so the classes after it would otherwise lose them. */
 class CGPrim : public CDrawable {
@@ -83,7 +83,7 @@ protected:
     static USHORT m_nCacheIdxOld;
 
 public:
-    virtual ~CGTexPrim2D() {}
+    /* MATCH: implicit destructor, as ~CPolyGT4ST's (2DSprObj's destructor inlines them for its CPolyGT4ST members) */
     CGTexPrim2D() { m_pTexInfo = NULL; }
     void setTPage(const TexInfo* pInInfo) { m_pTexInfo = (TexInfo*)pInInfo; }
     void setTPage(const CHAR* pTexName);
@@ -222,7 +222,7 @@ public:
     G_ST m_T2;
     G_ST m_T3;
 
-    virtual ~CPolyGT4ST() {}
+    /* MATCH: implicit destructor (see ~CGTexPrim2D) */
     virtual UINT getPacketSize() const { return CGTexPrim2D::getPacketSize() + 12; }
 private:
     virtual void makePkt();

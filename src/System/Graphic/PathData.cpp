@@ -770,7 +770,7 @@ void CDbgCube::init(CCoord* pCrd) {
     };
     static unsigned int col[6] = {0x80ff0000, 0x80000040, 0x80400000, 0x800000ff, 0x80004000, 0x8000ff00};
     G_STRIP Line;
-    m_gpPolyStrip.setIIP(FALSE);
+    m_gpPolyStrip.setShading(FALSE);
     m_gpPolyStrip.setBackClip(TRUE);
     for (INT i = 0; i < 6; i++) {
         Line.C.col = col[i];
@@ -827,7 +827,7 @@ void CDbgArrow::init(CCoord* pCrd) {
     static unsigned int col[10] = {0x80000000, 0x80000000, 0x80808080, 0x80404040, 0x80404040,
                                    0x80808080, 0x80101010, 0x80404040, 0x80404040, 0x80f0f0f0};
     G_STRIP Line;
-    m_gpPolyStrip.setIIP(FALSE);
+    m_gpPolyStrip.setShading(FALSE);
     m_gpPolyStrip.setBackClip(TRUE);
     Line.Term = 0;
     for (INT i = 0; i < 10; i++) {

@@ -7,7 +7,7 @@
 #include "Game/Collision/CollUtilA.h"
 #include "Game/Collision/CollUtil.h"
 #include "System/Task.h"
-#include "System/Graphic/3DCPrim.h"
+
 #include "Game/Collision/CollObj.h"
 #include "Game/Collision/Ride.h"
 
@@ -107,7 +107,7 @@ void CCollDisp::init() {
 #line 121
     m_pLines = new (__FILE__ "(121)") C3DCPrim[40];
     for (i = 0; i < 40; i++) {
-        m_pLines[i].create(2, 76, &Crd(i), NULL, 0);
+        m_pLines[i].create(2, 76, &Crd(i), 0);
         m_pLines[i].m_fGeta = 0.0f;
         m_pLines[i].setSemiTrans(ALPHA_OFF);
         m_pLines[i].setLayer(6, 0);
@@ -497,7 +497,7 @@ void CCollDispMapZone::_makeModelPrim() {
         nPoly4Sum += nPrim4;
         nPoly3Sum += nPrim3;
         if (nLineNum <= 0 || nPolyNum <= 0) continue;
-        m_pLine[i].create(0x82, nLineNum, &Crd(i + 1), NULL, 0);
+        m_pLine[i].create(0x82, nLineNum, &Crd(i + 1), 0);
         m_pLine[i].m_fGeta = 0.1f;
         m_pLine[i].setSemiTrans(ALPHA_OFF);
         m_pLine[i].setLayer(6, 0);
@@ -627,7 +627,7 @@ void CCollRideModelDisp::_makeModelPrim() {
         INT nLineNum = nPrim3 * 4 + nPrim4 * 5;
         INT nPolyNum = nPrim3 * 3 + nPrim4 * 4;
         if (nLineNum <= 0 || nPolyNum <= 0) continue;
-        m_pLine[i].create(0x82, nLineNum, &Crd(1), NULL, 0);
+        m_pLine[i].create(0x82, nLineNum, &Crd(1), 0);
         m_pLine[i].m_fGeta = 0.1f;
         m_pLine[i].setSemiTrans(ALPHA_OFF);
         m_pLine[i].setLayer(6, 0);

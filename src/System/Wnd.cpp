@@ -43,33 +43,33 @@ inline void* operator new(size_t size, char* msg) throw() {
 
 
 
-class CPolyGT4 : public CGTexPrim {
-public:
-    G_XYZ m_P0;  /* 0x20 */
-    G_XYZ m_P1;  /* 0x2c */
-    G_XYZ m_P2;  /* 0x38 */
-    G_XYZ m_P3;  /* 0x44 */
-    G_RGBA m_C0; /* 0x50 */
-    G_RGBA m_C1; /* 0x54 */
-    G_RGBA m_C2; /* 0x58 */
-    G_RGBA m_C3; /* 0x5c */
-    G_UV m_T0;   /* 0x60 */
-    G_UV m_T1;   /* 0x64 */
-    G_UV m_T2;   /* 0x68 */
-    G_UV m_T3;   /* 0x6c */
 
-    CPolyGT4() {
-        m_C0.set(0x80, 0x80, 0x80, 0x80);
-        m_C1 = m_C0;
-        m_C2 = m_C0;
-        m_C3 = m_C0;
-    }
-    virtual ~CPolyGT4();
-    virtual UINT getPacketSize() const;
-private:
-    virtual FIX4 calcZ();
-    virtual void makePkt();
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 INT CBaseWnd::m_nLayerFG = 9;
 
@@ -1163,7 +1163,7 @@ void CImageWndPH::init_c(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& si
         CPolyGT4* pPoly = new (__FILE__ "(2015)") CPolyGT4;
         pPoly->setLayerFG(m_nLayerFG);
         pPoly->setTPage(pTexName);
-        TexInfo* pTexInfo = pPoly->getTexInfo();
+        TexInfo* pTexInfo = pPoly->getTPage();
         if (!pTexInfo) {
             delete pPoly;
             return;
@@ -1189,7 +1189,7 @@ void CImageWndPH::init_c(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& si
         pPoly->setSemiTrans((ALPHA)1);
         m_pPolyGT4 = pPoly;
     }
-    TexInfo* pTexInfo = m_pPolyGT4->getTexInfo();
+    TexInfo* pTexInfo = m_pPolyGT4->getTPage();
     if (!pTexInfo) return;
     USHORT tw = pTexInfo->_TexInfo._nDistW;
     USHORT th = pTexInfo->_TexInfo._nDistH;
