@@ -108,8 +108,8 @@ typedef struct _pppMngSt { /* 0xd0 */
         struct {
             sceVu0FVECTOR parRot[3];
             sceVu0FVECTOR parLoc;
-        } s;
-    } u;
+        };
+    };
     sceVu0FVECTOR parScl;
     sceVu0FVECTOR parCol;
     sceVu0FVECTOR parChrScl;
@@ -184,11 +184,13 @@ extern sceVu0FMATRIX *ppvlpCMatrix;
 /* end PARTIAL pppKeDMatPht */
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthUserCtrl */
-typedef struct { /* 0x4 */
-    u_char r;
-    u_char g;
-    u_char b;
-    u_char a;
+typedef union { /* 0x4 */
+    struct {
+        u_char r;
+        u_char g;
+        u_char b;
+        u_char a;
+    };
 } pppCVECTOR;
 
 extern sceVu0FVECTOR *ppvReferencePosList;
@@ -235,11 +237,13 @@ extern BOOL ppvUserStopPartF;
 /* end PARTIAL pppMatrixXYZ */
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppColMove */
-typedef struct { /* 0x8 */
-    short r;
-    short g;
-    short b;
-    short a;
+typedef union { /* 0x8 */
+    struct {
+        short r;
+        short g;
+        short b;
+        short a;
+    };
 } pppHCVECTOR;
 /* end PARTIAL pppColMove */
 

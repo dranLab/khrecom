@@ -419,7 +419,7 @@ static void shipoly(pppModelSt *pMdl, PRyjDrawShipolyBone *pParam, VRyjDrawShipo
                 pVal->unFrameCt = 0;
             }
         }
-        sceVu0CopyVector(ppvMng->u.s.parLoc, ppvReferencePosList[0]);
+        sceVu0CopyVector(ppvMng->parLoc, ppvReferencePosList[0]);
     }
 }
 
