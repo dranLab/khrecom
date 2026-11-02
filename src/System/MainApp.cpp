@@ -9,8 +9,7 @@
 #include "Game/Collision/CollUtil.h"
 #include "System/Graphic/Effect/effect.h"
 #include "Game/Card.h"
-#include "Game/Technic.h"
-/* defined before Game/Status.h: CStatus::initialize inlines it */
+/* defined before Game/Technic.h and Game/Status.h: their initialize() inlines it */
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 inline void* operator new(size_t size, char* msg) throw() {
@@ -19,6 +18,7 @@ inline void* operator new(size_t size, char* msg) throw() {
 inline void* operator new[](size_t size, char* msg) throw() {
     return com_malloc_d(size, msg, RET_ADDR());
 }
+#include "Game/Technic.h"
 #include "Game/Status.h"
 inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/Atel/AtelCrossFade.h"
@@ -229,14 +229,6 @@ struct MainAppSingletons {
     static void finalizeCard() {
         if (CCard::m_pInstance) delete CCard::m_pInstance;
         CCard::m_pInstance = __null;
-    }
-    static void initTechnic() {
-        if (!(__null == CTechnic::m_pInstance)) AssertApp("Game/Technic.h", 37, "__null == m_pInstance", 0);
-        CTechnic::m_pInstance = new ("Game/Technic.h(38)") CTechnic;
-    }
-    static void finalizeTechnic() {
-        if (CTechnic::m_pInstance) delete CTechnic::m_pInstance;
-        CTechnic::m_pInstance = __null;
     }
 };
 
@@ -619,7 +611,7 @@ static void _setupManagers() {
     CGameWork::initialize();
     CCtdMan::initialize();
     MainAppSingletons::initCard();
-    MainAppSingletons::initTechnic();
+    CTechnic::initialize();
     CStatus::initialize();
     _bSetupManagers = 1;
 }
@@ -666,7 +658,7 @@ static void _disposeManagers() {
     TRACE("---- CCard::finalize(); ----\n");
     MainAppSingletons::finalizeCard();
     TRACE("---- chnic::finalize(); ----\n");
-    MainAppSingletons::finalizeTechnic();
+    CTechnic::finalize();
     TRACE("---- atus::finalize(); ----\n");
     CStatus::finalize();
     TRACE("---- CSceneEnv::finalize(); ----\n");

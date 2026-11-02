@@ -1,4 +1,3 @@
-// PARTIAL: added for Form/Menu/TechHelp
 #ifndef GAME_TECHNIC_H
 #define GAME_TECHNIC_H
 
@@ -10,14 +9,15 @@ struct TECHNIC_INFO {
     unsigned char _technic[100];
 };
 
-/* Line numbers are the original ones (__LINE__ in messages); only line 38 (allocation) is known. */
 #ifndef TECHNIC_H_PATH // MATCH: path override for Game/Status ("c:/KHCOM/MainApp/...")
 #define TECHNIC_H_PATH "Game/Technic.h"
 #endif
-#line 20 TECHNIC_H_PATH
+#line 1 TECHNIC_H_PATH
+/* MATCH: operator new for CTechnic::initialize's allocation, declared only: the includers define it themselves */
+inline void* operator new(size_t size, char* msg) throw();
+
 class CTechnic {
 private:
-    friend struct MainAppSingletons; // PARTIAL: System/MainApp creates and deletes the instance
     static CTechnic* m_pInstance;
     static TECHNIC_INFO* m_pTechnicInfo;
 
@@ -25,14 +25,16 @@ private:
     ~CTechnic();
 
 public:
+#line 36
     static CTechnic& initialize() {
-        UINT nRA = 0;
-#line 37
-        if (m_pInstance != NULL) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = (CTechnic*)com_malloc_d(sizeof(CTechnic), __FILE__ "(38)", nRA);
+        if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
+        m_pInstance = new (__FILE__ "(38)") CTechnic;
         return *m_pInstance;
     }
-    static void finalize();
+    static void finalize() {
+        if (m_pInstance) delete m_pInstance;
+        m_pInstance = __null;
+    }
     static void clearAll();
     static void setAll();
     static BOOL addTechnic(USHORT inKind);
