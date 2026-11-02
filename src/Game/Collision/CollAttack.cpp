@@ -1,3 +1,4 @@
+#define COLLOBJ_H_COLLISION_CLASSES /* MATCH: CollAttack casts to the collision classes (sphere/point/circle/poly3) */
 #define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
 #include "System/Task.h"
 #include "Game/Collision/CollUtilA.h"
@@ -21,13 +22,12 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL)
 
-class CSphereCollision : public CCollision {};
-class CPointCollision : public CCollision {};
-class CCircleCollision : public CCollision {};
-class CPoly3Collision : public CCollision {
-public:
-    FVECTOR m_inP2; /* 0x80 */
-};
+
+
+
+
+
+
 
 static inline FLOAT _limitPI(FLOAT a) {
     FLOAT r;
@@ -182,7 +182,7 @@ BOOL CCollAttack::collideAttackFunc(CCollBody* pEntry) {
     pEntry->setEnemyPos(m_vEnemyPos);
     pEntry->setDamageAttr(m_AttackAttr);
     if (getType() == COLL_TYPE_POLY3) {
-        pEntry->setDamagePlane(m_pCollision->m_inWS, m_pCollision->m_inWE, ((CPoly3Collision*)m_pCollision)->m_inP2);
+        pEntry->setDamagePlane(m_pCollision->m_inWS, m_pCollision->m_inWE, ((CPoly3Collision*)m_pCollision)->m_BasePos);
     } else {
         pEntry->clearDamagePlane();
     }
@@ -200,11 +200,11 @@ BOOL CCollAttack::collideAttackFunc(CCollBody* pEntry) {
 }
 
 void CCollAttack::setBasePos(FVECTOR& vBasePos) {
-    if (m_pCollision && m_pCollision->m_Type == COLL_TYPE_POLY3) ((CPoly3Collision*)m_pCollision)->m_inP2 = vBasePos;
+    if (m_pCollision && m_pCollision->m_Type == COLL_TYPE_POLY3) ((CPoly3Collision*)m_pCollision)->m_BasePos = vBasePos;
 }
 
 FVECTOR* CCollAttack::getBasePos() {
-    if (m_pCollision && m_pCollision->m_Type == COLL_TYPE_POLY3) return &((CPoly3Collision*)m_pCollision)->m_inP2;
+    if (m_pCollision && m_pCollision->m_Type == COLL_TYPE_POLY3) return &((CPoly3Collision*)m_pCollision)->m_BasePos;
     return NULL;
 }
 
