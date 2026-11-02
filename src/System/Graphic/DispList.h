@@ -20,7 +20,7 @@ struct OTtag {
 struct SEMI_PACKET_LIST;
 
 class CDispListBase {
-    friend class CModelMan; // PARTIAL: guessed (CModelMan::drawDispListFG reads the OT table inline; getOTtagTbl is protected in the ref)
+    friend class CModelMan; // MATCH: CModelMan::drawDispListFG reads the OT table inline; getOTtagTbl is protected in the ref (friends are not in the debug info)
 private:
     OTtag* m_pOTtagTbl;   /* 0x0 */
     UINT m_nOTtagTblSize; /* 0x4 */
