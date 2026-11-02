@@ -14,32 +14,8 @@ inline void operator delete[](void* mem) { com_free(mem); }
 
 extern FVECTOR ONE_VECTOR;
 
-static inline FVECTOR operator+(const FVECTOR& v0, const FVECTOR& v1) {
-    FVECTOR vec = v0;
-    vec.x += v1.x;
-    vec.y += v1.y;
-    vec.z += v1.z;
-    vec.w += v1.w;
-    return vec;
-}
 
-static inline FVECTOR operator-(const FVECTOR& v0, const FVECTOR& v1) {
-    FVECTOR vec = v0;
-    vec.x -= v1.x;
-    vec.y -= v1.y;
-    vec.z -= v1.z;
-    vec.w -= v1.w;
-    return vec;
-}
 
-static inline FVECTOR operator*(const FVECTOR& v0, FLOAT inF) {
-    FVECTOR vec = v0;
-    vec.x *= inF;
-    vec.y *= inF;
-    vec.z *= inF;
-    vec.w *= inF;
-    return vec;
-}
 
 static FLOAT Hermite(FLOAT t0, FLOAT k1, FLOAT k2, FLOAT m1, FLOAT m2);
 

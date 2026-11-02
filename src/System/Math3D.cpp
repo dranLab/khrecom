@@ -34,55 +34,11 @@ static inline FLOAT _fabsf(FLOAT inValue) {
     return __builtin_fabsf(inValue);
 }
 
-static inline void operator-=(FVECTOR& v, const FVECTOR& inV) {
-    v.x -= inV.x;
-    v.y -= inV.y;
-    v.z -= inV.z;
-    v.w -= inV.w;
-}
 
-static inline FVECTOR operator+(const FVECTOR& v, const FVECTOR& inV) {
-    FVECTOR vec = v;
-    vec.x += inV.x;
-    vec.y += inV.y;
-    vec.z += inV.z;
-    vec.w += inV.w;
-    return vec;
-}
 
-static inline FVECTOR operator-(const FVECTOR& v, const FVECTOR& inV) {
-    FVECTOR vec = v;
-    vec.x -= inV.x;
-    vec.y -= inV.y;
-    vec.z -= inV.z;
-    vec.w -= inV.w;
-    return vec;
-}
 
-static inline FVECTOR operator-(const FVECTOR& inV) {
-    FVECTOR vec = inV;
-    vec.x = -vec.x;
-    vec.y = -vec.y;
-    vec.z = -vec.z;
-    vec.w = -vec.w;
-    return vec;
-}
 
-static inline FVECTOR operator*(const FVECTOR& v, FLOAT inF) {
-    FVECTOR vec = v;
-    vec.x *= inF;
-    vec.y *= inF;
-    vec.z *= inF;
-    vec.w *= inF;
-    return vec;
-}
 
-static inline void operator*=(FVECTOR& v, FLOAT inF) {
-    v.x *= inF;
-    v.y *= inF;
-    v.z *= inF;
-    v.w *= inF;
-}
 
 static inline void _init0(FVECTOR& v) {
     asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory");

@@ -69,12 +69,6 @@ extern "C" float sinf(float x);
 extern "C" float cosf(float x);
 extern "C" float atan2f(float y, float x);
 
-static inline void operator*=(FVECTOR& v, FLOAT inF) {
-    v.x *= inF;
-    v.y *= inF;
-    v.z *= inF;
-    v.w *= inF;
-}
 
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"

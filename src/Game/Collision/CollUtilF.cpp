@@ -70,14 +70,6 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
-inline FVECTOR operator+(const FVECTOR& v0, const FVECTOR& v1) {
-    FVECTOR v = v0;
-    v.x += v1.x;
-    v.y += v1.y;
-    v.z += v1.z;
-    v.w += v1.w;
-    return v;
-}
 
 INT CCollUtil::_checkHangEdge(CCollision& collision, FVECTOR& inDir, FVECTOR& inHeightDepth) {
     CCollision coll = collision;
