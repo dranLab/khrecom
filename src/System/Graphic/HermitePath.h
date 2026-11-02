@@ -69,8 +69,6 @@ public:
     FLOAT getDataSpeed() { return m_fDataSpeed; }
     INT getPathBlock() { return m_iNowBlock; }
     FLOAT getPathProgress() { return m_fProgress; }
-    INT getNowBlock() { return m_iNowBlock; }   // PARTIAL: name used by System/Graphic/HermitePathCamera
-    FLOAT getProgress() { return m_fProgress; } // PARTIAL: name used by System/Graphic/HermitePathCamera
     CPathVector* getPathVector() { return m_pPathVect; }
     BOOL update(FLOAT inRate);
     BOOL isRoundData();

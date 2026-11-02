@@ -139,17 +139,7 @@ public:
     void setWind(FVECTOR* inVel);
     void addWindXYZ(FVECTOR* inVel);
     FVECTOR& getWind() { return m_vWind; }
-
-    UINT getFlag() const; // not in the original: Game/Player/Friend reads m_uiFlag & 0x100 (isHalloweenTown)
 };
-
-/* Not emitted in PlayerManager.cpp (all inline members of the class are emitted there, and the original has no
- * getFlag). */
-#ifndef GAME_PLAYER_PLAYERMANAGER_CPP /* MATCH: GAME_PLAYER_PLAYERMANAGER_CPP gate, only for its own unit (tested 2026-11-02) */
-inline UINT CPlayerManager::getFlag() const {
-    return m_uiFlag;
-}
-#endif
 
 void* getBattleRsrcFirst();
 UINT getBattleRsrcSize();
