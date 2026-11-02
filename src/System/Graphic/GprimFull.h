@@ -340,7 +340,7 @@ inline void CCPrim::init() {
     m_SCISSOR = (ULONGLONG)-1;
 }
 inline FIX4 CCPrim::calcZ() {
-    if (m_V && m_V->f[2] >= 0.0f) return (FIX4)m_V->f[2] << 4;
+    if (m_V && m_V->fP.z >= 0.0f) return (FIX4)m_V->fP.z << 4;
     return 0;
 }
 
@@ -395,7 +395,7 @@ inline void CTPrim::init() {
     m_SCISSOR = (ULONGLONG)-1;
 }
 inline FIX4 CTPrim::calcZ() {
-    if (m_V && m_V->fP[2] >= 0.0f) return (FIX4)m_V->fP[2] << 4;
+    if (m_V && m_V->fP.z >= 0.0f) return (FIX4)m_V->fP.z << 4;
     return 0;
 }
 

@@ -134,21 +134,26 @@ union G_LAYER {
 };
 
 union FVERTEX {
+    FVECTOR fP;
+    IVECTOR iP;
     struct {
         int iPad[3];
         G_RGBA C;
     };
-    float f[4];
 };
 
 struct FTVERTEX {
-    float fT[4];
     union {
+        FVECTOR fT;
+        IVECTOR iT;
+    };
+    union {
+        FVECTOR fP;
+        IVECTOR iP;
         struct {
             int iPad[3];
             G_RGBA C;
         };
-        float fP[4];
     };
 };
 

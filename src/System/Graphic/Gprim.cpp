@@ -660,9 +660,9 @@ void CCPrim::makePkt() {
     INT i;
     for (i = m_iMax, pV = m_V; i > 0; i--, pV++) {
         _prefetch(pV, 0x10);
-        if (pV->f[2] >= 0.0f) {
+        if (pV->fP.z >= 0.0f) {
             p64[0] = pV->C.col;
-            p64[1] = _vecToXYZ(_screenClamp(*(FVECTOR*)pV));
+            p64[1] = _vecToXYZ(_screenClamp(pV->fP));
             p64 += 2;
         }
     }
@@ -732,10 +732,10 @@ void CTPrim::makePkt() {
     INT i;
     for (i = m_iMax, pV = m_V; i > 0; i--, pV++) {
         _prefetch(pV, 0x20);
-        if (pV->fP[2] >= 0.0f) {
-            p64[0] = *(ULONGLONG*)pV->fT;
-            p64[1] = (u_long)pV->C.col | ((u_long)*(UINT*)&pV->fT[2] << 32);
-            p64[2] = _vecToXYZ(_screenClamp(*(FVECTOR*)pV->fP));
+        if (pV->fP.z >= 0.0f) {
+            p64[0] = *(ULONGLONG*)pV->fT.v;
+            p64[1] = (u_long)pV->C.col | ((u_long)*(UINT*)&pV->fT.v[2] << 32);
+            p64[2] = _vecToXYZ(_screenClamp(pV->fP));
             p64 += 3;
         }
     }
@@ -752,7 +752,7 @@ void CTPrim::makePkt() {
     }
 }
 BOOL CTPrim::isRect(INT i, const FVECTOR* vRect) {
-    return __isRect(*(FVECTOR*)m_V[i].fP, vRect);
+    return __isRect(m_V[i].fP, vRect);
 }
 FLOAT RotTransPers(FVECTOR& out_v, const FMATRIX& in_m, const FVECTOR& in_v) {
     INT iQ;
