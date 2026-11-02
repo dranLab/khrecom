@@ -79,13 +79,14 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/Gprim (Gprim's classes for every includer: 19 partial classes, the CZFill/CPolyGT4/C3DCPrim copies and the gate dropped; 5 callers on the ref API) | 822 | 52 | 0 | 760 (673) | 180 |
 | 2026-11-02 | decomp/System-Graphic-PathData (finished 47/49, dispDebugLine/getNearPath parked; A1: no stand-ins) | 822 | 52 | 0 | 760 (673) | 180 |
 | 2026-11-02 | cleanup/System-Graphic-ShadowModel (CShadowModelMan stand-ins in DebugWindowTBL/ModelMan, isDraw; VSME on the ref density setters) | 823 | 50 | 0 | 760 (673) | 180 |
+| 2026-11-02 | decomp/System-Graphic-FrecFont (finished, makePkt and setupFontTex parked; A1: RsrcInfo stand-in reason) | 824 | 50 | 0 | 760 (673) | 180 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 823 (765 in 111 headers, 58 in 34 .cpp); MATCH: 180
-  by category: method 313, data member 62, type 72, fwd decl 49, #include 31, changed in place 120, padding 8, path override 22, gate 23, guessed 29, header-level 71, stand-in 17, other 6
+PARTIAL: 824 (765 in 111 headers, 59 in 35 .cpp); MATCH: 180
+  by category: method 313, data member 62, type 72, fwd decl 49, #include 31, changed in place 120, padding 8, path override 22, gate 24, guessed 29, header-level 71, stand-in 17, other 6
 stand-ins: 50 foreign in 31 files (28 names), 201 unattributed, 167 own
 duplicate class names across headers: 0
 padding: 14 arrays, 0 accessors
