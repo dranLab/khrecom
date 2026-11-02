@@ -250,15 +250,16 @@ def count_params(text):
 def parse_member(text, cls, line, body, vslot):
     s = re.sub(r"^\s*(?:(?:public|private|protected)\s*:\s*)+", "", text).strip()
     s = re.sub(r"\s+", " ", s)
+    s = re.sub(r"\s*__attribute__\s*\(\((?:[^()]|\([^()]*\))*\)\)", "", s).strip()
     if not s or s.startswith(("friend ", "using ", "typedef ")) or re.match(r"(class|struct|union|enum) \w+ ?$", s):
         return []
-    if re.match(r"(class|struct|union|enum)\b", s) and "{}" in s:
+    if re.match(r"(static )?(class|struct|union|enum)\b", s) and "{}" in s:
         rest = s.split("{}", 1)[1]
-        return [Member("field", n, line, s) for n in re.findall(r"(\w+)\s*(?:\[[^\]]*\])?\s*(?:,|$)", rest)]
+        return [Member("field", n, line, s, static=s.startswith("static ")) for n in re.findall(r"(\w+)\s*(?:\[[^\]]*\])?\s*(?:,|$)", rest)]
     p = s.find("(")
     eq = s.find("=")
     is_op = re.search(r"\boperator\b", s[:p] if p >= 0 else "")
-    if p >= 0 and (is_op or eq < 0 or eq > p) and not re.match(r"\(\s*[*&]", s[p:]):
+    if p >= 0 and (is_op or eq < 0 or eq > p) and not re.match(r"\(\s*(?:\w+::)*[*&]", s[p:]):
         prefix = s[:p].rstrip()
         m = re.search(r"(operator\s*\S+|~?\w+)$", prefix)
         if not m:
@@ -290,7 +291,9 @@ def parse_member(text, cls, line, body, vslot):
         part = part.split("=")[0]
         part = re.sub(r"\[[^\]]*\]", "", part)
         part = re.sub(r":\s*\w+\s*$", "", part)  # bit field
-        m = re.search(r"([A-Za-z_$]\w*)\s*\)?\s*(?:\([^)]*\))?\s*$", part)
+        # pointers to arrays/functions/members: T (*name)[n], T (C::*name)()
+        m = (re.search(r"\(\s*(?:\w+::)*[*&]+\s*([A-Za-z_]\w*)\s*\)", part)
+             or re.search(r"([A-Za-z_$]\w*)\s*\)?\s*(?:\([^)]*\))?\s*$", part))
         if m and not m.group(1).startswith("$"):
             out.append(Member("field", m.group(1), line, s, static=static))
     return out
@@ -337,8 +340,8 @@ def members_of(src, sc):
             if cur.strip():
                 emit(cur, cur_start, None)
             break
-        if kid.kind == "type":
-            cur += " {} "
+        if kid.kind == "type" or re.search(r"(?:^|[\s;:])(?:static\s+)?(?:struct|union|class)\s*$", cur):
+            cur += " {} "  # also anonymous struct members: static struct {...} m_pStateTbl[n]
         else:
             emit(cur, cur_start, (kid.start, kid.end))
             cur, cur_start = "", kid.end + 1
