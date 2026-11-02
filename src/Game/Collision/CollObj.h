@@ -62,9 +62,7 @@ public:
     FVECTOR m_outWE;     /* 0x20 */
     FVECTOR m_outNormal; /* 0x30 */
     FVECTOR m_outDetect; /* 0x40 */
-    // PARTIAL: m_Type, m_fgStatus, m_Radius split out for Game/Player/PlayerWeapon
     COLL_TYPE m_Type;    /* 0x50 */
-    // PARTIAL: m_Kind .. m_outInfoO split out for Game/Gimmick/GimmickSearchLaser
     COLL_KIND m_Kind;    /* 0x54 */
     INT m_outStatus;     /* 0x58 */
     INT m_fgStatus;      /* 0x5c */
@@ -73,8 +71,7 @@ public:
     COLL_INFO_UNION m_outInfo;  /* 0x68 */
     COLL_INFO_UNION m_outInfoO; /* 0x6c */
 
-    // PARTIAL: inline constructor and destructor (weak in the original) added for Game/Gimmick/GimmickSearchLaser
-    // (as in Game/Collision/CollUtilF.cpp)
+    // inline constructor and destructor: weak in the original (as in Game/Collision/CollUtilF.cpp)
     CCollision() {
         m_fgStatus = 0;
         m_Kind = COLL_KIND_PLAYER;
@@ -83,8 +80,11 @@ public:
         m_Radius = m_shiftY = 0.0f;
     }
     virtual ~CCollision() {} /* 0x70 */
+    void initForMap(/* parameters unknown */);
+    void initForObj(/* parameters unknown */);
     void setStartPos(const FVECTOR& inPos) { m_inWS = inPos; }
     void setEndPos(const FVECTOR& inPos) { m_inWE = inPos; }
+    FVECTOR& getOutPos(/* parameters unknown */);
 };
 
 /* PARTIAL: the other collision classes, for Game/Collision/CollObj (some includers have local copies) */
@@ -112,13 +112,13 @@ public:
 
 #endif
 
-// PARTIAL: added for Game/Collision/CollBody
 class CColumnCollision : public CCollision {
 public:
-    CColumnCollision() { // PARTIAL: added for Game/Collision/CollObj
+    CColumnCollision() {
         m_Type = COLL_TYPE_COLUMN;
         m_Radius = 0.5f;
     }
+    void setRadius(/* parameters unknown */);
 };
 
 #ifdef COLLOBJ_H_COLLISION_CLASSES // MATCH: the inline collideMap needs CCollUtil (CollUtil.h): only units that construct these classes define it

@@ -74,7 +74,6 @@ struct G_XYZ {
     FIX4 x;
     FIX4 y;
     FIX4 z;
-    // PARTIAL: added for System/DebugProcInfo
     void set(FIX4 _x, FIX4 _y, FIX4 _z) {
         x = _x;
         y = _y;
@@ -84,6 +83,7 @@ struct G_XYZ {
         x = _x;
         y = _y;
     }
+    void bufferZ(/* parameters unknown */);
 };
 
 struct G_RGBA {

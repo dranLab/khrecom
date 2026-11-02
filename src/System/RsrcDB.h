@@ -60,7 +60,7 @@ public:
     static CRsrcData* getRsrcWithHash(INT nRsrcType, INT nNameHash);
     static CRsrcData* getRsrcWithIndex(INT nRsrcType, INT nIndex, BOOL bOnlyCurrentScene);
     static void* getRsrcData(const CRsrcData& data);
-    static void* getRsrcData(INT nRsrcType, const CHAR* pszName) { // PARTIAL: inline added for Form/Menu/Camp (the original's name unknown)
+    static void* getRsrcData(INT nRsrcType, const CHAR* pszName) { // MATCH: inlined in Form/Menu/Camp; the ref lists one getRsrcData (this overload's name unknown)
         CRsrcData* pData = getRsrc(nRsrcType, pszName, NAME_CASE_SENSITIVE);
         return pData ? getRsrcData(*pData) : NULL;
     }
@@ -72,11 +72,15 @@ public:
     static void* getFirstData_Scene(INT nRsrcType);
     static CRsrcData* getFirstRsrc_Scene(INT nRsrcType, INT nGroupID);
     static void* getFirstData_Scene(INT nRsrcType, INT nGroupID);
+    static BOOL isDataExist(/* parameters unknown */);
     static void initSeekRsrc(INT nRsrcType, INT nGroupID);
     static CRsrcData* seekNextRsrc();
     static CRsrcData* seekNextRsrc_Opt();
     static CRsrcData* seekNextRsrc_Scene();
     static CRsrcData* seekNextRsrc_RcOpt();
+    static void* seekNextData(/* parameters unknown */);
+    static void* seekNextData_Scene(/* parameters unknown */);
+    static void* seekNextData_Opt(/* parameters unknown */);
     static INT checkGroupID(INT nGroupOfs, INT nGroupID);
     static UINT getRsrcGrpSize(INT nGroupID, INT nMemberID);
     static UINT getRsrcGrpSizeOnMemory(INT nGroupID, INT nMemberID);
