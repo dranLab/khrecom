@@ -128,19 +128,24 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/Coord-PathData (CCoords, CPathVector complete; classes complete 764) | 716 | 23 | 0 | 752 (0) | 898 |
 | 2026-11-02 | cleanup/missing-members 1-3 + CCmpData (23 classes: missing members declared; classes complete 787) | 716 | 23 | 0 | 752 (0) | 898 |
 | 2026-11-02 | cleanup/class-tags (31 classes: membership tags dropped, access MATCH; classes complete 818) | 666 | 23 | 0 | 752 (0) | 912 |
+| 2026-11-02 | tools/partials-implicit-dtor-2 + cleanup/missing-members-4 (classes complete 831) | 653 | 23 | 0 | 752 (0) | 914 |
+| 2026-11-02 | cleanup/class-tags-2 (CTask getSysTask protected; CEffectMan, CModelBG) | 637 | 23 | 0 | 752 (0) | 921 |
+| 2026-11-02 | cleanup/class-tags-3 + tools/partials-ref-names (MODELDATA, ALPHA) | 627 | 23 | 0 | 752 (0) | 922 |
+| 2026-11-02 | cleanup/EnemyParam (ENEMY_PARAM, CMotData) | 616 | 23 | 0 | 752 (0) | 922 |
+| 2026-11-02 | cleanup/CDrawable + CCoord-methods (classes complete 839) | 593 | 23 | 0 | 752 (0) | 925 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 666 (611 in 81 headers, 55 in 34 .cpp); MATCH: 912
-  by category: method 256, data member 45, type 59, fwd decl 44, #include 28, changed in place 101, padding 6, path override 1, gate 18, guessed 24, header-level 60, stand-in 18, other 6
+PARTIAL: 593 (538 in 76 headers, 55 in 34 .cpp); MATCH: 925
+  by category: method 217, data member 32, type 57, fwd decl 41, #include 28, changed in place 91, padding 6, path override 1, gate 18, guessed 18, header-level 60, stand-in 18, other 6
 stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
 mechanisms: 752 sites (0 untagged); #line: 1249
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 818, superset 20, partial 27, gated 23, missing 8, unattributed 309
+classes: complete 839, superset 17, partial 9, gated 23, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -163,7 +168,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
-| R2 | 14.5 | `Game/Collision/CollObj.h` | ready | 2 stand-in files, 0 dup headers, 9 gate users, 3 PARTIAL | CCollision, COLL_KIND, COLL_TYPE, CPointCollision (1 partial, 2 complete, 1 gated) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollUtilF, CSJointT<CCollObj> not in Game/Collision/CollUtilF |
+| R2 | 13.0 | `Game/Collision/CollObj.h` | ready | 2 stand-in files, 0 dup headers, 9 gate users | CCollision, COLL_KIND, COLL_TYPE, CPointCollision (3 complete, 1 gated) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollUtilF, CSJointT<CCollObj> not in Game/Collision/CollUtilF |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 | R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
 | R2 | 4.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | G_RGBA, QWdata (2 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
@@ -176,7 +181,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
-| `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
+| `CCollision` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
@@ -210,24 +215,21 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/CardBattle.h` | 45 | 5/1/0/0 | 146 |
 | `Game/CardKind.h` | 0 | 1/0/1/0 | 153 |
 | `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
-| `Game/CollParam.h` | 1 | 5/0/1/0 | 158 |
 | `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
-| `Game/Collision/CollObj.h` | 11 | 4/0/2/7 | 174 |
+| `Game/Collision/CollObj.h` | 6 | 6/0/0/7 | 174 |
 | `Game/Collision/CollUtil.h` | 7 | 0/0/0/0 | 150 |
 | `Game/Collision/CollUtilA.h` | 1 | 10/1/0/0 | 26 |
-| `Game/Collision/Ride.h` | 1 | 4/0/1/0 | 6 |
 | `Game/Debug/DWTBGM.h` | 1 | 0/0/0/0 | 1 |
 | `Game/Enemy/BattleEnemy.h` | 33 | 0/1/0/0 | 58 |
-| `Game/Enemy/EnemyParam.h` | 14 | 3/0/1/0 | 16 |
+| `Game/Enemy/EnemyParam.h` | 4 | 4/0/0/0 | 16 |
 | `Game/Enemy/Heartless.h` | 1 | 1/0/0/0 | 36 |
 | `Game/Enemy/MapEnemy.h` | 1 | 1/0/0/0 | 7 |
 | `Game/Entity.h` | 105 | 1/1/0/0 | 150 |
 | `Game/EntityFactory.h` | 14 | 1/1/0/0 | 49 |
 | `Game/Game.h` | 20 | 0/1/0/0 | 43 |
-| `Game/GameWork.h` | 0 | 4/0/2/0 | 60 |
 | `Game/Map.h` | 7 | 9/0/0/3 | 9 |
 | `Game/Movement.h` | 7 | 1/0/0/0 | 105 |
-| `Game/OsdDef.h` | 3 | 4/0/2/0 | 7 |
+| `Game/OsdDef.h` | 1 | 5/0/1/0 | 7 |
 | `Game/Player/DWTPlayer.h` | 2 | 0/0/0/0 | 5 |
 | `Game/Player/Player.h` | 44 | 2/1/0/0 | 72 |
 | `Game/Player/PlayerAnim.h` | 1 | 1/0/0/0 | 1 |
@@ -243,15 +245,14 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Component.h` | 3 | 2/0/0/0 | 5 |
 | `System/Coord.h` | 1 | 1/0/0/0 | 18 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 271 |
-| `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 11 |
 | `System/Graphic/2d/2DMan.h` | 1 | 3/0/0/0 | 166 |
 | `System/Graphic/2d/2DObj.h` | 2 | 1/0/0/0 | 167 |
 | `System/Graphic/2d/2DSeqCtrl.h` | 2 | 2/0/0/0 | 33 |
 | `System/Graphic/2d/2DSeqObj.h` | 2 | 6/0/0/0 | 167 |
-| `System/Graphic/Camera.h` | 22 | 6/0/1/0 | 89 |
-| `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 172 |
+| `System/Graphic/Camera.h` | 6 | 6/0/1/0 | 89 |
+| `System/Graphic/Effect/EffectMan.h` | 2 | 2/0/0/0 | 172 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 175 |
-| `System/Graphic/Effect/effect.h` | 6 | 5/1/0/0 | 77 |
+| `System/Graphic/Effect/effect.h` | 5 | 5/1/0/0 | 77 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 3 | 3/0/0/0 | 15 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
 | `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 30 |
@@ -264,22 +265,19 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/pppPart.h` | 57 | 21/3/0/0 | 215 |
 | `System/Graphic/Effect/libppp/pppfunctbl.h` | 1 | 0/0/0/0 | 2 |
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
-| `System/Graphic/Gprim.h` | 17 | 9/1/5/0 | 231 |
+| `System/Graphic/Gprim.h` | 5 | 12/1/2/0 | 231 |
 | `System/Graphic/MapUnit.h` | 1 | 0/0/0/0 | 3 |
-| `System/Graphic/Model.h` | 6 | 7/0/1/0 | 70 |
-| `System/Graphic/MotData.h` | 1 | 6/0/1/0 | 5 |
+| `System/Graphic/Model.h` | 5 | 8/0/0/0 | 70 |
 | `System/Graphic/PathData.h` | 1 | 9/0/0/0 | 8 |
-| `System/Graphic/ScreenMask.h` | 0 | 1/0/1/0 | 5 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
 | `System/Graphic/TexInfo.h` | 1 | 2/0/0/0 | 234 |
-| `System/Graphic/modeldata.h` | 10 | 2/1/0/1 | 82 |
+| `System/Graphic/modeldata.h` | 4 | 3/0/0/1 | 82 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 6 |
-| `System/RsrcDB.h` | 1 | 1/0/1/0 | 74 |
-| `System/RsrcData.h` | 4 | 31/0/2/0 | 29 |
+| `System/RsrcData.h` | 3 | 33/0/0/0 | 29 |
 | `System/SJoint.h` | 9 | 0/0/0/0 | 224 |
 | `System/SLContainer.h` | 14 | 0/0/0/0 | 244 |
-| `System/Task.h` | 10 | 2/1/0/0 | 244 |
+| `System/Task.h` | 4 | 3/0/0/0 | 244 |
 | `System/TaskMan.h` | 3 | 4/0/0/0 | 99 |
 | `System/Vector.h` | 21 | 0/0/3/0 | 266 |
 
