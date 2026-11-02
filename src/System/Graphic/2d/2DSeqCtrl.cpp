@@ -166,7 +166,7 @@ C2DSeqObj* C2DSeqCtrl::addSeq(const CHAR* pSedName, UINT idxSeq) {
     }
     HANDLE handle = C2DMan::create(pSedName, idxSeq, &m_seqControl);
     if (!handle) return NULL;
-    C2DSeqObj* p2DSeqObj = C2DSeq::m_pCurrent2DSeqObj;
+    C2DSeqObj* p2DSeqObj = C2DSeq::getCurrent2DSeqObj();
     if (!p2DSeqObj) return NULL;
     if (!m_nType && !m_nSeq) p2DSeqObj->m_fgParent = 0;
     if (m_nLayer >= 0) p2DSeqObj->changeLayer(m_nLayer);
@@ -194,7 +194,7 @@ C2DSeqObj* C2DSeqCtrl::addFnt(const CHAR* pSqdName, C2DFnt* p2DFnt) {
     }
     HANDLE handle = C2DMan::createFnt(pSqdName, p2DFnt, &m_seqControl);
     if (!handle) return NULL;
-    C2DSeqObj* p2DSeqObj = C2DSeq::m_pCurrent2DSeqObj;
+    C2DSeqObj* p2DSeqObj = C2DSeq::getCurrent2DSeqObj();
     if (!p2DSeqObj) return NULL;
     if (!m_nType && !m_nSeq) p2DSeqObj->m_fgParent = 0;
     if (m_nLayer >= 0) p2DSeqObj->changeLayer(m_nLayer);
@@ -220,7 +220,7 @@ C2DSeqObj* C2DSeqCtrl::replaceSeq(UINT nIdx, const CHAR* pSedName, UINT idxSeq) 
     if (!(nIdx < m_nSeq)) return NULL;
     handle = C2DMan::replaceSeq(m_hSeqHandle[nIdx], pSedName, idxSeq, &m_seqControl);
     if (!handle) return NULL;
-    p2DSeqObj = C2DSeq::m_pCurrent2DSeqObj;
+    p2DSeqObj = C2DSeq::getCurrent2DSeqObj();
     if (!p2DSeqObj) return NULL;
     if (!m_nType && !nIdx) p2DSeqObj->m_fgParent = 0;
     if (m_nLayer >= 0) p2DSeqObj->changeLayer(m_nLayer);
@@ -245,7 +245,7 @@ C2DSeqObj* C2DSeqCtrl::replaceFnt(UINT nIdx, const CHAR* pSedName, C2DFnt* p2DFn
     if (!(nIdx < m_nSeq)) return NULL;
     handle = C2DMan::replaceFnt(m_hSeqHandle[nIdx], pSedName, p2DFnt, &m_seqControl);
     if (!handle) return NULL;
-    p2DSeqObj = C2DSeq::m_pCurrent2DSeqObj;
+    p2DSeqObj = C2DSeq::getCurrent2DSeqObj();
     if (!p2DSeqObj) return NULL;
     if (!m_nType && !nIdx) p2DSeqObj->m_fgParent = 0;
     if (m_nLayer >= 0) p2DSeqObj->changeLayer(m_nLayer);
