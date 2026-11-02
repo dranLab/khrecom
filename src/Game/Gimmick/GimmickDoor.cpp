@@ -56,10 +56,6 @@ static inline void _unitVectorVu0(FVECTOR& v) {
 
 static inline BOOL isSpecialRoom(INT inRoomID) { return inRoomID == 0 || inRoomID == 99; }
 
-static inline LockOnManager::CLockOnManager* getLockOnMan(CTask* inTask) {
-    return (LockOnManager::CLockOnManager*)inTask->getSysTask(32);
-}
-
 CGimmickDoor::CGimmickDoor(CTask* inParent, const ZONEPARTS& inParts) : CBaseGimmick(inParent) {
     BOOL bCancel = FALSE;
     INT rsrcid;
@@ -115,14 +111,14 @@ CGimmickDoor::CGimmickDoor(CTask* inParent, const ZONEPARTS& inParts) : CBaseGim
     switch (m_DoorState) {
     case DOOR_STAT_CLOSED:
         changeMotion(1, 0, FALSE, -1, 0, 0);
-        { LockOnManager::CLockOnManager* pLockOn = getLockOnMan(this); pLockOn->registerLockOnObject(getHandle()); }
+        { LockOnManager::CLockOnManager* pLockOn = (LockOnManager::CLockOnManager*)getSysTask(32); pLockOn->registerLockOnObject(getHandle()); }
         m_iStep = 1;
         break;
     case DOOR_STAT_OPENED:
         changeMotion(3, 0, FALSE, -1, 0, 0);
         if (!info || (!info->isEventDoor() && info->_type != DOOR_TYPE_TO_EXTRA)) {
             if (!isSpecialRoom(CSceneInfo::getCurrentRoomID())) {
-                { LockOnManager::CLockOnManager* pLockOn = getLockOnMan(this); pLockOn->registerLockOnObject(getHandle()); }
+                { LockOnManager::CLockOnManager* pLockOn = (LockOnManager::CLockOnManager*)getSysTask(32); pLockOn->registerLockOnObject(getHandle()); }
             } else {
                 rideModelEnableChipCollision(0, FALSE);
                 rideModelEnableChipCollision(1, TRUE);

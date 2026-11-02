@@ -61,7 +61,7 @@ struct TaskMainParam;
 
 /* All inline members are emitted (weak) in Task.cpp, in declaration order: keep the order. */
 class CTask {
-    friend class CBaseWnd; // PARTIAL: added for System/Wnd (its ignorePause/ignorePlaySpeed set m_nInfo directly)
+    friend class CBaseWnd; // MATCH: System/Wnd's ignorePause/ignorePlaySpeed set m_nInfo directly (friends are not in the debug info)
 private:
     union {
         u_long128 _nZeroMember128;
@@ -115,7 +115,7 @@ public:
     FMATRIX& getLocal(UINT nIndex);
     const FMATRIX& getWorld(UINT nIndex) const;
     void setPriority(TASK_PRIORITY pri) { m_nProcPrio = pri; }
-    /* PARTIAL: callers pass plain ints (System/Graphic/PathCamera, TexCtrl, Camera); a member template is
+    /* MATCH: callers pass plain ints (System/Graphic/PathCamera, TexCtrl, Camera); a member template is
      * not emitted here. */
     template <class T> void setPriority(T pri) { setPriority((TASK_PRIORITY)pri); }
     TASK_PRIORITY getPriority() const { return (TASK_PRIORITY)m_nProcPrio; }
@@ -172,9 +172,9 @@ public:
             m_nInfo &= ~TASK_INFO_IGNOREPLAYSPEED;
         }
     }
-    CTask* getSysTask(UINT nID); // PARTIAL: public for Game/Gimmick/GimmickHitMore (protected in the original)
 
 protected:
+    CTask* getSysTask(UINT nID);
     BOOL addToParent(CTask& inParent);
     BOOL removeFromParent();
     BOOL declareSysTask(UINT nID);
@@ -196,9 +196,9 @@ protected:
     }
     CTaskSLCList& getChildren() { return m_listChildren; }
     const CTaskSLCList& getChildren() const { return m_listChildren; }
-    friend class CTaskSecondary; // PARTIAL: added for System/Graphic/Camera (m_nInfo)
-    friend class CFadeIOMask;    // PARTIAL: added for System/Graphic/ScreenMask (m_nInfo)
-    friend class CTaskMan;       // PARTIAL: added for System/TaskMan
+    friend class CTaskSecondary; // MATCH: System/Graphic/Camera reads m_nInfo (friends are not in the debug info)
+    friend class CFadeIOMask;    // MATCH: System/Graphic/ScreenMask reads m_nInfo
+    friend class CTaskMan;       // MATCH: System/TaskMan manages the private task state
 
 private:
     void invokeMain(TaskMainParam& param);
