@@ -100,7 +100,7 @@ void CTask::invokeSweepChildren() {
             }
         }
     }
-    m_listChildren.removeNull();
+    m_listChildren.sweep();
 }
 
 BOOL CTask::canProcMain(TaskMainParam& param) {

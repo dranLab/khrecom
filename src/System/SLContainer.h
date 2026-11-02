@@ -7,9 +7,8 @@
 class CTask;
 template <class T> class ISLCManagerT;
 template <class T> class SLContainerT;
-template <class T> class CSLCListT; // PARTIAL: added for System/CoordMan
+template <class T> class CSLCListT;
 
-// PARTIAL: added for System/CoordMan
 template <class T>
 class ISLCManagerT {
 public:
@@ -27,7 +26,7 @@ private:
     T* _pValue;
     SLContainerT<T>* _pNextContainer;
     int _nGeneral;
-    friend class CSLCListT<T>; // PARTIAL: added for System/CoordMan
+    friend class CSLCListT<T>; // MATCH: the list links the containers (friends are not in the debug info)
 public:
     HANDLE getHandle() { return _hID; }
     T* getValue() { return _pValue; }
@@ -45,13 +44,13 @@ private:
     SLContainerT<T>* m_pTailContainer;
     int m_nListSize;
 public:
-    virtual ~CSLCListT() { removeAll(); } // PARTIAL: body added for System/CoordMan
-    SLContainerT<T>* getHead() { return m_pHeadContainer; } // PARTIAL: added for Game/Bullet/BulletManager
-    int getSize() { return m_nListSize; } // PARTIAL: added for System/Graphic/2d/2DSpr
-    // PARTIAL: added for Game/Enemy/BattleEnemyManager
+    virtual ~CSLCListT() { removeAll(); }
+    SLContainerT<T>* getHead() { return m_pHeadContainer; }
+    SLContainerT<T>* getTail(/* parameters unknown */);
+    int getSize() { return m_nListSize; }
     SLContainerT<T>* getHead() const { return m_pHeadContainer; }
     int getSize() const { return m_nListSize; }
-    // PARTIAL: added for System/CoordMan
+    SLContainerT<T>* pushFront(/* parameters unknown */);
     CSLCListT(ISLCManagerT<T>& inSLCManager) : m_SLCManager(inSLCManager) { resetParam(); }
     SLContainerT<T>* pushBack(T& inEntry) {
         SLContainerT<T>* pContainer = createContainer(inEntry);
@@ -91,8 +90,9 @@ public:
         }
         return FALSE;
     }
-    // PARTIAL: added for System/Task (name unknown): drops the containers whose value was cleared
-    void removeNull() {
+    SLContainerT<T>* insert(/* parameters unknown */);
+    /* drops the containers whose value was cleared */
+    void sweep() {
         SLContainerT<T>* pPrevContainer = NULL;
         SLContainerT<T>* pContainer = m_pHeadContainer;
         while (pContainer) {
@@ -114,7 +114,6 @@ public:
             pContainer = pNextContainer;
         }
     }
-    // PARTIAL: added for System/Graphic/2d/2DSpr
     SLContainerT<T>* replace(HANDLE hContainer, T& inEntry) {
         SLContainerT<T>* pPrevContainer = NULL;
         SLContainerT<T>* pContainer = m_pHeadContainer;
@@ -152,6 +151,9 @@ public:
         }
         resetParam();
     }
+
+    BOOL clearValue(/* parameters unknown */);
+    SLContainerT<T>* getContainer(/* parameters unknown */);
 
 protected:
     SLContainerT<T>* createContainer(T& inEntry) {
