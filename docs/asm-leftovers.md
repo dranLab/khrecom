@@ -44,7 +44,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Collision/CollUtil` | 5 | 1238 | 5 | .rodata |
 | `System/Rcf` | 11 | 1152 | 11 |  |
 | `Game/Enemy/HumanBoss` | 7 | 1088 | 7 |  |
-| `System/Graphic/PathData` | 2 | 1075 |  |  |
+| `System/Graphic/PathData` | 2 | 1075 | 2 |  |
 | `System/Graphic/DeFocus` | 3 | 1065 | 3 |  |
 | `System/Graphic/FrecFont` | 2 | 908 | 1 |  |
 | `Game/Gimmick/GimmickTreasureBox` | 4 | 908 | 4 | .rodata |
@@ -154,6 +154,8 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/ModelMan` | `setupDrawMode__9CModelMani` | 64 | (comment) setupDrawMode: near-match. The two halves of the first GIF tag get swapped registers ($v0/$v1). |
 | `System/Graphic/PackMan` | `_initFrameEffPacket__Fiiii` | 487 | 2 lines - case 2's two XYZ2 ORs: the original has the X register first (or v0,s2,v0 / or v0,t7,v0), ours puts the shifted Y first; x \| y and y \| x source order, a shared macro for the three cases, case 3's h/nh form with constant 12 and a 15 min permuter run (21k candidates) all stay at 2. |
 | `System/Graphic/PackMan` | `sceVif1PkCloseUpkCode__FP13pacVif1Packet` | 53 | ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 + 15 min … |
+| `System/Graphic/PathData` | `getNearPath__11CPathVectorR7FVECTORPfT2PiRC7FVECTORPC7FVECTORif` | 586 | 9 lines - fNearDis/fNearT get f27/f26 instead of f26/f27, and the hoisted 0.0f compare constant is a copy of fNearT's register (cse2 equivalence) instead of its own `mtc1 zero,$f24`; the copy adds a ref to fNearT, which then wins the allocation. A clobber-free sqc2 asm for vNearNv (cse flush) … |
+| `System/Graphic/PathData` | `dispDebugLine__11CPathVectori` | 489 | 2 lines - in the first 8-step loop the original issues `mov.s $f21,$f20` (the hoisted 0.125f step) after `addiu s3,sp,608` (&Line.P), ours before it (scheduler tie); everything else matches. tried: t init/step forms (for header, t = t + 0.125f, block scope, init before SubVectorXYZ), ib/k forms of … |
 | `System/Graphic/ShadowModel` | `drawBefore__15CShadowModelMan` | 188 | (comment) Near match (two instructions: the original updates the i 64 + 63 induction register at the end of the loop body, not after i++), kept for reference: |
 | `System/Graphic/TexUtil` | `takeSnapShot__8CTexUtilPCc` | 234 | 72 of 280 lines, 4 bytes short - structure as the original (default display env -> width/height/PSM via (INT)(u_long >> n) & mask, TIM2 file and picture headers, per-line StoreImage + writeFile). Left: the reserved-bytes loop (pointer + own counter in the original), the GsTex0 TBW/PSM/TW/TH writes … |
 | `System/Graphic/TexUtil` | `makeCustomClut__8CTexUtilPUlT1ii` | 163 | 20 of 168 lines, same size - up-counting j (the original's reversed count-down), *pSrc read per term (lbu for the low byte) and `iI \| (iI << 16 \| iI << 8)` fixed most of it. Left: the register order of case 1's three channel terms (the original computes the >> 8 term into a1 first) and two … |
@@ -274,7 +276,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Atel/AtelCrossFade` | `onCreateTexMemory__Q24ATEL14CAtelCrossFadeiPvi` | 34 | (comment) Near-match: the three TRACE/return paths are tail-merged here (one jal TRACE), separate in the original. |
 | `Game/Atel/AtelCrossFade` | `AnimColor__Q24ATEL14CAtelCrossFade` | 69 | (comment) Near-match: the original keeps the temporary vector at sp+0x20 in s0 (a 0x70 frame); here it is at sp. |
 | `Game/Atel/AtelCrossFade` | `drawCrossFadeImage__Q24ATEL14CAtelCrossFade` | 188 | (comment) Near-match: the second loop schedules the packet stores differently and hoists the GIF tag constant. |
-| `Game/Atel/Avatar` | `_$_Q24ATEL7CAvatar` | 95 | 6 lines - the implicit lineY/lineX destructor calls get s5/s4 instead of s4/s5: their address pseudos tie on priority (2 refs / 17 insns) and ours numbers lineX first (lreg dump); no body form changed it. The draft needs the full classes of Gprim.h (inline ~C3DLine/~CGPrim; was … |
+| `Game/Atel/Avatar` | `_$_Q24ATEL7CAvatar` | 95 | 6 lines - the implicit lineY/lineX destructor calls get s5/s4 instead of s4/s5: their address pseudos tie on priority (2 refs / 17 insns) and ours numbers lineX first (lreg dump); no body form changed it. The draft uses the full classes of Gprim.h (inline ~C3DLine/~CGPrim). |
 | `Game/Atel/Avatar` | `onMove__Q24ATEL7CAvatariPvi` | 297 | 8 lines - the original reads p->_nType once with lhu for nType and nFlag, keeps the signed slti and tests nType twice before setVel; INT nType (lw) is the only form with the original registers (USHORT loads move p/CEntity to other s-registers), permuter found nothing. |
 | `Game/Atel/Avatar` | `RotateAvatarMain__Q24ATEL7CAvatar` | 139 | 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an … |
 | `Game/Atel/Avatar` | `onAvatarAttachEffect__Q24ATEL7CAvatariPvi` | 56 | 4 lines - the original stores rot's zero quad (por/sq) first, before the callee saves; ours after the p->Type load. Init forms/orders and 6 min of permuter (8.8k candidates) did not change it. |
@@ -369,7 +371,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 343 functions (78505 instructions) in 84 units, 247 of them parked; 12 units take a data section from assembly.
+Totals: 343 functions (78505 instructions) in 84 units, 249 of them parked; 12 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

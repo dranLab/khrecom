@@ -77,6 +77,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/task-slc-message (CTaskSLCManager to TaskMan.h; TASK_H_NO_SLC_OVERFLOW_MSG and 22 placeholders gone; PackMan/Memoca stand-ins) | 859 | 82 | 18 | 766 (680) | 177 |
 | 2026-11-02 | cleanup/2DMan (C2DMan for every includer: 28 stand-ins + SaveLoadCtrl.h copy, gate and string placeholders dropped) | 851 | 54 | 17 | 763 (677) | 177 |
 | 2026-11-02 | cleanup/Gprim (Gprim's classes for every includer: 19 partial classes, the CZFill/CPolyGT4/C3DCPrim copies and the gate dropped; 5 callers on the ref API) | 822 | 52 | 0 | 760 (673) | 180 |
+| 2026-11-02 | decomp/System-Graphic-PathData (finished 47/49, dispDebugLine/getNearPath parked; A1: no stand-ins) | 822 | 52 | 0 | 760 (673) | 180 |
 
 <!-- partials:start -->
 ## Summary
