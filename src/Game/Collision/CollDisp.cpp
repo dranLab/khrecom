@@ -1,7 +1,7 @@
 
 #define COLLDISP_CPP
 #define COLLDISP_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollDisp.h"
-#define GPRIM_H_PATH "System/Graphic/Gprim.h"
+
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
 #include "Game/Collision/CollUtilA.h"
