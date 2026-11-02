@@ -3624,7 +3624,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
                 break;
             }
             case 15:
-                CShadowModelMan::setADensity(param1.F);
+                CShadowModelMan::setAlphaDensity(param1.F);
                 break;
             case 16:
                 new (__FILE__ "(2672)") CAtelTutorial(CTaskMan::getSysTask(0x1A));
@@ -3655,7 +3655,7 @@ INT CVSM::execExt3Code(INT op, eATEL_REQ_RET& ret) {
                 }
                 break;
             case 22:
-                CShadowModelMan::setCDensity(param1.F);
+                CShadowModelMan::setColorDensity(param1.F);
                 break;
             case 23:
                 m_pAtelCard = new (__FILE__ "(2713)") CAtelCardSeq(CTaskMan::getSysTask(0x1A), 0, param1.I, param2.I);
