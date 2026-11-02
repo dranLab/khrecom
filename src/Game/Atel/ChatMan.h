@@ -1,11 +1,11 @@
-// PARTIAL: added for System/RootTask
+
 #ifndef GAME_ATEL_CHATMAN_H
 #define GAME_ATEL_CHATMAN_H
 
 #include "khtypes.h"
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
-#include "System/Task.h" // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
+#include "System/Task.h"
 #include "Game/Atel/CommandAccepter.h"
 
 /* Includers define the placement operator new before including this header. */
@@ -20,8 +20,8 @@ class CChatWndDtList;
 #define CHATMAN_H_PATH "Game/Atel/ChatMan.h"
 #endif
 
-/* PARTIAL: bases CTask, ICommandAccepter (0x40) added for Game/Gimmick/GimmickTreasureBox (sizeof 0x50).
- * The inline members are emitted (weak) in Game/Atel/ChatMan.cpp, in this order: keep it. */
+/* The inline members are emitted (weak) in Game/Atel/ChatMan.cpp, in this order: keep it.
+ */
 class CChatMan : public CTask, public ICommandAccepter {
 private:
     static CChatMan* m_pInstance;
@@ -46,8 +46,8 @@ public:
         delete m_pInstance;
         m_pInstance = NULL;
     }
-    // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
-    /* PARTIAL: reference added for Form/Menu/WorldSelect (the load of m_pInstance stays after stores) */
+    /* MATCH: m_pInstance read through a reference (Form/Menu/WorldSelect: the load stays after stores)
+     */
 #line 57 CHATMAN_H_PATH
     static CChatMan& instance() { CChatMan*& instance = m_pInstance;
         if (!(instance)) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
@@ -106,23 +106,15 @@ private:
     INT createChatWindow(INT nCmd, void* pParam, INT nID, INT fg);
     INT onCreateChatWindow(INT nCmd, void* pParam, INT nID);
     INT onCreateChatWindowC(INT nCmd, void* pParam, INT nID);
-    INT onCreateChatWindowCTD(INT nCmd, void* pParam, INT nID);
     INT onDestroyChatWindow(INT nCmd, void* pParam, INT nID);
-    INT onDestroyChatWindowAll(INT nCmd, void* pParam, INT nID);
-    INT onSetLayerTutorial(INT nCmd, void* pParam, INT nID);
     INT onOpen(INT nCmd, void* pParam, INT nID);
-    INT onOpenDelay(INT nCmd, void* pParam, INT nID);
     INT onClose(INT nCmd, void* pParam, INT nID);
     INT onCheckStatus(INT nCmd, void* pParam, INT nID);
-    INT onCheckPhaseCnt(INT nCmd, void* pParam, INT nID);
     INT onClearText(INT nCmd, void* pParam, INT nID);
     INT onSetText(INT nCmd, void* pParam, INT nID);
-    INT onSetTextCTD(INT nCmd, void* pParam, INT nID);
-    INT onChangeTextNext(INT nCmd, void* pParam, INT nID);
     INT onSetTextDelay(INT nCmd, void* pParam, INT nID);
     INT onSetWndStyle(INT nCmd, void* pParam, INT nID);
     INT onChangeWndStyle(INT nCmd, void* pParam, INT nID);
-    INT onSetWndRate(INT nCmd, void* pParam, INT nID);
     INT onSetTextMargin(INT nCmd, void* pParam, INT nID);
     INT onSetFontSize(INT nCmd, void* pParam, INT nID);
     INT onSetFontSpace(INT nCmd, void* pParam, INT nID);
@@ -130,20 +122,28 @@ private:
     INT onSetTextColor(INT nCmd, void* pParam, INT nID);
     INT onSetTextEXColor(INT nCmd, void* pParam, INT nID);
     INT onChangeTextSelect(INT nCmd, void* pParam, INT nID);
-    INT onEnableLFDisp(INT nCmd, void* pParam, INT nID);
-    INT onChangeCursorColor(INT nCmd, void* pParam, INT nID);
-    INT onSetDispInterval(INT nCmd, void* pParam, INT nID);
-    INT onSetSelectOffset(INT nCmd, void* pParam, INT nID);
-    INT onChangeText(INT nCmd, void* pParam, INT nID);
-    INT onChangeTextCTD(INT nCmd, void* pParam, INT nID);
-    INT onEnableDisp(INT nCmd, void* pParam, INT nID);
-    INT onSetCharFadeInDelay(INT nCmd, void* pParam, INT nID);
-    INT onSetTextFadeOutTime(INT nCmd, void* pParam, INT nID);
-    INT onEnableDisp0(INT nCmd, void* pParam, INT nID);
-    INT onSetWords(INT nCmd, void* pParam, INT nID);
     INT onSetSystemPause(INT nCmd, void* pParam, INT nID);
     INT onCreateImageWindow(INT nCmd, void* pParam, INT nID);
+    INT onSetWndRate(INT nCmd, void* pParam, INT nID);
+    INT onChangeText(INT nCmd, void* pParam, INT nID);
     INT onInitPhaseImageWindow(INT nCmd, void* pParam, INT nID);
+    INT onSetSelectOffset(INT nCmd, void* pParam, INT nID);
+    INT onChangeCursorColor(INT nCmd, void* pParam, INT nID);
+    INT onSetDispInterval(INT nCmd, void* pParam, INT nID);
+    INT onCreateChatWindowCTD(INT nCmd, void* pParam, INT nID);
+    INT onChangeTextNext(INT nCmd, void* pParam, INT nID);
+    INT onEnableDisp(INT nCmd, void* pParam, INT nID);
+    INT onSetWords(INT nCmd, void* pParam, INT nID);
+    INT onSetTextCTD(INT nCmd, void* pParam, INT nID);
+    INT onChangeTextCTD(INT nCmd, void* pParam, INT nID);
+    INT onEnableDisp0(INT nCmd, void* pParam, INT nID);
+    INT onOpenDelay(INT nCmd, void* pParam, INT nID);
+    INT onCheckPhaseCnt(INT nCmd, void* pParam, INT nID);
+    INT onDestroyChatWindowAll(INT nCmd, void* pParam, INT nID);
+    INT onSetLayerTutorial(INT nCmd, void* pParam, INT nID);
+    INT onSetCharFadeInDelay(INT nCmd, void* pParam, INT nID);
+    INT onSetTextFadeOutTime(INT nCmd, void* pParam, INT nID);
+    INT onEnableLFDisp(INT nCmd, void* pParam, INT nID);
 };
 
 } // namespace ATEL
