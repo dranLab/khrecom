@@ -1533,7 +1533,7 @@ void pppPartDrawEnd() {
 }
 static void init_part_mng(pppMngSt *pMng) {
     memset(pMng, 0, sizeof(pppMngSt));
-    sceVu0UnitMatrix(pMng->u.parMat);
+    sceVu0UnitMatrix(pMng->parMat);
     pMng->usef = 8;
     pMng->parChrScl[3] = pMng->parChrScl[2] = pMng->parChrScl[1] = pMng->parChrScl[0] = pMng->parCol[3] =
         pMng->parCol[2] = pMng->parCol[1] = pMng->parCol[0] = pMng->parScl[3] = pMng->parScl[2] = pMng->parScl[1] =
@@ -1577,11 +1577,11 @@ int pppStartPartMng(void *mng, u_long128 *dpd, u_int dpd_id, int priority, float
 }
 
 sceVu0FMATRIX *pppPartMngGetMatrix(void *mng) {
-    return &((pppMngSt *)mng)->u.parMat;
+    return &((pppMngSt *)mng)->parMat;
 }
 
 sceVu0FVECTOR *pppPartMngGetPos(void *mng) {
-    return &((pppMngSt *)mng)->u.s.parLoc;
+    return &((pppMngSt *)mng)->parLoc;
 }
 
 sceVu0FVECTOR *pppPartMngGetScl(void *mng) {

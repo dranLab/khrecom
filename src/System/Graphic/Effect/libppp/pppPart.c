@@ -254,7 +254,7 @@ void pppSetMatrix(pppMngSt *mng) {
     sceVu0FVECTOR v;
     int i;
 
-    sceVu0CopyMatrix(ppvParMatrix, mng->u.parMat);
+    sceVu0CopyMatrix(ppvParMatrix, mng->parMat);
     SCALE_VECTOR_XYZ(ppvParMatrix[0], mng->parScl[0]);
     SCALE_VECTOR_XYZ(ppvParMatrix[1], mng->parScl[1]);
     SCALE_VECTOR_XYZ(ppvParMatrix[2], mng->parScl[2]);
