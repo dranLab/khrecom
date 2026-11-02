@@ -494,7 +494,7 @@ public:
         m_nSize = 0;
     }
     void setSize(INT nSize);
-    INT getSize();
+    INT getSize() { return m_nSize; }
     virtual void changeLayerExt(BOOL bOn, INT nDepth) { setLayer(0x17, 0); }
     virtual FIX4 calcZ() { return 0; }
 };
