@@ -145,7 +145,7 @@ void CNowLoading::setupSprite() {
     }
     m_nX = 208;
     m_nY = (*(INT*)&SCREEN_HEIGHT >> 1) - 48; /* through a pointer: load stays after the m_nX store */
-    m_pSprite->setXY(m_nX << 4, m_nY << 4);
+    m_pSprite->m_P0.set(m_nX << 4, m_nY << 4);
     m_pSprite->setSemiTrans(1);
     m_pSprite->setLayerFG(24);
     m_pSprite->m_C0.a = 0;

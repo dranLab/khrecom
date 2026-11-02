@@ -278,15 +278,15 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
 #define ASSERT_AT(line, e) if (!(e)) AssertApp(__FILE__, line, #e, 0)
 
-class CZFill : public CGPrim {
-public:
-    INT m_nZ;
-    CZFill() { m_nZ = 0; }
-    virtual ~CZFill();
-    virtual UINT getPacketSize() const;
-private:
-    virtual void makePkt();
-};
+
+
+
+
+
+
+
+
+
 
 
 
