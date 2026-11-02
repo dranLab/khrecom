@@ -82,6 +82,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/System-Graphic-FrecFont (finished, makePkt and setupFontTex parked; A1: RsrcInfo stand-in reason) | 824 | 50 | 0 | 760 (673) | 180 |
 | 2026-11-02 | cleanup/System-RsrcData (RsrcData classes for every includer: gate RSRCDATA_H_FULL and 15 files of stand-ins dropped; DWTBGM.h namespace MATCH) | 820 | 27 | 0 | 757 (670) | 181 |
 | 2026-11-02 | decomp/System-Graphic-ShadowModel (finished: getScreenAreaClipToWorldPos matched, drawBefore parked; A1: no foreign stand-ins) | 820 | 27 | 0 | 757 (670) | 181 |
+| 2026-11-02 | decomp/System-Graphic-2d-2DSprObj (finished: move drafted to 25 lines and parked, initForSeq retried; A1: no foreign stand-ins) | 820 | 27 | 0 | 757 (670) | 181 |
 
 <!-- partials:start -->
 ## Summary
