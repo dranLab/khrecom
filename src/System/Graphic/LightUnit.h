@@ -42,7 +42,11 @@ public:
         m_pManager = NULL;
         inUse = -1;
     }
-    ~CEffectLight() { close(); } // PARTIAL: added for System/Graphic/WorldEnv
+    ~CEffectLight() { close(); }
+    void setPosition(/* parameters unknown */);
+    void setColor(/* parameters unknown */);
+    void setStartEnd(/* parameters unknown */);
+    void setParam(/* parameters unknown */);
     void close();
     BOOL isClosed() { return inUse < 0; }
     INT getID() { return inUse; }
@@ -65,9 +69,6 @@ private:
 public:
     CEffectLightMan();
     CEffectLight* getBlankLight();
-    CEffectLight* seekNextActiveLight();
-    void reset();
-    // PARTIAL: added for System/Graphic/WorldEnv
     CEffectLight* getLight(UINT nIndex) {
         if (nIndex < 32) return &m_LightTbl[nIndex];
         return NULL;
@@ -77,6 +78,8 @@ public:
         m_nLightIndex = 0;
         m_nLightSeekMask = -1;
     }
+    CEffectLight* seekNextActiveLight();
+    void reset();
 
 protected:
     void closeLight(UINT n) {
@@ -120,18 +123,17 @@ public:
         _calc(ctr);
     }
     void calc() { m_iFlags &= ~1; }
+    /* MATCH: types.h lists a second calc() without parameters: the BOOL is a guess, the body is what Model inlines */
+    void calc(BOOL bInCheck) {
+        if (!isCalc()) _calc();
+    }
     BOOL isCalc() { return m_iFlags & 1; }
     void setAmbient(const FVECTOR& in_color);
     void setLight(INT idx, FVECTOR in_light, FVECTOR in_color);
     virtual POINTLIGHTPACKED* getPointLightData() const { return NULL; }
-    // PARTIAL: added for System/Graphic/Effect/effect (original names unknown)
-    const FVECTOR& getAmbient() const { return m_Ambient; }
-    const FMATRIX& getColor() const { return m_Color; }
+    void affectMapLight(/* parameters unknown */);
+    void affectObjLight(/* parameters unknown */);
     void betaShade(FVECTOR& out, const FVECTOR& in);
-    // PARTIAL: added for System/Graphic/Model (types.h lists a second calc() and these getters; bodies guessed)
-    void calc(BOOL bInCheck) {
-        if (!isCalc()) _calc();
-    }
     FMATRIX& getLightMatrix() { return m_Light; }
     FMATRIX& getColorMatrix() { return m_Color; }
     FVECTOR& getAmbientVector() { return m_Ambient; }
