@@ -88,17 +88,19 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/Game-EffectMotion (finished: EFFECTMOTION_SOURCE_RODATA gate dropped, updateAttachEffect_ in park form) | 820 | 27 | 0 | 757 (670) | 181 |
 | 2026-11-02 | decomp/System-RcfCD (finished: 4 parked, drafts at 4/4-8/31/4 lines; _startCdRead non-deterministic) | 820 | 27 | 0 | 757 (670) | 181 |
 | 2026-11-02 | decomp/Game-Atel-CameraMan (finished: main matched, no asm left; A2: path overrides MATCH-tagged, redundant GPRIM_H_PATH dropped) | 819 | 27 | 0 | 756 (667) | 184 |
+| 2026-11-02 | decomp/Game-Movement (ctor draft to the constant-pool form, 53 lines, still parked; A2: COLLUTIL_H_PATH MATCH, GPRIM_H_PATH dropped) | 819 | 27 | 0 | 755 (665) | 185 |
+| 2026-11-02 | cleanup/GPRIM_H_PATH (defines equal to Gprim.h's default dropped in 2DSprObj, CollDisp) | 819 | 27 | 0 | 753 (663) | 185 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 819 (766 in 110 headers, 53 in 33 .cpp); MATCH: 184
+PARTIAL: 819 (766 in 110 headers, 53 in 33 .cpp); MATCH: 185
   by category: method 315, data member 62, type 72, fwd decl 49, #include 30, changed in place 121, padding 8, path override 21, gate 19, guessed 29, header-level 71, stand-in 16, other 6
 stand-ins: 27 foreign in 18 files (20 names), 201 unattributed, 167 own
 duplicate class names across headers: 0
 padding: 14 arrays, 0 accessors
-mechanisms: 756 sites (667 untagged); #line: 1244
+mechanisms: 753 sites (663 untagged); #line: 1244
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 608, superset 141, partial 112, gated 26, missing 8, unattributed 309
 ```
@@ -371,13 +373,13 @@ or `untagged`.
 | path override | `CARD_H_PATH` | 6 | 1 | the original's Card.h/Status.h strings carry |
 | path override | `CHATMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/ChatMan.cpp:2 |
 | path override | `COLLDISP_H_PATH` | 4 | 0 | untagged, e.g. Game/Collision/CollDisp.cpp:3 |
-| path override | `COLLUTIL_H_PATH` | 14 | 1 | __FILE__ as in the original .rodata |
+| path override | `COLLUTIL_H_PATH` | 14 | 2 | __FILE__ as in the original .rodata |
 | path override | `CTDMAN_H_PATH` | 6 | 1 | the original spelled this include with the full path ("c:/KHCOM/...", "System/CTD") |
 | path override | `D2MAN_H_PATH` | 10 | 0 | untagged, e.g. System/Graphic/2d/2DCard.cpp:3 |
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
 | path override | `EFFECT_H_PATH` | 5 | 0 | untagged, e.g. Game/Enemy/EnemyBarrelspider.cpp:4 |
 | path override | `FSM_H_PATH` | 1 | 0 | untagged, e.g. System/Fsm.cpp:1 |
-| path override | `GPRIM_H_PATH` | 164 | 9 | the collision classes come after CMapEnemy (their vtables precede its own) |
+| path override | `GPRIM_H_PATH` | 161 | 9 | the collision classes come after CMapEnemy (their vtables precede its own) |
 | path override | `LINKEDBUF_H_PATH` | 4 | 1 | __FILE__ as in the original .rodata |
 | path override | `MAPUNIT_H_PATH` | 1 | 0 | untagged, e.g. System/Graphic/MapUnit.cpp:5 |
 | path override | `MODELDATA_H_PATH` | 8 | 2 | TexInfoStub (the original has its assert strings) |
