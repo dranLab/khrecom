@@ -20,6 +20,7 @@ public:
     }
     virtual void releaseContainer(SLContainerT<CTask>& inContainer) { releaseBlock(&inContainer); }
     virtual SLContainerT<CTask>* getContainer(HANDLE hID) { return (SLContainerT<CTask>*)getValidActiveBlock(hID); }
+    CTask* getTask(/* parameters unknown */);
     void debugDump(UINT nStartIndex, UINT nEndIndex) { CFifoFpl::debugDump(nStartIndex, nEndIndex); }
 };
 

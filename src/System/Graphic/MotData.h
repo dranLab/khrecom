@@ -16,6 +16,10 @@ struct QUATERNION_DT {
     QUATERNION vQuatRotate;
     FVECTOR vTrans;
     FVECTOR vScale;
+
+    void set(/* parameters unknown */);
+    void invalidity(/* parameters unknown */);
+    BOOL isEffective(/* parameters unknown */);
 };
 
 typedef struct {

@@ -371,6 +371,7 @@ private:
 
 public:
     CRsrcCAM(const RsrcInfo& info, CBuf& data) : CRsrcData(info, data) { _setupDataCAM(); }
+    INT getCAMCount(/* parameters unknown */);
 };
 
 class CRsrcDLL : public CRsrcData {

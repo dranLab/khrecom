@@ -180,6 +180,11 @@ union AREA_SCENE {
         _nArea = nArea;
         _nScene = nScene;
     }
+    BOOL operator==(const AREA_SCENE& in) const;
+    BOOL operator!=(const AREA_SCENE& in) const;
+    void set(/* parameters unknown */);
+    void clear(/* parameters unknown */);
+    BOOL isEmpty(/* parameters unknown */);
 };
 
 enum GAMEMODE {

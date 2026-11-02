@@ -177,6 +177,7 @@ public:
     BOOL notifyRide();
     void land(FLOAT inDownLength, FLOAT inUpLength, BOOL inFirstHit);
     void updateVelocity();
+    static void setExternalForce(/* parameters unknown */);
 
 private:
     void calcPos_();

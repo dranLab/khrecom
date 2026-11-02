@@ -38,6 +38,7 @@ public:
     static FVECTOR& getColor(INT nCh);
     static ObjType::eObjBit getColorTypeBit(INT nCh);
     static void setStop(ObjType::eObjBit iBit);
+    static void clearStop(/* parameters unknown */);
     static ObjType::eObjBit getStopTypeBit();
     static ObjType::eObjBit getStopAndRequestTypeBit();
     static BOOL getStopRequestTypeBit(ObjType::eObjBit* pOutStopBit);

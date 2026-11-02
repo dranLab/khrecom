@@ -15,6 +15,9 @@ union ISVECTOR {
     };
     ULONGLONG _u64;
     LONGLONG _s64;
+
+    void set(/* parameters unknown */);
+    void init0(/* parameters unknown */);
 };
 
 struct ZONEPARTS {
