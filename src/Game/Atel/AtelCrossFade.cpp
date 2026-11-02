@@ -93,7 +93,7 @@ void CAtelCrossFade::main() {
 }
 
 #line 99
-/* Placeholder: re-emits onCreateTexMemory's string literals (it is INCLUDE_ASM'd), in their place in .rodata. */
+/* MATCH: Placeholder: re-emits onCreateTexMemory's string literals (it is INCLUDE_ASM'd), in their place in .rodata. */
 inline void _crossFadeTexMemoryStrings() {
     com_malloc_d(0, __FILE__ "(104)", 0);
     TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\x8e\xb8\x94s\x81I\x81I\n");

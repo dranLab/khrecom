@@ -9,7 +9,7 @@
 #include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
 #include "System/Graphic/Str.h"
-/* Placeholders: three empty strings follow Str.h's strings in .rodata (as in GimmickBell); which headers they
+/* MATCH: Placeholders: three empty strings follow Str.h's strings in .rodata (as in GimmickBell); which headers they
  * come from is not known. */
 inline void _emptyStringPlaceholder0() {
     TRACE("");

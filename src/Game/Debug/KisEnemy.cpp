@@ -10,7 +10,7 @@
 #include "System/Graphic/Anim.h"
 #include "System/Graphic/Str.h"
 
-/* Placeholder: .rodata has an empty string literal after Str.h's strings (from an unidentified header). */
+/* MATCH: Placeholder: .rodata has an empty string literal after Str.h's strings (from an unidentified header). */
 inline void _kisEnemyEmptyString() {
     TRACE("");
 }

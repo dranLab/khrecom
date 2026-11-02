@@ -9,7 +9,7 @@
 #include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
 
-/* Placeholders: two empty strings follow CardBattle.h's strings in .rodata. */
+/* MATCH: Placeholders: two empty strings follow CardBattle.h's strings in .rodata. */
 inline void _emptyStringPlaceholder0() {
     TRACE("");
 }

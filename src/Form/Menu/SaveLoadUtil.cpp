@@ -8,7 +8,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 
-/* Placeholder: an empty string follows CollUtil.h's strings in .rodata (as in LevelUp/WorldSelect); which header
+/* MATCH: Placeholder: an empty string follows CollUtil.h's strings in .rodata (as in LevelUp/WorldSelect); which header
  * it comes from is not known. phaseSaveGameData's "" shares it. */
 inline void _emptyStringPlaceholder() {
     TRACE("");

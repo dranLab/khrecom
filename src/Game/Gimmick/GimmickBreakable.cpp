@@ -12,7 +12,7 @@
 #include "Game/Gimmick/GimmickManager.h"
 #include "Game/LockOnManager.h"
 
-/* Placeholder: the last header string in .rodata is an empty string, after CollUtil.h's (the same in
+/* MATCH: Placeholder: the last header string in .rodata is an empty string, after CollUtil.h's (the same in
  * Game/Enemy/EnemyWyvern); which header it comes from is not known. */
 inline void _emptyStringPlaceholder() {
     TRACE("");

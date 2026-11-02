@@ -50,7 +50,7 @@ static CHAR* MoogleShopPack = "MogCardPack";
 #include "Form/Menu/SaveLoadCtrl.h"
 #include "Game/Enemy/HumanBoss.h"
 #include "System/Graphic/Anim.h"
-/* Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header, as in Game/Enemy/CreateEnemy). */
+/* MATCH: Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header, as in Game/Enemy/CreateEnemy). */
 inline void _vsmeMotionName() {
     TRACE("e123_062");
 }

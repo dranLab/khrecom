@@ -11,7 +11,7 @@
 #include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
 
-/* Placeholder: an empty string follows CardBattle.h's strings in .rodata (an unknown header's inline function). */
+/* MATCH: Placeholder: an empty string follows CardBattle.h's strings in .rodata (an unknown header's inline function). */
 inline void _emptyStringPlaceholder() {
     TRACE("");
 }

@@ -15,7 +15,7 @@
 #include "Game/CardBattle.h"
 #include "Game/Technic.h"
 
-/* Placeholder: an empty string follows Technic.h's strings in .rodata; which header it comes from is not known. */
+/* MATCH: Placeholder: an empty string follows Technic.h's strings in .rodata; which header it comes from is not known. */
 inline void _emptyStringPlaceholder() {
     TRACE("");
 }
@@ -315,7 +315,7 @@ CWorldCardSeq::CWorldCardSeq(CTask* pParent, INT in_CreateType) : CTask(pParent,
     for (INT i = 0; i < 5; i++) m_pCard[i] = NULL;
 }
 
-/* Placeholder: __FILE__ precedes the destructor's message in .rodata (used later by changeState's assert). */
+/* MATCH: Placeholder: __FILE__ precedes the destructor's message in .rodata (used later by changeState's assert). */
 inline void _filePlaceholder() {
     AssertApp(__FILE__, 0, 0, 0);
 }

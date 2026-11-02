@@ -9,7 +9,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 
-/* Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). */
+/* MATCH: Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). */
 inline void _enemyBluerhapsodyEmptyString() {
     TRACE("");
 }

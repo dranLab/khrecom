@@ -7,7 +7,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 
-/* Placeholder: an empty string follows CollUtil.h's strings in .rodata (as in GimmickPlantChild); which
+/* MATCH: Placeholder: an empty string follows CollUtil.h's strings in .rodata (as in GimmickPlantChild); which
  * header it comes from is not known. */
 inline void _emptyStringPlaceholder() {
     TRACE("");

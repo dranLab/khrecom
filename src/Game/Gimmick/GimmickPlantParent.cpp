@@ -9,7 +9,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 
-/* Placeholders: three empty strings, then System/TaskMan.h's container overflow message, follow
+/* MATCH: Placeholders: three empty strings, then System/TaskMan.h's container overflow message, follow
  * CollUtil.h's strings in .rodata (as in GimmickWarpPoint); which headers they come from is not known. */
 inline void _emptyStringPlaceholder0() {
     TRACE("");

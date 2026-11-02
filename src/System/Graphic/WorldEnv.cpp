@@ -147,7 +147,7 @@ void CWorldEnv::initialize() {
     _pEffLightMan = new (com_malloc_d(sizeof(CEffectLightMan), __FILE__ "(107)", RET_ADDR())) CEffectLightMan;
 }
 #endif
-/* placeholder for initialize's .rodata (its allocation messages) */
+/* MATCH: placeholder for initialize's .rodata (its allocation messages) */
 inline void _initializeStrings() {
     com_malloc_d(0, __FILE__ "(103)", 0);
     com_malloc_d(0, __FILE__ "(104)", 0);
