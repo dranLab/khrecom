@@ -507,7 +507,7 @@ void CPlayerManager::procPlayerDead() {
         CGame::reqWhiteFadeIn(10);
         CPackMan::setFrameEffect(2, 0, 0, 0);
         CPlaySpeedCtrl::setPlaySpeed(0.1f);
-        pPlayer->getPlayerCamera()->setFlag(0x20, TRUE);
+        pPlayer->getPlayerCamera()->setFlag(0x20, 0);
         m_pPathCamera = new (com_malloc_d(0x110, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(892)", RET_ADDR()))
             CPathCamera(pPlayer);
         if (!m_pPathCamera) AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 893, "m_pPathCamera", 0);
@@ -537,7 +537,7 @@ void CPlayerManager::procPlayerDead() {
             m_pCollMapCamera->off();
             m_pPathCamera->out();
             m_pPathCamera = NULL;
-            pPlayer->getPlayerCamera()->setFlag(0x20, FALSE);
+            pPlayer->getPlayerCamera()->setFlag(0, 0x20);
         } else {
             FVECTOR pos;
             pos.init();

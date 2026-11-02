@@ -1304,12 +1304,12 @@ void CPlayer::chkAtelControl() {
     if (CGameWork::getFlag(1, 5)) {
         if (isControl()) {
             m_uiPadFlag = (INT)m_uiPadFlag & ~1;
-            m_pCam->setFlag(1, TRUE);
+            m_pCam->setFlag(1, 0);
         }
     } else {
         if (!isControl()) {
             enableControl();
-            m_pCam->setFlag(1, FALSE);
+            m_pCam->setFlag(0, 1);
         }
     }
 }
@@ -1768,7 +1768,7 @@ void CPlayer::beginStateHide() {
     if (m_bIsBattleScene) setAnimForce(0x2A, 0, 0, 0, 0, 0);
     else setAnimForce(1, 0, 0, 0, 0, 0);
     setPlayerFlag(0x401001, 0);
-    m_pCam->setFlag(1, TRUE);
+    m_pCam->setFlag(1, 0);
 }
 void CPlayer::stateHide() {
     setPlayerFlag(0x400000, 0);
@@ -1782,7 +1782,7 @@ void CPlayer::endStateHide() {
     setPlayerFlag(0, 0x1001);
     setLand(5.0f, 0.5f, 1);
     clearSpeed();
-    m_pCam->setFlag(1, FALSE); /* the partial CPlayerCamera keeps (flag, on/off): the original is setFlag(0, 1) */
+    m_pCam->setFlag(0, 1);
 }
 BOOL CPlayer::isNowInAir() {
     m_bAirCheck = FALSE;
@@ -1886,7 +1886,7 @@ void CPlayer::initStartWait() {
     m_hTarget = 0;
     m_hLockon = 0;
     m_hGimmick = 0;
-    m_pCam->setFlag(1, TRUE);
+    m_pCam->setFlag(1, 0);
 }
 void CPlayer::exeStartWait() {
     if (m_bIsBattleScene) {
@@ -1899,7 +1899,7 @@ void CPlayer::exeStartWait() {
     if (getTimer() > 0) return;
     if (CGameWork::getFlag(1, 5)) return;
     enableControl();
-    m_pCam->setFlag(1, FALSE); // partial CPlayerCamera: (flag, on)
+    m_pCam->setFlag(0, 1);
     setPlayerFlag(0, 1);
     m_pMarker->setFlag(TRUE);
     if (!isAir()) initStandUp(0);
@@ -2612,7 +2612,7 @@ void CPlayer::initLadder(INT inStep) {
     m_iLadderStepMax = getLadderStepNow(m_vLadderPos.y + m_pMove->getLadderHeight()) - 4;
     m_JumpState = 6;
     m_pMove->setFlag(0, 0x40);
-    m_pCam->setFlag(8, TRUE);
+    m_pCam->setFlag(8, 0);
 }
 void CPlayer::exeLadder() {
     setPlayerFlag(0x400000, 0);
@@ -3244,7 +3244,7 @@ void CPlayer::initHang() {
     updateCoord();
     coordFix();
     m_pMove->setFlag(0, 0x40); // partial CMovement: (flag, on)
-    m_pCam->setFlag(2, TRUE);      // partial CPlayerCamera: (flag, on)
+    m_pCam->setFlag(2, 0);
     m_JumpState = 6;
     clearSpeed();
     m_fJumpSpdY = 0.0f;
@@ -3580,7 +3580,7 @@ void CPlayer::initRoomCreation() {
     setPos(pos);
     setLand(1.0f, 0.5f, 1);
     m_pCam->initCamera(1, 1, NULL);
-    m_pCam->setFlag(1, TRUE);
+    m_pCam->setFlag(1, 0);
 }
 void CPlayer::exeRoomCreation() {
     setPlayerFlag(0x400000, 0);
@@ -3597,7 +3597,7 @@ void CPlayer::exeRoomCreation() {
             m_iSubState = 4;
             setTrgFlag(0, 0x8000);
             m_WalkMode = 0;
-            m_pCam->setFlag(1, FALSE);
+            m_pCam->setFlag(0, 1);
             m_bDmgMuteki = FALSE;
             m_collBody.on();
             initStandUp(0);
@@ -3664,7 +3664,7 @@ void CPlayer::initWorldSelect() {
     setPos(pos);
     setOldPos(pos);
     m_pCam->initCamera(1, 1, NULL);
-    m_pCam->setFlag(1, TRUE);
+    m_pCam->setFlag(1, 0);
 }
 void CPlayer::exeWorldSelect() {
     setPlayerFlag(0x400000, 0);
@@ -3681,7 +3681,7 @@ void CPlayer::exeWorldSelect() {
             m_iSubState = 4;
             setTrgFlag(0, 0x8000);
             m_WalkMode = 0;
-            m_pCam->setFlag(1, FALSE);
+            m_pCam->setFlag(0, 1);
             m_bDmgMuteki = FALSE;
             m_collBody.on();
             initStandUp(0);
@@ -3718,7 +3718,7 @@ void CPlayer::initCarry() {
     clearSpeed();
     offWeapon();
     setAnimForce(0x17, 0, 0, 0, 0, 0);
-    m_pCam->setFlag(0x800, TRUE); /* the partial CPlayerCamera keeps (flag, on/off): the original is setFlag(0x800, 0) */
+    m_pCam->setFlag(0x800, 0);
 }
 void CPlayer::exeCarry() {
     TIMEQ frameTQ;
@@ -3814,7 +3814,7 @@ void CPlayer::exeCarry() {
             m_hGimmick = 0;
             m_pMarker->holdTarget(0);
         } else {
-            m_pCam->setFlag(0x800, TRUE);
+            m_pCam->setFlag(0x800, 0);
             if (isMotionEnd()) {
                 m_hGimmick = 0;
                 m_iSubState = 4;
@@ -5923,7 +5923,7 @@ void CPlayer::exeDead() {
         setPlayerFlag(0x1001, 0);
         m_iSubState = 4;
         addHP(m_iMaxHP / 4, 0x1770, 1);
-        m_pCam->setFlag(1, FALSE);
+        m_pCam->setFlag(0, 1);
         if (m_pCB) CardBattle::CCardBattle::decEnchantTime(1, 0x28, 0x2E);
         CSound::playSE(0x5C, -1, 0x40);
         setAnimForce(0x28, -1, 0, 0, 0, 0);
@@ -6610,13 +6610,13 @@ void CPlayer::initEscape() {
     m_pRevolver = NULL;
     CGameWork::setInt(1, 0xE2, -1);
     setBGFade(0.0f, 60.0f, 1);
-    m_pCam->setFlag(1, TRUE);      // partial CPlayerCamera: (flag, on)
-    m_pCam->setFlag(0x1000, TRUE);
+    m_pCam->setFlag(1, 0);
+    m_pCam->setFlag(0x1000, 0);
     if (getPos().z < 0.0f) m_vStartPos.z = 0.0f;
 }
 void CPlayer::exeEscape() {
     setPlayerFlag(0x400000, 0);
-    m_pCam->setFlag(0x1000, TRUE); /* the partial CPlayerCamera keeps (flag, on/off): the original is setFlag(0x1000, 0) */
+    m_pCam->setFlag(0x1000, 0);
     if (!m_iSubState) {
         m_tqEscape += m_tqFrameRate;
         if (m_tqEscape >= 2501) {
@@ -7375,7 +7375,7 @@ INT CPlayer::notifyBossDead(INT inCmd) {
         _instance()->setBattleFlag(0x04000004, 0);
         _instance()->initEnd();
         CSceneEnv::setStop((ObjType::eObjBit)0x20002);
-        _instance()->m_pCam->setFlag(0x20, TRUE);
+        _instance()->m_pCam->setFlag(0x20, 0);
         break;
     case 1:
         CSceneEnv::setStop((ObjType::eObjBit)0);

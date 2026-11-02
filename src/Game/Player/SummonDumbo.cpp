@@ -128,7 +128,7 @@ void CSummonDumbo::stateAction1() {
     case 3:
         if (isMotionEnd()) {
             changeMotion(4, 0, 1, -1, m_uiLevel, 0, m_uiLevel);
-            m_pPlayer->getPlayerCamera()->setFlag(0x800, 1);
+            m_pPlayer->getPlayerCamera()->setFlag(0x800, 0);
         }
         break;
     case 5:
@@ -148,7 +148,7 @@ void CSummonDumbo::stateAction1() {
         else x = (x - 0.25f) * m_pAtkData->WORK0 * 0.1f * getFrameRateF() * 0.017453292f;
         rot.y = _limitPI(rot.y - x);
         speed *= 0.5f;
-        m_pPlayer->getPlayerCamera()->setFlag(0x800, 1);
+        m_pPlayer->getPlayerCamera()->setFlag(0x800, 0);
     }
     setRot(rot);
     m_fDir = rot.y;
