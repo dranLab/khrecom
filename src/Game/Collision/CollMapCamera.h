@@ -11,7 +11,9 @@ class CCollisionList;
 class CCollMapCamera : public CCollMap {
 public:
     static CCMCSemiModelList* m_pSemiModelList;
-    static BOOL m_fgForceStop; // PARTIAL: public for Form/Menu/WorldSelect (private in the original)
+
+private:
+    static BOOL m_fgForceStop;
 
 private:
     BOOL m_fgListExist; /* 0x2c */
@@ -29,7 +31,6 @@ public:
 
 private:
     INT collideRide(CCollisionList* pList, INT fgTrue);
-public: // PARTIAL: public for Form/Menu/WorldSelect (private in the original)
     static void clearList();
 };
 

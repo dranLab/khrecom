@@ -593,8 +593,7 @@ void CWorldSelect::main() {
         m_pPathCamera->setLocal(TRUE);
         m_pPathCamera->init("world_cr_01", TRUE, FALSE, 0x80);
         m_pPathCamera->run();
-        CCollMapCamera::m_fgForceStop = TRUE;
-        CCollMapCamera::clearList();
+        CCollMapCamera::setFgForceStop(TRUE);
         CSound::playSE(0x4F, -1, 0x40);
         m_fTimer = 240.0f;
         m_nStep++;
