@@ -214,7 +214,7 @@ void CPlayerDRiku::stateInitial() {
     setConditionFlag(0x200000, 0x2000000);
     setConditionFlag(0x400000, 0);
     setTrgFlag(0, 0x100000);
-    m_pCB->setFlag(0, 0x400000);
+    m_pCB->disableDuelEntry(0);
     if (CGameWork::getFlag(1, 0)) {
         changeState(3);
     }
@@ -240,7 +240,7 @@ void CPlayerDRiku::beginStateBattle() {
         g_uiStartCondition = 0;
     }
     if (m_pCB) {
-        m_pCB->setFlag(0, 0x400000);
+        m_pCB->disableDuelEntry(0);
     }
 }
 
@@ -461,7 +461,7 @@ void CPlayerDRiku::exeTransform() {
         m_pCam->changeCamMode(3, 0);
         enableControl();
         m_pMarker->setFlag(TRUE);
-        m_pCB->setFlag(0, 0xc0000000);
+        m_pCB->disablePlayCard(0);
         break;
     case 4:
         if (m_pCB) {
@@ -558,7 +558,7 @@ void CPlayerDRiku::transferControl() {
     m_pGauge->setDMode(1, m_iDP, m_iMaxDP);
     m_pCB = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
     m_pCB->transferPlayerEnchant(m_pRiku);
-    m_pCB->setFlag(0, 0x400000);
+    m_pCB->disableDuelEntry(0);
     m_pRevolver = m_pRiku->m_pRevolver;
     m_pRevolver->changeDarkMode(getHandle(), 1);
     setConditionFlag(0, 0x881803f);
