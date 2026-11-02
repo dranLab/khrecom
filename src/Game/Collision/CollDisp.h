@@ -1,4 +1,3 @@
-// PARTIAL: added for Game/Debug/KisEnemy
 #ifndef GAME_COLLISION_COLLDISP_H
 #define GAME_COLLISION_COLLDISP_H
 
@@ -6,51 +5,15 @@
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
 
-/* Placeholders for CCollDisp's inline singleton constructor/creation: their strings
- * ("Game/Collision/CollDisp.h", "__null == m_pInstance", "Game/Collision/CollDisp.h(49)", "m_pInstance")
- * are in .rodata of every includer. Only line 49 is known (it is part of the allocation message). */
-/* PARTIAL: path override added for Game/GameSubField ("c:/KHCOM/MainApp/Game/Collision/CollDisp.h") */
-#ifndef COLLDISP_H_PATH
+#ifndef COLLDISP_H_PATH /* MATCH: CollDisp, GameSubField, GameSubBattle and Entity name it "c:/KHCOM/MainApp/Game/Collision/CollDisp.h" */
 #define COLLDISP_H_PATH "Game/Collision/CollDisp.h"
 #endif
-/* Game/Collision/CollDisp.cpp defines the full classes and the real inline functions itself. */
-#ifndef COLLDISP_CPP
-#line 1 COLLDISP_H_PATH
-inline void _collDispCheckInstance(void* inInstance) {
-    if (!(__null == inInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-}
-inline void* _collDispCreate() {
-    void* p = com_malloc_d(4, __FILE__ "(49)", (UINT)-1);
-    if (!p) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
-    return p;
-}
-
-// PARTIAL: added for Game/Bullet/Bullet
-class CTask;
-class CCollDisp {
-private:
-    UBYTE _pad[0x60]; /* PARTIAL: the original derives from CTask (size 0x60) */
-public:
-    // PARTIAL: added for Game/GameSubField (create/destroy are inline in the original)
-    CCollDisp(CTask* pParent, INT nDisp, INT nMapZoneDisp);
-    static CCollDisp* m_pInstance;
-    static BOOL m_fgDisp;
-    // PARTIAL: added for Form/DebugWindowTBL
-    static UINT m_fgMapZoneDisp;
-    static SHORT m_bMapZoneColR;
-    static SHORT m_bMapZoneColG;
-    static SHORT m_bMapZoneColB;
-};
-// PARTIAL: added for Game/Entity
-class CRideModel;
-class CCollRideModelDisp {
-private:
-    UBYTE _pad[0x60]; /* PARTIAL: the original derives from CTaskSecondary (size 0x60) */
-public:
-    CCollRideModelDisp(CTask* inBo, CRideModel* inRideModel, BOOL inAutoUpdate);
-};
-
-#else /* COLLDISP_CPP */
+#include "System/Task.h"
+#include "System/Vector.h"
+class CCollisionList;
+class CCoord;
+/* PARTIAL: operator new for CCollDisp::initialize's allocation, declared only: the includers define it themselves */
+inline void* operator new(size_t size, char* msg) throw();
 
 class CCollObj;
 class C3DCPrim;
@@ -61,7 +24,7 @@ class CRideModel;
 class CCollDispMapZone;
 
 class CCollDisp : public CTaskSecondary {
-    friend void _setBodyLines(CCollDisp* pThis, class CCollisionList* pList);
+    friend void _setBodyLines(CCollDisp* pThis, class CCollisionList* pList); /* MATCH: data placeholder of the parked setBodyLines */
 public:
     static CCollDisp* m_pInstance;
     static INT m_fgDisp;
@@ -116,7 +79,7 @@ private:
     MCD_INFO* m_pInfo;   /* 0x48 */
     INT m_iChipNum;      /* 0x4c */
     UINT m_uiLineCol;    /* 0x50 */
-    UINT m_fgQuit;       /* 0x54 */
+    UINT m_uiQuitReq;    /* 0x54 */
 
 public:
     CCollDispMapZone(CTask* inParentObj, MCD_INFO* inInfo);
@@ -153,7 +116,5 @@ private:
     void _makeModelPrim();
 };
 
-
-#endif /* COLLDISP_CPP */
 
 #endif /* GAME_COLLISION_COLLDISP_H */
