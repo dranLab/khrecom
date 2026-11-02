@@ -15,7 +15,6 @@ private:
     float m_fLen[2];
 
 public:
-    // PARTIAL: constructors added for System/Graphic/Anim
     CTriangleIK() {
         m_nIdxAll = -1;
         m_fLen[1] = 0.0f;
@@ -68,6 +67,9 @@ public:
     void getFootPos(FVECTOR* pvOutPosL, FVECTOR* pvOutPosR, CCoords& Crds, FLOAT fr);
     void clearOldFootPos();
     void updateFootEffect(CCoords& Crds);
+    void setFootEffect(/* parameters unknown */);
+    INT isGround(/* parameters unknown */);
+    INT isFirstGround(/* parameters unknown */);
     static BOOL isIK(const MODELDATA& Model);
 };
 
