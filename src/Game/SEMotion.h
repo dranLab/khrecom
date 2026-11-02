@@ -28,6 +28,7 @@ struct SE_DATA {
     BOOL set;            /* 0x3c */
     short sRandom[4][2]; /* 0x40 */
 
+    void init();
     TIMEQ getStart() const { return tqStart * 50; }
     TIMEQ getEnd() const { return tqEnd * 50; }
     UINT isFoot() const { return uiFlag & 0x1; }

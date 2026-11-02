@@ -15,6 +15,10 @@ public:
     static INT getAnalogRY(UINT nPad = 0);
     static INT getAnalogLX(UINT nPad = 0);
     static INT getAnalogLY(UINT nPad = 0);
+    static FLOAT getAnalogFRX(/* parameters unknown */);
+    static FLOAT getAnalogFRY(/* parameters unknown */);
+    static FLOAT getAnalogFLX(/* parameters unknown */);
+    static FLOAT getAnalogFLY(/* parameters unknown */);
     static BOOL isTrgOK(UINT nPad = 0);
     static BOOL isTrgTalk(UINT nPad = 0);
     static BOOL isTrgTalkMesNext(UINT nPad = 0);
