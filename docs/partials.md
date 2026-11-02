@@ -120,19 +120,25 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/System-Graphic-LightUnit (light classes complete) | 738 | 23 | 0 | 753 (0) | 889 |
 | 2026-11-02 | cleanup/line1-markers (whole-header markers; declared-only operator new MATCH) | 733 | 23 | 0 | 753 (0) | 891 |
 | 2026-11-02 | cleanup/Gimmick-virtual-order (13 classes complete; classes complete 746) | 733 | 23 | 0 | 753 (0) | 891 |
+| 2026-11-02 | cleanup/friend-leftovers (CCollMapCamera access; kept friends MATCH) | 728 | 23 | 0 | 753 (0) | 894 |
+| 2026-11-02 | cleanup/accessor-names (HermitePath/PlayerManager ref names) | 725 | 23 | 0 | 752 (0) | 895 |
+| 2026-11-02 | cleanup/friend-leftovers-2 (2DSeq friend dropped) | 723 | 23 | 0 | 752 (0) | 896 |
+| 2026-11-02 | tools/partials-overload-vorder (overloaded virtuals by name; classes complete 758) | 723 | 23 | 0 | 752 (0) | 896 |
+| 2026-11-02 | cleanup/retag-leftovers (TriangleIK/PathCamera/DispList complete) | 720 | 23 | 0 | 752 (0) | 898 |
+| 2026-11-02 | cleanup/Coord-PathData (CCoords, CPathVector complete; classes complete 764) | 716 | 23 | 0 | 752 (0) | 898 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 733 (678 in 97 headers, 55 in 34 .cpp); MATCH: 891
-  by category: method 288, data member 53, type 66, fwd decl 44, #include 28, changed in place 116, padding 6, path override 1, gate 18, guessed 29, header-level 60, stand-in 18, other 6
+PARTIAL: 716 (661 in 86 headers, 55 in 34 .cpp); MATCH: 898
+  by category: method 282, data member 50, type 66, fwd decl 44, #include 28, changed in place 109, padding 6, path override 1, gate 18, guessed 28, header-level 60, stand-in 18, other 6
 stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
-mechanisms: 753 sites (0 untagged); #line: 1249
+mechanisms: 752 sites (0 untagged); #line: 1249
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 746, superset 68, partial 51, gated 23, missing 8, unattributed 309
+classes: complete 764, superset 51, partial 50, gated 23, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -204,9 +210,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/CardKind.h` | 0 | 0/0/2/0 | 153 |
 | `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
 | `Game/CollParam.h` | 1 | 5/0/1/0 | 158 |
-| `Game/Collision/CollBody.h` | 1 | 0/1/0/0 | 23 |
 | `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
-| `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
 | `Game/Collision/CollObj.h` | 11 | 4/0/2/7 | 174 |
 | `Game/Collision/CollUtil.h` | 7 | 0/0/0/0 | 150 |
 | `Game/Collision/CollUtilA.h` | 1 | 10/1/0/0 | 26 |
@@ -216,16 +220,12 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Enemy/BattleEnemy.h` | 33 | 0/1/0/0 | 58 |
 | `Game/Enemy/EnemyParam.h` | 15 | 2/1/1/0 | 16 |
 | `Game/Enemy/Heartless.h` | 5 | 0/1/0/0 | 36 |
-| `Game/Enemy/HumanBoss.h` | 0 | 0/1/0/0 | 4 |
 | `Game/Enemy/MapEnemy.h` | 1 | 1/0/0/0 | 7 |
-| `Game/Enemy/MapEnemyManager.h` | 1 | 1/1/0/0 | 8 |
 | `Game/Entity.h` | 105 | 1/1/0/0 | 150 |
 | `Game/EntityFactory.h` | 14 | 1/1/0/0 | 49 |
 | `Game/Game.h` | 20 | 0/1/0/0 | 43 |
-| `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
 | `Game/GameSubBattle.h` | 0 | 1/0/1/0 | 2 |
 | `Game/GameWork.h` | 3 | 3/1/2/0 | 60 |
-| `Game/Gimmick/BaseGimmick.h` | 0 | 1/1/0/0 | 46 |
 | `Game/Map.h` | 9 | 6/2/1/3 | 9 |
 | `Game/MapUnitTable.h` | 3 | 0/2/0/0 | 11 |
 | `Game/Movement.h` | 7 | 0/0/1/0 | 105 |
@@ -237,7 +237,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Player/PlayerCamera.h` | 16 | 3/0/0/1 | 25 |
 | `Game/Player/PlayerControl.h` | 3 | 1/1/0/0 | 73 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
-| `Game/Player/PlayerManager.h` | 0 | 1/1/0/0 | 22 |
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 53 |
 | `Game/SEMotion.h` | 0 | 5/0/1/0 | 4 |
 | `Game/SceneEnv.h` | 1 | 0/0/1/0 | 37 |
@@ -246,19 +245,15 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Buf.h` | 4 | 0/1/0/0 | 38 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
 | `System/Component.h` | 3 | 2/0/0/0 | 5 |
-| `System/Coord.h` | 3 | 0/1/0/0 | 18 |
+| `System/Coord.h` | 1 | 1/0/0/0 | 18 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 271 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 11 |
 | `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 167 |
-| `System/Graphic/2d/2DLayObj.h` | 1 | 0/1/0/0 | 3 |
 | `System/Graphic/2d/2DMan.h` | 1 | 3/0/0/0 | 166 |
 | `System/Graphic/2d/2DObj.h` | 4 | 0/1/0/0 | 167 |
-| `System/Graphic/2d/2DSeq.h` | 1 | 1/1/0/0 | 5 |
-| `System/Graphic/2d/2DSeqCtrl.h` | 2 | 1/1/0/0 | 33 |
+| `System/Graphic/2d/2DSeqCtrl.h` | 2 | 2/0/0/0 | 33 |
 | `System/Graphic/2d/2DSeqObj.h` | 8 | 3/3/0/0 | 167 |
 | `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 89 |
-| `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
-| `System/Graphic/DispList.h` | 1 | 9/1/0/0 | 2 |
 | `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 172 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 175 |
 | `System/Graphic/Effect/effect.h` | 6 | 1/1/4/0 | 77 |
@@ -275,17 +270,14 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/pppfunctbl.h` | 1 | 0/0/0/0 | 2 |
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Gprim.h` | 17 | 8/1/6/0 | 231 |
-| `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/MapUnit.h` | 1 | 0/0/0/0 | 3 |
 | `System/Graphic/Model.h` | 12 | 4/3/1/0 | 70 |
 | `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 75 |
 | `System/Graphic/MotData.h` | 1 | 4/0/3/0 | 5 |
-| `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
-| `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 8 |
+| `System/Graphic/PathData.h` | 1 | 9/0/0/0 | 8 |
 | `System/Graphic/ScreenMask.h` | 0 | 1/0/1/0 | 5 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
 | `System/Graphic/TexInfo.h` | 1 | 1/0/1/0 | 234 |
-| `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
 | `System/Graphic/modeldata.h` | 11 | 1/2/0/1 | 82 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/Math3D.h` | 1 | 2/1/0/0 | 59 |
@@ -460,7 +452,7 @@ or `untagged`.
 | unit gate site | `GAME_MAP_CPP` | 1 | 1 | the full classes need System/Task.h, Gprim.h and Model.h, whose strings Game/MapUnitTable's .rodata lacks; other includers see the partial CMap below |
 | unit gate site | `GAME_PLAYER_PLAYERCAMERA_CPP` | 1 | 1 | GAME_PLAYER_PLAYERCAMERA_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 2 | 2 | GAME_PLAYER_PLAYERGAUGE_CPP gate, only for its own unit (tested 2026-11-02) |
-| unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 2 | 2 | GAME_PLAYER_PLAYERMANAGER_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 1 | GAME_PLAYER_PLAYERMANAGER_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_PLAYER_PLAYER_CPP` | 46 | 46 | GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) |
 
 ## String evidence
