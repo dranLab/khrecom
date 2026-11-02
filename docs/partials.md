@@ -90,19 +90,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/Game-Atel-CameraMan (finished: main matched, no asm left; A2: path overrides MATCH-tagged, redundant GPRIM_H_PATH dropped) | 819 | 27 | 0 | 756 (667) | 184 |
 | 2026-11-02 | decomp/Game-Movement (ctor draft to the constant-pool form, 53 lines, still parked; A2: COLLUTIL_H_PATH MATCH, GPRIM_H_PATH dropped) | 819 | 27 | 0 | 755 (665) | 185 |
 | 2026-11-02 | cleanup/GPRIM_H_PATH (defines equal to Gprim.h's default dropped in 2DSprObj, CollDisp) | 819 | 27 | 0 | 753 (663) | 185 |
+| 2026-11-02 | decomp/System-Wnd (finished: setIcon matched, CImageWnd::init parked; PH placeholders dropped; A2: G_RGBA/G_XY equal the ref, path overrides MATCH) | 816 | 27 | 0 | 753 (661) | 187 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 819 (766 in 110 headers, 53 in 33 .cpp); MATCH: 185
-  by category: method 315, data member 62, type 72, fwd decl 49, #include 30, changed in place 121, padding 8, path override 21, gate 19, guessed 29, header-level 71, stand-in 16, other 6
-stand-ins: 27 foreign in 18 files (20 names), 201 unattributed, 167 own
+PARTIAL: 816 (763 in 110 headers, 53 in 33 .cpp); MATCH: 187
+  by category: method 312, data member 62, type 72, fwd decl 49, #include 30, changed in place 121, padding 8, path override 21, gate 19, guessed 29, header-level 71, stand-in 16, other 6
+stand-ins: 27 foreign in 18 files (20 names), 199 unattributed, 167 own
 duplicate class names across headers: 0
 padding: 14 arrays, 0 accessors
-mechanisms: 753 sites (663 untagged); #line: 1244
+mechanisms: 753 sites (661 untagged); #line: 1244
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 608, superset 141, partial 112, gated 26, missing 8, unattributed 309
+classes: complete 610, superset 139, partial 112, gated 26, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -128,7 +129,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R2 | 15.5 | `Game/Collision/CollObj.h` | ready | 3 stand-in files, 0 dup headers, 8 gate users, 3 PARTIAL | CCircleCollision, CCollision, COLL_KIND, COLL_TYPE, CPointCollision, ... (+2) (4 gated, 1 partial, 2 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollAttack, CSJointT<CCollObj> not in Game/Collision/CollAttack |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 | R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
-| R2 | 5.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users, 2 PARTIAL | G_RGBA, QWdata (1 superset, 1 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
+| R2 | 4.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | G_RGBA, QWdata (2 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
 
 ## Classes with foreign copies
 
@@ -151,7 +152,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
-| `G_RGBA` | superset | System/Graphic/Gprim.h | 1 |  | 2 PARTIAL |
+| `G_RGBA` | complete | System/Graphic/Gprim.h | 1 |  |  |
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
 | `QWdata` | complete | System/Graphic/Gprim.h | 1 |  |  |
 
@@ -296,7 +297,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 38 |
 | `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 5 |
-| `System/Graphic/Gprim.h` | 20 | 6/3/6/0 | 231 |
+| `System/Graphic/Gprim.h` | 17 | 8/1/6/0 | 231 |
 | `System/Graphic/GprimFull.h` | 0 | 1/28/6/0 | 231 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 10 |
@@ -374,12 +375,12 @@ or `untagged`.
 | path override | `CHATMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/ChatMan.cpp:2 |
 | path override | `COLLDISP_H_PATH` | 4 | 0 | untagged, e.g. Game/Collision/CollDisp.cpp:3 |
 | path override | `COLLUTIL_H_PATH` | 14 | 2 | __FILE__ as in the original .rodata |
-| path override | `CTDMAN_H_PATH` | 6 | 1 | the original spelled this include with the full path ("c:/KHCOM/...", "System/CTD") |
+| path override | `CTDMAN_H_PATH` | 6 | 2 | this unit names CtdMan.h by its full original path |
 | path override | `D2MAN_H_PATH` | 10 | 0 | untagged, e.g. System/Graphic/2d/2DCard.cpp:3 |
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
 | path override | `EFFECT_H_PATH` | 5 | 0 | untagged, e.g. Game/Enemy/EnemyBarrelspider.cpp:4 |
 | path override | `FSM_H_PATH` | 1 | 0 | untagged, e.g. System/Fsm.cpp:1 |
-| path override | `GPRIM_H_PATH` | 161 | 9 | the collision classes come after CMapEnemy (their vtables precede its own) |
+| path override | `GPRIM_H_PATH` | 161 | 10 | the collision classes come after CMapEnemy (their vtables precede its own) |
 | path override | `LINKEDBUF_H_PATH` | 4 | 1 | __FILE__ as in the original .rodata |
 | path override | `MAPUNIT_H_PATH` | 1 | 0 | untagged, e.g. System/Graphic/MapUnit.cpp:5 |
 | path override | `MODELDATA_H_PATH` | 8 | 2 | TexInfoStub (the original has its assert strings) |
