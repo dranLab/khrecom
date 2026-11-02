@@ -671,7 +671,9 @@ def compare(ours, ref):
         "order_ok": common_f == [f for f in ref_fields if f in common_f],
         "missing_methods": sorted(n for n in rm if n not in om),
         "extra_methods": sorted(n for n in om if n not in rm and n not in ("~" + cls, cls)),
-        "param_mismatch": sorted(n for n, ps in rm.items() if n in om and not om[n] & ps and any(ps)),
+        # the ref lists only named parameters (unnamed/unused ones are dropped): fewer than the ref is wrong
+        "param_mismatch": sorted(n for n, ps in rm.items() if n in om and any(ps)
+                                 and all(o < p for o in om[n] for p in ps if p)),
         "vorder_ok": vcommon == [v for v in dict.fromkeys(rvirt) if v in vcommon],
         "ref_file": ref.file,
     }
