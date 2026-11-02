@@ -5,9 +5,9 @@
 #include "khtypes.h"
 
 union FMATRIX;
-union FVECTOR; // PARTIAL: added for Game/Gimmick/GimmickTutorial
-class CEffect; // PARTIAL: added for Game/Player/SummonTink
-class CCoord;  // PARTIAL: added for Form/Menu/WorldSelect
+union FVECTOR;
+class CEffect;
+class CCoord;
 
 #include "System/Graphic/Effect/ObjType.h"
 
@@ -51,7 +51,6 @@ struct EFFMAN_ZSORT_BUF;
 
 class CEffectMan {
 public:
-    // PARTIAL: complete for System/Graphic/Effect/EffectMan
     static void _effInitialize(int work_memory_size, int packet_memory_size);
     static void _effFinalize();
     static HANDLE _setEffect(const EFFECT_DATA& effect_data, UINT no, ObjType::eObjType eType, INT nNum, const CCoord* pParent,
@@ -95,11 +94,11 @@ public:
     static HANDLE attachEffect3(const EFFECT_DATA& data, UINT nNo, ObjType::eObjType eType, const CCoord* pParent,
                                 const CCoord* pParent1, const CCoord* pParent2, const FMATRIX* pMat,
                                 const FMATRIX* pMat1, const FMATRIX* pMat2, FLOAT fWait, const EFFECT_SE* pSeData);
-    static void killAll(ObjType::eObjBit inBit, FLOAT inTime); // PARTIAL: added for Game/Player/Summon
-    static void killAll(const CHAR* inName, FLOAT inTime); // PARTIAL: added for Game/Player/PlayerManager
+    static void killAll(ObjType::eObjBit inBit, FLOAT inTime);
+    static void killAll(const CHAR* inName, FLOAT inTime);
     static INT getEffectNameNum(const CHAR* pszName);
     static INT getEffectNameHandles(HANDLE* pOutHandle, const CHAR* pszName, INT nSize);
-    static void setFogRange(FLOAT fNear, FLOAT fFar);            // PARTIAL: added for System/Graphic/WorldEnv
+    static void setFogRange(FLOAT fNear, FLOAT fFar);
     static void setFogClamp(unsigned char nMin, unsigned char nMax);
     static void setFogColor(unsigned char r, unsigned char g, unsigned char b);
     static INT _sortEffect(EFFMAN_ZSORT_BUF* elist, const FMATRIX& mWS, INT nEffNum, INT nSemiNum);
@@ -119,7 +118,7 @@ public:
     static BOOL del(CEffect& eff);
     static BOOL del(HANDLE hEffect);
     static INT getNum();
-    static CEffect* getEffect(HANDLE inHandle); // PARTIAL: added for Game/Player/SummonTink
+    static CEffect* getEffect(HANDLE inHandle);
     static void killEffect(HANDLE inHandle, FLOAT inTime);
     static void loopEndEffect(HANDLE hEffect);
     static CEffect& getExceptEffect();
