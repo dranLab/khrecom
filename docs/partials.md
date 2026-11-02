@@ -115,19 +115,24 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/Game-Status (CStatus complete: initialize/finalize inlines, friends dropped) | 762 | 23 | 0 | 753 (0) | 882 |
 | 2026-11-02 | cleanup/Game-Technic (CTechnic complete: real initialize/finalize) | 760 | 23 | 0 | 753 (0) | 883 |
 | 2026-11-02 | cleanup/Game-Card (CCard complete: ref accessors for m_pCardInfo, ref access) | 748 | 23 | 0 | 753 (0) | 885 |
+| 2026-11-02 | cleanup/Form-Menu-TechHelp (isEnd inline, friends dropped) | 746 | 23 | 0 | 753 (0) | 885 |
+| 2026-11-02 | cleanup/System-LinkedBuf-2 (CLinkedPtr/CDelayedFree complete) | 742 | 23 | 0 | 753 (0) | 888 |
+| 2026-11-02 | cleanup/System-Graphic-LightUnit (light classes complete) | 738 | 23 | 0 | 753 (0) | 889 |
+| 2026-11-02 | cleanup/line1-markers (whole-header markers; declared-only operator new MATCH) | 733 | 23 | 0 | 753 (0) | 891 |
+| 2026-11-02 | cleanup/Gimmick-virtual-order (13 classes complete; classes complete 746) | 733 | 23 | 0 | 753 (0) | 891 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 748 (693 in 104 headers, 55 in 34 .cpp); MATCH: 885
-  by category: method 291, data member 55, type 68, fwd decl 44, #include 28, changed in place 118, padding 6, path override 1, gate 18, guessed 31, header-level 64, stand-in 18, other 6
+PARTIAL: 733 (678 in 97 headers, 55 in 34 .cpp); MATCH: 891
+  by category: method 288, data member 53, type 66, fwd decl 44, #include 28, changed in place 116, padding 6, path override 1, gate 18, guessed 29, header-level 60, stand-in 18, other 6
 stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
 mechanisms: 753 sites (0 untagged); #line: 1249
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 726, superset 84, partial 55, gated 23, missing 8, unattributed 309
+classes: complete 746, superset 68, partial 51, gated 23, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -187,7 +192,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
 | `Form/Menu/SaveLoadCtrl.h` | 2 | 7/1/0/0 | 7 |
 | `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 4 |
-| `Form/Menu/TechHelp.h` | 2 | 0/1/0/0 | 3 |
 | `Game/Atel/CommandAccepter.h` | 1 | 1/0/0/0 | 15 |
 | `Game/Atel/EventTrap.h` | 0 | 4/1/0/0 | 3 |
 | `Game/Atel/VSME.h` | 0 | 11/0/1/0 | 7 |
@@ -201,7 +205,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
 | `Game/CollParam.h` | 1 | 5/0/1/0 | 158 |
 | `Game/Collision/CollBody.h` | 1 | 0/1/0/0 | 23 |
-| `Game/Collision/CollDisp.h` | 1 | 3/0/0/0 | 7 |
 | `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
 | `Game/Collision/CollObj.h` | 11 | 4/0/2/7 | 174 |
@@ -212,8 +215,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/EffectMotion.h` | 0 | 5/0/2/0 | 8 |
 | `Game/Enemy/BattleEnemy.h` | 33 | 0/1/0/0 | 58 |
 | `Game/Enemy/EnemyParam.h` | 15 | 2/1/1/0 | 16 |
-| `Game/Enemy/EnemyTornadostep.h` | 0 | 0/0/1/0 | 2 |
-| `Game/Enemy/EnemyWhitemushroom.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Enemy/Heartless.h` | 5 | 0/1/0/0 | 36 |
 | `Game/Enemy/HumanBoss.h` | 0 | 0/1/0/0 | 4 |
 | `Game/Enemy/MapEnemy.h` | 1 | 1/0/0/0 | 7 |
@@ -225,16 +226,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/GameSubBattle.h` | 0 | 1/0/1/0 | 2 |
 | `Game/GameWork.h` | 3 | 3/1/2/0 | 60 |
 | `Game/Gimmick/BaseGimmick.h` | 0 | 1/1/0/0 | 46 |
-| `Game/Gimmick/GimmickBell.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickDeceiveEnemy.h` | 1 | 1/0/0/0 | 3 |
-| `Game/Gimmick/GimmickHitRepetition.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickHitReturn.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickJackBox.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickJumpStand.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickLotusLeaf.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickSteamTrap.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickThunderTrap.h` | 0 | 0/2/0/0 | 2 |
-| `Game/Gimmick/GimmickUpFloor.h` | 0 | 0/2/0/0 | 2 |
 | `Game/Map.h` | 9 | 6/2/1/3 | 9 |
 | `Game/MapUnitTable.h` | 3 | 0/2/0/0 | 11 |
 | `Game/Movement.h` | 7 | 0/0/1/0 | 105 |
@@ -260,14 +251,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 11 |
 | `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 167 |
 | `System/Graphic/2d/2DLayObj.h` | 1 | 0/1/0/0 | 3 |
-| `System/Graphic/2d/2DMan.h` | 2 | 3/0/0/0 | 166 |
+| `System/Graphic/2d/2DMan.h` | 1 | 3/0/0/0 | 166 |
 | `System/Graphic/2d/2DObj.h` | 4 | 0/1/0/0 | 167 |
 | `System/Graphic/2d/2DSeq.h` | 1 | 1/1/0/0 | 5 |
 | `System/Graphic/2d/2DSeqCtrl.h` | 2 | 1/1/0/0 | 33 |
 | `System/Graphic/2d/2DSeqObj.h` | 8 | 3/3/0/0 | 167 |
 | `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 89 |
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
-| `System/Graphic/DeFocus.h` | 1 | 4/0/0/0 | 6 |
 | `System/Graphic/DispList.h` | 1 | 9/1/0/0 | 2 |
 | `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 172 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 175 |
@@ -286,7 +276,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Gprim.h` | 17 | 8/1/6/0 | 231 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
-| `System/Graphic/LightUnit.h` | 4 | 4/1/2/0 | 10 |
 | `System/Graphic/MapUnit.h` | 1 | 0/0/0/0 | 3 |
 | `System/Graphic/Model.h` | 12 | 4/3/1/0 | 70 |
 | `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 75 |
@@ -295,11 +284,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 8 |
 | `System/Graphic/ScreenMask.h` | 0 | 1/0/1/0 | 5 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
-| `System/Graphic/StrPrim.h` | 1 | 1/0/0/0 | 36 |
 | `System/Graphic/TexInfo.h` | 1 | 1/0/1/0 | 234 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
 | `System/Graphic/modeldata.h` | 11 | 1/2/0/1 | 82 |
-| `System/LinkedBuf.h` | 4 | 1/2/1/0 | 7 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/Math3D.h` | 1 | 2/1/0/0 | 59 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 6 |
