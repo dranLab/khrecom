@@ -101,13 +101,14 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/System-Movie-AudioDec (finished: constructor 6/120 parked) | 810 | 27 | 0 | 750 (656) | 191 |
 | 2026-11-02 | decomp/Game-GameSubField-2 (finished: waitStartAtel 4/86 parked; A2: path overrides MATCH) | 810 | 27 | 0 | 750 (654) | 193 |
 | 2026-11-02 | cleanup/Game-Collision-CollObj-2 (CollAttack on the header's collision classes; CollUtilF left: field types first) | 810 | 23 | 0 | 751 (653) | 194 |
+| 2026-11-02 | cleanup/Game-Collision-CollObj-3 (CCollision m_outInfo*/m_Type/m_Kind with the ref types; CollUtilF stand-in reasoned: ctor order) | 811 | 23 | 0 | 751 (653) | 194 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 810 (756 in 110 headers, 54 in 34 .cpp); MATCH: 194
-  by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 20, gate 19, guessed 30, header-level 69, stand-in 17, other 6
+PARTIAL: 811 (756 in 110 headers, 55 in 34 .cpp); MATCH: 194
+  by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 20, gate 19, guessed 30, header-level 69, stand-in 18, other 6
 stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
