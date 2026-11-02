@@ -93,19 +93,21 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/System-Wnd (finished: setIcon matched, CImageWnd::init parked; PH placeholders dropped; A2: G_RGBA/G_XY equal the ref, path overrides MATCH) | 816 | 27 | 0 | 753 (661) | 187 |
 | 2026-11-02 | decomp/Game-Collision-CollDisp-2 (finished: setBodyLines 38/105 same size and setAttackLines 62/178 parked with notes) | 816 | 27 | 0 | 753 (661) | 187 |
 | 2026-11-02 | cleanup/Game-Collision-CollDisp (CollDisp.h ungated for all 7 includers, op new declared only; GameSubBattle/Field use initialize/finalize) | 809 | 27 | 0 | 750 (658) | 189 |
+| 2026-11-02 | decomp/System-Graphic-DispList-2 (finished: _drawOT 62/291 parked; CShadowModel::getSize inline) | 809 | 27 | 0 | 750 (658) | 189 |
+| 2026-11-02 | cleanup/System-Graphic-DispList (full classes moved from DispList.cpp into DispList.h; ModelMan on addTail/setZ; CModelMan friend guessed) | 810 | 27 | 0 | 750 (658) | 189 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 809 (756 in 110 headers, 53 in 33 .cpp); MATCH: 189
-  by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 20, gate 19, guessed 29, header-level 70, stand-in 16, other 6
-stand-ins: 27 foreign in 18 files (20 names), 199 unattributed, 167 own
+PARTIAL: 810 (756 in 110 headers, 54 in 34 .cpp); MATCH: 189
+  by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 20, gate 19, guessed 30, header-level 69, stand-in 17, other 6
+stand-ins: 27 foreign in 18 files (20 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
-padding: 12 arrays, 0 accessors
-mechanisms: 750 sites (658 untagged); #line: 1243
+padding: 9 arrays, 0 accessors
+mechanisms: 750 sites (658 untagged); #line: 1245
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 613, superset 139, partial 112, gated 23, missing 8, unattributed 309
+classes: complete 613, superset 140, partial 112, gated 23, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -280,7 +282,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 89 |
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
 | `System/Graphic/DeFocus.h` | 1 | 2/0/2/0 | 6 |
-| `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
+| `System/Graphic/DispList.h` | 1 | 1/1/8/0 | 2 |
 | `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 172 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 175 |
 | `System/Graphic/Effect/effect.h` | 7 | 1/1/4/0 | 77 |
