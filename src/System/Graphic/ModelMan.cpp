@@ -67,8 +67,8 @@ public:
         clear(FALSE);
     }
     virtual void insert(CDrawable& inPrim, FIX4 inZ) {
-        _insertTail(*getOTtagTbl(), inPrim);
-        _setZ(inPrim, inZ);
+        getOTtagTbl()->addTail(&inPrim);
+        inPrim.setZ(inZ);
     }
 };
 
@@ -82,9 +82,9 @@ public:
         clear(FALSE);
     }
     virtual void insert(CDrawable& inPrim, FIX4 inZ) {
-        _insertTail(*getOTtagTbl(), inPrim);
+        getOTtagTbl()->addTail(&inPrim);
         if (inZ > 0xffff280) inZ = 0xffff280;
-        _setZ(inPrim, inZ);
+        inPrim.setZ(inZ);
         m_nEntryCount++;
     }
     INT draw(SEMI_PACKET_LIST* pList);
@@ -99,10 +99,10 @@ class CDispListSemiZSingleSort : public CDispListSemiSingleSort {
 public:
     CDispListSemiZSingleSort() {}
     virtual void insert(CDrawable& inPrim, FIX4 inZ) {
-        _insertTail(*getOTtagTbl(), inPrim);
+        getOTtagTbl()->addTail(&inPrim);
         if (inZ <= 0xffff7ff) inZ = 0xffff800;
         if (inZ > 0xffff9ff) inZ = 0xffff9ff;
-        _setZ(inPrim, inZ);
+        inPrim.setZ(inZ);
         m_nEntryCount++;
     }
 };
@@ -111,10 +111,10 @@ class CDispListSemiLastSingleSort : public CDispListSemiSingleSort {
 public:
     CDispListSemiLastSingleSort() {}
     virtual void insert(CDrawable& inPrim, FIX4 inZ) {
-        _insertTail(*getOTtagTbl(), inPrim);
+        getOTtagTbl()->addTail(&inPrim);
         if (inZ <= 0xffffbff) inZ = 0xffffc00;
         if (inZ > 0xffffdff) inZ = 0xffffdff;
-        _setZ(inPrim, inZ);
+        inPrim.setZ(inZ);
         m_nEntryCount++;
     }
 };
@@ -495,7 +495,7 @@ void CModelMan::drawDispListFG() {
         OTtag* pTbl = pList->getOTtagTbl();
         UINT n = 25;
         bUseWarning = FALSE;
-        if (pTbl && n < (UINT)pList->getOTtagTblSize()) bUseWarning = pTbl[n].m_pHead != NULL;
+        if (pTbl && n < (UINT)pList->getOTtagTblSize()) bUseWarning = pTbl[n]._pHeadPrim != NULL;
     } else {
         bUseWarning = FALSE;
     }
