@@ -97,9 +97,6 @@ struct ENCHANT_PARAM {
 // PARTIAL: added for Game/Player/SummonDumbo
 class CCardBattle : public CTask {
     /* 0x000 CTask */
-    // PARTIAL: members added for Game/Player/PlayerRiku
-    // PARTIAL: split out for Game/CardBattle
-    // PARTIAL: split for Game/CardBattle
     Message::CMessageManager* m_pMesage; /* 0x040 */
     MES_CARD_INFO m_mesCardInfo[2]; /* 0x044 */
     TIMEQ m_tqMainTimer;           /* 0x08c */
@@ -129,11 +126,10 @@ class CCardBattle : public CTask {
     INT m_tqEnchantTimer[2];  /* 0x18c */
     HANDLE m_hGimmickOwner;   /* 0x194 */
     CARD m_cardRoom;          /* 0x198 */
-public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void setDuelBreakCount(INT inSide, INT inCount); // PARTIAL: added for Game/Enemy/BattleEnemy (parameter names guessed)
+public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void setDuelBreakCount(INT inSide, INT inCount); // parameter names guessed
     UINT m_uiFlag;            /* 0x19c */
     UINT m_uiDuelState;       /* 0x1a0 */
     HANDLE m_hDuelEnemy;      /* 0x1a4 */
-    // PARTIAL: added for Game/CardBattle
     USHORT m_nDuelBreakCount;    /* 0x1a8 */
     USHORT m_nDuelBreakCountMax; /* 0x1aa */
     INT m_iDuelSkill;            /* 0x1ac */
@@ -179,13 +175,11 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
         return m_pInstance ? m_pInstance->m_iCount[inUser - 1] : 0;
     }
 #else
-    // PARTIAL: added for Game/Player/PlayerRiku
     INT getEnchantKind() { return m_cardEnchant[0].m_nKind < 0x44 ? 0 : m_cardEnchant[0].m_nKind - 0x43; }
-    // PARTIAL: added for Game/Enemy/HumanBoss (the enemy side's enchant)
     INT getEnchantKind(INT inSide) { return m_cardEnchant[inSide].m_nKind < 0x44 ? 0 : m_cardEnchant[inSide].m_nKind - 0x43; }
     HANDLE getDuelEnemy() { return m_hDuelEnemy; }
-    // PARTIAL: added for Game/Player/PlayerSora (out of line in Game/CardBattle, inlined elsewhere)
-    INT isNowDuelEntry() const { return m_uiDuelState == 2; } // PARTIAL: added for Game/CardBattle
+    // MATCH: out of line in Game/CardBattle, inlined elsewhere (Game/Player/PlayerSora)
+    INT isNowDuelEntry() const { return m_uiDuelState == 2; }
     INT isNowDuel() const { return m_uiDuelState == 5; }
     INT isNowSetEnemyDuelCard() const { return m_uiState[1] == 10; }
     INT isPronounceMode() const { return m_uiDuelState >= 9; }
@@ -193,42 +187,37 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     INT isNowSetEnemyPronounce() const { return m_uiState[1] == 15; }
     USHORT getDuelBreakCountMax() const { return m_nDuelBreakCountMax; }
     static INT getDuelSkill() { return m_pInstance ? m_pInstance->m_iDuelSkill : 0; }
-    void disableDuelEntry(UINT inSet) { setFlag(inSet, inSet ^ 0x400000); }
+    void disableDuelEntry(UINT inSet) { m_uiFlag = (m_uiFlag | inSet) & ~(inSet ^ 0x400000); }
     void setSubTimer(TIMEQ inTime) { m_tqSubTimer = inTime; }
     TIMEQ getSubTimer() const { return m_tqSubTimer; }
-    ::CTask* asTask() { return this; } // PARTIAL: added for Game/CardBattle
 
 
 
-    void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
-    void disablePlayCard(UINT inSet) { setFlag(inSet, inSet ^ 0xC0000000); } // PARTIAL: added for Game/CardBattle
-    static UINT isDisablePlayCard() { return m_pInstance ? m_pInstance->m_uiFlag & 0xC0000000 : 0; } // PARTIAL: added for Game/CardRevolver
+    void disablePlayCard(UINT inSet) { m_uiFlag = (m_uiFlag | inSet) & ~(inSet ^ 0xC0000000); }
+    static UINT isDisablePlayCard() { return m_pInstance ? m_pInstance->m_uiFlag & 0xC0000000 : 0; }
 #endif
     void destroyPlayCard(INT inFlag, INT inP1);
     void transferPlayerEnchant(CPlayer* inPlayer);
     void setDuelEntry(INT inFlag);
     void setDuelStart(INT inFlag);
     static void calcEnchant_AttackPoint(INT& ioPower, ATK_KIND& ioKind, ATK_ATTR inAttr, UINT inUpKind);
-    static CCardBattle* getInstance(); // PARTIAL: added for Game/Player/PlayerManager
-    CCardBattle(); // PARTIAL: added for Game/CardBattle
-    static INT getGimmickCount(); // PARTIAL: added for Game/Prize
-    // PARTIAL: added for Game/Enemy/Heartless
+    static CCardBattle* getInstance();
+    CCardBattle();
+    static INT getGimmickCount();
     INT setEnemyCard(HANDLE inEnemy, INT inParam, INT inNumber);
     static INT getPlayingCardPoint(INT inSide);
-    // PARTIAL: added for Game/CardBattle
     static CCardBattle* m_pInstance;
     virtual ~CCardBattle();
     virtual void main();
     virtual void disp();
     void resetNowPlaying(INT inFlag);
-    // PARTIAL: added for Game/CardRevolver
     BOOL testBreakingCard(UINT inSide);
     static BOOL isExecutingCard(INT inSide);
     INT setPlayCard(HANDLE inOwner, INT inSide, class CBattleCard* inCard, CARD* inData, INT inTest);
     INT setDuelPlayStock(class CBattleCard** inCards, INT inSkill);
     INT setEnemyPronounceCard(HANDLE inOwner, class CBattleCard* inCard);
-    INT setPronounceStart(INT inFlag); // PARTIAL: added for Game/Player/PlayerSora
-    void setPronounceEnd(INT inCount); // PARTIAL: added for Game/Player/PlayerSora
+    INT setPronounceStart(INT inFlag);
+    void setPronounceEnd(INT inCount);
     static void decEnchantTime(INT inSide, INT inKind, INT inFlag);
     friend class CCardRevolver;
     INT setPlayStock(HANDLE inOwner, INT inSide, class CBattleCard** inCards, INT inSkill, INT inExtra, INT inFirst, INT inTest);
@@ -243,7 +232,7 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     static INT getPlutoCount();
     static void setGimmickOwner(HANDLE h);
     static HANDLE getGimmickOwner();
-    static BOOL isPlayingGimmickCard(); static BOOL isStandingCard(INT inSide); // PARTIAL: isStandingCard added for Game/Player/Player
+    static BOOL isPlayingGimmickCard(); static BOOL isStandingCard(INT inSide);
     INT calcPointBreak(INT a, INT b);
     void destroyEnemyCard(INT inHandle);
     void destroyRevolver(INT inSide);
@@ -252,8 +241,8 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     static BOOL isBattleEnd();
     static void setSuspend(BOOL b);
     static BOOL isSuspend();
-    static BOOL isLevitate(); static void notifyCompleteGimmick(); static void notifyMakeGimmick(CARD* inCard, INT inFlag); // PARTIAL: notifyCompleteGimmick, notifyMakeGimmick added for Game/Player/Player
-    void calcEnchantParam(ENCHANT_PARAM& ioParam); // PARTIAL: added for Game/Player/Player
+    static BOOL isLevitate(); static void notifyCompleteGimmick(); static void notifyMakeGimmick(CARD* inCard, INT inFlag);
+    void calcEnchantParam(ENCHANT_PARAM& ioParam);
     static void setBlack(BOOL b);
     static BOOL isBlack();
     void destroyStockFolder(INT inSide);
@@ -267,7 +256,6 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     static void setBattleEnd();
     void initCardBreak(INT n, UINT f);
     void resetEnchantCard(INT inSide);
-    // PARTIAL: added for Game/CardBattle
     void init();
     void calcPlayingCard();
     void exePlaying(INT inUser);

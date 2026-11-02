@@ -1263,7 +1263,7 @@ void CPlayer::setControl() {
             if (isConditionFlag(0x8810000)) {
                 if (isConditionFlag(0x8000000)) {
                     TRACE("CPlayer::setControl(); DARKPUNISHER -> STOCK_SKILL ...enableDuelEntry\n");
-                    m_pCB->setFlag(0, 0x400000);
+                    m_pCB->disableDuelEntry(0);
                 }
                 setConditionFlag(0, 0x8810000);
                 m_pMove->setFlag(0, 1);
@@ -4381,7 +4381,7 @@ void CPlayer::onMsg(INT inMsg, void* inExtraInfo) {
                         if (m_iDP <= 0) {
                             setTrgFlag(0x100000, 0);
                             m_iDP = 0;
-                            m_pCB->setFlag(0x400000, 0);
+                            m_pCB->disableDuelEntry(0x400000);
                         }
                         TRACE(" DP:%d/%d, in DMODE\n", m_iDP, m_iMaxDP);
                         m_pGauge->setDP(m_iDP, m_iMaxDP);
@@ -4477,7 +4477,7 @@ void CPlayer::onMsg(INT inMsg, void* inExtraInfo) {
                     if (isConditionFlag(0x400000)) {
                         if (m_iDP <= 0) {
                             setTrgFlag(0x100000, 0);
-                            m_pCB->setFlag(0x400000, 0);
+                            m_pCB->disableDuelEntry(0x400000);
                             m_iDP = 0;
                         }
                         TRACE(" DP:%d/%d, in DMODE\n", m_iDP, m_iMaxDP);
@@ -5291,7 +5291,7 @@ BOOL CPlayer::chkDamage() {
             if (m_iDP <= 0) {
                 setTrgFlag(0x100000, 0);
                 m_iDP = 0;
-                m_pCB->setFlag(0x400000, 0);
+                m_pCB->disableDuelEntry(0x400000);
                 setBattleFlag(0, 8);
             }
             TRACE("Riku : HP = %d/%d, DP = %d/%d,\n", m_iHP, m_iMaxHP, m_iDP, m_iMaxDP);
@@ -6057,7 +6057,7 @@ void CPlayer::initBadCondition() {
         m_pMove->setFlag(1, 0);
         setOldPos(m_vCenterPos);
         setTrgFlag(0, 0x8000);
-        m_pCB->setFlag(0x400000, 0);
+        m_pCB->disableDuelEntry(0x400000);
     } else if (isConditionFlag(0x8000)) {
         m_iSubState = 0xB;
         setTimer(15000);
@@ -6165,7 +6165,7 @@ void CPlayer::exeBadCondition() {
         } else {
             break;
         }
-        m_pCB->setFlag(0, 0x400000);
+        m_pCB->disableDuelEntry(0);
         break;
     case 11:
         if (getTimer() <= 0) {

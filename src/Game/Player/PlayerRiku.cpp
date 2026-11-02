@@ -348,7 +348,7 @@ void CPlayerRiku::exeTransform() {
         m_pMarker->setFlag(FALSE);
         m_pCB->destroyPlayCard(1, 0);
         setBattleFlag(0, 0x10200000);
-        m_pCB->setFlag(0xc0000000, 0);
+        m_pCB->disablePlayCard(0xc0000000);
         if (isBattleFlag(2)) {
             setBattleFlag(0, 2);
             m_tqEscape = 0;
@@ -464,7 +464,7 @@ void CPlayerRiku::transferControl() {
     m_pGauge->setDMode(0, m_iDP, 0);
     m_pCB = (CardBattle::CCardBattle*)CTaskMan::getSysTask(0x16);
     m_pCB->transferPlayerEnchant(m_pDark);
-    m_pCB->setFlag(0, 0x400000);
+    m_pCB->disableDuelEntry(0);
     m_pRevolver = m_pDark->m_pRevolver;
     m_pRevolver->changeDarkMode(getHandle(), 0);
     setConditionFlag(0, 0x881803f);
@@ -1616,7 +1616,7 @@ void CPlayer::exeDuel() {
             m_iStepStockSkill = 0;
             startStockSkillAction();
             m_PlayerState = DUEL;
-            m_pCB->setFlag(0xc0000000, 0);
+            m_pCB->disablePlayCard(0xc0000000);
             break;
         }
         if (isTrgFlag(0x10) && chkChargeMove(0)) break;
@@ -1630,7 +1630,7 @@ void CPlayer::exeDuel() {
         exeStockSkill();
         if (m_PlayerState != DUEL) {
             setPlayerFlag(0, 1);
-            m_pCB->setFlag(0, 0xc0000000);
+            m_pCB->disablePlayCard(0);
             setBattleFlag(0, 0x8000000);
         }
         break;
