@@ -107,6 +107,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/unit-gates (12 unit gates tested: all needed; MATCH-tagged with 78 header sites) | 810 | 23 | 0 | 751 (146) | 713 |
 | 2026-11-02 | cleanup/mechanism-tags (feature/guard/pragma sites, last placeholders: untagged 0) | 809 | 23 | 0 | 751 (0) | 861 |
 | 2026-11-02 | cleanup/partial-comments (path-override PARTIALs -> MATCH; TitleReportDllStarter.h complete) | 792 | 23 | 0 | 751 (0) | 877 |
+| 2026-11-02 | tools/partials-implicit-dtor + parse-fixes (implicit dtors, declaration-order virtuals, member-pointer fields; classes complete 613 -> 711) | 792 | 23 | 0 | 751 (0) | 877 |
 
 <!-- partials:start -->
 ## Summary
@@ -119,7 +120,7 @@ duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
 mechanisms: 751 sites (0 untagged); #line: 1248
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 613, superset 140, partial 112, gated 23, missing 8, unattributed 309
+classes: complete 711, superset 93, partial 61, gated 23, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -162,7 +163,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 1 |  |  |
-| `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 1 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, setAutomaticDistance, setAutomaticHeight, setClipDistance, setDraw, ... (+3); 6 PARTIAL |
+| `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 1 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, setAutomaticDistance, setAutomaticHeight, setClipDistance, setDraw, ... (+2); 6 PARTIAL |
 | `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | complete | System/Graphic/Gprim.h | 1 |  |  |
@@ -177,11 +178,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Form/DebugWindow.h` | 0 | 2/1/0/4 | 12 |
 | `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 17 |
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
-| `Form/Menu/Menu.h` | 0 | 0/0/1/0 | 19 |
-| `Form/Menu/SaveLoadCtrl.h` | 11 | 1/1/6/0 | 7 |
+| `Form/Menu/SaveLoadCtrl.h` | 11 | 2/3/3/0 | 7 |
 | `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 4 |
 | `Form/Menu/TechHelp.h` | 2 | 0/1/0/0 | 3 |
-| `Game/AtWater.h` | 0 | 1/1/0/0 | 2 |
 | `Game/Atel/AtelBlur.h` | 0 | 1/1/0/0 | 3 |
 | `Game/Atel/AtelCrossFade.h` | 0 | 1/1/0/0 | 4 |
 | `Game/Atel/AtelFog.h` | 0 | 3/1/0/0 | 3 |
@@ -189,82 +188,66 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Atel/CameraMan.h` | 0 | 2/1/0/0 | 3 |
 | `Game/Atel/ChatMan.h` | 5 | 0/1/0/0 | 7 |
 | `Game/Atel/CommandAccepter.h` | 1 | 1/0/0/0 | 15 |
-| `Game/Atel/EventTrap.h` | 0 | 1/2/2/0 | 3 |
-| `Game/Atel/VSME.h` | 0 | 10/0/2/0 | 7 |
+| `Game/Atel/EventTrap.h` | 0 | 4/1/0/0 | 3 |
+| `Game/Atel/VSME.h` | 0 | 11/0/1/0 | 7 |
 | `Game/AttachCard.h` | 1 | 1/0/0/0 | 2 |
 | `Game/AttachMotion.h` | 1 | 1/0/0/0 | 155 |
-| `Game/AttackMotion.h` | 7 | 1/2/0/0 | 154 |
+| `Game/AttackMotion.h` | 7 | 2/1/0/0 | 154 |
 | `Game/BodyCollision.h` | 3 | 0/1/0/0 | 55 |
-| `Game/Bullet/Bullet.h` | 8 | 2/3/0/0 | 30 |
+| `Game/Bullet/Bullet.h` | 8 | 3/2/0/0 | 30 |
 | `Game/Card.h` | 12 | 2/0/1/0 | 25 |
 | `Game/CardBattle.h` | 46 | 4/2/0/0 | 146 |
 | `Game/CardKind.h` | 0 | 0/0/2/0 | 153 |
 | `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
 | `Game/CollParam.h` | 1 | 5/0/1/0 | 158 |
-| `Game/Collision/CollAttack.h` | 0 | 0/1/0/0 | 11 |
 | `Game/Collision/CollBody.h` | 1 | 0/1/0/0 | 23 |
 | `Game/Collision/CollDisp.h` | 1 | 3/0/0/0 | 7 |
 | `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
-| `Game/Collision/CollMap.h` | 0 | 0/1/0/0 | 29 |
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
 | `Game/Collision/CollObj.h` | 11 | 4/0/2/7 | 174 |
 | `Game/Collision/CollUtil.h` | 7 | 0/0/0/0 | 150 |
-| `Game/Collision/CollUtilA.h` | 1 | 9/1/1/0 | 26 |
+| `Game/Collision/CollUtilA.h` | 1 | 10/1/0/0 | 26 |
 | `Game/Collision/Ride.h` | 1 | 4/0/1/0 | 6 |
 | `Game/Debug/DWTBGM.h` | 1 | 0/0/0/0 | 1 |
 | `Game/EffectMotion.h` | 0 | 5/0/2/0 | 8 |
-| `Game/Enemy/BattleEnemy.h` | 33 | 0/0/1/0 | 58 |
+| `Game/Enemy/BattleEnemy.h` | 33 | 0/1/0/0 | 58 |
 | `Game/Enemy/EnemyParam.h` | 15 | 2/1/1/0 | 16 |
 | `Game/Enemy/EnemyTornadostep.h` | 0 | 0/0/1/0 | 2 |
 | `Game/Enemy/EnemyWhitemushroom.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Enemy/Heartless.h` | 5 | 0/1/0/0 | 36 |
 | `Game/Enemy/HumanBoss.h` | 0 | 0/1/0/0 | 4 |
-| `Game/Enemy/MapEnemy.h` | 1 | 0/0/1/0 | 7 |
+| `Game/Enemy/MapEnemy.h` | 1 | 1/0/0/0 | 7 |
 | `Game/Enemy/MapEnemyManager.h` | 1 | 1/1/0/0 | 8 |
 | `Game/Entity.h` | 105 | 1/1/0/0 | 150 |
 | `Game/EntityFactory.h` | 14 | 1/1/0/0 | 49 |
 | `Game/Game.h` | 20 | 0/1/0/0 | 43 |
 | `Game/GameSub.h` | 1 | 0/1/0/0 | 4 |
 | `Game/GameSubBattle.h` | 0 | 1/0/1/0 | 2 |
-| `Game/GameWork.h` | 3 | 2/1/3/0 | 60 |
+| `Game/GameWork.h` | 3 | 3/1/2/0 | 60 |
 | `Game/Gimmick/BaseGimmick.h` | 0 | 1/1/0/0 | 46 |
-| `Game/Gimmick/GimmickAngelArrow.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Gimmick/GimmickBell.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickCarry.h` | 0 | 0/1/0/0 | 4 |
 | `Game/Gimmick/GimmickDeceiveEnemy.h` | 1 | 1/0/0/0 | 3 |
-| `Game/Gimmick/GimmickDominoPillar.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickFountain.h` | 0 | 0/1/0/0 | 2 |
+| `Game/Gimmick/GimmickHitRepetition.h` | 0 | 0/1/0/0 | 2 |
+| `Game/Gimmick/GimmickHitReturn.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Gimmick/GimmickJackBox.h` | 0 | 0/1/0/0 | 2 |
+| `Game/Gimmick/GimmickJumpStand.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Gimmick/GimmickLotusLeaf.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickSavePoint.h` | 0 | 0/1/0/0 | 3 |
+| `Game/Gimmick/GimmickSteamTrap.h` | 0 | 0/1/0/0 | 2 |
 | `Game/Gimmick/GimmickThunderTrap.h` | 0 | 0/2/0/0 | 2 |
-| `Game/Gimmick/GimmickToldPipe.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickTreasureBox.h` | 0 | 1/1/0/0 | 4 |
-| `Game/Gimmick/GimmickTutorial.h` | 0 | 1/2/0/0 | 2 |
-| `Game/Gimmick/GimmickWarpPoint.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Gimmick/GimmickWindowLid.h` | 0 | 0/1/0/0 | 2 |
-| `Game/InterpolateMove.h` | 0 | 0/0/3/0 | 1 |
+| `Game/Gimmick/GimmickUpFloor.h` | 0 | 0/2/0/0 | 2 |
 | `Game/Map.h` | 9 | 6/2/1/3 | 9 |
 | `Game/MapUnitTable.h` | 3 | 0/2/0/0 | 11 |
 | `Game/Movement.h` | 7 | 0/0/1/0 | 105 |
 | `Game/OsdDef.h` | 3 | 3/0/3/0 | 7 |
 | `Game/Player/DWTPlayer.h` | 2 | 0/0/0/0 | 5 |
-| `Game/Player/Friend.h` | 0 | 0/0/1/0 | 16 |
-| `Game/Player/Player.h` | 44 | 2/0/1/0 | 72 |
+| `Game/Player/Player.h` | 44 | 2/1/0/0 | 72 |
 | `Game/Player/PlayerAnim.h` | 1 | 1/0/0/0 | 1 |
 | `Game/Player/PlayerAttack.h` | 2 | 1/0/0/0 | 26 |
 | `Game/Player/PlayerCamera.h` | 16 | 3/0/0/1 | 25 |
 | `Game/Player/PlayerControl.h` | 3 | 1/1/0/0 | 73 |
-| `Game/Player/PlayerDRiku.h` | 0 | 0/1/0/0 | 3 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
 | `Game/Player/PlayerManager.h` | 0 | 1/1/0/0 | 22 |
-| `Game/Player/PlayerRiku.h` | 0 | 0/1/0/0 | 3 |
-| `Game/Player/PlayerSora.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Player/Summon.h` | 0 | 0/0/1/0 | 11 |
-| `Game/Player/SummonGenie.h` | 0 | 0/1/0/0 | 2 |
-| `Game/Player/SummonMushu.h` | 0 | 0/1/0/0 | 2 |
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 53 |
-| `Game/Prize.h` | 0 | 0/1/0/0 | 4 |
 | `Game/SEMotion.h` | 0 | 5/0/1/0 | 4 |
 | `Game/SceneEnv.h` | 1 | 0/0/1/0 | 37 |
 | `Game/SceneInfo.h` | 5 | 29/0/1/0 | 86 |
@@ -273,24 +256,21 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Technic.h` | 2 | 1/1/0/0 | 19 |
 | `System/Buf.h` | 4 | 0/1/0/0 | 38 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
-| `System/Component.h` | 3 | 1/1/0/0 | 5 |
+| `System/Component.h` | 3 | 2/0/0/0 | 5 |
 | `System/Coord.h` | 3 | 0/1/0/0 | 18 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 271 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 11 |
 | `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 167 |
-| `System/Graphic/2d/2DFntObj.h` | 0 | 0/1/0/0 | 3 |
-| `System/Graphic/2d/2DLay.h` | 0 | 3/1/0/0 | 5 |
 | `System/Graphic/2d/2DLayObj.h` | 1 | 0/1/0/0 | 3 |
-| `System/Graphic/2d/2DMan.h` | 2 | 2/0/1/0 | 166 |
+| `System/Graphic/2d/2DMan.h` | 2 | 3/0/0/0 | 166 |
 | `System/Graphic/2d/2DObj.h` | 4 | 0/1/0/0 | 167 |
 | `System/Graphic/2d/2DSeq.h` | 1 | 1/1/0/0 | 5 |
 | `System/Graphic/2d/2DSeqCtrl.h` | 2 | 1/1/0/0 | 33 |
 | `System/Graphic/2d/2DSeqObj.h` | 8 | 3/3/0/0 | 167 |
-| `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 9 |
 | `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 89 |
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
-| `System/Graphic/DeFocus.h` | 1 | 2/0/2/0 | 6 |
-| `System/Graphic/DispList.h` | 1 | 1/1/8/0 | 2 |
+| `System/Graphic/DeFocus.h` | 1 | 4/0/0/0 | 6 |
+| `System/Graphic/DispList.h` | 1 | 9/1/0/0 | 2 |
 | `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 172 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 175 |
 | `System/Graphic/Effect/effect.h` | 6 | 1/1/4/0 | 77 |
@@ -302,38 +282,33 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/keProg/KeBornRnd.h` | 5 | 0/0/0/0 | 11 |
 | `System/Graphic/Effect/libppp/keProg/KeDMat.h` | 1 | 0/0/0/0 | 3 |
 | `System/Graphic/Effect/libppp/keProg/KeDttSpr.h` | 1 | 1/0/0/0 | 2 |
-| `System/Graphic/Effect/libppp/keProg/KeLns.h` | 0 | 12/0/1/0 | 3 |
 | `System/Graphic/Effect/libppp/keProg/KeTh.h` | 4 | 18/0/0/0 | 7 |
 | `System/Graphic/Effect/libppp/pppPart.h` | 57 | 21/3/0/0 | 215 |
 | `System/Graphic/Effect/libppp/pppfunctbl.h` | 1 | 0/0/0/0 | 2 |
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
-| `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 38 |
-| `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 5 |
 | `System/Graphic/Gprim.h` | 17 | 8/1/6/0 | 231 |
-| `System/Graphic/GprimFull.h` | 0 | 1/28/6/0 | 231 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
-| `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 10 |
+| `System/Graphic/LightUnit.h` | 4 | 4/1/2/0 | 10 |
 | `System/Graphic/MapUnit.h` | 1 | 0/0/0/0 | 3 |
-| `System/Graphic/Model.h` | 12 | 0/3/5/0 | 70 |
+| `System/Graphic/Model.h` | 12 | 4/3/1/0 | 70 |
 | `System/Graphic/ModelMan.h` | 0 | 2/0/1/0 | 75 |
 | `System/Graphic/MotData.h` | 1 | 4/0/3/0 | 5 |
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
 | `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 8 |
-| `System/Graphic/PathDataCamera.h` | 0 | 0/1/0/0 | 3 |
-| `System/Graphic/ScreenMask.h` | 0 | 0/1/1/0 | 5 |
+| `System/Graphic/ScreenMask.h` | 0 | 1/0/1/0 | 5 |
 | `System/Graphic/ShadowModel.h` | 6 | 0/0/1/0 | 9 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
-| `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 36 |
+| `System/Graphic/StrPrim.h` | 1 | 1/0/0/0 | 36 |
 | `System/Graphic/TexInfo.h` | 1 | 1/0/1/0 | 234 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
 | `System/Graphic/modeldata.h` | 11 | 1/2/0/1 | 82 |
 | `System/LinkedBuf.h` | 4 | 1/2/1/0 | 7 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
-| `System/Math3D.h` | 1 | 2/0/1/0 | 59 |
+| `System/Math3D.h` | 1 | 2/1/0/0 | 59 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 6 |
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 97 |
 | `System/RsrcDB.h` | 1 | 1/0/1/0 | 74 |
-| `System/RsrcData.h` | 5 | 20/0/13/0 | 29 |
+| `System/RsrcData.h` | 5 | 29/1/3/0 | 29 |
 | `System/SJoint.h` | 9 | 0/0/0/0 | 224 |
 | `System/SLContainer.h` | 14 | 0/0/0/0 | 244 |
 | `System/Task.h` | 11 | 1/2/0/0 | 244 |
