@@ -457,10 +457,10 @@ static void _makeInputName() {
 }
 
 void _makeDispName();
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", _makeDispName__3DWTv);
+/* Parked: 25 of 45 lines - the copy loop: the original keeps i + j unreduced (addu/slti each pass) and lays the
+ * loop out with the first pass peeled. */
 #if 0
-/* differs in the copy loop: the original keeps i + j unreduced (addu/slti each pass) and lays the loop out with the first pass peeled */
-static void _makeDispName() {
+void _makeDispName() {
     INT i;
     INT j;
     CHAR* pC = DebugWork::g_dw.nakamich.szNameBuf;
@@ -471,6 +471,8 @@ static void _makeDispName() {
     }
     pC[j] = 0;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", _makeDispName__3DWTv);
 #endif
 
 static BOOL debugWinNameLineCall(CDebugWindow* pObj, INT iLineY, INT inParam) {
@@ -569,10 +571,11 @@ static BOOL _fadeoutSE(CDebugWindow* pObj, INT inY, INT inParam) {
 
 
 BOOL debugWinSeTestLineCall(CDebugWindow* pObj, INT iLineY, INT inParam);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", debugWinSeTestLineCall__3DWTP12CDebugWindowii);
+/* Parked: 2 of 51 lines, same size - only the playSE call: the original sets a1/a2 first and loads iSE_Id (a0) in
+ * the jal delay slot, ours loads it before li a2. Tried: a reference local for iSE_Id (15), |= form for bVoice
+ * (23), ternary (23), permuter 5 min (2 -> 2). */
 #if 0
-/* differs only in the delay slot of the playSE call: the original loads iSE_Id last (li a2,64 first) */
-static BOOL debugWinSeTestLineCall(CDebugWindow* pObj, INT iLineY, INT inParam) {
+BOOL debugWinSeTestLineCall(CDebugWindow* pObj, INT iLineY, INT inParam) {
     if (inParam & 0x20) {
         _stopSE();
         if (DebugWork::g_dw.sound.bVoice) {
@@ -587,6 +590,8 @@ static BOOL debugWinSeTestLineCall(CDebugWindow* pObj, INT iLineY, INT inParam) 
     }
     return TRUE;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", debugWinSeTestLineCall__3DWTP12CDebugWindowii);
 #endif
 
 static DEBUG_WINDOW_LINE debugWinSeTestLine[15] = {
@@ -2906,10 +2911,7 @@ static BOOL debugWCCardAll(CDebugWindow* pObj, INT inY, INT inParam) {
 }
 
 BOOL debugWCMPFull(CDebugWindow* pObj, INT inY, INT inParam);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", debugWCMPFull__3DWTP12CDebugWindowii);
-#if 0
-/* differs only in a register: the original loads %hi(CPlayerManager::m_pInstance) into v1, ours into v0 */
-static BOOL debugWCMPFull(CDebugWindow* pObj, INT inY, INT inParam) {
+BOOL debugWCMPFull(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x20) {
         CStatus::setMP(99999);
         PLM::CPlayerManager* plm = PLM::CPlayerManager::getPLM();
@@ -2919,7 +2921,6 @@ static BOOL debugWCMPFull(CDebugWindow* pObj, INT inY, INT inParam) {
     }
     return TRUE;
 }
-#endif
 
 static BOOL debugWCEXPFull(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x20) {
