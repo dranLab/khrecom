@@ -249,6 +249,257 @@ void CHermitePathCamera::main() {
     updateMatrix(vPos, vLook, updatePos(vPos, vLook, fr, TRUE));
 }
 
+/* Parked: 88 of 723 lines - same structure; left: the case-2 fStep lives in f12 in the original (ours f2), the
+ * hoisted addresses of the BG-check and learp blocks get swapped s-registers (&m_vWPos s0, &vAdd s0 / &OldPos s1 in
+ * the original), the mInv address is kept in a register here and recomputed there. tried: fStep scope, mInv
+ * placement, chained stores, pHPath ternary; permuter (method wrapper) 15 min, 3.5k candidates: no gain.
+ * Levers that got it here (157 -> 88): `>= 0.002f` length tests with the flag in the else, fProj carrying both
+ * results into setProjectionDist, a 2-case switch for iFlg == 7, getSpeed() into a temp before the distance call,
+ * iBlock1 = getNowBlock() + 1, `INT iTcb = 0; if (...) iTcb = 1;`, the second division in its own statement. */
+#if 0
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
+void Normalize(FVECTOR& v0, const FVECTOR& v1);
+extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
+namespace Math3D {
+FLOAT VectorLength(const FVECTOR& inVector);
+}
+static inline FLOAT _fabs(FLOAT inValue) {
+    FLOAT ret;
+    asm("abs.s %0, %1" : "=f"(ret) : "f"(inValue));
+    return ret;
+}
+
+FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOOL bUpdate) {
+    FLOAT fRoll;
+    FLOAT fProj;
+    FLOAT fRate;
+    fRoll = 0.0f;
+    if (m_iStep != 3) {
+        if (!m_pPath->getPathVector()) goto common;
+        if (m_pPath->getPathVectorNum() > 0) {
+            if (m_pPath->getPathVectorNum() < 2) {
+                m_vPos = m_pPath->getPathVector()[0];
+                fRoll = m_pPath->getPathRoll(0);
+                m_vPos.w = 1.0f;
+            } else {
+                switch (m_iKind) {
+                case 2:
+                    {
+                        FLOAT fStep = m_pPath->getTargetDistanceToPathStep(
+                            ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTrans(), m_fDistance);
+                        if (bUpdate) {
+                            fRate = fr * 0.125f;
+                            if (1.0f < fRate) fRate = 1.0f;
+                            m_fStep += (fStep - m_fStep) * fRate;
+                        } else {
+                            m_fStep = fStep;
+                        }
+                    }
+                    m_pPath->getPathStepToPosition(m_vPos, m_fStep, FALSE);
+                    fRoll = m_pPath->getPathStepToRoll(m_fStep);
+                    break;
+                case 1:
+                case 4:
+                    if (bUpdate) {
+                        if (m_iPathFlags & 0x4000000) {
+                            INT iBlock1 = m_pMyHPath->getNowBlock() + 1;
+                            FLOAT fVSpeed0 = m_pPath->getPathSpeed(iBlock1 - 1);
+                            FLOAT fVSpeed1 = m_pPath->getPathSpeed(iBlock1);
+                            FLOAT fSpeed = (fVSpeed1 - fVSpeed0) *
+                                               m_pMyHPath->getHermiteCoefficient(iBlock1 - 1, m_pMyHPath->getProgress()) +
+                                           fVSpeed0;
+                            m_pMyHPath->setSpeed(fSpeed * 0.0046296297f);
+                        }
+                        m_pMyHPath->update(fr);
+                    }
+                    m_pMyHPath->getNowPos(m_vPos);
+                    fRoll = m_pMyHPath->getNowRoll();
+                    break;
+                case 0:
+                    if (bUpdate) {
+                        if (m_iPathFlags & 0x4000000) {
+                            INT iBlock1 = m_pMyHPath->getNowBlock() + 1;
+                            FLOAT fVSpeed0 = m_pPath->getPathSpeed(iBlock1 - 1);
+                            FLOAT fVSpeed1 = m_pPath->getPathSpeed(iBlock1);
+                            FLOAT fSpeed = (fVSpeed1 - fVSpeed0) *
+                                               m_pMyHPath->getHermiteCoefficient(iBlock1 - 1, m_pMyHPath->getProgress()) +
+                                           fVSpeed0;
+                            m_pMyHPath->setSpeed(fSpeed * 0.0046296297f);
+                        }
+                        m_pMyHPath->update(fr);
+                    }
+                    m_pMyHPath->getNowPos(m_vPos);
+                    fRoll = m_pMyHPath->getNowRoll();
+                    if (m_iPathFlags & 0x20000000) {
+                        FLOAT fSpd = m_pMyHPath->getSpeed();
+                        FLOAT fTime = m_pMyHPath->getHermiteDistanceAll() / fSpd;
+                        FLOAT fDist = m_pHPath->getHermiteDistanceAll();
+                        m_pHPath->setSpeed(fDist / fTime);
+                        if (bUpdate) m_pHPath->update(fr);
+                    } else {
+                        FLOAT fTime = m_pMyHPath->getHermiteCoefficient(m_pMyHPath->getNowBlock(), m_pMyHPath->getProgress());
+                        if (1.0f <= fTime) fTime = 0.999999f;
+                        fTime += m_pMyHPath->getNowBlock();
+                        if (m_pHPath->getPathVector()) {
+                            FVECTOR vPos;
+                            INT iTcb = 0;
+                            if (m_pPath->getPathVectorNum() >= 3) iTcb = 1;
+                            m_pHPath->getPathVector()->getPathStepToPosition(vPos, fTime, iTcb);
+                            CCoord& crd = ((CTask*)m_pTarget)->Crd(0);
+                            crd.m_Local.v[3] = vPos;
+                            crd.m_Flag = 1;
+                        }
+                    }
+                    break;
+                case 3:
+                    if (m_iPathFlags & 0x20000000) {
+                        FLOAT fSpd = m_pHPath->getSpeed();
+                        FLOAT fTime = m_pHPath->getHermiteDistanceAll() / fSpd;
+                        FLOAT fDist = m_pMyHPath->getHermiteDistanceAll();
+                        m_pMyHPath->setSpeed(fDist / fTime);
+                        if (bUpdate) m_pMyHPath->update(fr);
+                        m_pMyHPath->getNowPos(m_vPos);
+                        fRoll = m_pMyHPath->getNowRoll();
+                    } else {
+                        FLOAT fTime = m_pHPath->getHermiteCoefficient(m_pHPath->getNowBlock(), m_pHPath->getProgress());
+                        if (1.0f <= fTime) fTime = 0.999999f;
+                        fTime += m_pHPath->getNowBlock();
+                        m_fStep = fTime;
+                        m_pPath->getPathStepToPosition(m_vPos, m_fStep, m_pPath->getPathVectorNum() >= 3);
+                        fRoll = m_pPath->getPathStepToRoll(m_fStep);
+                    }
+                    break;
+                }
+            }
+        }
+    common:
+        if (Crd(0).getParent()) {
+            ApplyMatrix(m_vWPos, Crd(0).getParent()->getWorldMatrix(), m_vPos);
+        } else {
+            m_vWPos = m_vPos;
+        }
+        vLook = ((CCoord&)m_pTarget->Crd(0)).getWorldMatrix().getTrans();
+        vLook.y += m_fOffsetY;
+        if (bUpdate) {
+            fRate = m_fLookDelay * fr;
+            if (1.0f < fRate) fRate = 1.0f;
+            SubVectorXYZ(vLook, vLook, m_vTargetPos);
+            ScaleVectorXYZ(vLook, vLook, fRate);
+            AddVectorXYZ(m_vTargetPos, m_vTargetPos, vLook);
+        } else {
+            m_vTargetPos = vLook;
+        }
+        if (m_pCollMapCamera) {
+            FVECTOR vResult;
+            if (m_pCollMapCamera->checkBGforCamera(m_vWPos, m_vTargetPos, vResult, m_iStatus & 4)) {
+                m_vPos = m_vWPos = vResult;
+                if (Crd(0).getParent()) {
+                    FMATRIX mInv;
+                    sceVu0InversMatrix(mInv, Crd(0).getParent()->getWorldMatrix());
+                    ApplyMatrix(m_vPos, mInv, m_vWPos);
+                }
+            }
+        }
+        fProj = m_fStartProj;
+        if (bUpdate && (m_iPathFlags & 0x200)) {
+            CHermitePath* pHPath = m_pMyHPath;
+            if (!pHPath) pHPath = m_pHPath;
+            if (pHPath) {
+                INT iBlock = pHPath->getNowBlock();
+                FLOAT fDistance = pHPath->getProgress();
+                for (INT i = 0; i < iBlock; i++) {
+                    fDistance += pHPath->getHermiteDistance(i);
+                }
+                FLOAT fTotalRate = fDistance / pHPath->getHermiteDistanceAll();
+                fProj = m_fStartProj + (m_fEndProj - m_fStartProj) * fTotalRate;
+            }
+        }
+        m_fProj = fProj;
+    }
+    if (m_iStep == 0 || m_iStep == 3) {
+        FVECTOR vLen;
+        FVECTOR vAdd;
+        FLOAT fLen;
+        INT iFlg = 0;
+        FLOAT fAdd;
+        fRate = m_fLearpIn;
+        if (m_iStep == 3) {
+            CCamera* pCam = CWorldEnv::getOldCamera();
+            if (pCam) {
+                m_vTargetPos = *pCam->getLook();
+                m_vWPos = pCam->Crd(0).getWorldMatrix().getTrans();
+                m_fProj = pCam->getProjectionDist();
+            }
+            fRate = m_fLearpOut;
+        }
+        if (bUpdate) {
+            fRate *= fr;
+            if (1.0f < fRate) fRate = 1.0f;
+        } else {
+            fRate = 0.0f;
+        }
+        SubVectorXYZ(vLen, m_vLearpAimPos, m_vLearpOldPos);
+        ScaleVectorXYZ(vAdd, vLen, fRate);
+        if (Math3D::VectorLength(vLen) >= 0.002f) {
+            if (Math3D::VectorLength(vAdd) < 0.002f) {
+                Normalize(vAdd, vAdd);
+                ScaleVectorXYZ(vAdd, vAdd, 0.002f);
+            }
+        } else {
+            iFlg = 1;
+        }
+        AddVectorXYZ(m_vLearpOldPos, m_vLearpOldPos, vAdd);
+        SubVectorXYZ(vAdd, m_vWPos, m_vLearpAimPos);
+        AddVectorXYZ(vPos, m_vLearpOldPos, vAdd);
+        if (Crd(0).getParent()) {
+            FMATRIX mInv;
+            sceVu0InversMatrix(mInv, Crd(0).getParent()->getWorldMatrix());
+            ApplyMatrix(vPos, mInv, vPos);
+        }
+        SubVectorXYZ(vLen, m_vLearpAimLook, m_vLearpOldLook);
+        ScaleVectorXYZ(vAdd, vLen, fRate);
+        if (Math3D::VectorLength(vLen) >= 0.002f) {
+            if (Math3D::VectorLength(vAdd) < 0.002f) {
+                Normalize(vAdd, vAdd);
+                ScaleVectorXYZ(vAdd, vAdd, 0.002f);
+            }
+        } else {
+            iFlg |= 2;
+        }
+        AddVectorXYZ(m_vLearpOldLook, m_vLearpOldLook, vAdd);
+        SubVectorXYZ(vAdd, m_vTargetPos, m_vLearpAimLook);
+        AddVectorXYZ(vLook, m_vLearpOldLook, vAdd);
+        fLen = m_fLearpAimProj - m_fLearpOldProj;
+        fAdd = fLen * fRate;
+        if (_fabs(fLen) < 0.002f) {
+            m_fLearpOldProj = m_fLearpAimProj;
+            iFlg |= 4;
+        } else {
+            if (_fabs(fAdd) < 0.002f) fAdd = (0.0f <= fAdd) ? 0.002f : -0.002f;
+            m_fLearpOldProj += fAdd;
+        }
+        fProj = m_fLearpOldProj + (m_fProj - m_fLearpAimProj);
+        if (iFlg == 7) {
+            switch (m_iStep) {
+            case 0:
+                m_iStep = 1;
+                break;
+            case 3:
+                CTask::out();
+                break;
+            }
+        }
+    }
+    setProjectionDist(fProj);
+    if (m_iStep == 1) {
+        vPos = m_vPos;
+        vLook = m_vTargetPos;
+    }
+    return fRoll;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/HermitePathCamera", updatePos__18CHermitePathCameraR7FVECTORT1fi);
 /* placeholder for updatePos's jump table (labels of the included assembly) */
 __asm__(
@@ -260,6 +511,7 @@ __asm__(
     ".word .L0012B4D8\n"
     ".word .L0012B2A8\n"
     ".text\n");
+#endif
 
 void CHermitePathCamera::updateMatrix(FVECTOR& vPos, FVECTOR& vLook, FLOAT fRoll) {
     setPos(vPos);
