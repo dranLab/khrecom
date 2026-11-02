@@ -35,6 +35,7 @@ private:
 public:
     // PARTIAL: added for Game/GameSubField
     static void setAutomatic() { m_iStatus &= ~4; }
+    static BOOL isDraw() { return !((m_iStatus >> 2) & 1); } // PARTIAL: added for System/Graphic/ModelMan (bit 4 = shadows off, from the inlined test)
     static void setUpPer(FLOAT f) { m_fUpPer = f; }
     static FLOAT getUpPer() { return m_fUpPer; }     // PARTIAL: added for System/Graphic/Model
     static FLOAT getDownLen() { return m_fDownLen; }
@@ -45,7 +46,7 @@ public:
     static FMATRIX& getWorldTextureMatrix() { return m_mWorldTexture; }
     static FVECTOR& getShadowParam() { return m_vParam; }
     static ULONGLONG getTEX_0() { return m_lTex0; }
-    static void setDownLen(FLOAT f) { m_fDownLen = f; } static void setCDensity(FLOAT f) { m_fCDensity = f; } static void setADensity(FLOAT f) { m_fADensity = f; } // PARTIAL: densities added for Game/Atel/VSME
+    static void setDownLen(FLOAT f) { m_fDownLen = f; }
     // PARTIAL: added for Game/Map (the stores go through a reference: the original reloads m_pFog after each)
     static void setColorDensity(FLOAT fDensity) { FLOAT& r = m_fCDensity; r = fDensity; }
     static void setAlphaDensity(FLOAT fDensity) { FLOAT& r = m_fADensity; r = fDensity; }
