@@ -80,19 +80,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/System-Graphic-PathData (finished 47/49, dispDebugLine/getNearPath parked; A1: no stand-ins) | 822 | 52 | 0 | 760 (673) | 180 |
 | 2026-11-02 | cleanup/System-Graphic-ShadowModel (CShadowModelMan stand-ins in DebugWindowTBL/ModelMan, isDraw; VSME on the ref density setters) | 823 | 50 | 0 | 760 (673) | 180 |
 | 2026-11-02 | decomp/System-Graphic-FrecFont (finished, makePkt and setupFontTex parked; A1: RsrcInfo stand-in reason) | 824 | 50 | 0 | 760 (673) | 180 |
+| 2026-11-02 | cleanup/System-RsrcData (RsrcData classes for every includer: gate RSRCDATA_H_FULL and 15 files of stand-ins dropped; DWTBGM.h namespace MATCH) | 820 | 27 | 0 | 757 (670) | 181 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 824 (765 in 111 headers, 59 in 35 .cpp); MATCH: 180
-  by category: method 313, data member 62, type 72, fwd decl 49, #include 31, changed in place 120, padding 8, path override 22, gate 24, guessed 29, header-level 71, stand-in 17, other 6
-stand-ins: 50 foreign in 31 files (28 names), 201 unattributed, 167 own
+PARTIAL: 820 (767 in 111 headers, 53 in 33 .cpp); MATCH: 181
+  by category: method 315, data member 62, type 72, fwd decl 49, #include 30, changed in place 121, padding 8, path override 22, gate 19, guessed 29, header-level 71, stand-in 16, other 6
+stand-ins: 27 foreign in 18 files (20 names), 201 unattributed, 167 own
 duplicate class names across headers: 0
 padding: 14 arrays, 0 accessors
-mechanisms: 760 sites (673 untagged); #line: 1242
+mechanisms: 757 sites (670 untagged); #line: 1241
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 589, superset 141, partial 99, gated 59, missing 8, unattributed 309
+classes: complete 608, superset 141, partial 112, gated 26, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -104,10 +105,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
 | R1 | 5.0 | `System/Graphic/ShadowModel.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
+| R1 | 4.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 4 gate users |  () |  (gate) |
 | R1 | 3.0 | `Form/DebugWindow.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
-| R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
-| R1 | 2.5 | `System/RsrcDB.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CRsrcDB (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
@@ -116,7 +116,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
-| R2 | 32.0 | `System/RsrcData.h` | ready | 15 stand-in files, 0 dup headers, 2 gate users | CRsrcANN, CRsrcAZF, CRsrcData, CRsrcTex, CRsrcVSV, ... (+2) (7 gated) | gated strings: RSRCDATA_H_FULL |
 | R2 | 15.5 | `Game/Collision/CollObj.h` | ready | 3 stand-in files, 0 dup headers, 8 gate users, 3 PARTIAL | CCircleCollision, CCollision, COLL_KIND, COLL_TYPE, CPointCollision, ... (+2) (4 gated, 1 partial, 2 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollAttack, CSJointT<CCollObj> not in Game/Collision/CollAttack |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 | R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
@@ -126,10 +125,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | class | readiness | home | stand-in files | also defined in | gaps vs ref |
 |---|---|---|---:|---|---|
-| `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
-| `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
-| `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
@@ -142,10 +138,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
 | `CPoly3Collision` | gated | Game/Collision/CollObj.h | 1 |  |  |
-| `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
-| `CRsrcDB` | partial | System/RsrcDB.h | 1 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene; 1 PARTIAL |
-| `CRsrcTex` | gated | System/RsrcData.h | 1 |  |  |
-| `CRsrcVSV` | gated | System/RsrcData.h | 1 |  | missing methods: getBgmID, getFilePath, getSectorSize, getStartSector, ~CRsrcVSV |
 | `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 1 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, setAutomaticDistance, setAutomaticHeight, setClipDistance, setDraw, ... (+3); 6 PARTIAL |
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
@@ -153,7 +145,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `G_RGBA` | superset | System/Graphic/Gprim.h | 1 |  | 2 PARTIAL |
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
 | `QWdata` | complete | System/Graphic/Gprim.h | 1 |  |  |
-| `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
 
 ## Headers
 
@@ -198,7 +189,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollUtil.h` | 8 | 0/0/0/0 | 150 |
 | `Game/Collision/CollUtilA.h` | 1 | 9/1/1/0 | 26 |
 | `Game/Collision/Ride.h` | 1 | 4/0/1/0 | 6 |
-| `Game/Debug/DWTBGM.h` | 1 | 1/0/0/0 | 1 |
+| `Game/Debug/DWTBGM.h` | 1 | 0/0/0/0 | 1 |
 | `Game/EffectMotion.h` | 0 | 5/0/2/0 | 8 |
 | `Game/Enemy/BattleEnemy.h` | 35 | 0/0/1/0 | 58 |
 | `Game/Enemy/EnemyParam.h` | 15 | 2/1/1/0 | 16 |
@@ -258,7 +249,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Status.h` | 11 | 1/0/1/0 | 15 |
 | `Game/StorageWork.h` | 2 | 2/1/1/0 | 61 |
 | `Game/Technic.h` | 3 | 1/1/0/0 | 19 |
-| `System/Buf.h` | 4 | 0/1/0/0 | 26 |
+| `System/Buf.h` | 4 | 0/1/0/0 | 38 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
 | `System/Component.h` | 3 | 1/1/0/0 | 5 |
 | `System/Coord.h` | 3 | 0/1/0/0 | 18 |
@@ -319,11 +310,11 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Math3D.h` | 1 | 2/0/1/0 | 59 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 6 |
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 97 |
-| `System/RsrcDB.h` | 1 | 1/0/1/0 | 68 |
-| `System/RsrcData.h` | 4 | 0/0/0/33 | 29 |
-| `System/SJoint.h` | 9 | 0/0/0/0 | 214 |
-| `System/SLContainer.h` | 14 | 0/0/0/0 | 240 |
-| `System/Task.h` | 11 | 1/2/0/0 | 240 |
+| `System/RsrcDB.h` | 1 | 1/0/1/0 | 74 |
+| `System/RsrcData.h` | 6 | 20/0/13/0 | 29 |
+| `System/SJoint.h` | 9 | 0/0/0/0 | 224 |
+| `System/SLContainer.h` | 14 | 0/0/0/0 | 244 |
+| `System/Task.h` | 11 | 1/2/0/0 | 244 |
 | `System/TaskMan.h` | 7 | 1/2/1/0 | 99 |
 | `System/Vector.h` | 22 | 0/0/3/0 | 266 |
 
@@ -339,7 +330,7 @@ or `untagged`.
 | feature | `COLLOBJ_H_COLLISION_CLASSES` | 7 | 7 | constructs CPointCollision/CSphereCollision |
 | feature | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | getDetectInfo as INT (see CollObj.h) |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
-| feature | `KH_PLACEMENT_NEW_DEFINED` | 3 | 3 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
+| feature | `KH_PLACEMENT_NEW_DEFINED` | 4 | 4 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature | `MODELDATA_H_TEXINFO` | 6 | 6 | TexInfoStub (the original has its assert strings) |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 2 | RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) |
 | feature site | `ANIM_H_GETFLAG_DECL_ONLY` | 2 | 2 | these units' originals call CAnim::getFlag out of line (Entity, EffectMotion, SEMotion, GimmickLotusLeaf) |
@@ -347,15 +338,13 @@ or `untagged`.
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 2 | the inline collideMap needs CCollUtil (CollUtil.h): only units that construct these classes define it |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar) |
-| feature site | `KH_PLACEMENT_NEW_DEFINED` | 2 | 2 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
+| feature site | `KH_PLACEMENT_NEW_DEFINED` | 1 | 1 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 1 | only includers whose original .rodata has TexInfoStub's assert strings |
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
 | full-class | `FORM_DEBUGMENU_FULL` | 1 | 1 | the owner sees the full classes |
 | full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the owner sees the full classes (Gprim.h included first) |
-| full-class | `RSRCDATA_H_FULL` | 2 | 0 | untagged, e.g. System/RsrcDB.cpp:2 |
 | full-class site | `FORM_DEBUGMENU_FULL` | 1 | 1 | the full classes need Gprim.h/PadHandler.h; System/Debug and System/RootTask originals lack Gprim.h's strings |
 | full-class site | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings |
-| full-class site | `RSRCDATA_H_FULL` | 1 | 0 | untagged, e.g. System/RsrcData.h:12 |
 | guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 0 | untagged, e.g. Game/Gimmick/CreateGimmick.cpp:1 |
 | guard skip | `GAME_COLLISION_COLLUTILA_H` | 1 | 0 | untagged, e.g. Game/Collision/CollUtil.h:28 |
 | guard skip | `GAME_ENTITY_H` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:447 |
@@ -519,3 +508,8 @@ Generated by `tools/partials.py --update docs/partials.md`.
 - 2D container message (resolved, cleanup/2DMan): read from the bytes, all 166 originals with the message have
   the `2DMan.h` path, exactly our includers; the real `C2DMan::initialize` and `C2DOSLCManager::createContainer`
   inlines now give those strings.
+- `RsrcData.h` inside `namespace DWT` (open, cleanup/System-RsrcData): in DebugWindowTBL's original `.rodata` the
+  `System/RsrcData.h(156)` string sits right before `DWTBGM.h`'s, so `RsrcData.h` is first included there, inside
+  `namespace DWT` (its BGM functions are `__3DWT`), yet the original calls `CRsrcDB` and uses `CRsrcData` at global
+  scope. `DWTBGM.h` closes and reopens the namespace around the include (`MATCH:`); the original's real structure is
+  unknown.
