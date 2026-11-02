@@ -632,7 +632,7 @@ void CAnim::setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped) {
                 m_Flags[1] &= ~0x40;
             }
             if (tq >= m_nMaxTq) {
-                tq = (SHORT)(m_pMotData->GetRetFrame() - 1) * 3000 / m_nFps + tq % m_nMaxTq;
+                tq = (SHORT)(m_pMotData->GetLoopFrame() - 1) * 3000 / m_nFps + tq % m_nMaxTq;
                 if (tq >= m_nMaxTq) {
                     tq = m_nMaxTq - 3000 / m_nFps;
                 }
