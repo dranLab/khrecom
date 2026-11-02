@@ -35,16 +35,17 @@ union ALPHA {
     ALPHA() {}
     ALPHA(_ALPHA nMode) { _value = nMode; }
     ALPHA(INT nMode) { _value = nMode; }
-    operator INT() const { return _value; }
-    // PARTIAL: added for System/Graphic/ScreenMask (the result is materialized: xori + bnez)
+    operator int() const { return _value; }
     BOOL operator==(_ALPHA nMode) const { return _value == nMode; }
-    BOOL operator!=(_ALPHA nMode) const { return _value != nMode; } // PARTIAL: added for System/Graphic/2d/2DSprObj
+    BOOL operator!=(_ALPHA nMode) const { return _value != nMode; }
     ALPHA& operator=(const ALPHA& a) {
         _value = a._value;
         return *this;
     }
-    BYTE getAlphaMode() const { return alphaMode; }   // PARTIAL: added for System/Graphic/DispList
-    BYTE getAlphaValue() const { return alphaValue; } // PARTIAL: added for System/Graphic/DispList
+    BYTE getAlphaMode() const { return alphaMode; }
+    void setAlphaMode(/* parameters unknown */);
+    BYTE getAlphaValue() const { return alphaValue; }
+    void setAlphaValue(/* parameters unknown */);
 };
 
 // PARTIAL: added for Game/AtWater

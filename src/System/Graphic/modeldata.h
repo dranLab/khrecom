@@ -31,7 +31,6 @@ struct BONELABEL {
 
 // PARTIAL: added for Game/ModelObj
 struct MODELDATA {
-    // PARTIAL: data members added for System/Graphic/LightUnit
     BYTE m_nBoneNum;
     BYTE m_BoneIndex;
     unsigned char m_Pad[2];
@@ -44,7 +43,7 @@ struct MODELDATA {
     void* m_pSemiData; /* MODELTAG* */
     BBOX* m_pBBox;
 
-    BOOL isDataEmpty() const { return !m_pData || *(UINT*)m_pData == 0x60000000; } // PARTIAL: added for System/Graphic/Model
+    BOOL isDataEmpty() const { return !m_pData || *(UINT*)m_pData == 0x60000000; }
     BOOL isSemiDataEmpty() const { return !m_pSemiData || *(UINT*)m_pSemiData == 0x60000000; }
     UINT getRawMode() const {
         if (!isDataEmpty()) return ((UINT*)m_pData)[7];
@@ -52,7 +51,7 @@ struct MODELDATA {
         return 0;
     }
     USHORT getMode() const { return getRawMode(); }
-    BOOL isShadow() const { if (getMode() == 0x10) return TRUE; return FALSE; } // PARTIAL: added for System/Graphic/Model; if-form for Game/Entity translucence_ (li 1; movn)
+    BOOL isShadow() const { if (getMode() == 0x10) return TRUE; return FALSE; } // MATCH: if-form for Game/Entity translucence_ (li 1; movn)
     USHORT getShaderOption() const {
         const SHORT* tag = (const SHORT*)(!isDataEmpty() ? m_pData : m_pSemiData);
         INT version = tag[0x16 / 2];
@@ -61,13 +60,11 @@ struct MODELDATA {
     }
     BOOL enablePointLight() const;
     BOOL enableLight() const;
-    INT getBoneIndex(const CHAR* pName) const; // PARTIAL: added for System/Graphic/TriangleIK
-    // PARTIAL: added for Game/AttachCard
+    INT getBoneIndex(const CHAR* pName) const;
     static BOOL isNormal(UINT mode);
     static BOOL isColorI(UINT mode);
     static BOOL isColorF(UINT mode);
     static BOOL isTexture(UINT mode);
-    // PARTIAL: added for System/Graphic/Model
     static BOOL isSky(UINT mode);
     static BOOL isMap(UINT mode);
     static BOOL isCharacter(UINT mode);
