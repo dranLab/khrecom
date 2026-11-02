@@ -1,4 +1,3 @@
-// PARTIAL: added for System/Graphic/ModelMan
 #ifndef SYSTEM_GRAPHIC_DISPLIST_H
 #define SYSTEM_GRAPHIC_DISPLIST_H
 
@@ -6,17 +5,26 @@
 #include "System/Graphic/Gprim.h"
 
 struct OTtag {
-    CDrawable* m_pHead;
-    CDrawable* m_pTail;
+    CDrawable* _pHeadPrim;
+    CDrawable* _pTailPrim;
+    BOOL isEmpty() const { return _pHeadPrim == NULL; }
+    void addTail(CDrawable* pPrim) {
+        CDrawable* pTail = _pTailPrim;
+        _pTailPrim = pPrim;
+        if (pTail) pTail->m_pNext = pPrim;
+        pPrim->m_pNext = NULL;
+        if (!_pHeadPrim) _pHeadPrim = pPrim;
+    }
 };
 
 struct SEMI_PACKET_LIST;
 
 class CDispListBase {
+    friend class CModelMan; // PARTIAL: guessed (CModelMan::drawDispListFG reads the OT table inline; getOTtagTbl is protected in the ref)
 private:
-    OTtag* m_pOTtagTbl;      /* 0x0 */
-    UINT m_nOTtagTblSize;    /* 0x4 */
-    UINT m_iDebugFlags;      /* 0x8 */
+    OTtag* m_pOTtagTbl;   /* 0x0 */
+    UINT m_nOTtagTblSize; /* 0x4 */
+    UINT m_iDebugFlags;   /* 0x8 */
 
 public:
     CDispListBase() {
@@ -25,91 +33,74 @@ public:
         m_iDebugFlags = 0;
     }
     virtual ~CDispListBase();
-    virtual void insert(CDrawable& inPrim, FIX4 inZ);
+    virtual void insert(CDrawable& inPrim, FIX4 inZ) = 0;
     virtual void clear(BOOL bUncached);
-    void draw(INT nStart, INT nEnd);
-    virtual UINT getEntryCount() const;
+    void draw(INT nStart, INT nSize);
+    virtual UINT getEntryCount() const { return 0; }
+    BOOL hasAnyPrim(UINT nTblIdx) {
+        if (m_pOTtagTbl && nTblIdx < m_nOTtagTblSize) {
+            OTtag& tag = m_pOTtagTbl[nTblIdx];
+            return !tag.isEmpty();
+        }
+        return FALSE;
+    }
+    CDrawable* getHeadPrim(INT nTblIdx);
 
 protected:
-    virtual void _beginDraw();
-    virtual void _drawOT(OTtag& inTag);
-    virtual void _endDraw();
-    void setupOTtagTbl(UINT nSize);
-public:
-    OTtag* getOTtagTbl() { return m_pOTtagTbl; }
-    INT getOTtagTblSize() { return m_nOTtagTblSize; }
-protected:
-    /* adds a primitive at the end of an OT entry (original name unknown) */
-    void _insertTail(OTtag& tag, CDrawable& inPrim) {
-        CDrawable* pTailOld = tag.m_pTail;
-        tag.m_pTail = &inPrim;
-        if (pTailOld) pTailOld->m_pNext = &inPrim;
-        inPrim.m_pNext = NULL;
-        if (!tag.m_pHead) tag.m_pHead = &inPrim;
-    }
-    void _setZ(CDrawable& inPrim, FIX4 inZ) { inPrim.m_nZ = inZ; }
+    virtual void _beginDraw() = 0;
+    virtual void _drawOT(OTtag& inOT) = 0;
+    virtual void _endDraw() = 0;
+    void setupOTtagTbl(UINT nInSize);
+    OTtag* getOTtagTbl() const { return m_pOTtagTbl; }
+    INT getOTtagTblSize() const { return m_nOTtagTblSize; }
+    void _startDirectMode();
+    void _endDirectMode();
+    G_LAYER checkCache(CDrawable& inPrim, G_LAYER nLayer);
+    CDrawable* _draw(CDrawable& inPrim);
+    CDrawable* _getNextDrawable(CDrawable& inPrim) { return inPrim.m_pNext; }
 };
 
 class CDispList : public CDispListBase {
-private:
-    UINT _m_0x10[2]; /* 0x10 */
+protected:
+    UINT m_nEntryCount; /* 0x10 */
+
 public:
     CDispList() {
         setupOTtagTbl(26);
         clear(FALSE);
     }
-    virtual ~CDispList();
-    virtual void insert(CDrawable& inPrim, FIX4 inZ);
-    virtual void clear(BOOL bUncached);
-};
-
-class CDispListBG : public CDispList {
-public:
-    CDispListBG() {}
-    virtual ~CDispListBG();
-};
-
-class CDispListFG : public CDispList {
-public:
-    CDispListFG() {}
-    virtual ~CDispListFG();
-};
-
-class CDispListShadowDraw : public CDispListBase {
-private:
-    UINT _m_0x10; /* 0x10 */
-public:
-    CDispListShadowDraw() {
-        setupOTtagTbl(1);
-        clear(FALSE);
+    virtual void clear(BOOL bUncached) {
+        CDispListBase::clear(bUncached);
+        m_nEntryCount = 0;
     }
-    virtual ~CDispListShadowDraw();
     virtual void insert(CDrawable& inPrim, FIX4 inZ);
-    virtual void clear(BOOL bUncached);
-};
+    virtual UINT getEntryCount() const { return m_nEntryCount; }
 
-class CDispListShadowMap : public CDispListBase {
-private:
-    UINT _m_0x10; /* 0x10 */
-public:
-    CDispListShadowMap() {
-        setupOTtagTbl(1);
-        clear(FALSE);
-    }
-    virtual ~CDispListShadowMap();
-    virtual void insert(CDrawable& inPrim, FIX4 inZ);
-    virtual void clear(BOOL bUncached);
+protected:
+    virtual void _beginDraw();
+    virtual void _drawOT(OTtag& inOT);
+    virtual void _endDraw();
 };
 
 class CDispListSemiBase : public CDispListBase {
 private:
     ULONGLONG m_nTestFlag; /* 0x10 */
-    ULONGLONG m_nAlphaMode; /* 0x18 ALPHA */
+    ALPHA m_nAlphaMode;    /* 0x18 */
+
+public:
 
 protected:
     virtual void _beginDraw();
-    virtual void _drawOT(OTtag& inTag);
+    virtual void _drawOT(OTtag& inOT);
     virtual void _endDraw();
+    BOOL _checkTestMode(const CDrawable& inPrim) {
+        if (inPrim.m_LayerInfo._nID & 0x10) return FALSE;
+        BOOL bRes = FALSE;
+        if (inPrim.m_nAlphaMode != m_nAlphaMode || inPrim.m_nTestFlag != m_nTestFlag) bRes = TRUE;
+        return bRes;
+    }
+    void _updateTestMode(const CDrawable* pInPrim);
+    void _resetTestMode() { _updateTestMode(NULL); }
 };
 
 class CDispListSemi : public CDispListSemiBase {
@@ -118,8 +109,90 @@ public:
         setupOTtagTbl(0x800);
         clear(TRUE);
     }
-    virtual ~CDispListSemi();
     virtual void insert(CDrawable& inPrim, FIX4 inZ);
+};
+
+class CDispListWithoutZ : public CDispList {
+private:
+    ALPHA m_nAlphaMode; /* 0x14 */
+
+public:
+    virtual void insert(CDrawable& inPrim, FIX4 inZ);
+
+protected:
+    virtual void _beginDraw();
+    virtual void _drawOT(OTtag& inOT);
+    virtual void _endDraw();
+    void _enableZTest(BOOL bEnable);
+    void _updateAlphaMode(ALPHA inAlpha);
+};
+
+class CDispListBG : public CDispListWithoutZ {
+public:
+
+protected:
+    virtual void _beginDraw();
+    virtual void _endDraw();
+};
+
+class CDispListFG : public CDispListWithoutZ {
+public:
+
+protected:
+    virtual void _beginDraw();
+    virtual void _endDraw();
+};
+
+class CDispListShadowDraw : public CDispListBase {
+protected:
+    UINT m_nEntryCount; /* 0x10 */
+
+public:
+
+protected:
+    virtual void _beginDraw();
+    virtual void _drawOT(OTtag& inOT);
+    virtual void _endDraw();
+
+public:
+    CDispListShadowDraw() {
+        setupOTtagTbl(1);
+        clear(FALSE);
+    }
+    virtual void insert(CDrawable& inPrim, FIX4 inZ) {
+        getOTtagTbl()[0].addTail(&inPrim);
+        inPrim.m_nZ = inZ;
+        m_nEntryCount++;
+    }
+    virtual void clear(BOOL bUncached) {
+        CDispListBase::clear(bUncached);
+        m_nEntryCount = 0;
+    }
+    virtual UINT getEntryCount() const { return m_nEntryCount; }
+};
+
+class CDispListShadowMap : public CDispListBase {
+protected:
+    UINT m_nEntryCount; /* 0x10 */
+
+public:
+
+protected:
+    virtual void _beginDraw();
+    virtual void _drawOT(OTtag& inOT);
+    virtual void _endDraw();
+
+public:
+    CDispListShadowMap() {
+        setupOTtagTbl(1);
+        clear(FALSE);
+    }
+    virtual void insert(CDrawable& inPrim, FIX4 inZ);
+    virtual void clear(BOOL bUncached) {
+        CDispListBase::clear(bUncached);
+        m_nEntryCount = 0;
+    }
+    virtual UINT getEntryCount() const { return m_nEntryCount; }
 };
 
 #endif /* SYSTEM_GRAPHIC_DISPLIST_H */
