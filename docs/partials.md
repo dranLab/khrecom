@@ -102,17 +102,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/Game-GameSubField-2 (finished: waitStartAtel 4/86 parked; A2: path overrides MATCH) | 810 | 27 | 0 | 750 (654) | 193 |
 | 2026-11-02 | cleanup/Game-Collision-CollObj-2 (CollAttack on the header's collision classes; CollUtilF left: field types first) | 810 | 23 | 0 | 751 (653) | 194 |
 | 2026-11-02 | cleanup/Game-Collision-CollObj-3 (CCollision m_outInfo*/m_Type/m_Kind with the ref types; CollUtilF stand-in reasoned: ctor order) | 811 | 23 | 0 | 751 (653) | 194 |
+| 2026-11-02 | cleanup/path-overrides (290 .cpp *_H_PATH overrides MATCH-tagged, none redundant; LinkedBuf.h's) | 810 | 23 | 0 | 751 (370) | 485 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 811 (756 in 110 headers, 55 in 34 .cpp); MATCH: 194
-  by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 20, gate 19, guessed 30, header-level 69, stand-in 18, other 6
+PARTIAL: 810 (755 in 110 headers, 55 in 34 .cpp); MATCH: 485
+  by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 19, gate 19, guessed 30, header-level 69, stand-in 18, other 6
 stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
-mechanisms: 751 sites (653 untagged); #line: 1248
+mechanisms: 751 sites (370 untagged); #line: 1248
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 613, superset 140, partial 112, gated 23, missing 8, unattributed 309
 ```
@@ -323,7 +324,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/TexInfo.h` | 1 | 1/0/1/0 | 234 |
 | `System/Graphic/TriangleIK.h` | 1 | 2/1/1/0 | 2 |
 | `System/Graphic/modeldata.h` | 12 | 1/2/0/1 | 82 |
-| `System/LinkedBuf.h` | 5 | 1/2/1/0 | 7 |
+| `System/LinkedBuf.h` | 4 | 1/2/1/0 | 7 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/Math3D.h` | 1 | 2/0/1/0 | 59 |
 | `System/Memoca.h` | 2 | 4/0/0/0 | 6 |
@@ -371,36 +372,36 @@ or `untagged`.
 | opt-out | `MAPENEMY_H_NO_COLL_ANIM` | 2 | 2 | the original has no BodyCollision.h/Anim.h strings |
 | opt-out site | `MAPENEMY_H_NO_COLL_ANIM` | 1 | 1 | the .rodata of Game/Enemy/MapEnemyManager and Game/Enemy/CreateEnemy has no BodyCollision.h/Anim.h
  * strings: they define MAPENEMY_H_NO_COLL_ANIM before includ |
-| path override | `ANIM_H_PATH` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:2 |
-| path override | `ATELBLUR_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/AtelBlur.cpp:2 |
-| path override | `ATELCROSSFADE_H_PATH` | 3 | 1 | the original spelled the directory "ATEL" |
-| path override | `ATELFOG_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/AtelFog.cpp:2 |
-| path override | `BATTLEENEMY_H_PATH` | 46 | 1 | the original included it by its full path |
-| path override | `BODYCOLLISION_H_PATH` | 2 | 1 | __FILE__ of these headers as in the original .rodata |
-| path override | `CAMERAMAN_H_PATH` | 2 | 2 | CVSM's flag accessors are only inline in this unit (Game/Atel/VSME.h) |
-| path override | `CARDBATTLE_H_PATH` | 5 | 2 | the original includes it under this name |
-| path override | `CARD_H_PATH` | 6 | 1 | the original's Card.h/Status.h strings carry |
-| path override | `CHATMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/ChatMan.cpp:2 |
-| path override | `COLLDISP_H_PATH` | 4 | 1 | this unit names CollDisp.h by its full original path |
-| path override | `COLLUTIL_H_PATH` | 14 | 4 | CollAttack casts to the collision classes (sphere/point/circle/poly3) |
-| path override | `CTDMAN_H_PATH` | 6 | 2 | this unit names CtdMan.h by its full original path |
-| path override | `D2MAN_H_PATH` | 10 | 0 | untagged, e.g. System/Graphic/2d/2DCard.cpp:3 |
+| path override | `ANIM_H_PATH` | 2 | 2 | this unit names Anim.h so (header default "System/Graphic/Anim.h") |
+| path override | `ATELBLUR_H_PATH` | 2 | 2 | this unit names AtelBlur.h so (header default "c:/KHCOM/MainApp/Game/ATEL/AtelBlur.h") |
+| path override | `ATELCROSSFADE_H_PATH` | 3 | 3 | the original spelled the directory "ATEL" |
+| path override | `ATELFOG_H_PATH` | 2 | 2 | this unit names AtelFog.h so (header default "c:/KHCOM/MainApp/Game/ATEL/AtelFog.h") |
+| path override | `BATTLEENEMY_H_PATH` | 46 | 46 | this unit names BattleEnemy.h so (header default "Game/Enemy/BattleEnemy.h") |
+| path override | `BODYCOLLISION_H_PATH` | 2 | 2 | this unit names BodyCollision.h so (header default "Game/BodyCollision.h") |
+| path override | `CAMERAMAN_H_PATH` | 2 | 2 | this unit names CameraMan.h so (header default "c:/KHCOM/MainApp/Game/ATEL/CameraMan.h") |
+| path override | `CARDBATTLE_H_PATH` | 5 | 5 | the original includes it under this name |
+| path override | `CARD_H_PATH` | 6 | 6 | the original's Card.h/Status.h strings carry |
+| path override | `CHATMAN_H_PATH` | 2 | 2 | this unit names ChatMan.h so (header default "Game/Atel/ChatMan.h") |
+| path override | `COLLDISP_H_PATH` | 4 | 4 | this unit names CollDisp.h by its full original path |
+| path override | `COLLUTIL_H_PATH` | 14 | 14 | __FILE__ as in the original .rodata |
+| path override | `CTDMAN_H_PATH` | 6 | 6 | this unit names CtdMan.h so (header default "System/CTD/CtdMan.h") |
+| path override | `D2MAN_H_PATH` | 10 | 10 | this unit names 2DMan.h so (header default "System/Graphic/2D/2DMan.h") |
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
-| path override | `EFFECT_H_PATH` | 5 | 1 | this unit names effect.h by its full original path |
-| path override | `FSM_H_PATH` | 1 | 0 | untagged, e.g. System/Fsm.cpp:1 |
-| path override | `GPRIM_H_PATH` | 161 | 10 | the collision classes come after CMapEnemy (their vtables precede its own) |
-| path override | `LINKEDBUF_H_PATH` | 4 | 1 | __FILE__ as in the original .rodata |
-| path override | `MAPUNIT_H_PATH` | 1 | 0 | untagged, e.g. System/Graphic/MapUnit.cpp:5 |
-| path override | `MODELDATA_H_PATH` | 8 | 2 | TexInfoStub (the original has its assert strings) |
-| path override | `MODEL_H_PATH` | 8 | 1 | __FILE__ as in the original .rodata |
-| path override | `OSDDEF_H_PATH` | 1 | 0 | untagged, e.g. Game/EntityFactory.cpp:1 |
+| path override | `EFFECT_H_PATH` | 5 | 5 | this unit names effect.h so (header default "System/Graphic/Effect/effect.h") |
+| path override | `FSM_H_PATH` | 1 | 1 | this unit names Fsm.h so (header default "System/Fsm.h") |
+| path override | `GPRIM_H_PATH` | 161 | 161 | this unit names Gprim.h so (header default "System/Graphic/Gprim.h") |
+| path override | `LINKEDBUF_H_PATH` | 4 | 4 | __FILE__ as in the original .rodata |
+| path override | `MAPUNIT_H_PATH` | 1 | 1 | this unit names MapUnit.h so (header default "System/Graphic/MapUnit.h") |
+| path override | `MODELDATA_H_PATH` | 8 | 8 | __FILE__ as in the original .rodata |
+| path override | `MODEL_H_PATH` | 8 | 8 | this unit names Model.h so (header default "System/Graphic/Model.h") |
+| path override | `OSDDEF_H_PATH` | 1 | 1 | this unit names OsdDef.h so (header default "Game/OsdDef.h") |
 | path override | `PATHDATACAMERA_H_PATH` | 2 | 2 | the original includes it under this name |
-| path override | `RSRCDATA_H_PATH` | 5 | 1 | RsrcData.h strings in .rodata use the full path |
-| path override | `SAVELOADCTRL_H_PATH` | 5 | 0 | untagged, e.g. Form/Menu/TitleReportDllStarter.cpp:3 |
-| path override | `STATUS_H_PATH` | 5 | 1 | the original's Card.h/Status.h strings carry |
-| path override | `TECHNIC_H_PATH` | 4 | 1 | the original includes it under this name |
-| path override | `TITLEREPORTDLLSTARTER_H_PATH` | 1 | 0 | untagged, e.g. Form/Menu/TitleReportDllStarter.cpp:2 |
-| path override | `VECTOR_H_PATH` | 1 | 0 | untagged, e.g. System/TaskMan.cpp:3 |
+| path override | `RSRCDATA_H_PATH` | 5 | 5 | RsrcData.h strings in .rodata use the full path |
+| path override | `SAVELOADCTRL_H_PATH` | 5 | 5 | this unit names SaveLoadCtrl.h so (header default "Form/Menu/SaveLoadCtrl.h") |
+| path override | `STATUS_H_PATH` | 5 | 5 | this unit names Status.h so (header default "Game/Status.h") |
+| path override | `TECHNIC_H_PATH` | 4 | 4 | the original includes it under this name |
+| path override | `TITLEREPORTDLLSTARTER_H_PATH` | 1 | 1 | this unit names TitleReportDllStarter.h so (header default "Form/Menu/TitleReportDllStarter.h") |
+| path override | `VECTOR_H_PATH` | 1 | 1 | this unit names Vector.h so (header default "System/Vector.h") |
 | placeholder | `_addCardStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:1170 |
 | placeholder | `_alloc*` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:87 |
 | placeholder | `_bossDeadDemoEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:23 |
