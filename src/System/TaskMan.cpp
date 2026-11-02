@@ -1,6 +1,6 @@
 
 #include "System/HeapMan.h"
-#define VECTOR_H_PATH "c:/KHCOM/MainApp/System/Vector.h"
+#define VECTOR_H_PATH "c:/KHCOM/MainApp/System/Vector.h" /* MATCH: this unit names Vector.h so (header default "System/Vector.h") */
 #include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Str.h"

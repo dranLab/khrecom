@@ -2,9 +2,9 @@
 #include "khtypes.h"
 #define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */
 /* MATCH: this unit's original names the headers with their full path (c:/KHCOM/MainApp/...) */
-#define GPRIM_H_PATH "src/System/Graphic/Gprim.h"
-#define MODELDATA_H_PATH "src/System/Graphic/modeldata.h"
-#define MODEL_H_PATH "src/System/Graphic/Model.h"
+#define GPRIM_H_PATH "src/System/Graphic/Gprim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define MODELDATA_H_PATH "src/System/Graphic/modeldata.h" /* MATCH: this unit names modeldata.h so (header default "System/Graphic/modeldata.h") */
+#define MODEL_H_PATH "src/System/Graphic/Model.h" /* MATCH: this unit names Model.h so (header default "System/Graphic/Model.h") */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"
 #include "System/Task.h"

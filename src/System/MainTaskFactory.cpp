@@ -1,5 +1,5 @@
 
-#define ANIM_H_PATH "System/Graphic/anim.h"
+#define ANIM_H_PATH "System/Graphic/anim.h" /* MATCH: this unit names Anim.h so (header default "System/Graphic/Anim.h") */
 #include "System/MainTaskFactory.h"
 #include "System/HeapMan.h"
 

@@ -1,7 +1,7 @@
 #define MODELDATA_H_TEXINFO_CTOR /* MATCH: reqTransTex declares a TexInfo local (constructor memsets it) */
 #include "System/VramMan.h"
 #include "System/Graphic/Gprim.h"
-#define MODEL_H_PATH "System/Graphic/model.h"
+#define MODEL_H_PATH "System/Graphic/model.h" /* MATCH: this unit names Model.h so (header default "System/Graphic/Model.h") */
 #include "System/Graphic/Model.h"
 #include "System/HeapMan.h"
 #include "System/MainApp.h"

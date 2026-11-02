@@ -1,8 +1,8 @@
 
-#define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h"
-#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
-#define MODEL_H_PATH "c:/KHCOM/MainApp/System/Graphic/Model.h"
-#define MAPUNIT_H_PATH "c:/KHCOM/MainApp/System/Graphic/MapUnit.h"
+#define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h" /* MATCH: this unit names modeldata.h so (header default "System/Graphic/modeldata.h") */
+#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define MODEL_H_PATH "c:/KHCOM/MainApp/System/Graphic/Model.h" /* MATCH: this unit names Model.h so (header default "System/Graphic/Model.h") */
+#define MAPUNIT_H_PATH "c:/KHCOM/MainApp/System/Graphic/MapUnit.h" /* MATCH: this unit names MapUnit.h so (header default "System/Graphic/MapUnit.h") */
 #include "System/Graphic/modeldata.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"

@@ -1,8 +1,8 @@
 
-#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
-#define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h"
-#define MODEL_H_PATH "c:/KHCOM/MainApp/System/Graphic/Model.h"
-#define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h"
+#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h" /* MATCH: this unit names modeldata.h so (header default "System/Graphic/modeldata.h") */
+#define MODEL_H_PATH "c:/KHCOM/MainApp/System/Graphic/Model.h" /* MATCH: this unit names Model.h so (header default "System/Graphic/Model.h") */
+#define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h" /* MATCH: this unit names effect.h so (header default "System/Graphic/Effect/effect.h") */
 #define COLLOBJ_H_INFO_AS_INT /* MATCH: getDetectInfo as INT (see CollObj.h) */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/modeldata.h"

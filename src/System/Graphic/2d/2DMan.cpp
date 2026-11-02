@@ -1,7 +1,7 @@
 
 
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
-#define D2MAN_H_PATH "c:/KHCOM/MainApp/System/Graphic/2d/2Dman.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define D2MAN_H_PATH "c:/KHCOM/MainApp/System/Graphic/2d/2Dman.h" /* MATCH: this unit names 2DMan.h so (header default "System/Graphic/2D/2DMan.h") */
 inline void* operator new(unsigned int, void* p) throw() { return p; }
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"

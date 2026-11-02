@@ -1,4 +1,4 @@
-#define GPRIM_H_PATH "System/Graphic/gprim.h"
+#define GPRIM_H_PATH "System/Graphic/gprim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "System/Graphic/Gprim.h"
 #include "System/Movie/MovieScript.h"
 #include "System/MainApp.h"

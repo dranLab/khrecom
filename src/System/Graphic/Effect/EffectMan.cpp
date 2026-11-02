@@ -1,4 +1,4 @@
-#define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h"
+#define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h" /* MATCH: this unit names effect.h so (header default "System/Graphic/Effect/effect.h") */
 #include "System/Graphic/Effect/effect.h"
 #include "System/TaskMan.h"
 #include "System/Task.h"
@@ -7,7 +7,7 @@
 inline CCoord& CEffect::Crd(INT nNum) { return m_pCrds->Crd(nNum); }
 inline CCoord& CEffect::Crd(INT nNum) const { return m_pCrds->Crd(nNum); }
 inline INT CEffect::getCoordNum() const { return m_pCrds->getCoordNum(); }
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "System/Graphic/Gprim.h"
 #include "Game/Entity.h"
 #include "System/Graphic/Model.h"

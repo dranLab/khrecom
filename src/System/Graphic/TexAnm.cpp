@@ -1,6 +1,6 @@
 #define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */
-#define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h"
-#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
+#define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h" /* MATCH: this unit names modeldata.h so (header default "System/Graphic/modeldata.h") */
+#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "System/Graphic/modeldata.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/TexAnm.h"
