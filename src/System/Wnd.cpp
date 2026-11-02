@@ -1,6 +1,6 @@
 
-#define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h"
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h" /* MATCH: this unit names CtdMan.h by its full original path */
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit spells it GPrim.h */
 #include "System/Ctd/CtdMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Wnd.h"
@@ -922,12 +922,8 @@ BOOL CText::initTextFadeOut() {
 }
 
 BOOL CText::isEndTextFadeOut() { return m_fAlphaTimer == 0.0f; }
-__asm__(".section .sdata\n");
-struct CTextPH : CText { CTextPH();
-    void setIcon_c() __attribute__((section(".sdata")));
-};
 #line 1601
-void CTextPH::setIcon_c() {
+void CText::setIcon() {
     unsigned char seqNoTbl[64] = {
         0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x12, 0x0f, 0x11, 0x10, 0x15, 0x16, 0x1b, 0x17, 0x18, 0x1c, 0x1d,
         0x19, 0x1a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -940,11 +936,11 @@ void CTextPH::setIcon_c() {
     m_pIconPos = NULL;
     if (m_pIconCtrl) delete[] m_pIconCtrl;
     m_pIconCtrl = NULL;
-    CHAR* p = (CHAR*)m_pFnt->getText();
-    while (*(BYTE*)p) {
-        if (*p >= 0) {
+    BYTE* p = (BYTE*)m_pFnt->getText();
+    if (*p) do {
+        if ((CHAR)*p >= 0) {
             p++;
-        } else if ((BYTE)*p < 0xf9) {
+        } else if (*p < 0xf9) {
             p += 2;
         } else {
             BYTE c = p[1];
@@ -953,7 +949,7 @@ void CTextPH::setIcon_c() {
             }
             p += 2;
         }
-    }
+    } while (*p);
     if (m_nIcon) {
         m_pIconPos = new G_XY[m_nIcon];
         m_pIconCtrl = new D2::C2DSeqCtrl[m_nIcon];
@@ -966,7 +962,6 @@ void CTextPH::setIcon_c() {
         if (m_pFnt) m_pFnt->setIconXYPtr(m_pIconPos);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Wnd", setIcon__5CText);
 #line 1640
 void CText::_main(FLOAT frameRateF) {
     if (!m_dispEnable) return;
@@ -1150,13 +1145,13 @@ void CImageWnd::createWindow(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI
     init(pos0, size0, pos1, size1, pTexName, fRate, color0, color1, fgFlip);
 }
 
-__asm__(".section .sdata\n");
-struct CImageWndPH : CImageWnd { CImageWndPH();
-    void init_c(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1, const CHAR* pTexName, FLOAT fRate,
-                G_RGBA color0, G_RGBA color1, INT fgFlip) __attribute__((section(".sdata")));
-};
+/* Parked: 16 of 239 lines, 4 bytes short - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other
+ * registers and the T0..T3 stores another order, and the second `if (!pTexInfo) return;` fills its delay slot from
+ * the fallthrough (lui 0x8000) where the original takes the epilogue's lq. Tried: declaration orders (ref's w, h, w2,
+ * h2), one pTexInfo for both getTPage calls, pos0.m_x in a local, hill.py (2026-10-19), permuter 10 min (21 -> 21). */
+#if 0
 #line 1900
-void CImageWndPH::init_c(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1, const CHAR* pTexName, FLOAT fRate,
+void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1, const CHAR* pTexName, FLOAT fRate,
                      G_RGBA color0, G_RGBA color1, INT fgFlip) {
     if (!m_pPolyGT4) {
 #line 2015
@@ -1227,7 +1222,13 @@ void CImageWndPH::init_c(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& si
     m_fCurrentRate = 0.0f;
     m_fRate = 1.0f / fRate;
 }
+#else
+__asm__(".section .sdata\n");
+__attribute__((section(".sdata"))) void _CImageWnd_init_strings(INT n) {
+    TRACE(__FILE__ "(2015)");
+}
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Wnd", init__9CImageWndRt7CPointT1ZiRt6CSizeT1ZiT1T2PCcfG6G_RGBAT7i);
+#endif
 #line 2082
 void CImageWnd::mainImpl() {
     if (!m_pPolyGT4) return;

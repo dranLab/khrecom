@@ -64,7 +64,7 @@ union QWdata {
 struct G_XY {
     FIX4 x;
     FIX4 y;
-    void set(FIX4 _x, FIX4 _y) { // PARTIAL: added for System/Wnd
+    void set(FIX4 _x, FIX4 _y) {
         x = _x;
         y = _y;
     }
@@ -98,14 +98,14 @@ struct G_RGBA {
         UINT c;
         unsigned char v[4];
     };
-    // PARTIAL: added for Game/NowLoading (the original has constructors; a union member here can't)
+
     void set(UBYTE _r, UBYTE _g, UBYTE _b, UBYTE _a) {
         r = _r;
         g = _g;
         b = _b;
         a = _a;
     }
-    // PARTIAL: added for System/Movie/MSVideo
+
     void set(UBYTE _r, UBYTE _g, UBYTE _b) {
         r = _r;
         g = _g;

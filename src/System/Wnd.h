@@ -186,7 +186,7 @@ public:
 };
 
 class CText : public CComponent {
-    friend struct CTextPH;
+
 private:
     D2::C2DSeqCtrl* m_pSelectCtrl;  /* 0x14 */
     D2::C2DSeqCtrl* m_pIconCtrl;    /* 0x18 */
@@ -258,7 +258,7 @@ private:
 };
 
 class CImageWnd : public CBaseWnd {
-    friend struct CImageWndPH;
+
 private:
     FVECTOR m_initPos;       /* 0xa0 */
     FVECTOR m_targetPos;     /* 0xb0 */
