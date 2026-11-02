@@ -55,11 +55,11 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/TexUtil` | 4 | 651 | 4 |  |
 | `Game/SceneInfo` | 8 | 651 | 8 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
-| `Game/Game` | 5 | 624 |  |  |
 | `Game/EffectMotion` | 4 | 609 | 1 |  |
 | `System/Graphic/Effect/EffectMan` | 3 | 604 | 3 |  |
 | `Game/CardBattle` | 5 | 600 | 5 |  |
 | `Game/Atel/Avatar` | 4 | 587 | 4 |  |
+| `Game/Game` | 4 | 583 | 4 |  |
 | `Game/Enemy/MapEnemy` | 3 | 562 | 3 |  |
 | `Game/Enemy/BattleEnemy` | 5 | 558 | 5 |  |
 | `System/RcfCD` | 4 | 549 |  |  |
@@ -249,6 +249,10 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/CardRevolver` | `changeCount__Q210CardBattle13CEnchantGaugei` | 67 | 14 lines off, register allocation of the two quotients: the original keeps inNum / 10 in a0 and m_nCount / 10 in v0 (then a3 = v0 + 0x6C); ours puts num into a3. Worked: `if (m_uiState == 4) return;` before the switch (the extra beq), case 4 explicit, num = m_nCount / 10 computed once. Tried: 8 … |
 | `Game/CardRevolver` | `setStockInfo__Q210CardBattle12CStockFolder` | 217 | 17 lines off, scheduling of the first block: the original issues div, then the changeTexture argument zeros interleaved with pos.init(), the trap check after; ours keeps them apart. Worked: inverted layout ternary (>= 0x6F first), _ref(g_pStockSkillList), m_uiState before m_uiCategory in default. … |
 | `Game/EffectMotion` | `updateAttachEffect___17CEffectMotionCtrli` | 339 | (comment) Close: only case 2's "m_iStep = 0" tails differ - gcc cross-jumps them all into the second body's copy, the original keeps the one in the effect == NULL branch (the other bodies jump there). jump2's cross-jumping (find_cross_jump) merges a "sw $0; j" tail that follows a label after one … |
+| `Game/Game` | `procFieldMenu__9CGameMain` | 60 | 8 lines - with the early `return FALSE` guard the layout matches, but our second m_hCamp test after the guard reloads the member instead of being threaded to the world-map block. tried: combined \|\|-condition, else-if chains with returns, a flag temp first; permuter 10 min, 10k candidates (score 16 … |
+| `Game/Game` | `playField__9CGameMain` | 89 | 4 lines - the `f < 0 -> 15` arm sits right before the join; the original places it after the changeState block. Levers: nSub assigned in both arms (arg register), the state as one nested ternary (5 -> 4). tried: if-chains, inverted inner ternary, (INT) cast; permuter 10 min, 11.5k candidates: no … |
+| `Game/Game` | `endFieldSub__9CGameMain` | 371 | 21 of 428 lines - ref names/order and the six `SHORT nScene` inlines (_isEventScene) in place; left: the bEventNext = !bPooh arm is if-converted (movn) here, a branch + store there; the theater block's s4/s7 pair; stack reload registers. tried: bWorld10/bEventNext decl swap (40 -> 30), merged … |
+| `Game/Game` | `playBattle__9CGameMain` | 63 | 15 lines - the original places the first two flag arms (13, 15) out of line after the changeState block; ours keeps them inline. tried: negated nested ifs, else-wrapped tail, comma-ternary (18). |
 | `Game/Map` | `init__4CMapii` | 1046 | 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/ while/goto loop shapes, by-value apply inline and a 10 min permuter run … |
 | `Game/Map` | `disp__4CMap` | 906 | 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes, group selection by player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons). The 44 bytes: the original keeps two copies of the "flush the last model" block (group and … |
 | `Game/Map` | `main__4CSky` | 84 | 6 lines - the loop's i*16 offset goes to v1 and is copied to s3 (the original computes it into s3 directly, so `move a0,s4` fills the first test's delay slot); FVECTOR::addRot with `this` as asm operand, zero-test, reference, declaration and index forms and an 8 min permuter run (12k candidates) … |
@@ -374,7 +378,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 342 functions (77834 instructions) in 84 units, 252 of them parked; 12 units take a data section from assembly.
+Totals: 341 functions (77793 instructions) in 84 units, 256 of them parked; 12 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

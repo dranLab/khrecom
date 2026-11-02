@@ -84,6 +84,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/System-Graphic-ShadowModel (finished: getScreenAreaClipToWorldPos matched, drawBefore parked; A1: no foreign stand-ins) | 820 | 27 | 0 | 757 (670) | 181 |
 | 2026-11-02 | decomp/System-Graphic-2d-2DSprObj (finished: move drafted to 25 lines and parked, initForSeq retried; A1: no foreign stand-ins) | 820 | 27 | 0 | 757 (670) | 181 |
 | 2026-11-02 | decomp/System-Graphic-HermitePathCamera (finished: updatePos drafted to 88 lines and parked; A1: no foreign stand-ins) | 820 | 27 | 0 | 757 (670) | 181 |
+| 2026-11-02 | decomp/Game-Game (finished: procBattleMenu matched, procFieldMenu/playField/playBattle/endFieldSub parked; A1: no stand-ins) | 820 | 27 | 0 | 757 (670) | 181 |
 
 <!-- partials:start -->
 ## Summary
