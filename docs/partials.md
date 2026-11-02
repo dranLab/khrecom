@@ -99,17 +99,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/Game-Atel-Atel-2 (finished: setScreenFader 37/206 parked; A2: features already MATCH) | 810 | 27 | 0 | 750 (656) | 191 |
 | 2026-11-02 | decomp/Form-DebugWindowTBL-2 (finished: debugWCMPFull matched; debugWinSeTestLineCall 2/51, _makeDispName 25/45 parked) | 810 | 27 | 0 | 750 (656) | 191 |
 | 2026-11-02 | decomp/System-Movie-AudioDec (finished: constructor 6/120 parked) | 810 | 27 | 0 | 750 (656) | 191 |
+| 2026-11-02 | decomp/Game-GameSubField-2 (finished: waitStartAtel 4/86 parked; A2: path overrides MATCH) | 810 | 27 | 0 | 750 (654) | 193 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 810 (756 in 110 headers, 54 in 34 .cpp); MATCH: 191
+PARTIAL: 810 (756 in 110 headers, 54 in 34 .cpp); MATCH: 193
   by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 20, gate 19, guessed 30, header-level 69, stand-in 17, other 6
 stand-ins: 27 foreign in 18 files (20 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
-mechanisms: 750 sites (656 untagged); #line: 1248
+mechanisms: 750 sites (654 untagged); #line: 1248
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 613, superset 140, partial 112, gated 23, missing 8, unattributed 309
 ```
@@ -381,8 +382,8 @@ or `untagged`.
 | path override | `CARDBATTLE_H_PATH` | 5 | 2 | the original includes it under this name |
 | path override | `CARD_H_PATH` | 6 | 1 | the original's Card.h/Status.h strings carry |
 | path override | `CHATMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/ChatMan.cpp:2 |
-| path override | `COLLDISP_H_PATH` | 4 | 0 | untagged, e.g. Game/Collision/CollDisp.cpp:3 |
-| path override | `COLLUTIL_H_PATH` | 14 | 2 | __FILE__ as in the original .rodata |
+| path override | `COLLDISP_H_PATH` | 4 | 1 | this unit names CollDisp.h by its full original path |
+| path override | `COLLUTIL_H_PATH` | 14 | 3 | __FILE__ as in the original .rodata |
 | path override | `CTDMAN_H_PATH` | 6 | 2 | this unit names CtdMan.h by its full original path |
 | path override | `D2MAN_H_PATH` | 10 | 0 | untagged, e.g. System/Graphic/2d/2DCard.cpp:3 |
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
