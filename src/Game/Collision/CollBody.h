@@ -14,7 +14,7 @@ static inline void _unitVector(FVECTOR& v) {
 }
 
 class CCollBody : public CCollObj {
-    friend class CPlayer; // PARTIAL: added for Game/Player/Player (exeQuickBarrier stores m_uiFlag/m_GuardAttrFlag directly)
+    friend class CPlayer; // MATCH: Game/Player/Player stores m_uiFlag/m_GuardAttrFlag directly: setGuard() & co. on the embedded m_collBody keep a separate base pointer (offsets not folded)
 private:
     FVECTOR m_vEnemyPos;          /* 0x020 */
     FVECTOR m_DamagePlane;        /* 0x030 */

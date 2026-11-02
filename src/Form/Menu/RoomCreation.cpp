@@ -475,7 +475,7 @@ void CRoomCreation::dispose() {
     CSceneEnv::setStop((ObjType::eObjBit)0);
     CGlare::on(0.0f);
     CGameWork::setInt(1, 0xE2, 0);
-    CCollMapCamera::m_fgForceStop = FALSE;
+    CCollMapCamera::setFgForceStop(FALSE);
 }
 
 void CRoomCreation::removeRsrc() {
@@ -585,8 +585,7 @@ void CRoomCreation::main() {
         vColor.set(1.0f, 1.0f, 1.0f, 0.0f);
         CSceneEnv::setColor((ObjType::eObjBit)4, 30.0f, vColor, NULL, 1);
         CGlare::off(30.0f);
-        CCollMapCamera::m_fgForceStop = TRUE;
-        CCollMapCamera::clearList();
+        CCollMapCamera::setFgForceStop(TRUE);
         m_nStep++;
         break;
     }

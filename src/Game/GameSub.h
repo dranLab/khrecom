@@ -7,7 +7,7 @@
 class CAtel;
 
 class CGameSub : public CFSM {
-    friend class CGameMain; // PARTIAL: added for Game/Game
+    friend class CGameMain; // MATCH: Game/Game calls the protected isAtelStarted/resumeAtel (friends are not in the debug info)
 private:
     CStateTemplate<CGameSub>* m_pStateTbl; /* 0x2c */
     INT m_nNewStateID;                     /* 0x30 */
