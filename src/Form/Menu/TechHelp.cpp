@@ -129,8 +129,4 @@ void CTechHelp::main() {
         break;
     }
 }
-
-BOOL CTechHelp::isEnd() {
-    return m_bEnd;
-}
 // SOURCE DATA: .data .rodata

@@ -2373,7 +2373,7 @@ INT CCamp::techWinMenu() {
         }
         break;
     case 3:
-        if (CTechHelp::m_bEnd) {
+        if (CTechHelp::isEnd()) {
             m_nTechWinStep = 2;
         }
         break;
@@ -3003,7 +3003,7 @@ INT CCamp::statusWinMenu() {
         }
         break;
     case 5:
-        if (CTechHelp::m_bEnd) {
+        if (CTechHelp::isEnd()) {
             m_nSubStep = 2;
         }
         break;
