@@ -394,7 +394,26 @@ void CGameMain::checkStartFieldMenu() {
     }
     if (m_nGameProcFlag & 0x400) suspendTaskInGame(2);
 }
+/* Parked: 8 lines - with the early `return FALSE` guard the layout matches, but our second m_hCamp test after the
+ * guard reloads the member instead of being threaded to the world-map block. tried: combined ||-condition, else-if
+ * chains with returns, a flag temp first; permuter 10 min, 10k candidates (score 16 -> 11 only). */
+#if 0
+BOOL CGameMain::procFieldMenu() {
+    if (!m_hCamp && !(m_hPause || m_hWorldMap) && !(m_nGameProcFlag & 0x1000)) return FALSE;
+    if (m_hCamp) {
+        if (!CTaskMan::getTask(m_hCamp)) camp(FALSE);
+    } else if (m_hWorldMap) {
+        if (!CTaskMan::getTask(m_hWorldMap)) worldMap(FALSE);
+    } else if (m_hPause) {
+        if (!CTaskMan::getTask(m_hPause)) pause(FALSE, 0);
+    } else if (CSaveLoad::isExited()) {
+        m_nGameProcFlag &= ~0x1000;
+    }
+    return TRUE;
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", procFieldMenu__9CGameMain);
+#endif
 void CGameMain::checkStartBattleMenu() {
     if (CPadHandler::isButtonTrg(0x800, 0)) {
         INT nMode = 0;
@@ -411,7 +430,25 @@ void CGameMain::checkStartBattleMenu() {
         suspendTaskInGame(2);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", procBattleMenu__9CGameMain);
+BOOL CGameMain::procBattleMenu() {
+    if (m_hPause) {
+        if (CTaskMan::getTask(m_hPause)) return TRUE;
+        pause(FALSE, 0);
+        if (CSceneInfo::isMinigameScene()) {
+            switch (CPause::getResult()) {
+            case 2:
+                gotoRetryBattle();
+                return TRUE;
+            case 3:
+                CSceneInfo::reqExitMinigame(0);
+                gotoEndBattle();
+                break;
+            }
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
 BOOL CGameMain::checkExitPause() {
     if (m_nGameProcFlag & 0x800) {
         m_nGameProcFlag &= ~0xc00;
@@ -670,14 +707,184 @@ void CGameMain::prePlayField() {
     m_bPauseEnable = TRUE;
     CMainApp::enableDbgUsrPause(TRUE, FALSE);
 }
+/* Parked: 4 lines - the `f < 0 -> 15` arm sits right before the join; the original places it after the changeState
+ * block. Levers: nSub assigned in both arms (arg register), the state as one nested ternary (5 -> 4). tried: if-chains,
+ * inverted inner ternary, (INT) cast; permuter 10 min, 11.5k candidates: no gain. */
+#if 0
+void CGameMain::playField() {
+    INT nState = (m_nGameProcFlag & 1) ? 13 : (m_nGameProcFlag & 0x80000000) ? 15 : (m_nGameProcFlag & 0x10000) ? 12 : 0;
+    if (nState) {
+        m_nGameProcFlag |= 0x40000000;
+        changeState(nState);
+        return;
+    }
+    if (procFieldMenu()) return;
+    BOOL bFlag = CGameWork::getFlag(1, 0x34);
+    if (CSceneInfo::hasReqChangeScene() || CSceneInfo::hasReqEnterBattle() || bFlag) {
+        INT nSub;
+        if (!bFlag && CSceneInfo::hasReqEnterBattle()) {
+            if (CGame::isDbgStartFromBattle()) CGameWork::backup(CGameWork::BACKUP_PRIMARY);
+            CGame::setBlackBeforeEncount(CAtel::isFadeActive());
+            nSub = 3;
+        } else {
+            nSub = 5;
+        }
+        m_pSubField->reqChangeGameSubState(nSub);
+        m_bPauseEnable = FALSE;
+        CMainApp::enableDbgUsrPause(0, 1);
+        suspendTaskInGame(1);
+        changeState(6);
+    }
+    m_pSubField->update();
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", playField__9CGameMain);
+#endif
 void CGameMain::preEndField() {}
 void CGameMain::endField() {
     m_pSubField->update();
     if (m_pSubField->getGameSubState() == 6) endFieldSub();
 }
+/* Parked: 21 of 428 lines - ref names/order and the six `SHORT nScene` inlines (_isEventScene) in place; left: the
+ * bEventNext = !bPooh arm is if-converted (movn) here, a branch + store there; the theater block's s4/s7 pair; stack
+ * reload registers. tried: bWorld10/bEventNext decl swap (40 -> 30), merged state condition (-> 21), ternary/ifelse
+ * forms of bEventNext; permuter 12 min, 14k candidates (22 -> 20 only by reordering against the ref). */
+#if 0
+static inline BOOL _isEventScene(SHORT nScene) { return (USHORT)(nScene - 2000) < 1000; }
+void CGameMain::endFieldSub() {
+    GAMEMODE nReqBattle = CSceneInfo::hasReqEnterBattle();
+    BOOL bDelField;
+    BOOL bDelFieldMap;
+    BOOL bDelBattle;
+    BOOL bDelBattleMap = FALSE;
+    BOOL bDelPlayerRsrc = FALSE;
+    BOOL bEntranceIO = FALSE;
+    BOOL bEventNext = FALSE;
+    BOOL bPooh = CSceneInfo::getCurrentWorldID(TRUE) == 10;
+    SHORT nNextScene = CSceneInfo::getNextSceneNum();
+    SHORT nCurrentScene = CSceneInfo::getCurrentSceneNum();
+    BOOL bTheater = CGameWork::getFlag(1, 0x33);
+    INT nNextState;
+    INT nNextMapID;
+    if (bTheater) {
+        TRACE("\x83V\x83" "A\x83^\x81[\x83\x82\x81[\x83h\x8fI\x97\xb9\x81`\n");
+        bEntranceIO = TRUE;
+        bDelField = TRUE;
+        bDelFieldMap = TRUE;
+        bDelBattle = TRUE;
+        bDelBattleMap = TRUE;
+        bDelPlayerRsrc = TRUE;
+        bEventNext = bEntranceIO;
+        nNextScene = nCurrentScene;
+    } else if (nReqBattle) {
+        bDelField = FALSE;
+        if (CSceneInfo::isEventScene() || (USHORT)(CSceneInfo::getNextSceneNum() - 1050) < 149) bDelField = TRUE;
+        bDelFieldMap = bDelField;
+        bDelBattle = CSceneInfo::isNextBattleRsrcUpdate();
+    } else {
+        SHORT nCurArea = CSceneInfo::getCurrentAreaNum();
+        SHORT nNextArea = CSceneInfo::getNextAreaNum();
+        nNextMapID = CRcf::getMapID(nNextArea, nNextScene);
+        if (nCurArea != nNextArea && (nCurArea == 0 || nNextArea == 0)) bEntranceIO = TRUE;
+        bEventNext = FALSE;
+        if (_isEventScene(nNextScene)) bEventNext = !bPooh;
+        bDelField = FALSE;
+        if (bEntranceIO || CSceneInfo::getCurrentSceneNum() != nNextScene) bDelField = TRUE;
+        bDelPlayerRsrc = FALSE;
+        if (bEventNext && nNextMapID) bDelPlayerRsrc = CGame::isSoraGame() != 0;
+        if (!bDelPlayerRsrc && bEntranceIO) {
+            INT nWorld = CSceneInfo::getCurrentWorldID(FALSE);
+            if (nWorld == 6 || nWorld == 10) bDelPlayerRsrc = TRUE;
+        }
+        bDelBattleMap = FALSE;
+        if (bEntranceIO || bEventNext) bDelBattleMap = TRUE;
+        bDelBattle = FALSE;
+        if (bDelBattleMap || CSceneInfo::isNextBattleRsrcUpdate() || (m_pSubBattle && !CSceneInfo::getMapRsrcCache(2))) {
+            bDelBattle = TRUE;
+        }
+        if (!bDelBattle) {
+            RoomInfo* pRoom = CSceneInfo::getRoomInfo(CSceneInfo::getNextRoomID());
+            if (pRoom && pRoom->_pSrcInfo && pRoom->_pSrcInfo->_nRoomType == 7) {
+                bDelBattle = TRUE;
+                bDelBattleMap = TRUE;
+            }
+        }
+        bDelFieldMap = FALSE;
+        if (bEntranceIO || CSceneInfo::checkMapRsrcCache(nNextMapID, 1) < 0) bDelFieldMap = TRUE;
+    }
+    CCamp::removeRsrc();
+    CRoomCreation::removeRsrc();
+    CJiminyMemoFlag::outTask();
+    if (bDelField && m_pSubField) {
+        m_pSubField->terminate();
+        delete m_pSubField;
+        m_pSubField = NULL;
+    }
+    if (bDelFieldMap) CSceneInfo::removeMapRsrcCache(1);
+    if (bDelBattle && m_pSubBattle) {
+        m_pSubBattle->terminate();
+        delete m_pSubBattle;
+        m_pSubBattle = NULL;
+    }
+    if (bDelBattleMap) CSceneInfo::removeMapRsrcCache(2);
+    if (bDelPlayerRsrc) {
+        PLM::removePlayerRsrc(0);
+        PLM::removeBattlePlayerRsrc(0);
+    } else if (nReqBattle != 1 && CGame::isSoraGame()) {
+        PLM::removeBattlePlayerRsrc(0);
+    }
+    if (bEventNext || (bPooh && bEntranceIO) || CSceneInfo::isLastFloorScene()) removeInconstRsrc();
+    if (bEntranceIO) {
+        removeInconstWorldRsrc();
+        removeConstWorldRsrc();
+    } else if ((USHORT)(CSceneInfo::getNextSceneNum() - 1050) < 149) {
+        removeInconstWorldRsrc();
+    }
+    CSceneInfo::update();
+    if (bTheater) {
+        CSound::clearForEventScene();
+        nNextState = 16;
+        CWorldEnv::setFogColor(0, 0, 0);
+    } else if (nReqBattle) {
+        if (_isEventScene(nCurrentScene)) CSound::clearForEventScene();
+        if (m_pSubBattle) {
+            CEncountEffect::start();
+            nNextState = 8;
+        } else {
+            m_nGameProcFlag |= 0x10000000;
+            nNextState = 2;
+        }
+    } else {
+        nNextState = 1;
+        if (!bEntranceIO) {
+            if (m_pSubBattle || _isEventScene(nNextScene) || CSceneInfo::getCurrentBattleSceneNum() <= 0) {
+                nNextState = 3;
+            } else {
+                nNextState = 2;
+            }
+            if (_isEventScene(nCurrentScene)) {
+                if (!(_isEventScene(nNextScene))) {
+                    CSound::clearForEventScene();
+                    if (CSceneInfo::getCurrentWorldID(TRUE) == 10) CRsrcDB::resetRsrc(0x2f, 1);
+                }
+            } else if (_isEventScene(nNextScene)) {
+                CSound::clearForBattleScene();
+            }
+            if (CGame::isRikuGame() && CSceneInfo::getCurrentWorldID(FALSE) == 12 && CSceneInfo::getCurrentSceneNum() == 30) {
+                CSound::fadeoutAllBGM(60);
+            }
+        }
+        if (CSceneInfo::hasReqChangeFloor()) {
+            removeConstFloorRsrc();
+            initNextFloor();
+        }
+    }
+    changeState(nNextState);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", endFieldSub__9CGameMain);
 __asm__(".rdata\n.align 3\n.word 0x41835683\n.word 0x5B815E83\n.word 0x5B818283\n.word 0x498F6883\n.word 0x6081B997\n.word 0x0000000A\n.text\n");
+#endif
 void CGameMain::initNextFloor() {
     INT nIndex = CSceneInfo::getNextFloorIndex();
     SHORT nFloor = CSceneInfo::getFloorNumber(nIndex, CGame::isSoraGame());
@@ -727,7 +934,40 @@ void CGameMain::prePlayBattle() {
     m_bPauseEnable = TRUE;
     CMainApp::enableDbgUsrPause(TRUE, FALSE);
 }
+/* Parked: 15 lines - the original places the first two flag arms (13, 15) out of line after the changeState block;
+ * ours keeps them inline. tried: negated nested ifs, else-wrapped tail, comma-ternary (18). */
+#if 0
+void CGameMain::playBattle() {
+    INT nState = 0;
+    if (m_nGameProcFlag & 1) {
+        m_nGameProcFlag |= 4;
+        nState = 13;
+    } else if (m_nGameProcFlag & 0x80000000) {
+        m_nGameProcFlag |= 4;
+        nState = 15;
+    } else if (m_nGameProcFlag & 0x10000) {
+        m_nGameProcFlag |= 0x40000;
+        nState = 12;
+    }
+    if (nState) {
+        m_nGameProcFlag |= 0x40000000;
+        changeState(nState);
+        return;
+    }
+    if (procBattleMenu()) return;
+    m_pSubBattle->update();
+    if (CSceneInfo::hasReqExitBattle()) {
+        if (CSceneInfo::hasReqRetryBattle()) {
+            gotoRetryBattle();
+        } else {
+            gotoEndBattle();
+        }
+        m_bPauseEnable = FALSE;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", playBattle__9CGameMain);
+#endif
 void CGameMain::gotoEndBattle() {
     if (CSceneInfo::isMinigameScene()) CMinigameManager::sendEvent(1, NULL);
     changeState(10);
