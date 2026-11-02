@@ -87,17 +87,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/Game-Game (finished: procBattleMenu matched, procFieldMenu/playField/playBattle/endFieldSub parked; A1: no stand-ins) | 820 | 27 | 0 | 757 (670) | 181 |
 | 2026-11-02 | decomp/Game-EffectMotion (finished: EFFECTMOTION_SOURCE_RODATA gate dropped, updateAttachEffect_ in park form) | 820 | 27 | 0 | 757 (670) | 181 |
 | 2026-11-02 | decomp/System-RcfCD (finished: 4 parked, drafts at 4/4-8/31/4 lines; _startCdRead non-deterministic) | 820 | 27 | 0 | 757 (670) | 181 |
+| 2026-11-02 | decomp/Game-Atel-CameraMan (finished: main matched, no asm left; A2: path overrides MATCH-tagged, redundant GPRIM_H_PATH dropped) | 819 | 27 | 0 | 756 (667) | 184 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 820 (767 in 111 headers, 53 in 33 .cpp); MATCH: 181
-  by category: method 315, data member 62, type 72, fwd decl 49, #include 30, changed in place 121, padding 8, path override 22, gate 19, guessed 29, header-level 71, stand-in 16, other 6
+PARTIAL: 819 (766 in 110 headers, 53 in 33 .cpp); MATCH: 184
+  by category: method 315, data member 62, type 72, fwd decl 49, #include 30, changed in place 121, padding 8, path override 21, gate 19, guessed 29, header-level 71, stand-in 16, other 6
 stand-ins: 27 foreign in 18 files (20 names), 201 unattributed, 167 own
 duplicate class names across headers: 0
 padding: 14 arrays, 0 accessors
-mechanisms: 757 sites (670 untagged); #line: 1244
+mechanisms: 756 sites (667 untagged); #line: 1244
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 608, superset 141, partial 112, gated 26, missing 8, unattributed 309
 ```
@@ -303,7 +304,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/MotData.h` | 1 | 4/0/3/0 | 5 |
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
 | `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 8 |
-| `System/Graphic/PathDataCamera.h` | 1 | 0/1/0/0 | 3 |
+| `System/Graphic/PathDataCamera.h` | 0 | 0/1/0/0 | 3 |
 | `System/Graphic/ScreenMask.h` | 0 | 0/1/1/0 | 5 |
 | `System/Graphic/ShadowModel.h` | 6 | 0/0/1/0 | 9 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
@@ -365,7 +366,7 @@ or `untagged`.
 | path override | `ATELFOG_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/AtelFog.cpp:2 |
 | path override | `BATTLEENEMY_H_PATH` | 46 | 1 | the original included it by its full path |
 | path override | `BODYCOLLISION_H_PATH` | 2 | 1 | __FILE__ of these headers as in the original .rodata |
-| path override | `CAMERAMAN_H_PATH` | 2 | 1 | CVSM's flag accessors are only inline in this unit (Game/Atel/VSME.h) |
+| path override | `CAMERAMAN_H_PATH` | 2 | 2 | CVSM's flag accessors are only inline in this unit (Game/Atel/VSME.h) |
 | path override | `CARDBATTLE_H_PATH` | 5 | 2 | the original includes it under this name |
 | path override | `CARD_H_PATH` | 6 | 1 | the original's Card.h/Status.h strings carry |
 | path override | `CHATMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/ChatMan.cpp:2 |
@@ -376,13 +377,13 @@ or `untagged`.
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
 | path override | `EFFECT_H_PATH` | 5 | 0 | untagged, e.g. Game/Enemy/EnemyBarrelspider.cpp:4 |
 | path override | `FSM_H_PATH` | 1 | 0 | untagged, e.g. System/Fsm.cpp:1 |
-| path override | `GPRIM_H_PATH` | 165 | 9 | the collision classes come after CMapEnemy (their vtables precede its own) |
+| path override | `GPRIM_H_PATH` | 164 | 9 | the collision classes come after CMapEnemy (their vtables precede its own) |
 | path override | `LINKEDBUF_H_PATH` | 4 | 1 | __FILE__ as in the original .rodata |
 | path override | `MAPUNIT_H_PATH` | 1 | 0 | untagged, e.g. System/Graphic/MapUnit.cpp:5 |
 | path override | `MODELDATA_H_PATH` | 8 | 2 | TexInfoStub (the original has its assert strings) |
 | path override | `MODEL_H_PATH` | 8 | 1 | __FILE__ as in the original .rodata |
 | path override | `OSDDEF_H_PATH` | 1 | 0 | untagged, e.g. Game/EntityFactory.cpp:1 |
-| path override | `PATHDATACAMERA_H_PATH` | 2 | 1 | the original includes it under this name |
+| path override | `PATHDATACAMERA_H_PATH` | 2 | 2 | the original includes it under this name |
 | path override | `RSRCDATA_H_PATH` | 5 | 1 | RsrcData.h strings in .rodata use the full path |
 | path override | `SAVELOADCTRL_H_PATH` | 5 | 0 | untagged, e.g. Form/Menu/TitleReportDllStarter.cpp:3 |
 | path override | `STATUS_H_PATH` | 5 | 1 | the original's Card.h/Status.h strings carry |
