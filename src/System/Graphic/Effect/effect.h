@@ -6,7 +6,7 @@
 #include "System/Vector.h" // PARTIAL: added for Game/Gimmick/GimmickTutorial
 #include "System/Graphic/Effect/ObjType.h"
 
-#ifndef EFFECT_H_PATH // PARTIAL: path override added for Game/Enemy/EnemyBarrelspider ("System/Graphic/Effect/Effect.h")
+#ifndef EFFECT_H_PATH // MATCH: path override for Game/Enemy/EnemyBarrelspider ("System/Graphic/Effect/Effect.h")
 #define EFFECT_H_PATH "System/Graphic/Effect/effect.h"
 #endif
 

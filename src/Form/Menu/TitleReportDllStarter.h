@@ -1,4 +1,4 @@
-// PARTIAL: added for System/MainTaskFactory
+
 #ifndef FORM_MENU_TITLEREPORTDLLSTARTER_H
 #define FORM_MENU_TITLEREPORTDLLSTARTER_H
 
@@ -10,7 +10,7 @@
 #include "System/Fsm.h"
 
 /* Line numbers are the original ones (__LINE__ in messages); only lines 55-57 (create) are known. */
-/* PARTIAL: path override added for Form/Menu/TitleReportDllStarter ("c:/KHCOM/MainApp/...") */
+/* MATCH: path override for Form/Menu/TitleReportDllStarter ("c:/KHCOM/MainApp/...") */
 #ifndef TITLEREPORTDLLSTARTER_H_PATH
 #define TITLEREPORTDLLSTARTER_H_PATH "Form/Menu/TitleReportDllStarter.h"
 #endif

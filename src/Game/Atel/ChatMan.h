@@ -15,7 +15,7 @@ namespace ATEL {
 class CChatWndDt;
 class CChatWndDtList;
 
-/* PARTIAL: __FILE__ of this header differs per includer ("c:/KHCOM/MainApp/Game/Atel/ChatMan.h" in Game/Atel/ChatMan) */
+/* MATCH: path override: __FILE__ of this header differs per includer ("c:/KHCOM/MainApp/Game/Atel/ChatMan.h" in Game/Atel/ChatMan) */
 #ifndef CHATMAN_H_PATH
 #define CHATMAN_H_PATH "Game/Atel/ChatMan.h"
 #endif

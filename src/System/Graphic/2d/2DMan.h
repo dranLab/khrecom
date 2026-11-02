@@ -7,7 +7,7 @@
 #include "System/HeapMan.h"
 #include "System/Debug.h"
 
-/* PARTIAL: path override added for System/Graphic/2d/2DFntObj ("c:/KHCOM/MainApp/System/Graphic/2d/2DMan.h") */
+/* MATCH: path override for System/Graphic/2d/2DFntObj ("c:/KHCOM/MainApp/System/Graphic/2d/2DMan.h") */
 #ifndef D2MAN_H_PATH
 #define D2MAN_H_PATH "System/Graphic/2D/2DMan.h"
 #endif

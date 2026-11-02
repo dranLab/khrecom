@@ -83,7 +83,7 @@ struct OBJ_FORMATION {
     }
 };
 
-#ifndef OSDDEF_H_PATH // PARTIAL: path override added for Game/EntityFactory ("c:/KHCOM/MainApp/Game/OsdDef.h")
+#ifndef OSDDEF_H_PATH // MATCH: path override for Game/EntityFactory ("c:/KHCOM/MainApp/Game/OsdDef.h")
 #define OSDDEF_H_PATH "Game/OsdDef.h"
 #endif
 #line 126 OSDDEF_H_PATH

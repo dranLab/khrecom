@@ -11,7 +11,7 @@ struct TECHNIC_INFO {
 };
 
 /* Line numbers are the original ones (__LINE__ in messages); only line 38 (allocation) is known. */
-#ifndef TECHNIC_H_PATH // PARTIAL: path override added for Game/Status ("c:/KHCOM/MainApp/...")
+#ifndef TECHNIC_H_PATH // MATCH: path override for Game/Status ("c:/KHCOM/MainApp/...")
 #define TECHNIC_H_PATH "Game/Technic.h"
 #endif
 #line 20 TECHNIC_H_PATH

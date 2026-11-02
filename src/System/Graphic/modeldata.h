@@ -8,7 +8,7 @@
 
 /* Placeholder for the original header's inline function asserting _pTexInfo: its strings
  * ("System/Graphic/modeldata.h", "_pTexInfo") are in .rodata of every includer. The line number is not known. */
-#ifndef MODELDATA_H_PATH // PARTIAL: path override added for System/Graphic/MapUnit
+#ifndef MODELDATA_H_PATH // MATCH: path override for System/Graphic/MapUnit
 #define MODELDATA_H_PATH "System/Graphic/modeldata.h"
 #endif
 #line 1 MODELDATA_H_PATH

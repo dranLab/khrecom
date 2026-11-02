@@ -109,7 +109,7 @@ extern "C" void com_free(void* mem);
 extern "C" void AssertApp(char* pszFile, int nLine, char* pszMsg, char* pszExp);
 
 /* __FILE__ as in the original (the header is found through "-I src" here). Line numbers are not known. */
-/* PARTIAL: path override added for System/TaskMan ("c:/KHCOM/MainApp/System/Vector.h") */
+/* MATCH: path override for System/TaskMan ("c:/KHCOM/MainApp/System/Vector.h") */
 #ifndef VECTOR_H_PATH
 #define VECTOR_H_PATH "System/Vector.h"
 #endif
