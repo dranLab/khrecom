@@ -95,32 +95,8 @@ static inline FLOAT _limitRot(FLOAT r) {
     return r;
 }
 
-static inline FVECTOR operator-(const FVECTOR& v0, const FVECTOR& inV) {
-    FVECTOR vec = v0;
-    vec.x -= inV.x;
-    vec.y -= inV.y;
-    vec.z -= inV.z;
-    vec.w -= inV.w;
-    return vec;
-}
 
-static inline FVECTOR operator+(const FVECTOR& v0, const FVECTOR& inV) {
-    FVECTOR vec = v0;
-    vec.x += inV.x;
-    vec.y += inV.y;
-    vec.z += inV.z;
-    vec.w += inV.w;
-    return vec;
-}
 
-static inline FVECTOR operator*(const FVECTOR& v0, FLOAT inF) {
-    FVECTOR vec = v0;
-    vec.x *= inF;
-    vec.y *= inF;
-    vec.z *= inF;
-    vec.w *= inF;
-    return vec;
-}
 
 static inline void _setOne(FVECTOR& v) {
     v.x = 1.0f;

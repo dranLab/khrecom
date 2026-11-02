@@ -290,12 +290,6 @@ void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 
 
 inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
-inline void operator*=(FVECTOR& v, FLOAT inF) { /* PARTIAL: as in System/Coord (FVECTOR::operator*= in the original) */
-    v.x *= inF;
-    v.y *= inF;
-    v.z *= inF;
-    v.w *= inF;
-}
 static inline FVECTOR _applyMatrix(FMATRIX& m, FVECTOR& v) {
     FVECTOR b;
     ApplyMatrix(b, m, v);

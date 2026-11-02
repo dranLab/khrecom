@@ -21,24 +21,20 @@ union FVECTOR {
     u_long128 _q;
     unsigned long _ul[2];
     unsigned int _ui[4];
-    // PARTIAL: added for Game/Player/FriendAladdin
+    void init0() { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(this)); }
+    void init() {
+        _q = 0;
+        w = 1.0f;
+    }
     void set(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW = 1.0f) {
         x = inX;
         y = inY;
         z = inZ;
         w = inW;
     }
-    // PARTIAL: added for Form/Menu/Camp
     void setAll(FLOAT f) { x = y = z = w = f; }
     void setAllXYZ(FLOAT f) { x = y = z = f; }
-    // PARTIAL: added for Game/Debug/DebugPathData (body from the asm: vf0 = 0,0,0,1)
-    void init0() { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(this)); }
-    // PARTIAL: added for Game/Player/FriendAriel
-    void init() {
-        _q = 0;
-        w = 1.0f;
-    }
-    // PARTIAL: added for Game/Map (CSky::main; roundPI from System/Coord)
+    void zero(/* parameters unknown */);
     void addRot(const FVECTOR& vInSrc) {
         FVECTOR& vOut = *this;
         FLOAT fPI = 3.1415927f;
@@ -58,15 +54,71 @@ union FVECTOR {
                          : "=r"(nFlag) : "r"(this), "r"(&vInSrc) : "memory");
         if (nFlag & 0x3f) roundPI(vOut, nFlag);
     }
-    // PARTIAL: added for System/Graphic/Camera
+    BOOL operator==(const FVECTOR& inV) const { return _ul[0] == inV._ul[0] && _ul[1] == inV._ul[1]; }
     BOOL operator!=(const FVECTOR& inV) const { return _ul[0] != inV._ul[0] || _ul[1] != inV._ul[1]; }
+    void operator+=(const FVECTOR& in) {
+        const float(&inV)[4] = in.v; /* MATCH: through the array (System/Graphic/LightUnit's betaShade) */
+        x += inV[0];
+        y += inV[1];
+        z += inV[2];
+        w += inV[3];
+    }
+    void operator-=(const FVECTOR& inV) {
+        x -= inV.x;
+        y -= inV.y;
+        z -= inV.z;
+        w -= inV.w;
+    }
+    void operator*=(FLOAT f) {
+        x *= f;
+        y *= f;
+        z *= f;
+        w *= f;
+    }
+    FVECTOR operator+(const FVECTOR& inV) const {
+        FVECTOR vec = *this;
+        vec.x += inV.x;
+        vec.y += inV.y;
+        vec.z += inV.z;
+        vec.w += inV.w;
+        return vec;
+    }
+    FVECTOR operator-(const FVECTOR& inV) const {
+        FVECTOR vec = *this;
+        vec.x -= inV.x;
+        vec.y -= inV.y;
+        vec.z -= inV.z;
+        vec.w -= inV.w;
+        return vec;
+    }
+    FVECTOR operator-() const {
+        FVECTOR vec = *this;
+        vec.x = -vec.x;
+        vec.y = -vec.y;
+        vec.z = -vec.z;
+        vec.w = -vec.w;
+        return vec;
+    }
+    FVECTOR operator*(FLOAT f) const {
+        FVECTOR vec = *this;
+        vec.x *= f;
+        vec.y *= f;
+        vec.z *= f;
+        vec.w *= f;
+        return vec;
+    }
+    FVECTOR operator*(const FVECTOR& inV) const {
+        FVECTOR vec = *this;
+        vec.x *= inV.x;
+        vec.y *= inV.y;
+        vec.z *= inV.z;
+        vec.w *= inV.w;
+        return vec;
+    }
     // PARTIAL: added for System/Graphic/Anim (name guessed)
     BOOL isZero() const { return _ul[0] == 0 && _ul[1] == 0; }
-    // PARTIAL: added for Game/Collision/CollMapCamera
-    BOOL operator==(const FVECTOR& inV) const { return _ul[0] == inV._ul[0] && _ul[1] == inV._ul[1]; }
 };
 
-// PARTIAL: added for Game/Atel/EventTrap
 typedef int _IVECTOR[4];
 union IVECTOR {
     _IVECTOR v;
@@ -77,13 +129,24 @@ union IVECTOR {
         INT w;
     };
     u_long128 _q;
-    // PARTIAL: added for System/Graphic/2d/2DSprObj
+    unsigned long _ul[2];
+    void init(/* parameters unknown */);
     void set(INT _x, INT _y, INT _z, INT _w) {
         x = _x;
         y = _y;
         z = _z;
         w = _w;
     }
+    void setAll(/* parameters unknown */);
+    void setAllXYZ(/* parameters unknown */);
+    BOOL operator==(const IVECTOR& inV) const;
+    BOOL operator!=(const IVECTOR& inV) const;
+    void operator+=(const IVECTOR& inV);
+    void operator-=(const IVECTOR& inV);
+    void operator*=(INT n);
+    IVECTOR operator+(const IVECTOR& inV) const;
+    IVECTOR operator-(const IVECTOR& inV) const;
+    IVECTOR operator*(INT n) const;
 };
 
 typedef float _FMATRIX[4][4];
@@ -91,13 +154,17 @@ typedef float (*_FMATRIX_ROWP)[4];
 union FMATRIX {
     _FMATRIX m;
     FVECTOR v[4];
+    void init(/* parameters unknown */);
+    void initWithScale(/* parameters unknown */);
+    void initC3(/* parameters unknown */);
+    void initTrans(/* parameters unknown */);
+    FVECTOR& getTrans() { return v[3]; }
+    FVECTOR& getTransRef(/* parameters unknown */);
     void setTrans(const FVECTOR& vecIn) { v[3] = vecIn; }
-    FVECTOR& getTrans() { return v[3]; } // PARTIAL: added for Game/Collision/CollMapCamera
-    // PARTIAL: added for System/Graphic/Camera
+    void set(/* parameters unknown */);
     BOOL operator!=(const FMATRIX& inM) const { return v[0] != inM.v[0] || v[1] != inM.v[1] || v[2] != inM.v[2] || v[3] != inM.v[3]; }
-    // PARTIAL: added for Game/Collision/Ride
     BOOL operator==(const FMATRIX& inM) const { return v[0] == inM.v[0] && v[1] == inM.v[1] && v[2] == inM.v[2] && v[3] == inM.v[3]; }
-    // PARTIAL: added for Game/Bullet/Bullet (sceVu0 functions take sceVu0FMATRIX)
+    // PARTIAL: the ref's conversions are to _FMATRIX* / float(*)[4][4] / _FMATRIX& (Game/Bullet/Bullet needs the row pointer for sceVu0)
     operator _FMATRIX_ROWP() { return m; }
 };
 

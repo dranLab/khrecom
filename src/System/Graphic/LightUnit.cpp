@@ -284,22 +284,7 @@ void CLightUnit::setLight(INT idx, FVECTOR in_light, FVECTOR in_color) {
     }
 }
 
-static inline void operator+=(FVECTOR& v, const FVECTOR& in) {
-    const float(&inV)[4] = in.v;
-    v.x += inV[0];
-    v.y += inV[1];
-    v.z += inV[2];
-    v.w += inV[3];
-}
 
-static inline FVECTOR operator*(const FVECTOR& v, const FVECTOR& inV) {
-    FVECTOR vec = v;
-    vec.x *= inV.x;
-    vec.y *= inV.y;
-    vec.z *= inV.z;
-    vec.w *= inV.w;
-    return vec;
-}
 
 void CLightUnit::betaShade(FVECTOR& out, const FVECTOR& in) {
     FVECTOR ret = m_Ambient;

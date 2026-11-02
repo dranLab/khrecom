@@ -287,14 +287,6 @@ MC_CHIP* CCollUtil::_searchChipCollisionNext() {
     return __null;
 }
 
-static inline FVECTOR operator-(const FVECTOR& v0, const FVECTOR& dVec) {
-    FVECTOR vec = v0;
-    vec.x -= dVec.x;
-    vec.y -= dVec.y;
-    vec.z -= dVec.z;
-    vec.w -= dVec.w;
-    return vec;
-}
 
 static inline FLOAT _getLength(const FVECTOR& p0, const FVECTOR& p1) {
     FVECTOR v;

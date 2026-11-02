@@ -144,14 +144,6 @@ CCameraDt::~CCameraDt() {
     if (m_pCamera) m_pCamera->out();
 }
 
-static inline FVECTOR operator+(const FVECTOR& v0, const FVECTOR& inV) {
-    FVECTOR vec = v0;
-    vec.x += inV.x;
-    vec.y += inV.y;
-    vec.z += inV.z;
-    vec.w += inV.w;
-    return vec;
-}
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
                  "sqc2 $vf0, 0x30(%0)\n"
