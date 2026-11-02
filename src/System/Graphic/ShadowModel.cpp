@@ -228,15 +228,15 @@ void CShadowModelMan::updateShadowMatrix(const FVECTOR& vMax, const FVECTOR& vMi
     CModel::resetWorldScreenMatrix();
 }
 
-/* Near match (two instructions: the original updates the i * 64 + 63 induction register at the end of the loop
- * body, not after i++), kept for reference: */
+/* Parked: 2 instructions - the original updates the i * 64 + 63 induction register at the end of the loop body,
+ * not after i++. tried: i++ positions; permuter (method wrapper) 15 min, 30k candidates: no gain (score 2). */
 #if 0
 void CShadowModelMan::drawBefore() {
     QWdata* qp;
     u_long128 tag;
     CModel::setSendCtrl(4);
     __asm__ volatile("pcpyld %0, %2, %1" : "=r"(tag) : "r"((u_long)0x1000000000008000UL), "0"((u_long)0xE));
-    qp = CPackMan::pkOpenGifTag(tag);
+    qp = (QWdata*)CPackMan::pkOpenGifTag(tag);
     ((u_long*)qp)[0] = (u_long)(VRAM::_TEX_AREA_START / 32) | ((u_long)(sdw_SCREEN_WIDTH / 64) << 16);
     ((u_long*)qp)[1] = 0x4C;
     qp++;
@@ -277,8 +277,9 @@ void CShadowModelMan::drawBefore() {
     qp++;
     CPackMan::pkCloseGifTag(qp);
 }
-#endif
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/ShadowModel", drawBefore__15CShadowModelMan);
+#endif
 static QWdata* setSdwTSprite32(QWdata* qp, FIX4 plsx, FIX4 plsy, UINT z, FLOAT fScale) {
     PRIMIVECTOR pv[2];
     PRIMIVECTOR uv[2];
