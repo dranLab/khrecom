@@ -1,6 +1,6 @@
 
-#define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h"
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h" /* MATCH: this unit names CtdMan.h by its full original path */
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit spells it GPrim.h */
 #include "System/Ctd/CtdMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Wnd.h"
