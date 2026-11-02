@@ -95,17 +95,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/Game-Collision-CollDisp (CollDisp.h ungated for all 7 includers, op new declared only; GameSubBattle/Field use initialize/finalize) | 809 | 27 | 0 | 750 (658) | 189 |
 | 2026-11-02 | decomp/System-Graphic-DispList-2 (finished: _drawOT 62/291 parked; CShadowModel::getSize inline) | 809 | 27 | 0 | 750 (658) | 189 |
 | 2026-11-02 | cleanup/System-Graphic-DispList (full classes moved from DispList.cpp into DispList.h; ModelMan on addTail/setZ; CModelMan friend guessed) | 810 | 27 | 0 | 750 (658) | 189 |
+| 2026-11-02 | decomp/System-Graphic-Effect-effect-2 (finished: Setup 4/133, _updateSE 2/94, strcpyEffName 8/24 parked; A2: EFFECT_CPP gate kept, MATCH) | 810 | 27 | 0 | 750 (656) | 191 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 810 (756 in 110 headers, 54 in 34 .cpp); MATCH: 189
+PARTIAL: 810 (756 in 110 headers, 54 in 34 .cpp); MATCH: 191
   by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 20, gate 19, guessed 30, header-level 69, stand-in 17, other 6
 stand-ins: 27 foreign in 18 files (20 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
-mechanisms: 750 sites (658 untagged); #line: 1245
+mechanisms: 750 sites (656 untagged); #line: 1247
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 613, superset 140, partial 112, gated 23, missing 8, unattributed 309
 ```
@@ -382,7 +383,7 @@ or `untagged`.
 | path override | `CTDMAN_H_PATH` | 6 | 2 | this unit names CtdMan.h by its full original path |
 | path override | `D2MAN_H_PATH` | 10 | 0 | untagged, e.g. System/Graphic/2d/2DCard.cpp:3 |
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
-| path override | `EFFECT_H_PATH` | 5 | 0 | untagged, e.g. Game/Enemy/EnemyBarrelspider.cpp:4 |
+| path override | `EFFECT_H_PATH` | 5 | 1 | this unit names effect.h by its full original path |
 | path override | `FSM_H_PATH` | 1 | 0 | untagged, e.g. System/Fsm.cpp:1 |
 | path override | `GPRIM_H_PATH` | 161 | 10 | the collision classes come after CMapEnemy (their vtables precede its own) |
 | path override | `LINKEDBUF_H_PATH` | 4 | 1 | __FILE__ as in the original .rodata |
@@ -466,7 +467,7 @@ or `untagged`.
 | placeholder | `_vsmeMotionName*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:54 |
 | pragma | `#pragma implementation` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:2 |
 | pragma | `#pragma interface` | 1 | 1 | the inline functions and vtables only in Gprim.o, as in the originals |
-| unit gate | `EFFECT_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Effect/effect.cpp:1 |
+| unit gate | `EFFECT_CPP` | 1 | 1 | effect.cpp includes effect_inl.h itself after Coord.h (weak order) and owns the placeholder strings; without it the link fails |
 | unit gate | `FORM_MENU_JIMINYMEMO_CPP` | 1 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:1 |
 | unit gate | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.cpp:2 |
 | unit gate | `FORM_MENU_SAVELOAD_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoad.cpp:2 |
