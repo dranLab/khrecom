@@ -12,16 +12,16 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
 
-namespace D2 {
-class C2DMan { /* System/Graphic/2d/2DMan.h */
-public:
-    static HANDLE create(const CHAR* pName, UINT nIdx, SeqControl* pSeqControl);
-    static void destroy(HANDLE handle);
-    static C2DSeqObj* getSeqObj(HANDLE handle);
-    static void enableDisp(HANDLE handle, BOOL bEnable);
-    static void changeSeqLayer(HANDLE handle, INT nLayer);
-};
-}
+
+
+
+
+
+
+
+
+
+
 
 using namespace D2;
 

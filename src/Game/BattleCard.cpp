@@ -27,12 +27,12 @@ extern "C" float sinf(float);
 using namespace CardBattle;
 
 extern INT SCREEN_HEIGHT;
-namespace D2 {
-class C2DMan { /* PARTIAL: stand-in for System/Graphic/2d/2DMan C2DMan: gated by SYSTEM_GRAPHIC_2D_2DMAN_CPP */
-public:
-    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
-};
-}
+
+
+
+
+
+
 extern INT SCREEN_HEIGHT;
 namespace CardBattle {
 static LPCSTR g_szDpxZexion2 = "zexion2";

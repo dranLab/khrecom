@@ -21,15 +21,15 @@ namespace D2 {
 
 
 
-class C2DMan {
-public:
-    static C2DBase* getBase(HANDLE handle);
-    static ISLCManagerT<C2DO>* get2DOSLCManager();
-    static C2DO* get2DO(HANDLE hID) {
-        SLContainerT<C2DO>* pContainer = get2DOSLCManager()->getContainer(hID);
-        return pContainer ? pContainer->getValue() : NULL;
-    }
-};
+
+
+
+
+
+
+
+
+
 
 UINT C2DLayObj::m_uiID = 0;
 
@@ -46,7 +46,7 @@ C2DLayObj::~C2DLayObj() {
     INT i;
     for (i = 0; i < m_nSeqObj; i++) {
         HANDLE hSeqObj = m_pSeqObjHandle[i];
-        C2DO* p2DO = C2DMan::get2DO(hSeqObj);
+        C2DO* p2DO = C2DMan::get2DOSLCManager().get2DO(hSeqObj);
         if (p2DO) {
             if (C2DSpr::deleteList(*p2DO)) {
                 delete p2DO;
@@ -84,7 +84,7 @@ TIMEQ C2DLayObj::getTime() {
     INT i;
     for (i = 0; i < m_nSeqObj; i++) {
         HANDLE hSeqObj = m_pSeqObjHandle[i];
-        C2DO* p2DO = C2DMan::get2DO(hSeqObj);
+        C2DO* p2DO = C2DMan::get2DOSLCManager().get2DO(hSeqObj);
         if (p2DO) {
             if (qTime < ((C2DSeqObj*)p2DO)->getTime()) qTime = ((C2DSeqObj*)p2DO)->getTime();
         }
@@ -96,7 +96,7 @@ BOOL C2DLayObj::isEnd() {
     INT i;
     for (i = 0; i < m_nSeqObj; i++) {
         HANDLE hSeqObj = m_pSeqObjHandle[i];
-        C2DO* p2DO = C2DMan::get2DO(hSeqObj);
+        C2DO* p2DO = C2DMan::get2DOSLCManager().get2DO(hSeqObj);
         if (p2DO && !((C2DSeqObj*)p2DO)->isEnd()) {
             return FALSE;
         }
@@ -108,7 +108,7 @@ void C2DLayObj::enableDisp(HANDLE handle, BOOL bEnable) {
     INT i;
     for (i = 0; i < m_nSeqObj; i++) {
         HANDLE hSeqObj = m_pSeqObjHandle[i];
-        C2DO* p2DO = C2DMan::get2DO(hSeqObj);
+        C2DO* p2DO = C2DMan::get2DOSLCManager().get2DO(hSeqObj);
         if (p2DO) {
             p2DO->enableDisp(bEnable);
         }

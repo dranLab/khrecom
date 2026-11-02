@@ -24,13 +24,13 @@
 #include <string.h>
 
 
-namespace D2 {
-class C2DMan {
-public:
-    static HANDLE init(void* inFile, const CHAR* pBaseName);
-    static void destroyBase(HANDLE handleBase);
-};
-}  // namespace D2
+
+
+
+
+
+
+
 
 extern "C" {
 TIM2_PICTUREHEADER* Tim2GetPictureHeader(void* pTim2, int imgno);

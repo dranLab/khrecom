@@ -293,21 +293,21 @@ using namespace D2;
 
 
 
-namespace D2 {
-class C2DMan {
-public:
-    enum D2MAN_LEVEL {
-        D2MAN_LEVEL0 = 0,
-        D2MAN_LEVEL1 = 1
-    };
-    static HANDLE create(const char* pName, UINT nIdx);
-    static void destroy(HANDLE h);
-    static BOOL isEnd(HANDLE h);
-    static void setLayer(INT nLayer);
-    static void changeLevel(D2MAN_LEVEL nLevel);
-    static void getLayPosition(const char* pName, UINT nIdx, UINT nId, FVECTOR& vPos, int nFlag);
-};
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern INT SCREEN_HEIGHT;

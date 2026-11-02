@@ -45,14 +45,14 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 namespace D2 {
 
-class C2DMan { /* System/Graphic/2d/2DMan.h */
-public:
-    static ISLCManagerT<C2DO>* get2DOSLCManager();
-    static C2DO* get2DO(HANDLE hID) {
-        SLContainerT<C2DO>* pContainer = get2DOSLCManager()->getContainer(hID);
-        return pContainer ? pContainer->getValue() : NULL;
-    }
-};
+
+
+
+
+
+
+
+
 
 /* the .sqd file header (original name unknown) */
 struct SQD_HEADER {
@@ -168,7 +168,7 @@ HANDLE C2DSeq::createFnt(C2DFnt* p2DFnt, SeqControl* pSeqControl) {
 HANDLE C2DSeq::replaceSeq(HANDLE hCurrent, UINT inNo, SeqControl* pSeqControl) {
     if (inNo >= (UINT)m_nSequenceMax) return 0;
     if (!hCurrent) return 0;
-    C2DSeqObj* pCurrent = (C2DSeqObj*)C2DMan::get2DO(hCurrent);
+    C2DSeqObj* pCurrent = (C2DSeqObj*)C2DMan::get2DOSLCManager().get2DO(hCurrent);
     if (!pCurrent) return 0;
     m_pTexInfo = CRsrcDB::getRsrcTex(m_pTexName, NAME_CASE_SENSITIVE);
     if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
@@ -185,7 +185,7 @@ HANDLE C2DSeq::replaceSeq(HANDLE hCurrent, UINT inNo, SeqControl* pSeqControl) {
         handle = replaceList(hCurrent, *p2DSeqObj);
         if (handle == -1) {
             TRACE_COL(_TTY_YELLOW, "C2DSeq::replaceSeq\x8e\xb8\x94\x73\x81\x49\n");
-            SLContainerT<C2DO>* pContainer = C2DMan::get2DOSLCManager()->getContainer(hCurrent);
+            SLContainerT<C2DO>* pContainer = C2DMan::get2DOSLCManager().getContainer(hCurrent);
             if (pContainer) {
                 pContainer->setValue(NULL);
                 if (p2DSeqObj) delete p2DSeqObj;
@@ -202,7 +202,7 @@ HANDLE C2DSeq::replaceSeq(HANDLE hCurrent, UINT inNo, SeqControl* pSeqControl) {
 
 HANDLE C2DSeq::replaceFnt(HANDLE hCurrent, C2DFnt* p2DFnt, SeqControl* pSeqControl) {
     if (!hCurrent) return 0;
-    C2DSeqObj* pCurrent = (C2DSeqObj*)C2DMan::get2DO(hCurrent);
+    C2DSeqObj* pCurrent = (C2DSeqObj*)C2DMan::get2DOSLCManager().get2DO(hCurrent);
     if (!pCurrent) return 0;
 #line 287
     C2DSeqObj* p2DSeqObj = new (com_malloc_d(sizeof(C2DSeqObj), __FILE__ "(287)", RET_ADDR())) C2DSeqObj(pSeqControl);
@@ -215,7 +215,7 @@ HANDLE C2DSeq::replaceFnt(HANDLE hCurrent, C2DFnt* p2DFnt, SeqControl* pSeqContr
         handle = replaceList(hCurrent, *p2DSeqObj);
         if (handle == -1) {
             TRACE_COL(_TTY_YELLOW, "C2DSeq::replaceFnt\x8e\xb8\x94\x73\x81\x49\n");
-            SLContainerT<C2DO>* pContainer = C2DMan::get2DOSLCManager()->getContainer(hCurrent);
+            SLContainerT<C2DO>* pContainer = C2DMan::get2DOSLCManager().getContainer(hCurrent);
             if (pContainer) {
                 pContainer->setValue(NULL);
                 if (p2DSeqObj) delete p2DSeqObj;
@@ -240,17 +240,17 @@ HANDLE C2DSeq::createSpr(UINT inUnitNo, UINT inNo) {
 }
 
 TIMEQ C2DSeq::getTime(HANDLE handle) {
-    C2DSeqObj* p2DSeqObj = (C2DSeqObj*)C2DMan::get2DO(handle);
+    C2DSeqObj* p2DSeqObj = (C2DSeqObj*)C2DMan::get2DOSLCManager().get2DO(handle);
     return p2DSeqObj ? p2DSeqObj->getTime() : 0;
 }
 
 TIMEQ C2DSeq::getTimeMax(HANDLE handle) {
-    C2DSeqObj* p2DSeqObj = (C2DSeqObj*)C2DMan::get2DO(handle);
+    C2DSeqObj* p2DSeqObj = (C2DSeqObj*)C2DMan::get2DOSLCManager().get2DO(handle);
     return p2DSeqObj ? p2DSeqObj->getTimeMax() : 0;
 }
 
 BOOL C2DSeq::isEnd(HANDLE handle) {
-    C2DSeqObj* p2DSeqObj = (C2DSeqObj*)C2DMan::get2DO(handle);
+    C2DSeqObj* p2DSeqObj = (C2DSeqObj*)C2DMan::get2DOSLCManager().get2DO(handle);
     return p2DSeqObj ? p2DSeqObj->isEnd() : FALSE;
 }
 

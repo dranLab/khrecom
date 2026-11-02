@@ -141,12 +141,12 @@ static inline INT _getEnchantKind(CCardBattle* p, INT inUser) {
     return ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind < 0x44 ? 0 : ((CB_ENCHANT_VIEW*)p)->m_cardEnchant[inUser - 1].m_nKind - 0x43;
 }
 static inline BOOL _isEqual(UINT a, UINT b) { return a == b; }
-namespace D2 {
-class C2DMan { /* PARTIAL: stand-in for System/Graphic/2d/2DMan C2DMan: gated by SYSTEM_GRAPHIC_2D_2DMAN_CPP */
-public:
-    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
-};
-}
+
+
+
+
+
+
 extern INT SCREEN_HEIGHT;
 static const CARD_DATA cardDataTbl[224] = {
     { { 0x00 }, 0, 0, 0, "" }, // 0

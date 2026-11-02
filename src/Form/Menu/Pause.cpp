@@ -16,20 +16,20 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
 
-namespace D2 {
-class C2DMan {
-public:
-    enum D2MAN_LEVEL {
-        D2MAN_LEVEL0 = 0,
-        D2MAN_LEVEL1 = 1
-    };
-    static HANDLE create(const char* pName, UINT nIdx);
-    static void destroy(HANDLE h);
-    static BOOL isEnd(HANDLE h);
-    static void setLayer(INT nLayer);
-    static void changeLevel(D2MAN_LEVEL nLevel);
-};
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "Game/Atel/VSME.h"
 

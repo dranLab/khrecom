@@ -14,10 +14,10 @@ extern "C" void sceVu0ClampVector(FVECTOR& v0, FVECTOR& v1, float min, float max
 
 namespace D2 {
 
-class C2DMan {
-public:
-    static USHORT m_nLayer;
-};
+
+
+
+
 
 static inline void _clampVector(FVECTOR& v0, FVECTOR& v1, float min, float max) {
     sceVu0ClampVector(v0, v1, min, max);

@@ -8,12 +8,12 @@
 #include "System/HeapMan.h"
 #include "Form/Menu/Menu.h"
 
-namespace D2 {
-class C2DMan {
-public:
-    static void destroy(HANDLE h);
-};
-}
+
+
+
+
+
+
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 

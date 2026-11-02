@@ -1,5 +1,5 @@
 
-#define SYSTEM_GRAPHIC_2D_2DMAN_CPP
+
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define D2MAN_H_PATH "c:/KHCOM/MainApp/System/Graphic/2d/2Dman.h"
 inline void* operator new(unsigned int, void* p) throw() { return p; }
@@ -24,11 +24,11 @@ template <class T> static inline T& _ref(T& v) { return v; }
 
 namespace D2 {
 
-/* Inline in the original (System/Graphic/2d/2DLay calls it as C2DMan::get2DO); not emitted here. */
-static inline C2DO* get2DO(HANDLE hID) {
-    SLContainerT<C2DO>* pContainer = C2DMan::get2DOSLCManager().getContainer(hID);
-    return pContainer ? pContainer->getValue() : NULL;
-}
+
+
+
+
+
 
 C2DMan* C2DMan::m_pInstance = NULL;
 C2DBaseList* C2DMan::m_p2DBaseList = NULL;
@@ -239,7 +239,7 @@ void C2DMan::setLayer(INT inLayer) {
 
 void C2DMan::destroy(HANDLE handle) {
     if (!m_pInstance || !handle) return;
-    C2DO* p2DO = get2DO(handle);
+    C2DO* p2DO = get2DOSLCManager().get2DO(handle);
     if (p2DO && C2DSpr::deleteList(*p2DO)) delete p2DO;
 }
 
@@ -325,31 +325,31 @@ void C2DMan::enableDisp(HANDLE handle, BOOL bEnable) {
 
 void C2DMan::changeSeqTime(HANDLE handle, UINT inTime) {
     if (!m_pInstance) return;
-    C2DO* p2DO = get2DO(handle);
+    C2DO* p2DO = get2DOSLCManager().get2DO(handle);
     if (p2DO) p2DO->changeTimeExt(inTime * 50);
 }
 
 void C2DMan::changeSeqTexture(HANDLE handle, INT inSprIdx, CHAR* pTexName, G_UV* pStart, G_UV* pEnd) {
     if (!m_pInstance) return;
-    C2DO* p2DO = get2DO(handle);
+    C2DO* p2DO = get2DOSLCManager().get2DO(handle);
     if (p2DO) p2DO->changeTexture(inSprIdx, pTexName, pStart, pEnd);
 }
 
 void C2DMan::changeSeqTexture(HANDLE handle, INT inSeqIdx, INT inSprIdx, CHAR* pTexName, G_UV* pStart, G_UV* pEnd) {
     if (!m_pInstance) return;
-    C2DO* p2DO = get2DO(handle);
+    C2DO* p2DO = get2DOSLCManager().get2DO(handle);
     if (p2DO) p2DO->changeTexture(inSeqIdx, inSprIdx, pTexName, pStart, pEnd);
 }
 
 void C2DMan::restartSeq(HANDLE handle, FLOAT fStart) {
     if (!m_pInstance) return;
-    C2DO* p2DO = get2DO(handle);
+    C2DO* p2DO = get2DOSLCManager().get2DO(handle);
     if (p2DO) p2DO->restart((INT)fStart);
 }
 
 void C2DMan::changeSeqLayer(HANDLE handle, INT nLayer) {
     if (!m_pInstance) return;
-    C2DO* p2DO = get2DO(handle);
+    C2DO* p2DO = get2DOSLCManager().get2DO(handle);
     if (p2DO) p2DO->changeLayer(nLayer);
 }
 

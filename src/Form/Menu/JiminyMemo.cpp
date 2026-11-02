@@ -32,16 +32,16 @@
 inline void* operator new(size_t, void* p) throw() { return p; }
 
 
-namespace D2 {
-class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the class only for its own unit */
-public:
-    static void destroy(HANDLE hHandle);
-    static HANDLE create(const CHAR* pBaseName, UINT inNo);
-    static void setLayer(INT inLayer);
-    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inSeqNo, FVECTOR& outPos, INT inMode);
-    static BOOL isEnd(HANDLE handle);
-};
-}
+
+
+
+
+
+
+
+
+
+
 #include "System/RsrcDB.h"
 
 
