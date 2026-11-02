@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
 #define BODYCOLLISION_H_PATH "c:/KHCOM/MainApp/Game/BodyCollision.h"
 #include "System/HeapMan.h"

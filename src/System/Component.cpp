@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "System/Component.h"
 
 // Build stamp at the head of .rodata: no symbol in the original, pointed to by __BUILD (.sdata)

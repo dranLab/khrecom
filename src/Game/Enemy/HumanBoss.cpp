@@ -1,6 +1,7 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h" // MATCH: the original spelled the include "GPrim.h"
 #define COLLOBJ_H_ENUMS_ONLY /* MATCH: the collision classes come later (their vtables follow CHumanBoss's) */
 #define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h" // MATCH: the original included it by its full path
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -25,7 +26,6 @@ inline void _humanBossEmptyString() {
 #include "Game/Collision/CollObj.h"
 #include "Game/CardKind.h"
 #include "Game/Debug/DebugWork.h"
-#include "System/TaskMan.h"
 #include "System/Math3D.h"
 #include "System/Rnd.h"
 #include "include_asm.h"

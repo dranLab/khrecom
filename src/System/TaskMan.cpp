@@ -1,10 +1,10 @@
-#define SYSTEM_TASKMAN_CPP
+
 #include "System/HeapMan.h"
 #define VECTOR_H_PATH "c:/KHCOM/MainApp/System/Vector.h"
-#include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Str.h"
-#include "System/TaskMan.h"
+
 #include "System/Vector.h"
 #include "System/FifoFpl.h"
 #include "System/RootTask.h"

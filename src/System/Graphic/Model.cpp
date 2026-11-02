@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG /* MATCH: this unit's original lacks Task.h's SLC overflow message */
+
 #include "khtypes.h"
 #define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */
 /* MATCH: this unit's original names the headers with their full path (c:/KHCOM/MainApp/...) */

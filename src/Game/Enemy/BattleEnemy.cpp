@@ -1,4 +1,5 @@
 #define GAME_ENEMY_BATTLEENEMY_CPP
+#include "System/TaskMan.h"
 #include "khtypes.h"
 #define BATTLEENEMY_H_STATE_TEMPLATE
 #define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
@@ -26,7 +27,6 @@ inline void _emptyStringPlaceholder0() {
 #include "System/Debug.h"
 #include "System/Fsm.h"
 #include "Game/GameWork.h"
-#include "System/TaskMan.h"
 #include "System/Graphic/Effect/EffectMan.h"
 #include "Game/Bullet/BulletManager.h"
 #include "Game/Debug/DebugWork.h"

@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define GAME_ATEL_VSME_CPP /* MATCH: CVSM's flag accessors are only inline in this unit (Game/Atel/VSME.h) */
 #define CAMERAMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/CameraMan.h"
 #define CHATMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/ChatMan.h"
@@ -23,9 +23,9 @@ inline void* operator new(size_t size, char* msg) throw() {
 #include "Game/Atel/CameraMan.h"
 #include "Game/Atel/ChatMan.h"
 #include "System/Ctd/CtdMan.h"
-inline void _taskSLCOverflowMsg() {
-    TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
-}
+#include "System/TaskMan.h"
+
+
 #include "System/Graphic/Effect/effect.h"
 #include "Game/Atel/AtelFog.h"
 #include "Game/Atel/AtelCrossFade.h"

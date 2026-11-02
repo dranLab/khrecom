@@ -1,7 +1,7 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "Game/Bullet/BulletManager.h"
+#include "System/TaskMan.h"
 #include "Game/Bullet/Bullet.h"
-
 CBulletManager::CBulletManager(CTask* inParent) : CTask(inParent, 0x4000) {
     declareSysTask(27);
 }

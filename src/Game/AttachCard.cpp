@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"
 #define LINKEDBUF_H_PATH "System/LinkedBuf.h"
 #include "System/Graphic/Gprim.h"

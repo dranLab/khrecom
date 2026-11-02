@@ -1,5 +1,5 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "System/Task.h"
 #include "Game/Player/SummonCloud.h"
 #include "System/Graphic/Gprim.h"
@@ -19,10 +19,10 @@ inline void _emptyStringPlaceholder2() {
     TRACE("");
 }
 
-/* System/Task.h's task container overflow message comes after them here (see TASK_H_NO_SLC_OVERFLOW_MSG). */
-inline void _taskSLCOverflowHere() {
-    TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
-}
+
+#include "System/TaskMan.h"
+
+
 
 #include "Game/BodyCollision.h"
 #include "Game/Enemy/BattleEnemy.h"

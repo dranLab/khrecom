@@ -1,6 +1,7 @@
 #define FORM_MENU_JIMINYMEMO_CPP
 #include "khtypes.h"
 #include "Form/Menu/Menu.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"
 #include "System/Graphic/Anim.h"
@@ -14,7 +15,6 @@
 #include "Form/Menu/JiminyMemo.h"
 #include "System/Math3D.h"
 #include "System/Com.h"
-#include "System/TaskMan.h"
 #include "Game/CardKind.h"
 #include "System/Graphic/Camera.h"
 #include "System/Graphic/WorldEnv.h"

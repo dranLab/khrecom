@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h"
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Ctd/CtdMan.h"

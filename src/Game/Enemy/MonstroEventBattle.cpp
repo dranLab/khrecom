@@ -2,6 +2,7 @@
 #include <string.h>
 inline void* operator new(size_t, void* p) throw() { return p; }
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/modeldata.h"
 #include "System/Graphic/Model.h"
@@ -33,7 +34,6 @@ inline void _monstroEventBattleEmptyString() {
 #include "Game/EntityFactory.h"
 #include "Game/GameWork.h"
 #include "Game/SceneInfo.h"
-#include "System/TaskMan.h"
 #include "Form/Menu/MonstroGauge.h"
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)

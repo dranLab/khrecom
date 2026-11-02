@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h"
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
 #define MODEL_H_PATH "c:/KHCOM/MainApp/System/Graphic/Model.h"

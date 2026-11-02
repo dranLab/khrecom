@@ -1,5 +1,6 @@
 #define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h"
 #include "System/Graphic/Effect/effect.h"
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #include "System/Coord.h"
 /* effect_inl.h defines these only when Coord.h comes first, but effect.h's strings come first in .rodata */
@@ -20,7 +21,6 @@ inline INT CEffect::getCoordNum() const { return m_pCrds->getCoordNum(); }
 #include "Game/Debug/DebugWork.h"
 #include "System/Spad.h"
 #include "include_asm.h"
-
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 

@@ -1,4 +1,5 @@
 #define OSDDEF_H_PATH "c:/KHCOM/MainApp/Game/OsdDef.h"
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #include "Game/OsdDef.h"
 #include "Game/EntityFactory.h"
@@ -7,7 +8,6 @@
 #include "System/Com.h"
 #include "System/Debug.h"
 #include "System/HeapMan.h"
-#include "System/TaskMan.h"
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)

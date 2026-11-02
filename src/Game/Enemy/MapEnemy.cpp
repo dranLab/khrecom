@@ -2,6 +2,7 @@
 #define COLLOBJ_H_ENUMS_ONLY /* MATCH: the collision classes come after CMapEnemy (their vtables precede its own) */
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "Game/BodyCollision.h"
 #include "Game/Collision/CollUtilA.h"
 #include "Game/Collision/CollUtil.h"
@@ -48,7 +49,6 @@ inline void _emptyStringPlaceholder() {
 #include "Game/Movement.h"
 #include "Game/MessageManager.h"
 #include "System/Graphic/Effect/EffectMan.h"
-#include "System/TaskMan.h"
 #include "Game/SceneEnv.h"
 #include "Game/GameWork.h"
 #include <string.h>

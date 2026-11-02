@@ -1,5 +1,6 @@
 #define GAME_BULLET_BULLET_CPP
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "Game/Collision/CollUtil.h"
 
 /* Placeholder: an empty string follows CollUtil.h's strings in .rodata (as in GimmickFountain); which header it
@@ -18,7 +19,6 @@ inline void _emptyStringPlaceholder() {
 #include "Game/Collision/CollMap.h"
 #include "Game/Movement.h"
 #include "Game/LockOnManager.h"
-#include "System/TaskMan.h"
 #include "System/Coord.h"
 #include "System/Debug.h"
 #include "System/Math3D.h"

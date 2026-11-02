@@ -1,5 +1,6 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "Game/Player/FriendDonald.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -28,7 +29,6 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/EntityFactory.h"
 #include "Game/Movement.h"
 #include "System/Graphic/Effect/EffectMan.h"
-#include "System/TaskMan.h"
 #include "System/Rnd.h"
 #include "System/Graphic/Camera.h"
 

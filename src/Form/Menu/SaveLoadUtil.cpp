@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "System/Task.h"
 #include "System/Graphic/Anim.h"
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
@@ -14,10 +14,10 @@ inline void _emptyStringPlaceholder() {
     TRACE("");
 }
 
-/* System/Task.h's container pool overflow message: here it follows the empty string. */
-inline void _taskSLCOverflowSaveLoadUtil() {
-    TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
-}
+/* System/TaskMan.h's container overflow message: here it follows the empty string. */
+#include "System/TaskMan.h"
+
+
 
 #include "System/Ctd/CtdMan.h"
 #include "Form/Menu/SaveLoadUtil.h"

@@ -2,7 +2,7 @@
 #define SYSTEM_GRAPHIC_TEXCTRL_H
 
 #include "khtypes.h"
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "System/Task.h"
 
 typedef unsigned char TIM2_UCHAR8;

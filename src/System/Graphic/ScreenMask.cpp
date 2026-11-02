@@ -1,5 +1,5 @@
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "System/Graphic/ScreenMask.h"
 
 #include "System/Graphic/PackMan.h"

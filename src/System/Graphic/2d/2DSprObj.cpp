@@ -1,11 +1,11 @@
 #define GPRIM_H_PATH "System/Graphic/Gprim.h"
 #define D2MAN_H_PATH "c:/KHCOM/MainApp/System/Graphic/2d/2DMan.h"
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
 #include "System/Graphic/2d/2DSprObj.h"
 #include "include_asm.h"
-
 #include "System/Graphic/2d/2DSpr.h"
 #include "System/Graphic/2d/2DSeqObj.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"

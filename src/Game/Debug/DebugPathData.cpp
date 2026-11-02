@@ -1,16 +1,16 @@
 #include "khtypes.h"
 #define FORM_DEBUGWINDOW_FULL /* MATCH: CNakCamera; the original has Gprim.h's strings (PathData.h includes it first) */
 #define COLLOBJ_H_COLLISION_CLASSES /* MATCH: CPointCollision (debugWinPathEditPosCamGround) */
-#define TASK_H_NO_SLC_OVERFLOW_MSG /* MATCH: the message comes after DebugPathData.h's strings (placeholder below) */
+
 #include "System/Graphic/PathData.h"
 #include "System/Graphic/HermitePath.h"
 #include "System/Graphic/Str.h"
 #include "System/DebugProcInfo.h"
 #include "Game/Debug/DebugPathData.h"
-/* MATCH: placeholder: the task container overflow message (System/TaskMan.h in the original) comes here */
-inline void _taskSLCOverflowDebugPathData() {
-    TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
-}
+
+#include "System/TaskMan.h"
+
+
 #define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h" /* MATCH: the original includes it under this name */
 #include "System/Graphic/PathDataCamera.h"
 #include "Game/Collision/CollUtilA.h"

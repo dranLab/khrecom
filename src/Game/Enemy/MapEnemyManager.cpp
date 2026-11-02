@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define MAPENEMY_H_NO_COLL_ANIM /* MATCH: the original has no BodyCollision.h/Anim.h strings */
 #include <string.h>
 

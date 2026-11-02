@@ -3,6 +3,26 @@
 #define SYSTEM_TASKMAN_H
 
 #include "khtypes.h"
+#include "System/Debug.h"
+#include "System/SLContainer.h"
+#include "System/FifoFpl.h"
+
+/* CTaskSLCManager comes before CTask (Task.h, included below): TaskMan's vtables follow that order */
+class CTaskSLCManager : public ISLCManagerT<CTask>, private CFifoFpl {
+public:
+    CTaskSLCManager() { CFifoFpl::initialize(sizeof(SLContainerT<CTask>), 0x1000, NULL); }
+    virtual SLContainerT<CTask>* createContainer() {
+        SLContainerT<CTask>* pContainer = (SLContainerT<CTask>*)allocBlock();
+        if (!pContainer) {
+            TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
+        }
+        return pContainer;
+    }
+    virtual void releaseContainer(SLContainerT<CTask>& inContainer) { releaseBlock(&inContainer); }
+    virtual SLContainerT<CTask>* getContainer(HANDLE hID) { return (SLContainerT<CTask>*)getValidActiveBlock(hID); }
+    void debugDump(UINT nStartIndex, UINT nEndIndex) { CFifoFpl::debugDump(nStartIndex, nEndIndex); }
+};
+
 #include "System/Task.h"
 
 // PARTIAL: added for System/RootTask
@@ -38,7 +58,6 @@ struct TaskMainParam {
     }
 };
 
-class CTaskSLCManager;
 
 class CTaskMan {
 public:

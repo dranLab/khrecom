@@ -7,7 +7,7 @@
 #include "System/Debug.h"
 #include "Game/Debug/DebugWork.h"
 #include "Game/SceneInfo.h"
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "Game/Game.h"
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);

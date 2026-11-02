@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "System/CoordMan.h"
 #include "System/FifoFpl.h"
 #include "System/HeapMan.h"

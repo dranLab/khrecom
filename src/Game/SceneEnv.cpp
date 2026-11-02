@@ -1,11 +1,11 @@
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"
 #include "Game/Game.h"
 #include "Game/SceneEnv.h"
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
-
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 inline void* operator new(size_t size, char* msg) throw() {

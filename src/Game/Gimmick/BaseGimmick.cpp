@@ -1,5 +1,6 @@
 #define GAME_GIMMICK_BASEGIMMICK_CPP
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #include "Game/Collision/CollUtil.h"
 #include "Game/BodyCollision.h"
@@ -8,7 +9,6 @@
 #include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
 #include "System/Graphic/Str.h"
-
 /* Placeholders: three empty strings follow Str.h's strings in .rodata (as in GimmickBell); which headers they
  * come from is not known. */
 inline void _emptyStringPlaceholder0() {

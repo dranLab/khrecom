@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "Game/Gimmick/GimmickGuillotine.h"
 #include "System/Graphic/Effect/effect.h"
 #include "System/Graphic/Gprim.h"

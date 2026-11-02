@@ -1,6 +1,7 @@
 #include "System/Task.h"
 #include "System/PadHandler.h"
 #define FORM_DEBUGMENU_FULL /* MATCH: the owner sees the full classes */
+#include "System/TaskMan.h"
 #include "Form/DebugMenu.h"
 #include "System/Graphic/Gprim.h"
 #include "System/DebugProcInfo.h"
@@ -8,7 +9,6 @@
 #include "System/MainApp.h"
 #include "System/SJoint.h"
 #include "System/Memoca.h"
-#include "System/TaskMan.h"
 #include "System/Sound/SoundMan.h"
 #include "System/Graphic/WorldEnv.h"
 #include "Game/SceneInfo.h"

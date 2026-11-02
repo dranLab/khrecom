@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define RSRCDATA_H_FULL
 #define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h"
 #define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h"

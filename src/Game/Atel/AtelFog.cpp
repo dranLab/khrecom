@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define ATELFOG_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelFog.h"
 #include "System/Task.h"
 #include <string.h>

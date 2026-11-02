@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define SYSTEM_GRAPHIC_ANIM_H /* the original's includes don't bring in Anim.h (no "2 > idx" in .rodata) */
 #include "System/Graphic/modeldata.h"
 #include "Game/BodyCollision.h"

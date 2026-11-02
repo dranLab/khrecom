@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
 #include "System/Graphic/Gprim.h"
 #include "Game/Collision/CollUtil.h"

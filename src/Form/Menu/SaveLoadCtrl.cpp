@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define FORM_MENU_SAVELOADCTRL_CPP
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define SAVELOADCTRL_H_PATH "c:/KHCOM/MainApp/Form/Menu/SaveLoadCtrl.h"

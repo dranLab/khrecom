@@ -1,4 +1,5 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #include "Game/Player/FriendAriel.h"
 #include "System/Graphic/Gprim.h"
@@ -23,7 +24,6 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/Player/PlayerAttack.h"
 #include "Game/Movement.h"
 #include "Game/LockOnManager.h"
-#include "System/TaskMan.h"
 
 static inline FLOAT Abs(FLOAT inVal) {
     FLOAT ret;

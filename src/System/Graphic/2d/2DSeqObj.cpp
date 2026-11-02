@@ -1,5 +1,6 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define D2MAN_H_PATH "c:/KHCOM/MainApp/System/Graphic/2d/2DMan.h"
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -9,7 +10,6 @@
 #include "System/Graphic/2d/2DFntObj.h"
 #include "System/Graphic/2d/2DSpr.h"
 #include "System/Graphic/2d/2DSeq.h"
-
 inline void* operator new(size_t, void* p) throw() { return p; }
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })

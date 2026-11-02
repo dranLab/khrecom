@@ -1,4 +1,5 @@
 #define SYSTEM_GRAPHIC_ANIM_H /* the original's includes don't bring in Anim.h (no "2 > idx" in .rodata) */
+#include "System/TaskMan.h"
 #include "Game/EntityFactory.h"
 #include "Game/Collision/CollUtil.h"
 #include "System/Graphic/Gprim.h"
@@ -8,7 +9,6 @@
 #include "Game/Enemy/BattleEnemy.h"
 #include "Game/Enemy/HumanBoss.h"
 #include "Game/OsdDef.h"
-#include "System/TaskMan.h"
 #include "System/HeapMan.h"
 #include "Game/Gimmick/BaseGimmick.h"
 #include "Game/Gimmick/GimmickTreasureBox.h"

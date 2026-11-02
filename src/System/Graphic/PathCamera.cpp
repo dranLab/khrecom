@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "System/HeapMan.h"
 #include "System/MainApp.h"
 #include "System/Graphic/PathCamera.h"

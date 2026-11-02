@@ -1,4 +1,5 @@
 #include "System/RootTask.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 
 inline void* operator new(size_t, void* p) throw() { return p; }
@@ -6,7 +7,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/Atel/ChatMan.h"
 #include "System/Graphic/2d/2DMan.h"
 #include "System/Graphic/Effect/effect.h"
-#include "System/TaskMan.h"
 #include "System/PadIO.h"
 #include "Form/DebugMenu.h"
 #include "Form/SystemMessage.h"

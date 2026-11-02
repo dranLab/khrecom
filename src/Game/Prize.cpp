@@ -2,6 +2,7 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"
 #define LINKEDBUF_H_PATH "System/LinkedBuf.h"
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #include "Game/Collision/CollUtil.h"
 #include "System/Graphic/Effect/effect.h"
@@ -33,7 +34,6 @@ inline void operator delete[](void* mem) { com_free(mem); }
 #include "System/Graphic/Effect/EffectMan.h"
 #include "System/Graphic/Camera.h"
 #include "System/Math3D.h"
-#include "System/TaskMan.h"
 #include "System/Sound/SoundMan.h"
 #include "System/Rnd.h"
 #include <string.h>

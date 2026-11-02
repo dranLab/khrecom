@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define ATELBLUR_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelBlur.h"
 #define GPRIM_H_PATH "System/../System/Graphic/Gprim.h"
 #include "System/Task.h"

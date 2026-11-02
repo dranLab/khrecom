@@ -1,4 +1,5 @@
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Ctd/CtdMan.h"
 #include "Game/Card.h"
@@ -36,7 +37,6 @@ inline void _emptyStringPlaceholder() {
 #include "Form/Menu/MenuModel.h"
 #include "System/Wnd.h"
 #include "System/Rcf.h"
-#include "System/TaskMan.h"
 #include "Form/Menu/WorldWarp.h"
 #include "Form/Menu/DecknameEdit.h"
 #include "Form/Menu/JMemoFlag.h"

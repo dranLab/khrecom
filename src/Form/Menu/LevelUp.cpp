@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -16,10 +16,10 @@ inline void _emptyStringPlaceholder() {
 #include "Game/Status.h"
 #include "Game/Technic.h"
 
-/* System/Task.h's container pool overflow message: here it follows Technic.h's strings. */
-inline void _taskSLCOverflowLevelUp() {
-    TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
-}
+/* System/TaskMan.h's container overflow message: here it follows Technic.h's strings. */
+#include "System/TaskMan.h"
+
+
 
 #include "System/Ctd/CtdMan.h"
 #include "Form/Menu/LevelUp.h"
