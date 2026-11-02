@@ -1,4 +1,3 @@
-// PARTIAL: the ref's implicit destructors are not declared
 #ifndef SYSTEM_GRAPHIC_DEFOCUS_H
 #define SYSTEM_GRAPHIC_DEFOCUS_H
 

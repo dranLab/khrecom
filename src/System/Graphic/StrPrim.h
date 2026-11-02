@@ -1,4 +1,3 @@
-// PARTIAL: added for System/Graphic/2d/2DFnt
 #ifndef SYSTEM_GRAPHIC_STRPRIM_H
 #define SYSTEM_GRAPHIC_STRPRIM_H
 
