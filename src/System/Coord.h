@@ -34,7 +34,6 @@ public:
         _coord_alart(nIndex);
         return getExceptCoord();
     }
-    // PARTIAL: the overloads below added for System/Coord
     CCoord& Crd(UINT nIndex) const {
         if (m_nCrdNum && m_pCrdArray && nIndex < m_nCrdNum) {
             return m_pCrdArray[nIndex];
@@ -74,6 +73,6 @@ private:
     friend class CCoordMan;
 };
 
-void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1); // PARTIAL: added for Game/Debug/DebugPathData
+void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 
 #endif /* SYSTEM_COORD_H */
