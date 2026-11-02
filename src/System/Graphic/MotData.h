@@ -63,17 +63,13 @@ public:
     FLOAT GetDataHS(FLOAT inFrame);
     void PrepareGetDataHS(FLOAT inFrame);
     void Next(FLOAT inFrame);
-    void ResetHS() {
-        m_HS_Frame1 = 0.0f;
-        m_HS_KeyNo1 = 0;
-        m_HS_Val1 = GetVal(0);
-        m_HS_KeyNo2 = 1;
-    }
     BYTE* getInterpolate() { return (BYTE*)(m_pCode + m_nKey); }
     BOOL IsInterpolateLinear(INT inNo) {
         if (inNo < 0 || inNo >= m_nKey) return TRUE;
         return getInterpolate()[inNo >> 3] & (1 << (inNo & 7));
     }
+    void AddKey(/* parameters unknown */);
+    void InsertKey(/* parameters unknown */);
     void SetKeyFrameShort() { m_Flag |= 1; }
     void SetKeyFrameByte() { m_Flag &= ~1; }
     void SetLoop() { m_Flag |= 2; }
@@ -90,6 +86,9 @@ public:
         m_Min *= 0.017453292f;
         m_ValRange *= 0.017453292f;
     }
+    INT CalcDataSiz(/* parameters unknown */);
+    BOOL IsFixData(/* parameters unknown */);
+    INT EncodeBin(/* parameters unknown */);
     void DecodeBin(BYTE* pData, const BYTE* inBuf);
 
 private:
