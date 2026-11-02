@@ -100,17 +100,7 @@ inline void* operator new(size_t size, char* msg) throw() {
 
 
 
-/* Game/Collision/CollDisp.h's inline create/destroy (lines 48-50) and CollUtil.h's dispose accessor (line 202) */
-static inline void _collDispCreate(CTask* pParent, INT nDisp, INT nMapZoneDisp) {
-    CCollDisp*& instance = CCollDisp::m_pInstance;
-    if (!(__null == instance)) AssertApp(COLLDISP_H_PATH, 48, "__null == m_pInstance", 0);
-    instance = new (COLLDISP_H_PATH "(49)") CCollDisp(pParent, nDisp, nMapZoneDisp);
-    if (!instance) AssertApp(COLLDISP_H_PATH, 50, "m_pInstance", 0);
-}
-static inline void _collDispDestroy() {
-    if (CCollDisp::m_pInstance) delete (CTask*)CCollDisp::m_pInstance;
-    CCollDisp::m_pInstance = __null;
-}
+/* Game/Collision/CollUtil.h's dispose accessor (line 202) */
 static inline void _collUtilDispose() {
     CCollUtil*& instance = CCollUtil::m_pInstance;
     if (!instance) AssertApp(COLLUTIL_H_PATH, 202, "m_pInstance", 0);
@@ -345,7 +335,7 @@ void CGameSubBattle::setupTasks() {
     CShadowModelMan::setDownLen(2.8f);
     CDeFocus::create(pGame);
     CDeFocus::offNear();
-    _collDispCreate(pGame, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);
+    CCollDisp::initialize(pGame, dbgButtonDown(USR_SYSTEM, 0x100, 1) | CCollDisp::m_fgDisp, CCollDisp::m_fgMapZoneDisp);
     changeState(4);
 }
 
@@ -466,7 +456,7 @@ void CGameSubBattle::disposeTasks() {
     CDeFocus::remove();
     CEffectMan::killAll((ObjType::eObjBit)0xFFFFFFFF, 0.0f);
     D2::C2DSpr::destroyAllForSceneChange();
-    _collDispDestroy();
+    CCollDisp::finalize();
     _collUtilDispose();
 }
 
