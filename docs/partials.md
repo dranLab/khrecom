@@ -103,17 +103,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/Game-Collision-CollObj-2 (CollAttack on the header's collision classes; CollUtilF left: field types first) | 810 | 23 | 0 | 751 (653) | 194 |
 | 2026-11-02 | cleanup/Game-Collision-CollObj-3 (CCollision m_outInfo*/m_Type/m_Kind with the ref types; CollUtilF stand-in reasoned: ctor order) | 811 | 23 | 0 | 751 (653) | 194 |
 | 2026-11-02 | cleanup/path-overrides (290 .cpp *_H_PATH overrides MATCH-tagged, none redundant; LinkedBuf.h's) | 810 | 23 | 0 | 751 (370) | 485 |
+| 2026-11-02 | cleanup/placeholder-tags (138 placeholder comments MATCH-tagged) | 810 | 23 | 0 | 751 (235) | 623 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 810 (755 in 110 headers, 55 in 34 .cpp); MATCH: 485
+PARTIAL: 810 (755 in 110 headers, 55 in 34 .cpp); MATCH: 623
   by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 19, gate 19, guessed 30, header-level 69, stand-in 18, other 6
 stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
-mechanisms: 751 sites (370 untagged); #line: 1248
+mechanisms: 751 sites (235 untagged); #line: 1248
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 613, superset 140, partial 112, gated 23, missing 8, unattributed 309
 ```
@@ -404,71 +405,72 @@ or `untagged`.
 | path override | `VECTOR_H_PATH` | 1 | 1 | this unit names Vector.h so (header default "System/Vector.h") |
 | placeholder | `_addCardStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:1170 |
 | placeholder | `_alloc*` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:87 |
-| placeholder | `_bossDeadDemoEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:23 |
+| placeholder | `_bossDeadDemoEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_collUtilCreate*` | 1 | 0 | untagged, e.g. Game/Collision/CollUtil.h:20 |
-| placeholder | `_createEnemyMotionName*` | 1 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:15 |
+| placeholder | `_createEnemyMotionName*` | 1 | 1 | Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header). |
 | placeholder | `_emptyString*` | 1 | 0 | untagged, e.g. System/MainTaskFactory.cpp:90 |
-| placeholder | `_emptyStringPlaceholder*` | 180 | 0 | untagged, e.g. Form/DebugWindowTBL.cpp:15 |
+| placeholder | `_emptyStringPlaceholder*` | 180 | 81 | Placeholder: an empty string follows CardBattle.h's strings in .rodata (an unknown header's inline function). |
 | placeholder | `_emptyStringPlaceholderBattleCard*` | 1 | 1 | placeholder: an empty string follows CollUtil.h's strings in .rodata (as in Game/CardRevolver) |
 | placeholder | `_emptyStringPlaceholderCardRevolver*` | 1 | 1 | placeholder: an empty string follows CollUtil.h's strings in .rodata; which header it comes from is not known |
 | placeholder | `_emptyStringPlaceholderDebugPathData*` | 1 | 1 | placeholder: an empty string follows CardBattle.h's strings in .rodata; which header it comes from is not known |
 | placeholder | `_emptyStringPlaceholderPlayerGauge*` | 1 | 1 | placeholder: an empty string follows CollUtil.h's strings in .rodata (as in PlayerManager and CardRevolver) |
-| placeholder | `_emptyTrace*` | 1 | 0 | untagged, e.g. Game/EffectMotion.cpp:31 |
-| placeholder | `_enemyAirpirateEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAirpirate.cpp:13 |
-| placeholder | `_enemyAirsoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAirsoldier.cpp:13 |
-| placeholder | `_enemyAquatankEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyAquatank.cpp:13 |
-| placeholder | `_enemyBanditEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyBandit.cpp:13 |
-| placeholder | `_enemyBarrelspiderEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyBarrelspider.cpp:14 |
-| placeholder | `_enemyBlackfungusEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyBlackfungus.cpp:13 |
-| placeholder | `_enemyBluerhapsodyEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyBluerhapsody.cpp:13 |
-| placeholder | `_enemyBouncywildEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyBouncywild.cpp:13 |
-| placeholder | `_enemyDarkballEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyDarkball.cpp:13 |
-| placeholder | `_enemyDefenderEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyDefender.cpp:13 |
-| placeholder | `_enemyFatbanditEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyFatbandit.cpp:13 |
-| placeholder | `_enemyGargoyleEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyGargoyle.cpp:13 |
-| placeholder | `_enemyGreenrequiemEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyGreenrequiem.cpp:23 |
-| placeholder | `_enemyHeartsoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyHeartsoldier.cpp:14 |
-| placeholder | `_enemyLargebodyEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyLargebody.cpp:13 |
-| placeholder | `_enemyLoudnessEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyLoudness.cpp:23 |
-| placeholder | `_enemyNeoshadowEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyNeoshadow.cpp:15 |
-| placeholder | `_enemyPirateEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyPirate.cpp:13 |
-| placeholder | `_enemyPowerwildEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyPowerwild.cpp:13 |
-| placeholder | `_enemyRednocturneEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyRednocturne.cpp:13 |
-| placeholder | `_enemyScrewdiverEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyScrewdiver.cpp:13 |
-| placeholder | `_enemySearchghostEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemySearchghost.cpp:13 |
-| placeholder | `_enemyShadowEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyShadow.cpp:14 |
-| placeholder | `_enemySoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemySoldier.cpp:13 |
-| placeholder | `_enemySpadesoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemySpadesoldier.cpp:14 |
-| placeholder | `_enemyTornadostepEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyTornadostep.cpp:13 |
-| placeholder | `_enemyWightnightEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyWightnight.cpp:13 |
-| placeholder | `_enemyWizardEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyWizard.cpp:13 |
-| placeholder | `_enemyWyvernEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyWyvern.cpp:13 |
-| placeholder | `_enemyYellowoperaEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyYellowopera.cpp:13 |
+| placeholder | `_emptyTrace*` | 1 | 1 | Placeholder for an unknown header's inline function: its empty string literal follows "System/RsrcData.h(156)" in
+ * the original .rodata. |
+| placeholder | `_enemyAirpirateEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyAirsoldierEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyAquatankEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyBanditEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyBarrelspiderEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyBlackfungusEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyBluerhapsodyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyBouncywildEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyDarkballEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyDefenderEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyFatbanditEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyGargoyleEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyGreenrequiemEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyHeartsoldierEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyLargebodyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyLoudnessEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyNeoshadowEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyPirateEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyPowerwildEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyRednocturneEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyScrewdiverEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemySearchghostEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyShadowEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemySoldierEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemySpadesoldierEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyTornadostepEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyWightnightEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyWizardEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyWyvernEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_enemyYellowoperaEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_entityEmptyStringPlaceholder*` | 1 | 0 | untagged, e.g. Game/Entity.cpp:23 |
-| placeholder | `_heartlessEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/Heartless.cpp:14 |
+| placeholder | `_heartlessEmptyString*` | 1 | 1 | Placeholder: .rodata has empty string literals after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_humanBossEmptyString*` | 1 | 1 | placeholder - .rodata has an empty string literal after Str.h's strings (from an unidentified header). |
 | placeholder | `_initCardStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:503 |
 | placeholder | `_initCardWorldStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:414 |
-| placeholder | `_initializeStrings*` | 1 | 0 | untagged, e.g. System/Graphic/WorldEnv.cpp:151 |
-| placeholder | `_kisEnemyEmptyString*` | 1 | 0 | untagged, e.g. Game/Debug/KisEnemy.cpp:14 |
-| placeholder | `_mapEnemyAirEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyAir.cpp:11 |
-| placeholder | `_mapEnemyGroundEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyGround.cpp:11 |
-| placeholder | `_mapEnemyMushroomEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MapEnemyMushroom.cpp:11 |
+| placeholder | `_initializeStrings*` | 1 | 1 | placeholder for initialize's .rodata (its allocation messages) |
+| placeholder | `_kisEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after Str.h's strings (from an unidentified header). |
+| placeholder | `_mapEnemyAirEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_mapEnemyGroundEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_mapEnemyMushroomEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_mcShaderCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:515 |
 | placeholder | `_mcShaderDelete*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:518 |
 | placeholder | `_modelAssertZero*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:512 |
 | placeholder | `_modelCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:509 |
-| placeholder | `_monstroEventBattleEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MonstroEventBattle.cpp:28 |
-| placeholder | `_premiumPrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:11 |
+| placeholder | `_monstroEventBattleEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_premiumPrizeMessage*` | 12 | 11 | Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. |
 | placeholder | `_roPh*` | 8 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:2186 |
 | placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:150 |
 | placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1750 |
 | placeholder | `_roulettePrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:14 |
-| placeholder | `_sampleEnemyEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/SampleEnemy.cpp:13 |
+| placeholder | `_sampleEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:418 |
 | placeholder | `_stateSnatchStringPlaceholder*` | 1 | 1 | placeholder for the asm stateSnatch's strings |
-| placeholder | `_statusEmptyString*` | 1 | 0 | untagged, e.g. Game/Status.cpp:14 |
-| placeholder | `_vsmeMotionName*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:54 |
+| placeholder | `_statusEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
+| placeholder | `_vsmeMotionName*` | 1 | 1 | Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header, as in Game/Enemy/CreateEnemy). |
 | pragma | `#pragma implementation` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:2 |
 | pragma | `#pragma interface` | 1 | 1 | the inline functions and vtables only in Gprim.o, as in the originals |
 | unit gate | `EFFECT_CPP` | 1 | 1 | effect.cpp includes effect_inl.h itself after Coord.h (weak order) and owns the placeholder strings; without it the link fails |
