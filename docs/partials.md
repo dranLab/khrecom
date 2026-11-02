@@ -105,17 +105,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/path-overrides (290 .cpp *_H_PATH overrides MATCH-tagged, none redundant; LinkedBuf.h's) | 810 | 23 | 0 | 751 (370) | 485 |
 | 2026-11-02 | cleanup/placeholder-tags (138 placeholder comments MATCH-tagged) | 810 | 23 | 0 | 751 (235) | 623 |
 | 2026-11-02 | cleanup/unit-gates (12 unit gates tested: all needed; MATCH-tagged with 78 header sites) | 810 | 23 | 0 | 751 (146) | 713 |
+| 2026-11-02 | cleanup/mechanism-tags (feature/guard/pragma sites, last placeholders: untagged 0) | 809 | 23 | 0 | 751 (0) | 861 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 810 (755 in 110 headers, 55 in 34 .cpp); MATCH: 713
-  by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 19, gate 19, guessed 30, header-level 69, stand-in 18, other 6
+PARTIAL: 809 (754 in 110 headers, 55 in 34 .cpp); MATCH: 861
+  by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 19, gate 18, guessed 30, header-level 69, stand-in 18, other 6
 stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
-mechanisms: 751 sites (146 untagged); #line: 1248
+mechanisms: 751 sites (0 untagged); #line: 1248
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 613, superset 140, partial 112, gated 23, missing 8, unattributed 309
 ```
@@ -212,7 +213,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/Ride.h` | 1 | 4/0/1/0 | 6 |
 | `Game/Debug/DWTBGM.h` | 1 | 0/0/0/0 | 1 |
 | `Game/EffectMotion.h` | 0 | 5/0/2/0 | 8 |
-| `Game/Enemy/BattleEnemy.h` | 35 | 0/0/1/0 | 58 |
+| `Game/Enemy/BattleEnemy.h` | 34 | 0/0/1/0 | 58 |
 | `Game/Enemy/EnemyParam.h` | 15 | 2/1/1/0 | 16 |
 | `Game/Enemy/EnemyTornadostep.h` | 0 | 0/0/1/0 | 2 |
 | `Game/Enemy/EnemyWhitemushroom.h` | 0 | 0/1/0/0 | 2 |
@@ -347,7 +348,7 @@ or `untagged`.
 | kind | key | sites | tagged | reason, or an untagged site |
 |---|---|---:|---:|---|
 | feature | `ANIM_H_GETFLAG_DECL_ONLY` | 4 | 4 | the original calls CAnim::getFlag out of line |
-| feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:4 |
+| feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 1 | this unit sees m_EnemyState as the real CStateTemplate array (System/Fsm.h strings and the state table) |
 | feature | `COLLOBJ_H_COLLISION_CLASSES` | 8 | 8 | CollAttack casts to the collision classes (sphere/point/circle/poly3) |
 | feature | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | getDetectInfo as INT (see CollObj.h) |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
@@ -355,7 +356,7 @@ or `untagged`.
 | feature | `MODELDATA_H_TEXINFO` | 6 | 6 | TexInfoStub (the original has its assert strings) |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 2 | RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) |
 | feature site | `ANIM_H_GETFLAG_DECL_ONLY` | 2 | 2 | these units' originals call CAnim::getFlag out of line (Entity, EffectMotion, SEMotion, GimmickLotusLeaf) |
-| feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:10 |
+| feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 2 | Game/Enemy/BattleEnemy sees m_EnemyState as the real CStateTemplate array |
 | feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 2 | the inline collideMap needs CCollUtil (CollUtil.h): only units that construct these classes define it |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar) |
@@ -366,11 +367,11 @@ or `untagged`.
 | full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the owner sees the full classes (Gprim.h included first) |
 | full-class site | `FORM_DEBUGMENU_FULL` | 1 | 1 | the full classes need Gprim.h/PadHandler.h; System/Debug and System/RootTask originals lack Gprim.h's strings |
 | full-class site | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings |
-| guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 0 | untagged, e.g. Game/Gimmick/CreateGimmick.cpp:1 |
-| guard skip | `GAME_COLLISION_COLLUTILA_H` | 1 | 0 | untagged, e.g. Game/Collision/CollUtil.h:28 |
-| guard skip | `GAME_ENTITY_H` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:447 |
-| guard skip | `GAME_SCENEINFO_H` | 2 | 0 | untagged, e.g. Game/Card.h:141 |
-| guard skip | `SYSTEM_COORD_H` | 1 | 0 | untagged, e.g. System/Graphic/Effect/effect_inl.h:9 |
+| guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 2 | the original's includes don't bring in Anim.h (no "2 > idx" in .rodata) |
+| guard skip | `GAME_COLLISION_COLLUTILA_H` | 1 | 1 | the accessor only for includers that have the class (see above) |
+| guard skip | `GAME_ENTITY_H` | 1 | 1 | only for includers that have CEntity (see below) |
+| guard skip | `GAME_SCENEINFO_H` | 2 | 2 | initCard takes WORLD_ID: declared only where SceneInfo.h is included |
+| guard skip | `SYSTEM_COORD_H` | 1 | 1 | the Crd inlines need CCoords: only for includers with Coord.h before this (weak order) |
 | opt-out | `MAPENEMY_H_NO_COLL_ANIM` | 2 | 2 | the original has no BodyCollision.h/Anim.h strings |
 | opt-out site | `MAPENEMY_H_NO_COLL_ANIM` | 1 | 1 | the .rodata of Game/Enemy/MapEnemyManager and Game/Enemy/CreateEnemy has no BodyCollision.h/Anim.h
  * strings: they define MAPENEMY_H_NO_COLL_ANIM before includ |
@@ -404,13 +405,13 @@ or `untagged`.
 | path override | `TECHNIC_H_PATH` | 4 | 4 | the original includes it under this name |
 | path override | `TITLEREPORTDLLSTARTER_H_PATH` | 1 | 1 | this unit names TitleReportDllStarter.h so (header default "Form/Menu/TitleReportDllStarter.h") |
 | path override | `VECTOR_H_PATH` | 1 | 1 | this unit names Vector.h so (header default "System/Vector.h") |
-| placeholder | `_addCardStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:1170 |
-| placeholder | `_alloc*` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:87 |
+| placeholder | `_addCardStrings*` | 1 | 1 | placeholder for the INCLUDE_ASM'd addCard's string |
+| placeholder | `_alloc*` | 2 | 2 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_bossDeadDemoEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
-| placeholder | `_collUtilCreate*` | 1 | 0 | untagged, e.g. Game/Collision/CollUtil.h:20 |
+| placeholder | `_collUtilCreate*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_createEnemyMotionName*` | 1 | 1 | Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header). |
-| placeholder | `_emptyString*` | 1 | 0 | untagged, e.g. System/MainTaskFactory.cpp:90 |
-| placeholder | `_emptyStringPlaceholder*` | 180 | 81 | Placeholder: an empty string follows CardBattle.h's strings in .rodata (an unknown header's inline function). |
+| placeholder | `_emptyString*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_emptyStringPlaceholder*` | 180 | 180 | Placeholder: an empty string follows CardBattle.h's strings in .rodata (an unknown header's inline function). |
 | placeholder | `_emptyStringPlaceholderBattleCard*` | 1 | 1 | placeholder: an empty string follows CollUtil.h's strings in .rodata (as in Game/CardRevolver) |
 | placeholder | `_emptyStringPlaceholderCardRevolver*` | 1 | 1 | placeholder: an empty string follows CollUtil.h's strings in .rodata; which header it comes from is not known |
 | placeholder | `_emptyStringPlaceholderDebugPathData*` | 1 | 1 | placeholder: an empty string follows CardBattle.h's strings in .rodata; which header it comes from is not known |
@@ -447,32 +448,32 @@ or `untagged`.
 | placeholder | `_enemyWizardEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_enemyWyvernEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_enemyYellowoperaEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
-| placeholder | `_entityEmptyStringPlaceholder*` | 1 | 0 | untagged, e.g. Game/Entity.cpp:23 |
+| placeholder | `_entityEmptyStringPlaceholder*` | 1 | 1 | placeholder (see above) |
 | placeholder | `_heartlessEmptyString*` | 1 | 1 | Placeholder: .rodata has empty string literals after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_humanBossEmptyString*` | 1 | 1 | placeholder - .rodata has an empty string literal after Str.h's strings (from an unidentified header). |
-| placeholder | `_initCardStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:503 |
-| placeholder | `_initCardWorldStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:414 |
+| placeholder | `_initCardStrings*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_initCardWorldStrings*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_initializeStrings*` | 1 | 1 | placeholder for initialize's .rodata (its allocation messages) |
 | placeholder | `_kisEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after Str.h's strings (from an unidentified header). |
 | placeholder | `_mapEnemyAirEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_mapEnemyGroundEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_mapEnemyMushroomEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
-| placeholder | `_mcShaderCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:515 |
-| placeholder | `_mcShaderDelete*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:518 |
-| placeholder | `_modelAssertZero*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:512 |
-| placeholder | `_modelCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:509 |
+| placeholder | `_mcShaderCreate*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_mcShaderDelete*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_modelAssertZero*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_modelCreate*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_monstroEventBattleEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
-| placeholder | `_premiumPrizeMessage*` | 12 | 11 | Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. |
-| placeholder | `_roPh*` | 8 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:2186 |
-| placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:150 |
-| placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1750 |
-| placeholder | `_roulettePrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:14 |
+| placeholder | `_premiumPrizeMessage*` | 12 | 12 | Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. |
+| placeholder | `_roPh*` | 8 | 8 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_roPh0a*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_roPhExecActor*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_roulettePrizeMessage*` | 12 | 12 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
-| placeholder | `_saveLoadCtrlAlloc*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:418 |
+| placeholder | `_saveLoadCtrlAlloc*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_stateSnatchStringPlaceholder*` | 1 | 1 | placeholder for the asm stateSnatch's strings |
 | placeholder | `_statusEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_vsmeMotionName*` | 1 | 1 | Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header, as in Game/Enemy/CreateEnemy). |
-| pragma | `#pragma implementation` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:2 |
+| pragma | `#pragma implementation` | 1 | 1 | the Gprim weak tail from C (user-approved pragma mechanism) |
 | pragma | `#pragma interface` | 1 | 1 | the inline functions and vtables only in Gprim.o, as in the originals |
 | unit gate | `EFFECT_CPP` | 1 | 1 | effect.cpp includes effect_inl.h itself after Coord.h (weak order) and owns the placeholder strings; without it the link fails |
 | unit gate | `FORM_MENU_JIMINYMEMO_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
