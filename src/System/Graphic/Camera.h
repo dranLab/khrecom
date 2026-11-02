@@ -11,7 +11,7 @@
 class CCoord {
 public:
     FMATRIX m_Local;
-    // PARTIAL: 0x40..0x8f split for Game/Gimmick/GimmickFountain
+    // PARTIAL: the ref has m_WorldTimestamp/m_pParent after an 8-byte union and private fields (ours public)
     union {
         struct {
             TIMEQ m_FixTimestamp;   /* 0x40 */
@@ -19,10 +19,9 @@ public:
             TIMEQ m_WorldTimestamp; /* 0x48 */
             CCoord* m_pParent;      /* 0x4c */
         };
-        u_long128 _q40; // PARTIAL: added for Game/Atel/EventTrap (the constructor clears 0x40..0x4f at once)
-        ULONGLONG _ulFixTimestamp; // PARTIAL: added for System/Coord (0x40, with m_Flag)
+        u_long128 _q40; // MATCH: Game/Atel/EventTrap: the constructor clears 0x40..0x4f at once
+        ULONGLONG _ulFixTimestamp;
     };
-    // PARTIAL: m_Rot added for System/Graphic/TriangleIK
     union {
         FMATRIX m_Rot;              /* 0x50 */
         struct {
@@ -34,16 +33,17 @@ public:
         };
     };
     FMATRIX m_World;     /* 0x90 */
-    // PARTIAL: added for System/Graphic/Camera
     void setLocal(const FMATRIX& matIn) {
         if (m_Local != matIn) {
             m_Local = matIn;
             touch();
         }
     }
-    void setParent(CCoord* pParent) { m_pParent = pParent; } // PARTIAL: added for System/Graphic/Camera
-    void touch(); // PARTIAL: added for System/Graphic/Camera (defined below CCamera)
-    // PARTIAL: added for Game/Atel/EventTrap
+    void updateLocal(/* parameters unknown */);
+    void setTrans(/* parameters unknown */);
+    void updateTrans(/* parameters unknown */);
+    void setParent(CCoord* pParent) { m_pParent = pParent; }
+    void touch(); // defined below CCamera
     CCoord() {
         _q40 = 0;
         m_fScaleX = 1.0f;
@@ -52,35 +52,39 @@ public:
         m_hHandle = 0;
     }
     void fix(INT n = 0);
-    FMATRIX& getWorldMatrix() { return m_World; } // PARTIAL: added for Game/Gimmick/GimmickBell
-    FVECTOR getWorldPos() { return m_World.v[3]; } // PARTIAL: added for System/Graphic/Effect/effect (original name unknown)
-    FMATRIX& getLocalMatrix() { return m_Local; } // PARTIAL: added for Game/Gimmick/GimmickFountain
-    CCoord* getParent() { return m_pParent; }     // PARTIAL: added for Game/Gimmick/GimmickFountain
-    void recalcLocalMatrix(); // PARTIAL: added for System/Graphic/Camera
-    // PARTIAL: added for System/Graphic/TriangleIK
+    TIMEQ getWorldTimestamp(/* parameters unknown */);
+    FMATRIX& getWorldMatrix() { return m_World; }
+    FMATRIX& getWorldRot33Matrix(/* parameters unknown */);
+    FVECTOR getWorldPos() { return m_World.v[3]; } // PARTIAL: Effect/effect and EffectMan (original name unknown)
+    FMATRIX& getLocalMatrix() { return m_Local; }
+    CCoord* getParent() { return m_pParent; }
+    void recalcLocalMatrix();
     void getScale(FVECTOR& outScale) {
         outScale.x = m_fScaleX;
         outScale.y = m_fScaleY;
         outScale.z = m_fScaleZ;
     }
-    void recalcWorldMatrix(); // PARTIAL: added for Form/Menu/WorldSelect
-    // PARTIAL: added for System/Coord
+    void recalcWorldMatrix();
     void getRotTransPersMatrix(FMATRIX& outMat);
     void getRotTransPersMatrix_VF04_07();
     void RotTransPers(IVECTOR& outV, const FVECTOR& inV);
     void RotTransPers(FVECTOR& outV, const FVECTOR& inV);
-    void resetTimeStamp() {
+    void resetTimestamp() {
         m_FixTimestamp = -1;
         m_WorldTimestamp = -1;
     }
+    HANDLE getHandle(/* parameters unknown */);
     void setHandle(HANDLE h) { m_hHandle = h; }
-    // PARTIAL: added for System/Graphic/Anim (name guessed)
     void setScale(const FVECTOR& inScale) {
         m_fScaleX = inScale.x;
         m_fScaleY = inScale.y;
         m_fScaleZ = inScale.z;
         m_Flag = 1;
     }
+
+private:
+    void _mulParent(/* parameters unknown */);
+    void _checkParent(/* parameters unknown */);
 };
 
 class CCamera : public CTaskSecondary {
@@ -192,7 +196,7 @@ public:
     virtual void main();
 };
 
-inline void CCoord::touch() { m_Flag = 1; } // PARTIAL: added for System/Graphic/Camera
+inline void CCoord::touch() { m_Flag = 1; }
 
 FLOAT ViewAngleToProjection(FLOAT fViewAngle);
 FLOAT ProjectionToViewAngle(FLOAT fProjection);

@@ -474,7 +474,7 @@ void CCoords::resetTimeStamp() {
     CCoord* p = Crd();
     if (p) {
         for (INT i = 0; i < m_nCrdNum; i++, p++) {
-            p->resetTimeStamp();
+            p->resetTimestamp();
         }
     }
 }
