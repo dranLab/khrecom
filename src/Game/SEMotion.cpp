@@ -291,7 +291,7 @@ BOOL CSEMotionCtrl::setupFootSE_() {
         ApplyMatrix(coll.m_inWE, m_pOwner->Crd(0).m_World, coll.m_inWE);
         if (coll.collideMap()) {
             COLL_INFO_UNION info;
-            info.info = coll.m_outInfo;
+            info.info = coll.m_outInfo.info;
             m_iSeID += info.infoID * 16;
         }
         break;

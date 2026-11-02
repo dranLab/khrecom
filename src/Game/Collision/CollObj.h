@@ -63,23 +63,23 @@ public:
     FVECTOR m_outNormal; /* 0x30 */
     FVECTOR m_outDetect; /* 0x40 */
     // PARTIAL: m_Type, m_fgStatus, m_Radius split out for Game/Player/PlayerWeapon
-    INT m_Type;          /* 0x50 COLL_TYPE */
+    COLL_TYPE m_Type;    /* 0x50 */
     // PARTIAL: m_Kind .. m_outInfoO split out for Game/Gimmick/GimmickSearchLaser
-    INT m_Kind;          /* 0x54 COLL_KIND */
+    COLL_KIND m_Kind;    /* 0x54 */
     INT m_outStatus;     /* 0x58 */
     INT m_fgStatus;      /* 0x5c */
     FLOAT m_Radius;      /* 0x60 */
     FLOAT m_shiftY;      /* 0x64 */
-    INT m_outInfo;       /* 0x68 COLL_INFO_UNION */
-    INT m_outInfoO;      /* 0x6c COLL_INFO_UNION */
+    COLL_INFO_UNION m_outInfo;  /* 0x68 */
+    COLL_INFO_UNION m_outInfoO; /* 0x6c */
 
     // PARTIAL: inline constructor and destructor (weak in the original) added for Game/Gimmick/GimmickSearchLaser
     // (as in Game/Collision/CollUtilF.cpp)
     CCollision() {
         m_fgStatus = 0;
-        m_Kind = 0;
-        m_outInfoO = 0;
-        m_outInfo = 0;
+        m_Kind = COLL_KIND_PLAYER;
+        m_outInfoO.info = 0;
+        m_outInfo.info = 0;
         m_Radius = m_shiftY = 0.0f;
     }
     virtual ~CCollision() {} /* 0x70 */
@@ -205,18 +205,18 @@ public:
     FLOAT getRadius() { return m_pCollision ? m_pCollision->m_Radius : 0.0f; }
 #ifdef COLLOBJ_H_INFO_AS_INT /* MATCH: System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently */
     INT getDetectInfo() {
-        if (m_pCollision) return m_pCollision->m_outInfo;
+        if (m_pCollision) return m_pCollision->m_outInfo.info;
         return 0;
     }
     INT getDetectInfoO() {
-        if (m_pCollision) return m_pCollision->m_outInfoO;
+        if (m_pCollision) return m_pCollision->m_outInfoO.info;
         return 0;
     }
 #else
     COLL_INFO_UNION getDetectInfo() {
         COLL_INFO_UNION info;
         if (m_pCollision) {
-            info.info = m_pCollision->m_outInfo;
+            info.info = m_pCollision->m_outInfo.info;
             return info;
         }
         info.info = 0;
@@ -225,7 +225,7 @@ public:
     COLL_INFO_UNION getDetectInfoO() {
         COLL_INFO_UNION info;
         if (m_pCollision) {
-            info.info = m_pCollision->m_outInfoO;
+            info.info = m_pCollision->m_outInfoO.info;
             return info;
         }
         info.info = 0;

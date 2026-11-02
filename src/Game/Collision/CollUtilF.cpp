@@ -23,7 +23,7 @@ enum COLL_KIND {
 
 
 
-class CCollision {
+class CCollision { /* PARTIAL: stand-in for Game/Collision/CollObj.h CCollision: its inline constructor stores in another order here (m_Kind .. m_fgStatus) and the copy constructor is written out; the header order is the one its other includers need */
 public:
     /* 0x00 */ FVECTOR m_inWS;
     /* 0x10 */ FVECTOR m_inWE;

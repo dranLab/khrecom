@@ -103,7 +103,7 @@ INT CCollMapCamera::collideMapTrueCamera(INT fgContinue) {
             if (ret) setEndPos(*getOutPos());
             ret |= CCollUtil::detectMCD(*m_pCollision);
             SJ_FOREACH(CMCSemiModel, pEntry, *m_pSemiModelList) pEntry->flag = 0;
-            if (((COLL_INFO_UNION*)&m_pCollision->m_outInfo)->infoPID == 1) {
+            if (m_pCollision->m_outInfo.infoPID == 1) {
                 FMATRIX** pMat = CCollUtil::getInstance()->m_pSemiTransMat;
                 INT stSuu = CCollUtil::getInstance()->m_SemiTransMatIdx;
                 for (INT i = 0; i < stSuu; i++) {
@@ -149,7 +149,7 @@ INT CCollMapCamera::collideMapTrueCamera(INT fgContinue) {
 
 INT CCollMapCamera::collideRide(CCollisionList* pList, INT fgTrue) {
     INT ret0 = 0;
-    COLL_INFO_UNION& collInfoO = *(COLL_INFO_UNION*)&m_pCollision->m_outInfoO;
+    COLL_INFO_UNION& collInfoO = m_pCollision->m_outInfoO;
     collInfoO.info = 0;
     SJ_FOREACH(CCollObj, pEntry, *pList) {
         if (!pEntry->isEnable()) continue;
