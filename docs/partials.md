@@ -96,6 +96,7 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/System-Graphic-DispList-2 (finished: _drawOT 62/291 parked; CShadowModel::getSize inline) | 809 | 27 | 0 | 750 (658) | 189 |
 | 2026-11-02 | cleanup/System-Graphic-DispList (full classes moved from DispList.cpp into DispList.h; ModelMan on addTail/setZ; CModelMan friend guessed) | 810 | 27 | 0 | 750 (658) | 189 |
 | 2026-11-02 | decomp/System-Graphic-Effect-effect-2 (finished: Setup 4/133, _updateSE 2/94, strcpyEffName 8/24 parked; A2: EFFECT_CPP gate kept, MATCH) | 810 | 27 | 0 | 750 (656) | 191 |
+| 2026-11-02 | decomp/Game-Atel-Atel-2 (finished: setScreenFader 37/206 parked; A2: features already MATCH) | 810 | 27 | 0 | 750 (656) | 191 |
 
 <!-- partials:start -->
 ## Summary
@@ -106,7 +107,7 @@ PARTIAL: 810 (756 in 110 headers, 54 in 34 .cpp); MATCH: 191
 stand-ins: 27 foreign in 18 files (20 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
-mechanisms: 750 sites (656 untagged); #line: 1247
+mechanisms: 750 sites (656 untagged); #line: 1248
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 613, superset 140, partial 112, gated 23, missing 8, unattributed 309
 ```
