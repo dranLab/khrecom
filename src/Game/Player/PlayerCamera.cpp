@@ -1,4 +1,4 @@
-#define GAME_PLAYER_PLAYERCAMERA_CPP /* MATCH: unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) */
+
 
 #include "System/Fsm.h" /* the full CFSM (before Game/Entity.h) */
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */

@@ -112,10 +112,7 @@ static inline FLOAT _sqrtf(FLOAT inValue) {
     return ret;
 }
 static inline INT _getNowCamMode() {
-    INT mode = 0;
-    PlayerCamera::CPlayerCamera* cam = PlayerCamera::CPlayerCamera::getInstanceRef();
-    if (cam) mode = cam->getCamMode();
-    return mode;
+    return PlayerCamera::CPlayerCamera::getNowCamMode();
 }
 
 #include "System/Rcf.h"
