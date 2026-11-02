@@ -712,8 +712,8 @@ void CSaveLoadUI::preCheckBoot() {
     m_pMessageDlgCursor->changeLayer(14);
     m_pMainLightMark = createLightMark(LIGHTMARK_TYPE_CURSOR, 16, TRUE);
     for (INT j = 0; j < 2; j++) {
-        m_pMessageDlgBtnAgent[j]->m_pCursor = m_pMessageDlgCursor;
-        m_pMessageDlgBtnAgent[j]->m_pLightMark = m_pMainLightMark;
+        m_pMessageDlgBtnAgent[j]->attachCursor(m_pMessageDlgCursor);
+        m_pMessageDlgBtnAgent[j]->attachLightMark(m_pMainLightMark);
     }
     m_nStep = 0;
     m_nTimer = 0;
@@ -853,7 +853,7 @@ void CSaveLoadUI::preOpenSlot() {
 void CSaveLoadUI::exeOpenSlot() {}
 void CSaveLoadUI::preSelSlot() {
     setActiveSlotPlate(m_nSlot);
-    m_pMainLightMark->m_nFlag &= ~2;
+    m_pMainLightMark->setSleep(FALSE);
 }
 void CSaveLoadUI::exeSelSlot() {
     if (isTrgCANCEL()) {
@@ -874,7 +874,7 @@ void CSaveLoadUI::endSelSlot() {
     if (m_pMainCursor) m_pMainCursor->enableDisp(FALSE);
     if (m_pMainLightMark && m_pMainLightMark->isSeqCtrlVisible()) {
         m_pMainLightMark->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
-        m_pMainLightMark->m_nFlag |= 2;
+        m_pMainLightMark->setSleep(TRUE);
     }
     outHelpMessage();
 }
@@ -2024,13 +2024,13 @@ void CSaveLoadUI::setupDataPlate(SHORT nDataIdx) {
         pPlate->setCaptionShift(-110.0f, fY);
     }
     sprintf(m_szDataItemContent[n], "%s\n%s\n%s", szLine[0], szLine[1], szLine[2]);
-    BOOL bSelected = pPlate->getCurerntSeq() == pPlate->m_nActiveLoopSeq;
+    BOOL bSelected = pPlate->isSelected();
     pPlate->setupState(s_seqDataPlateTbl[nCircle][getRsrcType()]);
     pPlate->setupActiveSeq(s_seqDataActPlateTbl[nCircle][getRsrcType()]);
     BOOL bNew = pPlate->getState() == C2DSeqAgent::_STATE_NOT_START;
     if (bNew) {
         pPlate->changeSeq(s_seqDataPlateTbl[nCircle][getRsrcType()]._tbl[0]);
-        if (pPlate->m_pCtrl) pPlate->m_pCtrl->enableDisp(FALSE);
+        pPlate->enableDisp(FALSE);
     } else if (pPlate->getState() == C2DSeqAgent::STATE_LOOP) {
         pPlate->changeSeq(bSelected ? s_seqDataActPlateTbl[nCircle][getRsrcType()]
                                     : s_seqDataPlateTbl[nCircle][getRsrcType()]._tbl[1]);
@@ -2169,7 +2169,7 @@ void CSaveLoadUI::openMessageDlg(const CHAR* pszTxt, INT nIcon, INT nType) {
         C2DSeqSelectable* pBtn = m_pMessageDlgBtnAgent[i];
         if (bOpenTbl[i]) {
             CHAR* pszText = pszCapTbl[i];
-            if (pBtn->m_pCaption) pBtn->m_pCaption->setText(pszText);
+            pBtn->setCaptionText(pszText);
             if (bLooped) {
                 BOOL bSel = i == m_nDlgSel;
                 pBtn->select(bSel);
@@ -2292,9 +2292,9 @@ void CSaveLoadUI::outDataList(INT nNextState) {
         }
         m_pDataListContainerAgent->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
         C2DSeqScrollbarCtrl* pScrollbar = m_pDataListScrollbar;
-        for (INT i = 0; i < 3; i++) {
-            pScrollbar->m_pParts[i]->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
-        }
+        pScrollbar->changeState(C2DSeqAgent::STATE_OUT);
+
+
         for (INT i = 0; i < 4; i++) {
             m_pDataItemPlate[i]->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
         }
@@ -2302,7 +2302,7 @@ void CSaveLoadUI::outDataList(INT nNextState) {
         if (m_pMainCursor) m_pMainCursor->enableDisp(FALSE);
         if (m_pMainLightMark && m_pMainLightMark->isSeqCtrlVisible()) {
             m_pMainLightMark->changeState(C2DSeqAgent::STATE_OUT, TRUE, -1);
-            m_pMainLightMark->m_nFlag |= 2;
+            m_pMainLightMark->setSleep(TRUE);
         }
     } else {
         if (nNextState >= 0) changeState(nNextState);
