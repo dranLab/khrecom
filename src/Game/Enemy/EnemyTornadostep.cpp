@@ -30,7 +30,7 @@ CEnemyTornadostep::CEnemyTornadostep(CTask* inParent) : CHeartless(inParent, 0, 
     setHeartlessFlag(1, 0);
     setFallMotionIndex(3);
     setLandMotionIndex(4);
-    m_iMoveStep = 0;
+    m_iPropellerStep = 0;
 }
 
 CEnemyTornadostep::~CEnemyTornadostep() {}
@@ -40,7 +40,7 @@ void CEnemyTornadostep::beginStateMain() {
 }
 
 void CEnemyTornadostep::stateMain() {
-    switch (m_iMoveStep) {
+    switch (m_iPropellerStep) {
     case 0: {
         FVECTOR target;
         getPlayerPosition(target);
@@ -53,12 +53,12 @@ void CEnemyTornadostep::stateMain() {
         m_pMove->enableGravity(FALSE);
         clearBtlEnemyFlag(0x10);
         ((FVECTOR&)getRot()).y = calcDirection(target);
-        m_iMoveStep++;
+        m_iPropellerStep++;
         break;
     }
     case 1:
         if (isMotionEnd()) {
-            m_iMoveStep++;
+            m_iPropellerStep++;
         }
         break;
     case 2: {
@@ -74,7 +74,7 @@ void CEnemyTornadostep::stateMain() {
             spd = getHeight() / (FLOAT)(getMotionTotalTime() / 50);
             v.set(0.0f, -spd, 0.0f);
             m_pMove->setVel(v);
-            m_iMoveStep++;
+            m_iPropellerStep++;
         }
         break;
     }
@@ -84,7 +84,7 @@ void CEnemyTornadostep::stateMain() {
             setBtlEnemyFlag(0x10);
             m_pMove->enableGravity(TRUE);
             commonMoveInit(Tornadostep::IdlingMotion, Tornadostep::MoveMotion, 2.0f);
-            m_iMoveStep = 0;
+            m_iPropellerStep = 0;
         }
         break;
     }
@@ -93,7 +93,7 @@ void CEnemyTornadostep::stateMain() {
 void CEnemyTornadostep::endStateMain() {
     commonMoveEnd();
     m_pMove->enableGravity(TRUE);
-    m_iMoveStep = 0;
+    m_iPropellerStep = 0;
 }
 
 void CEnemyTornadostep::beginStateAttack1() {

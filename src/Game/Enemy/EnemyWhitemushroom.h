@@ -16,7 +16,6 @@ protected:
     virtual void beginStateMain();
     virtual void stateMain();
     virtual void endStateMain();
-    virtual void onInvalid();
     virtual void beginStateSmallDamage();
     virtual void stateSmallDamage();
     virtual void endStateSmallDamage();
@@ -25,6 +24,7 @@ protected:
     virtual void endStateBigDamage();
     virtual void beginStateDead();
     virtual void stateDead();
+    virtual void onInvalid();
 private:
     void beginDamage_();
     void damage_();

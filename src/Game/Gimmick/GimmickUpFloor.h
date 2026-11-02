@@ -12,9 +12,9 @@ private:
 
 public:
     CGimmickUpFloorSwitch(CTask* inParent, INT in_GimID);
+    virtual void AfterInit();
     virtual ~CGimmickUpFloorSwitch();
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
-    virtual void AfterInit();
     virtual void beginStateMain();
     virtual void stateMain();
     virtual void endStateMain();
@@ -34,9 +34,9 @@ private:
 
 public:
     CGimmickUpFloor(CTask* inParent, INT in_GimID);
+    virtual void AfterInit();
     virtual ~CGimmickUpFloor();
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
-    virtual void AfterInit();
     virtual void beginStateMain();
     virtual void stateMain();
     virtual void endStateMain();

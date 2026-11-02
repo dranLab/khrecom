@@ -11,8 +11,8 @@ private:
 
 public:
     CGimmickKLotusLeaf(CTask* inParent);
-    virtual ~CGimmickKLotusLeaf();
     virtual void AfterInit();
+    virtual ~CGimmickKLotusLeaf();
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
     virtual void beginStateMain();
     virtual void stateMain();
