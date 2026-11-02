@@ -90,7 +90,7 @@ CCollUtil* CCollUtil::m_pInstance = __null;
 
 CCollUtil::CCollUtil() {
     m_pCheckColl = new (D_00489258) CSphereCollision;
-    m_pCheckColl->m_Kind = 0;
+    m_pCheckColl->m_Kind = COLL_KIND_PLAYER;
     m_pCheckColl->m_shiftY = 0.0f;
     m_pChipStatus = __null;
 }

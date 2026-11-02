@@ -63,9 +63,9 @@ public:
     FVECTOR m_outNormal; /* 0x30 */
     FVECTOR m_outDetect; /* 0x40 */
     // PARTIAL: m_Type, m_fgStatus, m_Radius split out for Game/Player/PlayerWeapon
-    INT m_Type;          /* 0x50 COLL_TYPE */
+    COLL_TYPE m_Type;    /* 0x50 */
     // PARTIAL: m_Kind .. m_outInfoO split out for Game/Gimmick/GimmickSearchLaser
-    INT m_Kind;          /* 0x54 COLL_KIND */
+    COLL_KIND m_Kind;    /* 0x54 */
     INT m_outStatus;     /* 0x58 */
     INT m_fgStatus;      /* 0x5c */
     FLOAT m_Radius;      /* 0x60 */
@@ -77,7 +77,7 @@ public:
     // (as in Game/Collision/CollUtilF.cpp)
     CCollision() {
         m_fgStatus = 0;
-        m_Kind = 0;
+        m_Kind = COLL_KIND_PLAYER;
         m_outInfoO.info = 0;
         m_outInfo.info = 0;
         m_Radius = m_shiftY = 0.0f;
