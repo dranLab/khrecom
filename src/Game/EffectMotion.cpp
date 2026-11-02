@@ -4,12 +4,12 @@
 #include "include_asm.h"
 
 /* The unit's .rodata ends with an unnamed copy of CAttachMotion's vtable (and .text with one of its inline destructor):
- * our compiled copies are only kept with these lines in config/SLUS_217.99/symbol_addrs.txt
+ * our compiled copies are kept by these lines in config/SLUS_217.99/symbol_addrs.txt
  *     _$_13CAttachMotion_001EDB28 = 0x001EDB28; // type:func size:0x30
  *     _vt$13CAttachMotion_0047CDF8 = 0x0047CDF8; // size:0x30
- * With them, set this to 1 and end the file with "// SOURCE DATA: .rodata" (all three functions below match then). Until
- * then the data comes from the original assembly, so the functions with string literals stay INCLUDE_ASM. */
-#define EFFECTMOTION_SOURCE_RODATA 1
+ * (the data comes from source: the functions with string literals are C). */
+
+
 #include "System/HeapMan.h"
 #include "System/Graphic/Effect/effect.h"
 #include "System/Graphic/Gprim.h"
@@ -138,16 +138,16 @@ CEffectMotionCtrl::~CEffectMotionCtrl() {
     kill();
 }
 
-#if EFFECTMOTION_SOURCE_RODATA
+
 #line 44
 BOOL CEffectMotionCtrl::initalize(CEntity* inOwner) {
     ASSERT(inOwner);
     m_pOwner = inOwner;
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/EffectMotion", initalize__17CEffectMotionCtrlP7CEntity);
-#endif
+
+
+
 
 void CEffectMotionCtrl::set(const ATTACH_EFFECT_DATA* inData) {
     m_iStep = 0;
@@ -248,8 +248,7 @@ HANDLE CEffectMotionCtrl::fadeoutEffect_(FLOAT inTime) {
     return m_hHandle;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/EffectMotion", updateAttachEffect___17CEffectMotionCtrli);
-/* Close: only case 2's "m_iStep = 0" tails differ - gcc cross-jumps them all into the second body's copy, the
+/* Parked: close, only case 2's "m_iStep = 0" tails differ - gcc cross-jumps them all into the second body's copy, the
  * original keeps the one in the effect == NULL branch (the other bodies jump there). jump2's cross-jumping
  * (find_cross_jump) merges a "sw $0; j" tail that follows a label after one matching insn, and the copy processed
  * first (earlier in the function) is the one deleted; with the three tails jumping to the same label the last copy
@@ -371,6 +370,8 @@ BOOL CEffectMotionCtrl::updateAttachEffect_(TIMEQ inCurrentTime) {
     }
     return TRUE;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/EffectMotion", updateAttachEffect___17CEffectMotionCtrli);
 #endif
 
 BOOL CEffectMotionCtrl::updateLocusEffect_(TIMEQ inCurrentTime) {
@@ -519,7 +520,7 @@ void CEffectMotion::killLoopEffect(BOOL inLoopEnd, INT inNo) {
     }
 }
 
-#if EFFECTMOTION_SOURCE_RODATA
+
 void CEffectMotion::setObserveEffect(HANDLE inHandle, const ATTACH_EFFECT_DATA* inAttach,
                                      const LOCUS_EFFECT_DATA* inLocus) {
     CEffect* effect = CEffectMan::getEffect(inHandle);
@@ -544,9 +545,9 @@ void CEffectMotion::setObserveEffect(HANDLE inHandle, const ATTACH_EFFECT_DATA* 
         effect->detachCoord();
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/EffectMotion", setObserveEffect__13CEffectMotioniPC18ATTACH_EFFECT_DATAPC17LOCUS_EFFECT_DATA);
-#endif
+
+
+
 
 void CEffectMotion::setColor(const FVECTOR& inColor) {
     INT n = m_iObserveEffectCount;
@@ -588,7 +589,7 @@ void CEffectMotion::setAlpha(FLOAT inAlpha) {
     }
 }
 
-#if EFFECTMOTION_SOURCE_RODATA
+
 BOOL CEffectMotion::initialize_(EET_HEADER* inHeader) {
     if (!inHeader->addrMapping()) {
         return FALSE;
@@ -625,9 +626,9 @@ BOOL CEffectMotion::initialize_(EET_HEADER* inHeader) {
     }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/EffectMotion", initialize___13CEffectMotionP10EET_HEADER);
-#endif
+
+
+
 
 BOOL CEffectMotion::set_(INT inIndex, INT inNo, BOOL inStop) {
     if (!m_pHeader) {
