@@ -23,7 +23,7 @@ struct ENEMY_CARD {
     BYTE pad[2];
 };
 
-// PARTIAL: added for Game/Enemy/MapEnemy
+
 struct EXTRA_ENEMY_PARAM {
     char szName[12]; /* 0x0 */
     FLOAT fValue;    /* 0xc */

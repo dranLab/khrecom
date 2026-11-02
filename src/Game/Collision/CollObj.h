@@ -7,7 +7,7 @@
 #include "khtypes.h"
 #include "Game/Collision/CollInfo.h"
 
-// PARTIAL: added for Game/Player/PlayerWeapon
+
 enum COLL_TYPE {
     COLL_TYPE_NONE = 0,
     COLL_TYPE_POINT = 1,
@@ -254,7 +254,7 @@ protected:
     virtual void init(COLL_KIND collKind, COLL_TYPE collType, HANDLE hTask, INT fgStatus);
 };
 
-// PARTIAL: added for Game/Collision/CollMapCamera
+
 class CCollisionList : public CSJointListT<CCollObj> {
 public:
     ~CCollisionList() {

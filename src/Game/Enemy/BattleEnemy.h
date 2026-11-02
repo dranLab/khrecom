@@ -11,8 +11,8 @@
 #include "System/Fsm.h"
 #endif
 
-struct ENEMY_PARAM; // PARTIAL: added for Game/Enemy/EnemyAirpirate
-struct ENEMY_ACT;   // PARTIAL: added for Game/Enemy/Heartless
+struct ENEMY_PARAM;
+struct ENEMY_ACT;
 namespace BattleEnemy {
 INT GameModeHp(INT inHp); // PARTIAL: added for Game/Enemy/BattleEnemy
 }

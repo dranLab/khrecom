@@ -7,8 +7,8 @@
 #include "System/SLContainer.h"
 
 class CCoords;
-class CCoord; // PARTIAL: added for Game/Atel/AtelCamera
-union FMATRIX; // PARTIAL: added for System/Graphic/PathCamera
+class CCoord;
+union FMATRIX;
 class CTask;
 
 enum TASK_PRIORITY {
@@ -219,7 +219,7 @@ public:
     CHAR* getDebugInfo() const { return m_pszDebugInfo; }
 };
 
-// PARTIAL: added for Game/Atel/AtelCamera
+
 class CTaskSecondary : public CTask {
 public:
     CTaskSecondary(CTask* pParent, INT nProcPrio = 0x4000) : CTask(pParent, nProcPrio) { m_nInfo |= 2; }

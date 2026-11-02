@@ -64,7 +64,7 @@ typedef struct { /* 0x30 */
 
 void *op_shape_draw(OSHAPE_VU1 *sh, OSHAPE_IN *shi, int nPacketSize);
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthPrize */
+
 typedef struct { /* 0x70 */
     word flag;
     word dummy0;

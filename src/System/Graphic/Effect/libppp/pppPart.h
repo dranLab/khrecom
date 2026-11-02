@@ -151,7 +151,7 @@ typedef struct _pppMngSt { /* 0xd0 */
 extern pppMngSt *ppvMng;
 /* end PARTIAL pppRyjMngFlag */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeDrct */
+
 typedef struct { /* 0xc */
     float x;
     float y;
@@ -165,7 +165,7 @@ extern sceVu0FMATRIX ppvScreenMatrix;
 void sceVu0CopyMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1);
 /* end PARTIAL pppKeDMat */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixXYZ */
+
 typedef struct { /* 0xc */
     word x;
     word y;
@@ -183,7 +183,7 @@ void sceVu0MulVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2);
 extern sceVu0FMATRIX *ppvlpCMatrix;
 /* end PARTIAL pppKeDMatPht */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthUserCtrl */
+
 typedef union { /* 0x4 */
     struct {
         u_char r;
@@ -207,7 +207,7 @@ typedef void (*PPPUSRFUNC)();
 extern PPPUSRFUNC *ppvHookFuncTbl;
 /* end PARTIAL pppDrawHook */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeParMatR */
+
 typedef struct { /* 0x8 */
     word pdtn;
     word valoff;
@@ -236,7 +236,7 @@ extern BOOL ppvUserStopPartF;
                          : : "r"(v), "r"(s) : "memory")
 /* end PARTIAL pppMatrixXYZ */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppColMove */
+
 typedef union { /* 0x8 */
     struct {
         short r;
@@ -294,7 +294,7 @@ typedef struct _pppEMCB { /* 0x10 */
 extern void (*ppvErrorFunc)();
 /* end PARTIAL pppAlloc */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeMdlTfd */
+
 typedef struct { /* 0x10 */
     struct _pppEMCB *last_free_heap;
     struct _pppEMCB *effect_heap_top;
@@ -351,7 +351,7 @@ int sceGsSetDefLoadImage(sceGsLoadImage *lp, short dbp, short dbw, short dpsm, s
 void op_ot_add_before(u_long128 *packet, int qsize, int otz, int pri);
 void op_ot_add(u_long128 *packet, int qsize, int otz, int pri); /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeShpDtt */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/KeDttSpr */
+
 typedef struct {
     u_long SCAX0 : 11;
     u_long pad11 : 5;

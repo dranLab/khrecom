@@ -19,8 +19,8 @@ inline void _effectCheckValid(BOOL inValid) {
 }
 #endif
 
-class CEntity; // PARTIAL: added for Game/Player/SummonGenie
-class CCoords; // PARTIAL: added for Game/Bullet/Bullet
+class CEntity;
+class CCoords;
 class CCoord;
 class CLightUnit;
 struct G_RGBA;

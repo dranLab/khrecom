@@ -16,7 +16,7 @@ inline void _modelDataCheckTexInfo(void* _pTexInfo) {
     if (!_pTexInfo) AssertApp(__FILE__, __LINE__, "_pTexInfo", 0);
 }
 
-// PARTIAL: added for System/Graphic/LightUnit
+
 struct BBOX {
     float x[2];
     float y[2];
@@ -29,7 +29,7 @@ struct BONELABEL {
     SHORT m_BuddyIndex;  /* 0x12 */
 };
 
-// PARTIAL: added for Game/ModelObj
+
 struct MODELDATA {
     BYTE m_nBoneNum;
     BYTE m_BoneIndex;

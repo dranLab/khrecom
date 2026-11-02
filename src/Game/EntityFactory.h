@@ -8,7 +8,7 @@
 
 class CEntity;
 struct BULLET_PARAM;
-struct OBJ_INFO; // PARTIAL: added for Game/Enemy/MapEnemyManager
+struct OBJ_INFO;
 
 // PARTIAL: added for Game/Player/FriendAladdin (original: Game/Prize.h)
 struct PRIZE_PARAM {

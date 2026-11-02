@@ -10,11 +10,11 @@
 #include "Game/CardKind.h"     // PARTIAL: added for Game/CardBattle (CARD members)
 #include "System/Task.h"        // PARTIAL: added for Game/CardBattle (CCardBattle is a CTask)
 
-class CPlayer; // PARTIAL: added for Game/Player/PlayerRiku
-class CTask; // PARTIAL: added for Game/CardBattle
-namespace D2 { class C2DSeqCtrl; class C2DFnt; } namespace CardBattle { class CBattleCard; } class C2DCard; // PARTIAL: added for Game/CardBattle
-namespace Message { class CMessageManager; } // PARTIAL: added for Game/CardBattle
-union FVECTOR; // PARTIAL: added for Game/Player/FriendPluto
+class CPlayer;
+class CTask;
+namespace D2 { class C2DSeqCtrl; class C2DFnt; } namespace CardBattle { class CBattleCard; } class C2DCard;
+namespace Message { class CMessageManager; }
+union FVECTOR;
 
 /* Placeholder for the original header's inline function asserting inUser: its strings
  * ("Game/CardBattle.h", "inUser") are in .rodata of every includer. The line number is not known. */
@@ -26,7 +26,7 @@ inline void _cardBattleCheckUser(void* inUser) {
     if (!inUser) AssertApp(__FILE__, __LINE__, "inUser", 0);
 }
 
-// PARTIAL: added for Game/Player/FriendAladdin
+
 struct BC_PARAM {
     unsigned short POWER[4];
     union {
@@ -46,7 +46,7 @@ struct BC_PARAM {
     LPCSTR EFF_NAME;
 };
 
-// PARTIAL: added for Game/Player/SummonDumbo
+
 struct SS_PARAM {
     unsigned short POWER[4];
     BYTE DUMMY;
@@ -77,7 +77,7 @@ void getDropFriendCard(CARD& outCard, INT inRate); void calcFreezeDamage(INT& io
 extern char* g_szDbgDeckName[10];
 extern char* g_szEnemyCardEffName[60];
 
-// PARTIAL: added for Game/Player/Player
+
 struct ENCHANT_PARAM {
     UINT uiUser;        /* 0x00 */
     HANDLE hOwner;      /* 0x04 */
@@ -94,7 +94,7 @@ struct ENCHANT_PARAM {
     void init(INT inOwner, UINT inUser);
 };
 
-// PARTIAL: added for Game/Player/SummonDumbo
+
 class CCardBattle : public CTask {
     /* 0x000 CTask */
     Message::CMessageManager* m_pMesage; /* 0x040 */

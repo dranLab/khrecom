@@ -26,7 +26,7 @@ public:
 
 #include "System/Task.h"
 
-// PARTIAL: added for System/RootTask
+
 enum MAINTASK_CALLMODE {
     MAINTASK_REPLACE = 0,
     MAINTASK_CALL_REPLACE = 1,

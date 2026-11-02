@@ -6,7 +6,7 @@
 #include "Game/CollParam.h"
 #include "System/Graphic/Effect/ObjType.h" // PARTIAL: added for Game/Enemy/BattleEnemy (setHitEffectParam)
 
-union FVECTOR; // PARTIAL: added for Game/Gimmick/BaseGimmick
+union FVECTOR;
 class CEntity;
 
 class CCollBody;

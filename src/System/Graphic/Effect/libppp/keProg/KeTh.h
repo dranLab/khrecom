@@ -4,7 +4,7 @@
 
 #include "System/Graphic/Effect/libppp/pppPart.h"
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/KeTh */
+
 typedef struct { /* 0x10 */
     u_long NLOOP : 15;
     u_long EOP : 1;
@@ -211,7 +211,7 @@ typedef struct _KeaThCp_Update { /* 0x18 */
     sceVu0FVECTOR *Vec;
 } KeaThCp_Update;
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/KeTh */
+
 typedef struct _KeaThBp_MkGifPk { /* 0x28 */
     sceVu0FMATRIX *Mat;
     KeThBP *This;

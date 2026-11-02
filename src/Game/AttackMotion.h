@@ -7,10 +7,10 @@
 #include "Game/CollParam.h"           // ATK_KIND
 #include "Game/Collision/CollObj.h"   // COLL_KIND
 
-union FVECTOR; // PARTIAL: added for Game/Player/FriendBeast
-class CEntity; // PARTIAL: added for Game/Gimmick/BaseGimmick
+union FVECTOR;
+class CEntity;
 
-// PARTIAL: added for Game/Gimmick/GimmickGuillotine
+
 enum ATK_ATTR {
     ATK_ATTR_PHYSICAL = 0,
     ATK_ATTR_NONE = 1,
