@@ -663,7 +663,7 @@ def compare(ours, ref):
     rvirt = [m.name for m in ref.members if m.kind == "method" and m.vslot is not None
              and not (implicit_dtor and m.name == dtor)]
     ovirt = [m.name for m in ours.members if m.kind == "method" and m.virtual]
-    vcommon = [v for v in ovirt if v in rvirt]
+    vcommon = list(dict.fromkeys(v for v in ovirt if v in rvirt))  # overloads: by name, first declaration
     return {
         "missing_fields": [f for f in ref_fields if f not in our_fields] + sorted(ref_static - our_static),
         "extra_fields": [f for f in our_fields if f not in ref_fields],
