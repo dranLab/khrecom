@@ -234,8 +234,8 @@ class Member:
 
 def count_params(text):
     text = text.strip()
-    if text in ("", "void"):
-        return 0
+    if text in ("", "void") or re.fullmatch(r"\w+\s*\*\s*,\s*int\s*,\s*void", text):
+        return 0  # the ref writes some inline methods as f(X*, int, void): parameters unknown
     depth, n = 0, 1
     for c in text:
         if c in "(<[":
