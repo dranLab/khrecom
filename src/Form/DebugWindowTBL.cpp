@@ -2906,10 +2906,7 @@ static BOOL debugWCCardAll(CDebugWindow* pObj, INT inY, INT inParam) {
 }
 
 BOOL debugWCMPFull(CDebugWindow* pObj, INT inY, INT inParam);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", debugWCMPFull__3DWTP12CDebugWindowii);
-#if 0
-/* differs only in a register: the original loads %hi(CPlayerManager::m_pInstance) into v1, ours into v0 */
-static BOOL debugWCMPFull(CDebugWindow* pObj, INT inY, INT inParam) {
+BOOL debugWCMPFull(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x20) {
         CStatus::setMP(99999);
         PLM::CPlayerManager* plm = PLM::CPlayerManager::getPLM();
@@ -2919,7 +2916,6 @@ static BOOL debugWCMPFull(CDebugWindow* pObj, INT inY, INT inParam) {
     }
     return TRUE;
 }
-#endif
 
 static BOOL debugWCEXPFull(CDebugWindow* pObj, INT inY, INT inParam) {
     if (inParam & 0x20) {
