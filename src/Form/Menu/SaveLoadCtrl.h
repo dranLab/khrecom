@@ -415,7 +415,7 @@ inline C2DSeqScrollbarCtrl::C2DSeqScrollbarCtrl(CTask* pParent)
 #else
 /* Placeholder for an inline function of the original header at line 310 (an allocation message). */
 #line 310 SAVELOADCTRL_H_PATH
-inline void* _saveLoadCtrlAlloc310() {
+inline void* _saveLoadCtrlAlloc310() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     return com_malloc_d(4, __FILE__ "(310)", (UINT)-1);
 }
 #endif

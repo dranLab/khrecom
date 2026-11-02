@@ -147,7 +147,7 @@ static INT debugWinNPCListAllCall(CDebugWindow* pObj, INT inParam) {
 /* placeholder: "" comes right before szPlayMode's strings in the original (0x48C630; the tables and cardDataTbl
    share it), though the first table using it (debugWinNPCListLine) follows szStockKindName: its source is unknown */
 __asm__(".rdata\n");
-inline void _roPh0a() {
+inline void _roPh0a() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("");
 }
 namespace DWTEvent {
@@ -1747,7 +1747,7 @@ void CVSM::execActor() {
 #else
 /* placeholder: rodata of execActor__Q24ATEL4CVSM */
 __asm__(".rdata\n");
-inline void _roPhExecActor() {
+inline void _roPhExecActor() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("(ATEL_REQ <= nState) && (_ATEL_REQ_MAX > nState)");
     TRACE("mada->ok pc:%d\n");
 }
@@ -5387,7 +5387,7 @@ void CVSM::acWaitReq(Actor& act, INT nTime, INT nAddr) {
 #else
 /* placeholder: rodata of acWaitReq__Q24ATEL4CVSMRQ24ATEL5Actorii */
 __asm__(".rdata\n");
-inline void _roPh35() {
+inline void _roPh35() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("acWaitReq act:%d time:%d address:%d \n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acWaitReq__Q24ATEL4CVSMRQ24ATEL5Actorii);

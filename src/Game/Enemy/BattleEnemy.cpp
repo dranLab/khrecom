@@ -1,7 +1,7 @@
 #define GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) */
 #include "System/TaskMan.h"
 #include "khtypes.h"
-#define BATTLEENEMY_H_STATE_TEMPLATE
+#define BATTLEENEMY_H_STATE_TEMPLATE /* MATCH: this unit sees m_EnemyState as the real CStateTemplate array (System/Fsm.h strings and the state table) */
 #define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h" /* MATCH: this unit names BattleEnemy.h so (header default "Game/Enemy/BattleEnemy.h") */
 #define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */

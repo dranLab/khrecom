@@ -37,7 +37,7 @@ struct ATK_COLL_DATA;
 inline void _checkIndex8(INT inIndex) {
     if (!(0 <= inIndex && inIndex < 8)) AssertApp(__FILE__, __LINE__, "0 <= inIndex && inIndex < 8", 0);
 }
-inline void* _alloc528() {
+inline void* _alloc528() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     return com_malloc_d(4, __FILE__ "(528)", (UINT)-1);
 }
 
@@ -84,10 +84,10 @@ inline void _checkEvbVersion(INT nVersion) {
     TRACE("****************** EVB\x82\xcc\x83\x6f\x81\x5b\x83\x57\x83\x87\x83\x93\x82\xaa\x8c\xc3\x82\xa2\x82\xc5\x82\xb7 ******************\n");
     TRACE("****************** Version = %d ******************\n", nVersion);
 }
-inline void* _alloc183() {
+inline void* _alloc183() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     return com_malloc_d(4, __FILE__ "(183)", (UINT)-1);
 }
-inline void _emptyString() {
+inline void _emptyString() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("");
 }
 
@@ -102,7 +102,7 @@ inline void _checkSesVersion(INT nVersion) {
     TRACE("****************** SES\x82\xcc\x83\x6f\x81\x5b\x83\x57\x83\x87\x83\x93\x82\xaa\x8c\xc3\x82\xa2\x82\xc5\x82\xb7 ******************\n");
     TRACE("****************** Version = %d ******************\n", nVersion);
 }
-inline void* _alloc215() {
+inline void* _alloc215() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     return com_malloc_d(4, __FILE__ "(215)", (UINT)-1);
 }
 

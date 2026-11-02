@@ -15,10 +15,10 @@
 inline void _emptyStringPlaceholder0() {
     TRACE("");
 }
-inline void _emptyStringPlaceholder1() {
+inline void _emptyStringPlaceholder1() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("");
 }
-inline void _emptyStringPlaceholder2() {
+inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("");
 }
 

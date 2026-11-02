@@ -17,7 +17,7 @@
 inline void _collUtilCheckInstance(void* inInstance) {
     if (!(__null == inInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
 }
-inline void* _collUtilCreate() {
+inline void* _collUtilCreate() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     void* p = com_malloc_d(4, __FILE__ "(185)", (UINT)-1);
     if (!p) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
     return p;
@@ -25,7 +25,7 @@ inline void* _collUtilCreate() {
 
 /* PARTIAL: added for Game/Atel/EventTrap - the singleton accessor (line 194), for includers that have the class
  * (Game/Collision/CollUtilA.h, included before this header). */
-#ifdef GAME_COLLISION_COLLUTILA_H
+#ifdef GAME_COLLISION_COLLUTILA_H /* MATCH: the accessor only for includers that have the class (see above) */
 /* The load of m_pInstance is not a "fixed scalar" to gcc's alias analysis (it stays ordered after stores through
  * pointers, Game/Gimmick/GimmickSearchLaser's CGimmickSearchLaserCircle::stateMain): a reference to it does that. */
 #line 192

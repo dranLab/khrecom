@@ -444,7 +444,7 @@ public:
     static void setSendCtrl(INT nMode);
 };
 
-#ifdef GAME_ENTITY_H
+#ifdef GAME_ENTITY_H /* MATCH: only for includers that have CEntity (see below) */
 /* PARTIAL: getModel(INT) is not in the original CEntity (callers use it as getModel()[i]); kept out of Game/Entity,
  * whose key function would emit it. */
 #ifndef GAME_ENTITY_CPP /* MATCH: GAME_ENTITY_CPP gate, only for its own unit (tested 2026-11-02) */
@@ -506,16 +506,16 @@ public:
 inline void _modelCheckData(void* inData) {
     if (!(inData != __null)) AssertApp(__FILE__, __LINE__, "m_pData != __null", 0);
 }
-inline void* _modelCreate() {
+inline void* _modelCreate() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     return com_malloc_d(4, __FILE__ "(569)", (UINT)-1);
 }
-inline void _modelAssertZero() {
+inline void _modelAssertZero() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     AssertApp(__FILE__, __LINE__, "0", 0);
 }
-inline void _mcShaderCreate() {
+inline void _mcShaderCreate() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("create CMCShader\n");
 }
-inline void _mcShaderDelete() {
+inline void _mcShaderDelete() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("delete CMCShader\n");
 }
 

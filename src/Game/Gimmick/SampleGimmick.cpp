@@ -1,5 +1,5 @@
 
-#define SYSTEM_GRAPHIC_ANIM_H /* the original's includes don't bring in Anim.h (no "2 > idx" in .rodata) */
+#define SYSTEM_GRAPHIC_ANIM_H /* MATCH: the original's includes don't bring in Anim.h (no "2 > idx" in .rodata) */
 #include "System/Graphic/modeldata.h"
 #include "Game/BodyCollision.h"
 #include "Game/Gimmick/SampleGimmick.h"

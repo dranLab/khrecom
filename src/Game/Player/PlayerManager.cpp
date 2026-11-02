@@ -15,10 +15,10 @@
 inline void _emptyStringPlaceholder0() {
     TRACE("");
 }
-inline void _emptyStringPlaceholder1() {
+inline void _emptyStringPlaceholder1() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("");
 }
-inline void _emptyStringPlaceholder2() {
+inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("");
 }
 
@@ -26,7 +26,7 @@ inline void _emptyStringPlaceholder2() {
 inline void _premiumPrizeMessage() {
     TRACE("\x83v\x83\x8c\x83~\x83" "A\x83\x80\x83v\x83\x89\x83" "C\x83Y\x93\xfc\x8e\xe8\x81I\x81I\n");
 }
-inline void _roulettePrizeMessage() {
+inline void _roulettePrizeMessage() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("\x83\x8b\x81[\x83\x8c\x83" "b\x83g\x83v\x83\x89\x83" "C\x83Y\x93\xfc\x8e\xe8\x81I\x81I\n");
 }
 

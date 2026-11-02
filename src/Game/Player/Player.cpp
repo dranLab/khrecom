@@ -24,7 +24,7 @@
 #include "System/RsrcData.h"
 #include "Game/Collision/CollUtil.h"
 /* one empty string follows CollUtil.h's strings */
-inline void _emptyStringPlaceholder0() {
+inline void _emptyStringPlaceholder0() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("");
 }
 #include "System/Graphic/Str.h"
@@ -5137,7 +5137,7 @@ FLOAT CPlayer::getDefAttr(ATK_ATTR inAttr) const {
 }
 /* placeholder: rodata of chkDamage__7CPlayer */
 __asm__(".rdata\n");
-inline void _roPh20() {
+inline void _roPh20() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("CPlayer:: (initDamage)\n");
     TRACE("-------- Damege Info ------------------\n");
     TRACE("Sora : HP = %d/%d\n");
@@ -7706,7 +7706,7 @@ void CPlayer::exeFooting() {
 #else
 /* placeholder: rodata of exeFooting__7CPlayer */
 __asm__(".rdata\n");
-inline void _roPh30() {
+inline void _roPh30() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
     TRACE("CPlayer:: exeFooting -> initTransform(0)\n");
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeFooting__7CPlayer);
