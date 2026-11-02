@@ -1,4 +1,3 @@
-// PARTIAL: added for System/Buf
 #ifndef SYSTEM_LINKEDBUF_H
 #define SYSTEM_LINKEDBUF_H
 
@@ -13,30 +12,31 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #endif
 
 class CLinkedPtr : public CSJointT<CLinkedPtr> {
-protected:
-    void* m_pPtr; /* 0x8 */
+private:
+    void* m_pBuf; /* 0x8 */
 
 public:
     CLinkedPtr(void* pInPtr) { setPtr(pInPtr); }
     virtual ~CLinkedPtr() {}
-    void setPtr(void* pInPtr); /* defined below: not inlined into the constructors */
+    void setPtr(void* pInPtr); /* MATCH: defined below: not inlined into the constructors */
+    void* getPtr() { return m_pBuf; }
 };
 
 inline void CLinkedPtr::setPtr(void* pInPtr) {
-    m_pPtr = pInPtr;
+    m_pBuf = pInPtr;
 }
 
 class CMallocPtr : public CLinkedPtr {
 public:
     CMallocPtr(void* pInPtr) : CLinkedPtr(pInPtr) {}
     virtual ~CMallocPtr() {
-        if (m_pPtr) com_free(m_pPtr);
+        if (getPtr()) com_free(getPtr());
     }
 };
 
 typedef CSJointListT<CLinkedPtr> CPtrList;
 
-class CLinkedBuf : public CSJointT<CLinkedBuf> { // PARTIAL: added for System/LinkedBuf
+class CLinkedBuf : public CSJointT<CLinkedBuf> {
 private:
     void* m_pBuf; /* 0x8 */
 
@@ -51,29 +51,32 @@ public:
 };
 
 class CDelayedFree {
+    friend class CPackMan; /* MATCH: System/Graphic/PackMan sets up, flips and disposes the free lists (private) */
+
 public:
-    static void initFreeList(); // PARTIAL: added for System/LinkedBuf
-    static void disposeFreeList();
     static void addFreePtr(CLinkedPtr& inPtr);
     static void lockFreeList();
     static void unlockFreeList();
     static BOOL isFreeListEmpty();
+
+private:
+    static void initFreeList();
+    static void disposeFreeList();
     static void flipFreeList(INT nID);
-    static void addFreeMallocPtr(void* pInPtr); /* name unknown (inline) */
 };
 
 /* MATCH: path override for Game/AttachCard and Game/Prize ("System/LinkedBuf.h") */
 #ifdef LINKEDBUF_H_PATH
 #line 1 LINKEDBUF_H_PATH
 #endif
+/* MATCH: name unknown (inlined everywhere; the ref's CDelayedFree has no such member) */
 #line 130
-inline void CDelayedFree::addFreeMallocPtr(void* pInPtr) {
+inline void DelayedFree(void* pInPtr) {
     CMallocPtr* pPtr = new (com_malloc_d(sizeof(CMallocPtr), __FILE__ "(131)", ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; }))) CMallocPtr(pInPtr);
     if (!pPtr) AssertApp(__FILE__, __LINE__, "pPtr", 0);
-    addFreePtr(*pPtr);
+    CDelayedFree::addFreePtr(*pPtr);
 }
 
-// PARTIAL: added for Game/AttachCard
 template <class T>
 class CNewPtrT : public CLinkedPtr {
 private:
@@ -82,7 +85,7 @@ private:
 public:
     CNewPtrT(T* pInBuf, BOOL bInArray) : CLinkedPtr(pInBuf) { m_bArray = bInArray; }
     virtual ~CNewPtrT() {
-        T* p = (T*)m_pPtr;
+        T* p = (T*)getPtr();
         if (p) {
             if (m_bArray) delete[] p;
             else delete p;
