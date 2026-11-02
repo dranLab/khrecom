@@ -97,9 +97,8 @@ private:
     C3DPolyStrip m_DDPathPolys;    /* 0x1c4 */
 
 public:
-    // PARTIAL: added for System/Graphic/HermitePathCamera
     CPathVector(const FVECTOR* pPath, INT iPathMax) { init(pPath, iPathMax, 0); }
-    CPathVector() : m_pVec(NULL), m_iVecMax(0), m_pPathData(NULL) {} // PARTIAL: added for System/Graphic/PathData
+    CPathVector() : m_pVec(NULL), m_iVecMax(0), m_pPathData(NULL) {}
     ~CPathVector();
     void init(const FVECTOR* pPath, INT iPathMax, INT iMode);
     void init(const PATH_VECTOR* pPathData, BOOL bAlloc);
