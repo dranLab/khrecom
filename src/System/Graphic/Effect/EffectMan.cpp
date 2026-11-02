@@ -1090,7 +1090,7 @@ void CEffectMan::destroyer() {
             }
         }
     }
-    s_pEffectList->removeNull();
+    s_pEffectList->sweep();
 }
 void CEffectMan::initialize(CTask* p) {
 #line 1864

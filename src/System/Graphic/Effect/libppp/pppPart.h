@@ -202,10 +202,10 @@ extern sceVu0FMATRIX *ppvReferenceMatrixList;
 extern int ppvReferenceMatrixNum;
 /* end PARTIAL pppRyjMegaBirthUserCtrl2 */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppDrawHook */
+
 typedef void (*PPPUSRFUNC)();
 extern PPPUSRFUNC *ppvHookFuncTbl;
-/* end PARTIAL pppDrawHook */
+
 
 
 typedef struct { /* 0x8 */
@@ -217,14 +217,14 @@ void sceVu0Normalize(sceVu0FVECTOR v0, sceVu0FVECTOR v1);
 void sceVu0CopyVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1);
 /* end PARTIAL pppKeParMatR */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjDrawMatrixWorld */
+
 extern sceVu0FMATRIX ppvCameraMatrix;
 extern sceVu0FMATRIX ppvParMatrix;
-/* end PARTIAL pppRyjDrawMatrixWorld */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppAngle */
+
+
 extern BOOL ppvUserStopPartF;
-/* end PARTIAL pppAngle */
+
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppMatrixXYZ */
 /* v.xyz *= s (VU0 macro mode) */
@@ -403,11 +403,11 @@ extern u_long ppvGsScissor;
 /* end PARTIAL pppKeShpDtt */
 /* end PARTIAL pppKeMdlTfd */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppDrawMdl */
+
 extern sceVu0FMATRIX ppvLightMatrix;
 extern sceVu0FMATRIX ppvColorMatrix;
 extern long128 ppvVNWork[2048];
-/* end PARTIAL pppDrawMdl */
+
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjDrawMatrixWorldWood */
 extern sceVu0FMATRIX ppvWorldMatrixWood;

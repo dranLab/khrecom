@@ -489,7 +489,7 @@ static void _delGroup(CRsrcList& inList, INT nGrpID, BOOL bForce) {
             }
         }
     }
-    inList.removeNull();
+    inList.sweep();
 }
 
 static void _delGroupOpt(CRsrcList& inList, INT nFlag) {
@@ -505,7 +505,7 @@ static void _delGroupOpt(CRsrcList& inList, INT nFlag) {
             }
         }
     }
-    inList.removeNull();
+    inList.sweep();
 }
 
 void _removeRsrc(INT nID, BOOL bForce) {
@@ -555,7 +555,7 @@ void CRsrcDB::removeRsrc(CRsrcData& rsrc) {
             else delete &rsrc;
         }
     }
-    lst.removeNull();
+    lst.sweep();
 }
 
 void CRsrcDB::removeSceneAttachedData(UINT nNum) {
