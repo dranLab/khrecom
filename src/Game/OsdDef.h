@@ -22,7 +22,7 @@ struct OBJ_INFO {
     FLOAT z;
     FLOAT height;
     FLOAT dir;
-    union { // PARTIAL: union added for Game/Enemy/BattleEnemyManager (compares both IDs as one word; name unknown)
+    union { // MATCH: Game/Enemy/BattleEnemyManager compares both IDs as one word (the ref has the two fields; union name unknown)
         struct {
             SHORT sGroupID;
             SHORT sID;
@@ -41,6 +41,8 @@ struct OBJ_INFO {
         if (inOn) uiFlag |= inFlag;
         else uiFlag &= ~inFlag;
     }
+    BOOL isAppear(/* parameters unknown */);
+    BOOL isRotXZ(/* parameters unknown */);
 };
 
 struct OBJ_GROUP {
@@ -60,9 +62,11 @@ struct OBJ_GROUP {
 struct OBJ_FORMATION {
     OBJ_GROUP* pGroup[OSD_CATEGORY_MAX][16];
 
-    OBJ_GROUP* getObjGroup(INT inCategory, INT inGroupNo);
+    OBJ_GROUP* getPlayerGroup(/* parameters unknown */);
     OBJ_GROUP* getEnemyGroup(INT inGroupNo) { return getObjGroup(OSD_CATEGORY_ENEMY, inGroupNo); }
-    OBJ_GROUP* getGimmickGroup(INT inGroupNo) { return getObjGroup(OSD_CATEGORY_GIMMICK, inGroupNo); } // PARTIAL: added for Game/Gimmick/GimmickManager
+    OBJ_GROUP* getGimmickGroup(INT inGroupNo) { return getObjGroup(OSD_CATEGORY_GIMMICK, inGroupNo); }
+    OBJ_GROUP* getNpcGroup(/* parameters unknown */);
+    OBJ_GROUP* getObjGroup(INT inCategory, INT inGroupNo);
     void addrMapping(void* inBase) {
         for (UINT i = 0; i < OSD_CATEGORY_MAX; i++) {
             for (UINT j = 0; j < 16; j++) {

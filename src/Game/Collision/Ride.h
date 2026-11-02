@@ -85,9 +85,10 @@ private:
 
 public:
     CRider(HANDLE hTask, FLOAT shiftY, FLOAT radius, COLL_KIND kind, BOOL fgHang);
+    virtual ~CRider() {}
     HANDLE getHandle() { return m_hTask; }
+    void setHandle(/* parameters unknown */);
     BOOL isHang() { return m_fgHang; }
-    // PARTIAL: added for Game/Collision/CollMap (original names unknown)
     void setPosition(FVECTOR& Rotate, FVECTOR& Position) {
         m_Rotate = Rotate;
         m_Position = Position;

@@ -359,8 +359,11 @@ public:
         m_nFlag = 0;
         _setupAZF();
     }
-    BOOL isTexIncomplete() { return m_nFlag & 1; } // PARTIAL: added for Game/Map (body from its inlined test)
+    void* getAZFData(/* parameters unknown */);
+    struct ZONEDATA* getZoneData(/* parameters unknown */);
+    BOOL isTexIncomplete() { return m_nFlag & 1; }
     void reSetupTex();
+    MODELDATA* getModelData(/* parameters unknown */);
 };
 
 class CRsrcCAM : public CRsrcData {

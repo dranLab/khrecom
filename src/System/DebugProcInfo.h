@@ -9,11 +9,11 @@
 class CFnt : public CStrPrim {
 public:
     CFnt() { setStyle(0); }
-    // PARTIAL: added for Form/DebugMenu
     CFnt(INT nX, INT nY, const G_RGBA* pColor, INT nSize, const CHAR* pszText, UINT nStyle, INT nZ)
         : CStrPrim(nX, nY, pColor, nSize, pszText, nStyle | 0x8000, nZ) {}
     virtual ~CFnt() {}
     void setStyle(UINT nStyle);
+    void deleteStyle(/* parameters unknown */);
 };
 
 inline void CFnt::setStyle(UINT nStyle) { m_Style = nStyle | 0x8000; }

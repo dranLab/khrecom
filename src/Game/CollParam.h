@@ -82,8 +82,9 @@ struct ATK_COLL_PARAM { // 0xa0
     /* 0x98 */ BOOL bEnable;
     /* 0x9c */ UINT uiFlag;
 
+    void setFlag(/* parameters unknown */);
     ATK_KIND getAtkKind() const;
-    UINT isNoLoop() const { return uiFlag & 1; }   // PARTIAL: added for Game/AttackMotion
+    UINT isNoLoop() const { return uiFlag & 1; }
     UINT isFinish() const { return uiFlag & 2; }
 };
 
