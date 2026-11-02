@@ -589,11 +589,17 @@ void CCmpData::DecodeBin(BYTE* pData, const BYTE* inBuf) {
 
 void CCmpData::Next(FLOAT inFrame) {
     if (inFrame == 0.0f) {
-        ResetHS();
+        m_HS_Frame1 = 0.0f;
+        m_HS_KeyNo1 = 0;
+        m_HS_Val1 = GetVal(0);
+        m_HS_KeyNo2 = 1;
     } else {
         FLOAT fFrame2 = m_HS_Frame2;
         if (inFrame < fFrame2) {
-            ResetHS();
+            m_HS_Frame1 = 0.0f;
+            m_HS_KeyNo1 = 0;
+            m_HS_Val1 = GetVal(0);
+            m_HS_KeyNo2 = 1;
             fFrame2 = GetKeyFrame(m_HS_KeyNo2);
         }
         if (fFrame2 < inFrame) {
