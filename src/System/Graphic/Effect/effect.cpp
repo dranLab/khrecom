@@ -512,11 +512,11 @@ BOOL CEffect::calcLight(FVECTOR& outColor, const FVECTOR& inColor) {
     if (!m_pNLight) return FALSE;
     m_pNLight->reCalc();
     CLightUnit* light = m_pNLight;
-    FVECTOR vC = light->getAmbient();
-    AddVector(vC, vC, light->getColor().v[0]);
-    AddVector(vC, vC, light->getColor().v[1]);
-    AddVector(vC, vC, light->getColor().v[2]);
-    AddVector(vC, vC, light->getColor().v[3]);
+    FVECTOR vC = light->getAmbientVector();
+    AddVector(vC, vC, light->getColorMatrix().v[0]);
+    AddVector(vC, vC, light->getColorMatrix().v[1]);
+    AddVector(vC, vC, light->getColorMatrix().v[2]);
+    AddVector(vC, vC, light->getColorMatrix().v[3]);
     vC.w = 1.0f;
     MulVector(outColor, inColor, vC);
     sceVu0ClampVector(outColor.v, outColor.v, 0.0f, 2.0f);
