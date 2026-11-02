@@ -1,6 +1,6 @@
 
-#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
-#define GPRIM_H_PATH "System/Graphic/Gprim.h"
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: this unit names CollUtil.h by its full original path */
+
 #include "System/Task.h"
 #include "System/TaskMan.h"
 #include "Game/Collision/CollInfo.h"
