@@ -1,5 +1,5 @@
-#define EFFECT_CPP
-#define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h"
+#define EFFECT_CPP /* MATCH: effect.cpp includes effect_inl.h itself after Coord.h (weak order) and owns the placeholder strings; without it the link fails */
+#define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h" /* MATCH: this unit names effect.h by its full original path */
 #include <string.h>
 
 #include "System/Graphic/Effect/effect.h"
