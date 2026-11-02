@@ -818,8 +818,8 @@ void CDispListShadowMap::insert(CDrawable& inPrim, FIX4 inZ) {
     CModel* pModel = ((CShadowModel&)inPrim).getParentModel();
     if (pModel) {
         FVECTOR v[2];
-        FVECTOR& vCamPos = CShadowModelMan::m_vCamPos;
-        FLOAT fClip = CShadowModelMan::m_fClipDistSq;
+        FVECTOR& vCamPos = CShadowModelMan::getUpdateCameraPos();
+        FLOAT fClip = CShadowModelMan::getClipDistanceSq();
         pModel->getWorldBBox(v[0], v[1]);
         _vecAdd(v[1], v[0], v[1]);
         _vecScale(v[1], v[1], 0.5f);
