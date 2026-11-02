@@ -35,6 +35,7 @@ struct ATTACH_EFFECT_DATA {
     BOOL set;           /* 0x78 */
     int pad[9];         /* 0x7c */
 
+    void init(/* parameters unknown */);
     TIMEQ getStart() const { return tqStart * 50; }
     TIMEQ getEnd() const { return tqEnd * 50; }
     UINT isAttachOff() const { return uiFlag & 0x1; }
@@ -72,6 +73,7 @@ struct LOCUS_EFFECT_DATA {
     INT step;           /* 0x68 */
     int pad[13];        /* 0x6c */
 
+    void init(/* parameters unknown */);
     TIMEQ getStart() const { return tqStart * 50; }
     TIMEQ getEnd() const { return tqEnd * 50; }
 };

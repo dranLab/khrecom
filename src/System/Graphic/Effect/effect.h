@@ -32,6 +32,8 @@ private:
 
 public:
     void set(u_long128* data);
+    void clear(/* parameters unknown */);
+    BOOL is_exist(/* parameters unknown */);
     static void Setup(u_long128* data);
     static void Shift(u_long128* to, u_long128* from);
 };
@@ -42,9 +44,11 @@ private:
 
 public:
     void set(u_long128* data);
+    void clear(/* parameters unknown */);
     BOOL no_search(u_int effect_no, u_long128*& dpd, u_int& dpd_id) const;
     int idx_to_no(int idx) const;
     int get_num() const;
+    BOOL is_exist(/* parameters unknown */);
     static void Setup(u_long128* data, BOOL bDownVer);
     static void Shift(u_long128* to, u_long128* from);
 };
@@ -55,6 +59,9 @@ struct EFFECT_SE_DATA {
     USHORT nNo;
     UBYTE nFadeTime;
     unsigned char nPad8[1];
+
+    void init(/* parameters unknown */);
+    BOOL isEmpty(/* parameters unknown */);
 };
 
 struct EFFECT_SE_HEAD {
@@ -62,6 +69,8 @@ struct EFFECT_SE_HEAD {
     int nPad32[2];
     USHORT nVer;
     USHORT nNum;
+
+    void init(/* parameters unknown */);
 };
 
 struct EFFECT_SE {

@@ -54,6 +54,7 @@ struct OBJ_GROUP {
             pObjInfo[i].setFlag(1, FALSE);
         }
     }
+    BOOL checkAllAppear(/* parameters unknown */);
 };
 
 struct OBJ_FORMATION {
