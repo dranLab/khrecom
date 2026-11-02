@@ -309,7 +309,7 @@ void C2DSprObj::getFukidasiRect(FVECTOR2 (*vOut)[4]) {
  * the 0.25f stores in the prologue (the original puts `addiu s3,sp,32` after the first two fVec2 stores) and the
  * load/store order of the sway block (the original loads x_sway[0], y_sway[0], x_sway[1], y_sway[1] in that order and
  * stores m_vSway[0] first); tried: fVec2 as fields/chain/set/setAll, iAlphaBlend order, six statement orders of the
- * sway block with and without temporaries, an 8 min permuter run (23 -> 23). The five `BOOL b = m_status.x_stop;
+ * sway block with and without temporaries, an 8 min permuter run (23 -> 23), a 15 min one (2026-11-02, 40k: 20 -> 20). The five `BOOL b = m_status.x_stop;
  * if (b)` blocks are what makes the original's dsll/dsra32/andi extraction. */
 #if 0
 TIMEQ C2DSprObj::initForSeq(SEQ_ANIMATION* pSeqAnim, LAY_SCREEN* pLayScreen) {
@@ -461,13 +461,191 @@ void C2DSprObj::_main(TIMEQ qTime) {
         m_Flg &= ~1;
     }
 }
-/* Not attempted: 438 instructions; read from the asm only. Flow: bilinear flag from m_status.bilinear_disable, mat =
- * scale * RotMatrix(m_vRot) * translate(m_vPos + m_vSwy) * translate(m_vOfs), then the m_pSeqControl chain (the first
- * object after m_fgParent == 0 stores parentMatrix/parentColor/controlMatrix/controlColor, later ones only multiply with
- * pParentSeqControl; the m_fgParent < 0 / parentMatrix[3][3] == 0 cases choose parentMatrix or vCol), the bilinear
- * decision (mat diagonal != 1), colour clamp (ScaleVector 128, sceVu0ClampVector 0..255, FTOI0Vector), then the
- * getRect/getFukidasiRect loop and the per-vertex ApplyMatrix2 + MMI colour multiply (pextlb/pmulth/ppacb). */
+/* Parked: 25 of 465 lines - only the vertex loop differs: the MMI colour multiply's 0xFF splat is a TImode
+ * constant here (`por v0,zero,zero` before `li`, the original only does `li`), the pmulth/tmp registers come out
+ * v1/v0 instead of a0/v1, the vertex-loop pointers get other registers and lCol is loaded before the expand.
+ * tried: "0"(0xFF) / "r"(0xFF) / u_long constant forms (hoisted out of the loop: 27), separate pmulth result,
+ * memory clobbers, pointer increment orders; permuter (method wrapper) 15 min, 49k candidates: 29 -> 27 only. */
+#if 0
+void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
+void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
+extern "C" void sceVu0RotMatrix(FMATRIX& m0, const FMATRIX& m1, const FVECTOR& rot);
+extern "C" void sceVu0ClampVector(FVECTOR& v0, const FVECTOR& v1, float fMin, float fMax);
+
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
+static inline void _applyMatrix2(FVECTOR& v0, const FMATRIX& m0, const FVECTOR2& v2) {
+    asm volatile("ld $8, 0x0(%2)\n"
+                 "lqc2 $vf4, 0x0(%1)\n"
+                 "lqc2 $vf5, 0x10(%1)\n"
+                 "lqc2 $vf6, 0x20(%1)\n"
+                 "lqc2 $vf7, 0x30(%1)\n"
+                 "qmtc2.ni $8, $vf8\n"
+                 "vmulax.xyzw $ACC, $vf4, $vf8x\n"
+                 "vmadday.xyzw $ACC, $vf5, $vf8y\n"
+                 "vmaddaz.xyzw $ACC, $vf6, $vf0z\n"
+                 "vmaddw.xyzw $vf4, $vf7, $vf0w\n"
+                 "sqc2 $vf4, 0x0(%0)\n"
+                 :
+                 : "r"(&v0), "r"(&m0), "r"(&v2)
+                 : "$8", "memory");
+}
+static inline void _ftoi4(IVECTOR& iVec, const FVECTOR& fVec) {
+    asm volatile("lqc2 $vf4, 0x0(%1)\n"
+                 "vftoi4.xyzw $vf4, $vf4\n"
+                 "sqc2 $vf4, 0x0(%0)\n"
+                 :
+                 : "r"(&iVec), "r"(&fVec)
+                 : "memory");
+}
+static inline UINT _mulColor(UINT iCol, u_long128 iMul) {
+    u_long128 ivCol;
+    u_long128 tmp;
+    __asm__ volatile("pextlb %0, $0, %1" : "=r"(ivCol) : "r"(iCol));
+    __asm__ volatile("pextlh %0, $0, %0" : "=r"(ivCol) : "0"(ivCol));
+    __asm__ volatile("pmulth %0, %1, %2" : "=r"(ivCol) : "r"(ivCol), "r"(iMul));
+    tmp = 0xFF;
+    __asm__ volatile("pextlw %0, %0, %0" : "=r"(tmp) : "0"(tmp));
+    __asm__ volatile("pcpyld %0, %0, %0" : "=r"(tmp) : "0"(tmp));
+    __asm__ volatile("psrlw %0, %0, 7" : "=r"(ivCol) : "0"(ivCol));
+    __asm__ volatile("pcgtw %0, %1, %0" : "=r"(tmp) : "r"(ivCol), "0"(tmp));
+    __asm__ volatile("por %0, %1, %0" : "=r"(tmp) : "r"(ivCol), "0"(tmp));
+    __asm__ volatile("ppach %0, $0, %0" : "=r"(tmp) : "0"(tmp));
+    UINT iRet;
+    __asm__ volatile("ppacb %0, $0, %1" : "=r"(iRet) : "r"(tmp));
+    return iRet;
+}
+void C2DSprObj::move() {
+    FVECTOR fVec;
+    IVECTOR iVec;
+    FMATRIX mat;
+    FMATRIX mat2;
+    FVECTOR vCol;
+    CHAR fgBilinear;
+    u_long128 lCol;
+    BOOL bBilinear;
+    FVECTOR2 primPosBuf[9][4];
+    fgBilinear = 0;
+    setBilinear(m_status.bilinear_disable);
+    _unitMatrixVu0(mat);
+    mat.m[0][0] = m_vScl.x;
+    mat.m[1][1] = m_vScl.y;
+    sceVu0RotMatrix(mat, mat, m_vRot);
+    AddVector2(fVec, m_vPos, m_vSwy);
+    mat.v[3] = fVec;
+    _unitMatrixVu0(mat2);
+    *(FVECTOR2*)&fVec = m_vOfs;
+    mat2.v[3] = fVec;
+    MulMatrix(mat, mat, mat2);
+    vCol = m_vCol;
+    if (m_pSeqControl) {
+        if (m_fgParent == 0) {
+            MulMatrix(mat, m_pSeqControl->matrix, mat);
+            m_pSeqControl->parentMatrix = mat;
+            if (m_pSeqControl->fgColor) {
+                MulVector(vCol, m_pSeqControl->vCol, vCol);
+                m_pSeqControl->parentColor = vCol;
+                if (m_pSeqControl->pParentSeqControl) {
+                    MulMatrix(mat, m_pSeqControl->pParentSeqControl->controlMatrix, mat);
+                    MulVector(vCol, m_pSeqControl->pParentSeqControl->controlColor, vCol);
+                    fgBilinear = m_pSeqControl->pParentSeqControl->fgBilinear;
+                }
+                m_pSeqControl->controlMatrix = mat;
+                m_pSeqControl->controlColor = vCol;
+            } else {
+                if (m_pSeqControl->pParentSeqControl) {
+                    MulMatrix(mat, m_pSeqControl->pParentSeqControl->controlMatrix, mat);
+                    fgBilinear = m_pSeqControl->pParentSeqControl->fgBilinear;
+                }
+                m_pSeqControl->controlMatrix = mat;
+            }
+            m_fgParent = 1;
+            if (mat.m[0][0] != 1.0f || mat.m[1][1] != 1.0f || mat.m[2][2] != 1.0f) setBilinear(TRUE);
+            if (fgBilinear) setBilinear(TRUE);
+            m_pSeqControl->fgBilinear = isBilinear();
+        } else {
+            if (m_pSeqControl->fgColor) {
+                if (m_fgParent < 0 && m_pSeqControl->parentMatrix.m[3][3] != 0.0f) {
+                    MulMatrix(mat, m_pSeqControl->parentMatrix, mat);
+                    MulVector(vCol, m_pSeqControl->parentColor, vCol);
+                } else {
+                    MulMatrix(mat, m_pSeqControl->matrix, mat);
+                    MulVector(vCol, m_pSeqControl->vCol, vCol);
+                }
+                if (m_pSeqControl->pParentSeqControl) {
+                    MulMatrix(mat, m_pSeqControl->pParentSeqControl->controlMatrix, mat);
+                    MulVector(vCol, m_pSeqControl->pParentSeqControl->controlColor, vCol);
+                }
+            } else {
+                if (m_fgParent < 0 && m_pSeqControl->parentMatrix.m[3][3] != 0.0f) {
+                    MulMatrix(mat, m_pSeqControl->parentMatrix, mat);
+                } else {
+                    MulMatrix(mat, m_pSeqControl->matrix, mat);
+                }
+                if (m_pSeqControl->pParentSeqControl) {
+                    MulMatrix(mat, m_pSeqControl->pParentSeqControl->controlMatrix, mat);
+                }
+            }
+            setBilinear(m_pSeqControl->fgBilinear);
+            if (mat.m[0][0] != 1.0f || mat.m[1][1] != 1.0f || mat.m[2][2] != 1.0f) setBilinear(TRUE);
+        }
+    } else {
+        if (mat.m[0][0] != 1.0f || mat.m[1][1] != 1.0f || mat.m[2][2] != 1.0f) setBilinear(TRUE);
+    }
+    ScaleVector(vCol, vCol, 128.0f);
+    sceVu0ClampVector(vCol, vCol, 0.0f, 255.0f);
+    FTOI0Vector(*(IVECTOR*)&lCol, vCol);
+    bBilinear = isBilinear();
+    if (m_Flg & 8) {
+        for (INT i = 0; i < m_nPoly; i++) {
+            getRect(primPosBuf[i], m_pSprPrim[i]);
+        }
+        getFukidasiRect(primPosBuf);
+    }
+    for (INT i = 0; i < m_nPoly; i++) {
+        SprPrim* pSprPrim = &m_pSprPrim[i];
+        FVECTOR2* primPos;
+        if (m_Flg & 8) {
+            primPos = primPosBuf[i];
+        } else {
+            getRect(primPosBuf[0], *pSprPrim);
+            primPos = primPosBuf[0];
+        }
+        G_RGBA* primCol = (G_RGBA*)((BYTE*)pSprPrim->pSprParts + 0x1C);
+        G_XY* pXY = &pSprPrim->polyGT4.m_P0;
+        G_RGBA* pRGBA = &pSprPrim->polyGT4.m_C0;
+        pSprPrim->polyGT4.setTexNearest(!bBilinear);
+        for (INT j = 0; j < 4; j++) {
+            FVECTOR& v0 = fVec;
+            _applyMatrix2(v0, mat, *primPos);
+            _ftoi4(iVec, fVec);
+            if (!bBilinear) {
+                iVec.x = (iVec.x & 0xFFFFFFF0) | 8;
+                iVec.y = (iVec.y & 0xFFFFFFF0) | 8;
+            }
+            pXY->set(iVec.x, iVec.y);
+            pXY++;
+            pRGBA->col = _mulColor(primCol->col, lCol);
+            primCol++;
+            pRGBA++;
+            primPos++;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/2d/2DSprObj", move__Q22D29C2DSprObj);
+#endif
 void C2DSprObj::getRect(FVECTOR2* pvOut4, SprPrim& rSprPrim) {
     FVECTOR fVec;
     IVECTOR iVec;
