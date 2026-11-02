@@ -1,5 +1,5 @@
-#define EFFECT_CPP
-#define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h"
+#define EFFECT_CPP /* MATCH: effect.cpp includes effect_inl.h itself after Coord.h (weak order) and owns the placeholder strings; without it the link fails */
+#define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h" /* MATCH: this unit names effect.h by its full original path */
 #include <string.h>
 
 #include "System/Graphic/Effect/effect.h"
@@ -150,8 +150,45 @@ int EFFECT_DATA::get_num() const {
 }
 
 #line 124
+/* Parked: 4 of 133 lines, same size - with i reused for the DPD loop and the ParNum TRACE before `p += 16` (draft
+ * below) the loop registers match; left: the two TRACE header reads go through data (s3) in the original, ours
+ * through p (s1), and `p += 16` sits before the ParNum TRACE there. The placeholder's form (own j, p += first) is
+ * also 4 lines (i in a0, not s2). Tried: dpx_header/data/p reads, declaration orders, late p init, j counting
+ * down, permuter 10 min (12 -> 12). */
+#if 0
+void EFFECT_DATA::Setup(u_long128* data, BOOL bDownVer) {
+    u_char* p = (u_char*)data;
+    _DPX_HEADER* dpx_header = (_DPX_HEADER*)p;
+    int dpd_num;
+    int i;
+#line 127
+    ASSERT(0 == (int)data % 16);
+    TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> DpxVer:%d\n", ((_DPX_HEADER*)data)->DpxVer);
+    TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> ParNum:%d\n", ((_DPX_HEADER*)data)->ParNum);
+    p += sizeof(_DPX_HEADER);
+#line 133
+    ASSERT(dpx_header->DpxVer >= 130);
+    ((_DPX_HEADER*)data)->Head = 0x5844;
+    for (i = 0; i < dpx_header->ParNum; i++, p += sizeof(_DPX_PAR)) {
+        if (((_DPX_PAR*)p)->Dpd) ((_DPX_PAR*)p)->Dpd = (u_long128*)((u_char*)((_DPX_PAR*)p)->Dpd + (int)data);
+    }
+    dpd_num = *(int*)p;
+    p += sizeof(int);
+    TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> DpdNum:%d\n", dpd_num);
+    for (i = 0; i < dpd_num; i++) {
+        EFFECT_DPD_DATA* dpd = (EFFECT_DPD_DATA*)(*(int*)p + (int)data);
+        pppInitDpd((char*)dpd);
+        if (bDownVer) dpd->sHead.ver = 140;
+        dpd->sHead.mcode = s_nMagicCode;
+        dpd->sHead.head = 0x5044;
+        p += sizeof(int);
+        s_nMagicCode++;
+        TRACE_USER((USER)6, "EFFECT_DATA::Setup() -> pppInitDpd() -> DpdVer:%08x\n", *(int*)dpd);
+    }
+}
+#else
 __asm__(".section .sdata\n");
-/* Placeholder for the INCLUDE_ASM'd Setup below (emits its strings in place). Near match: p and i swap s1/s2. */
+/* Placeholder for the INCLUDE_ASM'd Setup below (emits its strings in place). */
 static void __attribute__((section(".sdata"))) _Setup(u_long128* data, BOOL bDownVer) {
     u_char* p = (u_char*)data;
     _DPX_HEADER* dpx_header = (_DPX_HEADER*)p;
@@ -183,6 +220,7 @@ static void __attribute__((section(".sdata"))) _Setup(u_long128* data, BOOL bDow
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/effect", Setup__11EFFECT_DATAPUxi);
+#endif
 
 #line 181
 void EFFECT_DATA::Shift(u_long128* to, u_long128* from) {
@@ -307,8 +345,9 @@ void CEffect::_playSE(const EFFECT_SE* pSeData, UINT nNo) {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/effect", _updateSE__7CEffect);
-/* Near match: "li v0,-1" and "lw s0,36(s1)" swap in the first block. */
+/* Parked: 2 of 94 lines, same size - "li v0,-1" (nVol) and "lw s0,36(s1)" (m_pCrds for Crd(0)) swap in the first
+ * block. Tried: nVol at function scope or assigned separately, Crd(0)/getWorldPos into a local first (6), nPan
+ * declared first, permuter 10 min (2 -> 2). */
 #if 0
 void CEffect::_updateSE() {
     if (!m_hSe && m_nSeID > 0 && !isWaiting()) {
@@ -324,6 +363,8 @@ void CEffect::_updateSE() {
         }
     }
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/effect", _updateSE__7CEffect);
 #endif
 
 void CEffect::_fadeoutSE(FLOAT fFrame) {
@@ -343,10 +384,12 @@ int CEffect::_setData(const EFFECT_DATA& effect_data, u_int no) {
 }
 
 void strcpyEffName(char* pszDstName, const char* pszSrcName, INT nNum);
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/effect", strcpyEffName__FPcPCci);
-/* Near match: the original keeps the destination in a second register (t1/a3). */
+/* Parked: 8 of 24 lines, 4 bytes short - the original keeps the destination in its own register (t1) and copies it
+ * each iteration (a3 = t1; store via a3; t1 = a3 + 1 in the bnel delay slot); ours advances a3 itself. Tried: a
+ * per-iteration copy p (CSE'd away), char c local (19), *dst++ forms (13-16), increment in the for step (9),
+ * return instead of break (19). */
 #if 0
-static void strcpyEffName(char* pszDstName, const char* pszSrcName, INT nNum) {
+void strcpyEffName(char* pszDstName, const char* pszSrcName, INT nNum) {
     if (!pszDstName || !pszSrcName) return;
     for (INT i = 0; i < nNum; i++) {
         *pszDstName = pszSrcName[i];
@@ -357,6 +400,8 @@ static void strcpyEffName(char* pszDstName, const char* pszSrcName, INT nNum) {
         pszDstName++;
     }
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/effect", strcpyEffName__FPcPCci);
 #endif
 
 INT CEffect::_strcmpName(const char* pszEffName) {
