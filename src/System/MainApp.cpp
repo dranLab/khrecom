@@ -10,6 +10,15 @@
 #include "System/Graphic/Effect/effect.h"
 #include "Game/Card.h"
 #include "Game/Technic.h"
+/* defined before Game/Status.h: CStatus::initialize inlines it */
+#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
+inline void* operator new(size_t size, char* msg) throw() {
+    return com_malloc_d(size, msg, RET_ADDR());
+}
+inline void* operator new[](size_t size, char* msg) throw() {
+    return com_malloc_d(size, msg, RET_ADDR());
+}
 #include "Game/Status.h"
 inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/Atel/AtelCrossFade.h"
@@ -23,14 +32,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
-inline void* operator new[](size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
 inline void operator delete[](void* mem) { com_free(mem); }
 
 struct SemaParam {
@@ -236,14 +237,6 @@ struct MainAppSingletons {
     static void finalizeTechnic() {
         if (CTechnic::m_pInstance) delete CTechnic::m_pInstance;
         CTechnic::m_pInstance = __null;
-    }
-    static void initStatus() {
-        if (!(__null == CStatus::m_pInstance)) AssertApp("Game/Status.h", 37, "__null == m_pInstance", 0);
-        CStatus::m_pInstance = new ("Game/Status.h(38)") CStatus;
-    }
-    static void finalizeStatus() {
-        if (CStatus::m_pInstance) delete CStatus::m_pInstance;
-        CStatus::m_pInstance = __null;
     }
 };
 
@@ -627,7 +620,7 @@ static void _setupManagers() {
     CCtdMan::initialize();
     MainAppSingletons::initCard();
     MainAppSingletons::initTechnic();
-    MainAppSingletons::initStatus();
+    CStatus::initialize();
     _bSetupManagers = 1;
 }
 
@@ -675,7 +668,7 @@ static void _disposeManagers() {
     TRACE("---- chnic::finalize(); ----\n");
     MainAppSingletons::finalizeTechnic();
     TRACE("---- atus::finalize(); ----\n");
-    MainAppSingletons::finalizeStatus();
+    CStatus::finalize();
     TRACE("---- CSceneEnv::finalize(); ----\n");
     CSceneEnv::finalize();
     TRACE("---- CCoordMan::finalize(); ----\n");

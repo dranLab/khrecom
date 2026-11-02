@@ -149,19 +149,19 @@ void CStatus::setStatus(unsigned char (*pInitCardTbl)[2]) {
 
 BOOL CStatus::setMP(INT inMP) {
     if (inMP < 0) {
-        _info()->MP = 0;
+        m_pStatusInfo->MP = 0;
         return FALSE;
     }
     if (inMP > 99999) {
-        _info()->MP = 99999;
+        m_pStatusInfo->MP = 99999;
         return FALSE;
     }
-    _info()->MP = inMP;
+    m_pStatusInfo->MP = inMP;
     return TRUE;
 }
 
 BOOL CStatus::addMP(INT inMP) {
-    return setMP(_info()->MP + inMP);
+    return setMP(getMP() + inMP);
 }
 
 INT CStatus::getLvExp(UINT inLV) {
@@ -174,9 +174,9 @@ BOOL CStatus::isLevelUp() {
     INT exp;
     if (CGame::getDbgGameMode() == 7) return FALSE;
     if (CGame::getDbgGameMode() == 8) return FALSE;
-    exp = getLvExp(_info()->LV);
+    exp = getLvExp(getLV());
     if (exp < 0) return FALSE;
-    return _info()->EXP >= exp;
+    return getEXP() >= exp;
 }
 
 // SOURCE DATA: .data .rodata

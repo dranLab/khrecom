@@ -872,7 +872,7 @@ INT CCard::checkCurrentDeck() {
             nTotalCP += getCP(pDeck[i]);
         }
     }
-    if (nAttackCard) return (CStatus::m_pStatusInfo->CPMax < nTotalCP) << 1;
+    if (nAttackCard) return (CStatus::getCPMax() < nTotalCP) << 1;
     return 1;
 }
 
