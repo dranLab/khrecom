@@ -650,6 +650,7 @@ def compare(ours, ref):
             out[m.name].add(m.params)
         return out
     rm, om = methods(ref), methods(ours)
+    ref_names = {m.name for m in ref.members if m.kind == "method"}
     # A destructor right after the implicit operator=/X() block is the implicit one (gcc 2.95 chains the
     # implicitly declared members in front of the user's): not required unless our class declares it.
     dtor = "~" + cls
@@ -674,7 +675,8 @@ def compare(ours, ref):
         "padding": padding,
         "order_ok": common_f == [f for f in ref_fields if f in common_f],
         "missing_methods": sorted(n for n in rm if n not in om),
-        "extra_methods": sorted(n for n in om if n not in rm and n not in ("~" + cls, cls)),
+        # a name the ref lists at all is not extra (its parameterless operator= entries are dropped above)
+        "extra_methods": sorted(n for n in om if n not in rm and n not in ref_names and n not in ("~" + cls, cls)),
         # the ref lists only named parameters (unnamed/unused ones are dropped): fewer than the ref is wrong
         "param_mismatch": sorted(n for n, ps in rm.items() if n in om and any(ps)
                                  and all(o < p for o in om[n] for p in ps if p)),
