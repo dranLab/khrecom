@@ -35,6 +35,9 @@ struct CARD { // 0x4
         };
     };
 
+    void init(/* parameters unknown */);
+    BYTE getTexNo(/* parameters unknown */);
+    BYTE getTexPos(/* parameters unknown */);
     LPCTSTR getName();
 };
 
