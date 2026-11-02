@@ -433,12 +433,176 @@ void CShadowModelMan::drawAfter() {
     CPackMan::pkCloseGifTag(qp);
     CModel::resetSendCtrl(4);
 }
-/* Placeholder for the INCLUDE_ASM'd function below: its float constant (1.7014118e38f) in .rodata. */
-__asm__(".section .sdata\n");
-static FLOAT __attribute__((section(".sdata"))) _getScreenAreaClipToWorldPosConst() {
-    return 1.7014118e38f;
+static int _getCrossPoint(FVECTOR& ww, const FVECTOR& pw0, const FVECTOR& vw0, float height, float limit);
+static void _ScreenToWorld(FVECTOR& w, const FMATRIX& wvm, const SCREEN* scr, const FVECTOR& s);
+static void _WorldToScreen(FVECTOR& s, const FMATRIX& wsm, const SCREEN* scr, const FVECTOR& w);
+static FLOAT _HitLineLine2D(FVECTOR& p0, FVECTOR& p1, FVECTOR& l0, FVECTOR& l1, INT iXYZ);
+#define SDW_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SDW_MAX(a, b) ((a) > (b) ? (a) : (b))
+
+void getScreenAreaClipToWorldPos(FVECTOR& sv, FVECTOR& ev, FVECTOR* av, const FMATRIX& wvm, const FMATRIX& wsm,
+                                 const SCREEN* scr, const IRECT* clips, float height, float limit) {
+    FVECTOR ww[4];
+    FVECTOR vs[4];
+    FVECTOR vw[4];
+    FVECTOR ps;
+    FVECTOR pw;
+    FVECTOR vss[2];
+    float min_x;
+    float max_x;
+    float min_y;
+    float max_y;
+    int i;
+    int chk;
+    int over;
+    float xsa;
+    float ysa;
+    float c;
+    float k;
+    min_x = clips->m_left;
+    max_x = clips->m_right;
+    min_y = clips->m_top;
+    max_y = clips->m_bottom;
+    vs[0].set(min_x, min_y, scr->scrz);
+    vs[1].set(max_x, min_y, scr->scrz);
+    vs[2].set(min_x, max_y, scr->scrz);
+    vs[3].set(max_x, max_y, scr->scrz);
+    over = 0;
+    chk = 0;
+    ps.set(0.0f, 0.0f, 0.0f);
+    _ScreenToWorld(pw, wvm, scr, ps);
+    for (i = 0; i < 4; i++) {
+        _ScreenToWorld(vw[i], wvm, scr, vs[i]);
+        if (_getCrossPoint(ww[i], pw, vw[i], height, limit)) {
+            chk++;
+            over++;
+            if (i & 1) {
+                _WorldToScreen(vss[0], wsm, scr, ww[i - 1]);
+                _WorldToScreen(vss[1], wsm, scr, ww[i]);
+                if (vss[0].x == vss[1].x || chk == 1) {
+                    vss[0].x = vss[0].x < min_x ? min_x : (max_x < vss[0].x ? max_x : vss[0].x);
+                    vss[0].y = vss[0].y < min_y ? min_y : (max_y < vss[0].y ? max_y : vss[0].y);
+                    vss[1].x = vss[1].x < min_x ? min_x : (max_x < vss[1].x ? max_x : vss[1].x);
+                    vss[1].y = vss[1].y < min_y ? min_y : (max_y < vss[1].y ? max_y : vss[1].y);
+                } else {
+                    if (vss[0].y < vss[1].y) {
+                        xsa = vss[0].x - vss[1].x;
+                        ysa = vss[0].y - vss[1].y;
+                        c = vss[0].y;
+                    } else {
+                        xsa = vss[1].x - vss[0].x;
+                        ysa = vss[1].y - vss[0].y;
+                        c = vss[1].y;
+                    }
+                    k = ysa / xsa;
+                    if (max_x < vss[0].x) {
+                        vss[0].y = k * max_x + c;
+                        vss[0].x = max_x;
+                    } else if (vss[0].x < min_x) {
+                        vss[0].y = k * min_x + c;
+                        vss[0].x = min_x;
+                    }
+                    if (max_x < vss[1].x) {
+                        vss[1].y = k * max_x + c;
+                        vss[1].x = max_x;
+                    } else if (vss[1].x < min_x) {
+                        vss[1].y = k * min_x + c;
+                        vss[1].x = min_x;
+                    }
+                }
+                _ScreenToWorld(vw[i - 1], wvm, scr, vss[0]);
+                _ScreenToWorld(vw[i], wvm, scr, vss[1]);
+                _getCrossPoint(ww[i - 1], pw, vw[i - 1], height, limit);
+                _getCrossPoint(ww[i], pw, vw[i], height, limit);
+                chk = 0;
+            }
+        }
+    }
+    sv.x = SDW_MIN(SDW_MIN(ww[0].x, ww[1].x), SDW_MIN(ww[2].x, ww[3].x));
+    sv.y = height;
+    sv.z = SDW_MIN(SDW_MIN(ww[0].z, ww[1].z), SDW_MIN(ww[2].z, ww[3].z));
+    sv.w = 1.0f;
+    ev.x = SDW_MAX(SDW_MAX(ww[0].x, ww[1].x), SDW_MAX(ww[2].x, ww[3].x));
+    ev.y = height;
+    ev.z = SDW_MAX(SDW_MAX(ww[0].z, ww[1].z), SDW_MAX(ww[2].z, ww[3].z));
+    ev.w = 1.0f;
+    if (av) {
+        if (over) {
+            FLOAT fT;
+            INT iChk;
+            FVECTOR vWPos[5];
+            FVECTOR vSRct[4];
+            FVECTOR vSOut[2];
+            FVECTOR vScr[2];
+            vSOut[0].set(0.0f, 10000.0f, 0.0f);
+            vSOut[1].set(0.0f, 10000.0f, 0.0f);
+            vSRct[0].set(min_x, min_y, scr->scrz);
+            vSRct[1].set(min_x, max_y, scr->scrz);
+            vSRct[2].set(max_x, min_y, scr->scrz);
+            vSRct[3].set(max_x, max_y, scr->scrz);
+            vWPos[0].set(sv.x, sv.y, sv.z);
+            vWPos[1].set(ev.x, sv.y, sv.z);
+            vWPos[2].set(ev.x, sv.y, ev.z);
+            vWPos[3].set(sv.x, sv.y, ev.z);
+            vWPos[4].set(sv.x, sv.y, sv.z);
+            iChk = 0;
+            for (int i = 0; i < 2; i++) {
+                for (int j = 0; j < 4; j++) {
+                    _WorldToScreen(vScr[0], wsm, scr, vWPos[j]);
+                    _WorldToScreen(vScr[1], wsm, scr, vWPos[j + 1]);
+                    fT = _HitLineLine2D(vSRct[i * 2], vSRct[i * 2 + 1], vScr[0], vScr[1], 2);
+                    if (fT != 1.7014118e38f) {
+                        FVECTOR vTmp;
+                        SubVectorXYZ(vTmp, vScr[1], vScr[0]);
+                        ScaleVectorXYZ(vTmp, vTmp, fT);
+                        AddVectorXYZ(vTmp, vScr[0], vTmp);
+                        if (vTmp.y < vSOut[i].y) {
+                            iChk |= 1 << i;
+                            vSOut[i] = vTmp;
+                        }
+                    }
+                }
+            }
+            if (iChk == 1) {
+                _ScreenToWorld(vw[0], wvm, scr, vSOut[0]);
+                _getCrossPoint(ww[0], pw, vw[0], height, limit);
+            }
+            if (iChk == 2) {
+                _ScreenToWorld(vw[1], wvm, scr, vSOut[1]);
+                _getCrossPoint(ww[1], pw, vw[1], height, limit);
+            }
+            if (iChk == 3) {
+                int ii = 1;
+                int i = 0;
+                if (vSOut[1].y > vSOut[0].y) {
+                    ii = 0;
+                    i = 1;
+                }
+                FVECTOR v[2];
+                v[0] = vSOut[i];
+                v[1] = vSOut[i];
+                v[0].x += min_x * 4.0f;
+                v[1].x += max_x * 4.0f;
+                fT = _HitLineLine2D(vSRct[ii * 2], vSRct[ii * 2 + 1], v[0], v[1], 2);
+                if (fT != 1.7014118e38f) {
+                    FVECTOR vTmp;
+                    SubVectorXYZ(vTmp, v[1], v[0]);
+                    ScaleVectorXYZ(vTmp, vTmp, fT);
+                    AddVectorXYZ(vTmp, v[0], vTmp);
+                    vSOut[ii] = vTmp;
+                }
+                for (ii = 0; ii < 2; ii++) {
+                    _ScreenToWorld(vw[ii], wvm, scr, vSOut[ii]);
+                    _getCrossPoint(ww[ii], pw, vw[ii], height, limit);
+                }
+            }
+        }
+        av[0] = ww[0];
+        av[1] = ww[1];
+        av[2] = ww[2];
+        av[3] = ww[3];
+    }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/ShadowModel", getScreenAreaClipToWorldPos__FR7FVECTORT0P7FVECTORRC7FMATRIXT3PC6SCREENPCt6RECT_T1Ziff);
 
 static int _getCrossPlanePoint(FVECTOR& ww, const FVECTOR& pw0, const FVECTOR& vw0, float height, float limit) {
     FVECTOR vPlaneNormal;
