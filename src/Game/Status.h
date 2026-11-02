@@ -1,4 +1,3 @@
-// PARTIAL: added for Form/Menu/MonstroGauge
 #ifndef GAME_STATUS_H
 #define GAME_STATUS_H
 
@@ -6,19 +5,13 @@
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
 
-/* Placeholder for CStatus's inline singleton creation: its strings ("Game/Status.h",
- * "__null == m_pInstance", "Game/Status.h(38)") are in .rodata of every includer.
- * Only line 38 is known (it is part of the allocation message). */
 #ifndef STATUS_H_PATH // MATCH: path override for Game/Status ("c:/KHCOM/MainApp/...")
 #define STATUS_H_PATH "Game/Status.h"
 #endif
 #line 1 STATUS_H_PATH
-inline void* _statusCreate(void* inInstance) {
-    if (!(__null == inInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-    return com_malloc_d(4, __FILE__ "(38)", (UINT)-1);
-}
+/* MATCH: operator new for CStatus::initialize's allocation, declared only: the includers define it themselves */
+inline void* operator new(size_t size, char* msg) throw();
 
-/* PARTIAL: added for Form/Menu/LevelUp - accessors inline, as the callers read m_pStatusInfo directly. */
 struct STATUS_INFO {
     INT HP;       /* 0x00 */
     INT HPMax;    /* 0x04 */
@@ -32,42 +25,58 @@ struct STATUS_INFO {
     INT playTime; /* 0x24 */
 };
 
+typedef STATUS_INFO STATUS;
+
 class CStatus {
 private:
-    friend struct MainAppSingletons; // PARTIAL: System/MainApp creates and deletes the instance
-    friend class CCard; // PARTIAL: added for Game/Card
     static CStatus* m_pInstance;
     static STATUS_INFO* m_pStatusInfo;
-    /* read through a reference: the original reloads m_pStatusInfo after every store into it */
-    static STATUS_INFO*& _info() { return m_pStatusInfo; }
-    CStatus(); // PARTIAL: added for Game/Status
+
+    CStatus();
     ~CStatus();
-    static void setStatus(unsigned char (*pInitCardTbl)[2]);
 
 public:
-    static STATUS_INFO& getStaus() { return *m_pStatusInfo; } // PARTIAL: added for Game/Player/Player (name as in the original; plain read, no reload)
-    static INT getHP() { return _info()->HP; }
-    static void setHP(INT n) { _info()->HP = n; }
-    static INT getHPMax() { return _info()->HPMax; }
-    static void setHPMax(INT n) { _info()->HPMax = n; }
-    static INT getCPMax() { return _info()->CPMax; }
-    static void setCPMax(INT n) { _info()->CPMax = n; }
-    static INT getAP() { return _info()->AP; }
-    static void setAP(INT n) { _info()->AP = n; }
-    static INT getDPMax() { return _info()->DPMax; }
-    static void setDPMax(INT n) { _info()->DPMax = n; }
-    static INT getEXP() { return _info()->EXP; }
-    static INT getLV() { return _info()->LV; }
-    static void setLV(INT n) { _info()->LV = n; }
-    static INT getMP() { return _info()->MP; } // PARTIAL: added for Form/Menu/Camp
-    static INT getLvExp(UINT nLv);
-    static void setEXP(INT inEXP) { _info()->EXP = inEXP; } // PARTIAL: added for Form/DebugWindowTBL
-    static BOOL setMP(INT inMP);                             // PARTIAL: added for Form/DebugWindowTBL
+#line 36
+    static CStatus& initialize() {
+        if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
+        m_pInstance = new (__FILE__ "(38)") CStatus;
+        return *m_pInstance;
+    }
+    static void finalize() {
+        if (m_pInstance) delete m_pInstance;
+        m_pInstance = __null;
+    }
+    static STATUS& getStaus() { return *m_pStatusInfo; }
+    /* MATCH: the accessors read m_pStatusInfo through a reference: the original reloads it after every store into it */
+    static INT getHP() { STATUS_INFO*& p = m_pStatusInfo; return p->HP; }
+    static void setHP(INT n) { STATUS_INFO*& p = m_pStatusInfo; p->HP = n; }
+    static INT getHPMax() { STATUS_INFO*& p = m_pStatusInfo; return p->HPMax; }
+    static void setHPMax(INT n) { STATUS_INFO*& p = m_pStatusInfo; p->HPMax = n; }
+    static INT getCP(/* parameters unknown */);
+    static void setCP(/* parameters unknown */);
+    static INT getCPMax() { STATUS_INFO*& p = m_pStatusInfo; return p->CPMax; }
+    static void setCPMax(INT n) { STATUS_INFO*& p = m_pStatusInfo; p->CPMax = n; }
+    static INT getAP() { STATUS_INFO*& p = m_pStatusInfo; return p->AP; }
+    static void setAP(INT n) { STATUS_INFO*& p = m_pStatusInfo; p->AP = n; }
+    static INT getDPMax() { STATUS_INFO*& p = m_pStatusInfo; return p->DPMax; }
+    static void setDPMax(INT n) { STATUS_INFO*& p = m_pStatusInfo; p->DPMax = n; }
+    static INT getEXP() { STATUS_INFO*& p = m_pStatusInfo; return p->EXP; }
+    static void setEXP(INT inEXP) { STATUS_INFO*& p = m_pStatusInfo; p->EXP = inEXP; }
+    static INT getLV() { STATUS_INFO*& p = m_pStatusInfo; return p->LV; }
+    static void setLV(INT n) { STATUS_INFO*& p = m_pStatusInfo; p->LV = n; }
+    static INT getMP() { STATUS_INFO*& p = m_pStatusInfo; return p->MP; }
+    static BOOL setMP(INT inMP);
     static BOOL addMP(INT inMP);
+    static INT getPlayTime(/* parameters unknown */);
+    static void setPlayTime(/* parameters unknown */);
+    static INT getLvExp(UINT nLv);
     static BOOL isLevelUp();
 #ifdef GAME_SCENEINFO_H /* MATCH: only for includers that have SceneInfo.h (WORLD_ID) */
-    static void initStatus(USHORT nDeck, WORLD_ID nWorld, SHORT nFloor); // PARTIAL: added for Form/DebugMenu
+    static void initStatus(USHORT nDeck, WORLD_ID nWorld, SHORT nFloor);
 #endif
+
+private:
+    static void setStatus(unsigned char (*pInitCardTbl)[2]);
 };
 
 #endif /* GAME_STATUS_H */
