@@ -436,9 +436,9 @@ void CRoulette::main() {
     case 3: {
         vec.set(-200.0f, -100.0f, 0.0f, 1.0f);
         if (!m_fgRoulette) {
-            USHORT nDeck = CCard::m_pCardInfo->_nCurrentDeck;
-            nCard = CCard::m_pCardInfo->_nDeck[nDeck];
-            pDeck = CCard::m_pCardInfo->_deck[nDeck];
+            USHORT nDeck = CCard::getCurrentDeckNo();
+            nCard = CCard::getDeckMax(nDeck);
+            pDeck = CCard::getDeck(nDeck);
         } else {
             CARD card[22];
             CGimmickManager* pGimMan = (CGimmickManager*)getSysTask(0x11);
@@ -639,7 +639,7 @@ INT CRoulette::menuMain() {
             m_pBaloonCtrl->enableDisp(FALSE);
             if (!m_fgRoulette) {
                 m_nSelect = (m_idxStart + 5) % m_nCardMax;
-                CCard::makePremiereDeck(_ref(CCard::m_pCardInfo)->_nCurrentDeck, m_idxDeck[m_nSelect]);
+                CCard::makePremiereDeck(CCard::getCurrentDeckNo(), m_idxDeck[m_nSelect]);
                 m_nSelect = (m_idxStart + 5) % m_nCardDummyMax;
             } else {
                 m_nSelect = (m_idxStart + 5) % m_nCardDummyMax;

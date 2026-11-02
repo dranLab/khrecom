@@ -396,7 +396,7 @@ void CDecknameEdit::_getDeckName() {
         }
     }
     for (INT i = 0; i < 3; i++) {
-        _convertHan2Zen((CHAR*)m_szNameBuf[i], CCard::m_pCardInfo->_deckName[i]);
+        _convertHan2Zen((CHAR*)m_szNameBuf[i], CCard::getDeckName(i));
         TRACE_USER(HMATSUOK, "%d [%s]\n", i, m_szNameBuf[i]);
     }
 }
@@ -406,7 +406,7 @@ void CDecknameEdit::_setDeckName() {
 
     for (i = 0; i < 3; i++) {
         CCard::setDeckName(i, (CHAR*)m_szNameBuf[i]);
-        TRACE_USER(HMATSUOK, "%d [%s] -> [%s]\n", i, m_szNameBuf[i], CCard::m_pCardInfo->_deckName[i]);
+        TRACE_USER(HMATSUOK, "%d [%s] -> [%s]\n", i, m_szNameBuf[i], CCard::getDeckName(i));
     }
 }
 
@@ -783,7 +783,7 @@ void CDnEditNamePlate::_initialize() {
     FVECTOR fvPos;
     G_RGBA stRGBA;
 
-    m_nEquipNo = CCard::m_pCardInfo->_nCurrentDeck;
+    m_nEquipNo = CCard::getCurrentDeckNo();
     LIMIT_RANGE(m_nDeckNo, 0, 2);
     nType = _getDispType();
     setBasePos(2, NULL, -1);

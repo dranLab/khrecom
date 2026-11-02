@@ -3657,7 +3657,7 @@ BOOL CBattleEnemy::canCreateEnemyCard_() {
     CARD_KIND kind = m_CardKind;
     if (kind == 0x59) return FALSE;
     if (!CCard::canAddCard((USHORT)kind, 0)) return FALSE;
-    if (CCard::m_pCardInfo->_nMapTotal < 5) return FALSE;
+    if (CCard::getMapTotal() < 5) return FALSE;
     if (DebugWork::g_dw.enemy.uiFlag & 0x2000) return TRUE;
     INT rate = m_pEnemyParam->uiEnemyCardDrop;
     RoomInfo* room = CSceneInfo::getRoomInfo(-1);

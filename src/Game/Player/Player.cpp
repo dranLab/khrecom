@@ -920,7 +920,7 @@ void CPlayer::makeRevolver() {
         if (!pDeck) {
             m_pRevolver = new (com_malloc_d(sizeof(CardBattle::CCardRevolver), __FILE__ "(1156)", RET_ADDR())) CardBattle::CCardRevolver(this, NULL, 1, -1);
         } else {
-            INT max = CCard::m_pCardInfo->_nDeck[CCard::m_pCardInfo->_nCurrentDeck];
+            INT max = CCard::getCurrentDeckMax();
             INT sc = CCard::getCurrentShortCut();
             if (dbgCheckUser(KKIKUCHI) && sc == -1) sc = DebugWork::g_dw.player.iTemp;
             deck = (CARD*)com_malloc_d((max + 1) * sizeof(CARD), __FILE__ "(1172)", RET_ADDR());

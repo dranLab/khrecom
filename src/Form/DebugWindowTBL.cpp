@@ -2890,7 +2890,7 @@ static BOOL debugWCCardFull(CDebugWindow* pObj, INT inY, INT inParam) {
         }
     }
     if (CGame::isSoraGame()) {
-        while (CCard::m_pCardInfo->_nBattleTotal < 999) {
+        while (CCard::getBattleTotal() < 999) {
             for (j = 0; j < 6; j++) {
                 for (i = idTbl[j][0]; i < idTbl[j][1]; i++) {
                     for (k = 0; k < 10; k++) {

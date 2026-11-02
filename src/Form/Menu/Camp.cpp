@@ -366,9 +366,6 @@ extern CHAR D_004E33E8[]; /* "\x81~%02d", setDeckInfo */
 template <class T> static inline T& _ref(T& v) { return v; }
 
 /* CCard's inline accessors (not in the original's symbols) */
-static inline CARD* _getDeck(USHORT nDeck) { return _ref(CCard::m_pCardInfo)->_deck[nDeck]; }
-static inline void _setCurrentDeckNo(USHORT nDeck) { CCard::m_pCardInfo->_nCurrentDeck = nDeck; }
-static inline UINT _getDeckCount(USHORT nDeck) { return _ref(CCard::m_pCardInfo)->_nDeck[nDeck]; }
 
 static inline void _setCardNK(CARD& c, USHORT kind, BYTE num) {
     c.m_nId = 0;
@@ -547,7 +544,7 @@ CCamp::CCamp(CTask* p, BOOL bWorldmapMode) : CMenu(p, 0) {
     m_nDeckSelect = 0;
     m_nNumSelect = 0;
     m_nCardInOut = 0;
-    m_nDeckNoSelect = _ref(CCard::m_pCardInfo)->_nCurrentDeck;
+    m_nDeckNoSelect = CCard::getCurrentDeckNo();
     m_nButtonHelpRun[1] = 999;
     m_nButtonHelpRun[0] = 999;
     m_nMainCmdHistRun[1] = 999;
@@ -560,7 +557,7 @@ CCamp::CCamp(CTask* p, BOOL bWorldmapMode) : CMenu(p, 0) {
     m_bCategorySelectMode = 0;
     m_nTechSelectTop = 0;
     m_nTechSelect = 0;
-    m_nDeckSetSelect = _ref(CCard::m_pCardInfo)->_nCurrentDeck;
+    m_nDeckSetSelect = CCard::getCurrentDeckNo();
     m_bShortCutMode = 0;
     m_nConfigSelect = 0;
     m_nStatusMax = 0;
@@ -749,7 +746,7 @@ void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
         m_nKindTotal[i] = 0;
     }
     m_nCard = 0;
-    pDeck = _getDeck(nInDeck);
+    pDeck = CCard::getDeck(nInDeck);
     for (INT i = 0; i < m_nCardKindMax; i++) {
         for (INT j = 0; j < 10; j++) {
             m_nKind10Tbl[i][j] = m_nCardKind10[i][j];
@@ -779,7 +776,7 @@ void CCamp::initCardKind(INT nInDeck, INT nInCategory, BOOL bCardDelete) {
         }
         for (INT i = 0; i < 3; i++) {
             CARD* pDst = cardTmp[i];
-            pCardTmp = _getDeck(i);
+            pCardTmp = CCard::getDeck(i);
             for (INT j = 0; j < 99; j++) {
                 pDst[j] = pCardTmp[j];
             }
@@ -866,8 +863,8 @@ void CCamp::initDeck(INT nInDeck, INT nInCategory) {
     INT nSCIndex;
     INT idx;
 
-    m_pDeckSrc = _getDeck(nInDeck);
-    m_nDeck[0] = _getDeckCount(nInDeck);
+    m_pDeckSrc = CCard::getDeck(nInDeck);
+    m_nDeck[0] = CCard::getDeckMax(nInDeck);
     m_nDeck[4] = 0;
     m_nDeck[3] = 0;
     m_nDeck[2] = 0;
@@ -2458,7 +2455,7 @@ INT CCamp::deckSetWinMenu() {
         }
         break;
     case 3:
-        _setCurrentDeckNo(m_nDeckSetSelect);
+        CCard::setCurrentDeckNo(m_nDeckSetSelect);
         setDeckSetWin(9);
         setDeckDeck(0x13);
         m_nSubStep = 2;
@@ -2698,7 +2695,7 @@ INT CCamp::mapCardWinMenu() {
             CSound::playSE(4, -1, 0x40);
             m_nSubStep = 2;
         } else if (_isButtonTrg(0x40, 0)) {
-            if (CCard::m_pCardInfo->_nMapTotal < 0x15) {
+            if (CCard::getMapTotal() < 0x15) {
                 m_nError = 3;
                 m_nErrorWinStep = 0;
                 m_nSubStep = 6;
@@ -3947,12 +3944,12 @@ INT CCamp::setDeckDeck(INT nSetCmd) {
                 p2DSeqCtrl->addSeq(m_pSeqName, m_nDeckNoSelect * 2 + 0xF2);
                 p2DSeqObj = p2DSeqCtrl->addSeqShift(m_pSeqName, 0xAE, -2.0f, 108.0f);
                 p2DSeqObj->changeLayer(0x10);
-                if (m_nDeckSelect == CCard::m_pCardInfo->_nCurrentDeck) {
+                if (m_nDeckSelect == CCard::getCurrentDeckNo()) {
                     p2DSeqCtrl->enableDisp(1, TRUE);
                 } else {
                     p2DSeqCtrl->enableDisp(1, FALSE);
                 }
-                m_pDeckDeckFnt[0] = NEW(4591, C2DFnt)(0, 0, &rgba, 0xE, CCard::m_pCardInfo->_deckName[m_nDeckNoSelect], 0x40);
+                m_pDeckDeckFnt[0] = NEW(4591, C2DFnt)(0, 0, &rgba, 0xE, CCard::getDeckName(m_nDeckNoSelect), 0x40);
                 p2DSeqObj = p2DSeqCtrl->addFntShift(m_pSeqName, m_pDeckDeckFnt[0], -73.0f, -9.0f);
                 p2DSeqObj->changeLayer(0x10);
             }
@@ -4059,12 +4056,12 @@ INT CCamp::setDeckDeck(INT nSetCmd) {
         if (m_pDeckDeckCtrl[2]) {
             INT nIdx = m_nDeckNoSelect * 2;
             m_pDeckDeckCtrl[2]->replaceSeq(0, m_pSeqName, !m_nCardInOut ? nIdx + 0xF2 : nIdx + 0xF1);
-            if (m_nDeckNoSelect == CCard::m_pCardInfo->_nCurrentDeck) {
+            if (m_nDeckNoSelect == CCard::getCurrentDeckNo()) {
                 m_pDeckDeckCtrl[2]->enableDisp(1, TRUE);
             } else {
                 m_pDeckDeckCtrl[2]->enableDisp(1, FALSE);
             }
-            m_pDeckDeckFnt[0]->setText(CCard::m_pCardInfo->_deckName[m_nDeckNoSelect]);
+            m_pDeckDeckFnt[0]->setText(CCard::getDeckName(m_nDeckNoSelect));
         }
         break;
     }
@@ -4728,9 +4725,9 @@ INT CCamp::setDeckSetWin(INT nSetCmd) {
         C2DMan::getLayPosition(m_pLadName, 0xD, 2, vec, 0);
         C2DMan::getLayPosition(m_pLadName, 0xD, 3, vec2, 0);
         for (INT i = 0; i < 3; i++) {
-            INT nSetSeqIdx = i == CCard::m_pCardInfo->_nCurrentDeck ? 0 : 2;
+            INT nSetSeqIdx = i == CCard::getCurrentDeckNo() ? 0 : 2;
             CButton* pButton = m_pDeckSetButton[i] = NEW(5656, CButton);
-            pButton->init(m_pSeqName, 0x10, decksetSeqTbl, vec, m_pDeckSetWinCtrl, CCard::m_pCardInfo->_deckName[i], 0xE, 2.0f, 1.0f,
+            pButton->init(m_pSeqName, 0x10, decksetSeqTbl, vec, m_pDeckSetWinCtrl, CCard::getDeckName(i), 0xE, 2.0f, 1.0f,
                           0x40, NULL, nSetSeqIdx + fgSetOrClear);
             if (nSetSeqIdx == 0) {
                 m_pDeckSetEquipFnt = NEW(5663, C2DFnt)(0, 0, &rgba, 0xD, CCtdMan::getText(0x500003), 0x40);
@@ -5154,7 +5151,7 @@ INT CCamp::setStatusWin(INT nSetCmd) {
                     break;
                 case 5:
                     if (!m_bPlayerKind) {
-                        pBuf = CCard::m_pCardInfo->_deckName[CCard::m_pCardInfo->_nCurrentDeck];
+                        pBuf = CCard::getDeckName(CCard::getCurrentDeckNo());
                     } else {
                         sprintf(buf, statusStr[0], CStatus::getDPMax());
                     }
@@ -6436,7 +6433,7 @@ INT CCamp::setStatusWin1(INT nSetCmd) {
                     pButton = m_pWin1EtcButton[3];
                     C2DMan::getLayPosition(m_pLadName, 0, 0x12, vec2, 1);
                     pButton->init(m_pSeqName, 0x14, deckNameSeqTbl, vec2, NULL,
-                                  CCard::m_pCardInfo->_deckName[CCard::m_pCardInfo->_nCurrentDeck], 0xE, -3.0f, 2.0f, 0x40,
+                                  CCard::getDeckName(CCard::getCurrentDeckNo()), 0xE, -3.0f, 2.0f, 0x40,
                                   NULL, -1);
                 }
             }
@@ -7395,7 +7392,7 @@ void CCamp::setCurrentRoomName(INT nSetCmd) {
 
 void CCamp::setTotalCP() {
     m_nTotalCP = 0;
-    CARD* pDeck = _getDeck(m_nDeckNoSelect);
+    CARD* pDeck = CCard::getDeck(m_nDeckNoSelect);
     for (INT i = 0; i < 99; i++) {
         if (pDeck[i].m_nId) {
             m_nTotalCP += CCard::getCP(pDeck[i]);

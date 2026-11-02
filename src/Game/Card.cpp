@@ -302,7 +302,7 @@ CCard::CCard() {
 CCard::~CCard() {}
 
 /* read through a reference: the original reloads m_pCardInfo after a store into it */
-static inline CARD_INFO*& _infoRef() { return CCard::m_pCardInfo; }
+template <class T> static inline T& _ref(T& v) { return v; }
 
 static inline void _setCard2(CARD& c, USHORT inKind, CHAR num) {
     c.m_nId = 0;
@@ -412,11 +412,11 @@ void CCard::initCardWorld() {
 /* placeholder for initCardWorld's .rodata strings */
 __asm__(".rdata\n"); /* the preceding INCLUDE_ASM left .text; gcc assumes .rdata for these strings */
 inline void _initCardWorldStrings() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_SENSITIVE);
+    void* m_pCardInitRsrc = CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_SENSITIVE);
 #line 118
-    if (!CCard::m_pCardInitRsrc) AssertApp(__FILE__, __LINE__, "m_pCardInitRsrc", 0);
+    if (!m_pCardInitRsrc) AssertApp(__FILE__, __LINE__, "m_pCardInitRsrc", 0);
 #line 121
-    if (!(*(UINT*)&((CI_HEADER*)CCard::m_pCardInitRsrc)->sig == 0x00494340)) AssertApp(__FILE__, __LINE__, "*(UINT*)&pCIHeader->sig == 0x00494340", 0);
+    if (!(*(UINT*)&((CI_HEADER*)m_pCardInitRsrc)->sig == 0x00494340)) AssertApp(__FILE__, __LINE__, "*(UINT*)&pCIHeader->sig == 0x00494340", 0);
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Card", initCardWorld__5CCard);
 #endif
@@ -439,14 +439,14 @@ void CCard::initCard(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFloorN
 #line 160
         ASSERT(m_pCardInitRsrc);
     }
-    _infoRef()->_nTotalMax = 999;
-    _infoRef()->_nFlag = 0;
+    _ref(m_pCardInfo)->_nTotalMax = 999;
+    _ref(m_pCardInfo)->_nFlag = 0;
     initCardAppearance();
     pCIHeader = (CI_HEADER*)m_pCardInitRsrc;
 #line 173
     ASSERT(*(UINT*)&pCIHeader->sig == 0x00494340);
     pIdxTbl = (USHORT*)((BYTE*)pCIHeader + pCIHeader->ofsTbl);
-    for (i = 0; i < 3; i++) strcpy(_infoRef()->_deckName[i], pDeckName[i]);
+    for (i = 0; i < 3; i++) strcpy(_ref(m_pCardInfo)->_deckName[i], pDeckName[i]);
     if (inNo == 0) {
         if (CGame::isSoraGame()) {
             idx = inCurrentFloorNumber - 1;
@@ -697,12 +697,12 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Card", searchCardKind__5CCardUss)
 
 INT CCard::addDeck(CARD inCard, USHORT inDeckNum) {
     if (!inCard.m_nCategory0 || inCard.m_nCategory0 >= 8) return 0;
-    if (_infoRef()->_nDeck[inDeckNum] >= 99) return 0;
-    CARD* pDeck = _infoRef()->_deck[inDeckNum];
+    if (_ref(m_pCardInfo)->_nDeck[inDeckNum] >= 99) return 0;
+    CARD* pDeck = _ref(m_pCardInfo)->_deck[inDeckNum];
     for (INT i = 0; i < 99; i++) {
         if (!pDeck[i].m_nId) {
             pDeck[i] = inCard;
-            _infoRef()->_nDeck[inDeckNum]++;
+            _ref(m_pCardInfo)->_nDeck[inDeckNum]++;
             return 1;
         }
     }
@@ -802,10 +802,10 @@ void CCard::packDeck(USHORT inDeckNum) {
 
 INT CCard::removeDeck(USHORT inDeckNum, SHORT inIdx) {
     if (inIdx >= 99) return 0;
-    CARD* pDeck = _infoRef()->_deck[inDeckNum];
+    CARD* pDeck = _ref(m_pCardInfo)->_deck[inDeckNum];
     if (!pDeck[inIdx].m_nId) return 0;
     pDeck[inIdx].m_nId = 0;
-    _infoRef()->_nDeck[inDeckNum]--;
+    _ref(m_pCardInfo)->_nDeck[inDeckNum]--;
     if (inIdx == getShortCut(inDeckNum)) clearShortCut(inDeckNum);
     return 1;
 }
@@ -1411,15 +1411,15 @@ void CCard::initCardAppearance() {
     memset(m_pCardInfo->_fgNew, 0, 0x4B);
     for (i = 0; i < 0x12A; i++) setCardAppearance(i, 0);
     if (CGame::isSoraGame()) {
-        _infoRef()->_nBattleTotalMax = 0x38B;
-        _infoRef()->_nMapTotalMax = 99;
+        _ref(m_pCardInfo)->_nBattleTotalMax = 0x38B;
+        _ref(m_pCardInfo)->_nMapTotalMax = 99;
         setCardPossible(1);
         setCardPossible(0x1B);
         setCardPossible(0x1D);
         setCardPossible(0x2A);
     } else {
-        _infoRef()->_nBattleTotalMax = 999;
-        _infoRef()->_nMapTotalMax = 99;
+        _ref(m_pCardInfo)->_nBattleTotalMax = 999;
+        _ref(m_pCardInfo)->_nMapTotalMax = 99;
         setCardPossible(0x12);
     }
 }
