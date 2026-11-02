@@ -78,14 +78,15 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/2DMan (C2DMan for every includer: 28 stand-ins + SaveLoadCtrl.h copy, gate and string placeholders dropped) | 851 | 54 | 17 | 763 (677) | 177 |
 | 2026-11-02 | cleanup/Gprim (Gprim's classes for every includer: 19 partial classes, the CZFill/CPolyGT4/C3DCPrim copies and the gate dropped; 5 callers on the ref API) | 822 | 52 | 0 | 760 (673) | 180 |
 | 2026-11-02 | decomp/System-Graphic-PathData (finished 47/49, dispDebugLine/getNearPath parked; A1: no stand-ins) | 822 | 52 | 0 | 760 (673) | 180 |
+| 2026-11-02 | cleanup/System-Graphic-ShadowModel (CShadowModelMan stand-ins in DebugWindowTBL/ModelMan, isDraw; VSME on the ref density setters) | 823 | 50 | 0 | 760 (673) | 180 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 822 (765 in 111 headers, 57 in 33 .cpp); MATCH: 180
-  by category: method 313, data member 62, type 72, fwd decl 49, #include 31, changed in place 120, padding 8, path override 22, gate 23, guessed 29, header-level 71, stand-in 16, other 6
-stand-ins: 52 foreign in 32 files (28 names), 201 unattributed, 167 own
+PARTIAL: 823 (765 in 111 headers, 58 in 34 .cpp); MATCH: 180
+  by category: method 313, data member 62, type 72, fwd decl 49, #include 31, changed in place 120, padding 8, path override 22, gate 23, guessed 29, header-level 71, stand-in 17, other 6
+stand-ins: 50 foreign in 31 files (28 names), 201 unattributed, 167 own
 duplicate class names across headers: 0
 padding: 14 arrays, 0 accessors
 mechanisms: 760 sites (673 untagged); #line: 1242
@@ -101,7 +102,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
+| R1 | 5.0 | `System/Graphic/ShadowModel.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 3.0 | `Form/DebugWindow.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
@@ -127,7 +128,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
-| `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 3 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, isDraw, setAutomaticDistance, setAutomaticHeight, setClipDistance, ... (+4); extra methods: setADensity, setCDensity; 6 PARTIAL |
 | `RsrcInfo` | gated | System/RsrcData.h | 3 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
@@ -145,6 +145,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CRsrcDB` | partial | System/RsrcDB.h | 1 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene; 1 PARTIAL |
 | `CRsrcTex` | gated | System/RsrcData.h | 1 |  |  |
 | `CRsrcVSV` | gated | System/RsrcData.h | 1 |  | missing methods: getBgmID, getFilePath, getSectorSize, getStartSector, ~CRsrcVSV |
+| `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 1 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, setAutomaticDistance, setAutomaticHeight, setClipDistance, setDraw, ... (+3); 6 PARTIAL |
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
@@ -306,7 +307,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 8 |
 | `System/Graphic/PathDataCamera.h` | 1 | 0/1/0/0 | 3 |
 | `System/Graphic/ScreenMask.h` | 0 | 0/1/1/0 | 5 |
-| `System/Graphic/ShadowModel.h` | 6 | 0/0/1/0 | 7 |
+| `System/Graphic/ShadowModel.h` | 6 | 0/0/1/0 | 9 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
 | `System/Graphic/StrPrim.h` | 1 | 0/1/0/0 | 36 |
 | `System/Graphic/TexInfo.h` | 1 | 1/0/1/0 | 234 |
