@@ -29,7 +29,7 @@ struct EXTRA_ENEMY_PARAM {
     FLOAT fValue;    /* 0xc */
 };
 
-struct BASIC_ENEMY_PARAM { // PARTIAL: added for Game/Enemy/BattleEnemy
+struct BASIC_ENEMY_PARAM {
     INT iHP;  /* 0x0 */
     INT iAP;  /* 0x4 */
     INT iExp; /* 0x8 */

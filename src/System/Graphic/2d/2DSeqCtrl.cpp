@@ -168,7 +168,7 @@ C2DSeqObj* C2DSeqCtrl::addSeq(const CHAR* pSedName, UINT idxSeq) {
     if (!handle) return NULL;
     C2DSeqObj* p2DSeqObj = C2DSeq::getCurrent2DSeqObj();
     if (!p2DSeqObj) return NULL;
-    if (!m_nType && !m_nSeq) p2DSeqObj->m_fgParent = 0;
+    if (!m_nType && !m_nSeq) p2DSeqObj->setParent();
     if (m_nLayer >= 0) p2DSeqObj->changeLayer(m_nLayer);
     if (!m_bEnable) p2DSeqObj->enableDisp(FALSE);
     m_bitEnable |= m_bitTbl[m_nSeq];
@@ -196,7 +196,7 @@ C2DSeqObj* C2DSeqCtrl::addFnt(const CHAR* pSqdName, C2DFnt* p2DFnt) {
     if (!handle) return NULL;
     C2DSeqObj* p2DSeqObj = C2DSeq::getCurrent2DSeqObj();
     if (!p2DSeqObj) return NULL;
-    if (!m_nType && !m_nSeq) p2DSeqObj->m_fgParent = 0;
+    if (!m_nType && !m_nSeq) p2DSeqObj->setParent();
     if (m_nLayer >= 0) p2DSeqObj->changeLayer(m_nLayer);
     if (!m_bEnable) p2DSeqObj->enableDisp(FALSE);
     m_bitEnable |= m_bitTbl[m_nSeq];
@@ -222,7 +222,7 @@ C2DSeqObj* C2DSeqCtrl::replaceSeq(UINT nIdx, const CHAR* pSedName, UINT idxSeq) 
     if (!handle) return NULL;
     p2DSeqObj = C2DSeq::getCurrent2DSeqObj();
     if (!p2DSeqObj) return NULL;
-    if (!m_nType && !nIdx) p2DSeqObj->m_fgParent = 0;
+    if (!m_nType && !nIdx) p2DSeqObj->setParent();
     if (m_nLayer >= 0) p2DSeqObj->changeLayer(m_nLayer);
     if (!m_bEnable) p2DSeqObj->enableDisp(FALSE);
     m_hSeqHandle[nIdx] = handle;
@@ -247,7 +247,7 @@ C2DSeqObj* C2DSeqCtrl::replaceFnt(UINT nIdx, const CHAR* pSedName, C2DFnt* p2DFn
     if (!handle) return NULL;
     p2DSeqObj = C2DSeq::getCurrent2DSeqObj();
     if (!p2DSeqObj) return NULL;
-    if (!m_nType && !nIdx) p2DSeqObj->m_fgParent = 0;
+    if (!m_nType && !nIdx) p2DSeqObj->setParent();
     if (m_nLayer >= 0) p2DSeqObj->changeLayer(m_nLayer);
     if (!m_bEnable) p2DSeqObj->enableDisp(FALSE);
     m_hSeqHandle[nIdx] = handle;

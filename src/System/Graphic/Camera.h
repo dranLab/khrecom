@@ -93,7 +93,6 @@ private:
 public:
     CCamera(CTask* pParent, INT nPri);
     virtual ~CCamera();
-    // PARTIAL: inline members added for System/Graphic/Camera
     void setCameraPriority(INT nPri) {
         if (nPri < 0) {
             m_nCameraPriority = 0x80;

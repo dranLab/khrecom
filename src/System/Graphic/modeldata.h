@@ -23,7 +23,7 @@ struct BBOX {
     float z[2];
 };
 
-struct BONELABEL { /* PARTIAL: added for System/Graphic/Model */
+struct BONELABEL {
     char m_Name[16];     /* 0x00 */
     SHORT m_ParentIndex; /* 0x10 */
     SHORT m_BuddyIndex;  /* 0x12 */

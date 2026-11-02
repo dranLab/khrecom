@@ -63,7 +63,7 @@ struct BULLET_PARAM {
     BULLET_EFFECT_SHADOW_INFO* pShadow;    /* 0xbc */
 
     void init(INT inBulletID, INT inGroupID);
-    INT isAttachNoRot() const { return uiFlag & 1; } // PARTIAL: added for Game/Bullet/Bullet
+    INT isAttachNoRot() const { return uiFlag & 1; }
 };
 
 
@@ -108,7 +108,7 @@ public:
     void setCollAttackPos(const FVECTOR& inPos);
     virtual void disp();
     void setOwner(HANDLE inOwner) { m_hOwner = inOwner; }
-    // PARTIAL: Game/Bullet/CreateBullet calls setOwner with the owner entity (defined below, outside Bullet.cpp,
+    // MATCH: Game/Bullet/CreateBullet calls setOwner with the owner entity (defined below, outside Bullet.cpp,
     // since an inline member here would be emitted in Bullet.o)
     void setOwner(CEntity* inOwner);
     void setAttackID(UINT inID);

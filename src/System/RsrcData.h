@@ -455,7 +455,6 @@ public:
         _setupVSV();
     }
     CHAR* getFilePath();
-    // PARTIAL: bodies added for System/Sound/SoundMan (from its inlined reads)
     UINT getStartSector() { return m_nStartSect; }
     UINT getSectorSize() { return m_nSectSize; }
     UINT getBgmID() { return m_nBgmID; }

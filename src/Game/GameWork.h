@@ -119,9 +119,9 @@ public:
 };
 
 class CGameWork {
-    friend class CSceneInfo;       // PARTIAL: added for Game/SceneInfo
-    friend struct _SceneInfoWork;  // PARTIAL: added for Game/SceneInfo (its file-local functions)
-    friend class CAtel; // PARTIAL: added for Game/Atel/Atel (_ref(m_pMCWork) keeps the original's reload after each store)
+    friend class CSceneInfo;       // MATCH: Game/SceneInfo uses the private members (friends are not in the debug info)
+    friend struct _SceneInfoWork;  // MATCH: Game/SceneInfo's file-local functions (same)
+    friend class CAtel; // MATCH: Game/Atel/Atel (_ref(m_pMCWork) keeps the original's reload after each store)
 public:
     enum BACKUP {
         BACKUP_PRIMARY = 0,
