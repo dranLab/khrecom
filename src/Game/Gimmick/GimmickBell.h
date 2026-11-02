@@ -11,8 +11,8 @@ private:
 
 public:
     CGimmickBell(CTask* inParent);
-    virtual ~CGimmickBell();
     virtual void AfterInit();
+    virtual ~CGimmickBell();
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
     virtual void beginStateMain();
     virtual void stateMain();

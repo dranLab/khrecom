@@ -15,9 +15,9 @@ private:
 
 public:
     CGimmickHitReturn(CTask* inParent, INT in_GimID);
+    virtual void AfterInit();
     virtual ~CGimmickHitReturn();
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
-    virtual void AfterInit();
     virtual void beginStateMain();
     virtual void stateMain();
     virtual void endStateMain();

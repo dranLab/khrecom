@@ -14,8 +14,8 @@ private:
 
 public:
     CGimmickThunderTrap(CTask* inParent);
-    virtual ~CGimmickThunderTrap();
     virtual void AfterInit();
+    virtual ~CGimmickThunderTrap();
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
     virtual void beginStateMain();
     virtual void stateMain();
@@ -35,8 +35,8 @@ private:
 
 public:
     CGimmickThunderLaser(CTask* inParent);
-    virtual ~CGimmickThunderLaser();
     virtual void AfterInit();
+    virtual ~CGimmickThunderLaser();
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
     virtual void beginStateMain();
     virtual void stateMain();

@@ -15,8 +15,8 @@ private:
 public:
     CGimmickJumpStand(CTask* inParent, INT in_GimID);
     virtual ~CGimmickJumpStand();
-    virtual INT getTypeID() const;
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
+    virtual INT getTypeID() const;
     virtual void beginStateMain();
     virtual void stateMain();
     virtual void endStateMain();

@@ -16,9 +16,9 @@ private:
 
 public:
     CGimmickSteamTrap(CTask* inParent);
+    virtual void AfterInit();
     virtual ~CGimmickSteamTrap();
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
-    virtual void AfterInit();
     virtual void beginStateMain();
     virtual void stateMain();
     virtual void endStateMain();

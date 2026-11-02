@@ -5,7 +5,7 @@
 
 class CEnemyTornadostep : public CHeartless {
 private:
-    INT m_iMoveStep; /* 0x880 */
+    INT m_iPropellerStep; /* 0x880 */
 
 public:
     CEnemyTornadostep(CTask* inParent);
@@ -16,10 +16,9 @@ protected:
     virtual void endStateMain();
     virtual void beginStateAttack1();
     virtual void stateAttack1();
+    virtual void endStateAttack1();
     virtual void beginStateAttack2();
     virtual void stateAttack2();
-private:
-    virtual void endStateAttack1();
     virtual void endStateAttack2();
 };
 

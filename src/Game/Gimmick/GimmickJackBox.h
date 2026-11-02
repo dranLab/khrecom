@@ -11,8 +11,8 @@ private:
 
 public:
     CGimmickJackBox(CTask* inParent);
-    virtual ~CGimmickJackBox();
     virtual void AfterInit();
+    virtual ~CGimmickJackBox();
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
     virtual void beginStateMain();
     virtual void stateMain();

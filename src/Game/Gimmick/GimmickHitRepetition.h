@@ -15,9 +15,9 @@ private:
 
 public:
     CGimmickHitRepetition(CTask* inParent, INT in_GimID);
+    virtual void AfterInit();
     virtual ~CGimmickHitRepetition();
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
-    virtual void AfterInit();
     void putPrize();
     virtual void beginStateMain();
     virtual void stateMain();
