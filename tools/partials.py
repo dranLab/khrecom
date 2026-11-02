@@ -647,9 +647,18 @@ def compare(ours, ref):
             out[m.name].add(m.params)
         return out
     rm, om = methods(ref), methods(ours)
+    # A destructor right after the implicit operator=/X() block is the implicit one (gcc 2.95 chains the
+    # implicitly declared members in front of the user's): not required unless our class declares it.
+    dtor = "~" + cls
+    lead = [m.name for m in ref.members if m.kind == "method" and not m.name.startswith("$")
+            and not (m.name == "operator=" or (m.name == cls and m.params == 0))][:1]
+    implicit_dtor = lead == [dtor] and dtor not in om
+    if implicit_dtor:
+        rm.pop(dtor, None)
     common_f = [f for f in our_fields if f in ref_fields]
-    rvirt = [m.name for m in sorted((m for m in ref.members if m.kind == "method" and m.vslot is not None),
-                                    key=lambda m: m.vslot)]
+    # Overriders keep their slot from the base: compare the declaration order (the ref's member order).
+    rvirt = [m.name for m in ref.members if m.kind == "method" and m.vslot is not None
+             and not (implicit_dtor and m.name == dtor)]
     ovirt = [m.name for m in ours.members if m.kind == "method" and m.virtual]
     vcommon = [v for v in ovirt if v in rvirt]
     return {
