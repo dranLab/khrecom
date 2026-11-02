@@ -12,7 +12,7 @@
 #include "Game/CardBattle.h"
 #include "System/Graphic/Str.h"
 
-/* Placeholder: an empty string follows Str.h's strings in .rodata (as in GimmickWallHole); which header it comes
+/* MATCH: Placeholder: an empty string follows Str.h's strings in .rodata (as in GimmickWallHole); which header it comes
  * from is not known. */
 inline void _emptyStringPlaceholder() {
     TRACE("");

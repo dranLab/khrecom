@@ -11,7 +11,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 
-/* Placeholders: three empty strings follow CollUtil.h's strings in .rodata (as in Friend and Summon). */
+/* MATCH: Placeholders: three empty strings follow CollUtil.h's strings in .rodata (as in Friend and Summon). */
 inline void _emptyStringPlaceholder0() {
     TRACE("");
 }
@@ -22,7 +22,7 @@ inline void _emptyStringPlaceholder2() {
     TRACE("");
 }
 
-/* Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. */
+/* MATCH: Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. */
 inline void _premiumPrizeMessage() {
     TRACE("\x83v\x83\x8c\x83~\x83" "A\x83\x80\x83v\x83\x89\x83" "C\x83Y\x93\xfc\x8e\xe8\x81I\x81I\n");
 }

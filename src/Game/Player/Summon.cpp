@@ -9,7 +9,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 
-/* Placeholders: three empty strings follow CollUtil.h's strings in .rodata (as in FriendAladdin). */
+/* MATCH: Placeholders: three empty strings follow CollUtil.h's strings in .rodata (as in FriendAladdin). */
 inline void _emptyStringPlaceholder0() {
     TRACE("");
 }

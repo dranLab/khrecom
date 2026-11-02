@@ -8,7 +8,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 
-/* Placeholders: three empty strings follow CollUtil.h's strings in .rodata (as in FriendAladdin). */
+/* MATCH: Placeholders: three empty strings follow CollUtil.h's strings in .rodata (as in FriendAladdin). */
 inline void _emptyStringPlaceholder0() {
     TRACE("");
 }
@@ -59,7 +59,7 @@ namespace Friend {
 
 static LPCSTR g_szBoneWeaponR = "WeaponR";
 
-/* Placeholders: two empty strings follow "WeaponR" in .rodata. */
+/* MATCH: Placeholders: two empty strings follow "WeaponR" in .rodata. */
 inline void _emptyStringPlaceholder3() {
     TRACE("");
 }

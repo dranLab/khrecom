@@ -26,7 +26,7 @@ inline void* operator new[](size_t size, char* msg) throw() {
 }
 inline void operator delete[](void* mem) { com_free(mem); }
 
-/* Placeholder for an unknown header's inline function: its empty string literal follows "System/RsrcData.h(156)" in
+/* MATCH: Placeholder for an unknown header's inline function: its empty string literal follows "System/RsrcData.h(156)" in
  * the original .rodata. */
 inline void _emptyTrace() {
     TRACE("");

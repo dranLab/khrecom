@@ -10,7 +10,7 @@
 #include "Game/Collision/CollUtilA.h"
 #include "Game/Collision/CollUtil.h"
 
-/* Placeholder: an empty string follows CollUtil.h's strings in .rodata (as in GimmickCarry); which header it
+/* MATCH: Placeholder: an empty string follows CollUtil.h's strings in .rodata (as in GimmickCarry); which header it
  * comes from is not known. */
 inline void _emptyStringPlaceholder() {
     TRACE("");

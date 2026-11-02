@@ -11,7 +11,7 @@
 #include "Game/OsdDef.h"
 #include "System/Graphic/Anim.h"
 
-/* Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header). */
+/* MATCH: Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header). */
 inline void _createEnemyMotionName() {
     TRACE("e123_062");
 }

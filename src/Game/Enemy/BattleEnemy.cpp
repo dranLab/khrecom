@@ -14,7 +14,7 @@
 #include "Game/Enemy/BattleEnemy.h"
 #include "System/Graphic/Anim.h"
 #include "System/Graphic/Str.h"
-/* Placeholder: an empty string follows Str.h's strings in .rodata; which header it comes from is not known. */
+/* MATCH: Placeholder: an empty string follows Str.h's strings in .rodata; which header it comes from is not known. */
 inline void _emptyStringPlaceholder0() {
     TRACE("");
 }

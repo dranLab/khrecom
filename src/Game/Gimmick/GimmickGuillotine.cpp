@@ -8,7 +8,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 
-/* Placeholders: three empty strings follow CollUtil.h's strings in .rodata (as in GimmickWindowLid/Bell); which
+/* MATCH: Placeholders: three empty strings follow CollUtil.h's strings in .rodata (as in GimmickWindowLid/Bell); which
  * headers they come from is not known. */
 inline void _emptyStringPlaceholder0() {
     TRACE("");

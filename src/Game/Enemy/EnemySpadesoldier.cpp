@@ -10,12 +10,12 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 
-/* Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). */
+/* MATCH: Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). */
 inline void _enemySpadesoldierEmptyString() {
     TRACE("");
 }
 
-/* Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. */
+/* MATCH: Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. */
 inline void _premiumPrizeMessage() {
     TRACE("\x83v\x83\x8c\x83~\x83" "A\x83\x80\x83v\x83\x89\x83" "C\x83Y\x93\xfc\x8e\xe8\x81I\x81I\n");
 }
