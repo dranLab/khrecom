@@ -1,5 +1,5 @@
 #define GAME_GIMMICK_GIMMICKMANAGER_CPP
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include <string.h>
 #include "Game/Gimmick/GimmickManager.h"
 extern "C" int sprintf(char* buf, const char* fmt, ...);

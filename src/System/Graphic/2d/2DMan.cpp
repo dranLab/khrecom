@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define SYSTEM_GRAPHIC_2D_2DMAN_CPP
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define D2MAN_H_PATH "c:/KHCOM/MainApp/System/Graphic/2d/2Dman.h"

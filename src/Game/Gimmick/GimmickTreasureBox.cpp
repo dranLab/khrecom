@@ -1,7 +1,7 @@
 /* .rodata: with CardMaxWarningMain compiled (its #if 0 version below), this include order and the placeholder
  * reproduce the unit's .rodata byte for byte (checked); add "// SOURCE DATA: .rodata" and compile NormalMain,
  * EnemyMain and EnemyPop (they match) once CardMaxWarningMain matches. */
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "Game/Gimmick/GimmickTreasureBox.h"
 #include "System/Graphic/Effect/effect.h"

@@ -4,6 +4,7 @@
 #define TECHNIC_H_PATH "c:/KHCOM/MainApp/Game/Technic.h" /* MATCH: the original includes it under this name */
 #define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h" /* MATCH: the original includes it under this name */
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "Game/Technic.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -14,7 +15,6 @@
 /* MATCH: placeholder: an empty string follows CollUtil.h's strings in .rodata; which header it comes from is not known */
 inline void _emptyStringPlaceholderCardRevolver() { TRACE(""); }
 #include "Game/CardRevolver.h"
-#include "System/TaskMan.h"
 #include "System/Sound/SoundMan.h"
 #include "Game/GameWork.h"
 #include "Game/Player/Player.h"

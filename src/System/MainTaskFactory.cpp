@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define ANIM_H_PATH "System/Graphic/anim.h"
 #include "System/MainTaskFactory.h"
 #include "System/HeapMan.h"

@@ -1,4 +1,5 @@
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Anim.h"
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Graphic/Gprim.h"
@@ -6,7 +7,6 @@
 #include "Game/CardBattle.h"
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
-
 /* Placeholders: three empty strings follow CollUtil.h's strings in .rodata (as in FriendAladdin). */
 inline void _emptyStringPlaceholder0() {
     TRACE("");

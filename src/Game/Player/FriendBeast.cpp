@@ -1,5 +1,6 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "Game/Player/FriendBeast.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -25,7 +26,6 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/Player/PlayerAttack.h"
 #include "Game/AttackMotion.h"
 #include "Game/Movement.h"
-#include "System/TaskMan.h"
 
 namespace Friend {
 

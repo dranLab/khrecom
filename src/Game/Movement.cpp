@@ -2,6 +2,7 @@
 #define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
 #define GPRIM_H_PATH "System/Graphic/Gprim.h"
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "Game/Collision/CollInfo.h"
 
 
@@ -22,7 +23,6 @@
 #include "Game/Entity.h"
 #include "Game/Collision/CollMap.h"
 #include "System/Math3D.h"
-#include "System/TaskMan.h"
 #include "System/Debug.h"
 #include "System/Graphic/Camera.h"
 #include "System/Graphic/Effect/EffectMan.h"

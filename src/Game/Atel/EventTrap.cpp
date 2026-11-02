@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "Game/Atel/EventTrap.h"
 #include "Game/Collision/CollUtil.h"
 

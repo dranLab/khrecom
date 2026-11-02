@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "Game/Gimmick/GimmickWindowLid.h"
 #include "System/Graphic/Gprim.h"

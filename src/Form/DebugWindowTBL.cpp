@@ -1,6 +1,7 @@
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Str.h"
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #define DEBUGPATHDATA_H_PATH "Game/Debug/DebugPathData.h" /* MATCH: the original includes it under this name */
 #include "Game/Debug/DebugPathData.h"
@@ -20,7 +21,6 @@ inline void _emptyStringPlaceholder() {
 #include "Game/Technic.h"
 #include "Game/Status.h"
 #include "Game/Card.h"
-#include "System/TaskMan.h"
 #include "System/PadIO.h"
 #include "System/Rnd.h"
 #include "System/MainApp.h"

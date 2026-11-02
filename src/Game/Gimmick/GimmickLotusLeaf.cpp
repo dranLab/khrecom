@@ -1,6 +1,6 @@
 #define ANIM_H_GETFLAG_DECL_ONLY /* MATCH: the original calls CAnim::getFlag out of line */
 #line 1
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "Game/Gimmick/GimmickLotusLeaf.h"
 #include "Game/BodyCollision.h"

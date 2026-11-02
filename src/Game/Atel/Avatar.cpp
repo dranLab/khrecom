@@ -1,6 +1,6 @@
 #include "khtypes.h"
 #define ENTITY_H_SETFLAG_DIRECT /* MATCH: setEntityFlag on the CEntity base subobject (constructor, InitAvatar) */
-#define TASK_H_NO_SLC_OVERFLOW_MSG /* MATCH: the original .rodata has no Task.h container-overflow message */
+
 #include "Game/Atel/Avatar.h"
 #include "System/Graphic/Anim.h"
 #include "System/Graphic/Model.h"

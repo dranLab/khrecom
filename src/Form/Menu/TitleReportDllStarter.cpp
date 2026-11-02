@@ -3,13 +3,13 @@
 #define SAVELOADCTRL_H_PATH "System/../Form/Menu/SaveLoadCtrl.h"
 #include <string.h>
 inline void* operator new(size_t, void* p) throw() { return p; }
-#include "System/Task.h" /* first: its SLC overflow message leads .rodata */
+#include "System/TaskMan.h"
+#include "System/Task.h"
 #include "Form/Menu/TitleReportDllStarter.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
 #include "Form/Menu/SaveLoadCtrl.h"
 #include "System/Fsm.h"
-
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)

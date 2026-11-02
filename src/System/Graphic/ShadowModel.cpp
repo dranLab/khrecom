@@ -5,12 +5,12 @@
 #include "System/Graphic/modeldata.h"
 #include "System/Graphic/Model.h"
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Anim.h"
 #include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
-
 /* Placeholders: two empty strings follow CollUtil.h's strings in .rodata (as in Game/Enemy/MapEnemyShadow); which
  * headers they come from is not known. */
 inline void _emptyStringPlaceholder0() {

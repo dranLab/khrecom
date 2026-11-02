@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 
 #define ANIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Anim.h"
 #include "System/Graphic/Anim.h"

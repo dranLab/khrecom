@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Graphic/Anim.h"
 #include "System/Graphic/Gprim.h"

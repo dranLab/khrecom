@@ -4,6 +4,7 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "Game/Enemy/BattleEnemyManager.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -27,7 +28,6 @@ inline void _emptyStringPlaceholder0() {
 #include "Game/Enemy/BattleEnemyManager.h"
 #include "Game/MessageManager.h"
 #include "Game/GameWork.h"
-#include "System/TaskMan.h"
 #include "System/HeapMan.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
 #include "System/Sound/SoundMan.h"

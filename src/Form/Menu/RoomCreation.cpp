@@ -1,4 +1,5 @@
 #include "Form/Menu/Menu.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -20,7 +21,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "System/Ctd/CtdMan.h"
 #include "Form/Menu/RoomCreation.h"
 #include "System/HeapMan.h"
-#include "System/TaskMan.h"
 #include "System/MainApp.h"
 #include "System/Math3D.h"
 #include "System/Graphic/PathCamera.h"

@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "Game/Gimmick/GimmickCarry.h"
 #include "System/Graphic/Effect/effect.h"

@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "Game/Gimmick/GimmickTutorial.h"
 #include "System/Graphic/Effect/effect.h"
@@ -22,10 +22,10 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "System/Graphic/modeldata.h"
 #include "System/Graphic/Model.h"
 #include "Game/Collision/CollBody.h"
-/* Placeholder: the task container overflow message (System/Task.h) comes last of the header strings here. */
-inline void _taskSLCOverflowLate() {
-    TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
-}
+
+#include "System/TaskMan.h"
+
+
 
 #include "System/Graphic/Effect/EffectMan.h"
 #include "Game/Movement.h"

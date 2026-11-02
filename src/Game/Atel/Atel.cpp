@@ -1,12 +1,12 @@
 #define ENTITY_H_SETFLAG_DIRECT /* MATCH: setEntityFlag(0, 0x1000) as a plain and (createAvatar) */
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "Game/Atel/Atel.h"
 #include "System/Graphic/Gprim.h"
 #include "Game/Atel/Avatar.h"
-/* placeholder: Task.h's container-overflow message comes after Avatar.h's strings here */
-inline void _atelTaskSLCOverflow() {
-    TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
-}
+
+#include "System/TaskMan.h"
+
+
 #include "System/Task.h"
 #include "Game/Card.h"
 #include "Game/Technic.h"

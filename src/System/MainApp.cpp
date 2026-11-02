@@ -2,6 +2,7 @@
 #define ATELCROSSFADE_H_PATH "Game/ATEL/AtelCrossFade.h" // MATCH: the original spelled the directory "ATEL"
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Ctd/CtdMan.h"
 #include "System/Graphic/Str.h"
@@ -146,7 +147,6 @@ extern "C" char _gp[];
 
 #include "System/Graphic/ModelMan.h"
 
-#include "System/TaskMan.h"
 
 #include "System/PadIO.h"
 

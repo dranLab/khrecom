@@ -1,7 +1,7 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#include "System/TaskMan.h"
 #include "Game/EntityFactory.h"
 #include "Game/Bullet/Bullet.h"
-#include "System/TaskMan.h"
 #include "System/HeapMan.h"
 
 inline void* operator new(size_t, void* p) { return p; }

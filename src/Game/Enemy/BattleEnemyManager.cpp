@@ -2,6 +2,7 @@
 #define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
@@ -27,7 +28,6 @@ inline void _emptyStringPlaceholder0() {
 #include "Game/Game.h"
 #include "Game/GameWork.h"
 #include "Game/Debug/DebugWork.h"
-#include "System/TaskMan.h"
 #include "System/Math3D.h"
 #include "System/Rnd.h"
 #include <math.h>

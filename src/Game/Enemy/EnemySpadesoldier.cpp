@@ -1,6 +1,7 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
@@ -25,7 +26,6 @@ inline void _roulettePrizeMessage() {
 #include "Game/BodyCollision.h"
 #include "Game/Movement.h"
 #include "Game/GameWork.h"
-#include "System/TaskMan.h"
 #include "Game/Collision/CollBody.h"
 #include "Game/MessageManager.h"
 namespace Message {

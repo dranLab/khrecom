@@ -1,4 +1,5 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -6,7 +7,6 @@
 #include "System/Ctd/CtdMan.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "System/Graphic/2d/2DSeqCtrl.h"
-#include "System/TaskMan.h"
 #include "Form/SystemMessage.h"
 #include <string.h>
 

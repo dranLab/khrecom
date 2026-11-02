@@ -1,7 +1,7 @@
 /* .rodata comes from the original assembly: the unit's data starts at 0x48959C (4 mod 8) with the end of
  * CSphereCollision's vtable and a copy of CCollision's, so string literals (8-byte aligned) can't be placed from
  * source. The code refers to the original's strings by their labels instead. */
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "Game/Collision/CollUtilA.h"
 #include "System/HeapMan.h"
 #include "System/Task.h"

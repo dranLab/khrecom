@@ -1,6 +1,7 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
@@ -24,7 +25,6 @@ inline void _enemyGreenrequiemEmptyString() {
 }
 
 #include "Game/Bullet/Bullet.h"
-#include "System/TaskMan.h"
 #include "System/Math3D.h"
 #include "System/Rnd.h"
 #include "Game/Movement.h"

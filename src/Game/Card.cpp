@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"
 #define TECHNIC_H_PATH "c:/KHCOM/MainApp/Game/Technic.h"

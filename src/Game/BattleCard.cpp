@@ -2,6 +2,7 @@
 #include "khtypes.h"
 #define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: the original includes it under this name */
 #define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h" /* MATCH: the original includes it under this name */
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -15,7 +16,6 @@ inline void _emptyStringPlaceholderBattleCard() { TRACE(""); }
 #include "Game/GameWork.h"
 #include "Game/Debug/DebugWork.h"
 #include "System/Rnd.h"
-#include "System/TaskMan.h"
 #include "System/Com.h"
 #include "System/Graphic/WorldEnv.h"
 #include "Game/Entity.h"

@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"
 #define STATUS_H_PATH "c:/KHCOM/MainApp/Game/Status.h"
 #include "Game/Game.h"
@@ -11,10 +11,10 @@
 #include "Game/Collision/CollUtil.h"
 /* placeholder: 8 zero bytes follow CollUtil.h's strings in the original */
 __asm__(".rdata\n.align 3\n.word 0\n.word 0\n"); /* stays in .rdata: gcc has not left it here */
-/* placeholder: Task.h's container-overflow message comes here */
-inline void _gameTaskSLCOverflow() {
-    TRACE("\x83\x5e\x83\x58\x83\x4e\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
-}
+
+#include "System/TaskMan.h"
+
+
 #ifndef KH_PLACEMENT_NEW_DEFINED // MATCH: placement new is not in the ref headers (the units define it themselves); defined once per unit
 #define KH_PLACEMENT_NEW_DEFINED
 inline void* operator new(size_t, void* p) throw() { return p; }

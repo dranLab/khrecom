@@ -1,5 +1,6 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "System/Graphic/modeldata.h"
 #include "Game/Gimmick/GimmickDoor.h"
 #include "System/Graphic/Gprim.h"
@@ -22,7 +23,6 @@ inline void _emptyStringPlaceholder0() {
 #include "Game/GameWork.h"
 #include "Game/LockOnManager.h"
 #include "Game/Player/Player.h"
-#include "System/TaskMan.h"
 
 #define DOOR_WORLD(w)                                                                                        \
     {                                                                                                        \

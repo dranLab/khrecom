@@ -1,5 +1,6 @@
 #define GAME_PLAYER_FRIEND_CPP
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#include "System/TaskMan.h"
 #include "System/Task.h"
 #include "Game/Player/Friend.h"
 #include "System/Graphic/Gprim.h"
@@ -33,7 +34,6 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/LockOnManager.h"
 #include "Game/EffectMotion.h"
 #include "Game/Bullet/BulletManager.h"
-#include "System/TaskMan.h"
 #include "System/Math3D.h"
 #include "System/Graphic/Camera.h"
 #include "Game/Debug/DebugWork.h"

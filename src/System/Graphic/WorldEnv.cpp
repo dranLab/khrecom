@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h"
 #include "System/Graphic/Effect/effect.h"
 #include "System/Graphic/WorldEnv.h"

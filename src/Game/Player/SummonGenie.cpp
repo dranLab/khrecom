@@ -1,5 +1,6 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #include "System/Task.h"
+#include "System/TaskMan.h"
 #include "Game/Player/SummonGenie.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -26,7 +27,6 @@ inline void _emptyStringPlaceholder2() {
 #include "Game/Movement.h"
 #include "Game/Bullet/Bullet.h"
 #include "Game/EntityFactory.h"
-#include "System/TaskMan.h"
 #include "System/Rnd.h"
 #include "include_asm.h"
 

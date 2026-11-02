@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "Game/Gimmick/GimmickUpFloor.h"
 #include "Game/BodyCollision.h"
 #include "System/Graphic/modeldata.h"

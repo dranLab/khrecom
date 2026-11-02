@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "System/SJoint.h"
 /* vtable order: CSJointT<CLinkedPtr> is completed before CCoords, CLinkedPtr after it */
 class CLinkedPtr;

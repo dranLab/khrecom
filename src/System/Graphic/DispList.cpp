@@ -11,7 +11,7 @@
 extern "C" void qsort(void* base, size_t num, size_t size, int (*cmp)(const void*, const void*));
 #include "System/Graphic/ModelMan.h"
 #include "System/VramMan.h"
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "System/Coord.h"
 #include "System/Graphic/ShadowModel.h"
 #include "System/Graphic/WorldEnv.h"

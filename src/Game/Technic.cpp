@@ -2,7 +2,7 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h"
 #define TECHNIC_H_PATH "c:/KHCOM/MainApp/Game/Technic.h"
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"

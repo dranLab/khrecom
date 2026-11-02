@@ -1,6 +1,7 @@
 #define GPRIM_H_PATH "System/Graphic/GPrim.h"
 #define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
 #define MAPENEMY_H_NO_COLL_ANIM /* MATCH: the original has no BodyCollision.h/Anim.h strings */
+#include "System/TaskMan.h"
 #include "Game/EntityFactory.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
@@ -54,7 +55,6 @@ inline void _createEnemyMotionName() {
 #include "Game/Enemy/MapEnemyGround.h"
 #include "Game/Enemy/MapEnemyMushroom.h"
 #include "Game/Enemy/MapEnemyAir.h"
-#include "System/TaskMan.h"
 #include "System/HeapMan.h"
 #include "System/Math3D.h"
 #include "System/Com.h"

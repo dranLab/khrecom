@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"

@@ -1,4 +1,4 @@
-#define TASK_H_NO_SLC_OVERFLOW_MSG
+
 #define CAMERAMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/CameraMan.h"
 #define GPRIM_H_PATH "System/Graphic/Gprim.h"
 #define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h"
