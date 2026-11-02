@@ -29,7 +29,7 @@ public:
     virtual BOOL initalize(INT inGroupID, INT inRsrcID, UINT iFlag);
     virtual BOOL initalize(INT inGroupID, INT inRsrcID) { return initalize(inGroupID, inRsrcID, 0); }
     virtual BOOL startCardBattle();
-    void setHeartlessFlag(UINT inSet, UINT inMask) { m_uiHeartlessFlag = (m_uiHeartlessFlag | inSet) & ~inMask; } // PARTIAL: added for Game/Enemy/EnemyBluerhapsody
+    void setHeartlessFlag(UINT inSet, UINT inMask) { m_uiHeartlessFlag = (m_uiHeartlessFlag | inSet) & ~inMask; }
     UINT isEnableRotMove() const { return m_uiHeartlessFlag & 1; }
     UINT isEnableEvade() const { return m_uiHeartlessFlag & 2; }
     UINT isEnableEvade2() const { return m_uiHeartlessFlag & 4; }
@@ -37,19 +37,19 @@ public:
 protected:
     virtual void aiCardBattle();
     virtual INT getDuelAttackState();
-    void commonMoveInit(const CHAR* inIdling, const CHAR* inWalk, FLOAT inRand); // PARTIAL: added for Game/Enemy/EnemyLargebody
+    void commonMoveInit(const CHAR* inIdling, const CHAR* inWalk, FLOAT inRand);
     void commonMove();
     void commonMoveEnd();
     void commonFlyInit(const CHAR* inIdling, const CHAR* inWalk, FLOAT inRandMin, FLOAT inRandMax);
     void commonFly();
     void commonFlyEnd();
-    static void randAimPos(FVECTOR& outPos, FLOAT inRange); // PARTIAL: added for Game/Enemy/EnemyNeoshadow
+    static void randAimPos(FVECTOR& outPos, FLOAT inRange);
     void randAimPosForFly();
     void computeRotMoveVelocity(FVECTOR& outVel, FLOAT inRot);
     BOOL checkBattleEnemyFlag(UINT inFlag);
     BOOL canRotMove();
     BOOL canEvade();
-    BOOL canAttack(INT inIndex); // PARTIAL: added for Game/Enemy/EnemyAirpirate
+    BOOL canAttack(INT inIndex);
     BOOL canAttack();
     virtual INT randomBattleCardNumber() const;
     virtual INT getBattleCardNumber(INT inIndex) const;

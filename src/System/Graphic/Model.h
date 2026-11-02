@@ -22,7 +22,7 @@ class CTexAnm;
 class CSemiModel;
 class CFadeModel;
 class CModel;
-union _TEX_UV_OFFSET { // PARTIAL: added for System/Graphic/Model
+union _TEX_UV_OFFSET {
     struct {
         FLOAT fu;
         FLOAT fv;
@@ -117,13 +117,13 @@ public:
 // PARTIAL: differs from the ref in m_pData (const), m_TexInfo (stand-in struct), the guessed friends and the public
 // 0x030 union
 class CModel : public CDrawable {
-    friend class CSemiZModel; // PARTIAL: guessed (CSemiZModel::makePkt sets m_ShaderOption, no accessor exists)
-    friend class CSemiModel;  // PARTIAL: guessed (CSemiModel::calcZ reads m_pFadeModel, no accessor exists)
-    friend class CFadeModel;  // PARTIAL: guessed (CFadeModel::makePkt calls the protected disp0)
+    friend class CSemiZModel; // MATCH: CSemiZModel::makePkt sets m_ShaderOption, no accessor exists (friends are not in the debug info)
+    friend class CSemiModel;  // MATCH: CSemiModel::calcZ reads m_pFadeModel, no accessor exists
+    friend class CFadeModel;  // MATCH: CFadeModel::makePkt calls the protected disp0
 private:
     FVECTOR m_ColorScale; /* 0x020 */
 public:
-    // PARTIAL: the 0x030 union is public for Game/Gimmick/GimmickDominoPillar, which sets bit 0x100 of m_nFlag
+    // MATCH: the 0x030 union is public for Game/Gimmick/GimmickDominoPillar, which sets bit 0x100 of m_nFlag
     // directly (an inline CModel setter adds an addiu per model and does not match)
     union {
         u_long128 _ZeroInitializer;
@@ -469,7 +469,7 @@ private:
 };
 
 class CBBox : public CGPrim {
-public: // PARTIAL: public as in the ref (struct); for Game/Map
+public: // as in the ref (struct)
     CCoord* m_pCrd;  /* 0x1c */
     G_RGBA m_C0;     /* 0x20 */
     BBOX m_bbox;     /* 0x24 */

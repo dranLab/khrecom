@@ -28,7 +28,6 @@ public:
     C2DBase();
     virtual ~C2DBase();
     static void initialize();
-    // PARTIAL: parameters added for System/Graphic/2d/2DLay
     virtual BOOL init(void* pData, const CHAR* pBaseName) = 0;
     virtual HANDLE create(UINT inNo) = 0;
     virtual void destroy(HANDLE handle) = 0;

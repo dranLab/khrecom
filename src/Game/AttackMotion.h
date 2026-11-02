@@ -69,7 +69,7 @@ private:
     UINT isEnemyPos_() { return m_uiFlag & 1; }
 };
 
-class CAttackMotion : public CAttachMotion { // PARTIAL: base CAttachMotion added for Game/Gimmick/BaseGimmick
+class CAttackMotion : public CAttachMotion {
 private:
     INT m_iAtkMotCtrlCount;           /* 0x08 */
     INT m_iNowCtrlCount;              /* 0x0c */

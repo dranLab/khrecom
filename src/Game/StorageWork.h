@@ -19,7 +19,6 @@ struct _EventDoorInfo { // 0x4
 };
 
 struct MCWork { // 0x2ad4
-    // PARTIAL: added for Form/Menu/MoogleShop
     struct _RoomInfo { // 0xb8
         /* 0x00 */ UINT __opaque[0xb4 / 4]; // _nArea .. _mapEnemyInfo
         /* 0xb4 */ UINT _moogleShopFlag;

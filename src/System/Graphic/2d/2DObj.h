@@ -14,13 +14,13 @@ namespace D2 {
 class C2DSeqObj;
 
 class C2DObj : public CSJointT<C2DObj> {
-    friend class C2DSeqObj; // PARTIAL: added for System/Graphic/2d/2DSeqObj (calls changeTexture/changeLayer)
+    friend class C2DSeqObj; // MATCH: System/Graphic/2d/2DSeqObj calls the protected changeTexture/changeLayer (friends are not in the debug info)
 protected:
     SeqControl* m_pSeqControl; /* 0x8 */
     CHAR m_fgDisp;             /* 0xc */
 
 public:
-    C2DObj() {} // PARTIAL: added for System/Graphic/2d/2DSprObj (sets m_pSeqControl itself)
+    C2DObj() {}
     C2DObj(SeqControl* pSeqControl) : m_pSeqControl(pSeqControl) {}
     virtual ~C2DObj() {}
     virtual void _main(TIMEQ qTime) = 0;

@@ -19,7 +19,7 @@ struct SPR_SPRITE;
 struct LAY_SCREEN;
 class C2DSprObj;
 
-struct SPR_PARTS { // PARTIAL: added for System/Graphic/2d/2DSeqObj
+struct SPR_PARTS {
     UINT palette;
     UINT u0;
     UINT v0;
@@ -103,7 +103,7 @@ public:
 namespace D2 {
 
 class C2DO {
-public: // PARTIAL: inline (weak in the original) and public as in the debug info, for System/Graphic/2d/2DLayObj
+public:
     HANDLE m_hBaseHandle; /* 0x0 */
     HANDLE m_hHandle;     /* 0x4 */
     /* vtable 0x8 */
@@ -112,7 +112,7 @@ public: // PARTIAL: inline (weak in the original) and public as in the debug inf
     virtual ~C2DO() {}
     HANDLE getBaseHandle() { return m_hBaseHandle; }
     HANDLE _getHandle() { return m_hHandle; }
-    void _setHandle(HANDLE h) { m_hHandle = h; } // PARTIAL: added for System/Graphic/2d/2DSpr
+    void _setHandle(HANDLE h) { m_hHandle = h; }
     virtual void _main() {}
     virtual void _disp() {}
     virtual void changeTimeExt(INT qTime) {}
@@ -124,9 +124,8 @@ public: // PARTIAL: inline (weak in the original) and public as in the debug inf
 };
 
 class C2DSeqObj : public C2DO {
-    friend class ::C2DCard; // PARTIAL: System/Graphic/2d/2DCard sets m_fgMainSkip
-    friend class C2DSeqCtrl; // PARTIAL: System/Graphic/2d/2DSeqCtrl clears m_fgParent
-    friend class C2DMan;     // PARTIAL: System/Graphic/2d/2DMan resets m_uiID
+    friend class ::C2DCard; // MATCH: System/Graphic/2d/2DCard sets m_fgMainSkip (no accessor in the ref; (friends are not in the debug info))
+    friend class C2DMan;     // MATCH: System/Graphic/2d/2DMan resets m_uiID (no accessor in the ref; (friends are not in the debug info))
 private:
     static UINT m_uiID;
     CScissoring* m_pScissoringEnd;  /* 0x0c */

@@ -45,7 +45,6 @@ struct TaskMainParam {
     INT _nProcLevel;
     INT _nFlag;
 
-    // PARTIAL: added for System/TaskMan
     TaskMainParam(CVector<int>& array, TIMEQ nSysTQ, TIMEQ nSysLag, TIMEQ nLag, INT nRnd, INT nFlag)
         : _SecondaryArray(array), _nSysTickCount(nSysTQ), _nSysLag(nSysLag), _nLag(nLag), _nRnd(nRnd), _nProcLevel(4),
           _nFlag(nFlag) {
@@ -64,16 +63,15 @@ class CTaskMan {
 public:
     static void initialize();
     static void finalize();
-    // PARTIAL: added for System/Task
     static ISLCManagerT<CTask>& getSLCManager();
     static void update(TIMEQ nTQ, TIMEQ nDispTQ, BOOL bPause);
     static void postprocess();
     static BOOL registerSysTask(UINT nID, CTask& inTask);
     static BOOL unregisterSysTask(CTask& inTask);
     static void removeMainTask(CTask& inTask);
-    static BOOL reqChangeMainTask(INT nID, MAINTASK_CALLMODE nMode); // PARTIAL: added for System/RootTask
+    static BOOL reqChangeMainTask(INT nID, MAINTASK_CALLMODE nMode);
     static CTask* getSysTask(UINT nID);
-    static CTask* getTask(HANDLE hTask); // PARTIAL: added for Form/Menu/MoogleShop
+    static CTask* getTask(HANDLE hTask);
     static CTask* getRootTask();
     static void enableRnd_TaskProc(BOOL bFlag);
     static BOOL reqSuspendGameTask();

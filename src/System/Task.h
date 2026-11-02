@@ -222,7 +222,6 @@ public:
 // PARTIAL: added for Game/Atel/AtelCamera
 class CTaskSecondary : public CTask {
 public:
-    // PARTIAL: inline body added for System/Graphic/Camera
     CTaskSecondary(CTask* pParent, INT nProcPrio = 0x4000) : CTask(pParent, nProcPrio) { m_nInfo |= 2; }
 };
 

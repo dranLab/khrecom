@@ -29,7 +29,6 @@ inline void _cardBattleCheckUser(void* inUser) {
 // PARTIAL: added for Game/Player/FriendAladdin
 struct BC_PARAM {
     unsigned short POWER[4];
-    // PARTIAL: unions completed for Game/Player/Summon
     union {
         BYTE BREAK;
         BYTE EFF_PART;

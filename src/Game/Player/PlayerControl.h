@@ -13,7 +13,7 @@ enum Houkou {
 };
 
 class CPlayerPad : public CPadHandler {
-    friend class CPlayer; // PARTIAL: added for Game/Player/Player (enablePadControl writes m_uiPadFlag)
+    friend class CPlayer; // MATCH: Game/Player/Player (enablePadControl) writes m_uiPadFlag (friends are not in the debug info)
 private:
     UINT m_uiPadFlag;
     FLOAT m_fDir;
@@ -77,8 +77,8 @@ public:
     BOOL isTrgBattleChange();
     BOOL isTrgWarpStartPos();
     BOOL isDownDebugMode();
-    void enableControl() { UINT& f = m_uiPadFlag; f |= 1; } // PARTIAL: inline body added for Game/Player/PlayerRiku
-    BOOL isControl() { return m_uiPadFlag & 1; } // PARTIAL: inline body added for Game/Player/Player
+    void enableControl() { UINT& f = m_uiPadFlag; f |= 1; } // MATCH: through a reference (Game/Player/PlayerRiku)
+    BOOL isControl() { return m_uiPadFlag & 1; }
     BOOL isTrgAnyPad();
 };
 

@@ -297,7 +297,7 @@ public:
             m_pParts[i]->startOrRestart();
         }
     }
-    void changeState(C2DSeqAgent::STATE nState) { // PARTIAL: guessed parameters (the ref lists none; body from Form/Menu/SaveLoad)
+    void changeState(C2DSeqAgent::STATE nState) { // parameters guessed (the ref lists none; body from Form/Menu/SaveLoad)
         for (INT i = 0; i < 3; i++) {
             m_pParts[i]->changeState(nState, TRUE, -1);
         }

@@ -52,7 +52,7 @@ struct AMBIENTLIGHT {
     FVECTOR col;
 };
 
-struct ALF_DATA { // PARTIAL: added for Game/Map
+struct ALF_DATA {
     USHORT infinite_suu;
     USHORT nVer;
     USHORT point_suu;
@@ -71,7 +71,7 @@ struct LIGHTDATA {
     POINTLIGHT* point;
     SPOTLIGHT* spot;
     AMBIENTLIGHT* ambient;
-    void set(const ALF_DATA* pData); // PARTIAL: added for Game/Map
+    void set(const ALF_DATA* pData);
 };
 
 struct FOGDATA { // 0xb0
