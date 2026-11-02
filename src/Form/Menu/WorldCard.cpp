@@ -1,6 +1,6 @@
 
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
-#define SAVELOADCTRL_H_PATH "c:/KHCOM/MainApp/Form/Menu/SaveLoadCtrl.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define SAVELOADCTRL_H_PATH "c:/KHCOM/MainApp/Form/Menu/SaveLoadCtrl.h" /* MATCH: this unit names SaveLoadCtrl.h so (header default "Form/Menu/SaveLoadCtrl.h") */
 #include <string.h>
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"

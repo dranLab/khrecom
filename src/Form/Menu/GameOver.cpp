@@ -1,7 +1,7 @@
 #include "System/Task.h"
 #include "System/TaskMan.h"
 #include "System/Graphic/Anim.h"
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
