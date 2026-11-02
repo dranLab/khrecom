@@ -100,17 +100,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/Form-DebugWindowTBL-2 (finished: debugWCMPFull matched; debugWinSeTestLineCall 2/51, _makeDispName 25/45 parked) | 810 | 27 | 0 | 750 (656) | 191 |
 | 2026-11-02 | decomp/System-Movie-AudioDec (finished: constructor 6/120 parked) | 810 | 27 | 0 | 750 (656) | 191 |
 | 2026-11-02 | decomp/Game-GameSubField-2 (finished: waitStartAtel 4/86 parked; A2: path overrides MATCH) | 810 | 27 | 0 | 750 (654) | 193 |
+| 2026-11-02 | cleanup/Game-Collision-CollObj-2 (CollAttack on the header's collision classes; CollUtilF left: field types first) | 810 | 23 | 0 | 751 (653) | 194 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 810 (756 in 110 headers, 54 in 34 .cpp); MATCH: 193
+PARTIAL: 810 (756 in 110 headers, 54 in 34 .cpp); MATCH: 194
   by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 20, gate 19, guessed 30, header-level 69, stand-in 17, other 6
-stand-ins: 27 foreign in 18 files (20 names), 199 unattributed, 157 own
+stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
-mechanisms: 750 sites (654 untagged); #line: 1248
+mechanisms: 751 sites (653 untagged); #line: 1248
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 613, superset 140, partial 112, gated 23, missing 8, unattributed 309
 ```
@@ -135,7 +136,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
-| R2 | 15.5 | `Game/Collision/CollObj.h` | ready | 3 stand-in files, 0 dup headers, 8 gate users, 3 PARTIAL | CCircleCollision, CCollision, COLL_KIND, COLL_TYPE, CPointCollision, ... (+2) (4 gated, 1 partial, 2 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollAttack, CSJointT<CCollObj> not in Game/Collision/CollAttack |
+| R2 | 14.5 | `Game/Collision/CollObj.h` | ready | 2 stand-in files, 0 dup headers, 9 gate users, 3 PARTIAL | CCollision, COLL_KIND, COLL_TYPE, CPointCollision (1 partial, 2 complete, 1 gated) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollUtilF, CSJointT<CCollObj> not in Game/Collision/CollUtilF |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 | R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
 | R2 | 4.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | G_RGBA, QWdata (2 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
@@ -145,20 +146,17 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | class | readiness | home | stand-in files | also defined in | gaps vs ref |
 |---|---|---|---:|---|---|
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
-| `CPointCollision` | gated | Game/Collision/CollObj.h | 2 |  |  |
 | `sceDmaChan` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `tD_CHCR` | missing | System/Graphic/Effect/libppp/draw/draw_w.h | 2 |  |  |
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
-| `CCircleCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CCircleCollision |
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
-| `CPoly3Collision` | gated | Game/Collision/CollObj.h | 1 |  |  |
+| `CPointCollision` | gated | Game/Collision/CollObj.h | 1 |  |  |
 | `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 1 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, setAutomaticDistance, setAutomaticHeight, setClipDistance, setDraw, ... (+3); 6 PARTIAL |
-| `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | complete | System/Graphic/Gprim.h | 1 |  |  |
@@ -346,7 +344,7 @@ or `untagged`.
 |---|---|---:|---:|---|
 | feature | `ANIM_H_GETFLAG_DECL_ONLY` | 4 | 4 | the original calls CAnim::getFlag out of line |
 | feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:4 |
-| feature | `COLLOBJ_H_COLLISION_CLASSES` | 7 | 7 | constructs CPointCollision/CSphereCollision |
+| feature | `COLLOBJ_H_COLLISION_CLASSES` | 8 | 8 | CollAttack casts to the collision classes (sphere/point/circle/poly3) |
 | feature | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | getDetectInfo as INT (see CollObj.h) |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 4 | 4 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
@@ -383,7 +381,7 @@ or `untagged`.
 | path override | `CARD_H_PATH` | 6 | 1 | the original's Card.h/Status.h strings carry |
 | path override | `CHATMAN_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/ChatMan.cpp:2 |
 | path override | `COLLDISP_H_PATH` | 4 | 1 | this unit names CollDisp.h by its full original path |
-| path override | `COLLUTIL_H_PATH` | 14 | 3 | __FILE__ as in the original .rodata |
+| path override | `COLLUTIL_H_PATH` | 14 | 4 | CollAttack casts to the collision classes (sphere/point/circle/poly3) |
 | path override | `CTDMAN_H_PATH` | 6 | 2 | this unit names CtdMan.h by its full original path |
 | path override | `D2MAN_H_PATH` | 10 | 0 | untagged, e.g. System/Graphic/2d/2DCard.cpp:3 |
 | path override | `DEBUGPATHDATA_H_PATH` | 3 | 3 | the original includes it under this name |
