@@ -1,4 +1,4 @@
-#define GPRIM_H_PATH "System/Graphic/Gprim.h"
+
 #define D2MAN_H_PATH "c:/KHCOM/MainApp/System/Graphic/2d/2DMan.h"
 #include "System/TaskMan.h"
 #include "System/Task.h"
