@@ -38,7 +38,7 @@ void CBuf::attachBuf(BYTE* pInBuf, INT nInSize) {
 void CBuf::releaseBuf(BOOL bDelay) {
     if (m_bManaged && m_pBuf) {
         if (bDelay) {
-            CDelayedFree::addFreeMallocPtr(m_pBuf);
+            DelayedFree(m_pBuf);
         } else {
             com_free(m_pBuf);
         }
