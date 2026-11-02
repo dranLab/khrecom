@@ -1,4 +1,4 @@
-#define GAME_BULLET_BULLET_CPP
+#define GAME_BULLET_BULLET_CPP /* MATCH: unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) */
 #include "System/Task.h"
 #include "System/TaskMan.h"
 #include "Game/Collision/CollUtil.h"

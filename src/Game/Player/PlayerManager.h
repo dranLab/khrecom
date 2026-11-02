@@ -90,7 +90,7 @@ private:
     UINT getPlayerRsrcGrpSize(INT nMemberID);
 
 public:
-#ifdef GAME_PLAYER_PLAYERMANAGER_CPP
+#ifdef GAME_PLAYER_PLAYERMANAGER_CPP /* MATCH: GAME_PLAYER_PLAYERMANAGER_CPP gate, only for its own unit (tested 2026-11-02) */
     static CPlayerManager* getPLM() { return m_pInstance; }
 #else
     // not in the original: Friend/Summon/... reload m_pInstance after each store, as through a reference
@@ -145,7 +145,7 @@ public:
 
 /* Not emitted in PlayerManager.cpp (all inline members of the class are emitted there, and the original has no
  * getFlag). */
-#ifndef GAME_PLAYER_PLAYERMANAGER_CPP
+#ifndef GAME_PLAYER_PLAYERMANAGER_CPP /* MATCH: GAME_PLAYER_PLAYERMANAGER_CPP gate, only for its own unit (tested 2026-11-02) */
 inline UINT CPlayerManager::getFlag() const {
     return m_uiFlag;
 }

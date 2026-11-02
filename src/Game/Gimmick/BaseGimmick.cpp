@@ -1,4 +1,4 @@
-#define GAME_GIMMICK_BASEGIMMICK_CPP
+#define GAME_GIMMICK_BASEGIMMICK_CPP /* MATCH: unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) */
 #define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "System/TaskMan.h"
 #include "System/Task.h"

@@ -1,6 +1,6 @@
 #define ANIM_H_GETFLAG_DECL_ONLY /* MATCH: the original calls CAnim::getFlag out of line */
 #line 1
-#define GAME_ENTITY_CPP
+#define GAME_ENTITY_CPP /* MATCH: unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) */
 /* MATCH: __FILE__ of these headers as in the original .rodata */
 #define BODYCOLLISION_H_PATH "c:/KHCOM/MainApp/Game/BodyCollision.h" /* MATCH: this unit names BodyCollision.h so (header default "Game/BodyCollision.h") */
 #define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: this unit names CollUtil.h so (header default "Game/Collision/CollUtil.h") */

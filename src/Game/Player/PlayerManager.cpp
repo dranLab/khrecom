@@ -1,4 +1,4 @@
-#define GAME_PLAYER_PLAYERMANAGER_CPP
+#define GAME_PLAYER_PLAYERMANAGER_CPP /* MATCH: unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) */
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Model.h"

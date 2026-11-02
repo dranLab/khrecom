@@ -1,4 +1,4 @@
-#define GAME_PLAYER_PLAYER_CPP
+#define GAME_PLAYER_PLAYER_CPP /* MATCH: unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) */
 
 #include "khtypes.h"
 #include "Game/Collision/CollInfo.h"

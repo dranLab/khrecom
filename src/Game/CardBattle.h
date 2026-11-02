@@ -146,7 +146,7 @@ public: BOOL setEnemyDuelCard(HANDLE inHandle, INT inKind, INT inNumber); void s
     FVECTOR m_vBreakPos;         /* 0x1d0 */
     class CEnchantGauge* m_pEnchantGauge[2]; /* 0x1e0 */
     class CDuelGauge* m_pDuelGauge; /* 0x1e8 */
-#if defined(GAME_CARDBATTLE_CPP) || defined(GAME_BATTLECARD_CPP) /* Game/BattleCard inlines the original members too */
+#if defined(GAME_CARDBATTLE_CPP) || defined(GAME_BATTLECARD_CPP) /* MATCH: GAME_BATTLECARD_CPP gate (tested 2026-11-02): Game/BattleCard inlines the original members too */
     /* the original's inline members, in its definition order (Game/CardBattle emits them all with the key function) */
     void disablePlayCard(UINT inSet) { m_uiFlag = (m_uiFlag | inSet) & ~(inSet ^ 0xC0000000); }
     static UINT isDisablePlayCard() { return m_pInstance ? m_pInstance->m_uiFlag & 0xC0000000 : 0; }
