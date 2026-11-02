@@ -75,19 +75,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/System-Graphic-Anim (one CAnim; ANIM_H_FULL_CLASS dropped; ANIM_H_GETFLAG_DECL_ONLY for 4 units) | 860 | 84 | 18 | 952 (859) | 183 |
 | 2026-11-02 | cleanup/stand-in-reasons (Memoca, effect, pppEiDrawShipoly stand-ins documented) | 863 | 84 | 18 | 952 (859) | 183 |
 | 2026-11-02 | cleanup/task-slc-message (CTaskSLCManager to TaskMan.h; TASK_H_NO_SLC_OVERFLOW_MSG and 22 placeholders gone; PackMan/Memoca stand-ins) | 859 | 82 | 18 | 766 (680) | 177 |
+| 2026-11-02 | cleanup/2DMan (C2DMan for every includer: 28 stand-ins + SaveLoadCtrl.h copy, gate and string placeholders dropped) | 851 | 54 | 17 | 763 (677) | 177 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 859 (797 in 112 headers, 62 in 36 .cpp); MATCH: 177
-  by category: method 327, data member 63, type 84, fwd decl 50, #include 31, changed in place 120, padding 8, path override 22, gate 29, guessed 31, header-level 72, stand-in 16, other 6
-stand-ins: 82 foreign in 61 files (31 names), 201 unattributed, 167 own
-duplicate class names across headers: 18
+PARTIAL: 851 (794 in 112 headers, 57 in 33 .cpp); MATCH: 177
+  by category: method 326, data member 63, type 82, fwd decl 50, #include 31, changed in place 121, padding 8, path override 22, gate 23, guessed 31, header-level 72, stand-in 16, other 6
+stand-ins: 54 foreign in 34 files (30 names), 201 unattributed, 167 own
+duplicate class names across headers: 17
 padding: 14 arrays, 0 accessors
-mechanisms: 766 sites (680 untagged); #line: 1245
+mechanisms: 763 sites (677 untagged); #line: 1244
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 584, superset 128, partial 95, gated 83, missing 8, unattributed 309
+classes: complete 586, superset 128, partial 96, gated 80, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -114,16 +115,15 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
-| R2 | 59.0 | `System/Graphic/2d/2DMan.h` | ready | 28 stand-in files, 1 dup headers, 0 gate users | C2DMan (1 gated) | weak hint: CSJointListT<C2DBase> not in Form/Menu/Camp, ISLCManagerT<C2DO> not in Form/Menu/Camp |
 | R2 | 32.0 | `System/RsrcData.h` | ready | 15 stand-in files, 0 dup headers, 2 gate users | CRsrcANN, CRsrcAZF, CRsrcData, CRsrcTex, CRsrcVSV, ... (+2) (7 gated) | gated strings: RSRCDATA_H_FULL |
 | R2 | 16.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 1 dup headers, 0 gate users, 18 PARTIAL | C3DLine, C3DLines, C3DPolyG4, C3DStripBase, C3DTile, ... (+12) (15 gated, 1 superset, 1 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
 | R2 | 15.5 | `Game/Collision/CollObj.h` | ready | 3 stand-in files, 0 dup headers, 8 gate users, 3 PARTIAL | CCircleCollision, CCollision, COLL_KIND, COLL_TYPE, CPointCollision, ... (+2) (4 gated, 1 partial, 2 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollAttack, CSJointT<CCollObj> not in Game/Collision/CollAttack |
+| R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 
 ## Classes with foreign copies
 
 | class | readiness | home | stand-in files | also defined in | gaps vs ref |
 |---|---|---|---:|---|---|
-| `C2DMan` | gated | System/Graphic/2d/2DMan.h | 28 | Form/Menu/SaveLoadCtrl.h |  |
 | `CRsrcData` | gated | System/RsrcData.h | 12 |  |  |
 | `CHeapMan` | missing | System/HeapMan.h | 5 |  |  |
 | `CRsrcANN` | gated | System/RsrcData.h | 3 |  |  |
@@ -180,7 +180,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 17 |
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
 | `Form/Menu/Menu.h` | 0 | 0/0/1/0 | 19 |
-| `Form/Menu/SaveLoadCtrl.h` | 14 | 1/1/6/0 | 7 |
+| `Form/Menu/SaveLoadCtrl.h` | 11 | 1/1/6/0 | 7 |
 | `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 4 |
 | `Form/Menu/TechHelp.h` | 2 | 0/1/0/0 | 3 |
 | `Form/Menu/TitleReportDllStarter.h` | 2 | 1/0/0/0 | 4 |
@@ -280,15 +280,15 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Coord.h` | 3 | 0/1/0/0 | 18 |
 | `System/Debug.h` | 5 | 0/0/0/2 | 271 |
 | `System/DebugProcInfo.h` | 1 | 1/0/1/0 | 11 |
-| `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 11 |
+| `System/Graphic/2d/2DBase.h` | 1 | 1/1/0/0 | 167 |
 | `System/Graphic/2d/2DFntObj.h` | 0 | 0/1/0/0 | 3 |
 | `System/Graphic/2d/2DLay.h` | 0 | 3/1/0/0 | 5 |
 | `System/Graphic/2d/2DLayObj.h` | 1 | 0/1/0/0 | 3 |
-| `System/Graphic/2d/2DMan.h` | 3 | 0/0/0/3 | 166 |
-| `System/Graphic/2d/2DObj.h` | 4 | 0/1/0/0 | 17 |
+| `System/Graphic/2d/2DMan.h` | 3 | 2/0/1/0 | 166 |
+| `System/Graphic/2d/2DObj.h` | 4 | 0/1/0/0 | 167 |
 | `System/Graphic/2d/2DSeq.h` | 1 | 1/1/0/0 | 5 |
 | `System/Graphic/2d/2DSeqCtrl.h` | 2 | 1/1/0/0 | 33 |
-| `System/Graphic/2d/2DSeqObj.h` | 8 | 3/3/0/0 | 16 |
+| `System/Graphic/2d/2DSeqObj.h` | 8 | 3/3/0/0 | 167 |
 | `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 9 |
 | `System/Graphic/3DCPrim.h` | 1 | 0/0/1/0 | 1 |
 | `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 89 |
@@ -338,9 +338,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/PadHandler.h` | 0 | 0/0/1/0 | 97 |
 | `System/RsrcDB.h` | 1 | 1/0/1/0 | 68 |
 | `System/RsrcData.h` | 4 | 0/0/0/33 | 29 |
-| `System/SJoint.h` | 9 | 0/0/0/0 | 210 |
-| `System/SLContainer.h` | 14 | 0/0/0/0 | 236 |
-| `System/Task.h` | 11 | 1/2/0/0 | 236 |
+| `System/SJoint.h` | 9 | 0/0/0/0 | 214 |
+| `System/SLContainer.h` | 14 | 0/0/0/0 | 240 |
+| `System/Task.h` | 11 | 1/2/0/0 | 240 |
 | `System/TaskMan.h` | 7 | 1/2/1/0 | 99 |
 | `System/Vector.h` | 22 | 0/0/3/0 | 266 |
 
@@ -411,7 +411,6 @@ or `untagged`.
 | path override | `TECHNIC_H_PATH` | 4 | 1 | the original includes it under this name |
 | path override | `TITLEREPORTDLLSTARTER_H_PATH` | 1 | 0 | untagged, e.g. Form/Menu/TitleReportDllStarter.cpp:2 |
 | path override | `VECTOR_H_PATH` | 1 | 0 | untagged, e.g. System/TaskMan.cpp:3 |
-| placeholder | `_2dManCreate*` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.h:22 |
 | placeholder | `_addCardStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:1170 |
 | placeholder | `_alloc*` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:87 |
 | placeholder | `_bossDeadDemoEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:23 |
@@ -497,7 +496,6 @@ or `untagged`.
 | unit gate | `GAME_PLAYER_PLAYERGAUGE_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerGauge.cpp:2 |
 | unit gate | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerManager.cpp:1 |
 | unit gate | `GAME_PLAYER_PLAYER_CPP` | 1 | 0 | untagged, e.g. Game/Player/Player.cpp:1 |
-| unit gate | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.cpp:2 |
 | unit gate | `SYSTEM_GRAPHIC_GPRIM_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:1 |
 | unit gate site | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.h:17 |
 | unit gate site | `EFFECT_CPP` | 3 | 0 | untagged, e.g. System/Graphic/Effect/effect.h:13 |
@@ -514,7 +512,6 @@ or `untagged`.
 | unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 2 | 1 | as above |
 | unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Player/PlayerManager.h:93 |
 | unit gate site | `GAME_PLAYER_PLAYER_CPP` | 46 | 0 | untagged, e.g. Game/Player/Player.h:135 |
-| unit gate site | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.h:30 |
 | unit gate site | `SYSTEM_GRAPHIC_GPRIM_CPP` | 2 | 0 | untagged, e.g. System/Graphic/Gprim.h:156 |
 
 ## String evidence
@@ -539,6 +536,6 @@ Generated by `tools/partials.py --update docs/partials.md`.
 - Task SLC overflow message (resolved, cleanup/task-slc-message): in 99 originals, read from the bytes: the 84 units
   that include `TaskMan.h` and 15 that now include it explicitly; never in a `Task.h`-only original (26 of those
   derive from `CTask`). `CTaskSLCManager` lives in `TaskMan.h`, the SLC templates in `System/SLContainer.h`.
-- 2D container message: not ambiguous. Splat writes many strings as `.word`, so a grep of the `.asciz` lines
-  undercounts; read from the bytes, all 166 originals with the message have the `2DMan.h` path (2DMan itself
-  through its own `__FILE__`), and they are exactly our 166 includers.
+- 2D container message (resolved, cleanup/2DMan): read from the bytes, all 166 originals with the message have
+  the `2DMan.h` path, exactly our includers; the real `C2DMan::initialize` and `C2DOSLCManager::createContainer`
+  inlines now give those strings.
