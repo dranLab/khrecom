@@ -55,6 +55,7 @@ public:
     static UINT getLatestSlot();
     BOOL isUnformated() { return (m_nFlag >> 1) & 1; }
     void formated() { m_nFlag &= ~2; }
+    /* MATCH: name unknown (not in the ref): written out, phaseGetEntries grows from 0x7f4 to 0x7f8 bytes */
     void setNoSpace(BOOL bOn) {
         if (bOn) {
             m_nFlag |= 1;
