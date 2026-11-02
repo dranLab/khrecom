@@ -58,50 +58,38 @@ struct SE_MANAGED_DATA {
 };
 
 class CEntity : public CTask, public CFSM {
-    friend class CSEMotionCtrl; // PARTIAL: added for Game/SEMotion
+    friend class CSEMotionCtrl;
     friend class CSEMotion;
-    friend class CMovement; // PARTIAL: added for Game/Movement
-    friend class CMapEnemy; // PARTIAL: added for Game/Enemy/MapEnemy (sets m_EntityType)
+    friend class CMovement;
+    friend class CMapEnemy;
 protected:
-    // PARTIAL: m_pMove split out for Game/Gimmick/GimmickBreakable
-    // PARTIAL: m_pModels, m_iModelCount split out for Game/Gimmick/GimmickPlantChild
     FVECTOR m_vStartPos;          /* 0x070 */
     CModel* m_pModels;            /* 0x080 */
     FVECTOR* m_pvModelColor;      /* 0x084 */
     INT m_iModelCount;            /* 0x088 */
-    // PARTIAL: m_pAnim split out for Game/Gimmick/GimmickLotusLeaf
-    // PARTIAL: m_pNLight, m_pGLight split out for Game/AttachCard
     CLightUnit* m_pNLight;        /* 0x08c */
     CLightUnit* m_pGLight;        /* 0x090 */
     CAnim* m_pAnim;               /* 0x094 */
-    CTexAnm* m_pTexAnm;           /* 0x098 */ // PARTIAL: split out for Game/Entity
+    CTexAnm* m_pTexAnm;           /* 0x098 */
     INT m_nTexAnmNum;             /* 0x09c */
     CMovement* m_pMove;  /* 0x0a0 */
-    // PARTIAL: m_pAttack, m_iID split out for Game/Gimmick/GimmickToldPipe
-    CBodyCollision* m_pBodyColl; /* 0x0a4 */ // PARTIAL: split out for Game/Gimmick/GimmickGuillotine
+    CBodyCollision* m_pBodyColl; /* 0x0a4 */
     CAttackMotion* m_pAttack; /* 0x0a8 */
-    // PARTIAL: m_pEffect split out for Game/Player/PlayerWeapon
     CEffectMotion* m_pEffect; /* 0x0ac */
-    // PARTIAL: m_pSE split out for Game/Player/Summon
-    CEffectMotion* m_pEffectEx; /* 0x0b0 */ // PARTIAL: split out for Game/Entity
+    CEffectMotion* m_pEffectEx; /* 0x0b0 */
     CAttachMotion* m_pSE; /* 0x0b4 CSEMotion* */
-    CAttachMotion* m_pSEEx; /* 0x0b8 CSEMotion* */ // PARTIAL: split out for Game/Entity
+    CAttachMotion* m_pSEEx; /* 0x0b8 CSEMotion* */
     INT m_iID;           /* 0x0bc */
-    FVECTOR m_vTargetPos;     /* 0x0c0 */ // PARTIAL: split out for Game/Entity
+    FVECTOR m_vTargetPos;     /* 0x0c0 */
     FVECTOR m_vRootMoveScale; /* 0x0d0 */
 private:
     ObjType::eObjType m_EntityType; /* 0x0e0 */
     UINT m_uiEntityFlag;   /* 0x0e4 */
-    // PARTIAL: m_tqTimer split out for Game/Player/FriendJack
-    // PARTIAL: m_uiDispOffFlag/m_uiCheckEyeOffFlag split out for Game/Gimmick/GimmickStatue
     UINT m_uiDispOffFlag;     /* 0x0e8 */
     UINT m_uiCheckEyeOffFlag; /* 0x0ec */
     TIMEQ m_tqTimer;       /* 0x0f0 */
-    // PARTIAL: m_iFlashingCounter/m_fNearTranslucence split out for Game/Gimmick/GimmickDominoPillar
     INT m_iFlashingCounter;    /* 0x0f4 */
     FLOAT m_fNearTranslucence; /* 0x0f8 */
-    // PARTIAL: fade members split out for Game/Player/PlayerWeapon
-    // PARTIAL: split out for Game/Bullet/Bullet
     FLOAT m_fSpeed;        /* 0x0fc */
     FLOAT m_fRate;         /* 0x100 */
     HANDLE m_hTarget;      /* 0x104 */
@@ -112,16 +100,16 @@ private:
     TIMEQ m_tqFadeTimer;   /* 0x118 */
     TIMEQ m_tqFadeTime;    /* 0x11c */
     INT m_iFadeModel;      /* 0x120 */
-    struct COLL_PARAM_HEADER* m_pCollParam; /* 0x124 */ // PARTIAL: split out for Game/Entity
+    struct COLL_PARAM_HEADER* m_pCollParam; /* 0x124 */
     class CRideModel* m_pRideModel;         /* 0x128 */
-    SE_MANAGED_DATA m_SeManagedData[4]; /* 0x130 */ // PARTIAL: split out for Game/Entity
+    SE_MANAGED_DATA m_SeManagedData[4]; /* 0x130 */
     TIMEQ m_tqDamageDispTimer;          /* 0x1b0 */
     char m_szNumberString[16];          /* 0x1b4 */
     class CFnt* m_pDamageString;        /* 0x1c4 */
 
 public:
     CEntity(CTask* inParent);
-    CEntity(CTask* inParent, ObjType::eObjType inType); // PARTIAL: added for Game/Gimmick/BaseGimmick
+    CEntity(CTask* inParent, ObjType::eObjType inType);
     virtual ~CEntity();
     virtual INT getTypeID() const;
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
@@ -131,7 +119,7 @@ public:
     virtual void disp();
     virtual void onMsg(INT inMsg, void* inExtraInfo);
     virtual void getLockOnPos(FVECTOR& outPos);
-    virtual void getHeadPos(FVECTOR& outPos) const; // PARTIAL: const added for Game/Gimmick/GimmickHitMore
+    virtual void getHeadPos(FVECTOR& outPos) const;
     virtual void getUseCardPos(FVECTOR& outPos);
     virtual void getCameraTargetPos(FVECTOR& outPos);
     virtual void endStateProc();
@@ -141,103 +129,90 @@ public:
     virtual void updatePositionAfter();
     virtual void lastUpdate();
 
-    // PARTIAL: added for Game/Gimmick/GimmickBreakable
     void bodyCollOnBody(INT inKind);
     void bodyCollOffBody(INT inKind);
-    void bodyCollOn(INT inKind); // PARTIAL: added for Game/Gimmick/GimmickGuillotine
-    void bodyCollOff(INT inKind); // PARTIAL: added for Game/Gimmick/GimmickStatue
+    void bodyCollOn(INT inKind);
+    void bodyCollOff(INT inKind);
     void rideModelEnableAllCollision(BOOL inEnable);
     void rideModelChangeListR2();
-    void rideModelChangeListRC(); // PARTIAL: added for Game/Gimmick/GimmickRideDest
+    void rideModelChangeListRC();
 
     void setEntityType(ObjType::eObjType inType);
     ObjType::eObjType getEntityType() const;
     UINT getFlag() const;
     UINT isHeartless() const;
-    // PARTIAL: added for Game/Gimmick/GimmickPlantChild (getModel needs CModel's definition: System/Graphic/Model.h)
     INT getID() const;
-    INT isFirstStandsGroundIK(); // PARTIAL: added for Game/Movement
-    void updateBadStatusEffect(HANDLE inHandle); // PARTIAL: added for Game/Enemy/MapEnemy
-    BOOL testFront(const FVECTOR& inPos) const; // PARTIAL: added for Game/Enemy/MapEnemy
-    BOOL entityVisibleAxisY(const CEntity* inEntity, FLOAT inAngle); // PARTIAL: added for Game/Enemy/MapEnemy
-    HANDLE setBadStatusEffect(const CHAR* inName, INT inKind, FLOAT inScale); // PARTIAL: added for Game/Enemy/MapEnemy (parameter names guessed)
+    INT isFirstStandsGroundIK();
+    void updateBadStatusEffect(HANDLE inHandle);
+    BOOL testFront(const FVECTOR& inPos) const;
+    BOOL entityVisibleAxisY(const CEntity* inEntity, FLOAT inAngle);
+    HANDLE setBadStatusEffect(const CHAR* inName, INT inKind, FLOAT inScale);
     INT getModelCount() const;
     CModel* getModel();
     CModel* getModel() const;
     inline CModel* getModel(INT inIndex);
     // Entity.cpp also emits this out of line (setEntityFlag__7CEntityUiUi): or inSet, then clear inMask.
-    // PARTIAL: changed for Game/Gimmick/GimmickSavePoint - the store goes through a reference (not a struct
+    // MATCH: changed for Game/Gimmick/GimmickSavePoint - the store goes through a reference (not a struct
     // member access), so the scheduler does not move a following global load above it.
     void setEntityFlag(UINT inSet, UINT inMask);
-    // PARTIAL: added for Game/Gimmick/GimmickStatue (also out of line: setCheckEyeOffFlag__7CEntityUiUi)
     void setCheckEyeOffFlag(UINT inSet, UINT inMask);
-    // PARTIAL: added for Game/Gimmick/GimmickSavePoint
     const FVECTOR& getPos() const;
-    void setPos(const FVECTOR& inPos); // PARTIAL: added for Game/Gimmick/GimmickHitFlying
-    INT getMotionIndex(const CHAR* inName) const; // PARTIAL: added for Game/Enemy/EnemyWyvern
-    void setOldPos(const FVECTOR& inPos); // PARTIAL: added for Game/Gimmick/BaseGimmick
+    void setPos(const FVECTOR& inPos);
+    INT getMotionIndex(const CHAR* inName) const;
+    void setOldPos(const FVECTOR& inPos);
     FLOAT calcDistanceXZ(const CEntity* inEntity) const;
-    FLOAT calcDistanceXZ(const CEntity& inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickDoor
-    FLOAT calcDistance(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickDeceive
-    FLOAT calcDirection(const CEntity* inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickFallTomb
-    void calcDirection(FVECTOR& outRot, const FVECTOR& inPos) const; // PARTIAL: added for Game/Player/SummonMushu
-    HANDLE setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale); void setDamageNumber(const FVECTOR& inPos, INT inDamage); // PARTIAL: setDamageNumber added for Game/Player/Player
+    FLOAT calcDistanceXZ(const CEntity& inEntity) const;
+    FLOAT calcDistance(const CEntity* inEntity) const;
+    FLOAT calcDirection(const CEntity* inEntity) const;
+    void calcDirection(FVECTOR& outRot, const FVECTOR& inPos) const;
+    HANDLE setEffect(const CHAR* inName, UINT inFlag, const FVECTOR* inPos, const FVECTOR* inRot, FLOAT inScale); void setDamageNumber(const FVECTOR& inPos, INT inDamage);
     BOOL isRideOnPlayer();
-    // PARTIAL: added for Game/Gimmick/GimmickWindowLid
     INT getBoneIndex(const CHAR* inBoneName, INT inModelIndex) const;
     BOOL isMotionEnd() const;
     BOOL isHangOnPlayer();
     void rideModelEnableChipCollision(INT inIdx, BOOL inSw);
     void rideModelSetChipLocalMatrix(INT inIndex, const FMATRIX* in_pMatrix);
-    // PARTIAL: added for Game/Player/FriendJack
     void setTimer(TIMEQ inTq);
     TIMEQ getTimer() const;
-    HANDLE setDeathEffect(); void setDeathEffect(const FVECTOR* inPos); // PARTIAL: added for Game/Enemy/BattleEnemy (void: the caller keeps v0 free)
-    void rideModelSetAttachMatrix(const FMATRIX* inpMat); // PARTIAL: added for Game/Gimmick/GimmickRideOn
-    // PARTIAL: added for Game/Enemy/MapEnemyShadow
+    HANDLE setDeathEffect(); void setDeathEffect(const FVECTOR* inPos);
+    void rideModelSetAttachMatrix(const FMATRIX* inpMat);
     FLOAT calcDistanceSq(const CEntity* inEntity) const;
-    FLOAT calcDistanceSq(const CEntity& inEntity) const; // PARTIAL: added for Game/Gimmick/GimmickManager
+    FLOAT calcDistanceSq(const CEntity& inEntity) const;
     TIMEQ getMotionTotalTime() const;
     BOOL arriveTarget(const FVECTOR& inTarget, FLOAT inRange);
-    BOOL arriveTargetXZ(const FVECTOR& inTarget, FLOAT inRange); // PARTIAL: added for Game/Enemy/MapEnemyMushroom
+    BOOL arriveTargetXZ(const FVECTOR& inTarget, FLOAT inRange);
     void clearSpeed();
-    // PARTIAL: added for Game/Enemy/EnemyDarkball
     void changeMotionFileName(const CHAR* inName, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
-    FMATRIX* getBoneMatrix(const CHAR* inBoneName) const; // PARTIAL: added for Game/Enemy/EnemyFatbandit
-    // PARTIAL: added for Game/Enemy/MapEnemyGround
+    FMATRIX* getBoneMatrix(const CHAR* inBoneName) const;
     INT getMotionCurrentID(); /* inline in the original; defined where CAnim is complete (Game/Enemy/MapEnemyGround.cpp) */
     void endTargetChase();
     INT setTexAnmSeq(INT nAnmNo, INT nSeqNo);
-    INT setTexAnmSeq(INT nAnmNo, const CHAR* pszSeqName); // PARTIAL: added for Game/Enemy/BossDeadDemo
-    void enableNotSemiModel(INT inModel, UINT inFlag); // PARTIAL: added for Game/Atel/Avatar (parameter names guessed)
-    void playVoice(INT inFileID, INT inID, INT inPriority); // PARTIAL: added for Game/Enemy/HumanBoss
-    void loadModelColor_(); // PARTIAL: added for Game/Enemy/EnemyHeartsoldier
-    FLOAT getHeight() const; // PARTIAL: added for Game/Enemy/EnemyTornadostep
+    INT setTexAnmSeq(INT nAnmNo, const CHAR* pszSeqName);
+    void enableNotSemiModel(INT inModel, UINT inFlag);
+    void playVoice(INT inFileID, INT inID, INT inPriority);
+    void loadModelColor_();
+    FLOAT getHeight() const;
     void warp(const FVECTOR& inPos);
-    // PARTIAL: added for Game/Player/SummonDumbo
     void setRot(const FVECTOR& inRot);
     void setScale(const FVECTOR& inScale);
     FVECTOR& getRot();
-    const FVECTOR& getRot() const; // PARTIAL: added for Game/Gimmick/GimmickPlantParent
+    const FVECTOR& getRot() const;
     const FVECTOR& getScale() const;
     void updateCoord();
-    void updateRootMove(); // PARTIAL: added for Game/Entity
+    void updateRootMove();
     void updateAnimation();
     BOOL initRideModel_(INT inGroup);
     BOOL initCollision_(INT inGroupID, INT inRsrcID);
     void updateSE_();
     void updateFade_();
     void translucence_();
-    // PARTIAL: added for Game/EntityFactory
     void positionFix(const FVECTOR& inPos, FLOAT inDir);
     void positionFix(const FVECTOR& inPos, const FVECTOR& inRot);
     void land(FLOAT inDownLength, FLOAT inUpLength, BOOL inFirstHit);
     void coordFix();
-    // PARTIAL: added for Game/Player/PlayerDRiku
     BOOL createLegIK(FLOAT inP0, FLOAT inP1);
     void setFootEffectIK(const CHAR* inName, INT inFlag);
     void setGroundIK(INT inFlag);
-    // PARTIAL: added for Game/Player/FriendKing (also out of line: setDispOffFlag__7CEntityUiUi)
     void setDispOffFlag(UINT inSet, UINT inMask);
     TIMEQ getMotionCurrentTime() const;
     void userBodyCollOn(INT inIndex);
@@ -245,33 +220,24 @@ public:
     void userBodyCollOff(INT inIndex);
     void userBodyCollOffBody(INT inIndex);
     HANDLE setAppearEffect();
-    HANDLE setDisappearEffect(); // PARTIAL: added for Game/Player/Friend
-    // PARTIAL: added for Game/Gimmick/GimmickDominoPillar
+    HANDLE setDisappearEffect();
     void setNearTranslucence(FLOAT inTrans);
     FLOAT getNearTranslucence() const;
-    // PARTIAL: added for Game/Player/FriendPluto
     UINT isTargetMoveXZ() const;
     BOOL startTargetMoveXZ(const FVECTOR& inPos, FLOAT inSpeed, FLOAT inAccel, FLOAT inRange);
     void endTargetMoveXZ();
-    // PARTIAL: added for Game/Player/FriendPan
     FLOAT calcDirection(const FVECTOR& inPos) const;
     void setAnimSpeed(FLOAT inSpeed);
-    // PARTIAL: added for Game/Player/FriendAriel
     const FVECTOR& getVel() const;
     void setVel(const FVECTOR& inVel);
-    const FVECTOR& getOldPos() const; // PARTIAL: added for Game/Player/FriendGoofy
-    // PARTIAL: added for Game/Gimmick/GimmickThunderTrap
+    const FVECTOR& getOldPos() const;
     HANDLE attachEffect(const CHAR* inName, UINT inNo, const CCoord* inParent, const FVECTOR* inPos,
                         const FVECTOR* inRot, FLOAT inWait);
-    // PARTIAL: added for Game/Player/SummonTink
     FLOAT calcDistanceXZ(const FVECTOR& inPos) const;
     static FLOAT rndArea(FLOAT inMin, FLOAT inMax);
-    // PARTIAL: added for Game/Player/SummonBambi
     BOOL isGround() const;
     FLOAT calcDistance(const FVECTOR& inPos) const;
-    // PARTIAL: added for Game/Player/PlayerWeapon (weak in the original)
     UINT isDispOFF() const;
-    // PARTIAL: added for Game/EffectMotion
     CAnim* getAnim();
     CAnim* getAnim() const;
     HANDLE setEffect(const CHAR* inName, UINT inFlag, const FMATRIX* inMat, FLOAT inScale);
@@ -279,17 +245,14 @@ public:
                          const CCoord* inParent3, const FVECTOR* inPos1, const FVECTOR* inPos2, const FVECTOR* inPos3,
                          FLOAT inWait);
     BOOL isMotionLoop() const;
-    // PARTIAL: added for Game/Player/SummonCloud
     void setModelAlphaScale(FLOAT inAlpha, INT inModel);
-    void killLoopEffect(INT inNo); // PARTIAL: added for Game/Player/Summon
-    // PARTIAL: added for Game/Gimmick/GimmickCarry
+    void killLoopEffect(INT inNo);
     void changeMotionEx(INT inRsrcID, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
-    void changeMotionEx(const CHAR* inRsrcName, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo); // PARTIAL: added for Game/Entity
+    void changeMotionEx(const CHAR* inRsrcName, INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     void enableFade2Path(BOOL inSw, INT inIndex);
     UINT isPermissionLockOn() const;
     FLOAT calcDistanceXZSq(const FVECTOR& inPos) const;
     FLOAT calcDistanceXZSq(const CEntity* inEntity) const;
-    // PARTIAL: added for Game/Bullet/Bullet
     const FVECTOR& getStartPos() const;
     void setStartPos(const FVECTOR& inPos);
     void setRate(FLOAT inRate);
@@ -301,12 +264,11 @@ public:
     INT getFlashingCounter() const;
     FLOAT calcDistanceSq(const FVECTOR& inPos) const;
     HANDLE playSEPanAndVol(INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
-    HANDLE playSEPan(INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType); // PARTIAL: added for Game/Entity
-    void playSEManaged(INT inFileID, INT inID, INT inBoneIndex, const FVECTOR* inOffset); // PARTIAL: added for Game/Entity
+    HANDLE playSEPan(INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType);
+    void playSEManaged(INT inFileID, INT inID, INT inBoneIndex, const FVECTOR* inOffset);
     void setSEPanAndVol(HANDLE inHandle, INT inFile, INT inID, INT inPan, const FVECTOR* inPos, INT inFlag);
-    void setSEPan(HANDLE inHandle, INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType); // PARTIAL: added for Game/Entity
+    void setSEPan(HANDLE inHandle, INT inFile, INT inID, INT inVol, INT inBoneIndex, const FVECTOR* inOffset, INT inType);
     void fadeoutSE(HANDLE inHandle, INT inFile, INT inID, INT inTime, INT inFlag);
-    // PARTIAL: added for Game/Entity
     INT getMotionCurrentID() const;
     INT getMotionCount() const;
     INT getRideCollisionNum() const;
@@ -368,7 +330,7 @@ public:
     void targetMove_();
     BOOL initEffectEx_(const CHAR* inRsrcName);
     BOOL initEffectEx_(INT inID);
-    BOOL initalizeModel(INT inGroup, BOOL bLight); // PARTIAL: added for Game/Entity
+    BOOL initalizeModel(INT inGroup, BOOL bLight);
     BOOL initEffect_(INT inID);
     BOOL initSEEx_(INT inID);
     BOOL initSE_(INT inID);
@@ -379,7 +341,6 @@ public:
     void changeMotionWithSameCheck(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     HANDLE setRecoverEffect(const CHAR* inName, INT inNo);
     void setupFade(FLOAT inStart, FLOAT inEnd, TIMEQ inTime, INT inModel);
-    // PARTIAL: added for Game/Entity (the rest of the original's inline members; defined after the class)
     void setTimerFrame(INT inFrame);
     void setTimerSecond(FLOAT inSecond);
     void setSpeed(FLOAT inSpeed);
@@ -427,7 +388,7 @@ inline void CEntity::setStartPos(const FVECTOR& inPos) { m_vStartPos = inPos; }
 #ifdef ENTITY_H_SETFLAG_DIRECT // MATCH: the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar)
 inline void CEntity::setEntityFlag(UINT inSet, UINT inMask) { m_uiEntityFlag = (m_uiEntityFlag | inSet) & ~inMask; }
 #else
-// PARTIAL: changed for Game/Gimmick/GimmickSavePoint - the store goes through a reference (not a struct member
+// MATCH: changed for Game/Gimmick/GimmickSavePoint - the store goes through a reference (not a struct member
 // access), so the scheduler does not move a following global load above it.
 inline void CEntity::setEntityFlag(UINT inSet, UINT inMask) { UINT& f = m_uiEntityFlag; f = (f | inSet) & ~inMask; }
 #endif
