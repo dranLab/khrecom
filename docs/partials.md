@@ -112,19 +112,22 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/System-Graphic-ShadowModel (CShadowModelMan complete) | 777 | 23 | 0 | 753 (0) | 879 |
 | 2026-11-02 | cleanup/Game-Atel-ChatMan (CChatMan in ref form) | 772 | 23 | 0 | 753 (0) | 880 |
 | 2026-11-02 | tools/partials-param-count (classes complete 723) | 772 | 23 | 0 | 753 (0) | 880 |
+| 2026-11-02 | cleanup/Game-Status (CStatus complete: initialize/finalize inlines, friends dropped) | 762 | 23 | 0 | 753 (0) | 882 |
+| 2026-11-02 | cleanup/Game-Technic (CTechnic complete: real initialize/finalize) | 760 | 23 | 0 | 753 (0) | 883 |
+| 2026-11-02 | cleanup/Game-Card (CCard complete: ref accessors for m_pCardInfo, ref access) | 748 | 23 | 0 | 753 (0) | 885 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 772 (717 in 107 headers, 55 in 34 .cpp); MATCH: 880
-  by category: method 299, data member 57, type 71, fwd decl 47, #include 29, changed in place 122, padding 6, path override 1, gate 18, guessed 31, header-level 67, stand-in 18, other 6
+PARTIAL: 748 (693 in 104 headers, 55 in 34 .cpp); MATCH: 885
+  by category: method 291, data member 55, type 68, fwd decl 44, #include 28, changed in place 118, padding 6, path override 1, gate 18, guessed 31, header-level 64, stand-in 18, other 6
 stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
-mechanisms: 753 sites (0 untagged); #line: 1248
+mechanisms: 753 sites (0 untagged); #line: 1249
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 723, superset 85, partial 57, gated 23, missing 8, unattributed 309
+classes: complete 726, superset 84, partial 55, gated 23, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -193,7 +196,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/AttackMotion.h` | 7 | 2/1/0/0 | 154 |
 | `Game/BodyCollision.h` | 3 | 0/1/0/0 | 55 |
 | `Game/Bullet/Bullet.h` | 8 | 3/2/0/0 | 30 |
-| `Game/Card.h` | 12 | 2/0/1/0 | 25 |
 | `Game/CardBattle.h` | 46 | 4/2/0/0 | 146 |
 | `Game/CardKind.h` | 0 | 0/0/2/0 | 153 |
 | `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
@@ -249,9 +251,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/SEMotion.h` | 0 | 5/0/1/0 | 4 |
 | `Game/SceneEnv.h` | 1 | 0/0/1/0 | 37 |
 | `Game/SceneInfo.h` | 5 | 29/0/1/0 | 86 |
-| `Game/Status.h` | 10 | 1/0/1/0 | 15 |
 | `Game/StorageWork.h` | 2 | 2/1/1/0 | 61 |
-| `Game/Technic.h` | 2 | 1/1/0/0 | 19 |
 | `System/Buf.h` | 4 | 0/1/0/0 | 38 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
 | `System/Component.h` | 3 | 2/0/0/0 | 5 |
