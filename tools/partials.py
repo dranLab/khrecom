@@ -837,8 +837,15 @@ class Project:
         if not refs:
             return "unattributed", {}
         owner = self.ref_owner(name)
-        ref = next((t for t, o in refs if o == home.src.unit), None) or next(
-            (t for t, o in refs if o == owner), refs[0][0])
+        ref = next((t for t, o in refs if o == home.src.unit), None)
+        if ref is None:
+            # several ref types share the name (e.g. CARD_DATA): the one with the most of our field names
+            ours_f = {m.name for m in home.members if m.kind == "field"}
+            by_fields = max(refs, key=lambda r: len(ours_f & {m.name for m in r[0].members if m.kind == "field"}))
+            if len(refs) > 1 and ours_f & {m.name for m in by_fields[0].members if m.kind == "field"}:
+                ref = by_fields[0]
+            else:
+                ref = next((t for t, o in refs if o == owner), refs[0][0])
         d = compare(home, ref)
         d["partial_marks"] = sum(text.count("PARTIAL") for line, text in home.src.comments
                                  if home.line <= line <= home.end_line)
