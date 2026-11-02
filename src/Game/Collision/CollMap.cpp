@@ -114,7 +114,7 @@ INT CCollMap::collideRide(BOOL fgExceptNowRide) {
     INT inLocal;
     FVECTOR* pTargetPos;
     FVECTOR vTmp;
-    m_pCollision->m_outInfoO = 0;
+    m_pCollision->m_outInfoO.info = 0;
     m_pCollision->m_outNormal.y = -1.0f;
     if (pList->getListSize()) {
         ret0 = collideRideR2(*m_pCollision, &pRideAtari, fgExceptNowRide);

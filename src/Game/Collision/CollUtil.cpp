@@ -473,9 +473,9 @@ INT CCollUtil::_detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* p
         collision.m_outDetect = m_vDetect2;
         collision.m_outWE = m_vCkE;
     }
-    if (!collision.m_outInfoO) {
+    if (!collision.m_outInfoO.info) {
         m_iInfo2.infoPID &= 0x7F;
-        collision.m_outInfoO = m_iInfo2.info;
+        collision.m_outInfoO.info = m_iInfo2.info;
     }
     return iFg;
 }
@@ -687,7 +687,7 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
     MC_DATA* pMCData;
     MC_CHIP* pMCChip;
     FLOAT fMDVal2;
-    collision.m_outInfo = 0;
+    collision.m_outInfo.info = 0;
     if (!m_pMCDInfo) {
         if (collision.m_inWE.y < -1.0f) {
             collision.m_outWE = collision.m_inWE;
@@ -825,7 +825,7 @@ INT CCollUtil::_detectMCD(CCollision& collision) {
         collision.m_outStatus = m_DetectStatus;
     }
     m_iInfo2.infoPID &= 0x7F;
-    collision.m_outInfo = m_iInfo2.info;
+    collision.m_outInfo.info = m_iInfo2.info;
     return iFg;
 }
 #else

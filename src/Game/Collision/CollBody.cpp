@@ -122,7 +122,7 @@ INT CCollBody::collideBody(INT iTargetType) {
     if (ret1) {
         m_pCollision->m_outWE = m_collTmp.m_outWE;
         m_pCollision->m_outDetect = m_collTmp.m_outDetect;
-        m_pCollision->m_outInfo = m_collTmp.m_outInfo;
+        m_pCollision->m_outInfo.info = m_collTmp.m_outInfo.info;
         m_pCollision->m_outNormal = m_collTmp.m_outNormal;
         m_pCollision->m_outStatus = m_collTmp.m_outStatus;
     }
