@@ -144,7 +144,7 @@ static inline void _addAssign(FVECTOR& a, const FVECTOR& b) {
     a.z += b.z;
     a.w += b.w;
 }
-/* System/RsrcDB.h parses only with RSRCDATA_H_FULL: local declarations of what makeAnimIndex needs */
+
 
 #include "System/RsrcDB.h"
 

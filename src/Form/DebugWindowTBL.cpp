@@ -96,14 +96,14 @@ static inline void _unitVectorVu0(FVECTOR& v) {
 
 
 
-class CRsrcData {
-private:
-    void* m_pDataSrc;
-    char m_szName[24];
 
-public:
-    char* getName() { return m_szName; }
-};
+
+
+
+
+
+
+
 
 #include "System/RsrcDB.h"
 

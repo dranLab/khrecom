@@ -71,22 +71,22 @@ extern "C" char D_00480FC8[];
 extern "C" char D_00480FF0[];
 extern "C" char D_00480CE8[];
 extern "C" char D_00480D08[];
-class CRsrcData { /* PARTIAL: stand-in for System/RsrcData CRsrcData: gated by RSRCDATA_H_FULL */
-    CBuf* m_pDataSrc;      /* 0x00 */
-    char m_szName[24];     /* 0x04 */
-    INT m_nRsrcType;       /* 0x1c */
-    INT m_nRsrcGroup;      /* 0x20 */
 
-public:
-    CHAR* getName() const { return (CHAR*)m_szName; }
-    CBuf* getDataSrc() const { return m_pDataSrc; }
-    BYTE* getRsrcData() const {
-        BYTE* p = NULL;
-        if (getDataSrc()) p = getDataSrc()->getBufPtr();
-        return p;
-    }
-    INT getRsrcGroupID() const { return m_nRsrcGroup; }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include "System/RsrcDB.h"
 
 
@@ -280,15 +280,15 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "memory");
 }
 void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
-class CRsrcAZF : public CRsrcData { /* PARTIAL: stand-in for System/RsrcData CRsrcAZF: gated by RSRCDATA_H_FULL */
-    BYTE _pad24[0x48 - 0x24];
-    USHORT m_nAMFCount; /* 0x48 */
-    USHORT m_nFlag;     /* 0x4a */
 
-public:
-    BOOL isTexIncomplete() const { return m_nFlag & 1; }
-    void reSetupTex();
-};
+
+
+
+
+
+
+
+
 inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 inline void operator*=(FVECTOR& v, FLOAT inF) { /* PARTIAL: as in System/Coord (FVECTOR::operator*= in the original) */
     v.x *= inF;

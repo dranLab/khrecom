@@ -9,26 +9,15 @@
 #define RSRCDATA_H_PATH "System/RsrcData.h"
 #endif
 
-#ifndef RSRCDATA_H_FULL
-/* Placeholder for the original header's inline allocation: its string ("System/RsrcData.h(156)") is in .rodata
- * of every includer. */
-#line 1 RSRCDATA_H_PATH
-inline void* _rsrcDataAlloc(size_t n) {
-    return com_malloc_d(n, __FILE__ "(156)", (UINT)-1);
-}
-#else
-/* PARTIAL: the classes, added for System/RsrcDB (define RSRCDATA_H_FULL before including) */
 #include "System/Buf.h"
 #include "System/SJoint.h"
 #include "System/Task.h"
 #include <string.h>
 
-#ifndef KH_PLACEMENT_NEW_DEFINED // MATCH: placement new is not in the ref headers (the units define it themselves); defined once per unit
-#define KH_PLACEMENT_NEW_DEFINED
-inline void* operator new(size_t, void* p) throw() { return p; }
-#endif
+/* PARTIAL: placement new for CRsrcData's inline allocation, declared only: the includers define it themselves */
+inline void* operator new(size_t, void* p) throw();
 
-extern "C" char _ctype_[];
+extern "C" const char _ctype_[];
 #define RSRCDATA_TOLOWER(c) (((_ctype_ + 1)[c] & 1) ? (c) + 0x20 : (c))
 
 /* Iteration over a CSJointListT (the original's macro; see Game/Collision/CollMapCamera) */
@@ -370,6 +359,7 @@ public:
         m_nFlag = 0;
         _setupAZF();
     }
+    BOOL isTexIncomplete() { return m_nFlag & 1; } // PARTIAL: added for Game/Map (body from its inlined test)
     void reSetupTex();
 };
 
@@ -463,6 +453,11 @@ public:
         m_nSectSize = nSectSize;
         _setupVSV();
     }
+    CHAR* getFilePath();
+    // PARTIAL: bodies added for System/Sound/SoundMan (from its inlined reads)
+    UINT getStartSector() { return m_nStartSect; }
+    UINT getSectorSize() { return m_nSectSize; }
+    UINT getBgmID() { return m_nBgmID; }
 };
 
 class CRsrcSPD : public CRsrcData {
@@ -542,6 +537,5 @@ public:
     CRsrcIMZ(const RsrcInfo& info, CBuf& data) : CRsrcData(info, data) {}
 };
 
-#endif /* RSRCDATA_H_FULL */
 
 #endif /* SYSTEM_RSRCDATA_H */

@@ -45,16 +45,16 @@ int atoi(const char* s);
 
 
 
-class CRsrcData {
-    CBuf* m_pBuf;
-public:
-    BYTE* getData() {
-        BYTE* p = __null;
-        if (m_pBuf) p = m_pBuf->getBufPtr();
-        return p;
-    }
-    INT getSize() { return m_pBuf ? m_pBuf->getBufSize() : -1; }
-};
+
+
+
+
+
+
+
+
+
+
 
 #include "System/RsrcDB.h"
 

@@ -21,7 +21,7 @@
 #include "include_asm.h"
 
 class CRsrcData;
-/* PARTIAL: stand-in for System/RsrcDB NAME_CASE: gated by RSRCDATA_H_FULL (strings: System/RsrcData.h(156)) */
+
 #include "System/RsrcDB.h"
 
 

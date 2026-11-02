@@ -52,17 +52,17 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 
-class CRsrcData {
-    CBuf* m_pDataSrc;
 
-public:
-    CBuf* getDataSrc() { return m_pDataSrc; }
-    BYTE* getRsrcData() {
-        BYTE* p = NULL;
-        if (getDataSrc()) p = getDataSrc()->getBufPtr();
-        return p;
-    }
-};
+
+
+
+
+
+
+
+
+
+
 
 #include "System/RsrcDB.h"
 

@@ -43,17 +43,17 @@ BYTE* ExpandData(BYTE* pSrc, BYTE* pDst);
 
 class CRsrcData;
 
-struct RsrcInfo {
-    CHAR* _pszName;
-    INT _nGroupID;
-    INT _nRefGroupID;
-    INT _nRsrcType;
-    BOOL _bSceneManaged;
-    BYTE _cOption;
-    BYTE _cParam;
 
-    RsrcInfo() : _nRefGroupID(0), _cOption(0), _cParam(1) {}
-};
+
+
+
+
+
+
+
+
+
+
 
 #include "System/RsrcDB.h"
 

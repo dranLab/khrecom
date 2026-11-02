@@ -35,37 +35,37 @@ inline void operator delete[](void* mem) { com_free(mem); }
 
 MODELDATA* AMFfromMDL(INT nGrpID, INT index);
 
-class CRsrcData {
-private:
-    CBuf* m_pDataSrc;
-    UBYTE _m_0x04[0x40];
 
-public:
-    virtual ~CRsrcData();
-    BYTE* getRsrcData() {
-        BYTE* p = NULL;
-        if (m_pDataSrc) p = m_pDataSrc->getBufPtr();
-        return p;
-    }
-};
 
-class CRsrcANN : public CRsrcData {
-private:
-    INT m_nCount;
 
-public:
-    INT getMotCount() const { return m_nCount; }
-    CMotData* getMotData(INT nInMotNo) {
-        if (nInMotNo < 0 || nInMotNo >= m_nCount) {
-            return NULL;
-        }
-        CMotData** p = (CMotData**)getRsrcData();
-        if (!p) {
-            return NULL;
-        }
-        return p[nInMotNo];
-    }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 extern FVECTOR ONE_VECTOR;
 extern "C" float atan2f(float y, float x);

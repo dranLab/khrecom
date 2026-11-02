@@ -52,13 +52,13 @@ void* Tim2GetImage(TIM2_PICTUREHEADER* ph, int mipmap);
 
 
 
-struct TexMemScroll {
-    INT m_UvTime;
-    INT m_UvStatus;
-    INT m_UvFps;
-    INT m_NowLine;
-    INT m_MaxLine;
-};
+
+
+
+
+
+
+
 
 #include "System/Buf.h"
 
@@ -70,49 +70,49 @@ struct TexMemScroll {
 
 
 
-class CRsrcData {
-private:
-    CBuf* m_pDataSrc;
-    char m_szName[24];
-    INT m_nRsrcType;
-    INT m_nRsrcGroup;
-    HANDLE m_hThis;
-    HANDLE m_hParent;
-    HANDLE* m_phChildren;
-    USHORT m_nChildCount;
-    USHORT m_nChildRest;
-    BYTE m_refTagList[0x10];
-public:
-    virtual ~CRsrcData();
-    CBuf* getDataSrc() { return m_pDataSrc; }
-    BYTE* getRsrcData() {
-        BYTE* pData = NULL;
-        if (getDataSrc()) {
-            pData = getDataSrc()->getBufPtr();
-        }
-        return pData;
-    }
-    CHAR* getName() { return m_szName; }
-};
 
-class CRsrcTex : public CRsrcData {
-private:
-    TexInfo* m_pTexInfo;
-    TexMemScroll* m_pScr;
-public:
-    virtual ~CRsrcTex();
-    TexInfo* getTexInfo() { return m_pTexInfo; }
-    TexMemScroll* getTexMemScroll() { return m_pScr; }
-};
 
-typedef CSLCListT<CRsrcData> CRsrcList;
 
-/* PARTIAL: stand-in for System/RsrcDB CRsrcDB: TexCtrl keeps its CRsrcList typedef (CSLCListT<CRsrcData>), which conflicts with RsrcDB.h's forward declaration */
-class CRsrcDB {
-public:
-    static CRsrcList& getRsrcList(UINT nType);
-    static CRsrcList& getScrollTexList();
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "System/Graphic/PackMan.h"
 

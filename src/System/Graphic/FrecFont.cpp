@@ -54,16 +54,16 @@ int Tim2CheckFileHeader(const void* pTim2);
 
 
 
-/* PARTIAL: stand-in for System/RsrcData RsrcInfo: gated by RSRCDATA_H_FULL */
-struct RsrcInfo {
-    CHAR* _pszName;
-    INT _nGroupID;
-    INT _nRefGroupID;
-    INT _nRsrcType;
-    BOOL _bSceneManaged;
-    BYTE _cOption;
-    BYTE _cParam;
-};
+
+
+
+
+
+
+
+
+
+
 
 
 

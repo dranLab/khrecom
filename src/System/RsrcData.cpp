@@ -1,5 +1,5 @@
 
-#define RSRCDATA_H_FULL
+inline void* operator new(unsigned int, void* p) throw() { return p; }
 #define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h"
 #define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h"
 #define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */

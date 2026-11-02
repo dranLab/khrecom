@@ -78,13 +78,13 @@ extern CPlayer* g_pPlayer;
 
 
 
-class CRsrcData {
-private:
-    CBuf* m_pDataSrc;
 
-public:
-    void* getRsrcData() { return m_pDataSrc ? m_pDataSrc->getBufPtr() : NULL; }
-};
+
+
+
+
+
+
 
 #include "System/RsrcDB.h"
 

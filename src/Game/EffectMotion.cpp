@@ -67,33 +67,33 @@ inline BOOL EET_HEADER::addrMapping() {
 
 
 
-class CRsrcData {
-private:
-    CBuf* m_pDataSrc;
-    UBYTE _m_0x04[0x40];
 
-public:
-    virtual ~CRsrcData();
-    BYTE* getRsrcData() { return m_pDataSrc ? m_pDataSrc->getBufPtr() : NULL; }
-};
 
-class CRsrcANN : public CRsrcData {
-private:
-    INT m_nCount;
 
-public:
-    INT getMotCount() const { return m_nCount; }
-    CMotData* getMotData(INT nInMotNo) {
-        if (nInMotNo < 0 || nInMotNo >= m_nCount) {
-            return NULL;
-        }
-        CMotData** p = (CMotData**)getRsrcData();
-        if (!p) {
-            return NULL;
-        }
-        return p[nInMotNo];
-    }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "System/RsrcDB.h"
 
