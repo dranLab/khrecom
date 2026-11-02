@@ -1,7 +1,7 @@
 
-#define CAMERAMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/CameraMan.h"
-#define GPRIM_H_PATH "System/Graphic/Gprim.h"
-#define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h"
+#define CAMERAMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/CameraMan.h" /* MATCH: this unit names its header Game/Atel (others: Game/ATEL) */
+
+#define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h" /* MATCH: this unit includes it by the relative path */
 #include <string.h>
 inline void* operator new(size_t, void* p) throw() { return p; }
 
@@ -54,6 +54,8 @@ inline void* operator new(size_t size, char* msg) throw() {
 
 extern "C" float atan2f(float y, float x);
 extern "C" float powf(float x, float y);
+extern "C" float tanf(float x); extern "C" void sceVu0RotMatrixX(FMATRIX& m0, const FMATRIX& m1, float rx); extern "C" void sceVu0RotMatrixY(FMATRIX& m0, const FMATRIX& m1, float ry);
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2); void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 extern "C" float sceVu0InnerProduct(float* v0, float* v1);
 void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -142,11 +144,152 @@ CCameraDt::~CCameraDt() {
     if (m_pCamera) m_pCamera->out();
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/CameraMan", main__Q24ATEL10CCameraMan);
-/* main's jump table (the function is still assembly). */
-asm(".rdata\n.align 3\njtbl_0048B660:\n"
-    ".word .L0023C318\n.word .L0023C25C\n.word .L0023C354\n.word .L0023C80C\n.word .L0023C80C\n.word .L0023C318\n"
-    ".word .L0023C6C4\n.text\n");
+static inline FVECTOR operator+(const FVECTOR& v0, const FVECTOR& inV) {
+    FVECTOR vec = v0;
+    vec.x += inV.x;
+    vec.y += inV.y;
+    vec.z += inV.z;
+    vec.w += inV.w;
+    return vec;
+}
+static inline void _unitMatrixVu0(FMATRIX& m) {
+    asm volatile("vmr32.xyzw $vf1, $vf0\n"
+                 "sqc2 $vf0, 0x30(%0)\n"
+                 "vmr32.xyzw $vf2, $vf1\n"
+                 "sqc2 $vf1, 0x20(%0)\n"
+                 "vmr32.xyzw $vf3, $vf2\n"
+                 "sqc2 $vf2, 0x10(%0)\n"
+                 "sqc2 $vf3, 0x0(%0)\n"
+                 :
+                 : "r"(&m)
+                 : "memory");
+}
+
+void CCameraMan::main() {
+    CCameraDt* pDt = m_pActiveCameraDt;
+    if (pDt) {
+        FLOAT fRate0 = getFrameRateF();
+        pDt->m_fFrameCnt += fRate0;
+        ICamera* pCam = pDt->m_pCamera;
+        FVECTOR vec;
+        FVECTOR objTrans;
+        if (pDt->m_kind == 5) objTrans = pDt->m_pTargetObj->Crd(0).getWorldMatrix().getTrans();
+        if (pDt->m_kind < 2) objTrans = pDt->m_pTargetObj->Crd(0).getWorldMatrix().getTrans();
+        switch (pDt->m_kind) {
+        case 1:
+            if (pDt->m_changeKind == 16) {
+                pDt->m_cameraPos = objTrans + pDt->m_relativePos;
+            } else {
+                pDt->m_currentCameraPos = objTrans + pDt->m_relativePos;
+            }
+        case 0:
+        case 5:
+            if (pDt->m_changeKind == 16) {
+                pDt->m_targetPos = objTrans;
+                pDt->m_targetPos.y += pDt->m_targetHeight;
+            } else {
+                pDt->m_currentTargetPos = objTrans;
+                pDt->m_currentTargetPos.y += pDt->m_targetHeight;
+            }
+        case 2:
+            if (pDt->m_changeKind == 16) {
+                if (pDt->m_fFrameCnt < pDt->m_fTargetFrame) {
+                    FLOAT r = 1.0f - powf(pDt->m_fChangeRate, fRate0);
+                    if (pDt->m_fTargetFrame * 0.5f < pDt->m_fFrameCnt) {
+                        FLOAT f = pDt->m_fFrameCnt / pDt->m_fTargetFrame - 0.5f;
+                        f += f;
+                        if (r < f) r = f;
+                    }
+                    FVECTOR vec0;
+                    FVECTOR vec1;
+                    FMATRIX mat0;
+                    SubVector(vec, pDt->m_targetPos, pDt->m_currentTargetPos);
+                    ScaleVector(vec, vec, r);
+                    AddVectorXYZ(pDt->m_currentTargetPos, pDt->m_currentTargetPos, vec);
+                    makeRot(vec0, pDt->m_cameraPos, pDt->m_targetPos);
+                    makeRot(vec1, pDt->m_currentCameraPos, pDt->m_currentTargetPos);
+                    SubVector(vec, vec0, vec1);
+                    if (vec.y > 3.141592653589793) {
+                        vec.y = vec.y - 6.283185307179586;
+                    } else if (vec.y < -3.141592653589793) {
+                        vec.y = vec.y + 6.283185307179586;
+                    }
+                    r *= 1.125f;
+                    if (1.0f < r) r = 1.0f;
+                    ScaleVector(vec, vec, r);
+                    AddVectorXYZ(vec1, vec1, vec);
+                    FLOAT fR0 = vec1.y;
+                    if (fR0 < -3.1415927f) {
+                        fR0 += 6.2831855f;
+                    } else if (3.1415927f < fR0) {
+                        fR0 -= 6.2831855f;
+                    }
+                    vec1.y = fR0;
+                    _unitMatrixVu0(mat0);
+                    sceVu0RotMatrixX(mat0, mat0, vec1.x);
+                    sceVu0RotMatrixY(mat0, mat0, vec1.y);
+                    mat0.v[3] = pDt->m_currentTargetPos;
+                    vec0.set(0.0f, 0.0f, vec1.z);
+                    ApplyMatrix(vec0, mat0, vec0);
+                    pDt->m_currentCameraPos = vec0;
+                } else {
+                    pDt->m_currentCameraPos = pDt->m_cameraPos;
+                    pDt->m_currentTargetPos = pDt->m_targetPos;
+                }
+            }
+            vec = pDt->m_currentCameraPos;
+            vec.w = 1.0f;
+            pCam->setPos(vec);
+            pDt->m_currentTargetPos.w = 1.0f;
+            pCam->lookAt(pDt->m_currentTargetPos, NULL);
+            break;
+        case 6:
+            {
+                FVECTOR vec;
+                if (m_pActiveCameraDt->m_fFrameCnt <= m_pActiveCameraDt->m_fStartEndFrame + 2.0f) {
+                    ScaleVector(vec, m_pActiveCameraDt->m_camStEdAddSpeed, fRate0);
+                    AddVectorXYZ(m_pActiveCameraDt->m_camStEdSpeed, m_pActiveCameraDt->m_camStEdSpeed, vec);
+                    AddVectorXYZ(pDt->m_currentTargetPos, pDt->m_currentTargetPos, m_pActiveCameraDt->m_camStEdSpeed);
+                } else if (m_pActiveCameraDt->m_fFrameCnt <=
+                           m_pActiveCameraDt->m_fMidFrame + m_pActiveCameraDt->m_fStartEndFrame + 1.0f) {
+                    ScaleVector(vec, m_pActiveCameraDt->m_camMidSpeed, fRate0);
+                    AddVectorXYZ(pDt->m_currentTargetPos, pDt->m_currentTargetPos, vec);
+                    m_pActiveCameraDt->m_camStEdSpeed = m_pActiveCameraDt->m_camMidSpeed;
+                } else if (m_pActiveCameraDt->m_fFrameCnt <= m_pActiveCameraDt->m_fMidFrame + m_pActiveCameraDt->m_fStartEndFrame +
+                                                                  m_pActiveCameraDt->m_fStartEndFrame + 1.0f) {
+                    ScaleVector(vec, m_pActiveCameraDt->m_camStEdAddSpeed, fRate0);
+                    SubVectorXYZ(m_pActiveCameraDt->m_camStEdSpeed, m_pActiveCameraDt->m_camStEdSpeed, vec);
+                    AddVectorXYZ(pDt->m_currentTargetPos, pDt->m_currentTargetPos, m_pActiveCameraDt->m_camStEdSpeed);
+                }
+                pDt->m_currentTargetPos.w = 1.0f;
+                pCam->lookAt(pDt->m_currentTargetPos, NULL);
+            }
+            break;
+        }
+    }
+    if (m_timerIgnorePause) {
+        if (--m_timerIgnorePause == 0) {
+            CPackMan::setFrameEffect(0, 0, 0, 0);
+            CMainApp::setSysPause(FALSE);
+            if (m_pActiveCameraDt) m_pActiveCameraDt->m_pCamera->ignorePause(FALSE);
+        }
+    }
+    if (m_fgGakaku) {
+        FLOAT fDist = m_targetGakaku - m_currentGakaku;
+        if (fDist <= 1.0 && fDist >= -1.0) {
+            m_currentGakaku = m_targetGakaku;
+            m_fgGakaku = 0;
+        } else {
+            m_currentGakaku = m_currentGakaku + getFrameRateF() * (fDist * 0.1f);
+            if ((m_targetGakaku - m_currentGakaku) * fDist < 0.0f) m_currentGakaku = m_targetGakaku;
+        }
+        CCamera* pCam = CWorldEnv::getActiveCamera();
+        if (pCam) {
+            FLOAT scrz = tanf((90.0f - m_currentGakaku * 0.5f) * 6.283185307179586 / 360.0) * 256.0f - 512.0f;
+            pCam->setProjectionDist(scrz);
+        }
+    }
+}
 
 INT CCameraMan::createCameraFix(void* pParam, INT nID) {
     ATEL_CAMERA_PARAM* p = (ATEL_CAMERA_PARAM*)pParam;

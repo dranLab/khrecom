@@ -48,7 +48,7 @@ public:
         _run();
         m_pHPC->run();
     }
-#ifndef PATHDATACAMERA_H_PATH // PARTIAL: path override added for Game/Atel/CameraMan ("System/Graphic/PathDataCamera.h")
+#ifndef PATHDATACAMERA_H_PATH /* MATCH: Game/Atel/CameraMan names it "System/Graphic/PathDataCamera.h" */
 #define PATHDATACAMERA_H_PATH "c:/KHCOM/MainApp/System/Graphic/PathDataCamera.h"
 #endif
 #line 58 PATHDATACAMERA_H_PATH
