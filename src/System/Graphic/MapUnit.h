@@ -12,7 +12,7 @@ struct ZONEPARTS;
 inline void* operator new(size_t, void* p) { return p; }
 
 /* Creates a map unit object of class T (the function pointer in MAPUNITTABLE). */
-#ifndef MAPUNIT_H_PATH // PARTIAL: path override added for System/Graphic/MapUnit
+#ifndef MAPUNIT_H_PATH // MATCH: path override for System/Graphic/MapUnit
 #define MAPUNIT_H_PATH "System/Graphic/MapUnit.h"
 #endif
 #line 75 MAPUNIT_H_PATH

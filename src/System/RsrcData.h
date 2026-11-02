@@ -5,7 +5,7 @@
 #include "khtypes.h"
 #include "System/HeapMan.h"
 
-#ifndef RSRCDATA_H_PATH // PARTIAL: path override added for System/RcfCD
+#ifndef RSRCDATA_H_PATH // MATCH: path override for System/RcfCD
 #define RSRCDATA_H_PATH "System/RsrcData.h"
 #endif
 

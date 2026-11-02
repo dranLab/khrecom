@@ -29,7 +29,7 @@ static CHAR* RecoverEffectName = "cure01";
 
 /* Placeholder for the original header's inline functions checking indices: their strings are in .rodata
  * of every includer, in this order. Line numbers are not known. */
-#ifndef BATTLEENEMY_H_PATH // PARTIAL: path override added for Game/Gimmick/CreateGimmick ("../Enemy/BattleEnemy.h")
+#ifndef BATTLEENEMY_H_PATH // MATCH: path override for Game/Gimmick/CreateGimmick ("../Enemy/BattleEnemy.h")
 #define BATTLEENEMY_H_PATH "Game/Enemy/BattleEnemy.h"
 #endif
 #line 1 BATTLEENEMY_H_PATH

@@ -9,7 +9,7 @@
 /* Placeholders for CCollUtil's inline singleton constructor/creation: their strings
  * ("Game/Collision/CollUtil.h", "__null == m_pInstance", "Game/Collision/CollUtil.h(185)", "m_pInstance")
  * are in .rodata of every includer. Only line 185 is known (it is part of the allocation message). */
-/* PARTIAL: path override added for Game/Collision/CollMapCamera ("c:/KHCOM/MainApp/...") */
+/* MATCH: path override for Game/Collision/CollMapCamera ("c:/KHCOM/MainApp/...") */
 #ifndef COLLUTIL_H_PATH
 #define COLLUTIL_H_PATH "Game/Collision/CollUtil.h"
 #endif

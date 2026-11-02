@@ -9,7 +9,7 @@
 /* Placeholder for CStatus's inline singleton creation: its strings ("Game/Status.h",
  * "__null == m_pInstance", "Game/Status.h(38)") are in .rodata of every includer.
  * Only line 38 is known (it is part of the allocation message). */
-#ifndef STATUS_H_PATH // PARTIAL: path override added for Game/Status ("c:/KHCOM/MainApp/...")
+#ifndef STATUS_H_PATH // MATCH: path override for Game/Status ("c:/KHCOM/MainApp/...")
 #define STATUS_H_PATH "Game/Status.h"
 #endif
 #line 1 STATUS_H_PATH

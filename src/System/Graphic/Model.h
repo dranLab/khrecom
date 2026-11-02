@@ -10,7 +10,7 @@
 #include "System/Vector.h"
 #include "System/Graphic/Gprim.h"
 
-/* PARTIAL: MODEL_H_PATH added for System/VramMan, whose original includes it as "System/Graphic/model.h" */
+/* MATCH: path override MODEL_H_PATH for System/VramMan, whose original includes it as "System/Graphic/model.h" */
 #ifndef MODEL_H_PATH
 #define MODEL_H_PATH "System/Graphic/Model.h"
 #endif

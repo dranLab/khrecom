@@ -18,7 +18,7 @@ union FVECTOR; // PARTIAL: added for Game/Player/FriendPluto
 
 /* Placeholder for the original header's inline function asserting inUser: its strings
  * ("Game/CardBattle.h", "inUser") are in .rodata of every includer. The line number is not known. */
-#ifndef CARDBATTLE_H_PATH // PARTIAL: path override added for Game/Technic ("c:/KHCOM/MainApp/Game/CardBattle.h")
+#ifndef CARDBATTLE_H_PATH // MATCH: path override for Game/Technic ("c:/KHCOM/MainApp/Game/CardBattle.h")
 #define CARDBATTLE_H_PATH "Game/CardBattle.h"
 #endif
 #line 1 CARDBATTLE_H_PATH
