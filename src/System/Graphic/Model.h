@@ -17,7 +17,7 @@
 #line 20 MODEL_H_PATH
 class CTask;
 class CCoord;
-class CCoords; // PARTIAL: added for System/Graphic/DispList
+class CCoords;
 class CTexAnm;
 class CSemiModel;
 class CFadeModel;
@@ -30,7 +30,7 @@ union _TEX_UV_OFFSET {
     ULONGLONG luv;
     _TEX_UV_OFFSET() { luv = 0; }
 };
-class CLightUnit; // PARTIAL: added for Game/ModelObj
+class CLightUnit;
 struct MODELDATA;
 
 #include "System/Graphic/ModelMan.h"

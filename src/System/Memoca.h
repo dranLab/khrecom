@@ -5,7 +5,7 @@
 #include "khtypes.h"
 
 class CBuf;
-struct DebugParam; // PARTIAL: added for Form/DebugMenu
+struct DebugParam;
 
 typedef struct {
     unsigned char Resv2;

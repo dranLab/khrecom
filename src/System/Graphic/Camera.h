@@ -154,7 +154,7 @@ public:
     virtual void ignorePlaySpeed(BOOL bFlag) = 0;
 };
 
-// PARTIAL: added for System/Graphic/Camera
+
 struct CameraQuakeParam {
     UINT _nTime;
     FLOAT _fPower;

@@ -10,16 +10,16 @@
 
 union FVECTOR;
 class CState;
-class CMovement; // PARTIAL: added for Game/Gimmick/GimmickBreakable
-class CAttackMotion; // PARTIAL: added for Game/Gimmick/GimmickToldPipe
-class CModel;    // PARTIAL: added for Game/Gimmick/GimmickPlantChild
-class CLightUnit;        // PARTIAL: added for Game/AttachCard
-union FMATRIX;   // PARTIAL: added for Game/Gimmick/GimmickWindowLid
-class CAnim;     // PARTIAL: added for Game/Gimmick/GimmickLotusLeaf
-class CBodyCollision; // PARTIAL: added for Game/Gimmick/GimmickGuillotine
-class CEffectMotion;  // PARTIAL: added for Game/Player/PlayerWeapon
-class CAttachMotion; // PARTIAL: added for Game/Player/Summon
-class CTexAnm; // PARTIAL: added for Game/Entity
+class CMovement;
+class CAttackMotion;
+class CModel;
+class CLightUnit;
+union FMATRIX;
+class CAnim;
+class CBodyCollision;
+class CEffectMotion;
+class CAttachMotion;
+class CTexAnm;
 
 
 

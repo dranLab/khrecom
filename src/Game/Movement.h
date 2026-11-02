@@ -6,8 +6,8 @@
 #include "System/Vector.h" // PARTIAL: added for Game/Enemy/MapEnemyShadow (setScale)
 #include "Game/Collision/CollObj.h" // PARTIAL: added for Game/Bullet/Bullet (COLL_KIND)
 
-class CEntity; // PARTIAL: added for Game/Enemy/MapEnemyShadow
-class CCollMap; // PARTIAL: added for Game/Player/SummonSinba
+class CEntity;
+class CCollMap;
 
 /* The complete class, for Game/Movement (its key unit, which emits every inline below as a weak copy, in this
  * order). Other units keep the partial class below. */

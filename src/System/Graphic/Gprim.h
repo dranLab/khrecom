@@ -48,7 +48,7 @@ union ALPHA {
     void setAlphaValue(/* parameters unknown */);
 };
 
-// PARTIAL: added for Game/AtWater
+
 union QWdata {
     u_long ul64[2];
     u_long128 ul128;
@@ -114,7 +114,7 @@ struct G_RGBA {
     }
 };
 
-// PARTIAL: added for Game/NowLoading
+
 struct G_UV {
     USHORT u;
     USHORT v;

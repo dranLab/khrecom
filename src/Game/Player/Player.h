@@ -6,19 +6,19 @@
 #include "Game/Entity.h"
 
 namespace CardBattle {
-class CCardRevolver; // PARTIAL: added for Game/Player/FriendKing
+class CCardRevolver;
 }
 
 namespace PlayerCamera {
-class CPlayerCamera; // PARTIAL: added for Game/Player/FriendJack
+class CPlayerCamera;
 }
 
 namespace Gauge {
-class CLockonMarker; // PARTIAL: added for Game/Player/Summon
+class CLockonMarker;
 }
 
 namespace PlayerWeapon {
-class CPlayerWeapon; // PARTIAL: added for Game/Player/FriendDonald
+class CPlayerWeapon;
 }
 
 // PARTIAL: added for Game/Player/PlayerRiku
@@ -27,7 +27,7 @@ class CPlayerWeapon; // PARTIAL: added for Game/Player/FriendDonald
 #include "Game/AttackMotion.h"
 namespace PLM {
 class CPlayerManager;
-struct CARD; // PARTIAL: added for Game/Prize
+struct CARD;
 }
 namespace Gauge {
 class CPlayerGauge;
@@ -766,7 +766,7 @@ public:
 extern CPlayer* g_pPlayer;
 FVECTOR getPlayerPos(BOOL flag);
 
-// PARTIAL: added for Game/Player/PlayerManager
+
 struct PL_PARAM {
     UINT USE_MAP_ACTION;
     UINT USE_BTL_ACTION;

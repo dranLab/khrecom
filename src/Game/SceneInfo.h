@@ -306,7 +306,7 @@ struct FloorInfo { // 0xd8c
     SHORT getEventRoomIdx(EVENTROOM_TBLIDX i) { return (UINT)i < __EVENTROOM_MAX ? _nEventRoomIdxTbl[i] : -1; }
 };
 
-// PARTIAL: added for Game/Gimmick/GimmickManager
+
 struct _GimmickInfo {
     BYTE _nStat;
     BYTE _nID;
@@ -317,7 +317,7 @@ struct _GimmickRoomInfo {
     SHORT _cardCount;
 };
 
-// PARTIAL: added for Game/Enemy/MapEnemyManager
+
 struct _MapEnemyInfo {
     BYTE _byID;
     BYTE _byDead;
