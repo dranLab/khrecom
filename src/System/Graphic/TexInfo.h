@@ -44,11 +44,14 @@ struct TexInfo {
     BOOL isFixTex() const { return !_TexInfo._pImage || (_nFlag & 1); }
     BOOL isFixClut() const { return !_ClutInfo._pImage || (_nFlag & 2); }
     BOOL isFix() const { return isFixTex() && isFixClut(); }
-    CHAR* getName() const { return _pName; }
+    INT isTexW(/* parameters unknown */);
     ULONGLONG getTPage() const { return _nTPage; }
     ULONGLONG getTPage(UINT nTexPos, UINT nClutPos) const {
         return _nTPage | nTexPos | ((ULONGLONG)nClutPos << 37);
     }
+    FLOAT getUVScrollOfs(/* parameters unknown */);
+    BOOL isUVScroll(/* parameters unknown */);
+    CHAR* getName() const { return _pName; }
 #ifdef MODELDATA_H_TEXINFO_CTOR /* MATCH: only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves */
     TexInfo() { memset(this, 0, sizeof(TexInfo)); }
 #endif

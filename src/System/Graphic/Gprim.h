@@ -240,6 +240,10 @@ protected:
     G_XYZ m_Center;
 
 public:
+    void setCenter(/* parameters unknown */);
+    G_XYZ& getCenter(/* parameters unknown */);
+    void setRot(/* parameters unknown */);
+    FLOAT getRot(/* parameters unknown */);
     void calcVert(IVECTOR& iv) {
         FVECTOR v;
         sceVu0ITOF4Vector(v, iv);
