@@ -1,5 +1,5 @@
-#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
-#define COLLDISP_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollDisp.h"
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: this unit names CollUtil.h by its full original path */
+#define COLLDISP_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollDisp.h" /* MATCH: this unit names CollDisp.h by its full original path */
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/modeldata.h"
@@ -362,8 +362,37 @@ void CGameSubField::preWaitStartAtel() {
     CWorldEnv::readyMike(1, 1);
 }
 
-/* waitStartAtel stays INCLUDE_ASM (the original jumps out of line for isEventScene() and if-converts the scene
- * test; no source form found). Its C, as a placeholder in a stripped section, keeps s_pszBgmTbl referenced. */
+/* Parked: 4 of 86 lines, 4 bytes short - with the isEventScene() case as the else branch (draft) only one block
+ * differs: the original keeps `b; move s0,zero` out of line for isEventScene() (after the BGM table load), ours lets
+ * reorg turn it into a bnezl. Tried: ||-chains, nested ifs, one combined condition (7), a goto into if (0) (4). */
+#if 0
+void CGameSubField::waitStartAtel() {
+    if (m_nStep > 0) {
+        if (--m_nStep == 0) {
+            startAtel();
+            BOOL bBGM = TRUE;
+            CGame::reqBlackFadeIn(20);
+            if (!CSceneInfo::isEventScene()) {
+                if (CGameWork::getFlag(1, 0x32) || CSceneInfo::isLastFloorScene()) {
+                    bBGM = FALSE;
+                } else if (CGame::isRikuGame() && CSceneInfo::getCurrentWorldID(0) == 12 && CSceneInfo::getCurrentSceneNum() == 30) {
+                    bBGM = FALSE;
+                }
+            } else {
+                bBGM = FALSE;
+            }
+            if (bBGM) {
+                INT w = CSceneInfo::getCurrentWorldID(1);
+                CHAR* pszBgm = (w < 14) ? s_pszBgmTbl[w] : NULL;
+                if (pszBgm) CSound::crossFadeinBGM(pszBgm, 60, -1, 0);
+            }
+        }
+    } else if (CGame::isFadeDone()) {
+        changeState(6);
+    }
+}
+#else
+/* placeholder in a stripped section: keeps s_pszBgmTbl referenced */
 __asm__(".section .sdata\n");
 static void __attribute__((section(".sdata"))) _waitStartAtel(CGameSubField* pThis, INT& m_nStep) {
     if (m_nStep > 0) {
@@ -387,6 +416,7 @@ static void __attribute__((section(".sdata"))) _waitStartAtel(CGameSubField* pTh
     }
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/GameSubField", waitStartAtel__13CGameSubField);
+#endif
 
 void CGameSubField::prePlay() {
     if (!CWorldEnv::isReadyMike()) {
