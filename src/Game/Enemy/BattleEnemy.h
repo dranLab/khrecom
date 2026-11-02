@@ -109,7 +109,7 @@ public:
     virtual BOOL initalize(INT inGroupID, INT inRsrcID) { return initalize(inGroupID, inRsrcID, 0); }
     virtual void onMsg(INT inMsg, void* inExtraInfo);
     virtual void onOut();
-#ifdef GAME_ENEMY_BATTLEENEMY_CPP
+#ifdef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     /* The original inline members, in the order this object emits them (weak). */
     void setBattleEnemyFlag(ULONGLONG inOn, ULONGLONG inOff) { m_ullBtlEnemyFlag = (m_ullBtlEnemyFlag | inOn) & ~inOff; }
     void setHp(INT inHp) { m_iHp = inHp; }
@@ -261,7 +261,7 @@ public:
     void playSmallDamageSE();
     void playBigDamageSE();
     INT selectDamageMotion_();
-#ifndef GAME_ENEMY_BATTLEENEMY_CPP
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     INT getParam() { return m_iParam; }
 #endif
     void makeExpPrize();              // PARTIAL: added for Game/Enemy/BossDeadDemo
@@ -269,29 +269,29 @@ public:
     static INT m_iDuelCardNum;        // PARTIAL: added for Game/Enemy/BattleEnemy
     static INT m_iDuelCardPtr;
     static int m_iDuelCardArray[10];
-#ifndef GAME_ENEMY_BATTLEENEMY_CPP
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     void setParam(INT inParam) { m_iParam = inParam; } // PARTIAL: added for Game/Enemy/CreateEnemy
 #endif
     // PARTIAL: added for Game/Enemy/BattleEnemyManager
-#ifndef GAME_ENEMY_BATTLEENEMY_CPP
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     UINT getBattleEnemyFlag() const { return m_ullBtlEnemyFlag; }
     void setGroupNo(INT inNo) { m_iGroupNo = inNo; }
     INT getGroupNo() const { return m_iGroupNo; }
 #endif
     HANDLE getNearestChild(FLOAT& outDist, CEntity& inEntity);
-#ifndef GAME_ENEMY_BATTLEENEMY_CPP
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     ULONGLONG isPermissionCardBattle() const { return m_ullBtlEnemyFlag & 0x200; }
 #endif
     INT getHpMax() const;
     BOOL isCurrentState(INT inState); // PARTIAL: added for Game/Enemy/HumanBoss
     INT getPlayerState();             // PARTIAL: added for Game/Enemy/HumanBoss
     // PARTIAL: added for Game/Enemy/EnemyAirpirate
-#ifndef GAME_ENEMY_BATTLEENEMY_CPP
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     ENEMY_PARAM* getEnemyParam() { return m_pEnemyParam; }
     ENEMY_PARAM* getEnemyParam() const { return m_pEnemyParam; } // PARTIAL: added for Game/Enemy/HumanBoss
 #endif
     INT getAttackRate() const;
-#ifndef GAME_ENEMY_BATTLEENEMY_CPP
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     INT getAttackState() const { return m_iAttackState; } // PARTIAL: added for Game/Enemy/Heartless
 #endif
     BOOL canAttack_(const ENEMY_ACT* inAct);
@@ -307,7 +307,7 @@ public:
     virtual void getUseCardPos(FVECTOR& outPos);
     virtual void changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr, INT inEffectNo, INT inSENo);
     virtual BOOL startCardBattle();
-#ifdef GAME_ENEMY_BATTLEENEMY_CPP
+#ifdef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     virtual void bossDeadDemoCallback() {}
     virtual void setBossDeadEffect();
     virtual void killBossDeadEffect();
@@ -335,7 +335,7 @@ protected:
     virtual void beginStateAppear();
     virtual void stateAppear();
     virtual void endStateAppear();
-#ifdef GAME_ENEMY_BATTLEENEMY_CPP
+#ifdef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     virtual void beginStateMain() {}
     virtual void stateMain() {}
     virtual void endStateMain() {}
@@ -458,7 +458,7 @@ protected:
     virtual void beginStateDead();
     virtual void stateDead();
     virtual void endStateDead();
-#ifdef GAME_ENEMY_BATTLEENEMY_CPP
+#ifdef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     virtual void aiCardBattle() {}
     virtual void onGuard() {}
     virtual void onDamage() {}
@@ -601,7 +601,7 @@ public: // PARTIAL: state wrappers added for Game/Enemy/BattleEnemy
     void stateDead_();
     void endStateDead_();
 public:
-#ifndef GAME_ENEMY_BATTLEENEMY_CPP
+#ifndef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     void setAttackState_(INT inState) { m_iAttackState = inState; } // PARTIAL: added for Game/Enemy/Heartless (no range check)
 #endif
 public:
@@ -611,7 +611,7 @@ public:
         if (!(2 <= inState && inState < 10)) AssertApp(__FILE__, __LINE__, "BTL_ENEMY_STATE_ATTACK1 <= inState && inState < BTL_ENEMY_STATE_ATTACK_MAX", 0);
         m_iAttackState = inState;
     }
-#ifdef GAME_ENEMY_BATTLEENEMY_CPP
+#ifdef GAME_ENEMY_BATTLEENEMY_CPP /* MATCH: GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) */
     BOOL canAttack(const ENEMY_ACT* inAct) { return canAttack_(inAct); }
     BOOL cancelTimeOver_() const { return m_tqCancelTimer <= 0; }
 #endif

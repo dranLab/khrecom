@@ -10,7 +10,7 @@
 #define EFFECT_H_PATH "System/Graphic/Effect/effect.h"
 #endif
 
-#ifdef EFFECT_CPP
+#ifdef EFFECT_CPP /* MATCH: EFFECT_CPP gate, only for its own unit (tested 2026-11-02) */
 /* Placeholder: effect.cpp includes effect_inl.h (whose asserts own these strings) after other headers, but the
  * strings come first in its .rodata. */
 #line 1 EFFECT_H_PATH
@@ -145,7 +145,7 @@ public:
     inline CCoord& Crd(INT nNum);
     inline CCoord& Crd(INT nNum) const;
     inline INT getCoordNum() const;
-#ifndef EFFECT_CPP
+#ifndef EFFECT_CPP /* MATCH: EFFECT_CPP gate, only for its own unit (tested 2026-11-02) */
     CCoords* getCoords() { return m_pCrds; } const FVECTOR& getScale() const { return m_vScale; } // PARTIAL: added for Game/Bullet/Bullet (getScale: Game/Enemy/BattleEnemy, name unknown)
     // PARTIAL: added for Game/Player/FriendDonald
     void setScale(FLOAT _x, FLOAT _y, FLOAT _z) { m_vScale.set(_x, _y, _z); }
@@ -207,7 +207,7 @@ private:
     char* print_prof();
 };
 
-#ifndef EFFECT_CPP
+#ifndef EFFECT_CPP /* MATCH: EFFECT_CPP gate, only for its own unit (tested 2026-11-02) */
 #include "System/Graphic/Effect/effect_inl.h"
 #endif
 

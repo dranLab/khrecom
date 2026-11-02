@@ -1,5 +1,5 @@
 
-#define FORM_MENU_SAVELOADCTRL_CPP
+#define FORM_MENU_SAVELOADCTRL_CPP /* MATCH: unit gate (its header gives this unit its own parts); without it the link fails (inlines this unit must emit) (tested 2026-11-02) */
 #define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #define SAVELOADCTRL_H_PATH "c:/KHCOM/MainApp/Form/Menu/SaveLoadCtrl.h" /* MATCH: this unit names SaveLoadCtrl.h so (header default "Form/Menu/SaveLoadCtrl.h") */
 #include "System/Graphic/Gprim.h"

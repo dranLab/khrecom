@@ -46,7 +46,7 @@ public:
     virtual BOOL initalize(INT inGroupID, INT inRsrcID);
     virtual BOOL initalize(INT inGroupID, INT inRsrcID, UINT inFlag);
     void setGimmickFlag(UINT inSet, UINT inMask) { m_uiGimmickFlag = (m_uiGimmickFlag | inSet) & ~inMask; }
-#ifndef GAME_GIMMICK_BASEGIMMICK_CPP
+#ifndef GAME_GIMMICK_BASEGIMMICK_CPP /* MATCH: GAME_GIMMICK_BASEGIMMICK_CPP gate, only for its own unit (tested 2026-11-02) */
     /* Not in the original: older Gimmick units call setGimmickFlag(flag, TRUE/FALSE); it would be emitted as an
      * extra weak function in Game/Gimmick/BaseGimmick, so that unit leaves it out. */
     void setGimmickFlag(UINT inFlag, BOOL inOn) {

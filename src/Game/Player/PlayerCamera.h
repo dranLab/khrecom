@@ -32,7 +32,7 @@ struct BCAM_PARAM {
 
 /* The full class (PlayerCamera.cpp defines GAME_PLAYER_PLAYERCAMERA_CPP) needs the camera, collision and state
  * machine headers; the other units get the reduced declaration below with the layout of the members they use. */
-#ifdef GAME_PLAYER_PLAYERCAMERA_CPP
+#ifdef GAME_PLAYER_PLAYERCAMERA_CPP /* MATCH: GAME_PLAYER_PLAYERCAMERA_CPP gate, only for its own unit (tested 2026-11-02) */
 #include "System/Graphic/Camera.h"
 #include "System/PadHandler.h"
 #include "System/Fsm.h"

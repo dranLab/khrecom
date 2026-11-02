@@ -167,7 +167,7 @@ private:
     friend class CHomingBullet;
 };
 
-#ifndef GAME_BULLET_BULLET_CPP
+#ifndef GAME_BULLET_BULLET_CPP /* MATCH: GAME_BULLET_BULLET_CPP gate, only for its own unit (tested 2026-11-02) */
 inline void CBullet::setOwner(CEntity* inOwner) {
     m_hOwner = inOwner->getHandle();
     setEntityType(inOwner->getEntityType());

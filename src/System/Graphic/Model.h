@@ -447,7 +447,7 @@ public:
 #ifdef GAME_ENTITY_H
 /* PARTIAL: getModel(INT) is not in the original CEntity (callers use it as getModel()[i]); kept out of Game/Entity,
  * whose key function would emit it. */
-#ifndef GAME_ENTITY_CPP
+#ifndef GAME_ENTITY_CPP /* MATCH: GAME_ENTITY_CPP gate, only for its own unit (tested 2026-11-02) */
 inline CModel* CEntity::getModel(INT inIndex) { return &m_pModels[inIndex]; }
 #endif
 #endif

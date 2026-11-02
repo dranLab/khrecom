@@ -96,7 +96,7 @@ public:
 private:
     void _initialize();
     void calcMarkerScale();
-#ifdef GAME_PLAYER_PLAYERGAUGE_CPP
+#ifdef GAME_PLAYER_PLAYERGAUGE_CPP /* MATCH: GAME_PLAYER_PLAYERGAUGE_CPP gate, only for its own unit (tested 2026-11-02) */
     /* MATCH: the ref inlines only for Game/Player/PlayerGauge (emitted with the key function, in ref definition order); Game/Player/PlayerRiku matches with its own forms below */
     void setDistance(INT inDist) { m_iDist = inDist; }
 public:

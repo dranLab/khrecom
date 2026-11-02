@@ -90,7 +90,7 @@ public:
     void changeState(STATE nState, BOOL bSkipIfSame, SHORT nExtSeq);
     void changeSeq(SHORT nSeqID);
     STATE getState() const { return m_nState; }
-#ifdef FORM_MENU_SAVELOADCTRL_CPP
+#ifdef FORM_MENU_SAVELOADCTRL_CPP /* MATCH: FORM_MENU_SAVELOADCTRL_CPP gate, only for its own unit (tested 2026-11-02) */
     BOOL isNotStarted() const { return m_nState == _STATE_NOT_START; }
 #else
     /* Inline in the original, but its callers call it (not inlined there): declared only, here. */
@@ -145,7 +145,7 @@ private:
     friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
-#ifdef FORM_MENU_SAVELOAD_CPP
+#ifdef FORM_MENU_SAVELOAD_CPP /* MATCH: FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) */
     /* Inline in the original: emitted (weak, with the vtable) in Form/Menu/SaveLoad, in this order. */
     C2DSeqLightMarkAgent(CTask* pParent) : C2DSeqAgent(pParent) {
         m_nMoveTime = -1;
@@ -199,7 +199,7 @@ private:
     friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
-#ifdef FORM_MENU_SAVELOAD_CPP
+#ifdef FORM_MENU_SAVELOAD_CPP /* MATCH: FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) */
     /* Inline in the original: emitted (weak, with the vtable) in Form/Menu/SaveLoad, in this order. */
     C2DSeqSelectable(CTask* pParent) : C2DSeqAgent(pParent) {
         m_pCtrl = NULL;
@@ -279,7 +279,7 @@ private:
     friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
-#ifdef FORM_MENU_SAVELOAD_CPP
+#ifdef FORM_MENU_SAVELOAD_CPP /* MATCH: FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) */
     inline C2DSeqScrollbarCtrl(CTask* pParent); // PARTIAL: added for Form/Menu/SaveLoad (defined at the end)
     ~C2DSeqScrollbarCtrl() {
         for (INT i = 0; i < 3; i++) {
@@ -340,7 +340,7 @@ private:
     HM m_Time;         /* 0x170 */
 
 public:
-#ifdef FORM_MENU_SAVELOAD_CPP
+#ifdef FORM_MENU_SAVELOAD_CPP /* MATCH: FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) */
     C2DSeqTimeCtrl() : C2DSeqCtrl(1) { /* inline in the original (Form/Menu/SaveLoad) */
         m_pszLad = NULL;
         m_nSeqUnit = 0;
@@ -374,7 +374,7 @@ private:
     SHORT __nFiller;     /* 0x17a */
 
 public:
-#ifdef FORM_MENU_SAVELOAD_CPP
+#ifdef FORM_MENU_SAVELOAD_CPP /* MATCH: FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) */
     C2DSeqNumericCtrl() : C2DSeqCtrl(1) { /* inline in the original (Form/Menu/SaveLoad) */
         m_pszLad = NULL;
         m_nSeqUnit = 0;
@@ -396,7 +396,7 @@ public:
     BOOL updateValue(UINT nValue);
 };
 
-#ifdef FORM_MENU_SAVELOAD_CPP
+#ifdef FORM_MENU_SAVELOAD_CPP /* MATCH: FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) */
 /* The original header's line 310 is the allocation in this constructor (inlined in Form/Menu/SaveLoad). */
 #line 300 SAVELOADCTRL_H_PATH
 inline C2DSeqScrollbarCtrl::C2DSeqScrollbarCtrl(CTask* pParent)

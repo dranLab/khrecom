@@ -1,4 +1,4 @@
-#define FORM_MENU_JIMINYMEMO_CPP
+#define FORM_MENU_JIMINYMEMO_CPP /* MATCH: unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) */
 #include "khtypes.h"
 #include "Form/Menu/Menu.h"
 #include "System/TaskMan.h"
