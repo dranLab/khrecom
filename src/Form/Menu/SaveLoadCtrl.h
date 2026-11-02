@@ -130,7 +130,6 @@ private:
 
 public:
     void setupSeq(const CHAR* pszLad, SHORT nUnit, SHORT nSeqNormal, SHORT nSeqHistory);
-    // PARTIAL: added for Form/Menu/SaveLoad
     void setNormalSeq() { replaceSeq(0, m_pszLad, m_nSeqUnit, m_nSeqTbl[0]); }
     void setHistorySeq() { replaceSeq(0, m_pszLad, m_nSeqUnit, m_nSeqTbl[1]); }
 };
@@ -142,7 +141,6 @@ private:
     FVECTOR m_vTargetPos;    /* 0x90 */
     TIMEQ m_nMoveTime;       /* 0xa0 */
     INT m_nFlag;             /* 0xa4 */
-    friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
 #ifdef FORM_MENU_SAVELOAD_CPP /* MATCH: FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) */
@@ -156,25 +154,19 @@ public:
         delete m_pCtrl;
         m_pCtrl = NULL;
     }
+#else
+    C2DSeqLightMarkAgent(CTask* pParent);
+#endif
+    void setupSeq(SeqTbl stbl, const CHAR* pszLad, SHORT nUnit, SHORT nLayer, BOOL bFollow);
+    void setPos(FVECTOR& vPos);
+#ifdef FORM_MENU_SAVELOAD_CPP /* MATCH: FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) */
     virtual void procLoop() {
         if (m_nFlag & 1) updatePos();
     }
     virtual void onOutSeq() {
         if (m_nFlag & 1) m_nMoveTime = -1;
     }
-#else
-    C2DSeqLightMarkAgent(CTask* pParent);
 #endif
-    void setupSeq(SeqTbl stbl, const CHAR* pszLad, SHORT nUnit, SHORT nLayer, BOOL bFollow);
-    void setPos(FVECTOR& vPos);
-    void setFollow(BOOL bOn) {
-        if (bOn) {
-            m_nFlag |= 1;
-        } else {
-            m_nFlag &= ~1;
-        }
-    }
-    // PARTIAL: added for Form/Menu/SaveLoad
     void setSleep(BOOL bSleep) {
         if (bSleep) {
             m_nFlag |= 2;
@@ -182,6 +174,7 @@ public:
             m_nFlag &= ~2;
         }
     }
+    BOOL isSleep();
 
 protected:
     void updatePos();
@@ -196,7 +189,6 @@ private:
     C2DSeqLightMarkAgent* m_pLightMark; /* 0x84 */
     FPOINT m_fptLightOfs;             /* 0x88 */
     SHORT m_nActiveLoopSeq;           /* 0x90 */
-    friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
 #ifdef FORM_MENU_SAVELOAD_CPP /* MATCH: FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) */
@@ -216,33 +208,19 @@ public:
         delete m_pCtrl;
         m_pCtrl = NULL;
     }
+#else
+    C2DSeqSelectable(CTask* pParent);
+#endif
+    void setupSeq(SeqTbl stbl, const CHAR* pszLad, SHORT nUnit, SHORT nActiveSeq, SHORT nLayer);
+    void setupActiveSeq(SHORT nSeq) { m_nActiveLoopSeq = nSeq; }
+#ifdef FORM_MENU_SAVELOAD_CPP /* MATCH: FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) */
     virtual void dispose() {
         delete m_pCtrl;
         m_pCtrl = NULL;
         C2DSeqAgent::dispose();
     }
-#else
-    C2DSeqSelectable(CTask* pParent);
 #endif
-    void setupSeq(SeqTbl stbl, const CHAR* pszLad, SHORT nUnit, SHORT nActiveSeq, SHORT nLayer);
     void select(BOOL bSel);
-    void setCaptionParam(const CHAR* pszText, INT nSize, const G_RGBA* pCol, UINT nStyle);
-    void getCursorPos(FVECTOR& vOut) const;
-    void getLightMarkPos(FVECTOR& vOut) const;
-    // PARTIAL: added for Form/Menu/SaveLoad
-    void attachCursor(C2DSeqCursorCtrl* pCursor) { m_pCursor = pCursor; }
-    void attachLightMark(C2DSeqLightMarkAgent* pLight) { m_pLightMark = pLight; }
-    void enableDisp(BOOL bDisp) {
-        if (m_pCtrl) m_pCtrl->enableDisp(bDisp);
-    }
-    void enableDispCaption(BOOL bDisp) {
-        if (m_pCtrl) m_pCtrl->enableDisp(1, bDisp);
-    }
-    void setupActiveSeq(SHORT nSeq) { m_nActiveLoopSeq = nSeq; }
-    void setCaptionShift(FLOAT fX, FLOAT fY) {
-        if (m_pCtrl) m_pCtrl->setFntPos(1, fX, fY);
-    }
-    inline void setCaptionSize(INT nSize); // defined where D2::C2DFnt is complete (Form/Menu/SaveLoad)
     void setCtrlPos(FVECTOR& vPos) {
         if (m_pCtrl) m_pCtrl->setPos(vPos);
     }
@@ -252,7 +230,18 @@ public:
     void setCtrlParent(D2::C2DSeqCtrl* pParent) {
         if (m_pCtrl) m_pCtrl->setParent(pParent);
     }
+    void enableDisp(BOOL bDisp) {
+        if (m_pCtrl) m_pCtrl->enableDisp(bDisp);
+    }
+    void enableDispCaption(BOOL bDisp) {
+        if (m_pCtrl) m_pCtrl->enableDisp(1, bDisp);
+    }
+    void setCaptionParam(const CHAR* pszText, INT nSize, const G_RGBA* pCol, UINT nStyle);
     inline void setCaptionText(const CHAR* pszText); // defined where D2::C2DFnt is complete (Form/Menu/SaveLoad)
+    inline void setCaptionSize(INT nSize);           // likewise
+    void setCaptionShift(FLOAT fX, FLOAT fY) {
+        if (m_pCtrl) m_pCtrl->setFntPos(1, fX, fY);
+    }
     inline void setCaptionSpace(INT nX, INT nY);     // likewise
     void setCursorOfs(FLOAT fX, FLOAT fY) {
         m_fptCursorOfs.x = fX;
@@ -262,6 +251,13 @@ public:
         m_fptLightOfs.x = fX;
         m_fptLightOfs.y = fY;
     }
+    FPOINT getCursorOfs();
+    FPOINT getLightOfs();
+    void getCursorPos(FVECTOR& vOut) const;
+    void getLightMarkPos(FVECTOR& vOut) const;
+    void attachCursor(C2DSeqCursorCtrl* pCursor) { m_pCursor = pCursor; }
+    void attachLightMark(C2DSeqLightMarkAgent* pLight) { m_pLightMark = pLight; }
+    BOOL isSelected() { return getCurerntSeq() == m_nActiveLoopSeq; }
 };
 
 class C2DSeqScrollbarCtrl {
@@ -276,11 +272,10 @@ private:
     FLOAT m_fScrollPos;           /* 0x2c */
     USHORT m_nAllItemCount;       /* 0x30 */
     USHORT m_nDispItemCount;      /* 0x32 */
-    friend class CSaveLoadUI; // PARTIAL: added for Form/Menu/SaveLoad
 
 public:
 #ifdef FORM_MENU_SAVELOAD_CPP /* MATCH: FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) */
-    inline C2DSeqScrollbarCtrl(CTask* pParent); // PARTIAL: added for Form/Menu/SaveLoad (defined at the end)
+    inline C2DSeqScrollbarCtrl(CTask* pParent); // defined at the end (its allocation is the header's line 310)
     ~C2DSeqScrollbarCtrl() {
         for (INT i = 0; i < 3; i++) {
             delete m_pCtrls[i];
@@ -296,15 +291,20 @@ public:
 #endif
     void setupSeq(D2::C2DSeqCtrl* pParent, const C2DSeqAgent::SeqTbl* pTbl, const CHAR* pszLad, SHORT nUnit,
                   SHORT nLayer, SHORT nBodySize);
-    void setBasePos(FVECTOR& vPos);
-    void setScrollRange(FLOAT fMaxBodySize, USHORT nItemCount, USHORT nDispCount, BOOL bUpdateForm);
-    void setScrollPos(USHORT nPos, BOOL bUpdateForm);
-    // PARTIAL: added for Form/Menu/SaveLoad
+    void start();
     void startOrRestart() {
         for (INT i = 0; i < 3; i++) {
             m_pParts[i]->startOrRestart();
         }
     }
+    void changeState(C2DSeqAgent::STATE nState) { // PARTIAL: guessed parameters (the ref lists none; body from Form/Menu/SaveLoad)
+        for (INT i = 0; i < 3; i++) {
+            m_pParts[i]->changeState(nState, TRUE, -1);
+        }
+    }
+    void setBasePos(FVECTOR& vPos);
+    void setScrollRange(FLOAT fMaxBodySize, USHORT nItemCount, USHORT nDispCount, BOOL bUpdateForm);
+    void setScrollPos(USHORT nPos, BOOL bUpdateForm);
 
 protected:
     void updateForm();
@@ -353,7 +353,7 @@ public:
 #endif
     void setupSeq(const CHAR* pszLad, SHORT nUnit, SHORT nSeqNum0, SHORT nSeqColon, SHORT nSeqBlank);
     void show();
-    void hide() { // PARTIAL: added for Form/Menu/SaveLoad
+    void hide() {
         if (m_nState == 2) enableDisp(FALSE);
         if (m_nState) m_nState = 3;
     }
@@ -389,7 +389,7 @@ public:
 #endif
     void setupSeq(const CHAR* pszLad, SHORT nUnit, SHORT nSeqNum0, SHORT nSeqBlank, UINT nMaxValue);
     void show();
-    void hide() { // PARTIAL: added for Form/Menu/SaveLoad
+    void hide() {
         if (m_nState == 2) enableDisp(FALSE);
         if (m_nState) m_nState = 3;
     }

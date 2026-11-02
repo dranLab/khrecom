@@ -190,7 +190,7 @@ void C2DSeqLightMarkAgent::setupSeq(SeqTbl stbl, const CHAR* pszLad, SHORT nUnit
     pCtrl->enableColorCtrl(TRUE);
     C2DSeqAgent::setupSeq(*pCtrl, pszLad, nUnit, 0);
     m_pCtrl = pCtrl;
-    setFollow(bFollow);
+    if (bFollow) m_nFlag |= 1; else m_nFlag &= ~1;
 }
 
 void C2DSeqLightMarkAgent::setPos(FVECTOR& vPos) {
