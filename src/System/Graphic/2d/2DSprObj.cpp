@@ -309,7 +309,7 @@ void C2DSprObj::getFukidasiRect(FVECTOR2 (*vOut)[4]) {
  * the 0.25f stores in the prologue (the original puts `addiu s3,sp,32` after the first two fVec2 stores) and the
  * load/store order of the sway block (the original loads x_sway[0], y_sway[0], x_sway[1], y_sway[1] in that order and
  * stores m_vSway[0] first); tried: fVec2 as fields/chain/set/setAll, iAlphaBlend order, six statement orders of the
- * sway block with and without temporaries, an 8 min permuter run (23 -> 23). The five `BOOL b = m_status.x_stop;
+ * sway block with and without temporaries, an 8 min permuter run (23 -> 23), a 15 min one (2026-11-02, 40k: 20 -> 20). The five `BOOL b = m_status.x_stop;
  * if (b)` blocks are what makes the original's dsll/dsra32/andi extraction. */
 #if 0
 TIMEQ C2DSprObj::initForSeq(SEQ_ANIMATION* pSeqAnim, LAY_SCREEN* pLayScreen) {
