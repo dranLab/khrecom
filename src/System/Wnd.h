@@ -186,7 +186,7 @@ public:
 };
 
 class CText : public CComponent {
-    friend struct CTextPH;
+
 private:
     D2::C2DSeqCtrl* m_pSelectCtrl;  /* 0x14 */
     D2::C2DSeqCtrl* m_pIconCtrl;    /* 0x18 */
