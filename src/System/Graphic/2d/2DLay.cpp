@@ -16,17 +16,17 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 namespace D2 {
 
-class C2DMan { /* System/Graphic/2d/2DMan.h */
-public:
-    static HANDLE init(void* pData, const CHAR* pName);
-    static C2DBase* getBase(HANDLE handle);
-    static void destroyBase(HANDLE handle);
-    static ISLCManagerT<C2DO>* get2DOSLCManager();
-    static C2DO* get2DO(HANDLE hID) {
-        SLContainerT<C2DO>* pContainer = get2DOSLCManager()->getContainer(hID);
-        return pContainer ? pContainer->getValue() : NULL;
-    }
-};
+
+
+
+
+
+
+
+
+
+
+
 
 /* the .lad file header (original name unknown) */
 struct LAD_HEADER {
@@ -132,22 +132,22 @@ INT C2DLay::getSprIdMax(UINT inUnitNo) {
 }
 
 TIMEQ C2DLay::getTime(HANDLE handle) {
-    C2DLayObj* p2DLayObj = (C2DLayObj*)C2DMan::get2DO(handle);
+    C2DLayObj* p2DLayObj = (C2DLayObj*)C2DMan::get2DOSLCManager().get2DO(handle);
     return p2DLayObj ? p2DLayObj->getTime() : 0;
 }
 
 TIMEQ C2DLay::getTimeMax(HANDLE handle) {
-    C2DLayObj* p2DLayObj = (C2DLayObj*)C2DMan::get2DO(handle);
+    C2DLayObj* p2DLayObj = (C2DLayObj*)C2DMan::get2DOSLCManager().get2DO(handle);
     return p2DLayObj ? p2DLayObj->getTimeMax() : 0;
 }
 
 BOOL C2DLay::isEnd(HANDLE handle) {
-    C2DLayObj* p2DLayObj = (C2DLayObj*)C2DMan::get2DO(handle);
+    C2DLayObj* p2DLayObj = (C2DLayObj*)C2DMan::get2DOSLCManager().get2DO(handle);
     return p2DLayObj ? p2DLayObj->isEnd() : FALSE;
 }
 
 void C2DLay::enableDisp(HANDLE handle, BOOL bEnable) {
-    C2DLayObj* p2DLayObj = (C2DLayObj*)C2DMan::get2DO(handle);
+    C2DLayObj* p2DLayObj = (C2DLayObj*)C2DMan::get2DOSLCManager().get2DO(handle);
     if (p2DLayObj) p2DLayObj->enableDisp(handle, bEnable);
 }
 

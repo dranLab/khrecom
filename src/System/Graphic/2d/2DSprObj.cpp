@@ -13,13 +13,13 @@
 #include "System/Math3D.h"
 #include "System/Graphic/WorldEnv.h"
 
-namespace D2 {
-class C2DMan { /* System/Graphic/2d/2DMan.h */
-public:
-    static INT m_nLayer;
-    static INT m_fg2DViewer;
-};
-}
+
+
+
+
+
+
+
 
 using namespace D2;
 

@@ -324,12 +324,12 @@ static inline void _setCard(CARD& c, USHORT nKind, BYTE nNumber) {
     c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
     c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
-namespace D2 {
-class C2DMan { /* PARTIAL: System/Graphic/2d/2DMan.h declares the classes only for its own unit */
-public:
-    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
-};
-}
+
+
+
+
+
+
 extern "C" int abs(int);
 template <class T> static inline T& _ref(T& v) { return v; }
 static inline void _setFlag(UINT& ioFlag, UINT inSet, UINT inMask) { ioFlag = (ioFlag | inSet) & ~inMask; }

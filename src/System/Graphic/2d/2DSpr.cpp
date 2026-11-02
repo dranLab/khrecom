@@ -21,14 +21,14 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 namespace D2 {
 
-class C2DMan { /* System/Graphic/2d/2DMan.h */
-public:
-    static ISLCManagerT<C2DO>& get2DOSLCManager();
-    static C2DO* get2DO(HANDLE hID) {
-        SLContainerT<C2DO>* pContainer = get2DOSLCManager().getContainer(hID);
-        return pContainer ? pContainer->getValue() : NULL;
-    }
-};
+
+
+
+
+
+
+
+
 
 INT C2DSpr::m_n2DSeqObjListSelect = -1;
 C2DOSLCList* C2DSpr::m_p2DOSLCList = NULL;
@@ -230,7 +230,7 @@ HANDLE C2DSpr::createSpr(UINT inUnitNo, UINT inNo) {
 }
 
 void C2DSpr::destroy(HANDLE handle) {
-    C2DO* p2DO = C2DMan::get2DO(handle);
+    C2DO* p2DO = C2DMan::get2DOSLCManager().get2DO(handle);
     if (p2DO) {
         m_p2DOSLCList->remove(handle);
         delete p2DO;
@@ -238,11 +238,11 @@ void C2DSpr::destroy(HANDLE handle) {
 }
 
 C2DSeqObj* C2DSpr::getSeqObj(HANDLE handle) {
-    return (C2DSeqObj*)C2DMan::get2DO(handle);
+    return (C2DSeqObj*)C2DMan::get2DOSLCManager().get2DO(handle);
 }
 
 void C2DSpr::enableDisp(HANDLE handle, BOOL bEnable) {
-    C2DO* p2DO = C2DMan::get2DO(handle);
+    C2DO* p2DO = C2DMan::get2DOSLCManager().get2DO(handle);
     if (p2DO) p2DO->enableDisp(bEnable);
 }
 

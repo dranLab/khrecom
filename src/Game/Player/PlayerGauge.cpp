@@ -59,12 +59,12 @@ namespace CardBattle {
 extern G_UV g_uvCRCounterNumTex[8][10];
 }
 FVECTOR getPlayerPos(BOOL flag);
-namespace D2 {
-class C2DMan { /* PARTIAL: stand-in for System/Graphic/2d/2DMan C2DMan: gated by SYSTEM_GRAPHIC_2D_2DMAN_CPP */
-public:
-    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal);
-};
-}
+
+
+
+
+
+
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
 FLOAT RotTransPersClipW(IVECTOR& out_v, const FVECTOR& in_v);

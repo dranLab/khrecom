@@ -15,18 +15,18 @@
 #define SAVELOADCTRL_H_PATH "Form/Menu/SaveLoadCtrl.h"
 #endif
 
-namespace D2 {
-class C2DMan { /* PARTIAL: added for Form/Menu/BtlReportCtrl */
-public:
-    static void destroy(HANDLE h);
-    static void setLayer(INT nLayer);
-    static HANDLE create(const CHAR* pszLad, UINT nSeq);
-    static BOOL isEnd(HANDLE h);
-    static BOOL getLayPosition(const CHAR* pLadName, UINT inNo, UINT inIdx, FVECTOR& outPos, BOOL bLocal); /* PARTIAL: added for Form/Menu/WorldCard */
-    enum D2MAN_LEVEL { D2MAN_LEVEL0 = 0, D2MAN_LEVEL1 = 1, D2MAN_LEVEL2 = 2 }; /* PARTIAL: added for Form/Menu/SaveLoad */
-    static void changeLevel(D2MAN_LEVEL nLevel);
-};
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 class C2DSeqAgent : public CTask {
 public:

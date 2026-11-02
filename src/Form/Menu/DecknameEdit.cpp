@@ -20,12 +20,12 @@ extern INT SCREEN_HEIGHT;
 static inline INT& _screenHeight() { return SCREEN_HEIGHT; }
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
-namespace D2 {
-class C2DMan {
-public:
-    static void getLayPosition(const char* pName, UINT nIdx, UINT nId, FVECTOR& vPos, int nFlag);
-};
-}
+
+
+
+
+
+
 
 inline void* operator new(size_t, void* p) throw() { return p; }
 

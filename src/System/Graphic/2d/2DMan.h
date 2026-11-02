@@ -7,32 +7,19 @@
 #include "System/HeapMan.h"
 #include "System/Debug.h"
 
-/* Placeholders for the original header's inline functions: C2DMan's singleton constructor/creation
- * ("System/Graphic/2D/2DMan.h", "__null == m_pInstance", "System/Graphic/2D/2DMan.h(49)") and the 2D
- * container pool overflow message ("2D用コンテナが MAX に到達しました\n", Shift-JIS), in this order in
- * .rodata of every includer. Only line 49 is known (it is part of the allocation message). */
 /* PARTIAL: path override added for System/Graphic/2d/2DFntObj ("c:/KHCOM/MainApp/System/Graphic/2d/2DMan.h") */
 #ifndef D2MAN_H_PATH
 #define D2MAN_H_PATH "System/Graphic/2D/2DMan.h"
 #endif
 #line 1 D2MAN_H_PATH
-inline void _2dManCheckInstance(void* inInstance) {
-    if (!(__null == inInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-}
-inline void* _2dManCreate() {
-    return com_malloc_d(4, __FILE__ "(49)", (UINT)-1);
-}
-inline void _2dSLCOverflow() {
-    TRACE("2D\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
-}
-
-/* PARTIAL: the classes, for System/Graphic/2d/2DMan only (other includers declare their own C2DMan) */
-#ifdef SYSTEM_GRAPHIC_2D_2DMAN_CPP
 #include "System/Task.h"
 #include "System/SJoint.h"
 #include "System/FifoFpl.h"
 #include "System/Graphic/2d/2DBase.h"
 #include "System/Graphic/2d/2DSeqObj.h"
+
+/* PARTIAL: placement new for C2DMan::initialize, declared only: the includers define it themselves (or never call it) */
+inline void* operator new(size_t, void* p) throw();
 
 namespace D2 {
 
@@ -127,7 +114,7 @@ public:
 };
 
 /* Declared after C2DMan: its vtables come first in .rodata. */
-class C2DOSLCManager : public ISLCManagerT<C2DO>, public CFifoFpl {
+class C2DOSLCManager : public ISLCManagerT<C2DO>, private CFifoFpl {
 public:
     C2DOSLCManager() { initialize(sizeof(SLContainerT<C2DO>), 0x800, NULL); }
     /* implicit destructor: synthesized where it is first needed (weak function order) */
@@ -135,6 +122,11 @@ public:
     virtual SLContainerT<C2DO>* createContainer();
     virtual void releaseContainer(SLContainerT<C2DO>& inContainer);
     virtual SLContainerT<C2DO>* getContainer(HANDLE hID);
+    C2DO* get2DO(HANDLE hID) {
+        SLContainerT<C2DO>* pContainer = getContainer(hID);
+        return pContainer ? pContainer->getValue() : NULL;
+    }
+    void debugDump(UINT nStartIndex, UINT nEndIndex) { CFifoFpl::debugDump(nStartIndex, nEndIndex); }
 };
 
 }  // namespace D2
@@ -142,7 +134,7 @@ public:
 namespace D2 {
 inline SLContainerT<C2DO>* C2DOSLCManager::createContainer() {
     SLContainerT<C2DO>* pContainer = (SLContainerT<C2DO>*)allocBlock();
-    if (!pContainer) _2dSLCOverflow();
+    if (!pContainer) TRACE("2D\x97\x70\x83\x52\x83\x93\x83\x65\x83\x69\x82\xaa MAX \x82\xc9\x93\x9e\x92\x42\x82\xb5\x82\xdc\x82\xb5\x82\xbd\n");
     return pContainer;
 }
 inline void C2DOSLCManager::releaseContainer(SLContainerT<C2DO>& inContainer) { releaseBlock(&inContainer); }
@@ -151,8 +143,5 @@ inline SLContainerT<C2DO>* C2DOSLCManager::getContainer(HANDLE hID) {
 }
 }  // namespace D2
 
-namespace D2 {
-}  // namespace D2
-#endif /* SYSTEM_GRAPHIC_2D_2DMAN_CPP */
 
 #endif /* SYSTEM_GRAPHIC_2D_2DMAN_H */

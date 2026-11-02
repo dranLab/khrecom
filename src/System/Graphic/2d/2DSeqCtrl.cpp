@@ -14,23 +14,23 @@ extern "C" void sceVu0RotMatrix(FMATRIX& m0, FMATRIX& m1, FVECTOR& rot);
 
 namespace D2 {
 
-class C2DMan { /* System/Graphic/2d/2DMan.h */
-public:
-    static HANDLE create(const CHAR* pSedName, UINT idxSeq, SeqControl* pSeqControl);
-    static HANDLE createFnt(const CHAR* pSqdName, C2DFnt* p2DFnt, SeqControl* pSeqControl);
-    static HANDLE replaceSeq(HANDLE hCurrent, const CHAR* pSedName, UINT idxSeq, SeqControl* pSeqControl);
-    static HANDLE replaceFnt(HANDLE hCurrent, const CHAR* pSqdName, C2DFnt* p2DFnt, SeqControl* pSeqControl);
-    static void destroy(HANDLE handle);
-    static C2DSeqObj* getSeqObj(HANDLE handle);
-    static void enableDisp(HANDLE handle, BOOL bEnable);
-    static void changeSeqTime(HANDLE handle, UINT inTime);
-    static TIMEQ getTime(HANDLE handle);
-    static void changeSeqLayer(HANDLE handle, INT nLayer);
-    static void restartSeq(HANDLE handle, FLOAT fStart);
-    static BOOL isEnd(HANDLE handle);
-    static void changeSeqTexture(HANDLE handle, INT inSprIdx, CHAR* pTexName, G_UV* pStart, G_UV* pEnd);
-    static void changeSeqTexture(HANDLE handle, INT inSeqIdx, INT inSprIdx, CHAR* pTexName, G_UV* pStart, G_UV* pEnd);
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 unsigned char C2DSeqCtrl::m_bitTbl[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 

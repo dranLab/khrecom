@@ -27,11 +27,11 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 namespace D2 {
 
-class C2DMan { /* System/Graphic/2d/2DMan.h */
-public:
-    static TIMEQ m_qTimeD;
-    static INT m_fg2DViewer;
-};
+
+
+
+
+
 
 UINT C2DSeqObj::m_uiID = 0;
 

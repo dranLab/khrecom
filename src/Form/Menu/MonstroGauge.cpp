@@ -33,15 +33,15 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
 
-namespace D2 {
-class C2DMan {
-public:
-    static HANDLE create(const char* pName, UINT nIdx);
-    static void destroy(HANDLE h);
-    static void setLayer(INT nLayer);
-    static BOOL isEnd(HANDLE h);
-};
-}
+
+
+
+
+
+
+
+
+
 
 #include "System/Sound/SoundMan.h"
 #line 50

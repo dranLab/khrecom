@@ -13,15 +13,15 @@ struct TexInfo;
 
 
 
-namespace D2 {
-class C2DMan {
-public:
-    static HANDLE create(const char* pName, UINT nIdx);
-    static void destroy(HANDLE h);
-    static void setLayer(INT nLayer);
-    static BOOL isEnd(HANDLE h);
-};
-}
+
+
+
+
+
+
+
+
+
 
 #include "System/RsrcDB.h"
 

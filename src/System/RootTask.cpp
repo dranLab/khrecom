@@ -70,22 +70,22 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 
-namespace D2 {
-class C2DMan {
-    char _pad[0x40];
-    static C2DMan* m_pInstance;
 
-    C2DMan(CTask* pParent);
 
-public:
-#line 47 "System/Graphic/2D/2DMan.h"
-    static C2DMan& initialize(CTask* pInParent) {
-        if (!(__null == m_pInstance)) AssertApp(__FILE__, __LINE__, "__null == m_pInstance", 0);
-        m_pInstance = new (com_malloc_d(sizeof(C2DMan), __FILE__ "(49)", RET_ADDR())) C2DMan(pInParent);
-        return *m_pInstance;
-    }
-};
-} // namespace D2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #line 100 "c:/KHCOM/MainApp/System/RootTask.cpp"
 namespace {

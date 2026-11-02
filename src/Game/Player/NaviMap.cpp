@@ -42,17 +42,17 @@ inline void operator delete[](void* mem) { com_free(mem); }
 
 
 
-namespace D2 {
-class C2DMan {
-public:
-    static HANDLE create(const char* pName, UINT nIdx);
-    static void destroy(HANDLE h);
-    static void setLayer(INT nLayer);
-    static BOOL isEnd(HANDLE h);
-    static void enableDisp(HANDLE h, BOOL bEnable);
-    static void getLayPosition(const char* pName, UINT nIdx, UINT nLay, FVECTOR& vPos, BOOL b);
-};
-}  // namespace D2
+
+
+
+
+
+
+
+
+
+
+
 
 extern "C" {
 void sceVu0RotMatrixX(FMATRIX& m0, FMATRIX& m1, float rx);
