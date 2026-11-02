@@ -91,19 +91,21 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | decomp/Game-Movement (ctor draft to the constant-pool form, 53 lines, still parked; A2: COLLUTIL_H_PATH MATCH, GPRIM_H_PATH dropped) | 819 | 27 | 0 | 755 (665) | 185 |
 | 2026-11-02 | cleanup/GPRIM_H_PATH (defines equal to Gprim.h's default dropped in 2DSprObj, CollDisp) | 819 | 27 | 0 | 753 (663) | 185 |
 | 2026-11-02 | decomp/System-Wnd (finished: setIcon matched, CImageWnd::init parked; PH placeholders dropped; A2: G_RGBA/G_XY equal the ref, path overrides MATCH) | 816 | 27 | 0 | 753 (661) | 187 |
+| 2026-11-02 | decomp/Game-Collision-CollDisp-2 (finished: setBodyLines 38/105 same size and setAttackLines 62/178 parked with notes) | 816 | 27 | 0 | 753 (661) | 187 |
+| 2026-11-02 | cleanup/Game-Collision-CollDisp (CollDisp.h ungated for all 7 includers, op new declared only; GameSubBattle/Field use initialize/finalize) | 809 | 27 | 0 | 750 (658) | 189 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 816 (763 in 110 headers, 53 in 33 .cpp); MATCH: 187
-  by category: method 312, data member 62, type 72, fwd decl 49, #include 30, changed in place 121, padding 8, path override 21, gate 19, guessed 29, header-level 71, stand-in 16, other 6
+PARTIAL: 809 (756 in 110 headers, 53 in 33 .cpp); MATCH: 189
+  by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 20, gate 19, guessed 29, header-level 70, stand-in 16, other 6
 stand-ins: 27 foreign in 18 files (20 names), 199 unattributed, 167 own
 duplicate class names across headers: 0
-padding: 14 arrays, 0 accessors
-mechanisms: 753 sites (661 untagged); #line: 1244
+padding: 12 arrays, 0 accessors
+mechanisms: 750 sites (658 untagged); #line: 1243
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 610, superset 139, partial 112, gated 26, missing 8, unattributed 309
+classes: complete 613, superset 139, partial 112, gated 23, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -191,7 +193,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/CollParam.h` | 1 | 5/0/1/0 | 158 |
 | `Game/Collision/CollAttack.h` | 0 | 0/1/0/0 | 11 |
 | `Game/Collision/CollBody.h` | 1 | 0/1/0/0 | 23 |
-| `Game/Collision/CollDisp.h` | 8 | 0/0/0/3 | 7 |
+| `Game/Collision/CollDisp.h` | 1 | 3/0/0/0 | 7 |
 | `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
 | `Game/Collision/CollMap.h` | 0 | 0/1/0/0 | 29 |
 | `Game/Collision/CollMapCamera.h` | 2 | 0/1/0/0 | 8 |
@@ -396,7 +398,6 @@ or `untagged`.
 | placeholder | `_addCardStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:1170 |
 | placeholder | `_alloc*` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:87 |
 | placeholder | `_bossDeadDemoEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:23 |
-| placeholder | `_collDispCreate*` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.h:22 |
 | placeholder | `_collUtilCreate*` | 1 | 0 | untagged, e.g. Game/Collision/CollUtil.h:20 |
 | placeholder | `_createEnemyMotionName*` | 1 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:15 |
 | placeholder | `_emptyString*` | 1 | 0 | untagged, e.g. System/MainTaskFactory.cpp:90 |
@@ -463,7 +464,6 @@ or `untagged`.
 | placeholder | `_vsmeMotionName*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:54 |
 | pragma | `#pragma implementation` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:2 |
 | pragma | `#pragma interface` | 1 | 1 | the inline functions and vtables only in Gprim.o, as in the originals |
-| unit gate | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.cpp:2 |
 | unit gate | `EFFECT_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Effect/effect.cpp:1 |
 | unit gate | `FORM_MENU_JIMINYMEMO_CPP` | 1 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:1 |
 | unit gate | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.cpp:2 |
@@ -478,7 +478,6 @@ or `untagged`.
 | unit gate | `GAME_PLAYER_PLAYERGAUGE_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerGauge.cpp:2 |
 | unit gate | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerManager.cpp:1 |
 | unit gate | `GAME_PLAYER_PLAYER_CPP` | 1 | 0 | untagged, e.g. Game/Player/Player.cpp:1 |
-| unit gate site | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.h:17 |
 | unit gate site | `EFFECT_CPP` | 3 | 0 | untagged, e.g. System/Graphic/Effect/effect.h:13 |
 | unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 2 | 0 | untagged, e.g. Form/Menu/JiminyMemo.h:12 |
 | unit gate site | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:93 |
