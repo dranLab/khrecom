@@ -1,4 +1,3 @@
-// PARTIAL: added for Game/Gimmick/GimmickDeceive
 #ifndef GAME_GIMMICK_GIMMICKDECEIVEENEMY_H
 #define GAME_GIMMICK_GIMMICKDECEIVEENEMY_H
 

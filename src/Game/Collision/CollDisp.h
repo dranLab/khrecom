@@ -12,7 +12,7 @@
 #include "System/Vector.h"
 class CCollisionList;
 class CCoord;
-/* PARTIAL: operator new for CCollDisp::initialize's allocation, declared only: the includers define it themselves */
+/* MATCH: operator new for CCollDisp::initialize's allocation, declared only: the includers define it themselves */
 inline void* operator new(size_t size, char* msg) throw();
 
 class CCollObj;
