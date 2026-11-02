@@ -340,7 +340,7 @@ void CLevelUp::main() {
         }
         break;
     case 9:
-        if (CTechHelp::m_bEnd) m_nStep = 10;
+        if (CTechHelp::isEnd()) m_nStep = 10;
         break;
     case 10:
         C2DMan::destroy(m_hLay);
@@ -392,7 +392,7 @@ void CLevelUp::main() {
         }
         break;
     case 16:
-        if (CTechHelp::m_bEnd) {
+        if (CTechHelp::isEnd()) {
             setUpMsg(3);
             m_nStep = 17;
         }
