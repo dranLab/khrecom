@@ -138,7 +138,7 @@ public:
     static CARD m_deckCurrent[99];
     static void* m_pCardInitRsrc;
     static struct BC_PARAM* m_pBCParam;
-#ifdef GAME_SCENEINFO_H
+#ifdef GAME_SCENEINFO_H /* MATCH: initCard takes WORLD_ID: declared only where SceneInfo.h is included */
     static void initCard(USHORT nDeck, WORLD_ID nWorld, SHORT nFloor); // PARTIAL: added for Form/DebugMenu
 #endif
 };

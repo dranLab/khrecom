@@ -444,7 +444,7 @@ public:
     static void setSendCtrl(INT nMode);
 };
 
-#ifdef GAME_ENTITY_H
+#ifdef GAME_ENTITY_H /* MATCH: only for includers that have CEntity (see below) */
 /* PARTIAL: getModel(INT) is not in the original CEntity (callers use it as getModel()[i]); kept out of Game/Entity,
  * whose key function would emit it. */
 #ifndef GAME_ENTITY_CPP /* MATCH: GAME_ENTITY_CPP gate, only for its own unit (tested 2026-11-02) */

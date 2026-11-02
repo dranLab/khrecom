@@ -65,7 +65,7 @@ public:
     static BOOL setMP(INT inMP);                             // PARTIAL: added for Form/DebugWindowTBL
     static BOOL addMP(INT inMP);
     static BOOL isLevelUp();
-#ifdef GAME_SCENEINFO_H
+#ifdef GAME_SCENEINFO_H /* MATCH: only for includers that have SceneInfo.h (WORLD_ID) */
     static void initStatus(USHORT nDeck, WORLD_ID nWorld, SHORT nFloor); // PARTIAL: added for Form/DebugMenu
 #endif
 };

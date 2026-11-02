@@ -6,7 +6,7 @@ inline HANDLE CEffect::_getHandle() const { return m_hHandle; }
 inline void CEffect::_setHandle(HANDLE h) { m_hHandle = h; }
 inline void CEffect::setType(ObjType::eObjType eType) { m_eType = eType; }
 inline ObjType::eObjType CEffect::getType() { return m_eType; }
-#ifdef SYSTEM_COORD_H
+#ifdef SYSTEM_COORD_H /* MATCH: the Crd inlines need CCoords: only for includers with Coord.h before this (weak order) */
 inline CCoord& CEffect::Crd(INT nNum) { return m_pCrds->Crd(nNum); }
 inline CCoord& CEffect::Crd(INT nNum) const { return m_pCrds->Crd(nNum); }
 inline INT CEffect::getCoordNum() const { return m_pCrds->getCoordNum(); }

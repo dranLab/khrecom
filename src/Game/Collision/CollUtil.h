@@ -25,7 +25,7 @@ inline void* _collUtilCreate() {
 
 /* PARTIAL: added for Game/Atel/EventTrap - the singleton accessor (line 194), for includers that have the class
  * (Game/Collision/CollUtilA.h, included before this header). */
-#ifdef GAME_COLLISION_COLLUTILA_H
+#ifdef GAME_COLLISION_COLLUTILA_H /* MATCH: the accessor only for includers that have the class (see above) */
 /* The load of m_pInstance is not a "fixed scalar" to gcc's alias analysis (it stays ordered after stores through
  * pointers, Game/Gimmick/GimmickSearchLaser's CGimmickSearchLaserCircle::stateMain): a reference to it does that. */
 #line 192
