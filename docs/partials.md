@@ -74,19 +74,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/System-Graphic-modeldata (TexInfoStub stand-in in TexAnm; MODELDATA_H_TEXINFO tagged) | 891 | 84 | 18 | 948 (861) | 176 |
 | 2026-11-02 | cleanup/System-Graphic-Anim (one CAnim; ANIM_H_FULL_CLASS dropped; ANIM_H_GETFLAG_DECL_ONLY for 4 units) | 860 | 84 | 18 | 952 (859) | 183 |
 | 2026-11-02 | cleanup/stand-in-reasons (Memoca, effect, pppEiDrawShipoly stand-ins documented) | 863 | 84 | 18 | 952 (859) | 183 |
+| 2026-11-02 | cleanup/task-slc-message (CTaskSLCManager to TaskMan.h; TASK_H_NO_SLC_OVERFLOW_MSG and 22 placeholders gone; PackMan/Memoca stand-ins) | 859 | 82 | 18 | 766 (680) | 177 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 863 (799 in 111 headers, 64 in 37 .cpp); MATCH: 183
-  by category: method 327, data member 63, type 84, fwd decl 50, #include 32, changed in place 120, padding 8, path override 22, gate 30, guessed 31, header-level 72, stand-in 18, other 6
-stand-ins: 84 foreign in 61 files (33 names), 201 unattributed, 167 own
+PARTIAL: 859 (797 in 112 headers, 62 in 36 .cpp); MATCH: 177
+  by category: method 327, data member 63, type 84, fwd decl 50, #include 31, changed in place 120, padding 8, path override 22, gate 29, guessed 31, header-level 72, stand-in 16, other 6
+stand-ins: 82 foreign in 61 files (31 names), 201 unattributed, 167 own
 duplicate class names across headers: 18
 padding: 14 arrays, 0 accessors
-mechanisms: 952 sites (859 untagged); #line: 1245
-opt-out defines in .cpp: TASK_H_NO_SLC_OVERFLOW_MSG 158, MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 584, superset 128, partial 94, gated 84, missing 8, unattributed 309
+mechanisms: 766 sites (680 untagged); #line: 1245
+opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
+classes: complete 584, superset 128, partial 95, gated 83, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -98,8 +99,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
-| R1 | 5.0 | `Form/DebugWindow.h` | ready | 1 stand-in files, 0 dup headers, 3 gate users | CDebugWindow (1 superset) | inline bodies or virtuals (gate) |
 | R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
+| R1 | 3.0 | `Form/DebugWindow.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `System/Graphic/3DCPrim.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users | C3DCPrim (1 partial) | inline bodies or virtuals |
 | R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
@@ -109,14 +110,14 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Graphic/GprimFull.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPolyGT4 (1 superset) | inline bodies or virtuals |
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
+| R1 | 2.0 | `System/Wnd.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CTextWnd (1 complete) | inline bodies or virtuals |
 | R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
-| R2 | 59.0 | `System/Graphic/2d/2DMan.h` | ready | 28 stand-in files, 1 dup headers, 0 gate users | C2DMan (1 gated) | adds strings: System/Graphic/2d/2DFntObj (1), System/Graphic/2d/2DSeqCtrl (1); weak hint: CSJointListT<C2DBase> not in Form/Menu/Camp, ISLCManagerT<C2DO> not in Form/Menu/Camp |
+| R2 | 59.0 | `System/Graphic/2d/2DMan.h` | ready | 28 stand-in files, 1 dup headers, 0 gate users | C2DMan (1 gated) | weak hint: CSJointListT<C2DBase> not in Form/Menu/Camp, ISLCManagerT<C2DO> not in Form/Menu/Camp |
 | R2 | 32.0 | `System/RsrcData.h` | ready | 15 stand-in files, 0 dup headers, 2 gate users | CRsrcANN, CRsrcAZF, CRsrcData, CRsrcTex, CRsrcVSV, ... (+2) (7 gated) | gated strings: RSRCDATA_H_FULL |
 | R2 | 16.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 1 dup headers, 0 gate users, 18 PARTIAL | C3DLine, C3DLines, C3DPolyG4, C3DStripBase, C3DTile, ... (+12) (15 gated, 1 superset, 1 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
 | R2 | 15.5 | `Game/Collision/CollObj.h` | ready | 3 stand-in files, 0 dup headers, 8 gate users, 3 PARTIAL | CCircleCollision, CCollision, COLL_KIND, COLL_TYPE, CPointCollision, ... (+2) (4 gated, 1 partial, 2 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollAttack, CSJointT<CCollObj> not in Game/Collision/CollAttack |
-| R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 
 ## Classes with foreign copies
 
@@ -134,10 +135,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CCMCSemiModelList` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `CCircleCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CCircleCollision |
 | `CCollision` | partial | Game/Collision/CollObj.h | 1 |  | missing methods: getOutPos, initForMap, initForObj; 3 PARTIAL |
-| `CDebugWindow` | superset | Form/DebugWindow.h | 1 |  | padding: _m_0x40; virtual order differs |
 | `CDispListSemiSingleSort` | missing | System/Graphic/ModelMan.h | 1 |  |  |
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
-| `CMemocaDataEntries` | superset | Form/Menu/SaveLoadUtil.h | 1 |  | extra methods: setNoSpace |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
@@ -177,12 +176,12 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | header | PARTIAL | classes complete/superset/partial/gated | includers |
 |---|---:|---|---:|
 | `Form/DebugMenu.h` | 0 | 1/0/0/3 | 4 |
-| `Form/DebugWindow.h` | 0 | 2/1/0/4 | 11 |
+| `Form/DebugWindow.h` | 0 | 2/1/0/4 | 12 |
 | `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 17 |
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
 | `Form/Menu/Menu.h` | 0 | 0/0/1/0 | 19 |
 | `Form/Menu/SaveLoadCtrl.h` | 14 | 1/1/6/0 | 7 |
-| `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 3 |
+| `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 4 |
 | `Form/Menu/TechHelp.h` | 2 | 0/1/0/0 | 3 |
 | `Form/Menu/TitleReportDllStarter.h` | 2 | 1/0/0/0 | 4 |
 | `Game/AtWater.h` | 0 | 1/1/0/0 | 2 |
@@ -340,8 +339,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/RsrcDB.h` | 1 | 1/0/1/0 | 68 |
 | `System/RsrcData.h` | 4 | 0/0/0/33 | 29 |
 | `System/SJoint.h` | 9 | 0/0/0/0 | 210 |
-| `System/Task.h` | 27 | 1/2/0/1 | 235 |
-| `System/TaskMan.h` | 7 | 1/2/0/0 | 84 |
+| `System/SLContainer.h` | 14 | 0/0/0/0 | 236 |
+| `System/Task.h` | 11 | 1/2/0/0 | 236 |
+| `System/TaskMan.h` | 7 | 1/2/1/0 | 99 |
 | `System/Vector.h` | 22 | 0/0/3/0 | 266 |
 
 ## Mechanisms
@@ -352,7 +352,7 @@ or `untagged`.
 | kind | key | sites | tagged | reason, or an untagged site |
 |---|---|---:|---:|---|
 | feature | `ANIM_H_GETFLAG_DECL_ONLY` | 4 | 4 | the original calls CAnim::getFlag out of line |
-| feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:3 |
+| feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:4 |
 | feature | `COLLOBJ_H_COLLISION_CLASSES` | 7 | 7 | constructs CPointCollision/CSphereCollision |
 | feature | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | getDetectInfo as INT (see CollObj.h) |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
@@ -379,10 +379,8 @@ or `untagged`.
 | guard skip | `GAME_SCENEINFO_H` | 2 | 0 | untagged, e.g. Game/Card.h:141 |
 | guard skip | `SYSTEM_COORD_H` | 1 | 0 | untagged, e.g. System/Graphic/Effect/effect_inl.h:9 |
 | opt-out | `MAPENEMY_H_NO_COLL_ANIM` | 2 | 2 | the original has no BodyCollision.h/Anim.h strings |
-| opt-out | `TASK_H_NO_SLC_OVERFLOW_MSG` | 159 | 6 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
 | opt-out site | `MAPENEMY_H_NO_COLL_ANIM` | 1 | 1 | the .rodata of Game/Enemy/MapEnemyManager and Game/Enemy/CreateEnemy has no BodyCollision.h/Anim.h
  * strings: they define MAPENEMY_H_NO_COLL_ANIM before includ |
-| opt-out site | `TASK_H_NO_SLC_OVERFLOW_MSG` | 1 | 0 | untagged, e.g. System/Task.h:201 |
 | path override | `ANIM_H_PATH` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:2 |
 | path override | `ATELBLUR_H_PATH` | 2 | 0 | untagged, e.g. Game/Atel/AtelBlur.cpp:2 |
 | path override | `ATELCROSSFADE_H_PATH` | 3 | 1 | the original spelled the directory "ATEL" |
@@ -416,13 +414,12 @@ or `untagged`.
 | placeholder | `_2dManCreate*` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.h:22 |
 | placeholder | `_addCardStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:1170 |
 | placeholder | `_alloc*` | 2 | 0 | untagged, e.g. System/MainTaskFactory.cpp:87 |
-| placeholder | `_atelTaskSLCOverflow*` | 1 | 0 | untagged, e.g. Game/Atel/Atel.cpp:7 |
-| placeholder | `_bossDeadDemoEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:22 |
+| placeholder | `_bossDeadDemoEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:23 |
 | placeholder | `_collDispCreate*` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.h:22 |
 | placeholder | `_collUtilCreate*` | 1 | 0 | untagged, e.g. Game/Collision/CollUtil.h:20 |
-| placeholder | `_createEnemyMotionName*` | 1 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:14 |
+| placeholder | `_createEnemyMotionName*` | 1 | 0 | untagged, e.g. Game/Enemy/CreateEnemy.cpp:15 |
 | placeholder | `_emptyString*` | 1 | 0 | untagged, e.g. System/MainTaskFactory.cpp:90 |
-| placeholder | `_emptyStringPlaceholder*` | 180 | 0 | untagged, e.g. Form/DebugWindowTBL.cpp:14 |
+| placeholder | `_emptyStringPlaceholder*` | 180 | 0 | untagged, e.g. Form/DebugWindowTBL.cpp:15 |
 | placeholder | `_emptyStringPlaceholderBattleCard*` | 1 | 1 | placeholder: an empty string follows CollUtil.h's strings in .rodata (as in Game/CardRevolver) |
 | placeholder | `_emptyStringPlaceholderCardRevolver*` | 1 | 1 | placeholder: an empty string follows CollUtil.h's strings in .rodata; which header it comes from is not known |
 | placeholder | `_emptyStringPlaceholderDebugPathData*` | 1 | 1 | placeholder: an empty string follows CardBattle.h's strings in .rodata; which header it comes from is not known |
@@ -440,27 +437,26 @@ or `untagged`.
 | placeholder | `_enemyDefenderEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyDefender.cpp:13 |
 | placeholder | `_enemyFatbanditEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyFatbandit.cpp:13 |
 | placeholder | `_enemyGargoyleEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyGargoyle.cpp:13 |
-| placeholder | `_enemyGreenrequiemEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyGreenrequiem.cpp:22 |
-| placeholder | `_enemyHeartsoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyHeartsoldier.cpp:13 |
+| placeholder | `_enemyGreenrequiemEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyGreenrequiem.cpp:23 |
+| placeholder | `_enemyHeartsoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyHeartsoldier.cpp:14 |
 | placeholder | `_enemyLargebodyEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyLargebody.cpp:13 |
-| placeholder | `_enemyLoudnessEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyLoudness.cpp:22 |
+| placeholder | `_enemyLoudnessEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyLoudness.cpp:23 |
 | placeholder | `_enemyNeoshadowEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyNeoshadow.cpp:15 |
 | placeholder | `_enemyPirateEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyPirate.cpp:13 |
 | placeholder | `_enemyPowerwildEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyPowerwild.cpp:13 |
 | placeholder | `_enemyRednocturneEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyRednocturne.cpp:13 |
 | placeholder | `_enemyScrewdiverEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyScrewdiver.cpp:13 |
 | placeholder | `_enemySearchghostEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemySearchghost.cpp:13 |
-| placeholder | `_enemyShadowEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyShadow.cpp:13 |
+| placeholder | `_enemyShadowEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyShadow.cpp:14 |
 | placeholder | `_enemySoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemySoldier.cpp:13 |
-| placeholder | `_enemySpadesoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemySpadesoldier.cpp:13 |
+| placeholder | `_enemySpadesoldierEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemySpadesoldier.cpp:14 |
 | placeholder | `_enemyTornadostepEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyTornadostep.cpp:13 |
 | placeholder | `_enemyWightnightEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyWightnight.cpp:13 |
 | placeholder | `_enemyWizardEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyWizard.cpp:13 |
 | placeholder | `_enemyWyvernEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyWyvern.cpp:13 |
 | placeholder | `_enemyYellowoperaEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/EnemyYellowopera.cpp:13 |
-| placeholder | `_entityEmptyStringPlaceholder*` | 1 | 0 | untagged, e.g. Game/Entity.cpp:22 |
-| placeholder | `_gameTaskSLCOverflow*` | 1 | 0 | untagged, e.g. Game/Game.cpp:15 |
-| placeholder | `_heartlessEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/Heartless.cpp:13 |
+| placeholder | `_entityEmptyStringPlaceholder*` | 1 | 0 | untagged, e.g. Game/Entity.cpp:23 |
+| placeholder | `_heartlessEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/Heartless.cpp:14 |
 | placeholder | `_humanBossEmptyString*` | 1 | 1 | placeholder - .rodata has an empty string literal after Str.h's strings (from an unidentified header). |
 | placeholder | `_initCardStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:503 |
 | placeholder | `_initCardWorldStrings*` | 1 | 0 | untagged, e.g. Game/Card.cpp:414 |
@@ -473,25 +469,16 @@ or `untagged`.
 | placeholder | `_mcShaderDelete*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:518 |
 | placeholder | `_modelAssertZero*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:512 |
 | placeholder | `_modelCreate*` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:509 |
-| placeholder | `_monstroEventBattleEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MonstroEventBattle.cpp:27 |
-| placeholder | `_pathDataCameraSLCOverflow*` | 1 | 0 | untagged, e.g. System/Graphic/PathDataCamera.cpp:7 |
-| placeholder | `_premiumPrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:10 |
+| placeholder | `_monstroEventBattleEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/MonstroEventBattle.cpp:28 |
+| placeholder | `_premiumPrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:11 |
 | placeholder | `_roPh*` | 8 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:2186 |
 | placeholder | `_roPh0a*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:150 |
 | placeholder | `_roPhExecActor*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:1750 |
-| placeholder | `_roulettePrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:13 |
+| placeholder | `_roulettePrizeMessage*` | 12 | 0 | untagged, e.g. Game/Enemy/BossDeadDemo.cpp:14 |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 0 | untagged, e.g. Game/Enemy/SampleEnemy.cpp:13 |
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:418 |
 | placeholder | `_stateSnatchStringPlaceholder*` | 1 | 1 | placeholder for the asm stateSnatch's strings |
 | placeholder | `_statusEmptyString*` | 1 | 0 | untagged, e.g. Game/Status.cpp:14 |
-| placeholder | `_taskSLCOverflow*` | 3 | 0 | untagged, e.g. Form/Menu/BtlReportCtrl.cpp:8 |
-| placeholder | `_taskSLCOverflowDebugPathData*` | 1 | 1 | placeholder: the task container overflow message (System/TaskMan.h in the original) comes here |
-| placeholder | `_taskSLCOverflowHere*` | 1 | 0 | untagged, e.g. Game/Player/SummonCloud.cpp:23 |
-| placeholder | `_taskSLCOverflowLate*` | 1 | 0 | untagged, e.g. Game/Gimmick/GimmickTutorial.cpp:26 |
-| placeholder | `_taskSLCOverflowLevelUp*` | 1 | 0 | untagged, e.g. Form/Menu/LevelUp.cpp:20 |
-| placeholder | `_taskSLCOverflowMsg*` | 6 | 0 | untagged, e.g. Game/Atel/VSME.cpp:26 |
-| placeholder | `_taskSLCOverflowPlaceholder*` | 6 | 0 | untagged, e.g. Form/Menu/WorldCard.cpp:10 |
-| placeholder | `_taskSLCOverflowSaveLoadUtil*` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadUtil.cpp:18 |
 | placeholder | `_vsmeMotionName*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:54 |
 | pragma | `#pragma implementation` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:2 |
 | pragma | `#pragma interface` | 1 | 0 | untagged, e.g. System/Graphic/GprimFull.h:4 |
@@ -512,7 +499,6 @@ or `untagged`.
 | unit gate | `GAME_PLAYER_PLAYER_CPP` | 1 | 0 | untagged, e.g. Game/Player/Player.cpp:1 |
 | unit gate | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.cpp:2 |
 | unit gate | `SYSTEM_GRAPHIC_GPRIM_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:1 |
-| unit gate | `SYSTEM_TASKMAN_CPP` | 1 | 0 | untagged, e.g. System/TaskMan.cpp:1 |
 | unit gate site | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.h:17 |
 | unit gate site | `EFFECT_CPP` | 3 | 0 | untagged, e.g. System/Graphic/Effect/effect.h:13 |
 | unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 2 | 0 | untagged, e.g. Form/Menu/JiminyMemo.h:12 |
@@ -530,7 +516,6 @@ or `untagged`.
 | unit gate site | `GAME_PLAYER_PLAYER_CPP` | 46 | 0 | untagged, e.g. Game/Player/Player.h:135 |
 | unit gate site | `SYSTEM_GRAPHIC_2D_2DMAN_CPP` | 1 | 0 | untagged, e.g. System/Graphic/2d/2DMan.h:30 |
 | unit gate site | `SYSTEM_GRAPHIC_GPRIM_CPP` | 2 | 0 | untagged, e.g. System/Graphic/Gprim.h:156 |
-| unit gate site | `SYSTEM_TASKMAN_CPP` | 2 | 0 | untagged, e.g. System/Task.h:183 |
 
 ## String evidence
 
@@ -551,7 +536,9 @@ Generated by `tools/partials.py --update docs/partials.md`.
 
 ## Open puzzles
 
-- Task SLC overflow message: in 99 originals; 154 of our sources opt out (`TASK_H_NO_SLC_OVERFLOW_MSG`). Queue
-  item "task-slc-message" checks it against the `TaskMan.h` includers.
-- 2D container message: in 166 originals, while the `2DMan.h` path is plain text in only about 119; it may come
-  from another header (queue item 7 of the plan).
+- Task SLC overflow message (resolved, cleanup/task-slc-message): in 99 originals, read from the bytes: the 84 units
+  that include `TaskMan.h` and 15 that now include it explicitly; never in a `Task.h`-only original (26 of those
+  derive from `CTask`). `CTaskSLCManager` lives in `TaskMan.h`, the SLC templates in `System/SLContainer.h`.
+- 2D container message: not ambiguous. Splat writes many strings as `.word`, so a grep of the `.asciz` lines
+  undercounts; read from the bytes, all 166 originals with the message have the `2DMan.h` path (2DMan itself
+  through its own `__FILE__`), and they are exactly our 166 includers.
