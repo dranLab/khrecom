@@ -655,7 +655,11 @@ def compare(ours, ref):
     dtor = "~" + cls
     lead = [m.name for m in ref.members if m.kind == "method" and not m.name.startswith("$")
             and not (m.name == "operator=" or (m.name == cls and m.params == 0))][:1]
-    implicit_dtor = lead == [dtor] and dtor not in om
+    names = [(m.name, m.params) for m in ref.members if m.kind == "method" and not m.name.startswith("$")]
+    last_x = max((i for i, (n, ps) in enumerate(names) if n == cls and ps == 0), default=-1)
+    # ... also one listed inside that block (before its last X()): op=, X(<user params>), ~X, X()
+    in_block = any(n == dtor for n, _ in names[:last_x])
+    implicit_dtor = (lead == [dtor] or in_block) and dtor not in om
     if implicit_dtor:
         rm.pop(dtor, None)
     common_f = [f for f in our_fields if f in ref_fields]
