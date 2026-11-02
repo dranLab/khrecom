@@ -79,41 +79,41 @@ extern "C" const char _ctype_[];
 
 
 
-class CRsrcData {
-private:
-    CBuf* m_pDataSrc;
-    char m_szName[24];
-    INT m_nRsrcType;
-    INT m_nRsrcGroup;
-    HANDLE m_hThis;
-    HANDLE m_hParent;
-    HANDLE* m_phChildren;
-    USHORT m_nChildCount;
-    USHORT m_nChildRest;
-    INT m_refTagList[4];
-    void* m_pVtbl;
 
-public:
-    BYTE* getRsrcData() {
-        BYTE* p = NULL;
-        if (m_pDataSrc) {
-            p = m_pDataSrc->getBufPtr();
-        }
-        return p;
-    }
-};
 
-class CRsrcVSV : public CRsrcData {
-private:
-    UINT m_nStartSect;
-    UINT m_nSectSize;
-    UINT m_nBgmID;
 
-public:
-    UINT getStartSector() { return m_nStartSect; }
-    UINT getSectorSize() { return m_nSectSize; }
-    UINT getBgmID() { return m_nBgmID; }
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "System/RsrcDB.h"
 

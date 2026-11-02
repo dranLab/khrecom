@@ -1,5 +1,5 @@
-
-#define RSRCDATA_H_FULL
+#define KH_PLACEMENT_NEW_DEFINED /* MATCH: placement new is not in the ref headers (the units define it themselves); defined once per unit */
+inline void* operator new(unsigned int, void* p) throw() { return p; }
 #define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h"
 #define LINKEDBUF_H_PATH "c:/KHCOM/MainApp/System/LinkedBuf.h"
 #include "System/Graphic/Gprim.h"

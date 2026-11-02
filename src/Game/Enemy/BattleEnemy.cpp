@@ -86,15 +86,15 @@ extern "C" char D_004AD588[];
 extern "C" char D_004AC8E8[];
 extern "C" char D_004AC8F0[];
 extern "C" char D_004AC920[];
-class CRsrcData { /* PARTIAL: System/RsrcData.h declares the class only with RSRCDATA_H_FULL */
-    CBuf* m_pDataSrc; /* 0x00 */
-public:
-    BYTE* getRsrcData() const {
-        BYTE* p = NULL;
-        if (m_pDataSrc) p = m_pDataSrc->getBufPtr();
-        return p;
-    }
-};
+
+
+
+
+
+
+
+
+
 #include "System/RsrcDB.h"
 
 
