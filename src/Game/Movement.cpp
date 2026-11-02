@@ -191,15 +191,19 @@ inline void _ctorStrings(void* p) {
     TRACE(__FILE__ "(211)");
     if (!p) AssertApp(__FILE__, 212, "m_pMapCollision", 0);
 }
-/* Parked: 54/143 lines differ with the draft below (size 420 = original): the original loads its two vectors
- * ({0,0,0,1} and {1,1,1,1}) from unnamed gcc constant-pool entries (D_004824A0/B0) into registers before all stores
- * and stores the vtable late; `static const FVECTOR` gives the right size but named statics, loaded one by one with
- * the vtable store first. Tried: static/local/const locals, const compound literals, const refs (memset + stores,
- * 440 bytes), a 7 min permuter run (55 -> 54). */
+/* Parked: 53/143 lines differ with the draft below (size 420 = original). The two vectors are unnamed gcc
+ * constant-pool entries (D_004824A0/B0): a BLKmode compound literal read without a target goes to the pool
+ * (output_constant_def), which the draft's _V1 member reads reproduce (two 16-byte entries, lq each). Left: the
+ * original loads both before all stores and stores the vtable after the four init() zero stores; ours stores the
+ * vtable first. When this matches, drop the .rdata block above (the pool entries then come from C, before the
+ * "(211)" string). Tried: static/local/const locals (pieces, or named statics), a 32-byte {zero, one} struct (one
+ * entry, one base), TImode integer constants (pcpyld synthesis), &compound literal (rejected), permuter 10 min
+ * (56 -> 54, cosmetic only). */
 #if 0
 CMovement::CMovement(CEntity* inOwner) {
-    static const FVECTOR vZero = {{0.0f, 0.0f, 0.0f, 1.0f}};
-    static const FVECTOR vOne = {{1.0f, 1.0f, 1.0f, 1.0f}};
+    struct _V1 { FVECTOR v[1]; };
+#define vZero (((const _V1){{{{0.0f, 0.0f, 0.0f, 1.0f}}}}).v[0])
+#define vOne (((const _V1){{{{1.0f, 1.0f, 1.0f, 1.0f}}}}).v[0])
     FVECTOR o;
     m_vOldPos = m_vPos = m_vOldRot = m_vRot = m_vVel = m_vAcc = vZero;
     m_qQuat.init();
@@ -240,6 +244,8 @@ CMovement::CMovement(CEntity* inOwner) {
         break;
     }
     m_pMapCollision->init(coll_kind, (COLL_TYPE)2, 1, inOwner->getHandle());
+#undef vZero
+#undef vOne
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Movement", __9CMovementP7CEntity);
