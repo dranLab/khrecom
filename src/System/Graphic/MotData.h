@@ -138,16 +138,37 @@ public:
     ~CMotData();
     void Cleanup();
     void CleanupCmp();
+    void SetName(/* parameters unknown */);
     CHAR* GetName() { return m_Name; }
     INT GetNbSkl() { return m_nSkl; }
     INT GetNbFrame() { return m_nFrame; }
     INT GetFps() { return m_Fps; }
     INT GetHokan() { return m_Hokan; }
-    USHORT GetRetFrame() { return m_nRetFrame; } // PARTIAL: added for System/Graphic/Anim (name guessed)
     BOOL IsKeyFrameShort() { return m_nFrame >= 256; }
     BOOL IsLoop() { return m_nRetFrame > 0; }
+    SHORT GetLoopFrame() { return m_nRetFrame; }
+    SHORT GetLoopData(/* parameters unknown */);
+    INT CalcOrgSiz(/* parameters unknown */);
+    struct MOTVEC& GetRot(/* parameters unknown */);
+    struct MOTVEC& GetTrs(/* parameters unknown */);
+    struct MOTVEC& GetScl(/* parameters unknown */);
+    FLOAT GetOrgData(/* parameters unknown */);
+    INT CalcCmpDataSiz(/* parameters unknown */);
     FLOAT GetCmpData(INT inAtr, INT inSkl, FLOAT inFrame);
+    SHORT GetNbKeyFrame(/* parameters unknown */);
+    SHORT GetKeyFrame(/* parameters unknown */);
+    FLOAT GetKeyVal(/* parameters unknown */);
+    BOOL IsInterpolateLinear(/* parameters unknown */);
+    BOOL IsFixData(/* parameters unknown */);
+    void DetermineInterpolate(/* parameters unknown */);
+    INT CheckGosa(/* parameters unknown */);
+    void CompressData(/* parameters unknown */);
+    void CompressSkl(/* parameters unknown */);
+    void CompressAll(/* parameters unknown */);
+    INT EncodeBin(/* parameters unknown */);
     void DecodeBin(const BYTE* inBuf);
+    void GetMatrix0(/* parameters unknown */);
+    void GetMatrix(/* parameters unknown */);
     void _GetQuaternionDt(QUATERNION_DT& outDt, INT inSkl, FLOAT inFrame);
     void GetQuaternionDt(QUATERNION_DT& outDt, INT inSkl, FLOAT inFrame);
     void PrepareGetDataHS(FLOAT inFrame);

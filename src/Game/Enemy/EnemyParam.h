@@ -37,7 +37,6 @@ struct BASIC_ENEMY_PARAM {
 };
 
 struct ENEMY_PARAM {
-    // PARTIAL: split out for Game/Enemy/BattleEnemy
     char szCode[4];              /* 0x00 */
     UINT uiVersion;              /* 0x04 */
     struct BASIC_ENEMY_PARAM* pBasic; /* 0x08 */
@@ -45,37 +44,40 @@ struct ENEMY_PARAM {
     UINT uiEnemyCardDrop;        /* 0x10 */
     float fAttr[5];              /* 0x14 */
     int iSpecialEffect[7];       /* 0x28 */
-    INT iCardCount;      /* 0x44 */ // PARTIAL: added for Game/Enemy/Heartless
+    INT iCardCount;      /* 0x44 */
     struct ENEMY_CARD* pCards; /* 0x48 */
     INT iActCount;       /* 0x4c */
     ENEMY_ACT* pActs;    /* 0x50 */
-    INT iEnemyCard;      /* 0x54 */ // PARTIAL: added for Game/Enemy/HumanBoss
+    INT iEnemyCard;      /* 0x54 */
     unsigned char byEnemyCards[4]; /* 0x58 */
-    int iDamageMotionIndex[10]; /* 0x5c */ // PARTIAL: added for Game/SEMotion
-    int iFaintMotionIndex[3]; /* 0x84 */ // PARTIAL: added for Game/Enemy/EnemyNeoshadow
-    // PARTIAL: iExtraParamCount, pExtraParam split out for Game/Enemy/MapEnemy
+    int iDamageMotionIndex[10]; /* 0x5c */
+    int iFaintMotionIndex[3]; /* 0x84 */
     INT iExtraParamCount;            /* 0x90 */
     struct EXTRA_ENEMY_PARAM* pExtraParam; /* 0x94 */
     int iAttackRate[2];              /* 0x98 */
-    INT iAppearMotionIndex;    /* 0xa0 */ // PARTIAL: added for Game/Enemy/MapEnemyMushroom
+    INT iAppearMotionIndex;    /* 0xa0 */
     INT iDisappearMotionIndex; /* 0xa4 */
     INT pad[2];                /* 0xa8 */
 
-    // PARTIAL: added for Game/Enemy/MapEnemy
-    FLOAT getExtraParam(char* inName) {
-        for (INT i = 0; i < iExtraParamCount; i++) {
-            if (!strcmp(pExtraParam[i].szName, inName)) return pExtraParam[i].fValue;
-        }
-        return 0.0f;
-    }
-    // PARTIAL: added for Game/SEMotion
+    BOOL addrMapping(/* parameters unknown */);
+    BASIC_ENEMY_PARAM* getBasicParam(/* parameters unknown */);
+    ENEMY_ACT* getEnemyAct(/* parameters unknown */);
+    int getSpecialEffect(INT inIndex) const { return iSpecialEffect[inIndex]; }
+    FLOAT getAttr(/* parameters unknown */);
+    INT getDmgMotIndex(/* parameters unknown */);
     BOOL isDamageMotion(INT inIndex) const {
         for (INT i = 0; i < 10; i++) {
             if (iDamageMotionIndex[i] == inIndex) return TRUE;
         }
         return FALSE;
     }
-    int getSpecialEffect(INT inIndex) const { return iSpecialEffect[inIndex]; } // PARTIAL: added for Game/Enemy/BattleEnemy (name unknown)
+    INT getFaintMotIndex(/* parameters unknown */);
+    FLOAT getExtraParam(char* inName) {
+        for (INT i = 0; i < iExtraParamCount; i++) {
+            if (!strcmp(pExtraParam[i].szName, inName)) return pExtraParam[i].fValue;
+        }
+        return 0.0f;
+    }
 };
 
 /* Placeholders for the original header's inline functions: their strings ("@ENP", the parameter file's
