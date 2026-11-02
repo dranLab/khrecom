@@ -41,6 +41,7 @@ struct RTP {
     SHORT status;      /* 0x8 */
     SHORT wait_key;    /* 0xa */
     RTP() {}
+    void clear();
 };
 
 struct Actor {

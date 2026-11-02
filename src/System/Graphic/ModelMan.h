@@ -28,6 +28,8 @@ struct MODEL_SEND_CACHE {
     };
     IVECTOR ivPP;
     FVECTOR fvColorScale;
+
+    void clear();
 };
 
 struct SEMI_PACKET_LIST {

@@ -16,6 +16,7 @@ public:
     virtual INT getGameSubState() const;
     virtual BOOL reqChangeGameSubState(INT nState);
     virtual void terminate();
+    void startEncountEffect();
 
 private:
     void preLoadField();
