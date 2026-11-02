@@ -1,7 +1,7 @@
 #define ANIM_H_GETFLAG_DECL_ONLY /* MATCH: the original calls CAnim::getFlag out of line */
 #line 1
 
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "Game/Gimmick/GimmickLotusLeaf.h"
 #include "Game/BodyCollision.h"
 #include "System/Graphic/Gprim.h"

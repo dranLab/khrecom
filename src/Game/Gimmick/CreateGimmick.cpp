@@ -5,7 +5,7 @@
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
 #include "Game/CardBattle.h"
-#define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Gimmick/../Enemy/BattleEnemy.h"
+#define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Gimmick/../Enemy/BattleEnemy.h" /* MATCH: this unit names BattleEnemy.h so (header default "Game/Enemy/BattleEnemy.h") */
 #include "Game/Enemy/BattleEnemy.h"
 #include "Game/Enemy/HumanBoss.h"
 #include "Game/OsdDef.h"

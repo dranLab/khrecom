@@ -1,9 +1,9 @@
 
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
-#define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"
-#define TECHNIC_H_PATH "c:/KHCOM/MainApp/Game/Technic.h"
-#define STATUS_H_PATH "c:/KHCOM/MainApp/Game/Status.h"
-#define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h" /* MATCH: this unit names Card.h so (header default "Game/Card.h") */
+#define TECHNIC_H_PATH "c:/KHCOM/MainApp/Game/Technic.h" /* MATCH: this unit names Technic.h so (header default "Game/Technic.h") */
+#define STATUS_H_PATH "c:/KHCOM/MainApp/Game/Status.h" /* MATCH: this unit names Status.h so (header default "Game/Status.h") */
+#define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h" /* MATCH: this unit names CardBattle.h so (header default "Game/CardBattle.h") */
 #include "Game/Status.h"
 #include "Game/Technic.h"
 #include "System/Ctd/CtdMan.h"

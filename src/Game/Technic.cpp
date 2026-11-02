@@ -1,7 +1,7 @@
 #include "System/Ctd/CtdMan.h"
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
-#define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h"
-#define TECHNIC_H_PATH "c:/KHCOM/MainApp/Game/Technic.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h" /* MATCH: this unit names CardBattle.h so (header default "Game/CardBattle.h") */
+#define TECHNIC_H_PATH "c:/KHCOM/MainApp/Game/Technic.h" /* MATCH: this unit names Technic.h so (header default "Game/Technic.h") */
 
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"

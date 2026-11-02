@@ -1,5 +1,5 @@
-#define GPRIM_H_PATH "System/Graphic/gprim.h"
-#define CHATMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/ChatMan.h"
+#define GPRIM_H_PATH "System/Graphic/gprim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define CHATMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/ChatMan.h" /* MATCH: this unit names ChatMan.h so (header default "Game/Atel/ChatMan.h") */
 #include "System/TaskMan.h"
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"

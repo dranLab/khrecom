@@ -1,6 +1,6 @@
 
-#define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"
-#define STATUS_H_PATH "c:/KHCOM/MainApp/Game/Status.h"
+#define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h" /* MATCH: this unit names Card.h so (header default "Game/Card.h") */
+#define STATUS_H_PATH "c:/KHCOM/MainApp/Game/Status.h" /* MATCH: this unit names Status.h so (header default "Game/Status.h") */
 #include "Game/Game.h"
 #include "System/HeapMan.h"
 #include "System/Graphic/Gprim.h"

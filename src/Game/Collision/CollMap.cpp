@@ -1,4 +1,4 @@
-#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: this unit names CollUtil.h so (header default "Game/Collision/CollUtil.h") */
 #define COLLOBJ_H_COLLISION_CLASSES /* MATCH: constructs CPointCollision/CSphereCollision */
 #include "System/Task.h"
 #include "System/TaskMan.h"

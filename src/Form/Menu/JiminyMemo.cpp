@@ -6,7 +6,7 @@
 #include "System/Graphic/Model.h"
 #include "System/Graphic/Anim.h"
 #include "System/Graphic/2d/2DMan.h"
-#define CTDMAN_H_PATH "System/Ctd/CtdMan.h"
+#define CTDMAN_H_PATH "System/Ctd/CtdMan.h" /* MATCH: this unit names CtdMan.h so (header default "System/CTD/CtdMan.h") */
 #include "System/Ctd/CtdMan.h"
 #include "System/Graphic/Effect/effect.h"
 #include "System/Graphic/Effect/EffectMan.h"

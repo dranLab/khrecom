@@ -1,5 +1,5 @@
 
-#define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h"
+#define EFFECT_H_PATH "c:/KHCOM/MainApp/System/Graphic/Effect/effect.h" /* MATCH: this unit names effect.h so (header default "System/Graphic/Effect/effect.h") */
 #include "System/Graphic/Effect/effect.h"
 #include "System/Graphic/WorldEnv.h"
 #include "System/Graphic/Camera.h"

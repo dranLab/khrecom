@@ -1,6 +1,6 @@
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
-#define TITLEREPORTDLLSTARTER_H_PATH "c:/KHCOM/MainApp/Form/Menu/TitleReportDllStarter.h"
-#define SAVELOADCTRL_H_PATH "System/../Form/Menu/SaveLoadCtrl.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define TITLEREPORTDLLSTARTER_H_PATH "c:/KHCOM/MainApp/Form/Menu/TitleReportDllStarter.h" /* MATCH: this unit names TitleReportDllStarter.h so (header default "Form/Menu/TitleReportDllStarter.h") */
+#define SAVELOADCTRL_H_PATH "System/../Form/Menu/SaveLoadCtrl.h" /* MATCH: this unit names SaveLoadCtrl.h so (header default "Form/Menu/SaveLoadCtrl.h") */
 #include <string.h>
 inline void* operator new(size_t, void* p) throw() { return p; }
 #include "System/TaskMan.h"

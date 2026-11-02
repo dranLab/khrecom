@@ -1,5 +1,5 @@
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
-#define SAVELOADCTRL_H_PATH "c:/KHCOM/MainApp/Form/Menu/SaveLoadCtrl.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define SAVELOADCTRL_H_PATH "c:/KHCOM/MainApp/Form/Menu/SaveLoadCtrl.h" /* MATCH: this unit names SaveLoadCtrl.h so (header default "Form/Menu/SaveLoadCtrl.h") */
 /* the task container message follows SaveLoadCtrl.h's strings here (placeholder below) */
 
 #include "System/Graphic/Gprim.h"

@@ -1,6 +1,6 @@
 
-#define ATELBLUR_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelBlur.h"
-#define GPRIM_H_PATH "System/../System/Graphic/Gprim.h"
+#define ATELBLUR_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelBlur.h" /* MATCH: this unit names AtelBlur.h so (header default "c:/KHCOM/MainApp/Game/ATEL/AtelBlur.h") */
+#define GPRIM_H_PATH "System/../System/Graphic/Gprim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "System/Task.h"
 #include <string.h>
 

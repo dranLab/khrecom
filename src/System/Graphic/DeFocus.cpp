@@ -1,5 +1,5 @@
 
-#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h"
+#define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/DeFocus.h"
 #include "Game/Debug/DebugWork.h"

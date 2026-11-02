@@ -1,4 +1,4 @@
-#define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h"
+#define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h" /* MATCH: this unit names RsrcData.h so (header default "System/RsrcData.h") */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/modeldata.h"
 #include "System/Graphic/Model.h"

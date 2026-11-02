@@ -1,6 +1,6 @@
 
 
-#define ANIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Anim.h"
+#define ANIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Anim.h" /* MATCH: this unit names Anim.h so (header default "System/Graphic/Anim.h") */
 #include "System/Graphic/Anim.h"
 #include "System/HeapMan.h"
 #include "System/Graphic/Gprim.h"

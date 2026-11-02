@@ -1,10 +1,10 @@
 
 #define GAME_ATEL_VSME_CPP /* MATCH: CVSM's flag accessors are only inline in this unit (Game/Atel/VSME.h) */
-#define CAMERAMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/CameraMan.h"
-#define CHATMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/ChatMan.h"
-#define ATELFOG_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelFog.h"
-#define ATELCROSSFADE_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelCrossFade.h"
-#define ATELBLUR_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelBlur.h"
+#define CAMERAMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/CameraMan.h" /* MATCH: this unit names CameraMan.h so (header default "c:/KHCOM/MainApp/Game/ATEL/CameraMan.h") */
+#define CHATMAN_H_PATH "c:/KHCOM/MainApp/Game/Atel/ChatMan.h" /* MATCH: this unit names ChatMan.h so (header default "Game/Atel/ChatMan.h") */
+#define ATELFOG_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelFog.h" /* MATCH: this unit names AtelFog.h so (header default "c:/KHCOM/MainApp/Game/ATEL/AtelFog.h") */
+#define ATELCROSSFADE_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelCrossFade.h" /* MATCH: this unit names AtelCrossFade.h so (header default "c:/KHCOM/MainApp/Game/ATEL/AtelCrossFade.h") */
+#define ATELBLUR_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelBlur.h" /* MATCH: this unit names AtelBlur.h so (header default "c:/KHCOM/MainApp/Game/ATEL/AtelBlur.h") */
 #include "khtypes.h"
 #include "System/Debug.h"
 #include "System/HeapMan.h"

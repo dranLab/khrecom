@@ -1,4 +1,4 @@
-#define OSDDEF_H_PATH "c:/KHCOM/MainApp/Game/OsdDef.h"
+#define OSDDEF_H_PATH "c:/KHCOM/MainApp/Game/OsdDef.h" /* MATCH: this unit names OsdDef.h so (header default "Game/OsdDef.h") */
 #include "System/TaskMan.h"
 #include "System/Task.h"
 #include "Game/OsdDef.h"

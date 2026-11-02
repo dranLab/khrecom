@@ -1,6 +1,6 @@
 
 #define COLLOBJ_H_ENUMS_ONLY /* MATCH: the collision classes come after CMapEnemy (their vtables precede its own) */
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "System/Task.h"
 #include "System/TaskMan.h"
 #include "Game/BodyCollision.h"

@@ -2,7 +2,7 @@
  * reproduce the unit's .rodata byte for byte (checked); add "// SOURCE DATA: .rodata" and compile NormalMain,
  * EnemyMain and EnemyPop (they match) once CardMaxWarningMain matches. */
 
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "Game/Gimmick/GimmickTreasureBox.h"
 #include "System/Graphic/Effect/effect.h"
 #include "System/Graphic/Gprim.h"
