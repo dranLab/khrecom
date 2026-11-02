@@ -108,19 +108,23 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/mechanism-tags (feature/guard/pragma sites, last placeholders: untagged 0) | 809 | 23 | 0 | 751 (0) | 861 |
 | 2026-11-02 | cleanup/partial-comments (path-override PARTIALs -> MATCH; TitleReportDllStarter.h complete) | 792 | 23 | 0 | 751 (0) | 877 |
 | 2026-11-02 | tools/partials-implicit-dtor + parse-fixes (implicit dtors, declaration-order virtuals, member-pointer fields; classes complete 613 -> 711) | 792 | 23 | 0 | 751 (0) | 877 |
+| 2026-11-02 | cleanup/Form-Menu-SaveLoadCtrl (classes in ref form, friends -> ref accessors) | 783 | 23 | 0 | 753 (0) | 879 |
+| 2026-11-02 | cleanup/System-Graphic-ShadowModel (CShadowModelMan complete) | 777 | 23 | 0 | 753 (0) | 879 |
+| 2026-11-02 | cleanup/Game-Atel-ChatMan (CChatMan in ref form) | 772 | 23 | 0 | 753 (0) | 880 |
+| 2026-11-02 | tools/partials-param-count (classes complete 723) | 772 | 23 | 0 | 753 (0) | 880 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 792 (737 in 109 headers, 55 in 34 .cpp); MATCH: 877
-  by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 3, gate 18, guessed 30, header-level 68, stand-in 18, other 6
+PARTIAL: 772 (717 in 107 headers, 55 in 34 .cpp); MATCH: 880
+  by category: method 299, data member 57, type 71, fwd decl 47, #include 29, changed in place 122, padding 6, path override 1, gate 18, guessed 31, header-level 67, stand-in 18, other 6
 stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
-mechanisms: 751 sites (0 untagged); #line: 1248
+mechanisms: 753 sites (0 untagged); #line: 1248
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 711, superset 93, partial 61, gated 23, missing 8, unattributed 309
+classes: complete 723, superset 85, partial 57, gated 23, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -131,13 +135,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
-| R1 | 5.0 | `System/Graphic/ShadowModel.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
 | R1 | 4.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 4 gate users |  () |  (gate) |
 | R1 | 3.0 | `Form/DebugWindow.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
+| R1 | 2.0 | `System/Graphic/ShadowModel.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CShadowModelMan (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Wnd.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CTextWnd (1 complete) | inline bodies or virtuals |
 | R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
@@ -163,7 +167,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
 | `CPointCollision` | gated | Game/Collision/CollObj.h | 1 |  |  |
-| `CShadowModelMan` | partial | System/Graphic/ShadowModel.h | 1 |  | missing methods: getClipDistanceSq, getUpdateCameraPos, setAutomaticDistance, setAutomaticHeight, setClipDistance, setDraw, ... (+2); 6 PARTIAL |
+| `CShadowModelMan` | complete | System/Graphic/ShadowModel.h | 1 |  |  |
 | `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | complete | System/Graphic/Gprim.h | 1 |  |  |
@@ -178,15 +182,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Form/DebugWindow.h` | 0 | 2/1/0/4 | 12 |
 | `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 17 |
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
-| `Form/Menu/SaveLoadCtrl.h` | 11 | 2/3/3/0 | 7 |
+| `Form/Menu/SaveLoadCtrl.h` | 2 | 7/1/0/0 | 7 |
 | `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 4 |
 | `Form/Menu/TechHelp.h` | 2 | 0/1/0/0 | 3 |
-| `Game/Atel/AtelBlur.h` | 0 | 1/1/0/0 | 3 |
-| `Game/Atel/AtelCrossFade.h` | 0 | 1/1/0/0 | 4 |
-| `Game/Atel/AtelFog.h` | 0 | 3/1/0/0 | 3 |
-| `Game/Atel/Avatar.h` | 0 | 5/1/0/0 | 4 |
-| `Game/Atel/CameraMan.h` | 0 | 2/1/0/0 | 3 |
-| `Game/Atel/ChatMan.h` | 5 | 0/1/0/0 | 7 |
 | `Game/Atel/CommandAccepter.h` | 1 | 1/0/0/0 | 15 |
 | `Game/Atel/EventTrap.h` | 0 | 4/1/0/0 | 3 |
 | `Game/Atel/VSME.h` | 0 | 11/0/1/0 | 7 |
@@ -296,7 +294,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/PathCamera.h` | 1 | 3/1/0/0 | 7 |
 | `System/Graphic/PathData.h` | 3 | 8/1/0/0 | 8 |
 | `System/Graphic/ScreenMask.h` | 0 | 1/0/1/0 | 5 |
-| `System/Graphic/ShadowModel.h` | 6 | 0/0/1/0 | 9 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
 | `System/Graphic/StrPrim.h` | 1 | 1/0/0/0 | 36 |
 | `System/Graphic/TexInfo.h` | 1 | 1/0/1/0 | 234 |
@@ -467,7 +464,7 @@ or `untagged`.
 | unit gate site | `EFFECT_CPP` | 3 | 3 | EFFECT_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 2 | 2 | FORM_MENU_JIMINYMEMO_CPP gate (tested 2026-11-02): its own unit includes it as "JiminyMemo.h" (the full path) |
 | unit gate site | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 1 | FORM_MENU_SAVELOADCTRL_CPP gate, only for its own unit (tested 2026-11-02) |
-| unit gate site | `FORM_MENU_SAVELOAD_CPP` | 6 | 6 | FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `FORM_MENU_SAVELOAD_CPP` | 8 | 8 | FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_ATEL_VSME_CPP` | 1 | 1 | Game/Atel/Atel (CAtel::start ...) calls these out of line: inline-called-not-inlined |
 | unit gate site | `GAME_BULLET_BULLET_CPP` | 1 | 1 | GAME_BULLET_BULLET_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 12 | GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) |
