@@ -117,7 +117,7 @@ void CFriend::changeMotion(INT inIndex, TIMEQ inTq, BOOL inRootMove, TIMEQ inGr,
 
 BOOL CFriend::initalize() {
     PLM::CPlayerManager* pPLM = PLM::CPlayerManager::getPLM();
-    if (pPLM->getFlag() & 0x100) {
+    if (pPLM->isHalloweenTown()) {
         switch (m_uiCharaID) {
         case 1:
             m_uiCharaID = 11;

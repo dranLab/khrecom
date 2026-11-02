@@ -162,11 +162,11 @@ void CPathDataCamera::update(FLOAT fr, BOOL bUpdate) {
             CPathVector* p = m_pPathData->getPathVectorData(m_iNum);
             p->getPathParam(sParam);
             if (sParam.iFlags & 0x4000000) {
-                INT iBlock0 = m_pHPM->getNowBlock();
+                INT iBlock0 = m_pHPM->getPathBlock();
                 INT iBlock1 = iBlock0 + 1;
                 FLOAT fVSpeed0 = p->getPathSpeed(iBlock0);
                 FLOAT fVSpeed1 = p->getPathSpeed(iBlock1);
-                FLOAT fSpeed = (fVSpeed1 - fVSpeed0) * m_pHPM->getHermiteCoefficient(iBlock0, m_pHPM->getProgress()) + fVSpeed0;
+                FLOAT fSpeed = (fVSpeed1 - fVSpeed0) * m_pHPM->getHermiteCoefficient(iBlock0, m_pHPM->getPathProgress()) + fVSpeed0;
                 m_pHPM->setSpeed(fSpeed * 0.0046296297f);
             }
             m_pHPM->update(fr);

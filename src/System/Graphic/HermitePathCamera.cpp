@@ -255,7 +255,7 @@ void CHermitePathCamera::main() {
  * placement, chained stores, pHPath ternary; permuter (method wrapper) 15 min, 3.5k candidates: no gain.
  * Levers that got it here (157 -> 88): `>= 0.002f` length tests with the flag in the else, fProj carrying both
  * results into setProjectionDist, a 2-case switch for iFlg == 7, getSpeed() into a temp before the distance call,
- * iBlock1 = getNowBlock() + 1, `INT iTcb = 0; if (...) iTcb = 1;`, the second division in its own statement. */
+ * iBlock1 = getPathBlock() + 1, `INT iTcb = 0; if (...) iTcb = 1;`, the second division in its own statement. */
 #if 0
 void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
@@ -304,11 +304,11 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
                 case 4:
                     if (bUpdate) {
                         if (m_iPathFlags & 0x4000000) {
-                            INT iBlock1 = m_pMyHPath->getNowBlock() + 1;
+                            INT iBlock1 = m_pMyHPath->getPathBlock() + 1;
                             FLOAT fVSpeed0 = m_pPath->getPathSpeed(iBlock1 - 1);
                             FLOAT fVSpeed1 = m_pPath->getPathSpeed(iBlock1);
                             FLOAT fSpeed = (fVSpeed1 - fVSpeed0) *
-                                               m_pMyHPath->getHermiteCoefficient(iBlock1 - 1, m_pMyHPath->getProgress()) +
+                                               m_pMyHPath->getHermiteCoefficient(iBlock1 - 1, m_pMyHPath->getPathProgress()) +
                                            fVSpeed0;
                             m_pMyHPath->setSpeed(fSpeed * 0.0046296297f);
                         }
@@ -320,11 +320,11 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
                 case 0:
                     if (bUpdate) {
                         if (m_iPathFlags & 0x4000000) {
-                            INT iBlock1 = m_pMyHPath->getNowBlock() + 1;
+                            INT iBlock1 = m_pMyHPath->getPathBlock() + 1;
                             FLOAT fVSpeed0 = m_pPath->getPathSpeed(iBlock1 - 1);
                             FLOAT fVSpeed1 = m_pPath->getPathSpeed(iBlock1);
                             FLOAT fSpeed = (fVSpeed1 - fVSpeed0) *
-                                               m_pMyHPath->getHermiteCoefficient(iBlock1 - 1, m_pMyHPath->getProgress()) +
+                                               m_pMyHPath->getHermiteCoefficient(iBlock1 - 1, m_pMyHPath->getPathProgress()) +
                                            fVSpeed0;
                             m_pMyHPath->setSpeed(fSpeed * 0.0046296297f);
                         }
@@ -339,9 +339,9 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
                         m_pHPath->setSpeed(fDist / fTime);
                         if (bUpdate) m_pHPath->update(fr);
                     } else {
-                        FLOAT fTime = m_pMyHPath->getHermiteCoefficient(m_pMyHPath->getNowBlock(), m_pMyHPath->getProgress());
+                        FLOAT fTime = m_pMyHPath->getHermiteCoefficient(m_pMyHPath->getPathBlock(), m_pMyHPath->getPathProgress());
                         if (1.0f <= fTime) fTime = 0.999999f;
-                        fTime += m_pMyHPath->getNowBlock();
+                        fTime += m_pMyHPath->getPathBlock();
                         if (m_pHPath->getPathVector()) {
                             FVECTOR vPos;
                             INT iTcb = 0;
@@ -363,9 +363,9 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
                         m_pMyHPath->getNowPos(m_vPos);
                         fRoll = m_pMyHPath->getNowRoll();
                     } else {
-                        FLOAT fTime = m_pHPath->getHermiteCoefficient(m_pHPath->getNowBlock(), m_pHPath->getProgress());
+                        FLOAT fTime = m_pHPath->getHermiteCoefficient(m_pHPath->getPathBlock(), m_pHPath->getPathProgress());
                         if (1.0f <= fTime) fTime = 0.999999f;
-                        fTime += m_pHPath->getNowBlock();
+                        fTime += m_pHPath->getPathBlock();
                         m_fStep = fTime;
                         m_pPath->getPathStepToPosition(m_vPos, m_fStep, m_pPath->getPathVectorNum() >= 3);
                         fRoll = m_pPath->getPathStepToRoll(m_fStep);
@@ -407,8 +407,8 @@ FLOAT CHermitePathCamera::updatePos(FVECTOR& vPos, FVECTOR& vLook, FLOAT fr, BOO
             CHermitePath* pHPath = m_pMyHPath;
             if (!pHPath) pHPath = m_pHPath;
             if (pHPath) {
-                INT iBlock = pHPath->getNowBlock();
-                FLOAT fDistance = pHPath->getProgress();
+                INT iBlock = pHPath->getPathBlock();
+                FLOAT fDistance = pHPath->getPathProgress();
                 for (INT i = 0; i < iBlock; i++) {
                     fDistance += pHPath->getHermiteDistance(i);
                 }

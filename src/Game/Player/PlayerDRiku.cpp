@@ -1296,7 +1296,7 @@ void CPlayerDRiku::exeStockSkill() {
             m_vAppearPos = m_vEnemyPos;
             setPos(m_vEnemyPos);
             pos.x = m_vStartPos.x;
-            if (!(m_pPLM->getFlag() & 0x2000)) pos.y = m_vEnemyPos.y + 5.0f;
+            if (!(m_pPLM->isJaferBattle())) pos.y = m_vEnemyPos.y + 5.0f;
             else pos.y = 7.0f;
             pos.z = m_vStartPos.z;
             setOldPos(pos);
@@ -1321,7 +1321,7 @@ void CPlayerDRiku::exeStockSkill() {
             searchWarpPos(m_fJumpDir);
             warp(m_vWarpPos[0]);
             m_iSubState = 0x69b;
-            if (m_pPLM->getFlag() & 0x2000) {
+            if (m_pPLM->isJaferBattle()) {
                 pos.set(m_vWarpPos[0].x, 7.0f, m_vWarpPos[0].z, 1.0f);
                 setOldPos(pos);
             }

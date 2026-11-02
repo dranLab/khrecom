@@ -135,7 +135,7 @@ void CHermitePathMoveS::main() {
         INT iBlock2 = iBlock1 + 1;
         FLOAT fVSpeed0 = m_pPath->getPathSpeed(iBlock1);
         FLOAT fVSpeed1 = m_pPath->getPathSpeed(iBlock2);
-        FLOAT fSpeed = (fVSpeed1 - fVSpeed0) * m_HPath.getHermiteCoefficient(iBlock1, m_HPath.getProgress()) + fVSpeed0;
+        FLOAT fSpeed = (fVSpeed1 - fVSpeed0) * m_HPath.getHermiteCoefficient(iBlock1, m_HPath.getPathProgress()) + fVSpeed0;
         m_HPath.setSpeed(fSpeed * 0.0046296297f);
     }
     m_HPath.update(fRate);
