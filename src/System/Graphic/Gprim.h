@@ -154,8 +154,8 @@ struct FTVERTEX {
 
 /* The original's CDrawable::getPacketSize/makePkt are pure (their vtable slots hold __pure_virtual). */
 class CDrawable {
-    friend class CDispListBase; // PARTIAL: System/Graphic/DispList links primitives
-    friend class CDispList;           // PARTIAL: System/Graphic/DispList
+    friend class CDispListBase; // MATCH: System/Graphic/DispList links primitives (friends are not in the debug info)
+    friend class CDispList;
     friend class CDispListSemi;
     friend class CDispListSemiBase;
     friend class CDispListSemiSingleSort;
@@ -163,7 +163,7 @@ class CDrawable {
     friend class CDispListShadowDraw;
     friend class CDispListShadowMap;
     friend struct OTtag;
-    friend class CModelMan;     // PARTIAL: System/Graphic/ModelMan reads the layer and calls makePkt
+    friend class CModelMan;     // MATCH: System/Graphic/ModelMan reads the layer and calls makePkt
 private:
     CDrawable* m_pNext;
 protected:
@@ -173,26 +173,43 @@ protected:
     UINT m_nTestFlag;
     G_LAYER m_LayerInfo;
 public:
-    // PARTIAL: added for Game/NowLoading
     CDrawable() {}
+    virtual void disp();
+    virtual UINT getPacketSize() const = 0;
+private:
+    virtual void makePkt() = 0;
+    CDrawable* getNextDrawable(/* parameters unknown */);
+    void setNextDrawable(/* parameters unknown */);
+public:
     void setTestFlag(UINT nFlag) { m_nTestFlag = nFlag; }
     void setLayer(USHORT nID, USHORT nDepth) {
         m_LayerInfo._nID = nID;
         m_LayerInfo._nDepth = nDepth;
     }
+    void setLayerDepth(USHORT nInDepth) { m_LayerInfo._nDepth = nInDepth; }
     void setLayerFG(USHORT nDepth) { setLayer(3, nDepth); }
-    void setLayerDepth(USHORT nInDepth) { m_LayerInfo._nDepth = nInDepth; } // PARTIAL: added for Game/Map
-    void setSemiTrans(ALPHA nInAlpha) { m_nAlphaMode = nInAlpha; }
-    USHORT getLayerDepth() const { return m_LayerInfo._nDepth; } // PARTIAL: added for System/Graphic/2d/2DSprObj
-    void setZ(FIX4 nZ) { m_nZ = nZ; } // PARTIAL: added for System/Graphic/Model
+    void setLayerBG(/* parameters unknown */);
+    void setLayerDirect(/* parameters unknown */);
     USHORT getLayerID() const { return m_LayerInfo._nID; }
+    USHORT getLayerDepth() const { return m_LayerInfo._nDepth; }
+    G_LAYER getLayerInfo(/* parameters unknown */);
+    void setAlphaTestEnable(/* parameters unknown */);
+    void setAlphaTestDefault(/* parameters unknown */);
+    void setDstAlphaTestEnable(/* parameters unknown */);
+    void setDstAlphaMode(/* parameters unknown */);
+    void setDepthTestEnable(/* parameters unknown */);
+    void setDepthTestCmp(/* parameters unknown */);
     ULONGLONG getTestFlag() const { return m_nTestFlag; }
+    void setSemiTrans(ALPHA nInAlpha) { m_nAlphaMode = nInAlpha; }
     ALPHA getSemiTrans() const { return m_nAlphaMode; }
+    void setZ(FIX4 nZ) { m_nZ = nZ; }
     FIX4 getZ() const { return m_nZ; }
-    virtual void disp();
-    virtual UINT getPacketSize() const = 0;
-private:
-    virtual void makePkt() = 0;
+    void setFlag(/* parameters unknown */);
+    void resetFlag(/* parameters unknown */);
+    USHORT getFlag(/* parameters unknown */);
+    void setSemiSort(/* parameters unknown */);
+    BOOL isSemiSort(/* parameters unknown */);
+    void copyAttribute(/* parameters unknown */);
 };
 
 /* The types below have no #pragma interface (their inline functions are not emitted in Gprim.o); the classes are in
