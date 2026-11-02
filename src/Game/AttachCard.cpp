@@ -1,6 +1,6 @@
 
-#define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"
-#define LINKEDBUF_H_PATH "System/LinkedBuf.h"
+#define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h" /* MATCH: this unit names Card.h so (header default "Game/Card.h") */
+#define LINKEDBUF_H_PATH "System/LinkedBuf.h" /* MATCH: this unit names LinkedBuf.h by the relative path (LinkedBuf.h switches __FILE__ only when it is defined) */
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/modeldata.h"
 #include "System/Graphic/Model.h"

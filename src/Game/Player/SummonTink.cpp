@@ -1,5 +1,5 @@
 
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "Game/Player/SummonTink.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"

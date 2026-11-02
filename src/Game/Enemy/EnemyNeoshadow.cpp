@@ -1,6 +1,6 @@
 
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
-#define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h" /* MATCH: this unit names BattleEnemy.h so (header default "Game/Enemy/BattleEnemy.h") */
 #include "System/Task.h"
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"

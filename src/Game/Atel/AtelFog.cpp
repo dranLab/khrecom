@@ -1,5 +1,5 @@
 
-#define ATELFOG_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelFog.h"
+#define ATELFOG_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelFog.h" /* MATCH: this unit names AtelFog.h so (header default "c:/KHCOM/MainApp/Game/ATEL/AtelFog.h") */
 #include "System/Task.h"
 #include <string.h>
 

@@ -62,7 +62,7 @@ public:
     static void addFreeMallocPtr(void* pInPtr); /* name unknown (inline) */
 };
 
-/* PARTIAL: path override added for Game/AttachCard ("System/LinkedBuf.h") */
+/* MATCH: path override for Game/AttachCard and Game/Prize ("System/LinkedBuf.h") */
 #ifdef LINKEDBUF_H_PATH
 #line 1 LINKEDBUF_H_PATH
 #endif

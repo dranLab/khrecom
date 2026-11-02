@@ -2,10 +2,10 @@
 #line 1
 #define GAME_ENTITY_CPP
 /* MATCH: __FILE__ of these headers as in the original .rodata */
-#define BODYCOLLISION_H_PATH "c:/KHCOM/MainApp/Game/BodyCollision.h"
-#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
-#define COLLDISP_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollDisp.h"
-#define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h"
+#define BODYCOLLISION_H_PATH "c:/KHCOM/MainApp/Game/BodyCollision.h" /* MATCH: this unit names BodyCollision.h so (header default "Game/BodyCollision.h") */
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: this unit names CollUtil.h so (header default "Game/Collision/CollUtil.h") */
+#define COLLDISP_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollDisp.h" /* MATCH: this unit names CollDisp.h so (header default "Game/Collision/CollDisp.h") */
+#define CARDBATTLE_H_PATH "c:/KHCOM/MainApp/Game/CardBattle.h" /* MATCH: this unit names CardBattle.h so (header default "Game/CardBattle.h") */
 #include "khtypes.h"
 #include "System/HeapMan.h"
 #include "System/Graphic/LightUnit.h"

@@ -1,5 +1,5 @@
 #define GAME_GIMMICK_BASEGIMMICK_CPP
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "System/TaskMan.h"
 #include "System/Task.h"
 #include "Game/Collision/CollUtil.h"

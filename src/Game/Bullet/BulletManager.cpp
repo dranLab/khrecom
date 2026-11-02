@@ -1,4 +1,4 @@
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "Game/Bullet/BulletManager.h"
 #include "System/TaskMan.h"
 #include "Game/Bullet/Bullet.h"

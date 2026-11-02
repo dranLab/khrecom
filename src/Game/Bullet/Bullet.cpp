@@ -11,7 +11,7 @@ inline void _emptyStringPlaceholder() {
 
 #include "Game/Entity.h"
 #include "System/Fsm.h" // before Gprim.h: CState's vtable copy follows CVector<G_LINE>'s in .rodata
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "Game/Bullet/Bullet.h"
 #include "System/Graphic/Effect/effect.h"
 #include "Game/Collision/CollDisp.h"

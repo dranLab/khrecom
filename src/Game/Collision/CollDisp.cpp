@@ -1,6 +1,6 @@
 
 
-#define COLLDISP_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollDisp.h"
+#define COLLDISP_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollDisp.h" /* MATCH: this unit names CollDisp.h so (header default "Game/Collision/CollDisp.h") */
 
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"

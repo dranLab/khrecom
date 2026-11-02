@@ -1,5 +1,5 @@
 
-#define ATELCROSSFADE_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelCrossFade.h"
+#define ATELCROSSFADE_H_PATH "c:/KHCOM/MainApp/Game/Atel/AtelCrossFade.h" /* MATCH: this unit names AtelCrossFade.h so (header default "c:/KHCOM/MainApp/Game/ATEL/AtelCrossFade.h") */
 #include "System/Graphic/Gprim.h"
 
 inline void* operator new(size_t, void* p) throw() { return p; }

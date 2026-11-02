@@ -1,6 +1,6 @@
 
-#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
-#define BODYCOLLISION_H_PATH "c:/KHCOM/MainApp/Game/BodyCollision.h"
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: this unit names CollUtil.h so (header default "Game/Collision/CollUtil.h") */
+#define BODYCOLLISION_H_PATH "c:/KHCOM/MainApp/Game/BodyCollision.h" /* MATCH: this unit names BodyCollision.h so (header default "Game/BodyCollision.h") */
 #include "System/HeapMan.h"
 #include "Game/Collision/CollUtil.h"
 #include "Game/Collision/CollBody.h"

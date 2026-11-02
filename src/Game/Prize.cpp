@@ -1,7 +1,7 @@
-#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h"
-#define GPRIM_H_PATH "System/Graphic/GPrim.h"
-#define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h"
-#define LINKEDBUF_H_PATH "System/LinkedBuf.h"
+#define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: this unit names CollUtil.h so (header default "Game/Collision/CollUtil.h") */
+#define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
+#define CARD_H_PATH "c:/KHCOM/MainApp/Game/Card.h" /* MATCH: this unit names Card.h so (header default "Game/Card.h") */
+#define LINKEDBUF_H_PATH "System/LinkedBuf.h" /* MATCH: this unit names LinkedBuf.h by the relative path (LinkedBuf.h switches __FILE__ only when it is defined) */
 #include "System/TaskMan.h"
 #include "System/Task.h"
 #include "Game/Collision/CollUtil.h"
