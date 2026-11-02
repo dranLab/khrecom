@@ -54,7 +54,7 @@ int Tim2CheckFileHeader(const void* pTim2);
 
 
 
-
+/* PARTIAL: stand-in for System/RsrcData RsrcInfo: gated by RSRCDATA_H_FULL */
 struct RsrcInfo {
     CHAR* _pszName;
     INT _nGroupID;
@@ -368,12 +368,306 @@ void _makeFontPkt(const _FontInfo& font, USHORT nCode, FIX4 x, FIX4 y, FIX4 w, F
     }
 }
 
-/* Not attempted: 656 instructions whose locals all live in stack slots (nStyle, bDebugMode, nPalette, space, the
- * colour words ... are stored and reloaded around every use), with PS2 MMI colour arithmetic (pextlb/pmulth/ppacb on
- * u_long128 ivCol/iMul), a pkOpenGifTag packet, the control-code switch (jump table below) and _makeFontPkt calls;
- * the stack layout needs the ref's inline-expansion structure (several inline groups with their own iCol/ivCol
- * parameters) rebuilt first. getDispSize (same control-code loop) is matched and is the model for the loop. */
+/* Parked: 331 of 749 lines - the draft has the original's structure (all locals in stack slots, contiguous MMI colour
+ * sequences as volatile in-place asm, control-code switch, outline/shadow passes), but the spill slots differ: the
+ * original's G_RGBA locals colExt/colBak/colSave get their (16-aligned) slots right after font, ours after nChar, so
+ * every later offset and the register choices shift. tried: declaration order (ref order, all at the top, the three
+ * colours first), .col copies instead of struct copies (worse), getDispSize adjust as if/else (worse), _setQW with
+ * "r" data (worse), tmp = 0xFF forms for the clamp constant (the original rematerialises li 255 per multiply).
+ * Next: find why gcc numbers the G_RGBA pseudos late (ADDRESSOF from struct copies?) before tuning anything else. */
+#if 0
+#include "System/Graphic/PackMan.h"
+static inline u_long128 _expandColor(UINT iCol) {
+    u_long128 ivCol;
+    __asm__ volatile("pextlb %0, $0, %1" : "=r"(ivCol) : "r"(iCol));
+    __asm__ volatile("pextlh %0, $0, %0" : "=r"(ivCol) : "0"(ivCol));
+    return ivCol;
+}
+static inline u_long128 _clampColor(u_long128 ivCol) {
+    u_long128 tmp;
+    __asm__ volatile("pextlw %0, %0, %0" : "=r"(tmp) : "0"(0xFF));
+    __asm__ volatile("pcpyld %0, %0, %0" : "=r"(tmp) : "0"(tmp));
+    __asm__ volatile("psrlw %0, %0, 7" : "=r"(ivCol) : "0"(ivCol));
+    __asm__ volatile("pcgtw %0, %1, %0" : "=r"(tmp) : "r"(ivCol), "0"(tmp));
+    __asm__ volatile("por %0, %1, %0" : "=r"(tmp) : "r"(ivCol), "0"(tmp));
+    return tmp;
+}
+static inline UINT _packColor(u_long128 ivCol) {
+    UINT iCol;
+    __asm__ volatile("ppach %0, $0, %0" : "=r"(ivCol) : "0"(ivCol));
+    __asm__ volatile("ppacb %0, $0, %1" : "=r"(iCol) : "r"(ivCol));
+    return iCol;
+}
+static inline UINT _mulColor(UINT iCol, UINT iMul) {
+    u_long128 ivCol = _expandColor(iCol);
+    u_long128 ivMul = _expandColor(iMul);
+    __asm__ volatile("pmulth %0, %1, %2" : "=r"(ivCol) : "r"(ivCol), "r"(ivMul));
+    return _packColor(_clampColor(ivCol));
+}
+static inline void _setRGBAQ(u_long128*& qp, UINT iCol) {
+    u_long128 out128;
+    __asm__ volatile("pcpyld %0, %1, %0" : "=r"(out128) : "r"((u_long)1), "0"((u_long)iCol));
+    *qp++ = out128;
+}
+
+void CFrecFont::makePkt(CFntM2& prim) {
+    UINT nStyle = prim.m_Style;
+    INT nFontType = (nStyle & 0x1000) >> 12;
+    BOOL bDebugMode = nStyle & 0x8000;
+    USHORT nPalette = 0;
+    if (nFontType) {
+        if (!(nStyle & 0x10000)) {
+            if (nStyle & 0x2000) {
+                nPalette = 1;
+            } else if (nStyle & 0x20000) {
+                nPalette = 2;
+            } else if (nStyle & 0x40000) {
+                nPalette = 3;
+            } else {
+                nPalette = 4;
+            }
+        }
+    }
+    if (nFontType >= s_nAvailableFontTypes) return;
+    BOOL bEnableColor = nFontType == 0;
+    _FontInfo& font = s_FontInfo[nFontType];
+    if (!font._pSjisCnvTbl) return;
+    G_RGBA colBase;
+    G_RGBA colExt;
+    G_RGBA colBak;
+    UINT brightness = prim.getBrightness();
+    if (bEnableColor) {
+        colBase.col = _mulColor(prim.m_C0.col, brightness);
+        colExt.col = _mulColor(prim.m_exC0.col, brightness);
+    } else {
+        colExt.col = 0x80808080;
+        INT a = (prim.m_C0.a * (brightness >> 24)) >> 7;
+        if (a > 0xFF) a = 0xFF;
+        colBase.col = (a << 24) | 0x808080;
+    }
+    BYTE* pAlphaTbl = (BYTE*)prim.getAlphaTbl();
+    BYTE nExtAlpha;
+    BYTE nExtAlphaOld;
+    if (pAlphaTbl) {
+        nExtAlpha = pAlphaTbl[0];
+        colExt.col = (colExt.col & 0xFFFFFF) | (nExtAlpha << 24);
+        colBase.col = (colBase.col & 0xFFFFFF) | (nExtAlpha << 24);
+    }
+    BYTE* pStr = (BYTE*)prim.getText();
+    FIX4 x = prim.m_P0.x;
+    FIX4 y;
+    FIX4 w = prim.m_Size;
+    FIX4 h = w;
+    y = prim.m_P0.y - w;
+    INT nBaseSize = font._nFontSize;
+    BOOL bIsBaseW = (w >> 4) == nBaseSize;
+    G_XY space = prim.m_Space;
+    G_XY* pLineXY = prim.getLineXYPtr();
+    G_XY* pIconXY = prim.getIconXYPtr();
+    colBak = colBase;
+    FIX4 x0;
+    FIX4 xOld;
+    if (!pLineXY) {
+        if (nStyle & 3) {
+            G_XY wh;
+            getDispSize(wh, prim, NULL, NULL);
+            FIX4 d = wh.x;
+            if (nStyle & 2) d >>= 1;
+            x -= d;
+        }
+        xOld = x;
+        x0 = x;
+    } else {
+        xOld = x;
+        x0 = x;
+        x += pLineXY[0].x;
+    }
+    INT nIcon = 0;
+    BOOL bHalfSpaceExt = !(nStyle & 0x9000);
+    UINT nStyleBak = nStyle = nStyle & 0xD0;
+    INT nLine = 0;
+    INT nChar = 0;
+    u_long128 tag;
+    __asm__ volatile("pcpyld %0, %1, %0" : "=r"(tag) : "r"((u_long)0xE), "0"((u_long)0x1000800000008000UL));
+    u_long128* qp = CPackMan::pkOpenGifTag(tag);
+    _setQW(qp, 0, 5, 9);
+    _setQW(qp, 1, s_nTEX2_2, 0x17);
+    _setQW(qp, 2, 0x356, 0);
+    _setQW(qp, 3, colBase.col, 1);
+    qp += 4;
+    while (*pStr) {
+        USHORT c = *pStr++;
+        USHORT nSJIS;
+        if (pAlphaTbl) nExtAlpha = pAlphaTbl[nChar];
+        if (c < 0x80) {
+            if (c <= 0x20) {
+                switch (c) {
+                case 9:
+                    {
+                        FIX4 ww = prim.m_Size;
+                        FIX4 sp = space.x;
+                        if (!bHalfSpaceExt) {
+                            x += ((ww >> 1) + sp) << 2;
+                        } else {
+                            x += (ww / 2 + sp) << 2;
+                        }
+                    }
+                    break;
+                case 0x20:
+                    {
+                        FIX4 ww = prim.m_Size;
+                        FIX4 sp = space.x;
+                        if (!bHalfSpaceExt) {
+                            x += (ww >> 1) - (ww >> 3) + sp;
+                        } else {
+                            x += (ww >> 1) - (ww >> 3) + sp;
+                        }
+                    }
+                    break;
+                case 10:
+                    nLine++;
+                    x = x0;
+                    if (pLineXY) x += pLineXY[nLine].x;
+                    y += w + space.y;
+                    break;
+                }
+                if (nLine >= prim.getDispLines()) break;
+                continue;
+            } else {
+                if (bDebugMode) h = w >> 1;
+                nSJIS = c;
+            }
+        } else {
+            USHORT c2 = *pStr;
+            if (c2) pStr++;
+            if (c >= 0xF9) {
+                switch (c2) {
+                case 0x40:
+                    x = xOld;
+                    break;
+                case 0x41:
+                    if (bEnableColor) {
+                        colBase = colBak;
+                        _setRGBAQ(qp, colBase.col);
+                    }
+                    break;
+                case 0x42:
+                    {
+                        FIX4 t = x - 2;
+                        x = t - space.x;
+                    }
+                    break;
+                case 0x43:
+                case 0x44:
+                case 0x45:
+                    x += 0x10 << (c2 - 0x43);
+                    break;
+                case 0x46:
+                case 0x47:
+                    nPalette = c2 - 0x46;
+                    break;
+                case 0x48:
+                    nStyle = nStyleBak;
+                    break;
+                case 0x49:
+                    prim.resetDispCharsCtrl();
+                    break;
+                default:
+                    if (c2 < 0x50) {
+                    } else if (c2 < 0x60) {
+                        if (bEnableColor) {
+                            colBase.col = _mulColor(s_fntFixColor[c2 - 0x50], brightness);
+                            _setRGBAQ(qp, colBase.col);
+                        }
+                    } else if (c2 < 0x70) {
+                        nStyle = 0x10 << (c2 - 0x60);
+                    } else if (c2 < 0x80) {
+                        if (prim.getCurrentDispChars() < nChar) {
+                            prim.setDispChars(nChar);
+                            prim.setDispCharsCtrl(c2 - 0x6F);
+                        }
+                    } else {
+                        if (pIconXY) pIconXY[nIcon++].set(x, y + w);
+                        if (c2 < 0x98) x += 0x200;
+                        else if (c2 < 0xA0) x += 0x280;
+                        else x += 0x180;
+                    }
+                    break;
+                }
+                continue;
+            }
+            nSJIS = (c << 8) | c2;
+            if (nSJIS == 0x8140) {
+                x += ((prim.m_Size >> 1) + space.x) << 1;
+                continue;
+            }
+            if (bDebugMode) h = w;
+        }
+        USHORT nCode = _fromSJIS(font, nSJIS);
+        USHORT nPPW = font._pFontWidthTbl[nCode];
+        if (nPPW < nBaseSize) nPPW++;
+        USHORT s = 0;
+        if (bDebugMode) s = nPPW;
+        xOld = x;
+        if (nStyle && bEnableColor) {
+            if (nStyle & 0x10) {
+                _makeFontPkt(font, nCode, x + (h >> 4), y, h, w, qp, s, 0);
+                x = xOld;
+            } else {
+                FIX4 ySave = y;
+                G_RGBA colSave = colBase;
+                if (nStyle & 0x80) {
+                    colBase = colExt;
+                    _setRGBAQ(qp, colBase.col);
+                    x -= h >> 4;
+                    y -= w >> 4;
+                    _makeFontPkt(font, nCode, x, y, h, w, qp, s, 0);
+                    x += h >> 3;
+                    _makeFontPkt(font, nCode, x, y, h, w, qp, s, 0);
+                    y += w >> 3;
+                    _makeFontPkt(font, nCode, x, y, h, w, qp, s, 0);
+                    x -= h >> 3;
+                } else {
+                    colBase = colExt;
+                    _setRGBAQ(qp, colBase.col);
+                    x += h >> 3;
+                    y += w >> 3;
+                }
+                _makeFontPkt(font, nCode, x, y, h, w, qp, s, 0);
+                y = ySave;
+                colBase = colSave;
+                _setRGBAQ(qp, colBase.col);
+                x = xOld;
+            }
+        }
+        if (pAlphaTbl && nExtAlpha != nExtAlphaOld) {
+            colBase.a = nExtAlpha;
+            colExt.col = (colExt.col & 0xFFFFFF) | (nExtAlpha << 24);
+            colBak = colBase;
+            nExtAlphaOld = nExtAlpha;
+            _setRGBAQ(qp, colBase.col);
+        }
+        _makeFontPkt(font, nCode, x, y, h, w, qp, s, nPalette);
+        if (bDebugMode) {
+            x += h;
+        } else {
+            FIX4 xNew;
+            if (bIsBaseW) xNew = x + (nPPW << 4);
+            else xNew = x + nPPW * h / nBaseSize;
+            x = xNew;
+        }
+        nChar++;
+        x += space.x;
+        if (prim.getDispChars() && nChar >= prim.getDispChars()) break;
+    }
+    _setQW(qp, 0, CPackMan::getDefault_CLAMP_2(), 9);
+    qp++;
+    CPackMan::pkCloseGifTag(qp);
+    prim.setCurrentDispChars(nChar);
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/FrecFont", makePkt__9CFrecFontR6CFntM2);
+#endif
 /* placeholder for makePkt's data: the colour table it reads, then its jump table (labels of the included assembly) */
 __asm__(".section .sdata\n");
 static void __attribute__((section(".sdata"))) _makePktData() {
