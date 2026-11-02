@@ -411,7 +411,25 @@ void CGameMain::checkStartBattleMenu() {
         suspendTaskInGame(2);
     }
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", procBattleMenu__9CGameMain);
+BOOL CGameMain::procBattleMenu() {
+    if (m_hPause) {
+        if (CTaskMan::getTask(m_hPause)) return TRUE;
+        pause(FALSE, 0);
+        if (CSceneInfo::isMinigameScene()) {
+            switch (CPause::getResult()) {
+            case 2:
+                gotoRetryBattle();
+                return TRUE;
+            case 3:
+                CSceneInfo::reqExitMinigame(0);
+                gotoEndBattle();
+                break;
+            }
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
 BOOL CGameMain::checkExitPause() {
     if (m_nGameProcFlag & 0x800) {
         m_nGameProcFlag &= ~0xc00;
