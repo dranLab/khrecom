@@ -490,7 +490,7 @@ CEntity* CBattleEnemyManager::createRoulettePrize(const FVECTOR& inPos) {
     if ((USHORT)(CSceneInfo::getCurrentSceneNum() - 1050) < 149) return NULL;
     if (isAppearRoulettePrize()) return NULL;
     if (CCard::isMapCardFull()) return NULL;
-    if (!CCard::m_pCardInfo->_nMapTotal) return NULL;
+    if (!CCard::getMapTotal()) return NULL;
     if (!(DebugWork::g_dw.enemy.uiFlag & 0x100)) {
         RoomInfo* room = CSceneInfo::getRoomInfo(-1);
         if (!room) return NULL;

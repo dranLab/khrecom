@@ -8,8 +8,7 @@
 #include "System/Graphic/Str.h"
 #include "Game/Collision/CollUtil.h"
 #include "System/Graphic/Effect/effect.h"
-#include "Game/Card.h"
-/* defined before Game/Technic.h and Game/Status.h: their initialize() inlines it */
+/* defined before Game/Card.h, Game/Technic.h and Game/Status.h: their initialize() inlines it */
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 inline void* operator new(size_t size, char* msg) throw() {
@@ -18,6 +17,7 @@ inline void* operator new(size_t size, char* msg) throw() {
 inline void* operator new[](size_t size, char* msg) throw() {
     return com_malloc_d(size, msg, RET_ADDR());
 }
+#include "Game/Card.h"
 #include "Game/Technic.h"
 #include "Game/Status.h"
 inline void* operator new(size_t, void* p) throw() { return p; }
@@ -221,14 +221,6 @@ struct MainAppSingletons {
     static void finalizeCollUtil() {
         if (CCollUtil::m_pInstance) delete CCollUtil::m_pInstance;
         CCollUtil::m_pInstance = __null;
-    }
-    static void initCard() {
-        if (!(__null == CCard::m_pInstance)) AssertApp("Game/Card.h", 65, "__null == m_pInstance", 0);
-        CCard::m_pInstance = new ("Game/Card.h(66)") CCard;
-    }
-    static void finalizeCard() {
-        if (CCard::m_pInstance) delete CCard::m_pInstance;
-        CCard::m_pInstance = __null;
     }
 };
 
@@ -610,7 +602,7 @@ static void _setupManagers() {
     CMovie::initialize();
     CGameWork::initialize();
     CCtdMan::initialize();
-    MainAppSingletons::initCard();
+    CCard::initialize();
     CTechnic::initialize();
     CStatus::initialize();
     _bSetupManagers = 1;
@@ -656,7 +648,7 @@ static void _disposeManagers() {
     TRACE("---- CCtdMan::finalize(); ----\n");
     CCtdMan::finalize();
     TRACE("---- CCard::finalize(); ----\n");
-    MainAppSingletons::finalizeCard();
+    CCard::finalize();
     TRACE("---- chnic::finalize(); ----\n");
     CTechnic::finalize();
     TRACE("---- atus::finalize(); ----\n");
