@@ -104,17 +104,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/Game-Collision-CollObj-3 (CCollision m_outInfo*/m_Type/m_Kind with the ref types; CollUtilF stand-in reasoned: ctor order) | 811 | 23 | 0 | 751 (653) | 194 |
 | 2026-11-02 | cleanup/path-overrides (290 .cpp *_H_PATH overrides MATCH-tagged, none redundant; LinkedBuf.h's) | 810 | 23 | 0 | 751 (370) | 485 |
 | 2026-11-02 | cleanup/placeholder-tags (138 placeholder comments MATCH-tagged) | 810 | 23 | 0 | 751 (235) | 623 |
+| 2026-11-02 | cleanup/unit-gates (12 unit gates tested: all needed; MATCH-tagged with 78 header sites) | 810 | 23 | 0 | 751 (146) | 713 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 810 (755 in 110 headers, 55 in 34 .cpp); MATCH: 623
+PARTIAL: 810 (755 in 110 headers, 55 in 34 .cpp); MATCH: 713
   by category: method 311, data member 61, type 72, fwd decl 47, #include 30, changed in place 122, padding 6, path override 19, gate 19, guessed 30, header-level 69, stand-in 18, other 6
 stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
 duplicate class names across headers: 0
 padding: 9 arrays, 0 accessors
-mechanisms: 751 sites (235 untagged); #line: 1248
+mechanisms: 751 sites (146 untagged); #line: 1248
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 613, superset 140, partial 112, gated 23, missing 8, unattributed 309
 ```
@@ -474,33 +475,33 @@ or `untagged`.
 | pragma | `#pragma implementation` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:2 |
 | pragma | `#pragma interface` | 1 | 1 | the inline functions and vtables only in Gprim.o, as in the originals |
 | unit gate | `EFFECT_CPP` | 1 | 1 | effect.cpp includes effect_inl.h itself after Coord.h (weak order) and owns the placeholder strings; without it the link fails |
-| unit gate | `FORM_MENU_JIMINYMEMO_CPP` | 1 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:1 |
-| unit gate | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.cpp:2 |
-| unit gate | `FORM_MENU_SAVELOAD_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoad.cpp:2 |
+| unit gate | `FORM_MENU_JIMINYMEMO_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
+| unit gate | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the link fails (inlines this unit must emit) (tested 2026-11-02) |
+| unit gate | `FORM_MENU_SAVELOAD_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
 | unit gate | `GAME_ATEL_VSME_CPP` | 1 | 1 | CVSM's flag accessors are only inline in this unit (Game/Atel/VSME.h) |
-| unit gate | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.cpp:1 |
-| unit gate | `GAME_ENEMY_BATTLEENEMY_CPP` | 1 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.cpp:1 |
-| unit gate | `GAME_ENTITY_CPP` | 1 | 0 | untagged, e.g. Game/Entity.cpp:3 |
-| unit gate | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.cpp:1 |
-| unit gate | `GAME_MAP_CPP` | 1 | 0 | untagged, e.g. Game/Map.cpp:1 |
-| unit gate | `GAME_PLAYER_PLAYERCAMERA_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerCamera.cpp:1 |
-| unit gate | `GAME_PLAYER_PLAYERGAUGE_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerGauge.cpp:2 |
-| unit gate | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerManager.cpp:1 |
-| unit gate | `GAME_PLAYER_PLAYER_CPP` | 1 | 0 | untagged, e.g. Game/Player/Player.cpp:1 |
-| unit gate site | `EFFECT_CPP` | 3 | 0 | untagged, e.g. System/Graphic/Effect/effect.h:13 |
-| unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 2 | 0 | untagged, e.g. Form/Menu/JiminyMemo.h:12 |
-| unit gate site | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:93 |
-| unit gate site | `FORM_MENU_SAVELOAD_CPP` | 6 | 0 | untagged, e.g. Form/Menu/SaveLoadCtrl.h:148 |
+| unit gate | `GAME_BULLET_BULLET_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
+| unit gate | `GAME_ENEMY_BATTLEENEMY_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
+| unit gate | `GAME_ENTITY_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
+| unit gate | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
+| unit gate | `GAME_MAP_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
+| unit gate | `GAME_PLAYER_PLAYERCAMERA_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
+| unit gate | `GAME_PLAYER_PLAYERGAUGE_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the link fails (inlines this unit must emit) (tested 2026-11-02) |
+| unit gate | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
+| unit gate | `GAME_PLAYER_PLAYER_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
+| unit gate site | `EFFECT_CPP` | 3 | 3 | EFFECT_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 2 | 2 | FORM_MENU_JIMINYMEMO_CPP gate (tested 2026-11-02): its own unit includes it as "JiminyMemo.h" (the full path) |
+| unit gate site | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 1 | FORM_MENU_SAVELOADCTRL_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `FORM_MENU_SAVELOAD_CPP` | 6 | 6 | FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_ATEL_VSME_CPP` | 1 | 1 | Game/Atel/Atel (CAtel::start ...) calls these out of line: inline-called-not-inlined |
-| unit gate site | `GAME_BULLET_BULLET_CPP` | 1 | 0 | untagged, e.g. Game/Bullet/Bullet.h:170 |
-| unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 0 | untagged, e.g. Game/Enemy/BattleEnemy.h:112 |
-| unit gate site | `GAME_ENTITY_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Model.h:450 |
-| unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 0 | untagged, e.g. Game/Gimmick/BaseGimmick.h:49 |
+| unit gate site | `GAME_BULLET_BULLET_CPP` | 1 | 1 | GAME_BULLET_BULLET_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 12 | GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `GAME_ENTITY_CPP` | 1 | 1 | GAME_ENTITY_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 1 | GAME_GIMMICK_BASEGIMMICK_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_MAP_CPP` | 1 | 1 | the full classes need System/Task.h, Gprim.h and Model.h, whose strings Game/MapUnitTable's .rodata lacks; other includers see the partial CMap below |
-| unit gate site | `GAME_PLAYER_PLAYERCAMERA_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerCamera.h:35 |
-| unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 2 | 1 | as above |
-| unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Player/PlayerManager.h:93 |
-| unit gate site | `GAME_PLAYER_PLAYER_CPP` | 46 | 0 | untagged, e.g. Game/Player/Player.h:135 |
+| unit gate site | `GAME_PLAYER_PLAYERCAMERA_CPP` | 1 | 1 | GAME_PLAYER_PLAYERCAMERA_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 2 | 2 | GAME_PLAYER_PLAYERGAUGE_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 2 | 2 | GAME_PLAYER_PLAYERMANAGER_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `GAME_PLAYER_PLAYER_CPP` | 46 | 46 | GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) |
 
 ## String evidence
 
