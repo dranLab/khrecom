@@ -76,19 +76,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-02 | cleanup/stand-in-reasons (Memoca, effect, pppEiDrawShipoly stand-ins documented) | 863 | 84 | 18 | 952 (859) | 183 |
 | 2026-11-02 | cleanup/task-slc-message (CTaskSLCManager to TaskMan.h; TASK_H_NO_SLC_OVERFLOW_MSG and 22 placeholders gone; PackMan/Memoca stand-ins) | 859 | 82 | 18 | 766 (680) | 177 |
 | 2026-11-02 | cleanup/2DMan (C2DMan for every includer: 28 stand-ins + SaveLoadCtrl.h copy, gate and string placeholders dropped) | 851 | 54 | 17 | 763 (677) | 177 |
+| 2026-11-02 | cleanup/Gprim (Gprim's classes for every includer: 19 partial classes, the CZFill/CPolyGT4/C3DCPrim copies and the gate dropped; 5 callers on the ref API) | 822 | 52 | 0 | 760 (673) | 180 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 851 (794 in 112 headers, 57 in 33 .cpp); MATCH: 177
-  by category: method 326, data member 63, type 82, fwd decl 50, #include 31, changed in place 121, padding 8, path override 22, gate 23, guessed 31, header-level 72, stand-in 16, other 6
-stand-ins: 54 foreign in 34 files (30 names), 201 unattributed, 167 own
-duplicate class names across headers: 17
+PARTIAL: 822 (765 in 111 headers, 57 in 33 .cpp); MATCH: 180
+  by category: method 313, data member 62, type 72, fwd decl 49, #include 31, changed in place 120, padding 8, path override 22, gate 23, guessed 29, header-level 71, stand-in 16, other 6
+stand-ins: 52 foreign in 32 files (28 names), 201 unattributed, 167 own
+duplicate class names across headers: 0
 padding: 14 arrays, 0 accessors
-mechanisms: 763 sites (677 untagged); #line: 1244
+mechanisms: 760 sites (673 untagged); #line: 1242
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 586, superset 128, partial 96, gated 80, missing 8, unattributed 309
+classes: complete 589, superset 141, partial 99, gated 59, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -100,25 +101,23 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
 | R1 | 9.0 | `System/Graphic/ShadowModel.h` | ready | 3 stand-in files, 0 dup headers, 0 gate users, 6 PARTIAL | CShadowModelMan (1 partial) | inline bodies or virtuals |
-| R1 | 5.0 | `System/Graphic/DeFocus.h` | ready | 1 stand-in files, 1 dup headers, 0 gate users | CZFill (1 partial) | inline bodies or virtuals |
 | R1 | 3.0 | `Form/DebugWindow.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
-| R1 | 3.0 | `System/Graphic/3DCPrim.h` | ready | 0 stand-in files, 1 dup headers, 0 gate users | C3DCPrim (1 partial) | inline bodies or virtuals |
 | R1 | 3.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 2.5 | `System/RsrcDB.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users, 1 PARTIAL | CRsrcDB (1 partial) | inline bodies or virtuals |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
-| R1 | 2.0 | `System/Graphic/GprimFull.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPolyGT4 (1 superset) | inline bodies or virtuals |
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Wnd.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CTextWnd (1 complete) | inline bodies or virtuals |
 | R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R2 | 32.0 | `System/RsrcData.h` | ready | 15 stand-in files, 0 dup headers, 2 gate users | CRsrcANN, CRsrcAZF, CRsrcData, CRsrcTex, CRsrcVSV, ... (+2) (7 gated) | gated strings: RSRCDATA_H_FULL |
-| R2 | 16.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 1 dup headers, 0 gate users, 18 PARTIAL | C3DLine, C3DLines, C3DPolyG4, C3DStripBase, C3DTile, ... (+12) (15 gated, 1 superset, 1 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
 | R2 | 15.5 | `Game/Collision/CollObj.h` | ready | 3 stand-in files, 0 dup headers, 8 gate users, 3 PARTIAL | CCircleCollision, CCollision, COLL_KIND, COLL_TYPE, CPointCollision, ... (+2) (4 gated, 1 partial, 2 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollAttack, CSJointT<CCollObj> not in Game/Collision/CollAttack |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
+| R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
+| R2 | 5.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users, 2 PARTIAL | G_RGBA, QWdata (1 superset, 1 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
 
 ## Classes with foreign copies
 
@@ -141,35 +140,17 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
 | `CPoly3Collision` | gated | Game/Collision/CollObj.h | 1 |  |  |
-| `CPolyGT4` | superset | System/Graphic/GprimFull.h | 1 |  | virtual order differs |
 | `CRsrcAZF` | gated | System/RsrcData.h | 1 |  | missing methods: getAZFData, getModelData, getZoneData, isTexIncomplete, ~CRsrcAZF |
 | `CRsrcDB` | partial | System/RsrcDB.h | 1 |  | missing methods: isDataExist, seekNextData, seekNextData_Opt, seekNextData_Scene; 1 PARTIAL |
 | `CRsrcTex` | gated | System/RsrcData.h | 1 |  |  |
 | `CRsrcVSV` | gated | System/RsrcData.h | 1 |  | missing methods: getBgmID, getFilePath, getSectorSize, getStartSector, ~CRsrcVSV |
 | `CSphereCollision` | gated | Game/Collision/CollObj.h | 1 |  | missing methods: setRadius, ~CSphereCollision |
 | `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
-| `CZFill` | partial | System/Graphic/DeFocus.h | 1 | System/Graphic/GprimFull.h | missing methods: ~CZFill |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | superset | System/Graphic/Gprim.h | 1 |  | 2 PARTIAL |
 | `PRIZE_DATA` | missing | Game/Enemy/BattleEnemy.h | 1 |  |  |
 | `QWdata` | complete | System/Graphic/Gprim.h | 1 |  |  |
 | `TexMemScroll` | gated | System/RsrcData.h | 1 |  |  |
-| `C3DCPrim` | partial | System/Graphic/3DCPrim.h | 0 | System/Graphic/GprimFull.h | missing methods: getObjPtr, makePkt_Line0, makePkt_Line1, makePkt_LineStrip0, makePkt_LineStrip1, makePkt_None, ... (+13); parameter count differs: create; virtual order differs |
-| `C3DLine` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h |  |
-| `C3DLines` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DLines |
-| `C3DPolyG4` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DPolyG4 |
-| `C3DStripBase` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~C3DStripBase; 1 PARTIAL |
-| `C3DTile` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | virtual order differs |
-| `CCPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: setALPHA, setCLAMP, setSCISSOR, setTEST; virtual order differs; 5 PARTIAL |
-| `CGPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: isBackClip, isSemiTrans, isShading, isTexNearest, setShading, setTexNearest; extra methods: setIIP; virtual order differs; 3 PARTIAL |
-| `CGTexPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: getTPage, setTexture, setTmpTexAreaForAllPrims, updateTexCache; extra methods: getTexInfo; virtual order differs; 4 PARTIAL |
-| `CGTexPrim2D` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing fields: m_nCacheIdxOld; missing methods: setTexture, updateTexCache, ~CGTexPrim2D; 1 PARTIAL |
-| `CPolyG4` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | virtual order differs |
-| `CPolyGT4ST` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: ~CPolyGT4ST |
-| `CScissoring` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: getPacketSize, makePkt; 1 PARTIAL |
-| `CSprt` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | extra methods: setXY; virtual order differs |
-| `CTPrim` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | missing methods: calcZ, getPacketSize, init, makePkt, setALPHA, setCLAMP, ... (+3); 1 PARTIAL |
-| `CTile` | gated | System/Graphic/Gprim.h | 0 | System/Graphic/GprimFull.h | virtual order differs |
 
 ## Headers
 
@@ -290,10 +271,9 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/2d/2DSeqCtrl.h` | 2 | 1/1/0/0 | 33 |
 | `System/Graphic/2d/2DSeqObj.h` | 8 | 3/3/0/0 | 167 |
 | `System/Graphic/2d/2DSpr.h` | 0 | 3/1/0/0 | 9 |
-| `System/Graphic/3DCPrim.h` | 1 | 0/0/1/0 | 1 |
 | `System/Graphic/Camera.h` | 23 | 5/1/1/0 | 89 |
 | `System/Graphic/ColorFader.h` | 1 | 2/1/0/0 | 7 |
-| `System/Graphic/DeFocus.h` | 1 | 2/0/3/0 | 6 |
+| `System/Graphic/DeFocus.h` | 1 | 2/0/2/0 | 6 |
 | `System/Graphic/DispList.h` | 1 | 1/0/8/0 | 1 |
 | `System/Graphic/Effect/EffectMan.h` | 10 | 1/1/0/0 | 172 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 175 |
@@ -313,8 +293,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/libppp/ryjProg/RyjMegaBirthUserCtrl.h` | 1 | 0/0/0/0 | 4 |
 | `System/Graphic/Fnt.h` | 0 | 0/1/0/0 | 38 |
 | `System/Graphic/Glare.h` | 0 | 1/1/0/0 | 5 |
-| `System/Graphic/Gprim.h` | 48 | 3/3/5/21 | 231 |
-| `System/Graphic/GprimFull.h` | 0 | 1/15/2/0 | 1 |
+| `System/Graphic/Gprim.h` | 20 | 6/3/6/0 | 231 |
+| `System/Graphic/GprimFull.h` | 0 | 1/28/6/0 | 231 |
 | `System/Graphic/HermitePath.h` | 2 | 2/1/0/0 | 6 |
 | `System/Graphic/LightUnit.h` | 4 | 4/0/3/0 | 10 |
 | `System/Graphic/MapUnit.h` | 2 | 0/0/0/0 | 3 |
@@ -480,7 +460,7 @@ or `untagged`.
 | placeholder | `_statusEmptyString*` | 1 | 0 | untagged, e.g. Game/Status.cpp:14 |
 | placeholder | `_vsmeMotionName*` | 1 | 0 | untagged, e.g. Game/Atel/VSME.cpp:54 |
 | pragma | `#pragma implementation` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:2 |
-| pragma | `#pragma interface` | 1 | 0 | untagged, e.g. System/Graphic/GprimFull.h:4 |
+| pragma | `#pragma interface` | 1 | 1 | the inline functions and vtables only in Gprim.o, as in the originals |
 | unit gate | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.cpp:2 |
 | unit gate | `EFFECT_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Effect/effect.cpp:1 |
 | unit gate | `FORM_MENU_JIMINYMEMO_CPP` | 1 | 0 | untagged, e.g. Form/Menu/JiminyMemo.cpp:1 |
@@ -496,7 +476,6 @@ or `untagged`.
 | unit gate | `GAME_PLAYER_PLAYERGAUGE_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerGauge.cpp:2 |
 | unit gate | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 0 | untagged, e.g. Game/Player/PlayerManager.cpp:1 |
 | unit gate | `GAME_PLAYER_PLAYER_CPP` | 1 | 0 | untagged, e.g. Game/Player/Player.cpp:1 |
-| unit gate | `SYSTEM_GRAPHIC_GPRIM_CPP` | 1 | 0 | untagged, e.g. System/Graphic/Gprim.cpp:1 |
 | unit gate site | `COLLDISP_CPP` | 1 | 0 | untagged, e.g. Game/Collision/CollDisp.h:17 |
 | unit gate site | `EFFECT_CPP` | 3 | 0 | untagged, e.g. System/Graphic/Effect/effect.h:13 |
 | unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 2 | 0 | untagged, e.g. Form/Menu/JiminyMemo.h:12 |
@@ -512,7 +491,6 @@ or `untagged`.
 | unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 2 | 1 | as above |
 | unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 2 | 0 | untagged, e.g. Game/Player/PlayerManager.h:93 |
 | unit gate site | `GAME_PLAYER_PLAYER_CPP` | 46 | 0 | untagged, e.g. Game/Player/Player.h:135 |
-| unit gate site | `SYSTEM_GRAPHIC_GPRIM_CPP` | 2 | 0 | untagged, e.g. System/Graphic/Gprim.h:156 |
 
 ## String evidence
 
@@ -525,7 +503,6 @@ than our includers (units with a source only). A heuristic: stand-ins and opt-ou
 | `Game/Collision/CollUtil.h` | 153 | 150 | 3: Game/Collision/CollUtil, Game/Collision/CollUtilO, Game/Collision/Ride | 0:  |
 | `Game/OsdDef.h` | 8 | 7 | 1: System/MainTaskFactory | 0:  |
 | `System/Graphic/Anim.h` | 149 | 149 | 0:  | 2: Game/Gimmick/CreateGimmick, Game/Gimmick/SampleGimmick |
-| `System/Graphic/Gprim.h` | 233 | 231 | 1: Game/Collision/CollUtil | 0:  |
 | `System/Graphic/Str.h` | 141 | 140 | 1: Game/Collision/CollUtil | 0:  |
 
 Generated by `tools/partials.py --update docs/partials.md`.
