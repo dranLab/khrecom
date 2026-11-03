@@ -138,19 +138,25 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-03 | cleanup/CCardBattle + vertex-types + ppp-types + tools/partials-ref-choice (classes complete 850) | 437 | 23 | 0 | 752 (0) | 929 |
 | 2026-11-03 | cleanup/fwd-include-tags + pppPart-tags (SJoint/SLContainer: sweep) | 346 | 23 | 0 | 752 (0) | 931 |
 | 2026-11-03 | cleanup/PlayerCamera-ungate + line1-markers-2 (gated 22) | 316 | 23 | 0 | 750 (0) | 930 |
+| 2026-11-03 | cleanup/whole-header-tags + libvu0-header + Coord-prototypes | 238 | 23 | 0 | 750 (0) | 933 |
+| 2026-11-03 | cleanup/collobj-ungate (collision classes for all includers) | 236 | 22 | 0 | 742 (0) | 928 |
+| 2026-11-03 | cleanup/debug-h + map-h (MAP_H_STRUCTS_ONLY) | 228 | 22 | 0 | 740 (0) | 931 |
+| 2026-11-03 | cleanup/debugwindow-full + debugmenu-full (gated 3) | 228 | 22 | 0 | 732 (0) | 923 |
+| 2026-11-03 | cleanup/small-classes + anon-members + ceffect-scale (tools/partials: anonymous members) | 228 | 22 | 0 | 732 (0) | 923 |
+| 2026-11-03 | cleanup/player-inlines (CPlayer unit-gate pairs unified) | 222 | 22 | 0 | 691 (0) | 882 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 316 (264 in 66 headers, 52 in 34 .cpp); MATCH: 930
-  by category: method 77, data member 18, type 21, fwd decl 6, #include 28, changed in place 61, padding 3, path override 1, gate 18, guessed 14, header-level 45, stand-in 18, other 6
-stand-ins: 23 foreign in 17 files (17 names), 199 unattributed, 157 own
+PARTIAL: 222 (182 in 49 headers, 40 in 24 .cpp); MATCH: 882
+  by category: method 52, data member 12, type 15, fwd decl 2, #include 14, changed in place 50, padding 2, path override 1, gate 6, guessed 12, header-level 33, stand-in 18, other 5
+stand-ins: 22 foreign in 16 files (16 names), 199 unattributed, 155 own
 duplicate class names across headers: 0
-padding: 5 arrays, 0 accessors
-mechanisms: 750 sites (0 untagged); #line: 1249
+padding: 2 arrays, 0 accessors
+mechanisms: 691 sites (0 untagged); #line: 1249
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 851, superset 11, partial 4, gated 22, missing 8, unattributed 309
+classes: complete 872, superset 12, partial 1, gated 3, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -162,7 +168,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | risk | benefit | item | state | counts | classes | why |
 |---|---:|---|---|---|---|---|
 | R1 | 4.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 4 gate users |  () |  (gate) |
-| R1 | 3.0 | `Form/DebugWindow.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
 | R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
@@ -170,13 +175,13 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 2.0 | `System/Graphic/ShadowModel.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CShadowModelMan (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Wnd.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CTextWnd (1 complete) | inline bodies or virtuals |
-| R1 | 1.0 | `Form/DebugMenu.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
+| R1 | 1.0 | `Game/Collision/CollUtil.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
-| R2 | 13.0 | `Game/Collision/CollObj.h` | ready | 2 stand-in files, 0 dup headers, 9 gate users | CCollision, COLL_KIND, COLL_TYPE, CPointCollision (3 complete, 1 gated) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollUtilF, CSJointT<CCollObj> not in Game/Collision/CollUtilF |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 | R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
 | R2 | 4.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | G_RGBA, QWdata (2 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
+| R2 | 3.0 | `Game/Collision/CollObj.h` | ready | 1 stand-in files, 0 dup headers, 1 gate users | CCollision, COLL_KIND, COLL_TYPE (3 complete) | weak hint: CSJointListT<CCollObj> not in Game/Collision/CollUtilF, CSJointT<CCollObj> not in Game/Collision/CollUtilF |
 
 ## Classes with foreign copies
 
@@ -192,7 +197,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
-| `CPointCollision` | gated | Game/Collision/CollObj.h | 1 |  |  |
 | `CShadowModelMan` | complete | System/Graphic/ShadowModel.h | 1 |  |  |
 | `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
@@ -204,75 +208,56 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 
 | header | PARTIAL | classes complete/superset/partial/gated | includers |
 |---|---:|---|---:|
-| `Form/DebugMenu.h` | 0 | 1/0/0/3 | 4 |
-| `Form/DebugWindow.h` | 0 | 2/1/0/4 | 12 |
 | `Form/Menu/JMemoFlag.h` | 1 | 0/1/0/0 | 17 |
 | `Form/Menu/JiminyMemo.h` | 1 | 0/0/0/1 | 2 |
 | `Form/Menu/SaveLoadCtrl.h` | 1 | 8/0/0/0 | 7 |
 | `Form/Menu/SaveLoadUtil.h` | 0 | 3/1/0/0 | 4 |
 | `Game/Atel/CommandAccepter.h` | 1 | 1/0/0/0 | 15 |
 | `Game/Atel/EventTrap.h` | 0 | 4/1/0/0 | 3 |
-| `Game/AttachCard.h` | 1 | 1/0/0/0 | 2 |
 | `Game/AttachMotion.h` | 1 | 1/0/0/0 | 155 |
-| `Game/AttackMotion.h` | 3 | 3/0/0/0 | 154 |
-| `Game/BodyCollision.h` | 1 | 1/0/0/0 | 55 |
-| `Game/Bullet/Bullet.h` | 5 | 5/0/0/0 | 30 |
-| `Game/CardBattle.h` | 12 | 6/0/0/0 | 146 |
+| `Game/AttackMotion.h` | 1 | 3/0/0/0 | 154 |
+| `Game/CardBattle.h` | 1 | 6/0/0/0 | 146 |
 | `Game/CardKindEnum.h` | 1 | 1/0/0/0 | 100 |
 | `Game/Collision/CollInfo.h` | 1 | 1/0/0/0 | 177 |
-| `Game/Collision/CollObj.h` | 4 | 6/0/0/7 | 174 |
-| `Game/Collision/CollUtil.h` | 7 | 0/0/0/0 | 150 |
-| `Game/Collision/CollUtilA.h` | 1 | 10/1/0/0 | 26 |
+| `Game/Collision/CollObj.h` | 3 | 13/0/0/0 | 174 |
+| `Game/Collision/CollUtilA.h` | 1 | 11/0/0/0 | 26 |
 | `Game/Debug/DWTBGM.h` | 1 | 0/0/0/0 | 1 |
 | `Game/Enemy/BattleEnemy.h` | 31 | 0/1/0/0 | 58 |
 | `Game/Enemy/EnemyParam.h` | 3 | 4/0/0/0 | 16 |
-| `Game/Entity.h` | 5 | 2/0/0/0 | 150 |
-| `Game/EntityFactory.h` | 3 | 2/0/0/0 | 49 |
-| `Game/Game.h` | 1 | 1/0/0/0 | 43 |
-| `Game/Map.h` | 7 | 9/0/0/3 | 9 |
+| `Game/Entity.h` | 2 | 2/0/0/0 | 150 |
+| `Game/EntityFactory.h` | 1 | 2/0/0/0 | 49 |
+| `Game/Map.h` | 4 | 11/1/0/0 | 9 |
 | `Game/Movement.h` | 5 | 1/0/0/0 | 105 |
-| `Game/OsdDef.h` | 1 | 5/0/1/0 | 7 |
+| `Game/OsdDef.h` | 1 | 5/1/0/0 | 7 |
 | `Game/Player/DWTPlayer.h` | 2 | 0/0/0/0 | 5 |
-| `Game/Player/Player.h` | 38 | 2/1/0/0 | 72 |
+| `Game/Player/Player.h` | 32 | 2/1/0/0 | 72 |
 | `Game/Player/PlayerAnim.h` | 1 | 1/0/0/0 | 1 |
 | `Game/Player/PlayerAttack.h` | 2 | 1/0/0/0 | 26 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 53 |
 | `Game/SceneEnv.h` | 1 | 1/0/0/0 | 37 |
-| `Game/SceneInfo.h` | 3 | 30/0/0/0 | 86 |
+| `Game/SceneInfo.h` | 1 | 30/0/0/0 | 86 |
 | `Game/StorageWork.h` | 1 | 3/0/1/0 | 61 |
 | `System/Buf.h` | 1 | 1/0/0/0 | 38 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
-| `System/Component.h` | 3 | 2/0/0/0 | 5 |
-| `System/Coord.h` | 1 | 1/0/0/0 | 18 |
-| `System/Debug.h` | 5 | 0/0/0/2 | 271 |
+| `System/Coord.h` | 1 | 1/0/0/0 | 27 |
 | `System/Graphic/2d/2DMan.h` | 1 | 3/0/0/0 | 166 |
-| `System/Graphic/2d/2DObj.h` | 1 | 1/0/0/0 | 167 |
-| `System/Graphic/2d/2DSeqCtrl.h` | 1 | 2/0/0/0 | 33 |
-| `System/Graphic/2d/2DSeqObj.h` | 2 | 6/0/0/0 | 167 |
-| `System/Graphic/Camera.h` | 5 | 6/0/1/0 | 100 |
-| `System/Graphic/Effect/EffectMan.h` | 2 | 2/0/0/0 | 172 |
+| `System/Graphic/Camera.h` | 5 | 6/1/0/0 | 109 |
+| `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 172 |
 | `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 175 |
 | `System/Graphic/Effect/effect.h` | 3 | 5/1/0/0 | 77 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 2 | 3/0/0/0 | 15 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
 | `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 30 |
-| `System/Graphic/Effect/libppp/draw/shape.h` | 1 | 5/0/0/0 | 18 |
-| `System/Graphic/Effect/libppp/keProg/KeBornRnd.h` | 5 | 0/0/0/0 | 11 |
-| `System/Graphic/Effect/libppp/keProg/KeTh.h` | 2 | 18/0/0/0 | 7 |
-| `System/Graphic/Effect/libppp/pppPart.h` | 42 | 24/0/0/0 | 215 |
-| `System/Graphic/Gprim.h` | 3 | 14/0/1/0 | 231 |
-| `System/Graphic/MapUnit.h` | 1 | 0/0/0/0 | 3 |
+| `System/Graphic/Effect/libppp/pppPart.h` | 32 | 24/0/0/0 | 215 |
+| `System/Graphic/Gprim.h` | 3 | 15/0/0/0 | 231 |
 | `System/Graphic/Model.h` | 3 | 8/0/0/0 | 70 |
-| `System/Graphic/PathData.h` | 1 | 9/0/0/0 | 8 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
 | `System/Graphic/TexInfo.h` | 1 | 2/0/0/0 | 234 |
 | `System/Graphic/modeldata.h` | 2 | 3/0/0/1 | 82 |
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
-| `System/Memoca.h` | 1 | 4/0/0/0 | 6 |
-| `System/RsrcData.h` | 2 | 33/0/0/0 | 29 |
-| `System/SLContainer.h` | 4 | 0/0/0/0 | 244 |
-| `System/TaskMan.h` | 2 | 4/0/0/0 | 99 |
+| `System/RsrcData.h` | 1 | 33/0/0/0 | 29 |
+| `System/SLContainer.h` | 4 | 0/0/0/0 | 251 |
 | `System/Vector.h` | 9 | 1/2/0/0 | 266 |
 
 ## Mechanisms
@@ -284,24 +269,20 @@ or `untagged`.
 |---|---|---:|---:|---|
 | feature | `ANIM_H_GETFLAG_DECL_ONLY` | 4 | 4 | the original calls CAnim::getFlag out of line |
 | feature | `BATTLEENEMY_H_STATE_TEMPLATE` | 1 | 1 | this unit sees m_EnemyState as the real CStateTemplate array (System/Fsm.h strings and the state table) |
-| feature | `COLLOBJ_H_COLLISION_CLASSES` | 8 | 8 | CollAttack casts to the collision classes (sphere/point/circle/poly3) |
 | feature | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | getDetectInfo as INT (see CollObj.h) |
 | feature | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | setEntityFlag(0, 0x1000) as a plain and (createAvatar) |
+| feature | `GAME_COLLISION_COLLOBJ_H` | 1 | 1 | Game/Collision/CollUtil.h tests it (collideMap, see below) |
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 4 | 4 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature | `MODELDATA_H_TEXINFO` | 6 | 6 | TexInfoStub (the original has its assert strings) |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 2 | RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) |
 | feature site | `ANIM_H_GETFLAG_DECL_ONLY` | 2 | 2 | these units' originals call CAnim::getFlag out of line (Entity, EffectMotion, SEMotion, GimmickLotusLeaf) |
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 2 | Game/Enemy/BattleEnemy sees m_EnemyState as the real CStateTemplate array |
-| feature site | `COLLOBJ_H_COLLISION_CLASSES` | 2 | 2 | the inline collideMap needs CCollUtil (CollUtil.h): only units that construct these classes define it |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
 | feature site | `ENTITY_H_SETFLAG_DIRECT` | 2 | 2 | the plain form, for Game/Atel/Atel (createAvatar) and Game/Atel/Avatar (ctor, InitAvatar) |
+| feature site | `GAME_COLLISION_COLLOBJ_H` | 1 | 1 | the collision classes' collideMap, when Game/Collision/CollObj.h came first (see there) |
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 1 | 1 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 1 | only includers whose original .rodata has TexInfoStub's assert strings |
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
-| full-class | `FORM_DEBUGMENU_FULL` | 1 | 1 | the owner sees the full classes |
-| full-class | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the owner sees the full classes (Gprim.h included first) |
-| full-class site | `FORM_DEBUGMENU_FULL` | 1 | 1 | the full classes need Gprim.h/PadHandler.h; System/Debug and System/RootTask originals lack Gprim.h's strings |
-| full-class site | `FORM_DEBUGWINDOW_FULL` | 3 | 3 | the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings |
 | guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 2 | the original's includes don't bring in Anim.h (no "2 > idx" in .rodata) |
 | guard skip | `GAME_COLLISION_COLLUTILA_H` | 1 | 1 | the accessor only for includers that have the class (see above) |
 | guard skip | `GAME_ENTITY_H` | 1 | 1 | only for includers that have CEntity (see below) |
@@ -419,7 +400,6 @@ or `untagged`.
 | unit gate | `GAME_ENEMY_BATTLEENEMY_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
 | unit gate | `GAME_ENTITY_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
 | unit gate | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
-| unit gate | `GAME_MAP_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
 | unit gate | `GAME_PLAYER_PLAYERGAUGE_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the link fails (inlines this unit must emit) (tested 2026-11-02) |
 | unit gate | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
 | unit gate | `GAME_PLAYER_PLAYER_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
@@ -432,10 +412,9 @@ or `untagged`.
 | unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 12 | GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_ENTITY_CPP` | 1 | 1 | GAME_ENTITY_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 1 | GAME_GIMMICK_BASEGIMMICK_CPP gate, only for its own unit (tested 2026-11-02) |
-| unit gate site | `GAME_MAP_CPP` | 1 | 1 | the full classes need System/Task.h, Gprim.h and Model.h, whose strings Game/MapUnitTable's .rodata lacks; other includers see the partial CMap below |
 | unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 2 | 2 | GAME_PLAYER_PLAYERGAUGE_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 1 | GAME_PLAYER_PLAYERMANAGER_CPP gate, only for its own unit (tested 2026-11-02) |
-| unit gate site | `GAME_PLAYER_PLAYER_CPP` | 46 | 46 | GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `GAME_PLAYER_PLAYER_CPP` | 5 | 5 | GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) |
 
 ## String evidence
 
