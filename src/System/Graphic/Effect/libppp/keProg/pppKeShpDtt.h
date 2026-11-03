@@ -1,7 +1,7 @@
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_PPPKESHPDTT_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_PPPKESHPDTT_H
 
-#include "System/Graphic/Effect/libppp/pppPart.h"
+#include "System/Graphic/Effect/libppp/partMng.h"
 
 enum {
     IKeShpDtt_This = 0,

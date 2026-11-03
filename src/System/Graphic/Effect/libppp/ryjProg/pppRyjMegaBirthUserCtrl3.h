@@ -1,7 +1,7 @@
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_RYJPROG_PPPRYJMEGABIRTHUSERCTRL3_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_RYJPROG_PPPRYJMEGABIRTHUSERCTRL3_H
 
-#include "System/Graphic/Effect/libppp/pppPart.h"
+#include "System/Graphic/Effect/libppp/partMng.h"
 
 typedef struct { /* 0x20 */
     pppCDT cdt;
