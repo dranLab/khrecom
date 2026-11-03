@@ -676,24 +676,22 @@ __asm__(
     ".text\n");
 #endif
 
-/* near-match: kept as INCLUDE_ASM */
-#if 0
 INT CCard::searchCardKind(USHORT inID, SHORT inNumber) {
     INT total = 0;
+    INT i;
+    INT nCard;
     if (inNumber < 0) {
-        for (INT i = 0; i < 10; i++) {
-            INT nCard = searchCard(inID, i);
-            total += (nCard > 0) * nCard;
+        for (i = 0; i < 10; i++) {
+            nCard = searchCard(inID, i);
+            INT b = nCard > 0; // MATCH: a direct (nCard > 0) * nCard folds to (nCard > -1) (li -1)
+            total += b * nCard;
         }
     } else {
-        total = searchCard(inID, inNumber);
-        if (total < 1) total = 0;
+        nCard = searchCard(inID, inNumber);
+        if (nCard > 0) total = nCard;
     }
     return total;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Card", searchCardKind__5CCardUss);
-#endif
 
 INT CCard::addDeck(CARD inCard, USHORT inDeckNum) {
     if (!inCard.m_nCategory0 || inCard.m_nCategory0 >= 8) return 0;
