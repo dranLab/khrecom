@@ -23,7 +23,7 @@ inline void _emptyStringPlaceholder() {
 #include "Game/Enemy/EnemyParam.h"
 #include "System/Graphic/Effect/effect.h"
 #include "Game/Enemy/MapEnemy.h"
-#define COLLOBJ_H_COLLISION_CLASSES /* MATCH: constructs CPointCollision */
+
 #undef COLLOBJ_H_ENUMS_ONLY
 #include "Game/Collision/CollObj.h"
 #include "Game/Collision/CollMap.h"

@@ -21,7 +21,7 @@ inline void _humanBossEmptyString() {
 
 #include "System/Graphic/Effect/effect.h"
 #include "Game/BodyCollision.h"
-#define COLLOBJ_H_COLLISION_CLASSES /* MATCH: constructs CPointCollision */
+
 #undef COLLOBJ_H_ENUMS_ONLY
 #include "Game/Collision/CollObj.h"
 #include "Game/CardKind.h"

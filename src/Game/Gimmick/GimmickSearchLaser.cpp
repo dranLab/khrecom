@@ -37,18 +37,18 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "System/Rnd.h"
 #include "include_asm.h"
 #include "Game/Collision/CollBody.h"
-/* Inline in the original's collision header: the weak copies of its destructors and collideMap end this
- * object (the vtables and the named copies are other objects'). */
-class CSphereCollision : public CCollision {
-public:
-    CSphereCollision() { m_Type = COLL_TYPE_SPHERE; }
-    virtual ~CSphereCollision() {}
-    void setRadius(FLOAT inRadius) {
-        m_shiftY = inRadius;
-        m_Radius = inRadius;
-    }
-    virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
-};
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "Game/Gimmick/GimmickManager.h"
 
