@@ -340,7 +340,15 @@ def members_of(src, sc):
             if cur.strip():
                 emit(cur, cur_start, None)
             break
-        if kid.kind == "type" or re.search(r"(?:^|[\s;:])(?:static\s+)?(?:struct|union|class)\s*$", cur):
+        if re.search(r"(?:^|[\s;:{}])(?:struct|union)\s*$", cur) and re.match(r"\s*;", code[kid.end + 1:]):
+            # an anonymous struct/union member: its fields are the class's own (C++ anonymous union, gcc's
+            # anonymous struct extension)
+            text = re.sub(r"(?:struct|union)\s*$", "", cur)
+            if text.strip():
+                emit(text, cur_start, None)
+            out.extend(m for m in members_of(src, kid) if m.kind == "field")
+            cur, cur_start = "", kid.end + 1
+        elif kid.kind == "type" or re.search(r"(?:^|[\s;:])(?:static\s+)?(?:struct|union|class)\s*$", cur):
             cur += " {} "  # also anonymous struct members: static struct {...} m_pStateTbl[n]
         else:
             emit(cur, cur_start, (kid.start, kid.end))

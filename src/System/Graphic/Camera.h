@@ -11,21 +11,25 @@
 class CCoord {
 public:
     FMATRIX m_Local;
-    // PARTIAL: the ref has m_WorldTimestamp/m_pParent after an 8-byte union and private fields (ours public)
+    // PARTIAL: the ref's fields from here are private (ours public)
     union {
         struct {
-            TIMEQ m_FixTimestamp;   /* 0x40 */
-            INT m_Flag;             /* 0x44 */
+            union {
+                struct {
+                    TIMEQ m_FixTimestamp; /* 0x40 */
+                    INT m_Flag;           /* 0x44 */
+                };
+                ULONGLONG _ulFixTimestamp;
+            };
             TIMEQ m_WorldTimestamp; /* 0x48 */
             CCoord* m_pParent;      /* 0x4c */
         };
         u_long128 _q40; // MATCH: Game/Atel/EventTrap: the constructor clears 0x40..0x4f at once
-        ULONGLONG _ulFixTimestamp;
     };
     union {
         FMATRIX m_Rot;              /* 0x50 */
         struct {
-            UBYTE _pad50[0x30];
+            int m_hHandlePad___[12];
             FLOAT m_fScaleX;        /* 0x80 */
             FLOAT m_fScaleY;        /* 0x84 */
             FLOAT m_fScaleZ;        /* 0x88 */
