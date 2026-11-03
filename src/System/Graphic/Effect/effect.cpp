@@ -384,25 +384,16 @@ int CEffect::_setData(const EFFECT_DATA& effect_data, u_int no) {
 }
 
 void strcpyEffName(char* pszDstName, const char* pszSrcName, INT nNum);
-/* Parked: 8 of 24 lines, 4 bytes short - the original keeps the destination in its own register (t1) and copies it
- * each iteration (a3 = t1; store via a3; t1 = a3 + 1 in the bnel delay slot); ours advances a3 itself. Tried: a
- * per-iteration copy p (CSE'd away), char c local (19), *dst++ forms (13-16), increment in the for step (9),
- * return instead of break (19). */
-#if 0
 void strcpyEffName(char* pszDstName, const char* pszSrcName, INT nNum) {
     if (!pszDstName || !pszSrcName) return;
     for (INT i = 0; i < nNum; i++) {
-        *pszDstName = pszSrcName[i];
-        if (*pszDstName == '\0' || *pszDstName == '.') {
-            *pszDstName = '\0';
+        pszDstName[i] = pszSrcName[i];
+        if (pszDstName[i] == '\0' || pszDstName[i] == '.') {
+            pszDstName[i] = '\0';
             break;
         }
-        pszDstName++;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/effect", strcpyEffName__FPcPCci);
-#endif
 
 INT CEffect::_strcmpName(const char* pszEffName) {
     char szName[20];
