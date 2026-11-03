@@ -7400,14 +7400,12 @@ void CCamp::setTotalCP() {
     }
 }
 
-/* Parked: 4 of 44 lines differ: the original computes nIndex + 1 from a1 and moves idx = nIndex into the beqz delay
-   slot; ours copies nIndex through idx first. tried: idx assigned in an else / after the test, separate n = nIndex + 1,
-   i <= nIndex, return nIndex directly, comma init in the for; permuter 5 + 15 min: it stalls on this function (7 candidates per run). */
-#if 0
 INT CCamp::getCardIndex(INT nIndex) {
-    INT idx = nIndex;
+    INT idx;
 
-    if (m_nDeckCategorySelect) {
+    if (!m_nDeckCategorySelect) {
+        idx = nIndex;
+    } else {
         INT i;
         idx = -1;
         for (i = 0; i < nIndex + 1; i++) {
@@ -7422,9 +7420,6 @@ INT CCamp::getCardIndex(INT nIndex) {
     }
     return idx;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", getCardIndex__5CCampi);
-#endif
 
 BOOL CCamp::removeDeck(INT nIndex) {
     if (m_pDeck[nIndex].m_nId) {
