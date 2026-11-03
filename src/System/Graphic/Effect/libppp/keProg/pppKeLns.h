@@ -1,7 +1,7 @@
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_PPPKELNS_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_PPPKELNS_H
 
-#include "System/Graphic/Effect/libppp/pppPart.h"
+#include "System/Graphic/Effect/libppp/partMng.h"
 #include "System/Graphic/Effect/libppp/keProg/KeLns.h"
 #include "System/Graphic/Effect/libppp/keProg/Ke.h"
 #include "System/Graphic/Effect/libppp/draw/draw_w.h"

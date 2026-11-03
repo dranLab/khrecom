@@ -1,7 +1,7 @@
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_PPPDRAWSHAPEX_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_PPPDRAWSHAPEX_H
 
-#include "System/Graphic/Effect/libppp/pppPart.h"
+#include "System/Graphic/Effect/libppp/partMng.h"
 
 enum {
     IDrawShapeX_This = 0,

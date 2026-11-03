@@ -1,7 +1,7 @@
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_EIPROG_PPPEIDRAWSHIPOLY_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_EIPROG_PPPEIDRAWSHIPOLY_H
 
-#include "System/Graphic/Effect/libppp/pppPart.h"
+#include "System/Graphic/Effect/libppp/partMng.h"
 
 typedef struct { /* 0xa4 */
     pppCDT cdt;

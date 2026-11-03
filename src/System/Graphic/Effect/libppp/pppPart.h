@@ -198,10 +198,6 @@ extern sceVu0FVECTOR *ppvReferencePosList;
 extern int ppvReferencePosNum;
 /* end PARTIAL pppRyjMegaBirthUserCtrl */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMegaBirthUserCtrl2 */
-extern sceVu0FMATRIX *ppvReferenceMatrixList;
-extern int ppvReferenceMatrixNum;
-/* end PARTIAL pppRyjMegaBirthUserCtrl2 */
 
 
 typedef void (*PPPUSRFUNC)();
@@ -284,16 +280,6 @@ extern sceVu0FVECTOR ppvParAng;
 
 
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/pppAlloc */
-typedef struct _pppEMCB { /* 0x10 */
-    struct _pppEMCB *next;
-    struct _pppEMCB *before;
-    int owner;
-    int wdummy;
-} pppEMCB;
-
-extern void (*ppvErrorFunc)();
-/* end PARTIAL pppAlloc */
 
 
 typedef struct { /* 0x10 */
@@ -393,15 +379,6 @@ void FlushCache(int operation);
 
 /* end PARTIAL pppKeTkFade */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeShpDtt (partMng.h) */
-extern int ppvDispWidth;
-extern int ppvDispHeight;
-extern int ppvDrawWidth;
-extern int ppvDrawHeight;
-extern int ppvDrawFrameBase;
-extern int ppvDispFrameBase;
-extern u_long ppvGsScissor;
-/* end PARTIAL pppKeShpDtt */
 /* end PARTIAL pppKeMdlTfd */
 
 
@@ -442,7 +419,6 @@ typedef struct tagOANM_HEADER { /* 0x18 */
     OANM_SEQ seq[1];
 } OANM_HEADER;
 
-void debugDpdCheckShapeData(int nShapeNum); /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppDrawShapeX (partMng.h) */
 /* end PARTIAL pppDrawShape */
 
 
