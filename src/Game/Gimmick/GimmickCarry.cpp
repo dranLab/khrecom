@@ -470,7 +470,7 @@ void CGimmickCarry::CarryThrow() {
     Normalize(v, v);
     ScaleVector(v, v, 2.0f);
     AddVector(cColl.m_inWE, cColl.m_inWS, v);
-    if (CCollUtil::getInstance()->_detectMCD(cColl)) {
+    if (CCollUtil::instance()._detectMCD(cColl)) {
         /* "ギミック：投げられていきなり外にでた\n" */
         TRACE("\x83\x4d\x83\x7e\x83\x62\x83\x4e\x81\x46\x93\x8a\x82\xb0\x82\xe7\x82\xea\x82\xc4\x82\xa2\x82\xab\x82\xc8"
               "\x82\xe8\x8a\x4f\x82\xc9\x82\xc5\x82\xbd\n");
@@ -541,7 +541,7 @@ void CGimmickCarry::CancelCarry() {
     Normalize(v, v);
     ScaleVector(v, v, 2.0f);
     AddVector(cColl.m_inWE, cColl.m_inWS, v);
-    if (CCollUtil::getInstance()->_detectMCD(cColl)) {
+    if (CCollUtil::instance()._detectMCD(cColl)) {
         /* "ギミック：投げられていきなり外にでた\n" */
         TRACE("\x83\x4d\x83\x7e\x83\x62\x83\x4e\x81\x46\x93\x8a\x82\xb0\x82\xe7\x82\xea\x82\xc4\x82\xa2\x82\xab\x82\xc8"
               "\x82\xe8\x8a\x4f\x82\xc9\x82\xc5\x82\xbd\n");

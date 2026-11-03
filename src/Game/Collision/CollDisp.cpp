@@ -136,7 +136,7 @@ void CCollDisp::main() {
     if (m_fgMapZoneDisp) {
         if (!m_pMapZone) {
 #line 163
-            m_pMapZone = new (__FILE__ "(163)") CCollDispMapZone(this, *(MCD_INFO**)((UBYTE*)CCollUtil::getInstance() + 0x20));
+            m_pMapZone = new (__FILE__ "(163)") CCollDispMapZone(this, *(MCD_INFO**)((UBYTE*)&CCollUtil::instance() + 0x20));
         }
         UINT uiCol = (m_bMapZoneColA << 24) | (m_bMapZoneColB << 16) | (m_bMapZoneColG << 8) | m_bMapZoneColR;
         if (m_pMapZone->getLineColor() != uiCol) m_pMapZone->changeLineColor(uiCol);

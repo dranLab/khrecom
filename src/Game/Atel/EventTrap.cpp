@@ -55,7 +55,7 @@ void CEventLine::setData(const LineTrapSrc& inData) {
 }
 
 INT CEventLine::checkTrap(const ETMoveData& inData) {
-    return CCollUtil::getInstance()->_detectActorTrapXZ(inData, getCheckData());
+    return CCollUtil::instance()._detectActorTrapXZ(inData, getCheckData());
 }
 
 void CEventLine::dispShape() {
@@ -69,7 +69,7 @@ void CEventBox::setData(const BoxTrapSrc& inData) {
 }
 
 INT CEventBox::checkTrap(const ETMoveData& inData) {
-    return CCollUtil::getInstance()->_detectActorTrapXZ(inData, getCheckData());
+    return CCollUtil::instance()._detectActorTrapXZ(inData, getCheckData());
 }
 
 void CEventBox::setupVertexes() {
