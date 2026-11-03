@@ -1668,29 +1668,24 @@ void* CModel::getExtendClut(INT nTex, INT nType) {
 ret3:
     return *(void**)(m_TexInfo[nTex].m_pTex + 0x50);
 }
-/* Parked: 5 lines off, operand order only: the original adds this + idx*8 (addu a1,a0,v0), ours idx*8 + this. Worked: the if/else-if chain with `nInType == t && p[0x54] != t`, the direct p->ext arm first, raw this-relative addressing (m_TexInfo[inIdx] makes gcc pre-add this+0x68). Tried: switch, nested ifs, expression orders; permuter 10 min (34061 candidates, stays 5). */
-#if 0
 void CModel::getChangeClut(INT inIdx, INT nInType) {
     BYTE* p;
     if (inIdx < 0 || inIdx >= m_pData->m_nTexNum) return;
-    p = (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68));
+    p = (*(BYTE**)((BYTE*)this + (inIdx << 3) + 0x68)); // MATCH: << 3, not * 8 (a MULT operand is canonicalized first: addu a1,idx8,this)
     if (!(p[0x55] & 0x40)) return;
     if (nInType == 0 && p[0x54] != 0) {
-        (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(p + 0x48);
+        (*(BYTE**)((BYTE*)this + (inIdx << 3) + 0x68)) = *(BYTE**)(p + 0x48);
     } else if (nInType == 1 && p[0x54] != 1) {
-        if (!p[0x54]) (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(p + 0x48);
-        else (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(*(BYTE**)(p + 0x48) + 0x48);
+        if (!p[0x54]) (*(BYTE**)((BYTE*)this + (inIdx << 3) + 0x68)) = *(BYTE**)(p + 0x48);
+        else (*(BYTE**)((BYTE*)this + (inIdx << 3) + 0x68)) = *(BYTE**)(*(BYTE**)(p + 0x48) + 0x48);
     } else if (nInType == 2 && p[0x54] != 2) {
-        if (!p[0x54]) (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(p + 0x4c);
-        else (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(*(BYTE**)(p + 0x48) + 0x4c);
+        if (!p[0x54]) (*(BYTE**)((BYTE*)this + (inIdx << 3) + 0x68)) = *(BYTE**)(p + 0x4c);
+        else (*(BYTE**)((BYTE*)this + (inIdx << 3) + 0x68)) = *(BYTE**)(*(BYTE**)(p + 0x48) + 0x4c);
     } else if (nInType == 3 && p[0x54] != 3) {
-        if (!p[0x54]) (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(p + 0x50);
-        else (*(BYTE**)((BYTE*)this + inIdx * 8 + 0x68)) = *(BYTE**)(*(BYTE**)(p + 0x48) + 0x50);
+        if (!p[0x54]) (*(BYTE**)((BYTE*)this + (inIdx << 3) + 0x68)) = *(BYTE**)(p + 0x50);
+        else (*(BYTE**)((BYTE*)this + (inIdx << 3) + 0x68)) = *(BYTE**)(*(BYTE**)(p + 0x48) + 0x50);
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", getChangeClut__6CModelii);
-#endif
 BOOL MODELDATA::enablePointLight() const {
     BOOL ret;
     if (getRawMode() & 0x2000000) return FALSE;
