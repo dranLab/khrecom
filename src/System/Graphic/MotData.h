@@ -19,7 +19,7 @@ struct QUATERNION_DT {
 
     void set(/* parameters unknown */);
     void invalidity(/* parameters unknown */);
-    BOOL isEffective(/* parameters unknown */);
+    BOOL isEffective() { if (vQuatRotate._ul[0] == 0 && vQuatRotate._ul[1] == 0) return FALSE; return TRUE; }
 };
 
 typedef struct {
