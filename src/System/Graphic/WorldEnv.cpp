@@ -91,10 +91,6 @@ static inline void _cameraMatrix(FMATRIX& matOut, FVECTOR& vInPos, FVECTOR& vInZ
     sceVu0CameraMatrix(matOut, vecPos, vecDir, vecV);
 }
 
-static inline void _unitVector(FVECTOR& v) {
-    asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory");
-}
-
 /* initialize: not deterministic here. The registers of the gcse-hoisted %hi() loads follow PRE's expression hash
  * order, which hashes symbol-name pointers, so the output changes between compiler runs (this version matches in
  * about 1 of 6). */
@@ -147,9 +143,6 @@ static void _makeWorldViewMatrix(const FMATRIX* pInWorldMat, FLOAT fInXofs, FLOA
 static void _makeViewClipMatrix();
 static void _makeBillboardMatrix(const FMATRIX* pWorldMat);
 
-/* mainProc: near-match. The original stores _vecMikePos.z through a new %hi(_vecMikePos + 8) after the sqc2 of the
- * unit vector (Coord.h's inline, lines 87-91); here the address register of the asm is reused. */
-#if 0
 void CWorldEnv::mainProc() {
     CCamera* pCamera = getActiveCamera();
     BOOL bInit;
@@ -161,7 +154,7 @@ void CWorldEnv::mainProc() {
         _makeWorldViewMatrix(pMatWorld, pCamera->getOffsetX(), pCamera->getOffsetY());
         setScreenZ(pCamera->getProjectionDist());
         FVECTOR v;
-        _unitVector(v);
+        v.init0();
         v.z = _fMikeOffsetZ;
         ApplyMatrix(_vecMikePos, *pMatWorld, v);
     } else {
@@ -169,7 +162,7 @@ void CWorldEnv::mainProc() {
         bInit = FALSE;
         _makeWorldViewMatrix(NULL, 0.0f, 0.0f);
         setScreenZ(0.0f);
-        _unitVector(_vecMikePos);
+        _vecMikePos.init0(); // MATCH: init0 (no "memory" clobber) - the volatile asm makes cse recompute %hi(_vecMikePos + 8)
         _vecMikePos.z = _fMikeOffsetZ;
     }
     _makeBillboardMatrix(pMatWorld);
@@ -181,8 +174,6 @@ void CWorldEnv::mainProc() {
     _pFrustum->initialize(e, SCREEN_HEIGHT * (1.0f / 512.0f), 1.0f, getDispFar(), bInit);
     _nWorldScreenTQ = CMainApp::getTickCount();
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/WorldEnv", mainProc__9CWorldEnv);
 
 BOOL CWorldEnv::pushCamera(CCamera& inCamera) {
     INT i;
