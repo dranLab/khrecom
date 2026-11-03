@@ -1,11 +1,6 @@
 #include "Game/Collision/CollUtilA.h"
 
-// PARTIAL: from System/Coord.h
-void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
-FLOAT InnerProduct(const FVECTOR& v0);
-void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+#include "System/Coord.h"
 
 INT CCollUtil::_detectActorTrapXZ(const ETMoveData& moveData, const EventTrapData& trapData) {
     FVECTOR* pVert;

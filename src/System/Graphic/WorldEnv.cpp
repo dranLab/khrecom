@@ -19,16 +19,9 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-// PARTIAL: from System/Coord.h and the sce libraries
-void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
-void ViewClipMatrix(FMATRIX& m, FLOAT scrw, FLOAT scrh, FLOAT scrz, FLOAT fNear, FLOAT fFar);
+#include "System/Coord.h"
+// from the sce libraries
 void RotTransPers(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
-void Normalize(FVECTOR& v0, const FVECTOR& v1);
-void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void ITOF0Vector(FVECTOR& v0, const IVECTOR& v1);
-void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
 extern "C" {
 float atan2f(float y, float x);
 float tanf(float x);
@@ -83,20 +76,6 @@ static inline void _setViewScreenMatrix(FLOAT fInScrz, FLOAT fInAx, FLOAT fInAy,
     sceVu0ViewScreenMatrix(_matViewScreen, fInScrz, fInAx, fInAy, 2048.0f, 2048.0f, 1.0f, 16777000.0f, 0.1f, fInFar);
 }
 
-// PARTIAL: from System/Coord.h (names unknown)
-static inline void _setVector(FVECTOR& v, FLOAT x, FLOAT y, FLOAT z, FLOAT w) {
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    v.w = w;
-}
-static inline void _setVector(IVECTOR& v, INT x, INT y, INT z, INT w) {
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    v.w = w;
-}
-
 static inline void _cameraMatrix(FMATRIX& matOut, FVECTOR& vInPos, FVECTOR& vInZd, FVECTOR& vInYd, FVECTOR& vInRot) {
     FMATRIX matWork;
     FVECTOR vecDir;
@@ -128,11 +107,11 @@ void CWorldEnv::initialize() {
     setFogParam(300.0f, 500.0f, 255.0f, 0.0f);
     _fDispFar = 520.0f;
 
-    _setVector(_ivecFogColor, 0, 0, 0, 0);
-    _setVector(_vecFixCameraPos, 0.0f, -1.0f, -4.0f, 0.0f);
-    _setVector(_vecFixCameraZd, 0.0f, 0.0f, 1.0f, 1.0f);
-    _setVector(_vecFixCameraYd, 0.0f, 1.0f, 0.0f, 1.0f);
-    _setVector(_vecFixCameraRot, 0.0f, 0.0f, 3.1415927f, 0.0f);
+    _ivecFogColor.set(0, 0, 0, 0);
+    _vecFixCameraPos.set(0.0f, -1.0f, -4.0f, 0.0f);
+    _vecFixCameraZd.set(0.0f, 0.0f, 1.0f, 1.0f);
+    _vecFixCameraYd.set(0.0f, 1.0f, 0.0f, 1.0f);
+    _vecFixCameraRot.set(0.0f, 0.0f, 3.1415927f, 0.0f);
 
     _fScreenZ = 0.0f;
     _fDefScreenZ = 0.0f;

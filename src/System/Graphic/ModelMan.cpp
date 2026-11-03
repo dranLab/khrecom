@@ -17,9 +17,8 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-// PARTIAL: from System/Coord.h and the sce libraries
-void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
-void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+#include "System/Coord.h"
+// from the sce libraries
 extern "C" void sceVu0InversMatrix(FMATRIX& m0, const FMATRIX& m1);
 
 

@@ -7,10 +7,8 @@ float atan2f(float y, float x);
 void sceVu0InterVector(float* v0, float* v1, float* v2, float t);
 }
 
-// PARTIAL: from System/Coord.h and System/Math3D.h
-void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void MulVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void Normalize(FVECTOR& v0, const FVECTOR& v1);
+#include "System/Coord.h"
+// from System/Math3D.h
 namespace Math3D {
 FLOAT PointToPointDistance(const FVECTOR& inP0, const FVECTOR& inP1);
 }

@@ -29,16 +29,7 @@ inline void _emptyStringPlaceholder1() { /* MATCH: placeholder: an inline functi
 #include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
 
-/* PARTIAL: from System/Coord.h */
-void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
-void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
-void DivVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
-void Normalize(FVECTOR& v0, const FVECTOR& v1);
-void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
-void FTOI4Vector(IVECTOR& v0, const FVECTOR& v1);
+#include "System/Coord.h"
 extern "C" {
 void sceVu0CameraMatrix(float m[4][4], float p[4], float zd[4], float yd[4]);
 void sceVu0UnitMatrix(float m[4][4]);
