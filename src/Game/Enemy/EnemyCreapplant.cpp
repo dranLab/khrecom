@@ -130,7 +130,7 @@ void CRootNeedle::lastUpdate() {
 }
 
 CEnemyCreapplant::CEnemyCreapplant(CTask* inParent) : CHeartless(inParent, 0, 0) {
-    setBtlEnemyFlag(0x8200108000ULL);
+    setBattleEnemyFlag(0x8200108000ULL, 0);
 }
 
 CEnemyCreapplant::~CEnemyCreapplant() {}

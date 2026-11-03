@@ -25,7 +25,7 @@ static CHAR* HpAbsorbMotion = "e014_051";
 
 CEnemySearchghost::CEnemySearchghost(CTask* inParent) : CHeartless(inParent, 0, 0) {
     setEntityFlag(0x80, 0);
-    setBtlEnemyFlag(0x100);
+    setBattleEnemyFlag(0x100, 0);
     m_hAbsorb = 0;
 }
 
@@ -63,7 +63,7 @@ void CEnemySearchghost::beginStateAttack2() {
 }
 
 void CEnemySearchghost::stateAttack2() {
-    if (isBtlEnemyFlag(0x40)) {
+    if (isHitAttack()) {
         FVECTOR pos;
         CEffectMan::killEffect(m_hAbsorb, 0.0f);
         getLockOnPos(pos);

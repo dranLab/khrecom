@@ -68,29 +68,29 @@ CHeartless::~CHeartless() {}
 
 BOOL CHeartless::initalize(INT inGroupID, INT inRsrcID, UINT iFlag) {
     if (!CBattleEnemy::initalize(inGroupID, inRsrcID, iFlag)) return FALSE;
-    if (!isBtlEnemyFlag(0x100)) m_pMove->enableGravity(TRUE);
+    if (!isFly()) m_pMove->enableGravity(TRUE);
     return TRUE;
 }
 
 BOOL CHeartless::startCardBattle() {
-    clearBtlEnemyFlag(0x802);
+    setBattleEnemyFlag(0, 0x802);
     CardBattle::CCardBattle* cb = (CardBattle::CCardBattle*)CTaskMan::getSysTask(22);
 #line 115
     ASSERT(cb);
     INT num = randomBattleCardNumber();
-    if (!isBtlEnemyFlag(0x8000000) && num < CardBattle::CCardBattle::getPlayingCardPoint(1) &&
+    if (!isAlwaysSetCard() && num < CardBattle::CCardBattle::getPlayingCardPoint(1) &&
         RND::genrand_int31() % 20) {
-        setBtlEnemyFlag(2);
-        clearBtlEnemyFlag(0x200);
+        setBattleEnemyFlag(2, 0);
+        setBattleEnemyFlag(0, 0x200);
         return FALSE;
     }
     if (!cb->setEnemyCard(getHandle(), *(INT*)((BYTE*)this + 0x240), num)) {
-        setBtlEnemyFlag(2);
-        clearBtlEnemyFlag(0x200);
+        setBattleEnemyFlag(2, 0);
+        setBattleEnemyFlag(0, 0x200);
         onCardBattleFailed();
         return FALSE;
     }
-    setBtlEnemyFlag(1);
+    setBattleEnemyFlag(1, 0);
     return TRUE;
 }
 
@@ -114,14 +114,14 @@ void CHeartless::aiCardBattle() {
     if (DebugWork::g_dw.enemy.uiFlag & 8) {
         for (INT i = 0; i < getEnemyParam()->iActCount; i++) {
             if (getEnemyParam()->pActs[i].iActNo == DebugWork::g_dw.enemy.sActNo) {
-                setBtlEnemyFlag(0x200);
+                setBattleEnemyFlag(0x200, 0);
                 setAttackState_(DebugWork::g_dw.enemy.sActNo + 2);
                 return;
             }
         }
         return;
     }
-    setBtlEnemyFlag(0x200);
+    setBattleEnemyFlag(0x200, 0);
     setAttackState(act[RND::genrand_int31() % count]);
 }
 
@@ -146,7 +146,7 @@ void CHeartless::commonMove() {
     case 0:
         if (canRotMove()) {
             changeRotMoveState_();
-            setBtlEnemyFlag(0x80000000);
+            setBattleEnemyFlag(0x80000000, 0);
             m_fRot = 1.0f;
             break;
         }
@@ -167,7 +167,7 @@ void CHeartless::commonMove() {
             changeHeartlessMotion_(m_iWalkMotIndex);
             m_iStep = 5;
             m_fRot = 1.0f;
-            setBtlEnemyFlag(0x80000000);
+            setBattleEnemyFlag(0x80000000, 0);
             break;
         }
         if (m_pMove->getCollisionFlag() & 0xA) {
@@ -241,7 +241,7 @@ void CHeartless::commonMove() {
             v.z = vel.z;
             m_pMove->setVel(v);
             if (calcDistanceXZSq(_ref(g_pPlayer)) > 16.0f) {
-                clearBtlEnemyFlag(0x80000000);
+                setBattleEnemyFlag(0, 0x80000000);
                 changeIdlingState_();
             }
         }
@@ -268,7 +268,7 @@ void CHeartless::commonMove() {
 }
 
 void CHeartless::commonMoveEnd() {
-    clearBtlEnemyFlag(0x80000000);
+    setBattleEnemyFlag(0, 0x80000000);
 }
 
 void CHeartless::commonFlyInit(const CHAR* inIdling, const CHAR* inWalk, FLOAT inRandMin, FLOAT inRandMax) {
@@ -287,7 +287,7 @@ void CHeartless::commonFly() {
     case 0:
         if (canRotMove() && getHeight() < 3.5f) {
             changeRotMoveState_();
-            setBtlEnemyFlag(0x80000000);
+            setBattleEnemyFlag(0x80000000, 0);
             m_fRot = 1.0f;
             break;
         }
@@ -307,7 +307,7 @@ void CHeartless::commonFly() {
             changeHeartlessMotion_(m_iWalkMotIndex);
             m_iStep = 5;
             m_fRot = 1.0f;
-            setBtlEnemyFlag(0x80000000);
+            setBattleEnemyFlag(0x80000000, 0);
             break;
         }
         if (getTimer() <= 0 || arriveTarget(m_vAimPos, (m_fSpeed + 0.1f) * getFrameRateF())) {
@@ -354,7 +354,7 @@ void CHeartless::commonFly() {
             v.y = 0.0f;
             m_pMove->setVel(v);
             if (calcDistanceXZSq(_ref(g_pPlayer)) > 16.0f) {
-                clearBtlEnemyFlag(0x80000000);
+                setBattleEnemyFlag(0, 0x80000000);
                 changeIdlingState_();
             }
         }
@@ -381,7 +381,7 @@ void CHeartless::commonFly() {
 }
 
 void CHeartless::commonFlyEnd() {
-    clearBtlEnemyFlag(0x80000000);
+    setBattleEnemyFlag(0, 0x80000000);
 }
 
 void CHeartless::randAimPos(FVECTOR& outPos, FLOAT inRange) {

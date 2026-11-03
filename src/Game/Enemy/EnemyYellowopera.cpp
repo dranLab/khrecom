@@ -38,7 +38,7 @@ static CHAR* RushSpeedParamName = "RushSpeed";
 
 CEnemyYellowopera::CEnemyYellowopera(CTask* inParent) : CHeartless(inParent, 0, 0) {
     setEntityFlag(0x80, 0);
-    setBtlEnemyFlag(0x100);
+    setBattleEnemyFlag(0x100, 0);
 }
 
 CEnemyYellowopera::~CEnemyYellowopera() {}
@@ -117,7 +117,7 @@ void CEnemyYellowopera::stateAttack2() {
         }
         break;
     case 1:
-        if (getTimer() <= 0 || isBtlEnemyFlag(0x40) || m_pMove->isGround() || m_pMove->isWall()) {
+        if (getTimer() <= 0 || isHitAttack() || m_pMove->isGround() || m_pMove->isWall()) {
             changeMotionFileName(Yellowopera::RushAttackEndMotion, 0, FALSE, -1, 0, 0);
             clearSpeed();
             m_iStep++;

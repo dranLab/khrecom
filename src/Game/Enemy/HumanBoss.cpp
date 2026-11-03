@@ -721,7 +721,7 @@ void CHumanBoss::aiCardBattle() {
     }
 #line 762
     ASSERT(m_pCardData);
-    clearBtlEnemyFlag(0x82);
+    setBattleEnemyFlag(0, 0x82);
     if (m_pCardRevolver->isEnableCharge()) {
         if (!isStartRollDeck()) {
             setHumanBossFlag(0x10, 0);
@@ -908,7 +908,7 @@ BOOL CHumanBoss::reloadCardProc() {
             m_iRemainCardNum = num;
         }
     }
-    setBtlEnemyFlag(0x80);
+    setBattleEnemyFlag(0x80, 0);
     return TRUE;
 }
 
@@ -1395,7 +1395,7 @@ BOOL CHumanBoss::setPlayCard(INT inState) {
         return FALSE;
     }
     setAttackState_(inState);
-    setBtlEnemyFlag(0x201);
+    setBattleEnemyFlag(0x201, 0);
     setHumanBossFlag(0, 0xb0);
     return TRUE;
 }
@@ -1404,7 +1404,7 @@ BOOL CHumanBoss::setPlayStock(INT inState) {
     if (!m_pCardRevolver->setPlayStock(0, 0)) {
         return FALSE;
     }
-    setBtlEnemyFlag(0x201);
+    setBattleEnemyFlag(0x201, 0);
     setAttackState_(inState);
     m_pDoBattleAct = m_pUseStock;
     clearStockTotalNumber();

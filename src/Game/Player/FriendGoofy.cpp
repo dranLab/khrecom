@@ -51,8 +51,8 @@ static LPCSTR g_szBoneShield = "shield";
 unsigned char g_GoofyAttackID[4] = { 86, 100, 101, 0 };
 
 static inline BOOL _isCatchable(CBattleEnemy* pTarget) {
-    if (pTarget->isBtlEnemyFlag(0x80000)) return 0;
-    if (pTarget->isBtlEnemyFlag(0x100000)) return 0;
+    if (pTarget->isNoDmgResponse()) return 0;
+    if (pTarget->isNoBigDamage()) return 0;
     return 1;
 }
 
@@ -251,7 +251,7 @@ INT CFriendGoofy::exeGoofySmash() {
     case 1:
         if (m_pAttack) m_pAttack->setEnemyPos(m_pPlayer->getPos());
         if (m_uiFlag & 0x800) {
-            if (pTarget && _isCatchable(pTarget) && !pTarget->isBtlEnemyFlag(0x20000)) {
+            if (pTarget && _isCatchable(pTarget) && !pTarget->isBind()) {
                 m_iSubState = 3;
                 setTimer(3000);
                 m_pPlayer->getPlayerCamera()->changeNowPlayer(m_pPlayer->getHandle(), m_hTarget);

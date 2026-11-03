@@ -69,7 +69,7 @@ void CEnemyBlackfungus::stateMain() {
         if (m_bMetal) {
             if (m_tqMetalTimer > 0) break;
             changeMotionFileName(Blackfungus::ReturnMotion, 0, FALSE, -1, 0, 0);
-            clearBtlEnemyFlag(0x10);
+            setBattleEnemyFlag(0, 0x10);
             m_iBlackfungusStep = 3;
             clearSpeed();
         } else if (RND::genrand_int31() % 100 == 0) {
@@ -80,9 +80,9 @@ void CEnemyBlackfungus::stateMain() {
         break;
     case 1:
         if (getMotionCurrentTime() >= 3850) {
-            clearBtlEnemyFlag(0x10);
-            setBtlEnemyFlag(0x2000);
-            clearBtlEnemyFlag(0x10);
+            setBattleEnemyFlag(0, 0x10);
+            setBattleEnemyFlag(0x2000, 0);
+            setBattleEnemyFlag(0, 0x10);
             m_pBodyColl->setMuteki(0);
             m_pBodyColl->setMuteki(1);
             m_pBodyColl->setMuteki(2);
@@ -95,7 +95,7 @@ void CEnemyBlackfungus::stateMain() {
         }
     case 2:
         if (isMotionEnd()) {
-            setBtlEnemyFlag(0x10);
+            setBattleEnemyFlag(0x10, 0);
             commonMoveInit(_ref(Blackfungus::IdlingMotion), _ref(Blackfungus::MoveMotion), 1.5f);
             m_iBlackfungusStep = 0;
             m_tqMetalTimer = (TIMEQ)(getExtraParam(_ref(Blackfungus::MetalmodeParamName)) * 60.0f * 50.0f);
@@ -104,8 +104,8 @@ void CEnemyBlackfungus::stateMain() {
     case 3:
         if (getMotionCurrentTime() >= 2750) {
             setDispOffFlag(2, 1);
-            setBtlEnemyFlag(0x10);
-            clearBtlEnemyFlag(0x2000);
+            setBattleEnemyFlag(0x10, 0);
+            setBattleEnemyFlag(0, 0x2000);
             m_pBodyColl->setMuteki(-1);
             m_bMetal = FALSE;
             m_iBlackfungusStep = 4;
@@ -121,8 +121,8 @@ void CEnemyBlackfungus::stateMain() {
 
 void CEnemyBlackfungus::endStateMain() {
     if (!m_bMetal) {
-        setBtlEnemyFlag(0x10);
-        clearBtlEnemyFlag(0x2000);
+        setBattleEnemyFlag(0x10, 0);
+        setBattleEnemyFlag(0, 0x2000);
     }
 }
 
@@ -143,7 +143,7 @@ void CEnemyBlackfungus::beginStateAttack2() {
 }
 
 void CEnemyBlackfungus::stateAttack2() {
-    if (isBtlEnemyFlag(0x40)) {
+    if (isHitAttack()) {
         m_bPoisonTouch = TRUE;
     }
     switch (m_iStep) {

@@ -63,7 +63,7 @@ void CEnemyWightnight::stateAttack1() {
     case 0:
         turnToPlayerY(0.17453292f);
         if (isMotionEnd()) {
-            if (!isBtlEnemyFlag(0x20000) && RND::genrand_int31() % 10 == 0) {
+            if (!isBind() && RND::genrand_int31() % 10 == 0) {
                 changeMotionFileName(Wightnight::JumpStartMotion, 0, FALSE, -1, 0, 0);
                 m_iStep = 1;
             } else {

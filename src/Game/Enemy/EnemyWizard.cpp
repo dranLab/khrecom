@@ -52,7 +52,7 @@ static const FVECTOR WeaponOffset = {{0.55f, 0.0f, 0.0f, 1.0f}};
 
 CEnemyWizard::CEnemyWizard(CTask* inParent) : CHeartless(inParent, 0, 0) {
     setEntityFlag(0x80, 0);
-    setBtlEnemyFlag(0x100);
+    setBattleEnemyFlag(0x100, 0);
 }
 
 CEnemyWizard::~CEnemyWizard() {}

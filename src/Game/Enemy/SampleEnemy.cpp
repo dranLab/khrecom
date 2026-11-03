@@ -30,7 +30,7 @@ BOOL CSampleEnemy::initalize(INT inGroupID, INT inRsrcID) {
 }
 
 void CSampleEnemy::beginStateMain() {
-    clearBtlEnemyFlag(0x10);
+    setBattleEnemyFlag(0, 0x10);
     changeMotion(1, 0, FALSE, -1, 0, 0);
 }
 

@@ -232,14 +232,14 @@ void CEnemyLoudness::aiCardBattle() {
     if (DebugWork::g_dw.enemy.uiFlag & 8) {
         for (INT i = 0; i < param->iActCount; i++) {
             if (param->pActs[i].iActNo == DebugWork::g_dw.enemy.sActNo) {
-                setBtlEnemyFlag(0x200);
+                setBattleEnemyFlag(0x200, 0);
                 setAttackState(DebugWork::g_dw.enemy.sActNo + 2);
                 return;
             }
         }
         return;
     }
-    setBtlEnemyFlag(0x200);
+    setBattleEnemyFlag(0x200, 0);
     setAttackState(act[RND::genrand_int31() % count] + 2);
 }
 

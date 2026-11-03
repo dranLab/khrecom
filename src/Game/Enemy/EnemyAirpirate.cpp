@@ -30,7 +30,7 @@ static CHAR* ChargePunchMotion = "e022_051";
 
 CEnemyAirpirate::CEnemyAirpirate(CTask* inParent) : CHeartless(inParent, 0, 0) {
     setEntityFlag(0x80, 0);
-    setBtlEnemyFlag(0x100);
+    setBattleEnemyFlag(0x100, 0);
     setHeartlessFlag(1, 0);
 }
 
@@ -119,14 +119,14 @@ void CEnemyAirpirate::aiCardBattle() {
     if (DebugWork::g_dw.enemy.uiFlag & 8) {
         for (INT i = 0; i < param->iActCount; i++) {
             if (param->pActs[i].iActNo == DebugWork::g_dw.enemy.sActNo) {
-                setBtlEnemyFlag(0x200);
+                setBattleEnemyFlag(0x200, 0);
                 setAttackState(DebugWork::g_dw.enemy.sActNo + 2);
                 return;
             }
         }
         return;
     }
-    setBtlEnemyFlag(0x200);
+    setBattleEnemyFlag(0x200, 0);
     setAttackState(act[RND::genrand_int31() % count] + 2);
 }
 

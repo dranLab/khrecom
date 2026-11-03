@@ -59,7 +59,7 @@ void CEnemySoldier::stateAttack1() {
     case 0:
         turnToPlayerY(0.17453292f);
         if (isMotionEnd()) {
-            if (!isBtlEnemyFlag(0x20000) && RND::genrand_int31() % 10 == 0) {
+            if (!isBind() && RND::genrand_int31() % 10 == 0) {
                 changeMotionFileName(Soldier::JumpStartMotion, 0, FALSE, -1, 0, 0);
                 m_iStep = 1;
             } else {
@@ -121,7 +121,7 @@ void CEnemySoldier::stateAttack2() {
     case 1:
         turnToPlayerY(0.17453292f);
         m_pMove->calcVelocityXZ(getExtraParam(Soldier::KickSpeedParamName));
-        if (isBtlEnemyFlag(0x40) || getMotionCurrentTime() >= 5700) {
+        if (isHitAttack() || getMotionCurrentTime() >= 5700) {
             m_iStep = 2;
         }
     case 2:
