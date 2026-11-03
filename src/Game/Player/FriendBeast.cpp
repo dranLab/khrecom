@@ -32,8 +32,8 @@ namespace Friend {
 unsigned char g_BeastAttackID[4] = { 91, 113, 114, 0 };
 
 static inline BOOL _isCatchable(CBattleEnemy* pTarget) {
-    if (pTarget->isBtlEnemyFlag(0x80000)) return 0;
-    if (pTarget->isBtlEnemyFlag(0x100000)) return 0;
+    if (pTarget->isNoDmgResponse()) return 0;
+    if (pTarget->isNoBigDamage()) return 0;
     return 1;
 }
 
@@ -88,7 +88,7 @@ void CFriendBeast::stateAction1() {
     if (m_iSubState == 0) {
         if (m_pAttack) m_pAttack->setEnemyPos(m_pPlayer->getPos());
         if (m_uiFlag & 0x800) {
-            if (pTarget && _isCatchable(pTarget) && !pTarget->isBtlEnemyFlag(0x20000)) {
+            if (pTarget && _isCatchable(pTarget) && !pTarget->isBind()) {
                 setTimer(9000);
                 m_iSubState++;
                 m_pPlayer->getPlayerCamera()->changeNowPlayer(m_pPlayer->getHandle(), m_hTarget);
@@ -170,7 +170,7 @@ void CFriendBeast::stateAction2() {
         pTarget->getLockOnPos(m_vAimPos);
         if (m_iSubState == 0) {
             if (m_uiFlag & 0x800) {
-                if (_isCatchable(pTarget) && !pTarget->isBtlEnemyFlag(0x20000)) {
+                if (_isCatchable(pTarget) && !pTarget->isBind()) {
                     setTimer(9000);
                     m_iSubState++;
                     m_pPlayer->getPlayerCamera()->changeNowPlayer(m_pPlayer->getHandle(), m_hTarget);

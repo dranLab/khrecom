@@ -725,8 +725,8 @@ void CBattleEnemyManager::startNearestCardBattleEnemy_() {
         CTask* task = pContainer->getValue();
         if (task && task->getTypeID() == CLASS_TYPE_CBATTLE_ENEMY) {
             CBattleEnemy* enemy = (CBattleEnemy*)task;
-            if (enemy->isPermissionCardBattle()) {
-                enemy->clearBtlEnemyFlag(0x200);
+            if (enemy->isPutCardReady()) {
+                enemy->setBattleEnemyFlag(0, 0x200);
                 FLOAT dist = enemy->calcDistanceSq(_ref(g_pPlayer));
                 if (dist < nearestDist) {
                     nearestEnemy = enemy;
@@ -736,7 +736,7 @@ void CBattleEnemyManager::startNearestCardBattleEnemy_() {
         }
     }
     if (nearestEnemy) {
-        nearestEnemy->setBtlEnemyFlag(0x800);
+        nearestEnemy->setBattleEnemyFlag(0x800, 0);
         setDidCardBattleEnemy(nearestEnemy->getHandle());
     }
 }

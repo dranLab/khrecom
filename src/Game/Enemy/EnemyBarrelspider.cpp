@@ -99,7 +99,7 @@ void CEnemyBarrelspider::stateAttack2() {
     case 2:
         turnToPlayerY(0.17453292f);
         m_pMove->calcVelocityXZ(m_fSpeed * 3.0f);
-        if (isBtlEnemyFlag(0x40)) {
+        if (isHitAttack()) {
             changeMotionFileName(Barrelspider::BarrelMotion, 0, FALSE, -1, 0, 0);
             setTimer(100);
             clearSpeed();

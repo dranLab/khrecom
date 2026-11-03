@@ -78,10 +78,10 @@ void CEnemyNeoshadow::updateAfter() {
 
 void CEnemyNeoshadow::beginStateAppear() {
     setEntityFlag(0, 1);
-    if (isBtlEnemyFlag(8) || isBtlEnemyFlag(0x20000000000ULL)) {
+    if (isStartFaint() || isStartSleep()) {
         setEntityFlag(0x10000, 0);
         changeMotion(getEnemyParam()->iFaintMotionIndex[1], 0, FALSE, -1, 0, 0);
-        if (isBtlEnemyFlag(8)) {
+        if (isStartFaint()) {
             setTimer(15000);
             setBadStatusEffect(1, 0.0f);
         } else {
@@ -99,7 +99,7 @@ void CEnemyNeoshadow::beginStateAppear() {
 }
 
 void CEnemyNeoshadow::stateAppear() {
-    if (isBtlEnemyFlag(8) || isBtlEnemyFlag(0x20000000000ULL)) {
+    if (isStartFaint() || isStartSleep()) {
         switch (m_iStep) {
         case 0:
             if (getTimer() <= 0) {
@@ -136,14 +136,14 @@ void CEnemyNeoshadow::stateMain() {
             randAimPos(m_vAimPos, m_fRandMax);
             m_iCount = 0;
             m_iStep = 1;
-        } else if (!isBtlEnemyFlag(0x800) && !isBtlEnemyFlag(1)) {
+        } else if (!isStartCardBattle() && !isCardBattle()) {
             if (rand() % (INT)getExtraParam(Neoshadow::DigRateParamName) == 0) {
                 changeMotionFileName(Neoshadow::DigMotion, 0, FALSE, -1, 0, 0);
                 userBodyCollOff(-1);
                 userBodyCollOffBody(-1);
                 TIMEQ tq = getMotionTotalTime();
                 setupDig_(1, tq);
-                clearBtlEnemyFlag(0x10);
+                setBattleEnemyFlag(0, 0x10);
                 m_iStep = 2;
             }
         }
@@ -209,7 +209,7 @@ void CEnemyNeoshadow::stateMain() {
             changeMotionFileName(Neoshadow::IdlingMotion, 0, FALSE, -1, 0, 0);
             userBodyCollOn(-1);
             m_iStep = 0;
-            setBtlEnemyFlag(0x10);
+            setBattleEnemyFlag(0x10, 0);
         }
         break;
     }
@@ -277,7 +277,7 @@ void CEnemyNeoshadow::stateAttack2() {
     case 3:
         turnToPlayerY(0.08726646f);
         m_pMove->calcVelocityXZ(0.125f);
-        if (isBtlEnemyFlag(0x40) || getTimer() <= 0) {
+        if (isHitAttack() || getTimer() <= 0) {
             changeMotionFileName(Neoshadow::ShadowOut3Motion, 0, FALSE, -1, 0, 0);
             clearSpeed();
             m_iStep++;

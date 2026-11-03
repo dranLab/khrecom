@@ -38,7 +38,7 @@ static CHAR* Attack2Motion = "e013_051";
 
 CEnemyGargoyle::CEnemyGargoyle(CTask* inParent) : CHeartless(inParent, 0, 0) {
     setEntityFlag(0x80, 0);
-    setBtlEnemyFlag(0x100);
+    setBattleEnemyFlag(0x100, 0);
 }
 
 CEnemyGargoyle::~CEnemyGargoyle() {}

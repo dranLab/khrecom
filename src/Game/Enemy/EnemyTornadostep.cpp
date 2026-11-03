@@ -51,7 +51,7 @@ void CEnemyTornadostep::stateMain() {
         clearSpeed();
         changeMotionFileName(Tornadostep::PropellerChargeMotion, 0, TRUE, -1, 0, 0);
         m_pMove->enableGravity(FALSE);
-        clearBtlEnemyFlag(0x10);
+        setBattleEnemyFlag(0, 0x10);
         ((FVECTOR&)getRot()).y = calcDirection(target);
         m_iPropellerStep++;
         break;
@@ -81,7 +81,7 @@ void CEnemyTornadostep::stateMain() {
     case 3:
         if (isMotionEnd()) {
             clearSpeed();
-            setBtlEnemyFlag(0x10);
+            setBattleEnemyFlag(0x10, 0);
             m_pMove->enableGravity(TRUE);
             commonMoveInit(Tornadostep::IdlingMotion, Tornadostep::MoveMotion, 2.0f);
             m_iPropellerStep = 0;

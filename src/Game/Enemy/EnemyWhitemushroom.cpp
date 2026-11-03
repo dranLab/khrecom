@@ -81,7 +81,7 @@ void CEnemyWhitemushroom::onInvalid() {
     CCollBody* hit = m_pBodyColl->getHitCollBody();
     UINT i;
     ASSERT(hit);
-    if (!isBtlEnemyFlag(0x80000)) {
+    if (!isNoDmgResponse()) {
         if (hit->getDamageKind() == 14) return;
         changeBattleEnemyState(11);
     }

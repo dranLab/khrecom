@@ -27,7 +27,7 @@ static CHAR* BiteSpeedParamName = "BiteSpeed";
 
 CEnemyDarkball::CEnemyDarkball(CTask* inParent) : CHeartless(inParent, 0, 0) {
     setEntityFlag(0x80, 0);
-    setBtlEnemyFlag(0x100);
+    setBattleEnemyFlag(0x100, 0);
 }
 
 CEnemyDarkball::~CEnemyDarkball() {}
@@ -66,7 +66,7 @@ void CEnemyDarkball::stateAttack1() {
     case 1:
         turnToPlayer(0.17453292f);
         m_pMove->calcVelocity(getExtraParam(Darkball::BiteSpeedParamName));
-        if (getTimer() <= 0 || isBtlEnemyFlag(0x40)) {
+        if (getTimer() <= 0 || isHitAttack()) {
             clearSpeed();
             changeMotionFileName(Darkball::BiteAttack3Motion, 0, FALSE, -1, 0, 0);
             m_iStep++;

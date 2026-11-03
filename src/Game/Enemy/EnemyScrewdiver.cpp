@@ -27,7 +27,7 @@ static CHAR* Attack2Motion = "e019_051";
 
 CEnemyScrewdiver::CEnemyScrewdiver(CTask* inParent) : CHeartless(inParent, 0, 0) {
     setEntityFlag(0x80, 0);
-    setBtlEnemyFlag(0x100);
+    setBattleEnemyFlag(0x100, 0);
 }
 
 CEnemyScrewdiver::~CEnemyScrewdiver() {}

@@ -88,7 +88,7 @@ void CEnemyPowerwild::stateAttack2() {
     case 0:
         turnToPlayerY(0.17453292f);
         if (isMotionEnd()) {
-            if (!isBtlEnemyFlag(0x20000) && RND::genrand_int31() % 10 == 0) {
+            if (!isBind() && RND::genrand_int31() % 10 == 0) {
                 changeMotionFileName(Powerwild::JumpStartMotion, 0, FALSE, -1, 0, 0);
                 m_iStep++;
             } else {

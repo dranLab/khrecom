@@ -71,7 +71,7 @@ void CEnemyPirate::stateAttack2() {
     case 0:
         turnToPlayerY(0.08726646f);
         if (isMotionEnd()) {
-            if (!isBtlEnemyFlag(0x20000) && RND::genrand_int31() % 10 == 0) {
+            if (!isBind() && RND::genrand_int31() % 10 == 0) {
                 changeMotionFileName(Pirate::JumpStartMotion, 0, FALSE, -1, 0, 0);
                 m_pMove->calcOrbitVelocityFromDistance(1.2217305f, 3.0f);
                 FVECTOR vel = m_pMove->getVel();

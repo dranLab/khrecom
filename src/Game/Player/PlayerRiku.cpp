@@ -891,7 +891,7 @@ void CPlayerRiku::exeStockSkill() {
         } else {
             pTarget = NULL;
         if (m_hMark > 0) pTarget = (CBattleEnemy*)CTaskMan::getTask(m_hMark);
-            if (pTarget && pTarget->isActiveTarget() && !pTarget->isBtlEnemyFlag(0x20000)) {
+            if (pTarget && pTarget->canFlick() && !pTarget->isBind()) {
                 pos = pTarget->getPos();
                 vel = pTarget->getVel();
                 if (0.0f < vel.y && 4.0f < pos.y - m_vJumpStartPos.y) {
@@ -924,7 +924,7 @@ void CPlayerRiku::exeStockSkill() {
         if (m_hMark > 0) pTarget = (CBattleEnemy*)CTaskMan::getTask(m_hMark);
         if (pTarget) {
             pTarget->getLockOnPos(m_vMarkPos);
-            if (pTarget->isActiveTarget() && !pTarget->isBtlEnemyFlag(0x20000)) {
+            if (pTarget->canFlick() && !pTarget->isBind()) {
                 vel = pTarget->getVel();
                 if (vel.y < 0.0f) {
                     pos = pTarget->getOldPos();
@@ -970,7 +970,7 @@ void CPlayerRiku::exeStockSkill() {
         if (m_hMark > 0) pTarget = (CBattleEnemy*)CTaskMan::getTask(m_hMark);
         if (pTarget) {
             pTarget->getLockOnPos(m_vMarkPos);
-            if (!m_bIsAttackHit && pTarget->isActiveTarget() && !pTarget->isBtlEnemyFlag(0x20000)) {
+            if (!m_bIsAttackHit && pTarget->canFlick() && !pTarget->isBind()) {
                 vel = pTarget->getVel();
                 if (vel.y < 0.0f) {
                     pos = pTarget->getOldPos();

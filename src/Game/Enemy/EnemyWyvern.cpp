@@ -57,7 +57,7 @@ static CHAR* RushAtkSpdParamName = "RushAtkSpd";
 
 CEnemyWyvern::CEnemyWyvern(CTask* inParent) : CHeartless(inParent, 0, 0) {
     setEntityFlag(0x80, 0);
-    setBtlEnemyFlag(0x100);
+    setBattleEnemyFlag(0x100, 0);
     m_fBodyRviseCoefficient = 0.1f;
     m_fHomingDeg = 10.0f;
 }
@@ -87,7 +87,7 @@ void CEnemyWyvern::stateMain() {
             changeMotion(m_iWalkStartMotIndex, 0, FALSE, -1, 0, 0);
             FVECTOR vVel;
             vVel.set(0.0f, 0.01f, 0.0f);
-            setBtlEnemyFlag(0x800000000ULL);
+            setBattleEnemyFlag(0x800000000ULL, 0);
             m_pMove->setVel(vVel);
             m_iRotFlyStep = 1;
         } else {
@@ -137,7 +137,7 @@ void CEnemyWyvern::stateMain() {
             commonFlyInit(Wyvern::IdlingMotion, Wyvern::MoveLoopMotion, 0.5f, 1.5f);
             changeMotion(m_iIdlingMotIndex, 0, FALSE, -1, 0, 0);
             m_iRotFlyStep = 0;
-            clearBtlEnemyFlag(0x800000000ULL);
+            setBattleEnemyFlag(0, 0x800000000ULL);
         }
         break;
     }
@@ -145,7 +145,7 @@ void CEnemyWyvern::stateMain() {
 
 void CEnemyWyvern::endStateMain() {
     commonFlyEnd();
-    clearBtlEnemyFlag(0x800000000ULL);
+    setBattleEnemyFlag(0, 0x800000000ULL);
 }
 
 void CEnemyWyvern::beginStateAttack1() {
@@ -185,7 +185,7 @@ void CEnemyWyvern::stateAttack1() {
         }
         break;
     case 2:
-        if (isBtlEnemyFlag(0x40)) {
+        if (isHitAttack()) {
             clearSpeed();
             m_iStep++;
             break;

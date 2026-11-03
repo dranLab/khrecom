@@ -27,7 +27,7 @@ static CHAR* Attack2Motion = "e004_051";
 
 CEnemyBluerhapsody::CEnemyBluerhapsody(CTask* inParent) : CHeartless(inParent, 0, 0) {
     setEntityFlag(0x80, 0);
-    setBtlEnemyFlag(0x100);
+    setBattleEnemyFlag(0x100, 0);
     setHeartlessFlag(4, 0);
 }
 

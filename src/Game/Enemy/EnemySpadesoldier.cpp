@@ -139,7 +139,7 @@ void CEnemySpadesoldier::stateAttack2() {
     case 1:
         turnToPlayerY(0.08726646f);
         m_pMove->calcVelocityXZ(m_fSpeed);
-        if (isBtlEnemyFlag(0x40)) {
+        if (isHitAttack()) {
             endCardBattle(NULL, 6000);
         }
         break;

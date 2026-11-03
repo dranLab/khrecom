@@ -97,10 +97,10 @@ void CEnemyShadow::updateAfter() {
 
 void CEnemyShadow::beginStateAppear() {
     setEntityFlag(0, 1);
-    if (isBtlEnemyFlag(8) || isBtlEnemyFlag(0x20000000000ULL)) {
+    if (isStartFaint() || isStartSleep()) {
         setEntityFlag(0x10000, 0);
         changeMotion(getEnemyParam()->iFaintMotionIndex[1], 0, FALSE, -1, 0, 0);
-        if (isBtlEnemyFlag(8)) {
+        if (isStartFaint()) {
             setTimer(15000);
             setBadStatusEffect(1, 0.0f);
         } else {
@@ -117,7 +117,7 @@ void CEnemyShadow::beginStateAppear() {
 }
 
 void CEnemyShadow::stateAppear() {
-    if (isBtlEnemyFlag(8) || isBtlEnemyFlag(0x20000000000ULL)) {
+    if (isStartFaint() || isStartSleep()) {
         switch (m_iStep) {
         case 0:
             if (getTimer() <= 0) {
@@ -169,13 +169,13 @@ void CEnemyShadow::stateMain() {
             randAimPos(m_vAimPos, m_fRandMax);
             m_iCount = 0;
             m_iStep = 1;
-        } else if (!isBtlEnemyFlag(0x800) && !isBtlEnemyFlag(1)) {
+        } else if (!isStartCardBattle() && !isCardBattle()) {
             if (rand() % (INT)getExtraParam("DigRate") == 0) {
                 changeMotionFileName(Shadow::DigMotion, 0, FALSE, -1, 0, 0);
                 bodyCollOff(-1);
                 bodyCollOffBody(-1);
                 setupDig_(1, 1000);
-                clearBtlEnemyFlag(0x10);
+                setBattleEnemyFlag(0, 0x10);
                 m_iStep = 2;
             }
         }
@@ -240,7 +240,7 @@ void CEnemyShadow::stateMain() {
             changeMotionFileName(Shadow::IdlingMotion, 0, FALSE, -1, 0, 0);
             bodyCollOn(-1);
             m_iStep = 0;
-            setBtlEnemyFlag(0x10);
+            setBattleEnemyFlag(0x10, 0);
         }
         break;
     }
@@ -272,7 +272,7 @@ void CEnemyShadow::stateAttack2() {
         turnToPlayerY(0.17453292f);
         if (getMotionCurrentTime() < 1750) break;
         changeMotionFileName(Shadow::JumpAttackMotion, 0, FALSE, -1, 0, 0);
-        if (isBtlEnemyFlag(0x20000)) {
+        if (isBind()) {
             m_iStep = 3;
         } else {
             m_pMove->calcOrbitVelocityFromSpeedY(0.15f, calcDistanceXZ(g_pPlayer) - 0.5f);
