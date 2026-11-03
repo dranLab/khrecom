@@ -1,5 +1,5 @@
 #include "khtypes.h"
-#define FORM_DEBUGWINDOW_FULL /* MATCH: CNakCamera; the original has Gprim.h's strings (PathData.h includes it first) */
+
 
 
 #include "System/Graphic/PathData.h"
