@@ -154,6 +154,24 @@ typedef float (*_FMATRIX_ROWP)[4];
 union FMATRIX {
     _FMATRIX m;
     FVECTOR v[4];
+    struct {
+        FLOAT m00;
+        FLOAT m10;
+        FLOAT m20;
+        FLOAT m30;
+        FLOAT m01;
+        FLOAT m11;
+        FLOAT m21;
+        FLOAT m31;
+        FLOAT m02;
+        FLOAT m12;
+        FLOAT m22;
+        FLOAT m32;
+        FLOAT x;
+        FLOAT y;
+        FLOAT z;
+        FLOAT w;
+    };
     void init(/* parameters unknown */);
     void initWithScale(/* parameters unknown */);
     void initC3(/* parameters unknown */);
