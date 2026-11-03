@@ -4068,9 +4068,11 @@ INT CCamp::setDeckDeck(INT nSetCmd) {
     return 1;
 }
 
-/* Parked: 4 of 1048 lines differ in the last loop: the addu operand order of this + m_nKindCategorySelect * 2 and
-   v0/v1 swapped for the nColSeq != 0x73 compare. tried: without _ref (24 lines), _ref(*(p + i)), _ref(m_nKind)[i],
-   != 0, !i, swapped operand/condition orders, !(a && b); permuter 7 min (4293) and 15 min (9220 candidates), no gain. */
+/* Parked: 3 of 1048 lines differ in the last loop: v0/v1 swapped for the nColSeq != 0x73 compare (nColSeq is spilled;
+   reload loads it into v0 where the original has the 0x73 in v0). The addu order (this + sel * 2) is fixed by
+   `(BYTE*)this + (m_nKindCategorySelect << 1) + 6464` (4 -> 3). tried: without _ref (24 lines), _ref(*(p + i)),
+   _ref(m_nKind)[i], != 0, !i, swapped operand/condition orders, !(a && b); permuter 7 min (4293) and 15 min (9220
+   candidates), no gain. */
 #if 0
 INT CCamp::setDeckInfo(INT nSetCmd) {
     static char* pStrNum[4] = { "%d", "\x81~%02d", "", "--" };
@@ -4309,7 +4311,7 @@ INT CCamp::setDeckInfo(INT nSetCmd) {
         for (INT i = 0; i < 10; i++) {
             p2DSeqCtrl = m_pDeckInfoNumCtrl[i];
             if (!m_nCardInOut && card.m_nKind) {
-                if (_ref(m_nKind[m_nKindCategorySelect]) && (nColSeq != 0x73 || i == 0)) {
+                if (_ref(*(USHORT*)((BYTE*)this + (m_nKindCategorySelect << 1) + 6464)) && (nColSeq != 0x73 || i == 0)) {
                     char chrNum[16];
                     INT nOff = (m_nKind10Tbl[idx][i] == 0);
                     p2DSeqCtrl->enableDisp(TRUE);
