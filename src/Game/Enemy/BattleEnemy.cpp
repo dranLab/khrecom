@@ -1564,7 +1564,7 @@ void CBattleEnemy::beginStateFreeze() {
         } else {
             effect->setScale(BattleEnemy::g_vIceSizeTbl[BattleEnemy::g_byBossIceSizeIndexTbl[idx]]);
         }
-        FLOAT base = effect->getScale().y < effect->getScale().x ? effect->getScale().x : effect->getScale().y;
+        FLOAT base = effect->scale().y < effect->scale().x ? effect->scale().x : effect->scale().y;
         m_pBodyColl->setRadiusScale(base * 0.5f / m_pBodyColl->getLargeRadius());
     }
 }

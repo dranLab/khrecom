@@ -155,7 +155,7 @@ public:
     inline CCoord& Crd(INT nNum) const;
     inline INT getCoordNum() const;
 #ifndef EFFECT_CPP /* MATCH: EFFECT_CPP gate, only for its own unit (tested 2026-11-02) */
-    CCoords* getCoords() { return m_pCrds; } const FVECTOR& getScale() const { return m_vScale; } // PARTIAL: added for Game/Bullet/Bullet (getScale: Game/Enemy/BattleEnemy, name unknown)
+    CCoords* getCoords() { return m_pCrds; } // PARTIAL: added for Game/Bullet/Bullet (Coord.h comes after this header there: no Crd())
     // PARTIAL: added for Game/Player/FriendDonald
     void setScale(FLOAT _x, FLOAT _y, FLOAT _z) { m_vScale.set(_x, _y, _z); }
 #endif
