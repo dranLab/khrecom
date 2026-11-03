@@ -9,7 +9,7 @@
 #include "System/Graphic/DeFocus.h"
 #include "System/Graphic/WorldEnv.h"
 #include "Game/Debug/DebugWork.h"
-#define FORM_DEBUGWINDOW_FULL /* MATCH: the owner sees the full classes (Gprim.h included first) */
+
 #include "Form/DebugWindow.h"
 #include "include_asm.h"
 

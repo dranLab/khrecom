@@ -3,6 +3,9 @@
 
 #include "khtypes.h"
 #include "System/Task.h"
+#include "System/Graphic/Gprim.h"
+#include "System/DebugProcInfo.h"
+#include "System/Graphic/Camera.h"
 
 class CDebugWindow;
 struct DEBUG_WINDOW_TBL;
@@ -36,11 +39,6 @@ struct DEBUG_WINDOW_TBL {
     INT (*pAllFunc)(CDebugWindow* pObj, INT inParam);
 };
 
-/* The full class definitions need System/Graphic/Gprim.h (CTile, CFnt), whose inline functions put strings into
- * .rodata of every includer: only Form/DebugWindow.cpp defines FORM_DEBUGWINDOW_FULL (after including them); other
- * includers see the same layout with the members as padding. */
-#ifdef FORM_DEBUGWINDOW_FULL // MATCH: the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings
-
 struct DEBUG_WINDOW_LINE_BUF {
     CFnt fntString;
     char szString[128];
@@ -54,11 +52,9 @@ struct DEBUG_WINDOW_LINE_CURX {
     UBYTE iMax;
 };
 
-#endif
 
 class CDebugWindow : public CTask {
 private:
-#ifdef FORM_DEBUGWINDOW_FULL // MATCH: the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings
     UINT m_iStatus;
     INT m_iStep;
     INT m_iAnswer;
@@ -85,9 +81,6 @@ private:
     CTile m_gpFrame;
     CTile m_gpTitle;
     CTile m_gpCur;
-#else
-    UBYTE _m_0x40[0x180]; /* 0x040 .. 0x1bc */
-#endif
     static CDebugWindow* m_pInstance;
     static BOOL m_bTopOpen;
 
@@ -99,8 +92,8 @@ public:
     CDebugWindow(CTask* pParent, const DEBUG_WINDOW_TBL& inTbl, INT iTop);
     CDebugWindow(CTask* pParent, const char* pStr);
     CDebugWindow(CDebugWindow* pParent, const char* pStr);
-    virtual void out();
     virtual ~CDebugWindow();
+    virtual void out();
     virtual void main();
     virtual void disp();
     BOOL sendMessage(INT iMes, const DEBUG_WINDOW_TBL* pWin);
@@ -133,7 +126,6 @@ private:
     void init(const DEBUG_WINDOW_TBL& data);
 };
 
-#ifdef FORM_DEBUGWINDOW_FULL // MATCH: the full classes need Gprim.h (CFnt, CTile) and CCamera; Game/Gimmick/GimmickManager's original lacks Gprim.h's strings
 
 class CNakCamera : public CCamera {
 private:
@@ -230,7 +222,6 @@ public:
     }
 };
 
-#endif
 
 // Form/DebugWindowTBL.h in the original
 namespace DWT {
