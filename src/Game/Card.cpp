@@ -294,7 +294,7 @@ BC_PARAM* CCard::m_pBCParam;
 
 CCard::CCard() {
     m_pCardInfo = (CARD_INFO*)CGameWork::progMCW()._cardInfo;
-    m_pCardInfo2 = (CARD_INFO2*)&CGameWork::progMCW2()._cardInfo2_nKeyTotal;
+    m_pCardInfo2 = &CGameWork::progMCW2()._cardInfo2;
     m_pCardInitRsrc = NULL;
     m_pBCParam = NULL;
 }

@@ -1,7 +1,19 @@
-#ifndef GAME_CARD_H
-#define GAME_CARD_H
+#ifndef GAME_CARD_H_STRUCTS
+#define GAME_CARD_H_STRUCTS
 
 #include "khtypes.h"
+
+struct CARD_INFO2 {
+    USHORT _nKeyTotal;
+    char _nKey[4];
+};
+#endif /* GAME_CARD_H_STRUCTS */
+
+/* MATCH: with CARD_H_STRUCTS_ONLY defined, only CARD_INFO2: Game/StorageWork.h's MCWork2 embeds it, and this
+ * header's strings (CCard's inline allocation) are not in all of its includers' originals */
+#if !defined(GAME_CARD_H) && !defined(CARD_H_STRUCTS_ONLY)
+#define GAME_CARD_H
+
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
 #include "System/Debug.h"
@@ -12,11 +24,6 @@ union IVECTOR;
 
 /* MATCH: operator new for CCard::initialize's allocation, declared only: the includers define it themselves */
 inline void* operator new(size_t size, char* msg) throw();
-
-struct CARD_INFO2 {
-    USHORT _nKeyTotal;
-    char _nKey[4];
-};
 
 struct CARD_INFO {
     USHORT _nBattleTotal;          /* 0x000 */
