@@ -420,8 +420,6 @@ void CSEMotion::stop() {
     m_iNowCtrlCount = 0;
 }
 
-/* Matches except that `this` and `ctrl` swap registers (s1/s2). */
-#if 0
 void CSEMotion::update() {
     TIMEQ current = m_pOwner->getMotionCurrentTime();
     INT n = m_iNowCtrlCount;
@@ -431,16 +429,17 @@ void CSEMotion::update() {
     }
     if (m_hBeforeVoice) {
         m_tqVoiceTimer -= m_pOwner->getFrameRate();
-        if (m_tqVoiceTimer > 0 && CSound::isSEPlaying(m_hBeforeVoice, _voiceSeq(m_iBeforeFileID, m_iBeforeVoiceID))) {
-            m_pOwner->setSEPanAndVol(m_hBeforeVoice, m_iBeforeFileID, m_iBeforeVoiceID, 0, NULL, 1);
+        if (m_tqVoiceTimer > 0) {
+            if (CSound::isSEPlaying(m_hBeforeVoice, _voiceSeq(m_iBeforeFileID, m_iBeforeVoiceID))) {
+                m_pOwner->setSEPanAndVol(m_hBeforeVoice, m_iBeforeFileID, m_iBeforeVoiceID, 0, NULL, 1);
+            } else {
+                m_hBeforeVoice = 0;
+            }
         } else {
             m_hBeforeVoice = 0;
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SEMotion", update__9CSEMotion);
-#endif
 
 #line 765
 void CSEMotion::playFootStopSE() {
