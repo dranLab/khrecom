@@ -3,6 +3,7 @@
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H
 
 #include "khtypes.h"
+#include "sdk/libvu0.h"
 
 /* Core particle (ppp) types shared by the libppp units (C). */
 
@@ -10,8 +11,8 @@ typedef int word;
 typedef unsigned int u_word; /* PARTIAL: added for System/Graphic/Effect/libppp/pppAlloc */
 /* 16-aligned as in the SDK's libvu0.h. This makes pppMngSt 8-aligned, so gcc merges byte tests like
    "ppvMng->bFlagStop == 0 && ppvMng->bBoolSlow == 0" into one ld + mask, as the original does. */
-typedef float sceVu0FVECTOR[4] __attribute__((aligned(16)));
-typedef float sceVu0FMATRIX[4][4] __attribute__((aligned(16)));
+
+
 
 typedef struct {
     short x;
@@ -94,7 +95,7 @@ typedef struct _pppPObject { /* 0xa0 */
 // PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppDrawMatrix
 extern pppPObject *ppvPObj;
 extern sceVu0FMATRIX ppvSWMatrix;
-void sceVu0MulMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1, sceVu0FMATRIX m2);
+
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMngFlag */
 
@@ -159,11 +160,11 @@ typedef struct { /* 0xc */
 } pppFVECTOR;
 /* end PARTIAL pppKeDrct */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeDMat */
+
 extern sceVu0FMATRIX ppvWorldMatrix;
 extern sceVu0FMATRIX ppvScreenMatrix;
-void sceVu0CopyMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1);
-/* end PARTIAL pppKeDMat */
+
+
 
 
 typedef struct { /* 0xc */
@@ -173,15 +174,15 @@ typedef struct { /* 0xc */
 } pppIVECTOR;
 /* end PARTIAL pppGetRotMatrixXYZ */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeDMatPht */
+
 extern sceVu0FVECTOR ppvParScl;
 extern sceVu0FVECTOR ppvParLoc;
-void sceVu0ScaleVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, float t);
-void sceVu0ApplyMatrix(sceVu0FVECTOR v0, sceVu0FMATRIX m0, sceVu0FVECTOR v1);
-void sceVu0UnitMatrix(sceVu0FMATRIX m);
-void sceVu0MulVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2);
+
+
+
+
 extern sceVu0FMATRIX *ppvlpCMatrix;
-/* end PARTIAL pppKeDMatPht */
+
 
 
 typedef union { /* 0x4 */
@@ -213,8 +214,8 @@ typedef struct { /* 0x8 */
     word valoff;
 } pppParamPObj;
 
-void sceVu0Normalize(sceVu0FVECTOR v0, sceVu0FVECTOR v1);
-void sceVu0CopyVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1);
+
+
 /* end PARTIAL pppKeParMatR */
 
 
@@ -278,10 +279,10 @@ extern long128 ppvDbgTemp[1];
                          : "=r"(r) : : "$8")
 /* end PARTIAL pppRandFloat */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjMatrixWorldXYZ */
+
 extern sceVu0FVECTOR ppvParAng;
-void sceVu0InversMatrix(sceVu0FMATRIX m0, sceVu0FMATRIX m1);
-/* end PARTIAL pppRyjMatrixWorldXYZ */
+
+
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/pppAlloc */
 typedef struct _pppEMCB { /* 0x10 */
@@ -388,8 +389,8 @@ void *op_spr_alloc(word mem);
 void op_spr_free(word mem);
 int sceGsExecLoadImage(sceGsLoadImage *lp, u_long128 *srcaddr);
 void FlushCache(int operation);
-void sceVu0DivVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, float q);
-void sceVu0AddVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2);
+
+
 /* end PARTIAL pppKeTkFade */
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeShpDtt (partMng.h) */
@@ -409,11 +410,11 @@ extern sceVu0FMATRIX ppvColorMatrix;
 extern long128 ppvVNWork[2048];
 
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/ryjProg/pppRyjDrawMatrixWorldWood */
+
 extern sceVu0FMATRIX ppvWorldMatrixWood;
 extern sceVu0FMATRIX ppvSWMatrixWood;
-void sceVu0OuterProduct(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2);
-/* end PARTIAL pppRyjDrawMatrixWorldWood */
+
+
 
 /* PARTIAL: added for System/Graphic/Effect/libppp/eiProg/pppDrawShape */
 typedef struct _pppShapeSt { /* 0x8 */
@@ -444,8 +445,8 @@ typedef struct tagOANM_HEADER { /* 0x18 */
 void debugDpdCheckShapeData(int nShapeNum); /* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppDrawShapeX (partMng.h) */
 /* end PARTIAL pppDrawShape */
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/pppPart */
-typedef int sceVu0IVECTOR[4] __attribute__((aligned(16)));
+
+
 
 typedef struct _pppPEtcData { /* 0x110 */
     float afBbox[32];
@@ -482,7 +483,7 @@ typedef void (*PPPDES)();
 
 extern sceVu0FVECTOR ppvEye;
 extern BOOL ppvSysStopPartF;
-float sceVu0InnerProduct(sceVu0FVECTOR v0, sceVu0FVECTOR v1);
+
 BOOL pppStartPart(pppMngSt *mng, long *lpdt, BOOL callInitFuncf);
 void pppInitPdt(long *lpdt, pppProg *progtbl);
 void pppMovePdt(long *lpdt, int offset);
@@ -493,6 +494,6 @@ void pppSetMatrix(pppMngSt *mng);
 BOOL pppRunPartExec(pppMngSt *mng);
 BOOL pppRunPart(pppMngSt *mng, BOOL drawf);
 BOOL pppRunPartImpotent(pppMngSt *mng);
-/* end PARTIAL pppPart */
+
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_PPPPART_H */

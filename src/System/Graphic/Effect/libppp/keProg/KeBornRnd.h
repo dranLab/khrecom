@@ -9,12 +9,12 @@ int KeVu0RndI(void);
 
 void KeBornRnd2(pppPObject *pObj, void *pDat, void *fnc, u_short *pIdxNxt, short idxVsf, u_char md, u_char num);
 
-/* PARTIAL: sceVu0SubVector below is the SDK's (libvu0.h in the original) */
+
 void KeVu0CopyVecXYZ(float *d, float *s);
 void KeVu0AddVecXYZ(float *d, float *s0, float *s1);
 float KeVu0Sqrt(float x);
 void KeVu0SubVecXYZ(float *d, float *s0, float *s1);
-void sceVu0SubVector(sceVu0FVECTOR v0, sceVu0FVECTOR v1, sceVu0FVECTOR v2);
+
 
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_KEBORNRND_H */
