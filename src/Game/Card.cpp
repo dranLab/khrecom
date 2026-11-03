@@ -1559,25 +1559,18 @@ BOOL CCard::isCardAlreadyGet(USHORT usKind2) {
     return (UINT)(getCardAppearance(usKind2) - 2) < 2;
 }
 
-/* near-match: kept as INCLUDE_ASM */
-#if 0
 BOOL CCard::isBattleTotalMaxUpCard(USHORT usKind2) {
     if (!CGame::isSoraGame()) return FALSE;
     if (!isCardForTotalMaxUp(usKind2)) return FALSE;
     USHORT usKind = usKind2 & 0xFF;
     USHORT usKindP = usKind | 0x100;
     if (canPremium(usKind)) {
-        if (isCardAlreadyGet(usKind)) return FALSE;
-        if (isCardAlreadyGet(usKindP)) return FALSE;
-        return TRUE;
+        if (!isCardAlreadyGet(usKind) && !isCardAlreadyGet(usKindP)) return TRUE;
+    } else {
+        if (!isCardAlreadyGet(usKind)) return TRUE;
     }
-    BOOL bGet = isCardAlreadyGet(usKind);
-    if (!bGet) return TRUE;
     return FALSE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Card", isBattleTotalMaxUpCard__5CCardUs);
-#endif
 
 BOOL CCard::isCardForTotalMaxUp(USHORT usKind2) {
     USHORT usKind = usKind2 & 0xFF;
