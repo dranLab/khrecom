@@ -96,21 +96,18 @@ public:
 private:
     void _initialize();
     void calcMarkerScale();
-#ifdef GAME_PLAYER_PLAYERGAUGE_CPP /* MATCH: GAME_PLAYER_PLAYERGAUGE_CPP gate, only for its own unit (tested 2026-11-02) */
-    /* MATCH: the ref inlines only for Game/Player/PlayerGauge (emitted with the key function, in ref definition order); Game/Player/PlayerRiku matches with its own forms below */
+    /* the ref inlines (Game/Player/PlayerGauge emits them with the key function, in ref definition order) */
     void setDistance(INT inDist) { m_iDist = inDist; }
 public:
     void on() { m_bFlag = TRUE; }
     void off() { m_bFlag = FALSE; }
     BOOL isFlag() { return m_bFlag; }
     void setFlag(UINT inSet, UINT inMask) { m_uiFlag = (m_uiFlag | inSet) & ~inMask; }
-#endif
 public:
     void setTarget(HANDLE inTarget);
     void setLockon(HANDLE inTarget, INT inDist);
     void cancelLockon(HANDLE& inTarget, INT inFlag);
     void chkLockon(HANDLE& inTarget);
-#ifdef GAME_PLAYER_PLAYERGAUGE_CPP /* MATCH: as above */
     void changeMode() {
         m_iMode ^= 1;
         m_bTrg = TRUE;
@@ -127,23 +124,13 @@ public:
         m_hLockon = 0;
     }
     INT getMode() { return m_iMode; }
-#else
-    /* PARTIAL: Game/Player/PlayerRiku's forms of the ref inlines (names and store orders unknown) */
-    void setFlag(BOOL inFlag) { m_bFlag = inFlag; }
-    void changeMode() {
-        m_iMode = 1;
-        m_bTrg = TRUE;
-        m_hLockon = 0;
-    }
+    // PARTIAL: added for Game/Player/Player and PlayerRiku (chkLockon, autoLockon, exeDuel): changeMode(INT)'s
+    // stores in another order (original name unknown)
+#ifndef GAME_PLAYER_PLAYERGAUGE_CPP /* MATCH: not in the original class: the key unit would emit a weak copy */
     void setMode(INT inMode) {
         m_iMode = inMode;
         m_hLockon = 0;
         m_bTrg = TRUE;
-    }
-    void changeMode(INT inMode) {
-        m_bTrg = TRUE;
-        m_iMode = inMode;
-        m_hLockon = 0;
     }
 #endif
     void onPush(INT inKind);

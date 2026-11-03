@@ -1543,7 +1543,7 @@ void CPlayer::endStateField() {
     m_uiAttackKind = 0;
     m_uiPreAttackKind = 0;
     m_uiAttackID = 0;
-    m_pMarker->setFlag(FALSE);
+    m_pMarker->off();
 }
 void CPlayer::beginStateBattle() {
     m_iState = 1;
@@ -1754,7 +1754,7 @@ void CPlayer::endStateBattle() {
     m_uiAttackKind = 0;
     m_uiPreAttackKind = 0;
     m_uiAttackID = 0;
-    m_pMarker->setFlag(FALSE);
+    m_pMarker->off();
 }
 void CPlayer::beginStateWait() {
     m_iState = 2;
@@ -1901,7 +1901,7 @@ void CPlayer::exeStartWait() {
     enableControl();
     m_pCam->setFlag(0, 1);
     setPlayerFlag(0, 1);
-    m_pMarker->setFlag(TRUE);
+    m_pMarker->on();
     if (!isAir()) initStandUp(0);
     else initFall();
     if (isBattleFlag(1) && !isBattleFlag(0x80000000)) {
@@ -3506,7 +3506,7 @@ void CPlayer::initTreasureBox() {
     clearSpeed();
     m_collBody.off();
     onWeapon(1);
-    m_pMarker->setFlag(FALSE);
+    m_pMarker->off();
     setAnimRsrcEx(0xFDC, 0, 0, 0, 0, 0, 1);
     m_bDmgMuteki = TRUE;
     pTarget = (CEntity*)CTaskMan::getTask(m_hGimmick);
@@ -3539,7 +3539,7 @@ void CPlayer::exeTreasureBox() {
         setPlayerFlag(0, 1);
         m_collBody.on();
         initStandUp(0);
-        m_pMarker->setFlag(TRUE);
+        m_pMarker->on();
         m_pMarker->holdTarget(0);
     }
 }
@@ -3554,7 +3554,7 @@ void CPlayer::initRoomCreation() {
     m_collBody.off();
     m_bDmgMuteki = TRUE;
     offWeapon();
-    m_pMarker->setFlag(FALSE);
+    m_pMarker->off();
     setAnimForce(1, -1, 0, 0, 0, 0);
     pTarget = (CEntity*)CTaskMan::getTask(m_hGimmick);
     FLOAT d = pTarget->getRot().y + 3.1415927f;
@@ -3601,7 +3601,7 @@ void CPlayer::exeRoomCreation() {
             m_bDmgMuteki = FALSE;
             m_collBody.on();
             initStandUp(0);
-            m_pMarker->setFlag(TRUE);
+            m_pMarker->on();
             m_pMarker->holdTarget(0);
         }
         break;
@@ -3639,7 +3639,7 @@ void CPlayer::initWorldSelect() {
     m_collBody.off();
     m_bDmgMuteki = TRUE;
     offWeapon();
-    m_pMarker->setFlag(FALSE);
+    m_pMarker->off();
     setAnimForce(1, -1, 0, 0, 0, 0);
     pTarget = (CEntity*)CTaskMan::getTask(m_hGimmick);
     FLOAT d = pTarget->getRot().y + 3.1415927f;
@@ -3685,7 +3685,7 @@ void CPlayer::exeWorldSelect() {
             m_bDmgMuteki = FALSE;
             m_collBody.on();
             initStandUp(0);
-            m_pMarker->setFlag(TRUE);
+            m_pMarker->on();
             m_pMarker->holdTarget(0);
         }
         break;
@@ -3933,7 +3933,7 @@ void CPlayer::resetAction(INT inMode) {
         m_bIsCanCombo = FALSE;
         offAttack();
         m_pMarker->cancelLockon(m_hLockon, 0);
-        m_pMarker->setFlag(FALSE);
+        m_pMarker->off();
         if (m_bIsMinigameScene) MG_SKILL::killMGSkill();
         break;
     case 8:
@@ -3945,7 +3945,7 @@ void CPlayer::resetAction(INT inMode) {
         setBattleFlag(0, 0x00130000);
         setBattleFlag(0, 0x03000000);
         m_pMarker->cancelLockon(m_hLockon, 0);
-        m_pMarker->setFlag(FALSE);
+        m_pMarker->off();
         offAttack();
         setPlayerFlag(1, 0x00401000);
         setPushon(0);
@@ -4042,14 +4042,14 @@ void CPlayer::chkLockon() {
     if (m_bIsBattleScene && m_PlayerState != HANG && !CGameWork::getFlag(1, 0xC)) {
         if (!m_pMarker->m_iMode) {
             if (isTrgLockon()) {
-                m_pMarker->changeMode(m_pMarker->m_iMode ^ 1);
+                m_pMarker->changeMode();
                 bCheck = TRUE;
                 m_pMarker->chkLockon(m_hTarget);
                 if (m_hTarget > 0) CSound::playSE(7, -1, 0x40);
                 setTrgFlag(0, 0x1000);
             }
         } else if (isRTrgLockon() && (m_uiTrgFlag & 0x1000)) {
-            m_pMarker->changeMode(m_pMarker->m_iMode ^ 1);
+            m_pMarker->changeMode();
             bCheck = TRUE;
             m_pMarker->chkLockon(m_hTarget);
             if (m_hTarget > 0) CSound::playSE(8, -1, 0x40);
@@ -5828,7 +5828,7 @@ void CPlayer::initDead() {
     m_iSubState = 0;
     if (m_pMarker) {
         m_pMarker->cancelLockon(m_hLockon, 0);
-        m_pMarker->setFlag(FALSE);
+        m_pMarker->off();
     }
     m_tqEffCharge = 0;
     fadeEffect(m_hEffCharge, 0);
@@ -5934,7 +5934,7 @@ void CPlayer::exeDead() {
             CSceneEnv::setStop((ObjType::eObjBit)0);
             m_iSubState = 2;
             m_bIsDead = FALSE;
-            m_pMarker->setFlag(TRUE);
+            m_pMarker->on();
             initStandUp(0);
             m_bDmgMuteki = FALSE;
             m_tqMutekiTimer = 3000;

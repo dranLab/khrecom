@@ -342,7 +342,7 @@ void CPlayerRiku::exeTransform() {
         setPlayerFlag(0x1001, 0);
         ((_CollBodyView*)m_collBody)->offBody();
         offWeapon();
-        m_pMarker->setFlag(FALSE);
+        m_pMarker->off();
         m_pCB->destroyPlayCard(1, 0);
         setBattleFlag(0, 0x10200000);
         m_pCB->disablePlayCard(0xc0000000);
@@ -411,7 +411,7 @@ void CPlayerRiku::exeTransform() {
         m_pCam->changeNowPlayer(0, 0);
         m_pCam->changeCamMode(3, 0);
         enableControl();
-        m_pMarker->setFlag(TRUE);
+        m_pMarker->on();
         m_iSubState = 0;
         setConditionFlag(0, 0x200000);
         break;
@@ -1516,7 +1516,7 @@ void CPlayer::exeDuel() {
         if (getTimer() <= 2500) {
             if (isTrgStock()) {
                 TRACE("exeDuel:  Duel Entry TRG!\n");
-                m_pMarker->setFlag(FALSE);
+                m_pMarker->off();
                 setPushon(0);
                 m_iSubState = 9002;
                 clearSpeed();
@@ -1585,7 +1585,7 @@ void CPlayer::exeDuel() {
             m_pMove->setFlag(0x40, 0);
             resetAction(0);
             m_pMarker->cancelLockon(m_hLockon, 0);
-            m_pMarker->setFlag(TRUE);
+            m_pMarker->on();
             initStandUp(0);
             setConditionFlag(0x8000, 0);
             setFaceAnim(3, 0);
@@ -1605,7 +1605,7 @@ void CPlayer::exeDuel() {
             m_pMarker->chkLockon(m_hTarget);
             m_hLockon = m_hTarget;
             m_pMarker->holdTarget(8);
-            m_pMarker->setFlag(TRUE);
+            m_pMarker->on();
             PlayerCamera::CPlayerCamera::setBattleCamData(0, NULL);
             m_pCam->changeNowPlayer(0, m_hLockon);
             m_pCam->changeCamMode(4, 0);
