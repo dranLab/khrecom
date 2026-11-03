@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Bullet/CreateBullet
+
 #ifndef GAME_BULLET_BULLET_H
 #define GAME_BULLET_BULLET_H
 

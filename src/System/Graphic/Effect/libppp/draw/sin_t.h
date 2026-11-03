@@ -1,4 +1,4 @@
-// PARTIAL: added for System/Graphic/Effect/libppp/stdProg/pppGetRotMatrixX
+
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_DRAW_SIN_T_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_DRAW_SIN_T_H
 
