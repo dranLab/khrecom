@@ -65,10 +65,7 @@ public:
     virtual ~CCollision() {}
 };
 
-// PARTIAL: from System/Coord.h
-void Normalize(FVECTOR& v0, const FVECTOR& v1);
-void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
-void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+#include "System/Coord.h"
 
 
 INT CCollUtil::_checkHangEdge(CCollision& collision, FVECTOR& inDir, FVECTOR& inHeightDepth) {

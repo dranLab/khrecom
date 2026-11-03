@@ -18,10 +18,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL)
 
-// PARTIAL: from System/Coord.h
-FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
-void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void Normalize(FVECTOR& v0, const FVECTOR& v1);
+#include "System/Coord.h"
 
 INT CCollMap::m_fgSameFrame = 0;
 BOOL CCollMap::m_bExceptBSCheck = 0;

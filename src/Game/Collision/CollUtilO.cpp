@@ -18,15 +18,7 @@ inline CCollUtil* CCollUtil::getInstance() {
 #include "Game/Collision/CollObj.h"
 #include "include_asm.h"
 
-// PARTIAL: from System/Coord.h
-void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-FLOAT InnerProduct(const FVECTOR& v0);
-FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
-void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void Normalize(FVECTOR& v0, const FVECTOR& v1);
-void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
-void DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q);
+#include "System/Coord.h"
 
 extern "C" void sceVu0InversMatrix(float m0[4][4], float m1[4][4]);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);

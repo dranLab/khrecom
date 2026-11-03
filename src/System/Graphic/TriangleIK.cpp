@@ -16,15 +16,7 @@
 #include "System/Math3D.h"
 #include "System/Debug.h"
 
-// PARTIAL: from System/Coord.h
-void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
-void Normalize(FVECTOR& v0, const FVECTOR& v1);
-void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
-void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
-void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+#include "System/Coord.h"
 extern "C" float acosf(float x);
 
 #define FOOT_POS_NONE 1.70141183e+38f

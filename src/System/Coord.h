@@ -73,6 +73,26 @@ private:
     friend class CCoordMan;
 };
 
+void ApplyMatrix33(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+void ViewClipMatrix(FMATRIX& m, FLOAT scrw, FLOAT scrh, FLOAT scrz, FLOAT fNear, FLOAT fFar);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
+void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
+void OuterProduct(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+FLOAT InnerProduct(const FVECTOR& v0, const FVECTOR& v1);
+FLOAT InnerProduct(const FVECTOR& v0);
+void Normalize(FVECTOR& v0, const FVECTOR& v1);
+void DivVector(FVECTOR& v0, const FVECTOR& v1, FLOAT q);
+void DivVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
+void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void SubVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void MulVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
+void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT f);
+void FTOI0Vector(IVECTOR& v0, const FVECTOR& v1);
+void FTOI4Vector(IVECTOR& v0, const FVECTOR& v1);
+void ITOF0Vector(FVECTOR& v0, const IVECTOR& v1);
+void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
+void MulVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 #endif /* SYSTEM_COORD_H */

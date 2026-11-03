@@ -8,8 +8,7 @@ extern "C" {
 float atan2f(float y, float x);
 }
 
-// PARTIAL: from System/Coord.h
-void Normalize(FVECTOR& v0, const FVECTOR& v1);
+#include "System/Coord.h"
 #include "System/Graphic/WorldEnv.h"
 
 static inline FLOAT _sqrtf(FLOAT x) {
