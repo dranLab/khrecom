@@ -89,6 +89,6 @@ void *pppGetVu1DrawSpad1(void);
 void *pppGetVu1DrawSpad(void);
 void op_ztest_init(void);
 void pppWaitVif1(void);
-/* end PARTIAL pppRyjMegaBirthPrize */
+
 
 #endif /* SYSTEM_GRAPHIC_EFFECT_LIBPPP_DRAW_SHAPE_H */

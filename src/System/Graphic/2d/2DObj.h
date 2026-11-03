@@ -5,7 +5,7 @@
 #include "khtypes.h"
 #include "System/SJoint.h"
 
-namespace D2 { struct SeqControl; } // PARTIAL: in D2 as in the original
+namespace D2 { struct SeqControl; } // in D2 as in the original
 struct TexInfo;
 struct G_UV;
 

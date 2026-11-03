@@ -4,7 +4,7 @@
 
 #include "khtypes.h"
 #include "System/Task.h"
-#include "System/Vector.h" // PARTIAL: added for Game/Player/FriendAladdin
+#include "System/Vector.h"
 
 class CEntity;
 struct BULLET_PARAM;
@@ -40,7 +40,7 @@ public:
     CEntity* createGimmick(INT inRsrcID, CTask* inParent, void* inExtraInfo);
 };
 
-void LoadMapEnemy(); // PARTIAL: added for Game/EntityFactory
+void LoadMapEnemy();
 void LoadBattleEnemy();
 
 #endif /* GAME_ENTITYFACTORY_H */

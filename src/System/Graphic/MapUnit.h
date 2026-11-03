@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Gimmick/SampleGimmick
+
 #ifndef SYSTEM_GRAPHIC_MAPUNIT_H
 #define SYSTEM_GRAPHIC_MAPUNIT_H
 

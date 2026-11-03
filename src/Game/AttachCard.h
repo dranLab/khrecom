@@ -1,4 +1,4 @@
-// PARTIAL: added for Form/Menu/RoomCreation
+
 #ifndef GAME_ATTACHCARD_H
 #define GAME_ATTACHCARD_H
 

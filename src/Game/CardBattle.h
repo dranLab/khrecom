@@ -1,14 +1,14 @@
-// PARTIAL: added for Game/Gimmick/GimmickBreakable
+
 #ifndef GAME_CARDBATTLE_H
 #define GAME_CARDBATTLE_H
 
 #include "khtypes.h"
 #include "System/MainApp.h"
-#include "Game/CollParam.h"     // PARTIAL: added for Game/Player/SummonDumbo (ATK_KIND)
-#include "Game/AttackMotion.h" // PARTIAL: added for Game/Player/SummonDumbo (ATK_ATTR)
-#include "System/Vector.h"     // PARTIAL: added for Game/CardBattle (m_vBreakPos)
-#include "Game/CardKind.h"     // PARTIAL: added for Game/CardBattle (CARD members)
-#include "System/Task.h"        // PARTIAL: added for Game/CardBattle (CCardBattle is a CTask)
+#include "Game/CollParam.h"
+#include "Game/AttackMotion.h"
+#include "System/Vector.h"
+#include "Game/CardKind.h"
+#include "System/Task.h"
 
 class CPlayer;
 class CTask;
@@ -57,7 +57,7 @@ struct SS_PARAM {
     LPCSTR NAME;
 };
 
-// PARTIAL: added for Game/CardBattle (the card info sent with the duel messages)
+
 struct MES_CARD_INFO {
     CARD m_cardData[7];
     SHORT m_nStock;
@@ -70,9 +70,9 @@ struct MES_CARD_INFO {
 };
 namespace CardBattle {
 extern BC_PARAM* g_pBattleCardList;
-extern SS_PARAM* g_pStockSkillList; // PARTIAL: added for Game/Player/SummonDumbo
-extern unsigned char g_DropFriendCardList[32][8]; // PARTIAL: added for Game/Player/PlayerManager
-void getDropFriendCard(CARD& outCard, INT inRate); void calcFreezeDamage(INT& ioDamage); // PARTIAL: calcFreezeDamage added for Game/Enemy/BattleEnemy // PARTIAL: added for Game/Enemy/BattleEnemy
+extern SS_PARAM* g_pStockSkillList;
+extern unsigned char g_DropFriendCardList[32][8];
+void getDropFriendCard(CARD& outCard, INT inRate); void calcFreezeDamage(INT& ioDamage);
 // PARTIAL: added for Game/Player/PlayerManager (Game/CardRevolver.h in the original)
 extern char* g_szDbgDeckName[10];
 extern char* g_szEnemyCardEffName[60];

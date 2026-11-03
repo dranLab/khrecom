@@ -1,4 +1,4 @@
-/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeThHitBorn (KeTh thread types, as far as used) */
+
 #ifndef SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_KETH_H
 #define SYSTEM_GRAPHIC_EFFECT_LIBPPP_KEPROG_KETH_H
 
@@ -244,7 +244,7 @@ void KeThBP_Quit(KeThBP *_p);
 KeThBP *KeThResHd_BPAlloc(KeThResHd *_t);
 void KeThCp_Reset(KeThCp *_t, KeThResHd *res);
 
-/* PARTIAL: added for System/Graphic/Effect/libppp/keProg/pppKeTh */
+
 void KeThResHd_Init(KeThResHd *_t, u_char bpNum, u_char rpNum);
 void KeThCp_AddBp(KeThCp *_t, KeThResHd *pResHd, sceVu0FVECTOR *pRPos, sceVu0FVECTOR *pVec);
 void KeThCp_Update(KeaThCp_Update *_a);
