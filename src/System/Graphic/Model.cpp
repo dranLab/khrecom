@@ -695,16 +695,22 @@ void resultCheckBBox(FVECTOR& min, FVECTOR& max) {
     asm volatile("sqc2 $vf2, 0(%0)" : : "r"(&min) : "memory");
     asm volatile("sqc2 $vf3, 0(%0)" : : "r"(&max) : "memory");
 }
-/* Parked: 5 lines off: the original leaves the bc1t delay slot empty (lui 0xc000 in the final jr slot), has an extra nop after the beqz slot and builds the result in v1 (move v0,v1); ours fills bc1t with the lui. Tried: compare forms (>, <=, !<), result locals (clip |= ret, res), if/else return; permuter 15 min (24217 candidates, 16 -> 13). */
+/* Parked: 2 lines: the original ORs into clip's register and copies it (or v1,v0,v1; jr ra; move v0,v1), ours ORs straight into v0. Worked: !(x[0] > x[1]) (load order), clip |= ret in the if-block with the 0xC0000000 return last, asm "nop" opening the if (ret) block. An `asm("or %0, %1, %0" : "+r"(clip) : "r"(ret))` for the OR matches the whole function, kept out (MIPS arithmetic stays C). The ref has only `INT ret` (no clip local). Tried: ternary + inline helper, if/else result, block-local clip, register asm v0/v1 locals, empty "+r" barrier. */
 #if 0
 INT resultCheckBBox(CCoord& crd, const BBOX* bbox) {
     INT ret;
     INT clip;
-    if (bbox->x[1] < bbox->x[0]) return 0xC0000000;
-    asm volatile("cfc2.i %0, $vi4" : "=r"(ret));
-    asm volatile("cfc2.ni %0, $vi5" : "=r"(clip));
-    if (ret) ret = (ret | 0x8000) << 16;
-    return ret | clip;
+    if (!(bbox->x[0] > bbox->x[1])) {
+        asm volatile("cfc2.i %0, $vi4" : "=r"(ret));
+        asm volatile("cfc2.ni %0, $vi5" : "=r"(clip));
+        if (ret) {
+            asm volatile("nop");
+            ret = (ret | 0x8000) << 16;
+        }
+        clip |= ret;
+        return clip;
+    }
+    return 0xC0000000;
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resultCheckBBox__FR6CCoordPC4BBOX);
