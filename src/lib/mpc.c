@@ -44,9 +44,10 @@ static void receiveDataFromIPU(unsigned int addr, int size);
 #define _setIpuCmd(d, cmd)                                                              \
     ({                                                                                  \
         unsigned int __type;                                                            \
+        unsigned int __cmd = (cmd); /* MATCH: value before the address (loop.c keeps IPU_CMD per pass) */ \
                                                                                         \
-        (void)(REG(IPU_CMD) = (cmd));                                                   \
-        __type = (cmd) & 0xF0000000;                                                    \
+        (void)(REG(IPU_CMD) = __cmd);                                                   \
+        __type = __cmd & 0xF0000000;                                                    \
         (d)->x82C = __type;                                                             \
         if (__type == 0x20000000 || __type == 0x30000000 || __type == 0x40000000) {     \
             (d)->x828 = 0;                                                              \
@@ -737,8 +738,6 @@ static int _decMB0(_sceMpegDecoder *d, int *mbtype, int *motion_type, int *dct_t
 }
 
 
-/* Parked: the loop keeps the IPU_CMD address in a saved register here (the original rebuilds it each pass) */
-#if 0
 int _sceMpegMbAddressIncrement(_sceMpegDecoder *d)
 {
     int inc = 0;
@@ -774,12 +773,6 @@ int _sceMpegMbAddressIncrement(_sceMpegDecoder *d)
     } while (cont);
     return inc;
 }
-#endif
-/* _sceMpegMbAddressIncrement's strings */
-__asm__(".rdata\n"
-        ".align 3\n.asciz \"Invalid macroblock_address_increment code(0x%08x)\"\n"
-        ".text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _sceMpegMbAddressIncrement);
 
 void _sceMpegWaitIpuIdle(_sceMpegDecoder *d)
 {
