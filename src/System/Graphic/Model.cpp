@@ -994,25 +994,19 @@ void CModel::disp0(INT semikind, u_long nInTest, INT iFlags) {
         _disp0_SetPacket(nMode, pData, semikind, nInTest, iFlags, tex0);
     }
 }
-/* Parked: 2 lines off: the original loads *pData before the lui 0x6000 of the tag compare, ours lui first. Tried: d/mode locals, store forms, int (*)[4]/u_long/u_long128 pData, test forms (!=, ^, ternary, tag local); permuter 12 min (22337 candidates, stays 2). */
-#if 0
 u_long* CModel::_disp0_GetData(UINT& nMode, INT iFlags) {
     UINT* pData;
-    UINT mode;
     if (iFlags & 1) {
         pData = (UINT*)m_pData->m_pSemiData;
-        mode = ((USHORT*)pData)[0x1c / 2];
+        nMode = ((USHORT*)pData)[0x1c / 2];
     } else {
-        mode = m_Mode;
+        UINT mode = m_Mode;
         pData = (UINT*)m_pData->m_pData;
+        nMode = mode;
     }
-    nMode = mode;
     if (*pData == 0x60000000) return NULL;
     return (u_long*)pData;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_GetData__6CModelRUii);
-#endif
 void CModel::disp0_SetMicroCode(u_long128* pMProg) {
     if (!((m_pMpg == g_mpg0) || (m_pMpg == g_mpg2) || (m_pMpg == __null))) AssertApp(__FILE__, 2539, "(m_pMpg==g_mpg0)||(m_pMpg==g_mpg2)||(m_pMpg == __null)", 0);
     if (pMProg != m_pMpg || (m_iSendFlg & 0x100)) {
