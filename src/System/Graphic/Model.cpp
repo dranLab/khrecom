@@ -186,25 +186,17 @@ u_long128* CModel::getMicroProg() {
     if (m_pShader) return *(u_long128**)((BYTE*)m_pShader + 4);
     return NULL;
 }
-/* Parked: 12 lines off, registers only: the original keeps the masked mode in a1, the table pointer in a2, 0xffff in a3 and the TRACE string's %hi in a0; ours mode a0, pointer a1, 0xffff a2, string a3. Tried: for/while/break loop shapes, a UINT copy of mode; permuter 12 min (24539 candidates, stays 12). */
-#if 0
 SHADERDESC* searchShaderDesc(USHORT mode) {
     SHADERDESC* ret = g_ShaderDescTbl;
     while (TRUE) {
         if (ret->m_Mode == 0xFFFF) {
-            TRACE("\203V\203F\201[\203_\203f\203B\203X\203N\203\212\203v\203^\202\252\214\251\202\302\202\251\202\350\202\334\202\271\202\361\202\305\202\265\202\275(%04x).\n");
+            TRACE("\203V\203F\201[\203_\203f\203B\203X\203N\203\212\203v\203^\202\252\214\251\202\302\202\251\202\350\202\334\202\271\202\361\202\305\202\265\202\275(%04x).\n", mode);
             return NULL;
         }
         if (ret->m_Mode == (mode & ret->m_Mask)) return ret;
         ret++;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", searchShaderDesc__FUs);
-#endif
-/* MATCH: stripped placeholder (.sdata): the parked searchShaderDesc's string at its .rodata position */
-__asm__(".section .sdata\n");
-void __attribute__((section(".sdata"))) _searchShaderDesc_rodata() { TRACE("\203V\203F\201[\203_\203f\203B\203X\203N\203\212\203v\203^\202\252\214\251\202\302\202\251\202\350\202\334\202\271\202\361\202\305\202\265\202\275(%04x).\n", 0); }
 void CModel::releaseData() {
     if (m_pSemiModel && isManagedSemiModel()) {
         delete m_pSemiModel;
