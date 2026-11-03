@@ -94,7 +94,7 @@ static inline void _calcMove(FVECTOR& vOut, FVECTOR& vOutSpeed, const FVECTOR& i
 }
 
 static inline FLOAT _getLadderPosition(FVECTOR& outPos, FVECTOR& outNorm) {
-    return CCollUtil::getInstance()->_getLadderPosition(outPos, outNorm);
+    return CCollUtil::instance()._getLadderPosition(outPos, outNorm);
 }
 
 static inline void _unitMatrixVu0(FMATRIX& m) {

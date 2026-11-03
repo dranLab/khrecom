@@ -111,11 +111,10 @@ struct COLL_CUBE {
 };
 
 // PARTIAL: all members public (the ref's private ones are called directly where CollUtil.h's static inline
-// wrappers stand expanded: its inline strings must not be in those objects); getInstance() for the ref's instance()
+// wrappers stand expanded: its inline strings must not be in those objects)
 class CCollUtil {
 public:
     static CCollUtil* m_pInstance;
-    static CCollUtil* getInstance();
     CCollUtil();
     ~CCollUtil();
 

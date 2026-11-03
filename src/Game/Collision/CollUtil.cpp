@@ -23,10 +23,10 @@ extern char D_004891D0[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" */
 extern char D_00489248[]; /* "m_pInstance" */
 
 /* Game/Collision/CollUtil.h's accessor (line 194), with the original's strings */
-inline CCollUtil* CCollUtil::getInstance() {
-    CCollUtil*& instance = m_pInstance;
-    if (!instance) AssertApp(D_004891D0, 194, D_00489248, 0);
-    return instance;
+inline CCollUtil& CCollUtil::instance() {
+    CCollUtil*& p = m_pInstance;
+    if (!p) AssertApp(D_004891D0, 194, D_00489248, 0);
+    return *p;
 }
 #define COLLUTIL_H_LOCAL_ACCESSOR /* MATCH: CollObj.h's collideMap inlines this accessor */
 #include "Game/Collision/CollObj.h"

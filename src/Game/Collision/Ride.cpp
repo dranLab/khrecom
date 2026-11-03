@@ -32,13 +32,13 @@ extern char D_00489850[]; /* "(m_pMatIOld)&&(m_MCDInfo.pMatrix)" */
 #define ASSERT_S(e, s) if (!(e)) AssertApp(D_004896D0, __LINE__, s, 0)
 
 /* Game/Collision/CollUtil.h's accessor (line 194), with the original's strings */
-inline CCollUtil* CCollUtil::getInstance() {
-    CCollUtil*& instance = m_pInstance;
-    if (!instance) AssertApp(D_004895C0, 194, D_00489638, 0);
-    return instance;
+inline CCollUtil& CCollUtil::instance() {
+    CCollUtil*& p = m_pInstance;
+    if (!p) AssertApp(D_004895C0, 194, D_00489638, 0);
+    return *p;
 }
 inline void CCollUtil::initializeData(void* pData, MCD_INFO* pMCDInfo) {
-    getInstance()->_initializeData(pData, pMCDInfo);
+    instance()._initializeData(pData, pMCDInfo);
 }
 
 /* iterates a CSJointListT, the current entry may be removed (original macro name unknown) */
@@ -283,7 +283,7 @@ void CRideEtc::init() {
 
 INT CRideEtc::detectEtc(CCollision& collision) {
     COLL_CUBE cube;
-    return CCollUtil::getInstance()->_detectBBoxPointEZ(cube, collision) != 0;
+    return CCollUtil::instance()._detectBBoxPointEZ(cube, collision) != 0;
 }
 
 void CRideEtc::hoseiRiders() {

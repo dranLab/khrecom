@@ -29,62 +29,62 @@ inline void* _collUtilCreate() { /* MATCH: placeholder: an inline function's str
 /* The load of m_pInstance is not a "fixed scalar" to gcc's alias analysis (it stays ordered after stores through
  * pointers, Game/Gimmick/GimmickSearchLaser's CGimmickSearchLaserCircle::stateMain): a reference to it does that. */
 #line 192
-inline CCollUtil* CCollUtil::getInstance() {
-    CCollUtil*& instance = m_pInstance;
-    if (!instance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
-    return instance;
+inline CCollUtil& CCollUtil::instance() {
+    CCollUtil*& p = m_pInstance;
+    if (!p) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
+    return *p;
 }
 
 inline INT CCollUtil::detectMCD(CCollision& collision) {
-    return getInstance()->_detectMCD(collision);
+    return instance()._detectMCD(collision);
 }
 
 inline INT CCollUtil::detectColumnColumnEz(CColumnCollision& coll0, CColumnCollision& coll1) {
-    return getInstance()->_detectColumnColumnEz(coll0, coll1);
+    return instance()._detectColumnColumnEz(coll0, coll1);
 }
 inline INT CCollUtil::detectColumnColumn(CColumnCollision& coll0, CColumnCollision& coll1) {
-    return getInstance()->_detectColumnColumn(coll0, coll1);
+    return instance()._detectColumnColumn(coll0, coll1);
 }
 inline INT CCollUtil::detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork) {
-    return getInstance()->_detectOCD(collision, pMCDInfo, pOCDWork, 1);
+    return instance()._detectOCD(collision, pMCDInfo, pOCDWork, 1);
 }
 
 inline INT CCollUtil::detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork, INT fgLocal) {
-    return getInstance()->_detectOCD(collision, pMCDInfo, pOCDWork, fgLocal);
+    return instance()._detectOCD(collision, pMCDInfo, pOCDWork, fgLocal);
 }
 inline INT CCollUtil::checkWaterSurface(FVECTOR& inPos) {
-    return getInstance()->_checkWaterSurface(inPos);
+    return instance()._checkWaterSurface(inPos);
 }
 
 inline void CCollUtil::initializeData(void* pData, MCD_INFO* pMCDInfo) {
-    getInstance()->_initializeData(pData, pMCDInfo);
+    instance()._initializeData(pData, pMCDInfo);
 }
 
 inline INT CCollUtil::detectSpherePoint(CSphereCollision& coll0, CPointCollision& coll1) {
-    return getInstance()->_detectSpherePoint(coll0, coll1);
+    return instance()._detectSpherePoint(coll0, coll1);
 }
 inline INT CCollUtil::detectSphereSphere(CSphereCollision& coll0, CSphereCollision& coll1) {
-    return getInstance()->_detectSphereSphere(coll0, coll1);
+    return instance()._detectSphereSphere(coll0, coll1);
 }
 inline INT CCollUtil::detectSpherePoly3(CSphereCollision& coll0, CPoly3Collision& coll1) {
-    return getInstance()->_detectSpherePoly3(coll0, coll1);
+    return instance()._detectSpherePoly3(coll0, coll1);
 }
 inline INT CCollUtil::detectSphereCircle(CSphereCollision& coll0, CCircleCollision& coll1) {
-    return getInstance()->_detectSphereCircle(coll0, coll1);
+    return instance()._detectSphereCircle(coll0, coll1);
 }
 inline INT CCollUtil::detectColumnPoint(CColumnCollision& coll0, CPointCollision& coll1) {
-    return getInstance()->_detectColumnPoint(coll0, coll1);
+    return instance()._detectColumnPoint(coll0, coll1);
 }
 inline INT CCollUtil::detectColumnSphere(CColumnCollision& coll0, CSphereCollision& coll1, INT inFlag) {
-    return getInstance()->_detectColumnSphere(coll0, coll1, inFlag);
+    return instance()._detectColumnSphere(coll0, coll1, inFlag);
 }
 inline INT CCollUtil::detectColumnPoly3(CColumnCollision& coll0, CPoly3Collision& coll1) {
-    return getInstance()->_detectColumnPoly3(coll0, coll1);
+    return instance()._detectColumnPoly3(coll0, coll1);
 }
 
 #ifdef GAME_COLLISION_COLLOBJ_H /* MATCH: the collision classes' collideMap, when Game/Collision/CollObj.h came first (see there) */
-inline INT CPointCollision::collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
-inline INT CSphereCollision::collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
+inline INT CPointCollision::collideMap() { return CCollUtil::instance()._detectMCD(*this); }
+inline INT CSphereCollision::collideMap() { return CCollUtil::instance()._detectMCD(*this); }
 #endif
 #endif
 
