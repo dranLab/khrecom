@@ -1380,23 +1380,21 @@ INT CCardBattle::setEnchantCard(HANDLE inHandle, INT inUser, CBattleCard* inCard
     }
     return 1;
 }
-/* Parked: address forms - the original computes &m_cardEnchant[_PLAYER] as (idx*4+0x17c)+base and loads the kind with
- * offset 0 (kept in two registers), and &m_nEnchantTime[_PLAYER] as (base+0x184)+idx*4; ours folds the offsets the
- * other way round; the reload of m_pInstance after the decrement matches via the INT* pTime pointer; tried: CARD view
- * struct / reference / pointer locals for the enchant, BYTE/INT/UINT kind, _ref forms, compare operand order,
- * permuter 4 min (8263 candidates, no gain) */
+/* Parked: 9 of 81 lines - only the first m_nKind load: the original adds _PLAYER*4 + 380 before this (lbu 0(v0))
+ * and keeps the value in a2; ours lbu 380(this + _PLAYER*4). No kind/pTime locals (the ref has only _PLAYER and
+ * pGauge) and _ref(m_pInstance) on the m_nKind reads gave the size (18 -> 9 lines). Tried: &arr[0][i], _ref on
+ * the element/array, *(&..m_nKind), == 0, _PLAYER assigned separately; permuter 10 min with only this draft on
+ * (10116 candidates, stays 15); earlier: 4 min (8263, no gain). */
 #if 0
 void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
     if (!(inUser)) AssertApp(__FILE__, 1977, "inUser", 0);
     UINT _PLAYER = inUser - 1;
-    INT kind = m_pInstance->m_cardEnchant[_PLAYER].m_nKind;
-    if (!kind) return;
-    if (inPart != g_pBattleCardList[kind].EFF_PART) return;
-    if (inKind && inKind != kind - 0x43) return;
+    if (!_ref(m_pInstance)->m_cardEnchant[_PLAYER].m_nKind) return;
+    if (inPart != g_pBattleCardList[_ref(m_pInstance)->m_cardEnchant[_PLAYER].m_nKind].EFF_PART) return;
+    if (inKind && inKind != _ref(m_pInstance)->m_cardEnchant[_PLAYER].m_nKind - 0x43) return;
     CEnchantGauge* pGauge = m_pInstance->m_pEnchantGauge[_PLAYER];
     if (!pGauge) return;
-    INT* pTime = &m_pInstance->m_nEnchantTime[_PLAYER];
-    (*pTime)--;
+    m_pInstance->m_nEnchantTime[_PLAYER]--;
     if (_ref(m_pInstance)->m_nEnchantTime[_PLAYER] <= 0) {
         pGauge->changeCount(0);
         m_pInstance->resetEnchantCard(inUser);
