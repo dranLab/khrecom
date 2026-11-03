@@ -36,8 +36,8 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
 | `Game/CardRevolver` | 10 | 2061 | 10 |  |
 | `Form/Menu/RoomCreation` | 1 | 1995 | 1 |  |
-| `System/Graphic/Model` | 13 | 1812 | 13 |  |
 | `Game/Card` | 12 | 1794 | 12 |  |
+| `System/Graphic/Model` | 12 | 1789 | 12 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 | .rodata |
 | `Game/BattleCard` | 4 | 1461 | 4 |  |
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
@@ -53,8 +53,8 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `Form/DebugWindow` | 2 | 667 | 2 |  |
 | `System/Graphic/TexUtil` | 4 | 651 | 4 |  |
-| `Game/SceneInfo` | 8 | 651 | 8 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
+| `Game/SceneInfo` | 7 | 610 | 7 |  |
 | `System/Graphic/Effect/EffectMan` | 3 | 604 | 3 |  |
 | `Game/CardBattle` | 5 | 600 | 5 |  |
 | `Game/Atel/Avatar` | 4 | 587 | 4 |  |
@@ -139,7 +139,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/FrecFont` | `makePkt__9CFrecFontR6CFntM2` | 656 | 331 of 749 lines - the draft has the original's structure (all locals in stack slots, contiguous MMI colour sequences as volatile in-place asm, control-code switch, outline/shadow passes), but the spill slots differ: the original's G_RGBA locals colExt/colBak/colSave get their (16-aligned) slots … |
 | `System/Graphic/Glare` | `makePkt__10CGlarePrim` | 446 | (comment) not matching: register allocation differs (the original keeps the -1 of its divisions by 32 in a saved register from the start); with it the function-local statics ofsX/ofsY, so .data comes from the original assembly |
 | `System/Graphic/HermitePathCamera` | `updatePos__18CHermitePathCameraR7FVECTORT1fi` | 632 | 88 of 723 lines - same structure; left: the case-2 fStep lives in f12 in the original (ours f2), the hoisted addresses of the BG-check and learp blocks get swapped s-registers (&m_vWPos s0, &vAdd s0 / &OldPos s1 in the original), the mInv address is kept in a register here and recomputed there. … |
-| `System/Graphic/Model` | `searchShaderDesc__FUs` | 23 | 12 lines off, registers only: the original keeps the masked mode in a1, the table pointer in a2, 0xffff in a3 and the TRACE string's %hi in a0; ours mode a0, pointer a1, 0xffff a2, string a3. Tried: for/while/break loop shapes, a UINT copy of mode; permuter 12 min (24539 candidates, stays 12). |
 | `System/Graphic/Model` | `link__6CModelR7CCoords` | 207 | 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 … |
 | `System/Graphic/Model` | `changeTextureSub__6CModeliPC7TexInfo` | 89 | 4 lines off, scheduling: the original keeps the m_pData load after both zero stores of nTmpTex/nTmpClut, ours hoists it between them. addTexture (same loop) matches. Tried: store orders, chained assignment, i init outside the for, condition order. |
 | `System/Graphic/Model` | `getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3` | 88 | 3 lines off: the original stores vMN[1].z/.y through the &vMN[1] operand register (t1), ours through sp. Worked: vMN[i].set(MIN/MAX, ...) (default w = 1.0f), one asm statement with all operands, D_ labels for the +-1.7e38 constants. Tried: field stores, chained assignment, pointer local; permuter … |
@@ -267,7 +266,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/SceneInfo` | `clear__10CSceneInfo` | 139 | ~110 lines - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders (incl. the lui order) and 7 min of permuter (10k candidates, 104 -> 98) did not get closer. |
 | `Game/SceneInfo` | `initFloor__10CSceneInfo` | 145 | 21 lines - the block after getFloorNumber: the original computes the s_CurrentFloor address and the clearEventRoomTbl loop pointer after the s_nCurrentFloorNumber store (lui order) with other registers; the loop body matches with the shared pSrc pointer, the tail with the *_nEventDoorStateTbl[i] … |
 | `Game/SceneInfo` | `_checkAvailableDoorID__FRC8DoorInfo` | 30 | 2 lines - the constant 5 of the second _type compare: the original loads it into v1 (li v1,5 in the beq delay slot), ours into v0. Structure matches (switch on getDoorState, `== 4 break; != 5 return TRUE`); ~25 forms (ifs, result variable, nested switch, local type) and 4 min of permuter (3k … |
-| `Game/SceneInfo` | `openGoalDoor__10CSceneInfo` | 41 | 2 lines - the nDoor copy (move s0,v0) is scheduled before the li a1,2 of setEventRoomSceneNum; the original issues li a1 first. nDoor declaration forms/types did not change it. |
 | `Game/SceneInfo` | `rollbackEventDoorState__10CSceneInfoi` | 175 | ~35 lines - the outer room loop: the original re-materializes the s_CurrentFloor address for the room (mtlo/madd) and for the count each iteration; ours shares one base. Door/state/norma logic matches; room addressing forms and 5 min of permuter (42 -> 38) did not get it. |
 | `Game/SceneInfo` | `getNormaColor__C8DoorInfoUs` | 41 | 15 lines - the first `return 0` (key && idx+1 == count) stays an inline `b end` block after a bne in the original, ours branches straight to the epilogue; the bValid test comes out as movn here, as bnel + sltu there. |
 | `Game/SceneInfo` | `getNormaNumber__C8DoorInfoUs` | 33 | 3 lines - the first `return 0` stays an inline `b end` block after a bne in the original; ours inverts it into a beq to the epilogue. ~12 structural variants (nested, else-if, result var, !(..) &&) give the same; the permuter cannot find const methods. |
@@ -387,7 +385,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 335 functions (76783 instructions) in 83 units, 266 of them parked; 12 units take a data section from assembly.
+Totals: 333 functions (76719 instructions) in 83 units, 264 of them parked; 12 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
