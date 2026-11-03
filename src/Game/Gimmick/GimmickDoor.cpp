@@ -14,7 +14,7 @@
 inline void _emptyStringPlaceholder0() {
     TRACE("");
 }
-
+#define MAP_H_STRUCTS_ONLY /* MATCH: only the structs (see Game/Map.h) */
 #include "System/Graphic/Effect/effect.h"
 #include "System/Graphic/Effect/EffectMan.h"
 #include "System/Graphic/MapUnit.h"

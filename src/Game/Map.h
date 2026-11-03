@@ -1,6 +1,6 @@
 // PARTIAL: added for Game/MapUnitTable
-#ifndef GAME_MAP_H
-#define GAME_MAP_H
+#ifndef GAME_MAP_H_STRUCTS
+#define GAME_MAP_H_STRUCTS
 
 #include "khtypes.h"
 #include "System/Vector.h" // PARTIAL: added for System/Graphic/LightUnit
@@ -105,8 +105,17 @@ struct ZONEDATA { // 0x20
     INT __parts_suu;
 };
 
-#ifdef GAME_MAP_CPP /* MATCH: the full classes need System/Task.h, Gprim.h and Model.h, whose strings Game/MapUnitTable's .rodata lacks; other includers see the partial CMap below */
-/* The complete class, for Game/Map (graphics members as padding). */
+#endif /* GAME_MAP_H_STRUCTS */
+
+/* MATCH: with MAP_H_STRUCTS_ONLY defined, only the structs: the classes need System/Task.h, Gprim.h and Model.h,
+ * whose strings the .rodata of Game/MapUnitTable and Game/Gimmick/GimmickDoor lacks */
+#if !defined(GAME_MAP_H) && !defined(MAP_H_STRUCTS_ONLY)
+#define GAME_MAP_H
+
+#include "System/Task.h"
+#include "System/Graphic/Gprim.h"
+#include "System/Graphic/Model.h"
+
 class CSky;
 class CMapLightUnit;
 class CTexAnm;
@@ -178,24 +187,5 @@ private:
     INT _checkEffId(ZONEPARTS* parts, BOOL bUseMapUnit);
     void _createEffIdProc(ZONEPARTS* parts, INT nEType);
 };
-#else
-// PARTIAL: added for System/Graphic/LightUnit (only the members it uses). The original derives from CTask;
-// the base is left out (as padding) so that includers without System/Task.h (Game/MapUnitTable) don't get its
-// .rodata string: cast CTaskMan::getSysTask()'s result.
-class CMap {
-private:
-    UBYTE _pad[0x15E8];
-    LIGHTDATA m_Light;    /* 0x15e8 */
-    LIGHTDATA m_MapLight; /* 0x1608 */
-    UBYTE _pad1628[0x58]; /* 0x1628 .. (size 0x1680) */ // PARTIAL: added for Game/GameSubField
 
-public:
-    CMap(class CTask* pParent, UINT nMapID); // PARTIAL: added for Game/GameSubField
-    void init(INT nMode0, INT nMode1);
-    LIGHTDATA* getLightData() { return &m_Light; }
-    LIGHTDATA* getMapLightData() { return &m_MapLight; }
-};
-
-#endif /* GAME_MAP_CPP */
-
-#endif // GAME_MAP_H
+#endif /* GAME_MAP_H */
