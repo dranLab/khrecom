@@ -394,14 +394,18 @@ void CGameMain::checkStartFieldMenu() {
     }
     if (m_nGameProcFlag & 0x400) suspendTaskInGame(2);
 }
-/* Parked: 8 lines - with the early `return FALSE` guard the layout matches, but our second m_hCamp test after the
- * guard reloads the member instead of being threaded to the world-map block. tried: combined ||-condition, else-if
- * chains with returns, a flag temp first; permuter 10 min, 10k candidates (score 16 -> 11 only). */
+/* Parked: 3 lines - a local hCamp (CSE-eliminated, so not in the ref) lets the hCamp != 0 guard path thread
+ * straight into the camp block (8 -> 3); left: the (m_hPause || m_hWorldMap) path still jumps back to the
+ * `if (hCamp)` retest (beqzl a0) where the original threads it to the world-map test (bnezl ..; lw a0,m_hWorldMap)
+ * and the flag path ends in `b` to it. tried with the local: ||-guard, nested guards, else-if guard after the camp
+ * arm (block order breaks), hWorldMap local (splits the ld). Before: combined ||-condition, else-if chains with
+ * returns, a flag temp first; permuter 10 min, 10k candidates (score 16 -> 11 only). */
 #if 0
 BOOL CGameMain::procFieldMenu() {
-    if (!m_hCamp && !(m_hPause || m_hWorldMap) && !(m_nGameProcFlag & 0x1000)) return FALSE;
-    if (m_hCamp) {
-        if (!CTaskMan::getTask(m_hCamp)) camp(FALSE);
+    HANDLE hCamp = m_hCamp;
+    if (!hCamp && !(m_hPause || m_hWorldMap) && !(m_nGameProcFlag & 0x1000)) return FALSE;
+    if (hCamp) {
+        if (!CTaskMan::getTask(hCamp)) camp(FALSE);
     } else if (m_hWorldMap) {
         if (!CTaskMan::getTask(m_hWorldMap)) worldMap(FALSE);
     } else if (m_hPause) {
