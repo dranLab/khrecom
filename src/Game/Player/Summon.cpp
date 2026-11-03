@@ -441,7 +441,7 @@ void CSummon::changeCameraSummon(HANDLE sumTarget, INT inMode, INT inReset) {
 
 void CSummon::setLockon(HANDLE inHandle) {
     m_hLockon = inHandle;
-    Gauge::CLockonMarker* pMarker = m_pPlayer->getMarker();
+    Gauge::CLockonMarker* pMarker = m_pPlayer->getLockonMarker();
     if (inHandle > 0) {
         m_pPlayer->setPlayerFlag(0x10000, 0);
         pMarker->changeMode();
@@ -459,7 +459,7 @@ void CSummon::resetLockon() {
     if (g_pPlayer && (m_uiFlag & 0x80)) {
         SET_FLAG(0, 0x80);
         m_pPlayer->setPlayerFlag(0, 0x10000);
-        Gauge::CLockonMarker* pMarker = m_pPlayer->getMarker();
+        Gauge::CLockonMarker* pMarker = m_pPlayer->getLockonMarker();
         if (pMarker) {
             pMarker->offPush();
             pMarker->changeMode(0);
@@ -484,7 +484,7 @@ void CSummon::killChild(FLOAT inFadeTime) {
 }
 
 void CSummon::setPushon(INT inFlag) {
-    Gauge::CLockonMarker* pMarker = m_pPlayer->getMarker();
+    Gauge::CLockonMarker* pMarker = m_pPlayer->getLockonMarker();
     if (inFlag) {
         pMarker->onPush(inFlag);
     } else {

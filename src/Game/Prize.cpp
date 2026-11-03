@@ -756,7 +756,7 @@ void CPrize::cardMainSpecial_() {
         }
         FLOAT dist;
         if (((CardBattle::CCardBattle*)CTaskMan::getSysTask(22))->getEnchantKind() == 9) {
-            dist = g_pPlayer->getCardDraw();
+            dist = g_pPlayer->getCardDrawRadius();
             dist *= dist;
         } else {
             dist = 2.25f;
@@ -1144,7 +1144,7 @@ BOOL CPrize::isDraw_() {
     if (!m_bHoming) return FALSE;
     FLOAT radius;
     if (g_pPlayer) {
-        radius = g_pPlayer->getCardDraw();
+        radius = g_pPlayer->getCardDrawRadius();
         radius *= radius;
     } else {
         radius = 25.0f;

@@ -688,7 +688,7 @@ void CFriend::changeCamera(HANDLE inTarget, INT inMode, INT inReset) {
 
 void CFriend::setLockon(HANDLE inHandle) {
     m_hLockon = inHandle;
-    Gauge::CLockonMarker* pMarker = m_pPlayer->getMarker();
+    Gauge::CLockonMarker* pMarker = m_pPlayer->getLockonMarker();
     if (inHandle > 0) {
         m_pPlayer->setPlayerFlag(0x10000, 0);
         pMarker->changeMode();
@@ -705,7 +705,7 @@ void CFriend::setLockon(HANDLE inHandle) {
 void CFriend::resetLockon() {
     if (g_pPlayer && (m_uiFlag & 0x80)) {
         SET_FLAG(0, 0x80);
-        Gauge::CLockonMarker* pMarker = m_pPlayer->getMarker();
+        Gauge::CLockonMarker* pMarker = m_pPlayer->getLockonMarker();
         m_pPlayer->setPlayerFlag(0, 0x10000);
         if (pMarker) {
             pMarker->offPush();
@@ -731,7 +731,7 @@ void CFriend::killChild(FLOAT inFadeTime) {
 }
 
 void CFriend::setPushon(INT inFlag) {
-    Gauge::CLockonMarker* pMarker = m_pPlayer->getMarker();
+    Gauge::CLockonMarker* pMarker = m_pPlayer->getLockonMarker();
     if (inFlag) {
         pMarker->onPush(inFlag);
     } else {

@@ -321,91 +321,74 @@ public:
     CPlayer(CTask* inParent, UINT inID, INT inEx); // PARTIAL: added for Game/Player/PlayerManager
     void notifyDead(INT inFlag);                   // PARTIAL: added for Game/Player/PlayerManager
     // PARTIAL: added for Game/Player/PlayerWeapon
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
     FVECTOR& getCenterPos(); // the weak copies are emitted in the original order: defined after the class
-#else
-    FVECTOR& getCenterPos() { return m_vCenterPos; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     FVECTOR& getAppearPos(); // the weak copies are emitted in the original order: defined after the class
-#else
-    FVECTOR& getAppearPos() { return m_vAppearPos; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     FVECTOR& getJumpStartPos(); // the weak copies are emitted in the original order: defined after the class
-#else
-    FVECTOR& getJumpStartPos() { return m_vJumpStartPos; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     FVECTOR& getMarkPos(); // the weak copies are emitted in the original order: defined after the class
-#else
-    FVECTOR& getMarkPos() { return m_vMarkPos; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     PlayerCamera::CPlayerCamera* getPlayerCamera() const; // the weak copies are emitted in the original order: defined after the class
-#else
-    PlayerCamera::CPlayerCamera* getPlayerCamera() { return m_pCam; } // PARTIAL: added for Game/Player/FriendJack
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     INT getPlayerState() const; // the weak copies are emitted in the original order: defined after the class
-#else
-    INT getPlayerState() { return m_PlayerState; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     INT getHP(); // the weak copies are emitted in the original order: defined after the class
-#else
-    INT getHP() { return m_iHP; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     INT getLV(); // the weak copies are emitted in the original order: defined after the class
-#else
-    INT getLV() { return m_iLV; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     INT getEXP(); // the weak copies are emitted in the original order: defined after the class
-#else
-    INT getEXP() { return m_iEXP; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     void setHP(INT inHP); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setHP(INT inHP) { m_iHP = inHP; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     void setMaxHP(INT inMaxHP); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setMaxHP(INT inHP) { m_iMaxHP = inHP; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     void setAP(INT inAP); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setAP(INT inAP) { m_iAP = inAP; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     void setLV(INT inLV); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setLV(INT inLV) { m_iLV = inLV; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     void setEXP(INT inEXP); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setEXP(INT inEXP) { m_iEXP = inEXP; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     void setMP(INT inMP); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setMP(INT inMP) { m_iMP = inMP; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     void setMaxDP(INT inDP); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setMaxDP(INT inDP) { m_iMaxDP = inDP; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     INT getMaxHP(); // the weak copies are emitted in the original order: defined after the class
-#else
-    INT getMaxHP() { return m_iMaxHP; }
-#endif
+
+
+
     void addHP(INT inHP, INT inFlag, INT inEffect);
     void setPrizeHealing(TIMEQ inTime); // PARTIAL: added for Game/Player/SummonTink
     void exePrizeHealing();
@@ -430,83 +413,70 @@ public:
     void exeWalk(); void setWalkAnim(); void exeStartWait(); INT isStartLadderJump(); void procDropMP(); INT chkBattleIdle(); FLOAT getAirHeight(FVECTOR* inPos, FLOAT inHeight, INT inLimit); FLOAT getFrontAirHeight(FVECTOR* inPos, FLOAT inLength, FLOAT inHeight, FLOAT inDir);
     void recoverCollMap();
     // PARTIAL: added for Game/Gimmick/GimmickWindowLid
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
     void setConditionFlag(UINT inSet, UINT inMask); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setConditionFlag(UINT inSet, UINT inMask) { m_uiConditionFlag = (m_uiConditionFlag | inSet) & ~inMask; }
-#endif
+
+
+
     // PARTIAL: added for Game/Player/FriendKing
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
     CardBattle::CCardRevolver* getRevolver() const; // the weak copies are emitted in the original order: defined after the class
-#else
-    CardBattle::CCardRevolver* getRevolver() { return m_pRevolver; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     INT isConditionFlag(UINT inFlag) const; // the weak copies are emitted in the original order: defined after the class
-#else
-    INT isConditionFlag(UINT inFlag) { return m_uiConditionFlag & inFlag; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     UINT getAttackID(); // the weak copies are emitted in the original order: defined after the class
-#else
-    UINT getAttackID() { return m_uiAttackID; }
-#endif
+
+
+
     void setCure(INT inID, INT inPow);
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
     INT getCount() const; // the weak copies are emitted in the original order: defined after the class
-#else
-    INT getCount() { return m_iCount; } // PARTIAL: added for Game/Player/Friend
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     INT isBattleFlag(UINT inFlag) const; // the weak copies are emitted in the original order: defined after the class
-#else
-    INT isBattleFlag(UINT inFlag) { return m_uiBattleFlag & inFlag; } // PARTIAL: added for Game/Player/SummonMushu
-#endif
+
+
+
     // PARTIAL: added for Game/Player/FriendDonald
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
     PlayerWeapon::CPlayerWeapon* getWeapon() const; // the weak copies are emitted in the original order: defined after the class
-#else
-    PlayerWeapon::CPlayerWeapon* getWeapon() { return m_pWeapon; }
-#endif
+
+
+
     void getWeaponTopPos(FVECTOR& outPos); void getCaskPos(FVECTOR& inVec);
     // PARTIAL: added for Game/Player/SummonCloud
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
     void setDir(const FLOAT& inDir); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setDir(FLOAT inDir) { m_fDir = inDir; }
-#endif
+
+
+
     // PARTIAL: added for Game/Player/Summon
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
     FLOAT getDir(); // the weak copies are emitted in the original order: defined after the class
-#else
-    FLOAT getDir() { return m_fDir; }
-#endif
-#ifndef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate (tested 2026-11-02): not in the original class: emitted as weak copies if defined in the key function's unit */
-    Gauge::CLockonMarker* getMarker() { return m_pMarker; }
-#endif
+
+
+
+
+
+
     INT calcAppearPos(FLOAT inDist, FLOAT inRadius, FVECTOR* inCenter);
     void calcAppearPosFS(FLOAT inDist, FLOAT inRadius);
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
     HANDLE isNowMark(); // the weak copies are emitted in the original order: defined after the class
-#else
-    HANDLE isNowMark() { return m_hMark; } // PARTIAL: added for Game/Player/FriendGoofy (original name/type unknown)
-#endif
+
+
+
     // PARTIAL: added for Game/Player/PlayerCamera
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
     HANDLE isNowLockon(); // the weak copies are emitted in the original order: defined after the class
-#else
-    HANDLE isNowLockon() { return m_hLockon; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     FVECTOR& getLockonPos(); // the weak copies are emitted in the original order: defined after the class
-#else
-    FVECTOR& getLockonPos() { return m_vLockonPos; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     FVECTOR& getStartPos(); // the weak copies are emitted in the original order: defined after the class
-#else
-    FVECTOR& getStartPos() { return m_vStartPos; }
-#endif
+
+
+
     BOOL isNowIdleAnim();
     // PARTIAL: added for Game/Gimmick/GimmickJumpStand
     INT getJumpState() const;
@@ -514,26 +484,29 @@ public:
     static void notifyGetPrize(INT inKind, INT inNumber, INT inState);
     // PARTIAL: added for Game/Prize (getter names unknown)
     void notifyReturnCard(const CARD* inCard);
-#ifndef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate (tested 2026-11-02): not in the original class: emitted as weak copies if defined in the key function's unit */
-    FLOAT getPrizeDraw() const { return m_fPrizeDraw; }
-#endif
-#ifndef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate (tested 2026-11-02): not in the original class: emitted as weak copies if defined in the key function's unit */
-    FLOAT getCardDraw() const { return m_fCardDraw; }
-#endif
+
+
+
+
+
+
     static BOOL notifyBossDead(INT inStep);   // PARTIAL: added for Game/Enemy/BossDeadDemo
     static HANDLE getLevelUpEffect(); // PARTIAL: added for Game/Gimmick/GimmickTreasureBox
     // PARTIAL: added for Game/Player/FriendBeast (also out of line: setPlayerFlag__7CPlayerUiUi)
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
     void setPlayerFlag(UINT inSet, UINT inMask); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setPlayerFlag(UINT inSet, UINT inMask) { UINT& f = m_uiPlayerFlag; f = (f | inSet) & ~inMask; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     void setTrgFlag(UINT inSet, UINT inMask); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setTrgFlag(UINT inSet, UINT inMask) { UINT& f = m_uiTrgFlag; f = (f | inSet) & ~inMask; } // PARTIAL: added for Form/Menu/WorldSelect
-#endif
-    // PARTIAL: added for Game/Player/FriendBeast (CPlayer's virtuals up to vtable[36])
+
+
+
+    // PARTIAL: added for Game/Player/PlayerRiku and FriendBeast (virtuals and overrides, in the ref's order)
+    virtual ~CPlayer();
+    virtual void stateInitial();
+    virtual void updateBefore();
+    virtual void updateAfter();
+    virtual void lastUpdate();
     virtual void beginStateField();
     virtual void stateField();
     virtual void endStateField();
@@ -546,6 +519,11 @@ public:
     virtual void beginStateHide();
     virtual void stateHide();
     virtual void endStateHide();
+    virtual void getLockOnPos(FVECTOR& outPos);
+    virtual void getHeadPos(FVECTOR& outPos) const;
+    virtual void getUseCardPos(FVECTOR& outPos);
+    virtual void getCameraTargetPos(FVECTOR& outPos);
+    virtual void onMsg(INT inMsg, void* inExtraInfo);
     virtual void onWeapon(INT inEffect);
     virtual void offWeapon();
     virtual void setStateSE(INT inState, INT inKind);
@@ -578,43 +556,28 @@ public:
     virtual void exeDuel();
     virtual void initPronounce(INT inFlag);
     virtual void exePronounce();
-    // PARTIAL: added for Game/Player/PlayerRiku (overrides, for the vtables)
-    virtual ~CPlayer();
-    virtual void stateInitial();
-    virtual void onMsg(INT inMsg, void* inExtraInfo);
-    virtual void getLockOnPos(FVECTOR& outPos);
-    virtual void getHeadPos(FVECTOR& outPos) const;
-    virtual void getUseCardPos(FVECTOR& outPos);
-    virtual void getCameraTargetPos(FVECTOR& outPos);
-    virtual void updateBefore();
-    virtual void updateAfter();
-    virtual void lastUpdate();
+
     // PARTIAL: added for Game/Player/PlayerRiku
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
     void setActionFlag(UINT inSet, UINT inMask); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setActionFlag(UINT inSet, UINT inMask) { UINT& f = m_uiActionFlag; f = (f | inSet) & ~inMask; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     void setBattleFlag(UINT inSet, UINT inMask); // the weak copies are emitted in the original order: defined after the class
-#else
-    void setBattleFlag(UINT inSet, UINT inMask) { UINT& f = m_uiBattleFlag; f = (f | inSet) & ~inMask; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     INT isPlayerFlag(UINT inFlag) const; // the weak copies are emitted in the original order: defined after the class
-#else
-    INT isPlayerFlag(UINT inFlag) { return m_uiPlayerFlag & inFlag; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     INT isActionFlag(UINT inFlag) const; // the weak copies are emitted in the original order: defined after the class
-#else
-    INT isActionFlag(UINT inFlag) { return m_uiActionFlag & inFlag; }
-#endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
+
+
     INT isTrgFlag(UINT inFlag) const; // the weak copies are emitted in the original order: defined after the class
-#else
-    INT isTrgFlag(UINT inFlag) { return m_uiTrgFlag & inFlag; }
-#endif
+
+
+
     static CPlayer* m_pInstance;
 #ifndef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate (tested 2026-11-02): not in the original class: emitted as weak copies if defined in the key function's unit */
     static CPlayer*& _instance() { return m_pInstance; } // PARTIAL: reference accessor (as CStatus::_info): the original reloads m_pInstance after every store
@@ -714,7 +677,7 @@ public:
         return handle;
     }
 #endif
-#ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
+
     INT getCurrentState();
     UINT getCharaID();
     PL_PARAM* getParam();
@@ -760,7 +723,7 @@ public:
     HANDLE isNowTarget();
     HANDLE getOldLockon();
     INT getOldCamMode();
-#endif
+
 };
 
 extern CPlayer* g_pPlayer;
@@ -801,6 +764,7 @@ extern char* szAtkAnimID[71];
 
 #ifdef GAME_PLAYER_PLAYER_CPP /* MATCH: GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) */
 static inline CPlayer*& _instance() { return CPlayer::m_pInstance; }
+#endif
 /* CPlayer's weak inline functions, defined here in the order the original emitted them (the key function beginStateField is in Player.cpp) */
 inline INT CPlayer::getCurrentState() { return m_iState; }
 inline void CPlayer::stateWait() {  }
@@ -913,6 +877,5 @@ inline void CPlayer::exeJump2nd() {  }
 inline void CPlayer::exeAvoid() {  }
 inline void CPlayer::initPronounce(INT inFlag) {  }
 inline void CPlayer::exePronounce() {  }
-#endif
 
 #endif /* GAME_PLAYER_PLAYER_H */
