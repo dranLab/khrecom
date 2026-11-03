@@ -115,8 +115,6 @@ union FVECTOR {
         vec.w *= inV.w;
         return vec;
     }
-    // PARTIAL: added for System/Graphic/Anim (name guessed)
-    BOOL isZero() const { return _ul[0] == 0 && _ul[1] == 0; }
 };
 
 typedef int _IVECTOR[4];
