@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Gimmick/GimmickHitReturn
+
 #ifndef SYSTEM_GRAPHIC_EFFECT_EFFECTMAN_H
 #define SYSTEM_GRAPHIC_EFFECT_EFFECTMAN_H
 

@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Gimmick/GimmickBreakable
+
 #ifndef GAME_COLLISION_COLLUTIL_H
 #define GAME_COLLISION_COLLUTIL_H
 
@@ -23,7 +23,7 @@ inline void* _collUtilCreate() { /* MATCH: placeholder: an inline function's str
     return p;
 }
 
-/* PARTIAL: added for Game/Atel/EventTrap - the singleton accessor (line 194), for includers that have the class
+/* The singleton accessor (line 194), for includers that have the class
  * (Game/Collision/CollUtilA.h, included before this header). */
 #ifdef GAME_COLLISION_COLLUTILA_H /* MATCH: the accessor only for includers that have the class (see above) */
 /* The load of m_pInstance is not a "fixed scalar" to gcc's alias analysis (it stays ordered after stores through
@@ -34,11 +34,11 @@ inline CCollUtil* CCollUtil::getInstance() {
     if (!instance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
     return instance;
 }
-// PARTIAL: added for Game/Collision/CollMapCamera (original lines unknown)
+
 inline INT CCollUtil::detectMCD(CCollision& collision) {
     return getInstance()->_detectMCD(collision);
 }
-// PARTIAL: added for Game/Collision/CollBody (original lines unknown)
+
 inline INT CCollUtil::detectColumnColumnEz(CColumnCollision& coll0, CColumnCollision& coll1) {
     return getInstance()->_detectColumnColumnEz(coll0, coll1);
 }
@@ -48,18 +48,18 @@ inline INT CCollUtil::detectColumnColumn(CColumnCollision& coll0, CColumnCollisi
 inline INT CCollUtil::detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork) {
     return getInstance()->_detectOCD(collision, pMCDInfo, pOCDWork, 1);
 }
-// PARTIAL: added for Game/Collision/CollMap (original lines unknown)
+
 inline INT CCollUtil::detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork, INT fgLocal) {
     return getInstance()->_detectOCD(collision, pMCDInfo, pOCDWork, fgLocal);
 }
 inline INT CCollUtil::checkWaterSurface(FVECTOR& inPos) {
     return getInstance()->_checkWaterSurface(inPos);
 }
-// PARTIAL: added for Game/Collision/Ride (original line unknown)
+
 inline void CCollUtil::initializeData(void* pData, MCD_INFO* pMCDInfo) {
     getInstance()->_initializeData(pData, pMCDInfo);
 }
-// PARTIAL: added for Game/Collision/CollAttack (original lines unknown)
+
 inline INT CCollUtil::detectSpherePoint(CSphereCollision& coll0, CPointCollision& coll1) {
     return getInstance()->_detectSpherePoint(coll0, coll1);
 }

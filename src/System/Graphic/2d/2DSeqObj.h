@@ -7,8 +7,8 @@
 
 struct G_UV;
 struct TexInfo;
-namespace D2 { struct SeqControl; } // PARTIAL: in D2 as in the original
-namespace D2 { // PARTIAL: added for System/Graphic/2d/2DSeq
+namespace D2 { struct SeqControl; } // in D2 as in the original
+namespace D2 {
 class C2DFnt;
 class C2DObj;
 struct SEQ_SEQUENCE;

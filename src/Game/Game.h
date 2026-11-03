@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Gimmick/GimmickSavePoint
+
 #ifndef GAME_GAME_H
 #define GAME_GAME_H
 

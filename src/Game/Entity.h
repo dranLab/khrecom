@@ -4,9 +4,9 @@
 
 #include "khtypes.h"
 #include "System/Task.h"
-#include "System/Vector.h" // PARTIAL: added for Game/Bullet/Bullet (setStartPos)
-#include "System/Graphic/Effect/EffectMan.h" // PARTIAL: added for Game/Gimmick/BaseGimmick (ObjType::eObjType)
-// PARTIAL: Gprim.h include moved to Game/Bullet/Bullet.h for Game/Gimmick/GimmickHitMore (its strings are not in every includer)
+#include "System/Vector.h"
+#include "System/Graphic/Effect/EffectMan.h"
+// MATCH: Gprim.h is included by Game/Bullet/Bullet.h for Game/Gimmick/GimmickHitMore (its strings are not in every includer)
 
 union FVECTOR;
 class CState;

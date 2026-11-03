@@ -6,7 +6,7 @@
 #include "System/Vector.h"
 
 
-struct G_UV; /* PARTIAL: added for Form/Menu/WorldWarp */
+struct G_UV;
 
 namespace D2 {
 

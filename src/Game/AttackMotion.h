@@ -1,9 +1,9 @@
-// PARTIAL: added for Game/Gimmick/GimmickToldPipe
+
 #ifndef GAME_ATTACKMOTION_H
 #define GAME_ATTACKMOTION_H
 
 #include "khtypes.h"
-#include "System/Vector.h"           // PARTIAL: added for Game/AttackMotion (CAttackMotionCtrl)
+#include "System/Vector.h"
 #include "Game/CollParam.h"           // ATK_KIND
 #include "Game/Collision/CollObj.h"   // COLL_KIND
 

@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/CardKind
+
 #ifndef GAME_SCENEINFO_H
 #define GAME_SCENEINFO_H
 
@@ -167,8 +167,8 @@ struct WorldSelTable { // 0x8
     WORLD_ID* _pTbl;
 };
 
-// PARTIAL: the ref's default constructor, operator=, operator==, operator!=, set (2), clear and isEmpty are
-// missing (inline, never emitted: their parameters are unknown); AREA_SCENE(INT) is guessed for System/RsrcDB
+// AREA_SCENE's constructor parameters are guessed (the ref lists none); set (2 in the ref) is declared once:
+// its parameters are unknown (inline, never emitted)
 union AREA_SCENE {
     struct {
         SHORT _nScene;

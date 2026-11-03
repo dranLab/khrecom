@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Bullet/CreateBullet
+
 #ifndef SYSTEM_TASKMAN_H
 #define SYSTEM_TASKMAN_H
 
@@ -33,7 +33,7 @@ enum MAINTASK_CALLMODE {
     MAINTASK_CALL_HIDE = 2
 };
 
-// PARTIAL: added for System/Task
+
 template <class T> class CVector;
 extern INT VSYNC_TIMEQ;
 struct TaskMainParam {

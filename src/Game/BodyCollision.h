@@ -4,7 +4,7 @@
 #include "khtypes.h"
 #include "System/MainApp.h"
 #include "Game/CollParam.h"
-#include "System/Graphic/Effect/ObjType.h" // PARTIAL: added for Game/Enemy/BattleEnemy (setHitEffectParam)
+#include "System/Graphic/Effect/ObjType.h"
 
 union FVECTOR;
 class CEntity;

@@ -14,7 +14,7 @@
 #include "System/Task.h"
 #include <string.h>
 
-/* PARTIAL: placement new for CRsrcData's inline allocation, declared only: the includers define it themselves */
+/* MATCH: placement new for CRsrcData's inline allocation, declared only: the includers define it themselves */
 inline void* operator new(size_t, void* p) throw();
 
 extern "C" const char _ctype_[];

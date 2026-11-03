@@ -6,7 +6,7 @@
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/Camera.h"
 
-/* PARTIAL: added for System/Graphic/PathDataCamera (layouts from the debug info; members as needed) */
+
 
 class CDbgCube {
 private:

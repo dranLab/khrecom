@@ -3,13 +3,13 @@
 #define GAME_BULLET_BULLET_H
 
 #include "khtypes.h"
-#include "System/Graphic/Gprim.h" // PARTIAL: moved here from Game/Entity.h for Game/Gimmick/GimmickHitMore
+#include "System/Graphic/Gprim.h" // MATCH: here, not in Game/Entity.h: Game/Gimmick/GimmickHitMore's original lacks Gprim.h's strings
 #include "Game/Entity.h"
-#include "System/Vector.h" // PARTIAL: added for Game/Player/SummonMushu (BULLET_PARAM)
-#include "Game/Collision/CollObj.h" // PARTIAL: COLL_KIND moved there for Game/Bullet/Bullet
-#include "System/Fsm.h" // PARTIAL: added for Game/Bullet/Bullet
+#include "System/Vector.h"
+#include "Game/Collision/CollObj.h"
+#include "System/Fsm.h"
 
-// PARTIAL: completed for Game/Player/SummonMushu
+
 struct BULLET_EFFECT_INFO {
     CHAR* pEffectName;
     INT iNo;
