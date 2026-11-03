@@ -3,8 +3,8 @@
 
 #include "khtypes.h"
 #include "System/Debug.h"
-
-class CTask;
+#include "System/Task.h"
+#include "System/PadHandler.h"
 
 struct DebugParam {
     INT _nUserIndex;
@@ -29,15 +29,10 @@ struct DebugParam {
     INT _nSceneIndexInRoom;
 };
 
-/* The full class definitions need System/Task.h, System/PadHandler.h and System/Graphic/Gprim.h, whose inline
- * functions put strings into .rodata of every includer: only Form/DebugMenu.cpp defines FORM_DEBUGMENU_FULL (after
- * including them); other includers see the static interface only. */
-#ifdef FORM_DEBUGMENU_FULL // MATCH: the full classes need Gprim.h/PadHandler.h; System/Debug and System/RootTask originals lack Gprim.h's strings
 
 class CDebugMenuLocal;
 class CTile;
 class CPolyG4;
-class CBfObj;
 
 class CDebugMenu : public CTask {
 private:
@@ -77,36 +72,11 @@ private:
     CPolyG4* m_pPolyBar[7];
 
 public:
-    CColorCheck(CTask* pInParent);
+    CColorCheck(CBfObj* pInParent);
     virtual ~CColorCheck();
     virtual void main();
     virtual void disp();
 };
 
-#else
-
-class CDebugMenu {
-public:
-    CDebugMenu(CTask* pParent);
-    static void setDebugUser(USER inID);
-    static USER getDebugUser();
-    static DebugParam& getDebugParam();
-    static void initParam(INT nLocale);
-    static BOOL startLoadFromMemoca();
-    static BOOL isCompleteLoadFromMemoca();
-};
-
-/* CTask-derived; the base is omitted here so the header need not include Task.h */
-class CColorCheck {
-public:
-    CColorCheck(CTask* pParent);
-};
-
-class CScreenCheck {
-public:
-    CScreenCheck(CTask* pParent);
-};
-
-#endif // FORM_DEBUGMENU_FULL
 
 #endif // FORM_DEBUGMENU_H

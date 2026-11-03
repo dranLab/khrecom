@@ -18,7 +18,7 @@ struct TIM2_FILEHEADER {
 };
 
 class CTexAnm;
-typedef CTask CBfObj;
+
 
 class CTexCtrl : public CTask {
 public:

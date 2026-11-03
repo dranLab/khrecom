@@ -218,7 +218,7 @@ private:
 public:
     CHAR* getDebugInfo() const { return m_pszDebugInfo; }
 };
-
+typedef CTask CBfObj;
 
 class CTaskSecondary : public CTask {
 public:
