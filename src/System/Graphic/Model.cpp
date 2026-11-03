@@ -391,16 +391,15 @@ void CModel::changeTexture(const CHAR* inSrc, const CHAR* inDst) {
     }
     setupUVScroll(0);
 }
-/* Parked: 4 lines off, scheduling: the original keeps the m_pData load after both zero stores of nTmpTex/nTmpClut, ours hoists it between them. addTexture (same loop) matches. Tried: store orders, chained assignment, i init outside the for, condition order. */
-#if 0
+template <class T> static inline T& _ref(T& v) { return v; }
 void CModel::changeTextureSub(INT idx, const TexInfo* m) {
     SHORT nTmpTex;
     SHORT nTmpClut;
     INT i;
     if (idx >= 0 && idx < m_pData->m_nTexNum) {
         ((TexInfoStub*)&m_TexInfo[idx])->init(m, -1, -1);
-        nTmpClut = 0;
-        nTmpTex = 0;
+        _ref(nTmpTex) = 0; // MATCH: stores via a reference stay before the m_pData load
+        _ref(nTmpClut) = 0;
         for (i = 0; i < m_pData->m_nTexNum; i++) {
             TexInfoStub* t = (TexInfoStub*)&m_TexInfo[i];
             t->update(nTmpTex, nTmpClut);
@@ -408,9 +407,6 @@ void CModel::changeTextureSub(INT idx, const TexInfo* m) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", changeTextureSub__6CModeliPC7TexInfo);
-#endif
 void CModel::setShadowSize(INT nSize) {
     if (m_Mode == 0x10 && m_pFadeModel) *(INT*)((BYTE*)m_pFadeModel + 0x28) = nSize;
 }
@@ -1021,7 +1017,6 @@ void CModel::_disp0_SetTexture(INT nFlag, u_long* pTag) {
 }
 /* Parked: 137 of 659 lines off, same size; mostly registers: the original gives this s5 and iFlags&2 s4 (ours swapped), the bone/light min() selects use movn (an if-form gives that but swaps s0/s1 globally), the no-light branch materializes zero twice. Worked: case 2 with default, (USHORT) mode compares inline, pcpyld tied to the tag word, _ref(m_iSendFlg) after the GIF stores, cache-hit close in the else arm, x/y/z/w colour stores, pextlw pack with a non-early-clobber temp. Tried: iFlags &= 2, a BOOL copy, zero variants; permuter 20 min (19316 candidates, stays 145). */
 #if 0
-template <class T> static inline T& _ref(T& v) { return v; }
 static inline u_long128 _packWord(INT x, INT y, INT z, INT w) {
     u_long128 tmp;
     u_long128 out128;
