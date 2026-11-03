@@ -1791,11 +1791,6 @@ void CPrizeGauge::setPrizeMp(INT inMp) {
     }
     _ref(m_pInstance)->setDispMogSeq();
 }
-/* Parked: 18 lines off: the %hi(m_pInstance) base and its loop copy swap s2/s3, and the inMp <= 0 return
-   branch doesn't get the epilogue's lq s0 in its delay slot, so the loop top gets an alignment nop. Worked:
-   *(T*)& stores for m_uiMogState and m_iDropMp (m_pInstance reloaded after them, as resetHP). Tried: loop shapes
-   (index base 0/1, do-while, pointer local), early-return shapes; permuter 3 min (8172, no gain). */
-#if 0
 void CPrizeGauge::setDropMp(INT inMp) {
     INT i;
     if (!m_pInstance) return;
@@ -1811,13 +1806,10 @@ void CPrizeGauge::setDropMp(INT inMp) {
         }
     }
     *(INT*)&m_pInstance->m_iDropMp = inMp; // MATCH: as resetHP
-    m_pInstance->m_iOldMp = 0;
     m_pInstance->m_iMp = 0;
+    *(INT*)&m_pInstance->m_iOldMp = 0; // MATCH: m_pInstance reloaded for the call after it
     m_pInstance->setDispMogSeq();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerGauge", setDropMp__Q25Gauge11CPrizeGaugei);
-#endif
 void CPrizeGauge::setPrizeCard(CARD& inData, INT inMode, INT inStack) {
     INT i;
 
