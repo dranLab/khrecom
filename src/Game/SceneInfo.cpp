@@ -1781,9 +1781,6 @@ DOOR_ID _openGoalDoor(const RoomInfo& roomGoal) {
     pGoalDoor->setDoorState(DOOR_STAT_OPENED);
     return (DOOR_ID)nDoor;
 }
-/* Parked: 2 lines - the nDoor copy (move s0,v0) is scheduled before the li a1,2 of setEventRoomSceneNum;
-   the original issues li a1 first. nDoor declaration forms/types did not change it. */
-#if 0
 void CSceneInfo::openGoalDoor() {
     RoomInfo* pRoom = getEventRoomInfo(_EVENTROOM_GOAL);
     if (!pRoom || pRoom->isExceptRoom()) {
@@ -1794,9 +1791,6 @@ void CSceneInfo::openGoalDoor() {
     setEventRoomSceneNum(_EVENTROOM_GOAL, 2);
     makeRoom(*pRoom, nDoor, 2, getCardIDFromSceneNum(2), CGameWork::m_pMCWork->_nNextRCNormaNum);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", openGoalDoor__10CSceneInfo);
-#endif
 __asm__(".rdata\n.align 3\n.word 0x8B837581\n.word 0x80835B81\n.word 0x5A836564\n.word 0x4E838C83\n.word 0x76816783\n.word 0x4F8AC888\n.word 0xFC93C582\n.word 0xC482C182\n.word 0xCC82E982\n.word 0x4181C582\n.word 0x5B815383\n.word 0xE0948B83\n.word 0x4A8AF082\n.word 0xDC82AF82\n.word 0xF182B982\n.word 0x0000000A\n.word 0x00000000\n.word 0x00000000\n.text\n");
 void CSceneInfo::backupEventDoorState() {
     USHORT nFloorIdx = getCurrentFloorIndex();
