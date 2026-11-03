@@ -651,7 +651,7 @@ void CAnim::setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", setMotion__5CAnimiii);
 #endif
-/* Near-match: the fixed-quaternion test (original sets 1 by default, then tests the second word) */
+/* Parked: 1 of 377 lines, same size - only the operand order of the vScale / QuaternionToMatrix address in the m_HokanTq <= 0 fix block (original base + fix_no * 48, ours the reverse). The fixed-quaternion test is the ref's QUATERNION_DT::isEffective() (if both words are zero return FALSE; return TRUE: li 1 + movz; 6 -> 1). Tried: integer/pointer address forms, a reference/pointer local (78), m_pFixQuat[i], statement orders, an explicit operator= (the ref lists one). */
 #if 0
 void CAnim::_setUpdate(int nSkl, TIMEQ tqFr, BOOL bClipped) {
     FLOAT frm0;
@@ -692,7 +692,7 @@ void CAnim::_setUpdate(int nSkl, TIMEQ tqFr, BOOL bClipped) {
         CCoord& crd = m_pCrds->Crd(i);
         FVECTOR vScale;
         INT fix_no = -1;
-        if (!m_pFixQuat[i].vQuatRotate.isZero()) {
+        if (m_pFixQuat[i].isEffective()) {
             fix_no = i;
         }
         if (fix_no != -1) {
