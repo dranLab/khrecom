@@ -49,7 +49,7 @@ enum COLL_KIND {
 #endif /* GAME_COLLISION_COLLOBJ_H_ENUMS */
 
 #if !defined(GAME_COLLISION_COLLOBJ_H) && !defined(COLLOBJ_H_ENUMS_ONLY)
-#define GAME_COLLISION_COLLOBJ_H
+#define GAME_COLLISION_COLLOBJ_H /* MATCH: Game/Collision/CollUtil.h tests it (collideMap, see below) */
 
 #include "System/Vector.h"
 #include "System/SJoint.h"
@@ -87,13 +87,18 @@ public:
     FVECTOR& getOutPos(/* parameters unknown */);
 };
 
-/* PARTIAL: the other collision classes, for Game/Collision/CollObj (some includers have local copies) */
-#ifdef COLLOBJ_H_COLLISION_CLASSES // MATCH: the inline collideMap needs CCollUtil (CollUtil.h): only units that construct these classes define it
+
 class CPointCollision : public CCollision {
 public:
     CPointCollision() { m_Type = COLL_TYPE_POINT; } virtual ~CPointCollision() {}
-    virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
+    virtual INT collideMap();
 };
+/* MATCH: collideMap inlines CCollUtil::getInstance (Game/Collision/CollUtil.h): defined here when CollUtil.h came
+ * first (or the unit has its own accessor: COLLUTIL_H_LOCAL_ACCESSOR), else at the end of CollUtil.h
+ * (Game/Gimmick/GimmickSearchLaser gets CollObj.h early via CardBattle.h) */
+#if (defined(GAME_COLLISION_COLLUTIL_H) && defined(GAME_COLLISION_COLLUTILA_H)) || defined(COLLUTIL_H_LOCAL_ACCESSOR)
+inline INT CPointCollision::collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
+#endif
 
 class CSphereCollision : public CCollision {
 public:
@@ -101,8 +106,15 @@ public:
         m_Type = COLL_TYPE_SPHERE;
         m_Radius = m_shiftY = 0.5f;
     }
-    virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
+    void setRadius(FLOAT inRadius) {
+        m_shiftY = inRadius;
+        m_Radius = inRadius;
+    }
+    virtual INT collideMap();
 };
+#if (defined(GAME_COLLISION_COLLUTIL_H) && defined(GAME_COLLISION_COLLUTILA_H)) || defined(COLLUTIL_H_LOCAL_ACCESSOR)
+inline INT CSphereCollision::collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); } // MATCH: see above
+#endif
 
 class CPoly3Collision : public CCollision {
 public:
@@ -110,7 +122,7 @@ public:
     CPoly3Collision() { m_Type = COLL_TYPE_POLY3; }
 };
 
-#endif
+
 
 class CColumnCollision : public CCollision {
 public:
@@ -121,13 +133,14 @@ public:
     void setRadius(/* parameters unknown */);
 };
 
-#ifdef COLLOBJ_H_COLLISION_CLASSES // MATCH: the inline collideMap needs CCollUtil (CollUtil.h): only units that construct these classes define it
+
 class CCircleCollision : public CCollision {
 public:
     CCircleCollision() {
         m_Type = COLL_TYPE_CIRCLE;
         m_Radius = 0.5f;
     }
+    void setRadius(/* parameters unknown */);
 };
 
 class CModelCollision : public CCollision {
@@ -144,7 +157,7 @@ class CInfinityCollision : public CCollision {
 public:
     CInfinityCollision() { m_Type = COLL_TYPE_INFINITY; }
 };
-#endif
+
 
 /* All inline members are emitted (weak) in Game/Collision/CollObj.cpp, in declaration order: keep the order. */
 class CCollObj : public CSJointT<CCollObj> {

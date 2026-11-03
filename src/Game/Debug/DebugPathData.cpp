@@ -1,6 +1,6 @@
 #include "khtypes.h"
 #define FORM_DEBUGWINDOW_FULL /* MATCH: CNakCamera; the original has Gprim.h's strings (PathData.h includes it first) */
-#define COLLOBJ_H_COLLISION_CLASSES /* MATCH: CPointCollision (debugWinPathEditPosCamGround) */
+
 
 #include "System/Graphic/PathData.h"
 #include "System/Graphic/HermitePath.h"

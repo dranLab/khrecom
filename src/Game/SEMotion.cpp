@@ -114,14 +114,14 @@ inline BOOL SES_HEADER::addrMapping() {
 
 
 
-/* Inline in the original's collision header: the weak copies of its destructors and collideMap end this
- * object. */
-class CPointCollision : public CCollision { /* PARTIAL: stand-in for Game/Gimmick/GimmickCarry CPointCollision: gated by COLLOBJ_H_COLLISION_CLASSES (CollObj.h comes in early via Movement.h) */
-public:
-    CPointCollision() { m_Type = COLL_TYPE_POINT; }
-    virtual ~CPointCollision() {}
-    virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
-};
+
+
+
+
+
+
+
+
 
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 

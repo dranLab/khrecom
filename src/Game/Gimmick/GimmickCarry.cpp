@@ -39,14 +39,14 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #include <math.h>
 
-/* Inline in the original's collision header: the weak copies of its destructors and collideMap end this
- * object (the named copies are other objects'). */
-class CPointCollision : public CCollision {
-public:
-    CPointCollision() { m_Type = COLL_TYPE_POINT; }
-    virtual ~CPointCollision() {}
-    virtual INT collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
-};
+
+
+
+
+
+
+
+
 
 // System/Coord.h
 void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);

@@ -1,6 +1,6 @@
 /* .rodata comes from the original assembly: the split puts the unit's data at 0x4893B4 (4 mod 8), so string
  * literals can't be placed from source; the code refers to the original's strings by their labels. */
-#define COLLOBJ_H_COLLISION_CLASSES // MATCH: CollObj.h's point/circle/poly3 classes are gated (other includers keep local copies)
+
 #include "Game/Collision/CollUtilA.h"
 #include "System/HeapMan.h"
 #include "System/MainApp.h"
@@ -14,7 +14,7 @@ inline CCollUtil* CCollUtil::getInstance() {
     if (!instance) AssertApp(D_00489500, 194, D_00489578, 0);
     return instance;
 }
-
+#define COLLUTIL_H_LOCAL_ACCESSOR /* MATCH: CollObj.h's collideMap inlines this accessor */
 #include "Game/Collision/CollObj.h"
 #include "include_asm.h"
 

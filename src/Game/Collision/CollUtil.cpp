@@ -1,7 +1,7 @@
 /* .rodata comes from the original assembly: the split ends it at 0x4893B4, in the middle of CSphereCollision's
  * vtable (Game/Collision/CollUtilO's data holds the rest and CCollision's vtable). The code refers to the
  * original's strings by their labels instead. */
-#define COLLOBJ_H_COLLISION_CLASSES /* MATCH: CCollUtil() constructs a CSphereCollision (CollObj.h gates the collision classes) */
+
 
 #include "khtypes.h"
 #include "Game/Collision/CollInfo.h"
@@ -28,7 +28,7 @@ inline CCollUtil* CCollUtil::getInstance() {
     if (!instance) AssertApp(D_004891D0, 194, D_00489248, 0);
     return instance;
 }
-
+#define COLLUTIL_H_LOCAL_ACCESSOR /* MATCH: CollObj.h's collideMap inlines this accessor */
 #include "Game/Collision/CollObj.h"
 #include "Game/Collision/Ride.h"
 #include "include_asm.h"

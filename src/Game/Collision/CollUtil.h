@@ -81,6 +81,11 @@ inline INT CCollUtil::detectColumnSphere(CColumnCollision& coll0, CSphereCollisi
 inline INT CCollUtil::detectColumnPoly3(CColumnCollision& coll0, CPoly3Collision& coll1) {
     return getInstance()->_detectColumnPoly3(coll0, coll1);
 }
+
+#ifdef GAME_COLLISION_COLLOBJ_H /* MATCH: the collision classes' collideMap, when Game/Collision/CollObj.h came first (see there) */
+inline INT CPointCollision::collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
+inline INT CSphereCollision::collideMap() { return CCollUtil::getInstance()->_detectMCD(*this); }
+#endif
 #endif
 
 #endif /* GAME_COLLISION_COLLUTIL_H */
