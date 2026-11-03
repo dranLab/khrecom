@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Atel/AtelTutorial
+
 #ifndef SYSTEM_GRAPHIC_2D_2DSEQCTRL_H
 #define SYSTEM_GRAPHIC_2D_2DSEQCTRL_H
 

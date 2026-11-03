@@ -1,4 +1,4 @@
-// PARTIAL: added for System/Movie/MSStream
+
 #ifndef SYSTEM_RSRCDATA_H
 #define SYSTEM_RSRCDATA_H
 

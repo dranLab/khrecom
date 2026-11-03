@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Enemy/EnemyDarkball
+
 #ifndef GAME_ENEMY_HEARTLESS_H
 #define GAME_ENEMY_HEARTLESS_H
 

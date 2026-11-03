@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Bullet/CreateBullet
+
 #ifndef GAME_ENTITYFACTORY_H
 #define GAME_ENTITYFACTORY_H
 

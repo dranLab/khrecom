@@ -1,4 +1,4 @@
-// PARTIAL: added for System/Graphic/2d/2DFntObj (original header name unknown)
+
 #ifndef SYSTEM_GRAPHIC_2D_2DOBJ_H
 #define SYSTEM_GRAPHIC_2D_2DOBJ_H
 

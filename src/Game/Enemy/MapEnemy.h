@@ -1,4 +1,4 @@
-// PARTIAL: added for Game/Enemy/MapEnemyShadow
+
 #ifndef GAME_ENEMY_MAPENEMY_H
 #define GAME_ENEMY_MAPENEMY_H
 
