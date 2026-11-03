@@ -691,7 +691,7 @@ void CFriend::setLockon(HANDLE inHandle) {
     Gauge::CLockonMarker* pMarker = m_pPlayer->getLockonMarker();
     if (inHandle > 0) {
         m_pPlayer->setPlayerFlag(0x10000, 0);
-        pMarker->changeMode();
+        pMarker->changeMode(1);
         pMarker->setLockon(m_hLockon, 0);
         pMarker->holdTarget(8);
     } else {

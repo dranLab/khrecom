@@ -260,7 +260,7 @@ void CPlayerDRiku::endStateBattle() {
     m_uiPreAttackKind = 0;
     m_uiAttackID = 0;
     if (m_pMarker) {
-        m_pMarker->setFlag(0);
+        m_pMarker->off();
     }
 }
 
@@ -457,7 +457,7 @@ void CPlayerDRiku::exeTransform() {
         m_pCam->changeNowPlayer(0, 0);
         m_pCam->changeCamMode(3, 0);
         enableControl();
-        m_pMarker->setFlag(TRUE);
+        m_pMarker->on();
         m_pCB->disablePlayCard(0);
         break;
     case 4:
@@ -470,7 +470,7 @@ void CPlayerDRiku::exeTransform() {
         setPlayerFlag(0x1001, 0);
         ((_CollBodyView*)m_collBody)->offBody();
         offWeapon();
-        m_pMarker->setFlag(FALSE);
+        m_pMarker->off();
         m_pCB->destroyPlayCard(1, 0);
         setBattleFlag(0, 0x10200000);
         if (isBattleFlag(2)) {
