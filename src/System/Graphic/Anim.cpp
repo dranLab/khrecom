@@ -86,13 +86,7 @@ static inline void _addVector(FVECTOR& v0, const FVECTOR& v1) {
 }
 
 static inline FLOAT _limitRot(FLOAT r) {
-    if (r < -3.1415927f) {
-        return r + 6.2831855f;
-    }
-    if (r > 3.1415927f) {
-        return r - 6.2831855f;
-    }
-    return r;
+    return (r < -3.1415927f) ? r + 6.2831855f : (r > 3.1415927f) ? r - 6.2831855f : r; // MATCH: one ternary (the if/return form keeps the sum in another FP register)
 }
 
 
@@ -739,8 +733,6 @@ void CAnim::_setUpdate(int nSkl, TIMEQ tqFr, BOOL bClipped) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _setUpdate__5CAnimiii);
 #endif
-/* Near-match: the angle limit keeps the argument in another FP register (mov.s copy) */
-#if 0
 void CAnim::_exeRootMove() {
     FVECTOR trs1;
     FLOAT rot1;
@@ -781,9 +773,6 @@ void CAnim::_exeRootMove() {
     m_vRootMovePreRot.y = rot1;
     crd.getLocalMatrix() = m_BufRootMtx;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _exeRootMove__5CAnim);
-#endif
 void CAnim::getRootMove(FVECTOR& outTrs, FLOAT& outRotY) {
     outTrs = m_vRootMoveTrs;
     outRotY = m_vRootMoveRot.y;
