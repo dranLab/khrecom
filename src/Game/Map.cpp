@@ -64,11 +64,8 @@ public:
 };
 
 extern LIGHTDATA ALF_default;
-extern "C" char D_00480FA0[];
 extern "C" char D_00480B70[];
 extern const FVECTOR ONE_VECTOR;
-extern "C" char D_00480FC8[];
-extern "C" char D_00480FF0[];
 extern "C" char D_00480CE8[];
 extern "C" char D_00480D08[];
 
@@ -1127,16 +1124,12 @@ void CMap::createEnvSE(const ZONEPARTS& inParts) {
     if (unitId.c[1] == '0') CGame::playConstEnvSE(nFile * 1000 + nID, -1, FALSE);
 }
 extern "C" FLOAT sinf(FLOAT);
-/* Parked: 3 lines - the three &m_pRotShift[i] before the LimitPI/sinf calls come out as base+offset (addu s0,s0,s1), the
-   original adds offset+base; reference, pointer, index-first, inline-helper forms all keep it (permuter can't take the
-   initializer-list constructor). */
-#if 0
 CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInParent) {
     setPriority((TASK_PRIORITY)0x8000);
     m_modelSuu = pZone->skynum;
-    m_pModel = new (D_00480FA0) CModelBG[m_modelSuu];
-    m_pRot = new (D_00480FC8) FVECTOR[m_modelSuu];
-    m_pRotShift = new (D_00480FF0) FVECTOR[m_modelSuu];
+    m_pModel = new ("c:/KHCOM/MainApp/Game/Map.cpp(1813)") CModelBG[m_modelSuu];
+    m_pRot = new ("c:/KHCOM/MainApp/Game/Map.cpp(1816)") FVECTOR[m_modelSuu];
+    m_pRotShift = new ("c:/KHCOM/MainApp/Game/Map.cpp(1817)") FVECTOR[m_modelSuu];
     m_vColor.setAll(1.0f);
     addCoord(m_modelSuu + 1);
     CCoord& crd = Crd(0);
@@ -1149,15 +1142,15 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
         m_pRot[i].set(0.0f, 0.0f, 0.0f, 0.0f);
         m_pRotShift[i]._q = 0;
         if (pZoneparts->rot.x) {
-            FVECTOR& v = m_pRotShift[i];
+            FVECTOR& v = *(FVECTOR*)((i << 4) + (INT)m_pRotShift); // MATCH: offset + base (addu s0,s1,s0); &m_pRotShift[i] adds base first
             v.x = sinf(Math3D::LimitPI(pZoneparts->rot.x * 0.01f * 0.017453292f)) * 0.1f;
         }
         if (pZoneparts->rot.y) {
-            FVECTOR& v = m_pRotShift[i];
+            FVECTOR& v = *(FVECTOR*)((i << 4) + (INT)m_pRotShift);
             v.y = sinf(Math3D::LimitPI(pZoneparts->rot.y * 0.01f * 0.017453292f)) * 0.1f;
         }
         if (pZoneparts->rot.z) {
-            FVECTOR& v = m_pRotShift[i];
+            FVECTOR& v = *(FVECTOR*)((i << 4) + (INT)m_pRotShift);
             v.z = sinf(Math3D::LimitPI(pZoneparts->rot.z * 0.01f * 0.017453292f)) * 0.1f;
         }
         m_pRotShift[i].w = 0.0f;
@@ -1175,28 +1168,6 @@ CSky::CSky(CTask* pInParent, void* pAZF, ZONEDATA* pZone) : CTaskSecondary(pInPa
         if (nLayer < 9) nLayer += 2;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Map", __4CSkyP5CTaskPvP8ZONEDATA);
-#endif
-/* MATCH: CSky::CSky's .rodata while it is INCLUDE_ASM */
-__asm__(".rdata\n"
-        ".align 3\n"
-        ".asciz \"c:/KHCOM/MainApp/Game/Map.cpp(1813)\"\n"
-        ".align 2\n"
-        ".asciz \"\"\n"
-        ".align 2\n"
-        ".align 3\n"
-        ".asciz \"c:/KHCOM/MainApp/Game/Map.cpp(1816)\"\n"
-        ".align 2\n"
-        ".asciz \"\"\n"
-        ".align 2\n"
-        ".align 3\n"
-        ".asciz \"c:/KHCOM/MainApp/Game/Map.cpp(1817)\"\n"
-        ".align 2\n"
-        ".asciz \"\"\n"
-        ".align 2\n"
-        ".align 3\n"
-        ".text\n");
 CSky::~CSky() {
     if (m_pModel) delete[] m_pModel;
     m_pModel = NULL;
