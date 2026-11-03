@@ -2,6 +2,9 @@
 #define GAME_STORAGEWORK_H
 
 #include "khtypes.h"
+#define CARD_H_STRUCTS_ONLY /* MATCH: only CARD_INFO2 (see Game/Card.h) */
+#include "Game/Card.h"
+#undef CARD_H_STRUCTS_ONLY
 
 /* Save data blocks (memory card work). Member types owned by other units
  * (_RoomInfo, _DoorInfo, CARD_INFO, ...) are opaque blocks of the original size. */
@@ -56,7 +59,7 @@ struct MCWork { // 0x2ad4
 };
 
 struct MCWork2 { // 0x62e
-    // PARTIAL: nested as in the original (Game/SceneInfo's _initRoomInfo/_initDoor signatures)
+    // MATCH: nested as in the original (Game/SceneInfo's _initRoomInfo/_initDoor signatures)
     struct _DoorInfo { // 0xa
         BYTE _nStat;
         unsigned char __nFiller[3];
@@ -77,8 +80,7 @@ struct MCWork2 { // 0x62e
     /* 0x5ac */ _RoomInfo2 _roomInfo2GoalEnt;
     /* 0x5d8 */ unsigned char _nEventDoorOpenTbl[16][3];
     /* 0x608 */ unsigned char _nWorldOnFloor[2][16];
-    /* 0x628 */ USHORT _cardInfo2_nKeyTotal; // CARD_INFO2
-    /* 0x62a */ char _cardInfo2_nKey[4];
+    /* 0x628 */ CARD_INFO2 _cardInfo2;
 
     void initialize();
     void preSave();
