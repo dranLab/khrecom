@@ -923,9 +923,6 @@ void CEffectMan::play(FLOAT fFrameRate) {
     s_fFrameRate = fFrameRate;
     s_iStatus |= 4;
 }
-/* Near-match: the original if-converts bPlay on !(status & 1) (xori/movn) */
-#if 0
-static inline BOOL _isInit() { return s_iStatus & 1; }
 static inline BOOL _isPause() { return s_iStatus & 2; }
 void CEffectMan::update() {
     BOOL bPlay;
@@ -935,7 +932,7 @@ void CEffectMan::update() {
 
     if (DebugWork::g_dw.sys.m_iStopEffect) return;
     bPlay = !_isPause();
-    if (!_isInit()) bPlay = FALSE;
+    if (!(s_iStatus & 1)) bPlay = FALSE;
     if (bPlay) {
         if (s_pArgWorldView) pMWV = s_pArgWorldView; else pMWV = &CWorldEnv::getWorldViewMatrix();
         if (s_pArgViewScreen) pMVS = s_pArgViewScreen; else pMVS = &CWorldEnv::getViewScreenMatrix();
@@ -945,9 +942,6 @@ void CEffectMan::update() {
     s_fFrameRate = 0.0f;
     s_iStatus &= ~4;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/EffectMan", update__10CEffectMan);
-#endif
 void CEffectMan::_sendModel(void* pDmaChanVif1, EFFMAN_ZSORT_BUF* pEffList, INT nIdx, BOOL bReInit) {
     pacVif1Packet pktVif1;
     u_long128* pPkt;
