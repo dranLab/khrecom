@@ -1,6 +1,6 @@
 #include "Game/MapUnitTable.h"
+#define MAP_H_STRUCTS_ONLY /* MATCH: only the structs (see Game/Map.h) */
 #include "Game/Map.h"
-
 // Defined in Game/Gimmick/GimmickDoor.cpp (declared in Game/Gimmick/GimmickDoor.h in the original)
 extern MAPUNITTABLE g_DoorWorld0[12];
 extern MAPUNITTABLE g_DoorWorld1[12];
