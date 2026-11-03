@@ -690,10 +690,11 @@ void CTexUtil::makeWhiteClut(const TexInfo* inpInfo, INT inSrcBufIdx, INT inOutB
     }
 }
 
-/* Parked: 19 of 123 lines, 8 bytes short - structure as the original; _nDistBufW = (UINT)(w - 1) / 64 + 1 (the
- * original's unmasked ((w-1)+64)>>6, not CSE'd with the first _align). Left: the nWidth * nHeight mult (the
- * original computes it in the alloc-check delay slot) and the two loop-alignment nops that follow from it.
- * Statement positions and permuter 5 min: no gain. */
+/* Parked: 10 of 120 lines, same size - the mult between the allocTex call and its test (`r = allocTex(..);
+ * nImageSize = w * h; if (r < 0)`, the original fills the bltz slot with it; 19 -> 10). Left: _nDistBufW, where the
+ * original adds 64 to the (w-1) of an earlier block and shifts (ours (w-1)>>6 + 1; every source form with +64
+ * folds to w+63 and is CSE'd with the first _align, 51 lines: nW1 locals, inline helpers, casts), the qwImage
+ * sra position and one clut zero store (_nDistY last in the original). permuter 5 min (old form): no gain. */
 #if 0
 BOOL CTexUtil::setupTexInfo(TexInfo& outInfo, const BYTE* pInTex, INT nWidth, INT nHeight) {
     INT nTexSize;
@@ -701,10 +702,11 @@ BOOL CTexUtil::setupTexInfo(TexInfo& outInfo, const BYTE* pInTex, INT nWidth, IN
     INT nClutPos;
 
     nTexSize = _align(_align(nWidth, 64) / 4 * nHeight, 64) / 64;
-    if (CVramMan::allocTex(nTexSize, 0, nTexPos, nClutPos, 0) < 0) return FALSE;
+    INT r = CVramMan::allocTex(nTexSize, 0, nTexPos, nClutPos, 0);
+    INT nImageSize = nWidth * nHeight;
+    if (r < 0) return FALSE;
     VTransInfo& tex = outInfo._TexInfo;
     VTransInfo& clut = outInfo._ClutInfo;
-    INT nImageSize = nWidth * nHeight;
     tex._nDistPos = nTexPos;
     tex._pImage = (ULONGLONG*)pInTex;
     tex._nFormat = 0;
