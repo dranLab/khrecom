@@ -6549,22 +6549,17 @@ void CCamp::setLight(INT nSelect, INT nMode) {
     }
 }
 
-/* Parked: 2 of 198 lines differ: the two member addresses of the top-index select (&m_nMCSelSelectTop,
-   &m_nKindSelectTop) issue in the other order in the prologue (equal-priority tie). tried: ternary both polarities,
-   if/else and default+if forms, the ref's `INT& nKindSelectTop` reference local, idx local; permuter 6 min (3573
-   candidates) and 15 min (9060 candidates), no gain. */
-#if 0
 void CCamp::setCursor2(INT nSelect, INT nMode, BOOL bMapCard) {
     FVECTOR vec;
-    INT* pTop = bMapCard ? &m_nMCSelSelectTop : &m_nKindSelectTop;
+    INT& nKindSelectTop = !bMapCard ? m_nKindSelectTop : m_nMCSelSelectTop; // MATCH: ref local; the !bMapCard polarity keeps the movn target order
 
     if (nMode < 2) {
-        nSelect -= *pTop;
+        nSelect -= nKindSelectTop;
         if (nSelect >= 9) {
-            *pTop += 3;
+            nKindSelectTop += 3;
             nSelect -= 3;
         } else if (nSelect < 0) {
-            *pTop -= 3;
+            nKindSelectTop -= 3;
             nSelect += 3;
         }
         C2DCard** ppCard = !bMapCard ? m_pDeckCardCard : m_pMCCard;
@@ -6621,19 +6616,6 @@ void CCamp::setCursor2(INT nSelect, INT nMode, BOOL bMapCard) {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", setCursor2__5CCampiii);
-#endif
-// setCursor2__5CCampiii: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 3\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x37,0x38,0x36,0x32,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0xF8,0xD9,0x31,0x00,0xC4,0xDA,0x31,0x00,0xF4,0xDA,0x31,0x00,0x1C,0xDB,0x31,0x00\n"
-    ".byte 0x44,0xDB,0x31,0x00,0x94,0xDB,0x31,0x00,0xC4,0xDA,0x31,0x00,0xAC,0xDB,0x31,0x00\n"
-    ".section .text");
 
 void CCamp::setCursor3(INT nSelect, INT nMode, BOOL bMapCard) {
     FVECTOR vec;
