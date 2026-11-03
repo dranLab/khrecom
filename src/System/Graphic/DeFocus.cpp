@@ -69,30 +69,24 @@ void CDeFocus::BlurSet(INT iKind, FLOAT fRate, FLOAT fTime, INT iNum) {
     BlurPrim.setKind(iKind);
     BlurPrim.setRate(p.m_fBlurOldRate);
 }
-/* Parked: 2 of 52 lines - only the preheader order: the original sets the hoisted `1` (for 1 << i) before
- * p = m_sBlurParam, ours after. `p++, i++` in the for header fixed the increments; p init as declaration,
- * statement before the loop or first in the for header, a local for the 1, permuter 5 min: no change. */
-#if 0
 INT CDeFocus::_BlurUpdate(FLOAT fr) {
     INT iRet = 0;
     INT i;
-    BLUR_PARAM* p;
-    for (i = 0, p = m_sBlurParam; i < 2; p++, i++) {
-        if (!m_BlurPrim[i].getKind()) continue;
+    for (i = 0; i < 2; i++) {
+        CBlurPrim* prim = &m_BlurPrim[i];
+        BLUR_PARAM* p = &m_sBlurParam[i];
+        if (!prim->getKind()) continue;
         if (!(p->m_fBlurNowTime <= p->m_fBlurTotalTime)) continue;
         p->m_fBlurNowTime += fr;
         FLOAT t = p->m_fBlurNowTime / p->m_fBlurTotalTime;
         if (t >= 1.0f) t = 1.0f;
         INT iRate = (INT)(p->m_fBlurOldRate + (p->m_fBlurAimRate - p->m_fBlurOldRate) * t);
-        m_BlurPrim[i].setRate(iRate);
-        if (p->m_fBlurAimRate == 0.0f && iRate == 0) m_BlurPrim[i].setKind(0);
+        prim->setRate(iRate);
+        if (p->m_fBlurAimRate == 0.0f && iRate == 0) prim->setKind(0);
         iRet |= 1 << i;
     }
     return iRet;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/DeFocus", _BlurUpdate__8CDeFocusf);
-#endif
 void CDeFocus::BlurDistanceSet(FLOAT fDistance, INT iNum) {
     if (!m_pInstance || iNum >= 2) return;
     m_pInstance->m_BlurPrim[iNum].setDistance(fDistance);
