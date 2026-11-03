@@ -1,17 +1,8 @@
-// PARTIAL: added for Game/MapCardDef
 #ifndef SYSTEM_DEBUG_H
 #define SYSTEM_DEBUG_H
 
 #include "khtypes.h"
 
-#ifndef __cplusplus
-/* PARTIAL: added for System/Graphic/Effect/libppp/draw/md (C units only see TRACE) */
-void TRACE(char* fmt, ...);
-#else
-
-extern "C" void TRACE(char* fmt, ...);
-
-// PARTIAL: added for System/Movie/MovieFiles
 enum USER {
     USR_SYSTEM = 0,
     USR_PROG = 1,
@@ -76,9 +67,6 @@ enum USER {
     USR_TERMINATOR = 60
 };
 
-extern "C" void TRACE_USER(USER uid, char* fmt, ...);
-
-// PARTIAL: added for System/Graphic/2d/2DBase
 enum TtyColor {
     _TTY_NORMAL = 0,
     _TTY_BLACK = 30,
@@ -100,10 +88,11 @@ enum TtyColor {
     _TTY_REV_WHITE = 47
 };
 
-extern "C" void TRACE_COL(TtyColor nCol, char* fmt, ...);
+#ifndef __cplusplus /* MATCH: the C units (libppp) only call TRACE: USER and TtyColor are no C type names */
+void TRACE(char* fmt, ...);
+#else
+extern char _szTraceBuf[1536];
 
-// PARTIAL: added for System/Debug
-extern "C" void TRACE_USER_COL(USER uid, TtyColor nCol, char* fmt, ...);
 extern "C" int dbgCheckUser(USER uid);
 INT dbgButtonTrg(USER uid, UINT button, INT padId);
 INT dbgButtonDown(USER uid, UINT button, INT padId);
@@ -113,9 +102,10 @@ INT dbgAnalogRX(USER uid, INT padId);
 INT dbgAnalogRY(USER uid, INT padId);
 INT dbgAnalogLX(USER uid, INT padId);
 INT dbgAnalogLY(USER uid, INT padId);
-
-extern char _szTraceBuf[1536];
-
+extern "C" void TRACE(char* fmt, ...);
+extern "C" void TRACE_COL(TtyColor nCol, char* fmt, ...);
+extern "C" void TRACE_USER(USER uid, char* fmt, ...);
+extern "C" void TRACE_USER_COL(USER uid, TtyColor nCol, char* fmt, ...);
 #endif /* __cplusplus */
 
 #endif /* SYSTEM_DEBUG_H */
