@@ -365,13 +365,7 @@ static inline void _setRotTransPersMatrix(FMATRIX& m) {
         : "r"(&m));
 }
 static inline FLOAT _adjustRad(FLOAT r) {
-    FLOAT ret = r;
-    if (r < -3.1415927f) {
-        ret = r + 6.2831855f;
-    } else if (ret > 3.1415927f) {
-        ret -= 6.2831855f;
-    }
-    return ret;
+    return (r < -3.1415927f) ? r + 6.2831855f : (r > 3.1415927f) ? r - 6.2831855f : r; // MATCH: one ternary (stateSnatch's wrap keeps the sum in the m_vRot.y register)
 }
 
 void CardBattle::initLayoutData() {
@@ -1755,10 +1749,6 @@ void CBattleCard::preStateSnatch() {
     m_iLayer = lay.layer;
     m_pCard->changeLayer(m_iLayer);
 }
-/* Parked: 4 lines - the first _adjustRad (m_vRot.y) keeps the sum in the loaded m_vRot.y register (f4) and copies it to
-   ret (mov.s f6,f4); ours computes the sum straight into ret (f6). In-place sums, explicit wrap code, operand order and
-   10 min of permuter (15k candidates) did not change it; the m_vRot.z wrap matches. */
-#if 0
 void CBattleCard::stateSnatch() {
     switch (m_uiMode) {
     case 0x11:
@@ -1820,14 +1810,6 @@ void CBattleCard::stateSnatch() {
     }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateSnatch__Q210CardBattle11CBattleCard);
-/* MATCH: placeholder for the asm stateSnatch's strings */
-inline void _stateSnatchStringPlaceholder() {
-    TRACE("PLCR:: snatchCard =\n");
-    TRACE("  [Card%03d:%d] iStock=%d, iHand=%d/%d, uiFlag=%08x, hEnemy=%d,\n");
-}
-#endif
 void CBattleCard::setPronounce(UINT inPri) {
     changeState(6);
     m_uiMode = 8;
