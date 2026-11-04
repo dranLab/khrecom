@@ -1314,14 +1314,6 @@ extern "C" char D_00487570[];
 extern "C" char D_00487590[];
 extern "C" char D_004875B0[];
 extern "C" char D_004875D0[];
-/* Parked: 5 lines off: the original hoists &sPathParam.fTime (the start of the parameter pointer) out of the
-   paths loop into a stack slot, like &sVecParam and &vPath; ours computes it before the parameter loop.
-   Worked: one j per inner loop, the 0xFFFFFFF0 mask, the _zeroVec helper (45 -> 5 lines). Tried for the
-   pointer: init before iCount / at its declaration / (INT*)&s + 1 / &((INT*)&s)[1] / base + j inside the
-   loop / indexed writeFile argument / set-once pointer + &p[j] (2026-10-28: still addiu sp,36 straight into the
-   induction register; the original copies a hoisted pseudo); permuter 15 min (42581 candidates, no gain). Needs
-   CPathData::makeVertexSpeedAll (PathData.h). */
-#if 0
 static inline void _zeroVec(FVECTOR& v) { asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v) : "memory"); }
 BOOL CDebugPathData::savePath(const CHAR* pName) {
     CDebugPathData* p = getInstance();
@@ -1351,9 +1343,6 @@ BOOL CDebugPathData::savePath(const CHAR* pName) {
         PATH_VECTOR_PARAM sVecParam;
         PATH_PARAM sPathParam;
         FVECTOR vPath;
-        INT* pParam;
-        INT iCount;
-        INT iZero;
         TRACE(D_00487458, i);
         memset(&sVecParam, 0, sizeof(sVecParam));
         sVecParam.iVer = 2;
@@ -1385,13 +1374,13 @@ BOOL CDebugPathData::savePath(const CHAR* pName) {
             }
         }
         TRACE(D_004874F0, i);
-        iCount = 0;
-        iZero = 0;
+        INT* pParam = (INT*)&sPathParam.fTime; /* MATCH: declared here (after the vector loop, as the ref's p/iCount/iZero), set once and indexed: loop.c hoists it after &vPath (spill slot order) */
+        INT iCount = 0;
+        INT iZero = 0;
         TRACE(D_00487510, i);
-        pParam = (INT*)&sPathParam.fTime;
-        for (INT j = 0; j < 10; j++, pParam++) {
+        for (INT j = 0; j < 10; j++) {
             if (sPathParam.iFlags & (1 << j)) {
-                iRet = CFileIO::writeFile(iFD, pParam, sizeof(INT));
+                iRet = CFileIO::writeFile(iFD, &pParam[j], sizeof(INT));
                 if (iRet < 0) {
                     TRACE(D_004873F0, iRet);
                     return FALSE;
@@ -1420,8 +1409,5 @@ BOOL CDebugPathData::savePath(const CHAR* pName) {
     }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Debug/DebugPathData", savePath__14CDebugPathDataPCc);
-#endif
 __asm__(".rdata\n.align 3\n.word 0x40837483\n.word 0x8B834383\n.word 0x62837783\n.word 0xCC825F83\n.word 0xAB82918F\n.word 0xDD829E8D\n.word 0x6E8E4A8A\n.word 0x0000000A\n.word 0x833A6425\n.word 0x83408374\n.word 0x828B8343\n.word 0x82918FCC\n.word 0x829E8DAB\n.word 0x8EC982DD\n.word 0x217394B8\n.word 0x21212121\n.word 0x21212121\n.word 0x21212121\n.word 0x00000A21\n.word 0x00000000\n.word 0x40837483\n.word 0x8B834383\n.word 0x62837783\n.word 0xCC825F83\n.word 0xAB82918F\n.word 0xDD829E8D\n.word 0xED82498F\n.word 0x000AE882\n.word 0xAB82918F\n.word 0xDE829E8D\n.word 0x58837083\n.word 0x9490CC82\n.word 0x000A6425\n.word 0x00000000\n.word 0x2D2D2D2D\n.word 0x2D2D2D2D\n.word 0x8F3A6425\n.word 0x8DAB8291\n.word 0x82DD829E\n.word 0x82B782DC\n.word 0x2D2D2DE6\n.word 0x2D2D2D2D\n.word 0x00000A2D\n.word 0x00000000\n.word 0x833A6425\n.word 0x83588370\n.word 0x83628377\n.word 0x8FCC825F\n.word 0x8DAB8291\n.word 0x8ADD829E\n.word 0x0A6E8E4A\n.word 0x00000000\n.word 0x833A6425\n.word 0x83588370\n.word 0x83628377\n.word 0x8FCC825F\n.word 0x8DAB8291\n.word 0x8FDD829E\n.word 0x82ED8249\n.word 0x00000AE8\n.word 0xAB82918F\n.word 0xDE829E8D\n.word 0x5F93B892\n.word 0x9490CC82\n.word 0x000A6425\n.word 0x00000000\n.word 0x923A6425\n.word 0x825F93B8\n.word 0x82918FCC\n.word 0x829E8DAB\n.word 0x8E4A8ADD\n.word 0x00000A6E\n.word 0x923A6425\n.word 0x825F93B8\n.word 0x82918FCC\n.word 0x829E8DAB\n.word 0x82498FDD\n.word 0x0AE882ED\n.word 0x00000000\n.word 0x00000000\n.word 0x833A6425\n.word 0x83898370\n.word 0x835B8181\n.word 0x8FCC825E\n.word 0x8DAB8291\n.word 0x8ADD829E\n.word 0x0A6E8E4A\n.word 0x00000000\n.word 0x833A6425\n.word 0x83898370\n.word 0x835B8181\n.word 0x8FCC825E\n.word 0x8DAB8291\n.word 0x8FDD829E\n.word 0x82ED8249\n.word 0x00000AE8\n.word 0xAB82918F\n.word 0xF1829E8D\n.word 0x7083BE82\n.word 0x81838983\n.word 0x5E835B81\n.word 0x9490CC82\n.word 0x000A6425\n.word 0x00000000\n.word 0xAB82918F\n.word 0xDE829E8D\n.word 0x66837083\n.word 0x93834283\n.word 0xCC824F83\n.word 0x64259490\n.word 0x0000000A\n.word 0x00000000\n.word 0x833A6425\n.word 0x83668370\n.word 0x83938342\n.word 0x8FCC824F\n.word 0x8DAB8291\n.word 0x8ADD829E\n.word 0x0A6E8E4A\n.word 0x00000000\n.word 0x833A6425\n.word 0x83668370\n.word 0x83938342\n.word 0x8FCC824F\n.word 0x8DAB8291\n.word 0x8FDD829E\n.word 0x82ED8249\n.word 0x00000AE8\n.word 0x833A6425\n.word 0x83408374\n.word 0x828B8343\n.word 0x834E83CC\n.word 0x835B818D\n.word 0x8EC98259\n.word 0x217394B8\n.word 0x21212121\n.word 0x21212121\n.word 0x21212121\n.word 0x00000A21\n.word 0x00000000\n.text\n");
 // SOURCE DATA: .data .rodata
