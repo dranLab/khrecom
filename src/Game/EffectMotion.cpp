@@ -248,13 +248,6 @@ HANDLE CEffectMotionCtrl::fadeoutEffect_(FLOAT inTime) {
     return m_hHandle;
 }
 
-/* Parked: close, only case 2's "m_iStep = 0" tails differ - gcc cross-jumps them all into the second body's copy, the
- * original keeps the one in the effect == NULL branch (the other bodies jump there). jump2's cross-jumping
- * (find_cross_jump) merges a "sw $0; j" tail that follows a label after one matching insn, and the copy processed
- * first (earlier in the function) is the one deleted; with the three tails jumping to the same label the last copy
- * can't survive, and making the first two bodies identical merges them entirely. Explicit "return TRUE"s in the
- * bodies and both nestings of the effect == NULL branch were tried. */
-#if 0
 BOOL CEffectMotionCtrl::updateAttachEffect_(TIMEQ inCurrentTime) {
     CEffect* effect;
     if (!m_pAttachEffectData) {
@@ -353,13 +346,14 @@ BOOL CEffectMotionCtrl::updateAttachEffect_(TIMEQ inCurrentTime) {
                         m_iStep = 0;
                     } else {
                         m_pParent->setObserveEffect(m_hHandle, m_pAttachEffectData, m_pLocusEffectData);
-                        m_iStep = 0;
+                        goto zero;
                     }
                 } else {
                     m_iStep = 3;
                 }
             } else {
                 if (m_iCount <= 0 || --m_iCount > 0) {
+                zero: /* MATCH: the kept m_iStep = 0 tail (cross-jump keeps this copy) */
                     m_iStep = 0;
                 } else {
                     m_iStep = 3;
@@ -370,9 +364,6 @@ BOOL CEffectMotionCtrl::updateAttachEffect_(TIMEQ inCurrentTime) {
     }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/EffectMotion", updateAttachEffect___17CEffectMotionCtrli);
-#endif
 
 BOOL CEffectMotionCtrl::updateLocusEffect_(TIMEQ inCurrentTime) {
     CEffect* effect;
