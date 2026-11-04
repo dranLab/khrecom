@@ -569,10 +569,7 @@ void CAnim::play(TIMEQ inAddTq, BOOL bClipped) {
     }
     setMotion(m_Tq, inAddTq, bClipped);
 }
-/* Near-match: register choice for m_pMotData (a0 vs t0) and the operand order of one addu */
-#if 0
 void CAnim::setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped) {
-    TIMEQ tq;
     INT nFrame;
 
     if (!isLinked()) {
@@ -585,66 +582,63 @@ void CAnim::setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped) {
         return;
     }
     m_Flags[0] = 0;
-    tq = inTq + inPlus;
+    inTq += inPlus; /* MATCH: the parameter is the running time (no tq local) */
     if (m_ZeroHokan) {
-        tq = 0;
+        inTq = 0;
     }
     if (m_pMotData->IsLoop()) {
         if (m_Speed >= 0.0f) {
             nFrame = (m_nMaxFrame - 1) * 3000 / m_nFps;
-            if (tq >= nFrame) {
+            if (inTq >= nFrame) {
                 if (!(m_Flags[1] & 0x40)) {
                     m_Flags[0] = 1;
                     m_Flags[1] |= 0x41;
-                    tq = nFrame;
+                    inTq = nFrame;
                 }
             } else {
                 m_Flags[1] &= ~0x40;
             }
-            if (tq >= m_nMaxTq) {
-                tq = (SHORT)(m_pMotData->GetLoopFrame() - 1) * 3000 / m_nFps + tq % m_nMaxTq;
-                if (tq >= m_nMaxTq) {
-                    tq = m_nMaxTq - 3000 / m_nFps;
+            if (inTq >= m_nMaxTq) {
+                { INT t = (SHORT)(m_pMotData->m_nRetFrame - 1) * 3000 / m_nFps; inTq = inTq % m_nMaxTq + t; } /* MATCH: loop term first */
+                if (inTq >= m_nMaxTq) {
+                    inTq = m_nMaxTq - 3000 / m_nFps;
                 }
                 m_Flags[0] |= 0x80;
                 m_Flags[1] |= 0x80;
-            } else if (tq < 0) {
-                tq = m_nMaxTq - (-tq % m_nMaxTq);
+            } else if (inTq < 0) {
+                inTq = m_nMaxTq - (-inTq % m_nMaxTq);
             }
         } else {
-            if (tq < 0) {
-                tq = m_nMaxTq - (-tq % m_nMaxTq);
+            if (inTq < 0) {
+                inTq = m_nMaxTq - (-inTq % m_nMaxTq);
                 m_Flags[0] = 0x81;
                 m_Flags[1] |= 0x81;
-            } else if (tq >= m_nMaxTq) {
-                tq = tq % m_nMaxTq;
+            } else if (inTq >= m_nMaxTq) {
+                inTq = inTq % m_nMaxTq;
             }
         }
     } else {
         if (m_Speed >= 0.0f) {
-            if (tq < 0) {
-                tq = 0;
-            } else if (tq >= m_nMaxTq) {
+            if (inTq < 0) {
+                inTq = 0;
+            } else if (inTq >= m_nMaxTq) {
                 m_Flags[0] = 2;
                 m_Flags[1] |= 2;
-                tq = m_nMaxTq;
+                inTq = m_nMaxTq;
             }
         } else {
-            if (tq < 0) {
+            if (inTq < 0) {
                 m_Flags[0] = 2;
                 m_Flags[1] |= 2;
-                tq = 0;
-            } else if (tq >= m_nMaxTq) {
-                tq = m_nMaxTq;
+                inTq = 0;
+            } else if (inTq >= m_nMaxTq) {
+                inTq = m_nMaxTq;
             }
         }
     }
-    m_Tq = tq;
+    m_Tq = inTq;
     _setUpdate(m_nSkl, inPlus, bClipped);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", setMotion__5CAnimiii);
-#endif
 void CAnim::_setUpdate(int nSkl, TIMEQ tqFr, BOOL bClipped) {
     FLOAT frm0;
     CMotData* md;

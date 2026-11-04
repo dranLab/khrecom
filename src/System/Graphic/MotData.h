@@ -119,6 +119,7 @@ union CMPFIX {
 };
 
 class CMotData {
+    friend class CAnim; /* MATCH: CAnim::setMotion reads m_nRetFrame directly (lhu) */
 private:
     char m_Name[16];
     SHORT m_nSkl;
