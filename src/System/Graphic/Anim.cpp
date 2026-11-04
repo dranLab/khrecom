@@ -645,8 +645,6 @@ void CAnim::setMotion(TIMEQ inTq, TIMEQ inPlus, BOOL bClipped) {
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", setMotion__5CAnimiii);
 #endif
-/* Parked: 1 of 377 lines, same size - only the operand order of the vScale / QuaternionToMatrix address in the m_HokanTq <= 0 fix block (original base + fix_no * 48, ours the reverse). The fixed-quaternion test is the ref's QUATERNION_DT::isEffective() (if both words are zero return FALSE; return TRUE: li 1 + movz; 6 -> 1). Tried: integer/pointer address forms, a reference/pointer local (78), m_pFixQuat[i], statement orders, an explicit operator= (the ref lists one). */
-#if 0
 void CAnim::_setUpdate(int nSkl, TIMEQ tqFr, BOOL bClipped) {
     FLOAT frm0;
     CMotData* md;
@@ -691,9 +689,9 @@ void CAnim::_setUpdate(int nSkl, TIMEQ tqFr, BOOL bClipped) {
         }
         if (fix_no != -1) {
             if (m_HokanTq <= 0) {
-                vScale = m_pFixQuat[fix_no].vScale;
-                Quaternion::QuaternionToMatrix(crd.getLocalMatrix(), m_pFixQuat[fix_no].vQuatRotate,
-                                               m_pFixQuat[fix_no].vTrans);
+                QUATERNION_DT* pFix = m_pFixQuat + fix_no; /* MATCH: ptr + n (not &ptr[n]) adds base first */
+                vScale = pFix->vScale;
+                Quaternion::QuaternionToMatrix(crd.getLocalMatrix(), pFix->vQuatRotate, pFix->vTrans);
                 *pQuat = m_pFixQuat[fix_no];
                 crd.setScale(vScale);
                 continue;
@@ -730,9 +728,6 @@ void CAnim::_setUpdate(int nSkl, TIMEQ tqFr, BOOL bClipped) {
     }
     _exeRootMove();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Anim", _setUpdate__5CAnimiii);
-#endif
 void CAnim::_exeRootMove() {
     FVECTOR trs1;
     FLOAT rot1;
