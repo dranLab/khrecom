@@ -465,11 +465,6 @@ void CSceneInfo::initFloor(INT nFloorIdx, WORLD_ID world) {
     _SceneInfoWork::mc()->_nNextRCNormaNum = 0;
     if (world) CCard::setCardPossibleWorld(world);
 }
-/* Parked: 21 lines - the block after getFloorNumber: the original computes the s_CurrentFloor address and the
-   clearEventRoomTbl loop pointer after the s_nCurrentFloorNumber store (lui order) with other registers; the loop
-   body matches with the shared pSrc pointer, the tail with the *_nEventDoorStateTbl[i] form. Statement orders and
-   5 min of permuter (7k candidates) gave nothing. */
-#if 0
 void CSceneInfo::initFloor() {
     BOOL bSora = CGame::isSoraGame();
     INT nFloorIdx = _SceneInfoWork::mc()->_nFloorIdx;
@@ -479,7 +474,7 @@ void CSceneInfo::initFloor() {
     FLOOR::FloorLayout* pFloorSrc = getFloorDataSrc(nIdx, bSora);
     RCNORMA::FloorNormaSrc* pFloorNormaSrc = getFloorNormaDataSrc(nIdx, bSora);
     if (!(pFloorSrc && pFloorNormaSrc)) AssertApp(__FILE__, 691, "pFloorSrc && pFloorNormaSrc", 0);
-    s_nCurrentFloorNumber = getFloorNumber(nFloorIdx, bSora);
+    *(SHORT*)&s_nCurrentFloorNumber = getFloorNumber(nFloorIdx, bSora); // MATCH: not a fixed scalar store: the pFloorSrc loads stay after it
     FloorInfo& floor = s_CurrentFloor;
     floor._nRoomCount = pFloorSrc->_nRoomCount;
     floor.clearEventRoomTbl();
@@ -494,9 +489,6 @@ void CSceneInfo::initFloor() {
     _setWorldEntrance(world, pEntSceneTbl[0], pEntSceneTbl[1], TRUE);
     if (bSora && world == 13 && *_SceneInfoWork::mc()->_nEventDoorStateTbl[nFloorIdx] == 4) showAllHiddenDoorsOfCurrentFloor();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", initFloor__10CSceneInfo);
-#endif
 void _initDoor(DoorInfo& door, const FLOOR::DoorSrcInfo* pSrcInfo, DOOR_ID id, const FLOOR::FloorLayout* pFloorLayout, const RCNORMA::FloorNormaSrc* pFloorNormaSrc, STORAGE::MCWork2::_DoorInfo& st_info, const RoomInfo& room, BOOL bContinue) {
     BYTE* pDoorState = bContinue ? NULL : &st_info._nStat;
     door._id = id;
