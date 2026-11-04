@@ -1,7 +1,3 @@
-/* .rodata: with CardMaxWarningMain compiled (its #if 0 version below), this include order and the placeholder
- * reproduce the unit's .rodata byte for byte (checked); add "// SOURCE DATA: .rodata" and compile NormalMain,
- * EnemyMain and EnemyPop (they match) once CardMaxWarningMain matches. */
-
 #define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #include "Game/Gimmick/GimmickTreasureBox.h"
 #include "System/Graphic/Effect/effect.h"
@@ -164,10 +160,6 @@ BOOL CGimmickTreasureBox::checkOpenTresureBoxPermission() {
     return TRUE;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickTreasureBox", CardMaxWarningMain__19CGimmickTreasureBox);
-#if 0
-/* Only the scheduling differs: the original stores CWCP2.ctdID before loading CChatMan::m_pInstance, ours
- * after it (every statement order tried). It blocks the unit's .rodata from source (SOURCE DATA). */
 BOOL CGimmickTreasureBox::CardMaxWarningMain() {
     switch (m_LocalStep) {
     case 0: {
@@ -230,7 +222,6 @@ BOOL CGimmickTreasureBox::CardMaxWarningMain() {
     }
     return FALSE;
 }
-#endif
 
 void CGimmickTreasureBox::beginStateMain() {}
 
@@ -246,10 +237,6 @@ void CGimmickTreasureBox::stateMain() {
 
 void CGimmickTreasureBox::endStateMain() {}
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickTreasureBox", NormalMain__19CGimmickTreasureBox);
-#if 0
-/* Matches, but uses string literals and a jump table: needs the unit's .rodata from source, which
- * CardMaxWarningMain blocks. */
 void CGimmickTreasureBox::NormalMain() {
     switch (m_Step) {
     case 1:
@@ -309,7 +296,7 @@ void CGimmickTreasureBox::NormalMain() {
         break;
     }
     case 7:
-        if (CLevelUp::m_bEnd) {
+        if (CLevelUp::isEnd()) {
             m_Step = 9;
             m_Stat |= 1;
             CGameWork::setFlag(1, 5, FALSE);
@@ -358,12 +345,7 @@ void CGimmickTreasureBox::NormalMain() {
         break;
     }
 }
-#endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickTreasureBox", EnemyMain__19CGimmickTreasureBox);
-#if 0
-/* Matches, but uses a string literal and a jump table: needs the unit's .rodata from source, which
- * CardMaxWarningMain blocks. */
 void CGimmickTreasureBox::EnemyMain() {
     switch (m_Step) {
     case 1:
@@ -408,12 +390,7 @@ void CGimmickTreasureBox::EnemyMain() {
         break;
     }
 }
-#endif
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Gimmick/GimmickTreasureBox", EnemyPop__19CGimmickTreasureBox);
-#if 0
-/* Matches, but uses string literals and a jump table: needs the unit's .rodata from source, which
- * CardMaxWarningMain blocks. */
 void CGimmickTreasureBox::EnemyPop() {
     CEntity* entity;
     FVECTOR v;
@@ -470,7 +447,6 @@ void CGimmickTreasureBox::EnemyPop() {
         entity->setRot(v);
     }
 }
-#endif
 
 CGimmickTreasureBoxForEffectID::CGimmickTreasureBoxForEffectID(CTask* inParent, const ZONEPARTS& inParts)
     : CBaseGimmick(inParent, inParts) {}
@@ -488,3 +464,4 @@ void CGimmickTreasureBoxForEffectID::beginStateHitAttack() {}
 void CGimmickTreasureBoxForEffectID::stateHitAttack() {}
 
 void CGimmickTreasureBoxForEffectID::endStateHitAttack() {}
+// SOURCE DATA: .rodata
