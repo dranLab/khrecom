@@ -742,8 +742,6 @@ asm(".section .rodata\n"
     ".word 0\n"
     ".section .text");
 #endif
-/* Parked: with a target, the m_vMarkPos/m_hMark copies get swapped registers and rot.y is stored before m_fDir/m_fJumpDir instead of in the branch delay slot (11 lines differ). */
-#if 0
 void CPlayerDRiku::initJump2nd() {
     if (isBattleFlag(0x200000)) return;
     setPlayerState(JUMP_2ND);
@@ -756,7 +754,7 @@ void CPlayerDRiku::initJump2nd() {
     _ref(m_fJumpPow) = m_pParam->JUMP_POWER;
     m_fMoveSpdXZ = m_fJumpSpdXZ;
     m_uiAttackID = 0xa5;
-    m_pAtkData = &g_AttackDataList[0xa5];
+    m_pAtkData = &g_AttackDataList[m_uiAttackID];
     m_fJumpGravity = g_fGravity * 0.16f;
     m_pMarker->holdTarget(8);
     CEntity* pTarget = m_hTarget > 0 ? (CEntity*)CTaskMan::getTask(m_hTarget) : NULL;
@@ -767,9 +765,9 @@ void CPlayerDRiku::initJump2nd() {
         calcAppearPos(-2.0f, 0.5f, &m_vMarkPos);
         m_vMarkPos = m_vAppearPos;
         m_hMark = m_hTarget;
-        m_fDir = calcDirection(m_vMarkPos);
-        m_fJumpDir = m_fDir;
-        rot.y = m_fDir;
+        m_fJumpDir = calcDirection(m_vMarkPos);
+        rot.y = m_fJumpDir;
+        m_fDir = m_fJumpDir;
     } else {
         calcAppearPos(2.0f, 0.5f, &m_vCenterPos);
         m_hMark = 0;
@@ -788,9 +786,6 @@ void CPlayerDRiku::initJump2nd() {
     m_fDistXZ = m_fDistY = 0.0f;
     m_fJumpSpdY = g_fAntiGravity * m_fJumpPow;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerDRiku", initJump2nd__Q22PL12CPlayerDRiku);
-#endif
 void CPlayerDRiku::exeJump2nd() {
     TIMEQ frame = getMotionCurrentTime() / 50;
     FVECTOR vel = m_pMove->getVel();
