@@ -711,16 +711,23 @@ void CGameMain::prePlayField() {
     m_bPauseEnable = TRUE;
     CMainApp::enableDbgUsrPause(TRUE, FALSE);
 }
-/* Parked: 4 lines - the `f < 0 -> 15` arm sits right before the join; the original places it after the changeState
- * block. Levers: nSub assigned in both arms (arg register), the state as one nested ternary (5 -> 4). tried: if-chains,
- * inverted inner ternary, (INT) cast; permuter 10 min, 11.5k candidates: no gain. */
-#if 0
 void CGameMain::playField() {
-    INT nState = (m_nGameProcFlag & 1) ? 13 : (m_nGameProcFlag & 0x80000000) ? 15 : (m_nGameProcFlag & 0x10000) ? 12 : 0;
+    INT nState;
+    if (m_nGameProcFlag & 1) {
+        nState = 13;
+    } else if (m_nGameProcFlag & 0x80000000) {
+        goto s15; /* MATCH: the 15 arm out of line after the changeState block */
+    } else {
+        nState = (m_nGameProcFlag & 0x10000) ? 12 : 0;
+    }
+check:
     if (nState) {
         m_nGameProcFlag |= 0x40000000;
         changeState(nState);
         return;
+    s15:
+        nState = 15;
+        goto check;
     }
     if (procFieldMenu()) return;
     BOOL bFlag = CGameWork::getFlag(1, 0x34);
@@ -741,9 +748,6 @@ void CGameMain::playField() {
     }
     m_pSubField->update();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", playField__9CGameMain);
-#endif
 void CGameMain::preEndField() {}
 void CGameMain::endField() {
     m_pSubField->update();
