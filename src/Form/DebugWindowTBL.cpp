@@ -571,18 +571,17 @@ static BOOL _fadeoutSE(CDebugWindow* pObj, INT inY, INT inParam) {
 
 
 BOOL debugWinSeTestLineCall(CDebugWindow* pObj, INT iLineY, INT inParam);
-/* Parked: 2 of 51 lines, same size - only the playSE call: the original sets a1/a2 first and loads iSE_Id (a0) in
- * the jal delay slot, ours loads it before li a2. Tried: a reference local for iSE_Id (15), |= form for bVoice
- * (23), ternary (23), permuter 5 min (2 -> 2). */
-#if 0
 BOOL debugWinSeTestLineCall(CDebugWindow* pObj, INT iLineY, INT inParam) {
     if (inParam & 0x20) {
         _stopSE();
-        if (DebugWork::g_dw.sound.bVoice) {
-            DebugWork::g_dw.sound.iSE_Id = (DebugWork::g_dw.sound.iSE_FileId * 1000 + DebugWork::g_dw.sound.iSE_SeId) | 0x10000000;
+        DEBUG_WORK& dw = DebugWork::g_dw; /* MATCH: one base for the id computation and its store */
+        INT id;
+        if (dw.sound.bVoice) {
+            id = (dw.sound.iSE_FileId * 1000 + dw.sound.iSE_SeId) | 0x10000000;
         } else {
-            DebugWork::g_dw.sound.iSE_Id = DebugWork::g_dw.sound.iSE_FileId * 1000 + DebugWork::g_dw.sound.iSE_SeId;
+            id = dw.sound.iSE_FileId * 1000 + dw.sound.iSE_SeId;
         }
+        dw.sound.iSE_Id = id;
         DebugWork::g_dw.sound.iSE_Handle = CSound::playSE(DebugWork::g_dw.sound.iSE_Id, -1, 0x40);
     }
     if (inParam & 2) {
@@ -590,9 +589,6 @@ BOOL debugWinSeTestLineCall(CDebugWindow* pObj, INT iLineY, INT inParam) {
     }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", debugWinSeTestLineCall__3DWTP12CDebugWindowii);
-#endif
 
 static DEBUG_WINDOW_LINE debugWinSeTestLine[15] = {
     {" +- FILE-ID:%4d -+", &DebugWork::g_dw.sound.iSE_FileId, 4, {0}, 2, 0.0f, 0.0f, 0.0f, NULL, 0, NULL, NULL},
