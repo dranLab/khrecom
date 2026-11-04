@@ -1004,10 +1004,8 @@ void CDnEditWordPlate::startLeave() {
     }
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/DecknameEdit", chgType__16CDnEditWordPlateii);
-/* Scheduling only: same instructions, but the original fills the bSeOn branch's delay slot with the playSE
- * "li a0,3" (ours: "li a1,-1") and allocates the tab label pointer to v1 (ours: a1). */
-#if 0
+/* read through a reference: the original loads _pszSeqName after the colour store */
+template <class T> static inline T& _ref(T& v) { return v; }
 void CDnEditWordPlate::chgType(INT inType, BOOL bSeOn) {
     G_RGBA stRGBA;
     INT i;
@@ -1017,17 +1015,16 @@ void CDnEditWordPlate::chgType(INT inType, BOOL bSeOn) {
             CSound::playSE(3, -1, 64);
         }
         stRGBA.col = 0x80202020;
-        _setColor(m_pTabLabel[m_nPlateType], stRGBA);
-        m_pSeq->replaceSeqShift(0, _pszSeqName, _DnEditPlateAnim[inType][1], m_fvBasePos.x, m_fvBasePos.y);
+        m_pTabLabel[m_nPlateType]->setColor(stRGBA);
+        m_pSeq->replaceSeqShift(0, _ref(_pszSeqName), _DnEditPlateAnim[inType][1], m_fvBasePos.x, m_fvBasePos.y);
         for (i = 0; i < 21; i++) {
             m_pLabel[i]->chgType(inType);
         }
         m_nPlateType = inType;
         stRGBA.col = 0x80808080;
-        _setColor(m_pTabLabel[m_nPlateType], stRGBA);
+        m_pTabLabel[m_nPlateType]->setColor(stRGBA);
     }
 }
-#endif
 
 void CDnEditWordPlate::beginStateAppear() {}
 
