@@ -1058,8 +1058,6 @@ void CMapEnemy::flyEnemyProc_() {
         if (calcDistanceSq(g_pPlayer) > getDisappearDistance()) changeMapEnemyState(8);
     }
 }
-/* near-match (the vol store lands in a delay slot): kept as INCLUDE_ASM */
-#if 0
 BOOL CMapEnemy::hitTest_() {
     if (!m_pBodyColl) return FALSE;
     m_pBodyColl->detect();
@@ -1072,7 +1070,8 @@ BOOL CMapEnemy::hitTest_() {
     CCollBody* hit = m_pBodyColl->getHitCollBody();
 #line 1864
     ASSERT(hit);
-    INT vol = -1;
+    INT vol;
+    *(volatile INT*)&vol = -1; // MATCH: volatile store: the original issues it before the hit->m_pCollision load
     INT pan = CSound::getPanAndVol(*hit->getDetectPos(), vol);
     INT nID = (INT)m_pEnemyParam->getExtraParam(MapEnemy::FileIDParamName);
     CSound::playSE(nID * 1000 + no, vol, pan);
@@ -1102,49 +1101,6 @@ BOOL CMapEnemy::hitTest_() {
     }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/MapEnemy", hitTest___9CMapEnemy);
-__asm__(
-    ".rdata\n"
-    ".align 4\n"
-    ".word .L002D1820\n"
-    ".word .L002D1834\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D180C\n"
-    ".word .L002D180C\n"
-    ".word .L002D180C\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D180C\n"
-    ".word .L002D180C\n"
-    ".word .L002D180C\n"
-    ".word .L002D1848\n"
-    ".word .L002D1848\n"
-    ".word .L002D1868\n"
-    ".word .L002D1820\n"
-    ".text\n");
-#endif
 
 BOOL CMapEnemy::searchGround_(FLOAT inRadius, FVECTOR* outPos) {
     CPointCollision coll;
