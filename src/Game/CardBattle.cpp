@@ -1141,7 +1141,7 @@ BOOL CCardBattle::checkNowPlaying(INT inSide, CBattleCard* pCard) {
     }
     return FALSE;
 }
-/* Parked: final return only - the original computes 4 into v0 and movn's 1 from v1 when iDuelOK (the != path sets v0 = 1 in the bne delay slot, one exit); ours keeps 1 in v1/v0 and movz's or branches; tried: ~35 return forms (?: nests, ret locals, if chains, && forms), iDuelOK as INT/UINT/BOOL/SHORT and its if/ternary forms, inPlayer vs _PLAYER uses, permuter 4 min (7128 candidates, no gain) */
+/* Parked: 2 lines, the final return only - the original computes 4 into v0 and movn's 1 from v1 when iDuelOK (the != path sets v0 = 1 in the bne delay slot, one exit); this form branches (beqz iDuelOK) instead of the movn. `if (!=) return 1; return !iDuelOK ? 4 : 1;` gives the exact movn block, but jump2 then merges the != return into the shared return-1 stub (4 lines); the ternary through a result variable movz's 1 in v1 (3 lines). tried: ~35 return forms (?: nests, ret locals, if chains, && forms), iDuelOK as INT/UINT/BOOL/SHORT and its if/ternary forms, inPlayer vs _PLAYER uses, permuter 4 min (7128 candidates, no gain); 2026-11-04: ~30 more (r=4/if forms, goto to each early return 1, nested polarity) */
 #if 0
 INT CCardBattle::testPlayingCard(UINT inPlayer) {
     UINT _PLAYER = inPlayer;
@@ -1173,7 +1173,8 @@ INT CCardBattle::testPlayingCard(UINT inPlayer) {
     if (iDuelOK && (m_uiFlag & 0x80000)) return 1;
     if (m_uiFlag & (0x100 << _ENEMY)) return 4;
     if (iPoint > 0 && iPoint < iPointE) return 4;
-    return (iPoint != iPointE) ? 1 : (!iDuelOK ? 4 : 1);
+    if (iPoint == iPointE && !iDuelOK) return 4;
+    return 1;
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", testPlayingCard__Q210CardBattle11CCardBattleUi);
