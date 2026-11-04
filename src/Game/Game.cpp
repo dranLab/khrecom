@@ -938,25 +938,30 @@ void CGameMain::prePlayBattle() {
     m_bPauseEnable = TRUE;
     CMainApp::enableDbgUsrPause(TRUE, FALSE);
 }
-/* Parked: 15 lines - the original places the first two flag arms (13, 15) out of line after the changeState block;
- * ours keeps them inline. tried: negated nested ifs, else-wrapped tail, comma-ternary (18). */
-#if 0
 void CGameMain::playBattle() {
     INT nState = 0;
-    if (m_nGameProcFlag & 1) {
-        m_nGameProcFlag |= 4;
-        nState = 13;
-    } else if (m_nGameProcFlag & 0x80000000) {
-        m_nGameProcFlag |= 4;
-        nState = 15;
-    } else if (m_nGameProcFlag & 0x10000) {
-        m_nGameProcFlag |= 0x40000;
+    INT v;
+    if (m_nGameProcFlag & 1) goto s13; /* MATCH: the 13/15 arms out of line after the changeState block */
+    if (m_nGameProcFlag & 0x80000000) goto s15;
+    if (m_nGameProcFlag & 0x10000) {
         nState = 12;
+        v = m_nGameProcFlag | 0x40000;
+        do {} while (0); /* MATCH: loop note aligns the shared flag store (nop) */
+    store:
+        m_nGameProcFlag = v;
     }
     if (nState) {
         m_nGameProcFlag |= 0x40000000;
         changeState(nState);
         return;
+    s15:
+        v = m_nGameProcFlag | 4;
+        nState = 15;
+        goto store;
+    s13:
+        v = m_nGameProcFlag | 4;
+        nState = 13;
+        goto store;
     }
     if (procBattleMenu()) return;
     m_pSubBattle->update();
@@ -969,9 +974,6 @@ void CGameMain::playBattle() {
         m_bPauseEnable = FALSE;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", playBattle__9CGameMain);
-#endif
 void CGameMain::gotoEndBattle() {
     if (CSceneInfo::isMinigameScene()) CMinigameManager::sendEvent(1, NULL);
     changeState(10);
