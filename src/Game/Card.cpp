@@ -1181,19 +1181,12 @@ BOOL CCard::shouldDispMapCardFullMessage() {
 void CCard::finishMapCardFullMessage() { m_pCardInfo->_nFlag |= 2; }
 
 void CCard::resetMapCardFullMessage() { m_pCardInfo->_nFlag &= ~2; }
-/* near-match: kept as INCLUDE_ASM */
-#if 0
 CARD CCard::correctCardRank(CARD card) {
     INT nKind;
     INT nRank;
     INT i;
     INT nCategory = card.m_nCategory0;
-    if (nCategory == 0) return card;
-    if (nCategory < 5 || nCategory == 9) {
-        if (canAddCard(card)) return card;
-    } else {
-        return card;
-    }
+    if (nCategory == 0 || (nCategory >= 5 && nCategory != 9) || canAddCard(card)) return card; /* MATCH: one condition (shared return reloads card) */
     nRank = card.m_nNumber;
     nKind = card.m_nKind2;
     if (nRank != 0) {
@@ -1216,9 +1209,6 @@ CARD CCard::correctCardRank(CARD card) {
     _setCard(card, 0, 0);
     return card;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Card", correctCardRank__5CCardG4CARD);
-#endif
 BOOL CCard::isHaveMapCard(INT nRank) {
     if (nRank <= 0) nRank = 10;
     for (INT nKind = 0xA1; nKind < 0xBA; nKind++) {
