@@ -7048,81 +7048,75 @@ BOOL CCamp::checkNorma(SHORT idx, USHORT& roomID, INT nRoomSelect) {
     return i < 4;
 }
 
-/* Parked: 15 of 169 lines differ: in the left/right loop the original's rotated prefix (loop test .. `if
-   (!bDiscover) break`) stops before the checkNorma test, which stays at the loop top; ours rotates the whole body.
-   tried: nested ifs, `continue` forms, `!bDiscover || checkNorma`, bDiscover if/else, while + i++, (UINT) range test,
-   i % 2, ternary step, -= i * 6, the up/down loop's (matching) form; permuter 8 min (4622 candidates, no gain). */
-#if 0
 INT CCamp::searchRoom(INT iDir, BOOL bDiscover) {
-    USHORT roomID;
-    INT nRoom;
+    INT nRoomSelect;
+    INT idx;
+    INT idx2;
+    INT idx3;
     INT i;
-    INT col;
-    INT row;
+    USHORT roomID;
 
-    INT cur = m_nRoomSelect;
+    nRoomSelect = m_nRoomSelect;
     switch (iDir) {
     case 0:
-        nRoom = cur + 6;
-        if (nRoom >= 48) {
+        idx = nRoomSelect + 6;
+        if (idx >= 48) {
             return -1;
         }
         goto updown;
     case 1:
-        nRoom = cur - 6;
-        if (nRoom < 0) {
+        idx = nRoomSelect - 6;
+        if (idx < 0) {
             return -1;
         }
     updown:
-        if (m_roomMap[nRoom] && (!bDiscover || checkNorma(-1, roomID, nRoom))) {
-            return nRoom;
+        if (m_roomMap[idx] && (!bDiscover || checkNorma(-1, roomID, idx))) {
+            return idx;
         }
-        col = nRoom % 6;
-        row = nRoom - col;
+        idx2 = idx % 6;
+        idx3 = idx - idx2;
         for (i = 1; i < 11; i++) {
             if ((i & 1) == 0) {
-                col -= i;
+                idx2 -= i;
             } else {
-                col += i;
+                idx2 += i;
             }
-            if (col >= 0 && col < 6) {
-                nRoom = row + col;
-                if (m_roomMap[nRoom] && (!bDiscover || checkNorma(-1, roomID, nRoom))) {
+            if (idx2 >= 0 && idx2 < 6) {
+                idx = idx3 + idx2;
+                if (m_roomMap[idx] && (!bDiscover || checkNorma(-1, roomID, idx))) {
                     break;
                 }
             }
         }
-        return i > 10 ? -1 : nRoom;
+        return i > 10 ? -1 : idx;
     case 2:
-        nRoom = cur - 1;
-        if (nRoom % 6 == 5) {
+        idx = nRoomSelect - 1;
+        if (idx % 6 == 5) {
             return -1;
         }
         goto leftright;
     case 3:
-        nRoom = cur + 1;
-        if (nRoom % 6 == 0) {
+        idx = nRoomSelect + 1;
+        if (idx % 6 == 0) {
             return -1;
         }
     leftright:
-        if (m_roomMap[nRoom] && (!bDiscover || checkNorma(-1, roomID, nRoom))) {
-            return nRoom;
+        if (m_roomMap[idx] && (!bDiscover || checkNorma(-1, roomID, idx))) {
+            return idx;
         }
         for (i = 1; i < 15; i++) {
             if ((i & 1) == 0) {
-                nRoom += i * -6;
+                idx = idx + i * -6;
             } else {
-                nRoom += i * 6;
+                idx = idx + i * 6;
             }
-            if (nRoom < 0 || nRoom >= 48 || !m_roomMap[nRoom]) continue; if (!bDiscover) break; if (checkNorma(-1, roomID, nRoom)) break;
+            idx3 = idx; // MATCH: the extra copy pushes checkNorma's exit test past expand_end_loop's 30-insn scan (not rotated)
+            if (idx3 < 0 || idx3 >= 48 || !m_roomMap[idx3]) continue; if (!bDiscover) break; if (checkNorma(-1, roomID, idx3)) break;
         }
-        return i > 14 ? -1 : nRoom;
+        return i > 14 ? -1 : idx;
     }
     return -1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", searchRoom__5CCampii);
-#endif
 
 void CCamp::setCardHelp(SHORT kind) {
     static LPCTSTR pStrNull = "";
