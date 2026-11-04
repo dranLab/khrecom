@@ -2419,19 +2419,13 @@ void CSaveLoadUI::callbackMessageDlg(C2DSeqAgent& agent) {
         break;
     }
 }
-/* Parked: registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours
- * nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the
- * if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min (5617 candidates, no gain) */
-#if 0
 BOOL CSaveLoadUI::checkSelector(SHORT& nOutIdx, SHORT nMax, INT nValDownKey, INT nValUpKey, SHORT nUpDownValue,
                                 BOOL bSetSE, BOOL bLoopChk) {
     SHORT nNewIdx = nOutIdx;
     if (isButtonRpt(nValDownKey)) {
         nNewIdx -= nUpDownValue;
         if (nNewIdx < 0) {
-            if (nOutIdx != 0) {
-                nNewIdx = 0;
-            } else if (!bLoopChk || isButtonTrg(nValDownKey)) {
+            if (nOutIdx == 0 && (!bLoopChk || isButtonTrg(nValDownKey))) {
                 nNewIdx = nMax - 1;
             } else {
                 nNewIdx = 0;
@@ -2440,9 +2434,7 @@ BOOL CSaveLoadUI::checkSelector(SHORT& nOutIdx, SHORT nMax, INT nValDownKey, INT
     } else if (isButtonRpt(nValUpKey)) {
         nNewIdx += nUpDownValue;
         if (nNewIdx > nMax - 1) {
-            if (nOutIdx != nMax - 1) {
-                nNewIdx = nMax - 1;
-            } else if (!bLoopChk || isButtonTrg(nValUpKey)) {
+            if (nMax - 1 == nOutIdx && (!bLoopChk || isButtonTrg(nValUpKey))) { /* MATCH: one condition, nMax - 1 first */
                 nNewIdx = 0;
             } else {
                 nNewIdx = nMax - 1;
@@ -2456,9 +2448,6 @@ BOOL CSaveLoadUI::checkSelector(SHORT& nOutIdx, SHORT nMax, INT nValDownKey, INT
     }
     return bUpdate;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/SaveLoad", checkSelector__11CSaveLoadUIRssiisii);
-#endif
 /* Parked: 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0`
  * (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function
  * scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter 4 min (5641 candidates) */
