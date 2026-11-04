@@ -749,9 +749,9 @@ void CGameMain::endField() {
     m_pSubField->update();
     if (m_pSubField->getGameSubState() == 6) endFieldSub();
 }
-/* Parked: 21 of 428 lines - ref names/order and the six `SHORT nScene` inlines (_isEventScene) in place; left: the
- * bEventNext = !bPooh arm is if-converted (movn) here, a branch + store there; the theater block's s4/s7 pair; stack
- * reload registers. tried: bWorld10/bEventNext decl swap (40 -> 30), merged state condition (-> 21), ternary/ifelse
+/* Parked: 4 of 426 lines - ref names/order and the six `SHORT nScene` inlines (_isEventScene) in place; the bEventNext
+ * arm as `if (_isEventScene(..) && !bPooh) bEventNext = TRUE;` (21 -> 4); left: the theater block's s4/s7 pair (the
+ * TRUE flags around the TRACE call). Earlier, stack reload registers. tried: bWorld10/bEventNext decl swap (40 -> 30), merged state condition (-> 21), ternary/ifelse
  * forms of bEventNext; permuter 12 min, 14k candidates (22 -> 20 only by reordering against the ref). */
 #if 0
 static inline BOOL _isEventScene(SHORT nScene) { return (USHORT)(nScene - 2000) < 1000; }
@@ -791,7 +791,7 @@ void CGameMain::endFieldSub() {
         nNextMapID = CRcf::getMapID(nNextArea, nNextScene);
         if (nCurArea != nNextArea && (nCurArea == 0 || nNextArea == 0)) bEntranceIO = TRUE;
         bEventNext = FALSE;
-        if (_isEventScene(nNextScene)) bEventNext = !bPooh;
+        if (_isEventScene(nNextScene) && !bPooh) bEventNext = TRUE;
         bDelField = FALSE;
         if (bEntranceIO || CSceneInfo::getCurrentSceneNum() != nNextScene) bDelField = TRUE;
         bDelPlayerRsrc = FALSE;
