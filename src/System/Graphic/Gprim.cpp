@@ -3090,9 +3090,7 @@ FIX4 C3DStripBase::calcZ() {
         if (iz < 0) iz = 0;
     }
 
-    if (m_fGeta == 0.0f) {
-        m_fGetaZ = 0.0f;
-    } else {
+    if (m_fGeta != 0.0f) {
         FMATRIX* pWMat;
         if (m_pObj) {
             pWMat = &m_pObj->Crd(it->Bone).m_World;
@@ -3100,6 +3098,8 @@ FIX4 C3DStripBase::calcZ() {
             pWMat = m_pCrd ? &m_pCrd->m_World : NULL;
         }
         m_fGetaZ = getPrimGetaZ(iz, it->P, pWMat, m_fGeta);
+    } else {
+        m_fGetaZ = 0.0f;
     }
 
     return iz;
@@ -3161,9 +3161,7 @@ FIX4 C3DTexStripBase::calcZ() {
         if (iz < 0) iz = 0;
     }
 
-    if (m_fGeta == 0.0f) {
-        m_fGetaZ = 0.0f;
-    } else {
+    if (m_fGeta != 0.0f) {
         FMATRIX* pWMat;
         if (m_pObj) {
             pWMat = &m_pObj->Crd(it->Bone).m_World;
@@ -3171,6 +3169,8 @@ FIX4 C3DTexStripBase::calcZ() {
             pWMat = m_pCrd ? &m_pCrd->m_World : NULL;
         }
         m_fGetaZ = getPrimGetaZ(iz, it->P, pWMat, m_fGeta);
+    } else {
+        m_fGetaZ = 0.0f;
     }
 
     return iz;
@@ -3332,9 +3332,7 @@ FIX4 C3DCPrim::calcZ() {
         if (iz < 0) iz = 0;
     }
 
-    if (m_fGeta == 0.0f) {
-        m_fGetaZ = 0.0f;
-    } else {
+    if (m_fGeta != 0.0f) {
         FMATRIX* pWMat;
         if (m_pObj) {
             pWMat = &m_pObj->Crd(it->Bone).m_World;
@@ -3342,6 +3340,8 @@ FIX4 C3DCPrim::calcZ() {
             pWMat = m_pCrd ? &m_pCrd->m_World : NULL;
         }
         m_fGetaZ = getPrimGetaZ(iz, it->P, pWMat, m_fGeta);
+    } else {
+        m_fGetaZ = 0.0f;
     }
 
     return m_iZ < 0 ? iz : m_iZ << 4;
@@ -3508,9 +3508,7 @@ FIX4 C3DTPrim::calcZ() {
         if (iz < 0) iz = 0;
     }
 
-    if (m_fGeta == 0.0f) {
-        m_fGetaZ = 0.0f;
-    } else {
+    if (m_fGeta != 0.0f) {
         FMATRIX* pWMat;
         if (m_pObj) {
             pWMat = &m_pObj->Crd(it->Bone).m_World;
@@ -3518,6 +3516,8 @@ FIX4 C3DTPrim::calcZ() {
             pWMat = m_pCrd ? &m_pCrd->m_World : NULL;
         }
         m_fGetaZ = getPrimGetaZ(iz, it->P, pWMat, m_fGeta);
+    } else {
+        m_fGetaZ = 0.0f;
     }
 
     return m_iZ < 0 ? iz : m_iZ << 4;
