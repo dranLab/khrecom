@@ -484,7 +484,7 @@ INT CCard::deleteCard(USHORT inID, SHORT inNumber) {
     case 1: {
         if (inNumber >= 10) return 0;
         if (!m_pCardInfo->_nBattleTotal) return -1;
-        USHORT id = fgPremium ? inID - 0x101 : inID - 1;
+        USHORT id = inID - (fgPremium ? 0x101 : 1);
         char& c = m_pCardInfo->_nAttak[fgPremium][id][inNumber];
         if (!c) return -2;
         c--;
@@ -496,7 +496,7 @@ INT CCard::deleteCard(USHORT inID, SHORT inNumber) {
     case 3: {
         if (inNumber >= 10) return 0;
         if (!m_pCardInfo->_nBattleTotal) return -1;
-        USHORT id = fgPremium ? inID - 0x11A : inID - 0x1A;
+        USHORT id = inID - (fgPremium ? 0x11A : 0x1A);
         char& c = m_pCardInfo->_nMagic[fgPremium][id][inNumber];
         if (!c) return -2;
         c--;
@@ -568,73 +568,48 @@ __asm__(
     ".text\n");
 #endif
 
-/* near-match: kept as INCLUDE_ASM */
-#if 0
 INT CCard::searchCard(USHORT inID, SHORT inNumber) {
     CARD card;
     _setCard(card, inID, inNumber);
     USHORT fgPremium = card.m_fgPremium;
+    USHORT id;
     INT nCard = 0;
     switch (card.m_nCategory0) {
     case 0:
         return 0;
-    case 1: {
+    case 1:
         if (inNumber >= 10) return 0;
-        USHORT id = fgPremium ? inID - 0x101 : inID - 1;
+        id = inID - (fgPremium ? 0x101 : 0x1);
         nCard = m_pCardInfo->_nAttak[fgPremium][id][inNumber];
         break;
-    }
     case 2:
-    case 3: {
+    case 3:
         if (inNumber >= 10) return 0;
-        USHORT id = fgPremium ? inID - 0x11A : inID - 0x1A;
+        id = inID - (fgPremium ? 0x11a : 0x1a);
         nCard = m_pCardInfo->_nMagic[fgPremium][id][inNumber];
         break;
-    }
-    case 4: {
+    case 4:
         if (inNumber >= 10) return 0;
         nCard = m_pCardInfo->_nItem[inID - 0x2A][inNumber];
         break;
-    }
-    case 7: {
+    case 7:
         if (inNumber != 0) return 0;
-        USHORT id = inID - 0x44;
+        id = inID - 0x44;
         nCard = m_pCardInfo->_nEnemy[id];
         break;
-    }
-    case 9: {
+    case 9:
         if (inNumber >= 10) return 0;
-        USHORT id = inID - 0xA1;
+        id = inID - 0xA1;
         nCard = m_pCardInfo->_nMap[id][inNumber];
         break;
-    }
-    case 10: {
+    case 10:
         if (inNumber != 0) return 0;
-        USHORT id = inID - 0xBA;
+        id = inID - 0xBA;
         nCard = m_pCardInfo2->_nKey[id];
         break;
     }
-    }
     return nCard;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Card", searchCard__5CCardUss);
-__asm__(
-    ".rdata\n"
-    ".align 4\n"
-    ".word .L001D6DFC\n"
-    ".word .L001D6D18\n"
-    ".word .L001D6D5C\n"
-    ".word .L001D6D5C\n"
-    ".word .L001D6DA0\n"
-    ".word .L001D6E48\n"
-    ".word .L001D6E48\n"
-    ".word .L001D6DCC\n"
-    ".word .L001D6E48\n"
-    ".word .L001D6DF0\n"
-    ".word .L001D6E28\n"
-    ".text\n");
-#endif
 
 INT CCard::searchCardKind(USHORT inID, SHORT inNumber) {
     INT total = 0;
@@ -1063,7 +1038,7 @@ BOOL CCard::addCard(USHORT inID, SHORT inNumber) {
             AssertApp(__FILE__, __LINE__, "0", 0);
             return FALSE;
         }
-        id = fgPremium ? inID - 0x101 : inID - 1;
+        id = inID - (fgPremium ? 0x101 : 1);
         m_pCardInfo->_nAttak[fgPremium][id][inNumber]++;
         m_pCardInfo->_nBattleTotal++;
         return TRUE;
@@ -1074,7 +1049,7 @@ BOOL CCard::addCard(USHORT inID, SHORT inNumber) {
             AssertApp(__FILE__, __LINE__, "0", 0);
             return FALSE;
         }
-        id = fgPremium ? inID - 0x11A : inID - 0x1A;
+        id = inID - (fgPremium ? 0x11A : 0x1A);
         m_pCardInfo->_nMagic[fgPremium][id][inNumber]++;
         m_pCardInfo->_nBattleTotal++;
         return TRUE;
@@ -1146,7 +1121,10 @@ __asm__(
 
 BOOL CCard::canAddCard(CARD card) { return canAddCard(card.m_nKind2, card.m_nNumber2); }
 
-/* near-match: kept as INCLUDE_ASM */
+/* Parked: 16 of 193 lines: cases 7/9/10 return TRUE by a taken branch (bnez -> li v0,1) and fall into the FALSE
+ * return, ours inverts them; case 4's return FALSE is the default label in the original. Worked: case 0 (the jump
+ * table starts at 0), inID - (fgPremium ? 0x101 : 1), `if (x < 99) return TRUE; break;` + one final return FALSE.
+ * Tried: per-arm return TRUE/FALSE pairs and a final return TRUE (setcc again, 28-62 lines). */
 #if 0
 BOOL CCard::canAddCard(USHORT inID, SHORT inNumber) {
     if (!isAddCardValid(inID, inNumber)) return FALSE;
@@ -1157,31 +1135,39 @@ BOOL CCard::canAddCard(USHORT inID, SHORT inNumber) {
     USHORT fgPremium = card.m_fgPremium;
     USHORT id;
     switch (card.m_nCategory0) {
+    case 0:
+        break;
     case 1:
         if (isBattleCardFull()) return FALSE;
-        id = fgPremium ? inID - 0x101 : inID - 1;
-        return m_pCardInfo->_nAttak[fgPremium][id][inNumber] < 99;
+        id = inID - (fgPremium ? 0x101 : 1);
+        if (m_pCardInfo->_nAttak[fgPremium][id][inNumber] < 99) return TRUE;
+        break;
     case 2:
     case 3:
         if (isBattleCardFull()) return FALSE;
-        id = fgPremium ? inID - 0x11A : inID - 0x1A;
-        return m_pCardInfo->_nMagic[fgPremium][id][inNumber] < 99;
+        id = inID - (fgPremium ? 0x11A : 0x1A);
+        if (m_pCardInfo->_nMagic[fgPremium][id][inNumber] < 99) return TRUE;
+        break;
     case 4:
         if (isBattleCardFull()) return FALSE;
         id = inID - 0x2A;
-        return m_pCardInfo->_nItem[id][inNumber] < 99;
+        if (m_pCardInfo->_nItem[id][inNumber] < 99) return TRUE;
+        break;
     case 7:
         if (isBattleCardFull()) return FALSE;
         id = inID - 0x44;
-        return m_pCardInfo->_nEnemy[id] < 99;
+        if (m_pCardInfo->_nEnemy[id] < 99) return TRUE;
+        break;
     case 9:
         if (isMapCardFull()) return FALSE;
         id = inID - 0xA1;
-        return m_pCardInfo->_nMap[id][inNumber] < 9;
+        if (m_pCardInfo->_nMap[id][inNumber] < 9) return TRUE;
+        break;
     case 10:
         if (isKeyCardFull()) return FALSE;
         id = inID - 0xBA;
-        return !m_pCardInfo2->_nKey[id];
+        if (!m_pCardInfo2->_nKey[id]) return TRUE;
+        break;
     }
     return FALSE;
 }
@@ -1204,8 +1190,6 @@ __asm__(
     ".text\n");
 #endif
 
-/* near-match: kept as INCLUDE_ASM */
-#if 0
 BOOL CCard::isAddCardValid(USHORT inID, SHORT inNumber) {
     if (!isValid(inID)) return FALSE;
     USHORT kind = inID & 0xFF;
@@ -1216,51 +1200,46 @@ BOOL CCard::isAddCardValid(USHORT inID, SHORT inNumber) {
         _setCard(card, inID, inNumber);
     }
     switch (card.m_nCategory0) {
+    case 0:
+        return FALSE;
     case 1:
         if (inNumber < 0) return FALSE;
         if (inNumber >= 10) return FALSE;
-        if (CGame::isSoraGame()) return kind != 0x12;
-        return kind == 0x12;
+        if (CGame::isSoraGame()) {
+            if (kind == 0x12) return FALSE;
+        } else {
+            if (kind != 0x12) return FALSE;
+        }
+        break;
     case 2:
     case 3:
         if (inNumber < 0) return FALSE;
         if (inNumber >= 10) return FALSE;
         if ((USHORT)(kind - 0x21) < 2) return FALSE;
-        return TRUE;
+        break;
     case 4:
         if (inNumber < 0) return FALSE;
-        return inNumber < 10;
+        if (inNumber >= 10) return FALSE;
+        break;
     case 7:
-        if (!CGame::isSoraGame()) return TRUE;
-        return kind != 0x59;
+        if (CGame::isSoraGame()) {
+            if (kind == 0x59) return FALSE;
+        }
+        break;
     case 9:
         if (inNumber < 0) return FALSE;
         if (inNumber >= 10) return FALSE;
-        if (inID != 0xB9) return TRUE;
-        return inNumber == 0;
+        if (inID == 0xB9) {
+            if (inNumber != 0) return FALSE;
+        }
+        break;
     case 10:
-        return TRUE;
+        break;
+    default:
+        return FALSE;
     }
-    return FALSE;
+    return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Card", isAddCardValid__5CCardUss);
-__asm__(
-    ".rdata\n"
-    ".align 4\n"
-    ".word .L001D8AFC\n"
-    ".word .L001D8AD0\n"
-    ".word .L001D8B04\n"
-    ".word .L001D8B04\n"
-    ".word .L001D8B2C\n"
-    ".word .L001D8AFC\n"
-    ".word .L001D8AFC\n"
-    ".word .L001D8B48\n"
-    ".word .L001D8AFC\n"
-    ".word .L001D8B68\n"
-    ".word .L001D8B8C\n"
-    ".text\n");
-#endif
 BOOL CCard::isBattleCardFull() { return m_pCardInfo->_nBattleTotal >= m_pCardInfo->_nBattleTotalMax; }
 
 BOOL CCard::isMapCardFull() { return m_pCardInfo->_nMapTotal >= m_pCardInfo->_nMapTotalMax; }
