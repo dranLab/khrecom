@@ -74,12 +74,12 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/SceneInfo` | 3 | 344 | 3 |  |
 | `Game/EffectMotion` | 1 | 339 | 1 |  |
 | `Game/Collision/CollAttack` | 3 | 334 | 3 |  |
-| `System/Graphic/ModelMan` | 3 | 311 | 3 |  |
 | `Game/Card` | 2 | 307 | 2 |  |
 | `Game/Debug/DebugPathData` | 1 | 292 | 1 |  |
 | `Game/Atel/AtelCrossFade` | 3 | 291 | 3 | .data |
 | `Game/Enemy/MapEnemy` | 1 | 290 | 1 |  |
 | `Form/Menu/Roulette` | 1 | 270 | 1 |  |
+| `System/Graphic/ModelMan` | 2 | 268 | 2 |  |
 | `Game/Collision/CollDisp` | 2 | 262 | 2 |  |
 | `System/Graphic/DispList` | 1 | 245 | 1 |  |
 | `System/Math3D` | 1 | 234 | 1 |  |
@@ -142,9 +142,8 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/Model` | `_disp0_SetPacket__6CModelUiPA3_CiiUliPUl` | 588 | 137 of 659 lines off, same size; mostly registers: the original gives this s5 and iFlags&2 s4 (ours swapped), the bone/light min() selects use movn (an if-form gives that but swaps s0/s1 globally), the no-light branch materializes zero twice. Worked: case 2 with default, (USHORT) mode compares … |
 | `System/Graphic/Model` | `link__10CSemiModelP6CModel` | 72 | 13 lines off: after getRawMode the original computes isDataEmpty && isSemiDataEmpty into a1 and never uses it (dead code left after a cross-jump?); ours drops the semi half. Tried: unused BOOL local, empty if, ternary, statement, duplicated identical arms (24 lines). |
 | `System/Graphic/Model` | `makePkt__5CBBox` | 412 | 116 lines off, register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers. Tried: x[0] > x[1] compare, a … |
-| `System/Graphic/ModelMan` | `reset__9CModelMan` | 43 | (comment) reset: near-match. The original reloads the 0.0f arguments (and stack addresses) after each call to FVECTOR::set (called out of line here); this build keeps them in callee-saved registers across the call. |
-| `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | (comment) setupDrawEnv: near-match. The original reloads the 0.0f arguments (and stack addresses) after each call to FVECTOR::set (called out of line here); this build keeps them in callee-saved registers across the call. |
-| `System/Graphic/ModelMan` | `setupDrawMode__9CModelMani` | 64 | (comment) setupDrawMode: near-match. The two halves of the first GIF tag get swapped registers ($v0/$v1). |
+| `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
+| `System/Graphic/ModelMan` | `setupDrawMode__9CModelMani` | 64 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
 | `System/Graphic/PackMan` | `_initFrameEffPacket__Fiiii` | 487 | 2 lines - case 2's two XYZ2 ORs: the original has the X register first (or v0,s2,v0 / or v0,t7,v0), ours puts the shifted Y first; x \| y and y \| x source order, a shared macro for the three cases, case 3's h/nh form with constant 12 and a 15 min permuter run (21k candidates) all stay at 2. |
 | `System/Graphic/PackMan` | `sceVif1PkCloseUpkCode__FP13pacVif1Packet` | 53 | ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 + 15 min … |
 | `System/Graphic/PathData` | `getNearPath__11CPathVectorR7FVECTORPfT2PiRC7FVECTORPC7FVECTORif` | 586 | 9 lines - fNearDis/fNearT get f27/f26 instead of f26/f27, and the hoisted 0.0f compare constant is a copy of fNearT's register (cse2 equivalence) instead of its own `mtc1 zero,$f24`; the copy adds a ref to fNearT, which then wins the allocation. A clobber-free sqc2 asm for vNearNv (cse flush) … |
@@ -339,7 +338,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 289 functions (71626 instructions) in 80 units, 221 of them parked; 12 units take a data section from assembly.
+Totals: 288 functions (71583 instructions) in 80 units, 220 of them parked; 12 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

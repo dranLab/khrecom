@@ -1,3 +1,4 @@
+#define VECTOR_H_SET_CALL /* MATCH: FVECTOR::setCall (the original calls FVECTOR::set out of line) */
 #define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */
 #define GPRIM_H_PATH "c:/KHCOM/MainApp/System/Graphic/Gprim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #define MODELDATA_H_PATH "c:/KHCOM/MainApp/System/Graphic/modeldata.h" /* MATCH: this unit names modeldata.h so (header default "System/Graphic/modeldata.h") */
@@ -187,9 +188,6 @@ static inline void _vu0SetDisp(FVECTOR& v0, FVECTOR& v1) {
                  : "r"(&v0), "r"(&v1));
 }
 
-/* reset: near-match. The original reloads the 0.0f arguments (and stack addresses) after each call to FVECTOR::set
- * (called out of line here); this build keeps them in callee-saved registers across the call. */
-#if 0
 void CModelMan::reset() {
     TexInfo* pInfo = CRsrcDB::getRsrcTex("errer", NAME_CASE_SENSITIVE);
     if (pInfo) s_ToonTex0 = pInfo->getTPage();
@@ -197,8 +195,8 @@ void CModelMan::reset() {
     if (pInfo) s_SpecTex0 = pInfo->getTPage();
     FVECTOR vMax;
     FVECTOR vMin;
-    vMax.set(4096.0f, 4096.0f, 0.0f, 65535.0f);
-    vMin.set(0.0f, 0.0f, 0.0f, 0.0f);
+    vMax.setCall(4096.0f, 4096.0f, 0.0f, 65535.0f);
+    vMin.setCall(0.0f, 0.0f, 0.0f, 0.0f);
     asm volatile("lqc2 $vf1, 0x0(%0)\n"
                  "lqc2 $vf2, 0x0(%1)\n"
                  "viaddi $vi1, $vi0, 1\n"
@@ -207,15 +205,6 @@ void CModelMan::reset() {
                  :
                  : "r"(&vMax), "r"(&vMin));
 }
-#endif
-/* placeholder for reset's .rodata (its resource names): code in .sdata, which the build strips */
-__attribute__((section(".sdata"))) void _resetPlaceholder() {
-    CRsrcDB::getRsrcTex("errer", NAME_CASE_SENSITIVE);
-    CRsrcDB::getRsrcTex("speclar", NAME_CASE_SENSITIVE);
-}
-/* a reference to FVECTOR::set makes gcc output its weak copy (that the included assembly calls); stripped as well */
-__attribute__((section(".sdata"))) void (FVECTOR::*_pSetRef)(FLOAT, FLOAT, FLOAT, FLOAT) = &FVECTOR::set;
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/ModelMan", reset__9CModelMan);
 
 static inline void _unitMatrix(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
@@ -242,8 +231,8 @@ static inline FVECTOR _applyMatrix(const FMATRIX& m, const FVECTOR& v) {
     return b;
 }
 
-/* setupDrawEnv: near-match. The original reloads the 0.0f arguments (and stack addresses) after each call to FVECTOR::set
- * (called out of line here); this build keeps them in callee-saved registers across the call. */
+/* Parked: 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame
+ * is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. */
 #if 0
 void CModelMan::setupDrawEnv() {
     FMATRIX& matWS = CWorldEnv::getWorldScreenMatrix();
@@ -263,7 +252,7 @@ void CModelMan::setupDrawEnv() {
                  : "r"(&matWS));
     {
         FVECTOR vFogParam;
-        vFogParam.set(0.0f, CWorldEnv::getDispFar(), 0.0f, 0.0f);
+        vFogParam.setCall(0.0f, CWorldEnv::getDispFar(), 0.0f, 0.0f);
         asm volatile("lqc2 $vf1, 0x0(%0)\n"
                      "viaddi $vi1, $vi0, 0\n"
                      "vsqi.xyzw $vf1, ($vi1++)\n"

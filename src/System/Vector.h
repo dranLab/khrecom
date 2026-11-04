@@ -26,6 +26,9 @@ union FVECTOR {
         _q = 0;
         w = 1.0f;
     }
+#ifdef VECTOR_H_SET_CALL /* MATCH: setCall is defined before set, so it keeps a call (ModelMan calls FVECTOR::set out of line) */
+    void setCall(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW) { set(inX, inY, inZ, inW); }
+#endif
     void set(FLOAT inX, FLOAT inY, FLOAT inZ, FLOAT inW = 1.0f) {
         x = inX;
         y = inY;
