@@ -270,46 +270,8 @@ void _startCdRead(INT nStartSect, INT nSectCnt);
 INT _analyzeCdMemberHeader(BYTE*& pExtBuff);
 void _addRsrcFileToDB(UINT nGroup, INT nType, BYTE*& pExtBuff);
 
-/* Placeholder: the C of initialize__6CRcfCD (not matching yet); its strings and vtable uses keep the data in order. */
-__attribute__((section(".sdata"))) static void _initialize_c() {
-    INT nLocale;
-    SectorInfoEntry* p;
-    USHORT i;
-
-    s_nGroupCount = 0;
-#line 282
-    s_pCdMemberDataList = new (com_malloc_d(sizeof(CDMemberList), __FILE__ "(282)", RET_ADDR())) CDMemberList;
-    s_pCdMember = NULL;
-    while ((nLocale = _checkCdContents()) == -1) DelayThread(1000);
-    CRcf::setLocale(nLocale);
-    while (mcdRead(0x244, 1, s_pCdBuff)) DelayThread(1000);
-    s_SectBlockHeader = *(SectBlockHeader*)s_pCdBuff;
-#line 305
-    s_pSectInfoBlock = (SectorInfoEntry*)com_memalign_d(64, s_SectBlockHeader._nIndexSectCnt << 11, __FILE__ "(305)", (UINT)-1);
-    while (mcdRead(0x245, s_SectBlockHeader._nIndexSectCnt, s_pSectInfoBlock)) DelayThread(1000);
-    p = s_pSectInfoBlock;
-    for (i = 0; i < s_SectBlockHeader._nSectInfoCnt; i++, p++) {
-        if (!p->setup((UINT)s_pSectInfoBlock)) continue;
-        if (p->_szName[0] != 'g') continue;
-        USHORT nGroup = atoi(&p->_szName[1]);
-        s_nGroupNumTbl[s_nGroupCount] = nGroup;
-        s_pGroupDataInfoTbl[s_nGroupCount] = p;
-        s_nGroupCount++;
-        CD_GROUP_SECTOR* pMember = (CD_GROUP_SECTOR*)p->_nAddress;
-        for (UINT m = 0; m < p->_nEntryCount; m++, pMember++) {
-            pMember->setup(nGroup, p->_nStartSect);
-        }
-    }
-    CRcfCD::setupRcfAlias();
-    _loadMovieInfo();
-}
-/* Parked: 4 lines (the .sdata placeholder above is the draft) - the section-info loop's increments get swapped
- * s-registers (i + 1 in s1, p + 32 in s2; the original has s2/s1). tried: p++/i++ order; permuter 10 min, 3.3k: no gain. */
-#if 0
 void CRcfCD::initialize() {
     INT nLocale;
-    SectorInfoEntry* p;
-    USHORT i;
 
     s_nGroupCount = 0;
 #line 282
@@ -322,8 +284,8 @@ void CRcfCD::initialize() {
 #line 305
     s_pSectInfoBlock = (SectorInfoEntry*)com_memalign_d(64, s_SectBlockHeader._nIndexSectCnt << 11, __FILE__ "(305)", (UINT)-1);
     while (mcdRead(0x245, s_SectBlockHeader._nIndexSectCnt, s_pSectInfoBlock)) DelayThread(1000);
-    p = s_pSectInfoBlock;
-    for (i = 0; i < s_SectBlockHeader._nSectInfoCnt; i++, p++) {
+    SectorInfoEntry* p = s_pSectInfoBlock; /* MATCH: p and i declared at the loop (increment s-register order) */
+    for (USHORT i = 0; i < s_SectBlockHeader._nSectInfoCnt; i++, p++) {
         if (!p->setup((UINT)s_pSectInfoBlock)) continue;
         if (p->_szName[0] != 'g') continue;
         USHORT nGroup = atoi(&p->_szName[1]);
@@ -338,9 +300,7 @@ void CRcfCD::initialize() {
     CRcfCD::setupRcfAlias();
     _loadMovieInfo();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/RcfCD", initialize__6CRcfCD);
-#endif
+#line 344
 
 void CRcfCD::finalize() {
     if (s_pSectInfoBlock) com_free(s_pSectInfoBlock);
