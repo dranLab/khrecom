@@ -2201,22 +2201,6 @@ INT CPlayer::initIdle(INT inAir, INT inStand) {
     }
     return bAir;
 }
-/* Parked: 11 lines differ (frame, structure, every branch and call match): (1) the first ofs constants - the original
-   loads 0.07f into $f1 and 0.5f into $f0, ours the reverse (pseudo-number order of the two li.s); (2) the join
-   block of the final fix-up: the original loads pos.x ($f0) before pos.z ($f1) in the branch delay slots, ours loads
-   pos.z first. Found: the atan2f wrap needs the separate-result form (_limitPI2: `mov.s f1,f0` right after the call,
-   constants in $f0; the in-place form puts r in $f2 and the constant first) - that took the diff from 79 to 34 lines;
-   FVECTOR::set() for the vStart/vEnd of the fix-up block took it to 13 (plain field stores or brace init: 34+).
-   tried: all orders of the 4 ofs stores, oz/oy temporaries, set()/brace init for ofs, z-then-x and local-variable
-   orders for m_vWallPos, interleaved/reversed vStart/vEnd stores, per-block FLOAT r, _limitPI/_limitPI3 and tools/
-   permuter.py through the method alias wrapper (8 min, score 40 -> 24 by commuting operands/declaration order, which
-   funcdiff shows as worse). Retried 2026-10-25 ($LM tags):
-   the first ofs is one brace-init line (`FVECTOR ofs = {{0, 0.07f, 0.5f, 1}}` after the flag test, the other
-   aggregates declared after it) -> fixes (1); m_vWallPos.x before .z (lines 3686/3687) -> 9 lines. Left: the
-   join block loads pos.x into $f1 and pos.z into $f0 (original $f0/$f1) and sets v0 = 1 before the two stores
-   (original after). tried: v[] / *(FLOAT*)& reads and stores, `bHit = TRUE; return bHit;`, tools/permuter.py
-   through the method wrapper again (10 min, 4717 candidates, no better). */
-#if 0
 INT CPlayer::chkWall(INT inStep) {
     if (!isActionFlag(0x10000)) return FALSE;
     FVECTOR ofs = {{0.0f, 0.07f, 0.5f, 1.0f}};
@@ -2338,14 +2322,14 @@ INT CPlayer::chkWall(INT inStep) {
     if (m_pCollMap->collideMap()) {
         vNormal = *m_pCollMap->getDetectNormal();
         if (vNormal.y < 0.64278764f) pos = *m_pCollMap->getDetectPos();
+        m_vWallPos.x = pos.x;
+        m_vWallPos.z = pos.z;
+    } else {
+        m_vWallPos.x = pos.x;
+        m_vWallPos.z = pos.z;
     }
-    m_vWallPos.x = pos.x;
-    m_vWallPos.z = pos.z;
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkWall__7CPlayeri);
-#endif
 INT CPlayer::chkWallBottom() {
     FVECTOR vStart;
     FVECTOR vEnd;
