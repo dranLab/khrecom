@@ -328,12 +328,6 @@ static inline void _mulMatrix(FMATRIX& res, const FMATRIX& m0, const FMATRIX& m1
                  : : "r"(&res), "r"(&m0), "r"(&m1) : "memory");
 }
 
-/* Parked: _detectOCD: 2 of 440 lines differ, only the stack slot of the second _getLength temp (original sp+0x30 = the
- * operator-'s frame, ours sp+0x20 = its return temp; RTL: temp-slot reuse). Tried: _getLength2 without ret, block-local
- * FVECTOR, by-value dVec, vec0 = inside the DivVector call, no block scope, permuter 8 min. Levers that got it here:
- * invariant iChipSuu local (loop reversal), increments in the for header, retry block inside while (1), hill-climbed
- * store orders, collision spilled once the inner loop held iLoopCnt in fp. */
-#if 0
 INT CCollUtil::_detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* pOCDWork, INT fgLocal) {
     INT i;
     FVECTOR vec0;
@@ -387,7 +381,8 @@ INT CCollUtil::_detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* p
     m_DetectStatus = 0;
     m_fgCamera = (UINT)m_iKind >= (UINT)COLL_KIND_CAMERA;
     m_iInfo2.info = 0;
-    vec0 = m_vCkE0 - m_vCkS0;
+    FVECTOR dVec = m_vCkE0 - m_vCkS0; /* MATCH: the ref's dVec: operator-'s return temp stays in use, the second _getLength reuses its frame slot */
+    vec0 = dVec;
     DivVector(vec1, vec0, fLenCnt);
     m_pPrimInfo = (PRIM_INFO*)SPAD::allocSpad(0x2400);
     m_pPrimInfo2 = (PRIM_INFO2*)SPAD::allocSpad(0x1000);
@@ -471,9 +466,6 @@ INT CCollUtil::_detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* p
     }
     return iFg;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", _detectOCD__9CCollUtilR10CCollisionP8MCD_INFOP8OCD_WORKi);
-#endif
 #if 0 /* the parked draft below is static, as in the original */
 static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal);
 #else
