@@ -618,10 +618,6 @@ BOOL CRcf::isCompleteLoadRCF(INT nGroup, INT nMember) {
     _signalsema();
     return result;
 }
-/* Parked: _LoadRCFProc: 1 of 81 lines - our case-tree branch is `beqzl` where the original has `beqz` (same delay
- * slot `li v0,2`): reorg sees v0 live on the default path's fall-off exit (return-value USE) and the original
- * doesn't. `default: return nResult;` and a label before the final return are worse (10-11 lines). */
-#if 0
 INT _LoadRCFProc(ULONG nGroup, INT nType) {
     INT nResult;
 
@@ -641,7 +637,7 @@ INT _LoadRCFProc(ULONG nGroup, INT nType) {
         nResult = _parseRCF_EntryFile(nGroup, nType);
         break;
     default:
-        goto end;
+        return 2;
     }
     if (s_nFilePtr >= s_nReadFileSize || nResult == 2) {
         _setLinkreqRead();
@@ -650,11 +646,7 @@ INT _LoadRCFProc(ULONG nGroup, INT nType) {
         nResult = 2;
     }
     return nResult;
-end:;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _LoadRCFProc__FUii);
-#endif
 INT CRcf::_loadRCFAlias() {
     CRcfCD::setupRcfAlias();
     return TRUE;
