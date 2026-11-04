@@ -347,12 +347,6 @@ struct CI_HEADER {
     UINT dataTbl;
 };
 
-static inline void _clampIdx(INT& ioIdx, INT inNo, INT inDefault) {
-    if ((UINT)(inNo - 1) >= 13) ioIdx = inDefault;
-}
-
-/* near-match: kept as INCLUDE_ASM */
-#if 0
 void CCard::initCardWorld() {
     CI_HEADER* pCIHeader;
     USHORT* pIdxTbl;
@@ -384,13 +378,10 @@ void CCard::initCardWorld() {
 #line 121
     ASSERT(*(UINT*)&pCIHeader->sig == 0x00494340);
     pIdxTbl = (USHORT*)((BYTE*)pCIHeader + pCIHeader->ofsTbl);
-    INT nWorld = CSceneInfo::getCurrentWorldID(1);
-    idx = nWorld + 14;
-    if (nWorld == 0) {
-        idx = 27;
-    } else {
-        _clampIdx(idx, nWorld, 28);
-    }
+    idxCard = CSceneInfo::getCurrentWorldID(1);
+    idx = idxCard + 14;
+    if (idxCard == 0) idx = 27;
+    else if ((UINT)(idxCard - 1) >= 13) idx = 28;
     idx += 1;
     INT cnt = pIdxTbl[idx];
     if (idx) {
@@ -398,8 +389,7 @@ void CCard::initCardWorld() {
     } else {
         cnt = cnt - 8;
     }
-    idxCard = pIdxTbl[idx - 1];
-    pInitCardTbl = (unsigned char (*)[2])((BYTE*)pCIHeader + pCIHeader->dataTbl + idxCard * 2 + 0x10);
+    pInitCardTbl = (unsigned char (*)[2])((BYTE*)pCIHeader + pCIHeader->dataTbl + pIdxTbl[idx - 1] * 2 + 0x10);
     setCard(pInitCardTbl, cnt);
     for (i = 99; i < 127; i++) {
         if (searchCard(i, 0)) {
@@ -408,20 +398,6 @@ void CCard::initCardWorld() {
         }
     }
 }
-#else
-/* placeholder for initCardWorld's .rodata strings */
-__asm__(".rdata\n"); /* the preceding INCLUDE_ASM left .text; gcc assumes .rdata for these strings */
-inline void _initCardWorldStrings() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    void* m_pCardInitRsrc = CRsrcDB::getRsrc(1, "CardInit", NAME_CASE_SENSITIVE);
-#line 118
-    if (!m_pCardInitRsrc) AssertApp(__FILE__, __LINE__, "m_pCardInitRsrc", 0);
-#line 121
-    if (!(*(UINT*)&((CI_HEADER*)m_pCardInitRsrc)->sig == 0x00494340)) AssertApp(__FILE__, __LINE__, "*(UINT*)&pCIHeader->sig == 0x00494340", 0);
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Card", initCardWorld__5CCard);
-#endif
-/* near-match: kept as INCLUDE_ASM */
-#if 0
 void CCard::initCard(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFloorNumber) {
     CI_HEADER* pCIHeader;
     USHORT* pIdxTbl;
@@ -450,14 +426,11 @@ void CCard::initCard(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFloorN
     if (inNo == 0) {
         if (CGame::isSoraGame()) {
             idx = inCurrentFloorNumber - 1;
-            _clampIdx(idx, inCurrentFloorNumber, 13);
+            if ((UINT)(inCurrentFloorNumber - 1) >= 13) idx = 13;
         } else {
             idx = inDebugWorldID + 14;
-            if (inDebugWorldID == 0) {
-                idx = 27;
-            } else {
-                _clampIdx(idx, inDebugWorldID, 28);
-            }
+            if (inDebugWorldID == 0) idx = 27;
+            else if ((UINT)(inDebugWorldID - 1) >= 13) idx = 28;
         }
         idx += 1;
         cnt = pIdxTbl[idx];
@@ -467,8 +440,8 @@ void CCard::initCard(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFloorN
             cnt = cnt - 8;
         }
         idxCard = pIdxTbl[idx - 1];
-        pInitCardTbl = (unsigned char (*)[2])((BYTE*)pCIHeader + pCIHeader->dataTbl + idxCard * 2 + 0x10);
-        setCard(pInitCardTbl, cnt);
+        pInitCardTbl = (unsigned char (*)[2])((BYTE*)pCIHeader + pCIHeader->dataTbl + idxCard * 2);
+        setCard(pInitCardTbl + 8, cnt);
         idx = (idx < 15) ? 0 : 15;
         cnt = pIdxTbl[idx];
         if (idx) {
@@ -477,13 +450,15 @@ void CCard::initCard(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFloorN
             cnt = cnt - 8;
         }
         idxCard = pIdxTbl[idx - 1];
-        pInitCardTbl = (unsigned char (*)[2])((BYTE*)pCIHeader + pCIHeader->dataTbl + idxCard * 2 + 0x10);
-        setCard(pInitCardTbl, cnt);
-    } else if (inNo == 1 || inNo == 2) {
+        pInitCardTbl = (unsigned char (*)[2])((BYTE*)pCIHeader + pCIHeader->dataTbl + idxCard * 2);
+        setCard(pInitCardTbl + 8, cnt);
+    } else {
         if (inNo == 1) {
             idx = 0;
-        } else {
+        } else if (inNo == 2) {
             idx = 27;
+        } else {
+            return;
         }
         idx += 1;
         cnt = pIdxTbl[idx];
@@ -493,25 +468,10 @@ void CCard::initCard(USHORT inNo, WORLD_ID inDebugWorldID, SHORT inCurrentFloorN
             cnt = cnt - 8;
         }
         idxCard = pIdxTbl[idx - 1];
-        pInitCardTbl = (unsigned char (*)[2])((BYTE*)pCIHeader + pCIHeader->dataTbl + idxCard * 2 + 0x10);
-        setCard(pInitCardTbl, cnt);
+        pInitCardTbl = (unsigned char (*)[2])((BYTE*)pCIHeader + pCIHeader->dataTbl + idxCard * 2);
+        setCard(pInitCardTbl + 8, cnt);
     }
 }
-#else
-/* placeholder for initCard's static (.data) and its strings (emitted first from an inline, in .rodata) */
-__asm__(".rdata\n"); /* the preceding INCLUDE_ASM left .text; gcc assumes .rdata for these strings */
-inline void _initCardStrings() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE("Deck 1");
-    TRACE("Deck 2");
-    TRACE("Deck 3");
-}
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) char* _initCardData(INT i) {
-    static char* pDeckName[3] = { "Deck 1", "Deck 2", "Deck 3" };
-    return pDeckName[i];
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Card", initCard__5CCardUs8WORLD_IDs);
-#endif
 /* near-match: kept as INCLUDE_ASM */
 #if 0
 INT CCard::deleteCard(USHORT inID, SHORT inNumber) {
