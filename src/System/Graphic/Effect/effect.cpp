@@ -345,13 +345,10 @@ void CEffect::_playSE(const EFFECT_SE* pSeData, UINT nNo) {
     }
 }
 
-/* Parked: 2 of 94 lines, same size - "li v0,-1" (nVol) and "lw s0,36(s1)" (m_pCrds for Crd(0)) swap in the first
- * block. Tried: nVol at function scope or assigned separately, Crd(0)/getWorldPos into a local first (6), nPan
- * declared first, permuter 10 min (2 -> 2). */
-#if 0
 void CEffect::_updateSE() {
     if (!m_hSe && m_nSeID > 0 && !isWaiting()) {
-        INT nVol = -1;
+        INT nVol;
+        *(volatile INT*)&nVol = -1; // MATCH: volatile store: the original issues it before the m_pCrds load
         INT nPan = CSound::getPanAndVol(Crd(0).getWorldPos(), nVol);
         m_hSe = CSound::playSE(m_nSeID, nVol, nPan);
     }
@@ -363,9 +360,6 @@ void CEffect::_updateSE() {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/effect", _updateSE__7CEffect);
-#endif
 
 void CEffect::_fadeoutSE(FLOAT fFrame) {
     if (m_hSe && m_nSeID > 0) {
