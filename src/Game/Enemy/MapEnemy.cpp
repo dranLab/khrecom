@@ -1146,13 +1146,15 @@ __asm__(
     ".text\n");
 #endif
 
-/* near-match (inRadius and the end angle in swapped FP registers): kept as INCLUDE_ASM */
-#if 0
 BOOL CMapEnemy::searchGround_(FLOAT inRadius, FVECTOR* outPos) {
     CPointCollision coll;
     FVECTOR pos;
-    for (FLOAT deg = (FLOAT)(rand() % 360), d = deg + 360.0f; deg < d; deg += 45.0f) {
-        FLOAT rad = Math3D::LimitPI(deg * 0.017453292f);
+    FLOAT deg;
+    FLOAT rad;
+    FLOAT d;
+    d = (FLOAT)(rand() % 360);
+    for (deg = d; deg < d + 360.0f; deg += 45.0f) {
+        rad = Math3D::LimitPI(deg * 0.017453292f);
         pos = getPlayerPos(FALSE);
         pos.x += inRadius * cosf(rad);
         pos.y += 0.1f;
@@ -1167,9 +1169,6 @@ BOOL CMapEnemy::searchGround_(FLOAT inRadius, FVECTOR* outPos) {
     }
     return FALSE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/MapEnemy", searchGround___9CMapEnemyfP7FVECTOR);
-#endif
 BOOL CMapEnemy::initEnemyParam_(INT inGroupID, INT inRsrcID) {
     ENEMY_PARAM* param = (ENEMY_PARAM*)CRsrcDB::getFirstData(0x15, inGroupID * 10000 + inRsrcID, 1);
     if (!param) return FALSE;
