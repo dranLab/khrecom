@@ -695,7 +695,7 @@ void resultCheckBBox(FVECTOR& min, FVECTOR& max) {
     asm volatile("sqc2 $vf2, 0(%0)" : : "r"(&min) : "memory");
     asm volatile("sqc2 $vf3, 0(%0)" : : "r"(&max) : "memory");
 }
-/* Parked: 2 lines: the original ORs into clip's register and copies it (or v1,v0,v1; jr ra; move v0,v1), ours ORs straight into v0. Worked: !(x[0] > x[1]) (load order), clip |= ret in the if-block with the 0xC0000000 return last, asm "nop" opening the if (ret) block. An `asm("or %0, %1, %0" : "+r"(clip) : "r"(ret))` for the OR matches the whole function, kept out (MIPS arithmetic stays C). The ref has only `INT ret` (no clip local). Tried: ternary + inline helper, if/else result, block-local clip, register asm v0/v1 locals, empty "+r" barrier. */
+/* Parked: 1 line: the OR's operand order (original `or v1,v0,v1`, ours `or v1,v1,v0`; ret | clip, clip | ret, inline shift and swapped declarations all give ours); `clip |= ret` in both arms of `if (ret)` gave the copy (2 -> 1, build/joinsweep.py). Before: the original ORs into clip's register and copies it (or v1,v0,v1; jr ra; move v0,v1), ours ORs straight into v0. Worked: !(x[0] > x[1]) (load order), clip |= ret in the if-block with the 0xC0000000 return last, asm "nop" opening the if (ret) block. An `asm("or %0, %1, %0" : "+r"(clip) : "r"(ret))` for the OR matches the whole function, kept out (MIPS arithmetic stays C). The ref has only `INT ret` (no clip local). Tried: ternary + inline helper, if/else result, block-local clip, register asm v0/v1 locals, empty "+r" barrier. */
 #if 0
 INT resultCheckBBox(CCoord& crd, const BBOX* bbox) {
     INT ret;
@@ -706,8 +706,10 @@ INT resultCheckBBox(CCoord& crd, const BBOX* bbox) {
         if (ret) {
             asm volatile("nop");
             ret = (ret | 0x8000) << 16;
+            clip |= ret;
+        } else {
+            clip |= ret;
         }
-        clip |= ret;
         return clip;
     }
     return 0xC0000000;
