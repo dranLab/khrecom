@@ -2141,11 +2141,6 @@ void CBattleEnemy::killBossDeadEffect() {
     if (pEffect) pEffect->kill();
     m_hDeath = 0;
 }
-/* Parked: 3 lines - the original keeps the hp <= 0 `return 0` as a stub right after the bgtz (the count >= 8 and
- * inParent paths jump to it) and a separate return-0 copy after ApplyMatrix; ours (this goto form) merges the stub
- * into the ApplyMatrix copy; tried: early returns, nested if/else with final return 0, if (hp > 0) {...} return 0,
- * ApplyMatrix path falling to a final return, goto fail (closest), permuter 5 min (5739 candidates, no gain) */
-#if 0
 HANDLE CBattleEnemy::recover(INT inPoint, const CHAR* inEffectName, INT inEffectNo, const FVECTOR& inPos, const CCoord* inParent) {
     if (m_iHp <= 0) {
     fail:
@@ -2171,7 +2166,7 @@ HANDLE CBattleEnemy::recover(INT inPoint, const CHAR* inEffectName, INT inEffect
         stopDmg->vDetectPos.w = 1.0f;
         sceVu0InversMatrix(m, Crd(0).m_World);
         ApplyMatrix(stopDmg->vDetectPos, m, stopDmg->vDetectPos);
-        return 0;
+        goto fail; /* MATCH: the shared return-0 stub */
     }
     m_iHp += inPoint;
     if (getHpMax() < m_iHp) m_iHp = getHpMax();
@@ -2186,9 +2181,6 @@ HANDLE CBattleEnemy::recover(INT inPoint, const CHAR* inEffectName, INT inEffect
     Gauge::CCommonGauge::setDispSeq(getHandle(), 1);
     return m_hRecover;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", recover__12CBattleEnemyiPCciRC7FVECTORPC6CCoord);
-#endif
 void CBattleEnemy::kill() {
     if (isState(m_EnemyState[30])) return;
     m_iHp = 0;
