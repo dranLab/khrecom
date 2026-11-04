@@ -1257,11 +1257,6 @@ INT CCardBattle::setPlayCard(HANDLE inHandle, INT inUser, CBattleCard* inCard, C
     if (inTest) return testPlayingCard(_PLAYER);
     return 1;
 }
-/* Parked: induction variable - the original's copy loop runs on &m_pCard[_PLAYER][i] (cardData at -0x38), ours on
- * &m_cardData[_PLAYER][i] (m_pCard at +0x38); all else matches; tried: pointer/index forms of inCard (in-body and
- * for-header increments), the m_pCard store per branch, an m_pCard row pointer, call/copy order, permuter 4 min
- * (7957 candidates, no gain) */
-#if 0
 INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard, INT inSkill, INT inExtra, INT inFirst,
                               INT inTest) {
     if (!(inUser)) AssertApp(__FILE__, 1754, "inUser", 0);
@@ -1272,17 +1267,16 @@ INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard,
     m_uiResult[_PLAYER] = 0;
     m_tqPlayTimer[_PLAYER] = 0;
     INT max = inSkill < 4 ? inSkill : 3;
-    INT count = 0;
     INT i;
+    INT count = 0;
     for (i = 0; i < max; i++) {
         if (inCard[i]) count++;
     }
     for (i = 0; i < max; i++) {
-        CBattleCard* pCard = *inCard;
-        m_pCard[_PLAYER][i] = pCard;
-        if (pCard) {
-            m_cardData[_PLAYER][i] = *pCard->getCardData();
-            pCard->setPlayStock(count);
+        m_pCard[_PLAYER][i] = *inCard; /* MATCH: no card local (the ref has none): the m_pCard element is the loop's giv */
+        if (m_pCard[_PLAYER][i]) {
+            m_cardData[_PLAYER][i] = *m_pCard[_PLAYER][i]->getCardData();
+            m_pCard[_PLAYER][i]->setPlayStock(count);
         } else {
             _setCard(m_cardData[_PLAYER][i], 0, 0);
         }
@@ -1291,12 +1285,9 @@ INT CCardBattle::setPlayStock(HANDLE inHandle, INT inUser, CBattleCard** inCard,
     m_iStock[_PLAYER] = inSkill;
     m_iExtra[_PLAYER] = inExtra;
     m_iFirst[_PLAYER] = inFirst;
-    if (!inTest) return 1;
-    return testPlayingCard(_PLAYER);
+    if (inTest) return testPlayingCard(_PLAYER);
+    return 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setPlayStock__Q210CardBattle11CCardBattleiiPPQ210CardBattle11CBattleCardiiii);
-#endif
 INT CCardBattle::setEnchantCard(HANDLE inHandle, INT inUser, CBattleCard* inCard) {
     if (!(inUser)) AssertApp(__FILE__, 1823, "inUser", 0);
     UINT _PLAYER = inUser - 1;
