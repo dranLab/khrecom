@@ -41,7 +41,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
 | `Game/Collision/CollUtil` | 5 | 1238 | 5 | .rodata |
 | `Game/BattleCard` | 3 | 1160 | 3 |  |
-| `Game/Card` | 6 | 1119 | 6 |  |
 | `Game/Enemy/HumanBoss` | 7 | 1088 | 7 |  |
 | `System/Graphic/PathData` | 2 | 1075 | 2 |  |
 | `System/Graphic/DeFocus` | 2 | 1014 | 2 |  |
@@ -77,6 +76,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/EffectMotion` | 1 | 339 | 1 |  |
 | `Game/Collision/CollAttack` | 3 | 334 | 3 |  |
 | `System/Graphic/ModelMan` | 3 | 311 | 3 |  |
+| `Game/Card` | 2 | 307 | 2 |  |
 | `Game/Debug/DebugPathData` | 1 | 292 | 1 |  |
 | `Game/Atel/AtelCrossFade` | 3 | 291 | 3 | .data |
 | `Form/Menu/Roulette` | 1 | 270 | 1 |  |
@@ -213,11 +213,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/BattleCard` | `__Q210CardBattle11CBattleCardP5CTaskiiii` | 628 | 8 lines - in the inState == 2 block the original stores m_iState/m_pRevolver first (m_iState from the compare's reload); ours schedules them after the SCREEN_HEIGHT load and reloads inState. Store orders, changeState(inState), m_iState = 2, switch and hill.py did not change it. |
 | `Game/BattleCard` | `destroy__Q210CardBattle11CBattleCardi` | 117 | 5 lines - the original keeps two copies of `addGimmickCount(-1); break;` (cases 0xe and 6); our jump2 cross-jumps case 0xe's tail into case 6. Per-case flag sets, gotos, labels, argument spellings and block scopes all merge too (synthetic tests build/ps/cj/d*.cpp, e*.cpp, f1.cpp). |
 | `Game/BattleCard` | `stateDestroy__Q210CardBattle11CBattleCard` | 415 | 22 lines - the first _adjustRad of each case keeps the sum in the loaded register and copies it to ret (mov.s); ours computes the sum straight into ret (same as stateSnatch). Case 4 also swaps a1/a2 (timer vs dy). Inline/explicit wrap forms, store orders and 12 min of permuter (10k candidates) did … |
-| `Game/Card` | `deleteCard__5CCardUss` | 200 | (comment) near-match: kept as INCLUDE_ASM |
-| `Game/Card` | `insertDeck__5CCardG4CARDUssi` | 221 | (comment) near-match: kept as INCLUDE_ASM |
-| `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | (comment) near-match: kept as INCLUDE_ASM |
-| `Game/Card` | `addCard__5CCardUss` | 224 | (comment) near-match: kept as INCLUDE_ASM |
-| `Game/Card` | `canAddCard__5CCardUss` | 167 | 16 of 193 lines: cases 7/9/10 return TRUE by a taken branch (bnez -> li v0,1) and fall into the FALSE return, ours inverts them; case 4's return FALSE is the default label in the original. Worked: case 0 (the jump table starts at 0), inID - (fgPremium ? 0x101 : 1), `if (x < 99) return TRUE; … |
+| `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
 | `Game/Card` | `correctCardRank__5CCardG4CARD` | 212 | (comment) near-match: kept as INCLUDE_ASM |
 | `Game/CardBattle` | `testPlayingCard__Q210CardBattle11CCardBattleUi` | 89 | final return only - the original computes 4 into v0 and movn's 1 from v1 when iDuelOK (the != path sets v0 = 1 in the bne delay slot, one exit); ours keeps 1 in v1/v0 and movz's or branches; tried: ~35 return forms (?: nests, ret locals, if chains, && forms), iDuelOK as INT/UINT/BOOL/SHORT and its … |
 | `Game/CardBattle` | `setPlayStock__Q210CardBattle11CCardBattleiiPPQ210CardBattle11CBattleCardiiii` | 144 | induction variable - the original's copy loop runs on &m_pCard[_PLAYER][i] (cardData at -0x38), ours on &m_cardData[_PLAYER][i] (m_pCard at +0x38); all else matches; tried: pointer/index forms of inCard (in-body and for-header increments), the m_pCard store per branch, an m_pCard row pointer, … |
@@ -351,7 +347,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `checkSelector__11CSaveLoadUIRssiisii` | 127 | registers only (22 lines): the original keeps this in s1, nOutIdx in s2 and nValDownKey in s3, ours nValDownKey/this/nOutIdx in s1/s2/s3 (global-alloc priority); code and layout match once isButtonRpt/Trg are the if-return-call inlines; tried: ternary/if forms of the pad inlines, permuter 4 min … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 300 functions (73066 instructions) in 81 units, 232 of them parked; 12 units take a data section from assembly.
+Totals: 296 functions (72254 instructions) in 81 units, 228 of them parked; 12 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
