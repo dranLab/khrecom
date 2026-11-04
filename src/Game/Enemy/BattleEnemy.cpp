@@ -2362,20 +2362,14 @@ BOOL CBattleEnemy::initEnemyParam(INT inGroupID, INT inRsrcID, INT inIndex) {
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", initEnemyParam__12CBattleEnemyiii);
 #endif
 __asm__(".rdata\n.align 3\n.word 0x3D3C2030\n.word 0x6F6C6620\n.word 0x2620726F\n.word 0x6C662026\n.word 0x20726F6F\n.word 0x4E45203C\n.word 0x5F594D45\n.word 0x41524150\n.word 0x423A3A4D\n.word 0x43495341\n.word 0x58414D5F\n.word 0x00000000\n.word 0x00000000\n.word 0x00000000\n.text\n");
-/* Parked: the load of hitBody->m_pCollision (getDetectPos) is scheduled before the vol = -1 store in ours, after
- * it in the original (8 lines: registers a2/v1, order): our vol store is a fixed scalar MEM that cannot alias the
- * varying struct load; `INT vol[1]` matches but the ref says INT vol (same open issue: MapEnemy::hitTest_); tried:
- * no hitBody local (getHitCollBody() twice), separate pos local, `INT vol; vol = -1`, _ref(vol) store/arg,
- * playSE(.., getPanAndVol(..)) args, full Game/Collision/CollBody.h class, if/return getDetectPos, permuter 6 min
- * (9052 candidates, no gain); sched dump: insn r135=[r129+0xc] has no dependence on [$1]=r132 */
-#if 0
 void CBattleEnemy::playSmallDamageSE() {
     if (isNoPlayDamageSE()) return;
     INT fileID = (INT)getExtraParam(BattleEnemy::FileIDParamName);
     INT seID = m_iDamageCounter ? 1 : 2;
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
     if (hitBody) {
-        INT vol = -1;
+        INT vol;
+        *(volatile INT*)&vol = -1; // MATCH: volatile store: the original issues it before the hitBody->m_pCollision load
         INT pan = CSound::getPanAndVol(*hitBody->getDetectPos(), vol);
         CSound::playSE(fileID * 1000 | seID, vol, pan);
     } else {
@@ -2383,23 +2377,14 @@ void CBattleEnemy::playSmallDamageSE() {
     }
     m_iDamageCounter ^= 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playSmallDamageSE__12CBattleEnemy);
-#endif
-/* Parked: the load of hitBody->m_pCollision (getDetectPos) is scheduled before the vol = -1 store in ours, after
- * it in the original (8 lines: registers a2/v1, order): our vol store is a fixed scalar MEM that cannot alias the
- * varying struct load; `INT vol[1]` matches but the ref says INT vol (same open issue: MapEnemy::hitTest_); tried:
- * no hitBody local (getHitCollBody() twice), separate pos local, `INT vol; vol = -1`, _ref(vol) store/arg,
- * playSE(.., getPanAndVol(..)) args, full Game/Collision/CollBody.h class, if/return getDetectPos, permuter 6 min
- * (9052 candidates, no gain); sched dump: insn r135=[r129+0xc] has no dependence on [$1]=r132 */
-#if 0
 void CBattleEnemy::playBigDamageSE() {
     if (isNoPlayDamageSE()) return;
     INT fileID = (INT)getExtraParam(BattleEnemy::FileIDParamName);
     INT seID = m_iDamageCounter ? 3 : 4;
     CCollBody* hitBody = m_pBodyColl->getHitCollBody();
     if (hitBody) {
-        INT vol = -1;
+        INT vol;
+        *(volatile INT*)&vol = -1; // MATCH: volatile store: the original issues it before the hitBody->m_pCollision load
         INT pan = CSound::getPanAndVol(*hitBody->getDetectPos(), vol);
         CSound::playSE(fileID * 1000 | seID, vol, pan);
     } else {
@@ -2407,9 +2392,6 @@ void CBattleEnemy::playBigDamageSE() {
     }
     m_iDamageCounter ^= 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/BattleEnemy", playBigDamageSE__12CBattleEnemy);
-#endif
 void CBattleEnemy::playDamageSE(ATK_KIND inDmgKind) {
     switch (inDmgKind) {
     case ATK_KIND_DMG_BIG:
