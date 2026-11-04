@@ -1360,42 +1360,29 @@ void _getStageInfo(SHORT& nOutGroup, SHORT& nOutMember, CHAR* pOutLabel, INT* pO
     }
     _skipDbgLine();
 }
-/* Parked: 6 of 108 lines, only %hi(s_pDbgFileBuf) - ours computes it into v0 and copies it to s2 (gcse PRE copy),
- * the original loads it into s2 directly. Tried: plain delete, a CBuf*& reference, return in the success branch,
- * permuter 5 min. */
-#if 0
 BOOL _loadRcfInfoFile(const CHAR* pszFile) {
     INT nLen;
     BYTE* pBuf;
 
     if (s_pDbgFileBuf) delete s_pDbgFileBuf;
     nLen = CFileIO::getFileSize(pszFile);
-    if (nLen > 0) {
-#line 2257
-        s_pDbgFileBuf = new (__FILE__ "(2257)") CBuf;
-        ASSERT(s_pDbgFileBuf);
-        pBuf = s_pDbgFileBuf->allocBuf_A64(nLen + 1);
-        ASSERT(pBuf);
-        if (CFileIO::loadFile(pszFile, pBuf, nLen) >= 0) {
-            goto ok;
-        }
-        if (s_pDbgFileBuf) delete s_pDbgFileBuf;
+    if (nLen <= 0) {
+        s_pDbgFileBuf = __null;
+        return FALSE;
     }
-    s_pDbgFileBuf = __null;
-    return FALSE;
-ok:
+#line 2257
+    s_pDbgFileBuf = new (__FILE__ "(2257)") CBuf;
+    ASSERT(s_pDbgFileBuf);
+    pBuf = s_pDbgFileBuf->allocBuf_A64(nLen + 1);
+    ASSERT(pBuf);
+    if (CFileIO::loadFile(pszFile, pBuf, nLen) < 0) {
+        if (s_pDbgFileBuf) delete s_pDbgFileBuf;
+        s_pDbgFileBuf = __null;
+        return FALSE;
+    }
     pBuf[nLen] = 0;
     return TRUE;
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _loadRcfInfoFile_strings(INT n) {
-    TRACE(__FILE__ "(2257)");
-    if (n) AssertApp(__FILE__, 0, "s_pDbgFileBuf", 0);
-    if (n) AssertApp(__FILE__, 0, "pBuf", 0);
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _loadRcfInfoFile__FPCc);
-#endif
 void _disposeRcfInfoFile() {
     if (s_pDbgFileBuf) delete s_pDbgFileBuf;
     s_pDbgFileBuf = __null;
