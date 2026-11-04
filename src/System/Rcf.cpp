@@ -146,7 +146,7 @@ public:
     INT getMemberID() { return m_nMemeberID; }
     BOOL hasLinkOwner() { return m_nOwnerID != 0; }
     INT getLinkOwnerID() { return m_nOwnerID; }
-    INT getType() { return m_nType; }
+    INT getType() { return *(INT*)&m_nType; } /* MATCH: not an in-struct access: the original reloads it after global stores */
     BYTE* getBuff() { return m_pBuff; }
     CRCFQueueData* getNextData() { return m_pNext; }
     void setNextData(CRCFQueueData* p) { m_pNext = p; }
@@ -196,7 +196,7 @@ INT s_nRsrcFileSize;
 volatile INT s_nReadStep;
 volatile INT s_nReadThreadInfo;
 volatile BOOL s_bThreadEnable;
-ULONG s_nReadRsrcID;
+volatile ULONG s_nReadRsrcID; /* MATCH: volatile (thread-shared; the original never moves its store into a delay slot) */
 INT s_nReadGroup;
 volatile INT s_nReadFileSize;
 volatile INT s_nLinkOwnerGroup; /* volatile: _parseRCF_EntryFile reloads it in a bnezl slot (thread-shared, like s_nReadStep) */
@@ -458,7 +458,9 @@ inline void CRCFQueueData::init(INT nGroupID, INT nMemeberID, INT nType, BYTE* p
     p->m_pBuff = pBuff;
     p->m_nType = nType;
 }
-/* Near-match: the original re-reads the entry type after every global store */
+/* Parked: 3 lines - the inner loop's top label is not aligned in the original (offset 0xf4, no .p2align nop), ours
+ * gets the LOOP_BEG alignment nop and so a plain bne instead of the bnel into the loop top; getType() through a cast
+ * fixed the type reloads (21 -> 3). Tried: for(;;) with breaks, a goto loop (jump threading drops the pre-test). */
 #if 0
 void CRcf::_threadReadProc(void* p) {
     volatile ULONG nReadID;
@@ -499,8 +501,6 @@ __attribute__((section(".sdata"))) void _threadReadProc_strings(INT n) {
 }
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _threadReadProc__4CRcfPv);
 #endif
-/* Near-match: store scheduling of s_nReadRsrcID */
-#if 0
 BOOL CRcf::_launchReadThread(ULONG nData, INT nType) {
     INT ra;
     ThreadParam tp;
@@ -536,15 +536,6 @@ BOOL CRcf::_launchReadThread(ULONG nData, INT nType) {
     _setReadThreadRunning();
     return TRUE;
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _launchReadThread_strings(INT n) {
-    TRACE("!!!!!!!!! ERROR READ THREAD Activation !!!!!!!!! %x\n");
-    TRACE("***** Start Load RCF #%05d (in #%05d) *****\n");
-    TRACE("***** Start Load RCF #%05d *****\n");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _launchReadThread__4CRcfUii);
-#endif
 void _setReadThreadEnd() {
     if (_isReadThreadRunning()) {
         s_nReadThreadInfo = -s_nReadThreadInfo;
