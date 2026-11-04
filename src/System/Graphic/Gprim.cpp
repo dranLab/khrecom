@@ -2487,7 +2487,10 @@ QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord
     }
     return pQw;
 }
-/* Parked: the strip-skip loop entry only - the original jumps into the rolled loop at its Term test (b X with the
+/* Parked: 3 lines (2026-11-04, was 11; the other fans 5/5/3 with the same form): `if (!(it < end)) goto done;
+ * goto in0;` into the first skip do-while and a trailing `done: return pQw;` fix the !Back entry; left: in the Back
+ * skip loop jump.c inverts `if (!term) goto body; goto next1;` (original: beqz term -> body, b next1 stealing the
+ * outer sltu); for(;;)/while/label forms and continue don't keep it. Before: the original jumps into the rolled loop at its Term test (b X with the
  * lhu in the slot), ours copies the test to the loop entry (jump.c duplicate_loop_exit_test) or keeps a redundant
  * it < end test; fg/end and iDir/0x8000 registers fixed by the plain while (it < end) form and iDir = 0 first;
  * tried: while/do-while/for(;;) skip loops, goto into the loop, bLoop variable with a bottom label, an inline Term
@@ -2505,9 +2508,11 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Bac
             fW = RotTransPersClipW(p, it->P);
             if (bTop) {
                 if (p.w) {
-                    if (!(it < end)) return pQw;
+                    if (!(it < end)) goto done;
+                    goto in0;
                     do {
                         if (!(it < end)) return pQw;
+                    in0:;
                     } while (!(it++)->Term);
                     goto next0;
                 }
@@ -2540,11 +2545,11 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Bac
             fW = RotTransPersClipW(p, vDir[iDir], it->P);
             if (bTop) {
                 if (p.w) {
-                    if (!(it < end)) return pQw;
-                    do {
-                        if (!(it < end)) return pQw;
-                    } while (!(it++)->Term);
-                    goto next1;
+                    if (!(it < end)) goto done;
+                    for (;;) {
+                        if ((it++)->Term) goto next1;
+                        if (!(it < end)) goto done;
+                    }
                 }
                 p.w = 0x8000;
                 bTop = 0;
@@ -2572,6 +2577,7 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Bac
         next1:;
         }
     }
+done:
     return pQw;
 }
 #else
@@ -2598,9 +2604,11 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* 
             fW = RotTransPersClipW(p, it->P);
             if (bTop) {
                 if (p.w) {
-                    if (!(it < end)) return pQw;
+                    if (!(it < end)) goto done;
+                    goto in0;
                     do {
-                        if (!(it < end)) return pQw;
+                        if (!(it < end)) goto done;
+                    in0:;
                     } while (!(it++)->Term);
                     goto next0;
                 }
@@ -2637,11 +2645,11 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* 
             fW = RotTransPersClipW(p, vDir[iDir], it->P);
             if (bTop) {
                 if (p.w) {
-                    if (!(it < end)) return pQw;
-                    do {
-                        if (!(it < end)) return pQw;
-                    } while (!(it++)->Term);
-                    goto next1;
+                    if (!(it < end)) goto done;
+                    for (;;) {
+                        if ((it++)->Term) goto next1;
+                        if (!(it < end)) goto done;
+                    }
                 }
                 p.w = 0x8000;
                 bTop = 0;
@@ -2669,6 +2677,7 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* 
         next1:;
         }
     }
+done:
     return pQw;
 }
 #else
@@ -2854,9 +2863,11 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
             RotTransPersClipW(p, it->P);
             if (bTop) {
                 if (p.w) {
-                    if (!(it < end)) return pQw;
+                    if (!(it < end)) goto done;
+                    goto in0;
                     do {
-                        if (!(it < end)) return pQw;
+                        if (!(it < end)) goto done;
+                    in0:;
                     } while (!(it++)->Term);
                     goto next0;
                 }
@@ -2888,11 +2899,11 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
             RotTransPersClipW(p, vDir[iDir], it->P);
             if (bTop) {
                 if (p.w) {
-                    if (!(it < end)) return pQw;
-                    do {
-                        if (!(it < end)) return pQw;
-                    } while (!(it++)->Term);
-                    goto next1;
+                    if (!(it < end)) goto done;
+                    for (;;) {
+                        if ((it++)->Term) goto next1;
+                        if (!(it < end)) goto done;
+                    }
                 }
                 p.w = 0x8000;
                 bTop = 0;
@@ -2919,6 +2930,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
         next1:;
         }
     }
+done:
     return pQw;
 }
 #else
@@ -2943,9 +2955,11 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCr
             RotTransPersClipW(p, it->P);
             if (bTop) {
                 if (p.w) {
-                    if (!(it < end)) return pQw;
+                    if (!(it < end)) goto done;
+                    goto in0;
                     do {
-                        if (!(it < end)) return pQw;
+                        if (!(it < end)) goto done;
+                    in0:;
                     } while (!(it++)->Term);
                     goto next0;
                 }
@@ -2981,11 +2995,11 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCr
             RotTransPersClipW(p, vDir[iDir], it->P);
             if (bTop) {
                 if (p.w) {
-                    if (!(it < end)) return pQw;
-                    do {
-                        if (!(it < end)) return pQw;
-                    } while (!(it++)->Term);
-                    goto next1;
+                    if (!(it < end)) goto done;
+                    for (;;) {
+                        if ((it++)->Term) goto next1;
+                        if (!(it < end)) goto done;
+                    }
                 }
                 p.w = 0x8000;
                 bTop = 0;
@@ -3012,6 +3026,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCr
         next1:;
         }
     }
+done:
     return pQw;
 }
 #else
