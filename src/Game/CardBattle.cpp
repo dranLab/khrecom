@@ -2546,11 +2546,6 @@ void CDuelGauge::main() {
     exeCount();
     exeDuelNG();
 }
-/* Parked: one store slot - the original schedules the m_tqTimer store (0x5c) after the zero stores of m_uiCount and
- * m_uiResult, ours before them (and the setLayer sb one slot earlier); the statement order is the $LM line order;
- * tried: all 720 orders of the six stores (200 tested), chained/temp assignments for timer/limit, pSeq load forms
- * (_ref, m_pSeqCtrls, &[0]), permuter 4 min (13841 candidates, no gain) */
-#if 0
 void CDuelGauge::setStart(TIMEQ inTime, UINT inCount) {
     m_uiState = 1;
     m_uiCount = 0;
@@ -2560,7 +2555,7 @@ void CDuelGauge::setStart(TIMEQ inTime, UINT inCount) {
     m_tqLimit = inTime;
     D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[0];
     pSeq->setLayer(8);
-    pSeq->addSeq(g_szSeqDuel, 30);
+    pSeq->addSeq(_ref(g_szSeqDuel), 30); /* MATCH: reading the name via _ref keeps its load after the stores */
     FVECTOR pos;
     D2::C2DMan::getLayPosition(g_szLadDuel, 1, 0, pos, FALSE);
     pSeq->setPos(pos);
@@ -2569,9 +2564,6 @@ void CDuelGauge::setStart(TIMEQ inTime, UINT inCount) {
     CSound::playSE(0x14B, -1, 64);
     m_hTimerSE = CSound::playSE(0x14C, -1, 64);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", setStart__Q210CardBattle10CDuelGaugeiUi);
-#endif
 void CDuelGauge::setResult(UINT inResult) {
     m_uiResult = inResult;
     D2::C2DSeqCtrl* pSeq = &m_pSeqCtrls[0];
