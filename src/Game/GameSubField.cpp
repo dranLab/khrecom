@@ -362,28 +362,34 @@ void CGameSubField::preWaitStartAtel() {
     CWorldEnv::readyMike(1, 1);
 }
 
-/* Parked: 4 of 86 lines, 4 bytes short - with the isEventScene() case as the else branch (draft) only one block
- * differs: the original keeps `b; move s0,zero` out of line for isEventScene() (after the BGM table load), ours lets
- * reorg turn it into a bnezl. Tried: ||-chains, nested ifs, one combined condition (7), a goto into if (0) (4). */
-#if 0
 void CGameSubField::waitStartAtel() {
+    INT w;
+    CHAR* pszBgm;
     if (m_nStep > 0) {
         if (--m_nStep == 0) {
             startAtel();
             BOOL bBGM = TRUE;
             CGame::reqBlackFadeIn(20);
-            if (!CSceneInfo::isEventScene()) {
-                if (CGameWork::getFlag(1, 0x32) || CSceneInfo::isLastFloorScene()) {
-                    bBGM = FALSE;
-                } else if (CGame::isRikuGame() && CSceneInfo::getCurrentWorldID(0) == 12 && CSceneInfo::getCurrentSceneNum() == 30) {
-                    bBGM = FALSE;
-                }
-            } else {
+            do { /* MATCH: a jump out of a loop is predicted not taken (reorg fills from the fall-through) */
+                if (CSceneInfo::isEventScene()) goto ev; /* MATCH: the event-scene block between the ternary arms */
+            } while (0);
+            if (CGameWork::getFlag(1, 0x32) || CSceneInfo::isLastFloorScene()) {
+                bBGM = FALSE;
+            } else if (CGame::isRikuGame() && CSceneInfo::getCurrentWorldID(0) == 12 && CSceneInfo::getCurrentSceneNum() == 30) {
                 bBGM = FALSE;
             }
+        check:
             if (bBGM) {
-                INT w = CSceneInfo::getCurrentWorldID(1);
-                CHAR* pszBgm = (w < 14) ? s_pszBgmTbl[w] : NULL;
+                w = CSceneInfo::getCurrentWorldID(1);
+                if (w < 14) {
+                    pszBgm = s_pszBgmTbl[w];
+                    goto have;
+                ev:
+                    bBGM = FALSE;
+                    goto check;
+                }
+                pszBgm = NULL;
+            have:
                 if (pszBgm) CSound::crossFadeinBGM(pszBgm, 60, -1, 0);
             }
         }
@@ -391,32 +397,6 @@ void CGameSubField::waitStartAtel() {
         changeState(6);
     }
 }
-#else
-/* placeholder in a stripped section: keeps s_pszBgmTbl referenced */
-__asm__(".section .sdata\n");
-static void __attribute__((section(".sdata"))) _waitStartAtel(CGameSubField* pThis, INT& m_nStep) {
-    if (m_nStep > 0) {
-        if (--m_nStep == 0) {
-            BOOL bBgm = TRUE;
-            CGame::reqBlackFadeIn(20);
-            if (CSceneInfo::isEventScene() || CGameWork::getFlag(1, 0x32) || CSceneInfo::isLastFloorScene()) {
-                bBgm = FALSE;
-            } else if (CGame::isRikuGame() && CSceneInfo::getCurrentWorldID(0) == 12 && CSceneInfo::getCurrentSceneNum() == 30) {
-                bBgm = FALSE;
-            }
-            if (bBgm) {
-                INT nWorld = CSceneInfo::getCurrentWorldID(1);
-                CHAR* pszBgm = (nWorld < 14) ? s_pszBgmTbl[nWorld] : NULL;
-                if (pszBgm) {
-                    CSound::crossFadeinBGM(pszBgm, 60, -1, 0);
-                }
-            }
-        }
-    } else if (CGame::isFadeDone()) {
-    }
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/GameSubField", waitStartAtel__13CGameSubField);
-#endif
 
 void CGameSubField::prePlay() {
     if (!CWorldEnv::isReadyMike()) {
