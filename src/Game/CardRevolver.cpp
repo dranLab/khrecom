@@ -3355,11 +3355,6 @@ void CEnchantGauge::setText() {
     if (m_cardData.m_nKind < 0x43) return;
     m_pFntName->setText(g_szEnemyCardEffName[m_cardData.m_nKind - 0x43]);
 }
-/* Parked: 15 lines off, all one register: the original keeps m_nNext and num = m_nNext / 10 in a1 (then a3 =
-   a1 + 0x2B), ours in a3 (same family as changeCount). Worked: the first switch without case 0 (gives the beqz /
-   sltiu 3 / == 6 tree), explicit cases 0 and 6 in the jump-table switch, _ref(g_szSeqCockpit). Tried: compare
-   operand order, UINT num, num before the zero test, shared num variable; permuter 4 min (3468, no gain). */
-#if 0
 void CEnchantGauge::main() {
     UINT flag = (m_uiUser == 1) ? 2 : 4;
     INT num;
@@ -3412,7 +3407,8 @@ void CEnchantGauge::main() {
                 if (num > 0) m_pSeqCtrls[1].replaceSeq(0, _ref(g_szSeqCockpit), num + 0x2B);
                 else m_pSeqCtrls[1].replaceSeq(0, _ref(g_szSeqCockpit), 0x35);
             }
-            m_pSeqCtrls[2].replaceSeq(0, _ref(g_szSeqCockpit), m_nNext % 10 + 0x2B);
+            num = m_nNext % 10;
+            m_pSeqCtrls[2].replaceSeq(0, _ref(g_szSeqCockpit), num + 0x2B);
             m_uiState = 2;
             m_nCount = m_nNext;
         }
@@ -3434,15 +3430,6 @@ void CEnchantGauge::main() {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", main__Q210CardBattle13CEnchantGauge);
-#endif
-__asm__(".rdata\n.align 4\n.word 0x001EAB74\n.word 0x001EA934\n.word 0x001EA9B4\n.word 0x001EA9D8\n.word 0x001EAAF4\n.word 0x001EAB4C\n.word 0x001EAB74\n.word 0x00000000\n.text\n");
-/* Parked: 14 lines off, register allocation of the two quotients: the original keeps inNum / 10 in a0 and
-   m_nCount / 10 in v0 (then a3 = v0 + 0x6C); ours puts num into a3. Worked: `if (m_uiState == 4) return;`
-   before the switch (the extra beq), case 4 explicit, num = m_nCount / 10 computed once. Tried: 8 forms of the
-   compare/order; permuter 4 min (2507 candidates, no gain). */
-#if 0
 void CEnchantGauge::changeCount(INT inNum) {
     INT num;
     if (m_uiState == 4) return;
@@ -3458,16 +3445,13 @@ void CEnchantGauge::changeCount(INT inNum) {
     default:
         m_nNext = inNum;
         num = m_nCount / 10;
-        if (inNum / 10 != num) m_pSeqCtrls[1].replaceSeq(0, g_szSeqCockpit, num + 0x6C);
-        m_pSeqCtrls[2].replaceSeq(0, g_szSeqCockpit, m_nCount % 10 + 0x6C);
+        if (num != inNum / 10) m_pSeqCtrls[1].replaceSeq(0, g_szSeqCockpit, num + 0x6C);
+        num = m_nCount % 10;
+        m_pSeqCtrls[2].replaceSeq(0, g_szSeqCockpit, num + 0x6C);
         m_uiState = 3;
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", changeCount__Q210CardBattle13CEnchantGaugei);
-#endif
-__asm__(".rdata\n.align 4\n.word 0x001EABD4\n.word 0x001EABDC\n.word 0x001EABD4\n.word 0x001EAC7C\n.word 0x001EABD4\n.word 0x001EABD4\n.text\n");
 void CEnchantGauge::destroy() {
     m_nNext = 0;
     CCardBattle* pBattle = _ref(CCardBattle::m_pInstance);
