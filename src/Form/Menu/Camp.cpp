@@ -2560,12 +2560,6 @@ INT CCamp::deckClearWinMenu() {
     return ret;
 }
 
-/* Parked: 2 of 819 lines differ (was 86): with deckEditMenu's forms (member arithmetic instead of nSelect, the
-   number-grid moves with `n = 9; if (m < 5) n = 4;`, per-arm clamps in the down move, fgCursorMove in both arms
-   of the right move, error stores Error/WinStep/SubStep) only the cancel block is left: the original fills
-   setCursor2(0, 2, TRUE)'s delay slot with `ret = 1`, ours with `li a3,1` (ret = 1 issues after the call) - the
-   same as statusWinMenu. tried: ret before/after the call, TRUE vs 1; permuter 7 min (4249) and 15 min (9076 candidates), no gain. */
-#if 0
 INT CCamp::mapCardWinMenu() {
     BOOL ret = FALSE;
     BOOL fgCursorMove = FALSE;
@@ -2596,8 +2590,8 @@ INT CCamp::mapCardWinMenu() {
         break;
     case 2:
         if (_isButtonTrg(0x20, 0)) {
+        cancel: /* MATCH: label before the shared flag store (ret = 1 fills the setCursor2 delay slot) */
             m_bCategorySelectMode = FALSE;
-        cancel:
             ret = 1;
             setCursor2(0, 2, TRUE);
             setCursor3(0, 2, TRUE);
@@ -2787,7 +2781,6 @@ INT CCamp::mapCardWinMenu() {
     }
     case 4:
         if (_isTrgCANCEL(0)) {
-            m_bCategorySelectMode = FALSE;
             goto cancel;
         }
         if (_isButtonTrg(0x101000, 0)) {
@@ -2868,15 +2861,6 @@ INT CCamp::mapCardWinMenu() {
     }
     return ret;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", mapCardWinMenu__5CCamp);
-#endif
-// mapCardWinMenu__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    ".byte 0x5C,0x09,0x31,0x00,0x90,0x09,0x31,0x00,0x00,0x0A,0x31,0x00,0xB8,0x0D,0x31,0x00\n"
-    ".byte 0x0C,0x11,0x31,0x00,0xE8,0x0D,0x31,0x00,0x28,0x13,0x31,0x00,0x50,0x13,0x31,0x00\n"
-    ".section .text");
 
 /* Parked: 2 of 457 lines differ: reorg fills setStatusWin(4)'s delay slot (cancel block, after the `cancel:`
    label) with `li a1,4` in ours, with `ret = 1` (s3) in the original. tried: ret before/after the call and before the
