@@ -457,23 +457,25 @@ static void _makeInputName() {
 }
 
 void _makeDispName();
-/* Parked: 25 of 45 lines - the copy loop: the original keeps i + j unreduced (addu/slti each pass) and lays the
- * loop out with the first pass peeled. */
-#if 0
 void _makeDispName() {
     INT i;
     INT j;
     CHAR* pC = DebugWork::g_dw.nakamich.szNameBuf;
     for (i = 0; i < 8 && pC[i] == '*'; i++) {
     }
-    for (j = 0; (i + j < 8) && (pC[i + j] != '*'); ++j) {
+    j = 0;
+    if (i < 8 && pC[i] != '*') {
         pC[j] = pC[i + j];
+        for (;;) { /* MATCH: goto exits (not break) keep the loop unrotated, first copy peeled as in the original */
+            j++;
+            if (!(i + j < 8)) goto done;
+            if (pC[i + j] == '*') goto done;
+            pC[j] = pC[i + j];
+        }
     }
+done:
     pC[j] = 0;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/DebugWindowTBL", _makeDispName__3DWTv);
-#endif
 
 static BOOL debugWinNameLineCall(CDebugWindow* pObj, INT iLineY, INT inParam) {
     if (inParam & 1) {
