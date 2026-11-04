@@ -394,19 +394,16 @@ void CGameMain::checkStartFieldMenu() {
     }
     if (m_nGameProcFlag & 0x400) suspendTaskInGame(2);
 }
-/* Parked: 3 lines - a local hCamp (CSE-eliminated, so not in the ref) lets the hCamp != 0 guard path thread
- * straight into the camp block (8 -> 3); left: the (m_hPause || m_hWorldMap) path still jumps back to the
- * `if (hCamp)` retest (beqzl a0) where the original threads it to the world-map test (bnezl ..; lw a0,m_hWorldMap)
- * and the flag path ends in `b` to it. tried with the local: ||-guard, nested guards, else-if guard after the camp
- * arm (block order breaks), hWorldMap local (splits the ld). Before: combined ||-condition, else-if chains with
- * returns, a flag temp first; permuter 10 min, 10k candidates (score 16 -> 11 only). */
-#if 0
 BOOL CGameMain::procFieldMenu() {
     HANDLE hCamp = m_hCamp;
-    if (!hCamp && !(m_hPause || m_hWorldMap) && !(m_nGameProcFlag & 0x1000)) return FALSE;
-    if (hCamp) {
-        if (!CTaskMan::getTask(hCamp)) camp(FALSE);
-    } else if (m_hWorldMap) {
+    if (!hCamp) {
+        if (!(m_hPause || m_hWorldMap) && !(m_nGameProcFlag & 0x1000)) goto ret0;
+        goto wm; /* MATCH: threads the guard path to the world-map test */
+    }
+    if (!CTaskMan::getTask(hCamp)) camp(FALSE);
+    return TRUE;
+wm:
+    if (m_hWorldMap) {
         if (!CTaskMan::getTask(m_hWorldMap)) worldMap(FALSE);
     } else if (m_hPause) {
         if (!CTaskMan::getTask(m_hPause)) pause(FALSE, 0);
@@ -414,10 +411,9 @@ BOOL CGameMain::procFieldMenu() {
         m_nGameProcFlag &= ~0x1000;
     }
     return TRUE;
+ret0:
+    return FALSE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", procFieldMenu__9CGameMain);
-#endif
 void CGameMain::checkStartBattleMenu() {
     if (CPadHandler::isButtonTrg(0x800, 0)) {
         INT nMode = 0;
