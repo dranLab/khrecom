@@ -1121,7 +1121,10 @@ __asm__(
 
 BOOL CCard::canAddCard(CARD card) { return canAddCard(card.m_nKind2, card.m_nNumber2); }
 
-/* near-match: kept as INCLUDE_ASM */
+/* Parked: 16 of 193 lines: cases 7/9/10 return TRUE by a taken branch (bnez -> li v0,1) and fall into the FALSE
+ * return, ours inverts them; case 4's return FALSE is the default label in the original. Worked: case 0 (the jump
+ * table starts at 0), inID - (fgPremium ? 0x101 : 1), `if (x < 99) return TRUE; break;` + one final return FALSE.
+ * Tried: per-arm return TRUE/FALSE pairs and a final return TRUE (setcc again, 28-62 lines). */
 #if 0
 BOOL CCard::canAddCard(USHORT inID, SHORT inNumber) {
     if (!isAddCardValid(inID, inNumber)) return FALSE;
@@ -1132,31 +1135,39 @@ BOOL CCard::canAddCard(USHORT inID, SHORT inNumber) {
     USHORT fgPremium = card.m_fgPremium;
     USHORT id;
     switch (card.m_nCategory0) {
+    case 0:
+        break;
     case 1:
         if (isBattleCardFull()) return FALSE;
         id = inID - (fgPremium ? 0x101 : 1);
-        return m_pCardInfo->_nAttak[fgPremium][id][inNumber] < 99;
+        if (m_pCardInfo->_nAttak[fgPremium][id][inNumber] < 99) return TRUE;
+        break;
     case 2:
     case 3:
         if (isBattleCardFull()) return FALSE;
         id = inID - (fgPremium ? 0x11A : 0x1A);
-        return m_pCardInfo->_nMagic[fgPremium][id][inNumber] < 99;
+        if (m_pCardInfo->_nMagic[fgPremium][id][inNumber] < 99) return TRUE;
+        break;
     case 4:
         if (isBattleCardFull()) return FALSE;
         id = inID - 0x2A;
-        return m_pCardInfo->_nItem[id][inNumber] < 99;
+        if (m_pCardInfo->_nItem[id][inNumber] < 99) return TRUE;
+        break;
     case 7:
         if (isBattleCardFull()) return FALSE;
         id = inID - 0x44;
-        return m_pCardInfo->_nEnemy[id] < 99;
+        if (m_pCardInfo->_nEnemy[id] < 99) return TRUE;
+        break;
     case 9:
         if (isMapCardFull()) return FALSE;
         id = inID - 0xA1;
-        return m_pCardInfo->_nMap[id][inNumber] < 9;
+        if (m_pCardInfo->_nMap[id][inNumber] < 9) return TRUE;
+        break;
     case 10:
         if (isKeyCardFull()) return FALSE;
         id = inID - 0xBA;
-        return !m_pCardInfo2->_nKey[id];
+        if (!m_pCardInfo2->_nKey[id]) return TRUE;
+        break;
     }
     return FALSE;
 }
