@@ -82,10 +82,6 @@ public:
     void exeDuelNG();
 };
 }
-extern "C" char D_004772C0[]; /* "...CardBattle.cpp(NNNN)" */
-extern "C" char D_004772F0[]; /* "...CardBattle.cpp(NNNN)" */
-extern "C" char D_00477320[]; /* break effect name */
-extern "C" char D_00477328[]; /* speed break effect name */
 namespace PL {
 extern FLOAT g_fDefAttr[18][6];
 }
@@ -1654,16 +1650,12 @@ void CCardBattle::dispPlayingEnemy() {
         }
     }
 }
-/* Parked: registers/scheduling only (12 lines) - the m_pSeqCtrlBreak null test loads into v0 (ours a0, reused by the
- * else call), and in the speed branch the original stores m_hSpeed before loading m_pSeqCtrlSpeed for enableDisp
- * (jal delay slot); tried: _ref/== NULL test forms, m_hBreak store placement, permuter 4 min (379 candidates) */
-#if 0
 void CCardBattle::initCardBreak(HANDLE inHandle, UINT inUser) {
     m_vBreakPos.init();
     if (!inHandle) {
         m_hBreak = 0;
         if (!m_pSeqCtrlBreak) {
-            m_pSeqCtrlBreak = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_004772C0, RET_ADDR())) D2::C2DSeqCtrl(2);
+            m_pSeqCtrlBreak = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2598)", RET_ADDR())) D2::C2DSeqCtrl(2);
             m_pSeqCtrlBreak->setLayer(7);
             m_pSeqCtrlBreak->addSeq(g_szSeqCockpit, 1);
             UINT flag = 0x20000;
@@ -1673,11 +1665,11 @@ void CCardBattle::initCardBreak(HANDLE inHandle, UINT inUser) {
             }
             m_pSeqCtrlBreak->enableDisp(FALSE);
         } else {
-            m_pSeqCtrlBreak->enableDisp(FALSE);
+            m_pSeqCtrlSpeed->enableDisp(FALSE); // sic: the original hides m_pSeqCtrlSpeed here, not m_pSeqCtrlBreak
         }
         m_hSpeed = 0;
         if (!m_pSeqCtrlSpeed) {
-            m_pSeqCtrlSpeed = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), D_004772F0, RET_ADDR())) D2::C2DSeqCtrl(2);
+            m_pSeqCtrlSpeed = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2616)", RET_ADDR())) D2::C2DSeqCtrl(2);
             UINT flag = 0x20000;
             if (m_uiFlag & flag) {
                 m_pSeqCtrlSpeed->setLayer(7);
@@ -1696,7 +1688,7 @@ void CCardBattle::initCardBreak(HANDLE inHandle, UINT inUser) {
     if (!pEntity) return;
     pEntity->getUseCardPos(m_vBreakPos);
     if (!m_iPointBonus || inUser == 1) {
-        pEntity->setEffect(D_00477320, 0, &m_vBreakPos, NULL, 0.0f);
+        pEntity->setEffect("break", 0, &m_vBreakPos, NULL, 0.0f);
         pEntity->getHeadPos(m_vBreakPos);
         m_hBreak = inHandle;
         m_pSeqCtrlBreak->enableDisp(TRUE);
@@ -1704,23 +1696,21 @@ void CCardBattle::initCardBreak(HANDLE inHandle, UINT inUser) {
                                        &g_uvCRCounterNumTex[1][m_iPointBreak]);
         m_pSeqCtrlBreak->restart(0, 0.0f);
     } else {
-        pEntity->setEffect(D_00477328, 5, &m_vBreakPos, NULL, 0.0f);
+        pEntity->setEffect("speed_break", 5, &m_vBreakPos, NULL, 0.0f);
         pEntity->getHeadPos(m_vBreakPos);
         m_hSpeed = inHandle;
         m_pSeqCtrlSpeed->enableDisp(TRUE);
         INT point = m_iPointBreak + m_iPointBonus;
-        m_pSeqCtrlSpeed->changeTexture(1, 0, NULL, &g_uvCRCounterNumTex[0][point / 10],
-                                       &g_uvCRCounterNumTex[1][point / 10]);
-        m_pSeqCtrlSpeed->changeTexture(2, 0, NULL, &g_uvCRCounterNumTex[0][point % 10],
-                                       &g_uvCRCounterNumTex[1][point % 10]);
+        INT hi = point / 10; // MATCH: each division in its own statement (hi/lo not in the ref's locals: CSE'd away)
+        m_pSeqCtrlSpeed->changeTexture(1, 0, NULL, &g_uvCRCounterNumTex[0][hi],
+                                       &g_uvCRCounterNumTex[1][hi]);
+        INT lo = point % 10;
+        m_pSeqCtrlSpeed->changeTexture(2, 0, NULL, &g_uvCRCounterNumTex[0][lo],
+                                       &g_uvCRCounterNumTex[1][lo]);
         m_pSeqCtrlSpeed->restart(0, 0.0f);
         m_iPointBonus = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", initCardBreak__Q210CardBattle11CCardBattleiUi);
-#endif
-__asm__(".rdata\n.align 3\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61432F65\n.word 0x61426472\n.word 0x656C7474\n.word 0x7070632E\n.word 0x39353228\n.word 0x00002938\n.word 0x00000000\n.word 0x4B2F3A63\n.word 0x4D4F4348\n.word 0x69614D2F\n.word 0x7070416E\n.word 0x6D61472F\n.word 0x61432F65\n.word 0x61426472\n.word 0x656C7474\n.word 0x7070632E\n.word 0x31363228\n.word 0x00002936\n.word 0x00000000\n.word 0x61657262\n.word 0x0000006B\n.word 0x65657073\n.word 0x72625F64\n.word 0x006B6165\n.word 0x00000000\n.text\n");
 void CCardBattle::dispCardBreak() {
     if (m_hBreak > 0) {
         if (m_pSeqCtrlBreak->isEnd(0)) {
