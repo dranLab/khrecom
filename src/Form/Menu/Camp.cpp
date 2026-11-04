@@ -2862,11 +2862,6 @@ INT CCamp::mapCardWinMenu() {
     return ret;
 }
 
-/* Parked: 2 of 457 lines differ: reorg fills setStatusWin(4)'s delay slot (cancel block, after the `cancel:`
-   label) with `li a1,4` in ours, with `ret = 1` (s3) in the original. tried: ret before/after the call and before the
-   label, ret/bChange declaration order (ref: ret, fgCursorMove, nStatusTechSelectOld); permuter 6 min (3613
-   candidates) and 15 min (8843 candidates), no gain. */
-#if 0
 INT CCamp::statusWinMenu() {
     BOOL bChange = FALSE;
     INT ret = 0;
@@ -2902,8 +2897,8 @@ INT CCamp::statusWinMenu() {
     case 2:
         setStatusWin(3);
         if (_isButtonTrg(0x20, 0)) {
+        cancel: /* MATCH: label before the shared flag store (ret = 1 fills the setStatusWin delay slot) */
             m_bCategorySelectMode = FALSE;
-        cancel:
             ret = 1;
             setStatusWin(4);
             setButtonHelp(4, 0, 0);
@@ -2993,7 +2988,6 @@ INT CCamp::statusWinMenu() {
         break;
     case 4:
         if (_isTrgCANCEL(0)) {
-            m_bCategorySelectMode = FALSE;
             goto cancel;
         }
         if (_isButtonTrg(0x101000, 0)) {
@@ -3036,18 +3030,6 @@ INT CCamp::statusWinMenu() {
     }
     return ret;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/Camp", statusWinMenu__5CCamp);
-#endif
-// statusWinMenu__5CCamp: its .rodata/.data, for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n"
-    ".align 4\n"
-    ".byte 0x63,0x3A,0x2F,0x4B,0x48,0x43,0x4F,0x4D,0x2F,0x4D,0x61,0x69,0x6E,0x41,0x70,0x70\n"
-    ".byte 0x2F,0x46,0x6F,0x72,0x6D,0x2F,0x4D,0x65,0x6E,0x75,0x2F,0x43,0x61,0x6D,0x70,0x2E\n"
-    ".byte 0x63,0x70,0x70,0x28,0x33,0x32,0x33,0x37,0x29,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".byte 0xAC,0x14,0x31,0x00,0x20,0x15,0x31,0x00,0x8C,0x15,0x31,0x00,0x58,0x18,0x31,0x00\n"
-    ".byte 0x9C,0x18,0x31,0x00,0x84,0x18,0x31,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n"
-    ".section .text");
 
 INT CCamp::configWinMenu() {
     BOOL bChange = FALSE;
