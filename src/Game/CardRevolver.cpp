@@ -3241,12 +3241,6 @@ static inline void _clearPrizeFlags(PRIZE_PARAM* p) {
     p->uiFlag = 0;
     p->uiPrizeFlag = 0;
 }
-/* Parked: 1 line off: the TRACE's card-kind argument - the original reloads it (lbu 0x150(s0)) as the last argument
-   load; card->getCardKind() / getCardData()->m_nKind schedule it right after a3, param.PrizeKind (below) puts it
-   last but from the stack. Worked: _clearPrizeFlags(&param), getCardData()->m_nKind for PrizeKind, BattleCard.h's
-   isPlutoON with an `unsigned int flag` local (hoisted mask). Tried: kind sources, card-test/loop shapes;
-   permuter 5 min (5834 candidates, no gain). */
-#if 0
 void CCardRevolver::dropPlutoMarkCard(const FVECTOR* inPos) {
     CBattleCard* card;
     INT i;
@@ -3260,7 +3254,8 @@ void CCardRevolver::dropPlutoMarkCard(const FVECTOR* inPos) {
     for (i = 0; i < m_nReloadID; i++) {
         card = &m_pCards[n];
         if (card && card->isPlutoON()) {
-            param.PrizeKind = card->getCardData()->m_nKind;
+            CARD* pData = card->getCardData(); /* MATCH: one data pointer for the kind and the TRACE number */
+            param.PrizeKind = pData->m_nKind;
             param.iNumber = card->getBaseCardNumber();
             FLOAT rx = (-70.0f - RND::genrand_real1() * 10.0f) * 0.017453292f;
             FLOAT ry = RND::genrand_real1() * 360.0f * 0.017453292f;
@@ -3269,7 +3264,7 @@ void CCardRevolver::dropPlutoMarkCard(const FVECTOR* inPos) {
             CPrize* pPrize = (CPrize*)CEntityFactory::getInstance()->createPrize(param, 0);
             if (!pPrize) return;
             pPrize->enableReturnCard(TRUE);
-            TRACE(D_0047AC08, n, param.PrizeKind, card->getCardData()->m_nNumber, card->getBaseCardNumber(),
+            TRACE(D_0047AC08, n, pData->m_nKind, pData->m_nNumber, card->getBaseCardNumber(),
                   card->getStock(), card->getHand(), card->getHandMax(), card->getFlag(), card->getCardOwner());
             card->setCardOwner(2);
             card->resetPlutoON();
@@ -3279,9 +3274,6 @@ void CCardRevolver::dropPlutoMarkCard(const FVECTOR* inPos) {
         if (++n >= m_nReloadID) n = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", dropPlutoMarkCard__Q210CardBattle13CCardRevolverPC7FVECTOR);
-#endif
 void CCardRevolver::setPlayNG(INT inFlag, INT inCategory) {
     INT i;
     if (inFlag) {
