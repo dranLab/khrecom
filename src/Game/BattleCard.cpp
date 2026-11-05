@@ -379,10 +379,6 @@ void CardBattle::initLayoutData() {
 }
 inline void* operator new(size_t, void* p) throw() { return p; }
 #define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-/* Parked: 8 lines - in the inState == 2 block the original stores m_iState/m_pRevolver first (m_iState from the
-   compare's reload); ours schedules them after the SCREEN_HEIGHT load and reloads inState. Store orders,
-   changeState(inState), m_iState = 2, switch and hill.py did not change it. */
-#if 0
 CardBattle::CBattleCard::CBattleCard(CTask* pParent, INT inIndex, INT inNumber, INT inUser, INT inState)
     : CTask(pParent, 0x4000) {
     m_uiFlag = 0;
@@ -409,8 +405,10 @@ CardBattle::CBattleCard::CBattleCard(CTask* pParent, INT inIndex, INT inNumber, 
     m_iStockCount = 0;
     m_hTarget = 0;
     if (inState == 2) {
-        m_pRevolver = (CCardRevolver*)pParent;
-        m_iState = inState;
+        // MATCH: stores through plain pointers (not in-struct MEMs) are ordered before the SCREEN_HEIGHT load, which
+        // gives them the scheduling priority to come first
+        *(CCardRevolver**)&m_pRevolver = (CCardRevolver*)pParent;
+        *(INT*)&m_iState = inState;
         m_uiMode = 10;
         m_Pos.set(0, SCREEN_HEIGHT + 0x60);
         m_vRot.set(0.0f, 0.0f, 0.0f, 1.0f);
@@ -425,60 +423,6 @@ CardBattle::CBattleCard::CBattleCard(CTask* pParent, INT inIndex, INT inNumber, 
         if (((_bits*)&m_cardData)->cat1 == 4) m_uiFlag |= 0x8000;
     }
 }
-#else
-/* MATCH: placeholder for the asm constructor: the same body in the stripped .sdata section keeps its .rodata (Fsm.h
-   strings, the member-function pointer constants, the new's file string) and instantiates CStateTemplate */
-namespace CardBattle {
-struct CBattleCardPH : CBattleCard {
-    CBattleCardPH();
-    void ctor_c(CTask* pParent, INT inIndex, INT inNumber, INT inUser, INT inState) __attribute__((section(".sdata")));
-};
-}
-__asm__(".section .sdata\n");
-void CBattleCardPH::ctor_c(CTask* pParent, INT inIndex, INT inNumber, INT inUser, INT inState) {
-    for (INT i = 0; i < 7; i++) new (&m_State[i]) CStateTemplate<CBattleCard>;
-    m_uiFlag = 0;
-    m_uiUser = inUser;
-    m_iStock = -1;
-    m_iHandMax = 0;
-    m_tqTimer = 0;
-    m_pCard = NULL;
-    m_pRevolver = NULL;
-    m_iHand = -1;
-    m_uiOwner = inUser;
-    m_State[0].set(this, &CBattleCard::preStateUse, &CBattleCard::stateUse, NULL);
-    m_State[1].set(this, &CBattleCard::preStateStock, &CBattleCard::stateStock, NULL);
-    m_State[2].set(this, &CBattleCard::preStateHand, &CBattleCard::stateHand, NULL);
-    m_State[3].set(this, &CBattleCard::preStateDestroy, &CBattleCard::stateDestroy, NULL);
-    m_State[4].set(this, &CBattleCard::preStateDuel, &CBattleCard::stateDuel, NULL);
-    m_State[5].set(this, &CBattleCard::preStateSnatch, &CBattleCard::stateSnatch, NULL);
-    m_State[6].set(this, &CBattleCard::preStatePronounce, &CBattleCard::statePronounce, NULL);
-    _setCard(m_cardData, inIndex, inNumber);
-    m_nNumberR = -1;
-    m_nNumberE = -1;
-    m_nNumber = inNumber;
-    m_pCard = new (com_malloc_d(sizeof(C2DCard), __FILE__ "(246)", RET_ADDR())) C2DCard;
-    m_iStockCount = 0;
-    m_hTarget = 0;
-    if (inState == 2) {
-        m_pRevolver = (CCardRevolver*)pParent;
-        m_iState = inState;
-        m_uiMode = 10;
-        m_Pos.set(0, SCREEN_HEIGHT + 0x60);
-        m_vRot.set(0.0f, 0.0f, 0.0f, 1.0f);
-        m_fBright = 1.0f;
-        m_uiFlag |= 0x20;
-        changeState(2);
-    } else {
-        _initialize();
-    }
-    {
-        struct _bits { u_long b0 : 28; u_long cat1 : 4; };
-        if (((_bits*)&m_cardData)->cat1 == 4) m_uiFlag |= 0x8000;
-    }
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", __Q210CardBattle11CBattleCardP5CTaskiiii);
-#endif
 CBattleCard::~CBattleCard() {
     if (m_pCard) delete m_pCard;
     m_pCard = NULL;
