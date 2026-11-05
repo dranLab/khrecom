@@ -1,5 +1,7 @@
 # Kingdom Hearts Re:Chain Of Memories Decompilation
 
+[![check](https://github.com/dranLab/khrecom/actions/workflows/check.yml/badge.svg?branch=main)](https://github.com/dranLab/khrecom/actions/workflows/check.yml)
+
 An AI assisted work-in-progress matching decompilation of **Kingdom Hearts Re:Chain of Memories** (PlayStation 2).
 
 The goal is C source that, compiled with the original compiler, produces a byte-identical copy of the game's executable.
