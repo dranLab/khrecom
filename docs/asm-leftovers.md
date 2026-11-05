@@ -45,13 +45,12 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/FrecFont` | 2 | 908 | 2 |  |
 | `Game/Collision/CollUtil` | 4 | 822 | 4 | .rodata |
 | `System/Graphic/2d/2DSprObj` | 2 | 763 | 2 |  |
-| `System/Rcf` | 7 | 741 | 7 |  |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `Form/DebugWindow` | 2 | 667 | 2 |  |
 | `System/Graphic/TexUtil` | 4 | 651 | 4 |  |
+| `System/Rcf` | 6 | 649 | 6 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
 | `Game/Atel/Avatar` | 4 | 587 | 4 |  |
-| `System/Graphic/Effect/EffectMan` | 2 | 546 | 2 |  |
 | `System/Graphic/PackMan` | 2 | 540 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
 | `Game/BattleCard` | 2 | 532 | 2 |  |
@@ -73,6 +72,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/ModelMan` | 2 | 268 | 2 |  |
 | `Game/Collision/CollDisp` | 2 | 262 | 2 |  |
 | `System/Graphic/DispList` | 1 | 245 | 1 |  |
+| `System/Graphic/Effect/EffectMan` | 1 | 243 | 1 |  |
 | `System/Math3D` | 1 | 234 | 1 |  |
 | `Game/Collision/CollBody` | 1 | 232 | 1 |  |
 | `System/Wnd` | 1 | 225 | 1 |  |
@@ -112,7 +112,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | unit | function | instr | note |
 |---|---|---:|---|
 | `System/Math3D` | `InvMatrix__6Math3DR7FMATRIXRC7FMATRIX` | 234 | (comment) Same code apart from register allocation: gcc hoists the 1e-8 constants and a "li 20" out of the outer loop (the original keeps them inside), which moves &c into s1. |
-| `System/Wnd` | `init__9CImageWndRt7CPointT1ZiRt6CSizeT1ZiT1T2PCcfG6G_RGBAT7i` | 225 | 16 of 239 lines, 4 bytes short - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers and the T0..T3 stores another order, and the second `if (!pTexInfo) return;` fills its delay slot from the fallthrough (lui 0x8000) where the original takes the epilogue's lq. Tried: … |
+| `System/Wnd` | `init__9CImageWndRt7CPointT1ZiRt6CSizeT1ZiT1T2PCcfG6G_RGBAT7i` | 225 | 14 of 239 lines - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers (original w a1, h a2, w2 a3, h2 t0; ours w v1, h a1, h2 a2) and the T0..T3 stores another order. Tried (2026-11-05: decl/assignment forms of w, h, w2, h2, INT locals): declaration orders (ref's w, h, … |
 | `System/Memoca` | `_setupIconSys__FPCc` | 199 |  |
 | `System/Memoca` | `_McCheckDataFileExist__FiPCc` | 99 |  |
 | `System/Memoca` | `_McWriteIcons__FPCc` | 144 |  |
@@ -165,8 +165,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/2d/2DSprObj` | `initForSeq__Q22D29C2DSprObjPQ22D213SEQ_ANIMATIONPQ22D210LAY_SCREEN` | 325 | 20 of 342 lines differ (same size, same structure): the order of the independent address computations and the 0.25f stores in the prologue (the original puts `addiu s3,sp,32` after the first two fVec2 stores) and the load/store order of the sway block (the original loads x_sway[0], y_sway[0], … |
 | `System/Graphic/2d/2DSprObj` | `move__Q22D29C2DSprObj` | 438 | 25 of 465 lines - only the vertex loop differs: the MMI colour multiply's 0xFF splat is a TImode constant here (`por v0,zero,zero` before `li`, the original only does `li`), the pmulth/tmp registers come out v1/v0 instead of a0/v1, the vertex-loop pointers get other registers and lCol is loaded … |
 | `System/Graphic/Effect/effect` | `Setup__11EFFECT_DATAPUxi` | 105 | 4 of 133 lines, same size - with i reused for the DPD loop and the ParNum TRACE before `p += 16` (draft below) the loop registers match; left: the two TRACE header reads go through data (s3) in the original, ours through p (s1), and `p += 16` sits before the ParNum TRACE there. The placeholder's … |
-| `System/Graphic/Effect/EffectMan` | `_updateCoord__10CEffectManP7CEffect` | 243 | (comment) Near-match: register choice of the length temporary and a hoisted address high part |
-| `System/Graphic/Effect/EffectMan` | `_calc__10CEffectManfRC7FMATRIXT2P7CCamerai` | 303 | (comment) Near-match: pPos/pLook get each other's registers |
+| `System/Graphic/Effect/EffectMan` | `_updateCoord__10CEffectManP7CEffect` | 243 | 7 lines - _lengthVf4's iTmp is s3 in the original (ours v0; a register asm local reshuffles the whole function) and the hoisted %hi(s_vEffKhComScale) (lui s4) is scheduled before the mMat copy instead of into the `b`'s delay slot. |
 | `System/Graphic/Effect/libppp/partMng` | `vramcache` | 292 | (comment) Register allocation: the original keeps abBlock (the VLA's address) on the stack and the assert's string addresses in s5/s6; here abBlock gets s7 and bUseBlockNum s3, so the file name's %hi lives in t0 (saved around the call, 16 more bytes of frame). The return blocks are also laid out … |
 | `System/Graphic/Effect/libppp/partMng` | `pppInitPartRender` | 108 | (comment) Scheduling only: gcc puts the g_Env.lpVsf store first; the original keeps the stores to ppvEnv and g_Env.lpModel/lpShape/lpVsf in source order (all orders of the five statements tried). |
 | `System/Graphic/Effect/libppp/pppPart` | `pppSetMatrix` | 168 | (comment) Differs only in v0/v1 register choice for the scale factors of SCALE_VECTOR_XYZ (reload rotation): the original rotates v0/v1, ours always uses v0. |
@@ -182,7 +181,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Sound/driver/sddrv_ee` | `TsSdVsbPlay` | 262 | (comment) Register allocation: addr is spilled instead of kept in s8 (one more stack slot), so most registers differ. |
 | `System/Movie/MSVideo` | `setLoadImageTagsYX__12CMoviePlayerPUiPviiiii` | 180 | (comment) Not matching: mby - 1 is not hoisted into a register for the inner loop (the original keeps it in s8 and spills i * 16), so the j++ / dsay increments are scheduled differently. |
 | `System/Rcf` | `finalize__4CRcf` | 111 | (comment) Near-match: register allocation of two statics and a loop-bound reload |
-| `System/Rcf` | `reqLoadRCFFront__4CRcfiiiPUci` | 92 | (comment) Near-match: register choice inside linkFront |
 | `System/Rcf` | `_threadReadProc__4CRcfPv` | 97 | 3 lines - the inner loop's top label is not aligned in the original (offset 0xf4, no .p2align nop), ours gets the LOOP_BEG alignment nop and so a plain bne instead of the bnel into the loop top; getType() through a cast fixed the type reloads (21 -> 3). Tried: for(;;) with breaks, a goto loop … |
 | `System/Rcf` | `_parseRCF_EntryFile__FUii` | 123 | 28 of 169 lines, same size - the 0x7F (sound list) branch's CBuf/RsrcInfo setup: the original loads s_nReadGroup/s_nLinkOwnerGroup/s_bSceneManagedMode into t2/t0/t1 before the CBuf vtable lui and keeps the constant 1 in a3; ours schedules the vtable first (t3/t1/t2, t0). Rest matches with … |
 | `System/Rcf` | `_atoi__FPCc` | 71 | _atoi: 11 of 77 lines, 8 bytes short - hex/decimal paths as the original; left: the original keeps a branch for the isupper() lowercase step where ours makes movz (ternary, if/else, inline and !isupper forms all give movz), and the decimal loop's p++/return tail scheduling. Permuter 6 min: no gain. |
@@ -300,7 +298,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 254 functions (64315 instructions) in 74 units, 188 of them parked; 11 units take a data section from assembly.
+Totals: 252 functions (63920 instructions) in 74 units, 186 of them parked; 11 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

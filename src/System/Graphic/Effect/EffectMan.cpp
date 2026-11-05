@@ -727,7 +727,9 @@ INT CEffectMan::_sortEffect(EFFMAN_ZSORT_BUF* elist, const FMATRIX& mWS, INT nEf
     if (i >= 2) qsort(elist, i, sizeof(EFFMAN_ZSORT_BUF), EffMan_QSortComp);
     return i;
 }
-/* Near-match: register choice of the length temporary and a hoisted address high part */
+/* Parked: 7 lines - _lengthVf4's iTmp is s3 in the original (ours v0; a register asm local reshuffles the whole
+   function) and the hoisted %hi(s_vEffKhComScale) (lui s4) is scheduled before the mMat copy instead of into the
+   `b`'s delay slot. */
 #if 0
 BOOL CEffectMan::_updateCoord(CEffect* effect) {
     CCoord* pCrd;
@@ -763,8 +765,9 @@ BOOL CEffectMan::_updateCoord(CEffect* effect) {
         if (effect->m_iFlag & 0x80) {
             FMATRIX mMat = *pMat;
             float fDist[3];
-            i = 0;
+            INT i = 0; // MATCH: the ref's second, block-local i (the first loop's i gets another register)
             goto test;
+            do {} while (0); // MATCH: the loop note aligns the next label (the original's nop after the `b`)
         inc:
             i++;
         test:
@@ -821,8 +824,6 @@ void CEffectMan::_updateColor(CEffect* effect) {
         }
     }
 }
-/* Near-match: pPos/pLook get each other's registers */
-#if 0
 void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS, CCamera* pCam, BOOL frustumClip) {
     FMATRIX mCam;
     FVECTOR* pLook = __null;
@@ -837,7 +838,8 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
     asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&vLookTmp));
     if (pCam) {
         pPos = &pCam->Crd(0).m_World.v[3];
-        if (((FVECTOR*)((char*)pCam + 0x50))->w != 0.0f) pLook = (FVECTOR*)((char*)pCam + 0x50);
+        // MATCH: a ternary (with an if, pPos and pLook get each other's s-registers)
+        pLook = (((FVECTOR*)((char*)pCam + 0x50))->w != 0.0f) ? (FVECTOR*)((char*)pCam + 0x50) : __null;
     }
     if (!pPos || !pLook) {
         applySignWorldViewMatrix(mCam, mWV);
@@ -909,15 +911,6 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
     pppPartCalcEnd();
     SPAD::freeSpad(0x4000);
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _calc_strings(INT n) {
-    TRACE("Data Err!! calcEffect %s %d\n");
-    TRACE("Data Err!! calcEffect %08x %d\n");
-    TRACE("(0)");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/EffectMan", _calc__10CEffectManfRC7FMATRIXT2P7CCamerai);
-#endif
 FLOAT CEffectMan::getFrameRate() { return s_fFrameRate; }
 void CEffectMan::play(FLOAT fFrameRate) {
     s_fFrameRate = fFrameRate;
