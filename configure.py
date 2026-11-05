@@ -286,9 +286,12 @@ def write_original_labels(opts: dict) -> str:
     labels: dict[str, int] = {}
     # The data's assembly too: where splat read string bytes as label + addend (.word D_0063696C + 0x2), that label
     # may be defined nowhere once the data around its address comes from source.
+    # And the C/C++ sources: compiled code names the original's strings and tables `extern D_xxxxxxxx` while the
+    # unit's data is still asm, and a fresh split has no .s file of an already matched function that mentions them.
     for path in sorted([*(ROOT / opts["asm_path"] / "nonmatchings").rglob("*.s"),
-                        *(ROOT / opts["asm_path"] / "data").rglob("*.s")]):
-        for m in ADDRESS_LABEL.finditer(path.read_text(encoding="utf-8")):
+                        *(ROOT / opts["asm_path"] / "data").rglob("*.s"),
+                        *[p for p in (ROOT / "src").rglob("*") if p.suffix in (".c", ".cpp", ".h", ".s")]]):
+        for m in ADDRESS_LABEL.finditer(path.read_text(encoding="latin-1")):
             labels[m.group(1)] = int(m.group(2), 16)
     out = Path(opts["build_path"]) / "original_labels.ld"
     (ROOT / out).parent.mkdir(parents=True, exist_ok=True)

@@ -7,6 +7,8 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
 ## Build and verify
 
 - `tools/check.sh` - the gate: configure + full build + checksum + overview. Must exit 0 before any commit/merge.
+  CI (`.github/workflows/check.yml`) runs it from a fresh clone on every push to `main` (game ELF from the
+  repository secret `GAME_ELF_URL`, optional `GAME_ELF_TOKEN`), so the build must not depend on local leftovers.
   Lists only files not complete or changed on the branch (all: `--full` or `build/check.overview.txt`).
 - `.venv/bin/python configure.py` - re-split (splat) and write `build.ninja`/`objdiff.json` (~30 s). `check.sh` runs it.
 - `ninja` - build; fails unless the rebuilt image matches the original (SHA-1).

@@ -297,6 +297,9 @@ header split the original didn't have, or make a class a template to hide its st
   -N, PARTIAL -M, mechanisms -K)"` with the `partials.py --summary` deltas, then V5 on `main`, then the docs
   block of "Keeping the docs current" (every merge, not only a unit's last). Delete the branch once it is
   merged. A cleanup branch never contains function matches.
+- Pushing is the user's: they push `main` to GitHub (`origin`), where CI runs `tools/check.sh` from a fresh clone
+  (`.github/workflows/check.yml`). A local checkout keeps stale files in `asm/` and `build/` that a fresh clone
+  lacks; when CI fails but the local gate passes, look for such a dependency first.
 
 ## Record keeping
 
