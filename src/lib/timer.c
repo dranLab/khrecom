@@ -291,14 +291,14 @@ static Counter *UnlinkAlarm(Counter *c)
     return next;
 }
 
-/* Parked: scheduling (53 lines differ) */
+/* Parked: scheduling (32 lines; 45 before the handler's time argument in a local, decomp-permuter) */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/timer", cbTimerHandler);
 #if 0
 static int cbTimerHandler(int cause, void *arg, void *addr)
 {
     Counter *c;
     unsigned int count, mode;
-    unsigned long now, t, ret;
+    unsigned long now, t, ret, tt;
 
     if ((*T2_MODE & T2_EQUF) && (c = g_Timer.alarm)) {
         do {
@@ -315,9 +315,10 @@ static int cbTimerHandler(int cause, void *arg, void *addr)
                 break;
             }
             g_Timer.next = UnlinkAlarm(c);
+            tt = now + c->count - c->base;
             g_Timer.handling = ((int)c << 4) | c->id;
             asm volatile ("lw\t$gp, %0" : : "m" (c->gp));
-            ret = c->handler(((int)c << 4) | c->id, c->schedule, now + c->count - c->base, c->arg, addr);
+            ret = c->handler(((int)c << 4) | c->id, c->schedule, tt, c->arg, addr);
             if (ret == 0) {
                 c->mode &= ~2;
             } else if (ret == (unsigned long)-1) {
