@@ -6,7 +6,7 @@ The goal is to bring each of these units to "all functions C + `// SOURCE DATA`"
 functions first.
 
 **Out of scope**
-- SDK units (`lib/...`): they have a separate plan (docs/plan-library-decompilation.md).
+- SDK units (`lib/...`): see docs/sdk-leftovers.md (the library reference).
 - Hand-written `.s` units (`crt0`, `System/expand`): they stay assembly.
 
 libppp and `sddrv_ee` are the game's own code (MainApp paths), so they are in scope.

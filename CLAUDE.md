@@ -87,7 +87,7 @@ Current work (finishing the big game units function by function, with the valida
   `com_malloc_d(size, __FILE__ "(" line ")", -1)` (see `System/HeapMan.h`, `System/MainApp.h` in `ref/`).
 - `long` is 64-bit; `int`, `LONG`, `INT` are 32-bit.
 
-## Library units (`lib/...`, branch `sdk-decomp`; plan: `docs/plan-library-decompilation.md`)
+## Library units (`lib/...`; open work, levers, per-unit notes and history: `docs/sdk-leftovers.md`)
 
 - Sony SDK, libgcc, newlib, libsn: built with other toolchains. `build.yaml`'s `overrides:` (fnmatch on the unit
   name, first match wins) sets `compiler`/`cflags`/`source_root`/`assembler` per unit. `assembler: <package>` uses
@@ -103,35 +103,9 @@ Current work (finishing the big game units function by function, with the valida
   functions in order, `static` exactly for the file-local ones (everything else is global: other data may point
   at it). Assemblers: `ee-as` 2.10 (ee-gcc2.96 package; no mfc0 hazard nops) and 2.9
   (ee-gcc2.9-990721; adds them). Sony's code has inline asm blocks with their own `.set noreorder` loops (DIntr).
-- Register/scheduling levers that worked in libkernl: `volatile` on single struct fields (reloads), reusing a
-  parameter as loop index/result (shares its s-register), a callee declared `void` vs `int` (v0 free or not).
-- Open in sifrpc (9 functions parked, C under `#if 0`): the original copies packet fields load/store pair by pair,
-  ours lets the scheduler hoist loads above stores of other pointer/int types (alias sets); -fno-strict-aliasing
-  and scheduling flags don't reproduce it either. Same family: sifcmd's _sceSifCmdIntrHdlr (registers only).
-- Open in kprintf2 (ftoi, printfloat, _sceSnprintf parked; C under `#if 0`, rodata stays asm): _sceSnprintf is
-  off only by a `nop` between `c.eq.s` and `bc1f` (gcc writes `#nop`). No assembler here gives that nop together
-  with the unit's other code: 2.9 gas inserts it but also one after `mtc1` and fills no `j $31`; 2.10/2.12 insert
-  none. printf levers: one variable for several roles (the original's `n`/`p`/`uval` share s-registers), the tail
-  `start = p + 1; len = bufend - p; goto output;` per case, `if (val >= 0) {...} else '-'` arm order.
-- Open in filestub (_sceFs_Rcv_Intr parked, jump table as file-scope asm): only the prologue differs, two
-  swapped registers around the `ee_retbuf_sel` store (an empty `asm volatile` barrier moves it, but isn't source).
-  ~/kh1/src/lib/libkernl/filestub.c (an older libkernl, matched) was the base; ours adds named semaphores,
-  sceFsSifCallRpc retries, double-buffered replies.
-- Open in graphdev_sceGsExecStoreImage (parked, C under `#if 0`): the per-PSM switch matches once each case is
-  `if (bytes == 0) {...} else {...}` (gcc merges the identical then-parts); left: registers in the PSMCT24 tail
-  and the original keeping the raw trxreg (t1) for the final TRXREG write.
-- Open in graphdev_checkModelVersion (sceGsSetDefDispEnv parked): structure matches (if/else if chain, not switch;
-  DX = dx*magh + ((long)off[0] + 636) through a `long` temp); left: the original computes DY and off[0]+636
-  before magh and ORs the DISPLAY fields in another order. String kept by an unused static inline placeholder.
-- Open in csc (_doCSC2, _sceMpegCscStoreRefImage parked; handlers match): sceMpegCbData must be the 32-byte union
-  (stack layout); the IPU command store + cmd-type check is an inline taking cmd as parameter; left: 2-register
-  swaps (0xffc0 vs D3_CHCR address in _doCSC2, rgb/qwc s1/s2 in the inlined small-picture CSC block).
-- Open in libpad2 (scePad2CreateSocket, scePad2GetButtonInfo parked): CreateSocket only schedules the
-  pad2_info base (lui) after the 820 multiplier; GetButtonInfo needs `if (valid) { switch ... }` and keeps the
-  button type in a1 instead of a3. Levers that worked here: `if (x < 0) return x;` early returns, the shared
-  `return state` with the fail block inside the else branch (goto into it).
-- Open in hncAt3dec (hncAt3dec_Idle parked): structure matches (per-channel `final_dout` loops counting down);
-  only the register assignment differs. Init matched once each switch case sets all three values itself.
+- What is left (parked drafts with their remaining difference), the levers that worked in lib/ and the notes per
+  unit (sifrpc, kprintf2, filestub, graphdev, csc, libpad2, hncAt3dec, ...): `docs/sdk-leftovers.md`. Keep it
+  current: `Parked:` notes in the source, then `tools/leftovers.py lib --update docs/sdk-leftovers.md`.
 - GNU as fills an open delay slot only when no label precedes the branch: -g's `$LM` line labels count. A `j $31`
   left unfilled where the original filled it: put the last statement and `}` on one line (lib/init).
 
