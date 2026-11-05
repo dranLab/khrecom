@@ -401,9 +401,10 @@ INT CAvatar::onSetPosPathTop(INT nCmd, void* pParam, INT nID) {
     setAvatarTargetPos(*pV);
     return -1;
 }
-/* Parked: 8 lines - the original reads p->_nType once with lhu for nType and nFlag, keeps the signed slti
-   and tests nType twice before setVel; INT nType (lw) is the only form with the original registers (USHORT
-   loads move p/CEntity to other s-registers), permuter found nothing. */
+/* Parked: 53 lines, registers only - with the ref's USHORT nType/nFlag (one lhu) and the final switch the
+   code is the original's, but p (14 refs over 187 insns) loses the global-alloc priority tie against case 1's
+   pV (3 over 13) and takes s2, pushing CEntity* to s1 (the original: p s1, CEntity* s4, one more s-register).
+   An INT nType read with lw gives p a 15th ref and the original registers (6 lines, one extra lw). */
 #if 0
 INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
     AvatarMoveParam* p = (AvatarMoveParam*)pParam;
@@ -416,7 +417,7 @@ INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
     setAvatarStartPos(vOrigin);
     m_pMoveStruct->_nMoveType = p->_nType;
     m_pMoveStruct->_nMoveMotion = p->_nMotion;
-    INT nType = p->_nType & 0xf;
+    USHORT nType = p->_nType & 0xf;
     USHORT nFlag = p->_nType & 0xfff0;
     switch (nType) {
     case 1:
@@ -453,8 +454,10 @@ INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
         return -1;
     }
     calcAvatarMoveSpeed(vVel);
-    if (nType < 3) {
+    switch (nType) { // MATCH: a switch compares the promoted int (slti), an if on the USHORT would be unsigned
+    case 0: case 1: case 2:
         if (nType == 0) m_pMove->setVel(vVel);
+        break;
     }
     return -1;
 }
