@@ -76,11 +76,11 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/mpc` | `_rix_000` | 29 | hand-written | MMI reference-copy routines (_rix_*: luminance, _ri0_*: chrominance) |
 | `lib/eecdvd_sceCdCallback` | `sceCdLayerSearchFile` | 191 | parked | the 2nd/3rd SCE_CD_debug reloads land in v0 in the original, v1 here. |
 | `lib/eecdvd_sceCdCallback` | `sceCdInit` | 186 | parked | t0/t1 swapped for the _scmd_dr_bind/_sceCd_ee_read_mode %hi, and the order of li/lui before the _sceCd_CdInit_ON store. |
-| `lib/eecdvd_sceCdCallback` | `_sceCd_cbLoop` | 52 | parked | the exit block stores _sceCd_c_cb_sem, sceCdCbfunc_num, cb_thid and keeps cb_flag for the delay slot; ours schedules cb_flag earlier. |
+| `lib/eecdvd_sceCdCallback` | `_sceCd_cbLoop` | 52 | parked | the exit block stores _sceCd_c_cb_sem, sceCdCbfunc_num, cb_thid and keeps cb_flag for the delay slot; ours schedules cb_flag earlier. The exit block on one line with `sceCdCbfunc_num = cb_flag = 0` (decomp-permuter) fixes the code, but two hoisted luis (cb_flag's %hi in fp) then swap registers: … |
 | `lib/eecdvd_sceCdCallback` | `_sceCdSC` | 44 | parked | the original is a compare chain (no jump table) with the arms in reverse case order; a switch here gives a table. |
 | `lib/hncAt3dec` | `hncAt3dec_Idle` | 72 | parked | same structure, but the registers differ (orig: out s1, out2 s0, stereo/count s3, i s2). |
 | `lib/libat3dec` | `unpack_mddata` | 316 | parked | structure right; the gain loops keep &gain[0][0][1] in a register and reload 255 (ours hoists it) |
-| `lib/libat3dec` | `gainc_window` | 161 | parked | 23 lines off: the original sets the return value -1 at the top of the loop (the conditional returns branch straight to the epilogue) |
+| `lib/libat3dec` | `gainc_window` | 161 | parked | 11 lines off (23 before the early `lt` compare, decomp-permuter): the original sets the return value -1 at the top of the loop (the conditional returns branch straight to the epilogue) |
 | `lib/libat3dec` | `channel_conv_joint` | 122 | parked | close: loop.c bases the inner loop on the channel 0 samples (the original on channel 1) and strength-reduces the band offset (the original recomputes (3 band) 136 from a counter) |
 | `lib/libat3dec` | `at3dec_proc` | 97 | parked | 20 lines off: the original enters the copy loop with the byte the skip loop loaded (reorg), registers differ |
 | `lib/libat3dec` | `f2t_nodata` | 90 | parked | 5 lines off: the band address of the loop is (x << 4) + x with swapped registers |
