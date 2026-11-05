@@ -93,35 +93,25 @@ void CAtelCrossFade::main() {
 }
 
 #line 99
-/* MATCH: Placeholder: re-emits onCreateTexMemory's string literals (it is INCLUDE_ASM'd), in their place in .rodata. */
-inline void _crossFadeTexMemoryStrings() {
-    com_malloc_d(0, __FILE__ "(104)", 0);
-    TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\x8e\xb8\x94s\x81I\x81I\n");
-    TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\n");
-    TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83\x81\x83\x82\x83\x8a\x82\xf0\x8d\xc4\x8am\x95\xdb\x82\xb5\x82\xe6\x82\xa4\x82\xc6\x82\xb5\x82\xdc\x82\xb5\x82\xbd\x81" "B\n");
-}
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/AtelCrossFade", onCreateTexMemory__Q24ATEL14CAtelCrossFadeiPvi);
 
-/* Near-match: the three TRACE/return paths are tail-merged here (one jal TRACE), separate in the original. */
-#if 0
 INT CAtelCrossFade::onCreateTexMemory(INT nCmd, void* pParam, INT nID) {
     if (!m_pCrossFadeImage) {
         m_pCrossFadeImage = (u_long128*)com_malloc_d(SCREEN_HEIGHT << 11, __FILE__ "(104)", RET_ADDR());
         if (!m_pCrossFadeImage) {
             TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\x8e\xb8\x94s\x81I\x81I\n");
-            return -1;
+            return -1; /* MATCH: return here, goto ret in the other two: keeps the three TRACE calls apart (no cross-jump) */
         } else {
             TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83\x81\x83\x82\x83\x8a\x8am\x95\xdb\n");
-            return -1;
+            goto ret;
         }
     } else {
         TRACE("\x83N\x83\x8d\x83X\x83t\x83" "F\x81[\x83h\x97p\x83\x81\x83\x82\x83\x8a\x82\xf0\x8d\xc4\x8am\x95\xdb\x82\xb5\x82\xe6\x82\xa4\x82\xc6\x82\xb5\x82\xdc\x82\xb5\x82\xbd\x81" "B\n");
-        return -1;
+        goto ret;
     }
+ret:
+    return -1;
 }
-
-#endif
 
 INT CAtelCrossFade::onStoreTexImage(INT nCmd, void* pParam, INT nID) {
     setCrossFadeFlag(1, 0);
