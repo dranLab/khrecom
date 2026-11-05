@@ -26,7 +26,7 @@ struct sceSifDmaData {
 };
 
 extern "C" {
-int hncAt3dec_Init(at3decinfo* info);
+void hncAt3dec_Init(at3decinfo* info); /* MATCH: void here (lib/hncAt3dec returns int): no $v0 set by the call */
 int hncAt3dec_Idle(at3decinfo* info);
 int TsSdMpegSetVolume(int vol);
 int TsSdCheckDriverSetParam2();
@@ -117,11 +117,6 @@ private:
 
 static CAudioDecImpl* s_pAudioDec = NULL;
 
-/* Parked: 6 of 120 lines, same size - the delay slot of hncAt3dec_Init gets the p_at3decwork store instead of
- * at3decparam's (and v0/v1 swap in the next lines). Tried (2026-11-02): every order of the three m_at3info stores
- * with and without the pWork local (the ref has none) and around the second allocation, _ref() on either store
- * (6-11 lines). */
-#if 0
 CAudioDecImpl::CAudioDecImpl()
     : m_nState(0), m_nHeaderCount(0), m_nPcmPut(0), m_nPcmCount(0), m_nPcmTotalBytes(0), m_nAt3Put(0),
       m_nAt3Count(0), m_nAt3TotalBytes(0), m_nIopLastPos(0), m_nIopPausePos(0), m_nTotalBytesSent(0),
@@ -130,10 +125,10 @@ CAudioDecImpl::CAudioDecImpl()
     m_ZeroBuf.allocBuf_A64(0x800);
     m_At3Buf.allocBuf_A64(0x1200);
     m_at3info.p_pcmbuf = (short int*)com_malloc_d(0x1000, __FILE__ "(165)", -1);
-    void* pWork = com_malloc_d(0x68CA, __FILE__ "(166)", -1);
+    m_at3info.p_at3decwork = com_malloc_d(0x68CA, __FILE__ "(166)", -1);
     m_at3info.at3decparam = 1;
     m_at3info.minusvol = 0;
-    m_at3info.p_at3decwork = pWork;
+
     hncAt3dec_Init(&m_at3info);
     _ref(m_nIopBufAddr) = NMSVIDEO_IOP_ADDR_FOR_AUDIO_DECODE;
     _ref(m_nIopBufSize) = 0x6000;
@@ -144,12 +139,6 @@ CAudioDecImpl::CAudioDecImpl()
     memset(m_ZeroBuf.getBufPtr(), 0, 0x800);
     _sendToIOP(NMSVIDEO_IOP_ADDR_FOR_AUDIO_ZEROBUF, m_ZeroBuf.getBufPtr(), 0x800);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Movie/AudioDec", __13CAudioDecImpl);
-// The constructor's allocation messages (.rodata's first strings), for its INCLUDE_ASM; remove with it.
-asm(".section .rodata\n.align 3\n.asciz \"c:/KHCOM/MainApp/System/Movie/AudioDec.cpp(165)\"\n"
-    ".align 3\n.asciz \"c:/KHCOM/MainApp/System/Movie/AudioDec.cpp(166)\"\n.previous");
-#endif
 
 CAudioDecImpl::~CAudioDecImpl() {
     pause();
