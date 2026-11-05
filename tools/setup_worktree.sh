@@ -30,6 +30,12 @@ else
     for d in tools/compilers tools/wibo tools/ccc tools/objdiff ref .venv; do
         link "$d"
     done
+    # the decomp-permuter submodule: check it out from the main checkout's copy (no network)
+    sub=tools/decomp-permuter
+    if [[ -e "$main/$sub/.git" && -z "$(ls -A "$sub" 2>/dev/null)" ]]; then
+        git -c protocol.file.allow=always -c "submodule.$sub.url=$main/$sub" submodule update --init --quiet "$sub" \
+            && echo "checked out $sub"
+    fi
 fi
 
 if [[ "${1:-}" != "--no-configure" ]]; then

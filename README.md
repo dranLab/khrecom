@@ -221,6 +221,9 @@ tools/
   imagediff.py          where the rebuilt image differs from the original (object, section, symbol)
   asm.py                a file's original assembly or data, compact
   compare_compilers.py  one source file against every installed compiler
+  permuter.py           random source mutations of one near-matching function (C and C++)
+  decomp_permuter.py    runs decomp-permuter on one function of a C unit (set-up, run, rescoring)
+  decomp-permuter/      (submodule) simonlindholm/decomp-permuter
   candidates.py         files not decompiled yet, for handing out work
   progress.py           progress table (matched / hand-written / INCLUDE_ASM / not started) for this README
   leftovers.py          what is left per function (parked / hand-written / not attempted), for docs/
