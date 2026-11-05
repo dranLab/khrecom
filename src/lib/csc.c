@@ -87,8 +87,8 @@ int DisableDmac(int cause);
 static int _ch3dmaCSC(int ch, void *arg, void *addr);
 static int _ch4dma(int ch, void *arg, void *addr);
 
-/* Parked: _doCSC2 differs only in two registers (0xffc0 / D3_CHCR); _sceMpegCscStoreRefImage in s1/s2 for the
-   inlined CSC block's rgb/qwc. */
+/* Parked: _doCSC2 3 lines (6 before the do-while(0) around the DMA kick) - registers; _sceMpegCscStoreRefImage
+   in s1/s2 for the inlined CSC block's rgb/qwc. */
 #if 0
 static void _doCSC2(MpegSys *sys, void *rgb, int mbnum)
 {
@@ -104,17 +104,20 @@ static void _doCSC2(MpegSys *sys, void *rgb, int mbnum)
     data.count = 0;
     IPU_WAIT();
     hid = AddDmacHandler2(3, _ch3dmaCSC, 0, &data);
-    *D_STAT = 8; EnableDmac(3);
-    oldei = DIntr();
-    *D3_MADR = (unsigned int)rgb & 0x0fffffff;
-    *D3_QWC = MB_CHUNK * 0x40;
-    *D3_CHCR = 0x100;
-    if (oldei) {
-        EIntr();
-    }
-    *IPU_CMD = 0x70000000 | MB_CHUNK; /* CSC */
-    cb.type = 4;
-    _sceMpegDispatchMpegCallback(sys->mp, &cb);
+    *D_STAT = 8;
+    do { /* MATCH: a loop note around the DMA kick (a macro body?) fixes its registers (decomp-permuter) */
+        EnableDmac(3);
+        oldei = DIntr();
+        *D3_MADR = (unsigned int)rgb & 0x0fffffff;
+        *D3_QWC = MB_CHUNK * 0x40;
+        *D3_CHCR = 0x100;
+        if (oldei) {
+            EIntr();
+        }
+        *IPU_CMD = 0x70000000 | MB_CHUNK; /* CSC */
+        cb.type = 4;
+        _sceMpegDispatchMpegCallback(sys->mp, &cb);
+    } while (0);
     while (data.count < data.nchunk) {
     }
     if (data.error) {
