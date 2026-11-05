@@ -225,11 +225,15 @@ void CTaskMan::_invokePrimary(TaskMainParam& param) {
     CCoordMan::update(param._nSysTickCount, CCoords::_PP_PRIMARY);
 }
 
-/* Matches except for one srl that the original has as dsrl (isSecondaryObj) and a delay slot. */
+/* 3 lines (2026-11-05, was 4): the original's dsrl for isSecondaryObj is a 64-bit test: (m_nInfo & 2UL) != 0 returned
+   as u_long (a BOOL return gives srl). Left: the delay slot of `if (!task.isInactive()) goto children;` (ours beqzl
+   stealing the loop's first lw, the original beqz with the fall-through lhu; do { } while (0) around it: no change). */
 #if 0
+static inline u_long _isSecondaryObj64(const CTask& t) { return (t.m_nInfo & 2UL) != 0; }
 void CTaskMan::_invokePrimary_Main(TaskMainParam& param, CTask& task) {
     if (!task.isInactive()) {
-        if (task.isSecondaryObj()) {
+        if (_isSecondaryObj64(task)) {
+
             if (!param._SecondaryArray.push_back(task.getHandle())) {
                 TRACE("<error> CTaskMan : SecondaryArray.push_back\n");
             }
