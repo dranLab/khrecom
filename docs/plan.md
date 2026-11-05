@@ -13,6 +13,32 @@ Reference docs, kept current by tools (never edit their generated parts by hand)
 | `docs/partials.md` | the header-cleanup report (PARTIAL markers, stand-ins, mechanisms, class readiness); its trend table is hand-kept, one row per cleanup merge | `tools/partials.py --update docs/partials.md` |
 | `README.md` | the progress table | `tools/progress.py --update README.md` |
 
+## Keeping the docs current
+
+The generated parts come from the sources (`Parked:` notes, `PARTIAL`/`MATCH` comments), so they go stale with
+every change that is merged without regenerating. Regenerating all four takes about 10 seconds:
+
+    .venv/bin/python tools/leftovers.py game --update docs/asm-leftovers.md
+    .venv/bin/python tools/leftovers.py lib --update docs/sdk-leftovers.md
+    .venv/bin/python tools/partials.py --update docs/partials.md
+    .venv/bin/python tools/progress.py --update README.md
+    git status --short docs/ README.md
+
+- **After every merge into `main`** (unit chunks, finished units, cleanup batches, library work, docs or tool
+  changes): run the block on `main`, then commit what changed as `docs: regenerate leftovers and progress`.
+- **At session start**, before any work: run the block. If anything changes, the docs were stale: commit it first,
+  so the session starts from current docs.
+- **Hand-kept parts**, updated in the same merge as the change that affects them:
+
+  | part | update when |
+  |---|---|
+  | "Where things stand" and the work table below (this file) | a work item finishes or the order changes; at the end of every session (numbers and date). Drop a unit from the work table once it has no unparked function left: `tools/partials.py` reads the table to tell which owners are in progress. |
+  | the blocker table at the top of `docs/asm-leftovers.md` | a blocker is found or resolved |
+  | `docs/sdk-leftovers.md` "Working on a library unit", "Levers", "Notes per unit" | a library lever or finding appears, or a note there no longer holds (e.g. a listed function got matched) |
+  | `docs/sdk-leftovers.md` "Search history" | after a permuter sweep over the library |
+  | `docs/partials.md` trend table | one row per cleanup merge (`partials.py --summary` before and after) |
+  | `CLAUDE.md` | a tool, rule or toolchain fact changes |
+
 ## Where things stand (2026-11-05)
 
 - **Progress:** 11830 of 12311 functions matched (88.8%): game 11067 of 11323, libraries 763 of 988 (plus 151
@@ -78,7 +104,8 @@ its data comes from source (or is recorded as blocked). Never leave a function t
 1. `git status` clean, on `main` or on the unit's branch `decomp/<Unit-with-dashes>` (slashes become dashes).
    Create the branch from `main` when you start a unit.
 2. `tools/check.sh > build/check.log 2>&1; echo $?` must print 0 before you change anything. If it doesn't, find
-   out why first (a stale tree usually just needs `configure.py`).
+   out why first (a stale tree usually just needs `configure.py`). Then the docs block of "Keeping the docs
+   current": commit any change before starting.
 3. Read the unit's memory file and the levers index below. Open `build/progress/<unit>.md` if it exists.
 4. List the unit's remaining functions: `tools/leftovers.py game --unit <unit>` (state, size, note) and
    `tools/asm.py <unit>` (every function, size, weak/global).
@@ -200,8 +227,8 @@ Once every function is matched or parked:
    of `docs/asm-leftovers.md`.
 3. **Finish hook part 1** (A2): the unit's own classes to the full ref class.
 4. **The "NOT matching" noise** should go away with the data; if not, find out whether it is an objdiff artifact.
-5. **Gate, merge, docs** on `main`: V5, then regenerate the four reference docs (table at the top) and commit
-   them as `docs: regenerate leftovers and progress`.
+5. **Gate, merge, docs** on `main`: V5, then the docs block of "Keeping the docs current", and update the work
+   table and "Where things stand" of this file (the unit leaves the table).
 6. **Memory:** the unit's `*-unit-lessons` file and its `MEMORY.md` line.
 7. **Finish hook part 2** (A2) on a cleanup branch.
 
@@ -246,7 +273,7 @@ group of about 10 .cpp files, V3 each.
 **A3. Between-work batch:** on `main`, `partials.py --queue`, take the top ready item; branch
 `cleanup/<Header-with-dashes>` or `cleanup/<topic>`; header changes first, then the .cpp swaps in groups;
 log in `build/progress/cleanup-<name>.md`; merge with the `--summary` deltas; add a row to the trend table of
-`docs/partials.md` and regenerate it. Items over about 30 files are split by top directory.
+`docs/partials.md`, then the docs block. Items over about 30 files are split by top directory.
 
 **A4. The ladder**, when completing a header would break another unit's `.rodata` (stop at the first step that
 works): forward declarations instead of includes; move the type to the header the original used (string
@@ -267,14 +294,18 @@ header split the original didn't have, or make a class a template to hide its st
   session's Co-Authored-By line.
 - Merge into `main` in chunks (every 10-20 matched functions, at the end of a session, when a unit is finished):
   V5 on the branch, then `git checkout main && git merge --no-ff <branch> -m "Merge <branch>: <what> (stand-ins
-  -N, PARTIAL -M, mechanisms -K)"` with the `partials.py --summary` deltas, then V5 on `main`. Delete the
-  branch once it is merged. A cleanup branch never contains function matches.
+  -N, PARTIAL -M, mechanisms -K)"` with the `partials.py --summary` deltas, then V5 on `main`, then the docs
+  block of "Keeping the docs current" (every merge, not only a unit's last). Delete the branch once it is
+  merged. A cleanup branch never contains function matches.
 
 ## Record keeping
 
 - `build/progress/<unit>.md` (ignored, survives compaction): one line per attempt (function, date, result,
   levers). Read it at session start.
-- The source holds the per-function truth (`Parked:` notes); the tools turn it into the docs.
+- The source holds the per-function truth (`Parked:` notes); the tools turn it into the docs. When a draft
+  improves, update its note (line count, what still differs) in the same commit, so the regenerated docs
+  show it.
+- At the end of every session: V5 on `main`, the docs block, and "Where things stand" of this file.
 - A new lever that works gets a memory file or a line in the unit's lessons file right away.
 
 ## Levers index (symptom -> memory file)
