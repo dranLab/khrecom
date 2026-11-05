@@ -30,7 +30,7 @@ shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters swit
 - **Split units** (`graphdev_*`, `libgcc2_*`) are one function per object. Weak-function and vtable rules don't
   apply (all C).
 - **Searching:** `tools/permuter.py <unit> <fn>` (text mutations) and, for these C units,
-  `tools/decomp_permuter.py <unit> <fn> --minutes N -j N` (AST randomizations; see plan-big-units step 4).
+  `tools/decomp_permuter.py <unit> <fn> --minutes N -j N` (AST randomizations; see `docs/plan.md`, the per-function loop step 4).
   Read each result: its randomizations can change the meaning or depend on noise.
 - **Validation:** funcdiff, then the full build's SHA-1 (`ninja`), then `tools/check.sh` before a merge. funcdiff
   normalizes relocation targets, so a swap of two globals' `%hi` registers in the same 64 KB page shows as a
