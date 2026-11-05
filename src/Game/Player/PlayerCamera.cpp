@@ -151,7 +151,6 @@ PCAM_DATA* pTestCamData[6] = {
 PCAM_PARAM g_ParamTest;
 PCAM_DATA* g_pCamData[6];
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", getPlayerCameraDir__Q212PlayerCamera13CPlayerCamera);
 #if 0
 /* Only the scheduling of the first block differs: the original zeroes dir (por/sq) before loading m_pInstance
  * (the zero gets $v1, then m_pInstance), ours loads m_pInstance first. */
@@ -169,6 +168,8 @@ FVECTOR CPlayerCamera::getPlayerCameraDir() {
     }
     return dir;
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", getPlayerCameraDir__Q212PlayerCamera13CPlayerCamera);
 #endif
 
 INT CPlayerCamera::getPlayerCameraPos(FVECTOR& outPos) {
@@ -736,7 +737,6 @@ void CPlayerCamera::collideMapTrueCamera(const FVECTOR& inEye, const FVECTOR& in
     m_collMap.collideMapTrueCamera(0);
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", procFieldNormal__Q212PlayerCamera13CPlayerCamera);
 #if 0
 /* Only the first block's scheduling differs: the original zeroes ofs (por $v0/sq) after the copy of eye, ours
  * between eye's load and store (por $v1), so the zero gets another register (as in getPlayerCameraDir). */
@@ -819,6 +819,8 @@ void CPlayerCamera::procFieldNormal() {
         }
     }
 }
+#else
+INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", procFieldNormal__Q212PlayerCamera13CPlayerCamera);
 #endif
 #line 1204
 void CPlayerCamera::procFieldParallel() {
