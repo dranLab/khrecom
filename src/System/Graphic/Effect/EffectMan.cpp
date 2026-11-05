@@ -824,8 +824,6 @@ void CEffectMan::_updateColor(CEffect* effect) {
         }
     }
 }
-/* Near-match: pPos/pLook get each other's registers */
-#if 0
 void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS, CCamera* pCam, BOOL frustumClip) {
     FMATRIX mCam;
     FVECTOR* pLook = __null;
@@ -840,7 +838,8 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
     asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&vLookTmp));
     if (pCam) {
         pPos = &pCam->Crd(0).m_World.v[3];
-        if (((FVECTOR*)((char*)pCam + 0x50))->w != 0.0f) pLook = (FVECTOR*)((char*)pCam + 0x50);
+        // MATCH: a ternary (with an if, pPos and pLook get each other's s-registers)
+        pLook = (((FVECTOR*)((char*)pCam + 0x50))->w != 0.0f) ? (FVECTOR*)((char*)pCam + 0x50) : __null;
     }
     if (!pPos || !pLook) {
         applySignWorldViewMatrix(mCam, mWV);
@@ -912,15 +911,6 @@ void CEffectMan::_calc(FLOAT fFrameRate, const FMATRIX& mWV, const FMATRIX& mVS,
     pppPartCalcEnd();
     SPAD::freeSpad(0x4000);
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _calc_strings(INT n) {
-    TRACE("Data Err!! calcEffect %s %d\n");
-    TRACE("Data Err!! calcEffect %08x %d\n");
-    TRACE("(0)");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/EffectMan", _calc__10CEffectManfRC7FMATRIXT2P7CCamerai);
-#endif
 FLOAT CEffectMan::getFrameRate() { return s_fFrameRate; }
 void CEffectMan::play(FLOAT fFrameRate) {
     s_fFrameRate = fFrameRate;
