@@ -616,9 +616,6 @@ void CMovement::updateVelocity() {
     pos.init();
     _calcMove(pos, m_vVel, acc, m_pOwner->getFrameRateF());
 }
-/* near-match (register copies of &end/&norm before the last two detect calls): kept as INCLUDE_ASM */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Movement", calcPos___9CMovement);
-#if 0
 void CMovement::calcPos_() {
 #line 1135
     ASSERT(m_pOwner);
@@ -690,8 +687,10 @@ void CMovement::calcPos_() {
         FVECTOR end = pos;
         FVECTOR norm;
         if (start.y == end.y) end.y -= 0.1f;
-        if ((mapCollisionDetect_(start, end, NULL, &norm) && norm.y >= 0.64278764f) ||
-            (rideCollisionDetect_(start, end, NULL, &norm) && norm.y >= 0.64278764f)) {
+        if (mapCollisionDetect_(start, end, NULL, &norm) && norm.y >= 0.64278764f) { /* MATCH: else-if with the arm duplicated (cross-jumped), not one || condition */
+            m_vPos = pos;
+            m_vVel = vel;
+        } else if (rideCollisionDetect_(start, end, NULL, &norm) && norm.y >= 0.64278764f) {
             m_vPos = pos;
             m_vVel = vel;
         } else {
@@ -699,7 +698,6 @@ void CMovement::calcPos_() {
         }
     }
 }
-#endif
 void CMovement::move_(BOOL inGround) {
     FVECTOR acc = m_vAcc;
     FVECTOR hitback;
