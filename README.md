@@ -12,9 +12,9 @@ Functions of `SLUS_217.99` by state (percentages: share of the row's code size).
 
 | | Functions | Matched C/C++ | Hand-written assembly | INCLUDE_ASM (to resolve) | Not started |
 |---|---:|---:|---:|---:|---:|
-| Game code (`System/`, `Game/`, `Form/`, `crt0`) | 11323 | 11066 (89.5%) | 5 (0.0%) | 252 (10.4%) | 0 (0.0%) |
-| Libraries (`lib/`: Sony SDK, C library, libgcc) | 988 | 758 (78.4%) | 151 (2.4%) | 75 (19.1%) | 4 (0.1%) |
-| **Total** | **12311** | **11824** (88.7%) | **156** (0.2%) | **327** (11.1%) | **4** (0.0%) |
+| Game code (`System/`, `Game/`, `Form/`, `crt0`) | 11323 | 11067 (89.6%) | 5 (0.0%) | 251 (10.4%) | 0 (0.0%) |
+| Libraries (`lib/`: Sony SDK, C library, libgcc) | 988 | 763 (80.2%) | 151 (2.4%) | 70 (17.3%) | 4 (0.1%) |
+| **Total** | **12311** | **11830** (88.8%) | **156** (0.2%) | **321** (10.9%) | **4** (0.0%) |
 
 Matched: compiled from `src/` and byte-identical (the build checks the whole image). Hand-written assembly:
 written in assembly originally (no compiler output to match; stays `.s`). INCLUDE_ASM: the file is compiled
