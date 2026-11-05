@@ -6138,7 +6138,7 @@ asm(".section .rodata\n"
     " pStrButton.4484:\n"
     ".byte 0x48,0x40,0x4E,0x00,0xF8,0x43,0x4E,0x00\n"
     ".section .text");
-/* Parked: 53 of 282 lines differ (was 81): with the ref's function-level `INT i` plus a block `INT i` in the else
+/* Parked: 40 of 285 lines differ (was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else
    branch `this` is in s0 as in the original; left: in the font-replacing loop the original recomputes
    &m_pMainCmdFnt[i] from i each iteration (only m_pMainCmdCtrl[i] strength-reduced), ours folds both into one giv;
    the create loop's first test uses a1 (nSetCmd == 0) in the original. tried: SAFE_DELETE / template inline /
@@ -6174,10 +6174,10 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
                 m_nCurrentCmdMax = nMode ? (!m_bPlayerKind ? 6 : 2) : 7;
                 for (i = 0; i < m_nCurrentCmdMax; i++) {
                     p2DSeqCtrl = m_pMainCmdCtrl[i];
-                    delete m_pMainCmdFnt[i];
-                    m_pMainCmdFnt[i] = NULL;
-                    m_pMainCmdFnt[i] = NEW(7448, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][i], 0x40);
-                    p2DSeqCtrl->replaceFnt(1, m_pSeqName, m_pMainCmdFnt[i]);
+                    delete _ref(m_pMainCmdFnt)[i];
+                    _ref(m_pMainCmdFnt)[i] = NULL;
+                    _ref(m_pMainCmdFnt)[i] = NEW(7448, C2DFnt)(0, 0, &rgba, 0xF, m_pMainCmdName[m_bPlayerKind][nMode][i], 0x40);
+                    p2DSeqCtrl->replaceFnt(1, m_pSeqName, _ref(m_pMainCmdFnt)[i]);
                 }
                 m_nMainMode = nMode;
             }
