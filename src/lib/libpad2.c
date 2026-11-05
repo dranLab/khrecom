@@ -114,8 +114,6 @@ int scePad2End(void)
     return 1;
 }
 
-/* Parked: the pad2_info address (lui) is scheduled before the 820 multiplier. */
-#if 0
 int scePad2CreateSocket(scePad2SocketParam *param, void *buf)
 {
     sceDbcSocketParam dp;
@@ -141,20 +139,11 @@ int scePad2CreateSocket(scePad2SocketParam *param, void *buf)
     dp.number = 1;
     dp.option |= 1;
     socket = sceDbcCreateSocket(&dp, buf, (char *)buf + 0x80);
-    if (socket >= 0) {
-        pad2_info[socket].valid = 1;
-        pad2_info[socket].buf = buf;
-        scePad2InitDmaDBuff(socket);
-    }
+    if (socket < 0) return socket; /* MATCH: early return (an if around the stores schedules the pad2_info lui first) */
+    pad2_info[socket].valid = 1;
+    pad2_info[socket].buf = buf;
+    scePad2InitDmaDBuff(socket);
     return socket;
-}
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libpad2", scePad2CreateSocket);
-
-/* Keeps scePad2CreateSocket's string in .rodata while it is assembly (never emitted). */
-static inline void scePad2CreateSocket_strings(void *buf)
-{
-    scePrintf("libpad2: buffer addr is not 64 byte align. %08x\n", buf);
 }
 
 int scePad2DeleteSocket(int socket)
@@ -244,7 +233,7 @@ int scePad2GetState(int socket)
     return state;
 }
 
-/* Parked: button type kept in a1 (orig a3), movz instead of movn for the digital case. */
+/* Parked: 5 lines - button type kept in a1 (orig a3), movz instead of movn for the digital case. */
 #if 0
 int scePad2GetButtonInfo(int socket, unsigned char *data, int button)
 {
@@ -258,7 +247,8 @@ int scePad2GetButtonInfo(int socket, unsigned char *data, int button)
         ret = ((data[bi.byte] >> bi.bit) & 1) ? 0 : bi.type;
         break;
     case 8:
-        v = data[bi.byte] >> bi.bit;
+        ret = data[bi.byte] >> bi.bit; /* ret as the first temporary (decomp-permuter): 12 -> 5 lines */
+        v = ret;
         if (bi.bit) {
             bi.byte++;
             v |= data[bi.byte] << (bi.type - bi.bit);
