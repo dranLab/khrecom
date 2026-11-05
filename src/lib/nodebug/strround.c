@@ -282,8 +282,6 @@ __asm__(".rdata\n.align 4\njtbl_004FE710:\n"
         ".text\n");
 
 
-/* Parked: add_separators: count and the constant 2 swap t0/t1 */
-#if 0
 /* insert ',' between groups of 3 integer digits; the result goes to buf */
 char *add_separators(char *buf, char *cp, char *end, int *size)
 {
@@ -321,11 +319,14 @@ char *add_separators(char *buf, char *cp, char *end, int *size)
     for (p = end; cp < p; p--) {
         *q-- = *p;
         if (p <= st.dot) {
+            /* MATCH: count++ in both arms (decomp-permuter): count and the constant 2 swap t0/t1 otherwise */
             if (count % 3 == 0 && count != 0) {
                 *q-- = ',';
                 n++;
+                count++;
+            } else {
+                count++;
             }
-            count++;
         }
     }
     *q = *p;
@@ -334,6 +335,4 @@ char *add_separators(char *buf, char *cp, char *end, int *size)
     *size = n;
     return buf;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/strround", add_separators);
 // SOURCE DATA: .rodata .bss

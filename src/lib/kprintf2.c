@@ -47,7 +47,7 @@ static void serialPutchar(int c)
 }
 
 /* The integer value of x * 1e6 (x: the bits of a double) for "0.%d". */
-/* Parked: 21 lines differ (permuter score) */
+/* Parked: 9 lines differ */
 #if 0
 int ftoi(unsigned long x)
 {
@@ -62,7 +62,7 @@ int ftoi(unsigned long x)
     }
     m = ((x << 12) >> 12) | (1UL << 52);
     if (e < 0) {
-        m >>= -e - 2;
+        m >>= (e = -e) - 2; /* e negated in place (decomp-permuter): 17 -> 9 lines */
         if ((m & 3) == 3) {
             m = (m >> 2) + 1;
         } else {
@@ -79,7 +79,9 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/kprintf2", ftoi);
 
 static int _sceSnprintf_pf(PutcFunc func, void *ctx, unsigned int *size, const char *fmt, ...);
 
-/* Parked: 16 lines differ (permuter score) */
+/* Parked: 16 lines differ - blocked by the unit's asm .rodata: with its literals compiled (decomp-permuter's build)
+   the ftoi result in a temporary before the "0.%d" call matches; the original's D_004FEC90.. labels as externs do not
+   (69 lines: extern doubles are not constants) */
 #if 0
 int printfloat(PutcFunc func, void *ctx, unsigned int *size, double d)
 {
