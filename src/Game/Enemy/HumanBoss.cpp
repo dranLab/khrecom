@@ -1200,7 +1200,7 @@ BOOL CHumanBoss::stockActProc(const CARD* inActiveCard) {
 }
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Enemy/HumanBoss", normalActProc__10CHumanBossPC4CARD);
-#if 0 /* near match: the two setDoBattleAct/useCard tails are cross-jumped (the original keeps both) */
+#if 0 /* near match, 7 lines: both setDoBattleAct/useCard tails kept (goto ret from the first, 2026-11-05; was 20); left: s5/s6 swap of the -1 constant and &tmp[count] (global-alloc tie), one move a0,s0 after the div */
 BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
     ACT_DATA* tmp[8];
     INT count = 0;
@@ -1240,13 +1240,14 @@ BOOL CHumanBoss::normalActProc(const CARD* inActiveCard) {
         }
         setDoBattleAct(act);
         useCard(act->iState);
-        return TRUE;
+        goto ret;
     roll:
         m_pCardRevolver->rollDeck(1, 0, 300);
         return FALSE;
     }
     setDoBattleAct(act);
     useCard(act->iState);
+ret:
     return TRUE;
 }
 #endif
