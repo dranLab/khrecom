@@ -528,7 +528,8 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", unpack_mddata);
 #endif
 
-/* Parked: 20 lines off: the original enters the copy loop with the byte the skip loop loaded (reorg), registers differ */
+/* Parked: 11 lines off (20 before the 0xF8 pad byte in a variable, decomp-permuter): the original enters the copy loop
+   with the byte the skip loop loaded (reorg), registers differ */
 #if 0
 static inline int _before(unsigned char *a, unsigned char *b)
 {
@@ -543,6 +544,7 @@ int at3dec_proc(At3Work *w)
     unsigned char *src;
     unsigned char *p;
     unsigned char *d;
+    unsigned char pad;
 
     for (i = 0; i < w->nch; i++) {
         rev = 0;
@@ -553,8 +555,9 @@ int at3dec_proc(At3Work *w)
         if (rev) {
             src = w->stream;
             d = w->buf;
+            pad = 0xF8;
             p = src + w->frameSize + off - 1;
-            while (*p == 0xF8 && _before(src, p)) {
+            while (*p == pad && _before(src, p)) {
                 p--;
             }
             while (src < p) {
