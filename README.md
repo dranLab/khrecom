@@ -8,7 +8,7 @@ The goal is C source that, compiled with the original compiler, produces a byte-
 > This repository contains **no game data** — you need your own dump of the disc.
 
 > [!IMPORTANT]
-> This repository uses the translation beta as a base because of it's debug information.
+> This repository uses the **US translation beta** as a base because of it's debug information.
 
 ## Progress
 
