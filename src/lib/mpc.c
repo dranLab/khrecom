@@ -126,9 +126,6 @@ static void _dualPrimeVector(_sceMpegDecoder *d, int *out, int *dmv, int mvx, in
     }
 }
 
-/* Parked: all but the field-picture setup matches: there the original schedules the constant 2 of the x160 test before
-   sel = 0 (registers a1/a0/a2 of the refs loads differ) */
-#if 0
 static void _getAllRefs(_sceMpegDecoder *d, int x, int y, int mbtype, int motion_type, int (*pmv)[2][2], int (*mvfs)[2],
                         int *dmv)
 {
@@ -137,6 +134,7 @@ static void _getAllRefs(_sceMpegDecoder *d, int x, int y, int mbtype, int motion
     int avg;
     int bf;
     int sel;
+    int two;
 
     sel = 1;
     d->spr[d->x820].count = 0;
@@ -158,11 +156,12 @@ static void _getAllRefs(_sceMpegDecoder *d, int x, int y, int mbtype, int motion
                 _sceMpegError1(d, "(a) invalid motion_type(%d)-0", motion_type);
             }
         } else {
+            two = 2; /* MATCH: constant in a variable: its li is scheduled before the stores */
             refs[0][0] = d->top[0];
             refs[0][1] = d->bottom[0];
             refs[1][0] = d->top[1];
             refs[1][1] = d->bottom[1];
-            bf = d->x184 == 2;
+            bf = d->x184 == two;
             sel = 0;
             if (d->x160 == 2 && d->x130) {
                 sel = bf != mvfs[0][0];
@@ -214,16 +213,6 @@ static void _getAllRefs(_sceMpegDecoder *d, int x, int y, int mbtype, int motion
         }
     }
 }
-#else
-/* _getAllRefs's strings */
-__asm__(".rdata\n"
-        ".align 3\n.asciz \"(a) invalid motion_type(%d)-0\"\n"
-        ".align 3\n.asciz \"(b) invalid motion_type(%d)-1\"\n"
-        ".align 3\n.asciz \"(c) invalid motion_type(%d)-2\"\n"
-        ".text\n");
-
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/mpc", _getAllRefs);
-#endif
 
 
 static int _motionComp0(_sceMpegDecoder *d, int mbaddr, int dct_type, int mbtype, int motion_type, int (*pmv)[2][2],
