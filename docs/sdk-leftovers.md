@@ -106,13 +106,13 @@ Sorted by unit, then size. `instr`: instructions in the original.
 | `lib/sifrpc` | `sceSifExecRequest` | 113 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
 | `lib/sifrpc` | `sceSifInitRpc` | 103 | parked | 62 lines differ (permuter score) |
 | `lib/sifrpc` | `_request_rdata` | 52 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
-| `lib/sifrpc` | `_request_end` | 51 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
+| `lib/sifrpc` | `_request_end` | 51 | parked | 11 lines (47 before the client/buff locals, decomp-permuter) - the original tests 0x8000000A first with a range check (more cases in its switch?), ours 0x80000009 |
 | `lib/sifrpc` | `_request_bind` | 51 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
 | `lib/sifrpc` | `_sceRpcGetPacket` | 42 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
-| `lib/sifrpc` | `_request_call` | 35 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
+| `lib/sifrpc` | `_request_call` | 35 | parked | 8 lines, 4 bytes short (45 before the do-while(0) around the fno copy, decomp-permuter); the rest of the field copies still let the scheduler hoist loads |
 | `lib/sifrpc` | `sceSifCheckStatRpc` | 15 | parked | the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads |
 | `lib/filestub` | `_sceFs_Rcv_Intr` | 237 | parked | 14 lines differ (permuter score) |
-| `lib/timer` | `cbTimerHandler` | 173 | parked | scheduling (53 lines differ) |
+| `lib/timer` | `cbTimerHandler` | 173 | parked | scheduling (32 lines; 45 before the handler's time argument in a local, decomp-permuter) |
 | `lib/timer` | `SetNextComp` | 100 | parked | loop shape (15 lines differ) |
 | `lib/timer` | `TimerBusClock2Freq` | 21 | parked | the original keeps div.s out of the call's delay slot (only ee-gcc2.96 does that) |
 | `lib/timer` | `TimerFreq2BusClock` | 13 | parked | as TimerBusClock2Freq |
