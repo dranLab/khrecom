@@ -112,7 +112,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | unit | function | instr | note |
 |---|---|---:|---|
 | `System/Math3D` | `InvMatrix__6Math3DR7FMATRIXRC7FMATRIX` | 234 | (comment) Same code apart from register allocation: gcc hoists the 1e-8 constants and a "li 20" out of the outer loop (the original keeps them inside), which moves &c into s1. |
-| `System/Wnd` | `init__9CImageWndRt7CPointT1ZiRt6CSizeT1ZiT1T2PCcfG6G_RGBAT7i` | 225 | 16 of 239 lines, 4 bytes short - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers and the T0..T3 stores another order, and the second `if (!pTexInfo) return;` fills its delay slot from the fallthrough (lui 0x8000) where the original takes the epilogue's lq. Tried: … |
+| `System/Wnd` | `init__9CImageWndRt7CPointT1ZiRt6CSizeT1ZiT1T2PCcfG6G_RGBAT7i` | 225 | 14 of 239 lines - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers (original w a1, h a2, w2 a3, h2 t0; ours w v1, h a1, h2 a2) and the T0..T3 stores another order. Tried (2026-11-05: decl/assignment forms of w, h, w2, h2, INT locals): declaration orders (ref's w, h, … |
 | `System/Memoca` | `_setupIconSys__FPCc` | 199 |  |
 | `System/Memoca` | `_McCheckDataFileExist__FiPCc` | 99 |  |
 | `System/Memoca` | `_McWriteIcons__FPCc` | 144 |  |
