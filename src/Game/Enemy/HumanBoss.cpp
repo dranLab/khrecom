@@ -652,7 +652,7 @@ __attribute__((section(".sdata"))) void _setupAct_placeholder(void* p, void* q, 
     com_malloc_d(4, __FILE__ "(684)", (UINT)-1);
     if (!r) AssertApp(__FILE__, 0, "m_pStockData", 0);
 }
-#if 0 /* near match: the -1 of the normal acts shares the register of the compares (the original loads it separately) */
+#if 0 /* near match, 18 lines (2026-11-05, was 22: stock arm's chain sMax = sMin): the -1 of the normal acts shares the register of the compares (the original loads it separately); (SHORT)/0xFFFF/local forms tried */
 void CHumanBoss::setupAct() {
     ACT_DATA tmp[8];
     ACT_DATA tmp2[8];
@@ -677,7 +677,7 @@ void CHumanBoss::setupAct() {
             tmp2[m_iStockNum].iState = act->iActNo + 2;
             tmp2[m_iStockNum].pAct = act;
             tmp2[m_iStockNum].bEnable = TRUE;
-            tmp2[m_iStockNum].sMinNumber = tmp2[m_iStockNum].sMaxNumber = -1;
+            tmp2[m_iStockNum].sMaxNumber = tmp2[m_iStockNum].sMinNumber = -1;
             m_iStockNum++;
 #line 669
             ASSERT(m_iStockNum <= 8);
