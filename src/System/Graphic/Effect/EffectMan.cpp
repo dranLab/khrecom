@@ -727,7 +727,9 @@ INT CEffectMan::_sortEffect(EFFMAN_ZSORT_BUF* elist, const FMATRIX& mWS, INT nEf
     if (i >= 2) qsort(elist, i, sizeof(EFFMAN_ZSORT_BUF), EffMan_QSortComp);
     return i;
 }
-/* Near-match: register choice of the length temporary and a hoisted address high part */
+/* Parked: 7 lines - _lengthVf4's iTmp is s3 in the original (ours v0; a register asm local reshuffles the whole
+   function) and the hoisted %hi(s_vEffKhComScale) (lui s4) is scheduled before the mMat copy instead of into the
+   `b`'s delay slot. */
 #if 0
 BOOL CEffectMan::_updateCoord(CEffect* effect) {
     CCoord* pCrd;
@@ -763,8 +765,9 @@ BOOL CEffectMan::_updateCoord(CEffect* effect) {
         if (effect->m_iFlag & 0x80) {
             FMATRIX mMat = *pMat;
             float fDist[3];
-            i = 0;
+            INT i = 0; // MATCH: the ref's second, block-local i (the first loop's i gets another register)
             goto test;
+            do {} while (0); // MATCH: the loop note aligns the next label (the original's nop after the `b`)
         inc:
             i++;
         test:
