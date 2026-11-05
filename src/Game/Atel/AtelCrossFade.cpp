@@ -164,17 +164,16 @@ INT CAtelCrossFade::onSetCrossFadeRGBA_Anim(INT nCmd, void* pParam, INT nID) {
     return -1;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/AtelCrossFade", AnimColor__Q24ATEL14CAtelCrossFade);
 
-/* Near-match: the original keeps the temporary vector at sp+0x20 in s0 (a 0x70 frame); here it is at sp. */
-#if 0
 INT CAtelCrossFade::AnimColor() {
     m_ColorAnim._nColorTimeCount += getFrameRate();
-    BOOL bOver = m_ColorAnim.isOverTimeLimit();
-    if (!bOver) {
-        FVECTOR v;
-        ScaleVector(v, m_ColorAnim._vColorSpeed, getFrameRate());
-        AddVector(m_ColorAnim._vColorBuf, m_ColorAnim._vColorBuf, v);
+    BOOL bRes = m_ColorAnim.isOverTimeLimit();
+    IVECTOR iv; /* MATCH: the ref's iv/Color (unused) give ColorSpeed its sp+0x20 slot */
+    FVECTOR Color;
+    FVECTOR ColorSpeed;
+    if (!bRes) {
+        ScaleVector(ColorSpeed, m_ColorAnim._vColorSpeed, getFrameRate());
+        AddVector(m_ColorAnim._vColorBuf, m_ColorAnim._vColorBuf, ColorSpeed);
         _setIVector(m_Color, (INT)m_ColorAnim._vColorBuf.x, (INT)m_ColorAnim._vColorBuf.y,
                     (INT)m_ColorAnim._vColorBuf.z, (INT)m_ColorAnim._vColorBuf.w);
     } else {
@@ -183,10 +182,9 @@ INT CAtelCrossFade::AnimColor() {
         m_nState ^= 1;
         setCrossFadeFlag(0, 2);
     }
-    return bOver;
+    return bRes;
 }
 
-#endif
 
 void CAtelCrossFade::storeCrossFadeImage() {
     INT i;
