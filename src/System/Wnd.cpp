@@ -1145,9 +1145,9 @@ void CImageWnd::createWindow(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI
     init(pos0, size0, pos1, size1, pTexName, fRate, color0, color1, fgFlip);
 }
 
-/* Parked: 16 of 239 lines, 4 bytes short - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other
- * registers and the T0..T3 stores another order, and the second `if (!pTexInfo) return;` fills its delay slot from
- * the fallthrough (lui 0x8000) where the original takes the epilogue's lq. Tried: declaration orders (ref's w, h, w2,
+/* Parked: 14 of 239 lines - the flip block (w2 = w; w = 0 under fgFlip bits, 4 USHORTs) gets other registers
+ * (original w a1, h a2, w2 a3, h2 t0; ours w v1, h a1, h2 a2) and the T0..T3 stores another order. Tried (2026-11-05:
+ * decl/assignment forms of w, h, w2, h2, INT locals): declaration orders (ref's w, h, w2,
  * h2), one pTexInfo for both getTPage calls, pos0.m_x in a local, hill.py (2026-10-19), permuter 10 min (21 -> 21). */
 #if 0
 #line 1900
@@ -1188,7 +1188,8 @@ void CImageWnd::init(CPointI& pos0, CSizeI& size0, CPointI& pos1, CSizeI& size1,
     if (!pTexInfo) return;
     USHORT tw = pTexInfo->_TexInfo._nDistW;
     USHORT th = pTexInfo->_TexInfo._nDistH;
-    if (pos0.m_x != (INT)0x80000000) {
+    if ((UINT)pos0.m_x != 0x80000000) { // MATCH: unsigned test: the lw of pos0.m_x is scheduled first, so reorg fills
+                                        // the `return`'s delay slot from the epilogue
         m_initPos.x = pos0.m_x - 256;
         m_initPos.y = pos0.m_y - _screenHeight() / 2;
     } else {
