@@ -6550,18 +6550,12 @@ extern FVECTOR TelopMessagePosition;
 extern CursorPosition L1R1DigitSlashOffset;
 }
 }
-/* Parked (final group): the inlined mainInit tail (posi._q = 0; posi.w = 1.0f; setContentStep(20); setContentScroll(0/1))
-   schedules the step/w/scroll stores in another order: in ours setContentStep's store and the posi.w stack store are
-   dependent (sched2 dump), in the original they are not (step lands before w in mainInit, after scroll[1] in mainIn).
-   mainInit 7 lines standalone, mainLoadWait 2, mainIn 2; the rest (layout setup, digit seqs, telop font) matches.
-   tried: all orders of the tail statements (scored on both callers), block-scoped tail FVECTOR (30), step first
-   (contentCollection recipe); tools/permuter.py 2 runs on mainInit (12/10, no gain). The weak functions can only
-   come from C together (key functions + deferred inline output), so they stay INCLUDE_ASM as a group. */
+/* Parked: final group, see the note above getTaskPointer<T>. The tail is the brace-initialized posi of line 4042 (memory
+   fvector-brace-init-aligned); mainInit matches standalone. */
 #if 0
 inline void CJiminyMemo::mainInit() {
     CMemo2DLayout* pLay;
     D2::C2DSeqCtrl* pMess;
-    FVECTOR posi;
     pLay = new (__FILE__ "(3948)") CMemo2DLayout(this);
     if (pLay) {
         D2::C2DSeqCtrl* pSeq;
@@ -6606,11 +6600,13 @@ inline void CJiminyMemo::mainInit() {
         }
         pSeq = pLay->getSeqCtrl(2);
         if (pSeq) {
+            FVECTOR posi;
             D2::C2DMan::getLayPosition(m_pLadFileName, 0x2C, 1, posi, 0);
             pSeq->setLocalPos(posi);
         }
         pSeq = pLay->getSeqCtrl(5);
         if (pSeq) {
+            FVECTOR posi;
             D2::C2DMan::getLayPosition(m_pLadFileName, 0x2C, 2, posi, 0);
             pSeq->setLocalPos(posi);
         }
@@ -6632,11 +6628,10 @@ inline void CJiminyMemo::mainInit() {
     }
     JiminyMemo::playSE(3);
     setLayoutState(m_hLayout, 1);
-    setContentStep(20);
-    posi._q = 0;
-    posi.w = 1.0f;
+    FVECTOR posi = { 0.0f, 0.0f, 0.0f, 1.0f };
     setContentScroll(0, posi);
     setContentScroll(1, posi);
+    setContentStep(20);
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", mainInit__11CJiminyMemo);
