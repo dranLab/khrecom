@@ -2,3 +2,4 @@ splat64[mips]>=0.50.0,<0.51
 ninja_syntax>=1.7.2
 pycdlib>=1.14.0
 pyelftools>=0.31
+toml>=0.10  # tools/decomp-permuter

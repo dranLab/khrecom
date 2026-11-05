@@ -20,6 +20,11 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
   matching function (statement/declaration order, operand order, temporaries, ...), compiled in parallel and scored
   against the original; the best variant goes to `build/permuter/<function>/best.c` (+ `best.diff`). Parked drafts
   under `#if 0` are switched on in its copies; the real source is never touched. Check a result's semantics.
+- `.venv/bin/python tools/decomp_permuter.py <unit> <function> [--minutes N] [-j N]` - for `.c` units only: runs
+  decomp-permuter (`tools/decomp-permuter`, git submodule; pycparser, AST randomizations) on the preprocessed unit
+  with the unit's own build; results in `build/decomp-permuter/<function>/output-*/diff.txt`, rescored at the end in
+  funcdiff-style differing lines (its own scores weigh differences differently and can rise while lines drop).
+  `--setup-only`, then edit `base.c` (PERM_* macros, PERM_IGNORE for unparsable code) and `--resume`; `--report`.
 - `.venv/bin/python tools/compare_compilers.py SLUS_217.99 src/<unit>.cpp` - per function, with every installed compiler.
 - `.venv/bin/python tools/candidates.py SLUS_217.99` - files not decompiled yet (size, functions, header strings).
 - `.venv/bin/python tools/leftovers.py lib|game [--update docs/sdk-leftovers.md|docs/asm-leftovers.md]` - what is left

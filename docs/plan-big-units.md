@@ -116,6 +116,19 @@ For one function `F` of unit `U`:
    INCLUDE_ASM` first, which the permuter switches on by itself. Read `build/permuter/F/best.diff`. Adopt a
    variant only if it keeps the program's meaning (the permuter's safe mutations do, but check moves of
    statements across calls or stores). Then validate it like any other change.
+
+   For a `.c` unit, also run decomp-permuter (it parses C only; its AST randomizations found what
+   `tools/permuter.py` missed in lib/kprintf2 ftoi, 21 -> 9 lines in 5 minutes):
+
+       .venv/bin/python tools/decomp_permuter.py U F --minutes 15 -j 16
+
+   It ends with the best outputs rescored in differing lines. Go by that count, not by its own score:
+   on a far-off function its score can drop while the line count rises. Read the `diff.txt` of the best
+   one. Its randomizations do change the meaning sometimes, and they often add noise (duplicated `if` arms,
+   casts). Carry over only the sensible part by hand, then check it with funcdiff. For code it cannot parse,
+   use `--setup-only`, wrap the construct in `PERM_IGNORE(...)` in `base.c`, and run with `--resume`. Asm
+   statements are wrapped automatically. `PERM_GENERAL(a, b)` and other macros in `base.c` test chosen
+   variants (see `tools/decomp-permuter/README.md`).
 5. **Validate** with the ladder below. Only a function that passed V1-V4 counts as matched.
 6. **Commit** (see "Commits and merges"), update `build/progress/U.md`, and continue with the next function.
 
