@@ -93,11 +93,28 @@ def preprocess(command: str, source: Path, text: str, out: Path, workdir: Path) 
         sys.exit("preprocessing failed:\n" + (r.stdout + r.stderr)[-2000:])
 
 
+def starts_statement(text: str, pos: int) -> bool:
+    """Whether the code at pos begins a statement: after ; { } or a label's :, or after the ) of an if/while/for/
+    switch condition (not after a declarator's ), as in `void f(void) __asm__("name");`)."""
+    before = text[:pos].rstrip()
+    if not before or before[-1] in ";{}:":
+        return True
+    if before[-1] != ")":
+        return False
+    depth, j = 0, len(before) - 1
+    while j >= 0:
+        depth += {")": 1, "(": -1}.get(before[j], 0)
+        if depth == 0:
+            break
+        j -= 1
+    return re.search(r"\b(if|while|for|switch)\s*$", before[:max(j, 0)]) is not None
+
+
 def ignore_asm(text: str) -> str:
     """Every asm statement as PERM_IGNORE(...): pycparser rejects VU0 asm with expression operands."""
     out, i = [], 0
     for m in re.finditer(r"\b__asm__\s*(?:__volatile__|volatile)?\s*\(", text):
-        if m.start() < i or not re.search(r"(^|[;{}):])\s*$", text[max(0, m.start() - 200):m.start()]):
+        if m.start() < i or not starts_statement(text, m.start()):
             continue  # not a statement (a register asm declaration, an asm label)
         j, depth = m.end(), 1
         while depth:
@@ -213,20 +230,44 @@ def line_score(workdir: Path, func: str, src: Path) -> int | None:
         obj.unlink(missing_ok=True)
 
 
+def permuter_base(workdir: Path, func: str) -> Path | None:
+    """base.c as decomp-permuter compiles its unrandomized base: preprocessed, PERM_* expanded and printed by
+    pycparser, one statement per line. Its outputs have that layout too, and with GNU as the -g line labels decide
+    delay slots, so the outputs are compared with this, not with base.c's own layout."""
+    out = workdir / "base_permuter.c"
+    code = (f"import sys; sys.path.insert(0, {str(PERMUTER.parent)!r})\n"
+            "from src.preprocess import preprocess\n"
+            "from src.perm.parse import perm_parse\n"
+            "from src.perm.eval import perm_evaluate_one\n"
+            "from src.candidate import Candidate\n"
+            "from src.helpers import get_default_randomization_weights\n"
+            f"src, st = perm_evaluate_one(perm_parse(preprocess({str(workdir / 'base.c')!r})))\n"
+            f"cand = Candidate.from_source(src, st, {func!r}, get_default_randomization_weights('gcc'), rng_seed=0)\n"
+            f"open({str(out)!r}, 'w').write(cand.get_source())\n")
+    r = subprocess.run([sys.executable, "-c", code], cwd=PERMUTER.parent, capture_output=True, text=True)
+    return out if r.returncode == 0 and out.exists() else None
+
+
 def report(workdir: Path, count: int = 5) -> None:
     """The best outputs, rescored in differing lines (decomp-permuter's own scores weigh kinds of differences)."""
     func = re.search(r'func_name = "([^"]+)"', (workdir / "settings.toml").read_text()).group(1)
     base = line_score(workdir, func, workdir / "base_unwrapped.c")
+    pbase_c = permuter_base(workdir, func)
+    pbase = line_score(workdir, func, pbase_c) if pbase_c else None
     outs = sorted(workdir.glob("output-*"), key=lambda d: (int(d.name.split("-")[1]), -d.stat().st_mtime))[:count]
+
     def lines(n: int | None) -> str:
         return "does not compile" if n is None else f"{n} lines differ"
 
-    print(f"\nbase.c: {lines(base)}")
+    print(f"\nbase.c: {lines(base)} in its own layout, {lines(pbase)} as decomp-permuter compiles it "
+          "(the outputs' layout: compare them with this)")
     if not outs:
         print("no improvement")
     for d in outs:
-        print(f"{d.relative_to(ROOT)}/diff.txt: score {d.name.split('-')[1]}, "
-              f"{lines(line_score(workdir, func, d / 'source.c'))}")
+        n = line_score(workdir, func, d / "source.c")
+        gain = f" ({n - pbase:+d} against the permuter's base)" if n is not None and pbase is not None else ""
+        print(f"{d.relative_to(ROOT)}/diff.txt: score {d.name.split('-')[1]}, {lines(n)}{gain}")
+    print("an output's gain only counts once it holds in the real source (tools/funcdiff.py)")
 
 
 def main() -> None:

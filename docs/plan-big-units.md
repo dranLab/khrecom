@@ -122,10 +122,13 @@ For one function `F` of unit `U`:
 
        .venv/bin/python tools/decomp_permuter.py U F --minutes 15 -j 16
 
-   It ends with the best outputs rescored in differing lines. Go by that count, not by its own score:
-   on a far-off function its score can drop while the line count rises. Read the `diff.txt` of the best
-   one. Its randomizations do change the meaning sometimes, and they often add noise (duplicated `if` arms,
-   casts). Carry over only the sensible part by hand, then check it with funcdiff. For code it cannot parse,
+   It ends with the best outputs rescored in differing lines, next to the base as decomp-permuter compiles
+   it (its one-statement-per-line layout, the outputs' layout). Go by that count, not by its own score: on a
+   far-off function its score can drop while the line count rises. Read the `diff.txt` of the best one. Its
+   randomizations do change the meaning sometimes, and they often add noise (duplicated `if` arms, casts).
+   Carry over only the sensible part by hand, then check it with funcdiff and the full build: a gain often
+   depends on the noise and disappears without it (unpack_mddata), and funcdiff can call a register swap
+   between same-page globals a MATCH that the SHA-1 rejects (_sceCd_cbLoop). For code it cannot parse,
    use `--setup-only`, wrap the construct in `PERM_IGNORE(...)` in `base.c`, and run with `--resume`. Asm
    statements are wrapped automatically. `PERM_GENERAL(a, b)` and other macros in `base.c` test chosen
    variants (see `tools/decomp-permuter/README.md`).
