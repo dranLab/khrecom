@@ -1,9 +1,11 @@
 # SDK (lib/) leftovers
 
-The `lib/` units that are not fully decompiled. All 167 lib units build byte-identical. The list below is what
-still comes from the original assembly, as a whole unit, a function or a data section. It is generated from the
-sources by `tools/leftovers.py lib --update docs/sdk-leftovers.md`: the status and the "what differs" text come
-from the `Parked:` / `Hand-written:` / `Not attempted:` note above each function (see the tool's help).
+The reference for the library units (`lib/...`: Sony SDK, libat3dec, libgcc, newlib, libsn): what is left, how to
+work on it and what has been tried. All library units build byte-identical; 921 of 985 functions are matched
+(135 of the 153 units with a source are complete), plus 16 units that have no source file (data only, except
+`lib/nodebug/memcmp`). The inventory below is generated from the sources by `tools/leftovers.py lib --update
+docs/sdk-leftovers.md`: the status and the "what differs" text come from the `Parked:` / `Hand-written:` /
+`Not attempted:` note above each function. Keep those notes current in the source, then regenerate.
 
 Status:
 - **not attempted**: no C written yet.
@@ -11,8 +13,83 @@ Status:
   It was parked after many variants stopped improving the diff.
 - **hand-written**: no compiler output to match (MMI, trap handlers, `.s` sources). These stay assembly.
 
-To re-check: `tools/check.sh` lists every unit with INCLUDE_ASM functions left. `tools/funcdiff.py <unit>`
-shows a draft's diff after you switch its `#if 0` to `#if 1`.
+To re-check: `tools/check.sh` lists every unit with INCLUDE_ASM functions left; `tools/funcdiff.py <unit> <fn>`
+shows a draft's diff after you switch its `#if 0` to `#if 1` (the permuters switch drafts on in their own copies).
+
+## Working on a library unit
+
+- **Toolchain:** per family, set in `config/SLUS_217.99/build.yaml` `overrides:`; the table and the assembler
+  rules are in CLAUDE.md ("Library units"). A function that only matches another compiler usually needs a source
+  change, not another toolchain.
+- **No `ref/`**, no `__LINE__`/assert strings: `.rodata` is constants, strings and jump tables. The .mdebug has
+  names only (`stdump functions iso/SLUS_217.99` lists each file's functions, `static` for file-local ones).
+  SDK declarations go in `include/sdk/*.h`, library-internal structs in the unit's source or `src/lib/*.h`.
+- **Delay slots:** with GNU as (`.set reorder`) the assembler fills open delay slots, but only when no label
+  precedes the branch, and `-g`'s `$LM` line labels count: statements on one line, or a `do { } while (0)` (loop
+  note), change which slots get filled.
+- **Split units** (`graphdev_*`, `libgcc2_*`) are one function per object. Weak-function and vtable rules don't
+  apply (all C).
+- **Searching:** `tools/permuter.py <unit> <fn>` (text mutations) and, for these C units,
+  `tools/decomp_permuter.py <unit> <fn> --minutes N -j N` (AST randomizations; see plan-big-units step 4).
+  Read each result: its randomizations can change the meaning or depend on noise.
+- **Validation:** funcdiff, then the full build's SHA-1 (`ninja`), then `tools/check.sh` before a merge. funcdiff
+  normalizes relocation targets, so a swap of two globals' `%hi` registers in the same 64 KB page shows as a
+  MATCH that the SHA-1 rejects (`_sceCd_cbLoop`).
+- **Data:** a unit whose `.rodata` still comes from asm (`kprintf2`, `libat3dec`, ...) strips the compiled
+  `.rodata`: a draft with string literals or double constants doesn't link there (`printfloat`); the original's
+  labels as externs work for strings but not for doubles (not constants any more).
+
+## Levers that worked in lib/
+
+- A constant in a variable set before the stores it should precede (`_getAllRefs`'s `2`, `at3dec_proc`'s `0xF8`).
+- An early `if (x < 0) return x;` instead of an `if` around the success path (`scePad2CreateSocket`).
+- A statement duplicated into both arms of the preceding `if` (`add_separators`' `count++`).
+- `do { ... } while (0)` around one statement or block as a scheduling barrier / loop note (`relocate_dll`'s
+  `patch()`, `_request_call`'s `fno` copy, `_doCSC2`'s DMA kick).
+- A pointer or field read into a local (`_request_end`'s client and `buff`, `cbTimerHandler`'s time argument,
+  libppp's `pppSetMatrix` after a `"memory"` asm).
+- A callee declared `int` instead of `void` (v0 not free after the call: `snDllUnload`'s `snAllBreaksIn`).
+- `volatile` on single struct fields (reloads), a parameter reused as loop index or result (shares its
+  s-register) (libkernl).
+- printf family: one variable for several roles (the original's `n`/`p`/`uval` share s-registers), the tail
+  `start = p + 1; len = bufend - p; goto output;` per case, `if (val >= 0) {...} else '-'` arm order.
+- Sony's code has inline asm blocks with their own `.set noreorder` loops (DIntr).
+
+## Notes per unit
+
+- **sifrpc** (9 parked): the original copies packet fields load/store pair by pair; ours lets the scheduler hoist
+  loads above stores of other pointer/int types (alias sets); `-fno-strict-aliasing` and scheduling flags don't
+  reproduce it. Locals for the copied pointer/field and a `do { } while (0)` around one copy got `_request_end`
+  (47 -> 11) and `_request_call` (45 -> 8) close; try the same on the others. Same family: sifcmd's
+  `_sceSifCmdIntrHdlr` (registers only).
+- **kprintf2** (`_sceSnprintf`, `printfloat`, `ftoi` parked; `.rodata` stays asm): `_sceSnprintf` is off only by a
+  `nop` between `c.eq.s` and `bc1f` (gcc writes `#nop`); no assembler here gives that nop together with the
+  unit's other code (2.9 gas inserts it but also one after `mtc1` and fills no `j $31`; 2.10/2.12 insert none).
+  `printfloat` matches with its literals compiled (ftoi's result in a temporary first), so it waits for the
+  unit's `.rodata` from source.
+- **filestub** (`_sceFs_Rcv_Intr`, jump table as file-scope asm): only the prologue differs, two swapped registers
+  around the `ee_retbuf_sel` store (an empty `asm volatile` barrier moves it, but isn't source).
+  `~/kh1/src/lib/libkernl/filestub.c` (an older libkernl, matched) was the base; ours adds named semaphores,
+  sceFsSifCallRpc retries, double-buffered replies.
+- **graphdev_sceGsExecStoreImage**: the per-PSM switch matches once each case is `if (bytes == 0) {...} else
+  {...}` (gcc merges the identical then-parts); left: registers in the PSMCT24 tail and the original keeping the
+  raw trxreg (t1) for the final TRXREG write.
+- **graphdev_checkModelVersion** (`sceGsSetDefDispEnv`, ~100 lines): structure matches (if/else if chain, not
+  switch; DX = dx*magh + ((long)off[0] + 636) through a `long` temp); left: the original computes DY and
+  off[0]+636 before magh and ORs the DISPLAY fields in another order. String kept by an unused static inline.
+- **csc** (`_doCSC2`, `_sceMpegCscStoreRefImage`; the handlers match): sceMpegCbData must be the 32-byte union
+  (stack layout); the IPU command store + cmd-type check is an inline taking cmd as parameter; left: register
+  swaps (rgb/qwc s1/s2 in the inlined small-picture CSC block).
+- **libpad2** (`scePad2GetButtonInfo`, 5 lines): needs `if (valid) { switch ... }`; keeps the button type in a1
+  instead of a3. Lever here: the shared `return state` with the fail block inside the else branch (goto into it).
+- **hncAt3dec** (`hncAt3dec_Idle`): structure matches (per-channel `final_dout` loops counting down); only the
+  register assignment differs. Init matched once each switch case sets all three values itself.
+- **eecdvd_sceCdCallback**: `_sceCd_cbLoop` matches by funcdiff with the exit block on one line and
+  `sceCdCbfunc_num = cb_flag = 0`, but two hoisted luis swap registers (SHA-1 fails, gcse order of the symbols).
+- **mpc** (`_getRef0`): decomp-permuter can't parse it (a statement expression `({ ... })` in a condition).
+- **timer** (`TimerBusClock2Freq`, `TimerFreq2BusClock`): the original keeps `div.s` out of the call's delay
+  slot, which only ee-gcc2.96 does; the unit is built with the Sony toolchain (991111).
+- **lib/init**: a `j $31` left unfilled where the original filled it: the last statement and `}` on one line.
 
 ## Inventory
 
@@ -138,58 +215,19 @@ Generated by `tools/leftovers.py lib`.
 
 `src/lib/at3core.s`, `src/lib/klib.s`, `src/lib/tlbtrap.s`, `src/lib/nodebug/_init.s`.
 
-## Permuter sweep (2026-10-21)
+## Search history
 
-`tools/permuter.py`, 5 minutes per parked function (18 parallel compiles). Score: differing instruction lines,
-0 = match. No function reached a match; the improved variants only reorder independent statements, swap operands
-or add temporaries, and were not adopted into the drafts (rerun the permuter to get them back).
+- **2026-10-21, `tools/permuter.py`**, 5 minutes per parked function: no match; the improvements only reordered
+  independent statements, swapped operands or added temporaries and were not adopted.
+- **2026-11-05, `tools/decomp_permuter.py`**, 8 minutes per parked C function (lines: funcdiff in the real source):
 
-| unit | function | start | best | candidates |
-|---|---|---|---|---|
-| `lib/libpad2` | `scePad2CreateSocket` | 2 | 2 | 36071 |
-| `lib/nodebug/check_dll` | `snDllUnload` | 3 | 3 | 28149 |
-| `lib/kprintf2` | `_sceSnprintf` | 4 | 4 | 24377 |
-| `lib/libat3dec` | `f2t_nodata` | 5 | 5 | 40707 |
-| `lib/sifrpc` | `_sceRpcGetPacket` | 5 | 5 | 43216 |
-| `lib/nodebug/check_dll` | `relocate_dll` | 5 | 5 | 26540 |
-| `lib/csc` | `_doCSC2` | 7 | 7 | 40714 |
-| `lib/mpc` | `_getAllRefs` | 9 | 9 | 14356 |
-| `lib/csc` | `_sceMpegCscStoreRefImage` | 9 | 9 | 41037 |
-| `lib/timer` | `TimerBusClock2Freq` | 10 | 10 | 0 |
-| `lib/sifrpc` | `_request_rdata` | 11 | 11 | 57190 |
-| `lib/nodebug/strround` | `add_separators` | 11 | 11 | 34164 |
-| `lib/sifrpc` | `sceSifCallRpc` | 12 | 12 | 37453 |
-| `lib/libpad2` | `scePad2GetButtonInfo` | 12 | 12 | 27728 |
-| `lib/pack` | `sceMpegDemuxPssRing` | 14 | 14 | 13932 |
-| `lib/filestub` | `_sceFs_Rcv_Intr` | 14 | 14 | 12407 |
-| `lib/timer` | `SetNextComp` | 15 | 15 | 32159 |
-| `lib/nodebug/__errno` | `memcpy` | 15 | 15 | 48759 |
-| `lib/timer` | `TimerFreq2BusClock` | 16 | 16 | 0 |
-| `lib/kprintf2` | `printfloat` | 16 | 16 | 41578 |
-| `lib/libat3dec` | `at3dec_proc` | 20 | 20 | 40065 |
-| `lib/eecdvd_sceCdCallback` | `_sceCd_cbLoop` | 20 | 20 | 29755 |
-| `lib/sifrpc` | `_request_bind` | 21 | 21 | 46065 |
-| `lib/kprintf2` | `ftoi` | 21 | 21 | 29054 |
-| `lib/sifrpc` | `sceSifCheckStatRpc` | 25 | 25 | 11 |
-| `lib/mpc` | `_sceMpegMbAddressIncrement` | 28 | 28 | 19223 |
-| `lib/sifrpc` | `sceSifExecRequest` | 28 | 28 | 41720 |
-| `lib/libat3dec` | `gainc_window` | 31 | 29 | 35959 |
-| `lib/hncAt3dec` | `hncAt3dec_Idle` | 36 | 36 | 53651 |
-| `lib/sifcmd` | `_sceSifCmdIntrHdlr` | 36 | 36 | 44663 |
-| `lib/eecdvd_sceCdCallback` | `sceCdLayerSearchFile` | 37 | 37 | 22756 |
-| `lib/eecdvd_sceCdCallback` | `sceCdInit` | 42 | 38 | 24252 |
-| `lib/sifrpc` | `_request_call` | 45 | 45 | 48696 |
-| `lib/timer` | `cbTimerHandler` | 53 | 51 | 29222 |
-| `lib/sifrpc` | `_request_end` | 62 | 62 | 58153 |
-| `lib/nodebug/__errno` | `memmove` | 62 | 62 | 47810 |
-| `lib/graphdev_sceGsExecStoreImage` | `sceGsExecStoreImage` | 88 | 66 | 32270 |
-| `lib/eecdvd_sceCdCallback` | `_sceCdSC` | 73 | 73 | 51205 |
-| `lib/libat3dec` | `channel_conv_joint` | 95 | 79 | 36362 |
-| `lib/graphdev_checkModelVersion` | `sceGsSetDefDispEnv` | 113 | 113 | 47180 |
-| `lib/libat3dec` | `unpack_mddata` | 162 | 162 | 33164 |
-| `lib/nodebug/strround` | `fftoa` | 199 | 162 | 25625 |
-| `lib/mpc` | `_getRef0` | 182 | 181 | 16990 |
+  | result | functions |
+  |---|---|
+  | matched | `relocate_dll`, `snDllUnload` (check_dll), `scePad2CreateSocket` (libpad2), `_getAllRefs` (mpc), `add_separators` (strround) |
+  | improved | `_request_end` 47 -> 11, `_request_call` 45 -> 8 (sifrpc); `cbTimerHandler` 45 -> 32 (timer); `gainc_window` 23 -> 11, `at3dec_proc` 20 -> 11 (libat3dec); `ftoi` 17 -> 9 (kprintf2); `scePad2GetButtonInfo` 12 -> 5 (libpad2); `_doCSC2` 6 -> 3 (csc) |
+  | false or blocked | `_sceCd_cbLoop` (funcdiff MATCH, SHA-1 fails), `printfloat` (matches only with the unit's `.rodata` from source) |
+  | rejected (changed the meaning or depended on noise) | `hncAt3dec_Idle`, `_sceFs_Rcv_Intr`, `unpack_mddata`, `sceSifCallRpc`, `TimerFreq2BusClock` |
+  | not parseable | `_getRef0` (statement expression) |
+  | no gain | the others (`sceGsSetDefDispEnv`, `sceGsExecStoreImage`, `memcpy`/`memmove`, `fftoa`, `_sceSnprintf`, the rest of sifrpc, `SetNextComp`, ...) |
 
-Not searchable this way: `TimerBusClock2Freq`, `TimerFreq2BusClock`, `sceSifCheckStatRpc` (too small for the
-mutations; the timer pair differs in where div.s is placed). The drafts that are stuck at a low score differ in
-register choices that no statement-level mutation reaches.
+  Logs: `build/dpq.log`; outputs per function in `build/decomp-permuter/<function>/`.
