@@ -1,0 +1,80 @@
+# The gate (tools/check.sh: configure, full build, SHA-1 of the rebuilt image) on every push to main.
+#
+# The game executable is never part of the repository. The job downloads it from a private location at start
+# and deletes it at the end; nothing derived from it (iso/, asm/, build/) is cached or uploaded.
+#
+# Repository secrets (Settings > Secrets and variables > Actions):
+#   GAME_ELF_URL    URL of the game ELF (iso/SLUS_217.99, SHA-1 9bd4535c...), e.g. a release asset of a private
+#                   repository: https://api.github.com/repos/<owner>/<repo>/releases/assets/<id>
+#   GAME_ELF_TOKEN  optional, sent as "Authorization: Bearer <token>" (for a private repository: a fine-grained
+#                   token with read access to that repository's contents only)
+name: check
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: System packages
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -q
+          sudo apt-get install -y -q binutils-mips-linux-gnu ninja-build libc6:i386
+
+      - name: Python environment
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -q --upgrade pip
+          .venv/bin/pip install -q -r requirements.txt
+
+      # Public downloads only (decomp.me's compiler archive, wibo): safe to cache.
+      - name: Cache toolchains
+        uses: actions/cache@v4
+        with:
+          path: |
+            tools/compilers
+            tools/wibo
+          key: toolchains-${{ hashFiles('config/SLUS_217.99/build.yaml', 'tools/download_compiler.py') }}
+
+      - name: Toolchains
+        run: |
+          for pkg in $(grep -o 'ee-gcc[0-9a-z.-]*' config/SLUS_217.99/build.yaml | sort -u); do
+            [ -d "tools/compilers/$pkg" ] || .venv/bin/python tools/download_compiler.py "$pkg"
+          done
+          echo "9d3b6214d1f739ac95e27e139ef045a45cd59aa2  tools/wibo/wibo" | sha1sum -c --quiet -
+
+      - name: Game executable (private)
+        env:
+          GAME_ELF_URL: ${{ secrets.GAME_ELF_URL }}
+          GAME_ELF_TOKEN: ${{ secrets.GAME_ELF_TOKEN }}
+        run: |
+          if [ -z "$GAME_ELF_URL" ]; then
+            echo "::error::the repository secret GAME_ELF_URL is not set (see the comment at the top of this workflow)"
+            exit 1
+          fi
+          auth=()
+          if [ -n "$GAME_ELF_TOKEN" ]; then auth=(-H "Authorization: Bearer $GAME_ELF_TOKEN"); fi
+          curl -fsSL "${auth[@]}" -H "Accept: application/octet-stream" -o iso/SLUS_217.99 "$GAME_ELF_URL"
+          echo "9bd4535cf74a179bb18165cf17098ca122e1acf9  iso/SLUS_217.99" | sha1sum -c --quiet - \
+            || { echo "::error::the downloaded file is not SLUS_217.99"; rm -f iso/SLUS_217.99; exit 1; }
+
+      - name: tools/check.sh
+        run: tools/check.sh
+
+      - name: Remove the game data
+        if: always()
+        run: rm -rf iso/SLUS_217.99 iso/SLUS_217.99.rom asm build
