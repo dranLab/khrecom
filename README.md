@@ -1,9 +1,14 @@
-# khrecom
+# Kingdom Hearts Re:Chain Of Memories Decompilation
 
-A work-in-progress matching decompilation of **Kingdom Hearts Re:Chain of Memories** (PlayStation 2).
+An AI assisted work-in-progress matching decompilation of **Kingdom Hearts Re:Chain of Memories** (PlayStation 2).
 
-The goal is C source that, compiled with the original compiler, produces a byte-identical copy
-of the game's executable. This repository contains **no game data** — you need your own dump of the disc.
+The goal is C source that, compiled with the original compiler, produces a byte-identical copy of the game's executable.
+
+> [!IMPORTANT]
+> This repository contains **no game data** — you need your own dump of the disc.
+
+> [!IMPORTANT]
+> This repository uses the translation beta as a base because of it's debug information.
 
 ## Progress
 
@@ -141,101 +146,3 @@ the original ELF won't apply to the rebuilt one.
    `python3 tools/funcdiff.py <path> [<function>]` is the non-interactive version (used by agents).
 4. `tools/check.sh` before committing: configure, full build with checksum, and an overview of the files
    compiled from source (`INCLUDE_ASM`'d functions are counted separately).
-
-## Notes
-
-- **Status:** `ninja` rebuilds a byte-identical code image of SLUS_217.99 (see [Progress](#progress) for how
-  much of it is compiled from C/C++). The ELF still has its symbol table (18k symbols) and `.mdebug` debug info;
-  the game is C++ built with EE-GCC 2.9x (`gcc2_compiled.` markers, GCC 2 name mangling).
-  Code and data are split into the original objects (game code under `System/`, `Game/`, `Form/`,
-  Sony SDK / newlib / libgcc under `lib/`): 665 `.text`, 232 `.data`, 373 `.rodata` and 105 `.bss`
-  units. Objects without debug info are `lib/nodebug/<first symbol>` (their data boundaries are
-  approximate), uninitialized globals the linker placed last are `common`; `.sndata`, `.sdata` and
-  `.sbss` are single files.
-- `mips-linux-gnu-as` aligns every section to 16 bytes, the original toolchain didn't, and Sony's
-  linker script starts each section at `ALIGN(128)`. `configure.py` resets each object's sections to
-  the alignment its original address implies (see `object_fixups`).
-
-- **Toolchain:** SN Systems ProDG, all Windows executables run under [wibo](https://github.com/decompals/wibo):
-  compiler `ee-gcc2.95.3-136` with `-O2 -G0 -fno-exceptions -fno-rtti -g`, assembler **Ps2EeAs** (from the
-  same package). Only this combination matches every function of `ColorFader`; 2.95.3-114, 2.95.2-273a
-  (each with its own Ps2EeAs), the Linux 2.9 builds and Sony's 2.96 don't.
-  - Ps2EeAs inserts the EE's hazard nops and pads divisions and short loops (hardware errata). Its
-    divisions rule fires near labels, and `-g`'s line-number labels decide where: without `-g` the
-    padding differs. `-g` changes no instruction otherwise.
-  - The anonymous namespace names in the ELF (`...cppM1aaaa`, from a `c:\` path) have the low-entropy
-    suffix only the Windows compilers produce; only `build.cpp` has exception tables; vtables have no
-    RTTI slot.
-- `tools/ee_asm_compat.py` sits between compiler and assembler: it gives anonymous namespaces their
-  original names (`_GLOBAL_$N$c__KHCOM_...cppM1aaaa`) and source paths in strings their original
-  `c:/KHCOM/MainApp/` prefix. Ps2EeAs can't read splat's macros, so `INCLUDE_ASM` files are inlined with
-  the macros expanded and every instruction that needs no relocation written as a `.word`: otherwise
-  Ps2EeAs would add its erratum padding a second time. (Without Ps2EeAs, it targets modern gas instead.)
-  Ps2EeAs crashes under wibo instead of printing an error, so a crash in the `cc` step means an
-  assembler error; `ee_asm_compat`'s output is in `build/.../<file>.o.s`.
-- **`.rodata` layout of an object:** first the string literals of the inline functions of every included
-  header, in include order and whether used or not (assert/allocation messages such as
-  `"c:/KHCOM/MainApp/System/Graphic/Gprim.h(613)"`, `"m_V"`); then the constants of the file's own
-  functions; vtables last. Nothing references the unused header strings, so `split_objects.py` assigns
-  unreferenced data before a file's first referenced item to that file (they used to land with the
-  previous file). To match a file's `.rodata`, its headers must reproduce those strings, `__LINE__`
-  included.
-- objdiff can report less than 100% for data that matches: the target objects contain splat's
-  `.word func_0` relocations for zero words (e.g. empty vtable slots) and the padding before the next
-  object, the compiled ones don't. The full build's checksum is what counts.
-
-## Layout
-
-```
-configure.py            splits the game with splat and writes build.ninja
-requirements.txt        Python dependencies (splat, ninja_syntax, pycdlib, pyelftools)
-CLAUDE.md               project knowledge for Claude Code sessions (toolchain, conventions, pitfalls)
-.claude/                Claude Code sub-agents (agents/) and slash commands (commands/) for decompiling
-docs/                   plans and the list of parked INCLUDE_ASM functions (asm-leftovers.md)
-config/<VERSION>/       one folder per game version (e.g. SLUS_XXX.XX)
-  <VERSION>.yaml        splat config: segments/files and their addresses
-  symbol_addrs.txt      known symbols (name = address; // type:func)
-  elf_symbol_addrs.txt  symbols from the ELF's symbol table (generated by import_symbols.py)
-  reloc_addrs.txt       manual relocation overrides
-  linker_script_extra.ld
-  build.yaml            compiler + flags for this version
-include/                headers (common.h, math.h, string.h; splat also generates include_asm.h,
-                        macro.inc, labels.inc)
-include/khtypes.h       the game's basic types (INT, BOOL, FLOAT, TIMEQ, ...)
-src/                    decompiled C++ code, laid out like the original (src/System/PlaySpeedCtrl.cpp + .h)
-tools/
-  setup_wsl.sh          one-time install of the system packages and .venv (Ubuntu/WSL)
-  extract_iso.py        pulls the boot ELF out of a disc image
-  elf_info.py           sections, symbols and compiler fingerprints of an ELF
-  init_version.py       creates config/<VERSION>/ via `splat create_config`
-  import_symbols.py     ELF symbol table -> config/<VERSION>/elf_symbol_addrs.txt
-  split_objects.py      splits code and data into the original objects (uses mdebug.py)
-  mdebug.py             reader for the ELF's .mdebug debug info
-  gen_reference.py      C++ reference tree from the debug info (ccc's stdump/uncc)
-  build_iso.py          copy of the disc image with the built ELF, for boot tests (`ninja iso`)
-  objdiff.sh            runs objdiff-cli (downloaded on first use) with the generated objdiff.json
-  ee_asm_compat.py      prepares the compiler's assembly for Ps2EeAs (original names and paths, inlined
-                        INCLUDE_ASM), or for modern binutils without it (used by the build)
-  check.sh              the gate: configure + full build/checksum + overview (before every commit/merge)
-  funcdiff.py           non-interactive per-function comparison with the original
-  imagediff.py          where the rebuilt image differs from the original (object, section, symbol)
-  asm.py                a file's original assembly or data, compact
-  compare_compilers.py  one source file against every installed compiler
-  permuter.py           random source mutations of one near-matching function (C and C++)
-  decomp_permuter.py    runs decomp-permuter on one function of a C unit (set-up, run, rescoring)
-  decomp-permuter/      (submodule) simonlindholm/decomp-permuter
-  candidates.py         files not decompiled yet, for handing out work
-  progress.py           progress table (matched / hand-written / INCLUDE_ASM / not started) for this README
-  leftovers.py          what is left per function (parked / hand-written / not attempted), for docs/
-  setup_worktree.sh     prepares a git worktree (links game files and tools, configures)
-  download_compiler.py  fetches a PS2 compiler from decomp.me's archive
-  splat_ext/            custom splat segment types (empty for now)
-  compilers/            (ignored) compilers from download_compiler.py
-  wibo/                 (ignored) wibo, runs the Windows compiler and assembler
-  ccc/                  (ignored) ccc, downloaded by gen_reference.py
-  objdiff/              (ignored) objdiff-cli, downloaded by objdiff.sh
-iso/          (ignored except README.md) your disc image + extracted ELF
-asm/          (ignored) disassembly generated by splat
-build/        (ignored) build output
-ref/          (ignored) reference tree from gen_reference.py
-```
