@@ -1619,11 +1619,7 @@ int pppPartMngIsWaiting(void *mng) {
 void pppSetPause(int pause) {
     ppvUserStopPartF = pause;
 }
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/partMng", pppInitPartRender);
 
-/* Scheduling only: gcc puts the g_Env.lpVsf store first; the original keeps the stores to ppvEnv and
-   g_Env.lpModel/lpShape/lpVsf in source order (all orders of the five statements tried). */
-#if 0
 void pppInitPartRender(void *work_memory, int work_memory_size, void *packet_memory, int packet_memory_size,
                        int disp_width, int disp_height, int draw_width, int draw_height, int z_frame_base,
                        int draw_frame_base, int disp_frame_base, u_long gs_frame, u_long gs_zbuf, u_long gs_xyoffset,
@@ -1648,17 +1644,16 @@ void pppInitPartRender(void *work_memory, int work_memory_size, void *packet_mem
     ppvWorkMemSize = work_memory_size;
     ppvPacketMemSize = packet_memory_size;
     pppCreateHeap(&g_Env.heapMng, work_memory, work_memory_size);
-    ppvEnv = &g_Env;
-    g_Env.lpModel = RendModel;
+    g_Env.lpModel = RendModel; /* MATCH: the g_Env stores before ppvEnv's (decomp-permuter) */
     g_Env.lpShape = RendShape;
     g_Env.lpVsf = RendVsf;
+    ppvEnv = &g_Env;
     ppvHookFuncTbl = NULL;
     sceVu0UnitMatrix(ppvUnitMatrix);
     *(u_long128 *)ppvZeroVector = 0;
     ppvZeroVector[3] = 1.0f;
     pppSetPrimPacket(packet_memory, packet_memory_size);
 }
-#endif
 
 typedef struct {
     u_long128 m[4];
