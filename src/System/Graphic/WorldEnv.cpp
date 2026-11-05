@@ -394,15 +394,10 @@ CBillboardHelper& CWorldEnv::getBBHelper() {
     return *_pBBHelper;
 }
 
-/* getBillboardMatrix: near-match. The original compares nFlag with -1 in a register (slt) and copies the constant 1
- * it also compares with; a constant -1 is folded to slti here, a variable keeps slt but not the shared 1. */
-#if 0
 void CWorldEnv::getBillboardMatrix(FMATRIX& matOut, const FVECTOR& vecPos, INT nFlag) {
-    INT nDef = -1;
-    _pBBHelper->getBillboardMatrix(matOut, vecPos, nFlag > nDef ? nFlag : 1);
+    if (nFlag < 0) nFlag = 1; /* MATCH: the parameter defaulted in place (slt against a -1 register + movn of the shared 1) */
+    _pBBHelper->getBillboardMatrix(matOut, vecPos, nFlag);
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/WorldEnv", getBillboardMatrix__9CWorldEnvR7FMATRIXRC7FVECTORi);
 
 void applySignWorldViewMatrix(FMATRIX& m0, const FMATRIX& m1) {
     asm volatile("qmtc2.ni %2, $vf8\n"
