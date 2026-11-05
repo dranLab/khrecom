@@ -247,12 +247,15 @@ void pppNormalize(float *v0, float *v1) {
 
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/pppPart", pppSetMatrix);
 
-/* Differs only in v0/v1 register choice for the scale factors of SCALE_VECTOR_XYZ (reload rotation): the original rotates v0/v1, ours always uses v0. */
+/* Parked: 3 lines (24 before the pEtc local read after the first matrix scale, decomp-permuter) - v0/v1 register
+   choice for the scale factors of SCALE_VECTOR_XYZ (the original rotates v0/v1). */
 #if 0
 void pppSetMatrix(pppMngSt *mng) {
+    struct _pppPEtcData *etc;
     sceVu0FMATRIX mat;
     sceVu0FVECTOR v;
     int i;
+
 
     sceVu0CopyMatrix(ppvParMatrix, mng->parMat);
     SCALE_VECTOR_XYZ(ppvParMatrix[0], mng->parScl[0]);
@@ -265,11 +268,12 @@ void pppSetMatrix(pppMngSt *mng) {
     }
     pppGetRotMatrixXYZ(mat, (pppIVECTOR *)mng->pEtc->ivecAngle);
     SCALE_VECTOR_XYZ(mat[0], mng->pEtc->vecScale[0]);
+    etc = mng->pEtc;
     SCALE_VECTOR_XYZ(mat[1], mng->pEtc->vecScale[1]);
     SCALE_VECTOR_XYZ(mat[2], mng->pEtc->vecScale[2]);
     mat[3][0] = mng->pEtc->vecOffset[0];
     mat[3][1] = mng->pEtc->vecOffset[1];
-    mat[3][2] = mng->pEtc->vecOffset[2];
+    mat[3][2] = etc->vecOffset[2];
     sceVu0MulMatrix(ppvParMatrix, ppvParMatrix, mat);
     if (mng->bBoolFollowCam) {
         ppvParMatrix[3][0] += ppvEye[0];

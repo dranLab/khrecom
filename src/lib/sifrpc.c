@@ -237,7 +237,8 @@ static void *_sceRpcGetFPacket2(struct rpc_data *rd, int rid)
     return (char *)rd->client_table + rid * 0x40;
 }
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
+/* Parked: 11 lines (47 before the client/buff locals, decomp-permuter) - the original tests 0x8000000A first with a
+   range check (more cases in its switch?), ours 0x80000009 */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_end);
 #if 0
 static void _request_end(RpcRendPkt *rend, struct rpc_data *rd)
@@ -247,21 +248,28 @@ static void _request_end(RpcRendPkt *rend, struct rpc_data *rd)
     switch (rend->cid) {
     case SIF_CMD_RPC_CALL:
         if (rend->client->func) {
-            gp = SetGP((int)rend->client->gp);
-            rend->client->func(rend->client->para);
+            sceSifClientData *cd = rend->client;
+            gp = SetGP((int)cd->gp);
+            cd->func(cd->para);
             SetGP(gp);
         }
         break;
     case SIF_CMD_RPC_BIND:
         rend->client->serve = rend->server;
-        rend->client->buff = rend->buff;
+        {
+            void *buff = rend->buff;
+            rend->client->buff = buff;
+        }
         break;
     }
     if (rend->client->rpcd.tid >= 0) {
         iSignalSema(rend->client->rpcd.tid);
     }
-    _sceRpcFreePacket(rend->client->rpcd.paddr);
-    rend->client->rpcd.paddr = 0;
+    {
+        sceSifClientData *cd = rend->client;
+        _sceRpcFreePacket(cd->rpcd.paddr);
+        cd->rpcd.paddr = 0;
+    }
 }
 #endif
 
@@ -433,7 +441,8 @@ int sceSifBindRpc(sceSifClientData *cd, unsigned int request, unsigned int mode)
 }
 
 /* A call for an EE server: queue it for its thread. */
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
+/* Parked: 8 lines, 4 bytes short (45 before the do-while(0) around the fno copy, decomp-permuter); the rest of the
+   field copies still let the scheduler hoist loads */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_call);
 #if 0
 static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
@@ -449,7 +458,9 @@ static void _request_call(RpcCallPkt *call, struct rpc_data *rd)
     qd->end = sd;
     sd->paddr = call->rpc.pkt_addr;
     sd->client = call->client;
-    sd->fno = call->fno;
+    do {
+        sd->fno = call->fno;
+    } while (0);
     sd->size = call->ssize;
     sd->receive = call->receive;
     sd->rsize = call->rsize;
