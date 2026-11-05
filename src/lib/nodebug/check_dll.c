@@ -61,7 +61,7 @@ extern int printf(const char *, ...);
 extern void snDllCacheFlush(void);
 extern void snNotifyDebugger(void);
 extern void snAllBreaksOut(void);
-extern void snAllBreaksIn(void);
+extern int snAllBreaksIn(void); /* MATCH: int to the callers (the stub returns nothing): v0 is not free after the call */
 static int relocate_dll(SN_DLL_HEADER *h, u_int delta);
 int snDllUnload(SN_DLL_HEADER *h);
 
@@ -272,8 +272,6 @@ static int undefine_symbol(char *name, u_short hash)
     if (p)          \
     (p) = (void *)((char *)(p) + delta)
 
-#if 0
-/* Parked: only the scheduling of the HI16 patch() call's arguments differs */
 static int relocate_dll(SN_DLL_HEADER *h, u_int delta)
 {
     SN_SYMBOL *s;
@@ -363,7 +361,9 @@ static int relocate_dll(SN_DLL_HEADER *h, u_int delta)
                     }
                 } while (t2 != 0);
                 hi += *(short *)lo;
-                patch((u_int *)addr, 5, delta + hi);
+                do { /* MATCH: a loop note around the HI16 patch (a do-while(0) macro body?) orders its arguments */
+                    patch((u_int *)addr, 5, delta + hi);
+                } while (0);
             } break;
             case 2:
                 patch((u_int *)addr, 4, delta + ((*(u_int *)addr & 0x3ffffff) << 2));
@@ -395,11 +395,6 @@ static int relocate_dll(SN_DLL_HEADER *h, u_int delta)
     snDllCacheFlush();
     return 0;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/check_dll", relocate_dll);
-asm(".rdata\n.align 3\njtbl_004FB300:\n"
-    ".word .L00361054\n.word .L00361088\n.word .L00361064\n.word .L0036109C\n.word .L003610B8\n"
-    ".text\n");
 
 static int add_relmod(u_int name, u_int header)
 {
@@ -498,8 +493,6 @@ int snDllLoaded(SN_DLL_HEADER *h, u_int *ptable)
     return 0;
 }
 
-#if 0
-/* Parked: only the register of notify's address differs */
 int snDllUnload(SN_DLL_HEADER *h)
 {
     SN_DLL_HEADER **pp;
@@ -532,14 +525,6 @@ int snDllUnload(SN_DLL_HEADER *h)
         printf("###DLL:Unloaded %08x\n", idx);
     }
     return 0;
-}
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/nodebug/check_dll", snDllUnload);
-
-/* keeps snDllUnload's string in this object's .rodata while the function is asm */
-static inline const char *snDllUnload_string(void)
-{
-    return "###DLL:Unloaded %08x\n";
 }
 
 int snDllMove(SN_DLL_HEADER *dst, SN_DLL_HEADER *src, u_int *ptable)
