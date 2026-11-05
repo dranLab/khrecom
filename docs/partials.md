@@ -144,19 +144,20 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-03 | cleanup/debugwindow-full + debugmenu-full (gated 3) | 228 | 22 | 0 | 732 (0) | 923 |
 | 2026-11-03 | cleanup/small-classes + anon-members + ceffect-scale (tools/partials: anonymous members) | 228 | 22 | 0 | 732 (0) | 923 |
 | 2026-11-03 | cleanup/player-inlines (CPlayer unit-gate pairs unified) | 222 | 22 | 0 | 691 (0) | 882 |
+| 2026-11-05 | catch-up: the unit merges since 2026-11-03 (placeholders and unit-gate sites dropped as their functions got matched; MATCH comments of the new matches) | 205 | 22 | 0 | 680 (0) | 930 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 222 (182 in 49 headers, 40 in 24 .cpp); MATCH: 882
-  by category: method 52, data member 12, type 15, fwd decl 2, #include 14, changed in place 50, padding 2, path override 1, gate 6, guessed 12, header-level 33, stand-in 18, other 5
-stand-ins: 22 foreign in 16 files (16 names), 199 unattributed, 155 own
+PARTIAL: 205 (165 in 48 headers, 40 in 24 .cpp); MATCH: 930
+  by category: method 47, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 18, other 5
+stand-ins: 22 foreign in 16 files (16 names), 198 unattributed, 155 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 691 sites (0 untagged); #line: 1249
+mechanisms: 680 sites (0 untagged); #line: 1244
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
-classes: complete 872, superset 12, partial 1, gated 3, missing 8, unattributed 309
+classes: complete 873, superset 12, partial 0, gated 3, missing 8, unattributed 309
 ```
 
 ## Queue (top 20)
@@ -178,6 +179,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | R1 | 1.0 | `Game/Collision/CollUtil.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `Game/Collision/CollUtilA.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R1 | 1.0 | `System/Coord.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
+| R1 | 1.0 | `System/Vector.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
 | R2 | 6.0 | `System/Graphic/Anim.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: ANIM_H_GETFLAG_DECL_ONLY |
 | R2 | 6.0 | `System/Graphic/modeldata.h` | ready | 0 stand-in files, 0 dup headers, 6 gate users |  () | gated strings: MODELDATA_H_TEXINFO |
 | R2 | 4.0 | `System/Graphic/Gprim.h` | ready | 2 stand-in files, 0 dup headers, 0 gate users | G_RGBA, QWdata (2 complete) | adds strings: System/Graphic/Effect/effect (4), System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly (4) |
@@ -222,7 +224,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Collision/CollObj.h` | 3 | 13/0/0/0 | 174 |
 | `Game/Collision/CollUtilA.h` | 1 | 11/0/0/0 | 26 |
 | `Game/Debug/DWTBGM.h` | 1 | 0/0/0/0 | 1 |
-| `Game/Enemy/BattleEnemy.h` | 31 | 0/1/0/0 | 58 |
+| `Game/Enemy/BattleEnemy.h` | 23 | 0/1/0/0 | 58 |
 | `Game/Enemy/EnemyParam.h` | 3 | 4/0/0/0 | 16 |
 | `Game/Entity.h` | 2 | 2/0/0/0 | 150 |
 | `Game/EntityFactory.h` | 1 | 2/0/0/0 | 49 |
@@ -237,7 +239,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 53 |
 | `Game/SceneEnv.h` | 1 | 1/0/0/0 | 37 |
 | `Game/SceneInfo.h` | 1 | 30/0/0/0 | 86 |
-| `Game/StorageWork.h` | 1 | 3/0/1/0 | 61 |
 | `System/Buf.h` | 1 | 1/0/0/0 | 38 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
 | `System/Coord.h` | 1 | 1/0/0/0 | 27 |
@@ -248,8 +249,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/Graphic/Effect/effect.h` | 3 | 5/1/0/0 | 77 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 2 | 3/0/0/0 | 15 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
-| `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 30 |
-| `System/Graphic/Effect/libppp/pppPart.h` | 32 | 24/0/0/0 | 215 |
+| `System/Graphic/Effect/libppp/draw/md.h` | 2 | 0/0/0/0 | 41 |
+| `System/Graphic/Effect/libppp/pppPart.h` | 25 | 24/0/0/0 | 215 |
 | `System/Graphic/Gprim.h` | 3 | 15/0/0/0 | 231 |
 | `System/Graphic/Model.h` | 3 | 8/0/0/0 | 70 |
 | `System/Graphic/Str.h` | 1 | 0/0/0/0 | 140 |
@@ -258,7 +259,7 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `System/MainApp.h` | 2 | 1/0/0/1 | 270 |
 | `System/RsrcData.h` | 1 | 33/0/0/0 | 29 |
 | `System/SLContainer.h` | 4 | 0/0/0/0 | 251 |
-| `System/Vector.h` | 9 | 1/2/0/0 | 266 |
+| `System/Vector.h` | 8 | 1/2/0/0 | 266 |
 
 ## Mechanisms
 
@@ -275,6 +276,7 @@ or `untagged`.
 | feature | `KH_PLACEMENT_NEW_DEFINED` | 4 | 4 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature | `MODELDATA_H_TEXINFO` | 6 | 6 | TexInfoStub (the original has its assert strings) |
 | feature | `MODELDATA_H_TEXINFO_CTOR` | 2 | 2 | RSRC_NEW(TexInfo) in _setupTexData runs the constructor (memset) |
+| feature | `VECTOR_H_SET_CALL` | 1 | 1 | FVECTOR::setCall (the original calls FVECTOR::set out of line) |
 | feature site | `ANIM_H_GETFLAG_DECL_ONLY` | 2 | 2 | these units' originals call CAnim::getFlag out of line (Entity, EffectMotion, SEMotion, GimmickLotusLeaf) |
 | feature site | `BATTLEENEMY_H_STATE_TEMPLATE` | 2 | 2 | Game/Enemy/BattleEnemy sees m_EnemyState as the real CStateTemplate array |
 | feature site | `COLLOBJ_H_INFO_AS_INT` | 1 | 1 | System/Graphic/TriangleIK was written against an INT result: with the union its else branch schedules the TRACE arguments differently |
@@ -283,6 +285,7 @@ or `untagged`.
 | feature site | `KH_PLACEMENT_NEW_DEFINED` | 1 | 1 | placement new is not in the ref headers (the units define it themselves); defined once per unit |
 | feature site | `MODELDATA_H_TEXINFO` | 1 | 1 | only includers whose original .rodata has TexInfoStub's assert strings |
 | feature site | `MODELDATA_H_TEXINFO_CTOR` | 1 | 1 | only System/RsrcData (new TexInfo) has the constructor; the other units memset their locals themselves |
+| feature site | `VECTOR_H_SET_CALL` | 1 | 1 | setCall is defined before set, so it keeps a call (ModelMan calls FVECTOR::set out of line) |
 | guard pre-define | `SYSTEM_GRAPHIC_ANIM_H` | 2 | 2 | the original's includes don't bring in Anim.h (no "2 > idx" in .rodata) |
 | guard skip | `GAME_COLLISION_COLLUTILA_H` | 1 | 1 | the accessor only for includers that have the class (see above) |
 | guard skip | `GAME_ENTITY_H` | 1 | 1 | only for includers that have CEntity (see below) |
@@ -321,7 +324,6 @@ or `untagged`.
 | path override | `TECHNIC_H_PATH` | 4 | 4 | the original includes it under this name |
 | path override | `TITLEREPORTDLLSTARTER_H_PATH` | 1 | 1 | this unit names TitleReportDllStarter.h so (header default "Form/Menu/TitleReportDllStarter.h") |
 | path override | `VECTOR_H_PATH` | 1 | 1 | this unit names Vector.h so (header default "System/Vector.h") |
-| placeholder | `_addCardStrings*` | 1 | 1 | placeholder for the INCLUDE_ASM'd addCard's string |
 | placeholder | `_alloc*` | 2 | 2 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_bossDeadDemoEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_collUtilCreate*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
@@ -367,8 +369,6 @@ or `untagged`.
 | placeholder | `_entityEmptyStringPlaceholder*` | 1 | 1 | placeholder (see above) |
 | placeholder | `_heartlessEmptyString*` | 1 | 1 | Placeholder: .rodata has empty string literals after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_humanBossEmptyString*` | 1 | 1 | placeholder - .rodata has an empty string literal after Str.h's strings (from an unidentified header). |
-| placeholder | `_initCardStrings*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
-| placeholder | `_initCardWorldStrings*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_initializeStrings*` | 1 | 1 | placeholder for initialize's .rodata (its allocation messages) |
 | placeholder | `_kisEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after Str.h's strings (from an unidentified header). |
 | placeholder | `_mapEnemyAirEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
@@ -382,11 +382,9 @@ or `untagged`.
 | placeholder | `_premiumPrizeMessage*` | 12 | 12 | Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. |
 | placeholder | `_roPh*` | 8 | 8 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roPh0a*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
-| placeholder | `_roPhExecActor*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roulettePrizeMessage*` | 12 | 12 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_saveLoadCtrlAlloc*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
-| placeholder | `_stateSnatchStringPlaceholder*` | 1 | 1 | placeholder for the asm stateSnatch's strings |
 | placeholder | `_statusEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_vsmeMotionName*` | 1 | 1 | Placeholder: .rodata has "e123_062" after Anim.h's strings (from an unidentified header, as in Game/Enemy/CreateEnemy). |
 | pragma | `#pragma implementation` | 1 | 1 | the Gprim weak tail from C (user-approved pragma mechanism) |
@@ -409,10 +407,10 @@ or `untagged`.
 | unit gate site | `FORM_MENU_SAVELOAD_CPP` | 8 | 8 | FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_ATEL_VSME_CPP` | 1 | 1 | Game/Atel/Atel (CAtel::start ...) calls these out of line: inline-called-not-inlined |
 | unit gate site | `GAME_BULLET_BULLET_CPP` | 1 | 1 | GAME_BULLET_BULLET_CPP gate, only for its own unit (tested 2026-11-02) |
-| unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 12 | 12 | GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `GAME_ENEMY_BATTLEENEMY_CPP` | 5 | 5 | GAME_ENEMY_BATTLEENEMY_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_ENTITY_CPP` | 1 | 1 | GAME_ENTITY_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_GIMMICK_BASEGIMMICK_CPP` | 1 | 1 | GAME_GIMMICK_BASEGIMMICK_CPP gate, only for its own unit (tested 2026-11-02) |
-| unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 2 | 2 | GAME_PLAYER_PLAYERGAUGE_CPP gate, only for its own unit (tested 2026-11-02) |
+| unit gate site | `GAME_PLAYER_PLAYERGAUGE_CPP` | 1 | 1 | not in the original class: the key unit would emit a weak copy |
 | unit gate site | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 1 | GAME_PLAYER_PLAYERMANAGER_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_PLAYER_PLAYER_CPP` | 5 | 5 | GAME_PLAYER_PLAYER_CPP gate, only for its own unit (tested 2026-11-02) |
 
@@ -424,6 +422,7 @@ than our includers (units with a source only). A heuristic: stand-ins and opt-ou
 | header | originals | ours | only originals | only ours |
 |---|---:|---:|---|---|
 | `Form/Menu/JiminyMemo.h` | 3 | 2 | 1: System/MainTaskFactory | 0:  |
+| `Game/Card.h` | 25 | 64 | 0:  | 39: Form/Menu/GameOver, Form/Menu/JMemoFlag, Form/Menu/JiminyMemo, Form/Menu/LevelUp, ... (+35) |
 | `Game/Collision/CollUtil.h` | 153 | 150 | 3: Game/Collision/CollUtil, Game/Collision/CollUtilO, Game/Collision/Ride | 0:  |
 | `Game/OsdDef.h` | 8 | 7 | 1: System/MainTaskFactory | 0:  |
 | `System/Graphic/Anim.h` | 149 | 149 | 0:  | 2: Game/Gimmick/CreateGimmick, Game/Gimmick/SampleGimmick |
