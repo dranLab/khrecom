@@ -166,8 +166,8 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", channel_conv_joint);
    through the stack */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", imdct);
 
-/* Parked: 23 lines off: the original sets the return value -1 at the top of the loop (the conditional returns branch
-   straight to the epilogue) */
+/* Parked: 11 lines off (23 before the early `lt` compare, decomp-permuter): the original sets the return value -1 at
+   the top of the loop (the conditional returns branch straight to the epilogue) */
 #if 0
 #define GAINC_STEP()                                                    \
     *p = ((*p >> 11) * subgaintable[sh & 7]) >> ((sh >> 3) + 4);        \
@@ -186,11 +186,12 @@ static int gainc_window(char *ch, int band)
         return -1;
     }
     do {
+        int lt = p < ((At3Band *)ch)[band].spec + g[0] + 1;
         if (end < ((At3Band *)ch)[band].spec + g[0] + 1) {
             return -1;
         }
         sh = g[1];
-        if (!(p < ((At3Band *)ch)[band].spec + g[0] + 1)) {
+        if (!lt) {
             return -1;
         }
         if (sh >= 16) {

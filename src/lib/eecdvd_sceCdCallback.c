@@ -144,7 +144,10 @@ void _sceCd_cd_callback(void *p)
     sceCdCbfunc_num = 0;
 }
 
-/* Parked: the exit block stores _sceCd_c_cb_sem, sceCdCbfunc_num, cb_thid and keeps cb_flag for the delay slot; ours schedules cb_flag earlier. */
+/* Parked: the exit block stores _sceCd_c_cb_sem, sceCdCbfunc_num, cb_thid and keeps cb_flag for the delay slot; ours
+   schedules cb_flag earlier. The exit block on one line with `sceCdCbfunc_num = cb_flag = 0` (decomp-permuter) fixes
+   the code, but two hoisted luis (cb_flag's %hi in fp) then swap registers: funcdiff says MATCH, the SHA-1 fails
+   (gcse PRE order of the symbols; also for the permuter's own one-line loop). */
 #if 0
 void _sceCd_cbLoop(void)
 {
