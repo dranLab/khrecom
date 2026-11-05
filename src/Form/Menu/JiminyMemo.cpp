@@ -3641,14 +3641,6 @@ extern CursorPosition CardMapOffset;
 }
 }
 }
-/* Parked: 2 lines: in case 40's card-view branch the original stores the step (50, v1) before the next mode
-   (8, v0); ours stores the mode first. The sched2 dump shows both stores tied (prio 5, both after the shift.x/y
-   loads), broken by RTL order; writing setContentStep(50) first fixes the store order but swaps v0/v1 (4 lines).
-   Everything else matches (const eventFlagId, const Light/Frame/Flicker tables, x < cursorLimitX via cprop,
-   shift._q = 0 + w, setters before the shift init per the line markers).
-   tried: all 360 orders of the six statements of that block, declaration placement; tools/permuter.py (other
-   drafts hidden) 10 min, no improvement. */
-#if 0
 void CJiminyMemo::contentCollection() {
     const INT eventFlagId = isModeJiminyMemo() ? 0xB7 : 0x14F;
     BOOL bCursorShift = FALSE;
@@ -3867,11 +3859,9 @@ void CJiminyMemo::contentCollection() {
                 JiminyMemo::playSE(4);
             } else if (_isButtonTrg(0x80, 0)) {
                 if (setParamFromCollectToCardView()) {
-                    FVECTOR shift;
-                    setNextContentMode(8);
                     setContentStep(50);
-                    shift._q = 0;
-                    shift.w = 1.0f;
+                    setNextContentMode(8);
+                    FVECTOR shift = { 0.0f, 0.0f, 0.0f, 1.0f };
                     setContentScroll(0, shift);
                     setContentScroll(1, shift);
                     JiminyMemo::playSE(2);
@@ -4253,24 +4243,6 @@ void CJiminyMemo::contentCollection() {
         }
     }
 }
-#else
-/* placeholder: rodata of contentCollection__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh28() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE(__FILE__ "(6227)");
-    TRACE(__FILE__ "(6234)");
-    TRACE(__FILE__ "(6280)");
-    TRACE(__FILE__ "(6294)");
-    TRACE("%3d%s");
-}
-__asm__(".rdata\n.align 4\n.word .L0032D36C\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032DC3C\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n");
-__asm__(".word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032DED0\n.word .L0032E2AC\n.word .L0032E368\n.word .L0032E500\n.word .L0032E598\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032E778\n.word .L0032EB40\n");
-__asm__(".word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032E928\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n");
-__asm__(".word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032E94C\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n");
-__asm__(".word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032E94C\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n.word .L0032EB40\n");
-__asm__(".word .L0032EB40\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCollection__11CJiminyMemo);
-#endif
 void CJiminyMemo::CardScreenSideClip(BOOL inAllDisp) {
     CMemo2DCard* pCard;
     if (*(FLOAT*)&work(0x1F0) < 1.0f || inAllDisp == TRUE) {

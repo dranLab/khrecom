@@ -6,7 +6,7 @@
 
 #include "khtypes.h"
 
-typedef float _FVECTOR[4];
+typedef float _FVECTOR[4] __attribute__((aligned(16)));
 union FVECTOR;
 void roundPI(FVECTOR& vInOut, INT nInClip); // System/Coord
 
