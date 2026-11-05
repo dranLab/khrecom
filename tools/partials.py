@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inventory of the PARTIAL pseudo-implementations in src/ (docs/plan-partials.md): PARTIAL and MATCH comments,
+"""Inventory of the PARTIAL pseudo-implementations in src/ (docs/plan.md, "Header cleanup"): PARTIAL and MATCH comments,
 padding members, local stand-in copies of other units' classes, duplicate class definitions, gates and other
 matching mechanisms, each class's completeness against the reference (ref/), and which headers' strings each
 original unit's .rodata contains. Read-only: it changes nothing but the generated part of the docs.
@@ -82,7 +82,7 @@ UNIT_IN_TEXT = re.compile(r"\bfor ((?:Form|Game|System)/[\w/]+)")
 PADDING = re.compile(r"^(_m_0x[0-9A-Fa-f]+|_pad\w*)$")
 PADDING_REF = re.compile(r"\b(_m_0x[0-9A-Fa-f]+|_pad\w*)\b")
 STRING_CALLS = re.compile(r"\b(AssertApp|TRACE\w*|com_malloc_d|printf|PRINTF)\b")
-PLAN_UNIT = re.compile(r"^\| \d+ \| `([^`]+)` \|", re.M)
+PLAN_UNIT = re.compile(r"^[ \t]*\| \d+ \| `([^`]+)` \|", re.M)  # docs/plan.md's work table (may be indented)
 CATEGORIES = ("method", "data member", "type", "fwd decl", "#include", "changed in place", "padding",
               "path override", "gate", "guessed", "header-level", "stand-in", "other")
 READINESS = ("complete", "superset", "partial", "gated", "missing", "unattributed")
@@ -756,12 +756,12 @@ class Project:
 
     def plan_order(self):
         def read():
-            plan = ROOT / "docs" / "plan-big-units.md"
+            plan = ROOT / "docs" / "plan.md"
             return PLAN_UNIT.findall(plan.read_text(encoding="utf-8")) if plan.exists() else []
         return self.cached("plan", read)
 
     def in_progress(self, unit):
-        """A plan-big-units unit with functions neither matched nor parked."""
+        """A unit of docs/plan.md's work table with functions neither matched nor parked."""
         if unit not in self.plan_order():
             return False
         asm, parked, _, _ = self.status.get(unit, (0, 0, set(), False))
@@ -1338,7 +1338,7 @@ def print_unit(p, unit):
         sys.exit(f"{unit}: no such unit with a source file")
     asm, parked, sd, _ = st
     order = p.plan_order()
-    pos = f"plan-big-units #{order.index(unit) + 1}" if unit in order else "not in plan-big-units"
+    pos = f"plan #{order.index(unit) + 1}" if unit in order else "not in the plan's work table"
     print(f"{unit} ({rel}): {asm} INCLUDE_ASM ({parked} parked); SOURCE DATA: {' '.join(sorted(sd)) or 'none'}; {pos}")
     idx = {}
     for k, s in enumerate(p.originals.get(unit, [])):

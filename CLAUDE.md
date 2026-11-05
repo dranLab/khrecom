@@ -31,7 +31,7 @@ Everything runs in Linux (WSL), from the repo root, with the project's venv: `.v
   per function (parked `#if 0` drafts with their `Parked:` notes, hand-written, not attempted), asm data sections;
   `game --unit <unit>` lists every function of one unit that is still INCLUDE_ASM.
 - `.venv/bin/python tools/partials.py [--summary|--unit <unit>|--header <h>|--class <C>|--queue|--strings [<h>]]` -
-  PARTIAL/stand-in/mechanism inventory and class readiness vs the ref (`docs/plan-partials.md`);
+  PARTIAL/stand-in/mechanism inventory and class readiness vs the ref (`docs/plan.md`, "Header cleanup");
   `--update docs/partials.md` regenerates the report.
 - `tools/setup_worktree.sh` - prepare a fresh git worktree (links game files and tools, runs configure).
 
@@ -50,8 +50,8 @@ A *unit* is one original object file, named after its source path, e.g. `System/
 
 ## Decompiling a unit
 
-Current work (finishing the big game units function by function, with the validation workflow):
-`docs/plan-big-units.md`.
+The plan for all remaining work (state, work order, per-function loop, validation, header cleanup):
+`docs/plan.md`.
 
 1. Create `src/<unit>.cpp` (or `.c`: see the source path in the yaml comment, or `candidates.py`). Its existence
    alone switches the unit's code to the compiled object (`configure.py` does it; never edit the yaml).

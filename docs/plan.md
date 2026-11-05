@@ -1,0 +1,325 @@
+# Plan: finish the matching decompilation
+
+The one plan for the remaining work. Read it completely, then `CLAUDE.md`, then the memory index (`MEMORY.md`,
+loaded at session start) before touching code. It replaces the earlier plans (big units, asm leftovers, PARTIAL
+cleanup, library decompilation) and the handover notes; their history is in git.
+
+Reference docs, kept current by tools (never edit their generated parts by hand):
+
+| doc | what | regenerate |
+|---|---|---|
+| `docs/asm-leftovers.md` | every game function still `INCLUDE_ASM`, with its `Parked:` note; a hand-kept table of structural blockers at the top | `tools/leftovers.py game --update docs/asm-leftovers.md` |
+| `docs/sdk-leftovers.md` | the library reference: open functions, how to work on lib units, levers, notes per unit, search history | `tools/leftovers.py lib --update docs/sdk-leftovers.md` |
+| `docs/partials.md` | the header-cleanup report (PARTIAL markers, stand-ins, mechanisms, class readiness); its trend table is hand-kept, one row per cleanup merge | `tools/partials.py --update docs/partials.md` |
+| `README.md` | the progress table | `tools/progress.py --update README.md` |
+
+## Where things stand (2026-11-05)
+
+- **Progress:** 11830 of 12311 functions matched (88.8%): game 11067 of 11323, libraries 763 of 988 (plus 151
+  hand-written). `tools/check.sh`: 12192 functions decompiled in 662 files, 611 complete.
+- **Game:** 251 functions still `INCLUDE_ASM` in 74 units. 185 are parked (C draft under `#if 0` with a note).
+  64 were never attempted, all in JiminyMemo. Movement's and AudioDec's constructors have drafts but are listed
+  as "not attempted" (leftovers.py misses constructors in drafts). 11 units take a data section from assembly.
+- **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
+  details in `docs/sdk-leftovers.md`.
+- **Header cleanup:** PARTIAL 205 (165 in 48 headers, 40 in 24 .cpp), 22 foreign stand-ins in 16 files, 0
+  duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
+  `tools/partials.py --queue` has 16 ready items.
+
+Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py game|lib` (what is left) and
+`tools/partials.py --summary` (cleanup) give the current state.
+
+## Remaining work, in this order
+
+1. **JiminyMemo's final group** (the only untried game code), then the two constructors with drafts:
+
+   | # | unit | functions left (parked) | note | read first (memory) |
+   |---|---|---:|---|---|
+   | 1 | `Form/Menu/JiminyMemo` | 83 (19) | the final group needs the `content*` functions for its const tables, plus the mainInit tail; `.bss` from asm | jiminymemo-unit-lessons |
+   | 2 | `Game/Movement` | 1 (draft) | constructor 53/143 lines: unnamed constant-pool vectors | movement-unit-lessons |
+   | 3 | `System/Movie/AudioDec` | 1 (draft) | constructor 6/120 lines: one delay slot | |
+
+   (`tools/partials.py` reads this table: a listed unit with functions neither matched nor parked counts as in
+   progress for the cleanup queue. Keep the `| # | \`unit\` |` row form.)
+
+2. **Parked game drafts** (185): retry them closest first, with the levers index and both permuters. List them
+   with their notes: `tools/leftovers.py game` ("Parked functions"). Leads already known: sddrv_ee
+   `TsSdSepPlayDBG` (decomp-permuter 20 -> 8 lines, not yet checked in the source), Avatar `onMove` (registers
+   only: a 14-vs-15-refs priority tie), PathData `getNearPath` (9 lines), 2DSprObj `initForSeq` (20/342),
+   HumanBoss `initalize` (4/71). The hand-kept table at the top of
+   `docs/asm-leftovers.md` lists the blockers that need more than a source change.
+3. **Data from source** for the 11 game units that still take a section from asm (`tools/leftovers.py game`:
+   "data from asm"; JiminyMemo, pppEiDrawShipoly, shape, CollUtil, Glare, sddrv_ee, AtelCrossFade, CollUtilO,
+   AtelBlur, Ride, EntityFactory). Ride can't: the split puts its `.rodata` at 4 mod 8 (out of scope).
+4. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
+   a library unit" section.
+5. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
+   cleanup"). The items waiting on a user decision are listed under "When to stop and ask".
+
+Work on one unit at a time, one function at a time. A unit is done when every function is matched or parked and
+its data comes from source (or is recorded as blocked). Never leave a function that was neither tried nor parked.
+
+## Working rules
+
+- Strictly sequential, in the main checkout: no sub-agents, workers, worktrees or parallel decompilation.
+  Parallel compiles inside `tools/permuter.py` and `tools/decomp_permuter.py` are fine.
+- No changes to `tools/`, `configure.py`, `config/` or the build flags, except `tools/partials.py` (approved)
+  and `config/SLUS_217.99/symbol_addrs.txt` lines that name unnamed weak or vtable copies. Anything else: ask.
+- Only real C/C++ (see V4). Keep `MATCH: <reason>` on every kept mechanism.
+- There is no git remote: never push, rebase `main` or force anything. Never commit `iso/`, `ref/`, `asm/` or
+  `build/`. Never use `git stash`. Keep `docs/plan-partials-prompt.md`-style local files out of commits: add
+  files by name, never `git add docs`.
+- Keep scratch files in `build/` (WSL wipes `/tmp`). Use `.venv/bin/python`.
+- Don't run `ninja` or `tools/check.sh` while a background permuter queue is in its setup step: both call ninja
+  (a collision fails the setup; queue scripts should retry).
+
+## Session start (every session, also after a context compaction)
+
+1. `git status` clean, on `main` or on the unit's branch `decomp/<Unit-with-dashes>` (slashes become dashes).
+   Create the branch from `main` when you start a unit.
+2. `tools/check.sh > build/check.log 2>&1; echo $?` must print 0 before you change anything. If it doesn't, find
+   out why first (a stale tree usually just needs `configure.py`).
+3. Read the unit's memory file and the levers index below. Open `build/progress/<unit>.md` if it exists.
+4. List the unit's remaining functions: `tools/leftovers.py game --unit <unit>` (state, size, note) and
+   `tools/asm.py <unit>` (every function, size, weak/global).
+5. First session of a unit: the start hook (header cleanup, A1) before the first function.
+
+## Order of functions inside a unit
+
+- The smallest remaining non-weak function first. Small functions (getters, state wrappers, forwards) fill in
+  the class layout and the headers that the big functions need.
+- Generated families first where memory has a generator (state wrappers from the vtable order; `acWait*`
+  through `build/vsgen.py`; Gprim's VU0 helpers through `build/gpconv.py`).
+- Weak functions are inline functions: do them only when their class definition is right, in the class body (or
+  `inline` in the header) in the original emission order (key-function-emits-all-inlines,
+  weak-emission-definition-order, inline-called-not-inlined).
+- Parked drafts last, with fresh eyes once the rest of the unit is done.
+- The source keeps the original function order: replace an `INCLUDE_ASM` line in place.
+
+## The per-function loop
+
+For one function `F` of unit `U`:
+
+1. **Study.** `tools/asm.py U F`. In `ref/SLUS_217.99/src/U.cpp`, find the signature, parameter names and
+   locals (the ref's locals and their scopes are evidence: block-local variables, inline temporaries). Look up
+   only the types you need in `ref/SLUS_217.99/types.h` (`grep -n -A<n>`). Read the note or draft above `F`.
+2. **Write** the C/C++ in place of the `INCLUDE_ASM` line. Keep the original line numbers wherever `__LINE__`
+   reaches an assert or allocation message (`#line N` to resync). Without `// SOURCE DATA` the compiled
+   `.rodata` is stripped: string literals and constant tables in new code refer to the original's labels as
+   `extern const char D_xxxxxxxx[];`.
+3. **Iterate** with `tools/funcdiff.py U F` (`|` differs, `~` only an offset or address). One change at a time,
+   guided by the levers index.
+4. **Near miss** (same structure, roughly 20 differing lines or fewer): run a permuter before parking. Both
+   switch a parked `#if 0` draft on in their own copies.
+
+       .venv/bin/python tools/permuter.py U F --minutes 15 -j 16          # C and C++: text mutations
+       .venv/bin/python tools/decomp_permuter.py U F --minutes 15 -j 16   # .c units only: AST randomizations
+
+   `tools/permuter.py` writes `build/permuter/F/best.diff`. `tools/decomp_permuter.py` ends with its best
+   outputs rescored in differing lines, next to its own base (go by that count, not its score), in
+   `build/decomp-permuter/F/output-*/diff.txt`. Its randomizations sometimes change the meaning and often add
+   noise (duplicated `if` arms, casts): carry over only the sensible part by hand, then check it in the real
+   source. A gain often depends on the noise and disappears without it. For code it can't parse:
+   `--setup-only`, wrap the construct in `PERM_IGNORE(...)` in `base.c`, `--resume` (asm statements are
+   wrapped automatically; statement expressions and nested functions can't be handled).
+5. **Validate** with V1-V4. Only then does the function count as matched.
+6. **Commit** (see "Commits and merges"), log it in `build/progress/U.md`, continue.
+
+## Validation
+
+Never skip a level because the one before looked fine.
+
+**V1: the function.** `tools/funcdiff.py U F` prints `MATCH` and no `|` lines, and `tools/leftovers.py game
+--unit U` no longer lists `F`: funcdiff also says MATCH for a function that is still `INCLUDE_ASM` or whose draft
+sits in `#if 0`. funcdiff normalizes relocation targets, so it can't see two globals swapping registers when
+their `%hi` is the same (same 64 KB page): only V3 can.
+
+**V2: the rest of the unit.** `tools/funcdiff.py U` compared with the previous run (`> build/progress/U.overview`):
+nothing that was MATCH may now differ, no new function may appear (extra weak copies, vtables). The known noise
+(`__static_initialization_and_destruction_0`, `DWTPlayer::Debug*` "NOT matching" in units whose data is from
+asm) is neither a regression nor a fix.
+
+**V3: the whole image.** `ninja > build/ninja.log 2>&1; echo $?` prints 0: the SHA-1 of the complete
+executable, the only real proof. On failure, `tools/imagediff.py` (object, section, symbol of the first
+difference). After a shared-header edit every includer was recompiled: header strings and `__LINE__`s move other
+units' `.rodata`, so keep the header's line layout (add members in place, `#line` if needed) and follow A0.
+
+**V4: honest C.** Review `git diff` before each commit:
+- Real C/C++ for what the original does. Not allowed: `.word`/`.byte` instructions, the original's instruction
+  stream in `asm()`, an `INCLUDE_ASM` under another name, branch-target tricks, edits in `build/`, `asm/`,
+  `config/` or `expected/`.
+- Allowed inline asm: the VU0/MMI/COP2 instructions the original wrote as inline asm (see the ref and the
+  vu0-asm-function-conversion / ppp-keshptail-patterns memories); empty `asm volatile("" ...)` barriers as a
+  lever, with a comment. MIPS arithmetic stays in C (user's rule).
+- Only the unit's `src/U.cpp`/`.h` and the headers its classes need; a new or extended header of another unit
+  gets `// PARTIAL: added for <unit>` while incomplete (hook edits A1/A2 may touch other files).
+
+**V5: the gate.** `tools/check.sh` exits 0 before every merge into `main`, again on `main` after it, and at the
+end of every session.
+
+**V6: data.** When you add or extend `// SOURCE DATA:`: V3 passes and `tools/imagediff.py` reports nothing
+(funcdiff ignores data).
+
+If a level fails and you can't fix it, revert to the last commit. The branch passes V3 at every commit.
+
+## Parking
+
+No fixed time box. Park a function when many tries stop improving it: dozens of variants across several lever
+families, plus a permuter run of at least 15 minutes on a near miss, with the best diff no longer shrinking. A
+function that keeps improving is not parked. Form (`tools/leftovers.py` reads the `Parked:` prefix):
+
+    /* Parked: <what still differs, concretely: registers/instructions, which block>; tried: <lever families,
+       permuter runs and their best score> */
+    #if 0
+    <the best draft>
+    #else
+    INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/<unit>", <F>);
+    #endif
+
+Update the existing note of an old draft instead of adding a second one, including its line count when a draft
+improves.
+
+## Structural blockers
+
+When one cause blocks many functions (example: compiled switches put jump tables into `.rodata`, which is
+stripped until the unit has `// SOURCE DATA`): name it in `build/progress/<unit>.md` with the affected functions,
+and consider resolving the cause itself (bring the data from source early with the placeholder recipes, V6).
+The gate still runs; a half-done data step is not committed. If the fix needs `tools/`/`configure.py`/`config/`,
+ask.
+
+## Finishing a unit
+
+Once every function is matched or parked:
+
+1. **Retry the parked ones**, including old drafts.
+2. **Data (`// SOURCE DATA`).** With parked functions left, use the placeholder recipes
+   (include-asm-with-source-data, rcf-placeholder-and-volatile, include-asm-jumptable-data, wnd-unit-lessons);
+   replace `extern D_...` strings by literals; reproduce the header strings' order (inline functions' strings in
+   include order, then the file's constants, vtables last). Validate with V6. A unit whose `.rodata` can't start
+   where the split puts it (misaligned-unit-rodata) keeps its data from assembly: note it in the table at the top
+   of `docs/asm-leftovers.md`.
+3. **Finish hook part 1** (A2): the unit's own classes to the full ref class.
+4. **The "NOT matching" noise** should go away with the data; if not, find out whether it is an objdiff artifact.
+5. **Gate, merge, docs** on `main`: V5, then regenerate the four reference docs (table at the top) and commit
+   them as `docs: regenerate leftovers and progress`.
+6. **Memory:** the unit's `*-unit-lessons` file and its `MEMORY.md` line.
+7. **Finish hook part 2** (A2) on a cleanup branch.
+
+## Header cleanup
+
+The PARTIAL pseudo-implementations in headers (`// PARTIAL: added for <unit>`), local stand-in copies of other
+units' classes, and matching mechanisms are replaced by the real classes from the owning units: full ref classes
+(all fields, methods and virtuals in ref order), mechanisms only where needed, each with a `MATCH:` reason.
+The key fact: the strings of a header's inline functions land in the `.rodata` of every includer, in include
+order, so the original `.rodata` (`build/SLUS_217.99/expected/asm/data/<U>.rodata.s`, `partials.py --strings`)
+shows which headers each original unit included. Fix the header structure from that evidence and the ref,
+rather than just including a header.
+
+**A0. Header-change protocol** (every hook and batch):
+1. Baseline: `tools/check.sh` exits 0; save `partials.py --header <h>` to `build/partials/<h>.before` and the
+   funcdiff overviews of the units owning a class in the header.
+2. Edit in place, in ref order, keeping the line layout (`#line N <X>_H_PATH` after insertions before a
+   `__LINE__`/`__FILE__` site). All edits to one header in one build (5-15 minutes: long timeout).
+3. V3. On failure classify with `tools/imagediff.py`: `.rodata` of a unit = strings or their order (A4); weak
+   `.text` in a foreign unit = an inline now emitted there (A4.4); a normal function's `.text` = the caller's
+   codegen changed (ref types, ref-return-types-matter); vtable data = declaration or virtual order
+   (vtable-emission-order); link error = a mangled name changed (`elf_symbol_addrs.txt` is the truth). Bisect per
+   class, don't guess.
+4. V2 for the owner units; `--header` again: the includers that "add strings" must not grow (this also covers
+   units whose `.rodata` is still asm, which V3 can't check).
+5. V4 (only declarations, layouts, includes and mechanisms change), V5.
+
+**A1. Unit start hook** (on `decomp/<U>`, before the first function; time-limited, it must never block the
+unit): `partials.py --unit <U>`; replace each foreign stand-in whose owner is complete or superset and
+string-compatible with an include of the owner header (at the position the original's string order says);
+add missing members to the owner header in ref form; a stand-in that can't be replaced keeps
+`/* PARTIAL: stand-in for <Owner> <Class>: <reason> */`. Commit per owner header.
+
+**A2. Unit finish hook.** Part 1, on the unit branch after its data step: every class the ref assigns to U
+becomes the full ref class (ref names and order, no padding, virtuals in `/* vtable[n] */` order, no implicit
+members); inline bodies only with evidence (the key unit's weak tail, weak copies, visible inlining); try
+removing each mechanism, keep it with `MATCH:` if V3 fails; delete PARTIAL comments of classes that now equal
+the ref. Part 2, on `cleanup/<Unit-with-dashes>` after the merge: `partials.py --class` per class, replace the
+stand-ins and duplicates elsewhere, drop unneeded gates and include-guard pre-defines; commit per header and per
+group of about 10 .cpp files, V3 each.
+
+**A3. Between-work batch:** on `main`, `partials.py --queue`, take the top ready item; branch
+`cleanup/<Header-with-dashes>` or `cleanup/<topic>`; header changes first, then the .cpp swaps in groups;
+log in `build/progress/cleanup-<name>.md`; merge with the `--summary` deltas; add a row to the trend table of
+`docs/partials.md` and regenerate it. Items over about 30 files are split by top directory.
+
+**A4. The ladder**, when completing a header would break another unit's `.rodata` (stop at the first step that
+works): forward declarations instead of includes; move the type to the header the original used (string
+evidence + ref owner); move types only the owner uses into its .cpp; for a weak function now emitted in a
+foreign unit, keep the method declaration-only outside the key unit (`#ifdef <KEY>_CPP`, `MATCH:`); last
+resort, a per-unit opt-out macro with `MATCH:` and an entry in `docs/partials.md`'s open puzzles. Never invent a
+header split the original didn't have, or make a class a template to hide its strings.
+
+## Commits and merges
+
+| work | branch | commit messages |
+|---|---|---|
+| functions of a unit, start hook, finish hook part 1 | `decomp/<Unit-with-dashes>` | `<unit>: match <F>`, `<unit>: park <F>`, `<unit>: <F> draft N -> M lines`, `<U>: use <header> instead of stand-ins`, `<U>: complete <Class> in <header>` |
+| finish hook part 2, queue batches, docs-only and tool work | `cleanup/<...>` | `cleanup <header>: <what>` |
+| regenerated docs | `main` | `docs: regenerate leftovers and progress` / `docs: regenerate partials` |
+
+- Commit after every matched function (V1-V4), adding the unit's files by name. Commit messages end with the
+  session's Co-Authored-By line.
+- Merge into `main` in chunks (every 10-20 matched functions, at the end of a session, when a unit is finished):
+  V5 on the branch, then `git checkout main && git merge --no-ff <branch> -m "Merge <branch>: <what> (stand-ins
+  -N, PARTIAL -M, mechanisms -K)"` with the `partials.py --summary` deltas, then V5 on `main`. Delete the
+  branch once it is merged. A cleanup branch never contains function matches.
+
+## Record keeping
+
+- `build/progress/<unit>.md` (ignored, survives compaction): one line per attempt (function, date, result,
+  levers). Read it at session start.
+- The source holds the per-function truth (`Parked:` notes); the tools turn it into the docs.
+- A new lever that works gets a memory file or a line in the unit's lessons file right away.
+
+## Levers index (symptom -> memory file)
+
+| symptom in the diff | read |
+|---|---|
+| registers swapped, same instructions | scheduling-mismatch-techniques, global-alloc-priority-lreg, asm-barrier-death-note-levers, loop-const-merge-and-load-order, asymmetric-giv-overloads, gcse-pre-hash-order |
+| stores in another order | sched-store-order-reg-weight, volatile-delay-slots-store-permutation, small-union-ctor-stores, fixed-scalar-varying-struct-alias, join-store-per-arm |
+| the original reloads a global/member, ours keeps it (or the reverse) | global-reload-ref-helper, fixed-scalar-varying-struct-alias, const-global-reorg-redundant-load, mapenemy-unit-lessons |
+| tails merged or not merged, branch layout | gcc-crossjump-alias-rules, crossjump-dup-arm-stores, crossjump-case-label-chain, state-machine-break-vs-return, guard-plus-while-and-static-members, first-return-stub-ternary, bool-tail-shared-false |
+| loop shape, hoisted constants, extra nops | loop-rotation-break-layout, loop-hoist-constant-order, loop-hoist-lifetime-store-order, loop-align-empty-loop-note, short-loop-padding, div-line-label-nops, preheader-giv-init-order |
+| stack offsets differ | stack-slot-order-decl-position, unused-locals-stack-frame, inline-return-temp-slot |
+| conditional moves, compares | cmov-operand-order, angle-wrap-ternary, index-loop-signed-slt, bit-test-fold-jtbl-align |
+| jump table vs compare chain | atel-unit-lessons (5+ case nodes), include-asm-jumptable-data, bit-test-fold-jtbl-align |
+| weak functions, vtables, emission order | key-function-emits-all-inlines, vtable-emission-order, weak-emission-definition-order, inline-called-not-inlined, weak-order-and-scalar-mem-alias |
+| strings, rodata order | include-asm-with-source-data, template-strings-not-merged, static-table-strings-position, placeholder-file-literal-and-vtable-decl-order, misaligned-unit-rodata |
+| return type / getter form changes code | ref-return-types-matter, entity-unit-lessons |
+| VU0 / GS packets / u128 | vu0-asm-function-conversion, ppp-keshptail-patterns, gs-packet-u128-patterns, sp-address-inline-wrappers, volatile-asm-cse-flush |
+| C units (lib/, libppp, sddrv) | `docs/sdk-leftovers.md` "Levers that worked in lib/", decomp-permuter-c-units |
+| signal 11 in the cc step | cc1plus-silent-segfault, CLAUDE.md pitfalls (Ps2EeAs) |
+
+Scratch scripts in `build/` from earlier sessions (read one before using it; not maintained): `vtry.py`
+(enable a draft, apply text variants, funcdiff each), `vifelse.py` / `ifeshow.sh` (the same for
+`#if 0 ... #else` drafts), `dumpvar.py` (compile a variant with gcc dump flags such as `-dl -dg -dS`),
+`permute_overload.py` (tools/permuter.py on an overloaded or const method), `hill.py` (statement-order hill
+climb), `permfn.py`, `rocmp.py` (rodata check), `vsgen.py`, `gpconv.py`, `coord_conv.py`, `swap_keep.py`
+(replace a stand-in with an include, keeping the line count).
+
+## Context economy
+
+Keep output small: one function's assembly at a time; `funcdiff` without `--full`; logs to `build/*.log` with
+`echo $?; tail -5`; never print a whole unit source, `grep -n` / `sed -n` the part you change.
+
+## When to stop and ask the user
+
+- A function or the unit's data needs a change to `tools/`, `configure.py`, `config/` (other than symbol_addrs
+  names) or the compiler flags.
+- V3 or V5 fails on `main` and the cause isn't in your change.
+- Anything destructive (resetting branches, deleting drafts someone else wrote).
+- Header cleanup: a partition fix that reaches more than about 20 includers or moves a type against the ref
+  owner; string evidence that contradicts the ref; a new kind of mechanism; completion that needs changes to
+  matched C beyond ref type corrections; unifying `Gprim.h` and `GprimFull.h`; a new opt-out macro more than
+  about 5 units need; no net decrease of stand-ins plus PARTIAL markers after 3 consecutive units.
+- **Waiting on a decision now:** the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
+  (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
+  container message is in 166 originals, the 2DMan.h path in only about 119).
+- When the user runs a /loop unattended, decide these cases yourself, log the decision and continue
+  (unattended-decide-stop-cases).
