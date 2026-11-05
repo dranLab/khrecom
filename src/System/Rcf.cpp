@@ -251,7 +251,8 @@ inline void CRCFQueueData::linkFront() {
         CRCFQueueData* pBackData = s_pReadQueue;
         if (pBackData->isNOP()) {
             CRCFQueueData* p;
-            s_pReadQueue = this;
+            *(CRCFQueueData**)&s_pReadQueue = this; /* MATCH: not a fixed scalar MEM: stored before p's copy, and
+                                                        p = this gets its own register (pBackData stays in v1) */
             p = this;
             while (p->m_pNext) {
                 p = p->m_pNext;
@@ -422,8 +423,6 @@ void CRcf::reqLoadRCF(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLink
         CNowLoading::start();
     }
 }
-/* Near-match: register choice inside linkFront */
-#if 0
 void CRcf::reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT nLinkOwner) {
     CRCFQueueData* pPrev;
     CRCFQueueData* pData;
@@ -442,13 +441,6 @@ void CRcf::reqLoadRCFFront(INT nGroup, INT nMember, INT nType, BYTE* pBuff, INT 
         CNowLoading::start();
     }
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _reqLoadRCFFront_strings(INT n) {
-    TRACE(__FILE__ "(553)");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", reqLoadRCFFront__4CRcfiiiPUci);
-#endif
 
 inline void CRCFQueueData::init(INT nGroupID, INT nMemeberID, INT nType, BYTE* pBuff, INT nLinkOwner) {
     volatile CRCFQueueData* p = this;
