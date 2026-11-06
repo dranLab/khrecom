@@ -1297,23 +1297,18 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_SetPacket__6CModelUiPA3_CiiUliPUl);
 #endif
-/* Parked: 13 lines off: after getRawMode the original computes isDataEmpty && isSemiDataEmpty into a1 and never uses it (dead code left after a cross-jump?); ours drops the semi half. Tried: unused BOOL local, empty if, ternary, statement, duplicated identical arms (24 lines). */
-#if 0
 void CSemiModel::link(CModel* m) {
     UINT rawMode;
     m_pModel = m;
     setPacketSize(m->getModelData()->m_nPacketSize);
     rawMode = m->getModelData()->getRawMode();
-    BOOL bEmpty = m->getModelData()->isDataEmpty() && m->getModelData()->isSemiDataEmpty();
+    USHORT mode = m->getModelData()->getMode();
     if (getLayerID() != 0x18 && getLayerID() != 0x17) {
         if (rawMode & 0x10000000) setSemiTrans(ALPHA_BLEND);
         else setSemiTrans(ALPHA_PLUS);
     }
     initSemiZModel();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__10CSemiModelP6CModel);
-#endif
 void CSemiModel::initSemiZModel() {
     USHORT mode;
     UINT rawMode;
