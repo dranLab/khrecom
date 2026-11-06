@@ -118,7 +118,7 @@ static inline u_long128 _calcSTQ(ULONGLONG inSTQ, UINT iW) {
                      "qmtc2.ni %0, $vf8\n"
                      "vmulz.xy $vf8, $vf8, $vf8z\n"
                      "qmfc2.ni %0, $vf8\n"
-                     : "=r"(iRet)
+                     : "=&r"(iRet)
                      : "r"(iW), "r"(inSTQ));
     return iRet;
 }
@@ -144,11 +144,6 @@ static inline ULONGLONG _getHi64(u_long128 x) {
     __asm__ volatile("pcpyud %0, %1, $0" : "=r"(out) : "r"(x));
     return out;
 }
-static inline ULONGLONG _toU64(u_long128 x) {
-    ULONGLONG out64;
-    __asm__ volatile("por %0, $0, %1" : "=r"(out64) : "r"(x));
-    return out64;
-}
 static inline FLOAT _hiToFloat(u_long128 x) {
     FLOAT outf;
     ULONGLONG tmp;
@@ -165,17 +160,6 @@ static inline INT _toInt(ULONGLONG x) {
 }
 static inline FLOAT _getW(u_long128 x) { return _hiToFloat(_getHi64(x)); }
 static inline INT _getZ(u_long128 x) { return _toInt(_getHi64(x)); }
-static inline u_long128 _calcSTQ(const G_ST& st, UINT iW) {
-    ULONGLONG inSTQ = *(ULONGLONG*)&st;
-    u_long128 iRet;
-    __asm__ volatile("pcpyld %0, %2, %1\n"
-                     "qmtc2.ni %0, $vf8\n"
-                     "vmulz.xy $vf8, $vf8, $vf8z\n"
-                     "qmfc2.ni %0, $vf8\n"
-                     : "=r"(iRet)
-                     : "r"(inSTQ), "r"(iW));
-    return iRet;
-}
 INT BackClip(const FVECTOR* in_fV, INT iDirL);
 FLOAT getPrimGetaZ(INT iz, const FVECTOR& Vert, const FMATRIX* pWMat, FLOAT fGeta);
 static inline void _getTmpTexArea(INT nID, UINT& nTexPos, UINT& nClutPos) { /* PARTIAL: VramDef.h */
@@ -1808,10 +1792,6 @@ void C3DLines::makePkt() {
     }
     CPackMan::pkCloseGifTag();
 }
-/* Parked: registers only - the original loads it->S into v1 before the mfc1 of fW0 (filling the beql slot) and keeps
- * iW in a0, ours puts iW in v1 and loads it->S after; tried: STQ inline taking G_ST&/ULONGLONG/FLOAT, iW before/after
- * the call, an inSTQ block local, permuter 15 min (15280 candidates, no gain) */
-#if 0
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
     IVECTOR p[3];
     FLOAT fW0;
@@ -1843,13 +1823,6 @@ ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
     }
     return p64;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1);
-#endif
-/* Parked: registers only - as in the CCoord-less version the original keeps iW in a0 and the copy of the mfc1 in v1
- * (ld of it->S after it), ours swaps them; tried: STQ inline taking G_ST&+UINT, G_ST&+FLOAT, operand order in the
- * pcpyld asm, iW assigned inside the call, permuter 15 min (12213 candidates, no gain) */
-#if 0
 ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd) {
     IVECTOR p[3];
     FLOAT fW0;
@@ -1878,11 +1851,11 @@ ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* p
             continue;
         }
         iW = *(UINT*)&fW0;
-        p64[0] = (ULONGLONG)_calcSTQ(it[0].S, iW);
+        p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
         p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
         p64[2] = _vecToXYZ(p[0]);
         iW = *(UINT*)&fW1;
-        p64[3] = (ULONGLONG)_calcSTQ(it[1].S, iW);
+        p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
         p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
         p64[5] = _vecToXYZ(p[1]);
         it += 2;
@@ -1890,9 +1863,6 @@ ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* p
     }
     return p64;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexLine__FPUlP7G_STRIPT1P6CCoord);
-#endif
 /* Parked: registers only - per vertex the original loads it->S into v1 (the first one in the beql slot) and copies
  * the mfc1 result into a0 for iW, ours puts iW in v1 and loads it->S into v0; loop shape, per-loop fW and mfc1
  * order (volatile _floatBits) match; tried: S read into a local first/last, STQ inline with swapped operands, iW
@@ -1924,15 +1894,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL 
                 it += 3;
             } else {
                 iW = _floatBits(fW0);
-                p64[0] = _toU64(_calcSTQ(*(ULONGLONG*)&it[0].S, iW));
+                p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
                 p64[2] = _vecToXYZ(p[0]);
                 iW = _floatBits(fW1);
-                p64[3] = _toU64(_calcSTQ(*(ULONGLONG*)&it[1].S, iW));
+                p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
                 p64[5] = _vecToXYZ(p[1]);
                 iW = _floatBits(fW2);
-                p64[6] = _toU64(_calcSTQ(*(ULONGLONG*)&it[2].S, iW));
+                p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
                 p64[8] = _vecToXYZ(p[2]);
                 it += 3;
@@ -1965,15 +1935,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL 
                 it += 3;
             } else {
                 iW = _floatBits(fW0);
-                p64[0] = _toU64(_calcSTQ(*(ULONGLONG*)&it[0].S, iW));
+                p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
                 p64[2] = _vecToXYZ(p[0]);
                 iW = _floatBits(fW1);
-                p64[3] = _toU64(_calcSTQ(*(ULONGLONG*)&it[1].S, iW));
+                p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
                 p64[5] = _vecToXYZ(p[1]);
                 iW = _floatBits(fW2);
-                p64[6] = _toU64(_calcSTQ(*(ULONGLONG*)&it[2].S, iW));
+                p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
                 p64[8] = _vecToXYZ(p[2]);
                 it += 3;
@@ -2029,15 +1999,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoor
                 it += 3;
             } else {
                 iW = _floatBits(fW0);
-                p64[0] = _toU64(_calcSTQ(*(ULONGLONG*)&it[0].S, iW));
+                p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
                 p64[2] = _vecToXYZ(p[0]);
                 iW = _floatBits(fW1);
-                p64[3] = _toU64(_calcSTQ(*(ULONGLONG*)&it[1].S, iW));
+                p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
                 p64[5] = _vecToXYZ(p[1]);
                 iW = _floatBits(fW2);
-                p64[6] = _toU64(_calcSTQ(*(ULONGLONG*)&it[2].S, iW));
+                p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
                 p64[8] = _vecToXYZ(p[2]);
                 it += 3;
@@ -2082,15 +2052,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoor
                 it += 3;
             } else {
                 iW = _floatBits(fW0);
-                p64[0] = _toU64(_calcSTQ(*(ULONGLONG*)&it[0].S, iW));
+                p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
                 p64[2] = _vecToXYZ(p[0]);
                 iW = _floatBits(fW1);
-                p64[3] = _toU64(_calcSTQ(*(ULONGLONG*)&it[1].S, iW));
+                p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
                 p64[5] = _vecToXYZ(p[1]);
                 iW = _floatBits(fW2);
-                p64[6] = _toU64(_calcSTQ(*(ULONGLONG*)&it[2].S, iW));
+                p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
                 p64[8] = _vecToXYZ(p[2]);
                 it += 3;
@@ -2837,12 +2807,9 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
     }
     return pQw;
 }
-/* Parked: the strip-skip loop entry only (as _makePkt_TexTriangleFan) - the original jumps into the rolled skip
- * loop at its Term test, ours copies that test to the loop entry or keeps a redundant it < end test; this draft
- * (11 lines) fixes the fg/end registers and the bLoop scheduling of the earlier one (32) with a plain while (it <
- * end) loop, a goto to the loop end instead of continue and iDir = 0 first; tried before: while/do-while/goto
- * shapes, an explicit BOOL bLoop, declaration orders, permuter 15 min; now also: for(;;)/goto-into-loop skip
- * loops, an inline Term test, continue in the body, permuter 2x15 min on the textured twin */
+/* Parked: 3 lines - the skip loop is solved (as the other fans); iW in a local gives the original's s7/s8 (without it
+ * iDir loses to the hoisted 0x8000, priority 833 vs 862), but its li then sits before the entry test (the original
+ * sets it after, with the &vDir addiu); assigned in the loop body loop.c hoists it and the swap comes back. */
 #if 0
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) {
     IVECTOR p;
@@ -2886,6 +2853,7 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
     } else {
         FVECTOR vDir[3];
         INT iDir = 0;
+        INT iW = 0x8000;
         while (it < end) {
             _prefetch(it, 0x20);
             RotTransPersClipW(p, vDir[iDir], it->P);
@@ -2902,12 +2870,12 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
                     }
                     goto next1;
                 }
-                p.w = 0x8000;
+                p.w = iW;
                 bTop = 0;
             } else if (p.w) {
                 fg |= 2;
             } else if (fg) {
-                p.w = 0x8000;
+                p.w = iW;
             } else {
                 p.w |= BackClip(vDir, 0);
             }
