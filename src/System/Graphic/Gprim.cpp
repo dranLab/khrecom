@@ -2488,15 +2488,6 @@ QWdata* _makePkt_TexTriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord
     }
     return pQw;
 }
-/* Parked: 3 lines (2026-11-04, was 11; the other fans 5/5/3 with the same form): `if (!(it < end)) goto done;
- * goto in0;` into the first skip do-while and a trailing `done: return pQw;` fix the !Back entry; left: in the Back
- * skip loop jump.c inverts `if (!term) goto body; goto next1;` (original: beqz term -> body, b next1 stealing the
- * outer sltu); for(;;)/while/label forms and continue don't keep it. Before: the original jumps into the rolled loop at its Term test (b X with the
- * lhu in the slot), ours copies the test to the loop entry (jump.c duplicate_loop_exit_test) or keeps a redundant
- * it < end test; fg/end and iDir/0x8000 registers fixed by the plain while (it < end) form and iDir = 0 first;
- * tried: while/do-while/for(;;) skip loops, goto into the loop, bLoop variable with a bottom label, an inline Term
- * test, continue in the body, permuter 2x15 min (30 -> 23, no gain after) */
-#if 0
 QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) {
     IVECTOR p;
     UINT fg = 2;
@@ -2548,9 +2539,14 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Bac
                 if (p.w) {
                     if (!(it < end)) goto done;
                     for (;;) {
-                        if ((it++)->Term) goto next1;
+                        if (it->Term) {
+                            it++;
+                            break;
+                        }
+                        it++;
                         if (!(it < end)) goto done;
                     }
+                    goto next1;
                 }
                 p.w = 0x8000;
                 bTop = 0;
@@ -2581,13 +2577,6 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Bac
 done:
     return pQw;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1i);
-#endif
-/* Parked: the strip-skip loop entry only, as in the CCoord-less version (the original enters the rolled skip loop
- * at its Term test, ours copies the test to the entry or keeps a redundant it < end test); bone check at the loop
- * top, iDir = 0 last in this one; tried: the CCoord-less version's levers (see there) */
-#if 0
 QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back) {
     IVECTOR p;
     UINT fg = 2;
@@ -2648,9 +2637,14 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* 
                 if (p.w) {
                     if (!(it < end)) goto done;
                     for (;;) {
-                        if ((it++)->Term) goto next1;
+                        if (it->Term) {
+                            it++;
+                            break;
+                        }
+                        it++;
                         if (!(it < end)) goto done;
                     }
+                    goto next1;
                 }
                 p.w = 0x8000;
                 bTop = 0;
@@ -2681,9 +2675,6 @@ QWdata* _makePkt_TexTriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* 
 done:
     return pQw;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
-#endif
 QWdata* _makePkt_LineStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end) {
     IVECTOR p;
     UINT fg;
@@ -2902,9 +2893,14 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
                 if (p.w) {
                     if (!(it < end)) goto done;
                     for (;;) {
-                        if ((it++)->Term) goto next1;
+                        if (it->Term) {
+                            it++;
+                            break;
+                        }
+                        it++;
                         if (!(it < end)) goto done;
                     }
+                    goto next1;
                 }
                 p.w = 0x8000;
                 bTop = 0;
@@ -2937,9 +2933,6 @@ done:
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1i);
 #endif
-/* Parked: the strip-skip loop entry only, as in _makePkt_TexTriangleFan; bone check at the loop top, iDir = 0
- * last; tried: the levers of the CCoord-less fans (see there) */
-#if 0
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back) {
     IVECTOR p;
     UINT fg = 2;
@@ -2998,9 +2991,14 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCr
                 if (p.w) {
                     if (!(it < end)) goto done;
                     for (;;) {
-                        if ((it++)->Term) goto next1;
+                        if (it->Term) {
+                            it++;
+                            break;
+                        }
+                        it++;
                         if (!(it < end)) goto done;
                     }
+                    goto next1;
                 }
                 p.w = 0x8000;
                 bTop = 0;
@@ -3030,9 +3028,6 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* pCr
 done:
     return pQw;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
-#endif
 FLOAT getPrimGetaZ(INT iz, const FVECTOR& Vert, const FMATRIX* pWMat, FLOAT fGeta) {
     CCamera* pCam = CWorldEnv::getActiveCamera();
     if (pCam) {
