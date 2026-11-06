@@ -2901,31 +2901,30 @@ extern CursorPosition NewMarkPosiOffset;
 extern FLOAT JiminyRotY __asm__("D_0068C400"); /* PARTIAL: .bss still from the original's assembly */
 }
 }
-/* Parked: 129 lines: the stack slots of iFlag[5]/bComp[5] (and the pMarkSeq/pNewSeq spills) differ, which
-   shifts every s-register from the prologue on (s7 vs s8 saves); the code itself matches in structure.
-   tried: declaration orders of posi/telopNo/iFlag/bComp/pMarkSeq/pNewSeq (posi after bComp fixes the slots but
-   breaks the registers, 270 lines), listNum statement order per arm, member vs local listNum, braces per
-   statement; tools/permuter.py (fixed wrapper, other drafts hidden) 3 runs, 277 -> 141 -> 129 applied. */
+/* Parked: 255 lines in this form (ref declaration order, line-marker statement order: stack slots and &iFlag right),
+   129 with posi declared first (slots wrong, registers right, a pseudo for &iFlag). Left here: global-alloc gives
+   pMarkSeq an s-register where the original spills it and keeps the hoisted 16 in s8 (bCursorShift s7), which shifts
+   this to s1 and telopNo to s2. tried: scalar declaration orders (no effect); permuter 3 runs on the 129 form. */
 #if 0
 void CJiminyMemo::contentMenu() {
     BOOL bCursorShift = FALSE;
     switch (getContentStep()) {
     case 20: {
-        FVECTOR posi;
         INT listNum;
+        INT telopNo;
         int iFlag[5];
         int bComp[5];
-        INT telopNo;
-        D2::C2DSeqCtrl** pNewSeq;
+        FVECTOR posi;
         D2::C2DSeqCtrl** pMarkSeq;
+        D2::C2DSeqCtrl** pNewSeq;
         CMemo2DSequence* pList;
         if (isModeJiminyMemo()) {
+            listNum = 5;
+            telopNo = 0x700101;
             getMenuContentFlag(0, 0x11, &iFlag[0], &bComp[0]);
             getMenuContentFlag(0xB7, 0x98, &iFlag[1], &bComp[1]);
-            listNum = 5;
             iFlag[2] = iFlag[1];
             bComp[2] = bComp[1];
-            telopNo = 0x700101;
             getMenuContentFlag(0x17, 0x68, &iFlag[3], &bComp[3]);
             getMenuContentFlag(0x18A, 6, &iFlag[4], &bComp[4]);
             if (bComp[4] == TRUE && CGameWork::getByte(0, 4) >= 2 && CGameWork::getByte(0, 5) >= 2 &&
@@ -2937,8 +2936,8 @@ void CJiminyMemo::contentMenu() {
             }
             if (!iFlag[4]) listNum = 4;
         } else {
-            telopNo = 0x700116;
             listNum = 4;
+            telopNo = 0x700116;
             getMenuContentFlag(0x11, 6, &iFlag[0], &bComp[0]);
             getMenuContentFlag(0x14F, 0x3B, &iFlag[1], &bComp[1]);
             iFlag[2] = iFlag[1];
@@ -6151,14 +6150,6 @@ namespace Minigame {
 extern INT NoteSeqData[5];
 }
 }
-/* Parked: 34 lines, all stack offsets: the six hoisted string addresses (strBGlider..strBPanic, &scoreStr) are
-   spilled in another slot order (GCSE/PRE creates their pseudos in hash-table order: ours BPanic first, the
-   original BGlider first). Everything else matches (time math via the Com.h(59) seconds inline, string table).
-   tried: aggregate initializer for scoreStr, if vs ternary for the scores, unused posi removed (worse); RTL dump
-   shows pseudos 567.. made by gcse; scoreStr declared
-   with the other locals + element stores (34/99); tools/permuter.py (fixed wrapper, target on, others hidden)
-   9 min: no gain (earlier "score 1" was a wrapper bug); gcse hash order (see memory gcse-pre-hash-order). */
-#if 0
 /* PARTIAL: the original's System/Com.h(59) inline: seconds to time quanta */
 static inline INT _sec2tq(INT inSec) { return inSec * 3000; }
 void CJiminyMemo::contentMinigame() {
@@ -6183,11 +6174,11 @@ void CJiminyMemo::contentMinigame() {
         pList = createSequence(JiminyMemo::Minigame::NoteSeqData, 0x10, 0x12, 0, NULL);
         if (pList) {
             int bFlag[6];
-            CHAR* pPoint;
-            CHAR* pMin;
-            CHAR* pSec;
-            CHAR* pTime;
-            CHAR* pMask;
+            CHAR* pPoint = NULL;
+            CHAR* pMin = NULL;
+            CHAR* pSec = NULL;
+            CHAR* pTime = NULL;
+            CHAR* pMask = NULL;
             INT bg;
             INT wd;
             INT eb;
@@ -6341,25 +6332,6 @@ void CJiminyMemo::contentMinigame() {
     }
     if (m_ContentMinigame.pList) m_ContentMinigame.pList->main(getFrameRateF());
 }
-#else
-/* placeholder: rodata of contentMinigame__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh36() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE(__FILE__ "(9647)");
-    TRACE(__FILE__ "(9654)");
-    TRACE("%d%s");
-    TRACE("%s");
-    TRACE("%s%d%s%02d%s%02d");
-    TRACE("%s--%s--%s--");
-}
-__asm__(".rdata\n.align 4\n.word .L00334AC4\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L0033527C\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n");
-__asm__(".word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L0033532C\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L00335388\n.word .L003354D0\n");
-__asm__(".word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003353EC\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n");
-__asm__(".word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L00335410\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n");
-__asm__(".word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L00335410\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n.word .L003354D0\n");
-__asm__(".word .L003354D0\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentMinigame__11CJiminyMemo);
-#endif
 /* Parked: final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the
    .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once.
    Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every function matches except
