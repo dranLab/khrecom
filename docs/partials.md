@@ -145,17 +145,18 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-03 | cleanup/small-classes + anon-members + ceffect-scale (tools/partials: anonymous members) | 228 | 22 | 0 | 732 (0) | 923 |
 | 2026-11-03 | cleanup/player-inlines (CPlayer unit-gate pairs unified) | 222 | 22 | 0 | 691 (0) | 882 |
 | 2026-11-05 | catch-up: the unit merges since 2026-11-03 (placeholders and unit-gate sites dropped as their functions got matched; MATCH comments of the new matches) | 205 | 22 | 0 | 680 (0) | 930 |
+| 2026-11-06 | cleanup: JiminyMemo finish, CPause and CShadowModelMan stand-ins replaced by the owner headers (friends with MATCH) | 202 | 20 | 0 | 676 (0) | 930 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 205 (165 in 48 headers, 40 in 24 .cpp); MATCH: 930
-  by category: method 47, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 18, other 5
-stand-ins: 22 foreign in 16 files (16 names), 198 unattributed, 155 own
+PARTIAL: 202 (165 in 48 headers, 37 in 22 .cpp); MATCH: 931
+  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 16, other 5
+stand-ins: 20 foreign in 15 files (14 names), 198 unattributed, 155 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 680 sites (0 untagged); #line: 1244
+mechanisms: 676 sites (0 untagged); #line: 1245
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 873, superset 12, partial 0, gated 3, missing 8, unattributed 309
 ```
@@ -170,10 +171,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 |---|---:|---|---|---|---|---|
 | R1 | 4.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 4 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
-| R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
-| R1 | 2.0 | `System/Graphic/ShadowModel.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CShadowModelMan (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Wnd.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CTextWnd (1 complete) | inline bodies or virtuals |
 | R1 | 1.0 | `Game/Collision/CollUtil.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
@@ -198,8 +197,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
-| `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
-| `CShadowModelMan` | complete | System/Graphic/ShadowModel.h | 1 |  |  |
 | `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | complete | System/Graphic/Gprim.h | 1 |  |  |
@@ -237,15 +234,15 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Player/PlayerAttack.h` | 2 | 1/0/0/0 | 26 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 53 |
-| `Game/SceneEnv.h` | 1 | 1/0/0/0 | 37 |
+| `Game/SceneEnv.h` | 1 | 1/0/0/0 | 38 |
 | `Game/SceneInfo.h` | 1 | 30/0/0/0 | 86 |
 | `System/Buf.h` | 1 | 1/0/0/0 | 38 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
 | `System/Coord.h` | 1 | 1/0/0/0 | 27 |
 | `System/Graphic/2d/2DMan.h` | 1 | 3/0/0/0 | 166 |
 | `System/Graphic/Camera.h` | 5 | 6/1/0/0 | 109 |
-| `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 172 |
-| `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 175 |
+| `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 173 |
+| `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 176 |
 | `System/Graphic/Effect/effect.h` | 3 | 5/1/0/0 | 77 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 2 | 3/0/0/0 | 15 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |
@@ -380,7 +377,7 @@ or `untagged`.
 | placeholder | `_modelCreate*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_monstroEventBattleEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_premiumPrizeMessage*` | 12 | 12 | Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. |
-| placeholder | `_roPh*` | 8 | 8 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_roPh*` | 3 | 3 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roPh0a*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roulettePrizeMessage*` | 12 | 12 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
@@ -402,7 +399,7 @@ or `untagged`.
 | unit gate | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
 | unit gate | `GAME_PLAYER_PLAYER_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
 | unit gate site | `EFFECT_CPP` | 3 | 3 | EFFECT_CPP gate, only for its own unit (tested 2026-11-02) |
-| unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 2 | 2 | FORM_MENU_JIMINYMEMO_CPP gate (tested 2026-11-02): its own unit includes it as "JiminyMemo.h" (the full path) |
+| unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 3 | 3 | FORM_MENU_JIMINYMEMO_CPP gate (tested 2026-11-02): its own unit includes it as "JiminyMemo.h" (the full path) |
 | unit gate site | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 1 | FORM_MENU_SAVELOADCTRL_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `FORM_MENU_SAVELOAD_CPP` | 8 | 8 | FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_ATEL_VSME_CPP` | 1 | 1 | Game/Atel/Atel (CAtel::start ...) calls these out of line: inline-called-not-inlined |

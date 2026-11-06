@@ -505,46 +505,47 @@ int _sceCd_scmd_prechk(int cmd)
     return 1;
 }
 
-/* Parked: the original is a compare chain (no jump table) with the arms in reverse case order; a switch here gives a table. */
-#if 0
 int _sceCdSC(int code, int *param)
 {
     int v;
 
-    switch ((long)code) {
-    case 0x8014:
-        v = (int)&_sceCd_cd_scmd;
-        break;
-    case 0x8013:
-        v = (int)_sceCd_scmdrdata;
-        break;
-    case 0x8012:
-        v = (int)_sceCd_scmdsdata;
-        break;
-    case 0x8011:
-        v = _sceCd_scmd_semid;
-        break;
-    case 0x8004:
-        v = (int)&_sceCd_cd_ncmd;
-        break;
-    case 0x8003:
-        v = (int)_sceCd_ncmdrdata;
-        break;
-    case 0x8002:
-        v = (int)_sceCd_ncmdsdata;
-        break;
-    case 0x8001:
-        v = _sceCd_ncmd_semid;
-        break;
-    default:
-        v = 0;
-        break;
-    }
+    if (code == 0x8001) goto c1;
+    if (code == 0x8003) goto c3;
+    if (code == 0x8002) goto c2;
+    if (code == 0x8004) goto c4;
+    if (code == 0x8011) goto c11;
+    if (code == 0x8013) goto c13;
+    if (code == 0x8012) goto c12;
+    if (code != 0x8014) goto def;
+    v = (int)&_sceCd_cd_scmd;
+    goto end;
+def:
+    v = 0;
+    goto end;
+c12:
+    v = (int)_sceCd_scmdsdata;
+    goto end;
+c13:
+    v = (int)_sceCd_scmdrdata;
+    goto end;
+c11:
+    v = _sceCd_scmd_semid;
+    goto end;
+c4:
+    v = (int)&_sceCd_cd_ncmd;
+    goto end;
+c2:
+    v = (int)_sceCd_ncmdsdata;
+    goto end;
+c3:
+    v = (int)_sceCd_ncmdrdata;
+    goto end;
+c1:
+    v = _sceCd_ncmd_semid;
+end:
     *param = v;
     return 1;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/eecdvd_sceCdCallback", _sceCdSC);
 
 /* Parked: t0/t1 swapped for the _scmd_dr_bind/_sceCd_ee_read_mode %hi, and the order of li/lui before the _sceCd_CdInit_ON store. */
 #if 0

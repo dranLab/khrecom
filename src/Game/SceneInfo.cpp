@@ -785,25 +785,18 @@ void CSceneInfo::setNextBattleScene(SHORT nScene) {
     s_nNextBattleScene = nScene;
 }
 BOOL _checkAvailableDoorID(const DoorInfo& door);
-/* Parked: 2 lines - the constant 5 of the second _type compare: the original loads it into v1 (li v1,5 in the beq delay slot), ours into v0. Structure matches (switch on getDoorState, `== 4 break; != 5 return TRUE`); ~25 forms (ifs, result variable, nested switch, local type) and 4 min of permuter (3k candidates) kept it. */
-#if 0
 BOOL _checkAvailableDoorID(const DoorInfo& d) {
     switch (d.getDoorState()) {
-    case DOOR_STAT_CLOSED:
-        if (d.isSpecialDoor()) return FALSE;
-        if (d._type == DOOR_TYPE_OPEN_AFTER_EVENT) break;
-        if (d._type != DOOR_TYPE_TO_GOAL) return TRUE;
-        break;
     case DOOR_STAT_OPENED:
     case DOOR_STAT_ONE_WAY:
     case DOOR_STAT_UNAVAILABLE:
         return TRUE;
+    case DOOR_STAT_CLOSED:
+        if (!d.isSpecialDoor() && d._type != DOOR_TYPE_OPEN_AFTER_EVENT && d._type != DOOR_TYPE_TO_GOAL) return TRUE;
+        break;
     }
     return FALSE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/SceneInfo", _checkAvailableDoorID__FRC8DoorInfo);
-#endif
 DOOR_ID _checkAvailableDoorID(INT nRoomID, DOOR_ID nDoor) {
     if (nDoor >= 4) return (DOOR_ID)4;
     RoomInfo* pRoom = CSceneInfo::getRoomInfo(nRoomID);

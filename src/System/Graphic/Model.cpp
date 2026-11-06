@@ -634,27 +634,15 @@ INT checkBSphere(CCoord& crd, const FVECTOR& ctr, FLOAT rad) {
     return Math3D::CheckVisibleBoundingSphere(sphere, frustum) ? 0 : 0x80000000;
 }
 INT checkBSphere(CCoord& crd, const FVECTOR& ctr, FLOAT rad);
-/* Parked: 10 lines off, FP registers only: the original keeps the shared 0.5f in f5 (x sum f6, y[1] f7), ours 0.5f in f7. Worked: x[0] > x[1] compare, a copy tmp (declared first) of ctr as the call argument, sqrt after the copy. Tried: statement orders, w first/last, 0.5f local; permuter 12 min (37389 candidates, stays 10). */
-#if 0
 INT checkBSphere(CCoord& crd, const BBOX* bbox) {
-    FVECTOR tmp;
-    FVECTOR ctr;
     FLOAT r;
-    FLOAT ret;
     if (bbox->x[0] > bbox->x[1]) return 0xC0000000;
-    ctr.x = (bbox->x[0] + bbox->x[1]) * 0.5f;
-    ctr.y = (bbox->y[0] + bbox->y[1]) * 0.5f;
-    ctr.z = (bbox->z[0] + bbox->z[1]) * 0.5f;
-    ctr.w = 1.0f;
+    FVECTOR ctr = { (bbox->x[0] + bbox->x[1]) * 0.5f, (bbox->y[0] + bbox->y[1]) * 0.5f, (bbox->z[0] + bbox->z[1]) * 0.5f, 1.0f };
     r = (bbox->x[0] - bbox->x[1]) * (bbox->x[0] - bbox->x[1]) + (bbox->y[0] - bbox->y[1]) * (bbox->y[0] - bbox->y[1])
         + (bbox->z[0] - bbox->z[1]) * (bbox->z[0] - bbox->z[1]);
-    tmp = ctr;
     r = _sqrtf(r) * 0.5f;
-    return checkBSphere(crd, tmp, r);
+    return checkBSphere(crd, ctr, r);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", checkBSphere__FR6CCoordPC4BBOX);
-#endif
 /* Parked: 12 lines off, registers only: the original keeps the scratchpad pointer in v1 and the clip result in a0 (or a0,v0,a0; move v0,a0), ours v0/v1. Worked: the 0xC0000000 return last (if (!(x[1] < x[0])) {...}), v assigned inside the if, asm "nop" opening the if (ret) block (the original's extra nop after the beqz slot; same tail as the parked resultCheckBBox(CCoord&)). Tried: one/two-output cfc2 asm, 'm' operand lqc2 helpers, result local, decl order; permuter 15 min (45593 candidates, stays 16). */
 #if 0
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox) {
@@ -1309,23 +1297,18 @@ void CModel::_disp0_SetPacket(UINT nMode, const int (*pData)[4], INT semikind, u
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", _disp0_SetPacket__6CModelUiPA3_CiiUliPUl);
 #endif
-/* Parked: 13 lines off: after getRawMode the original computes isDataEmpty && isSemiDataEmpty into a1 and never uses it (dead code left after a cross-jump?); ours drops the semi half. Tried: unused BOOL local, empty if, ternary, statement, duplicated identical arms (24 lines). */
-#if 0
 void CSemiModel::link(CModel* m) {
     UINT rawMode;
     m_pModel = m;
     setPacketSize(m->getModelData()->m_nPacketSize);
     rawMode = m->getModelData()->getRawMode();
-    BOOL bEmpty = m->getModelData()->isDataEmpty() && m->getModelData()->isSemiDataEmpty();
+    USHORT mode = m->getModelData()->getMode();
     if (getLayerID() != 0x18 && getLayerID() != 0x17) {
         if (rawMode & 0x10000000) setSemiTrans(ALPHA_BLEND);
         else setSemiTrans(ALPHA_PLUS);
     }
     initSemiZModel();
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", link__10CSemiModelP6CModel);
-#endif
 void CSemiModel::initSemiZModel() {
     USHORT mode;
     UINT rawMode;

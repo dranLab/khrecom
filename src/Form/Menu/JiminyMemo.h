@@ -16,6 +16,14 @@ inline void _jiminyMemoCheckId(INT inId) {
     if (!(inId < 8)) AssertApp(__FILE__, __LINE__, "inId < PARAM_NUM", 0);
 }
 
+#ifdef FORM_MENU_JIMINYMEMO_CPP /* MATCH: FORM_MENU_JIMINYMEMO_CPP gate: the helper keeps the header file name in the class inlines asserts */
+/* the class inlines setContentParam/getContentParam (header lines 1185/1193) assert their index with the
+ * header's file name; the class itself is in Form/Menu/JiminyMemo.cpp */
+inline void _jiminyMemoAssertParamId(INT inId, INT inLine) {
+    if (!(inId < 2)) AssertApp(__FILE__, inLine, "inId < PARAM_NUM", 0);
+}
+#endif
+
 #ifndef FORM_MENU_JIMINYMEMO_CPP /* MATCH: FORM_MENU_JIMINYMEMO_CPP gate (tested 2026-11-02): full class in Form/Menu/JiminyMemo.cpp */
 class CJiminyMemo : public CTask {
 public:

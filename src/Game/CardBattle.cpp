@@ -1368,18 +1368,13 @@ INT CCardBattle::setEnchantCard(HANDLE inHandle, INT inUser, CBattleCard* inCard
     }
     return 1;
 }
-/* Parked: 9 of 81 lines - only the first m_nKind load: the original adds _PLAYER*4 + 380 before this (lbu 0(v0))
- * and keeps the value in a2; ours lbu 380(this + _PLAYER*4). No kind/pTime locals (the ref has only _PLAYER and
- * pGauge) and _ref(m_pInstance) on the m_nKind reads gave the size (18 -> 9 lines). Tried: &arr[0][i], _ref on
- * the element/array, *(&..m_nKind), == 0, _PLAYER assigned separately; permuter 10 min with only this draft on
- * (10116 candidates, stays 15); earlier: 4 min (8263, no gain). */
-#if 0
 void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
     if (!(inUser)) AssertApp(__FILE__, 1977, "inUser", 0);
     UINT _PLAYER = inUser - 1;
-    if (!_ref(m_pInstance)->m_cardEnchant[_PLAYER].m_nKind) return;
-    if (inPart != g_pBattleCardList[_ref(m_pInstance)->m_cardEnchant[_PLAYER].m_nKind].EFF_PART) return;
-    if (inKind && inKind != _ref(m_pInstance)->m_cardEnchant[_PLAYER].m_nKind - 0x43) return;
+    CARD& card = _ref(m_pInstance)->m_cardEnchant[_PLAYER];
+    if (!card.m_nKind) return;
+    if (inPart != g_pBattleCardList[card.m_nKind].EFF_PART) return;
+    if (inKind && inKind != card.m_nKind - 0x43) return;
     CEnchantGauge* pGauge = m_pInstance->m_pEnchantGauge[_PLAYER];
     if (!pGauge) return;
     m_pInstance->m_nEnchantTime[_PLAYER]--;
@@ -1390,9 +1385,6 @@ void CCardBattle::decEnchantTime(INT inUser, INT inPart, INT inKind) {
         pGauge->changeCount(_ref(m_pInstance)->m_nEnchantTime[_PLAYER]);
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardBattle", decEnchantTime__Q210CardBattle11CCardBattleiii);
-#endif
 void CCardBattle::destroyPlayCard(INT inFlag, INT inP1) { resetNowPlaying(inFlag); }
 void CCardBattle::resetNowPlaying(INT inUser) {
     if (!(inUser)) AssertApp(__FILE__, 2028, "inUser", 0);

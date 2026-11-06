@@ -2055,39 +2055,21 @@ INT CPlayer::chkWalkMode() {
     m_fWalkSpeed = aim_power * m_pParam->MAX_RUN_SPEED * dash;
     return 2;
 }
-/* Parked: 2 lines differ: the delay slot of jal calcVelocityXZ (the original issues the m_fWalkSpeed store
-   first and puts mov.s $f12,$f1 in the slot; this draft the reverse). The angle-wrap register (r in $f1, not
-   $f13) is fixed by keeping aim_dir live after the call with an empty asm (see the draft); without it r inherits
-   aim_dir's $f13 preference from the Homing argument copy (global.c expand_preferences: aim_dir dies at the
-   subtraction because sched1 issues the v.y store first). $LM tags: dirY via getDir() (Player.h:856), both
-   rotation writes via CMovement::setRot (Movement.h:65). tried before: _limitPI/_abs helper bodies (return
-   forms, ret local, if/if, volatile/non-volatile asm, fabsf), r as an explicit local first/last, the ref's locals
-   at the top, folded calcVelocityXZ argument, the else-block and in-place wrap forms, r computed before/between
-   the v stores (best 6 lines without the asm). 2026-10-25: the keep-alive asm after the wrap (21, blocks
-   scheduling), at the end (6, epilogue order), after the call (2), after v.y = dirY (4), non-volatile (4),
-   between the speed store and the call (3, forces a reload of m_fWalkSpeed); a separate d = aim_dir - dirY
-   before the vector (6); folded call argument with the asm (2). */
-#if 0
 void CPlayer::exeWalk() {
     FLOAT aim_dir = m_fAnalogViewDir;
     FLOAT d0 = Movement::Homing(m_fDir, aim_dir, 0.2f, m_fFrameRate);
     if (m_WalkMode) m_fDir = d0;
     setWalkAnim();
     FLOAT dirY = getDir();
-    FVECTOR v;
-    v._q = 0;
-    v.y = aim_dir;
+    FVECTOR v = { 0.0f, aim_dir, 0.0f, 0.0f };
     m_pMove->setRot(v);
     m_fMovePower = 1.0f - _abs(_limitPI(aim_dir - dirY)) / 3.1415927f;
     m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower;
     m_pMove->calcVelocityXZ(m_fWalkSpeed);
-    __asm__ __volatile__("" : : "f"(aim_dir)); /* keeps aim_dir live past the wrap: matching lever */
+     /* keeps aim_dir live past the wrap: matching lever */
     v.y = dirY;
     m_pMove->setRot(v);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer);
-#endif
 void CPlayer::setWalkAnim() {
     INT anim;
     switch (m_PlayerState) {
@@ -2368,36 +2350,21 @@ void CPlayer::initWall() {
     m_pMove->setFlag(0, 0x40); // partial CMovement: (flag, on)
     m_fFootRadius = 0.5f;
 }
-/* Parked: 4 lines differ (size, frame, every branch, call and register allocation match): at the start the
-   original issues `lw m_iSubState` (getSubState) before the `sw zero` of vec.y, ours stores vec.y first (right after
-   the lq of the getRot copy). Found 2026-10-25 from the $LM tags (25 -> 4): the first ofs is one brace-init line
-   (`FVECTOR ofs = {{0, 0, 0.6f, 1}}`), the second ofs.set(0.5f, 0, 0) (Coord.h inline; the 0.5f then shares the
-   setRadius constant in $f23, which fixed the old cancel_speed/0.5f register cascade), getDir() for dir and in the
-   houkou wrap, setSubState() in the three cases, m_fJumpSpdXZ and m_fMoveSpdXZ as two statements, and a real bug:
-   the HOUKOU_RIGHT case compares getAnimID() with 1 (the animation it starts), not 3. tried for the rest: all 24
-   orders of the vec stores and the cancel_power read (permblk.py), chained x = w = 1 / y = z = 0 forms (10),
-   vec.set() (25), brace init of vec (12), vec.v[1] and _ref(vec).y reads, getSubState() in the test, and
-   tools/permuter.py through the method wrapper (10 min, 4918 candidates, no better). Earlier: ~25 variants of the
-   cancel_* declarations, arm statement orders, houkou forms, cast read of g_fAntiGravity. */
-#if 0
 void CPlayer::exeWall() {
     FVECTOR pos;
     FVECTOR rot;
-    FVECTOR vec;
     FLOAT dir;
     Houkou houkou;
-    FMATRIX m;
     FLOAT cancel_power;
     FLOAT cancel_speed;
     FLOAT r;
     setPlayerFlag(0x400000, 0);
     pos = getPos();
     rot = getRot();
-    vec.x = 1.0f;
-    vec.y = 0.0f;
-    vec.z = 0.0f;
-    vec.w = 1.0f;
+    FVECTOR vec = { 1.0f, 0.0f, 0.0f, 1.0f };
+    FMATRIX m;
     cancel_power = vec.y;
+
     if (!getSubState()) {
         FLOAT d0 = Movement::Homing(m_fDir, m_fWallDir, 0.15f, getFrameRateF());
         m_fDir = d0;
@@ -2509,9 +2476,6 @@ void CPlayer::exeWall() {
     m_fJumpSpdY = vel.y;
     m_pMove->setVel(vel);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWall__7CPlayer);
-#endif
 /* FVECTOR::operator-(const FVECTOR&) of the original (ref locals: FVECTOR* this, FVECTOR vec). */
 static inline FVECTOR _subVec(const FVECTOR& a, const FVECTOR& inV) {
     FVECTOR vec = a;
@@ -2694,24 +2658,15 @@ void CPlayer::exeLadder() {
         m_pMove->setVel(vel);
     }
 }
-/* Parked: everything but the ofs block matches (wrap: r wrapped in place, then dir = r); left: after getPos the
-   original issues lq pos (v1) before lui LADDER_LOCAL_OFS (v0), ours schedules the lui first (sched1 priority:
-   hi->lwc1->swc1 chain) and allocates pos to a1. tried: all orders of pos/ofs statements (perm.py), set(),
-   brace init (adds a temp copy), x = y = 0 chains, FVECTOR pos = getPos(), extern const; best 10 lines.
-   Retried 2026-10-25: $LM tags put all four ofs stores on one line (4280) after pos = getPos() (4279), as in the draft; non-const LADDER_LOCAL_OFS (as the ref declares it) moves it to .data and fails the image, .v[2] / *(FLOAT*)& / _ref() / -> reads compile identically; tools/permuter.py through the method wrapper (10 min, 5151 candidates, no better). */
-#if 0
 INT CPlayer::isStartLadderJump() {
     FLOAT dir;
     FVECTOR pos;
-    FVECTOR ofs;
-    FMATRIX m;
     if (!isTrgFlag(1)) return FALSE;
     dir = m_fDir;
     pos = getPos();
-    ofs.x = 0.0f;
-    ofs.y = 0.0f;
-    ofs.z = PL::LADDER_LOCAL_OFS.z;
-    ofs.w = 1.0f;
+    FVECTOR ofs = { 0.0f, 0.0f, PL::LADDER_LOCAL_OFS.z, 1.0f };
+    FMATRIX m;
+
     _unitMatrix(m);
     _rotMatrixY(m, dir);
     ApplyMatrixXYZ(ofs, m, ofs);
@@ -2740,9 +2695,6 @@ INT CPlayer::isStartLadderJump() {
     m_pMove->setFlag(0x40, 0); // partial CMovement: (flag, on)
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", isStartLadderJump__7CPlayer);
-#endif
 INT CPlayer::getJumpState() const {
     switch (m_PlayerState) {
     case 6:
@@ -5140,7 +5092,7 @@ inline void _roPh20() { /* MATCH: placeholder: an inline function's strings, in 
     TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n");
 }
 __asm__(".rdata\n.align 4\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026F018\n.word .L0026F018\n.word .L0026ED28\n.word .L0026EEE8\n.word .L0026EF64\n.word .L0026F018\n.word .L0026EEB4\n.word .L0026F018\n.word .L0026EF3C\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF94\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC40\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF80\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026ECBC\n.word .L0026EFA8\n.word .L0026EFBC\n.word .L0026EC84\n.word .L0026EC70\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC30\n.word .L0026EEAC\n.text\n");
-/* Parked: 20 lines differ, same size; structure, all branches, calls, the
+/* Parked: 8 lines differ (2026-11-06, was 20: both vel brace-initialized, m_fDir store between brace and copy; markers at 9456/9593: por, sq 0x30, swc1 y 0x34, lq 0x30, sq 0x20 all on one line, so a temporary copied straight into vec; (FVECTOR){..} does not compile at the first site, braces at both sites add 16 bytes of frame), same size; structure, all branches, calls, the
    40-entry jump table, frame and strings match. Left, four scheduling/register spots: (1) old_condition
    (isConditionFlag(0x881803F)): the original loads the flag word into v1 and the mask into v0, ours the reverse;
    (2) case 6 (knock-back): the {0, dir0, 0, 0} rotation temp gets v1 in the original (v0 ours, swapping the li 1 /
@@ -5400,13 +5352,11 @@ BOOL CPlayer::chkDamage() {
         setAnimForce(0x22, 0, 0, 0, m_bIsDead, 0);
         m_bDmgInAir = TRUE;
         m_JumpState = 3;
-        m_fJumpSpdY = 0.0f;
         m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+        m_fJumpSpdY = 0.0f;
         m_fDir = dir0;
         FVECTOR vec;
-        FVECTOR vel;
-        vel._q = 0;
-        vel.y = dir0;
+        FVECTOR vel = { 0.0f, dir0, 0.0f, 0.0f };
         vec = vel;
         m_pMove->setRot(vec);
         vec.x = dpos.x;
@@ -5499,11 +5449,10 @@ BOOL CPlayer::chkDamage() {
     m_fJumpGravity = PL::g_fGravity;
     m_fJumpSpdY = 0.0f;
     if (!bIsBackHit) {
-        m_fDir = Movement::Homing(m_fDir, dir0, 0.5f, m_fFrameRate);
         FVECTOR vec;
-        FVECTOR vel;
-        vel._q = 0;
-        vel.y = m_fDir;
+        FLOAT d = Movement::Homing(m_fDir, dir0, 0.5f, m_fFrameRate);
+        FVECTOR vel = { 0.0f, d, 0.0f, 0.0f };
+        m_fDir = d;
         vec = vel;
         m_pMove->setRot(vec);
     } else {
@@ -6346,14 +6295,7 @@ void CPlayer::exeCharge() {
         break;
     }
 }
-/* Parked: only the block before chargeReloadCard is scheduled differently: the original zeroes pos with v1
-   after the flag 'and' and loads m_pRevolver after the flag store; ours zeroes pos in a0 first and loads
-   m_pRevolver before the store. tried: all orders of setPlayerFlag/pos._q/pos.w (the 5-line ones zero w and
-   are wrong), pos.init()/set()/copy, direct and cast flag stores, cast and volatile-reference m_pRevolver
-   loads, memory asm barriers (best 6); best clean draft 8 lines. tools/permuter.py can't run on C++ methods. Retried 2026-10-25 (sched dump): our sched1 has no dependency between the flag store and the m_pRevolver load and issues the pos zero (por) before the mask 'and', so pos gets a0 instead of reusing v1 after the mask dies; in the original that v1 reuse (sched2 anti-dependence) is what keeps por/sq and the m_pRevolver load late. tried: direct member stores (&= ~0x10 keeps the load late but gives lui/ori, 10 lines; (INT) casts, -17, a reference block: 8), _ref() and volatile m_pRevolver reads, the three valid flag/pos orders (8-10). */
-#if 0
 INT CPlayer::chkChargeMove(INT inFlag) {
-    FVECTOR pos;
     CEffect* effect;
     if (CGameWork::getFlag(1, 8)) return TRUE;
     if (!inFlag && CGame::isSoraGame()) {
@@ -6361,8 +6303,7 @@ INT CPlayer::chkChargeMove(INT inFlag) {
         if (m_pCB->getEnchantKind() != 10) return FALSE;
     }
     setPlayerFlag(0, 0x10);
-    pos._q = 0;
-    pos.w = 1.0f;
+    FVECTOR pos = { 0.0f, 0.0f, 0.0f, 1.0f };
     if (m_pRevolver->chargeReloadCard(0) != 1) {
         m_tqEffCharge = 1000;
         if (m_hEffCharge) return TRUE;
@@ -6376,9 +6317,6 @@ INT CPlayer::chkChargeMove(INT inFlag) {
     }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", chkChargeMove__7CPlayeri);
-#endif
 void CPlayer::fadeEffCharge() {
     if (m_hEffCharge > 0) {
         m_tqEffCharge -= getFrameRate();
@@ -7569,15 +7507,6 @@ void CPlayer::initFooting(INT inFlag) {
         m_pMove->setFlag(0x40, 0);
     }
 }
-/* Parked: all but 4 instructions match (frame, branches, walk block registers). Left: in the analog walk arm the
-   original issues `lw m_pMove` between the `sq t._q` and the `swc1 t.y` and loads `lq t` only after the m_fDir
-   store; ours puts the lq right after the t.y store and the m_pMove load after it. tried: ~45 variants (store
-   order of the clear block = battle, cond, trg; dir/diff/result as one, two or three FP variables - a separate
-   `nd` for the Homing result and `d0 = m_fDir` before the call give the original's mov.s f12,f0 and f0 result;
-   m_fDir store before/inside/after the temp block, CMovement* / FVECTOR& temporaries for getRot(), line
-   layout) plus tools/permuter.py through a method alias wrapper (build/progress/Game/Player/permute_method.py):
-   safe 15 min (6082 candidates) and --unsafe 10 min (4320), score stays 1. Retried 2026-10-25: $LM tags show setDir() (Player.h:852) for the m_fDir store and CMovement::setRot (Movement.h:65), both now in the draft (same 4 lines). The same Homing -> {0, d, 0, 0} -> copy -> setRot block is left in parked chkDamage: our sched1 fills the lq stall with the m_pMove load (priority 4) instead of the m_fDir store (3); the original issues the store first (memory fvector-ctor-operator-temps). */
-#if 0
 void CPlayer::exeFooting() {
     FVECTOR target;
     FVECTOR pos;
@@ -7672,11 +7601,9 @@ void CPlayer::exeFooting() {
             else if (r > 3.1415927f) r -= 6.2831855f;
             d0 = m_fDir;
             FLOAT nd = Movement::Homing(d0, m_fAnalogViewDir, 0.1f, m_fFrameRate);
-            setDir(nd);
             {
-                FVECTOR t;
-                t._q = 0;
-                t.y = nd;
+                FVECTOR t = { 0.0f, nd, 0.0f, 0.0f };
+                setDir(nd);
                 v = t;
             }
             m_pMove->setRot(v);
@@ -7687,14 +7614,6 @@ void CPlayer::exeFooting() {
         m_pMove->calcVelocityXZ(m_fWalkSpeed);
     }
 }
-#else
-/* placeholder: rodata of exeFooting__7CPlayer */
-__asm__(".rdata\n");
-inline void _roPh30() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE("CPlayer:: exeFooting -> initTransform(0)\n");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeFooting__7CPlayer);
-#endif
 void CPlayer::updateFooting() {
     if (isConditionFlag(0x10000000)) {
         CEntity* pEntity = m_hFooting > 0 ? (CEntity*)CTaskMan::getTask(m_hFooting) : NULL;

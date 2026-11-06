@@ -115,11 +115,11 @@ public:
 
 
 
-/* PARTIAL: stand-in for System/Graphic/ShadowModel CShadowModelMan: the ordering asm in the dead-player block reads the private m_iStatus */
-class CShadowModelMan {
-public:
-    static UINT m_iStatus;
-};
+#include "System/Graphic/ShadowModel.h"
+
+
+
+
 
 #include "Game/Enemy/BattleEnemyManager.h"
 

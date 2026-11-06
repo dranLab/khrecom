@@ -993,13 +993,10 @@ INT CAvatar::onAvatarAttach(INT nCmd, void* pParam, INT nID) {
     *(CCoord**)((BYTE*)&crd + 0x4c) = &pTarget->Crd(pTarget->getBoneIndex((const CHAR*)pParam, 0));
     return -1;
 }
-/* Parked: 4 lines - the original stores rot's zero quad (por/sq) first, before the callee saves; ours after
-   the p->Type load. Init forms/orders and 6 min of permuter (8.8k candidates) did not change it. */
-#if 0
 INT CAvatar::onAvatarAttachEffect(INT nCmd, void* pParam, INT nID) {
     AvatarEffectAttach* p = (AvatarEffectAttach*)pParam;
-    FVECTOR rot;
-    rot.init();
+    FVECTOR rot = { 0.0f, 0.0f, 0.0f, 1.0f };
+
     switch (p->Type) {
     case 0:
         break;
@@ -1013,9 +1010,6 @@ INT CAvatar::onAvatarAttachEffect(INT nCmd, void* pParam, INT nID) {
     }
     return CEffectMan::attachEffect(p->EffectName, p->EfxNo, (ObjType::eObjType)13, &Crd(getBoneIndex(p->BoneName, 0)), NULL, &rot, 0.0f);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onAvatarAttachEffect__Q24ATEL7CAvatariPvi);
-#endif
 INT CAvatar::onAvatarSetLookPosition(INT nCmd, void* pParam, INT nID) {
     AvatarSetLook* p = (AvatarSetLook*)pParam;
     FVECTOR v = _crdWorldPos(getAtel().getVSM()->getAvatar(p->TargetID)->Crd(0));

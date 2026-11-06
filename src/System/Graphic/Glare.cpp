@@ -19,7 +19,7 @@ extern INT SCREEN_HEIGHT;
 QWdata* set_csprite64(QWdata* qp, INT x, INT y, UINT col, INT w, INT h);
 QWdata* set_tsprite32(QWdata* qp, INT x, INT y, UINT col, INT u, INT v, INT w, INT h);
 
-/* CGlare::m_pInstance is defined in the original .data (assembly) */
+CGlare* CGlare::m_pInstance = NULL;
 
 #line 26
 void CGlare::create(CTask* p) {
@@ -170,6 +170,10 @@ static QWdata* setTspriteNoSlice(QWdata* qp, FIX4 ofsx, FIX4 ofsy, FIX4 u0, FIX4
 
 /* not matching: register allocation differs (the original keeps the -1 of its divisions by 32 in a saved register
  * from the start); with it the function-local statics ofsX/ofsY, so .data comes from the original assembly */
+/* makePkt's function-local statics, for its INCLUDE_ASM; remove with it. */
+FIX4 ofsX_asm __asm__("ofsX.1914") = -80;
+FIX4 ofsY_asm __asm__("ofsY.1915") = -16;
+#line 173
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Glare", makePkt__10CGlarePrim);
 #if 0
 void CGlarePrim::makePkt() {
@@ -296,4 +300,4 @@ void CGlarePrim::makePkt() {
 
 #endif
 
-// SOURCE DATA: .rodata
+// SOURCE DATA: .data .rodata

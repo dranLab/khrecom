@@ -604,10 +604,7 @@ void CPlayerRiku::initStockSkill(INT inNo) {
     m_hMagicCore = 0;
 }
 
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerRiku", exeStockSkill__Q22PL11CPlayerRiku);
 
-/* Best attempt (same structure): the CBattleEnemy flag tests get swapped registers, 0x6CD doesn't reload the flag, and 0.0f isn't rematerialized in f20 in 0x6CC. */
-#if 0
 void CPlayerRiku::exeStockSkill() {
     INT SESeq;
     FVECTOR pos;
@@ -803,10 +800,9 @@ void CPlayerRiku::exeStockSkill() {
             FVECTOR v;
             speed = m_pAtkData->WORK2 * 0.1f;
             _limitPI(m_fAnalogViewDir - m_fDir);
-            m_fDir = Movement::Homing(m_fDir, m_fAnalogViewDir, 0.2f, m_fFrameRate);
-            FVECTOR tmp;
-            tmp._q = 0;
-            tmp.y = m_fDir;
+            FLOAT d = Movement::Homing(m_fDir, m_fAnalogViewDir, 0.2f, m_fFrameRate);
+            FVECTOR tmp = { 0.0f, d, 0.0f, 0.0f };
+            setDir(d);
             v = tmp;
             setRot(v);
         }
@@ -1185,7 +1181,6 @@ void CPlayerRiku::exeStockSkill() {
     }
     procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
 }
-#endif
 
 void CPlayerRiku::initFriend(INT inNo) {
     if (m_pCB->getEnchantKind() == 0x1b) {

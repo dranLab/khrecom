@@ -305,7 +305,11 @@ void C2DSprObj::getFukidasiRect(FVECTOR2 (*vOut)[4]) {
         }
     }
 }
-/* Parked: 20 of 342 lines differ (same size, same structure): the order of the independent address computations and
+/* Parked: 14 of 340 lines (2026-11-06, was 20: fVec2 is the brace init), all in the sway block. Markers: fVec.set(four
+ * sway values) (Coord.h:730) and m_vSway[i].set() (Coord.h:200); the stores come out sway0 x/y, fVec z/w, sway1, fVec x/y.
+ * Writing fVec.set + m_vSway[i].set(fVec...) fixes the source shape but moves the spill slots of the hoisted this+off
+ * addresses (gcse bucket order, memory gcse-bucket-count-lever: about 8 more insns put them right) and then 16-20 lines
+ * stay in that block; 144 orders with locals: 26 at best. Before: same size, same structure: the order of the independent address computations and
  * the 0.25f stores in the prologue (the original puts `addiu s3,sp,32` after the first two fVec2 stores) and the
  * load/store order of the sway block (the original loads x_sway[0], y_sway[0], x_sway[1], y_sway[1] in that order and
  * stores m_vSway[0] first); tried: fVec2 as fields/chain/set/setAll, iAlphaBlend order, six statement orders of the
@@ -315,7 +319,6 @@ void C2DSprObj::getFukidasiRect(FVECTOR2 (*vOut)[4]) {
 TIMEQ C2DSprObj::initForSeq(SEQ_ANIMATION* pSeqAnim, LAY_SCREEN* pLayScreen) {
     IVECTOR iVec;
     FVECTOR fVec;
-    FVECTOR fVec2;
     m_iStep = 1;
     m_status = pSeqAnim->status;
     { BOOL b = m_status.base_stop; if (b) m_status.base_disable = 1; }
@@ -323,10 +326,7 @@ TIMEQ C2DSprObj::initForSeq(SEQ_ANIMATION* pSeqAnim, LAY_SCREEN* pLayScreen) {
     { BOOL b = m_status.rotate_stop; if (b) m_status.rotate_disable = 1; }
     { BOOL b = m_status.color_stop; if (b) m_status.color_disable = 1; }
     { BOOL b = m_status.scale_stop; if (b) m_status.scale_disable = 1; }
-    fVec2.x = 0.25f;
-    fVec2.y = 0.25f;
-    fVec2.z = 0.25f;
-    fVec2.w = 0.25f;
+    FVECTOR fVec2 = { 0.25f, 0.25f, 0.25f, 0.25f };
     INT iAlphaBlend = pSeqAnim->alpha_blend;
     if (iAlphaBlend) {
         ALPHA nInAlpha = iAlphaBlend == 1 ? ALPHA_PLUS : ALPHA_MINUS;

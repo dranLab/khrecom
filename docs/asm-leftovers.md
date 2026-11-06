@@ -5,6 +5,8 @@ the closest result. Revisit after the units with few leftovers are done; lessons
 
 | Unit | Function / data | Remaining difference |
 |---|---|---|
+| Game/Collision/CollUtilO | `.rodata` from asm | Same as Ride: the split puts its `.rodata` at 0x4893B4, 4 mod 8, starting with the previous unit's vtable tail. |
+| System/Sound/driver/sddrv_ee | `.bss` from asm | `static STR_DATA_CHK str_data_ee[6]` (the ref's only static) is 0x60 of the 0x110 bytes; with it alone everything after moves by 0x80. The rest is unknown. |
 | Game/Collision/Ride | `.rodata` from asm | Split puts the unit's `.rodata` at 4 mod 8 (starts with another unit's vtable tail); gcc 8-aligns strings, so source data can't line up. Needs a split change (out of scope). |
 | System/dlmalloc | `destroy_mspace` | Original: `lw seg.next; beqz; lw; bnezl; lw; L: bnezl; lw` (peeled step + while loop with a duplicated exit test). jump2 cross-jumps the peeled `lw; beqz` into the loop; an asm statement between them stops that but reorg then leaves the second test's delay slot unfilled. See the note in the source. |
 | System/Graphic/2d/2DCard | `replaceNorma` | Original loads the by-value `NormaSrc` as four `lhu` + `dsll`/`or` into a1; ours copies it to an aligned temporary and uses one `ld`. No struct shape or compiler version reproduces it. |
@@ -25,19 +27,16 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 
 | unit | functions left | instr left | parked | data from asm |
 |---|---:|---:|---:|---|
-| `Game/Player/PlayerSora` | 2 | 7322 | 2 |  |
-| `Form/Menu/JiminyMemo` | 83 | 5244 | 19 | .bss |
 | `Game/Player/PlayerDRiku` | 3 | 5073 | 3 |  |
 | `Form/Menu/Camp` | 7 | 4599 | 7 |  |
-| `Game/Player/PlayerRiku` | 2 | 2940 | 2 |  |
-| `Game/Player/Player` | 10 | 2868 | 10 |  |
 | `System/Graphic/Gprim` | 15 | 2159 | 15 |  |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
 | `Form/Menu/RoomCreation` | 1 | 1995 | 1 |  |
 | `Game/Map` | 2 | 1952 | 2 |  |
-| `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 | .rodata |
-| `Game/CardRevolver` | 7 | 1627 | 7 |  |
-| `System/Graphic/Model` | 9 | 1621 | 9 |  |
+| `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 |  |
+| `Game/Player/Player` | 5 | 1764 | 5 |  |
+| `System/Graphic/Model` | 7 | 1502 | 7 |  |
+| `Game/CardRevolver` | 6 | 1410 | 6 |  |
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
 | `Game/Enemy/HumanBoss` | 7 | 1088 | 7 |  |
 | `System/Graphic/PathData` | 2 | 1075 | 2 |  |
@@ -50,23 +49,24 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/TexUtil` | 4 | 651 | 4 |  |
 | `System/Rcf` | 6 | 649 | 6 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
-| `Game/Atel/Avatar` | 4 | 587 | 4 |  |
 | `System/Graphic/PackMan` | 2 | 540 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
 | `Game/BattleCard` | 2 | 532 | 2 |  |
+| `Game/Atel/Avatar` | 3 | 531 | 3 |  |
+| `Game/Player/PlayerRiku` | 1 | 520 | 1 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
-| `System/Graphic/Glare` | 1 | 446 | 1 | .data |
+| `System/Graphic/Glare` | 1 | 446 | 1 |  |
 | `System/Memoca` | 3 | 442 | 3 |  |
 | `Game/Player/NaviMap` | 1 | 425 | 1 |  |
 | `System/Sound/driver/sddrv_ee` | 2 | 403 | 2 | .bss |
 | `System/RcfCD` | 3 | 390 | 3 |  |
 | `Game/Game` | 1 | 371 | 1 |  |
-| `Game/Player/PlayerCamera` | 2 | 371 | 2 |  |
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
-| `Game/SceneInfo` | 3 | 344 | 3 |  |
 | `Game/Collision/CollAttack` | 3 | 334 | 3 |  |
+| `Game/Player/PlayerCamera` | 1 | 332 | 1 |  |
 | `Game/Enemy/BattleEnemy` | 2 | 327 | 2 |  |
 | `Form/Menu/SaveLoad` | 2 | 320 | 2 |  |
+| `Game/SceneInfo` | 2 | 314 | 2 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
 | `Game/Enemy/MapEnemy` | 1 | 290 | 1 |  |
 | `System/Graphic/ModelMan` | 2 | 268 | 2 |  |
@@ -79,20 +79,20 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/TaskMan` | 2 | 217 | 2 |  |
 | `Game/Atel/Atel` | 1 | 189 | 1 |  |
 | `System/Graphic/ShadowModel` | 1 | 188 | 1 |  |
-| `Game/Atel/AtelCrossFade` | 1 | 188 | 1 | .data |
+| `Game/Atel/AtelCrossFade` | 1 | 188 | 1 |  |
 | `Game/Enemy/EnemyWhitemushroom` | 1 | 184 | 1 |  |
 | `System/Movie/MSVideo` | 1 | 180 | 1 |  |
 | `System/Graphic/Effect/libppp/pppPart` | 1 | 168 | 1 |  |
-| `Game/CardBattle` | 2 | 155 | 2 |  |
 | `Game/Enemy/BattleEnemyManager` | 1 | 149 | 1 |  |
 | `Game/AttackMotion` | 1 | 136 | 1 |  |
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
+| `Form/Menu/JiminyMemo` | 1 | 122 | 1 |  |
 | `Game/Collision/CollUtilO` | 1 | 121 | 1 | .rodata |
 | `Game/Gimmick/GimmickPlantParent` | 1 | 108 | 1 |  |
 | `System/Graphic/Effect/effect` | 1 | 105 | 1 |  |
 | `Game/Movement` | 1 | 105 |  |  |
-| `System/Movie/AudioDec` | 1 | 97 |  |  |
 | `Game/Card` | 1 | 95 | 1 |  |
+| `Game/CardBattle` | 1 | 89 | 1 |  |
 | `Game/Player/PlayerGauge` | 1 | 77 | 1 |  |
 | `Game/Player/SummonTink` | 1 | 37 | 1 |  |
 | `System/Graphic/Anim` | 1 | 33 | 1 |  |
@@ -100,7 +100,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/2d/2DCard` | 1 | 30 | 1 |  |
 | `System/dlmalloc` | 1 | 14 | 1 |  |
 
-Units with all functions in C but data from asm: `Game/Atel/AtelBlur` (.data), `Game/Collision/Ride` (.rodata), `Game/EntityFactory` (.data).
+Units with all functions in C but data from asm: `Game/Collision/Ride` (.rodata).
 
 Units without a source file: `Game/Player/PlayerAnim`, `Game/Player/PlayerAttack`, `System/Graphic/Effect/libppp/draw/draw_w`, `System/Graphic/Effect/libppp/draw/draw_ws`, `System/Graphic/Effect/libppp/draw/global_w`, `System/Graphic/Effect/libppp/draw/md1`, `System/Graphic/Effect/libppp/draw/sin_t`, `System/Graphic/Effect/libppp/keProg/KeDMat`, `System/Graphic/Effect/libppp/pppfunctbl`, `cod/004FF700`, `cod/2C2B00`, `cod/3FF680`, `common`.
 
@@ -123,16 +123,14 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/DispList` | `_drawOT__19CDispListShadowDrawR5OTtag` | 245 | 62 of 291 lines, 4 bytes long - logic matches (CShadowModel::getSize inline). Left: the original does not strength-reduce the draw loop over pBuf[j] (li 12 + mult every iteration), which frees an s-register: it keeps i in s6 and spills hHnd, ours spills i. Tried: hHnd as a function-level local or … |
 | `System/Graphic/FrecFont` | `setupFontTex__9CFrecFontRC8RsrcInfoRC4CBuf` | 252 | (comment) Matches except for the order of two loop-invariant CSA values that loop.c hoists ((nCSA + 6) << 56 is computed before (nCSA + 2) << 56 in the original). |
 | `System/Graphic/FrecFont` | `makePkt__9CFrecFontR6CFntM2` | 656 | 331 of 749 lines - the draft has the original's structure (all locals in stack slots, contiguous MMI colour sequences as volatile in-place asm, control-code switch, outline/shadow passes), but the spill slots differ: the original's G_RGBA locals colExt/colBak/colSave get their (16-aligned) slots … |
-| `System/Graphic/Glare` | `makePkt__10CGlarePrim` | 446 | (comment) not matching: register allocation differs (the original keeps the -1 of its divisions by 32 in a saved register from the start); with it the function-local statics ofsX/ofsY, so .data comes from the original assembly |
+| `System/Graphic/Glare` | `makePkt__10CGlarePrim` | 446 |  |
 | `System/Graphic/HermitePathCamera` | `updatePos__18CHermitePathCameraR7FVECTORT1fi` | 632 | 88 of 723 lines - same structure; left: the case-2 fStep lives in f12 in the original (ours f2), the hoisted addresses of the BG-check and learp blocks get swapped s-registers (&m_vWPos s0, &vAdd s0 / &OldPos s1 in the original), the mInv address is kept in a register here and recomputed there. … |
 | `System/Graphic/Model` | `link__6CModelR7CCoords` | 207 | 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 … |
 | `System/Graphic/Model` | `getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3` | 88 | 3 lines off: the original stores vMN[1].z/.y through the &vMN[1] operand register (t1), ours through sp. Worked: vMN[i].set(MIN/MAX, ...) (default w = 1.0f), one asm statement with all operands, D_ labels for the +-1.7e38 constants. Tried: field stores, chained assignment, pointer local; permuter … |
 | `System/Graphic/Model` | `calcWorldBBox__6CModeli` | 153 | 38 lines off: the original keeps &pCrd->m_World as the strength-reduced loop pointer (s3 += 0xd0, counter counted down), &vMax/&vMin in s8/s7 for the init stores and the VU0 block, and loads the final bbox into f4/f5/f0..f3 in max-then-min order. Tried: pCrd[i] indexing (keeps the counter, 41 … |
-| `System/Graphic/Model` | `checkBSphere__FR6CCoordPC4BBOX` | 47 | 10 lines off, FP registers only: the original keeps the shared 0.5f in f5 (x sum f6, y[1] f7), ours 0.5f in f7. Worked: x[0] > x[1] compare, a copy tmp (declared first) of ctr as the call argument, sqrt after the copy. Tried: statement orders, w first/last, 0.5f local; permuter 12 min (37389 … |
 | `System/Graphic/Model` | `checkBBox__FRC7FMATRIXPC4BBOX` | 36 | 12 lines off, registers only: the original keeps the scratchpad pointer in v1 and the clip result in a0 (or a0,v0,a0; move v0,a0), ours v0/v1. Worked: the 0xC0000000 return last (if (!(x[1] < x[0])) {...}), v assigned inside the if, asm "nop" opening the if (ret) block (the original's extra nop … |
 | `System/Graphic/Model` | `resultCheckBBox__FR6CCoordPC4BBOX` | 18 | only the beqz target: the original's ret == 0 path branches to the OR (one OR for both paths, then jr ra; move v0,v1), ours to the jr ra (cse knows ret == 0 there and drops the else-arm OR); without the else the OR goes straight into v0 (combine). The OR's operand order (or v1,v0,v1) is right with … |
 | `System/Graphic/Model` | `_disp0_SetPacket__6CModelUiPA3_CiiUliPUl` | 588 | 137 of 659 lines off, same size; mostly registers: the original gives this s5 and iFlags&2 s4 (ours swapped), the bone/light min() selects use movn (an if-form gives that but swaps s0/s1 globally), the no-light branch materializes zero twice. Worked: case 2 with default, (USHORT) mode compares … |
-| `System/Graphic/Model` | `link__10CSemiModelP6CModel` | 72 | 13 lines off: after getRawMode the original computes isDataEmpty && isSemiDataEmpty into a1 and never uses it (dead code left after a cross-jump?); ours drops the semi half. Tried: unused BOOL local, empty if, ternary, statement, duplicated identical arms (24 lines). |
 | `System/Graphic/Model` | `makePkt__5CBBox` | 412 | 116 lines off, register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers. Tried: x[0] > x[1] compare, a … |
 | `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
 | `System/Graphic/ModelMan` | `setupDrawMode__9CModelMani` | 64 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
@@ -162,7 +160,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/Gprim` | `calcZ__8C3DCPrim` | 118 | registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter … |
 | `System/Graphic/Gprim` | `calcZ__8C3DTPrim` | 118 | registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter … |
 | `System/Graphic/2d/2DCard` | `replaceNorma__7C2DCardGQ27RCNORMA8NormaSrci` | 30 | (comment) Not matching: the original passes inNorma to createNorma as four lhu from the parameter's stack slot combined with dsll/or into a1 (extract_bit_field in 16-bit pieces); ours copies the struct to an 8-aligned temporary and loads it with one ld. No struct shape tried (bitfields, arrays, … |
-| `System/Graphic/2d/2DSprObj` | `initForSeq__Q22D29C2DSprObjPQ22D213SEQ_ANIMATIONPQ22D210LAY_SCREEN` | 325 | 20 of 342 lines differ (same size, same structure): the order of the independent address computations and the 0.25f stores in the prologue (the original puts `addiu s3,sp,32` after the first two fVec2 stores) and the load/store order of the sway block (the original loads x_sway[0], y_sway[0], … |
+| `System/Graphic/2d/2DSprObj` | `initForSeq__Q22D29C2DSprObjPQ22D213SEQ_ANIMATIONPQ22D210LAY_SCREEN` | 325 | 14 of 340 lines (2026-11-06, was 20: fVec2 is the brace init), all in the sway block. Markers: fVec.set(four sway values) (Coord.h:730) and m_vSway[i].set() (Coord.h:200); the stores come out sway0 x/y, fVec z/w, sway1, fVec x/y. Writing fVec.set + m_vSway[i].set(fVec...) fixes the source shape … |
 | `System/Graphic/2d/2DSprObj` | `move__Q22D29C2DSprObj` | 438 | 25 of 465 lines - only the vertex loop differs: the MMI colour multiply's 0xFF splat is a TImode constant here (`por v0,zero,zero` before `li`, the original only does `li`), the pmulth/tmp registers come out v1/v0 instead of a0/v1, the vertex-loop pointers get other registers and lCol is loaded … |
 | `System/Graphic/Effect/effect` | `Setup__11EFFECT_DATAPUxi` | 105 | 4 of 133 lines, same size - with i reused for the DPD loop and the ParNum TRACE before `p += 16` (draft below) the loop registers match; left: the two TRACE header reads go through data (s3) in the original, ours through p (s1), and `p += 16` sits before the ParNum TRACE there. The placeholder's … |
 | `System/Graphic/Effect/EffectMan` | `_updateCoord__10CEffectManP7CEffect` | 243 | 7 lines - _lengthVf4's iTmp is s3 in the original (ours v0; a register asm local reshuffles the whole function) and the hoisted %hi(s_vEffKhComScale) (lui s4) is scheduled before the mMat copy instead of into the `b`'s delay slot. |
@@ -176,7 +174,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/Effect/libppp/keProg/KeTh` | `KeThBP_Update` | 685 | (comment) Best attempt: same code apart from register allocation (the original has flg in s7, pTp in fp and &vf._06 in s6; this gets fp/s6/s7) and the order of a few spill slots (preStep - rootStep, &vf._07, &vf._08, flg & 0x120, &pRP->InVec), which shifts scheduling around them. |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | `pppKeShpTail3Draw` | 514 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | `pppKeShpTail3XDraw` | 532 |  |
-| `System/Sound/driver/sddrv_ee` | `TsSdSepPlayDBG` | 141 | (comment) Register allocation: sep_size's bytes and the sep_param scan loop get other temporaries (pointer/counter swapped). |
+| `System/Sound/driver/sddrv_ee` | `TsSdSepPlayDBG` | 141 | 4 lines with the barrier above (2026-11-06): the lbu of byte 13 vs the hoisted lui/li of the scan loop; sep_size forms 4-11 lines. Earlier: Register allocation: sep_size's bytes and the sep_param scan loop get other temporaries (pointer/counter swapped). |
 | `System/Sound/driver/sddrv_ee` | `TsSdVsbPlay` | 262 | (comment) Register allocation: addr is spilled instead of kept in s8 (one more stack slot), so most registers differ. |
 | `System/Movie/MSVideo` | `setLoadImageTagsYX__12CMoviePlayerPUiPviiiii` | 180 | (comment) Not matching: mby - 1 is not hoisted into a register for the inner loop (the original keeps it in s8 and spills i * 16), so the j++ / dsay increments are scheduled differently. |
 | `System/Rcf` | `finalize__4CRcf` | 111 | (comment) Near-match: register allocation of two statics and a loop-bound reload |
@@ -195,19 +193,16 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/BattleCard` | `stateDestroy__Q210CardBattle11CBattleCard` | 415 | 22 lines - the first _adjustRad of each case keeps the sum in the loaded register and copies it to ret (mov.s); ours computes the sum straight into ret (same as stateSnatch). Case 4 also swaps a1/a2 (timer vs dy). Inline/explicit wrap forms, store orders and 12 min of permuter (10k candidates) did … |
 | `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
 | `Game/CardBattle` | `testPlayingCard__Q210CardBattle11CCardBattleUi` | 89 | 2 lines, the final return only - the original computes 4 into v0 and movn's 1 from v1 when iDuelOK (the != path sets v0 = 1 in the bne delay slot, one exit); this form branches (beqz iDuelOK) instead of the movn. `if (!=) return 1; return !iDuelOK ? 4 : 1;` gives the exact movn block, but jump2 … |
-| `Game/CardBattle` | `decEnchantTime__Q210CardBattle11CCardBattleiii` | 66 | 9 of 81 lines - only the first m_nKind load: the original adds _PLAYER*4 + 380 before this (lbu 0(v0)) and keeps the value in a2; ours lbu 380(this + _PLAYER*4). No kind/pTime locals (the ref has only _PLAYER and pGauge) and _ref(m_pInstance) on the m_nKind reads gave the size (18 -> 9 lines). … |
 | `Game/CardRevolver` | `main__Q210CardBattle13CCardRevolver` | 321 | 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), … |
 | `Game/CardRevolver` | `rollDeck__Q210CardBattle13CCardRevolveriii` | 248 | 5 lines off, the direction `a`: the original computes it as li t3,1 / slt v0,v1,a1 / movz t3,v1,v0 with v1 = -1 set in both predecessors of the join, then negates num with bltzl; ours branches (bgez). Worked: one `i` for all three loops (s0), !m_iMode-first rc/pCards select, hand++ after setHand, … |
 | `Game/CardRevolver` | `changeMode__Q210CardBattle13CCardRevolverii` | 101 | 12 lines off, all in `limit`: the original loads m_nTotal[m_iMode] (lhu + sll 16) above the m_iMode branch and sign-extends (sra 16) only in that arm (interblock-scheduled split extension); ours branches first and uses lh. Worked: `if (inMode == -1) ^= 1; else =`, `!old_mode ? m_pCards : … |
 | `Game/CardRevolver` | `exeReload__Q210CardBattle13CCardRevolver` | 127 | 14 lines off: register allocation and latch order of the first loop - the original keeps i in t0 and the card offset in a2 (decremented first in the latch, in the continue paths' delay slots), ours the reverse; the second loop's i likewise. Worked (from 48 bytes over to same size): separate … |
 | `Game/CardRevolver` | `initAction__Q210CardBattle13CCardRevolver` | 265 | ~165 lines off, mostly register allocation: ours keeps one more value live across calls (the getStock() == -1 value is CSE'd into an s-register for the later getHand() test), so two flags spill instead of one (bReloadOC) and every flag moves one register. Structure found: decEnchantTime inside … |
-| `Game/CardRevolver` | `setStockInfo__Q210CardBattle13CCardRevolver` | 348 | 22 lines off, two places: the first block has CStockFolder::setStockInfo's open issue (the original issues the div before the pos.init() zero stores and the changeTexture zero arguments, ours after); the num > 0 arms load a0/a1 for setPos at the top of each arm with one shared jal in the original. … |
-| `Game/CardRevolver` | `setStockInfo__Q210CardBattle12CStockFolder` | 217 | 17 lines off, scheduling of the first block: the original issues div, then the changeTexture argument zeros interleaved with pos.init(), the trap check after; ours keeps them apart. Worked: inverted layout ternary (>= 0x6F first), _ref(g_pStockSkillList), m_uiState before m_uiCategory in default. … |
+| `Game/CardRevolver` | `setStockInfo__Q210CardBattle13CCardRevolver` | 348 | 5 lines off (brace-initialized pos, 2026-11-06; 22 before): the first m_uiUser == 1 arm's `sw y; jal setPos` should cross-jump into the else arm's, but sched1 puts (use (const_int 0)) after the else arm's call (it ends a block), so jump2's find_cross_jump compares USE with the arm's jump and … |
 | `Game/Game` | `endFieldSub__9CGameMain` | 371 | 4 of 426 lines - ref names/order and the six `SHORT nScene` inlines (_isEventScene) in place; the bEventNext arm as `if (_isEventScene(..) && !bPooh) bEventNext = TRUE;` (21 -> 4); left: the theater block's s4/s7 pair (the TRUE flags around the TRACE call). Earlier, stack reload registers. tried: … |
 | `Game/Map` | `init__4CMapii` | 1046 | 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/ while/goto loop shapes, by-value apply inline and a 10 min permuter run … |
 | `Game/Map` | `disp__4CMap` | 906 | 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes, group selection by player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons). The 44 bytes: the original keeps two copies of the "flush the last model" block (group and … |
 | `Game/SceneInfo` | `clear__10CSceneInfo` | 139 | ~110 lines - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders (incl. the lui order) and 7 min of permuter (10k candidates, 104 -> 98) did not get closer. |
-| `Game/SceneInfo` | `_checkAvailableDoorID__FRC8DoorInfo` | 30 | 2 lines - the constant 5 of the second _type compare: the original loads it into v1 (li v1,5 in the beq delay slot), ours into v0. Structure matches (switch on getDoorState, `== 4 break; != 5 return TRUE`); ~25 forms (ifs, result variable, nested switch, local type) and 4 min of permuter (3k … |
 | `Game/SceneInfo` | `rollbackEventDoorState__10CSceneInfoi` | 175 | ~35 lines - the outer room loop: the original re-materializes the s_CurrentFloor address for the room (mtlo/madd) and for the count each iteration; ours shares one base. Door/state/norma logic matches; room addressing forms and 5 min of permuter (42 -> 38) did not get it. |
 | `Game/Collision/CollAttack` | `chkGuardSuccess__11CCollAttackP9CCollBody` | 112 | (comment) not matching: the original's last angle wrap branch has an empty delay slot (ours: bc1fl with the abs.s) |
 | `Game/Collision/CollAttack` | `chkMutekiSuccess__11CCollAttackP9CCollBody` | 112 | (comment) not matching: the original's last angle wrap branch has an empty delay slot (ours: bc1fl with the abs.s) |
@@ -227,30 +222,20 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Atel/Avatar` | `_$_Q24ATEL7CAvatar` | 95 | 6 lines - the implicit lineY/lineX destructor calls get s5/s4 instead of s4/s5: their address pseudos tie on priority (2 refs / 17 insns) and ours numbers lineX first (lreg dump); no body form changed it. The draft uses the full classes of Gprim.h (inline ~C3DLine/~CGPrim). |
 | `Game/Atel/Avatar` | `onMove__Q24ATEL7CAvatariPvi` | 297 | 53 lines, registers only - with the ref's USHORT nType/nFlag (one lhu) and the final switch the code is the original's, but p (14 refs over 187 insns) loses the global-alloc priority tie against case 1's pV (3 over 13) and takes s2, pushing CEntity to s1 (the original: p s1, CEntity s4, one more … |
 | `Game/Atel/Avatar` | `RotateAvatarMain__Q24ATEL7CAvatar` | 139 | 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an … |
-| `Game/Atel/Avatar` | `onAvatarAttachEffect__Q24ATEL7CAvatariPvi` | 56 | 4 lines - the original stores rot's zero quad (por/sq) first, before the callee saves; ours after the p->Type load. Init forms/orders and 6 min of permuter (8.8k candidates) did not change it. |
 | `Game/Atel/VSME` | `acWaitReq__Q24ATEL4CVSMRQ24ATEL5Actorii` | 32 | same instructions and order except the wait_timer product: the original multiplies into LO ("mult $zero,s1,v1" + mflo before the sh), ours with the 3-operand mult into v1 (gcc's mulsi3_mult3 "l" vs "d" alternative, chosen by regclass: LO only when the product feeds a plain register copy, as for a … |
 | `Game/Player/Friend` | `setMagic__Q26Friend7CFriendi` | 1274 |  |
 | `Game/Player/NaviMap` | `main__Q25Gauge8CNaviMap` | 425 | (comment) Not matching: in the debug-rotation block (g_dw.player.iTemp == 2) the original keeps PI in $f3 from before the branch and loads 180.0f/-PI in $f2/$f1 (100.0f and -PI share $f1); here 180.0f is hoisted too and the registers of 180.0f/-PI swap (9 lines). Everything else matches; the "deg" … |
-| `Game/Player/Player` | `exeWalk__7CPlayer` | 83 | 2 lines differ: the delay slot of jal calcVelocityXZ (the original issues the m_fWalkSpeed store first and puts mov.s $f12,$f1 in the slot; this draft the reverse). The angle-wrap register (r in $f1, not $f13) is fixed by keeping aim_dir live after the call with an empty asm (see the draft); … |
-| `Game/Player/Player` | `exeWall__7CPlayer` | 517 | 4 lines differ (size, frame, every branch, call and register allocation match): at the start the original issues `lw m_iSubState` (getSubState) before the `sw zero` of vec.y, ours stores vec.y first (right after the lq of the getRot copy). Found 2026-10-25 from the $LM tags (25 -> 4): the first … |
-| `Game/Player/Player` | `isStartLadderJump__7CPlayer` | 120 | everything but the ofs block matches (wrap: r wrapped in place, then dir = r); left: after getPos the original issues lq pos (v1) before lui LADDER_LOCAL_OFS (v0), ours schedules the lui first (sched1 priority: hi->lwc1->swc1 chain) and allocates pos to a1. tried: all orders of pos/ofs statements … |
 | `Game/Player/Player` | `exeHang__7CPlayer` | 550 | 23 lines differ, all FP-register/load-order of the two angle wraps: the original loads m_fDir first ($f0) then m_fAnalogViewDir ($f1) for `view - dir + PI` (ours the reverse), and in the drop-off arm it loads dir into $f12 in the branch delay slots and copies it to $f22 after getPos (ours loads … |
 | `Game/Player/Player` | `initAttackField__7CPlayeri` | 81 | registers match; only the stores after the g_fGravity load are scheduled differently (the original stores m_JumpState right after the load and m_fJumpGravity before the g_CardBreakTime load; ours stores them later). tried: all 24 orders of the JumpState/CardBreakTime/JumpGravity/JumpSpdY block, … |
 | `Game/Player/Player` | `initAttack__7CPlayeri` | 104 | same spot as initAttackField: around the g_fGravity load the original keeps the %hi in v0 (later s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi moves. The flag block (battle 0x10/0x80000/8, then trg 4) and the ternary m_iComboBoost match. … |
-| `Game/Player/Player` | `chkDamage__7CPlayer` | 961 | 20 lines differ, same size; structure, all branches, calls, the 40-entry jump table, frame and strings match. Left, four scheduling/register spots: (1) old_condition (isConditionFlag(0x881803F)): the original loads the flag word into v1 and the mask into v0, ours the reverse; (2) case 6 … |
+| `Game/Player/Player` | `chkDamage__7CPlayer` | 961 | 8 lines differ (2026-11-06, was 20: both vel brace-initialized, m_fDir store between brace and copy; markers at 9456/9593: por, sq 0x30, swc1 y 0x34, lq 0x30, sq 0x20 all on one line, so a temporary copied straight into vec; (FVECTOR){..} does not compile at the first site, braces at both sites … |
 | `Game/Player/Player` | `setConfuse__7CPlayerii` | 68 | in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but swaps v0/a2 (tq/pad). tried: all 6 statement orders x tq forms (ternary, param default, … |
-| `Game/Player/Player` | `chkChargeMove__7CPlayeri` | 91 | only the block before chargeReloadCard is scheduled differently: the original zeroes pos with v1 after the flag 'and' and loads m_pRevolver after the flag store; ours zeroes pos in a0 first and loads m_pRevolver before the store. tried: all orders of setPlayerFlag/pos._q/pos.w (the 5-line ones … |
-| `Game/Player/Player` | `exeFooting__7CPlayer` | 293 | all but 4 instructions match (frame, branches, walk block registers). Left: in the analog walk arm the original issues `lw m_pMove` between the `sq t._q` and the `swc1 t.y` and loads `lq t` only after the m_fDir store; ours puts the lq right after the t.y store and the m_pMove load after it. … |
-| `Game/Player/PlayerCamera` | `getPlayerCameraDir__Q212PlayerCamera13CPlayerCamera` | 39 | (comment) Only the scheduling of the first block differs: the original zeroes dir (por/sq) before loading m_pInstance (the zero gets $v1, then m_pInstance), ours loads m_pInstance first. |
 | `Game/Player/PlayerCamera` | `procFieldNormal__Q212PlayerCamera13CPlayerCamera` | 332 |  |
 | `Game/Player/PlayerDRiku` | `setAttack__Q22PL12CPlayerDRiku` | 451 | 7 lines off, registers only: in the card branch the original keeps %hi(g_pBattleCardList) in t0 and the shared constant 1 (m_iAttackNo == 1, _upKind's shift) in a2, ours t1 and t0. Worked: CPlayer::setAttack's form, the player-flag 0x80000 arm first, `pre == 7 \|\| isAir()` for the last hit, case 7 … |
 | `Game/Player/PlayerDRiku` | `exeStockSkill__Q22PL12CPlayerDRiku` | 3473 | structurally complete (35 cases in the original order, Riku's 0x6cc-0x6f9 group renumbered to 0x712-0x73f), same frame, 8 bytes long, 173 of 3903 lines off: case 1's attack-ID switch keeps a compare for the empty case 0x690 in the original; cross-jumped tails differ (0x67c's flag-and-return tail, … |
 | `Game/Player/PlayerDRiku` | `setMagic__Q22PL12CPlayerDRikuiii` | 1149 | same structure and size within 8 bytes, 310 of 1363 lines off: the BULLET_PARAM field stores and the member loads feeding them are scheduled differently in every case (the original loads m_AtkKind, m_AtkAttr, m_iAttackPower in that order and stores them together), plus registers in the stock-skill … |
 | `Game/Player/PlayerGauge` | `setCharge__Q25Gauge12CEscapeGaugef` | 77 | 3 lines off, the getLayPosition argument loads: the original sets a2 first and a1 (7) last (in the jal delay slot), ours a1 first. Worked: case 2 with its own copy of case 1's body (separate tree nodes 1/0/2/3, cross-jumped later), case 0 falling into it. Tried: _ref(g_szLadCockpit), FALSE vs 0, … |
-| `Game/Player/PlayerRiku` | `exeStockSkill__Q22PL11CPlayerRiku` | 2420 | (comment) Best attempt (same structure): the CBattleEnemy flag tests get swapped registers, 0x6CD doesn't reload the flag, and 0.0f isn't rematerialized in f20 in 0x6CC. |
 | `Game/Player/PlayerRiku` | `setMagic__Q22PL11CPlayerRikuiii` | 520 | (comment) Best attempt (same structure): BULLET_PARAM field stores and the attack-power loads are scheduled differently. |
-| `Game/Player/PlayerSora` | `exeStockSkill__Q22PL11CPlayerSora` | 7049 | 14 of 7930 lines differ, in three case groups (711/741/1042; all other jump-table groups match): the original loads m_pMove (lw 0xa0) between the two stores into the {0, d0, 0, 0} temp and stores m_fDir before copying the temp; ours (sched1) loads m_pMove after both temp stores and sched2 keeps it … |
-| `Game/Player/PlayerSora` | `exeGlide__Q22PL11CPlayerSora` | 273 | only the analog-steering block after Homing differs: the original loads m_pMove (lw v1,0xa0) before the y store into the {0, dir, 0, 0} temporary at sp+0x20 and copies it (lq/sq to sp+0x10) after the m_fDir store; ours stores y and loads the temp first (its stack-temp accesses conflict with this-> … |
 | `Game/Player/SummonTink` | `initRecover__Q26Summon11CSummonTink` | 37 | (comment) Best attempt: same size; combine folds the Crd() result straight into a3 ("move a3,v0" right after the call), so the effect name's address lands in v0 instead of v1 and the lui/lw are scheduled later. |
 | `Game/Enemy/BattleEnemy` | `setupFlick__12CBattleEnemy` | 82 | the 30-degree constant (0.5235988f) is loaded once into $f20 and reused for sinf, cosf and calcOrbitSpeedFromDistance in ours; the original reloads it (lui/ori/mtc1) before each call and keeps the sinf result in $f20 instead (vel.y stored after cosf); tried: field stores vs vel.set(), … |
 | `Game/Enemy/BattleEnemy` | `initEnemyParam__12CBattleEnemyiii` | 245 | 34 lines - the Riku-game scan loop: the original places the getRsrcData() ternary before the inline getExtraParam's found block and keeps the parameter in s0 (ours: s2, blocks swapped); the rest (seek loops, relocation, floor mapping, basic param) matches; tried: while/for/continue loop forms, … |
@@ -275,29 +260,11 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setMainCmd__5CCampii` | 257 | 40 of 285 lines differ (was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else branch `this` is in s0 as in the original; left: in the font-replacing loop the … |
 | `Form/Menu/Camp` | `setStatusWin1__5CCampi` | 429 | 13 of 487 lines differ (was 23): vec.set() (the ref's inlined `FVECTOR *this`) and a precomputed `m_bPlayerKind + 0xF` (permuter) fixed the rest; left: the original keeps &vec in v0 (y/w/z stores and the later fShift = vec.z load through it), so pPlayerManager is reloaded from its spill slot for … |
 | `Form/Menu/JiminyMemo` | `ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii` | 122 | 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches. tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the … |
-| `Form/Menu/JiminyMemo` | `contentMenu__11CJiminyMemo` | 859 | 129 lines: the stack slots of iFlag[5]/bComp[5] (and the pMarkSeq/pNewSeq spills) differ, which shifts every s-register from the prologue on (s7 vs s8 saves); the code itself matches in structure. tried: declaration orders of posi/telopNo/iFlag/bComp/pMarkSeq/pNewSeq (posi after bComp fixes the … |
-| `Form/Menu/JiminyMemo` | `contentCollection__11CJiminyMemo` | 1759 | 2 lines: in case 40's card-view branch the original stores the step (50, v1) before the next mode (8, v0); ours stores the mode first. The sched2 dump shows both stores tied (prio 5, both after the shift.x/y loads), broken by RTL order; writing setContentStep(50) first fixes the store order but … |
-| `Form/Menu/JiminyMemo` | `contentCharaView_ModelView__11CJiminyMemo` | 287 | 6 lines: three FP registers of case 40 (DEG2RAD(2.0f) constant, 1/4096 constant, the rotation load: original f4/f1/f3, ours f1/f3/f4). Everything else matches. tried: line-marker layout (both table arms written out, flags 0x8000 then 0x4000, setter order, ry split over 3 statements), literal vs … |
-| `Form/Menu/JiminyMemo` | `contentMinigame__11CJiminyMemo` | 688 | 34 lines, all stack offsets: the six hoisted string addresses (strBGlider..strBPanic, &scoreStr) are spilled in another slot order (GCSE/PRE creates their pseudos in hash-table order: ours BPanic first, the original BGlider first). Everything else matches (time math via the Com.h(59) seconds … |
-| `Form/Menu/JiminyMemo` | `setPosition__15CMemo2DSequenceRC7FVECTOR` | 10 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `setLocalPosition__15CMemo2DSequenceRC7FVECTOR` | 10 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `setScale__11CMemo2DCardf` | 9 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `setContentParam__11CJiminyMemoii` | 26 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `getContentParam__11CJiminyMemoi` | 23 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `setContentScroll__11CJiminyMemoiRC7FVECTOR` | 8 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `getContentScroll__11CJiminyMemoiR7FVECTOR` | 12 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `mainInit__11CJiminyMemo` | 320 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `mainLoadWait__11CJiminyMemo` | 332 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `mainIn__11CJiminyMemo` | 322 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `mainInWait__11CJiminyMemo` | 18 | final group, see the note above getTaskPointer<T> |
-| `Form/Menu/JiminyMemo` | `mainLoop__11CJiminyMemo` | 2 | final group, see the note above getTaskPointer<T> |
-| `Form/Menu/JiminyMemo` | `mainOut__11CJiminyMemo` | 13 | final group, see the note above getTaskPointer<T> |
-| `Form/Menu/JiminyMemo` | `mainOutWait__11CJiminyMemo` | 22 | final group, see the note above getTaskPointer<T> |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). |
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 251 functions (63812 instructions) in 74 units, 185 of them parked; 11 units take a data section from assembly.
+Totals: 153 functions (47220 instructions) in 72 units, 152 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

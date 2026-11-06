@@ -231,6 +231,9 @@ void pppStartVu1ShapeProg(int fog) {
     }
 }
 
+/* pppVu1ShapeDraw's strings, for its INCLUDE_ASM; remove with it. */
+asm(".section .rodata\n.align 3\n.asciz \"c:/KHCOM/MainApp/System/Graphic/Effect/libppp/draw/shape.c\"\n"
+    ".align 3\n.asciz \"sh_counter <= 12\"\n.align 3\n.previous");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Effect/libppp/draw/shape", pppVu1ShapeDraw);
 
 /* Close: 8 lines off - the DMA tag field stores (id/next/qwc/p[]) of tags 0, 2 and 3 are scheduled
@@ -1819,4 +1822,4 @@ void *pppGetVu1DrawSpad(void) {
     ppvVu1SprDbId ^= 1;
     return ppvVu1SprDbId ? (void *)0x70002D00 : (void *)0x70001A00;
 }
-// SOURCE DATA: .bss
+// SOURCE DATA: .rodata .bss

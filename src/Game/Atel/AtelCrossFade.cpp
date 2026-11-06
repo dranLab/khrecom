@@ -52,6 +52,7 @@ void sceDmaSendN(sceDmaChan* d, void* addr, int size);
 #include "include_asm.h"
 
 namespace ATEL {
+CAtelCrossFade* CAtelCrossFade::m_pInstance = NULL;
 
 /* (original form unknown) */
 static inline void _setIVector(IVECTOR& v, INT x, INT y, INT z, INT w) {
@@ -276,4 +277,4 @@ BOOL CAtelCrossFade::isCrossFadeDrawImage() {
 
 } // namespace ATEL
 
-// SOURCE DATA: .rodata
+// SOURCE DATA: .data .rodata

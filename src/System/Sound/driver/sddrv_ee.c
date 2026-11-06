@@ -875,7 +875,7 @@ asm(".section .rodata\n"
     ".previous");
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Sound/driver/sddrv_ee", TsSdSepPlayDBG);
 
-/* Register allocation: sep_size's bytes and the sep_param scan loop get other temporaries (pointer/counter swapped). */
+/* Parked: 4 lines with the barrier above (2026-11-06): the lbu of byte 13 vs the hoisted lui/li of the scan loop; sep_size forms 4-11 lines. Earlier: Register allocation: sep_size's bytes and the sep_param scan loop get other temporaries (pointer/counter swapped). */
 #if 0
 void TsSdSepPlayDBG(int addr, int vol, int pan, int se_id, int mtrack, int dtime) {
     int sep_num;
@@ -895,6 +895,8 @@ void TsSdSepPlayDBG(int addr, int vol, int pan, int se_id, int mtrack, int dtime
         return;
     }
     sep_num = TsSdGetSepNum(addr);
+    do { /* MATCH: empty loop = scheduling barrier (decomp-permuter): 16 -> 4 lines */
+    } while (0);
     sep_size = ((u_char *)addr)[12] + (((u_char *)addr)[13] << 8);
     for (num = 0; num < 4; num++) {
         if (((sep_param[num] >> 23) & 3) != 2) {

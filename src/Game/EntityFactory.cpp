@@ -32,7 +32,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 
-CEntityFactory* CEntityFactory::m_pInstance;
+CEntityFactory* CEntityFactory::m_pInstance = NULL;
 
 CEntityFactory::CEntityFactory() : CTask(getSysTask(1), 0x4000) {
     declareSysTask(4);
@@ -162,4 +162,4 @@ void LoadBattleEnemy() {
     CRcf::reqLoadEnemy(900);
 }
 
-// SOURCE DATA: .rodata
+// SOURCE DATA: .data .rodata
