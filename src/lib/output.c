@@ -161,8 +161,12 @@ static void _cpr8(_sceMpegDecoder *d, _sceMpegPicture *pict)
 }
 /* Parked: 24 of 189 lines, 4 bytes long (2026-11-06, first attempt). Worked: ptsStep, lastPts, ptsField and showCount are
    volatile (reloaded across __muldi3, a full ld before the truncation), one embedded read of ptsStep, the flag word's
-   or tree (96 forms searched). Left: the original reloads tags in the beqz delay slot (volatile tags keeps the reload
-   but blocks the slot), `*pPts = pict->pts` goes through s5 there, and the buffer-size test's flag is in s0. */
+   or tree (96 forms searched). Left: the original reloads tags in the beqz delay slot, filled by GNU as, not gcc (as only
+   swaps the insn right before the branch, so the lw has to follow the `and`; hasPts/outputMode/nextPts look volatile
+   too: gcc must not fill that slot from the target, and _dispRefImageField reloads hasPts after the same store).
+   Tried: volatile tags (the lw lands above the `and`, 24-30 lines), tags through a union (order right, slot still
+   nop, 32), all on one line for the $LM rule. `*pPts = pict->pts` goes through s5 there; the size test's flag is in s0.
+   _dispRefImageField is this body twice: wait for this one. */
 #if 0
 static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n)
 {
