@@ -683,8 +683,6 @@ void resultCheckBBox(FVECTOR& min, FVECTOR& max) {
     asm volatile("sqc2 $vf2, 0(%0)" : : "r"(&min) : "memory");
     asm volatile("sqc2 $vf3, 0(%0)" : : "r"(&max) : "memory");
 }
-/* Parked: only the beqz target: the original's ret == 0 path branches to the OR (one OR for both paths, then jr ra; move v0,v1), ours to the jr ra (cse knows ret == 0 there and drops the else-arm OR); without the else the OR goes straight into v0 (combine). The OR's operand order (or v1,v0,v1) is right with `{ INT t = ret | clip; clip = t; }` in the then-arm (2026-11-04; ret | clip, clip | ret, inline shift and swapped declarations gave or v1,v1,v0; also tried: goto into the OR, do{}while(0) after it, INT res join, ret = clip copies). Before that: `clip |= ret` in both arms of `if (ret)` gave the copy (2 -> 1, build/joinsweep.py). Before: the original ORs into clip's register and copies it (or v1,v0,v1; jr ra; move v0,v1), ours ORs straight into v0. Worked: !(x[0] > x[1]) (load order), clip |= ret in the if-block with the 0xC0000000 return last, asm "nop" opening the if (ret) block. An `asm("or %0, %1, %0" : "+r"(clip) : "r"(ret))` for the OR matches the whole function, kept out (MIPS arithmetic stays C). The ref has only `INT ret` (no clip local). Tried: ternary + inline helper, if/else result, block-local clip, register asm v0/v1 locals, empty "+r" barrier. */
-#if 0
 INT resultCheckBBox(CCoord& crd, const BBOX* bbox) {
     INT ret;
     INT clip;
@@ -694,17 +692,14 @@ INT resultCheckBBox(CCoord& crd, const BBOX* bbox) {
         if (ret) {
             asm volatile("nop");
             ret = (ret | 0x8000) << 16;
-            { INT t = ret | clip; clip = t; }
-        } else {
-            clip |= ret;
         }
+        asm volatile(""); /* MATCH: reorg cannot take the or for the beqz slot */
+        { INT t = ret | clip; clip = t; }
+        asm volatile("" : : "r"(clip)); /* MATCH: a second use keeps combine from moving the or into the return value */
         return clip;
     }
     return 0xC0000000;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", resultCheckBBox__FR6CCoordPC4BBOX);
-#endif
 INT CModel::checkBBox() {
     INT ret;
     if (m_pCrds->getCoordNum() <= 0) return -1;
