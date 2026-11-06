@@ -50,7 +50,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Rcf` | 5 | 552 | 5 |  |
 | `System/Graphic/PackMan` | 2 | 540 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
-| `Game/BattleCard` | 2 | 532 | 2 |  |
 | `Game/Atel/Avatar` | 3 | 531 | 3 |  |
 | `Game/Player/PlayerRiku` | 1 | 520 | 1 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
@@ -68,13 +67,13 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
 | `Game/Enemy/MapEnemy` | 1 | 290 | 1 |  |
-| `System/Graphic/ModelMan` | 2 | 268 | 2 |  |
 | `Game/Collision/CollDisp` | 2 | 262 | 2 |  |
 | `System/Graphic/DispList` | 1 | 245 | 1 |  |
 | `System/Math3D` | 1 | 234 | 1 |  |
 | `Game/Collision/CollBody` | 1 | 232 | 1 |  |
 | `System/Wnd` | 1 | 225 | 1 |  |
 | `System/TaskMan` | 2 | 217 | 2 |  |
+| `System/Graphic/ModelMan` | 1 | 204 | 1 |  |
 | `Game/Atel/Atel` | 1 | 189 | 1 |  |
 | `Game/Atel/AtelCrossFade` | 1 | 188 | 1 |  |
 | `Game/Enemy/EnemyWhitemushroom` | 1 | 184 | 1 |  |
@@ -84,6 +83,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
 | `Form/Menu/JiminyMemo` | 1 | 122 | 1 |  |
 | `Game/Collision/CollUtilO` | 1 | 121 | 1 | .rodata |
+| `Game/BattleCard` | 1 | 117 | 1 |  |
 | `Game/Gimmick/GimmickPlantParent` | 1 | 108 | 1 |  |
 | `System/Graphic/Effect/effect` | 1 | 105 | 1 |  |
 | `Game/Movement` | 1 | 105 |  |  |
@@ -124,11 +124,10 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/Model` | `link__6CModelR7CCoords` | 207 | 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 … |
 | `System/Graphic/Model` | `getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3` | 88 | 3 lines off: the original stores vMN[1].z/.y through the &vMN[1] operand register (t1), ours through sp. Worked: vMN[i].set(MIN/MAX, ...) (default w = 1.0f), one asm statement with all operands, D_ labels for the +-1.7e38 constants. Tried: field stores, chained assignment, pointer local; permuter … |
 | `System/Graphic/Model` | `calcWorldBBox__6CModeli` | 153 | 38 lines off: the original keeps &pCrd->m_World as the strength-reduced loop pointer (s3 += 0xd0, counter counted down), &vMax/&vMin in s8/s7 for the init stores and the VU0 block, and loads the final bbox into f4/f5/f0..f3 in max-then-min order. Tried: pCrd[i] indexing (keeps the counter, 41 … |
-| `System/Graphic/Model` | `checkBBox__FRC7FMATRIXPC4BBOX` | 36 | 12 lines off, registers only: the original keeps the scratchpad pointer in v1 and the clip result in a0 (or a0,v0,a0; move v0,a0), ours v0/v1. Worked: the 0xC0000000 return last (if (!(x[1] < x[0])) {...}), v assigned inside the if, asm "nop" opening the if (ret) block (the original's extra nop … |
+| `System/Graphic/Model` | `checkBBox__FRC7FMATRIXPC4BBOX` | 36 | 12 lines, same size (the tail as resultCheckBBox) - registers only: the original has ret v0, the scratchpad pointer v1, clip a0, as if the three overlapped in priority order. Ours keeps the pointer local to the first block, so it takes v0 and clip v1. With "r"(v) in the join barrier v goes global … |
 | `System/Graphic/Model` | `_disp0_SetPacket__6CModelUiPA3_CiiUliPUl` | 588 | 137 of 659 lines off, same size; mostly registers: the original gives this s5 and iFlags&2 s4 (ours swapped), the bone/light min() selects use movn (an if-form gives that but swaps s0/s1 globally), the no-light branch materializes zero twice. Worked: case 2 with default, (USHORT) mode compares … |
 | `System/Graphic/Model` | `makePkt__5CBBox` | 412 | 116 lines off, register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers. Tried: x[0] > x[1] compare, a … |
 | `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
-| `System/Graphic/ModelMan` | `setupDrawMode__9CModelMani` | 64 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
 | `System/Graphic/PackMan` | `_initFrameEffPacket__Fiiii` | 487 | 2 lines - case 2's two XYZ2 ORs: the original has the X register first (or v0,s2,v0 / or v0,t7,v0), ours puts the shifted Y first; x \| y and y \| x source order, a shared macro for the three cases, case 3's h/nh form with constant 12 and a 15 min permuter run (21k candidates) all stay at 2. |
 | `System/Graphic/PackMan` | `sceVif1PkCloseUpkCode__FP13pacVif1Packet` | 53 | ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 + 15 min … |
 | `System/Graphic/PathData` | `getNearPath__11CPathVectorR7FVECTORPfT2PiRC7FVECTORPC7FVECTORif` | 586 | 4 lines (2026-11-06, was 9: fNearT = 0.0f right after iNearStep, statement changes from tools/permuter.py; its declaration shuffle was noise); left: the hoisted 0.0f compare constant is a copy of fNearT here, mtc1 zero in the original, and one mov.s $f27,$f3 sits in another arm. Earlier: 9 lines - … |
@@ -160,7 +159,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Movie/MSVideo` | `setLoadImageTagsYX__12CMoviePlayerPUiPviiiii` | 180 | (comment) Not matching: mby - 1 is not hoisted into a register for the inner loop (the original keeps it in s8 and spills i * 16), so the j++ / dsay increments are scheduled differently. |
 | `System/Rcf` | `finalize__4CRcf` | 111 | (comment) Near-match: register allocation of two statics and a loop-bound reload |
 | `System/Rcf` | `_parseRCF_EntryFile__FUii` | 123 | 28 of 169 lines, same size - the 0x7F (sound list) branch's CBuf/RsrcInfo setup: the original loads s_nReadGroup/s_nLinkOwnerGroup/s_bSceneManagedMode into t2/t0/t1 before the CBuf vtable lui and keeps the constant 1 in a3; ours schedules the vtable first (t3/t1/t2, t0). Rest matches with … |
-| `System/Rcf` | `_atoi__FPCc` | 71 | _atoi: 11 of 77 lines, 8 bytes short - hex/decimal paths as the original; left: the original keeps a branch for the isupper() lowercase step where ours makes movz (ternary, if/else, inline and !isupper forms all give movz), and the decimal loop's p++/return tail scheduling. Permuter 6 min: no gain. |
+| `System/Rcf` | `_atoi__FPCc` | 71 | _atoi: 7 of 78 lines, same size - hex/decimal paths and the isupper branch (_tolower) as the original; left: the decimal loop: the original's top is not aligned and p++ stays last. Real loop forms give the align nop and move p++ (for (;; p++), while, tests in the condition); a goto loop drops it … |
 | `System/Rcf` | `_atolen__FPCc` | 73 | _atolen: 14 of 81 lines, 4 bytes short - _atoi's shape (one return, goto exits, '$' test first with the 0x case inside `if (*p != '$')`); left: the same isupper branch-vs-movz in _hexValue as _atoi, and the original's block order (0x case jumps over the '$' block to `nRet = 2`, p = lpszInStr + 2 … |
 | `System/Rcf` | `loadNextCategoryInfo__4CRcfiPciPi` | 174 | (comment) Near-match: register allocation |
 | `System/RcfCD` | `_startCdRead__Fii` | 41 | 4-8 lines, varying between identical builds (the draft above is the C) - the hoisted lui's of the s_n*_R statics get s5/s6 in an order that changes per compiler run (gcse PRE hash order, memory gcse-pre-hash-order); store orders tried (all worse). Kept asm because the result is not reproducible. |
@@ -170,7 +169,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/TaskMan` | `_invokePrimary_Main__8CTaskManR13TaskMainParamR5CTask` | 82 |  |
 | `Game/AttackMotion` | `initialize__13CAttackMotionP14ATK_COLL_PARAMi` | 136 |  |
 | `Game/BattleCard` | `destroy__Q210CardBattle11CBattleCardi` | 117 | 5 lines - the original keeps two copies of `addGimmickCount(-1); break;` (cases 0xe and 6); our jump2 cross-jumps case 0xe's tail into case 6. Per-case flag sets, gotos, labels, argument spellings and block scopes all merge too (synthetic tests build/ps/cj/d*.cpp, e*.cpp, f1.cpp). |
-| `Game/BattleCard` | `stateDestroy__Q210CardBattle11CBattleCard` | 415 | 22 lines - the first _adjustRad of each case keeps the sum in the loaded register and copies it to ret (mov.s); ours computes the sum straight into ret (same as stateSnatch). Case 4 also swaps a1/a2 (timer vs dy). Inline/explicit wrap forms, store orders and 12 min of permuter (10k candidates) did … |
 | `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
 | `Game/CardBattle` | `testPlayingCard__Q210CardBattle11CCardBattleUi` | 89 | 2 lines, the final return only - the original computes 4 into v0 and movn's 1 from v1 when iDuelOK (the != path sets v0 = 1 in the bne delay slot, one exit); this form branches (beqz iDuelOK) instead of the movn. `if (!=) return 1; return !iDuelOK ? 4 : 1;` gives the exact movn block, but jump2 … |
 | `Game/CardRevolver` | `main__Q210CardBattle13CCardRevolver` | 321 | 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), … |
@@ -241,7 +239,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 134 functions (44380 instructions) in 68 units, 133 of them parked; 5 units take a data section from assembly.
+Totals: 132 functions (43901 instructions) in 68 units, 131 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

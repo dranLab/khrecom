@@ -1053,10 +1053,13 @@ SHORT CRcf::getBattleScene(SHORT nArea, SHORT nScene) {
     return 0;
 }
 static inline INT _tolower(INT c) {
+    INT l = c + 0x20;
     if (isupper(c)) {
-        return c + 0x20;
+    } else {
+        __asm__ volatile(""); /* MATCH: keeps the branch: jump.c would make this a movz */
+        l = c;
     }
-    return c;
+    return l;
 }
 
 static inline INT _hexValue(INT c) {
@@ -1072,9 +1075,9 @@ static inline INT _hexValue(INT c) {
     return n;
 }
 
-/* Parked: _atoi: 11 of 77 lines, 8 bytes short - hex/decimal paths as the original; left: the original keeps a
- * branch for the isupper() lowercase step where ours makes movz (ternary, if/else, inline and !isupper forms
- * all give movz), and the decimal loop's p++/return tail scheduling. Permuter 6 min: no gain. */
+/* Parked: _atoi: 7 of 78 lines, same size - hex/decimal paths and the isupper branch (_tolower) as the original; left:
+ * the decimal loop: the original's top is not aligned and p++ stays last. Real loop forms give the align nop and move
+ * p++ (for (;; p++), while, tests in the condition); a goto loop drops it but loses the hoisted lui/li 10. */
 #if 0
 INT _atoi(const CHAR* lpszInStr) {
     INT nRet = 0;
