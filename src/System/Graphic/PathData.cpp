@@ -302,7 +302,7 @@ void CPathVector::getPathParam(PATH_PARAM& sParam) const {
 /* placeholder: CVector<G_STRIP>'s assert strings come here (getNearPath, INCLUDE_ASM, uses operator[]) */
 inline void _pathDataVectorStrings(G_STRIP_VECTOR& v) { v.back(); }
 
-/* Parked: 9 lines - fNearDis/fNearT get f27/f26 instead of f26/f27, and the hoisted 0.0f compare constant is a copy of
+/* Parked: 4 lines (2026-11-06, was 9: fNearT = 0.0f right after iNearStep, statement changes from tools/permuter.py; its declaration shuffle was noise); left: the hoisted 0.0f compare constant is a copy of fNearT here, mtc1 zero in the original, and one mov.s $f27,$f3 sits in another arm. Earlier: 9 lines - fNearDis/fNearT get f27/f26 instead of f26/f27, and the hoisted 0.0f compare constant is a copy of
    fNearT's register (cse2 equivalence) instead of its own `mtc1 zero,$f24`; the copy adds a ref to fNearT, which then
    wins the allocation. A clobber-free sqc2 asm for vNearNv (cse flush) fixes both but moves 6 spill slots (29 lines).
    tried: init orders, chained/decl initializers, fNearT = t/fBottom = 0, fNearDis arm forms (13), decl order of
@@ -335,16 +335,16 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
     FVECTOR vCloss;
     m_DDPathPolys.m_vVERT.clear();
     iNearStep = 0;
+    fNearT = 0.0f;
     fNearDis = 1.7014118e+38f;
     fChkNearDis = 1.7014118e+38f;
-    fNearT = 0.0f;
     _zeroVectorVu0(vNearNv);
     dir = 0;
     for (i = -1; i <= path_max - 1; i++) {
         step[0] = i - 1;
         step[1] = i;
         step[2] = i + 1;
-        step[3] = i + 2;
+        step[3] = 2 + i;
         for (j = 0; j < 4; j++) {
             if (step[j] < 0) {
                 SubVector(fvTmp, pathv[0], pathv[1]);
@@ -357,10 +357,10 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
                 ScaleVector(fvTmp, fvTmp, hashi * (FLOAT)(step[j] - (path_max - 1)));
                 AddVector(pv[j], pathv[path_max - 1], fvTmp);
             } else {
-                pv[j] = pathv[step[j]];
+                __typeof__(step[j]) pt776 = step[j]; pv[j] = pathv[pt776];
             }
         }
-        fDis = Math3D::GetDistance2OfLineAndPoint(pv[1], pv[2], vTarget);
+        { fDis = Math3D::GetDistance2OfLineAndPoint(pv[1], pv[2], vTarget); }
         if (fDis < fChkNearDis) {
             pv[3].y = pv[2].y = pv[1].y = pv[0].y = vTarget.y;
             flg = 0;
@@ -375,13 +375,13 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
             if (InnerProduct(pnv, pvec) >= 0.0f) flg = 1;
             for (j = 1; j < 4; j++) {
                 SubVector(v0[j], pv[j], pv[j - 1]);
-                Normalize(v0[j], v0[j]);
+                { Normalize(v0[j], v0[j]); }
                 OuterProduct(v0[j], v0[j], fvTmp);
                 ScaleVector(v0[j], v0[j], fChkDis);
                 if (flg) AddVector(v0[j], pv[j], v0[j]);
                 else SubVector(v0[j], pv[j], v0[j]);
             }
-            for (j = 1; j < 3; j++) {
+            for (j = 1; 3 > j; j++) {
                 if (i + (j - 1) <= 0 || i + (j - 1) >= path_max - 1) {
                     fBottom = 0.0f;
                 } else {
@@ -390,12 +390,12 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
                 }
                 if (!(fBottom > -0.001f && fBottom < 0.001f)) {
                     t = ((pv[j + 1].x - pv[j].x) * (v0[j + 1].z - v0[j].z) -
-                         (v0[j + 1].x - v0[j].x) * (pv[j + 1].z - pv[j].z)) / fBottom;
+                         (v0[j + 1].x - v0[j].x) * (pv[1 + j].z - pv[j].z)) / fBottom;
                 } else {
                     t = 0.0f;
                 }
-                v1[j - 1].x = (pv[j].x - pv[j - 1].x) * t + v0[j].x;
-                v1[j - 1].y = pv[j].y;
+                __typeof__((pv[j].x - pv[j - 1].x)) pt306 = (pv[j].x - pv[j - 1].x); v1[j - 1].x = pt306 * t + v0[j].x;
+                __typeof__(pv[j].y) pt622 = pv[j].y; v1[j - 1].y = pt622;
                 v1[j - 1].z = (pv[j].z - pv[j - 1].z) * t + v0[j].z;
             }
             SubVector(v0[0], pv[1], pv[2]);
@@ -423,13 +423,13 @@ void CPathVector::getNearPath(FVECTOR& outvN, float* outfDis, float* outfT, int*
                 t = Math3D::GetIntersectionOfLineAndPoint(vCloss, v1[0], v1[1], vTarget);
                 if (0.0f <= t && t <= 1.0f) {
                     if (i < path_max - 1 || !dir) {
+                        if (0 <= i) dir++;
                         vNearNv = pnv;
-                        if (i >= 0) dir++;
-                        if (!flg) fChkDis = -fChkDis;
-                        fNearDis = fChkDis;
                         fNearT = t;
-                        fChkNearDis = fDis;
+                        if (!flg) fChkDis = -fChkDis;
                         iNearStep = i;
+                        fNearDis = fChkDis;
+                        fChkNearDis = fDis;
                     }
                 }
             }
