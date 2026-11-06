@@ -749,50 +749,45 @@ void CGameMain::endField() {
     m_pSubField->update();
     if (m_pSubField->getGameSubState() == 6) endFieldSub();
 }
-/* Parked: 4 of 426 lines - ref names/order and the six `SHORT nScene` inlines (_isEventScene) in place; the bEventNext
- * arm as `if (_isEventScene(..) && !bPooh) bEventNext = TRUE;` (21 -> 4); left: the theater block's s4/s7 pair (the
- * TRUE flags around the TRACE call). Earlier, stack reload registers. tried: bWorld10/bEventNext decl swap (40 -> 30), merged state condition (-> 21), ternary/ifelse
- * forms of bEventNext; permuter 12 min, 14k candidates (22 -> 20 only by reordering against the ref). */
-#if 0
 static inline BOOL _isEventScene(SHORT nScene) { return (USHORT)(nScene - 2000) < 1000; }
 void CGameMain::endFieldSub() {
-    GAMEMODE nReqBattle = CSceneInfo::hasReqEnterBattle();
     BOOL bDelField;
+    GAMEMODE nReqBattle = CSceneInfo::hasReqEnterBattle();
     BOOL bDelFieldMap;
-    BOOL bDelBattle;
-    BOOL bDelBattleMap = FALSE;
     BOOL bDelPlayerRsrc = FALSE;
     BOOL bEntranceIO = FALSE;
+    BOOL bDelBattle;
+    BOOL bDelBattleMap = FALSE;
+    INT nNextState;
     BOOL bEventNext = FALSE;
     BOOL bPooh = CSceneInfo::getCurrentWorldID(TRUE) == 10;
     SHORT nNextScene = CSceneInfo::getNextSceneNum();
     SHORT nCurrentScene = CSceneInfo::getCurrentSceneNum();
-    BOOL bTheater = CGameWork::getFlag(1, 0x33);
-    INT nNextState;
     INT nNextMapID;
+    BOOL bTheater = CGameWork::getFlag(1, 0x33);
     if (bTheater) {
-        TRACE("\x83V\x83" "A\x83^\x81[\x83\x82\x81[\x83h\x8fI\x97\xb9\x81`\n");
-        bEntranceIO = TRUE;
         bDelField = TRUE;
+        TRACE("\x83V\x83" "A\x83^\x81[\x83\x82\x81[\x83h\x8fI\x97\xb9\x81`\n");
         bDelFieldMap = TRUE;
         bDelBattle = TRUE;
         bDelBattleMap = TRUE;
         bDelPlayerRsrc = TRUE;
+        bEntranceIO = TRUE;
         bEventNext = bEntranceIO;
         nNextScene = nCurrentScene;
     } else if (nReqBattle) {
         bDelField = FALSE;
         if (CSceneInfo::isEventScene() || (USHORT)(CSceneInfo::getNextSceneNum() - 1050) < 149) bDelField = TRUE;
         bDelFieldMap = bDelField;
-        bDelBattle = CSceneInfo::isNextBattleRsrcUpdate();
+        { bDelBattle = CSceneInfo::isNextBattleRsrcUpdate(); }
     } else {
         SHORT nCurArea = CSceneInfo::getCurrentAreaNum();
         SHORT nNextArea = CSceneInfo::getNextAreaNum();
         nNextMapID = CRcf::getMapID(nNextArea, nNextScene);
-        if (nCurArea != nNextArea && (nCurArea == 0 || nNextArea == 0)) bEntranceIO = TRUE;
+        if (nCurArea != nNextArea && (0 == nCurArea || nNextArea == 0)) bEntranceIO = TRUE;
         bEventNext = FALSE;
         if (_isEventScene(nNextScene) && !bPooh) bEventNext = TRUE;
-        bDelField = FALSE;
+        { bDelField = FALSE; }
         if (bEntranceIO || CSceneInfo::getCurrentSceneNum() != nNextScene) bDelField = TRUE;
         bDelPlayerRsrc = FALSE;
         if (bEventNext && nNextMapID) bDelPlayerRsrc = CGame::isSoraGame() != 0;
@@ -808,7 +803,7 @@ void CGameMain::endFieldSub() {
         }
         if (!bDelBattle) {
             RoomInfo* pRoom = CSceneInfo::getRoomInfo(CSceneInfo::getNextRoomID());
-            if (pRoom && pRoom->_pSrcInfo && pRoom->_pSrcInfo->_nRoomType == 7) {
+            if (pRoom && pRoom->_pSrcInfo && 7 == pRoom->_pSrcInfo->_nRoomType) {
                 bDelBattle = TRUE;
                 bDelBattleMap = TRUE;
             }
@@ -834,13 +829,13 @@ void CGameMain::endFieldSub() {
     if (bDelPlayerRsrc) {
         PLM::removePlayerRsrc(0);
         PLM::removeBattlePlayerRsrc(0);
-    } else if (nReqBattle != 1 && CGame::isSoraGame()) {
-        PLM::removeBattlePlayerRsrc(0);
+    } else if (1 != nReqBattle && CGame::isSoraGame()) {
+        { PLM::removeBattlePlayerRsrc(0); }
     }
     if (bEventNext || (bPooh && bEntranceIO) || CSceneInfo::isLastFloorScene()) removeInconstRsrc();
     if (bEntranceIO) {
         removeInconstWorldRsrc();
-        removeConstWorldRsrc();
+        { removeConstWorldRsrc(); }
     } else if ((USHORT)(CSceneInfo::getNextSceneNum() - 1050) < 149) {
         removeInconstWorldRsrc();
     }
@@ -852,11 +847,11 @@ void CGameMain::endFieldSub() {
     } else if (nReqBattle) {
         if (_isEventScene(nCurrentScene)) CSound::clearForEventScene();
         if (m_pSubBattle) {
-            CEncountEffect::start();
             nNextState = 8;
+            CEncountEffect::start();
         } else {
-            m_nGameProcFlag |= 0x10000000;
             nNextState = 2;
+            { m_nGameProcFlag = m_nGameProcFlag | 0x10000000; }
         }
     } else {
         nNextState = 1;
@@ -885,10 +880,6 @@ void CGameMain::endFieldSub() {
     }
     changeState(nNextState);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Game", endFieldSub__9CGameMain);
-__asm__(".rdata\n.align 3\n.word 0x41835683\n.word 0x5B815E83\n.word 0x5B818283\n.word 0x498F6883\n.word 0x6081B997\n.word 0x0000000A\n.text\n");
-#endif
 void CGameMain::initNextFloor() {
     INT nIndex = CSceneInfo::getNextFloorIndex();
     SHORT nFloor = CSceneInfo::getFloorNumber(nIndex, CGame::isSoraGame());
