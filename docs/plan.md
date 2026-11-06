@@ -41,9 +41,9 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-06)
 
-- **Progress:** 11927 of 12311 functions matched: game 11163 of 11323, libraries 764 of 988 (plus 151 hand-written).
+- **Progress:** 11929 of 12311 functions matched: game 11165 of 11323, libraries 764 of 988 (plus 151 hand-written).
   `tools/check.sh` is the current count.
-- **Game:** 155 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
+- **Game:** 153 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
   Movement constructor has a draft but is listed as "not attempted" (leftovers.py misses constructors in drafts).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;

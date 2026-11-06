@@ -35,7 +35,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Map` | 2 | 1952 | 2 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 |  |
 | `Game/Player/Player` | 5 | 1764 | 5 |  |
-| `System/Graphic/Model` | 8 | 1574 | 8 |  |
+| `System/Graphic/Model` | 7 | 1502 | 7 |  |
 | `Game/CardRevolver` | 6 | 1410 | 6 |  |
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
 | `Game/Enemy/HumanBoss` | 7 | 1088 | 7 |  |
@@ -83,7 +83,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Enemy/EnemyWhitemushroom` | 1 | 184 | 1 |  |
 | `System/Movie/MSVideo` | 1 | 180 | 1 |  |
 | `System/Graphic/Effect/libppp/pppPart` | 1 | 168 | 1 |  |
-| `Game/CardBattle` | 2 | 155 | 2 |  |
 | `Game/Enemy/BattleEnemyManager` | 1 | 149 | 1 |  |
 | `Game/AttackMotion` | 1 | 136 | 1 |  |
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
@@ -93,6 +92,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/effect` | 1 | 105 | 1 |  |
 | `Game/Movement` | 1 | 105 |  |  |
 | `Game/Card` | 1 | 95 | 1 |  |
+| `Game/CardBattle` | 1 | 89 | 1 |  |
 | `Game/Player/PlayerGauge` | 1 | 77 | 1 |  |
 | `Game/Player/SummonTink` | 1 | 37 | 1 |  |
 | `System/Graphic/Anim` | 1 | 33 | 1 |  |
@@ -131,7 +131,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/Model` | `checkBBox__FRC7FMATRIXPC4BBOX` | 36 | 12 lines off, registers only: the original keeps the scratchpad pointer in v1 and the clip result in a0 (or a0,v0,a0; move v0,a0), ours v0/v1. Worked: the 0xC0000000 return last (if (!(x[1] < x[0])) {...}), v assigned inside the if, asm "nop" opening the if (ret) block (the original's extra nop … |
 | `System/Graphic/Model` | `resultCheckBBox__FR6CCoordPC4BBOX` | 18 | only the beqz target: the original's ret == 0 path branches to the OR (one OR for both paths, then jr ra; move v0,v1), ours to the jr ra (cse knows ret == 0 there and drops the else-arm OR); without the else the OR goes straight into v0 (combine). The OR's operand order (or v1,v0,v1) is right with … |
 | `System/Graphic/Model` | `_disp0_SetPacket__6CModelUiPA3_CiiUliPUl` | 588 | 137 of 659 lines off, same size; mostly registers: the original gives this s5 and iFlags&2 s4 (ours swapped), the bone/light min() selects use movn (an if-form gives that but swaps s0/s1 globally), the no-light branch materializes zero twice. Worked: case 2 with default, (USHORT) mode compares … |
-| `System/Graphic/Model` | `link__10CSemiModelP6CModel` | 72 | 13 lines off: after getRawMode the original computes isDataEmpty && isSemiDataEmpty into a1 and never uses it (dead code left after a cross-jump?); ours drops the semi half. Tried: unused BOOL local, empty if, ternary, statement, duplicated identical arms (24 lines). |
 | `System/Graphic/Model` | `makePkt__5CBBox` | 412 | 116 lines off, register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers. Tried: x[0] > x[1] compare, a … |
 | `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
 | `System/Graphic/ModelMan` | `setupDrawMode__9CModelMani` | 64 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
@@ -194,7 +193,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/BattleCard` | `stateDestroy__Q210CardBattle11CBattleCard` | 415 | 22 lines - the first _adjustRad of each case keeps the sum in the loaded register and copies it to ret (mov.s); ours computes the sum straight into ret (same as stateSnatch). Case 4 also swaps a1/a2 (timer vs dy). Inline/explicit wrap forms, store orders and 12 min of permuter (10k candidates) did … |
 | `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
 | `Game/CardBattle` | `testPlayingCard__Q210CardBattle11CCardBattleUi` | 89 | 2 lines, the final return only - the original computes 4 into v0 and movn's 1 from v1 when iDuelOK (the != path sets v0 = 1 in the bne delay slot, one exit); this form branches (beqz iDuelOK) instead of the movn. `if (!=) return 1; return !iDuelOK ? 4 : 1;` gives the exact movn block, but jump2 … |
-| `Game/CardBattle` | `decEnchantTime__Q210CardBattle11CCardBattleiii` | 66 | 9 of 81 lines - only the first m_nKind load: the original adds _PLAYER*4 + 380 before this (lbu 0(v0)) and keeps the value in a2; ours lbu 380(this + _PLAYER*4). No kind/pTime locals (the ref has only _PLAYER and pGauge) and _ref(m_pInstance) on the m_nKind reads gave the size (18 -> 9 lines). … |
 | `Game/CardRevolver` | `main__Q210CardBattle13CCardRevolver` | 321 | 27 lines off, only the TRACE argument loads in the three card dumps: the original loads uiFlag into v1 and uiOwner last into v0 (the card pointer's register), ours the other way round. Worked: state switch with explicit returns, m_pCards[i] indexed directly (pBC temp moved the pointer to t4), … |
 | `Game/CardRevolver` | `rollDeck__Q210CardBattle13CCardRevolveriii` | 248 | 5 lines off, the direction `a`: the original computes it as li t3,1 / slt v0,v1,a1 / movz t3,v1,v0 with v1 = -1 set in both predecessors of the join, then negates num with bltzl; ours branches (bgez). Worked: one `i` for all three loops (s0), !m_iMode-first rc/pCards select, hand++ after setHand, … |
 | `Game/CardRevolver` | `changeMode__Q210CardBattle13CCardRevolverii` | 101 | 12 lines off, all in `limit`: the original loads m_nTotal[m_iMode] (lhu + sll 16) above the m_iMode branch and sign-extends (sra 16) only in that arm (interblock-scheduled split extension); ours branches first and uses lh. Worked: `if (inMode == -1) ^= 1; else =`, `!old_mode ? m_pCards : … |
@@ -266,7 +264,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 155 functions (47358 instructions) in 72 units, 154 of them parked; 5 units take a data section from assembly.
+Totals: 153 functions (47220 instructions) in 72 units, 152 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
