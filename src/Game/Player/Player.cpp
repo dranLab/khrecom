@@ -2350,36 +2350,21 @@ void CPlayer::initWall() {
     m_pMove->setFlag(0, 0x40); // partial CMovement: (flag, on)
     m_fFootRadius = 0.5f;
 }
-/* Parked: 4 lines differ (size, frame, every branch, call and register allocation match): at the start the
-   original issues `lw m_iSubState` (getSubState) before the `sw zero` of vec.y, ours stores vec.y first (right after
-   the lq of the getRot copy). Found 2026-10-25 from the $LM tags (25 -> 4): the first ofs is one brace-init line
-   (`FVECTOR ofs = {{0, 0, 0.6f, 1}}`), the second ofs.set(0.5f, 0, 0) (Coord.h inline; the 0.5f then shares the
-   setRadius constant in $f23, which fixed the old cancel_speed/0.5f register cascade), getDir() for dir and in the
-   houkou wrap, setSubState() in the three cases, m_fJumpSpdXZ and m_fMoveSpdXZ as two statements, and a real bug:
-   the HOUKOU_RIGHT case compares getAnimID() with 1 (the animation it starts), not 3. tried for the rest: all 24
-   orders of the vec stores and the cancel_power read (permblk.py), chained x = w = 1 / y = z = 0 forms (10),
-   vec.set() (25), brace init of vec (12), vec.v[1] and _ref(vec).y reads, getSubState() in the test, and
-   tools/permuter.py through the method wrapper (10 min, 4918 candidates, no better). Earlier: ~25 variants of the
-   cancel_* declarations, arm statement orders, houkou forms, cast read of g_fAntiGravity. */
-#if 0
 void CPlayer::exeWall() {
     FVECTOR pos;
     FVECTOR rot;
-    FVECTOR vec;
     FLOAT dir;
     Houkou houkou;
-    FMATRIX m;
     FLOAT cancel_power;
     FLOAT cancel_speed;
     FLOAT r;
     setPlayerFlag(0x400000, 0);
     pos = getPos();
     rot = getRot();
-    vec.x = 1.0f;
-    vec.y = 0.0f;
-    vec.z = 0.0f;
-    vec.w = 1.0f;
+    FVECTOR vec = { 1.0f, 0.0f, 0.0f, 1.0f };
+    FMATRIX m;
     cancel_power = vec.y;
+
     if (!getSubState()) {
         FLOAT d0 = Movement::Homing(m_fDir, m_fWallDir, 0.15f, getFrameRateF());
         m_fDir = d0;
@@ -2491,9 +2476,6 @@ void CPlayer::exeWall() {
     m_fJumpSpdY = vel.y;
     m_pMove->setVel(vel);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWall__7CPlayer);
-#endif
 /* FVECTOR::operator-(const FVECTOR&) of the original (ref locals: FVECTOR* this, FVECTOR vec). */
 static inline FVECTOR _subVec(const FVECTOR& a, const FVECTOR& inV) {
     FVECTOR vec = a;
