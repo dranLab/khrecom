@@ -34,7 +34,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Map` | 2 | 1952 | 2 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 |  |
 | `Game/Player/Player` | 5 | 1764 | 5 |  |
-| `System/Graphic/Model` | 7 | 1502 | 7 |  |
+| `System/Graphic/Model` | 6 | 1484 | 6 |  |
 | `Game/CardRevolver` | 6 | 1410 | 6 |  |
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
 | `Game/Enemy/HumanBoss` | 7 | 1088 | 7 |  |
@@ -46,8 +46,8 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `Form/DebugWindow` | 2 | 667 | 2 |  |
 | `System/Graphic/TexUtil` | 4 | 651 | 4 |  |
-| `System/Rcf` | 6 | 649 | 6 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
+| `System/Rcf` | 5 | 552 | 5 |  |
 | `System/Graphic/PackMan` | 2 | 540 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
 | `Game/BattleCard` | 2 | 532 | 2 |  |
@@ -80,7 +80,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Enemy/EnemyWhitemushroom` | 1 | 184 | 1 |  |
 | `System/Movie/MSVideo` | 1 | 180 | 1 |  |
 | `System/Graphic/Effect/libppp/pppPart` | 1 | 168 | 1 |  |
-| `Game/Enemy/BattleEnemyManager` | 1 | 149 | 1 |  |
 | `Game/AttackMotion` | 1 | 136 | 1 |  |
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
 | `Form/Menu/JiminyMemo` | 1 | 122 | 1 |  |
@@ -126,7 +125,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/Model` | `getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3` | 88 | 3 lines off: the original stores vMN[1].z/.y through the &vMN[1] operand register (t1), ours through sp. Worked: vMN[i].set(MIN/MAX, ...) (default w = 1.0f), one asm statement with all operands, D_ labels for the +-1.7e38 constants. Tried: field stores, chained assignment, pointer local; permuter … |
 | `System/Graphic/Model` | `calcWorldBBox__6CModeli` | 153 | 38 lines off: the original keeps &pCrd->m_World as the strength-reduced loop pointer (s3 += 0xd0, counter counted down), &vMax/&vMin in s8/s7 for the init stores and the VU0 block, and loads the final bbox into f4/f5/f0..f3 in max-then-min order. Tried: pCrd[i] indexing (keeps the counter, 41 … |
 | `System/Graphic/Model` | `checkBBox__FRC7FMATRIXPC4BBOX` | 36 | 12 lines off, registers only: the original keeps the scratchpad pointer in v1 and the clip result in a0 (or a0,v0,a0; move v0,a0), ours v0/v1. Worked: the 0xC0000000 return last (if (!(x[1] < x[0])) {...}), v assigned inside the if, asm "nop" opening the if (ret) block (the original's extra nop … |
-| `System/Graphic/Model` | `resultCheckBBox__FR6CCoordPC4BBOX` | 18 | only the beqz target: the original's ret == 0 path branches to the OR (one OR for both paths, then jr ra; move v0,v1), ours to the jr ra (cse knows ret == 0 there and drops the else-arm OR); without the else the OR goes straight into v0 (combine). The OR's operand order (or v1,v0,v1) is right with … |
 | `System/Graphic/Model` | `_disp0_SetPacket__6CModelUiPA3_CiiUliPUl` | 588 | 137 of 659 lines off, same size; mostly registers: the original gives this s5 and iFlags&2 s4 (ours swapped), the bone/light min() selects use movn (an if-form gives that but swaps s0/s1 globally), the no-light branch materializes zero twice. Worked: case 2 with default, (USHORT) mode compares … |
 | `System/Graphic/Model` | `makePkt__5CBBox` | 412 | 116 lines off, register allocation: structure matches (8-corner RotTransPers loop with min/max and W range, colour checks, four line-strip GIF packets), but the original keeps this in s4, &m_C0 in s1 and different caller-saved temporaries spilled around RotTransPers. Tried: x[0] > x[1] compare, a … |
 | `System/Graphic/ModelMan` | `setupDrawEnv__9CModelMan` | 204 | 58 of 242 lines (65 with vFogParam.set inlined) - FVECTOR::setCall gives the original's set call, but the frame is 16 bytes larger (an extra saved register s3 for &wv_i) and the fog/matrix constant block is scheduled differently. |
@@ -161,7 +159,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Sound/driver/sddrv_ee` | `TsSdVsbPlay` | 262 | (comment) Register allocation: addr is spilled instead of kept in s8 (one more stack slot), so most registers differ. |
 | `System/Movie/MSVideo` | `setLoadImageTagsYX__12CMoviePlayerPUiPviiiii` | 180 | (comment) Not matching: mby - 1 is not hoisted into a register for the inner loop (the original keeps it in s8 and spills i * 16), so the j++ / dsay increments are scheduled differently. |
 | `System/Rcf` | `finalize__4CRcf` | 111 | (comment) Near-match: register allocation of two statics and a loop-bound reload |
-| `System/Rcf` | `_threadReadProc__4CRcfPv` | 97 | 3 lines - the inner loop's top label is not aligned in the original (offset 0xf4, no .p2align nop), ours gets the LOOP_BEG alignment nop and so a plain bne instead of the bnel into the loop top; getType() through a cast fixed the type reloads (21 -> 3). Tried: for(;;) with breaks, a goto loop … |
 | `System/Rcf` | `_parseRCF_EntryFile__FUii` | 123 | 28 of 169 lines, same size - the 0x7F (sound list) branch's CBuf/RsrcInfo setup: the original loads s_nReadGroup/s_nLinkOwnerGroup/s_bSceneManagedMode into t2/t0/t1 before the CBuf vtable lui and keeps the constant 1 in a3; ours schedules the vtable first (t3/t1/t2, t0). Rest matches with … |
 | `System/Rcf` | `_atoi__FPCc` | 71 | _atoi: 11 of 77 lines, 8 bytes short - hex/decimal paths as the original; left: the original keeps a branch for the isupper() lowercase step where ours makes movz (ternary, if/else, inline and !isupper forms all give movz), and the decimal loop's p++/return tail scheduling. Permuter 6 min: no gain. |
 | `System/Rcf` | `_atolen__FPCc` | 73 | _atolen: 14 of 81 lines, 4 bytes short - _atoi's shape (one return, goto exits, '$' test first with the 0x case inside `if (*p != '$')`); left: the same isupper branch-vs-movz in _hexValue as _atoi, and the original's block order (0x case jumps over the '$' block to `nRet = 2`, p = lpszInStr + 2 … |
@@ -201,7 +198,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Atel/Atel` | `setScreenFader__5CAtelifi` | 189 | 37 of 206 lines, 16 bytes short - logic, switch and jump table match. Left: the original computes the layer as `beqz; b then (li v0,1); else: b end (li 1); then: li 10` (a jump-evaluated boolean threaded away) and keeps nLayer in s1; ours branches once, which rotates the s-registers … |
 | `Game/Atel/AtelCrossFade` | `drawCrossFadeImage__Q24ATEL14CAtelCrossFade` | 188 | (comment) Near-match: the second loop schedules the packet stores differently and hoists the GIF tag constant. |
 | `Game/Atel/Avatar` | `_$_Q24ATEL7CAvatar` | 95 | 6 lines - the implicit lineY/lineX destructor calls get s5/s4 instead of s4/s5: their address pseudos tie on priority (2 refs / 17 insns) and ours numbers lineX first (lreg dump); no body form changed it. The draft uses the full classes of Gprim.h (inline ~C3DLine/~CGPrim). |
-| `Game/Atel/Avatar` | `onMove__Q24ATEL7CAvatariPvi` | 297 | 53 lines, registers only - with the ref's USHORT nType/nFlag (one lhu) and the final switch the code is the original's, but p (14 refs over 187 insns) loses the global-alloc priority tie against case 1's pV (3 over 13) and takes s2, pushing CEntity to s1 (the original: p s1, CEntity s4, one more … |
+| `Game/Atel/Avatar` | `onMove__Q24ATEL7CAvatariPvi` | 297 | 1 line (was 53) - the final test: the original has `slti 3`, then `bne s6, 0` twice; the switch's range node gives bltz for the first. The empty asm in case 0 settled the registers: pV 3 refs / 13 insns outranked p 14 / 187 by a hair. An INT local keeps slti but the second zero test folds (even … |
 | `Game/Atel/Avatar` | `RotateAvatarMain__Q24ATEL7CAvatar` | 139 | 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an … |
 | `Game/Atel/VSME` | `acWaitReq__Q24ATEL4CVSMRQ24ATEL5Actorii` | 32 | same instructions and order except the wait_timer product: the original multiplies into LO ("mult $zero,s1,v1" + mflo before the sh), ours with the 3-operand mult into v1 (gcc's mulsi3_mult3 "l" vs "d" alternative, chosen by regclass: LO only when the product feeds a plain register copy, as for a … |
 | `Game/Player/Friend` | `setMagic__Q26Friend7CFriendi` | 1274 |  |
@@ -220,7 +217,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Player/SummonTink` | `initRecover__Q26Summon11CSummonTink` | 37 | (comment) Best attempt: same size; combine folds the Crd() result straight into a3 ("move a3,v0" right after the call), so the effect name's address lands in v0 instead of v1 and the lui/lw are scheduled later. |
 | `Game/Enemy/BattleEnemy` | `setupFlick__12CBattleEnemy` | 82 | the 30-degree constant (0.5235988f) is loaded once into $f20 and reused for sinf, cosf and calcOrbitSpeedFromDistance in ours; the original reloads it (lui/ori/mtc1) before each call and keeps the sinf result in $f20 instead (vel.y stored after cosf); tried: field stores vs vel.set(), … |
 | `Game/Enemy/BattleEnemy` | `initEnemyParam__12CBattleEnemyiii` | 245 | 34 lines - the Riku-game scan loop: the original places the getRsrcData() ternary before the inline getExtraParam's found block and keeps the parameter in s0 (ours: s2, blocks swapped); the rest (seek loops, relocation, floor mapping, basic param) matches; tried: while/for/continue loop forms, … |
-| `Game/Enemy/BattleEnemyManager` | `createBattleEnemies___19CBattleEnemyManager` | 149 | 5 lines - `this`/`group` priorities tie in global-alloc (lreg: this 39 uses / 110 insns = 1.773, group 19/43 = 1.767, so this gets s2, the original's group does); `register ... asm("$18")` for group gives the registers but an extra move a1,v0 / move s2,a1 copy and a nop (35 -> 5). Tried: group … |
 | `Game/Enemy/EnemyWhitemushroom` | `damage___19CEnemyWhitemushroom` | 184 | (comment) Near-match (3 lines): in case 4 the original loads the vtable pointer for getLockOnPos right after the two TIMEQ stores of setupFade; here the vtable entry loads depend on all six setupFade stores (unknown alias), so the vptr load ranks below them and comes last. Tried (~45 min): … |
 | `Game/Enemy/HumanBoss` | `initalize__10CHumanBossiiUi` | 58 | (comment) near match: the store of the entity flag is scheduled before the load of m_iParam |
 | `Game/Enemy/HumanBoss` | `getAttackCardNum__C10CHumanBossUi` | 43 | (comment) near match, 20 lines (2026-11-05, was 27): the goto-built outer loop reloads iCardCount/pCards like the original (a for loop hoists them); left: the original hoists the m_pEnemyParam load once (t2), ours reloads it too. The ref lists card/j at function level and no getEnemyParam inline |
@@ -245,7 +241,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 137 functions (44644 instructions) in 69 units, 136 of them parked; 5 units take a data section from assembly.
+Totals: 134 functions (44380 instructions) in 68 units, 133 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
