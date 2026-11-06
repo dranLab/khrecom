@@ -466,11 +466,7 @@ INT CCollUtil::_detectOCD(CCollision& collision, MCD_INFO* pMCDInfo, OCD_WORK* p
     }
     return iFg;
 }
-#if 0 /* the parked draft below is static, as in the original */
 static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal);
-#else
-INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal); /* MATCH: INCLUDE_ASM'd (parked): global label */
-#endif
 INT CCollUtil::__detectMCInitInit(MC_CHIP* pChip) {
     asm volatile("lqc2 $vf4, 0x30(%0)" : : "r"(this));
     asm volatile("lqc2 $vf8, 0x80(%0)\n"
@@ -485,31 +481,31 @@ INT CCollUtil::__detectMCInitInit(MC_CHIP* pChip) {
 }
 static inline INT _vecX(u_long128 x) {
     INT out32;
-    asm("sll %0, %1, 0" : "=r"(out32) : "r"(x));
+    asm volatile("sll %0, %1, 0" : "=r"(out32) : "r"(x));
     return out32;
 }
 static inline INT _vecY(u_long128 x) {
     INT out32;
-    asm("dsra32 %0, %1, 0" : "=r"(out32) : "r"(x));
+    asm volatile("dsra32 %0, %1, 0" : "=r"(out32) : "r"(x));
     return out32;
+}
+static inline ULONGLONG _vecHi(u_long128 x) {
+    ULONGLONG out64;
+    asm volatile("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
+    return out64;
 }
 static inline INT _vecZ(u_long128 x) {
-    ULONGLONG out64;
     INT out32;
-    asm("pcpyud %0, %1, $0" : "=r"(out64) : "r"(x));
-    asm("sll %0, %1, 0" : "=r"(out32) : "r"(out64));
+    asm volatile("sll %0, %1, 0" : "=r"(out32) : "r"(_vecHi(x)));
     return out32;
 }
-/* Parked: 23 lines, registers only - the original keeps the VU0 flag and iRet in a2 and fMDVal/zoneVec in v1, ours
-   v0/a0; iRet-as-flag, if/else and early-return forms and a 5 min permuter run (14.5k candidates) keep it. */
-#if 0
 static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal) {
     INT iRet;
     u_long128 zoneVec;
-    INT flag;
     asm volatile("lqc2 $vf5, 0x0(%0)\n"
                  "lqc2 $vf6, 0x10(%0)" : : "r"(pMCData));
-    asm volatile("qmtc2.ni %0, $vf7" : : "r"(fMDVal));
+    /* MATCH: the v0 clobber makes reload take v1 for fMDVal. */
+    asm volatile("qmtc2.ni %0, $vf7" : : "r"(fMDVal) : "$2");
     asm volatile("vmulax.xyzw $ACC, $vf4, $vf7x\n"
                  "vmsubw.xyz $vf4, $vf5, $vf0w\n"
                  "vnop\n"
@@ -522,18 +518,20 @@ static INT __detectMCInitInit_Check(MC_DATA* pMCData, FLOAT fMDVal) {
                  "vnop\n"
                  "vnop\n"
                  "vnop");
-    asm volatile("cfc2.ni %0, $vi16" : "=r"(flag));
-    iRet = -1;
-    if (!(flag & 0xC0)) {
+    asm volatile("cfc2.ni %0, $vi16" : "=r"(iRet));
+    iRet = iRet & 0xC0;
+    if (iRet != 0) {
+        iRet = -1;
+    } else {
         asm volatile("qmfc2.ni %0, $vf4" : "=r"(zoneVec));
-        iRet = (_vecZ(zoneVec) * pMCData->xw + _vecX(zoneVec)) * pMCData->yw + _vecY(zoneVec);
+        iRet = _vecZ(zoneVec) * pMCData->xw;
+        iRet += _vecX(zoneVec);
+        iRet *= pMCData->yw;
+        iRet += _vecY(zoneVec);
         if (pMCData->tbl[iRet][0] == 0xFFFF) iRet = -1;
     }
     return iRet;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollUtil", __detectMCInitInit_Check__FP7MC_DATAf);
-#endif
 extern char D_004892F8[]; /* PRIM_INFO overflow message */
 extern char D_00489310[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.cpp" */
 extern char D_00489340[]; /* "m_PrimInfoIdx < PRIM_INFO_MAX" */
