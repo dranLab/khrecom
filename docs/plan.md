@@ -64,7 +64,8 @@ every change that is merged without regenerating. Regenerating all four takes ab
   counted-down loop where the ref has `i`, asm helpers for what gcc emits itself (a `por` after `pcpyud` is a DI -> TI
   conversion, `*(UINT*)&f` gives the `mfc1`). `build/reflocals.py > build/jm/reflocals.log`, then `build/refjoin.py 60`,
   ranks near misses; `build/remeasure.log` was refreshed 2026-11-06 evening (tried without gain: createBootInfoMsg,
-  setStockInfo, _invokePrimary_Main, dispDebugLine, setCharge, setDeckInfo; next: pppSetMatrix, HumanBoss initalize, effect Setup). Check the helpers
+  setStockInfo, _invokePrimary_Main, dispDebugLine, setCharge, setDeckInfo, pppSetMatrix, HumanBoss initalize, effect Setup,
+  checkBBox). `build/refextra.py 40` lists drafts with invented locals, the better lead: initRecover, setAttack, stateDestroy, setupCardRevolver. Check the helpers
   first: `asm volatile` against plain `asm`, and `=&r` where the original keeps inputs and output apart. See memory
   ref-locals-reveal-shape, ti-di-conversion-is-por.
 - **Permuters are exhausted for now (2026-11-06):** three 10-minute queues covered every parked game draft 4-45 lines off

@@ -643,7 +643,10 @@ INT checkBSphere(CCoord& crd, const BBOX* bbox) {
     r = _sqrtf(r) * 0.5f;
     return checkBSphere(crd, ctr, r);
 }
-/* Parked: 12 lines off, registers only: the original keeps the scratchpad pointer in v1 and the clip result in a0 (or a0,v0,a0; move v0,a0), ours v0/v1. Worked: the 0xC0000000 return last (if (!(x[1] < x[0])) {...}), v assigned inside the if, asm "nop" opening the if (ret) block (the original's extra nop after the beqz slot; same tail as the parked resultCheckBBox(CCoord&)). Tried: one/two-output cfc2 asm, 'm' operand lqc2 helpers, result local, decl order; permuter 15 min (45593 candidates, stays 16). */
+/* Parked: 12 lines, same size (the tail as resultCheckBBox) - registers only: the original has ret v0, the scratchpad
+   pointer v1, clip a0, as if the three overlapped in priority order. Ours keeps the pointer local to the first block,
+   so it takes v0 and clip v1. With "r"(v) in the join barrier v goes global but loses to clip (a2); winning needs
+   about six more refs. The ref's locals (two inline v, m, ret, no clip) point to a different shape. */
 #if 0
 INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox) {
     INT ret;
@@ -670,7 +673,9 @@ INT checkBBox(const FMATRIX& mWorldMatrix, const BBOX* bbox) {
             asm volatile("nop");
             ret = (ret | 0x8000) << 16;
         }
-        clip |= ret;
+        asm volatile(""); /* MATCH: reorg cannot take the or for the beqz slot */
+        { INT t = ret | clip; clip = t; }
+        asm volatile("" : : "r"(clip)); /* MATCH: a second use keeps combine from moving the or into the return value */
         return clip;
     }
     return 0xC0000000;
