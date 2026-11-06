@@ -561,7 +561,7 @@ static inline FLOAT _vf4x() {
         _vf4x();                                                \
     })
 /* Parked: 18 of 186 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals. Left: reload's
-   t8/t9 for the two qmfc2 (ours v0) and with them d0 in f2 and the results in f1/f0; both orders of the setup loads
+   t8/t9 for the two qmfc2 (ours v0: iTmp read before written, "+r" as in EffectMan's _lengthVf4, but here it then outranks the pChip/&vCk copies, 28 lines) and with them d0 in f2 and the results in f1/f0; both orders of the setup loads
    (t3/t4 addiu, lw 56/400) and two sw pairs. */
 #if 0
 void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {

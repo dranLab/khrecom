@@ -2450,7 +2450,9 @@ BOOL CSaveLoadUI::checkSelector(SHORT& nOutIdx, SHORT nMax, INT nValDownKey, INT
 }
 /* Parked: 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0`
  * (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function
- * scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter 4 min (5641 candidates) */
+ * scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter 4 min (5641 candidates); reorg takes the
+ * target only if it does not own the fall-through (a label after the branch) or li v0,12 conflicts: unused label,
+ * do/while(0) and switch(0) in the arm change nothing */
 #if 0
 void CSaveLoadUI::createBootInfoMsg(INT nRes, CHAR* pszOutMsg) {
     INT nSlot = 0;
