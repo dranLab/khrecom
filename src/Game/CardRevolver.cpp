@@ -2739,7 +2739,7 @@ void CCardRevolver::deleteStock() {
     delete m_pSeqCtrlStock_Num10;
     m_pSeqCtrlStock_Num10 = NULL;
 }
-/* Parked: 22 lines off, two places: the first block has CStockFolder::setStockInfo's open issue (the original issues
+/* Parked: 5 lines off (brace-initialized pos, 2026-11-06; 22 before): the first m_uiUser == 1 arm's `sw y; jal setPos` should cross-jump into the else arm's, but sched1 puts (use (const_int 0)) after the else arm's call (it ends a block), so jump2's find_cross_jump compares USE with the arm's jump and stops. y forms in that arm change nothing, two places: the first block has CStockFolder::setStockInfo's open issue (the original issues
    the div before the pos.init() zero stores and the changeTexture zero arguments, ours after); the num > 0 arms
    load a0/a1 for setPos at the top of each arm with one shared jal in the original. A setPos per arm gives that
    setup but no cross-jump (sched1 puts a (use (const_int 0)) after a block-ending call, jump2 then stops), and
@@ -2750,7 +2750,6 @@ void CCardRevolver::deleteStock() {
 void CCardRevolver::setStockInfo() {
     CB_LAYOUT* pLayout;
     FLOAT ofsY;
-    FVECTOR pos;
     INT num;
     INT category;
     if (m_uiUser == 2) {
@@ -2782,7 +2781,7 @@ void CCardRevolver::setStockInfo() {
         pLayout = (m_iStockSkill >= 0x6F) ? &g_LayoutData[32 + m_iStock] : &g_LayoutData[29 + m_iStock];
         break;
     }
-    pos.init();
+    FVECTOR pos = { 0.0f, 0.0f, 0.0f, 1.0f };
     num = m_iStockSum % 10;
     m_pSeqCtrlStock_Num01->changeTexture(0, 0, 0, NULL, &g_uvCRCounterNumTex[m_uiNumTexID][num], &g_uvCRCounterNumTex[m_uiNumTexID + 1][num]);
     m_pSeqCtrlStock_Num01->changeTexture(0, 1, 0, NULL, &g_uvCRCounterNumTex[m_uiNumTexID][num], &g_uvCRCounterNumTex[m_uiNumTexID + 1][num]);
