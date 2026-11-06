@@ -537,30 +537,32 @@ extern char D_00489310[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.cpp" */
 extern char D_00489340[]; /* "m_PrimInfoIdx < PRIM_INFO_MAX" */
 extern char D_00489360[]; /* "m_PrimInfoIdx2 < PRIM_INFO2_MAX" */
 static inline INT _dotN(FVECTOR& v) {
-    u_long128 ret;
-    INT iTmp;
+    INT ret;
     asm volatile("lqc2 $vf4, 0x0(%1)\n"
                  "vmulax.x $ACC, $vf21, $vf4x\n"
                  "vmadday.x $ACC, $vf22, $vf4y\n"
                  "vmaddz.x $vf4, $vf23, $vf4z\n"
-                 "qmfc2.ni %0, $vf4" : "=r"(ret) : "r"(&v));
-    asm("sll %0, %1, 0" : "=r"(iTmp) : "r"(ret));
-    return iTmp;
-}
-static inline FLOAT _dotNf(FVECTOR& v) {
-    INT iTmp;
-    FLOAT ret;
-    asm volatile("lqc2 $vf4, 0x0(%1)\n"
-                 "vmulax.x $ACC, $vf21, $vf4x\n"
-                 "vmadday.x $ACC, $vf22, $vf4y\n"
-                 "vmaddz.x $vf4, $vf23, $vf4z\n"
-                 "qmfc2.ni %0, $vf4" : "=r"(iTmp) : "r"(&v));
-    asm("mtc1 %1, %0" : "=f"(ret) : "r"(iTmp));
+                 "qmfc2.ni %0, $vf4\n"
+                 "sll %0, %0, 0" : "=r"(ret) : "r"(&v));
     return ret;
 }
-/* Parked: 48 of 185 lines, 4 bytes long - structure, frame (unused primInfo/primInfo2/v0 locals) and VU0 blocks as the
-   original; left: the t-register numbering of pMCData/iCnt/entryCnt/pPrimInfo2 (t0/t1/t2/a3 there) and one extra
-   instruction. hill.py over the setup statements and a 5 min permuter run (14.5k candidates) gain 1 line. */
+static inline FLOAT _vf4x() {
+    INT iTmp;
+    FLOAT ret;
+    asm volatile("qmfc2.ni %0, $vf4" : "=r"(ret));
+    return ret;
+}
+#define _dotNf(v)                                               \
+    ({                                                          \
+        asm volatile("lqc2 $vf4, 0x0(%0)\n"                     \
+                     "vmulax.x $ACC, $vf21, $vf4x\n"            \
+                     "vmadday.x $ACC, $vf22, $vf4y\n"           \
+                     "vmaddz.x $vf4, $vf23, $vf4z" : : "r"(&v)); \
+        _vf4x();                                                \
+    })
+/* Parked: 18 of 186 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals. Left: reload's
+   t8/t9 for the two qmfc2 (ours v0) and with them d0 in f2 and the results in f1/f0; both orders of the setup loads
+   (t3/t4 addiu, lw 56/400) and two sw pairs. */
 #if 0
 void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
     FVECTOR vCk0;
@@ -568,6 +570,7 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
     FVECTOR vCkM;
     FVECTOR vCkVec;
     MC_DATA* pMCData;
+    INT iIdx;
     USHORT* pPrimIdx;
     INT iCnt;
     MC_PRIM* pPrim;
@@ -595,14 +598,16 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
     pMCData = (MC_DATA*)pChip->data;
     pPrimInfo2 = &m_pPrimInfo2[m_PrimInfoIdx2];
     entryCnt = 0;
-    pPrimIdx = &pMCData->prim[pMCData->tbl[iArea][0]];
+    iIdx = pMCData->tbl[iArea][0];
+    pPrimIdx = &pMCData->prim[iIdx];
     iCnt = pMCData->tbl[iArea][1];
-    for (; iCnt; iCnt--, pPrimIdx++) {
+    for (INT i = 0; i < iCnt; i++) {
+        INT iPrimIdx = pPrimIdx[i];
         FVECTOR v0;
         FVECTOR v1;
         FVECTOR* pN0;
         FLOAT d0;
-        pPrim = &pMCData->prim4[*pPrimIdx];
+        pPrim = &pMCData->prim4[iPrimIdx];
         if (!m_fgCamera && pPrim->info < 0) continue;
         pN0 = &pMCData->norm[pPrim->n0];
         asm volatile("lqc2 $vf21, 0x0(%0)\n"
@@ -615,7 +620,7 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
                          "qmtc2.ni %2, $vf6\n"
                          "vaddax.xyzw $ACC, $vf5, $vf0x\n"
                          "vmsubx.xyzw $vf4, $vf4, $vf6x\n"
-                         "sqc2 $vf4, 0x0(%3)" : : "r"(&vCk1), "r"(pN0), "r"(m_Radius), "r"(&v1) : "memory");
+                         "sqc2 $vf4, 0x0(%3)" : : "r"(&vCk1), "r"(pN0), "r"(*(INT*)&m_Radius), "r"(&v1) : "memory");
         } else {
             v1 = vCk1;
         }
