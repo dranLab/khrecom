@@ -2055,39 +2055,21 @@ INT CPlayer::chkWalkMode() {
     m_fWalkSpeed = aim_power * m_pParam->MAX_RUN_SPEED * dash;
     return 2;
 }
-/* Parked: 2 lines differ: the delay slot of jal calcVelocityXZ (the original issues the m_fWalkSpeed store
-   first and puts mov.s $f12,$f1 in the slot; this draft the reverse). The angle-wrap register (r in $f1, not
-   $f13) is fixed by keeping aim_dir live after the call with an empty asm (see the draft); without it r inherits
-   aim_dir's $f13 preference from the Homing argument copy (global.c expand_preferences: aim_dir dies at the
-   subtraction because sched1 issues the v.y store first). $LM tags: dirY via getDir() (Player.h:856), both
-   rotation writes via CMovement::setRot (Movement.h:65). tried before: _limitPI/_abs helper bodies (return
-   forms, ret local, if/if, volatile/non-volatile asm, fabsf), r as an explicit local first/last, the ref's locals
-   at the top, folded calcVelocityXZ argument, the else-block and in-place wrap forms, r computed before/between
-   the v stores (best 6 lines without the asm). 2026-10-25: the keep-alive asm after the wrap (21, blocks
-   scheduling), at the end (6, epilogue order), after the call (2), after v.y = dirY (4), non-volatile (4),
-   between the speed store and the call (3, forces a reload of m_fWalkSpeed); a separate d = aim_dir - dirY
-   before the vector (6); folded call argument with the asm (2). */
-#if 0
 void CPlayer::exeWalk() {
     FLOAT aim_dir = m_fAnalogViewDir;
     FLOAT d0 = Movement::Homing(m_fDir, aim_dir, 0.2f, m_fFrameRate);
     if (m_WalkMode) m_fDir = d0;
     setWalkAnim();
     FLOAT dirY = getDir();
-    FVECTOR v;
-    v._q = 0;
-    v.y = aim_dir;
+    FVECTOR v = { 0.0f, aim_dir, 0.0f, 0.0f };
     m_pMove->setRot(v);
     m_fMovePower = 1.0f - _abs(_limitPI(aim_dir - dirY)) / 3.1415927f;
     m_fWalkSpeed = m_fWalkSpeed / 60.0f * m_fMovePower;
     m_pMove->calcVelocityXZ(m_fWalkSpeed);
-    __asm__ __volatile__("" : : "f"(aim_dir)); /* keeps aim_dir live past the wrap: matching lever */
+     /* keeps aim_dir live past the wrap: matching lever */
     v.y = dirY;
     m_pMove->setRot(v);
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeWalk__7CPlayer);
-#endif
 void CPlayer::setWalkAnim() {
     INT anim;
     switch (m_PlayerState) {
