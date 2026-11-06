@@ -11,7 +11,7 @@ class C2DSeqCtrl;
 class C2DFnt;
 }
 
-class CPause : public CMenu {
+class CPause : public CMenu { friend class CMoviePlayer; /* MATCH: reads m_nResult directly (the getter schedules differently) */
 private:
     BOOL m_nPauseKind;               /* 0x80 */
     BOOL m_bEventSkip;               /* 0x84 */

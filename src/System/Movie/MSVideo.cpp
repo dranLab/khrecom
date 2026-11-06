@@ -69,15 +69,15 @@ extern INT SCREEN_HEIGHT;
 
 
 
-/* PARTIAL: stand-in for Form/Menu/Pause CPause: the original reads m_nResult through _ref (getResult() schedules the load differently) */
-class CPause : public CTask {
-private:
-    BYTE _pad[0x100 - sizeof(CTask)];
+#include "Form/Menu/Pause.h"
 
-public:
-    static UINT m_nResult;
-    CPause(CTask* p, INT nPauseKind);
-};
+
+
+
+
+
+
+
 
 #include "System/Graphic/ScreenMask.h"
 

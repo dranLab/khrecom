@@ -145,14 +145,15 @@ One row per merge into main (`partials.py --summary` before and after).
 | 2026-11-03 | cleanup/small-classes + anon-members + ceffect-scale (tools/partials: anonymous members) | 228 | 22 | 0 | 732 (0) | 923 |
 | 2026-11-03 | cleanup/player-inlines (CPlayer unit-gate pairs unified) | 222 | 22 | 0 | 691 (0) | 882 |
 | 2026-11-05 | catch-up: the unit merges since 2026-11-03 (placeholders and unit-gate sites dropped as their functions got matched; MATCH comments of the new matches) | 205 | 22 | 0 | 680 (0) | 930 |
+| 2026-11-06 | cleanup: JiminyMemo finish, CPause and CShadowModelMan stand-ins replaced by the owner headers (friends with MATCH) | 202 | 20 | 0 | 676 (0) | 930 |
 
 <!-- partials:start -->
 ## Summary
 
 ```
-PARTIAL: 204 (165 in 48 headers, 39 in 24 .cpp); MATCH: 928
-  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 18, other 5
-stand-ins: 22 foreign in 16 files (16 names), 198 unattributed, 155 own
+PARTIAL: 202 (165 in 48 headers, 37 in 22 .cpp); MATCH: 930
+  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 16, other 5
+stand-ins: 20 foreign in 15 files (14 names), 198 unattributed, 155 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
 mechanisms: 676 sites (1 untagged); #line: 1245
@@ -170,10 +171,8 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 |---|---:|---|---|---|---|---|
 | R1 | 4.0 | `System/LinkedBuf.h` | ready | 0 stand-in files, 0 dup headers, 4 gate users |  () |  (gate) |
 | R1 | 3.0 | `Game/Entity.h` | ready | 0 stand-in files, 0 dup headers, 3 gate users |  () |  (gate) |
-| R1 | 2.0 | `Form/Menu/Pause.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CPause (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `Game/Enemy/MapEnemy.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `Game/SceneInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
-| R1 | 2.0 | `System/Graphic/ShadowModel.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CShadowModelMan (1 complete) | inline bodies or virtuals |
 | R1 | 2.0 | `System/Graphic/TexInfo.h` | ready | 0 stand-in files, 0 dup headers, 2 gate users |  () |  (gate) |
 | R1 | 2.0 | `System/Wnd.h` | ready | 1 stand-in files, 0 dup headers, 0 gate users | CTextWnd (1 complete) | inline bodies or virtuals |
 | R1 | 1.0 | `Game/Collision/CollUtil.h` | ready | 0 stand-in files, 0 dup headers, 1 gate users |  () |  (gate) |
@@ -198,8 +197,6 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `CMCSemiModel` | missing | Game/Collision/CollMapCamera.h | 1 |  |  |
 | `COLL_KIND` | complete | Game/Collision/CollObj.h | 1 |  |  |
 | `COLL_TYPE` | complete | Game/Collision/CollObj.h | 1 |  |  |
-| `CPause` | complete | Form/Menu/Pause.h | 1 |  |  |
-| `CShadowModelMan` | complete | System/Graphic/ShadowModel.h | 1 |  |  |
 | `CTextWnd` | complete | System/Wnd.h | 1 |  |  |
 | `ChatWndCreateCTDParam` | missing | Game/Atel/VSME.h | 1 |  |  |
 | `G_RGBA` | complete | System/Graphic/Gprim.h | 1 |  |  |
@@ -237,15 +234,15 @@ users + 0.5 x the header's PARTIAL. Items whose owner unit is in progress are de
 | `Game/Player/PlayerAttack.h` | 2 | 1/0/0/0 | 26 |
 | `Game/Player/PlayerGauge.h` | 3 | 6/1/0/0 | 15 |
 | `Game/PoolList.h` | 1 | 0/0/0/0 | 53 |
-| `Game/SceneEnv.h` | 1 | 1/0/0/0 | 37 |
+| `Game/SceneEnv.h` | 1 | 1/0/0/0 | 38 |
 | `Game/SceneInfo.h` | 1 | 30/0/0/0 | 86 |
 | `System/Buf.h` | 1 | 1/0/0/0 | 38 |
 | `System/Com.h` | 1 | 0/0/0/0 | 8 |
 | `System/Coord.h` | 1 | 1/0/0/0 | 27 |
 | `System/Graphic/2d/2DMan.h` | 1 | 3/0/0/0 | 166 |
 | `System/Graphic/Camera.h` | 5 | 6/1/0/0 | 109 |
-| `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 172 |
-| `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 175 |
+| `System/Graphic/Effect/EffectMan.h` | 1 | 2/0/0/0 | 173 |
+| `System/Graphic/Effect/ObjType.h` | 1 | 1/0/0/0 | 176 |
 | `System/Graphic/Effect/effect.h` | 3 | 5/1/0/0 | 77 |
 | `System/Graphic/Effect/libppp/draw/draw_w.h` | 2 | 3/0/0/0 | 15 |
 | `System/Graphic/Effect/libppp/draw/global_w.h` | 1 | 0/0/0/0 | 9 |

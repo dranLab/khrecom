@@ -13,9 +13,9 @@ struct RECT_T {
 };
 typedef RECT_T<int> IRECT;
 
-struct SCREEN;
+struct SCREEN; namespace PLM { class CPlayerManager; }
 
-class CShadowModelMan {
+class CShadowModelMan { friend class PLM::CPlayerManager; /* MATCH: procPlayerDead sets m_iStatus directly */
 private:
     static FMATRIX m_mWorldTexture;
     static FMATRIX m_mWorldScreen;
