@@ -41,11 +41,11 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-06)
 
-- **Progress:** 11923 of 12311 functions matched: game 11160 of 11323 (92.1% of the code), libraries 763 of 988
-  (plus 151 hand-written). `tools/check.sh`: 12194 functions decompiled in 662 files, 612 complete.
-- **Game:** 158 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
+- **Progress:** 11925 of 12311 functions matched: game 11162 of 11323, libraries 763 of 988 (plus 151 hand-written).
+  `tools/check.sh` is the current count.
+- **Game:** 156 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
   Movement constructor has a draft but is listed as "not attempted" (leftovers.py misses constructors in drafts).
-  10 units take a data section from assembly.
+  5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
   details in `docs/sdk-leftovers.md`.
 - **Header cleanup:** PARTIAL 204 (165 in 48 headers, 39 in 24 .cpp), 22 foreign stand-ins in 16 files, 0
@@ -78,9 +78,9 @@ Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py 
    only: a 14-vs-15-refs priority tie), PathData `getNearPath` (9 lines), 2DSprObj `initForSeq` (20/342),
    HumanBoss `initalize` (4/71). The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
-3. **Data from source** for the 10 game units that still take a section from asm (`tools/leftovers.py game`:
-   "data from asm"; pppEiDrawShipoly, shape, CollUtil, Glare, sddrv_ee, AtelCrossFade, CollUtilO,
-   AtelBlur, Ride, EntityFactory). Ride can't: the split puts its `.rodata` at 4 mod 8 (out of scope).
+3. **Data from source** for the units that still take a section from asm: `pppEiDrawShipoly` (.bss .data .rodata) and
+   `CollUtil` (.rodata). `Ride` and `CollUtilO` can't (`.rodata` at 4 mod 8), `sddrv_ee`'s `.bss` is blocked (see the
+   table at the top of `docs/asm-leftovers.md`).
 4. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
    a library unit" section.
 5. **Header cleanup**, interleaved: one `tools/partials.py --queue` item between two work items (see "Header
