@@ -151,12 +151,10 @@ PCAM_DATA* pTestCamData[6] = {
 PCAM_PARAM g_ParamTest;
 PCAM_DATA* g_pCamData[6];
 
-#if 0
 /* Only the scheduling of the first block differs: the original zeroes dir (por/sq) before loading m_pInstance
  * (the zero gets $v1, then m_pInstance), ours loads m_pInstance first. */
 FVECTOR CPlayerCamera::getPlayerCameraDir() {
-    FVECTOR dir;
-    dir.init();
+    FVECTOR dir = { 0.0f, 0.0f, 0.0f, 1.0f };
     if (m_pInstance) {
         dir = m_pInstance->getNowCamDir();
         if (m_pInstance->m_iMode == 2) {
@@ -168,9 +166,6 @@ FVECTOR CPlayerCamera::getPlayerCameraDir() {
     }
     return dir;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerCamera", getPlayerCameraDir__Q212PlayerCamera13CPlayerCamera);
-#endif
 
 INT CPlayerCamera::getPlayerCameraPos(FVECTOR& outPos) {
     if (m_pInstance) {
