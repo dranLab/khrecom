@@ -3632,19 +3632,13 @@ void CStockFolder::deleteGauge() {
     delete m_pSeqCtrl_Num10;
     m_pSeqCtrl_Num10 = NULL;
 }
-/* Parked: 17 lines off, scheduling of the first block: the original issues div, then the changeTexture argument
-   zeros interleaved with pos.init(), the trap check after; ours keeps them apart. Worked: inverted layout ternary
-   (>= 0x6F first), _ref(g_pStockSkillList), m_uiState before m_uiCategory in default. Tried: pos.init placement
-   (3 forms); permuter 4 min (3743 candidates, best 25 -> applied). */
-#if 0
 void CStockFolder::setStockInfo() {
     CB_LAYOUT* pLayout;
-    FVECTOR pos;
     INT num;
     INT category;
     m_p2DFntStockName->setText(g_szStockSkillName[m_iStockSkill]);
     if (m_uiUser == 2) pLayout = (m_iStockSkill >= 0x6F) ? &g_LayoutData[32 + m_iStock] : &g_LayoutData[29 + m_iStock];
-    pos.init();
+    FVECTOR pos = { 0.0f, 0.0f, 0.0f, 1.0f };
     num = m_iStockSum % 10;
     m_pSeqCtrl_Num01->changeTexture(0, 0, 0, NULL, &g_uvCRCounterNumTex[m_nNumTexID][num], &g_uvCRCounterNumTex[m_nNumTexID + 1][num]);
     m_pSeqCtrl_Num01->changeTexture(0, 1, 0, NULL, &g_uvCRCounterNumTex[m_nNumTexID][num], &g_uvCRCounterNumTex[m_nNumTexID + 1][num]);
@@ -3691,10 +3685,6 @@ void CStockFolder::setStockInfo() {
     m_pSeqCtrl->enableDisp(TRUE);
     m_uiState = 1;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/CardRevolver", setStockInfo__Q210CardBattle12CStockFolder);
-#endif
-__asm__(".rdata\n.align 4\n.word 0x001EB87C\n.word 0x001EB888\n.word 0x001EB894\n.word 0x001EB8AC\n.word 0x001EB894\n.word 0x001EB8AC\n.word 0x001EB8A0\n.word 0x00000000\n.text\n");
 INT CStockFolder::setStockCard(INT inKind, INT inNumber) {
     if (CGameWork::getFlag(1, 10)) return 0;
     if (m_uiFlag & 2) return 0;
