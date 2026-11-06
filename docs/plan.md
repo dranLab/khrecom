@@ -41,14 +41,14 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-06)
 
-- **Progress:** 11925 of 12311 functions matched: game 11162 of 11323, libraries 763 of 988 (plus 151 hand-written).
+- **Progress:** 11927 of 12311 functions matched: game 11163 of 11323, libraries 764 of 988 (plus 151 hand-written).
   `tools/check.sh` is the current count.
-- **Game:** 156 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
+- **Game:** 155 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
   Movement constructor has a draft but is listed as "not attempted" (leftovers.py misses constructors in drafts).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
   details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 204 (165 in 48 headers, 39 in 24 .cpp), 22 foreign stand-ins in 16 files, 0
+- **Header cleanup:** PARTIAL 202 (165 in 48 headers, 37 in 22 .cpp), 20 foreign stand-ins in 15 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
   `tools/partials.py --queue` has the ready items.
 - **Method that paid off (2026-11-06):** read `build/asmlines.py` before permuting. Most long-parked drafts had a
