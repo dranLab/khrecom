@@ -667,17 +667,6 @@ void CPlayerSora::initStockSkill(INT inNo) {
         setPlayerFlag(0x2000000, 0);
     }
 }
-/* Parked: 14 of 7930 lines differ, in three case groups (711/741/1042; all other jump-table groups match):
-   the original loads m_pMove (lw 0xa0) between the two stores into the {0, d0, 0, 0} temp and stores m_fDir
-   before copying the temp; ours (sched1) loads m_pMove after both temp stores and sched2 keeps it (post-reload
-   sp vs s3 alias) - same open issue as exeGlide. tried: _ref/pointer/reference temp stores, compound literal and
-   brace init (memset), m_pMove/setDir moved before the temp, register-asm and empty-asm barriers, two 30-min
-   permuter runs (59->58, 36->35). Levers that matched the rest: separate early `case 1211:`/`case 1473:` copies
-   of the procSkillEnd tail, const g_EffTbl_* (.rodata), function-scope effect/pHB/scale/pos/rot,
-   _subAngle(getDir(), viewDir) + Homing(getDir(), ...) for the turning blocks, _ref(g_pStockSkillList)[..].POWER.
-   The draft needs `void operator+=(const FVECTOR&)` in FVECTOR (Vector.h; clashes with LightUnit.cpp's free
-   operator+=). */
-#if 0
 void CPlayerSora::exeStockSkill() {
     INT SESeq;
     FVECTOR pos;
@@ -1461,15 +1450,8 @@ void CPlayerSora::exeStockSkill() {
             rot = getRot();
             if (m_fAnalogPower >= 0.3f) {
                 speed = 3.0f;
-                FVECTOR v;
-                {
-                    /* the original's brace-initialized temporary ({0, dir, 0, 0}, cleared as one quadword) */
-                    FVECTOR t;
-                    t._q = 0;
-                    t.y = m_fAnalogViewDir;
-                    v = t;
-                }
-                setRot(v);
+                FVECTOR t = { 0.0f, m_fAnalogViewDir, 0.0f, 0.0f };
+                setRot(t);
             }
             m_fWalkSpeed = speed / 60.0f;
             m_fJumpSpdXZ = Movement::Approach(m_fJumpSpdXZ, m_fWalkSpeed, 0.02f, m_fFrameRate);
@@ -2060,13 +2042,10 @@ void CPlayerSora::exeStockSkill() {
             FLOAT d0 = Movement::Homing(getDir(), m_fAnalogViewDir, 0.05f, m_fFrameRate);
             FVECTOR v;
             {
-                /* the original's brace-initialized temporary ({0, dir, 0, 0}, cleared as one quadword) */
-                FVECTOR t;
-                t._q = 0;
-                t.y = d0;
+                FVECTOR t = { 0.0f, d0, 0.0f, 0.0f };
+                setDir(d0);
                 v = t;
             }
-            setDir(d0);
             m_pMove->setRot(v);
             if (m_pAnim->getAnimID() != 2) {
                 setAnimSkillEx(2, -1, 0, 0, 0);
@@ -2207,13 +2186,10 @@ void CPlayerSora::exeStockSkill() {
             FLOAT d0 = Movement::Homing(getDir(), m_fAnalogViewDir, 0.03f, m_fFrameRate);
             FVECTOR v;
             {
-                /* the original's brace-initialized temporary ({0, dir, 0, 0}, cleared as one quadword) */
-                FVECTOR t;
-                t._q = 0;
-                t.y = d0;
+                FVECTOR t = { 0.0f, d0, 0.0f, 0.0f };
+                setDir(d0);
                 v = t;
             }
-            setDir(d0);
             m_pMove->setRot(v);
         }
         m_fWalkSpeed = speed / 60.0f;
@@ -2786,13 +2762,10 @@ void CPlayerSora::exeStockSkill() {
             FLOAT d0 = Movement::Homing(getDir(), m_fAnalogViewDir, m_pAtkData->WORK1 * 0.01f, m_fFrameRate);
             FVECTOR v;
             {
-                /* the original's brace-initialized temporary ({0, dir, 0, 0}, cleared as one quadword) */
-                FVECTOR t;
-                t._q = 0;
-                t.y = d0;
+                FVECTOR t = { 0.0f, d0, 0.0f, 0.0f };
+                setDir(d0);
                 v = t;
             }
-            setDir(d0);
             m_pMove->setRot(v);
         }
         m_fWalkSpeed = m_pAtkData->MAX_SPEED / 60.0f;
@@ -3009,108 +2982,6 @@ void CPlayerSora::exeStockSkill() {
         procGravity(frame, m_pAtkData->MOVE_END_FRAME, 1);
     }
 }
-#else
-/* placeholder: .rodata of exeStockSkill__Q22PL11CPlayerSora (strings, jump tables) */
-__asm__(".rdata\n.align 3\n.byte 0x65,0x78,0x65,0x53,0x74,0x6f,0x63,0x6b,0x53,0x6b,0x69,0x6c,0x6c,0x3a,0x20,0x20\n.byte 0x46,0x49,0x4e,0x41,0x4c,0x42,0x52,0x45,0x41,0x4b,0x20,0x20,0x45,0x6e,0x74,0x72\n.byte 0x79,0x20,0x4e,0x47,0x2e,0x2e,0x2e,0x0a,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n.align 3\n.byte 0x72,0x65,0x63,0x6f,0x6d,0x00,0x00,0x00\n.align 3\n.byte 0x43,0x50,0x6c,0x61,0x79,0x65,0x72,0x53,0x6f,0x72,0x61,0x3a,0x3a,0x20,0x53,0x53\n.byte 0x5f,0x52,0x45,0x46,0x52,0x45,0x43,0x54,0x52,0x41,0x49,0x44,0x20,0x3a,0x20,0x42\n.byte 0x75,0x6c,0x6c,0x65,0x74,0x3d,0x25,0x64,0x2f,0x25,0x64,0x2c,0x0a,0x00,0x00,0x00\n.align 3\n.byte 0x65,0x78,0x65,0x53,0x74,0x6f,0x63,0x6b,0x53,0x6b,0x69,0x6c,0x6c,0x3a,0x20,0x20\n.byte 0x53,0x4f,0x4e,0x49,0x43,0x52,0x41,0x56,0x45,0x20,0x20,0x45,0x6e,0x74,0x72,0x79\n.byte 0x20,0x4e,0x47,0x2e,0x2e,0x2e,0x0a,0x00\n.align 3\n");
-__asm__(".byte 0x65,0x78,0x65,0x53,0x74,0x6f,0x63,0x6b,0x53,0x6b,0x69,0x6c,0x6c,0x3a,0x20,0x20\n.byte 0x4c,0x41,0x53,0x54,0x41,0x52,0x43,0x41,0x4e,0x55,0x4d,0x20,0x20,0x45,0x6e,0x74\n.byte 0x72,0x79,0x20,0x4e,0x47,0x2e,0x2e,0x2e,0x0a,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n.align 3\n.byte 0x65,0x78,0x65,0x53,0x74,0x6f,0x63,0x6b,0x53,0x6b,0x69,0x6c,0x6c,0x3a,0x20,0x20\n.byte 0x4c,0x41,0x53,0x54,0x41,0x52,0x43,0x41,0x4e,0x55,0x4d,0x20,0x20,0x46,0x69,0x6e\n.byte 0x69,0x73,0x68,0x20,0x4e,0x47,0x2e,0x2e,0x2e,0x0a,0x00,0x00,0x00,0x00,0x00,0x00\n.align 3\n.byte 0x6c,0x69,0x6d,0x69,0x74,0x34,0x00,0x00\n.align 3\n.byte 0x6d,0x61,0x67,0x6e,0x65,0x73,0x70,0x69,0x72,0x61,0x6c,0x00,0x00,0x00,0x00,0x00\n.align 3\n.byte 0x69,0x74,0x65,0x6d,0x70,0x6c,0x75,0x73,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\n.align 4\n.word .L00295CAC\n.word .L0029C9CC\n");
-__asm__(".word .L002963E8\n.word .L00296400\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00296590\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029661C\n.word .L00296640\n.word .L00296908\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00296A48\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00296C04\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00296CC4\n");
-__asm__(".word .L00296D30\n.word .L00297050\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00297170\n.word .L002972B4\n.word .L002972B4\n.word .L002972B4\n.word .L002972B4\n.word .L002972B4\n.word .L002972B4\n");
-__asm__(".word .L002975DC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00297700\n.word .L00297844\n.word .L00297844\n.word .L00297844\n.word .L00297844\n.word .L00297844\n.word .L00297844\n.word .L00297844\n.word .L002979E4\n");
-__asm__(".word .L002979E4\n.word .L002979E4\n.word .L002979E4\n.word .L002979E4\n.word .L00297C8C\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00297D24\n.word .L00297E8C\n.word .L00298488\n.word .L00298488\n.word .L002984F4\n.word .L00298610\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029869C\n.word .L0029879C\n.word .L0029C90C\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L002987F8\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L002987F8\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298894\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298894\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298894\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L002988FC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L002988FC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00296CC4\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00296CC4\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L00296CC4\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00296CC4\n.word .L002970B8\n.word .L00297050\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00296CC4\n.word .L00297068\n.word .L00297050\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298A70\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298A70\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298AF8\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298AF8\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L00298C80\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298C80\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298D50\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298D50\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298E04\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298E5C\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00298ED4\n.word .L00298F58\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00299024\n.word .L002990BC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L00299188\n.word .L00299220\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L002992EC\n.word .L00299374\n.word .L00299420\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00299464\n.word .L00299544\n.word .L002998BC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L002999A0\n");
-__asm__(".word .L00299B00\n.word .L00299C64\n.word .L00299C9C\n.word .L00299D18\n.word .L00299DA4\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L00299DE8\n.word .L00299EA0\n.word .L0029A0F4\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029A10C\n.word .L0029A160\n.word .L0029A1EC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029A29C\n.word .L0029A310\n.word .L0029A364\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029A38C\n.word .L0029A480\n.word .L0029A650\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029A69C\n.word .L0029A800\n.word .L0029A914\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029AA10\n");
-__asm__(".word .L0029AC5C\n.word .L0029AFF8\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029B0BC\n.word .L0029C9CC\n.word .L0029B164\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029B1A8\n.word .L0029B298\n.word .L0029B4E8\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029B52C\n.word .L0029C9CC\n.word .L0029B66C\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029B6B0\n.word .L0029B7E0\n.word .L0029B860\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029B8C4\n.word .L0029B984\n.word .L0029B984\n.word .L0029B984\n.word .L0029B984\n.word .L0029BB40\n.word .L0029BB94\n.word .L0029BC34\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE30\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE30\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BEAC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE30\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE30\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BEAC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BF68\n.word .L0029C058\n.word .L0029C0B8\n");
-__asm__(".word .L0029C240\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE30\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029BE30\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE30\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE30\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE58\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE58\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE58\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE58\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BEAC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029BEAC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE30\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029BE30\n.word .L0029C918\n.word .L0029C2B8\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C550\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C550\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C550\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C550\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C4EC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C4EC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C4EC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C43C\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C43C\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C550\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C550\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C4EC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C4EC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C550\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C550\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C550\n.word .L0029C4C0\n.word .L0029C74C\n.word .L0029C918\n.word .L0029C9CC\n");
-__asm__(".word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C92C\n");
-__asm__(".word .L0029C92C\n.word .L0029C964\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C9CC\n.word .L0029C7D0\n.word .L0029C850\n.word .L0029C90C\n.word func_0\n.word func_0\n.align 4\n.word .L0029C3D8\n");
-__asm__(".word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3D8\n");
-__asm__(".word .L0029C3D8\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3B0\n.word .L0029C3D8\n.word .L0029C3D8\n.word .L0029C3D8\n.word func_0\n.word func_0\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeStockSkill__Q22PL11CPlayerSora);
-#endif
 void CPlayerSora::initMagic(INT inNo) {
     FVECTOR pos;
     FVECTOR rot;
@@ -4805,14 +4676,6 @@ void CPlayerSora::initGlide(INT inFlag) {
     setFaceAnim(0, 0);
     m_pMove->setFlag(0x40, 0);
 }
-/* Parked: only the analog-steering block after Homing differs: the original loads m_pMove (lw v1,0xa0) before
-   the y store into the {0, dir, 0, 0} temporary at sp+0x20 and copies it (lq/sq to sp+0x10) after the m_fDir
-   store; ours stores y and loads the temp first (its stack-temp accesses conflict with this-> accesses, the
-   original's do not) - 4 lines. tried: decl scopes/stack-slot order (vel/vNormal/v), brace init (memset: FVECTOR
-   union is BLKmode here), explicit temp block, _ref/pointer/array-element/scalar-pointer stores, d0 as Homing
-   result vs wrapped angle, setDir before/after/inside the temp block, getRot() = v, early m_pMove local,
-   -dS sched dump (dependence 496 -> 469/484 in ours); permuter 6 + 12 min, best 4 lines (start 8) */
-#if 0
 void CPlayerSora::exeGlide() {
     FLOAT speed;
     setBattleFlag(0, 8);
@@ -4844,13 +4707,11 @@ void CPlayerSora::exeGlide() {
     m_pMove->setVel(vel);
     if (m_fAnalogPower >= 0.3f) {
         FLOAT d0 = _limitPI2(m_fAnalogViewDir - getDir());
-        setDir(Movement::Homing(getDir(), m_fAnalogViewDir, g_fGlideTurnRate, m_fFrameRate));
         FVECTOR v;
         {
-            /* the original's brace-initialized temporary ({0, dir, 0, 0}, cleared as one quadword) */
-            FVECTOR t;
-            t._q = 0;
-            t.y = getDir();
+            FLOAT dir = Movement::Homing(getDir(), m_fAnalogViewDir, g_fGlideTurnRate, m_fFrameRate);
+            FVECTOR t = { 0.0f, dir, 0.0f, 0.0f };
+            setDir(dir);
             v = t;
         }
         m_pMove->setRot(v);
@@ -4887,9 +4748,6 @@ void CPlayerSora::exeGlide() {
     if (m_fJumpTop < m_fJumpHeight) m_fJumpTop = m_fJumpHeight;
     m_tqJumpTimer += m_tqFrameRate;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/PlayerSora", exeGlide__Q22PL11CPlayerSora);
-#endif
 void CPlayerSora::exeAvoid() {
     exeDogeRoll();
 }
