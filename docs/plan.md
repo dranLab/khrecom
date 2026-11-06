@@ -41,9 +41,9 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-06)
 
-- **Progress:** 11915 of 12311 functions matched (89.6%): game 11152 of 11323, libraries 763 of 988 (plus 151
-  hand-written). `tools/check.sh`: 12193 functions decompiled in 662 files, 612 complete.
-- **Game:** 166 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
+- **Progress:** 11923 of 12311 functions matched: game 11160 of 11323 (92.1% of the code), libraries 763 of 988
+  (plus 151 hand-written). `tools/check.sh`: 12194 functions decompiled in 662 files, 612 complete.
+- **Game:** 158 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
   Movement constructor has a draft but is listed as "not attempted" (leftovers.py misses constructors in drafts).
   10 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
@@ -55,7 +55,8 @@ every change that is merged without regenerating. Regenerating all four takes ab
   wrong source shape the line markers show directly (one-line brace init, a condition on one line, statement order,
   a direct assignment), not a scheduling accident. See memory void-callee-v0, fvector-brace-init-aligned,
   gcse-bucket-count-lever. `build/lineorder.py` compresses the markers, `build/normdiff.py` is a register-blind diff,
-  `build/lregpri.py` ranks pseudos by global-alloc priority.
+  `build/lregpri.py` ranks pseudos by global-alloc priority, `build/secsize.py` compares section sizes with the
+  split, `build/bracetry2.py`/`bracetmp.py` sweep drafts for brace-init forms.
 
 Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py game|lib` (what is left) and
 `tools/partials.py --summary` (cleanup) give the current state.

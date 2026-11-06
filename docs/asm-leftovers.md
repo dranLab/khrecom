@@ -25,18 +25,16 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 
 | unit | functions left | instr left | parked | data from asm |
 |---|---:|---:|---:|---|
-| `Game/Player/PlayerSora` | 2 | 7322 | 2 |  |
 | `Game/Player/PlayerDRiku` | 3 | 5073 | 3 |  |
 | `Form/Menu/Camp` | 7 | 4599 | 7 |  |
-| `Game/Player/PlayerRiku` | 2 | 2940 | 2 |  |
-| `Game/Player/Player` | 10 | 2868 | 10 |  |
+| `Game/Player/Player` | 7 | 2401 | 7 |  |
 | `System/Graphic/Gprim` | 15 | 2159 | 15 |  |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
 | `Form/Menu/RoomCreation` | 1 | 1995 | 1 |  |
 | `Game/Map` | 2 | 1952 | 2 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 | .rodata |
-| `Game/CardRevolver` | 7 | 1627 | 7 |  |
 | `System/Graphic/Model` | 9 | 1621 | 9 |  |
+| `Game/CardRevolver` | 6 | 1410 | 6 |  |
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
 | `Game/Enemy/HumanBoss` | 7 | 1088 | 7 |  |
 | `System/Graphic/PathData` | 2 | 1075 | 2 |  |
@@ -53,6 +51,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
 | `Game/BattleCard` | 2 | 532 | 2 |  |
 | `Game/Atel/Avatar` | 3 | 531 | 3 |  |
+| `Game/Player/PlayerRiku` | 1 | 520 | 1 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
 | `System/Graphic/Glare` | 1 | 446 | 1 | .data |
 | `System/Memoca` | 3 | 442 | 3 |  |
@@ -60,9 +59,9 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Sound/driver/sddrv_ee` | 2 | 403 | 2 | .bss |
 | `System/RcfCD` | 3 | 390 | 3 |  |
 | `Game/Game` | 1 | 371 | 1 |  |
-| `Game/Player/PlayerCamera` | 2 | 371 | 2 |  |
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
 | `Game/Collision/CollAttack` | 3 | 334 | 3 |  |
+| `Game/Player/PlayerCamera` | 1 | 332 | 1 |  |
 | `Game/Enemy/BattleEnemy` | 2 | 327 | 2 |  |
 | `Form/Menu/SaveLoad` | 2 | 320 | 2 |  |
 | `Game/SceneInfo` | 2 | 314 | 2 |  |
@@ -200,8 +199,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/CardRevolver` | `changeMode__Q210CardBattle13CCardRevolverii` | 101 | 12 lines off, all in `limit`: the original loads m_nTotal[m_iMode] (lhu + sll 16) above the m_iMode branch and sign-extends (sra 16) only in that arm (interblock-scheduled split extension); ours branches first and uses lh. Worked: `if (inMode == -1) ^= 1; else =`, `!old_mode ? m_pCards : … |
 | `Game/CardRevolver` | `exeReload__Q210CardBattle13CCardRevolver` | 127 | 14 lines off: register allocation and latch order of the first loop - the original keeps i in t0 and the card offset in a2 (decremented first in the latch, in the continue paths' delay slots), ours the reverse; the second loop's i likewise. Worked (from 48 bytes over to same size): separate … |
 | `Game/CardRevolver` | `initAction__Q210CardBattle13CCardRevolver` | 265 | ~165 lines off, mostly register allocation: ours keeps one more value live across calls (the getStock() == -1 value is CSE'd into an s-register for the later getHand() test), so two flags spill instead of one (bReloadOC) and every flag moves one register. Structure found: decEnchantTime inside … |
-| `Game/CardRevolver` | `setStockInfo__Q210CardBattle13CCardRevolver` | 348 | 22 lines off, two places: the first block has CStockFolder::setStockInfo's open issue (the original issues the div before the pos.init() zero stores and the changeTexture zero arguments, ours after); the num > 0 arms load a0/a1 for setPos at the top of each arm with one shared jal in the original. … |
-| `Game/CardRevolver` | `setStockInfo__Q210CardBattle12CStockFolder` | 217 | 17 lines off, scheduling of the first block: the original issues div, then the changeTexture argument zeros interleaved with pos.init(), the trap check after; ours keeps them apart. Worked: inverted layout ternary (>= 0x6F first), _ref(g_pStockSkillList), m_uiState before m_uiCategory in default. … |
+| `Game/CardRevolver` | `setStockInfo__Q210CardBattle13CCardRevolver` | 348 | 5 lines off (brace-initialized pos, 2026-11-06; 22 before): the first m_uiUser == 1 arm's `sw y; jal setPos` should cross-jump into the else arm's, but sched1 puts (use (const_int 0)) after the else arm's call (it ends a block), so jump2's find_cross_jump compares USE with the arm's jump and … |
 | `Game/Game` | `endFieldSub__9CGameMain` | 371 | 4 of 426 lines - ref names/order and the six `SHORT nScene` inlines (_isEventScene) in place; the bEventNext arm as `if (_isEventScene(..) && !bPooh) bEventNext = TRUE;` (21 -> 4); left: the theater block's s4/s7 pair (the TRUE flags around the TRACE call). Earlier, stack reload registers. tried: … |
 | `Game/Map` | `init__4CMapii` | 1046 | 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/ while/goto loop shapes, by-value apply inline and a 10 min permuter run … |
 | `Game/Map` | `disp__4CMap` | 906 | 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes, group selection by player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons). The 44 bytes: the original keeps two copies of the "flush the last model" block (group and … |
@@ -228,26 +226,19 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Atel/VSME` | `acWaitReq__Q24ATEL4CVSMRQ24ATEL5Actorii` | 32 | same instructions and order except the wait_timer product: the original multiplies into LO ("mult $zero,s1,v1" + mflo before the sh), ours with the 3-operand mult into v1 (gcc's mulsi3_mult3 "l" vs "d" alternative, chosen by regclass: LO only when the product feeds a plain register copy, as for a … |
 | `Game/Player/Friend` | `setMagic__Q26Friend7CFriendi` | 1274 |  |
 | `Game/Player/NaviMap` | `main__Q25Gauge8CNaviMap` | 425 | (comment) Not matching: in the debug-rotation block (g_dw.player.iTemp == 2) the original keeps PI in $f3 from before the branch and loads 180.0f/-PI in $f2/$f1 (100.0f and -PI share $f1); here 180.0f is hoisted too and the registers of 180.0f/-PI swap (9 lines). Everything else matches; the "deg" … |
-| `Game/Player/Player` | `exeWalk__7CPlayer` | 83 | 2 lines differ: the delay slot of jal calcVelocityXZ (the original issues the m_fWalkSpeed store first and puts mov.s $f12,$f1 in the slot; this draft the reverse). The angle-wrap register (r in $f1, not $f13) is fixed by keeping aim_dir live after the call with an empty asm (see the draft); … |
 | `Game/Player/Player` | `exeWall__7CPlayer` | 517 | 4 lines differ (size, frame, every branch, call and register allocation match): at the start the original issues `lw m_iSubState` (getSubState) before the `sw zero` of vec.y, ours stores vec.y first (right after the lq of the getRot copy). Found 2026-10-25 from the $LM tags (25 -> 4): the first … |
 | `Game/Player/Player` | `isStartLadderJump__7CPlayer` | 120 | everything but the ofs block matches (wrap: r wrapped in place, then dir = r); left: after getPos the original issues lq pos (v1) before lui LADDER_LOCAL_OFS (v0), ours schedules the lui first (sched1 priority: hi->lwc1->swc1 chain) and allocates pos to a1. tried: all orders of pos/ofs statements … |
 | `Game/Player/Player` | `exeHang__7CPlayer` | 550 | 23 lines differ, all FP-register/load-order of the two angle wraps: the original loads m_fDir first ($f0) then m_fAnalogViewDir ($f1) for `view - dir + PI` (ours the reverse), and in the drop-off arm it loads dir into $f12 in the branch delay slots and copies it to $f22 after getPos (ours loads … |
 | `Game/Player/Player` | `initAttackField__7CPlayeri` | 81 | registers match; only the stores after the g_fGravity load are scheduled differently (the original stores m_JumpState right after the load and m_fJumpGravity before the g_CardBreakTime load; ours stores them later). tried: all 24 orders of the JumpState/CardBreakTime/JumpGravity/JumpSpdY block, … |
 | `Game/Player/Player` | `initAttack__7CPlayeri` | 104 | same spot as initAttackField: around the g_fGravity load the original keeps the %hi in v0 (later s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi moves. The flag block (battle 0x10/0x80000/8, then trg 4) and the ternary m_iComboBoost match. … |
-| `Game/Player/Player` | `chkDamage__7CPlayer` | 961 | 20 lines differ, same size; structure, all branches, calls, the 40-entry jump table, frame and strings match. Left, four scheduling/register spots: (1) old_condition (isConditionFlag(0x881803F)): the original loads the flag word into v1 and the mask into v0, ours the reverse; (2) case 6 … |
+| `Game/Player/Player` | `chkDamage__7CPlayer` | 961 | 8 lines differ (2026-11-06, was 20: both vel brace-initialized, m_fDir store between brace and copy; markers at 9456/9593: por, sq 0x30, swc1 y 0x34, lq 0x30, sq 0x20 all on one line, so a temporary copied straight into vec; (FVECTOR){..} does not compile at the first site, braces at both sites … |
 | `Game/Player/Player` | `setConfuse__7CPlayerii` | 68 | in the set arm the original loads ConditionFlag (v1), li 21000 (v0), PadFlag (a2); this order gets the registers right but schedules the PadFlag load first; source order cond/tq/pad gives the load order but swaps v0/a2 (tq/pad). tried: all 6 statement orders x tq forms (ternary, param default, … |
-| `Game/Player/Player` | `chkChargeMove__7CPlayeri` | 91 | only the block before chargeReloadCard is scheduled differently: the original zeroes pos with v1 after the flag 'and' and loads m_pRevolver after the flag store; ours zeroes pos in a0 first and loads m_pRevolver before the store. tried: all orders of setPlayerFlag/pos._q/pos.w (the 5-line ones … |
-| `Game/Player/Player` | `exeFooting__7CPlayer` | 293 | all but 4 instructions match (frame, branches, walk block registers). Left: in the analog walk arm the original issues `lw m_pMove` between the `sq t._q` and the `swc1 t.y` and loads `lq t` only after the m_fDir store; ours puts the lq right after the t.y store and the m_pMove load after it. … |
-| `Game/Player/PlayerCamera` | `getPlayerCameraDir__Q212PlayerCamera13CPlayerCamera` | 39 | (comment) Only the scheduling of the first block differs: the original zeroes dir (por/sq) before loading m_pInstance (the zero gets $v1, then m_pInstance), ours loads m_pInstance first. |
 | `Game/Player/PlayerCamera` | `procFieldNormal__Q212PlayerCamera13CPlayerCamera` | 332 |  |
 | `Game/Player/PlayerDRiku` | `setAttack__Q22PL12CPlayerDRiku` | 451 | 7 lines off, registers only: in the card branch the original keeps %hi(g_pBattleCardList) in t0 and the shared constant 1 (m_iAttackNo == 1, _upKind's shift) in a2, ours t1 and t0. Worked: CPlayer::setAttack's form, the player-flag 0x80000 arm first, `pre == 7 \|\| isAir()` for the last hit, case 7 … |
 | `Game/Player/PlayerDRiku` | `exeStockSkill__Q22PL12CPlayerDRiku` | 3473 | structurally complete (35 cases in the original order, Riku's 0x6cc-0x6f9 group renumbered to 0x712-0x73f), same frame, 8 bytes long, 173 of 3903 lines off: case 1's attack-ID switch keeps a compare for the empty case 0x690 in the original; cross-jumped tails differ (0x67c's flag-and-return tail, … |
 | `Game/Player/PlayerDRiku` | `setMagic__Q22PL12CPlayerDRikuiii` | 1149 | same structure and size within 8 bytes, 310 of 1363 lines off: the BULLET_PARAM field stores and the member loads feeding them are scheduled differently in every case (the original loads m_AtkKind, m_AtkAttr, m_iAttackPower in that order and stores them together), plus registers in the stock-skill … |
 | `Game/Player/PlayerGauge` | `setCharge__Q25Gauge12CEscapeGaugef` | 77 | 3 lines off, the getLayPosition argument loads: the original sets a2 first and a1 (7) last (in the jal delay slot), ours a1 first. Worked: case 2 with its own copy of case 1's body (separate tree nodes 1/0/2/3, cross-jumped later), case 0 falling into it. Tried: _ref(g_szLadCockpit), FALSE vs 0, … |
-| `Game/Player/PlayerRiku` | `exeStockSkill__Q22PL11CPlayerRiku` | 2420 | (comment) Best attempt (same structure): the CBattleEnemy flag tests get swapped registers, 0x6CD doesn't reload the flag, and 0.0f isn't rematerialized in f20 in 0x6CC. |
 | `Game/Player/PlayerRiku` | `setMagic__Q22PL11CPlayerRikuiii` | 520 | (comment) Best attempt (same structure): BULLET_PARAM field stores and the attack-power loads are scheduled differently. |
-| `Game/Player/PlayerSora` | `exeStockSkill__Q22PL11CPlayerSora` | 7049 | 14 of 7930 lines differ, in three case groups (711/741/1042; all other jump-table groups match): the original loads m_pMove (lw 0xa0) between the two stores into the {0, d0, 0, 0} temp and stores m_fDir before copying the temp; ours (sched1) loads m_pMove after both temp stores and sched2 keeps it … |
-| `Game/Player/PlayerSora` | `exeGlide__Q22PL11CPlayerSora` | 273 | only the analog-steering block after Homing differs: the original loads m_pMove (lw v1,0xa0) before the y store into the {0, dir, 0, 0} temporary at sp+0x20 and copies it (lq/sq to sp+0x10) after the m_fDir store; ours stores y and loads the temp first (its stack-temp accesses conflict with this-> … |
 | `Game/Player/SummonTink` | `initRecover__Q26Summon11CSummonTink` | 37 | (comment) Best attempt: same size; combine folds the Crd() result straight into a3 ("move a3,v0" right after the call), so the effect name's address lands in v0 instead of v1 and the lui/lw are scheduled later. |
 | `Game/Enemy/BattleEnemy` | `setupFlick__12CBattleEnemy` | 82 | the 30-degree constant (0.5235988f) is loaded once into $f20 and reused for sinf, cosf and calcOrbitSpeedFromDistance in ours; the original reloads it (lui/ori/mtc1) before each call and keeps the sinf result in $f20 instead (vel.y stored after cosf); tried: field stores vs vel.set(), … |
 | `Game/Enemy/BattleEnemy` | `initEnemyParam__12CBattleEnemyiii` | 245 | 34 lines - the Riku-game scan loop: the original places the getRsrcData() ternary before the inline getExtraParam's found block and keeps the parameter in s0 (ours: s2, blocks swapped); the rest (seek loops, relocation, floor mapping, basic param) matches; tried: while/for/continue loop forms, … |
@@ -276,7 +267,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 166 functions (58507 instructions) in 73 units, 165 of them parked; 10 units take a data section from assembly.
+Totals: 158 functions (48042 instructions) in 72 units, 157 of them parked; 10 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
