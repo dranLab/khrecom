@@ -334,15 +334,13 @@ CAttackMotion::~CAttackMotion() {
     m_pAtkMotCtrl = NULL;
 }
 
-/* Matches except that two loop registers swap (i + 1 and the next param pointer: s5/s6). */
-#if 0
 #line 431
 BOOL CAttackMotion::initialize(ATK_COLL_PARAM* inAtkCollParam, INT inCount) {
     ASSERT(inAtkCollParam);
     m_iAtkCollParamNum = inCount;
     m_pAtkCollParam = inAtkCollParam;
     ATK_COLL_PARAM* param = inAtkCollParam;
-    for (INT i = 0; i < inCount; i++, param++) {
+    for (INT i = 0; i < inCount;) {
         for (INT j = 0; j < 2; j++) {
             if (param->BoneOffset[j].iBoneIndex <= 0) {
                 param->BoneOffset[j].iBoneIndex = m_pOwner->getBoneIndex(param->BoneOffset[j].szBoneName, 0);
@@ -353,6 +351,9 @@ BOOL CAttackMotion::initialize(ATK_COLL_PARAM* inAtkCollParam, INT inCount) {
         if (param->iMotIndex <= 0) {
             param->iMotIndex = m_pOwner->getMotionIndex(param->szName);
         }
+        i++;
+        __asm__ volatile(""); /* MATCH: one more insn of life for the next param: i + 1 wins the tie and gets s5 */
+        param++;
     }
     COLL_KIND coll_kind;
     switch (m_pOwner->getEntityType()) {
@@ -382,19 +383,6 @@ BOOL CAttackMotion::initialize(ATK_COLL_PARAM* inAtkCollParam, INT inCount) {
     }
     return TRUE;
 }
-#else
-/* placeholder for initialize's strings (the original's .rodata has them here) */
-__asm__(".section .sdata\n");
-#line 431
-static void __attribute__((section(".sdata"))) _initializeStrings(ATK_COLL_PARAM* inAtkCollParam, ATK_COLL_PARAM* param, INT j) {
-    ASSERT(inAtkCollParam);
-#line 445
-    ASSERT(param->BoneOffset[j].iBoneIndex != -1);
-#line 469
-    com_malloc_d(0, __FILE__ "(469)", 0);
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/AttackMotion", initialize__13CAttackMotionP14ATK_COLL_PARAMi);
-#endif
 
 BOOL CAttackMotion::set(INT inIndex) {
     if (!hasAtkCollParam()) {
