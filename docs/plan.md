@@ -41,9 +41,9 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-06)
 
-- **Progress:** 11931 of 12311 functions matched: game 11166 of 11323, libraries 765 of 988 (plus 151 hand-written).
+- **Progress:** 11944 of 12311 functions matched: game 11179 of 11323, libraries 765 of 988 (plus 151 hand-written).
   `tools/check.sh` is the current count.
-- **Game:** 152 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
+- **Game:** 139 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
   Movement constructor has a draft but is listed as "not attempted" (leftovers.py misses constructors in drafts).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
@@ -58,6 +58,14 @@ every change that is merged without regenerating. Regenerating all four takes ab
   `build/lregpri.py` ranks pseudos by global-alloc priority, `build/secsize.py` compares section sizes with the
   split, `build/bracetry2.py`/`bracetmp.py` sweep drafts for brace-init forms.
 
+- **Next method: compare drafts with the ref's locals (2026-11-06).** It matched 13 functions in one sitting (Gprim 12,
+  CollUtil 1; detectMCInit 48 -> 18 lines) after three permuter queues had matched two. The ref lists every local and
+  inline scope in order, so a missing or extra local means a wrong source shape: invented `flag`/`bTop` variables, a
+  counted-down loop where the ref has `i`, asm helpers for what gcc emits itself (a `por` after `pcpyud` is a DI -> TI
+  conversion, `*(UINT*)&f` gives the `mfc1`). `build/reflocals.py > build/jm/reflocals.log`, then `build/refjoin.py 60`,
+  ranks near misses; start with createBootInfoMsg, drawBefore, setStockInfo, createBattleEnemies. Check the helpers
+  first: `asm volatile` against plain `asm`, and `=&r` where the original keeps inputs and output apart. See memory
+  ref-locals-reveal-shape, ti-di-conversion-is-por.
 - **Permuters are exhausted for now (2026-11-06):** three 10-minute queues covered every parked game draft 4-45 lines off
   (about 73 drafts, 12 hours). Only endFieldSub and getNearPath gained, and only their statement changes counted. Do not
   rerun them on a draft whose source did not change; read its line markers instead. tools/permuter.py can't enable some
@@ -340,6 +348,7 @@ header split the original didn't have, or make a class a template to hide its st
 | strings, rodata order | include-asm-with-source-data, template-strings-not-merged, static-table-strings-position, placeholder-file-literal-and-vtable-decl-order, misaligned-unit-rodata |
 | return type / getter form changes code | ref-return-types-matter, entity-unit-lessons |
 | VU0 / GS packets / u128 | vu0-asm-function-conversion, ppp-keshptail-patterns, gs-packet-u128-patterns, sp-address-inline-wrappers, volatile-asm-cse-flush |
+| Draft lacks a ref local, or "registers only" around asm helpers | `ref-locals-reveal-shape`, `ti-di-conversion-is-por` |
 | C units (lib/, libppp, sddrv) | `docs/sdk-leftovers.md` "Levers that worked in lib/", decomp-permuter-c-units |
 | signal 11 in the cc step | cc1plus-silent-segfault, CLAUDE.md pitfalls (Ps2EeAs) |
 

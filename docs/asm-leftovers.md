@@ -29,7 +29,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 |---|---:|---:|---:|---|
 | `Game/Player/PlayerDRiku` | 3 | 5073 | 3 |  |
 | `Form/Menu/Camp` | 7 | 4599 | 7 |  |
-| `System/Graphic/Gprim` | 15 | 2159 | 15 |  |
 | `System/Graphic/Effect/libppp/eiProg/pppEiDrawShipoly` | 3 | 2143 | 3 | .bss .data .rodata |
 | `Form/Menu/RoomCreation` | 1 | 1995 | 1 |  |
 | `Game/Map` | 2 | 1952 | 2 |  |
@@ -42,7 +41,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/PathData` | 2 | 1075 | 2 |  |
 | `System/Graphic/DeFocus` | 2 | 1014 | 2 |  |
 | `System/Graphic/FrecFont` | 2 | 908 | 2 |  |
-| `Game/Collision/CollUtil` | 4 | 822 | 4 | .rodata |
+| `Game/Collision/CollUtil` | 3 | 781 | 3 | .rodata |
 | `System/Graphic/2d/2DSprObj` | 2 | 763 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/KeTh` | 1 | 685 | 1 |  |
 | `Form/DebugWindow` | 2 | 667 | 2 |  |
@@ -57,6 +56,7 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
 | `System/Graphic/Glare` | 1 | 446 | 1 |  |
 | `System/Memoca` | 3 | 442 | 3 |  |
+| `System/Graphic/Gprim` | 3 | 426 | 3 |  |
 | `Game/Player/NaviMap` | 1 | 425 | 1 |  |
 | `System/Sound/driver/sddrv_ee` | 2 | 403 | 2 | .bss |
 | `System/RcfCD` | 3 | 390 | 3 |  |
@@ -145,19 +145,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/WorldEnv` | `initialize__9CWorldEnv` | 128 |  |
 | `System/Graphic/Gprim` | `makePkt__6CZFill` | 109 | 8 lines - two scheduling ties: the original loads 0x206 before the shared zero for the PRIM/PRMODE A+D pair, and strength-reduces i 64 + 63 with its increment at the loop end while i++ sits inside the SCISSOR expression (ours increments both there); this draft fixed the hoisted-constant order (XYZ … |
 | `System/Graphic/Gprim` | `makePkt__8CRotSprt` | 173 | the corner setup before the two calcVert calls (load/store order of b, c and ab: the original keeps a separate copy of m_P0.y for ab.set's _y parameter) and the register numbering that follows; a reference to m_P1 (not in the ref's locals) reproduces the original's s0 = &m_P1 read of m_P1.y in the … |
-| `System/Graphic/Gprim` | `_makePkt_TexLine__FPUlP7G_STRIPT1` | 75 | registers only - the original loads it->S into v1 before the mfc1 of fW0 (filling the beql slot) and keeps iW in a0, ours puts iW in v1 and loads it->S after; tried: STQ inline taking G_ST&/ULONGLONG/FLOAT, iW before/after the call, an inSTQ block local, permuter 15 min (15280 candidates, no gain) |
-| `System/Graphic/Gprim` | `_makePkt_TexLine__FPUlP7G_STRIPT1P6CCoord` | 102 | registers only - as in the CCoord-less version the original keeps iW in a0 and the copy of the mfc1 in v1 (ld of it->S after it), ours swaps them; tried: STQ inline taking G_ST&+UINT, G_ST&+FLOAT, operand order in the pcpyld asm, iW assigned inside the call, permuter 15 min (12213 candidates, no … |
-| `System/Graphic/Gprim` | `_makePkt_TexTriangle__FPUlP7G_STRIPT1i` | 209 | registers only - per vertex the original loads it->S into v1 (the first one in the beql slot) and copies the mfc1 result into a0 for iW, ours puts iW in v1 and loads it->S into v0; loop shape, per-loop fW and mfc1 order (volatile _floatBits) match; tried: S read into a local first/last, STQ inline … |
-| `System/Graphic/Gprim` | `_makePkt_TexTriangle__FPUlP7G_STRIPT1P6CCoordi` | 263 | registers (as the CCoord-less version: it->S into v1 and the mfc1 copy in a0 for iW, ours swapped) and one loop-alignment nop before the second loop; the draft is the CCoord-less one plus the per-vertex bone checks of the matched _makePkt_Triangle (CCoord); tried: the CCoord-less version's levers … |
-| `System/Graphic/Gprim` | `_makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1i` | 162 | 3 lines (2026-11-04, was 11; the other fans 5/5/3 with the same form): `if (!(it < end)) goto done; goto in0;` into the first skip do-while and a trailing `done: return pQw;` fix the !Back entry; left: in the Back skip loop jump.c inverts `if (!term) goto body; goto next1;` (original: beqz term -> … |
-| `System/Graphic/Gprim` | `_makePkt_TexTriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi` | 179 | the strip-skip loop entry only, as in the CCoord-less version (the original enters the rolled skip loop at its Term test, ours copies the test to the entry or keeps a redundant it < end test); bone check at the loop top, iDir = 0 last in this one; tried: the CCoord-less version's levers (see there) |
-| `System/Graphic/Gprim` | `_makePkt_TriangleFan__FP6QWdataP7G_STRIPT1i` | 144 | the strip-skip loop entry only (as _makePkt_TexTriangleFan) - the original jumps into the rolled skip loop at its Term test, ours copies that test to the loop entry or keeps a redundant it < end test; this draft (11 lines) fixes the fg/end registers and the bLoop scheduling of the earlier one (32) … |
-| `System/Graphic/Gprim` | `_makePkt_TriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi` | 163 | the strip-skip loop entry only, as in _makePkt_TexTriangleFan; bone check at the loop top, iDir = 0 last; tried: the levers of the CCoord-less fans (see there) |
-| `System/Graphic/Gprim` | `getPrimGetaZ__FiRC7FVECTORPC7FMATRIXf` | 100 | argument order of the RotTransPersW call (the original sets a1 before a0; sched1 issues a1 first only when its source REG_DEADs, ours keeps vW's address live) and with it the TImode result register (a1 vs a0); tried: matrix ref local, temp for the result, 0.0f > w, wrapper with swapped parameters, … |
-| `System/Graphic/Gprim` | `calcZ__12C3DStripBase` | 122 | registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter … |
-| `System/Graphic/Gprim` | `calcZ__15C3DTexStripBase` | 122 | registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter … |
-| `System/Graphic/Gprim` | `calcZ__8C3DCPrim` | 118 | registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter … |
-| `System/Graphic/Gprim` | `calcZ__8C3DTPrim` | 118 | registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter … |
+| `System/Graphic/Gprim` | `_makePkt_TriangleFan__FP6QWdataP7G_STRIPT1i` | 144 | 3 lines - the skip loop is solved (as the other fans); iW in a local gives the original's s7/s8 (without it iDir loses to the hoisted 0x8000, priority 833 vs 862), but its li then sits before the entry test (the original sets it after, with the &vDir addiu); assigned in the loop body loop.c hoists … |
 | `System/Graphic/2d/2DCard` | `replaceNorma__7C2DCardGQ27RCNORMA8NormaSrci` | 30 | (comment) Not matching: the original passes inNorma to createNorma as four lhu from the parameter's stack slot combined with dsll/or into a1 (extract_bit_field in 16-bit pieces); ours copies the struct to an 8-aligned temporary and loads it with one ld. No struct shape tried (bitfields, arrays, … |
 | `System/Graphic/2d/2DSprObj` | `initForSeq__Q22D29C2DSprObjPQ22D213SEQ_ANIMATIONPQ22D210LAY_SCREEN` | 325 | 14 of 340 lines (2026-11-06, was 20: fVec2 is the brace init), all in the sway block. Markers: fVec.set(four sway values) (Coord.h:730) and m_vSway[i].set() (Coord.h:200); the stores come out sway0 x/y, fVec z/w, sway1, fVec x/y. Writing fVec.set + m_vSway[i].set(fVec...) fixes the source shape … |
 | `System/Graphic/2d/2DSprObj` | `move__Q22D29C2DSprObj` | 438 | 25 of 465 lines - only the vertex loop differs: the MMI colour multiply's 0xFF splat is a TImode constant here (`por v0,zero,zero` before `li`, the original only does `li`), the pmulth/tmp registers come out v1/v0 instead of a0/v1, the vertex-loop pointers get other registers and lCol is loaded … |
@@ -210,8 +198,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Collision/CollDisp` | `setBodyLines__9CCollDispP14CCollisionList` | 95 | 38 of 105 lines, same size - structure matches (case 4/5 column first, `case 2: default:` sphere); left: the s-registers are rotated (original this s1, collision s0, type s2, fg s3, &m_inWE s4) and the sphere arm recomputes &m_inWE where ours reuses it. Tried: this vs a pThis copy, decl orders, … |
 | `Game/Collision/CollMap` | `collideRide__8CCollMapi` | 224 | (comment) collideRide and collideRideR2 don't match yet. collideRide: the original's `pRideAtari = NULL` store is not a "fixed scalar" to the scheduler (it is ordered before the coll constructor's stores), as if pRideAtari's address had been taken before; every way of doing that here also moves … |
 | `Game/Collision/CollMap` | `collideRideR2__8CCollMapR10CCollisionPP5CRidei` | 141 |  |
-| `Game/Collision/CollUtil` | `__detectMCInitInit_Check__FP7MC_DATAf` | 41 | 23 lines, registers only - the original keeps the VU0 flag and iRet in a2 and fMDVal/zoneVec in v1, ours v0/a0; iRet-as-flag, if/else and early-return forms and a 5 min permuter run (14.5k candidates) keep it. |
-| `Game/Collision/CollUtil` | `detectMCInit__9CCollUtilP7MC_CHIPi` | 169 | 48 of 185 lines, 4 bytes long - structure, frame (unused primInfo/primInfo2/v0 locals) and VU0 blocks as the original; left: the t-register numbering of pMCData/iCnt/entryCnt/pPrimInfo2 (t0/t1/t2/a3 there) and one extra instruction. hill.py over the setup statements and a 5 min permuter run (14.5k … |
+| `Game/Collision/CollUtil` | `detectMCInit__9CCollUtilP7MC_CHIPi` | 169 | 18 of 186 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals. Left: reload's t8/t9 for the two qmfc2 (ours v0) and with them d0 in f2 and the results in f1/f0; both orders of the setup loads (t3/t4 addiu, lw 56/400) and two sw pairs. |
 | `Game/Collision/CollUtil` | `_detectMCD__9CCollUtilR10CCollision` | 424 | _detectMCD: 146 of 467 lines, 8 bytes short - structure as the original (MCD path of _detectOCD: area chip table walk, two allocSpad asserts, same segment loop); ret declared after i for its spill slot, the vf4 asm before the vCkS reference. Left: this in s3 instead of s2 (most lines), the retry … |
 | `Game/Collision/CollUtil` | `detectMap__9CCollUtilP7FVECTORT1` | 188 | 39 of 213 lines, 4 bytes long - two passes, renew test and info merge as the original; left: the pPrimInfo2/i init order and an extra delay-slot load at the second pass, the attr byte's `andi` copy (a0) and the return-1 block (the original sets v0 after the m_pDetectMatA/ChipA/NormalA stores). |
 | `Game/Collision/CollUtilO` | `_detectColumnColumnEz__9CCollUtilR16CColumnCollisionT1` | 121 | 7 of 125 lines - the original loads columnColl1's radius after columnColl0's (sched1 hoists ours above the z subtraction, so c0.z/c1.R swap f3/f4). Tried: radius statement order, r1 split, direct/SubVector differences, permuter 9 min (23k candidates, no gain). |
@@ -262,7 +249,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 152 functions (46849 instructions) in 71 units, 151 of them parked; 5 units take a data section from assembly.
+Totals: 139 functions (45075 instructions) in 71 units, 138 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
