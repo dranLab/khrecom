@@ -227,7 +227,10 @@ void CTaskMan::_invokePrimary(TaskMainParam& param) {
 
 /* 3 lines (2026-11-05, was 4): the original's dsrl for isSecondaryObj is a 64-bit test: (m_nInfo & 2UL) != 0 returned
    as u_long (a BOOL return gives srl). Left: the delay slot of `if (!task.isInactive()) goto children;` (ours beqzl
-   stealing the loop's first lw, the original beqz with the fall-through lhu; do { } while (0) around it: no change). */
+   stealing the loop's first lw, the original beqz with the fall-through lhu; do { } while (0) around it: no change).
+   2026-11-06: a load cannot enter a non-annulled slot from the fall-through (may trap), so the original's lhu is before
+   that beqz in the RTL: gcse PRE inserted it after invokeMain, as the join's load is available from the entry. Ours
+   does not, the two loads differ at gcse time; a SHORT/USHORT temp, a USHORT cast and re-test shapes do not fix it. */
 #if 0
 static inline u_long _isSecondaryObj64(const CTask& t) { return (t.m_nInfo & 2UL) != 0; }
 void CTaskMan::_invokePrimary_Main(TaskMainParam& param, CTask& task) {

@@ -71,13 +71,11 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/ModelMan` | 2 | 268 | 2 |  |
 | `Game/Collision/CollDisp` | 2 | 262 | 2 |  |
 | `System/Graphic/DispList` | 1 | 245 | 1 |  |
-| `System/Graphic/Effect/EffectMan` | 1 | 243 | 1 |  |
 | `System/Math3D` | 1 | 234 | 1 |  |
 | `Game/Collision/CollBody` | 1 | 232 | 1 |  |
 | `System/Wnd` | 1 | 225 | 1 |  |
 | `System/TaskMan` | 2 | 217 | 2 |  |
 | `Game/Atel/Atel` | 1 | 189 | 1 |  |
-| `System/Graphic/ShadowModel` | 1 | 188 | 1 |  |
 | `Game/Atel/AtelCrossFade` | 1 | 188 | 1 |  |
 | `Game/Enemy/EnemyWhitemushroom` | 1 | 184 | 1 |  |
 | `System/Movie/MSVideo` | 1 | 180 | 1 |  |
@@ -137,7 +135,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/PackMan` | `sceVif1PkCloseUpkCode__FP13pacVif1Packet` | 53 | ~25 lines - register allocation: the original keeps wl (numlen >> 8) in t0 and cl in numlen's register a1, ours swaps them (and the t2/t3 numbering follows); the vn != 3 branch layout, the code copy and the shared divide tail match. cl/wl declaration order, signed locals, ternaries and 5 + 15 min … |
 | `System/Graphic/PathData` | `getNearPath__11CPathVectorR7FVECTORPfT2PiRC7FVECTORPC7FVECTORif` | 586 | 4 lines (2026-11-06, was 9: fNearT = 0.0f right after iNearStep, statement changes from tools/permuter.py; its declaration shuffle was noise); left: the hoisted 0.0f compare constant is a copy of fNearT here, mtc1 zero in the original, and one mov.s $f27,$f3 sits in another arm. Earlier: 9 lines - … |
 | `System/Graphic/PathData` | `dispDebugLine__11CPathVectori` | 489 | 2 lines - in the first 8-step loop the original issues `mov.s $f21,$f20` (the hoisted 0.125f step) after `addiu s3,sp,608` (&Line.P), ours before it (scheduler tie); everything else matches. tried: t init/step forms (for header, t = t + 0.125f, block scope, init before SubVectorXYZ), ib/k forms of … |
-| `System/Graphic/ShadowModel` | `drawBefore__15CShadowModelMan` | 188 | 2 instructions - the original updates the i 64 + 63 induction register at the end of the loop body, not after i++. tried: i++ positions; permuter (method wrapper) 15 min, 30k candidates: no gain (score 2). |
 | `System/Graphic/TexUtil` | `takeSnapShot__8CTexUtilPCc` | 234 | 72 of 280 lines, 4 bytes short - structure as the original (default display env -> width/height/PSM via (INT)(u_long >> n) & mask, TIM2 file and picture headers, per-line StoreImage + writeFile). Left: the reserved-bytes loop (pointer + own counter in the original), the GsTex0 TBW/PSM/TW/TH writes … |
 | `System/Graphic/TexUtil` | `makeCustomClut__8CTexUtilPUlT1ii` | 163 | 20 of 168 lines, same size - up-counting j (the original's reversed count-down), *pSrc read per term (lbu for the low byte) and `iI \| (iI << 16 \| iI << 8)` fixed most of it. Left: the register order of case 1's three channel terms (the original computes the >> 8 term into a1 first) and two … |
 | `System/Graphic/TexUtil` | `setupTexInfo__8CTexUtilR7TexInfoPCUcii` | 116 | 10 of 120 lines, same size - the mult between the allocTex call and its test (`r = allocTex(..); nImageSize = w h; if (r < 0)`, the original fills the bltz slot with it; 19 -> 10). Left: _nDistBufW, where the original adds 64 to the (w-1) of an earlier block and shifts (ours (w-1)>>6 + 1; every … |
@@ -150,7 +147,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/2d/2DSprObj` | `initForSeq__Q22D29C2DSprObjPQ22D213SEQ_ANIMATIONPQ22D210LAY_SCREEN` | 325 | 14 of 340 lines (2026-11-06, was 20: fVec2 is the brace init), all in the sway block. Markers: fVec.set(four sway values) (Coord.h:730) and m_vSway[i].set() (Coord.h:200); the stores come out sway0 x/y, fVec z/w, sway1, fVec x/y. Writing fVec.set + m_vSway[i].set(fVec...) fixes the source shape … |
 | `System/Graphic/2d/2DSprObj` | `move__Q22D29C2DSprObj` | 438 | 25 of 465 lines - only the vertex loop differs: the MMI colour multiply's 0xFF splat is a TImode constant here (`por v0,zero,zero` before `li`, the original only does `li`), the pmulth/tmp registers come out v1/v0 instead of a0/v1, the vertex-loop pointers get other registers and lCol is loaded … |
 | `System/Graphic/Effect/effect` | `Setup__11EFFECT_DATAPUxi` | 105 | 4 of 133 lines, same size - with i reused for the DPD loop and the ParNum TRACE before `p += 16` (draft below) the loop registers match; left: the two TRACE header reads go through data (s3) in the original, ours through p (s1), and `p += 16` sits before the ParNum TRACE there. The placeholder's … |
-| `System/Graphic/Effect/EffectMan` | `_updateCoord__10CEffectManP7CEffect` | 243 | 7 lines - _lengthVf4's iTmp is s3 in the original (ours v0; a register asm local reshuffles the whole function) and the hoisted %hi(s_vEffKhComScale) (lui s4) is scheduled before the mMat copy instead of into the `b`'s delay slot. |
 | `System/Graphic/Effect/libppp/partMng` | `vramcache` | 292 | (comment) Register allocation: the original keeps abBlock (the VLA's address) on the stack and the assert's string addresses in s5/s6; here abBlock gets s7 and bUseBlockNum s3, so the file name's %hi lives in t0 (saved around the call, 16 more bytes of frame). The return blocks are also laid out … |
 | `System/Graphic/Effect/libppp/pppPart` | `pppSetMatrix` | 168 | 3 lines (24 before the pEtc local read after the first matrix scale, decomp-permuter) - v0/v1 register choice for the scale factors of SCALE_VECTOR_XYZ (the original rotates v0/v1). |
 | `System/Graphic/Effect/libppp/draw/shape` | `pppVu1ShapeDraw` | 133 |  |
@@ -198,7 +194,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Collision/CollDisp` | `setBodyLines__9CCollDispP14CCollisionList` | 95 | 38 of 105 lines, same size - structure matches (case 4/5 column first, `case 2: default:` sphere); left: the s-registers are rotated (original this s1, collision s0, type s2, fg s3, &m_inWE s4) and the sphere arm recomputes &m_inWE where ours reuses it. Tried: this vs a pThis copy, decl orders, … |
 | `Game/Collision/CollMap` | `collideRide__8CCollMapi` | 224 | (comment) collideRide and collideRideR2 don't match yet. collideRide: the original's `pRideAtari = NULL` store is not a "fixed scalar" to the scheduler (it is ordered before the coll constructor's stores), as if pRideAtari's address had been taken before; every way of doing that here also moves … |
 | `Game/Collision/CollMap` | `collideRideR2__8CCollMapR10CCollisionPP5CRidei` | 141 |  |
-| `Game/Collision/CollUtil` | `detectMCInit__9CCollUtilP7MC_CHIPi` | 169 | 18 of 186 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals. Left: reload's t8/t9 for the two qmfc2 (ours v0) and with them d0 in f2 and the results in f1/f0; both orders of the setup loads (t3/t4 addiu, lw 56/400) and two sw pairs. |
+| `Game/Collision/CollUtil` | `detectMCInit__9CCollUtilP7MC_CHIPi` | 169 | 18 of 186 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals. Left: reload's t8/t9 for the two qmfc2 (ours v0: iTmp read before written, "+r" as in EffectMan's _lengthVf4, but here it then outranks the pChip/&vCk copies, 28 lines) and with them d0 in f2 and the results … |
 | `Game/Collision/CollUtil` | `_detectMCD__9CCollUtilR10CCollision` | 424 | _detectMCD: 146 of 467 lines, 8 bytes short - structure as the original (MCD path of _detectOCD: area chip table walk, two allocSpad asserts, same segment loop); ret declared after i for its spill slot, the vf4 asm before the vCkS reference. Left: this in s3 instead of s2 (most lines), the retry … |
 | `Game/Collision/CollUtil` | `detectMap__9CCollUtilP7FVECTORT1` | 188 | 39 of 213 lines, 4 bytes long - two passes, renew test and info merge as the original; left: the pPrimInfo2/i init order and an extra delay-slot load at the second pass, the attr byte's `andi` copy (a0) and the return-1 block (the original sets v0 after the m_pDetectMatA/ChipA/NormalA stores). |
 | `Game/Collision/CollUtilO` | `_detectColumnColumnEz__9CCollUtilR16CColumnCollisionT1` | 121 | 7 of 125 lines - the original loads columnColl1's radius after columnColl0's (sched1 hoists ours above the z subtraction, so c0.z/c1.R swap f3/f4). Tried: radius statement order, r1 split, direct/SubVector differences, permuter 9 min (23k candidates, no gain). |
@@ -249,7 +245,7 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 139 functions (45075 instructions) in 71 units, 138 of them parked; 5 units take a data section from assembly.
+Totals: 137 functions (44644 instructions) in 69 units, 136 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
