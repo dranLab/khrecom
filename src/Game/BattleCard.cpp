@@ -1025,10 +1025,6 @@ void CBattleCard::preStateDestroy() {
     m_iStock = -1;
     m_iStep = RND::genrand_int31() % 100;
 }
-/* Parked: 22 lines - the first _adjustRad of each case keeps the sum in the loaded register and copies it to ret
-   (mov.s); ours computes the sum straight into ret (same as stateSnatch). Case 4 also swaps a1/a2 (timer vs dy).
-   Inline/explicit wrap forms, store orders and 12 min of permuter (10k candidates) did not change it. */
-#if 0
 void CBattleCard::stateDestroy() {
     switch (m_uiMode) {
     case 3:
@@ -1049,8 +1045,8 @@ void CBattleCard::stateDestroy() {
         if (m_tqTimer <= 0) m_tqTimer = 0;
         INT dx = (m_EndPos.x - m_StartPos.x) * m_tqTimer / 400;
         INT dy = (m_EndPos.y - m_StartPos.y) * m_tqTimer / 400;
-        m_Pos.y = m_EndPos.y - dy;
         m_Pos.x = m_EndPos.x - dx;
+        m_Pos.y = m_EndPos.y - dy;
         if (m_vRot.w < 1.0f) m_vRot.w += getFrameRate() * 0.5f / 400.0f;
         if (m_vRot.w > 1.0f) m_vRot.w = 1.0f;
         if (abs(dx) <= 64 && abs(dy) <= 64) {
@@ -1106,12 +1102,6 @@ void CBattleCard::stateDestroy() {
         break;
     }
 }
-#else
-/* MATCH: the parked function's jump table (compiled jump tables of the other switches sit around it in .rodata) */
-asm(".rdata\n.align 4\njtbl_004735C0:\n"
-    ".word .L001D0860\n.word .L001D0938\n.word .L001D0A3C\n.word .L001D0BDC\n.word .L001D0DD8\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/BattleCard", stateDestroy__Q210CardBattle11CBattleCard);
-#endif
 void CBattleCard::moveCard(TIMEQ inTime, TIMEQ inRoll) {
     FLOAT sc;
     if (!inTime) return;
