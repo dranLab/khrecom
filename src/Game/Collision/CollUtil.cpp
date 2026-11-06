@@ -560,7 +560,7 @@ static inline FLOAT _vf4x() {
                      "vmaddz.x $vf4, $vf23, $vf4z" : : "r"(&v)); \
         _vf4x();                                                \
     })
-/* Parked: 18 of 186 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals. Left: reload's
+/* Parked: 14 of 185 lines, same size - the helpers and the i/iPrimIdx loop follow the ref's locals. Left: reload's
    t8/t9 for the two qmfc2 (ours v0: iTmp read before written, "+r" as in EffectMan's _lengthVf4, but here it then outranks the pChip/&vCk copies, 28 lines) and with them d0 in f2 and the results in f1/f0; both orders of the setup loads
    (t3/t4 addiu, lw 56/400) and two sw pairs. */
 #if 0
@@ -571,11 +571,11 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
     FVECTOR vCkVec;
     MC_DATA* pMCData;
     INT iIdx;
-    USHORT* pPrimIdx;
     INT iCnt;
     MC_PRIM* pPrim;
-    PRIM_INFO primInfo;
+    USHORT* pPrimIdx;
     PRIM_INFO2 primInfo2;
+    PRIM_INFO primInfo;
     INT entryCnt;
     PRIM_INFO2* pPrimInfo2;
     FVECTOR& _vCkS0 = m_vCkS0;
@@ -596,10 +596,10 @@ void CCollUtil::detectMCInit(MC_CHIP* pChip, INT iArea) {
                  "sqc2 $vf6, 0x0(%3)\n"
                  "sqc2 $vf5, 0x0(%4)" : : "r"(&_vCkS0), "r"(&_vCkE), "r"(&vCk0), "r"(&vCk1), "r"(&vCkVec) : "memory");
     pMCData = (MC_DATA*)pChip->data;
-    pPrimInfo2 = &m_pPrimInfo2[m_PrimInfoIdx2];
     entryCnt = 0;
     iIdx = pMCData->tbl[iArea][0];
     pPrimIdx = &pMCData->prim[iIdx];
+    pPrimInfo2 = &m_pPrimInfo2[m_PrimInfoIdx2];
     iCnt = pMCData->tbl[iArea][1];
     for (INT i = 0; i < iCnt; i++) {
         INT iPrimIdx = pPrimIdx[i];

@@ -2786,9 +2786,9 @@ QWdata* _makePkt_TriangleStrip(QWdata* pQw, G_STRIP* it, G_STRIP* end, CCoord* p
     }
     return pQw;
 }
-/* Parked: 3 lines - the skip loop is solved (as the other fans); iW in a local gives the original's s7/s8 (without it
- * iDir loses to the hoisted 0x8000, priority 833 vs 862), but its li then sits before the entry test (the original
- * sets it after, with the &vDir addiu); assigned in the loop body loop.c hoists it and the swap comes back. */
+/* Parked: 2 lines - the skip loop is solved (as the other fans); iW in a local, declared before iDir, gives the original's
+ * s7/s8 (without it iDir loses to the hoisted 0x8000, priority 833 vs 862). Left: its li sits before the entry test, the
+ * original sets it after, with the &vDir addiu; a guard + do/while or an assignment in the body brings the swap back. */
 #if 0
 QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) {
     IVECTOR p;
@@ -2831,8 +2831,8 @@ QWdata* _makePkt_TriangleFan(QWdata* pQw, G_STRIP* it, G_STRIP* end, BOOL Back) 
         return pQw;
     } else {
         FVECTOR vDir[3];
-        INT iDir = 0;
         INT iW = 0x8000;
+        INT iDir = 0;
         while (it < end) {
             _prefetch(it, 0x20);
             RotTransPersClipW(p, vDir[iDir], it->P);
