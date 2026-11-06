@@ -5122,7 +5122,7 @@ inline void _roPh20() { /* MATCH: placeholder: an inline function's strings, in 
     TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n");
 }
 __asm__(".rdata\n.align 4\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026F018\n.word .L0026F018\n.word .L0026ED28\n.word .L0026EEE8\n.word .L0026EF64\n.word .L0026F018\n.word .L0026EEB4\n.word .L0026F018\n.word .L0026EF3C\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF94\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC40\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF80\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026ECBC\n.word .L0026EFA8\n.word .L0026EFBC\n.word .L0026EC84\n.word .L0026EC70\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC30\n.word .L0026EEAC\n.text\n");
-/* Parked: 20 lines differ, same size; structure, all branches, calls, the
+/* Parked: 16 lines differ (2026-11-06, was 20: first vel brace-initialized; markers at 9456/9593: por, sq 0x30, swc1 y 0x34, lq 0x30, sq 0x20 all on one line, so a temporary copied straight into vec; (FVECTOR){..} does not compile at the first site, braces at both sites add 16 bytes of frame), same size; structure, all branches, calls, the
    40-entry jump table, frame and strings match. Left, four scheduling/register spots: (1) old_condition
    (isConditionFlag(0x881803F)): the original loads the flag word into v1 and the mask into v0, ours the reverse;
    (2) case 6 (knock-back): the {0, dir0, 0, 0} rotation temp gets v1 in the original (v0 ours, swapping the li 1 /
@@ -5386,9 +5386,7 @@ BOOL CPlayer::chkDamage() {
         m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
         m_fDir = dir0;
         FVECTOR vec;
-        FVECTOR vel;
-        vel._q = 0;
-        vel.y = dir0;
+        FVECTOR vel = { 0.0f, dir0, 0.0f, 0.0f };
         vec = vel;
         m_pMove->setRot(vec);
         vec.x = dpos.x;
@@ -7540,15 +7538,6 @@ void CPlayer::initFooting(INT inFlag) {
         m_pMove->setFlag(0x40, 0);
     }
 }
-/* Parked: all but 4 instructions match (frame, branches, walk block registers). Left: in the analog walk arm the
-   original issues `lw m_pMove` between the `sq t._q` and the `swc1 t.y` and loads `lq t` only after the m_fDir
-   store; ours puts the lq right after the t.y store and the m_pMove load after it. tried: ~45 variants (store
-   order of the clear block = battle, cond, trg; dir/diff/result as one, two or three FP variables - a separate
-   `nd` for the Homing result and `d0 = m_fDir` before the call give the original's mov.s f12,f0 and f0 result;
-   m_fDir store before/inside/after the temp block, CMovement* / FVECTOR& temporaries for getRot(), line
-   layout) plus tools/permuter.py through a method alias wrapper (build/progress/Game/Player/permute_method.py):
-   safe 15 min (6082 candidates) and --unsafe 10 min (4320), score stays 1. Retried 2026-10-25: $LM tags show setDir() (Player.h:852) for the m_fDir store and CMovement::setRot (Movement.h:65), both now in the draft (same 4 lines). The same Homing -> {0, d, 0, 0} -> copy -> setRot block is left in parked chkDamage: our sched1 fills the lq stall with the m_pMove load (priority 4) instead of the m_fDir store (3); the original issues the store first (memory fvector-ctor-operator-temps). */
-#if 0
 void CPlayer::exeFooting() {
     FVECTOR target;
     FVECTOR pos;
@@ -7643,11 +7632,9 @@ void CPlayer::exeFooting() {
             else if (r > 3.1415927f) r -= 6.2831855f;
             d0 = m_fDir;
             FLOAT nd = Movement::Homing(d0, m_fAnalogViewDir, 0.1f, m_fFrameRate);
-            setDir(nd);
             {
-                FVECTOR t;
-                t._q = 0;
-                t.y = nd;
+                FVECTOR t = { 0.0f, nd, 0.0f, 0.0f };
+                setDir(nd);
                 v = t;
             }
             m_pMove->setRot(v);
@@ -7658,14 +7645,6 @@ void CPlayer::exeFooting() {
         m_pMove->calcVelocityXZ(m_fWalkSpeed);
     }
 }
-#else
-/* placeholder: rodata of exeFooting__7CPlayer */
-__asm__(".rdata\n");
-inline void _roPh30() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE("CPlayer:: exeFooting -> initTransform(0)\n");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeFooting__7CPlayer);
-#endif
 void CPlayer::updateFooting() {
     if (isConditionFlag(0x10000000)) {
         CEntity* pEntity = m_hFooting > 0 ? (CEntity*)CTaskMan::getTask(m_hFooting) : NULL;
