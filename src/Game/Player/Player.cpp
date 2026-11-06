@@ -5122,7 +5122,7 @@ inline void _roPh20() { /* MATCH: placeholder: an inline function's strings, in 
     TRACE("PL::chkDamage(); kind=%d, \x81\xa6\x96\xa2\x8d\xec\x90\xac\x81i\x82\xc6\x82\xe8\x82\xa0\x82\xa6\x82\xb8\x8f\xac\x83_\x83\x81\x81[\x83W\x88\xb5\x82\xa2\x81j\n");
 }
 __asm__(".rdata\n.align 4\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026F018\n.word .L0026F018\n.word .L0026ED28\n.word .L0026EEE8\n.word .L0026EF64\n.word .L0026F018\n.word .L0026EEB4\n.word .L0026F018\n.word .L0026EF3C\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF94\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC40\n.word .L0026F018\n.word .L0026F018\n.word .L0026EF80\n.word .L0026EEC4\n.word .L0026ED00\n.word .L0026ECD8\n.word .L0026ECBC\n.word .L0026EFA8\n.word .L0026EFBC\n.word .L0026EC84\n.word .L0026EC70\n.word .L0026F018\n.word .L0026F018\n.word .L0026F018\n.word .L0026EC30\n.word .L0026EEAC\n.text\n");
-/* Parked: 16 lines differ (2026-11-06, was 20: first vel brace-initialized; markers at 9456/9593: por, sq 0x30, swc1 y 0x34, lq 0x30, sq 0x20 all on one line, so a temporary copied straight into vec; (FVECTOR){..} does not compile at the first site, braces at both sites add 16 bytes of frame), same size; structure, all branches, calls, the
+/* Parked: 8 lines differ (2026-11-06, was 20: both vel brace-initialized, m_fDir store between brace and copy; markers at 9456/9593: por, sq 0x30, swc1 y 0x34, lq 0x30, sq 0x20 all on one line, so a temporary copied straight into vec; (FVECTOR){..} does not compile at the first site, braces at both sites add 16 bytes of frame), same size; structure, all branches, calls, the
    40-entry jump table, frame and strings match. Left, four scheduling/register spots: (1) old_condition
    (isConditionFlag(0x881803F)): the original loads the flag word into v1 and the mask into v0, ours the reverse;
    (2) case 6 (knock-back): the {0, dir0, 0, 0} rotation temp gets v1 in the original (v0 ours, swapping the li 1 /
@@ -5382,8 +5382,8 @@ BOOL CPlayer::chkDamage() {
         setAnimForce(0x22, 0, 0, 0, m_bIsDead, 0);
         m_bDmgInAir = TRUE;
         m_JumpState = 3;
-        m_fJumpSpdY = 0.0f;
         m_fJumpGravity = *(FLOAT*)&PL::g_fGravity;
+        m_fJumpSpdY = 0.0f;
         m_fDir = dir0;
         FVECTOR vec;
         FVECTOR vel = { 0.0f, dir0, 0.0f, 0.0f };
@@ -5479,11 +5479,10 @@ BOOL CPlayer::chkDamage() {
     m_fJumpGravity = PL::g_fGravity;
     m_fJumpSpdY = 0.0f;
     if (!bIsBackHit) {
-        m_fDir = Movement::Homing(m_fDir, dir0, 0.5f, m_fFrameRate);
         FVECTOR vec;
-        FVECTOR vel;
-        vel._q = 0;
-        vel.y = m_fDir;
+        FLOAT d = Movement::Homing(m_fDir, dir0, 0.5f, m_fFrameRate);
+        FVECTOR vel = { 0.0f, d, 0.0f, 0.0f };
+        m_fDir = d;
         vec = vel;
         m_pMove->setRot(vec);
     } else {
