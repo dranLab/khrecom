@@ -184,7 +184,9 @@ void sceSifExitRpc(void)
     _sceSifInitCheck = 0;
 }
 
-/* Parked: the original copies the packet fields in strict load/store order, ours lets the scheduler hoist loads */
+/* Parked: 1 line, 4 bytes short - in the pid == 1 arm the original also sets v1 = 1 (`li v1,1` after the old + 2): pid
+   is written again for the rpc_id store after the join. `pid = 1` in the arm folds away, before or after rd->pid++, also
+   across an empty asm or through a local; an asm output keeps it but disturbs the load (6 lines). */
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _sceRpcGetPacket);
 #if 0
 static void *_sceRpcGetPacket(struct rpc_data *rd)

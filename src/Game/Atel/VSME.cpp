@@ -5335,6 +5335,9 @@ INT CVSM::searchActorID(const CHAR* pszActor) const {
     }
     return m_ActorTbl[i]._ATP.id;
 }
+/* Parked: 2 lines - with the product in lo only reload's register differs (mflo v0, original v1). Before that: same
+   order but gcc's 3-operand mult. A "$2" clobber on an empty asm moves the mflo with it (12 lines), "l" in an asm 18.
+   Older notes: */
 /* Parked: same instructions and order except the wait_timer product: the original multiplies into LO ("mult $zero,s1,v1"
    + mflo before the sh), ours with the 3-operand mult into v1 (gcc's mulsi3_mult3 "l" vs "d" alternative, chosen by
    regclass: LO only when the product feeds a plain register copy, as for a call argument in PathData::delPath); ours
@@ -5349,7 +5352,10 @@ void CVSM::acWaitReq(Actor& act, INT nTime, INT nAddr) {
     ATP& atp = act._ATP;
     atp.status = 3;
     atp.next_address = nAddr;
-    atp.wait_timer = nTime * (CMainApp::isNTSC() ? 25 : 25);
+    {
+        register INT nWait asm("lo") = nTime * (CMainApp::isNTSC() ? 25 : 25); /* MATCH: two-operand mult, mflo at the sh */
+        atp.wait_timer = nWait;
+    }
     _TRACE(m_bTrace, "acWaitReq act:%d time:%d address:%d \n", atp.id, nTime, nAddr);
 }
 #else
