@@ -52,9 +52,6 @@ void CCollBody::init(COLL_KIND collKind, COLL_TYPE collType, HANDLE hTask, INT f
     on();
 }
 
-/* not matching: the original copies the results at the end relative to m_collTmp.m_outWE (ours: relative to
- * m_collTmp, or with the registers of ret1 and m_collTmp swapped) */
-#if 0
 INT CCollBody::collideBody(INT iTargetType) {
     CCollisionList* pCollList[2];
     INT bodyType;
@@ -119,60 +116,21 @@ INT CCollBody::collideBody(INT iTargetType) {
             }
         }
     }
+    /* MATCH: four insns of life for ret1 only: the %hi pseudo then outranks it (8 refs / 270 vs 9 / 304) and ret1 gets fp */
+    __asm__ volatile("");
+    __asm__ volatile("");
+    __asm__ volatile("");
+    __asm__ volatile("");
     if (ret1) {
-        m_pCollision->m_outWE = m_collTmp.m_outWE;
-        m_pCollision->m_outDetect = m_collTmp.m_outDetect;
-        m_pCollision->m_outInfo.info = m_collTmp.m_outInfo.info;
-        m_pCollision->m_outNormal = m_collTmp.m_outNormal;
-        m_pCollision->m_outStatus = m_collTmp.m_outStatus;
+        BYTE* pT = (BYTE*)&m_collTmp.m_outWE; /* MATCH: all five reads go through one base */
+        m_pCollision->m_outWE = *(FVECTOR*)pT;
+        m_pCollision->m_outDetect = *(FVECTOR*)(pT + 0x20);
+        m_pCollision->m_outInfo.info = *(UINT*)(pT + 0x48);
+        m_pCollision->m_outNormal = *(FVECTOR*)(pT + 0x10);
+        m_pCollision->m_outStatus = *(INT*)(pT + 0x38);
     }
     return ret1;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Collision/CollBody", collideBody__9CCollBodyi);
-/* placeholder for collideBody's .rodata: its strings, then its jump table (labels of the included assembly) */
-#line 158
-inline void _collideBodyStrings() { ASSERT(0); }
-__asm__(
-    ".rdata\n"
-    ".align 4\n"
-    ".word .L00222330\n"
-    ".word .L002223B8\n"
-    ".word .L00222330\n"
-    ".word .L00222374\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L002223B8\n"
-    ".word .L00222330\n"
-    ".word .L002223B8\n"
-    ".word .L00222330\n"
-    ".word .L00222374\n"
-    ".text\n");
 
 BOOL CCollBody::collideBodyFunc(CCollBody* pEntry) {
     switch (pEntry->getKind() & 0xE) {
