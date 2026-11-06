@@ -401,10 +401,10 @@ INT CAvatar::onSetPosPathTop(INT nCmd, void* pParam, INT nID) {
     setAvatarTargetPos(*pV);
     return -1;
 }
-/* Parked: 53 lines, registers only - with the ref's USHORT nType/nFlag (one lhu) and the final switch the
-   code is the original's, but p (14 refs over 187 insns) loses the global-alloc priority tie against case 1's
-   pV (3 over 13) and takes s2, pushing CEntity* to s1 (the original: p s1, CEntity* s4, one more s-register).
-   An INT nType read with lw gives p a 15th ref and the original registers (6 lines, one extra lw). */
+/* Parked: 1 line (was 53) - the final test: the original has `slti 3`, then `bne s6, 0` twice; the switch's range node
+   gives bltz for the first. The empty asm in case 0 settled the registers: pV 3 refs / 13 insns outranked p 14 / 187
+   by a hair. An INT local keeps slti but the second zero test folds (even across an empty asm, in a nested switch);
+   if on the USHORT gives sltiu. */
 #if 0
 INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
     AvatarMoveParam* p = (AvatarMoveParam*)pParam;
@@ -437,6 +437,7 @@ INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
         if (nFlag & 0x80) {
             FVECTOR* pV = getPathStartPos(p->_pszPathFile);
             if (!pV) return -1;
+            __asm__ volatile(""); /* MATCH: one more insn of life for pV: p outranks it and keeps s1 */
             setAvatarTargetPos(*pV);
         } else {
             setAvatarTargetPos(p->_vTarget);
