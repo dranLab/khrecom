@@ -138,8 +138,9 @@ static inline u_long128 _calcSTQW(ULONGLONG inSTQ, FLOAT fW) {
                      : "r"(inSTQ), "f"(fW));
     return iRet;
 }
-static inline u_long128 _getHi64(u_long128 x) {
-    u_long128 out;
+/* MATCH: the output is 64-bit and _hiToFloat takes u_long128: the por in _getW is that conversion, not an asm. */
+static inline ULONGLONG _getHi64(u_long128 x) {
+    ULONGLONG out;
     __asm__ volatile("pcpyud %0, %1, $0" : "=r"(out) : "r"(x));
     return out;
 }
@@ -148,7 +149,7 @@ static inline ULONGLONG _toU64(u_long128 x) {
     __asm__ volatile("por %0, $0, %1" : "=r"(out64) : "r"(x));
     return out64;
 }
-static inline FLOAT _hiToFloat(ULONGLONG x) {
+static inline FLOAT _hiToFloat(u_long128 x) {
     FLOAT outf;
     ULONGLONG tmp;
     __asm__ volatile("dsra32 %1, %2, 0\n"
@@ -157,12 +158,12 @@ static inline FLOAT _hiToFloat(ULONGLONG x) {
                      : "r"(x));
     return outf;
 }
-static inline INT _toInt(u_long128 x) {
+static inline INT _toInt(ULONGLONG x) {
     INT tmp;
     __asm__ volatile("sll %0, %1, 0" : "=r"(tmp) : "r"(x));
     return tmp;
 }
-static inline FLOAT _getW(u_long128 x) { return _hiToFloat(_toU64(_getHi64(x))); }
+static inline FLOAT _getW(u_long128 x) { return _hiToFloat(_getHi64(x)); }
 static inline INT _getZ(u_long128 x) { return _toInt(_getHi64(x)); }
 static inline u_long128 _calcSTQ(const G_ST& st, UINT iW) {
     ULONGLONG inSTQ = *(ULONGLONG*)&st;
@@ -3032,11 +3033,6 @@ done:
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TriangleFan__FP6QWdataP7G_STRIPT1P6CCoordi);
 #endif
-/* Parked: argument order of the RotTransPersW call (the original sets a1 before a0; sched1 issues a1 first only
- * when its source REG_DEADs, ours keeps vW's address live) and with it the TImode result register (a1 vs a0);
- * tried: matrix ref local, temp for the result, 0.0f > w, wrapper with swapped parameters, const attribute,
- * element helpers as asm (pcpyud/por/dsra32+mtc1/sll: 53 -> 10 lines), permuter 15 min (9926 candidates, no gain) */
-#if 0
 FLOAT getPrimGetaZ(INT iz, const FVECTOR& Vert, const FMATRIX* pWMat, FLOAT fGeta) {
     CCamera* pCam = CWorldEnv::getActiveCamera();
     if (pCam) {
@@ -3069,15 +3065,6 @@ FLOAT getPrimGetaZ(INT iz, const FVECTOR& Vert, const FMATRIX* pWMat, FLOAT fGet
     }
     return 0.0f;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", getPrimGetaZ__FiRC7FVECTORPC7FMATRIXf);
-#endif
-/* Parked: registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the
- * TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it
- * stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter wrapper, const attribute,
- * declaration-only callee, permuter 15 min on C3DCPrim::calcZ (10285 candidates) and on getPrimGetaZ (same cause),
- * no gain */
-#if 0
 FIX4 C3DStripBase::calcZ() {
     G_STRIP* it;
     FMATRIX mMat;
@@ -3119,9 +3106,6 @@ FIX4 C3DStripBase::calcZ() {
 
     return iz;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__12C3DStripBase);
-#endif
 void C3DStripBase::makePkt() {
     QWdata* pQw;
     QWdata* pQwTop;
@@ -3143,12 +3127,6 @@ void C3DStripBase::makePkt() {
         CPackMan::pkSetCurrentPointer(pQwTop);
     }
 }
-/* Parked: registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the
- * TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it
- * stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter wrapper, const attribute,
- * declaration-only callee, permuter 15 min on C3DCPrim::calcZ (10285 candidates) and on getPrimGetaZ (same cause),
- * no gain */
-#if 0
 FIX4 C3DTexStripBase::calcZ() {
     G_STRIP* it;
     FMATRIX mMat;
@@ -3190,9 +3168,6 @@ FIX4 C3DTexStripBase::calcZ() {
 
     return iz;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__15C3DTexStripBase);
-#endif
 void C3DTexStripBase::makePkt() {
     QWdata* pQw;
     QWdata* pQwTop;
@@ -3314,12 +3289,6 @@ void C3DCPrim::_create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, CCoord
     m_V = (G_STRIP*)com_malloc_d(m_iMax * sizeof(G_STRIP), __FILE__ "(4121)", (UINT)-1);
     if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
 }
-/* Parked: registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the
- * TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it
- * stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter wrapper, const attribute,
- * declaration-only callee, permuter 15 min on C3DCPrim::calcZ (10285 candidates) and on getPrimGetaZ (same cause),
- * no gain */
-#if 0
 FIX4 C3DCPrim::calcZ() {
     G_STRIP* it;
     FMATRIX mMat;
@@ -3361,9 +3330,6 @@ FIX4 C3DCPrim::calcZ() {
 
     return m_iZ < 0 ? iz : m_iZ << 4;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DCPrim);
-#endif
 void C3DCPrim::makePkt() {
     QWdata* pQw;
     QWdata* pQwTop;
@@ -3490,12 +3456,6 @@ void C3DTPrim::_create(ULONGLONG iPrim, INT iVertexNum, CCoord* pCParent, CCoord
     m_V = (G_STRIP*)com_malloc_d(m_iMax * sizeof(G_STRIP), __FILE__ "(4316)", (UINT)-1);
     if (!m_V) AssertApp(__FILE__, __LINE__, "m_V", 0);
 }
-/* Parked: registers only - the original loads a1 (it->P) before a0 (mMat) for the RotTransPersW call and keeps the
- * TImode result in a1 (ours a0); sched1 puts a1 first only when its source dies at the call (toy test), here it
- * stays live for getPrimGetaZ; tried: copies/recomputed it, swapped-parameter wrapper, const attribute,
- * declaration-only callee, permuter 15 min on C3DCPrim::calcZ (10285 candidates) and on getPrimGetaZ (same cause),
- * no gain */
-#if 0
 FIX4 C3DTPrim::calcZ() {
     G_STRIP* it;
     FMATRIX mMat;
@@ -3537,9 +3497,6 @@ FIX4 C3DTPrim::calcZ() {
 
     return m_iZ < 0 ? iz : m_iZ << 4;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", calcZ__8C3DTPrim);
-#endif
 void C3DTPrim::makePkt() {
     ULONGLONG lTex0;
     QWdata* pQw;
