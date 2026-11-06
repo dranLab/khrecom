@@ -6037,13 +6037,6 @@ extern INT DuskyNoteSeqData[5];
 extern FVECTOR ModelPosi;
 }
 }
-/* Parked: 6 lines: three FP registers of case 40 (DEG2RAD(2.0f) constant, 1/4096 constant, the rotation load:
-   original f4/f1/f3, ours f1/f3/f4). Everything else matches.
-   tried: line-marker layout (both table arms written out, flags 0x8000 then 0x4000, setter order, ry split over
-   3 statements), literal vs DEG2RAD constant, * 1/4096 vs / 4096, operand orders, ry as one or two statements;
-   rotation as one/two/three statements, const ry;
-   tools/permuter.py (fixed wrapper, target draft on, other drafts hidden) 8 min: no improvement. */
-#if 0
 INT CJiminyMemo::contentCharaView_ModelView() {
     INT rval = TRUE;
     INT charaNo;
@@ -6116,7 +6109,8 @@ INT CJiminyMemo::contentCharaView_ModelView() {
             work(0x3C8) = 50;
             JiminyMemo::playSE(4);
         } else if (pObj) {
-            FLOAT ry = (FLOAT)_getAnalogLX(0) * DEG2RAD(2.0f) / 4096.0f * getFrameRateF();
+            const FLOAT k = DEG2RAD(2.0f); /* MATCH: const local: the constant is born first, so it gets the longest span (f4) */
+            FLOAT ry = (FLOAT)_getAnalogLX(0) * k / 4096.0f * getFrameRateF();
             ry = Math3D::LimitPI(pObj->getRotateY() + ry);
             pObj->setRotateY(ry);
         }
@@ -6151,20 +6145,6 @@ INT CJiminyMemo::contentCharaView_ModelView() {
     if (work(0x3C4)) ((CMemo2DSequence*)work(0x3C4))->main(getFrameRateF());
     return rval;
 }
-#else
-/* placeholder: rodata of contentCharaView_ModelView__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh35() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE(__FILE__ "(9474)");
-}
-__asm__(".rdata\n.align 4\n.word .L0033464C\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L0033480C\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n");
-__asm__(".word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334830\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334918\n.word .L00334A00\n");
-__asm__(".word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334960\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n");
-__asm__(".word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334984\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n");
-__asm__(".word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334984\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n.word .L00334A00\n");
-__asm__(".word .L003349F8\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentCharaView_ModelView__11CJiminyMemo);
-#endif
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 namespace JiminyMemo {
 namespace Minigame {
