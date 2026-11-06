@@ -154,7 +154,7 @@ public:
     void setExec() { m_nStep = 1; }
     void setEnd() { m_nStep = 2; }
     void setCancel() { m_nStep = 3; }
-    BOOL isCANCEL() { return m_nStep == 3; }
+    BOOL isCANCEL() { return *(INT*)&m_nStep == 3; } /* MATCH: not volatile here: reorg steals the load for the loop's bnel slot */
 };
 
 /* PARTIAL: CRCFAliasData lacks the ref's init, linkTail, setSrc, setDst, setID (parameters unknown, no users here) */
@@ -450,10 +450,6 @@ inline void CRCFQueueData::init(INT nGroupID, INT nMemeberID, INT nType, BYTE* p
     p->m_pBuff = pBuff;
     p->m_nType = nType;
 }
-/* Parked: 3 lines - the inner loop's top label is not aligned in the original (offset 0xf4, no .p2align nop), ours
- * gets the LOOP_BEG alignment nop and so a plain bne instead of the bnel into the loop top; getType() through a cast
- * fixed the type reloads (21 -> 3). Tried: for(;;) with breaks, a goto loop (jump threading drops the pre-test). */
-#if 0
 void CRcf::_threadReadProc(void* p) {
     volatile ULONG nReadID;
     CRCFQueueData* pReadEntry;
@@ -486,13 +482,6 @@ void CRcf::_threadReadProc(void* p) {
         SleepThread();
     }
 }
-#else
-__asm__(".section .sdata\n");
-__attribute__((section(".sdata"))) void _threadReadProc_strings(INT n) {
-    if (!n) AssertApp(__FILE__, 0, "pReadEntry", 0);
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Rcf", _threadReadProc__4CRcfPv);
-#endif
 BOOL CRcf::_launchReadThread(ULONG nData, INT nType) {
     INT ra;
     ThreadParam tp;
