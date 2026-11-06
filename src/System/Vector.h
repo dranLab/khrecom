@@ -120,7 +120,7 @@ union FVECTOR {
     }
 };
 
-typedef int _IVECTOR[4];
+typedef int _IVECTOR[4] __attribute__((aligned(16)));
 union IVECTOR {
     _IVECTOR v;
     struct {
@@ -150,7 +150,7 @@ union IVECTOR {
     IVECTOR operator*(INT n) const;
 };
 
-typedef float _FMATRIX[4][4];
+typedef float _FMATRIX[4][4] __attribute__((aligned(16)));
 typedef float (*_FMATRIX_ROWP)[4];
 union FMATRIX {
     _FMATRIX m;
