@@ -58,6 +58,12 @@ every change that is merged without regenerating. Regenerating all four takes ab
   `build/lregpri.py` ranks pseudos by global-alloc priority, `build/secsize.py` compares section sizes with the
   split, `build/bracetry2.py`/`bracetmp.py` sweep drafts for brace-init forms.
 
+- **Permuters are exhausted for now (2026-11-06):** three 10-minute queues covered every parked game draft 4-45 lines off
+  (about 73 drafts, 12 hours). Only endFieldSub and getNearPath gained, and only their statement changes counted. Do not
+  rerun them on a draft whose source did not change; read its line markers instead. tools/permuter.py can't enable some
+  drafts and then reports an instant MATCH on the asm (Setup, AttackMotion initialize, CZFill::makePkt, the fans): check
+  with `build/showdraft.py`, not with its score.
+
 Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py game|lib` (what is left) and
 `tools/partials.py --summary` (cleanup) give the current state.
 
