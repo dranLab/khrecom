@@ -6,23 +6,48 @@ typedef struct _sceMpegPicture _sceMpegPicture;
 
 struct _sceMpegPicture {
     unsigned int image; /* 0x00 */
-    char _pad04[0xC - 0x4];
+    int w; /* 0x04 */
+    int h; /* 0x08 */
     int rows; /* 0x0C */
     int width; /* 0x10 */
+    int _pad14; /* 0x14 */
+    long pts; /* 0x18 */
+    long dts; /* 0x20 */
+    int pictType; /* 0x28 */
+    int flag2C; /* 0x2C */
+    int flag30; /* 0x30 */
+    int flag34; /* 0x34 */
+    int flag38; /* 0x38 */
+    int flag3C; /* 0x3C */
+    int flag40; /* 0x40 */
+    int info[6]; /* 0x44 */
+    int v5C; /* 0x5C */
+    int v60; /* 0x60 */
 };
 
 typedef struct {
     char _pad00[0x4];
     int outputPending; /* 0x04 */
     int state; /* 0x08 */
-    char _pad0C[0xC0 - 0xC];
+    char _pad0C[0x8C - 0xC];
+    int hasPts; /* 0x8C */
+    volatile long ptsStep; /* 0x90 */
+    volatile int lastPts; /* 0x98 */
+    volatile int ptsField; /* 0x9C */
+    volatile long showCount; /* 0xA0 */
+    char _padA8[0xC0 - 0xA8];
     int outputBase; /* 0xC0 */
-    char _padC4[0xEC - 0xC4];
+    int useCsc; /* 0xC4 */
+    int info[6]; /* 0xC8 */
+    int vE0; /* 0xE0 */
+    int vE4; /* 0xE4 */
+    char _padE8[0xEC - 0xE8];
     unsigned int refBase; /* 0xEC */
-    char _padF0[0xF4 - 0xF0];
+    int bufW; /* 0xF0 */
     int width; /* 0xF4 */
     int stride; /* 0xF8 */
-    char _padFC[0x108 - 0xFC];
+    char _padFC[0x100 - 0xFC];
+    long nextPts; /* 0x100 */
     int outputMode; /* 0x108 */
     char _pad10C[0x128 - 0x10C];
     int frameCount; /* 0x128 */
@@ -36,6 +61,10 @@ typedef struct {
     _sceMpegPicture *frame[4]; /* 0x1C8 */
     _sceMpegPicture *top[4]; /* 0x1D8 */
     _sceMpegPicture *bottom[4]; /* 0x1E8 */
+    char _pad1F8[0x834 - 0x1F8];
+    int outputReady; /* 0x834 */
+    char _pad838[0x868 - 0x838];
+    long *tags; /* 0x868 */
 } _sceMpegDecoder;
 
 typedef struct {
@@ -49,6 +78,8 @@ typedef struct {
 
 extern void _sceMpegError(_sceMpegDecoder *d, const char *msg);
 static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n);
+extern int sceSnprintf(char *buf, int n, const char *fmt, ...);
+extern void _sceMpegCscStoreRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict);
 static void _dispRefImageField(_sceMpegDecoder *d, _sceMpegPicture *top, _sceMpegPicture *bottom, int n);
 
 /* fields shown per picture, by picture structure and repeat flags */
@@ -128,7 +159,80 @@ static void _cpr8(_sceMpegDecoder *d, _sceMpegPicture *pict)
         dst0 += d->stride * 0xC0;
     }
 }
+/* Parked: 24 of 189 lines, 4 bytes long (2026-11-06, first attempt). Worked: ptsStep, lastPts, ptsField and showCount are
+   volatile (reloaded across __muldi3, a full ld before the truncation), one embedded read of ptsStep, the flag word's
+   or tree (96 forms searched). Left: the original reloads tags in the beqz delay slot (volatile tags keeps the reload
+   but blocks the slot), `*pPts = pict->pts` goes through s5 there, and the buffer-size test's flag is in s0. */
+#if 0
+static void _dispRefImage(_sceMpegDecoder *d, _sceMpegPicture *pict, int n)
+{
+    char buf[256];
+    long *tags = d->tags;
+    long *pPts = &tags[2];
+    long *pDts = &tags[3];
+    long *pFlags = &tags[4];
+    int ok;
+
+    if (d->hasPts) {
+        long v = pict->pts;
+        if (v < 0 && d->lastPts >= 0) {
+            int n = d->showCount;
+            long odd = n & 1;
+            long step;
+            int adj = odd & (d->ptsField & 1) & ((step = d->ptsStep) & 1);
+            tags[2] = d->lastPts + ((int)((step * n) >> 1) + adj);
+            odd &= d->ptsStep;
+            tags = d->tags;
+            if (odd) d->ptsField++;
+        } else {
+            *pPts = v;
+        }
+    } else {
+        *pPts = pict->pts;
+    }
+    if (d->outputMode == 2 && d->nextPts >= 0) {
+        *pPts = d->nextPts;
+        d->outputMode = 0;
+        d->nextPts = -1;
+    }
+    *pDts = pict->dts;
+    *pFlags = (((long)pict->flag3C << 6) | ((long)pict->flag40 << 5)) | ((pict->flag2C | ((long)pict->flag34 << 8)) | (((long)pict->flag30 << 3) | ((long)pict->flag38 << 7)));
+    d->lastPts = tags[2];
+    d->showCount = (unsigned int)_showCount[(int)(tags[4] >> 5) & 0xF];
+    d->vE0 = pict->v5C;
+    d->vE4 = pict->v60;
+    d->info[0] = pict->info[0];
+    d->info[1] = pict->info[1];
+    d->info[2] = pict->info[2];
+    d->info[3] = pict->info[3];
+    d->info[4] = pict->info[4];
+    d->info[5] = pict->info[5];
+    if (d->width) {
+        ok = d->bufW >= pict->w && d->width >= pict->h;
+    } else {
+        ok = d->stride >= pict->rows * pict->width;
+    }
+    if (!ok) {
+        sceSnprintf(buf, 256, "Too small buffer size for %dx%d picture\n", pict->w, pict->h);
+        _sceMpegError(d, buf);
+        if (!ok) return;
+    }
+    if (pict->pictType == 1) {
+        if (d->useCsc) {
+            _sceMpegCscStoreRefImage(d, pict);
+        } else {
+            _cpr8(d, pict);
+        }
+        if (d->state != 2) {
+            d->state = 2;
+            d->outputBase = d->frameCount;
+        }
+        d->outputReady = 1;
+    }
+}
+#else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/output", _dispRefImage);
+#endif
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/output", _dispRefImageField);
 /* gcc still thinks it is in .rdata (the next string follows without a section change) */
 __asm__(".rdata");
