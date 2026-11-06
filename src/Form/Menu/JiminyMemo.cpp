@@ -2901,11 +2901,6 @@ extern CursorPosition NewMarkPosiOffset;
 extern FLOAT JiminyRotY __asm__("D_0068C400"); /* PARTIAL: .bss still from the original's assembly */
 }
 }
-/* Parked: 255 lines in this form (ref declaration order, line-marker statement order: stack slots and &iFlag right),
-   129 with posi declared first (slots wrong, registers right, a pseudo for &iFlag). Left here: global-alloc gives
-   pMarkSeq an s-register where the original spills it and keeps the hoisted 16 in s8 (bCursorShift s7), which shifts
-   this to s1 and telopNo to s2. tried: scalar declaration orders (no effect); permuter 3 runs on the 129 form. */
-#if 0
 void CJiminyMemo::contentMenu() {
     BOOL bCursorShift = FALSE;
     switch (getContentStep()) {
@@ -2957,7 +2952,7 @@ void CJiminyMemo::contentMenu() {
             for (INT i = 0; i < m_ContentMenu.iSeqCtrlNum; i++) m_ContentMenu.pSeqCtrl[i] = NULL;
         }
         pMarkSeq = m_ContentMenu.pSeqCtrl + m_ContentMenu.iStringNum;
-        pNewSeq = m_ContentMenu.pSeqCtrl + m_ContentMenu.iStringNum + 5;
+        pNewSeq = m_ContentMenu.pSeqCtrl + (m_ContentMenu.iStringNum + 5);
         pList = createSequence(JiminyMemo::Menu::NoteSeqData, 0x10, 1, 0, NULL);
         if (pList) {
             m_ContentMenu.pList = pList;
@@ -2973,8 +2968,8 @@ void CJiminyMemo::contentMenu() {
                                                      0x11, 0x20002, m_ContentMenu.iCursorCurrent, pList);
         m_ContentMenu.pCursorLight = createSequence(JiminyMemo::Menu::CursorLightSeqTbl, 0x11, 0, 2, pList);
         if (m_ContentMenu.pCursorLight) m_ContentMenu.pCursorLight->setInState(0);
-        createMarkSequence(0x92, listNum, 0, 8, 0x11, pList, pMarkSeq);
         bCursorShift = TRUE;
+        createMarkSequence(0x92, listNum, 0, 8, 0x11, pList, pMarkSeq);
         for (INT i = 0; listNum > i; i++) {
             if (pMarkSeq[i]) pMarkSeq[i]->enableDisp(bComp[i]);
         }
@@ -3135,24 +3130,6 @@ void CJiminyMemo::contentMenu() {
         }
     }
 }
-#else
-/* placeholder: rodata of contentMenu__11CJiminyMemo */
-__asm__(".rdata\n");
-inline void _roPh25() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE(__FILE__ "(5252)");
-    TRACE(__FILE__ "(5258)");
-    TRACE(__FILE__ "(5350)");
-    TRACE(__FILE__ "(5359)");
-    TRACE(__FILE__ "(5377)");
-}
-__asm__(".rdata\n.align 4\n.word .L0032AFAC\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032B520\n.word .L0032B794\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n");
-__asm__(".word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032B830\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032B9B4\n.word .L0032BC08\n");
-__asm__(".word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BA78\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n");
-__asm__(".word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BA9C\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n");
-__asm__(".word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BA9C\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n.word .L0032BC08\n");
-__asm__(".word .L0032BC08\n.byte 0x00,0x00,0x00,0x00\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Form/Menu/JiminyMemo", contentMenu__11CJiminyMemo);
-#endif
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 namespace JiminyMemo {
 namespace Story {
