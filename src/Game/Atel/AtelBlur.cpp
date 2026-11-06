@@ -23,6 +23,7 @@ void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT r);
 
 
 namespace ATEL {
+CAtelBlur* CAtelBlur::m_pInstance = NULL;
 
 /* the parameter of the animation commands (original name unknown) */
 struct ATEL_BLUR_ANIM_PARAM {
@@ -148,4 +149,4 @@ INT CAtelBlur::Anim() {
 
 } // namespace ATEL
 
-// SOURCE DATA: .rodata
+// SOURCE DATA: .data .rodata
