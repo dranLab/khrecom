@@ -150,12 +150,12 @@ One row per merge into main (`partials.py --summary` before and after).
 ## Summary
 
 ```
-PARTIAL: 205 (165 in 48 headers, 40 in 24 .cpp); MATCH: 930
-  by category: method 47, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 18, other 5
+PARTIAL: 204 (165 in 48 headers, 39 in 24 .cpp); MATCH: 928
+  by category: method 46, data member 10, type 14, fwd decl 2, #include 14, changed in place 45, padding 2, path override 1, gate 5, guessed 9, header-level 33, stand-in 18, other 5
 stand-ins: 22 foreign in 16 files (16 names), 198 unattributed, 155 own
 duplicate class names across headers: 0
 padding: 2 arrays, 0 accessors
-mechanisms: 680 sites (0 untagged); #line: 1244
+mechanisms: 677 sites (1 untagged); #line: 1244
 opt-out defines in .cpp: MAPENEMY_H_NO_COLL_ANIM 2
 classes: complete 873, superset 12, partial 0, gated 3, missing 8, unattributed 309
 ```
@@ -380,7 +380,7 @@ or `untagged`.
 | placeholder | `_modelCreate*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_monstroEventBattleEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
 | placeholder | `_premiumPrizeMessage*` | 12 | 12 | Placeholders for an unknown header's inline functions (prize messages) that come next in .rodata. |
-| placeholder | `_roPh*` | 8 | 8 | placeholder: an inline function's strings, in the original .rodata order |
+| placeholder | `_roPh*` | 4 | 4 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roPh0a*` | 1 | 1 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_roulettePrizeMessage*` | 12 | 12 | placeholder: an inline function's strings, in the original .rodata order |
 | placeholder | `_sampleEnemyEmptyString*` | 1 | 1 | Placeholder: .rodata has an empty string literal after CollUtil.h's strings (from an unidentified header). |
@@ -402,7 +402,7 @@ or `untagged`.
 | unit gate | `GAME_PLAYER_PLAYERMANAGER_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the image differs (tested 2026-11-02) |
 | unit gate | `GAME_PLAYER_PLAYER_CPP` | 1 | 1 | unit gate (its header gives this unit its own parts); without it the unit compiles only against its full header (tested 2026-11-02) |
 | unit gate site | `EFFECT_CPP` | 3 | 3 | EFFECT_CPP gate, only for its own unit (tested 2026-11-02) |
-| unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 2 | 2 | FORM_MENU_JIMINYMEMO_CPP gate (tested 2026-11-02): its own unit includes it as "JiminyMemo.h" (the full path) |
+| unit gate site | `FORM_MENU_JIMINYMEMO_CPP` | 3 | 2 | FORM_MENU_JIMINYMEMO_CPP gate (tested 2026-11-02): its own unit includes it as "JiminyMemo.h" (the full path) |
 | unit gate site | `FORM_MENU_SAVELOADCTRL_CPP` | 1 | 1 | FORM_MENU_SAVELOADCTRL_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `FORM_MENU_SAVELOAD_CPP` | 8 | 8 | FORM_MENU_SAVELOAD_CPP gate, only for its own unit (tested 2026-11-02) |
 | unit gate site | `GAME_ATEL_VSME_CPP` | 1 | 1 | Game/Atel/Atel (CAtel::start ...) calls these out of line: inline-called-not-inlined |

@@ -39,43 +39,46 @@ every change that is merged without regenerating. Regenerating all four takes ab
   | `docs/partials.md` trend table | one row per cleanup merge (`partials.py --summary` before and after) |
   | `CLAUDE.md` | a tool, rule or toolchain fact changes |
 
-## Where things stand (2026-11-05)
+## Where things stand (2026-11-06)
 
-- **Progress:** 11830 of 12311 functions matched (88.8%): game 11067 of 11323, libraries 763 of 988 (plus 151
-  hand-written). `tools/check.sh`: 12192 functions decompiled in 662 files, 611 complete.
-- **Game:** 251 functions still `INCLUDE_ASM` in 74 units. 185 are parked (C draft under `#if 0` with a note).
-  64 were never attempted, all in JiminyMemo. Movement's and AudioDec's constructors have drafts but are listed
-  as "not attempted" (leftovers.py misses constructors in drafts). 11 units take a data section from assembly.
+- **Progress:** 11915 of 12311 functions matched (89.6%): game 11152 of 11323, libraries 763 of 988 (plus 151
+  hand-written). `tools/check.sh`: 12193 functions decompiled in 662 files, 612 complete.
+- **Game:** 166 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
+  Movement constructor has a draft but is listed as "not attempted" (leftovers.py misses constructors in drafts).
+  10 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
   details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 205 (165 in 48 headers, 40 in 24 .cpp), 22 foreign stand-ins in 16 files, 0
+- **Header cleanup:** PARTIAL 204 (165 in 48 headers, 39 in 24 .cpp), 22 foreign stand-ins in 16 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
-  `tools/partials.py --queue` has 16 ready items.
+  `tools/partials.py --queue` has the ready items.
+- **Method that paid off (2026-11-06):** read `build/asmlines.py` before permuting. Most long-parked drafts had a
+  wrong source shape the line markers show directly (one-line brace init, a condition on one line, statement order,
+  a direct assignment), not a scheduling accident. See memory void-callee-v0, fvector-brace-init-aligned,
+  gcse-bucket-count-lever. `build/lineorder.py` compresses the markers, `build/normdiff.py` is a register-blind diff,
+  `build/lregpri.py` ranks pseudos by global-alloc priority.
 
 Numbers change with every merge: `tools/check.sh` (totals), `tools/leftovers.py game|lib` (what is left) and
 `tools/partials.py --summary` (cleanup) give the current state.
 
 ## Remaining work, in this order
 
-1. **JiminyMemo's final group** (the only untried game code), then the two constructors with drafts:
+1. **The Movement constructor** (the only draft not counted as parked):
 
    | # | unit | functions left (parked) | note | read first (memory) |
    |---|---|---:|---|---|
-   | 1 | `Form/Menu/JiminyMemo` | 83 (19) | the final group needs the `content*` functions for its const tables, plus the mainInit tail; `.bss` from asm | jiminymemo-unit-lessons |
-   | 2 | `Game/Movement` | 1 (draft) | constructor 53/143 lines: unnamed constant-pool vectors | movement-unit-lessons |
-   | 3 | `System/Movie/AudioDec` | 1 (draft) | constructor 6/120 lines: one delay slot | |
+   | 1 | `Game/Movement` | 1 (draft) | constructor 53/143 lines: unnamed constant-pool vectors. Line markers: the `:178` stores are a member-initializer list (13 members = lines 179-191), lines 192-198 one vector each; that form gave 60+ lines so far | movement-unit-lessons |
 
    (`tools/partials.py` reads this table: a listed unit with functions neither matched nor parked counts as in
    progress for the cleanup queue. Keep the `| # | \`unit\` |` row form.)
 
-2. **Parked game drafts** (185): retry them closest first, with the levers index and both permuters. List them
-   with their notes: `tools/leftovers.py game` ("Parked functions"). Leads already known: sddrv_ee
+2. **Parked game drafts**: retry them closest first, line markers first, then the levers index and both permuters.
+   List them with their notes: `tools/leftovers.py game` ("Parked functions"). Leads already known: sddrv_ee
    `TsSdSepPlayDBG` (decomp-permuter 20 -> 8 lines, not yet checked in the source), Avatar `onMove` (registers
    only: a 14-vs-15-refs priority tie), PathData `getNearPath` (9 lines), 2DSprObj `initForSeq` (20/342),
    HumanBoss `initalize` (4/71). The hand-kept table at the top of
    `docs/asm-leftovers.md` lists the blockers that need more than a source change.
-3. **Data from source** for the 11 game units that still take a section from asm (`tools/leftovers.py game`:
-   "data from asm"; JiminyMemo, pppEiDrawShipoly, shape, CollUtil, Glare, sddrv_ee, AtelCrossFade, CollUtilO,
+3. **Data from source** for the 10 game units that still take a section from asm (`tools/leftovers.py game`:
+   "data from asm"; pppEiDrawShipoly, shape, CollUtil, Glare, sddrv_ee, AtelCrossFade, CollUtilO,
    AtelBlur, Ride, EntityFactory). Ride can't: the split puts its `.rodata` at 4 mod 8 (out of scope).
 4. **Library leftovers**: the parked and not attempted functions of `docs/sdk-leftovers.md`, with its "Working on
    a library unit" section.
@@ -315,6 +318,9 @@ header split the original didn't have, or make a class a template to hide its st
 
 | symptom in the diff | read |
 |---|---|
+| one-line `por/sq` + `swc1 w`, wrong store order around an FVECTOR | fvector-brace-init-aligned |
+| delay slot of a call and the v0/v1 pair after it | void-callee-v0 |
+| spill slots / regs of hoisted `this+off` addresses | gcse-bucket-count-lever, gcse-pre-hash-order |
 | registers swapped, same instructions | scheduling-mismatch-techniques, global-alloc-priority-lreg, asm-barrier-death-note-levers, loop-const-merge-and-load-order, asymmetric-giv-overloads, gcse-pre-hash-order |
 | stores in another order | sched-store-order-reg-weight, volatile-delay-slots-store-permutation, small-union-ctor-stores, fixed-scalar-varying-struct-alias, join-store-per-arm |
 | the original reloads a global/member, ours keeps it (or the reverse) | global-reload-ref-helper, fixed-scalar-varying-struct-alias, const-global-reorg-redundant-load, mapenemy-unit-lessons |

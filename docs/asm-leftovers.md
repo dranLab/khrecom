@@ -26,7 +26,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | unit | functions left | instr left | parked | data from asm |
 |---|---:|---:|---:|---|
 | `Game/Player/PlayerSora` | 2 | 7322 | 2 |  |
-| `Form/Menu/JiminyMemo` | 83 | 5244 | 19 | .bss |
 | `Game/Player/PlayerDRiku` | 3 | 5073 | 3 |  |
 | `Form/Menu/Camp` | 7 | 4599 | 7 |  |
 | `Game/Player/PlayerRiku` | 2 | 2940 | 2 |  |
@@ -50,10 +49,10 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `System/Graphic/TexUtil` | 4 | 651 | 4 |  |
 | `System/Rcf` | 6 | 649 | 6 |  |
 | `System/Graphic/HermitePathCamera` | 1 | 632 | 1 |  |
-| `Game/Atel/Avatar` | 4 | 587 | 4 |  |
 | `System/Graphic/PackMan` | 2 | 540 | 2 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3X` | 1 | 532 | 1 |  |
 | `Game/BattleCard` | 2 | 532 | 2 |  |
+| `Game/Atel/Avatar` | 3 | 531 | 3 |  |
 | `System/Graphic/Effect/libppp/keProg/pppKeShpTail3` | 1 | 514 | 1 |  |
 | `System/Graphic/Glare` | 1 | 446 | 1 | .data |
 | `System/Memoca` | 3 | 442 | 3 |  |
@@ -63,10 +62,10 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Game` | 1 | 371 | 1 |  |
 | `Game/Player/PlayerCamera` | 2 | 371 | 2 |  |
 | `Game/Collision/CollMap` | 2 | 365 | 2 |  |
-| `Game/SceneInfo` | 3 | 344 | 3 |  |
 | `Game/Collision/CollAttack` | 3 | 334 | 3 |  |
 | `Game/Enemy/BattleEnemy` | 2 | 327 | 2 |  |
 | `Form/Menu/SaveLoad` | 2 | 320 | 2 |  |
+| `Game/SceneInfo` | 2 | 314 | 2 |  |
 | `System/Graphic/Effect/libppp/partMng` | 1 | 292 | 1 |  |
 | `Game/Enemy/MapEnemy` | 1 | 290 | 1 |  |
 | `System/Graphic/ModelMan` | 2 | 268 | 2 |  |
@@ -87,11 +86,11 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Enemy/BattleEnemyManager` | 1 | 149 | 1 |  |
 | `Game/AttackMotion` | 1 | 136 | 1 |  |
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
+| `Form/Menu/JiminyMemo` | 1 | 122 | 1 |  |
 | `Game/Collision/CollUtilO` | 1 | 121 | 1 | .rodata |
 | `Game/Gimmick/GimmickPlantParent` | 1 | 108 | 1 |  |
 | `System/Graphic/Effect/effect` | 1 | 105 | 1 |  |
 | `Game/Movement` | 1 | 105 |  |  |
-| `System/Movie/AudioDec` | 1 | 97 |  |  |
 | `Game/Card` | 1 | 95 | 1 |  |
 | `Game/Player/PlayerGauge` | 1 | 77 | 1 |  |
 | `Game/Player/SummonTink` | 1 | 37 | 1 |  |
@@ -207,7 +206,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Map` | `init__4CMapii` | 1046 | 87 of 1193 lines, same size - the bbox loop's &b (ApplyMatrix output) is hoisted into s2 here, the original recomputes it per iteration, which shifts the saved registers of xmin/xmax/zmin/zmax and the division block; for/do/ while/goto loop shapes, by-value apply inline and a 10 min permuter run … |
 | `Game/Map` | `disp__4CMap` | 906 | 709 of 1308 lines, 44 bytes short - structure as the original (debug clamp, shader modes, group selection by player position, pipelined kick/resultCheckBBox display via group table or grid, sky polygons). The 44 bytes: the original keeps two copies of the "flush the last model" block (group and … |
 | `Game/SceneInfo` | `clear__10CSceneInfo` | 139 | ~110 lines - the first run of stores: the original reloads m_pMCWork before each store (the *(T*)& scalar stores give that) but keeps two -1 registers and seven s-registers for the %hi parts; statement orders (incl. the lui order) and 7 min of permuter (10k candidates, 104 -> 98) did not get closer. |
-| `Game/SceneInfo` | `_checkAvailableDoorID__FRC8DoorInfo` | 30 | 2 lines - the constant 5 of the second _type compare: the original loads it into v1 (li v1,5 in the beq delay slot), ours into v0. Structure matches (switch on getDoorState, `== 4 break; != 5 return TRUE`); ~25 forms (ifs, result variable, nested switch, local type) and 4 min of permuter (3k … |
 | `Game/SceneInfo` | `rollbackEventDoorState__10CSceneInfoi` | 175 | ~35 lines - the outer room loop: the original re-materializes the s_CurrentFloor address for the room (mtlo/madd) and for the count each iteration; ours shares one base. Door/state/norma logic matches; room addressing forms and 5 min of permuter (42 -> 38) did not get it. |
 | `Game/Collision/CollAttack` | `chkGuardSuccess__11CCollAttackP9CCollBody` | 112 | (comment) not matching: the original's last angle wrap branch has an empty delay slot (ours: bc1fl with the abs.s) |
 | `Game/Collision/CollAttack` | `chkMutekiSuccess__11CCollAttackP9CCollBody` | 112 | (comment) not matching: the original's last angle wrap branch has an empty delay slot (ours: bc1fl with the abs.s) |
@@ -227,7 +225,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Game/Atel/Avatar` | `_$_Q24ATEL7CAvatar` | 95 | 6 lines - the implicit lineY/lineX destructor calls get s5/s4 instead of s4/s5: their address pseudos tie on priority (2 refs / 17 insns) and ours numbers lineX first (lreg dump); no body form changed it. The draft uses the full classes of Gprim.h (inline ~C3DLine/~CGPrim). |
 | `Game/Atel/Avatar` | `onMove__Q24ATEL7CAvatariPvi` | 297 | 53 lines, registers only - with the ref's USHORT nType/nFlag (one lhu) and the final switch the code is the original's, but p (14 refs over 187 insns) loses the global-alloc priority tie against case 1's pV (3 over 13) and takes s2, pushing CEntity to s1 (the original: p s1, CEntity s4, one more … |
 | `Game/Atel/Avatar` | `RotateAvatarMain__Q24ATEL7CAvatar` | 139 | 8 lines - the first isOverAvatarRotTimeLimit() comes out as xori; the original builds bRes with li 1 + movz (its weak copy is xori too). Inline/caller forms and 8 min of permuter (9k candidates) did not change it. The VU0 add/clip block (FVECTOR::addRot in the ref) is written out here: through an … |
-| `Game/Atel/Avatar` | `onAvatarAttachEffect__Q24ATEL7CAvatariPvi` | 56 | 4 lines - the original stores rot's zero quad (por/sq) first, before the callee saves; ours after the p->Type load. Init forms/orders and 6 min of permuter (8.8k candidates) did not change it. |
 | `Game/Atel/VSME` | `acWaitReq__Q24ATEL4CVSMRQ24ATEL5Actorii` | 32 | same instructions and order except the wait_timer product: the original multiplies into LO ("mult $zero,s1,v1" + mflo before the sh), ours with the 3-operand mult into v1 (gcc's mulsi3_mult3 "l" vs "d" alternative, chosen by regclass: LO only when the product feeds a plain register copy, as for a … |
 | `Game/Player/Friend` | `setMagic__Q26Friend7CFriendi` | 1274 |  |
 | `Game/Player/NaviMap` | `main__Q25Gauge8CNaviMap` | 425 | (comment) Not matching: in the debug-rotation block (g_dw.player.iTemp == 2) the original keeps PI in $f3 from before the branch and loads 180.0f/-PI in $f2/$f1 (100.0f and -PI share $f1); here 180.0f is hoisted too and the registers of 180.0f/-PI swap (9 lines). Everything else matches; the "deg" … |
@@ -275,29 +272,11 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setMainCmd__5CCampii` | 257 | 40 of 285 lines differ (was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else branch `this` is in s0 as in the original; left: in the font-replacing loop the … |
 | `Form/Menu/Camp` | `setStatusWin1__5CCampi` | 429 | 13 of 487 lines differ (was 23): vec.set() (the ref's inlined `FVECTOR *this`) and a precomputed `m_bPlayerKind + 0xF` (permuter) fixed the rest; left: the original keeps &vec in v0 (y/w/z stores and the later fShift = vec.z load through it), so pPlayerManager is reloaded from its spill slot for … |
 | `Form/Menu/JiminyMemo` | `ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii` | 122 | 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches. tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the … |
-| `Form/Menu/JiminyMemo` | `contentMenu__11CJiminyMemo` | 859 | 129 lines: the stack slots of iFlag[5]/bComp[5] (and the pMarkSeq/pNewSeq spills) differ, which shifts every s-register from the prologue on (s7 vs s8 saves); the code itself matches in structure. tried: declaration orders of posi/telopNo/iFlag/bComp/pMarkSeq/pNewSeq (posi after bComp fixes the … |
-| `Form/Menu/JiminyMemo` | `contentCollection__11CJiminyMemo` | 1759 | 2 lines: in case 40's card-view branch the original stores the step (50, v1) before the next mode (8, v0); ours stores the mode first. The sched2 dump shows both stores tied (prio 5, both after the shift.x/y loads), broken by RTL order; writing setContentStep(50) first fixes the store order but … |
-| `Form/Menu/JiminyMemo` | `contentCharaView_ModelView__11CJiminyMemo` | 287 | 6 lines: three FP registers of case 40 (DEG2RAD(2.0f) constant, 1/4096 constant, the rotation load: original f4/f1/f3, ours f1/f3/f4). Everything else matches. tried: line-marker layout (both table arms written out, flags 0x8000 then 0x4000, setter order, ry split over 3 statements), literal vs … |
-| `Form/Menu/JiminyMemo` | `contentMinigame__11CJiminyMemo` | 688 | 34 lines, all stack offsets: the six hoisted string addresses (strBGlider..strBPanic, &scoreStr) are spilled in another slot order (GCSE/PRE creates their pseudos in hash-table order: ours BPanic first, the original BGlider first). Everything else matches (time math via the Com.h(59) seconds … |
-| `Form/Menu/JiminyMemo` | `setPosition__15CMemo2DSequenceRC7FVECTOR` | 10 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `setLocalPosition__15CMemo2DSequenceRC7FVECTOR` | 10 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `setScale__11CMemo2DCardf` | 9 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `setContentParam__11CJiminyMemoii` | 26 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `getContentParam__11CJiminyMemoi` | 23 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `setContentScroll__11CJiminyMemoiRC7FVECTOR` | 8 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `getContentScroll__11CJiminyMemoiR7FVECTOR` | 12 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `mainInit__11CJiminyMemo` | 320 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `mainLoadWait__11CJiminyMemo` | 332 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `mainIn__11CJiminyMemo` | 322 | final group (destructors = key functions, all weak class inlines, getTaskPointer<T>, static init, the .rodata after the vtables): gcc emits all of it at the end of the object, so it can only come from C at once. Drafted in full (build/jm/grp4.cpp; recipe in memory jiminymemo-unit-lessons): every … |
-| `Form/Menu/JiminyMemo` | `mainInWait__11CJiminyMemo` | 18 | final group, see the note above getTaskPointer<T> |
-| `Form/Menu/JiminyMemo` | `mainLoop__11CJiminyMemo` | 2 | final group, see the note above getTaskPointer<T> |
-| `Form/Menu/JiminyMemo` | `mainOut__11CJiminyMemo` | 13 | final group, see the note above getTaskPointer<T> |
-| `Form/Menu/JiminyMemo` | `mainOutWait__11CJiminyMemo` | 22 | final group, see the note above getTaskPointer<T> |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). |
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 251 functions (63812 instructions) in 74 units, 185 of them parked; 11 units take a data section from assembly.
+Totals: 166 functions (58507 instructions) in 73 units, 165 of them parked; 10 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->
