@@ -178,7 +178,8 @@ ISLCManagerT<CTask>& CTaskMan::getSLCManager() {
     return *_pSLCManager;
 }
 
-/* Matches except that nTQ and bPause swap registers (s5/s6). */
+/* Parked: 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ
+   store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. */
 #if 0
 #line 223
 void CTaskMan::update(TIMEQ nTQ, TIMEQ nDispTQ, BOOL bPause) {
@@ -186,6 +187,7 @@ void CTaskMan::update(TIMEQ nTQ, TIMEQ nDispTQ, BOOL bPause) {
     TIMEQ nSysLag = CPlaySpeedCtrl::getSysProgressTime(nDispTQ);
     TIMEQ nLag = CPlaySpeedCtrl::getProgressTime(nSysLag);
     INT nFlag = bPause ? (SHORT)(_nTaskFlag | 1) : (SHORT)(_nTaskFlag & ~1);
+    __asm__ volatile("" : : "r"(nTQ)); /* MATCH: a third ref for nTQ: it outranks bPause and takes s5 */
     _pSecondaryTaskArray->clear();
     TaskMainParam param(*_ref(_pSecondaryTaskArray), nTQ, nSysLag, nLag, _nRnd, nFlag);
     if (_nPauseReq) {
