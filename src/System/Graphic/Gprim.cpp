@@ -122,11 +122,6 @@ static inline u_long128 _calcSTQ(ULONGLONG inSTQ, UINT iW) {
                      : "r"(iW), "r"(inSTQ));
     return iRet;
 }
-static inline UINT _floatBits(FLOAT f) {
-    UINT i;
-    __asm__ volatile("mfc1 %0, %1" : "=r"(i) : "f"(f));
-    return i;
-}
 static inline u_long128 _calcSTQW(ULONGLONG inSTQ, FLOAT fW) {
     u_long128 iRet;
     __asm__ volatile("mfc1 %0, %2\n"
@@ -1863,12 +1858,6 @@ ULONGLONG* _makePkt_TexLine(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* p
     }
     return p64;
 }
-/* Parked: registers only - per vertex the original loads it->S into v1 (the first one in the beql slot) and copies
- * the mfc1 result into a0 for iW, ours puts iW in v1 and loads it->S into v0; loop shape, per-loop fW and mfc1
- * order (volatile _floatBits) match; tried: S read into a local first/last, STQ inline with swapped operands, iW
- * assigned inside the call, register asm a0 for iW, a C bit-cast inline, permuter 2x15 min (9270 candidates, no
- * gain) */
-#if 0
 ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL Back) {
     IVECTOR p[3];
     UINT iW;
@@ -1893,15 +1882,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL 
             next0:
                 it += 3;
             } else {
-                iW = _floatBits(fW0);
+                iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
                 p64[2] = _vecToXYZ(p[0]);
-                iW = _floatBits(fW1);
+                iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
                 p64[5] = _vecToXYZ(p[1]);
-                iW = _floatBits(fW2);
+                iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
                 p64[8] = _vecToXYZ(p[2]);
@@ -1934,15 +1923,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL 
             next1:
                 it += 3;
             } else {
-                iW = _floatBits(fW0);
+                iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
                 p64[2] = _vecToXYZ(p[0]);
-                iW = _floatBits(fW1);
+                iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
                 p64[5] = _vecToXYZ(p[1]);
-                iW = _floatBits(fW2);
+                iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
                 p64[8] = _vecToXYZ(p[2]);
@@ -1953,13 +1942,6 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, BOOL 
     }
     return p64;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1i);
-#endif
-/* Parked: registers (as the CCoord-less version: it->S into v1 and the mfc1 copy in a0 for iW, ours swapped) and
- * one loop-alignment nop before the second loop; the draft is the CCoord-less one plus the per-vertex bone checks
- * of the matched _makePkt_Triangle (CCoord); tried: the CCoord-less version's levers (see there) */
-#if 0
 ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoord* pCrd, BOOL Back) {
     IVECTOR p[3];
     INT iBone;
@@ -1998,15 +1980,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoor
             next0:
                 it += 3;
             } else {
-                iW = _floatBits(fW0);
+                iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
                 p64[2] = _vecToXYZ(p[0]);
-                iW = _floatBits(fW1);
+                iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
                 p64[5] = _vecToXYZ(p[1]);
-                iW = _floatBits(fW2);
+                iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
                 p64[8] = _vecToXYZ(p[2]);
@@ -2051,15 +2033,15 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoor
             next1:
                 it += 3;
             } else {
-                iW = _floatBits(fW0);
+                iW = *(UINT*)&fW0;
                 p64[0] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[0].S, iW);
                 p64[1] = it[0].C.col | ((ULONGLONG)iW << 32);
                 p64[2] = _vecToXYZ(p[0]);
-                iW = _floatBits(fW1);
+                iW = *(UINT*)&fW1;
                 p64[3] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[1].S, iW);
                 p64[4] = it[1].C.col | ((ULONGLONG)iW << 32);
                 p64[5] = _vecToXYZ(p[1]);
-                iW = _floatBits(fW2);
+                iW = *(UINT*)&fW2;
                 p64[6] = (ULONGLONG)_calcSTQ(*(ULONGLONG*)&it[2].S, iW);
                 p64[7] = it[2].C.col | ((ULONGLONG)iW << 32);
                 p64[8] = _vecToXYZ(p[2]);
@@ -2070,9 +2052,6 @@ ULONGLONG* _makePkt_TexTriangle(ULONGLONG* p64, G_STRIP* it, G_STRIP* end, CCoor
     }
     return p64;
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Gprim", _makePkt_TexTriangle__FPUlP7G_STRIPT1P6CCoordi);
-#endif
 ULONGLONG* _makePkt_Line(ULONGLONG* p64, G_STRIP* it, G_STRIP* end) {
     IVECTOR p[3];
     while (it < end) {
