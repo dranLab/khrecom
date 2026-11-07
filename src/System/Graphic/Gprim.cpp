@@ -308,7 +308,9 @@ void CScissoring::setDefault() {
     p1.y = SCREEN_HEIGHT - 1;
     setRect(p0, p1);
 }
-/* Parked: 8 lines - two scheduling ties: the original loads 0x206 before the shared zero for the PRIM/PRMODE A+D
+/* Parked: 2 lines (2026-11-07, 0x206 pinned): only addiu a2,a2,64 sits mid-loop here, at the loop end in the original. `INT v = i + 1`
+   with v * 64 - 1 (as PackMan's packet) gets a2 = 63 and the end step but leaves a temp for i (13), a separate x biv or j loses i (9, 27).
+   Earlier: 8 lines - two scheduling ties: the original loads 0x206 before the shared zero for the PRIM/PRMODE A+D
  * pair, and strength-reduces i * 64 + 63 with its increment at the loop end while i++ sits inside the SCISSOR
  * expression (ours increments both there); this draft fixed the hoisted-constant order (XYZ helper with y first
  * and z by reference, as the original's PackMan.h inline) and i++ (line 277); tried before: _gifTag vs _AD, _ref
@@ -327,7 +329,11 @@ void CZFill::makePkt() {
 
     qp[0].ul128 = _AD(0x48, 0x32001);
     qp[1].ul128 = _AD(0x4F, (_ref(VRAM::_ZBUF_START) / 32) | 0x31000000);
-    qp[2].ul128 = _AD(0, 0x206);
+    {
+        register ULONGLONG uPrim asm("$3") = 0x206; /* MATCH: 0x206 before the shared zero */
+        __asm__ volatile("" : : "r"(uPrim));
+        qp[2].ul128 = _AD(0, uPrim);
+    }
     qp[3].ul128 = _AD(1, 0);
     qp += 4;
 

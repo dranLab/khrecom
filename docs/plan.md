@@ -92,6 +92,9 @@ every change that is merged without regenerating. Regenerating all four takes ab
 - **Constructor with pool constants (2026-11-07):** CMovement went 53 -> 26 -> 0 once the two constants sat in `u_long128`
   locals (`vZero._q`, TImode pseudos): both lq first, registers and the vtable store right at once (16 lines). The rest was
   store order, so write chains and `init()` out as single stores and run the guarded search. See memory timode-local-pool-constants.
+- **Guarded order search over 25 drafts (2026-11-07, 2-37 lines):** nothing gained. finalize's reported 17 -> 16 is noise: the same source gives 17, 17 and 11 on identical builds (gcse hash order, as
+  _startCdRead), so its score means little. What is left there is
+  register allocation or scheduling, not statement order: do not rerun it on these drafts unless their source changes.
 - **Order searches (2026-11-07):** `build/hillqueue.py <min> <unit:name>...` climbs runs of simple statements; `build/hillstmt.py`
   one chosen run. Real gains: Movement ctor 53 -> 26, CImageWnd::init 14 -> 5, calcWorldBBox 45 -> 28, finalize 17 -> 11,
   setupTexInfo 10 -> 6. **A lower line count proves nothing about behaviour; only a match does.** Five moves were wrong and
