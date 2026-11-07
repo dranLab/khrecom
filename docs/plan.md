@@ -41,9 +41,9 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-06)
 
-- **Progress:** 11952 of 12311 functions matched: game 11187 of 11323, libraries 765 of 988 (plus 151 hand-written).
+- **Progress:** 11954 of 12311 functions matched: game 11189 of 11323, libraries 765 of 988 (plus 151 hand-written).
   `tools/check.sh` is the current count.
-- **Game:** 131 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
+- **Game:** 129 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
   Movement constructor has a draft but is listed as "not attempted" (leftovers.py misses constructors in drafts).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
@@ -58,8 +58,8 @@ every change that is merged without regenerating. Regenerating all four takes ab
   `build/lregpri.py` ranks pseudos by global-alloc priority, `build/secsize.py` compares section sizes with the
   split, `build/bracetry2.py`/`bracetmp.py` sweep drafts for brace-init forms.
 
-- **Next method: compare drafts with the ref's locals (2026-11-06).** It matched 21 functions in one sitting (Gprim 12,
-  CollUtil, CollBody, ShadowModel, EffectMan, BattleEnemyManager, Model, Rcf, BattleCard, ModelMan 1 each; onMove 53 -> 1, detectMCInit 48 -> 18 lines) after three permuter queues had matched two. The ref lists every local and
+- **Next method: compare drafts with the ref's locals (2026-11-06).** It matched 23 functions in one sitting (Gprim 12,
+  Model 2, CollUtil, CollBody, ShadowModel, EffectMan, BattleEnemyManager, Rcf, BattleCard, ModelMan, AttackMotion 1 each; onMove 53 -> 1, detectMCInit 48 -> 18 lines) after three permuter queues had matched two. The ref lists every local and
   inline scope in order, so a missing or extra local means a wrong source shape: invented `flag`/`bTop` variables, a
   counted-down loop where the ref has `i`, asm helpers for what gcc emits itself (a `por` after `pcpyud` is a DI -> TI
   conversion, `*(UINT*)&f` gives the `mfc1`). `build/reflocals.py > build/jm/reflocals.log`, then `build/refjoin.py 60`,
@@ -67,7 +67,8 @@ every change that is merged without regenerating. Regenerating all four takes ab
   setStockInfo, _invokePrimary_Main, dispDebugLine, setCharge, setDeckInfo, pppSetMatrix, HumanBoss initalize, effect Setup,
   checkBBox). `build/refextra.py 40` lists drafts with invented locals, the better lead. Parked notes go stale: read the current diff first (stateDestroy and setupDrawMode were one statement swap).
   A permuter queue over the eight drafts changed on 2026-11-06 gained on two (the last fan 3 -> 2, detectMCInit 18 -> 14);
-  onMove, acWaitReq, update, _atoi, _atolen and checkBBox held. `build/banddiff.py lo hi` prints current diffs for a band,
+  onMove, acWaitReq, update, _atoi, _atolen and checkBBox held. `build/regswap.py 60` separates pure register permutations (solve with the priority formula), `build/refcount.py` lists
+  locals declared fewer times than in the ref (one variable per loop: Model::link), `build/banddiff.py lo hi` prints current diffs,
   `build/permlines.py` sweeps the order of adjacent statements (no gain on initAttackField, setupFontTex). Check the helpers
   first: `asm volatile` against plain `asm`, and `=&r` where the original keeps inputs and output apart. See memory
   ref-locals-reveal-shape, ti-di-conversion-is-por.

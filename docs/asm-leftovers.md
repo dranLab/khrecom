@@ -34,8 +34,8 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Map` | 2 | 1952 | 2 |  |
 | `System/Graphic/Effect/libppp/draw/shape` | 2 | 1771 | 2 |  |
 | `Game/Player/Player` | 5 | 1764 | 5 |  |
-| `System/Graphic/Model` | 6 | 1484 | 6 |  |
 | `Game/CardRevolver` | 6 | 1410 | 6 |  |
+| `System/Graphic/Model` | 5 | 1277 | 5 |  |
 | `Game/Player/Friend` | 1 | 1274 | 1 |  |
 | `Game/Enemy/HumanBoss` | 7 | 1088 | 7 |  |
 | `System/Graphic/PathData` | 2 | 1075 | 2 |  |
@@ -78,7 +78,6 @@ Sorted by the instructions left. `parked`: functions with a C draft under `#if 0
 | `Game/Enemy/EnemyWhitemushroom` | 1 | 184 | 1 |  |
 | `System/Movie/MSVideo` | 1 | 180 | 1 |  |
 | `System/Graphic/Effect/libppp/pppPart` | 1 | 168 | 1 |  |
-| `Game/AttackMotion` | 1 | 136 | 1 |  |
 | `System/Graphic/WorldEnv` | 1 | 128 | 1 |  |
 | `Form/Menu/JiminyMemo` | 1 | 122 | 1 |  |
 | `Game/Collision/CollUtilO` | 1 | 121 | 1 | .rodata |
@@ -120,7 +119,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/Graphic/FrecFont` | `makePkt__9CFrecFontR6CFntM2` | 656 | 331 of 749 lines - the draft has the original's structure (all locals in stack slots, contiguous MMI colour sequences as volatile in-place asm, control-code switch, outline/shadow passes), but the spill slots differ: the original's G_RGBA locals colExt/colBak/colSave get their (16-aligned) slots … |
 | `System/Graphic/Glare` | `makePkt__10CGlarePrim` | 446 |  |
 | `System/Graphic/HermitePathCamera` | `updatePos__18CHermitePathCameraR7FVECTORT1fi` | 632 | 88 of 723 lines - same structure; left: the case-2 fStep lives in f12 in the original (ours f2), the hoisted addresses of the BG-check and learp blocks get swapped s-registers (&m_vWPos s0, &vAdd s0 / &OldPos s1 in the original), the mInv address is kept in a register here and recomputed there. … |
-| `System/Graphic/Model` | `link__6CModelR7CCoords` | 207 | 25 lines off, registers only: the original gives the loop counter i s2 and nIdx s1 (ours i s1); the extra loop-head nop differs too. Worked: one getCoordNum() load in a local for the byte store and the compare, BONELABEL[i].m_ParentIndex, four Crd(i) inlines (four strength-reduced i*0xd0 … |
 | `System/Graphic/Model` | `getApplyMatrixBBox__FR7FVECTORT0RC7FMATRIXRC7FVECTORT3` | 88 | 3 lines off: the original stores vMN[1].z/.y through the &vMN[1] operand register (t1), ours through sp. Worked: vMN[i].set(MIN/MAX, ...) (default w = 1.0f), one asm statement with all operands, D_ labels for the +-1.7e38 constants. Tried: field stores, chained assignment, pointer local; permuter … |
 | `System/Graphic/Model` | `calcWorldBBox__6CModeli` | 153 | 38 lines off: the original keeps &pCrd->m_World as the strength-reduced loop pointer (s3 += 0xd0, counter counted down), &vMax/&vMin in s8/s7 for the init stores and the VU0 block, and loads the final bbox into f4/f5/f0..f3 in max-then-min order. Tried: pCrd[i] indexing (keeps the counter, 41 … |
 | `System/Graphic/Model` | `checkBBox__FRC7FMATRIXPC4BBOX` | 36 | 12 lines, same size (the tail as resultCheckBBox) - registers only: the original has ret v0, the scratchpad pointer v1, clip a0, as if the three overlapped in priority order. Ours keeps the pointer local to the first block, so it takes v0 and clip v1. With "r"(v) in the join barrier v goes global … |
@@ -166,7 +164,6 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `System/RcfCD` | `_addRsrcFileToDB__FUiiRPUc` | 159 | 4 lines (draft above) - `addiu s0,sp,32` (&info) and the _nLinkID load are scheduled before the group test in the original, after it here. tried: permuter 10 min, 33k candidates: no gain. |
 | `System/TaskMan` | `update__8CTaskManiii` | 135 | 4 lines - the barrier settles nTQ/bPause (s5/s6). Left: the TaskMainParam stores: the original issues the nTQ store early and _SecondaryArray's after _nSysLag's; a scheduling tie across the clear() block. |
 | `System/TaskMan` | `_invokePrimary_Main__8CTaskManR13TaskMainParamR5CTask` | 82 |  |
-| `Game/AttackMotion` | `initialize__13CAttackMotionP14ATK_COLL_PARAMi` | 136 |  |
 | `Game/BattleCard` | `destroy__Q210CardBattle11CBattleCardi` | 117 | 5 lines - the original keeps two copies of `addGimmickCount(-1); break;` (cases 0xe and 6); our jump2 cross-jumps case 0xe's tail into case 6. Per-case flag sets, gotos, labels, argument spellings and block scopes all merge too (synthetic tests build/ps/cj/d*.cpp, e*.cpp, f1.cpp). |
 | `Game/Card` | `getAttribute__5CCardG4CARDPPCcN32` | 95 | 30 of 124 lines, registers only: buf's address (3 uses / 38 insns) outranks the CCtdMan::m_pInstance address (4 / 110) in global-alloc priority, the original has them the other way round (s6/s5) and keeps card.m_nKind in a0. Worked: `pLF = buf; *pOutStrAttack = pLF;` (parameter registers, 53 -> … |
 | `Game/CardBattle` | `testPlayingCard__Q210CardBattle11CCardBattleUi` | 89 | 2 lines, the final return only - the original computes 4 into v0 and movn's 1 from v1 when iDuelOK (the != path sets v0 = 1 in the bne delay slot, one exit); this form branches (beqz iDuelOK) instead of the movn. `if (!=) return 1; return !iDuelOK ? 4 : 1;` gives the exact movn block, but jump2 … |
@@ -230,14 +227,14 @@ the comment next to the draft, marked (comment); shortened to 300 characters.
 | `Form/Menu/Camp` | `setTechWin__5CCampi` | 551 | 53 of 621 lines differ: in the sleight-list loop the original spills pTechCateTbl and nTechCateCnt and recomputes &pTechCateTbl[nTechSelectTop] from the spilled pointer every iteration; ours strength-reduces it into an s-register (the same giv difference as setMainCmd's font loop). tried: the … |
 | `Form/Menu/Camp` | `setMapCardWin__5CCampi` | 1227 | same size, 33 of 1409 lines differ: the stack slots of the spilled hoisted addresses (&m_pMCInfoNumCtrl, &m_pMCInfoNumFnt, &m_pMCFnt, &m_pMCCard, &m_nMapKind, i + 1) are assigned in another order (orig 0x74 NumFnt, 0x78 MapKind, 0x7c i+1, 0x84 MCCard, 0x88 MCFnt, 0x8c NumCtrl; ours ascending by … |
 | `Form/Menu/Camp` | `setWorldmapCursor__5CCamp` | 853 | 62 of 941 lines differ. The RCNORMA::NormaSrc argument of createNorma is built from four lhu of its stack copy in the original (extract_bit_field pieces), one ld in ours - the open issue of RoomCreation::menuMain and C2DCard::replaceNorma; the s3/s4 and spill-slot (0x64/0x68) swaps around it … |
-| `Form/Menu/Camp` | `setMainCmd__5CCampii` | 257 | 40 of 285 lines differ (was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else branch `this` is in s0 as in the original; left: in the font-replacing loop the … |
+| `Form/Menu/Camp` | `setMainCmd__5CCampii` | 257 | 17 of 276 lines, 8 bytes short (40 before each loop got its own i, as in the ref; was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else branch `this` is in s0 as in … |
 | `Form/Menu/Camp` | `setStatusWin1__5CCampi` | 429 | 13 of 487 lines differ (was 23): vec.set() (the ref's inlined `FVECTOR *this`) and a precomputed `m_bPlayerKind + 0xF` (permuter) fixed the rest; left: the original keeps &vec in v0 (y/w/z stores and the later fShift = vec.z load through it), so pPlayerManager is reloaded from its spill slot for … |
 | `Form/Menu/JiminyMemo` | `ScrollBarChange__11CJiminyMemoPPQ22D210C2DSeqCtrlffiii` | 122 | 22 lines: ours hoists the 2.0f of case 2 out of the loop (an extra saved f24, frame +16, 0.01f moves from f23 to f24); the original loads it inside case 2 like ScrollBarInit does. Everything else matches. tried: y expression forms (temp, parenthesised, vec = vPos + .y), case order, INT i at the … |
 | `Form/Menu/RoomCreation` | `menuMain__13CRoomCreation` | 1995 | (comment) menuMain: the RCNORMA::NormaSrc by-value arguments (createNorma/replaceNorma) are built from four halfword loads in the original, ld in ours; the register allocation in case 0 follows from that (0x50 bytes shorter). |
 | `Form/Menu/SaveLoad` | `exeMessageDlg__11CSaveLoadUI` | 126 | the case-1 OK tail (m_nDlgResult = 1; CSound::playSE(2, -1, 64)) is cross-jumped into the identical tail of case 2/3 in ours, the original keeps both copies; also the lockPadControl(TRUE) tail loads into v1 (original v0) and one nop in the select loop; tried: switch vs if/else chain, combined … |
 | `Form/Menu/SaveLoad` | `createBootInfoMsg__11CSaveLoadUIiPc` | 194 | 2 lines - the original fills the beqz (nSlot) delay slot with the else branch's first `move a1, s0` (pszForm), ours keeps it in the else block; everything else matches; tried: if/else polarity, szSlot at function scope, a nested slot-sprintf inline, case orders, locals for each CTD text, permuter … |
 
-Totals: 131 functions (43669 instructions) in 67 units, 130 of them parked; 5 units take a data section from assembly.
+Totals: 129 functions (43326 instructions) in 66 units, 128 of them parked; 5 units take a data section from assembly.
 
 Generated by `tools/leftovers.py game`.
 <!-- leftovers:game:end -->

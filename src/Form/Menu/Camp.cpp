@@ -6138,7 +6138,7 @@ asm(".section .rodata\n"
     " pStrButton.4484:\n"
     ".byte 0x48,0x40,0x4E,0x00,0xF8,0x43,0x4E,0x00\n"
     ".section .text");
-/* Parked: 40 of 285 lines differ (was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else
+/* Parked: 17 of 276 lines, 8 bytes short (40 before each loop got its own i, as in the ref; was 81, 53 before 2026-11-05: _ref(m_pMainCmdFnt)[i] in the font-replacing loop keeps its own address computation): with the ref's function-level `INT i` plus a block `INT i` in the else
    branch `this` is in s0 as in the original; left: in the font-replacing loop the original recomputes
    &m_pMainCmdFnt[i] from i each iteration (only m_pMainCmdCtrl[i] strength-reduced), ours folds both into one giv;
    the create loop's first test uses a1 (nSetCmd == 0) in the original. tried: SAFE_DELETE / template inline /
@@ -6149,7 +6149,6 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
     FVECTOR vec2;
     C2DSeqCtrl* p2DSeqCtrl;
     G_RGBA rgba;
-    INT i;
 
     if (nSetCmd == 0) {
         rgba.col = 0x80404040;
@@ -6158,7 +6157,7 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
             vec.y = 88.0f;
             vec.w = 1.0f;
             vec.z = 0.0f;
-            for (i = 0; i < m_nCurrentCmdMax; i++) {
+            for (INT i = 0; i < m_nCurrentCmdMax; i++) {
                 p2DSeqCtrl = m_pMainCmdCtrl[i] = NEW(7430, C2DSeqCtrl);
                 p2DSeqCtrl->setLayer(0xC);
                 p2DSeqCtrl->enableColorCtrl(TRUE);
@@ -6169,10 +6168,9 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
                 vec.y += 26.0f;
             }
         } else {
-            INT i;
             if (nMode != m_nMainMode) {
                 m_nCurrentCmdMax = nMode ? (!m_bPlayerKind ? 6 : 2) : 7;
-                for (i = 0; i < m_nCurrentCmdMax; i++) {
+                for (INT i = 0; i < m_nCurrentCmdMax; i++) {
                     p2DSeqCtrl = m_pMainCmdCtrl[i];
                     delete _ref(m_pMainCmdFnt)[i];
                     _ref(m_pMainCmdFnt)[i] = NULL;
@@ -6181,16 +6179,16 @@ INT CCamp::setMainCmd(INT nSetCmd, INT nMode) {
                 }
                 m_nMainMode = nMode;
             }
-            for (i = 0; i < m_nCurrentCmdMax; i++) {
+            for (INT i = 0; i < m_nCurrentCmdMax; i++) {
                 m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 4);
             }
         }
     } else if (nSetCmd == 1) {
-        for (i = 0; i < m_nCurrentCmdMax; i++) {
+        for (INT i = 0; i < m_nCurrentCmdMax; i++) {
             m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 5);
         }
     } else if (nSetCmd == 2) {
-        for (i = 0; i < m_nCurrentCmdMax; i++) {
+        for (INT i = 0; i < m_nCurrentCmdMax; i++) {
             m_pMainCmdCtrl[i]->replaceSeq(0, m_pSeqName, 6);
         }
     }
