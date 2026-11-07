@@ -3185,21 +3185,6 @@ void CPlayer::initHang() {
     m_fJumpSpdY = 0.0f;
     if (m_pMarker) m_pMarker->cancelLockon(m_hLockon, 0);
 }
-/* Parked: 23 lines differ, all FP-register/load-order of the two angle wraps: the original loads m_fDir first ($f0)
-   then m_fAnalogViewDir ($f1) for `view - dir + PI` (ours the reverse), and in the drop-off arm it loads dir into $f12
-   in the branch delay slots and copies it to $f22 after getPos (ours loads $f22 directly and lui/mtc1 the 0.5f after
-   the call); the second wrap (dir - PI) keeps d in $f1 and r in $f12 (ours both in $f12). Everything else matches
-   (frame, switch layout, collision sequences, FVECTOR::set() for the pointer-addressed w stores, getAnalogHoukou()
-   for the pad pointer in s0). tried: ~20 variants (dir as a local before/after the branch, a/b operand locals,
-   operand order, _limitPI2 vs explicit if/else, rot.y/m_fDir store orders, d0 copy before getPos) and
-   tools/permuter.py through the method alias wrapper (6 min; its best only commuted the vStart/vEnd sums, worse).
-   Same family as the parked exeWall / exeWalk wraps. Retried 2026-10-25 ($LM tags): getDir() in the first
-   wrap and for dir, the model pointer read directly (m_pModels; the original inlines getModel, our Model.h only
-   defines it after Entity.h) -> 18 lines, but 8 bytes short: the two `mov.s` copies of the original are missing
-   (dir loaded into $f12 in the three branch delay slots and copied to $f22 after getPos, and the second wrap's
-   result r kept in $f12 apart from d = dir - PI in $f1 with the PI constant shared with the r > PI test); also the
-   0.5f (ofs.set / setRadius) is loaded into $f21 before getPos. tried: setDir(r), rot.y before setDir (23). */
-#if 0
 void CPlayer::exeHang() {
     FLOAT dir;
     Houkou houkou;
@@ -3242,7 +3227,7 @@ void CPlayer::exeHang() {
         if (getAnalogHoukou()) houkou = getHoukouFromAngle(r);
         else houkou = HOUKOU_NUTRAL;
         if (isTrgFlag(1) || getAnalogHoukou() == HOUKOU_DOWN || houkou == HOUKOU_DOWN) {
-            dir = getDir();
+            r = getDir(); dir = r;
             pos = getPos();
             ofs.set(0.0f, 0.0f, -0.6f);
             _unitMatrix(m);
@@ -3323,9 +3308,6 @@ void CPlayer::exeHang() {
         m_pCollMap->setHangPosition(rot, pos);
     }
 }
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Player/Player", exeHang__7CPlayer);
-#endif
 void CPlayer::initAvoid() {
     if (isConditionFlag(0x10000000) && !isConditionFlag(0x400000)) {
         initFooting(2);
@@ -4534,11 +4516,7 @@ INT CPlayer::startSingleAction() {
     m_iStepStockSkill++;
     return TRUE;
 }
-/* Parked: same spot as initAttackField: around the g_fGravity load the original keeps the %hi in v0 (later
-   s0) and stores m_JumpState after the load; ours uses v1 and stores it before, and the g_CardBreakTime %hi
-   moves. The flag block (battle 0x10/0x80000/8, then trg 4) and the ternary m_iComboBoost match.
-   tried: block perms (perm.py, hillmove.py), cast loads/stores on g_fGravity/g_CardBreakTime/
-   m_JumpState/m_fJumpGravity, gravity via a local; best 13 lines. tools/permuter.py can't run on C++ methods. Retried 2026-10-25: the $LM line order (gravity 7818 before JumpState 7819) also gives 13 lines: li 3 then issues before the gravity lwc1 (equal priority, later insn first) and the %hi(g_fGravity) moves from v0 to v1; same family as initAttackField. */
+/* Parked: 13 of 118 lines (2026-11-08): around the g_fGravity load the original has %hi(g_fGravity) in v0 and the 3 for m_JumpState in v1 (lwc1 before li v1,3; its PRE copy move s0,v0 after lw a0,m_uiCardID), ours hi in v1 and 3 in v0 (li before lwc1, move s0 right after it), and the g_CardBreakTime %hi issues earlier. The rest matches. Cause: local-alloc; sched1 issues the PRE copy right after the lui, so hi dies before li 3 is born and gets the other register; for the original's pair li 3 must be born inside hi's life and hi allocated first, which plain statement order can't give (hi's chain has the higher priority). The source order is the $LM order (gravity 7818, JumpState 7819, break time 7823, combo 7824). tried: casts on all four (32 combinations, plain/cast BCL), operand order, one-line forms, two-step gravity, register pins and barriers in the initAttackField form (15 layouts, best 10, none 0), tools/permuter.py 15 min (12, no gain). */
 #if 0
 void CPlayer::initAttack(INT inNo) {
     setPlayerState(PL::ATTACK);
@@ -4556,8 +4534,8 @@ void CPlayer::initAttack(INT inNo) {
     m_bNextTrg = FALSE;
     m_iNextAttack = 0;
     *(FLOAT*)&m_fMoveSpdXZ = isAir() ? m_fJumpSpdXZ : m_fWalkSpeed;
-    m_JumpState = 3;
     m_fJumpGravity = PL::g_fGravity * 0.16f;
+    m_JumpState = 3;
     m_tqCardBreakTime = PL::g_CardBreakTime[(*(BC_PARAM**)&CardBattle::g_pBattleCardList)[m_uiCardID].BREAK];
     m_iComboBoost = isConditionFlag(0x40000000) ? m_iComboBoost + 20 : 0;
     setAttack();
