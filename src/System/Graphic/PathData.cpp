@@ -724,7 +724,13 @@ static inline void _setFlag(CCoord& c) { c.m_Flag = 1; }
    `addiu s3,sp,608` (&Line.P), ours before it (scheduler tie); everything else matches. tried: t init/step forms (for
    header, t = t + 0.125f, block scope, init before SubVectorXYZ), ib/k forms of the pPath loop; permuter (method
    wrapper) 15 min, 15.8k candidates: no gain. Levers that got it here: _setTrans/_setFlag CCoord& inlines, ib = i - 1
-   before the i == 0 test, ib >= m_iVecMax before the in-range arm, block-local k = i - 1 + j (j counts down). */
+   before the i == 0 test, ib >= m_iVecMax before the in-range arm, block-local k = i - 1 + j (j counts down).
+   2026-11-07: sched dump (-dS -dR -fsched-verbose-9): the preheader holds the loop.c movables 1964 (&Line.P, depends
+   on the call through $at) and 1969 (step, a cse2 copy of t's 0.125f); both ready at t=6 in sched1, which issues 1969
+   first, sched2 keeps that stream order. tried: empty asm and "i"(0) cse-flush asm after every statement (2-186), opaque
+   asm on t, register pins (t f20, step f21, pP s3), pP local with operand barrier (2 in the loop, 122-180 before it),
+   step/one locals, while/do-while/j <= 7, Line.P.w first, i..iLoopNum scoped in the if block (as the ref); permuter
+   (#define wrapper so it finds the method) 15 min, 13.7k: no gain. */
 #if 0
 void CPathVector::dispDebugLine(INT iFlg) {
     INT i;
