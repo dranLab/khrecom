@@ -2,11 +2,11 @@
 #include "System/Ctd/CtdMan.h"
 #include "System/SJoint.h"
 #include "System/Debug.h"
+#include "System/HeapMan.h"
 extern "C" int sprintf(char*, const char*, ...);
 
-inline void* operator new(size_t, void* p) throw() { return p; }
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
+
 
 class CCtd : public CSJointT<CCtd> {
 public:
@@ -45,7 +45,7 @@ CCtdMan::~CCtdMan() {
 void CCtdMan::setup() {
     if (m_pCtdList == NULL) {
 #line 37
-        m_pCtdList = NEW(37, CCtdList);
+        m_pCtdList = new (__FILE__ "(37)") CCtdList;
     }
 }
 
@@ -55,7 +55,7 @@ void CCtdMan::initializeData(void* pDtHead) {
     CtdHeader* pHead = (CtdHeader*)pDtHead;
     if (*(UINT*)pHead->sig == 0x44544340) {
 #line 57
-        CCtd* pCtd = NEW(57, CCtd);
+        CCtd* pCtd = new (__FILE__ "(57)") CCtd;
         CtdBlock* pCtdBlock = (CtdBlock*)(pHead + 1);
         pCtd->m_nBlock = pHead->nBlock;
         pCtd->m_nText = pHead->nText;

@@ -15,7 +15,7 @@ inline void _emptyStringPlaceholder() {
 }
 
 #include "Game/Card.h"
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 #include "Game/Atel/ChatMan.h"
 #include "System/Graphic/Effect/effect.h"
 
@@ -35,8 +35,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/GameWork.h"
 #include "Game/Game.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
 
 /* Game/CardKind's card table: a static in the original's header, emitted (with its strings) at the end of
  * .rodata. */
@@ -478,7 +477,7 @@ void CWorldSelect::main() {
         }
 #line 239
         ASSERT(g_pPlayer);
-        m_pWorldCard = NEW(240, CEntity)(this, (ObjType::eObjType)1);
+        m_pWorldCard = new (__FILE__ "(240)") CEntity(this, (ObjType::eObjType)1);
         m_pWorldCard->setEntityFlag(0x400000, 0);
         m_pWorldCard->initalize(10, 0x20);
         m_pWorldCard->Crd(0).setParent(&g_pPlayer->Crd(g_pPlayer->getBoneIndex("root", 0)));
@@ -516,14 +515,14 @@ void CWorldSelect::main() {
         m_hLay = C2DMan::create(m_pLadName, 0);
         vPos.init();
 #line 290
-        m_pExplainCtrl = NEW(290, C2DSeqCtrl);
+        m_pExplainCtrl = new (__FILE__ "(290)") C2DSeqCtrl;
         m_pExplainCtrl->setLayer(12);
         m_pExplainCtrl->addSeq(pSeqName, 0x19);
         m_pExplainCtrl->setPos(vPos);
         m_pExplainCtrl->enableColorCtrl(TRUE);
         rgba.col = 0x807C7C7C;
 #line 296
-        m_pExplainFnt = NEW(296, C2DFnt)(0, 0, &rgba, 15, ": Select card         : Confirm", 0x240);
+        m_pExplainFnt = new (__FILE__ "(296)") C2DFnt(0, 0, &rgba, 15, ": Select card         : Confirm", 0x240);
         _setFntLayer(m_pExplainFnt, 12, 0);
         m_pExplainCtrl->addFnt(pSeqName, m_pExplainFnt);
         CSound::playSE(0x4E, -1, 0x40);
@@ -589,7 +588,7 @@ void CWorldSelect::main() {
         break;
     case 9:
 #line 373
-        m_pPathCamera = NEW(373, CPathCamera)(this);
+        m_pPathCamera = new (__FILE__ "(373)") CPathCamera(this);
         m_pPathCamera->setLocal(TRUE);
         m_pPathCamera->init("world_cr_01", TRUE, FALSE, 0x80);
         m_pPathCamera->run();
@@ -704,10 +703,10 @@ INT CWorldSelect::menuMain() {
             m_posLocal[i].y = cosf(vec2.y) * 150.0f;
             vec2.y += m_nRotOne * 0.017453292f;
 #line 509
-            C2DSeqCtrl* pCardCtrl = m_pCardCtrl[i] = NEW(509, C2DSeqCtrl);
+            C2DSeqCtrl* pCardCtrl = m_pCardCtrl[i] = new (__FILE__ "(509)") C2DSeqCtrl;
             pCardCtrl->addSeq(pSeqName, 0xD);
 #line 512
-            C2DCard* pCard = m_pCard[i] = NEW(512, C2DCard);
+            C2DCard* pCard = m_pCard[i] = new (__FILE__ "(512)") C2DCard;
             _setCard(card, cardKindTbl[m_nWorld[i]], 0);
             pCard->create(card);
             pCard->setParent(pCardCtrl);
@@ -728,7 +727,7 @@ INT CWorldSelect::menuMain() {
         m_pCardCtrl[m_nSelect]->replaceSeq(0, pSeqName, 0x11);
         m_pCardCtrl[m_nSelect]->addSeq(pSeqName, 0x12);
 #line 534
-        m_pNameWndCtrl = NEW(534, C2DSeqCtrl);
+        m_pNameWndCtrl = new (__FILE__ "(534)") C2DSeqCtrl;
         m_pNameWndCtrl->setLayer(13);
         m_nSeqNameWnd = 10;
         m_pNameWndCtrl->addSeq(pSeqName, 10);
@@ -736,12 +735,12 @@ INT CWorldSelect::menuMain() {
         m_pNameWndCtrl->setPos(vec);
         rgba.col = 0x807C7C7C;
 #line 541
-        m_pNameWndFnt = NEW(541, C2DFnt)(0, 0, &rgba, 0x11, cardDataTbl[cardKindTbl[m_nWorld[m_nSelect]]].pName, 0x242);
+        m_pNameWndFnt = new (__FILE__ "(541)") C2DFnt(0, 0, &rgba, 0x11, cardDataTbl[cardKindTbl[m_nWorld[m_nSelect]]].pName, 0x242);
         _setFntLayer(m_pNameWndFnt, 12, 0);
         m_pNameWndCtrl->addFnt(pSeqName, m_pNameWndFnt);
         m_pNameWndCtrl->enableColorCtrl(TRUE);
 #line 548
-        m_pIconCtrl = NEW(548, C2DSeqCtrl);
+        m_pIconCtrl = new (__FILE__ "(548)") C2DSeqCtrl;
         m_pIconCtrl->setLayer(12);
         m_pIconCtrl->setPos(vec);
         m_pIconCtrl->addSeq(pIconSeqNameTmp, 0);

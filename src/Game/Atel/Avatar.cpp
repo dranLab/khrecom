@@ -104,6 +104,7 @@ void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT t);
 void ApplyMatrix(FVECTOR& v0, const FMATRIX& m0, const FVECTOR& v1);
 #include "System/RsrcDB.h"
+#include "System/HeapMan.h"
 
 
 
@@ -124,8 +125,7 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "r"(&m)
                  : "memory");
 }
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 CAvatar::CAvatar(CTask* pParent)
     : CEntity(pParent, (ObjType::eObjType)4), m_nState(0) {
@@ -270,7 +270,7 @@ FLOAT CAvatar::getDirection() const { return 0.0f; }
 INT CAvatar::getTypeID() const { return 0x4000; }
 BOOL CAvatar::createMoveStruct() {
     if (m_pMoveStruct) return TRUE;
-    m_pMoveStruct = new (com_malloc_d(sizeof(AvatarMoveStruct), __FILE__ "(458)", RET_ADDR())) AvatarMoveStruct;
+    m_pMoveStruct = new (__FILE__ "(458)") AvatarMoveStruct;
     if (!m_pMoveStruct) {
         TRACE(" ... Fail to create MoveStructure\n");
         return FALSE;
@@ -279,7 +279,7 @@ BOOL CAvatar::createMoveStruct() {
 }
 BOOL CAvatar::createRotateStruct() {
     if (m_pRotateStruct) return TRUE;
-    m_pRotateStruct = new (com_malloc_d(sizeof(AvatarRotateStruct), __FILE__ "(477)", RET_ADDR())) AvatarRotateStruct;
+    m_pRotateStruct = new (__FILE__ "(477)") AvatarRotateStruct;
     if (!m_pRotateStruct) {
         TRACE(" ... Fail to create RotateStructure\n");
         return FALSE;
@@ -1097,11 +1097,11 @@ AvatarMoveStruct::~AvatarMoveStruct() {
 }
 BOOL AvatarMoveStruct::setupPath(const CHAR* pszPath, USHORT nMotion) {
     delete _pPathData;
-    _pPathData = new (com_malloc_d(sizeof(CPathData), __FILE__ "(2268)", RET_ADDR())) CPathData(pszPath);
+    _pPathData = new (__FILE__ "(2268)") CPathData(pszPath);
     _nMoveMotion = 0;
     if (_pPathData) {
         if (!_pHermiteHelper) {
-            _pHermiteHelper = new (com_malloc_d(sizeof(CHermitePath), __FILE__ "(2274)", RET_ADDR())) CHermitePath;
+            _pHermiteHelper = new (__FILE__ "(2274)") CHermitePath;
             if (!_pHermiteHelper) goto end;
         }
         {

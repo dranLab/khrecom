@@ -3,7 +3,7 @@
 
 #define PATHDATACAMERA_H_PATH "System/Graphic/PathDataCamera.h" /* MATCH: this unit includes it by the relative path */
 #include <string.h>
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "Game/Atel/CameraMan.h"
@@ -46,11 +46,7 @@ namespace ATEL {
 
 template <class T> static inline T& _ref(T& v) { return v; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
 
 extern "C" float atan2f(float y, float x);
 extern "C" float powf(float x, float y);
@@ -64,6 +60,7 @@ void Normalize(FVECTOR& v0, const FVECTOR& v1);
 void ApplyMatrixXYZ(FVECTOR& v0, const FMATRIX& m, const FVECTOR& v1);
 
 #include "System/Graphic/PackMan.h"
+#include "System/HeapMan.h"
 
 
 

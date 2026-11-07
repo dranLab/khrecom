@@ -49,7 +49,7 @@
 #include "Game/Gimmick/GimmickWindowLid.h"
 #include "Game/Gimmick/SampleGimmick.h"
 
-inline void* operator new(size_t, void* p) { return p; }
+
 
 /* Gimmicks whose code is not in the main executable (map overlays): the original calls their constructors
  * through "jal 0". Only the constructor and the size matter here; the names are guesses from the debug info

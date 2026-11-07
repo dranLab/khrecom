@@ -14,8 +14,8 @@
 #include "System/Task.h"
 #include <string.h>
 
-/* MATCH: placement new for CRsrcData's inline allocation, declared only: the includers define it themselves */
-inline void* operator new(size_t, void* p) throw();
+
+
 
 extern "C" const char _ctype_[];
 #define RSRCDATA_TOLOWER(c) (((_ctype_ + 1)[c] & 1) ? (c) + 0x20 : (c))
@@ -92,7 +92,7 @@ public:
     void dumpTag() const;
 };
 
-#define RSRCDATA_RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 class CRsrcData {
     friend class CRsrcDB;
@@ -122,7 +122,7 @@ public:
 #line 155 RSRCDATA_H_PATH
     CRsrcData(const RsrcInfo& info, CBuf& data) {
         init(info);
-        m_pDataSrc = new (com_malloc_d(sizeof(CBuf), __FILE__ "(156)", RSRCDATA_RET_ADDR())) CBuf;
+        m_pDataSrc = new (__FILE__ "(156)") CBuf;
         data.copyTo(*m_pDataSrc);
     }
     CRsrcData(const RsrcInfo& info) : m_pDataSrc(NULL) { init(info); }

@@ -6,10 +6,10 @@
 #include "System/HeapMan.h"
 #include "System/SJoint.h"
 
-#ifndef KH_PLACEMENT_NEW_DEFINED // MATCH: placement new is not in the ref headers (the units define it themselves); defined once per unit
-#define KH_PLACEMENT_NEW_DEFINED
-inline void* operator new(size_t, void* p) throw() { return p; }
-#endif
+
+
+
+
 
 class CLinkedPtr : public CSJointT<CLinkedPtr> {
 private:

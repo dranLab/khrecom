@@ -75,12 +75,7 @@ inline void _roulettePrizeMessage() { /* MATCH: placeholder: an inline function'
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" float atan2f(float y, float x);
 
-inline void* operator new(size_t, void* p) throw() { return p; }
-static inline UINT RET_ADDR() {
-    UINT nRA;
-    __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA));
-    return nRA;
-}
+
 
 #include "System/Rcf.h"
 
@@ -390,7 +385,7 @@ void CPlayerManager::init() {
         sprintf(m_strBlock[i], " ");
         DebugWork::g_dw.player.m_szBlock[i] = m_strBlock[i];
     }
-    m_pWindow = new (com_malloc_d(0x1C0, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(701)", RET_ADDR()))
+    m_pWindow = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(701)")
         CDebugWindow(this, DWTPlayer::debugPlayerBlockInfo);
     m_pWindow->dispOff(0);
 }
@@ -508,7 +503,7 @@ void CPlayerManager::procPlayerDead() {
         CPackMan::setFrameEffect(2, 0, 0, 0);
         CPlaySpeedCtrl::setPlaySpeed(0.1f);
         pPlayer->getPlayerCamera()->setFlag(0x20, 0);
-        m_pPathCamera = new (com_malloc_d(0x110, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(892)", RET_ADDR()))
+        m_pPathCamera = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(892)")
             CPathCamera(pPlayer);
         if (!m_pPathCamera) AssertApp("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp", 893, "m_pPathCamera", 0);
         m_pPathCamera->setLocal(TRUE);
@@ -517,7 +512,7 @@ void CPlayerManager::procPlayerDead() {
         m_pPathCamera->ignorePlaySpeed(FALSE);
         m_pPathCamera->run();
         if (!m_pCollMapCamera) {
-            m_pCollMapCamera = new (com_malloc_d(0x30, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(901)", RET_ADDR()))
+            m_pCollMapCamera = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(901)")
                 CCollMapCamera();
         }
         if (m_pCollMapCamera) m_pCollMapCamera->init((COLL_KIND)0x8000000C, (COLL_TYPE)2, 0, getHandle());
@@ -1234,24 +1229,24 @@ CPlayer* createPlayer(UINT inID, CTask* inParent, INT inEx) {
         switch (uiPlayerID) {
         case 1:
         case 2:
-            pPlayer = new (com_malloc_d(0x7C0, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2297)", RET_ADDR()))
+            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2297)")
                 PL::CPlayerSora(parent);
             break;
         case 3:
         case 4:
-            pPlayer = new (com_malloc_d(0x780, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2301)", RET_ADDR()))
+            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2301)")
                 PL::CPlayerRiku(parent);
             break;
         case 5:
-            pPlayer = new (com_malloc_d(0x7C0, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2305)", RET_ADDR()))
+            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2305)")
                 PL::CPlayerDRiku(parent, 5, inEx);
             break;
         case 6:
-            pPlayer = new (com_malloc_d(0x7C0, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2308)", RET_ADDR()))
+            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2308)")
                 PL::CPlayerDRiku(parent, 6, inEx);
             break;
         default:
-            pPlayer = new (com_malloc_d(0x770, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2312)", RET_ADDR()))
+            pPlayer = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2312)")
                 CPlayer(parent, g_uiPlayerID, 0);
             break;
         }
@@ -1314,45 +1309,45 @@ CEntity* CPlayerManager::createFriend(UINT inID, CTask* inParent) {
     offFlag(m_uiFlag, 0x42);
     switch (inID) {
     case 1:
-        m_pFriend = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2418)", RET_ADDR()))
+        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2418)")
             Friend::CFriendDonald(parent);
         break;
     case 2:
-        m_pFriend = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2421)", RET_ADDR()))
+        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2421)")
             Friend::CFriendGoofy(parent, 0);
         break;
     case 3:
-        m_pFriend = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2424)", RET_ADDR()))
+        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2424)")
             Friend::CFriendAladdin(parent);
         break;
     case 4:
-        m_pFriend = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2427)", RET_ADDR()))
+        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2427)")
             Friend::CFriendAriel(parent);
         break;
     case 5:
-        m_pFriend = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2430)", RET_ADDR()))
+        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2430)")
             Friend::CFriendJack(parent);
         break;
     case 6:
-        m_pFriend = new (com_malloc_d(0x350, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2433)", RET_ADDR()))
+        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2433)")
             Friend::CFriendPan(parent);
         break;
     case 7:
-        m_pFriend = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2436)", RET_ADDR()))
+        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2436)")
             Friend::CFriendBeast(parent);
         break;
     case 8:
-        m_pFriend = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2439)", RET_ADDR()))
+        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2439)")
             Friend::CFriendKing(parent);
         break;
     case 9:
-        m_pFriend = new (com_malloc_d(0x350, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2442)", RET_ADDR()))
+        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2442)")
             Friend::CFriendPluto(parent);
         break;
     case 10:
-        m_pFriendEx = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2445)", RET_ADDR()))
+        m_pFriendEx = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2445)")
             Friend::CFriendGoofy(parent, 1);
-        m_pFriend = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2446)", RET_ADDR()))
+        m_pFriend = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2446)")
             Friend::CFriendDonald(parent);
         break;
     }
@@ -1470,31 +1465,31 @@ CEntity* CPlayerManager::createSummon(UINT inID, CTask* inParent) {
     offFlag(m_uiFlag, 0x20);
     switch (inID) {
     case 1:
-        m_pSummon = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2687)", RET_ADDR()))
+        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2687)")
             Summon::CSummonSinba(parent);
         break;
     case 2:
-        m_pSummon = new (com_malloc_d(0x350, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2690)", RET_ADDR()))
+        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2690)")
             Summon::CSummonGenie(parent);
         break;
     case 3:
-        m_pSummon = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2693)", RET_ADDR()))
+        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2693)")
             Summon::CSummonBambi(parent);
         break;
     case 4:
-        m_pSummon = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2696)", RET_ADDR()))
+        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2696)")
             Summon::CSummonDumbo(parent);
         break;
     case 5:
-        m_pSummon = new (com_malloc_d(0x360, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2699)", RET_ADDR()))
+        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2699)")
             Summon::CSummonTink(parent);
         break;
     case 6:
-        m_pSummon = new (com_malloc_d(0x340, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2702)", RET_ADDR()))
+        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2702)")
             Summon::CSummonMushu(parent);
         break;
     case 7:
-        m_pSummon = new (com_malloc_d(0x350, "c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2705)", RET_ADDR()))
+        m_pSummon = new ("c:/KHCOM/MainApp/Game/Player/PlayerManager.cpp(2705)")
             Summon::CSummonCloud(parent);
         break;
     }

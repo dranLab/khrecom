@@ -12,9 +12,8 @@
 #include "Game/Collision/Ride.h"
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 extern char D_004895C0[]; /* "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" */
 extern char D_00489638[]; /* "m_pInstance" */
 extern char D_00489670[]; /* "c:/KHCOM/MainApp/Game/Collision/Ride.cpp(23)" */
@@ -78,7 +77,7 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
 
 #line 20
 CRide::CRide() {
-    m_pRiderList = new (com_malloc_d(sizeof(CRiderList), D_00489670, RET_ADDR())) CRiderList;
+    m_pRiderList = new (D_00489670) CRiderList;
     m_fgOnLook = 0;
 }
 

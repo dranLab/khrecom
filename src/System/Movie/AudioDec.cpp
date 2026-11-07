@@ -6,9 +6,8 @@
 #include <string.h>
 #include "include_asm.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 typedef struct {
     unsigned char* p_at3buf;
@@ -353,7 +352,7 @@ void CAudioDecImpl::getIopEmptyArea(INT& pd0, INT& d0, INT& pd1, INT& d1, INT nP
 }
 
 void CAudioDec::create() {
-    s_pAudioDec = new (com_malloc_d(sizeof(CAudioDecImpl), __FILE__ "(631)", RET_ADDR())) CAudioDecImpl;
+    s_pAudioDec = new (__FILE__ "(631)") CAudioDecImpl;
     if (!s_pAudioDec) {
         AssertApp(__FILE__, 632, "s_pAudioDec", 0);
     }
@@ -412,7 +411,7 @@ void CAudioDec::reset() {
     if (s_pAudioDec) {
         s_pAudioDec->reset();
     } else {
-        s_pAudioDec = new (com_malloc_d(sizeof(CAudioDecImpl), __FILE__ "(701)", RET_ADDR())) CAudioDecImpl;
+        s_pAudioDec = new (__FILE__ "(701)") CAudioDecImpl;
     }
 }
 

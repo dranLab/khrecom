@@ -14,7 +14,6 @@ void MulVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT r);
 void Normalize(FVECTOR& v0, const FVECTOR& v1);
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 

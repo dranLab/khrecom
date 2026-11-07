@@ -17,10 +17,10 @@ inline void _enemyLargebodyEmptyString() {
 #include "Game/AttackMotion.h"
 #include "System/Graphic/Camera.h"
 #include "System/Graphic/WorldEnv.h"
+#include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 namespace Largebody {
 static CHAR* IdlingMotion = "e009_001";
@@ -79,7 +79,7 @@ void CEnemyLargebody::stateAttack2() {
             param._fCycle = 10.0f;
             param._nTime = 50;
             param._fPower = 0.25f;
-            new (com_malloc_d(sizeof(CCameraQuakeV), __FILE__ "(105)", RET_ADDR())) CCameraQuakeV(*pCamera, &param, 0.25f);
+            new (__FILE__ "(105)") CCameraQuakeV(*pCamera, &param, 0.25f);
             m_iStep = 1;
         }
         break;

@@ -2,9 +2,8 @@
 #include "Game/AtWater.h"
 #include "System/Math3D.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 extern "C" float cosf(float);
 extern "C" float sinf(float);
@@ -13,6 +12,7 @@ extern "C" float sinf(float);
 #line 16
 
 #include "System/Graphic/PackMan.h"
+#include "System/HeapMan.h"
 
 
 
@@ -34,7 +34,7 @@ CAtWater* CAtWater::m_pInstance = NULL;
 void CAtWater::create(CTask* p) {
     if (!m_pInstance) {
         m_pInstance =
-            new (com_malloc_d(sizeof(CAtWater), __FILE__ "(28)", RET_ADDR())) CAtWater(p);
+            new (__FILE__ "(28)") CAtWater(p);
         if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
     }
 }
@@ -42,7 +42,7 @@ void CAtWater::create(CTask* p) {
 #line 38
 CAtWater::CAtWater(CTask* p) : CTask(p, 0x4000) {
     m_pAtWater =
-        new (com_malloc_d(sizeof(CAtWaterPrim), __FILE__ "(40)", RET_ADDR())) CAtWaterPrim();
+        new (__FILE__ "(40)") CAtWaterPrim();
     if (!m_pAtWater) AssertApp(__FILE__, __LINE__, "m_pAtWater", 0);
 }
 

@@ -1,5 +1,5 @@
 
-inline void* operator new(unsigned int, void* p) throw() { return p; }
+
 #define RSRCDATA_H_PATH "c:/KHCOM/MainApp/System/RsrcData.h" /* MATCH: this unit names RsrcData.h so (header default "System/RsrcData.h") */
 #define CTDMAN_H_PATH "c:/KHCOM/MainApp/System/CTD/CtdMan.h" /* MATCH: this unit names CtdMan.h so (header default "System/CTD/CtdMan.h") */
 #define MODELDATA_H_TEXINFO /* MATCH: TexInfoStub (the original has its assert strings) */
@@ -39,13 +39,12 @@ int snDllUnload(void* pDll);
 void* snDllGetFreeMemory(void* pDll);
 }
 
-inline void operator delete[](void* p) { com_free(p); }
-inline void* operator new[](size_t size, const char* pszFile) throw() {
-    UINT nRA = RSRCDATA_RET_ADDR();
-    return com_malloc_d(size, (char*)pszFile, nRA);
-}
 
-#define RSRC_NEW(line, T) new (__FILE__ "(" #line ")") T
+
+
+
+
+
 #define RSRC_ALLOC(line, n) operator new(n, __FILE__ "(" #line ")")
 #define _RSRC_STR(e) #e
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, _RSRC_STR(e), 0)
@@ -72,11 +71,11 @@ CRsrcData* CRsrcDataFactory::createRsrcData(const RsrcInfo& info, CBuf& data) {
     case 58:
     case 62:
 #line 79
-        pRsrc = RSRC_NEW(79, CRsrcData)(info, data);
+        pRsrc = new (__FILE__ "(79)") CRsrcData(info, data);
         break;
     case 13:
 #line 82
-        pRsrc = RSRC_NEW(82, CRsrcData)(info, data);
+        pRsrc = new (__FILE__ "(82)") CRsrcData(info, data);
         break;
     case 25:
         pRsrc = createRsrcFont(info, data);
@@ -87,99 +86,99 @@ CRsrcData* CRsrcDataFactory::createRsrcData(const RsrcInfo& info, CBuf& data) {
         break;
     case 3:
 #line 89
-        pRsrc = RSRC_NEW(89, CRsrcAAF)(info, data);
+        pRsrc = new (__FILE__ "(89)") CRsrcAAF(info, data);
         break;
     case 4:
 #line 91
-        pRsrc = RSRC_NEW(91, CRsrcMCD)(info, data);
+        pRsrc = new (__FILE__ "(91)") CRsrcMCD(info, data);
         break;
     case 6:
 #line 93
-        pRsrc = RSRC_NEW(93, CRsrcAMF)(info, data);
+        pRsrc = new (__FILE__ "(93)") CRsrcAMF(info, data);
         break;
     case 8:
 #line 95
-        pRsrc = RSRC_NEW(95, CRsrcANM)(info, data);
+        pRsrc = new (__FILE__ "(95)") CRsrcANM(info, data);
         break;
     case 29:
 #line 97
-        pRsrc = RSRC_NEW(97, CRsrcANN)(info, data);
+        pRsrc = new (__FILE__ "(97)") CRsrcANN(info, data);
         break;
     case 9:
 #line 99
-        pRsrc = RSRC_NEW(99, CRsrcAZF)(info, data);
+        pRsrc = new (__FILE__ "(99)") CRsrcAZF(info, data);
         break;
     case 11:
     case 42:
 #line 102
-        pRsrc = RSRC_NEW(102, CRsrcMDL)(info, data);
+        pRsrc = new (__FILE__ "(102)") CRsrcMDL(info, data);
         break;
     case 28:
 #line 106
-        pRsrc = RSRC_NEW(106, CRsrcCAM)(info, data);
+        pRsrc = new (__FILE__ "(106)") CRsrcCAM(info, data);
         break;
     case 31:
 #line 108
-        pRsrc = RSRC_NEW(108, CRsrcDLL)(info, data);
+        pRsrc = new (__FILE__ "(108)") CRsrcDLL(info, data);
         break;
     case 39:
 #line 110
-        pRsrc = RSRC_NEW(110, CRsrcData)(info, data);
+        pRsrc = new (__FILE__ "(110)") CRsrcData(info, data);
         break;
     case 40:
 #line 112
-        pRsrc = RSRC_NEW(112, CRsrcMEP)(info, data);
+        pRsrc = new (__FILE__ "(112)") CRsrcMEP(info, data);
         break;
     case 45:
 #line 118
-        pRsrc = RSRC_NEW(118, CRsrcSND)(info, data);
+        pRsrc = new (__FILE__ "(118)") CRsrcSND(info, data);
         break;
     case 47:
 #line 119
-        pRsrc = RSRC_NEW(119, CRsrcRSD)(info, data);
+        pRsrc = new (__FILE__ "(119)") CRsrcRSD(info, data);
         break;
     case 48:
 #line 121
-        pRsrc = RSRC_NEW(121, CRsrcSES)(info, data);
+        pRsrc = new (__FILE__ "(121)") CRsrcSES(info, data);
         break;
     case 51:
     case 52:
 #line 124
-        pRsrc = RSRC_NEW(124, CRsrcMMP)(info, data);
+        pRsrc = new (__FILE__ "(124)") CRsrcMMP(info, data);
         break;
     case 54:
 #line 126
-        pRsrc = RSRC_NEW(126, CRsrcCTD)(info, data);
+        pRsrc = new (__FILE__ "(126)") CRsrcCTD(info, data);
         break;
     case 53:
     case 61:
 #line 129
-        pRsrc = RSRC_NEW(129, CRsrcVSV)(info, data);
+        pRsrc = new (__FILE__ "(129)") CRsrcVSV(info, data);
         break;
     case 56:
 #line 131
-        pRsrc = RSRC_NEW(131, CRsrcSPD)(info, data);
+        pRsrc = new (__FILE__ "(131)") CRsrcSPD(info, data);
         break;
     case 59:
 #line 132
-        pRsrc = RSRC_NEW(132, CRsrcSQD)(info, data);
+        pRsrc = new (__FILE__ "(132)") CRsrcSQD(info, data);
         break;
     case 60:
 #line 133
-        pRsrc = RSRC_NEW(133, CRsrcLAD)(info, data);
+        pRsrc = new (__FILE__ "(133)") CRsrcLAD(info, data);
         break;
     case 5:
 #line 135
-        pRsrc = RSRC_NEW(135, CRsrcDPX)(info, data);
+        pRsrc = new (__FILE__ "(135)") CRsrcDPX(info, data);
         break;
     case 24:
 #line 136
-        pRsrc = RSRC_NEW(136, CRsrcTXA)(info, data);
+        pRsrc = new (__FILE__ "(136)") CRsrcTXA(info, data);
         break;
     case 22:
     case 41:
 #line 140
-        pRsrc = RSRC_NEW(140, CRsrcALF)(info, data);
+        pRsrc = new (__FILE__ "(140)") CRsrcALF(info, data);
         break;
     }
     return pRsrc;
@@ -189,7 +188,7 @@ static CRsrcData* createRsrcTex(const RsrcInfo& info, CBuf& data) {
     RsrcInfo infoTmp(info);
     if (infoTmp._cOption & 0x30) infoTmp._nRsrcType |= 0x800;
 #line 154
-    CRsrcTex* pTex = RSRC_NEW(154, CRsrcTex)(infoTmp, data);
+    CRsrcTex* pTex = new (__FILE__ "(154)") CRsrcTex(infoTmp, data);
     CRsrcData* pRsrc = pTex;
     if (!pTex->getTexInfo()) {
         delete pTex;
@@ -199,7 +198,7 @@ static CRsrcData* createRsrcTex(const RsrcInfo& info, CBuf& data) {
         infoTmp._cOption = 2;
         infoTmp._cParam = 3;
 #line 167
-        pRsrc = RSRC_NEW(167, CRsrcTex)(infoTmp, pTmp);
+        pRsrc = new (__FILE__ "(167)") CRsrcTex(infoTmp, pTmp);
     }
     return pRsrc;
 }
@@ -265,7 +264,7 @@ BOOL CRsrcGroupTagList::hasTagOpt(INT nFlag) const {
 
 void CRsrcGroupTagList::addTag(INT nGrpID) {
 #line 280
-    CRsrcGroupTag* p = RSRC_NEW(280, CRsrcGroupTag)(nGrpID);
+    CRsrcGroupTag* p = new (__FILE__ "(280)") CRsrcGroupTag(nGrpID);
     if (p) pushBack(*p);
 }
 
@@ -415,7 +414,7 @@ void CRsrcTex::_setupTexData(CBuf& data, INT nType, INT nOpt) {
     BOOL bImd = (getRsrcType() & 0x7f) == 0x10;
     INT nAllocType = getAllocType();
 #line 535
-    m_pTexInfo = RSRC_NEW(535, TexInfo);
+    m_pTexInfo = new (__FILE__ "(535)") TexInfo;
 #line 536
     ASSERT(m_pTexInfo);
     BOOL bResult;
@@ -438,7 +437,7 @@ void CRsrcTex::_setupTexData(CBuf& data, INT nType, INT nOpt) {
             break;
         case 3: {
     #line 576
-            pNewData = RSRC_NEW(576, CBuf);
+            pNewData = new (__FILE__ "(576)") CBuf;
             data.copyTo(*pNewData);
             m_pTexInfo->_nInfoType = 0;
             m_pTexInfo->_nType = nType;
@@ -470,15 +469,15 @@ void CRsrcTex::_setupTexData(CBuf& data, INT nType, INT nOpt) {
                 ULONGLONG* pSrc = m_pTexInfo->_ClutInfo._pImage;
                 ULONGLONG* p = pSrc;
     #line 616
-                m_pTexInfo->_pExtendInfo0 = RSRC_NEW(616, TexInfo);
+                m_pTexInfo->_pExtendInfo0 = new (__FILE__ "(616)") TexInfo;
                 _setupExTexData(m_pTexInfo->_pExtendInfo0, pSrc, p, extend_size, 1);
                 p = m_pTexInfo->_pExtendInfo0->_ClutInfo._pImage;
     #line 620
-                m_pTexInfo->_pExtendInfo1 = RSRC_NEW(620, TexInfo);
+                m_pTexInfo->_pExtendInfo1 = new (__FILE__ "(620)") TexInfo;
                 _setupExTexData(m_pTexInfo->_pExtendInfo1, pSrc, p, extend_size, 2);
                 p = m_pTexInfo->_pExtendInfo1->_ClutInfo._pImage;
     #line 624
-                m_pTexInfo->_pExtendInfo2 = RSRC_NEW(624, TexInfo);
+                m_pTexInfo->_pExtendInfo2 = new (__FILE__ "(624)") TexInfo;
                 _setupExTexData(m_pTexInfo->_pExtendInfo2, pSrc, p, extend_size, 3);
             }
             break;
@@ -556,6 +555,7 @@ BOOL CRsrcAMF::setupAMF(MODELDATA* pData, BOOL bExitOnTexErr) {
 }
 
 #include "Game/Map.h"
+#include "System/HeapMan.h"
 
 
 
@@ -725,7 +725,7 @@ void CRsrcANN::_setupANN() {
     BYTE* pBinSrc = pSrc + 4;
     BYTE* pMotSrc = pBinSrc + m_nCount * sizeof(MOTBIN);
 #line 1231
-    CBuf* pTmp = RSRC_NEW(1231, CBuf);
+    CBuf* pTmp = new (__FILE__ "(1231)") CBuf;
 #line 1232
     ASSERT(pTmp);
     pTmp->allocBuf(m_nCount * sizeof(CMotData*));
@@ -916,7 +916,7 @@ void CRsrcALF::_setupALF() {
     nNewBytes += pAlf->spot_suu * 0x20;
     nNewBytes += 0x10;
 #line 1710
-    CBuf* pTmp = RSRC_NEW(1710, CBuf);
+    CBuf* pTmp = new (__FILE__ "(1710)") CBuf;
 #line 1711
     ASSERT(pTmp);
     pTmp->allocBuf(nNewBytes);

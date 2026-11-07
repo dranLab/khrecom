@@ -21,8 +21,9 @@ inline void _emptyStringPlaceholder1() { /* MATCH: placeholder: an inline functi
 #include "Game/Atel/AtelTutorial.h"
 #include "Game/Player/Player.h"
 #include "Game/GameWork.h"
+#include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) { return p; }
+
 
 CAtelTutorial::CAtelTutorial(CTask* pParent) : CTask(pParent, 0x8000) {
     TRACE("CAtelTutorial Create\n");

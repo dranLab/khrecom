@@ -9,18 +9,18 @@
 #include "System/VramMan.h"
 #include "System/Math3D.h"
 #include "include_asm.h"
+#include "System/HeapMan.h"
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 CDeFocus* CDeFocus::m_pInstance = NULL;
 
 void CDeFocus::create(CTask* p) {
     if (!m_pInstance) {
 #line 28
-        m_pInstance = new (com_malloc_d(sizeof(CDeFocus), __FILE__ "(28)", RET_ADDR())) CDeFocus(p);
+        m_pInstance = new (__FILE__ "(28)") CDeFocus(p);
         ASSERT(m_pInstance);
     }
 }

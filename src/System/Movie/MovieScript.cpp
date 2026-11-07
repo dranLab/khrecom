@@ -12,7 +12,7 @@ int sprintf(char* buf, const char* fmt, ...);
 int strncasecmp(const char* s1, const char* s2, size_t n);
 }
 
-inline void* operator new(size_t, void* p) { return p; }
+
 
 
 

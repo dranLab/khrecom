@@ -33,7 +33,6 @@ inline void _emptyStringPlaceholder() {
 #include <string.h>
 #include "include_asm.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int atoi(const char* s);

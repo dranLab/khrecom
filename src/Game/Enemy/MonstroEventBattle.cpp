@@ -1,6 +1,6 @@
 #define BATTLEENEMY_H_PATH "c:/KHCOM/MainApp/Game/Enemy/BattleEnemy.h" /* MATCH: this unit names BattleEnemy.h so (header default "Game/Enemy/BattleEnemy.h") */
 #include <string.h>
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 #include "System/Task.h"
 #include "System/TaskMan.h"
 #include "System/Graphic/Gprim.h"
@@ -37,7 +37,6 @@ inline void _monstroEventBattleEmptyString() {
 #include "Form/Menu/MonstroGauge.h"
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #include "Game/Player/Player.h"
 
@@ -62,6 +61,7 @@ inline void _monstroEventBattleEmptyString() {
 
 
 #include "System/RsrcDB.h"
+#include "System/HeapMan.h"
 
 
 
@@ -147,7 +147,7 @@ BOOL CMonstroEventBattle::setup() {
     m_iTotalDead = (INT)param->getValue(MonstroEventBattle::_totalDead());
     m_tqGaugeDownTimer = m_tqGaugeDown = (TIMEQ)(param->getValue(MonstroEventBattle::_gaugeDown()) * 60.0f * 50.0f);
 #line 99
-    CMostroGauge* gauge = new (com_malloc_d(sizeof(CMostroGauge), __FILE__ "(99)", RET_ADDR())) CMostroGauge(this);
+    CMostroGauge* gauge = new (__FILE__ "(99)") CMostroGauge(this);
     if (!gauge) return FALSE;
     m_hGauge = gauge->getHandle();
     CGameWork::setFlag(1, 5, TRUE);

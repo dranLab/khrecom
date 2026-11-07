@@ -36,11 +36,8 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "Game/Gimmick/GimmickManager.h"
 #include "Game/SceneInfo.h"
 #include "Game/Collision/CollBody.h"
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+#include "System/HeapMan.h"
 
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
 
 CBaseGimmick::CBaseGimmick(CTask* inParent)
     : CEntity(inParent, ObjType::OBJ_TYPE_GIMMICK), m_uiGimmickFlag(0), m_iUniqueID(0), m_hEffectHandle(0) {

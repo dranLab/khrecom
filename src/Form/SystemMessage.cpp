@@ -19,11 +19,12 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 
 #include "System/RsrcDB.h"
+#include "System/HeapMan.h"
 
 
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 namespace {
 C2DSeqAgent* s_pSysWindowAgent = NULL;
@@ -33,7 +34,6 @@ void (*s_pExtEndHandler)() = NULL;
 char s_szSysMessage[256];
 }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 static void _openWnd();
 static void _callbackSysMessageLoop(C2DSeqAgent& agent);
@@ -144,21 +144,21 @@ static void _createWindow() {
 
     /* through a reference: keeps the store before the virtual call (scheduling) */
     D2::C2DSeqCtrl*& rCtrl = s_pSysWindowCtrl;
-    rCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(213)", RET_ADDR())) D2::C2DSeqCtrl;
+    rCtrl = new (__FILE__ "(213)") D2::C2DSeqCtrl;
     rCtrl->addSeq(s_pszSysWndSeq, tbl._tbl[0]);
     s_pSysWindowCtrl->changeLayer(25);
     rgba.col = 0x80707070;
-    pFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(220)", RET_ADDR())) D2::C2DFnt(0, 0, &rgba, 15, s_szSysMessage, 0x46);
+    pFnt = new (__FILE__ "(220)") D2::C2DFnt(0, 0, &rgba, 15, s_szSysMessage, 0x46);
     pFnt->m_Space.x = 0;
     pFnt->m_Space.y = 0x30;
     s_szSysMessage[0] = '\0';
     s_pSysWindowCtrl->addFntShift(s_pszSysWndSeq, pFnt, 0.0f, -8.0f);
     s_pSysWindowCtrl->addSeqShift(s_pszSysWndSeq, 0, -150.0f, -36.0f);
     rgba.col = 0x80000070;
-    pFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(229)", RET_ADDR())) D2::C2DFnt(0, 0, &rgba, 15, "INFORMATION", 0x40);
+    pFnt = new (__FILE__ "(229)") D2::C2DFnt(0, 0, &rgba, 15, "INFORMATION", 0x40);
     s_pSysWindowCtrl->addFntShift(s_pszSysWndSeq, pFnt, -120.0f, -40.0f);
     s_pSysWindowCtrl->enableColorCtrl(TRUE);
-    s_pSysWindowAgent = new (com_malloc_d(sizeof(C2DSeqAgent), __FILE__ "(233)", RET_ADDR())) C2DSeqAgent(CTaskMan::getSysTask(0));
+    s_pSysWindowAgent = new (__FILE__ "(233)") C2DSeqAgent(CTaskMan::getSysTask(0));
     s_pSysWindowAgent->setupSeq(*s_pSysWindowCtrl, s_pszSysWndSeq, 0);
     s_pSysWindowAgent->setupState(tbl._tbl[0], tbl._tbl[1], tbl._tbl[2], _callbackSysMessageLoop,
                                   _callbackSysMessageClosed);

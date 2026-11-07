@@ -7,7 +7,7 @@
 
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #include "Game/Atel/CameraMan.h"
 #include "Game/Atel/AtelFog.h"
@@ -16,7 +16,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Game/GameSub.h"
 #include "System/TaskMan.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #include "Game/Atel/Atel.h"
 
@@ -40,6 +39,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 #include "System/Rcf.h"
+#include "System/HeapMan.h"
 
 
 
@@ -69,7 +69,7 @@ void CGameSub::preSetupAtel() {
     if (!m_pAtel) {
         CBuf* abc = CRsrcDB::getRsrcABC(CSceneInfo::getNextAtelSrcID());
         if (abc) {
-            m_pAtel = new (com_malloc_d(sizeof(CAtel), __FILE__ "(79)", RET_ADDR())) CAtel(CTaskMan::getSysTask(1));
+            m_pAtel = new (__FILE__ "(79)") CAtel(CTaskMan::getSysTask(1));
             if (!(m_pAtel)) AssertApp(__FILE__, __LINE__, "m_pAtel", 0);
             m_pAtel->loadFromMem(abc->getBufPtr());
             m_pAtel->setupActor();

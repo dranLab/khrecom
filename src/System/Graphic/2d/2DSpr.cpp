@@ -8,13 +8,13 @@
 #include "System/Task.h"
 #include <string.h>
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 
 
 #include "System/RsrcDB.h"
+#include "System/HeapMan.h"
 
 
 
@@ -50,7 +50,7 @@ void C2DSpr::initializeList() {
     INT i;
     for (i = 0; i < 3; i++) {
         if (!m_p2DOSLCL[i]) {
-            m_p2DOSLCL[i] = new (com_malloc_d(sizeof(C2DOSLCList), __FILE__ "(55)", RET_ADDR()))
+            m_p2DOSLCL[i] = new (__FILE__ "(55)")
                 C2DOSLCList(C2DMan::get2DOSLCManager());
         }
     }
@@ -213,7 +213,7 @@ HANDLE C2DSpr::create(UINT inNo) {
     SPR_SPRITE* pSprSprite = &m_pSprSprite[inNo];
     INT nIndex = pSprSprite->pos;
     INT nSprite = pSprSprite->max;
-    C2DSeqObj* p2DSeqObj = new (com_malloc_d(sizeof(C2DSeqObj), __FILE__ "(324)", RET_ADDR())) C2DSeqObj;
+    C2DSeqObj* p2DSeqObj = new (__FILE__ "(324)") C2DSeqObj;
     return p2DSeqObj->create(m_hBase, nSprite, m_pTexInfo, &m_pSprGroup[nIndex], m_pSprParts);
 }
 
@@ -225,7 +225,7 @@ HANDLE C2DSpr::createSpr(UINT inUnitNo, UINT inNo) {
     SPR_SPRITE* pSprSprite = &m_pSprSprite[inNo];
     INT nIndex = pSprSprite->pos;
     INT nSprite = pSprSprite->max;
-    C2DSeqObj* p2DSeqObj = new (com_malloc_d(sizeof(C2DSeqObj), __FILE__ "(354)", RET_ADDR())) C2DSeqObj;
+    C2DSeqObj* p2DSeqObj = new (__FILE__ "(354)") C2DSeqObj;
     return p2DSeqObj->create(m_hBase, nSprite, m_pTexInfo, &m_pSprGroup[nIndex], m_pSprParts);
 }
 

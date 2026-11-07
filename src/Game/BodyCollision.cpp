@@ -13,12 +13,7 @@ void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void AddVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVectorXYZ(FVECTOR& v0, const FVECTOR& v1, FLOAT r);
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new[](size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
-inline void operator delete[](void* mem) { com_free(mem); }
 
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 

@@ -27,10 +27,9 @@ void SubVectorXYZ(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 
 
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
+
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
 using namespace D2;
@@ -316,7 +315,7 @@ HANDLE CDecknameEdit::startEdit(CTask* inpParent, INT inDeckNo) {
 
     if (isFinish()) {
         m_hHandle = 0;
-        pTask = NEW(601, CDecknameEdit)(inpParent, inDeckNo);
+        pTask = new (__FILE__ "(601)") CDecknameEdit(inpParent, inDeckNo);
         if (pTask) {
             m_hHandle = pTask->getHandle();
         }
@@ -365,17 +364,17 @@ void CDecknameEdit::_initialize() {
     m_State[1].set(this, &CDecknameEdit::beginStateMain, &CDecknameEdit::stateMain, &CDecknameEdit::endStateMain);
     m_State[2].set(this, &CDecknameEdit::beginStateLeave, &CDecknameEdit::stateLeave, &CDecknameEdit::endStateLeave);
     _getDeckName();
-    m_pDeckName = NEW(677, CDnEditNamePlate)(this, m_nDeckNo);
+    m_pDeckName = new (__FILE__ "(677)") CDnEditNamePlate(this, m_nDeckNo);
 #line 678
     ASSERT(m_pDeckName);
     m_pDeckName->setName(m_szNameBuf[m_nDeckNo]);
-    m_pWordPlate = NEW(681, CDnEditWordPlate)(this);
+    m_pWordPlate = new (__FILE__ "(681)") CDnEditWordPlate(this);
 #line 682
     ASSERT(m_pWordPlate);
-    m_pCursor1 = NEW(684, CDnEditCursor1)(this, m_pWordPlate->_getSeq());
+    m_pCursor1 = new (__FILE__ "(684)") CDnEditCursor1(this, m_pWordPlate->_getSeq());
 #line 685
     ASSERT(m_pCursor1);
-    m_pCursor2 = NEW(687, CDnEditCursor2)(this, m_pWordPlate->_getSeq());
+    m_pCursor2 = new (__FILE__ "(687)") CDnEditCursor2(this, m_pWordPlate->_getSeq());
 #line 688
     ASSERT(m_pCursor2);
     changeState(0);
@@ -725,7 +724,7 @@ CDnEditBase::~CDnEditBase() {
 void CDnEditBase::_init(INT inSw, C2DSeqCtrl* inpParentSeq) {
     FVECTOR fvPos;
 
-    m_pSeq = NEW(1208, C2DSeqCtrl)(inSw);
+    m_pSeq = new (__FILE__ "(1208)") C2DSeqCtrl(inSw);
 #line 1209
     ASSERT(m_pSeq);
     m_pSeq->setLayer(16);
@@ -793,17 +792,17 @@ void CDnEditNamePlate::_initialize() {
     getLayPos(fvPos, 5, NULL, -1);
     m_pSeq->addSeqShift(_pszSeqName, _DnEditNamePlateSubPlateAnimNo[1][nType], fvPos.x, fvPos.y);
     stRGBA.col = 0x80808080;
-    m_pDeckNoBase = NEW(1307, C2DFnt)(0, 0, &stRGBA, 14, NULL, 0x42);
+    m_pDeckNoBase = new (__FILE__ "(1307)") C2DFnt(0, 0, &stRGBA, 14, NULL, 0x42);
     m_pSeq->addFntShift(_pszSeqName, m_pDeckNoBase, 46.0f, 7.0f);
     stRGBA.col = 0x80007878;
-    m_pDeckEquip = NEW(1311, C2DFnt)(0, 0, &stRGBA, 13, NULL, 0x42);
+    m_pDeckEquip = new (__FILE__ "(1311)") C2DFnt(0, 0, &stRGBA, 13, NULL, 0x42);
     m_pSeq->addFntShift(_pszSeqName, m_pDeckEquip, 276.0f, 6.0f);
     chgDeckNo(m_nDeckNo);
     stRGBA.col = 0x80808080;
-    m_pName = NEW(1318, C2DFnt)(0, 0, &stRGBA, 15, NULL, 0x40);
+    m_pName = new (__FILE__ "(1318)") C2DFnt(0, 0, &stRGBA, 15, NULL, 0x40);
     getLayPos(fvPos, 6, NULL, -1);
     m_pSeq->addFntShift(_pszSeqName, m_pName, fvPos.x + -10.0f, fvPos.y + 0.0f);
-    m_pCursor = NEW(1323, CDnEditNameCursor)(this, m_pSeq);
+    m_pCursor = new (__FILE__ "(1323)") CDnEditNameCursor(this, m_pSeq);
     changeState(0);
 }
 
@@ -923,7 +922,7 @@ void CDnEditCharLabel::_initialize(const DN_EDIT_CHAR_DATA* pstData, INT inType)
     setBasePos(3, NULL, -1);
     stRGBA.col = 0x80808080;
     for (i = 0; i < 5; i++) {
-        m_pFnt[i] = NEW(1499, C2DFnt)(0, 0, &stRGBA, 18, pstData->pszChar[inType], 0x42);
+        m_pFnt[i] = new (__FILE__ "(1499)") C2DFnt(0, 0, &stRGBA, 18, pstData->pszChar[inType], 0x42);
 #line 1500
         ASSERT(m_pFnt[i]);
         getLayPos(fvPos, pstData->m_nLayIdx, NULL, -1);
@@ -981,13 +980,13 @@ void CDnEditWordPlate::_initialize() {
     setBasePos(3, NULL, -1);
     m_pSeq->addSeqShift(_pszSeqName, _DnEditPlateAnim[m_nPlateType][0], m_fvBasePos.x, m_fvBasePos.y);
     for (i = 0; i < 21; i++) {
-        m_pLabel[i] = NEW(1573, CDnEditCharLabel)(this, m_pSeq, &_stDnEditCharData[i * 5], m_nPlateType);
+        m_pLabel[i] = new (__FILE__ "(1573)") CDnEditCharLabel(this, m_pSeq, &_stDnEditCharData[i * 5], m_nPlateType);
 #line 1574
         ASSERT(m_pLabel[i]);
     }
     stRGBA.col = 0x80808080;
     getLayPos(fvPos, 117, NULL, -1);
-    pFnt = NEW(1580, C2DFnt)(0, 0, &stRGBA, 16, _pszEndName, 0x42);
+    pFnt = new (__FILE__ "(1580)") C2DFnt(0, 0, &stRGBA, 16, _pszEndName, 0x42);
     m_pSeq->addFntShift(_pszSeqName, pFnt, fvPos.x, fvPos.y + 4.0f);
     changeState(0);
 }

@@ -24,10 +24,10 @@ inline void _emptyStringPlaceholder() {
 #include "System/Math3D.h"
 #include "Game/Debug/DebugWork.h"
 #include "include_asm.h"
+#include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 extern "C" {
 float sinf(float x);
@@ -159,7 +159,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
     pos = inParam.vPos;
     m_uiFlag = inParam.uiFlag;
     if (inParam.iGroupID == 3) {
-        m_pMove = new (com_malloc_d(sizeof(CMovement), __FILE__ "(149)", RET_ADDR())) CMovement(this);
+        m_pMove = new (__FILE__ "(149)") CMovement(this);
         if (!m_pMove) {
             return FALSE;
         }
@@ -234,7 +234,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
         }
     }
     setTimer(inParam.tqHomingTime);
-    m_pAttack = new (com_malloc_d(sizeof(CCollAttack), __FILE__ "(279)", RET_ADDR())) CCollAttack;
+    m_pAttack = new (__FILE__ "(279)") CCollAttack;
     if (!m_pAttack) {
         return FALSE;
     }
@@ -298,7 +298,7 @@ BOOL CBullet::setup(const BULLET_PARAM& inParam) {
         G_LINE line;
         FVECTOR ofs;
         FMATRIX m;
-        m_pCollLines = new (com_malloc_d(sizeof(C3DLines), __FILE__ "(357)", RET_ADDR())) C3DLines;
+        m_pCollLines = new (__FILE__ "(357)") C3DLines;
         if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
         m_pCollLines->m_pCrd = &Crd(0);
         {
@@ -991,7 +991,7 @@ INT CHomingBullet::initExplode() {
     if (_collDispRef()) {
         FLOAT deltaRingAngle;
         G_LINE line;
-        m_pCollLines = new (com_malloc_d(sizeof(C3DLines), __FILE__ "(1527)", RET_ADDR())) C3DLines;
+        m_pCollLines = new (__FILE__ "(1527)") C3DLines;
         if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
         m_pCollLines->m_pCrd = &Crd(0);
         {
@@ -1043,7 +1043,7 @@ void CHomingBullet::exeSpread() {
     if (_collDispRef()) {
         FLOAT deltaRingAngle;
         G_LINE line;
-        m_pCollLines = new (com_malloc_d(sizeof(C3DLines), __FILE__ "(1593)", RET_ADDR())) C3DLines;
+        m_pCollLines = new (__FILE__ "(1593)") C3DLines;
         if (!(m_pCollLines)) AssertApp(__FILE__, __LINE__, "m_pCollLines", 0);
         m_pCollLines->m_pCrd = &Crd(0);
         {

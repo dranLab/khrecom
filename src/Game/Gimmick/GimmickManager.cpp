@@ -35,9 +35,8 @@ inline void _emptyStringPlaceholder() {
 #include "System/Vector.h"
 #include "System/Com.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 
 
@@ -65,6 +64,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 #include "System/RsrcDB.h"
+#include "System/HeapMan.h"
 
 
 
@@ -1921,7 +1921,7 @@ static DEBUG_WINDOW_LINE debugGimProbLine[25] = {
 CGimmickProbDebug::CGimmickProbDebug(CTask* pParent) : CTask(pParent, 0x8000) {
     m_pWindow = NULL;
     DEBUG_WINDOW_TBL debugGimProbInfo = {"\x83M\x83~\x83""b\x83N\x82\xbf\x82\xe3\x82\xa4\x82\xb9\x82\xf1", 0x68, -(SCREEN_HEIGHT >> 1) + 0x28, 13, 24, 12, 0, 6, debugGimProbLine, NULL, NULL};
-    m_pWindow = new (com_malloc_d(sizeof(CDebugWindow), __FILE__ "(2870)", RET_ADDR())) CDebugWindow(this, debugGimProbInfo);
+    m_pWindow = new (__FILE__ "(2870)") CDebugWindow(this, debugGimProbInfo);
     m_pWindow->dispOn(0);
     szdebugGimPossibleCardName = DebugWork::g_dw.gimDropProb.PossibleCardName;
     szdebugGimCardName = DebugWork::g_dw.gimDropProb.CardName;

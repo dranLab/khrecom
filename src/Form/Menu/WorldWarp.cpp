@@ -260,10 +260,9 @@ static const CARD_DATA cardDataTbl[224] = {
     { { 0x00 }, 0, 0, 0, "" }, // 223
 };
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
+
 
 
 
@@ -536,14 +535,14 @@ INT CWorldWarp::menuMain() {
         }
         for (INT i = 0; i < 12 && m_idxWorld[i + 1] >= 0 && (!m_bWarpOrCard || i < m_nMaxFloorWorld); i++) {
 #line 324
-            pSeqCtrlTmp = m_pRouteCtrl[i] = NEW(324, C2DSeqCtrl);
+            pSeqCtrlTmp = m_pRouteCtrl[i] = new (__FILE__ "(324)") C2DSeqCtrl;
             pSeqCtrlTmp->addSeq(m_pSeqName, (i & 3) != 3 ? 0x44 : (i != 7 ? 0x47 : 0x4A));
             C2DMan::getLayPosition(m_pLadName, 9, i + 3, vec, 0);
             pSeqCtrlTmp->setPos(vec);
         }
         for (INT i = 0; i < 13 && m_idxWorld[i] >= 0; i++) {
 #line 334
-            pSeqCtrlTmp = m_pCardCtrl[i] = NEW(334, C2DSeqCtrl);
+            pSeqCtrlTmp = m_pCardCtrl[i] = new (__FILE__ "(334)") C2DSeqCtrl;
             pSeqCtrlTmp->enableColorCtrl(TRUE);
             pSeqCtrlTmp->setLayer(13);
             nSeq = (m_bWarpOrCard && m_nMaxFloorWorld < i) ? 0x53 : (i != m_idxSrcWorld ? 0x15 : 0x19);
@@ -559,7 +558,7 @@ INT CWorldWarp::menuMain() {
         rgba.col = 0x807C7C7C;
         if (!m_bWarpOrCard) {
 #line 354
-            m_pCardSrcCtrl = NEW(354, C2DSeqCtrl);
+            m_pCardSrcCtrl = new (__FILE__ "(354)") C2DSeqCtrl;
             m_pCardSrcCtrl->enableColorCtrl(TRUE);
             m_pCardSrcCtrl->addSeq(m_pSeqName, 0x1F);
             nSeq = !m_bPlayerKind ? m_idxSrcWorld + 0x2E : 0x2D - m_idxSrcWorld;
@@ -574,14 +573,14 @@ INT CWorldWarp::menuMain() {
                 pCardName = pNullName;
             }
 #line 368
-            m_pCardSrcFnt[0] = NEW(368, C2DFnt)(0, 0, &rgba, 15, pCardName, 0x240);
+            m_pCardSrcFnt[0] = new (__FILE__ "(368)") C2DFnt(0, 0, &rgba, 15, pCardName, 0x240);
             m_pCardSrcCtrl->addFntShift(m_pSeqName, m_pCardSrcFnt[0], -14.0f, 15.0f);
 #line 373
-            m_pCardSrcFnt[1] = NEW(373, C2DFnt)(0, 0, &rgba, 13, CCtdMan::getText(0x900000), 0x240);
+            m_pCardSrcFnt[1] = new (__FILE__ "(373)") C2DFnt(0, 0, &rgba, 13, CCtdMan::getText(0x900000), 0x240);
             m_pCardSrcCtrl->addFntShift(m_pSeqName, m_pCardSrcFnt[1], -138.0f, 0.0f);
         }
 #line 382
-        m_pCardDistCtrl = NEW(382, C2DSeqCtrl);
+        m_pCardDistCtrl = new (__FILE__ "(382)") C2DSeqCtrl;
         m_pCardDistCtrl->setLayer(16);
         m_pCardDistCtrl->enableColorCtrl(TRUE);
         m_pCardDistCtrl->addSeq(m_pSeqName, !m_bWarpOrCard ? 0x1C : 0x56);
@@ -599,15 +598,15 @@ INT CWorldWarp::menuMain() {
             pCardName = pNullName;
         }
 #line 399
-        m_pCardDistFnt[0] = NEW(399, C2DFnt)(0, 0, &rgba, 15, pCardName, 0x240);
+        m_pCardDistFnt[0] = new (__FILE__ "(399)") C2DFnt(0, 0, &rgba, 15, pCardName, 0x240);
         m_pCardDistCtrl->addFntShift(m_pSeqName, m_pCardDistFnt[0], -14.0f, 15.0f);
         if (!m_bWarpOrCard) {
 #line 405
-            m_pCardDistFnt[1] = NEW(405, C2DFnt)(0, 0, &rgba, 13, CCtdMan::getText(0x900001), 0x240);
+            m_pCardDistFnt[1] = new (__FILE__ "(405)") C2DFnt(0, 0, &rgba, 13, CCtdMan::getText(0x900001), 0x240);
             m_pCardDistCtrl->addFntShift(m_pSeqName, m_pCardDistFnt[1], -138.0f, 0.0f);
         }
 #line 414
-        m_pHelpButton = NEW(414, CButton);
+        m_pHelpButton = new (__FILE__ "(414)") CButton;
         C2DMan::getLayPosition(m_pLadName, 10, 0x1C, vec, 0);
         vec.x -= 256.0f;
         vec.y -= 192.0f;
@@ -651,15 +650,15 @@ INT CWorldWarp::menuMain() {
                 if (m_pWinConfirm == NULL) {
                     vec.set(0.0f, 64.0f, 0.0f);
 #line 475
-                    m_pWinConfirm = NEW(475, CButton);
+                    m_pWinConfirm = new (__FILE__ "(475)") CButton;
                     m_pWinConfirm->init(m_pSeqName, 15, winConfirmSeqTbl, vec, NULL, CCtdMan::getText(0x900004), 0x10, 0.0f, -20.0f, 0x242, NULL, -1);
                     m_pWinConfirm->get2DFnt()->setSpace(0, 0x40);
 #line 481
-                    m_pButtonYenNo[0] = NEW(481, CButton);
+                    m_pButtonYenNo[0] = new (__FILE__ "(481)") CButton;
                     C2DMan::getLayPosition(m_pLadName, 0, 1, vec, 0);
                     m_pButtonYenNo[0]->init(m_pSeqName, 15, buttonYesNoSeqTbl, vec, PIN_V1(m_pWinConfirm)->get2DSeqCtrl(), CCtdMan::getText(0x900005), 0x10, 0.0f, 9.0f, 0x242, NULL, -1);
 #line 487
-                    m_pButtonYenNo[1] = NEW(487, CButton);
+                    m_pButtonYenNo[1] = new (__FILE__ "(487)") CButton;
                     C2DMan::getLayPosition(m_pLadName, 0, 2, vec, 0);
                     m_pButtonYenNo[1]->init(m_pSeqName, 15, buttonYesNoSeqTbl, vec, PIN_V1(m_pWinConfirm)->get2DSeqCtrl(), CCtdMan::getText(0x900006), 0x10, 0.0f, 9.0f, 0x242, NULL, -1);
                 } else {
@@ -674,7 +673,7 @@ INT CWorldWarp::menuMain() {
                 if (m_pWinConfirm == NULL) {
                     C2DMan::getLayPosition(m_pLadName, 10, 0x1D, vec, 0);
 #line 507
-                    m_pWinConfirm = NEW(507, CButton);
+                    m_pWinConfirm = new (__FILE__ "(507)") CButton;
                     vec.x -= 256.0f;
                     vec.y -= 192.0f;
                     m_pWinConfirm->init(m_pSeqName, 15, winInfoSeqTbl, vec, NULL, "", 0xE, -47.0f, -2.0f, 0x40, NULL, -1);
@@ -685,7 +684,7 @@ INT CWorldWarp::menuMain() {
                 delete m_pWorldCard;
                 m_pWorldCard = NULL;
 #line 523
-                m_pWorldCard = NEW(523, C2DCard);
+                m_pWorldCard = new (__FILE__ "(523)") C2DCard;
                 m_pWorldCard->setLayer(16);
                 m_pWorldCard->enableColorCtrl(TRUE);
                 m_pWorldCard->setParent(m_pWinConfirm->get2DSeqCtrl());
@@ -872,7 +871,7 @@ void CWorldWarp::moveCursorAndLight(INT id, FLOAT fFrameRate) {
         }
         if (m_pCursorCtrl[id] == NULL) {
 #line 762
-            m_pCursorCtrl[id] = NEW(762, C2DSeqCtrl);
+            m_pCursorCtrl[id] = new (__FILE__ "(762)") C2DSeqCtrl;
             m_pCursorCtrl[id]->setLayer(id + 15);
             m_pCursorCtrl[id]->addSeqShift(m_pSeqName, 14, !id ? -8.0f : -48.0f, -4.0f);
         }
@@ -883,7 +882,7 @@ void CWorldWarp::moveCursorAndLight(INT id, FLOAT fFrameRate) {
         m_vPosLightTarget[id] = vec;
         if (m_pLightCtrl[id] == NULL) {
 #line 775
-            m_pLightCtrl[id] = NEW(775, C2DSeqCtrl);
+            m_pLightCtrl[id] = new (__FILE__ "(775)") C2DSeqCtrl;
             m_pLightCtrl[id]->setLayer(id + 15);
             m_pLightCtrl[id]->addSeq(m_pSeqName, 0x11);
             m_vPosLightCurrent[id] = m_vPosLightTarget[id];

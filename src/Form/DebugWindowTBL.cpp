@@ -54,10 +54,8 @@ static INT _HEAP_START = (((INT)_end - 1) / 64 + 1) * 64;
 static INT _HEAP_SIZE = 0x2000000 - 0x40000 - _HEAP_START;
 }
 
-inline void* operator new(size_t n) throw() { return com_malloc(n); }
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 static inline void _unitVectorVu0(FVECTOR& v) {
     asm volatile("sqc2 $vf0, 0x0(%0)" : : "r"(&v));
@@ -2589,6 +2587,7 @@ static DEBUG_WINDOW_TBL debugWinThrowTest = {"ATEL\x81@CONFIG", -176, -(SCREEN_H
 } // namespace DWTGimThrow
 
 #include "Game/Debug/DWTBGM.h"
+#include "System/HeapMan.h"
 
 namespace DWTFog {
 
@@ -3111,7 +3110,7 @@ static BOOL DebugCameraOn(CDebugWindow* pObj, INT inY, INT inParam) {
                     pM = pR;
                 }
 #line 450
-                DebugWork::g_dw.nakamich.m_pDCam = new (com_malloc_d(sizeof(CNakCamera), __FILE__ "(450)", RET_ADDR())) CNakCamera(pM, 1, 0x300, &vPos, 3.1415927f, (void**)&DebugWork::g_dw.nakamich.m_pDCam);
+                DebugWork::g_dw.nakamich.m_pDCam = new (__FILE__ "(450)") CNakCamera(pM, 1, 0x300, &vPos, 3.1415927f, (void**)&DebugWork::g_dw.nakamich.m_pDCam);
                 DebugWork::g_dw.nakamich.m_pDCam->Action(0);
                 DebugWork::g_dw.nakamich.m_pDCam->SetDebugViewAngle(-1e7f);
             }

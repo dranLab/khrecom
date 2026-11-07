@@ -3,10 +3,10 @@
 #include "Game/MessageManager.h"
 #include "System/TaskMan.h"
 #include "Game/Entity.h"
+#include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 namespace Message {
 
@@ -24,7 +24,7 @@ CMessageManager::~CMessageManager() {
 #line 46
 CMessageManager& CMessageManager::getInstance() {
     if (m_pInstance == NULL) {
-        m_pInstance = new (com_malloc_d(sizeof(CMessageManager), __FILE__ "(48)", RET_ADDR())) CMessageManager;
+        m_pInstance = new (__FILE__ "(48)") CMessageManager;
         if (!m_pInstance) AssertApp(__FILE__, __LINE__, "m_pInstance", 0);
     }
     return *m_pInstance;

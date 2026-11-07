@@ -61,8 +61,7 @@ void TsSdVsbStop(int vsb_id);
 void SubVector(FVECTOR& outV, const FVECTOR& inV0, const FVECTOR& inV1);
 FLOAT InnerProduct(const FVECTOR& inV0, const FVECTOR& inV1);
 
-inline void* operator new(size_t, void* p) throw() { return p; }
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
 #define SEQ_VSB 0x10000000
@@ -344,14 +343,14 @@ void CSound::initialize() {
     _setBGMMasterVolume(128);
     for (i = 0; i < 2; i++) {
 #line 408
-        s_pBGMAgents[i] = new (com_malloc_d(sizeof(CBGMAgentStream), __FILE__ "(408)", RET_ADDR())) CBGMAgentStream(i);
+        s_pBGMAgents[i] = new (__FILE__ "(408)") CBGMAgentStream(i);
         ASSERT(s_pBGMAgents[i]);
     }
 #line 417
-    s_pVoiceAgent = new (com_malloc_d(sizeof(CVoiceAgent), __FILE__ "(417)", RET_ADDR())) CVoiceAgent(i);
+    s_pVoiceAgent = new (__FILE__ "(417)") CVoiceAgent(i);
     ASSERT(s_pVoiceAgent);
 #line 424
-    s_pBGMMasterVolAgent = new (com_malloc_d(sizeof(CMasterVolAgent), __FILE__ "(424)", RET_ADDR())) CMasterVolAgent;
+    s_pBGMMasterVolAgent = new (__FILE__ "(424)") CMasterVolAgent;
     ASSERT(s_pBGMMasterVolAgent);
 }
 

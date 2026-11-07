@@ -27,16 +27,17 @@
 #include "Game/Entity.h"
 #include "include_asm.h"
 
-#ifndef KH_PLACEMENT_NEW_DEFINED // MATCH: placement new is not in the ref headers (the units define it themselves); defined once per unit
-#define KH_PLACEMENT_NEW_DEFINED
-inline void* operator new(size_t, void* p) throw() { return p; }
-#endif
 
-#define ATEL_RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-#define ATEL_NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", ATEL_RET_ADDR())) T
+
+
+
+
+
+
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
 #include "Game/Atel/VSME.h"
+#include "System/HeapMan.h"
 namespace ATEL {
 
 
@@ -93,14 +94,14 @@ CAtel::~CAtel() {
 
 #line 97
 static inline CFadeIOMask* _newFader(INT nLayer) {
-    return ATEL_NEW(98, CFadeIOMask)(*CTaskMan::getSysTask(0), nLayer);
+    return new (__FILE__ "(98)") CFadeIOMask(*CTaskMan::getSysTask(0), nLayer);
 }
 
 void CAtel::loadFromMem(const BYTE* pAddr) {
     if (!pAddr) return;
     if (!m_pVSM) {
 #line 106
-        m_pVSM = ATEL_NEW(106, CVSM)(*this, 0);
+        m_pVSM = new (__FILE__ "(106)") CVSM(*this, 0);
 #line 107
         ASSERT(m_pVSM);
     }
@@ -231,13 +232,13 @@ BOOL CAtel::createAvatar(INT nRsrcID, Actor& act, INT flag) {
 
 CEntity* CAtel::createAvatar(INT inRsrcID, CTask* inParent) {
 #line 323
-    CAvatar* p = new (com_malloc_d(0x3b0, __FILE__ "(323)", ATEL_RET_ADDR())) CAvatar(inParent);
+    CAvatar* p = new (__FILE__ "(323)") CAvatar(inParent);
     return p ? AVATAR_ENTITY(p) : NULL;
 }
 
 BOOL CAtel::createEventTrap(const LineTrapSrc& src, Actor& act) {
 #line 331
-    CEventLine* p = ATEL_NEW(331, CEventLine);
+    CEventLine* p = new (__FILE__ "(331)") CEventLine;
     if (p) {
         p->setData(src);
         act._pEventTrap = p;
@@ -248,7 +249,7 @@ BOOL CAtel::createEventTrap(const LineTrapSrc& src, Actor& act) {
 
 BOOL CAtel::createEventTrap(const BoxTrapSrc& src, Actor& act) {
 #line 345
-    CEventBox* pBox = ATEL_NEW(345, CEventBox);
+    CEventBox* pBox = new (__FILE__ "(345)") CEventBox;
     if (pBox) {
         pBox->setData(src);
         act._pEventTrap = pBox;
@@ -280,7 +281,7 @@ void CAtel::setScreenFader(INT nKind, FLOAT fRate, INT nLayer) {
     nKind &= 7;
     if (!pFader) {
 #line 98
-        pFader = ATEL_NEW(98, CFadeIOMask)(*CTaskMan::getSysTask(0), nLayer);
+        pFader = new (__FILE__ "(98)") CFadeIOMask(*CTaskMan::getSysTask(0), nLayer);
     } else {
         pFader->setLayer(nLayer);
     }

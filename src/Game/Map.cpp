@@ -29,9 +29,6 @@
 #include "System/Graphic/Effect/effect_inl.h"
 #include "include_asm.h"
 
-inline void operator delete[](void* pv) { com_free(pv); }
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 
 #define SJ_FOREACH(T, pEntry, list) \
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
@@ -286,7 +283,6 @@ void MulMatrix(FMATRIX& m0, const FMATRIX& m1, const FMATRIX& m2);
 
 
 
-inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 static inline FVECTOR _applyMatrix(FMATRIX& m, FVECTOR& v) {
     FVECTOR b;
     ApplyMatrix(b, m, v);
@@ -786,6 +782,7 @@ void CMap::resetFog() {
 }
 #define COLLUTIL_H_PATH "c:/KHCOM/MainApp/Game/Collision/CollUtil.h" /* MATCH: __FILE__ as in the original .rodata */
 #include "Game/Collision/CollUtil.h" /* MATCH: included here: its strings follow resetFog's */
+#include "System/HeapMan.h"
 void CMap::main() {
     if (CSceneEnv::getStopTypeBit() & 0x800) return;
     if (!m_pTexAnm) return;

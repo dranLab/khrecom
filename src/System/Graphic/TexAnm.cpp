@@ -10,7 +10,6 @@
 extern "C" int strcasecmp(const char* s1, const char* s2);
 extern "C" int rand();
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 /* non-volatile: the size load may be scheduled before it (CModelTexAnm::setup) */
 #define RET_ADDR_NV() ({ UINT nRA; __asm__("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 

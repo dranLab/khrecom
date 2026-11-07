@@ -4,7 +4,7 @@
 #include "System/Task.h"
 #include <string.h>
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #include "Game/Atel/AtelBlur.h"
 #include "System/Graphic/Gprim.h"
@@ -17,6 +17,7 @@ void AddVector(FVECTOR& v0, const FVECTOR& v1, const FVECTOR& v2);
 void ScaleVector(FVECTOR& v0, const FVECTOR& v1, FLOAT r);
 
 #include "System/Graphic/PackMan.h"
+#include "System/HeapMan.h"
 
 
 

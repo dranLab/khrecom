@@ -8,14 +8,7 @@
 #include "khtypes.h"
 #include "System/Debug.h"
 #include "System/HeapMan.h"
-inline void* operator new(size_t, void* p) throw() { return p; }
-/* PARTIAL: the original System/HeapMan.h(134) has it inline */
-inline void* operator new(size_t size) throw() { return com_malloc(size); }
-/* PARTIAL: the original System/HeapMan.h(150-153) has the debug allocation inline */
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-inline void* operator new(size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
+
 /* .rodata starts with the strings of the included headers' inline functions, in this order. */
 #include "System/Graphic/Gprim.h"
 #include "Game/Atel/Avatar.h"

@@ -16,7 +16,7 @@ inline void _emptyStringPlaceholder() {
     TRACE("");
 }
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 #include "Game/Atel/ChatMan.h"
 
 #include "System/Graphic/PathCamera.h"
@@ -33,7 +33,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 #include "include_asm.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
 #include "Game/Gimmick/GimmickManager.h"
 
@@ -76,6 +75,7 @@ struct ChatWndCreateCTDParam {
 
 
 #include "Game/Player/PlayerGauge.h"
+#include "System/HeapMan.h"
 
 CGimmickTreasureBox::CGimmickTreasureBox(CTask* inParent) : CBaseGimmick(inParent) {
     m_Step = 0;
@@ -250,7 +250,7 @@ void CGimmickTreasureBox::NormalMain() {
         setEntityFlag(0, 0x10000);
         g_pPlayer->cancelLockon();
         CSceneEnv::setStop((ObjType::eObjBit)(ObjType::OBJ_BIT_BULLET | ObjType::OBJ_BIT_ENEMY));
-        m_pPathCamera = new (com_malloc_d(sizeof(CPathCamera), __FILE__ "(486)", RET_ADDR())) CPathCamera(this);
+        m_pPathCamera = new (__FILE__ "(486)") CPathCamera(this);
         CGameWork::setInt(1, 0xE2, -1);
         if (m_pPathCamera->init("test", TRUE, FALSE, 0x80)) {
             m_pPathCamera->initBGCheck(FALSE);
@@ -278,7 +278,7 @@ void CGimmickTreasureBox::NormalMain() {
             CSceneEnv::setStop((ObjType::eObjBit)(ObjType::OBJ_BIT_TRUE_ALL & ~(ObjType::OBJ_BIT_2D | ObjType::OBJ_BIT_FUKIDASI | ObjType::OBJ_BIT_GIMMICK)));
             if (prize.StockKind) {
                 CTechnic::addTechnic(prize.StockKind);
-                new (com_malloc_d(sizeof(CLevelUp), __FILE__ "(525)", RET_ADDR())) CLevelUp(getSysTask(1), prize.StockKind);
+                new (__FILE__ "(525)") CLevelUp(getSysTask(1), prize.StockKind);
                 m_Step = 7;
                 CGameWork::setFlag(1, 5, TRUE);
             } else if (prize.Kind == 0) {
@@ -358,7 +358,7 @@ void CGimmickTreasureBox::EnemyMain() {
         setEntityFlag(0, 0x10000);
         g_pPlayer->cancelLockon();
         CSceneEnv::setStop((ObjType::eObjBit)(ObjType::OBJ_BIT_BULLET | ObjType::OBJ_BIT_ENEMY));
-        m_pPathCamera = new (com_malloc_d(sizeof(CPathCamera), __FILE__ "(675)", RET_ADDR())) CPathCamera(this);
+        m_pPathCamera = new (__FILE__ "(675)") CPathCamera(this);
         CGameWork::setInt(1, 0xE2, -1);
         if (m_pPathCamera->init("test", TRUE, FALSE, 0x80)) {
             m_pPathCamera->initBGCheck(FALSE);

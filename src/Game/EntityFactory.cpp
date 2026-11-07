@@ -9,10 +9,9 @@
 #include "System/Debug.h"
 #include "System/HeapMan.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #include "Game/Prize.h"
 
@@ -45,7 +44,7 @@ CEntityFactory::~CEntityFactory() {
 #line 46
 CEntityFactory* CEntityFactory::getInstance() {
     if (!m_pInstance) {
-        m_pInstance = new (com_malloc_d(sizeof(CEntityFactory), __FILE__ "(48)", RET_ADDR())) CEntityFactory;
+        m_pInstance = new (__FILE__ "(48)") CEntityFactory;
         ASSERT(m_pInstance);
     }
     return m_pInstance;
@@ -129,7 +128,7 @@ CEntity* CEntityFactory::createPrize(const PRIZE_PARAM& inParam, CTask* inParent
     } else {
         parent = inParent;
     }
-    CPrize* prize = new (com_malloc_d(sizeof(CPrize), __FILE__ "(198)", RET_ADDR())) CPrize(parent);
+    CPrize* prize = new (__FILE__ "(198)") CPrize(parent);
     /* two failure paths with their own TRACE (cross-jumped): with one shared tail the first null test's
      * delay slot is filled from the target instead of the fallthrough */
     if (prize == NULL) {

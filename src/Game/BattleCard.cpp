@@ -20,6 +20,7 @@ inline void _emptyStringPlaceholderBattleCard() { TRACE(""); }
 #include "System/Graphic/WorldEnv.h"
 #include "Game/Entity.h"
 #include "include_asm.h"
+#include "System/HeapMan.h"
 
 extern "C" int abs(int);
 extern "C" float sinf(float);
@@ -377,8 +378,7 @@ void CardBattle::initLayoutData() {
         lay.y = (INT)vPos.y;
     }
 }
-inline void* operator new(size_t, void* p) throw() { return p; }
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 CardBattle::CBattleCard::CBattleCard(CTask* pParent, INT inIndex, INT inNumber, INT inUser, INT inState)
     : CTask(pParent, 0x4000) {
     m_uiFlag = 0;
@@ -401,7 +401,7 @@ CardBattle::CBattleCard::CBattleCard(CTask* pParent, INT inIndex, INT inNumber, 
     m_nNumberR = -1;
     m_nNumberE = -1;
     m_nNumber = inNumber;
-    m_pCard = new (com_malloc_d(sizeof(C2DCard), __FILE__ "(246)", RET_ADDR())) C2DCard;
+    m_pCard = new (__FILE__ "(246)") C2DCard;
     m_iStockCount = 0;
     m_hTarget = 0;
     if (inState == 2) {

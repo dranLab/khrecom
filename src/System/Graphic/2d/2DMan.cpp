@@ -2,7 +2,7 @@
 
 #define GPRIM_H_PATH "System/Graphic/GPrim.h" /* MATCH: this unit names Gprim.h so (header default "System/Graphic/Gprim.h") */
 #define D2MAN_H_PATH "c:/KHCOM/MainApp/System/Graphic/2d/2Dman.h" /* MATCH: this unit names 2DMan.h so (header default "System/Graphic/2D/2DMan.h") */
-inline void* operator new(unsigned int, void* p) throw() { return p; }
+
 #include "System/Graphic/Gprim.h"
 #include "System/Graphic/2d/2DMan.h"
 #include "System/Graphic/2d/2DSpr.h"
@@ -12,8 +12,8 @@ inline void* operator new(unsigned int, void* p) throw() { return p; }
 #include "Game/SceneEnv.h"
 #include "Game/Debug/DebugWork.h"
 #include <string.h>
+#include "System/HeapMan.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define SJ_FOREACH(T, pEntry, list) \
     for (T *pEntry = (list).getHead(), *__pn = pEntry ? pEntry->getNext() : NULL; pEntry; \
          pEntry = __pn, __pn = __pn ? __pn->getNext() : NULL)
@@ -41,8 +41,8 @@ C2DMan::D2MAN_LEVEL C2DMan::m_nLevelReq;
 
 C2DMan::C2DMan(CTask* p) : CTaskSecondary(p) {
 #line 49
-    m_p2DBaseList = new (com_malloc_d(sizeof(C2DBaseList), __FILE__ "(49)", RET_ADDR())) C2DBaseList;
-    _ref(m_p2DOSLCManager) = new (com_malloc_d(sizeof(C2DOSLCManager), __FILE__ "(50)", RET_ADDR())) C2DOSLCManager;
+    m_p2DBaseList = new (__FILE__ "(49)") C2DBaseList;
+    _ref(m_p2DOSLCManager) = new (__FILE__ "(50)") C2DOSLCManager;
     m_p2DOSLCManager->createContainer();
     m_nLayer = 11;
     m_nLevel = D2MAN_LEVEL0;
@@ -93,15 +93,15 @@ HANDLE C2DMan::init(void* inFile, const CHAR* pBaseName) {
     switch (*(UINT*)inFile) {
     case 0x44525053:
 #line 171
-        p2DBase = new (com_malloc_d(sizeof(C2DSpr), __FILE__ "(171)", RET_ADDR())) C2DSpr;
+        p2DBase = new (__FILE__ "(171)") C2DSpr;
         break;
     case 0x44514553:
 #line 174
-        p2DBase = new (com_malloc_d(sizeof(C2DSeq), __FILE__ "(174)", RET_ADDR())) C2DSeq;
+        p2DBase = new (__FILE__ "(174)") C2DSeq;
         break;
     case 0x4459414C:
 #line 177
-        p2DBase = new (com_malloc_d(sizeof(C2DLay), __FILE__ "(177)", RET_ADDR())) C2DLay;
+        p2DBase = new (__FILE__ "(177)") C2DLay;
         break;
     }
     if (!p2DBase) {

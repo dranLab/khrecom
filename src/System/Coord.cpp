@@ -8,6 +8,7 @@ typedef char _instCSJointLinkedPtr[sizeof(CSJointT<CLinkedPtr>)];
 #include "System/CoordMan.h"
 #include "System/Debug.h"
 #include "System/Tsin.h"
+#include "System/HeapMan.h"
 
 extern const FVECTOR ONE_VECTOR = { { 1.0f, 1.0f, 1.0f, 1.0f } };
 extern const FMATRIX ONE_MATRIX = { { { 1.0f, 0.0f, 0.0f, 0.0f },
@@ -83,12 +84,7 @@ static inline void _unitMatrixVu0(FMATRIX& m) {
                  : "memory");
 }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new[](size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
-inline void operator delete[](void* mem) { com_free(mem); }
 
 void CCoords::_coord_alart(UINT nIndex) const {
     TRACE("*** CCoords:: \x94\xcd\x88\xcd\x8aO\x82\xcc Coord \x82\xaa\x8ew\x92\xe8\x82\xb3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb7 this:%08x pCrdArray:%08x CrdNum:%d Index:%d ***\n",

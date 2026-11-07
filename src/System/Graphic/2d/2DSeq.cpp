@@ -32,13 +32,13 @@ inline void _gprimCopy(_GPrimCopy<FVERTEX>* p) {
 #include "System/Task.h"
 #include <string.h>
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 
 
 #include "System/RsrcDB.h"
+#include "System/HeapMan.h"
 
 
 
@@ -87,7 +87,7 @@ HANDLE C2DSeq::create(UINT inNo) {
     if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 73
-    C2DSeqObj* p2DSeqObj = new (com_malloc_d(sizeof(C2DSeqObj), __FILE__ "(73)", RET_ADDR())) C2DSeqObj;
+    C2DSeqObj* p2DSeqObj = new (__FILE__ "(73)") C2DSeqObj;
     HANDLE handle = p2DSeqObj->create(getBaseHandle(), m_pTexInfo, pSeqSequence, m_pSeqAnimation, m_pSprGroup,
                                       m_pSprParts, m_pSprSprite, NULL);
     if (!handle) {
@@ -105,7 +105,7 @@ HANDLE C2DSeq::create(UINT inNo, SeqControl* pSeqControl) {
     if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 110
-    C2DSeqObj* p2DSeqObj = new (com_malloc_d(sizeof(C2DSeqObj), __FILE__ "(110)", RET_ADDR())) C2DSeqObj(pSeqControl);
+    C2DSeqObj* p2DSeqObj = new (__FILE__ "(110)") C2DSeqObj(pSeqControl);
     HANDLE handle = p2DSeqObj->create(getBaseHandle(), m_pTexInfo, pSeqSequence, m_pSeqAnimation, m_pSprGroup,
                                       m_pSprParts, m_pSprSprite, NULL);
     if (!handle) {
@@ -122,7 +122,7 @@ HANDLE C2DSeq::create(LAY_SCREEN* pLayScreen) {
     if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[pLayScreen->sequence_id];
 #line 145
-    C2DSeqObj* p2DSeqObj = new (com_malloc_d(sizeof(C2DSeqObj), __FILE__ "(145)", RET_ADDR())) C2DSeqObj;
+    C2DSeqObj* p2DSeqObj = new (__FILE__ "(145)") C2DSeqObj;
     HANDLE handle = p2DSeqObj->create(getBaseHandle(), m_pTexInfo, pSeqSequence, m_pSeqAnimation, m_pSprGroup,
                                       m_pSprParts, m_pSprSprite, pLayScreen);
     if (!handle) {
@@ -140,7 +140,7 @@ HANDLE C2DSeq::createSeq(UINT inUnitNo, UINT inNo, SeqControl* pSeqControl) {
     if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 184
-    C2DSeqObj* p2DSeqObj = new (com_malloc_d(sizeof(C2DSeqObj), __FILE__ "(184)", RET_ADDR())) C2DSeqObj(pSeqControl);
+    C2DSeqObj* p2DSeqObj = new (__FILE__ "(184)") C2DSeqObj(pSeqControl);
     HANDLE handle = p2DSeqObj->create(getBaseHandle(), m_pTexInfo, pSeqSequence, m_pSeqAnimation, m_pSprGroup,
                                       m_pSprParts, m_pSprSprite, NULL);
     if (!handle) {
@@ -154,7 +154,7 @@ HANDLE C2DSeq::createSeq(UINT inUnitNo, UINT inNo, SeqControl* pSeqControl) {
 
 HANDLE C2DSeq::createFnt(C2DFnt* p2DFnt, SeqControl* pSeqControl) {
 #line 211
-    C2DSeqObj* p2DSeqObj = new (com_malloc_d(sizeof(C2DSeqObj), __FILE__ "(211)", RET_ADDR())) C2DSeqObj(pSeqControl);
+    C2DSeqObj* p2DSeqObj = new (__FILE__ "(211)") C2DSeqObj(pSeqControl);
     HANDLE handle = p2DSeqObj->createFnt(getBaseHandle(), p2DFnt);
     if (!handle) {
         if (p2DSeqObj) delete p2DSeqObj;
@@ -174,7 +174,7 @@ HANDLE C2DSeq::replaceSeq(HANDLE hCurrent, UINT inNo, SeqControl* pSeqControl) {
     if (!m_pTexInfo) m_pTexInfo = CRsrcDB::getRsrcTex("error", NAME_CASE_SENSITIVE);
     SEQ_SEQUENCE* pSeqSequence = &m_pSeqSequence[inNo];
 #line 245
-    C2DSeqObj* p2DSeqObj = new (com_malloc_d(sizeof(C2DSeqObj), __FILE__ "(245)", RET_ADDR())) C2DSeqObj(pSeqControl);
+    C2DSeqObj* p2DSeqObj = new (__FILE__ "(245)") C2DSeqObj(pSeqControl);
     HANDLE handle = p2DSeqObj->create(getBaseHandle(), m_pTexInfo, pSeqSequence, m_pSeqAnimation, m_pSprGroup,
                                       m_pSprParts, m_pSprSprite, NULL);
     if (!handle) {
@@ -205,7 +205,7 @@ HANDLE C2DSeq::replaceFnt(HANDLE hCurrent, C2DFnt* p2DFnt, SeqControl* pSeqContr
     C2DSeqObj* pCurrent = (C2DSeqObj*)C2DMan::get2DOSLCManager().get2DO(hCurrent);
     if (!pCurrent) return 0;
 #line 287
-    C2DSeqObj* p2DSeqObj = new (com_malloc_d(sizeof(C2DSeqObj), __FILE__ "(287)", RET_ADDR())) C2DSeqObj(pSeqControl);
+    C2DSeqObj* p2DSeqObj = new (__FILE__ "(287)") C2DSeqObj(pSeqControl);
     HANDLE handle = p2DSeqObj->createFnt(getBaseHandle(), p2DFnt);
     if (!handle) {
         if (p2DSeqObj) delete p2DSeqObj;

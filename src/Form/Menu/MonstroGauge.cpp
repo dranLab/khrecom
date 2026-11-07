@@ -28,10 +28,9 @@ inline void _emptyStringPlaceholder2() { /* MATCH: placeholder: an inline functi
 #include "System/Graphic/2d/2DSeqObj.h"
 #include "Game/GameWork.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-#define NEW(line, T) new (com_malloc_d(sizeof(T), __FILE__ "(" #line ")", RET_ADDR())) T
+
+
 
 
 
@@ -84,7 +83,7 @@ void CMostroGauge::main() {
         vec._q = 0;
         vec.w = 1.0f;
 #line 79
-        m_pGaugeCtrl = NEW(79, C2DSeqCtrl);
+        m_pGaugeCtrl = new (__FILE__ "(79)") C2DSeqCtrl;
         m_pGaugeCtrl->enableColorCtrl(TRUE);
         m_pGaugeCtrl->setPos(vec);
         p2DSeqObj = m_pGaugeCtrl->addSeq(pSeqName, 1);
@@ -100,7 +99,7 @@ void CMostroGauge::main() {
         p2DSeqObj = m_pGaugeCtrl->addSeq(pSeqName, 5);
         p2DSeqObj->changeLayer(2);
 #line 96
-        m_pTimeCtrl = NEW(96, C2DSeqCtrl);
+        m_pTimeCtrl = new (__FILE__ "(96)") C2DSeqCtrl;
         m_pTimeCtrl->setLayer(2);
         m_pTimeCtrl->enableColorCtrl(TRUE);
         m_pTimeCtrl->setPos(vec);

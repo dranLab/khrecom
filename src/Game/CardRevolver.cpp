@@ -31,11 +31,7 @@ inline void _emptyStringPlaceholderCardRevolver() { TRACE(""); }
 
 using namespace CardBattle;
 
-inline void* operator new(unsigned int, void* p) throw() { return p; }
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
-inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
-inline void operator delete[](void* mem) { com_free(mem); }
+
 
 namespace CardBattle {
 static LPCSTR g_szLadCockpit = "Cockpit.lad";
@@ -524,7 +520,7 @@ void CCardRevolver::_initialize(CARD* inDeck, INT inShortCut) {
 }
 void CCardRevolver::_initCounter() {
     initCounter();
-    m_pEmpty = new (com_malloc_d(sizeof(C2DCard), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(810)", RET_ADDR())) C2DCard;
+    m_pEmpty = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(810)") C2DCard;
     m_pEmpty->setLayer(2);
     m_pEmpty->createEmpty();
     FVECTOR vPos;
@@ -2562,7 +2558,7 @@ void CCardRevolver::setNumberEffect(INT inKind) {
 }
 void CCardRevolver::_initNumEffect() {
     m_uiNumEffState = 0;
-    m_pSeqCtrlNumEff = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4430)", RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrlNumEff = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4430)") D2::C2DSeqCtrl;
 }
 void CCardRevolver::exeNumEffect() {
     switch (m_uiNumEffState) {
@@ -2590,7 +2586,7 @@ void CCardRevolver::exeNumEffect() {
 }
 void CCardRevolver::setTrapEffect() {
     if (!m_pSeqCtrlTrap) {
-        m_pSeqCtrlTrap = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4469)", RET_ADDR())) D2::C2DSeqCtrl;
+        m_pSeqCtrlTrap = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4469)") D2::C2DSeqCtrl;
     }
     m_pSeqCtrlTrap->setLayer(8);
     m_pSeqCtrlTrap->addSeq(g_szSeqCockpit, 0x96);
@@ -2615,9 +2611,9 @@ void CCardRevolver::initStock() {
     m_pSeqCtrlStock = NULL;
     m_pSeqCtrlStock_Num01 = NULL;
     m_pSeqCtrlStock_Num10 = NULL;
-    m_pSeqCtrlStock = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4510)", RET_ADDR())) D2::C2DSeqCtrl;
-    m_pSeqCtrlStock_Num10 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4511)", RET_ADDR())) D2::C2DSeqCtrl;
-    m_pSeqCtrlStock_Num01 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4512)", RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrlStock = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4510)") D2::C2DSeqCtrl;
+    m_pSeqCtrlStock_Num10 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4511)") D2::C2DSeqCtrl;
+    m_pSeqCtrlStock_Num01 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4512)") D2::C2DSeqCtrl;
     m_pSeqCtrlStock->setLayer(7);
     m_pSeqCtrlStock_Num01->setLayer(8);
     m_pSeqCtrlStock_Num10->setLayer(8);
@@ -2655,7 +2651,7 @@ void CCardRevolver::initStock() {
 void CCardRevolver::initStockSkillName(D2::C2DSeqCtrl* inSeq) {
     G_RGBA rgba;
     rgba.col = 0x80808080;
-    m_p2DFntStockName = new (com_malloc_d(sizeof(D2::C2DFnt), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(4567)", RET_ADDR()))
+    m_p2DFntStockName = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(4567)")
         D2::C2DFnt(0, 0, &rgba, 14, g_szStockSkillName[m_iStockSkill], 0x80);
     inSeq->addFntShift(g_szSeqCockpit, m_p2DFntStockName, -4.0f, 0.0f);
     inSeq->m_seqControl.fgColor = 1;
@@ -3496,9 +3492,9 @@ void CStockFolder::initGauge() {
     m_pSeqCtrl_Num01 = NULL;
     m_pSeqCtrl_Num10 = NULL;
     m_nNumTexID = 0;
-    m_pSeqCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6211)", RET_ADDR())) D2::C2DSeqCtrl;
-    m_pSeqCtrl_Num10 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6212)", RET_ADDR())) D2::C2DSeqCtrl;
-    m_pSeqCtrl_Num01 = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6213)", RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrl = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6211)") D2::C2DSeqCtrl;
+    m_pSeqCtrl_Num10 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6212)") D2::C2DSeqCtrl;
+    m_pSeqCtrl_Num01 = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6213)") D2::C2DSeqCtrl;
     m_pSeqCtrl->setLayer(7);
     m_pSeqCtrl_Num01->setLayer(8);
     m_pSeqCtrl_Num10->setLayer(8);
@@ -3522,7 +3518,7 @@ void CStockFolder::initGauge() {
 void CStockFolder::initName(D2::C2DSeqCtrl* inSeq) {
     G_RGBA rgba;
     rgba.col = 0x80808080;
-    m_p2DFntStockName = new (com_malloc_d(sizeof(D2::C2DFnt), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6245)", RET_ADDR()))
+    m_p2DFntStockName = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6245)")
         D2::C2DFnt(0, 0, &rgba, 14, g_szStockSkillName[m_iStockSkill], 0x80);
     inSeq->addFntShift(g_szSeqCockpit, m_p2DFntStockName, -4.0f, 0.0f);
     inSeq->m_seqControl.fgColor = 1;
@@ -3680,7 +3676,7 @@ INT CStockFolder::setStockCard(INT inKind, INT inNumber) {
     if (!pBattle) return 0;
     if (pBattle->isPlayingCard(m_uiUser)) return 0;
     if (m_iStock == 3) return 0;
-    m_pCards[m_iStock] = new (com_malloc_d(sizeof(CBattleCard), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6495)", RET_ADDR())) CBattleCard(this, inKind, inNumber, m_uiUser, 0);
+    m_pCards[m_iStock] = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6495)") CBattleCard(this, inKind, inNumber, m_uiUser, 0);
     CBattleCard* pCard = m_pCards[m_iStock];
     pCard->setFolderON();
     pCard->setRoomEffect(NULL);
@@ -3772,7 +3768,7 @@ INT CStockFolder::setPronounceCard(INT inKind, INT inNumber) {
     }
     return 0;
 ok:
-    m_pCards[m_iStock] = new (com_malloc_d(sizeof(CBattleCard), "c:/KHCOM/MainApp/Game/CardRevolver.cpp(6700)", RET_ADDR())) CBattleCard(this, inKind, inNumber, m_uiUser, 0);
+    m_pCards[m_iStock] = new ("c:/KHCOM/MainApp/Game/CardRevolver.cpp(6700)") CBattleCard(this, inKind, inNumber, m_uiUser, 0);
     CBattleCard* pCard = m_pCards[m_iStock];
     pCard->setRoomEffect(NULL);
     m_pData[m_iStock] = pCard->getCardData();

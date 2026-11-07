@@ -14,10 +14,10 @@
 #include "System/Graphic/PathData.h"
 #include "System/Graphic/HermitePath.h"
 #include "System/TaskMan.h"
+#include "System/HeapMan.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 static inline void _unitMatrixVu0(FMATRIX& m) {
     asm volatile("vmr32.xyzw $vf1, $vf0\n"
@@ -39,7 +39,7 @@ static inline void _initVf0(FVECTOR& v) {
 #line 30
 CPathDataCamera::CPathDataCamera(CTask* p, const CHAR* pszInName, INT iKind, const CTask* pTarget, INT iNum,
                                  const CTask* pParent) : CTask(p, 0x4000) {
-    m_pPathData = new (com_malloc_d(sizeof(CPathData), __FILE__ "(32)", RET_ADDR())) CPathData(pszInName);
+    m_pPathData = new (__FILE__ "(32)") CPathData(pszInName);
     if (!m_pPathData) AssertApp(__FILE__, __LINE__, "m_pPathData", 0);
     m_iStatus = 1;
     _init(iKind, (CTask*)pTarget, iNum, (CTask*)pParent);
@@ -48,7 +48,7 @@ CPathDataCamera::CPathDataCamera(CTask* p, const CHAR* pszInName, INT iKind, con
 #line 41
 CPathDataCamera::CPathDataCamera(CTask* p, const PATH_DATA* pPathData, INT iKind, const CTask* pTarget, INT iNum,
                                  const CTask* pParent) : CTask(p, 0x4000) {
-    m_pPathData = new (com_malloc_d(sizeof(CPathData), __FILE__ "(43)", RET_ADDR())) CPathData(pPathData);
+    m_pPathData = new (__FILE__ "(43)") CPathData(pPathData);
     if (!m_pPathData) AssertApp(__FILE__, __LINE__, "m_pPathData", 0);
     m_iStatus = 1;
     _init(iKind, (CTask*)pTarget, iNum, (CTask*)pParent);
@@ -92,12 +92,12 @@ void CPathDataCamera::_init(INT iKind, CTask* pTarget, INT iNum, CTask* pParent)
     switch (iKind) {
     case 2:
 #line 109
-        m_pHPC = new (com_malloc_d(sizeof(CHermitePathCamera), __FILE__ "(109)", RET_ADDR())) CHermitePathCamera(pObj, m_pPathData->getPathVectorData(m_iNum), m_pTarget, NULL, 1, pParent);
+        m_pHPC = new (__FILE__ "(109)") CHermitePathCamera(pObj, m_pPathData->getPathVectorData(m_iNum), m_pTarget, NULL, 1, pParent);
         if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);
         break;
     case 1:
 #line 115
-        m_pHPC = new (com_malloc_d(sizeof(CHermitePathCamera), __FILE__ "(115)", RET_ADDR())) CHermitePathCamera(pObj, m_pPathData->getPathVectorData(m_iNum), m_pTarget, NULL, 0, pParent);
+        m_pHPC = new (__FILE__ "(115)") CHermitePathCamera(pObj, m_pPathData->getPathVectorData(m_iNum), m_pTarget, NULL, 0, pParent);
         if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);
         break;
     case 0:
@@ -120,7 +120,7 @@ void CPathDataCamera::_init(INT iKind, CTask* pTarget, INT iNum, CTask* pParent)
         if (pParent && pParent->getCoordNum() > 0) Crd(0).setParent(&pParent->Crd(0));
         if (m_pPathData->getPathVectorNum(m_iNum) >= 2) {
 #line 149
-            m_pHPM = new (com_malloc_d(sizeof(CHermitePath), __FILE__ "(149)", RET_ADDR())) CHermitePath;
+            m_pHPM = new (__FILE__ "(149)") CHermitePath;
             if (!m_pHPM) AssertApp(__FILE__, __LINE__, "m_pHPM", 0);
             m_pHPM->makePathFromPathVector(m_pPathData->getPathVectorData(m_iNum));
             iType = 1;
@@ -136,7 +136,7 @@ void CPathDataCamera::_init(INT iKind, CTask* pTarget, INT iNum, CTask* pParent)
         Crd(0).touch();
         Crd(0).fix(0);
 #line 192
-        m_pHPC = new (com_malloc_d(sizeof(CHermitePathCamera), __FILE__ "(192)", RET_ADDR())) CHermitePathCamera(pObj, m_pPathData->getPathVectorData(iIdx), m_pTarget, m_pHPM, iType, pParent);
+        m_pHPC = new (__FILE__ "(192)") CHermitePathCamera(pObj, m_pPathData->getPathVectorData(iIdx), m_pTarget, m_pHPM, iType, pParent);
         if (!m_pHPC) AssertApp(__FILE__, __LINE__, "m_pHPC", 0);
         break;
     }
@@ -211,7 +211,7 @@ void CPathDataCamera::entryDebugArrow() {
     if (!m_DDPathCamArrow && getCoordNum() > 0) {
         FVECTOR vRot;
 #line 314
-        m_DDPathCamArrow = new (com_malloc_d(sizeof(CDbgArrow), __FILE__ "(314)", RET_ADDR())) CDbgArrow;
+        m_DDPathCamArrow = new (__FILE__ "(314)") CDbgArrow;
         if (!m_DDPathCamArrow) AssertApp(__FILE__, __LINE__, "m_DDPathCamArrow", 0);
         m_DDPathCamArrow->getCoord().setParent(&Crd(0));
         _initVf0(vRot);

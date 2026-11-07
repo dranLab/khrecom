@@ -2,7 +2,7 @@
 #define TITLEREPORTDLLSTARTER_H_PATH "c:/KHCOM/MainApp/Form/Menu/TitleReportDllStarter.h" /* MATCH: this unit names TitleReportDllStarter.h so (header default "Form/Menu/TitleReportDllStarter.h") */
 #define SAVELOADCTRL_H_PATH "System/../Form/Menu/SaveLoadCtrl.h" /* MATCH: this unit names SaveLoadCtrl.h so (header default "Form/Menu/SaveLoadCtrl.h") */
 #include <string.h>
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 #include "System/TaskMan.h"
 #include "System/Task.h"
 #include "Form/Menu/TitleReportDllStarter.h"
@@ -11,7 +11,6 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 #include "Form/Menu/SaveLoadCtrl.h"
 #include "System/Fsm.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 #define ASSERT(e) if (!(e)) AssertApp(__FILE__, __LINE__, #e, 0)
 
 #include "System/RsrcDB.h"
@@ -20,6 +19,7 @@ inline void* operator new(size_t, void* p) throw() { return p; }
 
 
 #include "System/Rcf.h"
+#include "System/HeapMan.h"
 
 
 
@@ -96,14 +96,14 @@ void CTitleReportDllStarter::stateDllLoad() {
         switch (m_LaunchMode) {
         case 0:
 #line 126
-            m_hChildTask = (new (com_malloc_d(sizeof(BattleReport::CBtlReport), __FILE__ "(126)", RET_ADDR()))
+            m_hChildTask = (new (__FILE__ "(126)")
                                 BattleReport::CBtlReport(this, m_nParam))->getHandle();
             break;
         case 1:
             break;
         case 2:
 #line 128
-            new (com_malloc_d(sizeof(CTitle), __FILE__ "(128)", RET_ADDR())) CTitle(this);
+            new (__FILE__ "(128)") CTitle(this);
             break;
         }
         changeState(2);

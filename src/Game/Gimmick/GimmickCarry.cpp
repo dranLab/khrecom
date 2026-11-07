@@ -18,7 +18,7 @@ inline void _emptyStringPlaceholder() {
     TRACE("");
 }
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 #include "Game/Atel/ChatMan.h"
 #include "Game/BodyCollision.h"
 #include "System/Graphic/modeldata.h"

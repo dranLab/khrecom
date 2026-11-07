@@ -15,9 +15,8 @@
 #include "Game/SceneInfo.h"
 #include "include_asm.h"
 
-inline void* operator new(size_t, void* p) throw() { return p; }
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
+
 
 #include "System/Coord.h"
 // from the sce libraries
@@ -115,11 +114,11 @@ void CWorldEnv::initialize() {
     _nWorldScreenTQ = 0;
     _bMikeReady = FALSE;
 
-    _pFrustum = new (com_malloc_d(sizeof(CFrustum), __FILE__ "(103)", RET_ADDR())) CFrustum;
-    _pBBHelper = new (com_malloc_d(sizeof(CBillboardHelper), __FILE__ "(104)", RET_ADDR())) CBillboardHelper;
+    _pFrustum = new (__FILE__ "(103)") CFrustum;
+    _pBBHelper = new (__FILE__ "(104)") CBillboardHelper;
 
 
-    _pEffLightMan = new (com_malloc_d(sizeof(CEffectLightMan), __FILE__ "(107)", RET_ADDR())) CEffectLightMan;
+    _pEffLightMan = new (__FILE__ "(107)") CEffectLightMan;
 }
 #endif
 /* MATCH: placeholder for initialize's .rodata (its allocation messages) */

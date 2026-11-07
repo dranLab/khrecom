@@ -32,11 +32,11 @@ inline void _emptyStringPlaceholderPlayerGauge() { TRACE(""); }
 #include "System/Sound/SoundMan.h"
 #include "System/Graphic/2d/2DFnt.h"
 #include "include_asm.h"
+#include "System/HeapMan.h"
 
 using namespace Gauge;
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
-inline void* operator new(unsigned int, void* p) throw() { return p; }
+
 namespace Gauge {
 LPCSTR g_szLadGauge = "gauge.lad";
 LPCSTR g_szSeqFace = "gauge:00";
@@ -324,9 +324,6 @@ static inline void _setCardNum(CARD& c, USHORT kind, BYTE num) {
     c.m_nCategory20 = cardDataTbl[c.m_nKind].nCategory0;
     c.m_nCategory21 = cardDataTbl[c.m_nKind].nCategory1;
 }
-inline void* operator new(size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
-inline void operator delete[](void* mem) { com_free(mem); }
-inline void* operator new[](size_t size, char* msg) throw() { return com_malloc_d(size, msg, RET_ADDR()); }
 template <class T> static inline T& _ref(T& v) { return v; }
 
 CPlayerGauge::CPlayerGauge(CTask* p) : CTask(p, 0x4000), m_pNaviMap(NULL), m_pFriend(NULL) { _initialize(); }
@@ -1815,7 +1812,7 @@ void CPrizeGauge::setPrizeCard(CARD& inData, INT inMode, INT inStack) {
 
     if (!m_pInstance) {
 #line 2645
-        new (com_malloc_d(sizeof(CPrizeGauge), __FILE__ "(2645)", RET_ADDR())) CPrizeGauge(NULL);
+        new (__FILE__ "(2645)") CPrizeGauge(NULL);
         setPrizeCard(inData, inMode, 0);
         return;
     }
@@ -1849,7 +1846,7 @@ void CPrizeGauge::setPrizeCard(CARD& inData, INT inMode, INT inStack) {
             pSeq0->setPos(pos);
             rgba.col = 0x80808080;
 #line 2705
-            p2DFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2705)", RET_ADDR())) D2::C2DFnt(0, 0, &rgba, 0xE, inData.getName(), 0);
+            p2DFnt = new (__FILE__ "(2705)") D2::C2DFnt(0, 0, &rgba, 0xE, inData.getName(), 0);
             pSeq0->addFnt(g_szSeqGetCard, p2DFnt);
             pSeq0->enableColorCtrl(TRUE);
             pSeq1 = &_ref(m_pInstance)->m_pCardSeqCtrls[1];
@@ -1883,7 +1880,7 @@ void CPrizeGauge::setPrizeCard(CARD& inData, INT inMode, INT inStack) {
         pSeq0->setPos(pos);
         rgba.col = 0x80808080;
 #line 2746
-        p2DFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2746)", RET_ADDR())) D2::C2DFnt(0, 0, &rgba, 0x12, inData.getName(), 2);
+        p2DFnt = new (__FILE__ "(2746)") D2::C2DFnt(0, 0, &rgba, 0x12, inData.getName(), 2);
         pSeq0->addFnt(g_szSeqGetCard, p2DFnt);
         pSeq0->enableColorCtrl(TRUE);
         pSeq1 = &_ref(m_pInstance)->m_pCardSeqCtrls[1];
@@ -1934,7 +1931,7 @@ INT CPrizeGauge::exePrizeCard() {
             pSeq->setPos(pos);
             rgba.col = 0x80808080;
 #line 2816
-            p2DFnt = new (com_malloc_d(sizeof(D2::C2DFnt), __FILE__ "(2816)", RET_ADDR())) D2::C2DFnt(0, 0, &rgba, 0x12, m_cardData.getName(), 2);
+            p2DFnt = new (__FILE__ "(2816)") D2::C2DFnt(0, 0, &rgba, 0x12, m_cardData.getName(), 2);
             pSeq->addFnt(g_szSeqGetCard, p2DFnt);
             pSeq->enableColorCtrl(TRUE);
             pSeq = &m_pCardSeqCtrls[1];
@@ -1980,7 +1977,7 @@ CEscapeGauge::~CEscapeGauge() {
 void CEscapeGauge::_initialize() {
     m_uiState = 0;
     m_uiFlag = 0;
-    m_pSeqCtrl = new (com_malloc_d(sizeof(D2::C2DSeqCtrl), __FILE__ "(2903)", RET_ADDR())) D2::C2DSeqCtrl;
+    m_pSeqCtrl = new (__FILE__ "(2903)") D2::C2DSeqCtrl;
     m_pSeqCtrl->setLayer(8);
 }
 void CEscapeGauge::main() {

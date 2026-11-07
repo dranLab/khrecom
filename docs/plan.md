@@ -49,7 +49,7 @@ every change that is merged without regenerating. Regenerating all four takes ab
 - **Libraries:** 18 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
   (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
   details in `docs/sdk-leftovers.md`.
-- **Header cleanup:** PARTIAL 188 (156 in 44 headers, 32 in 18 .cpp), 11 foreign stand-ins in 6 files, 0
+- **Header cleanup:** PARTIAL 186 (156 in 44 headers, 30 in 17 .cpp), 11 foreign stand-ins in 6 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
   `tools/partials.py --queue` has the ready items.
 - **Method that paid off (2026-11-06):** read `tools/helpers/asmlines.py` before permuting. Most long-parked drafts had a
@@ -327,13 +327,10 @@ log in `build/progress/cleanup-<name>.md`; merge with the `--summary` deltas; ad
 
 **Queue state (2026-11-07):** the R1 "gate" items are feature macros a unit defines before the include. Dropping each
 one's `#define`s and rebuilding: ENTITY_H_SETFLAG_DIRECT, MODELDATA_H_TEXINFO_CTOR, GAME_COLLISION_COLLOBJ_H (CollUtil)
-and VECTOR_H_SET_CALL all change the image, so they stay. KH_PLACEMENT_NEW_DEFINED (LinkedBuf.h): checked 2026-11-07
-(build/progress/cleanup-placement-new-Form.md): the original's .mdebug line labels put all global operators in
-System/HeapMan.h (new 134, delete 136/137, `new(size_t, char*)` throw() 150-153, `new[]` 156-159, placement new 168), and
-the units wrote `new (__FILE__ "(N)") T`; ours emulate that with `new (com_malloc_d(...)) T` plus about 95 local
-placement-new copies (40 local `new(size_t, char*)`, 33 `new[]`, 34 `delete`). Moving them to HeapMan.h is not
-codegen-free per se and reaches ~170 includers: waiting on the user (see "When to stop and ask"). LinkedBuf.h's MATCH
-comment ("the units define it themselves") is wrong. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users
+and VECTOR_H_SET_CALL all change the image, so they stay. The global operators are done (cleanup/heapman-operators, 2026-11-07): System/HeapMan.h has RET_ADDR (inline
+asm: __builtin_return_address reloads ra), new, delete, delete[], new(size_t, char*), new[] and placement new, all
+throw(); the sites are `new (__FILE__ "(N)") T` (Camp's setWorldmap keeps the emulated form, MATCH), the local copies
+and the KH_PLACEMENT_NEW_DEFINED gate are gone. MapEnemy.h, SceneInfo.h, CollUtilA.h and Coord.h list gate users
 without a feature macro.
 
 **A4. The ladder**, when completing a header would break another unit's `.rodata` (stop at the first step that
@@ -449,8 +446,7 @@ Keep output small: one function's assembly at a time; `funcdiff` without `--full
 - **Waiting on a decision now:** the original's .mdebug type order (build/progress/cleanup-Gprim.h.md) puts G_XY,
   G_XYZ, G_RGBA, G_UV, G_ST and F_UL with the vector/coord headers (in all 274 originals with FVECTOR; Gprim.h's own
   G_LAYER/CDrawable/FVERTEX in 234) and the C++ QWdata in a base-types header after the khtypes typedefs, against the
-  ref's placement and ~230 includers. And the global operators (new/delete/placement new) back into System/HeapMan.h with
-  `new (__FILE__ "(N)") T` sites (see "Queue state"; ~170 includers, matched C changes). And the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
+  ref's placement and ~230 includers. And the `D2MAN_H_PATH` (2DMan.h, `D2::C2DMan`) and `RSRCDATA_H_FULL`
   (`CRsrcData`/`RsrcInfo`/`CRsrcANN`) gates, 10 files: the string evidence for 2DMan.h is ambiguous (the 2D
   container message is in 166 originals, the 2DMan.h path in only about 119).
 - When the user runs a /loop unattended, decide these cases yourself, log the decision and continue

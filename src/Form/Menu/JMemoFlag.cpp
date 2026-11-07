@@ -13,9 +13,8 @@
 #include "Game/GameWork.h"
 #include "Game/Game.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new(size_t, void* p) throw() { return p; }
+
 
 #include "System/RsrcDB.h"
 
@@ -49,7 +48,7 @@ template <class T> static inline T& _ref(T& v) { return v; }
 INT CJiminyMemoFlag::createTask(CTask* inParent, INT inMode) {
     if (s_pTask != NULL || s_hTask != 0) return -1;
 #line 61
-    CJiminyMemo* pMemo = new (com_malloc_d(sizeof(CJiminyMemo), __FILE__ "(61)", RET_ADDR())) CJiminyMemo(inParent, inMode);
+    CJiminyMemo* pMemo = new (__FILE__ "(61)") CJiminyMemo(inParent, inMode);
     if (pMemo != NULL) {
         _ref(s_pTask) = pMemo;
         s_hTask = pMemo->getHandle();

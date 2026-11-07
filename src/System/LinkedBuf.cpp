@@ -1,14 +1,8 @@
 #include "include_asm.h"
 #include "System/LinkedBuf.h"
+#include "System/HeapMan.h"
 
-#define RET_ADDR() ({ UINT nRA; __asm__ volatile("daddu %0, $31, $0" : "=r"(nRA)); nRA; })
 
-inline void* operator new[](size_t size, char* msg) throw() {
-    return com_malloc_d(size, msg, RET_ADDR());
-}
-inline void operator delete[](void* mem) {
-    com_free(mem);
-}
 
 namespace {
 CPtrList* s_pFreeListTbl;
