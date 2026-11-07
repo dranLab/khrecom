@@ -1,4 +1,4 @@
-// PARTIAL: added for System/CoordMan
+
 #ifndef SYSTEM_COORD_H
 #define SYSTEM_COORD_H
 
