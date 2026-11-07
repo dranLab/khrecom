@@ -5338,34 +5338,17 @@ INT CVSM::searchActorID(const CHAR* pszActor) const {
 /* Parked: 2 lines - with the product in lo only reload's register differs (mflo v0, original v1). Before that: same
    order but gcc's 3-operand mult. A "$2" clobber on an empty asm moves the mflo with it (12 lines), "l" in an asm 18.
    Older notes: */
-/* Parked: same instructions and order except the wait_timer product: the original multiplies into LO ("mult $zero,s1,v1"
-   + mflo before the sh), ours with the 3-operand mult into v1 (gcc's mulsi3_mult3 "l" vs "d" alternative, chosen by
-   regclass: LO only when the product feeds a plain register copy, as for a call argument in PathData::delPath); ours
-   is 4 bytes shorter. Line tags: status (5114) before next_address (5115), the whole product on the isNTSC line. tried:
-   ternary inside/outside the product and with commuted arms, if/else, INT/USHORT/TIMEQ product locals, an INT
-   multiplier local, (UINT)/(SHORT)/float operands, an inline USHORT setter, statement orders, tools/permuter.py
-   10 min (50056 candidates, no better than 4); retry: an inline INT-returning product helper, an inline INT-parameter
-   setter, a widening (long) product (gives mult + mflo, but also mfhi and the 64-bit merge), a register asm v1
-   temporary (combine folds it into the mult3). Every original "mult $zero" + mflo in the game feeds a call argument. */
-#if 0
 void CVSM::acWaitReq(Actor& act, INT nTime, INT nAddr) {
     ATP& atp = act._ATP;
     atp.status = 3;
     atp.next_address = nAddr;
     {
         register INT nWait asm("lo") = nTime * (CMainApp::isNTSC() ? 25 : 25); /* MATCH: two-operand mult, mflo at the sh */
-        atp.wait_timer = nWait;
+        register INT nWaitV1 asm("$3") = nWait; /* MATCH: mflo into v1 */
+        atp.wait_timer = nWaitV1;
     }
     _TRACE(m_bTrace, "acWaitReq act:%d time:%d address:%d \n", atp.id, nTime, nAddr);
 }
-#else
-/* placeholder: rodata of acWaitReq__Q24ATEL4CVSMRQ24ATEL5Actorii */
-__asm__(".rdata\n");
-inline void _roPh35() { /* MATCH: placeholder: an inline function's strings, in the original .rodata order */
-    TRACE("acWaitReq act:%d time:%d address:%d \n");
-}
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/VSME", acWaitReq__Q24ATEL4CVSMRQ24ATEL5Actorii);
-#endif
 __asm__(".rdata\n"); /* gcc believes it is in .rdata (placeholder), INCLUDE_ASM left .text */
 void CVSM::acWaitLoadRsrc(Actor& act, INT nAddr) {
     ATP& atp = act._ATP;
