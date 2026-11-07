@@ -58,8 +58,6 @@ typedef struct {
     Pad2ButtonInfo binfo[50];
 } Pad2Info;
 
-#include "include_asm.h"
-
 void scePrintf(const char *fmt, ...);
 void *memcpy(void *dst, const void *src, unsigned int n);
 void *memset(void *dst, int c, unsigned int n);
@@ -233,39 +231,31 @@ int scePad2GetState(int socket)
     return state;
 }
 
-/* Parked: 3 lines (2026-11-07, through a pointer to bi, decomp-permuter): case 8's address in v0 and the byte in v1, swapped. */
-#if 0
 int scePad2GetButtonInfo(int socket, unsigned char *data, int button)
 {
     Pad2ButtonInfo bi = pad2_info[socket].binfo[button];
-    int ret;
     unsigned char v;
-    Pad2ButtonInfo *p = &bi;
 
-    if (p->valid) {
-    switch (p->type) {
-    case 1:
-        ret = ((data[p->byte] >> p->bit) & 1) ? 0 : p->type;
-        break;
-    case 8:
-        ret = data[p->byte] >> p->bit; /* ret as the first temporary (decomp-permuter): 12 -> 5 lines */
-        v = ret;
-        if (p->bit) {
-            p->byte++;
-            v |= data[p->byte] << (p->type - p->bit);
+    if (bi.valid) {
+        switch (bi.type) {
+        case 1:
+            if (!((data[bi.byte] >> bi.bit) & 1)) {
+                return bi.type;
+            }
+            return 0;
+        case 8:
+            v = data[bi.byte] >> bi.bit;
+            if (bi.bit) {
+                bi.byte++;
+                v |= data[bi.byte] << (bi.type - bi.bit);
+            }
+            return v;
+        default:
+            return -1;
         }
-        ret = v;
-        break;
-    default:
-        ret = -1;
-        break;
-    }
-    return ret;
     }
     return -1;
 }
-#endif
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libpad2", scePad2GetButtonInfo);
 
 static void scePad2InitDmaDBuff(int socket)
 {
