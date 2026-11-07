@@ -385,6 +385,8 @@ header split the original didn't have, or make a class a template to hide its st
 | spill slots / regs of hoisted `this+off` addresses | gcse-bucket-count-lever, gcse-pre-hash-order |
 | registers swapped, same instructions | scheduling-mismatch-techniques, global-alloc-priority-lreg, asm-barrier-death-note-levers, loop-const-merge-and-load-order, asymmetric-giv-overloads, gcse-pre-hash-order |
 | preheader hoist order, constant hoisted only in ours | loop-two-pass-hoist-threshold, preheader-giv-init-order, loop-hoist-lifetime-store-order |
+| the original repeats a test that cse folds in ours | duplicate-test-masked-form |
+| a hoisted constant is a copy of a variable initialised to it | volatile-asm-cse-flush (`asm volatile("" : : "i"(0))` after the init) |
 | stores in another order | sched-store-order-reg-weight, volatile-delay-slots-store-permutation, small-union-ctor-stores, fixed-scalar-varying-struct-alias, join-store-per-arm |
 | the original reloads a global/member, ours keeps it (or the reverse) | global-reload-ref-helper, fixed-scalar-varying-struct-alias, const-global-reorg-redundant-load, mapenemy-unit-lessons |
 | tails merged or not merged, branch layout | gcc-crossjump-alias-rules, crossjump-dup-arm-stores, crossjump-case-label-chain, state-machine-break-vs-return, guard-plus-while-and-static-members, first-return-stub-ternary, bool-tail-shared-false |

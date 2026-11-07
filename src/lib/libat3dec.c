@@ -775,7 +775,7 @@ INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", f2t_nodata);
    loop's final value), band as the jw/joint loop counter, the tone count and the band limit in nb): only the
    operand order of the level addresses differs, the original adds pointer + index (addu v1,s7,s0), ours
    index + pointer; tried: *(gp + k), k[gp], 2-D/3-D pointer types, char * offsets, block-local pointers, a flat
-   gain array (132), decomp-permuter 15 min */
+   gain array (132), decomp-permuter 15 min, tools/permuter.py 10 min (22,692 variants): no gain */
 #if 0
 static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
 {
