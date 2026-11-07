@@ -400,15 +400,6 @@ INT CAvatar::onSetPosPathTop(INT nCmd, void* pParam, INT nID) {
     setAvatarTargetPos(*pV);
     return -1;
 }
-/* Parked: 1 line (was 53) - the final test: the original has `slti 3`, then `bne s6, 0` twice; the switch's range node
-   gives bltz for the first. The empty asm in case 0 settled the registers: pV 3 refs / 13 insns outranked p 14 / 187
-   by a hair. An INT local keeps slti but the second zero test folds (even across an empty asm, in a nested switch);
-   if on the USHORT gives sltiu. 2026-11-07: `INT nTest = nType; if (nTest < 3) if (nType == 0) { asm volatile("" : "+r"(nType));
-   if (nType == 0) ...` gives the exact tail but 2 more refs put nType (8 refs / 200, pri 1200) above pV (750): it needs 7 refs.
-   "=r" alone splits the pseudo (frame +16), asm on nTest copies through v0, a register local on s6 reserves s6 for the whole
-   function, a case 0 / case 1,2 tree changes the structure. A join between the tests (do/while(0) + break, goto join) gets rid of the asm's
-   refs but jump merges the two tests; goto end out of a do/while keeps both but as bnez + 2 lines of layout (5). */
-#if 0
 INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
     AvatarMoveParam* p = (AvatarMoveParam*)pParam;
     if (!(p)) AssertApp(__FILE__, 779, "p", 0);
@@ -458,26 +449,16 @@ INT CAvatar::onMove(INT nCmd, void* pParam, INT nID) {
         return -1;
     }
     calcAvatarMoveSpeed(vVel);
-    /* 1 line left (2026-11-07): the original tests nType != 0 twice after the < 3 range check (ours: < 0, then != 0). Case 0
-       on its own (with or without the inner if), cases 1/2 as breaks or separate labels: 6 (the range check folds); an
-       (INT) if pair: 3. nType is USHORT in the ref. */
-    switch (nType) { // MATCH: a switch compares the promoted int (slti), an if on the USHORT would be unsigned
-    case 0: case 1: case 2:
-        if (nType == 0) m_pMove->setVel(vVel);
-        break;
+    /* MATCH: the original tests nType against 3 signed (slti; a compare on the USHORT is unsigned, a switch adds a < 0
+       test) and then tests nType != 0 twice: cse folds a repeated test on nType itself, not one on nType & 0xf, which
+       combine reduces to nType afterwards (nType is p->_nType & 0xf). */
+    if ((SHORT)nType < 3) {
+        if ((nType & 0xf) == 0) {
+            if (nType == 0) m_pMove->setVel(vVel);
+        }
     }
     return -1;
 }
-#else
-/* MATCH: placeholder for the asm onMove's assert string */
-inline void _onMoveStringPlaceholder(void* p) {
-    if (!(p)) AssertApp(__FILE__, 779, "p", 0);
-}
-/* MATCH: the parked function's jump table (compiled jump tables of the other switches sit around it in .rodata) */
-asm(".rdata\n.align 4\njtbl_0048AF40:\n"
-    ".word .L00236FD4\n.word .L00236E44\n.word .L00237160\n.word .L00237160\n.word .L00237160\n.word .L00237160\n.word .L00237160\n.word .L002370C4\n.word .L00237080\n.word .L00237140\n.text\n");
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/Game/Atel/Avatar", onMove__Q24ATEL7CAvatariPvi);
-#endif
 void CAvatar::calcAvatarMoveSpeed(FVECTOR& vOut) {
     switch (getAvatarMoveType()) {
     case 1:
