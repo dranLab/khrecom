@@ -46,8 +46,8 @@ every change that is merged without regenerating. Regenerating all four takes ab
   (fixed 2026-11-07: it used to count a parked `#if 0 ... #else INCLUDE_ASM #endif` as done).
 - **Game:** 82 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note).
   5 units take a data section from assembly.
-- **Libraries:** 22 parked, 1 not attempted, 27 hand-written (stay assembly), 2 units with data from assembly
-  (__assert, __umoddi3: need a split / link-alignment change);
+- **Libraries:** 19 parked, 1 not attempted, 27 hand-written (stay assembly), no unit with data from assembly
+  (the last two, __assert and __umoddi3, needed the split / link-alignment fixes of 2026-11-07);
   details in `docs/sdk-leftovers.md`.
 - **Header cleanup:** PARTIAL 190 (156 in 44 headers, 34 in 20 .cpp), 14 foreign stand-ins in 9 files, 0
   duplicate classes, 0 untagged mechanisms; classes complete 873, superset 12, gated 3, missing 8.
