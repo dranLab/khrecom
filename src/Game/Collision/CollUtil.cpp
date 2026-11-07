@@ -885,9 +885,9 @@ INT CCollUtil::detectMap(FVECTOR* pWS, FVECTOR* pWE) {
     if (attr == 6) {
         m_vNormal2.set(0.0f, 0.0f, 1.0f, 0.0f);
     }
+    m_vNormalA = m_pPrimInfoCurrent->pInfo2->pNorm[m_pPrimInfoCurrent->pPrim->n0];
     m_pDetectMatA = m_pPrimInfoCurrent->pInfo2->pMatLW;
     m_pDetectChipA = m_pPrimInfoCurrent->pInfo2->pMcChip;
-    m_vNormalA = m_pPrimInfoCurrent->pInfo2->pNorm[m_pPrimInfoCurrent->pPrim->n0];
     return 1;
 }
 #else

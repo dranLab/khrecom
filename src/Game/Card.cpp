@@ -824,8 +824,8 @@ BOOL CCard::getAttribute(CARD card, const CHAR** pOutStrAttack, const CHAR** pOu
     INT i;
     UINT ctdID;
     if (card.m_nKind < 0x7F) {
-        ctdID = card.m_nKind > 0x19 ? 0x319 : card.m_nKind + 0x300;
         strcpy(buf, CCtdMan::getText(ctdID));
+        ctdID = card.m_nKind > 0x19 ? 0x319 : card.m_nKind + 0x300;
         pLF = buf;
         *pOutStrAttack = pLF;
         for (i = 0; i < 2; i++) {

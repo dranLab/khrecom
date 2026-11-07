@@ -567,9 +567,9 @@ void CModel::calcWorldBBox(BOOL bCalc) {
     CCoord* pCrd;
     INT iBoneNum;
     if ((m_nFlag & 0x200) && !bCalc) return;
+    iBoneNum = m_pData->m_nBoneNum;
     if (!(m_pData)) AssertApp(__FILE__, 1067, "m_pData", 0);
     pCrd = &getCrd(0);
-    iBoneNum = m_pData->m_nBoneNum;
     vMax.set(-1.70141183e+38f, -1.70141183e+38f, -1.70141183e+38f, 1.0f);
     vMin.set(1.70141183e+38f, 1.70141183e+38f, 1.70141183e+38f, 1.0f);
     for (i = 0; i < iBoneNum; i++, pCrd++) {
@@ -593,13 +593,13 @@ void CModel::calcWorldBBox(BOOL bCalc) {
         vMin.y = _y - CShadowModelMan::getDownLen();
         vMax.y = _y + (vMax.y - _y) * CShadowModelMan::getUpPer();
     }
-    m_nFlag |= 0x200;
     m_BBox.x[1] = vMax.x;
     m_BBox.y[1] = vMax.y;
     m_BBox.z[1] = vMax.z;
     m_BBox.x[0] = vMin.x;
     m_BBox.y[0] = vMin.y;
     m_BBox.z[0] = vMin.z;
+    m_nFlag |= 0x200;
 }
 #else
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/System/Graphic/Model", calcWorldBBox__6CModeli);

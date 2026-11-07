@@ -514,8 +514,8 @@ CScreenColoredMask::CScreenColoredMask() {
  * declarations, permuter 15 min (49 -> 48). CRotSprt's key function: the weak tail needs it */
 #if 0
 void CRotSprt::makePkt() {
-    G_XYZ b;
     G_XYZ c;
+    G_XYZ b;
     IVECTOR ab;
     IVECTOR cd;
     ULONGLONG tex;

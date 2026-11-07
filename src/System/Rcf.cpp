@@ -866,9 +866,9 @@ INT _parseRCF_EntryFile(ULONG nGroup, INT nType) {
         info._pszName = szFilePath;
         info._nGroupID = s_nReadGroup;
         info._nRefGroupID = s_nLinkOwnerGroup;
-        info._nRsrcType = 0x27;
         info._bSceneManaged = s_bSceneManagedMode;
         CRsrcDB::addRsrc(info, buf, __null);
+        info._nRsrcType = 0x27;
         _skipLine();
         return 0;
     }

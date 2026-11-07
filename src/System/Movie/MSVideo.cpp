@@ -671,10 +671,10 @@ void CMoviePlayer::setLoadImageTagsYX(u_int* tags, void* image, int skip, int x,
         for (j = 0; j < mby; j++) {
             eop = 0;
             if (i == mbx - 1) eop = 1;
-            if (j != mby - 1) eop = 0;
-            setDMAscTag(p, 0, 0, 0, 1, 0, 4);
             p += 4;
+            setDMAscTag(p, 0, 0, 0, 1, 0, 4);
             setGIFtag(p, 0xE, 1, 0, 0, 0, 0, 2);
+            if (j != mby - 1) eop = 0;
             p += 4;
             setTRXPOS(p, 0, x + i * 16, y + j * 16);
             p += 4;
