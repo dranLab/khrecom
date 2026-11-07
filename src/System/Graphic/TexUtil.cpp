@@ -492,7 +492,8 @@ INT CTexUtil::getClutSize(const BYTE* pInTim2) {
 /* Parked: 20 of 168 lines, same size - up-counting j (the original's reversed count-down), *pSrc read per term
  * (lbu for the low byte) and `iI | (iI << 16 | iI << 8)` fixed most of it. Left: the register order of case 1's
  * three channel terms (the original computes the >> 8 term into a1 first) and two instructions in case 2's loop.
- * Term forms and permuter 6 min: no gain. */
+ * Term forms and permuter 6 min: no gain. 2026-11-07: 17 lines (was 20) with a local per term, g first: the pixel word and
+ * the g term still have each other's registers; a local for the pixel word gives 43 (the original reads the low byte with lbu). */
 #if 0
 void CTexUtil::makeCustomClut(ULONGLONG* inSrc, ULONGLONG* inDest, INT inType, INT inColNum) {
     UINT* pSrc;
@@ -508,8 +509,10 @@ void CTexUtil::makeCustomClut(ULONGLONG* inSrc, ULONGLONG* inDest, INT inType, I
     case 1: {
         INT j;
         for (j = 0; j < inColNum; j++) {
-            *pDes = (*pSrc & 0xFF000000) | ((UBYTE)(0xFF - (UBYTE)*pSrc) >> 1) | (((0xFF - (*pSrc >> 8)) << 7) & 0x7F00) |
-                    (((UBYTE)(0xFF - (*pSrc >> 16)) >> 1) << 16);
+            UINT g = (((0xFF - (*pSrc >> 8)) << 7) & 0x7F00);
+            UINT r = (((UBYTE)(0xFF - (*pSrc >> 16)) >> 1) << 16);
+            UINT b = ((UBYTE)(0xFF - (UBYTE)*pSrc) >> 1);
+            *pDes = (((*pSrc & 0xFF000000) | b) | g) | r;
             pSrc++;
             pDes++;
         }
