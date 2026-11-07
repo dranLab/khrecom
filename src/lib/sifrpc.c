@@ -139,6 +139,8 @@ void _request_bind(RpcBindPkt *bind, struct rpc_data *rd);
 void _request_call(RpcCallPkt *call, struct rpc_data *rd);
 /* MATCH: a store of alias set 0: every later read reloads and stays behind it, which is the pair-by-pair copy order */
 #define _PKT_STORE(lv, m) (((union { void *p; int i; } *)&(lv))->m)
+/* MATCH: a read of alias set 0 (through a union): it conflicts with every store before it and is not moved above them */
+#define _PKT_ANY(lv, m) _PKT_STORE(lv, m)
 
 void _request_rdata(RpcOtherDataPkt *rdata, struct rpc_data *rd);
 
@@ -245,12 +247,8 @@ static void *_sceRpcGetFPacket2(struct rpc_data *rd, int rid)
     return (char *)rd->client_table + rid * 0x40;
 }
 
-/* Parked: 2 of 53 lines, same size (2026-11-07, was 11): the 0x8000000A-first range check is a third case node (RDATA, only
-   break), the client a local before the tid test (kept in s1 across the call), the bind copy's buff load behind the serve
-   store (empty barrier). Left: buff in v0 for v1: the barrier splits the block; a union store there reloads rend->client
-   (9), the client read before the switch changes the arms (20). */
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/sifrpc", _request_end);
-#if 0
+/* The 0x8000000A-first range check is a third case node (RDATA, only break); the client is a local before the tid test
+   (kept in s1 across the call). */
 static void _request_end(RpcRendPkt *rend, struct rpc_data *rd)
 {
     int gp;
@@ -268,8 +266,7 @@ static void _request_end(RpcRendPkt *rend, struct rpc_data *rd)
         {
             sceSifClientData *c = rend->client;
             c->serve = rend->server;
-            asm volatile("");
-            c->buff = rend->buff;
+            c->buff = _PKT_ANY(rend->buff, p); /* MATCH: read of alias set 0, stays behind the serve store */
         }
         break;
     case 0x8000000C:
@@ -284,7 +281,6 @@ static void _request_end(RpcRendPkt *rend, struct rpc_data *rd)
         cd->rpcd.paddr = 0;
     }
 }
-#endif
 
 static unsigned long _alarm_rdata(int id, unsigned long schedule, unsigned long actual, void *arg)
 {
