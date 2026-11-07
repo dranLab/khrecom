@@ -2,7 +2,6 @@
    channel 4 feeding macroblocks and channel 3 returning RGB; large pictures go in chunks of 1023 macroblocks driven by
    DMA interrupt handlers. */
 #include "sdk/eekernel.h"
-#include "include_asm.h"
 #include "sdk/libmpeg.h"
 
 #define D_STAT ((volatile unsigned int *)0x1000E010)
@@ -124,8 +123,6 @@ static void _doCSC2(MpegSys *sys, void *rgb, int mbnum)
     RemoveDmacHandler(3, hid);
 }
 
-/* Parked: _sceMpegCscStoreRefImage in s1/s2 for the inlined CSC block's rgb/qwc. */
-#if 0
 static inline void _sceMpegIpuCmd(MpegSys *sys, unsigned int cmd)
 {
     *IPU_CMD = cmd;
@@ -142,13 +139,13 @@ static inline void _doCSC1(MpegSys *sys, int mbnum)
 {
     sceMpegCbData cb;
     void *rgb = sys->rgbBuf;
+    unsigned int qwc = mbnum * 0x40; /* MATCH: in a local: rgb/qwc registers */
     int oldei;
-    unsigned int cmd;
 
     IPU_WAIT();
     oldei = DIntr();
     *D3_MADR = (unsigned int)rgb & 0x0fffffff;
-    *D3_QWC = mbnum * 0x40;
+    *D3_QWC = qwc;
     *D3_CHCR = 0x100;
     if (oldei) {
         EIntr();
@@ -186,7 +183,7 @@ void _sceMpegCscStoreRefImage(MpegSys *sys, MpegRefImage *ref)
     d4.addr = (unsigned int)ref->mbBuf & 0x0fffffff;
     if (d4.qwc > 0xffff) {
         hid = AddDmacHandler2(4, _ch4dma, 0, &d4);
-        *D_STAT = 0x10; EnableDmac(4);
+        *D_STAT = 0x10; EnableDmac(4); /* MATCH: one line: the store goes in the jal slot */
         oldei = DIntr();
         *D4_MADR = d4.addr;
         *D4_QWC = 0xffff;
@@ -207,7 +204,7 @@ void _sceMpegCscStoreRefImage(MpegSys *sys, MpegRefImage *ref)
         oldei = DIntr();
         *D4_MADR = (unsigned int)ref->mbBuf & 0x0fffffff;
         *D4_QWC = d4.qwc;
-        *D4_CHCR = 0x101; if (oldei) {
+        *D4_CHCR = 0x101; if (oldei) { /* MATCH: one line (delay slot fill) */
             EIntr();
         }
         d4.qwc = 0;
@@ -220,10 +217,6 @@ void _sceMpegCscStoreRefImage(MpegSys *sys, MpegRefImage *ref)
     cb.type = 3;
     _sceMpegDispatchMpegCallback(sys->mp, &cb);
 }
-
-#else
-INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/csc", _sceMpegCscStoreRefImage);
-#endif
 
 static int _ch3dmaCSC(int ch, void *arg, void *addr)
 {
