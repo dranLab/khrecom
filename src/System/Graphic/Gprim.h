@@ -5,7 +5,7 @@
 #include "khtypes.h"
 #include "System/MainApp.h"
 #include "System/HeapMan.h"
-#include "System/Vector.h" // PARTIAL: added for Game/Atel/EventTrap
+#include "System/Vector.h" /* FVECTOR and the basic graphics types (G_XY ... G_ST) */
 #include "System/Graphic/TexInfo.h"
 
 /* __FILE__ of this header in the original differs per includer ("System/Graphic/Gprim.h" in most, also
@@ -56,84 +56,8 @@ union ALPHA {
     BYTE getAlphaValue() const { return alphaValue; }
     void setAlphaValue(/* parameters unknown */);
 };
-
-
-union QWdata {
-    u_long ul64[2];
-    u_long128 ul128;
-    u_int ui32[4];
-    u_long u64[2];
-    u_long128 u128;
-    u_int u32[4];
-    u_short u16[8];
-    long s64[2];
-    int s32[4];
-    short s16[8];
-};
-
-struct G_XY {
-    FIX4 x;
-    FIX4 y;
-    void set(FIX4 _x, FIX4 _y) {
-        x = _x;
-        y = _y;
-    }
-};
-
-struct G_XYZ {
-    FIX4 x;
-    FIX4 y;
-    FIX4 z;
-    void set(FIX4 _x, FIX4 _y, FIX4 _z) {
-        x = _x;
-        y = _y;
-        z = _z;
-    }
-    void set(FIX4 _x, FIX4 _y) {
-        x = _x;
-        y = _y;
-    }
-    void bufferZ(/* parameters unknown */);
-};
-
-struct G_RGBA {
-    union {
-        struct {
-            UBYTE r;
-            UBYTE g;
-            UBYTE b;
-            UBYTE a;
-        };
-        UINT col;
-        UINT c;
-        unsigned char v[4];
-    };
-
-    void set(UBYTE _r, UBYTE _g, UBYTE _b, UBYTE _a) {
-        r = _r;
-        g = _g;
-        b = _b;
-        a = _a;
-    }
-
-    void set(UBYTE _r, UBYTE _g, UBYTE _b) {
-        r = _r;
-        g = _g;
-        b = _b;
-    }
-};
-
-
-struct G_UV {
-    USHORT u;
-    USHORT v;
-
-    void set(USHORT _u, USHORT _v) {
-        u = _u;
-        v = _v;
-    }
-};
-
+/* moved to System/Vector.h (QWdata: khtypes.h) */
+#line 137
 union G_LAYER {
     INT _nInfo;
     struct {
@@ -232,16 +156,8 @@ public:
 typedef SHORT TDEG;
 class CCoord;
 class CCoords;
-
-struct G_ST {
-    FLOAT s;
-    FLOAT t;
-    void set(FLOAT _s, FLOAT _t) {
-        s = _s;
-        t = _t;
-    }
-};
-
+/* moved to System/Vector.h (QWdata: khtypes.h) */
+#line 245
 struct G_LINE {
     FVECTOR P0;
     FVECTOR P1;

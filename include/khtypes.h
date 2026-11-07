@@ -44,6 +44,21 @@ typedef u_short u_int16;
 typedef u_int u_int32;
 typedef u_long u_int64;
 typedef u_long128 u_int128;
+#ifdef __cplusplus
+/* After the base typedefs in every C++ original (296: u_int128 QWdata mallinfo); C units keep their own. */
+union QWdata {
+    u_long ul64[2];
+    u_long128 ul128;
+    u_int ui32[4];
+    u_long u64[2];
+    u_long128 u128;
+    u_int u32[4];
+    u_short u16[8];
+    long s64[2];
+    int s32[4];
+    short s16[8];
+};
+#endif
 
 /* C++ can't convert ((void*)0) to other pointer types; __null is what g++'s <stddef.h> uses. */
 #ifndef NULL

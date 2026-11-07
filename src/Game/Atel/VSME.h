@@ -7,12 +7,8 @@
 class CAtel;
 namespace ATEL { class CAvatar; class CEventTrap; struct ChatWndCreateCTDParam; }
 class CAtelCardSeq;
-
-union F_UL {
-    FLOAT f;
-    ULONG ul;
-};
-
+/* F_UL: System/Vector.h */
+#line 16
 namespace ATEL {
 
 struct ATP {
