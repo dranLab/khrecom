@@ -260,8 +260,11 @@ static void channel_conv_joint(At3Work *w);
 static int gainc_window(char *ch, int band);
 static void f2t_nodata(At3Band *bands, int band);
 
-/* Parked: close: loop.c bases the inner loop on the channel 0 samples (the original on channel 1) and strength-reduces the
-   band offset (the original recomputes (3 * band) * 136 from a counter) */
+/* Parked: 63 of 130 lines (2026-11-07; 87 before the band counter j += 2, a second biv kept in the stack slot like the
+   original's, and nw read after the gain tests): what differs is register allocation in the band prologue and the
+   sample loop (the original puts the joint[1] gains in t3/t1 and reuses them for n0/n1, dg0 lands in t1; the band
+   address is offset + w, ours w + offset); tried: load/statement orders of the gain and weight reads, separate
+   variables, decomp-permuter 15 min (only the m operand order, -5) */
 #if 0
 static void channel_conv_joint(At3Work *w)
 {
@@ -332,7 +335,7 @@ static void channel_conv_joint(At3Work *w)
             cg1 += ndg1;
             x = pr[k - 3320];
             y = pr[k];
-            m = n0 * (x >> 4) + n1 * (y >> 4);
+            m = n1 * (y >> 4) + n0 * (x >> 4);
             pr[k - 3320] = ((m >> 8) * h0) >> 6;
             pr[k] = (((x - m) >> 8) * h1) >> 6;
         }
@@ -741,7 +744,9 @@ static int getNoiseSpectrum(char *ch, int nqus, At3Work *w)
     return 0;
 }
 
-/* Parked: 5 lines off: the band address of the loop is (x << 4) + x with swapped registers */
+/* Parked: 5 of 92 lines (2026-11-07): after the memcpy the original recomputes the band address into fresh registers,
+   (x << 4) + x into v1 and offset + bands; ours reuses v0 and adds bands + offset; tried: q/p order, a band pointer
+   local, bands + band, int-row casts ([408], [136] rows), an index loop (84), decomp-permuter 12 min (no gain) */
 #if 0
 static void f2t_nodata(At3Band *bands, int band)
 {
@@ -765,7 +770,12 @@ static void f2t_nodata(At3Band *bands, int band)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", f2t_nodata);
 #endif
 
-/* Parked: structure right; the gain loops keep &gain[0][0][1] in a register and reload 255 (ours hoists it) */
+/* Parked: 3 of 337 lines (2026-11-07; 157 before: the levels through a pointer to gain[0][0][1] (the original
+   keeps sp + 4 in s7, a block-local copy in the tail loop gives its move a1,s7), the terminator stored at [i] (the
+   loop's final value), band as the jw/joint loop counter, the tone count and the band limit in nb): only the
+   operand order of the level addresses differs, the original adds pointer + index (addu v1,s7,s0), ours
+   index + pointer; tried: *(gp + k), k[gp], 2-D/3-D pointer types, char * offsets, block-local pointers, a flat
+   gain array (132), decomp-permuter 15 min */
 #if 0
 static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
 {
@@ -809,8 +819,8 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
     memcpy(&ch->qmfhead, &ch->qmfsave, sizeof(At3Blk23));
     memset(ch->spec, 0, sizeof(ch->spec));
     w->maxpos = nbands << 8;
-    n = read_unpack_from_msb(5, w);
-    if (n && getToneSpectrum((char *)ch, n, nbands, w) == -1) {
+    nb = read_unpack_from_msb(5, w);
+    if (nb && getToneSpectrum((char *)ch, nb, nbands, w) == -1) {
         return -1;
     }
     if (getNoiseSpectrum((char *)ch, read_unpack_from_msb(5, w) + 1, w) == -1) {
@@ -851,14 +861,12 @@ static int unpack_mddata(At3Chan *ch, int rev, At3Work *w)
 INCLUDE_ASM("asm/SLUS_217.99/nonmatchings/lib/libat3dec", unpack_mddata);
 #endif
 
-/* Parked: 11 lines off (20 before the 0xF8 pad byte in a variable, decomp-permuter): the original enters the copy loop
-   with the byte the skip loop loaded (reorg), registers differ */
+/* Parked: 7 of 102 lines (2026-11-07; 11 before the skip loop as `while (*--p == 0xF8 && src < p)`, which also
+   makes the pad variable unnecessary): reorg fills the copy loop's entry differently: the original puts p-- in the
+   beqz slot (from the fall-through) and the stolen first store in the jump's slot, ours a beqzl with the w->stream
+   store and p-- in the jump's slot; one alignment nop before the iqmf loop follows; tried: 7 copy-loop forms
+   (while, for, if + do-while, _before, separate ++/--), decomp-permuter 15 min (no gain) */
 #if 0
-static inline int _before(unsigned char *a, unsigned char *b)
-{
-    return a < b;
-}
-
 int at3dec_proc(At3Work *w)
 {
     int off = 0;
@@ -867,7 +875,6 @@ int at3dec_proc(At3Work *w)
     unsigned char *src;
     unsigned char *p;
     unsigned char *d;
-    unsigned char pad;
 
     for (i = 0; i < w->nch; i++) {
         rev = 0;
