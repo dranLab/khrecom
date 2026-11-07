@@ -41,9 +41,9 @@ every change that is merged without regenerating. Regenerating all four takes ab
 
 ## Where things stand (2026-11-07)
 
-- **Progress:** 11962 of 12311 functions matched: game 11197 of 11323, libraries 765 of 988 (plus 151 hand-written).
+- **Progress:** 11964 of 12311 functions matched: game 11199 of 11323, libraries 765 of 988 (plus 151 hand-written).
   `tools/check.sh` is the current count.
-- **Game:** 121 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
+- **Game:** 119 functions still `INCLUDE_ASM`. Nearly all are parked (C draft under `#if 0` with a note); the
   Movement constructor has a draft but is listed as "not attempted" (leftovers.py misses constructors in drafts).
   5 units take a data section from assembly.
 - **Libraries:** 38 parked, 5 not attempted, 27 hand-written (stay assembly), 5 units with data from assembly;
@@ -72,13 +72,14 @@ every change that is merged without regenerating. Regenerating all four takes ab
   `build/permlines.py` sweeps the order of adjacent statements (no gain on initAttackField, setupFontTex). Check the helpers
   first: `asm volatile` against plain `asm`, and `=&r` where the original keeps inputs and output apart. See memory
   ref-locals-reveal-shape, ti-di-conversion-is-por.
-- **Read the scheduler and reorg, then pin (2026-11-07).** 8 functions in one sitting, all long parked as "scheduling tie"
+- **Read the scheduler and reorg, then pin (2026-11-07).** 10 functions in one sitting, all long parked as "scheduling tie"
   (setCharge, initAttackField, setConfuse, CHumanBoss::initalize, CNakCamera::main, beginStateHitAttack, acWaitReq,
-  createBootInfoMsg). Dump `-dS -dR -fsched-verbose-9`, `build/jm/schedshow.py <.sched2> <fn signature> <rtl key>` prints the
+  createBootInfoMsg, setStockInfo, CBattleCard::destroy). Dump `-dS -dR -fsched-verbose-9`, `build/jm/schedshow.py <.sched2> <fn signature> <rtl key>` prints the
   successors, priorities and issue order for the block. Ask what the original's order implies, in this order: a tail written out
-  (call-arg-order-dependents), a cast store (fixed-scalar-varying-struct-alias), a clobber that marks a register dead for reorg,
+  (call-arg-order-dependents), a cast store (fixed-scalar-varying-struct-alias), a clobber that marks a register dead for reorg, a load inside both arms for a cross-jump
+  (crossjump-block-end-call), an empty asm in one arm to stop one,
   and only then issue-order groups with empty barriers and register locals (issue-order-pins). Guarded order searches found
-  nothing more on the five reverted drafts: their honest scores stand at 30, 27, 9, 5, 31.
+  nothing more on the five reverted drafts: their honest scores stand at 30, 27, 9, 5, 31 (setStockInfo then matched by reading the cross-jump).
 - **Order searches (2026-11-07):** `build/hillqueue.py <min> <unit:name>...` climbs runs of simple statements; `build/hillstmt.py`
   one chosen run. Real gains: Movement ctor 53 -> 26, CImageWnd::init 14 -> 5, calcWorldBBox 45 -> 28, finalize 17 -> 11,
   setupTexInfo 10 -> 6. **A lower line count proves nothing about behaviour; only a match does.** Five moves were wrong and
@@ -354,6 +355,7 @@ header split the original didn't have, or make a class a template to hide its st
 | argument loads rotated before a call near a block end | call-arg-order-dependents |
 | member store issued before/after a global load's `lui` | fixed-scalar-varying-struct-alias |
 | same insns, issue order or v0/v1 wrong, no source order fixes it | issue-order-pins |
+| ours repeats `...; jal x`, the original branches into the other copy (or the reverse) | crossjump-block-end-call |
 | one-line `por/sq` + `swc1 w`, wrong store order around an FVECTOR | fvector-brace-init-aligned |
 | delay slot of a call and the v0/v1 pair after it | void-callee-v0 |
 | spill slots / regs of hoisted `this+off` addresses | gcse-bucket-count-lever, gcse-pre-hash-order |
